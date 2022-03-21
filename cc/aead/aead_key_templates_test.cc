@@ -395,7 +395,7 @@ TEST(AeadKeyTemplatesTest, testKmsEnvelopeAeadMultipleKeysSameKek) {
 
   auto kek_uri_result = test::FakeKmsClient::CreateFakeKeyUri();
   EXPECT_TRUE(kek_uri_result.ok()) << kek_uri_result.status();
-  std::string kek_uri = kek_uri_result.ValueOrDie();
+  std::string kek_uri = kek_uri_result.value();
   auto register_fake_kms_client_status = test::FakeKmsClient::RegisterNewClient(
       kek_uri, /* credentials_path= */ "");
 
@@ -407,19 +407,19 @@ TEST(AeadKeyTemplatesTest, testKmsEnvelopeAeadMultipleKeysSameKek) {
       AeadKeyTemplates::KmsEnvelopeAead(kek_uri, dek_template);
   auto handle_result1 = KeysetHandle::GenerateNew(key_template1);
   EXPECT_TRUE(handle_result1.ok());
-  auto handle1 = std::move(handle_result1.ValueOrDie());
+  auto handle1 = std::move(handle_result1.value());
   auto aead_result1 = handle1->GetPrimitive<Aead>();
   EXPECT_TRUE(aead_result1.ok());
-  auto aead1 = std::move(aead_result1.ValueOrDie());
+  auto aead1 = std::move(aead_result1.value());
 
   const KeyTemplate& key_template2 =
       AeadKeyTemplates::KmsEnvelopeAead(kek_uri, dek_template);
   auto handle_result2 = KeysetHandle::GenerateNew(key_template2);
   EXPECT_TRUE(handle_result2.ok());
-  auto handle2 = std::move(handle_result2.ValueOrDie());
+  auto handle2 = std::move(handle_result2.value());
   auto aead_result2 = handle2->GetPrimitive<Aead>();
   EXPECT_TRUE(aead_result2.ok());
-  auto aead2 = std::move(aead_result2.ValueOrDie());
+  auto aead2 = std::move(aead_result2.value());
 
   EXPECT_THAT(EncryptThenDecrypt(*aead1, *aead2, "message", "aad"), IsOk());
 }

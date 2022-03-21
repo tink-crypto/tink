@@ -100,7 +100,7 @@ TEST(KmsAeadKeyManagerTest, CreateKey) {
   key_format.set_key_uri("Some uri");
   auto key_or = KmsAeadKeyManager().CreateKey(key_format);
   ASSERT_THAT(key_or.status(), IsOk());
-  EXPECT_THAT(key_or.ValueOrDie().params().key_uri(), Eq(key_format.key_uri()));
+  EXPECT_THAT(key_or.value().params().key_uri(), Eq(key_format.key_uri()));
 }
 
 class KmsAeadKeyManagerCreateTest : public ::testing::Test {
@@ -128,9 +128,9 @@ TEST_F(KmsAeadKeyManagerCreateTest, CreateAead) {
 
   DummyAead direct_aead("prefix1:some_key1");
 
-  EXPECT_THAT(EncryptThenDecrypt(*kms_aead.ValueOrDie(), direct_aead,
-                                 "plaintext", "aad"),
-              IsOk());
+  EXPECT_THAT(
+      EncryptThenDecrypt(*kms_aead.value(), direct_aead, "plaintext", "aad"),
+      IsOk());
 }
 
 TEST_F(KmsAeadKeyManagerCreateTest, CreateAeadWrongKeyName) {
@@ -161,9 +161,9 @@ TEST_F(KmsAeadKeyManagerCreateTest, CreateAeadUnboundKey) {
 
   DummyAead direct_aead("prefix2:some_key2");
 
-  EXPECT_THAT(EncryptThenDecrypt(*kms_aead.ValueOrDie(), direct_aead,
-                                 "plaintext", "aad"),
-              IsOk());
+  EXPECT_THAT(
+      EncryptThenDecrypt(*kms_aead.value(), direct_aead, "plaintext", "aad"),
+      IsOk());
 }
 
 }  // namespace

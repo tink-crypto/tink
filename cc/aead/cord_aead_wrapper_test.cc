@@ -76,7 +76,7 @@ std::unique_ptr<PrimitiveSet<CordAead>> setup_keyset() {
       absl::make_unique<DummyCordAead>(aead_name_0);
   auto entry_result =
       aead_set->AddPrimitive(std::move(aead), keyset_info.key_info(0));
-  auto aead_set_result = aead_set->set_primary(entry_result.ValueOrDie());
+  auto aead_set_result = aead_set->set_primary(entry_result.value());
   return aead_set;
 }
 
@@ -86,7 +86,7 @@ TEST(AeadSetWrapperTest, WrapperEncryptDecrypt) {
   CordAeadWrapper wrapper;
   auto aead_result = wrapper.Wrap(std::move(aead_set));
   ASSERT_THAT(aead_result.status(), IsOk());
-  auto aead = std::move(aead_result.ValueOrDie());
+  auto aead = std::move(aead_result.value());
   absl::Cord plaintext;
   plaintext.Append("some_plaintext");
   absl::Cord aad;
@@ -94,11 +94,11 @@ TEST(AeadSetWrapperTest, WrapperEncryptDecrypt) {
 
   auto encrypt_result = aead->Encrypt(plaintext, aad);
   EXPECT_TRUE(encrypt_result.ok()) << encrypt_result.status();
-  absl::Cord ciphertext = encrypt_result.ValueOrDie();
+  absl::Cord ciphertext = encrypt_result.value();
 
   auto decrypt_result = aead->Decrypt(ciphertext, aad);
   EXPECT_TRUE(decrypt_result.ok()) << decrypt_result.status();
-  EXPECT_EQ(plaintext, decrypt_result.ValueOrDie());
+  EXPECT_EQ(plaintext, decrypt_result.value());
 }
 
 TEST(AeadSetWrapperTest, WrapperEncryptDecryptMultipleKeys) {
@@ -115,7 +115,7 @@ TEST(AeadSetWrapperTest, WrapperEncryptDecryptMultipleKeys) {
   EXPECT_TRUE(encrypt_result.ok()) << encrypt_result.status();
   absl::Cord ciphertext;
   ciphertext.Append(aead_set->get_primary()->get_identifier());
-  ciphertext.Append(encrypt_result.ValueOrDie());
+  ciphertext.Append(encrypt_result.value());
 
   // Add a second key
   KeysetInfo::KeyInfo* key_info;
@@ -135,13 +135,13 @@ TEST(AeadSetWrapperTest, WrapperEncryptDecryptMultipleKeys) {
   CordAeadWrapper wrapper;
   auto aead_result = wrapper.Wrap(std::move(aead_set));
   ASSERT_THAT(aead_result.status(), IsOk());
-  aead = std::move(aead_result.ValueOrDie());
+  aead = std::move(aead_result.value());
 
   // Encrypt with the wrapped AEAD and check if result was equal to the
   // encryption with the primary key.
   auto encrypt_wrap_result = aead->Encrypt(plaintext, aad);
   EXPECT_TRUE(encrypt_wrap_result.ok()) << encrypt_wrap_result.status();
-  EXPECT_EQ(ciphertext, encrypt_wrap_result.ValueOrDie());
+  EXPECT_EQ(ciphertext, encrypt_wrap_result.value());
 }
 
 TEST(AeadSetWrapperTest, WrapperEncryptDecryptManyChunks) {
@@ -150,7 +150,7 @@ TEST(AeadSetWrapperTest, WrapperEncryptDecryptManyChunks) {
   CordAeadWrapper wrapper;
   auto aead_result = wrapper.Wrap(std::move(aead_set));
   ASSERT_THAT(aead_result.status(), IsOk());
-  auto aead = std::move(aead_result.ValueOrDie());
+  auto aead = std::move(aead_result.value());
 
   std::string plaintext = "";
   for (int i = 0; i < 1000; i++) {
@@ -163,11 +163,11 @@ TEST(AeadSetWrapperTest, WrapperEncryptDecryptManyChunks) {
 
   auto encrypt_result = aead->Encrypt(plaintext_cord, aad);
   EXPECT_TRUE(encrypt_result.ok()) << encrypt_result.status();
-  absl::Cord ciphertext = encrypt_result.ValueOrDie();
+  absl::Cord ciphertext = encrypt_result.value();
 
   auto decrypt_result = aead->Decrypt(ciphertext, aad);
   EXPECT_TRUE(decrypt_result.ok()) << decrypt_result.status();
-  EXPECT_EQ(plaintext, decrypt_result.ValueOrDie());
+  EXPECT_EQ(plaintext, decrypt_result.value());
 }
 
 TEST(AeadSetWrapperTest, WrapperEncryptBadDecrypt) {
@@ -176,7 +176,7 @@ TEST(AeadSetWrapperTest, WrapperEncryptBadDecrypt) {
   CordAeadWrapper wrapper;
   auto aead_result = wrapper.Wrap(std::move(aead_set));
   ASSERT_THAT(aead_result.status(), IsOk());
-  auto aead = std::move(aead_result.ValueOrDie());
+  auto aead = std::move(aead_result.value());
   absl::Cord plaintext;
   plaintext.Append("some_plaintext");
   absl::Cord aad;

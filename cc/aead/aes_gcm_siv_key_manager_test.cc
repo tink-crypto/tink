@@ -143,7 +143,7 @@ TEST(AesGcmSivKeyManagerTest, Create16ByteKey) {
   StatusOr<AesGcmSivKey> key_or = AesGcmSivKeyManager().CreateKey(format);
 
   ASSERT_THAT(key_or.status(), IsOk());
-  EXPECT_THAT(key_or.ValueOrDie().key_value().size(), Eq(format.key_size()));
+  EXPECT_THAT(key_or.value().key_value().size(), Eq(format.key_size()));
 }
 
 TEST(AesGcmSivKeyManagerTest, Create32ByteKey) {
@@ -153,7 +153,7 @@ TEST(AesGcmSivKeyManagerTest, Create32ByteKey) {
   StatusOr<AesGcmSivKey> key_or = AesGcmSivKeyManager().CreateKey(format);
 
   ASSERT_THAT(key_or.status(), IsOk());
-  EXPECT_THAT(key_or.ValueOrDie().key_value().size(), Eq(format.key_size()));
+  EXPECT_THAT(key_or.value().key_value().size(), Eq(format.key_size()));
 }
 
 TEST(AesGcmSivKeyManagerTest, CreateAeadFailsWithOpenSsl) {

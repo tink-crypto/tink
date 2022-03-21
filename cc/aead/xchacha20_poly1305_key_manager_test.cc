@@ -106,8 +106,8 @@ TEST(XChaCha20Poly1305KeyManagerTest, CreateKey) {
       XChaCha20Poly1305KeyManager().CreateKey(XChaCha20Poly1305KeyFormat());
 
   ASSERT_THAT(key_or.status(), IsOk());
-  EXPECT_THAT(key_or.ValueOrDie().key_value(), SizeIs(32));
-  EXPECT_THAT(key_or.ValueOrDie().version(), Eq(0));
+  EXPECT_THAT(key_or.value().key_value(), SizeIs(32));
+  EXPECT_THAT(key_or.value().version(), Eq(0));
 }
 
 TEST(XChaCha20Poly1305KeyManagerTest, DeriveKey) {
@@ -119,8 +119,8 @@ TEST(XChaCha20Poly1305KeyManagerTest, DeriveKey) {
       XChaCha20Poly1305KeyManager().DeriveKey(format, &input_stream);
 
   ASSERT_THAT(key_or.status(), IsOk());
-  EXPECT_THAT(key_or.ValueOrDie().key_value(), SizeIs(32));
-  EXPECT_THAT(key_or.ValueOrDie().version(), Eq(0));
+  EXPECT_THAT(key_or.value().key_value(), SizeIs(32));
+  EXPECT_THAT(key_or.value().version(), Eq(0));
 }
 
 TEST(XChaCha20Poly1305KeyManagerTest, DeriveKeyFromLongSeed) {
@@ -132,7 +132,7 @@ TEST(XChaCha20Poly1305KeyManagerTest, DeriveKeyFromLongSeed) {
   auto key_or = XChaCha20Poly1305KeyManager().DeriveKey(format, &input_stream);
 
   ASSERT_THAT(key_or.status(), IsOk());
-  EXPECT_THAT(key_or.ValueOrDie().key_value(),
+  EXPECT_THAT(key_or.value().key_value(),
               Eq("0123456789abcdef0123456789abcdef"));
 }
 
@@ -166,7 +166,7 @@ TEST(XChaCha20Poly1305KeyManagerTest, CreateKeyValid) {
       XChaCha20Poly1305KeyManager().CreateKey(XChaCha20Poly1305KeyFormat());
 
   ASSERT_THAT(key_or.status(), IsOk());
-  EXPECT_THAT(XChaCha20Poly1305KeyManager().ValidateKey(key_or.ValueOrDie()),
+  EXPECT_THAT(XChaCha20Poly1305KeyManager().ValidateKey(key_or.value()),
               IsOk());
 }
 

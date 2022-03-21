@@ -68,7 +68,7 @@ util::StatusOr<absl::Cord> CordAeadSetWrapper::Encrypt(
   if (!encrypt_result.ok()) return encrypt_result.status();
   absl::Cord result;
   result.Append(aead_set_->get_primary()->get_identifier());
-  result.Append(encrypt_result.ValueOrDie());
+  result.Append(encrypt_result.value());
   return result;
 }
 
@@ -81,11 +81,11 @@ util::StatusOr<absl::Cord> CordAeadSetWrapper::Decrypt(
     if (primitives_result.ok()) {
       auto raw_ciphertext =
           ciphertext.Subcord(key_id.size(), ciphertext.size());
-      for (auto& aead_entry : *(primitives_result.ValueOrDie())) {
+      for (auto& aead_entry : *(primitives_result.value())) {
         CordAead& aead = aead_entry->get_primitive();
         auto decrypt_result = aead.Decrypt(raw_ciphertext, associated_data);
         if (decrypt_result.ok()) {
-          return std::move(decrypt_result.ValueOrDie());
+          return std::move(decrypt_result.value());
         } else {
           // LOG that a matching key didn't decrypt the ciphertext.
         }
@@ -96,11 +96,11 @@ util::StatusOr<absl::Cord> CordAeadSetWrapper::Decrypt(
   // No matching key succeeded with decryption, try all RAW keys.
   auto raw_primitives_result = aead_set_->get_raw_primitives();
   if (raw_primitives_result.ok()) {
-    for (auto& aead_entry : *(raw_primitives_result.ValueOrDie())) {
+    for (auto& aead_entry : *(raw_primitives_result.value())) {
       CordAead& aead = aead_entry->get_primitive();
       auto decrypt_result = aead.Decrypt(ciphertext, associated_data);
       if (decrypt_result.ok()) {
-        return std::move(decrypt_result.ValueOrDie());
+        return std::move(decrypt_result.value());
       }
     }
   }

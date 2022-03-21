@@ -55,14 +55,14 @@ TEST(KmsEnvelopeAeadTest, BasicEncryptDecrypt) {
 
   auto aead_result = KmsEnvelopeAead::New(dek_template, std::move(remote_aead));
   EXPECT_THAT(aead_result.status(), IsOk());
-  auto aead = std::move(aead_result.ValueOrDie());
+  auto aead = std::move(aead_result.value());
   std::string message = "Some data to encrypt.";
   std::string aad = "Some data to authenticate.";
   auto encrypt_result = aead->Encrypt(message, aad);
   EXPECT_THAT(encrypt_result.status(), IsOk());
-  auto decrypt_result = aead->Decrypt(encrypt_result.ValueOrDie(), aad);
+  auto decrypt_result = aead->Decrypt(encrypt_result.value(), aad);
   EXPECT_THAT(decrypt_result.status(), IsOk());
-  EXPECT_EQ(decrypt_result.ValueOrDie(), message);
+  EXPECT_EQ(decrypt_result.value(), message);
 }
 
 TEST(KmsEnvelopeAeadTest, NullAead) {
@@ -102,12 +102,12 @@ TEST(KmsEnvelopeAeadTest, DecryptionErrors) {
 
   auto aead_result = KmsEnvelopeAead::New(dek_template, std::move(remote_aead));
   EXPECT_THAT(aead_result.status(), IsOk());
-  auto aead = std::move(aead_result.ValueOrDie());
+  auto aead = std::move(aead_result.value());
   std::string message = "Some data to encrypt.";
   std::string aad = "Some data to authenticate.";
   auto encrypt_result = aead->Encrypt(message, aad);
   EXPECT_THAT(encrypt_result.status(), IsOk());
-  auto ct = encrypt_result.ValueOrDie();
+  auto ct = encrypt_result.value();
 
   // Empty ciphertext.
   auto decrypt_result = aead->Decrypt("", aad);
@@ -155,12 +155,12 @@ TEST(KmsEnvelopeAeadTest, KeyFormat) {
   auto aead_result = KmsEnvelopeAead::New(dek_template, std::move(remote_aead));
   EXPECT_THAT(aead_result.status(), IsOk());
 
-  auto aead = std::move(aead_result.ValueOrDie());
+  auto aead = std::move(aead_result.value());
   std::string message = "Some data to encrypt.";
   std::string aad = "Some data to authenticate.";
   auto encrypt_result = aead->Encrypt(message, aad);
   EXPECT_THAT(encrypt_result.status(), IsOk());
-  auto ct = encrypt_result.ValueOrDie();
+  auto ct = encrypt_result.value();
 
   // Recover DEK from ciphertext
   auto enc_dek_size =
@@ -172,7 +172,7 @@ TEST(KmsEnvelopeAeadTest, KeyFormat) {
 
   // Check if we can deserialize a GCM key proto from the decrypted DEK.
   google::crypto::tink::AesGcmKey key;
-  EXPECT_THAT(key.ParseFromString(dek_decrypt_result.ValueOrDie()), true);
+  EXPECT_THAT(key.ParseFromString(dek_decrypt_result.value()), true);
   EXPECT_THAT(key.key_value().size(), testing::Eq(16));
 }
 

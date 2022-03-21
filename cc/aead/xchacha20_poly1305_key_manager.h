@@ -112,7 +112,7 @@ class XChaCha20Poly1305KeyManager
     }
     google::crypto::tink::XChaCha20Poly1305Key key;
     key.set_version(get_version());
-    key.set_key_value(randomness.ValueOrDie());
+    key.set_key_value(randomness.value());
     return key;
   }
 

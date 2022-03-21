@@ -55,7 +55,7 @@ class AesGcmKeyManager
       auto aes_gcm_result = subtle::AesGcmBoringSsl::New(
           util::SecretDataFromStringView(key.key_value()));
       if (!aes_gcm_result.ok()) return aes_gcm_result.status();
-      return {std::move(aes_gcm_result.ValueOrDie())};
+      return {std::move(aes_gcm_result.value())};
     }
   };
   class CordAeadFactory : public PrimitiveFactory<CordAead> {
@@ -65,7 +65,7 @@ class AesGcmKeyManager
           crypto::tink::internal::CordAesGcmBoringSsl::New(
               util::SecretDataFromStringView(key.key_value()));
       if (!cord_aes_gcm_result.ok()) return cord_aes_gcm_result.status();
-      return {std::move(cord_aes_gcm_result.ValueOrDie())};
+      return {std::move(cord_aes_gcm_result.value())};
     }
   };
 
@@ -125,7 +125,7 @@ class AesGcmKeyManager
     }
     google::crypto::tink::AesGcmKey key;
     key.set_version(get_version());
-    key.set_key_value(randomness.ValueOrDie());
+    key.set_key_value(randomness.value());
     return key;
   }
 

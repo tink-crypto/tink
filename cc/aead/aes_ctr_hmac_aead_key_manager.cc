@@ -77,7 +77,7 @@ StatusOr<AesCtrHmacAeadKey> AesCtrHmacAeadKeyManager::CreateKey(
   if (!hmac_key_or.status().ok()) {
     return hmac_key_or.status();
   }
-  *aes_ctr_hmac_aead_key.mutable_hmac_key() = hmac_key_or.ValueOrDie();
+  *aes_ctr_hmac_aead_key.mutable_hmac_key() = hmac_key_or.value();
 
   return aes_ctr_hmac_aead_key;
 }
@@ -93,12 +93,12 @@ StatusOr<std::unique_ptr<Aead>> AesCtrHmacAeadKeyManager::AeadFactory::Create(
   if (!hmac_result.ok()) return hmac_result.status();
 
   auto cipher_res = subtle::EncryptThenAuthenticate::New(
-      std::move(aes_ctr_result.ValueOrDie()),
-      std::move(hmac_result.ValueOrDie()), key.hmac_key().params().tag_size());
+      std::move(aes_ctr_result.value()), std::move(hmac_result.value()),
+      key.hmac_key().params().tag_size());
   if (!cipher_res.ok()) {
     return cipher_res.status();
   }
-  return std::move(cipher_res.ValueOrDie());
+  return std::move(cipher_res.value());
 }
 
 Status AesCtrHmacAeadKeyManager::ValidateKey(

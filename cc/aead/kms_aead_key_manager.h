@@ -44,7 +44,7 @@ class KmsAeadKeyManager
       const auto& key_uri = kms_aead_key.params().key_uri();
       auto kms_client_result = KmsClients::Get(key_uri);
       if (!kms_client_result.ok()) return kms_client_result.status();
-      return kms_client_result.ValueOrDie()->GetAead(key_uri);
+      return kms_client_result.value()->GetAead(key_uri);
     }
   };
 
