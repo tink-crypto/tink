@@ -71,7 +71,7 @@ std::unique_ptr<RandomAccessStream> GetRandomAccessStream(
 util::Status ReadAll(RandomAccessStream* ra_stream, std::string* contents) {
   int chunk_size = 42;
   contents->clear();
-  auto buffer = std::move(util::Buffer::New(chunk_size).ValueOrDie());
+  auto buffer = std::move(util::Buffer::New(chunk_size).value());
   int64_t position = 0;
   auto status = ra_stream->PRead(position, chunk_size, buffer.get());
   while (status.ok()) {
@@ -110,7 +110,7 @@ std::unique_ptr<PrimitiveSet<StreamingAead>> GetTestStreamingAeadSet(
     auto entry_result = saead_set->AddPrimitive(std::move(saead), key_info);
     EXPECT_TRUE(entry_result.ok());
     if (i + 1 == spec.size()) {
-      EXPECT_THAT(saead_set->set_primary(entry_result.ValueOrDie()), IsOk());
+      EXPECT_THAT(saead_set->set_primary(entry_result.value()), IsOk());
     }
     i++;
   }
@@ -152,7 +152,7 @@ TEST(StreamingAeadSetWrapperTest, BasicEncryptionAndDecryption) {
   StreamingAeadWrapper wrapper;
   auto wrap_result = wrapper.Wrap(std::move(saead_set));
   EXPECT_TRUE(wrap_result.ok()) << wrap_result.status();
-  auto saead = std::move(wrap_result.ValueOrDie());
+  auto saead = std::move(wrap_result.value());
   for (int pt_size : {0, 1, 10, 100, 10000}) {
     std::string plaintext = subtle::Random::GetRandomBytes(pt_size);
     for (std::string aad : {"some_aad", "", "some other aad"}) {
@@ -169,7 +169,7 @@ TEST(StreamingAeadSetWrapperTest, BasicEncryptionAndDecryption) {
       auto enc_stream_result =
           saead->NewEncryptingStream(std::move(ct_destination), aad);
       EXPECT_THAT(enc_stream_result.status(), IsOk());
-      auto enc_stream = std::move(enc_stream_result.ValueOrDie());
+      auto enc_stream = std::move(enc_stream_result.value());
       auto status = WriteToStream(enc_stream.get(), plaintext);
       EXPECT_THAT(status, IsOk());
       EXPECT_EQ(absl::StrCat(saead_name_2, aad, plaintext), ct_buf->str());
@@ -184,7 +184,7 @@ TEST(StreamingAeadSetWrapperTest, BasicEncryptionAndDecryption) {
           saead->NewDecryptingStream(std::move(ct_source), aad);
       EXPECT_THAT(dec_stream_result.status(), IsOk());
       std::string decrypted;
-      status = ReadFromStream(dec_stream_result.ValueOrDie().get(), &decrypted);
+      status = ReadFromStream(dec_stream_result.value().get(), &decrypted);
       EXPECT_THAT(status, IsOk());
       EXPECT_EQ(plaintext, decrypted);
     }
@@ -208,7 +208,7 @@ TEST(StreamingAeadSetWrapperTest, DecryptionWithRandomAccessStream) {
   StreamingAeadWrapper wrapper;
   auto wrap_result = wrapper.Wrap(std::move(saead_set));
   EXPECT_TRUE(wrap_result.ok()) << wrap_result.status();
-  auto saead = std::move(wrap_result.ValueOrDie());
+  auto saead = std::move(wrap_result.value());
   for (int pt_size : {0, 1, 10, 100, 10000}) {
     std::string plaintext = subtle::Random::GetRandomBytes(pt_size);
     for (std::string aad : {"some_aad", "", "some other aad"}) {
@@ -226,7 +226,7 @@ TEST(StreamingAeadSetWrapperTest, DecryptionWithRandomAccessStream) {
       auto enc_stream_result =
           saead->NewEncryptingStream(std::move(ct_destination), aad);
       EXPECT_THAT(enc_stream_result.status(), IsOk());
-      auto enc_stream = std::move(enc_stream_result.ValueOrDie());
+      auto enc_stream = std::move(enc_stream_result.value());
       auto status = WriteToStream(enc_stream.get(), plaintext);
       EXPECT_THAT(status, IsOk());
       EXPECT_EQ(absl::StrCat(saead_name_2, aad, plaintext), ct_buf->str());
@@ -237,7 +237,7 @@ TEST(StreamingAeadSetWrapperTest, DecryptionWithRandomAccessStream) {
           saead->NewDecryptingRandomAccessStream(std::move(ct_source), aad);
       EXPECT_THAT(dec_stream_result.status(), IsOk());
       std::string decrypted;
-      status = ReadAll(dec_stream_result.ValueOrDie().get(), &decrypted);
+      status = ReadAll(dec_stream_result.value().get(), &decrypted);
       EXPECT_THAT(status, StatusIs(absl::StatusCode::kOutOfRange,
                                    HasSubstr("EOF")));
       EXPECT_EQ(plaintext, decrypted);
@@ -267,7 +267,7 @@ TEST(StreamingAeadSetWrapperTest, DecryptionAfterWrapperIsDestroyed) {
     StreamingAeadWrapper wrapper;
     auto wrap_result = wrapper.Wrap(std::move(saead_set));
     EXPECT_TRUE(wrap_result.ok()) << wrap_result.status();
-    auto saead = std::move(wrap_result.ValueOrDie());
+    auto saead = std::move(wrap_result.value());
 
     // Prepare ciphertext destination stream.
     auto ct_stream = absl::make_unique<std::stringstream>();
@@ -279,7 +279,7 @@ TEST(StreamingAeadSetWrapperTest, DecryptionAfterWrapperIsDestroyed) {
     auto enc_stream_result =
         saead->NewEncryptingStream(std::move(ct_destination), aad);
     EXPECT_THAT(enc_stream_result.status(), IsOk());
-    auto enc_stream = std::move(enc_stream_result.ValueOrDie());
+    auto enc_stream = std::move(enc_stream_result.value());
     auto status = WriteToStream(enc_stream.get(), plaintext);
     EXPECT_THAT(status, IsOk());
     EXPECT_EQ(absl::StrCat(saead_name_2, aad, plaintext), ct_buf->str());
@@ -293,7 +293,7 @@ TEST(StreamingAeadSetWrapperTest, DecryptionAfterWrapperIsDestroyed) {
     auto dec_stream_result =
         saead->NewDecryptingStream(std::move(ct_source), aad);
     EXPECT_THAT(dec_stream_result.status(), IsOk());
-    dec_stream = std::move(dec_stream_result.ValueOrDie());
+    dec_stream = std::move(dec_stream_result.value());
   }
   // Now wrapper and saead are out of scope,
   // but decrypting stream should still work.

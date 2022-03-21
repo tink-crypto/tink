@@ -61,7 +61,7 @@ class AesCtrHmacStreamingKeyManager
           auto streaming_result =
               crypto::tink::subtle::AesCtrHmacStreaming::New(params);
           if (!streaming_result.ok()) return streaming_result.status();
-          return {std::move(streaming_result.ValueOrDie())};
+          return {std::move(streaming_result.value())};
         }
   };
 

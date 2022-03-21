@@ -101,7 +101,7 @@ util::Status DecryptingRandomAccessStream::PRead(
   if (!raw_primitives_result.ok()) {
     return Status(absl::StatusCode::kInternal, "No RAW primitives found");
   }
-  for (auto& primitive : *(raw_primitives_result.ValueOrDie())) {
+  for (auto& primitive : *(raw_primitives_result.value())) {
     StreamingAead& streaming_aead = primitive->get_primitive();
     auto shared_ct = absl::make_unique<SharedRandomAccessStream>(
         ciphertext_source_.get());
@@ -109,11 +109,11 @@ util::Status DecryptingRandomAccessStream::PRead(
         streaming_aead.NewDecryptingRandomAccessStream(
             std::move(shared_ct), associated_data_);
     if (decrypting_stream_result.ok()) {
-      auto status = decrypting_stream_result.ValueOrDie()->PRead(
-          position, count, dest_buffer);
+      auto status =
+          decrypting_stream_result.value()->PRead(position, count, dest_buffer);
       if (status.ok() || status.code() == absl::StatusCode::kOutOfRange) {
         // Found a match.
-        matching_stream_ = std::move(decrypting_stream_result.ValueOrDie());
+        matching_stream_ = std::move(decrypting_stream_result.value());
         return status;
       }
     }

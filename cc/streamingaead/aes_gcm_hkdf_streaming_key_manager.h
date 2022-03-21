@@ -58,7 +58,7 @@ class AesGcmHkdfStreamingKeyManager
       auto streaming_result =
           subtle::AesGcmHkdfStreaming::New(std::move(params));
       if (!streaming_result.ok()) return streaming_result.status();
-      return {std::move(streaming_result.ValueOrDie())};
+      return {std::move(streaming_result.value())};
     }
   };
 

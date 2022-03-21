@@ -84,7 +84,7 @@ std::unique_ptr<InputStream> GetCiphertextSource(StreamingAead* saead,
   auto enc_stream_result =
       saead->NewEncryptingStream(std::move(ct_destination), aad);
   EXPECT_THAT(enc_stream_result.status(), IsOk());
-  EXPECT_THAT(WriteToStream(enc_stream_result.ValueOrDie().get(), pt), IsOk());
+  EXPECT_THAT(WriteToStream(enc_stream_result.value().get(), pt), IsOk());
 
   // Return the ciphertext as InputStream.
   auto ct_stream3 = absl::make_unique<std::stringstream>(ct_buf->str());
@@ -120,7 +120,7 @@ std::shared_ptr<PrimitiveSet<StreamingAead>> GetTestStreamingAeadSet(
     auto entry_result = saead_set->AddPrimitive(std::move(saead), key_info);
     EXPECT_TRUE(entry_result.ok());
     if (i + 1 == spec.size()) {
-      EXPECT_THAT(saead_set->set_primary(entry_result.ValueOrDie()), IsOk());
+      EXPECT_THAT(saead_set->set_primary(entry_result.value()), IsOk());
     }
     i++;
   }
@@ -148,7 +148,7 @@ TEST(DecryptingInputStreamTest, BasicDecryption) {
       // in the primitive set, so that we can test decryption with both
       // the primary primitive, and the non-primary ones.
       std::vector<std::unique_ptr<InputStream>> ciphertexts;
-      for (const auto& p : *(saead_set->get_raw_primitives().ValueOrDie())) {
+      for (const auto& p : *(saead_set->get_raw_primitives().value())) {
         ciphertexts.push_back(
             GetCiphertextSource(&(p->get_primitive()), plaintext, aad));
       }
@@ -161,8 +161,8 @@ TEST(DecryptingInputStreamTest, BasicDecryption) {
             DecryptingInputStream::New(saead_set, std::move(ct), aad);
         EXPECT_THAT(dec_stream_result.status(), IsOk());
         std::string decrypted;
-        auto status = ReadFromStream(dec_stream_result.ValueOrDie().get(),
-                                &decrypted);
+        auto status =
+            ReadFromStream(dec_stream_result.value().get(), &decrypted);
         EXPECT_THAT(status, IsOk());
         EXPECT_EQ(plaintext, decrypted);
       }
@@ -194,8 +194,7 @@ TEST(DecryptingInputStreamTest, WrongAssociatedData) {
           DecryptingInputStream::New(saead_set, std::move(ct), "wrong aad");
       EXPECT_THAT(dec_stream_result.status(), IsOk());
       std::string decrypted;
-      auto status = ReadFromStream(dec_stream_result.ValueOrDie().get(),
-                                   &decrypted);
+      auto status = ReadFromStream(dec_stream_result.value().get(), &decrypted);
       EXPECT_THAT(status, StatusIs(absl::StatusCode::kInvalidArgument));
     }
   }
@@ -224,8 +223,7 @@ TEST(DecryptingInputStreamTest, WrongCiphertext) {
           DecryptingInputStream::New(saead_set, std::move(wrong_ct), aad);
       EXPECT_THAT(dec_stream_result.status(), IsOk());
       std::string decrypted;
-      auto status = ReadFromStream(dec_stream_result.ValueOrDie().get(),
-                                   &decrypted);
+      auto status = ReadFromStream(dec_stream_result.value().get(), &decrypted);
       EXPECT_THAT(status, StatusIs(absl::StatusCode::kInvalidArgument));
     }
   }

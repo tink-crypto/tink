@@ -72,18 +72,18 @@ util::StatusOr<int> DecryptingInputStream::Next(const void** data) {
   if (!raw_primitives_result.ok()) {
     return Status(absl::StatusCode::kInternal, "No RAW primitives found");
   }
-  for (auto& primitive : *(raw_primitives_result.ValueOrDie())) {
+  for (auto& primitive : *(raw_primitives_result.value())) {
     StreamingAead& streaming_aead = primitive->get_primitive();
     auto shared_ct = absl::make_unique<SharedInputStream>(
         buffered_ct_source_.get());
     auto decrypting_stream_result = streaming_aead.NewDecryptingStream(
         std::move(shared_ct), associated_data_);
     if (decrypting_stream_result.ok()) {
-      auto next_result = decrypting_stream_result.ValueOrDie()->Next(data);
+      auto next_result = decrypting_stream_result.value()->Next(data);
       if (next_result.status().code() == absl::StatusCode::kOutOfRange ||
           next_result.ok()) {  // Found a match.
         buffered_ct_source_->DisableRewinding();
-        matching_stream_ = std::move(decrypting_stream_result.ValueOrDie());
+        matching_stream_ = std::move(decrypting_stream_result.value());
         return next_result;
       }
     }
