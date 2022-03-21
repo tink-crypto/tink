@@ -160,18 +160,17 @@ KeysetHandle::GetPrimitives(const KeyManager<P>* custom_manager) const {
           custom_manager->DoesSupport(key.key_data().type_url())) {
         auto primitive_result = custom_manager->GetPrimitive(key.key_data());
         if (!primitive_result.ok()) return primitive_result.status();
-        primitive = std::move(primitive_result.ValueOrDie());
+        primitive = std::move(primitive_result.value());
       } else {
         auto primitive_result = Registry::GetPrimitive<P>(key.key_data());
         if (!primitive_result.ok()) return primitive_result.status();
-        primitive = std::move(primitive_result.ValueOrDie());
+        primitive = std::move(primitive_result.value());
       }
       auto entry_result =
           primitives->AddPrimitive(std::move(primitive), KeyInfoFromKey(key));
       if (!entry_result.ok()) return entry_result.status();
       if (key.key_id() == get_keyset().primary_key_id()) {
-        auto primary_result =
-            primitives->set_primary(entry_result.ValueOrDie());
+        auto primary_result = primitives->set_primary(entry_result.value());
         if (!primary_result.ok()) return primary_result;
       }
     }
@@ -196,7 +195,7 @@ crypto::tink::util::StatusOr<std::unique_ptr<P>> KeysetHandle::GetPrimitive(
   if (!primitives_result.ok()) {
     return primitives_result.status();
   }
-  return Registry::Wrap<P>(std::move(primitives_result.ValueOrDie()));
+  return Registry::Wrap<P>(std::move(primitives_result.value()));
 }
 
 }  // namespace tink

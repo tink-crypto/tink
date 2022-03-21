@@ -45,7 +45,7 @@ google::crypto::tink::Cecpq2AeadHkdfPrivateKey GetCecpq2AeadHkdfTestKey(
 
   auto cecpq2_key_pair_or_status =
       pqc::GenerateCecpq2Keypair(util::Enums::ProtoToSubtle(curve_type));
-  auto cecpq2_key_pair = std::move(cecpq2_key_pair_or_status.ValueOrDie());
+  auto cecpq2_key_pair = std::move(cecpq2_key_pair_or_status.value());
 
   std::string hrss_priv_key_seed_str(
       reinterpret_cast<const char *>(

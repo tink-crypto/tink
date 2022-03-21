@@ -118,7 +118,7 @@ TEST_F(CordAesGcmBoringSslTest, CanDecryptWithStringAead) {
       subtle::AesGcmBoringSsl::New(key_);
   ASSERT_THAT(string_aead.status(), IsOk());
   util::StatusOr<std::string> plaintext =
-      (*string_aead)->Decrypt(ct.ValueOrDie().Flatten(), aad_cord.Flatten());
+      (*string_aead)->Decrypt(ct.value().Flatten(), aad_cord.Flatten());
   ASSERT_THAT(plaintext.status(), IsOk());
   EXPECT_EQ(*plaintext, kMessage);
 }

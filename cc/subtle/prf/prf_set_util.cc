@@ -43,7 +43,7 @@ class PrfFromStreamingPrf : public Prf {
     if (!output_result.ok()) {
       return output_result.status();
     }
-    std::string output = output_result.ValueOrDie();
+    std::string output = output_result.value();
     return output;
   }
 
@@ -62,7 +62,7 @@ class PrfFromStatefulMacFactory : public Prf {
     if (!stateful_mac_result.ok()) {
       return stateful_mac_result.status();
     }
-    auto stateful_mac = std::move(stateful_mac_result.ValueOrDie());
+    auto stateful_mac = std::move(stateful_mac_result.value());
     auto status = stateful_mac->Update(input);
     if (!status.ok()) {
       return status;
@@ -71,7 +71,7 @@ class PrfFromStatefulMacFactory : public Prf {
     if (!output_result.ok()) {
       return output_result.status();
     }
-    std::string output = std::move(output_result.ValueOrDie());
+    std::string output = std::move(output_result.value());
     if (output.size() < output_length) {
       return util::Status(
           absl::StatusCode::kInvalidArgument,

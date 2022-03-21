@@ -41,9 +41,9 @@ crypto::tink::util::Status EncryptThenDecrypt(
       aead_or_daead.Encrypt(message, associated_data);
   if (!encryption_or.status().ok()) return encryption_or.status();
   StatusOr<std::string> decryption_or =
-      aead_or_daead.Decrypt(encryption_or.ValueOrDie(), associated_data);
+      aead_or_daead.Decrypt(encryption_or.value(), associated_data);
   if (!decryption_or.status().ok()) return decryption_or.status();
-  if (decryption_or.ValueOrDie() != message) {
+  if (decryption_or.value() != message) {
     return crypto::tink::util::Status(absl::StatusCode::kInternal,
                                       "Message/Decryption mismatch");
   }

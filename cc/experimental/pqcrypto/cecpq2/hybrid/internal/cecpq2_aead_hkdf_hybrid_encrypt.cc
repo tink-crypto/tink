@@ -74,8 +74,8 @@ util::StatusOr<std::unique_ptr<HybridEncrypt>> Cecpq2AeadHkdfHybridEncrypt::New(
   if (!dem_result.ok()) return dem_result.status();
 
   return {absl::WrapUnique(new Cecpq2AeadHkdfHybridEncrypt(
-      recipient_key, std::move(kem_result).ValueOrDie(),
-      std::move(dem_result).ValueOrDie()))};
+      recipient_key, std::move(kem_result).value(),
+      std::move(dem_result).value()))};
 }
 
 util::StatusOr<std::string> Cecpq2AeadHkdfHybridEncrypt::Encrypt(
@@ -84,7 +84,7 @@ util::StatusOr<std::string> Cecpq2AeadHkdfHybridEncrypt::Encrypt(
   util::StatusOr<uint32_t> key_material_size_or =
       dem_helper_->GetKeyMaterialSize();
   if (!key_material_size_or.ok()) return key_material_size_or.status();
-  uint32_t key_material_size = key_material_size_or.ValueOrDie();
+  uint32_t key_material_size = key_material_size_or.value();
 
   // Use KEM to get a symmetric key
   util::StatusOr<
@@ -98,7 +98,7 @@ util::StatusOr<std::string> Cecpq2AeadHkdfHybridEncrypt::Encrypt(
               recipient_key_.params().kem_params().ec_point_format()));
   if (!kem_key_result.ok()) return kem_key_result.status();
   std::unique_ptr<const subtle::Cecpq2HkdfSenderKemBoringSsl::KemKey> kem_key =
-      std::move(kem_key_result.ValueOrDie());
+      std::move(kem_key_result.value());
 
   // Use the symmetric key to get an AEAD-primitive
   util::StatusOr<std::unique_ptr<crypto::tink::subtle::AeadOrDaead>>
@@ -106,7 +106,7 @@ util::StatusOr<std::string> Cecpq2AeadHkdfHybridEncrypt::Encrypt(
           dem_helper_->GetAeadOrDaead(kem_key->get_symmetric_key());
   if (!aead_or_daead_result.ok()) return aead_or_daead_result.status();
   std::unique_ptr<crypto::tink::subtle::AeadOrDaead> aead_or_daead =
-      std::move(aead_or_daead_result.ValueOrDie());
+      std::move(aead_or_daead_result.value());
 
   // Do the actual encryption using the AEAD-primitive
   util::StatusOr<std::string> encrypt_result =
@@ -115,7 +115,7 @@ util::StatusOr<std::string> Cecpq2AeadHkdfHybridEncrypt::Encrypt(
 
   // Prepend AEAD-ciphertext with a KEM component
   std::string ciphertext =
-      absl::StrCat(kem_key->get_kem_bytes(), encrypt_result.ValueOrDie());
+      absl::StrCat(kem_key->get_kem_bytes(), encrypt_result.value());
 
   return ciphertext;
 }

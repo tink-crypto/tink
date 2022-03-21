@@ -70,7 +70,7 @@ class PrimitiveSet {
         return util::Status(absl::StatusCode::kInvalidArgument,
                             "The primitive must be non-null.");
       }
-      std::string identifier = identifier_result.ValueOrDie();
+      std::string identifier = identifier_result.value();
       return absl::WrapUnique(new Entry(std::move(primitive), identifier,
                                         key_info.status(), key_info.key_id(),
                                         key_info.output_prefix_type()));
@@ -118,8 +118,8 @@ class PrimitiveSet {
     if (!entry_or.ok()) return entry_or.status();
 
     absl::MutexLock lock(&primitives_mutex_);
-    std::string identifier = entry_or.ValueOrDie()->get_identifier();
-    primitives_[identifier].push_back(std::move(entry_or.ValueOrDie()));
+    std::string identifier = entry_or.value()->get_identifier();
+    primitives_[identifier].push_back(std::move(entry_or.value()));
     return primitives_[identifier].back().get();
   }
 

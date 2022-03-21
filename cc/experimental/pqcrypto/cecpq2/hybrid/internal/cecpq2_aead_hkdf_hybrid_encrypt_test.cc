@@ -47,7 +47,7 @@ namespace {
 google::crypto::tink::Cecpq2AeadHkdfPublicKey CreateValidKey() {
   auto cecp2_key_pair = crypto::tink::pqc::GenerateCecpq2Keypair(
                             subtle::EllipticCurveType::CURVE25519)
-                            .ValueOrDie();
+                            .value();
   google::crypto::tink::Cecpq2AeadHkdfPublicKey sender_key;
   sender_key.set_hrss_public_key_marshalled(
       cecp2_key_pair.hrss_key_pair.hrss_public_key_marshaled);
@@ -100,7 +100,7 @@ TEST(Cecpq2AeadHkdfHybridEncryptTest, InvalidKeyUnsupportedDemKeyType) {
   auto status_or_cecpq2_key =
       pqc::GenerateCecpq2Keypair(subtle::EllipticCurveType::CURVE25519);
   ASSERT_THAT(status_or_cecpq2_key.status(), IsOk());
-  auto cecpq2_key_pair = std::move(status_or_cecpq2_key).ValueOrDie();
+  auto cecpq2_key_pair = std::move(status_or_cecpq2_key).value();
 
   google::crypto::tink::Cecpq2AeadHkdfPublicKey sender_key = CreateValidKey();
   sender_key.mutable_params()
@@ -155,7 +155,7 @@ TEST(Cecpq2AeadHkdfHybridEncryptTest, Basic) {
           auto key_or = Cecpq2AeadHkdfHybridEncrypt::New(cecpq2_key);
           ASSERT_THAT(key_or.status(), IsOk());
           std::unique_ptr<HybridEncrypt> hybrid_encrypt(
-              std::move(key_or.ValueOrDie()));
+              std::move(key_or.value()));
           // Use the primitive
           auto encrypt_result =
               hybrid_encrypt->Encrypt(plaintext, context_info);

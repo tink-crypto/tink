@@ -83,8 +83,8 @@ StatusOr<std::shared_ptr<ChannelCredentials>> GetCredentials(
   // Try reading credentials from a file.
   auto json_creds_result = ReadFile(credentials_path);
   if (!json_creds_result.ok()) return json_creds_result.status();
-  auto creds = grpc::ServiceAccountJWTAccessCredentials(
-      json_creds_result.ValueOrDie());
+  auto creds =
+      grpc::ServiceAccountJWTAccessCredentials(json_creds_result.value());
   if (creds != nullptr) {
     // Creating "empty" 'channel_creds', to convert 'creds'
     // to ChannelCredentials via CompositeChannelCredentials().
@@ -128,8 +128,8 @@ GcpKmsClient::New(absl::string_view key_uri,
   ChannelArguments args;
   args.SetUserAgentPrefix(
       absl::StrCat(kTinkUserAgentPrefix, Version::kTinkVersion, " CPP-Python"));
-  client->kms_stub_ = KeyManagementService::NewStub(grpc::CreateCustomChannel(
-      kGcpKmsServer, creds_result.ValueOrDie(), args));
+  client->kms_stub_ = KeyManagementService::NewStub(
+      grpc::CreateCustomChannel(kGcpKmsServer, creds_result.value(), args));
   return std::move(client);
 }
 
@@ -167,7 +167,7 @@ Status GcpKmsClient::RegisterNewClient(absl::string_view key_uri,
     return client_result.status();
   }
 
-  return KmsClients::Add(std::move(client_result.ValueOrDie()));
+  return KmsClients::Add(std::move(client_result.value()));
 }
 
 }  // namespace gcpkms

@@ -87,7 +87,7 @@ KeyTemplate* NewJwtRsaSsaPkcs1KeyTemplate(JwtRsaSsaPkcs1Algorithm algorithm,
   BN_set_word(e.get(), public_exponent);
   util::StatusOr<std::string> e_str =
       internal::BignumToString(e.get(), BN_num_bytes(e.get()));
-  key_format.set_public_exponent(e_str.ValueOrDie());
+  key_format.set_public_exponent(e_str.value());
   key_format.SerializeToString(key_template->mutable_value());
   return key_template;
 }
@@ -107,7 +107,7 @@ KeyTemplate* NewJwtRsaSsaPssKeyTemplate(JwtRsaSsaPssAlgorithm algorithm,
   BN_set_word(e.get(), public_exponent);
   util::StatusOr<std::string> e_str =
       internal::BignumToString(e.get(), BN_num_bytes(e.get()));
-  key_format.set_public_exponent(e_str.ValueOrDie());
+  key_format.set_public_exponent(e_str.value());
   key_format.SerializeToString(key_template->mutable_value());
   return key_template;
 }

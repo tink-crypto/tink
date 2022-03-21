@@ -86,11 +86,9 @@ class Cecpq2AeadHkdfHybridDecryptTest : public ::testing::Test {
     auto result = Cecpq2AeadHkdfHybridDecrypt::New(cecpq2_key);
     if (!result.ok()) return result.status();
 
-    std::unique_ptr<HybridDecrypt> hybrid_decrypt(
-        std::move(result.ValueOrDie()));
-    std::unique_ptr<HybridEncrypt> hybrid_encrypt(
-        std::move(Cecpq2AeadHkdfHybridEncrypt::New(cecpq2_key.public_key())
-                      .ValueOrDie()));
+    std::unique_ptr<HybridDecrypt> hybrid_decrypt(std::move(result.value()));
+    std::unique_ptr<HybridEncrypt> hybrid_encrypt(std::move(
+        Cecpq2AeadHkdfHybridEncrypt::New(cecpq2_key.public_key()).value()));
 
     std::string context_info = "some context info";
     for (uint32_t plaintext_size : {0, 1, 10, 100, 1000}) {
@@ -98,13 +96,13 @@ class Cecpq2AeadHkdfHybridDecryptTest : public ::testing::Test {
       std::string plaintext = Random::GetRandomBytes(plaintext_size);
       auto ciphertext_or = hybrid_encrypt->Encrypt(plaintext, context_info);
       if (!ciphertext_or.ok()) return ciphertext_or.status();
-      auto ciphertext = ciphertext_or.ValueOrDie();
+      auto ciphertext = ciphertext_or.value();
       {  // Regular decryption
         auto decrypt_result = hybrid_decrypt->Decrypt(ciphertext, context_info);
         if (!decrypt_result.ok()) {
           return decrypt_result.status();
         }
-        if (plaintext != decrypt_result.ValueOrDie())
+        if (plaintext != decrypt_result.value())
           return crypto::tink::util::Status(
               absl::StatusCode::kInternal,
               "Regular Encryption-Decryption failed:"
@@ -113,14 +111,14 @@ class Cecpq2AeadHkdfHybridDecryptTest : public ::testing::Test {
       {  // Encryption and decryption with empty context info
         const absl::string_view empty_context_info;
         auto ciphertext =
-            hybrid_encrypt->Encrypt(plaintext, empty_context_info).ValueOrDie();
+            hybrid_encrypt->Encrypt(plaintext, empty_context_info).value();
         auto decrypt_result =
             hybrid_decrypt->Decrypt(ciphertext, empty_context_info);
 
         if (!decrypt_result.ok()) {
           return decrypt_result.status();
         }
-        if (plaintext != decrypt_result.ValueOrDie())
+        if (plaintext != decrypt_result.value())
           return crypto::tink::util::Status(
               absl::StatusCode::kInternal,
               "Empty Context Info Encryption-Decryption failed:"
@@ -131,13 +129,13 @@ class Cecpq2AeadHkdfHybridDecryptTest : public ::testing::Test {
         const absl::string_view empty_context_info;
         auto ciphertext =
             hybrid_encrypt->Encrypt(empty_plaintext, empty_context_info)
-                .ValueOrDie();
+                .value();
         auto decrypt_result =
             hybrid_decrypt->Decrypt(ciphertext, empty_context_info);
         if (!decrypt_result.ok()) {
           return decrypt_result.status();
         }
-        if (empty_plaintext != decrypt_result.ValueOrDie())
+        if (empty_plaintext != decrypt_result.value())
           return crypto::tink::util::Status(
               absl::StatusCode::kInternal,
               "Empty Context Info and Message Encryption-Decryption failed:"
@@ -180,7 +178,7 @@ google::crypto::tink::Cecpq2AeadHkdfPrivateKey CreateValidKey() {
 
   auto cecp2_key_pair = crypto::tink::pqc::GenerateCecpq2Keypair(
                             subtle::EllipticCurveType::CURVE25519)
-                            .ValueOrDie();
+                            .value();
 
   recipient_key.set_x25519_private_key(std::string(
       util::SecretDataAsStringView(cecp2_key_pair.x25519_key_pair.priv)));
@@ -322,7 +320,7 @@ TEST_F(Cecpq2AeadHkdfHybridDecryptTest, AesGcmHybridDecryption) {
                                 key_params.hash_type, ":", aes_gcm_key_size));
       auto cecpq2_key_pair_or_status =
           pqc::GenerateCecpq2Keypair(key_params.ec_curve);
-      auto cecpq2_key_pair = std::move(cecpq2_key_pair_or_status.ValueOrDie());
+      auto cecpq2_key_pair = std::move(cecpq2_key_pair_or_status.value());
       google::crypto::tink::Cecpq2AeadHkdfPrivateKey cecpq2_key;
       cecpq2_key.set_hrss_private_key_seed(
           std::string(util::SecretDataAsStringView(
@@ -380,7 +378,7 @@ TEST_F(Cecpq2AeadHkdfHybridDecryptTest, XChaCha20Poly1305HybridDecryption) {
                               key_params.hash_type));
     auto cecpq2_key_pair_or_status =
         pqc::GenerateCecpq2Keypair(key_params.ec_curve);
-    auto cecpq2_key_pair = std::move(cecpq2_key_pair_or_status.ValueOrDie());
+    auto cecpq2_key_pair = std::move(cecpq2_key_pair_or_status.value());
     google::crypto::tink::Cecpq2AeadHkdfPrivateKey cecpq2_key;
     cecpq2_key.set_hrss_private_key_seed(
         std::string(util::SecretDataAsStringView(
@@ -434,7 +432,7 @@ TEST_F(Cecpq2AeadHkdfHybridDecryptTest, AesSivHybridDecryption) {
   for (auto key_params : GetCommonHybridKeyParamsList()) {
     auto cecpq2_key_pair_or_status =
         pqc::GenerateCecpq2Keypair(key_params.ec_curve);
-    auto cecpq2_key_pair = std::move(cecpq2_key_pair_or_status.ValueOrDie());
+    auto cecpq2_key_pair = std::move(cecpq2_key_pair_or_status.value());
     google::crypto::tink::Cecpq2AeadHkdfPrivateKey cecpq2_key;
     cecpq2_key.set_hrss_private_key_seed(
         std::string(util::SecretDataAsStringView(
