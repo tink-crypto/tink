@@ -71,7 +71,13 @@ public abstract class KeyTypeManager<KeyProtoT extends MessageLite> {
       return clazz;
     }
 
-    /** Creates a new instance of {@code PrimitiveT}. */
+    /**
+     * Creates a new instance of {@code PrimitiveT}.
+     *
+     * <p>For primitives of type {@code Mac}, {@code Aead}, {@code PublicKeySign}, {@code
+     * PublicKeyVerify}, {@code DeterministicAead}, {@code HybridEncrypt}, and {@code HybridDecrypt}
+     * this should be a primitive which <b>ignores</b> the output prefix and assumes "RAW".
+     */
     public abstract PrimitiveT getPrimitive(KeyT key) throws GeneralSecurityException;
   }
 
