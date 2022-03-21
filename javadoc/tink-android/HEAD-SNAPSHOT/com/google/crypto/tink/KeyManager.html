@@ -210,7 +210,10 @@ var activeTableTab = "activeTableTab";
 <pre><a href="../../../../com/google/crypto/tink/KeyManager.html" title="type parameter in KeyManager">P</a>&nbsp;getPrimitive(com.google.protobuf.ByteString&nbsp;serializedKey)
         throws <a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
 <div class="block">Constructs an instance of P for the key given in <code>serializedKey</code>, which must be a
- serialized key protocol buffer handled by this manager.</div>
+ serialized key protocol buffer handled by this manager.
+
+ <p>For primitives of type <code>Mac</code>, <code>Aead</code>, <code>PublicKeySign</code>, <code>PublicKeyVerify</code>, <code>DeterministicAead</code>, <code>HybridEncrypt</code>, and <code>HybridDecrypt</code>
+ this should be a primitive which <b>ignores</b> the output prefix and assumes "RAW".</div>
 <dl>
 <dt><span class="returnLabel">Returns:</span></dt>
 <dd>the new constructed P</dd>
@@ -228,7 +231,10 @@ var activeTableTab = "activeTableTab";
 <h4>getPrimitive</h4>
 <pre><a href="../../../../com/google/crypto/tink/KeyManager.html" title="type parameter in KeyManager">P</a>&nbsp;getPrimitive(com.google.protobuf.MessageLite&nbsp;key)
         throws <a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
-<div class="block">Constructs an instance of P for the key given in <code>key</code>.</div>
+<div class="block">Constructs an instance of P for the key given in <code>key</code>.
+
+ <p>For primitives of type <code>Mac</code>, <code>Aead</code>, <code>PublicKeySign</code>, <code>PublicKeyVerify</code>, <code>DeterministicAead</code>, <code>HybridEncrypt</code>, and <code>HybridDecrypt</code>
+ this should be a primitive which <b>ignores</b> the output prefix and assumes "RAW".</div>
 <dl>
 <dt><span class="returnLabel">Returns:</span></dt>
 <dd>the new constructed P</dd>
