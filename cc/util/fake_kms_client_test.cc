@@ -76,25 +76,25 @@ class FakeKmsClientTest : public ::testing::Test {
 TEST_F(FakeKmsClientTest, CreateNewAeadSuccess) {
   auto uri_result = FakeKmsClient::CreateFakeKeyUri();
   EXPECT_TRUE(uri_result.ok()) << uri_result.status();
-  std::string key_uri = uri_result.ValueOrDie();
+  std::string key_uri = uri_result.value();
 
   auto client_result = FakeKmsClient::New(key_uri, "");
   EXPECT_TRUE(client_result.ok()) << client_result.status();
-  auto client = std::move(client_result.ValueOrDie());
+  auto client = std::move(client_result.value());
   EXPECT_TRUE(client->DoesSupport(key_uri));
 
   auto aead_result = client->GetAead(key_uri);
   EXPECT_TRUE(aead_result.ok()) << aead_result.status();
-  auto aead = std::move(aead_result.ValueOrDie());
+  auto aead = std::move(aead_result.value());
 
   std::string plaintext = "some_plaintext";
   std::string aad = "some_aad";
   auto encrypt_result = aead->Encrypt(plaintext, aad);
   EXPECT_TRUE(encrypt_result.ok()) << encrypt_result.status();
-  std::string ciphertext = encrypt_result.ValueOrDie();
+  std::string ciphertext = encrypt_result.value();
   auto decrypt_result = aead->Decrypt(ciphertext, aad);
   EXPECT_TRUE(decrypt_result.ok()) << decrypt_result.status();
-  EXPECT_EQ(plaintext, decrypt_result.ValueOrDie());
+  EXPECT_EQ(plaintext, decrypt_result.value());
 }
 
 TEST_F(FakeKmsClientTest, ClientIsBound) {
@@ -104,7 +104,7 @@ TEST_F(FakeKmsClientTest, ClientIsBound) {
       "YXhLZXkSFhICCBAaEPFnQNgtxEG0vEek8bBfgL8YARABGL3oi0kgAQ";
   auto client_result = FakeKmsClient::New(key_uri, "");
   EXPECT_TRUE(client_result.ok()) << client_result.status();
-  auto client = std::move(client_result.ValueOrDie());
+  auto client = std::move(client_result.value());
 
   // No other key_uri is accepted, even a valid one.
   std::string another_key_uri =
@@ -119,7 +119,7 @@ TEST_F(FakeKmsClientTest, ClientIsBound) {
 TEST_F(FakeKmsClientTest, ClientIsUnbound) {
   auto client_result = FakeKmsClient::New("", "");
   EXPECT_TRUE(client_result.ok()) << client_result.status();
-  auto client = std::move(client_result.ValueOrDie());
+  auto client = std::move(client_result.value());
 
   // All valid 'fake-kms' key_uris are accepted.
   std::string uri =
@@ -142,32 +142,31 @@ TEST_F(FakeKmsClientTest, ClientIsUnbound) {
 TEST_F(FakeKmsClientTest, RegisterAndEncryptDecryptWithKmsAead) {
   auto uri_result = FakeKmsClient::CreateFakeKeyUri();
   EXPECT_TRUE(uri_result.ok()) << uri_result.status();
-  std::string key_uri = uri_result.ValueOrDie();
+  std::string key_uri = uri_result.value();
   auto status = FakeKmsClient::RegisterNewClient(key_uri, "");
   EXPECT_THAT(status, IsOk());
 
   KeyTemplate key_template = NewKmsAeadKeyTemplate(key_uri);
   auto handle_result = KeysetHandle::GenerateNew(key_template);
   EXPECT_TRUE(handle_result.ok()) << handle_result.status();
-  auto aead_result =
-      handle_result.ValueOrDie()->GetPrimitive<crypto::tink::Aead>();
+  auto aead_result = handle_result.value()->GetPrimitive<crypto::tink::Aead>();
   EXPECT_TRUE(aead_result.ok()) << aead_result.status();
-  auto aead = std::move(aead_result.ValueOrDie());
+  auto aead = std::move(aead_result.value());
 
   std::string plaintext = "some_plaintext";
   std::string aad = "some_aad";
   auto encrypt_result = aead->Encrypt(plaintext, aad);
   EXPECT_TRUE(encrypt_result.ok()) << encrypt_result.status();
-  std::string ciphertext = encrypt_result.ValueOrDie();
+  std::string ciphertext = encrypt_result.value();
   auto decrypt_result = aead->Decrypt(ciphertext, aad);
   EXPECT_TRUE(decrypt_result.ok()) << decrypt_result.status();
-  EXPECT_EQ(plaintext, decrypt_result.ValueOrDie());
+  EXPECT_EQ(plaintext, decrypt_result.value());
 }
 
 TEST_F(FakeKmsClientTest, RegisterAndEncryptDecryptWithKmsEnvelopeAead) {
   auto uri_result = FakeKmsClient::CreateFakeKeyUri();
   EXPECT_TRUE(uri_result.ok()) << uri_result.status();
-  std::string key_uri = uri_result.ValueOrDie();
+  std::string key_uri = uri_result.value();
   auto status = FakeKmsClient::RegisterNewClient(key_uri, "");
   EXPECT_THAT(status, IsOk());
 
@@ -175,19 +174,18 @@ TEST_F(FakeKmsClientTest, RegisterAndEncryptDecryptWithKmsEnvelopeAead) {
       NewKmsEnvelopeKeyTemplate(key_uri, AeadKeyTemplates::Aes128Gcm());
   auto handle_result = KeysetHandle::GenerateNew(key_template);
   EXPECT_TRUE(handle_result.ok()) << handle_result.status();
-  auto aead_result =
-      handle_result.ValueOrDie()->GetPrimitive<crypto::tink::Aead>();
+  auto aead_result = handle_result.value()->GetPrimitive<crypto::tink::Aead>();
   EXPECT_TRUE(aead_result.ok()) << aead_result.status();
-  auto aead = std::move(aead_result.ValueOrDie());
+  auto aead = std::move(aead_result.value());
 
   std::string plaintext = "some_plaintext";
   std::string aad = "some_aad";
   auto encrypt_result = aead->Encrypt(plaintext, aad);
   EXPECT_TRUE(encrypt_result.ok()) << encrypt_result.status();
-  std::string ciphertext = encrypt_result.ValueOrDie();
+  std::string ciphertext = encrypt_result.value();
   auto decrypt_result = aead->Decrypt(ciphertext, aad);
   EXPECT_TRUE(decrypt_result.ok()) << decrypt_result.status();
-  EXPECT_EQ(plaintext, decrypt_result.ValueOrDie());
+  EXPECT_EQ(plaintext, decrypt_result.value());
 }
 
 // TODO(b/174740983): Add test where an unbounded KeyClient is registered.

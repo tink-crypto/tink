@@ -62,8 +62,8 @@ RawJwtRsaSsaPssVerifyKeyManager::PublicKeyVerifyFactory::Create(
     return salt_length.status();
   }
   internal::RsaSsaPssParams params;
-  params.sig_hash = Enums::ProtoToSubtle(hash_or.ValueOrDie());
-  params.mgf1_hash = Enums::ProtoToSubtle(hash_or.ValueOrDie());
+  params.sig_hash = Enums::ProtoToSubtle(hash_or.value());
+  params.mgf1_hash = Enums::ProtoToSubtle(hash_or.value());
   params.salt_length = *salt_length;
 
   util::StatusOr<std::unique_ptr<RsaSsaPssVerifyBoringSsl>> verify =

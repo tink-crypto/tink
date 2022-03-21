@@ -167,7 +167,7 @@ util::StatusOr<std::string> HexDecode(absl::string_view hex) {
 }
 
 std::string HexDecodeOrDie(absl::string_view hex) {
-  return HexDecode(hex).ValueOrDie();
+  return HexDecode(hex).value();
 }
 
 std::string HexEncode(absl::string_view bytes) {
@@ -263,8 +263,7 @@ EciesAeadHkdfPrivateKey GetEciesAeadHkdfTestKey(
     google::crypto::tink::EllipticCurveType curve_type,
     google::crypto::tink::EcPointFormat ec_point_format,
     google::crypto::tink::HashType hash_type) {
-  auto test_key = internal::NewEcKey(
-      Enums::ProtoToSubtle(curve_type)).ValueOrDie();
+  auto test_key = internal::NewEcKey(Enums::ProtoToSubtle(curve_type)).value();
   EciesAeadHkdfPrivateKey ecies_key;
   ecies_key.set_version(0);
   ecies_key.set_key_value(
@@ -379,8 +378,7 @@ EcdsaPrivateKey GetEcdsaTestPrivateKey(
     google::crypto::tink::EllipticCurveType curve_type,
     google::crypto::tink::HashType hash_type,
     google::crypto::tink::EcdsaSignatureEncoding encoding) {
-  auto test_key = internal::NewEcKey(
-      Enums::ProtoToSubtle(curve_type)).ValueOrDie();
+  auto test_key = internal::NewEcKey(Enums::ProtoToSubtle(curve_type)).value();
   EcdsaPrivateKey ecdsa_key;
   ecdsa_key.set_version(0);
   ecdsa_key.set_key_value(
@@ -397,7 +395,7 @@ EcdsaPrivateKey GetEcdsaTestPrivateKey(
 }
 
 Ed25519PrivateKey GetEd25519TestPrivateKey() {
-  auto test_key = internal::NewEd25519Key().ValueOrDie();
+  auto test_key = internal::NewEd25519Key().value();
   Ed25519PrivateKey ed25519_key;
   ed25519_key.set_version(0);
   ed25519_key.set_key_value(test_key->private_key);

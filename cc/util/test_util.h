@@ -282,7 +282,7 @@ class DummyCordAead : public CordAead {
     if (!ciphertext.ok()) return ciphertext.status();
 
     absl::Cord ciphertext_cord;
-    ciphertext_cord.Append(ciphertext.ValueOrDie());
+    ciphertext_cord.Append(ciphertext.value());
     return ciphertext_cord;
   }
 
@@ -294,7 +294,7 @@ class DummyCordAead : public CordAead {
     if (!plaintext.ok()) return plaintext.status();
 
     absl::Cord plaintext_cord;
-    plaintext_cord.Append(plaintext.ValueOrDie());
+    plaintext_cord.Append(plaintext.value());
     return plaintext_cord;
   }
 
@@ -385,12 +385,12 @@ class DummyStreamingAead : public StreamingAead {
           status_ = next_result.status();
           return status_;
         }
-        if (next_result.ValueOrDie() < header_.size()) {
+        if (next_result.value() < header_.size()) {
           status_ =
               util::Status(absl::StatusCode::kInternal, "Buffer too small");
         } else {
           memcpy(*data, header_.data(), static_cast<int>(header_.size()));
-          ct_dest_->BackUp(next_result.ValueOrDie() - header_.size());
+          ct_dest_->BackUp(next_result.value() - header_.size());
         }
       }
       if (!status_.ok()) return status_;
@@ -415,7 +415,7 @@ class DummyStreamingAead : public StreamingAead {
         void* buf;
         auto next_result = Next(&buf);
         if (next_result.ok()) {
-          BackUp(next_result.ValueOrDie());
+          BackUp(next_result.value());
         } else {
           status_ = next_result.status();
           return status_;
@@ -456,7 +456,7 @@ class DummyStreamingAead : public StreamingAead {
           }
           return status_;
         }
-        if (next_result.ValueOrDie() < exp_header_.size()) {
+        if (next_result.value() < exp_header_.size()) {
           status_ =
               util::Status(absl::StatusCode::kInternal, "Buffer too small");
         } else if (memcmp((*data), exp_header_.data(),
@@ -465,7 +465,7 @@ class DummyStreamingAead : public StreamingAead {
                                  "Corrupted header");
         }
         if (status_.ok()) {
-          ct_source_->BackUp(next_result.ValueOrDie() - exp_header_.size());
+          ct_source_->BackUp(next_result.value() - exp_header_.size());
         }
       }
       if (!status_.ok()) return status_;
@@ -530,14 +530,14 @@ class DummyStreamingAead : public StreamingAead {
       }
       auto ct_size_result = ct_source_->size();
       if (!ct_size_result.ok()) return ct_size_result.status();
-      auto pt_size = ct_size_result.ValueOrDie() - exp_header_.size();
+      auto pt_size = ct_size_result.value() - exp_header_.size();
       if (pt_size >= 0) return pt_size;
       return util::Status(absl::StatusCode::kUnavailable, "size not available");
     }
 
    private:
     void Initialize() ABSL_EXCLUSIVE_LOCKS_REQUIRED(status_mutex_) {
-      auto buf = std::move(util::Buffer::New(exp_header_.size()).ValueOrDie());
+      auto buf = std::move(util::Buffer::New(exp_header_.size()).value());
       status_ = ct_source_->PRead(0, exp_header_.size(), buf.get());
       if (!status_.ok() && status_.code() != absl::StatusCode::kOutOfRange)
         return;

@@ -116,7 +116,7 @@ TEST(RawJwtEcdsaSignKeyManagerTest, CreateKeyValid) {
 
 JwtEcdsaPrivateKey CreateValidEs256Key() {
   JwtEcdsaKeyFormat format = CreateValidEs256KeyFormat();
-  return RawJwtEcdsaSignKeyManager().CreateKey(format).ValueOrDie();
+  return RawJwtEcdsaSignKeyManager().CreateKey(format).value();
 }
 
 TEST(RawJwtEcdsaSignKeyManagerTest, ValidateKey) {

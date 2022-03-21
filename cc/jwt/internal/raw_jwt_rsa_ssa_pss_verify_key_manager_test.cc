@@ -76,7 +76,7 @@ JwtRsaSsaPssKeyFormat CreateKeyFormat(JwtRsaSsaPssAlgorithm algorithm,
   internal::SslUniquePtr<BIGNUM> e(BN_new());
   BN_set_word(e.get(), public_exponent);
   key_format.set_public_exponent(
-      internal::BignumToString(e.get(), BN_num_bytes(e.get())).ValueOrDie());
+      internal::BignumToString(e.get(), BN_num_bytes(e.get())).value());
 
   return key_format;
 }
@@ -86,8 +86,8 @@ JwtRsaSsaPssPublicKey CreateValidPublicKey() {
       RawJwtRsaSsaPssSignKeyManager()
           .CreateKey(
               CreateKeyFormat(JwtRsaSsaPssAlgorithm::PS256, 3072, RSA_F4))
-          .ValueOrDie();
-  return RawJwtRsaSsaPssSignKeyManager().GetPublicKey(private_key).ValueOrDie();
+          .value();
+  return RawJwtRsaSsaPssSignKeyManager().GetPublicKey(private_key).value();
 }
 
 // Checks that a public key generaed by the SignKeyManager is considered valid.

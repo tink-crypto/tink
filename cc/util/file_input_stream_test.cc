@@ -38,8 +38,7 @@ util::Status ReadTillEnd(util::FileInputStream* input_stream,
   const void* buffer;
   auto next_result = input_stream->Next(&buffer);
   while (next_result.ok()) {
-    contents->append(static_cast<const char*>(buffer),
-                     next_result.ValueOrDie());
+    contents->append(static_cast<const char*>(buffer), next_result.value());
     next_result = input_stream->Next(&buffer);
   }
   return next_result.status();
@@ -79,7 +78,7 @@ TEST_F(FileInputStreamTest, testCustomBufferSizes) {
     const void* buffer;
     auto next_result = input_stream->Next(&buffer);
     EXPECT_TRUE(next_result.ok()) << next_result.status();
-    EXPECT_EQ(buffer_size, next_result.ValueOrDie());
+    EXPECT_EQ(buffer_size, next_result.value());
     EXPECT_EQ(file_contents.substr(0, buffer_size),
               std::string(static_cast<const char*>(buffer), buffer_size));
   }
@@ -101,7 +100,7 @@ TEST_F(FileInputStreamTest, testBackupAndPosition) {
   EXPECT_EQ(0, input_stream->Position());
   auto next_result = input_stream->Next(&buffer);
   EXPECT_TRUE(next_result.ok()) << next_result.status();
-  EXPECT_EQ(buffer_size, next_result.ValueOrDie());
+  EXPECT_EQ(buffer_size, next_result.value());
   EXPECT_EQ(buffer_size, input_stream->Position());
   EXPECT_EQ(file_contents.substr(0, buffer_size),
             std::string(static_cast<const char*>(buffer), buffer_size));
@@ -117,7 +116,7 @@ TEST_F(FileInputStreamTest, testBackupAndPosition) {
   // Call Next(), it should return exactly the backed up bytes.
   next_result = input_stream->Next(&buffer);
   EXPECT_TRUE(next_result.ok()) << next_result.status();
-  EXPECT_EQ(total_backup_size, next_result.ValueOrDie());
+  EXPECT_EQ(total_backup_size, next_result.value());
   EXPECT_EQ(buffer_size, input_stream->Position());
   EXPECT_EQ(
       file_contents.substr(buffer_size - total_backup_size, total_backup_size),
@@ -135,7 +134,7 @@ TEST_F(FileInputStreamTest, testBackupAndPosition) {
   // Call Next(), it should return exactly the backed up bytes.
   next_result = input_stream->Next(&buffer);
   EXPECT_TRUE(next_result.ok()) << next_result.status();
-  EXPECT_EQ(total_backup_size, next_result.ValueOrDie());
+  EXPECT_EQ(total_backup_size, next_result.value());
   EXPECT_EQ(buffer_size, input_stream->Position());
   EXPECT_EQ(
       file_contents.substr(buffer_size - total_backup_size, total_backup_size),
@@ -144,7 +143,7 @@ TEST_F(FileInputStreamTest, testBackupAndPosition) {
   // Call Next() again, it should return the second block.
   next_result = input_stream->Next(&buffer);
   EXPECT_TRUE(next_result.ok()) << next_result.status();
-  EXPECT_EQ(buffer_size, next_result.ValueOrDie());
+  EXPECT_EQ(buffer_size, next_result.value());
   EXPECT_EQ(2 * buffer_size, input_stream->Position());
   EXPECT_EQ(file_contents.substr(buffer_size, buffer_size),
             std::string(static_cast<const char*>(buffer), buffer_size));
@@ -163,7 +162,7 @@ TEST_F(FileInputStreamTest, testBackupAndPosition) {
   // Call Next() again, it should return the second block.
   next_result = input_stream->Next(&buffer);
   EXPECT_TRUE(next_result.ok()) << next_result.status();
-  EXPECT_EQ(buffer_size, next_result.ValueOrDie());
+  EXPECT_EQ(buffer_size, next_result.value());
   EXPECT_EQ(2 * buffer_size, input_stream->Position());
   EXPECT_EQ(file_contents.substr(buffer_size, buffer_size),
             std::string(static_cast<const char*>(buffer), buffer_size));

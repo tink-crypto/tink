@@ -97,13 +97,11 @@ TEST(RawJwtHmacKeyManagerTest, CreateKeyWithSha256) {
   key_format.set_algorithm(JwtHmacAlgorithm::HS256);
   auto hmac_key_or = RawJwtHmacKeyManager().CreateKey(key_format);
   ASSERT_THAT(hmac_key_or.status(), IsOk());
-  EXPECT_THAT(hmac_key_or.ValueOrDie().version(), Eq(0));
-  EXPECT_THAT(hmac_key_or.ValueOrDie().algorithm(), Eq(key_format.algorithm()));
-  EXPECT_THAT(hmac_key_or.ValueOrDie().key_value(),
-              SizeIs(key_format.key_size()));
+  EXPECT_THAT(hmac_key_or.value().version(), Eq(0));
+  EXPECT_THAT(hmac_key_or.value().algorithm(), Eq(key_format.algorithm()));
+  EXPECT_THAT(hmac_key_or.value().key_value(), SizeIs(key_format.key_size()));
 
-  EXPECT_THAT(RawJwtHmacKeyManager().ValidateKey(hmac_key_or.ValueOrDie()),
-              IsOk());
+  EXPECT_THAT(RawJwtHmacKeyManager().ValidateKey(hmac_key_or.value()), IsOk());
 }
 
 TEST(RawJwtHmacKeyManagerTest, CreateKeyWithSha384) {
@@ -112,13 +110,11 @@ TEST(RawJwtHmacKeyManagerTest, CreateKeyWithSha384) {
   key_format.set_algorithm(JwtHmacAlgorithm::HS384);
   auto hmac_key_or = RawJwtHmacKeyManager().CreateKey(key_format);
   ASSERT_THAT(hmac_key_or.status(), IsOk());
-  EXPECT_THAT(hmac_key_or.ValueOrDie().version(), Eq(0));
-  EXPECT_THAT(hmac_key_or.ValueOrDie().algorithm(), Eq(key_format.algorithm()));
-  EXPECT_THAT(hmac_key_or.ValueOrDie().key_value(),
-              SizeIs(key_format.key_size()));
+  EXPECT_THAT(hmac_key_or.value().version(), Eq(0));
+  EXPECT_THAT(hmac_key_or.value().algorithm(), Eq(key_format.algorithm()));
+  EXPECT_THAT(hmac_key_or.value().key_value(), SizeIs(key_format.key_size()));
 
-  EXPECT_THAT(RawJwtHmacKeyManager().ValidateKey(hmac_key_or.ValueOrDie()),
-              IsOk());
+  EXPECT_THAT(RawJwtHmacKeyManager().ValidateKey(hmac_key_or.value()), IsOk());
 }
 
 TEST(RawJwtHmacKeyManagerTest, CreateKeyWithSha512) {
@@ -127,13 +123,11 @@ TEST(RawJwtHmacKeyManagerTest, CreateKeyWithSha512) {
   key_format.set_algorithm(JwtHmacAlgorithm::HS512);
   auto key_or = RawJwtHmacKeyManager().CreateKey(key_format);
   ASSERT_THAT(key_or.status(), IsOk());
-  EXPECT_THAT(key_or.ValueOrDie().version(), Eq(0));
-  EXPECT_THAT(key_or.ValueOrDie().algorithm(), Eq(key_format.algorithm()));
-  EXPECT_THAT(key_or.ValueOrDie().key_value(),
-              SizeIs(key_format.key_size()));
+  EXPECT_THAT(key_or.value().version(), Eq(0));
+  EXPECT_THAT(key_or.value().algorithm(), Eq(key_format.algorithm()));
+  EXPECT_THAT(key_or.value().key_value(), SizeIs(key_format.key_size()));
 
-  EXPECT_THAT(RawJwtHmacKeyManager().ValidateKey(key_or.ValueOrDie()),
-              IsOk());
+  EXPECT_THAT(RawJwtHmacKeyManager().ValidateKey(key_or.value()), IsOk());
 }
 
 TEST(RawJwtHmacKeyManagerTest, ShortKeyIsInvalid) {
@@ -183,14 +177,14 @@ TEST(RawJwtHmacKeyManagerTest, GetPrimitiveFromNewKeysetHandle) {
 
   auto handle_result = KeysetHandle::GenerateNew(key_template);
   ASSERT_TRUE(handle_result.ok()) << handle_result.status();
-  std::unique_ptr<KeysetHandle> handle = std::move(handle_result.ValueOrDie());
+  std::unique_ptr<KeysetHandle> handle = std::move(handle_result.value());
 
   auto mac_result = handle->GetPrimitive<Mac>();
   ASSERT_TRUE(mac_result.ok()) << mac_result.status();
-  std::unique_ptr<Mac> mac = std::move(mac_result.ValueOrDie());
+  std::unique_ptr<Mac> mac = std::move(mac_result.value());
   auto tag_or = mac->ComputeMac("some plaintext");
   ASSERT_THAT(tag_or.status(), IsOk());
-  EXPECT_THAT(mac->VerifyMac(tag_or.ValueOrDie(), "some plaintext"), IsOk());
+  EXPECT_THAT(mac->VerifyMac(tag_or.value(), "some plaintext"), IsOk());
 }
 
 }  // namespace

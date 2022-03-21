@@ -43,7 +43,7 @@ util::StatusOr<Result> ReadBytesFromStreamImpl(int num_bytes,
     auto next_result = input_stream->Next(&buffer);
     if (!next_result.ok()) return next_result.status();
 
-    int num_bytes_in_chunk = next_result.ValueOrDie();
+    int num_bytes_in_chunk = next_result.value();
     int num_bytes_to_copy =
         std::min(num_bytes - num_bytes_read, num_bytes_in_chunk);
     absl::c_copy(absl::MakeSpan(reinterpret_cast<const char*>(buffer),
