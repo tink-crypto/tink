@@ -69,7 +69,7 @@ StreamingMacImpl::NewComputeMacOutputStream() const {
 
   std::unique_ptr<OutputStreamWithResult<std::string>> string_to_return =
       absl::make_unique<ComputeMacOutputStream>(std::move(mac_status.value()));
-  return string_to_return;
+  return std::move(string_to_return);
 }
 
 util::StatusOr<int> ComputeMacOutputStream::NextBuffer(void** buffer) {

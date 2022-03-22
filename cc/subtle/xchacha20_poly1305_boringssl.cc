@@ -57,7 +57,7 @@ util::StatusOr<std::unique_ptr<Aead>> XChacha20Poly1305BoringSsl::New(
   }
   std::unique_ptr<Aead> aead_impl =
       absl::WrapUnique(new XChacha20Poly1305BoringSsl(*std::move(aead)));
-  return aead_impl;
+  return std::move(aead_impl);
 }
 
 util::StatusOr<std::string> XChacha20Poly1305BoringSsl::Encrypt(

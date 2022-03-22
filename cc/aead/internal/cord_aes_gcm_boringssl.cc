@@ -89,7 +89,7 @@ util::StatusOr<std::unique_ptr<CordAead> > CordAesGcmBoringSsl::New(
 
   std::unique_ptr<CordAead> aead =
       absl::WrapUnique(new CordAesGcmBoringSsl(std::move(context)));
-  return aead;
+  return std::move(aead);
 }
 
 util::StatusOr<absl::Cord> CordAesGcmBoringSsl::Encrypt(

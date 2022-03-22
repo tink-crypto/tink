@@ -91,7 +91,7 @@ crypto::tink::util::StatusOr<util::SecretUniquePtr<AES_KEY>> InitAesKey(
     return util::Status(absl::StatusCode::kInvalidArgument,
                         "Invalid key value");
   }
-  return aeskey;
+  return std::move(aeskey);
 }
 
 }  // namespace

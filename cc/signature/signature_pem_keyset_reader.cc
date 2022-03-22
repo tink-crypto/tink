@@ -426,7 +426,7 @@ util::StatusOr<std::unique_ptr<Keyset>> PublicKeySignPemKeysetReader::Read() {
   // Set the 1st key as primary.
   keyset->set_primary_key_id(keyset->key(0).key_id());
 
-  return keyset;
+  return std::move(keyset);
 }
 
 util::StatusOr<std::unique_ptr<Keyset>> PublicKeyVerifyPemKeysetReader::Read() {
@@ -453,7 +453,7 @@ util::StatusOr<std::unique_ptr<Keyset>> PublicKeyVerifyPemKeysetReader::Read() {
   // Set the 1st key as primary.
   keyset->set_primary_key_id(keyset->key(0).key_id());
 
-  return keyset;
+  return std::move(keyset);
 }
 
 util::StatusOr<std::unique_ptr<EncryptedKeyset>>

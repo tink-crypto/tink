@@ -86,7 +86,7 @@ class JwtHmacKeyManager
       std::unique_ptr<JwtMacInternal> jwt_mac =
           absl::make_unique<jwt_internal::JwtMacImpl>(*std::move(mac),
                                                       algorithm, custom_kid);
-      return jwt_mac;
+      return std::move(jwt_mac);
     }
   };
 

@@ -50,7 +50,7 @@ JwtRsaSsaPkcs1VerifyKeyManager::PublicKeyVerifyFactory::Create(
   std::unique_ptr<JwtPublicKeyVerifyInternal> jwt_public_key_verify =
       absl::make_unique<jwt_internal::JwtPublicKeyVerifyImpl>(
           *std::move(verify), *name, custom_kid);
-  return jwt_public_key_verify;
+  return std::move(jwt_public_key_verify);
 }
 
 uint32_t JwtRsaSsaPkcs1VerifyKeyManager::get_version() const {

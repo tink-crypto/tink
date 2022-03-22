@@ -51,7 +51,7 @@ JwtRsaSsaPssSignKeyManager::PublicKeySignFactory::Create(
   std::unique_ptr<JwtPublicKeySignInternal> jwt_public_key_sign =
       absl::make_unique<jwt_internal::JwtPublicKeySignImpl>(*std::move(sign),
                                                             *name, custom_kid);
-  return jwt_public_key_sign;
+  return std::move(jwt_public_key_sign);
 }
 
 uint32_t JwtRsaSsaPssSignKeyManager::get_version() const {

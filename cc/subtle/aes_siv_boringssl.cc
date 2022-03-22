@@ -49,7 +49,7 @@ crypto::tink::util::StatusOr<util::SecretUniquePtr<AES_KEY>> InitializeAesKey(
     return util::Status(absl::StatusCode::kInternal,
                         "could not initialize aes key");
   }
-  return aes_key;
+  return std::move(aes_key);
 }
 
 }  // namespace

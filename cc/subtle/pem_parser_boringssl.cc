@@ -219,7 +219,7 @@ PemParser::ParseRsaPublicKey(absl::string_view pem_serialized_key) {
   rsa_public_key->e = *std::move(e_str);
   rsa_public_key->n = *std::move(n_str);
 
-  return rsa_public_key;
+  return std::move(rsa_public_key);
 }
 
 util::StatusOr<std::unique_ptr<internal::RsaPrivateKey>>
@@ -301,7 +301,7 @@ PemParser::ParseRsaPrivateKey(absl::string_view pem_serialized_key) {
   rsa_private_key->dq = *std::move(dq_str);
   rsa_private_key->crt = *std::move(crt_str);
 
-  return rsa_private_key;
+  return std::move(rsa_private_key);
 }
 
 util::StatusOr<std::string> PemParser::WriteRsaPublicKey(
@@ -394,7 +394,7 @@ PemParser::ParseEcPublicKey(absl::string_view pem_serialized_key) {
   ecdsa_public_key->pub_y = *std::move(y_string);
   ecdsa_public_key->curve = *std::move(curve);
 
-  return ecdsa_public_key;
+  return std::move(ecdsa_public_key);
 }
 
 util::StatusOr<std::unique_ptr<SubtleUtilBoringSSL::EcKey>>
@@ -454,7 +454,7 @@ PemParser::ParseEcPrivateKey(absl::string_view pem_serialized_key) {
   ecdsa_private_key->priv = *std::move(priv);
   ecdsa_private_key->curve = *std::move(curve);
 
-  return ecdsa_private_key;
+  return std::move(ecdsa_private_key);
 }
 
 util::StatusOr<std::string> PemParser::WriteEcPublicKey(

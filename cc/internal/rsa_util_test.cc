@@ -356,7 +356,7 @@ util::StatusOr<internal::SslUniquePtr<RSA>> NewRsaPublicKey(
   // RSA_set0_key takes ownership of the arguments.
   n.release();
   e.release();
-  return key;
+  return std::move(key);
 }
 
 TEST(RsaUtilTest, RsaCheckPublicKeyNullKey) {

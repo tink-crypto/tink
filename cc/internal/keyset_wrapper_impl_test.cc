@@ -16,6 +16,7 @@
 #include "tink/internal/keyset_wrapper_impl.h"
 
 #include <string>
+#include <utility>
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
@@ -59,7 +60,7 @@ class Wrapper : public PrimitiveWrapper<InputPrimitive, OutputPrimitive> {
         result->back().second.append(" (primary)");
       }
     }
-    return result;
+    return std::move(result);
   }
 };
 

@@ -424,7 +424,7 @@ util::StatusOr<std::unique_ptr<X25519Key>> NewX25519Key() {
   if (!res.ok()) {
     return res;
   }
-  return key;
+  return std::move(key);
 }
 
 EcKey EcKeyFromX25519Key(const X25519Key *x25519_key) {
