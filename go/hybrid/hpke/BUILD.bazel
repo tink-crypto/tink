@@ -65,3 +65,9 @@ filegroup(
     name = "testdata",
     srcs = ["testdata/boringssl_hpke_test_vectors.json"],
 )
+
+alias(
+    name = "go_default_library",
+    actual = ":hpke",
+    visibility = ["//visibility:public"],
+)
