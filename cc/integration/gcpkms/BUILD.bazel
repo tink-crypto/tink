@@ -10,7 +10,6 @@ cc_library(
     visibility = ["//visibility:public"],
     deps = [
         "//:aead",
-        "//:tink_cc",
         "//util:status",
         "//util:statusor",
         "@com_github_grpc_grpc//:grpc++",
@@ -27,8 +26,10 @@ cc_library(
     visibility = ["//visibility:public"],
     deps = [
         ":gcp_kms_aead",
+        "//:aead",
         "//:kms_client",
         "//:kms_clients",
+        "//:version",
         "//util:status",
         "//util:statusor",
         "@com_github_grpc_grpc//:grpc++",

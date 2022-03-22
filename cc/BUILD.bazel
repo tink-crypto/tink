@@ -482,6 +482,7 @@ cc_library(
     srcs = ["core/version.cc"],
     hdrs = [":version_h"],
     include_prefix = "tink",
+    visibility = ["//visibility:public"],
 )
 
 cc_library(
