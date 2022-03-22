@@ -39,7 +39,8 @@ template <typename StatusOrType>
 class IsOkAndHoldsMatcherImpl
     : public ::testing::MatcherInterface<StatusOrType> {
  public:
-  using value_type = typename std::remove_reference<StatusOrType>::type::type;
+  using value_type =
+      typename std::remove_reference<StatusOrType>::type::value_type;
 
   template <typename InnerMatcher>
   explicit IsOkAndHoldsMatcherImpl(InnerMatcher&& inner_matcher)
