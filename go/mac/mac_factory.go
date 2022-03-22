@@ -82,7 +82,7 @@ func (m *wrappedMAC) ComputeMAC(data []byte) ([]byte, error) {
 	}
 	if m.ps.Primary.PrefixType == tinkpb.OutputPrefixType_LEGACY {
 		d := data
-		if len(d) == maxInt {
+		if len(d) >= maxInt {
 			return nil, fmt.Errorf("mac_factory: data too long")
 		}
 		data = make([]byte, 0, len(d)+1)
@@ -121,7 +121,7 @@ func (m *wrappedMAC) VerifyMAC(mac, data []byte) error {
 			}
 			if entry.PrefixType == tinkpb.OutputPrefixType_LEGACY {
 				d := data
-				if len(d) == maxInt {
+				if len(d) >= maxInt {
 					return fmt.Errorf("mac_factory: data too long")
 				}
 				data = make([]byte, 0, len(d)+1)
