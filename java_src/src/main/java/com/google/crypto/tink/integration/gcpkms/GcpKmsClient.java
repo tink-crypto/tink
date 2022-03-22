@@ -21,6 +21,8 @@ import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.services.cloudkms.v1.CloudKMS;
 import com.google.api.services.cloudkms.v1.CloudKMSScopes;
+import com.google.auth.http.HttpCredentialsAdapter;
+import com.google.auth.oauth2.GoogleCredentials;
 import com.google.auto.service.AutoService;
 import com.google.crypto.tink.Aead;
 import com.google.crypto.tink.KmsClient;
@@ -98,21 +100,36 @@ public final class GcpKmsClient implements KmsClient {
       return withDefaultCredentials();
     }
     try {
-      GoogleCredential credentials =
-          GoogleCredential.fromStream(new FileInputStream(new File(credentialPath)));
+      GoogleCredentials credentials =
+          GoogleCredentials.fromStream(new FileInputStream(new File(credentialPath)));
       return withCredentials(credentials);
     } catch (IOException e) {
       throw new GeneralSecurityException("cannot load credentials", e);
     }
   }
 
-  /** Loads the provided credential. */
+  /** Loads the provided credential with {@code GoogleCredential}. */
   public KmsClient withCredentials(GoogleCredential credential) {
     if (credential.createScopedRequired()) {
       credential = credential.createScoped(CloudKMSScopes.all());
     }
     this.client =
         new CloudKMS.Builder(new NetHttpTransport(), new JacksonFactory(), credential)
+            .setApplicationName(APPLICATION_NAME)
+            .build();
+    return this;
+  }
+
+  /** Loads the provided credentials with {@code GoogleCredentials}. */
+  public KmsClient withCredentials(GoogleCredentials credentials) {
+    if (credentials.createScopedRequired()) {
+      credentials = credentials.createScoped(CloudKMSScopes.all());
+    }
+    this.client =
+        new CloudKMS.Builder(
+                new NetHttpTransport(),
+                new JacksonFactory(),
+                new HttpCredentialsAdapter(credentials))
             .setApplicationName(APPLICATION_NAME)
             .build();
     return this;
@@ -125,8 +142,7 @@ public final class GcpKmsClient implements KmsClient {
   @Override
   public KmsClient withDefaultCredentials() throws GeneralSecurityException {
     try {
-      GoogleCredential credentials =
-          GoogleCredential.getApplicationDefault(new NetHttpTransport(), new JacksonFactory());
+      GoogleCredentials credentials = GoogleCredentials.getApplicationDefault();
       return withCredentials(credentials);
     } catch (IOException e) {
       throw new GeneralSecurityException("cannot load default credentials", e);

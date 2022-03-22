@@ -13,6 +13,7 @@ TINK_MAVEN_ARTIFACTS = [
     "com.google.auto.service:auto-service-annotations:1.0-rc7",
     "com.google.api-client:google-api-client:1.31.4",
     "com.google.apis:google-api-services-cloudkms:v1-rev108-1.25.0",
+    "com.google.auth:google-auth-library-oauth2-http:1.6.0",
     "com.google.code.findbugs:jsr305:3.0.1",
     "com.google.code.gson:gson:2.8.6",
     "com.google.errorprone:error_prone_annotations:2.10.0",

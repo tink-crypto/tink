@@ -69,6 +69,7 @@
     <google-guava.version>30.1.1-jre</google-guava.version>
     <httpclient.version>4.5.13</httpclient.version>
     <jackson.version>2.12.1</jackson.version>
+    <google-auth-library-oauth2-http.version>1.6.0</google-auth-library-oauth2-http.version>
     <tink.version>VERSION_PLACEHOLDER</tink.version>
   </properties>
 
@@ -171,6 +172,12 @@
       <groupId>org.apache.httpcomponents</groupId>
       <artifactId>httpclient</artifactId>
       <version>${httpclient.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>com.google.auth</groupId>
+      <artifactId>google-auth-library-oauth2-http</artifactId>
+      <version>${google-auth-library-oauth2-http.version}</version>
     </dependency>
   </dependencies>
 </project>
