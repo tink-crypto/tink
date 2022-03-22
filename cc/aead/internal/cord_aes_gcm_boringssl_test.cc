@@ -128,7 +128,7 @@ TEST_F(CordAesGcmBoringSslTest, ModifiedCord) {
   absl::Cord aad = absl::Cord(kAad);
   util::StatusOr<absl::Cord> ct = cipher_->Encrypt(message, aad);
   ASSERT_THAT(ct.status(), IsOk());
-  util::StatusOr<std::string> plaintext = cipher_->Decrypt(*ct, aad);
+  util::StatusOr<absl::Cord> plaintext = cipher_->Decrypt(*ct, aad);
   ASSERT_THAT(plaintext.status(), IsOk());
   EXPECT_EQ(*plaintext, message);
 
