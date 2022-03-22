@@ -23,98 +23,88 @@ import (
 	"google.golang.org/protobuf/proto"
 	"github.com/google/tink/go/core/registry"
 	"github.com/google/tink/go/subtle/random"
-	pb "github.com/google/tink/go/proto/hpke_go_proto"
+	hpkepb "github.com/google/tink/go/proto/hpke_go_proto"
 )
 
-func TestPublicKeyManagerPrimitiveInvalidKeyVersion(t *testing.T) {
+func TestPublicKeyManagerPrimitiveRejectsInvalidKeyVersion(t *testing.T) {
 	km, err := registry.GetKeyManager(publicKeyTypeURL)
 	if err != nil {
 		t.Fatalf("GetKeyManager(%q) err = %v, want nil", publicKeyTypeURL, err)
 	}
 	pubKey, _ := pubPrivKeys(t, validParams(t))
-	pubKey.Version = publicKeyKeyVersion + 1
-	invalidPubKey, err := proto.Marshal(pubKey)
+	pubKey.Version = 1
+	serializedPubKey, err := proto.Marshal(pubKey)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if _, err := km.Primitive(invalidPubKey); err == nil {
-		t.Error("Primitive(invalidPubKey) err = nil, want error")
+	if _, err := km.Primitive(serializedPubKey); err == nil {
+		t.Error("Primitive() err = nil, want error")
 	}
 }
 
-func TestPublicKeyManagerPrimitiveUnknownKEM(t *testing.T) {
+func TestPublicKeyManagerPrimitiveRejectsInvalidParams(t *testing.T) {
 	km, err := registry.GetKeyManager(publicKeyTypeURL)
 	if err != nil {
 		t.Fatalf("GetKeyManager(%q) err = %v, want nil", publicKeyTypeURL, err)
 	}
-	params := validParams(t)
-	params.Kem = pb.HpkeKem_KEM_UNKNOWN
-	pubKey, _ := pubPrivKeys(t, params)
-	invalidPubKey, err := proto.Marshal(pubKey)
-	if err != nil {
-		t.Fatal(err)
+
+	tests := []struct {
+		name   string
+		params *hpkepb.HpkeParams
+	}{
+		{"kem", &hpkepb.HpkeParams{
+			Kem:  hpkepb.HpkeKem_KEM_UNKNOWN,
+			Kdf:  hpkepb.HpkeKdf_HKDF_SHA256,
+			Aead: hpkepb.HpkeAead_AES_256_GCM,
+		}},
+		{"kdf", &hpkepb.HpkeParams{
+			Kem:  hpkepb.HpkeKem_DHKEM_X25519_HKDF_SHA256,
+			Kdf:  hpkepb.HpkeKdf_KDF_UNKNOWN,
+			Aead: hpkepb.HpkeAead_AES_256_GCM,
+		}},
+		{"aead", &hpkepb.HpkeParams{
+			Kem:  hpkepb.HpkeKem_DHKEM_X25519_HKDF_SHA256,
+			Kdf:  hpkepb.HpkeKdf_HKDF_SHA256,
+			Aead: hpkepb.HpkeAead_AEAD_UNKNOWN,
+		}},
 	}
-	if _, err := km.Primitive(invalidPubKey); err == nil {
-		t.Error("Primitive(invalidPubKey) err = nil, want error")
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			pubKey, _ := pubPrivKeys(t, test.params)
+			serializedPubKey, err := proto.Marshal(pubKey)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if _, err := km.Primitive(serializedPubKey); err == nil {
+				t.Error("Primitive() err = nil, want error")
+			}
+		})
 	}
 }
 
-func TestPublicKeyManagerPrimitiveUnknownKDF(t *testing.T) {
-	km, err := registry.GetKeyManager(publicKeyTypeURL)
-	if err != nil {
-		t.Fatalf("GetKeyManager(%q) err = %v, want nil", publicKeyTypeURL, err)
-	}
-	params := validParams(t)
-	params.Kdf = pb.HpkeKdf_KDF_UNKNOWN
-	pubKey, _ := pubPrivKeys(t, params)
-	invalidPubKey, err := proto.Marshal(pubKey)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if _, err := km.Primitive(invalidPubKey); err == nil {
-		t.Error("Primitive(invalidPubKey) err = nil, want error")
-	}
-}
-
-func TestPublicKeyManagerPrimitiveUnknownAEAD(t *testing.T) {
-	km, err := registry.GetKeyManager(publicKeyTypeURL)
-	if err != nil {
-		t.Fatalf("GetKeyManager(%q) err = %v, want nil", publicKeyTypeURL, err)
-	}
-	params := validParams(t)
-	params.Aead = pb.HpkeAead_AEAD_UNKNOWN
-	pubKey, _ := pubPrivKeys(t, params)
-	invalidPubKey, err := proto.Marshal(pubKey)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if _, err := km.Primitive(invalidPubKey); err == nil {
-		t.Error("Primitive(invalidPubKey) err = nil, want error")
-	}
-}
-
-func TestPublicKeyManagerPrimitiveMissingParams(t *testing.T) {
+func TestPublicKeyManagerPrimitiveRejectsMissingParams(t *testing.T) {
 	km, err := registry.GetKeyManager(publicKeyTypeURL)
 	if err != nil {
 		t.Fatalf("GetKeyManager(%q) err = %v, want nil", publicKeyTypeURL, err)
 	}
 	pubKey, _ := pubPrivKeys(t, nil)
-	invalidPubKey, err := proto.Marshal(pubKey)
+	serializedPubKey, err := proto.Marshal(pubKey)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if _, err := km.Primitive(invalidPubKey); err == nil {
-		t.Error("Primitive(invalidPubKey) err = nil, want error")
+	if _, err := km.Primitive(serializedPubKey); err == nil {
+		t.Error("Primitive() err = nil, want error")
 	}
 }
 
-func TestPublicKeyManagerPrimitiveNilKey(t *testing.T) {
+func TestPublicKeyManagerPrimitiveRejectsNilKey(t *testing.T) {
 	km, err := registry.GetKeyManager(publicKeyTypeURL)
 	if err != nil {
 		t.Fatalf("GetKeyManager(%q) err = %v, want nil", publicKeyTypeURL, err)
 	}
 	if _, err := km.Primitive(nil); err == nil {
-		t.Error("Primitive(nil) err = nil, want error")
+		t.Error("Primitive() err = nil, want error")
 	}
 }
 
@@ -127,11 +117,11 @@ func TestPublicKeyManagerPrimitiveEncryptDecrypt(t *testing.T) {
 	wantPT := random.GetRandomBytes(200)
 	ctxInfo := random.GetRandomBytes(100)
 
-	aeadIDs := []pb.HpkeAead{pb.HpkeAead_AES_128_GCM, pb.HpkeAead_AES_256_GCM}
+	aeadIDs := []hpkepb.HpkeAead{hpkepb.HpkeAead_AES_128_GCM, hpkepb.HpkeAead_AES_256_GCM}
 	for _, aeadID := range aeadIDs {
-		params := &pb.HpkeParams{
-			Kem:  pb.HpkeKem_DHKEM_X25519_HKDF_SHA256,
-			Kdf:  pb.HpkeKdf_HKDF_SHA256,
+		params := &hpkepb.HpkeParams{
+			Kem:  hpkepb.HpkeKem_DHKEM_X25519_HKDF_SHA256,
+			Kdf:  hpkepb.HpkeKdf_HKDF_SHA256,
 			Aead: aeadID,
 		}
 		pubKey, privKey := pubPrivKeys(t, params)
@@ -142,7 +132,7 @@ func TestPublicKeyManagerPrimitiveEncryptDecrypt(t *testing.T) {
 
 		e, err := km.Primitive(serializedPubKey)
 		if err != nil {
-			t.Fatalf("Primitive(serializedPubKey) err = %v, want nil", err)
+			t.Fatalf("Primitive() err = %v, want nil", err)
 		}
 		enc, ok := e.(*Encrypt)
 		if !ok {
@@ -150,19 +140,19 @@ func TestPublicKeyManagerPrimitiveEncryptDecrypt(t *testing.T) {
 		}
 		dec, err := newDecrypt(privKey)
 		if err != nil {
-			t.Fatalf("newDecrypt(privKey) err = %v, want nil", err)
+			t.Fatalf("newDecrypt() err = %v, want nil", err)
 		}
 
 		ct, err := enc.Encrypt(wantPT, ctxInfo)
 		if err != nil {
-			t.Fatalf("Encrypt(wantPT, ctxInfo) err = %v, want nil", err)
+			t.Fatalf("Encrypt() err = %v, want nil", err)
 		}
 		gotPT, err := dec.Decrypt(ct, ctxInfo)
 		if err != nil {
-			t.Fatalf("Decrypt(ct, ctxInfo) err = %v, want nil", err)
+			t.Fatalf("Decrypt() err = %v, want nil", err)
 		}
 		if !bytes.Equal(gotPT, wantPT) {
-			t.Errorf("Decrypt(gotPT, wantPT) = %x, want %x", gotPT, wantPT)
+			t.Errorf("Decrypt() = %x, want %x", gotPT, wantPT)
 		}
 	}
 }
@@ -197,9 +187,9 @@ func TestPublicKeyManagerNotSupported(t *testing.T) {
 		t.Fatalf("GetKeyManager(%q) err = %v, want nil", publicKeyTypeURL, err)
 	}
 	if _, err := km.NewKey(nil); err != errNotSupported {
-		t.Fatalf("NewKey(nil) err = %v, want %v", err, errNotSupported)
+		t.Fatalf("NewKey() err = %v, want %v", err, errNotSupported)
 	}
 	if _, err := km.NewKeyData(nil); err != errNotSupported {
-		t.Fatalf("NewKeyData(nil) err = %v, want %v", err, errNotSupported)
+		t.Fatalf("NewKeyData() err = %v, want %v", err, errNotSupported)
 	}
 }

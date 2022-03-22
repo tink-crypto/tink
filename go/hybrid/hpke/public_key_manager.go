@@ -27,8 +27,10 @@ import (
 )
 
 const (
-	publicKeyKeyVersion uint32 = 0
-	publicKeyTypeURL           = "type.googleapis.com/google.crypto.tink.HpkePublicKey"
+	// maxSupportedPublicKeyVersion is the max supported public key version. It
+	// must be incremented when support for new versions are implemented.
+	maxSupportedPublicKeyVersion = 0
+	publicKeyTypeURL             = "type.googleapis.com/google.crypto.tink.HpkePublicKey"
 )
 
 var (
@@ -49,7 +51,7 @@ func (p *publicKeyManager) Primitive(serializedKey []byte) (interface{}, error) 
 	if err := proto.Unmarshal(serializedKey, key); err != nil {
 		return nil, errInvalidPublicKey
 	}
-	if err := keyset.ValidateKeyVersion(key.GetVersion(), publicKeyKeyVersion); err != nil {
+	if err := keyset.ValidateKeyVersion(key.GetVersion(), maxSupportedPublicKeyVersion); err != nil {
 		return nil, err
 	}
 	return newEncrypt(key)
