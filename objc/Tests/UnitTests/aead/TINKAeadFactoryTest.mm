@@ -84,15 +84,15 @@ using google::crypto::tink::KeyStatusType;
   // Prepare a Keyset.
   Keyset keyset;
   uint32_t key_id_1 = 1234543;
-  AesGcmKey new_key = AesGcmKeyManager().CreateKey(key_format).ValueOrDie();
+  AesGcmKey new_key = AesGcmKeyManager().CreateKey(key_format).value();
   AddTinkKey(key_type, key_id_1, new_key, KeyStatusType::ENABLED, KeyData::SYMMETRIC, &keyset);
 
   uint32_t key_id_2 = 726329;
-  new_key = AesGcmKeyManager().CreateKey(key_format).ValueOrDie();
+  new_key = AesGcmKeyManager().CreateKey(key_format).value();
   AddRawKey(key_type, key_id_2, new_key, KeyStatusType::ENABLED, KeyData::SYMMETRIC, &keyset);
 
   uint32_t key_id_3 = 7213743;
-  new_key = AesGcmKeyManager().CreateKey(key_format).ValueOrDie();
+  new_key = AesGcmKeyManager().CreateKey(key_format).value();
   AddTinkKey(key_type, key_id_3, new_key, KeyStatusType::ENABLED, KeyData::SYMMETRIC, &keyset);
 
   keyset.set_primary_key_id(key_id_3);
@@ -124,11 +124,9 @@ using google::crypto::tink::KeyStatusType;
   // Create raw ciphertext with 2nd key, and decrypt with Aead-instance.
   AesGcmKey raw_key;
   XCTAssertTrue(raw_key.ParseFromString(keyset.key(1).key_data().value()));
-  auto raw_aead =
-      std::move(AesGcmKeyManager().GetPrimitive<crypto::tink::Aead>(raw_key).ValueOrDie());
+  auto raw_aead = std::move(AesGcmKeyManager().GetPrimitive<crypto::tink::Aead>(raw_key).value());
   std::string raw_ciphertext =
-      raw_aead->Encrypt(absl::string_view("some_plaintext"), absl::string_view("some_aad"))
-          .ValueOrDie();
+      raw_aead->Encrypt(absl::string_view("some_plaintext"), absl::string_view("some_aad")).value();
   ciphertext = TINKStringToNSData(raw_ciphertext);
 
   decrypted = [aead decrypt:ciphertext withAdditionalData:aad error:&error];

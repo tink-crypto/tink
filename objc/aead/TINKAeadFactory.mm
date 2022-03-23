@@ -41,7 +41,7 @@
     }
     return nil;
   }
-  id<TINKAead> aead = [[TINKAeadInternal alloc] initWithCCAead:std::move(st.ValueOrDie())];
+  id<TINKAead> aead = [[TINKAeadInternal alloc] initWithCCAead:std::move(st.value())];
   if (!aead) {
     if (error) {
       *error = TINKStatusToError(crypto::tink::util::Status(

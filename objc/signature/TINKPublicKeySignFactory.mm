@@ -43,7 +43,7 @@
     return nil;
   }
   id<TINKPublicKeySign> publicKeySign =
-      [[TINKPublicKeySignInternal alloc] initWithCCPublicKeySign:std::move(st.ValueOrDie())];
+      [[TINKPublicKeySignInternal alloc] initWithCCPublicKeySign:std::move(st.value())];
   if (!publicKeySign) {
     if (error) {
       *error = TINKStatusToError(crypto::tink::util::Status(

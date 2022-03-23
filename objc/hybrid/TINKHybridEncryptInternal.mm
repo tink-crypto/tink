@@ -59,7 +59,7 @@
     return nil;
   }
 
-  return TINKStringToNSData(st.ValueOrDie());
+  return TINKStringToNSData(st.value());
 }
 
 - (nullable crypto::tink::HybridEncrypt *)ccHybridEncrypt {

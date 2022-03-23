@@ -51,7 +51,7 @@
     return nil;
   }
 
-  return TINKStringToNSData(st.ValueOrDie());
+  return TINKStringToNSData(st.value());
 }
 
 - (crypto::tink::PublicKeySign *)ccPublicKeySign {

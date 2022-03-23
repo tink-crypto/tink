@@ -49,7 +49,7 @@
     return nil;
   }
 
-  return TINKStringToNSData(st.ValueOrDie());
+  return TINKStringToNSData(st.value());
 }
 
 - (BOOL)verifyMac:(NSData *)mac forData:(NSData *)data error:(NSError **)error {
