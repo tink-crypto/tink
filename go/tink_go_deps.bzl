@@ -29,3 +29,12 @@ def tink_go_deps():
                 "https://github.com/bazelbuild/bazel-gazelle/releases/download/v0.22.1/bazel-gazelle-v0.22.1.tar.gz",
             ],
         )
+
+    if not native.existing_rule("wycheproof"):
+        # Commit from 2019-12-17
+        http_archive(
+            name = "wycheproof",
+            strip_prefix = "wycheproof-d8ed1ba95ac4c551db67f410c06131c3bc00a97c",
+            url = "https://github.com/google/wycheproof/archive/d8ed1ba95ac4c551db67f410c06131c3bc00a97c.zip",
+            sha256 = "eb1d558071acf1aa6d677d7f1cabec2328d1cf8381496c17185bd92b52ce7545",
+        )
