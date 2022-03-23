@@ -51,7 +51,7 @@ TEST(AwsKmsClientTest, testBasic) {
   {  // A client not bound to any particular key.
     auto client_result = AwsKmsClient::New("", creds_file);
     EXPECT_TRUE(client_result.ok()) << client_result.status();
-    auto client = std::move(client_result.ValueOrDie());
+    auto client = std::move(client_result.value());
     EXPECT_TRUE(client->DoesSupport(aws_key1));
     EXPECT_TRUE(client->DoesSupport(aws_key2));
     EXPECT_FALSE(client->DoesSupport(non_aws_key));
@@ -60,7 +60,7 @@ TEST(AwsKmsClientTest, testBasic) {
   {  // A client bound to a specific AWS KMS key.
     auto client_result = AwsKmsClient::New(aws_key1, creds_file);
     EXPECT_TRUE(client_result.ok()) << client_result.status();
-    auto client = std::move(client_result.ValueOrDie());
+    auto client = std::move(client_result.value());
     EXPECT_TRUE(client->DoesSupport(aws_key1));
     EXPECT_FALSE(client->DoesSupport(aws_key2));
     EXPECT_FALSE(client->DoesSupport(non_aws_key));

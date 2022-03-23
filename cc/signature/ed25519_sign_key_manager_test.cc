@@ -126,7 +126,7 @@ TEST(Ed25519SignKeyManagerTest, Create) {
 
   std::string message = "Some message";
   EXPECT_THAT(direct_verifier_or.value()->Verify(
-                  signer_or.ValueOrDie()->Sign(message).value(), message),
+                  signer_or.value()->Sign(message).value(), message),
               IsOk());
 }
 
@@ -147,7 +147,7 @@ TEST(Ed25519SignKeyManagerTest, CreateDifferentKey) {
 
   std::string message = "Some message";
   EXPECT_THAT(direct_verifier_or.value()->Verify(
-                  signer_or.ValueOrDie()->Sign(message).value(), message),
+                  signer_or.value()->Sign(message).value(), message),
               Not(IsOk()));
 }
 
@@ -176,7 +176,7 @@ TEST(Ed25519SignKeyManagerTest, DeriveKeySignVerify) {
   ASSERT_THAT(signer_or.status(), IsOk());
 
   std::string message = "Some message";
-  auto signature = signer_or.ValueOrDie()->Sign(message).value();
+  auto signature = signer_or.value()->Sign(message).value();
 
   auto verifier_or =
       Ed25519VerifyKeyManager().GetPrimitive<PublicKeyVerify>(key.public_key());

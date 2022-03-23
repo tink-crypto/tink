@@ -106,10 +106,9 @@ TEST(Ed25519SignKeyManagerTest, Create) {
   ASSERT_THAT(verifier_or.status(), IsOk());
 
   std::string message = "Some message";
-  EXPECT_THAT(
-      verifier_or.value()->Verify(
-          direct_signer_or.ValueOrDie()->Sign(message).value(), message),
-      IsOk());
+  EXPECT_THAT(verifier_or.value()->Verify(
+                  direct_signer_or.value()->Sign(message).value(), message),
+              IsOk());
 }
 
 TEST(Ed25519SignKeyManagerTest, CreateDifferentPrivateKey) {
@@ -128,10 +127,9 @@ TEST(Ed25519SignKeyManagerTest, CreateDifferentPrivateKey) {
   ASSERT_THAT(verifier_or.status(), IsOk());
 
   std::string message = "Some message";
-  EXPECT_THAT(
-      verifier_or.value()->Verify(
-          direct_signer_or.ValueOrDie()->Sign(message).value(), message),
-      Not(IsOk()));
+  EXPECT_THAT(verifier_or.value()->Verify(
+                  direct_signer_or.value()->Sign(message).value(), message),
+              Not(IsOk()));
 }
 
 }  // namespace

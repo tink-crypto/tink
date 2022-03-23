@@ -139,10 +139,9 @@ TEST_F(HybridConfigTest, DecryptWrapperRegistered) {
   std::string encryption =
       DummyHybridEncrypt("dummy").Encrypt("secret", "").value();
 
-  ASSERT_EQ(wrapped.ValueOrDie()
-                ->Decrypt(absl::StrCat(prefix, encryption), "")
-                .value(),
-            "secret");
+  ASSERT_EQ(
+      wrapped.value()->Decrypt(absl::StrCat(prefix, encryption), "").value(),
+      "secret");
 }
 
 // FIPS-only mode tests

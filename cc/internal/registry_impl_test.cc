@@ -1050,7 +1050,7 @@ TEST_F(RegistryTest, KeyTypeManagerGetFirstKeyManager) {
   AesGcmKey key = ExampleKeyTypeManager().CreateKey(format).value();
   auto aead = Registry::get_key_manager<Aead>(
                   "type.googleapis.com/google.crypto.tink.AesGcmKey")
-                  .ValueOrDie()
+                  .value()
                   ->GetPrimitive(key)
                   .value();
   std::string encryption = aead->Encrypt("TESTMESSAGE", "").value();
@@ -1071,7 +1071,7 @@ TEST_F(RegistryTest, KeyTypeManagerGetSecondKeyManager) {
   AesGcmKey key = ExampleKeyTypeManager().CreateKey(format).value();
   auto aead_variant = Registry::get_key_manager<AeadVariant>(
                           "type.googleapis.com/google.crypto.tink.AesGcmKey")
-                          .ValueOrDie()
+                          .value()
                           ->GetPrimitive(key)
                           .value();
   EXPECT_THAT(aead_variant->get(), Eq(key.key_value()));

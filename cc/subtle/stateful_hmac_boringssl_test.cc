@@ -252,17 +252,17 @@ bool WycheproofTest(const rapidjson::Document &root, HashType hash_type) {
       auto create_result =
           StatefulHmacBoringSsl::New(hash_type, tag.length(), key);
       EXPECT_THAT(create_result.status(), IsOk());
-      auto hmac = std::move(create_result.ValueOrDie());
+      auto hmac = std::move(create_result.value());
 
       auto update_result = hmac->Update(msg);
       EXPECT_THAT(update_result, IsOk());
 
       auto finalize_result = hmac->Finalize();
-      auto result = finalize_result.ValueOrDie();
+      auto result = finalize_result.value();
 
       bool success = result == tag;
       if (success) {
-        // std::string result_tag = result.ValueOrDie();
+        // std::string result_tag = result.value();
         if (expected == "invalid") {
           ADD_FAILURE() << "verified incorrect tag:" << id;
           errors++;

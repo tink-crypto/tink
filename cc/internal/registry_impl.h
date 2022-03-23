@@ -741,7 +741,7 @@ crypto::tink::util::StatusOr<std::unique_ptr<P>> RegistryImpl::GetPrimitive(
     absl::string_view type_url, const portable_proto::MessageLite& key) const {
   auto key_manager_result = get_key_manager<P>(type_url);
   if (key_manager_result.ok()) {
-    return key_manager_result.ValueOrDie()->GetPrimitive(key);
+    return key_manager_result.value()->GetPrimitive(key);
   }
   return key_manager_result.status();
 }

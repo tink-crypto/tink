@@ -233,7 +233,7 @@ TEST(EcdsaSignKeyManagerTest, Create) {
 
   std::string message = "Some message";
   EXPECT_THAT(direct_verifier_or.value()->Verify(
-                  signer_or.ValueOrDie()->Sign(message).value(), message),
+                  signer_or.value()->Sign(message).value(), message),
               IsOk());
 }
 
@@ -258,7 +258,7 @@ TEST(EcdsaSignKeyManagerTest, CreateDifferentKey) {
 
   std::string message = "Some message";
   EXPECT_THAT(direct_verifier_or.value()->Verify(
-                  signer_or.ValueOrDie()->Sign(message).value(), message),
+                  signer_or.value()->Sign(message).value(), message),
               Not(IsOk()));
 }
 

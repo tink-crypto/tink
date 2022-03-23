@@ -49,7 +49,7 @@ TEST(GcpKmsClientTest, ClientNotBoundToAKey) {
 
   auto client_result = GcpKmsClient::New("", creds_file);
   EXPECT_TRUE(client_result.ok()) << client_result.status();
-  auto client = std::move(client_result.ValueOrDie());
+  auto client = std::move(client_result.value());
   EXPECT_TRUE(client->DoesSupport(gcp_key1));
   EXPECT_TRUE(client->DoesSupport(gcp_key2));
   EXPECT_FALSE(client->DoesSupport(non_gcp_key));
@@ -64,7 +64,7 @@ TEST(GcpKmsClientTest, ClientBoundToASpecificKey) {
 
   auto client_result = GcpKmsClient::New(gcp_key1, creds_file);
   EXPECT_TRUE(client_result.ok()) << client_result.status();
-  auto client = std::move(client_result.ValueOrDie());
+  auto client = std::move(client_result.value());
   EXPECT_TRUE(client->DoesSupport(gcp_key1));
   EXPECT_FALSE(client->DoesSupport(gcp_key2));
   EXPECT_FALSE(client->DoesSupport(non_gcp_key));
