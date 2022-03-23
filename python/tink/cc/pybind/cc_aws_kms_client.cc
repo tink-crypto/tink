@@ -39,7 +39,7 @@ void PybindRegisterCcAwsKmsClient(pybind11::module* module) {
             if (!client_result.ok()) {
               throw pybind11::value_error("Could not create client.");
             }
-            return std::move(client_result.ValueOrDie());
+            return std::move(client_result.value());
           }))
       .def(
           "does_support",

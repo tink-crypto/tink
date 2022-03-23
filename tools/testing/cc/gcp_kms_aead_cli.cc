@@ -75,7 +75,7 @@ int main(int argc, char** argv) {
               << "\n";
     exit(1);
   }
-  auto client = std::move(client_result.ValueOrDie());
+  auto client = std::move(client_result.value());
 
   // Create Aead-primitive.
   auto aead_result = client->GetAead("gcp-kms://" + key_name);
@@ -85,7 +85,7 @@ int main(int argc, char** argv) {
               << "\n";
     exit(1);
   }
-  std::unique_ptr<Aead> aead(std::move(aead_result.ValueOrDie()));
+  std::unique_ptr<Aead> aead(std::move(aead_result.value()));
 
   // Read the input.
   std::string input = CliUtil::Read(input_filename);
@@ -100,7 +100,7 @@ int main(int argc, char** argv) {
                 << encrypt_result.status().message() << std::endl;
       exit(1);
     }
-    output = encrypt_result.ValueOrDie();
+    output = encrypt_result.value();
   } else {  // operation == "decrypt"
     auto decrypt_result = aead->Decrypt(input, associated_data);
     if (!decrypt_result.ok()) {
@@ -108,7 +108,7 @@ int main(int argc, char** argv) {
                 << decrypt_result.status().message() << std::endl;
       exit(1);
     }
-    output = decrypt_result.ValueOrDie();
+    output = decrypt_result.value();
   }
 
   // Write the output to the output file.
