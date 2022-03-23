@@ -28,7 +28,8 @@ import (
 )
 
 const (
-	maxInt = int(^uint(0) >> 1)
+	intSize = 32 << (^uint(0) >> 63) // 32 or 64
+	maxInt  = 1<<(intSize-1) - 1
 )
 
 // New creates a MAC primitive from the given keyset handle.

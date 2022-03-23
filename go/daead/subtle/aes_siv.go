@@ -62,7 +62,9 @@ type AESSIV struct {
 const (
 	// AESSIVKeySize is the key size in bytes.
 	AESSIVKeySize = 64
-	maxInt        = int(^uint(0) >> 1)
+
+	intSize = 32 << (^uint(0) >> 63) // 32 or 64
+	maxInt  = 1<<(intSize-1) - 1
 )
 
 // NewAESSIV returns an AESSIV instance.
