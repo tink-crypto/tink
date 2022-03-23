@@ -57,7 +57,7 @@ import java.util.Set;
 @Alpha
 public abstract class KeyTypeManager<KeyProtoT extends MessageLite> {
   /** A PrimitiveFactory knows how to create primitives from a given key. */
-  protected abstract static class PrimitiveFactory<PrimitiveT, KeyT> {
+  protected abstract static class PrimitiveFactory<PrimitiveT, KeyProtoT extends MessageLite> {
     private final Class<PrimitiveT> clazz;
 
     public PrimitiveFactory(Class<PrimitiveT> clazz) {
@@ -78,7 +78,7 @@ public abstract class KeyTypeManager<KeyProtoT extends MessageLite> {
      * PublicKeyVerify}, {@code DeterministicAead}, {@code HybridEncrypt}, and {@code HybridDecrypt}
      * this should be a primitive which <b>ignores</b> the output prefix and assumes "RAW".
      */
-    public abstract PrimitiveT getPrimitive(KeyT key) throws GeneralSecurityException;
+    public abstract PrimitiveT getPrimitive(KeyProtoT key) throws GeneralSecurityException;
   }
 
   private final Class<KeyProtoT> clazz;
@@ -190,7 +190,8 @@ public abstract class KeyTypeManager<KeyProtoT extends MessageLite> {
    * be able to generate keys. In particular, in this case it needs to have some KeyFormat protocol
    * buffer which can be validated, parsed, and from which a key can be generated.
    */
-  public abstract static class KeyFactory<KeyFormatProtoT extends MessageLite, KeyT> {
+  public abstract static class KeyFactory<
+      KeyFormatProtoT extends MessageLite, KeyProtoT extends MessageLite> {
     private final Class<KeyFormatProtoT> clazz;
     public KeyFactory(Class<KeyFormatProtoT> clazz) {
       this.clazz = clazz;
@@ -235,7 +236,7 @@ public abstract class KeyTypeManager<KeyProtoT extends MessageLite> {
         throws InvalidProtocolBufferException;
 
     /** Creates a new key from a given format. */
-    public abstract KeyT createKey(KeyFormatProtoT keyFormat) throws GeneralSecurityException;
+    public abstract KeyProtoT createKey(KeyFormatProtoT keyFormat) throws GeneralSecurityException;
 
     /**
      * Derives a new key from a given format, using the given {@code pseudoRandomness}.
@@ -251,7 +252,7 @@ public abstract class KeyTypeManager<KeyProtoT extends MessageLite> {
      * <p>Not every KeyTypeManager needs to implement this; if not implemented a {@link
      * GeneralSecurityException} will be thrown.
      */
-    public KeyT deriveKey(KeyFormatProtoT keyFormat, InputStream pseudoRandomness)
+    public KeyProtoT deriveKey(KeyFormatProtoT keyFormat, InputStream pseudoRandomness)
         throws GeneralSecurityException {
       throw new GeneralSecurityException("deriveKey not implemented for key of type " + clazz);
     }
