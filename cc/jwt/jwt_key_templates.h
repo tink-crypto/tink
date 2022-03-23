@@ -34,7 +34,7 @@ namespace tink {
 //   auto handle_result =
 //       KeysetHandle::GenerateNew(JwtHs256Template());
 //   if (!handle_result.ok()) { /* fail with error */ }
-//   auto keyset_handle = std::move(handle_result.ValueOrDie());
+//   auto keyset_handle = std::move(handle_result.value());
 const google::crypto::tink::KeyTemplate& JwtHs256Template();
 const google::crypto::tink::KeyTemplate& RawJwtHs256Template();
 const google::crypto::tink::KeyTemplate& JwtHs384Template();

@@ -92,7 +92,7 @@ class SignaturePemKeysetReader : public KeysetReader {
 // if (!reader_statusor.ok()) /* handle failure */
 //
 // auto keyset_handle_statusor =
-//     CleartextKeysetHandle::Read(reader_statusor.ValueOrDie());
+//     CleartextKeysetHandle::Read(*reader_statusor);
 class SignaturePemKeysetReaderBuilder {
  public:
   // Type of reader to build. The builder type depends on the primitive

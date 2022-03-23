@@ -33,7 +33,7 @@ namespace tink {
 //   auto handle_result = KeysetHandle::GenerateNew(
 //        Cecpq2HybridKeyTemplates::Cecpq2P256HkdfHmacSha256Aes128Gcm());
 //   if (!handle_result.ok()) { /* fail with error */ }
-//   auto keyset_handle = std::move(handle_result.ValueOrDie());
+//   auto keyset_handle = std::move(handle_result.value());
 
 // Returns a KeyTemplate that generates new instances of
 // Cecpq2AeadHkdfPrivateKey with the following parameters:
