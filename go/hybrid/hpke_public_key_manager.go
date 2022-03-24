@@ -14,13 +14,14 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-package hpke
+package hybrid
 
 import (
 	"errors"
 
 	"google.golang.org/protobuf/proto"
 	"github.com/google/tink/go/core/registry"
+	"github.com/google/tink/go/hybrid/hpke"
 	"github.com/google/tink/go/keyset"
 	hpkepb "github.com/google/tink/go/proto/hpke_go_proto"
 	tinkpb "github.com/google/tink/go/proto/tink_go_proto"
@@ -54,7 +55,7 @@ func (p *hpkePublicKeyManager) Primitive(serializedKey []byte) (interface{}, err
 	if err := keyset.ValidateKeyVersion(key.GetVersion(), maxSupportedPublicKeyVersion); err != nil {
 		return nil, err
 	}
-	return NewEncrypt(key)
+	return hpke.NewEncrypt(key)
 }
 
 func (p *hpkePublicKeyManager) DoesSupport(typeURL string) bool {

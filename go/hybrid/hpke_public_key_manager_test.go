@@ -14,17 +14,33 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-package hpke
+package hybrid
 
 import (
 	"bytes"
+	"fmt"
+	"os"
 	"testing"
 
 	"google.golang.org/protobuf/proto"
 	"github.com/google/tink/go/core/registry"
+	"github.com/google/tink/go/hybrid/hpke"
 	"github.com/google/tink/go/subtle/random"
+	"github.com/google/tink/go/subtle"
 	hpkepb "github.com/google/tink/go/proto/hpke_go_proto"
 )
+
+// TODO(b/201070904): Register key managers in hybrid.go once all HPKE key
+// templates are supported.
+func TestMain(m *testing.M) {
+	if err := registry.RegisterKeyManager(new(hpkePublicKeyManager)); err != nil {
+		panic(fmt.Sprintf("registry.RegisterKeyManager(hpkePublicKeyManager) err = %v, want nil", err))
+	}
+	if err := registry.RegisterKeyManager(new(hpkePrivateKeyManager)); err != nil {
+		panic(fmt.Sprintf("registry.RegisterKeyManager(hpkePrivateKeyManager) err = %v, want nil", err))
+	}
+	os.Exit(m.Run())
+}
 
 func TestPublicKeyManagerPrimitiveRejectsInvalidKeyVersion(t *testing.T) {
 	km, err := registry.GetKeyManager(publicKeyTypeURL)
@@ -131,13 +147,13 @@ func TestPublicKeyManagerPrimitiveEncryptDecrypt(t *testing.T) {
 		if err != nil {
 			t.Fatalf("Primitive() err = %v, want nil", err)
 		}
-		enc, ok := e.(*Encrypt)
+		enc, ok := e.(*hpke.Encrypt)
 		if !ok {
 			t.Fatal("primitive is not Encrypt")
 		}
-		dec, err := NewDecrypt(privKey)
+		dec, err := hpke.NewDecrypt(privKey)
 		if err != nil {
-			t.Fatalf("NewDecrypt() err = %v, want nil", err)
+			t.Fatalf("hpke.NewDecrypt() err = %v, want nil", err)
 		}
 
 		ct, err := enc.Encrypt(wantPT, ctxInfo)
@@ -184,10 +200,10 @@ func TestPublicKeyManagerNotSupported(t *testing.T) {
 		t.Fatalf("GetKeyManager(%q) err = %v, want nil", publicKeyTypeURL, err)
 	}
 	if _, err := km.NewKey(nil); err == nil {
-		t.Fatalf("NewKey(nil) err = nil, want %v", err)
+		t.Error("NewKey(nil) err = nil, want error")
 	}
 	if _, err := km.NewKeyData(nil); err == nil {
-		t.Fatalf("NewKeyData(nil) err = nil, want %v", err)
+		t.Error("NewKeyData(nil) err = nil, want error")
 	}
 }
 
@@ -203,4 +219,29 @@ func serializedPubPrivKeys(t *testing.T, params *hpkepb.HpkeParams) ([]byte, []b
 		t.Fatal(err)
 	}
 	return serializedPub, serializedPriv
+}
+
+func pubPrivKeys(t *testing.T, params *hpkepb.HpkeParams) (*hpkepb.HpkePublicKey, *hpkepb.HpkePrivateKey) {
+	t.Helper()
+
+	priv, err := subtle.GeneratePrivateKeyX25519()
+	if err != nil {
+		t.Fatalf("GeneratePrivateKeyX25519: err %q", err)
+	}
+	pub, err := subtle.PublicFromPrivateX25519(priv)
+	if err != nil {
+		t.Fatalf("PublicFromPrivateX25519: err %q", err)
+	}
+
+	pubKey := &hpkepb.HpkePublicKey{
+		Version:   0,
+		Params:    params,
+		PublicKey: pub,
+	}
+	privKey := &hpkepb.HpkePrivateKey{
+		Version:    0,
+		PublicKey:  pubKey,
+		PrivateKey: priv,
+	}
+	return pubKey, privKey
 }

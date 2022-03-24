@@ -14,7 +14,7 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-package hpke
+package hybrid
 
 import (
 	"bytes"
@@ -24,6 +24,7 @@ import (
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/testing/protocmp"
 	"github.com/google/tink/go/core/registry"
+	"github.com/google/tink/go/hybrid/hpke"
 	"github.com/google/tink/go/subtle/random"
 	hpkepb "github.com/google/tink/go/proto/hpke_go_proto"
 	tinkpb "github.com/google/tink/go/proto/tink_go_proto"
@@ -129,15 +130,15 @@ func TestPrivateKeyManagerPrimitiveEncryptDecrypt(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		enc, err := NewEncrypt(pubKey)
+		enc, err := hpke.NewEncrypt(pubKey)
 		if err != nil {
-			t.Fatalf("NewEncrypt() err = %v, want nil", err)
+			t.Fatalf("hpke.NewEncrypt() err = %v, want nil", err)
 		}
 		d, err := km.Primitive(serializedPrivKey)
 		if err != nil {
 			t.Fatalf("Primitive() err = %v, want nil", err)
 		}
-		dec, ok := d.(*Decrypt)
+		dec, ok := d.(*hpke.Decrypt)
 		if !ok {
 			t.Fatal("primitive is not Decrypt")
 		}
@@ -266,9 +267,9 @@ func TestPrivateKeyManagerNewKeyEncryptDecrypt(t *testing.T) {
 			t.Error("public key is missing")
 		}
 
-		enc, err := NewEncrypt(pubKey)
+		enc, err := hpke.NewEncrypt(pubKey)
 		if err != nil {
-			t.Fatalf("NewEncrypt() err = %v, want nil", err)
+			t.Fatalf("hpke.NewEncrypt() err = %v, want nil", err)
 		}
 		serializedPrivKey, err := proto.Marshal(privKeyProto)
 		if err != nil {
@@ -278,7 +279,7 @@ func TestPrivateKeyManagerNewKeyEncryptDecrypt(t *testing.T) {
 		if err != nil {
 			t.Fatalf("Primitive() err = %v, want nil", err)
 		}
-		dec, ok := d.(*Decrypt)
+		dec, ok := d.(*hpke.Decrypt)
 		if !ok {
 			t.Fatal("primitive is not Decrypt")
 		}

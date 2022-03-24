@@ -14,7 +14,7 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-package hpke
+package hybrid
 
 import (
 	"errors"
@@ -22,7 +22,9 @@ import (
 
 	"google.golang.org/protobuf/proto"
 	"github.com/google/tink/go/core/registry"
+	"github.com/google/tink/go/hybrid/hpke"
 	"github.com/google/tink/go/keyset"
+	"github.com/google/tink/go/subtle"
 	hpkepb "github.com/google/tink/go/proto/hpke_go_proto"
 	tinkpb "github.com/google/tink/go/proto/tink_go_proto"
 )
@@ -55,7 +57,7 @@ func (p *hpkePrivateKeyManager) Primitive(serializedKey []byte) (interface{}, er
 	if err := keyset.ValidateKeyVersion(key.GetVersion(), maxSupportedPrivateKeyVersion); err != nil {
 		return nil, err
 	}
-	return NewDecrypt(key)
+	return hpke.NewDecrypt(key)
 }
 
 // NewKey returns a set of private and public keys of key version 0.
@@ -71,11 +73,11 @@ func (p *hpkePrivateKeyManager) NewKey(serializedKeyFormat []byte) (proto.Messag
 		return nil, err
 	}
 
-	privKeyBytes, err := x25519KEMGeneratePrivateKey()
+	privKeyBytes, err := subtle.GeneratePrivateKeyX25519()
 	if err != nil {
 		return nil, fmt.Errorf("generate X25519 private key: %v", err)
 	}
-	pubKeyBytes, err := x25519KEMPublicFromPrivate(privKeyBytes)
+	pubKeyBytes, err := subtle.PublicFromPrivateX25519(privKeyBytes)
 	if err != nil {
 		return nil, fmt.Errorf("get X25519 public key from private key: %v", err)
 	}

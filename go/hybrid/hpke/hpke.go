@@ -20,8 +20,6 @@ package hpke
 import (
 	"encoding/binary"
 	"fmt"
-
-	"github.com/google/tink/go/core/registry"
 )
 
 const (
@@ -50,15 +48,6 @@ var (
 	emptyIKM            = []byte{}
 	emptyAssociatedData = []byte{}
 )
-
-func init() {
-	if err := registry.RegisterKeyManager(new(hpkePublicKeyManager)); err != nil {
-		panic(fmt.Sprintf("hpke.init() failed: %v", err))
-	}
-	if err := registry.RegisterKeyManager(new(hpkePrivateKeyManager)); err != nil {
-		panic(fmt.Sprintf("hpke.init() failed: %v", err))
-	}
-}
 
 // kemSuiteID generates the KEM suite ID from kemID according to
 // https://www.rfc-editor.org/rfc/rfc9180.html#section-4.1-5.
