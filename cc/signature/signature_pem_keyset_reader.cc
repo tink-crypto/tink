@@ -94,18 +94,34 @@ util::Status SetEcdsaParameters(const PemKeyParams& pem_parameters,
   }
 
   if (pem_parameters.hash_type != HashType::SHA256 ||
-      pem_parameters.key_size_in_bits != 256 ||
-      pem_parameters.algorithm != PemAlgorithm::ECDSA_IEEE) {
+      pem_parameters.key_size_in_bits != 256) {
     return util::Status(
         absl::StatusCode::kInvalidArgument,
         "Only NIST_P256 ECDSA supported. Parameters should contain "
-        "SHA256, 256 bit key size and ECDSA_IEEE algorithm.");
+        "SHA256 and 256 bit key size.");
   }
 
   parameters->set_hash_type(pem_parameters.hash_type);
   parameters->set_curve(EllipticCurveType::NIST_P256);
-  parameters->set_encoding(
-      google::crypto::tink::EcdsaSignatureEncoding::IEEE_P1363);
+
+  switch (pem_parameters.algorithm) {
+    case PemAlgorithm::ECDSA_IEEE: {
+      parameters->set_encoding(
+          google::crypto::tink::EcdsaSignatureEncoding::IEEE_P1363);
+      break;
+    }
+    case PemAlgorithm::ECDSA_DER: {
+      parameters->set_encoding(
+          google::crypto::tink::EcdsaSignatureEncoding::DER);
+      break;
+    }
+    default: {
+      return util::Status(
+          absl::StatusCode::kInvalidArgument,
+          "Only ECDSA supported. The algorithm parameter should be "
+          "ECDSA_IEEE or ECDSA_DER.");
+    }
+  }
 
   return util::OkStatus();
 }

@@ -145,15 +145,14 @@ constexpr absl::string_view kRsaPrivateKey2048 =
 
 // Helper function that creates an EcdsaPublicKey from the given PEM encoded
 // key `pem_encoded_key`, Hash type `hash_type` and key version `key_version`.
-EcdsaPublicKey GetExpectedEcdsaPublicKeyProto() {
+EcdsaPublicKey GetExpectedEcdsaPublicKeyProto(EcdsaSignatureEncoding encoding) {
   EcdsaPublicKey public_key_proto;
   public_key_proto.set_version(0);
   public_key_proto.set_x(absl::HexStringToBytes(kEcdsaP256PublicKeyX));
   public_key_proto.set_y(absl::HexStringToBytes(kEcdsaP256PublicKeyY));
   public_key_proto.mutable_params()->set_hash_type(HashType::SHA256);
   public_key_proto.mutable_params()->set_curve(EllipticCurveType::NIST_P256);
-  public_key_proto.mutable_params()->set_encoding(
-      EcdsaSignatureEncoding::IEEE_P1363);
+  public_key_proto.mutable_params()->set_encoding(encoding);
 
   return public_key_proto;
 }
@@ -509,7 +508,7 @@ TEST(SignaturePemKeysetReaderTest, ReadECDSACorrectPublicKey) {
 
   builder.Add({.serialized_key = std::string(kEcdsaP256PublicKey),
                .parameters = {.key_type = PemKeyType::PEM_EC,
-                              .algorithm = PemAlgorithm::ECDSA_IEEE,
+                              .algorithm = PemAlgorithm::ECDSA_DER,
                               .key_size_in_bits = 256,
                               .hash_type = HashType::SHA256}});
 
@@ -538,7 +537,8 @@ TEST(SignaturePemKeysetReaderTest, ReadECDSACorrectPublicKey) {
   expected_primary_data->set_type_url(key_manager.get_key_type());
   expected_primary_data->set_key_material_type(key_manager.key_material_type());
   expected_primary_data->set_value(
-      GetExpectedEcdsaPublicKeyProto().SerializeAsString());
+      GetExpectedEcdsaPublicKeyProto(
+          EcdsaSignatureEncoding::IEEE_P1363).SerializeAsString());
   EXPECT_THAT(keyset->key(0), EqualsKey(expected_primary))
       << "expected key: " << expected_primary.DebugString();
 
@@ -555,7 +555,8 @@ TEST(SignaturePemKeysetReaderTest, ReadECDSACorrectPublicKey) {
   expected_secondary_data->set_key_material_type(
       key_manager.key_material_type());
   expected_secondary_data->set_value(
-      GetExpectedEcdsaPublicKeyProto().SerializeAsString());
+      GetExpectedEcdsaPublicKeyProto(
+          EcdsaSignatureEncoding::DER).SerializeAsString());
   EXPECT_THAT(keyset->key(1), EqualsKey(expected_secondary))
       << "expected key: " << expected_secondary.DebugString();
 }

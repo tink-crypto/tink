@@ -29,15 +29,17 @@
 namespace crypto {
 namespace tink {
 
-// Type of key. Currently, only RSA keys are supported.
-// TODO(ambrosin): Add EC keys persing.
+// Type of key.
+//
+// Currently, PEM_EC only supports PublicKeyVerify.
 enum PemKeyType { PEM_RSA, PEM_EC };
 
 // Algorithm to use with this key.
 enum PemAlgorithm {
   RSASSA_PSS,
   RSASSA_PKCS1,
-  ECDSA_IEEE  // Represents the NIST_P256 curve with IEEE_P1363 encoding
+  ECDSA_IEEE,  // NIST_P256 curve with IEEE_P1363 encoding
+  ECDSA_DER  // NIST_P256 curve with DER encoding
 };
 
 // Common set of parameters for the PEM key.
