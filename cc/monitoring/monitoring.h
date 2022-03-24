@@ -71,17 +71,17 @@ class MonitoringKeySetInfo {
   };
 
   // Constructs a MonitoringKeySetInfo object with the given
-  // `keyset_properties`, `keyset_entries` and primary key ID `primary_key_id`.
+  // `keyset_annotations`, `keyset_entries` and primary key ID `primary_key_id`.
   MonitoringKeySetInfo(
-      const absl::flat_hash_map<std::string, std::string>& keyset_properties,
+      const absl::flat_hash_map<std::string, std::string>& keyset_annotations,
       const std::vector<Entry>& keyset_entries, uint32_t primary_key_id)
-      : keyset_properties_(keyset_properties),
+      : keyset_annotations_(keyset_annotations),
         keyset_entries_(keyset_entries),
         primary_key_id_(primary_key_id) {}
 
-  // Returns a const reference to the properties of this keyset.
-  const absl::flat_hash_map<std::string, std::string>& GetProperties() const {
-    return keyset_properties_;
+  // Returns a const reference to the annotations of this keyset.
+  const absl::flat_hash_map<std::string, std::string>& GetAnnotations() const {
+    return keyset_annotations_;
   }
   // Returns a const reference to the array of entries for this keyset.
   const std::vector<Entry>& GetEntries() const { return keyset_entries_; }
@@ -89,8 +89,8 @@ class MonitoringKeySetInfo {
   uint32_t GetPrimaryKeyId() const { return primary_key_id_; }
 
  private:
-  // Properties of this keyset in the form 'key' -> 'value'.
-  const absl::flat_hash_map<std::string, std::string> keyset_properties_;
+  // Annotations of this keyset in the form 'key' -> 'value'.
+  const absl::flat_hash_map<std::string, std::string> keyset_annotations_;
   const std::vector<Entry> keyset_entries_;
   const uint32_t primary_key_id_;
 };
