@@ -35,8 +35,8 @@ type Decrypt struct {
 
 var _ tink.HybridDecrypt = (*Decrypt)(nil)
 
-// newDecrypt constructs a Decrypt using HpkePrivateKey.
-func newDecrypt(recipientPrivKey *pb.HpkePrivateKey) (*Decrypt, error) {
+// NewDecrypt constructs a Decrypt using HpkePrivateKey.
+func NewDecrypt(recipientPrivKey *pb.HpkePrivateKey) (*Decrypt, error) {
 	if recipientPrivKey.GetPrivateKey() == nil || len(recipientPrivKey.GetPrivateKey()) == 0 {
 		return nil, errors.New("HpkePrivateKey.PrivateKey bytes are missing")
 	}

@@ -24,9 +24,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/google/tink/go/subtle"
 	"github.com/google/tink/go/testutil"
-	pb "github.com/google/tink/go/proto/hpke_go_proto"
 )
 
 // TODO(b/201070904): Separate tests into internal_test package.
@@ -81,40 +79,6 @@ type encryptionString struct {
 	associatedData string
 	nonce          string
 	ciphertext     string
-}
-
-func validParams(t *testing.T) *pb.HpkeParams {
-	t.Helper()
-	return &pb.HpkeParams{
-		Kem:  pb.HpkeKem_DHKEM_X25519_HKDF_SHA256,
-		Kdf:  pb.HpkeKdf_HKDF_SHA256,
-		Aead: pb.HpkeAead_AES_256_GCM,
-	}
-}
-
-func pubPrivKeys(t *testing.T, params *pb.HpkeParams) (*pb.HpkePublicKey, *pb.HpkePrivateKey) {
-	t.Helper()
-
-	priv, err := subtle.GeneratePrivateKeyX25519()
-	if err != nil {
-		t.Fatalf("GeneratePrivateKeyX25519: err %q", err)
-	}
-	pub, err := subtle.PublicFromPrivateX25519(priv)
-	if err != nil {
-		t.Fatalf("PublicFromPrivateX25519: err %q", err)
-	}
-
-	pubKey := &pb.HpkePublicKey{
-		Version:   0,
-		Params:    params,
-		PublicKey: pub,
-	}
-	privKey := &pb.HpkePrivateKey{
-		Version:    0,
-		PublicKey:  pubKey,
-		PrivateKey: priv,
-	}
-	return pubKey, privKey
 }
 
 // TODO(b/201070904): Include all Tink-supported RFC vectors.

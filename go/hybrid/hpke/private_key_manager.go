@@ -39,12 +39,12 @@ var (
 	errInvalidPrivateKeyFormat = errors.New("invalid HPKE private key format")
 )
 
-// privateKeyManager implements the KeyManager interface for HybridDecrypt.
-type privateKeyManager struct{}
+// hpkePrivateKeyManager implements the KeyManager interface for HybridDecrypt.
+type hpkePrivateKeyManager struct{}
 
-var _ registry.PrivateKeyManager = (*privateKeyManager)(nil)
+var _ registry.PrivateKeyManager = (*hpkePrivateKeyManager)(nil)
 
-func (p *privateKeyManager) Primitive(serializedKey []byte) (interface{}, error) {
+func (p *hpkePrivateKeyManager) Primitive(serializedKey []byte) (interface{}, error) {
 	if len(serializedKey) == 0 {
 		return nil, errInvalidPrivateKey
 	}
@@ -55,11 +55,11 @@ func (p *privateKeyManager) Primitive(serializedKey []byte) (interface{}, error)
 	if err := keyset.ValidateKeyVersion(key.GetVersion(), maxSupportedPrivateKeyVersion); err != nil {
 		return nil, err
 	}
-	return newDecrypt(key)
+	return NewDecrypt(key)
 }
 
 // NewKey returns a set of private and public keys of key version 0.
-func (p *privateKeyManager) NewKey(serializedKeyFormat []byte) (proto.Message, error) {
+func (p *hpkePrivateKeyManager) NewKey(serializedKeyFormat []byte) (proto.Message, error) {
 	if len(serializedKeyFormat) == 0 {
 		return nil, errInvalidPrivateKeyFormat
 	}
@@ -91,7 +91,7 @@ func (p *privateKeyManager) NewKey(serializedKeyFormat []byte) (proto.Message, e
 	}, nil
 }
 
-func (p *privateKeyManager) NewKeyData(serializedKeyFormat []byte) (*tinkpb.KeyData, error) {
+func (p *hpkePrivateKeyManager) NewKeyData(serializedKeyFormat []byte) (*tinkpb.KeyData, error) {
 	key, err := p.NewKey(serializedKeyFormat)
 	if err != nil {
 		return nil, err
@@ -107,7 +107,7 @@ func (p *privateKeyManager) NewKeyData(serializedKeyFormat []byte) (*tinkpb.KeyD
 	}, nil
 }
 
-func (p *privateKeyManager) PublicKeyData(serializedPrivKey []byte) (*tinkpb.KeyData, error) {
+func (p *hpkePrivateKeyManager) PublicKeyData(serializedPrivKey []byte) (*tinkpb.KeyData, error) {
 	privKey := new(hpkepb.HpkePrivateKey)
 	if err := proto.Unmarshal(serializedPrivKey, privKey); err != nil {
 		return nil, errInvalidPrivateKey
@@ -123,11 +123,11 @@ func (p *privateKeyManager) PublicKeyData(serializedPrivKey []byte) (*tinkpb.Key
 	}, nil
 }
 
-func (p *privateKeyManager) DoesSupport(typeURL string) bool {
+func (p *hpkePrivateKeyManager) DoesSupport(typeURL string) bool {
 	return typeURL == privateKeyTypeURL
 }
 
-func (p *privateKeyManager) TypeURL() string {
+func (p *hpkePrivateKeyManager) TypeURL() string {
 	return privateKeyTypeURL
 }
 

@@ -34,8 +34,8 @@ type Encrypt struct {
 
 var _ tink.HybridEncrypt = (*Encrypt)(nil)
 
-// newEncrypt constructs an Encrypt using HpkePublicKey.
-func newEncrypt(recipientPubKey *pb.HpkePublicKey) (*Encrypt, error) {
+// NewEncrypt constructs an Encrypt using HpkePublicKey.
+func NewEncrypt(recipientPubKey *pb.HpkePublicKey) (*Encrypt, error) {
 	if recipientPubKey.GetPublicKey() == nil || len(recipientPubKey.GetPublicKey()) == 0 {
 		return nil, errors.New("HpkePublicKey.PublicKey bytes are missing")
 	}

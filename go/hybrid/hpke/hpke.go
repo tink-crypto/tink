@@ -52,10 +52,10 @@ var (
 )
 
 func init() {
-	if err := registry.RegisterKeyManager(new(publicKeyManager)); err != nil {
+	if err := registry.RegisterKeyManager(new(hpkePublicKeyManager)); err != nil {
 		panic(fmt.Sprintf("hpke.init() failed: %v", err))
 	}
-	if err := registry.RegisterKeyManager(new(privateKeyManager)); err != nil {
+	if err := registry.RegisterKeyManager(new(hpkePrivateKeyManager)); err != nil {
 		panic(fmt.Sprintf("hpke.init() failed: %v", err))
 	}
 }

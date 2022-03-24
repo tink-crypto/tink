@@ -34,7 +34,12 @@ func TestPrivateKeyManagerPrimitiveRejectsInvalidKeyVersion(t *testing.T) {
 	if err != nil {
 		t.Fatalf("GetKeyManager(%q) err = %v, want nil", privateKeyTypeURL, err)
 	}
-	_, privKey := pubPrivKeys(t, validParams(t))
+	params := &hpkepb.HpkeParams{
+		Kem:  hpkepb.HpkeKem_DHKEM_X25519_HKDF_SHA256,
+		Kdf:  hpkepb.HpkeKdf_HKDF_SHA256,
+		Aead: hpkepb.HpkeAead_AES_256_GCM,
+	}
+	_, privKey := pubPrivKeys(t, params)
 	privKey.Version = 1
 	serializedPrivKey, err := proto.Marshal(privKey)
 	if err != nil {
@@ -74,11 +79,7 @@ func TestPrivateKeyManagerPrimitiveRejectsInvalidParams(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			_, privKey := pubPrivKeys(t, test.params)
-			serializedPrivKey, err := proto.Marshal(privKey)
-			if err != nil {
-				t.Fatal(err)
-			}
+			_, serializedPrivKey := serializedPubPrivKeys(t, test.params)
 			if _, err := km.Primitive(serializedPrivKey); err == nil {
 				t.Error("Primitive() err = nil, want error")
 			}
@@ -91,11 +92,7 @@ func TestPrivateKeyManagerPrimitiveRejectsMissingParams(t *testing.T) {
 	if err != nil {
 		t.Fatalf("GetKeyManager(%q) err = %v, want nil", privateKeyTypeURL, err)
 	}
-	_, privKey := pubPrivKeys(t, nil /*=params*/)
-	serializedPrivKey, err := proto.Marshal(privKey)
-	if err != nil {
-		t.Fatal(err)
-	}
+	_, serializedPrivKey := serializedPubPrivKeys(t, nil)
 	if _, err := km.Primitive(serializedPrivKey); err == nil {
 		t.Error("Primitive() err = nil, want error")
 	}
@@ -132,9 +129,9 @@ func TestPrivateKeyManagerPrimitiveEncryptDecrypt(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		enc, err := newEncrypt(pubKey)
+		enc, err := NewEncrypt(pubKey)
 		if err != nil {
-			t.Fatalf("newEncrypt() err = %v, want nil", err)
+			t.Fatalf("NewEncrypt() err = %v, want nil", err)
 		}
 		d, err := km.Primitive(serializedPrivKey)
 		if err != nil {
@@ -269,9 +266,9 @@ func TestPrivateKeyManagerNewKeyEncryptDecrypt(t *testing.T) {
 			t.Error("public key is missing")
 		}
 
-		enc, err := newEncrypt(pubKey)
+		enc, err := NewEncrypt(pubKey)
 		if err != nil {
-			t.Fatalf("newEncrypt() err = %v, want nil", err)
+			t.Fatalf("NewEncrypt() err = %v, want nil", err)
 		}
 		serializedPrivKey, err := proto.Marshal(privKeyProto)
 		if err != nil {
@@ -389,7 +386,12 @@ func TestPrivateKeyManagerPublicKeyData(t *testing.T) {
 		t.Errorf("primitive is not PrivateKeyManager")
 	}
 
-	_, privKey := pubPrivKeys(t, validParams(t))
+	params := &hpkepb.HpkeParams{
+		Kem:  hpkepb.HpkeKem_DHKEM_X25519_HKDF_SHA256,
+		Kdf:  hpkepb.HpkeKdf_HKDF_SHA256,
+		Aead: hpkepb.HpkeAead_AES_256_GCM,
+	}
+	_, privKey := pubPrivKeys(t, params)
 	serializedPrivKey, err := proto.Marshal(privKey)
 	if err != nil {
 		t.Fatal(err)

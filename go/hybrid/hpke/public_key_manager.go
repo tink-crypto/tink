@@ -38,12 +38,12 @@ var (
 	errNotSupported     = errors.New("not supported on HPKE public key manager")
 )
 
-// publicKeyManager implements the KeyManager interface for HybridEncrypt.
-type publicKeyManager struct{}
+// hpkePublicKeyManager implements the KeyManager interface for HybridEncrypt.
+type hpkePublicKeyManager struct{}
 
-var _ registry.KeyManager = (*publicKeyManager)(nil)
+var _ registry.KeyManager = (*hpkePublicKeyManager)(nil)
 
-func (p *publicKeyManager) Primitive(serializedKey []byte) (interface{}, error) {
+func (p *hpkePublicKeyManager) Primitive(serializedKey []byte) (interface{}, error) {
 	if len(serializedKey) == 0 {
 		return nil, errInvalidPublicKey
 	}
@@ -54,21 +54,21 @@ func (p *publicKeyManager) Primitive(serializedKey []byte) (interface{}, error) 
 	if err := keyset.ValidateKeyVersion(key.GetVersion(), maxSupportedPublicKeyVersion); err != nil {
 		return nil, err
 	}
-	return newEncrypt(key)
+	return NewEncrypt(key)
 }
 
-func (p *publicKeyManager) DoesSupport(typeURL string) bool {
+func (p *hpkePublicKeyManager) DoesSupport(typeURL string) bool {
 	return typeURL == publicKeyTypeURL
 }
 
-func (p *publicKeyManager) TypeURL() string {
+func (p *hpkePublicKeyManager) TypeURL() string {
 	return publicKeyTypeURL
 }
 
-func (p *publicKeyManager) NewKey(serializedKeyFormat []byte) (proto.Message, error) {
+func (p *hpkePublicKeyManager) NewKey(serializedKeyFormat []byte) (proto.Message, error) {
 	return nil, errNotSupported
 }
 
-func (p *publicKeyManager) NewKeyData(serializedKeyFormat []byte) (*tinkpb.KeyData, error) {
+func (p *hpkePublicKeyManager) NewKeyData(serializedKeyFormat []byte) (*tinkpb.KeyData, error) {
 	return nil, errNotSupported
 }
