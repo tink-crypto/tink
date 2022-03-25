@@ -28,6 +28,8 @@ namespace crypto {
 namespace tink {
 namespace util {
 
+#ifndef TINK_USE_ABSL_STATUSOR
+
 #ifndef CPP_TINK_TEMPORARY_STATUS_MUST_NOT_USE_RESULT
 template <typename T>
 class ABSL_MUST_USE_RESULT StatusOr;
@@ -256,6 +258,12 @@ StatusOr<T>::operator ::absl::StatusOr<T>() && {
   return std::move(*value_);
 }
 
+#else
+
+template <typename T>
+using StatusOr = absl::StatusOr<T>;
+
+#endif  // TINK_USE_ABSL_STATUSOR
 
 }  // namespace util
 }  // namespace tink

@@ -224,7 +224,7 @@ Status CliUtil::InitAws() {
                         "Failed to connect to AWS client.");
   }
   auto client_add_result =
-      KmsClients::Add(std::move(client_result.ValueOrDie()));
+      KmsClients::Add(std::move(client_result.value()));
   if (!client_add_result.ok()) {
     return Status(crypto::tink::util::error::INTERNAL,
                         "Failed to add KMS client.");

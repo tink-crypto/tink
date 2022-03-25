@@ -115,6 +115,10 @@ cc_library(
     name = "statusor",
     srcs = ["statusor.h"],
     hdrs = ["statusor.h"],
+    defines = select({
+        "//config:absl_statusor_enabled": ["TINK_USE_ABSL_STATUSOR"],
+        "//conditions:default": [],
+    }),
     include_prefix = "tink/util",
     visibility = ["//visibility:public"],
     deps = [

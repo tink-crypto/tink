@@ -99,8 +99,11 @@ TEST(StatusOrTest, AssignToErrorStatus) {
   StatusOr<std::string> ok_initially = std::string("Hi");
   error_initially = ok_initially;
   ASSERT_THAT(error_initially.status(), IsOk());
-  ASSERT_THAT(error_initially.ValueOrDie(), Eq("Hi"));
   ASSERT_THAT(error_initially.value(), Eq("Hi"));
+
+#ifndef TINK_USE_ABSL_STATUSOR
+  ASSERT_THAT(error_initially.ValueOrDie(), Eq("Hi"));
+#endif
 }
 
 // This tests that when we assign to something which is previously an error and
@@ -114,16 +117,21 @@ TEST(StatusOrTest, AssignToErrorStatusImplicitConvertible) {
   StatusOr<char const*> ok_initially = "Hi";
   error_initially = ok_initially;
   ASSERT_THAT(error_initially.status(), IsOk());
-  ASSERT_THAT(error_initially.ValueOrDie(), Eq("Hi"));
   ASSERT_THAT(error_initially.value(), Eq("Hi"));
+
+#ifndef TINK_USE_ABSL_STATUSOR
+  ASSERT_THAT(error_initially.ValueOrDie(), Eq("Hi"));
+#endif
 }
 
+#ifndef TINK_USE_ABSL_STATUSOR
 TEST(StatusOrTest, MoveOutMoveOnlyValueOrDie) {
   StatusOr<std::unique_ptr<int>> status_or_unique_ptr_int =
       absl::make_unique<int>(10);
   std::unique_ptr<int> ten = std::move(status_or_unique_ptr_int.ValueOrDie());
   ASSERT_THAT(*ten, Eq(10));
 }
+#endif
 
 TEST(StatusOrTest, MoveOutMoveOnlyValue) {
   StatusOr<std::unique_ptr<int>> status_or_unique_ptr_int =
