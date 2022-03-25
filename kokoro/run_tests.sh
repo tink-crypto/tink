@@ -177,18 +177,9 @@ main() {
     install_temp_protoc
 
     if [[ "${PLATFORM}" == 'linux' ]]; then
-      # Install a more recent Python.
-      : "${PYTHON_VERSION:=3.7.1}"
-      (
-        # Update the Python version list.
-        cd /home/kbuilder/.pyenv/plugins/python-build/../..
-        git pull
-        # TODO(b/187879867): Remove once pyenv issue is resolved.
-        git checkout 783870759566a77d09b426e0305bc0993a522765
-      )
-      eval "$(pyenv init -)"
-      pyenv install "${PYTHON_VERSION}"
-      pyenv global "${PYTHON_VERSION}"
+      # Install a more recent Python. Sourcing required to update callers
+      # environment.
+      source ./kokoro/testutils/install_python3.sh
     fi
 
     if [[ "${PLATFORM}" == 'darwin' ]]; then

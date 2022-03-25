@@ -19,22 +19,8 @@ set -euo pipefail
 cd ${KOKORO_ARTIFACTS_DIR}/git/tink
 
 ./kokoro/testutils/copy_credentials.sh
-
-install_python3() {
-  : "${PYTHON_VERSION:=3.7.1}"
-
-  # Update python version list.
-  (
-    cd /home/kbuilder/.pyenv/plugins/python-build/../..
-    git pull
-    # TODO(b/187879867): Remove once pyenv issue is resolved.
-    git checkout 783870759566a77d09b426e0305bc0993a522765
-  )
-  # Install Python.
-  eval "$(pyenv init -)"
-  pyenv install "${PYTHON_VERSION}"
-  pyenv global "${PYTHON_VERSION}"
-}
+# Sourcing required to update callers environment.
+source ./kokoro/testutils/install_python3.sh
 
 run_bazel_tests() {
   (
@@ -57,5 +43,4 @@ run_bazel_tests() {
   )
 }
 
-install_python3
 run_bazel_tests

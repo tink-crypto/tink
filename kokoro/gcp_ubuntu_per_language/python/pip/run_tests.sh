@@ -19,24 +19,10 @@ set -euo pipefail
 cd "${KOKORO_ARTIFACTS_DIR}/git/tink"
 
 ./kokoro/testutils/copy_credentials.sh
+# Sourcing required to update callers environment.
+source ./kokoro/testutils/install_python3.sh
 
 cd python
-
-install_python3() {
-  : "${PYTHON_VERSION:=3.7.1}"
-
-  # Update python version list.
-  (
-    cd /home/kbuilder/.pyenv/plugins/python-build/../..
-    git pull
-    # TODO(b/187879867): Remove once pyenv issue is resolved.
-    git checkout 783870759566a77d09b426e0305bc0993a522765
-  )
-  # Install Python.
-  eval "$(pyenv init -)"
-  pyenv install "${PYTHON_VERSION}"
-  pyenv global "${PYTHON_VERSION}"
-}
 
 install_temp_protoc() {
   local protoc_version='3.19.3'
@@ -76,7 +62,6 @@ run_tests_with_package() {
   find tink/ -not -path "*cc/pybind*" -type f -name "*_test.py" -print0 | xargs -0 -n1 python3
 }
 
-install_python3
 install_temp_protoc
 install_pip_package
 run_tests_with_package
