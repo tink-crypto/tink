@@ -798,8 +798,10 @@ crypto::tink::util::StatusOr<std::unique_ptr<P>> RegistryImpl::WrapKeyset(
   if (!wrapper_result.ok()) {
     return wrapper_result.status();
   }
+  // TODO(b/222245356): Replace empty annotations map with actual annotations
+  // when support is provided to this class.
   crypto::tink::util::StatusOr<std::unique_ptr<P>> primitive_result =
-      wrapper_result.value()->Wrap(keyset);
+      wrapper_result.value()->Wrap(keyset, /*annotations=*/{});
   return std::move(primitive_result);
 }
 

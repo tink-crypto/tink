@@ -16,6 +16,9 @@
 #ifndef TINK_INTERNAL_KEYSET_WRAPPER_IMPL_H_
 #define TINK_INTERNAL_KEYSET_WRAPPER_IMPL_H_
 
+#include <string>
+
+#include "absl/container/flat_hash_map.h"
 #include "tink/internal/key_info.h"
 #include "tink/internal/keyset_wrapper.h"
 #include "tink/primitive_set.h"
@@ -42,11 +45,12 @@ class KeysetWrapperImpl : public KeysetWrapper<Q> {
         transforming_wrapper_(*transforming_wrapper) {}
 
   crypto::tink::util::StatusOr<std::unique_ptr<Q>> Wrap(
-      const google::crypto::tink::Keyset& keyset) const override {
+      const google::crypto::tink::Keyset& keyset,
+      const absl::flat_hash_map<std::string, std::string>& annotations)
+      const override {
     crypto::tink::util::Status status = ValidateKeyset(keyset);
     if (!status.ok()) return status;
-    std::unique_ptr<PrimitiveSet<P>> primitives =
-        absl::make_unique<PrimitiveSet<P>>();
+    auto primitives = absl::make_unique<PrimitiveSet<P>>(annotations);
     for (const google::crypto::tink::Keyset::Key& key : keyset.key()) {
       if (key.status() != google::crypto::tink::KeyStatusType::ENABLED) {
         continue;

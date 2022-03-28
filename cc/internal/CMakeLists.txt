@@ -13,6 +13,7 @@ tink_cc_library(
   SRCS
     keyset_wrapper.h
   DEPS
+    absl::flat_hash_map
     tink::util::statusor
     tink::proto::tink_cc_proto
 )
@@ -42,6 +43,7 @@ tink_cc_library(
   DEPS
     tink::internal::key_info
     tink::internal::keyset_wrapper
+    absl::flat_hash_map
     tink::core::primitive_set
     tink::core::primitive_wrapper
     tink::util::statusor
@@ -197,9 +199,12 @@ tink_cc_test(
     tink::internal::keyset_wrapper_impl
     gmock
     absl::flat_hash_map
+    absl::memory
     absl::status
     absl::strings
+    tink::core::primitive_set
     tink::core::primitive_wrapper
+    tink::util::statusor
     tink::util::test_matchers
     tink::util::test_util
     tink::proto::tink_cc_proto
