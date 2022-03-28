@@ -189,7 +189,7 @@ std::unique_ptr<OutputPrimitive> GetOutputPrimitiveForTesting() {
 
 // Tests that annotations are correctly passed on to the generated PrimitiveSet.
 TEST(KeysetWrapperImplTest, WrapWithAnnotationCorrectlyWrittenToPrimitiveSet) {
-  auto wrapper = MockWrapper<InputPrimitive, OutputPrimitive>();
+  MockWrapper<InputPrimitive, OutputPrimitive> wrapper;
   auto keyset_wrapper =
       absl::make_unique<KeysetWrapperImpl<InputPrimitive, OutputPrimitive>>(
           &wrapper, CreateIn);
