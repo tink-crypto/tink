@@ -21,6 +21,7 @@
 #include <unordered_map>
 #include <vector>
 
+#include "absl/container/flat_hash_map.h"
 #include "absl/memory/memory.h"
 #include "absl/status/status.h"
 #include "absl/synchronization/mutex.h"
@@ -108,7 +109,12 @@ class PrimitiveSet {
   typedef std::vector<std::unique_ptr<Entry<P>>> Primitives;
 
   // Constructs an empty PrimitiveSet.
-  PrimitiveSet<P>() : primary_(nullptr) {}
+  // Note: This is equivalent to PrimitiveSet<P>(/*annotations=*/{}).
+  PrimitiveSet<P>() = default;
+  // Constructs an empty PrimitiveSet with `annotations`.
+  explicit PrimitiveSet<P>(
+      const absl::flat_hash_map<std::string, std::string>& annotations)
+      : annotations_(annotations) {}
 
   // Adds 'primitive' to this set for the specified 'key'.
   crypto::tink::util::StatusOr<Entry<P>*> AddPrimitive(
@@ -177,13 +183,21 @@ class PrimitiveSet {
     return result;
   }
 
+  const absl::flat_hash_map<std::string, std::string>& get_annotations() const {
+    return annotations_;
+  }
+
  private:
   typedef std::unordered_map<std::string, Primitives>
       CiphertextPrefixToPrimitivesMap;
-  Entry<P>* primary_;  // the Entry<P> object is owned by primitives_
+  // The Entry<P> object is owned by primitives_
+  Entry<P>* primary_ = nullptr;
   mutable absl::Mutex primitives_mutex_;
   CiphertextPrefixToPrimitivesMap primitives_
       ABSL_GUARDED_BY(primitives_mutex_);
+
+  // Annotations for the set of primitives.
+  const absl::flat_hash_map<std::string, std::string> annotations_;
 };
 
 }  // namespace tink

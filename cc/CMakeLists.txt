@@ -407,6 +407,7 @@ tink_cc_library(
     primitive_set.h
   DEPS
     tink::core::crypto_format
+    absl::flat_hash_map
     absl::memory
     absl::status
     absl::synchronization
