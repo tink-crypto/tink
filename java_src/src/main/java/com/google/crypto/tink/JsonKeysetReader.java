@@ -59,11 +59,6 @@ public final class JsonKeysetReader implements KeysetReader {
     json = null;
   }
 
-  private JsonKeysetReader(JsonObject json) {
-    this.json = json;
-    this.inputStream = null;
-  }
-
   /**
    * Static method to create a JsonKeysetReader from an {@link InputStream}.
    *
