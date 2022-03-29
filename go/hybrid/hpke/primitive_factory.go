@@ -100,6 +100,8 @@ func newAEAD(aeadID uint16) (aead, error) {
 		return newAESGCMAEAD(16)
 	case aes256GCM:
 		return newAESGCMAEAD(32)
+	case chaCha20Poly1305:
+		return &chaCha20Poly1305AEAD{}, nil
 	default:
 		return nil, fmt.Errorf("AEAD ID %d is not supported", aeadID)
 	}
@@ -114,6 +116,8 @@ func aeadIDFromProto(enum pb.HpkeAead) (uint16, error) {
 		return aes128GCM, nil
 	case pb.HpkeAead_AES_256_GCM:
 		return aes256GCM, nil
+	case pb.HpkeAead_CHACHA20_POLY1305:
+		return chaCha20Poly1305, nil
 	default:
 		return 0, fmt.Errorf("HpkeAead enum value %d is not supported", enum)
 	}

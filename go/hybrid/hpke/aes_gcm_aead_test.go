@@ -23,9 +23,15 @@ import (
 )
 
 func TestAESGCMAEADSealOpen(t *testing.T) {
-	vecs := aesGCMEncryptionVectors(t)
+	i := 0
+	vecs := aeadRFCVectors(t)
 	for k, v := range vecs {
-		t.Run(fmt.Sprintf("%d", k.aeadID), func(t *testing.T) {
+		if k.aeadID != aes128GCM && k.aeadID != aes256GCM {
+			continue
+		}
+
+		i++
+		t.Run(fmt.Sprintf("%d", k.id), func(t *testing.T) {
 			{
 				aead, err := newAEAD(k.aeadID)
 				if err != nil {
@@ -75,5 +81,8 @@ func TestAESGCMAEADSealOpen(t *testing.T) {
 				}
 			}
 		})
+	}
+	if i < 2 {
+		t.Errorf("number of vectors tested = %d, want > %d", i, 2)
 	}
 }

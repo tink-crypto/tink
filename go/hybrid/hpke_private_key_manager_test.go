@@ -117,8 +117,7 @@ func TestPrivateKeyManagerPrimitiveEncryptDecrypt(t *testing.T) {
 	pt := random.GetRandomBytes(200)
 	ctxInfo := random.GetRandomBytes(100)
 
-	aeadIDs := []hpkepb.HpkeAead{hpkepb.HpkeAead_AES_128_GCM, hpkepb.HpkeAead_AES_256_GCM}
-	for _, aeadID := range aeadIDs {
+	for _, aeadID := range hpkeAEADs {
 		params := &hpkepb.HpkeParams{
 			Kem:  hpkepb.HpkeKem_DHKEM_X25519_HKDF_SHA256,
 			Kdf:  hpkepb.HpkeKdf_HKDF_SHA256,
@@ -227,8 +226,7 @@ func TestPrivateKeyManagerNewKeyEncryptDecrypt(t *testing.T) {
 	wantPT := random.GetRandomBytes(200)
 	ctxInfo := random.GetRandomBytes(100)
 
-	aeadIDs := []hpkepb.HpkeAead{hpkepb.HpkeAead_AES_128_GCM, hpkepb.HpkeAead_AES_256_GCM}
-	for _, aeadID := range aeadIDs {
+	for _, aeadID := range hpkeAEADs {
 		keyFormat := &hpkepb.HpkeKeyFormat{
 			Params: &hpkepb.HpkeParams{
 				Kem:  hpkepb.HpkeKem_DHKEM_X25519_HKDF_SHA256,
@@ -314,8 +312,7 @@ func TestPrivateKeyManagerNewKeyData(t *testing.T) {
 		t.Fatalf("GetKeyManager(%q) err = %v, want nil", privateKeyTypeURL, err)
 	}
 
-	aeadIDs := []hpkepb.HpkeAead{hpkepb.HpkeAead_AES_128_GCM, hpkepb.HpkeAead_AES_256_GCM}
-	for _, aeadID := range aeadIDs {
+	for _, aeadID := range hpkeAEADs {
 		keyFormat := &hpkepb.HpkeKeyFormat{
 			Params: &hpkepb.HpkeParams{
 				Kem:  hpkepb.HpkeKem_DHKEM_X25519_HKDF_SHA256,

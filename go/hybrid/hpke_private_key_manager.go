@@ -138,7 +138,7 @@ func validateKeyFormat(kf *hpkepb.HpkeKeyFormat) error {
 	kem, kdf, aead := params.GetKem(), params.GetKdf(), params.GetAead()
 	if kem != hpkepb.HpkeKem_DHKEM_X25519_HKDF_SHA256 ||
 		kdf != hpkepb.HpkeKdf_HKDF_SHA256 ||
-		(aead != hpkepb.HpkeAead_AES_128_GCM && aead != hpkepb.HpkeAead_AES_256_GCM) {
+		(aead != hpkepb.HpkeAead_AES_128_GCM && aead != hpkepb.HpkeAead_AES_256_GCM && aead != hpkepb.HpkeAead_CHACHA20_POLY1305) {
 		return errInvalidPrivateKeyFormat
 	}
 	return nil

@@ -82,39 +82,35 @@ func TestKDFIDFromProtoUnsupportedID(t *testing.T) {
 	}
 }
 
-func TestNewAEADAES128GCM(t *testing.T) {
-	aeadID, err := aeadIDFromProto(pb.HpkeAead_AES_128_GCM)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if aeadID != aes128GCM {
-		t.Errorf("aeadID: got %d, want %d", aeadID, aes128GCM)
-	}
-
-	aead, err := newAEAD(aeadID)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if aead.id() != aes128GCM {
-		t.Errorf("id: got %d, want %d", aead.id(), aes128GCM)
-	}
+var aeads = []struct {
+	name  string
+	proto pb.HpkeAead
+	id    uint16
+}{
+	{"AES-128-GCM", pb.HpkeAead_AES_128_GCM, aes128GCM},
+	{"AES-256-GCM", pb.HpkeAead_AES_256_GCM, aes256GCM},
+	{"ChaCha20Poly1305", pb.HpkeAead_CHACHA20_POLY1305, chaCha20Poly1305},
 }
 
-func TestNewAEADAES256GCM(t *testing.T) {
-	aeadID, err := aeadIDFromProto(pb.HpkeAead_AES_256_GCM)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if aeadID != aes256GCM {
-		t.Errorf("aeadID: got %d, want %d", aeadID, aes256GCM)
-	}
+func TestNewAEAD(t *testing.T) {
+	for _, a := range aeads {
+		t.Run(a.name, func(t *testing.T) {
+			aeadID, err := aeadIDFromProto(a.proto)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if aeadID != a.id {
+				t.Errorf("aeadID: got %d, want %d", aeadID, a.id)
+			}
 
-	aead, err := newAEAD(aeadID)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if aead.id() != aes256GCM {
-		t.Errorf("id: got %d, want %d", aead.id(), aes256GCM)
+			aead, err := newAEAD(aeadID)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if aead.id() != a.id {
+				t.Errorf("id: got %d, want %d", aead.id(), a.id)
+			}
+		})
 	}
 }
 
@@ -131,24 +127,28 @@ func TestAEADIDFromProtoUnsupportedID(t *testing.T) {
 }
 
 func TestNewPrimitivesFromProto(t *testing.T) {
-	params := &pb.HpkeParams{
-		Kem:  pb.HpkeKem_DHKEM_X25519_HKDF_SHA256,
-		Kdf:  pb.HpkeKdf_HKDF_SHA256,
-		Aead: pb.HpkeAead_AES_256_GCM,
-	}
-	kem, kdf, aead, err := newPrimitivesFromProto(params)
-	if err != nil {
-		t.Fatalf("newPrimitivesFromProto: %v", err)
-	}
+	for _, a := range aeads {
+		t.Run("", func(t *testing.T) {
+			params := &pb.HpkeParams{
+				Kem:  pb.HpkeKem_DHKEM_X25519_HKDF_SHA256,
+				Kdf:  pb.HpkeKdf_HKDF_SHA256,
+				Aead: a.proto,
+			}
+			kem, kdf, aead, err := newPrimitivesFromProto(params)
+			if err != nil {
+				t.Fatalf("newPrimitivesFromProto: %v", err)
+			}
 
-	if kem.id() != x25519HKDFSHA256 {
-		t.Errorf("kem.id: got %d, want %d", kem.id(), x25519HKDFSHA256)
-	}
-	if kdf.id() != hkdfSHA256 {
-		t.Errorf("kdf.id: got %d, want %d", kdf.id(), hkdfSHA256)
-	}
-	if aead.id() != aes256GCM {
-		t.Errorf("aead.id: got %d, want %d", aead.id(), aes256GCM)
+			if kem.id() != x25519HKDFSHA256 {
+				t.Errorf("kem.id: got %d, want %d", kem.id(), x25519HKDFSHA256)
+			}
+			if kdf.id() != hkdfSHA256 {
+				t.Errorf("kdf.id: got %d, want %d", kdf.id(), hkdfSHA256)
+			}
+			if aead.id() != a.id {
+				t.Errorf("aead.id: got %d, want %d", aead.id(), a.id)
+			}
+		})
 	}
 }
 

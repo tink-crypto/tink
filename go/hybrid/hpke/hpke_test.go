@@ -42,6 +42,7 @@ var aeadIDs = []struct {
 }
 
 type hpkeID struct {
+	id     int
 	mode   uint8
 	kemID  uint16
 	kdfID  uint16
@@ -192,12 +193,7 @@ func internetDraftVector(t *testing.T) (hpkeID, vector) {
 		t.Fatalf("hex.DecodeString(baseNonce): err %q", err)
 	}
 
-	return hpkeID{
-			mode:   v.mode,
-			kemID:  v.kemID,
-			kdfID:  v.kdfID,
-			aeadID: v.aeadID,
-		},
+	return hpkeID{0 /*=id */, v.mode, v.kemID, v.kdfID, v.aeadID},
 		vector{
 			info:                   info,
 			senderPubKey:           senderPubKey,
@@ -247,10 +243,11 @@ func parseEncryptions(t *testing.T, encs []encryptionString) []encryptionVector 
 	return res
 }
 
-func aesGCMEncryptionVectors(t *testing.T) map[hpkeID]encryptionVector {
+// aeadRFCVectors returns RFC test vectors for AEAD IDs aes128GCM, aes256GCM,
+// and chaCha20Poly1305.
+func aeadRFCVectors(t *testing.T) map[hpkeID]encryptionVector {
 	t.Helper()
 
-	// Test vectors from HPKE RFC. Must only include AES-GCM vectors.
 	vecs := []struct {
 		mode                                              uint8
 		kemID, kdfID, aeadID                              uint16
@@ -302,10 +299,33 @@ func aesGCMEncryptionVectors(t *testing.T) map[hpkeID]encryptionVector {
 			nonce:          "55ff7a7d739c69f44b25447a",
 			ciphertext:     "d9ee248e220ca24ac00bbbe7e221a832e4f7fa64c4fbab3945b6f3af0c5ecd5e16815b328be4954a05fd352256",
 		},
+		// https://www.rfc-editor.org/rfc/rfc9180.html#appendix-A.2.1.1
+		{
+			mode:           0,
+			kemID:          32,
+			kdfID:          1,
+			aeadID:         3,
+			key:            "ad2744de8e17f4ebba575b3f5f5a8fa1f69c2a07f6e7500bc60ca6e3e3ec1c91",
+			plaintext:      "4265617574792069732074727574682c20747275746820626561757479",
+			associatedData: "436f756e742d30",
+			nonce:          "5c4d98150661b848853b547f",
+			ciphertext:     "1c5250d8034ec2b784ba2cfd69dbdb8af406cfe3ff938e131f0def8c8b60b4db21993c62ce81883d2dd1b51a28",
+		},
+		{
+			mode:           0,
+			kemID:          32,
+			kdfID:          1,
+			aeadID:         3,
+			key:            "ad2744de8e17f4ebba575b3f5f5a8fa1f69c2a07f6e7500bc60ca6e3e3ec1c91",
+			plaintext:      "4265617574792069732074727574682c20747275746820626561757479",
+			associatedData: "436f756e742d31",
+			nonce:          "5c4d98150661b848853b547e",
+			ciphertext:     "6b53c051e4199c518de79594e1c4ab18b96f081549d45ce015be002090bb119e85285337cc95ba5f59992dc98c",
+		},
 	}
 
 	m := make(map[hpkeID]encryptionVector)
-	for _, v := range vecs {
+	for i, v := range vecs {
 		var key, plaintext, associatedData, nonce, ciphertext []byte
 		var err error
 		if key, err = hex.DecodeString(v.key); err != nil {
@@ -324,7 +344,7 @@ func aesGCMEncryptionVectors(t *testing.T) map[hpkeID]encryptionVector {
 			t.Fatalf("hex.DecodeString(ciphertext): err %q", err)
 		}
 
-		id := hpkeID{v.mode, v.kemID, v.kdfID, v.aeadID}
+		id := hpkeID{i, v.mode, v.kemID, v.kdfID, v.aeadID}
 		m[id] = encryptionVector{
 			key:            key,
 			plaintext:      plaintext,
@@ -374,12 +394,12 @@ func baseModeX25519HKDFSHA256Vectors(t *testing.T) map[hpkeID]vector {
 	}
 
 	m := make(map[hpkeID]vector)
-	for _, v := range vecs {
+	for i, v := range vecs {
 		if v.Mode != baseMode || v.KEMID != x25519HKDFSHA256 {
 			continue
 		}
 
-		id := hpkeID{v.Mode, v.KEMID, v.KDFID, v.AEADID}
+		id := hpkeID{i, v.Mode, v.KEMID, v.KDFID, v.AEADID}
 		m[id] = vector{
 			info:             v.Info,
 			senderPubKey:     v.SenderPubKey,

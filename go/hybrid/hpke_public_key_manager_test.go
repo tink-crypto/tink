@@ -30,6 +30,12 @@ import (
 	hpkepb "github.com/google/tink/go/proto/hpke_go_proto"
 )
 
+var hpkeAEADs = []hpkepb.HpkeAead{
+	hpkepb.HpkeAead_AES_128_GCM,
+	hpkepb.HpkeAead_AES_256_GCM,
+	hpkepb.HpkeAead_CHACHA20_POLY1305,
+}
+
 // TODO(b/201070904): Register key managers in hybrid.go once all HPKE key
 // templates are supported.
 func TestMain(m *testing.M) {
@@ -130,8 +136,7 @@ func TestPublicKeyManagerPrimitiveEncryptDecrypt(t *testing.T) {
 	wantPT := random.GetRandomBytes(200)
 	ctxInfo := random.GetRandomBytes(100)
 
-	aeadIDs := []hpkepb.HpkeAead{hpkepb.HpkeAead_AES_128_GCM, hpkepb.HpkeAead_AES_256_GCM}
-	for _, aeadID := range aeadIDs {
+	for _, aeadID := range hpkeAEADs {
 		params := &hpkepb.HpkeParams{
 			Kem:  hpkepb.HpkeKem_DHKEM_X25519_HKDF_SHA256,
 			Kdf:  hpkepb.HpkeKdf_HKDF_SHA256,

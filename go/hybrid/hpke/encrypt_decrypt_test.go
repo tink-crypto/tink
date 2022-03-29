@@ -101,7 +101,7 @@ func TestNewDecryptMissingPrivKeyBytes(t *testing.T) {
 }
 
 func TestEncryptDecrypt(t *testing.T) {
-	aeadIDs := []pb.HpkeAead{pb.HpkeAead_AES_128_GCM, pb.HpkeAead_AES_256_GCM}
+	aeadIDs := []pb.HpkeAead{pb.HpkeAead_AES_128_GCM, pb.HpkeAead_AES_256_GCM, pb.HpkeAead_CHACHA20_POLY1305}
 	for _, aeadID := range aeadIDs {
 		params := &pb.HpkeParams{
 			Kem:  pb.HpkeKem_DHKEM_X25519_HKDF_SHA256,

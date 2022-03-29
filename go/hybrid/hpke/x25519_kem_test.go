@@ -19,6 +19,7 @@ package hpke
 import (
 	"bytes"
 	"errors"
+	"fmt"
 	"testing"
 
 	"github.com/google/tink/go/subtle"
@@ -26,15 +27,18 @@ import (
 
 // TODO(b/201070904): Write tests using internetDraftVector.
 func TestX25519KEMEncapsulateBoringSSLVectors(t *testing.T) {
+	i := 0
 	vecs := baseModeX25519HKDFSHA256Vectors(t)
-	for _, test := range aeadIDs {
-		t.Run(test.name, func(t *testing.T) {
-			key := hpkeID{baseMode, x25519HKDFSHA256, hkdfSHA256, test.aeadID}
-			vec, ok := vecs[key]
-			if !ok {
-				t.Fatalf("failed to find vector %v", key)
-			}
+	for key, vec := range vecs {
+		if key.mode != baseMode ||
+			key.kemID != x25519HKDFSHA256 ||
+			key.kdfID != hkdfSHA256 ||
+			(key.aeadID != aes128GCM && key.aeadID != aes256GCM && key.aeadID != chaCha20Poly1305) {
+			continue
+		}
 
+		i++
+		t.Run(fmt.Sprintf("%d", key.id), func(t *testing.T) {
 			kem, err := newKEM(x25519HKDFSHA256)
 			if err != nil {
 				t.Fatal(err)
@@ -56,6 +60,9 @@ func TestX25519KEMEncapsulateBoringSSLVectors(t *testing.T) {
 		})
 	}
 	x25519KEMGeneratePrivateKey = subtle.GeneratePrivateKeyX25519
+	if i < 2 {
+		t.Errorf("number of vectors tested = %d, want > %d", i, 2)
+	}
 }
 
 func TestX25519KEMEncapsulateBadRecipientPubKey(t *testing.T) {
@@ -87,15 +94,18 @@ func TestX25519KEMEncapsulateBadSenderPrivKey(t *testing.T) {
 }
 
 func TestX25519KEMDecapsulateBoringSSLVectors(t *testing.T) {
+	i := 0
 	vecs := baseModeX25519HKDFSHA256Vectors(t)
-	for _, test := range aeadIDs {
-		t.Run(test.name, func(t *testing.T) {
-			key := hpkeID{baseMode, x25519HKDFSHA256, hkdfSHA256, test.aeadID}
-			vec, ok := vecs[key]
-			if !ok {
-				t.Fatalf("failed to find vector %v", key)
-			}
+	for key, vec := range vecs {
+		if key.mode != baseMode ||
+			key.kemID != x25519HKDFSHA256 ||
+			key.kdfID != hkdfSHA256 ||
+			(key.aeadID != aes128GCM && key.aeadID != aes256GCM && key.aeadID != chaCha20Poly1305) {
+			continue
+		}
 
+		i++
+		t.Run(fmt.Sprintf("%d", key.id), func(t *testing.T) {
 			kem, err := newKEM(x25519HKDFSHA256)
 			if err != nil {
 				t.Fatal(err)
@@ -109,12 +119,15 @@ func TestX25519KEMDecapsulateBoringSSLVectors(t *testing.T) {
 			}
 		})
 	}
+	if i < 2 {
+		t.Errorf("number of vectors tested = %d, want > %d", i, 2)
+	}
 }
 
-// TestX25519KEMDecapsulateEncapsulatedKeyPrefixesLargerSlice checks that--if
-// the encapsulated key is part of a larger slice, as is the case in HPKE--that
-// decapsulate does not modify the larger slice.
-// TODO(b/201070904): Link hpke.Encrypt once merged.
+// TestX25519KEMDecapsulateEncapsulatedKeyPrefixesLargerSlice checks--if the
+// encapsulated key is part of a larger slice, as in HPKE Encrypt
+// https://github.com/google/tink/blob/619b6c1bb1f8573ca56de50cfc6ba23d355670db/go/hybrid/hpke/encrypt.go#L61
+// --that decapsulate does not modify the larger slice.
 func TestX25519KEMDecapsulateEncapsulatedKeyPrefixesLargerSlice(t *testing.T) {
 	_, v := internetDraftVector(t)
 	kem, err := newKEM(x25519HKDFSHA256)
