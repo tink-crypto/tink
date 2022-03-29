@@ -24,6 +24,9 @@ import (
 	"fmt"
 )
 
+// TODO(b/201070904): Rename to AESGCMInsecureNonce and simplify by getting rid
+// of the prependIV bool.
+
 const (
 	// aesGCMMaxPlaintextSize is the maximum plaintext size defined by RFC 5116.
 	aesGCMMaxPlaintextSize = (1 << 36) - 31

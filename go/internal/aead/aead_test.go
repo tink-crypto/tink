@@ -20,7 +20,32 @@ import (
 	"testing"
 
 	"github.com/google/tink/go/internal/aead"
+	"github.com/google/tink/go/testutil"
 )
+
+type AEADSuite struct {
+	testutil.WycheproofSuite
+	TestGroups []*AEADGroup `json:"testGroups"`
+}
+
+type AEADGroup struct {
+	testutil.WycheproofGroup
+	IvSize  uint32      `json:"ivSize"`
+	KeySize uint32      `json:"keySize"`
+	TagSize uint32      `json:"tagSize"`
+	Type    string      `json:"type"`
+	Tests   []*AEADCase `json:"tests"`
+}
+
+type AEADCase struct {
+	testutil.WycheproofCase
+	Aad testutil.HexBytes `json:"aad"`
+	Ct  testutil.HexBytes `json:"ct"`
+	Iv  testutil.HexBytes `json:"iv"`
+	Key testutil.HexBytes `json:"key"`
+	Msg testutil.HexBytes `json:"msg"`
+	Tag testutil.HexBytes `json:"tag"`
+}
 
 func TestValidateAESKeySize(t *testing.T) {
 	for _, keySize := range []uint32{8, 16, 24, 32, 40} {
