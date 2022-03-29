@@ -17,6 +17,7 @@
 package com.google.crypto.tink.integration.gcpkms;
 
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
+import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.services.cloudkms.v1.CloudKMS;
@@ -121,17 +122,21 @@ public final class GcpKmsClient implements KmsClient {
   }
 
   /** Loads the provided credentials with {@code GoogleCredentials}. */
-  public KmsClient withCredentials(GoogleCredentials credentials) {
+  public KmsClient withCredentials(GoogleCredentials credentials) throws GeneralSecurityException {
     if (credentials.createScopedRequired()) {
       credentials = credentials.createScoped(CloudKMSScopes.all());
     }
-    this.client =
-        new CloudKMS.Builder(
-                new NetHttpTransport(),
-                new JacksonFactory(),
-                new HttpCredentialsAdapter(credentials))
-            .setApplicationName(APPLICATION_NAME)
-            .build();
+    try {
+      this.client =
+          new CloudKMS.Builder(
+                  GoogleNetHttpTransport.newTrustedTransport(),
+                  new JacksonFactory(),
+                  new HttpCredentialsAdapter(credentials))
+              .setApplicationName(APPLICATION_NAME)
+              .build();
+    } catch (IOException e) {
+      throw new GeneralSecurityException("cannot build GCP KMS client", e);
+    }
     return this;
   }
 
