@@ -38,6 +38,13 @@ import (
 )
 
 func init() {
+	if err := registry.RegisterKeyManager(new(hpkePublicKeyManager)); err != nil {
+		panic(fmt.Sprintf("hybrid.init() failed: %v", err))
+	}
+	if err := registry.RegisterKeyManager(new(hpkePrivateKeyManager)); err != nil {
+		panic(fmt.Sprintf("hybrid.init() failed: %v", err))
+	}
+
 	if err := registry.RegisterKeyManager(new(eciesAEADHKDFPrivateKeyKeyManager)); err != nil {
 		panic(fmt.Sprintf("hybrid.init() failed: %v", err))
 	}

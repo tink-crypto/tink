@@ -90,7 +90,7 @@ SUPPORTED_LANGUAGES = {
     'AesCtrHmacStreamingKey': ['cc', 'java', 'go', 'python'],
     'AesGcmHkdfStreamingKey': ['cc', 'java', 'go', 'python'],
     'EciesAeadHkdfPrivateKey': ['cc', 'java', 'go', 'python'],
-    'HpkePrivateKey': ['cc', 'java', 'python'],
+    'HpkePrivateKey': ['cc', 'java', 'go', 'python'],
     'AesCmacKey': ['cc', 'java', 'go', 'python'],
     'HmacKey': ['cc', 'java', 'go', 'python'],
     'EcdsaPrivateKey': ['cc', 'java', 'go', 'python'],

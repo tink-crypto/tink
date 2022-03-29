@@ -18,8 +18,6 @@ package hybrid
 
 import (
 	"bytes"
-	"fmt"
-	"os"
 	"testing"
 
 	"google.golang.org/protobuf/proto"
@@ -34,18 +32,6 @@ var hpkeAEADs = []hpkepb.HpkeAead{
 	hpkepb.HpkeAead_AES_128_GCM,
 	hpkepb.HpkeAead_AES_256_GCM,
 	hpkepb.HpkeAead_CHACHA20_POLY1305,
-}
-
-// TODO(b/201070904): Register key managers in hybrid.go once all HPKE key
-// templates are supported.
-func TestMain(m *testing.M) {
-	if err := registry.RegisterKeyManager(new(hpkePublicKeyManager)); err != nil {
-		panic(fmt.Sprintf("registry.RegisterKeyManager(hpkePublicKeyManager) err = %v, want nil", err))
-	}
-	if err := registry.RegisterKeyManager(new(hpkePrivateKeyManager)); err != nil {
-		panic(fmt.Sprintf("registry.RegisterKeyManager(hpkePrivateKeyManager) err = %v, want nil", err))
-	}
-	os.Exit(m.Run())
 }
 
 func TestPublicKeyManagerPrimitiveRejectsInvalidKeyVersion(t *testing.T) {
