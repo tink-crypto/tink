@@ -453,7 +453,9 @@ public final class Registry {
     if (manager == null) {
       throw new IllegalArgumentException("key manager must be non-null.");
     }
-    // TODO(kste): Do not allow registering for key types when in FIPS-mode.
+    if (!TinkFipsUtil.AlgorithmFipsCompatibility.ALGORITHM_NOT_FIPS.isCompatible()) {
+      throw new GeneralSecurityException("Registering key managers is not supported in FIPS mode");
+    }
     String typeUrl = manager.getKeyType();
     // Use an empty key format because old-style key managers don't export their key formats
     ensureKeyManagerInsertable(typeUrl, manager.getClass(), Collections.emptyMap(), newKeyAllowed);

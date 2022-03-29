@@ -1654,5 +1654,19 @@ public class RegistryTest {
     EcdsaSignKeyManager.registerPair(true);
   }
 
+
+  @Test
+  public void testFips_registerFipsKeyManager_fails() throws Exception {
+    Assume.assumeTrue(TinkFipsUtil.fipsModuleAvailable());
+
+    Registry.reset();
+    Registry.restrictToFipsIfEmpty();
+
+    String typeUrl = "testNewKeyDataTypeUrl";
+    CustomAeadKeyManager km = new CustomAeadKeyManager(typeUrl);
+    assertThrows(
+        GeneralSecurityException.class, () -> Registry.registerKeyManager(km));
+  }
+
   private static class FakeAead {}
 }
