@@ -63,13 +63,9 @@ run_linux_tests() {
 }
 
 run_all_linux_tests() {
-  run_linux_tests "cc"
-  run_linux_tests "java_src"
-  run_linux_tests "go"
-  run_linux_tests "python"
+  # TODO(b/154445252): Delete this when per-language MacOS Javascript tests are
+  # added.
   run_linux_tests "javascript"
-  run_linux_tests "tools"
-  run_linux_tests "apps"
   run_linux_tests "examples/cc"
 
   local -a MANUAL_EXAMPLE_JAVA_TARGETS
@@ -197,8 +193,6 @@ main() {
 
     ./kokoro/testutils/copy_credentials.sh
     ./kokoro/testutils/update_android_sdk.sh
-    # Sourcing required to update callers environment.
-    source ./kokoro/testutils/install_go.sh
   fi
 
   # Verify required environment variables.
@@ -219,8 +213,6 @@ main() {
 
   echo "using java binary: $(which java)"
   java -version
-
-  echo "Using go binary from $(which go): $(go version)"
 
   echo "using python: $(which python)"
   python --version
