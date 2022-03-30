@@ -33,11 +33,11 @@ java_test(
     size = "small",
     srcs = ["KeyTypeManagerTest.java"],
     deps = [
+        "//proto:aes_gcm_java_proto",
+        "//proto:tink_java_proto",
+        "//src/main/java/com/google/crypto/tink/internal:key_type_manager",
         "@com_google_protobuf//:protobuf_javalite",
         "@maven//:com_google_truth_truth",
         "@maven//:junit_junit",
-        "//src/main/java/com/google/crypto/tink/internal:key_type_manager",
-        "//proto:aes_gcm_java_proto",
-        "//proto:tink_java_proto",
     ],
 )
