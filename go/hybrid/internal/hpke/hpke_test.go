@@ -365,7 +365,7 @@ func baseModeX25519HKDFSHA256Vectors(t *testing.T) map[hpkeID]vector {
 	t.Helper()
 
 	srcDir, _ := os.LookupEnv("TEST_SRCDIR")
-	path := filepath.Join(srcDir, os.Getenv("TEST_WORKSPACE"), "/hybrid/hpke/testdata/boringssl_hpke_test_vectors.json")
+	path := filepath.Join(srcDir, os.Getenv("TEST_WORKSPACE"), "/hybrid/internal/hpke/testdata/boringssl_hpke_test_vectors.json")
 	f, err := os.Open(path)
 	if err != nil {
 		t.Fatal(err)

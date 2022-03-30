@@ -18,7 +18,7 @@ go_library(
         "primitive_factory.go",
         "x25519_kem.go",
     ],
-    importpath = "github.com/google/tink/go/hybrid/hpke",
+    importpath = "github.com/google/tink/go/hybrid/internal/hpke",
     deps = [
         "//internal/aead",
         "//proto/hpke_go_proto",

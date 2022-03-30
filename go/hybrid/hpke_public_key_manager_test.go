@@ -22,7 +22,7 @@ import (
 
 	"google.golang.org/protobuf/proto"
 	"github.com/google/tink/go/core/registry"
-	"github.com/google/tink/go/hybrid/hpke"
+	"github.com/google/tink/go/hybrid/internal/hpke"
 	"github.com/google/tink/go/subtle/random"
 	"github.com/google/tink/go/subtle"
 	hpkepb "github.com/google/tink/go/proto/hpke_go_proto"

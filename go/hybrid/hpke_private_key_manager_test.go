@@ -24,7 +24,7 @@ import (
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/testing/protocmp"
 	"github.com/google/tink/go/core/registry"
-	"github.com/google/tink/go/hybrid/hpke"
+	"github.com/google/tink/go/hybrid/internal/hpke"
 	"github.com/google/tink/go/subtle/random"
 	hpkepb "github.com/google/tink/go/proto/hpke_go_proto"
 	tinkpb "github.com/google/tink/go/proto/tink_go_proto"
