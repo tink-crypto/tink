@@ -181,7 +181,11 @@ KeysetHandle::GetPrimitives(const KeyManager<P>* custom_manager) const {
 template <class P>
 crypto::tink::util::StatusOr<std::unique_ptr<P>> KeysetHandle::GetPrimitive()
     const {
-  return internal::RegistryImpl::GlobalInstance().WrapKeyset<P>(keyset_);
+  // TODO(b/222245356): Replace second argument with annotations when available
+  // to KeysetHandle via its public interface.
+  return internal::RegistryImpl::GlobalInstance().WrapKeyset<P>(
+      keyset_,
+      /*annotations=*/{});
 }
 
 template <class P>

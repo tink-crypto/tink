@@ -913,7 +913,8 @@ TEST_F(RegistryTest, KeysetWrappingTest) {
               IsOk());
 
   crypto::tink::util::StatusOr<std::unique_ptr<AeadVariant>> aead_variant =
-      RegistryImpl::GlobalInstance().WrapKeyset<AeadVariant>(keyset);
+      RegistryImpl::GlobalInstance().WrapKeyset<AeadVariant>(
+          keyset, /*annotations=*/{});
   EXPECT_THAT(aead_variant.status(), IsOk());
   EXPECT_THAT(aead_variant.value()->get(), Eq(raw_key));
 }
@@ -937,7 +938,8 @@ TEST_F(RegistryTest, TransformingKeysetWrappingTest) {
               IsOk());
 
   crypto::tink::util::StatusOr<std::unique_ptr<std::string>> string_primitive =
-      RegistryImpl::GlobalInstance().WrapKeyset<std::string>(keyset);
+      RegistryImpl::GlobalInstance().WrapKeyset<std::string>(
+          keyset, /*annotations=*/{});
   EXPECT_THAT(string_primitive.status(), IsOk());
   EXPECT_THAT(*string_primitive.value(), Eq(raw_key));
 }

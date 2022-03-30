@@ -135,9 +135,11 @@ class RegistryImpl {
       std::unique_ptr<PrimitiveSet<P>> primitive_set) const
       ABSL_LOCKS_EXCLUDED(maps_mutex_);
 
+  // Wraps a `keyset` and annotates it with `annotations`.
   template <class P>
   crypto::tink::util::StatusOr<std::unique_ptr<P>> WrapKeyset(
-      const google::crypto::tink::Keyset& keyset) const
+      const google::crypto::tink::Keyset& keyset,
+      const absl::flat_hash_map<std::string, std::string>& annotations) const
       ABSL_LOCKS_EXCLUDED(maps_mutex_);
 
   crypto::tink::util::StatusOr<google::crypto::tink::KeyData> DeriveKey(
@@ -792,17 +794,14 @@ crypto::tink::util::StatusOr<std::unique_ptr<P>> RegistryImpl::Wrap(
 
 template <class P>
 crypto::tink::util::StatusOr<std::unique_ptr<P>> RegistryImpl::WrapKeyset(
-    const google::crypto::tink::Keyset& keyset) const {
-  util::StatusOr<const KeysetWrapper<P>*> wrapper_result =
+    const google::crypto::tink::Keyset& keyset,
+    const absl::flat_hash_map<std::string, std::string>& annotations) const {
+  crypto::tink::util::StatusOr<const KeysetWrapper<P>*> keyset_wrapper =
       GetKeysetWrapper<P>();
-  if (!wrapper_result.ok()) {
-    return wrapper_result.status();
+  if (!keyset_wrapper.ok()) {
+    return keyset_wrapper.status();
   }
-  // TODO(b/222245356): Replace empty annotations map with actual annotations
-  // when support is provided to this class.
-  crypto::tink::util::StatusOr<std::unique_ptr<P>> primitive_result =
-      wrapper_result.value()->Wrap(keyset, /*annotations=*/{});
-  return std::move(primitive_result);
+  return (*keyset_wrapper)->Wrap(keyset, annotations);
 }
 
 inline crypto::tink::util::Status RegistryImpl::RestrictToFipsIfEmpty() const {
