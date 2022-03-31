@@ -4,16 +4,17 @@ licenses(["notice"])
 
 package(default_visibility = ["//:__subpackages__"])
 
+# Visible for our cross language tests only.
+
 java_library(
     name = "key_template_proto_converter",
     srcs = ["KeyTemplateProtoConverter.java"],
+    visibility = ["//visibility:public"],
     deps = [
         "//proto:tink_java_proto",
         "//src/main/java/com/google/crypto/tink:key_template",
         "@com_google_protobuf//:protobuf_javalite",
     ],
-    # Visible for our cross language tests only
-    visibility = ["//visibility:public"],
 )
 
 java_library(
@@ -37,7 +38,6 @@ android_library(
 java_library(
     name = "util",
     srcs = ["Util.java"],
-    deps = [],
 )
 
 android_library(
