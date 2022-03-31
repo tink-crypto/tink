@@ -31,7 +31,6 @@ java_library(
     srcs = ["JwtPublicKeyVerify.java"],
     deps = [
         ":jwt_validator",
-        ":raw_jwt",
         ":verified_jwt",
         "@maven//:com_google_errorprone_error_prone_annotations",
     ],
@@ -42,7 +41,6 @@ java_library(
     srcs = ["JwtPublicKeyVerifyInternal.java"],
     deps = [
         ":jwt_validator",
-        ":raw_jwt",
         ":verified_jwt",
         "@maven//:com_google_errorprone_error_prone_annotations",
     ],
@@ -102,7 +100,6 @@ java_library(
     name = "jwt_validator",
     srcs = ["JwtValidator.java"],
     deps = [
-        ":jwt_format",
         ":jwt_invalid_exception",
         ":raw_jwt",
         ":verified_jwt",
@@ -117,12 +114,10 @@ java_library(
         ":json_util",
         ":jwt_format",
         ":jwt_invalid_exception",
-        ":jwt_mac",
         ":jwt_mac_internal",
         ":jwt_validator",
         ":raw_jwt",
         ":verified_jwt",
-        "//proto:common_java_proto",
         "//proto:jwt_hmac_java_proto",
         "//proto:tink_java_proto",
         "//src/main/java/com/google/crypto/tink:key_template",
@@ -172,14 +167,12 @@ java_library(
     deps = [
         ":json_util",
         ":jwt_format",
-        ":jwt_invalid_exception",
         ":jwt_public_key_verify_internal",
         ":jwt_validator",
         ":raw_jwt",
         ":verified_jwt",
         "//proto:jwt_rsa_ssa_pss_java_proto",
         "//proto:tink_java_proto",
-        "//src/main/java/com/google/crypto/tink:public_key_sign",
         "//src/main/java/com/google/crypto/tink/internal:key_type_manager",
         "//src/main/java/com/google/crypto/tink/subtle:enums",
         "//src/main/java/com/google/crypto/tink/subtle:rsa_ssa_pss_verify_jce",
@@ -187,7 +180,6 @@ java_library(
         "//src/main/java/com/google/crypto/tink/subtle:validators",
         "@com_google_protobuf//:protobuf_javalite",
         "@maven//:com_google_code_gson_gson",
-        "@maven//:com_google_errorprone_error_prone_annotations",
     ],
 )
 
@@ -221,7 +213,6 @@ java_library(
     deps = [
         ":json_util",
         ":jwt_format",
-        ":jwt_invalid_exception",
         ":jwt_public_key_verify_internal",
         ":jwt_validator",
         ":raw_jwt",
@@ -235,7 +226,6 @@ java_library(
         "//src/main/java/com/google/crypto/tink/subtle:validators",
         "@com_google_protobuf//:protobuf_javalite",
         "@maven//:com_google_code_gson_gson",
-        "@maven//:com_google_errorprone_error_prone_annotations",
     ],
 )
 
@@ -284,7 +274,6 @@ java_library(
         "//src/main/java/com/google/crypto/tink/subtle:selfkeytests_validators",
         "//src/main/java/com/google/crypto/tink/subtle:validators",
         "@com_google_protobuf//:protobuf_javalite",
-        "@maven//:com_google_errorprone_error_prone_annotations",
     ],
 )
 
@@ -320,7 +309,6 @@ java_library(
     deps = [
         ":json_util",
         ":jwt_format",
-        ":jwt_invalid_exception",
         ":jwt_public_key_verify_internal",
         ":jwt_validator",
         ":raw_jwt",
