@@ -52,6 +52,8 @@ cc_library(
     visibility = ["//visibility:public"],
     deps = [
         ":secret_data",
+        ":status",
+        ":statusor",
         "@com_google_absl//absl/memory",
         "@com_google_protobuf//:protobuf_lite",
     ],

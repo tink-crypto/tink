@@ -23,6 +23,8 @@
 #include "google/protobuf/arena.h"
 #include "absl/memory/memory.h"
 #include "tink/util/secret_data.h"
+#include "tink/util/status.h"
+#include "tink/util/statusor.h"
 
 namespace crypto {
 namespace tink {
@@ -51,6 +53,14 @@ inline google::protobuf::ArenaOptions SecretArenaOptions() {
 template <typename T>
 class SecretProto {
  public:
+  static StatusOr<SecretProto<T>> ParseFromSecretData(const SecretData& data) {
+    SecretProto<T> proto;
+    if (!proto->ParseFromArray(data.data(), data.size())) {
+      return Status(absl::StatusCode::kInternal, "Could not parse proto");
+    }
+    return proto;
+  }
+
   SecretProto() {}
 
   SecretProto(const SecretProto& other) { *value_ = *other.value_; }

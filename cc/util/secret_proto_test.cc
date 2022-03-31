@@ -130,6 +130,17 @@ TYPED_TEST(SecretProtoTest, MoveAssignment) {
   EXPECT_TRUE(MessageDifferencer::Equals(*t, proto));
 }
 
+TYPED_TEST(SecretProtoTest, FromSecretData) {
+  TypeParam proto = CreateProto<TypeParam>();
+  SecretData data;
+  data.resize(proto.ByteSizeLong());
+  ASSERT_TRUE(proto.SerializeToArray(data.data(), data.size()));
+  StatusOr<SecretProto<TypeParam>> secret_proto =
+      SecretProto<TypeParam>::ParseFromSecretData(data);
+  ASSERT_TRUE(secret_proto.ok()) << secret_proto.status();
+  EXPECT_TRUE(MessageDifferencer::Equals(**secret_proto, proto));
+}
+
 }  // namespace
 }  // namespace util
 }  // namespace tink
