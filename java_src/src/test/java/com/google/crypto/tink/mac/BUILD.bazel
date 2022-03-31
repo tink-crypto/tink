@@ -21,6 +21,7 @@ java_test(
     name = "MacConfigTest",
     size = "small",
     srcs = ["MacConfigTest.java"],
+    tags = ["fips"],
     deps = [
         "//src/main/java/com/google/crypto/tink:mac",
         "//src/main/java/com/google/crypto/tink:registry",
