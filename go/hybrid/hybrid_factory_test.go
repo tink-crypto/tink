@@ -141,3 +141,41 @@ func TestFactoryWithValidPrimitiveSetType(t *testing.T) {
 		t.Fatalf("calling NewHybridDecrypt() with good *keyset.Handle failed %s", err)
 	}
 }
+
+func TestPrimitiveFactoryFailsWhenKeysetHasNoPrimary(t *testing.T) {
+	curve := commonpb.EllipticCurveType_NIST_P256
+	hash := commonpb.HashType_SHA256
+	format := commonpb.EcPointFormat_UNCOMPRESSED
+	dek := aead.AES128CTRHMACSHA256KeyTemplate()
+	salt := []byte("some salt")
+	privProto, err := testutil.GenerateECIESAEADHKDFPrivateKey(curve, hash, format, dek, salt)
+	if err != nil {
+		t.Fatalf("testutil.GenerateECIESAEADHKDFPrivateKey(curve, hash, format, dek, salt) failed: %s", err)
+	}
+	serialized, err := proto.Marshal(privProto)
+	if err != nil {
+		t.Fatalf("proto.Marshal(privateProto) failed: %v", err)
+	}
+	privKey := testutil.NewKey(
+		testutil.NewKeyData(eciesAEADHKDFPrivateKeyTypeURL, serialized, tinkpb.KeyData_ASYMMETRIC_PRIVATE),
+		tinkpb.KeyStatusType_ENABLED, 8, tinkpb.OutputPrefixType_RAW)
+	privKeysetWithoutPrimary := &tinkpb.Keyset{
+		Key: []*tinkpb.Keyset_Key{privKey},
+	}
+	privHandleWithoutPrimary, err := testkeyset.NewHandle(privKeysetWithoutPrimary)
+	if err != nil {
+		t.Fatalf("testkeyset.NewHandle(privKeysetWithoutPrimary) failed: %v", err)
+	}
+	pubHandleWithoutPrimary, err := privHandleWithoutPrimary.Public()
+	if err != nil {
+		t.Fatalf("privateHandleWithoutPrimary.Public() failed: %v", err)
+	}
+
+	if _, err = NewHybridEncrypt(pubHandleWithoutPrimary); err == nil {
+		t.Errorf("NewHybridEncrypt(pubHandleWithoutPrimary) err = nil, want error")
+	}
+
+	if _, err = NewHybridDecrypt(privHandleWithoutPrimary); err == nil {
+		t.Errorf("NewHybridDecrypt(privHandleWithoutPrimary) err = nil, want error")
+	}
+}

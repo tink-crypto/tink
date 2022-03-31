@@ -43,7 +43,6 @@ func Validate(keyset *tinkpb.Keyset) error {
 	}
 	primaryKeyID := keyset.PrimaryKeyId
 	hasPrimaryKey := false
-	containsOnlyPub := true
 	numEnabledKeys := 0
 	for _, key := range keyset.Key {
 		if err := validateKey(key); err != nil {
@@ -58,16 +57,13 @@ func Validate(keyset *tinkpb.Keyset) error {
 			}
 			hasPrimaryKey = true
 		}
-		if key.KeyData.KeyMaterialType != tinkpb.KeyData_ASYMMETRIC_PUBLIC {
-			containsOnlyPub = false
-		}
 		numEnabledKeys++
 	}
 	if numEnabledKeys == 0 {
 		return fmt.Errorf("keyset must contain at least one ENABLED key")
 	}
 
-	if !hasPrimaryKey && !containsOnlyPub {
+	if !hasPrimaryKey {
 		return fmt.Errorf("keyset does not contain a valid primary key")
 	}
 	return nil
