@@ -23,6 +23,7 @@ java_test(
     name = "DeterministicAeadConfigTest",
     size = "small",
     srcs = ["DeterministicAeadConfigTest.java"],
+    tags = ["fips"],
     deps = [
         "//src/main/java/com/google/crypto/tink:deterministic_aead",
         "//src/main/java/com/google/crypto/tink:registry",
