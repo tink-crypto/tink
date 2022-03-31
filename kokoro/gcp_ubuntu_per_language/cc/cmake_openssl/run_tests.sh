@@ -90,12 +90,8 @@ main() {
   cd "${KOKORO_ARTIFACTS_DIR}/git/tink"
 
   ./kokoro/testutils/copy_credentials.sh
-  if [[ -n "${KOKORO_ROOT}" ]]; then
-    # TODO(b/201806781): Remove when no longer necessary.
-    sudo apt-get install -y ca-certificates
-    sudo rm -f /usr/share/ca-certificates/mozilla/DST_Root_CA_X3.crt
-    sudo update-ca-certificates
-
+  ./kokoro/testutils/update_certs.sh
+  if [[ -n "${KOKORO_ROOT:-}" ]]; then
     install_cmake
     install_openssl
   fi

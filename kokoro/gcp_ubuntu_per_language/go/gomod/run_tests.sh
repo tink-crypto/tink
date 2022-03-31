@@ -20,6 +20,7 @@ REPO_DIR="${KOKORO_ARTIFACTS_DIR}/git/tink"
 
 cd "${REPO_DIR}"
 ./kokoro/testutils/copy_credentials.sh
+./kokoro/testutils/update_certs.sh
 # Sourcing required to update callers environment.
 source ./kokoro/testutils/install_go.sh
 
@@ -32,10 +33,6 @@ TMP_DIR="$(mktemp -dt go-module-test.XXXXXX)"
 GO_MOD_DIR="${TMP_DIR}/go-mod-test"
 
 REPO_URL_PREFIX="github.com/google/tink"
-
-# TODO(b/201806781): Remove when no longer necessary.
-sudo apt-get update
-sudo apt-get upgrade -y ca-certificates
 
 #######################################
 # Test an individual Go module within the Tink repository.
