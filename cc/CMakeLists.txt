@@ -104,7 +104,6 @@ tink_cc_library(
     tink::core::streaming_mac
     tink::core::version
     absl::core_headers
-    absl::flat_hash_map
     absl::memory
     absl::status
     absl::strings
@@ -459,7 +458,6 @@ tink_cc_library(
     tink::core::primitive_set
     tink::core::registry
     absl::core_headers
-    absl::flat_hash_map
     absl::memory
     absl::status
     absl::strings
@@ -722,11 +720,8 @@ tink_cc_test(
     tink::core::json_keyset_reader
     tink::core::json_keyset_writer
     tink::core::keyset_handle
-    tink::core::primitive_set
-    tink::core::primitive_wrapper
     gmock
     absl::status
-    absl::strings
     tink::aead::aead_key_templates
     tink::aead::aead_wrapper
     tink::aead::aes_gcm_key_manager
@@ -734,7 +729,6 @@ tink_cc_test(
     tink::signature::ecdsa_sign_key_manager
     tink::signature::signature_key_templates
     tink::util::protobuf_helper
-    tink::util::status
     tink::util::test_keyset_handle
     tink::util::test_matchers
     tink::util::test_util
