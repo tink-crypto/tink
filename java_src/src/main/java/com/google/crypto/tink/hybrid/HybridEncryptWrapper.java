@@ -40,6 +40,9 @@ public class HybridEncryptWrapper implements PrimitiveWrapper<HybridEncrypt, Hyb
     @Override
     public byte[] encrypt(final byte[] plaintext, final byte[] contextInfo)
         throws GeneralSecurityException {
+      if (primitives.getPrimary() == null) {
+        throw new GeneralSecurityException("keyset without primary key");
+      }
       return Bytes.concat(
           primitives.getPrimary().getIdentifier(),
           primitives.getPrimary().getPrimitive().encrypt(plaintext, contextInfo));
