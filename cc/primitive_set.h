@@ -74,7 +74,8 @@ class PrimitiveSet {
       std::string identifier = identifier_result.value();
       return absl::WrapUnique(new Entry(std::move(primitive), identifier,
                                         key_info.status(), key_info.key_id(),
-                                        key_info.output_prefix_type()));
+                                        key_info.output_prefix_type(),
+                                        key_info.type_url()));
     }
 
     P2& get_primitive() const { return *primitive_; }
@@ -89,21 +90,26 @@ class PrimitiveSet {
       return output_prefix_type_;
     }
 
+    absl::string_view get_key_type_url() const { return key_type_url_; }
+
    private:
     Entry(std::unique_ptr<P2> primitive, const std::string& identifier,
           google::crypto::tink::KeyStatusType status, uint32_t key_id,
-          google::crypto::tink::OutputPrefixType output_prefix_type)
+          google::crypto::tink::OutputPrefixType output_prefix_type,
+          absl::string_view key_type_url)
         : primitive_(std::move(primitive)),
           identifier_(identifier),
           status_(status),
           key_id_(key_id),
-          output_prefix_type_(output_prefix_type) {}
+          output_prefix_type_(output_prefix_type),
+          key_type_url_(key_type_url) {}
 
     std::unique_ptr<P> primitive_;
     std::string identifier_;
     google::crypto::tink::KeyStatusType status_;
     uint32_t key_id_;
     google::crypto::tink::OutputPrefixType output_prefix_type_;
+    const std::string key_type_url_;
   };
 
   typedef std::vector<std::unique_ptr<Entry<P>>> Primitives;

@@ -379,64 +379,99 @@ TEST_F(PrimitiveSetTest, DisabledKey) {
   EXPECT_FALSE(add_primitive_result.ok());
 }
 
-KeysetInfo::KeyInfo CreateKey(
-    uint32_t key_id, google::crypto::tink::OutputPrefixType output_prefix_type,
-    google::crypto::tink::KeyStatusType key_status) {
+KeysetInfo::KeyInfo CreateKey(uint32_t key_id,
+                              OutputPrefixType output_prefix_type,
+                              KeyStatusType key_status,
+                              absl::string_view type_url) {
   KeysetInfo::KeyInfo key_info;
   key_info.set_output_prefix_type(output_prefix_type);
   key_info.set_key_id(key_id);
   key_info.set_status(key_status);
+  std::string type_url_str(type_url);
+  key_info.set_type_url(type_url_str);
   return key_info;
+}
+
+// Struct to hold MAC, Id and type_url.
+struct MacIdAndTypeUrl {
+  std::string mac;
+  std::string id;
+  std::string type_url;
+};
+
+bool operator==(const MacIdAndTypeUrl& first, const MacIdAndTypeUrl& other) {
+  return first.mac == other.mac && first.id == other.id &&
+         first.type_url == other.type_url;
 }
 
 TEST_F(PrimitiveSetTest, GetAll) {
   PrimitiveSet<Mac> pset;
-  EXPECT_THAT(pset.AddPrimitive(absl::make_unique<DummyMac>("MAC1"),
-                                CreateKey(0x01010101, OutputPrefixType::TINK,
-                                          KeyStatusType::ENABLED))
-                  .status(),
-              IsOk());
+  EXPECT_THAT(
+      pset.AddPrimitive(
+              absl::make_unique<DummyMac>("MAC1"),
+              CreateKey(0x01010101, OutputPrefixType::TINK,
+                        KeyStatusType::ENABLED, /*type_url=*/
+                        "type.googleapis.com/google.crypto.tink.HmacKey"))
+          .status(),
+      IsOk());
 
-  EXPECT_THAT(pset.AddPrimitive(absl::make_unique<DummyMac>("MAC2"),
-                                CreateKey(0x02020202, OutputPrefixType::TINK,
-                                          KeyStatusType::ENABLED))
-                  .status(),
-              IsOk());
+  EXPECT_THAT(
+      pset.AddPrimitive(
+              absl::make_unique<DummyMac>("MAC2"),
+              CreateKey(0x02020202, OutputPrefixType::TINK,
+                        KeyStatusType::ENABLED, /*type_url=*/
+                        "type.googleapis.com/google.crypto.tink.HmacKey"))
+          .status(),
+      IsOk());
   // Add primitive and make it primary.
   auto entry_or = pset.AddPrimitive(
       absl::make_unique<DummyMac>("MAC3"),
-      CreateKey(0x02020202, OutputPrefixType::TINK, KeyStatusType::ENABLED));
+      CreateKey(0x02020202, OutputPrefixType::TINK,
+                KeyStatusType::ENABLED, /*type_url=*/
+                "type.googleapis.com/google.crypto.tink.AesCmacKey"));
   ASSERT_THAT(entry_or.status(), IsOk());
   EXPECT_THAT(pset.set_primary(entry_or.value()), IsOk());
 
-  EXPECT_THAT(pset.AddPrimitive(absl::make_unique<DummyMac>("MAC4"),
-                                CreateKey(0x02020202, OutputPrefixType::RAW,
-                                          KeyStatusType::ENABLED))
-                  .status(),
-              IsOk());
+  EXPECT_THAT(
+      pset.AddPrimitive(
+              absl::make_unique<DummyMac>("MAC4"),
+              CreateKey(0x02020202, OutputPrefixType::RAW,
+                        KeyStatusType::ENABLED, /*type_url=*/
+                        "type.googleapis.com/google.crypto.tink.AesCmacKey"))
+          .status(),
+      IsOk());
 
-  EXPECT_THAT(pset.AddPrimitive(absl::make_unique<DummyMac>("MAC5"),
-                                CreateKey(0x01010101, OutputPrefixType::TINK,
-                                          KeyStatusType::ENABLED))
-                  .status(),
-              IsOk());
+  EXPECT_THAT(
+      pset.AddPrimitive(
+              absl::make_unique<DummyMac>("MAC5"),
+              CreateKey(0x01010101, OutputPrefixType::TINK,
+                        KeyStatusType::ENABLED, /*type_url=*/
+                        "type.googleapis.com/google.crypto.tink.AesCmacKey"))
+          .status(),
+      IsOk());
 
-  std::vector<std::pair<std::string, std::string>> mac_and_id;
+  std::vector<MacIdAndTypeUrl> mac_id_and_type;
   for (auto* entry : pset.get_all()) {
     auto mac_or = entry->get_primitive().ComputeMac("");
     ASSERT_THAT(mac_or.status(), IsOk());
-    mac_and_id.push_back({mac_or.value(), entry->get_identifier()});
+    mac_id_and_type.push_back({mac_or.value(), entry->get_identifier(),
+                               std::string(entry->get_key_type_url())});
   }
 
   // In the following id part, the first byte is 1 for Tink.
-  std::vector<std::pair<std::string, std::string>> expected_result = {
-      {"13:0:DummyMac:MAC1", absl::StrCat("\1\1\1\1\1")},
-      {"13:0:DummyMac:MAC2", absl::StrCat("\1\2\2\2\2")},
-      {"13:0:DummyMac:MAC3", absl::StrCat("\1\2\2\2\2")},
-      {"13:0:DummyMac:MAC4", absl::StrCat("")},
-      {"13:0:DummyMac:MAC5", absl::StrCat("\1\1\1\1\1")}};
+  std::vector<MacIdAndTypeUrl> expected_result = {
+      {/*mac=*/"13:0:DummyMac:MAC1", /*id=*/absl::StrCat("\1\1\1\1\1"),
+       /*type_url=*/"type.googleapis.com/google.crypto.tink.HmacKey"},
+      {/*mac=*/"13:0:DummyMac:MAC2", /*id=*/absl::StrCat("\1\2\2\2\2"),
+       /*type_url=*/"type.googleapis.com/google.crypto.tink.HmacKey"},
+      {/*mac=*/"13:0:DummyMac:MAC3", /*id=*/absl::StrCat("\1\2\2\2\2"),
+       /*type_url=*/"type.googleapis.com/google.crypto.tink.AesCmacKey"},
+      {/*mac=*/"13:0:DummyMac:MAC4", /*id=*/"",
+       /*type_url=*/"type.googleapis.com/google.crypto.tink.AesCmacKey"},
+      {/*mac=*/"13:0:DummyMac:MAC5", /*id=*/absl::StrCat("\1\1\1\1\1"),
+       /*type_url=*/"type.googleapis.com/google.crypto.tink.AesCmacKey"}};
 
-  EXPECT_THAT(mac_and_id, UnorderedElementsAreArray(expected_result));
+  EXPECT_THAT(mac_id_and_type, UnorderedElementsAreArray(expected_result));
 }
 
 }  // namespace
