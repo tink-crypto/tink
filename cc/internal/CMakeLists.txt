@@ -404,3 +404,31 @@ tink_cc_test(
     tink::util::statusor
     tink::util::test_matchers
 )
+
+tink_cc_library(
+  NAME monitoring_util
+  SRCS
+    monitoring_util.h
+  DEPS
+    absl::flat_hash_map
+    absl::status
+    tink::core::primitive_set
+    tink::monitoring::monitoring
+    tink::util::statusor
+    tink::proto::tink_cc_proto
+)
+
+tink_cc_test(
+  NAME monitoring_util_test
+  SRCS
+    monitoring_util_test.cc
+  DEPS
+    tink::internal::monitoring_util
+    gmock
+    absl::status
+    absl::strings
+    tink::core::primitive_set
+    tink::monitoring::monitoring
+    tink::util::test_matchers
+    tink::proto::tink_cc_proto
+)

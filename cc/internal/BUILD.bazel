@@ -436,3 +436,32 @@ cc_test(
         "@com_google_googletest//:gtest_main",
     ],
 )
+
+cc_library(
+    name = "monitoring_util",
+    hdrs = ["monitoring_util.h"],
+    include_prefix = "tink/internal",
+    deps = [
+        "//:primitive_set",
+        "//monitoring",
+        "//proto:tink_cc_proto",
+        "//util:statusor",
+        "@com_google_absl//absl/container:flat_hash_map",
+        "@com_google_absl//absl/status",
+    ],
+)
+
+cc_test(
+    name = "monitoring_util_test",
+    srcs = ["monitoring_util_test.cc"],
+    deps = [
+        ":monitoring_util",
+        "//:primitive_set",
+        "//monitoring",
+        "//proto:tink_cc_proto",
+        "//util:test_matchers",
+        "@com_google_absl//absl/status",
+        "@com_google_absl//absl/strings",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
