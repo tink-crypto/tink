@@ -40,9 +40,7 @@ java_library(
 java_library(
     name = "hpke_aead",
     srcs = ["HpkeAead.java"],
-    deps = [
-        "@maven//:com_google_errorprone_error_prone_annotations",
-    ],
+    deps = ["@maven//:com_google_errorprone_error_prone_annotations"],
 )
 
 java_library(
@@ -95,9 +93,7 @@ java_library(
 java_library(
     name = "hpke_kdf",
     srcs = ["HpkeKdf.java"],
-    deps = [
-        "@maven//:com_google_errorprone_error_prone_annotations",
-    ],
+    deps = ["@maven//:com_google_errorprone_error_prone_annotations"],
 )
 
 java_library(

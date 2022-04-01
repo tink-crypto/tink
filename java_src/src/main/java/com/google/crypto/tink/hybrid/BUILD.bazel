@@ -10,6 +10,7 @@ java_library(
     deps = [
         ":hybrid_config",
         "//src/main/java/com/google/crypto/tink:config",
+        "//src/main/java/com/google/crypto/tink/config:tink_fips",
     ],
 )
 

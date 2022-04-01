@@ -134,7 +134,6 @@ java_test(
         "//src/main/java/com/google/crypto/tink/hybrid/internal:hpke_public_key_manager",
         "//src/main/java/com/google/crypto/tink/internal:key_type_manager",
         "//src/main/java/com/google/crypto/tink/subtle:random",
-        "@com_google_protobuf//:protobuf_javalite",
         "@maven//:com_google_truth_truth",
         "@maven//:junit_junit",
     ],

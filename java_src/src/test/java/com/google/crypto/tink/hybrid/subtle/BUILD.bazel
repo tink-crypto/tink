@@ -13,7 +13,6 @@ java_test(
 
 java_test(
     name = "RsaKemHybridEncryptTest",
-    size = "medium",
     srcs = ["RsaKemHybridEncryptTest.java"],
     deps = [
         "//src/main/java/com/google/crypto/tink:hybrid_decrypt",
@@ -31,7 +30,6 @@ java_test(
 
 java_test(
     name = "RsaKemHybridDecryptTest",
-    size = "medium",
     srcs = ["RsaKemHybridDecryptTest.java"],
     deps = [
         "//src/main/java/com/google/crypto/tink:hybrid_decrypt",

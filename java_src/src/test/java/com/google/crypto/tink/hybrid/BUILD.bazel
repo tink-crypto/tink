@@ -4,6 +4,7 @@ java_test(
     name = "HybridConfigTest",
     size = "small",
     srcs = ["HybridConfigTest.java"],
+    tags = ["fips"],
     deps = [
         "//src/main/java/com/google/crypto/tink:hybrid_decrypt",
         "//src/main/java/com/google/crypto/tink:registry",
@@ -154,7 +155,6 @@ java_test(
 
 java_test(
     name = "EciesAeadHkdfHybridDecryptTest",
-    size = "medium",
     srcs = ["EciesAeadHkdfHybridDecryptTest.java"],
     deps = [
         "//proto:common_java_proto",
