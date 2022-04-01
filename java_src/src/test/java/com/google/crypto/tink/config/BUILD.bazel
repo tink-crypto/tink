@@ -17,9 +17,7 @@ java_test(
     name = "TinkFipsTest",
     size = "small",
     srcs = ["TinkFipsTest.java"],
-    tags = [
-        "fips",
-    ],
+    tags = ["fips"],
     deps = [
         "//src/main/java/com/google/crypto/tink/config:tink_fips",
         "//src/main/java/com/google/crypto/tink/config/internal:tink_fips_util",
@@ -27,5 +25,4 @@ java_test(
         "@maven//:junit_junit",
     ],
 )
-
 
