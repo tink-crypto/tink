@@ -19,6 +19,7 @@
 #include <string>
 #include <utility>
 
+#include "absl/container/flat_hash_map.h"
 #include "absl/memory/memory.h"
 #include "absl/status/status.h"
 #include "absl/strings/string_view.h"
@@ -84,18 +85,22 @@ util::Status ValidateNoSecret(const Keyset& keyset) {
 
 }  // anonymous namespace
 
-// static
 util::StatusOr<std::unique_ptr<KeysetHandle>> KeysetHandle::Read(
-    std::unique_ptr<KeysetReader> reader, const Aead& master_key_aead) {
-  return ReadWithAssociatedData(std::move(reader), master_key_aead, "");
+    std::unique_ptr<KeysetReader> reader, const Aead& master_key_aead,
+    const absl::flat_hash_map<std::string, std::string>&
+        monitoring_annotations) {
+  return ReadWithAssociatedData(std::move(reader), master_key_aead,
+                                /*associated_data=*/"", monitoring_annotations);
 }
 
-// static
 util::StatusOr<std::unique_ptr<KeysetHandle>>
-KeysetHandle::ReadWithAssociatedData(std::unique_ptr<KeysetReader> reader,
-                                     const Aead& master_key_aead,
-                                     absl::string_view associated_data) {
-  auto enc_keyset_result = reader->ReadEncrypted();
+KeysetHandle::ReadWithAssociatedData(
+    std::unique_ptr<KeysetReader> reader, const Aead& master_key_aead,
+    absl::string_view associated_data,
+    const absl::flat_hash_map<std::string, std::string>&
+        monitoring_annotations) {
+  util::StatusOr<std::unique_ptr<EncryptedKeyset>> enc_keyset_result =
+      reader->ReadEncrypted();
   if (!enc_keyset_result.ok()) {
     return ToStatusF(absl::StatusCode::kInvalidArgument,
                      "Error reading encrypted keyset data: %s",
@@ -109,23 +114,25 @@ KeysetHandle::ReadWithAssociatedData(std::unique_ptr<KeysetReader> reader,
                      "Error decrypting encrypted keyset: %s",
                      keyset_result.status().message());
   }
-
-  std::unique_ptr<KeysetHandle> handle(
-      new KeysetHandle(std::move(keyset_result.value())));
-  return std::move(handle);
+  return absl::WrapUnique(
+      new KeysetHandle(*std::move(keyset_result), monitoring_annotations));
 }
 
-// static
 util::StatusOr<std::unique_ptr<KeysetHandle>> KeysetHandle::ReadNoSecret(
-    const std::string& serialized_keyset) {
+    const std::string& serialized_keyset,
+    const absl::flat_hash_map<std::string, std::string>&
+        monitoring_annotations) {
   Keyset keyset;
   if (!keyset.ParseFromString(serialized_keyset)) {
     return util::Status(absl::StatusCode::kInvalidArgument,
                         "Could not parse the input string as a Keyset-proto.");
   }
   util::Status validation = ValidateNoSecret(keyset);
-  if (!validation.ok()) return validation;
-  return absl::WrapUnique(new KeysetHandle(std::move(keyset)));
+  if (!validation.ok()) {
+    return validation;
+  }
+  return absl::WrapUnique(
+      new KeysetHandle(std::move(keyset), monitoring_annotations));
 }
 
 util::Status KeysetHandle::Write(KeysetWriter* writer,
@@ -161,15 +168,18 @@ util::Status KeysetHandle::WriteNoSecret(KeysetWriter* writer) const {
   return writer->Write(get_keyset());
 }
 
-// static
 util::StatusOr<std::unique_ptr<KeysetHandle>> KeysetHandle::GenerateNew(
-    const KeyTemplate& key_template) {
+    const KeyTemplate& key_template,
+    const absl::flat_hash_map<std::string, std::string>&
+        monitoring_annotations) {
   Keyset keyset;
-  auto result = AddToKeyset(key_template, /*as_primary=*/true, &keyset);
+  util::StatusOr<uint32_t> const result =
+      AddToKeyset(key_template, /*as_primary=*/true, &keyset);
   if (!result.ok()) {
     return result.status();
   }
-  return absl::WrapUnique<KeysetHandle>(new KeysetHandle(std::move(keyset)));
+  return absl::WrapUnique(
+      new KeysetHandle(std::move(keyset), monitoring_annotations));
 }
 
 util::StatusOr<std::unique_ptr<Keyset::Key>> ExtractPublicKey(

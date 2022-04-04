@@ -18,8 +18,10 @@
 #define TINK_KEYSET_HANDLE_H_
 
 #include <string>
+#include <utility>
 
 #include "absl/base/attributes.h"
+#include "absl/container/flat_hash_map.h"
 #include "absl/status/status.h"
 #include "tink/aead.h"
 #include "tink/internal/key_info.h"
@@ -38,27 +40,43 @@ namespace tink {
 // key material.
 class KeysetHandle {
  public:
-  // Creates a KeysetHandle from an encrypted keyset obtained via |reader|
-  // using |master_key_aead| to decrypt the keyset.
+  // Creates a KeysetHandle from an encrypted keyset obtained via `reader`
+  // using `master_key_aead` to decrypt the keyset, with monitoring annotations
+  // `monitoring_annotations`; by default, `monitoring_annotations` is empty.
   static crypto::tink::util::StatusOr<std::unique_ptr<KeysetHandle>> Read(
-      std::unique_ptr<KeysetReader> reader, const Aead& master_key_aead);
+      std::unique_ptr<KeysetReader> reader, const Aead& master_key_aead,
+      const absl::flat_hash_map<std::string, std::string>&
+          monitoring_annotations = {});
 
-  // Creates a KeysetHandle from an encrypted keyset obtained via |reader|
-  // using |master_key_aead| to decrypt the keyset, expecting |associated_data|.
+  // Creates a KeysetHandle from an encrypted keyset obtained via `reader`
+  // using `master_key_aead` to decrypt the keyset, expecting `associated_data`.
+  // The keyset is annotated for monitoring with `monitoring_annotations`; by
+  // default, `monitoring_annotations` is empty.
   static crypto::tink::util::StatusOr<std::unique_ptr<KeysetHandle>>
   ReadWithAssociatedData(std::unique_ptr<KeysetReader> reader,
                          const Aead& master_key_aead,
-                         absl::string_view associated_data);
+                         absl::string_view associated_data,
+                         const absl::flat_hash_map<std::string, std::string>&
+                             monitoring_annotations = {});
 
-  // Creates a KeysetHandle from a keyset which contains no secret key material.
-  // This can be used to load public keysets or envelope encryption keysets.
+  // Creates a KeysetHandle from a serialized keyset `serialized_keyset` which
+  // contains no secret key material, and annotates it with
+  // `monitoring_annotations` for monitoring; by default,
+  // `monitoring_annotations` is empty. This can be used to load public keysets
+  // or envelope encryption keysets.
   static crypto::tink::util::StatusOr<std::unique_ptr<KeysetHandle>>
-  ReadNoSecret(const std::string& serialized_keyset);
+  ReadNoSecret(const std::string& serialized_keyset,
+               const absl::flat_hash_map<std::string, std::string>&
+                   monitoring_annotations = {});
 
-  // Returns a new KeysetHandle that contains a single fresh key generated
-  // according to |key_template|.
+  // Returns a KeysetHandle for a new keyset that contains a single fresh key
+  // generated according to `key_template`. The keyset is annotated for
+  // monitoring with `monitoring_annotations`; by default,
+  // `monitoring_annotations` is empty.
   static crypto::tink::util::StatusOr<std::unique_ptr<KeysetHandle>>
-  GenerateNew(const google::crypto::tink::KeyTemplate& key_template);
+  GenerateNew(const google::crypto::tink::KeyTemplate& key_template,
+              const absl::flat_hash_map<std::string, std::string>&
+                  monitoring_annotations = {});
 
   // Encrypts the underlying keyset with the provided |master_key_aead|
   // and writes the resulting EncryptedKeyset to the given |writer|,
@@ -119,6 +137,18 @@ class KeysetHandle {
   explicit KeysetHandle(google::crypto::tink::Keyset keyset);
   // Creates a handle that contains the given keyset.
   explicit KeysetHandle(std::unique_ptr<google::crypto::tink::Keyset> keyset);
+  // Creates a handle that contains the given `keyset` and
+  // `monitoring_annotations`.
+  KeysetHandle(google::crypto::tink::Keyset keyset,
+               const absl::flat_hash_map<std::string, std::string>&
+                   monitoring_annotations)
+      : keyset_(std::move(keyset)),
+        monitoring_annotations_(monitoring_annotations) {}
+  KeysetHandle(std::unique_ptr<google::crypto::tink::Keyset> keyset,
+               const absl::flat_hash_map<std::string, std::string>&
+                   monitoring_annotations)
+      : keyset_(std::move(*keyset)),
+        monitoring_annotations_(monitoring_annotations) {}
 
   // Helper function which generates a key from a template, then adds it
   // to the keyset. TODO(tholenst): Change this to a proper member operating
@@ -142,6 +172,7 @@ class KeysetHandle {
       const KeyManager<P>* custom_manager) const;
 
   google::crypto::tink::Keyset keyset_;
+  absl::flat_hash_map<std::string, std::string> monitoring_annotations_;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -152,7 +183,8 @@ crypto::tink::util::StatusOr<std::unique_ptr<PrimitiveSet<P>>>
 KeysetHandle::GetPrimitives(const KeyManager<P>* custom_manager) const {
   crypto::tink::util::Status status = ValidateKeyset(get_keyset());
   if (!status.ok()) return status;
-  std::unique_ptr<PrimitiveSet<P>> primitives(new PrimitiveSet<P>());
+  std::unique_ptr<PrimitiveSet<P>> primitives(
+      new PrimitiveSet<P>(monitoring_annotations_));
   for (const google::crypto::tink::Keyset::Key& key : get_keyset().key()) {
     if (key.status() == google::crypto::tink::KeyStatusType::ENABLED) {
       std::unique_ptr<P> primitive;
@@ -181,11 +213,8 @@ KeysetHandle::GetPrimitives(const KeyManager<P>* custom_manager) const {
 template <class P>
 crypto::tink::util::StatusOr<std::unique_ptr<P>> KeysetHandle::GetPrimitive()
     const {
-  // TODO(b/222245356): Replace second argument with annotations when available
-  // to KeysetHandle via its public interface.
   return internal::RegistryImpl::GlobalInstance().WrapKeyset<P>(
-      keyset_,
-      /*annotations=*/{});
+      keyset_, monitoring_annotations_);
 }
 
 template <class P>
