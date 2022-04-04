@@ -243,6 +243,7 @@ tink_cc_test(
     tink::hybrid::ecies_aead_hkdf_private_key_manager
     tink::hybrid::ecies_aead_hkdf_public_key_manager
     tink::monitoring::monitoring
+    tink::monitoring::monitoring_client_mocks
     tink::subtle::aes_gcm_boringssl
     tink::subtle::random
     tink::util::istream_input_stream

@@ -274,6 +274,7 @@ cc_test(
         "//hybrid:ecies_aead_hkdf_private_key_manager",
         "//hybrid:ecies_aead_hkdf_public_key_manager",
         "//monitoring",
+        "//monitoring:monitoring_client_mocks",
         "//proto:aes_ctr_hmac_aead_cc_proto",
         "//proto:aes_gcm_cc_proto",
         "//proto:common_cc_proto",

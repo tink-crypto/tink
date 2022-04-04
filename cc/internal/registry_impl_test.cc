@@ -38,6 +38,7 @@
 #include "tink/hybrid/ecies_aead_hkdf_public_key_manager.h"
 #include "tink/keyset_manager.h"
 #include "tink/monitoring/monitoring.h"
+#include "tink/monitoring/monitoring_client_mocks.h"
 #include "tink/registry.h"
 #include "tink/subtle/aes_gcm_boringssl.h"
 #include "tink/subtle/random.h"
@@ -2017,17 +2018,9 @@ TEST_F(RegistryImplTest, FipsFailsIfNotEmpty) {
               StatusIs(absl::StatusCode::kInternal));
 }
 
-class FakeMonitoringClientFactory : public MonitoringClientFactory {
- public:
-  util::StatusOr<std::unique_ptr<MonitoringClient>> New(
-      const MonitoringContext& context) override {
-    return util::Status(absl::StatusCode::kUnimplemented, "Unimplemented");
-  }
-};
-
 TEST_F(RegistryImplTest, CanRegisterOnlyOneMonitoringFactory) {
   auto monitoring_client_factory =
-      absl::make_unique<FakeMonitoringClientFactory>();
+      absl::make_unique<MockMonitoringClientFactory>();
 
   RegistryImpl registry_impl;
   EXPECT_THAT(registry_impl.RegisterMonitoringClientFactory(
