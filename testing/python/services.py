@@ -317,7 +317,12 @@ class KeysetServicer(testing_api_pb2_grpc.KeysetServicer):
           tink.BinaryKeysetReader(request.master_keyset))
       master_aead = master_keyset_handle.primitive(aead.Aead)
 
-      reader = tink.BinaryKeysetReader(request.encrypted_keyset)
+      if request.keyset_reader_type == testing_api_pb2.KEYSET_READER_BINARY:
+        reader = tink.BinaryKeysetReader(request.encrypted_keyset)
+      elif request.keyset_reader_type == testing_api_pb2.KEYSET_READER_JSON:
+        reader = tink.JsonKeysetReader(request.encrypted_keyset.decode('utf8'))
+      else:
+        raise ValueError('unknown keyset reader type')
       if request.HasField('associated_data'):
         keyset_handle = tink.read_keyset_handle_with_associated_data(
             reader, master_aead, request.associated_data.value)
@@ -344,16 +349,28 @@ class KeysetServicer(testing_api_pb2_grpc.KeysetServicer):
           tink.BinaryKeysetReader(request.keyset))
       master_aead = master_keyset_handle.primitive(aead.Aead)
 
-      encrypted_keyset = io.BytesIO()
-      if request.HasField('associated_data'):
-        keyset_handle.write_with_associated_data(
-            tink.BinaryKeysetWriter(encrypted_keyset), master_aead,
-            request.associated_data.value)
+      if request.keyset_writer_type == testing_api_pb2.KEYSET_WRITER_BINARY:
+        encrypted_keyset = io.BytesIO()
+        writer = tink.BinaryKeysetWriter(encrypted_keyset)
+        if request.HasField('associated_data'):
+          keyset_handle.write_with_associated_data(
+              writer, master_aead, request.associated_data.value)
+        else:
+          keyset_handle.write(writer, master_aead)
+        return testing_api_pb2.KeysetWriteEncryptedResponse(
+            encrypted_keyset=encrypted_keyset.getvalue())
+      elif request.keyset_writer_type == testing_api_pb2.KEYSET_WRITER_JSON:
+        encrypted_keyset = io.StringIO()
+        writer = tink.JsonKeysetWriter(encrypted_keyset)
+        if request.HasField('associated_data'):
+          keyset_handle.write_with_associated_data(
+              writer, master_aead, request.associated_data.value)
+        else:
+          keyset_handle.write(writer, master_aead)
+        return testing_api_pb2.KeysetWriteEncryptedResponse(
+            encrypted_keyset=encrypted_keyset.getvalue().encode('utf8'))
       else:
-        keyset_handle.write(
-            tink.BinaryKeysetWriter(encrypted_keyset), master_aead)
-      return testing_api_pb2.KeysetWriteEncryptedResponse(
-          encrypted_keyset=encrypted_keyset.getvalue())
+        raise ValueError('unknown keyset writer type')
     except tink.TinkError as e:
       return testing_api_pb2.KeysetWriteEncryptedResponse(err=str(e))
 

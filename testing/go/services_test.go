@@ -178,9 +178,18 @@ func TestKeysetToJSONFail(t *testing.T) {
 func keysetWriteEncrypted(ctx context.Context, keysetService *services.KeysetService, keyset []byte, masterKeyset []byte, associatedData []byte) ([]byte, error) {
 	var request *pb.KeysetWriteEncryptedRequest
 	if associatedData != nil {
-		request = &pb.KeysetWriteEncryptedRequest{Keyset: keyset, MasterKeyset: masterKeyset, AssociatedData: &pb.BytesValue{Value: associatedData}}
+		request = &pb.KeysetWriteEncryptedRequest{
+			Keyset:           keyset,
+			MasterKeyset:     masterKeyset,
+			AssociatedData:   &pb.BytesValue{Value: associatedData},
+			KeysetWriterType: pb.KeysetWriterType_KEYSET_WRITER_BINARY,
+		}
 	} else {
-		request = &pb.KeysetWriteEncryptedRequest{Keyset: keyset, MasterKeyset: masterKeyset}
+		request = &pb.KeysetWriteEncryptedRequest{
+			Keyset:           keyset,
+			MasterKeyset:     masterKeyset,
+			KeysetWriterType: pb.KeysetWriterType_KEYSET_WRITER_BINARY,
+		}
 	}
 	response, err := keysetService.WriteEncrypted(ctx, request)
 	if err != nil {
@@ -199,9 +208,18 @@ func keysetWriteEncrypted(ctx context.Context, keysetService *services.KeysetSer
 func keysetReadEncrypted(ctx context.Context, keysetService *services.KeysetService, encryptedKeyset []byte, masterKeyset []byte, associatedData []byte) ([]byte, error) {
 	var request *pb.KeysetReadEncryptedRequest
 	if associatedData != nil {
-		request = &pb.KeysetReadEncryptedRequest{EncryptedKeyset: encryptedKeyset, MasterKeyset: masterKeyset, AssociatedData: &pb.BytesValue{Value: associatedData}}
+		request = &pb.KeysetReadEncryptedRequest{
+			EncryptedKeyset:  encryptedKeyset,
+			MasterKeyset:     masterKeyset,
+			AssociatedData:   &pb.BytesValue{Value: associatedData},
+			KeysetReaderType: pb.KeysetReaderType_KEYSET_READER_BINARY,
+		}
 	} else {
-		request = &pb.KeysetReadEncryptedRequest{EncryptedKeyset: encryptedKeyset, MasterKeyset: masterKeyset}
+		request = &pb.KeysetReadEncryptedRequest{
+			EncryptedKeyset:  encryptedKeyset,
+			MasterKeyset:     masterKeyset,
+			KeysetReaderType: pb.KeysetReaderType_KEYSET_READER_BINARY,
+		}
 	}
 	response, err := keysetService.ReadEncrypted(ctx, request)
 	if err != nil {

@@ -16,9 +16,9 @@
 
 #include "keyset_impl.h"
 
+#include <memory>
 #include <ostream>
 #include <sstream>
-#include <memory>
 #include <string>
 #include <utility>
 
@@ -30,8 +30,8 @@
 #include "tink/cleartext_keyset_handle.h"
 #include "tink/config/tink_config.h"
 #include "tink/hybrid/hybrid_key_templates.h"
-#include "proto/testing/testing_api.grpc.pb.h"
 #include "tink/util/test_matchers.h"
+#include "proto/testing/testing_api.grpc.pb.h"
 
 namespace crypto {
 namespace tink {
@@ -246,6 +246,7 @@ TEST_F(KeysetImplTest, ReadWriteEncryptedKeysetSuccess) {
   KeysetWriteEncryptedRequest write_request;
   write_request.set_keyset(*keyset);
   write_request.set_master_keyset(*master_keyset);
+  write_request.set_keyset_writer_type(tink_testing_api::KEYSET_WRITER_BINARY);
   KeysetWriteEncryptedResponse write_response;
 
   ASSERT_TRUE(
@@ -257,6 +258,7 @@ TEST_F(KeysetImplTest, ReadWriteEncryptedKeysetSuccess) {
   KeysetReadEncryptedRequest read_request;
   read_request.set_encrypted_keyset(write_response.encrypted_keyset());
   read_request.set_master_keyset(*master_keyset);
+  read_request.set_keyset_reader_type(tink_testing_api::KEYSET_READER_BINARY);
   KeysetReadEncryptedResponse read_response;
 
   ASSERT_TRUE(
@@ -280,6 +282,7 @@ TEST_F(KeysetImplTest, ReadWriteEncryptedWithAssociatedDataKeysetSuccess) {
   write_request.set_keyset(*keyset);
   write_request.set_master_keyset(*master_keyset);
   write_request.mutable_associated_data()->set_value(associated_data);
+  write_request.set_keyset_writer_type(tink_testing_api::KEYSET_WRITER_BINARY);
   KeysetWriteEncryptedResponse write_response;
 
   ASSERT_TRUE(
@@ -292,6 +295,7 @@ TEST_F(KeysetImplTest, ReadWriteEncryptedWithAssociatedDataKeysetSuccess) {
   read_request.set_encrypted_keyset(write_response.encrypted_keyset());
   read_request.set_master_keyset(*master_keyset);
   read_request.mutable_associated_data()->set_value(associated_data);
+  read_request.set_keyset_reader_type(tink_testing_api::KEYSET_READER_BINARY);
   KeysetReadEncryptedResponse read_response;
 
   ASSERT_TRUE(
@@ -311,6 +315,7 @@ TEST_F(KeysetImplTest, WriteEncryptedKeysetFail) {
   KeysetWriteEncryptedRequest write_request;
   write_request.set_keyset("invalid");
   write_request.set_master_keyset(*master_keyset);
+  write_request.set_keyset_writer_type(tink_testing_api::KEYSET_WRITER_BINARY);
   KeysetWriteEncryptedResponse write_response;
 
   ASSERT_TRUE(
@@ -329,6 +334,7 @@ TEST_F(KeysetImplTest, ReadEncryptedKeysetFail) {
   KeysetReadEncryptedRequest read_request;
   read_request.set_encrypted_keyset("invalid");
   read_request.set_master_keyset(*master_keyset);
+  read_request.set_keyset_reader_type(tink_testing_api::KEYSET_READER_BINARY);
   KeysetReadEncryptedResponse read_response;
 
   ASSERT_TRUE(

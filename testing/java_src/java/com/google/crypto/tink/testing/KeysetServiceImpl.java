@@ -38,12 +38,14 @@ import com.google.crypto.tink.proto.testing.KeysetPublicRequest;
 import com.google.crypto.tink.proto.testing.KeysetPublicResponse;
 import com.google.crypto.tink.proto.testing.KeysetReadEncryptedRequest;
 import com.google.crypto.tink.proto.testing.KeysetReadEncryptedResponse;
+import com.google.crypto.tink.proto.testing.KeysetReaderType;
 import com.google.crypto.tink.proto.testing.KeysetTemplateRequest;
 import com.google.crypto.tink.proto.testing.KeysetTemplateResponse;
 import com.google.crypto.tink.proto.testing.KeysetToJsonRequest;
 import com.google.crypto.tink.proto.testing.KeysetToJsonResponse;
 import com.google.crypto.tink.proto.testing.KeysetWriteEncryptedRequest;
 import com.google.crypto.tink.proto.testing.KeysetWriteEncryptedResponse;
+import com.google.crypto.tink.proto.testing.KeysetWriterType;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
 import io.grpc.Status;
@@ -141,7 +143,9 @@ public final class KeysetServiceImpl extends KeysetImplBase {
       JsonKeysetWriter.withOutputStream(jsonKeysetStream).write(keyset);
       jsonKeysetStream.close();
       response =
-          KeysetToJsonResponse.newBuilder().setJsonKeyset(jsonKeysetStream.toString("UTF-8")).build();
+          KeysetToJsonResponse.newBuilder()
+              .setJsonKeyset(jsonKeysetStream.toString("UTF-8"))
+              .build();
     } catch (GeneralSecurityException | InvalidProtocolBufferException e) {
       response = KeysetToJsonResponse.newBuilder().setErr(e.toString()).build();
     } catch (IOException e) {
@@ -190,8 +194,14 @@ public final class KeysetServiceImpl extends KeysetImplBase {
       Aead masterAead = masterKeysetHandle.getPrimitive(Aead.class);
 
       // read encrypted keyset to keysetHandle
-      KeysetReader reader =
-          BinaryKeysetReader.withBytes(request.getEncryptedKeyset().toByteArray());
+      KeysetReader reader;
+      if (request.getKeysetReaderType() == KeysetReaderType.KEYSET_READER_BINARY) {
+        reader = BinaryKeysetReader.withBytes(request.getEncryptedKeyset().toByteArray());
+      } else if (request.getKeysetReaderType() == KeysetReaderType.KEYSET_READER_JSON) {
+        reader = JsonKeysetReader.withBytes(request.getEncryptedKeyset().toByteArray());
+      } else {
+        throw new IllegalArgumentException("unknown keyset reader type");
+      }
       KeysetHandle keysetHandle;
       if (request.hasAssociatedData()) {
         keysetHandle =
@@ -210,11 +220,8 @@ public final class KeysetServiceImpl extends KeysetImplBase {
           KeysetReadEncryptedResponse.newBuilder()
               .setKeyset(ByteString.copyFrom(keysetStream.toByteArray()))
               .build();
-    } catch (GeneralSecurityException | InvalidProtocolBufferException e) {
+    } catch (IOException | GeneralSecurityException e) {
       response = KeysetReadEncryptedResponse.newBuilder().setErr(e.toString()).build();
-    } catch (IOException e) {
-      responseObserver.onError(Status.UNKNOWN.withDescription(e.getMessage()).asException());
-      return;
     }
     responseObserver.onNext(response);
     responseObserver.onCompleted();
@@ -239,7 +246,14 @@ public final class KeysetServiceImpl extends KeysetImplBase {
 
       // write keysetHandle as encrypted keyset
       ByteArrayOutputStream keysetStream = new ByteArrayOutputStream();
-      KeysetWriter writer = BinaryKeysetWriter.withOutputStream(keysetStream);
+      KeysetWriter writer;
+      if (request.getKeysetWriterType() == KeysetWriterType.KEYSET_WRITER_BINARY) {
+        writer = BinaryKeysetWriter.withOutputStream(keysetStream);
+      } else if (request.getKeysetWriterType() == KeysetWriterType.KEYSET_WRITER_JSON) {
+        writer = JsonKeysetWriter.withOutputStream(keysetStream);
+      } else {
+        throw new IllegalArgumentException("unknown keyset writer type");
+      }
       if (request.hasAssociatedData()) {
         keysetHandle.writeWithAssociatedData(
             writer, masterAead, request.getAssociatedData().getValue().toByteArray());
@@ -252,11 +266,8 @@ public final class KeysetServiceImpl extends KeysetImplBase {
           KeysetWriteEncryptedResponse.newBuilder()
               .setEncryptedKeyset(ByteString.copyFrom(keysetStream.toByteArray()))
               .build();
-    } catch (GeneralSecurityException | InvalidProtocolBufferException e) {
+    } catch (IOException | GeneralSecurityException e) {
       response = KeysetWriteEncryptedResponse.newBuilder().setErr(e.toString()).build();
-    } catch (IOException e) {
-      responseObserver.onError(Status.UNKNOWN.withDescription(e.getMessage()).asException());
-      return;
     }
     responseObserver.onNext(response);
     responseObserver.onCompleted();

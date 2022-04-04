@@ -49,12 +49,14 @@ import com.google.crypto.tink.proto.testing.KeysetGenerateResponse;
 import com.google.crypto.tink.proto.testing.KeysetGrpc;
 import com.google.crypto.tink.proto.testing.KeysetReadEncryptedRequest;
 import com.google.crypto.tink.proto.testing.KeysetReadEncryptedResponse;
+import com.google.crypto.tink.proto.testing.KeysetReaderType;
 import com.google.crypto.tink.proto.testing.KeysetTemplateRequest;
 import com.google.crypto.tink.proto.testing.KeysetTemplateResponse;
 import com.google.crypto.tink.proto.testing.KeysetToJsonRequest;
 import com.google.crypto.tink.proto.testing.KeysetToJsonResponse;
 import com.google.crypto.tink.proto.testing.KeysetWriteEncryptedRequest;
 import com.google.crypto.tink.proto.testing.KeysetWriteEncryptedResponse;
+import com.google.crypto.tink.proto.testing.KeysetWriterType;
 import com.google.crypto.tink.proto.testing.MacGrpc;
 import com.google.crypto.tink.proto.testing.MetadataGrpc;
 import com.google.crypto.tink.proto.testing.PrfSetComputeRequest;
@@ -225,7 +227,8 @@ public final class TestingServicesTest {
     KeysetReadEncryptedRequest.Builder requestBuilder =
         KeysetReadEncryptedRequest.newBuilder()
             .setEncryptedKeyset(ByteString.copyFrom(encryptedKeyset))
-            .setMasterKeyset(ByteString.copyFrom(masterKeyset));
+            .setMasterKeyset(ByteString.copyFrom(masterKeyset))
+            .setKeysetReaderType(KeysetReaderType.KEYSET_READER_BINARY);
     if (associatedData.isPresent()) {
       requestBuilder.setAssociatedData(
           BytesValue.newBuilder().setValue(ByteString.copyFrom(associatedData.get())).build());
@@ -239,7 +242,8 @@ public final class TestingServicesTest {
     KeysetWriteEncryptedRequest.Builder requestBuilder =
         KeysetWriteEncryptedRequest.newBuilder()
             .setKeyset(ByteString.copyFrom(keyset))
-            .setMasterKeyset(ByteString.copyFrom(masterKeyset));
+            .setMasterKeyset(ByteString.copyFrom(masterKeyset))
+            .setKeysetWriterType(KeysetWriterType.KEYSET_WRITER_BINARY);
     if (associatedData.isPresent()) {
       requestBuilder.setAssociatedData(
           BytesValue.newBuilder().setValue(ByteString.copyFrom(associatedData.get())).build());

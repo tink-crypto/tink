@@ -16,6 +16,8 @@
 import datetime
 import io
 
+from typing import Iterable, Tuple
+
 from absl.testing import absltest
 from absl.testing import parameterized
 
@@ -58,6 +60,12 @@ class TestingServersConfigTest(absltest.TestCase):
       ))
 
 
+def encrypted_keyset_test_cases() -> Iterable[Tuple[str, str, str]]:
+  for lang in testing_servers.LANGUAGES:
+    for reader_type, writer_type in testing_servers.KEYSET_READER_WRITER_TYPES:
+      yield (lang, reader_type, writer_type)
+
+
 class TestingServersTest(parameterized.TestCase):
 
   @classmethod
@@ -70,40 +78,45 @@ class TestingServersTest(parameterized.TestCase):
     testing_servers.stop()
     super(TestingServersTest, cls).tearDownClass()
 
-  @parameterized.parameters(['cc', 'java', 'go', 'python'])
+  @parameterized.parameters(testing_servers.LANGUAGES)
   def test_get_template(self, lang):
     template = testing_servers.key_template(lang, 'AES128_GCM')
     self.assertEqual(template.type_url,
                      'type.googleapis.com/google.crypto.tink.AesGcmKey')
 
-  @parameterized.parameters(['cc', 'java', 'go', 'python'])
-  def test_read_write_encrypted_keyset(self, lang):
+  @parameterized.parameters(encrypted_keyset_test_cases())
+  def test_read_write_encrypted_keyset(self, lang, keyset_reader_type,
+                                       keyset_writer_type):
     keyset = testing_servers.new_keyset(lang,
                                         aead.aead_key_templates.AES128_GCM)
     master_keyset = testing_servers.new_keyset(
         lang, aead.aead_key_templates.AES128_GCM)
     encrypted_keyset = testing_servers.keyset_write_encrypted(
-        lang, keyset, master_keyset, b'associated_data')
+        lang, keyset, master_keyset, b'associated_data', keyset_writer_type)
     output_keyset = testing_servers.keyset_read_encrypted(
-        lang, encrypted_keyset, master_keyset, b'associated_data')
+        lang, encrypted_keyset, master_keyset, b'associated_data',
+        keyset_reader_type)
     self.assertEqual(output_keyset, keyset)
 
     with self.assertRaises(tink.TinkError):
       testing_servers.keyset_read_encrypted(lang, encrypted_keyset,
                                             master_keyset,
-                                            b'invalid_associated_data')
+                                            b'invalid_associated_data',
+                                            keyset_reader_type)
     with self.assertRaises(tink.TinkError):
       testing_servers.keyset_read_encrypted(lang, b'invalid_encrypted_keyset',
-                                            master_keyset,
-                                            b'associated_data')
+                                            master_keyset, b'associated_data',
+                                            keyset_reader_type)
     with self.assertRaises(tink.TinkError):
       testing_servers.keyset_read_encrypted(lang, encrypted_keyset,
                                             b'invalid_master_keyset',
-                                            b'associated_data')
+                                            b'associated_data',
+                                            keyset_reader_type)
     with self.assertRaises(tink.TinkError):
       testing_servers.keyset_write_encrypted(lang, keyset,
                                              b'invalid_master_keyset',
-                                             b'associated_data')
+                                             b'associated_data',
+                                             keyset_writer_type)
 
   @parameterized.parameters(_SUPPORTED_LANGUAGES['aead'])
   def test_aead(self, lang):

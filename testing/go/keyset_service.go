@@ -20,6 +20,7 @@ package services
 import (
 	"bytes"
 	"context"
+	"errors"
 
 	"github.com/google/tink/go/aead"
 	"github.com/google/tink/go/daead"
@@ -215,7 +216,14 @@ func (s *KeysetService) WriteEncrypted(ctx context.Context, req *pb.KeysetWriteE
 	}
 
 	buf := new(bytes.Buffer)
-	writer := keyset.NewBinaryWriter(buf)
+	var writer keyset.Writer
+	if req.GetKeysetWriterType() == pb.KeysetWriterType_KEYSET_WRITER_BINARY {
+		writer = keyset.NewBinaryWriter(buf)
+	} else if req.GetKeysetWriterType() == pb.KeysetWriterType_KEYSET_WRITER_JSON {
+		writer = keyset.NewJSONWriter(buf)
+	} else {
+		return nil, errors.New("unknown keyset writer type")
+	}
 	if req.GetAssociatedData() != nil {
 		err = handle.WriteWithAssociatedData(writer, masterAead, req.GetAssociatedData().GetValue())
 	} else {
@@ -242,8 +250,14 @@ func (s *KeysetService) ReadEncrypted(ctx context.Context, req *pb.KeysetReadEnc
 			Result: &pb.KeysetReadEncryptedResponse_Err{err.Error()}}, nil
 	}
 
-	reader := keyset.NewBinaryReader(bytes.NewReader(req.GetEncryptedKeyset()))
-
+	var reader keyset.Reader
+	if req.GetKeysetReaderType() == pb.KeysetReaderType_KEYSET_READER_BINARY {
+		reader = keyset.NewBinaryReader(bytes.NewReader(req.GetEncryptedKeyset()))
+	} else if req.GetKeysetReaderType() == pb.KeysetReaderType_KEYSET_READER_JSON {
+		reader = keyset.NewJSONReader(bytes.NewReader(req.GetEncryptedKeyset()))
+	} else {
+		return nil, errors.New("unknown keyset reader type")
+	}
 	var handle *keyset.Handle
 	if req.GetAssociatedData() != nil {
 		handle, err = keyset.ReadWithAssociatedData(reader, masterAead, req.GetAssociatedData().GetValue())

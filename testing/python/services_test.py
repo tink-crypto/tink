@@ -173,7 +173,9 @@ class ServicesTest(absltest.TestCase):
     keyset = keyset_response.keyset
 
     write_encrypted_request = testing_api_pb2.KeysetWriteEncryptedRequest(
-        keyset=keyset, master_keyset=master_keyset)
+        keyset=keyset,
+        master_keyset=master_keyset,
+        keyset_writer_type=testing_api_pb2.KEYSET_WRITER_BINARY)
     write_encrypted_response = keyset_servicer.WriteEncrypted(
         write_encrypted_request, self._ctx)
     self.assertEqual(
@@ -181,7 +183,9 @@ class ServicesTest(absltest.TestCase):
     encrypted_keyset = write_encrypted_response.encrypted_keyset
 
     read_encrypted_request = testing_api_pb2.KeysetReadEncryptedRequest(
-        encrypted_keyset=encrypted_keyset, master_keyset=master_keyset)
+        encrypted_keyset=encrypted_keyset,
+        master_keyset=master_keyset,
+        keyset_reader_type=testing_api_pb2.KEYSET_READER_BINARY)
     read_encrypted_response = keyset_servicer.ReadEncrypted(
         read_encrypted_request, self._ctx)
     self.assertEqual(read_encrypted_response.WhichOneof('result'), 'keyset')
@@ -205,7 +209,8 @@ class ServicesTest(absltest.TestCase):
     write_encrypted_request = testing_api_pb2.KeysetWriteEncryptedRequest(
         keyset=keyset,
         master_keyset=master_keyset,
-        associated_data=testing_api_pb2.BytesValue(value=associated_data))
+        associated_data=testing_api_pb2.BytesValue(value=associated_data),
+        keyset_writer_type=testing_api_pb2.KEYSET_WRITER_BINARY)
     write_encrypted_response = keyset_servicer.WriteEncrypted(
         write_encrypted_request, self._ctx)
     self.assertEqual(
@@ -215,7 +220,8 @@ class ServicesTest(absltest.TestCase):
     read_encrypted_request = testing_api_pb2.KeysetReadEncryptedRequest(
         encrypted_keyset=encrypted_keyset,
         master_keyset=master_keyset,
-        associated_data=testing_api_pb2.BytesValue(value=associated_data))
+        associated_data=testing_api_pb2.BytesValue(value=associated_data),
+        keyset_reader_type=testing_api_pb2.KEYSET_READER_BINARY)
     read_encrypted_response = keyset_servicer.ReadEncrypted(
         read_encrypted_request, self._ctx)
     self.assertEqual(read_encrypted_response.WhichOneof('result'), 'keyset')
@@ -225,7 +231,8 @@ class ServicesTest(absltest.TestCase):
     read_encrypted_request = testing_api_pb2.KeysetReadEncryptedRequest(
         encrypted_keyset=encrypted_keyset,
         master_keyset=master_keyset,
-        associated_data=testing_api_pb2.BytesValue(value=b'wrong ad'))
+        associated_data=testing_api_pb2.BytesValue(value=b'wrong ad'),
+        keyset_reader_type=testing_api_pb2.KEYSET_READER_BINARY)
     read_encrypted_response = keyset_servicer.ReadEncrypted(
         read_encrypted_request, self._ctx)
     self.assertEqual(read_encrypted_response.WhichOneof('result'), 'err')
@@ -241,7 +248,8 @@ class ServicesTest(absltest.TestCase):
 
     write_encrypted_request = testing_api_pb2.KeysetWriteEncryptedRequest(
         keyset=b'invalid',
-        master_keyset=master_keyset)
+        master_keyset=master_keyset,
+        keyset_writer_type=testing_api_pb2.KEYSET_WRITER_BINARY)
     write_encrypted_response = keyset_servicer.WriteEncrypted(
         write_encrypted_request, self._ctx)
     self.assertEqual(write_encrypted_response.WhichOneof('result'), 'err')
@@ -257,7 +265,8 @@ class ServicesTest(absltest.TestCase):
 
     read_encrypted_request = testing_api_pb2.KeysetReadEncryptedRequest(
         encrypted_keyset=b'invalid',
-        master_keyset=master_keyset)
+        master_keyset=master_keyset,
+        keyset_reader_type=testing_api_pb2.KEYSET_READER_BINARY)
     read_encrypted_response = keyset_servicer.ReadEncrypted(
         read_encrypted_request, self._ctx)
     self.assertEqual(read_encrypted_response.WhichOneof('result'), 'err')
