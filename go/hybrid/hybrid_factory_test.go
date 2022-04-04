@@ -14,7 +14,7 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-package hybrid
+package hybrid_test
 
 import (
 	"bytes"
@@ -22,6 +22,7 @@ import (
 
 	"google.golang.org/protobuf/proto"
 	"github.com/google/tink/go/aead"
+	"github.com/google/tink/go/hybrid"
 	"github.com/google/tink/go/keyset"
 	"github.com/google/tink/go/signature"
 	"github.com/google/tink/go/subtle/random"
@@ -30,6 +31,8 @@ import (
 	commonpb "github.com/google/tink/go/proto/common_go_proto"
 	tinkpb "github.com/google/tink/go/proto/tink_go_proto"
 )
+
+const eciesAEADHKDFPrivateKeyTypeURL = "type.googleapis.com/google.crypto.tink.EciesAeadHkdfPrivateKey"
 
 func TestHybridFactoryTest(t *testing.T) {
 	c := commonpb.EllipticCurveType_NIST_P256
@@ -43,11 +46,11 @@ func TestHybridFactoryTest(t *testing.T) {
 
 	primaryPrivProto, err := testutil.GenerateECIESAEADHKDFPrivateKey(c, ht, primaryPtFmt, primaryDek, primarySalt)
 	if err != nil {
-		t.Error(err)
+		t.Fatalf("testutil.GenerateECIESAEADHKDFPrivateKey(c, ht, primaryPtFmt, primaryDek, primarySalt) err = %v, want nil", err)
 	}
 	sPrimaryPriv, err := proto.Marshal(primaryPrivProto)
 	if err != nil {
-		t.Error(err)
+		t.Fatalf("proto.Marshal(primaryPrivProto) err = %v, want nil", err)
 	}
 
 	primaryPrivKey := testutil.NewKey(
@@ -56,11 +59,11 @@ func TestHybridFactoryTest(t *testing.T) {
 
 	rawPrivProto, err := testutil.GenerateECIESAEADHKDFPrivateKey(c, ht, rawPtFmt, rawDek, rawSalt)
 	if err != nil {
-		t.Error(err)
+		t.Fatalf("testutil.GenerateECIESAEADHKDFPrivateKey(c, ht, rawPtFmt, rawDek, rawSalt) err = %v, want nil", err)
 	}
 	sRawPriv, err := proto.Marshal(rawPrivProto)
 	if err != nil {
-		t.Error(err)
+		t.Fatalf("proto.Marshal(rawPrivProto) err = %v, want nil", err)
 	}
 	rawPrivKey := testutil.NewKey(
 		testutil.NewKeyData(eciesAEADHKDFPrivateKeyTypeURL, sRawPriv, tinkpb.KeyData_ASYMMETRIC_PRIVATE),
@@ -70,21 +73,21 @@ func TestHybridFactoryTest(t *testing.T) {
 	privKeyset := testutil.NewKeyset(privKeys[0].KeyId, privKeys)
 	khPriv, err := testkeyset.NewHandle(privKeyset)
 	if err != nil {
-		t.Error(err)
+		t.Fatalf("testkeyset.NewHandle(privKeyset) err = %v, want nil", err)
 	}
 
 	khPub, err := khPriv.Public()
 	if err != nil {
-		t.Error(err)
+		t.Fatalf("khPriv.Public() err = %v, want nil", err)
 	}
 
-	e, err := NewHybridEncrypt(khPub)
+	e, err := hybrid.NewHybridEncrypt(khPub)
 	if err != nil {
-		t.Error(err)
+		t.Fatalf("hybrid.NewHybridEncrypt(khPub) err = %v, want nil", err)
 	}
-	d, err := NewHybridDecrypt(khPriv)
+	d, err := hybrid.NewHybridDecrypt(khPriv)
 	if err != nil {
-		t.Error(err)
+		t.Fatalf("hybrid.NewHybridDecrypt(khPriv) err = %v, want nil", err)
 	}
 
 	for i := 0; i < 1000; i++ {
@@ -92,14 +95,14 @@ func TestHybridFactoryTest(t *testing.T) {
 		ci := random.GetRandomBytes(20)
 		ct, err := e.Encrypt(pt, ci)
 		if err != nil {
-			t.Error(err)
+			t.Fatalf("e.Encrypt(pt, ci) err = %v, want nil", err)
 		}
 		gotpt, err := d.Decrypt(ct, ci)
 		if err != nil {
-			t.Error(err)
+			t.Fatalf("d.Decrypt(ct, ci) err = %v, want nil", err)
 		}
 		if !bytes.Equal(pt, gotpt) {
-			t.Error("expected pt:", pt, " not equal to decrypted pt:", gotpt)
+			t.Errorf("got plaintext %q, want %q", gotpt, pt)
 		}
 	}
 }
@@ -107,38 +110,38 @@ func TestHybridFactoryTest(t *testing.T) {
 func TestFactoryWithInvalidPrimitiveSetType(t *testing.T) {
 	wrongKH, err := keyset.NewHandle(signature.ECDSAP256KeyTemplate())
 	if err != nil {
-		t.Fatalf("failed to build *keyset.Handle: %s", err)
+		t.Fatalf("keyset.NewHandle(signature.ECDSAP256KeyTemplate()) err = %v, want nil", err)
 	}
 
-	_, err = NewHybridEncrypt(wrongKH)
+	_, err = hybrid.NewHybridEncrypt(wrongKH)
 	if err == nil {
-		t.Fatal("calling NewHybridEncrypt() with wrong *keyset.Handle should fail")
+		t.Error("hybrid.NewHybridEncrypt(wrongKH) err = nil, want not nil")
 	}
 
-	_, err = NewHybridDecrypt(wrongKH)
+	_, err = hybrid.NewHybridDecrypt(wrongKH)
 	if err == nil {
-		t.Fatal("calling NewHybridDecrypt() with wrong *keyset.Handle should fail")
+		t.Error("hybrid.NewHybridDecrypt(wrongKH) err = nil, want not nil")
 	}
 }
 
 func TestFactoryWithValidPrimitiveSetType(t *testing.T) {
-	goodKH, err := keyset.NewHandle(ECIESHKDFAES128GCMKeyTemplate())
+	goodKH, err := keyset.NewHandle(hybrid.ECIESHKDFAES128GCMKeyTemplate())
 	if err != nil {
-		t.Fatalf("failed to build *keyset.Handle: %s", err)
+		t.Fatalf("keyset.NewHandle(hybrid.ECIESHKDFAES128GCMKeyTemplate()) err = %v, want nil", err)
 	}
 
 	goodPublicKH, err := goodKH.Public()
 	if err != nil {
-		t.Fatalf("failed to get public *keyset.Handle: %s", err)
+		t.Fatalf("goodKH.Public() err = %v, want nil", err)
 	}
-	_, err = NewHybridEncrypt(goodPublicKH)
+	_, err = hybrid.NewHybridEncrypt(goodPublicKH)
 	if err != nil {
-		t.Fatalf("calling NewHybridEncrypt() with good *keyset.Handle failed: %s", err)
+		t.Errorf("hybrid.NewHybridEncrypt(goodPublicKH) err = %v, want nil", err)
 	}
 
-	_, err = NewHybridDecrypt(goodKH)
+	_, err = hybrid.NewHybridDecrypt(goodKH)
 	if err != nil {
-		t.Fatalf("calling NewHybridDecrypt() with good *keyset.Handle failed %s", err)
+		t.Errorf("hybrid.NewHybridDecrypt(goodKH) err = %v, want nil", err)
 	}
 }
 
@@ -154,7 +157,7 @@ func TestPrimitiveFactoryFailsWhenKeysetHasNoPrimary(t *testing.T) {
 	}
 	serialized, err := proto.Marshal(privProto)
 	if err != nil {
-		t.Fatalf("proto.Marshal(privateProto) failed: %v", err)
+		t.Fatalf("proto.Marshal(privateProto) err = %v, want nil", err)
 	}
 	privKey := testutil.NewKey(
 		testutil.NewKeyData(eciesAEADHKDFPrivateKeyTypeURL, serialized, tinkpb.KeyData_ASYMMETRIC_PRIVATE),
@@ -164,18 +167,18 @@ func TestPrimitiveFactoryFailsWhenKeysetHasNoPrimary(t *testing.T) {
 	}
 	privHandleWithoutPrimary, err := testkeyset.NewHandle(privKeysetWithoutPrimary)
 	if err != nil {
-		t.Fatalf("testkeyset.NewHandle(privKeysetWithoutPrimary) failed: %v", err)
+		t.Fatalf("testkeyset.NewHandle(privKeysetWithoutPrimary) err = %v, want nil", err)
 	}
 	pubHandleWithoutPrimary, err := privHandleWithoutPrimary.Public()
 	if err != nil {
-		t.Fatalf("privateHandleWithoutPrimary.Public() failed: %v", err)
+		t.Fatalf("privateHandleWithoutPrimary.Public() err = %v, want nil", err)
 	}
 
-	if _, err = NewHybridEncrypt(pubHandleWithoutPrimary); err == nil {
-		t.Errorf("NewHybridEncrypt(pubHandleWithoutPrimary) err = nil, want error")
+	if _, err = hybrid.NewHybridEncrypt(pubHandleWithoutPrimary); err == nil {
+		t.Errorf("NewHybridEncrypt(pubHandleWithoutPrimary) err = nil, want not nil")
 	}
 
-	if _, err = NewHybridDecrypt(privHandleWithoutPrimary); err == nil {
-		t.Errorf("NewHybridDecrypt(privHandleWithoutPrimary) err = nil, want error")
+	if _, err = hybrid.NewHybridDecrypt(privHandleWithoutPrimary); err == nil {
+		t.Errorf("NewHybridDecrypt(privHandleWithoutPrimary) err = nil, want not nil")
 	}
 }
