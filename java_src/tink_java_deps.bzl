@@ -15,7 +15,7 @@ TINK_MAVEN_ARTIFACTS = [
     "com.google.apis:google-api-services-cloudkms:v1-rev108-1.25.0",
     "com.google.auth:google-auth-library-oauth2-http:1.5.3",
     "com.google.code.findbugs:jsr305:3.0.1",
-    "com.google.code.gson:gson:2.8.6",
+    "com.google.code.gson:gson:2.8.9",
     "com.google.errorprone:error_prone_annotations:2.10.0",
     "com.google.http-client:google-http-client:1.31.0",
     "com.google.http-client:google-http-client-jackson2:1.31.0",
