@@ -195,6 +195,8 @@ test_maven_packages() {
 main() {
   # Initialization for Kokoro environments.
   if [[ -n "${KOKORO_ROOT}" ]]; then
+    cd "${KOKORO_ARTIFACTS_DIR}"/git*/tink
+
     use_bazel.sh $(cat .bazelversion)
 
     # Install protoc into a temporary directory.
