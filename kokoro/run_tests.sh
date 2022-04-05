@@ -164,6 +164,34 @@ install_temp_protoc() {
   export PATH="${protoc_tmpdir}/bin:${PATH}"
 }
 
+#######################################
+# Test Maven packages.
+# Globals:
+#   PLATFORM
+#   KOKORO_JOB_NAME
+# Arguments:
+#   None
+#######################################
+test_maven_packages() {
+  # Only test in the Ubuntu environment.
+  if [[ "${PLATFORM}" != "linux" ]]; then
+    return
+  fi
+
+  local -a maven_script_flags
+  if [[ ! "${KOKORO_JOB_NAME:-}" =~ ^tink/github ]]; then
+    # Unless running the GitHub continuous job, deploy and test Maven packages
+    # locally.
+    #
+    # Otherwise, snapshots will be published to the Maven Central repository.
+    maven_script_flags+=( -l )
+  fi
+  readonly maven_script_flags
+
+  ./maven/publish_snapshot.sh "${maven_script_flags[@]}"
+  ./maven/test_snapshot.sh "${maven_script_flags[@]}"
+}
+
 main() {
   # Initialization for Kokoro environments.
   if [[ -n "${KOKORO_ROOT}" ]]; then
@@ -234,6 +262,8 @@ main() {
     # run_macos_tests
     echo "*** ObjC tests not enabled yet."
   fi
+
+  test_maven_packages
 }
 
 main "$@"

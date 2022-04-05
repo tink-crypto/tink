@@ -25,10 +25,3 @@ set -x
 cd git*/tink
 
 source ./kokoro/run_tests.sh
-
-# On Linux, run all Maven tests and upload snapshot jars
-# TODO(b/226308020): Reenable after fixing  Maven dependency convergence errors.
-#if [[ $PLATFORM == 'linux' ]]; then
-#  ./maven/publish-snapshot.sh
-#  ./maven/test-snapshot.sh
-#fi
