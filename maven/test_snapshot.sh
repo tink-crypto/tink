@@ -24,7 +24,43 @@ set -x
 # Version of Android build-tools required for gradle.
 readonly ANDROID_BUILD_TOOLS_VERSION="28.0.3"
 
+usage() {
+  echo "Usage: $0 [-lh]"
+  echo "  -l: Local. Publish to local Maven repository (default: FALSE)."
+  echo "  -h: Help. Print this usage information."
+  exit 1
+}
+
+# Process flags.
+
+LOCAL="false"
+
+while getopts "lh" opt; do
+  case "${opt}" in
+    l) LOCAL="true" ;;
+    h) usage ;;
+    *) usage ;;
+  esac
+done
+shift $((OPTIND - 1))
+
+readonly LOCAL
+
+#######################################
+# Test snapshot Maven packages using an example Java app.
+# Globals:
+#   LOCAL
+# Arguments:
+#   None
+#######################################
 test_java_snapshot() {
+  local -a mvn_flags
+  if [[ "${LOCAL}" == "true" ]]; then
+    # Use snapshots present in the local repository.
+    mvn_flags+=( --no-snapshot-updates )
+  fi
+  readonly mvn_flags
+
   local -r test_tmpdir="$(mktemp -d)"
   mkdir -p "${test_tmpdir}"
 
@@ -33,7 +69,7 @@ test_java_snapshot() {
 
   local -r pom_file="examples/java_src/helloworld/pom.xml"
 
-  mvn package -f "${pom_file}"
+  mvn "${mvn_flags[@]}" package -f "${pom_file}"
 
   local -r plaintext="${test_tmpdir}/plaintext.bin"
   local -r encrypted="${test_tmpdir}/encrypted.bin"
@@ -41,9 +77,9 @@ test_java_snapshot() {
   local -r keyset="${test_tmpdir}/keyset.cfg"
 
   openssl rand 128 > "${plaintext}"
-  mvn exec:java -f "${pom_file}" \
+  mvn exec:java "${mvn_flags[@]}" -f "${pom_file}" \
     -Dexec.args="encrypt --keyset ${keyset} --in ${plaintext} --out ${encrypted}"
-  mvn exec:java -f $pom_file \
+  mvn exec:java "${mvn_flags[@]}" -f $pom_file \
     -Dexec.args="decrypt --keyset ${keyset} --in ${encrypted} --out ${decrypted}"
 
   assert_files_equal "${plaintext}" "${decrypted}"
@@ -51,7 +87,21 @@ test_java_snapshot() {
   rm -rf "${test_tmpdir}"
 }
 
+#######################################
+# Test snapshot Maven packages using an example Android app.
+# Globals:
+#   LOCAL
+# Arguments:
+#   None
+#######################################
 test_android_snapshot() {
+  local -a gradle_flags
+  if [[ "${LOCAL}" == "true" ]]; then
+    # Use snapshots present in the local repository.
+    gradle_flags+=( -PmavenLocation=local )
+  fi
+  readonly gradle_flags
+
   # Only in the Kokoro environment.
   if [[ -n "${KOKORO_ROOT}" ]]; then
     yes | "${ANDROID_HOME}/tools/bin/sdkmanager" \
@@ -59,7 +109,9 @@ test_android_snapshot() {
     yes | "${ANDROID_HOME}/tools/bin/sdkmanager" --licenses
   fi
 
-  ./examples/android/helloworld/gradlew -p ./examples/android/helloworld build
+  ./examples/android/helloworld/gradlew \
+    "${gradle_flags[@]}" \
+    -p ./examples/android/helloworld build
 }
 
 main() {

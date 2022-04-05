@@ -35,7 +35,7 @@ if [[ "${version_name}" =~ " " ]]; then
   exit 3
 fi
 
-bash "$(dirname $0)/execute-deploy.sh" \
+bash "$(dirname $0)/execute_deploy.sh" \
   "gpg:sign-and-deploy-file" \
   "${version_name}" \
   "-DrepositoryId=ossrh" \

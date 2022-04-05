@@ -19,8 +19,9 @@
 set -e
 
 usage() {
-  echo "Usage: $0 [-dh] <maven goal> <version> <additional maven args...>"
+  echo "Usage: $0 [-dlh] <maven goal> <version> <additional maven args...>"
   echo "  -d: Dry run. Only execute idempotent commands (default: FALSE)."
+  echo "  -l: Local. Deploy locally (default: FALSE)."
   echo "  -h: Help. Print this usage information."
   exit 1
 }
@@ -28,10 +29,12 @@ usage() {
 # Process flags.
 
 DRY_RUN="false"
+LOCAL="FALSE"
 
-while getopts "dh" opt; do
+while getopts "dlh" opt; do
   case "${opt}" in
     d) DRY_RUN="true" ;;
+    l) LOCAL="true" ;;
     h) usage ;;
     *) usage ;;
   esac
@@ -39,6 +42,7 @@ done
 shift $((OPTIND - 1))
 
 readonly DRY_RUN
+readonly LOCAL
 
 if (( $# < 2 )); then
   usage
@@ -153,6 +157,11 @@ deploy_library() {
 }
 
 publish_javadoc_to_github_pages() {
+  if [[ "${LOCAL}" == "true" ]]; then
+    echo "Local deployment, skipping publishing javadoc to GitHub Pages..."
+    return 0
+  fi
+
   local library_name="$1"
   local workspace_dir="$2"
   local javadoc="$3"
