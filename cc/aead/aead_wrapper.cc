@@ -20,11 +20,15 @@
 #include <string>
 #include <utility>
 
+#include "absl/memory/memory.h"
 #include "absl/status/status.h"
 #include "absl/strings/str_cat.h"
 #include "tink/aead.h"
 #include "tink/crypto_format.h"
+#include "tink/internal/monitoring_util.h"
+#include "tink/internal/registry_impl.h"
 #include "tink/internal/util.h"
+#include "tink/monitoring/monitoring.h"
 #include "tink/primitive_set.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
@@ -32,6 +36,10 @@
 namespace crypto {
 namespace tink {
 namespace {
+
+constexpr absl::string_view kPrimitive = "aead";
+constexpr absl::string_view kEncryptApi = "encrypt";
+constexpr absl::string_view kDecryptApi = "decrypt";
 
 util::Status Validate(PrimitiveSet<Aead>* aead_set) {
   if (aead_set == nullptr) {
@@ -45,12 +53,17 @@ util::Status Validate(PrimitiveSet<Aead>* aead_set) {
   return util::OkStatus();
 }
 
+// The actual wrapper.
 class AeadSetWrapper : public Aead {
  public:
-  explicit AeadSetWrapper(std::unique_ptr<PrimitiveSet<Aead>> aead_set)
-      : aead_set_(std::move(aead_set)) {}
-
-  ~AeadSetWrapper() override {}
+  explicit AeadSetWrapper(
+      std::unique_ptr<PrimitiveSet<Aead>> aead_set,
+      std::unique_ptr<MonitoringClient> monitoring_encryption_client = nullptr,
+      std::unique_ptr<MonitoringClient> monitoring_decryption_client = nullptr)
+      : aead_set_(std::move(aead_set)),
+        monitoring_encryption_client_(std::move(monitoring_encryption_client)),
+        monitoring_decryption_client_(std::move(monitoring_decryption_client)) {
+  }
 
   util::StatusOr<std::string> Encrypt(
       absl::string_view plaintext,
@@ -62,19 +75,25 @@ class AeadSetWrapper : public Aead {
 
  private:
   std::unique_ptr<PrimitiveSet<Aead>> aead_set_;
+  std::unique_ptr<MonitoringClient> monitoring_encryption_client_;
+  std::unique_ptr<MonitoringClient> monitoring_decryption_client_;
 };
 
 util::StatusOr<std::string> AeadSetWrapper::Encrypt(
     absl::string_view plaintext, absl::string_view associated_data) const {
-  // BoringSSL expects a non-null pointer for plaintext and additional_data,
-  // regardless of whether the size is 0.
-  plaintext = internal::EnsureStringNonNull(plaintext);
   associated_data = internal::EnsureStringNonNull(associated_data);
   const Aead& primitive = aead_set_->get_primary()->get_primitive();
   util::StatusOr<std::string> ciphertext =
       primitive.Encrypt(plaintext, associated_data);
   if (!ciphertext.ok()) {
+    if (monitoring_encryption_client_ != nullptr) {
+      monitoring_encryption_client_->LogFailure();
+    }
     return ciphertext.status();
+  }
+  if (monitoring_encryption_client_ != nullptr) {
+    monitoring_encryption_client_->Log(aead_set_->get_primary()->get_key_id(),
+                                       plaintext.size());
   }
   const std::string& key_id = aead_set_->get_primary()->get_identifier();
   return absl::StrCat(key_id, *ciphertext);
@@ -100,6 +119,10 @@ util::StatusOr<std::string> AeadSetWrapper::Decrypt(
         util::StatusOr<std::string> plaintext =
             aead.Decrypt(raw_ciphertext, associated_data);
         if (plaintext.ok()) {
+          if (monitoring_decryption_client_ != nullptr) {
+            monitoring_decryption_client_->Log(aead_entry->get_key_id(),
+                                               raw_ciphertext.size());
+          }
           return plaintext;
         }
       }
@@ -116,14 +139,21 @@ util::StatusOr<std::string> AeadSetWrapper::Decrypt(
       util::StatusOr<std::string> plaintext =
           aead.Decrypt(ciphertext, associated_data);
       if (plaintext.ok()) {
+        if (monitoring_decryption_client_ != nullptr) {
+          monitoring_decryption_client_->Log(aead_entry->get_key_id(),
+                                             ciphertext.size());
+        }
         return plaintext;
       }
     }
   }
+  if (monitoring_decryption_client_ != nullptr) {
+    monitoring_decryption_client_->LogFailure();
+  }
   return util::Status(absl::StatusCode::kInvalidArgument, "decryption failed");
 }
 
-}  // anonymous namespace
+}  // namespace
 
 util::StatusOr<std::unique_ptr<Aead>> AeadWrapper::Wrap(
     std::unique_ptr<PrimitiveSet<Aead>> aead_set) const {
@@ -131,8 +161,38 @@ util::StatusOr<std::unique_ptr<Aead>> AeadWrapper::Wrap(
   if (!status.ok()) {
     return status;
   }
-  std::unique_ptr<Aead> aead(new AeadSetWrapper(std::move(aead_set)));
-  return std::move(aead);
+
+  MonitoringClientFactory* const monitoring_factory =
+      internal::RegistryImpl::GlobalInstance().GetMonitoringClientFactory();
+
+  // Monitoring is not enabled. Create a wrapper without monitoring clients.
+  if (monitoring_factory == nullptr) {
+    return {absl::make_unique<AeadSetWrapper>(std::move(aead_set))};
+  }
+
+  util::StatusOr<MonitoringKeySetInfo> keyset_info =
+      internal::MonitoringKeySetInfoFromPrimitiveSet(*aead_set);
+  if (!keyset_info.ok()) {
+    return keyset_info.status();
+  }
+
+  util::StatusOr<std::unique_ptr<MonitoringClient>>
+      monitoring_encryption_client = monitoring_factory->New(
+          MonitoringContext(kPrimitive, kEncryptApi, *keyset_info));
+  if (!monitoring_encryption_client.ok()) {
+    return monitoring_encryption_client.status();
+  }
+
+  util::StatusOr<std::unique_ptr<MonitoringClient>>
+      monitoring_decryption_client = monitoring_factory->New(
+          MonitoringContext(kPrimitive, kDecryptApi, *keyset_info));
+  if (!monitoring_decryption_client.ok()) {
+    return monitoring_decryption_client.status();
+  }
+
+  return {absl::make_unique<AeadSetWrapper>(
+      std::move(aead_set), *std::move(monitoring_encryption_client),
+      *std::move(monitoring_decryption_client))};
 }
 
 }  // namespace tink

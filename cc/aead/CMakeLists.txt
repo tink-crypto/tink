@@ -8,13 +8,17 @@ tink_cc_library(
     aead_wrapper.cc
     aead_wrapper.h
   DEPS
+    absl::memory
     absl::status
     absl::strings
     tink::core::aead
     tink::core::crypto_format
     tink::core::primitive_set
     tink::core::primitive_wrapper
+    tink::internal::monitoring_util
+    tink::internal::registry_impl
     tink::internal::util
+    tink::monitoring::monitoring
     tink::util::status
     tink::util::statusor
     tink::proto::tink_cc_proto
@@ -305,9 +309,19 @@ tink_cc_test(
     aead_wrapper_test.cc
   DEPS
     tink::aead::aead_wrapper
+    tink::aead::mock_aead
     gmock
+    absl::flat_hash_map
+    absl::memory
+    absl::status
+    absl::strings
     tink::core::aead
+    tink::core::crypto_format
     tink::core::primitive_set
+    tink::core::registry
+    tink::internal::registry_impl
+    tink::monitoring::monitoring
+    tink::monitoring::monitoring_client_mocks
     tink::util::status
     tink::util::test_matchers
     tink::util::test_util

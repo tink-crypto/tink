@@ -22,8 +22,18 @@
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include "absl/container/flat_hash_map.h"
+#include "absl/memory/memory.h"
+#include "absl/status/status.h"
+#include "absl/strings/string_view.h"
 #include "tink/aead.h"
+#include "tink/aead/mock_aead.h"
+#include "tink/crypto_format.h"
+#include "tink/internal/registry_impl.h"
+#include "tink/monitoring/monitoring.h"
+#include "tink/monitoring/monitoring_client_mocks.h"
 #include "tink/primitive_set.h"
+#include "tink/registry.h"
 #include "tink/util/status.h"
 #include "tink/util/test_matchers.h"
 #include "tink/util/test_util.h"
@@ -39,15 +49,36 @@ using ::crypto::tink::test::StatusIs;
 using ::google::crypto::tink::KeysetInfo;
 using ::google::crypto::tink::KeyStatusType;
 using ::google::crypto::tink::OutputPrefixType;
+using ::testing::_;
+using ::testing::ByMove;
 using ::testing::HasSubstr;
+using ::testing::IsNull;
 using ::testing::IsSubstring;
 using ::testing::Not;
+using ::testing::Return;
+using ::testing::StrictMock;
+using ::testing::Test;
 
 void PopulateKeyInfo(KeysetInfo::KeyInfo* key_info, uint32_t key_id,
                      OutputPrefixType out_prefix_type, KeyStatusType status) {
   key_info->set_output_prefix_type(out_prefix_type);
   key_info->set_key_id(key_id);
   key_info->set_status(status);
+}
+
+// Creates a test keyset info object.
+KeysetInfo CreateTestKeysetInfo() {
+  KeysetInfo keyset_info;
+  PopulateKeyInfo(keyset_info.add_key_info(), /*key_id=*/1234543,
+                  OutputPrefixType::TINK,
+                  /*status=*/KeyStatusType::ENABLED);
+  PopulateKeyInfo(keyset_info.add_key_info(), /*key_id=*/726329,
+                  OutputPrefixType::LEGACY,
+                  /*status=*/KeyStatusType::ENABLED);
+  PopulateKeyInfo(keyset_info.add_key_info(), /*key_id=*/7213743,
+                  OutputPrefixType::TINK,
+                  /*status=*/KeyStatusType::ENABLED);
+  return keyset_info;
 }
 
 TEST(AeadSetWrapperTest, WrapNullptr) {
@@ -70,17 +101,7 @@ TEST(AeadSetWrapperTest, WrapEmpty) {
 }
 
 TEST(AeadSetWrapperTest, Basic) {
-  KeysetInfo keyset_info;
-  PopulateKeyInfo(keyset_info.add_key_info(), /*key_id=*/1234543,
-                  OutputPrefixType::TINK,
-                  /*status=*/KeyStatusType::ENABLED);
-  PopulateKeyInfo(keyset_info.add_key_info(), /*key_id=*/726329,
-                  OutputPrefixType::LEGACY,
-                  /*status=*/KeyStatusType::ENABLED);
-  PopulateKeyInfo(keyset_info.add_key_info(), /*key_id=*/7213743,
-                  OutputPrefixType::TINK,
-                  /*status=*/KeyStatusType::ENABLED);
-
+  KeysetInfo keyset_info = CreateTestKeysetInfo();
   std::string aead_name_0 = "aead0";
   std::string aead_name_1 = "aead1";
   std::string aead_name_2 = "aead2";
@@ -126,17 +147,7 @@ TEST(AeadSetWrapperTest, Basic) {
 }
 
 TEST(AeadSetWrapperTest, DecryptNonPrimary) {
-  KeysetInfo keyset_info;
-  PopulateKeyInfo(keyset_info.add_key_info(), /*key_id=*/1234543,
-                  OutputPrefixType::TINK,
-                  /*status=*/KeyStatusType::ENABLED);
-  PopulateKeyInfo(keyset_info.add_key_info(), /*key_id=*/726329,
-                  OutputPrefixType::LEGACY,
-                  /*status=*/KeyStatusType::ENABLED);
-  PopulateKeyInfo(keyset_info.add_key_info(), /*key_id=*/7213743,
-                  OutputPrefixType::TINK,
-                  /*status=*/KeyStatusType::ENABLED);
-
+  KeysetInfo keyset_info = CreateTestKeysetInfo();
   std::string aead_name_0 = "aead0";
   std::string aead_name_1 = "aead1";
   std::string aead_name_2 = "aead2";
@@ -180,6 +191,150 @@ TEST(AeadSetWrapperTest, DecryptNonPrimary) {
       aead->Decrypt(complete_ciphertext, aad);
   EXPECT_THAT(decrypted_plaintext.status(), IsOk());
 }
+
+// Tests with monitoring enabled.
+class AeadSetWrapperTestWithMonitoring : public Test {
+ protected:
+  // Perform some common initialization: reset the global registry, set expected
+  // calls for the mock monitoring factory and the returned clients.
+  void SetUp() override {
+    Registry::Reset();
+    auto monitoring_client_factory =
+        absl::make_unique<MockMonitoringClientFactory>();
+
+    auto encryption_monitoring_client =
+        absl::make_unique<StrictMock<MockMonitoringClient>>();
+    encryption_monitoring_client_ptr_ = encryption_monitoring_client.get();
+    auto decryption_monitoring_client =
+        absl::make_unique<StrictMock<MockMonitoringClient>>();
+    decryption_monitoring_client_ptr_ = decryption_monitoring_client.get();
+
+    EXPECT_CALL(*monitoring_client_factory, New(_))
+        .WillOnce(
+            Return(ByMove(util::StatusOr<std::unique_ptr<MonitoringClient>>(
+                std::move(encryption_monitoring_client)))))
+        .WillOnce(
+            Return(ByMove(util::StatusOr<std::unique_ptr<MonitoringClient>>(
+                std::move(decryption_monitoring_client)))));
+
+    ASSERT_THAT(internal::RegistryImpl::GlobalInstance()
+                    .RegisterMonitoringClientFactory(
+                        std::move(monitoring_client_factory)),
+                IsOk());
+    ASSERT_THAT(
+        internal::RegistryImpl::GlobalInstance().GetMonitoringClientFactory(),
+        Not(IsNull()));
+  }
+
+  // Cleanup the registry to avoid mock leaks.
+  void TearDown() override { Registry::Reset(); }
+
+  MockMonitoringClient* encryption_monitoring_client_ptr_;
+  MockMonitoringClient* decryption_monitoring_client_ptr_;
+};
+
+// Test that successful encrypt/decrypt operations are logged.
+TEST_F(AeadSetWrapperTestWithMonitoring,
+       WrapKeysetWithMonitoringEncryptDecryptSuccess) {
+  // Populate a primitive set.
+  KeysetInfo keyset_info = CreateTestKeysetInfo();
+  const absl::flat_hash_map<std::string, std::string> kAnnotations = {
+      {"key1", "value1"}, {"key2", "value2"}, {"key3", "value3"}};
+  auto aead_primitive_set = absl::make_unique<PrimitiveSet<Aead>>(kAnnotations);
+  ASSERT_THAT(aead_primitive_set
+                  ->AddPrimitive(absl::make_unique<DummyAead>("aead0"),
+                                 keyset_info.key_info(0))
+                  .status(),
+              IsOk());
+  ASSERT_THAT(aead_primitive_set
+                  ->AddPrimitive(absl::make_unique<DummyAead>("aead1"),
+                                 keyset_info.key_info(1))
+                  .status(),
+              IsOk());
+  // Set the last as primary.
+  util::StatusOr<PrimitiveSet<Aead>::Entry<Aead>*> last =
+      aead_primitive_set->AddPrimitive(absl::make_unique<DummyAead>("aead2"),
+                                       keyset_info.key_info(2));
+  ASSERT_THAT(last.status(), IsOk());
+  ASSERT_THAT(aead_primitive_set->set_primary(*last), IsOk());
+  // Record the ID of the primary key.
+  const uint32_t kPrimaryKeyId = keyset_info.key_info(2).key_id();
+
+  util::StatusOr<std::unique_ptr<Aead>> aead =
+      AeadWrapper().Wrap(std::move(aead_primitive_set));
+  ASSERT_THAT(aead.status(), IsOk());
+
+  constexpr absl::string_view kPlaintext = "This is some plaintext!";
+  constexpr absl::string_view kAdditionalData = "Some additional data!";
+  EXPECT_CALL(*encryption_monitoring_client_ptr_,
+              Log(kPrimaryKeyId, kPlaintext.size()));
+  util::StatusOr<std::string> ciphertext =
+      (*aead)->Encrypt(kPlaintext, kAdditionalData);
+  ASSERT_THAT(ciphertext.status(), IsOk());
+
+  // In the log expect the size of the ciphertext without the non-raw prefix.
+  auto raw_ciphertext =
+      absl::string_view(*ciphertext).substr(CryptoFormat::kNonRawPrefixSize);
+  EXPECT_CALL(*decryption_monitoring_client_ptr_,
+              Log(kPrimaryKeyId, raw_ciphertext.size()));
+  EXPECT_THAT((*aead)->Decrypt(*ciphertext, kAdditionalData).status(), IsOk());
+}
+
+// Test that monitoring logs encryption and decryption failures correctly.
+TEST_F(AeadSetWrapperTestWithMonitoring,
+       WrapKeysetWithMonitoringEncryptDecryptFailures) {
+  // Populate a primitive set.
+  KeysetInfo keyset_info = CreateTestKeysetInfo();
+
+  const absl::flat_hash_map<std::string, std::string> kAnnotations = {
+      {"key1", "value1"}, {"key2", "value2"}, {"key3", "value3"}};
+
+  auto aead_primitive_set = absl::make_unique<PrimitiveSet<Aead>>(kAnnotations);
+
+  // Assume encryption and decryption always fail.
+  auto mock_aead = absl::make_unique<MockAead>();
+  constexpr absl::string_view kPlaintext = "A plaintext!!";
+  constexpr absl::string_view kCiphertext = "A ciphertext!";
+  constexpr absl::string_view kAdditionalData = "Some additional data!";
+  ON_CALL(*mock_aead, Encrypt(kPlaintext, kAdditionalData))
+      .WillByDefault(Return(util::Status(absl::StatusCode::kInternal,
+                                         "Oh no encryption failed :(!")));
+  ON_CALL(*mock_aead, Decrypt(kCiphertext, kAdditionalData))
+      .WillByDefault(Return(util::Status(absl::StatusCode::kInternal,
+                                         "Oh no decryption failed :(!")));
+
+  util::StatusOr<PrimitiveSet<Aead>::Entry<Aead>*> primary =
+      aead_primitive_set->AddPrimitive(std::move(mock_aead),
+                                       keyset_info.key_info(2));
+  ASSERT_THAT(primary.status(), IsOk());
+  // Set the only primitive as primary.
+  ASSERT_THAT(aead_primitive_set->set_primary(*primary), IsOk());
+
+  util::StatusOr<std::unique_ptr<Aead>> aead =
+      AeadWrapper().Wrap(std::move(aead_primitive_set));
+  ASSERT_THAT(aead.status(), IsOk());
+
+  // Expect encryption failure gets logged.
+  EXPECT_CALL(*encryption_monitoring_client_ptr_, LogFailure());
+  util::StatusOr<std::string> ciphertext =
+      (*aead)->Encrypt(kPlaintext, kAdditionalData);
+  EXPECT_THAT(ciphertext.status(), Not(IsOk()));
+
+  // We must prepend the identifier to the ciphertext to make sure our mock gets
+  // called.
+  util::StatusOr<std::string> key_identifier =
+      CryptoFormat::GetOutputPrefix(keyset_info.key_info(2));
+  ASSERT_THAT(key_identifier.status(), IsOk());
+  std::string ciphertext_with_key_id =
+      absl::StrCat(*key_identifier, kCiphertext);
+
+  // Expect decryption failure gets logged.
+  EXPECT_CALL(*decryption_monitoring_client_ptr_, LogFailure());
+  EXPECT_THAT(
+      (*aead)->Decrypt(ciphertext_with_key_id, kAdditionalData).status(),
+      Not(IsOk()));
+}
+
 }  // namespace
 }  // namespace tink
 }  // namespace crypto
