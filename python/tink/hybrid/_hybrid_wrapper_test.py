@@ -17,6 +17,7 @@
 from absl.testing import absltest
 from absl.testing import parameterized
 import tink
+from tink import cleartext_keyset_handle
 from tink import core
 from tink import hybrid
 from tink.testing import keyset_builder
@@ -24,6 +25,71 @@ from tink.testing import keyset_builder
 
 TEMPLATE = hybrid.hybrid_key_templates.ECIES_P256_HKDF_HMAC_SHA256_AES128_GCM
 RAW_TEMPLATE = keyset_builder.raw_template(TEMPLATE)
+
+PRIVATE_KEYSET_WITH_PRIMARY = """
+  {
+    "primaryKeyId": 2160196527,
+    "key": [
+      {
+        "keyData": {
+          "typeUrl": "type.googleapis.com/google.crypto.tink.EciesAeadHkdfPrivateKey",
+          "value": "GiCP3xXdT0G7GQMQ+k7nsl+W5ElO3EN6ybwSPTGWdArHTBKKASIgrgyjrYI2mV+K8Csa703wGgtlOG+yxHajoM6quNA1IHEaIASUo/ubipc/Vn+WhN64qmnzp9mqzyvQTQ5jrNt6Xwq6EkQYARI6EjgYARICEBAKMHR5cGUuZ29vZ2xlYXBpcy5jb20vZ29vZ2xlLmNyeXB0by50aW5rLkFlc0djbUtleQoEEAMIAg==",
+          "keyMaterialType": "ASYMMETRIC_PRIVATE"
+        },
+        "status": "ENABLED",
+        "keyId": 2160196527,
+        "outputPrefixType": "TINK"
+      }
+    ]
+  }"""
+# Same as PRIVATE_KEYSET_WITH_PRIMARY, but without primaryKeyId.
+PRIVATE_KEYSET_WITHOUT_PRIMARY = """
+  {
+    "key": [
+      {
+        "keyData": {
+          "typeUrl": "type.googleapis.com/google.crypto.tink.EciesAeadHkdfPrivateKey",
+          "value": "GiCP3xXdT0G7GQMQ+k7nsl+W5ElO3EN6ybwSPTGWdArHTBKKASIgrgyjrYI2mV+K8Csa703wGgtlOG+yxHajoM6quNA1IHEaIASUo/ubipc/Vn+WhN64qmnzp9mqzyvQTQ5jrNt6Xwq6EkQYARI6EjgYARICEBAKMHR5cGUuZ29vZ2xlYXBpcy5jb20vZ29vZ2xlLmNyeXB0by50aW5rLkFlc0djbUtleQoEEAMIAg==",
+          "keyMaterialType": "ASYMMETRIC_PRIVATE"
+        },
+        "status": "ENABLED",
+        "keyId": 2160196527,
+        "outputPrefixType": "TINK"
+      }
+    ]
+  }"""
+PUBLIC_KEYSET_WITH_PRIMARY = """
+  {
+    "primaryKeyId": 2160196527,
+    "key": [
+      {
+        "keyData": {
+          "typeUrl": "type.googleapis.com/google.crypto.tink.EciesAeadHkdfPublicKey",
+          "value": "IiCuDKOtgjaZX4rwKxrvTfAaC2U4b7LEdqOgzqq40DUgcRogBJSj+5uKlz9Wf5aE3riqafOn2arPK9BNDmOs23pfCroSRBgBEjoSOBgBEgIQEAowdHlwZS5nb29nbGVhcGlzLmNvbS9nb29nbGUuY3J5cHRvLnRpbmsuQWVzR2NtS2V5CgQQAwgC",
+          "keyMaterialType": "ASYMMETRIC_PUBLIC"
+        },
+        "status": "ENABLED",
+        "keyId": 2160196527,
+        "outputPrefixType": "TINK"
+      }
+    ]
+  }"""
+# Same as PUBLIC_KEYSET_WITH_PRIMARY, but without primaryKeyId.
+PUBLIC_KEYSET_WITHOUT_PRIMARY = """
+  {
+    "key": [
+      {
+        "keyData": {
+          "typeUrl": "type.googleapis.com/google.crypto.tink.EciesAeadHkdfPublicKey",
+          "value": "IiCuDKOtgjaZX4rwKxrvTfAaC2U4b7LEdqOgzqq40DUgcRogBJSj+5uKlz9Wf5aE3riqafOn2arPK9BNDmOs23pfCroSRBgBEjoSOBgBEgIQEAowdHlwZS5nb29nbGVhcGlzLmNvbS9nb29nbGUuY3J5cHRvLnRpbmsuQWVzR2NtS2V5CgQQAwgC",
+          "keyMaterialType": "ASYMMETRIC_PUBLIC"
+        },
+        "status": "ENABLED",
+        "keyId": 2160196527,
+        "outputPrefixType": "TINK"
+      }
+    ]
+  }"""
 
 
 def setUpModule():
@@ -133,6 +199,29 @@ class HybridWrapperTest(parameterized.TestCase):
     self.assertEqual(dec2.decrypt(ciphertext4, b'context'), b'plaintext')
     self.assertEqual(dec3.decrypt(ciphertext4, b'context'), b'plaintext')
     self.assertEqual(dec4.decrypt(ciphertext4, b'context'), b'plaintext')
+
+  def test_encrypt_decrypt_with_primary_key_succeeds(self):
+    private_handle_with_primary = cleartext_keyset_handle.read(
+        tink.JsonKeysetReader(PRIVATE_KEYSET_WITH_PRIMARY))
+    public_handle_with_primary = cleartext_keyset_handle.read(
+        tink.JsonKeysetReader(PUBLIC_KEYSET_WITH_PRIMARY))
+    dec = private_handle_with_primary.primitive(hybrid.HybridDecrypt)
+    enc = public_handle_with_primary.primitive(hybrid.HybridEncrypt)
+    ciphertext = enc.encrypt(b'plaintext', b'context')
+    self.assertEqual(dec.decrypt(ciphertext, b'context'), b'plaintext')
+
+  def test_encrypt_decrypt_without_primary_key_fails(self):
+    with self.assertRaises(tink.TinkError):
+      cleartext_keyset_handle.read(
+          tink.JsonKeysetReader(PRIVATE_KEYSET_WITHOUT_PRIMARY))
+    # Currently, the public keyset only fails when 'encrypt' is called.
+    # TODO(b/228140127): It would be preferable that it fails earlier.
+    public_handle_without_primary = cleartext_keyset_handle.read(
+        tink.JsonKeysetReader(PUBLIC_KEYSET_WITHOUT_PRIMARY))
+    enc_without_primary = public_handle_without_primary.primitive(
+        hybrid.HybridEncrypt)
+    with self.assertRaises(tink.TinkError):
+      enc_without_primary.encrypt(b'plaintext', b'context')
 
 
 if __name__ == '__main__':

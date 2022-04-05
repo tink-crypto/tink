@@ -82,6 +82,7 @@ py_test(
         ":hybrid",
         requirement("six"),  # needed by absl-py
         requirement("absl-py"),
+        "//tink:cleartext_keyset_handle",
         "//tink:tink_python",
         "//tink/proto:tink_py_pb2",
         "//tink/testing:keyset_builder",
