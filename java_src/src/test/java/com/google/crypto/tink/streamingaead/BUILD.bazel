@@ -127,6 +127,7 @@ java_test(
     name = "StreamingAeadConfigTest",
     size = "small",
     srcs = ["StreamingAeadConfigTest.java"],
+    tags = ["fips"],
     deps = [
         "//src/main/java/com/google/crypto/tink:registry",
         "//src/main/java/com/google/crypto/tink:streaming_aead",
