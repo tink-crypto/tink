@@ -180,6 +180,7 @@ java_test(
     name = "SignatureConfigTest",
     size = "small",
     srcs = ["SignatureConfigTest.java"],
+    tags = ["fips"],
     deps = [
         "//src/main/java/com/google/crypto/tink:public_key_sign",
         "//src/main/java/com/google/crypto/tink:public_key_verify",
