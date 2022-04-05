@@ -44,6 +44,9 @@ main() {
   # Sourcing required to update callers environment.
   source ./kokoro/testutils/install_python3.sh
 
+  if [[ -n "${KOKORO_ROOT:-}" ]]; then
+    use_bazel.sh "$(cat cc/.bazelversion)"
+  fi
   cp "cc/WORKSPACE" "cc/WORKSPACE.bak"
   ./kokoro/testutils/replace_http_archive_with_local_reposotory.py \
     -f "cc/WORKSPACE" \
