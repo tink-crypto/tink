@@ -58,16 +58,12 @@ java_library(
         "PrfSet.java",
     ],
     visibility = ["//visibility:public"],
-    deps = [
-        "@maven//:com_google_errorprone_error_prone_annotations",
-    ],
+    deps = ["@maven//:com_google_errorprone_error_prone_annotations"],
 )
 
 java_library(
     name = "prf_set_wrapper",
-    srcs = [
-        "PrfSetWrapper.java",
-    ],
+    srcs = ["PrfSetWrapper.java"],
     visibility = ["//visibility:public"],
     deps = [
         ":prf_set",
