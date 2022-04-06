@@ -58,6 +58,19 @@ py_test(
 )
 
 py_test(
+    name = "keyset_validation_test",
+    srcs = ["keyset_validation_test.py"],
+    deps = [
+        "//util:supported_key_types",
+        "//util:testing_servers",
+        requirement("absl-py"),
+        "@tink_py//tink:tink_python",
+        "@tink_py//tink/jwt",
+        "@tink_py//tink/proto:tink_py_pb2",
+    ],
+)
+
+py_test(
     name = "json_test",
     srcs = ["json_test.py"],
     deps = [
