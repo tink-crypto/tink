@@ -50,7 +50,7 @@ func TestJWTComputeVerifyMAC(t *testing.T) {
 			}
 			m, err := jwt.NewMAC(handle)
 			if err != nil {
-				t.Errorf("New() err = %v, want nil", err)
+				t.Errorf("jwt.NewMAC() err = %v, want nil", err)
 			}
 			compact, err := m.ComputeMACAndEncode(rawJWT)
 			if err != nil {
@@ -58,7 +58,7 @@ func TestJWTComputeVerifyMAC(t *testing.T) {
 			}
 			verifier, err := jwt.NewValidator(&jwt.ValidatorOpts{AllowMissingExpiration: true})
 			if err != nil {
-				t.Errorf("NewValidator() err = %v, want nil", err)
+				t.Errorf("jwt.NewValidator() err = %v, want nil", err)
 			}
 			if _, err := m.VerifyMACAndDecode(compact, verifier); err != nil {
 				t.Errorf("m.VerifyMACAndDecode() err = %v, want nil", err)
@@ -103,7 +103,7 @@ func TestJWTSignVerifyECDSA(t *testing.T) {
 			}
 			validator, err := jwt.NewValidator(&jwt.ValidatorOpts{AllowMissingExpiration: true})
 			if err != nil {
-				t.Fatalf("jwt.NewJWTValidator() err = %v, want nil", err)
+				t.Fatalf("jwt.NewValidator() err = %v, want nil", err)
 			}
 			if _, err := verifier.VerifyAndDecode(compact, validator); err != nil {
 				t.Errorf("verifier.VerifyAndDecode() err = %v, want nil", err)
