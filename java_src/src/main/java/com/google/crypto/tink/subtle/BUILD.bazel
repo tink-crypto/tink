@@ -145,9 +145,7 @@ java_library(
 java_library(
     name = "ecies_aead_hkdf_dem_helper",
     srcs = ["EciesAeadHkdfDemHelper.java"],
-    deps = [
-        "//src/main/java/com/google/crypto/tink/hybrid/subtle:aead_or_daead",
-    ],
+    deps = ["//src/main/java/com/google/crypto/tink/hybrid/subtle:aead_or_daead"],
 )
 
 java_library(
@@ -294,8 +292,6 @@ java_library(
     srcs = ["AesGcmJce.java"],
     deps = [
         ":random",
-        ":subtle_util_cluster",
-        ":validators",
         "//src/main/java/com/google/crypto/tink:aead",
         "//src/main/java/com/google/crypto/tink/aead/internal:insecure_nonce_aes_gcm_jce",
         "//src/main/java/com/google/crypto/tink/config/internal:tink_fips_util",
@@ -423,9 +419,7 @@ java_library(
 java_library(
     name = "rewindable_readable_byte_channel",
     srcs = ["RewindableReadableByteChannel.java"],
-    deps = [
-        "@maven//:com_google_code_findbugs_jsr305",
-    ],
+    deps = ["@maven//:com_google_code_findbugs_jsr305"],
 )
 
 java_library(
