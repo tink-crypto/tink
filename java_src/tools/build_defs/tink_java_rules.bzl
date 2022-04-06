@@ -37,6 +37,9 @@ def tink_android_test(name, srcs, deps, shard_count = 1, data = [], min_version 
         manifest = "//third_party/tink/java_src/src/androidtest:AndroidManifest.xml",
         testonly = 1,
         multidex = "native",
+        javacopts = [
+            "-XepOpt:CheckReturnValue:CheckAllConstructors=false",  # b/226969262
+        ],
     )
 
     legacy_multidex_binary = name + "_legacy_binary"
@@ -49,6 +52,9 @@ def tink_android_test(name, srcs, deps, shard_count = 1, data = [], min_version 
         manifest = "//third_party/tink/java_src/src/androidtest:AndroidManifest.xml",
         testonly = 1,
         multidex = "legacy",
+        javacopts = [
+            "-XepOpt:CheckReturnValue:CheckAllConstructors=false",  # b/226969262
+        ],
     )
 
     for version_num, device in TARGET_DEVICES.items():
