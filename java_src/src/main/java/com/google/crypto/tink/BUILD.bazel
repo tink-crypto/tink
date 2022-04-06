@@ -478,9 +478,7 @@ android_library(
 
 java_library(
     name = "registry",
-    srcs = [
-        "Registry.java",
-    ],
+    srcs = ["Registry.java"],
     deps = [
         ":catalogue",
         ":key_manager",
