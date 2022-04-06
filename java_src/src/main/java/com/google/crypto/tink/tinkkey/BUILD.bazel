@@ -25,9 +25,7 @@ java_library(
 java_library(
     name = "key_access",
     srcs = ["KeyAccess.java"],
-    deps = [
-        "@maven//:com_google_errorprone_error_prone_annotations",
-    ],
+    deps = ["@maven//:com_google_errorprone_error_prone_annotations"],
 )
 
 java_library(
