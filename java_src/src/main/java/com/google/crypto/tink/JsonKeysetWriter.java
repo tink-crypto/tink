@@ -148,7 +148,7 @@ public final class JsonKeysetWriter implements KeysetWriter {
     JsonObject json = new JsonObject();
     json.addProperty("typeUrl", keyInfo.getTypeUrl());
     json.addProperty("status", keyInfo.getStatus().name());
-    json.addProperty("keyId", keyInfo.getKeyId());
+    json.addProperty("keyId", toUnsignedLong(keyInfo.getKeyId()));
     json.addProperty("outputPrefixType", keyInfo.getOutputPrefixType().name());
     return json;
   }
