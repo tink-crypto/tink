@@ -280,21 +280,33 @@ public class JsonKeysetReaderTest {
 
   @Test
   public void testReadEncrypted_multipleKeys_shouldWork() throws Exception {
-    KeyTemplate masterKeyTemplate = AeadKeyTemplates.AES128_EAX;
-    Aead masterKey = Registry.getPrimitive(Registry.newKeyData(masterKeyTemplate));
+    Aead keysetEncryptionAead =
+        KeysetHandle.generateNew(KeyTemplates.get("AES128_EAX")).getPrimitive(Aead.class);
     ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-    KeyTemplate template = MacKeyTemplates.HMAC_SHA256_128BITTAG;
-    KeysetHandle handle1 =
+    KeysetManager manager =
         KeysetManager.withEmptyKeyset()
-            .rotate(template)
-            .add(template)
-            .add(template)
-            .getKeysetHandle();
-    handle1.write(JsonKeysetWriter.withOutputStream(outputStream), masterKey);
+            .add(KeyTemplates.get("HMAC_SHA256_128BITTAG"))
+            .add(KeyTemplates.get("HMAC_SHA256_128BITTAG_RAW"))
+            .add(KeyTemplates.get("HMAC_SHA256_256BITTAG"))
+            .add(KeyTemplates.get("HMAC_SHA256_256BITTAG_RAW"))
+            .add(KeyTemplates.get("AES256_CMAC"));
+    // To get the key IDs
+    KeysetHandle h = manager.getKeysetHandle();
+    int keyId1 = h.getKeysetInfo().getKeyInfo(1).getKeyId();
+    int keyId2 = h.getKeysetInfo().getKeyInfo(2).getKeyId();
+    int keyId3 = h.getKeysetInfo().getKeyInfo(3).getKeyId();
+    int keyId4 = h.getKeysetInfo().getKeyInfo(4).getKeyId();
+    manager.setPrimary(keyId1);
+    manager.delete(keyId2);
+    manager.destroy(keyId3);
+    manager.disable(keyId4);
+    KeysetHandle handle1 = manager.getKeysetHandle();
+
+    handle1.write(JsonKeysetWriter.withOutputStream(outputStream), keysetEncryptionAead);
     KeysetHandle handle2 =
         KeysetHandle.read(
             JsonKeysetReader.withInputStream(new ByteArrayInputStream(outputStream.toByteArray())),
-            masterKey);
+            keysetEncryptionAead);
 
     assertKeysetHandle(handle1, handle2);
   }

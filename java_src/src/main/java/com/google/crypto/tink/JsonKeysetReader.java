@@ -242,38 +242,46 @@ public final class JsonKeysetReader implements KeysetReader {
   }
 
   private static KeyStatusType getStatus(String status) {
-    if (status.equals("ENABLED")) {
-      return KeyStatusType.ENABLED;
-    } else if (status.equals("DISABLED")) {
-      return KeyStatusType.DISABLED;
+    switch (status) {
+      case "ENABLED":
+        return KeyStatusType.ENABLED;
+      case "DISABLED":
+        return KeyStatusType.DISABLED;
+      case "DESTROYED":
+        return KeyStatusType.DESTROYED;
+      default:
+        throw new JsonParseException("unknown status: " + status);
     }
-    throw new JsonParseException("unknown status: " + status);
   }
 
   private static OutputPrefixType getOutputPrefixType(String type) {
-    if (type.equals("TINK")) {
-      return OutputPrefixType.TINK;
-    } else if (type.equals("RAW")) {
-      return OutputPrefixType.RAW;
-    } else if (type.equals("LEGACY")) {
-      return OutputPrefixType.LEGACY;
-    } else if (type.equals("CRUNCHY")) {
-      return OutputPrefixType.CRUNCHY;
+    switch (type) {
+      case "TINK":
+        return OutputPrefixType.TINK;
+      case "RAW":
+        return OutputPrefixType.RAW;
+      case "LEGACY":
+        return OutputPrefixType.LEGACY;
+      case "CRUNCHY":
+        return OutputPrefixType.CRUNCHY;
+      default:
+        throw new JsonParseException("unknown output prefix type: " + type);
     }
-    throw new JsonParseException("unknown output prefix type: " + type);
   }
 
   private static KeyMaterialType getKeyMaterialType(String type) {
-    if (type.equals("SYMMETRIC")) {
-      return KeyMaterialType.SYMMETRIC;
-    } else if (type.equals("ASYMMETRIC_PRIVATE")) {
-      return KeyMaterialType.ASYMMETRIC_PRIVATE;
-    } else if (type.equals("ASYMMETRIC_PUBLIC")) {
-      return KeyMaterialType.ASYMMETRIC_PUBLIC;
-    } else if (type.equals("REMOTE")) {
-      return KeyMaterialType.REMOTE;
+    switch (type) {
+      case "SYMMETRIC":
+        return KeyMaterialType.SYMMETRIC;
+      case "ASYMMETRIC_PRIVATE":
+        return KeyMaterialType.ASYMMETRIC_PRIVATE;
+      case "ASYMMETRIC_PUBLIC":
+        return KeyMaterialType.ASYMMETRIC_PUBLIC;
+      case "REMOTE":
+        return KeyMaterialType.REMOTE;
+      default:
+        throw new JsonParseException("unknown key material type: " + type);
     }
-    throw new JsonParseException("unknown key material type: " + type);
   }
 
   private static void validateKeyset(JsonObject json) {
