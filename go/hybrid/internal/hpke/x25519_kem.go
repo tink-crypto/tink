@@ -96,14 +96,16 @@ func (x *x25519KEM) deriveKEMSharedSecret(dh, senderPubKey, recipientPubKey []by
 	if err != nil {
 		return nil, err
 	}
-	info, err := labelInfo("shared_secret", ctx, suiteID, int(macLength))
+	hkdfKDF, err := newHKDFKDF(x.macAlg)
 	if err != nil {
 		return nil, err
 	}
-	return subtle.ComputeHKDF(
-		x.macAlg,
-		labelIKM("eae_prk", dh, suiteID),
+	return hkdfKDF.extractAndExpand(
 		/*salt=*/ nil,
-		info,
-		macLength)
+		dh,
+		"eae_prk",
+		ctx,
+		"shared_secret",
+		suiteID,
+		int(macLength))
 }
