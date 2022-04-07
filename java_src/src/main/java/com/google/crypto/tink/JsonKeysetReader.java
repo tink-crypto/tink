@@ -187,10 +187,16 @@ public final class JsonKeysetReader implements KeysetReader {
     } else {
       encryptedKeyset = Base64.decode(json.get("encryptedKeyset").getAsString());
     }
-    return EncryptedKeyset.newBuilder()
-        .setEncryptedKeyset(ByteString.copyFrom(encryptedKeyset))
-        .setKeysetInfo(keysetInfoFromJson(json.getAsJsonObject("keysetInfo")))
-        .build();
+    if (json.has("keysetInfo")) {
+      return EncryptedKeyset.newBuilder()
+          .setEncryptedKeyset(ByteString.copyFrom(encryptedKeyset))
+          .setKeysetInfo(keysetInfoFromJson(json.getAsJsonObject("keysetInfo")))
+          .build();
+    } else {
+      return EncryptedKeyset.newBuilder()
+          .setEncryptedKeyset(ByteString.copyFrom(encryptedKeyset))
+          .build();
+    }
   }
 
   private Keyset.Key keyFromJson(JsonObject json) {

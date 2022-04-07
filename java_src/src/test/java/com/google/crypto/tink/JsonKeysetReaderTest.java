@@ -312,6 +312,28 @@ public class JsonKeysetReaderTest {
   }
 
   @Test
+  public void testReadEncrypted_missingKeysetInfo_shouldSucceed() throws Exception {
+    Aead keysetEncryptionAead =
+        KeysetHandle.generateNew(KeyTemplates.get("AES128_EAX")).getPrimitive(Aead.class);
+    ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+    KeysetHandle handle1 = KeysetHandle.generateNew(KeyTemplates.get("HMAC_SHA256_128BITTAG"));
+
+    // Generate a valid encrypted keyset in JSON format, and delete "keysetInfo".
+    handle1.write(JsonKeysetWriter.withOutputStream(outputStream), keysetEncryptionAead);
+    JsonObject jsonEncryptedKeyset =
+        JsonParser.parseString(new String(outputStream.toByteArray(), UTF_8)).getAsJsonObject();
+    jsonEncryptedKeyset.remove("keysetInfo");
+    String jsonEncryptedKeysetWithoutKeysetInfo = jsonEncryptedKeyset.toString();
+
+    KeysetHandle handle2 =
+        KeysetHandle.read(
+            JsonKeysetReader.withString(jsonEncryptedKeysetWithoutKeysetInfo),
+            keysetEncryptionAead);
+
+    assertKeysetHandle(handle1, handle2);
+  }
+
+  @Test
   public void testReadEncrypted_missingEncryptedKeyset_shouldThrowException() throws Exception {
     KeyTemplate masterKeyTemplate = AeadKeyTemplates.AES128_EAX;
     Aead masterKey = Registry.getPrimitive(Registry.newKeyData(masterKeyTemplate));
