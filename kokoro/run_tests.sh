@@ -179,7 +179,7 @@ test_maven_packages() {
   fi
 
   local -a maven_script_flags
-  if [[ ! "${KOKORO_JOB_NAME:-}" =~ ^tink/github ]]; then
+  if [[ "${KOKORO_JOB_NAME:-}" != "tink/github/gcp_ubuntu/continuous" ]]; then
     # Unless running the GitHub continuous job, deploy and test Maven packages
     # locally.
     #
