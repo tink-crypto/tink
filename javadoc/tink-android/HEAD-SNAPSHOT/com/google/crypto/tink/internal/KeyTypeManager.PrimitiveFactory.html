@@ -92,14 +92,14 @@ var activeTableTab = "activeTableTab";
 <!-- ======== START OF CLASS DATA ======== -->
 <div class="header">
 <div class="subTitle">com.google.crypto.tink.internal</div>
-<h2 title="Class KeyTypeManager.PrimitiveFactory" class="title">Class KeyTypeManager.PrimitiveFactory&lt;PrimitiveT,KeyT&gt;</h2>
+<h2 title="Class KeyTypeManager.PrimitiveFactory" class="title">Class KeyTypeManager.PrimitiveFactory&lt;PrimitiveT,KeyProtoT extends com.google.protobuf.MessageLite&gt;</h2>
 </div>
 <div class="contentContainer">
 <ul class="inheritance">
 <li><a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">java.lang.Object</a></li>
 <li>
 <ul class="inheritance">
-<li>com.google.crypto.tink.internal.KeyTypeManager.PrimitiveFactory&lt;PrimitiveT,KeyT&gt;</li>
+<li>com.google.crypto.tink.internal.KeyTypeManager.PrimitiveFactory&lt;PrimitiveT,KeyProtoT&gt;</li>
 </ul>
 </li>
 </ul>
@@ -112,7 +112,7 @@ var activeTableTab = "activeTableTab";
 </dl>
 <hr>
 <br>
-<pre>protected abstract static class <span class="typeNameLabel">KeyTypeManager.PrimitiveFactory&lt;PrimitiveT,KeyT&gt;</span>
+<pre>protected abstract static class <span class="typeNameLabel">KeyTypeManager.PrimitiveFactory&lt;PrimitiveT,KeyProtoT extends com.google.protobuf.MessageLite&gt;</span>
 extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a></pre>
 <div class="block">A PrimitiveFactory knows how to create primitives from a given key.</div>
 </li>
@@ -152,7 +152,7 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 </tr>
 <tr id="i0" class="altColor">
 <td class="colFirst"><code>abstract <a href="../../../../../com/google/crypto/tink/internal/KeyTypeManager.PrimitiveFactory.html" title="type parameter in KeyTypeManager.PrimitiveFactory">PrimitiveT</a></code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/internal/KeyTypeManager.PrimitiveFactory.html#getPrimitive-KeyT-">getPrimitive</a></span>(<a href="../../../../../com/google/crypto/tink/internal/KeyTypeManager.PrimitiveFactory.html" title="type parameter in KeyTypeManager.PrimitiveFactory">KeyT</a>&nbsp;key)</code>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/internal/KeyTypeManager.PrimitiveFactory.html#getPrimitive-KeyProtoT-">getPrimitive</a></span>(<a href="../../../../../com/google/crypto/tink/internal/KeyTypeManager.PrimitiveFactory.html" title="type parameter in KeyTypeManager.PrimitiveFactory">KeyProtoT</a>&nbsp;key)</code>
 <div class="block">Creates a new instance of <code>PrimitiveT</code>.</div>
 </td>
 </tr>
@@ -195,15 +195,15 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 <!--   -->
 </a>
 <h3>Method Detail</h3>
-<a name="getPrimitive-java.lang.Object-">
+<a name="getPrimitive-com.google.protobuf.MessageLite-">
 <!--   -->
-</a><a name="getPrimitive-KeyT-">
+</a><a name="getPrimitive-KeyProtoT-">
 <!--   -->
 </a>
 <ul class="blockListLast">
 <li class="blockList">
 <h4>getPrimitive</h4>
-<pre>public abstract&nbsp;<a href="../../../../../com/google/crypto/tink/internal/KeyTypeManager.PrimitiveFactory.html" title="type parameter in KeyTypeManager.PrimitiveFactory">PrimitiveT</a>&nbsp;getPrimitive(<a href="../../../../../com/google/crypto/tink/internal/KeyTypeManager.PrimitiveFactory.html" title="type parameter in KeyTypeManager.PrimitiveFactory">KeyT</a>&nbsp;key)
+<pre>public abstract&nbsp;<a href="../../../../../com/google/crypto/tink/internal/KeyTypeManager.PrimitiveFactory.html" title="type parameter in KeyTypeManager.PrimitiveFactory">PrimitiveT</a>&nbsp;getPrimitive(<a href="../../../../../com/google/crypto/tink/internal/KeyTypeManager.PrimitiveFactory.html" title="type parameter in KeyTypeManager.PrimitiveFactory">KeyProtoT</a>&nbsp;key)
                                  throws <a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
 <div class="block">Creates a new instance of <code>PrimitiveT</code>.
 
