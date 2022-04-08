@@ -54,7 +54,8 @@ run_linux_tests() {
   (
     cd "${workspace_dir}"
     time bazel build "${BAZEL_FLAGS[@]}" -- ... || fail_with_debug_output
-    time bazel test "${BAZEL_FLAGS[@]}" "${TEST_FLAGS[@]}" -- ... || fail_with_debug_output
+    time bazel test "${BAZEL_FLAGS[@]}" "${TEST_FLAGS[@]}" -- ... \
+      || fail_with_debug_output
     if (( ${#manual_targets[@]} > 0 )); then
       time bazel test "${TEST_FLAGS[@]}"  -- "${manual_targets[@]}" \
         || fail_with_debug_output
@@ -63,8 +64,17 @@ run_linux_tests() {
 }
 
 run_all_linux_tests() {
-  # TODO(b/154445252): Delete this when per-language MacOS Javascript tests are
-  # added.
+  # TODO(b/228529710): Update using an easier to maintain approach to test
+  # parity.
+  if [[ "${KOKORO_JOB_NAME:-}" =~ ^tink/github ]]; then
+    run_linux_tests "cc"
+    run_linux_tests "java_src"
+    run_linux_tests "go"
+    run_linux_tests "python"
+    run_linux_tests "tools"
+    run_linux_tests "apps"
+  fi
+
   run_linux_tests "javascript"
   run_linux_tests "examples/cc"
 
@@ -223,6 +233,8 @@ main() {
 
     ./kokoro/testutils/copy_credentials.sh
     ./kokoro/testutils/update_android_sdk.sh
+    # Sourcing required to update callers environment.
+    source ./kokoro/testutils/install_go.sh
   fi
 
   # Verify required environment variables.
@@ -243,6 +255,8 @@ main() {
 
   echo "using java binary: $(which java)"
   java -version
+
+  echo "Using go binary from $(which go): $(go version)"
 
   echo "using python: $(which python)"
   python --version
