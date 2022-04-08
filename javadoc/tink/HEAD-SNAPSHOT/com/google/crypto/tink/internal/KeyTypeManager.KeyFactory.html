@@ -92,14 +92,14 @@ var activeTableTab = "activeTableTab";
 <!-- ======== START OF CLASS DATA ======== -->
 <div class="header">
 <div class="subTitle">com.google.crypto.tink.internal</div>
-<h2 title="Class KeyTypeManager.KeyFactory" class="title">Class KeyTypeManager.KeyFactory&lt;KeyFormatProtoT extends com.google.protobuf.MessageLite,KeyT&gt;</h2>
+<h2 title="Class KeyTypeManager.KeyFactory" class="title">Class KeyTypeManager.KeyFactory&lt;KeyFormatProtoT extends com.google.protobuf.MessageLite,KeyProtoT extends com.google.protobuf.MessageLite&gt;</h2>
 </div>
 <div class="contentContainer">
 <ul class="inheritance">
 <li><a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">java.lang.Object</a></li>
 <li>
 <ul class="inheritance">
-<li>com.google.crypto.tink.internal.KeyTypeManager.KeyFactory&lt;KeyFormatProtoT,KeyT&gt;</li>
+<li>com.google.crypto.tink.internal.KeyTypeManager.KeyFactory&lt;KeyFormatProtoT,KeyProtoT&gt;</li>
 </ul>
 </li>
 </ul>
@@ -112,7 +112,7 @@ var activeTableTab = "activeTableTab";
 </dl>
 <hr>
 <br>
-<pre>public abstract static class <span class="typeNameLabel">KeyTypeManager.KeyFactory&lt;KeyFormatProtoT extends com.google.protobuf.MessageLite,KeyT&gt;</span>
+<pre>public abstract static class <span class="typeNameLabel">KeyTypeManager.KeyFactory&lt;KeyFormatProtoT extends com.google.protobuf.MessageLite,KeyProtoT extends com.google.protobuf.MessageLite&gt;</span>
 extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a></pre>
 <div class="block">A <code>KeyFactory</code> creates new keys from a given KeyFormat.
 
@@ -177,13 +177,13 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 <th class="colLast" scope="col">Method and Description</th>
 </tr>
 <tr id="i0" class="altColor">
-<td class="colFirst"><code>abstract <a href="../../../../../com/google/crypto/tink/internal/KeyTypeManager.KeyFactory.html" title="type parameter in KeyTypeManager.KeyFactory">KeyT</a></code></td>
+<td class="colFirst"><code>abstract <a href="../../../../../com/google/crypto/tink/internal/KeyTypeManager.KeyFactory.html" title="type parameter in KeyTypeManager.KeyFactory">KeyProtoT</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/internal/KeyTypeManager.KeyFactory.html#createKey-KeyFormatProtoT-">createKey</a></span>(<a href="../../../../../com/google/crypto/tink/internal/KeyTypeManager.KeyFactory.html" title="type parameter in KeyTypeManager.KeyFactory">KeyFormatProtoT</a>&nbsp;keyFormat)</code>
 <div class="block">Creates a new key from a given format.</div>
 </td>
 </tr>
 <tr id="i1" class="rowColor">
-<td class="colFirst"><code><a href="../../../../../com/google/crypto/tink/internal/KeyTypeManager.KeyFactory.html" title="type parameter in KeyTypeManager.KeyFactory">KeyT</a></code></td>
+<td class="colFirst"><code><a href="../../../../../com/google/crypto/tink/internal/KeyTypeManager.KeyFactory.html" title="type parameter in KeyTypeManager.KeyFactory">KeyProtoT</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/internal/KeyTypeManager.KeyFactory.html#deriveKey-KeyFormatProtoT-java.io.InputStream-">deriveKey</a></span>(<a href="../../../../../com/google/crypto/tink/internal/KeyTypeManager.KeyFactory.html" title="type parameter in KeyTypeManager.KeyFactory">KeyFormatProtoT</a>&nbsp;keyFormat,
          <a href="https://docs.oracle.com/javase/8/docs/api/java/io/InputStream.html?is-external=true" title="class or interface in java.io">InputStream</a>&nbsp;pseudoRandomness)</code>
 <div class="block">Derives a new key from a given format, using the given <code>pseudoRandomness</code>.</div>
@@ -305,8 +305,8 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 <ul class="blockList">
 <li class="blockList">
 <h4>createKey</h4>
-<pre>public abstract&nbsp;<a href="../../../../../com/google/crypto/tink/internal/KeyTypeManager.KeyFactory.html" title="type parameter in KeyTypeManager.KeyFactory">KeyT</a>&nbsp;createKey(<a href="../../../../../com/google/crypto/tink/internal/KeyTypeManager.KeyFactory.html" title="type parameter in KeyTypeManager.KeyFactory">KeyFormatProtoT</a>&nbsp;keyFormat)
-                        throws <a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
+<pre>public abstract&nbsp;<a href="../../../../../com/google/crypto/tink/internal/KeyTypeManager.KeyFactory.html" title="type parameter in KeyTypeManager.KeyFactory">KeyProtoT</a>&nbsp;createKey(<a href="../../../../../com/google/crypto/tink/internal/KeyTypeManager.KeyFactory.html" title="type parameter in KeyTypeManager.KeyFactory">KeyFormatProtoT</a>&nbsp;keyFormat)
+                             throws <a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
 <div class="block">Creates a new key from a given format.</div>
 <dl>
 <dt><span class="throwsLabel">Throws:</span></dt>
@@ -322,9 +322,9 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 <ul class="blockList">
 <li class="blockList">
 <h4>deriveKey</h4>
-<pre>public&nbsp;<a href="../../../../../com/google/crypto/tink/internal/KeyTypeManager.KeyFactory.html" title="type parameter in KeyTypeManager.KeyFactory">KeyT</a>&nbsp;deriveKey(<a href="../../../../../com/google/crypto/tink/internal/KeyTypeManager.KeyFactory.html" title="type parameter in KeyTypeManager.KeyFactory">KeyFormatProtoT</a>&nbsp;keyFormat,
-                      <a href="https://docs.oracle.com/javase/8/docs/api/java/io/InputStream.html?is-external=true" title="class or interface in java.io">InputStream</a>&nbsp;pseudoRandomness)
-               throws <a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
+<pre>public&nbsp;<a href="../../../../../com/google/crypto/tink/internal/KeyTypeManager.KeyFactory.html" title="type parameter in KeyTypeManager.KeyFactory">KeyProtoT</a>&nbsp;deriveKey(<a href="../../../../../com/google/crypto/tink/internal/KeyTypeManager.KeyFactory.html" title="type parameter in KeyTypeManager.KeyFactory">KeyFormatProtoT</a>&nbsp;keyFormat,
+                           <a href="https://docs.oracle.com/javase/8/docs/api/java/io/InputStream.html?is-external=true" title="class or interface in java.io">InputStream</a>&nbsp;pseudoRandomness)
+                    throws <a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
 <div class="block">Derives a new key from a given format, using the given <code>pseudoRandomness</code>.
 
  <p>Implementations need to note that the given paramter <code>pseudoRandomness</code> may only
