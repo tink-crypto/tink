@@ -1,19 +1,9 @@
-"""
-Initialization of dependencies of C++ Tink.
-"""
+"""Initialization of dependencies of C++ Tink."""
 
-load("@com_google_googleapis//:repository_rules.bzl", "switched_rules_by_language")
-load("@com_github_grpc_grpc//bazel:grpc_deps.bzl", "grpc_deps")
-load("@com_github_grpc_grpc//bazel:grpc_extra_deps.bzl", "grpc_extra_deps")
-
+# Note: This is empty because dependencies that were initialized here now
+# moved to cc/integration/gcpkms/; nevertheless this is maintained to avoid
+# breaking existing builds.
+# TODO(b/213153744): Plan to remove this function in the future.
 def tink_cc_deps_init():
-    """ Initializes dependencies of C++ Tink.
-
-    """
-    switched_rules_by_language(
-        name = "com_google_googleapis_imports",
-        cc = True,
-        grpc = True,
-    )
-    grpc_deps()
-    grpc_extra_deps()
+    """Initializes dependencies of C++ Tink."""
+    pass

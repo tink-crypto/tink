@@ -18,6 +18,11 @@ local_repository(
 )
 
 local_repository(
+    name = "tink_cc_gcpkms",
+    path = "../cc/integration/gcpkms",
+)
+
+local_repository(
     name = "tink_java",
     path = "../java_src",
 )
@@ -99,6 +104,14 @@ tink_cc_deps_init()
 
 load("@tink_cc_awskms//:tink_cc_awskms_deps.bzl", "tink_cc_awskms_deps")
 tink_cc_awskms_deps()
+
+load("@tink_cc_gcpkms//:tink_cc_gcpkms_deps.bzl", "tink_cc_gcpkms_deps")
+
+tink_cc_gcpkms_deps()
+
+load("@tink_cc_gcpkms//:tink_cc_gcpkms_deps_init.bzl", "tink_cc_gcpkms_deps_init")
+
+tink_cc_gcpkms_deps_init()
 
 load("@tink_java//:tink_java_deps.bzl", "tink_java_deps")
 tink_java_deps()

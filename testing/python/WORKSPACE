@@ -22,6 +22,11 @@ local_repository(
     path = "../../cc/integration/awskms",
 )
 
+local_repository(
+    name = "tink_cc_gcpkms",
+    path = "../../cc/integration/gcpkms",
+)
+
 # NOTE: The Python dependencies have to be loaded first, as they rely on a
 # newer version of rules_python.
 load("@tink_py//:tink_py_deps.bzl", "tink_py_deps")
@@ -45,6 +50,14 @@ tink_cc_deps_init()
 load("@tink_cc_awskms//:tink_cc_awskms_deps.bzl", "tink_cc_awskms_deps")
 
 tink_cc_awskms_deps()
+
+load("@tink_cc_gcpkms//:tink_cc_gcpkms_deps.bzl", "tink_cc_gcpkms_deps")
+
+tink_cc_gcpkms_deps()
+
+load("@tink_cc_gcpkms//:tink_cc_gcpkms_deps_init.bzl", "tink_cc_gcpkms_deps_init")
+
+tink_cc_gcpkms_deps_init()
 
 # Release from 2021-12-12
 http_archive(
