@@ -1,0 +1,2 @@
+# Ignore AWS-KMS integration which is in its own WORKSPACE.
+integration/awskms

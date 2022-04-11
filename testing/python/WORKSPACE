@@ -17,6 +17,11 @@ local_repository(
     path = "../../cc",
 )
 
+local_repository(
+    name = "tink_cc_awskms",
+    path = "../../cc/integration/awskms",
+)
+
 # NOTE: The Python dependencies have to be loaded first, as they rely on a
 # newer version of rules_python.
 load("@tink_py//:tink_py_deps.bzl", "tink_py_deps")
@@ -36,6 +41,10 @@ tink_cc_deps()
 
 load("@tink_cc//:tink_cc_deps_init.bzl", "tink_cc_deps_init")
 tink_cc_deps_init()
+
+load("@tink_cc_awskms//:tink_cc_awskms_deps.bzl", "tink_cc_awskms_deps")
+
+tink_cc_awskms_deps()
 
 # Release from 2021-12-12
 http_archive(
@@ -59,8 +68,8 @@ grpc_deps()
 load("@rules_python//python:pip.bzl", "pip_install")
 
 pip_install(
-   name = "pip_deps",
-   requirements = "//:requirements.txt",
+    name = "pip_deps",
+    requirements = "//:requirements.txt",
 )
 
 pip_install(

@@ -42,6 +42,16 @@ local_repository(
 #     strip_prefix = "tink-master/cc",
 # )
 
+local_repository(
+    name = "tink_cc_awskms",
+    path = "../../cc/integration/awskms",
+)
+# http_archive(
+#     name = "tink_cc_awskms",
+#     urls = ["https://github.com/google/tink/archive/master.zip"],
+#     strip_prefix = "tink-master/cc/integration/awskms",
+# )
+
 # Load Tink dependencies.
 
 load("@tink_py//:tink_py_deps.bzl", "tink_py_deps")
@@ -67,6 +77,10 @@ tink_cc_deps()
 load("@tink_cc//:tink_cc_deps_init.bzl", "tink_cc_deps_init")
 
 tink_cc_deps_init()
+
+load("@tink_cc_awskms//:tink_cc_awskms_deps.bzl", "tink_cc_awskms_deps")
+
+tink_cc_awskms_deps()
 
 load("@rules_python//python:pip.bzl", "pip_install")
 

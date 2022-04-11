@@ -20,9 +20,9 @@ cc_library(
         "@tink_cc//:json_keyset_writer",
         "@tink_cc//:kms_clients",
         "@tink_cc//config:tink_config",
-        "@tink_cc//integration/awskms:aws_kms_client",
         "@tink_cc//integration/gcpkms:gcp_kms_client",
         "@tink_cc//util:status",
+        "@tink_cc_awskms//:aws_kms_client",
     ],
 )
 
@@ -33,9 +33,9 @@ cc_binary(
         ":cli_util",
         "@aws_cpp_sdk//:aws_sdk_core",
         "@tink_cc",
-        "@tink_cc//integration/awskms:aws_crypto",
-        "@tink_cc//integration/awskms:aws_kms_aead",
-        "@tink_cc//integration/awskms:aws_kms_client",
+        "@tink_cc_awskms//:aws_crypto",
+        "@tink_cc_awskms//:aws_kms_aead",
+        "@tink_cc_awskms//:aws_kms_client",
     ],
 )
 
