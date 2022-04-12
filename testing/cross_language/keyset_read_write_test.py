@@ -13,17 +13,28 @@
 # limitations under the License.
 """Cross-language tests for reading and writing encrypted keysets."""
 
-from typing import Iterable
+from typing import Iterable, Tuple
 
 from absl.testing import absltest
 from absl.testing import parameterized
-
 import tink
 from tink import aead
 from tink.proto import tink_pb2
 from util import key_util
 from util import supported_key_types
 from util import testing_servers
+
+
+# A small set of symmetric and asymmetric key templates of different primitives.
+# TODO(b/213462711): Replace this by a list of cleartext keysets.
+# Using keysets allows us to test more cases, for example public keysets,
+# keysets with deleted/destroyed keys and keys with all possible output prefix
+# types.
+SOME_TEMPLATES = (
+    'AES128_EAX',
+    'AES_CMAC_PRF',
+    'ECIES_P256_HKDF_HMAC_SHA256_AES128_GCM',
+    'ECDSA_P256')
 
 
 def setUpModule():
@@ -34,17 +45,18 @@ def tearDownModule():
   testing_servers.stop()
 
 
-def all_aead_key_template_names() -> Iterable[str]:
-  """Yields all AEAD key template names."""
-  for key_type in supported_key_types.AEAD_KEY_TYPES:
-    for key_template_name in supported_key_types.KEY_TEMPLATE_NAMES[key_type]:
-      yield key_template_name
+def all_test_cases() -> Iterable[Tuple[str, str, str]]:
+  """Yields (key_template, reader_type, writer_type) tuples to test."""
+  for key_template_name in SOME_TEMPLATES:
+    yield (key_template_name, 'KEYSET_READER_BINARY', 'KEYSET_WRITER_BINARY')
+    yield (key_template_name, 'KEYSET_READER_JSON', 'KEYSET_WRITER_JSON')
 
 
 class KeysetReadWriteTest(parameterized.TestCase):
 
-  @parameterized.parameters(all_aead_key_template_names())
-  def test_read_write_encrypted_keyset(self, key_template_name):
+  @parameterized.parameters(all_test_cases())
+  def test_read_write_encrypted_keyset(self, key_template_name, reader_type,
+                                       writer_type):
     # Use an arbitrary AEAD template that's supported in all languages,
     # and use an arbitrary language to generate the master_aead_keyset.
     keyset_encryption_keyset = testing_servers.new_keyset(
@@ -62,11 +74,16 @@ class KeysetReadWriteTest(parameterized.TestCase):
       for write_lang in supported_langs:
         encrypted_keyset = testing_servers.keyset_write_encrypted(
             write_lang, keyset, keyset_encryption_keyset, associated_data,
-            'KEYSET_WRITER_BINARY')
+            writer_type)
         for read_lang in supported_langs:
-          decrypted_keyset = testing_servers.keyset_read_encrypted(
-              read_lang, encrypted_keyset, keyset_encryption_keyset,
-              associated_data, 'KEYSET_READER_BINARY')
+          decrypted_keyset = None
+          try:
+            decrypted_keyset = testing_servers.keyset_read_encrypted(
+                read_lang, encrypted_keyset, keyset_encryption_keyset,
+                associated_data, reader_type)
+          except tink.TinkError as e:
+            self.fail('keyset written in %s failed to read in %s: %s' %
+                      (write_lang, read_lang, e))
           # Both keyset and decrypted_keyset are serialized tink_pb2.Keyset.
           key_util.assert_tink_proto_equal(
               self,
@@ -79,10 +96,10 @@ class KeysetReadWriteTest(parameterized.TestCase):
             testing_servers.keyset_read_encrypted(read_lang, encrypted_keyset,
                                                   keyset_encryption_keyset,
                                                   b'invalid_associated_data',
-                                                  'KEYSET_READER_BINARY')
+                                                  reader_type)
 
   @parameterized.parameters(testing_servers.LANGUAGES)
-  def test_read_encrypted_ignores_keyset_info(self, lang):
+  def test_read_encrypted_ignores_keyset_info_binary(self, lang):
     # Use an arbitrary AEAD template that's supported in all languages,
     # and use an arbitrary language to generate the master_aead_keyset.
     master_aead_keyset = testing_servers.new_keyset(
@@ -120,6 +137,8 @@ class KeysetReadWriteTest(parameterized.TestCase):
     key_util.assert_tink_proto_equal(
         self, tink_pb2.Keyset.FromString(keyset),
         tink_pb2.Keyset.FromString(decrypted_keyset))
+
+  # TODO(b/213462711): Add a test_read_encrypted_ignores_keyset_info_json test
 
 
 if __name__ == '__main__':
