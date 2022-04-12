@@ -19,7 +19,7 @@ package com.google.crypto.tink.integration.gcpkms;
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.http.javanet.NetHttpTransport;
-import com.google.api.client.json.jackson2.JacksonFactory;
+import com.google.api.client.json.gson.GsonFactory;
 import com.google.api.services.cloudkms.v1.CloudKMS;
 import com.google.api.services.cloudkms.v1.CloudKMSScopes;
 import com.google.auth.http.HttpCredentialsAdapter;
@@ -115,7 +115,7 @@ public final class GcpKmsClient implements KmsClient {
       credential = credential.createScoped(CloudKMSScopes.all());
     }
     this.client =
-        new CloudKMS.Builder(new NetHttpTransport(), new JacksonFactory(), credential)
+        new CloudKMS.Builder(new NetHttpTransport(), new GsonFactory(), credential)
             .setApplicationName(APPLICATION_NAME)
             .build();
     return this;
@@ -130,7 +130,7 @@ public final class GcpKmsClient implements KmsClient {
       this.client =
           new CloudKMS.Builder(
                   GoogleNetHttpTransport.newTrustedTransport(),
-                  new JacksonFactory(),
+                  new GsonFactory(),
                   new HttpCredentialsAdapter(credentials))
               .setApplicationName(APPLICATION_NAME)
               .build();
