@@ -1,5 +1,5 @@
 load("//tools:gen_maven_jar_rules.bzl", "gen_maven_jar_rules")
-load("@tink_base//tools:common.bzl", "check_deps")
+load("//tools:check_deps.bzl", "check_deps")
 
 package(default_visibility = ["//visibility:public"])
 

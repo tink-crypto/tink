@@ -1,6 +1,6 @@
 load("@build_bazel_rules_android//android:rules.bzl", "android_library")
 load("@tink_base//:tink_version.bzl", "TINK_VERSION_LABEL")
-load("@tink_base//tools:common.bzl", "template_rule")
+load("@tink_base//tools:template_rule.bzl", "template_rule")
 
 licenses(["notice"])
 

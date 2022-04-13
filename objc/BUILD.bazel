@@ -1,10 +1,11 @@
+load("@build_bazel_rules_apple//apple:ios.bzl", "ios_static_framework", "ios_unit_test")
+load("//:tink_version.bzl", "TINK_VERSION_LABEL")
+load("//tools:template_rule.bzl", "template_rule")
+
 licenses(["notice"])
 
 package(default_visibility = ["//tools/build_defs:internal_pkg"])
 
-load("@build_bazel_rules_apple//apple:ios.bzl", "ios_static_framework", "ios_unit_test")
-load("//:tink_version.bzl", "TINK_VERSION_LABEL")
-load("//tools:common.bzl", "template_rule")
 
 # public libraries
 

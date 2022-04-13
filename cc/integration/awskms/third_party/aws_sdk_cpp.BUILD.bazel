@@ -1,6 +1,6 @@
-licenses(["notice"])  # Apache 2.0
+load("@tink_base//tools:template_rule.bzl", "template_rule")
 
-load("@tink_base//tools:common.bzl", "template_rule")
+licenses(["notice"])  # Apache 2.0
 
 cc_library(
     name = "aws_sdk_core",
