@@ -18,9 +18,14 @@
 set -euo pipefail
 cd ${KOKORO_ARTIFACTS_DIR}/git/tink
 
-./kokoro/testutils/copy_credentials.sh
-
 cd cc
 use_bazel.sh $(cat .bazelversion)
-bazel build --//config:tink_use_absl_status=True --//config:tink_use_absl_statusor=True ...
-bazel test --//config:tink_use_absl_status=True --//config:tink_use_absl_statusor=True --test_output=errors -- ...
+bazel build \
+  --//config:tink_use_absl_status=True \
+  --//config:tink_use_absl_statusor=True \
+  -- ...
+bazel test \
+  --//config:tink_use_absl_status=True \
+  --//config:tink_use_absl_statusor=True \
+  --test_output=errors \
+  -- ...

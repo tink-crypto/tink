@@ -18,14 +18,12 @@
 set -euo pipefail
 
 cd ${KOKORO_ARTIFACTS_DIR}/git/tink
-./kokoro/testutils/copy_credentials.sh
 
 export XCODE_VERSION=11.3
 export DEVELOPER_DIR="/Applications/Xcode_${XCODE_VERSION}.app/Contents/Developer"
 export ANDROID_HOME="/Users/kbuilder/Library/Android/sdk"
 export COURSIER_OPTS="-Djava.net.preferIPv6Addresses=true"
 
-./kokoro/testutils/copy_credentials.sh
 ./kokoro/testutils/update_android_sdk.sh
 
 cd apps

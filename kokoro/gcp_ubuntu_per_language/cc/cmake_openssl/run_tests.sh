@@ -89,7 +89,6 @@ cc_cmake_build_and_run_tests() {
 main() {
   cd "${KOKORO_ARTIFACTS_DIR}/git/tink"
 
-  ./kokoro/testutils/copy_credentials.sh
   ./kokoro/testutils/update_certs.sh
   if [[ -n "${KOKORO_ROOT:-}" ]]; then
     install_cmake

@@ -18,8 +18,6 @@
 set -euo pipefail
 cd ${KOKORO_ARTIFACTS_DIR}/git/tink
 
-./kokoro/testutils/copy_credentials.sh
-
 cd javascript
 use_bazel.sh $(cat .bazelversion)
 bazel build ...

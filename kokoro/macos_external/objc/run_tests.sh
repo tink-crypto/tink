@@ -18,8 +18,6 @@
 set -euo pipefail
 cd ${KOKORO_ARTIFACTS_DIR}/git/tink
 
-./kokoro/testutils/copy_credentials.sh
-
 cd objc
 ## TODO(b/155060426) Reenable once the tests work.
 # use_bazel.sh $(cat .bazelversion)

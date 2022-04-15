@@ -22,8 +22,6 @@ main() {
     cd "${KOKORO_ARTIFACTS_DIR}/git/tink"
   fi
 
-  ./kokoro/testutils/copy_credentials.sh
-
   cd javascript
   if [[ -n "${KOKORO_ROOT:-}" ]]; then
     use_bazel.sh "$(cat .bazelversion)"
