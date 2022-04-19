@@ -607,3 +607,8 @@ java_library(
     name = "version",
     srcs = [":version_java"],
 )
+
+java_library(
+    name = "accesses_partial_key",
+    srcs = ["AccessesPartialKey.java"],
+)
