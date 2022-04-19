@@ -1,4 +1,4 @@
-load("@tink_base//tools:template_rule.bzl", "template_rule")
+load("@tink_cc_awskms//:template_rule.bzl", "template_rule")
 
 licenses(["notice"])  # Apache 2.0
 
