@@ -42,8 +42,8 @@ namespace crypto {
 namespace tink {
 namespace internal {
 
-const int kXchacha20Poly1305TagSizeInBytes = 16;
-const int kAesGcmTagSizeInBytes = 16;
+ABSL_CONST_INIT const int kXchacha20Poly1305TagSizeInBytes = 16;
+ABSL_CONST_INIT const int kAesGcmTagSizeInBytes = 16;
 
 namespace {
 
