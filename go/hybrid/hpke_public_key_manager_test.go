@@ -35,9 +35,9 @@ var hpkeAEADs = []hpkepb.HpkeAead{
 }
 
 func TestPublicKeyManagerPrimitiveRejectsInvalidKeyVersion(t *testing.T) {
-	km, err := registry.GetKeyManager(publicKeyTypeURL)
+	km, err := registry.GetKeyManager(hpkePublicKeyTypeURL)
 	if err != nil {
-		t.Fatalf("GetKeyManager(%q) err = %v, want nil", publicKeyTypeURL, err)
+		t.Fatalf("GetKeyManager(%q) err = %v, want nil", hpkePublicKeyTypeURL, err)
 	}
 	params := &hpkepb.HpkeParams{
 		Kem:  hpkepb.HpkeKem_DHKEM_X25519_HKDF_SHA256,
@@ -56,9 +56,9 @@ func TestPublicKeyManagerPrimitiveRejectsInvalidKeyVersion(t *testing.T) {
 }
 
 func TestPublicKeyManagerPrimitiveRejectsInvalidParams(t *testing.T) {
-	km, err := registry.GetKeyManager(publicKeyTypeURL)
+	km, err := registry.GetKeyManager(hpkePublicKeyTypeURL)
 	if err != nil {
-		t.Fatalf("GetKeyManager(%q) err = %v, want nil", publicKeyTypeURL, err)
+		t.Fatalf("GetKeyManager(%q) err = %v, want nil", hpkePublicKeyTypeURL, err)
 	}
 
 	tests := []struct {
@@ -93,9 +93,9 @@ func TestPublicKeyManagerPrimitiveRejectsInvalidParams(t *testing.T) {
 }
 
 func TestPublicKeyManagerPrimitiveRejectsMissingParams(t *testing.T) {
-	km, err := registry.GetKeyManager(publicKeyTypeURL)
+	km, err := registry.GetKeyManager(hpkePublicKeyTypeURL)
 	if err != nil {
-		t.Fatalf("GetKeyManager(%q) err = %v, want nil", publicKeyTypeURL, err)
+		t.Fatalf("GetKeyManager(%q) err = %v, want nil", hpkePublicKeyTypeURL, err)
 	}
 	serializedPubKey, _ := serializedPubPrivKeys(t, nil)
 	if _, err := km.Primitive(serializedPubKey); err == nil {
@@ -104,9 +104,9 @@ func TestPublicKeyManagerPrimitiveRejectsMissingParams(t *testing.T) {
 }
 
 func TestPublicKeyManagerPrimitiveRejectsNilKey(t *testing.T) {
-	km, err := registry.GetKeyManager(publicKeyTypeURL)
+	km, err := registry.GetKeyManager(hpkePublicKeyTypeURL)
 	if err != nil {
-		t.Fatalf("GetKeyManager(%q) err = %v, want nil", publicKeyTypeURL, err)
+		t.Fatalf("GetKeyManager(%q) err = %v, want nil", hpkePublicKeyTypeURL, err)
 	}
 	if _, err := km.Primitive(nil); err == nil {
 		t.Error("Primitive() err = nil, want error")
@@ -114,9 +114,9 @@ func TestPublicKeyManagerPrimitiveRejectsNilKey(t *testing.T) {
 }
 
 func TestPublicKeyManagerPrimitiveEncryptDecrypt(t *testing.T) {
-	km, err := registry.GetKeyManager(publicKeyTypeURL)
+	km, err := registry.GetKeyManager(hpkePublicKeyTypeURL)
 	if err != nil {
-		t.Fatalf("GetKeyManager(%q) err = %v, want nil", publicKeyTypeURL, err)
+		t.Fatalf("GetKeyManager(%q) err = %v, want nil", hpkePublicKeyTypeURL, err)
 	}
 
 	wantPT := random.GetRandomBytes(200)
@@ -162,12 +162,12 @@ func TestPublicKeyManagerPrimitiveEncryptDecrypt(t *testing.T) {
 }
 
 func TestPublicKeyManagerDoesSupport(t *testing.T) {
-	km, err := registry.GetKeyManager(publicKeyTypeURL)
+	km, err := registry.GetKeyManager(hpkePublicKeyTypeURL)
 	if err != nil {
-		t.Fatalf("GetKeyManager(%q) err = %v, want nil", publicKeyTypeURL, err)
+		t.Fatalf("GetKeyManager(%q) err = %v, want nil", hpkePublicKeyTypeURL, err)
 	}
-	if !km.DoesSupport(publicKeyTypeURL) {
-		t.Errorf("DoesSupport(%q) = false, want true", publicKeyTypeURL)
+	if !km.DoesSupport(hpkePublicKeyTypeURL) {
+		t.Errorf("DoesSupport(%q) = false, want true", hpkePublicKeyTypeURL)
 	}
 	unsupportedKeyTypeURL := "unsupported.key.type"
 	if km.DoesSupport(unsupportedKeyTypeURL) {
@@ -176,19 +176,19 @@ func TestPublicKeyManagerDoesSupport(t *testing.T) {
 }
 
 func TestPublicKeyManagerTypeURL(t *testing.T) {
-	km, err := registry.GetKeyManager(publicKeyTypeURL)
+	km, err := registry.GetKeyManager(hpkePublicKeyTypeURL)
 	if err != nil {
-		t.Fatalf("GetKeyManager(%q) err = %v, want nil", publicKeyTypeURL, err)
+		t.Fatalf("GetKeyManager(%q) err = %v, want nil", hpkePublicKeyTypeURL, err)
 	}
-	if km.TypeURL() != publicKeyTypeURL {
-		t.Errorf("TypeURL = %q, want %q", km.TypeURL(), publicKeyTypeURL)
+	if km.TypeURL() != hpkePublicKeyTypeURL {
+		t.Errorf("TypeURL = %q, want %q", km.TypeURL(), hpkePublicKeyTypeURL)
 	}
 }
 
 func TestPublicKeyManagerNotSupported(t *testing.T) {
-	km, err := registry.GetKeyManager(publicKeyTypeURL)
+	km, err := registry.GetKeyManager(hpkePublicKeyTypeURL)
 	if err != nil {
-		t.Fatalf("GetKeyManager(%q) err = %v, want nil", publicKeyTypeURL, err)
+		t.Fatalf("GetKeyManager(%q) err = %v, want nil", hpkePublicKeyTypeURL, err)
 	}
 	if _, err := km.NewKey(nil); err == nil {
 		t.Error("NewKey(nil) err = nil, want error")

@@ -25,8 +25,6 @@ import (
 	tinkpb "github.com/google/tink/go/proto/tink_go_proto"
 )
 
-const hpkePrivateKeyTypeURL = "type.googleapis.com/google.crypto.tink.HpkePrivateKey"
-
 // This file contains pre-generated KeyTemplates for HybridEncrypt keys. One can use these templates
 // to generate new Keysets.
 

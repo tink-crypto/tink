@@ -30,15 +30,16 @@ import (
 )
 
 const (
-	// maxSupportedPrivateKeyVersion is the max supported private key version. It
-	// must be incremented when support for new versions are implemented.
-	maxSupportedPrivateKeyVersion uint32 = 0
-	privateKeyTypeURL                    = "type.googleapis.com/google.crypto.tink.HpkePrivateKey"
+	// maxSupportedHPKEPrivateKeyVersion is the max supported private key
+	// version. It must be incremented when support for new versions are
+	// implemented.
+	maxSupportedHPKEPrivateKeyVersion uint32 = 0
+	hpkePrivateKeyTypeURL                    = "type.googleapis.com/google.crypto.tink.HpkePrivateKey"
 )
 
 var (
-	errInvalidPrivateKey       = errors.New("invalid HPKE private key")
-	errInvalidPrivateKeyFormat = errors.New("invalid HPKE private key format")
+	errInvalidHPKEPrivateKey       = errors.New("invalid HPKE private key")
+	errInvalidHPKEPrivateKeyFormat = errors.New("invalid HPKE private key format")
 )
 
 // hpkePrivateKeyManager implements the KeyManager interface for HybridDecrypt.
@@ -48,13 +49,13 @@ var _ registry.PrivateKeyManager = (*hpkePrivateKeyManager)(nil)
 
 func (p *hpkePrivateKeyManager) Primitive(serializedKey []byte) (interface{}, error) {
 	if len(serializedKey) == 0 {
-		return nil, errInvalidPrivateKey
+		return nil, errInvalidHPKEPrivateKey
 	}
 	key := new(hpkepb.HpkePrivateKey)
 	if err := proto.Unmarshal(serializedKey, key); err != nil {
-		return nil, errInvalidPrivateKey
+		return nil, errInvalidHPKEPrivateKey
 	}
-	if err := keyset.ValidateKeyVersion(key.GetVersion(), maxSupportedPrivateKeyVersion); err != nil {
+	if err := keyset.ValidateKeyVersion(key.GetVersion(), maxSupportedHPKEPrivateKeyVersion); err != nil {
 		return nil, err
 	}
 	return hpke.NewDecrypt(key)
@@ -63,11 +64,11 @@ func (p *hpkePrivateKeyManager) Primitive(serializedKey []byte) (interface{}, er
 // NewKey returns a set of private and public keys of key version 0.
 func (p *hpkePrivateKeyManager) NewKey(serializedKeyFormat []byte) (proto.Message, error) {
 	if len(serializedKeyFormat) == 0 {
-		return nil, errInvalidPrivateKeyFormat
+		return nil, errInvalidHPKEPrivateKeyFormat
 	}
 	keyFormat := new(hpkepb.HpkeKeyFormat)
 	if err := proto.Unmarshal(serializedKeyFormat, keyFormat); err != nil {
-		return nil, errInvalidPrivateKeyFormat
+		return nil, errInvalidHPKEPrivateKeyFormat
 	}
 	if err := validateKeyFormat(keyFormat); err != nil {
 		return nil, err
@@ -103,7 +104,7 @@ func (p *hpkePrivateKeyManager) NewKeyData(serializedKeyFormat []byte) (*tinkpb.
 		return nil, err
 	}
 	return &tinkpb.KeyData{
-		TypeUrl:         privateKeyTypeURL,
+		TypeUrl:         hpkePrivateKeyTypeURL,
 		Value:           serializedKey,
 		KeyMaterialType: tinkpb.KeyData_ASYMMETRIC_PRIVATE,
 	}, nil
@@ -112,25 +113,25 @@ func (p *hpkePrivateKeyManager) NewKeyData(serializedKeyFormat []byte) (*tinkpb.
 func (p *hpkePrivateKeyManager) PublicKeyData(serializedPrivKey []byte) (*tinkpb.KeyData, error) {
 	privKey := new(hpkepb.HpkePrivateKey)
 	if err := proto.Unmarshal(serializedPrivKey, privKey); err != nil {
-		return nil, errInvalidPrivateKey
+		return nil, errInvalidHPKEPrivateKey
 	}
 	serializedPubKey, err := proto.Marshal(privKey.GetPublicKey())
 	if err != nil {
-		return nil, errInvalidPrivateKey
+		return nil, errInvalidHPKEPrivateKey
 	}
 	return &tinkpb.KeyData{
-		TypeUrl:         publicKeyTypeURL,
+		TypeUrl:         hpkePublicKeyTypeURL,
 		Value:           serializedPubKey,
 		KeyMaterialType: tinkpb.KeyData_ASYMMETRIC_PUBLIC,
 	}, nil
 }
 
 func (p *hpkePrivateKeyManager) DoesSupport(typeURL string) bool {
-	return typeURL == privateKeyTypeURL
+	return typeURL == hpkePrivateKeyTypeURL
 }
 
 func (p *hpkePrivateKeyManager) TypeURL() string {
-	return privateKeyTypeURL
+	return hpkePrivateKeyTypeURL
 }
 
 func validateKeyFormat(kf *hpkepb.HpkeKeyFormat) error {
@@ -139,7 +140,7 @@ func validateKeyFormat(kf *hpkepb.HpkeKeyFormat) error {
 	if kem != hpkepb.HpkeKem_DHKEM_X25519_HKDF_SHA256 ||
 		kdf != hpkepb.HpkeKdf_HKDF_SHA256 ||
 		(aead != hpkepb.HpkeAead_AES_128_GCM && aead != hpkepb.HpkeAead_AES_256_GCM && aead != hpkepb.HpkeAead_CHACHA20_POLY1305) {
-		return errInvalidPrivateKeyFormat
+		return errInvalidHPKEPrivateKeyFormat
 	}
 	return nil
 }

@@ -28,15 +28,15 @@ import (
 )
 
 const (
-	// maxSupportedPublicKeyVersion is the max supported public key version. It
-	// must be incremented when support for new versions are implemented.
-	maxSupportedPublicKeyVersion = 0
-	publicKeyTypeURL             = "type.googleapis.com/google.crypto.tink.HpkePublicKey"
+	// maxSupportedHPKEPublicKeyVersion is the max supported public key version.
+	// It must be incremented when support for new versions are implemented.
+	maxSupportedHPKEPublicKeyVersion = 0
+	hpkePublicKeyTypeURL             = "type.googleapis.com/google.crypto.tink.HpkePublicKey"
 )
 
 var (
-	errInvalidPublicKey = errors.New("invalid HPKE public key")
-	errNotSupported     = errors.New("not supported on HPKE public key manager")
+	errInvalidHPKEPublicKey = errors.New("invalid HPKE public key")
+	errNotSupportedOnHPKE   = errors.New("not supported on HPKE public key manager")
 )
 
 // hpkePublicKeyManager implements the KeyManager interface for HybridEncrypt.
@@ -46,30 +46,30 @@ var _ registry.KeyManager = (*hpkePublicKeyManager)(nil)
 
 func (p *hpkePublicKeyManager) Primitive(serializedKey []byte) (interface{}, error) {
 	if len(serializedKey) == 0 {
-		return nil, errInvalidPublicKey
+		return nil, errInvalidHPKEPublicKey
 	}
 	key := new(hpkepb.HpkePublicKey)
 	if err := proto.Unmarshal(serializedKey, key); err != nil {
-		return nil, errInvalidPublicKey
+		return nil, errInvalidHPKEPublicKey
 	}
-	if err := keyset.ValidateKeyVersion(key.GetVersion(), maxSupportedPublicKeyVersion); err != nil {
+	if err := keyset.ValidateKeyVersion(key.GetVersion(), maxSupportedHPKEPublicKeyVersion); err != nil {
 		return nil, err
 	}
 	return hpke.NewEncrypt(key)
 }
 
 func (p *hpkePublicKeyManager) DoesSupport(typeURL string) bool {
-	return typeURL == publicKeyTypeURL
+	return typeURL == hpkePublicKeyTypeURL
 }
 
 func (p *hpkePublicKeyManager) TypeURL() string {
-	return publicKeyTypeURL
+	return hpkePublicKeyTypeURL
 }
 
 func (p *hpkePublicKeyManager) NewKey(serializedKeyFormat []byte) (proto.Message, error) {
-	return nil, errNotSupported
+	return nil, errNotSupportedOnHPKE
 }
 
 func (p *hpkePublicKeyManager) NewKeyData(serializedKeyFormat []byte) (*tinkpb.KeyData, error) {
-	return nil, errNotSupported
+	return nil, errNotSupportedOnHPKE
 }
