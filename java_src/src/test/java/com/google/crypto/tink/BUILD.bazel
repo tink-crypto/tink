@@ -366,3 +366,15 @@ java_test(
         "@maven//:junit_junit",
     ],
 )
+
+java_test(
+    name = "SecretKeyAccessTest",
+    size = "small",
+    srcs = ["SecretKeyAccessTest.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink:insecure_secret_key_access",
+        "//src/main/java/com/google/crypto/tink:secret_key_access",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
