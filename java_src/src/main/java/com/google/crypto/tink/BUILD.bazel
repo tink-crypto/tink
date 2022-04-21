@@ -631,3 +631,22 @@ java_library(
     name = "accesses_partial_key",
     srcs = ["AccessesPartialKey.java"],
 )
+
+java_library(
+    name = "key",
+    srcs = ["Key.java"],
+    deps = [
+        ":key_format",
+        "//src/main/java/com/google/crypto/tink/annotations:alpha",
+        "@maven//:com_google_errorprone_error_prone_annotations",
+    ],
+)
+
+java_library(
+    name = "key_format",
+    srcs = ["KeyFormat.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink/annotations:alpha",
+        "@maven//:com_google_errorprone_error_prone_annotations",
+    ],
+)
