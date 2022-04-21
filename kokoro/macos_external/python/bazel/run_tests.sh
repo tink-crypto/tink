@@ -18,7 +18,7 @@
 set -euo pipefail
 cd ${KOKORO_ARTIFACTS_DIR}/git/tink
 
-./kokoro/testutils/copy_credentials.sh
+./kokoro/testutils/copy_credentials.sh "testdata"
 
 # Install protobuf pip packages
 pip3 install protobuf --user

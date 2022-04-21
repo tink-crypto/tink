@@ -18,7 +18,7 @@
 set -euo pipefail
 cd ${KOKORO_ARTIFACTS_DIR}/git/tink
 
-./kokoro/testutils/copy_credentials.sh
+./kokoro/testutils/copy_credentials.sh "testdata"
 ./kokoro/testutils/update_android_sdk.sh
 
 cd java_src

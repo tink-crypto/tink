@@ -231,7 +231,8 @@ main() {
       pip3 install --user protobuf
     fi
 
-    ./kokoro/testutils/copy_credentials.sh
+    ./kokoro/testutils/copy_credentials.sh "examples/java_src/testdata"
+    ./kokoro/testutils/copy_credentials.sh "examples/python/testdata"
     ./kokoro/testutils/update_android_sdk.sh
     # Sourcing required to update callers environment.
     source ./kokoro/testutils/install_go.sh

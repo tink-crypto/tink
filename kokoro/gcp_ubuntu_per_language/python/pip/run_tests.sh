@@ -18,7 +18,7 @@
 set -euo pipefail
 cd "${KOKORO_ARTIFACTS_DIR}/git/tink"
 
-./kokoro/testutils/copy_credentials.sh
+./kokoro/testutils/copy_credentials.sh "testdata"
 # Sourcing required to update callers environment.
 source ./kokoro/testutils/install_python3.sh
 

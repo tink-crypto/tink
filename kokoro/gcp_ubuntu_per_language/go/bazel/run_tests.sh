@@ -18,7 +18,7 @@ set -euo pipefail
 
 if [[ -n "${KOKORO_ROOT}" ]]; then
   cd "${KOKORO_ARTIFACTS_DIR}/git/tink"
-  ./kokoro/testutils/copy_credentials.sh
+  ./kokoro/testutils/copy_credentials.sh "testdata"
   # Sourcing required to update callers environment.
   source ./kokoro/testutils/install_go.sh
 fi

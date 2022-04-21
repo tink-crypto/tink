@@ -28,12 +28,12 @@ sh_test(
         # Change this to your key
         "gcp-kms://projects/tink-test-infrastructure/locations/global/keyRings/unit-and-integration-testing/cryptoKeys/aead-key",
         # Change this to your credential
-        "$(rootpath @tink_base//testdata:credential.json)",
+        "$(rootpath //testdata:credential.json)",
     ],
     data = [
         ":encrypted_keyset_example",
         # Change this to your credential
-        "@tink_base//testdata:credential.json",
+        "//testdata:credential.json",
     ],
     tags = [
         "manual",

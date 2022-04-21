@@ -21,33 +21,47 @@
 #
 # Usage insructions:
 #
-#   ./kokoro/testutils/copy_credentials.sh
+#   ./kokoro/testutils/copy_credentials.sh <testdata dir>
 
 if [[ -z "${KOKORO_ROOT}" ]]; then
   exit 0
 fi
 
-cp "${TINK_TEST_SERVICE_ACCOUNT}" "testdata/credential.json"
+readonly TESTDATA_DIR="${1}"
+
+if [[ -z "${TESTDATA_DIR}" ]]; then
+  echo "Testdata directory must be set" >&2
+  exit 1
+fi
+
+if [[ ! -d "${TESTDATA_DIR}" ]]; then
+  echo "Testdata directory \"${TESTDATA_DIR}\" doesn't exist" >&2
+  exit 1
+fi
+
+cp "${TINK_TEST_SERVICE_ACCOUNT}" "${TESTDATA_DIR}/credential.json"
 
 # Create the different format for the AWS credentials
 readonly AWS_KEY_ID="AKIATNYZMJOHVMN7MSYH"
 readonly AWS_KEY="$(cat ${AWS_TINK_TEST_SERVICE_ACCOUNT})"
 
 cat <<END \
-  | tee testdata/aws_credentials_cc.txt testdata/credentials_aws.ini \
+  | tee "${TESTDATA_DIR}/aws_credentials_cc.txt" \
+    "${TESTDATA_DIR}/credentials_aws.ini" \
   > /dev/null
 [default]
 aws_access_key_id = ${AWS_KEY_ID}
 aws_secret_access_key = ${AWS_KEY}
 END
 
-cat <<END > testdata/credentials_aws.cred
+cat <<END > "${TESTDATA_DIR}/credentials_aws.cred"
 [default]
 accessKey = ${AWS_KEY_ID}
 secretKey = ${AWS_KEY}
 END
 
-cat <<END > testdata/credentials_aws.csv
+
+cat <<END > "${TESTDATA_DIR}/credentials_aws.csv"
 User name,Password,Access key ID,Secret access key,Console login link
 tink-user1,,${AWS_KEY_ID},${AWS_KEY},https://235739564943.signin.aws.amazon.com/console
 END

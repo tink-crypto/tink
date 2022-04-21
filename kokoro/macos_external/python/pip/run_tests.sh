@@ -17,7 +17,7 @@
 set -euo pipefail
 cd "${KOKORO_ARTIFACTS_DIR}/git/tink"
 
-./kokoro/testutils/copy_credentials.sh
+./kokoro/testutils/copy_credentials.sh "testdata"
 
 install_temp_protoc() {
   local protoc_version='3.19.3'
