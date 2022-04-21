@@ -239,7 +239,7 @@ java_test(
     name = "IntegrationTest",
     size = "small",
     srcs = ["IntegrationTest.java"],
-    data = ["@tink_base//testdata:ecies_keysets"],
+    data = ["//testdata:ecies_keysets"],
     deps = [
         "//src/main/java/com/google/crypto/tink:binary_keyset_reader",
         "//src/main/java/com/google/crypto/tink:cleartext_keyset_handle",

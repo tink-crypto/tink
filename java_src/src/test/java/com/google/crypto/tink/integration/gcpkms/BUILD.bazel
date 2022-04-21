@@ -4,9 +4,7 @@ java_test(
     name = "GcpKmsClientTest",
     size = "small",
     srcs = ["GcpKmsClientTest.java"],
-    data = [
-        "@tink_base//testdata:credential.json",
-    ],
+    data = ["//testdata:credential.json"],
     runtime_deps = [
         "@maven//:com_fasterxml_jackson_core_jackson_core",
     ],

@@ -122,7 +122,7 @@ public class CreatePublicKeysetCommandTest {
     assumeFalse(TestUtil.isRemoteBuildExecution());
     // Create an input stream containing a cleartext private keyset.
     String masterKeyUri = TestUtil.RESTRICTED_CRYPTO_KEY_URI;
-    String credentialPath = TestUtil.SERVICE_ACCOUNT_FILE;
+    String credentialPath = "../tink_base/" + TestUtil.SERVICE_ACCOUNT_FILE;
     InputStream inputStream1 = TinkeyUtil.createKeyset(
         template, INPUT_FORMAT, masterKeyUri, credentialPath);
     inputStream1.mark(inputStream1.available());

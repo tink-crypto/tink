@@ -97,7 +97,7 @@ java_test(
     name = "KmsEnvelopeAeadKeyManagerWithGcpTest",
     size = "small",
     srcs = ["KmsEnvelopeAeadKeyManagerWithGcpTest.java"],
-    data = ["@tink_base//testdata:credentials"],
+    data = ["//testdata:credentials"],
     tags = ["no_rbe"],
     deps = [
         "//proto:tink_java_proto",
@@ -201,7 +201,7 @@ java_test(
     name = "KmsAeadKeyManagerWithGcpTest",
     size = "small",
     srcs = ["KmsAeadKeyManagerWithGcpTest.java"],
-    data = ["@tink_base//testdata:credentials"],
+    data = ["//testdata:credentials"],
     tags = ["no_rbe"],
     deps = [
         "//src/main/java/com/google/crypto/tink:aead",

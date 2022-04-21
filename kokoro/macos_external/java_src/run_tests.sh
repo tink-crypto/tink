@@ -30,7 +30,7 @@ TEST_FLAGS=(
 readonly TEST_FLAGS
 
 cd ${KOKORO_ARTIFACTS_DIR}/git/tink
-./kokoro/testutils/copy_credentials.sh "testdata"
+./kokoro/testutils/copy_credentials.sh "java_src/testdata"
 ./kokoro/testutils/update_android_sdk.sh
 
 cd java_src

@@ -51,13 +51,13 @@ public class IntegrationTest {
     HybridDecrypt hybridDecrypt =
         CleartextKeysetHandle.read(
                 BinaryKeysetReader.withFile(
-                    new File("../tink_base/testdata/ecies_private_keyset2.bin")))
+                    new File("testdata/ecies_private_keyset2.bin")))
             .getPrimitive(HybridDecrypt.class);
 
     HybridEncrypt hybridEncrypt =
         CleartextKeysetHandle.read(
                 BinaryKeysetReader.withFile(
-                    new File("../tink_base/testdata/ecies_public_keyset2.bin")))
+                    new File("testdata/ecies_public_keyset2.bin")))
             .getPrimitive(HybridEncrypt.class);
 
     byte[] plaintext = Random.randBytes(20);
@@ -86,13 +86,13 @@ public class IntegrationTest {
     HybridDecrypt hybridDecrypt =
         CleartextKeysetHandle.read(
                 BinaryKeysetReader.withFile(
-                    new File("../tink_base/testdata/ecies_private_keyset.bin")))
+                    new File("testdata/ecies_private_keyset.bin")))
             .getPrimitive(HybridDecrypt.class);
 
     HybridEncrypt hybridEncrypt =
         CleartextKeysetHandle.read(
                 BinaryKeysetReader.withFile(
-                    new File("../tink_base/testdata/ecies_public_keyset.bin")))
+                    new File("testdata/ecies_public_keyset.bin")))
             .getPrimitive(HybridEncrypt.class);
 
     byte[] plaintext = Random.randBytes(20);

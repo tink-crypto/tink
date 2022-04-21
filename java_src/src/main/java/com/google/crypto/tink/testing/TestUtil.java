@@ -111,7 +111,7 @@ public final class TestUtil {
 
   // This is a credential of a service account that is granted access to
   // {@code RESTRICTED_CRYPTO_KEY_URI}.
-  public static final String SERVICE_ACCOUNT_FILE = "../tink_base/testdata/credential.json";
+  public static final String SERVICE_ACCOUNT_FILE = "testdata/credential.json";
 
   // This AWS KMS CryptoKey is restricted to Google use only and {@code AWS_CREDS}.
   public static final String AWS_CRYPTO_URI =
@@ -119,7 +119,7 @@ public final class TestUtil {
 
   // This is a credential for the AWS service account with granted access to
   // {@code AWS_CRYPTO_URI}.
-  public static final String AWS_CREDS = "../tink_base/testdata/credentials_aws.cred";
+  public static final String AWS_CREDS = "testdata/credentials_aws.cred";
 
   /** A dummy Aead-implementation that just throws exception. */
   public static class DummyAead implements Aead {

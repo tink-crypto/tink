@@ -78,7 +78,7 @@ public class CreateKeysetCommandTest {
     assumeFalse(TestUtil.isRemoteBuildExecution());
     // Create an encrypted keyset.
     String masterKeyUri = TestUtil.RESTRICTED_CRYPTO_KEY_URI;
-    String credentialPath = TestUtil.SERVICE_ACCOUNT_FILE;
+    String credentialPath = "../tink_base/" + TestUtil.SERVICE_ACCOUNT_FILE;
     ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
     CreateKeysetCommand.create(outputStream, outFormat, masterKeyUri, credentialPath, template);
     EncryptedKeyset encryptedKeyset = TinkeyUtil
