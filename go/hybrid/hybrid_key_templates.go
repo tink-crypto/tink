@@ -30,9 +30,9 @@ import (
 
 // DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_AES_128_GCM_Key_Template creates a HPKE
 // key template with
-//  - KEM DHKEM_X25519_HKDF_SHA256,
-//  - KDF HKDF_SHA256, and
-//  - AEAD AES_128_GCM.
+//  - KEM: DHKEM_X25519_HKDF_SHA256,
+//  - KDF: HKDF_SHA256, and
+//  - AEAD: AES_128_GCM.
 // It adds the 5-byte Tink prefix to ciphertexts.
 func DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_AES_128_GCM_Key_Template() *tinkpb.KeyTemplate {
 	return createHPKEKeyTemplate(
@@ -45,9 +45,9 @@ func DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_AES_128_GCM_Key_Template() *tinkpb.Key
 
 // DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_AES_128_GCM_Raw_Key_Template creates a
 // HPKE key template with
-//  - KEM DHKEM_X25519_HKDF_SHA256,
-//  - KDF HKDF_SHA256, and
-//  - AEAD AES_128_GCM.
+//  - KEM: DHKEM_X25519_HKDF_SHA256,
+//  - KDF: HKDF_SHA256, and
+//  - AEAD: AES_128_GCM.
 // It does not add a prefix to ciphertexts.
 func DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_AES_128_GCM_Raw_Key_Template() *tinkpb.KeyTemplate {
 	return createHPKEKeyTemplate(
@@ -60,9 +60,9 @@ func DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_AES_128_GCM_Raw_Key_Template() *tinkpb
 
 // DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_AES_256_GCM_Key_Template creates a HPKE
 // key template with
-//  - KEM DHKEM_X25519_HKDF_SHA256,
-//  - KDF HKDF_SHA256, and
-//  - AEAD AES_256_GCM.
+//  - KEM: DHKEM_X25519_HKDF_SHA256,
+//  - KDF: HKDF_SHA256, and
+//  - AEAD: AES_256_GCM.
 // It adds the 5-byte Tink prefix to ciphertexts.
 func DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_AES_256_GCM_Key_Template() *tinkpb.KeyTemplate {
 	return createHPKEKeyTemplate(
@@ -75,9 +75,9 @@ func DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_AES_256_GCM_Key_Template() *tinkpb.Key
 
 // DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_AES_256_GCM_Raw_Key_Template creates a
 // HPKE key template with
-//  - KEM DHKEM_X25519_HKDF_SHA256,
-//  - KDF HKDF_SHA256, and
-//  - AEAD AES_256_GCM.
+//  - KEM: DHKEM_X25519_HKDF_SHA256,
+//  - KDF: HKDF_SHA256, and
+//  - AEAD: AES_256_GCM.
 // It does not add a prefix to ciphertexts.
 func DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_AES_256_GCM_Raw_Key_Template() *tinkpb.KeyTemplate {
 	return createHPKEKeyTemplate(
@@ -90,9 +90,9 @@ func DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_AES_256_GCM_Raw_Key_Template() *tinkpb
 
 // DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_CHACHA20_POLY1305_Key_Template creates a HPKE
 // key template with
-//  - KEM DHKEM_X25519_HKDF_SHA256,
-//  - KDF HKDF_SHA256, and
-//  - AEAD CHACHA20_POLY1305.
+//  - KEM: DHKEM_X25519_HKDF_SHA256,
+//  - KDF: HKDF_SHA256, and
+//  - AEAD: CHACHA20_POLY1305.
 // It adds the 5-byte Tink prefix to ciphertexts.
 func DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_CHACHA20_POLY1305_Key_Template() *tinkpb.KeyTemplate {
 	return createHPKEKeyTemplate(
@@ -105,9 +105,9 @@ func DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_CHACHA20_POLY1305_Key_Template() *tink
 
 // DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_CHACHA20_POLY1305_Raw_Key_Template creates a
 // HPKE key template with
-//  - KEM DHKEM_X25519_HKDF_SHA256,
-//  - KDF HKDF_SHA256, and
-//  - AEAD CHACHA20_POLY1305.
+//  - KEM: DHKEM_X25519_HKDF_SHA256,
+//  - KDF: HKDF_SHA256, and
+//  - AEAD: CHACHA20_POLY1305.
 // It does not add a prefix to ciphertexts.
 func DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_CHACHA20_POLY1305_Raw_Key_Template() *tinkpb.KeyTemplate {
 	return createHPKEKeyTemplate(
