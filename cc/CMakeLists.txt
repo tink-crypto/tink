@@ -622,6 +622,21 @@ tink_cc_library(
 
 add_library(tink::core::secret_key_access_testonly ALIAS tink_internal_core_secret_key_access)
 
+tink_cc_library(
+  NAME key_format
+  SRCS
+    key_format.h
+)
+
+tink_cc_library(
+  NAME key
+  SRCS
+    key.h
+  DEPS
+    tink::core::key_format
+    absl::optional
+)
+
 # tests
 
 tink_cc_test(

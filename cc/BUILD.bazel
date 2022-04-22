@@ -673,6 +673,22 @@ cc_library(
     deps = [":key_access"],
 )
 
+cc_library(
+    name = "key_format",
+    hdrs = ["key_format.h"],
+    include_prefix = "tink",
+)
+
+cc_library(
+    name = "key",
+    hdrs = ["key.h"],
+    include_prefix = "tink",
+    deps = [
+        ":key_format",
+        "@com_google_absl//absl/types:optional",
+    ],
+)
+
 # tests
 
 cc_test(
