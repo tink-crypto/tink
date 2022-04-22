@@ -1,4 +1,4 @@
-load("@tink_base//:tink_version.bzl", "TINK_VERSION_LABEL")
+load("//:tink_version.bzl", "TINK_VERSION_LABEL")
 load("//:template_rule.bzl", "template_rule")
 
 package(default_visibility = ["//:__subpackages__"])

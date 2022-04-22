@@ -26,7 +26,9 @@ source ./kokoro/testutils/install_go.sh
 
 echo "Using go binary from $(which go): $(go version)"
 
-TINK_VERSION="$(cat ${REPO_DIR}/tink_version.bzl | grep ^TINK | cut -f 2 -d \")"
+readonly TINK_VERSION="$(cat ${REPO_DIR}/go/tink_version.bzl \
+                        | grep ^TINK \
+                        | cut -f 2 -d \")"
 
 # Create a temporary directory for performing module tests.
 TMP_DIR="$(mktemp -dt go-module-test.XXXXXX)"
