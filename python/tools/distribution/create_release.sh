@@ -29,7 +29,7 @@ readonly PYTHON_VERSIONS
 readonly PLATFORM="$(uname | tr '[:upper:]' '[:lower:]')"
 
 export TINK_SRC_PATH="${PWD}/.."
-readonly TINK_VERSION="$(grep ^TINK "${TINK_SRC_PATH}/tink_version.bzl" \
+readonly TINK_VERSION="$(grep ^TINK "${TINK_SRC_PATH}/python/VERSION" \
   | awk '{gsub(/"/, "", $3); print $3}')"
 
 readonly IMAGE_NAME="quay.io/pypa/manylinux2014_x86_64"
