@@ -55,11 +55,11 @@ def _replace_http_archive_with_local_repository(workspace_content: str,
           urls = ["https://github.com/google/tink/archive/master.zip"],
           strip_prefix = "tink-master/",
       )""")
-  tink_base_after = textwrap.dedent("""\
+  tink_base_after = textwrap.dedent(f"""\
       local_repository(
           name = "tink_base",
-          path = "{}",
-      )""".format(tink_base_path))
+          path = "{tink_base_path}",
+      )""")
   workspace_content = workspace_content.replace(tink_base_before,
                                                 tink_base_after)
 
@@ -70,12 +70,42 @@ def _replace_http_archive_with_local_repository(workspace_content: str,
           urls = ["https://github.com/google/tink/archive/master.zip"],
           strip_prefix = "tink-master/cc",
       )""")
-  tink_cc_after = textwrap.dedent("""\
+  tink_cc_after = textwrap.dedent(f"""\
       local_repository(
           name = "tink_cc",
-          path = "{}/cc",
-      )""".format(tink_base_path))
+          path = "{tink_base_path}/cc",
+      )""")
   workspace_content = workspace_content.replace(tink_cc_before, tink_cc_after)
+
+  # Tink Java.
+  tink_java_before = textwrap.dedent("""\
+      http_archive(
+          name = "tink_java",
+          urls = ["https://github.com/google/tink/archive/master.zip"],
+          strip_prefix = "tink-master/java_src",
+      )""")
+  tink_java_after = textwrap.dedent(f"""\
+      local_repository(
+          name = "tink_java",
+          path = "{tink_base_path}/java_src",
+      )""")
+  workspace_content = workspace_content.replace(tink_java_before,
+                                                tink_java_after)
+
+  # Tink Python.
+  tink_python_before = textwrap.dedent("""\
+      http_archive(
+          name = "tink_py",
+          urls = ["https://github.com/google/tink/archive/master.zip"],
+          strip_prefix = "tink-master/python",
+      )""")
+  tink_python_after = textwrap.dedent(f"""\
+      local_repository(
+          name = "tink_py",
+          path = "{tink_base_path}/python",
+      )""")
+  workspace_content = workspace_content.replace(tink_python_before,
+                                                tink_python_after)
 
   return workspace_content
 

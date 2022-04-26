@@ -42,16 +42,32 @@ fi
 
 # Sourcing required to update callers environment.
 source ./kokoro/testutils/install_python3.sh
+./kokoro/testutils/copy_credentials.sh "python/testdata"
 
-readonly WORKSPACE_FOLDER="cc"
+readonly WORKSPACE_FOLDER="python"
+
+# Targets tagged as "manual" that require setting GCP credentials.
+MANUAL_EXAMPLE_PYTHON_TARGETS=()
+if [[ -n "${KOKORO_ROOT:-}" ]]; then
+  MANUAL_EXAMPLE_PYTHON_TARGETS=(
+    "//gcs:gcs_envelope_aead_test_package"
+    "//gcs:gcs_envelope_aead_test"
+    "//envelope_aead:envelope_test_package"
+    "//envelope_aead:envelope_test"
+    "//encrypted_keyset:encrypted_keyset_test_package"
+    "//encrypted_keyset:encrypted_keyset_test"
+  )
+fi
+readonly MANUAL_EXAMPLE_PYTHON_TARGETS
 
 if [[ -n "${KOKORO_ROOT:-}" ]]; then
   use_bazel.sh "$(cat ${WORKSPACE_FOLDER}/.bazelversion)"
 fi
-
 cp "${WORKSPACE_FOLDER}/WORKSPACE" "${WORKSPACE_FOLDER}/WORKSPACE.bak"
 ./kokoro/testutils/replace_http_archive_with_local_reposotory.py \
   -f "${WORKSPACE_FOLDER}/WORKSPACE" \
   -t "${TINK_BASE_DIR}"
-./kokoro/testutils/run_bazel_tests.sh "${WORKSPACE_FOLDER}"
+./kokoro/testutils/run_bazel_tests.sh \
+  "${WORKSPACE_FOLDER}" \
+  "${MANUAL_EXAMPLE_PYTHON_TARGETS[@]}"
 mv "${WORKSPACE_FOLDER}/WORKSPACE.bak" "${WORKSPACE_FOLDER}/WORKSPACE"

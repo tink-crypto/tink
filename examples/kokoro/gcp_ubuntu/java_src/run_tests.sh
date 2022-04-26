@@ -40,18 +40,33 @@ if [[ (! -n "${TINK_BASE_DIR:-}" && ! -n "${KOKORO_ROOT:-}") \
   fi
 fi
 
+echo "Using Tink from ${TINK_BASE_DIR}"
+
 # Sourcing required to update callers environment.
 source ./kokoro/testutils/install_python3.sh
+./kokoro/testutils/copy_credentials.sh "java_src/testdata"
 
-readonly WORKSPACE_FOLDER="cc"
+readonly WORKSPACE_FOLDER="java_src"
+
+# Targets tagged as "manual" that require setting GCP credentials.
+MANUAL_EXAMPLE_JAVA_TARGETS=()
+if [[ -n "${KOKORO_ROOT:-}" ]]; then
+  MANUAL_EXAMPLE_JAVA_TARGETS=(
+    "//gcs:gcs_envelope_aead_example_test"
+    "//encryptedkeyset:encrypted_keyset_example_test"
+    "//envelopeaead:envelope_aead_example_test"
+  )
+fi
+readonly MANUAL_EXAMPLE_JAVA_TARGETS
 
 if [[ -n "${KOKORO_ROOT:-}" ]]; then
   use_bazel.sh "$(cat ${WORKSPACE_FOLDER}/.bazelversion)"
 fi
-
 cp "${WORKSPACE_FOLDER}/WORKSPACE" "${WORKSPACE_FOLDER}/WORKSPACE.bak"
 ./kokoro/testutils/replace_http_archive_with_local_reposotory.py \
   -f "${WORKSPACE_FOLDER}/WORKSPACE" \
   -t "${TINK_BASE_DIR}"
-./kokoro/testutils/run_bazel_tests.sh "${WORKSPACE_FOLDER}"
+./kokoro/testutils/run_bazel_tests.sh \
+  "${WORKSPACE_FOLDER}" \
+  "${MANUAL_EXAMPLE_JAVA_TARGETS[@]}"
 mv "${WORKSPACE_FOLDER}/WORKSPACE.bak" "${WORKSPACE_FOLDER}/WORKSPACE"
