@@ -14,7 +14,7 @@
 # limitations under the License.
 ################################################################################
 
-# This scripts runs all the Bazel tests withing a given workspace directory.
+# This script runs all the Bazel tests within a given workspace directory.
 #
 # Users must spcify the WORKSPACE directory. Optionally, the user can specify
 # a set of additional manual targets to run.
