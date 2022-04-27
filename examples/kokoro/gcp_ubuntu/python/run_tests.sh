@@ -40,11 +40,16 @@ if [[ (! -n "${TINK_BASE_DIR:-}" && ! -n "${KOKORO_ROOT:-}") \
   fi
 fi
 
+readonly WORKSPACE_FOLDER="python"
+
+if [[ -n "${KOKORO_ROOT:-}" ]]; then
+  use_bazel.sh "$(cat ${WORKSPACE_FOLDER}/.bazelversion)"
+fi
+
 # Sourcing required to update callers environment.
 source ./kokoro/testutils/install_python3.sh
+source ./kokoro/testutils/install_tink_via_pip.sh "${TINK_BASE_DIR}"
 ./kokoro/testutils/copy_credentials.sh "python/testdata"
-
-readonly WORKSPACE_FOLDER="python"
 
 # Targets tagged as "manual" that require setting GCP credentials.
 MANUAL_EXAMPLE_PYTHON_TARGETS=()
@@ -60,9 +65,6 @@ if [[ -n "${KOKORO_ROOT:-}" ]]; then
 fi
 readonly MANUAL_EXAMPLE_PYTHON_TARGETS
 
-if [[ -n "${KOKORO_ROOT:-}" ]]; then
-  use_bazel.sh "$(cat ${WORKSPACE_FOLDER}/.bazelversion)"
-fi
 cp "${WORKSPACE_FOLDER}/WORKSPACE" "${WORKSPACE_FOLDER}/WORKSPACE.bak"
 ./kokoro/testutils/replace_http_archive_with_local_reposotory.py \
   -f "${WORKSPACE_FOLDER}/WORKSPACE" \

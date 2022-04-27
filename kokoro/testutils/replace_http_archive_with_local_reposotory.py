@@ -77,6 +77,36 @@ def _replace_http_archive_with_local_repository(workspace_content: str,
       )""")
   workspace_content = workspace_content.replace(tink_cc_before, tink_cc_after)
 
+  # Tink C++ AWS-KMS.
+  tink_cc_awskms_before = textwrap.dedent("""\
+      http_archive(
+          name = "tink_cc_awskms",
+          urls = ["https://github.com/google/tink/archive/master.zip"],
+          strip_prefix = "tink-master/cc/integration/awskms",
+      )""")
+  tink_cc_awskms_after = textwrap.dedent(f"""\
+      local_repository(
+          name = "tink_cc_awskms",
+          path = "{tink_base_path}/cc/integration/awskms",
+      )""")
+  workspace_content = workspace_content.replace(tink_cc_awskms_before,
+                                                tink_cc_awskms_after)
+
+  # Tink C++ Cloud KMS.
+  tink_cc_gcpkms_before = textwrap.dedent("""\
+      http_archive(
+          name = "tink_cc_gcpkms",
+          urls = ["https://github.com/google/tink/archive/master.zip"],
+          strip_prefix = "tink-master/cc/integration/gcpkms",
+      )""")
+  tink_cc_gcpkms_after = textwrap.dedent(f"""\
+      local_repository(
+          name = "tink_cc_gcpkms",
+          path = "{tink_base_path}/cc/integration/gcpkms",
+      )""")
+  workspace_content = workspace_content.replace(tink_cc_gcpkms_before,
+                                                tink_cc_gcpkms_after)
+
   # Tink Java.
   tink_java_before = textwrap.dedent("""\
       http_archive(

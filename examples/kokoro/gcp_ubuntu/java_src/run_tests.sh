@@ -42,9 +42,10 @@ fi
 
 echo "Using Tink from ${TINK_BASE_DIR}"
 
-# Sourcing required to update callers environment.
+# Sourcing required to update caller's environment.
 source ./kokoro/testutils/install_python3.sh
 ./kokoro/testutils/copy_credentials.sh "java_src/testdata"
+./kokoro/testutils/update_android_sdk.sh
 
 readonly WORKSPACE_FOLDER="java_src"
 
