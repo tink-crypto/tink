@@ -437,6 +437,9 @@ tink_cc_library(
     tink::util::statusor
 )
 
+# Generate TINK_VERSION_H from version.h.templ. TINK_VERSION_LABEL is
+# substituted in version.h.templ with the value of PROJECT_VERSION.
+set(TINK_VERSION_LABEL "${PROJECT_VERSION}")
 configure_file(version.h.templ "${TINK_VERSION_H}")
 
 tink_cc_library(
