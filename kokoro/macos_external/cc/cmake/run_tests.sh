@@ -21,10 +21,3 @@ if [[ -n "${KOKORO_ROOT:-}" ]]; then
 fi
 
 ./kokoro/testutils/run_cmake_tests.sh .
-
-(
-  export TEST_TMPDIR="$(mktemp -dt examples-cc-cmake.XXXXXX)"
-  export TEST_SRCDIR="$(cd ..; pwd)"
-  cd examples/cc/helloworld
-  ./cmake_build_test.sh
-)

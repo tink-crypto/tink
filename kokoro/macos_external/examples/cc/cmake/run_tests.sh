@@ -1,5 +1,5 @@
 #!/bin/bash
-# Copyright 2020 Google LLC
+# Copyright 2022 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -20,4 +20,7 @@ if [[ -n "${KOKORO_ROOT:-}" ]]; then
   cd "${KOKORO_ARTIFACTS_DIR}/git/tink"
 fi
 
-./kokoro/testutils/run_cmake_tests.sh .
+export TEST_TMPDIR="$(mktemp -dt examples-cc-cmake.XXXXXX)"
+export TEST_SRCDIR="$(cd ..; pwd)"
+cd examples/cc/helloworld
+./cmake_build_test.sh

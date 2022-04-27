@@ -25,10 +25,3 @@ fi
 source ./kokoro/testutils/install_cmake.sh
 source ./kokoro/testutils/install_openssl.sh
 ./kokoro/testutils/run_cmake_tests.sh . -DTINK_USE_SYSTEM_OPENSSL=ON
-
-(
-  export TEST_TMPDIR="$(mktemp -dt examples-cc-cmake-openssl.XXXXXX)"
-  export TEST_SRCDIR="$(cd ..; pwd)"
-  cd examples/cc/helloworld
-  ./cmake_build_test.sh --openssl
-)
