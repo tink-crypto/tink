@@ -16,6 +16,8 @@
 
 package com.google.crypto.tink.subtle;
 
+import com.google.errorprone.annotations.Immutable;
+
 /**
  * Immutable Wrapper around a byte array.
  *
@@ -24,8 +26,8 @@ package com.google.crypto.tink.subtle;
  *
  * @since 1.0.0
  */
+@Immutable
 public final class ImmutableByteArray {
-
   /**
    * @param data the byte array to be wrapped.
    * @return an immutable wrapper around the provided bytes.
@@ -68,5 +70,6 @@ public final class ImmutableByteArray {
     System.arraycopy(buf, start, data, 0, len);
   }
 
+  @SuppressWarnings("Immutable") // We copy the data on input and output.
   private final byte[] data;
 }

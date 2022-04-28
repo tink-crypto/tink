@@ -16,9 +16,7 @@
 
 package com.google.crypto.tink.subtle;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotSame;
+import static com.google.common.truth.Truth.assertThat;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -27,14 +25,24 @@ import org.junit.runners.JUnit4;
 /** Tests for ImmutableByteArray */
 @RunWith(JUnit4.class)
 public class ImmutableByteArrayTest {
+  @Test
+  public void testBasicWorks() throws Exception {
+    byte[] plainArray = new byte[] {0, 1, 2, 3, 4, 5, 6, 7};
+    ImmutableByteArray array = ImmutableByteArray.of(plainArray);
+    assertThat(array.getBytes()).isEqualTo(plainArray);
+  }
 
   @Test
-  public void checkWrap() {
-    byte[] initial = new byte[] {(byte) 1};
-    ImmutableByteArray ba = ImmutableByteArray.of(initial);
-    byte[] result = ba.getBytes();
-    assertNotSame(result, initial);
-    assertArrayEquals(result, initial);
-    assertEquals(ba.getLength(), initial.length);
+  public void testWithRange() throws Exception {
+    byte[] plainArray = new byte[] {100, 100, 100, 0, 1, 2, 3, 4, 5, 6, 7, 100, 100, 100};
+    ImmutableByteArray array = ImmutableByteArray.of(plainArray, 3, 8);
+    assertThat(array.getBytes()).isEqualTo(new byte[] {0, 1, 2, 3, 4, 5, 6, 7});
+  }
+
+  @Test
+  public void testGetLength() throws Exception {
+    byte[] plainArray = new byte[] {100, 100, 100, 0, 1, 2, 3, 4, 5, 6, 7, 100, 100, 100};
+    ImmutableByteArray array = ImmutableByteArray.of(plainArray, 3, 8);
+    assertThat(array.getLength()).isEqualTo(8);
   }
 }

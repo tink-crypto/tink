@@ -362,6 +362,7 @@ java_test(
     srcs = ["ImmutableByteArrayTest.java"],
     deps = [
         "//src/main/java/com/google/crypto/tink/subtle:immutable_byte_array",
+        "@maven//:com_google_truth_truth",
         "@maven//:junit_junit",
     ],
 )

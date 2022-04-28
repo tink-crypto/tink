@@ -134,6 +134,7 @@ java_library(
 java_library(
     name = "immutable_byte_array",
     srcs = ["ImmutableByteArray.java"],
+    deps = ["@maven//:com_google_errorprone_error_prone_annotations"],
 )
 
 java_library(
