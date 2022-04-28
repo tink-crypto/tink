@@ -45,7 +45,7 @@ public final class AesGcmKeyManager extends KeyTypeManager<AesGcmKey> {
   AesGcmKeyManager() {
     super(
         AesGcmKey.class,
-        new PrimitiveFactory<Aead, AesGcmKey>(Aead.class) {
+        new KeyTypeManager.PrimitiveFactory<Aead, AesGcmKey>(Aead.class) {
           @Override
           public Aead getPrimitive(AesGcmKey key) throws GeneralSecurityException {
             return new AesGcmJce(key.getKeyValue().toByteArray());
