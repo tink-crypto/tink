@@ -90,3 +90,23 @@ android_library(
         "@com_google_protobuf//:protobuf_javalite",
     ],
 )
+
+java_library(
+    name = "key_tester",
+    testonly = 1,
+    srcs = ["KeyTester.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink:key",
+        "@maven//:com_google_truth_truth",
+    ],
+)
+
+android_library(
+    name = "key_tester-android",
+    testonly = 1,
+    srcs = ["KeyTester.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink:key-android",
+        "@maven//:com_google_truth_truth",
+    ],
+)
