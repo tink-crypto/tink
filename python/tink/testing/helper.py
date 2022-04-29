@@ -26,6 +26,8 @@ from tink import mac
 from tink import prf
 from tink import signature as pk_signature
 
+_GOOGLE3_TINK_BASE_PATH = 'google3/third_party/tink'
+
 
 def tink_root_path() -> str:
   """Returns the path to the Tink root directory used for the test enviroment.
@@ -41,13 +43,35 @@ def tink_root_path() -> str:
     # Bazel enviroment
     root_paths.append(os.path.join(os.environ['TEST_SRCDIR'], 'tink_base'))
     root_paths.append(os.path.join(os.environ['TEST_SRCDIR'],
-                                   'google3/third_party/tink'))
+                                   _GOOGLE3_TINK_BASE_PATH))
   for root_path in root_paths:
-    # return the first root path that exists.
+    # return the first path that exists.
     if os.path.exists(root_path):
       return root_path
-  raise ValueError('Could not find path to Tink root directory. Make sure that '
-                   'TINK_SRC_PATH is set.')
+  raise ValueError(
+      'Could not find path to Tink root directory among the available paths: '
+      f'{root_paths}. If a custom Tink root path is provided via TINK_SRC_PATH,'
+      ' make sure it is correct.')
+
+
+def tink_py_testdata_path() -> str:
+  """Returns the path to the test data directory to be used for testing."""
+  testdata_paths = []
+  if 'TINK_SRC_PATH' in os.environ:
+    testdata_paths += [os.path.join(os.environ['TINK_SRC_PATH'], 'testdata')]
+  if 'TEST_SRCDIR' in os.environ:
+    # Bazel enviroment
+    testdata_paths += [
+        os.path.join(os.environ['TEST_SRCDIR'], 'tink_py/testdata'),
+        os.path.join(os.environ['TEST_SRCDIR'], _GOOGLE3_TINK_BASE_PATH,
+                     'testdata')
+    ]
+  for testdata_path in testdata_paths:
+    # return the first path that exists.
+    if os.path.exists(testdata_path):
+      return testdata_path
+  raise ValueError('Could not find path to Tink testdata directory among the '
+                   f'available paths: {testdata_paths}.')
 
 
 def fake_key(

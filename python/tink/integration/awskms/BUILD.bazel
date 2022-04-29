@@ -27,9 +27,7 @@ py_library(
 py_test(
     name = "_aws_kms_client_test",
     srcs = ["_aws_kms_client_test.py"],
-    data = [
-        "@tink_base//testdata:credentials",
-    ],
+    data = ["//testdata:credentials"],
     srcs_version = "PY3",
     deps = [
         ":awskms",
@@ -42,9 +40,7 @@ py_test(
 py_test(
     name = "_aws_kms_aead_test",
     srcs = ["_aws_kms_aead_test.py"],
-    data = [
-        "@tink_base//testdata:credentials",
-    ],
+    data = ["//testdata:credentials"],
     srcs_version = "PY3",
     deps = [
         ":awskms",

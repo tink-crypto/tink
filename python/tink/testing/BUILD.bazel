@@ -25,7 +25,10 @@ py_test(
     name = "helper_test",
     srcs = ["helper_test.py"],
     data = [
-        "@tink_base//testdata:credentials",
+        # This is used to check Tink Python testdata path.
+        "//testdata:credentials",
+        # This is used to check Tink root path.
+        "@tink_base//:LICENSE",
     ],
     srcs_version = "PY3",
     deps = [
