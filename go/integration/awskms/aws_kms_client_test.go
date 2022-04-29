@@ -62,7 +62,7 @@ func TestNewClientWithCredentialsWithGoodCredentialsCsv(t *testing.T) {
 	if !ok {
 		t.Skip("TEST_SRCDIR not set")
 	}
-	goodCsvCredFile := filepath.Join(srcDir, "tink_base/testdata/credentials_aws.csv")
+	goodCsvCredFile := filepath.Join(srcDir, "tink_go/testdata/credentials_aws.csv")
 
 	_, err := NewClientWithCredentials(uriPrefix, goodCsvCredFile)
 	if err != nil {
@@ -77,7 +77,7 @@ func TestNewClientWithCredentialsWithGoodCredentialsIni(t *testing.T) {
 	if !ok {
 		t.Skip("TEST_SRCDIR not set")
 	}
-	credINIFile := filepath.Join(srcDir, "tink_base/testdata/credentials_aws.cred")
+	credINIFile := filepath.Join(srcDir, "tink_go/testdata/credentials_aws.cred")
 
 	_, err := NewClientWithCredentials(uriPrefix, credINIFile)
 	if err != nil {
@@ -92,7 +92,7 @@ func TestNewClientWithCredentialsWithBadCredentials(t *testing.T) {
 	if !ok {
 		t.Skip("TEST_SRCDIR not set")
 	}
-	badCredFile := filepath.Join(srcDir, "tink_base/testdata/bad_access_keys_aws.csv")
+	badCredFile := filepath.Join(srcDir, "tink_go/testdata/bad_access_keys_aws.csv")
 
 	_, err := NewClientWithCredentials(uriPrefix, badCredFile)
 	if err == nil {

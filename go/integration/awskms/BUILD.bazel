@@ -30,8 +30,8 @@ go_test(
         "aws_kms_client_test.go",
     ],
     data = [
+        "//testdata:credentials",
         "@google_root_pem//file",  #keep
-        "@tink_base//testdata:credentials",
     ],
     embed = [":awskms"],
     tags = ["no_rbe"],

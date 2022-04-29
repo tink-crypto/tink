@@ -28,10 +28,11 @@ go_test(
         "gcp_kms_client_test.go",
     ],
     data = [
+        # Credentials can be injected into the test files included in these
+        # targets.
+        "//testdata:credentials",
+        "//testdata:ecies_keysets",
         "@google_root_pem//file",  #keep
-        # Change this to your credentials.
-        "@tink_base//testdata:credentials",
-        "@tink_base//testdata:ecies_keysets",
         "@wycheproof//testvectors:all",  #keep
     ],
     embed = [":gcpkms"],

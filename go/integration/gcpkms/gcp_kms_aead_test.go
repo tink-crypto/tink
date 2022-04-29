@@ -37,7 +37,7 @@ const (
 )
 
 var (
-	credFile = "tink_base/testdata/credential.json"
+	credFile = "tink_go/testdata/credential.json"
 )
 
 func init() {

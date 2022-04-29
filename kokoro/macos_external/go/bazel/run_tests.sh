@@ -16,18 +16,19 @@
 
 set -euo pipefail
 
-if [[ -n "${KOKORO_ROOT}" ]]; then
+if [[ -n "${KOKORO_ROOT:-}" ]]; then
   cd "${KOKORO_ARTIFACTS_DIR}/git/tink"
-  ./kokoro/testutils/copy_credentials.sh "testdata"
-  # Sourcing required to update callers environment.
-  source ./kokoro/testutils/install_go.sh
 fi
+./kokoro/testutils/copy_credentials.sh "go/testdata"
+# Sourcing required to update callers environment.
+source ./kokoro/testutils/install_go.sh
 
 echo "Using go binary from $(which go): $(go version)"
 
 
-cd go/
-use_bazel.sh "$(cat .bazelversion)"
+if [[ -n "${KOKORO_ROOT:-}" ]]; then
+  use_bazel.sh "$(cat go/.bazelversion)"
+fi
 
 # TODO(b/219879042): Add tests that build files are up-to-date.
 # We already do these tests in gcp_ubuntu_per_language/go/bazel/run_tests.sh.
@@ -35,15 +36,13 @@ use_bazel.sh "$(cat .bazelversion)"
 # We either need to use a different version of bash, or replace readarray with
 # while loops.
 
-time bazel build -- ...
-time bazel test --test_output="errors" -- ...
-
+declare -a MANUAL_TARGETS
 # Run manual tests which rely on test data only available via Bazel.
-if [[ -n "${KOKORO_ROOT}" ]]; then
-  declare -a MANUAL_TARGETS
+if [[ -n "${KOKORO_ROOT:-}" ]]; then
   MANUAL_TARGETS=(
     "//integration/gcpkms:gcpkms_test"
   )
-  readonly MANUAL_TARGETS
-  time bazel test --test_output="errors" -- "${MANUAL_TARGETS[@]}"
 fi
+readonly MANUAL_TARGETS
+
+./kokoro/testutils/run_bazel_tests.sh go "${MANUAL_TARGETS[@]}"

@@ -58,6 +58,6 @@ install_temp_go() {
   export PATH="${go_tmpdir}/go/bin:${PATH}"
 }
 
-if [[ -n "${KOKORO_ROOT}" ]] ; then
+if [[ -n "${KOKORO_ROOT:-}" ]] ; then
   install_temp_go
 fi
