@@ -90,6 +90,14 @@ class SecretProto {
   inline T& operator*() { return *value_; }
   inline const T& operator*() const { return *value_; }
 
+  StatusOr<SecretData> SerializeAsSecretData() const {
+    SecretData data(value_->ByteSizeLong());
+    if (!value_->SerializeToArray(data.data(), data.size())) {
+      return Status(absl::StatusCode::kInternal, "Could not serialize proto");
+    }
+    return data;
+  }
+
  private:
   std::unique_ptr<google::protobuf::Arena> arena_ =
       absl::make_unique<google::protobuf::Arena>(internal::SecretArenaOptions());
