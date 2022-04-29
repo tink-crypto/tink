@@ -57,7 +57,7 @@ cc_test(
     name = "gcp_kms_client_test",
     size = "medium",
     srcs = ["gcp_kms_client_test.cc"],
-    data = ["@tink_base//testdata:credentials"],
+    data = ["//testdata:credentials"],
     deps = [
         ":gcp_kms_client",
         "@com_google_absl//absl/status",
