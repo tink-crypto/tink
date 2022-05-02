@@ -9,7 +9,7 @@ cc_library(
     name = "cli_util",
     srcs = ["cli_util.cc"],
     hdrs = ["cli_util.h"],
-    data = ["@tink_base//testdata:credentials"],
+    data = ["//testdata:credentials"],
     deps = [
         "@com_google_absl//absl/memory",
         "@com_google_absl//absl/strings",
@@ -67,8 +67,8 @@ sh_test(
     ],
     data = [
         ":aws_kms_aead_cli",
+        "//testdata:credentials",
         "//testing/cross_language:test_lib",
-        "@tink_base//testdata:credentials",
     ],
     tags = ["no_rbe"],
 )
@@ -81,9 +81,9 @@ sh_test(
     ],
     data = [
         ":gcp_kms_aead_cli",
+        "//testdata:credentials",
         "//testing/cross_language:test_lib",
         "@google_root_pem//file",
-        "@tink_base//testdata:credentials",
     ],
     tags = ["manual"],
 )

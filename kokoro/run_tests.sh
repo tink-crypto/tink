@@ -236,7 +236,7 @@ main() {
     ./kokoro/testutils/copy_credentials.sh "go/testdata"
     ./kokoro/testutils/copy_credentials.sh "java_src/testdata"
     ./kokoro/testutils/copy_credentials.sh "python/testdata"
-    ./kokoro/testutils/copy_credentials.sh "testdata"
+    ./kokoro/testutils/copy_credentials.sh "tools/testdata"
 
     ./kokoro/testutils/update_android_sdk.sh
     # Sourcing required to update callers environment.

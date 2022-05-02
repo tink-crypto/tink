@@ -58,7 +58,9 @@ def tink_py_testdata_path() -> str:
   """Returns the path to the test data directory to be used for testing."""
   testdata_paths = []
   if 'TINK_SRC_PATH' in os.environ:
-    testdata_paths += [os.path.join(os.environ['TINK_SRC_PATH'], 'testdata')]
+    testdata_paths += [
+        os.path.join(os.environ['TINK_SRC_PATH'], 'python/testdata')
+    ]
   if 'TEST_SRCDIR' in os.environ:
     # Bazel enviroment
     testdata_paths += [

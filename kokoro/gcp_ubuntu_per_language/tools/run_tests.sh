@@ -18,7 +18,7 @@ set -euo pipefail
 
 cd ${KOKORO_ARTIFACTS_DIR}/git/tink
 
-./kokoro/testutils/copy_credentials.sh "testdata"
+./kokoro/testutils/copy_credentials.sh "tools/testdata"
 ./kokoro/testutils/update_android_sdk.sh
 # Sourcing required to update callers environment.
 source ./kokoro/testutils/install_python3.sh

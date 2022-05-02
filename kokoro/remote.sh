@@ -30,8 +30,6 @@ if [[ -n "${KOKORO_ROOT}" ]]; then
   rm -f ~/.bazelrc
 
   use_bazel.sh $(cat .bazelversion)
-
-  ./kokoro/testutils/copy_credentials.sh "testdata"
   ./kokoro/testutils/update_android_sdk.sh
 fi
 

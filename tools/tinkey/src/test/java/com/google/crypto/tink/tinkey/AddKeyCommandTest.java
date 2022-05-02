@@ -114,7 +114,7 @@ public class AddKeyCommandTest {
     assumeFalse(TestUtil.isRemoteBuildExecution());
     // Create an input stream containing an encrypted keyset.
     String masterKeyUri = TestUtil.RESTRICTED_CRYPTO_KEY_URI;
-    String credentialPath = "../tink_base/" + TestUtil.SERVICE_ACCOUNT_FILE;
+    String credentialPath = TestUtil.SERVICE_ACCOUNT_FILE;
     InputStream inputStream =
         TinkeyUtil.createKeyset(existingTemplate, INPUT_FORMAT, masterKeyUri, credentialPath);
     EncryptedKeyset encryptedKeyset =
