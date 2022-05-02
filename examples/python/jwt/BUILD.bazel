@@ -7,6 +7,7 @@ licenses(["notice"])
 
 exports_files([
     "jwt_test_private_keyset.json",
+    "jwt_test_public_keyset.json",
 ])
 
 py_binary(
@@ -27,7 +28,6 @@ py_binary(
     python_version = "PY3",
     deps = [
         requirement("absl-py"),
-        "@tink_py//tink:cleartext_keyset_handle",
         "@tink_py//tink:tink_python",
         "@tink_py//tink/jwt",
     ],
@@ -53,11 +53,13 @@ sh_test(
         "$(rootpath :jwt_generate_public_jwk_set)",
         "$(rootpath :jwt_verify)",
         "$(rootpath :jwt_test_private_keyset.json)",
+        "$(rootpath :jwt_test_public_keyset.json)",
     ],
     data = [
         ":jwt_generate_public_jwk_set",
         ":jwt_sign",
         ":jwt_test_private_keyset.json",
+        ":jwt_test_public_keyset.json",
         ":jwt_verify",
     ],
 )
@@ -73,11 +75,13 @@ sh_test(
         "'python3 $(rootpath :jwt_generate_public_jwk_set.py)'",
         "'python3 $(rootpath :jwt_verify.py)'",
         "$(rootpath :jwt_test_private_keyset.json)",
+        "$(rootpath :jwt_test_public_keyset.json)",
     ],
     data = [
         ":jwt_generate_public_jwk_set.py",
         ":jwt_sign.py",
         ":jwt_test_private_keyset.json",
+        ":jwt_test_public_keyset.json",
         ":jwt_verify.py",
     ],
 )

@@ -1,0 +1,15 @@
+{
+  "primaryKeyId": 1742360595,
+  "key": [
+    {
+      "keyData": {
+        "typeUrl": "type.googleapis.com/google.crypto.tink.JwtEcdsaPublicKey",
+        "value": "EAEaIG40E1603MP9RyoomZth6r+NcO1XeODPZKMmP/lbD/kgIiBeoDMF9LS5BDCh6YgqE3DjHwWwnEKEI3WpPf8izEx1rQ==",
+        "keyMaterialType": "ASYMMETRIC_PUBLIC"
+      },
+      "status": "ENABLED",
+      "keyId": 1742360595,
+      "outputPrefixType": "TINK"
+    }
+  ]
+}

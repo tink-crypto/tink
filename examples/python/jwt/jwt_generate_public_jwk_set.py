@@ -13,9 +13,7 @@
 # limitations under the License.
 
 # [START python-jwt-sign-example]
-"""A utility for generating the public JWK set from the private keyset.
-
-It loads cleartext keys from disk - this is not recommended!
+"""A utility for generating the public JWK set from the public keyset.
 """
 
 from __future__ import absolute_import
@@ -27,16 +25,14 @@ from absl import app
 from absl import flags
 from absl import logging
 import tink
-from tink import cleartext_keyset_handle
 from tink import jwt
 
 
-FLAGS = flags.FLAGS
-
-flags.DEFINE_string('keyset_path', None,
-                    'Path to the keyset used for the JWT signature operation.')
-flags.DEFINE_string('public_jwk_set_path', None,
-                    'Path to public keyset in JWK format.')
+_PUBLIC_KEYSET_PATH = flags.DEFINE_string(
+    'public_keyset_path', None,
+    'Path to the public keyset in Tink JSON format.')
+_PUBLIC_JWK_SET_PATH = flags.DEFINE_string(
+    'public_jwk_set_path', None, 'Path to public keyset in JWK format.')
 
 
 def main(argv):
@@ -50,26 +46,25 @@ def main(argv):
     return 1
 
   # Read the keyset into a KeysetHandle
-  with open(FLAGS.keyset_path, 'rt') as keyset_file:
+  with open(_PUBLIC_KEYSET_PATH.value, 'rt') as keyset_file:
     try:
       text = keyset_file.read()
-      keyset_handle = cleartext_keyset_handle.read(tink.JsonKeysetReader(text))
+      public_keyset_handle = tink.read_no_secret_keyset_handle(
+          tink.JsonKeysetReader(text))
     except tink.TinkError as e:
       logging.exception('Error reading keyset: %s', e)
       return 1
 
   # Export Public Keyset as JWK set
-  public_jwk_set = jwt.jwk_set_from_public_keyset_handle(
-      keyset_handle.public_keyset_handle())
-  with open(FLAGS.public_jwk_set_path, 'wt') as public_jwk_set_file:
+  public_jwk_set = jwt.jwk_set_from_public_keyset_handle(public_keyset_handle)
+  with open(_PUBLIC_JWK_SET_PATH.value, 'wt') as public_jwk_set_file:
     public_jwk_set_file.write(public_jwk_set)
   logging.info('The public JWK set has been written to %s',
-               FLAGS.public_jwk_set_path)
+               _PUBLIC_JWK_SET_PATH.value)
 
 
 if __name__ == '__main__':
-  flags.mark_flags_as_required(
-      ['keyset_path', 'public_jwk_set_path'])
+  flags.mark_flags_as_required(['public_keyset_path', 'public_jwk_set_path'])
   app.run(main)
 
 # [END python-jwt-sign-example]
