@@ -1,4 +1,4 @@
-// Copyright 2021 Google LLC
+// Copyright 2017 Google Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -13,22 +13,24 @@
 // limitations under the License.
 //
 ////////////////////////////////////////////////////////////////////////////////
+
 syntax = "proto3";
 
 package google.crypto.tink;
 
-message TestProto {
-  uint64 num = 1;
-  bytes str = 2;  // Placeholder for ctype.
+option java_package = "com.google.crypto.tink.proto";
+option java_multiple_files = true;
+option go_package = "github.com/google/tink/proto/aes_siv_go_proto";
+
+message AesSivKeyFormat {
+  // Only valid value is: 64.
+  uint32 key_size = 1;
+  uint32 version = 2;
 }
 
-message NestedTestProto {
-  TestProto a = 1;
-  TestProto b = 2;
-  uint64 num = 3;
-  bytes str = 4;  // Placeholder for ctype.
-}
-
-message TestProtoWithoutCtype {
-  bytes str = 1;
+// key_type: type.googleapis.com/google.crypto.tink.AesSivKey
+message AesSivKey {
+  uint32 version = 1;
+  // First half is AES-CTR key, second is AES-SIV.
+  bytes key_value = 2;
 }

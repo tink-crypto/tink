@@ -13,22 +13,28 @@
 // limitations under the License.
 //
 ////////////////////////////////////////////////////////////////////////////////
+
 syntax = "proto3";
 
 package google.crypto.tink;
 
-message TestProto {
-  uint64 num = 1;
-  bytes str = 2;  // Placeholder for ctype.
+option java_package = "com.google.crypto.tink.proto";
+option java_multiple_files = true;
+option go_package = "github.com/google/tink/proto/cached_dek_aead_go_proto";
+
+message CachedDekAeadKeyFormat {
+  // Required.
+  // The location of a KMS key.
+  // With Google Cloud KMS, valid values have this format:
+  // gcp-kms://projects/*/locations/*/keyRings/*/cryptoKeys/*.
+  // With AWS KMS, valid values have this format:
+  // aws-kms://arn:aws:kms:<region>:<account-id>:key/<key-id>
+  string key_uri = 1;
 }
 
-message NestedTestProto {
-  TestProto a = 1;
-  TestProto b = 2;
-  uint64 num = 3;
-  bytes str = 4;  // Placeholder for ctype.
-}
-
-message TestProtoWithoutCtype {
-  bytes str = 1;
+// There is no actual key material in the key.
+message CachedDekAeadKey {
+  uint32 version = 1;
+  // The key format also contains the params.
+  CachedDekAeadKeyFormat params = 2;
 }

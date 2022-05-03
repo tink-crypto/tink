@@ -1,4 +1,4 @@
-// Copyright 2021 Google LLC
+// Copyright 2019 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -13,22 +13,29 @@
 // limitations under the License.
 //
 ////////////////////////////////////////////////////////////////////////////////
+
 syntax = "proto3";
 
 package google.crypto.tink;
 
-message TestProto {
-  uint64 num = 1;
-  bytes str = 2;  // Placeholder for ctype.
+import "proto/tink.proto";
+
+option java_package = "com.google.crypto.tink.proto";
+option java_multiple_files = true;
+option go_package = "github.com/google/tink/proto/prf_based_deriver_go_proto";
+
+message PrfBasedDeriverParams {
+  KeyTemplate derived_key_template = 1;
 }
 
-message NestedTestProto {
-  TestProto a = 1;
-  TestProto b = 2;
-  uint64 num = 3;
-  bytes str = 4;  // Placeholder for ctype.
+message PrfBasedDeriverKeyFormat {
+  KeyTemplate prf_key_template = 1;
+  PrfBasedDeriverParams params = 2;
 }
 
-message TestProtoWithoutCtype {
-  bytes str = 1;
+// key_type: type.googleapis.com/google.crypto.tink.PrfBasedDeriverKey
+message PrfBasedDeriverKey {
+  uint32 version = 1;
+  KeyData prf_key = 2;
+  PrfBasedDeriverParams params = 3;
 }

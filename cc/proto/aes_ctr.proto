@@ -1,4 +1,4 @@
-// Copyright 2021 Google LLC
+// Copyright 2017 Google Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -13,22 +13,27 @@
 // limitations under the License.
 //
 ////////////////////////////////////////////////////////////////////////////////
+
 syntax = "proto3";
 
 package google.crypto.tink;
 
-message TestProto {
-  uint64 num = 1;
-  bytes str = 2;  // Placeholder for ctype.
+option java_package = "com.google.crypto.tink.proto";
+option java_multiple_files = true;
+option go_package = "github.com/google/tink/proto/aes_ctr_go_proto";
+
+message AesCtrParams {
+  uint32 iv_size = 1;
 }
 
-message NestedTestProto {
-  TestProto a = 1;
-  TestProto b = 2;
-  uint64 num = 3;
-  bytes str = 4;  // Placeholder for ctype.
+message AesCtrKeyFormat {
+  AesCtrParams params = 1;
+  uint32 key_size = 2;
 }
 
-message TestProtoWithoutCtype {
-  bytes str = 1;
+// key_type: type.googleapis.com/google.crypto.tink.AesCtrKey
+message AesCtrKey {
+  uint32 version = 1;
+  AesCtrParams params = 2;
+  bytes key_value = 3;
 }

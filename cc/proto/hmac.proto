@@ -1,4 +1,4 @@
-// Copyright 2021 Google LLC
+// Copyright 2017 Google Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -13,22 +13,31 @@
 // limitations under the License.
 //
 ////////////////////////////////////////////////////////////////////////////////
+
 syntax = "proto3";
 
 package google.crypto.tink;
 
-message TestProto {
-  uint64 num = 1;
-  bytes str = 2;  // Placeholder for ctype.
+import "proto/common.proto";
+
+option java_package = "com.google.crypto.tink.proto";
+option java_multiple_files = true;
+option go_package = "github.com/google/tink/proto/hmac_go_proto";
+
+message HmacParams {
+  HashType hash = 1;  // HashType is an enum.
+  uint32 tag_size = 2;
 }
 
-message NestedTestProto {
-  TestProto a = 1;
-  TestProto b = 2;
-  uint64 num = 3;
-  bytes str = 4;  // Placeholder for ctype.
+// key_type: type.googleapis.com/google.crypto.tink.HmacKey
+message HmacKey {
+  uint32 version = 1;
+  HmacParams params = 2;
+  bytes key_value = 3;
 }
 
-message TestProtoWithoutCtype {
-  bytes str = 1;
+message HmacKeyFormat {
+  HmacParams params = 1;
+  uint32 key_size = 2;
+  uint32 version = 3;
 }

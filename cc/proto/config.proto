@@ -1,0 +1,50 @@
+// Copyright 2017 Google Inc.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+////////////////////////////////////////////////////////////////////////////////
+
+// Definitions for configuring Tink runtime environment.
+syntax = "proto3";
+
+package google.crypto.tink;
+
+option java_package = "com.google.crypto.tink.proto";
+option java_multiple_files = true;
+option go_package = "github.com/google/tink/proto/config_go_proto";
+
+// An entry that describes a key type to be used with Tink library,
+// specifying the corresponding primitive, key manager, and deprecation status.
+// All fields are required.
+message KeyTypeEntry {
+  // KeyTypeEntry is no longer supported.
+  option deprecated = true;
+
+  string primitive_name = 1;  // E.g. “Aead”, “Mac”, ... (case-insensitive)
+  string type_url = 2;        // Name of the key type.
+  uint32 key_manager_version = 3;  // Minimum required version of key manager.
+  bool new_key_allowed = 4;        // Can the key manager create new keys?
+  string catalogue_name = 5;       // Catalogue to be queried for key manager,
+                              // e.g. "Tink", "Custom", ... (case-insensitive)
+}
+
+// A complete configuration of Tink library: a list of key types
+// to be available via the Registry after initialization.
+// All fields are required.
+message RegistryConfig {
+  // RegistryConfig is no longer supported.
+  option deprecated = true;
+
+  string config_name = 1;
+  repeated KeyTypeEntry entry = 2;
+}
