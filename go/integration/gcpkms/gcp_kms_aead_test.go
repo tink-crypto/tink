@@ -14,7 +14,7 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-package gcpkms
+package gcpkms_test
 
 import (
 	"bytes"
@@ -27,6 +27,7 @@ import (
 	// context is used to cancel outstanding requests
 	"github.com/google/tink/go/aead"
 	"github.com/google/tink/go/core/registry"
+	"github.com/google/tink/go/integration/gcpkms"
 	"github.com/google/tink/go/keyset"
 	"github.com/google/tink/go/subtle/random"
 	"github.com/google/tink/go/tink"
@@ -54,7 +55,7 @@ func setupKMS(t *testing.T) {
 		t.Skip("TEST_SRCDIR not set")
 	}
 
-	g, err := NewClientWithCredentials(keyURI, filepath.Join(srcDir, credFile))
+	g, err := gcpkms.NewClientWithCredentials(keyURI, filepath.Join(srcDir, credFile))
 	if err != nil {
 		t.Errorf("error setting up gcp client: %v", err)
 	}

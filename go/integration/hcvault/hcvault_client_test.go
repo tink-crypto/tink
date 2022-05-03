@@ -14,7 +14,7 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-package hcvault
+package hcvault_test
 
 import (
 	"crypto/tls"
@@ -22,13 +22,14 @@ import (
 
 	"github.com/google/tink/go/aead"
 	"github.com/google/tink/go/core/registry"
+	"github.com/google/tink/go/integration/hcvault"
 	"github.com/google/tink/go/keyset"
 )
 
 func Example() {
 	const keyURI = "hcvault://hcvault.corp.com:8200/transit/keys/key-1"
 
-	vaultClient, err := NewClient(keyURI, tlsConfig(), vaultToken())
+	vaultClient, err := hcvault.NewClient(keyURI, tlsConfig(), vaultToken())
 	if err != nil {
 		log.Fatal(err)
 	}

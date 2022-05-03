@@ -35,9 +35,9 @@ go_test(
         "@google_root_pem//file",  #keep
         "@wycheproof//testvectors:all",  #keep
     ],
-    embed = [":gcpkms"],
     tags = ["manual"],
     deps = [
+        ":gcpkms",
         "//aead",
         "//core/registry",
         "//keyset",

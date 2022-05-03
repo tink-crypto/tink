@@ -25,8 +25,8 @@ go_test(
         "hcvault_client_test.go",
     ],
     data = ["//integration/hcvault/testdata:server_tls_files"],
-    embed = [":hcvault"],
     deps = [
+        ":hcvault",
         "//aead",
         "//core/registry",
         "//keyset",
