@@ -19,6 +19,7 @@ package com.google.crypto.tink.signature;
 import com.google.crypto.tink.PublicKeyVerify;
 import com.google.crypto.tink.config.internal.TinkFipsUtil;
 import com.google.crypto.tink.internal.KeyTypeManager;
+import com.google.crypto.tink.internal.PrimitiveFactory;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
 import com.google.crypto.tink.proto.RsaSsaPkcs1PublicKey;
 import com.google.crypto.tink.signature.internal.SigUtil;
@@ -41,8 +42,7 @@ class RsaSsaPkcs1VerifyKeyManager extends KeyTypeManager<RsaSsaPkcs1PublicKey> {
   public RsaSsaPkcs1VerifyKeyManager() {
     super(
         RsaSsaPkcs1PublicKey.class,
-        new KeyTypeManager.PrimitiveFactory<PublicKeyVerify, RsaSsaPkcs1PublicKey>(
-            PublicKeyVerify.class) {
+        new PrimitiveFactory<PublicKeyVerify, RsaSsaPkcs1PublicKey>(PublicKeyVerify.class) {
           @Override
           public PublicKeyVerify getPrimitive(RsaSsaPkcs1PublicKey keyProto)
               throws GeneralSecurityException {

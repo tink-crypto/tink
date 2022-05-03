@@ -33,7 +33,7 @@ public abstract class PrivateKeyTypeManager<
   protected PrivateKeyTypeManager(
       Class<KeyProtoT> clazz,
       Class<PublicKeyProtoT> publicKeyClazz,
-      KeyTypeManager.PrimitiveFactory<?, KeyProtoT>... factories) {
+      PrimitiveFactory<?, KeyProtoT>... factories) {
     super(clazz, factories);
     this.publicKeyClazz = publicKeyClazz;
   }

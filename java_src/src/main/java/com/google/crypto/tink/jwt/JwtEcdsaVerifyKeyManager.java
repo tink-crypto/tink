@@ -18,6 +18,7 @@ package com.google.crypto.tink.jwt;
 import static java.nio.charset.StandardCharsets.US_ASCII;
 
 import com.google.crypto.tink.internal.KeyTypeManager;
+import com.google.crypto.tink.internal.PrimitiveFactory;
 import com.google.crypto.tink.proto.JwtEcdsaAlgorithm;
 import com.google.crypto.tink.proto.JwtEcdsaPublicKey;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
@@ -75,7 +76,7 @@ class JwtEcdsaVerifyKeyManager extends KeyTypeManager<JwtEcdsaPublicKey> {
   }
 
   private static class JwtPublicKeyVerifyFactory
-      extends KeyTypeManager.PrimitiveFactory<JwtPublicKeyVerifyInternal, JwtEcdsaPublicKey> {
+      extends PrimitiveFactory<JwtPublicKeyVerifyInternal, JwtEcdsaPublicKey> {
     public JwtPublicKeyVerifyFactory() {
       super(JwtPublicKeyVerifyInternal.class);
     }

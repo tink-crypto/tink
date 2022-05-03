@@ -20,6 +20,7 @@ import static java.nio.charset.StandardCharsets.US_ASCII;
 import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.internal.KeyTypeManager;
+import com.google.crypto.tink.internal.PrimitiveFactory;
 import com.google.crypto.tink.internal.PrivateKeyTypeManager;
 import com.google.crypto.tink.proto.JwtRsaSsaPssAlgorithm;
 import com.google.crypto.tink.proto.JwtRsaSsaPssKeyFormat;
@@ -90,7 +91,7 @@ public final class JwtRsaSsaPssSignKeyManager
   }
 
   private static class JwtPublicKeySignFactory
-      extends KeyTypeManager.PrimitiveFactory<JwtPublicKeySignInternal, JwtRsaSsaPssPrivateKey> {
+      extends PrimitiveFactory<JwtPublicKeySignInternal, JwtRsaSsaPssPrivateKey> {
     public JwtPublicKeySignFactory() {
       super(JwtPublicKeySignInternal.class);
     }
@@ -168,8 +169,8 @@ public final class JwtRsaSsaPssSignKeyManager
   }
 
   @Override
-  public KeyFactory<JwtRsaSsaPssKeyFormat, JwtRsaSsaPssPrivateKey> keyFactory() {
-    return new KeyFactory<JwtRsaSsaPssKeyFormat, JwtRsaSsaPssPrivateKey>(
+  public KeyTypeManager.KeyFactory<JwtRsaSsaPssKeyFormat, JwtRsaSsaPssPrivateKey> keyFactory() {
+    return new KeyTypeManager.KeyFactory<JwtRsaSsaPssKeyFormat, JwtRsaSsaPssPrivateKey>(
         JwtRsaSsaPssKeyFormat.class) {
       @Override
       public void validateKeyFormat(JwtRsaSsaPssKeyFormat keyFormat)

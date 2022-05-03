@@ -20,6 +20,7 @@ import com.google.crypto.tink.HybridDecrypt;
 import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.internal.KeyTypeManager;
+import com.google.crypto.tink.internal.PrimitiveFactory;
 import com.google.crypto.tink.internal.PrivateKeyTypeManager;
 import com.google.crypto.tink.proto.HpkeAead;
 import com.google.crypto.tink.proto.HpkeKdf;
@@ -49,7 +50,7 @@ public final class HpkePrivateKeyManager
     super(
         HpkePrivateKey.class,
         HpkePublicKey.class,
-        new KeyTypeManager.PrimitiveFactory<HybridDecrypt, HpkePrivateKey>(HybridDecrypt.class) {
+        new PrimitiveFactory<HybridDecrypt, HpkePrivateKey>(HybridDecrypt.class) {
           @Override
           public HybridDecrypt getPrimitive(HpkePrivateKey recipientPrivateKey)
               throws GeneralSecurityException {
@@ -105,8 +106,8 @@ public final class HpkePrivateKeyManager
   }
 
   @Override
-  public KeyFactory<HpkeKeyFormat, HpkePrivateKey> keyFactory() {
-    return new KeyFactory<HpkeKeyFormat, HpkePrivateKey>(HpkeKeyFormat.class) {
+  public KeyTypeManager.KeyFactory<HpkeKeyFormat, HpkePrivateKey> keyFactory() {
+    return new KeyTypeManager.KeyFactory<HpkeKeyFormat, HpkePrivateKey>(HpkeKeyFormat.class) {
       @Override
       public void validateKeyFormat(HpkeKeyFormat keyFormat) throws GeneralSecurityException {
         HpkeUtil.validateParams(keyFormat.getParams());

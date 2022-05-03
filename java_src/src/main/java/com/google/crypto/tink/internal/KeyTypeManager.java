@@ -56,31 +56,6 @@ import java.util.Set;
  */
 @Alpha
 public abstract class KeyTypeManager<KeyProtoT extends MessageLite> {
-  /** A PrimitiveFactory knows how to create primitives from a given key. */
-  protected abstract static class PrimitiveFactory<PrimitiveT, KeyProtoT extends MessageLite> {
-    private final Class<PrimitiveT> clazz;
-
-    public PrimitiveFactory(Class<PrimitiveT> clazz) {
-      this.clazz = clazz;
-    }
-
-    /**
-     * Returns the class object corresponding to the generic parameter {@code PrimitiveT}.
-     */
-    final Class<PrimitiveT> getPrimitiveClass() {
-      return clazz;
-    }
-
-    /**
-     * Creates a new instance of {@code PrimitiveT}.
-     *
-     * <p>For primitives of type {@code Mac}, {@code Aead}, {@code PublicKeySign}, {@code
-     * PublicKeyVerify}, {@code DeterministicAead}, {@code HybridEncrypt}, and {@code HybridDecrypt}
-     * this should be a primitive which <b>ignores</b> the output prefix and assumes "RAW".
-     */
-    public abstract PrimitiveT getPrimitive(KeyProtoT key) throws GeneralSecurityException;
-  }
-
   private final Class<KeyProtoT> clazz;
 
   private final Map<Class<?>, PrimitiveFactory<?, KeyProtoT>> factories;

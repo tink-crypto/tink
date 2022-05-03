@@ -20,6 +20,7 @@ import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.PublicKeySign;
 import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.internal.KeyTypeManager;
+import com.google.crypto.tink.internal.PrimitiveFactory;
 import com.google.crypto.tink.internal.PrivateKeyTypeManager;
 import com.google.crypto.tink.proto.HashType;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
@@ -58,8 +59,7 @@ public final class RsaSsaPssSignKeyManager
     super(
         RsaSsaPssPrivateKey.class,
         RsaSsaPssPublicKey.class,
-        new KeyTypeManager.PrimitiveFactory<PublicKeySign, RsaSsaPssPrivateKey>(
-            PublicKeySign.class) {
+        new PrimitiveFactory<PublicKeySign, RsaSsaPssPrivateKey>(PublicKeySign.class) {
           @Override
           public PublicKeySign getPrimitive(RsaSsaPssPrivateKey keyProto)
               throws GeneralSecurityException {
@@ -136,8 +136,9 @@ public final class RsaSsaPssSignKeyManager
   }
 
   @Override
-  public KeyFactory<RsaSsaPssKeyFormat, RsaSsaPssPrivateKey> keyFactory() {
-    return new KeyFactory<RsaSsaPssKeyFormat, RsaSsaPssPrivateKey>(RsaSsaPssKeyFormat.class) {
+  public KeyTypeManager.KeyFactory<RsaSsaPssKeyFormat, RsaSsaPssPrivateKey> keyFactory() {
+    return new KeyTypeManager.KeyFactory<RsaSsaPssKeyFormat, RsaSsaPssPrivateKey>(
+        RsaSsaPssKeyFormat.class) {
       @Override
       public void validateKeyFormat(RsaSsaPssKeyFormat format) throws GeneralSecurityException {
         SigUtil.validateRsaSsaPssParams(format.getParams());

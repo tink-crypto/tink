@@ -18,6 +18,7 @@ package com.google.crypto.tink.signature;
 
 import com.google.crypto.tink.PublicKeyVerify;
 import com.google.crypto.tink.internal.KeyTypeManager;
+import com.google.crypto.tink.internal.PrimitiveFactory;
 import com.google.crypto.tink.proto.Ed25519PublicKey;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
 import com.google.crypto.tink.subtle.Ed25519Verify;
@@ -35,8 +36,7 @@ class Ed25519PublicKeyManager extends KeyTypeManager<Ed25519PublicKey> {
   public Ed25519PublicKeyManager() {
     super(
         Ed25519PublicKey.class,
-        new KeyTypeManager.PrimitiveFactory<PublicKeyVerify, Ed25519PublicKey>(
-            PublicKeyVerify.class) {
+        new PrimitiveFactory<PublicKeyVerify, Ed25519PublicKey>(PublicKeyVerify.class) {
           @Override
           public PublicKeyVerify getPrimitive(Ed25519PublicKey keyProto) {
             return new Ed25519Verify(keyProto.getKeyValue().toByteArray());

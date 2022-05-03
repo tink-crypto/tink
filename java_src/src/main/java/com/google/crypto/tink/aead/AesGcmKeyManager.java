@@ -21,6 +21,7 @@ import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.config.internal.TinkFipsUtil;
 import com.google.crypto.tink.internal.KeyTypeManager;
+import com.google.crypto.tink.internal.PrimitiveFactory;
 import com.google.crypto.tink.proto.AesGcmKey;
 import com.google.crypto.tink.proto.AesGcmKeyFormat;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
@@ -45,7 +46,7 @@ public final class AesGcmKeyManager extends KeyTypeManager<AesGcmKey> {
   AesGcmKeyManager() {
     super(
         AesGcmKey.class,
-        new KeyTypeManager.PrimitiveFactory<Aead, AesGcmKey>(Aead.class) {
+        new PrimitiveFactory<Aead, AesGcmKey>(Aead.class) {
           @Override
           public Aead getPrimitive(AesGcmKey key) throws GeneralSecurityException {
             return new AesGcmJce(key.getKeyValue().toByteArray());

@@ -18,6 +18,7 @@ package com.google.crypto.tink.hybrid;
 
 import com.google.crypto.tink.HybridEncrypt;
 import com.google.crypto.tink.internal.KeyTypeManager;
+import com.google.crypto.tink.internal.PrimitiveFactory;
 import com.google.crypto.tink.proto.EciesAeadHkdfParams;
 import com.google.crypto.tink.proto.EciesAeadHkdfPublicKey;
 import com.google.crypto.tink.proto.EciesHkdfKemParams;
@@ -40,8 +41,7 @@ class EciesAeadHkdfPublicKeyManager extends KeyTypeManager<EciesAeadHkdfPublicKe
   public EciesAeadHkdfPublicKeyManager() {
     super(
         EciesAeadHkdfPublicKey.class,
-        new KeyTypeManager.PrimitiveFactory<HybridEncrypt, EciesAeadHkdfPublicKey>(
-            HybridEncrypt.class) {
+        new PrimitiveFactory<HybridEncrypt, EciesAeadHkdfPublicKey>(HybridEncrypt.class) {
           @Override
           public HybridEncrypt getPrimitive(EciesAeadHkdfPublicKey recipientKeyProto)
               throws GeneralSecurityException {

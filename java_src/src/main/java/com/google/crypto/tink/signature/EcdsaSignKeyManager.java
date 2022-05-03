@@ -21,6 +21,7 @@ import com.google.crypto.tink.PublicKeySign;
 import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.config.internal.TinkFipsUtil;
 import com.google.crypto.tink.internal.KeyTypeManager;
+import com.google.crypto.tink.internal.PrimitiveFactory;
 import com.google.crypto.tink.internal.PrivateKeyTypeManager;
 import com.google.crypto.tink.proto.EcdsaKeyFormat;
 import com.google.crypto.tink.proto.EcdsaParams;
@@ -57,7 +58,7 @@ public final class EcdsaSignKeyManager
     super(
         EcdsaPrivateKey.class,
         EcdsaPublicKey.class,
-        new KeyTypeManager.PrimitiveFactory<PublicKeySign, EcdsaPrivateKey>(PublicKeySign.class) {
+        new PrimitiveFactory<PublicKeySign, EcdsaPrivateKey>(PublicKeySign.class) {
           @Override
           public PublicKeySign getPrimitive(EcdsaPrivateKey key) throws GeneralSecurityException {
             ECPrivateKey privateKey =
@@ -117,8 +118,8 @@ public final class EcdsaSignKeyManager
   }
 
   @Override
-  public KeyFactory<EcdsaKeyFormat, EcdsaPrivateKey> keyFactory() {
-    return new KeyFactory<EcdsaKeyFormat, EcdsaPrivateKey>(EcdsaKeyFormat.class) {
+  public KeyTypeManager.KeyFactory<EcdsaKeyFormat, EcdsaPrivateKey> keyFactory() {
+    return new KeyTypeManager.KeyFactory<EcdsaKeyFormat, EcdsaPrivateKey>(EcdsaKeyFormat.class) {
       @Override
       public void validateKeyFormat(EcdsaKeyFormat format) throws GeneralSecurityException {
         SigUtil.validateEcdsaParams(format.getParams());

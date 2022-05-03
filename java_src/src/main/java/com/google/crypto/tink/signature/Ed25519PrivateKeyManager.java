@@ -20,6 +20,7 @@ import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.PublicKeySign;
 import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.internal.KeyTypeManager;
+import com.google.crypto.tink.internal.PrimitiveFactory;
 import com.google.crypto.tink.internal.PrivateKeyTypeManager;
 import com.google.crypto.tink.proto.Ed25519KeyFormat;
 import com.google.crypto.tink.proto.Ed25519PrivateKey;
@@ -47,7 +48,7 @@ public final class Ed25519PrivateKeyManager
     super(
         Ed25519PrivateKey.class,
         Ed25519PublicKey.class,
-        new KeyTypeManager.PrimitiveFactory<PublicKeySign, Ed25519PrivateKey>(PublicKeySign.class) {
+        new PrimitiveFactory<PublicKeySign, Ed25519PrivateKey>(PublicKeySign.class) {
           @Override
           public PublicKeySign getPrimitive(Ed25519PrivateKey keyProto)
               throws GeneralSecurityException {
@@ -91,8 +92,9 @@ public final class Ed25519PrivateKeyManager
   }
 
   @Override
-  public KeyFactory<Ed25519KeyFormat, Ed25519PrivateKey> keyFactory() {
-    return new KeyFactory<Ed25519KeyFormat, Ed25519PrivateKey>(Ed25519KeyFormat.class) {
+  public KeyTypeManager.KeyFactory<Ed25519KeyFormat, Ed25519PrivateKey> keyFactory() {
+    return new KeyTypeManager.KeyFactory<Ed25519KeyFormat, Ed25519PrivateKey>(
+        Ed25519KeyFormat.class) {
       @Override
       public void validateKeyFormat(Ed25519KeyFormat format) throws GeneralSecurityException {}
 
