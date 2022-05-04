@@ -14,6 +14,14 @@ add_subdirectory(util)
 
 tink_module(core)
 
+if (TINK_USE_ABSL_STATUS)
+    target_compile_definitions(tink_util_status PUBLIC TINK_USE_ABSL_STATUS)
+endif()
+
+if (TINK_USE_ABSL_STATUSOR)
+    target_compile_definitions(tink_util_statusor INTERFACE TINK_USE_ABSL_STATUSOR)
+endif()
+
 # configuration settings for the build
 option(USE_ONLY_FIPS "Enables the FIPS only mode in Tink" OFF)
 if(USE_ONLY_FIPS)

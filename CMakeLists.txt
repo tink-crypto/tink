@@ -7,6 +7,8 @@ option(TINK_BUILD_TESTS "Build Tink tests" OFF)
 option(TINK_USE_SYSTEM_OPENSSL "Build Tink linking to OpenSSL installed in the system" OFF)
 option(TINK_USE_INSTALLED_ABSEIL "Build Tink linking to Abseil installed in the system" OFF)
 option(TINK_USE_INSTALLED_GOOGLETEST "Build Tink linking to GTest installed in the system" OFF)
+option(TINK_USE_ABSL_STATUS "Compile Tink with absl::Status" OFF)
+option(TINK_USE_ABSL_STATUSOR "Compile Tink with absl::StatusOr" OFF)
 
 set(CPACK_GENERATOR TGZ)
 set(CPACK_PACKAGE_VERSION ${PROJECT_VERSION})
