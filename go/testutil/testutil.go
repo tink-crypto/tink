@@ -91,8 +91,8 @@ func (km *DummyAEADKeyManager) TypeURL() string {
 
 // DummyAEAD is a dummy implementation of AEAD interface. It "encrypts" data
 // with a simple serialization capturing the dummy name, plaintext, and
-// additional data, and "decrypts" it by reversing this and checking that the
-// name and additional data match.
+// associated data, and "decrypts" it by reversing this and checking that the
+// name and associated data match.
 type DummyAEAD struct {
 	Name string
 }
@@ -100,17 +100,17 @@ type DummyAEAD struct {
 type dummyAEADData struct {
 	Name           string
 	Plaintext      []byte
-	AdditionalData []byte
+	AssociatedData []byte
 }
 
 // Encrypt encrypts the plaintext.
-func (a *DummyAEAD) Encrypt(plaintext []byte, additionalData []byte) ([]byte, error) {
+func (a *DummyAEAD) Encrypt(plaintext []byte, associatedData []byte) ([]byte, error) {
 	buf := new(bytes.Buffer)
 	encoder := gob.NewEncoder(buf)
 	err := encoder.Encode(dummyAEADData{
 		Name:           a.Name,
 		Plaintext:      plaintext,
-		AdditionalData: additionalData,
+		AssociatedData: associatedData,
 	})
 	if err != nil {
 		return nil, fmt.Errorf("dummy aead encrypt: %v", err)
@@ -119,14 +119,14 @@ func (a *DummyAEAD) Encrypt(plaintext []byte, additionalData []byte) ([]byte, er
 }
 
 // Decrypt decrypts the ciphertext.
-func (a *DummyAEAD) Decrypt(ciphertext []byte, additionalData []byte) ([]byte, error) {
+func (a *DummyAEAD) Decrypt(ciphertext []byte, associatedData []byte) ([]byte, error) {
 	data := dummyAEADData{}
 	decoder := gob.NewDecoder(bytes.NewBuffer(ciphertext))
 	if err := decoder.Decode(&data); err != nil {
 		return nil, fmt.Errorf("dummy aead decrypt: invalid data: %v", err)
 	}
-	if data.Name != a.Name || !bytes.Equal(data.AdditionalData, additionalData) {
-		return nil, errors.New("dummy aead encrypt: name/additional data mismatch")
+	if data.Name != a.Name || !bytes.Equal(data.AssociatedData, associatedData) {
+		return nil, errors.New("dummy aead encrypt: name/associated data mismatch")
 	}
 	return data.Plaintext, nil
 }
