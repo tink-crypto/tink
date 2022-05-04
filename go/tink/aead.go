@@ -24,14 +24,13 @@ Encryption with additional data ensures authenticity and integrity of that data,
 its secrecy. (see RFC 5116, https://tools.ietf.org/html/rfc5116)
 */
 type AEAD interface {
-	// Encrypt encrypts plaintext with additionalData as additional
-	// authenticated data. The resulting ciphertext allows for checking
-	// authenticity and integrity of additional data additionalData,
-	// but there are no guarantees wrt. secrecy of that data.
-	Encrypt(plaintext, additionalData []byte) ([]byte, error)
+	// Encrypt encrypts plaintext with associatedData as associated authenticated data.
+	// The resulting ciphertext allows for checking authenticity and integrity of associated data
+	// associatedData, but does not guarantee its secrecy.
+	Encrypt(plaintext, associatedData []byte) ([]byte, error)
 
-	// Decrypt decrypts ciphertext with {@code additionalData} as additional
-	// authenticated data. The decryption verifies the authenticity and integrity
-	// of the additional data, but there are no guarantees wrt. secrecy of that data.
-	Decrypt(ciphertext, additionalData []byte) ([]byte, error)
+	// Decrypt decrypts ciphertext with associatedData as associated authenticated data.
+	// The decryption verifies the authenticity and integrity of the associated data, but there are
+	// no guarantees with respect to secrecy of that data.
+	Decrypt(ciphertext, associatedData []byte) ([]byte, error)
 }
