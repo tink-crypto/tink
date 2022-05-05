@@ -14,7 +14,7 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-package awskms
+package awskms_test
 
 import (
 	"bytes"
@@ -30,6 +30,8 @@ import (
 	"github.com/google/tink/go/keyset"
 	"github.com/google/tink/go/subtle/random"
 	"github.com/google/tink/go/tink"
+
+	"github.com/google/tink/go/integration/awskms"
 )
 
 const (
@@ -56,7 +58,7 @@ func setupKMS(t *testing.T, cf string) {
 
 func setupKMSWithURI(t *testing.T, cf string, uri string) {
 	t.Helper()
-	g, err := NewClientWithCredentials(uri, cf)
+	g, err := awskms.NewClientWithCredentials(uri, cf)
 	if err != nil {
 		t.Fatalf("error setting up aws client: %v", err)
 	}

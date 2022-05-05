@@ -33,9 +33,9 @@ go_test(
         "//testdata:credentials",
         "@google_root_pem//file",  #keep
     ],
-    embed = [":awskms"],
     tags = ["no_rbe"],
     deps = [
+        ":awskms",
         "//aead",
         "//core/registry",
         "//keyset",
