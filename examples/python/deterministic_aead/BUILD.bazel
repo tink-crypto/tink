@@ -19,6 +19,27 @@ py_binary(
     ],
 )
 
+py_library(
+    name = "deterministic_aead_basic",
+    srcs = ["deterministic_aead_basic.py"],
+    deps = [
+        "@tink_py//tink:cleartext_keyset_handle",
+        "@tink_py//tink:tink_python",
+        "@tink_py//tink/daead",
+    ],
+)
+
+py_test(
+    name = "deterministic_aead_basic_test",
+    srcs = ["deterministic_aead_basic_test.py"],
+    python_version = "PY3",
+    deps = [
+        requirement("absl-py"),
+        ":deterministic_aead_basic"
+    ],
+)
+
+
 sh_test(
     name = "deterministic_aead_test",
     size = "small",
