@@ -158,12 +158,6 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 <div class="block">A <code>KeyFactory</code> creates new keys from a given KeyFormat.</div>
 </td>
 </tr>
-<tr class="rowColor">
-<td class="colFirst"><code>protected static class&nbsp;</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/internal/KeyTypeManager.PrimitiveFactory.html" title="class in com.google.crypto.tink.internal">KeyTypeManager.PrimitiveFactory</a>&lt;<a href="../../../../../com/google/crypto/tink/internal/KeyTypeManager.PrimitiveFactory.html" title="type parameter in KeyTypeManager.PrimitiveFactory">PrimitiveT</a>,<a href="../../../../../com/google/crypto/tink/internal/KeyTypeManager.PrimitiveFactory.html" title="type parameter in KeyTypeManager.PrimitiveFactory">KeyProtoT</a> extends com.google.protobuf.MessageLite&gt;</span></code>
-<div class="block">A PrimitiveFactory knows how to create primitives from a given key.</div>
-</td>
-</tr>
 </table>
 </li>
 </ul>
@@ -181,8 +175,8 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 </tr>
 <tr class="altColor">
 <td class="colFirst"><code>protected </code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/internal/KeyTypeManager.html#KeyTypeManager-java.lang.Class-com.google.crypto.tink.internal.KeyTypeManager.PrimitiveFactory...-">KeyTypeManager</a></span>(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Class.html?is-external=true" title="class or interface in java.lang">Class</a>&lt;<a href="../../../../../com/google/crypto/tink/internal/KeyTypeManager.html" title="type parameter in KeyTypeManager">KeyProtoT</a>&gt;&nbsp;clazz,
-              <a href="../../../../../com/google/crypto/tink/internal/KeyTypeManager.PrimitiveFactory.html" title="class in com.google.crypto.tink.internal">KeyTypeManager.PrimitiveFactory</a>&lt;?,<a href="../../../../../com/google/crypto/tink/internal/KeyTypeManager.html" title="type parameter in KeyTypeManager">KeyProtoT</a>&gt;...&nbsp;factories)</code>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/internal/KeyTypeManager.html#KeyTypeManager-java.lang.Class-com.google.crypto.tink.internal.PrimitiveFactory...-">KeyTypeManager</a></span>(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Class.html?is-external=true" title="class or interface in java.lang">Class</a>&lt;<a href="../../../../../com/google/crypto/tink/internal/KeyTypeManager.html" title="type parameter in KeyTypeManager">KeyProtoT</a>&gt;&nbsp;clazz,
+              <a href="../../../../../com/google/crypto/tink/internal/PrimitiveFactory.html" title="class in com.google.crypto.tink.internal">PrimitiveFactory</a>&lt;?,<a href="../../../../../com/google/crypto/tink/internal/KeyTypeManager.html" title="type parameter in KeyTypeManager">KeyProtoT</a>&gt;...&nbsp;factories)</code>
 <div class="block">Constructs a new KeyTypeManager.</div>
 </td>
 </tr>
@@ -291,7 +285,7 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 <!--   -->
 </a>
 <h3>Constructor Detail</h3>
-<a name="KeyTypeManager-java.lang.Class-com.google.crypto.tink.internal.KeyTypeManager.PrimitiveFactory...-">
+<a name="KeyTypeManager-java.lang.Class-com.google.crypto.tink.internal.PrimitiveFactory...-">
 <!--   -->
 </a>
 <ul class="blockListLast">
@@ -299,10 +293,10 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 <h4>KeyTypeManager</h4>
 <pre><a href="https://docs.oracle.com/javase/8/docs/api/java/lang/SafeVarargs.html?is-external=true" title="class or interface in java.lang">@SafeVarargs</a>
 protected&nbsp;KeyTypeManager(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Class.html?is-external=true" title="class or interface in java.lang">Class</a>&lt;<a href="../../../../../com/google/crypto/tink/internal/KeyTypeManager.html" title="type parameter in KeyTypeManager">KeyProtoT</a>&gt;&nbsp;clazz,
-                                      <a href="../../../../../com/google/crypto/tink/internal/KeyTypeManager.PrimitiveFactory.html" title="class in com.google.crypto.tink.internal">KeyTypeManager.PrimitiveFactory</a>&lt;?,<a href="../../../../../com/google/crypto/tink/internal/KeyTypeManager.html" title="type parameter in KeyTypeManager">KeyProtoT</a>&gt;...&nbsp;factories)</pre>
+                                      <a href="../../../../../com/google/crypto/tink/internal/PrimitiveFactory.html" title="class in com.google.crypto.tink.internal">PrimitiveFactory</a>&lt;?,<a href="../../../../../com/google/crypto/tink/internal/KeyTypeManager.html" title="type parameter in KeyTypeManager">KeyProtoT</a>&gt;...&nbsp;factories)</pre>
 <div class="block">Constructs a new KeyTypeManager.
 
- <p>Takes an arbitrary number of <a href="../../../../../com/google/crypto/tink/internal/KeyTypeManager.PrimitiveFactory.html" title="class in com.google.crypto.tink.internal"><code>KeyTypeManager.PrimitiveFactory</code></a> objects as input. These will be used
+ <p>Takes an arbitrary number of <a href="../../../../../com/google/crypto/tink/internal/PrimitiveFactory.html" title="class in com.google.crypto.tink.internal"><code>PrimitiveFactory</code></a> objects as input. These will be used
  and provided via <a href="../../../../../com/google/crypto/tink/internal/KeyTypeManager.html#getPrimitive-KeyProtoT-java.lang.Class-"><code>getPrimitive(KeyProtoT, java.lang.Class&lt;P&gt;)</code></a> to the user.</div>
 <dl>
 <dt><span class="throwsLabel">Throws:</span></dt>

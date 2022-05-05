@@ -6192,7 +6192,7 @@
 <dd>
 <div class="block">Creates the requested primitive.</div>
 </dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/internal/KeyTypeManager.PrimitiveFactory.html#getPrimitive-KeyProtoT-">getPrimitive(KeyProtoT)</a></span> - Method in class com.google.crypto.tink.internal.<a href="com/google/crypto/tink/internal/KeyTypeManager.PrimitiveFactory.html" title="class in com.google.crypto.tink.internal">KeyTypeManager.PrimitiveFactory</a></dt>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/internal/PrimitiveFactory.html#getPrimitive-KeyProtoT-">getPrimitive(KeyProtoT)</a></span> - Method in class com.google.crypto.tink.internal.<a href="com/google/crypto/tink/internal/PrimitiveFactory.html" title="class in com.google.crypto.tink.internal">PrimitiveFactory</a></dt>
 <dd>
 <div class="block">Creates a new instance of <code>PrimitiveT</code>.</div>
 </dd>
@@ -9153,7 +9153,7 @@
 <div class="block">An object which collects all the operations which one can do on for a single key type, identified
  by a single KeyProto.</div>
 </dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/internal/KeyTypeManager.html#KeyTypeManager-java.lang.Class-com.google.crypto.tink.internal.KeyTypeManager.PrimitiveFactory...-">KeyTypeManager(Class&lt;KeyProtoT&gt;, KeyTypeManager.PrimitiveFactory&lt;?, KeyProtoT&gt;...)</a></span> - Constructor for class com.google.crypto.tink.internal.<a href="com/google/crypto/tink/internal/KeyTypeManager.html" title="class in com.google.crypto.tink.internal">KeyTypeManager</a></dt>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/internal/KeyTypeManager.html#KeyTypeManager-java.lang.Class-com.google.crypto.tink.internal.PrimitiveFactory...-">KeyTypeManager(Class&lt;KeyProtoT&gt;, PrimitiveFactory&lt;?, KeyProtoT&gt;...)</a></span> - Constructor for class com.google.crypto.tink.internal.<a href="com/google/crypto/tink/internal/KeyTypeManager.html" title="class in com.google.crypto.tink.internal">KeyTypeManager</a></dt>
 <dd>
 <div class="block">Constructs a new KeyTypeManager.</div>
 </dd>
@@ -9165,10 +9165,6 @@
 <dd>
 <div class="block">A container that contains key format and other information that form key templates supported
  by this factory.</div>
-</dd>
-<dt><a href="com/google/crypto/tink/internal/KeyTypeManager.PrimitiveFactory.html" title="class in com.google.crypto.tink.internal"><span class="typeNameLink">KeyTypeManager.PrimitiveFactory</span></a>&lt;<a href="com/google/crypto/tink/internal/KeyTypeManager.PrimitiveFactory.html" title="type parameter in KeyTypeManager.PrimitiveFactory">PrimitiveT</a>,<a href="com/google/crypto/tink/internal/KeyTypeManager.PrimitiveFactory.html" title="type parameter in KeyTypeManager.PrimitiveFactory">KeyProtoT</a> extends com.google.protobuf.MessageLite&gt; - Class in <a href="com/google/crypto/tink/internal/package-summary.html">com.google.crypto.tink.internal</a></dt>
-<dd>
-<div class="block">A PrimitiveFactory knows how to create primitives from a given key.</div>
 </dd>
 <dt><a href="com/google/crypto/tink/KeyWrap.html" title="interface in com.google.crypto.tink"><span class="typeNameLink">KeyWrap</span></a> - Interface in <a href="com/google/crypto/tink/package-summary.html">com.google.crypto.tink</a></dt>
 <dd>
@@ -12291,7 +12287,11 @@
 <dd>
 <div class="block"><span class="deprecatedLabel">Deprecated.</span></div>
 &nbsp;</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/internal/KeyTypeManager.PrimitiveFactory.html#PrimitiveFactory-java.lang.Class-">PrimitiveFactory(Class&lt;PrimitiveT&gt;)</a></span> - Constructor for class com.google.crypto.tink.internal.<a href="com/google/crypto/tink/internal/KeyTypeManager.PrimitiveFactory.html" title="class in com.google.crypto.tink.internal">KeyTypeManager.PrimitiveFactory</a></dt>
+<dt><a href="com/google/crypto/tink/internal/PrimitiveFactory.html" title="class in com.google.crypto.tink.internal"><span class="typeNameLink">PrimitiveFactory</span></a>&lt;<a href="com/google/crypto/tink/internal/PrimitiveFactory.html" title="type parameter in PrimitiveFactory">PrimitiveT</a>,<a href="com/google/crypto/tink/internal/PrimitiveFactory.html" title="type parameter in PrimitiveFactory">KeyProtoT</a> extends com.google.protobuf.MessageLite&gt; - Class in <a href="com/google/crypto/tink/internal/package-summary.html">com.google.crypto.tink.internal</a></dt>
+<dd>
+<div class="block">A PrimitiveFactory knows how to create primitives from a given key.</div>
+</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/internal/PrimitiveFactory.html#PrimitiveFactory-java.lang.Class-">PrimitiveFactory(Class&lt;PrimitiveT&gt;)</a></span> - Constructor for class com.google.crypto.tink.internal.<a href="com/google/crypto/tink/internal/PrimitiveFactory.html" title="class in com.google.crypto.tink.internal">PrimitiveFactory</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/google/crypto/tink/PrimitiveSet.html" title="class in com.google.crypto.tink"><span class="typeNameLink">PrimitiveSet</span></a>&lt;<a href="com/google/crypto/tink/PrimitiveSet.html" title="type parameter in PrimitiveSet">P</a>&gt; - Class in <a href="com/google/crypto/tink/package-summary.html">com.google.crypto.tink</a></dt>
 <dd>
@@ -12317,7 +12317,7 @@
 <div class="block">A PrivateKeyManager is like an <a href="com/google/crypto/tink/internal/KeyTypeManager.html" title="class in com.google.crypto.tink.internal"><code>KeyTypeManager</code></a>, but additionally has a method to create a
  public key.</div>
 </dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/internal/PrivateKeyTypeManager.html#PrivateKeyTypeManager-java.lang.Class-java.lang.Class-com.google.crypto.tink.internal.KeyTypeManager.PrimitiveFactory...-">PrivateKeyTypeManager(Class&lt;KeyProtoT&gt;, Class&lt;PublicKeyProtoT&gt;, KeyTypeManager.PrimitiveFactory&lt;?, KeyProtoT&gt;...)</a></span> - Constructor for class com.google.crypto.tink.internal.<a href="com/google/crypto/tink/internal/PrivateKeyTypeManager.html" title="class in com.google.crypto.tink.internal">PrivateKeyTypeManager</a></dt>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/internal/PrivateKeyTypeManager.html#PrivateKeyTypeManager-java.lang.Class-java.lang.Class-com.google.crypto.tink.internal.PrimitiveFactory...-">PrivateKeyTypeManager(Class&lt;KeyProtoT&gt;, Class&lt;PublicKeyProtoT&gt;, PrimitiveFactory&lt;?, KeyProtoT&gt;...)</a></span> - Constructor for class com.google.crypto.tink.internal.<a href="com/google/crypto/tink/internal/PrivateKeyTypeManager.html" title="class in com.google.crypto.tink.internal">PrivateKeyTypeManager</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/integration/android/AndroidKeysetManager.html#promote-int-">promote(int)</a></span> - Method in class com.google.crypto.tink.integration.android.<a href="com/google/crypto/tink/integration/android/AndroidKeysetManager.html" title="class in com.google.crypto.tink.integration.android">AndroidKeysetManager</a></dt>
 <dd>
