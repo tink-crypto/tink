@@ -1,0 +1,195 @@
+// Copyright 2017 Google Inc.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+////////////////////////////////////////////////////////////////////////////////
+
+// Definitions for Cloud Crypto SDK (Tink) library.
+syntax = "proto3";
+
+package google.crypto.tink;
+
+option java_package = "com.google.crypto.tink.proto";
+option java_multiple_files = true;
+option go_package = "github.com/google/tink/proto/tink_go_proto";
+option objc_class_prefix = "TINKPB";
+
+// Each instantiation of a Tink primitive is identified by type_url,
+// which is a global URL pointing to a *Key-proto that holds key material
+// and other parameters of the instantiation.  For standard Tink key types
+// the value of type_url follows the structure of type_url-field of
+// google.protobuf.Any-protos, and is given as:
+//
+//   type.googleapis.com/packagename.messagename
+//
+// For example, for an HMAC key defined in proto google.cloud.tink.HmacKey
+// the value of type_url is:
+//
+//   type.googleapis.com/google.cloud.tink.HmacKey
+//
+// For each type_url, in addition to the *Key proto, there exist two
+// related structures:
+//   1. *Params: parameters of an instantiation of the primitive,
+//      needed when a key is being used.
+//   2. *KeyFormat: parameters needed to generate a new key; these
+//      include the corresponding Params, since when a factory generates
+//      a key based on KeyFormat, it must add Params to the resulting
+//      key proto with the actual key material.
+// The actual *KeyFormat proto is wrapped in a KeyTemplate message.
+// By convention, the name of the *KeyFormat-proto must be equal
+// to the name of the *Key-proto from type_url-field suffixed with "Format".
+
+message KeyTemplate {
+  // Required. The type_url of the key type in format
+  // type.googleapis.com/packagename.messagename -- see above for details.
+  // This is typically the protobuf type URL of the *Key proto. In particular,
+  // this is different of the protobuf type URL of the *KeyFormat proto.
+  string type_url = 1;
+
+  // Required. The serialized *KeyFormat proto.
+  bytes value = 2;
+
+  // Required. The type of prefix used when computing some primitives to
+  // identify the ciphertext/signature, etc.
+  OutputPrefixType output_prefix_type = 3;
+}
+
+enum KeyStatusType {
+  UNKNOWN_STATUS = 0;
+  ENABLED = 1;    // Can be used for crypto operations.
+  DISABLED = 2;   // Cannot be used, but exists and can become ENABLED.
+  DESTROYED = 3;  // Key data does not exist in this Keyset any more.
+}
+
+// Tink produces and accepts ciphertexts or signatures that consist
+// of a prefix and a payload. The payload and its format is determined
+// entirely by the primitive, but the prefix has to be one of the following
+// 4 types:
+//   - Legacy: prefix is 5 bytes, starts with \x00 and followed by a 4-byte
+//             key id that is computed from the key material. In addition to
+//             that, signature schemes and MACs will add a \x00 byte to the
+//             end of the data being signed / MACed when operating on keys
+//             with this OutputPrefixType.
+//   - Crunchy: prefix is 5 bytes, starts with \x00 and followed by a 4-byte
+//             key id that is generated randomly.
+//   - Tink  : prefix is 5 bytes, starts with \x01 and followed by 4-byte
+//             key id that is generated randomly.
+//   - Raw   : prefix is 0 byte, i.e., empty.
+enum OutputPrefixType {
+  UNKNOWN_PREFIX = 0;
+  TINK = 1;
+  LEGACY = 2;
+  RAW = 3;
+  CRUNCHY = 4;
+}
+
+// Each *Key proto by convention contains a version field, which
+// identifies the version of implementation that can work with this key.
+//   message SomeInstantiationKey {
+//     uint32 version = 1;
+//     ...
+//   }
+// Version is a monotonic counter: each implementation of a primitive
+// has its associated "current version", which starts at 0 and is incremented
+// upon updates of the code/key proto.  A key with version n needs
+// an implementation version n or higher to work.
+
+// For public key primitives, the public and private keys are distinct entities
+// and represent distinct primitives.  However, by convention, the private key
+// of a public-key primitive contains the corresponding public key proto.
+
+// The actual *Key-proto is wrapped in a KeyData message, which in addition
+// to this serialized proto contains also type_url identifying the
+// definition of *Key-proto (as in KeyFormat-message), and some extra metadata
+// about the type key material.
+message KeyData {
+  // Required.
+  string type_url = 1;  // In format type.googleapis.com/packagename.messagename
+  // Required.
+  // Contains specific serialized *Key proto
+  bytes value = 2;  // Placeholder for ctype.
+  enum KeyMaterialType {
+    UNKNOWN_KEYMATERIAL = 0;
+    SYMMETRIC = 1;
+    ASYMMETRIC_PRIVATE = 2;
+    ASYMMETRIC_PUBLIC = 3;
+    REMOTE = 4;  // points to a remote key, i.e., in a KMS.
+  }
+  // Required.
+  KeyMaterialType key_material_type = 3;
+}
+
+// A Tink user works usually not with single keys, but with keysets,
+// to enable key rotation.  The keys in a keyset can belong to different
+// implementations/key types, but must all implement the same primitive.
+// Any given keyset (and any given key) can be used for one primitive only.
+message Keyset {
+  message Key {
+    // Contains the actual, instantiation specific key proto.
+    // By convention, each key proto contains a version field.
+    KeyData key_data = 1;
+
+    KeyStatusType status = 2;
+
+    // Identifies a key within a keyset, is a part of metadata
+    // of a ciphertext/signature.
+    uint32 key_id = 3;
+
+    // Determines the prefix of the ciphertexts/signatures produced by this key.
+    // This value is copied verbatim from the key template.
+    OutputPrefixType output_prefix_type = 4;
+  }
+
+  // Identifies key used to generate new crypto data (encrypt, sign).
+  // Required.
+  uint32 primary_key_id = 1;
+
+  // Actual keys in the Keyset.
+  // Required.
+  repeated Key key = 2;
+}
+
+// Represents a "safe" Keyset that doesn't contain any actual key material,
+// thus can be used for logging or monitoring. Most fields are copied from
+// Keyset.
+message KeysetInfo {
+  message KeyInfo {
+    // the type url of this key,
+    // e.g., type.googleapis.com/google.crypto.tink.HmacKey.
+    string type_url = 1;
+
+    // See Keyset.Key.status.
+    KeyStatusType status = 2;
+
+    // See Keyset.Key.key_id.
+    uint32 key_id = 3;
+
+    // See Keyset.Key.output_prefix_type.
+    OutputPrefixType output_prefix_type = 4;
+  }
+
+  // See Keyset.primary_key_id.
+  uint32 primary_key_id = 1;
+
+  // KeyInfos in the KeysetInfo.
+  // Each KeyInfo is corresponding to a Key in the corresponding Keyset.
+  repeated KeyInfo key_info = 2;
+}
+
+// Represents a keyset that is encrypted with a master key.
+message EncryptedKeyset {
+  // Required.
+  bytes encrypted_keyset = 2;
+  // Optional.
+  KeysetInfo keyset_info = 3;
+}

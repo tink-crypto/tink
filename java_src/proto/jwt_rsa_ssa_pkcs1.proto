@@ -1,0 +1,82 @@
+// Copyright 2020 Google LLC
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+////////////////////////////////////////////////////////////////////////////////
+
+syntax = "proto3";
+
+package google.crypto.tink;
+
+option java_package = "com.google.crypto.tink.proto";
+option java_multiple_files = true;
+option go_package = "github.com/google/tink/proto/rsa_ssa_pkcs1_go_proto";
+
+enum JwtRsaSsaPkcs1Algorithm {
+  RS_UNKNOWN = 0;
+  RS256 = 1;
+  RS384 = 2;
+  RS512 = 3;
+}
+
+// key_type: type.googleapis.com/google.crypto.tink.JwtRsaSsaPkcs1PublicKey
+message JwtRsaSsaPkcs1PublicKey {
+  uint32 version = 1;
+  JwtRsaSsaPkcs1Algorithm algorithm = 2;
+  // Modulus.
+  // Unsigned big integer in bigendian representation.
+  bytes n = 3;
+  // Public exponent.
+  // Unsigned big integer in bigendian representation.
+  bytes e = 4;
+
+  // Optional, custom kid header value to be used with "RAW" keys.
+  // "TINK" keys with this value set will be rejected.
+  message CustomKid {
+    string value = 1;
+  }
+  CustomKid custom_kid = 5;
+}
+
+// key_type: type.googleapis.com/google.crypto.tink.RsaSsaPkcs1PrivateKey
+message JwtRsaSsaPkcs1PrivateKey {
+  uint32 version = 1;
+  JwtRsaSsaPkcs1PublicKey public_key = 2;
+  // Private exponent.
+  // Unsigned big integer in bigendian representation.
+  bytes d = 3;
+
+  // The following parameters are used to optimize RSA signature computation.
+  // The prime factor p of n.
+  // Unsigned big integer in bigendian representation.
+  bytes p = 4;
+  // The prime factor q of n.
+  // Unsigned big integer in bigendian representation.
+  bytes q = 5;
+  // d mod (p - 1).
+  // Unsigned big integer in bigendian representation.
+  bytes dp = 6;
+  // d mod (q - 1).
+  // Unsigned big integer in bigendian representation.
+  bytes dq = 7;
+  // Chinese Remainder Theorem coefficient q^(-1) mod p.
+  // Unsigned big integer in bigendian representation.
+  bytes crt = 8;
+}
+
+message JwtRsaSsaPkcs1KeyFormat {
+  uint32 version = 1;
+  JwtRsaSsaPkcs1Algorithm algorithm = 2;
+  uint32 modulus_size_in_bits = 3;
+  bytes public_exponent = 4;
+}
