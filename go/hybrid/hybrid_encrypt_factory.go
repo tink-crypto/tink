@@ -65,16 +65,16 @@ func newEncryptPrimitiveSet(ps *primitiveset.PrimitiveSet) (*wrappedHybridEncryp
 	return ret, nil
 }
 
-// Encrypt encrypts the given plaintext with the given additional authenticated data.
+// Encrypt encrypts the given plaintext binding contextInfo to the resulting ciphertext.
 // It returns the concatenation of the primary's identifier and the ciphertext.
-func (a *wrappedHybridEncrypt) Encrypt(pt, ad []byte) ([]byte, error) {
+func (a *wrappedHybridEncrypt) Encrypt(plaintext, contextInfo []byte) ([]byte, error) {
 	primary := a.ps.Primary
 	p, ok := (primary.Primitive).(tink.HybridEncrypt)
 	if !ok {
 		return nil, fmt.Errorf("hybrid_factory: not a HybridEncrypt primitive")
 	}
 
-	ct, err := p.Encrypt(pt, ad)
+	ct, err := p.Encrypt(plaintext, contextInfo)
 	if err != nil {
 		return nil, err
 	}
