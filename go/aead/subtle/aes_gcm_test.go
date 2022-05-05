@@ -125,7 +125,7 @@ func TestAESGCMModifyCiphertext(t *testing.T) {
 			t.Errorf("expect an error ciphertext is truncated until byte %d", i)
 		}
 	}
-	// modify additional authenticated data
+	// modify associated data
 	for i := 0; i < len(ad); i++ {
 		tmp := ad[i]
 		for j := 0; j < 8; j++ {

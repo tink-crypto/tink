@@ -48,23 +48,23 @@ func NewChaCha20Poly1305(key []byte) (*ChaCha20Poly1305, error) {
 	}, err
 }
 
-// Encrypt encrypts {@code pt} with {@code aad} as additional
-// authenticated data. The resulting ciphertext consists of two parts:
+// Encrypt encrypts plaintext with associatedData.
+// The resulting ciphertext consists of two parts:
 // (1) the nonce used for encryption and (2) the actual ciphertext.
-func (ca *ChaCha20Poly1305) Encrypt(pt []byte, aad []byte) ([]byte, error) {
+func (ca *ChaCha20Poly1305) Encrypt(plaintext []byte, associatedData []byte) ([]byte, error) {
 	nonce := random.GetRandomBytes(chacha20poly1305.NonceSize)
-	ct, err := ca.chaCha20Poly1305InsecureNonce.Encrypt(nonce, pt, aad)
+	ct, err := ca.chaCha20Poly1305InsecureNonce.Encrypt(nonce, plaintext, associatedData)
 	if err != nil {
 		return nil, err
 	}
 	return append(nonce, ct...), nil
 }
 
-// Decrypt decrypts {@code ct} with {@code aad} as the additionalauthenticated data.
-func (ca *ChaCha20Poly1305) Decrypt(ct []byte, aad []byte) ([]byte, error) {
-	if len(ct) < chacha20poly1305.NonceSize+poly1305TagSize {
+// Decrypt decrypts ciphertext with associatedData.
+func (ca *ChaCha20Poly1305) Decrypt(ciphertext []byte, associatedData []byte) ([]byte, error) {
+	if len(ciphertext) < chacha20poly1305.NonceSize+poly1305TagSize {
 		return nil, fmt.Errorf("chacha20poly1305: ciphertext too short")
 	}
-	nonce := ct[:chacha20poly1305.NonceSize]
-	return ca.chaCha20Poly1305InsecureNonce.Decrypt(nonce, ct[chacha20poly1305.NonceSize:], aad)
+	nonce := ciphertext[:chacha20poly1305.NonceSize]
+	return ca.chaCha20Poly1305InsecureNonce.Decrypt(nonce, ciphertext[chacha20poly1305.NonceSize:], associatedData)
 }
