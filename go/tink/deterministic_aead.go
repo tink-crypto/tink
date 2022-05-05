@@ -32,8 +32,8 @@ Encryption with associated data ensures authenticity (who the sender is) and int
 data has not been tampered with) of that data, but not its secrecy.
 
 References:
-https://tools.ietf.org/html/rfc5116
-https://tools.ietf.org/html/rfc5297#section-1.3
+ * https://tools.ietf.org/html/rfc5116
+ * https://tools.ietf.org/html/rfc5297#section-1.3
 */
 type DeterministicAEAD interface {
 	// EncryptDeterministically deterministically encrypts plaintext with associatedData as

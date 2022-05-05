@@ -14,7 +14,6 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-// Package tink provides the abstract interfaces of the primitives which Tink supports.
 package tink
 
 /*
