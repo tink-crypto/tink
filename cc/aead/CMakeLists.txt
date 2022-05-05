@@ -100,10 +100,12 @@ tink_cc_library(
   DEPS
     absl::strings
     tink::proto::aes_ctr_hmac_aead_cc_proto
+    tink::proto::aes_ctr_cc_proto
     tink::proto::aes_eax_cc_proto
     tink::proto::aes_gcm_cc_proto
     tink::proto::aes_gcm_siv_cc_proto
     tink::proto::common_cc_proto
+    tink::proto::hmac_cc_proto
     tink::proto::kms_envelope_cc_proto
     tink::proto::tink_cc_proto
     tink::proto::xchacha20_poly1305_cc_proto
@@ -207,6 +209,7 @@ tink_cc_library(
     tink::util::statusor
     tink::util::validation
     tink::proto::aes_ctr_hmac_aead_cc_proto
+    tink::proto::aes_ctr_cc_proto
     tink::proto::tink_cc_proto
 )
 
@@ -389,10 +392,12 @@ tink_cc_test(
     tink::util::fake_kms_client
     tink::util::test_matchers
     tink::proto::aes_ctr_hmac_aead_cc_proto
+    tink::proto::aes_ctr_cc_proto
     tink::proto::aes_eax_cc_proto
     tink::proto::aes_gcm_cc_proto
     tink::proto::aes_gcm_siv_cc_proto
     tink::proto::common_cc_proto
+    tink::proto::hmac_cc_proto
     tink::proto::kms_envelope_cc_proto
     tink::proto::tink_cc_proto
     tink::proto::xchacha20_poly1305_cc_proto
@@ -470,7 +475,9 @@ tink_cc_test(
     tink::util::statusor
     tink::util::test_matchers
     tink::proto::aes_ctr_hmac_aead_cc_proto
+    tink::proto::aes_ctr_cc_proto
     tink::proto::common_cc_proto
+    tink::proto::hmac_cc_proto
     tink::proto::tink_cc_proto
 )
 

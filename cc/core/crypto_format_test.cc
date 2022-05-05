@@ -14,11 +14,10 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-
 #include "tink/crypto_format.h"
+
 #include "gtest/gtest.h"
 #include "proto/tink.pb.h"
-
 
 using google::crypto::tink::KeysetInfo;
 using google::crypto::tink::OutputPrefixType;

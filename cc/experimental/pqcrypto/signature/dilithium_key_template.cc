@@ -18,9 +18,7 @@
 
 #include "tink/util/constants.h"
 #include "proto/experimental/pqcrypto/dilithium.pb.h"
-#include "proto/experimental/pqcrypto/dilithium.proto.h"
 #include "proto/tink.pb.h"
-#include "proto/tink.proto.h"
 
 extern "C" {
 #include "third_party/pqclean/crypto_sign/dilithium2/avx2/api.h"

@@ -141,8 +141,10 @@ tink_cc_library(
     tink::util::secret_data
     tink::util::statusor
     tink::proto::aes_ctr_hmac_aead_cc_proto
+    tink::proto::aes_ctr_cc_proto
     tink::proto::aes_gcm_cc_proto
     tink::proto::aes_siv_cc_proto
+    tink::proto::hmac_cc_proto
     tink::proto::tink_cc_proto
     tink::proto::xchacha20_poly1305_cc_proto
 )

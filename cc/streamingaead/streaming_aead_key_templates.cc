@@ -19,6 +19,7 @@
 #include "proto/aes_ctr_hmac_streaming.pb.h"
 #include "proto/aes_gcm_hkdf_streaming.pb.h"
 #include "proto/common.pb.h"
+#include "proto/hmac.pb.h"
 #include "proto/tink.pb.h"
 
 using google::crypto::tink::AesCtrHmacStreamingKeyFormat;

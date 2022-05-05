@@ -26,7 +26,6 @@
 #include "tink/experimental/pqcrypto/signature/sphincs_verify_key_manager.h"
 #include "tink/util/test_matchers.h"
 #include "proto/tink.pb.h"
-#include "proto/tink.proto.h"
 
 extern "C" {
 #include "third_party/pqclean/crypto_sign/sphincs-haraka-128f-robust/aesni/api.h"

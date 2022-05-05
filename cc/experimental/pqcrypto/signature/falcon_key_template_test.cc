@@ -27,7 +27,6 @@
 #include "tink/experimental/pqcrypto/signature/subtle/falcon_subtle_utils.h"
 #include "tink/util/test_matchers.h"
 #include "proto/tink.pb.h"
-#include "proto/tink.proto.h"
 
 namespace crypto {
 namespace tink {
