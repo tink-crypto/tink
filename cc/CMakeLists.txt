@@ -14,21 +14,19 @@ add_subdirectory(util)
 
 tink_module(core)
 
+# Configuration settings for the build.
+
 if (TINK_USE_ABSL_STATUS)
     target_compile_definitions(tink_util_status PUBLIC TINK_USE_ABSL_STATUS)
 endif()
-
 if (TINK_USE_ABSL_STATUSOR)
     target_compile_definitions(tink_util_statusor INTERFACE TINK_USE_ABSL_STATUSOR)
 endif()
-
-# configuration settings for the build
-option(USE_ONLY_FIPS "Enables the FIPS only mode in Tink" OFF)
 if(USE_ONLY_FIPS)
-    add_definitions(-DTINK_USE_ONLY_FIPS)
+    target_compile_definitions(tink_internal_fips_utils PUBLIC TINK_USE_ONLY_FIPS)
 endif()
 
-# public libraries
+# Public libraries.
 
 set(TINK_VERSION_H "${TINK_GENFILE_DIR}/tink/version.h")
 
