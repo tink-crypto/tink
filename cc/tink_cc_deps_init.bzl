@@ -1,9 +1,14 @@
 """Initialization of dependencies of C++ Tink."""
 
-# Note: This is empty because dependencies that were initialized here now
-# moved to cc/integration/gcpkms/; nevertheless this is maintained to avoid
-# breaking existing builds.
-# TODO(b/213153744): Plan to remove this function in the future.
+load("@com_google_protobuf//:protobuf_deps.bzl", "protobuf_deps")
+load("@bazel_toolchains//rules:rbe_repo.bzl", "rbe_autoconfig")
+
 def tink_cc_deps_init():
     """Initializes dependencies of C++ Tink."""
-    pass
+
+    # Initialize Protobuf dependencies.
+    protobuf_deps()
+
+    # Creates a default toolchain config for RBE. Use this as is if you are
+    # using the rbe_ubuntu16_04 container, otherwise refer to RBE docs.
+    rbe_autoconfig(name = "rbe_default")

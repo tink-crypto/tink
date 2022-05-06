@@ -1,13 +1,9 @@
-"""
-Dependencies of Tink base.
-"""
+"""Dependencies of Tink base."""
 
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive", "http_file")
 
 def tink_base_deps():
-    """ Loads dependencies of Tink base.
-
-    """
+    """Loads dependencies of Tink base."""
 
     # ----- Go
     # Release from 2021-01-20

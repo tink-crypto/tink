@@ -6,17 +6,6 @@ workspace(name = "tink_cc")
 #   path = "third_party/boringssl_fips/",
 # )
 
-local_repository(
-    name = "tink_base",
-    path = "..",
-)
-
-load("@tink_base//:tink_base_deps.bzl", "tink_base_deps")
-tink_base_deps()
-
-load("@tink_base//:tink_base_deps_init.bzl", "tink_base_deps_init")
-tink_base_deps_init()
-
 load("@tink_cc//:tink_cc_deps.bzl", "tink_cc_deps")
 tink_cc_deps()
 
