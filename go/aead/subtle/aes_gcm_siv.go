@@ -73,7 +73,7 @@ func (a *AESGCMSIV) Encrypt(plaintext, associatedData []byte) ([]byte, error) {
 		return nil, fmt.Errorf("aes_gcm_siv: plaintext too long")
 	}
 	if len(associatedData) > math.MaxInt32 {
-		return nil, fmt.Errorf("aes_gcm_siv: additional-data too long")
+		return nil, fmt.Errorf("aes_gcm_siv: associatedData too long")
 	}
 
 	nonce := random.GetRandomBytes(uint32(AESGCMSIVNonceSize))
@@ -113,7 +113,7 @@ func (a *AESGCMSIV) Decrypt(ciphertext, associatedData []byte) ([]byte, error) {
 		return nil, fmt.Errorf("aes_gcm_siv: ciphertext too long")
 	}
 	if len(associatedData) > math.MaxInt32 {
-		return nil, fmt.Errorf("aes_gcm_siv: additional-data too long")
+		return nil, fmt.Errorf("aes_gcm_siv: associatedData too long")
 	}
 
 	nonce := ciphertext[:AESGCMSIVNonceSize]

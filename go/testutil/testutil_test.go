@@ -32,16 +32,16 @@ func TestDummyAEAD(t *testing.T) {
 
 	// try to encrypt/decrypt some data
 	data := []byte{0, 1, 1, 2, 3, 5}
-	additionalData := []byte{3, 1, 4, 1, 5}
+	associatedData := []byte{3, 1, 4, 1, 5}
 
 	dummy := &testutil.DummyAEAD{Name: "name"}
-	cipher, err := dummy.Encrypt(data, additionalData)
+	cipher, err := dummy.Encrypt(data, associatedData)
 	if err != nil {
-		t.Fatalf("DummyAEAD.Encrypt(%+v, %+v) gave error: %v", data, additionalData, err)
+		t.Fatalf("DummyAEAD.Encrypt(%+v, %+v) gave error: %v", data, associatedData, err)
 	}
-	decrypt, err := dummy.Decrypt(cipher, additionalData)
+	decrypt, err := dummy.Decrypt(cipher, associatedData)
 	if err != nil {
-		t.Fatalf("DummyAEAD.Decrypt(ciphertext, %+v) gave errr: %v", additionalData, err)
+		t.Fatalf("DummyAEAD.Decrypt(ciphertext, %+v) gave errr: %v", associatedData, err)
 	}
 	if !bytes.Equal(data, decrypt) {
 		t.Errorf("DummyAEAD round-tripped data %+v back to %+v", data, decrypt)

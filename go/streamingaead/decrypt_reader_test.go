@@ -63,7 +63,7 @@ func BenchmarkDecryptReader(b *testing.B) {
 	}
 
 	plaintext := random.GetRandomBytes(8)
-	additionalData := random.GetRandomBytes(32)
+	associatedData := random.GetRandomBytes(32)
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
@@ -76,7 +76,7 @@ func BenchmarkDecryptReader(b *testing.B) {
 		go func() {
 			const writeAtLeast = 1 << 30 // 1 GiB
 
-			enc, err := encCipher.NewEncryptingWriter(w, additionalData)
+			enc, err := encCipher.NewEncryptingWriter(w, associatedData)
 			if err != nil {
 				b.Errorf("Cannot create encrypt writer: %v", err)
 				return
@@ -99,7 +99,7 @@ func BenchmarkDecryptReader(b *testing.B) {
 		}()
 
 		// Decrypt the ciphertext in small chunks.
-		dec, err := decCipher.NewDecryptingReader(r, additionalData)
+		dec, err := decCipher.NewDecryptingReader(r, associatedData)
 		if err != nil {
 			b.Fatalf("Cannot create decrypt reader: %v", err)
 		}
