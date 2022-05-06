@@ -193,8 +193,8 @@ tink_cc_library(
     tink::subtle::common_enums
     tink::subtle::random
     tink::subtle::mac::stateful_mac
-    tink::proto::aes_ctr_hmac_aead_cc_proto
     tink::proto::aes_ctr_cc_proto
+    tink::proto::aes_ctr_hmac_aead_cc_proto
     tink::proto::aes_siv_cc_proto
     tink::proto::common_cc_proto
     tink::proto::ecdsa_cc_proto
