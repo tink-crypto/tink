@@ -14,7 +14,7 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "experimental/pqcrypto/cecpq2/hybrid/internal/cecpq2_aead_hkdf_hybrid_decrypt.h"
+#include "tink/experimental/pqcrypto/cecpq2/hybrid/internal/cecpq2_aead_hkdf_hybrid_decrypt.h"
 
 #include <string>
 #include <utility>
@@ -31,9 +31,9 @@
 #include "tink/aead/xchacha20_poly1305_key_manager.h"
 #include "tink/config/tink_config.h"
 #include "tink/daead/aes_siv_key_manager.h"
-#include "experimental/pqcrypto/cecpq2/hybrid/internal/cecpq2_aead_hkdf_hybrid_encrypt.h"
-#include "experimental/pqcrypto/cecpq2/subtle/cecpq2_subtle_boringssl_util.h"
-#include "experimental/pqcrypto/cecpq2/util/test_util.h"
+#include "tink/experimental/pqcrypto/cecpq2/hybrid/internal/cecpq2_aead_hkdf_hybrid_encrypt.h"
+#include "tink/experimental/pqcrypto/cecpq2/subtle/cecpq2_subtle_boringssl_util.h"
+#include "tink/experimental/pqcrypto/cecpq2/util/test_util.h"
 #include "tink/hybrid_decrypt.h"
 #include "tink/registry.h"
 #include "tink/subtle/common_enums.h"

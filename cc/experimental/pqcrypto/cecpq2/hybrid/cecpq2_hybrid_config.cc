@@ -14,13 +14,13 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "experimental/pqcrypto/cecpq2/hybrid/cecpq2_hybrid_config.h"
+#include "tink/experimental/pqcrypto/cecpq2/hybrid/cecpq2_hybrid_config.h"
 
 #include "absl/memory/memory.h"
 #include "tink/aead/aead_config.h"
 #include "tink/config/tink_fips.h"
-#include "experimental/pqcrypto/cecpq2/hybrid/cecpq2_aead_hkdf_private_key_manager.h"
-#include "experimental/pqcrypto/cecpq2/hybrid/cecpq2_aead_hkdf_public_key_manager.h"
+#include "tink/experimental/pqcrypto/cecpq2/hybrid/cecpq2_aead_hkdf_private_key_manager.h"
+#include "tink/experimental/pqcrypto/cecpq2/hybrid/cecpq2_aead_hkdf_public_key_manager.h"
 #include "tink/hybrid/hybrid_decrypt_wrapper.h"
 #include "tink/hybrid/hybrid_encrypt_wrapper.h"
 #include "tink/registry.h"

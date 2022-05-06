@@ -14,12 +14,12 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-#include "experimental/pqcrypto/cecpq2/hybrid/cecpq2_hybrid_key_templates.h"
+#include "tink/experimental/pqcrypto/cecpq2/hybrid/cecpq2_hybrid_key_templates.h"
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
-#include "experimental/pqcrypto/cecpq2/hybrid/cecpq2_aead_hkdf_private_key_manager.h"
-#include "experimental/pqcrypto/cecpq2/hybrid/cecpq2_hybrid_config.h"
+#include "tink/experimental/pqcrypto/cecpq2/hybrid/cecpq2_aead_hkdf_private_key_manager.h"
+#include "tink/experimental/pqcrypto/cecpq2/hybrid/cecpq2_hybrid_config.h"
 #include "tink/util/test_matchers.h"
 #include "proto/experimental/pqcrypto/cecpq2_aead_hkdf.pb.h"
 

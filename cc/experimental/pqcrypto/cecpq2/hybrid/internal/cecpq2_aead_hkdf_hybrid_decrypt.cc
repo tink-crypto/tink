@@ -14,7 +14,7 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "experimental/pqcrypto/cecpq2/hybrid/internal/cecpq2_aead_hkdf_hybrid_decrypt.h"
+#include "tink/experimental/pqcrypto/cecpq2/hybrid/internal/cecpq2_aead_hkdf_hybrid_decrypt.h"
 
 #include <string>
 #include <utility>
@@ -23,8 +23,8 @@
 #include "absl/status/status.h"
 #include "openssl/hrss.h"
 #include "openssl/nid.h"
-#include "experimental/pqcrypto/cecpq2/hybrid/cecpq2_aead_hkdf_dem_helper.h"
-#include "experimental/pqcrypto/cecpq2/subtle/cecpq2_hkdf_recipient_kem_boringssl.h"
+#include "tink/experimental/pqcrypto/cecpq2/hybrid/cecpq2_aead_hkdf_dem_helper.h"
+#include "tink/experimental/pqcrypto/cecpq2/subtle/cecpq2_hkdf_recipient_kem_boringssl.h"
 #include "tink/hybrid_decrypt.h"
 #include "tink/internal/ec_util.h"
 #include "tink/util/enums.h"

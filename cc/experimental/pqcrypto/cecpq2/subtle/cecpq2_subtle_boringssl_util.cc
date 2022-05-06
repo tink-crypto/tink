@@ -14,7 +14,7 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "experimental/pqcrypto/cecpq2/subtle/cecpq2_subtle_boringssl_util.h"
+#include "tink/experimental/pqcrypto/cecpq2/subtle/cecpq2_subtle_boringssl_util.h"
 
 #include <utility>
 

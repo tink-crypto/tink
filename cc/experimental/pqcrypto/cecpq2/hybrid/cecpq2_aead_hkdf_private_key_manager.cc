@@ -14,7 +14,7 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "experimental/pqcrypto/cecpq2/hybrid/cecpq2_aead_hkdf_private_key_manager.h"
+#include "tink/experimental/pqcrypto/cecpq2/hybrid/cecpq2_aead_hkdf_private_key_manager.h"
 
 #include <string>
 #include <utility>
@@ -23,9 +23,9 @@
 #include "absl/status/status.h"
 #include "absl/strings/string_view.h"
 #include "openssl/hrss.h"
-#include "experimental/pqcrypto/cecpq2/hybrid/cecpq2_aead_hkdf_public_key_manager.h"
-#include "experimental/pqcrypto/cecpq2/hybrid/internal/cecpq2_aead_hkdf_hybrid_decrypt.h"
-#include "experimental/pqcrypto/cecpq2/subtle/cecpq2_subtle_boringssl_util.h"
+#include "tink/experimental/pqcrypto/cecpq2/hybrid/cecpq2_aead_hkdf_public_key_manager.h"
+#include "tink/experimental/pqcrypto/cecpq2/hybrid/internal/cecpq2_aead_hkdf_hybrid_decrypt.h"
+#include "tink/experimental/pqcrypto/cecpq2/subtle/cecpq2_subtle_boringssl_util.h"
 #include "tink/hybrid_decrypt.h"
 #include "tink/subtle/random.h"
 #include "tink/subtle/subtle_util.h"

@@ -14,7 +14,7 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "experimental/pqcrypto/cecpq2/hybrid/internal/cecpq2_aead_hkdf_hybrid_encrypt.h"
+#include "tink/experimental/pqcrypto/cecpq2/hybrid/internal/cecpq2_aead_hkdf_hybrid_encrypt.h"
 
 #include <string>
 #include <utility>
@@ -25,8 +25,8 @@
 #include "openssl/curve25519.h"
 #include "openssl/hrss.h"
 #include "tink/aead/aes_gcm_key_manager.h"
-#include "experimental/pqcrypto/cecpq2/subtle/cecpq2_subtle_boringssl_util.h"
-#include "experimental/pqcrypto/cecpq2/util/test_util.h"
+#include "tink/experimental/pqcrypto/cecpq2/subtle/cecpq2_subtle_boringssl_util.h"
+#include "tink/experimental/pqcrypto/cecpq2/util/test_util.h"
 #include "tink/hybrid_encrypt.h"
 #include "tink/registry.h"
 #include "tink/subtle/random.h"

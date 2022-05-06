@@ -14,7 +14,7 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "experimental/pqcrypto/cecpq2/util/test_util.h"
+#include "tink/experimental/pqcrypto/cecpq2/util/test_util.h"
 
 #include <string>
 #include <utility>
@@ -24,7 +24,7 @@
 #include "tink/aead/aes_ctr_hmac_aead_key_manager.h"
 #include "tink/aead/aes_gcm_key_manager.h"
 #include "tink/aead/xchacha20_poly1305_key_manager.h"
-#include "experimental/pqcrypto/cecpq2/subtle/cecpq2_subtle_boringssl_util.h"
+#include "tink/experimental/pqcrypto/cecpq2/subtle/cecpq2_subtle_boringssl_util.h"
 #include "tink/subtle/subtle_util.h"
 #include "tink/util/enums.h"
 #include "proto/aes_ctr.pb.h"

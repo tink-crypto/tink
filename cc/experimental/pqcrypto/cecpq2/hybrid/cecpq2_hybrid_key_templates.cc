@@ -14,7 +14,7 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "experimental/pqcrypto/cecpq2/hybrid/cecpq2_hybrid_key_templates.h"
+#include "tink/experimental/pqcrypto/cecpq2/hybrid/cecpq2_hybrid_key_templates.h"
 
 #include <string>
 

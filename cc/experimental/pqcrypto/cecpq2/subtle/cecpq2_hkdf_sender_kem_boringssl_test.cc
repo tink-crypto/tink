@@ -14,7 +14,7 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "experimental/pqcrypto/cecpq2/subtle/cecpq2_hkdf_sender_kem_boringssl.h"
+#include "tink/experimental/pqcrypto/cecpq2/subtle/cecpq2_hkdf_sender_kem_boringssl.h"
 
 #include <string>
 #include <utility>
@@ -26,8 +26,8 @@
 #include "openssl/hrss.h"
 #include "openssl/sha.h"
 #include "tink/config/tink_fips.h"
-#include "experimental/pqcrypto/cecpq2/subtle/cecpq2_hkdf_recipient_kem_boringssl.h"
-#include "experimental/pqcrypto/cecpq2/subtle/cecpq2_subtle_boringssl_util.h"
+#include "tink/experimental/pqcrypto/cecpq2/subtle/cecpq2_hkdf_recipient_kem_boringssl.h"
+#include "tink/experimental/pqcrypto/cecpq2/subtle/cecpq2_subtle_boringssl_util.h"
 #include "tink/subtle/common_enums.h"
 #include "tink/subtle/hkdf.h"
 #include "tink/subtle/random.h"

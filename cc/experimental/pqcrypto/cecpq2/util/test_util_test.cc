@@ -14,7 +14,7 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-#include "experimental/pqcrypto/cecpq2/util/test_util.h"
+#include "tink/experimental/pqcrypto/cecpq2/util/test_util.h"
 
 #include "gtest/gtest.h"
 #include "tink/aead/aes_gcm_key_manager.h"

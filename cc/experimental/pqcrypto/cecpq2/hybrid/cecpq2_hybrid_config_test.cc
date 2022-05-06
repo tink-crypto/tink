@@ -14,7 +14,7 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-#include "experimental/pqcrypto/cecpq2/hybrid/cecpq2_hybrid_config.h"
+#include "tink/experimental/pqcrypto/cecpq2/hybrid/cecpq2_hybrid_config.h"
 
 #include <list>
 #include <string>
@@ -24,9 +24,9 @@
 #include "gtest/gtest.h"
 #include "absl/status/status.h"
 #include "tink/config/tink_fips.h"
-#include "experimental/pqcrypto/cecpq2/hybrid/cecpq2_aead_hkdf_private_key_manager.h"
-#include "experimental/pqcrypto/cecpq2/hybrid/cecpq2_aead_hkdf_public_key_manager.h"
-#include "experimental/pqcrypto/cecpq2/hybrid/cecpq2_hybrid_key_templates.h"
+#include "tink/experimental/pqcrypto/cecpq2/hybrid/cecpq2_aead_hkdf_private_key_manager.h"
+#include "tink/experimental/pqcrypto/cecpq2/hybrid/cecpq2_aead_hkdf_public_key_manager.h"
+#include "tink/experimental/pqcrypto/cecpq2/hybrid/cecpq2_hybrid_key_templates.h"
 #include "tink/hybrid_decrypt.h"
 #include "tink/hybrid_encrypt.h"
 #include "tink/keyset_handle.h"
