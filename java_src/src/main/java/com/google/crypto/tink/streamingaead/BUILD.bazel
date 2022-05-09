@@ -233,9 +233,9 @@ android_library(
         "//src/main/java/com/google/crypto/tink:streaming_aead",
         "//src/main/java/com/google/crypto/tink/internal:key_type_manager-android",
         "//src/main/java/com/google/crypto/tink/internal:primitive_factory-android",
-        "//src/main/java/com/google/crypto/tink/subtle:aes_gcm_hkdf_streaming",
-        "//src/main/java/com/google/crypto/tink/subtle:random",
-        "//src/main/java/com/google/crypto/tink/subtle:validators",
+        "//src/main/java/com/google/crypto/tink/subtle:aes_gcm_hkdf_streaming-android",
+        "//src/main/java/com/google/crypto/tink/subtle:random-android",
+        "//src/main/java/com/google/crypto/tink/subtle:validators-android",
         "@com_google_protobuf//:protobuf_javalite",
     ],
 )
@@ -254,9 +254,9 @@ android_library(
         "//src/main/java/com/google/crypto/tink:streaming_aead",
         "//src/main/java/com/google/crypto/tink/internal:key_type_manager-android",
         "//src/main/java/com/google/crypto/tink/internal:primitive_factory-android",
-        "//src/main/java/com/google/crypto/tink/subtle:aes_ctr_hmac_streaming",
-        "//src/main/java/com/google/crypto/tink/subtle:random",
-        "//src/main/java/com/google/crypto/tink/subtle:validators",
+        "//src/main/java/com/google/crypto/tink/subtle:aes_ctr_hmac_streaming-android",
+        "//src/main/java/com/google/crypto/tink/subtle:random-android",
+        "//src/main/java/com/google/crypto/tink/subtle:validators-android",
         "@com_google_protobuf//:protobuf_javalite",
     ],
 )
@@ -267,7 +267,7 @@ android_library(
     deps = [
         "//src/main/java/com/google/crypto/tink:primitive_set-android",
         "//src/main/java/com/google/crypto/tink:streaming_aead",
-        "//src/main/java/com/google/crypto/tink/subtle:rewindable_readable_byte_channel",
+        "//src/main/java/com/google/crypto/tink/subtle:rewindable_readable_byte_channel-android",
         "@maven//:com_google_code_findbugs_jsr305",
     ],
 )

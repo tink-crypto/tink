@@ -36,3 +36,30 @@ java_library(
         "@maven//:com_google_errorprone_error_prone_annotations",
     ],
 )
+
+android_library(
+    name = "hkdf_streaming_prf-android",
+    srcs = ["HkdfStreamingPrf.java"],
+    deps = [
+        ":streaming_prf-android",
+        "//src/main/java/com/google/crypto/tink/subtle:enums-android",
+        "//src/main/java/com/google/crypto/tink/subtle:subtle_util_cluster-android",
+        "@maven//:com_google_errorprone_error_prone_annotations",
+    ],
+)
+
+android_library(
+    name = "prf_impl-android",
+    srcs = ["PrfImpl.java"],
+    deps = [
+        ":streaming_prf-android",
+        "//src/main/java/com/google/crypto/tink/prf:prf_set",
+        "@maven//:com_google_errorprone_error_prone_annotations",
+    ],
+)
+
+android_library(
+    name = "streaming_prf-android",
+    srcs = ["StreamingPrf.java"],
+    deps = ["@maven//:com_google_errorprone_error_prone_annotations"],
+)

@@ -76,7 +76,7 @@ java_library(
     ],
 )
 
-java_library(
+android_library(
     name = "hkdf_prf_key_manager-android",
     srcs = ["HkdfPrfKeyManager.java"],
     deps = [
@@ -88,12 +88,12 @@ java_library(
         "//src/main/java/com/google/crypto/tink:registry-android",
         "//src/main/java/com/google/crypto/tink/internal:key_type_manager-android",
         "//src/main/java/com/google/crypto/tink/internal:primitive_factory-android",
-        "//src/main/java/com/google/crypto/tink/subtle:enums",
-        "//src/main/java/com/google/crypto/tink/subtle:random",
-        "//src/main/java/com/google/crypto/tink/subtle:validators",
-        "//src/main/java/com/google/crypto/tink/subtle/prf:hkdf_streaming_prf",
-        "//src/main/java/com/google/crypto/tink/subtle/prf:prf_impl",
-        "//src/main/java/com/google/crypto/tink/subtle/prf:streaming_prf",
+        "//src/main/java/com/google/crypto/tink/subtle:enums-android",
+        "//src/main/java/com/google/crypto/tink/subtle:random-android",
+        "//src/main/java/com/google/crypto/tink/subtle:validators-android",
+        "//src/main/java/com/google/crypto/tink/subtle/prf:hkdf_streaming_prf-android",
+        "//src/main/java/com/google/crypto/tink/subtle/prf:prf_impl-android",
+        "//src/main/java/com/google/crypto/tink/subtle/prf:streaming_prf-android",
         "@com_google_protobuf//:protobuf_javalite",
     ],
 )
@@ -116,7 +116,7 @@ java_library(
     ],
 )
 
-java_library(
+android_library(
     name = "aes_cmac_prf_key_manager-android",
     srcs = ["AesCmacPrfKeyManager.java"],
     deps = [
@@ -127,9 +127,9 @@ java_library(
         "//src/main/java/com/google/crypto/tink:registry-android",
         "//src/main/java/com/google/crypto/tink/internal:key_type_manager-android",
         "//src/main/java/com/google/crypto/tink/internal:primitive_factory-android",
-        "//src/main/java/com/google/crypto/tink/subtle:prf_aes_cmac",
-        "//src/main/java/com/google/crypto/tink/subtle:random",
-        "//src/main/java/com/google/crypto/tink/subtle:validators",
+        "//src/main/java/com/google/crypto/tink/subtle:prf_aes_cmac-android",
+        "//src/main/java/com/google/crypto/tink/subtle:random-android",
+        "//src/main/java/com/google/crypto/tink/subtle:validators-android",
         "@com_google_protobuf//:protobuf_javalite",
     ],
 )
@@ -154,7 +154,7 @@ java_library(
     ],
 )
 
-java_library(
+android_library(
     name = "hmac_prf_key_manager-android",
     srcs = ["HmacPrfKeyManager.java"],
     deps = [
@@ -167,14 +167,14 @@ java_library(
         "//src/main/java/com/google/crypto/tink/config/internal:tink_fips_util-android",
         "//src/main/java/com/google/crypto/tink/internal:key_type_manager-android",
         "//src/main/java/com/google/crypto/tink/internal:primitive_factory-android",
-        "//src/main/java/com/google/crypto/tink/subtle:prf_hmac_jce",
-        "//src/main/java/com/google/crypto/tink/subtle:random",
-        "//src/main/java/com/google/crypto/tink/subtle:validators",
+        "//src/main/java/com/google/crypto/tink/subtle:prf_hmac_jce-android",
+        "//src/main/java/com/google/crypto/tink/subtle:random-android",
+        "//src/main/java/com/google/crypto/tink/subtle:validators-android",
         "@com_google_protobuf//:protobuf_javalite",
     ],
 )
 
-java_library(
+android_library(
     name = "prf_key_templates-android",
     srcs = ["PrfKeyTemplates.java"],
     deps = [
@@ -189,7 +189,7 @@ java_library(
     ],
 )
 
-java_library(
+android_library(
     name = "prf_config-android",
     srcs = ["PrfConfig.java"],
     deps = [
@@ -201,7 +201,7 @@ java_library(
     ],
 )
 
-java_library(
+android_library(
     name = "prf_set_wrapper-android",
     srcs = ["PrfSetWrapper.java"],
     deps = [
