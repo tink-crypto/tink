@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """A minimal example for using the deterministic AEAD API."""
-# [START deterministic-aead-simple-example]
+# [START deterministic-aead-basic-example]
 import tink
 from tink import cleartext_keyset_handle
 from tink import daead
@@ -62,5 +62,5 @@ def example():
   # the keyset and decrypts the ciphertext. If no key is found or decryption
   # fails, it raises an error.
   output = primitive.decrypt_deterministically(ciphertext, b'associated_data')
-  # [end deterministic-aead-simple-example]
+  # [end deterministic-aead-basic-example]
   assert output == b'msg'
