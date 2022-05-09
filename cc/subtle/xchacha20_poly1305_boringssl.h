@@ -44,11 +44,11 @@ class XChacha20Poly1305BoringSsl : public Aead {
 
   crypto::tink::util::StatusOr<std::string> Encrypt(
       absl::string_view plaintext,
-      absl::string_view additional_data) const override;
+      absl::string_view associated_data) const override;
 
   crypto::tink::util::StatusOr<std::string> Decrypt(
       absl::string_view ciphertext,
-      absl::string_view additional_data) const override;
+      absl::string_view associated_data) const override;
 
   static constexpr crypto::tink::internal::FipsCompatibility kFipsStatus =
       crypto::tink::internal::FipsCompatibility::kNotFips;
