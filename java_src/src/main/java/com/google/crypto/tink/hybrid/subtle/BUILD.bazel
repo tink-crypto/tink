@@ -39,3 +39,41 @@ java_library(
         "//src/main/java/com/google/crypto/tink:deterministic_aead",
     ],
 )
+
+android_library(
+    name = "aead_or_daead-android",
+    srcs = ["AeadOrDaead.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink:aead",
+        "//src/main/java/com/google/crypto/tink:deterministic_aead",
+    ],
+)
+
+android_library(
+    name = "rsa_kem-android",
+    srcs = ["RsaKem.java"],
+)
+
+android_library(
+    name = "rsa_kem_hybrid_decrypt-android",
+    srcs = ["RsaKemHybridDecrypt.java"],
+    deps = [
+        ":rsa_kem-android",
+        "//src/main/java/com/google/crypto/tink:aead",
+        "//src/main/java/com/google/crypto/tink:hybrid_decrypt",
+        "//src/main/java/com/google/crypto/tink/aead/subtle:aead_factory-android",
+        "//src/main/java/com/google/crypto/tink/subtle:hkdf-android",
+    ],
+)
+
+android_library(
+    name = "rsa_kem_hybrid_encrypt-android",
+    srcs = ["RsaKemHybridEncrypt.java"],
+    deps = [
+        ":rsa_kem-android",
+        "//src/main/java/com/google/crypto/tink:aead",
+        "//src/main/java/com/google/crypto/tink:hybrid_encrypt",
+        "//src/main/java/com/google/crypto/tink/aead/subtle:aead_factory-android",
+        "//src/main/java/com/google/crypto/tink/subtle:hkdf-android",
+    ],
+)

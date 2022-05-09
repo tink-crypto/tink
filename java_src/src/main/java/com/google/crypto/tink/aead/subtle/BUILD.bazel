@@ -33,3 +33,35 @@ java_library(
         "//src/main/java/com/google/crypto/tink/subtle:validators",
     ],
 )
+
+android_library(
+    name = "aead_factory-android",
+    srcs = ["AeadFactory.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink:aead",
+        "@maven//:com_google_errorprone_error_prone_annotations",
+    ],
+)
+
+android_library(
+    name = "aes_gcm_factory-android",
+    srcs = ["AesGcmFactory.java"],
+    deps = [
+        ":aead_factory-android",
+        "//src/main/java/com/google/crypto/tink:aead",
+        "//src/main/java/com/google/crypto/tink/subtle:aes_gcm_jce-android",
+        "@maven//:com_google_errorprone_error_prone_annotations",
+    ],
+)
+
+android_library(
+    name = "aes_gcm_siv-android",
+    srcs = ["AesGcmSiv.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink:aead",
+        "//src/main/java/com/google/crypto/tink/annotations:alpha",
+        "//src/main/java/com/google/crypto/tink/subtle:random-android",
+        "//src/main/java/com/google/crypto/tink/subtle:subtle_util_cluster-android",
+        "//src/main/java/com/google/crypto/tink/subtle:validators-android",
+    ],
+)
