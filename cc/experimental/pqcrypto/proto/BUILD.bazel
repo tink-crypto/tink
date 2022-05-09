@@ -3,7 +3,9 @@ package(default_visibility = ["//:__subpackages__"])
 
 licenses(["notice"])
 
-# cc protos
+# ----------------------------------------
+# cc_proto_library rules.
+# ----------------------------------------
 
 cc_proto_library(
     name = "cecpq2_aead_hkdf_cc_proto",
