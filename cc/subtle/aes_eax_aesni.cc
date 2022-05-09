@@ -361,7 +361,7 @@ __m128i AesEaxAesni::OMAC(absl::string_view blob, int tag) const {
 }
 
 bool AesEaxAesni::RawEncrypt(absl::string_view nonce, absl::string_view in,
-                             absl::string_view additional_data,
+                             absl::string_view associated_data,
                              absl::Span<uint8_t> ciphertext) const {
   // Sanity check
   if (in.size() + kTagSize != ciphertext.size()) {
@@ -373,7 +373,7 @@ bool AesEaxAesni::RawEncrypt(absl::string_view nonce, absl::string_view in,
   //   it would be possible to compute N and H independently of the encryption.
   //   So far this possiblity is not used in this implementation.
   const __m128i N = OMAC(nonce, 0);
-  const __m128i H = OMAC(additional_data, 1);
+  const __m128i H = OMAC(associated_data, 1);
 
   // Compute the initial counter in little endian order.
   // EAX uses big endian order, but it is easier to increment
@@ -424,10 +424,10 @@ bool AesEaxAesni::RawEncrypt(absl::string_view nonce, absl::string_view in,
 }
 
 bool AesEaxAesni::RawDecrypt(absl::string_view nonce, absl::string_view in,
-                             absl::string_view additional_data,
+                             absl::string_view associated_data,
                              absl::Span<uint8_t> plaintext) const {
   __m128i N = OMAC(nonce, 0);
-  __m128i H = OMAC(additional_data, 1);
+  __m128i H = OMAC(associated_data, 1);
 
   const uint8_t* ciphertext = reinterpret_cast<const uint8_t*>(in.data());
   const size_t ciphertext_size = in.size();
@@ -521,11 +521,11 @@ bool AesEaxAesni::RawDecrypt(absl::string_view nonce, absl::string_view in,
 }
 
 crypto::tink::util::StatusOr<std::string> AesEaxAesni::Encrypt(
-    absl::string_view plaintext, absl::string_view additional_data) const {
-  // BoringSSL expects a non-null pointer for plaintext and additional_data,
+    absl::string_view plaintext, absl::string_view associated_data) const {
+  // BoringSSL expects a non-null pointer for plaintext and associated_data,
   // regardless of whether the size is 0.
   plaintext = internal::EnsureStringNonNull(plaintext);
-  additional_data = internal::EnsureStringNonNull(additional_data);
+  associated_data = internal::EnsureStringNonNull(associated_data);
 
   if (SIZE_MAX - nonce_size_ - kTagSize <= plaintext.size()) {
     return util::Status(absl::StatusCode::kInvalidArgument,
@@ -537,7 +537,7 @@ crypto::tink::util::StatusOr<std::string> AesEaxAesni::Encrypt(
   const std::string nonce = Random::GetRandomBytes(nonce_size_);
   absl::c_copy(nonce, ciphertext.begin());
   bool result = RawEncrypt(
-      nonce, plaintext, additional_data,
+      nonce, plaintext, associated_data,
       absl::MakeSpan(reinterpret_cast<uint8_t*>(&ciphertext[nonce_size_]),
                      ciphertext_size - nonce_size_));
   if (!result) {
@@ -547,10 +547,10 @@ crypto::tink::util::StatusOr<std::string> AesEaxAesni::Encrypt(
 }
 
 crypto::tink::util::StatusOr<std::string> AesEaxAesni::Decrypt(
-    absl::string_view ciphertext, absl::string_view additional_data) const {
-  // BoringSSL expects a non-null pointer for additional_data,
+    absl::string_view ciphertext, absl::string_view associated_data) const {
+  // BoringSSL expects a non-null pointer for associated_data,
   // regardless of whether the size is 0.
-  additional_data = internal::EnsureStringNonNull(additional_data);
+  associated_data = internal::EnsureStringNonNull(associated_data);
 
   size_t ct_size = ciphertext.size();
   if (ct_size < nonce_size_ + kTagSize) {
@@ -564,7 +564,7 @@ crypto::tink::util::StatusOr<std::string> AesEaxAesni::Decrypt(
   std::string res;
   ResizeStringUninitialized(&res, out_size);
   bool result = RawDecrypt(
-      nonce, encrypted, additional_data,
+      nonce, encrypted, associated_data,
       absl::MakeSpan(reinterpret_cast<uint8_t*>(&res[0]), res.size()));
   if (!result) {
     return util::Status(absl::StatusCode::kInternal, "Decryption failed");

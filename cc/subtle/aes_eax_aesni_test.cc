@@ -26,7 +26,6 @@
 #include "gtest/gtest.h"
 #include "tink/subtle/wycheproof_util.h"
 #include "tink/util/secret_data.h"
-#include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "tink/util/test_util.h"
 
@@ -113,26 +112,26 @@ TEST(AesEaxAesniTest, testModification) {
       test::HexDecodeOrDie("000102030405060708090a0b0c0d0e0f"));
   auto cipher = std::move(AesEaxAesni::New(key, nonce_size).value());
   std::string message = "Some data to encrypt.";
-  std::string aad = "Some data to authenticate.";
-  std::string ct = cipher->Encrypt(message, aad).value();
-  EXPECT_TRUE(cipher->Decrypt(ct, aad).ok());
+  std::string associated_data = "Some data to authenticate.";
+  std::string ct = cipher->Encrypt(message, associated_data).value();
+  EXPECT_TRUE(cipher->Decrypt(ct, associated_data).ok());
   // Modify the ciphertext
   for (size_t i = 0; i < ct.size() * 8; i++) {
     std::string modified_ct = ct;
     modified_ct[i / 8] ^= 1 << (i % 8);
-    EXPECT_FALSE(cipher->Decrypt(modified_ct, aad).ok()) << i;
+    EXPECT_FALSE(cipher->Decrypt(modified_ct, associated_data).ok()) << i;
   }
-  // Modify the additional data
-  for (size_t i = 0; i < aad.size() * 8; i++) {
-    std::string modified_aad = aad;
-    modified_aad[i / 8] ^= 1 << (i % 8);
-    auto decrypted = cipher->Decrypt(ct, modified_aad);
+  // Modify the associated data
+  for (size_t i = 0; i < associated_data.size() * 8; i++) {
+    std::string modified_associated_data = associated_data;
+    modified_associated_data[i / 8] ^= 1 << (i % 8);
+    auto decrypted = cipher->Decrypt(ct, modified_associated_data);
     EXPECT_FALSE(decrypted.ok()) << i << " pt:" << decrypted.value();
   }
   // Truncate the ciphertext
   for (size_t i = 0; i < ct.size(); i++) {
     std::string truncated_ct(ct, 0, i);
-    EXPECT_FALSE(cipher->Decrypt(truncated_ct, aad).ok()) << i;
+    EXPECT_FALSE(cipher->Decrypt(truncated_ct, associated_data).ok()) << i;
   }
 }
 
