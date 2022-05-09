@@ -117,7 +117,7 @@ class OpenSslOneShotAeadImpl : public SslOneShotAead {
                                   absl::string_view iv,
                                   absl::Span<char> out) const override {
     absl::string_view plaintext_data = internal::EnsureStringNonNull(plaintext);
-    absl::string_view aad = internal::EnsureStringNonNull(associated_data);
+    absl::string_view ad = internal::EnsureStringNonNull(associated_data);
 
     const int64_t min_out_buff_size = CiphertextSize(plaintext.size());
     if (out.size() < min_out_buff_size) {
@@ -156,13 +156,13 @@ class OpenSslOneShotAeadImpl : public SslOneShotAead {
       return res;
     }
 
-    // Set the additional auth. data.
+    // Set the associated data.
     int len = 0;
     if (EVP_EncryptUpdate(context.get(), /*out=*/nullptr, &len,
-                          reinterpret_cast<const uint8_t *>(aad.data()),
-                          aad.size()) <= 0) {
+                          reinterpret_cast<const uint8_t *>(ad.data()),
+                          ad.size()) <= 0) {
       return util::Status(absl::StatusCode::kInternal,
-                          "Failed to set the additional authenticated data");
+                          "Failed to set associated data");
     }
 
     util::StatusOr<int64_t> raw_ciphertext_bytes =
@@ -188,7 +188,7 @@ class OpenSslOneShotAeadImpl : public SslOneShotAead {
                                   absl::string_view associated_data,
                                   absl::string_view iv,
                                   absl::Span<char> out) const override {
-    absl::string_view aad = internal::EnsureStringNonNull(associated_data);
+    absl::string_view ad = internal::EnsureStringNonNull(associated_data);
 
     if (ciphertext.size() < tag_size_) {
       return util::Status(
@@ -228,12 +228,12 @@ class OpenSslOneShotAeadImpl : public SslOneShotAead {
     }
 
     int len = 0;
-    // Add additional auth. data.
+    // Add the associated data.
     if (EVP_DecryptUpdate(context.get(), /*out=*/nullptr, &len,
-                          reinterpret_cast<const uint8_t *>(aad.data()),
-                          aad.size()) <= 0) {
+                          reinterpret_cast<const uint8_t *>(ad.data()),
+                          ad.size()) <= 0) {
       return util::Status(absl::StatusCode::kInternal,
-                          "Failed to set the additional authenticated data");
+                          "Failed to set associated_data");
     }
 
     const int64_t raw_ciphertext_size = ciphertext.size() - tag_size_;
@@ -301,7 +301,7 @@ class BoringSslOneShotAeadImpl : public SslOneShotAead {
                                   absl::string_view associated_data,
                                   absl::string_view iv,
                                   absl::Span<char> out) const override {
-    // BoringSSL expects a non-null pointer for additional_data,
+    // BoringSSL expects a non-null pointer for associated_data,
     // regardless of whether the size is 0.
     plaintext = internal::EnsureStringNonNull(plaintext);
     associated_data = internal::EnsureStringNonNull(associated_data);
