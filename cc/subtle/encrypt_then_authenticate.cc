@@ -58,15 +58,16 @@ util::StatusOr<std::unique_ptr<Aead>> EncryptThenAuthenticate::New(
 }
 
 util::StatusOr<std::string> EncryptThenAuthenticate::Encrypt(
-    absl::string_view plaintext, absl::string_view additional_data) const {
-  // BoringSSL expects a non-null pointer for plaintext and additional_data,
+    absl::string_view plaintext, absl::string_view associated_data) const {
+  // BoringSSL expects a non-null pointer for plaintext and associated_data,
   // regardless of whether the size is 0.
   plaintext = internal::EnsureStringNonNull(plaintext);
-  additional_data = internal::EnsureStringNonNull(additional_data);
+  associated_data = internal::EnsureStringNonNull(associated_data);
 
-  uint64_t aad_size_in_bytes = additional_data.size();
-  uint64_t aad_size_in_bits = aad_size_in_bytes * 8;
-  if (aad_size_in_bits / 8 != aad_size_in_bytes /* overflow occured! */) {
+  uint64_t associated_data_size_in_bytes = associated_data.size();
+  uint64_t associated_data_size_in_bits = associated_data_size_in_bytes * 8;
+  if (associated_data_size_in_bits / 8 !=
+      associated_data_size_in_bytes /* overflow occured! */) {
     return util::Status(absl::StatusCode::kInvalidArgument,
                         "additional data too long");
   }
@@ -76,8 +77,9 @@ util::StatusOr<std::string> EncryptThenAuthenticate::Encrypt(
     return ct.status();
   }
   std::string ciphertext(ct.value());
-  std::string toAuthData = absl::StrCat(additional_data, ciphertext,
-                                        longToBigEndianStr(aad_size_in_bits));
+  std::string toAuthData =
+      absl::StrCat(associated_data, ciphertext,
+                   longToBigEndianStr(associated_data_size_in_bits));
 
   auto tag = mac_->ComputeMac(toAuthData);
   if (!tag.ok()) {
@@ -90,27 +92,29 @@ util::StatusOr<std::string> EncryptThenAuthenticate::Encrypt(
 }
 
 util::StatusOr<std::string> EncryptThenAuthenticate::Decrypt(
-    absl::string_view ciphertext, absl::string_view additional_data) const {
-  // BoringSSL expects a non-null pointer for additional_data,
+    absl::string_view ciphertext, absl::string_view associated_data) const {
+  // BoringSSL expects a non-null pointer for associated_data,
   // regardless of whether the size is 0.
-  additional_data = internal::EnsureStringNonNull(additional_data);
+  associated_data = internal::EnsureStringNonNull(associated_data);
 
   if (ciphertext.size() < tag_size_) {
     return util::Status(absl::StatusCode::kInvalidArgument,
                         "ciphertext too short");
   }
 
-  uint64_t aad_size_in_bytes = additional_data.size();
-  uint64_t aad_size_in_bits = aad_size_in_bytes * 8;
-  if (aad_size_in_bits / 8 != aad_size_in_bytes /* overflow occured! */) {
+  uint64_t associated_data_size_in_bytes = associated_data.size();
+  uint64_t associated_data_size_in_bits = associated_data_size_in_bytes * 8;
+  if (associated_data_size_in_bits / 8 !=
+      associated_data_size_in_bytes /* overflow occured! */) {
     return util::Status(absl::StatusCode::kInvalidArgument,
                         "additional data too long");
   }
 
   auto payload = ciphertext.substr(0, ciphertext.size() - tag_size_);
   auto tag = ciphertext.substr(ciphertext.size() - tag_size_, tag_size_);
-  std::string toAuthData = absl::StrCat(additional_data, payload,
-                                        longToBigEndianStr(aad_size_in_bits));
+  std::string toAuthData =
+      absl::StrCat(associated_data, payload,
+                   longToBigEndianStr(associated_data_size_in_bits));
 
   auto verified = mac_->VerifyMac(tag, toAuthData);
   if (!verified.ok()) {

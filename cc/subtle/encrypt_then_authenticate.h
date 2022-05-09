@@ -33,8 +33,8 @@ namespace tink {
 namespace subtle {
 
 // This primitive performs an encrypt-then-Mac operation on plaintext and
-// additional authenticated data (aad). The Mac is computed over (aad ||
-// ciphertext || size of aad). This implementation is based on
+// associated data (ad). The Mac is computed over (ad ||
+// ciphertext || size of ad). This implementation is based on
 // http://tools.ietf.org/html/draft-mcgrew-aead-aes-cbc-hmac-sha2-05.
 class EncryptThenAuthenticate : public Aead {
  public:
@@ -42,22 +42,21 @@ class EncryptThenAuthenticate : public Aead {
       std::unique_ptr<IndCpaCipher> ind_cpa_cipher, std::unique_ptr<Mac> mac,
       uint8_t tag_size);
 
-  // Encrypts 'plaintext' with 'additional_data' as additional authenticated
-  // data. The resulting ciphertext allows for checking authenticity and
-  // integrity of additional data ({@code aad}), but does not guarantee its
-  // secrecy.
+  // Encrypts 'plaintext' with 'associated_data'. The resulting ciphertext
+  // allows for checking authenticity and integrity of associated_data (ad), but
+  // does not guarantee its secrecy.
   //
   // The plaintext is encrypted with an IndCpaCipher, then MAC is computed over
-  // (additional_data || ciphertext || t) where t is additional_data's length
+  // (associated_data || ciphertext || t) where t is associated_data's length
   // in bits represented as 64-bit bigendian unsigned integer. The final
   // ciphertext format is (ind-cpa ciphertext || mac).
   crypto::tink::util::StatusOr<std::string> Encrypt(
       absl::string_view plaintext,
-      absl::string_view additional_data) const override;
+      absl::string_view associated_data) const override;
 
   crypto::tink::util::StatusOr<std::string> Decrypt(
       absl::string_view ciphertext,
-      absl::string_view additional_data) const override;
+      absl::string_view associated_data) const override;
 
  private:
   static constexpr int kMinTagSizeInBytes = 10;
