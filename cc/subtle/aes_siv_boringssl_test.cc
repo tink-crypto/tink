@@ -25,7 +25,6 @@
 #include "tink/config/tink_fips.h"
 #include "tink/subtle/wycheproof_util.h"
 #include "tink/util/secret_data.h"
-#include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "tink/util/test_matchers.h"
 #include "tink/util/test_util.h"
@@ -63,11 +62,11 @@ TEST(AesSivBoringSslTest, testEncryptDecrypt) {
   auto res = AesSivBoringSsl::New(key);
   EXPECT_TRUE(res.ok()) << res.status();
   auto cipher = std::move(res.value());
-  std::string aad = "Additional data";
+  std::string associated_data = "Associated data";
   std::string message = "Some data to encrypt.";
-  auto ct = cipher->EncryptDeterministically(message, aad);
+  auto ct = cipher->EncryptDeterministically(message, associated_data);
   EXPECT_TRUE(ct.ok()) << ct.status();
-  auto pt = cipher->DecryptDeterministically(ct.value(), aad);
+  auto pt = cipher->DecryptDeterministically(ct.value(), associated_data);
   EXPECT_TRUE(pt.ok()) << pt.status();
   EXPECT_EQ(pt.value(), message);
 }
@@ -92,7 +91,7 @@ TEST(AesSivBoringSslTest, testNullPtrStringView) {
   // Decryption with ct == null should return an appropriate status.
   pt = cipher->DecryptDeterministically(null, "");
   EXPECT_FALSE(pt.ok());
-  // Additional data with an empty string view is the same an empty string.
+  // Associated data with an empty string view is the same an empty string.
   std::string message("123456789abcdefghijklmnop");
   ct = cipher->EncryptDeterministically(message, null);
   pt = cipher->DecryptDeterministically(ct.value(), "");
@@ -138,27 +137,27 @@ TEST(AesSivBoringSslTest, testEncryptDecryptMessageSize) {
   auto res = AesSivBoringSsl::New(key);
   EXPECT_TRUE(res.ok()) << res.status();
   auto cipher = std::move(res.value());
-  std::string aad = "Additional data";
+  std::string associated_data = "Associated data";
   for (int i = 0; i < 1024; ++i) {
     std::string message = std::string(i, 'a');
-    auto ct = cipher->EncryptDeterministically(message, aad);
+    auto ct = cipher->EncryptDeterministically(message, associated_data);
     EXPECT_TRUE(ct.ok()) << ct.status();
-    auto pt = cipher->DecryptDeterministically(ct.value(), aad);
+    auto pt = cipher->DecryptDeterministically(ct.value(), associated_data);
     EXPECT_TRUE(pt.ok()) << pt.status();
     EXPECT_EQ(pt.value(), message);
   }
   for (int i = 1024; i < 100000; i+= 5000) {
     std::string message = std::string(i, 'a');
-    auto ct = cipher->EncryptDeterministically(message, aad);
+    auto ct = cipher->EncryptDeterministically(message, associated_data);
     EXPECT_TRUE(ct.ok()) << ct.status();
-    auto pt = cipher->DecryptDeterministically(ct.value(), aad);
+    auto pt = cipher->DecryptDeterministically(ct.value(), associated_data);
     EXPECT_TRUE(pt.ok()) << pt.status();
     EXPECT_EQ(pt.value(), message);
   }
 }
 
-// Checks a range of aad sizes.
-TEST(AesSivBoringSslTest, testEncryptDecryptAadSize) {
+// Checks a range of associated_data sizes.
+TEST(AesSivBoringSslTest, testEncryptDecryptAssociatedDataSize) {
   if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
@@ -170,10 +169,10 @@ TEST(AesSivBoringSslTest, testEncryptDecryptAadSize) {
   auto cipher = std::move(res.value());
   std::string message = "Some plaintext";
   for (int i = 0; i < 1028; ++i) {
-    std::string aad = std::string(i, 'a');
-    auto ct = cipher->EncryptDeterministically(message, aad);
+    std::string associated_data = std::string(i, 'a');
+    auto ct = cipher->EncryptDeterministically(message, associated_data);
     EXPECT_TRUE(ct.ok()) << ct.status();
-    auto pt = cipher->DecryptDeterministically(ct.value(), aad);
+    auto pt = cipher->DecryptDeterministically(ct.value(), associated_data);
     EXPECT_TRUE(pt.ok()) << pt.status();
     EXPECT_EQ(pt.value(), message);
   }
@@ -189,17 +188,17 @@ TEST(AesSivBoringSslTest, testDecryptModification) {
   auto res = AesSivBoringSsl::New(key);
   EXPECT_TRUE(res.ok()) << res.status();
   auto cipher = std::move(res.value());
-  std::string aad = "Additional data";
+  std::string associated_data = "Associated data";
   for (int i = 0; i < 50; ++i) {
     std::string message = std::string(i, 'a');
-    auto ct = cipher->EncryptDeterministically(message, aad);
+    auto ct = cipher->EncryptDeterministically(message, associated_data);
     EXPECT_TRUE(ct.ok()) << ct.status();
     std::string ciphertext = ct.value();
     for (size_t b = 0; b < ciphertext.size(); ++b) {
       for (int bit = 0; bit < 8; ++bit) {
         std::string modified = ciphertext;
         modified[b] ^= (1 << bit);
-        auto pt = cipher->DecryptDeterministically(modified, aad);
+        auto pt = cipher->DecryptDeterministically(modified, associated_data);
         EXPECT_FALSE(pt.ok())
             << "Modified ciphertext decrypted."
             << " byte:" << b
@@ -223,7 +222,7 @@ void WycheproofTest(const rapidjson::Document &root) {
           util::SecretDataFromStringView(WycheproofUtil::GetBytes(test["key"]));
       std::string msg = WycheproofUtil::GetBytes(test["msg"]);
       std::string ct = WycheproofUtil::GetBytes(test["ct"]);
-      std::string aad = WycheproofUtil::GetBytes(test["aad"]);
+      std::string associated_data = WycheproofUtil::GetBytes(test["aad"]);
       int id = test["tcId"].GetInt();
       std::string result = test["result"].GetString();
       auto cipher = std::move(AesSivBoringSsl::New(key).value());
@@ -231,7 +230,7 @@ void WycheproofTest(const rapidjson::Document &root) {
       // Test encryption.
       // Encryption should always succeed since msg and aad are valid inputs.
       std::string encrypted =
-          cipher->EncryptDeterministically(msg, aad).value();
+          cipher->EncryptDeterministically(msg, associated_data).value();
       std::string encrypted_hex = test::HexEncode(encrypted);
       std::string ct_hex = test::HexEncode(ct);
       if (result == "valid" || result == "acceptable") {
@@ -243,7 +242,7 @@ void WycheproofTest(const rapidjson::Document &root) {
       }
 
       // Test decryption
-      auto decrypted = cipher->DecryptDeterministically(ct, aad);
+      auto decrypted = cipher->DecryptDeterministically(ct, associated_data);
       if (decrypted.ok()) {
         if (result == "invalid") {
           ADD_FAILURE() << "decrypted invalid ciphertext:" << id;

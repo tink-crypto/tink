@@ -37,7 +37,7 @@ namespace subtle {
 
 // AesSivBoringSsl is an implemenatation of AES-SIV-CMAC as defined in
 // https://tools.ietf.org/html/rfc5297 .
-// AesSivBoringSsl implements a deterministic encryption with additional
+// AesSivBoringSsl implements a deterministic encryption with associated
 // data (i.e. the DeterministicAead interface). Hence the implementation
 // below is restricted to one AD component.
 //
@@ -64,11 +64,11 @@ class AesSivBoringSsl : public DeterministicAead {
 
   crypto::tink::util::StatusOr<std::string> EncryptDeterministically(
       absl::string_view plaintext,
-      absl::string_view additional_data) const override;
+      absl::string_view associated_data) const override;
 
   crypto::tink::util::StatusOr<std::string> DecryptDeterministically(
       absl::string_view ciphertext,
-      absl::string_view additional_data) const override;
+      absl::string_view associated_data) const override;
 
   static bool IsValidKeySizeInBytes(size_t size) { return size == 64; }
 
