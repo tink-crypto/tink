@@ -62,6 +62,9 @@ public final class SecretKeyAccess {
   @CanIgnoreReturnValue
   public static SecretKeyAccess requireAccess(Optional<SecretKeyAccess> in)
       throws GeneralSecurityException {
-    return in.orElseThrow(() -> new GeneralSecurityException("SecretKeyAccess is required"));
+    if (!in.isPresent()) {
+      throw new GeneralSecurityException("SecretKeyAccess is required");
+    }
+    return in.get();
   }
 }
