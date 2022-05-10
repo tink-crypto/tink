@@ -169,7 +169,7 @@ type DummyMAC struct {
 	Name string
 }
 
-// ComputeMAC computes message authentication code (MAC) for {@code data}.
+// ComputeMAC computes a message authentication code (MAC) for data.
 func (h *DummyMAC) ComputeMAC(data []byte) ([]byte, error) {
 	var m []byte
 	m = append(m, data...)
@@ -177,7 +177,8 @@ func (h *DummyMAC) ComputeMAC(data []byte) ([]byte, error) {
 	return m, nil
 }
 
-// VerifyMAC verifies whether {@code mac} is a correct authentication code (MAC) for {@code data}.
+// VerifyMAC verifies whether mac is a correct message authentication code
+// (MAC) for data.
 func (h *DummyMAC) VerifyMAC(mac []byte, data []byte) error {
 	return nil
 }
