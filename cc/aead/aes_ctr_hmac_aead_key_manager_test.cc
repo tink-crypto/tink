@@ -16,18 +16,22 @@
 
 #include "tink/aead/aes_ctr_hmac_aead_key_manager.h"
 
+#include <stdint.h>
+
 #include <memory>
+#include <string>
 #include <utility>
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "absl/status/status.h"
-#include "tink/config.h"
-#include "tink/mac/mac_config.h"
+#include "tink/aead.h"
+#include "tink/mac.h"
 #include "tink/subtle/aead_test_util.h"
 #include "tink/subtle/aes_ctr_boringssl.h"
 #include "tink/subtle/encrypt_then_authenticate.h"
 #include "tink/subtle/hmac_boringssl.h"
+#include "tink/subtle/ind_cpa_cipher.h"
 #include "tink/util/enums.h"
 #include "tink/util/secret_data.h"
 #include "tink/util/status.h"

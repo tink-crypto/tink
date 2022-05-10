@@ -16,20 +16,26 @@
 
 #include "tink/aead/cord_aead_wrapper.h"
 
+#include <stdint.h>
+
 #include <memory>
 #include <string>
 #include <utility>
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include "absl/memory/memory.h"
 #include "absl/status/status.h"
+#include "absl/strings/cord.h"
 #include "absl/strings/cord_test_helpers.h"
 #include "absl/strings/str_split.h"
+#include "absl/strings/string_view.h"
 #include "tink/aead/cord_aead.h"
 #include "tink/primitive_set.h"
 #include "tink/util/status.h"
 #include "tink/util/test_matchers.h"
 #include "tink/util/test_util.h"
+#include "proto/tink.pb.h"
 
 using ::crypto::tink::test::DummyCordAead;
 using ::crypto::tink::test::IsOk;

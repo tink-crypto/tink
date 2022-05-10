@@ -16,32 +16,32 @@
 
 #include "tink/aead/aes_ctr_hmac_aead_key_manager.h"
 
+#include <cstdint>
+#include <functional>
 #include <map>
 #include <memory>
+#include <string>
 #include <utility>
 
-#include "absl/base/casts.h"
 #include "absl/status/status.h"
+#include "absl/status/statusor.h"
 #include "absl/strings/str_cat.h"
 #include "tink/aead.h"
-#include "tink/key_manager.h"
 #include "tink/mac.h"
 #include "tink/mac/hmac_key_manager.h"
-#include "tink/registry.h"
 #include "tink/subtle/aes_ctr_boringssl.h"
 #include "tink/subtle/encrypt_then_authenticate.h"
-#include "tink/subtle/hmac_boringssl.h"
+#include "tink/subtle/ind_cpa_cipher.h"
 #include "tink/subtle/random.h"
 #include "tink/util/enums.h"
-#include "tink/util/errors.h"
-#include "tink/util/protobuf_helper.h"
 #include "tink/util/secret_data.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "tink/util/validation.h"
 #include "proto/aes_ctr.pb.h"
 #include "proto/aes_ctr_hmac_aead.pb.h"
-#include "proto/tink.pb.h"
+#include "proto/common.pb.h"
+#include "proto/hmac.pb.h"
 
 namespace crypto {
 namespace tink {

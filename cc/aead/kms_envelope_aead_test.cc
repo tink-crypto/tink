@@ -16,16 +16,18 @@
 
 #include "tink/aead/kms_envelope_aead.h"
 
+#include <stdint.h>
+
 #include <memory>
 #include <string>
 #include <utility>
-#include <vector>
 
+#include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "absl/base/internal/endian.h"
 #include "absl/memory/memory.h"
 #include "absl/status/status.h"
-#include "absl/strings/str_cat.h"
+#include "tink/aead.h"
 #include "tink/aead/aead_config.h"
 #include "tink/aead/aead_key_templates.h"
 #include "tink/mac/mac_key_templates.h"

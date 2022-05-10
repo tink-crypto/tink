@@ -16,6 +16,8 @@
 
 #include "tink/aead/kms_envelope_aead.h"
 
+#include <stdint.h>
+
 #include <memory>
 #include <string>
 #include <utility>
@@ -26,7 +28,6 @@
 #include "absl/strings/string_view.h"
 #include "tink/aead.h"
 #include "tink/registry.h"
-#include "tink/util/errors.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "proto/tink.pb.h"

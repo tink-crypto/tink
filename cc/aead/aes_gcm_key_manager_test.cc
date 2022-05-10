@@ -16,21 +16,28 @@
 
 #include "tink/aead/aes_gcm_key_manager.h"
 
+#include <stdint.h>
+
 #include <memory>
 #include <sstream>
+#include <string>
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include "absl/memory/memory.h"
 #include "absl/status/status.h"
 #include "tink/aead.h"
+#include "tink/aead/cord_aead.h"
 #include "tink/aead/internal/cord_aes_gcm_boringssl.h"
 #include "tink/subtle/aead_test_util.h"
+#include "tink/subtle/aes_gcm_boringssl.h"
 #include "tink/util/istream_input_stream.h"
 #include "tink/util/secret_data.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "tink/util/test_matchers.h"
 #include "proto/aes_gcm.pb.h"
+#include "proto/tink.pb.h"
 
 namespace crypto {
 namespace tink {

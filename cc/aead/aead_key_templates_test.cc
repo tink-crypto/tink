@@ -16,24 +16,28 @@
 
 #include "tink/aead/aead_key_templates.h"
 
+#include <memory>
 #include <string>
 #include <utility>
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include "absl/status/status.h"
+#include "absl/status/statusor.h"
 #include "tink/aead.h"
 #include "tink/aead/aead_config.h"
 #include "tink/aead/aes_ctr_hmac_aead_key_manager.h"
 #include "tink/aead/aes_eax_key_manager.h"
 #include "tink/aead/aes_gcm_key_manager.h"
 #include "tink/aead/aes_gcm_siv_key_manager.h"
-#include "tink/aead/kms_envelope_aead.h"
 #include "tink/aead/kms_envelope_aead_key_manager.h"
 #include "tink/aead/xchacha20_poly1305_key_manager.h"
 #include "tink/core/key_manager_impl.h"
+#include "tink/key_manager.h"
 #include "tink/keyset_handle.h"
 #include "tink/subtle/aead_test_util.h"
 #include "tink/util/fake_kms_client.h"
+#include "tink/util/status.h"
 #include "tink/util/test_matchers.h"
 #include "proto/aes_ctr.pb.h"
 #include "proto/aes_ctr_hmac_aead.pb.h"

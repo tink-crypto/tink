@@ -21,6 +21,7 @@
 #include <utility>
 
 #include "absl/status/status.h"
+#include "absl/strings/cord.h"
 #include "tink/aead/cord_aead.h"
 #include "tink/crypto_format.h"
 #include "tink/primitive_set.h"

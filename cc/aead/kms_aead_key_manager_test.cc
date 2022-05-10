@@ -16,12 +16,15 @@
 
 #include "tink/aead/kms_aead_key_manager.h"
 
-#include <memory>
+#include <stdlib.h>
 
+#include <memory>
+#include <string>
+
+#include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include "absl/memory/memory.h"
 #include "absl/status/status.h"
-#include "absl/strings/match.h"
-#include "absl/strings/str_cat.h"
 #include "tink/aead.h"
 #include "tink/kms_client.h"
 #include "tink/kms_clients.h"
@@ -31,6 +34,7 @@
 #include "tink/util/test_matchers.h"
 #include "tink/util/test_util.h"
 #include "proto/kms_aead.pb.h"
+#include "proto/tink.pb.h"
 
 namespace crypto {
 namespace tink {

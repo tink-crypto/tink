@@ -16,17 +16,22 @@
 
 #include "tink/aead/aes_eax_key_manager.h"
 
+#include <stdint.h>
+
 #include <memory>
+#include <string>
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "tink/aead.h"
 #include "tink/subtle/aead_test_util.h"
+#include "tink/subtle/aes_eax_boringssl.h"
 #include "tink/util/secret_data.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "tink/util/test_matchers.h"
 #include "proto/aes_eax.pb.h"
+#include "proto/tink.pb.h"
 
 namespace crypto {
 namespace tink {
