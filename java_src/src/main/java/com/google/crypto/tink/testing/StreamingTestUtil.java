@@ -297,7 +297,7 @@ public final class StreamingTestUtil {
     }
 
     @Override
-    public synchronized int read(byte[] b, int off, int len){
+    public synchronized int read(byte[] b, int off, int len) {
       return super.read(b, off, min(len, maxChunkSize));
     }
   }
@@ -944,7 +944,7 @@ public final class StreamingTestUtil {
     }
 
     // Modify associatedData
-    // When the additional data is modified then any attempt to read plaintext must fail.
+    // When the associated data is modified then any attempt to read plaintext must fail.
     for (int pos = 0; pos < associatedData.length; pos++) {
       byte[] modifiedAd = Arrays.copyOf(associatedData, associatedData.length);
       modifiedAd[pos] ^= (byte) 1;
@@ -1056,7 +1056,7 @@ public final class StreamingTestUtil {
     }
 
     // Modify associatedData
-    // When the additional data is modified then any attempt to read plaintext must fail.
+    // When the associated data is modified then any attempt to read plaintext must fail.
     for (int pos = 0; pos < associatedData.length; pos++) {
       byte[] modifiedAad = Arrays.copyOf(associatedData, associatedData.length);
       modifiedAad[pos] ^= (byte) 1;
