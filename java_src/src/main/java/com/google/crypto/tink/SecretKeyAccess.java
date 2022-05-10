@@ -62,6 +62,8 @@ public final class SecretKeyAccess {
   @CanIgnoreReturnValue
   public static SecretKeyAccess requireAccess(Optional<SecretKeyAccess> in)
       throws GeneralSecurityException {
+    // Using in.orElseThrow currently fails to compile on some android versions with
+    // error: unreported exception Throwable; must be caught or declared to be thrown
     if (!in.isPresent()) {
       throw new GeneralSecurityException("SecretKeyAccess is required");
     }
