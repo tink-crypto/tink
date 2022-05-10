@@ -51,11 +51,11 @@ TEST(AesEaxBoringSslTest, TestBasic) {
   EXPECT_TRUE(res.ok()) << res.status();
   auto cipher = std::move(res.value());
   std::string message = "Some data to encrypt.";
-  std::string aad = "Some data to authenticate.";
-  auto ct = cipher->Encrypt(message, aad);
+  std::string associated_data = "Some data to authenticate.";
+  auto ct = cipher->Encrypt(message, associated_data);
   EXPECT_TRUE(ct.ok()) << ct.status();
   EXPECT_EQ(ct.value().size(), message.size() + nonce_size + 16);
-  auto pt = cipher->Decrypt(ct.value(), aad);
+  auto pt = cipher->Decrypt(ct.value(), associated_data);
   EXPECT_TRUE(pt.ok()) << pt.status();
   EXPECT_EQ(pt.value(), message);
 }
@@ -73,17 +73,17 @@ TEST(AesEaxBoringSslTest, TestMessageSize) {
   auto cipher = std::move(res.value());
   for (size_t size = 0; size < 260; size++) {
     std::string message(size, 'x');
-    std::string aad = "";
-    auto ct = cipher->Encrypt(message, aad);
+    std::string associated_data = "";
+    auto ct = cipher->Encrypt(message, associated_data);
     EXPECT_TRUE(ct.ok()) << ct.status();
     EXPECT_EQ(ct.value().size(), message.size() + nonce_size + 16);
-    auto pt = cipher->Decrypt(ct.value(), aad);
+    auto pt = cipher->Decrypt(ct.value(), associated_data);
     EXPECT_TRUE(pt.ok()) << pt.status();
     EXPECT_EQ(pt.value(), message);
   }
 }
 
-TEST(AesEaxBoringSslTest, TestAadSize) {
+TEST(AesEaxBoringSslTest, TestAssociatedDataSize) {
   if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
@@ -96,11 +96,11 @@ TEST(AesEaxBoringSslTest, TestAadSize) {
   auto cipher = std::move(res.value());
   for (size_t size = 0; size < 260; size++) {
     std::string message("Some message");
-    std::string aad(size, 'x');
-    auto ct = cipher->Encrypt(message, aad);
+    std::string associated_data(size, 'x');
+    auto ct = cipher->Encrypt(message, associated_data);
     EXPECT_TRUE(ct.ok()) << ct.status();
     EXPECT_EQ(ct.value().size(), message.size() + nonce_size + 16);
-    auto pt = cipher->Decrypt(ct.value(), aad);
+    auto pt = cipher->Decrypt(ct.value(), associated_data);
     EXPECT_TRUE(pt.ok()) << pt.status();
     EXPECT_EQ(pt.value(), message);
   }
@@ -118,11 +118,11 @@ TEST(AesEaxBoringSslTest, TestLongNonce) {
   EXPECT_TRUE(res.ok()) << res.status();
   auto cipher = std::move(res.value());
   std::string message = "Some data to encrypt.";
-  std::string aad = "Some data to authenticate.";
-  auto ct = cipher->Encrypt(message, aad);
+  std::string associated_data = "Some associated data.";
+  auto ct = cipher->Encrypt(message, associated_data);
   EXPECT_TRUE(ct.ok()) << ct.status();
   EXPECT_EQ(ct.value().size(), message.size() + nonce_size + 16);
-  auto pt = cipher->Decrypt(ct.value(), aad);
+  auto pt = cipher->Decrypt(ct.value(), associated_data);
   EXPECT_TRUE(pt.ok()) << pt.status();
   EXPECT_EQ(pt.value(), message);
 }
@@ -137,26 +137,26 @@ TEST(AesEaxBoringSslTest, TestModification) {
       test::HexDecodeOrDie("000102030405060708090a0b0c0d0e0f"));
   auto cipher = std::move(AesEaxBoringSsl::New(key, nonce_size).value());
   std::string message = "Some data to encrypt.";
-  std::string aad = "Some data to authenticate.";
-  std::string ct = cipher->Encrypt(message, aad).value();
-  EXPECT_TRUE(cipher->Decrypt(ct, aad).ok());
+  std::string associated_data = "Some data to authenticate.";
+  std::string ct = cipher->Encrypt(message, associated_data).value();
+  EXPECT_TRUE(cipher->Decrypt(ct, associated_data).ok());
   // Modify the ciphertext
   for (size_t i = 0; i < ct.size() * 8; i++) {
     std::string modified_ct = ct;
     modified_ct[i / 8] ^= 1 << (i % 8);
-    EXPECT_FALSE(cipher->Decrypt(modified_ct, aad).ok()) << i;
+    EXPECT_FALSE(cipher->Decrypt(modified_ct, associated_data).ok()) << i;
   }
   // Modify the additional data
-  for (size_t i = 0; i < aad.size() * 8; i++) {
-    std::string modified_aad = aad;
-    modified_aad[i / 8] ^= 1 << (i % 8);
-    auto decrypted = cipher->Decrypt(ct, modified_aad);
+  for (size_t i = 0; i < associated_data.size() * 8; i++) {
+    std::string modified_associated_data = associated_data;
+    modified_associated_data[i / 8] ^= 1 << (i % 8);
+    auto decrypted = cipher->Decrypt(ct, modified_associated_data);
     EXPECT_FALSE(decrypted.ok()) << i << " pt:" << decrypted.value();
   }
   // Truncate the ciphertext
   for (size_t i = 0; i < ct.size(); i++) {
     std::string truncated_ct(ct, 0, i);
-    EXPECT_FALSE(cipher->Decrypt(truncated_ct, aad).ok()) << i;
+    EXPECT_FALSE(cipher->Decrypt(truncated_ct, associated_data).ok()) << i;
   }
 }
 
@@ -279,12 +279,12 @@ bool WycheproofTest(const rapidjson::Document &root) {
       std::string iv = WycheproofUtil::GetBytes(test["iv"]);
       std::string msg = WycheproofUtil::GetBytes(test["msg"]);
       std::string ct = WycheproofUtil::GetBytes(test["ct"]);
-      std::string aad = WycheproofUtil::GetBytes(test["aad"]);
+      std::string associated_data = WycheproofUtil::GetBytes(test["aad"]);
       std::string tag = WycheproofUtil::GetBytes(test["tag"]);
       std::string id = absl::StrCat(test["tcId"].GetInt());
       std::string expected = test["result"].GetString();
       auto cipher = std::move(AesEaxBoringSsl::New(key, iv_size / 8).value());
-      auto result = cipher->Decrypt(iv + ct + tag, aad);
+      auto result = cipher->Decrypt(iv + ct + tag, associated_data);
       bool success = result.ok();
       if (success) {
         std::string decrypted = result.value();

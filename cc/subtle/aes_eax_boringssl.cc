@@ -228,18 +228,18 @@ util::Status AesEaxBoringSsl::CtrCrypt(const Block& N, absl::string_view in,
 }
 
 crypto::tink::util::StatusOr<std::string> AesEaxBoringSsl::Encrypt(
-    absl::string_view plaintext, absl::string_view additional_data) const {
-  // BoringSSL expects a non-null pointer for plaintext and additional_data,
+    absl::string_view plaintext, absl::string_view associated_data) const {
+  // BoringSSL expects a non-null pointer for plaintext and associated_data,
   // regardless of whether the size is 0.
   plaintext = internal::EnsureStringNonNull(plaintext);
-  additional_data = internal::EnsureStringNonNull(additional_data);
+  associated_data = internal::EnsureStringNonNull(associated_data);
 
   size_t ciphertext_size = plaintext.size() + nonce_size_ + kTagSize;
   std::string ciphertext;
   ResizeStringUninitialized(&ciphertext, ciphertext_size);
   const std::string nonce = Random::GetRandomBytes(nonce_size_);
   const Block N = Omac(nonce, 0);
-  const Block H = Omac(additional_data, 1);
+  const Block H = Omac(associated_data, 1);
   uint8_t* ct_start = reinterpret_cast<uint8_t*>(&ciphertext[nonce_size_]);
   util::Status res =
       CtrCrypt(N, plaintext, absl::MakeSpan(ciphertext).subspan(nonce_size_));
@@ -255,10 +255,10 @@ crypto::tink::util::StatusOr<std::string> AesEaxBoringSsl::Encrypt(
 }
 
 crypto::tink::util::StatusOr<std::string> AesEaxBoringSsl::Decrypt(
-    absl::string_view ciphertext, absl::string_view additional_data) const {
-  // BoringSSL expects a non-null pointer for additional_data,
+    absl::string_view ciphertext, absl::string_view associated_data) const {
+  // BoringSSL expects a non-null pointer for associated_data,
   // regardless of whether the size is 0.
-  additional_data = internal::EnsureStringNonNull(additional_data);
+  associated_data = internal::EnsureStringNonNull(associated_data);
 
   size_t ct_size = ciphertext.size();
   if (ct_size < nonce_size_ + kTagSize) {
@@ -270,7 +270,7 @@ crypto::tink::util::StatusOr<std::string> AesEaxBoringSsl::Decrypt(
   absl::string_view encrypted = ciphertext.substr(nonce_size_, out_size);
   absl::string_view tag = ciphertext.substr(ct_size - kTagSize, kTagSize);
   const Block N = Omac(nonce, 0);
-  const Block H = Omac(additional_data, 1);
+  const Block H = Omac(associated_data, 1);
   Block mac = Omac(encrypted, 2);
   XorBlock(N.data(), &mac);
   XorBlock(H.data(), &mac);
