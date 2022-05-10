@@ -38,3 +38,46 @@ sh_test(
     ],
     data = [":hybrid_encryption_cli"],
 )
+
+filegroup(
+    name = "hybrid_test_keyset",
+    srcs = [
+        "hybrid_test_private_keyset.json",
+        "hybrid_test_public_keyset.json",
+    ],
+)
+
+cc_binary(
+    name = "hybrid_cli",
+    srcs = ["hybrid_cli.cc"],
+    data = [":hybrid_test_keyset"],
+    deps = [
+        "@com_google_absl//absl/flags:flag",
+        "@com_google_absl//absl/flags:parse",
+        "@com_google_absl//absl/memory",
+        "@com_google_absl//absl/status",
+        "@com_google_absl//absl/strings",
+        "@tink_cc//:cleartext_keyset_handle",
+        "@tink_cc//:hybrid_decrypt",
+        "@tink_cc//:hybrid_encrypt",
+        "@tink_cc//:json_keyset_reader",
+        "@tink_cc//:keyset_handle",
+        "@tink_cc//:keyset_reader",
+        "@tink_cc//config:tink_config",
+        "@tink_cc//hybrid:hpke_config",
+        "@tink_cc//util:status",    ],
+)
+
+sh_test(
+    name = "hybrid_cli_test",
+    size = "small",
+    srcs = ["hybrid_cli_test.sh"],
+    args = [
+        "$(rootpath :hybrid_cli)",
+        "$(rootpaths :hybrid_test_keyset)",
+    ],
+    data = [
+        ":hybrid_cli",
+        ":hybrid_test_keyset",
+    ],
+)
