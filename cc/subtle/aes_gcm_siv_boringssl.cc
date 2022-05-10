@@ -56,7 +56,7 @@ util::StatusOr<std::unique_ptr<Aead>> AesGcmSivBoringSsl::New(
 }
 
 util::StatusOr<std::string> AesGcmSivBoringSsl::Encrypt(
-    absl::string_view plaintext, absl::string_view additional_data) const {
+    absl::string_view plaintext, absl::string_view associated_data) const {
   const int64_t kCiphertextSize =
       kIvSizeInBytes + aead_->CiphertextSize(plaintext.size());
   std::string ct;
@@ -69,7 +69,7 @@ util::StatusOr<std::string> AesGcmSivBoringSsl::Encrypt(
   auto nonce = absl::string_view(ct).substr(0, kIvSizeInBytes);
   auto ciphertext_and_tag_buffer = absl::MakeSpan(ct).subspan(kIvSizeInBytes);
   util::StatusOr<int64_t> written_bytes = aead_->Encrypt(
-      plaintext, additional_data, nonce, ciphertext_and_tag_buffer);
+      plaintext, associated_data, nonce, ciphertext_and_tag_buffer);
   if (!written_bytes.ok()) {
     return written_bytes.status();
   }
@@ -77,7 +77,7 @@ util::StatusOr<std::string> AesGcmSivBoringSsl::Encrypt(
 }
 
 util::StatusOr<std::string> AesGcmSivBoringSsl::Decrypt(
-    absl::string_view ciphertext, absl::string_view additional_data) const {
+    absl::string_view ciphertext, absl::string_view associated_data) const {
   if (ciphertext.size() < kIvSizeInBytes + kTagSizeInBytes) {
     return util::Status(absl::StatusCode::kInvalidArgument,
                         absl::StrCat("Ciphertext too short; expected at least ",
@@ -91,7 +91,7 @@ util::StatusOr<std::string> AesGcmSivBoringSsl::Decrypt(
   auto nonce = ciphertext.substr(0, kIvSizeInBytes);
   auto encrypted = ciphertext.substr(kIvSizeInBytes);
   util::StatusOr<int64_t> written_bytes = aead_->Decrypt(
-      encrypted, additional_data, nonce, absl::MakeSpan(plaintext));
+      encrypted, associated_data, nonce, absl::MakeSpan(plaintext));
   if (!written_bytes.ok()) {
     return written_bytes.status();
   }

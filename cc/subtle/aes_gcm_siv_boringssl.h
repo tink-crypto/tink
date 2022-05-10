@@ -41,7 +41,7 @@ namespace subtle {
 // https://datatracker.ietf.org/doc/draft-irtf-cfrg-gcmsiv/
 //
 // This encryption mode is intended for authenticated encryption with
-// additional authenticated data. A major security problem with AES-GCM is
+// associated data. A major security problem with AES-GCM is
 // that reusing the same nonce twice leaks the authentication key.
 // AES-GCM-SIV on the other hand has been designed to avoid this vulnerability.
 //
@@ -56,11 +56,11 @@ class AesGcmSivBoringSsl : public Aead {
 
   crypto::tink::util::StatusOr<std::string> Encrypt(
       absl::string_view plaintext,
-      absl::string_view additional_data) const override;
+      absl::string_view associated_data) const override;
 
   crypto::tink::util::StatusOr<std::string> Decrypt(
       absl::string_view ciphertext,
-      absl::string_view additional_data) const override;
+      absl::string_view associated_data) const override;
 
   static constexpr crypto::tink::internal::FipsCompatibility kFipsStatus =
       crypto::tink::internal::FipsCompatibility::kNotFips;
