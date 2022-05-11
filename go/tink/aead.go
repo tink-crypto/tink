@@ -17,18 +17,18 @@
 package tink
 
 /*
-AEAD is the interface for authenticated encryption with additional authenticated data.
+AEAD is the interface for authenticated encryption with associated data.
 Implementations of this interface are secure against adaptive chosen ciphertext attacks.
-Encryption with additional data ensures authenticity and integrity of that data, but not
+Encryption with associated data ensures authenticity and integrity of that data, but not
 its secrecy. (see RFC 5116, https://tools.ietf.org/html/rfc5116)
 */
 type AEAD interface {
-	// Encrypt encrypts plaintext with associatedData as associated authenticated data.
+	// Encrypt encrypts plaintext with associatedData as associated data.
 	// The resulting ciphertext allows for checking authenticity and integrity of associated data
 	// associatedData, but does not guarantee its secrecy.
 	Encrypt(plaintext, associatedData []byte) ([]byte, error)
 
-	// Decrypt decrypts ciphertext with associatedData as associated authenticated data.
+	// Decrypt decrypts ciphertext with associatedData as associated data.
 	// The decryption verifies the authenticity and integrity of the associated data, but there are
 	// no guarantees with respect to secrecy of that data.
 	Decrypt(ciphertext, associatedData []byte) ([]byte, error)

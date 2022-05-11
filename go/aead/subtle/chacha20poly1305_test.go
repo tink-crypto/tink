@@ -160,7 +160,7 @@ func TestChaCha20Poly1305ModifyCiphertext(t *testing.T) {
 			alteredIndex := rand.Intn(len(ad))
 			ad[alteredIndex] ^= 0x80
 			if _, err := ca.Decrypt(ct, ad); err == nil {
-				t.Errorf("#%d: Decrypt was successful after altering additional data", i)
+				t.Errorf("#%d: Decrypt was successful after altering associated data", i)
 				continue
 			}
 			ad[alteredIndex] ^= 0x80
