@@ -28,7 +28,6 @@
 #include "tink/aead/internal/wycheproof_aead.h"
 #include "tink/config/tink_fips.h"
 #include "tink/util/secret_data.h"
-#include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "tink/util/test_matchers.h"
 
@@ -38,7 +37,7 @@ namespace subtle {
 namespace {
 
 constexpr absl::string_view kMessage = "Some data to encrypt.";
-constexpr absl::string_view kAad = "Some data to authenticate.";
+constexpr absl::string_view kAssociatedData = "Some associated data.";
 constexpr absl::string_view kKey128 = "000102030405060708090a0b0c0d0e0f";
 constexpr absl::string_view kKey256 =
     "000102030405060708090a0b0c0d0e0f000102030405060708090a0b0c0d0e0f";
@@ -70,53 +69,60 @@ class AesGcmBoringSslTest : public Test {
 };
 
 TEST_F(AesGcmBoringSslTest, BasicEncryptDecrypt) {
-  util::StatusOr<std::string> ciphertext = cipher_->Encrypt(kMessage, kAad);
+  util::StatusOr<std::string> ciphertext =
+      cipher_->Encrypt(kMessage, kAssociatedData);
   ASSERT_THAT(ciphertext.status(), IsOk());
   EXPECT_EQ(ciphertext->size(), kMessage.size() + 12 + 16);
-  util::StatusOr<std::string> plaintext = cipher_->Decrypt(*ciphertext, kAad);
+  util::StatusOr<std::string> plaintext =
+      cipher_->Decrypt(*ciphertext, kAssociatedData);
   ASSERT_THAT(plaintext.status(), IsOk());
   EXPECT_EQ(*plaintext, kMessage);
 }
 
-TEST_F(AesGcmBoringSslTest, ModifyMessageAndAad) {
-  util::StatusOr<std::string> ciphertext = cipher_->Encrypt(kMessage, kAad);
+TEST_F(AesGcmBoringSslTest, ModifyMessageAndAssociatedData) {
+  util::StatusOr<std::string> ciphertext =
+      cipher_->Encrypt(kMessage, kAssociatedData);
   ASSERT_THAT(ciphertext.status(), IsOk());
-  ASSERT_THAT(cipher_->Decrypt(*ciphertext, kAad).status(), IsOk());
+  ASSERT_THAT(cipher_->Decrypt(*ciphertext, kAssociatedData).status(), IsOk());
   // Modify the ciphertext.
   for (size_t i = 0; i < ciphertext->size() * 8; i++) {
     std::string modified_ct = *ciphertext;
     modified_ct[i / 8] ^= 1 << (i % 8);
-    EXPECT_THAT(cipher_->Decrypt(modified_ct, kAad).status(), Not(IsOk())) << i;
+    EXPECT_THAT(cipher_->Decrypt(modified_ct, kAssociatedData).status(),
+                Not(IsOk()))
+        << i;
   }
-  // Modify the additional data.
-  for (size_t i = 0; i < kAad.size() * 8; i++) {
-    std::string modified_aad = std::string(kAad);
-    modified_aad[i / 8] ^= 1 << (i % 8);
-    auto decrypted = cipher_->Decrypt(*ciphertext, modified_aad);
+  // Modify the associated  data.
+  for (size_t i = 0; i < kAssociatedData.size() * 8; i++) {
+    std::string modified_ad = std::string(kAssociatedData);
+    modified_ad[i / 8] ^= 1 << (i % 8);
+    auto decrypted = cipher_->Decrypt(*ciphertext, modified_ad);
     EXPECT_THAT(decrypted.status(), Not(IsOk())) << i << " pt:" << *decrypted;
   }
   // Truncate the ciphertext.
   for (size_t i = 0; i < ciphertext->size(); i++) {
     std::string truncated_ct(*ciphertext, 0, i);
-    EXPECT_THAT(cipher_->Decrypt(truncated_ct, kAad).status(), Not(IsOk()))
+    EXPECT_THAT(cipher_->Decrypt(truncated_ct, kAssociatedData).status(),
+                Not(IsOk()))
         << i;
   }
 }
 
-void TestDecryptWithEmptyAad(Aead* cipher, absl::string_view ct,
+void TestDecryptWithEmptyAssociatedData(Aead* cipher, absl::string_view ct,
                              absl::string_view message) {
-  {  // AAD is a null string_view.
-    const absl::string_view aad;
-    util::StatusOr<std::string> plaintext = cipher->Decrypt(ct, aad);
+  {  // associated_data is a null string_view.
+    const absl::string_view associated_data;
+    util::StatusOr<std::string> plaintext =
+        cipher->Decrypt(ct, associated_data);
     EXPECT_THAT(plaintext.status(), IsOk());
     EXPECT_EQ(message, *plaintext);
   }
-  {  // AAD is a an empty string.
+  {  // associated_data is a an empty string.
     util::StatusOr<std::string> plaintext = cipher->Decrypt(ct, "");
     EXPECT_THAT(plaintext.status(), IsOk());
     EXPECT_EQ(message, *plaintext);
   }
-  {  // AAD is a default constructed string_view.
+  {  // associated_data is a default constructed string_view.
     util::StatusOr<std::string> plaintext =
         cipher->Decrypt(ct, absl::string_view());
     EXPECT_THAT(plaintext.status(), IsOk());
@@ -124,69 +130,73 @@ void TestDecryptWithEmptyAad(Aead* cipher, absl::string_view ct,
   }
 }
 
-TEST_F(AesGcmBoringSslTest, AadEmptyVersusNullStringView) {
+TEST_F(AesGcmBoringSslTest, AssociatedDataEmptyVersusNullStringView) {
   {
-    // AAD is a null string_view.
-    const absl::string_view aad;
-    auto ciphertext = cipher_->Encrypt(kMessage, aad);
+    // associated_data is a null string_view.
+    const absl::string_view associated_data;
+    auto ciphertext = cipher_->Encrypt(kMessage, associated_data);
     EXPECT_THAT(ciphertext.status(), IsOk());
-    TestDecryptWithEmptyAad(cipher_.get(), *ciphertext, kMessage);
+    TestDecryptWithEmptyAssociatedData(cipher_.get(), *ciphertext, kMessage);
   }
-  {  // AAD is a an empty string.
+  {  // associated_data is a an empty string.
     auto ciphertext = cipher_->Encrypt(kMessage, "");
     EXPECT_THAT(ciphertext.status(), IsOk());
-    TestDecryptWithEmptyAad(cipher_.get(), *ciphertext, kMessage);
+    TestDecryptWithEmptyAssociatedData(cipher_.get(), *ciphertext, kMessage);
   }
-  {  // AAD is a default constructed string_view.
+  {  // associated_data is a default constructed string_view.
     auto ciphertext = cipher_->Encrypt(kMessage, absl::string_view());
     EXPECT_THAT(ciphertext.status(), IsOk());
-    TestDecryptWithEmptyAad(cipher_.get(), *ciphertext, kMessage);
+    TestDecryptWithEmptyAssociatedData(cipher_.get(), *ciphertext, kMessage);
   }
 }
 
 TEST_F(AesGcmBoringSslTest, MessageEmptyVersusNullStringView) {
   {  // Message is a null string_view.
     const absl::string_view message;
-    util::StatusOr<std::string> ciphertext = cipher_->Encrypt(message, kAad);
+    util::StatusOr<std::string> ciphertext =
+        cipher_->Encrypt(message, kAssociatedData);
     ASSERT_THAT(ciphertext.status(), IsOk());
-    auto plaintext = cipher_->Decrypt(*ciphertext, kAad);
+    auto plaintext = cipher_->Decrypt(*ciphertext, kAssociatedData);
     ASSERT_THAT(plaintext.status(), IsOk());
     EXPECT_EQ(*plaintext, "");
   }
   {  // Message is an empty string.
     const std::string message = "";
-    util::StatusOr<std::string> ciphertext = cipher_->Encrypt(message, kAad);
+    util::StatusOr<std::string> ciphertext =
+        cipher_->Encrypt(message, kAssociatedData);
     ASSERT_THAT(ciphertext.status(), IsOk());
-    auto plaintext = cipher_->Decrypt(*ciphertext, kAad);
+    auto plaintext = cipher_->Decrypt(*ciphertext, kAssociatedData);
     ASSERT_THAT(plaintext.status(), IsOk());
     EXPECT_EQ(*plaintext, "");
   }
   {  // Message is a default constructed string_view.
     util::StatusOr<std::string> ciphertext =
-        cipher_->Encrypt(absl::string_view(), kAad);
+        cipher_->Encrypt(absl::string_view(), kAssociatedData);
     ASSERT_THAT(ciphertext.status(), IsOk());
-    auto plaintext = cipher_->Decrypt(*ciphertext, kAad);
+    auto plaintext = cipher_->Decrypt(*ciphertext, kAssociatedData);
     ASSERT_THAT(plaintext.status(), IsOk());
     EXPECT_EQ(*plaintext, "");
   }
 }
 
-TEST_F(AesGcmBoringSslTest, BothMessageAndAadEmpty) {
+TEST_F(AesGcmBoringSslTest, BothMessageAndAssociatedDataEmpty) {
   {  // Both are null string_view.
     const absl::string_view message;
-    const absl::string_view aad;
-    util::StatusOr<std::string> ciphertext = cipher_->Encrypt(message, aad);
+    const absl::string_view associated_data;
+    util::StatusOr<std::string> ciphertext =
+        cipher_->Encrypt(message, associated_data);
     ASSERT_THAT(ciphertext.status(), IsOk());
-    auto plaintext = cipher_->Decrypt(*ciphertext, aad);
+    auto plaintext = cipher_->Decrypt(*ciphertext, associated_data);
     ASSERT_THAT(plaintext.status(), IsOk());
     EXPECT_EQ(*plaintext, "");
   }
   {  // Both are empty string.
     const std::string message = "";
-    const std::string aad = "";
-    util::StatusOr<std::string> ciphertext = cipher_->Encrypt(message, aad);
+    const std::string associated_data = "";
+    util::StatusOr<std::string> ciphertext =
+        cipher_->Encrypt(message, associated_data);
     ASSERT_THAT(ciphertext.status(), IsOk());
-    auto plaintext = cipher_->Decrypt(*ciphertext, aad);
+    auto plaintext = cipher_->Decrypt(*ciphertext, associated_data);
     ASSERT_THAT(plaintext.status(), IsOk());
     EXPECT_EQ(*plaintext, "");
   }
