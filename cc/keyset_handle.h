@@ -78,15 +78,15 @@ class KeysetHandle {
               const absl::flat_hash_map<std::string, std::string>&
                   monitoring_annotations = {});
 
-  // Encrypts the underlying keyset with the provided |master_key_aead|
-  // and writes the resulting EncryptedKeyset to the given |writer|,
+  // Encrypts the underlying keyset with the provided `master_key_aead`
+  // and writes the resulting EncryptedKeyset to the given `writer`,
   // which must be non-null.
   crypto::tink::util::Status Write(KeysetWriter* writer,
                                    const Aead& master_key_aead) const;
 
-  // Encrypts the underlying keyset with the provided |master_key_aead|, using
-  // |associated_data|. and writes the resulting EncryptedKeyset to the given
-  // |writer|, which must be non-null.
+  // Encrypts the underlying keyset with the provided `master_key_aead`, using
+  // `associated_data`. and writes the resulting EncryptedKeyset to the given
+  // `writer`, which must be non-null.
   crypto::tink::util::Status WriteWithAssociatedData(
       KeysetWriter* writer, const Aead& master_key_aead,
       absl::string_view associated_data) const;
@@ -95,11 +95,11 @@ class KeysetHandle {
   // key material, thus can be used for logging or monitoring.
   google::crypto::tink::KeysetInfo GetKeysetInfo() const;
 
-  // Writes the underlying keyset to |writer| only if the keyset does not
+  // Writes the underlying keyset to `writer` only if the keyset does not
   // contain any secret key material.
   // This can be used to persist public keysets or envelope encryption keysets.
   // Users that need to persist cleartext keysets can use
-  // |CleartextKeysetHandle|.
+  // `CleartextKeysetHandle`.
   crypto::tink::util::Status WriteNoSecret(KeysetWriter* writer) const;
 
   // Returns a new KeysetHandle that contains public keys corresponding
