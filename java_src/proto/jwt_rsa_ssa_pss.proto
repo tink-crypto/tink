@@ -22,11 +22,12 @@ option java_package = "com.google.crypto.tink.proto";
 option java_multiple_files = true;
 option go_package = "github.com/google/tink/proto/jwt_rsa_ssa_pss_go_proto";
 
+// See https://datatracker.ietf.org/doc/html/rfc7518#section-3.5
 enum JwtRsaSsaPssAlgorithm {
   PS_UNKNOWN = 0;
-  PS256 = 1;
-  PS384 = 2;
-  PS512 = 3;
+  PS256 = 1;  // RSASSA-PSS using SHA-256 and MGF1 with SHA-256
+  PS384 = 2;  // RSASSA-PSS using SHA-384 and MGF1 with SHA-384
+  PS512 = 3;  // RSASSA-PSS using SHA-512 and MGF1 with SHA-512
 }
 
 // key_type: type.googleapis.com/google.crypto.tink.JwtRsaSsaPssPublicKey
@@ -34,10 +35,10 @@ message JwtRsaSsaPssPublicKey {
   uint32 version = 1;
   JwtRsaSsaPssAlgorithm algorithm = 2;
   // Modulus.
-  // Unsigned big integer in bigendian representation.
+  // Unsigned big integer in big-endian representation.
   bytes n = 3;
   // Public exponent.
-  // Unsigned big integer in bigendian representation.
+  // Unsigned big integer in big-endian representation.
   bytes e = 4;
 
   // Optional, custom kid header value to be used with "RAW" keys.
@@ -53,24 +54,24 @@ message JwtRsaSsaPssPrivateKey {
   uint32 version = 1;
   JwtRsaSsaPssPublicKey public_key = 2;
   // Private exponent.
-  // Unsigned big integer in bigendian representation.
+  // Unsigned big integer in big-endian representation.
   bytes d = 3;
 
   // The following parameters are used to optimize RSA signature computation.
   // The prime factor p of n.
-  // Unsigned big integer in bigendian representation.
+  // Unsigned big integer in big-endian representation.
   bytes p = 4;
   // The prime factor q of n.
-  // Unsigned big integer in bigendian representation.
+  // Unsigned big integer in big-endian representation.
   bytes q = 5;
   // d mod (p - 1).
-  // Unsigned big integer in bigendian representation.
+  // Unsigned big integer in big-endian representation.
   bytes dp = 6;
   // d mod (q - 1).
-  // Unsigned big integer in bigendian representation.
+  // Unsigned big integer in big-endian representation.
   bytes dq = 7;
   // Chinese Remainder Theorem coefficient q^(-1) mod p.
-  // Unsigned big integer in bigendian representation.
+  // Unsigned big integer in big-endian representation.
   bytes crt = 8;
 }
 
