@@ -182,7 +182,7 @@ android_library(
     srcs = ["SeekableByteChannelDecrypter.java"],
     deps = [
         "//src/main/java/com/google/crypto/tink:primitive_set-android",
-        "//src/main/java/com/google/crypto/tink:streaming_aead",
+        "//src/main/java/com/google/crypto/tink:streaming_aead-android",
         "@maven//:com_google_code_findbugs_jsr305",
     ],
 )
@@ -192,7 +192,7 @@ android_library(
     srcs = ["InputStreamDecrypter.java"],
     deps = [
         "//src/main/java/com/google/crypto/tink:primitive_set-android",
-        "//src/main/java/com/google/crypto/tink:streaming_aead",
+        "//src/main/java/com/google/crypto/tink:streaming_aead-android",
         "@maven//:com_google_code_findbugs_jsr305",
     ],
 )
@@ -205,7 +205,7 @@ android_library(
         ":readable_byte_channel_decrypter-android",
         ":seekable_byte_channel_decrypter-android",
         "//src/main/java/com/google/crypto/tink:primitive_set-android",
-        "//src/main/java/com/google/crypto/tink:streaming_aead",
+        "//src/main/java/com/google/crypto/tink:streaming_aead-android",
     ],
 )
 
@@ -216,7 +216,7 @@ android_library(
         ":streaming_aead_wrapper-android",
         "//src/main/java/com/google/crypto/tink:registry-android",
         "//src/main/java/com/google/crypto/tink:registry_cluster-android",
-        "//src/main/java/com/google/crypto/tink:streaming_aead",
+        "//src/main/java/com/google/crypto/tink:streaming_aead-android",
     ],
 )
 
@@ -230,7 +230,7 @@ android_library(
         "//proto:tink_java_proto_lite",
         "//src/main/java/com/google/crypto/tink:key_template-android",
         "//src/main/java/com/google/crypto/tink:registry-android",
-        "//src/main/java/com/google/crypto/tink:streaming_aead",
+        "//src/main/java/com/google/crypto/tink:streaming_aead-android",
         "//src/main/java/com/google/crypto/tink/internal:key_type_manager-android",
         "//src/main/java/com/google/crypto/tink/internal:primitive_factory-android",
         "//src/main/java/com/google/crypto/tink/subtle:aes_gcm_hkdf_streaming-android",
@@ -251,7 +251,7 @@ android_library(
         "//proto:tink_java_proto_lite",
         "//src/main/java/com/google/crypto/tink:key_template-android",
         "//src/main/java/com/google/crypto/tink:registry-android",
-        "//src/main/java/com/google/crypto/tink:streaming_aead",
+        "//src/main/java/com/google/crypto/tink:streaming_aead-android",
         "//src/main/java/com/google/crypto/tink/internal:key_type_manager-android",
         "//src/main/java/com/google/crypto/tink/internal:primitive_factory-android",
         "//src/main/java/com/google/crypto/tink/subtle:aes_ctr_hmac_streaming-android",
@@ -266,7 +266,7 @@ android_library(
     srcs = ["ReadableByteChannelDecrypter.java"],
     deps = [
         "//src/main/java/com/google/crypto/tink:primitive_set-android",
-        "//src/main/java/com/google/crypto/tink:streaming_aead",
+        "//src/main/java/com/google/crypto/tink:streaming_aead-android",
         "//src/main/java/com/google/crypto/tink/subtle:rewindable_readable_byte_channel-android",
         "@maven//:com_google_code_findbugs_jsr305",
     ],
@@ -280,6 +280,6 @@ android_library(
         "//src/main/java/com/google/crypto/tink:primitive_set-android",
         "//src/main/java/com/google/crypto/tink:primitive_wrapper-android",
         "//src/main/java/com/google/crypto/tink:registry-android",
-        "//src/main/java/com/google/crypto/tink:streaming_aead",
+        "//src/main/java/com/google/crypto/tink:streaming_aead-android",
     ],
 )

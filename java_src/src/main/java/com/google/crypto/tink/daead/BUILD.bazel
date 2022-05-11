@@ -40,7 +40,7 @@ android_library(
     srcs = ["DeterministicAeadFactory.java"],
     deps = [
         ":deterministic_aead_wrapper-android",
-        "//src/main/java/com/google/crypto/tink:deterministic_aead",
+        "//src/main/java/com/google/crypto/tink:deterministic_aead-android",
         "//src/main/java/com/google/crypto/tink:registry-android",
         "//src/main/java/com/google/crypto/tink:registry_cluster-android",
     ],
@@ -86,7 +86,7 @@ android_library(
     srcs = ["DeterministicAeadWrapper.java"],
     deps = [
         "//src/main/java/com/google/crypto/tink:crypto_format-android",
-        "//src/main/java/com/google/crypto/tink:deterministic_aead",
+        "//src/main/java/com/google/crypto/tink:deterministic_aead-android",
         "//src/main/java/com/google/crypto/tink:primitive_set-android",
         "//src/main/java/com/google/crypto/tink:primitive_wrapper-android",
         "//src/main/java/com/google/crypto/tink:registry-android",
@@ -118,7 +118,7 @@ android_library(
     deps = [
         "//proto:aes_siv_java_proto_lite",
         "//proto:tink_java_proto_lite",
-        "//src/main/java/com/google/crypto/tink:deterministic_aead",
+        "//src/main/java/com/google/crypto/tink:deterministic_aead-android",
         "//src/main/java/com/google/crypto/tink:key_template-android",
         "//src/main/java/com/google/crypto/tink:registry-android",
         "//src/main/java/com/google/crypto/tink/internal:key_type_manager-android",

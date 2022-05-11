@@ -546,7 +546,7 @@ android_library(
         "KeysetManager.java",
     ],
     deps = [
-        ":aead",
+        ":aead-android",
         ":key_template-android",
         ":keyset_reader-android",
         ":keyset_writer-android",
@@ -716,4 +716,68 @@ android_library(
         "//src/main/java/com/google/crypto/tink/internal:private_key_type_manager-android",
         "@com_google_protobuf//:protobuf_javalite",
     ],
+)
+
+android_library(
+    name = "aead-android",
+    srcs = ["Aead.java"],
+)
+
+android_library(
+    name = "deterministic_aead-android",
+    srcs = ["DeterministicAead.java"],
+)
+
+android_library(
+    name = "hybrid_decrypt-android",
+    srcs = ["HybridDecrypt.java"],
+)
+
+android_library(
+    name = "hybrid_encrypt-android",
+    srcs = ["HybridEncrypt.java"],
+)
+
+android_library(
+    name = "key_wrap-android",
+    srcs = ["KeyWrap.java"],
+)
+
+android_library(
+    name = "kms_client-android",
+    srcs = ["KmsClient.java"],
+    deps = [":aead-android"],
+)
+
+android_library(
+    name = "kms_clients-android",
+    srcs = ["KmsClients.java"],
+    deps = [":kms_client-android"],
+)
+
+android_library(
+    name = "kms_clients_test_util-android",
+    testonly = 1,
+    srcs = ["KmsClientsTestUtil.java"],
+    deps = [":kms_clients-android"],
+)
+
+android_library(
+    name = "mac-android",
+    srcs = ["Mac.java"],
+)
+
+android_library(
+    name = "public_key_sign-android",
+    srcs = ["PublicKeySign.java"],
+)
+
+android_library(
+    name = "public_key_verify-android",
+    srcs = ["PublicKeyVerify.java"],
+)
+
+android_library(
+    name = "streaming_aead-android",
+    srcs = ["StreamingAead.java"],
 )

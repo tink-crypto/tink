@@ -270,7 +270,6 @@ java_test(
         "//src/main/java/com/google/crypto/tink/subtle:selfkeytests_validators",
         "//src/main/java/com/google/crypto/tink/subtle:subtle_util_cluster",
         "@maven//:junit_junit",
-        "@maven//:pl_pragmatists_JUnitParams",
     ],
 )
 
