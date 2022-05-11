@@ -112,6 +112,12 @@ inline SecretData SecretDataFromStringView(absl::string_view secret) {
   return {secret.begin(), secret.end()};
 }
 
+// The same as SecretUniquePtr, but with value semantics.
+//
+// NOTE: SecretValue<T> will only protect the data which is stored in the
+// memory which a T object takes on the stack. In particular, std::string and
+// std::vector SHOULD NOT be used as arguments of T: they allocate memory
+// on the heap, and hence the data stored in them will NOT be protected.
 template <typename T>
 class SecretValue {
  public:
