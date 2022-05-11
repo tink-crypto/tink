@@ -687,7 +687,7 @@ android_library(
         ":bytes-android",
         ":field25519-android",
         ":hex-android",
-        "//src/main/java/com/google/crypto/tink/annotations:alpha",
+        "//src/main/java/com/google/crypto/tink/annotations:alpha-android",
     ],
 )
 
@@ -844,7 +844,7 @@ android_library(
 android_library(
     name = "field25519-android",
     srcs = ["Field25519.java"],
-    deps = ["//src/main/java/com/google/crypto/tink/annotations:alpha"],
+    deps = ["//src/main/java/com/google/crypto/tink/annotations:alpha-android"],
 )
 
 android_library(
@@ -1074,7 +1074,7 @@ android_library(
         ":curve25519-android",
         ":field25519-android",
         ":random-android",
-        "//src/main/java/com/google/crypto/tink/annotations:alpha",
+        "//src/main/java/com/google/crypto/tink/annotations:alpha-android",
     ],
 )
 

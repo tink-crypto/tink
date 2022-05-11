@@ -65,7 +65,7 @@ android_library(
         ":primitive_factory-android",
         "//proto:tink_java_proto_lite",
         "//src/main/java/com/google/crypto/tink:key_template-android",
-        "//src/main/java/com/google/crypto/tink/annotations:alpha",
+        "//src/main/java/com/google/crypto/tink/annotations:alpha-android",
         "//src/main/java/com/google/crypto/tink/config/internal:tink_fips_util-android",
         "@com_google_protobuf//:protobuf_javalite",
     ],
@@ -88,7 +88,7 @@ android_library(
     deps = [
         ":key_type_manager-android",
         ":primitive_factory-android",
-        "//src/main/java/com/google/crypto/tink/annotations:alpha",
+        "//src/main/java/com/google/crypto/tink/annotations:alpha-android",
         "@com_google_protobuf//:protobuf_javalite",
     ],
 )
