@@ -28,7 +28,6 @@ TINK_MAVEN_ARTIFACTS = [
     "org.ow2.asm:asm:7.0",
     "org.ow2.asm:asm-commons:7.0",
     "org.pantsbuild:jarjar:1.7.2",
-    "pl.pragmatists:JUnitParams:1.1.1",
 ]
 
 def tink_java_deps():
