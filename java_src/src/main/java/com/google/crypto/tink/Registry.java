@@ -30,9 +30,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Logger;
 
 /**
@@ -78,8 +78,8 @@ import java.util.logging.Logger;
 public final class Registry {
   private static final Logger logger = Logger.getLogger(Registry.class.getName());
 
-  private static final ConcurrentMap<String, KeyManagerContainer> keyManagerMap =
-      new ConcurrentHashMap<>(); // typeUrl -> KeyManager mapping
+  private static final AtomicReference<KeyManagerRegistry> keyManagerRegistry =
+      new AtomicReference<>(new KeyManagerRegistry());
 
   private static final ConcurrentMap<String, KeyDeriverContainer> keyDeriverMap =
       new ConcurrentHashMap<>(); // typeUrl -> deriver (created out of KeyTypeManager).
@@ -95,187 +95,6 @@ public final class Registry {
 
   private static final ConcurrentMap<String, KeyTemplate> keyTemplateMap =
       new ConcurrentHashMap<>(); // name -> KeyTemplate mapping
-
-  /**
-   * A container which either is constructed from a {@link KeyTypeManager} or from a {@link
-   * KeyManager}.
-   */
-  private static interface KeyManagerContainer {
-    /**
-     * Returns the KeyManager for the given primitive or throws if the given primitive is not in
-     * supportedPrimitives.
-     */
-    <P> KeyManager<P> getKeyManager(Class<P> primitiveClass) throws GeneralSecurityException;
-
-    /** Returns some KeyManager from the given one. */
-    KeyManager<?> getUntypedKeyManager();
-
-    /**
-     * The Class object corresponding to the actual KeyTypeManager/KeyManager used to build this
-     * object.
-     */
-    Class<?> getImplementingClass();
-
-    /**
-     * The primitives supported by the underlying {@link KeyTypeManager} resp. {@link KeyManager}.
-     */
-    Set<Class<?>> supportedPrimitives();
-
-    /**
-     * The Class object corresponding to the public key manager when this key manager was registered
-     * as first argument with "registerAsymmetricKeyManagers". Null otherwise.
-     */
-    Class<?> publicKeyManagerClassOrNull();
-
-    /**
-     * Parses a key into a corresponding message lite. Only works if the key type has been
-     * registered with a KeyTypeManager, returns null otherwise.
-     *
-     * <p>Can throw exceptions if validation fails or if parsing fails.
-     */
-    MessageLite parseKey(ByteString serializedKey)
-        throws GeneralSecurityException, InvalidProtocolBufferException;
-  }
-
-  private static <P> KeyManagerContainer createContainerFor(KeyManager<P> keyManager) {
-    final KeyManager<P> localKeyManager = keyManager;
-    return new KeyManagerContainer() {
-      @Override
-      public <Q> KeyManager<Q> getKeyManager(Class<Q> primitiveClass)
-          throws GeneralSecurityException {
-        if (!localKeyManager.getPrimitiveClass().equals(primitiveClass)) {
-          throw new InternalError(
-              "This should never be called, as we always first check supportedPrimitives.");
-        }
-        @SuppressWarnings("unchecked") // We checked equality of the primitiveClass objects.
-        KeyManager<Q> result = (KeyManager<Q>) localKeyManager;
-        return result;
-      }
-
-      @Override
-      public KeyManager<?> getUntypedKeyManager() {
-        return localKeyManager;
-      }
-
-      @Override
-      public Class<?> getImplementingClass() {
-        return localKeyManager.getClass();
-      }
-
-      @Override
-      public Set<Class<?>> supportedPrimitives() {
-        return Collections.<Class<?>>singleton(localKeyManager.getPrimitiveClass());
-      }
-
-      @Override
-      public Class<?> publicKeyManagerClassOrNull() {
-        return null;
-      }
-
-      @Override
-      public MessageLite parseKey(ByteString serializedKey)
-          throws GeneralSecurityException, InvalidProtocolBufferException {
-        return null;
-      }
-    };
-  }
-
-  private static <KeyProtoT extends MessageLite> KeyManagerContainer createContainerFor(
-      KeyTypeManager<KeyProtoT> keyManager) {
-    final KeyTypeManager<KeyProtoT> localKeyManager = keyManager;
-    return new KeyManagerContainer() {
-      @Override
-      public <Q> KeyManager<Q> getKeyManager(Class<Q> primitiveClass)
-          throws GeneralSecurityException {
-        try {
-          return new KeyManagerImpl<>(localKeyManager, primitiveClass);
-        } catch (IllegalArgumentException e) {
-          throw new GeneralSecurityException("Primitive type not supported", e);
-        }
-      }
-
-      @Override
-      public KeyManager<?> getUntypedKeyManager() {
-        return new KeyManagerImpl<>(
-            localKeyManager, localKeyManager.firstSupportedPrimitiveClass());
-      }
-
-      @Override
-      public Class<?> getImplementingClass() {
-        return localKeyManager.getClass();
-      }
-
-      @Override
-      public Set<Class<?>> supportedPrimitives() {
-        return localKeyManager.supportedPrimitives();
-      }
-
-      @Override
-      public Class<?> publicKeyManagerClassOrNull() {
-        return null;
-      }
-
-      @Override
-      public MessageLite parseKey(ByteString serializedKey)
-          throws GeneralSecurityException, InvalidProtocolBufferException {
-        KeyProtoT result = localKeyManager.parseKey(serializedKey);
-        localKeyManager.validateKey(result);
-        return result;
-      }
-    };
-  }
-
-  private static <KeyProtoT extends MessageLite, PublicKeyProtoT extends MessageLite>
-      KeyManagerContainer createPrivateKeyContainerFor(
-          final PrivateKeyTypeManager<KeyProtoT, PublicKeyProtoT> privateKeyTypeManager,
-          final KeyTypeManager<PublicKeyProtoT> publicKeyTypeManager) {
-    final PrivateKeyTypeManager<KeyProtoT, PublicKeyProtoT> localPrivateKeyManager =
-        privateKeyTypeManager;
-    final KeyTypeManager<PublicKeyProtoT> localPublicKeyManager = publicKeyTypeManager;
-    return new KeyManagerContainer() {
-      @Override
-      public <Q> KeyManager<Q> getKeyManager(Class<Q> primitiveClass)
-          throws GeneralSecurityException {
-        try {
-          return new PrivateKeyManagerImpl<>(
-              localPrivateKeyManager, localPublicKeyManager, primitiveClass);
-        } catch (IllegalArgumentException e) {
-          throw new GeneralSecurityException("Primitive type not supported", e);
-        }
-      }
-
-      @Override
-      public KeyManager<?> getUntypedKeyManager() {
-        return new PrivateKeyManagerImpl<>(
-            localPrivateKeyManager,
-            localPublicKeyManager,
-            localPrivateKeyManager.firstSupportedPrimitiveClass());
-      }
-
-      @Override
-      public Class<?> getImplementingClass() {
-        return localPrivateKeyManager.getClass();
-      }
-
-      @Override
-      public Set<Class<?>> supportedPrimitives() {
-        return localPrivateKeyManager.supportedPrimitives();
-      }
-
-      @Override
-      public Class<?> publicKeyManagerClassOrNull() {
-        return localPublicKeyManager.getClass();
-      }
-
-      @Override
-      public MessageLite parseKey(ByteString serializedKey)
-          throws GeneralSecurityException, InvalidProtocolBufferException {
-        KeyProtoT result = localPrivateKeyManager.parseKey(serializedKey);
-        localPrivateKeyManager.validateKey(result);
-        return result;
-      }
-    };
-  }
 
   private static interface KeyDeriverContainer {
     KeyData deriveKey(ByteString serializedKeyFormat, InputStream stream)
@@ -314,14 +133,6 @@ public final class Registry {
     };
   }
 
-  private static synchronized KeyManagerContainer getKeyManagerContainerOrThrow(String typeUrl)
-      throws GeneralSecurityException {
-    if (!keyManagerMap.containsKey(typeUrl)) {
-      throw new GeneralSecurityException("No key manager found for key type " + typeUrl);
-    }
-    return keyManagerMap.get(typeUrl);
-  }
-
   /**
    * Resets the registry.
    *
@@ -331,7 +142,7 @@ public final class Registry {
    * <p>This method is intended for testing.
    */
   static synchronized void reset() {
-    keyManagerMap.clear();
+    keyManagerRegistry.set(new KeyManagerRegistry());
     keyDeriverMap.clear();
     newKeyAllowedMap.clear();
     catalogueMap.clear();
@@ -410,16 +221,6 @@ public final class Registry {
   }
 
   /**
-   * Helper method to check if an instance is not null; taken from guava's Precondition.java
-   */
-  private static <T> T checkNotNull(T reference) {
-    if (reference == null) {
-      throw new NullPointerException();
-    }
-    return reference;
-  }
-
-  /**
    * Tries to register {@code manager} for {@code manager.getKeyType()}. Users can generate new keys
    * with this manager using the {@link Registry#newKey} methods.
    *
@@ -453,14 +254,17 @@ public final class Registry {
     if (manager == null) {
       throw new IllegalArgumentException("key manager must be non-null.");
     }
+    KeyManagerRegistry newKeyManagerRegistry = new KeyManagerRegistry(keyManagerRegistry.get());
+    newKeyManagerRegistry.registerKeyManager(manager);
+
     if (!TinkFipsUtil.AlgorithmFipsCompatibility.ALGORITHM_NOT_FIPS.isCompatible()) {
       throw new GeneralSecurityException("Registering key managers is not supported in FIPS mode");
     }
     String typeUrl = manager.getKeyType();
     // Use an empty key format because old-style key managers don't export their key formats
-    ensureKeyManagerInsertable(typeUrl, manager.getClass(), Collections.emptyMap(), newKeyAllowed);
-    keyManagerMap.putIfAbsent(typeUrl, createContainerFor(manager));
+    ensureKeyManagerInsertable(typeUrl, Collections.emptyMap(), newKeyAllowed);
     newKeyAllowedMap.put(typeUrl, Boolean.valueOf(newKeyAllowed));
+    keyManagerRegistry.set(newKeyManagerRegistry);
   }
 
   /**
@@ -487,30 +291,22 @@ public final class Registry {
     if (manager == null) {
       throw new IllegalArgumentException("key manager must be non-null.");
     }
+    KeyManagerRegistry newKeyManagerRegistry = new KeyManagerRegistry(keyManagerRegistry.get());
+    newKeyManagerRegistry.registerKeyManager(manager);
     String typeUrl = manager.getKeyType();
     ensureKeyManagerInsertable(
         typeUrl,
-        manager.getClass(),
         newKeyAllowed ? manager.keyFactory().keyFormats() : Collections.emptyMap(),
         newKeyAllowed);
 
-    TinkFipsUtil.AlgorithmFipsCompatibility fipsStatus = manager.fipsStatus();
-
-    if (!fipsStatus.isCompatible()) {
-      throw new GeneralSecurityException(
-          "failed to register key manager "
-              + manager.getClass()
-              + " as it is not FIPS compatible.");
-    }
-
-    if (!keyManagerMap.containsKey(typeUrl)) {
-      keyManagerMap.put(typeUrl, createContainerFor(manager));
+    if (!keyManagerRegistry.get().typeUrlExists(typeUrl)) {
       keyDeriverMap.put(typeUrl, createDeriverFor(manager));
       if (newKeyAllowed) {
         registerKeyTemplates(typeUrl, manager.keyFactory().keyFormats());
       }
     }
     newKeyAllowedMap.put(typeUrl, Boolean.valueOf(newKeyAllowed));
+    keyManagerRegistry.set(newKeyManagerRegistry);
   }
 
   /**
@@ -574,24 +370,15 @@ public final class Registry {
   private static synchronized <KeyProtoT extends MessageLite, KeyFormatProtoT extends MessageLite>
       void ensureKeyManagerInsertable(
           String typeUrl,
-          Class<?> implementingClass,
           Map<String, KeyTypeManager.KeyFactory.KeyFormat<KeyFormatProtoT>> keyFormats,
           boolean newKeyAllowed)
           throws GeneralSecurityException {
-    KeyManagerContainer container = keyManagerMap.get(typeUrl);
-    if (container != null && !container.getImplementingClass().equals(implementingClass)) {
-      logger.warning("Attempted overwrite of a registered key manager for key type " + typeUrl);
-      throw new GeneralSecurityException(
-          String.format(
-              "typeUrl (%s) is already registered with %s, cannot be re-registered with %s",
-              typeUrl, container.getImplementingClass().getName(), implementingClass.getName()));
-    }
     if (newKeyAllowed && newKeyAllowedMap.containsKey(typeUrl) && !newKeyAllowedMap.get(typeUrl)) {
       throw new GeneralSecurityException("New keys are already disallowed for key type " + typeUrl);
     }
 
     if (newKeyAllowed) {
-      if (keyManagerMap.containsKey(typeUrl)) {
+      if (keyManagerRegistry.get().typeUrlExists(typeUrl)) {
         // When re-inserting an already present KeyTypeManager, no new key templates should be
         // present.
         for (Map.Entry<String, KeyTypeManager.KeyFactory.KeyFormat<KeyFormatProtoT>> entry :
@@ -643,66 +430,20 @@ public final class Registry {
     if (privateKeyTypeManager == null || publicKeyTypeManager == null) {
       throw new IllegalArgumentException("given key managers must be non-null.");
     }
+    KeyManagerRegistry newKeyManagerRegistry = new KeyManagerRegistry(keyManagerRegistry.get());
+    newKeyManagerRegistry.registerAsymmetricKeyManagers(
+        privateKeyTypeManager, publicKeyTypeManager);
+
     String privateTypeUrl = privateKeyTypeManager.getKeyType();
     String publicTypeUrl = publicKeyTypeManager.getKeyType();
     ensureKeyManagerInsertable(
         privateTypeUrl,
-        privateKeyTypeManager.getClass(),
         newKeyAllowed ? privateKeyTypeManager.keyFactory().keyFormats() : Collections.emptyMap(),
         newKeyAllowed);
     // No key format because a public key manager cannot create new keys
-    ensureKeyManagerInsertable(
-        publicTypeUrl, publicKeyTypeManager.getClass(), Collections.emptyMap(), false);
-    if (privateTypeUrl.equals(publicTypeUrl)) {
-      throw new GeneralSecurityException("Private and public key type must be different.");
-    }
+    ensureKeyManagerInsertable(publicTypeUrl, Collections.emptyMap(), false);
 
-    TinkFipsUtil.AlgorithmFipsCompatibility fipsStatusPrivateKey =
-        privateKeyTypeManager.fipsStatus();
-    TinkFipsUtil.AlgorithmFipsCompatibility fipsStatusPublicKey = publicKeyTypeManager.fipsStatus();
-
-    if (!fipsStatusPrivateKey.isCompatible()) {
-      throw new GeneralSecurityException(
-          "failed to register key manager "
-              + privateKeyTypeManager.getClass()
-              + " as it is not FIPS compatible.");
-    }
-
-    if (!fipsStatusPublicKey.isCompatible()) {
-      throw new GeneralSecurityException(
-          "failed to register key manager "
-              + publicKeyTypeManager.getClass()
-              + " as it is not FIPS compatible.");
-    }
-
-    if (keyManagerMap.containsKey(privateTypeUrl)) {
-      Class<?> existingPublicKeyManagerClass =
-          keyManagerMap.get(privateTypeUrl).publicKeyManagerClassOrNull();
-      if (existingPublicKeyManagerClass != null) {
-        if (!existingPublicKeyManagerClass
-            .getName()
-            .equals(publicKeyTypeManager.getClass().getName())) {
-          logger.warning(
-              "Attempted overwrite of a registered key manager for key type "
-                  + privateTypeUrl
-                  + " with inconsistent public key type "
-                  + publicTypeUrl);
-          throw new GeneralSecurityException(
-              String.format(
-                  "public key manager corresponding to %s is already registered with %s, cannot"
-                      + " be re-registered with %s",
-                  privateKeyTypeManager.getClass().getName(),
-                  existingPublicKeyManagerClass.getName(),
-                  publicKeyTypeManager.getClass().getName()));
-        }
-      }
-    }
-
-    if (!keyManagerMap.containsKey(privateTypeUrl)
-        || keyManagerMap.get(privateTypeUrl).publicKeyManagerClassOrNull() == null) {
-      keyManagerMap.put(
-          privateTypeUrl,
-          createPrivateKeyContainerFor(privateKeyTypeManager, publicKeyTypeManager));
+    if (!keyManagerRegistry.get().typeUrlExists(privateTypeUrl)) {
       keyDeriverMap.put(privateTypeUrl, createDeriverFor(privateKeyTypeManager));
       if (newKeyAllowed) {
         registerKeyTemplates(
@@ -710,12 +451,9 @@ public final class Registry {
       }
     }
     newKeyAllowedMap.put(privateTypeUrl, newKeyAllowed);
-    if (!keyManagerMap.containsKey(publicTypeUrl)) {
-      keyManagerMap.put(publicTypeUrl, createContainerFor(publicKeyTypeManager));
-      // We do not allow key derivation for public key types. It doesn't seem like this would make
-      // sense.
-    }
     newKeyAllowedMap.put(publicTypeUrl, false);
+
+    keyManagerRegistry.set(newKeyManagerRegistry);
   }
 
   private static <KeyFormatProtoT extends MessageLite> void registerKeyTemplates(
@@ -776,53 +514,19 @@ public final class Registry {
    */
   @Deprecated
   public static <P> KeyManager<P> getKeyManager(String typeUrl) throws GeneralSecurityException {
-    return getKeyManagerInternal(typeUrl, null);
+    return keyManagerRegistry.get().getKeyManager(typeUrl);
   }
 
   /** @return a {@link KeyManager} for the given {@code typeUrl} (if found). */
   public static <P> KeyManager<P> getKeyManager(String typeUrl, Class<P> primitiveClass)
       throws GeneralSecurityException {
-    return getKeyManagerInternal(typeUrl, checkNotNull(primitiveClass));
+    return keyManagerRegistry.get().getKeyManager(typeUrl, primitiveClass);
   }
 
   /** @return a {@link KeyManager} for the given {@code typeUrl} (if found). */
   public static KeyManager<?> getUntypedKeyManager(String typeUrl)
       throws GeneralSecurityException {
-    KeyManagerContainer container = getKeyManagerContainerOrThrow(typeUrl);
-    return container.getUntypedKeyManager();
-  }
-
-  private static String toCommaSeparatedString(Set<Class<?>> setOfClasses) {
-    StringBuilder b = new StringBuilder();
-    boolean first = true;
-    for (Class<?> clazz : setOfClasses) {
-      if (!first) {
-        b.append(", ");
-      }
-      b.append(clazz.getCanonicalName());
-      first = false;
-    }
-    return b.toString();
-  }
-
-  private static <P> KeyManager<P> getKeyManagerInternal(String typeUrl, Class<P> primitiveClass)
-      throws GeneralSecurityException {
-    KeyManagerContainer container = getKeyManagerContainerOrThrow(typeUrl);
-    if (primitiveClass == null) {
-      @SuppressWarnings("unchecked")  // Only called from deprecated functions; unavoidable there.
-      KeyManager<P> result = (KeyManager<P>) container.getUntypedKeyManager();
-      return result;
-    }
-    if (container.supportedPrimitives().contains(primitiveClass)) {
-      return container.getKeyManager(primitiveClass);
-    }
-    throw new GeneralSecurityException(
-        "Primitive type "
-            + primitiveClass.getName()
-            + " not supported by key manager of type "
-            + container.getImplementingClass()
-            + ", supported primitives: "
-            + toCommaSeparatedString(container.supportedPrimitives()));
+    return keyManagerRegistry.get().getUntypedKeyManager(typeUrl);
   }
 
   /**
@@ -835,9 +539,8 @@ public final class Registry {
    *
    * @return a new {@link KeyData}
    */
-  public static synchronized KeyData
-      newKeyData(com.google.crypto.tink.proto.KeyTemplate keyTemplate)
-      throws GeneralSecurityException {
+  public static synchronized KeyData newKeyData(
+      com.google.crypto.tink.proto.KeyTemplate keyTemplate) throws GeneralSecurityException {
     KeyManager<?> manager = getUntypedKeyManager(keyTemplate.getTypeUrl());
     if (newKeyAllowedMap.get(keyTemplate.getTypeUrl()).booleanValue()) {
       return manager.newKeyData(keyTemplate.getValue());
@@ -953,7 +656,8 @@ public final class Registry {
   @SuppressWarnings("TypeParameterUnusedInFormals")
   public static <P> P getPrimitive(String typeUrl, MessageLite key)
       throws GeneralSecurityException {
-    return getPrimitiveInternal(typeUrl, key, null);
+    KeyManager<P> manager = keyManagerRegistry.get().getKeyManager(typeUrl);
+    return manager.getPrimitive(key);
   }
 
   /**
@@ -966,7 +670,8 @@ public final class Registry {
    */
   public static <P> P getPrimitive(String typeUrl, MessageLite key, Class<P> primitiveClass)
       throws GeneralSecurityException {
-    return getPrimitiveInternal(typeUrl, key, checkNotNull(primitiveClass));
+    KeyManager<P> manager = keyManagerRegistry.get().getKeyManager(typeUrl, primitiveClass);
+    return manager.getPrimitive(key);
   }
 
   /**
@@ -982,7 +687,8 @@ public final class Registry {
   @SuppressWarnings("TypeParameterUnusedInFormals")
   public static <P> P getPrimitive(String typeUrl, ByteString serializedKey)
       throws GeneralSecurityException {
-    return getPrimitiveInternal(typeUrl, serializedKey, null);
+    KeyManager<P> manager = keyManagerRegistry.get().getKeyManager(typeUrl);
+    return manager.getPrimitive(serializedKey);
   }
 
   /**
@@ -996,7 +702,8 @@ public final class Registry {
   public static <P> P getPrimitive(
       String typeUrl, ByteString serializedKey, Class<P> primitiveClass)
       throws GeneralSecurityException {
-    return getPrimitiveInternal(typeUrl, serializedKey, checkNotNull(primitiveClass));
+    KeyManager<P> manager = keyManagerRegistry.get().getKeyManager(typeUrl, primitiveClass);
+    return manager.getPrimitive(serializedKey);
   }
 
   /**
@@ -1054,19 +761,6 @@ public final class Registry {
   public static <P> P getPrimitive(KeyData keyData, Class<P> primitiveClass)
       throws GeneralSecurityException {
     return getPrimitive(keyData.getTypeUrl(), keyData.getValue(), primitiveClass);
-  }
-
-  private static <P> P getPrimitiveInternal(
-      String typeUrl, MessageLite key, Class<P> primitiveClass) throws GeneralSecurityException {
-    KeyManager<P> manager = getKeyManagerInternal(typeUrl, primitiveClass);
-    return manager.getPrimitive(key);
-  }
-
-  private static <P> P getPrimitiveInternal(
-      String typeUrl, ByteString serializedKey, Class<P> primitiveClass)
-      throws GeneralSecurityException {
-    KeyManager<P> manager = getKeyManagerInternal(typeUrl, primitiveClass);
-    return manager.getPrimitive(serializedKey);
   }
 
   /**
@@ -1137,8 +831,7 @@ public final class Registry {
    */
   static MessageLite parseKeyData(KeyData keyData)
       throws GeneralSecurityException, InvalidProtocolBufferException {
-    KeyManagerContainer container = getKeyManagerContainerOrThrow(keyData.getTypeUrl());
-    return container.parseKey(keyData.getValue());
+    return keyManagerRegistry.get().parseKeyData(keyData);
   }
 
   /**
@@ -1147,7 +840,7 @@ public final class Registry {
    * @throws GeneralSecurityException if any key manager has already been registered.
    */
   public static synchronized void restrictToFipsIfEmpty() throws GeneralSecurityException {
-    if (keyManagerMap.isEmpty()) {
+    if (keyManagerRegistry.get().isEmpty()) {
       TinkFipsUtil.setFipsRestricted();
       return;
     }

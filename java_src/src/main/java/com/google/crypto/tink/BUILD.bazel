@@ -480,12 +480,11 @@ java_library(
     deps = [
         ":catalogue",
         ":key_manager",
-        ":key_manager_impl",
+        ":key_manager_registry",
         ":key_template",
         ":primitive_set",
         ":primitive_wrapper",
         ":private_key_manager",
-        ":private_key_manager_impl",
         "//proto:tink_java_proto",
         "//src/main/java/com/google/crypto/tink/config/internal:tink_fips_util",
         "//src/main/java/com/google/crypto/tink/internal:key_type_manager",
@@ -500,12 +499,11 @@ android_library(
     deps = [
         ":catalogue-android",
         ":key_manager-android",
-        ":key_manager_impl-android",
+        ":key_manager_registry-android",
         ":key_template-android",
         ":primitive_set-android",
         ":primitive_wrapper-android",
         ":private_key_manager-android",
-        ":private_key_manager_impl-android",
         "//proto:tink_java_proto_lite",
         "//src/main/java/com/google/crypto/tink/config/internal:tink_fips_util-android",
         "//src/main/java/com/google/crypto/tink/internal:key_type_manager-android",
@@ -687,6 +685,36 @@ android_library(
     deps = [
         "//src/main/java/com/google/crypto/tink/annotations:alpha-android",
         "@maven//:com_google_errorprone_error_prone_annotations",
+    ],
+)
+
+java_library(
+    name = "key_manager_registry",
+    srcs = ["KeyManagerRegistry.java"],
+    deps = [
+        ":key_manager",
+        ":key_manager_impl",
+        ":private_key_manager_impl",
+        "//proto:tink_java_proto",
+        "//src/main/java/com/google/crypto/tink/config/internal:tink_fips_util",
+        "//src/main/java/com/google/crypto/tink/internal:key_type_manager",
+        "//src/main/java/com/google/crypto/tink/internal:private_key_type_manager",
+        "@com_google_protobuf//:protobuf_javalite",
+    ],
+)
+
+android_library(
+    name = "key_manager_registry-android",
+    srcs = ["KeyManagerRegistry.java"],
+    deps = [
+        ":key_manager-android",
+        ":key_manager_impl-android",
+        ":private_key_manager_impl-android",
+        "//proto:tink_java_proto_lite",
+        "//src/main/java/com/google/crypto/tink/config/internal:tink_fips_util-android",
+        "//src/main/java/com/google/crypto/tink/internal:key_type_manager-android",
+        "//src/main/java/com/google/crypto/tink/internal:private_key_type_manager-android",
+        "@com_google_protobuf//:protobuf_javalite",
     ],
 )
 

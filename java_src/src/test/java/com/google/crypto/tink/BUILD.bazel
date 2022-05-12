@@ -380,3 +380,45 @@ java_test(
         "@maven//:junit_junit",
     ],
 )
+
+java_test(
+    name = "KeyManagerRegistryTest",
+    size = "small",
+    srcs = ["KeyManagerRegistryTest.java"],
+    tags = ["fips"],
+    deps = [
+        "//proto:aes_gcm_java_proto",
+        "//proto:ed25519_java_proto",
+        "//proto:tink_java_proto",
+        "//src/main/java/com/google/crypto/tink:aead",
+        "//src/main/java/com/google/crypto/tink:key_manager",
+        "//src/main/java/com/google/crypto/tink:key_manager_registry",
+        "//src/main/java/com/google/crypto/tink:private_key_manager",
+        "//src/main/java/com/google/crypto/tink:registry",
+        "//src/main/java/com/google/crypto/tink/config/internal:tink_fips_util",
+        "//src/main/java/com/google/crypto/tink/internal:key_type_manager",
+        "//src/main/java/com/google/crypto/tink/internal:primitive_factory",
+        "//src/main/java/com/google/crypto/tink/internal:private_key_type_manager",
+        "@com_google_protobuf//:protobuf_javalite",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "RegistryMultithreadTest",
+    size = "small",
+    srcs = ["RegistryMultithreadTest.java"],
+    deps = [
+        "//proto:aes_gcm_java_proto",
+        "//proto:ed25519_java_proto",
+        "//proto:tink_java_proto",
+        "//src/main/java/com/google/crypto/tink:key_manager",
+        "//src/main/java/com/google/crypto/tink:registry",
+        "//src/main/java/com/google/crypto/tink/internal:key_type_manager",
+        "//src/main/java/com/google/crypto/tink/internal:private_key_type_manager",
+        "@com_google_protobuf//:protobuf_javalite",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
