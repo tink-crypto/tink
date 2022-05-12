@@ -14,12 +14,12 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-package com.google.crypto.tink.aead;
-
+package com.google.crypto.tink.integration.gcpkms;
 
 import com.google.crypto.tink.Aead;
 import com.google.crypto.tink.KeysetHandle;
-import com.google.crypto.tink.integration.gcpkms.GcpKmsClient;
+import com.google.crypto.tink.aead.AeadConfig;
+import com.google.crypto.tink.aead.AeadKeyTemplates;
 import com.google.crypto.tink.proto.KeyTemplate;
 import com.google.crypto.tink.testing.TestUtil;
 import java.util.Optional;
@@ -43,10 +43,10 @@ public class KmsEnvelopeAeadKeyManagerWithGcpTest {
   @Test
   public void testGcpKmsKeyRestricted() throws Exception {
     KeyTemplate dekTemplate = AeadKeyTemplates.AES128_CTR_HMAC_SHA256;
-    KeysetHandle keysetHandle = KeysetHandle.generateNew(
-        AeadKeyTemplates.createKmsEnvelopeAeadKeyTemplate(
-            TestUtil.RESTRICTED_CRYPTO_KEY_URI, dekTemplate));
+    KeysetHandle keysetHandle =
+        KeysetHandle.generateNew(
+            AeadKeyTemplates.createKmsEnvelopeAeadKeyTemplate(
+                TestUtil.RESTRICTED_CRYPTO_KEY_URI, dekTemplate));
     TestUtil.runBasicAeadTests(keysetHandle.getPrimitive(Aead.class));
   }
-
 }
