@@ -179,23 +179,6 @@ java_test(
 )
 
 java_test(
-    name = "KmsAeadKeyManagerWithGcpTest",
-    size = "small",
-    srcs = ["KmsAeadKeyManagerWithGcpTest.java"],
-    data = ["//testdata:credentials"],
-    tags = ["no_rbe"],
-    deps = [
-        "//src/main/java/com/google/crypto/tink:aead",
-        "//src/main/java/com/google/crypto/tink:registry_cluster",
-        "//src/main/java/com/google/crypto/tink/aead:aead_config",
-        "//src/main/java/com/google/crypto/tink/aead:aead_key_templates",
-        "//src/main/java/com/google/crypto/tink/integration/gcpkms:gcp_kms_client",
-        "//src/main/java/com/google/crypto/tink/testing:test_util",
-        "@maven//:junit_junit",
-    ],
-)
-
-java_test(
     name = "AeadKeyTemplatesTest",
     size = "small",
     srcs = ["AeadKeyTemplatesTest.java"],

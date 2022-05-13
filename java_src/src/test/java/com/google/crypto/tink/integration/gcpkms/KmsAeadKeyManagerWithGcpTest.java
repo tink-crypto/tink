@@ -14,11 +14,12 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-package com.google.crypto.tink.aead;
+package com.google.crypto.tink.integration.gcpkms;
 
 import com.google.crypto.tink.Aead;
 import com.google.crypto.tink.KeysetHandle;
-import com.google.crypto.tink.integration.gcpkms.GcpKmsClient;
+import com.google.crypto.tink.aead.AeadConfig;
+import com.google.crypto.tink.aead.AeadKeyTemplates;
 import com.google.crypto.tink.testing.TestUtil;
 import java.util.Optional;
 import org.junit.Before;
