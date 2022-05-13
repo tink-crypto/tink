@@ -15,6 +15,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // [START mac-example]
 // A command-line utility for testing Tink MAC.
+
 #include <fstream>
 #include <iostream>
 #include <memory>
