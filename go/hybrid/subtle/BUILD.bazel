@@ -11,12 +11,17 @@ go_library(
         "ecies_hkdf_recipient_kem.go",
         "ecies_hkdf_sender_kem.go",
         "elliptic_curves.go",
+        "public_key.go",
         "subtle.go",
     ],
     importpath = "github.com/google/tink/go/hybrid/subtle",
     deps = [
+        "//keyset",
+        "//proto/hpke_go_proto",
+        "//proto/tink_go_proto",
         "//subtle",
         "//tink",
+        "@org_golang_google_protobuf//proto",
     ],
 )
 
@@ -24,12 +29,19 @@ go_test(
     name = "subtle_test",
     srcs = [
         "elliptic_curves_test.go",
+        "public_key_test.go",
         "subtle_test.go",
     ],
     data = ["@wycheproof//testvectors:all"],
     deps = [
         ":subtle",
+        "//hybrid",
+        "//keyset",
+        "//proto/hpke_go_proto",
+        "//proto/tink_go_proto",
+        "//subtle/random",
         "//testutil",
+        "@org_golang_google_protobuf//proto",
     ],
 )
 
