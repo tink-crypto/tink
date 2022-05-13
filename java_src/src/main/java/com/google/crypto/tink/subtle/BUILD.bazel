@@ -78,7 +78,7 @@ java_library(
     deps = [
         ":elliptic_curves",
         ":hkdf",
-        ":immutable_byte_array",
+        "//src/main/java/com/google/crypto/tink/internal:byte_array",
     ],
 )
 
@@ -129,12 +129,6 @@ java_library(
 java_library(
     name = "bytes",
     srcs = ["Bytes.java"],
-)
-
-java_library(
-    name = "immutable_byte_array",
-    srcs = ["ImmutableByteArray.java"],
-    deps = ["@maven//:com_google_errorprone_error_prone_annotations"],
 )
 
 java_library(
@@ -348,9 +342,9 @@ java_library(
     deps = [
         ":ed25519_cluster",
         ":field25519",
-        ":immutable_byte_array",
         "//src/main/java/com/google/crypto/tink:public_key_verify",
         "//src/main/java/com/google/crypto/tink/config/internal:tink_fips_util",
+        "//src/main/java/com/google/crypto/tink/internal:byte_array",
     ],
 )
 
@@ -762,7 +756,7 @@ android_library(
     deps = [
         ":elliptic_curves-android",
         ":hkdf-android",
-        ":immutable_byte_array-android",
+        "//src/main/java/com/google/crypto/tink/internal:byte_array-android",
     ],
 )
 
@@ -810,9 +804,9 @@ android_library(
     deps = [
         ":ed25519_cluster-android",
         ":field25519-android",
-        ":immutable_byte_array-android",
         "//src/main/java/com/google/crypto/tink:public_key_verify-android",
         "//src/main/java/com/google/crypto/tink/config/internal:tink_fips_util-android",
+        "//src/main/java/com/google/crypto/tink/internal:byte_array-android",
     ],
 )
 
@@ -859,12 +853,6 @@ android_library(
         ":bytes-android",
         ":subtle_util_cluster-android",
     ],
-)
-
-android_library(
-    name = "immutable_byte_array-android",
-    srcs = ["ImmutableByteArray.java"],
-    deps = ["@maven//:com_google_errorprone_error_prone_annotations"],
 )
 
 android_library(

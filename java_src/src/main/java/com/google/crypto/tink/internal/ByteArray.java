@@ -14,7 +14,7 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-package com.google.crypto.tink.subtle;
+package com.google.crypto.tink.internal;
 
 import com.google.errorprone.annotations.Immutable;
 
@@ -27,12 +27,12 @@ import com.google.errorprone.annotations.Immutable;
  * @since 1.0.0
  */
 @Immutable
-public final class ImmutableByteArray {
+public final class ByteArray {
   /**
    * @param data the byte array to be wrapped.
    * @return an immutable wrapper around the provided bytes.
    */
-  public static ImmutableByteArray of(final byte[] data) {
+  public static ByteArray of(final byte[] data) {
     if (data == null) {
       return null;
     } else {
@@ -49,8 +49,8 @@ public final class ImmutableByteArray {
    * @return an immutable wrapper around the bytes in the slice from {@code start} to {@code start +
    *     len}
    */
-  public static ImmutableByteArray of(final byte[] data, final int start, final int len) {
-    return new ImmutableByteArray(data, start, len);
+  public static ByteArray of(final byte[] data, final int start, final int len) {
+    return new ByteArray(data, start, len);
   }
 
   /** @return a copy of the bytes wrapped by this object. */
@@ -65,7 +65,7 @@ public final class ImmutableByteArray {
     return data.length;
   }
 
-  private ImmutableByteArray(final byte[] buf, final int start, final int len) {
+  private ByteArray(final byte[] buf, final int start, final int len) {
     data = new byte[len];
     System.arraycopy(buf, start, data, 0, len);
   }

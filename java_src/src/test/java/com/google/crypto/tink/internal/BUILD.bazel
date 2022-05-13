@@ -55,3 +55,14 @@ java_test(
         "@maven//:junit_junit",
     ],
 )
+
+java_test(
+    name = "ByteArrayTest",
+    size = "small",
+    srcs = ["ByteArrayTest.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink/internal:byte_array",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)

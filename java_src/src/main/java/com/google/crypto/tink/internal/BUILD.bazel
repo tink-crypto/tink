@@ -134,3 +134,15 @@ android_library(
         "@com_google_protobuf//:protobuf_javalite",
     ],
 )
+
+java_library(
+    name = "byte_array",
+    srcs = ["ByteArray.java"],
+    deps = ["@maven//:com_google_errorprone_error_prone_annotations"],
+)
+
+android_library(
+    name = "byte_array-android",
+    srcs = ["ByteArray.java"],
+    deps = ["@maven//:com_google_errorprone_error_prone_annotations"],
+)

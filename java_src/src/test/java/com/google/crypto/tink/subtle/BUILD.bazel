@@ -356,17 +356,6 @@ java_test(
 )
 
 java_test(
-    name = "ImmutableByteArrayTest",
-    size = "small",
-    srcs = ["ImmutableByteArrayTest.java"],
-    deps = [
-        "//src/main/java/com/google/crypto/tink/subtle:immutable_byte_array",
-        "@maven//:com_google_truth_truth",
-        "@maven//:junit_junit",
-    ],
-)
-
-java_test(
     name = "ChaCha20Poly1305Test",
     size = "small",
     srcs = ["ChaCha20Poly1305Test.java"],
