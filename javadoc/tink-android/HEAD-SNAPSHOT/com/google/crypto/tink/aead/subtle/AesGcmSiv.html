@@ -118,9 +118,9 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 implements <a href="../../../../../../com/google/crypto/tink/Aead.html" title="interface in com.google.crypto.tink">Aead</a></pre>
 <div class="block">This primitive implements AES-GCM-SIV (as defined in RFC 8452) using JCE.
 
- <p>This encryption mode is intended for authenticated encryption with additional authenticated
- data. A major security problem with AES-GCM is that reusing the same nonce twice leaks the
- authentication key. AES-GCM-SIV on the other hand has been designed to avoid this vulnerability.
+ <p>This encryption mode is intended for authenticated encryption with associated data. A major
+ security problem with AES-GCM is that reusing the same nonce twice leaks the authentication key.
+ AES-GCM-SIV on the other hand has been designed to avoid this vulnerability.
 
  <p>This encryption requires a JCE provider that supports the <code>AES/GCM-SIV/NoPadding</code>
  transformation such as <a href="https://conscrypt.org">Conscrypt</a>. using JCE.</div>
@@ -163,14 +163,14 @@ implements <a href="../../../../../../com/google/crypto/tink/Aead.html" title="i
 <td class="colFirst"><code>byte[]</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/aead/subtle/AesGcmSiv.html#decrypt-byte:A-byte:A-">decrypt</a></span>(byte[]&nbsp;ciphertext,
        byte[]&nbsp;associatedData)</code>
-<div class="block">Decrypts <code>ciphertext</code> with <code>associatedData</code> as associated authenticated data.</div>
+<div class="block">On Android KitKat (API level 19) this method does not support non null or non empty <code>associatedData</code>.</div>
 </td>
 </tr>
 <tr id="i1" class="rowColor">
 <td class="colFirst"><code>byte[]</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/aead/subtle/AesGcmSiv.html#encrypt-byte:A-byte:A-">encrypt</a></span>(byte[]&nbsp;plaintext,
        byte[]&nbsp;associatedData)</code>
-<div class="block">Encrypts <code>plaintext</code> with <code>associatedData</code> as associated authenticated data.</div>
+<div class="block">On Android KitKat (API level 19) this method does not support non null or non empty <code>associatedData</code>.</div>
 </td>
 </tr>
 </table>
@@ -226,10 +226,7 @@ implements <a href="../../../../../../com/google/crypto/tink/Aead.html" title="i
 <pre>public&nbsp;byte[]&nbsp;encrypt(byte[]&nbsp;plaintext,
                       byte[]&nbsp;associatedData)
                throws <a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
-<div class="block"><span class="descfrmTypeLabel">Description copied from interface:&nbsp;<code><a href="../../../../../../com/google/crypto/tink/Aead.html#encrypt-byte:A-byte:A-">Aead</a></code></span></div>
-<div class="block">Encrypts <code>plaintext</code> with <code>associatedData</code> as associated authenticated data.
- The resulting ciphertext allows for checking authenticity and integrity of associated data
- (<code>associatedData</code>), but does not guarantee its secrecy.</div>
+<div class="block">On Android KitKat (API level 19) this method does not support non null or non empty <code>associatedData</code>. It might not work at all in older versions.</div>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
 <dd><code><a href="../../../../../../com/google/crypto/tink/Aead.html#encrypt-byte:A-byte:A-">encrypt</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../../../com/google/crypto/tink/Aead.html" title="interface in com.google.crypto.tink">Aead</a></code></dd>
@@ -257,10 +254,7 @@ implements <a href="../../../../../../com/google/crypto/tink/Aead.html" title="i
 <pre>public&nbsp;byte[]&nbsp;decrypt(byte[]&nbsp;ciphertext,
                       byte[]&nbsp;associatedData)
                throws <a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
-<div class="block"><span class="descfrmTypeLabel">Description copied from interface:&nbsp;<code><a href="../../../../../../com/google/crypto/tink/Aead.html#decrypt-byte:A-byte:A-">Aead</a></code></span></div>
-<div class="block">Decrypts <code>ciphertext</code> with <code>associatedData</code> as associated authenticated data.
- The decryption verifies the authenticity and integrity of the associated data, but there are
- no guarantees wrt. secrecy of that data.</div>
+<div class="block">On Android KitKat (API level 19) this method does not support non null or non empty <code>associatedData</code>. It might not work at all in older versions.</div>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
 <dd><code><a href="../../../../../../com/google/crypto/tink/Aead.html#decrypt-byte:A-byte:A-">decrypt</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../../../com/google/crypto/tink/Aead.html" title="interface in com.google.crypto.tink">Aead</a></code></dd>
