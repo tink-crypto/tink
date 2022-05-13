@@ -92,4 +92,4 @@ if __name__ == '__main__':
   flags.mark_flags_as_required([
       'mode', 'keyset_path', 'input_path', 'output_path'])
   app.run(main)
-# [end deterministic-aead-example]
+# [END deterministic-aead-example]

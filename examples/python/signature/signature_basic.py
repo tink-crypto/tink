@@ -93,4 +93,4 @@ def example():
   # Verify finds the correct key in the keyset. If no key is found or
   # verification fails, it raises an error.
   verify_primitive.verify(sig, b'msg')
-  # [end signature-basic-example]
+  # [END signature-basic-example]

@@ -61,5 +61,5 @@ def example():
   # the keyset and decrypts the ciphertext. If no key is found or decryption
   # fails, it raises an error.
   output = primitive.decrypt(ciphertext, b'associated_data')
-  # [end aead-basic-example]
+  # [END aead-basic-example]
   assert output == b'msg'
