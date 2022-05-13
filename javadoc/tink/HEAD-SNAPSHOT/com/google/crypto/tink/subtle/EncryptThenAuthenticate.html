@@ -115,10 +115,9 @@ var activeTableTab = "activeTableTab";
 <pre>public final class <span class="typeNameLabel">EncryptThenAuthenticate</span>
 extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a>
 implements <a href="../../../../../com/google/crypto/tink/Aead.html" title="interface in com.google.crypto.tink">Aead</a></pre>
-<div class="block">This primitive performs an encrypt-then-Mac operation on plaintext and additional authenticated
- data (aad).
+<div class="block">This primitive performs an encrypt-then-Mac operation on plaintext and associated data (ad).
 
- <p>The Mac is computed over (aad || ciphertext || size of aad), thus it doesn't violate the <a
+ <p>The Mac is computed over (ad || ciphertext || size of ad), thus it doesn't violate the <a
  href="https://en.wikipedia.org/wiki/Horton_Principle">Horton Principle</a>. This implementation
  is based on <a
  href="http://tools.ietf.org/html/draft-mcgrew-aead-aes-cbc-hmac-sha2-05">Authenticated Encryption
@@ -168,14 +167,14 @@ implements <a href="../../../../../com/google/crypto/tink/Aead.html" title="inte
 <td class="colFirst"><code>byte[]</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/subtle/EncryptThenAuthenticate.html#decrypt-byte:A-byte:A-">decrypt</a></span>(byte[]&nbsp;ciphertext,
        byte[]&nbsp;associatedData)</code>
-<div class="block">Decrypts <code>ciphertext</code> with <code>aad</code> as additional authenticated data.</div>
+<div class="block">Decrypts <code>ciphertext</code> with <code>associatedData</code> as associated data.</div>
 </td>
 </tr>
 <tr id="i1" class="rowColor">
 <td class="colFirst"><code>byte[]</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/subtle/EncryptThenAuthenticate.html#encrypt-byte:A-byte:A-">encrypt</a></span>(byte[]&nbsp;plaintext,
        byte[]&nbsp;associatedData)</code>
-<div class="block">Encrypts <code>plaintext</code> with <code>aad</code> as additional authenticated data.</div>
+<div class="block">Encrypts <code>plaintext</code> with <code>associatedData</code>.</div>
 </td>
 </tr>
 <tr id="i2" class="altColor">
@@ -257,12 +256,12 @@ implements <a href="../../../../../com/google/crypto/tink/Aead.html" title="inte
 <pre>public&nbsp;byte[]&nbsp;encrypt(byte[]&nbsp;plaintext,
                       byte[]&nbsp;associatedData)
                throws <a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
-<div class="block">Encrypts <code>plaintext</code> with <code>aad</code> as additional authenticated data. The resulting
- ciphertext allows for checking authenticity and integrity of additional data (<code>aad</code>), but
- does not guarantee its secrecy.
+<div class="block">Encrypts <code>plaintext</code> with <code>associatedData</code>. The resulting ciphertext allows
+ for checking authenticity and integrity of associated data (ad), but does not guarantee its
+ secrecy.
 
- <p>The plaintext is encrypted with an <code>IndCpaCipher</code>, then MAC is computed over (aad ||
- ciphertext || t) where t is aad's length in bits represented as 64-bit bigendian unsigned
+ <p>The plaintext is encrypted with an <code>IndCpaCipher</code>, then MAC is computed over (ad ||
+ ciphertext || t) where t is ad's length in bits represented as 64-bit bigendian unsigned
  integer. The final ciphertext format is (ind-cpa ciphertext || mac).</div>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
@@ -291,12 +290,12 @@ implements <a href="../../../../../com/google/crypto/tink/Aead.html" title="inte
 <pre>public&nbsp;byte[]&nbsp;decrypt(byte[]&nbsp;ciphertext,
                       byte[]&nbsp;associatedData)
                throws <a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
-<div class="block">Decrypts <code>ciphertext</code> with <code>aad</code> as additional authenticated data. The decryption
- verifies the authenticity and integrity of additional data (<code>aad</code>), but there are no
- guarantees wrt. secrecy of that data.
+<div class="block">Decrypts <code>ciphertext</code> with <code>associatedData</code> as associated data. The decryption
+ verifies the authenticity and integrity of associated data (ad), but there are no guarantees
+ with respect to secrecy of that data.
 
- <p>The ciphertext format is ciphertext || mac. The MAC is verified against (aad || ciphertext||
- t) where t is aad's length in bits represented as 64-bit bigendian unsigned integer.</div>
+ <p>The ciphertext format is ciphertext || mac. The MAC is verified against (ad || ciphertext||
+ t) where t is ad's length in bits represented as 64-bit bigendian unsigned integer.</div>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
 <dd><code><a href="../../../../../com/google/crypto/tink/Aead.html#decrypt-byte:A-byte:A-">decrypt</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../../com/google/crypto/tink/Aead.html" title="interface in com.google.crypto.tink">Aead</a></code></dd>
