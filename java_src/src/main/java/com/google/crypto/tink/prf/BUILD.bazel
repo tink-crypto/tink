@@ -80,7 +80,7 @@ android_library(
     name = "hkdf_prf_key_manager-android",
     srcs = ["HkdfPrfKeyManager.java"],
     deps = [
-        ":prf_set",
+        ":prf_set-android",
         "//proto:common_java_proto_lite",
         "//proto:hkdf_prf_java_proto_lite",
         "//proto:tink_java_proto_lite",
@@ -120,7 +120,7 @@ android_library(
     name = "aes_cmac_prf_key_manager-android",
     srcs = ["AesCmacPrfKeyManager.java"],
     deps = [
-        ":prf_set",
+        ":prf_set-android",
         "//proto:aes_cmac_prf_java_proto_lite",
         "//proto:tink_java_proto_lite",
         "//src/main/java/com/google/crypto/tink:key_template-android",
@@ -158,7 +158,7 @@ android_library(
     name = "hmac_prf_key_manager-android",
     srcs = ["HmacPrfKeyManager.java"],
     deps = [
-        ":prf_set",
+        ":prf_set-android",
         "//proto:common_java_proto_lite",
         "//proto:hmac_prf_java_proto_lite",
         "//proto:tink_java_proto_lite",
@@ -205,11 +205,21 @@ android_library(
     name = "prf_set_wrapper-android",
     srcs = ["PrfSetWrapper.java"],
     deps = [
-        ":prf_set",
+        ":prf_set-android",
         "//proto:tink_java_proto_lite",
         "//src/main/java/com/google/crypto/tink:primitive_set-android",
         "//src/main/java/com/google/crypto/tink:primitive_wrapper-android",
         "//src/main/java/com/google/crypto/tink:registry-android",
         "@maven//:com_google_errorprone_error_prone_annotations",
     ],
+)
+
+android_library(
+    name = "prf_set-android",
+    srcs = [
+        "Prf.java",
+        "PrfSet.java",
+    ],
+    visibility = ["//visibility:public"],
+    deps = ["@maven//:com_google_errorprone_error_prone_annotations"],
 )

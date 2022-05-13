@@ -912,7 +912,7 @@ android_library(
         ":subtle_util_cluster-android",
         ":validators-android",
         "//src/main/java/com/google/crypto/tink/config/internal:tink_fips_util-android",
-        "//src/main/java/com/google/crypto/tink/prf:prf_set",
+        "//src/main/java/com/google/crypto/tink/prf:prf_set-android",
         "@maven//:com_google_errorprone_error_prone_annotations",
     ],
 )
@@ -923,7 +923,7 @@ android_library(
     deps = [
         ":subtle_util_cluster-android",
         "//src/main/java/com/google/crypto/tink/config/internal:tink_fips_util-android",
-        "//src/main/java/com/google/crypto/tink/prf:prf_set",
+        "//src/main/java/com/google/crypto/tink/prf:prf_set-android",
         "@maven//:com_google_errorprone_error_prone_annotations",
     ],
 )
@@ -934,7 +934,7 @@ android_library(
     deps = [
         ":bytes-android",
         "//src/main/java/com/google/crypto/tink:mac-android",
-        "//src/main/java/com/google/crypto/tink/prf:prf_set",
+        "//src/main/java/com/google/crypto/tink/prf:prf_set-android",
         "@maven//:com_google_errorprone_error_prone_annotations",
     ],
 )

@@ -53,7 +53,7 @@ android_library(
     srcs = ["PrfImpl.java"],
     deps = [
         ":streaming_prf-android",
-        "//src/main/java/com/google/crypto/tink/prf:prf_set",
+        "//src/main/java/com/google/crypto/tink/prf:prf_set-android",
         "@maven//:com_google_errorprone_error_prone_annotations",
     ],
 )
