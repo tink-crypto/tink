@@ -1505,6 +1505,10 @@
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/XChaCha20Poly1305KeyFormat.Builder.html#buildPartial--">buildPartial()</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/XChaCha20Poly1305KeyFormat.Builder.html" title="class in com.google.crypto.tink.proto">XChaCha20Poly1305KeyFormat.Builder</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="com/google/crypto/tink/internal/ByteArray.html" title="class in com.google.crypto.tink.internal"><span class="typeNameLink">ByteArray</span></a> - Class in <a href="com/google/crypto/tink/internal/package-summary.html">com.google.crypto.tink.internal</a></dt>
+<dd>
+<div class="block">Immutable Wrapper around a byte array.</div>
+</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/subtle/Bytes.html#byteArrayToInt-byte:A-">byteArrayToInt(byte[])</a></span> - Static method in class com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/Bytes.html" title="class in com.google.crypto.tink.subtle">Bytes</a></dt>
 <dd>
 <div class="block">Transforms a passed LSB first byte array to an int</div>
@@ -4643,7 +4647,7 @@
 <div class="block">Returns the first <a href="com/google/crypto/tink/KmsClient.html" title="interface in com.google.crypto.tink"><code>KmsClient</code></a> automatically loaded with <a href="https://docs.oracle.com/javase/8/docs/api/java/util/ServiceLoader.html?is-external=true" title="class or interface in java.util"><code>ServiceLoader</code></a>
  that supports <code>keyUri</code>.</div>
 </dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/subtle/ImmutableByteArray.html#getBytes--">getBytes()</a></span> - Method in class com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/ImmutableByteArray.html" title="class in com.google.crypto.tink.subtle">ImmutableByteArray</a></dt>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/internal/ByteArray.html#getBytes--">getBytes()</a></span> - Method in class com.google.crypto.tink.internal.<a href="com/google/crypto/tink/internal/ByteArray.html" title="class in com.google.crypto.tink.internal">ByteArray</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/Registry.html#getCatalogue-java.lang.String-">getCatalogue(String)</a></span> - Static method in class com.google.crypto.tink.<a href="com/google/crypto/tink/Registry.html" title="class in com.google.crypto.tink">Registry</a></dt>
 <dd>
@@ -7678,7 +7682,7 @@
 <dd>
 <div class="block"><code>bytes key_value = 3;</code></div>
 </dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/subtle/ImmutableByteArray.html#getLength--">getLength()</a></span> - Method in class com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/ImmutableByteArray.html" title="class in com.google.crypto.tink.subtle">ImmutableByteArray</a></dt>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/internal/ByteArray.html#getLength--">getLength()</a></span> - Method in class com.google.crypto.tink.internal.<a href="com/google/crypto/tink/internal/ByteArray.html" title="class in com.google.crypto.tink.internal">ByteArray</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/subtle/PrfHmacJce.html#getMaxOutputLength--">getMaxOutputLength()</a></span> - Method in class com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/PrfHmacJce.html" title="class in com.google.crypto.tink.subtle">PrfHmacJce</a></dt>
 <dd>
@@ -12004,10 +12008,6 @@
  The signature's format is r || s, where r and s are zero-padded and have
  the same size in bytes as the order of the curve.</div>
 </dd>
-<dt><a href="com/google/crypto/tink/subtle/ImmutableByteArray.html" title="class in com.google.crypto.tink.subtle"><span class="typeNameLink">ImmutableByteArray</span></a> - Class in <a href="com/google/crypto/tink/subtle/package-summary.html">com.google.crypto.tink.subtle</a></dt>
-<dd>
-<div class="block">Immutable Wrapper around a byte array.</div>
-</dd>
 <dt><a href="com/google/crypto/tink/subtle/IndCpaCipher.html" title="interface in com.google.crypto.tink.subtle"><span class="typeNameLink">IndCpaCipher</span></a> - Interface in <a href="com/google/crypto/tink/subtle/package-summary.html">com.google.crypto.tink.subtle</a></dt>
 <dd>
 <div class="block">This interface for symmetric key ciphers that are indistinguishable against chosen-plaintext
@@ -15157,9 +15157,9 @@
 </a>
 <h2 class="title">O</h2>
 <dl>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/subtle/ImmutableByteArray.html#of-byte:A-">of(byte[])</a></span> - Static method in class com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/ImmutableByteArray.html" title="class in com.google.crypto.tink.subtle">ImmutableByteArray</a></dt>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/internal/ByteArray.html#of-byte:A-">of(byte[])</a></span> - Static method in class com.google.crypto.tink.internal.<a href="com/google/crypto/tink/internal/ByteArray.html" title="class in com.google.crypto.tink.internal">ByteArray</a></dt>
 <dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/subtle/ImmutableByteArray.html#of-byte:A-int-int-">of(byte[], int, int)</a></span> - Static method in class com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/ImmutableByteArray.html" title="class in com.google.crypto.tink.subtle">ImmutableByteArray</a></dt>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/internal/ByteArray.html#of-byte:A-int-int-">of(byte[], int, int)</a></span> - Static method in class com.google.crypto.tink.internal.<a href="com/google/crypto/tink/internal/ByteArray.html" title="class in com.google.crypto.tink.internal">ByteArray</a></dt>
 <dd>
 <div class="block">Wrap an immutable byte array over a slice of a bytearray</div>
 </dd>
