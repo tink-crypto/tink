@@ -49,7 +49,6 @@ namespace {
 
 using ::crypto::tink::test::IsOk;
 using ::crypto::tink::test::StatusIs;
-using ::testing::Not;
 using ::testing::TestParamInfo;
 using ::testing::ValuesIn;
 

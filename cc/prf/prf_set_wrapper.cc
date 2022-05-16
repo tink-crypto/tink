@@ -15,6 +15,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include "tink/prf/prf_set_wrapper.h"
 
+#include <utility>
+
 #include "absl/memory/memory.h"
 #include "absl/status/status.h"
 #include "tink/util/status.h"
@@ -31,7 +33,7 @@ class PrfSetPrimitiveWrapper : public PrfSet {
  public:
   explicit PrfSetPrimitiveWrapper(std::unique_ptr<PrimitiveSet<Prf>> prf_set)
       : prf_set_(std::move(prf_set)) {
-    for (const auto& prf : *prf_set_->get_raw_primitives().ValueOrDie()) {
+    for (const auto& prf : *prf_set_->get_raw_primitives().value()) {
       prfs_.insert({prf->get_key_id(), &prf->get_primitive()});
     }
   }

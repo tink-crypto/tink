@@ -1,0 +1,38 @@
+// Copyright 2017 Google Inc.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+////////////////////////////////////////////////////////////////////////////////
+
+syntax = "proto3";
+
+package google.crypto.tink;
+
+import "proto/aes_ctr.proto";
+import "proto/hmac.proto";
+
+option java_package = "com.google.crypto.tink.proto";
+option java_multiple_files = true;
+option go_package = "github.com/google/tink/proto/aes_ctr_hmac_aead_go_proto";
+
+message AesCtrHmacAeadKeyFormat {
+  AesCtrKeyFormat aes_ctr_key_format = 1;
+  HmacKeyFormat hmac_key_format = 2;
+}
+
+// key_type: type.googleapis.com/google.crypto.tink.AesCtrHmacAeadKey
+message AesCtrHmacAeadKey {
+  uint32 version = 1;
+  AesCtrKey aes_ctr_key = 2;
+  HmacKey hmac_key = 3;
+}

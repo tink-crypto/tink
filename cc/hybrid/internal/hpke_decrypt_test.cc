@@ -139,6 +139,23 @@ TEST(HpkeDecryptWithBadKemTest, BadKemFails) {
               StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
+TEST(HpkeDecryptWithShortCiphertextTest, ShortCiphertextFails) {
+  HpkeParams hpke_params =
+      CreateHpkeParams(HpkeKem::DHKEM_X25519_HKDF_SHA256, HpkeKdf::HKDF_SHA256,
+                       HpkeAead::AES_128_GCM);
+  HpkeTestParams params = DefaultHpkeTestParams();
+  HpkePrivateKey recipient_key =
+      CreateHpkePrivateKey(hpke_params, params.recipient_private_key);
+  util::StatusOr<std::unique_ptr<HybridDecrypt>> hpke_decrypt =
+      HpkeDecrypt::New(recipient_key);
+  ASSERT_THAT(hpke_decrypt.status(), IsOk());
+
+  util::StatusOr<std::string> plaintext =
+      (*hpke_decrypt)->Decrypt("short ciphertext", "associated data");
+
+  ASSERT_THAT(plaintext.status(), StatusIs(absl::StatusCode::kInvalidArgument));
+}
+
 TEST(HpkeDecryptWithBadCiphertextTest, BadCiphertextFails) {
   HpkeParams hpke_params =
       CreateHpkeParams(HpkeKem::DHKEM_X25519_HKDF_SHA256, HpkeKdf::HKDF_SHA256,

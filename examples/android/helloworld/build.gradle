@@ -4,8 +4,6 @@ buildscript {
     repositories {
         google()
         mavenCentral()
-        // TODO(b/214259089): Disable during service outage.
-        //jcenter()
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:3.6.0'
@@ -19,8 +17,6 @@ allprojects {
     repositories {
         google()
         mavenCentral()
-        // TODO(b/214259089): Disable during service outage.
-        //jcenter()
     }
 }
 

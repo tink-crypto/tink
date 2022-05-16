@@ -47,8 +47,8 @@ java_library(
     srcs = ["TinkFips.java"],
     visibility = ["//visibility:public"],
     deps = [
+        "//src/main/java/com/google/crypto/tink:registry",
         "//src/main/java/com/google/crypto/tink/config/internal:tink_fips_util",
-        "//src/main/java/com/google/crypto/tink:registry"
     ],
 )
 
@@ -57,7 +57,7 @@ android_library(
     srcs = ["TinkFips.java"],
     visibility = ["//visibility:public"],
     deps = [
+        "//src/main/java/com/google/crypto/tink:registry-android",
         "//src/main/java/com/google/crypto/tink/config/internal:tink_fips_util-android",
-        "//src/main/java/com/google/crypto/tink:registry-android"
     ],
 )

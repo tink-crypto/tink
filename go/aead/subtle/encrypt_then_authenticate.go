@@ -25,8 +25,8 @@ import (
 )
 
 // EncryptThenAuthenticate performs an encrypt-then-MAC operation on plaintext
-// and additional authenticated data (aad). The MAC is computed over (aad ||
-// ciphertext || size of aad). This implementation is based on
+// and associated data (ad). The MAC is computed over (ad ||
+// ciphertext || size of ad). This implementation is based on
 // http://tools.ietf.org/html/draft-mcgrew-aead-aes-cbc-hmac-sha2-05.
 type EncryptThenAuthenticate struct {
 	indCPACipher INDCPACipher
@@ -56,23 +56,23 @@ func NewEncryptThenAuthenticate(indCPACipher INDCPACipher, mac tink.MAC, tagSize
 	return &EncryptThenAuthenticate{indCPACipher, mac, tagSize}, nil
 }
 
-// Encrypt encrypts plaintext with additionalData as additional authenticated
-// data. The resulting ciphertext allows for checking authenticity and
-// integrity of additional data, but does not guarantee its secrecy.
+// Encrypt encrypts plaintext with associatedData.
+// The resulting ciphertext allows for checking authenticity and
+// integrity of associatedData, but does not guarantee its secrecy.
 //
 // The plaintext is encrypted with an INDCPACipher, then MAC is computed over
-// (additionalData || ciphertext || n) where n is additionalData's length
+// (associatedData || ciphertext || n) where n is associatedData's length
 // in bits represented as a 64-bit bigendian unsigned integer. The final
 // ciphertext format is (IND-CPA ciphertext || mac).
-func (e *EncryptThenAuthenticate) Encrypt(plaintext, additionalData []byte) ([]byte, error) {
+func (e *EncryptThenAuthenticate) Encrypt(plaintext, associatedData []byte) ([]byte, error) {
 	ciphertext, err := e.indCPACipher.Encrypt(plaintext)
 	if err != nil {
 		return nil, fmt.Errorf("encrypt_then_authenticate: %v", err)
 	}
 
-	toAuthData := append(additionalData, ciphertext...)
-	aadSizeInBits := uint64(len(additionalData)) * 8
-	toAuthData = append(toAuthData, uint64ToByte(aadSizeInBits)...)
+	toAuthData := append(associatedData, ciphertext...)
+	adSizeInBits := uint64(len(associatedData)) * 8
+	toAuthData = append(toAuthData, uint64ToByte(adSizeInBits)...)
 
 	tag, err := e.mac.ComputeMAC(toAuthData)
 	if err != nil {
@@ -87,9 +87,8 @@ func (e *EncryptThenAuthenticate) Encrypt(plaintext, additionalData []byte) ([]b
 	return ciphertext, nil
 }
 
-// Decrypt decrypts ciphertext with additionalData as additional authenticated
-// data.
-func (e *EncryptThenAuthenticate) Decrypt(ciphertext, additionalData []byte) ([]byte, error) {
+// Decrypt decrypts ciphertext with associatedData.
+func (e *EncryptThenAuthenticate) Decrypt(ciphertext, associatedData []byte) ([]byte, error) {
 	if len(ciphertext) < e.tagSize {
 		return nil, errors.New("ciphertext too short")
 	}
@@ -98,10 +97,10 @@ func (e *EncryptThenAuthenticate) Decrypt(ciphertext, additionalData []byte) ([]
 	payload := ciphertext[:len(ciphertext)-e.tagSize]
 
 	// Authenticate the following data:
-	// additionalData || payload || aadSizeInBits
-	toAuthData := append(additionalData, payload...)
-	aadSizeInBits := uint64(len(additionalData)) * 8
-	toAuthData = append(toAuthData, uint64ToByte(aadSizeInBits)...)
+	// associatedData || payload || adSizeInBits
+	toAuthData := append(associatedData, payload...)
+	adSizeInBits := uint64(len(associatedData)) * 8
+	toAuthData = append(toAuthData, uint64ToByte(adSizeInBits)...)
 
 	err := e.mac.VerifyMAC(ciphertext[len(ciphertext)-e.tagSize:], toAuthData)
 	if err != nil {

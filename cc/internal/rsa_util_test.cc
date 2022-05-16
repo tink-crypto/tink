@@ -304,7 +304,7 @@ TEST(RsaUtilTest, CopiesRsaPrivateKey) {
   util::StatusOr<internal::SslUniquePtr<RSA>> rsa_result =
       RsaPrivateKeyToRsa(private_key);
   EXPECT_TRUE(rsa_result.ok());
-  internal::SslUniquePtr<RSA> rsa = std::move(rsa_result).ValueOrDie();
+  internal::SslUniquePtr<RSA> rsa = std::move(rsa_result).value();
   const BIGNUM* n = nullptr;
   const BIGNUM* e = nullptr;
   const BIGNUM* d = nullptr;
@@ -328,7 +328,7 @@ TEST(RsaUtilTest, CopiesRsaPublicKey) {
   util::StatusOr<internal::SslUniquePtr<RSA>> rsa_result =
       RsaPublicKeyToRsa(public_key);
   EXPECT_TRUE(rsa_result.ok());
-  internal::SslUniquePtr<RSA> rsa = std::move(rsa_result).ValueOrDie();
+  internal::SslUniquePtr<RSA> rsa = std::move(rsa_result).value();
 
   const BIGNUM* n = nullptr;
   const BIGNUM* e = nullptr;
@@ -356,7 +356,7 @@ util::StatusOr<internal::SslUniquePtr<RSA>> NewRsaPublicKey(
   // RSA_set0_key takes ownership of the arguments.
   n.release();
   e.release();
-  return key;
+  return std::move(key);
 }
 
 TEST(RsaUtilTest, RsaCheckPublicKeyNullKey) {
@@ -402,9 +402,12 @@ TEST(RsaUtilTest, RsaCheckPublicKeyExponentNotOdd) {
 
 TEST(RsaUtilTest, RsaCheckPublicKeyModulusTooLarge) {
   // Get 1 byte more than 16384 bits (2048 bytes).
-  const std::string kModulusTooLarge = subtle::Random::GetRandomBytes(2049);
+  std::string too_large_modulus = subtle::Random::GetRandomBytes(2049);
+  if (too_large_modulus[0] == '\0') {
+    too_large_modulus[0] = 0x01;
+  }
   util::StatusOr<internal::SslUniquePtr<RSA>> key =
-      NewRsaPublicKey(absl::BytesToHexString(kModulusTooLarge), RSA_F4);
+      NewRsaPublicKey(absl::BytesToHexString(too_large_modulus), RSA_F4);
   ASSERT_THAT(key.status(), IsOk());
   EXPECT_THAT(RsaCheckPublicKey(key->get()), Not(IsOk()));
 }

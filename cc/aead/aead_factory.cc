@@ -16,14 +16,16 @@
 
 #include "tink/aead/aead_factory.h"
 
+#include <memory>
+
+#include "absl/memory/memory.h"
 #include "tink/aead.h"
+#include "tink/aead/aead_wrapper.h"
 #include "tink/key_manager.h"
 #include "tink/keyset_handle.h"
 #include "tink/registry.h"
-#include "tink/aead/aead_wrapper.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
-
 
 namespace crypto {
 namespace tink {

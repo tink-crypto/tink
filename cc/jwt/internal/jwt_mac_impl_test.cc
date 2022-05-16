@@ -68,7 +68,7 @@ util::StatusOr<std::unique_ptr<JwtMacInternal>> CreateJwtMac() {
   }
   std::unique_ptr<JwtMacInternal> jwt_mac = absl::make_unique<JwtMacImpl>(
       *std::move(mac), "HS256", /*kid=*/absl::nullopt);
-  return jwt_mac;
+  return std::move(jwt_mac);
 }
 
 TEST(JwtMacImplTest, CreateAndValidateToken) {

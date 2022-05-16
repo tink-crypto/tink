@@ -130,7 +130,7 @@ StatusOr<Aws::Auth::AWSCredentials> GetAwsCredentials(
     auto creds_result = Read(std::string(credentials_path));
     if (!creds_result.ok()) return creds_result.status();
     std::vector<std::string> creds_lines =
-        absl::StrSplit(creds_result.ValueOrDie(), '\n');
+        absl::StrSplit(creds_result.value(), '\n');
     if (creds_lines.size() < 3) {
       return util::Status(absl::StatusCode::kInvalidArgument,
                           absl::StrCat("Invalid format of credentials in file ",
@@ -141,7 +141,7 @@ StatusOr<Aws::Auth::AWSCredentials> GetAwsCredentials(
       return util::Status(absl::StatusCode::kInvalidArgument,
                           absl::StrCat("Invalid format of credentials in file ",
                                        credentials_path, " : ",
-                                       key_id_result.status().error_message()));
+                                       key_id_result.status().message()));
     }
     auto secret_key_result = GetValue("aws_secret_access_key", creds_lines[2]);
     if (!secret_key_result.ok()) {
@@ -149,10 +149,10 @@ StatusOr<Aws::Auth::AWSCredentials> GetAwsCredentials(
           absl::StatusCode::kInvalidArgument,
           absl::StrCat("Invalid format of credentials in file ",
                        credentials_path, " : ",
-                       secret_key_result.status().error_message()));
+                       secret_key_result.status().message()));
     }
-    return Aws::Auth::AWSCredentials(key_id_result.ValueOrDie().c_str(),
-                                     secret_key_result.ValueOrDie().c_str());
+    return Aws::Auth::AWSCredentials(key_id_result.value().c_str(),
+                                     secret_key_result.value().c_str());
   }
 
   // Get default credentials.
@@ -192,7 +192,7 @@ AwsKmsClient::New(absl::string_view key_uri,
   if (!credentials_result.ok()) {
     return credentials_result.status();
   }
-  client->credentials_ = credentials_result.ValueOrDie();
+  client->credentials_ = credentials_result.value();
 
   // If a specific key is given, create an AWS KMSClient.
   if (!key_uri.empty()) {
@@ -205,9 +205,7 @@ AwsKmsClient::New(absl::string_view key_uri,
     if (!config_result.ok()) return config_result.status();
     // Create AWS KMSClient.
     client->aws_client_ = Aws::MakeShared<Aws::KMS::KMSClient>(
-        kAwsCryptoAllocationTag,
-        client->credentials_,
-        config_result.ValueOrDie());
+        kAwsCryptoAllocationTag, client->credentials_, config_result.value());
   }
   return std::move(client);
 }
@@ -239,7 +237,7 @@ AwsKmsClient::GetAead(absl::string_view key_uri) const {
     auto config_result = GetAwsClientConfig(key_arn);
     if (!config_result.ok()) return config_result.status();
     auto aws_client = Aws::MakeShared<Aws::KMS::KMSClient>(
-        kAwsCryptoAllocationTag, credentials_, config_result.ValueOrDie());
+        kAwsCryptoAllocationTag, credentials_, config_result.value());
     return AwsKmsAead::New(key_arn, aws_client);
   }
 }
@@ -251,7 +249,7 @@ Status AwsKmsClient::RegisterNewClient(absl::string_view key_uri,
     return client_result.status();
   }
 
-  return KmsClients::Add(std::move(client_result.ValueOrDie()));
+  return KmsClients::Add(std::move(client_result.value()));
 }
 
 }  // namespace awskms

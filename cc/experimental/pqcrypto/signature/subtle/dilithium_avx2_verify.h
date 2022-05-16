@@ -53,5 +53,4 @@ class DilithiumAvx2Verify : public PublicKeyVerify {
 }  // namespace tink
 }  // namespace crypto
 
-// TINK_EXPERIMENTAL_PQCRYPTO_SIGNATURE_SUBTLE_DILITHIUM_AVX2_VERIFY_H_
-#endif
+#endif  // TINK_EXPERIMENTAL_PQCRYPTO_SIGNATURE_SUBTLE_DILITHIUM_AVX2_VERIFY_H_

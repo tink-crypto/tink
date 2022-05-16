@@ -18,6 +18,7 @@
 
 #include <memory>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include "gmock/gmock.h"
@@ -91,7 +92,7 @@ TEST(AesCtrHmacStreamSegmentEncrypterTest, Basic) {
                 auto enc_result = AesCtrHmacStreamSegmentEncrypter::New(
                     params, associated_data);
                 ASSERT_THAT(enc_result.status(), IsOk());
-                auto enc = std::move(enc_result.ValueOrDie());
+                auto enc = std::move(enc_result.value());
                 EXPECT_EQ(0, enc->get_segment_number());
                 int header_size = 1 + key_size + /* nonce_prefix_size = */ 7;
                 EXPECT_EQ(header_size, enc->get_header().size());
@@ -137,7 +138,7 @@ TEST(AesCtrHmacStreamSegmentEncrypterTest, EncryptLongPlaintext) {
   auto enc_result =
       AesCtrHmacStreamSegmentEncrypter::New(params, associated_data);
   ASSERT_THAT(enc_result.status(), IsOk());
-  auto enc = std::move(enc_result.ValueOrDie());
+  auto enc = std::move(enc_result.value());
 
   std::vector<uint8_t> pt(enc->get_plaintext_segment_size() + 1, 'p');
   std::vector<uint8_t> ct;
@@ -156,7 +157,7 @@ TEST(AesCtrHmacStreamSegmentEncrypterTest, EncryptNullCtBuffer) {
   auto enc_result =
       AesCtrHmacStreamSegmentEncrypter::New(params, associated_data);
   ASSERT_THAT(enc_result.status(), IsOk());
-  auto enc = std::move(enc_result.ValueOrDie());
+  auto enc = std::move(enc_result.value());
 
   std::vector<uint8_t> pt(enc->get_plaintext_segment_size(), 'p');
   ASSERT_THAT(enc->EncryptSegment(pt, true, nullptr),
@@ -199,13 +200,13 @@ TEST(AesCtrHmacStreamSegmentDecrypterTest, Basic) {
                 auto enc_result = AesCtrHmacStreamSegmentEncrypter::New(
                     params, associated_data);
                 ASSERT_THAT(enc_result.status(), IsOk());
-                auto enc = std::move(enc_result.ValueOrDie());
+                auto enc = std::move(enc_result.value());
 
                 // Get and initialize a segment decrypter.
                 auto dec_result = AesCtrHmacStreamSegmentDecrypter::New(
                     params, associated_data);
                 ASSERT_THAT(dec_result.status(), IsOk());
-                auto dec = std::move(dec_result.ValueOrDie());
+                auto dec = std::move(dec_result.value());
                 ASSERT_THAT(dec->Init(enc->get_header()), IsOk());
                 int header_size = 1 + key_size + /* nonce_prefix_size = */ 7;
                 EXPECT_EQ(header_size, dec->get_header_size());
@@ -257,11 +258,11 @@ TEST(AesCtrHmacStreamSegmentDecrypterTest, AlreadyInit) {
   auto enc_result =
       AesCtrHmacStreamSegmentEncrypter::New(params, associated_data);
   ASSERT_THAT(enc_result.status(), IsOk());
-  auto enc = std::move(enc_result.ValueOrDie());
+  auto enc = std::move(enc_result.value());
   auto dec_result =
       AesCtrHmacStreamSegmentDecrypter::New(params, associated_data);
   ASSERT_THAT(dec_result.status(), IsOk());
-  auto dec = std::move(dec_result.ValueOrDie());
+  auto dec = std::move(dec_result.value());
   ASSERT_THAT(dec->Init(enc->get_header()), IsOk());
   ASSERT_THAT(dec->Init(enc->get_header()),
               StatusIs(absl::StatusCode::kFailedPrecondition,
@@ -278,11 +279,11 @@ TEST(AesCtrHmacStreamSegmentDecrypterTest, InitWrongHeaderSize) {
   auto enc_result =
       AesCtrHmacStreamSegmentEncrypter::New(params, associated_data);
   ASSERT_THAT(enc_result.status(), IsOk());
-  auto enc = std::move(enc_result.ValueOrDie());
+  auto enc = std::move(enc_result.value());
   auto dec_result =
       AesCtrHmacStreamSegmentDecrypter::New(params, associated_data);
   ASSERT_THAT(dec_result.status(), IsOk());
-  auto dec = std::move(dec_result.ValueOrDie());
+  auto dec = std::move(dec_result.value());
   auto header = enc->get_header();
   header.resize(dec->get_header_size() - 1);
   ASSERT_THAT(dec->Init(header), StatusIs(absl::StatusCode::kInvalidArgument,
@@ -299,11 +300,11 @@ TEST(AesCtrHmacStreamSegmentDecrypterTest, InitCorruptedHeader) {
   auto enc_result =
       AesCtrHmacStreamSegmentEncrypter::New(params, associated_data);
   ASSERT_THAT(enc_result.status(), IsOk());
-  auto enc = std::move(enc_result.ValueOrDie());
+  auto enc = std::move(enc_result.value());
   auto dec_result =
       AesCtrHmacStreamSegmentDecrypter::New(params, associated_data);
   ASSERT_THAT(dec_result.status(), IsOk());
-  auto dec = std::move(dec_result.ValueOrDie());
+  auto dec = std::move(dec_result.value());
   auto header = enc->get_header();
   header[0] = 0;
   ASSERT_THAT(dec->Init(header), StatusIs(absl::StatusCode::kInvalidArgument,
@@ -320,11 +321,11 @@ TEST(AesCtrHmacStreamSegmentDecrypterTest, DecryptNotInit) {
   auto enc_result =
       AesCtrHmacStreamSegmentEncrypter::New(params, associated_data);
   ASSERT_THAT(enc_result.status(), IsOk());
-  auto enc = std::move(enc_result.ValueOrDie());
+  auto enc = std::move(enc_result.value());
   auto dec_result =
       AesCtrHmacStreamSegmentDecrypter::New(params, associated_data);
   ASSERT_THAT(dec_result.status(), IsOk());
-  auto dec = std::move(dec_result.ValueOrDie());
+  auto dec = std::move(dec_result.value());
 
   std::vector<uint8_t> ct(dec->get_ciphertext_segment_size(), 'c');
   std::vector<uint8_t> pt;
@@ -343,11 +344,11 @@ TEST(AesCtrHmacStreamSegmentDecrypterTest, DecryptLongCiphertext) {
   auto enc_result =
       AesCtrHmacStreamSegmentEncrypter::New(params, associated_data);
   ASSERT_THAT(enc_result.status(), IsOk());
-  auto enc = std::move(enc_result.ValueOrDie());
+  auto enc = std::move(enc_result.value());
   auto dec_result =
       AesCtrHmacStreamSegmentDecrypter::New(params, associated_data);
   ASSERT_THAT(dec_result.status(), IsOk());
-  auto dec = std::move(dec_result.ValueOrDie());
+  auto dec = std::move(dec_result.value());
   ASSERT_THAT(dec->Init(enc->get_header()), IsOk());
 
   std::vector<uint8_t> ct(dec->get_ciphertext_segment_size() + 1, 'c');
@@ -367,11 +368,11 @@ TEST(AesCtrHmacStreamSegmentDecrypterTest, DecryptNullPtBuffer) {
   auto enc_result =
       AesCtrHmacStreamSegmentEncrypter::New(params, associated_data);
   ASSERT_THAT(enc_result.status(), IsOk());
-  auto enc = std::move(enc_result.ValueOrDie());
+  auto enc = std::move(enc_result.value());
   auto dec_result =
       AesCtrHmacStreamSegmentDecrypter::New(params, associated_data);
   ASSERT_THAT(dec_result.status(), IsOk());
-  auto dec = std::move(dec_result.ValueOrDie());
+  auto dec = std::move(dec_result.value());
   ASSERT_THAT(dec->Init(enc->get_header()), IsOk());
 
   std::vector<uint8_t> ct(dec->get_ciphertext_segment_size(), 'c');
@@ -412,7 +413,7 @@ TEST(AesCtrHmacStreamingTest, Basic) {
                   params.tag_size = tag_size;
                   auto result = AesCtrHmacStreaming::New(params);
                   ASSERT_THAT(result.status(), IsOk());
-                  auto streaming_aead = std::move(result.ValueOrDie());
+                  auto streaming_aead = std::move(result.value());
 
                   std::string plaintext(plaintext_size, 'p');
                   std::string associated_data = "associated data";

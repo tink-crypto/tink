@@ -4,9 +4,7 @@ java_test(
     name = "GcpKmsClientTest",
     size = "small",
     srcs = ["GcpKmsClientTest.java"],
-    data = [
-        "@tink_base//testdata:credential.json",
-    ],
+    data = ["//testdata:credential.json"],
     runtime_deps = [
         "@maven//:com_fasterxml_jackson_core_jackson_core",
     ],
@@ -16,6 +14,41 @@ java_test(
         "//src/main/java/com/google/crypto/tink:kms_clients_test_util",
         "//src/main/java/com/google/crypto/tink/integration/gcpkms:gcp_kms_client",
         "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "KmsAeadKeyManagerWithGcpTest",
+    size = "small",
+    srcs = ["KmsAeadKeyManagerWithGcpTest.java"],
+    data = ["//testdata:credentials"],
+    tags = ["no_rbe"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink:aead",
+        "//src/main/java/com/google/crypto/tink:registry_cluster",
+        "//src/main/java/com/google/crypto/tink/aead:aead_config",
+        "//src/main/java/com/google/crypto/tink/aead:aead_key_templates",
+        "//src/main/java/com/google/crypto/tink/integration/gcpkms:gcp_kms_client",
+        "//src/main/java/com/google/crypto/tink/testing:test_util",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "KmsEnvelopeAeadKeyManagerWithGcpTest",
+    size = "small",
+    srcs = ["KmsEnvelopeAeadKeyManagerWithGcpTest.java"],
+    data = ["//testdata:credentials"],
+    tags = ["no_rbe"],
+    deps = [
+        "//proto:tink_java_proto",
+        "//src/main/java/com/google/crypto/tink:aead",
+        "//src/main/java/com/google/crypto/tink:registry_cluster",
+        "//src/main/java/com/google/crypto/tink/aead:aead_config",
+        "//src/main/java/com/google/crypto/tink/aead:aead_key_templates",
+        "//src/main/java/com/google/crypto/tink/integration/gcpkms:gcp_kms_client",
+        "//src/main/java/com/google/crypto/tink/testing:test_util",
         "@maven//:junit_junit",
     ],
 )

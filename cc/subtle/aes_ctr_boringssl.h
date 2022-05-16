@@ -18,6 +18,7 @@
 #define TINK_SUBTLE_AES_CTR_BORINGSSL_H_
 
 #include <memory>
+#include <string>
 #include <utility>
 
 #include "openssl/evp.h"

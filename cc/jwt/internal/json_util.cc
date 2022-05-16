@@ -29,7 +29,7 @@ namespace jwt_internal {
 namespace {
 
 util::Status ConvertProtoStatus(const google::protobuf::util::Status& status) {
-  return util::Status(static_cast<absl::StatusCode>(status.error_code()),
+  return util::Status(static_cast<absl::StatusCode>(status.code()),
                                     std::string(status.message().data(), status.message().length()));
 }
 

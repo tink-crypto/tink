@@ -17,6 +17,7 @@ sh_test(
     ],
     data = [
         ":test_lib",
+        "//testdata:credentials",
         "//testing:aead_cli_java",
         "//testing/cc:aead_cli_cc",
         "//testing/go:aead_cli_go",
@@ -24,7 +25,6 @@ sh_test(
         "//testing/python:aead_cli_python",
         "//tinkey",
         "@google_root_pem//file",
-        "@tink_base//testdata:credentials",
     ],
     tags = ["manual"],
 )

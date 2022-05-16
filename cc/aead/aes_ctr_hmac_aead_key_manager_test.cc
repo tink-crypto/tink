@@ -16,24 +16,31 @@
 
 #include "tink/aead/aes_ctr_hmac_aead_key_manager.h"
 
+#include <stdint.h>
+
+#include <memory>
+#include <string>
 #include <utility>
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "absl/status/status.h"
-#include "tink/config.h"
-#include "tink/mac/mac_config.h"
+#include "tink/aead.h"
+#include "tink/mac.h"
 #include "tink/subtle/aead_test_util.h"
 #include "tink/subtle/aes_ctr_boringssl.h"
 #include "tink/subtle/encrypt_then_authenticate.h"
 #include "tink/subtle/hmac_boringssl.h"
+#include "tink/subtle/ind_cpa_cipher.h"
 #include "tink/util/enums.h"
 #include "tink/util/secret_data.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "tink/util/test_matchers.h"
+#include "proto/aes_ctr.pb.h"
 #include "proto/aes_ctr_hmac_aead.pb.h"
 #include "proto/common.pb.h"
+#include "proto/hmac.pb.h"
 #include "proto/tink.pb.h"
 
 namespace crypto {
@@ -172,7 +179,7 @@ TEST(AesCtrHmacAeadKeyManagerTest, CreateKey) {
   StatusOr<AesCtrHmacAeadKey> key_or =
       AesCtrHmacAeadKeyManager().CreateKey(key_format);
   ASSERT_THAT(key_or.status(), IsOk());
-  const AesCtrHmacAeadKey& key = key_or.ValueOrDie();
+  const AesCtrHmacAeadKey& key = key_or.value();
   EXPECT_THAT(AesCtrHmacAeadKeyManager().ValidateKey(key),
               IsOk());
   EXPECT_THAT(key.aes_ctr_key().params().iv_size(),
@@ -206,13 +213,11 @@ TEST(AesCtrHmacAeadKeyManagerTest, CreateAead) {
   ASSERT_THAT(direct_hmac_or.status(), IsOk());
 
   auto direct_aead_or = subtle::EncryptThenAuthenticate::New(
-      std::move(direct_aes_ctr_or.ValueOrDie()),
-      std::move(direct_hmac_or.ValueOrDie()),
+      std::move(direct_aes_ctr_or.value()), std::move(direct_hmac_or.value()),
       key.hmac_key().params().tag_size());
   ASSERT_THAT(direct_aead_or.status(), IsOk());
 
-  EXPECT_THAT(EncryptThenDecrypt(*aead_or.ValueOrDie(),
-                                 *direct_aead_or.ValueOrDie(),
+  EXPECT_THAT(EncryptThenDecrypt(*aead_or.value(), *direct_aead_or.value(),
                                  "message", "aad"),
               IsOk());
 }

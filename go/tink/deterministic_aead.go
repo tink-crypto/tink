@@ -32,18 +32,24 @@ Encryption with associated data ensures authenticity (who the sender is) and int
 data has not been tampered with) of that data, but not its secrecy.
 
 References:
-https://tools.ietf.org/html/rfc5116
-https://tools.ietf.org/html/rfc5297#section-1.3
+ * https://tools.ietf.org/html/rfc5116
+ * https://tools.ietf.org/html/rfc5297#section-1.3
 */
 type DeterministicAEAD interface {
-	// EncryptDeterministically deterministically encrypts plaintext with additionalData as
-	// additional authenticated data. The resulting ciphertext allows for checking
-	// authenticity and integrity of additional data additionalData,
-	// but there are no guarantees wrt. secrecy of that data.
-	EncryptDeterministically(plaintext, additionalData []byte) ([]byte, error)
+	// EncryptDeterministically deterministically encrypts plaintext with associatedData as
+	// associated authenticated data.
+	//
+	// Warning:
+	// Encrypting the same plaintext multiple times protects the integrity of that plaintext,
+	// but confidentiality is compromised to the extent that an attacker can determine that
+	// the same plaintext was encrypted.
+	//
+	// The resulting ciphertext allows for checking authenticity and integrity of associatedData,
+	// but does not guarantee its secrecy.
+	EncryptDeterministically(plaintext, associatedData []byte) ([]byte, error)
 
-	// DecryptDeterministically deterministically decrypts ciphertext with additionalData as
-	// additional authenticated data. The decryption verifies the authenticity and integrity
-	// of the additional data, but there are no guarantees wrt. secrecy of that data.
-	DecryptDeterministically(ciphertext, additionalData []byte) ([]byte, error)
+	// DecryptDeterministically deterministically decrypts ciphertext with associatedData as
+	// associated authenticated data. The decryption verifies the authenticity and integrity
+	// of the associated data, but there are no guarantees with respect to secrecy of that data.
+	DecryptDeterministically(ciphertext, associatedData []byte) ([]byte, error)
 }

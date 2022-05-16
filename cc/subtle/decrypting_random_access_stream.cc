@@ -18,6 +18,7 @@
 
 #include <algorithm>
 #include <cstring>
+#include <utility>
 #include <vector>
 
 #include "absl/base/thread_annotations.h"
@@ -134,7 +135,7 @@ void DecryptingRandomAccessStream::InitializeIfNeeded()
     status_ = buf_result.status();
     return;
   }
-  auto buf = std::move(buf_result.ValueOrDie());
+  auto buf = std::move(buf_result.value());
   status_ = ct_source_->PRead(ct_offset_, header_size_, buf.get());
   if (!status_.ok()) {
     if (status_.code() == absl::StatusCode::kOutOfRange) {
@@ -156,7 +157,7 @@ void DecryptingRandomAccessStream::InitializeIfNeeded()
     status_ = ct_size_result.status();
     return;
   }
-  int64_t ct_size = ct_size_result.ValueOrDie();
+  int64_t ct_size = ct_size_result.value();
   // ct_segment_size_ is always larger than 1, thus full_segment_count is always
   // smaller than std::numeric_limits<int64_t>::max().
   int64_t full_segment_count = ct_size / ct_segment_size_;
@@ -255,7 +256,7 @@ util::Status DecryptingRandomAccessStream::PReadAndDecrypt(
 
   auto pt_size_result = size();
   if (pt_size_result.ok()) {
-    auto pt_size = pt_size_result.ValueOrDie();
+    auto pt_size = pt_size_result.value();
     if (position > pt_size) {
       return Status(absl::StatusCode::kOutOfRange,
                     "position is larger than stream size");
@@ -266,7 +267,7 @@ util::Status DecryptingRandomAccessStream::PReadAndDecrypt(
     return ToStatusF(absl::StatusCode::kInvalidArgument,
                      "Invalid ciphertext segment size %d.", ct_segment_size_);
   }
-  auto ct_buffer = std::move(ct_buffer_result.ValueOrDie());
+  auto ct_buffer = std::move(ct_buffer_result.value());
   std::vector<uint8_t> pt_segment;
   int remaining = count;
   int read_count = 0;

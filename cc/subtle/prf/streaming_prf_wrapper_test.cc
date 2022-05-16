@@ -16,6 +16,9 @@
 
 #include "tink/subtle/prf/streaming_prf_wrapper.h"
 
+#include <string>
+#include <utility>
+
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "absl/status/status.h"
@@ -77,16 +80,16 @@ TEST(KeysetDeriverWrapperTest, WrapSingle) {
   auto entry_or = prf_set->AddPrimitive(
       absl::make_unique<DummyStreamingPrf>("single_key"), key_info);
   ASSERT_THAT(entry_or.status(), IsOk());
-  EXPECT_THAT(prf_set->set_primary(entry_or.ValueOrDie()), IsOk());
+  EXPECT_THAT(prf_set->set_primary(entry_or.value()), IsOk());
 
   auto wrapped_prf = StreamingPrfWrapper().Wrap(std::move(prf_set));
 
   ASSERT_THAT(wrapped_prf.status(), IsOk());
 
   auto prf_output = ReadBytesFromStream(
-      23, wrapped_prf.ValueOrDie()->ComputePrf("input_text").get());
+      23, wrapped_prf.value()->ComputePrf("input_text").get());
   ASSERT_THAT(prf_output.status(), IsOk());
-  EXPECT_THAT(prf_output.ValueOrDie(), Eq("10:single_keyinput_text"));
+  EXPECT_THAT(prf_output.value(), Eq("10:single_keyinput_text"));
 }
 
 TEST(KeysetDeriverWrapperTest, WrapNonRaw) {
@@ -99,7 +102,7 @@ TEST(KeysetDeriverWrapperTest, WrapNonRaw) {
   auto entry_or = prf_set->AddPrimitive(
       absl::make_unique<DummyStreamingPrf>("single_key"), key_info);
   ASSERT_THAT(entry_or.status(), IsOk());
-  EXPECT_THAT(prf_set->set_primary(entry_or.ValueOrDie()), IsOk());
+  EXPECT_THAT(prf_set->set_primary(entry_or.value()), IsOk());
 
   EXPECT_THAT(StreamingPrfWrapper().Wrap(std::move(prf_set)).status(),
               StatusIs(absl::StatusCode::kInvalidArgument,
@@ -117,7 +120,7 @@ TEST(KeysetDeriverWrapperTest, WrapMultiple) {
   auto entry_or = prf_set->AddPrimitive(
       absl::make_unique<DummyStreamingPrf>("single_key"), key_info);
   ASSERT_THAT(entry_or.status(), IsOk());
-  EXPECT_THAT(prf_set->set_primary(entry_or.ValueOrDie()), IsOk());
+  EXPECT_THAT(prf_set->set_primary(entry_or.value()), IsOk());
   key_info.set_key_id(2345);
   EXPECT_THAT(
       prf_set

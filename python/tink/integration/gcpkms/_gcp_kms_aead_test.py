@@ -22,8 +22,8 @@ from tink import core
 from tink.integration import gcpkms
 from tink.testing import helper
 
-CREDENTIAL_PATH = os.path.join(helper.tink_root_path(),
-                               'testdata/credential.json')
+CREDENTIAL_PATH = os.path.join(helper.tink_py_testdata_path(),
+                               'credential.json')
 KEY_URI = 'gcp-kms://projects/tink-test-infrastructure/locations/global/keyRings/unit-and-integration-testing/cryptoKeys/aead-key'
 LOCAL_KEY_URI = 'gcp-kms://projects/tink-test-infrastructure/locations/europe-west1/keyRings/unit-and-integration-test/cryptoKeys/aead-key'
 BAD_KEY_URI = 'aws-kms://arn:aws:kms:us-east-2:235739564943:key/3ee50705-5a82-4f5b-9753-05c4f473922f'

@@ -16,13 +16,20 @@
 
 #include "tink/cc/cc_tink_config.h"
 
+#include <utility>
+
 #include "tink/config/tink_config.h"
+#include "tink/util/status.h"
+#include "tink/cc/pybind/tink_exception.h"
 
 namespace crypto {
 namespace tink {
 
-util::Status CcTinkConfigRegister() {
-  return TinkConfig::Register();
+void CcTinkConfigRegister() {
+  util::Status result = TinkConfig::Register();
+  if (!result.ok()) {
+    throw pybind11::google_tink::TinkException(result);
+  }
 }
 
 }  // namespace tink

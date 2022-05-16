@@ -73,9 +73,8 @@ EciesAeadHkdfPublicKey CreatePublicKey() {
   kem_params->set_hkdf_salt("");
   auto private_key_manager = EciesAeadHkdfPrivateKeyManager();
   return private_key_manager
-      .GetPublicKey(
-          private_key_manager.CreateKey(key_format).ValueOrDie())
-      .ValueOrDie();
+      .GetPublicKey(private_key_manager.CreateKey(key_format).value())
+      .value();
 }
 
 TEST(EciesAeadHkdfPublicKeyManagerTest, ValidateParams) {

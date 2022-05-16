@@ -28,6 +28,9 @@ import com.google.crypto.tink.aead.AesEaxKeyManager;
 import com.google.crypto.tink.aead.AesGcmKeyManager;
 import com.google.crypto.tink.config.TinkConfig;
 import com.google.crypto.tink.config.internal.TinkFipsUtil;
+import com.google.crypto.tink.internal.KeyTypeManager;
+import com.google.crypto.tink.internal.PrimitiveFactory;
+import com.google.crypto.tink.internal.PrivateKeyTypeManager;
 import com.google.crypto.tink.mac.MacConfig;
 import com.google.crypto.tink.mac.MacKeyTemplates;
 import com.google.crypto.tink.proto.AesEaxKey;
@@ -1034,8 +1037,9 @@ public class RegistryTest {
     }
 
     @Override
-    public KeyFactory<Ed25519KeyFormat, Ed25519PrivateKey> keyFactory() {
-      return new KeyFactory<Ed25519KeyFormat, Ed25519PrivateKey>(Ed25519KeyFormat.class) {
+    public KeyTypeManager.KeyFactory<Ed25519KeyFormat, Ed25519PrivateKey> keyFactory() {
+      return new KeyTypeManager.KeyFactory<Ed25519KeyFormat, Ed25519PrivateKey>(
+          Ed25519KeyFormat.class) {
         @Override
         public void validateKeyFormat(Ed25519KeyFormat format) throws GeneralSecurityException {}
 
@@ -1062,7 +1066,7 @@ public class RegistryTest {
         }
 
         @Override
-        public Map<String, KeyFactory.KeyFormat<Ed25519KeyFormat>> keyFormats() {
+        public Map<String, KeyTypeManager.KeyFactory.KeyFormat<Ed25519KeyFormat>> keyFormats() {
           return keyFormats;
         }
       };
@@ -1300,15 +1304,63 @@ public class RegistryTest {
   }
 
   @Test
-  public void testRegisterAssymmetricKeyManagers_publicKeyManagerReRegister_getPublicKeyData()
+  public void testRegisterAssymmetricKeyManagers_getPublicKeyData_shouldWork()
       throws Exception {
     Registry.reset();
+    Registry.registerAsymmetricKeyManagers(
+        new TestPrivateKeyTypeManager(), new TestPublicKeyTypeManager(), false);
+
+    Ed25519PrivateKey privateKey =
+        Ed25519PrivateKey.newBuilder()
+            .setKeyValue(ByteString.copyFrom(Random.randBytes(32)))
+            .setPublicKey(
+                Ed25519PublicKey.newBuilder()
+                    .setKeyValue(ByteString.copyFrom(Random.randBytes(32))))
+            .build();
+    KeyData publicKeyData =
+        Registry.getPublicKeyData(
+            new TestPrivateKeyTypeManager().getKeyType(), privateKey.toByteString());
+    assertThat(publicKeyData.getTypeUrl()).isEqualTo(new TestPublicKeyTypeManager().getKeyType());
+    Ed25519PublicKey publicKey =
+        Ed25519PublicKey.parseFrom(
+            publicKeyData.getValue(), ExtensionRegistryLite.getEmptyRegistry());
+    assertThat(publicKey.getKeyValue()).isEqualTo(privateKey.getPublicKey().getKeyValue());
+  }
+
+  @Test
+  public void testRegisterAsymmetricKeyManagersSeparately_getPublicKeyData_throws()
+      throws Exception {
+    Registry.reset();
+    // Register asymmetric key managers only with registerKeyManager.
+    Registry.registerKeyManager(new TestPrivateKeyTypeManager(), false);
+    Registry.registerKeyManager(new TestPublicKeyTypeManager(), false);
+
+    Ed25519PrivateKey privateKey =
+        Ed25519PrivateKey.newBuilder()
+            .setKeyValue(ByteString.copyFrom(Random.randBytes(32)))
+            .setPublicKey(
+                Ed25519PublicKey.newBuilder()
+                    .setKeyValue(ByteString.copyFrom(Random.randBytes(32))))
+            .build();
+    assertThrows(
+        GeneralSecurityException.class,
+        () ->
+            Registry.getPublicKeyData(
+            new TestPrivateKeyTypeManager().getKeyType(), privateKey.toByteString()));
+  }
+
+  @Test
+  public void testRegisterAssymmetricKeyManagersOnce_getPublicKeyData_shouldWork()
+      throws Exception {
+    Registry.reset();
+    // Register asymmetric key managers with registerAsymmetricKeyManagers and registerKeyManager.
+    Registry.registerKeyManager(new TestPrivateKeyTypeManager(), false);
     Registry.registerKeyManager(new TestPublicKeyTypeManager(), false);
     Registry.registerAsymmetricKeyManagers(
         new TestPrivateKeyTypeManager(), new TestPublicKeyTypeManager(), false);
+    Registry.registerKeyManager(new TestPrivateKeyTypeManager(), false);
     Registry.registerKeyManager(new TestPublicKeyTypeManager(), false);
 
-    // Check that getPublicKeyData works now.
     Ed25519PrivateKey privateKey =
         Ed25519PrivateKey.newBuilder()
             .setKeyValue(ByteString.copyFrom(Random.randBytes(32)))
@@ -1336,6 +1388,7 @@ public class RegistryTest {
         GeneralSecurityException.class,
         () ->
             Registry.registerAsymmetricKeyManagers(
+                // Note: due to the {} this is a subclass of TestPrivateKeyTypeManager.
                 new TestPrivateKeyTypeManager() {}, new TestPublicKeyTypeManager(), false));
   }
 
@@ -1649,6 +1702,20 @@ public class RegistryTest {
     Registry.restrictToFipsIfEmpty();
 
     EcdsaSignKeyManager.registerPair(true);
+  }
+
+
+  @Test
+  public void testFips_registerFipsKeyManager_fails() throws Exception {
+    Assume.assumeTrue(TinkFipsUtil.fipsModuleAvailable());
+
+    Registry.reset();
+    Registry.restrictToFipsIfEmpty();
+
+    String typeUrl = "testNewKeyDataTypeUrl";
+    CustomAeadKeyManager km = new CustomAeadKeyManager(typeUrl);
+    assertThrows(
+        GeneralSecurityException.class, () -> Registry.registerKeyManager(km));
   }
 
   private static class FakeAead {}

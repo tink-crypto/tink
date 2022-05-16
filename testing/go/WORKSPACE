@@ -12,27 +12,51 @@ local_repository(
     path = "../../go",
 )
 
+# Release from 2022-01-24
+http_archive(
+    name = "io_bazel_rules_go",
+    sha256 = "d6b2513456fe2229811da7eb67a444be7785f5323c6708b38d851d2b51e54d83",
+    urls = [
+        "https://mirror.bazel.build/github.com/bazelbuild/rules_go/releases/download/v0.30.0/rules_go-v0.30.0.zip",
+        "https://github.com/bazelbuild/rules_go/releases/download/v0.30.0/rules_go-v0.30.0.zip",
+    ],
+)
+
+# Release from 2021-10-11
+http_archive(
+    name = "bazel_gazelle",
+    sha256 = "de69a09dc70417580aabf20a28619bb3ef60d038470c7cf8442fafcf627c21cb",
+    urls = [
+        "https://mirror.bazel.build/github.com/bazelbuild/bazel-gazelle/releases/download/v0.24.0/bazel-gazelle-v0.24.0.tar.gz",
+        "https://github.com/bazelbuild/bazel-gazelle/releases/download/v0.24.0/bazel-gazelle-v0.24.0.tar.gz",
+    ],
+)
+
 load("@tink_base//:tink_base_deps.bzl", "tink_base_deps")
 tink_base_deps()
 
 load("@tink_base//:tink_base_deps_init.bzl", "tink_base_deps_init")
 tink_base_deps_init()
 
-load("@tink_go//:tink_go_deps.bzl", "tink_go_deps")
-tink_go_deps()
+load("@io_bazel_rules_go//go:deps.bzl", "go_register_toolchains", "go_rules_dependencies")
+load("@bazel_gazelle//:deps.bzl", "gazelle_dependencies", "go_repository")
+load("@tink_go//:deps.bzl", "go_dependencies")
 
-load("@tink_go//:tink_go_deps_init.bzl", "tink_go_deps_init")
-tink_go_deps_init()
+go_dependencies()
 
 # TODO(b/213404399): Remove after Gazelle issue is fixed.
-load("@bazel_gazelle//:deps.bzl", "gazelle_dependencies", "go_repository")
-gazelle_dependencies()
 go_repository(
     name = "com_google_cloud_go_compute",
     importpath = "cloud.google.com/go/compute",
     sum = "h1:rSUBvAyVwNJ5uQCKNJFMwPtTvJkfN38b6Pvb9zZoqJ8=",
     version = "v0.1.0",
 )
+
+go_rules_dependencies()
+
+go_register_toolchains(version = "1.17.6")
+
+gazelle_dependencies()
 
 # Release from 2021-09-15
 http_archive(

@@ -77,7 +77,7 @@ util::StatusOr<std::string> PublicKeySignSetWrapper::Sign(
   auto sign_result = primary->get_primitive().Sign(data);
   if (!sign_result.ok()) return sign_result.status();
   const std::string& key_id = primary->get_identifier();
-  return key_id + sign_result.ValueOrDie();
+  return key_id + sign_result.value();
 }
 
 }  // anonymous namespace

@@ -18,6 +18,7 @@
 #define TINK_SUBTLE_ECDSA_VERIFY_BORINGSSL_H_
 
 #include <memory>
+#include <utility>
 
 #include "absl/strings/string_view.h"
 #include "openssl/ec.h"

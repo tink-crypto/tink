@@ -57,7 +57,7 @@ TEST_F(KeysetManagerTest, testBasicOperations) {
   // Create a keyset manager with a single key.
   auto new_result = KeysetManager::New(key_template);
   EXPECT_TRUE(new_result.ok()) << new_result.status();
-  auto keyset_manager = std::move(new_result.ValueOrDie());
+  auto keyset_manager = std::move(new_result.value());
   EXPECT_EQ(1, keyset_manager->KeyCount());
 
   // Verify the keyset.
@@ -77,7 +77,7 @@ TEST_F(KeysetManagerTest, testBasicOperations) {
   auto add_result = keyset_manager->Add(key_template);
   EXPECT_TRUE(add_result.ok()) << add_result.status();
   EXPECT_EQ(2, keyset_manager->KeyCount());
-  auto key_id_1 = add_result.ValueOrDie();
+  auto key_id_1 = add_result.value();
   keyset = TestKeysetHandle::GetKeyset(*(keyset_manager->GetKeysetHandle()));
   EXPECT_EQ(2, keyset.key().size());
   EXPECT_EQ(key_id_0, keyset.primary_key_id());
@@ -94,7 +94,7 @@ TEST_F(KeysetManagerTest, testBasicOperations) {
   auto rotate_result = keyset_manager->Rotate(key_template);
   EXPECT_TRUE(rotate_result.ok()) << add_result.status();
   EXPECT_EQ(3, keyset_manager->KeyCount());
-  auto key_id_2 = rotate_result.ValueOrDie();
+  auto key_id_2 = rotate_result.value();
   keyset = TestKeysetHandle::GetKeyset(*(keyset_manager->GetKeysetHandle()));
   EXPECT_EQ(3, keyset.key().size());
   EXPECT_EQ(key_id_2, keyset.primary_key_id());
@@ -117,8 +117,8 @@ TEST_F(KeysetManagerTest, testBasicOperations) {
   EXPECT_EQ(key_id_1, keyset.primary_key_id());
 
   // Clone a keyset via the manager, and check equality.
-  auto keyset_manager_2 = std::move(
-      KeysetManager::New(*keyset_manager->GetKeysetHandle()).ValueOrDie());
+  auto keyset_manager_2 =
+      std::move(KeysetManager::New(*keyset_manager->GetKeysetHandle()).value());
   auto keyset_2 =
       TestKeysetHandle::GetKeyset(*(keyset_manager_2->GetKeysetHandle()));
   EXPECT_EQ(keyset.SerializeAsString(), keyset_2.SerializeAsString());

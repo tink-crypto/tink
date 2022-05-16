@@ -17,10 +17,12 @@
 #ifndef TINK_JWT_JWT_PUBLIC_KEY_SIGN_H_
 #define TINK_JWT_JWT_PUBLIC_KEY_SIGN_H_
 
+#include <string>
+
 #include "absl/strings/string_view.h"
+#include "tink/jwt/raw_jwt.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
-#include "tink/jwt/raw_jwt.h"
 
 namespace crypto {
 namespace tink {

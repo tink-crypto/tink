@@ -19,6 +19,8 @@
 #include <algorithm>
 #include <cstdint>
 #include <iterator>
+#include <string>
+#include <utility>
 
 #include "absl/memory/memory.h"
 #include "absl/status/status.h"
@@ -47,7 +49,7 @@ crypto::tink::util::StatusOr<util::SecretUniquePtr<AES_KEY>> InitializeAesKey(
     return util::Status(absl::StatusCode::kInternal,
                         "could not initialize aes key");
   }
-  return aes_key;
+  return std::move(aes_key);
 }
 
 }  // namespace
@@ -65,13 +67,13 @@ AesSivBoringSsl::New(const util::SecretData& key) {
   if (!k1_or.ok()) {
     return k1_or.status();
   }
-  util::SecretUniquePtr<AES_KEY> k1 = std::move(k1_or).ValueOrDie();
+  util::SecretUniquePtr<AES_KEY> k1 = std::move(k1_or).value();
   auto k2_or = InitializeAesKey(absl::MakeSpan(key).subspan(key.size() / 2));
   if (!k2_or.ok()) {
     return k2_or.status();
   }
 
-  util::SecretUniquePtr<AES_KEY> k2 = std::move(k2_or).ValueOrDie();
+  util::SecretUniquePtr<AES_KEY> k2 = std::move(k2_or).value();
   return {absl::WrapUnique(new AesSivBoringSsl(std::move(k1), std::move(k2)))};
 }
 
@@ -204,10 +206,10 @@ util::Status AesSivBoringSsl::AesCtrCrypt(absl::string_view in,
 }
 
 util::StatusOr<std::string> AesSivBoringSsl::EncryptDeterministically(
-    absl::string_view plaintext, absl::string_view additional_data) const {
+    absl::string_view plaintext, absl::string_view associated_data) const {
   uint8_t siv[kBlockSize];
-  S2v(absl::MakeSpan(reinterpret_cast<const uint8_t*>(additional_data.data()),
-                     additional_data.size()),
+  S2v(absl::MakeSpan(reinterpret_cast<const uint8_t*>(associated_data.data()),
+                     associated_data.size()),
       absl::MakeSpan(reinterpret_cast<const uint8_t*>(plaintext.data()),
                      plaintext.size()),
       siv);
@@ -226,7 +228,7 @@ util::StatusOr<std::string> AesSivBoringSsl::EncryptDeterministically(
 }
 
 util::StatusOr<std::string> AesSivBoringSsl::DecryptDeterministically(
-    absl::string_view ciphertext, absl::string_view additional_data) const {
+    absl::string_view ciphertext, absl::string_view associated_data) const {
   if (ciphertext.size() < kBlockSize) {
     return util::Status(absl::StatusCode::kInvalidArgument,
                         "ciphertext too short");
@@ -242,8 +244,8 @@ util::StatusOr<std::string> AesSivBoringSsl::DecryptDeterministically(
   }
 
   uint8_t s2v[kBlockSize];
-  S2v(absl::MakeSpan(reinterpret_cast<const uint8_t*>(additional_data.data()),
-                     additional_data.size()),
+  S2v(absl::MakeSpan(reinterpret_cast<const uint8_t*>(associated_data.data()),
+                     associated_data.size()),
       absl::MakeSpan(reinterpret_cast<const uint8_t*>(plaintext.data()),
                      plaintext_size),
       s2v);

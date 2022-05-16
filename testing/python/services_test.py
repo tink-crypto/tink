@@ -13,7 +13,6 @@
 # limitations under the License.
 """Tests for tink.tools.testing.python.testing_server."""
 
-from absl import logging
 from absl.testing import absltest
 import grpc
 
@@ -160,6 +159,118 @@ class ServicesTest(absltest.TestCase):
     self.assertEqual(response.WhichOneof('result'), 'err')
     self.assertNotEmpty(response.err)
 
+  def test_generate_keyset_write_read_encrypted(self):
+    keyset_servicer = services.KeysetServicer()
+
+    template = aead.aead_key_templates.AES128_GCM.SerializeToString()
+    gen_request = testing_api_pb2.KeysetGenerateRequest(template=template)
+    master_response = keyset_servicer.Generate(gen_request, self._ctx)
+    self.assertEqual(master_response.WhichOneof('result'), 'keyset')
+    master_keyset = master_response.keyset
+
+    keyset_response = keyset_servicer.Generate(gen_request, self._ctx)
+    self.assertEqual(keyset_response.WhichOneof('result'), 'keyset')
+    keyset = keyset_response.keyset
+
+    write_encrypted_request = testing_api_pb2.KeysetWriteEncryptedRequest(
+        keyset=keyset,
+        master_keyset=master_keyset,
+        keyset_writer_type=testing_api_pb2.KEYSET_WRITER_BINARY)
+    write_encrypted_response = keyset_servicer.WriteEncrypted(
+        write_encrypted_request, self._ctx)
+    self.assertEqual(
+        write_encrypted_response.WhichOneof('result'), 'encrypted_keyset')
+    encrypted_keyset = write_encrypted_response.encrypted_keyset
+
+    read_encrypted_request = testing_api_pb2.KeysetReadEncryptedRequest(
+        encrypted_keyset=encrypted_keyset,
+        master_keyset=master_keyset,
+        keyset_reader_type=testing_api_pb2.KEYSET_READER_BINARY)
+    read_encrypted_response = keyset_servicer.ReadEncrypted(
+        read_encrypted_request, self._ctx)
+    self.assertEqual(read_encrypted_response.WhichOneof('result'), 'keyset')
+    self.assertEqual(read_encrypted_response.keyset, keyset)
+
+  def test_generate_keyset_write_read_encrypted_with_associated_data(self):
+    keyset_servicer = services.KeysetServicer()
+
+    template = aead.aead_key_templates.AES128_GCM.SerializeToString()
+    gen_request = testing_api_pb2.KeysetGenerateRequest(template=template)
+    master_response = keyset_servicer.Generate(gen_request, self._ctx)
+    self.assertEqual(master_response.WhichOneof('result'), 'keyset')
+    master_keyset = master_response.keyset
+
+    keyset_response = keyset_servicer.Generate(gen_request, self._ctx)
+    self.assertEqual(keyset_response.WhichOneof('result'), 'keyset')
+    keyset = keyset_response.keyset
+
+    associated_data = b'associated_data'
+
+    write_encrypted_request = testing_api_pb2.KeysetWriteEncryptedRequest(
+        keyset=keyset,
+        master_keyset=master_keyset,
+        associated_data=testing_api_pb2.BytesValue(value=associated_data),
+        keyset_writer_type=testing_api_pb2.KEYSET_WRITER_BINARY)
+    write_encrypted_response = keyset_servicer.WriteEncrypted(
+        write_encrypted_request, self._ctx)
+    self.assertEqual(
+        write_encrypted_response.WhichOneof('result'), 'encrypted_keyset')
+    encrypted_keyset = write_encrypted_response.encrypted_keyset
+
+    read_encrypted_request = testing_api_pb2.KeysetReadEncryptedRequest(
+        encrypted_keyset=encrypted_keyset,
+        master_keyset=master_keyset,
+        associated_data=testing_api_pb2.BytesValue(value=associated_data),
+        keyset_reader_type=testing_api_pb2.KEYSET_READER_BINARY)
+    read_encrypted_response = keyset_servicer.ReadEncrypted(
+        read_encrypted_request, self._ctx)
+    self.assertEqual(read_encrypted_response.WhichOneof('result'), 'keyset')
+    self.assertEqual(read_encrypted_response.keyset, keyset)
+
+    # Using the wrong associated_data fails
+    read_encrypted_request = testing_api_pb2.KeysetReadEncryptedRequest(
+        encrypted_keyset=encrypted_keyset,
+        master_keyset=master_keyset,
+        associated_data=testing_api_pb2.BytesValue(value=b'wrong ad'),
+        keyset_reader_type=testing_api_pb2.KEYSET_READER_BINARY)
+    read_encrypted_response = keyset_servicer.ReadEncrypted(
+        read_encrypted_request, self._ctx)
+    self.assertEqual(read_encrypted_response.WhichOneof('result'), 'err')
+
+  def test_keyset_write_encrypted_fails_when_keyset_is_invalid(self):
+    keyset_servicer = services.KeysetServicer()
+
+    template = aead.aead_key_templates.AES128_GCM.SerializeToString()
+    gen_request = testing_api_pb2.KeysetGenerateRequest(template=template)
+    master_response = keyset_servicer.Generate(gen_request, self._ctx)
+    self.assertEqual(master_response.WhichOneof('result'), 'keyset')
+    master_keyset = master_response.keyset
+
+    write_encrypted_request = testing_api_pb2.KeysetWriteEncryptedRequest(
+        keyset=b'invalid',
+        master_keyset=master_keyset,
+        keyset_writer_type=testing_api_pb2.KEYSET_WRITER_BINARY)
+    write_encrypted_response = keyset_servicer.WriteEncrypted(
+        write_encrypted_request, self._ctx)
+    self.assertEqual(write_encrypted_response.WhichOneof('result'), 'err')
+
+  def test_keyset_read_encrypted_fails_when_encrypted_keyset_is_invalid(self):
+    keyset_servicer = services.KeysetServicer()
+
+    template = aead.aead_key_templates.AES128_GCM.SerializeToString()
+    gen_request = testing_api_pb2.KeysetGenerateRequest(template=template)
+    master_response = keyset_servicer.Generate(gen_request, self._ctx)
+    self.assertEqual(master_response.WhichOneof('result'), 'keyset')
+    master_keyset = master_response.keyset
+
+    read_encrypted_request = testing_api_pb2.KeysetReadEncryptedRequest(
+        encrypted_keyset=b'invalid',
+        master_keyset=master_keyset,
+        keyset_reader_type=testing_api_pb2.KEYSET_READER_BINARY)
+    read_encrypted_response = keyset_servicer.ReadEncrypted(
+        read_encrypted_request, self._ctx)
+    self.assertEqual(read_encrypted_response.WhichOneof('result'), 'err')
+
   def test_generate_encrypt_decrypt(self):
     keyset_servicer = services.KeysetServicer()
     aead_servicer = services.AeadServicer()
@@ -198,7 +309,6 @@ class ServicesTest(absltest.TestCase):
         keyset=keyset, ciphertext=ciphertext, associated_data=associated_data)
     dec_response = aead_servicer.Decrypt(dec_request, self._ctx)
     self.assertEqual(dec_response.WhichOneof('result'), 'err')
-    logging.info('Error in response: %s', dec_response.err)
     self.assertNotEmpty(dec_response.err)
 
   def test_server_info(self):
@@ -254,7 +364,6 @@ class ServicesTest(absltest.TestCase):
     dec_response = daead_servicer.DecryptDeterministically(dec_request,
                                                            self._ctx)
     self.assertEqual(dec_response.WhichOneof('result'), 'err')
-    logging.info('Error in response: %s', dec_response.err)
     self.assertNotEmpty(dec_response.err)
 
   def test_generate_compute_verify_mac(self):
@@ -289,7 +398,6 @@ class ServicesTest(absltest.TestCase):
     verify_request = testing_api_pb2.VerifyMacRequest(
         keyset=keyset, mac_value=b'invalid mac_value', data=b'data')
     verify_response = mac_servicer.VerifyMac(verify_request, self._ctx)
-    logging.info('Error in response: %s', verify_response.err)
     self.assertNotEmpty(verify_response.err)
 
   def test_generate_hybrid_encrypt_decrypt(self):
@@ -502,7 +610,6 @@ class ServicesTest(absltest.TestCase):
         keyset=keyset, ciphertext=ciphertext, associated_data=associated_data)
     dec_response = streaming_aead_servicer.Decrypt(dec_request, self._ctx)
     self.assertEqual(dec_response.WhichOneof('result'), 'err')
-    logging.info('Error in response: %s', dec_response.err)
     self.assertNotEmpty(dec_response.err)
 
 

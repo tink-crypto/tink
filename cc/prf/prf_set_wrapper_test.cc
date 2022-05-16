@@ -18,6 +18,7 @@
 #include <cstdint>
 #include <memory>
 #include <string>
+#include <utility>
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
@@ -94,7 +95,7 @@ TEST_F(PrfSetWrapperTest, NonRawKeyType) {
   key_info.set_output_prefix_type(google::crypto::tink::OutputPrefixType::TINK);
   auto entry = AddPrf("output", key_info);
   ASSERT_THAT(entry.status(), IsOk());
-  ASSERT_THAT(PrfSet()->set_primary(entry.ValueOrDie()), IsOk());
+  ASSERT_THAT(PrfSet()->set_primary(entry.value()), IsOk());
   PrfSetWrapper wrapper;
   EXPECT_THAT(wrapper.Wrap(std::move(PrfSet())).status(), Not(IsOk()));
 }
@@ -102,11 +103,11 @@ TEST_F(PrfSetWrapperTest, NonRawKeyType) {
 TEST_F(PrfSetWrapperTest, WrapOkay) {
   auto entry = AddPrf("output", MakeKey(1));
   ASSERT_THAT(entry.status(), IsOk());
-  ASSERT_THAT(PrfSet()->set_primary(entry.ValueOrDie()), IsOk());
+  ASSERT_THAT(PrfSet()->set_primary(entry.value()), IsOk());
   PrfSetWrapper wrapper;
   auto wrapped = wrapper.Wrap(std::move(PrfSet()));
   ASSERT_THAT(wrapped.status(), IsOk());
-  EXPECT_THAT(wrapped.ValueOrDie()->ComputePrimary("input", 6),
+  EXPECT_THAT(wrapped.value()->ComputePrimary("input", 6),
               IsOkAndHolds(StrEq("output")));
 }
 
@@ -114,7 +115,7 @@ TEST_F(PrfSetWrapperTest, WrapTwo) {
   std::string primary_output("output");
   auto entry = AddPrf(primary_output, MakeKey(1));
   ASSERT_THAT(entry.status(), IsOk());
-  ASSERT_THAT(PrfSet()->set_primary(entry.ValueOrDie()), IsOk());
+  ASSERT_THAT(PrfSet()->set_primary(entry.value()), IsOk());
 
   ASSERT_THAT(AddPrf(primary_output, MakeKey(1)).status(), IsOk());
   std::string secondary_output("different");
@@ -122,7 +123,7 @@ TEST_F(PrfSetWrapperTest, WrapTwo) {
   PrfSetWrapper wrapper;
   auto wrapped_or = wrapper.Wrap(std::move(PrfSet()));
   ASSERT_THAT(wrapped_or.status(), IsOk());
-  auto wrapped = std::move(wrapped_or.ValueOrDie());
+  auto wrapped = std::move(wrapped_or.value());
   EXPECT_THAT(wrapped->ComputePrimary("input", 6),
               IsOkAndHolds(StrEq("output")));
   const auto& prf_map = wrapped->GetPrfs();

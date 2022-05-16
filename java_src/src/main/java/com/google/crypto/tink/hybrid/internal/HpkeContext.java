@@ -28,10 +28,10 @@ import javax.annotation.concurrent.ThreadSafe;
 /**
  * Hybrid Public Key Encryption (HPKE) context for either a sender or a recipient.
  *
- * <p>https://www.ietf.org/archive/id/draft-irtf-cfrg-hpke-12.html#name-creating-the-encryption-con
+ * <p>https://www.rfc-editor.org/rfc/rfc9180.html#name-creating-the-encryption-con
  */
 @ThreadSafe
-public final class HpkeContext {
+final class HpkeContext {
   private static final byte[] EMPTY_IKM = new byte[0];
 
   private final HpkeAead aead;
@@ -82,7 +82,7 @@ public final class HpkeContext {
 
   /**
    * Creates HPKE sender context according to KeySchedule() defined in
-   * https://www.ietf.org/archive/id/draft-irtf-cfrg-hpke-12.html#section-5.1-9.
+   * https://www.rfc-editor.org/rfc/rfc9180.html#section-5.1-9.
    *
    * @param recipientPublicKey recipient's public key (pkR)
    * @param kem key encapsulation mechanism primitive
@@ -90,7 +90,7 @@ public final class HpkeContext {
    * @param aead authenticated encryption with associated data primitive
    * @param info application-specific information parameter to influence key generation
    */
-  public static HpkeContext createSenderContext(
+  static HpkeContext createSenderContext(
       HpkePublicKey recipientPublicKey, HpkeKem kem, HpkeKdf kdf, HpkeAead aead, byte[] info)
       throws GeneralSecurityException {
     HpkeKemEncapOutput encapOutput =
@@ -102,7 +102,7 @@ public final class HpkeContext {
 
   /**
    * Creates HPKE sender recipient context according to KeySchedule() defined in
-   * https://www.ietf.org/archive/id/draft-irtf-cfrg-hpke-12.html#section-5.1-9.
+   * https://www.rfc-editor.org/rfc/rfc9180.html#section-5.1-9.
    *
    * @param encapsulatedKey encapsulated key (enc)
    * @param recipientPrivateKey recipient's private key (skR)
@@ -111,7 +111,7 @@ public final class HpkeContext {
    * @param aead authenticated encryption with associated data primitive
    * @param info application-specific information parameter to influence key generation
    */
-  public static HpkeContext createRecipientContext(
+  static HpkeContext createRecipientContext(
       byte[] encapsulatedKey,
       HpkePrivateKey recipientPrivateKey,
       HpkeKem kem,
@@ -136,10 +136,7 @@ public final class HpkeContext {
     sequenceNumber = sequenceNumber.add(BigInteger.ONE);
   }
 
-  /**
-   * ComputeNonce() from
-   * https://www.ietf.org/archive/id/draft-irtf-cfrg-hpke-12.html#section-5.2-11.
-   */
+  /** ComputeNonce() from https://www.rfc-editor.org/rfc/rfc9180.html#section-5.2-11. */
   @GuardedBy("this")
   private byte[] computeNonce() throws GeneralSecurityException {
     return Bytes.xor(baseNonce, SubtleUtil.integer2Bytes(sequenceNumber, aead.getNonceLength()));
@@ -161,30 +158,28 @@ public final class HpkeContext {
     return baseNonce;
   }
 
-  public byte[] getEncapsulatedKey() {
+  byte[] getEncapsulatedKey() {
     return encapsulatedKey;
   }
 
   /**
    * Performs AEAD encryption of {@code plaintext} with {@code associatedData} according to
-   * ContextS.Seal() defined in
-   * https://www.ietf.org/archive/id/draft-irtf-cfrg-hpke-12.html#section-5.2-8.
+   * ContextS.Seal() defined in https://www.rfc-editor.org/rfc/rfc9180.html#section-5.2-8.
    *
    * @return ciphertext
    */
-  public byte[] seal(byte[] plaintext, byte[] associatedData) throws GeneralSecurityException {
+  byte[] seal(byte[] plaintext, byte[] associatedData) throws GeneralSecurityException {
     byte[] nonce = computeNonceAndIncrementSequenceNumber();
     return aead.seal(key, nonce, plaintext, associatedData);
   }
 
   /**
    * Performs AEAD decryption of {@code ciphertext} with {@code associatedData} according to
-   * ContextR.Open() defined in
-   * https://www.ietf.org/archive/id/draft-irtf-cfrg-hpke-12.html#section-5.2-10.
+   * ContextR.Open() defined in https://www.rfc-editor.org/rfc/rfc9180.html#section-5.2-10.
    *
    * @return plaintext
    */
-  public byte[] open(byte[] ciphertext, byte[] associatedData) throws GeneralSecurityException {
+  byte[] open(byte[] ciphertext, byte[] associatedData) throws GeneralSecurityException {
     byte[] nonce = computeNonceAndIncrementSequenceNumber();
     return aead.open(key, nonce, ciphertext, associatedData);
   }

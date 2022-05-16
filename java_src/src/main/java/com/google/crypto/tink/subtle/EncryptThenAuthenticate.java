@@ -24,10 +24,9 @@ import java.util.Arrays;
 import javax.crypto.spec.SecretKeySpec;
 
 /**
- * This primitive performs an encrypt-then-Mac operation on plaintext and additional authenticated
- * data (aad).
+ * This primitive performs an encrypt-then-Mac operation on plaintext and associated data (ad).
  *
- * <p>The Mac is computed over (aad || ciphertext || size of aad), thus it doesn't violate the <a
+ * <p>The Mac is computed over (ad || ciphertext || size of ad), thus it doesn't violate the <a
  * href="https://en.wikipedia.org/wiki/Horton_Principle">Horton Principle</a>. This implementation
  * is based on <a
  * href="http://tools.ietf.org/html/draft-mcgrew-aead-aes-cbc-hmac-sha2-05">Authenticated Encryption
@@ -57,12 +56,12 @@ public final class EncryptThenAuthenticate implements Aead {
   }
 
   /**
-   * Encrypts {@code plaintext} with {@code aad} as additional authenticated data. The resulting
-   * ciphertext allows for checking authenticity and integrity of additional data ({@code aad}), but
-   * does not guarantee its secrecy.
+   * Encrypts {@code plaintext} with {@code associatedData}. The resulting ciphertext allows
+   * for checking authenticity and integrity of associated data (ad), but does not guarantee its
+   * secrecy.
    *
-   * <p>The plaintext is encrypted with an {@code IndCpaCipher}, then MAC is computed over (aad ||
-   * ciphertext || t) where t is aad's length in bits represented as 64-bit bigendian unsigned
+   * <p>The plaintext is encrypted with an {@code IndCpaCipher}, then MAC is computed over (ad ||
+   * ciphertext || t) where t is ad's length in bits represented as 64-bit bigendian unsigned
    * integer. The final ciphertext format is (ind-cpa ciphertext || mac).
    *
    * @return resulting ciphertext.
@@ -71,23 +70,23 @@ public final class EncryptThenAuthenticate implements Aead {
   public byte[] encrypt(final byte[] plaintext, final byte[] associatedData)
       throws GeneralSecurityException {
     byte[] ciphertext = cipher.encrypt(plaintext);
-    byte[] aad = associatedData;
-    if (aad == null) {
-      aad = new byte[0];
+    byte[] ad = associatedData;
+    if (ad == null) {
+      ad = new byte[0];
     }
-    byte[] aadLengthInBits =
-        Arrays.copyOf(ByteBuffer.allocate(8).putLong(8L * aad.length).array(), 8);
-    byte[] macValue = mac.computeMac(Bytes.concat(aad, ciphertext, aadLengthInBits));
+    byte[] adLengthInBits =
+        Arrays.copyOf(ByteBuffer.allocate(8).putLong(8L * ad.length).array(), 8);
+    byte[] macValue = mac.computeMac(Bytes.concat(ad, ciphertext, adLengthInBits));
     return Bytes.concat(ciphertext, macValue);
   }
 
   /**
-   * Decrypts {@code ciphertext} with {@code aad} as additional authenticated data. The decryption
-   * verifies the authenticity and integrity of additional data ({@code aad}), but there are no
-   * guarantees wrt. secrecy of that data.
+   * Decrypts {@code ciphertext} with {@code associatedData} as associated data. The decryption
+   * verifies the authenticity and integrity of associated data (ad), but there are no guarantees
+   * with respect to secrecy of that data.
    *
-   * <p>The ciphertext format is ciphertext || mac. The MAC is verified against (aad || ciphertext||
-   * t) where t is aad's length in bits represented as 64-bit bigendian unsigned integer.
+   * <p>The ciphertext format is ciphertext || mac. The MAC is verified against (ad || ciphertext||
+   * t) where t is ad's length in bits represented as 64-bit bigendian unsigned integer.
    *
    * @return resulting plaintext.
    */
@@ -100,13 +99,13 @@ public final class EncryptThenAuthenticate implements Aead {
     byte[] rawCiphertext = Arrays.copyOfRange(ciphertext, 0, ciphertext.length - macLength);
     byte[] macValue =
         Arrays.copyOfRange(ciphertext, ciphertext.length - macLength, ciphertext.length);
-    byte[] aad = associatedData;
-    if (aad == null) {
-      aad = new byte[0];
+    byte[] ad = associatedData;
+    if (ad == null) {
+      ad = new byte[0];
     }
-    byte[] aadLengthInBits =
-        Arrays.copyOf(ByteBuffer.allocate(8).putLong(8L * aad.length).array(), 8);
-    mac.verifyMac(macValue, Bytes.concat(aad, rawCiphertext, aadLengthInBits));
+    byte[] adLengthInBits =
+        Arrays.copyOf(ByteBuffer.allocate(8).putLong(8L * ad.length).array(), 8);
+    mac.verifyMac(macValue, Bytes.concat(ad, rawCiphertext, adLengthInBits));
     return cipher.decrypt(rawCiphertext);
   }
 }

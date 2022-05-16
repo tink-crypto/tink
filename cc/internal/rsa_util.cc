@@ -316,7 +316,7 @@ util::StatusOr<internal::SslUniquePtr<RSA>> RsaPrivateKeyToRsa(
         absl::StrCat("Could not load RSA key: ", internal::GetSslErrors()));
   }
 #endif
-  return rsa;
+  return std::move(rsa);
 }
 
 util::StatusOr<internal::SslUniquePtr<RSA>> RsaPublicKeyToRsa(
@@ -344,7 +344,7 @@ util::StatusOr<internal::SslUniquePtr<RSA>> RsaPublicKeyToRsa(
   }
   n->release();
   e->release();
-  return rsa;
+  return std::move(rsa);
 }
 
 util::Status RsaCheckPublicKey(const RSA *key) {

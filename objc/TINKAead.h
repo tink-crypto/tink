@@ -21,10 +21,14 @@
 NS_ASSUME_NONNULL_BEGIN
 
 /**
- * The interface for authenticated encryption with additional authenticated data. Implementations of
- * this interface are secure against adaptive chosen ciphertext attacks. Encryption with additional
+ * The interface for authenticated encryption with associated data. Implementations of
+ * this interface are secure against adaptive chosen ciphertext attacks. Encryption with associated
  * data ensures authenticity and integrity of that data, but not its secrecy. (see RFC 5116,
  * https://tools.ietf.org/html/rfc5116)
+ *
+ * The associated data is sometimes also called additional authenticated data,
+ * that's why the parameter in this interface is called additionalData.
+ *
  */
 @protocol TINKAead <NSObject>
 

@@ -147,6 +147,14 @@ def _patch_with_local_path(workspace_content, base_path):
   workspace_content = re.sub(r'(?<="tink_cc",\n    path = ").*(?=\n)',
                              base_path + '/cc",  # Modified by setup.py',
                              workspace_content)
+  workspace_content = re.sub(
+      r'(?<="tink_cc_awskms",\n    path = ").*(?=\n)',
+      base_path + '/cc/integration/awskms",  # Modified by setup.py',
+      workspace_content)
+  workspace_content = re.sub(
+      r'(?<="tink_cc_gcpkms",\n    path = ").*(?=\n)',
+      base_path + '/cc/integration/gcpkms",  # Modified by setup.py',
+      workspace_content)
   return workspace_content
 
 
@@ -175,6 +183,22 @@ def _patch_with_http_archive(workspace_content, filename, prefix):
       )
       ''')
 
+  cc_awskms = textwrap.dedent(
+      '''\
+      local_repository(
+          name = "tink_cc_awskms",
+          path = "../cc/integration/awskms",
+      )
+      ''')
+
+  cc_gcpkms = textwrap.dedent(
+      '''\
+      local_repository(
+          name = "tink_cc_gcpkms",
+          path = "../cc/integration/gcpkms",
+      )
+      ''')
+
   base_patched = textwrap.dedent(
       '''\
       # Modified by setup.py
@@ -195,8 +219,30 @@ def _patch_with_http_archive(workspace_content, filename, prefix):
       )
       '''.format(filename, prefix))
 
+  cc_awskms_patched = textwrap.dedent(
+      '''\
+      # Modified by setup.py
+      http_archive(
+          name = "tink_cc_awskms",
+          urls = ["https://github.com/google/tink/archive/{}"],
+          strip_prefix = "{}/cc/integration/awskms",
+      )
+      '''.format(filename, prefix))
+
+  cc_gcpkms_patched = textwrap.dedent(
+      '''\
+      # Modified by setup.py
+      http_archive(
+          name = "tink_cc_gcpkms",
+          urls = ["https://github.com/google/tink/archive/{}"],
+          strip_prefix = "{}/cc/integration/gcpkms",
+      )
+      '''.format(filename, prefix))
+
   workspace_content = workspace_content.replace(base, base_patched)
   workspace_content = workspace_content.replace(cc, cc_patched)
+  workspace_content = workspace_content.replace(cc_awskms, cc_awskms_patched)
+  workspace_content = workspace_content.replace(cc_gcpkms, cc_gcpkms_patched)
   return workspace_content
 
 

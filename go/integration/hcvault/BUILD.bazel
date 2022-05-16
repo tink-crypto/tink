@@ -5,30 +5,36 @@ package(default_visibility = ["//:__subpackages__"])
 licenses(["notice"])  # keep
 
 go_library(
-    name = "go_default_library",
+    name = "hcvault",
     srcs = [
         "hcvault_aead.go",
         "hcvault_client.go",
     ],
     importpath = "github.com/google/tink/go/integration/hcvault",
     deps = [
-        "//core/registry:go_default_library",
-        "//tink:go_default_library",
-        "@com_github_hashicorp_vault_api//:go_default_library",
+        "//core/registry",
+        "//tink",
+        "@com_github_hashicorp_vault_api//:api",
     ],
 )
 
 go_test(
-    name = "go_default_test",
+    name = "hcvault_test",
     srcs = [
         "hcvault_aead_test.go",
         "hcvault_client_test.go",
     ],
     data = ["//integration/hcvault/testdata:server_tls_files"],
-    embed = [":go_default_library"],
     deps = [
-        "//aead:go_default_library",
-        "//core/registry:go_default_library",
-        "//keyset:go_default_library",
+        ":hcvault",
+        "//aead",
+        "//core/registry",
+        "//keyset",
     ],
+)
+
+alias(
+    name = "go_default_library",
+    actual = ":hcvault",
+    visibility = ["//visibility:public"],
 )

@@ -14,14 +14,14 @@
 # limitations under the License.
 ################################################################################
 
-ROOT_DIR="$TEST_SRCDIR/tools"
-AWS_KMS_AEAD_CLI="$ROOT_DIR/testing/cc/aws_kms_aead_cli"
-TEST_UTIL="$ROOT_DIR/testing/cross_language/test_util.sh"
-BASE_DIR="$TEST_SRCDIR/tink_base"
-AWS_KEY_ARN_FILE="$BASE_DIR/testdata/aws_key_arn.txt"
-CREDENTIALS_AWS_CSV_FILE="$BASE_DIR/testdata/aws_credentials_cc.txt"
-BAD_AWS_KEY_ARN_FILE="$BASE_DIR/testdata/bad_aws_key_arn.txt"
-BAD_CREDENTIALS_AWS_CSV_FILE="$BASE_DIR/testdata/bad_aws_credentials_cc.txt"
+REPO_DIR="${TEST_SRCDIR}"
+TOOLS_DIR="${REPO_DIR}/tools"
+AWS_KMS_AEAD_CLI="${TOOLS_DIR}/testing/cc/aws_kms_aead_cli"
+TEST_UTIL="${TOOLS_DIR}/testing/cross_language/test_util.sh"
+AWS_KEY_ARN_FILE="${TOOLS_DIR}/testdata/aws_key_arn.txt"
+CREDENTIALS_AWS_CSV_FILE="${TOOLS_DIR}/testdata/aws_credentials_cc.txt"
+BAD_AWS_KEY_ARN_FILE="${TOOLS_DIR}/testdata/bad_aws_key_arn.txt"
+BAD_CREDENTIALS_AWS_CSV_FILE="${TOOLS_DIR}/testdata/bad_aws_credentials_cc.txt"
 associated_data="some associated data"
 
 source $TEST_UTIL || exit 1

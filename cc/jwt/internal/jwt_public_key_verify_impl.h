@@ -17,6 +17,9 @@
 #ifndef TINK_JWT_INTERNAL_JWT_PUBLIC_KEY_VERIFY_IMPL_H_
 #define TINK_JWT_INTERNAL_JWT_PUBLIC_KEY_VERIFY_IMPL_H_
 
+#include <string>
+#include <utility>
+
 #include "absl/strings/string_view.h"
 #include "tink/jwt/internal/jwt_public_key_verify_internal.h"
 #include "tink/jwt/jwt_validator.h"

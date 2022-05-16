@@ -1,18 +1,24 @@
-load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
 
 package(default_visibility = ["//:__subpackages__"])  # keep
 
 licenses(["notice"])  # keep
 
 go_library(
-    name = "go_default_library",
+    name = "testkeyset",
     testonly = 1,
     srcs = ["testkeyset.go"],
     importpath = "github.com/google/tink/go/testkeyset",
     visibility = ["//visibility:public"],
     deps = [
-        "//internal:go_default_library",
-        "//keyset:go_default_library",
-        "//proto:tink_go_proto",
+        "//internal",
+        "//keyset",
+        "//proto/tink_go_proto",
     ],
+)
+
+alias(
+    name = "go_default_library",
+    actual = ":testkeyset",
+    visibility = ["//visibility:public"],
 )

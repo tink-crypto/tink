@@ -1,15 +1,16 @@
 licenses(["notice"])
 
+# AesGcmSivTest is `manual` because we currently don't support running Conscrypt
+# with Bazel.
+
 java_test(
     name = "AesGcmSivTest",
-    size = "medium",
     srcs = ["AesGcmSivTest.java"],
-    data = [
-        "@wycheproof//testvectors:all",
+    data = ["@wycheproof//testvectors:aes_gcm_siv"],
+    tags = [
+        "manual",
+        "notsan",
     ],
-    # This is disabled because we haven't figured out how to run Conscrypt
-    # with Bazel.
-    tags = ["manual"],
     deps = [
         "//src/main/java/com/google/crypto/tink/aead/subtle:aes_gcm_siv",
         "//src/main/java/com/google/crypto/tink/subtle:bytes",

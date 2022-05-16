@@ -44,9 +44,9 @@ func newHCVaultAEAD(keyURI string, client *api.Logical) tink.AEAD {
 }
 
 // Encrypt encrypts the plaintext data using a key stored in HashiCorp Vault.
-// additionalData parameter is used as a context for key derivation, more
+// associatedData parameter is used as a context for key derivation, more
 // information available https://www.vaultproject.io/docs/secrets/transit/index.html.
-func (a *vaultAEAD) Encrypt(plaintext, additionalData []byte) ([]byte, error) {
+func (a *vaultAEAD) Encrypt(plaintext, associatedData []byte) ([]byte, error) {
 	encryptionPath, err := a.getEncryptionPath(a.keyURI)
 	if err != nil {
 		return nil, err
@@ -55,7 +55,7 @@ func (a *vaultAEAD) Encrypt(plaintext, additionalData []byte) ([]byte, error) {
 	// https://www.vaultproject.io/api/secret/transit/index.html#encrypt-data.
 	req := map[string]interface{}{
 		"plaintext": base64.StdEncoding.EncodeToString(plaintext),
-		"context":   base64.StdEncoding.EncodeToString(additionalData),
+		"context":   base64.StdEncoding.EncodeToString(associatedData),
 	}
 	secret, err := a.client.Write(encryptionPath, req)
 	if err != nil {
@@ -66,9 +66,9 @@ func (a *vaultAEAD) Encrypt(plaintext, additionalData []byte) ([]byte, error) {
 }
 
 // Decrypt decrypts the ciphertext using a key stored in HashiCorp Vault.
-// additionalData parameter is used as a context for key derivation, more
+// associatedData parameter is used as a context for key derivation, more
 // information available https://www.vaultproject.io/docs/secrets/transit/index.html.
-func (a *vaultAEAD) Decrypt(ciphertext, additionalData []byte) ([]byte, error) {
+func (a *vaultAEAD) Decrypt(ciphertext, associatedData []byte) ([]byte, error) {
 	decryptionPath, err := a.getDecryptionPath(a.keyURI)
 	if err != nil {
 		return nil, err
@@ -77,7 +77,7 @@ func (a *vaultAEAD) Decrypt(ciphertext, additionalData []byte) ([]byte, error) {
 	// https://www.vaultproject.io/api/secret/transit/index.html#decrypt-data.
 	req := map[string]interface{}{
 		"ciphertext": string(ciphertext),
-		"context":    base64.StdEncoding.EncodeToString(additionalData),
+		"context":    base64.StdEncoding.EncodeToString(associatedData),
 	}
 	secret, err := a.client.Write(decryptionPath, req)
 	if err != nil {

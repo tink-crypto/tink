@@ -79,13 +79,6 @@ public class RsaSsaPkcs1VerifyJceTest {
     testWycheproofVectors("../wycheproof/testvectors/rsa_signature_4096_sha512_test.json");
   }
 
-  @Test
-  public void testWycheproofVectors3072() throws Exception {
-    Assume.assumeTrue(!TinkFips.useOnlyFips() || TinkFipsUtil.fipsModuleAvailable());
-
-    testWycheproofVectors("../wycheproof/testvectors/rsa_signature_3072_sha512_test.json");
-  }
-
   private static void testWycheproofVectors(String fileName) throws Exception {
     JsonObject jsonObj = WycheproofTestUtil.readJson(fileName);
 
@@ -108,7 +101,8 @@ public class RsaSsaPkcs1VerifyJceTest {
           continue;
         }
         String tcId =
-            String.format("testcase %d (%s)",
+            String.format(
+                "testcase %d (%s)",
                 testcase.get("tcId").getAsInt(), testcase.get("comment").getAsString());
         RSAPublicKey pubKey = (RSAPublicKey) kf.generatePublic(x509keySpec);
 
@@ -131,6 +125,13 @@ public class RsaSsaPkcs1VerifyJceTest {
       }
     }
     assertEquals(0, errors);
+  }
+
+  @Test
+  public void testWycheproofVectors3072() throws Exception {
+    Assume.assumeTrue(!TinkFips.useOnlyFips() || TinkFipsUtil.fipsModuleAvailable());
+
+    testWycheproofVectors("../wycheproof/testvectors/rsa_signature_3072_sha512_test.json");
   }
 
   private static byte[] getMessage(JsonObject testcase) throws Exception {

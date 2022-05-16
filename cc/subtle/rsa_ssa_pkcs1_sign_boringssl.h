@@ -18,6 +18,8 @@
 #define TINK_SUBTLE_RSA_SSA_PKCS1_SIGN_BORINGSSL_H_
 
 #include <memory>
+#include <string>
+#include <utility>
 
 #include "absl/strings/string_view.h"
 #include "openssl/ec.h"

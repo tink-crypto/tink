@@ -17,6 +17,8 @@
 #ifndef TINK_SUBTLE_ECIES_HKDF_RECIPIENT_KEM_BORINGSSL_H_
 #define TINK_SUBTLE_ECIES_HKDF_RECIPIENT_KEM_BORINGSSL_H_
 
+#include <memory>
+
 #include "absl/strings/string_view.h"
 #include "openssl/ec.h"
 #include "openssl/evp.h"

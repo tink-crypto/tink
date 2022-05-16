@@ -17,6 +17,9 @@
 // Implementation of an AEAD Service.
 #include "aead_impl.h"
 
+#include <string>
+#include <utility>
+
 #include "tink/aead.h"
 #include "tink/binary_keyset_reader.h"
 #include "tink/cleartext_keyset_handle.h"
@@ -39,24 +42,23 @@ using ::grpc::Status;
     return ::grpc::Status::OK;
   }
   auto handle_result =
-      CleartextKeysetHandle::Read(std::move(reader_result.ValueOrDie()));
+      CleartextKeysetHandle::Read(std::move(reader_result.value()));
   if (!handle_result.ok()) {
     response->set_err(std::string(handle_result.status().message()));
     return ::grpc::Status::OK;
   }
-  auto aead_result =
-      handle_result.ValueOrDie()->GetPrimitive<crypto::tink::Aead>();
+  auto aead_result = handle_result.value()->GetPrimitive<crypto::tink::Aead>();
   if (!aead_result.ok()) {
     response->set_err(std::string(aead_result.status().message()));
     return ::grpc::Status::OK;
   }
-  auto encrypt_result = aead_result.ValueOrDie()->Encrypt(
+  auto encrypt_result = aead_result.value()->Encrypt(
       request->plaintext(), request->associated_data());
   if (!encrypt_result.ok()) {
     response->set_err(std::string(encrypt_result.status().message()));
     return ::grpc::Status::OK;
   }
-  response->set_ciphertext(encrypt_result.ValueOrDie());
+  response->set_ciphertext(encrypt_result.value());
   return ::grpc::Status::OK;
 }
 
@@ -70,24 +72,23 @@ using ::grpc::Status;
     return ::grpc::Status::OK;
   }
   auto handle_result =
-      CleartextKeysetHandle::Read(std::move(reader_result.ValueOrDie()));
+      CleartextKeysetHandle::Read(std::move(reader_result.value()));
   if (!handle_result.ok()) {
     response->set_err(std::string(handle_result.status().message()));
     return ::grpc::Status::OK;
   }
-  auto aead_result =
-      handle_result.ValueOrDie()->GetPrimitive<crypto::tink::Aead>();
+  auto aead_result = handle_result.value()->GetPrimitive<crypto::tink::Aead>();
   if (!aead_result.ok()) {
     response->set_err(std::string(aead_result.status().message()));
     return ::grpc::Status::OK;
   }
-  auto decrypt_result = aead_result.ValueOrDie()->Decrypt(
+  auto decrypt_result = aead_result.value()->Decrypt(
       request->ciphertext(), request->associated_data());
   if (!decrypt_result.ok()) {
     response->set_err(std::string(decrypt_result.status().message()));
     return ::grpc::Status::OK;
   }
-  response->set_plaintext(decrypt_result.ValueOrDie());
+  response->set_plaintext(decrypt_result.value());
   return ::grpc::Status::OK;
 }
 

@@ -19,6 +19,7 @@
 #include <algorithm>
 #include <cstring>
 #include <iterator>
+#include <memory>
 #include <string>
 #include <utility>
 #include <vector>
@@ -31,7 +32,6 @@
 #include "absl/types/span.h"
 #include "tink/aead/internal/wycheproof_aead.h"
 #include "tink/aead/internal/zero_copy_aead.h"
-#include "tink/internal/err_util.h"
 #include "tink/subtle/subtle_util.h"
 #include "tink/util/statusor.h"
 #include "tink/util/test_matchers.h"
@@ -45,14 +45,13 @@ using ::crypto::tink::test::IsOk;
 using ::crypto::tink::test::StatusIs;
 using ::testing::AllOf;
 using ::testing::Eq;
-using ::testing::IsEmpty;
 using ::testing::Not;
 using ::testing::TestWithParam;
 using ::testing::ValuesIn;
 
 constexpr absl::string_view kKey128Hex = "000102030405060708090a0b0c0d0e0f";
 constexpr absl::string_view kMessage = "Some data to encrypt.";
-constexpr absl::string_view kAdditionalData = "Some data to authenticate.";
+constexpr absl::string_view kAssociatedData = "Some data to authenticate.";
 
 constexpr int kIvSizeInBytes = 12;
 constexpr int kTagSizeInBytes = 16;
@@ -63,7 +62,7 @@ constexpr int64_t kMaxEncryptionSize =
 // kMaxEncryptionSize - kIvSize - kTagSize.
 constexpr int64_t kMaxDecryptionSize = kMessage.size();
 
-// Encoded ciphertext of kMessage with kAdditionalData and kKey128Hex.
+// Encoded ciphertext of kMessage with kAssociatedData and kKey128Hex.
 constexpr absl::string_view kEncodedCiphertext =
     "22889553081aa27f0f62ed2f32b068331cb3d8103e121c8b0c898cf70b613e334b7e913323"
     "128429226950dd2f4d42a6fc";
@@ -94,7 +93,7 @@ TEST_F(ZeroCopyAesGcmBoringSslTest, EncryptDecrypt) {
   subtle::ResizeStringUninitialized(
       &ciphertext, cipher_->MaxEncryptionSize(kMessage.size()));
   util::StatusOr<int64_t> ciphertext_size =
-      cipher_->Encrypt(kMessage, kAdditionalData, absl::MakeSpan(ciphertext));
+      cipher_->Encrypt(kMessage, kAssociatedData, absl::MakeSpan(ciphertext));
   ASSERT_THAT(ciphertext_size.status(), IsOk());
   EXPECT_EQ(*ciphertext_size,
             kIvSizeInBytes + kMessage.size() + kTagSizeInBytes);
@@ -102,7 +101,7 @@ TEST_F(ZeroCopyAesGcmBoringSslTest, EncryptDecrypt) {
   subtle::ResizeStringUninitialized(
       &plaintext, cipher_->MaxDecryptionSize(ciphertext.size()));
   util::StatusOr<int64_t> plaintext_size =
-      cipher_->Decrypt(ciphertext, kAdditionalData, absl::MakeSpan(plaintext));
+      cipher_->Decrypt(ciphertext, kAssociatedData, absl::MakeSpan(plaintext));
 
   ASSERT_THAT(plaintext_size.status(), IsOk());
   EXPECT_EQ(plaintext, kMessage);
@@ -113,7 +112,7 @@ TEST_F(ZeroCopyAesGcmBoringSslTest, DecryptEncodedCiphertext) {
   subtle::ResizeStringUninitialized(&plaintext, kMaxDecryptionSize);
   util::StatusOr<int64_t> plaintext_size =
       cipher_->Decrypt(absl::HexStringToBytes(kEncodedCiphertext),
-                       kAdditionalData, absl::MakeSpan(plaintext));
+                       kAssociatedData, absl::MakeSpan(plaintext));
   ASSERT_THAT(plaintext_size.status(), IsOk());
   EXPECT_EQ(plaintext.substr(0, *plaintext_size), kMessage);
 }
@@ -124,7 +123,7 @@ TEST_F(ZeroCopyAesGcmBoringSslTest, EncryptBufferTooSmall) {
   std::string ciphertext;
   subtle::ResizeStringUninitialized(&ciphertext, kMaxEncryptionSize - 1);
   EXPECT_THAT(
-      cipher_->Encrypt(kMessage, kAdditionalData, absl::MakeSpan(ciphertext))
+      cipher_->Encrypt(kMessage, kAssociatedData, absl::MakeSpan(ciphertext))
           .status(),
       StatusIs(absl::StatusCode::kInvalidArgument));
 }
@@ -135,7 +134,7 @@ TEST_F(ZeroCopyAesGcmBoringSslTest, DecryptBufferTooSmall) {
   subtle::ResizeStringUninitialized(&plaintext, kMaxDecryptionSize - 1);
   EXPECT_THAT(cipher_
                   ->Decrypt(absl::HexStringToBytes(kEncodedCiphertext),
-                            kAdditionalData, absl::MakeSpan(plaintext))
+                            kAssociatedData, absl::MakeSpan(plaintext))
                   .status(),
               StatusIs(absl::StatusCode::kInvalidArgument));
 }
@@ -150,7 +149,7 @@ TEST_F(ZeroCopyAesGcmBoringSslTest, EncryptOverlappingPlaintextCiphertext) {
   auto cipher_buff =
       absl::MakeSpan(buffer).subspan(kMessage.size() - kIvSizeInBytes);
   EXPECT_THAT(
-      cipher_->Encrypt(plaintext, kAdditionalData, cipher_buff).status(),
+      cipher_->Encrypt(plaintext, kAssociatedData, cipher_buff).status(),
       StatusIs(absl::StatusCode::kFailedPrecondition));
 }
 
@@ -167,7 +166,7 @@ TEST_F(ZeroCopyAesGcmBoringSslTest, DecryptOverlappingPlaintextCiphertext) {
   auto ciphertext = absl::string_view(buffer).substr(ciphertext_start,
                                                      ciphertext_data.size());
   EXPECT_THAT(
-      cipher_->Decrypt(ciphertext, kAdditionalData, out_buffer).status(),
+      cipher_->Decrypt(ciphertext, kAssociatedData, out_buffer).status(),
       StatusIs(absl::StatusCode::kFailedPrecondition));
 }
 

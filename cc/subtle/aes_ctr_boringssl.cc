@@ -17,11 +17,12 @@
 #include "tink/subtle/aes_ctr_boringssl.h"
 
 #include <string>
+#include <utility>
 
 #include "absl/memory/memory.h"
 #include "absl/status/status.h"
 #include "openssl/evp.h"
-#include "tink/aead/internal/aead_util.h"
+#include "tink/internal/aes_util.h"
 #include "tink/internal/ssl_unique_ptr.h"
 #include "tink/internal/util.h"
 #include "tink/subtle/random.h"

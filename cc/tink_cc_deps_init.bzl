@@ -1,19 +1,14 @@
-"""
-Initialization of dependencies of C++ Tink.
-"""
+"""Initialization of dependencies of C++ Tink."""
 
-load("@com_google_googleapis//:repository_rules.bzl", "switched_rules_by_language")
-load("@com_github_grpc_grpc//bazel:grpc_deps.bzl", "grpc_deps")
-load("@com_github_grpc_grpc//bazel:grpc_extra_deps.bzl", "grpc_extra_deps")
+load("@com_google_protobuf//:protobuf_deps.bzl", "protobuf_deps")
+load("@bazel_toolchains//rules:rbe_repo.bzl", "rbe_autoconfig")
 
 def tink_cc_deps_init():
-    """ Initializes dependencies of C++ Tink.
+    """Initializes dependencies of C++ Tink."""
 
-    """
-    switched_rules_by_language(
-        name = "com_google_googleapis_imports",
-        cc = True,
-        grpc = True,
-    )
-    grpc_deps()
-    grpc_extra_deps()
+    # Initialize Protobuf dependencies.
+    protobuf_deps()
+
+    # Creates a default toolchain config for RBE. Use this as is if you are
+    # using the rbe_ubuntu16_04 container, otherwise refer to RBE docs.
+    rbe_autoconfig(name = "rbe_default")

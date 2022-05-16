@@ -17,9 +17,11 @@
 #ifndef TINK_PRIMITIVE_SET_H_
 #define TINK_PRIMITIVE_SET_H_
 
+#include <string>
 #include <unordered_map>
 #include <vector>
 
+#include "absl/container/flat_hash_map.h"
 #include "absl/memory/memory.h"
 #include "absl/status/status.h"
 #include "absl/synchronization/mutex.h"
@@ -69,10 +71,11 @@ class PrimitiveSet {
         return util::Status(absl::StatusCode::kInvalidArgument,
                             "The primitive must be non-null.");
       }
-      std::string identifier = identifier_result.ValueOrDie();
+      std::string identifier = identifier_result.value();
       return absl::WrapUnique(new Entry(std::move(primitive), identifier,
                                         key_info.status(), key_info.key_id(),
-                                        key_info.output_prefix_type()));
+                                        key_info.output_prefix_type(),
+                                        key_info.type_url()));
     }
 
     P2& get_primitive() const { return *primitive_; }
@@ -87,27 +90,37 @@ class PrimitiveSet {
       return output_prefix_type_;
     }
 
+    absl::string_view get_key_type_url() const { return key_type_url_; }
+
    private:
     Entry(std::unique_ptr<P2> primitive, const std::string& identifier,
           google::crypto::tink::KeyStatusType status, uint32_t key_id,
-          google::crypto::tink::OutputPrefixType output_prefix_type)
+          google::crypto::tink::OutputPrefixType output_prefix_type,
+          absl::string_view key_type_url)
         : primitive_(std::move(primitive)),
           identifier_(identifier),
           status_(status),
           key_id_(key_id),
-          output_prefix_type_(output_prefix_type) {}
+          output_prefix_type_(output_prefix_type),
+          key_type_url_(key_type_url) {}
 
     std::unique_ptr<P> primitive_;
     std::string identifier_;
     google::crypto::tink::KeyStatusType status_;
     uint32_t key_id_;
     google::crypto::tink::OutputPrefixType output_prefix_type_;
+    const std::string key_type_url_;
   };
 
   typedef std::vector<std::unique_ptr<Entry<P>>> Primitives;
 
   // Constructs an empty PrimitiveSet.
-  PrimitiveSet<P>() : primary_(nullptr) {}
+  // Note: This is equivalent to PrimitiveSet<P>(/*annotations=*/{}).
+  PrimitiveSet<P>() = default;
+  // Constructs an empty PrimitiveSet with `annotations`.
+  explicit PrimitiveSet<P>(
+      const absl::flat_hash_map<std::string, std::string>& annotations)
+      : annotations_(annotations) {}
 
   // Adds 'primitive' to this set for the specified 'key'.
   crypto::tink::util::StatusOr<Entry<P>*> AddPrimitive(
@@ -117,8 +130,8 @@ class PrimitiveSet {
     if (!entry_or.ok()) return entry_or.status();
 
     absl::MutexLock lock(&primitives_mutex_);
-    std::string identifier = entry_or.ValueOrDie()->get_identifier();
-    primitives_[identifier].push_back(std::move(entry_or.ValueOrDie()));
+    std::string identifier = entry_or.value()->get_identifier();
+    primitives_[identifier].push_back(std::move(entry_or.value()));
     return primitives_[identifier].back().get();
   }
 
@@ -176,13 +189,21 @@ class PrimitiveSet {
     return result;
   }
 
+  const absl::flat_hash_map<std::string, std::string>& get_annotations() const {
+    return annotations_;
+  }
+
  private:
   typedef std::unordered_map<std::string, Primitives>
       CiphertextPrefixToPrimitivesMap;
-  Entry<P>* primary_;  // the Entry<P> object is owned by primitives_
+  // The Entry<P> object is owned by primitives_
+  Entry<P>* primary_ = nullptr;
   mutable absl::Mutex primitives_mutex_;
   CiphertextPrefixToPrimitivesMap primitives_
       ABSL_GUARDED_BY(primitives_mutex_);
+
+  // Annotations for the set of primitives.
+  const absl::flat_hash_map<std::string, std::string> annotations_;
 };
 
 }  // namespace tink

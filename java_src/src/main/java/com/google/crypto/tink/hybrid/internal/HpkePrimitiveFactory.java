@@ -24,9 +24,9 @@ import java.util.Arrays;
  * Helper class for creating HPKE primitives from either algorithm identifiers or {@link
  * com.google.crypto.tink.proto.HpkeParams}.
  */
-public final class HpkePrimitiveFactory {
+final class HpkePrimitiveFactory {
   /** Returns an {@link HpkeKem} primitive corresponding to {@code kemId}. */
-  public static HpkeKem createKem(byte[] kemId) {
+  static HpkeKem createKem(byte[] kemId) {
     if (Arrays.equals(kemId, HpkeUtil.X25519_HKDF_SHA256_KEM_ID)) {
       return new X25519HpkeKem(new HkdfHpkeKdf("HmacSha256"));
     }
@@ -37,7 +37,7 @@ public final class HpkePrimitiveFactory {
    * Returns an {@link HpkeKem} primitive corresponding to {@link
    * com.google.crypto.tink.proto.HpkeParams#getKem()}.
    */
-  public static HpkeKem createKem(HpkeParams params) {
+  static HpkeKem createKem(HpkeParams params) {
     if (params.getKem() == com.google.crypto.tink.proto.HpkeKem.DHKEM_X25519_HKDF_SHA256) {
       return new X25519HpkeKem(new HkdfHpkeKdf("HmacSha256"));
     }
@@ -45,7 +45,7 @@ public final class HpkePrimitiveFactory {
   }
 
   /** Returns an {@link HpkeKdf} primitive corresponding to {@code kdfId}. */
-  public static HpkeKdf createKdf(byte[] kdfId) {
+  static HpkeKdf createKdf(byte[] kdfId) {
     if (Arrays.equals(kdfId, HpkeUtil.HKDF_SHA256_KDF_ID)) {
       return new HkdfHpkeKdf("HmacSha256");
     }
@@ -56,7 +56,7 @@ public final class HpkePrimitiveFactory {
    * Returns an {@link HpkeKdf} primitive corresponding to {@link
    * com.google.crypto.tink.proto.HpkeParams#getKdf()}.
    */
-  public static HpkeKdf createKdf(HpkeParams params) {
+  static HpkeKdf createKdf(HpkeParams params) {
     if (params.getKdf() == com.google.crypto.tink.proto.HpkeKdf.HKDF_SHA256) {
       return new HkdfHpkeKdf("HmacSha256");
     }
@@ -64,7 +64,7 @@ public final class HpkePrimitiveFactory {
   }
 
   /** Returns an {@link HpkeAead} primitive corresponding to {@code aeadId}. */
-  public static HpkeAead createAead(byte[] aeadId) throws GeneralSecurityException {
+  static HpkeAead createAead(byte[] aeadId) throws GeneralSecurityException {
     if (Arrays.equals(aeadId, HpkeUtil.AES_128_GCM_AEAD_ID)) {
       return new AesGcmHpkeAead(16);
     } else if (Arrays.equals(aeadId, HpkeUtil.AES_256_GCM_AEAD_ID)) {
@@ -79,7 +79,7 @@ public final class HpkePrimitiveFactory {
    * Returns an {@link HpkeAead} primitive corresponding to {@link
    * com.google.crypto.tink.proto.HpkeParams#getAead()}.
    */
-  public static HpkeAead createAead(HpkeParams params) throws GeneralSecurityException {
+  static HpkeAead createAead(HpkeParams params) throws GeneralSecurityException {
     if (params.getAead() == com.google.crypto.tink.proto.HpkeAead.AES_128_GCM) {
       return new AesGcmHpkeAead(16);
     } else if (params.getAead() == com.google.crypto.tink.proto.HpkeAead.AES_256_GCM) {

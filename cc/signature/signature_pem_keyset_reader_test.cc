@@ -26,6 +26,7 @@
 #include "absl/strings/str_cat.h"
 #include "absl/strings/string_view.h"
 #include "tink/internal/rsa_util.h"
+#include "tink/internal/ssl_util.h"
 #include "tink/keyset_handle.h"
 #include "tink/keyset_reader.h"
 #include "tink/public_key_sign.h"
@@ -144,15 +145,14 @@ constexpr absl::string_view kRsaPrivateKey2048 =
 
 // Helper function that creates an EcdsaPublicKey from the given PEM encoded
 // key `pem_encoded_key`, Hash type `hash_type` and key version `key_version`.
-EcdsaPublicKey GetExpectedEcdsaPublicKeyProto() {
+EcdsaPublicKey GetExpectedEcdsaPublicKeyProto(EcdsaSignatureEncoding encoding) {
   EcdsaPublicKey public_key_proto;
   public_key_proto.set_version(0);
   public_key_proto.set_x(absl::HexStringToBytes(kEcdsaP256PublicKeyX));
   public_key_proto.set_y(absl::HexStringToBytes(kEcdsaP256PublicKeyY));
   public_key_proto.mutable_params()->set_hash_type(HashType::SHA256);
   public_key_proto.mutable_params()->set_curve(EllipticCurveType::NIST_P256);
-  public_key_proto.mutable_params()->set_encoding(
-      EcdsaSignatureEncoding::IEEE_P1363);
+  public_key_proto.mutable_params()->set_encoding(encoding);
 
   return public_key_proto;
 }
@@ -176,7 +176,7 @@ util::StatusOr<RsaSsaPssPublicKey> GetRsaSsaPssPublicKeyProto(
   public_key_proto.mutable_params()->set_mgf1_hash(hash_type);
   public_key_proto.mutable_params()->set_sig_hash(hash_type);
   public_key_proto.mutable_params()->set_salt_length(
-      util::Enums::HashLength(hash_type).ValueOrDie());
+      util::Enums::HashLength(hash_type).value());
 
   return public_key_proto;
 }
@@ -222,7 +222,7 @@ util::StatusOr<RsaSsaPssPrivateKey> GetRsaSsaPssPrivateKeyProto(
   public_key_proto->mutable_params()->set_mgf1_hash(hash_type);
   public_key_proto->mutable_params()->set_sig_hash(hash_type);
   public_key_proto->mutable_params()->set_salt_length(
-      util::Enums::HashLength(hash_type).ValueOrDie());
+      util::Enums::HashLength(hash_type).value());
 
   return private_key_proto;
 }
@@ -249,7 +249,7 @@ TEST(SignaturePemKeysetReaderTest, ReadEncryptedUnsupported) {
   auto keyset_reader_or = builder.Build();
   ASSERT_THAT(keyset_reader_or.status(), IsOk());
   std::unique_ptr<KeysetReader> keyset_reader =
-      std::move(keyset_reader_or).ValueOrDie();
+      std::move(keyset_reader_or).value();
 
   EXPECT_THAT(keyset_reader->ReadEncrypted().status(),
               StatusIs(absl::StatusCode::kUnimplemented));
@@ -274,11 +274,11 @@ TEST(SignaturePemKeysetReaderTest, ReadRsaCorrectPublicKey) {
   auto keyset_reader_or = builder.Build();
   ASSERT_THAT(keyset_reader_or.status(), IsOk());
   std::unique_ptr<KeysetReader> keyset_reader =
-      std::move(keyset_reader_or).ValueOrDie();
+      std::move(keyset_reader_or).value();
 
   auto keyset_or = keyset_reader->Read();
   ASSERT_THAT(keyset_or.status(), IsOk());
-  std::unique_ptr<Keyset> keyset = std::move(keyset_or).ValueOrDie();
+  std::unique_ptr<Keyset> keyset = std::move(keyset_or).value();
 
   // Key manager to validate key type and key material type.
   RsaSsaPssVerifyKeyManager verify_key_manager;
@@ -344,11 +344,11 @@ TEST(SignaturePemKeysetReaderTest, ReadRsaCorrectPrivateKey) {
   auto keyset_reader_or = builder.Build();
   ASSERT_THAT(keyset_reader_or.status(), IsOk());
   std::unique_ptr<KeysetReader> keyset_reader =
-      std::move(keyset_reader_or).ValueOrDie();
+      std::move(keyset_reader_or).value();
 
   auto keyset_or = keyset_reader->Read();
   ASSERT_THAT(keyset_or.status(), IsOk());
-  std::unique_ptr<Keyset> keyset = std::move(keyset_or).ValueOrDie();
+  std::unique_ptr<Keyset> keyset = std::move(keyset_or).value();
 
   EXPECT_THAT(keyset->key(), SizeIs(2));
   EXPECT_EQ(keyset->primary_key_id(), keyset->key(0).key_id());
@@ -408,7 +408,7 @@ TEST(SignaturePemKeysetReaderTest, ReadRsaPrivateKeyKeyTypeMismatch) {
   auto keyset_reader_or = builder.Build();
   ASSERT_THAT(keyset_reader_or.status(), IsOk());
   std::unique_ptr<KeysetReader> keyset_reader =
-      std::move(keyset_reader_or).ValueOrDie();
+      std::move(keyset_reader_or).value();
 
   EXPECT_THAT(keyset_reader->Read().status(),
               StatusIs(absl::StatusCode::kInvalidArgument));
@@ -429,7 +429,7 @@ TEST(SignaturePemKeysetReaderTest, ReadRsaPublicKeyKeyTypeMismatch) {
   auto keyset_reader_or = builder.Build();
   ASSERT_THAT(keyset_reader_or.status(), IsOk());
   std::unique_ptr<KeysetReader> keyset_reader =
-      std::move(keyset_reader_or).ValueOrDie();
+      std::move(keyset_reader_or).value();
 
   EXPECT_THAT(keyset_reader->Read().status(),
               StatusIs(absl::StatusCode::kInvalidArgument));
@@ -449,7 +449,7 @@ TEST(SignaturePemKeysetReaderTest, ReadRsaPublicKeyTooSmall) {
   auto keyset_reader_or = builder.Build();
   ASSERT_THAT(keyset_reader_or.status(), IsOk());
   std::unique_ptr<KeysetReader> keyset_reader =
-      std::move(keyset_reader_or).ValueOrDie();
+      std::move(keyset_reader_or).value();
 
   EXPECT_THAT(keyset_reader->Read().status(),
               StatusIs(absl::StatusCode::kInvalidArgument));
@@ -470,7 +470,7 @@ TEST(SignaturePemKeysetReaderTest, ReadRsaPublicKeySizeMismatch) {
   auto keyset_reader_or = builder.Build();
   ASSERT_THAT(keyset_reader_or.status(), IsOk());
   std::unique_ptr<KeysetReader> keyset_reader =
-      std::move(keyset_reader_or).ValueOrDie();
+      std::move(keyset_reader_or).value();
 
   EXPECT_THAT(keyset_reader->Read().status(),
               StatusIs(absl::StatusCode::kInvalidArgument));
@@ -490,7 +490,7 @@ TEST(SignaturePemKeysetReaderTest, ReadRsaPublicKeyInvalidHashType) {
   auto keyset_reader_or = builder.Build();
   ASSERT_THAT(keyset_reader_or.status(), IsOk());
   std::unique_ptr<KeysetReader> keyset_reader =
-      std::move(keyset_reader_or).ValueOrDie();
+      std::move(keyset_reader_or).value();
 
   EXPECT_THAT(keyset_reader->Read().status(),
               StatusIs(absl::StatusCode::kInvalidArgument));
@@ -508,7 +508,7 @@ TEST(SignaturePemKeysetReaderTest, ReadECDSACorrectPublicKey) {
 
   builder.Add({.serialized_key = std::string(kEcdsaP256PublicKey),
                .parameters = {.key_type = PemKeyType::PEM_EC,
-                              .algorithm = PemAlgorithm::ECDSA_IEEE,
+                              .algorithm = PemAlgorithm::ECDSA_DER,
                               .key_size_in_bits = 256,
                               .hash_type = HashType::SHA256}});
 
@@ -517,7 +517,7 @@ TEST(SignaturePemKeysetReaderTest, ReadECDSACorrectPublicKey) {
 
   auto keyset_read = reader->get()->Read();
   ASSERT_THAT(keyset_read.status(), IsOk());
-  std::unique_ptr<Keyset> keyset = std::move(keyset_read).ValueOrDie();
+  std::unique_ptr<Keyset> keyset = std::move(keyset_read).value();
 
   // Key manager to validate key type and key material type.
   EcdsaVerifyKeyManager key_manager;
@@ -537,7 +537,8 @@ TEST(SignaturePemKeysetReaderTest, ReadECDSACorrectPublicKey) {
   expected_primary_data->set_type_url(key_manager.get_key_type());
   expected_primary_data->set_key_material_type(key_manager.key_material_type());
   expected_primary_data->set_value(
-      GetExpectedEcdsaPublicKeyProto().SerializeAsString());
+      GetExpectedEcdsaPublicKeyProto(
+          EcdsaSignatureEncoding::IEEE_P1363).SerializeAsString());
   EXPECT_THAT(keyset->key(0), EqualsKey(expected_primary))
       << "expected key: " << expected_primary.DebugString();
 
@@ -554,7 +555,8 @@ TEST(SignaturePemKeysetReaderTest, ReadECDSACorrectPublicKey) {
   expected_secondary_data->set_key_material_type(
       key_manager.key_material_type());
   expected_secondary_data->set_value(
-      GetExpectedEcdsaPublicKeyProto().SerializeAsString());
+      GetExpectedEcdsaPublicKeyProto(
+          EcdsaSignatureEncoding::DER).SerializeAsString());
   EXPECT_THAT(keyset->key(1), EqualsKey(expected_secondary))
       << "expected key: " << expected_secondary.DebugString();
 }
@@ -640,8 +642,22 @@ TEST(SignaturePemKeysetReaderTest, ReadSecp256k1ShouldFail) {
   auto reader = builder.Build();
   ASSERT_THAT(reader.status(), IsOk());
   auto keyset_read = reader->get()->Read();
-  ASSERT_THAT(keyset_read.status(),
-              StatusIs(absl::StatusCode::kInvalidArgument));
+  // With BoringSSL parsing of the PEM key fails when an unsupported curve is
+  // used [1]; Supported curves are defined here [2]. Tink doesn't distinguish
+  // between an error caused by a malformed PEM and an unsupported group by
+  // BoringSSL. On the other hand, with OpenSSL parsing succeeds, but this
+  // curve is unsupported by Tink. As a consequence, this fails with two
+  // different errors.
+  //
+  // [1]https://github.com/google/boringssl/blob/master/crypto/ec_extra/ec_asn1.c#L324
+  // [2]https://github.com/google/boringssl/blob/master/crypto/fipsmodule/ec/ec.c#L218
+  if (internal::IsBoringSsl()) {
+    EXPECT_THAT(keyset_read.status(),
+                StatusIs(absl::StatusCode::kInvalidArgument));
+  } else {
+    EXPECT_THAT(keyset_read.status(),
+                StatusIs(absl::StatusCode::kUnimplemented));
+  }
 }
 
 TEST(SignaturePemKeysetReaderTest, ReadEcdsaP384ShouldFail) {

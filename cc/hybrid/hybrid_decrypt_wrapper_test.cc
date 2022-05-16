@@ -106,30 +106,29 @@ TEST_F(HybridDecryptSetWrapperTest, Basic) {
     entry_result = hybrid_decrypt_set->AddPrimitive(std::move(hybrid_decrypt),
                                                     keyset.key_info(1));
     ASSERT_TRUE(entry_result.ok());
-    std::string prefix_id_1 = entry_result.ValueOrDie()->get_identifier();
+    std::string prefix_id_1 = entry_result.value()->get_identifier();
     hybrid_decrypt.reset(new DummyHybridDecrypt(hybrid_name_2));
     entry_result = hybrid_decrypt_set->AddPrimitive(std::move(hybrid_decrypt),
                                                     keyset.key_info(2));
     ASSERT_TRUE(entry_result.ok());
     // The last key is the primary.
-    ASSERT_THAT(hybrid_decrypt_set->set_primary(entry_result.ValueOrDie()),
-                IsOk());
+    ASSERT_THAT(hybrid_decrypt_set->set_primary(entry_result.value()), IsOk());
 
     // Wrap hybrid_decrypt_set and test the resulting HybridDecrypt.
     auto hybrid_decrypt_result = HybridDecryptWrapper().Wrap(
         std::move(hybrid_decrypt_set));
     EXPECT_TRUE(hybrid_decrypt_result.ok()) << hybrid_decrypt_result.status();
-    hybrid_decrypt = std::move(hybrid_decrypt_result.ValueOrDie());
+    hybrid_decrypt = std::move(hybrid_decrypt_result.value());
     std::string plaintext = "some_plaintext";
     std::string context_info = "some_context";
 
     {  // RAW key
       std::string ciphertext = DummyHybridEncrypt(hybrid_name_0)
                                    .Encrypt(plaintext, context_info)
-                                   .ValueOrDie();
+                                   .value();
       auto decrypt_result = hybrid_decrypt->Decrypt(ciphertext, context_info);
       EXPECT_TRUE(decrypt_result.ok()) << decrypt_result.status();
-      EXPECT_EQ(plaintext, decrypt_result.ValueOrDie());
+      EXPECT_EQ(plaintext, decrypt_result.value());
     }
 
     {  // No ciphertext prefix.
@@ -146,10 +145,10 @@ TEST_F(HybridDecryptSetWrapperTest, Basic) {
       std::string ciphertext =
           prefix_id_1 + DummyHybridEncrypt(hybrid_name_1)
                             .Encrypt(plaintext, context_info)
-                            .ValueOrDie();
+                            .value();
       auto decrypt_result = hybrid_decrypt->Decrypt(ciphertext, context_info);
       EXPECT_TRUE(decrypt_result.ok()) << decrypt_result.status();
-      EXPECT_EQ(plaintext, decrypt_result.ValueOrDie());
+      EXPECT_EQ(plaintext, decrypt_result.value());
     }
 
     {  // Bad ciphertext.

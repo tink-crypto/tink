@@ -132,8 +132,8 @@ TEST(AesCtrHmacStreamingKeyManagerTest, GetPrimitive) {
   // Check that the two primitives are the same by encrypting with one, and
   // decrypting with the other.
   EXPECT_THAT(
-      EncryptThenDecrypt(streaming_aead_from_manager_result.ValueOrDie().get(),
-                         streaming_aead_direct_result.ValueOrDie().get(),
+      EncryptThenDecrypt(streaming_aead_from_manager_result.value().get(),
+                         streaming_aead_direct_result.value().get(),
                          subtle::Random::GetRandomBytes(10000),
                          "some associated data", params.ciphertext_offset),
       IsOk());
@@ -237,18 +237,17 @@ TEST(AesCtrHmacStreamingKeyManagerTest, CreateKey) {
   key_format.mutable_params()->mutable_hmac_params()->set_tag_size(32);
   auto key_or = AesCtrHmacStreamingKeyManager().CreateKey(key_format);
   ASSERT_THAT(key_or.status(), IsOk());
-  EXPECT_THAT(key_or.ValueOrDie().version(), Eq(0));
-  EXPECT_THAT(key_or.ValueOrDie().params().ciphertext_segment_size(),
+  EXPECT_THAT(key_or.value().version(), Eq(0));
+  EXPECT_THAT(key_or.value().params().ciphertext_segment_size(),
               Eq(key_format.params().ciphertext_segment_size()));
-  EXPECT_THAT(key_or.ValueOrDie().params().derived_key_size(),
+  EXPECT_THAT(key_or.value().params().derived_key_size(),
               Eq(key_format.params().derived_key_size()));
-  EXPECT_THAT(key_or.ValueOrDie().params().hkdf_hash_type(),
+  EXPECT_THAT(key_or.value().params().hkdf_hash_type(),
               Eq(key_format.params().hkdf_hash_type()));
-  EXPECT_THAT(key_or.ValueOrDie().key_value().size(),
-              Eq(key_format.key_size()));
-  EXPECT_THAT(key_or.ValueOrDie().params().hmac_params().hash(),
+  EXPECT_THAT(key_or.value().key_value().size(), Eq(key_format.key_size()));
+  EXPECT_THAT(key_or.value().params().hmac_params().hash(),
               Eq(key_format.params().hmac_params().hash()));
-  EXPECT_THAT(key_or.ValueOrDie().params().hmac_params().tag_size(),
+  EXPECT_THAT(key_or.value().params().hmac_params().tag_size(),
               Eq(key_format.params().hmac_params().tag_size()));
 }
 
@@ -266,13 +265,13 @@ TEST(AesCtrHmacStreamingKeyManagerTest, DeriveKey) {
   util::StatusOr<AesCtrHmacStreamingKey> key_or =
       AesCtrHmacStreamingKeyManager().DeriveKey(key_format, &input_stream);
   ASSERT_THAT(key_or.status(), IsOk());
-  EXPECT_THAT(key_or.ValueOrDie().key_value(),
+  EXPECT_THAT(key_or.value().key_value(),
               Eq("01234567890123456789012345678901"));
-  EXPECT_THAT(key_or.ValueOrDie().params().derived_key_size(),
+  EXPECT_THAT(key_or.value().params().derived_key_size(),
               Eq(key_format.params().derived_key_size()));
-  EXPECT_THAT(key_or.ValueOrDie().params().hkdf_hash_type(),
+  EXPECT_THAT(key_or.value().params().hkdf_hash_type(),
               Eq(key_format.params().hkdf_hash_type()));
-  EXPECT_THAT(key_or.ValueOrDie().params().ciphertext_segment_size(),
+  EXPECT_THAT(key_or.value().params().ciphertext_segment_size(),
               Eq(key_format.params().ciphertext_segment_size()));
 }
 

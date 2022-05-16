@@ -5,7 +5,7 @@ package(default_visibility = ["//:__subpackages__"])  # keep
 licenses(["notice"])  # keep
 
 go_library(
-    name = "go_default_library",
+    name = "signature",
     srcs = [
         "ecdsa_signer_key_manager.go",
         "ecdsa_verifier_key_manager.go",
@@ -20,24 +20,24 @@ go_library(
     importpath = "github.com/google/tink/go/signature",
     visibility = ["//visibility:public"],
     deps = [
-        "//core/cryptofmt:go_default_library",
-        "//core/primitiveset:go_default_library",
-        "//core/registry:go_default_library",
-        "//keyset:go_default_library",
-        "//proto:common_go_proto",
-        "//proto:ecdsa_go_proto",
-        "//proto:ed25519_go_proto",
-        "//proto:tink_go_proto",
-        "//signature/subtle:go_default_library",
-        "//subtle:go_default_library",
-        "//tink:go_default_library",
-        "@org_golang_google_protobuf//proto:go_default_library",
-        "@org_golang_x_crypto//ed25519:go_default_library",
+        "//core/cryptofmt",
+        "//core/primitiveset",
+        "//core/registry",
+        "//keyset",
+        "//proto/common_go_proto",
+        "//proto/ecdsa_go_proto",
+        "//proto/ed25519_go_proto",
+        "//proto/tink_go_proto",
+        "//signature/subtle",
+        "//subtle",
+        "//tink",
+        "@org_golang_google_protobuf//proto",
+        "@org_golang_x_crypto//ed25519",
     ],
 )
 
 go_test(
-    name = "go_default_test",
+    name = "signature_test",
     srcs = [
         "ecdsa_signer_key_manager_test.go",
         "ecdsa_verifier_key_manager_test.go",
@@ -47,21 +47,25 @@ go_test(
         "signature_key_templates_test.go",
         "signature_test.go",
     ],
-    embed = [":go_default_library"],
     deps = [
-        "//core/cryptofmt:go_default_library",
-        "//core/registry:go_default_library",
-        "//mac:go_default_library",
-        "//proto:common_go_proto",
-        "//proto:ecdsa_go_proto",
-        "//proto:ed25519_go_proto",
-        "//proto:tink_go_proto",
-        "//signature/subtle:go_default_library",
-        "//subtle/random:go_default_library",
-        "//testkeyset:go_default_library",
-        "//testutil:go_default_library",
-        "//tink:go_default_library",
-        "@org_golang_google_protobuf//proto:go_default_library",
-        "@org_golang_x_crypto//ed25519:go_default_library",
+        ":signature",
+        "//core/registry",
+        "//keyset",
+        "//mac",
+        "//proto/common_go_proto",
+        "//proto/ecdsa_go_proto",
+        "//proto/ed25519_go_proto",
+        "//proto/tink_go_proto",
+        "//signature/subtle",
+        "//subtle/random",
+        "//testkeyset",
+        "//testutil",
+        "@org_golang_google_protobuf//proto",
     ],
+)
+
+alias(
+    name = "go_default_library",
+    actual = ":signature",
+    visibility = ["//visibility:public"],
 )

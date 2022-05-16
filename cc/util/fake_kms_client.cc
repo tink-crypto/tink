@@ -18,6 +18,8 @@
 #include <fstream>
 #include <iostream>
 #include <sstream>
+#include <string>
+#include <utility>
 
 #include "absl/status/status.h"
 #include "absl/strings/ascii.h"
@@ -102,11 +104,11 @@ StatusOr<std::unique_ptr<Aead>> FakeKmsClient::GetAead(
     return reader_result.status();
   }
   auto handle_result =
-      CleartextKeysetHandle::Read(std::move(reader_result.ValueOrDie()));
+      CleartextKeysetHandle::Read(std::move(reader_result.value()));
   if (!handle_result.ok()) {
     return handle_result.status();
   }
-  return handle_result.ValueOrDie()->GetPrimitive<crypto::tink::Aead>();
+  return handle_result.value()->GetPrimitive<crypto::tink::Aead>();
 }
 
 Status FakeKmsClient::RegisterNewClient(absl::string_view key_uri,
@@ -116,7 +118,7 @@ Status FakeKmsClient::RegisterNewClient(absl::string_view key_uri,
     return client_result.status();
   }
 
-  return KmsClients::Add(std::move(client_result.ValueOrDie()));
+  return KmsClients::Add(std::move(client_result.value()));
 }
 
 StatusOr<std::string> FakeKmsClient::CreateFakeKeyUri() {
@@ -132,8 +134,8 @@ StatusOr<std::string> FakeKmsClient::CreateFakeKeyUri() {
   if (!writer_result.ok()) {
     return writer_result.status();
   }
-  auto status = CleartextKeysetHandle::Write(writer_result.ValueOrDie().get(),
-                                             *handle_result.ValueOrDie());
+  auto status = CleartextKeysetHandle::Write(writer_result.value().get(),
+                                             *handle_result.value());
   if (!status.ok()) {
     return status;
   }

@@ -18,6 +18,7 @@
 
 #include <iostream>
 #include <string>
+#include <utility>
 
 #include "gtest/gtest.h"
 #include "absl/status/status.h"
@@ -94,7 +95,7 @@ TEST_F(RsaSsaPkcs1VerifyBoringSslTest, BasicVerify) {
 
   auto verifier_result = RsaSsaPkcs1VerifyBoringSsl::New(pub_key, params);
   ASSERT_TRUE(verifier_result.ok()) << verifier_result.status();
-  auto verifier = std::move(verifier_result.ValueOrDie());
+  auto verifier = std::move(verifier_result.value());
   auto status =
       verifier->Verify(nist_test_vector.signature, nist_test_vector.message);
   EXPECT_TRUE(status.ok()) << status << internal::GetSslErrors();
@@ -140,7 +141,7 @@ TEST_F(RsaSsaPkcs1VerifyBoringSslTest, Modification) {
 
   auto verifier_result = RsaSsaPkcs1VerifyBoringSsl::New(pub_key, params);
   ASSERT_TRUE(verifier_result.ok()) << verifier_result.status();
-  auto verifier = std::move(verifier_result.ValueOrDie());
+  auto verifier = std::move(verifier_result.value());
   // Modify the message.
   for (std::size_t i = 0; i < nist_test_vector.message.length(); i++) {
     std::string modified_message = nist_test_vector.message;
@@ -213,7 +214,7 @@ bool TestSignatures(const std::string& filename, bool allow_skipping) {
       }
       continue;
     }
-    auto verifier = std::move(verifier_result.ValueOrDie());
+    auto verifier = std::move(verifier_result.value());
     for (const rapidjson::Value& test : test_group["tests"].GetArray()) {
       std::string expected = test["result"].GetString();
       std::string msg = WycheproofUtil::GetBytes(test["msg"]);

@@ -17,10 +17,14 @@
 // Implementation of a StreamingAEAD Service.
 #include "streaming_aead_impl.h"
 
+#include <algorithm>
+#include <string>
+#include <utility>
+
 #include "absl/status/status.h"
-#include "tink/streaming_aead.h"
 #include "tink/binary_keyset_reader.h"
 #include "tink/cleartext_keyset_handle.h"
+#include "tink/streaming_aead.h"
 #include "tink/util/istream_input_stream.h"
 #include "tink/util/ostream_output_stream.h"
 #include "tink/util/status.h"
@@ -49,13 +53,13 @@ using ::grpc::Status;
     return ::grpc::Status::OK;
   }
   auto handle_result =
-      CleartextKeysetHandle::Read(std::move(reader_result.ValueOrDie()));
+      CleartextKeysetHandle::Read(std::move(reader_result.value()));
   if (!handle_result.ok()) {
     response->set_err(std::string(handle_result.status().message()));
     return ::grpc::Status::OK;
   }
   auto streaming_aead_result =
-      handle_result.ValueOrDie()->GetPrimitive<crypto::tink::StreamingAead>();
+      handle_result.value()->GetPrimitive<crypto::tink::StreamingAead>();
   if (!streaming_aead_result.ok()) {
     response->set_err(std::string(streaming_aead_result.status().message()));
     return ::grpc::Status::OK;
@@ -67,13 +71,13 @@ using ::grpc::Status;
       absl::make_unique<OstreamOutputStream>(std::move(ciphertext_stream)));
 
   auto encrypting_stream_result =
-      streaming_aead_result.ValueOrDie()->NewEncryptingStream(
+      streaming_aead_result.value()->NewEncryptingStream(
           std::move(ciphertext_destination), request->associated_data());
   if (!encrypting_stream_result.ok()) {
     response->set_err(std::string(encrypting_stream_result.status().message()));
     return ::grpc::Status::OK;
   }
-  auto encrypting_stream = std::move(encrypting_stream_result.ValueOrDie());
+  auto encrypting_stream = std::move(encrypting_stream_result.value());
 
   auto contents = request->plaintext();
   void* buffer;
@@ -87,7 +91,7 @@ using ::grpc::Status;
       response->set_err(std::string(next_result.status().message()));
       return ::grpc::Status::OK;
     }
-    available_space = next_result.ValueOrDie();
+    available_space = next_result.value();
     available_bytes = std::min(available_space, remaining);
     memcpy(buffer, contents.data() + pos, available_bytes);
     remaining -= available_bytes;
@@ -117,13 +121,13 @@ using ::grpc::Status;
     return ::grpc::Status::OK;
   }
   auto handle_result =
-      CleartextKeysetHandle::Read(std::move(reader_result.ValueOrDie()));
+      CleartextKeysetHandle::Read(std::move(reader_result.value()));
   if (!handle_result.ok()) {
     response->set_err(std::string(handle_result.status().message()));
     return ::grpc::Status::OK;
   }
   auto streaming_aead_result =
-      handle_result.ValueOrDie()->GetPrimitive<crypto::tink::StreamingAead>();
+      handle_result.value()->GetPrimitive<crypto::tink::StreamingAead>();
   if (!streaming_aead_result.ok()) {
     response->set_err(std::string(streaming_aead_result.status().message()));
     return ::grpc::Status::OK;
@@ -135,13 +139,13 @@ using ::grpc::Status;
       absl::make_unique<IstreamInputStream>(std::move(ciphertext_stream)));
 
   auto decrypting_stream_result =
-      streaming_aead_result.ValueOrDie()->NewDecryptingStream(
+      streaming_aead_result.value()->NewDecryptingStream(
           std::move(ciphertext_source), request->associated_data());
   if (!decrypting_stream_result.ok()) {
     response->set_err(std::string(decrypting_stream_result.status().message()));
     return ::grpc::Status::OK;
   }
-  auto decrypting_stream = std::move(decrypting_stream_result.ValueOrDie());
+  auto decrypting_stream = std::move(decrypting_stream_result.value());
 
   std::string plaintext;
   const void* buffer;
@@ -155,7 +159,7 @@ using ::grpc::Status;
       response->set_err(std::string(next_result.status().message()));
       return ::grpc::Status::OK;
     }
-    auto read_bytes = next_result.ValueOrDie();
+    auto read_bytes = next_result.value();
     if (read_bytes > 0) {
       plaintext.append(
           std::string(reinterpret_cast<const char*>(buffer), read_bytes));

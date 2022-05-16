@@ -16,6 +16,8 @@
 
 #include "tink/subtle/ecdsa_sign_boringssl.h"
 
+#include <string>
+#include <utility>
 #include <vector>
 
 #include "absl/status/status.h"
@@ -171,7 +173,7 @@ util::StatusOr<std::string> EcdsaSignBoringSsl::Sign(
     if (!status_or_sig.ok()) {
       return status_or_sig.status();
     }
-    return status_or_sig.ValueOrDie();
+    return status_or_sig.value();
   }
 
   return std::string(reinterpret_cast<char*>(buffer.data()), sig_length);

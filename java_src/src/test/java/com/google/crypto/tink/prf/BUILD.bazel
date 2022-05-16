@@ -40,7 +40,7 @@ java_test(
     deps = [
         "//proto:aes_cmac_prf_java_proto",
         "//src/main/java/com/google/crypto/tink:key_template",
-        "//src/main/java/com/google/crypto/tink:key_type_manager",
+        "//src/main/java/com/google/crypto/tink/internal:key_type_manager",
         "//src/main/java/com/google/crypto/tink/prf:aes_cmac_prf_key_manager",
         "//src/main/java/com/google/crypto/tink/prf:prf_set",
         "//src/main/java/com/google/crypto/tink/subtle:prf_aes_cmac",
@@ -60,7 +60,7 @@ java_test(
         "//proto:common_java_proto",
         "//proto:hmac_prf_java_proto",
         "//src/main/java/com/google/crypto/tink:key_template",
-        "//src/main/java/com/google/crypto/tink:key_type_manager",
+        "//src/main/java/com/google/crypto/tink/internal:key_type_manager",
         "//src/main/java/com/google/crypto/tink/prf:hmac_prf_key_manager",
         "//src/main/java/com/google/crypto/tink/prf:prf_set",
         "//src/main/java/com/google/crypto/tink/subtle:prf_hmac_jce",
@@ -82,7 +82,7 @@ java_test(
         "//proto:hkdf_prf_java_proto",
         "//proto:tink_java_proto",
         "//src/main/java/com/google/crypto/tink:key_template",
-        "//src/main/java/com/google/crypto/tink:key_type_manager",
+        "//src/main/java/com/google/crypto/tink/internal:key_type_manager",
         "//src/main/java/com/google/crypto/tink/prf:hkdf_prf_key_manager",
         "//src/main/java/com/google/crypto/tink/prf:prf_set",
         "//src/main/java/com/google/crypto/tink/subtle:enums",
@@ -91,6 +91,20 @@ java_test(
         "//src/main/java/com/google/crypto/tink/subtle/prf:streaming_prf",
         "//src/main/java/com/google/crypto/tink/testing:key_type_manager_test_util",
         "@com_google_protobuf//:protobuf_javalite",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "PrfConfigTest",
+    srcs = ["PrfConfigTest.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink:registry",
+        "//src/main/java/com/google/crypto/tink/config:tink_fips",
+        "//src/main/java/com/google/crypto/tink/config/internal:tink_fips_util",
+        "//src/main/java/com/google/crypto/tink/prf:prf_config",
+        "//src/main/java/com/google/crypto/tink/prf:prf_set",
         "@maven//:com_google_truth_truth",
         "@maven//:junit_junit",
     ],

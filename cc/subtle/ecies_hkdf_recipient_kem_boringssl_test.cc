@@ -16,6 +16,9 @@
 
 #include "tink/subtle/ecies_hkdf_recipient_kem_boringssl.h"
 
+#include <string>
+#include <utility>
+
 #include "gtest/gtest.h"
 #include "absl/status/status.h"
 #include "absl/strings/escaping.h"
@@ -82,7 +85,7 @@ TEST_F(EciesHkdfRecipientKemBoringSslTest, TestBasic) {
         test.curve,
         util::SecretDataFromStringView(absl::HexStringToBytes(test.priv_hex)));
     ASSERT_TRUE(ecies_kem_or.ok());
-    auto ecies_kem = std::move(ecies_kem_or).ValueOrDie();
+    auto ecies_kem = std::move(ecies_kem_or).value();
     auto kem_key_or = ecies_kem->GenerateKey(
         absl::HexStringToBytes(test.pub_encoded_hex), test.hash,
         absl::HexStringToBytes(test.salt_hex),
@@ -90,7 +93,7 @@ TEST_F(EciesHkdfRecipientKemBoringSslTest, TestBasic) {
     ASSERT_TRUE(kem_key_or.ok());
     EXPECT_EQ(test.out_key_hex,
               absl::BytesToHexString(
-                  util::SecretDataAsStringView(kem_key_or.ValueOrDie())));
+                  util::SecretDataAsStringView(kem_key_or.value())));
   }
 }
 
@@ -148,7 +151,7 @@ TEST_F(EciesHkdfNistPCurveRecipientKemBoringSslTest, TestGenerateKey) {
       util::SecretDataFromStringView(
           absl::HexStringToBytes(kNistP256PrivateKeyHex)));
   ASSERT_TRUE(status_or_recipient_kem.ok());
-  auto recipient_kem = std::move(status_or_recipient_kem.ValueOrDie());
+  auto recipient_kem = std::move(status_or_recipient_kem.value());
 
   auto status_or_shared_key = recipient_kem->GenerateKey(
       absl::HexStringToBytes(kNistP256PublicValueHex), HashType::SHA256,
@@ -156,8 +159,8 @@ TEST_F(EciesHkdfNistPCurveRecipientKemBoringSslTest, TestGenerateKey) {
       EcPointFormat::UNCOMPRESSED);
   ASSERT_TRUE(status_or_shared_key.ok());
 
-  EXPECT_EQ(absl::BytesToHexString(util::SecretDataAsStringView(
-                status_or_shared_key.ValueOrDie())),
+  EXPECT_EQ(absl::BytesToHexString(
+                util::SecretDataAsStringView(status_or_shared_key.value())),
             kNistP256SharedKeyHex);
 }
 

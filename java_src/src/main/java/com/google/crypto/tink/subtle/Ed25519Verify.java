@@ -18,6 +18,7 @@ package com.google.crypto.tink.subtle;
 
 import com.google.crypto.tink.PublicKeyVerify;
 import com.google.crypto.tink.config.internal.TinkFipsUtil;
+import com.google.crypto.tink.internal.ByteArray;
 import java.security.GeneralSecurityException;
 
 /**
@@ -44,7 +45,7 @@ public final class Ed25519Verify implements PublicKeyVerify {
   public static final int PUBLIC_KEY_LEN = Field25519.FIELD_LEN;
   public static final int SIGNATURE_LEN = Field25519.FIELD_LEN * 2;
 
-  private final ImmutableByteArray publicKey;
+  private final ByteArray publicKey;
 
   public Ed25519Verify(final byte[] publicKey) {
     if (!FIPS.isCompatible()) {
@@ -59,7 +60,7 @@ public final class Ed25519Verify implements PublicKeyVerify {
       throw new IllegalArgumentException(
           String.format("Given public key's length is not %s.", PUBLIC_KEY_LEN));
     }
-    this.publicKey = ImmutableByteArray.of(publicKey);
+    this.publicKey = ByteArray.of(publicKey);
   }
 
   @Override

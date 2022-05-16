@@ -14,14 +14,20 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "tink/cc/cc_streaming_aead_wrappers.h"
+#include "tink/cc/pybind/cc_streaming_aead_wrappers.h"
+
+#include <string>
+#include <utility>
 
 #include "pybind11/pybind11.h"
+#include "tink/cc/cc_streaming_aead_wrappers.h"
 #include "tink/cc/pybind/import_helper.h"
-#include "tink/cc/pybind/status_casters.h"
+#include "tink/cc/pybind/tink_exception.h"
 
 namespace crypto {
 namespace tink {
+
+using pybind11::google_tink::TinkException;
 
 void PybindRegisterCcStreamingAeadWrappers(pybind11::module* module) {
   namespace py = pybind11;
@@ -33,9 +39,14 @@ void PybindRegisterCcStreamingAeadWrappers(pybind11::module* module) {
       // TODO(b/145925674)
       [](StreamingAead* streaming_aead, const py::bytes& aad,
          std::shared_ptr<PythonFileObjectAdapter> ciphertext_destination)
-          -> util::StatusOr<std::unique_ptr<OutputStreamAdapter>> {
-        return NewCcEncryptingStream(streaming_aead, std::string(aad),
-                                     ciphertext_destination);
+          -> std::unique_ptr<OutputStreamAdapter> {
+        util::StatusOr<std::unique_ptr<OutputStreamAdapter>> result_stream =
+            NewCcEncryptingStream(streaming_aead, std::string(aad),
+                                  ciphertext_destination);
+        if (!result_stream.ok()) {
+          throw TinkException(result_stream.status());
+        }
+        return *std::move(result_stream);
       },
       py::arg("primitive"), py::arg("aad"), py::arg("destination"),
       // Keep destination alive at least as long as OutputStreamAdapter.
@@ -46,9 +57,14 @@ void PybindRegisterCcStreamingAeadWrappers(pybind11::module* module) {
       // TODO(b/145925674)
       [](StreamingAead* streaming_aead, const py::bytes& aad,
          std::shared_ptr<PythonFileObjectAdapter> ciphertext_source)
-          -> util::StatusOr<std::unique_ptr<InputStreamAdapter>> {
-        return NewCcDecryptingStream(streaming_aead, std::string(aad),
-                                     ciphertext_source);
+          -> std::unique_ptr<InputStreamAdapter> {
+        util::StatusOr<std::unique_ptr<InputStreamAdapter>> result_stream =
+            NewCcDecryptingStream(streaming_aead, std::string(aad),
+                                  ciphertext_source);
+        if (!result_stream.ok()) {
+          throw TinkException(result_stream.status());
+        }
+        return *std::move(result_stream);
       },
       py::arg("primitive"), py::arg("aad"), py::arg("source"),
       // Keep source alive at least as long as InputStreamAdapter.

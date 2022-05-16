@@ -79,6 +79,13 @@ public final class PrimitiveSet<P> {
       this.keyId = keyId;
     }
 
+    /**
+     * Returns the primitive for this entry.
+     *
+     * <p>For primitives of type {@code Mac}, {@code Aead}, {@code PublicKeySign}, {@code
+     * PublicKeyVerify}, {@code DeterministicAead}, {@code HybridEncrypt}, and {@code HybridDecrypt}
+     * this is a primitive which <b>ignores</b> the output prefix and assumes "RAW".
+     */
     public P getPrimitive() {
       return this.primitive;
     }

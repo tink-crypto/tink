@@ -55,10 +55,10 @@ def ts_library_from_closure(name, namespace_aliases, deps):
     closure_js_binary(
         name = name + "_bin",
         deps = [name + "_lib"],
-        # According to https://kangax.github.io/compat-table/es2016plus/,
-        # ES2017 is the latest standard fully supported by Chrome, Firefox,
-        # and Safari as of 2020-08-20. It is also used in tsconfig.json.
-        language = "ECMASCRIPT_2017",
+        # ECMASCRIPT_NEXT is required since the subtle elliptic curve point
+        # compression functions depend on BigInt, which was introduced in ES2020.
+        # https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/BigInt
+        language = "ECMASCRIPT_NEXT",
         entry_points = ["epm${name}".format(name = name)],
         # Advanced optimizations remove dead code, which is a problem here
         # because we have no way to straightforwardly tell Closure Compiler

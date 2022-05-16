@@ -17,6 +17,10 @@
 #ifndef TINK_SUBTLE_ECIES_HKDF_SENDER_KEM_BORINGSSL_H_
 #define TINK_SUBTLE_ECIES_HKDF_SENDER_KEM_BORINGSSL_H_
 
+#include <memory>
+#include <string>
+#include <utility>
+
 #include "absl/strings/string_view.h"
 #include "openssl/evp.h"
 #include "tink/internal/fips_utils.h"

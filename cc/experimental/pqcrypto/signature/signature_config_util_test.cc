@@ -16,6 +16,9 @@
 
 #include "tink/experimental/pqcrypto/signature/signature_config.h"
 
+#include <string>
+#include <utility>
+
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "tink/config/tink_fips.h"

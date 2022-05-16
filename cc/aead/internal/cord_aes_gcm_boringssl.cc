@@ -89,11 +89,11 @@ util::StatusOr<std::unique_ptr<CordAead> > CordAesGcmBoringSsl::New(
 
   std::unique_ptr<CordAead> aead =
       absl::WrapUnique(new CordAesGcmBoringSsl(std::move(context)));
-  return aead;
+  return std::move(aead);
 }
 
 util::StatusOr<absl::Cord> CordAesGcmBoringSsl::Encrypt(
-    absl::Cord plaintext, absl::Cord additional_data) const {
+    absl::Cord plaintext, absl::Cord associated_data) const {
   std::string iv = subtle::Random::GetRandomBytes(kIvSizeInBytes);
 
   internal::SslUniquePtr<EVP_CIPHER_CTX> context(EVP_CIPHER_CTX_new());
@@ -106,7 +106,7 @@ util::StatusOr<absl::Cord> CordAesGcmBoringSsl::Encrypt(
 
   int len = 0;
   // Process AAD.
-  for (auto ad_chunk : additional_data.Chunks()) {
+  for (auto ad_chunk : associated_data.Chunks()) {
     if (!EVP_EncryptUpdate(context.get(), /*out=*/nullptr, &len,
                            reinterpret_cast<const uint8_t*>(ad_chunk.data()),
                            ad_chunk.size())) {
@@ -152,7 +152,7 @@ util::StatusOr<absl::Cord> CordAesGcmBoringSsl::Encrypt(
 }
 
 util::StatusOr<absl::Cord> CordAesGcmBoringSsl::Decrypt(
-    absl::Cord ciphertext, absl::Cord additional_data) const {
+    absl::Cord ciphertext, absl::Cord associated_data) const {
   if (ciphertext.size() < kIvSizeInBytes + kTagSizeInBytes) {
     return util::Status(absl::StatusCode::kInternal, "Ciphertext too short");
   }
@@ -171,8 +171,8 @@ util::StatusOr<absl::Cord> CordAesGcmBoringSsl::Decrypt(
   }
 
   int len = 0;
-  // Process AAD.
-  for (auto ad_chunk : additional_data.Chunks()) {
+  // Process associated data.
+  for (auto ad_chunk : associated_data.Chunks()) {
     if (!EVP_DecryptUpdate(context.get(), nullptr, &len,
                            reinterpret_cast<const uint8_t*>(ad_chunk.data()),
                            ad_chunk.size())) {

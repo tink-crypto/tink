@@ -15,6 +15,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "tink/hybrid/ecies_aead_hkdf_private_key_manager.h"
+
 #include <string>
 
 #include "absl/memory/memory.h"

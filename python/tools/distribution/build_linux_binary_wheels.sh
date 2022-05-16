@@ -32,8 +32,8 @@ PYTHON_VERSIONS["3.8"]="cp38-cp38"
 PYTHON_VERSIONS["3.9"]="cp39-cp39"
 readonly -A PYTHON_VERSIONS
 
-readonly BAZEL_VERSION='4.2.1'
-readonly PROTOC_VERSION='3.14.0'
+readonly BAZEL_VERSION='4.2.2'
+readonly PROTOC_VERSION='3.19.3'
 
 # Get dependencies which are needed for building Tink.
 

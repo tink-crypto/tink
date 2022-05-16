@@ -15,9 +15,10 @@
 ################################################################################
 
 
-ROOT_DIR="$TEST_SRCDIR/tools"
-TINKEY_CLI="$ROOT_DIR/tinkey/tinkey"
-ENVELOPE_CLI="$ROOT_DIR/testing/go/generate_envelope_keyset"
+REPO_DIR="${TEST_SRCDIR}"
+TOOLS_DIR="${REPO_DIR}/tools"
+TINKEY_CLI="${TOOLS_DIR}/tinkey/tinkey"
+ENVELOPE_CLI="${TOOLS_DIR}/testing/go/generate_envelope_keyset"
 #############################################################################
 ##### Helper functions.
 

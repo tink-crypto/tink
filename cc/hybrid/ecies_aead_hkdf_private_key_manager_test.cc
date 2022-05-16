@@ -122,7 +122,7 @@ TEST(EciesAeadHkdfPrivateKeyManagerTest, CreateKey) {
   ASSERT_THAT(EciesAeadHkdfPrivateKeyManager().CreateKey(key_format).status(),
               IsOk());
   EciesAeadHkdfPrivateKey key =
-      EciesAeadHkdfPrivateKeyManager().CreateKey(key_format).ValueOrDie();
+      EciesAeadHkdfPrivateKeyManager().CreateKey(key_format).value();
   EXPECT_THAT(key.public_key().params().kem_params().curve_type(),
               Eq(key_format.params().kem_params().curve_type()));
   EXPECT_THAT(key.public_key().params().kem_params().hkdf_hash_type(),
@@ -143,7 +143,7 @@ TEST(EciesAeadHkdfPrivateKeyManagerTest, CreateKey) {
 EciesAeadHkdfPrivateKey CreateValidKey() {
   return EciesAeadHkdfPrivateKeyManager()
       .CreateKey(CreateValidKeyFormat())
-      .ValueOrDie();
+      .value();
 }
 
 TEST(EciesAeadHkdfPrivateKeyManagerTest, ValidateKeyEmpty) {
@@ -207,7 +207,7 @@ TEST(EciesAeadHkdfPrivateKeyManagerTest, GetPublicKey) {
   ASSERT_THAT(EciesAeadHkdfPrivateKeyManager().GetPublicKey(key).status(),
               IsOk());
   EciesAeadHkdfPublicKey public_key =
-      EciesAeadHkdfPrivateKeyManager().GetPublicKey(key).ValueOrDie();
+      EciesAeadHkdfPrivateKeyManager().GetPublicKey(key).value();
   EXPECT_THAT(public_key.params().kem_params().curve_type(),
               Eq(key.public_key().params().kem_params().curve_type()));
   EXPECT_THAT(public_key.params().kem_params().hkdf_hash_type(),
@@ -233,7 +233,7 @@ TEST(EciesAeadHkdfPrivateKeyManagerTest, Create) {
 
   EciesAeadHkdfPrivateKey private_key = CreateValidKey();
   EciesAeadHkdfPublicKey public_key =
-      EciesAeadHkdfPrivateKeyManager().GetPublicKey(private_key).ValueOrDie();
+      EciesAeadHkdfPrivateKeyManager().GetPublicKey(private_key).value();
 
   auto decrypt_or =
       EciesAeadHkdfPrivateKeyManager().GetPrimitive<HybridDecrypt>(private_key);
@@ -241,9 +241,9 @@ TEST(EciesAeadHkdfPrivateKeyManagerTest, Create) {
   auto encrypt_or = EciesAeadHkdfHybridEncrypt::New(public_key);
   ASSERT_THAT(encrypt_or.status(), IsOk());
 
-  ASSERT_THAT(HybridEncryptThenDecrypt(encrypt_or.ValueOrDie().get(),
-                                       decrypt_or.ValueOrDie().get(),
-                                       "some text", "some aad"),
+  ASSERT_THAT(HybridEncryptThenDecrypt(encrypt_or.value().get(),
+                                       decrypt_or.value().get(), "some text",
+                                       "some aad"),
               IsOk());
 }
 
@@ -253,9 +253,8 @@ TEST(EciesAeadHkdfPrivateKeyManagerTest, CreateDifferentKey) {
 
   EciesAeadHkdfPrivateKey private_key = CreateValidKey();
   // Note: we create a new private key in the next line.
-  EciesAeadHkdfPublicKey public_key = EciesAeadHkdfPrivateKeyManager()
-                                          .GetPublicKey(CreateValidKey())
-                                          .ValueOrDie();
+  EciesAeadHkdfPublicKey public_key =
+      EciesAeadHkdfPrivateKeyManager().GetPublicKey(CreateValidKey()).value();
 
   auto decrypt_or =
       EciesAeadHkdfPrivateKeyManager().GetPrimitive<HybridDecrypt>(private_key);
@@ -263,9 +262,9 @@ TEST(EciesAeadHkdfPrivateKeyManagerTest, CreateDifferentKey) {
   auto encrypt_or = EciesAeadHkdfHybridEncrypt::New(public_key);
   ASSERT_THAT(encrypt_or.status(), IsOk());
 
-  ASSERT_THAT(HybridEncryptThenDecrypt(encrypt_or.ValueOrDie().get(),
-                                       decrypt_or.ValueOrDie().get(),
-                                       "some text", "some aad"),
+  ASSERT_THAT(HybridEncryptThenDecrypt(encrypt_or.value().get(),
+                                       decrypt_or.value().get(), "some text",
+                                       "some aad"),
               Not(IsOk()));
 }
 

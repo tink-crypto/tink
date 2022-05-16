@@ -20,6 +20,8 @@ aes_eax_pb2.AesEaxKey, one can do:
 handle = keyset_handle.KeysetHandle(aead_key_templates.AES128_EAX).
 """
 
+import warnings
+
 from tink.proto import aes_ctr_hmac_aead_pb2
 from tink.proto import aes_eax_pb2
 from tink.proto import aes_gcm_pb2
@@ -43,7 +45,7 @@ _KMS_ENVELOPE_AEAD_KEY_TYPE_URL = (
     'type.googleapis.com/google.crypto.tink.KmsEnvelopeAeadKey')
 
 
-def create_aes_eax_key_template(
+def _create_aes_eax_key_template(
     key_size: int,
     iv_size: int,
     output_prefix_type: tink_pb2.OutputPrefixType = tink_pb2.TINK
@@ -59,7 +61,7 @@ def create_aes_eax_key_template(
   return key_template
 
 
-def create_aes_gcm_key_template(
+def _create_aes_gcm_key_template(
     key_size: int,
     output_prefix_type: tink_pb2.OutputPrefixType = tink_pb2.TINK
 ) -> tink_pb2.KeyTemplate:
@@ -73,7 +75,7 @@ def create_aes_gcm_key_template(
   return key_template
 
 
-def create_aes_gcm_siv_key_template(
+def _create_aes_gcm_siv_key_template(
     key_size: int,
     output_prefix_type: tink_pb2.OutputPrefixType = tink_pb2.TINK
 ) -> tink_pb2.KeyTemplate:
@@ -87,7 +89,7 @@ def create_aes_gcm_siv_key_template(
   return key_template
 
 
-def create_aes_ctr_hmac_aead_key_template(
+def _create_aes_ctr_hmac_aead_key_template(
     aes_key_size: int,
     iv_size: int,
     hmac_key_size: int,
@@ -156,44 +158,44 @@ def create_kms_envelope_aead_key_template(
   return key_template
 
 
-AES128_EAX = create_aes_eax_key_template(key_size=16, iv_size=16)
-AES128_EAX_RAW = create_aes_eax_key_template(
+AES128_EAX = _create_aes_eax_key_template(key_size=16, iv_size=16)
+AES128_EAX_RAW = _create_aes_eax_key_template(
     key_size=16, iv_size=16, output_prefix_type=tink_pb2.RAW)
-AES256_EAX = create_aes_eax_key_template(key_size=32, iv_size=16)
-AES256_EAX_RAW = create_aes_eax_key_template(
+AES256_EAX = _create_aes_eax_key_template(key_size=32, iv_size=16)
+AES256_EAX_RAW = _create_aes_eax_key_template(
     key_size=32, iv_size=16, output_prefix_type=tink_pb2.RAW)
-AES128_GCM = create_aes_gcm_key_template(key_size=16)
-AES128_GCM_RAW = create_aes_gcm_key_template(
+AES128_GCM = _create_aes_gcm_key_template(key_size=16)
+AES128_GCM_RAW = _create_aes_gcm_key_template(
     key_size=16, output_prefix_type=tink_pb2.RAW)
-AES256_GCM = create_aes_gcm_key_template(key_size=32)
-AES256_GCM_RAW = create_aes_gcm_key_template(
+AES256_GCM = _create_aes_gcm_key_template(key_size=32)
+AES256_GCM_RAW = _create_aes_gcm_key_template(
     key_size=32, output_prefix_type=tink_pb2.RAW)
-AES128_GCM_SIV = create_aes_gcm_siv_key_template(key_size=16)
-AES128_GCM_SIV_RAW = create_aes_gcm_siv_key_template(
+AES128_GCM_SIV = _create_aes_gcm_siv_key_template(key_size=16)
+AES128_GCM_SIV_RAW = _create_aes_gcm_siv_key_template(
     key_size=16, output_prefix_type=tink_pb2.RAW)
-AES256_GCM_SIV = create_aes_gcm_siv_key_template(key_size=32)
-AES256_GCM_SIV_RAW = create_aes_gcm_siv_key_template(
+AES256_GCM_SIV = _create_aes_gcm_siv_key_template(key_size=32)
+AES256_GCM_SIV_RAW = _create_aes_gcm_siv_key_template(
     key_size=32, output_prefix_type=tink_pb2.RAW)
-AES128_CTR_HMAC_SHA256 = create_aes_ctr_hmac_aead_key_template(
+AES128_CTR_HMAC_SHA256 = _create_aes_ctr_hmac_aead_key_template(
     aes_key_size=16,
     iv_size=16,
     hmac_key_size=32,
     tag_size=16,
     hash_type=common_pb2.SHA256)
-AES128_CTR_HMAC_SHA256_RAW = create_aes_ctr_hmac_aead_key_template(
+AES128_CTR_HMAC_SHA256_RAW = _create_aes_ctr_hmac_aead_key_template(
     aes_key_size=16,
     iv_size=16,
     hmac_key_size=32,
     tag_size=16,
     hash_type=common_pb2.SHA256,
     output_prefix_type=tink_pb2.RAW)
-AES256_CTR_HMAC_SHA256 = create_aes_ctr_hmac_aead_key_template(
+AES256_CTR_HMAC_SHA256 = _create_aes_ctr_hmac_aead_key_template(
     aes_key_size=32,
     iv_size=16,
     hmac_key_size=32,
     tag_size=32,
     hash_type=common_pb2.SHA256)
-AES256_CTR_HMAC_SHA256_RAW = create_aes_ctr_hmac_aead_key_template(
+AES256_CTR_HMAC_SHA256_RAW = _create_aes_ctr_hmac_aead_key_template(
     aes_key_size=32,
     iv_size=16,
     hmac_key_size=32,
@@ -205,3 +207,52 @@ XCHACHA20_POLY1305 = tink_pb2.KeyTemplate(
     output_prefix_type=tink_pb2.TINK)
 XCHACHA20_POLY1305_RAW = tink_pb2.KeyTemplate(
     type_url=_XCHACHA20_POLY1305_KEY_TYPE_URL, output_prefix_type=tink_pb2.RAW)
+
+
+# Deprecated. Use the predefined constant templates above instead.
+def create_aes_eax_key_template(
+    key_size: int,
+    iv_size: int,
+    output_prefix_type: tink_pb2.OutputPrefixType = tink_pb2.TINK
+) -> tink_pb2.KeyTemplate:
+  warnings.warn('The "create_aes_eax_key_template" function is deprecated.',
+                DeprecationWarning, 2)
+  return _create_aes_eax_key_template(key_size, iv_size, output_prefix_type)
+
+
+# Deprecated. Use the predefined constant templates above instead.
+def create_aes_gcm_key_template(
+    key_size: int,
+    output_prefix_type: tink_pb2.OutputPrefixType = tink_pb2.TINK
+) -> tink_pb2.KeyTemplate:
+  warnings.warn('The "create_aes_gcm_key_template" function is deprecated.',
+                DeprecationWarning, 2)
+  return _create_aes_gcm_key_template(key_size, output_prefix_type)
+
+
+# Deprecated. Use the predefined constant templates above instead.
+def create_aes_gcm_siv_key_template(
+    key_size: int,
+    output_prefix_type: tink_pb2.OutputPrefixType = tink_pb2.TINK
+) -> tink_pb2.KeyTemplate:
+  warnings.warn('The "create_aes_gcm_siv_key_template" function is deprecated.',
+                DeprecationWarning, 2)
+  return _create_aes_gcm_siv_key_template(key_size, output_prefix_type)
+
+
+# Deprecated. Use the predefined constant templates above instead.
+def create_aes_ctr_hmac_aead_key_template(
+    aes_key_size: int,
+    iv_size: int,
+    hmac_key_size: int,
+    tag_size: int,
+    hash_type: common_pb2.HashType,
+    output_prefix_type: tink_pb2.OutputPrefixType = tink_pb2.TINK
+) -> tink_pb2.KeyTemplate:
+  """Creates AesCtrHmacAeadKey template."""
+  warnings.warn(
+      'The "create_aes_ctr_hmac_aead_key_template" function is deprecated.',
+      DeprecationWarning, 2)
+  return _create_aes_ctr_hmac_aead_key_template(aes_key_size, iv_size,
+                                                hmac_key_size, tag_size,
+                                                hash_type, output_prefix_type)

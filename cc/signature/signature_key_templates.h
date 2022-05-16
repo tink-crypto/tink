@@ -33,7 +33,7 @@ namespace tink {
 //   auto handle_result =
 //       KeysetHandle::GenerateNew(SignatureKeyTemplates::EcdsaP256());
 //   if (!handle_result.ok()) { /* fail with error */ }
-//   auto keyset_handle = std::move(handle_result.ValueOrDie());
+//   auto keyset_handle = std::move(handle_result.value());
 class SignatureKeyTemplates {
  public:
   // Returns a KeyTemplate that generates new instances of EcdsaPrivateKey

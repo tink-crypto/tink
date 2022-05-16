@@ -17,7 +17,7 @@ import os
 import subprocess
 import time
 
-from typing import List
+from typing import List, Optional
 from absl import logging
 import grpc
 import portpicker
@@ -52,6 +52,9 @@ _SERVER_PATHS = {
 # All languages that have a testing server
 LANGUAGES = list(_SERVER_PATHS.keys())
 
+KEYSET_READER_WRITER_TYPES = [('KEYSET_READER_BINARY', 'KEYSET_WRITER_BINARY'),
+                              ('KEYSET_READER_JSON', 'KEYSET_WRITER_JSON')]
+
 # location of the testing_server java binary, relative to tink_root_path()
 _JAVA_PATH = (
     'testing/java_src/bazel-bin/testing_server.runfiles/local_jdk/bin/java')
@@ -78,7 +81,7 @@ SUPPORTED_LANGUAGES_BY_PRIMITIVE = {
     'mac': ['cc', 'go', 'java', 'python'],
     'signature': ['cc', 'go', 'java', 'python'],
     'prf': ['cc', 'java', 'go', 'python'],
-    'jwt': ['cc', 'java', 'python'],
+    'jwt': ['cc', 'java', 'go', 'python'],
 }
 
 
@@ -125,18 +128,18 @@ class _TestingServers():
       logging.info('cmd = %s', cmd)
       try:
         output_dir = os.environ['TEST_UNDECLARED_OUTPUTS_DIR']
-      except KeyError:
+      except KeyError as e:
         raise RuntimeError(
             'Could not start %s server, TEST_UNDECLARED_OUTPUTS_DIR environment'
-            'variable must be set')
+            'variable must be set') from e
       output_file = '%s-%s-%s' % (test_name, lang, 'server.log')
       output_path = os.path.join(output_dir, output_file)
       logging.info('writing server output to %s', output_path)
       try:
         self._output_file[lang] = open(output_path, 'w+')
-      except IOError:
+      except IOError as e:
         logging.info('unable to open server output file %s', output_path)
-        raise RuntimeError('Could not start %s server' % lang)
+        raise RuntimeError('Could not start %s server' % lang) from e
       self._server[lang] = subprocess.Popen(
           cmd, stdout=self._output_file[lang], stderr=subprocess.STDOUT)
       logging.info('%s server started on port %d with pid: %d.',
@@ -146,12 +149,12 @@ class _TestingServers():
     for lang in LANGUAGES:
       try:
         grpc.channel_ready_future(self._channel[lang]).result(timeout=30)
-      except:
+      except Exception as e:
         logging.info('Timeout while connecting to server %s', lang)
         self._server[lang].kill()
         out, err = self._server[lang].communicate()
-        raise RuntimeError(
-            'Could not start %s server, output=%s, err=%s' % (lang, out, err))
+        raise RuntimeError('Could not start %s server, output=%s, err=%s' %
+                           (lang, out, err)) from e
       self._metadata_stub[lang] = testing_api_pb2_grpc.MetadataStub(
           self._channel[lang])
       self._keyset_stub[lang] = testing_api_pb2_grpc.KeysetStub(
@@ -269,6 +272,25 @@ def keyset_to_json(lang: str, keyset: bytes) -> str:
 def keyset_from_json(lang: str, json_keyset: str) -> bytes:
   global _ts
   return _primitives.keyset_from_json(_ts.keyset_stub(lang), json_keyset)
+
+
+def keyset_read_encrypted(lang: str, encrypted_keyset: bytes,
+                          master_keyset: bytes,
+                          associated_data: Optional[bytes],
+                          keyset_reader_type: str) -> bytes:
+  global _ts
+  return _primitives.keyset_read_encrypted(
+      _ts.keyset_stub(lang), encrypted_keyset, master_keyset, associated_data,
+      keyset_reader_type)
+
+
+def keyset_write_encrypted(lang: str, keyset: bytes, master_keyset: bytes,
+                           associated_data: Optional[bytes],
+                           keyset_writer_type: str) -> bytes:
+  global _ts
+  return _primitives.keyset_write_encrypted(
+      _ts.keyset_stub(lang), keyset, master_keyset, associated_data,
+      keyset_writer_type)
 
 
 def jwk_set_to_keyset(lang: str, jwk_set: str) -> bytes:

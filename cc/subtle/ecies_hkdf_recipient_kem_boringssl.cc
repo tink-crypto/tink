@@ -16,6 +16,8 @@
 
 #include "tink/subtle/ecies_hkdf_recipient_kem_boringssl.h"
 
+#include <utility>
+
 #include "absl/memory/memory.h"
 #include "absl/status/status.h"
 #include "openssl/bn.h"
@@ -67,7 +69,7 @@ EciesHkdfNistPCurveRecipientKemBoringSsl::New(EllipticCurveType curve,
   // TODO(przydatek): consider refactoring internal/ec_util,
   //     so that the saved group can be used for KEM operations.
   return {absl::WrapUnique(new EciesHkdfNistPCurveRecipientKemBoringSsl(
-      curve, std::move(priv_key), std::move(status_or_ec_group.ValueOrDie())))};
+      curve, std::move(priv_key), std::move(status_or_ec_group.value())))};
 }
 
 EciesHkdfNistPCurveRecipientKemBoringSsl::
@@ -91,7 +93,7 @@ EciesHkdfNistPCurveRecipientKemBoringSsl::GenerateKey(
                      status_or_ec_point.status().message());
   }
   internal::SslUniquePtr<EC_POINT> pub_key =
-      std::move(status_or_ec_point.ValueOrDie());
+      std::move(status_or_ec_point.value());
   internal::SslUniquePtr<BIGNUM> priv_key(
       BN_bin2bn(priv_key_value_.data(), priv_key_value_.size(), nullptr));
   auto shared_secret_or =
@@ -99,7 +101,7 @@ EciesHkdfNistPCurveRecipientKemBoringSsl::GenerateKey(
   if (!shared_secret_or.ok()) {
     return shared_secret_or.status();
   }
-  util::SecretData shared_secret = shared_secret_or.ValueOrDie();
+  util::SecretData shared_secret = shared_secret_or.value();
   return Hkdf::ComputeEciesHkdfSymmetricKey(
       hash, kem_bytes, shared_secret, hkdf_salt, hkdf_info, key_size_in_bytes);
 }

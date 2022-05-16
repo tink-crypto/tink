@@ -17,6 +17,8 @@
 package com.google.crypto.tink;
 
 import com.google.crypto.tink.annotations.Alpha;
+import com.google.crypto.tink.internal.KeyTypeManager;
+import com.google.crypto.tink.internal.PrivateKeyTypeManager;
 import com.google.crypto.tink.proto.KeyData;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
@@ -30,10 +32,9 @@ import java.security.GeneralSecurityException;
  *
  * <p>Choosing {@code PrimitiveT} equal to {@link java.lang.Void} is valid; in this case the
  * functions {@link #getPrimitive} will throw if invoked.
- * TODO(tholenst) Reduce visibility to package visible once all managers have been migrated.
  */
 @Alpha
-public class PrivateKeyManagerImpl<
+class PrivateKeyManagerImpl<
         PrimitiveT, KeyProtoT extends MessageLite, PublicKeyProtoT extends MessageLite>
     extends KeyManagerImpl<PrimitiveT, KeyProtoT> implements PrivateKeyManager<PrimitiveT> {
 

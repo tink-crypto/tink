@@ -1,0 +1,19 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "aes_gcm_hkdf_streaming_go_proto",
+    srcs = ["aes_gcm_hkdf_streaming.pb.go"],
+    importpath = "github.com/google/tink/go/proto/aes_gcm_hkdf_streaming_go_proto",
+    visibility = ["//:__subpackages__"],
+    deps = [
+        "//proto/common_go_proto",
+        "@org_golang_google_protobuf//reflect/protoreflect",
+        "@org_golang_google_protobuf//runtime/protoimpl",
+    ],
+)
+
+alias(
+    name = "go_default_library",
+    actual = ":aes_gcm_hkdf_streaming_go_proto",
+    visibility = ["//:__subpackages__"],
+)

@@ -18,16 +18,16 @@
 
 #include "absl/status/status.h"
 #include "absl/strings/string_view.h"
+#include "tink/hybrid/ecies_aead_hkdf_hybrid_encrypt.h"
 #include "tink/hybrid_encrypt.h"
 #include "tink/key_manager.h"
-#include "tink/hybrid/ecies_aead_hkdf_hybrid_encrypt.h"
 #include "tink/util/errors.h"
 #include "tink/util/protobuf_helper.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "tink/util/validation.h"
-#include "proto/ecies_aead_hkdf.pb.h"
 #include "proto/common.pb.h"
+#include "proto/ecies_aead_hkdf.pb.h"
 #include "proto/tink.pb.h"
 
 namespace crypto {

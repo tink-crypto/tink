@@ -42,6 +42,9 @@ func NewECDSASigner(hashAlg string,
 	keyValue []byte) (*ECDSASigner, error) {
 	privKey := new(ecdsa.PrivateKey)
 	c := subtle.GetCurve(curve)
+	if c == nil {
+		return nil, errors.New("ecdsa_signer: invalid curve")
+	}
 	privKey.PublicKey.Curve = c
 	privKey.D = new(big.Int).SetBytes(keyValue)
 	privKey.PublicKey.X, privKey.PublicKey.Y = c.ScalarBaseMult(keyValue)

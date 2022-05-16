@@ -16,6 +16,8 @@
 #include "tink/aead/internal/aead_from_zero_copy.h"
 
 #include <memory>
+#include <string>
+#include <utility>
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"

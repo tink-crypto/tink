@@ -1,24 +1,28 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
 package(default_visibility = ["//:__subpackages__"])  # keep
 
 licenses(["notice"])  # keep
 
-load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
-
 go_library(
-    name = "go_default_library",
+    name = "cryptofmt",
     srcs = ["cryptofmt.go"],
     importpath = "github.com/google/tink/go/core/cryptofmt",
     visibility = ["//visibility:public"],
-    deps = [
-        "//proto:tink_go_proto",
-    ],
+    deps = ["//proto/tink_go_proto"],
 )
 
 go_test(
-    name = "go_default_test",
+    name = "cryptofmt_test",
     srcs = ["cryptofmt_test.go"],
-    embed = [":go_default_library"],
     deps = [
-        "//proto:tink_go_proto",
+        ":cryptofmt",
+        "//proto/tink_go_proto",
     ],
+)
+
+alias(
+    name = "go_default_library",
+    actual = ":cryptofmt",
+    visibility = ["//visibility:public"],
 )

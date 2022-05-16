@@ -18,7 +18,7 @@ package com.google.crypto.tink.jwt;
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertThrows;
 
-import com.google.crypto.tink.KeyTypeManager;
+import com.google.crypto.tink.internal.KeyTypeManager;
 import com.google.crypto.tink.proto.JwtEcdsaAlgorithm;
 import com.google.crypto.tink.proto.JwtEcdsaKeyFormat;
 import com.google.crypto.tink.proto.JwtEcdsaPrivateKey;
@@ -27,22 +27,26 @@ import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
 import com.google.crypto.tink.testing.TestUtil;
 import java.security.GeneralSecurityException;
 import java.util.Optional;
-import junitparams.JUnitParamsRunner;
-import junitparams.Parameters;
 import org.junit.Test;
+import org.junit.experimental.theories.DataPoints;
+import org.junit.experimental.theories.FromDataPoints;
+import org.junit.experimental.theories.Theories;
+import org.junit.experimental.theories.Theory;
 import org.junit.runner.RunWith;
 
 /** Unit tests for EcdsaVerifyKeyManager. */
-@RunWith(JUnitParamsRunner.class)
+@RunWith(Theories.class)
 public final class JwtEcdsaVerifyKeyManagerTest {
   private final JwtEcdsaSignKeyManager signManager = new JwtEcdsaSignKeyManager();
   private final KeyTypeManager.KeyFactory<JwtEcdsaKeyFormat, JwtEcdsaPrivateKey> factory =
       signManager.keyFactory();
   private final JwtEcdsaVerifyKeyManager verifyManager = new JwtEcdsaVerifyKeyManager();
 
-  private static Object[] parametersAlgo() {
-    return new Object[] {JwtEcdsaAlgorithm.ES256, JwtEcdsaAlgorithm.ES384, JwtEcdsaAlgorithm.ES512};
-  }
+  @DataPoints("parametersAlgos")
+  public static final JwtEcdsaAlgorithm[] PARAMETERS_ALGOS =
+      new JwtEcdsaAlgorithm[] {
+        JwtEcdsaAlgorithm.ES256, JwtEcdsaAlgorithm.ES384, JwtEcdsaAlgorithm.ES512
+      };
 
   @Test
   public void basics() throws Exception {
@@ -59,9 +63,10 @@ public final class JwtEcdsaVerifyKeyManagerTest {
         () -> verifyManager.validateKey(JwtEcdsaPublicKey.getDefaultInstance()));
   }
 
-  @Test
-  @Parameters(method = "parametersAlgo")
-  public void validateKey_ok(JwtEcdsaAlgorithm algorithm) throws Exception {
+  // Note: we use Theory as a parametrized test -- different from what the Theory framework intends.
+  @Theory
+  public void validateKey_ok(@FromDataPoints("parametersAlgos") JwtEcdsaAlgorithm algorithm)
+      throws Exception {
     if (TestUtil.isTsan()) {
       // factory.createKey is too slow in Tsan.
       return;
@@ -72,9 +77,10 @@ public final class JwtEcdsaVerifyKeyManagerTest {
     verifyManager.validateKey(publicKey);
   }
 
-  @Test
-  @Parameters(method = "parametersAlgo")
-  public void createPrimitive_ok(JwtEcdsaAlgorithm algorithm) throws Exception {
+  // Note: we use Theory as a parametrized test -- different from what the Theory framework intends.
+  @Theory
+  public void createPrimitive_ok(@FromDataPoints("parametersAlgos") JwtEcdsaAlgorithm algorithm)
+      throws Exception {
     if (TestUtil.isTsan()) {
       // factory.createKey is too slow in Tsan.
       return;
@@ -92,9 +98,10 @@ public final class JwtEcdsaVerifyKeyManagerTest {
         signer.signAndEncodeWithKid(token, Optional.empty()), validator, Optional.empty());
   }
 
-  @Test
-  @Parameters(method = "parametersAlgo")
-  public void createPrimitive_anotherKey_throw(JwtEcdsaAlgorithm algorithm) throws Exception {
+  // Note: we use Theory as a parametrized test -- different from what the Theory framework intends.
+  @Theory
+  public void createPrimitive_anotherKey_throw(
+      @FromDataPoints("parametersAlgos") JwtEcdsaAlgorithm algorithm) throws Exception {
     if (TestUtil.isTsan()) {
       // factory.createKey is too slow in Tsan.
       return;

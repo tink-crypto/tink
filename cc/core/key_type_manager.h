@@ -19,6 +19,7 @@
 
 #include <string>
 #include <tuple>
+#include <typeinfo>
 
 #include "absl/status/status.h"
 #include "absl/strings/str_cat.h"

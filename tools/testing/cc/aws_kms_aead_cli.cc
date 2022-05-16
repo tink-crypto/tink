@@ -78,21 +78,21 @@ int main(int argc, char** argv) {
   auto client_result = AwsKmsClient::New("", credentials_filename);
   if (!client_result.ok()) {
     std::clog << "Aead creation failed: "
-              << client_result.status().error_message()
+              << client_result.status().message()
               << "\n";
     exit(1);
   }
-  auto client = std::move(client_result.ValueOrDie());
+  auto client = std::move(client_result.value());
 
   // Create Aead-primitive.
   auto aead_result = client->GetAead("aws-kms://" + key_arn);
   if (!aead_result.ok()) {
     std::clog << "Aead creation failed: "
-              << aead_result.status().error_message()
+              << aead_result.status().message()
               << "\n";
     exit(1);
   }
-  std::unique_ptr<Aead> aead(std::move(aead_result.ValueOrDie()));
+  std::unique_ptr<Aead> aead(std::move(aead_result.value()));
 
   // Read the input.
   std::string input = CliUtil::Read(input_filename);
@@ -104,18 +104,18 @@ int main(int argc, char** argv) {
     auto encrypt_result = aead->Encrypt(input, associated_data);
     if (!encrypt_result.ok()) {
       std::clog << "Error while encrypting the input:"
-                << encrypt_result.status().error_message() << std::endl;
+                << encrypt_result.status().message() << std::endl;
       exit(1);
     }
-    output = encrypt_result.ValueOrDie();
+    output = encrypt_result.value();
   } else {  // operation == "decrypt"
     auto decrypt_result = aead->Decrypt(input, associated_data);
     if (!decrypt_result.ok()) {
       std::clog << "Error while decrypting the input:"
-                << decrypt_result.status().error_message() << std::endl;
+                << decrypt_result.status().message() << std::endl;
       exit(1);
     }
-    output = decrypt_result.ValueOrDie();
+    output = decrypt_result.value();
   }
 
   // Write the output to the output file.

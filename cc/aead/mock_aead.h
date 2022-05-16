@@ -17,8 +17,12 @@
 #ifndef TINK_AEAD_MOCK_AEAD_H_
 #define TINK_AEAD_MOCK_AEAD_H_
 
+#include <string>
+
 #include "gmock/gmock.h"
+#include "absl/strings/string_view.h"
 #include "tink/aead.h"
+#include "tink/util/statusor.h"
 
 namespace crypto {
 namespace tink {

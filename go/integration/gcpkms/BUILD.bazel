@@ -5,7 +5,7 @@ package(default_visibility = ["//:__subpackages__"])
 licenses(["notice"])  # keep
 
 go_library(
-    name = "go_default_library",
+    name = "gcpkms",
     srcs = [
         "gcp_kms_aead.go",
         "gcp_kms_client.go",
@@ -13,34 +13,41 @@ go_library(
     importpath = "github.com/google/tink/go/integration/gcpkms",
     visibility = ["//visibility:public"],
     deps = [
-        "//core/registry:go_default_library",
-        "//tink:go_default_library",
-        "@org_golang_google_api//cloudkms/v1:go_default_library",
-        "@org_golang_x_oauth2//:go_default_library",
-        "@org_golang_x_oauth2//google:go_default_library",
+        "//core/registry",
+        "//tink",
+        "@org_golang_google_api//cloudkms/v1:cloudkms",
+        "@org_golang_x_oauth2//:oauth2",
+        "@org_golang_x_oauth2//google",
     ],
 )
 
 go_test(
-    name = "go_default_test",
+    name = "gcpkms_test",
     srcs = [
         "gcp_kms_aead_test.go",
         "gcp_kms_client_test.go",
     ],
     data = [
+        # Credentials can be injected into the test files included in these
+        # targets.
+        "//testdata:credentials",
+        "//testdata:ecies_keysets",
         "@google_root_pem//file",  #keep
-        # Change this to your credentials.
-        "@tink_base//testdata:credentials",
-        "@tink_base//testdata:ecies_keysets",
         "@wycheproof//testvectors:all",  #keep
     ],
-    embed = [":go_default_library"],
     tags = ["manual"],
     deps = [
-        "//aead:go_default_library",
-        "//core/registry:go_default_library",
-        "//keyset:go_default_library",
-        "//subtle/random:go_default_library",
-        "//tink:go_default_library",
+        ":gcpkms",
+        "//aead",
+        "//core/registry",
+        "//keyset",
+        "//subtle/random",
+        "//tink",
     ],
+)
+
+alias(
+    name = "go_default_library",
+    actual = ":gcpkms",
+    visibility = ["//visibility:public"],
 )

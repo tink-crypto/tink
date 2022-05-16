@@ -43,11 +43,11 @@ func NewXChaCha20Poly1305(key []byte) (*XChaCha20Poly1305, error) {
 	return &XChaCha20Poly1305{Key: key}, nil
 }
 
-// Encrypt encrypts {@code pt} with {@code aad} as additional
-// authenticated data. The resulting ciphertext consists of two parts:
+// Encrypt encrypts plaintext with associatedData.
+// The resulting ciphertext consists of two parts:
 // (1) the nonce used for encryption and (2) the actual ciphertext.
-func (x *XChaCha20Poly1305) Encrypt(pt []byte, aad []byte) ([]byte, error) {
-	if len(pt) > maxInt-chacha20poly1305.NonceSizeX-poly1305TagSize {
+func (x *XChaCha20Poly1305) Encrypt(plaintext []byte, associatedData []byte) ([]byte, error) {
+	if len(plaintext) > maxInt-chacha20poly1305.NonceSizeX-poly1305TagSize {
 		return nil, fmt.Errorf("xchacha20poly1305: plaintext too long")
 	}
 	c, err := chacha20poly1305.NewX(x.Key)
@@ -56,13 +56,13 @@ func (x *XChaCha20Poly1305) Encrypt(pt []byte, aad []byte) ([]byte, error) {
 	}
 
 	n := x.newNonce()
-	ct := c.Seal(nil, n, pt, aad)
+	ct := c.Seal(nil, n, plaintext, associatedData)
 	return append(n, ct...), nil
 }
 
-// Decrypt decrypts {@code ct} with {@code aad} as the additionalauthenticated data.
-func (x *XChaCha20Poly1305) Decrypt(ct []byte, aad []byte) ([]byte, error) {
-	if len(ct) < chacha20poly1305.NonceSizeX+poly1305TagSize {
+// Decrypt decrypts ciphertext with associatedData.
+func (x *XChaCha20Poly1305) Decrypt(ciphertext []byte, associatedData []byte) ([]byte, error) {
+	if len(ciphertext) < chacha20poly1305.NonceSizeX+poly1305TagSize {
 		return nil, fmt.Errorf("xchacha20poly1305: ciphertext too short")
 	}
 
@@ -71,8 +71,8 @@ func (x *XChaCha20Poly1305) Decrypt(ct []byte, aad []byte) ([]byte, error) {
 		return nil, err
 	}
 
-	n := ct[:chacha20poly1305.NonceSizeX]
-	pt, err := c.Open(nil, n, ct[chacha20poly1305.NonceSizeX:], aad)
+	n := ciphertext[:chacha20poly1305.NonceSizeX]
+	pt, err := c.Open(nil, n, ciphertext[chacha20poly1305.NonceSizeX:], associatedData)
 	if err != nil {
 		return nil, fmt.Errorf("XChaCha20Poly1305.Decrypt: %s", err)
 	}

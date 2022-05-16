@@ -67,16 +67,16 @@ func newWrappedAead(ps *primitiveset.PrimitiveSet) (*wrappedAead, error) {
 	return ret, nil
 }
 
-// Encrypt encrypts the given plaintext with the given additional authenticated data.
+// Encrypt encrypts the given plaintext with the given associatedData.
 // It returns the concatenation of the primary's identifier and the ciphertext.
-func (a *wrappedAead) Encrypt(pt, ad []byte) ([]byte, error) {
+func (a *wrappedAead) Encrypt(plaintext, associatedData []byte) ([]byte, error) {
 	primary := a.ps.Primary
 	p, ok := (primary.Primitive).(tink.AEAD)
 	if !ok {
 		return nil, fmt.Errorf("aead_factory: not an AEAD primitive")
 	}
 
-	ct, err := p.Encrypt(pt, ad)
+	ct, err := p.Encrypt(plaintext, associatedData)
 	if err != nil {
 		return nil, err
 	}
@@ -84,14 +84,14 @@ func (a *wrappedAead) Encrypt(pt, ad []byte) ([]byte, error) {
 }
 
 // Decrypt decrypts the given ciphertext and authenticates it with the given
-// additional authenticated data. It returns the corresponding plaintext if the
+// associatedData. It returns the corresponding plaintext if the
 // ciphertext is authenticated.
-func (a *wrappedAead) Decrypt(ct, ad []byte) ([]byte, error) {
+func (a *wrappedAead) Decrypt(ciphertext, associatedData []byte) ([]byte, error) {
 	// try non-raw keys
 	prefixSize := cryptofmt.NonRawPrefixSize
-	if len(ct) > prefixSize {
-		prefix := ct[:prefixSize]
-		ctNoPrefix := ct[prefixSize:]
+	if len(ciphertext) > prefixSize {
+		prefix := ciphertext[:prefixSize]
+		ctNoPrefix := ciphertext[prefixSize:]
 		entries, err := a.ps.EntriesForPrefix(string(prefix))
 		if err == nil {
 			for i := 0; i < len(entries); i++ {
@@ -100,7 +100,7 @@ func (a *wrappedAead) Decrypt(ct, ad []byte) ([]byte, error) {
 					return nil, fmt.Errorf("aead_factory: not an AEAD primitive")
 				}
 
-				pt, err := p.Decrypt(ctNoPrefix, ad)
+				pt, err := p.Decrypt(ctNoPrefix, associatedData)
 				if err == nil {
 					return pt, nil
 				}
@@ -116,7 +116,7 @@ func (a *wrappedAead) Decrypt(ct, ad []byte) ([]byte, error) {
 				return nil, fmt.Errorf("aead_factory: not an AEAD primitive")
 			}
 
-			pt, err := p.Decrypt(ct, ad)
+			pt, err := p.Decrypt(ciphertext, associatedData)
 			if err == nil {
 				return pt, nil
 			}

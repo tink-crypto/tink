@@ -46,7 +46,7 @@ util::StatusOr<std::unique_ptr<HpkeEncryptBoringSsl>> HpkeEncryptBoringSsl::New(
   if (!status.ok()) {
     return status;
   }
-  return hpke_encrypt;
+  return std::move(hpke_encrypt);
 }
 
 util::StatusOr<std::unique_ptr<HpkeEncryptBoringSsl>>
@@ -60,7 +60,7 @@ HpkeEncryptBoringSsl::NewForTesting(
   if (!status.ok()) {
     return status;
   }
-  return hpke_encrypt;
+  return std::move(hpke_encrypt);
 }
 
 util::Status HpkeEncryptBoringSsl::Init(

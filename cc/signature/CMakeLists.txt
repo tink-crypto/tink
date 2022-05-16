@@ -540,9 +540,11 @@ tink_cc_test(
     tink::signature::ecdsa_verify_key_manager
     gmock
     absl::status
+    absl::strings
     tink::core::public_key_sign
     tink::core::public_key_verify
     tink::internal::ec_util
+    tink::internal::ssl_util
     tink::subtle::ecdsa_verify_boringssl
     tink::util::enums
     tink::util::istream_input_stream
@@ -687,6 +689,7 @@ tink_cc_test(
     absl::strings
     tink::core::cc
     tink::internal::rsa_util
+    tink::internal::ssl_util
     tink::subtle::pem_parser_boringssl
     tink::util::enums
     tink::util::secret_data

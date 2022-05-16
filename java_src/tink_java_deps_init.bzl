@@ -1,46 +1,19 @@
-"""
-Initialization of dependencies of Java Tink.
-"""
+"""Initialization of dependencies of Java Tink."""
 
 load("@com_google_protobuf//:protobuf_deps.bzl", javalite_protobuf_deps = "protobuf_deps")
+load("@bazel_toolchains//rules:rbe_repo.bzl", "rbe_autoconfig")
 load("@rules_jvm_external//:defs.bzl", "maven_install")
 load("@build_bazel_rules_android//android:rules.bzl", "android_sdk_repository")
+load("@tink_java//:tink_java_deps.bzl", "TINK_MAVEN_ARTIFACTS")
 
 def tink_java_deps_init():
-    """ Initializes dependencies of Java Tink.
-
-    """
+    """Initializes dependencies of Java Tink."""
     javalite_protobuf_deps()
+    rbe_autoconfig(name = "rbe_default")
+
     maven_install(
-        artifacts = [
-            "args4j:args4j:2.33",
-            "com.amazonaws:aws-java-sdk-core:1.11.976",
-            "com.amazonaws:aws-java-sdk-kms:1.11.976",
-            "com.google.auto:auto-common:0.10",
-            "com.google.auto.service:auto-service:1.0-rc7",
-            "com.google.auto.service:auto-service-annotations:1.0-rc7",
-            "com.google.api-client:google-api-client:1.31.4",
-            "com.google.apis:google-api-services-cloudkms:v1-rev108-1.25.0",
-            "com.google.code.findbugs:jsr305:3.0.1",
-            "com.google.code.gson:gson:2.8.6",
-            "com.google.errorprone:error_prone_annotations:2.10.0",
-            "com.google.http-client:google-http-client:1.31.0",
-            "com.google.http-client:google-http-client-jackson2:1.31.0",
-            "com.google.oauth-client:google-oauth-client:1.30.1",
-            "com.google.truth:truth:0.44",
-            "com.fasterxml.jackson.core:jackson-core:2.12.3",
-            "joda-time:joda-time:2.10.3",
-            "junit:junit:4.13",
-            "org.conscrypt:conscrypt-openjdk-uber:2.4.0",
-            "org.mockito:mockito-core:2.23.0",
-            "org.ow2.asm:asm:7.0",
-            "org.ow2.asm:asm-commons:7.0",
-            "org.pantsbuild:jarjar:1.7.2",
-            "pl.pragmatists:JUnitParams:1.1.1",
-        ],
+        artifacts = TINK_MAVEN_ARTIFACTS,
         repositories = [
-            # TODO(b/214259089): Disable during bintray outage.
-            #"https://jcenter.bintray.com/",
             "https://maven.google.com",
             "https://repo1.maven.org/maven2",
         ],

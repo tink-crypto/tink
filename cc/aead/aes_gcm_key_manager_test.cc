@@ -16,18 +16,28 @@
 
 #include "tink/aead/aes_gcm_key_manager.h"
 
+#include <stdint.h>
+
+#include <memory>
+#include <sstream>
+#include <string>
+
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include "absl/memory/memory.h"
 #include "absl/status/status.h"
 #include "tink/aead.h"
+#include "tink/aead/cord_aead.h"
 #include "tink/aead/internal/cord_aes_gcm_boringssl.h"
 #include "tink/subtle/aead_test_util.h"
+#include "tink/subtle/aes_gcm_boringssl.h"
 #include "tink/util/istream_input_stream.h"
 #include "tink/util/secret_data.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "tink/util/test_matchers.h"
 #include "proto/aes_gcm.pb.h"
+#include "proto/tink.pb.h"
 
 namespace crypto {
 namespace tink {
@@ -152,7 +162,7 @@ TEST(AesGcmKeyManagerTest, Create16ByteKey) {
   StatusOr<AesGcmKey> key_or = AesGcmKeyManager().CreateKey(format);
 
   ASSERT_THAT(key_or.status(), IsOk());
-  EXPECT_THAT(key_or.ValueOrDie().key_value().size(), Eq(format.key_size()));
+  EXPECT_THAT(key_or.value().key_value().size(), Eq(format.key_size()));
 }
 
 TEST(AesGcmKeyManagerTest, Create32ByteKey) {
@@ -162,7 +172,7 @@ TEST(AesGcmKeyManagerTest, Create32ByteKey) {
   StatusOr<AesGcmKey> key_or = AesGcmKeyManager().CreateKey(format);
 
   ASSERT_THAT(key_or.status(), IsOk());
-  EXPECT_THAT(key_or.ValueOrDie().key_value().size(), Eq(format.key_size()));
+  EXPECT_THAT(key_or.value().key_value().size(), Eq(format.key_size()));
 }
 
 TEST(AesGcmKeyManagerTest, CreateAead) {
@@ -172,19 +182,18 @@ TEST(AesGcmKeyManagerTest, CreateAead) {
   ASSERT_THAT(key_or.status(), IsOk());
 
   StatusOr<std::unique_ptr<Aead>> aead_or =
-      AesGcmKeyManager().GetPrimitive<Aead>(key_or.ValueOrDie());
+      AesGcmKeyManager().GetPrimitive<Aead>(key_or.value());
 
   ASSERT_THAT(aead_or.status(), IsOk());
 
   StatusOr<std::unique_ptr<Aead>> boring_ssl_aead_or =
       subtle::AesGcmBoringSsl::New(
-          util::SecretDataFromStringView(key_or.ValueOrDie().key_value()));
+          util::SecretDataFromStringView(key_or.value().key_value()));
   ASSERT_THAT(boring_ssl_aead_or.status(), IsOk());
 
-  ASSERT_THAT(
-      EncryptThenDecrypt(*aead_or.ValueOrDie(),
-                         *boring_ssl_aead_or.ValueOrDie(), "message", "aad"),
-      IsOk());
+  ASSERT_THAT(EncryptThenDecrypt(*aead_or.value(), *boring_ssl_aead_or.value(),
+                                 "message", "aad"),
+              IsOk());
 }
 
 TEST(AesGcmKeyManagerTest, CreateCordAead) {
@@ -194,19 +203,18 @@ TEST(AesGcmKeyManagerTest, CreateCordAead) {
   ASSERT_THAT(key_or.status(), IsOk());
 
   StatusOr<std::unique_ptr<CordAead>> aead_or =
-      AesGcmKeyManager().GetPrimitive<CordAead>(key_or.ValueOrDie());
+      AesGcmKeyManager().GetPrimitive<CordAead>(key_or.value());
 
   ASSERT_THAT(aead_or.status(), IsOk());
 
   StatusOr<std::unique_ptr<CordAead>> boring_ssl_aead_or =
       CordAesGcmBoringSsl::New(
-          util::SecretDataFromStringView(key_or.ValueOrDie().key_value()));
+          util::SecretDataFromStringView(key_or.value().key_value()));
   ASSERT_THAT(boring_ssl_aead_or.status(), IsOk());
 
-  ASSERT_THAT(
-      EncryptThenDecrypt(*aead_or.ValueOrDie(),
-                         *boring_ssl_aead_or.ValueOrDie(), "message", "aad"),
-      IsOk());
+  ASSERT_THAT(EncryptThenDecrypt(*aead_or.value(), *boring_ssl_aead_or.value(),
+                                 "message", "aad"),
+              IsOk());
 }
 
 TEST(AesGcmKeyManagerTest, DeriveShortKey) {
@@ -220,7 +228,7 @@ TEST(AesGcmKeyManagerTest, DeriveShortKey) {
   StatusOr<AesGcmKey> key_or =
       AesGcmKeyManager().DeriveKey(format, &input_stream);
   ASSERT_THAT(key_or.status(), IsOk());
-  EXPECT_THAT(key_or.ValueOrDie().key_value(), Eq("0123456789abcdef"));
+  EXPECT_THAT(key_or.value().key_value(), Eq("0123456789abcdef"));
 }
 
 TEST(AesGcmKeyManagerTest, DeriveLongKey) {
@@ -234,7 +242,7 @@ TEST(AesGcmKeyManagerTest, DeriveLongKey) {
   StatusOr<AesGcmKey> key_or =
       AesGcmKeyManager().DeriveKey(format, &input_stream);
   ASSERT_THAT(key_or.status(), IsOk());
-  EXPECT_THAT(key_or.ValueOrDie().key_value(),
+  EXPECT_THAT(key_or.value().key_value(),
               Eq("0123456789abcdef0123456789abcdef"));
 }
 

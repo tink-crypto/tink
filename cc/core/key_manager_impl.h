@@ -71,7 +71,7 @@ class KeyFactoryImpl<
             static_cast<const KeyFormatProto&>(key_format));
     if (!new_key_result.ok()) return new_key_result.status();
     return absl::implicit_cast<std::unique_ptr<portable_proto::MessageLite>>(
-        absl::make_unique<KeyProto>(std::move(new_key_result.ValueOrDie())));
+        absl::make_unique<KeyProto>(std::move(new_key_result.value())));
   }
 
   crypto::tink::util::StatusOr<std::unique_ptr<portable_proto::MessageLite>>
@@ -94,7 +94,7 @@ class KeyFactoryImpl<
   NewKeyData(absl::string_view serialized_key_format) const override {
     auto new_key_result = NewKey(serialized_key_format);
     if (!new_key_result.ok()) return new_key_result.status();
-    auto new_key = static_cast<const KeyProto&>(*(new_key_result.ValueOrDie()));
+    auto new_key = static_cast<const KeyProto&>(*(new_key_result.value()));
     auto key_data = absl::make_unique<google::crypto::tink::KeyData>();
     key_data->set_type_url(
         absl::StrCat(kTypeGoogleapisCom, KeyProto().GetTypeName()));
@@ -269,13 +269,13 @@ CreateDeriverFunctionFor(
     if (!key_proto_or.ok()) {
       return key_proto_or.status();
     }
-    status = key_type_manager->ValidateKey(key_proto_or.ValueOrDie());
+    status = key_type_manager->ValidateKey(key_proto_or.value());
     if (!status.ok()) {
       return status;
     }
     google::crypto::tink::KeyData result;
     result.set_type_url(key_type_manager->get_key_type());
-    result.set_value(key_proto_or.ValueOrDie().SerializeAsString());
+    result.set_value(key_proto_or.value().SerializeAsString());
     result.set_key_material_type(key_type_manager->key_material_type());
     return std::move(result);
   };

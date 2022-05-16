@@ -43,6 +43,7 @@ py_test(
     srcs_version = "PY3",
     deps = [
         ":jwt",
+        requirement("six"),  # needed by absl-py
         requirement("absl-py"),
     ],
 )
@@ -63,6 +64,7 @@ py_test(
     srcs_version = "PY3",
     deps = [
         ":jwt",
+        requirement("six"),  # needed by absl-py
         requirement("absl-py"),
     ],
 )
@@ -84,6 +86,7 @@ py_test(
     deps = [
         ":_jwt_validator",
         ":jwt",
+        requirement("six"),  # needed by absl-py
         requirement("absl-py"),
     ],
 )
@@ -109,6 +112,7 @@ py_test(
     srcs_version = "PY3",
     deps = [
         ":jwt",
+        requirement("six"),  # needed by absl-py
         requirement("absl-py"),
     ],
 )
@@ -136,6 +140,7 @@ py_test(
     deps = [
         ":_json_util",
         ":_jwt_error",
+        requirement("six"),  # needed by absl-py
         requirement("absl-py"),
     ],
 )
@@ -162,6 +167,7 @@ py_test(
         ":_jwt_format",
         ":_raw_jwt",
         "//tink/proto:tink_py_pb2",
+        requirement("six"),  # needed by absl-py
         requirement("absl-py"),
     ],
 )
@@ -223,6 +229,7 @@ py_test(
         ":_jwt_hmac_key_manager",
         ":_jwt_mac",
         ":jwt",
+        requirement("six"),  # needed by absl-py
         requirement("absl-py"),
         "//tink:tink_python",
         "//tink/proto:jwt_hmac_py_pb2",
@@ -255,6 +262,7 @@ py_test(
         ":jwt",
         "//tink/proto:jwt_hmac_py_pb2",
         "//tink/proto:tink_py_pb2",
+        requirement("six"),  # needed by absl-py
         requirement("absl-py"),
         "//tink:cleartext_keyset_handle",
         "//tink:tink_python",
@@ -292,6 +300,7 @@ py_test(
         ":jwt",
         "//tink/proto:jwt_ecdsa_py_pb2",
         "//tink/proto:tink_py_pb2",
+        requirement("six"),  # needed by absl-py
         requirement("absl-py"),
         "//tink:tink_python",
     ],
@@ -327,6 +336,7 @@ py_test(
         "//tink/proto:jwt_rsa_ssa_pkcs1_py_pb2",
         "//tink/proto:jwt_rsa_ssa_pss_py_pb2",
         "//tink/proto:tink_py_pb2",
+        requirement("six"),  # needed by absl-py
         requirement("absl-py"),
         "//tink:cleartext_keyset_handle",
         "//tink:tink_python",
@@ -355,6 +365,7 @@ py_test(
     srcs_version = "PY3",
     deps = [
         ":jwt",
+        requirement("six"),  # needed by absl-py
         requirement("absl-py"),
         "//tink:cleartext_keyset_handle",
         "//tink:tink_python",

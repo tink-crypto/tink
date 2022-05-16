@@ -14,12 +14,17 @@
 # limitations under the License.
 ################################################################################
 
-
 set -euo pipefail
+
 cd ${KOKORO_ARTIFACTS_DIR}/git/tink
 
-./kokoro/copy_credentials.sh
-./kokoro/update_android_sdk.sh
+./kokoro/testutils/copy_credentials.sh "tools/testdata"
+./kokoro/testutils/update_android_sdk.sh
+# Sourcing required to update callers environment.
+source ./kokoro/testutils/install_python3.sh
+source ./kokoro/testutils/install_go.sh
+
+echo "Using go binary from $(which go): $(go version)"
 
 cd tools
 use_bazel.sh $(cat .bazelversion)

@@ -70,10 +70,8 @@ class StreamingAeadDecryptingChannel implements ReadableByteChannel {
    */
   private boolean definedState;
 
-  /**
-   * The additional data that is authenticated with the ciphertext.
-   */
-  private byte[] aad;
+  /** The associated data that is authenticated with the ciphertext. */
+  private final byte[] associatedData;
 
   /**
    * The number of the current segment of ciphertext buffered in ciphertexSegment.
@@ -92,7 +90,7 @@ class StreamingAeadDecryptingChannel implements ReadableByteChannel {
     decrypter = streamAead.newStreamSegmentDecrypter();
     this.ciphertextChannel = ciphertextChannel;
     header = ByteBuffer.allocate(streamAead.getHeaderLength());
-    aad = Arrays.copyOf(associatedData, associatedData.length);
+    this.associatedData = Arrays.copyOf(associatedData, associatedData.length);
 
     // ciphertextSegment is one byte longer than a ciphertext segment,
     // so that the code can decide if the current segment is the last segment in the
@@ -143,7 +141,7 @@ class StreamingAeadDecryptingChannel implements ReadableByteChannel {
     } else {
       header.flip();
       try {
-        decrypter.init(header, aad);
+        decrypter.init(header, associatedData);
         headerRead = true;
       } catch (GeneralSecurityException ex) {
         // TODO(b/74249330): Try to define the state of this.
@@ -228,7 +226,6 @@ class StreamingAeadDecryptingChannel implements ReadableByteChannel {
         }
       }
       if (plaintextSegment.remaining() <= dst.remaining()) {
-        int sliceSize = plaintextSegment.remaining();
         dst.put(plaintextSegment);
       } else {
         int sliceSize = dst.remaining();

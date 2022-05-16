@@ -354,7 +354,7 @@ public final class KeysetHandle {
    *
    * @throws GeneralSecurityException
    */
-  public static void assertEnoughKeyMaterial(Keyset keyset) throws GeneralSecurityException {
+  private static void assertEnoughKeyMaterial(Keyset keyset) throws GeneralSecurityException {
     if (keyset == null || keyset.getKeyCount() <= 0) {
       throw new GeneralSecurityException("empty keyset");
     }
@@ -365,7 +365,7 @@ public final class KeysetHandle {
    *
    * @throws GeneralSecurityException
    */
-  public static void assertEnoughEncryptedKeyMaterial(EncryptedKeyset keyset)
+  private static void assertEnoughEncryptedKeyMaterial(EncryptedKeyset keyset)
       throws GeneralSecurityException {
     if (keyset == null || keyset.getEncryptedKeyset().size() == 0) {
       throw new GeneralSecurityException("empty keyset");

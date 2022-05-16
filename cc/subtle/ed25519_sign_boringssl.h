@@ -18,10 +18,11 @@
 #define TINK_SUBTLE_ED25519_SIGN_BORINGSSL_H_
 
 #include <memory>
+#include <string>
 #include <utility>
 
-#include "tink/config/tink_fips.h"
 #include "openssl/evp.h"
+#include "tink/config/tink_fips.h"
 #include "tink/internal/ssl_unique_ptr.h"
 #include "tink/public_key_sign.h"
 #include "tink/util/secret_data.h"

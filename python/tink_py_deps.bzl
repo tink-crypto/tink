@@ -9,16 +9,16 @@ def tink_py_deps():
     """
 
     if not native.existing_rule("rules_python"):
-        # Commit from 2020-03-05
+        # Release from 2022-01-05
         http_archive(
             name = "rules_python",
-            strip_prefix = "rules_python-748aa53d7701e71101dfd15d800e100f6ff8e5d1",
-            url = "https://github.com/bazelbuild/rules_python/archive/748aa53d7701e71101dfd15d800e100f6ff8e5d1.zip",
-            sha256 = "d3e40ca3b7e00b72d2b1585e0b3396bcce50f0fc692e2b7c91d8b0dc471e3eaf",
+            sha256 = "a30abdfc7126d497a7698c29c46ea9901c6392d6ed315171a6df5ce433aa4502",
+            strip_prefix = "rules_python-0.6.0",
+            url = "https://github.com/bazelbuild/rules_python/archive/0.6.0.tar.gz",
         )
 
     if not native.existing_rule("pybind11"):
-        # Commit from 2021-01-05
+        # Commit from 2021-12-28
         http_archive(
             name = "pybind11",
             build_file = "@pybind11_bazel//:pybind11.BUILD",

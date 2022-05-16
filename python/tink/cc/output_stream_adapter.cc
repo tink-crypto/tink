@@ -31,7 +31,7 @@ util::StatusOr<int64_t> OutputStreamAdapter::Write(absl::string_view data) {
   while (written < data.size()) {
     auto next_result = stream_->Next(&buffer);
     if (!next_result.ok()) return next_result.status();
-    int available = next_result.ValueOrDie();
+    int available = next_result.value();
     int write_count =
         std::min(available, static_cast<int>(data.size() - written));
     memcpy(buffer, data.data() + written, write_count);

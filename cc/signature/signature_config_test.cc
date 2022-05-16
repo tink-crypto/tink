@@ -98,20 +98,19 @@ TEST_F(SignatureConfigTest, PublicKeySignWrapperRegistered) {
           primitive_set
               ->AddPrimitive(absl::make_unique<DummyPublicKeySign>("dummy"),
                              key_info)
-              .ValueOrDie()),
+              .value()),
       IsOk());
 
   auto wrapped = Registry::Wrap(std::move(primitive_set));
 
   ASSERT_TRUE(wrapped.ok()) << wrapped.status();
-  auto signature_result = wrapped.ValueOrDie()->Sign("message");
+  auto signature_result = wrapped.value()->Sign("message");
   ASSERT_TRUE(signature_result.ok());
 
-  std::string prefix = CryptoFormat::GetOutputPrefix(key_info).ValueOrDie();
-  EXPECT_EQ(
-      signature_result.ValueOrDie(),
-      absl::StrCat(prefix,
-                   DummyPublicKeySign("dummy").Sign("message").ValueOrDie()));
+  std::string prefix = CryptoFormat::GetOutputPrefix(key_info).value();
+  EXPECT_EQ(signature_result.value(),
+            absl::StrCat(prefix,
+                         DummyPublicKeySign("dummy").Sign("message").value()));
 }
 
 
@@ -135,18 +134,16 @@ TEST_F(SignatureConfigTest, PublicKeyVerifyWrapperRegistered) {
           primitive_set
               ->AddPrimitive(absl::make_unique<DummyPublicKeyVerify>("dummy"),
                              key_info)
-              .ValueOrDie()),
+              .value()),
       IsOk());
-  std::string prefix = CryptoFormat::GetOutputPrefix(key_info).ValueOrDie();
-  std::string signature =
-      DummyPublicKeySign("dummy").Sign("message").ValueOrDie();
+  std::string prefix = CryptoFormat::GetOutputPrefix(key_info).value();
+  std::string signature = DummyPublicKeySign("dummy").Sign("message").value();
 
   auto wrapped = Registry::Wrap(std::move(primitive_set));
 
   ASSERT_TRUE(wrapped.ok()) << wrapped.status();
-  ASSERT_TRUE(wrapped.ValueOrDie()
-                  ->Verify(absl::StrCat(prefix, signature), "message")
-                  .ok());
+  ASSERT_TRUE(
+      wrapped.value()->Verify(absl::StrCat(prefix, signature), "message").ok());
 }
 
 // FIPS-only mode tests

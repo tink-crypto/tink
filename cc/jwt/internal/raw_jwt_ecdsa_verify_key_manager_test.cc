@@ -69,13 +69,13 @@ TEST(RawJwtEcdsaVerifyKeyManagerTest, ValidateEmptyKey) {
 JwtEcdsaPrivateKey CreateValidEs256PrivateKey() {
   JwtEcdsaKeyFormat key_format;
   key_format.set_algorithm(JwtEcdsaAlgorithm::ES256);
-  return RawJwtEcdsaSignKeyManager().CreateKey(key_format).ValueOrDie();
+  return RawJwtEcdsaSignKeyManager().CreateKey(key_format).value();
 }
 
 JwtEcdsaPublicKey CreateValidPublicKey() {
   return RawJwtEcdsaSignKeyManager()
       .GetPublicKey(CreateValidEs256PrivateKey())
-      .ValueOrDie();
+      .value();
 }
 
 // Checks that a public key generaed by the SignKeyManager is considered valid.
@@ -96,7 +96,7 @@ TEST(EcdsaSignKeyManagerTest, ValidateKeyUnknownAlgorithm) {
 TEST(EcdsaSignKeyManagerTest, Create) {
   JwtEcdsaPrivateKey private_key = CreateValidEs256PrivateKey();
   JwtEcdsaPublicKey public_key =
-      RawJwtEcdsaSignKeyManager().GetPublicKey(private_key).ValueOrDie();
+      RawJwtEcdsaSignKeyManager().GetPublicKey(private_key).value();
 
   internal::EcKey ec_key;
   ec_key.curve = Enums::ProtoToSubtle(EllipticCurveType::NIST_P256);

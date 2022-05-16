@@ -18,9 +18,7 @@
 
 #include "tink/util/constants.h"
 #include "proto/experimental/pqcrypto/sphincs.pb.h"
-#include "proto/experimental/pqcrypto/sphincs.proto.h"
 #include "proto/tink.pb.h"
-#include "proto/tink.proto.h"
 
 extern "C" {
 #include "third_party/pqclean/crypto_sign/sphincs-haraka-128f-robust/aesni/api.h"

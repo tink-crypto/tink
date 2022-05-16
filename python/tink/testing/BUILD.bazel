@@ -25,11 +25,15 @@ py_test(
     name = "helper_test",
     srcs = ["helper_test.py"],
     data = [
-        "@tink_base//testdata:credentials",
+        # This is used to check Tink Python testdata path.
+        "//testdata:credentials",
+        # This is used to check Tink root path.
+        "@tink_base//:LICENSE",
     ],
     srcs_version = "PY3",
     deps = [
         ":helper",
+        requirement("six"),  # needed by absl-py
         requirement("absl-py"),
         "//tink/core",
     ],
@@ -72,6 +76,7 @@ py_test(
     srcs_version = "PY3",
     deps = [
         ":keyset_builder",
+        requirement("six"),  # needed by absl-py
         requirement("absl-py"),
         "//tink/proto:tink_py_pb2",
         "@tink_py//tink:tink_python",
@@ -96,6 +101,7 @@ py_test(
     srcs_version = "PY3",
     deps = [
         ":fake_kms",
+        requirement("six"),  # needed by absl-py
         requirement("absl-py"),
         "//tink:tink_python",
         "//tink/aead",

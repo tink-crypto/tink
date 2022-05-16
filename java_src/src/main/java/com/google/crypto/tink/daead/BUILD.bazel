@@ -40,7 +40,7 @@ android_library(
     srcs = ["DeterministicAeadFactory.java"],
     deps = [
         ":deterministic_aead_wrapper-android",
-        "//src/main/java/com/google/crypto/tink:deterministic_aead",
+        "//src/main/java/com/google/crypto/tink:deterministic_aead-android",
         "//src/main/java/com/google/crypto/tink:registry-android",
         "//src/main/java/com/google/crypto/tink:registry_cluster-android",
     ],
@@ -86,11 +86,11 @@ android_library(
     srcs = ["DeterministicAeadWrapper.java"],
     deps = [
         "//src/main/java/com/google/crypto/tink:crypto_format-android",
-        "//src/main/java/com/google/crypto/tink:deterministic_aead",
+        "//src/main/java/com/google/crypto/tink:deterministic_aead-android",
         "//src/main/java/com/google/crypto/tink:primitive_set-android",
         "//src/main/java/com/google/crypto/tink:primitive_wrapper-android",
         "//src/main/java/com/google/crypto/tink:registry-android",
-        "//src/main/java/com/google/crypto/tink/subtle:bytes",
+        "//src/main/java/com/google/crypto/tink/subtle:bytes-android",
     ],
 )
 
@@ -102,8 +102,9 @@ java_library(
         "//proto:tink_java_proto",
         "//src/main/java/com/google/crypto/tink:deterministic_aead",
         "//src/main/java/com/google/crypto/tink:key_template",
-        "//src/main/java/com/google/crypto/tink:key_type_manager",
         "//src/main/java/com/google/crypto/tink:registry",
+        "//src/main/java/com/google/crypto/tink/internal:key_type_manager",
+        "//src/main/java/com/google/crypto/tink/internal:primitive_factory",
         "//src/main/java/com/google/crypto/tink/subtle:aes_siv",
         "//src/main/java/com/google/crypto/tink/subtle:random",
         "//src/main/java/com/google/crypto/tink/subtle:validators",
@@ -117,13 +118,14 @@ android_library(
     deps = [
         "//proto:aes_siv_java_proto_lite",
         "//proto:tink_java_proto_lite",
-        "//src/main/java/com/google/crypto/tink:deterministic_aead",
+        "//src/main/java/com/google/crypto/tink:deterministic_aead-android",
         "//src/main/java/com/google/crypto/tink:key_template-android",
-        "//src/main/java/com/google/crypto/tink:key_type_manager-android",
         "//src/main/java/com/google/crypto/tink:registry-android",
-        "//src/main/java/com/google/crypto/tink/subtle:aes_siv",
-        "//src/main/java/com/google/crypto/tink/subtle:random",
-        "//src/main/java/com/google/crypto/tink/subtle:validators",
+        "//src/main/java/com/google/crypto/tink/internal:key_type_manager-android",
+        "//src/main/java/com/google/crypto/tink/internal:primitive_factory-android",
+        "//src/main/java/com/google/crypto/tink/subtle:aes_siv-android",
+        "//src/main/java/com/google/crypto/tink/subtle:random-android",
+        "//src/main/java/com/google/crypto/tink/subtle:validators-android",
         "@com_google_protobuf//:protobuf_javalite",
     ],
 )

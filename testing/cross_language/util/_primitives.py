@@ -16,7 +16,7 @@
 import datetime
 import io
 import json
-from typing import BinaryIO, Mapping, Tuple
+from typing import BinaryIO, Optional, Mapping, Tuple
 
 import tink
 from tink import aead
@@ -79,6 +79,42 @@ def keyset_from_json(
   if response.err:
     raise tink.TinkError(response.err)
   return response.keyset
+
+
+def keyset_read_encrypted(stub: testing_api_pb2_grpc.KeysetStub,
+                          encrypted_keyset: bytes, master_keyset: bytes,
+                          associated_data: Optional[bytes],
+                          keyset_reader_type: str) -> bytes:
+  """Reads an encrypted keyset."""
+  request = testing_api_pb2.KeysetReadEncryptedRequest(
+      encrypted_keyset=encrypted_keyset,
+      master_keyset=master_keyset,
+      keyset_reader_type=testing_api_pb2.KeysetReaderType.Value(
+          keyset_reader_type))
+  if associated_data is not None:
+    request.associated_data.value = associated_data
+  response = stub.ReadEncrypted(request)
+  if response.err:
+    raise tink.TinkError(response.err)
+  return response.keyset
+
+
+def keyset_write_encrypted(stub: testing_api_pb2_grpc.KeysetStub, keyset: bytes,
+                           master_keyset: bytes,
+                           associated_data: Optional[bytes],
+                           keyset_writer_type: str) -> bytes:
+  """Writes an encrypted keyset."""
+  request = testing_api_pb2.KeysetWriteEncryptedRequest(
+      keyset=keyset,
+      master_keyset=master_keyset,
+      keyset_writer_type=testing_api_pb2.KeysetWriterType.Value(
+          keyset_writer_type))
+  if associated_data is not None:
+    request.associated_data.value = associated_data
+  response = stub.WriteEncrypted(request)
+  if response.err:
+    raise tink.TinkError(response.err)
+  return response.encrypted_keyset
 
 
 def jwk_set_to_keyset(stub: testing_api_pb2_grpc.JwtStub,

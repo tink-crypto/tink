@@ -18,6 +18,7 @@
 #define TINK_PYTHON_CC_PYTHON_OUTPUT_STREAM_H_
 
 #include <memory>
+#include <string>
 
 #include "tink/output_stream.h"
 #include "tink/util/status.h"

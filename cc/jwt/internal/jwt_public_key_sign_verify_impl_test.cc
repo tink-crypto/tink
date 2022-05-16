@@ -85,7 +85,7 @@ TEST_F(JwtSignatureImplTest, CreateAndValidateToken) {
           .SetExpiration(now + absl::Seconds(300))
           .Build();
   ASSERT_THAT(raw_jwt_or.status(), IsOk());
-  RawJwt raw_jwt = raw_jwt_or.ValueOrDie();
+  RawJwt raw_jwt = raw_jwt_or.value();
 
   util::StatusOr<std::string> compact =
       jwt_sign_->SignAndEncodeWithKid(raw_jwt, /*kid=*/absl::nullopt);

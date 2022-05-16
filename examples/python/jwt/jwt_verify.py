@@ -13,8 +13,7 @@
 # limitations under the License.
 
 # [START python-jwt-signature-example]
-"""A utility for verifying Json Web Tokens (JWT).
-"""
+"""A utility for verifying Json Web Tokens (JWT)."""
 
 from __future__ import absolute_import
 from __future__ import division
@@ -32,10 +31,14 @@ from tink import jwt
 
 FLAGS = flags.FLAGS
 
-flags.DEFINE_string('public_jwk_set_path', None,
-                    'Path to public keyset in JWK format.')
-flags.DEFINE_string('audience', None, 'Audience to be used in the token')
-flags.DEFINE_string('token_path', None, 'Path to the signature file.')
+_PUBLIC_KEYSET_PATH = flags.DEFINE_string(
+    'public_keyset_path', None, 'Path to public keyset in Tink JSON format.')
+_PUBLIC_JWK_SET_PATH = flags.DEFINE_string(
+    'public_jwk_set_path', None, 'Path to public keyset in JWK set format.')
+_AUDIENCE = flags.DEFINE_string('audience', None,
+                                'Audience to be used in the token')
+_TOKEN_PATH = flags.DEFINE_string('token_path', None,
+                                  'Path to the signature file.')
 
 
 def main(argv):
@@ -49,13 +52,26 @@ def main(argv):
     return 1
 
   # Read the keyset into a KeysetHandle
-  with open(FLAGS.public_jwk_set_path, 'rt') as public_jwk_set_file:
-    try:
-      text = public_jwk_set_file.read()
-      keyset_handle = jwt.jwk_set_to_keyset_handle(text)
-    except tink.TinkError as e:
-      logging.exception('Error reading keyset: %s', e)
-      return 1
+  if _PUBLIC_KEYSET_PATH.present:
+    with open(_PUBLIC_KEYSET_PATH.value, 'rt') as public_keyset_file:
+      try:
+        text = public_keyset_file.read()
+        keyset_handle = tink.read_no_secret_keyset_handle(
+            tink.JsonKeysetReader(text))
+      except tink.TinkError as e:
+        logging.exception('Error reading public keyset: %s', e)
+        return 1
+  elif _PUBLIC_JWK_SET_PATH.present:
+    with open(_PUBLIC_JWK_SET_PATH.value, 'rt') as public_jwk_set_file:
+      try:
+        text = public_jwk_set_file.read()
+        keyset_handle = jwt.jwk_set_to_public_keyset_handle(text)
+      except tink.TinkError as e:
+        logging.exception('Error reading public JWK set: %s', e)
+        return 1
+  else:
+    logging.info(
+        'Either --public_keyset_path or --public_jwk_set_path must be set')
 
   now = datetime.datetime.now(tz=datetime.timezone.utc)
   try:
@@ -65,9 +81,9 @@ def main(argv):
     return 1
 
   # Verify token
-  with open(FLAGS.token_path, 'rt') as token_file:
+  with open(_TOKEN_PATH.value, 'rt') as token_file:
     token = token_file.read()
-  validator = jwt.new_validator(expected_audience=FLAGS.audience)
+  validator = jwt.new_validator(expected_audience=_AUDIENCE.value)
   try:
     verified_jwt = jwt_verify.verify_and_decode(token, validator)
     expires_in = verified_jwt.expiration() - now
@@ -79,8 +95,7 @@ def main(argv):
 
 
 if __name__ == '__main__':
-  flags.mark_flags_as_required(
-      ['public_jwk_set_path', 'audience', 'token_path'])
+  flags.mark_flags_as_required(['audience', 'token_path'])
   app.run(main)
 
 # [END python-jwt-signature-example]

@@ -16,6 +16,8 @@
 
 #include "tink/experimental/pqcrypto/signature/falcon_key_template.h"
 
+#include <string>
+
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "tink/core/key_manager_impl.h"
@@ -25,7 +27,6 @@
 #include "tink/experimental/pqcrypto/signature/subtle/falcon_subtle_utils.h"
 #include "tink/util/test_matchers.h"
 #include "proto/tink.pb.h"
-#include "proto/tink.proto.h"
 
 namespace crypto {
 namespace tink {

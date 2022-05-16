@@ -42,31 +42,10 @@ namespace crypto {
 namespace tink {
 namespace internal {
 
-const int kXchacha20Poly1305TagSizeInBytes = 16;
-const int kAesGcmTagSizeInBytes = 16;
+ABSL_CONST_INIT const int kXchacha20Poly1305TagSizeInBytes = 16;
+ABSL_CONST_INIT const int kAesGcmTagSizeInBytes = 16;
 
 namespace {
-
-#ifdef OPENSSL_IS_BORINGSSL
-
-// Returns an EVP_AEAD cipher or an error if `key_size_in_bytes` is invalid.
-util::StatusOr<const EVP_AEAD *> GetAesGcmSivAeadCipherForKeySize(
-    int key_size_in_bytes) {
-  switch (key_size_in_bytes) {
-    case 16:
-      return EVP_aead_aes_128_gcm_siv();
-    case 32:
-      return EVP_aead_aes_256_gcm_siv();
-    default:
-      return util::Status(
-          absl::StatusCode::kInvalidArgument,
-          absl::StrCat(
-              "Invalid key size; valid values are {16, 32} bytes, got ",
-              key_size_in_bytes));
-  }
-}
-
-#endif
 
 // Sets `iv` to the given `context`, as well as the "direction"
 // (encrypt/decrypt) based on `encryption`.
@@ -138,7 +117,7 @@ class OpenSslOneShotAeadImpl : public SslOneShotAead {
                                   absl::string_view iv,
                                   absl::Span<char> out) const override {
     absl::string_view plaintext_data = internal::EnsureStringNonNull(plaintext);
-    absl::string_view aad = internal::EnsureStringNonNull(associated_data);
+    absl::string_view ad = internal::EnsureStringNonNull(associated_data);
 
     const int64_t min_out_buff_size = CiphertextSize(plaintext.size());
     if (out.size() < min_out_buff_size) {
@@ -177,13 +156,13 @@ class OpenSslOneShotAeadImpl : public SslOneShotAead {
       return res;
     }
 
-    // Set the additional auth. data.
+    // Set the associated data.
     int len = 0;
     if (EVP_EncryptUpdate(context.get(), /*out=*/nullptr, &len,
-                          reinterpret_cast<const uint8_t *>(aad.data()),
-                          aad.size()) <= 0) {
+                          reinterpret_cast<const uint8_t *>(ad.data()),
+                          ad.size()) <= 0) {
       return util::Status(absl::StatusCode::kInternal,
-                          "Failed to set the additional authenticated data");
+                          "Failed to set associated data");
     }
 
     util::StatusOr<int64_t> raw_ciphertext_bytes =
@@ -209,7 +188,7 @@ class OpenSslOneShotAeadImpl : public SslOneShotAead {
                                   absl::string_view associated_data,
                                   absl::string_view iv,
                                   absl::Span<char> out) const override {
-    absl::string_view aad = internal::EnsureStringNonNull(associated_data);
+    absl::string_view ad = internal::EnsureStringNonNull(associated_data);
 
     if (ciphertext.size() < tag_size_) {
       return util::Status(
@@ -249,12 +228,12 @@ class OpenSslOneShotAeadImpl : public SslOneShotAead {
     }
 
     int len = 0;
-    // Add additional auth. data.
+    // Add the associated data.
     if (EVP_DecryptUpdate(context.get(), /*out=*/nullptr, &len,
-                          reinterpret_cast<const uint8_t *>(aad.data()),
-                          aad.size()) <= 0) {
+                          reinterpret_cast<const uint8_t *>(ad.data()),
+                          ad.size()) <= 0) {
       return util::Status(absl::StatusCode::kInternal,
-                          "Failed to set the additional authenticated data");
+                          "Failed to set associated_data");
     }
 
     const int64_t raw_ciphertext_size = ciphertext.size() - tag_size_;
@@ -322,7 +301,7 @@ class BoringSslOneShotAeadImpl : public SslOneShotAead {
                                   absl::string_view associated_data,
                                   absl::string_view iv,
                                   absl::Span<char> out) const override {
-    // BoringSSL expects a non-null pointer for additional_data,
+    // BoringSSL expects a non-null pointer for associated_data,
     // regardless of whether the size is 0.
     plaintext = internal::EnsureStringNonNull(plaintext);
     associated_data = internal::EnsureStringNonNull(associated_data);

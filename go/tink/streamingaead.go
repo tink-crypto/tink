@@ -27,7 +27,7 @@ supported properties. This interface supports a streaming interface for symmetri
 authentication. The underlying encryption modes are selected so that partial plaintext can be
 obtained fast by decrypting and authenticating just a part of the ciphertext.
 
-Instances of StreamingAead must follow the OAE2 definition as proposed in the paper "Online
+Instances of StreamingAEAD must follow the OAE2 definition as proposed in the paper "Online
 Authenticated-Encryption and its Nonce-Reuse Misuse-Resistance" by Hoang, Reyhanitabar, Rogaway
 and Vizár https://eprint.iacr.org/2015/189.pdf
 */

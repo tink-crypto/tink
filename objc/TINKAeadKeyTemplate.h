@@ -95,6 +95,15 @@ typedef NS_ENUM(NSInteger, TINKAeadKeyTemplates) {
    *   OutputPrefixType: RAW
    */
   TINKAes256GcmNoPrefix = 8,
+
+  /**
+   * AesGcmKey with the following parameters:
+   *   Key size: 16 bytes
+   *   IV size: 12 bytes
+   *   Tag size: 16 bytes
+   *   OutputPrefixType: RAW
+   */
+  TINKAes128GcmNoPrefix = 9,
 };
 
 NS_ASSUME_NONNULL_BEGIN

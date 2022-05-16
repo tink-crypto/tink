@@ -14,27 +14,27 @@
 # limitations under the License.
 ################################################################################
 
-
 set -euo pipefail
 
 REPO_DIR="${KOKORO_ARTIFACTS_DIR}/git/tink"
 
-TINK_VERSION="$(cat ${REPO_DIR}/tink_version.bzl | grep ^TINK | cut -f 2 -d \")"
+cd "${REPO_DIR}"
+./kokoro/testutils/copy_credentials.sh "go/testdata"
+./kokoro/testutils/update_certs.sh
+# Sourcing required to update callers environment.
+source ./kokoro/testutils/install_go.sh
+
+echo "Using go binary from $(which go): $(go version)"
+
+readonly TINK_VERSION="$(cat ${REPO_DIR}/go/tink_version.bzl \
+                        | grep ^TINK \
+                        | cut -f 2 -d \")"
 
 # Create a temporary directory for performing module tests.
 TMP_DIR="$(mktemp -dt go-module-test.XXXXXX)"
 GO_MOD_DIR="${TMP_DIR}/go-mod-test"
 
 REPO_URL_PREFIX="github.com/google/tink"
-
-# TODO(b/201806781): Remove when no longer necessary.
-sudo apt-get update
-sudo apt-get upgrade -y ca-certificates
-
-(
-  cd "${REPO_DIR}"
-  ./kokoro/copy_credentials.sh
-)
 
 #######################################
 # Test an individual Go module within the Tink repository.
@@ -54,6 +54,8 @@ function test_go_mod() {
 
   echo "### Testing ${full_mod_name}..."
   (
+    echo "Using go binary from $(which go): $(go version)"
+
     set -x
     cd "${REPO_DIR}/${mod_name}"
     go build -v ./...
@@ -63,6 +65,8 @@ function test_go_mod() {
   mkdir "${GO_MOD_DIR}"
   (
     cd "${GO_MOD_DIR}"
+
+    echo "Using go binary from $(which go): $(go version)"
 
     # Display commands being run for the remainder of this subshell.
     set -x
@@ -145,6 +149,7 @@ function main() {
     | xargs -n 1 dirname)
 
   echo "### Go modules found:"
+
   for go_mod_dir in "${go_mod_dirs[@]}"; do
     echo "${go_mod_dir}"
   done

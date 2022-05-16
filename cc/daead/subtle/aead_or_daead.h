@@ -18,6 +18,8 @@
 #define TINK_DAEAD_SUBTLE_AEAD_OR_DAEAD_H_
 
 #include <memory>
+#include <string>
+#include <utility>
 
 #include "absl/types/variant.h"
 #include "tink/aead.h"

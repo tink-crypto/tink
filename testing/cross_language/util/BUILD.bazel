@@ -39,6 +39,7 @@ py_test(
     srcs_version = "PY3",
     deps = [
         ":supported_key_types",
+        requirement("six"),  # needed by absl-py
         requirement("absl-py"),
     ],
 )
@@ -59,6 +60,7 @@ py_library(
         "@tink_py//tink/prf",
         "@tink_py//tink/signature",
         "@tink_py//tink/streaming_aead",
+        requirement("six"),  # needed by absl-py
         requirement("absl-py"),
     ],
 )
@@ -160,6 +162,7 @@ py_test(
     deps = [
         ":key_util",
         "@com_google_protobuf//:protobuf_python",
+        requirement("six"),  # needed by absl-py
         requirement("absl-py"),
         "@tink_py//tink/proto:tink_py_pb2",
     ],

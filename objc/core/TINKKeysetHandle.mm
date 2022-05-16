@@ -78,7 +78,7 @@ static NSString *const kTinkService = @"com.google.crypto.tink";
     }
   }
 
-  return [self initWithCCKeysetHandle:std::move(st.ValueOrDie())];
+  return [self initWithCCKeysetHandle:std::move(st.value())];
 }
 
 - (instancetype)initWithKeysetReader:(TINKKeysetReader *)reader
@@ -122,7 +122,7 @@ static NSString *const kTinkService = @"com.google.crypto.tink";
     }
   }
 
-  return [self initWithCCKeysetHandle:std::move(st.ValueOrDie())];
+  return [self initWithCCKeysetHandle:std::move(st.value())];
 }
 
 - (nullable instancetype)initFromKeychainWithName:(NSString *)keysetName error:(NSError **)error {
@@ -192,7 +192,7 @@ static NSString *const kTinkService = @"com.google.crypto.tink";
       return nil;
     }
 
-    auto read_result = crypto::tink::CleartextKeysetHandle::Read(std::move(reader.ValueOrDie()));
+    auto read_result = crypto::tink::CleartextKeysetHandle::Read(std::move(reader.value()));
     if (!read_result.ok()) {
       if (error) {
         *error = TINKStatusToError(read_result.status());
@@ -200,7 +200,7 @@ static NSString *const kTinkService = @"com.google.crypto.tink";
       }
     }
 
-    return [self initWithCCKeysetHandle:std::move(read_result.ValueOrDie())];
+    return [self initWithCCKeysetHandle:std::move(read_result.value())];
   }
   return nil;
 }
@@ -338,7 +338,7 @@ static NSString *const kTinkService = @"com.google.crypto.tink";
     return nil;
   }
 
-  return [self initWithCCKeysetHandle:std::move(st.ValueOrDie())];
+  return [self initWithCCKeysetHandle:std::move(st.value())];
 }
 
 - (crypto::tink::KeysetHandle *)ccKeysetHandle {
@@ -359,7 +359,7 @@ static NSString *const kTinkService = @"com.google.crypto.tink";
     }
     return nil;
   }
-  return [[TINKKeysetHandle alloc] initWithCCKeysetHandle:std::move(status.ValueOrDie())];
+  return [[TINKKeysetHandle alloc] initWithCCKeysetHandle:std::move(status.value())];
 }
 
 - (NSData *)serializedKeysetNoSecret:(NSError **)error {
@@ -372,7 +372,7 @@ static NSString *const kTinkService = @"com.google.crypto.tink";
     }
     return nil;
   }
-  auto writer = std::move(writerResult.ValueOrDie());
+  auto writer = std::move(writerResult.value());
   auto writeNoSecretStatus = self.ccKeysetHandle->WriteNoSecret(writer.get());
   if (!writeNoSecretStatus.ok()) {
     if (error) {

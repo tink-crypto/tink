@@ -92,17 +92,17 @@ TEST(MacWrapperTest, Basic) {
                                        keyset_info.key_info(2));
   ASSERT_TRUE(entry_result.ok());
   // The last key is the primary.
-  ASSERT_THAT(mac_set->set_primary(entry_result.ValueOrDie()), IsOk());
+  ASSERT_THAT(mac_set->set_primary(entry_result.value()), IsOk());
 
   // Wrap mac_set and test the resulting Mac.
   auto mac_result = MacWrapper().Wrap(std::move(mac_set));
   EXPECT_TRUE(mac_result.ok()) << mac_result.status();
-  std::unique_ptr<Mac> mac = std::move(mac_result.ValueOrDie());
+  std::unique_ptr<Mac> mac = std::move(mac_result.value());
   std::string data = "some_data_for_mac";
 
   auto compute_mac_result = mac->ComputeMac(data);
   EXPECT_TRUE(compute_mac_result.ok()) << compute_mac_result.status();
-  std::string mac_value = compute_mac_result.ValueOrDie();
+  std::string mac_value = compute_mac_result.value();
   EXPECT_PRED_FORMAT2(testing::IsSubstring, mac_name_2, mac_value);
 
   util::Status status = mac->VerifyMac(mac_value, data);
@@ -128,18 +128,18 @@ TEST(MacWrapperTest, testLegacyAuthentication) {
   std::unique_ptr<Mac> mac(new DummyMac(mac_name));
   auto entry_result = mac_set->AddPrimitive(std::move(mac), key_info);
   ASSERT_TRUE(entry_result.ok());
-  ASSERT_THAT(mac_set->set_primary(entry_result.ValueOrDie()), IsOk());
+  ASSERT_THAT(mac_set->set_primary(entry_result.value()), IsOk());
 
   // Wrap mac_set and test the resulting Mac.
   auto mac_result = MacWrapper().Wrap(std::move(mac_set));
   EXPECT_TRUE(mac_result.ok()) << mac_result.status();
-  mac = std::move(mac_result.ValueOrDie());
+  mac = std::move(mac_result.value());
   std::string data = "Some data to authenticate";
 
   // Compute and verify MAC via wrapper.
   auto compute_mac_result = mac->ComputeMac(data);
   EXPECT_TRUE(compute_mac_result.ok()) << compute_mac_result.status();
-  std::string mac_value = compute_mac_result.ValueOrDie();
+  std::string mac_value = compute_mac_result.value();
   EXPECT_PRED_FORMAT2(testing::IsSubstring, mac_name, mac_value);
   auto status = mac->VerifyMac(mac_value, data);
   EXPECT_TRUE(status.ok()) << status;
@@ -168,7 +168,7 @@ class TryBreakLegacyMac : public Mac {
 
   crypto::tink::util::Status VerifyMac(absl::string_view mac,
                                        absl::string_view data) const override {
-    if (mac != ComputeMac(data).ValueOrDie()) {
+    if (mac != ComputeMac(data).value()) {
       return absl::InvalidArgumentError("Wrong mac");
     }
     return util::OkStatus();
@@ -197,16 +197,15 @@ TEST(MacWrapperTest, VerifyRawAfterLegacy) {
   auto entry1 =
       mac_set->AddPrimitive(absl::make_unique<DummyMac>(""), key_info_1);
   ASSERT_THAT(entry1.status(), IsOk());
-  ASSERT_THAT(mac_set->set_primary(entry1.ValueOrDie()), IsOk());
+  ASSERT_THAT(mac_set->set_primary(entry1.value()), IsOk());
 
   // Wrap mac_set and test the resulting Mac.
   auto wrapped_mac = MacWrapper().Wrap(std::move(mac_set));
   EXPECT_THAT(wrapped_mac.status(), IsOk());
 
   std::string data = "some data";
-  std::string mac_tag = TryBreakLegacyMac().ComputeMac(data).ValueOrDie();
-  EXPECT_THAT(wrapped_mac.ValueOrDie()->VerifyMac(mac_tag, data),
-              IsOk());
+  std::string mac_tag = TryBreakLegacyMac().ComputeMac(data).value();
+  EXPECT_THAT(wrapped_mac.value()->VerifyMac(mac_tag, data), IsOk());
 }
 
 }  // namespace

@@ -46,7 +46,7 @@ util::StatusOr<std::unique_ptr<HpkeDecryptBoringSsl>> HpkeDecryptBoringSsl::New(
   if (!status.ok()) {
     return status;
   }
-  return hpke_decrypt;
+  return std::move(hpke_decrypt);
 }
 
 util::Status HpkeDecryptBoringSsl::Init(const HpkeParams& params,

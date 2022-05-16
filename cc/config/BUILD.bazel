@@ -49,6 +49,17 @@ config_setting(
     visibility = ["//visibility:public"],
 )
 
+bool_flag(
+    name = "tink_use_absl_statusor",
+    build_setting_default = False,
+)
+
+config_setting(
+    name = "absl_statusor_enabled",
+    flag_values = {"//config:tink_use_absl_statusor": "True"},
+    visibility = ["//visibility:public"],
+)
+
 cc_library(
     name = "tink_fips",
     srcs = ["tink_fips.cc"],

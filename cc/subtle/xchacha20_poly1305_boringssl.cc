@@ -20,6 +20,7 @@
 #include <cstdint>
 #include <memory>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include "absl/memory/memory.h"
@@ -56,11 +57,11 @@ util::StatusOr<std::unique_ptr<Aead>> XChacha20Poly1305BoringSsl::New(
   }
   std::unique_ptr<Aead> aead_impl =
       absl::WrapUnique(new XChacha20Poly1305BoringSsl(*std::move(aead)));
-  return aead_impl;
+  return std::move(aead_impl);
 }
 
 util::StatusOr<std::string> XChacha20Poly1305BoringSsl::Encrypt(
-    absl::string_view plaintext, absl::string_view additional_data) const {
+    absl::string_view plaintext, absl::string_view associated_data) const {
   const int64_t kCiphertextSize =
       kNonceSizeInBytes + aead_->CiphertextSize(plaintext.size());
   std::string ct;
@@ -74,7 +75,7 @@ util::StatusOr<std::string> XChacha20Poly1305BoringSsl::Encrypt(
   auto ciphertext_and_tag_buffer =
       absl::MakeSpan(ct).subspan(kNonceSizeInBytes);
   util::StatusOr<int64_t> written_bytes = aead_->Encrypt(
-      plaintext, additional_data, nonce, ciphertext_and_tag_buffer);
+      plaintext, associated_data, nonce, ciphertext_and_tag_buffer);
   if (!written_bytes.ok()) {
     return written_bytes.status();
   }
@@ -82,7 +83,7 @@ util::StatusOr<std::string> XChacha20Poly1305BoringSsl::Encrypt(
 }
 
 util::StatusOr<std::string> XChacha20Poly1305BoringSsl::Decrypt(
-    absl::string_view ciphertext, absl::string_view additional_data) const {
+    absl::string_view ciphertext, absl::string_view associated_data) const {
   if (ciphertext.size() < kNonceSizeInBytes + kTagSizeInBytes) {
     return util::Status(absl::StatusCode::kInvalidArgument,
                         absl::StrCat("Ciphertext too short; expected at least ",
@@ -96,7 +97,7 @@ util::StatusOr<std::string> XChacha20Poly1305BoringSsl::Decrypt(
   auto nonce = ciphertext.substr(0, kNonceSizeInBytes);
   auto encrypted = ciphertext.substr(kNonceSizeInBytes);
   util::StatusOr<int64_t> written_bytes = aead_->Decrypt(
-      encrypted, additional_data, nonce, absl::MakeSpan(plaintext));
+      encrypted, associated_data, nonce, absl::MakeSpan(plaintext));
   if (!written_bytes.ok()) {
     return written_bytes.status();
   }

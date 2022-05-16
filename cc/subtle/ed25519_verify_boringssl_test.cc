@@ -18,6 +18,7 @@
 
 #include <memory>
 #include <string>
+#include <utility>
 
 #include "gtest/gtest.h"
 #include "absl/status/status.h"
@@ -261,7 +262,7 @@ bool TestSignatures(const std::string& filename, bool allow_skipping) {
       continue;
     }
 
-    auto verifier = std::move(verifier_result.ValueOrDie());
+    auto verifier = std::move(verifier_result.value());
     for (const rapidjson::Value& test : test_group["tests"].GetArray()) {
       std::string expected = test["result"].GetString();
       std::string msg = WycheproofUtil::GetBytes(test["msg"]);

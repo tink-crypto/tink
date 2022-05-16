@@ -31,6 +31,7 @@
 #include "tink/internal/bn_util.h"
 #include "tink/internal/fips_utils.h"
 #include "tink/internal/ssl_unique_ptr.h"
+#include "tink/internal/ssl_util.h"
 #include "tink/subtle/common_enums.h"
 #include "tink/subtle/subtle_util.h"
 #include "tink/subtle/wycheproof_util.h"
@@ -114,8 +115,6 @@ TEST(EcUtilTest, NewEcKeyReturnsWellFormedX25519Key) {
             Field(&EcKey::priv, SizeIs(X25519KeyPrivKeySize()))));
 }
 
-#ifdef OPENSSL_IS_BORINGSSL
-
 using EcUtilNewEcKeyWithSeed = TestWithParam<subtle::EllipticCurveType>;
 
 // Matcher for the equality of two EcKeys.
@@ -129,6 +128,9 @@ Matcher<EcKey> EqualsEcKey(const EcKey& expected) {
 TEST_P(EcUtilNewEcKeyWithSeed, KeysFromDifferentSeedAreDifferent) {
   if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
+  }
+  if (!IsBoringSsl()) {
+    GTEST_SKIP() << "NewEcKey with seed is not supported with OpenSSL";
   }
 
   util::SecretData seed1 = util::SecretDataFromStringView(
@@ -148,6 +150,10 @@ TEST_P(EcUtilNewEcKeyWithSeed, SameSeedGivesSameKey) {
   if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
+  if (!IsBoringSsl()) {
+    GTEST_SKIP() << "NewEcKey with seed is not supported with OpenSSL";
+  }
+
   util::SecretData seed1 = util::SecretDataFromStringView(
       absl::HexStringToBytes("000102030405060708090a0b0c0d0e0f"));
   subtle::EllipticCurveType curve = GetParam();
@@ -167,6 +173,9 @@ TEST(EcUtilTest, GenerationWithSeedFailsWithWrongCurve) {
   if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
+  if (!IsBoringSsl()) {
+    GTEST_SKIP() << "NewEcKey with seed is not supported with OpenSSL";
+  }
   util::SecretData seed = util::SecretDataFromStringView(
       absl::HexStringToBytes("000102030405060708090a0b0c0d0e0f"));
   util::StatusOr<EcKey> keypair =
@@ -174,11 +183,13 @@ TEST(EcUtilTest, GenerationWithSeedFailsWithWrongCurve) {
   EXPECT_THAT(keypair.status(), StatusIs(absl::StatusCode::kInternal));
 }
 
-#else
-
-TEST(EcUtilTest, NewEcKeyFromSeedUnimplemented) {
+TEST(EcUtilTest, NewEcKeyFromSeedUnimplementedIfOpenSsl) {
   if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
+  }
+  if (IsBoringSsl()) {
+    GTEST_SKIP()
+        << "OpenSSL-only test; skipping because BoringSSL is being used";
   }
   util::SecretData seed = util::SecretDataFromStringView(
       absl::HexStringToBytes("000102030405060708090a0b0c0d0e0f"));
@@ -186,8 +197,6 @@ TEST(EcUtilTest, NewEcKeyFromSeedUnimplemented) {
       NewEcKey(subtle::EllipticCurveType::CURVE25519, seed);
   EXPECT_THAT(keypair.status(), StatusIs(absl::StatusCode::kUnimplemented));
 }
-
-#endif
 
 TEST(EcUtilTest, NewX25519KeyGeneratesNewKeyEveryTime) {
   util::StatusOr<std::unique_ptr<X25519Key>> keypair1 = NewX25519Key();

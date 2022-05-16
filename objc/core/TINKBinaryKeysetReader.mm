@@ -48,7 +48,7 @@
       }
       return nil;
     }
-    self.ccReader = std::move(st.ValueOrDie());
+    self.ccReader = std::move(st.value());
     self.used = NO;
   }
   return self;

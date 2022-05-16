@@ -42,8 +42,8 @@
     }
     return nil;
   }
-  id<TINKDeterministicAead> aead = [[TINKDeterministicAeadInternal alloc]
-      initWithCCDeterministicAead:std::move(st.ValueOrDie())];
+  id<TINKDeterministicAead> aead =
+      [[TINKDeterministicAeadInternal alloc] initWithCCDeterministicAead:std::move(st.value())];
   if (!aead) {
     if (error) {
       *error = TINKStatusToError(

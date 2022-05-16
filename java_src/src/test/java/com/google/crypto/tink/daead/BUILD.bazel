@@ -23,6 +23,7 @@ java_test(
     name = "DeterministicAeadConfigTest",
     size = "small",
     srcs = ["DeterministicAeadConfigTest.java"],
+    tags = ["fips"],
     deps = [
         "//src/main/java/com/google/crypto/tink:deterministic_aead",
         "//src/main/java/com/google/crypto/tink:registry",
@@ -41,8 +42,8 @@ java_test(
         "//proto:tink_java_proto",
         "//src/main/java/com/google/crypto/tink:deterministic_aead",
         "//src/main/java/com/google/crypto/tink:key_template",
-        "//src/main/java/com/google/crypto/tink:key_type_manager",
         "//src/main/java/com/google/crypto/tink/daead:aes_siv_key_manager",
+        "//src/main/java/com/google/crypto/tink/internal:key_type_manager",
         "//src/main/java/com/google/crypto/tink/subtle:random",
         "//src/main/java/com/google/crypto/tink/testing:test_util",
         "@com_google_protobuf//:protobuf_javalite",

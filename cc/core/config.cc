@@ -16,6 +16,7 @@
 
 #include "tink/config.h"
 
+#include <memory>
 #include <string>
 
 #include "absl/status/status.h"

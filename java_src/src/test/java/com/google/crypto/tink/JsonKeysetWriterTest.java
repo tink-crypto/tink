@@ -17,6 +17,7 @@
 package com.google.crypto.tink;
 
 import static com.google.common.truth.Truth.assertThat;
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 import com.google.crypto.tink.aead.AeadKeyTemplates;
 import com.google.crypto.tink.config.TinkConfig;
@@ -129,10 +130,23 @@ public class JsonKeysetWriterTest {
             .build();
     KeysetHandle modifiedHandle = CleartextKeysetHandle.parseFrom(modified.toByteArray());
 
+    // Write cleartext keyset
     ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
     CleartextKeysetHandle.write(modifiedHandle, JsonKeysetWriter.withOutputStream(outputStream));
-    assertThat(outputStream.toString()).contains("\"primaryKeyId\":4275736384");
-    assertThat(outputStream.toString()).contains("\"keyId\":4275736384");
+    String cleartextKeysetInJson = new String(outputStream.toByteArray(), UTF_8);
+
+    assertThat(cleartextKeysetInJson).contains("\"primaryKeyId\":4275736384");
+    assertThat(cleartextKeysetInJson).contains("\"keyId\":4275736384");
+
+    // Write encrypted keyset
+    Aead keysetEncryptionAead =
+        KeysetHandle.generateNew(KeyTemplates.get("AES128_EAX")).getPrimitive(Aead.class);
+    ByteArrayOutputStream outputStream2 = new ByteArrayOutputStream();
+    modifiedHandle.write(JsonKeysetWriter.withOutputStream(outputStream2), keysetEncryptionAead);
+    String encryptedKeysetInJson = new String(outputStream2.toByteArray(), UTF_8);
+
+    assertThat(encryptedKeysetInJson).contains("\"primaryKeyId\":4275736384");
+    assertThat(encryptedKeysetInJson).contains("\"keyId\":4275736384");
   }
 
 }

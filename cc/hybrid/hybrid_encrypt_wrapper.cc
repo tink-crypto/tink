@@ -75,7 +75,7 @@ util::StatusOr<std::string> HybridEncryptSetWrapper::Encrypt(
       primary->get_primitive().Encrypt(plaintext, context_info);
   if (!encrypt_result.ok()) return encrypt_result.status();
   const std::string& key_id = primary->get_identifier();
-  return key_id + encrypt_result.ValueOrDie();
+  return key_id + encrypt_result.value();
 }
 
 }  // anonymous namespace

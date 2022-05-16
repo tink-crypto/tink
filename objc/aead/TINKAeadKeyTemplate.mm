@@ -65,6 +65,10 @@
       ccKeyTemplate = const_cast<google::crypto::tink::KeyTemplate *>(
           &crypto::tink::AeadKeyTemplates::Aes256GcmNoPrefix());
       break;
+    case TINKAes128GcmNoPrefix:
+      ccKeyTemplate = const_cast<google::crypto::tink::KeyTemplate *>(
+          &crypto::tink::AeadKeyTemplates::Aes128GcmNoPrefix());
+      break;
     default:
       if (error) {
         *error = TINKStatusToError(crypto::tink::util::Status(

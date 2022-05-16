@@ -8,7 +8,7 @@ java_test(
         "//proto:aes_gcm_java_proto",
         "//proto:tink_java_proto",
         "//src/main/java/com/google/crypto/tink:key_template",
-        "//src/main/java/com/google/crypto/tink:key_type_manager",
+        "//src/main/java/com/google/crypto/tink/internal:key_type_manager",
         "//src/main/java/com/google/crypto/tink/subtle:random",
         "//src/main/java/com/google/crypto/tink/testing:key_type_manager_test_util",
         "@com_google_protobuf//:protobuf_javalite",

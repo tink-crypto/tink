@@ -16,6 +16,9 @@
 #ifndef TINK_INTERNAL_KEYSET_WRAPPER_H_
 #define TINK_INTERNAL_KEYSET_WRAPPER_H_
 
+#include <string>
+
+#include "absl/container/flat_hash_map.h"
 #include "tink/util/statusor.h"
 #include "proto/tink.pb.h"
 
@@ -40,8 +43,11 @@ class KeysetWrapper {
  public:
   virtual ~KeysetWrapper() {}
 
+  // Wraps a given `keyset` with annotations `annotations`.
   virtual crypto::tink::util::StatusOr<std::unique_ptr<Primitive>> Wrap(
-      const google::crypto::tink::Keyset& keyset) const = 0;
+      const google::crypto::tink::Keyset& keyset,
+      const absl::flat_hash_map<std::string, std::string>& annotations)
+      const = 0;
 };
 
 }  // namespace internal

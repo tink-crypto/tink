@@ -18,12 +18,13 @@
 #define TINK_SUBTLE_HMAC_BORINGSSL_H_
 
 #include <memory>
+#include <string>
 #include <utility>
 
 #include "absl/strings/string_view.h"
 #include "openssl/evp.h"
-#include "tink/mac.h"
 #include "tink/internal/fips_utils.h"
+#include "tink/mac.h"
 #include "tink/subtle/common_enums.h"
 #include "tink/util/secret_data.h"
 #include "tink/util/status.h"

@@ -358,14 +358,14 @@ util::StatusOr<KeyData> EsPublicKeyDataFromKeyStruct(const Struct& key_struct) {
 }  // namespace
 
 util::StatusOr<std::unique_ptr<KeysetHandle>> JwkSetToPublicKeysetHandle(
-    absl::string_view json_jwk_set) {
-  util::StatusOr<Struct> jwk_set =
-      jwt_internal::JsonStringToProtoStruct(json_jwk_set);
-  if (!jwk_set.ok()) {
-    return jwk_set.status();
+    absl::string_view jwk_set) {
+  util::StatusOr<Struct> jwk_set_struct =
+      jwt_internal::JsonStringToProtoStruct(jwk_set);
+  if (!jwk_set_struct.ok()) {
+    return jwk_set_struct.status();
   }
-  auto it = jwk_set->fields().find("keys");
-  if (it == jwk_set->fields().end()) {
+  auto it = jwk_set_struct->fields().find("keys");
+  if (it == jwk_set_struct->fields().end()) {
     return util::Status(absl::StatusCode::kInvalidArgument, "keys not found");
   }
   if (it->second.kind_case() != Value::kListValue) {

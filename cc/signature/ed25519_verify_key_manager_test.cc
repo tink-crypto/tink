@@ -60,13 +60,11 @@ TEST(Ed25519VerifyKeyManagerTest, ValidateEmptyKey) {
 }
 
 Ed25519PrivateKey CreateValidPrivateKey() {
-  return Ed25519SignKeyManager().CreateKey(Ed25519KeyFormat()).ValueOrDie();
+  return Ed25519SignKeyManager().CreateKey(Ed25519KeyFormat()).value();
 }
 
 Ed25519PublicKey CreateValidPublicKey() {
-  return Ed25519SignKeyManager()
-      .GetPublicKey(CreateValidPrivateKey())
-      .ValueOrDie();
+  return Ed25519SignKeyManager().GetPublicKey(CreateValidPrivateKey()).value();
 }
 
 // Checks that a public key generaed by the SignKeyManager is considered valid.
@@ -96,7 +94,7 @@ TEST(Ed25519VerifyKeyManagerTest, PublicKeyWrongKeyLength64) {
 TEST(Ed25519SignKeyManagerTest, Create) {
   Ed25519PrivateKey private_key = CreateValidPrivateKey();
   Ed25519PublicKey public_key =
-      Ed25519SignKeyManager().GetPublicKey(private_key).ValueOrDie();
+      Ed25519SignKeyManager().GetPublicKey(private_key).value();
 
   auto direct_signer_or =
       subtle::Ed25519SignBoringSsl::New(util::SecretDataFromStringView(
@@ -108,18 +106,16 @@ TEST(Ed25519SignKeyManagerTest, Create) {
   ASSERT_THAT(verifier_or.status(), IsOk());
 
   std::string message = "Some message";
-  EXPECT_THAT(
-      verifier_or.ValueOrDie()->Verify(
-          direct_signer_or.ValueOrDie()->Sign(message).ValueOrDie(), message),
-      IsOk());
+  EXPECT_THAT(verifier_or.value()->Verify(
+                  direct_signer_or.value()->Sign(message).value(), message),
+              IsOk());
 }
 
 TEST(Ed25519SignKeyManagerTest, CreateDifferentPrivateKey) {
   Ed25519PrivateKey private_key = CreateValidPrivateKey();
   // Note: we create a new key in the next line.
-  Ed25519PublicKey public_key = Ed25519SignKeyManager()
-                                    .GetPublicKey(CreateValidPrivateKey())
-                                    .ValueOrDie();
+  Ed25519PublicKey public_key =
+      Ed25519SignKeyManager().GetPublicKey(CreateValidPrivateKey()).value();
 
   auto direct_signer_or = subtle::Ed25519SignBoringSsl::New(
       util::SecretDataFromStringView(absl::StrCat(
@@ -131,10 +127,9 @@ TEST(Ed25519SignKeyManagerTest, CreateDifferentPrivateKey) {
   ASSERT_THAT(verifier_or.status(), IsOk());
 
   std::string message = "Some message";
-  EXPECT_THAT(
-      verifier_or.ValueOrDie()->Verify(
-          direct_signer_or.ValueOrDie()->Sign(message).ValueOrDie(), message),
-      Not(IsOk()));
+  EXPECT_THAT(verifier_or.value()->Verify(
+                  direct_signer_or.value()->Sign(message).value(), message),
+              Not(IsOk()));
 }
 
 }  // namespace

@@ -30,7 +30,7 @@ A plugin for the `tink` artifact that integrates Tink with GCP KMS.
 ## Publishing snapshots
 
 ```shell
-./maven/publish-snapshot.sh
+./maven/publish_snapshot.sh
 ```
 
 This command publishes latest snapshots to Maven, and their Javadocs to
@@ -42,7 +42,7 @@ of https://github.com/google/tink.
 ## Testing snapshots
 
 ```shell
-./maven/test-snapshot.sh
+./maven/test_snapshot.sh
 ```
 
 New snapshots are also automatically tested for every new commit to the master

@@ -18,6 +18,8 @@
 #define TINK_SUBTLE_WYCHEPROOF_UTIL_H_
 
 #include <memory>
+#include <string>
+
 #include "include/rapidjson/document.h"
 #include "tink/subtle/common_enums.h"
 

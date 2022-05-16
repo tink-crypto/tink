@@ -32,7 +32,7 @@ import org.junit.runners.JUnit4;
 @RunWith(JUnit4.class)
 public final class AwsKmsClientTest {
   private static final String CREDENTIAL_FILE_PATH =
-      "../tink_base/testdata/credentials_aws.cred";
+      "testdata/credentials_aws.cred";
 
   @Before
   public void setUp() {

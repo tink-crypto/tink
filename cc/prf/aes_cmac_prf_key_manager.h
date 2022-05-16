@@ -17,6 +17,7 @@
 #define TINK_PRF_AES_CMAC_PRF_KEY_MANAGER_H_
 
 #include <algorithm>
+#include <string>
 #include <vector>
 
 #include "absl/memory/memory.h"
@@ -120,7 +121,7 @@ class AesCmacPrfKeyManager
     }
     google::crypto::tink::AesCmacPrfKey key;
     key.set_version(get_version());
-    key.set_key_value(randomness.ValueOrDie());
+    key.set_key_value(randomness.value());
     return key;
   }
 

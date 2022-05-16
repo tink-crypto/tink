@@ -13,7 +13,7 @@
 # limitations under the License.
 
 # [START python-jwt-sign-example]
-"""A utility for creating and signing Json Web Tokens (JWT).
+"""A utility for creating and signing JSON Web Tokens (JWT).
 
 It loads cleartext keys from disk - this is not recommended!
 """
@@ -33,12 +33,12 @@ from tink import cleartext_keyset_handle
 from tink import jwt
 
 
-FLAGS = flags.FLAGS
-
-flags.DEFINE_string('keyset_path', None,
-                    'Path to the keyset used for the JWT signature operation.')
-flags.DEFINE_string('audience', None, 'Audience to be used in the token')
-flags.DEFINE_string('token_path', None, 'Path to the token file.')
+_PRIVATE_KEYSET_PATH = flags.DEFINE_string(
+    'private_keyset_path', None,
+    'Path to the keyset used for the JWT signature operation.')
+_AUDIENCE = flags.DEFINE_string('audience', None,
+                                'Audience to be used in the token')
+_TOKEN_PATH = flags.DEFINE_string('token_path', None, 'Path to the token file.')
 
 
 def main(argv):
@@ -52,7 +52,7 @@ def main(argv):
     return 1
 
   # Read the keyset into a KeysetHandle
-  with open(FLAGS.keyset_path, 'rt') as keyset_file:
+  with open(_PRIVATE_KEYSET_PATH.value, 'rt') as keyset_file:
     try:
       text = keyset_file.read()
       keyset_handle = cleartext_keyset_handle.read(tink.JsonKeysetReader(text))
@@ -71,17 +71,17 @@ def main(argv):
 
   # Create token
   raw_jwt = jwt.new_raw_jwt(
-      audiences=[FLAGS.audience],
+      audiences=[_AUDIENCE.value],
       expiration=now + datetime.timedelta(seconds=100))
   token = jwt_sign.sign_and_encode(raw_jwt)
-  with open(FLAGS.token_path, 'wt') as token_file:
+  with open(_TOKEN_PATH.value, 'wt') as token_file:
     token_file.write(token)
-  logging.info('Token has been written to %s', FLAGS.token_path)
+  logging.info('Token has been written to %s', _TOKEN_PATH.value)
 
 
 if __name__ == '__main__':
   flags.mark_flags_as_required(
-      ['keyset_path', 'audience', 'token_path'])
+      ['private_keyset_path', 'audience', 'token_path'])
   app.run(main)
 
 # [END python-jwt-sign-example]

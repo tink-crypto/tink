@@ -68,7 +68,7 @@ RsaSsaPkcs1KeyFormat CreateKeyFormat(HashType hash_type,
   internal::SslUniquePtr<BIGNUM> e(BN_new());
   BN_set_word(e.get(), public_exponent);
   key_format.set_public_exponent(
-      internal::BignumToString(e.get(), BN_num_bytes(e.get())).ValueOrDie());
+      internal::BignumToString(e.get(), BN_num_bytes(e.get())).value());
   return key_format;
 }
 
@@ -178,7 +178,7 @@ TEST(RsaSsaPkcs1SignKeyManagerTest, CreateKey) {
   StatusOr<RsaSsaPkcs1PrivateKey> private_key_or =
       RsaSsaPkcs1SignKeyManager().CreateKey(key_format);
   ASSERT_THAT(private_key_or.status(), IsOk());
-  CheckNewKey(private_key_or.ValueOrDie(), key_format);
+  CheckNewKey(private_key_or.value(), key_format);
 }
 
 TEST(RsaSsaPkcs1SignKeyManagerTest, CreateKeySmallKey) {
@@ -188,7 +188,7 @@ TEST(RsaSsaPkcs1SignKeyManagerTest, CreateKeySmallKey) {
   StatusOr<RsaSsaPkcs1PrivateKey> private_key_or =
       RsaSsaPkcs1SignKeyManager().CreateKey(key_format);
   ASSERT_THAT(private_key_or.status(), IsOk());
-  CheckNewKey(private_key_or.ValueOrDie(), key_format);
+  CheckNewKey(private_key_or.value(), key_format);
 }
 
 TEST(RsaSsaPkcs1SignKeyManagerTest, CreateKeyLargeKey) {
@@ -198,15 +198,14 @@ TEST(RsaSsaPkcs1SignKeyManagerTest, CreateKeyLargeKey) {
   StatusOr<RsaSsaPkcs1PrivateKey> private_key_or =
       RsaSsaPkcs1SignKeyManager().CreateKey(key_format);
   ASSERT_THAT(private_key_or.status(), IsOk());
-  CheckNewKey(private_key_or.ValueOrDie(), key_format);
+  CheckNewKey(private_key_or.value(), key_format);
 }
 
 TEST(RsaSsaPkcs1SignKeyManagerTest, CreateKeyValid) {
   StatusOr<RsaSsaPkcs1PrivateKey> key_or =
       RsaSsaPkcs1SignKeyManager().CreateKey(ValidKeyFormat());
   ASSERT_THAT(key_or.status(), IsOk());
-  EXPECT_THAT(RsaSsaPkcs1SignKeyManager().ValidateKey(key_or.ValueOrDie()),
-              IsOk());
+  EXPECT_THAT(RsaSsaPkcs1SignKeyManager().ValidateKey(key_or.value()), IsOk());
 }
 
 // Check that in a bunch of CreateKey calls all generated primes are distinct.
@@ -218,8 +217,8 @@ TEST(RsaSsaPkcs1SignKeyManagerTest, CreateKeyAlwaysNewRsaPair) {
     StatusOr<RsaSsaPkcs1PrivateKey> key_or =
         RsaSsaPkcs1SignKeyManager().CreateKey(ValidKeyFormat());
     ASSERT_THAT(key_or.status(), IsOk());
-    keys.insert(key_or.ValueOrDie().p());
-    keys.insert(key_or.ValueOrDie().q());
+    keys.insert(key_or.value().p());
+    keys.insert(key_or.value().q());
   }
   EXPECT_THAT(keys, SizeIs(2 * num_generated_keys));
 }
@@ -229,16 +228,14 @@ TEST(RsaSsaPkcs1SignKeyManagerTest, GetPublicKey) {
       RsaSsaPkcs1SignKeyManager().CreateKey(ValidKeyFormat());
   ASSERT_THAT(key_or.status(), IsOk());
   StatusOr<RsaSsaPkcs1PublicKey> public_key_or =
-      RsaSsaPkcs1SignKeyManager().GetPublicKey(key_or.ValueOrDie());
+      RsaSsaPkcs1SignKeyManager().GetPublicKey(key_or.value());
   ASSERT_THAT(public_key_or.status(), IsOk());
-  EXPECT_THAT(public_key_or.ValueOrDie().version(),
-              Eq(key_or.ValueOrDie().public_key().version()));
-  EXPECT_THAT(public_key_or.ValueOrDie().params().hash_type(),
-              Eq(key_or.ValueOrDie().public_key().params().hash_type()));
-  EXPECT_THAT(public_key_or.ValueOrDie().n(),
-              Eq(key_or.ValueOrDie().public_key().n()));
-  EXPECT_THAT(public_key_or.ValueOrDie().e(),
-              Eq(key_or.ValueOrDie().public_key().e()));
+  EXPECT_THAT(public_key_or.value().version(),
+              Eq(key_or.value().public_key().version()));
+  EXPECT_THAT(public_key_or.value().params().hash_type(),
+              Eq(key_or.value().public_key().params().hash_type()));
+  EXPECT_THAT(public_key_or.value().n(), Eq(key_or.value().public_key().n()));
+  EXPECT_THAT(public_key_or.value().e(), Eq(key_or.value().public_key().e()));
 }
 
 TEST(EcdsaSignKeyManagerTest, Create) {
@@ -247,7 +244,7 @@ TEST(EcdsaSignKeyManagerTest, Create) {
   StatusOr<RsaSsaPkcs1PrivateKey> key_or =
       RsaSsaPkcs1SignKeyManager().CreateKey(key_format);
   ASSERT_THAT(key_or.status(), IsOk());
-  RsaSsaPkcs1PrivateKey key = key_or.ValueOrDie();
+  RsaSsaPkcs1PrivateKey key = key_or.value();
 
   auto signer_or = RsaSsaPkcs1SignKeyManager().GetPrimitive<PublicKeySign>(key);
   ASSERT_THAT(signer_or.status(), IsOk());
@@ -257,8 +254,8 @@ TEST(EcdsaSignKeyManagerTest, Create) {
   ASSERT_THAT(direct_verifier_or.status(), IsOk());
 
   std::string message = "Some message";
-  EXPECT_THAT(direct_verifier_or.ValueOrDie()->Verify(
-                  signer_or.ValueOrDie()->Sign(message).ValueOrDie(), message),
+  EXPECT_THAT(direct_verifier_or.value()->Verify(
+                  signer_or.value()->Sign(message).value(), message),
               IsOk());
 }
 

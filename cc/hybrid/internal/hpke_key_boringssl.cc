@@ -41,7 +41,7 @@ util::StatusOr<std::unique_ptr<HpkeKeyBoringSsl>> HpkeKeyBoringSsl::New(
   if (!status.ok()) {
     return status;
   }
-  return hpke_key;
+  return std::move(hpke_key);
 }
 
 util::Status HpkeKeyBoringSsl::Init(absl::string_view recipient_private_key) {

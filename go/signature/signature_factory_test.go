@@ -52,40 +52,71 @@ func TestSignerVerifyFactory(t *testing.T) {
 	privKeysetHandle, _ := testkeyset.NewHandle(privKeyset)
 	pubKeys := []*tinkpb.Keyset_Key{tinkPub, legacyPub, rawPub, crunchyPub}
 	pubKeyset := testutil.NewKeyset(pubKeys[0].KeyId, pubKeys)
-	pubKeysetHandle, _ := testkeyset.NewHandle(pubKeyset)
-
+	pubKeysetHandle, err := testkeyset.NewHandle(pubKeyset)
+	if err != nil {
+		t.Fatalf("testkeyset.NewHandle(pubKeyset) err = %v, want nil", err)
+	}
 	// sign some random data
 	signer, err := signature.NewSigner(privKeysetHandle)
 	if err != nil {
-		t.Errorf("getting sign primitive failed: %s", err)
+		t.Fatalf("signature.NewSigner(privKeysetHandle) err = %v, want nil", err)
 	}
 	data := random.GetRandomBytes(1211)
 	sig, err := signer.Sign(data)
 	if err != nil {
-		t.Errorf("signing failed: %s", err)
+		t.Fatalf("signer.Sign(data) err = %v, want nil", err)
 	}
 	// verify with the same set of public keys should work
 	verifier, err := signature.NewVerifier(pubKeysetHandle)
 	if err != nil {
-		t.Errorf("getting verify primitive failed: %s", err)
+		t.Fatalf("signature.NewVerifier(pubKeysetHandle) err = %v, want nil", err)
 	}
 	if err := verifier.Verify(sig, data); err != nil {
-		t.Errorf("verification failed: %s", err)
+		t.Errorf("verifier.Verify(sig, data) = %v, want nil", err)
 	}
-	// verify with random key should fail
-	_, randomPub := newECDSAKeysetKeypair(commonpb.HashType_SHA512,
+	// verify with other key should fail
+	_, otherPub := newECDSAKeysetKeypair(commonpb.HashType_SHA512,
 		commonpb.EllipticCurveType_NIST_P521,
 		tinkpb.OutputPrefixType_TINK,
 		1)
-	pubKeys = []*tinkpb.Keyset_Key{randomPub}
-	pubKeyset = testutil.NewKeyset(pubKeys[0].KeyId, pubKeys)
-	pubKeysetHandle, _ = testkeyset.NewHandle(pubKeyset)
-	verifier, err = signature.NewVerifier(pubKeysetHandle)
+	otherPubKeys := []*tinkpb.Keyset_Key{otherPub}
+	otherPubKeyset := testutil.NewKeyset(otherPubKeys[0].KeyId, otherPubKeys)
+	otherPubKeysetHandle, err := testkeyset.NewHandle(otherPubKeyset)
 	if err != nil {
-		t.Errorf("getting verify primitive failed: %s", err)
+		t.Fatalf("testkeyset.NewHandle(otherPubKeyset) err = %v, want nil", err)
 	}
-	if err = verifier.Verify(sig, data); err == nil {
-		t.Errorf("verification with random key should fail: %s", err)
+	otherVerifier, err := signature.NewVerifier(otherPubKeysetHandle)
+	if err != nil {
+		t.Fatalf("signature.NewVerifier(otherPubKeysetHandle) err = %v, want nil", err)
+	}
+	if err = otherVerifier.Verify(sig, data); err == nil {
+		t.Error("otherVerifier.Verify(sig, data) = nil, want not nil")
+	}
+}
+
+func TestPrimitiveFactoryFailsWhenKeysetHasNoPrimary(t *testing.T) {
+	privateKey, _ := newECDSAKeysetKeypair(commonpb.HashType_SHA512,
+		commonpb.EllipticCurveType_NIST_P521,
+		tinkpb.OutputPrefixType_TINK,
+		1)
+	privateKeysetWithoutPrimary := &tinkpb.Keyset{
+		Key: []*tinkpb.Keyset_Key{privateKey},
+	}
+	privateHandleWithoutPrimary, err := testkeyset.NewHandle(privateKeysetWithoutPrimary)
+	if err != nil {
+		t.Fatalf("testkeyset.NewHandle(privateKeysetWithoutPrimary) err = %v, want nil", err)
+	}
+	publicHandleWithoutPrimary, err := privateHandleWithoutPrimary.Public()
+	if err != nil {
+		t.Fatalf("privateHandleWithoutPrimary.Public() err = %v, want nil", err)
+	}
+
+	if _, err = signature.NewSigner(privateHandleWithoutPrimary); err == nil {
+		t.Errorf("signature.NewSigner(privateHandleWithoutPrimary) err = nil, want not nil")
+	}
+
+	if _, err = signature.NewVerifier(publicHandleWithoutPrimary); err == nil {
+		t.Errorf("signature.NewVerifier(publicHandleWithoutPrimary) err = nil, want not nil")
 	}
 }
 
@@ -111,38 +142,38 @@ func newECDSAKeysetKeypair(hashType commonpb.HashType,
 func TestFactoryWithInvalidPrimitiveSetType(t *testing.T) {
 	wrongKH, err := keyset.NewHandle(mac.HMACSHA256Tag128KeyTemplate())
 	if err != nil {
-		t.Fatalf("failed to build *keyset.Handle: %s", err)
+		t.Fatalf("keyset.NewHandle(mac.HMACSHA256Tag128KeyTemplate()) err = %v, want nil", err)
 	}
 
 	_, err = signature.NewSigner(wrongKH)
 	if err == nil {
-		t.Error("calling NewSigner() with wrong *keyset.Handle should fail")
+		t.Error("signature.NewSigner(wrongKH) err = nil, want not nil")
 	}
 
 	_, err = signature.NewVerifier(wrongKH)
 	if err == nil {
-		t.Error("calling NewVerifier() with wrong *keyset.Handle should fail")
+		t.Error("signature.NewVerifier(wrongKH) err = nil, want not nil")
 	}
 }
 
 func TestFactoryWithValidPrimitiveSetType(t *testing.T) {
 	goodKH, err := keyset.NewHandle(signature.ECDSAP256KeyTemplate())
 	if err != nil {
-		t.Fatalf("failed to build *keyset.Handle: %s", err)
+		t.Fatalf("keyset.NewHandle(signature.ECDSAP256KeyTemplate()) err = %v, want nil", err)
 	}
 
 	_, err = signature.NewSigner(goodKH)
 	if err != nil {
-		t.Errorf("calling NewSigner() with good *keyset.Handle failed: %s", err)
+		t.Fatalf("signature.NewSigner(goodKH) err = %v, want nil", err)
 	}
 
 	goodPublicKH, err := goodKH.Public()
 	if err != nil {
-		t.Errorf("failed to get public key: %s", err)
+		t.Fatalf("goodKH.Public() err = %v, want nil", err)
 	}
 
 	_, err = signature.NewVerifier(goodPublicKH)
 	if err != nil {
-		t.Errorf("calling NewVerifier() with good *keyset.Handle failed: %s", err)
+		t.Errorf("signature.NewVerifier(goodPublicKH) err = %v, want nil", err)
 	}
 }

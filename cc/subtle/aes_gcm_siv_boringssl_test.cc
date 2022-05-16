@@ -29,7 +29,6 @@
 #include "tink/internal/ssl_util.h"
 #include "tink/subtle/subtle_util.h"
 #include "tink/util/secret_data.h"
-#include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "tink/util/test_matchers.h"
 
@@ -41,7 +40,7 @@ namespace {
 constexpr absl::string_view kKey256Hex =
     "000102030405060708090a0b0c0d0e0f000102030405060708090a0b0c0d0e0f";
 constexpr absl::string_view kMessage = "Some data to encrypt.";
-constexpr absl::string_view kAdditionalData = "Some data to authenticate.";
+constexpr absl::string_view kAssociatedData = "Some data to authenticate.";
 
 constexpr int kIvSizeInBytes = 12;
 constexpr int kTagSizeInBytes = 16;
@@ -50,7 +49,6 @@ using ::crypto::tink::test::IsOk;
 using ::crypto::tink::test::StatusIs;
 using ::testing::AllOf;
 using ::testing::Eq;
-using ::testing::IsEmpty;
 using ::testing::Not;
 using ::testing::SizeIs;
 using ::testing::TestWithParam;
@@ -71,12 +69,12 @@ TEST(AesGcmSivBoringSslTest, EncryptDecrypt) {
     ASSERT_THAT(aead.status(), IsOk());
 
     util::StatusOr<std::string> ciphertext =
-        (*aead)->Encrypt(kMessage, kAdditionalData);
+        (*aead)->Encrypt(kMessage, kAssociatedData);
     ASSERT_THAT(ciphertext.status(), IsOk());
     EXPECT_THAT(*ciphertext,
                 SizeIs(kMessage.size() + kIvSizeInBytes + kTagSizeInBytes));
     util::StatusOr<std::string> plaintext =
-        (*aead)->Decrypt(*ciphertext, kAdditionalData);
+        (*aead)->Decrypt(*ciphertext, kAssociatedData);
     ASSERT_THAT(plaintext.status(), IsOk());
     EXPECT_EQ(*plaintext, kMessage);
   }
@@ -98,7 +96,7 @@ TEST(AesGcmSivBoringSslTest, DecryptFailsIfCiphertextTooSmall) {
   for (int i = 1; i < kIvSizeInBytes + kTagSizeInBytes; i++) {
     std::string ciphertext;
     ResizeStringUninitialized(&ciphertext, i);
-    EXPECT_THAT((*aead)->Decrypt(ciphertext, kAdditionalData).status(),
+    EXPECT_THAT((*aead)->Decrypt(ciphertext, kAssociatedData).status(),
                 StatusIs(absl::StatusCode::kInvalidArgument));
   }
 }

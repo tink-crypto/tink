@@ -23,6 +23,7 @@ SIGN_CLI="$1"
 GEN_PUBLIC_JWK_SET_CLI="$2"
 VERIFY_CLI="$3"
 PRIVATE_KEYSET_PATH="$4"
+PUBLIC_KEYSET_PATH="$5"
 
 AUDIENCE="audience"
 TOKEN_PATH="${TEST_TMPDIR}/token.txt"
@@ -53,7 +54,7 @@ print_test "generate_token"
 
 # Generate a signed token
 test_command ${SIGN_CLI} \
-  --keyset_path "${PRIVATE_KEYSET_PATH}" \
+  --private_keyset_path "${PRIVATE_KEYSET_PATH}" \
   --audience "${AUDIENCE}" \
   --token_path "${TOKEN_PATH}"
 
@@ -66,11 +67,28 @@ fi
 
 #############################################################################
 
-print_test "generate_public_keyset"
+print_test "verification_with_public_keyset"
+
+# Verify the token
+test_command ${VERIFY_CLI} \
+  --public_keyset_path "${PUBLIC_KEYSET_PATH}" \
+  --audience "${AUDIENCE}" \
+  --token_path "${TOKEN_PATH}"
+
+if (( TEST_STATUS == 0 )); then
+  echo "+++ Success: Verification passed for a valid token."
+else
+  echo "--- Failure: Verification failed for a valid token."
+  exit 1
+fi
+
+#############################################################################
+
+print_test "generate_public_jwk_set"
 
 # Generate the public keyset in JWK format
 test_command ${GEN_PUBLIC_JWK_SET_CLI} \
-  --keyset_path "${PRIVATE_KEYSET_PATH}" \
+  --public_keyset_path "${PUBLIC_KEYSET_PATH}" \
   --public_jwk_set_path "${PUBLIC_JWK_SET_PATH}"
 
 if (( TEST_STATUS == 0 )); then
@@ -82,7 +100,7 @@ fi
 
 #############################################################################
 
-print_test "normal_verification"
+print_test "verification_with_public_jwt_set"
 
 # Verify the token
 test_command ${VERIFY_CLI} \
@@ -147,7 +165,7 @@ TOKEN2_PATH="${TEST_TMPDIR}/token2.txt"
 
 # Try to generate a signed token using the public keyset
 test_command ${SIGN_CLI} \
-  --keyset_path "${PUBLIC_JWK_SET_PATH}" \
+  --private_keyset_path "${PUBLIC_JWK_SET_PATH}" \
   --audience "${AUDIENCE}" \
   --token_path "${TOKEN2_PATH} "
 

@@ -17,7 +17,7 @@
 package subtle_test
 
 var chaCha20Poly1305Tests = []struct {
-	plaintext, aad, key, nonce, out string
+	plaintext, associatedData, key, nonce, out string
 }{
 	{
 		"",

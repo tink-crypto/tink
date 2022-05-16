@@ -80,12 +80,9 @@ public final class Commands {
       Aead aead = handle.getPrimitive(Aead.class);
       // 3. Do crypto. It's that simple!
       byte[] plaintext = Files.readAllBytes(inFile.toPath());
-      byte[] ciphertext = aead.encrypt(plaintext, new byte[0] /* additionalData */);
-      FileOutputStream stream = new FileOutputStream(outFile);
-      try {
+      byte[] ciphertext = aead.encrypt(plaintext, new byte[0] /* associatedData */);
+      try (FileOutputStream stream = new FileOutputStream(outFile)) {
         stream.write(ciphertext);
-      } finally {
-        stream.close();
       }
     }
   }
@@ -99,12 +96,9 @@ public final class Commands {
       KeysetHandle handle = getKeysetHandle(keyset);
       Aead aead = handle.getPrimitive(Aead.class);
       byte[] ciphertext = Files.readAllBytes(inFile.toPath());
-      byte[] plaintext = aead.decrypt(ciphertext, new byte[0] /* additionalData */);
-      FileOutputStream stream = new FileOutputStream(outFile);
-      try {
+      byte[] plaintext = aead.decrypt(ciphertext, new byte[0] /* associatedData */);
+      try (FileOutputStream stream = new FileOutputStream(outFile)) {
         stream.write(plaintext);
-      } finally {
-        stream.close();
       }
     }
   }

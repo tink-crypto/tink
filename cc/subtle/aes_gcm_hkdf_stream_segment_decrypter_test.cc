@@ -17,8 +17,10 @@
 #include "tink/subtle/aes_gcm_hkdf_stream_segment_decrypter.h"
 
 #include <string>
+#include <utility>
 #include <vector>
 
+#include "gtest/gtest.h"
 #include "absl/strings/str_cat.h"
 #include "tink/subtle/aes_gcm_hkdf_stream_segment_encrypter.h"
 #include "tink/subtle/common_enums.h"
@@ -28,7 +30,6 @@
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "tink/util/test_util.h"
-#include "gtest/gtest.h"
 
 namespace crypto {
 namespace tink {
@@ -45,7 +46,7 @@ util::StatusOr<std::unique_ptr<StreamSegmentEncrypter>> GetEncrypter(
       hkdf_hash, ikm, params.salt, associated_data,
       derived_key_size);
   if (!hkdf_result.ok()) return hkdf_result.status();
-  params.key = hkdf_result.ValueOrDie();
+  params.key = hkdf_result.value();
   params.ciphertext_offset = ciphertext_offset;
   params.ciphertext_segment_size = ciphertext_segment_size;
   return AesGcmHkdfStreamSegmentEncrypter::New(params);
@@ -78,7 +79,7 @@ TEST(AesGcmHkdfStreamSegmentDecrypterTest, testBasic) {
               params.associated_data = associated_data;
               auto result = AesGcmHkdfStreamSegmentDecrypter::New(params);
               EXPECT_TRUE(result.ok()) << result.status();
-              auto dec = std::move(result.ValueOrDie());
+              auto dec = std::move(result.value());
 
               // Try to use the decrypter.
               std::vector<uint8_t> pt;
@@ -89,10 +90,11 @@ TEST(AesGcmHkdfStreamSegmentDecrypterTest, testBasic) {
                                   std::string(status.message()));
 
               // Get an encrypter and initialize the decrypter.
-              auto enc = std::move(
-                  GetEncrypter(params.ikm, hkdf_hash, derived_key_size,
-                               ciphertext_offset, ct_segment_size,
-                               associated_data).ValueOrDie());
+              auto enc =
+                  std::move(GetEncrypter(params.ikm, hkdf_hash,
+                                         derived_key_size, ciphertext_offset,
+                                         ct_segment_size, associated_data)
+                                .value());
               status = dec->Init(enc->get_header());
               EXPECT_TRUE(status.ok()) << status;
 

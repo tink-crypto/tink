@@ -18,6 +18,7 @@
 
 #include <iostream>
 #include <istream>
+#include <memory>
 #include <sstream>
 #include <utility>
 

@@ -16,6 +16,8 @@
 
 #include "tink/core/key_manager_impl.h"
 
+#include <memory>
+#include <sstream>
 #include <string>
 
 #include "gmock/gmock.h"
@@ -126,7 +128,7 @@ TEST(KeyManagerImplTest, FactoryNewKeyFromMessage) {
 
   AesGcmKeyFormat key_format;
   key_format.set_key_size(16);
-  auto key = key_manager->get_key_factory().NewKey(key_format).ValueOrDie();
+  auto key = key_manager->get_key_factory().NewKey(key_format).value();
 
   EXPECT_THAT(dynamic_cast<AesGcmKey&>(*key).key_value(), SizeIs(16));
 }
@@ -140,7 +142,7 @@ TEST(KeyManagerImplTest, FactoryNewKeyFromStringView) {
   key_format.set_key_size(16);
   auto key = key_manager->get_key_factory()
                  .NewKey(key_format.SerializeAsString())
-                 .ValueOrDie();
+                 .value();
 
   EXPECT_THAT(dynamic_cast<AesGcmKey&>(*key).key_value(), SizeIs(16));
 }
@@ -154,7 +156,7 @@ TEST(KeyManagerImplTest, FactoryNewKeyFromKeyData) {
   key_format.set_key_size(16);
   auto key_data = *key_manager->get_key_factory()
                        .NewKeyData(key_format.SerializeAsString())
-                       .ValueOrDie();
+                       .value();
 
   AesGcmKey key;
   key.ParseFromString(key_data.value());
@@ -221,9 +223,9 @@ TEST(CreateDeriverFunctionForTest, KeyMaterialAndKeyType) {
   key_format.set_key_size(16);
   auto key_or = deriver(key_format.SerializeAsString(), nullptr);
   ASSERT_THAT(key_or.status(), IsOk());
-  EXPECT_THAT(key_or.ValueOrDie().key_material_type(),
+  EXPECT_THAT(key_or.value().key_material_type(),
               Eq(ExampleKeyTypeManager().key_material_type()));
-  EXPECT_THAT(key_or.ValueOrDie().type_url(),
+  EXPECT_THAT(key_or.value().type_url(),
               Eq(ExampleKeyTypeManager().get_key_type()));
 }
 
@@ -242,14 +244,14 @@ TEST(CreateDeriverFunctionForTest, UseParametersAndReturnValue) {
           return bytes_or.status();
         }
         AesGcmKey key;
-        key.set_key_value(bytes_or.ValueOrDie());
+        key.set_key_value(bytes_or.value());
         return key;
       });
 
   auto deriver = CreateDeriverFunctionFor(&internal_km);
   auto key_or = deriver(key_format.SerializeAsString(), &input_stream);
   AesGcmKey result;
-  result.ParseFromString(key_or.ValueOrDie().value());
+  result.ParseFromString(key_or.value().value());
   // Length 9 prefix of the above string.
   EXPECT_THAT(result.key_value(), Eq("012345678"));
 }
@@ -297,11 +299,11 @@ TEST(KeyManagerImplTest, GetPrimitiveAead) {
 
   auto key_data = *key_manager->get_key_factory()
                        .NewKeyData(key_format.SerializeAsString())
-                       .ValueOrDie();
+                       .value();
 
-  auto aead = key_manager->GetPrimitive(key_data).ValueOrDie();
-  std::string encryption = aead->Encrypt("Hi", "aad").ValueOrDie();
-  std::string decryption = aead->Decrypt(encryption, "aad").ValueOrDie();
+  auto aead = key_manager->GetPrimitive(key_data).value();
+  std::string encryption = aead->Encrypt("Hi", "aad").value();
+  std::string decryption = aead->Decrypt(encryption, "aad").value();
   EXPECT_THAT(decryption, Eq("Hi"));
 }
 
@@ -314,11 +316,11 @@ TEST(KeyManagerImplTest, GetPrimitiveAeadVariant) {
   key_format.set_key_size(16);
   auto key_data = *key_manager->get_key_factory()
                        .NewKeyData(key_format.SerializeAsString())
-                       .ValueOrDie();
+                       .value();
 
   AesGcmKey key;
   key.ParseFromString(key_data.value());
-  auto aead_variant = key_manager->GetPrimitive(key_data).ValueOrDie();
+  auto aead_variant = key_manager->GetPrimitive(key_data).value();
   EXPECT_THAT(aead_variant->get(), Eq(key.key_value()));
 }
 
@@ -331,11 +333,11 @@ TEST(KeyManagerImplTest, GetPrimitiveFromKey) {
   key_format.set_key_size(16);
   auto key = key_manager->get_key_factory()
                  .NewKey(key_format.SerializeAsString())
-                 .ValueOrDie();
+                 .value();
 
-  auto aead = key_manager->GetPrimitive(*key).ValueOrDie();
-  std::string encryption = aead->Encrypt("Hi", "aad").ValueOrDie();
-  std::string decryption = aead->Decrypt(encryption, "aad").ValueOrDie();
+  auto aead = key_manager->GetPrimitive(*key).value();
+  std::string encryption = aead->Encrypt("Hi", "aad").value();
+  std::string decryption = aead->Decrypt(encryption, "aad").value();
   EXPECT_THAT(decryption, Eq("Hi"));
 }
 
@@ -375,7 +377,7 @@ TEST(KeyManagerImplTest, GetPrimitiveCallsValidate) {
   key_format.set_key_size(16);
   auto key_data = *key_manager->get_key_factory()
                        .NewKeyData(key_format.SerializeAsString())
-                       .ValueOrDie();
+                       .value();
 
   AesGcmKey key;
   key.ParseFromString(key_data.value());
@@ -397,7 +399,7 @@ TEST(KeyManagerImplTest, GetPrimitiveFromKeyCallsValidate) {
   key_format.set_key_size(16);
   auto key_data = *key_manager->get_key_factory()
                        .NewKeyData(key_format.SerializeAsString())
-                       .ValueOrDie();
+                       .value();
 
   AesGcmKey key;
   key.ParseFromString(key_data.value());
@@ -423,7 +425,7 @@ TEST(KeyManagerImplTest, GetPrimitiveFails) {
   key_format.set_key_size(16);
   auto key_data = *key_manager->get_key_factory()
                        .NewKeyData(key_format.SerializeAsString())
-                       .ValueOrDie();
+                       .value();
 
   EXPECT_THAT(key_manager->GetPrimitive(key_data).status(),
               StatusIs(absl::StatusCode::kInvalidArgument,
@@ -486,13 +488,13 @@ TEST(KeyManagerImplTest, GetPrimitiveWithoutFactoryAead) {
   AesGcmKeyFormat key_format;
   key_format.set_key_size(16);
 
-  KeyData key_data = test::AsKeyData(
-      ExampleKeyTypeManager().CreateKey(key_format).ValueOrDie(),
-      KeyData::SYMMETRIC);
+  KeyData key_data =
+      test::AsKeyData(ExampleKeyTypeManager().CreateKey(key_format).value(),
+                      KeyData::SYMMETRIC);
 
-  auto aead = key_manager->GetPrimitive(key_data).ValueOrDie();
-  std::string encryption = aead->Encrypt("Hi", "aad").ValueOrDie();
-  std::string decryption = aead->Decrypt(encryption, "aad").ValueOrDie();
+  auto aead = key_manager->GetPrimitive(key_data).value();
+  std::string encryption = aead->Encrypt("Hi", "aad").value();
+  std::string decryption = aead->Decrypt(encryption, "aad").value();
   EXPECT_THAT(decryption, Eq("Hi"));
 }
 

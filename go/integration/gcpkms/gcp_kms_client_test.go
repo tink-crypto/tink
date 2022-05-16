@@ -14,20 +14,21 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-package gcpkms
+package gcpkms_test
 
 import (
 	"log"
 
 	"github.com/google/tink/go/aead"
 	"github.com/google/tink/go/core/registry"
+	"github.com/google/tink/go/integration/gcpkms"
 	"github.com/google/tink/go/keyset"
 )
 
 func Example() {
 	const keyURI = "gcp-kms://......"
 
-	gcpclient, err := NewClientWithCredentials(keyURI, "/mysecurestorage/credentials.json")
+	gcpclient, err := gcpkms.NewClientWithCredentials(keyURI, "/mysecurestorage/credentials.json")
 	if err != nil {
 		log.Fatal(err)
 	}

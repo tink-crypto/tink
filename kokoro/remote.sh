@@ -30,9 +30,7 @@ if [[ -n "${KOKORO_ROOT}" ]]; then
   rm -f ~/.bazelrc
 
   use_bazel.sh $(cat .bazelversion)
-
-  ./kokoro/copy_credentials.sh
-  ./kokoro/update_android_sdk.sh
+  ./kokoro/testutils/update_android_sdk.sh
 fi
 
 echo "Using bazel binary: $(which bazel)"
@@ -60,79 +58,51 @@ RBE_ARGS=(
   --remote_executor="${KOKORO_FOUNDRY_BACKEND_ADDRESS}"
   --test_env=USER=anon
   --remote_instance_name="${KOKORO_FOUNDRY_PROJECT_ID}/instances/default_instance"
+  --config=remote
 )
 readonly RBE_ARGS
 
-RBE_BAZELRC="$PWD/tools/remote_build_execution/bazel-rbe.bazelrc"
-echo "RBE_BAZELRC: $RBE_BAZELRC"
+RBE_BAZELRC="${PWD}/tools/remote_build_execution/bazel-rbe.bazelrc"
+echo "RBE_BAZELRC: ${RBE_BAZELRC}"
 
 # TODO(b/141297103): enable Python
 # TODO(b/143102587): enable Javascript
 
-# Build and test C++.
-cd cc/
-time bazel --bazelrc="$RBE_BAZELRC" \
-  build "${RBE_ARGS[@]}" \
-  --config=remote \
-  --build_tag_filters=-no_rbe \
-  -- ...
+#######################################
+# Builds and runs unit test within the given Tink workspace.
+#
+# Arguments:
+#   workspace directory path relative to the Tink root.
+#######################################
+build_and_run_tests() {
+  local workspace_dir="${1}"
+  (
+    cd "${workspace_dir}"
 
-time bazel --bazelrc="$RBE_BAZELRC" \
-  test "${RBE_ARGS[@]}" \
-  --config=remote \
-  --test_output=errors \
-  --test_tag_filters=-no_rbe \
-  --jvmopt=-Drbe=1 \
-  -- ...
+    time bazel --bazelrc="${RBE_BAZELRC}" \
+      build "${RBE_ARGS[@]}" \
+      --build_tag_filters=-no_rbe \
+      -- ...
 
-# Build and test Java.
-cd ../java_src
-time bazel --bazelrc="$RBE_BAZELRC" \
-  build "${RBE_ARGS[@]}" \
-  --config=remote \
-  --build_tag_filters=-no_rbe \
-  -- ...
+    time bazel --bazelrc="${RBE_BAZELRC}" \
+      test "${RBE_ARGS[@]}" \
+      --test_output=errors \
+      --test_tag_filters=-no_rbe \
+      --jvmopt=-Drbe=1 \
+      -- ...
+  )
+}
 
-time bazel --bazelrc="$RBE_BAZELRC" \
-  test "${RBE_ARGS[@]}" \
-  --config=remote \
-  --test_output=errors \
-  --test_tag_filters=-no_rbe \
-  --jvmopt=-Drbe=1 \
-  -- ...
-
-# Build and test Go.
-cd ../go
-time bazel --bazelrc="$RBE_BAZELRC" \
-  build "${RBE_ARGS[@]}" \
-  --config=remote \
-  --build_tag_filters=-no_rbe \
-  -- ...
-
-time bazel --bazelrc="$RBE_BAZELRC" \
-  test "${RBE_ARGS[@]}" \
-  --config=remote \
-  --test_output=errors \
-  --test_tag_filters=-no_rbe \
-  --jvmopt=-Drbe=1 \
-  -- ...
+# C++.
+build_and_run_tests "cc/"
+# Java.
+build_and_run_tests "java_src/"
+# Go.
+build_and_run_tests "go/"
 
 # TODO(b/141297103): Python causes this to fail on remote
 # # Build tools and run cross-language tests.
-# cd ../tools
-# time bazel --bazelrc="$RBE_BAZELRC" \
-#   build "${RBE_ARGS[@]}" \
-#   --config=remote \
-#   --build_tag_filters=-no_rbe \
-#   -- ...
-#
-# time bazel --bazelrc="$RBE_BAZELRC" \
-#   test "${RBE_ARGS[@]}" \
-#   --config=remote \
-#   --test_output=errors \
-#   --test_tag_filters=-no_rbe \
-#   --jvmopt=-Drbe=1 \
-#   -- ...
+# build_and_run_tests "tools/"
 
 # We don't currently run TypeScript/JavaScript tests remotely because they
 # require libx11-xcb-dev in order to bring up browsers.

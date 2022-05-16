@@ -33,7 +33,7 @@ func TestChaCha20Poly1305EncryptDecrypt(t *testing.T) {
 	for i, test := range chaCha20Poly1305Tests {
 		key, _ := hex.DecodeString(test.key)
 		pt, _ := hex.DecodeString(test.plaintext)
-		aad, _ := hex.DecodeString(test.aad)
+		ad, _ := hex.DecodeString(test.associatedData)
 		nonce, _ := hex.DecodeString(test.nonce)
 		out, _ := hex.DecodeString(test.out)
 
@@ -43,16 +43,16 @@ func TestChaCha20Poly1305EncryptDecrypt(t *testing.T) {
 			continue
 		}
 
-		_, err = ca.Encrypt(pt, aad)
+		_, err = ca.Encrypt(pt, ad)
 		if err != nil {
 			t.Errorf("#%d, unexpected encryption error: %s", i, err)
 			continue
 		}
 
-		var combinedCt []byte
-		combinedCt = append(combinedCt, nonce...)
-		combinedCt = append(combinedCt, out...)
-		if got, err := ca.Decrypt(combinedCt, aad); err != nil {
+		var combinedCT []byte
+		combinedCT = append(combinedCT, nonce...)
+		combinedCT = append(combinedCT, out...)
+		if got, err := ca.Decrypt(combinedCT, ad); err != nil {
 			t.Errorf("#%d, unexpected decryption error: %s", i, err)
 			continue
 		} else if !bytes.Equal(pt, got) {
@@ -64,8 +64,8 @@ func TestChaCha20Poly1305EncryptDecrypt(t *testing.T) {
 
 func TestChaCha20Poly1305EmptyAssociatedData(t *testing.T) {
 	key := random.GetRandomBytes(chacha20poly1305.KeySize)
-	aad := []byte{}
-	badAad := []byte{1, 2, 3}
+	emptyAD := []byte{}
+	badAD := []byte{1, 2, 3}
 
 	ca, err := subtle.NewChaCha20Poly1305(key)
 	if err != nil {
@@ -74,39 +74,39 @@ func TestChaCha20Poly1305EmptyAssociatedData(t *testing.T) {
 
 	for i := 0; i < 75; i++ {
 		pt := random.GetRandomBytes(uint32(i))
-		// Encrpting with aad as a 0-length array
+		// Encrypting with associatedData as a 0-length array
 		{
-			ct, err := ca.Encrypt(pt, aad)
+			ct, err := ca.Encrypt(pt, emptyAD)
 			if err != nil {
-				t.Errorf("Encrypt(%x, %x) failed", pt, aad)
+				t.Errorf("Encrypt(%x, %x) failed", pt, emptyAD)
 				continue
 			}
 
-			if got, err := ca.Decrypt(ct, aad); err != nil || !bytes.Equal(pt, got) {
-				t.Errorf("Decrypt(Encrypt(pt, %x)): plaintext's don't match: got %x vs %x", aad, got, pt)
+			if got, err := ca.Decrypt(ct, emptyAD); err != nil || !bytes.Equal(pt, got) {
+				t.Errorf("Decrypt(Encrypt(pt, %x)): plaintext's don't match: got %x vs %x", emptyAD, got, pt)
 			}
 			if got, err := ca.Decrypt(ct, nil); err != nil || !bytes.Equal(pt, got) {
 				t.Errorf("Decrypt(Encrypt(pt, nil)): plaintext's don't match: got %x vs %x", got, pt)
 			}
-			if _, err := ca.Decrypt(ct, badAad); err == nil {
-				t.Errorf("Decrypt(Encrypt(pt, %x)) = _, nil; want: _, err", badAad)
+			if _, err := ca.Decrypt(ct, badAD); err == nil {
+				t.Errorf("Decrypt(Encrypt(pt, %x)) = _, nil; want: _, err", badAD)
 			}
 		}
-		// Encrpting with aad equal to null
+		// Encrypting with associatedData equal to nil
 		{
 			ct, err := ca.Encrypt(pt, nil)
 			if err != nil {
 				t.Errorf("Encrypt(%x, nil) failed", pt)
 			}
 
-			if got, err := ca.Decrypt(ct, aad); err != nil || !bytes.Equal(pt, got) {
-				t.Errorf("Decrypt(Encrypt(pt, %x)): plaintext's don't match: got %x vs %x; error: %v", aad, got, pt, err)
+			if got, err := ca.Decrypt(ct, emptyAD); err != nil || !bytes.Equal(pt, got) {
+				t.Errorf("Decrypt(Encrypt(pt, %x)): plaintext's don't match: got %x vs %x; error: %v", emptyAD, got, pt, err)
 			}
 			if got, err := ca.Decrypt(ct, nil); err != nil || !bytes.Equal(pt, got) {
 				t.Errorf("Decrypt(Encrypt(pt, nil)): plaintext's don't match: got %x vs %x; error: %v", got, pt, err)
 			}
-			if _, err := ca.Decrypt(ct, badAad); err == nil {
-				t.Errorf("Decrypt(Encrypt(pt, %x)) = _, nil; want: _, err", badAad)
+			if _, err := ca.Decrypt(ct, badAD); err == nil {
+				t.Errorf("Decrypt(Encrypt(pt, %x)) = _, nil; want: _, err", badAD)
 			}
 		}
 	}
@@ -117,7 +117,7 @@ func TestChaCha20Poly1305LongMessages(t *testing.T) {
 	// Encrypts and decrypts messages of size <= 8192.
 	for dataSize <= 1<<24 {
 		pt := random.GetRandomBytes(dataSize)
-		aad := random.GetRandomBytes(dataSize / 3)
+		ad := random.GetRandomBytes(dataSize / 3)
 		key := random.GetRandomBytes(chacha20poly1305.KeySize)
 
 		ca, err := subtle.NewChaCha20Poly1305(key)
@@ -125,14 +125,14 @@ func TestChaCha20Poly1305LongMessages(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		ct, err := ca.Encrypt(pt, aad)
+		ct, err := ca.Encrypt(pt, ad)
 		if err != nil {
-			t.Errorf("Encrypt(%x, %x) failed", pt, aad)
+			t.Errorf("Encrypt(%x, %x) failed", pt, ad)
 			continue
 		}
 
-		if got, err := ca.Decrypt(ct, aad); err != nil || !bytes.Equal(pt, got) {
-			t.Errorf("Decrypt(Encrypt(pt, %x)): plaintext's don't match: got %x vs %x; error: %v", aad, got, pt, err)
+		if got, err := ca.Decrypt(ct, ad); err != nil || !bytes.Equal(pt, got) {
+			t.Errorf("Decrypt(Encrypt(pt, %x)): plaintext's don't match: got %x vs %x; error: %v", ad, got, pt, err)
 		}
 
 		dataSize += 5 * dataSize / 11
@@ -143,32 +143,32 @@ func TestChaCha20Poly1305ModifyCiphertext(t *testing.T) {
 	for i, test := range chaCha20Poly1305Tests {
 		key, _ := hex.DecodeString(test.key)
 		pt, _ := hex.DecodeString(test.plaintext)
-		aad, _ := hex.DecodeString(test.aad)
+		ad, _ := hex.DecodeString(test.associatedData)
 
 		ca, err := subtle.NewChaCha20Poly1305(key)
 		if err != nil {
 			t.Fatal(err)
 		}
 
-		ct, err := ca.Encrypt(pt, aad)
+		ct, err := ca.Encrypt(pt, ad)
 		if err != nil {
 			t.Errorf("#%d: Encrypt failed", i)
 			continue
 		}
 
-		if len(aad) > 0 {
-			alterAadIdx := rand.Intn(len(aad))
-			aad[alterAadIdx] ^= 0x80
-			if _, err := ca.Decrypt(ct, aad); err == nil {
-				t.Errorf("#%d: Decrypt was successful after altering additional data", i)
+		if len(ad) > 0 {
+			alteredIndex := rand.Intn(len(ad))
+			ad[alteredIndex] ^= 0x80
+			if _, err := ca.Decrypt(ct, ad); err == nil {
+				t.Errorf("#%d: Decrypt was successful after altering associated data", i)
 				continue
 			}
-			aad[alterAadIdx] ^= 0x80
+			ad[alteredIndex] ^= 0x80
 		}
 
 		alterCtIdx := rand.Intn(len(ct))
 		ct[alterCtIdx] ^= 0x80
-		if _, err := ca.Decrypt(ct, aad); err == nil {
+		if _, err := ca.Decrypt(ct, ad); err == nil {
 			t.Errorf("#%d: Decrypt was successful after altering ciphertext", i)
 			continue
 		}
@@ -186,9 +186,9 @@ func TestChaCha20Poly1305RandomNonce(t *testing.T) {
 	}
 
 	cts := make(map[string]bool)
-	pt, aad := []byte{}, []byte{}
+	pt, ad := []byte{}, []byte{}
 	for i := 0; i < 1<<10; i++ {
-		ct, err := ca.Encrypt(pt, aad)
+		ct, err := ca.Encrypt(pt, ad)
 		ctHex := hex.EncodeToString(ct)
 		if err != nil || cts[ctHex] {
 			t.Errorf("TestRandomNonce failed: %v", err)
@@ -220,10 +220,10 @@ func TestChaCha20Poly1305WycheproofCases(t *testing.T) {
 }
 
 func runChaCha20Poly1305WycheproofCase(t *testing.T, tc *AEADCase) {
-	var combinedCt []byte
-	combinedCt = append(combinedCt, tc.Iv...)
-	combinedCt = append(combinedCt, tc.Ct...)
-	combinedCt = append(combinedCt, tc.Tag...)
+	var combinedCT []byte
+	combinedCT = append(combinedCT, tc.Iv...)
+	combinedCT = append(combinedCT, tc.Ct...)
+	combinedCT = append(combinedCT, tc.Tag...)
 
 	ca, err := subtle.NewChaCha20Poly1305(tc.Key)
 	if err != nil {
@@ -235,7 +235,7 @@ func runChaCha20Poly1305WycheproofCase(t *testing.T, tc *AEADCase) {
 		t.Fatalf("unexpected encryption error: %s", err)
 	}
 
-	decrypted, err := ca.Decrypt(combinedCt, tc.Aad)
+	decrypted, err := ca.Decrypt(combinedCT, tc.Aad)
 	if err != nil {
 		if tc.Result == "valid" {
 			t.Errorf("unexpected error: %s", err)

@@ -39,7 +39,7 @@ namespace {
 util::Status ReadAll(RandomAccessStream* ra_stream, int chunk_size,
                      std::string* contents) {
   contents->clear();
-  auto buffer = std::move(util::Buffer::New(chunk_size).ValueOrDie());
+  auto buffer = std::move(util::Buffer::New(chunk_size).value());
   int64_t position = 0;
   auto status = ra_stream->PRead(position, chunk_size, buffer.get());
   while (status.ok()) {
@@ -69,7 +69,7 @@ TEST(SharedRandomAccessStreamTest, ReadingStreams) {
     EXPECT_EQ(absl::StatusCode::kOutOfRange, status.code());
     EXPECT_EQ("EOF", status.message());
     EXPECT_EQ(file_contents, stream_contents);
-    EXPECT_EQ(stream_size, shared_stream.size().ValueOrDie());
+    EXPECT_EQ(stream_size, shared_stream.size().value());
   }
 }
 

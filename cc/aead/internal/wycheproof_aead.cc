@@ -15,6 +15,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include "tink/aead/internal/wycheproof_aead.h"
 
+#include <memory>
 #include <string>
 #include <vector>
 

@@ -26,8 +26,10 @@ class MacKeyTemplatesTest(parameterized.TestCase):
   def test_create_hmac_key_template(self):
     # Intentionally using "weird" or invalid values for parameters,
     # to test that the function correctly puts them in the resulting template.
-    template = mac.mac_key_templates.create_hmac_key_template(
-        key_size=42, tag_size=24, hash_type=common_pb2.SHA512)
+    template = None
+    with self.assertWarns(DeprecationWarning):
+      template = mac.mac_key_templates.create_hmac_key_template(
+          key_size=42, tag_size=24, hash_type=common_pb2.SHA512)
     self.assertEqual('type.googleapis.com/google.crypto.tink.HmacKey',
                      template.type_url)
     self.assertEqual(tink_pb2.TINK, template.output_prefix_type)
@@ -36,6 +38,13 @@ class MacKeyTemplatesTest(parameterized.TestCase):
     self.assertEqual(24, key_format.params.tag_size)
     self.assertEqual(common_pb2.SHA512, key_format.params.hash)
 
+  def test_create_aes_cmac_key_template(self):
+    template = None
+    with self.assertWarns(DeprecationWarning):
+      template = mac.mac_key_templates.create_aes_cmac_key_template(
+          key_size=42, tag_size=24)
+    self.assertEqual('type.googleapis.com/google.crypto.tink.AesCmacKey',
+                     template.type_url)
 
 if __name__ == '__main__':
   absltest.main()

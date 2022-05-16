@@ -20,6 +20,7 @@ import com.google.crypto.tink.config.internal.TinkFipsUtil;
 import com.google.crypto.tink.subtle.EngineFactory;
 import com.google.crypto.tink.subtle.SubtleUtil;
 import com.google.crypto.tink.subtle.Validators;
+import java.nio.ByteBuffer;
 import java.security.GeneralSecurityException;
 import java.security.spec.AlgorithmParameterSpec;
 import javax.crypto.Cipher;
@@ -121,8 +122,14 @@ public final class InsecureNonceAesGcmJce {
     if (iv.length != IV_SIZE_IN_BYTES) {
       throw new GeneralSecurityException("iv is wrong size");
     }
-    if (ciphertext.length < TAG_SIZE_IN_BYTES) {
+    int minimumCiphertextLength =
+        prependIv ? IV_SIZE_IN_BYTES + TAG_SIZE_IN_BYTES : TAG_SIZE_IN_BYTES;
+    if (ciphertext.length < minimumCiphertextLength) {
       throw new GeneralSecurityException("ciphertext too short");
+    }
+    if (prependIv
+        && !ByteBuffer.wrap(iv).equals(ByteBuffer.wrap(ciphertext, 0, IV_SIZE_IN_BYTES))) {
+      throw new GeneralSecurityException("iv does not match prepended iv");
     }
 
     AlgorithmParameterSpec params = getParams(iv);

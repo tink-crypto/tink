@@ -500,6 +500,24 @@ class JwtTest(parameterized.TestCase):
       jwt_mac.verify_mac_and_decode(token, EMPTY_VALIDATOR)
 
   @parameterized.parameters(SUPPORTED_LANGUAGES)
+  def test_verify_token_with_utf_16_encoded_payload_fails(self, lang):
+    token = generate_token_from_bytes('{"alg":"HS256"}'.encode('utf-8'),
+                                      '{"iss":"joe"}'.encode('utf-16'))
+    jwt_mac = testing_servers.jwt_mac(lang, KEYSET)
+
+    with self.assertRaises(tink.TinkError):
+      jwt_mac.verify_mac_and_decode(token, EMPTY_VALIDATOR)
+
+  @parameterized.parameters(SUPPORTED_LANGUAGES)
+  def test_verify_token_with_utf_32_encoded_payload_fails(self, lang):
+    token = generate_token_from_bytes('{"alg":"HS256"}'.encode('utf-8'),
+                                      '{"iss":"joe"}'.encode('utf-32'))
+    jwt_mac = testing_servers.jwt_mac(lang, KEYSET)
+
+    with self.assertRaises(tink.TinkError):
+      jwt_mac.verify_mac_and_decode(token, EMPTY_VALIDATOR)
+
+  @parameterized.parameters(SUPPORTED_LANGUAGES)
   def test_verify_token_with_many_recursions(self, lang):
     num_recursions = 10
     payload = ('{"a":' * num_recursions) + '""' + ('}' * num_recursions)
@@ -509,6 +527,8 @@ class JwtTest(parameterized.TestCase):
 
   @parameterized.parameters(SUPPORTED_LANGUAGES)
   def test_verify_token_with_too_many_recursions_fails(self, lang):
+    # TODO(b/220810178): enable test for golang once depth limit is enabled.
+    if lang == 'go': return
     # num_recursions has been chosen such that parsing of this token fails
     # in all languages. We want to make sure that the algorithm does not
     # hang or crash in this case, but only returns a parsing error.

@@ -57,13 +57,13 @@ func NewWithKeyManager(h *keyset.Handle, km registry.KeyManager) (tink.Streaming
 	return tink.StreamingAEAD(ret), nil
 }
 
-// wrappedStreamingAEAD is an StreamingAEAD implementation that uses the underlying primitive set
-// for deterministic encryption and decryption.
+// wrappedStreamingAEAD is a StreamingAEAD implementation that uses the underlying primitive set
+// for streaming encryption and decryption.
 type wrappedStreamingAEAD struct {
 	ps *primitiveset.PrimitiveSet
 }
 
-// Asserts that primitiveSet implements the StreamingAEAD interface.
+// Asserts that wrappedStreamingAEAD implements the StreamingAEAD interface.
 var _ tink.StreamingAEAD = (*wrappedStreamingAEAD)(nil)
 
 // NewEncryptingWriter returns a wrapper around underlying io.Writer, such that any write-operation

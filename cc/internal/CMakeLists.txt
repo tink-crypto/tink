@@ -13,6 +13,7 @@ tink_cc_library(
   SRCS
     keyset_wrapper.h
   DEPS
+    absl::flat_hash_map
     tink::util::statusor
     tink::proto::tink_cc_proto
 )
@@ -42,6 +43,7 @@ tink_cc_library(
   DEPS
     tink::internal::key_info
     tink::internal::keyset_wrapper
+    absl::flat_hash_map
     tink::core::primitive_set
     tink::core::primitive_wrapper
     tink::util::statusor
@@ -99,6 +101,7 @@ tink_cc_library(
     tink::core::key_manager
     tink::core::primitive_set
     tink::core::primitive_wrapper
+    tink::monitoring::monitoring
     tink::util::errors
     tink::util::protobuf_helper
     tink::util::status
@@ -196,9 +199,12 @@ tink_cc_test(
     tink::internal::keyset_wrapper_impl
     gmock
     absl::flat_hash_map
+    absl::memory
     absl::status
     absl::strings
+    tink::core::primitive_set
     tink::core::primitive_wrapper
+    tink::util::statusor
     tink::util::test_matchers
     tink::util::test_util
     tink::proto::tink_cc_proto
@@ -236,6 +242,8 @@ tink_cc_test(
     tink::config::tink_fips
     tink::hybrid::ecies_aead_hkdf_private_key_manager
     tink::hybrid::ecies_aead_hkdf_public_key_manager
+    tink::monitoring::monitoring
+    tink::monitoring::monitoring_client_mocks
     tink::subtle::aes_gcm_boringssl
     tink::subtle::random
     tink::util::istream_input_stream
@@ -320,6 +328,7 @@ tink_cc_test(
     tink::internal::ec_util
     tink::internal::fips_utils
     tink::internal::ssl_unique_ptr
+    tink::internal::ssl_util
     gmock
     absl::strings
     absl::span
@@ -395,4 +404,32 @@ tink_cc_test(
     tink::util::secret_data
     tink::util::statusor
     tink::util::test_matchers
+)
+
+tink_cc_library(
+  NAME monitoring_util
+  SRCS
+    monitoring_util.h
+  DEPS
+    absl::flat_hash_map
+    absl::status
+    tink::core::primitive_set
+    tink::monitoring::monitoring
+    tink::util::statusor
+    tink::proto::tink_cc_proto
+)
+
+tink_cc_test(
+  NAME monitoring_util_test
+  SRCS
+    monitoring_util_test.cc
+  DEPS
+    tink::internal::monitoring_util
+    gmock
+    absl::status
+    absl::strings
+    tink::core::primitive_set
+    tink::monitoring::monitoring
+    tink::util::test_matchers
+    tink::proto::tink_cc_proto
 )
