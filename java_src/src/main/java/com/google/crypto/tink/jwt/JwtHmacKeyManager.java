@@ -76,6 +76,24 @@ public final class JwtHmacKeyManager extends KeyTypeManager<JwtHmacKey> {
     }
   }
 
+  /** Returns the minimum key size in bytes.
+   *
+   * <p>These minimum key sizes are required by https://tools.ietf.org/html/rfc7518#section-3.2
+   */
+  private static final int getMinimumKeySizeInBytes(JwtHmacAlgorithm algorithm)
+      throws GeneralSecurityException {
+    switch (algorithm) {
+      case HS256:
+        return 32;
+      case HS384:
+        return 48;
+      case HS512:
+        return 64;
+      default:
+        throw new GeneralSecurityException("unknown algorithm");
+    }
+  }
+
   @Immutable
   private static final class JwtHmac implements JwtMacInternal {
     private final PrfMac prfMac;
@@ -132,10 +150,6 @@ public final class JwtHmacKeyManager extends KeyTypeManager<JwtHmacKey> {
           }
         });
   }
-
-  /** Minimum key size in bytes. */
-  private static final int MIN_KEY_SIZE_IN_BYTES = 32;
-
   @Override
   public String getKeyType() {
     return "type.googleapis.com/google.crypto.tink.JwtHmacKey";
@@ -154,7 +168,7 @@ public final class JwtHmacKeyManager extends KeyTypeManager<JwtHmacKey> {
   @Override
   public void validateKey(JwtHmacKey key) throws GeneralSecurityException {
     Validators.validateVersion(key.getVersion(), getVersion());
-    if (key.getKeyValue().size() < MIN_KEY_SIZE_IN_BYTES) {
+    if (key.getKeyValue().size() < getMinimumKeySizeInBytes(key.getAlgorithm())) {
       throw new GeneralSecurityException("key too short");
     }
   }
@@ -169,7 +183,7 @@ public final class JwtHmacKeyManager extends KeyTypeManager<JwtHmacKey> {
     return new KeyFactory<JwtHmacKeyFormat, JwtHmacKey>(JwtHmacKeyFormat.class) {
       @Override
       public void validateKeyFormat(JwtHmacKeyFormat format) throws GeneralSecurityException {
-        if (format.getKeySize() < MIN_KEY_SIZE_IN_BYTES) {
+        if (format.getKeySize() < getMinimumKeySizeInBytes(format.getAlgorithm())) {
           throw new GeneralSecurityException("key too short");
         }
       }
