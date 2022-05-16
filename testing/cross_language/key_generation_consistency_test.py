@@ -43,9 +43,6 @@ SUCCEEDS_BUT_SHOULD_FAIL = [
      'cc'),
     ('EciesAeadHkdfPrivateKey(NIST_P256,UNCOMPRESSED,SHA256,AesEaxKey(15,11))',
      'python'),
-    # TODO(b/232503130): Add stricter JwtHmacKey validation.
-    ('JwtHmacKey(47,HS384,RAW)', 'go'),
-    ('JwtHmacKey(63,HS512,RAW)', 'go'),
 ]
 
 # Test cases that fail in a language but should succeed

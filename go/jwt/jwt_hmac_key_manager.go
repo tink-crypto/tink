@@ -32,8 +32,6 @@ import (
 const (
 	jwtHMACKeyVersion = 0
 	jwtHMACTypeURL    = "type.googleapis.com/google.crypto.tink.JwtHmacKey"
-
-	minKeySizeBytes = 32
 )
 
 // jwtHMACKeyManager is an implementation of the KeyManager interface
@@ -46,6 +44,12 @@ var hsAlgToHash = map[jwtmacpb.JwtHmacAlgorithm]string{
 	jwtmacpb.JwtHmacAlgorithm_HS256: "SHA256",
 	jwtmacpb.JwtHmacAlgorithm_HS384: "SHA384",
 	jwtmacpb.JwtHmacAlgorithm_HS512: "SHA512",
+}
+
+var hsAlgToMinKeySizeBytes = map[jwtmacpb.JwtHmacAlgorithm]int{
+	jwtmacpb.JwtHmacAlgorithm_HS256: 32,
+	jwtmacpb.JwtHmacAlgorithm_HS384: 48,
+	jwtmacpb.JwtHmacAlgorithm_HS512: 64,
 }
 
 func (km *jwtHMACKeyManager) Primitive(serializedKey []byte) (interface{}, error) {
@@ -127,25 +131,26 @@ func (km *jwtHMACKeyManager) validateKey(key *jwtmacpb.JwtHmacKey) error {
 	if err := keyset.ValidateKeyVersion(key.Version, jwtHMACKeyVersion); err != nil {
 		return err
 	}
+	minKeySizeBytes, ok := hsAlgToMinKeySizeBytes[key.GetAlgorithm()]
+	if !ok {
+		return fmt.Errorf("invalid algorithm: '%v'", key.GetAlgorithm())
+	}
 	if len(key.KeyValue) < minKeySizeBytes {
 		return fmt.Errorf("invalid JwtHmacKey: KeyValue is too short")
 	}
-	return validateHMACAlgorithm(key.GetAlgorithm())
+	return nil
 }
 
 func (km *jwtHMACKeyManager) validateKeyFormat(keyFormat *jwtmacpb.JwtHmacKeyFormat) error {
 	if keyFormat == nil {
 		return fmt.Errorf("key format can't be nil")
 	}
-	if keyFormat.KeySize < minKeySizeBytes {
-		return fmt.Errorf("invalid JwtHmacKeyFormat: KeySize is too short")
+	minKeySizeBytes, ok := hsAlgToMinKeySizeBytes[keyFormat.GetAlgorithm()]
+	if !ok {
+		return fmt.Errorf("invalid algorithm: '%v'", keyFormat.GetAlgorithm())
 	}
-	return validateHMACAlgorithm(keyFormat.GetAlgorithm())
-}
-
-func validateHMACAlgorithm(alg jwtmacpb.JwtHmacAlgorithm) error {
-	if _, ok := hsAlgToHash[alg]; !ok {
-		return fmt.Errorf("unsupported algorithm")
+	if int(keyFormat.KeySize) < minKeySizeBytes {
+		return fmt.Errorf("invalid JwtHmacKeyFormat: KeySize is too small")
 	}
 	return nil
 }
