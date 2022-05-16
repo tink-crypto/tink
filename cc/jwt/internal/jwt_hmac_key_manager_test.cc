@@ -70,39 +70,37 @@ TEST(JwtHmacKeyManagerTest, ValidateEmptyKeyFormat) {
               Not(IsOk()));
 }
 
-TEST(JwtHmacKeyManagerTest, ValidKeyFormatHS256) {
+TEST(RawJwtHmacKeyManagerTest, ValidateHS256KeyFormat) {
   JwtHmacKeyFormat key_format;
   key_format.set_algorithm(JwtHmacAlgorithm::HS256);
   key_format.set_key_size(32);
   EXPECT_THAT(JwtHmacKeyManager().ValidateKeyFormat(key_format), IsOk());
+  key_format.set_key_size(31);
+  EXPECT_THAT(JwtHmacKeyManager().ValidateKeyFormat(key_format), Not(IsOk()));
 }
 
-TEST(JwtHmacKeyManagerTest, ValidateKeyFormatHS384) {
+TEST(RawJwtHmacKeyManagerTest, ValidateHS384KeyFormat) {
   JwtHmacKeyFormat key_format;
   key_format.set_algorithm(JwtHmacAlgorithm::HS384);
-  key_format.set_key_size(32);
+  key_format.set_key_size(48);
   EXPECT_THAT(JwtHmacKeyManager().ValidateKeyFormat(key_format), IsOk());
+  key_format.set_key_size(47);
+  EXPECT_THAT(JwtHmacKeyManager().ValidateKeyFormat(key_format), Not(IsOk()));
 }
 
-TEST(JwtHmacKeyManagerTest, ValidateKeyFormatHS512) {
+TEST(RawJwtHmacKeyManagerTest, ValidateHS512KeyFormat) {
   JwtHmacKeyFormat key_format;
   key_format.set_algorithm(JwtHmacAlgorithm::HS512);
-  key_format.set_key_size(32);
+  key_format.set_key_size(64);
   EXPECT_THAT(JwtHmacKeyManager().ValidateKeyFormat(key_format), IsOk());
-}
-
-TEST(JwtHmacKeyManagerTest, KeyTooShort) {
-  JwtHmacKeyFormat key_format;
-  key_format.set_algorithm(JwtHmacAlgorithm::HS256);
-
-  key_format.set_key_size(31);
+  key_format.set_key_size(63);
   EXPECT_THAT(JwtHmacKeyManager().ValidateKeyFormat(key_format), Not(IsOk()));
 }
 
 TEST(JwtHmacKeyManagerTest, CreateKey) {
   JwtHmacKeyFormat key_format;
   key_format.set_key_size(32);
-  key_format.set_algorithm(JwtHmacAlgorithm::HS512);
+  key_format.set_algorithm(JwtHmacAlgorithm::HS256);
   util::StatusOr<google::crypto::tink::JwtHmacKey> key =
       JwtHmacKeyManager().CreateKey(key_format);
   ASSERT_THAT(key.status(), IsOk());
@@ -122,41 +120,39 @@ TEST(JwtHmacKeyManagerTest, ValidateKeyWithUnknownAlgorithm_fails) {
   EXPECT_FALSE(JwtHmacKeyManager().ValidateKey(key).ok());
 }
 
-TEST(JwtHmacKeyManagerTest, ValidateKeySha256) {
+TEST(JwtHmacKeyManagerTest, ValidateHS256Key) {
   JwtHmacKey key;
   key.set_version(0);
   key.set_algorithm(JwtHmacAlgorithm::HS256);
-  key.set_key_value("0123456789abcdef0123456789abcdef");
-
+  key.set_key_value("0123456789abcdef0123456789abcdef");  // 32 bytes
   EXPECT_THAT(JwtHmacKeyManager().ValidateKey(key), IsOk());
+  key.set_key_value("0123456789abcdef0123456789abcde");  // 31 bytes
+  EXPECT_THAT(JwtHmacKeyManager().ValidateKey(key), Not(IsOk()));
 }
 
-TEST(JwtHmacKeyManagerTest, ValidateKeySha384) {
+TEST(JwtHmacKeyManagerTest, ValidateHS384Key) {
   JwtHmacKey key;
   key.set_version(0);
   key.set_algorithm(JwtHmacAlgorithm::HS384);
-  key.set_key_value("0123456789abcdef0123456789abcdef");
-
+  key.set_key_value(
+      "0123456789abcdef0123456789abcdef0123456789abcdef");  // 48 bytes
   EXPECT_THAT(JwtHmacKeyManager().ValidateKey(key), IsOk());
+  key.set_key_value(
+      "0123456789abcdef0123456789abcdef0123456789abcde");  // 47 bytes
+  EXPECT_THAT(JwtHmacKeyManager().ValidateKey(key), Not(IsOk()));
 }
 
-TEST(JwtHmacKeyManagerTest, ValidateKeySha512) {
+TEST(JwtHmacKeyManagerTest, ValidateHS512Key) {
   JwtHmacKey key;
   key.set_version(0);
   key.set_algorithm(JwtHmacAlgorithm::HS512);
-  key.set_key_value("0123456789abcdef0123456789abcdef");
-
-  EXPECT_THAT(JwtHmacKeyManager().ValidateKey(key), IsOk());
-}
-
-TEST(JwtHmacKeyManagerTest, ValidateKeyTooShort) {
-  JwtHmacKey key;
-  key.set_version(0);
-  key.set_algorithm(JwtHmacAlgorithm::HS256);
-  key.set_key_value("0123456789abcdef0123456789abcde");
-
+  key.set_key_value(  // 64 bytes
+      "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef");
+  key.set_key_value(  // 63 bytes
+      "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcde");
   EXPECT_THAT(JwtHmacKeyManager().ValidateKey(key), Not(IsOk()));
 }
+
 
 TEST(JwtHmacKeyManagerTest, DeriveKeyIsNotImplemented) {
   JwtHmacKeyFormat format;

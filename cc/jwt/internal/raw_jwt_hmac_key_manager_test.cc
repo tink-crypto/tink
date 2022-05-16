@@ -68,17 +68,40 @@ TEST(RawJwtHmacKeyManagerTest, ValidateEmptyKeyFormat) {
               Not(IsOk()));
 }
 
-TEST(RawJwtHmacKeyManagerTest, ValidKeyFormat) {
+// BETTER TESTS.
+
+TEST(RawJwtHmacKeyManagerTest, ValidateHS256KeyFormat) {
   JwtHmacKeyFormat key_format;
   key_format.set_algorithm(JwtHmacAlgorithm::HS256);
   key_format.set_key_size(32);
   EXPECT_THAT(RawJwtHmacKeyManager().ValidateKeyFormat(key_format), IsOk());
+  key_format.set_key_size(33);
+  EXPECT_THAT(RawJwtHmacKeyManager().ValidateKeyFormat(key_format), IsOk());
+  key_format.set_key_size(31);
+  EXPECT_THAT(RawJwtHmacKeyManager().ValidateKeyFormat(key_format),
+              Not(IsOk()));
 }
 
-TEST(RawJwtHmacKeyManagerTest, SmallKeySizeIsInvalidKeyFormat) {
+TEST(RawJwtHmacKeyManagerTest, ValidateHS384KeyFormat) {
+  JwtHmacKeyFormat key_format;
+  key_format.set_algorithm(JwtHmacAlgorithm::HS384);
+  key_format.set_key_size(48);
+  EXPECT_THAT(RawJwtHmacKeyManager().ValidateKeyFormat(key_format), IsOk());
+  key_format.set_key_size(49);
+  EXPECT_THAT(RawJwtHmacKeyManager().ValidateKeyFormat(key_format), IsOk());
+  key_format.set_key_size(47);
+  EXPECT_THAT(RawJwtHmacKeyManager().ValidateKeyFormat(key_format),
+              Not(IsOk()));
+}
+
+TEST(RawJwtHmacKeyManagerTest, ValidateHS512KeyFormat) {
   JwtHmacKeyFormat key_format;
   key_format.set_algorithm(JwtHmacAlgorithm::HS512);
-  key_format.set_key_size(31);
+  key_format.set_key_size(64);
+  EXPECT_THAT(RawJwtHmacKeyManager().ValidateKeyFormat(key_format), IsOk());
+  key_format.set_key_size(65);
+  EXPECT_THAT(RawJwtHmacKeyManager().ValidateKeyFormat(key_format), IsOk());
+  key_format.set_key_size(63);
   EXPECT_THAT(RawJwtHmacKeyManager().ValidateKeyFormat(key_format),
               Not(IsOk()));
 }
@@ -106,7 +129,7 @@ TEST(RawJwtHmacKeyManagerTest, CreateKeyWithSha256) {
 
 TEST(RawJwtHmacKeyManagerTest, CreateKeyWithSha384) {
   JwtHmacKeyFormat key_format;
-  key_format.set_key_size(32);
+  key_format.set_key_size(48);
   key_format.set_algorithm(JwtHmacAlgorithm::HS384);
   auto hmac_key_or = RawJwtHmacKeyManager().CreateKey(key_format);
   ASSERT_THAT(hmac_key_or.status(), IsOk());
@@ -119,7 +142,7 @@ TEST(RawJwtHmacKeyManagerTest, CreateKeyWithSha384) {
 
 TEST(RawJwtHmacKeyManagerTest, CreateKeyWithSha512) {
   JwtHmacKeyFormat key_format;
-  key_format.set_key_size(32);
+  key_format.set_key_size(64);
   key_format.set_algorithm(JwtHmacAlgorithm::HS512);
   auto key_or = RawJwtHmacKeyManager().CreateKey(key_format);
   ASSERT_THAT(key_or.status(), IsOk());
@@ -130,11 +153,36 @@ TEST(RawJwtHmacKeyManagerTest, CreateKeyWithSha512) {
   EXPECT_THAT(RawJwtHmacKeyManager().ValidateKey(key_or.value()), IsOk());
 }
 
-TEST(RawJwtHmacKeyManagerTest, ShortKeyIsInvalid) {
+TEST(RawJwtHmacKeyManagerTest, ValidateHS256Key) {
   JwtHmacKey key;
   key.set_version(0);
   key.set_algorithm(JwtHmacAlgorithm::HS256);
+  key.set_key_value("0123456789abcdef0123456789abcdef");  // 32 bytes
+  EXPECT_THAT(RawJwtHmacKeyManager().ValidateKey(key), IsOk());
   key.set_key_value("0123456789abcdef0123456789abcde");  // 31 bytes
+  EXPECT_THAT(RawJwtHmacKeyManager().ValidateKey(key), Not(IsOk()));
+}
+
+TEST(RawJwtHmacKeyManagerTest, ValidateHS384Key) {
+  JwtHmacKey key;
+  key.set_version(0);
+  key.set_algorithm(JwtHmacAlgorithm::HS384);
+  key.set_key_value(
+      "0123456789abcdef0123456789abcdef0123456789abcdef");  // 48 bytes
+  EXPECT_THAT(RawJwtHmacKeyManager().ValidateKey(key), IsOk());
+  key.set_key_value(
+      "0123456789abcdef0123456789abcdef0123456789abcde");  // 47 bytes
+  EXPECT_THAT(RawJwtHmacKeyManager().ValidateKey(key), Not(IsOk()));
+}
+
+TEST(RawJwtHmacKeyManagerTest, ValidateHS512Key) {
+  JwtHmacKey key;
+  key.set_version(0);
+  key.set_algorithm(JwtHmacAlgorithm::HS512);
+  key.set_key_value(  // 64 bytes
+      "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef");
+  key.set_key_value(  // 63 bytes
+      "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcde");
   EXPECT_THAT(RawJwtHmacKeyManager().ValidateKey(key), Not(IsOk()));
 }
 
