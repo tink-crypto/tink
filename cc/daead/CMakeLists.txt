@@ -113,7 +113,6 @@ tink_cc_test(
   DEPS
     tink::daead::deterministic_aead_wrapper
     gmock
-    absl::memory
     tink::core::deterministic_aead
     tink::core::primitive_set
     tink::util::status

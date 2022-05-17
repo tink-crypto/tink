@@ -16,11 +16,11 @@
 
 #include "tink/daead/deterministic_aead_wrapper.h"
 
+#include <memory>
 #include <string>
 #include <utility>
 
 #include "gtest/gtest.h"
-#include "absl/memory/memory.h"
 #include "tink/deterministic_aead.h"
 #include "tink/primitive_set.h"
 #include "tink/util/status.h"
@@ -116,19 +116,21 @@ TEST_F(DeterministicAeadSetWrapperTest, testBasic) {
     EXPECT_TRUE(daead_result.ok()) << daead_result.status();
     daead = std::move(daead_result.value());
     std::string plaintext = "some_plaintext";
-    std::string aad = "some_aad";
+    std::string associated_data = "some_associated_data";
 
-    auto encrypt_result = daead->EncryptDeterministically(plaintext, aad);
+    auto encrypt_result =
+        daead->EncryptDeterministically(plaintext, associated_data);
     EXPECT_TRUE(encrypt_result.ok()) << encrypt_result.status();
     std::string ciphertext = encrypt_result.value();
     EXPECT_PRED_FORMAT2(testing::IsSubstring, daead_name_2, ciphertext);
 
-    auto decrypt_result = daead->DecryptDeterministically(ciphertext, aad);
+    auto decrypt_result =
+        daead->DecryptDeterministically(ciphertext, associated_data);
     EXPECT_TRUE(decrypt_result.ok()) << decrypt_result.status();
     EXPECT_EQ(plaintext, decrypt_result.value());
 
     decrypt_result =
-        daead->DecryptDeterministically("some bad ciphertext", aad);
+        daead->DecryptDeterministically("some bad ciphertext", associated_data);
     EXPECT_FALSE(decrypt_result.ok());
     EXPECT_EQ(absl::StatusCode::kInvalidArgument,
               decrypt_result.status().code());

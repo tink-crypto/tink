@@ -67,7 +67,7 @@ class  DeterministicAeadSetWrapper : public DeterministicAead {
 util::StatusOr<std::string>
 DeterministicAeadSetWrapper::EncryptDeterministically(
     absl::string_view plaintext, absl::string_view associated_data) const {
-  // BoringSSL expects a non-null pointer for plaintext and additional_data,
+  // BoringSSL expects a non-null pointer for plaintext and associated_data,
   // regardless of whether the size is 0.
   plaintext = internal::EnsureStringNonNull(plaintext);
   associated_data = internal::EnsureStringNonNull(associated_data);
@@ -83,7 +83,7 @@ DeterministicAeadSetWrapper::EncryptDeterministically(
 util::StatusOr<std::string>
 DeterministicAeadSetWrapper::DecryptDeterministically(
     absl::string_view ciphertext, absl::string_view associated_data) const {
-  // BoringSSL expects a non-null pointer for plaintext and additional_data,
+  // BoringSSL expects a non-null pointer for plaintext and associated_data,
   // regardless of whether the size is 0.
   associated_data = internal::EnsureStringNonNull(associated_data);
 

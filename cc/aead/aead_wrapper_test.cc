@@ -270,11 +270,11 @@ TEST_F(AeadSetWrapperTestWithMonitoring,
   ASSERT_THAT(aead.status(), IsOk());
 
   constexpr absl::string_view kPlaintext = "This is some plaintext!";
-  constexpr absl::string_view kAdditionalData = "Some additional data!";
+  constexpr absl::string_view kAssociatedData = "Some associated data!";
   EXPECT_CALL(*encryption_monitoring_client_ptr_,
               Log(kPrimaryKeyId, kPlaintext.size()));
   util::StatusOr<std::string> ciphertext =
-      (*aead)->Encrypt(kPlaintext, kAdditionalData);
+      (*aead)->Encrypt(kPlaintext, kAssociatedData);
   ASSERT_THAT(ciphertext.status(), IsOk());
 
   // In the log expect the size of the ciphertext without the non-raw prefix.
@@ -282,7 +282,7 @@ TEST_F(AeadSetWrapperTestWithMonitoring,
       absl::string_view(*ciphertext).substr(CryptoFormat::kNonRawPrefixSize);
   EXPECT_CALL(*decryption_monitoring_client_ptr_,
               Log(kPrimaryKeyId, raw_ciphertext.size()));
-  EXPECT_THAT((*aead)->Decrypt(*ciphertext, kAdditionalData).status(), IsOk());
+  EXPECT_THAT((*aead)->Decrypt(*ciphertext, kAssociatedData).status(), IsOk());
 }
 
 // Test that monitoring logs encryption and decryption failures correctly.
@@ -300,11 +300,11 @@ TEST_F(AeadSetWrapperTestWithMonitoring,
   auto mock_aead = absl::make_unique<MockAead>();
   constexpr absl::string_view kPlaintext = "A plaintext!!";
   constexpr absl::string_view kCiphertext = "A ciphertext!";
-  constexpr absl::string_view kAdditionalData = "Some additional data!";
-  ON_CALL(*mock_aead, Encrypt(kPlaintext, kAdditionalData))
+  constexpr absl::string_view kAssociatedData = "Some associated data!";
+  ON_CALL(*mock_aead, Encrypt(kPlaintext, kAssociatedData))
       .WillByDefault(Return(util::Status(absl::StatusCode::kInternal,
                                          "Oh no encryption failed :(!")));
-  ON_CALL(*mock_aead, Decrypt(kCiphertext, kAdditionalData))
+  ON_CALL(*mock_aead, Decrypt(kCiphertext, kAssociatedData))
       .WillByDefault(Return(util::Status(absl::StatusCode::kInternal,
                                          "Oh no decryption failed :(!")));
 
@@ -322,7 +322,7 @@ TEST_F(AeadSetWrapperTestWithMonitoring,
   // Expect encryption failure gets logged.
   EXPECT_CALL(*encryption_monitoring_client_ptr_, LogFailure());
   util::StatusOr<std::string> ciphertext =
-      (*aead)->Encrypt(kPlaintext, kAdditionalData);
+      (*aead)->Encrypt(kPlaintext, kAssociatedData);
   EXPECT_THAT(ciphertext.status(), Not(IsOk()));
 
   // We must prepend the identifier to the ciphertext to make sure our mock gets
@@ -336,7 +336,7 @@ TEST_F(AeadSetWrapperTestWithMonitoring,
   // Expect decryption failure gets logged.
   EXPECT_CALL(*decryption_monitoring_client_ptr_, LogFailure());
   EXPECT_THAT(
-      (*aead)->Decrypt(ciphertext_with_key_id, kAdditionalData).status(),
+      (*aead)->Decrypt(ciphertext_with_key_id, kAssociatedData).status(),
       Not(IsOk()));
 }
 
