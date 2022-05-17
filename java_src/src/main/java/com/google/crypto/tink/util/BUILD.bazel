@@ -23,3 +23,27 @@ android_library(
         "@maven//:joda_time_joda_time",
     ],
 )
+
+java_library(
+    name = "secret_byte_array",
+    srcs = ["SecretByteArray.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink:secret_key_access",
+        "//src/main/java/com/google/crypto/tink/annotations:alpha",
+        "//src/main/java/com/google/crypto/tink/internal:byte_array",
+        "//src/main/java/com/google/crypto/tink/subtle:random",
+        "@maven//:com_google_errorprone_error_prone_annotations",
+    ],
+)
+
+android_library(
+    name = "secret_byte_array-android",
+    srcs = ["SecretByteArray.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink:secret_key_access-android",
+        "//src/main/java/com/google/crypto/tink/annotations:alpha-android",
+        "//src/main/java/com/google/crypto/tink/internal:byte_array-android",
+        "//src/main/java/com/google/crypto/tink/subtle:random-android",
+        "@maven//:com_google_errorprone_error_prone_annotations",
+    ],
+)

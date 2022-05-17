@@ -11,3 +11,15 @@ java_test(
         "@maven//:junit_junit",
     ],
 )
+
+java_test(
+    name = "SecretByteArrayTest",
+    size = "small",
+    srcs = ["SecretByteArrayTest.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink:insecure_secret_key_access",
+        "//src/main/java/com/google/crypto/tink/util:secret_byte_array",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
