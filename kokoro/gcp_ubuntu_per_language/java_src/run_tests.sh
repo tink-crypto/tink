@@ -65,13 +65,16 @@ test_build_bazel_file() {
     "${all_java_libs}" \
     "${all_android_libs}" \
     "${all_aws_kms_libs}" \
-    "${all_gcp_kms_libs}" > BUILD.bazel.generated
+    "${all_gcp_kms_libs}" > java_src/BUILD.bazel.generated
 
-  if ! cmp -s BUILD.bazel BUILD.bazel.generated ; then
+  if ! cmp -s java_src/BUILD.bazel java_src/BUILD.bazel.generated ; then
     echo "Files BUILD.bazel and BUILD.bazel.generated are different."
     echo "=============== BROKEN file //third_party/tink/java_src/BUILD.bazel. Should be: "
-    cat BUILD.bazel.generated
+    cat java_src/BUILD.bazel.generated
     echo "=============== END BROKEN file //third_party/tink/java_src/BUILD.bazel."
+    echo "=============== BEGIN DIFF"
+    diff java_src/BUILD.bazel java_src/BUILD.bazel.generated
+    echo "=============== END DIFF"
     exit 1
   fi
 }
