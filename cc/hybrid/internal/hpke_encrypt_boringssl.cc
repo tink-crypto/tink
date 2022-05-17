@@ -133,7 +133,6 @@ util::StatusOr<std::string> HpkeEncryptBoringSsl::EncapsulateKeyThenEncrypt(
   subtle::ResizeStringUninitialized(
       &ciphertext, enc_size + plaintext.size() +
                        EVP_HPKE_CTX_max_overhead(sender_ctx_.get()));
-  absl::c_copy(encapsulated_key_, ciphertext.begin());
   size_t max_out_len = ciphertext.size() - enc_size;
   size_t ciphertext_size;
   if (!EVP_HPKE_CTX_seal(
