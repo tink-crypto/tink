@@ -112,7 +112,7 @@ class MonitoringContext {
   // Returns the API function.
   std::string GetApi() const { return api_function_; }
   // Returns a constant reference to the keyset info.
-  const MonitoringKeySetInfo& GetKeySetInfo() { return keyset_info_; }
+  const MonitoringKeySetInfo& GetKeySetInfo() const { return keyset_info_; }
 
  private:
   const std::string primitive_;
