@@ -146,7 +146,7 @@ TEST(AesEaxBoringSslTest, TestModification) {
     modified_ct[i / 8] ^= 1 << (i % 8);
     EXPECT_FALSE(cipher->Decrypt(modified_ct, associated_data).ok()) << i;
   }
-  // Modify the additional data
+  // Modify the associated data
   for (size_t i = 0; i < associated_data.size() * 8; i++) {
     std::string modified_associated_data = associated_data;
     modified_associated_data[i / 8] ^= 1 << (i % 8);
