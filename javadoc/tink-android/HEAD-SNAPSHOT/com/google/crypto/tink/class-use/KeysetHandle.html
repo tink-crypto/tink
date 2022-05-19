@@ -86,15 +86,23 @@
 <td class="colLast">&nbsp;</td>
 </tr>
 <tr class="rowColor">
-<td class="colFirst"><a href="#com.google.crypto.tink.daead">com.google.crypto.tink.daead</a></td>
+<td class="colFirst"><a href="#com.google.crypto.tink.aead">com.google.crypto.tink.aead</a></td>
 <td class="colLast">&nbsp;</td>
 </tr>
 <tr class="altColor">
-<td class="colFirst"><a href="#com.google.crypto.tink.hybrid">com.google.crypto.tink.hybrid</a></td>
+<td class="colFirst"><a href="#com.google.crypto.tink.daead">com.google.crypto.tink.daead</a></td>
 <td class="colLast">&nbsp;</td>
 </tr>
 <tr class="rowColor">
+<td class="colFirst"><a href="#com.google.crypto.tink.hybrid">com.google.crypto.tink.hybrid</a></td>
+<td class="colLast">&nbsp;</td>
+</tr>
+<tr class="altColor">
 <td class="colFirst"><a href="#com.google.crypto.tink.integration.android">com.google.crypto.tink.integration.android</a></td>
+<td class="colLast">&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><a href="#com.google.crypto.tink.jwt">com.google.crypto.tink.jwt</a></td>
 <td class="colLast">&nbsp;</td>
 </tr>
 <tr class="altColor">
@@ -250,6 +258,28 @@
 </tbody>
 </table>
 </li>
+<li class="blockList"><a name="com.google.crypto.tink.aead">
+<!--   -->
+</a>
+<h3>Uses of <a href="../../../../../com/google/crypto/tink/KeysetHandle.html" title="class in com.google.crypto.tink">KeysetHandle</a> in <a href="../../../../../com/google/crypto/tink/aead/package-summary.html">com.google.crypto.tink.aead</a></h3>
+<table class="useSummary" border="0" cellpadding="3" cellspacing="0" summary="Use table, listing methods, and an explanation">
+<caption><span>Methods in <a href="../../../../../com/google/crypto/tink/aead/package-summary.html">com.google.crypto.tink.aead</a> with parameters of type <a href="../../../../../com/google/crypto/tink/KeysetHandle.html" title="class in com.google.crypto.tink">KeysetHandle</a></span><span class="tabEnd">&nbsp;</span></caption>
+<tr>
+<th class="colFirst" scope="col">Modifier and Type</th>
+<th class="colLast" scope="col">Method and Description</th>
+</tr>
+<tbody>
+<tr class="altColor">
+<td class="colFirst"><code>static <a href="../../../../../com/google/crypto/tink/Aead.html" title="interface in com.google.crypto.tink">Aead</a></code></td>
+<td class="colLast"><span class="typeNameLabel">AeadFactory.</span><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/aead/AeadFactory.html#getPrimitive-com.google.crypto.tink.KeysetHandle-">getPrimitive</a></span>(<a href="../../../../../com/google/crypto/tink/KeysetHandle.html" title="class in com.google.crypto.tink">KeysetHandle</a>&nbsp;keysetHandle)</code>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;
+<div class="block"><span class="deprecationComment">Use <code>keysetHandle.GetPrimitive(Aead.class)</code> after registering the <code>AeadWrapper</code> instead.</span></div>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</li>
 <li class="blockList"><a name="com.google.crypto.tink.daead">
 <!--   -->
 </a>
@@ -319,6 +349,59 @@
 <tr class="altColor">
 <td class="colFirst"><code><a href="../../../../../com/google/crypto/tink/KeysetHandle.html" title="class in com.google.crypto.tink">KeysetHandle</a></code></td>
 <td class="colLast"><span class="typeNameLabel">AndroidKeysetManager.</span><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/integration/android/AndroidKeysetManager.html#getKeysetHandle--">getKeysetHandle</a></span>()</code>&nbsp;</td>
+</tr>
+</tbody>
+</table>
+</li>
+<li class="blockList"><a name="com.google.crypto.tink.jwt">
+<!--   -->
+</a>
+<h3>Uses of <a href="../../../../../com/google/crypto/tink/KeysetHandle.html" title="class in com.google.crypto.tink">KeysetHandle</a> in <a href="../../../../../com/google/crypto/tink/jwt/package-summary.html">com.google.crypto.tink.jwt</a></h3>
+<table class="useSummary" border="0" cellpadding="3" cellspacing="0" summary="Use table, listing methods, and an explanation">
+<caption><span>Methods in <a href="../../../../../com/google/crypto/tink/jwt/package-summary.html">com.google.crypto.tink.jwt</a> that return <a href="../../../../../com/google/crypto/tink/KeysetHandle.html" title="class in com.google.crypto.tink">KeysetHandle</a></span><span class="tabEnd">&nbsp;</span></caption>
+<tr>
+<th class="colFirst" scope="col">Modifier and Type</th>
+<th class="colLast" scope="col">Method and Description</th>
+</tr>
+<tbody>
+<tr class="altColor">
+<td class="colFirst"><code>static <a href="../../../../../com/google/crypto/tink/KeysetHandle.html" title="class in com.google.crypto.tink">KeysetHandle</a></code></td>
+<td class="colLast"><span class="typeNameLabel">JwkSetConverter.</span><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/jwt/JwkSetConverter.html#toKeysetHandle-java.lang.String-com.google.crypto.tink.tinkkey.KeyAccess-">toKeysetHandle</a></span>(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;jwkSet,
+              <a href="../../../../../com/google/crypto/tink/tinkkey/KeyAccess.html" title="class in com.google.crypto.tink.tinkkey">KeyAccess</a>&nbsp;keyAccess)</code>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;
+<div class="block"><span class="deprecationComment">Use JwkSetConverter.toPublicKeysetHandle(jwkSet) instead.</span></div>
+</div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>static <a href="../../../../../com/google/crypto/tink/KeysetHandle.html" title="class in com.google.crypto.tink">KeysetHandle</a></code></td>
+<td class="colLast"><span class="typeNameLabel">JwkSetConverter.</span><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/jwt/JwkSetConverter.html#toPublicKeysetHandle-java.lang.String-">toPublicKeysetHandle</a></span>(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;jwkSet)</code>
+<div class="block">Converts a Json Web Key (JWK) set with public keys into a Tink KeysetHandle.</div>
+</td>
+</tr>
+</tbody>
+</table>
+<table class="useSummary" border="0" cellpadding="3" cellspacing="0" summary="Use table, listing methods, and an explanation">
+<caption><span>Methods in <a href="../../../../../com/google/crypto/tink/jwt/package-summary.html">com.google.crypto.tink.jwt</a> with parameters of type <a href="../../../../../com/google/crypto/tink/KeysetHandle.html" title="class in com.google.crypto.tink">KeysetHandle</a></span><span class="tabEnd">&nbsp;</span></caption>
+<tr>
+<th class="colFirst" scope="col">Modifier and Type</th>
+<th class="colLast" scope="col">Method and Description</th>
+</tr>
+<tbody>
+<tr class="altColor">
+<td class="colFirst"><code>static <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a></code></td>
+<td class="colLast"><span class="typeNameLabel">JwkSetConverter.</span><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/jwt/JwkSetConverter.html#fromKeysetHandle-com.google.crypto.tink.KeysetHandle-com.google.crypto.tink.tinkkey.KeyAccess-">fromKeysetHandle</a></span>(<a href="../../../../../com/google/crypto/tink/KeysetHandle.html" title="class in com.google.crypto.tink">KeysetHandle</a>&nbsp;handle,
+                <a href="../../../../../com/google/crypto/tink/tinkkey/KeyAccess.html" title="class in com.google.crypto.tink.tinkkey">KeyAccess</a>&nbsp;keyAccess)</code>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;
+<div class="block"><span class="deprecationComment">Use JwkSetConverter.fromPublicKeysetHandle(handle) instead.</span></div>
+</div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>static <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a></code></td>
+<td class="colLast"><span class="typeNameLabel">JwkSetConverter.</span><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/jwt/JwkSetConverter.html#fromPublicKeysetHandle-com.google.crypto.tink.KeysetHandle-">fromPublicKeysetHandle</a></span>(<a href="../../../../../com/google/crypto/tink/KeysetHandle.html" title="class in com.google.crypto.tink">KeysetHandle</a>&nbsp;handle)</code>
+<div class="block">Converts a Tink KeysetHandle with JWT public keys into a Json Web Key (JWK) set.</div>
+</td>
 </tr>
 </tbody>
 </table>
