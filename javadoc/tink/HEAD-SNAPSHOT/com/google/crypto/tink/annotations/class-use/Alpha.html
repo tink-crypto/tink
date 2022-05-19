@@ -82,15 +82,23 @@
 </tr>
 <tbody>
 <tr class="altColor">
-<td class="colFirst"><a href="#com.google.crypto.tink.aead.subtle">com.google.crypto.tink.aead.subtle</a></td>
+<td class="colFirst"><a href="#com.google.crypto.tink">com.google.crypto.tink</a></td>
 <td class="colLast">&nbsp;</td>
 </tr>
 <tr class="rowColor">
-<td class="colFirst"><a href="#com.google.crypto.tink.internal">com.google.crypto.tink.internal</a></td>
+<td class="colFirst"><a href="#com.google.crypto.tink.aead.subtle">com.google.crypto.tink.aead.subtle</a></td>
 <td class="colLast">&nbsp;</td>
 </tr>
 <tr class="altColor">
+<td class="colFirst"><a href="#com.google.crypto.tink.internal">com.google.crypto.tink.internal</a></td>
+<td class="colLast">&nbsp;</td>
+</tr>
+<tr class="rowColor">
 <td class="colFirst"><a href="#com.google.crypto.tink.subtle">com.google.crypto.tink.subtle</a></td>
+<td class="colLast">&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><a href="#com.google.crypto.tink.util">com.google.crypto.tink.util</a></td>
 <td class="colLast">&nbsp;</td>
 </tr>
 </tbody>
@@ -98,6 +106,44 @@
 </li>
 <li class="blockList">
 <ul class="blockList">
+<li class="blockList"><a name="com.google.crypto.tink">
+<!--   -->
+</a>
+<h3>Uses of <a href="../../../../../../com/google/crypto/tink/annotations/Alpha.html" title="annotation in com.google.crypto.tink.annotations">Alpha</a> in <a href="../../../../../../com/google/crypto/tink/package-summary.html">com.google.crypto.tink</a></h3>
+<table class="useSummary" border="0" cellpadding="3" cellspacing="0" summary="Use table, listing classes, and an explanation">
+<caption><span>Classes in <a href="../../../../../../com/google/crypto/tink/package-summary.html">com.google.crypto.tink</a> with annotations of type <a href="../../../../../../com/google/crypto/tink/annotations/Alpha.html" title="annotation in com.google.crypto.tink.annotations">Alpha</a></span><span class="tabEnd">&nbsp;</span></caption>
+<tr>
+<th class="colFirst" scope="col">Modifier and Type</th>
+<th class="colLast" scope="col">Class and Description</th>
+</tr>
+<tbody>
+<tr class="altColor">
+<td class="colFirst"><code>class&nbsp;</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/InsecureSecretKeyAccess.html" title="class in com.google.crypto.tink">InsecureSecretKeyAccess</a></span></code>
+<div class="block">A helper class to create <a href="../../../../../../com/google/crypto/tink/SecretKeyAccess.html" title="class in com.google.crypto.tink"><code>SecretKeyAccess</code></a> tokens.</div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>class&nbsp;</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/Key.html" title="class in com.google.crypto.tink">Key</a></span></code>
+<div class="block">Represents a cryptographic object.</div>
+</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>class&nbsp;</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/KeyFormat.html" title="class in com.google.crypto.tink">KeyFormat</a></span></code>
+<div class="block">Represents a cryptographic function without the actual key material.</div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>class&nbsp;</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/SecretKeyAccess.html" title="class in com.google.crypto.tink">SecretKeyAccess</a></span></code>
+<div class="block">Represents access to secret key material.</div>
+</td>
+</tr>
+</tbody>
+</table>
+</li>
 <li class="blockList"><a name="com.google.crypto.tink.aead.subtle">
 <!--   -->
 </a>
@@ -162,6 +208,26 @@
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/subtle/X25519.html" title="class in com.google.crypto.tink.subtle">X25519</a></span></code>
 <div class="block">Defines <a href="https://cr.yp.to/ecdh/curve25519-20060209.pdf">the ECDH Curve25519 function</a>,
  also known as the X25519 function.</div>
+</td>
+</tr>
+</tbody>
+</table>
+</li>
+<li class="blockList"><a name="com.google.crypto.tink.util">
+<!--   -->
+</a>
+<h3>Uses of <a href="../../../../../../com/google/crypto/tink/annotations/Alpha.html" title="annotation in com.google.crypto.tink.annotations">Alpha</a> in <a href="../../../../../../com/google/crypto/tink/util/package-summary.html">com.google.crypto.tink.util</a></h3>
+<table class="useSummary" border="0" cellpadding="3" cellspacing="0" summary="Use table, listing classes, and an explanation">
+<caption><span>Classes in <a href="../../../../../../com/google/crypto/tink/util/package-summary.html">com.google.crypto.tink.util</a> with annotations of type <a href="../../../../../../com/google/crypto/tink/annotations/Alpha.html" title="annotation in com.google.crypto.tink.annotations">Alpha</a></span><span class="tabEnd">&nbsp;</span></caption>
+<tr>
+<th class="colFirst" scope="col">Modifier and Type</th>
+<th class="colLast" scope="col">Class and Description</th>
+</tr>
+<tbody>
+<tr class="altColor">
+<td class="colFirst"><code>class&nbsp;</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/util/SecretByteArray.html" title="class in com.google.crypto.tink.util">SecretByteArray</a></span></code>
+<div class="block">A class storing an immutable byte array, protecting the data via <a href="../../../../../../com/google/crypto/tink/SecretKeyAccess.html" title="class in com.google.crypto.tink"><code>SecretKeyAccess</code></a>.</div>
 </td>
 </tr>
 </tbody>

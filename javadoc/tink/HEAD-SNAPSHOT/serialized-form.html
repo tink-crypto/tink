@@ -74,6 +74,16 @@
 <div class="serializedFormContainer">
 <ul class="blockList">
 <li class="blockList">
+<h2 title="Package">Package&nbsp;com.google.crypto.tink.jwt</h2>
+<ul class="blockList">
+<li class="blockList"><a name="com.google.crypto.tink.jwt.JwtInvalidException">
+<!--   -->
+</a>
+<h3>Class <a href="com/google/crypto/tink/jwt/JwtInvalidException.html" title="class in com.google.crypto.tink.jwt">com.google.crypto.tink.jwt.JwtInvalidException</a> extends <a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a> implements Serializable</h3>
+</li>
+</ul>
+</li>
+<li class="blockList">
 <h2 title="Package">Package&nbsp;com.google.crypto.tink.proto</h2>
 <ul class="blockList">
 <li class="blockList"><a name="com.google.crypto.tink.proto.AesCmacKey">
@@ -1655,6 +1665,526 @@
 <li class="blockList">
 <h4>publicKey_</h4>
 <pre>com.google.protobuf.ByteString publicKey_</pre>
+</li>
+<li class="blockListLast">
+<h4>memoizedIsInitialized</h4>
+<pre>byte memoizedIsInitialized</pre>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="blockList"><a name="com.google.crypto.tink.proto.JwtEcdsaKeyFormat">
+<!--   -->
+</a>
+<h3>Class <a href="com/google/crypto/tink/proto/JwtEcdsaKeyFormat.html" title="class in com.google.crypto.tink.proto">com.google.crypto.tink.proto.JwtEcdsaKeyFormat</a> extends com.google.protobuf.GeneratedMessageV3 implements Serializable</h3>
+<dl class="nameValue">
+<dt>serialVersionUID:</dt>
+<dd>0L</dd>
+</dl>
+<ul class="blockList">
+<li class="blockList">
+<h3>Serialized Fields</h3>
+<ul class="blockList">
+<li class="blockList">
+<h4>version_</h4>
+<pre>int version_</pre>
+</li>
+<li class="blockList">
+<h4>algorithm_</h4>
+<pre>int algorithm_</pre>
+</li>
+<li class="blockListLast">
+<h4>memoizedIsInitialized</h4>
+<pre>byte memoizedIsInitialized</pre>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="blockList"><a name="com.google.crypto.tink.proto.JwtEcdsaPrivateKey">
+<!--   -->
+</a>
+<h3>Class <a href="com/google/crypto/tink/proto/JwtEcdsaPrivateKey.html" title="class in com.google.crypto.tink.proto">com.google.crypto.tink.proto.JwtEcdsaPrivateKey</a> extends com.google.protobuf.GeneratedMessageV3 implements Serializable</h3>
+<dl class="nameValue">
+<dt>serialVersionUID:</dt>
+<dd>0L</dd>
+</dl>
+<ul class="blockList">
+<li class="blockList">
+<h3>Serialized Fields</h3>
+<ul class="blockList">
+<li class="blockList">
+<h4>version_</h4>
+<pre>int version_</pre>
+</li>
+<li class="blockList">
+<h4>publicKey_</h4>
+<pre><a href="com/google/crypto/tink/proto/JwtEcdsaPublicKey.html" title="class in com.google.crypto.tink.proto">JwtEcdsaPublicKey</a> publicKey_</pre>
+</li>
+<li class="blockList">
+<h4>keyValue_</h4>
+<pre>com.google.protobuf.ByteString keyValue_</pre>
+</li>
+<li class="blockListLast">
+<h4>memoizedIsInitialized</h4>
+<pre>byte memoizedIsInitialized</pre>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="blockList"><a name="com.google.crypto.tink.proto.JwtEcdsaPublicKey">
+<!--   -->
+</a>
+<h3>Class <a href="com/google/crypto/tink/proto/JwtEcdsaPublicKey.html" title="class in com.google.crypto.tink.proto">com.google.crypto.tink.proto.JwtEcdsaPublicKey</a> extends com.google.protobuf.GeneratedMessageV3 implements Serializable</h3>
+<dl class="nameValue">
+<dt>serialVersionUID:</dt>
+<dd>0L</dd>
+</dl>
+<ul class="blockList">
+<li class="blockList">
+<h3>Serialized Fields</h3>
+<ul class="blockList">
+<li class="blockList">
+<h4>version_</h4>
+<pre>int version_</pre>
+</li>
+<li class="blockList">
+<h4>algorithm_</h4>
+<pre>int algorithm_</pre>
+</li>
+<li class="blockList">
+<h4>x_</h4>
+<pre>com.google.protobuf.ByteString x_</pre>
+</li>
+<li class="blockList">
+<h4>y_</h4>
+<pre>com.google.protobuf.ByteString y_</pre>
+</li>
+<li class="blockList">
+<h4>customKid_</h4>
+<pre><a href="com/google/crypto/tink/proto/JwtEcdsaPublicKey.CustomKid.html" title="class in com.google.crypto.tink.proto">JwtEcdsaPublicKey.CustomKid</a> customKid_</pre>
+</li>
+<li class="blockListLast">
+<h4>memoizedIsInitialized</h4>
+<pre>byte memoizedIsInitialized</pre>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="blockList"><a name="com.google.crypto.tink.proto.JwtEcdsaPublicKey.CustomKid">
+<!--   -->
+</a>
+<h3>Class <a href="com/google/crypto/tink/proto/JwtEcdsaPublicKey.CustomKid.html" title="class in com.google.crypto.tink.proto">com.google.crypto.tink.proto.JwtEcdsaPublicKey.CustomKid</a> extends com.google.protobuf.GeneratedMessageV3 implements Serializable</h3>
+<dl class="nameValue">
+<dt>serialVersionUID:</dt>
+<dd>0L</dd>
+</dl>
+<ul class="blockList">
+<li class="blockList">
+<h3>Serialized Fields</h3>
+<ul class="blockList">
+<li class="blockList">
+<h4>value_</h4>
+<pre><a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a> value_</pre>
+</li>
+<li class="blockListLast">
+<h4>memoizedIsInitialized</h4>
+<pre>byte memoizedIsInitialized</pre>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="blockList"><a name="com.google.crypto.tink.proto.JwtHmacKey">
+<!--   -->
+</a>
+<h3>Class <a href="com/google/crypto/tink/proto/JwtHmacKey.html" title="class in com.google.crypto.tink.proto">com.google.crypto.tink.proto.JwtHmacKey</a> extends com.google.protobuf.GeneratedMessageV3 implements Serializable</h3>
+<dl class="nameValue">
+<dt>serialVersionUID:</dt>
+<dd>0L</dd>
+</dl>
+<ul class="blockList">
+<li class="blockList">
+<h3>Serialized Fields</h3>
+<ul class="blockList">
+<li class="blockList">
+<h4>version_</h4>
+<pre>int version_</pre>
+</li>
+<li class="blockList">
+<h4>algorithm_</h4>
+<pre>int algorithm_</pre>
+</li>
+<li class="blockList">
+<h4>keyValue_</h4>
+<pre>com.google.protobuf.ByteString keyValue_</pre>
+</li>
+<li class="blockList">
+<h4>customKid_</h4>
+<pre><a href="com/google/crypto/tink/proto/JwtHmacKey.CustomKid.html" title="class in com.google.crypto.tink.proto">JwtHmacKey.CustomKid</a> customKid_</pre>
+</li>
+<li class="blockListLast">
+<h4>memoizedIsInitialized</h4>
+<pre>byte memoizedIsInitialized</pre>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="blockList"><a name="com.google.crypto.tink.proto.JwtHmacKey.CustomKid">
+<!--   -->
+</a>
+<h3>Class <a href="com/google/crypto/tink/proto/JwtHmacKey.CustomKid.html" title="class in com.google.crypto.tink.proto">com.google.crypto.tink.proto.JwtHmacKey.CustomKid</a> extends com.google.protobuf.GeneratedMessageV3 implements Serializable</h3>
+<dl class="nameValue">
+<dt>serialVersionUID:</dt>
+<dd>0L</dd>
+</dl>
+<ul class="blockList">
+<li class="blockList">
+<h3>Serialized Fields</h3>
+<ul class="blockList">
+<li class="blockList">
+<h4>value_</h4>
+<pre><a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a> value_</pre>
+</li>
+<li class="blockListLast">
+<h4>memoizedIsInitialized</h4>
+<pre>byte memoizedIsInitialized</pre>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="blockList"><a name="com.google.crypto.tink.proto.JwtHmacKeyFormat">
+<!--   -->
+</a>
+<h3>Class <a href="com/google/crypto/tink/proto/JwtHmacKeyFormat.html" title="class in com.google.crypto.tink.proto">com.google.crypto.tink.proto.JwtHmacKeyFormat</a> extends com.google.protobuf.GeneratedMessageV3 implements Serializable</h3>
+<dl class="nameValue">
+<dt>serialVersionUID:</dt>
+<dd>0L</dd>
+</dl>
+<ul class="blockList">
+<li class="blockList">
+<h3>Serialized Fields</h3>
+<ul class="blockList">
+<li class="blockList">
+<h4>version_</h4>
+<pre>int version_</pre>
+</li>
+<li class="blockList">
+<h4>algorithm_</h4>
+<pre>int algorithm_</pre>
+</li>
+<li class="blockList">
+<h4>keySize_</h4>
+<pre>int keySize_</pre>
+</li>
+<li class="blockListLast">
+<h4>memoizedIsInitialized</h4>
+<pre>byte memoizedIsInitialized</pre>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="blockList"><a name="com.google.crypto.tink.proto.JwtRsaSsaPkcs1KeyFormat">
+<!--   -->
+</a>
+<h3>Class <a href="com/google/crypto/tink/proto/JwtRsaSsaPkcs1KeyFormat.html" title="class in com.google.crypto.tink.proto">com.google.crypto.tink.proto.JwtRsaSsaPkcs1KeyFormat</a> extends com.google.protobuf.GeneratedMessageV3 implements Serializable</h3>
+<dl class="nameValue">
+<dt>serialVersionUID:</dt>
+<dd>0L</dd>
+</dl>
+<ul class="blockList">
+<li class="blockList">
+<h3>Serialized Fields</h3>
+<ul class="blockList">
+<li class="blockList">
+<h4>version_</h4>
+<pre>int version_</pre>
+</li>
+<li class="blockList">
+<h4>algorithm_</h4>
+<pre>int algorithm_</pre>
+</li>
+<li class="blockList">
+<h4>modulusSizeInBits_</h4>
+<pre>int modulusSizeInBits_</pre>
+</li>
+<li class="blockList">
+<h4>publicExponent_</h4>
+<pre>com.google.protobuf.ByteString publicExponent_</pre>
+</li>
+<li class="blockListLast">
+<h4>memoizedIsInitialized</h4>
+<pre>byte memoizedIsInitialized</pre>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="blockList"><a name="com.google.crypto.tink.proto.JwtRsaSsaPkcs1PrivateKey">
+<!--   -->
+</a>
+<h3>Class <a href="com/google/crypto/tink/proto/JwtRsaSsaPkcs1PrivateKey.html" title="class in com.google.crypto.tink.proto">com.google.crypto.tink.proto.JwtRsaSsaPkcs1PrivateKey</a> extends com.google.protobuf.GeneratedMessageV3 implements Serializable</h3>
+<dl class="nameValue">
+<dt>serialVersionUID:</dt>
+<dd>0L</dd>
+</dl>
+<ul class="blockList">
+<li class="blockList">
+<h3>Serialized Fields</h3>
+<ul class="blockList">
+<li class="blockList">
+<h4>version_</h4>
+<pre>int version_</pre>
+</li>
+<li class="blockList">
+<h4>publicKey_</h4>
+<pre><a href="com/google/crypto/tink/proto/JwtRsaSsaPkcs1PublicKey.html" title="class in com.google.crypto.tink.proto">JwtRsaSsaPkcs1PublicKey</a> publicKey_</pre>
+</li>
+<li class="blockList">
+<h4>d_</h4>
+<pre>com.google.protobuf.ByteString d_</pre>
+</li>
+<li class="blockList">
+<h4>p_</h4>
+<pre>com.google.protobuf.ByteString p_</pre>
+</li>
+<li class="blockList">
+<h4>q_</h4>
+<pre>com.google.protobuf.ByteString q_</pre>
+</li>
+<li class="blockList">
+<h4>dp_</h4>
+<pre>com.google.protobuf.ByteString dp_</pre>
+</li>
+<li class="blockList">
+<h4>dq_</h4>
+<pre>com.google.protobuf.ByteString dq_</pre>
+</li>
+<li class="blockList">
+<h4>crt_</h4>
+<pre>com.google.protobuf.ByteString crt_</pre>
+</li>
+<li class="blockListLast">
+<h4>memoizedIsInitialized</h4>
+<pre>byte memoizedIsInitialized</pre>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="blockList"><a name="com.google.crypto.tink.proto.JwtRsaSsaPkcs1PublicKey">
+<!--   -->
+</a>
+<h3>Class <a href="com/google/crypto/tink/proto/JwtRsaSsaPkcs1PublicKey.html" title="class in com.google.crypto.tink.proto">com.google.crypto.tink.proto.JwtRsaSsaPkcs1PublicKey</a> extends com.google.protobuf.GeneratedMessageV3 implements Serializable</h3>
+<dl class="nameValue">
+<dt>serialVersionUID:</dt>
+<dd>0L</dd>
+</dl>
+<ul class="blockList">
+<li class="blockList">
+<h3>Serialized Fields</h3>
+<ul class="blockList">
+<li class="blockList">
+<h4>version_</h4>
+<pre>int version_</pre>
+</li>
+<li class="blockList">
+<h4>algorithm_</h4>
+<pre>int algorithm_</pre>
+</li>
+<li class="blockList">
+<h4>n_</h4>
+<pre>com.google.protobuf.ByteString n_</pre>
+</li>
+<li class="blockList">
+<h4>e_</h4>
+<pre>com.google.protobuf.ByteString e_</pre>
+</li>
+<li class="blockList">
+<h4>customKid_</h4>
+<pre><a href="com/google/crypto/tink/proto/JwtRsaSsaPkcs1PublicKey.CustomKid.html" title="class in com.google.crypto.tink.proto">JwtRsaSsaPkcs1PublicKey.CustomKid</a> customKid_</pre>
+</li>
+<li class="blockListLast">
+<h4>memoizedIsInitialized</h4>
+<pre>byte memoizedIsInitialized</pre>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="blockList"><a name="com.google.crypto.tink.proto.JwtRsaSsaPkcs1PublicKey.CustomKid">
+<!--   -->
+</a>
+<h3>Class <a href="com/google/crypto/tink/proto/JwtRsaSsaPkcs1PublicKey.CustomKid.html" title="class in com.google.crypto.tink.proto">com.google.crypto.tink.proto.JwtRsaSsaPkcs1PublicKey.CustomKid</a> extends com.google.protobuf.GeneratedMessageV3 implements Serializable</h3>
+<dl class="nameValue">
+<dt>serialVersionUID:</dt>
+<dd>0L</dd>
+</dl>
+<ul class="blockList">
+<li class="blockList">
+<h3>Serialized Fields</h3>
+<ul class="blockList">
+<li class="blockList">
+<h4>value_</h4>
+<pre><a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a> value_</pre>
+</li>
+<li class="blockListLast">
+<h4>memoizedIsInitialized</h4>
+<pre>byte memoizedIsInitialized</pre>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="blockList"><a name="com.google.crypto.tink.proto.JwtRsaSsaPssKeyFormat">
+<!--   -->
+</a>
+<h3>Class <a href="com/google/crypto/tink/proto/JwtRsaSsaPssKeyFormat.html" title="class in com.google.crypto.tink.proto">com.google.crypto.tink.proto.JwtRsaSsaPssKeyFormat</a> extends com.google.protobuf.GeneratedMessageV3 implements Serializable</h3>
+<dl class="nameValue">
+<dt>serialVersionUID:</dt>
+<dd>0L</dd>
+</dl>
+<ul class="blockList">
+<li class="blockList">
+<h3>Serialized Fields</h3>
+<ul class="blockList">
+<li class="blockList">
+<h4>version_</h4>
+<pre>int version_</pre>
+</li>
+<li class="blockList">
+<h4>algorithm_</h4>
+<pre>int algorithm_</pre>
+</li>
+<li class="blockList">
+<h4>modulusSizeInBits_</h4>
+<pre>int modulusSizeInBits_</pre>
+</li>
+<li class="blockList">
+<h4>publicExponent_</h4>
+<pre>com.google.protobuf.ByteString publicExponent_</pre>
+</li>
+<li class="blockListLast">
+<h4>memoizedIsInitialized</h4>
+<pre>byte memoizedIsInitialized</pre>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="blockList"><a name="com.google.crypto.tink.proto.JwtRsaSsaPssPrivateKey">
+<!--   -->
+</a>
+<h3>Class <a href="com/google/crypto/tink/proto/JwtRsaSsaPssPrivateKey.html" title="class in com.google.crypto.tink.proto">com.google.crypto.tink.proto.JwtRsaSsaPssPrivateKey</a> extends com.google.protobuf.GeneratedMessageV3 implements Serializable</h3>
+<dl class="nameValue">
+<dt>serialVersionUID:</dt>
+<dd>0L</dd>
+</dl>
+<ul class="blockList">
+<li class="blockList">
+<h3>Serialized Fields</h3>
+<ul class="blockList">
+<li class="blockList">
+<h4>version_</h4>
+<pre>int version_</pre>
+</li>
+<li class="blockList">
+<h4>publicKey_</h4>
+<pre><a href="com/google/crypto/tink/proto/JwtRsaSsaPssPublicKey.html" title="class in com.google.crypto.tink.proto">JwtRsaSsaPssPublicKey</a> publicKey_</pre>
+</li>
+<li class="blockList">
+<h4>d_</h4>
+<pre>com.google.protobuf.ByteString d_</pre>
+</li>
+<li class="blockList">
+<h4>p_</h4>
+<pre>com.google.protobuf.ByteString p_</pre>
+</li>
+<li class="blockList">
+<h4>q_</h4>
+<pre>com.google.protobuf.ByteString q_</pre>
+</li>
+<li class="blockList">
+<h4>dp_</h4>
+<pre>com.google.protobuf.ByteString dp_</pre>
+</li>
+<li class="blockList">
+<h4>dq_</h4>
+<pre>com.google.protobuf.ByteString dq_</pre>
+</li>
+<li class="blockList">
+<h4>crt_</h4>
+<pre>com.google.protobuf.ByteString crt_</pre>
+</li>
+<li class="blockListLast">
+<h4>memoizedIsInitialized</h4>
+<pre>byte memoizedIsInitialized</pre>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="blockList"><a name="com.google.crypto.tink.proto.JwtRsaSsaPssPublicKey">
+<!--   -->
+</a>
+<h3>Class <a href="com/google/crypto/tink/proto/JwtRsaSsaPssPublicKey.html" title="class in com.google.crypto.tink.proto">com.google.crypto.tink.proto.JwtRsaSsaPssPublicKey</a> extends com.google.protobuf.GeneratedMessageV3 implements Serializable</h3>
+<dl class="nameValue">
+<dt>serialVersionUID:</dt>
+<dd>0L</dd>
+</dl>
+<ul class="blockList">
+<li class="blockList">
+<h3>Serialized Fields</h3>
+<ul class="blockList">
+<li class="blockList">
+<h4>version_</h4>
+<pre>int version_</pre>
+</li>
+<li class="blockList">
+<h4>algorithm_</h4>
+<pre>int algorithm_</pre>
+</li>
+<li class="blockList">
+<h4>n_</h4>
+<pre>com.google.protobuf.ByteString n_</pre>
+</li>
+<li class="blockList">
+<h4>e_</h4>
+<pre>com.google.protobuf.ByteString e_</pre>
+</li>
+<li class="blockList">
+<h4>customKid_</h4>
+<pre><a href="com/google/crypto/tink/proto/JwtRsaSsaPssPublicKey.CustomKid.html" title="class in com.google.crypto.tink.proto">JwtRsaSsaPssPublicKey.CustomKid</a> customKid_</pre>
+</li>
+<li class="blockListLast">
+<h4>memoizedIsInitialized</h4>
+<pre>byte memoizedIsInitialized</pre>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="blockList"><a name="com.google.crypto.tink.proto.JwtRsaSsaPssPublicKey.CustomKid">
+<!--   -->
+</a>
+<h3>Class <a href="com/google/crypto/tink/proto/JwtRsaSsaPssPublicKey.CustomKid.html" title="class in com.google.crypto.tink.proto">com.google.crypto.tink.proto.JwtRsaSsaPssPublicKey.CustomKid</a> extends com.google.protobuf.GeneratedMessageV3 implements Serializable</h3>
+<dl class="nameValue">
+<dt>serialVersionUID:</dt>
+<dd>0L</dd>
+</dl>
+<ul class="blockList">
+<li class="blockList">
+<h3>Serialized Fields</h3>
+<ul class="blockList">
+<li class="blockList">
+<h4>value_</h4>
+<pre><a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a> value_</pre>
 </li>
 <li class="blockListLast">
 <h4>memoizedIsInitialized</h4>
