@@ -24,6 +24,7 @@ declare -a PYTHON_VERSIONS=
 PYTHON_VERSIONS+=("3.7")
 PYTHON_VERSIONS+=("3.8")
 PYTHON_VERSIONS+=("3.9")
+PYTHON_VERSIONS+=("3.10")
 readonly PYTHON_VERSIONS
 
 readonly PLATFORM="$(uname | tr '[:upper:]' '[:lower:]')"
@@ -33,7 +34,7 @@ readonly TINK_VERSION="$(grep ^TINK "${TINK_SRC_PATH}/python/VERSION" \
   | awk '{gsub(/"/, "", $3); print $3}')"
 
 readonly IMAGE_NAME="quay.io/pypa/manylinux2014_x86_64"
-readonly IMAGE_DIGEST="sha256:d4604fe14cb0d691031f202ee7daf240e6d463297b060e2de60994d82a8f22ac"
+readonly IMAGE_DIGEST="sha256:31d7d1cbbb8ea93ac64c3113bceaa0e9e13d65198229a25eee16dc70e8bf9cf7"
 readonly IMAGE="${IMAGE_NAME}@${IMAGE_DIGEST}"
 
 build_linux() {

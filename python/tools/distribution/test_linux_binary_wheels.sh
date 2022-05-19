@@ -21,12 +21,20 @@ set -euo pipefail
 #   ["<Python version>"]="<python tag>-<abi tag>"
 # where:
 #   <Python version> = language version, e.g "3.7"
-#   <python tag-<abi tag> = tags as specified in in PEP 491, e.g. "cp37-37m"
+#   <python tag>, <abi tag> = as defined at
+#       https://packaging.python.org/en/latest/specifications/, e.g. "cp37-37m"
 declare -A PYTHON_VERSIONS
 PYTHON_VERSIONS["3.7"]="cp37-cp37m"
 PYTHON_VERSIONS["3.8"]="cp38-cp38"
 PYTHON_VERSIONS["3.9"]="cp39-cp39"
+PYTHON_VERSIONS["3.10"]="cp310-cp310"
 readonly -A PYTHON_VERSIONS
+
+# This is a compressed tag set as specified at
+# https://peps.python.org/pep-0425/#compressed-tag-sets
+#
+# Keep in sync with the output of the auditwheel tool.
+readonly PLATFORM_TAG_SET="manylinux_2_17_x86_64.manylinux2014_x86_64"
 
 export TINK_SRC_PATH="/tmp/tink"
 
@@ -43,7 +51,7 @@ for v in "${!PYTHON_VERSIONS[@]}"; do
     # Executing in a subshell to make the PATH modification temporary.
     export PATH="${PATH}:/opt/python/${PYTHON_VERSIONS[$v]}/bin"
 
-    pip3 install release/*-"${PYTHON_VERSIONS[$v]}"-manylinux2014_x86_64.whl
+    pip3 install release/*-"${PYTHON_VERSIONS[$v]}"-"${PLATFORM_TAG_SET}".whl
     find tink/ -not -path "*cc/pybind*" -type f -name "*_test.py" -print0 \
       | xargs -0 -n1 python3
   )

@@ -25,11 +25,13 @@ set -euo pipefail
 #   ["<Python version>"]="<python tag>-<abi tag>"
 # where:
 #   <Python version> = language version, e.g "3.7"
-#   <python tag-<abi tag> = tags as specified in in PEP 491, e.g. "cp37-37m"
+#   <python tag>, <abi tag> = as defined at
+#       https://packaging.python.org/en/latest/specifications/, e.g. "cp37-37m"
 declare -A PYTHON_VERSIONS
 PYTHON_VERSIONS["3.7"]="cp37-cp37m"
 PYTHON_VERSIONS["3.8"]="cp38-cp38"
 PYTHON_VERSIONS["3.9"]="cp39-cp39"
+PYTHON_VERSIONS["3.10"]="cp310-cp310"
 readonly -A PYTHON_VERSIONS
 
 readonly TINK_SRC_PATH="/tmp/tink"
