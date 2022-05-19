@@ -14,31 +14,42 @@ def tink_cc_gcpkms_deps():
             sha256 = "a9bebf3c3d65d4d421b7e2adbd8600ede614e9e2cc0a05fb2a652f147d7802f3",
         )
 
+    # gRPC needs io_bazel_rules_go.
+    if not native.existing_rule("io_bazel_rules_go"):
+        http_archive(
+            name = "io_bazel_rules_go",
+            sha256 = "f2dcd210c7095febe54b804bb1cd3a58fe8435a909db2ec04e31542631cf715c",
+            urls = [
+                "https://mirror.bazel.build/github.com/bazelbuild/rules_go/releases/download/v0.31.0/rules_go-v0.31.0.zip",
+                "https://github.com/bazelbuild/rules_go/releases/download/v0.31.0/rules_go-v0.31.0.zip",
+            ],
+        )
+
     # gRPC needs rules_apple, which in turn needs rules_swift and apple_support.
     if not native.existing_rule("build_bazel_rules_apple"):
-        # Release from 2021-10-29.
+        # Release from 2022-05-02.
         http_archive(
             name = "build_bazel_rules_apple",
-            sha256 = "77e8bf6fda706f420a55874ae6ee4df0c9d95da6c7838228b26910fc82eea5a2",
-            url = "https://github.com/bazelbuild/rules_apple/releases/download/0.32.0/rules_apple.0.32.0.tar.gz",
+            sha256 = "12865e5944f09d16364aa78050366aca9dc35a32a018fa35f5950238b08bf744",
+            url = "https://github.com/bazelbuild/rules_apple/releases/download/0.34.2/rules_apple.0.34.2.tar.gz",
         )
     if not native.existing_rule("build_bazel_rules_swift"):
-        # Release from 2021-10-04.
+        # Release from 2022-03-23.
         http_archive(
             name = "build_bazel_rules_swift",
-            sha256 = "4f167e5dbb49b082c5b7f49ee688630d69fb96f15c84c448faa2e97a5780dbbc",
-            url = "https://github.com/bazelbuild/rules_swift/releases/download/0.24.0/rules_swift.0.24.0.tar.gz",
+            sha256 = "a2fd565e527f83fb3f9eb07eb9737240e668c9242d3bc318712efa54a7deda97",
+            url = "https://github.com/bazelbuild/rules_swift/releases/download/0.27.0/rules_swift.0.27.0.tar.gz",
         )
     if not native.existing_rule("build_bazel_apple_support"):
-        # Release from 2021-06-11.
+        # Release from 2022-02-03.
         http_archive(
             name = "build_bazel_apple_support",
-            sha256 = "76df040ade90836ff5543888d64616e7ba6c3a7b33b916aa3a4b68f342d1b447",
-            url = "https://github.com/bazelbuild/apple_support/releases/download/0.11.0/apple_support.0.11.0.tar.gz",
+            sha256 = "5bbce1b2b9a3d4b03c0697687023ef5471578e76f994363c641c5f50ff0c7268",
+            url = "https://github.com/bazelbuild/apple_support/releases/download/0.13.0/apple_support.0.13.0.tar.gz",
         )
 
     if not native.existing_rule("com_google_googleapis"):
-        # Matches version embedded in com_github_grpc_grpc from 2021-11-17.
+        # Matches version embedded in com_github_grpc_grpc from 2022-05-11.
         http_archive(
             name = "com_google_googleapis",
             sha256 = "5bb6b0253ccf64b53d6c7249625a7e3f6c3bc6402abd52d3778bfa48258703a0",
@@ -47,40 +58,64 @@ def tink_cc_gcpkms_deps():
         )
 
     if "upb" not in native.existing_rules():
-        # Matches version embedded in com_github_grpc_grpc from 2021-11-17.
+        # Matches version embedded in com_github_grpc_grpc from 2022-05-11.
         http_archive(
             name = "upb",
-            sha256 = "7c02096dceb6b1249feaf11e4531f6bf31b9abdbd2305038349d1f1749bf88ea",
-            strip_prefix = "upb-0e0de7d9f927aa888d9a0baeaf6576bbbb23bf0b",
-            url = "https://github.com/protocolbuffers/upb/archive/0e0de7d9f927aa888d9a0baeaf6576bbbb23bf0b.tar.gz",
+            sha256 = "d0fe259d650bf9547e75896a1307bfc7034195e4ae89f5139814d295991ba681",
+            strip_prefix = "upb-bef53686ec702607971bd3ea4d4fefd80c6cc6e8",
+            url = "https://github.com/protocolbuffers/upb/archive/bef53686ec702607971bd3ea4d4fefd80c6cc6e8.tar.gz",
         )
 
     if "envoy_api" not in native.existing_rules():
-        # Matches version embedded in com_github_grpc_grpc from 2021-11-17.
+        # Matches version embedded in com_github_grpc_grpc from 2022-05-11.
         http_archive(
             name = "envoy_api",
-            sha256 = "e89d4dddbadf797dd2700ce45ee8abc82557a934a15fcad82673e7d13213b868",
-            strip_prefix = "data-plane-api-20b1b5fcee88a20a08b71051a961181839ec7268",
-            url = "https://github.com/envoyproxy/data-plane-api/archive/20b1b5fcee88a20a08b71051a961181839ec7268.tar.gz",
+            sha256 = "c5807010b67033330915ca5a20483e30538ae5e689aa14b3631d6284beca4630",
+            strip_prefix = "data-plane-api-9c42588c956220b48eb3099d186487c2f04d32ec",
+            url = "https://github.com/envoyproxy/data-plane-api/archive/9c42588c956220b48eb3099d186487c2f04d32ec.tar.gz",
+        )
+
+    if "com_envoyproxy_protoc_gen_validate" not in native.existing_rules():
+        # Matches version embedded in com_github_grpc_grpc from 2022-05-11.
+        http_archive(
+            name = "com_envoyproxy_protoc_gen_validate",
+            strip_prefix = "protoc-gen-validate-4694024279bdac52b77e22dc87808bd0fd732b69",
+            sha256 = "1e490b98005664d149b379a9529a6aa05932b8a11b76b4cd86f3d22d76346f47",
+            urls = [
+                "https://github.com/envoyproxy/protoc-gen-validate/archive/4694024279bdac52b77e22dc87808bd0fd732b69.tar.gz",
+            ],
+            patches = ["@com_github_grpc_grpc//third_party:protoc-gen-validate.patch"],
+            patch_args = ["-p1"],
+        )
+
+    if "bazel_gazelle" not in native.existing_rules():
+        # Matches version embedded in com_github_grpc_grpc from 2022-05-11.
+        http_archive(
+            name = "bazel_gazelle",
+            sha256 = "de69a09dc70417580aabf20a28619bb3ef60d038470c7cf8442fafcf627c21cb",
+            urls = [
+                "https://mirror.bazel.build/github.com/bazelbuild/bazel-gazelle/releases/download/v0.24.0/bazel-gazelle-v0.24.0.tar.gz",
+                "https://github.com/bazelbuild/bazel-gazelle/releases/download/v0.24.0/bazel-gazelle-v0.24.0.tar.gz",
+            ],
         )
 
     if not native.existing_rule("com_github_grpc_grpc"):
-        # Release from 2021-12-15.
+        # Release from 2022-05-11.
         http_archive(
             name = "com_github_grpc_grpc",
-            sha256 = "305fa696963fc4f97590931a0fcdc9c020410edd7ee31e4915bddc6bf954fbfe",
-            strip_prefix = "grpc-1.43.0",
-            url = "https://github.com/grpc/grpc/archive/v1.43.0.zip",
+            sha256 = "94b104231a7794ceb99760dd481d581ede05b96adbc0042d1eb783514d4e2680",
+            strip_prefix = "grpc-1.46.1",
+            url = "https://github.com/grpc/grpc/archive/v1.46.1.zip",
         )
 
     # Not used by Java Tink, but apparently needed for C++ gRPC library.
     if not native.existing_rule("io_grpc_grpc_java"):
-        # Release from 2021-12-15.
+        # Release from 2022-04-28.
         http_archive(
             name = "io_grpc_grpc_java",
-            sha256 = "1356886b7f9d48b606c689ab027e88456cf7ccd671615d4da55e5f10a83e71d2",
-            strip_prefix = "grpc-java-1.43.0",
-            url = "https://github.com/grpc/grpc-java/archive/v1.43.0.tar.gz",
+            sha256 = "c1b80883511ceb1e433fb2d4b2f6d85dca0c62a265a6a3e6695144610d6f65b8",
+            strip_prefix = "grpc-java-1.46.0",
+            url = "https://github.com/grpc/grpc-java/archive/v1.46.0.tar.gz",
         )
 
     if not native.existing_rule("curl"):

@@ -24,11 +24,12 @@ load("@tink_java//:tink_java_deps.bzl", "TINK_MAVEN_ARTIFACTS", "tink_java_deps"
 
 tink_java_deps()
 
+# Release from 2022-04-28.
 http_archive(
     name = "io_grpc_grpc_java",
-    sha256 = "1356886b7f9d48b606c689ab027e88456cf7ccd671615d4da55e5f10a83e71d2",
-    strip_prefix = "grpc-java-1.43.0",
-    url = "https://github.com/grpc/grpc-java/archive/v1.43.0.tar.gz",
+    sha256 = "c1b80883511ceb1e433fb2d4b2f6d85dca0c62a265a6a3e6695144610d6f65b8",
+    strip_prefix = "grpc-java-1.46.0",
+    url = "https://github.com/grpc/grpc-java/archive/v1.46.0.tar.gz",
 )
 
 load("@rules_jvm_external//:defs.bzl", "maven_install")

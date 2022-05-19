@@ -59,23 +59,27 @@ http_archive(
 
 load("@io_bazel_rules_go//go:deps.bzl", "go_register_toolchains", "go_rules_dependencies")
 load("@bazel_gazelle//:deps.bzl", "gazelle_dependencies", "go_repository")
-
 load("@tink_py//:tink_py_deps.bzl", "tink_py_deps")
+
 tink_py_deps()
 
 load("@tink_py//:tink_py_deps_init.bzl", "tink_py_deps_init")
+
 tink_py_deps_init("tink_py")
 
 load("@rules_python//python:pip.bzl", "pip_install")
+
 pip_install(
-   name = "pip_deps",
-   requirements = "//:requirements.txt",
+    name = "pip_deps",
+    requirements = "//:requirements.txt",
 )
 
 load("@tink_base//:tink_base_deps.bzl", "tink_base_deps")
+
 tink_base_deps()
 
 load("@tink_base//:tink_base_deps_init.bzl", "tink_base_deps_init")
+
 tink_base_deps_init()
 
 load("@tink_go//:deps.bzl", "go_dependencies")
@@ -97,12 +101,15 @@ go_register_toolchains(version = "1.17.6")
 gazelle_dependencies()
 
 load("@tink_cc//:tink_cc_deps.bzl", "tink_cc_deps")
+
 tink_cc_deps()
 
 load("@tink_cc//:tink_cc_deps_init.bzl", "tink_cc_deps_init")
+
 tink_cc_deps_init()
 
 load("@tink_cc_awskms//:tink_cc_awskms_deps.bzl", "tink_cc_awskms_deps")
+
 tink_cc_awskms_deps()
 
 load("@tink_cc_gcpkms//:tink_cc_gcpkms_deps.bzl", "tink_cc_gcpkms_deps")
@@ -111,10 +118,12 @@ tink_cc_gcpkms_deps()
 
 load("@tink_cc_gcpkms//:tink_cc_gcpkms_deps_init.bzl", "tink_cc_gcpkms_deps_init")
 
-tink_cc_gcpkms_deps_init()
+tink_cc_gcpkms_deps_init(register_go = False)
 
 load("@tink_java//:tink_java_deps.bzl", "tink_java_deps")
+
 tink_java_deps()
 
 load("@tink_java//:tink_java_deps_init.bzl", "tink_java_deps_init")
+
 tink_java_deps_init()

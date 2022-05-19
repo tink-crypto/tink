@@ -19,4 +19,4 @@ tink_cc_gcpkms_deps()
 
 load("@tink_cc_gcpkms//:tink_cc_gcpkms_deps_init.bzl", "tink_cc_gcpkms_deps_init")
 
-tink_cc_gcpkms_deps_init()
+tink_cc_gcpkms_deps_init(register_go = True)
