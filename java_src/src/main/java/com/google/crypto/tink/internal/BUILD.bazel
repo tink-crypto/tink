@@ -138,11 +138,17 @@ android_library(
 java_library(
     name = "byte_array",
     srcs = ["ByteArray.java"],
-    deps = ["@maven//:com_google_errorprone_error_prone_annotations"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink/subtle:hex",
+        "@maven//:com_google_errorprone_error_prone_annotations",
+    ],
 )
 
 android_library(
     name = "byte_array-android",
     srcs = ["ByteArray.java"],
-    deps = ["@maven//:com_google_errorprone_error_prone_annotations"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink/subtle:hex-android",
+        "@maven//:com_google_errorprone_error_prone_annotations",
+    ],
 )

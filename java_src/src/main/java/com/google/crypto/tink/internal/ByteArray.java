@@ -16,7 +16,9 @@
 
 package com.google.crypto.tink.internal;
 
+import com.google.crypto.tink.subtle.Hex;
 import com.google.errorprone.annotations.Immutable;
+import java.util.Arrays;
 
 /**
  * Immutable Wrapper around a byte array.
@@ -68,6 +70,25 @@ public final class ByteArray {
   private ByteArray(final byte[] buf, final int start, final int len) {
     data = new byte[len];
     System.arraycopy(buf, start, data, 0, len);
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (!(o instanceof ByteArray)) {
+      return false;
+    }
+    ByteArray other = (ByteArray) o;
+    return Arrays.equals(other.data, data);
+  }
+
+  @Override
+  public int hashCode() {
+    return Arrays.hashCode(data);
+  }
+
+  @Override
+  public String toString() {
+    return "ByteArray(" + Hex.encode(data) + ")";
   }
 
   @SuppressWarnings("Immutable") // We copy the data on input and output.

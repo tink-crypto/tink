@@ -69,4 +69,43 @@ public class ByteArrayTest {
     array.getBytes()[5] = 55;
     assertThat(array.getBytes()).isEqualTo(new byte[] {0, 1, 2, 3, 4, 5, 6, 7});
   }
+
+  @Test
+  public void testEquals() throws Exception {
+    byte[] plainArray = new byte[] {1, 2, 3, 1, 2, 3};
+    ByteArray byteArray = ByteArray.of(plainArray);
+    assertThat(byteArray.equals(byteArray)).isTrue();
+    assertThat(byteArray.equals(ByteArray.of(plainArray))).isTrue();
+
+    assertThat(byteArray.equals(ByteArray.of(plainArray, 0, 5))).isFalse();
+    assertThat(byteArray.equals(ByteArray.of(plainArray, 1, 5))).isFalse();
+
+    assertThat(ByteArray.of(plainArray, 0, 3).equals(ByteArray.of(plainArray, 3, 3))).isTrue();
+  }
+
+  @Test
+  @SuppressWarnings("EqualsIncompatibleType")
+  public void testEquals_differentObject() throws Exception {
+    assertThat(ByteArray.of(new byte[] {}).equals(new Integer(0))).isFalse();
+  }
+
+  @Test
+  public void testHashCode() throws Exception {
+    byte[] plainArray = new byte[] {1, 2, 3, 1, 2, 3};
+    ByteArray byteArray = ByteArray.of(plainArray);
+    assertThat(byteArray.hashCode()).isEqualTo(ByteArray.of(plainArray).hashCode());
+
+    assertThat(ByteArray.of(plainArray, 0, 3).hashCode())
+        .isEqualTo(ByteArray.of(plainArray, 3, 3).hashCode());
+  }
+
+  @Test
+  public void testHashCode_notAlwaysTheSame() throws Exception {
+    int hashCode = ByteArray.of(new byte[] {0}).hashCode();
+    byte b = 1;
+    while (ByteArray.of(new byte[] {(byte) b}).hashCode() == hashCode && b != 0) {
+      b++;
+    }
+    assertThat(ByteArray.of(new byte[] {(byte) b}).hashCode()).isNotEqualTo(hashCode);
+  }
 }
