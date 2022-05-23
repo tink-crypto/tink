@@ -83,10 +83,10 @@ py_library(
     srcs = ["testing_servers.py"],
     srcs_version = "PY3",
     deps = [
+        ":_path_util",
         ":_primitives",
         ":testing_api_python_library",
         "@com_google_protobuf//:protobuf_python",
-        "@tink_py//tink/testing:helper",
         requirement("absl-py"),
         "@org_python_pypi_portpicker//:portpicker",
     ],
@@ -165,5 +165,25 @@ py_test(
         requirement("six"),  # needed by absl-py
         requirement("absl-py"),
         "@tink_py//tink/proto:tink_py_pb2",
+    ],
+)
+
+py_library(
+    name = "_path_util",
+    srcs = ["_path_util.py"],
+    srcs_version = "PY3",
+)
+
+py_test(
+    name = "_path_util_test",
+    srcs = ["_path_util_test.py"],
+    # This is used to check Tink root path.
+    data = ["@tink_base//:LICENSE"],
+    python_version = "PY3",
+    srcs_version = "PY3",
+    deps = [
+        ":_path_util",
+        requirement("six"),  # needed by absl-py
+        requirement("absl-py"),
     ],
 )

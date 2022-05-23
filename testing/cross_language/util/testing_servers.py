@@ -25,7 +25,7 @@ import portpicker
 from tink.proto import tink_pb2
 from proto.testing import testing_api_pb2
 from proto.testing import testing_api_pb2_grpc
-from tink.testing import helper
+from util import _path_util
 from util import _primitives
 
 # Server paths are relative to tink_root_path(), which can be set manually by:
@@ -87,7 +87,7 @@ SUPPORTED_LANGUAGES_BY_PRIMITIVE = {
 
 def _server_path(lang: str) -> str:
   """Returns the path where the server binary is located."""
-  root_dir = helper.tink_root_path()
+  root_dir = _path_util.tink_root_path()
   for relative_server_path in _SERVER_PATHS[lang]:
     server_path = os.path.join(root_dir, relative_server_path)
     logging.info('try path: %s', server_path)
@@ -99,7 +99,7 @@ def _server_path(lang: str) -> str:
 def _server_cmd(lang: str, port: int) -> List[str]:
   server_path = _server_path(lang)
   if lang == 'java' and server_path.endswith('.jar'):
-    java_path = os.path.join(helper.tink_root_path(), _JAVA_PATH)
+    java_path = os.path.join(_path_util.tink_root_path(), _JAVA_PATH)
     return [java_path, '-jar', server_path, '--port', '%d' % port]
   else:
     return [server_path, '--port', '%d' % port]

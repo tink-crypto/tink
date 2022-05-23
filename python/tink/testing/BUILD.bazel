@@ -24,12 +24,8 @@ py_library(
 py_test(
     name = "helper_test",
     srcs = ["helper_test.py"],
-    data = [
-        # This is used to check Tink Python testdata path.
-        "//testdata:credentials",
-        # This is used to check Tink root path.
-        "@tink_base//:LICENSE",
-    ],
+    # This is used to check Tink Python testdata path.
+    data = ["//testdata:credentials"],
     srcs_version = "PY3",
     deps = [
         ":helper",
