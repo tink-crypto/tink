@@ -330,8 +330,6 @@ tink_pybind_extension(
         "@tink_cc//prf:prf_set",
         "@tink_cc//util:status",
         "@tink_cc//util:statusor",
-        "@tink_cc_awskms//:aws_kms_client",
-        "@tink_cc_gcpkms//:gcp_kms_client",
     ],
 )
 
