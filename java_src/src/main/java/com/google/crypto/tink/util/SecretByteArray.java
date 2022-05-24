@@ -41,14 +41,14 @@ public final class SecretByteArray {
     if (access == null) {
       throw new NullPointerException("SecretKeyAccess required");
     }
-    return new SecretByteArray(ByteArray.of(value));
+    return new SecretByteArray(ByteArray.copyOf(value));
   }
 
   /**
    * Creates a new SecretByteArray with bytes chosen uniformly at random of length {@code length}.
    */
   public static SecretByteArray randomBytes(int length) {
-    return new SecretByteArray(ByteArray.of(Random.randBytes(length)));
+    return new SecretByteArray(ByteArray.copyOf(Random.randBytes(length)));
   }
 
   /**

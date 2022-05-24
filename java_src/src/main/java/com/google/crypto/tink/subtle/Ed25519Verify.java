@@ -60,7 +60,7 @@ public final class Ed25519Verify implements PublicKeyVerify {
       throw new IllegalArgumentException(
           String.format("Given public key's length is not %s.", PUBLIC_KEY_LEN));
     }
-    this.publicKey = ByteArray.of(publicKey);
+    this.publicKey = ByteArray.copyOf(publicKey);
   }
 
   @Override

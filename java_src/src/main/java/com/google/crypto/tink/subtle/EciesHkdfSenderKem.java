@@ -36,8 +36,8 @@ public final class EciesHkdfSenderKem {
     private final ByteArray symmetricKey;
 
     public KemKey(final byte[] kemBytes, final byte[] symmetricKey) {
-      this.kemBytes = ByteArray.of(kemBytes);
-      this.symmetricKey = ByteArray.of(symmetricKey);
+      this.kemBytes = ByteArray.copyOf(kemBytes);
+      this.symmetricKey = ByteArray.copyOf(symmetricKey);
     }
 
     public byte[] getKemBytes() {

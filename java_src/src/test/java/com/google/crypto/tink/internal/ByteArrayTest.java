@@ -28,28 +28,28 @@ public class ByteArrayTest {
   @Test
   public void testBasicWorks() throws Exception {
     byte[] plainArray = new byte[] {0, 1, 2, 3, 4, 5, 6, 7};
-    ByteArray array = ByteArray.of(plainArray);
+    ByteArray array = ByteArray.copyOf(plainArray);
     assertThat(array.getBytes()).isEqualTo(plainArray);
   }
 
   @Test
   public void testWithRange() throws Exception {
     byte[] plainArray = new byte[] {100, 100, 100, 0, 1, 2, 3, 4, 5, 6, 7, 100, 100, 100};
-    ByteArray array = ByteArray.of(plainArray, 3, 8);
+    ByteArray array = ByteArray.copyOf(plainArray, 3, 8);
     assertThat(array.getBytes()).isEqualTo(new byte[] {0, 1, 2, 3, 4, 5, 6, 7});
   }
 
   @Test
   public void testGetLength() throws Exception {
     byte[] plainArray = new byte[] {100, 100, 100, 0, 1, 2, 3, 4, 5, 6, 7, 100, 100, 100};
-    ByteArray array = ByteArray.of(plainArray, 3, 8);
+    ByteArray array = ByteArray.copyOf(plainArray, 3, 8);
     assertThat(array.getLength()).isEqualTo(8);
   }
 
   @Test
   public void testImmutability_inputCopied1() throws Exception {
     byte[] plainArray = new byte[] {100, 100, 100, 0, 1, 2, 3, 4, 5, 6, 7, 100, 100, 100};
-    ByteArray array = ByteArray.of(plainArray, 3, 8);
+    ByteArray array = ByteArray.copyOf(plainArray, 3, 8);
     plainArray[5] = 55;
     assertThat(array.getBytes()).isEqualTo(new byte[] {0, 1, 2, 3, 4, 5, 6, 7});
   }
@@ -57,7 +57,7 @@ public class ByteArrayTest {
   @Test
   public void testImmutability_inputCopied2() throws Exception {
     byte[] plainArray = new byte[] {0, 1, 2, 3, 4, 5, 6, 7};
-    ByteArray array = ByteArray.of(plainArray);
+    ByteArray array = ByteArray.copyOf(plainArray);
     plainArray[5] = 55;
     assertThat(array.getBytes()).isEqualTo(new byte[] {0, 1, 2, 3, 4, 5, 6, 7});
   }
@@ -65,7 +65,7 @@ public class ByteArrayTest {
   @Test
   public void testImmutability_outputCopied() throws Exception {
     byte[] plainArray = new byte[] {100, 100, 100, 0, 1, 2, 3, 4, 5, 6, 7, 100, 100, 100};
-    ByteArray array = ByteArray.of(plainArray, 3, 8);
+    ByteArray array = ByteArray.copyOf(plainArray, 3, 8);
     array.getBytes()[5] = 55;
     assertThat(array.getBytes()).isEqualTo(new byte[] {0, 1, 2, 3, 4, 5, 6, 7});
   }
@@ -73,39 +73,40 @@ public class ByteArrayTest {
   @Test
   public void testEquals() throws Exception {
     byte[] plainArray = new byte[] {1, 2, 3, 1, 2, 3};
-    ByteArray byteArray = ByteArray.of(plainArray);
+    ByteArray byteArray = ByteArray.copyOf(plainArray);
     assertThat(byteArray.equals(byteArray)).isTrue();
-    assertThat(byteArray.equals(ByteArray.of(plainArray))).isTrue();
+    assertThat(byteArray.equals(ByteArray.copyOf(plainArray))).isTrue();
 
-    assertThat(byteArray.equals(ByteArray.of(plainArray, 0, 5))).isFalse();
-    assertThat(byteArray.equals(ByteArray.of(plainArray, 1, 5))).isFalse();
+    assertThat(byteArray.equals(ByteArray.copyOf(plainArray, 0, 5))).isFalse();
+    assertThat(byteArray.equals(ByteArray.copyOf(plainArray, 1, 5))).isFalse();
 
-    assertThat(ByteArray.of(plainArray, 0, 3).equals(ByteArray.of(plainArray, 3, 3))).isTrue();
+    assertThat(ByteArray.copyOf(plainArray, 0, 3).equals(ByteArray.copyOf(plainArray, 3, 3)))
+        .isTrue();
   }
 
   @Test
   @SuppressWarnings("EqualsIncompatibleType")
   public void testEquals_differentObject() throws Exception {
-    assertThat(ByteArray.of(new byte[] {}).equals(new Integer(0))).isFalse();
+    assertThat(ByteArray.copyOf(new byte[] {}).equals(new Integer(0))).isFalse();
   }
 
   @Test
   public void testHashCode() throws Exception {
     byte[] plainArray = new byte[] {1, 2, 3, 1, 2, 3};
-    ByteArray byteArray = ByteArray.of(plainArray);
-    assertThat(byteArray.hashCode()).isEqualTo(ByteArray.of(plainArray).hashCode());
+    ByteArray byteArray = ByteArray.copyOf(plainArray);
+    assertThat(byteArray.hashCode()).isEqualTo(ByteArray.copyOf(plainArray).hashCode());
 
-    assertThat(ByteArray.of(plainArray, 0, 3).hashCode())
-        .isEqualTo(ByteArray.of(plainArray, 3, 3).hashCode());
+    assertThat(ByteArray.copyOf(plainArray, 0, 3).hashCode())
+        .isEqualTo(ByteArray.copyOf(plainArray, 3, 3).hashCode());
   }
 
   @Test
   public void testHashCode_notAlwaysTheSame() throws Exception {
-    int hashCode = ByteArray.of(new byte[] {0}).hashCode();
+    int hashCode = ByteArray.copyOf(new byte[] {0}).hashCode();
     byte b = 1;
-    while (ByteArray.of(new byte[] {(byte) b}).hashCode() == hashCode && b != 0) {
+    while (ByteArray.copyOf(new byte[] {(byte) b}).hashCode() == hashCode && b != 0) {
       b++;
     }
-    assertThat(ByteArray.of(new byte[] {(byte) b}).hashCode()).isNotEqualTo(hashCode);
+    assertThat(ByteArray.copyOf(new byte[] {(byte) b}).hashCode()).isNotEqualTo(hashCode);
   }
 }
