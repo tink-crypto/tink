@@ -24,6 +24,8 @@
 
 #include "tink/hybrid_encrypt.h"
 
+NS_ASSUME_NONNULL_BEGIN
+
 /**
  * This interface is internal-only. Use TINKHybridEncryptFactory to get an instance that conforms to
  * TINKHybridEncrypt.
@@ -38,5 +40,7 @@
 - (nullable crypto::tink::HybridEncrypt *)ccHybridEncrypt;
 
 @end
+
+NS_ASSUME_NONNULL_END
 
 #endif  // __cplusplus
