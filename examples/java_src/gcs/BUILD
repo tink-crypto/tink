@@ -7,8 +7,8 @@ java_binary(
     srcs = ["GcsEnvelopeAeadExample.java"],
     main_class = "gcs.GcsEnvelopeAeadExample",
     deps = [
-        "@examples_maven//:com_google_auth_google_auth_library_oauth2_http",
-        "@examples_maven//:com_google_cloud_google_cloud_storage",
+        "@maven//:com_google_auth_google_auth_library_oauth2_http",
+        "@maven//:com_google_cloud_google_cloud_storage",
         "@tink_java//src/main/java/com/google/crypto/tink:aead",
         "@tink_java//src/main/java/com/google/crypto/tink:key_templates",
         "@tink_java//src/main/java/com/google/crypto/tink:registry_cluster",
