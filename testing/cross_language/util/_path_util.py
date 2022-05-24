@@ -21,9 +21,8 @@ _GOOGLE3_TINK_BASE_PATH = 'google3/third_party/tink'
 def tink_root_path() -> str:
   """Returns the path to the Tink root directory used for the test enviroment.
 
-     The path can be set in the TINK_SRC_PATH enviroment variable. If Bazel
-     is used the path is derived from the Bazel enviroment variables. If that
-     does not work, it generates the root path relative to the __file__ path.
+  The path can be set in the TINK_SRC_PATH enviroment variable. If Bazel is used
+  the path is derived from the Bazel enviroment variables.
   """
   root_paths = []
   if 'TINK_SRC_PATH' in os.environ:
