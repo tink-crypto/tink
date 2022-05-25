@@ -37,7 +37,7 @@ public final class SecretByteArray {
    *
    * <p>The parameter {@code access} must be non-null.
    */
-  public static SecretByteArray copyOf(byte[] value, SecretKeyAccess access) {
+  public static SecretByteArray copyFrom(byte[] value, SecretKeyAccess access) {
     if (access == null) {
       throw new NullPointerException("SecretKeyAccess required");
     }
@@ -56,7 +56,7 @@ public final class SecretByteArray {
    *
    * <p>The parameter {@code access} must be non-null.
    */
-  public byte[] getBytes(SecretKeyAccess access) {
+  public byte[] toByteArray(SecretKeyAccess access) {
     if (access == null) {
       throw new NullPointerException("SecretKeyAccess required");
     }
@@ -64,7 +64,7 @@ public final class SecretByteArray {
   }
 
   /** Returns the length of the bytes wrapped by this object. */
-  public int getLength() {
+  public int size() {
     return byteArray.getBytes().length;
   }
 
