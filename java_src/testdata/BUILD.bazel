@@ -46,3 +46,9 @@ filegroup(
         "ecies_public_keyset2.bin",
     ],
 )
+
+filegroup(
+    name = "hpke_boringssl_test_vectors",
+    testonly = 1,
+    srcs = ["testvectors/hpke_boringssl.json"],
+)
