@@ -102,3 +102,30 @@ java_test(
         "@maven//:junit_junit",
     ],
 )
+
+java_test(
+    name = "ProtoKeyFormatSerializationTest",
+    size = "small",
+    srcs = ["ProtoKeyFormatSerializationTest.java"],
+    deps = [
+        "//proto:tink_java_proto",
+        "//src/main/java/com/google/crypto/tink/internal:byte_array",
+        "//src/main/java/com/google/crypto/tink/internal:proto_key_format_serialization",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "ProtoKeySerializationTest",
+    size = "small",
+    srcs = ["ProtoKeySerializationTest.java"],
+    deps = [
+        "//proto:tink_java_proto",
+        "//src/main/java/com/google/crypto/tink/internal:byte_array",
+        "//src/main/java/com/google/crypto/tink/internal:proto_key_serialization",
+        "@com_google_protobuf//:protobuf_javalite",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
