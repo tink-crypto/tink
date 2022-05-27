@@ -646,6 +646,20 @@ tink_cc_library(
     absl::optional
 )
 
+tink_cc_library(
+  NAME insecure_secret_key_access
+  SRCS
+    insecure_secret_key_access.h
+  DEPS
+    tink::core::secret_key_access_token
+)
+
+tink_cc_library(
+  NAME secret_key_access_token
+  SRCS
+    secret_key_access_token.h
+)
+
 # tests
 
 tink_cc_test(

@@ -689,6 +689,19 @@ cc_library(
     ],
 )
 
+cc_library(
+    name = "secret_key_access_token",
+    hdrs = ["secret_key_access_token.h"],
+    include_prefix = "tink",
+)
+
+cc_library(
+    name = "insecure_secret_key_access",
+    hdrs = ["insecure_secret_key_access.h"],
+    include_prefix = "tink",
+    deps = [":secret_key_access_token"],
+)
+
 # tests
 
 cc_test(
