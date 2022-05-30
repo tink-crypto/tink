@@ -25,8 +25,8 @@ from tink import cleartext_keyset_handle
 
 from tink import jwt
 
-from proto.testing import testing_api_pb2
-from proto.testing import testing_api_pb2_grpc
+from proto import testing_api_pb2
+from proto import testing_api_pb2_grpc
 
 
 def _to_timestamp_tuple(t: datetime.datetime) -> Tuple[int, int]:

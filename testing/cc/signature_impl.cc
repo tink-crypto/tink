@@ -24,7 +24,7 @@
 #include "tink/cleartext_keyset_handle.h"
 #include "tink/public_key_sign.h"
 #include "tink/public_key_verify.h"
-#include "proto/testing/testing_api.grpc.pb.h"
+#include "proto/testing_api.grpc.pb.h"
 
 namespace tink_testing_api {
 

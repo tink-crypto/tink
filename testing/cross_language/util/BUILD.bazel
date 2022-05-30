@@ -11,7 +11,7 @@ licenses(["notice"])
 
 python_grpc_library(
     name = "testing_api_python_library",
-    protos = ["@tink_base//proto/testing:testing_api_proto"],
+    protos = ["//proto:testing_api_proto"],
 )
 
 py_library(
@@ -137,11 +137,11 @@ py_library(
         "@tink_py//tink/proto:chacha20_poly1305_py_pb2",
         "@tink_py//tink/proto:ecdsa_py_pb2",
         "@tink_py//tink/proto:ecies_aead_hkdf_py_pb2",
-        "@tink_py//tink/proto:hpke_py_pb2",
         "@tink_py//tink/proto:ed25519_py_pb2",
         "@tink_py//tink/proto:hkdf_prf_py_pb2",
         "@tink_py//tink/proto:hmac_prf_py_pb2",
         "@tink_py//tink/proto:hmac_py_pb2",
+        "@tink_py//tink/proto:hpke_py_pb2",
         "@tink_py//tink/proto:jwt_ecdsa_py_pb2",
         "@tink_py//tink/proto:jwt_hmac_py_pb2",
         "@tink_py//tink/proto:jwt_rsa_ssa_pkcs1_py_pb2",

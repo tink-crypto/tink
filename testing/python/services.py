@@ -27,9 +27,9 @@ from tink import prf
 from tink import signature
 from tink import streaming_aead
 from tink.proto import tink_pb2
-from proto.testing import testing_api_pb2
-from proto.testing import testing_api_pb2_grpc
 from tink.testing import bytes_io
+from proto import testing_api_pb2
+from proto import testing_api_pb2_grpc
 
 
 # All KeyTemplate (as Protobuf) defined in the Python API.

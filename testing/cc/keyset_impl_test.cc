@@ -31,7 +31,7 @@
 #include "tink/config/tink_config.h"
 #include "tink/hybrid/hybrid_key_templates.h"
 #include "tink/util/test_matchers.h"
-#include "proto/testing/testing_api.grpc.pb.h"
+#include "proto/testing_api.grpc.pb.h"
 
 namespace crypto {
 namespace tink {

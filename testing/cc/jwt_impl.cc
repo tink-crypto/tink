@@ -24,13 +24,13 @@
 #include "tink/binary_keyset_reader.h"
 #include "tink/binary_keyset_writer.h"
 #include "tink/cleartext_keyset_handle.h"
+#include "tink/jwt/jwk_set_converter.h"
 #include "tink/jwt/jwt_mac.h"
 #include "tink/jwt/jwt_public_key_sign.h"
 #include "tink/jwt/jwt_public_key_verify.h"
 #include "tink/jwt/raw_jwt.h"
 #include "tink/util/status.h"
-#include "tink/jwt/jwk_set_converter.h"
-#include "proto/testing/testing_api.grpc.pb.h"
+#include "proto/testing_api.grpc.pb.h"
 
 namespace tink_testing_api {
 

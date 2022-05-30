@@ -28,8 +28,8 @@ import (
 	"google.golang.org/protobuf/testing/protocmp"
 	"github.com/google/tink/go/aead"
 	"github.com/google/tink/go/jwt"
-	pb "github.com/google/tink/proto/testing/testing_api_go_grpc"
 	"github.com/google/tink/testing/go/services"
+	pb "github.com/google/tink/testing/go/proto/testing_api_go_grpc"
 )
 
 func verifiedJWTFromResponse(response *pb.JwtVerifyResponse) (*pb.JwtToken, error) {

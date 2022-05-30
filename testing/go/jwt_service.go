@@ -26,7 +26,7 @@ import (
 	"github.com/google/tink/go/jwt"
 	"github.com/google/tink/go/keyset"
 	"github.com/google/tink/go/testkeyset"
-	pb "github.com/google/tink/proto/testing/testing_api_go_grpc"
+	pb "github.com/google/tink/testing/go/proto/testing_api_go_grpc"
 )
 
 // JWTService implements the JWT testing service.

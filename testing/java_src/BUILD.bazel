@@ -7,13 +7,13 @@ licenses(["notice"])
 java_proto_library(
     name = "testing_api_java_proto",
     testonly = 1,
-    deps = ["@tink_base//proto/testing:testing_api_proto"],
+    deps = ["//proto:testing_api_proto"],
 )
 
 java_grpc_library(
     name = "testing_api_java_grpc",
     testonly = 1,
-    srcs = ["@tink_base//proto/testing:testing_api_proto"],
+    srcs = ["//proto:testing_api_proto"],
     deps = [":testing_api_java_proto"],
 )
 

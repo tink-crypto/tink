@@ -23,10 +23,10 @@ import grpc
 import portpicker
 
 from tink.proto import tink_pb2
-from proto.testing import testing_api_pb2
-from proto.testing import testing_api_pb2_grpc
 from util import _path_util
 from util import _primitives
+from proto import testing_api_pb2
+from proto import testing_api_pb2_grpc
 
 # Server paths are relative to tink_root_path(), which can be set manually by:
 # bazel test util:testing_servers_test --test_env TINK_SRC_PATH=/tmp/tink

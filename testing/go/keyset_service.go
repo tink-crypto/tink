@@ -32,8 +32,8 @@ import (
 	"github.com/google/tink/go/signature"
 	"github.com/google/tink/go/streamingaead"
 	"github.com/google/tink/go/testkeyset"
-	pb "github.com/google/tink/proto/testing/testing_api_go_grpc"
 	tinkpb "github.com/google/tink/go/proto/tink_go_proto"
+	pb "github.com/google/tink/testing/go/proto/testing_api_go_grpc"
 
 	"google.golang.org/protobuf/proto"
 )

@@ -15,9 +15,9 @@ syntax = "proto3";
 
 package tink_testing_api;
 
-option java_package = "com.google.crypto.tink.proto.testing";
+option java_package = "com.google.crypto.tink.testing.proto";
 option java_multiple_files = true;
-option go_package = "github.com/google/tink/proto/testing/testing_api_go_proto";
+option go_package = "github.com/google/tink/testing/go/proto/testing_api_go_proto";
 // Placeholder for java_stubby_library
 
 // Service providing metadata about the server.

@@ -29,8 +29,8 @@ from tink import signature as tink_signature
 from tink import streaming_aead
 
 from tink.proto import tink_pb2
-from proto.testing import testing_api_pb2
-from proto.testing import testing_api_pb2_grpc
+from proto import testing_api_pb2
+from proto import testing_api_pb2_grpc
 
 
 def key_template(stub: testing_api_pb2_grpc.KeysetStub,
