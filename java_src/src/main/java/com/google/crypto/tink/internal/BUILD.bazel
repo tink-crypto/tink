@@ -258,3 +258,41 @@ android_library(
         "@maven//:com_google_errorprone_error_prone_annotations",
     ],
 )
+
+java_library(
+    name = "key_format_parser",
+    srcs = ["KeyFormatParser.java"],
+    deps = [
+        ":byte_array",
+        ":serialization",
+        "//src/main/java/com/google/crypto/tink:key_format",
+    ],
+)
+
+android_library(
+    name = "key_format_parser-android",
+    srcs = ["KeyFormatParser.java"],
+    deps = [
+        ":byte_array-android",
+        ":serialization-android",
+        "//src/main/java/com/google/crypto/tink:key_format-android",
+    ],
+)
+
+java_library(
+    name = "key_format_serializer",
+    srcs = ["KeyFormatSerializer.java"],
+    deps = [
+        ":serialization",
+        "//src/main/java/com/google/crypto/tink:key_format",
+    ],
+)
+
+android_library(
+    name = "key_format_serializer-android",
+    srcs = ["KeyFormatSerializer.java"],
+    deps = [
+        ":serialization-android",
+        "//src/main/java/com/google/crypto/tink:key_format-android",
+    ],
+)
