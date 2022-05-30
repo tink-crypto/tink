@@ -41,14 +41,14 @@ public final class SecretByteArray {
     if (access == null) {
       throw new NullPointerException("SecretKeyAccess required");
     }
-    return new SecretByteArray(ByteArray.copyOf(value));
+    return new SecretByteArray(ByteArray.copyFrom(value));
   }
 
   /**
    * Creates a new SecretByteArray with bytes chosen uniformly at random of length {@code length}.
    */
   public static SecretByteArray randomBytes(int length) {
-    return new SecretByteArray(ByteArray.copyOf(Random.randBytes(length)));
+    return new SecretByteArray(ByteArray.copyFrom(Random.randBytes(length)));
   }
 
   /**
@@ -60,12 +60,12 @@ public final class SecretByteArray {
     if (access == null) {
       throw new NullPointerException("SecretKeyAccess required");
     }
-    return byteArray.getBytes();
+    return byteArray.toByteArray();
   }
 
   /** Returns the length of the bytes wrapped by this object. */
   public int size() {
-    return byteArray.getBytes().length;
+    return byteArray.size();
   }
 
   /**
@@ -73,8 +73,8 @@ public final class SecretByteArray {
    * length of both SecretByteArray objects.
    */
   public boolean equalsSecretByteArray(SecretByteArray other) {
-    byte[] myArray = byteArray.getBytes();
-    byte[] otherArray = other.byteArray.getBytes();
+    byte[] myArray = byteArray.toByteArray();
+    byte[] otherArray = other.byteArray.toByteArray();
     if (myArray.length != otherArray.length) {
       return false;
     }

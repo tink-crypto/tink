@@ -60,7 +60,7 @@ public final class Ed25519Verify implements PublicKeyVerify {
       throw new IllegalArgumentException(
           String.format("Given public key's length is not %s.", PUBLIC_KEY_LEN));
     }
-    this.publicKey = ByteArray.copyOf(publicKey);
+    this.publicKey = ByteArray.copyFrom(publicKey);
   }
 
   @Override
@@ -69,7 +69,7 @@ public final class Ed25519Verify implements PublicKeyVerify {
       throw new GeneralSecurityException(
           String.format("The length of the signature is not %s.", SIGNATURE_LEN));
     }
-    if (!Ed25519.verify(data, signature, publicKey.getBytes())) {
+    if (!Ed25519.verify(data, signature, publicKey.toByteArray())) {
       throw new GeneralSecurityException("Signature check failed.");
     }
   }

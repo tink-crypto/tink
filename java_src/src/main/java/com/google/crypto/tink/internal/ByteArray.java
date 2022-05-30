@@ -34,11 +34,11 @@ public final class ByteArray {
    * @param data the byte array to be wrapped.
    * @return an immutable wrapper around the provided bytes.
    */
-  public static ByteArray copyOf(final byte[] data) {
+  public static ByteArray copyFrom(final byte[] data) {
     if (data == null) {
       return null;
     } else {
-      return copyOf(data, 0, data.length);
+      return copyFrom(data, 0, data.length);
     }
   }
 
@@ -51,19 +51,23 @@ public final class ByteArray {
    * @return an immutable wrapper around the bytes in the slice from {@code start} to {@code start +
    *     len}
    */
-  public static ByteArray copyOf(final byte[] data, final int start, final int len) {
+  public static ByteArray copyFrom(final byte[] data, final int start, final int len) {
     return new ByteArray(data, start, len);
   }
 
-  /** @return a copy of the bytes wrapped by this object. */
-  public byte[] getBytes() {
+  /**
+   * @return a copy of the bytes wrapped by this object.
+   */
+  public byte[] toByteArray() {
     byte[] result = new byte[data.length];
     System.arraycopy(data, 0, result, 0, data.length);
     return result;
   }
 
-  /** @return the length of the bytes wrapped by this object. */
-  public int getLength() {
+  /**
+   * @return the length of the bytes wrapped by this object.
+   */
+  public int size() {
     return data.length;
   }
 

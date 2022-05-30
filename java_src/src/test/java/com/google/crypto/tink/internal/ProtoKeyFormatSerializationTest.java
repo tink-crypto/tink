@@ -33,6 +33,6 @@ public final class ProtoKeyFormatSerializationTest {
     ProtoKeyFormatSerialization serialization = ProtoKeyFormatSerialization.create(template);
     assertThat(serialization.getKeyTemplate()).isEqualTo(template);
     assertThat(serialization.getObjectIdentifier())
-        .isEqualTo(ByteArray.copyOf("myTypeUrl".getBytes(UTF_8)));
+        .isEqualTo(ByteArray.copyFrom("myTypeUrl".getBytes(UTF_8)));
   }
 }

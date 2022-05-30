@@ -47,7 +47,7 @@ public final class ProtoKeySerialization implements Serialization {
       OutputPrefixType outputPrefixType,
       Optional<Integer> idRequirement) {
     this.typeUrl = typeUrl;
-    this.objectIdentifier = ByteArray.copyOf(typeUrl.getBytes(UTF_8));
+    this.objectIdentifier = ByteArray.copyFrom(typeUrl.getBytes(UTF_8));
     this.value = value;
     this.keyMaterialType = keyMaterialType;
     this.outputPrefixType = outputPrefixType;

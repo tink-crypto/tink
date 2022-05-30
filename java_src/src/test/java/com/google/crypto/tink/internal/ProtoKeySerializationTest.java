@@ -48,7 +48,7 @@ public final class ProtoKeySerializationTest {
     assertThat(serialization.getTypeUrl()).isEqualTo("myTypeUrl");
     assertThat(serialization.getIdRequirement().isPresent()).isFalse();
     assertThat(serialization.getObjectIdentifier())
-        .isEqualTo(ByteArray.copyOf("myTypeUrl".getBytes(UTF_8)));
+        .isEqualTo(ByteArray.copyFrom("myTypeUrl".getBytes(UTF_8)));
   }
 
   @Test

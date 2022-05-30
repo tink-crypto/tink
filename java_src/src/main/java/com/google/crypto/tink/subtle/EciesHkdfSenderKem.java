@@ -36,15 +36,15 @@ public final class EciesHkdfSenderKem {
     private final ByteArray symmetricKey;
 
     public KemKey(final byte[] kemBytes, final byte[] symmetricKey) {
-      this.kemBytes = ByteArray.copyOf(kemBytes);
-      this.symmetricKey = ByteArray.copyOf(symmetricKey);
+      this.kemBytes = ByteArray.copyFrom(kemBytes);
+      this.symmetricKey = ByteArray.copyFrom(symmetricKey);
     }
 
     public byte[] getKemBytes() {
       if (kemBytes == null) {
         return null;
       } else {
-        return kemBytes.getBytes();
+        return kemBytes.toByteArray();
       }
     }
 
@@ -52,7 +52,7 @@ public final class EciesHkdfSenderKem {
       if (symmetricKey == null) {
         return null;
       } else {
-        return symmetricKey.getBytes();
+        return symmetricKey.toByteArray();
       }
     }
   }

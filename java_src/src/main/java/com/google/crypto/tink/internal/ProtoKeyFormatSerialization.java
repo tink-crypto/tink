@@ -34,7 +34,7 @@ public final class ProtoKeyFormatSerialization implements Serialization {
 
   private ProtoKeyFormatSerialization(KeyTemplate keyTemplate) {
     this.keyTemplate = keyTemplate;
-    this.objectIdentifier = ByteArray.copyOf(keyTemplate.getTypeUrl().getBytes(UTF_8));
+    this.objectIdentifier = ByteArray.copyFrom(keyTemplate.getTypeUrl().getBytes(UTF_8));
   }
 
   /** Creates a new {@code ProtoKeyFormatSerialization} object. */
