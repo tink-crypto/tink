@@ -514,6 +514,7 @@ java_library(
         ":stream_segment_decrypter",
         ":stream_segment_encrypter",
         "//src/main/java/com/google/crypto/tink:streaming_aead",
+        "@maven//:androidx_annotation_annotation",
     ],
 )
 
@@ -883,6 +884,7 @@ android_library(
         ":stream_segment_decrypter-android",
         ":stream_segment_encrypter-android",
         "//src/main/java/com/google/crypto/tink:streaming_aead-android",
+        "@maven//:androidx_annotation_annotation",
     ],
 )
 
