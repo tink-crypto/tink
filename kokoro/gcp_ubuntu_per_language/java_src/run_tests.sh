@@ -67,6 +67,8 @@ test_build_bazel_file() {
     "${all_aws_kms_libs}" \
     "${all_gcp_kms_libs}" > java_src/BUILD.bazel.generated
 
+  buildifier java_src/BUILD.bazel.generated
+
   if ! cmp -s java_src/BUILD.bazel java_src/BUILD.bazel.generated ; then
     echo "Files BUILD.bazel and BUILD.bazel.generated are different."
     echo "=============== BROKEN file //third_party/tink/java_src/BUILD.bazel. Should be: "

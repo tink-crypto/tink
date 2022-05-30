@@ -113,9 +113,8 @@ check_deps(
 def _format_deps(deps_list):
   """Maps a list of dependencies into a single string."""
 
-  stripped_deps = [l.strip() for l in sorted(deps_list)]
-  indented_quoted_deps = ['        "{}",'.format(l) for l in stripped_deps]
-  return '\n'.join(indented_quoted_deps)
+  stripped_quoted_deps = ['"' + l.strip() + '",' for l in deps_list]
+  return '\n'.join(stripped_quoted_deps)
 
 
 def main():
