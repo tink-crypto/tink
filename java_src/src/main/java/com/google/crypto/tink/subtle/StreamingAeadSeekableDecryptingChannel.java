@@ -16,7 +16,6 @@
 
 package com.google.crypto.tink.subtle;
 
-import androidx.annotation.RequiresApi;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.ClosedChannelException;
@@ -160,15 +159,14 @@ class StreamingAeadSeekableDecryptingChannel implements SeekableByteChannel {
   }
 
   /**
-   * Tries to read the header of the ciphertext and derive the key used for the ciphertext from the
-   * information in the header.
+   * Tries to read the header of the ciphertext and derive the key used for the
+   * ciphertext from the information in the header.
    *
-   * @return true if the header was fully read and has a correct format. Returns false if the header
-   *     could not be read.
-   * @throws IOException if the header was incorrectly formatted or if there was an exception during
-   *     the key derivation.
+   * @return true if the header was fully read and has a correct format.
+   *               Returns false if the header could not be read.
+   * @throws IOException if the header was incorrectly formatted or if there
+   *         was an exception during the key derivation.
    */
-  @RequiresApi(24)
   private boolean tryReadHeader() throws IOException {
     ciphertextChannel.position(header.position() + firstSegmentOffset);
     ciphertextChannel.read(header);
