@@ -26,7 +26,7 @@ namespace {
 // An AEAD which will always return a kInternal status on API calls.
 class AlwaysFailAead : public Aead {
  public:
-  explicit AlwaysFailAead(const std::string message)
+  explicit AlwaysFailAead(std::string message)
       : message_(std::move(message)) {}
 
   crypto::tink::util::StatusOr<std::string> Encrypt(
