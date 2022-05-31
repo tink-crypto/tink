@@ -105,14 +105,6 @@ public final class SerializationRegistry {
     keyParserMap = new HashMap<>(builder.keyParserMap);
   }
 
-  /**
-   * Creates an new SerializationRegistry with the same registration is the one in {@code other}.
-   */
-  public SerializationRegistry(SerializationRegistry other) {
-    keySerializerMap = new HashMap<>(other.keySerializerMap);
-    keyParserMap = new HashMap<>(other.keyParserMap);
-  }
-
   private static class SerializerIndex {
     private final Class<?> keyClass;
     private final Class<? extends Serialization> keySerializationClass;
