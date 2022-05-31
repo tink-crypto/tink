@@ -159,3 +159,23 @@ java_test(
         "@maven//:junit_junit",
     ],
 )
+
+java_test(
+    name = "SerializationRegistryTest",
+    size = "small",
+    srcs = ["SerializationRegistryTest.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink:insecure_secret_key_access",
+        "//src/main/java/com/google/crypto/tink:key",
+        "//src/main/java/com/google/crypto/tink:key_format",
+        "//src/main/java/com/google/crypto/tink:secret_key_access",
+        "//src/main/java/com/google/crypto/tink/internal:byte_array",
+        "//src/main/java/com/google/crypto/tink/internal:key_parser",
+        "//src/main/java/com/google/crypto/tink/internal:key_serializer",
+        "//src/main/java/com/google/crypto/tink/internal:serialization",
+        "//src/main/java/com/google/crypto/tink/internal:serialization_registry",
+        "@maven//:com_google_errorprone_error_prone_annotations",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)

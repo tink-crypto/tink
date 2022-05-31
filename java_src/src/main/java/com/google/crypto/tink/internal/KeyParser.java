@@ -94,6 +94,9 @@ public abstract class KeyParser<SerializationT extends Serialization> {
    *       KeyParser.create(MyClass::parse, objectIdentifier, MySerialization.class);
    * }</pre>
    *
+   * Note that calling this function twice will result in objects which are not equal according to
+   * {@code Object.equals}, and hence cannot be used to re-register a previously registered object.
+   *
    * @param function The function used to parse a Key
    * @param objectIdentifier The identifier to be returned by {@link #getObjectIdentifier}
    * @param serializationClass The class object corresponding to {@code SerializationT}

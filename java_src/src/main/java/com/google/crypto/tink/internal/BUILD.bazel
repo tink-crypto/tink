@@ -260,6 +260,32 @@ android_library(
 )
 
 java_library(
+    name = "serialization_registry",
+    srcs = ["SerializationRegistry.java"],
+    deps = [
+        ":byte_array",
+        ":key_parser",
+        ":key_serializer",
+        ":serialization",
+        "//src/main/java/com/google/crypto/tink:key",
+        "//src/main/java/com/google/crypto/tink:secret_key_access",
+    ],
+)
+
+android_library(
+    name = "serialization_registry-android",
+    srcs = ["SerializationRegistry.java"],
+    deps = [
+        ":byte_array-android",
+        ":key_parser-android",
+        ":key_serializer-android",
+        ":serialization-android",
+        "//src/main/java/com/google/crypto/tink:key-android",
+        "//src/main/java/com/google/crypto/tink:secret_key_access-android",
+    ],
+)
+
+java_library(
     name = "key_format_parser",
     srcs = ["KeyFormatParser.java"],
     deps = [

@@ -79,6 +79,10 @@ public abstract class KeySerializer<KeyT extends Key, SerializationT extends Ser
    * KeySerializer<MyKey, MySerialization> serializer =
    *       KeySerializer.create(MyClass::serialize, MyKey.class, MySerialization.class);
    * }</pre>
+   *
+   * <p>Note that calling this function twice will result in objects which are not equal according
+   * to {@code Object.equals}, and hence cannot be used to re-register a previously registered
+   * object.
    */
   public static <KeyT extends Key, SerializationT extends Serialization>
       KeySerializer<KeyT, SerializationT> create(
