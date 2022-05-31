@@ -23,28 +23,28 @@ namespace crypto {
 namespace tink {
 namespace {
 
-// An AEAD which will always return a kInternal status on API calls.
+// An AEAD that always returns a kInternal status on API calls.
 class AlwaysFailAead : public Aead {
  public:
   explicit AlwaysFailAead(std::string message)
       : message_(std::move(message)) {}
 
-  crypto::tink::util::StatusOr<std::string> Encrypt(
+  util::StatusOr<std::string> Encrypt(
       absl::string_view plaintext,
       absl::string_view associated_data) const override {
     return util::Status(
         absl::StatusCode::kInternal,
-        absl::StrCat("AlwaysFailAead will always fail on encrypt (msg=",
-                     message_, ")"));
+        absl::StrCat(
+            "AlwaysFailAead will always fail on encrypt (msg=", message_, ")"));
   }
 
-  crypto::tink::util::StatusOr<std::string> Decrypt(
+  util::StatusOr<std::string> Decrypt(
       absl::string_view ciphertext,
       absl::string_view associated_data) const override {
     return util::Status(
         absl::StatusCode::kInternal,
-        absl::StrCat("AlwaysFailAead will always fail on decrypt (msg=",
-                     message_, ")"));
+        absl::StrCat(
+            "AlwaysFailAead will always fail on decrypt (msg=", message_, ")"));
   }
 
  private:

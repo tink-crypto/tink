@@ -24,8 +24,8 @@
 namespace crypto {
 namespace tink {
 
-// Returns an AEAD which will always return an error when calling Encrypt or
-// Decrypt. The error message will contain `message`.
+// Returns an AEAD that always returns an error when calling Encrypt or Decrypt.
+// The error message will contain `message`.
 std::unique_ptr<Aead> CreateAlwaysFailingAead(absl::string_view message = "");
 
 }  // namespace tink
