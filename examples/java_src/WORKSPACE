@@ -17,16 +17,6 @@ workspace(name = "examples_java")
 #   https://github.com/google/tink/blob/master/docs/JAVA-HOWTO.md
 
 local_repository(
-    name = "tink_base",
-    path = "../..",
-)
-# http_archive(
-#     name = "tink_base",
-#     urls = ["https://github.com/google/tink/archive/master.zip"],
-#     strip_prefix = "tink-master/",
-# )
-
-local_repository(
     name = "tink_java",
     path = "../../java_src",
 )
@@ -36,19 +26,14 @@ local_repository(
 #     strip_prefix = "tink-master/java_src",
 # )
 
-
 # Load Tink dependencies.
 
-load("@tink_base//:tink_base_deps.bzl", "tink_base_deps")
-tink_base_deps()
-
-load("@tink_base//:tink_base_deps_init.bzl", "tink_base_deps_init")
-tink_base_deps_init()
-
 load("@tink_java//:tink_java_deps.bzl", "tink_java_deps", "TINK_MAVEN_ARTIFACTS")
+
 tink_java_deps()
 
 load("@tink_java//:tink_java_deps_init.bzl", "tink_java_deps_init")
+
 tink_java_deps_init()
 
 load("@rules_jvm_external//:defs.bzl", "maven_install")
