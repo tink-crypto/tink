@@ -2,16 +2,11 @@ package(default_testonly = 1)
 
 licenses(["notice"])
 
-filegroup(
-    name = "test_vectors",
-    srcs = ["testdata/test_vectors.json"],
-)
-
 java_test(
     name = "AesGcmHpkeAeadTest",
     size = "small",
     srcs = ["AesGcmHpkeAeadTest.java"],
-    resources = [":test_vectors"],
+    data = ["//testdata:hpke_boringssl_test_vectors"],
     deps = [
         "//src/main/java/com/google/crypto/tink/hybrid/internal:aes_gcm_hpke_aead",
         "//src/main/java/com/google/crypto/tink/hybrid/internal:hpke_util",
@@ -27,7 +22,7 @@ java_test(
     name = "ChaCha20Poly1305HpkeAeadTest",
     size = "small",
     srcs = ["ChaCha20Poly1305HpkeAeadTest.java"],
-    resources = [":test_vectors"],
+    data = ["//testdata:hpke_boringssl_test_vectors"],
     deps = [
         "//src/main/java/com/google/crypto/tink/hybrid/internal:chacha20_poly1305_hpke_aead",
         "//src/main/java/com/google/crypto/tink/hybrid/internal:hpke_util",
@@ -43,7 +38,7 @@ java_test(
     name = "HkdfHpkeKdfTest",
     size = "small",
     srcs = ["HkdfHpkeKdfTest.java"],
-    resources = [":test_vectors"],
+    data = ["//testdata:hpke_boringssl_test_vectors"],
     deps = [
         "//src/main/java/com/google/crypto/tink/hybrid/internal:hkdf_hpke_kdf",
         "//src/main/java/com/google/crypto/tink/hybrid/internal:hpke_util",
@@ -62,7 +57,7 @@ java_test(
     name = "HpkeContextTest",
     size = "small",
     srcs = ["HpkeContextTest.java"],
-    resources = [":test_vectors"],
+    data = ["//testdata:hpke_boringssl_test_vectors"],
     deps = [
         "//proto:hpke_java_proto",
         "//src/main/java/com/google/crypto/tink/hybrid/internal:hpke_aead",
@@ -162,7 +157,7 @@ java_test(
     name = "X25519HpkeKemTest",
     size = "small",
     srcs = ["X25519HpkeKemTest.java"],
-    resources = [":test_vectors"],
+    data = ["//testdata:hpke_boringssl_test_vectors"],
     deps = [
         "//src/main/java/com/google/crypto/tink/hybrid/internal:hkdf_hpke_kdf",
         "//src/main/java/com/google/crypto/tink/hybrid/internal:hpke_kem_encap_output",

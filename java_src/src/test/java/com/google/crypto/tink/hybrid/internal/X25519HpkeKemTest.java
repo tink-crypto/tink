@@ -20,14 +20,12 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.Assert.assertThrows;
 
 import com.google.common.io.Files;
-import com.google.common.io.Resources;
 import com.google.common.truth.Expect;
 import com.google.crypto.tink.testing.HpkeTestId;
 import com.google.crypto.tink.testing.HpkeTestSetup;
 import com.google.crypto.tink.testing.HpkeTestUtil;
 import com.google.crypto.tink.testing.HpkeTestVector;
 import com.google.crypto.tink.testing.TestUtil;
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
@@ -53,20 +51,11 @@ public final class X25519HpkeKemTest {
 
   @BeforeClass
   public static void setUpTestVectors() throws IOException {
-    BufferedReader reader = null;
+    String path = "testdata/testvectors/hpke_boringssl.json";
     if (TestUtil.isAndroid()) {
-      reader =
-          Files.newReader(
-              new File(
-                  "/sdcard/googletest/test_runfiles/google3/" // Special prefix for Android.
-                      + "third_party/tink/java_src/src/test/java/com/google/crypto/tink/"
-                      + "hybrid/internal/testdata/test_vectors.json"),
-              UTF_8);
-    } else {
-      String path = "com/google/crypto/tink/hybrid/internal/testdata/test_vectors.json";
-      reader = Resources.asCharSource(Resources.getResource(path), UTF_8).openBufferedStream();
+      path = "/sdcard/googletest/test_runfiles/google3/" + path;  // Special prefix for Android.
     }
-    testVectors = HpkeTestUtil.parseTestVectors(reader);
+    testVectors = HpkeTestUtil.parseTestVectors(Files.newReader(new File(path), UTF_8));
   }
 
   private HpkeTestId getDefaultTestId() {
