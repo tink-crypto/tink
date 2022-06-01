@@ -59,4 +59,28 @@ public final class LegacyProtoKeyFormat extends KeyFormat {
   public int hashCode() {
     return Objects.hash(serialization.getKeyTemplate(), serialization.getObjectIdentifier());
   }
+
+  // This function is needed because LiteProto do not have a good toString function.
+  private static String outputPrefixToString(OutputPrefixType outputPrefixType) {
+    switch (outputPrefixType) {
+      case TINK:
+        return "TINK";
+      case LEGACY:
+        return "LEGACY";
+      case RAW:
+        return "RAW";
+      case CRUNCHY:
+        return "CRUNCHY";
+      default:
+        return "UNKNOWN";
+    }
+  }
+
+  @Override
+  public String toString() {
+    return String.format(
+        "(typeUrl=%s, outputPrefixType=%s)",
+        serialization.getKeyTemplate().getTypeUrl(),
+        outputPrefixToString(serialization.getKeyTemplate().getOutputPrefixType()));
+  }
 }

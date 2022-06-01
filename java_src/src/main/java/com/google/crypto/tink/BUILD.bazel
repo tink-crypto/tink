@@ -786,3 +786,21 @@ android_library(
     name = "version-android",
     srcs = [":version_java"],
 )
+
+java_library(
+    name = "key_status",
+    srcs = ["KeyStatus.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink/annotations:alpha",
+        "@maven//:com_google_errorprone_error_prone_annotations",
+    ],
+)
+
+android_library(
+    name = "key_status-android",
+    srcs = ["KeyStatus.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink/annotations:alpha-android",
+        "@maven//:com_google_errorprone_error_prone_annotations",
+    ],
+)
