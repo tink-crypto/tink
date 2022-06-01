@@ -63,7 +63,8 @@ public final class SerializationRegistry {
         KeySerializer<?, ?> existingSerializer = keySerializerMap.get(index);
         if (!existingSerializer.equals(serializer) || !serializer.equals(existingSerializer)) {
           throw new GeneralSecurityException(
-              "Attempt to register non-equal parser for already existing object of type: " + index);
+              "Attempt to register non-equal serializer for already existing object of type: "
+                  + index);
         }
       } else {
         keySerializerMap.put(index, serializer);
