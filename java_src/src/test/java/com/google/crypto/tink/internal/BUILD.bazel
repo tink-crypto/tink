@@ -179,3 +179,33 @@ java_test(
         "@maven//:junit_junit",
     ],
 )
+
+java_test(
+    name = "LegacyProtoKeyFormatTest",
+    size = "small",
+    srcs = ["LegacyProtoKeyFormatTest.java"],
+    deps = [
+        "//proto:tink_java_proto",
+        "//src/main/java/com/google/crypto/tink/internal:legacy_proto_key_format",
+        "//src/main/java/com/google/crypto/tink/internal:proto_key_format_serialization",
+        "@com_google_protobuf//:protobuf_javalite",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "LegacyProtoKeyTest",
+    size = "small",
+    srcs = ["LegacyProtoKeyTest.java"],
+    deps = [
+        "//proto:tink_java_proto",
+        "//src/main/java/com/google/crypto/tink:insecure_secret_key_access",
+        "//src/main/java/com/google/crypto/tink:secret_key_access",
+        "//src/main/java/com/google/crypto/tink/internal:legacy_proto_key",
+        "//src/main/java/com/google/crypto/tink/internal:proto_key_serialization",
+        "@com_google_protobuf//:protobuf_javalite",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
