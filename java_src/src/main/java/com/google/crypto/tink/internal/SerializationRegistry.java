@@ -17,6 +17,7 @@
 package com.google.crypto.tink.internal;
 
 import com.google.crypto.tink.Key;
+import com.google.crypto.tink.KeyFormat;
 import com.google.crypto.tink.SecretKeyAccess;
 import java.security.GeneralSecurityException;
 import java.util.HashMap;
@@ -25,26 +26,34 @@ import java.util.Objects;
 import java.util.Optional;
 
 /**
- * Allows registering {@code KeySerializer} and {@code KeyParser} objects, and parsing/serializing
- * keys with such objects.
+ * Allows registering {@code KeySerializer}, {@code KeyParser}, {@code KeyFormatSerializer}, and
+ * {@KeyFormatParser} objects, and parsing/serializing keys and key formats with such objects.
  */
 public final class SerializationRegistry {
   private final Map<SerializerIndex, KeySerializer<?, ?>> keySerializerMap;
   private final Map<ParserIndex, KeyParser<?>> keyParserMap;
+  private final Map<SerializerIndex, KeyFormatSerializer<?, ?>> keyFormatSerializerMap;
+  private final Map<ParserIndex, KeyFormatParser<?>> keyFormatParserMap;
 
   /** Allows building SerializationRegistry objects. */
   public static final class Builder {
     private final Map<SerializerIndex, KeySerializer<?, ?>> keySerializerMap;
     private final Map<ParserIndex, KeyParser<?>> keyParserMap;
+    private final Map<SerializerIndex, KeyFormatSerializer<?, ?>> keyFormatSerializerMap;
+    private final Map<ParserIndex, KeyFormatParser<?>> keyFormatParserMap;
 
     public Builder() {
       keySerializerMap = new HashMap<>();
       keyParserMap = new HashMap<>();
+      keyFormatSerializerMap = new HashMap<>();
+      keyFormatParserMap = new HashMap<>();
     }
 
     public Builder(SerializationRegistry registry) {
       keySerializerMap = new HashMap<>(registry.keySerializerMap);
       keyParserMap = new HashMap<>(registry.keyParserMap);
+      keyFormatSerializerMap = new HashMap<>(registry.keyFormatSerializerMap);
+      keyFormatParserMap = new HashMap<>(registry.keyFormatParserMap);
     }
 
     /**
@@ -96,6 +105,57 @@ public final class SerializationRegistry {
       return this;
     }
 
+    /**
+     * Registers a key serializer for later use in {@link #serializeKey}.
+     *
+     * <p>This registers a key serializer which can later be used to serialize a key by calling
+     * {@link #serializeKey}. If a serializer for the pair {@code (KeyT, SerializationT)} has
+     * already been registered, this checks if they are the same. If they are, the call is ignored,
+     * otherwise an exception is thrown.
+     */
+    public <KeyFormatT extends KeyFormat, SerializationT extends Serialization>
+        Builder registerKeyFormatSerializer(
+            KeyFormatSerializer<KeyFormatT, SerializationT> serializer)
+            throws GeneralSecurityException {
+      SerializerIndex index =
+          new SerializerIndex(serializer.getKeyFormatClass(), serializer.getSerializationClass());
+      if (keyFormatSerializerMap.containsKey(index)) {
+        KeyFormatSerializer<?, ?> existingSerializer = keyFormatSerializerMap.get(index);
+        if (!existingSerializer.equals(serializer) || !serializer.equals(existingSerializer)) {
+          throw new GeneralSecurityException(
+              "Attempt to register non-equal serializer for already existing object of type: "
+                  + index);
+        }
+      } else {
+        keyFormatSerializerMap.put(index, serializer);
+      }
+      return this;
+    }
+
+    /**
+     * Registers a key parser for later use in {@link #parseKey}.
+     *
+     * <p>This registers a key serializer which can later be used to serialize a key by calling
+     * {@link #parseKey}. If a parser for the pair {@code (SerializationT,
+     * parser.getObjectIdentifier())} has already been registered, this checks if they are the same.
+     * If they are, the call is ignored, otherwise an exception is thrown.
+     */
+    public <SerializationT extends Serialization> Builder registerKeyFormatParser(
+        KeyFormatParser<SerializationT> parser) throws GeneralSecurityException {
+      ParserIndex index =
+          new ParserIndex(parser.getSerializationClass(), parser.getObjectIdentifier());
+      if (keyFormatParserMap.containsKey(index)) {
+        KeyFormatParser<?> existingParser = keyFormatParserMap.get(index);
+        if (!existingParser.equals(parser) || !parser.equals(existingParser)) {
+          throw new GeneralSecurityException(
+              "Attempt to register non-equal parser for already existing object of type: " + index);
+        }
+      } else {
+        keyFormatParserMap.put(index, parser);
+      }
+      return this;
+    }
+
     SerializationRegistry build() {
       return new SerializationRegistry(this);
     }
@@ -104,6 +164,8 @@ public final class SerializationRegistry {
   private SerializationRegistry(Builder builder) {
     keySerializerMap = new HashMap<>(builder.keySerializerMap);
     keyParserMap = new HashMap<>(builder.keyParserMap);
+    keyFormatSerializerMap = new HashMap<>(builder.keyFormatSerializerMap);
+    keyFormatParserMap = new HashMap<>(builder.keyFormatParserMap);
   }
 
   private static class SerializerIndex {
@@ -213,5 +275,47 @@ public final class SerializationRegistry {
     KeySerializer<KeyT, SerializationT> serializer =
         (KeySerializer<KeyT, SerializationT>) keySerializerMap.get(index);
     return serializer.serializeKey(key, access);
+  }
+
+  /**
+   * Parses the given serialization into a KeyFormat.
+   *
+   * <p>This will look up a previously registered parser for the passed in {@code SerializationT}
+   * class, and the used object identifier (as indicated by {@code
+   * serializedKey.getObjectIdentifier()}), and then parse the object with this parsers.
+   */
+  public <SerializationT extends Serialization> KeyFormat parseKeyFormat(
+      SerializationT serializedKeyFormat) throws GeneralSecurityException {
+    ParserIndex index =
+        new ParserIndex(serializedKeyFormat.getClass(), serializedKeyFormat.getObjectIdentifier());
+
+    if (!keyFormatParserMap.containsKey(index)) {
+      throw new GeneralSecurityException(
+          "No Key Format Parser for requested key type " + index + " available");
+    }
+    @SuppressWarnings("unchecked") // We know we only insert like this.
+    KeyFormatParser<SerializationT> parser =
+        (KeyFormatParser<SerializationT>) keyFormatParserMap.get(index);
+    return parser.parseKeyFormat(serializedKeyFormat);
+  }
+
+  /**
+   * Serializes a given KeyFormat into a "SerializationT" object.
+   *
+   * <p>This will look up a previously registered serializer for the requested {@code
+   * SerializationT} class and the passed in key type, and then call serializeKey on the result.
+   */
+  public <KeyFormatT extends KeyFormat, SerializationT extends Serialization>
+      SerializationT serializeKeyFormat(
+          KeyFormatT keyFormat, Class<SerializationT> serializationClass)
+          throws GeneralSecurityException {
+    SerializerIndex index = new SerializerIndex(keyFormat.getClass(), serializationClass);
+    if (!keyFormatSerializerMap.containsKey(index)) {
+      throw new GeneralSecurityException("No Key Format serializer for " + index + " available");
+    }
+    @SuppressWarnings("unchecked") // We know we only insert like this.
+    KeyFormatSerializer<KeyFormatT, SerializationT> serializer =
+        (KeyFormatSerializer<KeyFormatT, SerializationT>) keyFormatSerializerMap.get(index);
+    return serializer.serializeKeyFormat(keyFormat);
   }
 }

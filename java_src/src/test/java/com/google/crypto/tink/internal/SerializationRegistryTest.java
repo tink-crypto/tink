@@ -60,6 +60,22 @@ public final class SerializationRegistryTest {
   private static final ByteArray B_2 = ByteArray.copyFrom("2".getBytes(UTF_8));
 
   @Immutable
+  private static final class TestKeyFormat1 extends KeyFormat {
+    @Override
+    public boolean hasIdRequirement() {
+      return false;
+    }
+  }
+
+  @Immutable
+  private static final class TestKeyFormat2 extends KeyFormat {
+    @Override
+    public boolean hasIdRequirement() {
+      return false;
+    }
+  }
+
+  @Immutable
   private static final class TestKey1 extends Key {
     @Override
     public KeyFormat getKeyFormat() {
@@ -488,5 +504,363 @@ public final class SerializationRegistryTest {
     assertThrows(
         GeneralSecurityException.class,
         () -> registry2.parseKey(new TestSerializationA(A_1), ACCESS));
+  }
+
+  // ================================================================================================
+  // KEY FORMAT TESTS
+  // ================================================================================================
+  private static TestSerializationA serializeKeyFormat1ToA(TestKeyFormat1 keyFormat)
+      throws GeneralSecurityException {
+    return new TestSerializationA(A_1);
+  }
+
+  private static TestSerializationA serializeKeyFormat2ToA(TestKeyFormat2 keyFormat)
+      throws GeneralSecurityException {
+    return new TestSerializationA(A_2);
+  }
+
+  private static TestSerializationB serializeKeyFormat1ToB(TestKeyFormat1 keyFormat)
+      throws GeneralSecurityException {
+    return new TestSerializationB(B_1);
+  }
+
+  private static TestSerializationB serializeKeyFormat2ToB(TestKeyFormat2 keyFormat)
+      throws GeneralSecurityException {
+    return new TestSerializationB(B_2);
+  }
+
+  private static KeyFormat parseAToKeyFormat1(TestSerializationA serialization)
+      throws GeneralSecurityException {
+    if (!A_1.equals(serialization.getObjectIdentifier())) {
+      throw new GeneralSecurityException("Wrong object identifier");
+    }
+    return new TestKeyFormat1();
+  }
+
+  private static KeyFormat parseAToKeyFormat2(TestSerializationA serialization)
+      throws GeneralSecurityException {
+    if (!A_2.equals(serialization.getObjectIdentifier())) {
+      throw new GeneralSecurityException("Wrong object identifier");
+    }
+    return new TestKeyFormat2();
+  }
+
+  private static KeyFormat parseBToKeyFormat1(TestSerializationB serialization)
+      throws GeneralSecurityException {
+    if (!B_1.equals(serialization.getObjectIdentifier())) {
+      throw new GeneralSecurityException("Wrong object identifier");
+    }
+    return new TestKeyFormat1();
+  }
+
+  private static KeyFormat parseBToKeyFormat2(TestSerializationB serialization)
+      throws GeneralSecurityException {
+    if (!B_2.equals(serialization.getObjectIdentifier())) {
+      throw new GeneralSecurityException("Wrong object identifier");
+    }
+    return new TestKeyFormat2();
+  }
+
+  // KeyFormatSerialization tests
+  @Test
+  public void test_registerKeyFormatSerializerAndGet() throws Exception {
+    SerializationRegistry registry =
+        new SerializationRegistry.Builder()
+            .registerKeyFormatSerializer(
+                KeyFormatSerializer.create(
+                    SerializationRegistryTest::serializeKeyFormat1ToA,
+                    TestKeyFormat1.class,
+                    TestSerializationA.class))
+            .build();
+    assertThat(registry.serializeKeyFormat(new TestKeyFormat1(), TestSerializationA.class))
+        .isNotNull();
+  }
+
+  @Test
+  public void test_emptyRegistrySerializeKeyFormat_throws() throws Exception {
+    SerializationRegistry registry = new SerializationRegistry.Builder().build();
+    assertThrows(
+        GeneralSecurityException.class,
+        () -> registry.serializeKeyFormat(new TestKeyFormat1(), TestSerializationA.class));
+  }
+
+  @Test
+  public void test_registerSameFormatSerializerTwice_works() throws Exception {
+    KeyFormatSerializer<TestKeyFormat1, TestSerializationA> testSerializer =
+        KeyFormatSerializer.create(
+            SerializationRegistryTest::serializeKeyFormat1ToA,
+            TestKeyFormat1.class,
+            TestSerializationA.class);
+    new SerializationRegistry.Builder()
+        .registerKeyFormatSerializer(testSerializer)
+        .registerKeyFormatSerializer(testSerializer)
+        .build();
+  }
+
+  @Test
+  public void test_registerDifferentSerializerWithSameFormatType_throws() throws Exception {
+    KeyFormatSerializer<TestKeyFormat1, TestSerializationA> testSerializer1 =
+        KeyFormatSerializer.create(
+            SerializationRegistryTest::serializeKeyFormat1ToA,
+            TestKeyFormat1.class,
+            TestSerializationA.class);
+    KeyFormatSerializer<TestKeyFormat1, TestSerializationA> testSerializer2 =
+        KeyFormatSerializer.create(
+            SerializationRegistryTest::serializeKeyFormat1ToA,
+            TestKeyFormat1.class,
+            TestSerializationA.class);
+    SerializationRegistry.Builder builder = new SerializationRegistry.Builder();
+    builder.registerKeyFormatSerializer(testSerializer1);
+    assertThrows(
+        GeneralSecurityException.class,
+        () -> builder.registerKeyFormatSerializer(testSerializer2).build());
+  }
+
+  @Test
+  public void test_registerDifferentSerializerWithDifferentFormatType_works() throws Exception {
+    KeyFormatSerializer<TestKeyFormat1, TestSerializationA> testSerializer1 =
+        KeyFormatSerializer.create(
+            SerializationRegistryTest::serializeKeyFormat1ToA,
+            TestKeyFormat1.class,
+            TestSerializationA.class);
+    KeyFormatSerializer<TestKeyFormat2, TestSerializationA> testSerializer2 =
+        KeyFormatSerializer.create(
+            SerializationRegistryTest::serializeKeyFormat2ToA,
+            TestKeyFormat2.class,
+            TestSerializationA.class);
+    new SerializationRegistry.Builder()
+        .registerKeyFormatSerializer(testSerializer1)
+        .registerKeyFormatSerializer(testSerializer2)
+        .build();
+  }
+
+  @Test
+  public void test_registerDifferentSerializerWithDifferentFormatSerializationType_works()
+      throws Exception {
+    KeyFormatSerializer<TestKeyFormat1, TestSerializationA> testSerializer1 =
+        KeyFormatSerializer.create(
+            SerializationRegistryTest::serializeKeyFormat1ToA,
+            TestKeyFormat1.class,
+            TestSerializationA.class);
+    KeyFormatSerializer<TestKeyFormat2, TestSerializationA> testSerializer2 =
+        KeyFormatSerializer.create(
+            SerializationRegistryTest::serializeKeyFormat2ToA,
+            TestKeyFormat2.class,
+            TestSerializationA.class);
+    new SerializationRegistry.Builder()
+        .registerKeyFormatSerializer(testSerializer1)
+        .registerKeyFormatSerializer(testSerializer2)
+        .build();
+  }
+
+  @Test
+  public void test_registerAllFormatSerializers_checkDispatch() throws Exception {
+    SerializationRegistry registry =
+        new SerializationRegistry.Builder()
+            .registerKeyFormatSerializer(
+                KeyFormatSerializer.create(
+                    SerializationRegistryTest::serializeKeyFormat1ToA,
+                    TestKeyFormat1.class,
+                    TestSerializationA.class))
+            .registerKeyFormatSerializer(
+                KeyFormatSerializer.create(
+                    SerializationRegistryTest::serializeKeyFormat1ToB,
+                    TestKeyFormat1.class,
+                    TestSerializationB.class))
+            .registerKeyFormatSerializer(
+                KeyFormatSerializer.create(
+                    SerializationRegistryTest::serializeKeyFormat2ToA,
+                    TestKeyFormat2.class,
+                    TestSerializationA.class))
+            .registerKeyFormatSerializer(
+                KeyFormatSerializer.create(
+                    SerializationRegistryTest::serializeKeyFormat2ToB,
+                    TestKeyFormat2.class,
+                    TestSerializationB.class))
+            .build();
+    assertThat(
+            registry
+                .serializeKeyFormat(new TestKeyFormat1(), TestSerializationA.class)
+                .getObjectIdentifier())
+        .isEqualTo(A_1);
+    assertThat(
+            registry
+                .serializeKeyFormat(new TestKeyFormat2(), TestSerializationA.class)
+                .getObjectIdentifier())
+        .isEqualTo(A_2);
+    assertThat(
+            registry
+                .serializeKeyFormat(new TestKeyFormat1(), TestSerializationB.class)
+                .getObjectIdentifier())
+        .isEqualTo(B_1);
+    assertThat(
+            registry
+                .serializeKeyFormat(new TestKeyFormat2(), TestSerializationB.class)
+                .getObjectIdentifier())
+        .isEqualTo(B_2);
+  }
+
+  @Test
+  public void test_formatSerializer_copyWorks() throws Exception {
+    SerializationRegistry registry =
+        new SerializationRegistry.Builder()
+            .registerKeyFormatSerializer(
+                KeyFormatSerializer.create(
+                    SerializationRegistryTest::serializeKeyFormat1ToA,
+                    TestKeyFormat1.class,
+                    TestSerializationA.class))
+            .build();
+    SerializationRegistry registry2 = new SerializationRegistry.Builder(registry).build();
+    assertThat(registry2.serializeKeyFormat(new TestKeyFormat1(), TestSerializationA.class))
+        .isNotNull();
+  }
+
+  @Test
+  public void test_copyDoesNotChangeOldVersion_formatSerializer() throws Exception {
+    SerializationRegistry registry1 = new SerializationRegistry.Builder().build();
+    SerializationRegistry.Builder builder = new SerializationRegistry.Builder(registry1);
+    SerializationRegistry registry2 = builder.build();
+    builder.registerKeyFormatSerializer(
+        KeyFormatSerializer.create(
+            SerializationRegistryTest::serializeKeyFormat1ToA,
+            TestKeyFormat1.class,
+            TestSerializationA.class));
+    assertThrows(
+        GeneralSecurityException.class,
+        () -> registry1.serializeKeyFormat(new TestKeyFormat1(), TestSerializationA.class));
+    assertThrows(
+        GeneralSecurityException.class,
+        () -> registry2.serializeKeyFormat(new TestKeyFormat1(), TestSerializationA.class));
+  }
+
+  // ========================================================================KeyFormat parsing tests
+  @Test
+  public void test_registerFormatParserAndGet() throws Exception {
+    SerializationRegistry registry =
+        new SerializationRegistry.Builder()
+            .registerKeyParser(
+                KeyParser.create(
+                    SerializationRegistryTest::parseAToKey1, A_1, TestSerializationA.class))
+            .build();
+    assertThat(registry.parseKey(new TestSerializationA(A_1), ACCESS)).isNotNull();
+  }
+
+  @Test
+  public void test_formatParse_emptyRegistry_throws() throws Exception {
+    SerializationRegistry registry = new SerializationRegistry.Builder().build();
+    assertThrows(
+        GeneralSecurityException.class, () -> registry.parseKeyFormat(new TestSerializationA(A_1)));
+  }
+
+  @Test
+  public void test_registerSameFormatParserTwice_works() throws Exception {
+    KeyFormatParser<TestSerializationA> testParser =
+        KeyFormatParser.create(
+            SerializationRegistryTest::parseAToKeyFormat1, A_1, TestSerializationA.class);
+    new SerializationRegistry.Builder()
+        .registerKeyFormatParser(testParser)
+        .registerKeyFormatParser(testParser)
+        .build();
+  }
+
+  @Test
+  public void test_registerDifferentParsersWithSameKeyFormatType_throws() throws Exception {
+    KeyFormatParser<TestSerializationA> testParser1 =
+        KeyFormatParser.create(
+            SerializationRegistryTest::parseAToKeyFormat1, A_1, TestSerializationA.class);
+    KeyFormatParser<TestSerializationA> testParser2 =
+        KeyFormatParser.create(
+            SerializationRegistryTest::parseAToKeyFormat1, A_1, TestSerializationA.class);
+    SerializationRegistry.Builder builder = new SerializationRegistry.Builder();
+    builder.registerKeyFormatParser(testParser1);
+    assertThrows(
+        GeneralSecurityException.class, () -> builder.registerKeyFormatParser(testParser2).build());
+  }
+
+  @Test
+  public void test_registerDifferentFormatParsersWithDifferentSerializationType_works()
+      throws Exception {
+    KeyFormatParser<TestSerializationA> testParser1 =
+        KeyFormatParser.create(
+            SerializationRegistryTest::parseAToKeyFormat1, A_1, TestSerializationA.class);
+    KeyFormatParser<TestSerializationB> testParser2 =
+        KeyFormatParser.create(
+            SerializationRegistryTest::parseBToKeyFormat1, B_1, TestSerializationB.class);
+    new SerializationRegistry.Builder()
+        .registerKeyFormatParser(testParser1)
+        .registerKeyFormatParser(testParser2)
+        .build();
+  }
+
+  @Test
+  public void test_registerDifferentFormatParsersWithDifferentKeyType_works() throws Exception {
+    KeyFormatParser<TestSerializationA> testParser1 =
+        KeyFormatParser.create(
+            SerializationRegistryTest::parseAToKeyFormat1, A_1, TestSerializationA.class);
+    KeyFormatParser<TestSerializationA> testParser2 =
+        KeyFormatParser.create(
+            SerializationRegistryTest::parseAToKeyFormat2, A_2, TestSerializationA.class);
+    new SerializationRegistry.Builder()
+        .registerKeyFormatParser(testParser1)
+        .registerKeyFormatParser(testParser2)
+        .build();
+  }
+
+  @Test
+  public void test_registerAllFormatParsers_checkDispatch() throws Exception {
+    SerializationRegistry registry =
+        new SerializationRegistry.Builder()
+            .registerKeyFormatParser(
+                KeyFormatParser.create(
+                    SerializationRegistryTest::parseAToKeyFormat1, A_1, TestSerializationA.class))
+            .registerKeyFormatParser(
+                KeyFormatParser.create(
+                    SerializationRegistryTest::parseBToKeyFormat1, B_1, TestSerializationB.class))
+            .registerKeyFormatParser(
+                KeyFormatParser.create(
+                    SerializationRegistryTest::parseAToKeyFormat2, A_2, TestSerializationA.class))
+            .registerKeyFormatParser(
+                KeyFormatParser.create(
+                    SerializationRegistryTest::parseBToKeyFormat2, B_2, TestSerializationB.class))
+            .build();
+    assertThat(registry.parseKeyFormat(new TestSerializationA(A_1)))
+        .isInstanceOf(TestKeyFormat1.class);
+    assertThat(registry.parseKeyFormat(new TestSerializationA(A_2)))
+        .isInstanceOf(TestKeyFormat2.class);
+    assertThat(registry.parseKeyFormat(new TestSerializationB(B_1)))
+        .isInstanceOf(TestKeyFormat1.class);
+    assertThat(registry.parseKeyFormat(new TestSerializationB(B_2)))
+        .isInstanceOf(TestKeyFormat2.class);
+  }
+
+  @Test
+  public void test_copyWorksForFormatParsers() throws Exception {
+    SerializationRegistry registry =
+        new SerializationRegistry.Builder()
+            .registerKeyFormatParser(
+                KeyFormatParser.create(
+                    SerializationRegistryTest::parseAToKeyFormat1, A_1, TestSerializationA.class))
+            .build();
+    SerializationRegistry registry2 = new SerializationRegistry.Builder(registry).build();
+    assertThat(registry2.parseKeyFormat(new TestSerializationA(A_1))).isNotNull();
+  }
+
+  @Test
+  public void test_copyDoesNotChangeOldVersion_formatParser() throws Exception {
+    SerializationRegistry registry1 = new SerializationRegistry.Builder().build();
+    SerializationRegistry.Builder builder = new SerializationRegistry.Builder(registry1);
+    SerializationRegistry registry2 = builder.build();
+
+    builder
+        .registerKeyFormatParser(
+            KeyFormatParser.create(
+                SerializationRegistryTest::parseAToKeyFormat1, A_1, TestSerializationA.class))
+        .build();
+    assertThrows(
+        GeneralSecurityException.class,
+        () -> registry1.parseKeyFormat(new TestSerializationA(A_1)));
+    assertThrows(
+        GeneralSecurityException.class,
+        () -> registry2.parseKeyFormat(new TestSerializationA(A_1)));
   }
 }
