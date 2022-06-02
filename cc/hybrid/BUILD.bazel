@@ -525,3 +525,26 @@ cc_test(
         "@com_google_googletest//:gtest_main",
     ],
 )
+
+cc_library(
+    name = "failing_hybrid",
+    srcs = ["failing_hybrid.cc"],
+    hdrs = ["failing_hybrid.h"],
+    include_prefix = "tink/hybrid",
+    deps = [
+        "//:hybrid_decrypt",
+        "//:hybrid_encrypt",
+        "@com_google_absl//absl/strings",
+    ],
+)
+
+cc_test(
+    name = "failing_hybrid_test",
+    srcs = ["failing_hybrid_test.cc"],
+    deps = [
+        ":failing_hybrid",
+        "//util:test_matchers",
+        "@com_google_absl//absl/status",
+        "@com_google_googletest//:gtest_main",
+    ],
+)

@@ -488,3 +488,25 @@ tink_cc_test(
     tink::proto::ecies_aead_hkdf_cc_proto
     tink::proto::tink_cc_proto
 )
+
+tink_cc_library(
+  NAME failing_hybrid
+  SRCS
+    failing_hybrid.cc
+    failing_hybrid.h
+  DEPS
+    absl::strings
+    tink::core::hybrid_decrypt
+    tink::core::hybrid_encrypt
+)
+
+tink_cc_test(
+  NAME failing_hybrid_test
+  SRCS
+    failing_hybrid_test.cc
+  DEPS
+    tink::hybrid::failing_hybrid
+    gmock
+    absl::status
+    tink::util::test_matchers
+)
