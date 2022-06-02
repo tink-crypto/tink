@@ -381,11 +381,14 @@ java_library(
     name = "mutable_serialization_registry",
     srcs = ["MutableSerializationRegistry.java"],
     deps = [
+        ":key_format_parser",
+        ":key_format_serializer",
         ":key_parser",
         ":key_serializer",
         ":serialization",
         ":serialization_registry",
         "//src/main/java/com/google/crypto/tink:key",
+        "//src/main/java/com/google/crypto/tink:key_format",
         "//src/main/java/com/google/crypto/tink:secret_key_access",
     ],
 )
@@ -394,11 +397,14 @@ android_library(
     name = "mutable_serialization_registry-android",
     srcs = ["MutableSerializationRegistry.java"],
     deps = [
+        ":key_format_parser-android",
+        ":key_format_serializer-android",
         ":key_parser-android",
         ":key_serializer-android",
         ":serialization-android",
         ":serialization_registry-android",
         "//src/main/java/com/google/crypto/tink:key-android",
+        "//src/main/java/com/google/crypto/tink:key_format-android",
         "//src/main/java/com/google/crypto/tink:secret_key_access-android",
     ],
 )

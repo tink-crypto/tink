@@ -47,6 +47,22 @@ public final class MutableSerializationRegistryTest {
   private static final Bytes B_2 = Bytes.copyFrom("2".getBytes(UTF_8));
 
   @Immutable
+  private static final class TestKeyFormat1 extends KeyFormat {
+    @Override
+    public boolean hasIdRequirement() {
+      return false;
+    }
+  }
+
+  @Immutable
+  private static final class TestKeyFormat2 extends KeyFormat {
+    @Override
+    public boolean hasIdRequirement() {
+      return false;
+    }
+  }
+
+  @Immutable
   private static final class TestKey1 extends Key {
     @Override
     public KeyFormat getKeyFormat() {
@@ -239,5 +255,130 @@ public final class MutableSerializationRegistryTest {
     assertThat(registry.parseKey(new TestSerializationA(A_2), ACCESS)).isInstanceOf(TestKey2.class);
     assertThat(registry.parseKey(new TestSerializationB(B_1), ACCESS)).isInstanceOf(TestKey1.class);
     assertThat(registry.parseKey(new TestSerializationB(B_2), ACCESS)).isInstanceOf(TestKey2.class);
+  }
+
+  // ================================================================================================
+  // KEY FORMAT TESTS
+  // ================================================================================================
+  private static TestSerializationA serializeKeyFormat1ToA(TestKeyFormat1 keyFormat)
+      throws GeneralSecurityException {
+    return new TestSerializationA(A_1);
+  }
+
+  private static TestSerializationA serializeKeyFormat2ToA(TestKeyFormat2 keyFormat)
+      throws GeneralSecurityException {
+    return new TestSerializationA(A_2);
+  }
+
+  private static TestSerializationB serializeKeyFormat1ToB(TestKeyFormat1 keyFormat)
+      throws GeneralSecurityException {
+    return new TestSerializationB(B_1);
+  }
+
+  private static TestSerializationB serializeKeyFormat2ToB(TestKeyFormat2 keyFormat)
+      throws GeneralSecurityException {
+    return new TestSerializationB(B_2);
+  }
+
+  private static KeyFormat parseAToKeyFormat1(TestSerializationA serialization)
+      throws GeneralSecurityException {
+    if (!A_1.equals(serialization.getObjectIdentifier())) {
+      throw new GeneralSecurityException("Wrong object identifier");
+    }
+    return new TestKeyFormat1();
+  }
+
+  private static KeyFormat parseAToKeyFormat2(TestSerializationA serialization)
+      throws GeneralSecurityException {
+    if (!A_2.equals(serialization.getObjectIdentifier())) {
+      throw new GeneralSecurityException("Wrong object identifier");
+    }
+    return new TestKeyFormat2();
+  }
+
+  private static KeyFormat parseBToKeyFormat1(TestSerializationB serialization)
+      throws GeneralSecurityException {
+    if (!B_1.equals(serialization.getObjectIdentifier())) {
+      throw new GeneralSecurityException("Wrong object identifier");
+    }
+    return new TestKeyFormat1();
+  }
+
+  private static KeyFormat parseBToKeyFormat2(TestSerializationB serialization)
+      throws GeneralSecurityException {
+    if (!B_2.equals(serialization.getObjectIdentifier())) {
+      throw new GeneralSecurityException("Wrong object identifier");
+    }
+    return new TestKeyFormat2();
+  }
+
+  @Test
+  public void test_registerAllFormatSerializers_checkDispatch() throws Exception {
+    MutableSerializationRegistry registry = new MutableSerializationRegistry();
+    registry.registerKeyFormatSerializer(
+        KeyFormatSerializer.create(
+            MutableSerializationRegistryTest::serializeKeyFormat1ToA,
+            TestKeyFormat1.class,
+            TestSerializationA.class));
+    registry.registerKeyFormatSerializer(
+        KeyFormatSerializer.create(
+            MutableSerializationRegistryTest::serializeKeyFormat1ToB,
+            TestKeyFormat1.class,
+            TestSerializationB.class));
+    registry.registerKeyFormatSerializer(
+        KeyFormatSerializer.create(
+            MutableSerializationRegistryTest::serializeKeyFormat2ToA,
+            TestKeyFormat2.class,
+            TestSerializationA.class));
+    registry.registerKeyFormatSerializer(
+        KeyFormatSerializer.create(
+            MutableSerializationRegistryTest::serializeKeyFormat2ToB,
+            TestKeyFormat2.class,
+            TestSerializationB.class));
+    assertThat(
+            registry
+                .serializeKeyFormat(new TestKeyFormat1(), TestSerializationA.class)
+                .getObjectIdentifier())
+        .isEqualTo(A_1);
+    assertThat(
+            registry
+                .serializeKeyFormat(new TestKeyFormat2(), TestSerializationA.class)
+                .getObjectIdentifier())
+        .isEqualTo(A_2);
+    assertThat(
+            registry
+                .serializeKeyFormat(new TestKeyFormat1(), TestSerializationB.class)
+                .getObjectIdentifier())
+        .isEqualTo(B_1);
+    assertThat(
+            registry
+                .serializeKeyFormat(new TestKeyFormat2(), TestSerializationB.class)
+                .getObjectIdentifier())
+        .isEqualTo(B_2);
+  }
+
+  @Test
+  public void test_registerAllFormatParsers_checkDispatch() throws Exception {
+    MutableSerializationRegistry registry = new MutableSerializationRegistry();
+    registry.registerKeyFormatParser(
+        KeyFormatParser.create(
+            MutableSerializationRegistryTest::parseAToKeyFormat1, A_1, TestSerializationA.class));
+    registry.registerKeyFormatParser(
+        KeyFormatParser.create(
+            MutableSerializationRegistryTest::parseBToKeyFormat1, B_1, TestSerializationB.class));
+    registry.registerKeyFormatParser(
+        KeyFormatParser.create(
+            MutableSerializationRegistryTest::parseAToKeyFormat2, A_2, TestSerializationA.class));
+    registry.registerKeyFormatParser(
+        KeyFormatParser.create(
+            MutableSerializationRegistryTest::parseBToKeyFormat2, B_2, TestSerializationB.class));
+    assertThat(registry.parseKeyFormat(new TestSerializationA(A_1)))
+        .isInstanceOf(TestKeyFormat1.class);
+    assertThat(registry.parseKeyFormat(new TestSerializationA(A_2)))
+        .isInstanceOf(TestKeyFormat2.class);
+    assertThat(registry.parseKeyFormat(new TestSerializationB(B_1)))
+        .isInstanceOf(TestKeyFormat1.class);
+    assertThat(registry.parseKeyFormat(new TestSerializationB(B_2)))
+        .isInstanceOf(TestKeyFormat2.class);
   }
 }

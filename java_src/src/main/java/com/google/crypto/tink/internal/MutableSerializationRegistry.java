@@ -17,6 +17,7 @@
 package com.google.crypto.tink.internal;
 
 import com.google.crypto.tink.Key;
+import com.google.crypto.tink.KeyFormat;
 import com.google.crypto.tink.SecretKeyAccess;
 import java.security.GeneralSecurityException;
 import java.util.Optional;
@@ -51,7 +52,7 @@ public final class MutableSerializationRegistry {
    * <p>This registers a key serializer which can later be used to serialize a key by calling {@link
    * #serializeKey}. If a serializer for the pair {@code (KeyT, SerializationT)} has already been
    * registered, this checks if they are the same. If they are, the call is ignored, otherwise an
-   * exception is thrown.
+   * exception is thrown, and the object is unchanged.
    */
   public synchronized <KeyT extends Key, SerializationT extends Serialization>
       void registerKeySerializer(KeySerializer<KeyT, SerializationT> serializer)
@@ -67,12 +68,45 @@ public final class MutableSerializationRegistry {
    * <p>This registers a key serializer which can later be used to serialize a key by calling {@link
    * #parseKey}. If a parser for the pair {@code (SerializationT, parser.getObjectIdentifier())} has
    * already been registered, this checks if they are the same. If they are, the call is ignored,
-   * otherwise an exception is thrown.
+   * otherwise an exception is thrown, and the object is unchanged.
    */
   public synchronized <SerializationT extends Serialization> void registerKeyParser(
       KeyParser<SerializationT> parser) throws GeneralSecurityException {
     SerializationRegistry newRegistry =
         new SerializationRegistry.Builder(registry.get()).registerKeyParser(parser).build();
+    registry.set(newRegistry);
+  }
+
+  /**
+   * Registers a key serializer for later use in {@link #serializeKey}.
+   *
+   * <p>This registers a key serializer which can later be used to serialize a key by calling {@link
+   * #serializeKey}. If a serializer for the pair {@code (KeyT, SerializationT)} has already been
+   * registered, this checks if they are the same. If they are, the call is ignored, otherwise an
+   * exception is thrown, and the object is unchanged.
+   */
+  public synchronized <KeyFormatT extends KeyFormat, SerializationT extends Serialization>
+      void registerKeyFormatSerializer(KeyFormatSerializer<KeyFormatT, SerializationT> serializer)
+          throws GeneralSecurityException {
+    SerializationRegistry newRegistry =
+        new SerializationRegistry.Builder(registry.get())
+            .registerKeyFormatSerializer(serializer)
+            .build();
+    registry.set(newRegistry);
+  }
+
+  /**
+   * Registers a key parser for later use in {@link #parseKey}.
+   *
+   * <p>This registers a key serializer which can later be used to serialize a key by calling {@link
+   * #parseKey}. If a parser for the pair {@code (SerializationT, parser.getObjectIdentifier())} has
+   * already been registered, this checks if they are the same. If they are, the call is ignored,
+   * otherwise an exception is thrown, and the object is unchanged.
+   */
+  public synchronized <SerializationT extends Serialization> void registerKeyFormatParser(
+      KeyFormatParser<SerializationT> parser) throws GeneralSecurityException {
+    SerializationRegistry newRegistry =
+        new SerializationRegistry.Builder(registry.get()).registerKeyFormatParser(parser).build();
     registry.set(newRegistry);
   }
 
@@ -99,5 +133,30 @@ public final class MutableSerializationRegistry {
       KeyT key, Class<SerializationT> serializationClass, Optional<SecretKeyAccess> access)
       throws GeneralSecurityException {
     return registry.get().serializeKey(key, serializationClass, access);
+  }
+
+  /**
+   * Parses the given serialization into a KeyFormat.
+   *
+   * <p>This will look up a previously registered parser for the passed in {@code SerializationT}
+   * class, and the used object identifier (as indicated by {@code
+   * serializedKey.getObjectIdentifier()}), and then parse the object with this parsers.
+   */
+  public <SerializationT extends Serialization> KeyFormat parseKeyFormat(
+      SerializationT serializedKeyFormat) throws GeneralSecurityException {
+    return registry.get().parseKeyFormat(serializedKeyFormat);
+  }
+
+  /**
+   * Serializes a given KeyFormat into a "SerializationT" object.
+   *
+   * <p>This will look up a previously registered serializer for the requested {@code
+   * SerializationT} class and the passed in key type, and then call serializeKey on the result.
+   */
+  public <KeyFormatT extends KeyFormat, SerializationT extends Serialization>
+      SerializationT serializeKeyFormat(
+          KeyFormatT keyFormat, Class<SerializationT> serializationClass)
+          throws GeneralSecurityException {
+    return registry.get().serializeKeyFormat(keyFormat, serializationClass);
   }
 }

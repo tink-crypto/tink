@@ -49,6 +49,22 @@ public final class MutableSerializationRegistryMultithreadTest {
   private static final Bytes B_2 = Bytes.copyFrom("2".getBytes(UTF_8));
 
   @Immutable
+  private static final class TestKeyFormat1 extends KeyFormat {
+    @Override
+    public boolean hasIdRequirement() {
+      return false;
+    }
+  }
+
+  @Immutable
+  private static final class TestKeyFormat2 extends KeyFormat {
+    @Override
+    public boolean hasIdRequirement() {
+      return false;
+    }
+  }
+
+  @Immutable
   private static final class TestKey1 extends Key {
     @Override
     public KeyFormat getKeyFormat() {
@@ -156,6 +172,42 @@ public final class MutableSerializationRegistryMultithreadTest {
     return new TestKey1();
   }
 
+  private static TestSerializationA serializeKeyFormat1ToA(TestKeyFormat1 keyFormat)
+      throws GeneralSecurityException {
+    return new TestSerializationA(A_1);
+  }
+
+  private static TestSerializationA serializeKeyFormat2ToA(TestKeyFormat2 keyFormat)
+      throws GeneralSecurityException {
+    return new TestSerializationA(A_2);
+  }
+
+  private static TestSerializationB serializeKeyFormat1ToB(TestKeyFormat1 keyFormat)
+      throws GeneralSecurityException {
+    return new TestSerializationB(B_1);
+  }
+
+  private static TestSerializationB serializeKeyFormat2ToB(TestKeyFormat2 keyFormat)
+      throws GeneralSecurityException {
+    return new TestSerializationB(B_2);
+  }
+
+  private static KeyFormat parseAToKeyFormat1(TestSerializationA serialization)
+      throws GeneralSecurityException {
+    if (!A_1.equals(serialization.getObjectIdentifier())) {
+      throw new GeneralSecurityException("Wrong object identifier");
+    }
+    return new TestKeyFormat1();
+  }
+
+  private static KeyFormat parseBToKeyFormat1(TestSerializationB serialization)
+      throws GeneralSecurityException {
+    if (!B_1.equals(serialization.getObjectIdentifier())) {
+      throw new GeneralSecurityException("Wrong object identifier");
+    }
+    return new TestKeyFormat1();
+  }
+
   private static final int REPETITIONS = 1000;
 
   @Test
@@ -171,6 +223,16 @@ public final class MutableSerializationRegistryMultithreadTest {
     registry.registerKeyParser(
         KeyParser.create(
             MutableSerializationRegistryMultithreadTest::parseAToKey1,
+            A_1,
+            TestSerializationA.class));
+    registry.registerKeyFormatSerializer(
+        KeyFormatSerializer.create(
+            MutableSerializationRegistryMultithreadTest::serializeKeyFormat1ToA,
+            TestKeyFormat1.class,
+            TestSerializationA.class));
+    registry.registerKeyFormatParser(
+        KeyFormatParser.create(
+            MutableSerializationRegistryMultithreadTest::parseAToKeyFormat1,
             A_1,
             TestSerializationA.class));
 
@@ -215,7 +277,7 @@ public final class MutableSerializationRegistryMultithreadTest {
                         TestSerializationB.class));
                 registry.registerKeySerializer(
                     KeySerializer.create(
-                        MutableSerializationRegistryMultithreadTest /*  */::serializeKey1ToB,
+                        MutableSerializationRegistryMultithreadTest::serializeKey1ToB,
                         TestKey1.class,
                         TestSerializationB.class));
               } catch (GeneralSecurityException e) {
@@ -239,6 +301,78 @@ public final class MutableSerializationRegistryMultithreadTest {
               try {
                 for (int i = 0; i < REPETITIONS; ++i) {
                   registry.serializeKey(new TestKey1(), TestSerializationA.class, ACCESS);
+                }
+              } catch (GeneralSecurityException e) {
+                throw new RuntimeException(e);
+              }
+            }));
+    // =============================== More threads doing the same thing, this time for key formats.
+    futures.add(
+        threadPool.submit(
+            () -> {
+              try {
+                for (int i = 0; i < REPETITIONS; ++i) {
+                  registry.registerKeyFormatParser(
+                      KeyFormatParser.create(
+                          MutableSerializationRegistryMultithreadTest::parseAToKeyFormat1,
+                          Bytes.copyFrom(ByteBuffer.allocate(4).putInt(i).array()),
+                          TestSerializationA.class));
+                }
+              } catch (GeneralSecurityException e) {
+                throw new RuntimeException(e);
+              }
+            }));
+    futures.add(
+        threadPool.submit(
+            () -> {
+              try {
+                // This thread mainly wants to do a key serializer registration, but we only have
+                // one of those, since each needs either a new serialization class, or a new key
+                // class. So first do a few parsing registrations to mix things up.
+                for (int i = 0; i < REPETITIONS / 2; ++i) {
+                  registry.registerKeyFormatParser(
+                      KeyFormatParser.create(
+                          MutableSerializationRegistryMultithreadTest::parseBToKeyFormat1,
+                          Bytes.copyFrom(ByteBuffer.allocate(4).putInt(i).array()),
+                          TestSerializationB.class));
+                }
+                registry.registerKeyFormatSerializer(
+                    KeyFormatSerializer.create(
+                        MutableSerializationRegistryMultithreadTest::serializeKeyFormat2ToA,
+                        TestKeyFormat2.class,
+                        TestSerializationA.class));
+                registry.registerKeyFormatSerializer(
+                    KeyFormatSerializer.create(
+                        MutableSerializationRegistryMultithreadTest::serializeKeyFormat2ToB,
+                        TestKeyFormat2.class,
+                        TestSerializationB.class));
+                registry.registerKeyFormatSerializer(
+                    KeyFormatSerializer.create(
+                        MutableSerializationRegistryMultithreadTest::serializeKeyFormat1ToB,
+                        TestKeyFormat1.class,
+                        TestSerializationB.class));
+              } catch (GeneralSecurityException e) {
+                throw new RuntimeException(e);
+              }
+            }));
+
+    futures.add(
+        threadPool.submit(
+            () -> {
+              try {
+                for (int i = 0; i < REPETITIONS; ++i) {
+                  registry.parseKeyFormat(new TestSerializationA(A_1));
+                }
+              } catch (GeneralSecurityException e) {
+                throw new RuntimeException(e);
+              }
+            }));
+    futures.add(
+        threadPool.submit(
+            () -> {
+              try {
+                for (int i = 0; i < REPETITIONS; ++i) {
+                  registry.serializeKeyFormat(new TestKeyFormat1(), TestSerializationA.class);
                 }
               } catch (GeneralSecurityException e) {
                 throw new RuntimeException(e);
