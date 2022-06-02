@@ -376,3 +376,29 @@ android_library(
         "@maven//:com_google_errorprone_error_prone_annotations",
     ],
 )
+
+java_library(
+    name = "mutable_serialization_registry",
+    srcs = ["MutableSerializationRegistry.java"],
+    deps = [
+        ":key_parser",
+        ":key_serializer",
+        ":serialization",
+        ":serialization_registry",
+        "//src/main/java/com/google/crypto/tink:key",
+        "//src/main/java/com/google/crypto/tink:secret_key_access",
+    ],
+)
+
+android_library(
+    name = "mutable_serialization_registry-android",
+    srcs = ["MutableSerializationRegistry.java"],
+    deps = [
+        ":key_parser-android",
+        ":key_serializer-android",
+        ":serialization-android",
+        ":serialization_registry-android",
+        "//src/main/java/com/google/crypto/tink:key-android",
+        "//src/main/java/com/google/crypto/tink:secret_key_access-android",
+    ],
+)
