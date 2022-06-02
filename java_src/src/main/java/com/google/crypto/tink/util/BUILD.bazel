@@ -25,8 +25,8 @@ android_library(
 )
 
 java_library(
-    name = "secret_byte_array",
-    srcs = ["SecretByteArray.java"],
+    name = "secret_bytes",
+    srcs = ["SecretBytes.java"],
     deps = [
         "//src/main/java/com/google/crypto/tink:secret_key_access",
         "//src/main/java/com/google/crypto/tink/annotations:alpha",
@@ -37,8 +37,8 @@ java_library(
 )
 
 android_library(
-    name = "secret_byte_array-android",
-    srcs = ["SecretByteArray.java"],
+    name = "secret_bytes-android",
+    srcs = ["SecretBytes.java"],
     deps = [
         "//src/main/java/com/google/crypto/tink:secret_key_access-android",
         "//src/main/java/com/google/crypto/tink/annotations:alpha-android",

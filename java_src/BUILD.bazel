@@ -283,7 +283,7 @@ gen_maven_jar_rules(
         "//src/main/java/com/google/crypto/tink/tinkkey/internal:internal_key_handle",
         "//src/main/java/com/google/crypto/tink/tinkkey/internal:proto_key",
         "//src/main/java/com/google/crypto/tink/util:keys_downloader",
-        "//src/main/java/com/google/crypto/tink/util:secret_byte_array",
+        "//src/main/java/com/google/crypto/tink/util:secret_bytes",
     ],
 )
 
@@ -568,7 +568,7 @@ gen_maven_jar_rules(
         "//src/main/java/com/google/crypto/tink/tinkkey/internal:internal_key_handle-android",
         "//src/main/java/com/google/crypto/tink/tinkkey/internal:proto_key-android",
         "//src/main/java/com/google/crypto/tink/util:keys_downloader-android",
-        "//src/main/java/com/google/crypto/tink/util:secret_byte_array-android",
+        "//src/main/java/com/google/crypto/tink/util:secret_bytes-android",
     ],
 )
 

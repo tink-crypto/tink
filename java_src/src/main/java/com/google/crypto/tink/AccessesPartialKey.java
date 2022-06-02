@@ -47,7 +47,7 @@ import java.lang.annotation.Target;
  *   class KeyExporter {
  *      ...
  *      {@literal @}AccessesPartialKey
- *      public static SecretByteArray exportHmacKey(HmacKey key) {
+ *      public static SecretBytes exportHmacKey(HmacKey key) {
  *        // The caller of this method can only handle keys without prefix, SHA256, 20 byte tags,
  *        // and 32 byte keys.
  *        if (key.getKeyFormat().getVariant() != HmacKeyFormat.Variant.NO_PREFIX ||

@@ -25,39 +25,39 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
-/** Tests for {@link SecretByteArray}. */
+/** Tests for {@link SecretBytes}. */
 @RunWith(JUnit4.class)
-public final class SecretByteArrayTest {
+public final class SecretBytesTest {
   @Test
   public void testBasicWorks() throws Exception {
     byte[] plainArray = new byte[] {0, 1, 2, 3, 4, 5, 6, 7};
-    SecretByteArray array = SecretByteArray.copyFrom(plainArray, InsecureSecretKeyAccess.get());
+    SecretBytes array = SecretBytes.copyFrom(plainArray, InsecureSecretKeyAccess.get());
     assertThat(array.toByteArray(InsecureSecretKeyAccess.get())).isEqualTo(plainArray);
   }
 
   @Test
   public void testSize() throws Exception {
     byte[] plainArray = new byte[] {0, 1, 2, 3, 4, 5, 6, 7};
-    SecretByteArray array = SecretByteArray.copyFrom(plainArray, InsecureSecretKeyAccess.get());
+    SecretBytes array = SecretBytes.copyFrom(plainArray, InsecureSecretKeyAccess.get());
     assertThat(array.size()).isEqualTo(8);
   }
 
   @Test
   public void testSecretAccessNull_throws() throws Exception {
     byte[] plainArray = new byte[] {0, 1, 2, 3, 4, 5, 6, 7};
-    assertThrows(NullPointerException.class, () -> SecretByteArray.copyFrom(plainArray, null));
+    assertThrows(NullPointerException.class, () -> SecretBytes.copyFrom(plainArray, null));
   }
 
   @Test
   public void testSecretAccessNull_toByteArray_throws() throws Exception {
-    SecretByteArray array = SecretByteArray.randomBytes(16);
+    SecretBytes array = SecretBytes.randomBytes(16);
     assertThrows(NullPointerException.class, () -> array.toByteArray(null));
   }
 
   @Test
   public void testImmutability_inputCopied() throws Exception {
     byte[] plainArray = new byte[] {0, 1, 2, 3, 4, 5, 6, 7};
-    SecretByteArray array = SecretByteArray.copyFrom(plainArray, InsecureSecretKeyAccess.get());
+    SecretBytes array = SecretBytes.copyFrom(plainArray, InsecureSecretKeyAccess.get());
     plainArray[5] = 55;
     assertThat(array.toByteArray(InsecureSecretKeyAccess.get()))
         .isEqualTo(new byte[] {0, 1, 2, 3, 4, 5, 6, 7});
@@ -66,50 +66,49 @@ public final class SecretByteArrayTest {
   @Test
   public void testImmutability_outputCopied() throws Exception {
     byte[] plainArray = new byte[] {0, 1, 2, 3, 4, 5, 6, 7};
-    SecretByteArray array = SecretByteArray.copyFrom(plainArray, InsecureSecretKeyAccess.get());
+    SecretBytes array = SecretBytes.copyFrom(plainArray, InsecureSecretKeyAccess.get());
     array.toByteArray(InsecureSecretKeyAccess.get())[5] = 55;
     assertThat(array.toByteArray(InsecureSecretKeyAccess.get()))
         .isEqualTo(new byte[] {0, 1, 2, 3, 4, 5, 6, 7});
   }
 
   @Test
-  public void testEqualsSecretByteArray_bitflips_different() throws Exception {
-    SecretByteArray array = SecretByteArray.randomBytes(8);
+  public void testEqualsSecretBytes_bitflips_different() throws Exception {
+    SecretBytes array = SecretBytes.randomBytes(8);
     for (int i = 0; i < 8; ++i) {
       for (int j = 0; j < 8; ++j) {
         byte[] plainArray = array.toByteArray(InsecureSecretKeyAccess.get());
         plainArray[i] = (byte) (plainArray[i] ^ 1 << j);
-        SecretByteArray array2 =
-            SecretByteArray.copyFrom(plainArray, InsecureSecretKeyAccess.get());
-        assertThat(array.equalsSecretByteArray(array2)).isFalse();
+        SecretBytes array2 = SecretBytes.copyFrom(plainArray, InsecureSecretKeyAccess.get());
+        assertThat(array.equalsSecretBytes(array2)).isFalse();
       }
     }
   }
 
   @Test
-  public void testEqualsSecretByteArray_lengths_different() throws Exception {
-    SecretByteArray array = SecretByteArray.randomBytes(16);
+  public void testEqualsSecretBytes_lengths_different() throws Exception {
+    SecretBytes array = SecretBytes.randomBytes(16);
     for (int i = 0; i < 16; ++i) {
       byte[] shorterCopy = Arrays.copyOf(array.toByteArray(InsecureSecretKeyAccess.get()), i);
-      SecretByteArray array2 = SecretByteArray.copyFrom(shorterCopy, InsecureSecretKeyAccess.get());
-      assertThat(array.equalsSecretByteArray(array2)).isFalse();
+      SecretBytes array2 = SecretBytes.copyFrom(shorterCopy, InsecureSecretKeyAccess.get());
+      assertThat(array.equalsSecretBytes(array2)).isFalse();
     }
   }
 
   @Test
-  public void testEqualsSecretByteArray_equals() throws Exception {
-    SecretByteArray array = SecretByteArray.randomBytes(16);
-    SecretByteArray array2 =
-        SecretByteArray.copyFrom(
+  public void testEqualsSecretBytes_equals() throws Exception {
+    SecretBytes array = SecretBytes.randomBytes(16);
+    SecretBytes array2 =
+        SecretBytes.copyFrom(
             array.toByteArray(InsecureSecretKeyAccess.get()), InsecureSecretKeyAccess.get());
-    assertThat(array.equalsSecretByteArray(array2)).isTrue();
+    assertThat(array.equalsSecretBytes(array2)).isTrue();
   }
 
   @Test
   public void testRandomBytes_alwaysDifferent() throws Exception {
-    SecretByteArray array = SecretByteArray.randomBytes(16);
+    SecretBytes array = SecretBytes.randomBytes(16);
     for (int i = 0; i < 100; ++i) {
-      assertThat(array.equalsSecretByteArray(SecretByteArray.randomBytes(16))).isFalse();
+      assertThat(array.equalsSecretBytes(SecretBytes.randomBytes(16))).isFalse();
     }
   }
 }

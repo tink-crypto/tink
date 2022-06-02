@@ -25,30 +25,28 @@ import com.google.errorprone.annotations.Immutable;
 /** A class storing an immutable byte array, protecting the data via {@link SecretKeyAccess}. */
 @Alpha
 @Immutable
-public final class SecretByteArray {
-  private final Bytes byteArray;
+public final class SecretBytes {
+  private final Bytes bytes;
 
-  private SecretByteArray(Bytes byteArray) {
-    this.byteArray = byteArray;
+  private SecretBytes(Bytes bytes) {
+    this.bytes = bytes;
   }
 
   /**
-   * Creates a new SecretByteArray with the contents given in {@code value}.
+   * Creates a new SecretBytes with the contents given in {@code value}.
    *
    * <p>The parameter {@code access} must be non-null.
    */
-  public static SecretByteArray copyFrom(byte[] value, SecretKeyAccess access) {
+  public static SecretBytes copyFrom(byte[] value, SecretKeyAccess access) {
     if (access == null) {
       throw new NullPointerException("SecretKeyAccess required");
     }
-    return new SecretByteArray(Bytes.copyFrom(value));
+    return new SecretBytes(Bytes.copyFrom(value));
   }
 
-  /**
-   * Creates a new SecretByteArray with bytes chosen uniformly at random of length {@code length}.
-   */
-  public static SecretByteArray randomBytes(int length) {
-    return new SecretByteArray(Bytes.copyFrom(Random.randBytes(length)));
+  /** Creates a new SecretBytes with bytes chosen uniformly at random of length {@code length}. */
+  public static SecretBytes randomBytes(int length) {
+    return new SecretBytes(Bytes.copyFrom(Random.randBytes(length)));
   }
 
   /**
@@ -60,21 +58,21 @@ public final class SecretByteArray {
     if (access == null) {
       throw new NullPointerException("SecretKeyAccess required");
     }
-    return byteArray.toByteArray();
+    return bytes.toByteArray();
   }
 
   /** Returns the length of the bytes wrapped by this object. */
   public int size() {
-    return byteArray.size();
+    return bytes.size();
   }
 
   /**
    * Returns true if the {@code other} byte array has the same bytes, in time depending only on the
-   * length of both SecretByteArray objects.
+   * length of both SecretBytes objects.
    */
-  public boolean equalsSecretByteArray(SecretByteArray other) {
-    byte[] myArray = byteArray.toByteArray();
-    byte[] otherArray = other.byteArray.toByteArray();
+  public boolean equalsSecretBytes(SecretBytes other) {
+    byte[] myArray = bytes.toByteArray();
+    byte[] otherArray = other.bytes.toByteArray();
     if (myArray.length != otherArray.length) {
       return false;
     }
