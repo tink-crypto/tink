@@ -173,3 +173,24 @@ tink_cc_test(
     tink::proto::common_cc_proto
     tink::proto::tink_cc_proto
 )
+
+tink_cc_library(
+  NAME failing_daead
+  SRCS
+    failing_daead.cc
+    failing_daead.h
+  DEPS
+    absl::strings
+    tink::core::deterministic_aead
+)
+
+tink_cc_test(
+  NAME failing_daead_test
+  SRCS
+    failing_daead_test.cc
+  DEPS
+    tink::daead::failing_daead
+    gmock
+    absl::status
+    tink::util::test_matchers
+)

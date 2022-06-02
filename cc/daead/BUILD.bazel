@@ -186,3 +186,25 @@ cc_test(
         "@com_google_googletest//:gtest_main",
     ],
 )
+
+cc_library(
+    name = "failing_daead",
+    srcs = ["failing_daead.cc"],
+    hdrs = ["failing_daead.h"],
+    include_prefix = "tink/daead",
+    deps = [
+        "//:deterministic_aead",
+        "@com_google_absl//absl/strings",
+    ],
+)
+
+cc_test(
+    name = "failing_daead_test",
+    srcs = ["failing_daead_test.cc"],
+    deps = [
+        ":failing_daead",
+        "//util:test_matchers",
+        "@com_google_absl//absl/status",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
