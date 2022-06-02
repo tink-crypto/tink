@@ -35,8 +35,6 @@ namespace crypto {
 namespace tink {
 namespace internal {
 
-using ::google::crypto::tink::HpkeParams;
-
 util::StatusOr<std::unique_ptr<HpkeEncryptBoringSsl>> HpkeEncryptBoringSsl::New(
     const google::crypto::tink::HpkeParams& params,
     absl::string_view recipient_public_key, absl::string_view context_info) {

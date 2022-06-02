@@ -164,10 +164,12 @@ cc_library(
 
 cc_library(
     name = "hpke_test_util",
+    testonly = 1,
     srcs = ["hpke_test_util.cc"],
     hdrs = ["hpke_test_util.h"],
     include_prefix = "tink/hybrid/internal",
     deps = [
+        ":hpke_util",
         "//proto:hpke_cc_proto",
         "//util:status",
         "//util:statusor",
@@ -177,12 +179,19 @@ cc_library(
 )
 
 cc_library(
+    name = "hpke_util",
+    hdrs = ["hpke_util.h"],
+    include_prefix = "tink/hybrid/internal",
+)
+
+cc_library(
     name = "hpke_util_boringssl",
     srcs = ["hpke_util_boringssl.cc"],
     hdrs = ["hpke_util_boringssl.h"],
     include_prefix = "tink/hybrid/internal",
     tags = ["requires_boringcrypto_update"],
     deps = [
+        ":hpke_util",
         "//proto:hpke_cc_proto",
         "//util:status",
         "//util:statusor",
@@ -345,6 +354,7 @@ cc_test(
     tags = ["requires_boringcrypto_update"],
     deps = [
         ":hpke_test_util",
+        ":hpke_util",
         ":hpke_util_boringssl",
         "//proto:hpke_cc_proto",
         "//util:test_matchers",
@@ -353,4 +363,3 @@ cc_test(
         "@com_google_googletest//:gtest_main",
     ],
 )
-#include "third_party/absl/status/status.h"

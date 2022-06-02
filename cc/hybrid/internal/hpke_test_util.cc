@@ -19,19 +19,13 @@
 #include <string>
 
 #include "absl/status/status.h"
+#include "tink/hybrid/internal/hpke_util.h"
 #include "tink/util/status.h"
 #include "proto/hpke.pb.h"
 
 namespace crypto {
 namespace tink {
 namespace internal {
-
-using ::google::crypto::tink::HpkeAead;
-using ::google::crypto::tink::HpkeKdf;
-using ::google::crypto::tink::HpkeKem;
-using ::google::crypto::tink::HpkeParams;
-using ::google::crypto::tink::HpkePrivateKey;
-using ::google::crypto::tink::HpkePublicKey;
 
 // Test vector from https://www.rfc-editor.org/rfc/rfc9180.html#appendix-A.1.
 // DHKEM(X25519, HKDF-SHA256), HKDF-SHA256, AES-128-GCM
@@ -80,23 +74,24 @@ HpkeTestParams DefaultHpkeTestParams() {
   return HpkeTestParams(kTestX25519HkdfSha256Aes128Gcm);
 }
 
-util::StatusOr<HpkeTestParams> CreateHpkeTestParams(const HpkeParams& params) {
-  if (params.kem() != HpkeKem::DHKEM_X25519_HKDF_SHA256) {
+util::StatusOr<HpkeTestParams> CreateHpkeTestParams(
+    const google::crypto::tink::HpkeParams& params) {
+  if (params.kem() != google::crypto::tink::HpkeKem::DHKEM_X25519_HKDF_SHA256) {
     return util::Status(
         absl::StatusCode::kInvalidArgument,
         absl::StrCat("No test parameters for specified KEM:", params.kem()));
   }
-  if (params.kdf() != HpkeKdf::HKDF_SHA256) {
+  if (params.kdf() != google::crypto::tink::HpkeKdf::HKDF_SHA256) {
     return util::Status(
         absl::StatusCode::kInvalidArgument,
         absl::StrCat("No test parameters for specified KDF:", params.kdf()));
   }
   switch (params.aead()) {
-    case HpkeAead::AES_128_GCM:
+    case google::crypto::tink::HpkeAead::AES_128_GCM:
       return HpkeTestParams(kTestX25519HkdfSha256Aes128Gcm);
-    case HpkeAead::AES_256_GCM:
+    case google::crypto::tink::HpkeAead::AES_256_GCM:
       return HpkeTestParams(kTestX25519HkdfSha256Aes256Gcm);
-    case HpkeAead::CHACHA20_POLY1305:
+    case google::crypto::tink::HpkeAead::CHACHA20_POLY1305:
       return HpkeTestParams(kTestX25519HkdfSha256ChaCha20Poly1305);
     default:
       return util::Status(absl::StatusCode::kInvalidArgument,
@@ -105,30 +100,60 @@ util::StatusOr<HpkeTestParams> CreateHpkeTestParams(const HpkeParams& params) {
   }
 }
 
-HpkeParams CreateHpkeParams(const HpkeKem& kem, const HpkeKdf& kdf,
-                            const HpkeAead& aead) {
-  HpkeParams params;
+util::StatusOr<HpkeTestParams> CreateHpkeTestParams(const HpkeParams& params) {
+  if (params.kem != HpkeKem::kX25519HkdfSha256) {
+    return util::Status(
+        absl::StatusCode::kInvalidArgument,
+        absl::StrCat("No test parameters for specified KEM:", params.kem));
+  }
+  if (params.kdf != HpkeKdf::kHkdfSha256) {
+    return util::Status(
+        absl::StatusCode::kInvalidArgument,
+        absl::StrCat("No test parameters for specified KDF:", params.kdf));
+  }
+  switch (params.aead) {
+    case HpkeAead::kAes128Gcm:
+      return HpkeTestParams(kTestX25519HkdfSha256Aes128Gcm);
+    case HpkeAead::kAes256Gcm:
+      return HpkeTestParams(kTestX25519HkdfSha256Aes256Gcm);
+    case HpkeAead::kChaCha20Poly1305:
+      return HpkeTestParams(kTestX25519HkdfSha256ChaCha20Poly1305);
+    default:
+      return util::Status(
+          absl::StatusCode::kInvalidArgument,
+          absl::StrCat("No test parameters for specified AEAD:", params.aead));
+  }
+}
+
+google::crypto::tink::HpkeParams CreateHpkeParams(
+    const google::crypto::tink::HpkeKem& kem,
+    const google::crypto::tink::HpkeKdf& kdf,
+    const google::crypto::tink::HpkeAead& aead) {
+  google::crypto::tink::HpkeParams params;
   params.set_kem(kem);
   params.set_kdf(kdf);
   params.set_aead(aead);
   return params;
 }
 
-HpkePublicKey CreateHpkePublicKey(const HpkeParams& params,
-                                  const std::string& raw_key_bytes) {
-  HpkePublicKey key_proto;
+google::crypto::tink::HpkePublicKey CreateHpkePublicKey(
+    const google::crypto::tink::HpkeParams& params,
+    const std::string& raw_key_bytes) {
+  google::crypto::tink::HpkePublicKey key_proto;
   key_proto.set_version(0);
   key_proto.set_public_key(raw_key_bytes);
   *key_proto.mutable_params() = params;
   return key_proto;
 }
 
-HpkePrivateKey CreateHpkePrivateKey(const HpkeParams& params,
-                                    const std::string& raw_key_bytes) {
-  HpkePrivateKey private_key_proto;
+google::crypto::tink::HpkePrivateKey CreateHpkePrivateKey(
+    const google::crypto::tink::HpkeParams& params,
+    const std::string& raw_key_bytes) {
+  google::crypto::tink::HpkePrivateKey private_key_proto;
   private_key_proto.set_version(0);
   private_key_proto.set_private_key(raw_key_bytes);
-  HpkePublicKey* public_key_proto = private_key_proto.mutable_public_key();
+  google::crypto::tink::HpkePublicKey* public_key_proto =
+      private_key_proto.mutable_public_key();
   *public_key_proto->mutable_params() = params;
   return private_key_proto;
 }

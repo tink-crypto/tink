@@ -158,6 +158,7 @@ tink_cc_library(
     hpke_test_util.cc
     hpke_test_util.h
   DEPS
+    tink::hybrid::internal::hpke_util
     absl::status
     absl::strings
     tink::util::status
@@ -168,11 +169,20 @@ tink_cc_library(
 )
 
 tink_cc_library(
+  NAME hpke_util
+  SRCS
+    hpke_util.h
+  TAGS
+    exclude_if_openssl
+)
+
+tink_cc_library(
   NAME hpke_util_boringssl
   SRCS
     hpke_util_boringssl.cc
     hpke_util_boringssl.h
   DEPS
+    tink::hybrid::internal::hpke_util
     absl::status
     absl::strings
     crypto
@@ -336,6 +346,7 @@ tink_cc_test(
     hpke_util_boringssl_test.cc
   DEPS
     tink::hybrid::internal::hpke_test_util
+    tink::hybrid::internal::hpke_util
     tink::hybrid::internal::hpke_util_boringssl
     gmock
     crypto

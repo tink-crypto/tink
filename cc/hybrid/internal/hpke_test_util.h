@@ -20,6 +20,7 @@
 #include <string>
 
 #include "absl/strings/escaping.h"
+#include "tink/hybrid/internal/hpke_util.h"
 #include "tink/util/statusor.h"
 #include "proto/hpke.pb.h"
 
@@ -55,6 +56,10 @@ HpkeTestParams DefaultHpkeTestParams();
 // Creates an HpkeTestParams struct for the specified HpkeParams protobuf.
 util::StatusOr<HpkeTestParams> CreateHpkeTestParams(
     const google::crypto::tink::HpkeParams& params);
+
+// Creates an HpkeTestParams struct for the specified HpkeParams struct.
+util::StatusOr<HpkeTestParams> CreateHpkeTestParams(
+    const HpkeParams& params);
 
 // Creates an HpkeParams protobuf from `kem`, `kdf`, and `aead`.
 google::crypto::tink::HpkeParams CreateHpkeParams(
