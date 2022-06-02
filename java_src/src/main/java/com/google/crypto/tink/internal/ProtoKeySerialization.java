@@ -34,7 +34,7 @@ import java.util.Optional;
 @Immutable
 public final class ProtoKeySerialization implements Serialization {
   private final String typeUrl;
-  private final ByteArray objectIdentifier;
+  private final Bytes objectIdentifier;
   private final ByteString value;
   private final KeyMaterialType keyMaterialType;
   private final OutputPrefixType outputPrefixType;
@@ -47,7 +47,7 @@ public final class ProtoKeySerialization implements Serialization {
       OutputPrefixType outputPrefixType,
       Optional<Integer> idRequirement) {
     this.typeUrl = typeUrl;
-    this.objectIdentifier = ByteArray.copyFrom(typeUrl.getBytes(UTF_8));
+    this.objectIdentifier = Bytes.copyFrom(typeUrl.getBytes(UTF_8));
     this.value = value;
     this.keyMaterialType = keyMaterialType;
     this.outputPrefixType = outputPrefixType;
@@ -111,7 +111,7 @@ public final class ProtoKeySerialization implements Serialization {
    * <p>This is the UTF8 encoding of the result of "getTypeUrl".
    */
   @Override
-  public ByteArray getObjectIdentifier() {
+  public Bytes getObjectIdentifier() {
     return objectIdentifier;
   }
 

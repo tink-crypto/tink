@@ -18,7 +18,7 @@ package com.google.crypto.tink.util;
 
 import com.google.crypto.tink.SecretKeyAccess;
 import com.google.crypto.tink.annotations.Alpha;
-import com.google.crypto.tink.internal.ByteArray;
+import com.google.crypto.tink.internal.Bytes;
 import com.google.crypto.tink.subtle.Random;
 import com.google.errorprone.annotations.Immutable;
 
@@ -26,9 +26,9 @@ import com.google.errorprone.annotations.Immutable;
 @Alpha
 @Immutable
 public final class SecretByteArray {
-  private final ByteArray byteArray;
+  private final Bytes byteArray;
 
-  private SecretByteArray(ByteArray byteArray) {
+  private SecretByteArray(Bytes byteArray) {
     this.byteArray = byteArray;
   }
 
@@ -41,14 +41,14 @@ public final class SecretByteArray {
     if (access == null) {
       throw new NullPointerException("SecretKeyAccess required");
     }
-    return new SecretByteArray(ByteArray.copyFrom(value));
+    return new SecretByteArray(Bytes.copyFrom(value));
   }
 
   /**
    * Creates a new SecretByteArray with bytes chosen uniformly at random of length {@code length}.
    */
   public static SecretByteArray randomBytes(int length) {
-    return new SecretByteArray(ByteArray.copyFrom(Random.randBytes(length)));
+    return new SecretByteArray(Bytes.copyFrom(Random.randBytes(length)));
   }
 
   /**

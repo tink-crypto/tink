@@ -39,10 +39,10 @@ public abstract class KeyParser<SerializationT extends Serialization> {
         throws GeneralSecurityException;
   }
 
-  private final ByteArray objectIdentifier;
+  private final Bytes objectIdentifier;
   private final Class<SerializationT> serializationClass;
 
-  private KeyParser(ByteArray objectIdentifier, Class<SerializationT> serializationClass) {
+  private KeyParser(Bytes objectIdentifier, Class<SerializationT> serializationClass) {
     this.objectIdentifier = objectIdentifier;
     this.serializationClass = serializationClass;
   }
@@ -65,7 +65,7 @@ public abstract class KeyParser<SerializationT extends Serialization> {
    * of type {@code SerializationT}, the registry will then obtain the {@code objectIdentifier} of
    * this serialization object, and call the parser corresponding to this object.
    */
-  public final ByteArray getObjectIdentifier() {
+  public final Bytes getObjectIdentifier() {
     return objectIdentifier;
   }
 
@@ -103,7 +103,7 @@ public abstract class KeyParser<SerializationT extends Serialization> {
    */
   public static <SerializationT extends Serialization> KeyParser<SerializationT> create(
       KeyParsingFunction<SerializationT> function,
-      ByteArray objectIdentifier,
+      Bytes objectIdentifier,
       Class<SerializationT> serializationClass) {
     return new KeyParser<SerializationT>(objectIdentifier, serializationClass) {
       @Override

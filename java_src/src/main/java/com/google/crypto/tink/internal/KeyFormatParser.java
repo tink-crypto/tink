@@ -36,10 +36,10 @@ public abstract class KeyFormatParser<SerializationT extends Serialization> {
     KeyFormat parseKeyFormat(SerializationT serialization) throws GeneralSecurityException;
   }
 
-  private final ByteArray objectIdentifier;
+  private final Bytes objectIdentifier;
   private final Class<SerializationT> serializationClass;
 
-  private KeyFormatParser(ByteArray objectIdentifier, Class<SerializationT> serializationClass) {
+  private KeyFormatParser(Bytes objectIdentifier, Class<SerializationT> serializationClass) {
     this.objectIdentifier = objectIdentifier;
     this.serializationClass = serializationClass;
   }
@@ -63,7 +63,7 @@ public abstract class KeyFormatParser<SerializationT extends Serialization> {
    * objectIdentifier} of this serialization object, and call the parser corresponding to this
    * object.
    */
-  public final ByteArray getObjectIdentifier() {
+  public final Bytes getObjectIdentifier() {
     return objectIdentifier;
   }
 
@@ -98,7 +98,7 @@ public abstract class KeyFormatParser<SerializationT extends Serialization> {
    */
   public static <SerializationT extends Serialization> KeyFormatParser<SerializationT> create(
       KeyFormatParsingFunction<SerializationT> function,
-      ByteArray objectIdentifier,
+      Bytes objectIdentifier,
       Class<SerializationT> serializationClass) {
     return new KeyFormatParser<SerializationT>(objectIdentifier, serializationClass) {
       @Override

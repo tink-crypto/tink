@@ -29,12 +29,12 @@ import java.util.Arrays;
  * @since 1.0.0
  */
 @Immutable
-public final class ByteArray {
+public final class Bytes {
   /**
    * @param data the byte array to be wrapped.
    * @return an immutable wrapper around the provided bytes.
    */
-  public static ByteArray copyFrom(final byte[] data) {
+  public static Bytes copyFrom(final byte[] data) {
     if (data == null) {
       return null;
     } else {
@@ -43,7 +43,7 @@ public final class ByteArray {
   }
 
   /**
-   * Wrap an immutable byte array over a slice of a bytearray
+   * Wrap an immutable byte array over a slice of a Bytes
    *
    * @param data the byte array to be wrapped.
    * @param start the starting index of the slice
@@ -51,8 +51,8 @@ public final class ByteArray {
    * @return an immutable wrapper around the bytes in the slice from {@code start} to {@code start +
    *     len}
    */
-  public static ByteArray copyFrom(final byte[] data, final int start, final int len) {
-    return new ByteArray(data, start, len);
+  public static Bytes copyFrom(final byte[] data, final int start, final int len) {
+    return new Bytes(data, start, len);
   }
 
   /**
@@ -71,17 +71,17 @@ public final class ByteArray {
     return data.length;
   }
 
-  private ByteArray(final byte[] buf, final int start, final int len) {
+  private Bytes(final byte[] buf, final int start, final int len) {
     data = new byte[len];
     System.arraycopy(buf, start, data, 0, len);
   }
 
   @Override
   public boolean equals(Object o) {
-    if (!(o instanceof ByteArray)) {
+    if (!(o instanceof Bytes)) {
       return false;
     }
-    ByteArray other = (ByteArray) o;
+    Bytes other = (Bytes) o;
     return Arrays.equals(other.data, data);
   }
 
@@ -92,7 +92,7 @@ public final class ByteArray {
 
   @Override
   public String toString() {
-    return "ByteArray(" + Hex.encode(data) + ")";
+    return "Bytes(" + Hex.encode(data) + ")";
   }
 
   @SuppressWarnings("Immutable") // We copy the data on input and output.

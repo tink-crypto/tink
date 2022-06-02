@@ -37,5 +37,5 @@ public interface Serialization {
    * identifier. When the registry is asked to parse a Serialization, the registry will then
    * dispatch it to the corresponding method.
    */
-  public ByteArray getObjectIdentifier();
+  public Bytes getObjectIdentifier();
 }

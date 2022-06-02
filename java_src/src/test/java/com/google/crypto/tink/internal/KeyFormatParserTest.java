@@ -40,8 +40,8 @@ public final class KeyFormatParserTest {
   @Immutable
   private static class ExampleSerialization implements Serialization {
     @Override
-    public ByteArray getObjectIdentifier() {
-      return ByteArray.copyFrom(new byte[0]);
+    public Bytes getObjectIdentifier() {
+      return Bytes.copyFrom(new byte[0]);
     }
   }
 
@@ -53,16 +53,14 @@ public final class KeyFormatParserTest {
   @Test
   public void createParser_works() throws Exception {
     KeyFormatParser.create(
-        KeyFormatParserTest::parse, ByteArray.copyFrom(new byte[0]), ExampleSerialization.class);
+        KeyFormatParserTest::parse, Bytes.copyFrom(new byte[0]), ExampleSerialization.class);
   }
 
   @Test
   public void createParser_parseKey_works() throws Exception {
     KeyFormatParser<ExampleSerialization> parser =
         KeyFormatParser.create(
-            KeyFormatParserTest::parse,
-            ByteArray.copyFrom(new byte[0]),
-            ExampleSerialization.class);
+            KeyFormatParserTest::parse, Bytes.copyFrom(new byte[0]), ExampleSerialization.class);
     assertThat(parser.parseKeyFormat(new ExampleSerialization())).isNotNull();
   }
 
@@ -71,9 +69,9 @@ public final class KeyFormatParserTest {
     KeyFormatParser<ExampleSerialization> parser =
         KeyFormatParser.create(
             KeyFormatParserTest::parse,
-            ByteArray.copyFrom(new byte[] {1, 2, 3}),
+            Bytes.copyFrom(new byte[] {1, 2, 3}),
             ExampleSerialization.class);
-    assertThat(parser.getObjectIdentifier()).isEqualTo(ByteArray.copyFrom(new byte[] {1, 2, 3}));
+    assertThat(parser.getObjectIdentifier()).isEqualTo(Bytes.copyFrom(new byte[] {1, 2, 3}));
     assertThat(parser.getSerializationClass()).isEqualTo(ExampleSerialization.class);
   }
 }

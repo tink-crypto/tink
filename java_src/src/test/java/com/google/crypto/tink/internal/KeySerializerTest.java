@@ -55,8 +55,8 @@ public final class KeySerializerTest {
   @Immutable
   private static class ExampleSerialization implements Serialization {
     @Override
-    public ByteArray getObjectIdentifier() {
-      return ByteArray.copyFrom(new byte[0]);
+    public Bytes getObjectIdentifier() {
+      return Bytes.copyFrom(new byte[0]);
     }
   }
 

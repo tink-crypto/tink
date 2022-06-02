@@ -204,10 +204,10 @@ public final class SerializationRegistry {
 
   private static class ParserIndex {
     private final Class<? extends Serialization> keySerializationClass;
-    private final ByteArray serializationIdentifier;
+    private final Bytes serializationIdentifier;
 
     private ParserIndex(
-        Class<? extends Serialization> keySerializationClass, ByteArray serializationIdentifier) {
+        Class<? extends Serialization> keySerializationClass, Bytes serializationIdentifier) {
       this.keySerializationClass = keySerializationClass;
       this.serializationIdentifier = serializationIdentifier;
     }

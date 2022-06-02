@@ -78,7 +78,7 @@ java_library(
     deps = [
         ":elliptic_curves",
         ":hkdf",
-        "//src/main/java/com/google/crypto/tink/internal:byte_array",
+        "//src/main/java/com/google/crypto/tink/internal:bytes",
     ],
 )
 
@@ -344,7 +344,7 @@ java_library(
         ":field25519",
         "//src/main/java/com/google/crypto/tink:public_key_verify",
         "//src/main/java/com/google/crypto/tink/config/internal:tink_fips_util",
-        "//src/main/java/com/google/crypto/tink/internal:byte_array",
+        "//src/main/java/com/google/crypto/tink/internal:bytes",
     ],
 )
 
@@ -756,7 +756,7 @@ android_library(
     deps = [
         ":elliptic_curves-android",
         ":hkdf-android",
-        "//src/main/java/com/google/crypto/tink/internal:byte_array-android",
+        "//src/main/java/com/google/crypto/tink/internal:bytes-android",
     ],
 )
 
@@ -806,7 +806,7 @@ android_library(
         ":field25519-android",
         "//src/main/java/com/google/crypto/tink:public_key_verify-android",
         "//src/main/java/com/google/crypto/tink/config/internal:tink_fips_util-android",
-        "//src/main/java/com/google/crypto/tink/internal:byte_array-android",
+        "//src/main/java/com/google/crypto/tink/internal:bytes-android",
     ],
 )
 

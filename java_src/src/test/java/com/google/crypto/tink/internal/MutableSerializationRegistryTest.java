@@ -41,10 +41,10 @@ public final class MutableSerializationRegistryTest {
   private static final Optional<SecretKeyAccess> ACCESS =
       Optional.of(InsecureSecretKeyAccess.get());
 
-  private static final ByteArray A_1 = ByteArray.copyFrom("0".getBytes(UTF_8));
-  private static final ByteArray A_2 = ByteArray.copyFrom("1".getBytes(UTF_8));
-  private static final ByteArray B_1 = ByteArray.copyFrom("1".getBytes(UTF_8));
-  private static final ByteArray B_2 = ByteArray.copyFrom("2".getBytes(UTF_8));
+  private static final Bytes A_1 = Bytes.copyFrom("0".getBytes(UTF_8));
+  private static final Bytes A_2 = Bytes.copyFrom("1".getBytes(UTF_8));
+  private static final Bytes B_1 = Bytes.copyFrom("1".getBytes(UTF_8));
+  private static final Bytes B_2 = Bytes.copyFrom("2".getBytes(UTF_8));
 
   @Immutable
   private static final class TestKey1 extends Key {
@@ -84,28 +84,28 @@ public final class MutableSerializationRegistryTest {
 
   @Immutable
   private static final class TestSerializationA implements Serialization {
-    public TestSerializationA(ByteArray objectIdentifier) {
+    public TestSerializationA(Bytes objectIdentifier) {
       this.objectIdentifier = objectIdentifier;
     }
 
-    private final ByteArray objectIdentifier;
+    private final Bytes objectIdentifier;
 
     @Override
-    public ByteArray getObjectIdentifier() {
+    public Bytes getObjectIdentifier() {
       return objectIdentifier;
     }
   }
 
   @Immutable
   private static final class TestSerializationB implements Serialization {
-    public TestSerializationB(ByteArray objectIdentifier) {
+    public TestSerializationB(Bytes objectIdentifier) {
       this.objectIdentifier = objectIdentifier;
     }
 
-    private final ByteArray objectIdentifier;
+    private final Bytes objectIdentifier;
 
     @Override
-    public ByteArray getObjectIdentifier() {
+    public Bytes getObjectIdentifier() {
       return objectIdentifier;
     }
   }

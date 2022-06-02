@@ -136,8 +136,8 @@ android_library(
 )
 
 java_library(
-    name = "byte_array",
-    srcs = ["ByteArray.java"],
+    name = "bytes",
+    srcs = ["Bytes.java"],
     deps = [
         "//src/main/java/com/google/crypto/tink/subtle:hex",
         "@maven//:com_google_errorprone_error_prone_annotations",
@@ -145,8 +145,8 @@ java_library(
 )
 
 android_library(
-    name = "byte_array-android",
-    srcs = ["ByteArray.java"],
+    name = "bytes-android",
+    srcs = ["Bytes.java"],
     deps = [
         "//src/main/java/com/google/crypto/tink/subtle:hex-android",
         "@maven//:com_google_errorprone_error_prone_annotations",
@@ -177,7 +177,7 @@ java_library(
     name = "serialization",
     srcs = ["Serialization.java"],
     deps = [
-        ":byte_array",
+        ":bytes",
         "@maven//:com_google_errorprone_error_prone_annotations",
     ],
 )
@@ -186,7 +186,7 @@ android_library(
     name = "serialization-android",
     srcs = ["Serialization.java"],
     deps = [
-        ":byte_array-android",
+        ":bytes-android",
         "@maven//:com_google_errorprone_error_prone_annotations",
     ],
 )
@@ -195,7 +195,7 @@ java_library(
     name = "key_parser",
     srcs = ["KeyParser.java"],
     deps = [
-        ":byte_array",
+        ":bytes",
         ":serialization",
         "//src/main/java/com/google/crypto/tink:key",
         "//src/main/java/com/google/crypto/tink:secret_key_access",
@@ -206,7 +206,7 @@ android_library(
     name = "key_parser-android",
     srcs = ["KeyParser.java"],
     deps = [
-        ":byte_array-android",
+        ":bytes-android",
         ":serialization-android",
         "//src/main/java/com/google/crypto/tink:key-android",
         "//src/main/java/com/google/crypto/tink:secret_key_access-android",
@@ -217,7 +217,7 @@ java_library(
     name = "proto_key_format_serialization",
     srcs = ["ProtoKeyFormatSerialization.java"],
     deps = [
-        ":byte_array",
+        ":bytes",
         ":serialization",
         "//proto:tink_java_proto",
         "@maven//:com_google_errorprone_error_prone_annotations",
@@ -228,7 +228,7 @@ java_library(
     name = "proto_key_serialization",
     srcs = ["ProtoKeySerialization.java"],
     deps = [
-        ":byte_array",
+        ":bytes",
         ":serialization",
         "//proto:tink_java_proto",
         "@com_google_protobuf//:protobuf_javalite",
@@ -240,7 +240,7 @@ android_library(
     name = "proto_key_format_serialization-android",
     srcs = ["ProtoKeyFormatSerialization.java"],
     deps = [
-        ":byte_array-android",
+        ":bytes-android",
         ":serialization-android",
         "//proto:tink_java_proto_lite",
         "@maven//:com_google_errorprone_error_prone_annotations",
@@ -251,7 +251,7 @@ android_library(
     name = "proto_key_serialization-android",
     srcs = ["ProtoKeySerialization.java"],
     deps = [
-        ":byte_array-android",
+        ":bytes-android",
         ":serialization-android",
         "//proto:tink_java_proto_lite",
         "@com_google_protobuf//:protobuf_javalite",
@@ -263,7 +263,7 @@ java_library(
     name = "serialization_registry",
     srcs = ["SerializationRegistry.java"],
     deps = [
-        ":byte_array",
+        ":bytes",
         ":key_format_parser",
         ":key_format_serializer",
         ":key_parser",
@@ -279,7 +279,7 @@ android_library(
     name = "serialization_registry-android",
     srcs = ["SerializationRegistry.java"],
     deps = [
-        ":byte_array-android",
+        ":bytes-android",
         ":key_format_parser-android",
         ":key_format_serializer-android",
         ":key_parser-android",
@@ -295,7 +295,7 @@ java_library(
     name = "key_format_parser",
     srcs = ["KeyFormatParser.java"],
     deps = [
-        ":byte_array",
+        ":bytes",
         ":serialization",
         "//src/main/java/com/google/crypto/tink:key_format",
     ],
@@ -305,7 +305,7 @@ android_library(
     name = "key_format_parser-android",
     srcs = ["KeyFormatParser.java"],
     deps = [
-        ":byte_array-android",
+        ":bytes-android",
         ":serialization-android",
         "//src/main/java/com/google/crypto/tink:key_format-android",
     ],

@@ -29,12 +29,12 @@ import com.google.errorprone.annotations.Immutable;
  */
 @Immutable
 public final class ProtoKeyFormatSerialization implements Serialization {
-  private final ByteArray objectIdentifier;
+  private final Bytes objectIdentifier;
   private final KeyTemplate keyTemplate;
 
   private ProtoKeyFormatSerialization(KeyTemplate keyTemplate) {
     this.keyTemplate = keyTemplate;
-    this.objectIdentifier = ByteArray.copyFrom(keyTemplate.getTypeUrl().getBytes(UTF_8));
+    this.objectIdentifier = Bytes.copyFrom(keyTemplate.getTypeUrl().getBytes(UTF_8));
   }
 
   /** Creates a new {@code ProtoKeyFormatSerialization} object. */
@@ -49,7 +49,7 @@ public final class ProtoKeyFormatSerialization implements Serialization {
 
   /** The typeUrl. */
   @Override
-  public ByteArray getObjectIdentifier() {
+  public Bytes getObjectIdentifier() {
     return objectIdentifier;
   }
 }
