@@ -230,6 +230,16 @@ tink_cc_library(
 )
 
 tink_cc_library(
+  NAME chunked_mac
+  SRCS
+    chunked_mac.h
+  DEPS
+    absl::strings
+    tink::util::status
+    tink::util::statusor
+)
+
+tink_cc_library(
   NAME hybrid_decrypt
   SRCS
     hybrid_decrypt.h

@@ -229,6 +229,18 @@ cc_library(
 )
 
 cc_library(
+    name = "chunked_mac",
+    hdrs = ["chunked_mac.h"],
+    include_prefix = "tink",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//util:status",
+        "//util:statusor",
+        "@com_google_absl//absl/strings",
+    ],
+)
+
+cc_library(
     name = "hybrid_decrypt",
     hdrs = ["hybrid_decrypt.h"],
     include_prefix = "tink",
