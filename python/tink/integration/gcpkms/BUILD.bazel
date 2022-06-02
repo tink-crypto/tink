@@ -32,7 +32,6 @@ py_test(
     deps = [
         ":gcpkms",
         "//tink/testing:helper",
-        requirement("six"),  # needed by absl-py
         requirement("absl-py"),
     ],
 )
@@ -49,7 +48,6 @@ py_test(
     deps = [
         ":gcpkms",
         "//tink/testing:helper",
-        requirement("six"),  # needed by absl-py
         requirement("absl-py"),
     ],
 )

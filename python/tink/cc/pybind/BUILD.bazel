@@ -43,7 +43,6 @@ py_test(
     srcs = ["cc_key_manager_test.py"],
     deps = [
         ":tink_bindings",
-        requirement("six"),  # needed by absl-py
         requirement("absl-py"),
         "//tink/aead",
         "//tink/hybrid",
@@ -99,7 +98,6 @@ py_test(
     deps = [
         ":tink_bindings",
         requirement("absl-py"),
-        requirement("six"),  # required by absl-py
     ],
 )
 

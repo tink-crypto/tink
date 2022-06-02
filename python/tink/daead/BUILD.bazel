@@ -42,7 +42,6 @@ py_test(
     srcs_version = "PY3",
     deps = [
         ":daead",
-        requirement("six"),  # needed by absl-py
         requirement("absl-py"),
         "//tink:tink_python",
         "//tink/core",
@@ -67,7 +66,6 @@ py_test(
     srcs_version = "PY3",
     deps = [
         ":daead",
-        requirement("six"),  # needed by absl-py
         requirement("absl-py"),
         "//tink/proto:aes_siv_py_pb2",
         "//tink/proto:tink_py_pb2",
@@ -91,7 +89,6 @@ py_test(
     srcs_version = "PY3",
     deps = [
         ":daead",
-        requirement("six"),  # needed by absl-py
         requirement("absl-py"),
         "//tink:tink_python",
         "//tink/proto:tink_py_pb2",

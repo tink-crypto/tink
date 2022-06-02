@@ -50,7 +50,6 @@ py_test(
     srcs_version = "PY3",
     deps = [
         ":hybrid",
-        requirement("six"),  # needed by absl-py
         requirement("absl-py"),
         "//tink:tink_python",
         "//tink/aead",
@@ -80,7 +79,6 @@ py_test(
     srcs_version = "PY3",
     deps = [
         ":hybrid",
-        requirement("six"),  # needed by absl-py
         requirement("absl-py"),
         "//tink:cleartext_keyset_handle",
         "//tink:tink_python",
@@ -109,7 +107,6 @@ py_test(
     srcs_version = "PY3",
     deps = [
         ":hybrid",
-        requirement("six"),  # needed by absl-py
         requirement("absl-py"),
         "//tink/aead",
         "//tink/proto:common_py_pb2",
