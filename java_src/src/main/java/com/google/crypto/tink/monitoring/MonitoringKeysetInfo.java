@@ -20,18 +20,20 @@ import com.google.crypto.tink.KeyFormat;
 import com.google.crypto.tink.KeyStatus;
 import com.google.crypto.tink.annotations.Alpha;
 import com.google.errorprone.annotations.Immutable;
+import java.security.GeneralSecurityException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 
 /**
  * Immutable representation of a Keyset in a certain point in time for the purpose of monitoring
  * operations involving cryptographic keys.
  *
- * <p>Do not use. This API is not yet read and may change or be removed.
+ * <p>Do not use. This API is not yet ready and may change or be removed.
  */
 @Immutable
 @Alpha
@@ -89,7 +91,7 @@ public final class MonitoringKeysetInfo {
   public static final class Builder {
     private ArrayList<Entry> entries = new ArrayList<>();
     private HashMap<String, String> annotations = new HashMap<>();
-    // TODO(juerg): Add primaryKeyId.
+    private Optional<Integer> primaryKeyId = Optional.empty();
 
     public Builder addAnnotations(Map<String, String> newAnnotations) {
       if (newAnnotations == null) {
@@ -115,14 +117,40 @@ public final class MonitoringKeysetInfo {
       return this;
     }
 
+    public Builder setPrimaryKeyId(int primaryKeyId) {
+      if (this.primaryKeyId == null) {
+        throw new IllegalStateException("setPrimaryKeyId cannot be called after build()");
+      }
+      this.primaryKeyId = Optional.of(primaryKeyId);
+      return this;
+    }
+
+    private boolean isPrimaryKeyIdInEntries() {
+      int primary = primaryKeyId.get();
+      for (Entry entry : entries) {
+        if (entry.getKeyId() == primary) {
+          return true;
+        }
+      }
+      return false;
+    }
+
     /** Builds the MonitoringKeysetInfo object. The builder is not usable anymore afterwards. */
-    public MonitoringKeysetInfo build() {
+    public MonitoringKeysetInfo build() throws GeneralSecurityException {
       if (entries == null || annotations == null) {
         throw new IllegalStateException("cannot call build() twice");
       }
+      if (!primaryKeyId.isPresent()) {
+        throw new GeneralSecurityException("not primary key ID set");
+      }
+      if (!isPrimaryKeyIdInEntries()) {
+        throw new GeneralSecurityException("primary key ID is not present in entries");
+      }
       MonitoringKeysetInfo output =
           new MonitoringKeysetInfo(
-              Collections.unmodifiableMap(this.annotations), Collections.unmodifiableList(entries));
+              Collections.unmodifiableMap(this.annotations),
+              Collections.unmodifiableList(entries),
+              primaryKeyId.get());
       // Collections.unmodifiableMap/List only gives an unmodifiable view of the underlying
       // collection. To make output immutable, we have to remove the reference to these collections.
       // This makes the builder unusable.
@@ -138,9 +166,13 @@ public final class MonitoringKeysetInfo {
   @SuppressWarnings("Immutable")
   private final List<Entry> entries;
 
-  private MonitoringKeysetInfo(Map<String, String> annotations, List<Entry> entries) {
+  private final int primaryKeyId;
+
+  private MonitoringKeysetInfo(
+      Map<String, String> annotations, List<Entry> entries, int primaryKeyId) {
     this.annotations = annotations;
     this.entries = entries;
+    this.primaryKeyId = primaryKeyId;
   }
 
   public static Builder newBuilder() {
@@ -155,13 +187,19 @@ public final class MonitoringKeysetInfo {
     return entries;
   }
 
+  public int getPrimaryKeyId() {
+    return primaryKeyId;
+  }
+
   @Override
   public boolean equals(Object obj) {
     if (!(obj instanceof MonitoringKeysetInfo)) {
       return false;
     }
     MonitoringKeysetInfo info = (MonitoringKeysetInfo) obj;
-    return annotations.equals(info.annotations) && entries.equals(info.entries);
+    return annotations.equals(info.annotations)
+        && entries.equals(info.entries)
+        && (primaryKeyId == info.primaryKeyId);
   }
 
   @Override
@@ -171,6 +209,7 @@ public final class MonitoringKeysetInfo {
 
   @Override
   public String toString() {
-    return String.format("(annotations=%s, entries=%s)", annotations, entries);
+    return String.format(
+        "(annotations=%s, entries=%s, primaryKeyId=%s)", annotations, entries, primaryKeyId);
   }
 }
