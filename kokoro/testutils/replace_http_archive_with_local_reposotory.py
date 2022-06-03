@@ -48,21 +48,6 @@ def _replace_http_archive_with_local_repository(workspace_content: str,
       """)
   workspace_content = workspace_content.replace(http_archive_load, '')
 
-  # Tink Base.
-  tink_base_before = textwrap.dedent("""\
-      http_archive(
-          name = "tink_base",
-          urls = ["https://github.com/google/tink/archive/master.zip"],
-          strip_prefix = "tink-master/",
-      )""")
-  tink_base_after = textwrap.dedent(f"""\
-      local_repository(
-          name = "tink_base",
-          path = "{tink_base_path}",
-      )""")
-  workspace_content = workspace_content.replace(tink_base_before,
-                                                tink_base_after)
-
   # Tink C++.
   tink_cc_before = textwrap.dedent("""\
       http_archive(
