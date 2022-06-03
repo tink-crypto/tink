@@ -18,6 +18,7 @@ package com.google.crypto.tink.internal;
 
 import com.google.crypto.tink.Key;
 import com.google.crypto.tink.SecretKeyAccess;
+import com.google.crypto.tink.util.Bytes;
 import java.security.GeneralSecurityException;
 import java.util.Optional;
 

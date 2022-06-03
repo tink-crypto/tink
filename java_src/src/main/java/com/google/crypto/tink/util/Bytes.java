@@ -14,7 +14,7 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-package com.google.crypto.tink.internal;
+package com.google.crypto.tink.util;
 
 import com.google.crypto.tink.subtle.Hex;
 import com.google.errorprone.annotations.Immutable;

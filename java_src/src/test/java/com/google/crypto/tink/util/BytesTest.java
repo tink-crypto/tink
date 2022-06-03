@@ -14,7 +14,7 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-package com.google.crypto.tink.internal;
+package com.google.crypto.tink.util;
 
 import static com.google.common.truth.Truth.assertThat;
 

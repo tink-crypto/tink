@@ -18,7 +18,6 @@ package com.google.crypto.tink.util;
 
 import com.google.crypto.tink.SecretKeyAccess;
 import com.google.crypto.tink.annotations.Alpha;
-import com.google.crypto.tink.internal.Bytes;
 import com.google.crypto.tink.subtle.Random;
 import com.google.errorprone.annotations.Immutable;
 

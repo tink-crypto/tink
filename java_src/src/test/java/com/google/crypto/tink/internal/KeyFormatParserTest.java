@@ -19,6 +19,7 @@ package com.google.crypto.tink.internal;
 import static com.google.common.truth.Truth.assertThat;
 
 import com.google.crypto.tink.KeyFormat;
+import com.google.crypto.tink.util.Bytes;
 import com.google.errorprone.annotations.Immutable;
 import java.security.GeneralSecurityException;
 import org.junit.Test;

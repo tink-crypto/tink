@@ -19,6 +19,7 @@ package com.google.crypto.tink.internal;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 import com.google.crypto.tink.proto.KeyTemplate;
+import com.google.crypto.tink.util.Bytes;
 import com.google.errorprone.annotations.Immutable;
 
 /**
