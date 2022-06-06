@@ -24,9 +24,11 @@ if [[ -n "${KOKORO_ROOT:-}" ]]; then
   cd "${KOKORO_ARTIFACTS_DIR}/git/tink_examples"
 fi
 
-# Note: When running on the Kokoro CI, we expect these two folders to exist:
+# Note: When running on the Kokoro CI, we expect these folders to exist:
 #
-#  ${KOKORO_ARTIFACTS_DIR}/git/tink
+#  ${KOKORO_ARTIFACTS_DIR}/git/tink_java
+#  ${KOKORO_ARTIFACTS_DIR}/git/tink_java_awskms
+#  ${KOKORO_ARTIFACTS_DIR}/git/tink_java_gcpkms
 #  ${KOKORO_ARTIFACTS_DIR}/git/tink_examples
 #
 # If this is not the case, we are using this script locally for a manual on-off
@@ -34,13 +36,19 @@ fi
 # repository), and so we are going to checkout tink from GitHub).
 if [[ (! -n "${TINK_BASE_DIR:-}" && ! -n "${KOKORO_ROOT:-}") \
       || -n "${KOKORO_ROOT:-}" ]]; then
-  TINK_BASE_DIR="$(pwd)/../tink"
-  if [[ ! -d "${TINK_BASE_DIR}" ]]; then
-    git clone https://github.com/google/tink.git "${TINK_BASE_DIR}"
+  TINK_BASE_DIR="$(pwd)/.."
+  if [[ ! -d "${TINK_BASE_DIR}/tink_java" ]]; then
+    git clone https://github.com/tink-crypto/tink-java.git \
+      "${TINK_BASE_DIR}/tink_java"
+  fi
+  if [[ ! -d "${TINK_BASE_DIR}/tink_java_gcpkms" ]]; then
+    git clone https://github.com/tink-crypto/tink-java-gcpkms.git \
+      "${TINK_BASE_DIR}/tink_java_gcpkms"
   fi
 fi
 
-echo "Using Tink from ${TINK_BASE_DIR}"
+echo "Using Tink Java from ${TINK_BASE_DIR}/tink_java"
+echo "Using Tink Java Google Cloud KMS from ${TINK_BASE_DIR}/tink_java_gcpkms"
 
 # Sourcing required to update caller's environment.
 source ./kokoro/testutils/install_python3.sh
@@ -48,6 +56,15 @@ source ./kokoro/testutils/install_python3.sh
 ./kokoro/testutils/update_android_sdk.sh
 
 readonly WORKSPACE_FOLDER="java_src"
+
+if [[ -n "${KOKORO_ROOT:-}" ]]; then
+  use_bazel.sh "$(cat ${WORKSPACE_FOLDER}/.bazelversion)"
+fi
+cp "${WORKSPACE_FOLDER}/WORKSPACE" "${WORKSPACE_FOLDER}/WORKSPACE.bak"
+
+./kokoro/testutils/replace_http_archive_with_local_reposotory.py \
+  -f "${WORKSPACE_FOLDER}/WORKSPACE" \
+  -t "${TINK_BASE_DIR}"
 
 # Targets tagged as "manual" that require setting GCP credentials.
 MANUAL_EXAMPLE_JAVA_TARGETS=()
@@ -60,14 +77,8 @@ if [[ -n "${KOKORO_ROOT:-}" ]]; then
 fi
 readonly MANUAL_EXAMPLE_JAVA_TARGETS
 
-if [[ -n "${KOKORO_ROOT:-}" ]]; then
-  use_bazel.sh "$(cat ${WORKSPACE_FOLDER}/.bazelversion)"
-fi
-cp "${WORKSPACE_FOLDER}/WORKSPACE" "${WORKSPACE_FOLDER}/WORKSPACE.bak"
-./kokoro/testutils/replace_http_archive_with_local_reposotory.py \
-  -f "${WORKSPACE_FOLDER}/WORKSPACE" \
-  -t "${TINK_BASE_DIR}"
 ./kokoro/testutils/run_bazel_tests.sh \
   "${WORKSPACE_FOLDER}" \
   "${MANUAL_EXAMPLE_JAVA_TARGETS[@]}"
+
 mv "${WORKSPACE_FOLDER}/WORKSPACE.bak" "${WORKSPACE_FOLDER}/WORKSPACE"
