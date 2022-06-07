@@ -19,6 +19,10 @@ package com.google.crypto.tink.integration.awskms;
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertThrows;
 
+import com.amazonaws.auth.AWSCredentials;
+import com.amazonaws.auth.AWSCredentialsProvider;
+import com.amazonaws.auth.AWSStaticCredentialsProvider;
+import com.amazonaws.auth.PropertiesFileCredentialsProvider;
 import com.google.crypto.tink.KmsClient;
 import com.google.crypto.tink.KmsClients;
 import com.google.crypto.tink.KmsClientsTestUtil;
@@ -33,6 +37,8 @@ import org.junit.runners.JUnit4;
 public final class AwsKmsClientTest {
   private static final String CREDENTIAL_FILE_PATH =
       "testdata/credentials_aws.cred";
+  private static final AWSCredentialsProvider CREDENTIALS_PROVIDER =
+      new PropertiesFileCredentialsProvider(CREDENTIAL_FILE_PATH);
 
   @Before
   public void setUp() {
@@ -71,5 +77,32 @@ public final class AwsKmsClientTest {
     assertThrows(
         IllegalArgumentException.class,
         () -> AwsKmsClient.register(Optional.of("blah"), Optional.of(CREDENTIAL_FILE_PATH)));
+  }
+
+  @Test
+  public void register_provider() throws Exception {
+    // Register a client using AWS credentials provider bound to a single key.
+    String keyUri = "aws-kms://register-provider";
+    AwsKmsClient.register(Optional.of(keyUri), CREDENTIALS_PROVIDER);
+
+    KmsClient client = KmsClients.get(keyUri);
+    assertThat(client.doesSupport(keyUri)).isTrue();
+
+    String modifiedKeyUri = keyUri + "1";
+    assertThat(client.doesSupport(modifiedKeyUri)).isFalse();
+  }
+
+  @Test
+  public void register_provider_unbound() throws Exception {
+    // Register an unbound client using AWS credentials provider.
+    AwsKmsClient.register(Optional.empty(), CREDENTIALS_PROVIDER);
+
+    // This should return the above unbound client.
+    String keyUri = "aws-kms://register-provider-unbound";
+    KmsClient client = KmsClients.get(keyUri);
+    assertThat(client.doesSupport(keyUri)).isTrue();
+
+    String modifiedKeyUri = keyUri + "1";
+    assertThat(client.doesSupport(modifiedKeyUri)).isTrue();
   }
 }

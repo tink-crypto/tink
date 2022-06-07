@@ -156,11 +156,11 @@ public final class AwsKmsClient implements KmsClient {
   /**
    * Creates and registers a {@link #AwsKmsClient} with the Tink runtime.
    *
-   * <p>If {@code keyUri} is present, it is the only key that the new client will support. Otherwise
-   * the new client supports all AWS KMS keys.
+   * <p>If {@code keyUri} is present, it is the only key that the new client will support.
+   * Otherwise, the new client supports all AWS KMS keys.
    *
-   * <p>If {@code credentialPath} is present, load the credentials from that. Otherwise use the
-   * default credentials.
+   * <p>If {@code credentialPath} is present, load the credentials from that.
+   * Otherwise, use the default credentials.
    */
   public static void register(Optional<String> keyUri, Optional<String> credentialPath)
       throws GeneralSecurityException {
@@ -175,6 +175,26 @@ public final class AwsKmsClient implements KmsClient {
     } else {
       client.withDefaultCredentials();
     }
+    KmsClients.add(client);
+  }
+
+  /**
+   * Creates and registers a {@link #AwsKmsClient} with the Tink runtime.
+   *
+   * <p>If {@code keyUri} is present, it is the only key that the new client will support.
+   * Otherwise, the new client supports all AWS KMS keys.
+   *
+   * <p>{@code provider} specifies the {@link AWSCredentialsProvider} used to load the client.
+   */
+  public static void register(Optional<String> keyUri, AWSCredentialsProvider provider)
+      throws GeneralSecurityException {
+    AwsKmsClient client;
+    if (keyUri.isPresent()) {
+      client = new AwsKmsClient(keyUri.get());
+    } else {
+      client = new AwsKmsClient();
+    }
+    client.withCredentialsProvider(provider);
     KmsClients.add(client);
   }
 }
