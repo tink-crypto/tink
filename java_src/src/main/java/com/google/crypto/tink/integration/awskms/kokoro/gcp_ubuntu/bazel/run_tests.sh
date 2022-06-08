@@ -28,5 +28,11 @@ if [[ -n "${KOKORO_ROOT:-}" ]] ; then
   use_bazel.sh "$(cat .bazelversion)"
 fi
 
+readonly TINK_BASE_DIR="$(pwd)/.."
+
+source ./kokoro/testutils/install_python3.sh
 ./kokoro/testutils/update_android_sdk.sh
+./kokoro/testutils/replace_http_archive_with_local_reposotory.py \
+  -f "WORKSPACE" \
+  -t "${TINK_BASE_DIR}"
 ./kokoro/testutils/run_bazel_tests.sh .
