@@ -1,0 +1,32 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+package(default_visibility = ["//:__subpackages__"])  # keep
+
+go_library(
+    name = "monitoringutil",
+    srcs = ["monitoring_util.go"],
+    importpath = "github.com/google/tink/go/internal/monitoringutil",
+    deps = [
+        "//core/primitiveset",
+        "//monitoring",
+        "//proto/tink_go_proto",
+    ],
+)
+
+go_test(
+  name = "monitoringutil_test",
+    srcs = ["monitoring_util_test.go"],
+    embed = [":monitoringutil"],
+    deps = [
+        "//core/primitiveset",
+        "//monitoring",
+        "//proto/tink_go_proto",
+        "@com_github_google_go_cmp//cmp",
+    ],
+)
+
+alias(
+    name = "go_default_library",
+    actual = ":monitoringutil",
+    visibility = ["//:__subpackages__"],
+)
