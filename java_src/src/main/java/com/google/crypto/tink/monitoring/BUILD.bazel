@@ -25,3 +25,21 @@ android_library(
         "@maven//:com_google_errorprone_error_prone_annotations",
     ],
 )
+
+java_library(
+    name = "monitoring_client",
+    srcs = ["MonitoringClient.java"],
+    deps = [
+        ":monitoring_keyset_info",
+        "//src/main/java/com/google/crypto/tink/annotations:alpha",
+    ],
+)
+
+android_library(
+    name = "monitoring_client-android",
+    srcs = ["MonitoringClient.java"],
+    deps = [
+        ":monitoring_keyset_info-android",
+        "//src/main/java/com/google/crypto/tink/annotations:alpha-android",
+    ],
+)
