@@ -30,16 +30,27 @@ import (
 const (
 	hpkePublicKeyTypeURL  = "type.googleapis.com/google.crypto.tink.HpkePublicKey"
 	hpkePrivateKeyTypeURL = "type.googleapis.com/google.crypto.tink.HpkePrivateKey"
+
+	// Identifier values are at
+	// https://www.rfc-editor.org/rfc/rfc9180.html#section-7.
+	// KEM algorithm identifiers.
+	x25519HKDFSHA256 uint16 = 0x0020
+	// KDF algorithm identifiers.
+	hkdfSHA256 uint16 = 0x0001
+	// AEAD algorithm identifiers.
+	chaCha20Poly1305 uint16 = 0x0003
 )
 
 // PublicKeyFromPrimaryKey returns the public key bytes from handle's primary
 // key if 1) the primary key's key data matches template and 2) template is
-// listed as a supported below.
+// listed as supported below.
 //
 // Supported key templates include:
 //   * DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_CHACHA20_POLY1305_Raw_Key_Template,
 //     which specifically returns the KEM-encoding (i.e. SerializePublicKey() in
 //     https://www.rfc-editor.org/rfc/rfc9180.html#section-4-2.1.2.3)
+// When additional templates are added, SupportedHPKEParams and
+// supportedHPKEParamsFromProto must be updated.
 func PublicKeyFromPrimaryKey(handle *keyset.Handle, template *tinkpb.KeyTemplate) ([]byte, error) {
 	// Verify key template.
 	if template.GetTypeUrl() != hpkePrivateKeyTypeURL {
@@ -52,7 +63,7 @@ func PublicKeyFromPrimaryKey(handle *keyset.Handle, template *tinkpb.KeyTemplate
 	if err := proto.Unmarshal(template.GetValue(), templateKeyFormat); err != nil {
 		return nil, fmt.Errorf("failed to unmarshal HpkeKeyFormat: %v", err)
 	}
-	if err := supportedHPKEParams(templateKeyFormat.GetParams()); err != nil {
+	if err := supportedHPKEParamsFromProto(templateKeyFormat.GetParams()); err != nil {
 		return nil, err
 	}
 
@@ -101,9 +112,26 @@ func PublicKeyFromPrimaryKey(handle *keyset.Handle, template *tinkpb.KeyTemplate
 	return nil, errors.New("no valid primary HPKE public key in keyset")
 }
 
-// supportedHPKEParams implements the restrictions on HPKE params enforced by
-// PublicKeyFromPrimaryKey's supported key templates.
-func supportedHPKEParams(params *hpkepb.HpkeParams) error {
+// SupportedHPKEParams implements the restrictions on HPKE params enforced by
+// PublicKeyFromPrimaryKey's supported key templates. This verifies that keys
+// received from non-Tink sources use accepted params. Identifier values are at
+// https://www.rfc-editor.org/rfc/rfc9180.html#section-7.
+func SupportedHPKEParams(kem, kdf, aead uint16) error {
+	if kem != x25519HKDFSHA256 {
+		return fmt.Errorf("HPKE KEM %d not supported", kem)
+	}
+	if kdf != hkdfSHA256 {
+		return fmt.Errorf("HPKE KDF %d not supported", kdf)
+	}
+	if aead != chaCha20Poly1305 {
+		return fmt.Errorf("HPKE AEAD %d not supported", aead)
+	}
+	return nil
+}
+
+// supportedHPKEParamsFromProto implements the restrictions on HPKE params
+// enforced by PublicKeyFromPrimaryKey's supported key templates.
+func supportedHPKEParamsFromProto(params *hpkepb.HpkeParams) error {
 	if kem := params.GetKem(); kem != hpkepb.HpkeKem_DHKEM_X25519_HKDF_SHA256 {
 		return fmt.Errorf("HPKE KEM %s not supported", kem)
 	}

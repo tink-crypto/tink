@@ -212,6 +212,37 @@ func TestPublicKeyFromPrimaryKeyInvalidHandleFails(t *testing.T) {
 	}
 }
 
+func TestSupportedHPKEParams(t *testing.T) {
+	// Identifier values are at
+	// https://www.rfc-editor.org/rfc/rfc9180.html#section-7.
+	const (
+		// KEM.
+		x25519HKDFSHA256 uint16 = 0x0020
+		// KDF.
+		hkdfSHA256 uint16 = 0x0001
+		// AEAD.
+		aes128GCM        uint16 = 0x0001
+		aes256GCM        uint16 = 0x0002
+		chaCha20Poly1305 uint16 = 0x0003
+	)
+
+	if err := subtle.SupportedHPKEParams(x25519HKDFSHA256, hkdfSHA256, chaCha20Poly1305); err != nil {
+		t.Errorf("SupportedHPKEParams(%d, %d, %d) err = %v, want nil", x25519HKDFSHA256, hkdfSHA256, chaCha20Poly1305, err)
+	}
+	// Fails because aes128GCM is not supported.
+	if subtle.SupportedHPKEParams(x25519HKDFSHA256, hkdfSHA256, aes128GCM) == nil {
+		t.Errorf("SupportedHPKEParams(%d, %d, %d) = nil, want error", x25519HKDFSHA256, hkdfSHA256, aes128GCM)
+	}
+	// Fails because aes256GCM is not supported.
+	if subtle.SupportedHPKEParams(x25519HKDFSHA256, hkdfSHA256, aes256GCM) == nil {
+		t.Errorf("SupportedHPKEParams(%d, %d, %d) = nil, want error", x25519HKDFSHA256, hkdfSHA256, aes256GCM)
+	}
+	// Fails because none of the KEM, KDF, AEAD IDs are valid.
+	if subtle.SupportedHPKEParams(x25519HKDFSHA256+1, hkdfSHA256+1, chaCha20Poly1305+1) == nil {
+		t.Errorf("SupportedHPKEParams(%d, %d, %d) = nil, want error", x25519HKDFSHA256+1, hkdfSHA256+1, chaCha20Poly1305+1)
+	}
+}
+
 func keyDataFromBytes(t *testing.T, pubKeyBytes []byte, aeadID hpkepb.HpkeAead, typeURL string) (*tinkpb.KeyData, error) {
 	t.Helper()
 
