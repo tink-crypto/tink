@@ -66,7 +66,7 @@ fi
 readonly MANUAL_EXAMPLE_PYTHON_TARGETS
 
 cp "${WORKSPACE_FOLDER}/WORKSPACE" "${WORKSPACE_FOLDER}/WORKSPACE.bak"
-./kokoro/testutils/replace_http_archive_with_local_reposotory.py \
+./kokoro/testutils/replace_http_archive_with_local_repository.py \
   -f "${WORKSPACE_FOLDER}/WORKSPACE" \
   -t "${TINK_BASE_DIR}"
 ./kokoro/testutils/run_bazel_tests.sh \

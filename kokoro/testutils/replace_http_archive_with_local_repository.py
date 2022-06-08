@@ -17,12 +17,12 @@
 r"""Utility that replaces http_archive with local_repository in WORKSPACE files.
 
 Usage:
-  ./kokoro/testutils/replace_http_archive_with_local_reposotory.py \
+  ./kokoro/testutils/replace_http_archive_with_local_repository.py \
     -f <workspace directory> \
     -t <tink local base path>
 
 For examples:
-  ./kokoro/testutils/replace_http_archive_with_local_reposotory.py \
+  ./kokoro/testutils/replace_http_archive_with_local_repository.py \
     -f "cc/WORKSPACE" \
     -t "../../tink"
 """
