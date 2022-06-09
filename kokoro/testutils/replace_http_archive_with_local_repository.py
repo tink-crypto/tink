@@ -123,6 +123,20 @@ def _replace_http_archive_with_local_repository(workspace_content: str,
       )""")
   workspace_content = workspace_content.replace(tink_java_gcpkms_before,
                                                 tink_java_gcpkms_after)
+  # Tink Java AWS KMS.
+  tink_java_awskms_before = textwrap.dedent(f"""\
+      http_archive(
+          name = "tink_java_awskms",
+          urls = ["{_TINK_POLIREPO_GITHUB_ORG_URL}/tink-java-awskms/archive/main.zip"],
+          strip_prefix = "tink-java-awskms-main",
+      )""")
+  tink_java_awskms_after = textwrap.dedent(f"""\
+      local_repository(
+          name = "tink_java_awskms",
+          path = "{tink_base_path}/tink_java_awskms",
+      )""")
+  workspace_content = workspace_content.replace(tink_java_awskms_before,
+                                                tink_java_awskms_after)
 
   # Tink Python.
   tink_python_before = textwrap.dedent(f"""\
