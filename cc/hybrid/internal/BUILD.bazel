@@ -3,6 +3,25 @@ package(default_visibility = ["//:__subpackages__"])
 licenses(["notice"])
 
 cc_library(
+    name = "hpke_context_boringssl",
+    srcs = ["hpke_context_boringssl.cc"],
+    hdrs = ["hpke_context_boringssl.h"],
+    include_prefix = "tink/hybrid/internal",
+    tags = ["requires_boringcrypto_update"],
+    deps = [
+        ":hpke_util",
+        ":hpke_util_boringssl",
+        "//internal:ssl_unique_ptr",
+        "//subtle:subtle_util",
+        "//util:secret_data",
+        "//util:status",
+        "//util:statusor",
+        "@boringssl//:crypto",
+        "@com_google_absl//absl/strings",
+    ],
+)
+
+cc_library(
     name = "hpke_decrypt",
     srcs = ["hpke_decrypt.cc"],
     hdrs = ["hpke_decrypt.h"],
@@ -201,7 +220,50 @@ cc_library(
     ],
 )
 
+cc_library(
+    name = "test_hpke_context_boringssl",
+    testonly = 1,
+    srcs = ["test_hpke_context_boringssl.cc"],
+    hdrs = ["test_hpke_context_boringssl.h"],
+    include_prefix = "tink/hybrid/internal",
+    tags = ["requires_boringcrypto_update"],
+    deps = [
+        ":hpke_context_boringssl",
+        ":hpke_util",
+        ":hpke_util_boringssl",
+        "//internal:ssl_unique_ptr",
+        "//subtle:subtle_util",
+        "//util:secret_data",
+        "//util:status",
+        "//util:statusor",
+        "@boringssl//:crypto",
+        "@com_google_absl//absl/strings",
+    ],
+)
+
 # tests
+
+cc_test(
+    name = "hpke_context_boringssl_test",
+    size = "small",
+    srcs = ["hpke_context_boringssl_test.cc"],
+    tags = ["requires_boringcrypto_update"],
+    deps = [
+        ":hpke_context_boringssl",
+        ":hpke_test_util",
+        ":hpke_util",
+        ":test_hpke_context_boringssl",
+        "//proto:hpke_cc_proto",
+        "//util:secret_data",
+        "//util:status",
+        "//util:test_matchers",
+        "//util:test_util",
+        "@boringssl//:crypto",
+        "@com_google_absl//absl/status",
+        "@com_google_absl//absl/strings",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
 
 cc_test(
     name = "hpke_decrypt_boringssl_test",
