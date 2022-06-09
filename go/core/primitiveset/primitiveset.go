@@ -37,15 +37,17 @@ type Entry struct {
 	Prefix     string
 	PrefixType tinkpb.OutputPrefixType
 	Status     tinkpb.KeyStatusType
+	TypeURL    string
 }
 
-func newEntry(keyID uint32, p interface{}, prefix string, prefixType tinkpb.OutputPrefixType, status tinkpb.KeyStatusType) *Entry {
+func newEntry(keyID uint32, p interface{}, prefix string, prefixType tinkpb.OutputPrefixType, status tinkpb.KeyStatusType, typeURL string) *Entry {
 	return &Entry{
 		KeyID:      keyID,
 		Primitive:  p,
 		Prefix:     prefix,
 		Status:     status,
 		PrefixType: prefixType,
+		TypeURL:    typeURL,
 	}
 }
 
@@ -97,14 +99,24 @@ func (ps *PrimitiveSet) Add(p interface{}, key *tinkpb.Keyset_Key) (*Entry, erro
 	if key == nil || p == nil {
 		return nil, fmt.Errorf("primitive_set: key and primitive must not be nil")
 	}
-	if key.Status != tinkpb.KeyStatusType_ENABLED {
-		return nil, fmt.Errorf("The key must be ENABLED")
+	if key.GetKeyData() == nil {
+		return nil, fmt.Errorf("primitive_set: keyData must not be nil")
+	}
+	if key.GetStatus() != tinkpb.KeyStatusType_ENABLED {
+		return nil, fmt.Errorf("primitive_set: The key must be ENABLED")
 	}
 	prefix, err := cryptofmt.OutputPrefix(key)
 	if err != nil {
 		return nil, fmt.Errorf("primitive_set: %s", err)
 	}
-	e := newEntry(key.KeyId, p, prefix, key.OutputPrefixType, key.Status)
+	e := newEntry(
+		key.GetKeyId(),
+		p,
+		prefix,
+		key.GetOutputPrefixType(),
+		key.GetStatus(),
+		key.GetKeyData().GetTypeUrl(),
+	)
 	ps.Entries[prefix] = append(ps.Entries[prefix], e)
 	return e, nil
 }
