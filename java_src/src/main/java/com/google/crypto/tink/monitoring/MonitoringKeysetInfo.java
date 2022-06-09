@@ -23,9 +23,7 @@ import com.google.errorprone.annotations.Immutable;
 import java.security.GeneralSecurityException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -89,45 +87,37 @@ public final class MonitoringKeysetInfo {
 
   /** Builder */
   public static final class Builder {
-    private ArrayList<Entry> entries = new ArrayList<>();
-    private HashMap<String, String> annotations = new HashMap<>();
-    private Optional<Integer> primaryKeyId = Optional.empty();
+    private ArrayList<Entry> builderEntries = new ArrayList<>();
+    private MonitoringAnnotations builderAnnotations = MonitoringAnnotations.EMPTY;
+    private Optional<Integer> builderPrimaryKeyId = Optional.empty();
 
-    public Builder addAnnotations(Map<String, String> newAnnotations) {
-      if (newAnnotations == null) {
-        throw new IllegalStateException("addAnnotations cannot be called after build()");
+    public Builder setAnnotations(MonitoringAnnotations annotations) {
+      if (builderAnnotations == null) {
+        throw new IllegalStateException("setAnnotations cannot be called after build()");
       }
-      annotations.putAll(newAnnotations);
-      return this;
-    }
-
-    public Builder addAnnotation(String name, String value) {
-      if (annotations == null) {
-        throw new IllegalStateException("addProperty cannot be called after build()");
-      }
-      annotations.put(name, value);
+      builderAnnotations = annotations;
       return this;
     }
 
     public Builder addEntry(KeyStatus status, int keyId, KeyFormat keyFormat) {
-      if (entries == null) {
+      if (builderEntries == null) {
         throw new IllegalStateException("addEntry cannot be called after build()");
       }
-      entries.add(new Entry(status, keyId, keyFormat));
+      builderEntries.add(new Entry(status, keyId, keyFormat));
       return this;
     }
 
     public Builder setPrimaryKeyId(int primaryKeyId) {
-      if (this.primaryKeyId == null) {
+      if (builderPrimaryKeyId == null) {
         throw new IllegalStateException("setPrimaryKeyId cannot be called after build()");
       }
-      this.primaryKeyId = Optional.of(primaryKeyId);
+      builderPrimaryKeyId = Optional.of(primaryKeyId);
       return this;
     }
 
     private boolean isPrimaryKeyIdInEntries() {
-      int primary = primaryKeyId.get();
-      for (Entry entry : entries) {
+      int primary = builderPrimaryKeyId.get();
+      for (Entry entry : builderEntries) {
         if (entry.getKeyId() == primary) {
           return true;
         }
@@ -137,10 +127,10 @@ public final class MonitoringKeysetInfo {
 
     /** Builds the MonitoringKeysetInfo object. The builder is not usable anymore afterwards. */
     public MonitoringKeysetInfo build() throws GeneralSecurityException {
-      if (entries == null || annotations == null) {
+      if (builderEntries == null) {
         throw new IllegalStateException("cannot call build() twice");
       }
-      if (!primaryKeyId.isPresent()) {
+      if (!builderPrimaryKeyId.isPresent()) {
         throw new GeneralSecurityException("not primary key ID set");
       }
       if (!isPrimaryKeyIdInEntries()) {
@@ -148,20 +138,20 @@ public final class MonitoringKeysetInfo {
       }
       MonitoringKeysetInfo output =
           new MonitoringKeysetInfo(
-              Collections.unmodifiableMap(this.annotations),
-              Collections.unmodifiableList(entries),
-              primaryKeyId.get());
+              builderAnnotations,
+              Collections.unmodifiableList(builderEntries),
+              builderPrimaryKeyId.get());
       // Collections.unmodifiableMap/List only gives an unmodifiable view of the underlying
       // collection. To make output immutable, we have to remove the reference to these collections.
       // This makes the builder unusable.
-      entries = null;
-      annotations = null;
+      builderEntries = null;
+      builderAnnotations = null;
+      builderPrimaryKeyId = null;
       return output;
     }
   }
 
-  @SuppressWarnings("Immutable")
-  private final Map<String, String> annotations;
+  private final MonitoringAnnotations annotations;
 
   @SuppressWarnings("Immutable")
   private final List<Entry> entries;
@@ -169,7 +159,7 @@ public final class MonitoringKeysetInfo {
   private final int primaryKeyId;
 
   private MonitoringKeysetInfo(
-      Map<String, String> annotations, List<Entry> entries, int primaryKeyId) {
+      MonitoringAnnotations annotations, List<Entry> entries, int primaryKeyId) {
     this.annotations = annotations;
     this.entries = entries;
     this.primaryKeyId = primaryKeyId;
@@ -179,7 +169,7 @@ public final class MonitoringKeysetInfo {
     return new Builder();
   }
 
-  public Map<String, String> getAnnotations() {
+  public MonitoringAnnotations getAnnotations() {
     return annotations;
   }
 
