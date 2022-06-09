@@ -86,7 +86,7 @@ class AesCtrHmacAeadKeyFactory implements KeyManager.KeyFactory {
    * Checks the parameters and size of a given keyFormat.
    *
    */
-  validateAesCtrKeyFormat(keyFormat: null|PbAesCtrKeyFormat):
+  validateAesCtrKeyFormat(keyFormat: undefined|null|PbAesCtrKeyFormat):
       {aesCtrParams: PbAesCtrParams, aesCtrKeySize: number, ivSize: number} {
     if (!keyFormat) {
       throw new SecurityException(
@@ -113,7 +113,7 @@ class AesCtrHmacAeadKeyFactory implements KeyManager.KeyFactory {
    * Checks the parameters and size of a given keyFormat.
    *
    */
-  validateHmacKeyFormat(keyFormat: null|PbHmacKeyFormat): {
+  validateHmacKeyFormat(keyFormat: undefined|null|PbHmacKeyFormat): {
     hmacParams: PbHmacParams,
     hmacKeySize: number,
     hashType: string,
@@ -256,7 +256,7 @@ export class AesCtrHmacAeadKeyManager implements KeyManager.KeyManager<Aead> {
    * Checks the parameters and size of a given AES-CTR key.
    *
    */
-  private validateAesCtrKey(key: null|PbAesCtrKey):
+  private validateAesCtrKey(key: undefined|null|PbAesCtrKey):
       {aesCtrKeyValue: Uint8Array, ivSize: number} {
     if (!key) {
       throw new SecurityException(
@@ -274,7 +274,7 @@ export class AesCtrHmacAeadKeyManager implements KeyManager.KeyManager<Aead> {
    * Checks the parameters and size of a given HMAC key.
    *
    */
-  private validateHmacKey(key: null|PbHmacKey):
+  private validateHmacKey(key: undefined|null|PbHmacKey):
       {hmacKeyValue: Uint8Array, hashType: string, tagSize: number} {
     if (!key) {
       throw new SecurityException(
