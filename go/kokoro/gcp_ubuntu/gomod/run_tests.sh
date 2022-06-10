@@ -1,5 +1,5 @@
 #!/bin/bash
-# Copyright 2020 Google LLC
+# Copyright 2022 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,46 +16,28 @@
 
 set -euo pipefail
 
-REPO_DIR="$(pwd)"
+TINK_GO_PROJECT_PATH="$(pwd)"
 if [[ -n "${KOKORO_ROOT:-}" ]]; then
-  REPO_DIR="${KOKORO_ARTIFACTS_DIR}/git/tink"
-  cd "${REPO_DIR}"
+  TINK_GO_PROJECT_PATH="${KOKORO_ARTIFACTS_DIR}/git/tink_go"
+  cd "${TINK_GO_PROJECT_PATH}"
 fi
-readonly REPO_DIR
+readonly TINK_GO_PROJECT_PATH
 
-./kokoro/testutils/copy_credentials.sh "go/testdata"
 ./kokoro/testutils/update_certs.sh
 # Sourcing required to update callers environment.
 source ./kokoro/testutils/install_go.sh
 
 echo "Using go binary from $(which go): $(go version)"
 
-readonly TINK_VERSION="$(cat ${REPO_DIR}/go/tink_version.bzl \
+readonly TINK_GO_MODULE_URL="github.com/tink-crypto/tink-go"
+readonly TINK_VERSION="$(cat ${TINK_GO_PROJECT_PATH}/tink_version.bzl \
                         | grep ^TINK \
                         | cut -f 2 -d \")"
-
 # Create a temporary directory for performing module tests.
 readonly TMP_DIR="$(mktemp -dt go-module-test.XXXXXX)"
-readonly REPO_URL_PREFIX="github.com/google/tink"
 
-# Extract all go.mod instances from the repository.
-declare -a GO_MODULE_DIRECTORIES
-while read go_module_directory; do
-  GO_MODULE_DIRECTORIES+=("${go_module_directory}")
-done < <(find "${REPO_DIR}" -name "go.mod" \
-  | sed "s#^${REPO_DIR}/##" \
-  | xargs -n 1 dirname)
-
-echo "### Go modules found:"
-
-for go_module_directory in "${GO_MODULE_DIRECTORIES[@]}"; do
-  echo "${go_module_directory}"
-done
-
-for go_module_directory in "${GO_MODULE_DIRECTORIES[@]}"; do
-  ./kokoro/testutils/run_go_mod_tests.sh \
-    "${REPO_URL_PREFIX}/${go_module_directory}" \
-    "${REPO_DIR}/${go_module_directory}" \
-    "${TMP_DIR}" \
-    "${TINK_VERSION}"
-done
+./kokoro/testutils/run_go_mod_tests.sh \
+  "${TINK_GO_MODULE_URL}" \
+  "${TINK_GO_PROJECT_PATH}" \
+  "${TMP_DIR}" \
+  "${TINK_VERSION}"
