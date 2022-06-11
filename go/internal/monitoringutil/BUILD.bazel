@@ -14,10 +14,10 @@ go_library(
 )
 
 go_test(
-  name = "monitoringutil_test",
+    name = "monitoringutil_test",
     srcs = ["monitoring_util_test.go"],
-    embed = [":monitoringutil"],
     deps = [
+        ":monitoringutil",
         "//core/primitiveset",
         "//monitoring",
         "//proto/tink_go_proto",

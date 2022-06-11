@@ -20,7 +20,6 @@ go_test(
     srcs = ["primitiveset_test.go"],
     deps = [
         ":primitiveset",
-        "//core/cryptofmt",
         "//proto/tink_go_proto",
         "//testutil",
         "@com_github_google_go_cmp//cmp",
