@@ -520,6 +520,9 @@ java_library(
     ],
     deps = [
         ":aead",
+        ":insecure_secret_key_access",
+        ":key",
+        ":key_status",
         ":key_template",
         ":keyset_reader",
         ":keyset_writer",
@@ -527,7 +530,11 @@ java_library(
         ":registry",
         ":util",
         "//proto:tink_java_proto",
+        "//src/main/java/com/google/crypto/tink/annotations:alpha",
         "//src/main/java/com/google/crypto/tink/internal:key_status_type_proto_converter",
+        "//src/main/java/com/google/crypto/tink/internal:legacy_proto_key",
+        "//src/main/java/com/google/crypto/tink/internal:mutable_serialization_registry",
+        "//src/main/java/com/google/crypto/tink/internal:proto_key_serialization",
         "//src/main/java/com/google/crypto/tink/internal:util",
         "//src/main/java/com/google/crypto/tink/tinkkey:key_access",
         "//src/main/java/com/google/crypto/tink/tinkkey:key_handle",
@@ -536,6 +543,7 @@ java_library(
         "//src/main/java/com/google/crypto/tink/tinkkey/internal:proto_key",
         "@com_google_protobuf//:protobuf_javalite",
         "@maven//:com_google_code_findbugs_jsr305",
+        "@maven//:com_google_errorprone_error_prone_annotations",
     ],
 )
 
@@ -547,6 +555,9 @@ android_library(
     ],
     deps = [
         ":aead-android",
+        ":insecure_secret_key_access-android",
+        ":key-android",
+        ":key_status-android",
         ":key_template-android",
         ":keyset_reader-android",
         ":keyset_writer-android",
@@ -554,7 +565,11 @@ android_library(
         ":registry-android",
         ":util-android",
         "//proto:tink_java_proto_lite",
+        "//src/main/java/com/google/crypto/tink/annotations:alpha-android",
         "//src/main/java/com/google/crypto/tink/internal:key_status_type_proto_converter-android",
+        "//src/main/java/com/google/crypto/tink/internal:legacy_proto_key-android",
+        "//src/main/java/com/google/crypto/tink/internal:mutable_serialization_registry-android",
+        "//src/main/java/com/google/crypto/tink/internal:proto_key_serialization-android",
         "//src/main/java/com/google/crypto/tink/internal:util-android",
         "//src/main/java/com/google/crypto/tink/tinkkey:key_access-android",
         "//src/main/java/com/google/crypto/tink/tinkkey:key_handle-android",
@@ -563,6 +578,7 @@ android_library(
         "//src/main/java/com/google/crypto/tink/tinkkey/internal:proto_key-android",
         "@com_google_protobuf//:protobuf_javalite",
         "@maven//:com_google_code_findbugs_jsr305",
+        "@maven//:com_google_errorprone_error_prone_annotations",
     ],
 )
 
