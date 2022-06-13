@@ -38,7 +38,16 @@ const absl::string_view kTestX25519HkdfSha256Aes128Gcm[] = {
     "f938558b5d72f1a23810b4be2ab4f84331acc02fc97babc53a52ae8218a355a96d8770ac83"
     "d07bea87e13c512a",                                                  // ct
     "4612c550263fc8ad58375df3f557aac531d26850903e55a9f23f21d8534e8ac8",  // skRm
-    "37fda3567bdbd628e88668c3c8d7e97d1d1253b6d4ea6d44c150f741f1bf4431"   // enc
+    "37fda3567bdbd628e88668c3c8d7e97d1d1253b6d4ea6d44c150f741f1bf4431",  // enc
+    "",                        // exporter_contexts[0]
+    "00",                      // exporter_contexts[1]
+    "54657374436f6e74657874",  // exporter_contexts[2]
+    // exporter_values[0]
+    "3853fe2b4035195a573ffc53856e77058e15d9ea064de3e59f4961d0095250ee",
+    // exporter_values[1]
+    "2e8f0b54673c7029649d4eb9d5e33bf1872cf76d623ff164ac185da9e88c21a5",
+    // exporter_values[2]
+    "e9e43065102c3836401bed8c3c3c75ae46be1639869391d62c61f1ec7af54931"
 };
 
 // Test vector from https://www.rfc-editor.org/rfc/rfc9180.html#appendix-A.2.
@@ -52,7 +61,16 @@ const absl::string_view kTestX25519HkdfSha256ChaCha20Poly1305[] = {
     "1c5250d8034ec2b784ba2cfd69dbdb8af406cfe3ff938e131f0def8c8b60b4db21993c"
     "62ce81883d2dd1b51a28",                                              // ct
     "8057991eef8f1f1af18f4a9491d16a1ce333f695d4db8e38da75975c4478e0fb",  // skRm
-    "1afa08d3dec047a643885163f1180476fa7ddb54c6a8029ea33f95796bf2ac4a"   // enc
+    "1afa08d3dec047a643885163f1180476fa7ddb54c6a8029ea33f95796bf2ac4a",  // enc
+    "",                        // exporter_contexts[0]
+    "00",                      // exporter_contexts[1]
+    "54657374436f6e74657874",  // exporter_contexts[2]
+    // exporter_values[0]
+    "4bbd6243b8bb54cec311fac9df81841b6fd61f56538a775e7c80a9f40160606e",
+    // exporter_values[1]
+    "8c1df14732580e5501b00f82b10a1647b40713191b7c1240ac80e2b68808ba69",
+    // exporter_values[2]
+    "5acb09211139c43b3090489a9da433e8a30ee7188ba8b0a9a1ccf0c229283e53"
 };
 
 // BoringSSL test vectors with aead_id = 2.  Missing 'skRm' and 'enc'.
@@ -68,6 +86,12 @@ const absl::string_view kTestX25519HkdfSha256Aes256Gcm[] = {
     "8ef6c42b6960e2e28f",  // ct
     "",                    // Missing skRm
     "",                    // Missing enc
+    "",                    // Missing exporter_contexts[0]
+    "",                    // Missing exporter_contexts[1]
+    "",                    // Missing exporter_contexts[2]
+    "",                    // Missing exporter_values[0]
+    "",                    // Missing exporter_values[1]
+    "",                    // Missing exporter_values[2]
 };
 
 HpkeTestParams DefaultHpkeTestParams() {

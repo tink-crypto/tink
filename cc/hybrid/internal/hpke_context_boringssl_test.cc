@@ -75,6 +75,45 @@ TEST_P(HpkeContextBoringSslTest, Open) {
   ASSERT_THAT(plaintext, IsOkAndHolds(params->plaintext));
 }
 
+TEST_P(HpkeContextBoringSslTest, SenderExport) {
+  HpkeParams hpke_params = GetParam();
+  util::StatusOr<HpkeTestParams> params = CreateHpkeTestParams(hpke_params);
+  ASSERT_THAT(params.status(), IsOk());
+
+  util::StatusOr<SenderHpkeContextBoringSsl> sender_hpke_context =
+      TestHpkeContextBoringSsl::SetupSender(
+          hpke_params, params->recipient_public_key, params->application_info,
+          params->seed_for_testing);
+  ASSERT_THAT(sender_hpke_context.status(), IsOk());
+
+  for (int i = 0; i < params->exported_contexts.size(); ++i) {
+    util::StatusOr<util::SecretData> sender_secret =
+        sender_hpke_context->context->Export(params->exported_contexts[i], 32);
+    ASSERT_THAT(sender_secret, IsOkAndHolds(util::SecretDataFromStringView(
+                            params->exported_values[i])));
+  }
+}
+
+TEST_P(HpkeContextBoringSslTest, RecipientExport) {
+  HpkeParams hpke_params = GetParam();
+  util::StatusOr<HpkeTestParams> params = CreateHpkeTestParams(hpke_params);
+  ASSERT_THAT(params.status(), IsOk());
+
+  util::StatusOr<std::unique_ptr<HpkeContextBoringSsl>> recipient_hpke_context =
+      HpkeContextBoringSsl::SetupRecipient(
+          hpke_params,
+          util::SecretDataFromStringView(params->recipient_private_key),
+          params->encapsulated_key, params->application_info);
+  ASSERT_THAT(recipient_hpke_context.status(), IsOk());
+
+  for (int i = 0; i < params->exported_contexts.size(); ++i) {
+    util::StatusOr<util::SecretData> recipient_secret =
+        (*recipient_hpke_context)->Export(params->exported_contexts[i], 32);
+    ASSERT_THAT(recipient_secret, IsOkAndHolds(util::SecretDataFromStringView(
+                            params->exported_values[i])));
+  }
+}
+
 class HpkeContextBoringSslWithBadParamTest
     : public testing::TestWithParam<HpkeParams> {};
 
