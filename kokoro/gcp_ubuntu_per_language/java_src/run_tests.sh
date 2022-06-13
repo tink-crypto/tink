@@ -75,7 +75,7 @@ test_build_bazel_file() {
     cat java_src/BUILD.bazel.generated
     echo "#=============== END BROKEN file //third_party/tink/java_src/BUILD.bazel."
     echo "#=============== To fix this, run (from <Your CitC Client>/google3): "
-    echo "g4 open //third_party/tink/java_src/BUILD.bazel"
+    echo "g4 open third_party/tink/java_src/BUILD.bazel"
     echo "patch third_party/tink/java_src/BUILD.bazel<<END_OF_PATCH"
     ## We run under "set -e", so exit on error. Diff returns a non-zero exit
     ## status we flip it here.
