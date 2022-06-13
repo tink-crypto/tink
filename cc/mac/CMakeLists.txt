@@ -115,6 +115,24 @@ tink_cc_library(
     tink::proto::tink_cc_proto
 )
 
+tink_cc_library(
+  NAME mac_key_format
+  SRCS
+    mac_key_format.h
+  DEPS
+    tink::core::key_format
+)
+
+tink_cc_library(
+  NAME mac_key
+  SRCS
+    mac_key.h
+  DEPS
+    tink::mac::mac_key_format
+    absl::statusor
+    tink::core::key
+)
+
 # tests
 
 tink_cc_test(

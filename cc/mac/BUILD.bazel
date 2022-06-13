@@ -125,6 +125,24 @@ cc_library(
     ],
 )
 
+cc_library(
+    name = "mac_key_format",
+    hdrs = ["mac_key_format.h"],
+    include_prefix = "tink/mac",
+    deps = ["//:key_format"],
+)
+
+cc_library(
+    name = "mac_key",
+    hdrs = ["mac_key.h"],
+    include_prefix = "tink/mac",
+    deps = [
+        ":mac_key_format",
+        "//:key",
+        "@com_google_absl//absl/status:statusor",
+    ],
+)
+
 # tests
 
 cc_test(
