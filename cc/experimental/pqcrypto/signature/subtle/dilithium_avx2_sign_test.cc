@@ -34,12 +34,12 @@
 #include "tink/util/test_matchers.h"
 
 extern "C" {
-#include "third_party/pqclean/crypto_sign/dilithium2/avx2/api.h"
-#include "third_party/pqclean/crypto_sign/dilithium2aes/avx2/api.h"
-#include "third_party/pqclean/crypto_sign/dilithium3/avx2/api.h"
-#include "third_party/pqclean/crypto_sign/dilithium3aes/avx2/api.h"
-#include "third_party/pqclean/crypto_sign/dilithium5/avx2/api.h"
-#include "third_party/pqclean/crypto_sign/dilithium5aes/avx2/api.h"
+#include "third_party/pqclean/crypto_sign/dilithium2/api.h"
+#include "third_party/pqclean/crypto_sign/dilithium2aes/api.h"
+#include "third_party/pqclean/crypto_sign/dilithium3/api.h"
+#include "third_party/pqclean/crypto_sign/dilithium3aes/api.h"
+#include "third_party/pqclean/crypto_sign/dilithium5/api.h"
+#include "third_party/pqclean/crypto_sign/dilithium5aes/api.h"
 }
 
 namespace crypto {
@@ -66,10 +66,10 @@ TEST(DilithiumAvx2SignTest, InvalidPrivateKeys) {
   }
 
   for (int keysize = 0;
-       keysize <= PQCLEAN_DILITHIUM5_AVX2_CRYPTO_SECRETKEYBYTES; keysize++) {
-    if (keysize == PQCLEAN_DILITHIUM2_AVX2_CRYPTO_SECRETKEYBYTES ||
-        keysize == PQCLEAN_DILITHIUM3_AVX2_CRYPTO_SECRETKEYBYTES ||
-        keysize == PQCLEAN_DILITHIUM5_AVX2_CRYPTO_SECRETKEYBYTES) {
+       keysize <= PQCLEAN_DILITHIUM5_CRYPTO_SECRETKEYBYTES; keysize++) {
+    if (keysize == PQCLEAN_DILITHIUM2_CRYPTO_SECRETKEYBYTES ||
+        keysize == PQCLEAN_DILITHIUM3_CRYPTO_SECRETKEYBYTES ||
+        keysize == PQCLEAN_DILITHIUM5_CRYPTO_SECRETKEYBYTES) {
       // Valid key size.
       continue;
     }
@@ -181,23 +181,23 @@ TEST_P(DilithiumAvx2SignTest, FipsMode) {
 INSTANTIATE_TEST_SUITE_P(
     DilithiumAvx2SignTests, DilithiumAvx2SignTest,
     testing::ValuesIn<DilithiumTestCase>({
-        {"Dilithium2", PQCLEAN_DILITHIUM2_AVX2_CRYPTO_SECRETKEYBYTES,
-         PQCLEAN_DILITHIUM2_AVX2_CRYPTO_BYTES,
+        {"Dilithium2", PQCLEAN_DILITHIUM2_CRYPTO_SECRETKEYBYTES,
+         PQCLEAN_DILITHIUM2_CRYPTO_BYTES,
          DilithiumSeedExpansion::SEED_EXPANSION_SHAKE},
-        {"Dilithium3", PQCLEAN_DILITHIUM3_AVX2_CRYPTO_SECRETKEYBYTES,
-         PQCLEAN_DILITHIUM3_AVX2_CRYPTO_BYTES,
+        {"Dilithium3", PQCLEAN_DILITHIUM3_CRYPTO_SECRETKEYBYTES,
+         PQCLEAN_DILITHIUM3_CRYPTO_BYTES,
          DilithiumSeedExpansion::SEED_EXPANSION_SHAKE},
-        {"Dilithium5", PQCLEAN_DILITHIUM5_AVX2_CRYPTO_SECRETKEYBYTES,
-         PQCLEAN_DILITHIUM5_AVX2_CRYPTO_BYTES,
+        {"Dilithium5", PQCLEAN_DILITHIUM5_CRYPTO_SECRETKEYBYTES,
+         PQCLEAN_DILITHIUM5_CRYPTO_BYTES,
          DilithiumSeedExpansion::SEED_EXPANSION_SHAKE},
-        {"Dilithium2Aes", PQCLEAN_DILITHIUM2AES_AVX2_CRYPTO_SECRETKEYBYTES,
-         PQCLEAN_DILITHIUM2AES_AVX2_CRYPTO_BYTES,
+        {"Dilithium2Aes", PQCLEAN_DILITHIUM2AES_CRYPTO_SECRETKEYBYTES,
+         PQCLEAN_DILITHIUM2AES_CRYPTO_BYTES,
          DilithiumSeedExpansion::SEED_EXPANSION_AES},
-        {"Dilithium3Aes", PQCLEAN_DILITHIUM3AES_AVX2_CRYPTO_SECRETKEYBYTES,
-         PQCLEAN_DILITHIUM3_AVX2_CRYPTO_BYTES,
+        {"Dilithium3Aes", PQCLEAN_DILITHIUM3AES_CRYPTO_SECRETKEYBYTES,
+         PQCLEAN_DILITHIUM3_CRYPTO_BYTES,
          DilithiumSeedExpansion::SEED_EXPANSION_AES},
-        {"Dilithium5Aes", PQCLEAN_DILITHIUM5AES_AVX2_CRYPTO_SECRETKEYBYTES,
-         PQCLEAN_DILITHIUM5AES_AVX2_CRYPTO_BYTES,
+        {"Dilithium5Aes", PQCLEAN_DILITHIUM5AES_CRYPTO_SECRETKEYBYTES,
+         PQCLEAN_DILITHIUM5AES_CRYPTO_BYTES,
          DilithiumSeedExpansion::SEED_EXPANSION_AES},
     }),
     [](const testing::TestParamInfo<DilithiumAvx2SignTest::ParamType>& info) {

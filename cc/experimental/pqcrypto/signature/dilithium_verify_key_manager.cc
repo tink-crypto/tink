@@ -33,9 +33,9 @@
 #include "tink/util/validation.h"
 
 extern "C" {
-#include "third_party/pqclean/crypto_sign/dilithium2/avx2/api.h"
-#include "third_party/pqclean/crypto_sign/dilithium3/avx2/api.h"
-#include "third_party/pqclean/crypto_sign/dilithium5/avx2/api.h"
+#include "third_party/pqclean/crypto_sign/dilithium2/api.h"
+#include "third_party/pqclean/crypto_sign/dilithium3/api.h"
+#include "third_party/pqclean/crypto_sign/dilithium5/api.h"
 }
 
 namespace crypto {
@@ -67,12 +67,9 @@ Status DilithiumVerifyKeyManager::ValidateKey(
   Status status = ValidateVersion(key.version(), get_version());
   if (!status.ok()) return status;
 
-  if (key.key_value().length() !=
-          PQCLEAN_DILITHIUM2_AVX2_CRYPTO_PUBLICKEYBYTES &&
-      key.key_value().length() !=
-          PQCLEAN_DILITHIUM3_AVX2_CRYPTO_PUBLICKEYBYTES &&
-      key.key_value().length() !=
-          PQCLEAN_DILITHIUM5_AVX2_CRYPTO_PUBLICKEYBYTES) {
+  if (key.key_value().length() != PQCLEAN_DILITHIUM2_CRYPTO_PUBLICKEYBYTES &&
+      key.key_value().length() != PQCLEAN_DILITHIUM3_CRYPTO_PUBLICKEYBYTES &&
+      key.key_value().length() != PQCLEAN_DILITHIUM5_CRYPTO_PUBLICKEYBYTES) {
     return Status(absl::StatusCode::kInvalidArgument,
                   "Invalid dilithium public key size.");
   }
@@ -93,9 +90,9 @@ Status DilithiumVerifyKeyManager::ValidateParams(
   }
 
   switch (params.key_size()) {
-    case PQCLEAN_DILITHIUM2_AVX2_CRYPTO_SECRETKEYBYTES:
-    case PQCLEAN_DILITHIUM3_AVX2_CRYPTO_SECRETKEYBYTES:
-    case PQCLEAN_DILITHIUM5_AVX2_CRYPTO_SECRETKEYBYTES: {
+    case PQCLEAN_DILITHIUM2_CRYPTO_SECRETKEYBYTES:
+    case PQCLEAN_DILITHIUM3_CRYPTO_SECRETKEYBYTES:
+    case PQCLEAN_DILITHIUM5_CRYPTO_SECRETKEYBYTES: {
       break;
     }
     default: {

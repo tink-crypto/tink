@@ -34,8 +34,8 @@
 #include "tink/util/test_matchers.h"
 
 extern "C" {
-#include "third_party/pqclean/crypto_sign/falcon-1024/avx2/api.h"
-#include "third_party/pqclean/crypto_sign/falcon-512/avx2/api.h"
+#include "third_party/pqclean/crypto_sign/falcon-1024/api.h"
+#include "third_party/pqclean/crypto_sign/falcon-512/api.h"
 }
 
 namespace crypto {
@@ -207,9 +207,9 @@ TEST_P(FalconVerifyTest, FipsMode) {
 INSTANTIATE_TEST_SUITE_P(
     FalconVerifyTests, FalconVerifyTest,
     testing::ValuesIn<FalconTestCase>({{"Falcon512", kFalcon512PrivateKeySize,
-                                        PQCLEAN_FALCON512_AVX2_CRYPTO_BYTES},
+                                        PQCLEAN_FALCON512_CRYPTO_BYTES},
                                        {"Falcon1024", kFalcon1024PrivateKeySize,
-                                        PQCLEAN_FALCON1024_AVX2_CRYPTO_BYTES}}),
+                                        PQCLEAN_FALCON1024_CRYPTO_BYTES}}),
     [](const testing::TestParamInfo<FalconVerifyTest::ParamType>& info) {
       return info.param.test_name;
     });

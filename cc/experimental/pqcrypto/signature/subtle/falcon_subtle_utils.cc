@@ -28,8 +28,8 @@
 #include "tink/util/statusor.h"
 
 extern "C" {
-#include "third_party/pqclean/crypto_sign/falcon-1024/avx2/api.h"
-#include "third_party/pqclean/crypto_sign/falcon-512/avx2/api.h"
+#include "third_party/pqclean/crypto_sign/falcon-1024/api.h"
+#include "third_party/pqclean/crypto_sign/falcon-512/api.h"
 }
 
 namespace crypto {
@@ -68,7 +68,7 @@ crypto::tink::util::StatusOr<FalconKeyPair> GenerateFalconKeyPair(
     case kFalcon512PrivateKeySize: {
       private_key.resize(private_key_size);
       public_key.resize(kFalcon512PublicKeySize);
-      PQCLEAN_FALCON512_AVX2_crypto_sign_keypair(
+      PQCLEAN_FALCON512_crypto_sign_keypair(
           reinterpret_cast<uint8_t*>(public_key.data()),
           reinterpret_cast<uint8_t*>(private_key.data()));
       break;
@@ -77,7 +77,7 @@ crypto::tink::util::StatusOr<FalconKeyPair> GenerateFalconKeyPair(
     case kFalcon1024PrivateKeySize: {
       private_key.resize(private_key_size);
       public_key.resize(kFalcon1024PublicKeySize);
-      PQCLEAN_FALCON1024_AVX2_crypto_sign_keypair(
+      PQCLEAN_FALCON1024_crypto_sign_keypair(
           reinterpret_cast<uint8_t*>(public_key.data()),
           reinterpret_cast<uint8_t*>(private_key.data()));
       break;
