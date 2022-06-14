@@ -244,3 +244,16 @@ java_test(
         "@maven//:junit_junit",
     ],
 )
+
+java_test(
+    name = "MutableMonitoringRegistryTest",
+    size = "small",
+    srcs = ["MutableMonitoringRegistryTest.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink/internal:mutable_monitoring_registry",
+        "//src/main/java/com/google/crypto/tink/monitoring:monitoring_client",
+        "//src/main/java/com/google/crypto/tink/monitoring:monitoring_keyset_info",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)

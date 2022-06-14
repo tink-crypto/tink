@@ -390,3 +390,21 @@ android_library(
         "//src/main/java/com/google/crypto/tink:secret_key_access-android",
     ],
 )
+
+java_library(
+    name = "mutable_monitoring_registry",
+    srcs = ["MutableMonitoringRegistry.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink/monitoring:monitoring_client",
+        "//src/main/java/com/google/crypto/tink/monitoring:monitoring_keyset_info",
+    ],
+)
+
+android_library(
+    name = "mutable_monitoring_registry-android",
+    srcs = ["MutableMonitoringRegistry.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink/monitoring:monitoring_client-android",
+        "//src/main/java/com/google/crypto/tink/monitoring:monitoring_keyset_info-android",
+    ],
+)
