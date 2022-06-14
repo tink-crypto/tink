@@ -63,7 +63,7 @@ func KeysetInfoFromPrimitiveSet(ps *primitiveset.PrimitiveSet) (*monitoring.Keys
 			e := &monitoring.Entry{
 				KeyID:          pe.KeyID,
 				Status:         keyStatus,
-				FormatAsString: "", // TODO(b/225071831): populate FormatAsString with key format when available.
+				FormatAsString: pe.TypeURL, // TODO(b/225071831): populate FormatAsString with key format when available.
 			}
 			entries = append(entries, e)
 		}

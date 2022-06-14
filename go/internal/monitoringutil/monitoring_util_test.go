@@ -38,7 +38,8 @@ func validPrimitiveSet() *primitiveset.PrimitiveSet {
 		Entries: map[string][]*primitiveset.Entry{
 			"one": []*primitiveset.Entry{
 				{
-					Status: tpb.KeyStatusType_ENABLED,
+					Status:  tpb.KeyStatusType_ENABLED,
+					TypeURL: "type.googleapis.com/google.crypto.tink.AesGcmKey",
 				},
 			},
 		},
@@ -89,16 +90,19 @@ func TestKeysetInfoFromPrimitiveSet(t *testing.T) {
 			// Adding all entries under the same prefix to get deterministic output.
 			"one": []*primitiveset.Entry{
 				&primitiveset.Entry{
-					KeyID:  1,
-					Status: tpb.KeyStatusType_ENABLED,
+					KeyID:   1,
+					Status:  tpb.KeyStatusType_ENABLED,
+					TypeURL: "type.googleapis.com/google.crypto.tink.AesSivKey",
 				},
 				&primitiveset.Entry{
-					KeyID:  2,
-					Status: tpb.KeyStatusType_DISABLED,
+					KeyID:   2,
+					Status:  tpb.KeyStatusType_DISABLED,
+					TypeURL: "type.googleapis.com/google.crypto.tink.AesGcmKey",
 				},
 				&primitiveset.Entry{
-					KeyID:  3,
-					Status: tpb.KeyStatusType_DESTROYED,
+					KeyID:   3,
+					Status:  tpb.KeyStatusType_DESTROYED,
+					TypeURL: "type.googleapis.com/google.crypto.tink.AesCtrHmacKey",
 				},
 			},
 		},
@@ -110,17 +114,17 @@ func TestKeysetInfoFromPrimitiveSet(t *testing.T) {
 			{
 				KeyID:          1,
 				Status:         monitoring.Enabled,
-				FormatAsString: "",
+				FormatAsString: "type.googleapis.com/google.crypto.tink.AesSivKey",
 			},
 			{
 				KeyID:          2,
 				Status:         monitoring.Disabled,
-				FormatAsString: "",
+				FormatAsString: "type.googleapis.com/google.crypto.tink.AesGcmKey",
 			},
 			{
 				KeyID:          3,
 				Status:         monitoring.Destroyed,
-				FormatAsString: "",
+				FormatAsString: "type.googleapis.com/google.crypto.tink.AesCtrHmacKey",
 			},
 		},
 	}
