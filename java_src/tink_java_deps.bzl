@@ -5,6 +5,7 @@ load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive", "http_file"
 TINK_MAVEN_ARTIFACTS = [
     "com.amazonaws:aws-java-sdk-core:1.12.182",
     "com.amazonaws:aws-java-sdk-kms:1.12.182",
+    "androidx.annotation:annotation:1.3.0",
     "com.google.auto:auto-common:1.2.1",
     "com.google.auto.service:auto-service:1.0.1",
     "com.google.auto.service:auto-service-annotations:1.0.1",
