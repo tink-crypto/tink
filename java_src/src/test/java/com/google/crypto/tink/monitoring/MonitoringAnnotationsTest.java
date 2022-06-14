@@ -48,6 +48,12 @@ public final class MonitoringAnnotationsTest {
   }
 
   @Test
+  public void emptyIsEmpty() throws Exception {
+    HashMap<String, String> empty = new HashMap<>();
+    assertThat(MonitoringAnnotations.EMPTY.toMap()).containsExactlyEntriesIn(empty);
+  }
+
+  @Test
   public void overwriteWithSameName() throws Exception {
     MonitoringAnnotations annotations =
         MonitoringAnnotations.newBuilder()

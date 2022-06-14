@@ -16,10 +16,13 @@
 
 package com.google.crypto.tink;
 
+import com.google.crypto.tink.annotations.Alpha;
+import com.google.crypto.tink.monitoring.MonitoringAnnotations;
 import com.google.crypto.tink.proto.KeyStatusType;
 import com.google.crypto.tink.proto.Keyset;
 import com.google.crypto.tink.proto.OutputPrefixType;
 import com.google.crypto.tink.subtle.Hex;
+import com.google.errorprone.annotations.Immutable;
 import java.security.GeneralSecurityException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -49,6 +52,52 @@ import java.util.concurrent.ConcurrentMap;
  * @since 1.0.0
  */
 public final class PrimitiveSet<P> {
+
+  // A simple implementation of KeyFormat.
+  // Consider renaming this class and moving it into internal. And use it in LegacyProtoKey.
+  @Immutable
+  @Alpha
+  private static class SimpleKeyFormat extends KeyFormat {
+
+    private final String typeUrl;
+    private final OutputPrefixType outputPrefixType;
+
+    @Override
+    public boolean hasIdRequirement() {
+      return outputPrefixType != OutputPrefixType.RAW;
+    }
+
+    // This function is needed because LiteProto do not have a good toString function.
+    private static String outputPrefixToString(OutputPrefixType outputPrefixType) {
+      switch (outputPrefixType) {
+        case TINK:
+          return "TINK";
+        case LEGACY:
+          return "LEGACY";
+        case RAW:
+          return "RAW";
+        case CRUNCHY:
+          return "CRUNCHY";
+        default:
+          return "UNKNOWN";
+      }
+    }
+
+    /**
+     * Returns the string representation. The exact details are unspecified and subject to change.
+     */
+    @Override
+    public String toString() {
+      return String.format(
+          "(typeUrl=%s, outputPrefixType=%s)", typeUrl, outputPrefixToString(outputPrefixType));
+    }
+
+    private SimpleKeyFormat(String typeUrl, OutputPrefixType outputPrefixType) {
+      this.typeUrl = typeUrl;
+      this.outputPrefixType = outputPrefixType;
+    }
+  }
+
   /**
    * A single entry in the set. In addition to the actual primitive it holds also some extra
    * information about the primitive.
@@ -65,18 +114,21 @@ public final class PrimitiveSet<P> {
     private final OutputPrefixType outputPrefixType;
     // The id of the key.
     private final int keyId;
+    private final KeyFormat keyFormat;
 
     Entry(
         P primitive,
         final byte[] identifier,
         KeyStatusType status,
         OutputPrefixType outputPrefixType,
-        int keyId) {
+        int keyId,
+        KeyFormat keyFormat) {
       this.primitive = primitive;
       this.identifier = Arrays.copyOf(identifier, identifier.length);
       this.status = status;
       this.outputPrefixType = outputPrefixType;
       this.keyId = keyId;
+      this.keyFormat = keyFormat;
     }
 
     /**
@@ -109,11 +161,19 @@ public final class PrimitiveSet<P> {
     public int getKeyId() {
       return keyId;
     }
+
+    public KeyFormat getKeyFormat() {
+      return keyFormat;
+    }
   }
 
   /** @return the entry with the primary primitive. */
   public Entry<P> getPrimary() {
     return primary;
+  }
+
+  public MonitoringAnnotations getAnnotations() {
+    return annotations;
   }
 
   /** @return all primitives using RAW prefix. */
@@ -142,18 +202,30 @@ public final class PrimitiveSet<P> {
    * prefix). This allows quickly retrieving the list of primitives sharing some particular prefix.
    * Because all RAW keys are using an empty prefix, this also quickly allows retrieving them.
    */
-  private final ConcurrentMap<Prefix, List<Entry<P>>> primitives =
-      new ConcurrentHashMap<Prefix, List<Entry<P>>>();
+  private final ConcurrentMap<Prefix, List<Entry<P>>> primitives = new ConcurrentHashMap<>();
 
   private Entry<P> primary;
   private final Class<P> primitiveClass;
+  private final MonitoringAnnotations annotations;
 
   private PrimitiveSet(Class<P> primitiveClass) {
     this.primitiveClass = primitiveClass;
+    this.annotations = MonitoringAnnotations.EMPTY;
+  }
+
+  private PrimitiveSet(MonitoringAnnotations annotations, Class<P> primitiveClass) {
+    this.primitiveClass = primitiveClass;
+    this.annotations = annotations;
   }
 
   public static <P> PrimitiveSet<P> newPrimitiveSet(Class<P> primitiveClass) {
     return new PrimitiveSet<P>(primitiveClass);
+  }
+
+  // Only used by KeysetHandle.
+  static <P> PrimitiveSet<P> newPrimitiveSetWithAnnotations(
+      MonitoringAnnotations annotations, Class<P> primitiveClass) {
+    return new PrimitiveSet<P>(annotations, primitiveClass);
   }
 
   /** Sets given Entry {@code primary} as the primary one. */
@@ -182,20 +254,23 @@ public final class PrimitiveSet<P> {
     if (key.getStatus() != KeyStatusType.ENABLED) {
       throw new GeneralSecurityException("only ENABLED key is allowed");
     }
+    KeyFormat keyFormat =
+        new SimpleKeyFormat(key.getKeyData().getTypeUrl(), key.getOutputPrefixType());
     Entry<P> entry =
         new Entry<P>(
             primitive,
             CryptoFormat.getOutputPrefix(key),
             key.getStatus(),
             key.getOutputPrefixType(),
-            key.getKeyId());
-    List<Entry<P>> list = new ArrayList<Entry<P>>();
+            key.getKeyId(),
+            keyFormat);
+    List<Entry<P>> list = new ArrayList<>();
     list.add(entry);
     // Cannot use [] as keys in hash map, convert to Prefix wrapper class.
     Prefix identifier = new Prefix(entry.getIdentifier());
     List<Entry<P>> existing = primitives.put(identifier, Collections.unmodifiableList(list));
     if (existing != null) {
-      List<Entry<P>> newList = new ArrayList<Entry<P>>();
+      List<Entry<P>> newList = new ArrayList<>();
       newList.addAll(existing);
       newList.add(entry);
       primitives.put(identifier, Collections.unmodifiableList(newList));

@@ -23,12 +23,15 @@ import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
 
+import com.google.crypto.tink.monitoring.MonitoringAnnotations;
+import com.google.crypto.tink.proto.KeyData;
 import com.google.crypto.tink.proto.KeyStatusType;
 import com.google.crypto.tink.proto.Keyset.Key;
 import com.google.crypto.tink.proto.OutputPrefixType;
 import com.google.crypto.tink.subtle.Hex;
 import java.security.GeneralSecurityException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -131,6 +134,40 @@ public class PrimitiveSetTest {
     assertEquals(KeyStatusType.ENABLED, entry.getStatus());
     assertArrayEquals(CryptoFormat.getOutputPrefix(key2), entry.getIdentifier());
     assertEquals(2, entry.getKeyId());
+  }
+
+  @Test
+  public void testEntryGetKeyFormatToString() throws Exception {
+    PrimitiveSet<Mac> pset = PrimitiveSet.newPrimitiveSet(Mac.class);
+    Key key1 =
+        Key.newBuilder()
+            .setKeyId(1)
+            .setStatus(KeyStatusType.ENABLED)
+            .setOutputPrefixType(OutputPrefixType.TINK)
+            .setKeyData(KeyData.newBuilder().setTypeUrl("typeUrl1").build())
+            .build();
+    pset.addPrimitive(new DummyMac1(), key1);
+
+    PrimitiveSet.Entry<Mac> entry = pset.getPrimitive(key1).get(0);
+    assertThat(entry.getKeyFormat().toString())
+        .isEqualTo("(typeUrl=typeUrl1, outputPrefixType=TINK)");
+  }
+
+  @Test
+  public void testWithAnnotations() throws Exception {
+    MonitoringAnnotations annotations =
+        MonitoringAnnotations.newBuilder().add("name", "value").build();
+    PrimitiveSet<Mac> pset = PrimitiveSet.newPrimitiveSetWithAnnotations(annotations, Mac.class);
+
+    HashMap<String, String> expected = new HashMap<>();
+    expected.put("name", "value");
+    assertThat(pset.getAnnotations().toMap()).containsExactlyEntriesIn(expected);
+  }
+
+  @Test
+  public void testGetEmptyAnnotations() throws Exception {
+    PrimitiveSet<Mac> pset = PrimitiveSet.newPrimitiveSet(Mac.class);
+    assertThat(pset.getAnnotations()).isEqualTo(MonitoringAnnotations.EMPTY);
   }
 
   @Test
