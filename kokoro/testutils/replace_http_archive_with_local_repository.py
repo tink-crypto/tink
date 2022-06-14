@@ -51,6 +51,8 @@ def _replace_http_archive_with_local_repository(workspace_content: str,
       """)
   workspace_content = workspace_content.replace(http_archive_load, '')
 
+  # TODO(b/234429843): Remove this once we migrate tink-examples to using
+  # tink-py as a dependency instead of tink/python.
   # Tink C++.
   tink_cc_before = textwrap.dedent(f"""\
       http_archive(
@@ -91,6 +93,50 @@ def _replace_http_archive_with_local_repository(workspace_content: str,
       local_repository(
           name = "tink_cc_gcpkms",
           path = "{tink_base_path}/cc/integration/gcpkms",
+      )""")
+  workspace_content = workspace_content.replace(tink_cc_gcpkms_before,
+                                                tink_cc_gcpkms_after)
+
+  # Tink C++.
+  tink_cc_before = textwrap.dedent(f"""\
+      http_archive(
+          name = "tink_cc",
+          urls = ["{_TINK_POLIREPO_GITHUB_ORG_URL}/tink-cc/archive/master.zip"],
+          strip_prefix = "tink-cc-master",
+      )""")
+  tink_cc_after = textwrap.dedent(f"""\
+      local_repository(
+          name = "tink_cc",
+          path = "{tink_base_path}/tink_cc",
+      )""")
+  workspace_content = workspace_content.replace(tink_cc_before, tink_cc_after)
+
+  # Tink C++ AWS-KMS.
+  tink_cc_awskms_before = textwrap.dedent(f"""\
+      http_archive(
+          name = "tink_cc_awskms",
+          urls = ["{_TINK_POLIREPO_GITHUB_ORG_URL}/tink-cc-awskms/archive/main.zip"],
+          strip_prefix = "tink-cc-awskms-main",
+      )""")
+  tink_cc_awskms_after = textwrap.dedent(f"""\
+      local_repository(
+          name = "tink_cc_awskms",
+          path = "{tink_base_path}/tink_cc_awskms",
+      )""")
+  workspace_content = workspace_content.replace(tink_cc_awskms_before,
+                                                tink_cc_awskms_after)
+
+  # Tink C++ Google Cloud KMS.
+  tink_cc_gcpkms_before = textwrap.dedent(f"""\
+      http_archive(
+          name = "tink_cc_gcpkms",
+          urls = ["{_TINK_POLIREPO_GITHUB_ORG_URL}/tink-cc-gcpkms/archive/main.zip"],
+          strip_prefix = "tink-cc-gcpkms-main",
+      )""")
+  tink_cc_gcpkms_after = textwrap.dedent(f"""\
+      local_repository(
+          name = "tink_cc_gcpkms",
+          path = "{tink_base_path}/tink_cc_gcpkms",
       )""")
   workspace_content = workspace_content.replace(tink_cc_gcpkms_before,
                                                 tink_cc_gcpkms_after)
