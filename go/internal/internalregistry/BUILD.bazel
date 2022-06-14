@@ -1,0 +1,28 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+package(default_visibility = ["//:__subpackages__"])  # keep
+
+licenses(["notice"])  # keep
+
+go_library(
+    name = "internalregistry",
+    srcs = ["internal_registry.go"],
+    importpath = "github.com/google/tink/go/internal/internalregistry",
+    deps = ["//monitoring"],
+)
+
+go_test(
+    name = "internalregistry_test",
+    srcs = ["internal_registry_test.go"],
+    deps = [
+        ":internalregistry",
+        "//testing/fakemonitoring",
+        "@com_github_google_go_cmp//cmp",
+    ],
+)
+
+alias(
+    name = "go_default_library",
+    actual = ":internalregistry",
+    visibility = ["//:__subpackages__"],
+)
