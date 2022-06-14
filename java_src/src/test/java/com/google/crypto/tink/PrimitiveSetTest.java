@@ -92,7 +92,24 @@ public class PrimitiveSetTest {
             .setStatus(KeyStatusType.ENABLED)
             .setOutputPrefixType(OutputPrefixType.LEGACY)
             .build();
-    pset.addPrimitive(new DummyMac1(), key3);
+    PrimitiveSet.Entry<Mac> lastEntry = pset.addPrimitive(new DummyMac1(), key3);
+
+    // After the primitive set has been built, it is preferable to call makeImmutable() to make it
+    // immutable.
+    pset.makeImmutable();
+
+    // Check that setPrimary and addPrimitive now throw an Exception.
+    assertThrows(IllegalStateException.class, () -> pset.setPrimary(lastEntry));
+    assertThrows(
+        IllegalStateException.class,
+        () ->
+            pset.addPrimitive(
+                new DummyMac1(),
+                Key.newBuilder()
+                    .setKeyId(4)
+                    .setStatus(KeyStatusType.ENABLED)
+                    .setOutputPrefixType(OutputPrefixType.TINK)
+                    .build()));
 
     assertThat(pset.getAll()).hasSize(3);
 

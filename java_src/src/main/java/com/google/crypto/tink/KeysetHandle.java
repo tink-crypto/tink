@@ -168,17 +168,16 @@ public final class KeysetHandle {
    * load cleartext keysets can use {@link CleartextKeysetHandle}.
    *
    * @return a new {@link KeysetHandle} from {@code serialized} that is a serialized {@link Keyset}
-   * @throws GeneralSecurityException
+   * @throws GeneralSecurityException if the keyset is invalid
    */
+  @SuppressWarnings("UnusedException")
   public static final KeysetHandle readNoSecret(KeysetReader reader)
       throws GeneralSecurityException, IOException {
     try {
       Keyset keyset = reader.read();
       assertNoSecretKeyMaterial(keyset);
       return KeysetHandle.fromKeyset(keyset);
-    } catch (
-        @SuppressWarnings("UnusedException")
-        InvalidProtocolBufferException e) {
+    } catch (InvalidProtocolBufferException e) {
       // Do not propagate InvalidProtocolBufferException to guarantee no key material is leaked
       throw new GeneralSecurityException("invalid keyset");
     }
@@ -192,17 +191,16 @@ public final class KeysetHandle {
    * load cleartext keysets can use {@link CleartextKeysetHandle}.
    *
    * @return a new {@link KeysetHandle} from {@code serialized} that is a serialized {@link Keyset}
-   * @throws GeneralSecurityException
+   * @throws GeneralSecurityException if the keyset is invalid
    */
+  @SuppressWarnings("UnusedException")
   public static final KeysetHandle readNoSecret(final byte[] serialized)
       throws GeneralSecurityException {
     try {
       Keyset keyset = Keyset.parseFrom(serialized, ExtensionRegistryLite.getEmptyRegistry());
       assertNoSecretKeyMaterial(keyset);
       return KeysetHandle.fromKeyset(keyset);
-    } catch (
-        @SuppressWarnings("UnusedException")
-        InvalidProtocolBufferException e) {
+    } catch (InvalidProtocolBufferException e) {
       // Do not propagate InvalidProtocolBufferException to guarantee no key material is leaked
       throw new GeneralSecurityException("invalid keyset");
     }
@@ -241,6 +239,7 @@ public final class KeysetHandle {
   }
 
   /** Encrypts the keyset with the {@link Aead} master key. */
+  @SuppressWarnings("UnusedException")
   private static EncryptedKeyset encrypt(Keyset keyset, Aead masterKey, byte[] associatedData)
       throws GeneralSecurityException {
     byte[] encryptedKeyset = masterKey.encrypt(keyset.toByteArray(), associatedData);
@@ -253,9 +252,7 @@ public final class KeysetHandle {
       if (!keyset2.equals(keyset)) {
         throw new GeneralSecurityException("cannot encrypt keyset");
       }
-    } catch (
-        @SuppressWarnings("UnusedException")
-        InvalidProtocolBufferException e) {
+    } catch (InvalidProtocolBufferException e) {
       // Do not propagate InvalidProtocolBufferException to guarantee no key material is leaked
       throw new GeneralSecurityException("invalid keyset, corrupted key material");
     }
@@ -266,6 +263,7 @@ public final class KeysetHandle {
   }
 
   /** Decrypts the encrypted keyset with the {@link Aead} master key. */
+  @SuppressWarnings("UnusedException")
   private static Keyset decrypt(
       EncryptedKeyset encryptedKeyset, Aead masterKey, byte[] associatedData)
       throws GeneralSecurityException {
@@ -278,7 +276,6 @@ public final class KeysetHandle {
       assertEnoughKeyMaterial(keyset);
       return keyset;
     } catch (
-        @SuppressWarnings("UnusedException")
         InvalidProtocolBufferException e) {
       // Do not propagate InvalidProtocolBufferException to guarantee no key material is leaked
       throw new GeneralSecurityException("invalid keyset, corrupted key material");
@@ -352,7 +349,7 @@ public final class KeysetHandle {
   /**
    * Validates that a keyset handle contains enough key material to build a keyset on.
    *
-   * @throws GeneralSecurityException
+   * @throws GeneralSecurityException if the validation fails
    */
   private static void assertEnoughKeyMaterial(Keyset keyset) throws GeneralSecurityException {
     if (keyset == null || keyset.getKeyCount() <= 0) {
@@ -363,7 +360,7 @@ public final class KeysetHandle {
   /**
    * Validates that an encrypted keyset contains enough key material to build a keyset on.
    *
-   * @throws GeneralSecurityException
+   * @throws GeneralSecurityException if the validation fails
    */
   private static void assertEnoughEncryptedKeyMaterial(EncryptedKeyset keyset)
       throws GeneralSecurityException {
@@ -386,7 +383,7 @@ public final class KeysetHandle {
         }
       }
     }
-
+    primitives.makeImmutable();
     return Registry.wrap(primitives, classObject);
   }
 

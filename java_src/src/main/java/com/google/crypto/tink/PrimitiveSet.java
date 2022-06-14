@@ -207,15 +207,18 @@ public final class PrimitiveSet<P> {
   private Entry<P> primary;
   private final Class<P> primitiveClass;
   private final MonitoringAnnotations annotations;
+  private boolean isMutable;
 
   private PrimitiveSet(Class<P> primitiveClass) {
     this.primitiveClass = primitiveClass;
     this.annotations = MonitoringAnnotations.EMPTY;
+    this.isMutable = true;
   }
 
   private PrimitiveSet(MonitoringAnnotations annotations, Class<P> primitiveClass) {
     this.primitiveClass = primitiveClass;
     this.annotations = annotations;
+    this.isMutable = true;
   }
 
   public static <P> PrimitiveSet<P> newPrimitiveSet(Class<P> primitiveClass) {
@@ -228,8 +231,24 @@ public final class PrimitiveSet<P> {
     return new PrimitiveSet<P>(annotations, primitiveClass);
   }
 
-  /** Sets given Entry {@code primary} as the primary one. */
+  /**
+   * Makes the object immutable.
+   *
+   * <p>Calls to the methods {@link setPrimary} or {@link addPrimitive} after calling this method
+   * will throw an {@code IllegalStateException}.
+   */
+  void makeImmutable() {
+    this.isMutable = false;
+  }
+
+  /** Sets given Entry {@code primary} as the primary one.
+   *
+   * @throws IllegalStateException if {@link makeImmutable} has been called before.
+   */
   public void setPrimary(final Entry<P> primary) {
+    if (!isMutable) {
+      throw new IllegalStateException("setPrimary cannot be called on an immutable primitive set");
+    }
     if (primary == null) {
       throw new IllegalArgumentException("the primary entry must be non-null");
     }
@@ -247,10 +266,16 @@ public final class PrimitiveSet<P> {
   /**
    * Creates an entry in the primitive table.
    *
-   * @return the added entry
+   * @return the added {@link Entry}
+   *
+   * @throws IllegalStateException if {@link makeImmutable} has been called before.
    */
   public Entry<P> addPrimitive(final P primitive, Keyset.Key key)
       throws GeneralSecurityException {
+    if (!isMutable) {
+      throw new IllegalStateException(
+          "addPrimitive cannot be called on an immutable primitive set");
+    }
     if (key.getStatus() != KeyStatusType.ENABLED) {
       throw new GeneralSecurityException("only ENABLED key is allowed");
     }
