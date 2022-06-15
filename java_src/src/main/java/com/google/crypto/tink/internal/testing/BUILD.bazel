@@ -1,0 +1,26 @@
+load("@build_bazel_rules_android//android:rules.bzl", "android_library")
+
+licenses(["notice"])
+
+package(
+    default_testonly = 1,
+    default_visibility = ["//visibility:public"],
+)
+
+java_library(
+    name = "fake_monitoring_client",
+    srcs = ["FakeMonitoringClient.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink/monitoring:monitoring_client",
+        "//src/main/java/com/google/crypto/tink/monitoring:monitoring_keyset_info",
+    ],
+)
+
+android_library(
+    name = "fake_monitoring_client-android",
+    srcs = ["FakeMonitoringClient.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink/monitoring:monitoring_client-android",
+        "//src/main/java/com/google/crypto/tink/monitoring:monitoring_keyset_info-android",
+    ],
+)
