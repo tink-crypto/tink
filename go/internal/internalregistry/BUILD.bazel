@@ -17,7 +17,6 @@ go_test(
     deps = [
         ":internalregistry",
         "//testing/fakemonitoring",
-        "@com_github_google_go_cmp//cmp",
     ],
 )
 

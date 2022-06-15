@@ -1,4 +1,4 @@
-load("@io_bazel_rules_go//go:def.bzl", "go_library")
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
 
 package(default_visibility = ["//:__subpackages__"])  # keep
 
@@ -17,4 +17,14 @@ alias(
     name = "go_default_library",
     actual = ":fakemonitoring",
     visibility = ["//visibility:public"],
+)
+
+go_test(
+    name = "fakemonitoring_test",
+    srcs = ["fakemonitoring_test.go"],
+    deps = [
+        ":fakemonitoring",
+        "//monitoring",
+        "@com_github_google_go_cmp//cmp",
+    ],
 )

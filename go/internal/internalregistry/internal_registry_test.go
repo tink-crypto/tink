@@ -19,7 +19,6 @@ package internalregistry_test
 import (
 	"testing"
 
-	"github.com/google/go-cmp/cmp"
 	"github.com/google/tink/go/internal/internalregistry"
 	"github.com/google/tink/go/testing/fakemonitoring"
 )
@@ -32,9 +31,9 @@ func TestRegisterMonitoringClient(t *testing.T) {
 	if err := internalregistry.RegisterMonitoringClient(fakeClient); err != nil {
 		t.Fatalf("internalregistry.RegisterMonitoringClient() err = %v, want nil", err)
 	}
-	got := internalregistry.GetMonitoringClient()
-	if !cmp.Equal(got, fakeClient) {
-		t.Errorf("got = %v, want %v", got, fakeClient)
+	got := internalregistry.GetMonitoringClient().(*fakemonitoring.Client)
+	if got.Name != "fake-monitor-client-1" {
+		t.Errorf("got = %q, want %q", got.Name, "fake-monitor-client-1")
 	}
 }
 
