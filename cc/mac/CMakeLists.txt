@@ -241,3 +241,24 @@ tink_cc_test(
     tink::util::test_matchers
     tink::proto::hmac_cc_proto
 )
+
+tink_cc_library(
+  NAME failing_mac
+  SRCS
+    failing_mac.cc
+    failing_mac.h
+  DEPS
+    absl::strings
+    tink::core::mac
+)
+
+tink_cc_test(
+  NAME failing_mac_test
+  SRCS
+    failing_mac_test.cc
+  DEPS
+    tink::mac::failing_mac
+    gmock
+    absl::status
+    tink::util::test_matchers
+)
