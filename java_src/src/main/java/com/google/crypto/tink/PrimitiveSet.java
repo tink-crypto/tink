@@ -188,7 +188,7 @@ public final class PrimitiveSet<P> {
   }
 
   /** Returns the entries with primitives identified by the ciphertext prefix of {@code key}. */
-  protected List<Entry<P>> getPrimitive(Keyset.Key key) throws GeneralSecurityException {
+  List<Entry<P>> getPrimitive(Keyset.Key key) throws GeneralSecurityException {
     return getPrimitive(CryptoFormat.getOutputPrefix(key));
   }
 
@@ -202,7 +202,7 @@ public final class PrimitiveSet<P> {
    * prefix). This allows quickly retrieving the list of primitives sharing some particular prefix.
    * Because all RAW keys are using an empty prefix, this also quickly allows retrieving them.
    */
-  private final ConcurrentMap<Prefix, List<Entry<P>>> primitives = new ConcurrentHashMap<>();
+  private final ConcurrentMap<Prefix, List<Entry<P>>> primitives;
 
   private Entry<P> primary;
   private final Class<P> primitiveClass;
@@ -210,15 +210,27 @@ public final class PrimitiveSet<P> {
   private boolean isMutable;
 
   private PrimitiveSet(Class<P> primitiveClass) {
+    this.primitives = new ConcurrentHashMap<>();
     this.primitiveClass = primitiveClass;
     this.annotations = MonitoringAnnotations.EMPTY;
     this.isMutable = true;
   }
 
   private PrimitiveSet(MonitoringAnnotations annotations, Class<P> primitiveClass) {
+    this.primitives = new ConcurrentHashMap<>();
     this.primitiveClass = primitiveClass;
     this.annotations = annotations;
     this.isMutable = true;
+  }
+
+  /** Creates an immutable PrimitiveSet. It is used by the Builder.*/
+  private PrimitiveSet(ConcurrentMap<Prefix, List<Entry<P>>> primitives,
+      Entry<P> primary, MonitoringAnnotations annotations, Class<P> primitiveClass) {
+    this.primitives = primitives;
+    this.primary = primary;
+    this.primitiveClass = primitiveClass;
+    this.annotations = annotations;
+    this.isMutable = false;
   }
 
   public static <P> PrimitiveSet<P> newPrimitiveSet(Class<P> primitiveClass) {
@@ -291,7 +303,7 @@ public final class PrimitiveSet<P> {
             keyFormat);
     List<Entry<P>> list = new ArrayList<>();
     list.add(entry);
-    // Cannot use [] as keys in hash map, convert to Prefix wrapper class.
+    // Cannot use byte[] as keys in hash map, convert to Prefix wrapper class.
     Prefix identifier = new Prefix(entry.getIdentifier());
     List<Entry<P>> existing = primitives.put(identifier, Collections.unmodifiableList(list));
     if (existing != null) {
@@ -347,4 +359,92 @@ public final class PrimitiveSet<P> {
     }
   }
 
+  /** Builds an immutable PrimitiveSet. This is the prefered way to construct a PrimitiveSet. */
+  public static class Builder<P> {
+    private final Class<P> primitiveClass;
+
+    // primitives == null indicates that build has been called and the builder can't be used
+    // anymore.
+    private ConcurrentMap<Prefix, List<Entry<P>>> primitives = new ConcurrentHashMap<>();
+    private Entry<P> primary;
+    private MonitoringAnnotations annotations;
+
+    private Builder<P> addPrimitive(final P primitive, Keyset.Key key, boolean asPrimary)
+        throws GeneralSecurityException {
+      if (primitives == null) {
+        throw new IllegalStateException("addPrimitive cannot be called after build");
+      }
+      if (key.getStatus() != KeyStatusType.ENABLED) {
+        throw new GeneralSecurityException("only ENABLED key is allowed");
+      }
+      KeyFormat keyFormat =
+          new SimpleKeyFormat(key.getKeyData().getTypeUrl(), key.getOutputPrefixType());
+      Entry<P> entry =
+          new Entry<P>(
+              primitive,
+              CryptoFormat.getOutputPrefix(key),
+              key.getStatus(),
+              key.getOutputPrefixType(),
+              key.getKeyId(),
+              keyFormat);
+      List<Entry<P>> list = new ArrayList<>();
+      list.add(entry);
+      // Cannot use byte[] as keys in hash map, convert to Prefix wrapper class.
+      Prefix identifier = new Prefix(entry.getIdentifier());
+      List<Entry<P>> existing = primitives.put(identifier, Collections.unmodifiableList(list));
+      if (existing != null) {
+        List<Entry<P>> newList = new ArrayList<>();
+        newList.addAll(existing);
+        newList.add(entry);
+        primitives.put(identifier, Collections.unmodifiableList(newList));
+      }
+      if (asPrimary) {
+        if (this.primary != null) {
+          throw new IllegalStateException("you cannot set two primary primitives");
+        }
+        this.primary = entry;
+      }
+      return this;
+    }
+
+    /* Adds a non-primary primitive.*/
+    public Builder<P> addPrimitive(final P primitive, Keyset.Key key)
+        throws GeneralSecurityException {
+      return addPrimitive(primitive, key, false);
+    }
+
+    /* Adds the primary primitive. Should be called exactly once per PrimitiveSet.*/
+    public Builder<P> addPrimaryPrimitive(final P primitive, Keyset.Key key)
+        throws GeneralSecurityException {
+      return addPrimitive(primitive, key, true);
+    }
+
+    public Builder<P> setAnnotations(MonitoringAnnotations annotations) {
+      if (primitives == null) {
+        throw new IllegalStateException("setAnnotations cannot be called after build");
+      }
+      this.annotations = annotations;
+      return this;
+    }
+
+    public PrimitiveSet<P> build() throws GeneralSecurityException {
+      if (primitives == null) {
+        throw new IllegalStateException("build cannot be called twice");
+      }
+      // Note that we currently don't enforce that primary must be set.
+      PrimitiveSet<P> output =
+          new PrimitiveSet<P>(primitives, primary, annotations, primitiveClass);
+      this.primitives = null;
+      return output;
+    }
+
+    private Builder(Class<P> primitiveClass) {
+      this.primitiveClass = primitiveClass;
+      this.annotations = MonitoringAnnotations.EMPTY;
+    }
+  }
+
+  public static <P> Builder<P> newBuilder(Class<P> primitiveClass) {
+    return new Builder<P>(primitiveClass);
+  }
 }
