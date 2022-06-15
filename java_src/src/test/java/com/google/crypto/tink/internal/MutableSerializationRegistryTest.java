@@ -27,6 +27,7 @@ import com.google.crypto.tink.util.Bytes;
 import com.google.errorprone.annotations.Immutable;
 import java.security.GeneralSecurityException;
 import java.util.Optional;
+import javax.annotation.Nullable;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -39,8 +40,7 @@ import org.junit.runners.JUnit4;
  */
 @RunWith(JUnit4.class)
 public final class MutableSerializationRegistryTest {
-  private static final Optional<SecretKeyAccess> ACCESS =
-      Optional.of(InsecureSecretKeyAccess.get());
+  private static final SecretKeyAccess ACCESS = InsecureSecretKeyAccess.get();
 
   private static final Bytes A_1 = Bytes.copyFrom("0".getBytes(UTF_8));
   private static final Bytes A_2 = Bytes.copyFrom("1".getBytes(UTF_8));
@@ -127,32 +127,32 @@ public final class MutableSerializationRegistryTest {
     }
   }
 
-  private static TestSerializationA serializeKey1ToA(TestKey1 key, Optional<SecretKeyAccess> access)
+  private static TestSerializationA serializeKey1ToA(TestKey1 key, @Nullable SecretKeyAccess access)
       throws GeneralSecurityException {
     SecretKeyAccess.requireAccess(access);
     return new TestSerializationA(A_1);
   }
 
-  private static TestSerializationA serializeKey2ToA(TestKey2 key, Optional<SecretKeyAccess> access)
+  private static TestSerializationA serializeKey2ToA(TestKey2 key, @Nullable SecretKeyAccess access)
       throws GeneralSecurityException {
     SecretKeyAccess.requireAccess(access);
     return new TestSerializationA(A_2);
   }
 
-  private static TestSerializationB serializeKey1ToB(TestKey1 key, Optional<SecretKeyAccess> access)
+  private static TestSerializationB serializeKey1ToB(TestKey1 key, @Nullable SecretKeyAccess access)
       throws GeneralSecurityException {
     SecretKeyAccess.requireAccess(access);
     return new TestSerializationB(B_1);
   }
 
-  private static TestSerializationB serializeKey2ToB(TestKey2 key, Optional<SecretKeyAccess> access)
+  private static TestSerializationB serializeKey2ToB(TestKey2 key, @Nullable SecretKeyAccess access)
       throws GeneralSecurityException {
     SecretKeyAccess.requireAccess(access);
     return new TestSerializationB(B_2);
   }
 
   private static Key parseAToKey1(
-      TestSerializationA serialization, Optional<SecretKeyAccess> access)
+      TestSerializationA serialization, @Nullable SecretKeyAccess access)
       throws GeneralSecurityException {
     if (!A_1.equals(serialization.getObjectIdentifier())) {
       throw new GeneralSecurityException("Wrong object identifier");
@@ -162,7 +162,7 @@ public final class MutableSerializationRegistryTest {
   }
 
   private static Key parseAToKey2(
-      TestSerializationA serialization, Optional<SecretKeyAccess> access)
+      TestSerializationA serialization, @Nullable SecretKeyAccess access)
       throws GeneralSecurityException {
     if (!A_2.equals(serialization.getObjectIdentifier())) {
       throw new GeneralSecurityException("Wrong object identifier");
@@ -172,7 +172,7 @@ public final class MutableSerializationRegistryTest {
   }
 
   private static Key parseBToKey1(
-      TestSerializationB serialization, Optional<SecretKeyAccess> access)
+      TestSerializationB serialization, @Nullable SecretKeyAccess access)
       throws GeneralSecurityException {
     if (!B_1.equals(serialization.getObjectIdentifier())) {
       throw new GeneralSecurityException("Wrong object identifier");
@@ -182,7 +182,7 @@ public final class MutableSerializationRegistryTest {
   }
 
   private static Key parseBToKey2(
-      TestSerializationB serialization, Optional<SecretKeyAccess> access)
+      TestSerializationB serialization, @Nullable SecretKeyAccess access)
       throws GeneralSecurityException {
     if (!B_2.equals(serialization.getObjectIdentifier())) {
       throw new GeneralSecurityException("Wrong object identifier");

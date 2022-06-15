@@ -27,6 +27,7 @@ import com.google.crypto.tink.util.Bytes;
 import com.google.errorprone.annotations.Immutable;
 import java.security.GeneralSecurityException;
 import java.util.Optional;
+import javax.annotation.Nullable;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -61,7 +62,7 @@ public final class KeySerializerTest {
     }
   }
 
-  private static ExampleSerialization serialize(ExampleKey k, Optional<SecretKeyAccess> access)
+  private static ExampleSerialization serialize(ExampleKey k, @Nullable SecretKeyAccess access)
       throws GeneralSecurityException {
     SecretKeyAccess.requireAccess(access);
     return new ExampleSerialization();
@@ -78,12 +79,11 @@ public final class KeySerializerTest {
     KeySerializer<ExampleKey, ExampleSerialization> serializer =
         KeySerializer.create(
             KeySerializerTest::serialize, ExampleKey.class, ExampleSerialization.class);
-    assertThat(
-            serializer.serializeKey(new ExampleKey(), Optional.of(InsecureSecretKeyAccess.get())))
+    assertThat(serializer.serializeKey(new ExampleKey(), InsecureSecretKeyAccess.get()))
         .isNotNull();
     assertThrows(
         GeneralSecurityException.class,
-        () -> serializer.serializeKey(new ExampleKey(), Optional.empty()));
+        () -> serializer.serializeKey(new ExampleKey(), /* access = */ null));
   }
 
   @Test

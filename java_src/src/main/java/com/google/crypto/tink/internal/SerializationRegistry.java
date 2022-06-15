@@ -24,7 +24,7 @@ import java.security.GeneralSecurityException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
+import javax.annotation.Nullable;
 
 /**
  * Allows registering {@code KeySerializer}, {@code KeyParser}, {@code KeyFormatSerializer}, and
@@ -245,7 +245,7 @@ public final class SerializationRegistry {
    * serializedKey.getObjectIdentifier()}), and then parse the object with this parsers.
    */
   public <SerializationT extends Serialization> Key parseKey(
-      SerializationT serializedKey, Optional<SecretKeyAccess> access)
+      SerializationT serializedKey, @Nullable SecretKeyAccess access)
       throws GeneralSecurityException {
     ParserIndex index =
         new ParserIndex(serializedKey.getClass(), serializedKey.getObjectIdentifier());
@@ -266,7 +266,7 @@ public final class SerializationRegistry {
    * SerializationT} class and the passed in key type, and then call serializeKey on the result.
    */
   public <KeyT extends Key, SerializationT extends Serialization> SerializationT serializeKey(
-      KeyT key, Class<SerializationT> serializationClass, Optional<SecretKeyAccess> access)
+      KeyT key, Class<SerializationT> serializationClass, @Nullable SecretKeyAccess access)
       throws GeneralSecurityException {
     SerializerIndex index = new SerializerIndex(key.getClass(), serializationClass);
     if (!keySerializerMap.containsKey(index)) {

@@ -32,8 +32,7 @@ import org.junit.runners.JUnit4;
 
 @RunWith(JUnit4.class)
 public final class LegacyProtoKeyTest {
-  private static final Optional<SecretKeyAccess> ACCESS =
-      Optional.of(InsecureSecretKeyAccess.get());
+  private static final SecretKeyAccess ACCESS = InsecureSecretKeyAccess.get();
 
   @Test
   public void legacyProtoKeyCreate() throws Exception {
@@ -109,9 +108,10 @@ public final class LegacyProtoKeyTest {
             OutputPrefixType.RAW,
             Optional.empty());
     assertThrows(
-        GeneralSecurityException.class, () -> new LegacyProtoKey(serialization, Optional.empty()));
+        GeneralSecurityException.class,
+        () -> new LegacyProtoKey(serialization, /* access = */ null));
     LegacyProtoKey key = new LegacyProtoKey(serialization, ACCESS);
-    assertThrows(GeneralSecurityException.class, () -> key.getSerialization(Optional.empty()));
+    assertThrows(GeneralSecurityException.class, () -> key.getSerialization(/* access = */ null));
   }
 
   @Test
@@ -124,9 +124,10 @@ public final class LegacyProtoKeyTest {
             OutputPrefixType.RAW,
             Optional.empty());
     assertThrows(
-        GeneralSecurityException.class, () -> new LegacyProtoKey(serialization, Optional.empty()));
+        GeneralSecurityException.class,
+        () -> new LegacyProtoKey(serialization, /* access = */ null));
     LegacyProtoKey key = new LegacyProtoKey(serialization, ACCESS);
-    assertThrows(GeneralSecurityException.class, () -> key.getSerialization(Optional.empty()));
+    assertThrows(GeneralSecurityException.class, () -> key.getSerialization(/* access = */ null));
   }
 
   @Test
@@ -139,8 +140,8 @@ public final class LegacyProtoKeyTest {
             KeyMaterialType.ASYMMETRIC_PUBLIC,
             OutputPrefixType.RAW,
             Optional.empty());
-    LegacyProtoKey key = new LegacyProtoKey(serialization, Optional.empty());
-    key.getSerialization(Optional.empty());
+    LegacyProtoKey key = new LegacyProtoKey(serialization, /* access= */ null);
+    key.getSerialization(null);
   }
 
   @Test
@@ -153,8 +154,8 @@ public final class LegacyProtoKeyTest {
             KeyMaterialType.REMOTE,
             OutputPrefixType.RAW,
             Optional.empty());
-    LegacyProtoKey key = new LegacyProtoKey(serialization, Optional.empty());
-    key.getSerialization(Optional.empty());
+    LegacyProtoKey key = new LegacyProtoKey(serialization, /* access= */ null);
+    key.getSerialization(null);
   }
 
   @Test

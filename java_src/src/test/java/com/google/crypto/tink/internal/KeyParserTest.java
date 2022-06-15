@@ -27,6 +27,7 @@ import com.google.crypto.tink.util.Bytes;
 import com.google.errorprone.annotations.Immutable;
 import java.security.GeneralSecurityException;
 import java.util.Optional;
+import javax.annotation.Nullable;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -62,7 +63,7 @@ public final class KeyParserTest {
   }
 
   private static ExampleKey parse(
-      ExampleSerialization serialization, Optional<SecretKeyAccess> access)
+      ExampleSerialization serialization, @Nullable SecretKeyAccess access)
       throws GeneralSecurityException {
     SecretKeyAccess.requireAccess(access);
     return new ExampleKey();
@@ -78,12 +79,11 @@ public final class KeyParserTest {
     KeyParser<ExampleSerialization> parser =
         KeyParser.create(
             KeyParserTest::parse, Bytes.copyFrom(new byte[0]), ExampleSerialization.class);
-    assertThat(
-            parser.parseKey(new ExampleSerialization(), Optional.of(InsecureSecretKeyAccess.get())))
+    assertThat(parser.parseKey(new ExampleSerialization(), InsecureSecretKeyAccess.get()))
         .isNotNull();
     assertThrows(
         GeneralSecurityException.class,
-        () -> parser.parseKey(new ExampleSerialization(), Optional.empty()));
+        () -> parser.parseKey(new ExampleSerialization(), /* access = */ null));
   }
 
   @Test

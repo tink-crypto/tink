@@ -635,6 +635,7 @@ java_library(
     srcs = ["SecretKeyAccess.java"],
     deps = [
         "//src/main/java/com/google/crypto/tink/annotations:alpha",
+        "@maven//:com_google_code_findbugs_jsr305",
         "@maven//:com_google_errorprone_error_prone_annotations",
     ],
 )
@@ -644,6 +645,7 @@ android_library(
     srcs = ["SecretKeyAccess.java"],
     deps = [
         "//src/main/java/com/google/crypto/tink/annotations:alpha-android",
+        "@maven//:com_google_code_findbugs_jsr305",
         "@maven//:com_google_errorprone_error_prone_annotations",
     ],
 )

@@ -20,8 +20,8 @@ import com.google.crypto.tink.Key;
 import com.google.crypto.tink.KeyFormat;
 import com.google.crypto.tink.SecretKeyAccess;
 import java.security.GeneralSecurityException;
-import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
+import javax.annotation.Nullable;
 
 /**
  * A Mutable version of the {@link SerializationRegistry}.
@@ -118,7 +118,7 @@ public final class MutableSerializationRegistry {
    * serializedKey.getObjectIdentifier()}), and then parse the object with this parsers.
    */
   public <SerializationT extends Serialization> Key parseKey(
-      SerializationT serializedKey, Optional<SecretKeyAccess> access)
+      SerializationT serializedKey, @Nullable SecretKeyAccess access)
       throws GeneralSecurityException {
     return registry.get().parseKey(serializedKey, access);
   }
@@ -130,7 +130,7 @@ public final class MutableSerializationRegistry {
    * SerializationT} class and the passed in key type, and then call serializeKey on the result.
    */
   public <KeyT extends Key, SerializationT extends Serialization> SerializationT serializeKey(
-      KeyT key, Class<SerializationT> serializationClass, Optional<SecretKeyAccess> access)
+      KeyT key, Class<SerializationT> serializationClass, @Nullable SecretKeyAccess access)
       throws GeneralSecurityException {
     return registry.get().serializeKey(key, serializationClass, access);
   }

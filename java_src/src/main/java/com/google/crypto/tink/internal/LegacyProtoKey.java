@@ -23,6 +23,7 @@ import com.google.crypto.tink.subtle.Bytes;
 import com.google.errorprone.annotations.Immutable;
 import java.security.GeneralSecurityException;
 import java.util.Optional;
+import javax.annotation.Nullable;
 
 /** Implements a Key for legacy types where no actual parser is present. */
 @Immutable
@@ -30,7 +31,7 @@ public final class LegacyProtoKey extends Key {
   private final ProtoKeySerialization serialization;
 
   private static void throwIfMissingAccess(
-      ProtoKeySerialization protoKeySerialization, Optional<SecretKeyAccess> access)
+      ProtoKeySerialization protoKeySerialization, @Nullable SecretKeyAccess access)
       throws GeneralSecurityException {
     switch (protoKeySerialization.getKeyMaterialType()) {
       case SYMMETRIC:
@@ -46,7 +47,7 @@ public final class LegacyProtoKey extends Key {
    *
    * <p>Access is required for SYMMETRIC and ASYMMETRIC_PRIVATE key material types.
    */
-  public LegacyProtoKey(ProtoKeySerialization serialization, Optional<SecretKeyAccess> access)
+  public LegacyProtoKey(ProtoKeySerialization serialization, @Nullable SecretKeyAccess access)
       throws GeneralSecurityException {
     throwIfMissingAccess(serialization, access);
     this.serialization = serialization;
@@ -96,7 +97,7 @@ public final class LegacyProtoKey extends Key {
    *
    * <p>Access is required for SYMMETRIC and ASYMMETRIC_PRIVATE key material types.
    */
-  public ProtoKeySerialization getSerialization(Optional<SecretKeyAccess> access)
+  public ProtoKeySerialization getSerialization(@Nullable SecretKeyAccess access)
       throws GeneralSecurityException {
     throwIfMissingAccess(serialization, access);
     return serialization;
