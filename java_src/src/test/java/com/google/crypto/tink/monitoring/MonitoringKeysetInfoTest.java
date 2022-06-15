@@ -111,14 +111,12 @@ public final class MonitoringKeysetInfoTest {
   }
 
   @Test
-  public void primaryKeyMustBeSet() throws Exception  {
-    assertThrows(
-        GeneralSecurityException.class,
-        () ->
-            MonitoringKeysetInfo.newBuilder()
-                .addEntry(KeyStatus.ENABLED, 123, makeLegacyProtoKeyFormat("typeUrl123"))
-                .build());
-    assertThrows(GeneralSecurityException.class, () -> MonitoringKeysetInfo.newBuilder().build());
+  public void primaryIsNullIfItIsNotSet() throws Exception  {
+    MonitoringKeysetInfo info =
+        MonitoringKeysetInfo.newBuilder()
+            .addEntry(KeyStatus.ENABLED, 123, makeLegacyProtoKeyFormat("typeUrl123"))
+            .build();
+    assertThat(info.getPrimaryKeyId()).isNull();
   }
 
   @Test
