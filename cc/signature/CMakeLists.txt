@@ -702,3 +702,23 @@ tink_cc_test(
     tink::proto::tink_cc_proto
 )
 
+tink_cc_library(
+  NAME failing_signature
+  SRCS
+    failing_signature.cc
+    failing_signature.h
+  DEPS
+    absl::strings
+    tink::core::public_key_sign
+)
+
+tink_cc_test(
+  NAME failing_signature_test
+  SRCS
+    failing_signature_test.cc
+  DEPS
+    tink::signature::failing_signature
+    gmock
+    absl::status
+    tink::util::test_matchers
+)

@@ -737,3 +737,25 @@ cc_test(
         "@com_google_googletest//:gtest_main",
     ],
 )
+
+cc_library(
+    name = "failing_signature",
+    srcs = ["failing_signature.cc"],
+    hdrs = ["failing_signature.h"],
+    include_prefix = "tink/signature",
+    deps = [
+        "//:public_key_sign",
+        "@com_google_absl//absl/strings",
+    ],
+)
+
+cc_test(
+    name = "failing_signature_test",
+    srcs = ["failing_signature_test.cc"],
+    deps = [
+        ":failing_signature",
+        "//util:test_matchers",
+        "@com_google_absl//absl/status",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
