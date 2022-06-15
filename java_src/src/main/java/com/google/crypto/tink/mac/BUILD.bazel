@@ -183,3 +183,41 @@ android_library(
         "@com_google_protobuf//:protobuf_javalite",
     ],
 )
+
+java_library(
+    name = "mac_key",
+    srcs = ["MacKey.java"],
+    deps = [
+        ":mac_key_format",
+        "//src/main/java/com/google/crypto/tink:key",
+        "//src/main/java/com/google/crypto/tink/util:bytes",
+    ],
+)
+
+android_library(
+    name = "mac_key-android",
+    srcs = ["MacKey.java"],
+    deps = [
+        ":mac_key_format-android",
+        "//src/main/java/com/google/crypto/tink:key-android",
+        "//src/main/java/com/google/crypto/tink/util:bytes-android",
+    ],
+)
+
+java_library(
+    name = "mac_key_format",
+    srcs = ["MacKeyFormat.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink:key_format",
+        "@maven//:com_google_errorprone_error_prone_annotations",
+    ],
+)
+
+android_library(
+    name = "mac_key_format-android",
+    srcs = ["MacKeyFormat.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink:key_format-android",
+        "@maven//:com_google_errorprone_error_prone_annotations",
+    ],
+)
