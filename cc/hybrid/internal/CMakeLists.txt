@@ -1,6 +1,23 @@
 tink_module(hybrid::internal)
 
 tink_cc_library(
+  NAME hpke_context
+  SRCS
+    hpke_context.cc
+    hpke_context.h
+  DEPS
+    tink::hybrid::internal::hpke_context_boringssl
+    tink::hybrid::internal::hpke_util
+    absl::status
+    absl::strings
+    tink::util::secret_data
+    tink::util::status
+    tink::util::statusor
+  TAGS
+    exclude_if_openssl
+)
+
+tink_cc_library(
   NAME hpke_context_boringssl
   SRCS
     hpke_context_boringssl.cc
@@ -233,6 +250,22 @@ tink_cc_library(
 )
 
 # tests
+
+tink_cc_test(
+  NAME hpke_context_test
+  SRCS
+    hpke_context_test.cc
+  DEPS
+    tink::hybrid::internal::hpke_context
+    tink::hybrid::internal::hpke_test_util
+    tink::hybrid::internal::hpke_util
+    gmock
+    tink::util::secret_data
+    tink::util::statusor
+    tink::util::test_matchers
+  TAGS
+    exclude_if_openssl
+)
 
 tink_cc_test(
   NAME hpke_context_boringssl_test

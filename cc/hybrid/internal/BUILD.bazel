@@ -3,6 +3,23 @@ package(default_visibility = ["//:__subpackages__"])
 licenses(["notice"])
 
 cc_library(
+    name = "hpke_context",
+    srcs = ["hpke_context.cc"],
+    hdrs = ["hpke_context.h"],
+    include_prefix = "tink/hybrid/internal",
+    tags = ["requires_boringcrypto_update"],
+    deps = [
+        ":hpke_context_boringssl",
+        ":hpke_util",
+        "//util:secret_data",
+        "//util:status",
+        "//util:statusor",
+        "@com_google_absl//absl/status",
+        "@com_google_absl//absl/strings",
+    ],
+)
+
+cc_library(
     name = "hpke_context_boringssl",
     srcs = ["hpke_context_boringssl.cc"],
     hdrs = ["hpke_context_boringssl.h"],
@@ -242,6 +259,22 @@ cc_library(
 )
 
 # tests
+
+cc_test(
+    name = "hpke_context_test",
+    size = "small",
+    srcs = ["hpke_context_test.cc"],
+    tags = ["requires_boringcrypto_update"],
+    deps = [
+        ":hpke_context",
+        ":hpke_test_util",
+        ":hpke_util",
+        "//util:secret_data",
+        "//util:statusor",
+        "//util:test_matchers",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
 
 cc_test(
     name = "hpke_context_boringssl_test",
