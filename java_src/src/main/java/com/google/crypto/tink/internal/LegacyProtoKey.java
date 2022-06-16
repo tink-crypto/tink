@@ -22,7 +22,7 @@ import com.google.crypto.tink.SecretKeyAccess;
 import com.google.crypto.tink.subtle.Bytes;
 import com.google.errorprone.annotations.Immutable;
 import java.security.GeneralSecurityException;
-import java.util.Optional;
+import java.util.Objects;
 import javax.annotation.Nullable;
 
 /** Implements a Key for legacy types where no actual parser is present. */
@@ -81,15 +81,16 @@ public final class LegacyProtoKey extends Key {
     if (!other.getTypeUrl().equals(serialization.getTypeUrl())) {
       return false;
     }
-    if (!other.getIdRequirement().equals(serialization.getIdRequirement())) {
+    if (!Objects.equals(other.getIdRequirementOrNull(), serialization.getIdRequirementOrNull())) {
       return false;
     }
     return Bytes.equal(serialization.getValue().toByteArray(), other.getValue().toByteArray());
   }
 
   @Override
-  public Optional<Integer> getIdRequirement() {
-    return serialization.getIdRequirement();
+  @Nullable
+  public Integer getIdRequirementOrNull() {
+    return serialization.getIdRequirementOrNull();
   }
 
   /**

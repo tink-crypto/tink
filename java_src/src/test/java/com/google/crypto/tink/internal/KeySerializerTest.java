@@ -26,7 +26,6 @@ import com.google.crypto.tink.SecretKeyAccess;
 import com.google.crypto.tink.util.Bytes;
 import com.google.errorprone.annotations.Immutable;
 import java.security.GeneralSecurityException;
-import java.util.Optional;
 import javax.annotation.Nullable;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -44,8 +43,9 @@ public final class KeySerializerTest {
     }
 
     @Override
-    public Optional<Integer> getIdRequirement() {
-      return Optional.empty();
+    @Nullable
+    public Integer getIdRequirementOrNull() {
+      return null;
     }
 
     @Override

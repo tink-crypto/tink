@@ -25,7 +25,6 @@ import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
 import com.google.crypto.tink.proto.OutputPrefixType;
 import com.google.protobuf.ByteString;
 import java.security.GeneralSecurityException;
-import java.util.Optional;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -35,20 +34,20 @@ public final class LegacyProtoKeyTest {
   private static final SecretKeyAccess ACCESS = InsecureSecretKeyAccess.get();
 
   @Test
-  public void legacyProtoKeyCreate() throws Exception {
+  public void testLegacyProtoKeyCreate() throws Exception {
     ProtoKeySerialization serialization =
         ProtoKeySerialization.create(
             "myTypeUrl",
             ByteString.copyFrom(new byte[] {}),
             KeyMaterialType.SYMMETRIC,
             OutputPrefixType.RAW,
-            Optional.empty());
+            /*idRequirement = */ null);
     LegacyProtoKey key = new LegacyProtoKey(serialization, ACCESS);
     assertThat(key.getSerialization(ACCESS)).isSameInstanceAs(serialization);
   }
 
   @Test
-  public void getIdRequirement() throws Exception {
+  public void testGetIdRequirementOrNull() throws Exception {
     // RAW
     LegacyProtoKey key =
         new LegacyProtoKey(
@@ -57,9 +56,9 @@ public final class LegacyProtoKeyTest {
                 ByteString.copyFrom(new byte[] {}),
                 KeyMaterialType.SYMMETRIC,
                 OutputPrefixType.RAW,
-                Optional.empty()),
+                /*idRequirement = */ null),
             ACCESS);
-    assertThat(key.getIdRequirement().isPresent()).isFalse();
+    assertThat(key.getIdRequirementOrNull()).isNull();
 
     // TINK
     key =
@@ -69,9 +68,9 @@ public final class LegacyProtoKeyTest {
                 ByteString.copyFrom(new byte[] {}),
                 KeyMaterialType.SYMMETRIC,
                 OutputPrefixType.TINK,
-                Optional.of(123)),
+                123),
             ACCESS);
-    assertThat(key.getIdRequirement().get()).isEqualTo(123);
+    assertThat(key.getIdRequirementOrNull()).isEqualTo(123);
 
     // CRUNCHY
     key =
@@ -81,9 +80,9 @@ public final class LegacyProtoKeyTest {
                 ByteString.copyFrom(new byte[] {}),
                 KeyMaterialType.SYMMETRIC,
                 OutputPrefixType.CRUNCHY,
-                Optional.of(123)),
+                123),
             ACCESS);
-    assertThat(key.getIdRequirement().get()).isEqualTo(123);
+    assertThat(key.getIdRequirementOrNull()).isEqualTo(123);
 
     // LEGACY
     key =
@@ -93,9 +92,9 @@ public final class LegacyProtoKeyTest {
                 ByteString.EMPTY,
                 KeyMaterialType.SYMMETRIC,
                 OutputPrefixType.LEGACY,
-                Optional.of(123)),
+                123),
             ACCESS);
-    assertThat(key.getIdRequirement().get()).isEqualTo(123);
+    assertThat(key.getIdRequirementOrNull()).isEqualTo(123);
   }
 
   @Test
@@ -106,7 +105,7 @@ public final class LegacyProtoKeyTest {
             ByteString.EMPTY,
             KeyMaterialType.SYMMETRIC,
             OutputPrefixType.RAW,
-            Optional.empty());
+            /* idRequirement = */ null);
     assertThrows(
         GeneralSecurityException.class,
         () -> new LegacyProtoKey(serialization, /* access = */ null));
@@ -122,7 +121,7 @@ public final class LegacyProtoKeyTest {
             ByteString.EMPTY,
             KeyMaterialType.ASYMMETRIC_PRIVATE,
             OutputPrefixType.RAW,
-            Optional.empty());
+            /* idRequirement = */ null);
     assertThrows(
         GeneralSecurityException.class,
         () -> new LegacyProtoKey(serialization, /* access = */ null));
@@ -139,9 +138,9 @@ public final class LegacyProtoKeyTest {
             ByteString.EMPTY,
             KeyMaterialType.ASYMMETRIC_PUBLIC,
             OutputPrefixType.RAW,
-            Optional.empty());
-    LegacyProtoKey key = new LegacyProtoKey(serialization, /* access= */ null);
-    key.getSerialization(null);
+            /* idRequirement= */ null);
+    LegacyProtoKey key = new LegacyProtoKey(serialization, /* access = */ null);
+    key.getSerialization(/* access = */ null);
   }
 
   @Test
@@ -153,9 +152,9 @@ public final class LegacyProtoKeyTest {
             ByteString.EMPTY,
             KeyMaterialType.REMOTE,
             OutputPrefixType.RAW,
-            Optional.empty());
-    LegacyProtoKey key = new LegacyProtoKey(serialization, /* access= */ null);
-    key.getSerialization(null);
+            /* idRequirement= */ null);
+    LegacyProtoKey key = new LegacyProtoKey(serialization, /* access = */ null);
+    key.getSerialization(/* access = */ null);
   }
 
   @Test
@@ -167,7 +166,7 @@ public final class LegacyProtoKeyTest {
                 ByteString.EMPTY,
                 KeyMaterialType.SYMMETRIC,
                 OutputPrefixType.RAW,
-                Optional.empty()),
+                /* idRequirement = */ null),
             ACCESS);
     assertThat(
             key.equalsKey(
@@ -177,7 +176,7 @@ public final class LegacyProtoKeyTest {
                         ByteString.EMPTY,
                         KeyMaterialType.SYMMETRIC,
                         OutputPrefixType.RAW,
-                        Optional.empty()),
+                        /* idRequirement = */ null),
                     ACCESS)))
         .isTrue();
 
@@ -190,7 +189,7 @@ public final class LegacyProtoKeyTest {
                         ByteString.EMPTY,
                         KeyMaterialType.SYMMETRIC,
                         OutputPrefixType.RAW,
-                        Optional.empty()),
+                        /* idRequirement = */ null),
                     ACCESS)))
         .isFalse();
 
@@ -203,7 +202,7 @@ public final class LegacyProtoKeyTest {
                         ByteString.copyFrom(new byte[] {1}),
                         KeyMaterialType.SYMMETRIC,
                         OutputPrefixType.RAW,
-                        Optional.empty()),
+                        /* idRequirement = */ null),
                     ACCESS)))
         .isFalse();
 
@@ -216,7 +215,7 @@ public final class LegacyProtoKeyTest {
                         ByteString.EMPTY,
                         KeyMaterialType.ASYMMETRIC_PRIVATE,
                         OutputPrefixType.RAW,
-                        Optional.empty()),
+                        /* idRequirement = */ null),
                     ACCESS)))
         .isFalse();
 
@@ -229,7 +228,7 @@ public final class LegacyProtoKeyTest {
                         ByteString.EMPTY,
                         KeyMaterialType.SYMMETRIC,
                         OutputPrefixType.TINK,
-                        Optional.of(123)),
+                        123),
                     ACCESS)))
         .isFalse();
   }
@@ -243,7 +242,7 @@ public final class LegacyProtoKeyTest {
                 ByteString.EMPTY,
                 KeyMaterialType.SYMMETRIC,
                 OutputPrefixType.TINK,
-                Optional.of(123)),
+                123),
             ACCESS);
     LegacyProtoKey key123b =
         new LegacyProtoKey(
@@ -252,7 +251,7 @@ public final class LegacyProtoKeyTest {
                 ByteString.EMPTY,
                 KeyMaterialType.SYMMETRIC,
                 OutputPrefixType.TINK,
-                Optional.of(123)),
+                123),
             ACCESS);
     LegacyProtoKey key124 =
         new LegacyProtoKey(
@@ -261,7 +260,7 @@ public final class LegacyProtoKeyTest {
                 ByteString.EMPTY,
                 KeyMaterialType.SYMMETRIC,
                 OutputPrefixType.TINK,
-                Optional.of(124)),
+                124),
             ACCESS);
     assertThat(key123.equalsKey(key123b)).isTrue();
     assertThat(key123.equalsKey(key124)).isFalse();

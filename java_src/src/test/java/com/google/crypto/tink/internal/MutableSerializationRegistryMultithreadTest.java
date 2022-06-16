@@ -30,7 +30,6 @@ import java.nio.ByteBuffer;
 import java.security.GeneralSecurityException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -73,7 +72,8 @@ public final class MutableSerializationRegistryMultithreadTest {
     }
 
     @Override
-    public Optional<Integer> getIdRequirement() {
+    @Nullable
+    public Integer getIdRequirementOrNull() {
       throw new UnsupportedOperationException("Not needed in test");
     }
 
@@ -91,7 +91,8 @@ public final class MutableSerializationRegistryMultithreadTest {
     }
 
     @Override
-    public Optional<Integer> getIdRequirement() {
+    @Nullable
+    public Integer getIdRequirementOrNull() {
       throw new UnsupportedOperationException("Not needed in test");
     }
 

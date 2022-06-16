@@ -21,7 +21,7 @@ import static org.junit.Assert.assertThrows;
 
 import com.google.crypto.tink.Key;
 import com.google.crypto.tink.KeyFormat;
-import java.util.Optional;
+import javax.annotation.Nullable;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -75,8 +75,9 @@ public final class KeyTesterTest {
     }
 
     @Override
-    public Optional<Integer> getIdRequirement() {
-      return format.hasIdRequirement() ? Optional.of(id) : Optional.empty();
+    @Nullable
+    public Integer getIdRequirementOrNull() {
+      return format.hasIdRequirement() ? id : null;
     }
 
     @Override
@@ -188,8 +189,9 @@ public final class KeyTesterTest {
     TestKey key =
         new TestKey(10, format) {
           @Override
-          public Optional<Integer> getIdRequirement() {
-            return Optional.empty();
+          @Nullable
+          public Integer getIdRequirementOrNull() {
+            return null;
           }
         };
     KeyTester tester = new KeyTester().addEqualityGroup("", key);
@@ -208,8 +210,9 @@ public final class KeyTesterTest {
     TestKey key =
         new TestKey(10, format) {
           @Override
-          public Optional<Integer> getIdRequirement() {
-            return Optional.of(15);
+          @Nullable
+          public Integer getIdRequirementOrNull() {
+            return 15;
           }
         };
     KeyTester tester = new KeyTester().addEqualityGroup("", key);

@@ -25,7 +25,6 @@ import com.google.crypto.tink.proto.OutputPrefixType;
 import com.google.crypto.tink.util.Bytes;
 import com.google.protobuf.ByteString;
 import java.security.GeneralSecurityException;
-import java.util.Optional;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -41,13 +40,13 @@ public final class ProtoKeySerializationTest {
             ByteString.copyFrom(new byte[] {10, 11, 12}),
             KeyMaterialType.SYMMETRIC,
             OutputPrefixType.RAW,
-            Optional.empty());
+            /* idRequirement = */ null);
 
     assertThat(serialization.getValue()).isEqualTo(ByteString.copyFrom(new byte[] {10, 11, 12}));
     assertThat(serialization.getKeyMaterialType()).isEqualTo(KeyMaterialType.SYMMETRIC);
     assertThat(serialization.getOutputPrefixType()).isEqualTo(OutputPrefixType.RAW);
     assertThat(serialization.getTypeUrl()).isEqualTo("myTypeUrl");
-    assertThat(serialization.getIdRequirement().isPresent()).isFalse();
+    assertThat(serialization.getIdRequirementOrNull()).isNull();
     assertThat(serialization.getObjectIdentifier())
         .isEqualTo(Bytes.copyFrom("myTypeUrl".getBytes(UTF_8)));
   }
@@ -59,10 +58,9 @@ public final class ProtoKeySerializationTest {
     final KeyMaterialType keyMaterialType = KeyMaterialType.SYMMETRIC;
 
     ProtoKeySerialization serialization =
-        ProtoKeySerialization.create(
-            typeUrl, value, keyMaterialType, OutputPrefixType.TINK, Optional.of(123));
+        ProtoKeySerialization.create(typeUrl, value, keyMaterialType, OutputPrefixType.TINK, 123);
     assertThat(serialization.getOutputPrefixType()).isEqualTo(OutputPrefixType.TINK);
-    assertThat(serialization.getIdRequirement()).isEqualTo(Optional.of(123));
+    assertThat(serialization.getIdRequirementOrNull()).isEqualTo(123);
   }
 
   @Test
@@ -72,33 +70,42 @@ public final class ProtoKeySerializationTest {
     final KeyMaterialType keyMaterialType = KeyMaterialType.SYMMETRIC;
 
     ProtoKeySerialization.create(
-        typeUrl, value, keyMaterialType, OutputPrefixType.RAW, Optional.empty());
-    ProtoKeySerialization.create(
-        typeUrl, value, keyMaterialType, OutputPrefixType.TINK, Optional.of(123));
-    ProtoKeySerialization.create(
-        typeUrl, value, keyMaterialType, OutputPrefixType.CRUNCHY, Optional.of(123));
-    ProtoKeySerialization.create(
-        typeUrl, value, keyMaterialType, OutputPrefixType.LEGACY, Optional.of(123));
+        typeUrl, value, keyMaterialType, OutputPrefixType.RAW, /* idRequirement = */ null);
+    ProtoKeySerialization.create(typeUrl, value, keyMaterialType, OutputPrefixType.TINK, 123);
+    ProtoKeySerialization.create(typeUrl, value, keyMaterialType, OutputPrefixType.CRUNCHY, 123);
+    ProtoKeySerialization.create(typeUrl, value, keyMaterialType, OutputPrefixType.LEGACY, 123);
 
     assertThrows(
         GeneralSecurityException.class,
         () ->
             ProtoKeySerialization.create(
-                typeUrl, value, keyMaterialType, OutputPrefixType.RAW, Optional.of(123)));
+                typeUrl, value, keyMaterialType, OutputPrefixType.RAW, 123));
     assertThrows(
         GeneralSecurityException.class,
         () ->
             ProtoKeySerialization.create(
-                typeUrl, value, keyMaterialType, OutputPrefixType.TINK, Optional.empty()));
+                typeUrl,
+                value,
+                keyMaterialType,
+                OutputPrefixType.TINK,
+                /* idRequirement = */ null));
     assertThrows(
         GeneralSecurityException.class,
         () ->
             ProtoKeySerialization.create(
-                typeUrl, value, keyMaterialType, OutputPrefixType.CRUNCHY, Optional.empty()));
+                typeUrl,
+                value,
+                keyMaterialType,
+                OutputPrefixType.CRUNCHY,
+                /* idRequirement = */ null));
     assertThrows(
         GeneralSecurityException.class,
         () ->
             ProtoKeySerialization.create(
-                typeUrl, value, keyMaterialType, OutputPrefixType.LEGACY, Optional.empty()));
+                typeUrl,
+                value,
+                keyMaterialType,
+                OutputPrefixType.LEGACY,
+                /* idRequirement = */ null));
   }
 }
