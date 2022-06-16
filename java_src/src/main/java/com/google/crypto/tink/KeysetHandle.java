@@ -16,15 +16,21 @@
 
 package com.google.crypto.tink;
 
+import com.google.crypto.tink.annotations.Alpha;
+import com.google.crypto.tink.internal.LegacyProtoKey;
+import com.google.crypto.tink.internal.MutableSerializationRegistry;
+import com.google.crypto.tink.internal.ProtoKeySerialization;
 import com.google.crypto.tink.proto.EncryptedKeyset;
 import com.google.crypto.tink.proto.KeyData;
 import com.google.crypto.tink.proto.KeyStatusType;
 import com.google.crypto.tink.proto.Keyset;
 import com.google.crypto.tink.proto.KeysetInfo;
+import com.google.crypto.tink.proto.OutputPrefixType;
 import com.google.crypto.tink.tinkkey.KeyAccess;
 import com.google.crypto.tink.tinkkey.KeyHandle;
 import com.google.crypto.tink.tinkkey.internal.InternalKeyHandle;
 import com.google.crypto.tink.tinkkey.internal.ProtoKey;
+import com.google.errorprone.annotations.Immutable;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.ExtensionRegistryLite;
 import com.google.protobuf.InvalidProtocolBufferException;
@@ -33,6 +39,7 @@ import java.security.GeneralSecurityException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import javax.annotation.Nullable;
 
 /**
  * A KeysetHandle provides abstracted access to {@link Keyset}, to limit the exposure of actual
@@ -45,6 +52,113 @@ import java.util.List;
  * @since 1.0.0
  */
 public final class KeysetHandle {
+  /**
+   * Represents a single entry in a keyset.
+   *
+   * <p>An entry in a keyset consists of a key, its ID, and the {@link KeyStatus}. In addition,
+   * there is one key marked as a primary.
+   *
+   * <p>The ID should be considered unique (though currently Tink still accepts keysets with
+   * repeated IDs). The {@code KeyStatus} tells Tink whether the key should still be used or not.
+   * There should always be exactly one key which is marked as a primary, however, at the moment
+   * Tink still accepts keysets which have none. This will be changed in the future.
+   */
+  @Alpha
+  @Immutable
+  public static final class Entry {
+    private Entry(Key key, KeyStatus keyStatus, int id, boolean isPrimary) {
+      this.key = key;
+      this.keyStatus = keyStatus;
+      this.id = id;
+      this.isPrimary = isPrimary;
+    }
+
+    private final Key key;
+    private final KeyStatus keyStatus;
+    private final int id;
+    private final boolean isPrimary;
+    /**
+     * May return an internal class {@link com.google.crypto.tink.internal.LegacyProtoKey} in case
+     * there is no implementation of the corresponding key class yet.
+     */
+    public Key getKey() {
+      return key;
+    }
+
+    public KeyStatus getStatus() {
+      return keyStatus;
+    }
+
+    public int getId() {
+      return id;
+    }
+    /**
+     * Guaranteed to be true in exactly one entry.
+     *
+     * <p>Note: currently this may be false for all entries, since it is possible that keysets are
+     * parsed without a primary. In the future, such keysets will be rejected when the keyset is
+     * parsed.
+     */
+    public boolean isPrimary() {
+      return isPrimary;
+    }
+  }
+
+  private static KeyStatus parseStatus(KeyStatusType in) throws GeneralSecurityException {
+    switch (in) {
+      case ENABLED:
+        return KeyStatus.ENABLED;
+      case DISABLED:
+        return KeyStatus.DISABLED;
+      case DESTROYED:
+        return KeyStatus.DESTROYED;
+      default:
+        throw new GeneralSecurityException("Unknown key status");
+    }
+  }
+
+  private KeysetHandle.Entry entryByIndex(int i) {
+    Keyset.Key protoKey = keyset.getKey(i);
+    int id = protoKey.getKeyId();
+
+    @Nullable
+    Integer idRequirement = protoKey.getOutputPrefixType() == OutputPrefixType.RAW ? null : id;
+    ProtoKeySerialization protoKeySerialization;
+    try {
+      protoKeySerialization =
+          ProtoKeySerialization.create(
+              protoKey.getKeyData().getTypeUrl(),
+              protoKey.getKeyData().getValue(),
+              protoKey.getKeyData().getKeyMaterialType(),
+              protoKey.getOutputPrefixType(),
+              idRequirement);
+    } catch (GeneralSecurityException e) {
+      // Cannot happen -- this only happens if the idRequirement doesn't match OutputPrefixType
+      throw new IllegalStateException("Creating a protokey serialization failed", e);
+    }
+    Key key;
+    try {
+      key =
+          MutableSerializationRegistry.globalInstance()
+              .parseKey(protoKeySerialization, InsecureSecretKeyAccess.get());
+    } catch (GeneralSecurityException e) {
+      try {
+        key = new LegacyProtoKey(protoKeySerialization, InsecureSecretKeyAccess.get());
+      } catch (GeneralSecurityException e2) {
+        // Cannot happen -- this only throws if we have no access.
+        throw new IllegalStateException("Creating a LegacyProtoKey failed", e2);
+      }
+    }
+    KeyStatus status;
+    try {
+      status = parseStatus(protoKey.getStatus());
+    } catch (GeneralSecurityException e) {
+      // Possible if a status is wrongly set
+      throw new IllegalStateException("Parsing a status failed", e);
+    }
+    return new KeysetHandle.Entry(key, status, id, id == keyset.getPrimaryKeyId());
+  }
+
   private final Keyset keyset;
 
   private KeysetHandle(Keyset keyset) {
@@ -60,9 +174,52 @@ public final class KeysetHandle {
     return new KeysetHandle(keyset);
   }
 
-  /** @return the actual keyset data. */
+  /**
+   * @return the actual keyset data.
+   */
   Keyset getKeyset() {
     return keyset;
+  }
+
+  /**
+   * Returns the unique entry where isPrimary() = true and getStatus() = ENABLED.
+   *
+   * <p>Note: currently this may throw IllegalStateException, since it is possible that keysets are
+   * parsed without a primary. In the future, such keysets will be rejected when the keyset is
+   * parsed.
+   */
+  public KeysetHandle.Entry getPrimary() {
+    for (int i = 0; i < keyset.getKeyCount(); ++i) {
+      if (keyset.getKey(i).getKeyId() == keyset.getPrimaryKeyId()) {
+        Entry result = entryByIndex(i);
+        if (result.getStatus() != KeyStatus.ENABLED) {
+          throw new IllegalStateException("Keyset has primary which isn't enabled");
+        }
+        return result;
+      }
+    }
+    throw new IllegalStateException("Keyset has no primary");
+  }
+
+  /** Returns the size of this keyset. */
+  public int size() {
+    return keyset.getKeyCount();
+  }
+
+  /**
+   * Returns the entry at index i. The order is preserved and depends on the order at which the
+   * entries were inserted when the KeysetHandle was built.
+   *
+   * <p>Currently, this may throw "IllegalStateException" in case the status entry of the Key in the
+   * keyset was wrongly set. In the future, Tink will throw at parsing time in this case.
+   *
+   * @throws IndexOutOfBoundsException if i < 0 or i >= size();
+   */
+  public KeysetHandle.Entry getAt(int i) {
+    if (i < 0 || i >= size()) {
+      throw new IndexOutOfBoundsException("Invalid index " + i + " for keyset of size " + size());
+    }
+    return entryByIndex(i);
   }
 
   /** Returns the keyset data as a list of {@link KeyHandle}s. */
