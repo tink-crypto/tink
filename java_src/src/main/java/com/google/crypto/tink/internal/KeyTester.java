@@ -66,8 +66,8 @@ public final class KeyTester {
     } else {
       assertWithMessage(
               keyIdentifier
-                  + " has a format without IdRequirement, but getIdRequirementOrNull returns an"
-                  + " optional with value")
+                  + " has a format without IdRequirement, but getIdRequirementOrNull returns a"
+                  + " non-null value")
           .that(key.getIdRequirementOrNull())
           .isNull();
     }
