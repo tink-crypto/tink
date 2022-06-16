@@ -73,6 +73,9 @@ public final class FakeMonitoringClientTest {
     assertThat(logEntry.getApi()).isEqualTo("encrypt");
     assertThat(logEntry.getKeyId()).isEqualTo(123);
     assertThat(logEntry.getNumBytesAsInput()).isEqualTo(42);
+
+    client.clear();
+    assertThat(client.getLogEntries()).isEmpty();
   }
 
   @Test
@@ -97,6 +100,9 @@ public final class FakeMonitoringClientTest {
     assertThat(logFailureEntry.getKeysetInfo()).isEqualTo(keysetInfo);
     assertThat(logFailureEntry.getPrimitive()).isEqualTo("aead");
     assertThat(logFailureEntry.getApi()).isEqualTo("encrypt");
+
+    client.clear();
+    assertThat(client.getLogFailureEntries()).isEmpty();
   }
 
   @Test

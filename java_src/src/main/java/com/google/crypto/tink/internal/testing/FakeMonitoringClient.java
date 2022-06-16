@@ -111,6 +111,14 @@ public final class FakeMonitoringClient implements MonitoringClient {
   private final List<LogEntry> logEntries = new ArrayList<>();
   private final List<LogFailureEntry> logFailureEntries = new ArrayList<>();
 
+  private synchronized void addLogEntry(LogEntry entry) {
+    logEntries.add(entry);
+  }
+
+  private synchronized void addLogFailureEntry(LogFailureEntry entry) {
+    logFailureEntries.add(entry);
+  }
+
   private final class Logger implements MonitoringClient.Logger {
     private final MonitoringKeysetInfo keysetInfo;
     private final HashMap<Integer, MonitoringKeysetInfo.Entry> entries;
@@ -120,16 +128,15 @@ public final class FakeMonitoringClient implements MonitoringClient {
     @Override
     public void log(int keyId, long numBytesAsInput) {
       if (!entries.containsKey(keyId)) {
-        throw new IllegalStateException("keyId not found in keysetInfo");
+        throw new IllegalStateException("keyId not found in keysetInfo: " + keyId);
       }
-      // TODO(juerg): add locking.
-      logEntries.add(
+      addLogEntry(
           new LogEntry(keysetInfo, entries.get(keyId), primitive, api, keyId, numBytesAsInput));
     }
 
     @Override
     public void logFailure() {
-      logFailureEntries.add(new LogFailureEntry(keysetInfo, primitive, api));
+      addLogFailureEntry(new LogFailureEntry(keysetInfo, primitive, api));
     }
 
     private Logger(MonitoringKeysetInfo keysetInfo, String primitive, String api) {
@@ -151,15 +158,19 @@ public final class FakeMonitoringClient implements MonitoringClient {
     return new Logger(keysetInfo, primitive, api);
   }
 
-  /** Returns all log entries.*/
-  public List<LogEntry> getLogEntries() {
-    // TODO(juerg): This should reset the logEntries list.
+  /** Clears all log and log failure entries. */
+  public synchronized void clear() {
+    logEntries.clear();
+    logFailureEntries.clear();
+  }
+
+  /** Returns all log entries. */
+  public synchronized List<LogEntry> getLogEntries() {
     return Collections.unmodifiableList(logEntries);
   }
 
-  /** Returns all log failure entries.*/
-  public List<LogFailureEntry> getLogFailureEntries() {
-    // TODO(juerg): This should reset the logFailureEntries list.
+  /** Returns all log failure entries. */
+  public synchronized List<LogFailureEntry> getLogFailureEntries() {
     return Collections.unmodifiableList(logFailureEntries);
   }
 }
