@@ -464,6 +464,7 @@ java_library(
         "//src/main/java/com/google/crypto/tink/annotations:alpha",
         "//src/main/java/com/google/crypto/tink/monitoring:monitoring_annotations",
         "//src/main/java/com/google/crypto/tink/subtle:hex",
+        "@maven//:com_google_code_findbugs_jsr305",
         "@maven//:com_google_errorprone_error_prone_annotations",
     ],
 )
@@ -478,6 +479,7 @@ android_library(
         "//src/main/java/com/google/crypto/tink/annotations:alpha-android",
         "//src/main/java/com/google/crypto/tink/monitoring:monitoring_annotations-android",
         "//src/main/java/com/google/crypto/tink/subtle:hex-android",
+        "@maven//:com_google_code_findbugs_jsr305",
         "@maven//:com_google_errorprone_error_prone_annotations",
     ],
 )

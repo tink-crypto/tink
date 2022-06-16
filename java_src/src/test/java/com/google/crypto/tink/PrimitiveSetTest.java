@@ -70,7 +70,7 @@ public class PrimitiveSetTest {
   }
 
   @Test
-  public void testBasicFunctionality() throws Exception {
+  public void testBasicFunctionalityWithDeprecatedMutableInterface() throws Exception {
     PrimitiveSet<Mac> pset = PrimitiveSet.newPrimitiveSet(Mac.class);
     Key key1 =
         Key.newBuilder()
@@ -92,24 +92,7 @@ public class PrimitiveSetTest {
             .setStatus(KeyStatusType.ENABLED)
             .setOutputPrefixType(OutputPrefixType.LEGACY)
             .build();
-    PrimitiveSet.Entry<Mac> lastEntry = pset.addPrimitive(new DummyMac1(), key3);
-
-    // After the primitive set has been built, it is preferable to call makeImmutable() to make it
-    // immutable.
-    pset.makeImmutable();
-
-    // Check that setPrimary and addPrimitive now throw an Exception.
-    assertThrows(IllegalStateException.class, () -> pset.setPrimary(lastEntry));
-    assertThrows(
-        IllegalStateException.class,
-        () ->
-            pset.addPrimitive(
-                new DummyMac1(),
-                Key.newBuilder()
-                    .setKeyId(4)
-                    .setStatus(KeyStatusType.ENABLED)
-                    .setOutputPrefixType(OutputPrefixType.TINK)
-                    .build()));
+    pset.addPrimitive(new DummyMac1(), key3);
 
     assertThat(pset.getAll()).hasSize(3);
 
@@ -261,6 +244,21 @@ public class PrimitiveSetTest {
   }
 
   @Test
+  public void testNoPrimary_getPrimaryReturnsNull() throws Exception {
+    Key key =
+        Key.newBuilder()
+            .setKeyId(1)
+            .setStatus(KeyStatusType.ENABLED)
+            .setOutputPrefixType(OutputPrefixType.TINK)
+            .build();
+    PrimitiveSet<Mac> pset =
+        PrimitiveSet.newBuilder(Mac.class)
+            .addPrimitive(new DummyMac1(), key)
+            .build();
+    assertThat(pset.getPrimary()).isNull();
+  }
+
+  @Test
   public void testEntryGetKeyFormatToString() throws Exception {
     PrimitiveSet<Mac> pset = PrimitiveSet.newPrimitiveSet(Mac.class);
     Key key1 =
@@ -286,15 +284,11 @@ public class PrimitiveSetTest {
   public void testWithAnnotations() throws Exception {
     MonitoringAnnotations annotations =
         MonitoringAnnotations.newBuilder().add("name", "value").build();
-    PrimitiveSet<Mac> pset = PrimitiveSet.newPrimitiveSetWithAnnotations(annotations, Mac.class);
+    PrimitiveSet<Mac> pset = PrimitiveSet.newBuilder(Mac.class).setAnnotations(annotations).build();
 
     HashMap<String, String> expected = new HashMap<>();
     expected.put("name", "value");
     assertThat(pset.getAnnotations().toMap()).containsExactlyEntriesIn(expected);
-
-    PrimitiveSet<Mac> pset2 =
-        PrimitiveSet.newBuilder(Mac.class).setAnnotations(annotations).build();
-    assertThat(pset2.getAnnotations().toMap()).containsExactlyEntriesIn(expected);
   }
 
   @Test

@@ -31,6 +31,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import javax.annotation.Nullable;
 
 /**
  * A container class for a set of primitives -- implementations of cryptographic primitives offered
@@ -168,6 +169,7 @@ public final class PrimitiveSet<P> {
   }
 
   /** @return the entry with the primary primitive. */
+  @Nullable
   public Entry<P> getPrimary() {
     return primary;
   }
@@ -207,19 +209,13 @@ public final class PrimitiveSet<P> {
   private Entry<P> primary;
   private final Class<P> primitiveClass;
   private final MonitoringAnnotations annotations;
-  private boolean isMutable;
+  private final boolean isMutable;
 
+  @Deprecated
   private PrimitiveSet(Class<P> primitiveClass) {
     this.primitives = new ConcurrentHashMap<>();
     this.primitiveClass = primitiveClass;
     this.annotations = MonitoringAnnotations.EMPTY;
-    this.isMutable = true;
-  }
-
-  private PrimitiveSet(MonitoringAnnotations annotations, Class<P> primitiveClass) {
-    this.primitives = new ConcurrentHashMap<>();
-    this.primitiveClass = primitiveClass;
-    this.annotations = annotations;
     this.isMutable = true;
   }
 
@@ -233,30 +229,22 @@ public final class PrimitiveSet<P> {
     this.isMutable = false;
   }
 
+  /**
+   * Creates a new mutable PrimitiveSet.
+   *
+   * @deprecated use {@link Builder} instead.
+   */
+  @Deprecated
   public static <P> PrimitiveSet<P> newPrimitiveSet(Class<P> primitiveClass) {
     return new PrimitiveSet<P>(primitiveClass);
   }
 
-  // Only used by KeysetHandle.
-  static <P> PrimitiveSet<P> newPrimitiveSetWithAnnotations(
-      MonitoringAnnotations annotations, Class<P> primitiveClass) {
-    return new PrimitiveSet<P>(annotations, primitiveClass);
-  }
-
-  /**
-   * Makes the object immutable.
-   *
-   * <p>Calls to the methods {@link setPrimary} or {@link addPrimitive} after calling this method
-   * will throw an {@code IllegalStateException}.
-   */
-  void makeImmutable() {
-    this.isMutable = false;
-  }
-
   /** Sets given Entry {@code primary} as the primary one.
    *
-   * @throws IllegalStateException if {@link makeImmutable} has been called before.
+   * @throws IllegalStateException if object has been created by the {@link Builder}.
+   * @deprecated use {@link Builder.addPrimaryPrimitive} instead.
    */
+  @Deprecated
   public void setPrimary(final Entry<P> primary) {
     if (!isMutable) {
       throw new IllegalStateException("setPrimary cannot be called on an immutable primitive set");
@@ -280,8 +268,10 @@ public final class PrimitiveSet<P> {
    *
    * @return the added {@link Entry}
    *
-   * @throws IllegalStateException if {@link makeImmutable} has been called before.
+   * @throws IllegalStateException if object has been created by the {@link Builder}.
+   * @deprecated use {@link Builder.addPrimitive} or {@link Builder.addPrimaryPrimitive} instead.
    */
+  @Deprecated
   public Entry<P> addPrimitive(final P primitive, Keyset.Key key)
       throws GeneralSecurityException {
     if (!isMutable) {
