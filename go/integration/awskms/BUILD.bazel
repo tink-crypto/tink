@@ -33,7 +33,10 @@ go_test(
         "//testdata:credentials",
         "@google_root_pem//file",  #keep
     ],
-    tags = ["no_rbe"],
+    tags = [
+        "no_rbe",
+        "manual",
+    ],
     deps = [
         ":awskms",
         "//aead",

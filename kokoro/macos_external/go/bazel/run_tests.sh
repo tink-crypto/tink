@@ -29,10 +29,13 @@ echo "Using go binary from $(which go): $(go version)"
 
 ./kokoro/testutils/check_go_generated_files_up_to_date.sh go/
 
-declare -a MANUAL_TARGETS
-# Run manual tests which rely on test data only available via Bazel.
+MANUAL_TARGETS=()
+# Run manual tests that rely on test data only available via Bazel.
 if [[ -n "${KOKORO_ROOT:-}" ]]; then
-  MANUAL_TARGETS=( "//integration/gcpkms:gcpkms_test" )
+  MANUAL_TARGETS+=(
+    "//integration/gcpkms:gcpkms_test"
+    "//integration/awskms:awskms_test"
+  )
 fi
 readonly MANUAL_TARGETS
 
