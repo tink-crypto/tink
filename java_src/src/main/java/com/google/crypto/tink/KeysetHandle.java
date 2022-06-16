@@ -373,18 +373,18 @@ public final class KeysetHandle {
   private <B, P> P getPrimitiveWithKnownInputPrimitive(
       Class<P> classObject, Class<B> inputPrimitiveClassObject) throws GeneralSecurityException {
     Util.validateKeyset(keyset);
-    PrimitiveSet<B> primitives = PrimitiveSet.newPrimitiveSet(inputPrimitiveClassObject);
+    PrimitiveSet.Builder<B> builder = PrimitiveSet.newBuilder(inputPrimitiveClassObject);
     for (Keyset.Key key : keyset.getKeyList()) {
       if (key.getStatus() == KeyStatusType.ENABLED) {
         B primitive = Registry.getPrimitive(key.getKeyData(), inputPrimitiveClassObject);
-        PrimitiveSet.Entry<B> entry = primitives.addPrimitive(primitive, key);
         if (key.getKeyId() == keyset.getPrimaryKeyId()) {
-          primitives.setPrimary(entry);
+          builder.addPrimaryPrimitive(primitive, key);
+        } else {
+          builder.addPrimitive(primitive, key);
         }
       }
     }
-    primitives.makeImmutable();
-    return Registry.wrap(primitives, classObject);
+    return Registry.wrap(builder.build(), classObject);
   }
 
   /**

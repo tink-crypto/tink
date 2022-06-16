@@ -139,17 +139,18 @@ public final class TestUtil {
   /** @return a {@code PrimitiveSet} from a {@code KeySet} */
   public static <P> PrimitiveSet<P> createPrimitiveSet(Keyset keyset, Class<P> inputClass)
       throws GeneralSecurityException {
-    PrimitiveSet<P> primitives = PrimitiveSet.newPrimitiveSet(inputClass);
+    PrimitiveSet.Builder<P> builder = PrimitiveSet.newBuilder(inputClass);
     for (Keyset.Key key : keyset.getKeyList()) {
       if (key.getStatus() == KeyStatusType.ENABLED) {
         P primitive = Registry.getPrimitive(key.getKeyData(), inputClass);
-        PrimitiveSet.Entry<P> entry = primitives.addPrimitive(primitive, key);
         if (key.getKeyId() == keyset.getPrimaryKeyId()) {
-          primitives.setPrimary(entry);
+          builder.addPrimaryPrimitive(primitive, key);
+        } else {
+          builder.addPrimitive(primitive, key);
         }
       }
     }
-    return primitives;
+    return builder.build();
   }
 
   /** @return a {@code Keyset} from a {@code handle}. */
