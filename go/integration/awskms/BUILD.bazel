@@ -34,8 +34,8 @@ go_test(
         "@google_root_pem//file",  #keep
     ],
     tags = [
-        "no_rbe",
         "manual",
+        "no_rbe",
     ],
     deps = [
         ":awskms",
