@@ -34,7 +34,9 @@ def tink_py_testdata_path() -> str:
   testdata_paths = []
   if 'TINK_SRC_PATH' in os.environ:
     testdata_paths += [
-        os.path.join(os.environ['TINK_SRC_PATH'], 'python/testdata')
+        os.path.join(os.environ['TINK_SRC_PATH'], 'python/testdata'),
+        # TODO(b/233570181): Refactor this function to avoid duplicating paths.
+        os.path.join(os.environ['TINK_SRC_PATH'], 'testdata')
     ]
   if 'TEST_SRCDIR' in os.environ:
     # Bazel enviroment
