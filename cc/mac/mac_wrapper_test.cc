@@ -22,22 +22,36 @@
 #include "gtest/gtest.h"
 #include "absl/strings/str_cat.h"
 #include "tink/crypto_format.h"
+#include "tink/internal/registry_impl.h"
 #include "tink/mac.h"
+#include "tink/mac/failing_mac.h"
+#include "tink/monitoring/monitoring.h"
+#include "tink/monitoring/monitoring_client_mocks.h"
 #include "tink/primitive_set.h"
 #include "tink/util/status.h"
 #include "tink/util/test_matchers.h"
 #include "tink/util/test_util.h"
 #include "proto/tink.pb.h"
 
-using crypto::tink::test::DummyMac;
-using ::crypto::tink::test::IsOk;
-using google::crypto::tink::KeysetInfo;
-using google::crypto::tink::KeyStatusType;
-using google::crypto::tink::OutputPrefixType;
-
 namespace crypto {
 namespace tink {
 namespace {
+
+using ::crypto::tink::test::DummyMac;
+using ::crypto::tink::test::IsOk;
+using ::crypto::tink::test::IsOkAndHolds;
+using ::crypto::tink::test::StatusIs;
+using ::google::crypto::tink::KeysetInfo;
+using ::google::crypto::tink::KeyStatusType;
+using ::google::crypto::tink::OutputPrefixType;
+using ::testing::_;
+using ::testing::ByMove;
+using ::testing::IsNull;
+using ::testing::NiceMock;
+using ::testing::Not;
+using ::testing::NotNull;
+using ::testing::Return;
+using ::testing::Test;
 
 TEST(MacWrapperTest, WrapNullptr) {
   auto mac_result = MacWrapper().Wrap(nullptr);
@@ -206,6 +220,233 @@ TEST(MacWrapperTest, VerifyRawAfterLegacy) {
   std::string data = "some data";
   std::string mac_tag = TryBreakLegacyMac().ComputeMac(data).value();
   EXPECT_THAT(wrapped_mac.value()->VerifyMac(mac_tag, data), IsOk());
+}
+
+KeysetInfo::KeyInfo PopulateKeyInfo(uint32_t key_id,
+                                    OutputPrefixType out_prefix_type,
+                                    KeyStatusType status) {
+  KeysetInfo::KeyInfo key_info;
+  key_info.set_output_prefix_type(out_prefix_type);
+  key_info.set_key_id(key_id);
+  key_info.set_status(status);
+  return key_info;
+}
+
+// Creates a test keyset info object.
+KeysetInfo CreateTestKeysetInfo() {
+  KeysetInfo keyset_info;
+  *keyset_info.add_key_info() =
+      PopulateKeyInfo(/*key_id=*/1234543, OutputPrefixType::TINK,
+                      /*status=*/KeyStatusType::ENABLED);
+  *keyset_info.add_key_info() =
+      PopulateKeyInfo(/*key_id=*/726329, OutputPrefixType::LEGACY,
+                      /*status=*/KeyStatusType::ENABLED);
+  *keyset_info.add_key_info() =
+      PopulateKeyInfo(/*key_id=*/7213743, OutputPrefixType::TINK,
+                      /*status=*/KeyStatusType::ENABLED);
+  return keyset_info;
+}
+
+// Tests for the monitoring behavior.
+class MacSetWrapperWithMonitoringTest : public Test {
+ protected:
+  // Perform some common initialization: reset the global registry, set expected
+  // calls for the mock monitoring factory and the returned clients.
+  void SetUp() override {
+    Registry::Reset();
+
+    // Setup mocks for catching Monitoring calls.
+    auto monitoring_client_factory =
+        absl::make_unique<MockMonitoringClientFactory>();
+    auto compute_monitoring_client =
+        absl::make_unique<NiceMock<MockMonitoringClient>>();
+    compute_monitoring_client_ = compute_monitoring_client.get();
+    auto verify_monitoring_client =
+        absl::make_unique<NiceMock<MockMonitoringClient>>();
+    verify_monitoring_client_ = verify_monitoring_client.get();
+
+    // Monitoring tests expect that the client factory will create the
+    // corresponding MockMonitoringClients.
+    EXPECT_CALL(*monitoring_client_factory, New(_))
+        .WillOnce(
+            Return(ByMove(util::StatusOr<std::unique_ptr<MonitoringClient>>(
+                std::move(compute_monitoring_client)))))
+        .WillOnce(
+            Return(ByMove(util::StatusOr<std::unique_ptr<MonitoringClient>>(
+                std::move(verify_monitoring_client)))));
+
+    ASSERT_THAT(internal::RegistryImpl::GlobalInstance()
+                    .RegisterMonitoringClientFactory(
+                        std::move(monitoring_client_factory)),
+                IsOk());
+    ASSERT_THAT(
+        internal::RegistryImpl::GlobalInstance().GetMonitoringClientFactory(),
+        Not(IsNull()));
+  }
+
+  // Cleanup the registry to avoid mock leaks.
+  ~MacSetWrapperWithMonitoringTest() override { Registry::Reset(); }
+
+  MockMonitoringClient* compute_monitoring_client_;
+  MockMonitoringClient* verify_monitoring_client_;
+};
+
+// Tests that successful ComputeMac operations are logged.
+TEST_F(MacSetWrapperWithMonitoringTest,
+       WrapKeysetWithMonitoringComputeSuccess) {
+  // Create a primitive set and fill it with some entries
+  KeysetInfo keyset_info = CreateTestKeysetInfo();
+  const absl::flat_hash_map<std::string, std::string> annotations = {
+      {"key1", "value1"}, {"key2", "value2"}, {"key3", "value3"}};
+  auto mac_primitive_set = absl::make_unique<PrimitiveSet<Mac>>(annotations);
+  ASSERT_THAT(mac_primitive_set
+                  ->AddPrimitive(absl::make_unique<DummyMac>("mac0"),
+                                 keyset_info.key_info(0))
+                  .status(),
+              IsOk());
+  ASSERT_THAT(mac_primitive_set
+                  ->AddPrimitive(absl::make_unique<DummyMac>("mac1"),
+                                 keyset_info.key_info(1))
+                  .status(),
+              IsOk());
+  // Set the last as primary.
+  util::StatusOr<PrimitiveSet<Mac>::Entry<Mac>*> last =
+      mac_primitive_set->AddPrimitive(absl::make_unique<DummyMac>("mac2"),
+                                      keyset_info.key_info(2));
+  ASSERT_THAT(last.status(), IsOk());
+  ASSERT_THAT(mac_primitive_set->set_primary(*last), IsOk());
+  // Record the ID of the primary key.
+  const uint32_t primary_key_id = keyset_info.key_info(2).key_id();
+
+  // Create a MAC and compute an authentication tag
+  util::StatusOr<std::unique_ptr<Mac>> mac =
+      MacWrapper().Wrap(std::move(mac_primitive_set));
+  ASSERT_THAT(mac, IsOkAndHolds(NotNull()));
+
+  constexpr absl::string_view message = "This is some message!";
+
+  // Check that calling ComputeMac triggers a Log() call.
+  EXPECT_CALL(*compute_monitoring_client_, Log(primary_key_id, message.size()));
+  EXPECT_THAT((*mac)->ComputeMac(message).status(), IsOk());
+}
+
+// Test that successful VerifyMac operations are logged.
+TEST_F(MacSetWrapperWithMonitoringTest,
+       WrapKeysetWithMonitoringVerifySuccess) {
+  // Create a primitive set and fill it with some entries
+  KeysetInfo keyset_info = CreateTestKeysetInfo();
+  const absl::flat_hash_map<std::string, std::string> annotations = {
+      {"key1", "value1"}, {"key2", "value2"}, {"key3", "value3"}};
+  auto mac_primitive_set = absl::make_unique<PrimitiveSet<Mac>>(annotations);
+  ASSERT_THAT(mac_primitive_set
+                  ->AddPrimitive(absl::make_unique<DummyMac>("mac0"),
+                                 keyset_info.key_info(0))
+                  .status(),
+              IsOk());
+  ASSERT_THAT(mac_primitive_set
+                  ->AddPrimitive(absl::make_unique<DummyMac>("mac1"),
+                                 keyset_info.key_info(1))
+                  .status(),
+              IsOk());
+  // Set the last as primary.
+  util::StatusOr<PrimitiveSet<Mac>::Entry<Mac>*> last =
+      mac_primitive_set->AddPrimitive(absl::make_unique<DummyMac>("mac2"),
+                                      keyset_info.key_info(2));
+  ASSERT_THAT(last.status(), IsOk());
+  ASSERT_THAT(mac_primitive_set->set_primary(*last), IsOk());
+  // Record the ID of the primary key.
+  const uint32_t primary_key_id = keyset_info.key_info(2).key_id();
+
+  // Create a MAC, compute a Mac and verify it.
+  util::StatusOr<std::unique_ptr<Mac>> mac =
+      MacWrapper().Wrap(std::move(mac_primitive_set));
+  ASSERT_THAT(mac, IsOkAndHolds(NotNull()));
+
+  constexpr absl::string_view message = "This is some message!";
+
+  // Check that calling VerifyMac triggers a Log() call.
+  util::StatusOr<std::string> tag = (*mac)->ComputeMac(message);
+  EXPECT_THAT(tag.status(), IsOk());
+
+  // In the log expect the size of the message without the non-raw prefix.
+  EXPECT_CALL(*verify_monitoring_client_, Log(primary_key_id, message.size()));
+  EXPECT_THAT((*mac)->VerifyMac(*tag, message), IsOk());
+}
+
+TEST_F(MacSetWrapperWithMonitoringTest,
+       WrapKeysetWithMonitoringComputeFailures) {
+  // Create a primitive set and fill it with some entries.
+  KeysetInfo keyset_info = CreateTestKeysetInfo();
+  const absl::flat_hash_map<std::string, std::string> annotations = {
+      {"key1", "value1"}, {"key2", "value2"}, {"key3", "value3"}};
+  auto mac_primitive_set = absl::make_unique<PrimitiveSet<Mac>>(annotations);
+  ASSERT_THAT(mac_primitive_set
+                  ->AddPrimitive(CreateAlwaysFailingMac("mac "),
+                                 keyset_info.key_info(0))
+                  .status(),
+              IsOk());
+  ASSERT_THAT(mac_primitive_set
+                  ->AddPrimitive(CreateAlwaysFailingMac("mac "),
+                                 keyset_info.key_info(1))
+                  .status(),
+              IsOk());
+  // Set the last as primary.
+  util::StatusOr<PrimitiveSet<Mac>::Entry<Mac>*> last =
+      mac_primitive_set->AddPrimitive(CreateAlwaysFailingMac("mac "),
+                                      keyset_info.key_info(2));
+  ASSERT_THAT(last.status(), IsOk());
+  ASSERT_THAT(mac_primitive_set->set_primary(*last), IsOk());
+
+  // Create a MAC and compute a tag.
+  util::StatusOr<std::unique_ptr<Mac>> mac =
+      MacWrapper().Wrap(std::move(mac_primitive_set));
+  ASSERT_THAT(mac, IsOkAndHolds(NotNull()));
+
+  constexpr absl::string_view message = "This is some message!";
+
+  // Check that calling ComputeMac triggers a LogFailure() call.
+  EXPECT_CALL(*compute_monitoring_client_, LogFailure());
+  EXPECT_THAT((*mac)->ComputeMac(message).status(),
+              StatusIs(absl::StatusCode::kInternal));
+}
+
+// Test that monitoring logs verify failures correctly.
+TEST_F(MacSetWrapperWithMonitoringTest,
+       WrapKeysetWithMonitoringVerifyFailures) {
+  // Create a primitive set and fill it with some entries.
+  KeysetInfo keyset_info = CreateTestKeysetInfo();
+  const absl::flat_hash_map<std::string, std::string> annotations = {
+      {"key1", "value1"}, {"key2", "value2"}, {"key3", "value3"}};
+  auto mac_primitive_set = absl::make_unique<PrimitiveSet<Mac>>(annotations);
+  ASSERT_THAT(mac_primitive_set
+                  ->AddPrimitive(CreateAlwaysFailingMac("mac "),
+                                 keyset_info.key_info(0))
+                  .status(),
+              IsOk());
+  ASSERT_THAT(mac_primitive_set
+                  ->AddPrimitive(CreateAlwaysFailingMac("mac "),
+                                 keyset_info.key_info(1))
+                  .status(),
+              IsOk());
+  // Set the last as primary.
+  util::StatusOr<PrimitiveSet<Mac>::Entry<Mac>*> last =
+      mac_primitive_set->AddPrimitive(CreateAlwaysFailingMac("mac "),
+                                      keyset_info.key_info(2));
+  ASSERT_THAT(last.status(), IsOk());
+  ASSERT_THAT(mac_primitive_set->set_primary(*last), IsOk());
+
+  // Create a MAC and verify a tag.
+  util::StatusOr<std::unique_ptr<Mac>> mac =
+      MacWrapper().Wrap(std::move(mac_primitive_set));
+  ASSERT_THAT(mac, IsOkAndHolds(NotNull()));
+
+  constexpr absl::string_view message = "This is some message!";
+  constexpr absl::string_view tag = "some invalid tag!";
+
+  // Check that calling VerifyMac triggers a LogFailure() call.
+  EXPECT_CALL(*verify_monitoring_client_, LogFailure());
+  EXPECT_THAT((*mac)->VerifyMac(tag, message),
+              StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
 }  // namespace
