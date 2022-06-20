@@ -16,10 +16,12 @@
 #ifndef TINK_SIGNATURE_FAILING_SIGNATURE_H_
 #define TINK_SIGNATURE_FAILING_SIGNATURE_H_
 
+#include <memory>
 #include <string>
 
 #include "absl/strings/string_view.h"
 #include "tink/public_key_sign.h"
+#include "tink/public_key_verify.h"
 
 namespace crypto {
 namespace tink {
@@ -27,6 +29,11 @@ namespace tink {
 // Returns a PublicKeySign that always return an error when calling Sign.
 // The error message will contain `message`.
 std::unique_ptr<PublicKeySign> CreateAlwaysFailingPublicKeySign(
+    std::string message = "");
+
+// Returns a PublicKeyVerify that always returns an error when calling Verify.
+// The error message will contain `message`.
+std::unique_ptr<PublicKeyVerify> CreateAlwaysFailingPublicKeyVerify(
     std::string message = "");
 
 }  // namespace tink

@@ -718,6 +718,7 @@ tink_cc_library(
   DEPS
     absl::strings
     tink::core::public_key_sign
+    tink::core::public_key_verify
 )
 
 tink_cc_test(

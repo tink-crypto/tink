@@ -48,6 +48,24 @@ TEST(AlwaysFailPublicKeySign, SignFailsContainsMessage) {
       StatusIs(absl::StatusCode::kInternal, HasSubstr(expected_message)));
 }
 
+TEST(AlwaysFailPublicKeyVerify, VerifyFails) {
+  std::unique_ptr<PublicKeyVerify> failing_verify =
+      CreateAlwaysFailingPublicKeyVerify();
+
+  EXPECT_THAT(failing_verify->Verify("signature", "message"),
+              StatusIs(absl::StatusCode::kInternal));
+}
+
+TEST(AlwaysFailPublicKeyVerify, VerifyFailsContainsMessage) {
+  const std::string expected_message = "expected_message";
+  std::unique_ptr<PublicKeyVerify> failing_verify =
+      CreateAlwaysFailingPublicKeyVerify(expected_message);
+
+  EXPECT_THAT(
+      failing_verify->Verify("signature", "message"),
+      StatusIs(absl::StatusCode::kInternal, HasSubstr(expected_message)));
+}
+
 }  // namespace
 }  // namespace tink
 }  // namespace crypto

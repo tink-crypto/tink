@@ -15,10 +15,12 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include "tink/signature/failing_signature.h"
 
+#include <memory>
 #include <string>
 #include <utility>
 
 #include "tink/public_key_sign.h"
+#include "tink/public_key_verify.h"
 
 namespace crypto {
 namespace tink {
@@ -42,11 +44,34 @@ class AlwaysFailPublicKeySign : public PublicKeySign {
   const std::string message_;
 };
 
+// A PublicKeyVerify that always return a kInternal status on API calls.
+class AlwaysFailPublicKeyVerify : public PublicKeyVerify {
+ public:
+  explicit AlwaysFailPublicKeyVerify(std::string message)
+      : message_(std::move(message)) {}
+
+  util::Status Verify(absl::string_view /*signature*/,
+                      absl::string_view /*message*/) const override {
+    return absl::InternalError(
+        absl::StrCat(
+            "AlwaysFailPublicKeyVerify will always fail on verify (msg=",
+            message_, ")"));
+  }
+
+ private:
+  const std::string message_;
+};
+
 }  // namespace
 
 std::unique_ptr<PublicKeySign> CreateAlwaysFailingPublicKeySign(
     std::string message) {
   return absl::make_unique<AlwaysFailPublicKeySign>(std::move(message));
+}
+
+std::unique_ptr<PublicKeyVerify> CreateAlwaysFailingPublicKeyVerify(
+    std::string message) {
+  return absl::make_unique<AlwaysFailPublicKeyVerify>(std::move(message));
 }
 
 }  // namespace tink
