@@ -12,7 +12,10 @@ tink_cc_library(
     tink::core::primitive_set
     tink::core::primitive_wrapper
     tink::core::public_key_verify
+    tink::internal::monitoring_util
+    tink::internal::registry_impl
     tink::internal::util
+    tink::monitoring::monitoring
     tink::util::status
     tink::util::statusor
     tink::proto::tink_cc_proto
@@ -373,10 +376,14 @@ tink_cc_test(
   SRCS
     public_key_verify_wrapper_test.cc
   DEPS
+    tink::signature::failing_signature
     tink::signature::public_key_verify_wrapper
     gmock
     tink::core::primitive_set
     tink::core::public_key_verify
+    tink::internal::registry_impl
+    tink::monitoring::monitoring
+    tink::monitoring::monitoring_client_mocks
     tink::util::status
     tink::util::test_matchers
     tink::util::test_util

@@ -25,6 +25,9 @@
 #include "tink/internal/util.h"
 #include "tink/primitive_set.h"
 #include "tink/public_key_verify.h"
+#include "tink/internal/monitoring_util.h"
+#include "tink/internal/registry_impl.h"
+#include "tink/monitoring/monitoring.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "proto/tink.pb.h"
@@ -32,9 +35,12 @@
 namespace crypto {
 namespace tink {
 
-using google::crypto::tink::OutputPrefixType;
-
 namespace {
+
+constexpr absl::string_view kPrimitive = "public_key_verify";
+constexpr absl::string_view kVerifyApi = "verify";
+
+using ::google::crypto::tink::OutputPrefixType;
 
 util::Status Validate(PrimitiveSet<PublicKeyVerify>* public_key_verify_set) {
   if (public_key_verify_set == nullptr) {
@@ -51,8 +57,10 @@ util::Status Validate(PrimitiveSet<PublicKeyVerify>* public_key_verify_set) {
 class PublicKeyVerifySetWrapper : public PublicKeyVerify {
  public:
   explicit PublicKeyVerifySetWrapper(
-      std::unique_ptr<PrimitiveSet<PublicKeyVerify>> public_key_verify_set)
-      : public_key_verify_set_(std::move(public_key_verify_set)) {}
+      std::unique_ptr<PrimitiveSet<PublicKeyVerify>> public_key_verify_set,
+      std::unique_ptr<MonitoringClient> monitoring_verify_client = nullptr)
+      : public_key_verify_set_(std::move(public_key_verify_set)),
+      monitoring_verify_client_(std::move(monitoring_verify_client)) {}
 
   crypto::tink::util::Status Verify(absl::string_view signature,
                                     absl::string_view data) const override;
@@ -61,6 +69,7 @@ class PublicKeyVerifySetWrapper : public PublicKeyVerify {
 
  private:
   std::unique_ptr<PrimitiveSet<PublicKeyVerify>> public_key_verify_set_;
+  std::unique_ptr<MonitoringClient> monitoring_verify_client_;
 };
 
 util::Status PublicKeyVerifySetWrapper::Verify(absl::string_view signature,
@@ -93,6 +102,9 @@ util::Status PublicKeyVerifySetWrapper::Verify(absl::string_view signature,
       auto verify_result =
           public_key_verify.Verify(raw_signature, view_on_data_or_legacy_data);
       if (verify_result.ok()) {
+        if (monitoring_verify_client_ != nullptr) {
+          monitoring_verify_client_->Log(entry->get_key_id(), data.size());
+        }
         return util::OkStatus();
       } else {
         // LOG that a matching key didn't verify the signature.
@@ -107,9 +119,16 @@ util::Status PublicKeyVerifySetWrapper::Verify(absl::string_view signature,
       auto& public_key_verify = public_key_verify_entry->get_primitive();
       auto verify_result = public_key_verify.Verify(signature, data);
       if (verify_result.ok()) {
+        if (monitoring_verify_client_ != nullptr) {
+          monitoring_verify_client_->Log(public_key_verify_entry->get_key_id(),
+                                         data.size());
+        }
         return util::OkStatus();
       }
     }
+  }
+  if (monitoring_verify_client_ != nullptr) {
+    monitoring_verify_client_->LogFailure();
   }
   return util::Status(absl::StatusCode::kInvalidArgument, "Invalid signature.");
 }
@@ -121,9 +140,31 @@ util::StatusOr<std::unique_ptr<PublicKeyVerify>> PublicKeyVerifyWrapper::Wrap(
     const {
   util::Status status = Validate(public_key_verify_set.get());
   if (!status.ok()) return status;
-  std::unique_ptr<PublicKeyVerify> public_key_verify(
-      new PublicKeyVerifySetWrapper(std::move(public_key_verify_set)));
-  return std::move(public_key_verify);
+
+  MonitoringClientFactory* const monitoring_factory =
+      internal::RegistryImpl::GlobalInstance().GetMonitoringClientFactory();
+
+  // Monitoring is not enabled. Create a wrapper without monitoring clients.
+  if (monitoring_factory == nullptr) {
+    return {absl::make_unique<PublicKeyVerifySetWrapper>(
+        std::move(public_key_verify_set))};
+  }
+
+  util::StatusOr<MonitoringKeySetInfo> keyset_info =
+      internal::MonitoringKeySetInfoFromPrimitiveSet(*public_key_verify_set);
+  if (!keyset_info.ok()) {
+    return keyset_info.status();
+  }
+
+  util::StatusOr<std::unique_ptr<MonitoringClient>> monitoring_verify_client =
+      monitoring_factory->New(
+          MonitoringContext(kPrimitive, kVerifyApi, *keyset_info));
+  if (!monitoring_verify_client.ok()) {
+    return monitoring_verify_client.status();
+  }
+
+  return {absl::make_unique<PublicKeyVerifySetWrapper>(
+      std::move(public_key_verify_set), *std::move(monitoring_verify_client))};
 }
 
 }  // namespace tink
