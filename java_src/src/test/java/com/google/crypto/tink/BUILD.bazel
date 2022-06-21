@@ -197,6 +197,7 @@ java_test(
     name = "RegistryTest",
     size = "small",
     srcs = ["RegistryTest.java"],
+    tags = ["fips"],
     deps = [
         "//proto:aes_eax_java_proto",
         "//proto:aes_gcm_java_proto",
@@ -218,6 +219,7 @@ java_test(
         "//src/main/java/com/google/crypto/tink/aead:aes_eax_key_manager",
         "//src/main/java/com/google/crypto/tink/aead:aes_gcm_key_manager",
         "//src/main/java/com/google/crypto/tink/config:tink_config",
+        "//src/main/java/com/google/crypto/tink/config:tink_fips",
         "//src/main/java/com/google/crypto/tink/config/internal:tink_fips_util",
         "//src/main/java/com/google/crypto/tink/internal:key_type_manager",
         "//src/main/java/com/google/crypto/tink/internal:primitive_factory",
