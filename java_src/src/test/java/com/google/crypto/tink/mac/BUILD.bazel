@@ -98,12 +98,12 @@ java_test(
         "//src/main/java/com/google/crypto/tink:crypto_format",
         "//src/main/java/com/google/crypto/tink:mac",
         "//src/main/java/com/google/crypto/tink:primitive_set",
-        "//src/main/java/com/google/crypto/tink/daead:deterministic_aead_config",
         "//src/main/java/com/google/crypto/tink/mac:mac_config",
         "//src/main/java/com/google/crypto/tink/mac:mac_wrapper",
         "//src/main/java/com/google/crypto/tink/subtle:bytes",
         "//src/main/java/com/google/crypto/tink/subtle:random",
         "//src/main/java/com/google/crypto/tink/testing:test_util",
+        "@maven//:com_google_truth_truth",
         "@maven//:junit_junit",
     ],
 )

@@ -17,10 +17,10 @@
 package com.google.crypto.tink.mac;
 
 import static com.google.crypto.tink.testing.TestUtil.assertExceptionContains;
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
-import static org.junit.Assert.fail;
 
 import com.google.crypto.tink.CryptoFormat;
 import com.google.crypto.tink.KeysetHandle;
@@ -85,16 +85,16 @@ public class MacFactoryTest {
             keys[(i + 2) % j],
             keys[(i + 3) % j]));
       Mac mac = MacFactory.getPrimitive(keysetHandle);
-      byte[] plaintext = "plaintext".getBytes("UTF-8");
+      byte[] plaintext = "plaintext".getBytes(UTF_8);
       byte[] tag = mac.computeMac(plaintext);
       if (!keys[i].getOutputPrefixType().equals(OutputPrefixType.RAW)) {
-        byte[] prefix = Arrays.copyOfRange(tag, 0, CryptoFormat.NON_RAW_PREFIX_SIZE);
+        byte[] prefix = Arrays.copyOf(tag, CryptoFormat.NON_RAW_PREFIX_SIZE);
         assertArrayEquals(prefix, CryptoFormat.getOutputPrefix(keys[i]));
       }
       try {
         mac.verifyMac(tag, plaintext);
       } catch (GeneralSecurityException e) {
-        fail("Valid MAC, should not throw exception: " + i);
+        throw new AssertionError("Valid MAC, should not throw exception: " + i, e);
       }
 
       // Modify plaintext or tag and make sure the verifyMac failed.
@@ -108,7 +108,7 @@ public class MacFactoryTest {
               () ->
                   mac.verifyMac(
                       Arrays.copyOfRange(modified, plaintext.length, modified.length),
-                      Arrays.copyOfRange(modified, 0, plaintext.length)));
+                      Arrays.copyOf(modified, plaintext.length)));
         }
       }
 
@@ -120,7 +120,7 @@ public class MacFactoryTest {
       try {
         mac.verifyMac(tag, plaintext);
       } catch (GeneralSecurityException e) {
-        fail("Valid MAC, should not throw exception");
+        throw new AssertionError("Valid MAC, should not throw exception", e);
       }
 
       // mac with a random key not in the keyset, verify with the keyset should fail
@@ -149,14 +149,14 @@ public class MacFactoryTest {
     KeysetHandle keysetHandle = TestUtil.createKeysetHandle(
         TestUtil.createKeyset(primary));
     Mac mac = MacFactory.getPrimitive(keysetHandle);
-    byte[] plaintext = "blah".getBytes("UTF-8");
+    byte[] plaintext = "blah".getBytes(UTF_8);
     byte[] tag = mac.computeMac(plaintext);
     // no prefix
     assertEquals(16 /* TAG */, tag.length);
     try {
       mac.verifyMac(tag, plaintext);
     } catch (GeneralSecurityException e) {
-      fail("Valid MAC, should not throw exception");
+      throw new AssertionError("Valid MAC, should not throw exception", e);
     }
   }
 
