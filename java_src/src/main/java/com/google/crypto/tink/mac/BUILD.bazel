@@ -221,3 +221,51 @@ android_library(
         "@maven//:com_google_errorprone_error_prone_annotations",
     ],
 )
+
+java_library(
+    name = "aes_cmac_key",
+    srcs = ["AesCmacKey.java"],
+    deps = [
+        ":aes_cmac_key_format",
+        ":mac_key",
+        "//src/main/java/com/google/crypto/tink:accesses_partial_key",
+        "//src/main/java/com/google/crypto/tink:key",
+        "//src/main/java/com/google/crypto/tink/util:bytes",
+        "//src/main/java/com/google/crypto/tink/util:secret_bytes",
+        "@maven//:com_google_code_findbugs_jsr305",
+        "@maven//:com_google_errorprone_error_prone_annotations",
+    ],
+)
+
+android_library(
+    name = "aes_cmac_key-android",
+    srcs = ["AesCmacKey.java"],
+    deps = [
+        ":aes_cmac_key_format-android",
+        ":mac_key-android",
+        "//src/main/java/com/google/crypto/tink:accesses_partial_key-android",
+        "//src/main/java/com/google/crypto/tink:key-android",
+        "//src/main/java/com/google/crypto/tink/util:bytes-android",
+        "//src/main/java/com/google/crypto/tink/util:secret_bytes-android",
+        "@maven//:com_google_code_findbugs_jsr305",
+        "@maven//:com_google_errorprone_error_prone_annotations",
+    ],
+)
+
+java_library(
+    name = "aes_cmac_key_format",
+    srcs = ["AesCmacKeyFormat.java"],
+    deps = [
+        ":mac_key_format",
+        "@maven//:com_google_errorprone_error_prone_annotations",
+    ],
+)
+
+android_library(
+    name = "aes_cmac_key_format-android",
+    srcs = ["AesCmacKeyFormat.java"],
+    deps = [
+        ":mac_key_format-android",
+        "@maven//:com_google_errorprone_error_prone_annotations",
+    ],
+)
