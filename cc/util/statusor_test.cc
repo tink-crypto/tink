@@ -95,10 +95,10 @@ TEST(StatusOrTest, WithNoDefaultConstructor) {
 TEST(StatusOrTest, AssignToErrorStatus) {
   StatusOr<std::string> error_initially =
       Status(absl::StatusCode::kInvalidArgument, "Error message");
-  ASSERT_THAT(error_initially.status(), Not(IsOk()));
+  ASSERT_THAT(error_initially, Not(IsOk()));
   StatusOr<std::string> ok_initially = std::string("Hi");
   error_initially = ok_initially;
-  ASSERT_THAT(error_initially.status(), IsOk());
+  ASSERT_THAT(error_initially, IsOk());
   ASSERT_THAT(error_initially.value(), Eq("Hi"));
 
 #ifndef TINK_USE_ABSL_STATUSOR
@@ -113,10 +113,10 @@ TEST(StatusOrTest, AssignToErrorStatus) {
 TEST(StatusOrTest, AssignToErrorStatusImplicitConvertible) {
   StatusOr<std::string> error_initially =
       Status(absl::StatusCode::kInvalidArgument, "Error message");
-  ASSERT_THAT(error_initially.status(), Not(IsOk()));
+  ASSERT_THAT(error_initially, Not(IsOk()));
   StatusOr<char const*> ok_initially = "Hi";
   error_initially = ok_initially;
-  ASSERT_THAT(error_initially.status(), IsOk());
+  ASSERT_THAT(error_initially, IsOk());
   ASSERT_THAT(error_initially.value(), Eq("Hi"));
 
 #ifndef TINK_USE_ABSL_STATUSOR
