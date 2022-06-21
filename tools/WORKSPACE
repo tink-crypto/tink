@@ -3,11 +3,6 @@ workspace(name = "tools")
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
 local_repository(
-    name = "tink_base",
-    path = "..",
-)
-
-local_repository(
     name = "tink_cc",
     path = "../cc",
 )
@@ -73,14 +68,6 @@ pip_install(
     name = "pip_deps",
     requirements = "//:requirements.txt",
 )
-
-load("@tink_base//:tink_base_deps.bzl", "tink_base_deps")
-
-tink_base_deps()
-
-load("@tink_base//:tink_base_deps_init.bzl", "tink_base_deps_init")
-
-tink_base_deps_init()
 
 load("@tink_go//:deps.bzl", "go_dependencies")
 
