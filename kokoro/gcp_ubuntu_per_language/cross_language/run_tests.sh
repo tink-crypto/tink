@@ -66,12 +66,14 @@ main() {
     time bazel test --test_output=errors -- ...
   )
 
-  local TINK_SRC_PATH="${PWD}"
+  local TINK_CROSS_LANG_ROOT_PATH="${PWD}/testing"
   (
     cd testing/cross_language
     use_bazel "$(cat .bazelversion)"
     time bazel test \
-      --test_env TINK_SRC_PATH="${TINK_SRC_PATH}" --test_output=errors -- ...
+      --test_env TINK_CROSS_LANG_ROOT_PATH="${TINK_CROSS_LANG_ROOT_PATH}" \
+      --test_output=errors \
+      -- ...
   )
 }
 

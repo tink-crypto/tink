@@ -23,30 +23,22 @@ import grpc
 import portpicker
 
 from tink.proto import tink_pb2
-from util import _path_util
 from util import _primitives
 from proto import testing_api_pb2
 from proto import testing_api_pb2_grpc
 
-# Server paths are relative to tink_root_path(), which can be set manually by:
-# bazel test util:testing_servers_test --test_env TINK_SRC_PATH=/tmp/tink
+# Server paths are relative to a root folder where all the server are located.
+# It can be set manually as follows:
+#   bazel test util:testing_servers_test \
+#     --test_env TINK_CROSS_LANG_ROOT_PATH=<path to the root folder>
 _SERVER_PATHS = {
-    'cc': [
-        'testing/cc/bazel-bin/testing_server',
-        'testing/cc/testing_server'
-    ],
-    'go': [
-        'testing/go/bazel-bin/testing_server_/testing_server',
-        'testing/go/testing_server'
-    ],
+    'cc': ['cc/bazel-bin/testing_server', 'cc/testing_server'],
+    'go': ['go/bazel-bin/testing_server_/testing_server', 'go/testing_server'],
     'java': [
-        'testing/java_src/bazel-bin/testing_server_deploy.jar',
-        'testing/java_src/testing_server'
+        'java_src/bazel-bin/testing_server_deploy.jar',
+        'java_src/testing_server'
     ],
-    'python': [
-        'testing/python/bazel-bin/testing_server',
-        'testing/python/testing_server',
-    ]
+    'python': ['python/bazel-bin/testing_server', 'python/testing_server']
 }
 
 # All languages that have a testing server
@@ -55,9 +47,9 @@ LANGUAGES = list(_SERVER_PATHS.keys())
 KEYSET_READER_WRITER_TYPES = [('KEYSET_READER_BINARY', 'KEYSET_WRITER_BINARY'),
                               ('KEYSET_READER_JSON', 'KEYSET_WRITER_JSON')]
 
-# location of the testing_server java binary, relative to tink_root_path()
-_JAVA_PATH = (
-    'testing/java_src/bazel-bin/testing_server.runfiles/local_jdk/bin/java')
+# location of the testing_server java binary, relative to the root folder where
+# all the server are located.
+_JAVA_PATH = ('java_src/bazel-bin/testing_server.runfiles/local_jdk/bin/java')
 
 _PRIMITIVE_STUBS = {
     'aead': testing_api_pb2_grpc.AeadStub,
@@ -84,10 +76,44 @@ SUPPORTED_LANGUAGES_BY_PRIMITIVE = {
     'jwt': ['cc', 'java', 'go', 'python'],
 }
 
+_RELATIVE_ROOT_PATH = 'tink_base/testing'
+
+
+def _root_path() -> str:
+  """Return the root path where server binaries are located.
+
+  This root path can be set in the TINK_CROSS_LANG_ROOT_PATH enviroment
+  variable. If TINK_CROSS_LANG_ROOT_PATH is not set, the root path is calculated
+  from the TEST_SRCDIR enviroment variable.
+
+  Returns:
+    The root path of the cross language tests servers.
+  Raises:
+    ValueError if no variables are set.
+    FileNotFoundError if a variable is set but the path is invalid.
+  """
+
+  def _check_path_exists_or_fail(path, env_variable):
+    """Returns the path if it eixts, otherwise raises a FileNotFoundError."""
+    if os.path.exists(path):
+      return path
+    raise FileNotFoundError(f'Variable {env_variable} is set but has an ' +
+                            f'invalid path {path}')
+
+  if 'TINK_CROSS_LANG_ROOT_PATH' in os.environ:
+    return _check_path_exists_or_fail(os.environ['TINK_CROSS_LANG_ROOT_PATH'],
+                                      'TINK_CROSS_LANG_ROOT_PATH')
+  if 'TEST_SRCDIR' in os.environ:
+    return _check_path_exists_or_fail(
+        os.path.join(os.environ['TEST_SRCDIR'], _RELATIVE_ROOT_PATH),
+        'TEST_SRCDIR')
+
+  raise ValueError('No root path environment variable set')
+
 
 def _server_path(lang: str) -> str:
   """Returns the path where the server binary is located."""
-  root_dir = _path_util.tink_root_path()
+  root_dir = _root_path()
   for relative_server_path in _SERVER_PATHS[lang]:
     server_path = os.path.join(root_dir, relative_server_path)
     logging.info('try path: %s', server_path)
@@ -99,7 +125,7 @@ def _server_path(lang: str) -> str:
 def _server_cmd(lang: str, port: int) -> List[str]:
   server_path = _server_path(lang)
   if lang == 'java' and server_path.endswith('.jar'):
-    java_path = os.path.join(_path_util.tink_root_path(), _JAVA_PATH)
+    java_path = os.path.join(_root_path(), _JAVA_PATH)
     return [java_path, '-jar', server_path, '--port', '%d' % port]
   else:
     return [server_path, '--port', '%d' % port]
