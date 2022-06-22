@@ -196,8 +196,7 @@ public final class SerializationRegistry {
 
     @Override
     public String toString() {
-      return "key type "
-          + keyClass.getSimpleName()
+      return keyClass.getSimpleName()
           + " with serialization type: "
           + keySerializationClass.getSimpleName();
     }
@@ -230,8 +229,7 @@ public final class SerializationRegistry {
 
     @Override
     public String toString() {
-      return "key type "
-          + keySerializationClass.getSimpleName()
+      return keySerializationClass.getSimpleName()
           + ", object identifier: "
           + serializationIdentifier;
     }
