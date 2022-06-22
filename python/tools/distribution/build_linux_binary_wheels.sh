@@ -34,9 +34,9 @@ PYTHON_VERSIONS["3.9"]="cp39-cp39"
 PYTHON_VERSIONS["3.10"]="cp310-cp310"
 readonly -A PYTHON_VERSIONS
 
-readonly TINK_SRC_PATH="/tmp/tink"
+readonly TINK_PYTHON_ROOT_PATH="/tmp/tink/python"
 
-readonly BAZEL_VERSION="$(cat "${TINK_SRC_PATH}/python/.bazelversion")"
+readonly BAZEL_VERSION="$(cat ${TINK_PYTHON_ROOT_PATH}/.bazelversion)"
 readonly PROTOC_VERSION="3.19.3"
 
 # Get dependencies which are needed for building Tink.
@@ -52,7 +52,7 @@ curl -OL "https://github.com/protocolbuffers/protobuf/releases/download/v${PROTO
 unzip -o "${PROTOC_ZIP}" -d /usr/local bin/protoc
 
 # Setup required for Tink.
-export TINK_PYTHON_SETUPTOOLS_OVERRIDE_BASE_PATH="${TINK_SRC_PATH}"
+export TINK_PYTHON_SETUPTOOLS_OVERRIDE_BASE_PATH="${TINK_PYTHON_ROOT_PATH}/.."
 
 # Workaround for grpc which expects a python2 installation, which is not present
 # in the manylinux2014 container. Cannot be an empty string, otherwise Bazel

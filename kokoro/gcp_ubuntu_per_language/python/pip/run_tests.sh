@@ -31,8 +31,8 @@ source ./kokoro/testutils/install_tink_via_pip.sh "${PWD}/python"
 
 cd python
 
-# Set path to Tink base folder
-export TINK_SRC_PATH="${PWD}/.."
+# Set path to the Tink Python folder
+export TINK_PYTHON_ROOT_PATH="${PWD}"
 
 # Run Python tests directly so the package is used.
 # We exclude tests in tink/cc/pybind: they are implementation details and may

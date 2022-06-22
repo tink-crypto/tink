@@ -29,8 +29,8 @@ readonly PYTHON_VERSIONS
 
 readonly PLATFORM="$(uname | tr '[:upper:]' '[:lower:]')"
 
-export TINK_SRC_PATH="${PWD}/.."
-readonly TINK_VERSION="$(grep ^TINK "${TINK_SRC_PATH}/python/VERSION" \
+export TINK_PYTHON_ROOT_PATH="${PWD}"
+readonly TINK_VERSION="$(grep ^TINK "${TINK_PYTHON_ROOT_PATH}/VERSION" \
   | awk '{gsub(/"/, "", $3); print $3}')"
 
 readonly IMAGE_NAME="quay.io/pypa/manylinux2014_x86_64"
@@ -45,11 +45,11 @@ build_linux() {
   export DOCKER_CONTENT_TRUST=1
 
   # Build binary wheels.
-  docker run --volume "${TINK_SRC_PATH}:/tmp/tink" --workdir /tmp/tink/python \
+  docker run --volume "${TINK_PYTHON_ROOT_PATH}/..:/tmp/tink" --workdir /tmp/tink/python \
     "${IMAGE}" /tmp/tink/python/tools/distribution/build_linux_binary_wheels.sh
 
   ## Test binary wheels.
-  docker run --volume "${TINK_SRC_PATH}:/tmp/tink" --workdir /tmp/tink/python \
+  docker run --volume "${TINK_PYTHON_ROOT_PATH}/..:/tmp/tink" --workdir /tmp/tink/python \
     "${IMAGE}" /tmp/tink/python/tools/distribution/test_linux_binary_wheels.sh
 
   echo "### Building Linux source distribution ###"
@@ -59,7 +59,7 @@ build_linux() {
   enable_py_version "${latest}"
 
   # Build source distribution.
-  export TINK_PYTHON_SETUPTOOLS_OVERRIDE_BASE_PATH="${TINK_SRC_PATH}"
+  export TINK_PYTHON_SETUPTOOLS_OVERRIDE_BASE_PATH="${TINK_PYTHON_ROOT_PATH}/.."
   python3 setup.py sdist
   local sdist_filename="tink-${TINK_VERSION}.tar.gz"
   set_owner_within_tar "dist/${sdist_filename}"
