@@ -3,11 +3,6 @@ workspace(name = "testing_python")
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
 local_repository(
-    name = "tink_base",
-    path = "../..",
-)
-
-local_repository(
     name = "tink_py",
     path = "../../python",
 )
@@ -34,12 +29,6 @@ tink_py_deps()
 
 load("@tink_py//:tink_py_deps_init.bzl", "tink_py_deps_init")
 tink_py_deps_init("tink_py")
-
-load("@tink_base//:tink_base_deps.bzl", "tink_base_deps")
-tink_base_deps()
-
-load("@tink_base//:tink_base_deps_init.bzl", "tink_base_deps_init")
-tink_base_deps_init()
 
 load("@tink_cc//:tink_cc_deps.bzl", "tink_cc_deps")
 tink_cc_deps()
