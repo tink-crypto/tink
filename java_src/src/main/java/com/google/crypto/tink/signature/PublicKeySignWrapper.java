@@ -32,6 +32,9 @@ import java.security.GeneralSecurityException;
  * with the primary key.
  */
 public class PublicKeySignWrapper implements PrimitiveWrapper<PublicKeySign, PublicKeySign> {
+
+  private static final byte[] FORMAT_VERSION = new byte[] {0};
+
   private static class WrappedPublicKeySign implements PublicKeySign {
     private final PrimitiveSet<PublicKeySign> primitives;
 
@@ -41,15 +44,13 @@ public class PublicKeySignWrapper implements PrimitiveWrapper<PublicKeySign, Pub
 
     @Override
     public byte[] sign(final byte[] data) throws GeneralSecurityException {
+      byte[] data2 = data;
       if (primitives.getPrimary().getOutputPrefixType().equals(OutputPrefixType.LEGACY)) {
-        byte[] formatVersion = new byte[] {0};
-        return Bytes.concat(
-            primitives.getPrimary().getIdentifier(),
-            primitives.getPrimary().getPrimitive().sign(Bytes.concat(data, formatVersion)));
+        data2 = Bytes.concat(data, FORMAT_VERSION);
       }
       return Bytes.concat(
           primitives.getPrimary().getIdentifier(),
-          primitives.getPrimary().getPrimitive().sign(data));
+          primitives.getPrimary().getPrimitive().sign(data2));
     }
   }
 

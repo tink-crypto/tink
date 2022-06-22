@@ -40,9 +40,10 @@ import java.util.logging.Logger;
 class MacWrapper implements PrimitiveWrapper<Mac, Mac> {
   private static final Logger logger = Logger.getLogger(MacWrapper.class.getName());
 
+  private static final byte[] FORMAT_VERSION = new byte[] {0};
+
   private static class WrappedMac implements Mac {
     private final PrimitiveSet<Mac> primitives;
-    private final byte[] formatVersion = new byte[] {0};
 
     private WrappedMac(PrimitiveSet<Mac> primitives) {
       this.primitives = primitives;
@@ -50,14 +51,13 @@ class MacWrapper implements PrimitiveWrapper<Mac, Mac> {
 
     @Override
     public byte[] computeMac(final byte[] data) throws GeneralSecurityException {
+      byte[] data2 = data;
       if (primitives.getPrimary().getOutputPrefixType().equals(OutputPrefixType.LEGACY)) {
-        return Bytes.concat(
-            primitives.getPrimary().getIdentifier(),
-            primitives.getPrimary().getPrimitive().computeMac(Bytes.concat(data, formatVersion)));
+        data2 = Bytes.concat(data, FORMAT_VERSION);
       }
       return Bytes.concat(
           primitives.getPrimary().getIdentifier(),
-          primitives.getPrimary().getPrimitive().computeMac(data));
+          primitives.getPrimary().getPrimitive().computeMac(data2));
     }
 
     @Override
@@ -72,11 +72,11 @@ class MacWrapper implements PrimitiveWrapper<Mac, Mac> {
       List<PrimitiveSet.Entry<Mac>> entries = primitives.getPrimitive(prefix);
       for (PrimitiveSet.Entry<Mac> entry : entries) {
         try {
+          byte[] data2 = data;
           if (entry.getOutputPrefixType().equals(OutputPrefixType.LEGACY)) {
-            entry.getPrimitive().verifyMac(macNoPrefix, Bytes.concat(data, formatVersion));
-          } else {
-            entry.getPrimitive().verifyMac(macNoPrefix, data);
+            data2 = Bytes.concat(data, FORMAT_VERSION);
           }
+          entry.getPrimitive().verifyMac(macNoPrefix, data2);
           // If there is no exception, the MAC is valid and we can return.
           return;
         } catch (GeneralSecurityException e) {

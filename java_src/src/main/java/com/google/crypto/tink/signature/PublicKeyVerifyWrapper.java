@@ -41,6 +41,8 @@ import java.util.logging.Logger;
 class PublicKeyVerifyWrapper implements PrimitiveWrapper<PublicKeyVerify, PublicKeyVerify> {
   private static final Logger logger = Logger.getLogger(PublicKeyVerifyWrapper.class.getName());
 
+  private static final byte[] FORMAT_VERSION = new byte[] {0};
+
   private static class WrappedPublicKeyVerify implements PublicKeyVerify {
     private final PrimitiveSet<PublicKeyVerify> primitives;
 
@@ -60,18 +62,16 @@ class PublicKeyVerifyWrapper implements PrimitiveWrapper<PublicKeyVerify, Public
           Arrays.copyOfRange(signature, CryptoFormat.NON_RAW_PREFIX_SIZE, signature.length);
       List<PrimitiveSet.Entry<PublicKeyVerify>> entries = primitives.getPrimitive(prefix);
       for (PrimitiveSet.Entry<PublicKeyVerify> entry : entries) {
+        byte[] data2 = data;
+        if (entry.getOutputPrefixType().equals(OutputPrefixType.LEGACY)) {
+          data2 = Bytes.concat(data2, FORMAT_VERSION);
+        }
         try {
-          if (entry.getOutputPrefixType().equals(OutputPrefixType.LEGACY)) {
-            final byte[] formatVersion = new byte[] {0};
-            final byte[] dataWithFormatVersion = Bytes.concat(data, formatVersion);
-            entry.getPrimitive().verify(sigNoPrefix, dataWithFormatVersion);
-          } else {
-            entry.getPrimitive().verify(sigNoPrefix, data);
-          }
+          entry.getPrimitive().verify(sigNoPrefix, data2);
           // If there is no exception, the signature is valid and we can return.
           return;
         } catch (GeneralSecurityException e) {
-          logger.info("signature prefix matches a key, but cannot verify: " + e.toString());
+          logger.info("signature prefix matches a key, but cannot verify: " + e);
           // Ignored as we want to continue verification with the remaining keys.
         }
       }
