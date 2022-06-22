@@ -20,6 +20,7 @@ import com.google.crypto.tink.annotations.Alpha;
 import com.google.crypto.tink.internal.LegacyProtoKey;
 import com.google.crypto.tink.internal.MutableSerializationRegistry;
 import com.google.crypto.tink.internal.ProtoKeySerialization;
+import com.google.crypto.tink.monitoring.MonitoringAnnotations;
 import com.google.crypto.tink.proto.EncryptedKeyset;
 import com.google.crypto.tink.proto.KeyData;
 import com.google.crypto.tink.proto.KeyStatusType;
@@ -160,9 +161,16 @@ public final class KeysetHandle {
   }
 
   private final Keyset keyset;
+  private final MonitoringAnnotations annotations;
 
   private KeysetHandle(Keyset keyset) {
     this.keyset = keyset;
+    this.annotations = MonitoringAnnotations.EMPTY;
+  }
+
+  private KeysetHandle(Keyset keyset, MonitoringAnnotations annotations) {
+    this.keyset = keyset;
+    this.annotations = annotations;
   }
 
   /**
@@ -172,6 +180,16 @@ public final class KeysetHandle {
   static final KeysetHandle fromKeyset(Keyset keyset) throws GeneralSecurityException {
     assertEnoughKeyMaterial(keyset);
     return new KeysetHandle(keyset);
+  }
+
+  /**
+   * @return a new {@link KeysetHandle} from a {@code keyset} and {@code annotations}.
+   * @throws GeneralSecurityException if the keyset is null or empty.
+   */
+  static final KeysetHandle fromKeysetAndAnnotations(
+      Keyset keyset, MonitoringAnnotations annotations) throws GeneralSecurityException {
+    assertEnoughKeyMaterial(keyset);
+    return new KeysetHandle(keyset, annotations);
   }
 
   /**
@@ -531,6 +549,7 @@ public final class KeysetHandle {
       Class<P> classObject, Class<B> inputPrimitiveClassObject) throws GeneralSecurityException {
     Util.validateKeyset(keyset);
     PrimitiveSet.Builder<B> builder = PrimitiveSet.newBuilder(inputPrimitiveClassObject);
+    builder.setAnnotations(annotations);
     for (Keyset.Key key : keyset.getKeyList()) {
       if (key.getStatus() == KeyStatusType.ENABLED) {
         B primitive = Registry.getPrimitive(key.getKeyData(), inputPrimitiveClassObject);

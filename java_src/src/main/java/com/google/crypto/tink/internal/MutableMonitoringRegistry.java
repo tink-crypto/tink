@@ -49,18 +49,25 @@ public final class MutableMonitoringRegistry {
   }
   private static final DoNothingClient DO_NOTHING_CLIENT = new DoNothingClient();
 
-  private final AtomicReference<MonitoringClient> monitoringClient =
-      new AtomicReference<>(DO_NOTHING_CLIENT);
+  private final AtomicReference<MonitoringClient> monitoringClient = new AtomicReference<>();
+
+  public synchronized void clear() {
+    monitoringClient.set(null);
+  }
 
   public synchronized void registerMonitoringClient(MonitoringClient client) {
-    if (!monitoringClient.get().equals(DO_NOTHING_CLIENT)) {
+    if (monitoringClient.get() != null) {
       throw new IllegalStateException("a monitoring client has already been registered");
     }
     monitoringClient.set(client);
   }
 
   public MonitoringClient getMonitoringClient() {
-    return monitoringClient.get();
+    MonitoringClient client = monitoringClient.get();
+    if (client == null) {
+      return DO_NOTHING_CLIENT;
+    }
+    return client;
   }
 
   public MutableMonitoringRegistry() {}

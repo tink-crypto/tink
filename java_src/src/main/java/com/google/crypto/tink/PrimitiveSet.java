@@ -174,6 +174,10 @@ public final class PrimitiveSet<P> {
     return primary;
   }
 
+  public boolean hasAnnotations() {
+    return !annotations.toMap().isEmpty();
+  }
+
   public MonitoringAnnotations getAnnotations() {
     return annotations;
   }

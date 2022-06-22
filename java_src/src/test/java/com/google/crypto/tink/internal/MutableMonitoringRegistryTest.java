@@ -61,4 +61,21 @@ public final class MutableMonitoringRegistryTest {
     registry.registerMonitoringClient(client);
     assertThrows(IllegalStateException.class, () -> registry.registerMonitoringClient(client));
   }
+
+  @Test
+  public void testRegisterClearRegisterWorks() throws Exception {
+    MutableMonitoringRegistry registry = new MutableMonitoringRegistry();
+    MonitoringClient client = new StubMonitoringClient();
+    registry.registerMonitoringClient(client);
+    assertThat(registry.getMonitoringClient()).isEqualTo(client);
+
+    registry.clear();
+
+    // After clear, we should get the default client.
+    assertThat(registry.getMonitoringClient()).isNotInstanceOf(StubMonitoringClient.class);
+
+    // And we can register again.
+    registry.registerMonitoringClient(client);
+    assertThat(registry.getMonitoringClient()).isEqualTo(client);
+  }
 }

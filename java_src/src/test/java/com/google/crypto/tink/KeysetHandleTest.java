@@ -26,8 +26,13 @@ import com.google.crypto.tink.config.TinkConfig;
 import com.google.crypto.tink.internal.KeyParser;
 import com.google.crypto.tink.internal.KeyStatusTypeProtoConverter;
 import com.google.crypto.tink.internal.LegacyProtoKey;
+import com.google.crypto.tink.internal.MonitoringUtil;
+import com.google.crypto.tink.internal.MutableMonitoringRegistry;
 import com.google.crypto.tink.internal.MutableSerializationRegistry;
 import com.google.crypto.tink.internal.ProtoKeySerialization;
+import com.google.crypto.tink.internal.testing.FakeMonitoringClient;
+import com.google.crypto.tink.monitoring.MonitoringAnnotations;
+import com.google.crypto.tink.monitoring.MonitoringClient;
 import com.google.crypto.tink.proto.AesEaxKey;
 import com.google.crypto.tink.proto.AesEaxKeyFormat;
 import com.google.crypto.tink.proto.EcdsaPrivateKey;
@@ -76,14 +81,29 @@ public class KeysetHandleTest {
   }
 
   private static class AeadToEncryptOnlyWrapper implements PrimitiveWrapper<Aead, EncryptOnly> {
+    private static class EncryptOnlyWithMonitoring implements EncryptOnly {
+
+      private final MonitoringClient.Logger logger;
+      private final PrimitiveSet<Aead> primitiveSet;
+
+      EncryptOnlyWithMonitoring(PrimitiveSet<Aead> primitiveSet) {
+        this.primitiveSet = primitiveSet;
+        MonitoringClient client = MutableMonitoringRegistry.globalInstance().getMonitoringClient();
+        logger =
+            client.createLogger(
+                MonitoringUtil.getMonitoringKeysetInfo(primitiveSet), "encrypt_only", "encrypt");
+      }
+
+      @Override
+      public byte[] encrypt(final byte[] plaintext) throws GeneralSecurityException {
+        logger.log(primitiveSet.getPrimary().getKeyId(), plaintext.length);
+        return primitiveSet.getPrimary().getPrimitive().encrypt(plaintext, new byte[0]);
+      }
+    }
+
     @Override
     public EncryptOnly wrap(PrimitiveSet<Aead> set) throws GeneralSecurityException {
-      return new EncryptOnly() {
-        @Override
-        public byte[] encrypt(final byte[] plaintext) throws GeneralSecurityException {
-          return set.getPrimary().getPrimitive().encrypt(plaintext, new byte[0]);
-        }
-      };
+      return new EncryptOnlyWithMonitoring(set);
     }
 
     @Override
@@ -409,6 +429,31 @@ public class KeysetHandleTest {
 
     Aead aead = handle.getPrimitive(Aead.class);
     assertThat(aead.decrypt(encryptOnly.encrypt(message), new byte[0])).isEqualTo(message);
+  }
+
+  @Test
+  public void monitoringClientGetsAnnotationsWithKeysetInfo() throws Exception {
+    MutableMonitoringRegistry.globalInstance().clear();
+    FakeMonitoringClient fakeMonitoringClient = new FakeMonitoringClient();
+    MutableMonitoringRegistry.globalInstance().registerMonitoringClient(fakeMonitoringClient);
+
+    Keyset keyset =
+        TestUtil.createKeyset(
+            TestUtil.createKey(
+                TestUtil.createAesGcmKeyData(
+                    TestUtil.hexDecode("000102030405060708090a0b0c0d0e0f")),
+                42,
+                KeyStatusType.ENABLED,
+                OutputPrefixType.TINK));
+    byte[] message = Random.randBytes(123);
+    MonitoringAnnotations annotations =
+        MonitoringAnnotations.newBuilder().add("annotation_name", "annotation_value").build();
+    KeysetHandle handleWithAnnotations = KeysetHandle.fromKeysetAndAnnotations(keyset, annotations);
+    EncryptOnly encryptOnlyWithAnnotations = handleWithAnnotations.getPrimitive(EncryptOnly.class);
+    encryptOnlyWithAnnotations.encrypt(message);
+    List<FakeMonitoringClient.LogEntry> entries = fakeMonitoringClient.getLogEntries();
+    assertThat(entries).hasSize(1);
+    assertThat(entries.get(0).getKeysetInfo().getAnnotations()).isEqualTo(annotations);
   }
 
   @Test
