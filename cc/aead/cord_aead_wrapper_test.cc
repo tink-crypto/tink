@@ -91,7 +91,7 @@ TEST(AeadSetWrapperTest, WrapperEncryptDecrypt) {
   auto aead_set = setup_keyset();
   CordAeadWrapper wrapper;
   auto aead_result = wrapper.Wrap(std::move(aead_set));
-  ASSERT_THAT(aead_result.status(), IsOk());
+  ASSERT_THAT(aead_result, IsOk());
   auto aead = std::move(aead_result.value());
   absl::Cord plaintext;
   plaintext.Append("some_plaintext");
@@ -140,7 +140,7 @@ TEST(AeadSetWrapperTest, WrapperEncryptDecryptMultipleKeys) {
   // Wrap the primitive set
   CordAeadWrapper wrapper;
   auto aead_result = wrapper.Wrap(std::move(aead_set));
-  ASSERT_THAT(aead_result.status(), IsOk());
+  ASSERT_THAT(aead_result, IsOk());
   aead = std::move(aead_result.value());
 
   // Encrypt with the wrapped AEAD and check if result was equal to the
@@ -155,7 +155,7 @@ TEST(AeadSetWrapperTest, WrapperEncryptDecryptManyChunks) {
   auto aead_set = setup_keyset();
   CordAeadWrapper wrapper;
   auto aead_result = wrapper.Wrap(std::move(aead_set));
-  ASSERT_THAT(aead_result.status(), IsOk());
+  ASSERT_THAT(aead_result, IsOk());
   auto aead = std::move(aead_result.value());
 
   std::string plaintext = "";
@@ -181,7 +181,7 @@ TEST(AeadSetWrapperTest, WrapperEncryptBadDecrypt) {
   auto aead_set = setup_keyset();
   CordAeadWrapper wrapper;
   auto aead_result = wrapper.Wrap(std::move(aead_set));
-  ASSERT_THAT(aead_result.status(), IsOk());
+  ASSERT_THAT(aead_result, IsOk());
   auto aead = std::move(aead_result.value());
   absl::Cord plaintext;
   plaintext.Append("some_plaintext");

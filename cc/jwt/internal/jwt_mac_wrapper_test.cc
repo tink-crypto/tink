@@ -108,7 +108,7 @@ TEST_F(JwtMacWrapperTest, CannotWrapPrimitivesFromNonRawOrTinkKeys) {
 
   util::StatusOr<std::unique_ptr<KeysetHandle>> keyset_handle =
       KeysetHandle::GenerateNew(tink_key_template);
-  EXPECT_THAT(keyset_handle.status(), IsOk());
+  EXPECT_THAT(keyset_handle, IsOk());
 
   EXPECT_FALSE((*keyset_handle)->GetPrimitive<JwtMac>().status().ok());
 }
@@ -117,34 +117,34 @@ TEST_F(JwtMacWrapperTest, GenerateRawComputeVerifySuccess) {
   KeyTemplate key_template = createTemplate(OutputPrefixType::RAW);
   util::StatusOr<std::unique_ptr<KeysetHandle>> keyset_handle =
       KeysetHandle::GenerateNew(key_template);
-  EXPECT_THAT(keyset_handle.status(), IsOk());
+  EXPECT_THAT(keyset_handle, IsOk());
   util::StatusOr<std::unique_ptr<JwtMac>> jwt_mac =
       (*keyset_handle)->GetPrimitive<JwtMac>();
-  EXPECT_THAT(jwt_mac.status(), IsOk());
+  EXPECT_THAT(jwt_mac, IsOk());
 
   util::StatusOr<RawJwt> raw_jwt =
       RawJwtBuilder().SetIssuer("issuer").WithoutExpiration().Build();
-  ASSERT_THAT(raw_jwt.status(), IsOk());
+  ASSERT_THAT(raw_jwt, IsOk());
 
   util::StatusOr<std::string> compact =
       (*jwt_mac)->ComputeMacAndEncode(*raw_jwt);
-  ASSERT_THAT(compact.status(), IsOk());
+  ASSERT_THAT(compact, IsOk());
 
   util::StatusOr<JwtValidator> validator = JwtValidatorBuilder()
                                                .ExpectIssuer("issuer")
                                                .AllowMissingExpiration()
                                                .Build();
-  ASSERT_THAT(validator.status(), IsOk());
+  ASSERT_THAT(validator, IsOk());
   util::StatusOr<VerifiedJwt> verified_jwt =
       (*jwt_mac)->VerifyMacAndDecode(*compact, *validator);
-  ASSERT_THAT(verified_jwt.status(), IsOk());
+  ASSERT_THAT(verified_jwt, IsOk());
   EXPECT_THAT(verified_jwt->GetIssuer(), IsOkAndHolds("issuer"));
 
   util::StatusOr<JwtValidator> validator2 = JwtValidatorBuilder()
                                                 .ExpectIssuer("unknown")
                                                 .AllowMissingExpiration()
                                                 .Build();
-  ASSERT_THAT(validator2.status(), IsOk());
+  ASSERT_THAT(validator2, IsOk());
   util::StatusOr<VerifiedJwt> verified_jwt2 =
       (*jwt_mac)->VerifyMacAndDecode(*compact, *validator2);
   EXPECT_FALSE(verified_jwt2.ok());
@@ -158,7 +158,7 @@ TEST_F(JwtMacWrapperTest, GenerateRawComputeVerifySuccess) {
       KeysetHandleWithTinkPrefix(**keyset_handle);
   util::StatusOr<std::unique_ptr<JwtMac>> tink_jwt_mac =
       tink_keyset_handle->GetPrimitive<JwtMac>();
-  ASSERT_THAT(tink_jwt_mac.status(), IsOk());
+  ASSERT_THAT(tink_jwt_mac, IsOk());
 
   EXPECT_THAT(
       (*tink_jwt_mac)->VerifyMacAndDecode(*compact, *validator).status(),
@@ -169,27 +169,27 @@ TEST_F(JwtMacWrapperTest, GenerateTinkComputeVerifySuccess) {
   KeyTemplate key_template = createTemplate(OutputPrefixType::TINK);
   util::StatusOr<std::unique_ptr<KeysetHandle>> keyset_handle =
       KeysetHandle::GenerateNew(key_template);
-  EXPECT_THAT(keyset_handle.status(), IsOk());
+  EXPECT_THAT(keyset_handle, IsOk());
   util::StatusOr<std::unique_ptr<JwtMac>> jwt_mac =
       (*keyset_handle)->GetPrimitive<JwtMac>();
-  EXPECT_THAT(jwt_mac.status(), IsOk());
+  EXPECT_THAT(jwt_mac, IsOk());
 
   util::StatusOr<RawJwt> raw_jwt =
       RawJwtBuilder().SetIssuer("issuer").WithoutExpiration().Build();
-  ASSERT_THAT(raw_jwt.status(), IsOk());
+  ASSERT_THAT(raw_jwt, IsOk());
 
   util::StatusOr<std::string> compact =
       (*jwt_mac)->ComputeMacAndEncode(*raw_jwt);
-  ASSERT_THAT(compact.status(), IsOk());
+  ASSERT_THAT(compact, IsOk());
 
   util::StatusOr<JwtValidator> validator = JwtValidatorBuilder()
                                                .ExpectIssuer("issuer")
                                                .AllowMissingExpiration()
                                                .Build();
-  ASSERT_THAT(validator.status(), IsOk());
+  ASSERT_THAT(validator, IsOk());
   util::StatusOr<VerifiedJwt> verified_jwt =
       (*jwt_mac)->VerifyMacAndDecode(*compact, *validator);
-  ASSERT_THAT(verified_jwt.status(), IsOk());
+  ASSERT_THAT(verified_jwt, IsOk());
   EXPECT_THAT(verified_jwt->GetIssuer(), test::IsOkAndHolds("issuer"));
 
   // Parse header to make sure that key ID is correctly encoded.
@@ -202,7 +202,7 @@ TEST_F(JwtMacWrapperTest, GenerateTinkComputeVerifySuccess) {
   ASSERT_TRUE(DecodeHeader(parts[0], &json_header));
   util::StatusOr<google::protobuf::Struct> header =
       JsonStringToProtoStruct(json_header);
-  ASSERT_THAT(header.status(), IsOk());
+  ASSERT_THAT(header, IsOk());
   EXPECT_THAT(GetKeyId((*header).fields().find("kid")->second.string_value()),
               key_id);
 
@@ -212,7 +212,7 @@ TEST_F(JwtMacWrapperTest, GenerateTinkComputeVerifySuccess) {
       KeysetHandleWithNewKeyId(**keyset_handle);
   util::StatusOr<std::unique_ptr<JwtMac>> jwt_mac_with_new_key_id =
       keyset_handle_with_new_key_id->GetPrimitive<JwtMac>();
-  ASSERT_THAT(jwt_mac_with_new_key_id.status(), IsOk());
+  ASSERT_THAT(jwt_mac_with_new_key_id, IsOk());
 
   util::StatusOr<VerifiedJwt> verified_jwt_2 =
       (*jwt_mac_with_new_key_id)->VerifyMacAndDecode(*compact, *validator);
@@ -228,56 +228,56 @@ TEST_F(JwtMacWrapperTest, KeyRotation) {
     KeysetManager manager;
 
     util::StatusOr<uint32_t> old_id = manager.Add(key_template);
-    ASSERT_THAT(old_id.status(), IsOk());
+    ASSERT_THAT(old_id, IsOk());
     ASSERT_THAT(manager.SetPrimary(*old_id), IsOk());
     std::unique_ptr<KeysetHandle> handle1 = manager.GetKeysetHandle();
     util::StatusOr<std::unique_ptr<JwtMac>> jwt_mac1 =
         handle1->GetPrimitive<JwtMac>();
-    ASSERT_THAT(jwt_mac1.status(), IsOk());
+    ASSERT_THAT(jwt_mac1, IsOk());
 
     util::StatusOr<uint32_t> new_id = manager.Add(key_template);
-    ASSERT_THAT(new_id.status(), IsOk());
+    ASSERT_THAT(new_id, IsOk());
     std::unique_ptr<KeysetHandle> handle2 = manager.GetKeysetHandle();
     util::StatusOr<std::unique_ptr<JwtMac>> jwt_mac2 =
         handle2->GetPrimitive<JwtMac>();
-    ASSERT_THAT(jwt_mac2.status(), IsOk());
+    ASSERT_THAT(jwt_mac2, IsOk());
 
     ASSERT_THAT(manager.SetPrimary(*new_id), IsOk());
     std::unique_ptr<KeysetHandle> handle3 = manager.GetKeysetHandle();
     util::StatusOr<std::unique_ptr<JwtMac>> jwt_mac3 =
         handle3->GetPrimitive<JwtMac>();
-    ASSERT_THAT(jwt_mac3.status(), IsOk());
+    ASSERT_THAT(jwt_mac3, IsOk());
 
     ASSERT_THAT(manager.Disable(*old_id), IsOk());
     std::unique_ptr<KeysetHandle> handle4 = manager.GetKeysetHandle();
     util::StatusOr<std::unique_ptr<JwtMac>> jwt_mac4 =
         handle4->GetPrimitive<JwtMac>();
-    ASSERT_THAT(jwt_mac4.status(), IsOk());
+    ASSERT_THAT(jwt_mac4, IsOk());
 
     util::StatusOr<RawJwt> raw_jwt =
         RawJwtBuilder().SetIssuer("issuer").WithoutExpiration().Build();
-    ASSERT_THAT(raw_jwt.status(), IsOk());
+    ASSERT_THAT(raw_jwt, IsOk());
     util::StatusOr<JwtValidator> validator = JwtValidatorBuilder()
                                                  .ExpectIssuer("issuer")
                                                  .AllowMissingExpiration()
                                                  .Build();
-    ASSERT_THAT(validator.status(), IsOk());
+    ASSERT_THAT(validator, IsOk());
 
     util::StatusOr<std::string> compact1 =
         (*jwt_mac1)->ComputeMacAndEncode(*raw_jwt);
-    ASSERT_THAT(compact1.status(), IsOk());
+    ASSERT_THAT(compact1, IsOk());
 
     util::StatusOr<std::string> compact2 =
         (*jwt_mac2)->ComputeMacAndEncode(*raw_jwt);
-    ASSERT_THAT(compact2.status(), IsOk());
+    ASSERT_THAT(compact2, IsOk());
 
     util::StatusOr<std::string> compact3 =
         (*jwt_mac3)->ComputeMacAndEncode(*raw_jwt);
-    ASSERT_THAT(compact3.status(), IsOk());
+    ASSERT_THAT(compact3, IsOk());
 
     util::StatusOr<std::string> compact4 =
         (*jwt_mac4)->ComputeMacAndEncode(*raw_jwt);
-    ASSERT_THAT(compact4.status(), IsOk());
+    ASSERT_THAT(compact4, IsOk());
 
     EXPECT_THAT((*jwt_mac1)->VerifyMacAndDecode(*compact1, *validator).status(),
                 IsOk());

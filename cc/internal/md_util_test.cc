@@ -69,9 +69,9 @@ TEST(MdUtil, ComputeHashAcceptsNullStringView) {
   std::string str;
   util::StatusOr<std::string> empty_str_hash = ComputeHash(str, *EVP_sha512());
 
-  ASSERT_THAT(null_hash.status(), IsOk());
-  ASSERT_THAT(empty_hash.status(), IsOk());
-  ASSERT_THAT(empty_str_hash.status(), IsOk());
+  ASSERT_THAT(null_hash, IsOk());
+  ASSERT_THAT(empty_hash, IsOk());
+  ASSERT_THAT(empty_str_hash, IsOk());
 
   EXPECT_EQ(*null_hash, *empty_hash);
   EXPECT_EQ(*null_hash, *empty_str_hash);
@@ -120,7 +120,7 @@ GetMdUtilComputeHashSamplesTestParams() {
 TEST_P(MdUtilComputeHashSamplesTest, ComputesHash) {
   const MdUtilComputeHashSamplesTestParam& params = GetParam();
   util::StatusOr<const EVP_MD*> hasher = EvpHashFromHashType(params.hash_type);
-  ASSERT_THAT(hasher.status(), IsOk());
+  ASSERT_THAT(hasher, IsOk());
   std::string data = absl::HexStringToBytes(params.data_hex);
   std::string expected_digest =
       absl::HexStringToBytes(params.expected_digest_hex);

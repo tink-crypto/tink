@@ -175,7 +175,7 @@ TEST_F(Ed25519VerifyBoringSslTest, InvalidPublicKey) {
       continue;
     }
     std::string key(keysize, 'x');
-    EXPECT_THAT(Ed25519VerifyBoringSsl::New(key).status(), Not(IsOk()));
+    EXPECT_THAT(Ed25519VerifyBoringSsl::New(key), Not(IsOk()));
   }
 }
 
@@ -186,7 +186,7 @@ TEST_F(Ed25519VerifyBoringSslTest, MessageEmptyVersusNullStringView) {
   TestVector empty_message_test_vector = GetTestVectors()[0];
   util::StatusOr<std::unique_ptr<PublicKeyVerify>> verifier =
       Ed25519VerifyBoringSsl::New(empty_message_test_vector.public_key);
-  ASSERT_THAT(verifier.status(), IsOk());
+  ASSERT_THAT(verifier, IsOk());
 
   // Message is a null string_view.
   const absl::string_view kEmptyStringView;
@@ -216,7 +216,7 @@ TEST_P(Ed25519VerifyBoringSslParamsTest, VerifiesCorrectly) {
 
   util::StatusOr<std::unique_ptr<PublicKeyVerify>> verifier =
       Ed25519VerifyBoringSsl::New(test_vector.public_key);
-  ASSERT_THAT(verifier.status(), IsOk());
+  ASSERT_THAT(verifier, IsOk());
   EXPECT_THAT((*verifier)->Verify(test_vector.signature, test_vector.message),
               IsOk());
 }

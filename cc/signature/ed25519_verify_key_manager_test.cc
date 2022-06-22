@@ -99,11 +99,11 @@ TEST(Ed25519SignKeyManagerTest, Create) {
   auto direct_signer_or =
       subtle::Ed25519SignBoringSsl::New(util::SecretDataFromStringView(
           absl::StrCat(private_key.key_value(), public_key.key_value())));
-  ASSERT_THAT(direct_signer_or.status(), IsOk());
+  ASSERT_THAT(direct_signer_or, IsOk());
 
   auto verifier_or =
       Ed25519VerifyKeyManager().GetPrimitive<PublicKeyVerify>(public_key);
-  ASSERT_THAT(verifier_or.status(), IsOk());
+  ASSERT_THAT(verifier_or, IsOk());
 
   std::string message = "Some message";
   EXPECT_THAT(verifier_or.value()->Verify(
@@ -120,11 +120,11 @@ TEST(Ed25519SignKeyManagerTest, CreateDifferentPrivateKey) {
   auto direct_signer_or = subtle::Ed25519SignBoringSsl::New(
       util::SecretDataFromStringView(absl::StrCat(
           private_key.key_value(), private_key.public_key().key_value())));
-  ASSERT_THAT(direct_signer_or.status(), IsOk());
+  ASSERT_THAT(direct_signer_or, IsOk());
 
   auto verifier_or =
       Ed25519VerifyKeyManager().GetPrimitive<PublicKeyVerify>(public_key);
-  ASSERT_THAT(verifier_or.status(), IsOk());
+  ASSERT_THAT(verifier_or, IsOk());
 
   std::string message = "Some message";
   EXPECT_THAT(verifier_or.value()->Verify(

@@ -130,7 +130,7 @@ TEST(AesCmacKeyManagerTest, ValidateKeyFormatTagSizes) {
 
 TEST(AesCmacKeyManagerTest, CreateKey) {
   AesCmacKeyFormat format = ValidKeyFormat();
-  ASSERT_THAT(AesCmacKeyManager().CreateKey(format).status(), IsOk());
+  ASSERT_THAT(AesCmacKeyManager().CreateKey(format), IsOk());
   AesCmacKey key = AesCmacKeyManager().CreateKey(format).value();
   EXPECT_THAT(key.version(), Eq(0));
   EXPECT_THAT(key.key_value(), SizeIs(format.key_size()));
@@ -176,13 +176,13 @@ TEST(AesCmacKeyManagerTest, GetPrimitive) {
   AesCmacKeyFormat format = ValidKeyFormat();
   AesCmacKey key = AesCmacKeyManager().CreateKey(format).value();
   auto manager_mac_or = AesCmacKeyManager().GetPrimitive<Mac>(key);
-  ASSERT_THAT(manager_mac_or.status(), IsOk());
+  ASSERT_THAT(manager_mac_or, IsOk());
   auto mac_value_or = manager_mac_or.value()->ComputeMac("some plaintext");
-  ASSERT_THAT(mac_value_or.status(), IsOk());
+  ASSERT_THAT(mac_value_or, IsOk());
 
   auto direct_mac_or = subtle::AesCmacBoringSsl::New(
       util::SecretDataFromStringView(key.key_value()), key.params().tag_size());
-  ASSERT_THAT(direct_mac_or.status(), IsOk());
+  ASSERT_THAT(direct_mac_or, IsOk());
   EXPECT_THAT(
       direct_mac_or.value()->VerifyMac(mac_value_or.value(), "some plaintext"),
       IsOk());

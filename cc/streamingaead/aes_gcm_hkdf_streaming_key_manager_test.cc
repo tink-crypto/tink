@@ -110,7 +110,7 @@ TEST(AesGcmHkdfStreamingKeyManagerTest, GetPrimitive) {
 
   auto streaming_aead_from_manager_result =
       AesGcmHkdfStreamingKeyManager().GetPrimitive<StreamingAead>(key);
-  EXPECT_THAT(streaming_aead_from_manager_result.status(), IsOk());
+  EXPECT_THAT(streaming_aead_from_manager_result, IsOk());
 
   int derived_key_size = 16;
   int ciphertext_segment_size = 1024;
@@ -123,7 +123,7 @@ TEST(AesGcmHkdfStreamingKeyManagerTest, GetPrimitive) {
   params.ciphertext_offset = ciphertext_offset;
   auto streaming_aead_direct_result =
       subtle::AesGcmHkdfStreaming::New(std::move(params));
-  EXPECT_THAT(streaming_aead_direct_result.status(), IsOk());
+  EXPECT_THAT(streaming_aead_direct_result, IsOk());
 
   // Check that the two primitives are the same by encrypting with one, and
   // decrypting with the other.
@@ -205,7 +205,7 @@ TEST(AesGcmHkdfStreamingKeyManagerTest, CreateKey) {
   key_format.mutable_params()->set_hkdf_hash_type(HashType::SHA256);
   key_format.mutable_params()->set_ciphertext_segment_size(1024);
   auto key_or = AesGcmHkdfStreamingKeyManager().CreateKey(key_format);
-  ASSERT_THAT(key_or.status(), IsOk());
+  ASSERT_THAT(key_or, IsOk());
   EXPECT_THAT(key_or.value().version(), Eq(0));
   EXPECT_THAT(key_or.value().params().ciphertext_segment_size(),
               Eq(key_format.params().ciphertext_segment_size()));
@@ -229,7 +229,7 @@ TEST(AesGcmHkdfStreamingKeyManagerTest, DeriveKey) {
 
   StatusOr<AesGcmHkdfStreamingKey> key_or =
       AesGcmHkdfStreamingKeyManager().DeriveKey(key_format, &input_stream);
-  ASSERT_THAT(key_or.status(), IsOk());
+  ASSERT_THAT(key_or, IsOk());
   EXPECT_THAT(key_or.value().key_value(),
               Eq("01234567890123456789012345678901"));
   EXPECT_THAT(key_or.value().params().derived_key_size(),

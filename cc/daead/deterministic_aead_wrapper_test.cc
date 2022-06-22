@@ -239,18 +239,18 @@ TEST_F(DeterministicAeadSetWrapperWithMonitoringTest,
       daead_primitive_set
           ->AddPrimitive(absl::make_unique<DummyDeterministicAead>("daead0"),
                          keyset_info.key_info(0))
-          .status(), IsOk());
+          , IsOk());
   ASSERT_THAT(
       daead_primitive_set
           ->AddPrimitive(absl::make_unique<DummyDeterministicAead>("daead1"),
                          keyset_info.key_info(1))
-          .status(), IsOk());
+          , IsOk());
   // Set the last as primary.
   util::StatusOr<PrimitiveSet<DeterministicAead>::Entry<DeterministicAead>*>
       last = daead_primitive_set->AddPrimitive(
           absl::make_unique<DummyDeterministicAead>("daead2"),
           keyset_info.key_info(2));
-  ASSERT_THAT(last.status(), IsOk());
+  ASSERT_THAT(last, IsOk());
   ASSERT_THAT(daead_primitive_set->set_primary(*last), IsOk());
   // Record the ID of the primary key.
   const uint32_t primary_key_id = keyset_info.key_info(2).key_id();
@@ -268,7 +268,7 @@ TEST_F(DeterministicAeadSetWrapperWithMonitoringTest,
               Log(primary_key_id, plaintext.size()));
   util::StatusOr<std::string> ciphertext =
       (*daead)->EncryptDeterministically(plaintext, associated_data);
-  EXPECT_THAT(ciphertext.status(), IsOk());
+  EXPECT_THAT(ciphertext, IsOk());
 }
 
 // Test that successful encrypt operations are logged.
@@ -297,7 +297,7 @@ TEST_F(DeterministicAeadSetWrapperWithMonitoringTest,
       last = daead_primitive_set->AddPrimitive(
           absl::make_unique<DummyDeterministicAead>("daead2"),
           keyset_info.key_info(2));
-  ASSERT_THAT(last.status(), IsOk());
+  ASSERT_THAT(last, IsOk());
   ASSERT_THAT(daead_primitive_set->set_primary(*last), IsOk());
   // Record the ID of the primary key.
   const uint32_t primary_key_id = keyset_info.key_info(2).key_id();
@@ -315,7 +315,7 @@ TEST_F(DeterministicAeadSetWrapperWithMonitoringTest,
   // Check that calling DecryptDeterministically triggers a Log() call.
   util::StatusOr<std::string> ciphertext =
       (*daead)->EncryptDeterministically(plaintext, associated_data);
-  EXPECT_THAT(ciphertext.status(), IsOk());
+  EXPECT_THAT(ciphertext, IsOk());
 
   // In the log expect the size of the ciphertext without the non-raw prefix.
   EXPECT_CALL(*decryption_monitoring_client_,
@@ -349,7 +349,7 @@ TEST_F(DeterministicAeadSetWrapperWithMonitoringTest,
       last = daead_primitive_set->AddPrimitive(
           CreateAlwaysFailingDeterministicAead("daead2"),
           keyset_info.key_info(2));
-  ASSERT_THAT(last.status(), IsOk());
+  ASSERT_THAT(last, IsOk());
   ASSERT_THAT(daead_primitive_set->set_primary(*last), IsOk());
 
 
@@ -393,7 +393,7 @@ TEST_F(DeterministicAeadSetWrapperWithMonitoringTest,
       last = daead_primitive_set->AddPrimitive(
           CreateAlwaysFailingDeterministicAead("daead2"),
           keyset_info.key_info(2));
-  ASSERT_THAT(last.status(), IsOk());
+  ASSERT_THAT(last, IsOk());
   ASSERT_THAT(daead_primitive_set->set_primary(*last), IsOk());
 
 

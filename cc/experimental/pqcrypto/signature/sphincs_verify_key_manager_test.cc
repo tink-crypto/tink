@@ -160,7 +160,7 @@ TEST_P(SphincsVerifyKeyManagerTest, PublicKeyValid) {
   StatusOr<SphincsPublicKey> public_key =
       CreateValidPublicKey(test_case.private_key_size, test_case.hash_type,
                            test_case.variant, test_case.sig_length_type);
-  ASSERT_THAT(public_key.status(), IsOk());
+  ASSERT_THAT(public_key, IsOk());
 
   EXPECT_THAT(SphincsVerifyKeyManager().ValidateKey(*public_key), IsOk());
 }
@@ -169,7 +169,7 @@ TEST(SphincsVerifyKeyManagerTest, PublicKeyInvalidParams) {
   StatusOr<SphincsPublicKey> public_key = CreateValidPublicKey(
       subtle::kSphincsPrivateKeySize64, SphincsHashType::UNKNOWN_HASH_TYPE,
       SphincsVariant::UNKNOWN_VARIANT, SphincsSignatureType::UNKNOWN_SIG_TYPE);
-  EXPECT_THAT(public_key.status(), Not(IsOk()));
+  EXPECT_THAT(public_key, Not(IsOk()));
 }
 
 TEST_P(SphincsVerifyKeyManagerTest, PublicKeyWrongVersion) {
@@ -178,7 +178,7 @@ TEST_P(SphincsVerifyKeyManagerTest, PublicKeyWrongVersion) {
   StatusOr<SphincsPublicKey> public_key =
       CreateValidPublicKey(test_case.private_key_size, test_case.hash_type,
                            test_case.variant, test_case.sig_length_type);
-  ASSERT_THAT(public_key.status(), IsOk());
+  ASSERT_THAT(public_key, IsOk());
 
   public_key->set_version(1);
   EXPECT_THAT(SphincsVerifyKeyManager().ValidateKey(*public_key), Not(IsOk()));
@@ -190,11 +190,11 @@ TEST_P(SphincsVerifyKeyManagerTest, Create) {
   StatusOr<SphincsPrivateKey> private_key =
       CreateValidPrivateKey(test_case.private_key_size, test_case.hash_type,
                             test_case.variant, test_case.sig_length_type);
-  ASSERT_THAT(private_key.status(), IsOk());
+  ASSERT_THAT(private_key, IsOk());
 
   StatusOr<SphincsPublicKey> public_key =
       SphincsSignKeyManager().GetPublicKey(*private_key);
-  ASSERT_THAT(public_key.status(), IsOk());
+  ASSERT_THAT(public_key, IsOk());
 
   subtle::SphincsParamsPqclean sphincs_params_pqclean = {
       .hash_type = EnumsPqcrypto::ProtoToSubtle(test_case.hash_type),
@@ -208,15 +208,15 @@ TEST_P(SphincsVerifyKeyManagerTest, Create) {
 
   util::StatusOr<std::unique_ptr<PublicKeySign>> direct_signer =
       subtle::SphincsSign::New(sphincs_private_key_pqclean);
-  ASSERT_THAT(direct_signer.status(), IsOk());
+  ASSERT_THAT(direct_signer, IsOk());
 
   util::StatusOr<std::unique_ptr<PublicKeyVerify>> verifier =
       SphincsVerifyKeyManager().GetPrimitive<PublicKeyVerify>(*public_key);
-  ASSERT_THAT(verifier.status(), IsOk());
+  ASSERT_THAT(verifier, IsOk());
 
   std::string message = "Some message";
   util::StatusOr<std::string> signature = (*direct_signer)->Sign(message);
-  ASSERT_THAT(signature.status(), IsOk());
+  ASSERT_THAT(signature, IsOk());
   EXPECT_THAT((*verifier)->Verify(*signature, message), IsOk());
 }
 
@@ -226,18 +226,18 @@ TEST_P(SphincsVerifyKeyManagerTest, CreateInvalidPublicKey) {
   StatusOr<SphincsPrivateKey> private_key =
       CreateValidPrivateKey(test_case.private_key_size, test_case.hash_type,
                             test_case.variant, test_case.sig_length_type);
-  ASSERT_THAT(private_key.status(), IsOk());
+  ASSERT_THAT(private_key, IsOk());
 
   StatusOr<SphincsPublicKey> public_key =
       SphincsSignKeyManager().GetPublicKey(*private_key);
-  ASSERT_THAT(public_key.status(), IsOk());
+  ASSERT_THAT(public_key, IsOk());
 
   std::string bad_public_key_data = "bad_public_key";
   public_key->set_key_value(bad_public_key_data);
 
   util::StatusOr<std::unique_ptr<PublicKeyVerify>> verifier =
       SphincsVerifyKeyManager().GetPrimitive<PublicKeyVerify>(*public_key);
-  EXPECT_THAT(verifier.status(), Not(IsOk()));
+  EXPECT_THAT(verifier, Not(IsOk()));
 }
 
 TEST_P(SphincsVerifyKeyManagerTest, CreateDifferentPublicKey) {
@@ -246,16 +246,16 @@ TEST_P(SphincsVerifyKeyManagerTest, CreateDifferentPublicKey) {
   StatusOr<SphincsPrivateKey> private_key =
       CreateValidPrivateKey(test_case.private_key_size, test_case.hash_type,
                             test_case.variant, test_case.sig_length_type);
-  ASSERT_THAT(private_key.status(), IsOk());
+  ASSERT_THAT(private_key, IsOk());
 
   // Create a new public key derived from a diffferent private key.
   StatusOr<SphincsPrivateKey> new_private_key =
       CreateValidPrivateKey(test_case.private_key_size, test_case.hash_type,
                             test_case.variant, test_case.sig_length_type);
-  ASSERT_THAT(new_private_key.status(), IsOk());
+  ASSERT_THAT(new_private_key, IsOk());
   StatusOr<SphincsPublicKey> public_key =
       SphincsSignKeyManager().GetPublicKey(*new_private_key);
-  ASSERT_THAT(public_key.status(), IsOk());
+  ASSERT_THAT(public_key, IsOk());
 
   subtle::SphincsParamsPqclean sphincs_params_pqclean = {
       .hash_type = EnumsPqcrypto::ProtoToSubtle(test_case.hash_type),
@@ -269,15 +269,15 @@ TEST_P(SphincsVerifyKeyManagerTest, CreateDifferentPublicKey) {
 
   util::StatusOr<std::unique_ptr<PublicKeySign>> direct_signer =
       subtle::SphincsSign::New(sphincs_private_key_pqclean);
-  ASSERT_THAT(direct_signer.status(), IsOk());
+  ASSERT_THAT(direct_signer, IsOk());
 
   util::StatusOr<std::unique_ptr<PublicKeyVerify>> verifier =
       SphincsVerifyKeyManager().GetPrimitive<PublicKeyVerify>(*public_key);
-  ASSERT_THAT(verifier.status(), IsOk());
+  ASSERT_THAT(verifier, IsOk());
 
   std::string message = "Some message";
   util::StatusOr<std::string> signature = (*direct_signer)->Sign(message);
-  ASSERT_THAT(signature.status(), IsOk());
+  ASSERT_THAT(signature, IsOk());
   EXPECT_THAT((*verifier)->Verify(*signature, message), Not(IsOk()));
 }
 

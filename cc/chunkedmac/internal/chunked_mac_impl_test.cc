@@ -66,7 +66,7 @@ TEST(ChunkedMacFactoryTest, NewChunkedCmacSucceeds) {
   AesCmacKey key;
   *key.mutable_params() = params;
 
-  EXPECT_THAT(NewChunkedCmac(key).status(), IsOk());
+  EXPECT_THAT(NewChunkedCmac(key), IsOk());
 }
 
 TEST(ChunkedMacFactoryTest, NewChunkedCmacWithMissingKeyParamsFails) {
@@ -81,7 +81,7 @@ TEST(ChunkedMacFactoryTest, NewChunkedHmacSucceeds) {
   HmacKey key;
   *key.mutable_params() = params;
 
-  EXPECT_THAT(NewChunkedHmac(key).status(), IsOk());
+  EXPECT_THAT(NewChunkedHmac(key), IsOk());
 }
 
 TEST(ChunkedMacFactoryTest, NewChunkedHmacWithMissingKeyParamsFails) {
@@ -98,7 +98,7 @@ TEST(ChunkedMacImplTest, CreateComputationSucceeds) {
               std::move(stateful_mac)))));
   ChunkedMacImpl chunked_mac(std::move(factory));
 
-  EXPECT_THAT(chunked_mac.CreateComputation().status(), IsOk());
+  EXPECT_THAT(chunked_mac.CreateComputation(), IsOk());
 }
 
 TEST(ChunkedMacImplTest, CreateComputationWithFactoryErrorFails) {
@@ -122,7 +122,7 @@ TEST(ChunkedMacImplTest, CreateVerificationSucceeds) {
               std::move(stateful_mac)))));
   ChunkedMacImpl chunked_mac(std::move(factory));
 
-  EXPECT_THAT(chunked_mac.CreateVerification("tag").status(), IsOk());
+  EXPECT_THAT(chunked_mac.CreateVerification("tag"), IsOk());
 }
 
 TEST(ChunkedMacImplTest, CreateVerificationWithFactoryErrorFails) {

@@ -51,19 +51,19 @@ class JwtSignatureImplTest : public ::testing::Test {
   void SetUp() override {
     util::StatusOr<internal::EcKey> ec_key =
         internal::NewEcKey(subtle::EllipticCurveType::NIST_P256);
-    ASSERT_THAT(ec_key.status(), IsOk());
+    ASSERT_THAT(ec_key, IsOk());
 
     util::StatusOr<std::unique_ptr<subtle::EcdsaSignBoringSsl>> sign =
         subtle::EcdsaSignBoringSsl::New(
             *ec_key, subtle::HashType::SHA256,
             subtle::EcdsaSignatureEncoding::IEEE_P1363);
-    ASSERT_THAT(sign.status(), IsOk());
+    ASSERT_THAT(sign, IsOk());
 
     util::StatusOr<std::unique_ptr<subtle::EcdsaVerifyBoringSsl>> verify =
         subtle::EcdsaVerifyBoringSsl::New(
             *ec_key, subtle::HashType::SHA256,
             subtle::EcdsaSignatureEncoding::IEEE_P1363);
-    ASSERT_THAT(verify.status(), IsOk());
+    ASSERT_THAT(verify, IsOk());
 
     jwt_sign_ = absl::make_unique<JwtPublicKeySignImpl>(
         *std::move(sign), "ES256", /*custom_kid=*/absl::nullopt);
@@ -84,22 +84,22 @@ TEST_F(JwtSignatureImplTest, CreateAndValidateToken) {
           .SetIssuedAt(now)
           .SetExpiration(now + absl::Seconds(300))
           .Build();
-  ASSERT_THAT(raw_jwt_or.status(), IsOk());
+  ASSERT_THAT(raw_jwt_or, IsOk());
   RawJwt raw_jwt = raw_jwt_or.value();
 
   util::StatusOr<std::string> compact =
       jwt_sign_->SignAndEncodeWithKid(raw_jwt, /*kid=*/absl::nullopt);
-  ASSERT_THAT(compact.status(), IsOk());
+  ASSERT_THAT(compact, IsOk());
 
   util::StatusOr<JwtValidator> validator =
       JwtValidatorBuilder().ExpectTypeHeader("typeHeader").Build();
-  ASSERT_THAT(validator.status(), IsOk());
+  ASSERT_THAT(validator, IsOk());
 
   // Success
   util::StatusOr<VerifiedJwt> verified_jwt =
       jwt_verify_->VerifyAndDecodeWithKid(*compact, *validator,
                                           /*kid=*/absl::nullopt);
-  ASSERT_THAT(verified_jwt.status(), IsOk());
+  ASSERT_THAT(verified_jwt, IsOk());
   EXPECT_THAT(verified_jwt->GetTypeHeader(), IsOkAndHolds("typeHeader"));
   EXPECT_THAT(verified_jwt->GetJwtId(), IsOkAndHolds("id123"));
 
@@ -112,7 +112,7 @@ TEST_F(JwtSignatureImplTest, CreateAndValidateToken) {
   // Fails with wrong issuer
   util::StatusOr<JwtValidator> validator2 =
       JwtValidatorBuilder().ExpectIssuer("unknown").Build();
-  ASSERT_THAT(validator2.status(), IsOk());
+  ASSERT_THAT(validator2, IsOk());
   EXPECT_FALSE(
       jwt_verify_
           ->VerifyAndDecodeWithKid(*compact, *validator2, /*kid=*/absl::nullopt)
@@ -121,7 +121,7 @@ TEST_F(JwtSignatureImplTest, CreateAndValidateToken) {
   // Fails because token is not yet valid
   util::StatusOr<JwtValidator> validator_1970 =
       JwtValidatorBuilder().SetFixedNow(absl::FromUnixSeconds(12345)).Build();
-  ASSERT_THAT(validator_1970.status(), IsOk());
+  ASSERT_THAT(validator_1970, IsOk());
   EXPECT_FALSE(jwt_verify_
                    ->VerifyAndDecodeWithKid(*compact, *validator_1970,
                                             /*kid=*/absl::nullopt)
@@ -137,18 +137,18 @@ TEST_F(JwtSignatureImplTest, CreateAndValidateTokenWithKid) {
                                        .SetIssuedAt(now)
                                        .SetExpiration(now + absl::Seconds(300))
                                        .Build();
-  ASSERT_THAT(raw_jwt.status(), IsOk());
+  ASSERT_THAT(raw_jwt, IsOk());
 
   util::StatusOr<std::string> compact =
       jwt_sign_->SignAndEncodeWithKid(*raw_jwt, "kid-123");
-  ASSERT_THAT(compact.status(), IsOk());
+  ASSERT_THAT(compact, IsOk());
 
   util::StatusOr<JwtValidator> validator =
       JwtValidatorBuilder().ExpectTypeHeader("typeHeader").Build();
 
   util::StatusOr<VerifiedJwt> verified_jwt =
       jwt_verify_->VerifyAndDecodeWithKid(*compact, *validator, "kid-123");
-  ASSERT_THAT(verified_jwt.status(), IsOk());
+  ASSERT_THAT(verified_jwt, IsOk());
   EXPECT_THAT(verified_jwt->GetTypeHeader(), IsOkAndHolds("typeHeader"));
   EXPECT_THAT(verified_jwt->GetJwtId(), IsOkAndHolds("id123"));
 
@@ -166,7 +166,7 @@ TEST_F(JwtSignatureImplTest, CreateAndValidateTokenWithKid) {
   ASSERT_TRUE(DecodeHeader(parts[0], &json_header));
   util::StatusOr<google::protobuf::Struct> header =
       JsonStringToProtoStruct(json_header);
-  ASSERT_THAT(header.status(), IsOk());
+  ASSERT_THAT(header, IsOk());
   EXPECT_THAT(header->fields().find("kid")->second.string_value(),
               Eq("kid-123"));
 }
@@ -174,14 +174,14 @@ TEST_F(JwtSignatureImplTest, CreateAndValidateTokenWithKid) {
 TEST_F(JwtSignatureImplTest, FailsWithModifiedCompact) {
   util::StatusOr<RawJwt> raw_jwt =
       RawJwtBuilder().SetJwtId("id123").WithoutExpiration().Build();
-  ASSERT_THAT(raw_jwt.status(), IsOk());
+  ASSERT_THAT(raw_jwt, IsOk());
 
   util::StatusOr<std::string> compact =
       jwt_sign_->SignAndEncodeWithKid(*raw_jwt, /*kid=*/absl::nullopt);
-  ASSERT_THAT(compact.status(), IsOk());
+  ASSERT_THAT(compact, IsOk());
   util::StatusOr<JwtValidator> validator =
       JwtValidatorBuilder().AllowMissingExpiration().Build();
-  ASSERT_THAT(validator.status(), IsOk());
+  ASSERT_THAT(validator, IsOk());
 
   EXPECT_THAT(
       jwt_verify_
@@ -213,7 +213,7 @@ TEST_F(JwtSignatureImplTest, FailsWithModifiedCompact) {
 TEST_F(JwtSignatureImplTest, FailsWithInvalidTokens) {
   util::StatusOr<JwtValidator> validator =
       JwtValidatorBuilder().AllowMissingExpiration().Build();
-  ASSERT_THAT(validator.status(), IsOk());
+  ASSERT_THAT(validator, IsOk());
   EXPECT_FALSE(jwt_verify_
                    ->VerifyAndDecodeWithKid("eyJhbGciOiJIUzI1NiJ9.e30.YWJj.",
                                             *validator, /*kid=*/absl::nullopt)

@@ -58,17 +58,17 @@ TEST_P(FalconSignTest, ValidSignatureLength) {
   // Generate falcon key pair.
   util::StatusOr<FalconKeyPair> key_pair =
       GenerateFalconKeyPair(test_case.private_key_size);
-  ASSERT_THAT(key_pair.status(), IsOk());
+  ASSERT_THAT(key_pair, IsOk());
 
   // Create a new signer.
   util::StatusOr<std::unique_ptr<PublicKeySign>> signer =
       FalconSign::New(key_pair->GetPrivateKey());
-  ASSERT_THAT(signer.status(), IsOk());
+  ASSERT_THAT(signer, IsOk());
 
   // Sign a message.
   std::string message = "message to be signed";
   util::StatusOr<std::string> signature = ((*signer)->Sign(message));
-  ASSERT_THAT(signature.status(), IsOk());
+  ASSERT_THAT(signature, IsOk());
 
   // Check signature size.
   EXPECT_NE(*signature, message);
@@ -85,20 +85,20 @@ TEST_P(FalconSignTest, NonDeterminism) {
   // Generate falcon key pair.
   util::StatusOr<FalconKeyPair> key_pair =
       GenerateFalconKeyPair(test_case.private_key_size);
-  ASSERT_THAT(key_pair.status(), IsOk());
+  ASSERT_THAT(key_pair, IsOk());
 
   // Create two signers based on same private key.
   util::StatusOr<std::unique_ptr<PublicKeySign>> signer =
       FalconSign::New(key_pair->GetPrivateKey());
-  ASSERT_THAT(signer.status(), IsOk());
+  ASSERT_THAT(signer, IsOk());
 
   // Sign the same message twice, using the same private key.
   std::string message = "message to be signed";
   util::StatusOr<std::string> first_signature = ((*signer))->Sign(message);
-  ASSERT_THAT(first_signature.status(), IsOk());
+  ASSERT_THAT(first_signature, IsOk());
 
   util::StatusOr<std::string> second_signature = ((*signer))->Sign(message);
-  ASSERT_THAT(second_signature.status(), IsOk());
+  ASSERT_THAT(second_signature, IsOk());
 
   // Check signatures size.
   EXPECT_NE(*first_signature, message);
@@ -121,7 +121,7 @@ TEST_P(FalconSignTest, FipsMode) {
   // Generate falcon key pair.
   util::StatusOr<FalconKeyPair> key_pair =
       GenerateFalconKeyPair(test_case.private_key_size);
-  ASSERT_THAT(key_pair.status(), IsOk());
+  ASSERT_THAT(key_pair, IsOk());
 
   // Create a new signer.
   EXPECT_THAT(FalconSign::New(key_pair->GetPrivateKey()).status(),

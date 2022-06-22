@@ -60,7 +60,7 @@ TEST(MonitoringUtilTest, MonitoringKeySetInfoFromPrimitiveSetNullPrimary) {
   key_info.set_output_prefix_type(OutputPrefixType::TINK);
   util::StatusOr<PrimitiveSet<std::string>::Entry<std::string> *> added_entry =
       primitive_set.AddPrimitive(std::move(some_string), key_info);
-  ASSERT_THAT(added_entry.status(), IsOk());
+  ASSERT_THAT(added_entry, IsOk());
   EXPECT_THAT(MonitoringKeySetInfoFromPrimitiveSet(primitive_set).status(),
               test::StatusIs(absl::StatusCode::kInvalidArgument));
 }
@@ -119,16 +119,16 @@ TEST(MonitoringUtilTest, MonitoringKeySetInfoFromPrimitiveSetValid) {
   util::StatusOr<PrimitiveSet<std::string>::Entry<std::string> *> added_entry =
       primitive_set.AddPrimitive(std::move(primitive_1.primitive),
                                  primitive_1.key_info);
-  ASSERT_THAT(added_entry.status(), IsOk());
+  ASSERT_THAT(added_entry, IsOk());
   ASSERT_THAT(primitive_set.set_primary(*added_entry), IsOk());
 
   added_entry = primitive_set.AddPrimitive(std::move(primitive_2.primitive),
                                            primitive_2.key_info);
-  ASSERT_THAT(added_entry.status(), IsOk());
+  ASSERT_THAT(added_entry, IsOk());
 
   util::StatusOr<MonitoringKeySetInfo> monitoring_keyset_info =
       MonitoringKeySetInfoFromPrimitiveSet(primitive_set);
-  ASSERT_THAT(monitoring_keyset_info.status(), IsOk());
+  ASSERT_THAT(monitoring_keyset_info, IsOk());
   EXPECT_EQ(monitoring_keyset_info->GetPrimaryKeyId(), 1);
   EXPECT_THAT(monitoring_keyset_info->GetAnnotations(),
               UnorderedElementsAreArray(kAnnotations));

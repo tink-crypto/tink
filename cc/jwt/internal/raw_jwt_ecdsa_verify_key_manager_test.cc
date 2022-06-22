@@ -108,15 +108,15 @@ TEST(EcdsaSignKeyManagerTest, Create) {
       subtle::EcdsaSignBoringSsl::New(
           ec_key, Enums::ProtoToSubtle(HashType::SHA256),
           subtle::EcdsaSignatureEncoding::IEEE_P1363);
-  ASSERT_THAT(direct_signer.status(), IsOk());
+  ASSERT_THAT(direct_signer, IsOk());
 
   util::StatusOr<std::unique_ptr<PublicKeyVerify>> verifier =
       RawJwtEcdsaVerifyKeyManager().GetPrimitive<PublicKeyVerify>(public_key);
-  ASSERT_THAT(verifier.status(), IsOk());
+  ASSERT_THAT(verifier, IsOk());
 
   std::string message = "Some message";
   util::StatusOr<std::string> sig = (*direct_signer)->Sign(message);
-  ASSERT_THAT(sig.status(), IsOk());
+  ASSERT_THAT(sig, IsOk());
   EXPECT_THAT((*verifier)->Verify(*sig, message), IsOk());
 }
 
@@ -136,15 +136,15 @@ TEST(EcdsaSignKeyManagerTest, CreateDifferentPrivateKey) {
       subtle::EcdsaSignBoringSsl::New(
           ec_key, Enums::ProtoToSubtle(HashType::SHA256),
           subtle::EcdsaSignatureEncoding::IEEE_P1363);
-  ASSERT_THAT(direct_signer.status(), IsOk());
+  ASSERT_THAT(direct_signer, IsOk());
 
   util::StatusOr<std::unique_ptr<PublicKeyVerify>> verifier =
       RawJwtEcdsaVerifyKeyManager().GetPrimitive<PublicKeyVerify>(*public_key);
-  ASSERT_THAT(verifier.status(), IsOk());
+  ASSERT_THAT(verifier, IsOk());
 
   std::string message = "Some message";
   util::StatusOr<std::string> sig = (*direct_signer)->Sign(message);
-  ASSERT_THAT(sig.status(), IsOk());
+  ASSERT_THAT(sig, IsOk());
   EXPECT_THAT((*verifier)->Verify(*sig, message), Not(IsOk()));
 }
 

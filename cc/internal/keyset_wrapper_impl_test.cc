@@ -111,7 +111,7 @@ TEST(KeysetWrapperImplTest, Basic) {
   util::StatusOr<std::unique_ptr<OutputPrimitive>> wrapped =
       wrapper_or->Wrap(keyset, /*annotations=*/{});
 
-  ASSERT_THAT(wrapped.status(), IsOk());
+  ASSERT_THAT(wrapped, IsOk());
   ASSERT_THAT(*wrapped.value(),
               UnorderedElementsAre(Pair(111, "one"), Pair(222, "two (primary)"),
                                    Pair(333, "three")));
@@ -130,7 +130,7 @@ TEST(KeysetWrapperImplTest, FailingGetPrimitive) {
   util::StatusOr<std::unique_ptr<OutputPrimitive>> wrapped =
       wrapper_or->Wrap(keyset, /*annotations=*/{});
 
-  ASSERT_THAT(wrapped.status(), Not(IsOk()));
+  ASSERT_THAT(wrapped, Not(IsOk()));
   ASSERT_THAT(std::string(wrapped.status().message()), HasSubstr("error:two"));
 }
 
@@ -144,7 +144,7 @@ TEST(KeysetWrapperImplTest, ValidatesKeyset) {
   util::StatusOr<std::unique_ptr<OutputPrimitive>> wrapped =
       wrapper_or->Wrap(google::crypto::tink::Keyset(), /*annotations=*/{});
 
-  ASSERT_THAT(wrapped.status(), Not(IsOk()));
+  ASSERT_THAT(wrapped, Not(IsOk()));
 }
 
 // This test checks that only enabled keys are used to create the primitive set.
@@ -162,7 +162,7 @@ TEST(KeysetWrapperImplTest, OnlyEnabled) {
   util::StatusOr<std::unique_ptr<OutputPrimitive>> wrapped =
       wrapper_or->Wrap(keyset, /*annotations=*/{});
 
-  ASSERT_THAT(wrapped.status(), IsOk());
+  ASSERT_THAT(wrapped, IsOk());
   ASSERT_THAT(*wrapped.value(),
               UnorderedElementsAre(Pair(111, "one"), Pair(222, "two (primary)"),
                                    Pair(444, "four")));

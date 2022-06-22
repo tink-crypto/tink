@@ -251,7 +251,7 @@ TEST_F(JsonKeysetWriterTest, WriteLargeKeyId) {
   std::stringbuf buffer;
   std::unique_ptr<std::ostream> destination_stream(new std::ostream(&buffer));
   auto writer_result = JsonKeysetWriter::New(std::move(destination_stream));
-  ASSERT_THAT(writer_result.status(), IsOk());
+  ASSERT_THAT(writer_result, IsOk());
   auto writer = std::move(writer_result.value());
   ASSERT_THAT(writer->Write(keyset), IsOk());
   EXPECT_THAT(buffer.str(), HasSubstr("\"primaryKeyId\": 4123456789"));

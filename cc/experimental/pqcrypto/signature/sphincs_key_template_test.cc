@@ -132,7 +132,7 @@ TEST_P(SphincsKeyTemplateTest, KeyManagerCompatibility) {
 
   util::StatusOr<std::unique_ptr<portable_proto::MessageLite>> new_key_result =
       key_manager->get_key_factory().NewKey(key_format);
-  EXPECT_THAT(new_key_result.status(), IsOk());
+  EXPECT_THAT(new_key_result, IsOk());
 }
 
 INSTANTIATE_TEST_SUITE_P(

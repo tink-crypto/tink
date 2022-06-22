@@ -79,7 +79,7 @@ TEST(GcpKmsClientTest, ClientCreationAndRegistry) {
   EXPECT_THAT(client_result, IsOk());
 
   auto registry_result = KmsClients::Get(gcp_key1);
-  EXPECT_THAT(registry_result.status(), IsOk());
+  EXPECT_THAT(registry_result, IsOk());
 }
 
 TEST(GcpKmsClientTest, ClientCreationInvalidRegistry) {

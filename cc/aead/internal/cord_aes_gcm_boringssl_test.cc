@@ -59,7 +59,7 @@ class CordAesGcmBoringSslTest : public Test {
     key_ = util::SecretDataFromStringView(absl::HexStringToBytes(key_128));
     util::StatusOr<std::unique_ptr<CordAead>> res =
         CordAesGcmBoringSsl::New(key_);
-    ASSERT_THAT(res.status(), IsOk());
+    ASSERT_THAT(res, IsOk());
     cipher_ = std::move(*res);
   }
 
@@ -72,10 +72,10 @@ TEST_F(CordAesGcmBoringSslTest, EncryptDecryptCord) {
   absl::Cord associated_data_cord = absl::Cord(kAssociatedData);
   util::StatusOr<absl::Cord> ct =
       cipher_->Encrypt(message_cord, associated_data_cord);
-  ASSERT_THAT(ct.status(), IsOk());
+  ASSERT_THAT(ct, IsOk());
   EXPECT_THAT(*ct, SizeIs(message_cord.size() + 12 + 16));
   util::StatusOr<absl::Cord> pt = cipher_->Decrypt(*ct, associated_data_cord);
-  ASSERT_THAT(pt.status(), IsOk());
+  ASSERT_THAT(pt, IsOk());
   EXPECT_EQ(*pt, message_cord.Flatten());
 }
 
@@ -85,10 +85,10 @@ TEST_F(CordAesGcmBoringSslTest, ChunkyCordEncrypt) {
   absl::Cord associated_data_cord = absl::Cord(kAssociatedData);
   util::StatusOr<absl::Cord> ct =
       cipher_->Encrypt(message_cord, associated_data_cord);
-  ASSERT_THAT(ct.status(), IsOk());
+  ASSERT_THAT(ct, IsOk());
   EXPECT_THAT(*ct, SizeIs(message_cord.size() + 12 + 16));
   util::StatusOr<absl::Cord> pt = cipher_->Decrypt(*ct, associated_data_cord);
-  ASSERT_THAT(pt.status(), IsOk());
+  ASSERT_THAT(pt, IsOk());
   EXPECT_THAT(*pt, Eq(kLongMessage));
 }
 
@@ -97,12 +97,12 @@ TEST_F(CordAesGcmBoringSslTest, ChunkyCordDecrypt) {
   absl::Cord associated_data_cord = absl::Cord(kAssociatedData);
   util::StatusOr<absl::Cord> ct =
       cipher_->Encrypt(message_cord, associated_data_cord);
-  ASSERT_THAT(ct.status(), IsOk());
+  ASSERT_THAT(ct, IsOk());
   absl::Cord fragmented_ct = absl::MakeFragmentedCord(
       absl::StrSplit(ct->Flatten(), absl::ByLength(3)));
   util::StatusOr<absl::Cord> pt =
       cipher_->Decrypt(fragmented_ct, associated_data_cord);
-  ASSERT_THAT(pt.status(), IsOk());
+  ASSERT_THAT(pt, IsOk());
   EXPECT_THAT(*pt, Eq(kLongMessage));
 }
 
@@ -111,20 +111,20 @@ TEST_F(CordAesGcmBoringSslTest, CanDecryptWithStringAead) {
   absl::Cord associated_data_cord = absl::Cord(kAssociatedData);
   util::StatusOr<absl::Cord> ct =
       cipher_->Encrypt(message_cord, associated_data_cord);
-  ASSERT_THAT(ct.status(), IsOk());
+  ASSERT_THAT(ct, IsOk());
   EXPECT_EQ(ct->size(), message_cord.size() + 12 + 16);
   util::StatusOr<absl::Cord> pt = cipher_->Decrypt(*ct, associated_data_cord);
-  ASSERT_THAT(pt.status(), IsOk());
+  ASSERT_THAT(pt, IsOk());
   EXPECT_EQ(*pt, message_cord.Flatten());
 
   // Decrypt as string and check if it gives same result.
   util::StatusOr<std::unique_ptr<Aead>> string_aead =
       subtle::AesGcmBoringSsl::New(key_);
-  ASSERT_THAT(string_aead.status(), IsOk());
+  ASSERT_THAT(string_aead, IsOk());
   util::StatusOr<std::string> plaintext =
       (*string_aead)
           ->Decrypt(ct.value().Flatten(), associated_data_cord.Flatten());
-  ASSERT_THAT(plaintext.status(), IsOk());
+  ASSERT_THAT(plaintext, IsOk());
   EXPECT_EQ(*plaintext, kMessage);
 }
 
@@ -132,9 +132,9 @@ TEST_F(CordAesGcmBoringSslTest, ModifiedCord) {
   absl::Cord message = absl::Cord(kMessage);
   absl::Cord ad = absl::Cord(kAssociatedData);
   util::StatusOr<absl::Cord> ct = cipher_->Encrypt(message, ad);
-  ASSERT_THAT(ct.status(), IsOk());
+  ASSERT_THAT(ct, IsOk());
   util::StatusOr<absl::Cord> plaintext = cipher_->Decrypt(*ct, ad);
-  ASSERT_THAT(plaintext.status(), IsOk());
+  ASSERT_THAT(plaintext, IsOk());
   EXPECT_EQ(*plaintext, message);
 
   // Modify the ciphertext.
@@ -143,7 +143,7 @@ TEST_F(CordAesGcmBoringSslTest, ModifiedCord) {
     modified_ct[i / 8] ^= 1 << (i % 8);
     absl::Cord modified_ct_cord;
     modified_ct_cord = absl::Cord(modified_ct);
-    EXPECT_THAT(cipher_->Decrypt(modified_ct_cord, ad).status(), Not(IsOk()))
+    EXPECT_THAT(cipher_->Decrypt(modified_ct_cord, ad), Not(IsOk()))
         << i;
   }
   // Modify the associated data.
@@ -154,14 +154,14 @@ TEST_F(CordAesGcmBoringSslTest, ModifiedCord) {
     modified_associated_data_cord = absl::Cord(modified_ad);
     util::StatusOr<absl::Cord> decrypted =
         cipher_->Decrypt(*ct, modified_associated_data_cord);
-    EXPECT_THAT(decrypted.status(), Not(IsOk())) << i << " pt: " << *decrypted;
+    EXPECT_THAT(decrypted, Not(IsOk())) << i << " pt: " << *decrypted;
   }
   // Truncate the ciphertext.
   for (size_t i = 0; i < ct->size(); i++) {
     std::string truncated_ct(std::string(ct->Flatten()), 0, i);
     absl::Cord truncated_ct_cord;
     truncated_ct_cord = absl::Cord(truncated_ct);
-    EXPECT_THAT(cipher_->Decrypt(truncated_ct_cord, ad).status(), Not(IsOk()))
+    EXPECT_THAT(cipher_->Decrypt(truncated_ct_cord, ad), Not(IsOk()))
         << i;
   }
 }

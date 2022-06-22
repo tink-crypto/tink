@@ -108,22 +108,22 @@ TEST_P(SphincsVerifyTest, BasicSignVerify) {
 
   // Generate sphincs key pair.
   util::StatusOr<SphincsKeyPair> key_pair = GenerateSphincsKeyPair(params);
-  ASSERT_THAT(key_pair.status(), IsOk());
+  ASSERT_THAT(key_pair, IsOk());
 
   // Create a new signer.
   util::StatusOr<std::unique_ptr<PublicKeySign>> signer =
       SphincsSign::New(key_pair->GetPrivateKey());
-  ASSERT_THAT(signer.status(), IsOk());
+  ASSERT_THAT(signer, IsOk());
 
   // Sign a message.
   std::string message = "message to be signed";
   util::StatusOr<std::string> signature = (*signer)->Sign(message);
-  ASSERT_THAT(signature.status(), IsOk());
+  ASSERT_THAT(signature, IsOk());
 
   // Create a new verifier.
   absl::StatusOr<std::unique_ptr<PublicKeyVerify>> verifier =
       SphincsVerify::New(key_pair->GetPublicKey());
-  ASSERT_THAT(verifier.status(), IsOk());
+  ASSERT_THAT(verifier, IsOk());
 
   // Verify signature.
   Status status = (*verifier)->Verify(*signature, message);
@@ -146,22 +146,22 @@ TEST_P(SphincsVerifyTest, FailsWithWrongSignature) {
 
   // Generate sphincs key pair.
   util::StatusOr<SphincsKeyPair> key_pair = GenerateSphincsKeyPair(params);
-  ASSERT_THAT(key_pair.status(), IsOk());
+  ASSERT_THAT(key_pair, IsOk());
 
   // Create a new signer.
   util::StatusOr<std::unique_ptr<PublicKeySign>> signer =
       SphincsSign::New(key_pair->GetPrivateKey());
-  ASSERT_THAT(signer.status(), IsOk());
+  ASSERT_THAT(signer, IsOk());
 
   // Sign a message.
   std::string message = "message to be signed";
   util::StatusOr<std::string> signature = (*signer)->Sign(message);
-  ASSERT_THAT(signature.status(), IsOk());
+  ASSERT_THAT(signature, IsOk());
 
   // Create a new verifier.
   absl::StatusOr<std::unique_ptr<PublicKeyVerify>> verifier =
       SphincsVerify::New(key_pair->GetPublicKey());
-  ASSERT_THAT(verifier.status(), IsOk());
+  ASSERT_THAT(verifier, IsOk());
 
   // Verify signature.
   Status status =
@@ -185,22 +185,22 @@ TEST_P(SphincsVerifyTest, FailsWithWrongMessage) {
 
   // Generate sphincs key pair.
   util::StatusOr<SphincsKeyPair> key_pair = GenerateSphincsKeyPair(params);
-  ASSERT_THAT(key_pair.status(), IsOk());
+  ASSERT_THAT(key_pair, IsOk());
 
   // Create a new signer.
   util::StatusOr<std::unique_ptr<PublicKeySign>> signer =
       SphincsSign::New(key_pair->GetPrivateKey());
-  ASSERT_THAT(signer.status(), IsOk());
+  ASSERT_THAT(signer, IsOk());
 
   // Sign a message.
   std::string message = "message to be signed";
   util::StatusOr<std::string> signature = (*signer)->Sign(message);
-  ASSERT_THAT(signature.status(), IsOk());
+  ASSERT_THAT(signature, IsOk());
 
   // Create a new verifier.
   absl::StatusOr<std::unique_ptr<PublicKeyVerify>> verifier =
       SphincsVerify::New(key_pair->GetPublicKey());
-  ASSERT_THAT(verifier.status(), IsOk());
+  ASSERT_THAT(verifier, IsOk());
 
   // Verify signature.
   Status status = (*verifier)->Verify(*signature, "some bad message");
@@ -223,22 +223,22 @@ TEST_P(SphincsVerifyTest, FailsWithBytesFlipped) {
 
   // Generate sphincs key pair.
   util::StatusOr<SphincsKeyPair> key_pair = GenerateSphincsKeyPair(params);
-  ASSERT_THAT(key_pair.status(), IsOk());
+  ASSERT_THAT(key_pair, IsOk());
 
   // Create a new signer.
   util::StatusOr<std::unique_ptr<PublicKeySign>> signer =
       SphincsSign::New(key_pair->GetPrivateKey());
-  ASSERT_THAT(signer.status(), IsOk());
+  ASSERT_THAT(signer, IsOk());
 
   // Sign a message.
   std::string message = "message to be signed";
   util::StatusOr<std::string> signature = (*signer)->Sign(message);
-  ASSERT_THAT(signature.status(), IsOk());
+  ASSERT_THAT(signature, IsOk());
 
   // Create a new verifier.
   absl::StatusOr<std::unique_ptr<PublicKeyVerify>> verifier =
       SphincsVerify::New(key_pair->GetPublicKey());
-  ASSERT_THAT(verifier.status(), IsOk());
+  ASSERT_THAT(verifier, IsOk());
 
   // Invalidate one signature byte.
   (*signature)[0] ^= 1;
@@ -264,7 +264,7 @@ TEST_P(SphincsVerifyTest, FipsMode) {
 
   // Generate sphincs key pair.
   util::StatusOr<SphincsKeyPair> key_pair = GenerateSphincsKeyPair(params);
-  ASSERT_THAT(key_pair.status(), IsOk());
+  ASSERT_THAT(key_pair, IsOk());
 
   // Create a new signer.
   EXPECT_THAT(SphincsVerify::New(key_pair->GetPublicKey()).status(),

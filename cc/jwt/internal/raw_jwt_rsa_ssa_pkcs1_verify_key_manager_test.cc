@@ -132,10 +132,10 @@ TEST(JwtRsaSsaPkcs1SignKeyManagerTest, Create) {
       CreateKeyFormat(JwtRsaSsaPkcs1Algorithm::RS256, 3072, RSA_F4);
   StatusOr<JwtRsaSsaPkcs1PrivateKey> private_key =
       RawJwtRsaSsaPkcs1SignKeyManager().CreateKey(key_format);
-  ASSERT_THAT(private_key.status(), IsOk());
+  ASSERT_THAT(private_key, IsOk());
   StatusOr<JwtRsaSsaPkcs1PublicKey> public_key =
       RawJwtRsaSsaPkcs1SignKeyManager().GetPublicKey(*private_key);
-  ASSERT_THAT(public_key.status(), IsOk());
+  ASSERT_THAT(public_key, IsOk());
 
   internal::RsaPrivateKey private_key_subtle;
   private_key_subtle.n = private_key->public_key().n();
@@ -154,11 +154,11 @@ TEST(JwtRsaSsaPkcs1SignKeyManagerTest, Create) {
   util::StatusOr<std::unique_ptr<PublicKeyVerify>> verifier =
       RawJwtRsaSsaPkcs1VerifyKeyManager().GetPrimitive<PublicKeyVerify>(
           *public_key);
-  ASSERT_THAT(verifier.status(), IsOk());
+  ASSERT_THAT(verifier, IsOk());
 
   std::string message = "Some message";
   util::StatusOr<std::string> sig = (*direct_signer)->Sign(message);
-  ASSERT_THAT(sig.status(), IsOk());
+  ASSERT_THAT(sig, IsOk());
   EXPECT_THAT((*verifier)->Verify(*sig, message), IsOk());
 }
 
@@ -207,7 +207,7 @@ TEST(RawJwtRsaSsaPkcs1VerifyKeyManagerTest, NistTestVector) {
   key.set_e(nist_test_vector.e);
   util::StatusOr<std::unique_ptr<PublicKeyVerify>> verifier =
       RawJwtRsaSsaPkcs1VerifyKeyManager().GetPrimitive<PublicKeyVerify>(key);
-  EXPECT_THAT(verifier.status(), IsOk());
+  EXPECT_THAT(verifier, IsOk());
   EXPECT_THAT(
       (*verifier)->Verify(nist_test_vector.signature, nist_test_vector.message),
       IsOk());

@@ -219,18 +219,18 @@ TEST_F(HybridEncryptSetWrapperWithMonitoringTest,
       hybrid_encrypt_primitive_set
           ->AddPrimitive(absl::make_unique<DummyHybridEncrypt>("hybrid0"),
                          keyset_info.key_info(0))
-          .status(), IsOk());
+          , IsOk());
   ASSERT_THAT(
       hybrid_encrypt_primitive_set
           ->AddPrimitive(absl::make_unique<DummyHybridEncrypt>("hybrid1"),
                          keyset_info.key_info(1))
-          .status(), IsOk());
+          , IsOk());
   // Set the last as primary.
   util::StatusOr<PrimitiveSet<HybridEncrypt>::Entry<HybridEncrypt>*>
       last = hybrid_encrypt_primitive_set->AddPrimitive(
           absl::make_unique<DummyHybridEncrypt>("hybrid2"),
           keyset_info.key_info(2));
-  ASSERT_THAT(last.status(), IsOk());
+  ASSERT_THAT(last, IsOk());
   ASSERT_THAT(hybrid_encrypt_primitive_set->set_primary(*last), IsOk());
   // Record the ID of the primary key.
   const uint32_t primary_key_id = keyset_info.key_info(2).key_id();
@@ -248,7 +248,7 @@ TEST_F(HybridEncryptSetWrapperWithMonitoringTest,
               Log(primary_key_id, plaintext.size()));
   util::StatusOr<std::string> ciphertext =
       (*hybrid_encrypt)->Encrypt(plaintext, context);
-  EXPECT_THAT(ciphertext.status(), IsOk());
+  EXPECT_THAT(ciphertext, IsOk());
 }
 
 TEST_F(HybridEncryptSetWrapperWithMonitoringTest,
@@ -280,7 +280,7 @@ TEST_F(HybridEncryptSetWrapperWithMonitoringTest,
   // Create a Hybrid Encrypt and encrypt some data.
   util::StatusOr<std::unique_ptr<HybridEncrypt>> hybrid_encrypt =
       HybridEncryptWrapper().Wrap(std::move(hybrid_encrypt_primitive_set));
-  ASSERT_THAT(hybrid_encrypt.status(), IsOk());
+  ASSERT_THAT(hybrid_encrypt, IsOk());
 
   constexpr absl::string_view plaintext = "This is some plaintext!";
   constexpr absl::string_view context = "Some context!";

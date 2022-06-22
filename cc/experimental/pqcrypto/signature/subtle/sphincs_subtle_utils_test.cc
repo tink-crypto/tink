@@ -96,7 +96,7 @@ TEST_P(SphincsUtilsTest, SphincsKeysLength) {
 
   // Generate sphincs key pair.
   util::StatusOr<SphincsKeyPair> key_pair = GenerateSphincsKeyPair(params);
-  ASSERT_THAT(key_pair.status(), IsOk());
+  ASSERT_THAT(key_pair, IsOk());
 
   // Check keys size.
   EXPECT_EQ(key_pair->GetPrivateKey().GetKey().size(),
@@ -117,7 +117,7 @@ TEST_P(SphincsUtilsTest, DifferentContent) {
 
   // Generate sphincs key pair.
   util::StatusOr<SphincsKeyPair> key_pair = GenerateSphincsKeyPair(params);
-  ASSERT_THAT(key_pair.status(), IsOk());
+  ASSERT_THAT(key_pair, IsOk());
 
   // Check keys content is different.
   EXPECT_NE(util::SecretDataAsStringView(key_pair->GetPrivateKey().GetKey()),

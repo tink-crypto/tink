@@ -41,7 +41,7 @@ TEST(BufferTest, ExternalMemoryBlock) {
     SCOPED_TRACE(absl::StrCat("buf_size = ", buf_size));
     auto mem_block = absl::make_unique<char[]>(buf_size);
     auto buf_result = Buffer::NewNonOwning(mem_block.get(), buf_size);
-    ASSERT_THAT(buf_result.status(), IsOk());
+    ASSERT_THAT(buf_result, IsOk());
     auto buf = std::move(buf_result.value());
     EXPECT_EQ(buf_size, buf->size());
     EXPECT_EQ(buf_size, buf->allocated_size());
@@ -63,7 +63,7 @@ TEST(BufferTest, InternalMemoryBlock) {
   for (auto buf_size : {1, 10, 100, 1000, 10000, 100000, 1000000}) {
     SCOPED_TRACE(absl::StrCat("buf_size = ", buf_size));
     auto buf_result = Buffer::New(buf_size);
-    ASSERT_THAT(buf_result.status(), IsOk());
+    ASSERT_THAT(buf_result, IsOk());
     auto buf = std::move(buf_result.value());
     EXPECT_EQ(buf_size, buf->size());
     EXPECT_EQ(buf_size, buf->allocated_size());

@@ -126,7 +126,7 @@ TEST_F(MacConfigTest, RegisterFipsValidTemplates) {
   fips_key_templates.push_back(MacKeyTemplates::HmacSha512HalfSizeTag());
 
   for (auto key_template : fips_key_templates) {
-    EXPECT_THAT(KeysetHandle::GenerateNew(key_template).status(), IsOk());
+    EXPECT_THAT(KeysetHandle::GenerateNew(key_template), IsOk());
   }
 }
 

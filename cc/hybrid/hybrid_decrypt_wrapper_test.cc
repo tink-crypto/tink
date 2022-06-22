@@ -267,7 +267,7 @@ TEST_F(HybridDecryptSetWrapperWithMonitoringTest,
       hybrid_decrypt_primitive_set->AddPrimitive(
           absl::make_unique<DummyHybridDecrypt>("hybrid2"),
           keyset_info.key_info(2));
-  ASSERT_THAT(last.status(), IsOk());
+  ASSERT_THAT(last, IsOk());
   ASSERT_THAT(hybrid_decrypt_primitive_set->set_primary(*last), IsOk());
   // Record the ID of the primary key.
   const uint32_t primary_key_id = keyset_info.key_info(2).key_id();
@@ -317,7 +317,7 @@ TEST_F(HybridDecryptSetWrapperWithMonitoringTest,
   // Create a Hybrid Decrypt and decrypt some invalid ciphertext.
   util::StatusOr<std::unique_ptr<HybridDecrypt>> hybrid_decrypt =
       HybridDecryptWrapper().Wrap(std::move(hybrid_decrypt_primitive_set));
-  ASSERT_THAT(hybrid_decrypt.status(), IsOk());
+  ASSERT_THAT(hybrid_decrypt, IsOk());
 
   constexpr absl::string_view ciphertext = "This is some ciphertext!";
   constexpr absl::string_view context = "Some context!";

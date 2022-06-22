@@ -60,7 +60,7 @@ TEST_P(DilithiumKeyTest, DilithiumKeysLength) {
       key_pair = DilithiumPrivateKeyPqclean::GenerateKeyPair(
           test_case.private_key_size, test_case.seed_expansion);
 
-  ASSERT_THAT(key_pair.status(), IsOk());
+  ASSERT_THAT(key_pair, IsOk());
 
   // Check keys size.
   EXPECT_EQ((key_pair->first).GetKeyData().size(), test_case.private_key_size);
@@ -76,7 +76,7 @@ TEST_P(DilithiumKeyTest, DifferentContent) {
       key_pair = DilithiumPrivateKeyPqclean::GenerateKeyPair(
           test_case.private_key_size, test_case.seed_expansion);
 
-  ASSERT_THAT(key_pair.status(), IsOk());
+  ASSERT_THAT(key_pair, IsOk());
 
   // Check keys content is different.
   EXPECT_NE(util::SecretDataAsStringView(key_pair->first.GetKeyData()),

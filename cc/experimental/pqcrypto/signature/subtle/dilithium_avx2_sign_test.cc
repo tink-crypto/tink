@@ -96,17 +96,17 @@ TEST_P(DilithiumAvx2SignTest, SignatureLength) {
       key_pair = DilithiumPrivateKeyPqclean::GenerateKeyPair(
           test_case.key_size, test_case.seed_expansion);
 
-  ASSERT_THAT(key_pair.status(), IsOk());
+  ASSERT_THAT(key_pair, IsOk());
 
   // Create a new signer.
   util::StatusOr<std::unique_ptr<PublicKeySign>> signer =
       DilithiumAvx2Sign::New(key_pair->first);
-  ASSERT_THAT(signer.status(), IsOk());
+  ASSERT_THAT(signer, IsOk());
 
   // Sign a message.
   std::string message = "message to be signed";
   util::StatusOr<std::string> signature = (*std::move(signer))->Sign(message);
-  ASSERT_THAT(signature.status(), IsOk());
+  ASSERT_THAT(signature, IsOk());
 
   // Check signature size.
   EXPECT_NE(*signature, message);
@@ -126,26 +126,26 @@ TEST_P(DilithiumAvx2SignTest, Determinism) {
       key_pair = DilithiumPrivateKeyPqclean::GenerateKeyPair(
           test_case.key_size, test_case.seed_expansion);
 
-  ASSERT_THAT(key_pair.status(), IsOk());
+  ASSERT_THAT(key_pair, IsOk());
 
   // Create two signers based on same private key.
   util::StatusOr<std::unique_ptr<PublicKeySign>> first_signer =
       DilithiumAvx2Sign::New(key_pair->first);
-  ASSERT_THAT(first_signer.status(), IsOk());
+  ASSERT_THAT(first_signer, IsOk());
 
   util::StatusOr<std::unique_ptr<PublicKeySign>> second_signer =
       DilithiumAvx2Sign::New(key_pair->first);
-  ASSERT_THAT(second_signer.status(), IsOk());
+  ASSERT_THAT(second_signer, IsOk());
 
   // Sign the same message twice, using the same private key.
   std::string message = "message to be signed";
   util::StatusOr<std::string> first_signature =
       (*std::move(first_signer))->Sign(message);
-  ASSERT_THAT(first_signature.status(), IsOk());
+  ASSERT_THAT(first_signature, IsOk());
 
   util::StatusOr<std::string> second_signature =
       (*std::move(second_signer))->Sign(message);
-  ASSERT_THAT(second_signature.status(), IsOk());
+  ASSERT_THAT(second_signature, IsOk());
 
   // Check signatures size.
   EXPECT_NE(*first_signature, message);
@@ -171,7 +171,7 @@ TEST_P(DilithiumAvx2SignTest, FipsMode) {
       key_pair = DilithiumPrivateKeyPqclean::GenerateKeyPair(
           test_case.key_size, test_case.seed_expansion);
 
-  ASSERT_THAT(key_pair.status(), IsOk());
+  ASSERT_THAT(key_pair, IsOk());
 
   // Create a new signer.
   EXPECT_THAT(DilithiumAvx2Sign::New(key_pair->first).status(),

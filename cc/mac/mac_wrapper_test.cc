@@ -210,12 +210,12 @@ TEST(MacWrapperTest, VerifyRawAfterLegacy) {
 
   auto entry1 =
       mac_set->AddPrimitive(absl::make_unique<DummyMac>(""), key_info_1);
-  ASSERT_THAT(entry1.status(), IsOk());
+  ASSERT_THAT(entry1, IsOk());
   ASSERT_THAT(mac_set->set_primary(entry1.value()), IsOk());
 
   // Wrap mac_set and test the resulting Mac.
   auto wrapped_mac = MacWrapper().Wrap(std::move(mac_set));
-  EXPECT_THAT(wrapped_mac.status(), IsOk());
+  EXPECT_THAT(wrapped_mac, IsOk());
 
   std::string data = "some data";
   std::string mac_tag = TryBreakLegacyMac().ComputeMac(data).value();

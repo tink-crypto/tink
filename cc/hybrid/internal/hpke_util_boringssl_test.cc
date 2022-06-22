@@ -44,21 +44,21 @@ TEST(HpkeUtilBoringSslTest, ValidParamsFromProto) {
 
   util::StatusOr<const EVP_HPKE_KEM *> kem_from_enum =
       KemParam(google::crypto::tink::HpkeKem::DHKEM_X25519_HKDF_SHA256);
-  ASSERT_THAT(kem_from_enum.status(), IsOk());
+  ASSERT_THAT(kem_from_enum, IsOk());
   EXPECT_THAT(EVP_HPKE_KEM_id(*kem_from_enum),
               Eq(EVP_HPKE_DHKEM_X25519_HKDF_SHA256));
 
   util::StatusOr<const EVP_HPKE_KEM *> kem_from_proto = KemParam(params);
-  ASSERT_THAT(kem_from_proto.status(), IsOk());
+  ASSERT_THAT(kem_from_proto, IsOk());
   EXPECT_THAT(EVP_HPKE_KEM_id(*kem_from_proto),
               Eq(EVP_HPKE_DHKEM_X25519_HKDF_SHA256));
 
   util::StatusOr<const EVP_HPKE_KDF *> kdf = KdfParam(params);
-  ASSERT_THAT(kdf.status(), IsOk());
+  ASSERT_THAT(kdf, IsOk());
   EXPECT_THAT(EVP_HPKE_KDF_id(*kdf), Eq(EVP_HPKE_HKDF_SHA256));
 
   util::StatusOr<const EVP_HPKE_AEAD *> aead = AeadParam(params);
-  ASSERT_THAT(aead.status(), IsOk());
+  ASSERT_THAT(aead, IsOk());
   EXPECT_THAT(EVP_HPKE_AEAD_id(*aead), Eq(EVP_HPKE_AES_256_GCM));
 }
 
@@ -67,16 +67,16 @@ TEST(HpkeUtilBoringSslTest, ValidParamsFromStruct) {
                        HpkeAead::kAes256Gcm};
 
   util::StatusOr<const EVP_HPKE_KEM *> kem_from_proto = KemParam(params);
-  ASSERT_THAT(kem_from_proto.status(), IsOk());
+  ASSERT_THAT(kem_from_proto, IsOk());
   EXPECT_THAT(EVP_HPKE_KEM_id(*kem_from_proto),
               Eq(EVP_HPKE_DHKEM_X25519_HKDF_SHA256));
 
   util::StatusOr<const EVP_HPKE_KDF *> kdf = KdfParam(params);
-  ASSERT_THAT(kdf.status(), IsOk());
+  ASSERT_THAT(kdf, IsOk());
   EXPECT_THAT(EVP_HPKE_KDF_id(*kdf), Eq(EVP_HPKE_HKDF_SHA256));
 
   util::StatusOr<const EVP_HPKE_AEAD *> aead = AeadParam(params);
-  ASSERT_THAT(aead.status(), IsOk());
+  ASSERT_THAT(aead, IsOk());
   EXPECT_THAT(EVP_HPKE_AEAD_id(*aead), Eq(EVP_HPKE_AES_256_GCM));
 }
 
@@ -85,17 +85,17 @@ TEST(HpkeUtilBoringSslTest, UnknownKemParamFromProto) {
       CreateHpkeParams(google::crypto::tink::HpkeKem::KEM_UNKNOWN,
                        google::crypto::tink::HpkeKdf::HKDF_SHA256,
                        google::crypto::tink::HpkeAead::AES_256_GCM);
-  EXPECT_THAT(KemParam(params).status(), Not(IsOk()));
-  EXPECT_THAT(KdfParam(params).status(), IsOk());
-  EXPECT_THAT(AeadParam(params).status(), IsOk());
+  EXPECT_THAT(KemParam(params), Not(IsOk()));
+  EXPECT_THAT(KdfParam(params), IsOk());
+  EXPECT_THAT(AeadParam(params), IsOk());
 }
 
 TEST(HpkeUtilBoringSslTest, UnknownKemParamFromStruct) {
   HpkeParams params = {HpkeKem::kUnknownKem, HpkeKdf::kHkdfSha256,
                        HpkeAead::kAes256Gcm};
-  EXPECT_THAT(KemParam(params).status(), Not(IsOk()));
-  EXPECT_THAT(KdfParam(params).status(), IsOk());
-  EXPECT_THAT(AeadParam(params).status(), IsOk());
+  EXPECT_THAT(KemParam(params), Not(IsOk()));
+  EXPECT_THAT(KdfParam(params), IsOk());
+  EXPECT_THAT(AeadParam(params), IsOk());
 }
 
 TEST(HpkeUtilBoringSslTest, UnknownKdfParamFromProto) {
@@ -103,17 +103,17 @@ TEST(HpkeUtilBoringSslTest, UnknownKdfParamFromProto) {
       CreateHpkeParams(google::crypto::tink::HpkeKem::DHKEM_X25519_HKDF_SHA256,
                        google::crypto::tink::HpkeKdf::KDF_UNKNOWN,
                        google::crypto::tink::HpkeAead::AES_256_GCM);
-  EXPECT_THAT(KemParam(params).status(), IsOk());
-  EXPECT_THAT(KdfParam(params).status(), Not(IsOk()));
-  EXPECT_THAT(AeadParam(params).status(), IsOk());
+  EXPECT_THAT(KemParam(params), IsOk());
+  EXPECT_THAT(KdfParam(params), Not(IsOk()));
+  EXPECT_THAT(AeadParam(params), IsOk());
 }
 
 TEST(HpkeUtilBoringSslTest, UnknownKdfParamFromStruct) {
   HpkeParams params = {HpkeKem::kX25519HkdfSha256, HpkeKdf::kUnknownKdf,
                        HpkeAead::kAes256Gcm};
-  EXPECT_THAT(KemParam(params).status(), IsOk());
-  EXPECT_THAT(KdfParam(params).status(), Not(IsOk()));
-  EXPECT_THAT(AeadParam(params).status(), IsOk());
+  EXPECT_THAT(KemParam(params), IsOk());
+  EXPECT_THAT(KdfParam(params), Not(IsOk()));
+  EXPECT_THAT(AeadParam(params), IsOk());
 }
 
 TEST(HpkeUtilBoringSslTest, UnknownAeadParamFromProto) {
@@ -121,17 +121,17 @@ TEST(HpkeUtilBoringSslTest, UnknownAeadParamFromProto) {
       CreateHpkeParams(google::crypto::tink::HpkeKem::DHKEM_X25519_HKDF_SHA256,
                        google::crypto::tink::HpkeKdf::HKDF_SHA256,
                        google::crypto::tink::HpkeAead::AEAD_UNKNOWN);
-  EXPECT_THAT(KemParam(params).status(), IsOk());
-  EXPECT_THAT(KdfParam(params).status(), IsOk());
-  EXPECT_THAT(AeadParam(params).status(), Not(IsOk()));
+  EXPECT_THAT(KemParam(params), IsOk());
+  EXPECT_THAT(KdfParam(params), IsOk());
+  EXPECT_THAT(AeadParam(params), Not(IsOk()));
 }
 
 TEST(HpkeUtilBoringSslTest, UnknownAeadParamFromStruct) {
   HpkeParams params = {HpkeKem::kX25519HkdfSha256, HpkeKdf::kHkdfSha256,
                        HpkeAead::kUnknownAead};
-  EXPECT_THAT(KemParam(params).status(), IsOk());
-  EXPECT_THAT(KdfParam(params).status(), IsOk());
-  EXPECT_THAT(AeadParam(params).status(), Not(IsOk()));
+  EXPECT_THAT(KemParam(params), IsOk());
+  EXPECT_THAT(KdfParam(params), IsOk());
+  EXPECT_THAT(AeadParam(params), Not(IsOk()));
 }
 
 }  // namespace

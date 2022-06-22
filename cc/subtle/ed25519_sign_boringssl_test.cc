@@ -69,7 +69,7 @@ TEST_F(Ed25519SignBoringSslTest, testBasicSign) {
 
   // Generate a new key pair.
   util::StatusOr<Ed25519KeyPair> key = NewKeyPair();
-  ASSERT_THAT(key.status(), IsOk());
+  ASSERT_THAT(key, IsOk());
 
   // Create a new signer.
   auto signer_result = Ed25519SignBoringSsl::New(key->private_key);
@@ -133,7 +133,7 @@ TEST_F(Ed25519SignBoringSslTest, testMessageEmptyVersusNullStringView) {
 
   // Generate a new key pair.
   util::StatusOr<Ed25519KeyPair> key = NewKeyPair();
-  ASSERT_THAT(key.status(), IsOk());
+  ASSERT_THAT(key, IsOk());
 
   // Create a new signer.
   auto signer_result = Ed25519SignBoringSsl::New(key->private_key);
@@ -340,7 +340,7 @@ TEST_F(Ed25519SignBoringSslTest, testFipsMode) {
 
   // Generate a new key pair.
   util::StatusOr<Ed25519KeyPair> key = NewKeyPair();
-  ASSERT_THAT(key.status(), IsOk());
+  ASSERT_THAT(key, IsOk());
 
   // Create a new signer.
   EXPECT_THAT(Ed25519SignBoringSsl::New(key->private_key).status(),

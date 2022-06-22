@@ -148,37 +148,37 @@ class PrfFromStreamingPrfTest : public ::testing::Test {
 
 TEST_F(PrfFromStreamingPrfTest, ComputePrfBasic) {
   auto output_result = prf()->Compute("input", 5);
-  ASSERT_THAT(output_result.status(), IsOk());
+  ASSERT_THAT(output_result, IsOk());
   EXPECT_THAT(output_result.value(), StrEq("outpu"));
 }
 
 TEST_F(PrfFromStreamingPrfTest, ComputeTwice) {
   auto output_result = prf()->Compute("input", 5);
-  ASSERT_THAT(output_result.status(), IsOk());
+  ASSERT_THAT(output_result, IsOk());
   EXPECT_THAT(output_result.value(), StrEq("outpu"));
   output_result = prf()->Compute("input", 5);
-  ASSERT_THAT(output_result.status(), IsOk());
+  ASSERT_THAT(output_result, IsOk());
   EXPECT_THAT(output_result.value(), StrEq("outpu"));
 }
 
 TEST_F(PrfFromStreamingPrfTest, ComputeSubstring) {
   auto output_result = prf()->Compute("input", 5);
-  ASSERT_THAT(output_result.status(), IsOk());
+  ASSERT_THAT(output_result, IsOk());
   EXPECT_THAT(output_result.value(), StrEq("outpu"));
   output_result = prf()->Compute("input", 6);
-  ASSERT_THAT(output_result.status(), IsOk());
+  ASSERT_THAT(output_result, IsOk());
   EXPECT_THAT(output_result.value(), StrEq("output"));
   output_result = prf()->Compute("input", 2);
-  ASSERT_THAT(output_result.status(), IsOk());
+  ASSERT_THAT(output_result, IsOk());
   EXPECT_THAT(output_result.value(), StrEq("ou"));
 }
 
 TEST_F(PrfFromStreamingPrfTest, ComputeTooMuch) {
   auto output_result = prf()->Compute("input", 5);
-  ASSERT_THAT(output_result.status(), IsOk());
+  ASSERT_THAT(output_result, IsOk());
   EXPECT_THAT(output_result.value(), StrEq("outpu"));
   output_result = prf()->Compute("input", 100);
-  EXPECT_THAT(output_result.status(), Not(IsOk()))
+  EXPECT_THAT(output_result, Not(IsOk()))
       << "Output should not be okay, too much output requested";
 }
 

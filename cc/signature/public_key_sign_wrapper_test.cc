@@ -107,7 +107,7 @@ TEST(PublicKeySignSetWrapperTest, TestBasic) {
         new DummyPublicKeySign(signature_name_0));
     auto entry_result =
         pk_sign_set->AddPrimitive(std::move(pk_sign), keyset_info.key_info(0));
-    ASSERT_THAT(entry_result.status(), IsOk());
+    ASSERT_THAT(entry_result, IsOk());
 
     pk_sign = absl::make_unique<DummyPublicKeySign>(signature_name_1);
     entry_result =
@@ -152,7 +152,7 @@ TEST(PublicKeySignSetWrapperTest, TestLegacySignatures) {
   std::unique_ptr<PublicKeySign> pk_sign(
       new DummyPublicKeySign(signature_name));
   auto entry_result = pk_sign_set->AddPrimitive(std::move(pk_sign), key);
-  ASSERT_THAT(entry_result.status(), IsOk());
+  ASSERT_THAT(entry_result, IsOk());
   ASSERT_THAT(pk_sign_set->set_primary(entry_result.value()), IsOk());
 
   // Wrap pk_sign_set and test the resulting PublicKeySign.
@@ -162,7 +162,7 @@ TEST(PublicKeySignSetWrapperTest, TestLegacySignatures) {
 
   // Compute the signature via wrapper.
   auto sign_result = pk_sign->Sign(data);
-  EXPECT_THAT(sign_result.status(), IsOk());
+  EXPECT_THAT(sign_result, IsOk());
   std::string signature = sign_result.value();
   EXPECT_PRED_FORMAT2(testing::IsSubstring, signature_name, signature);
 
@@ -267,7 +267,7 @@ TEST_F(PublicKeySignSetWrapperWithMonitoringTest,
       public_key_sign_primitive_set->AddPrimitive(
           absl::make_unique<DummyPublicKeySign>("sign2"),
           keyset_info.key_info(2));
-  ASSERT_THAT(last.status(), IsOk());
+  ASSERT_THAT(last, IsOk());
   ASSERT_THAT(public_key_sign_primitive_set->set_primary(*last), IsOk());
   // Record the ID of the primary key.
   const uint32_t kPrimaryKeyId = keyset_info.key_info(2).key_id();
@@ -281,7 +281,7 @@ TEST_F(PublicKeySignSetWrapperWithMonitoringTest,
 
   // Check that calling Sign triggers a Log() call.
   EXPECT_CALL(*sign_monitoring_client_, Log(kPrimaryKeyId, kMessage.size()));
-  EXPECT_THAT((*public_key_sign)->Sign(kMessage).status(), IsOk());
+  EXPECT_THAT((*public_key_sign)->Sign(kMessage), IsOk());
 }
 
 TEST_F(PublicKeySignSetWrapperWithMonitoringTest,
@@ -306,7 +306,7 @@ TEST_F(PublicKeySignSetWrapperWithMonitoringTest,
   util::StatusOr<PrimitiveSet<PublicKeySign>::Entry<PublicKeySign>*> last =
       public_key_sign_primitive_set->AddPrimitive(
           CreateAlwaysFailingPublicKeySign("sign2"), keyset_info.key_info(2));
-  ASSERT_THAT(last.status(), IsOk());
+  ASSERT_THAT(last, IsOk());
   ASSERT_THAT(public_key_sign_primitive_set->set_primary(*last), IsOk());
 
   // Create a PublicKeySign and sign some data.

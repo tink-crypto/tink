@@ -47,7 +47,7 @@ TEST(HpkeKeyBoringSslTest, CreateValidHpkeKey) {
   HpkeTestParams params = DefaultHpkeTestParams();
   util::StatusOr<std::unique_ptr<HpkeKeyBoringSsl>> hpke_key =
       HpkeKeyBoringSsl::New(hpke_params.kem(), params.recipient_private_key);
-  ASSERT_THAT(hpke_key.status(), IsOk());
+  ASSERT_THAT(hpke_key, IsOk());
 }
 
 TEST(HpkeKeyBoringSslTest, BadKemFails) {

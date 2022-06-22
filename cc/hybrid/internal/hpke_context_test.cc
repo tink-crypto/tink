@@ -52,19 +52,19 @@ INSTANTIATE_TEST_SUITE_P(
 TEST_P(HpkeContextTest, SealAndOpen) {
   HpkeParams hpke_params = GetParam();
   util::StatusOr<HpkeTestParams> params = CreateHpkeTestParams(hpke_params);
-  ASSERT_THAT(params.status(), IsOk());
+  ASSERT_THAT(params, IsOk());
 
   util::StatusOr<std::unique_ptr<HpkeContext>> sender_hpke_context =
       HpkeContext::SetupSender(hpke_params, params->recipient_public_key,
                                params->application_info);
-  ASSERT_THAT(sender_hpke_context.status(), IsOk());
+  ASSERT_THAT(sender_hpke_context, IsOk());
 
   util::StatusOr<std::unique_ptr<HpkeContext>> recipient_hpke_context =
       HpkeContext::SetupRecipient(
           hpke_params,
           util::SecretDataFromStringView(params->recipient_private_key),
           (*sender_hpke_context)->EncapsulatedKey(), params->application_info);
-  ASSERT_THAT(recipient_hpke_context.status(), IsOk());
+  ASSERT_THAT(recipient_hpke_context, IsOk());
 
   std::vector<std::string> inputs = {"", params->plaintext};
   std::vector<std::string> context_infos = {"", params->application_info};
@@ -74,11 +74,11 @@ TEST_P(HpkeContextTest, SealAndOpen) {
                                 context_info, "'"));
       util::StatusOr<std::string> ciphertext =
           (*sender_hpke_context)->Seal(input, context_info);
-      ASSERT_THAT(ciphertext.status(), IsOk());
+      ASSERT_THAT(ciphertext, IsOk());
 
       util::StatusOr<std::string> plaintext =
           (*recipient_hpke_context)->Open(*ciphertext, context_info);
-      ASSERT_THAT(plaintext.status(), IsOk());
+      ASSERT_THAT(plaintext, IsOk());
 
       EXPECT_THAT(*plaintext, Eq(input));
     }
@@ -88,19 +88,19 @@ TEST_P(HpkeContextTest, SealAndOpen) {
 TEST_P(HpkeContextTest, Export) {
   HpkeParams hpke_params = GetParam();
   util::StatusOr<HpkeTestParams> params = CreateHpkeTestParams(hpke_params);
-  ASSERT_THAT(params.status(), IsOk());
+  ASSERT_THAT(params, IsOk());
 
   util::StatusOr<std::unique_ptr<HpkeContext>> sender_hpke_context =
       HpkeContext::SetupSender(hpke_params, params->recipient_public_key,
                                params->application_info);
-  ASSERT_THAT(sender_hpke_context.status(), IsOk());
+  ASSERT_THAT(sender_hpke_context, IsOk());
 
   util::StatusOr<std::unique_ptr<HpkeContext>> recipient_hpke_context =
       HpkeContext::SetupRecipient(
           hpke_params,
           util::SecretDataFromStringView(params->recipient_private_key),
           (*sender_hpke_context)->EncapsulatedKey(), params->application_info);
-  ASSERT_THAT(recipient_hpke_context.status(), IsOk());
+  ASSERT_THAT(recipient_hpke_context, IsOk());
 
   std::vector<std::string> exporter_contexts = {"", "c", "context"};
   std::vector<int> secret_lengths = {0, 8, 16, 32, 64};
@@ -110,11 +110,11 @@ TEST_P(HpkeContextTest, Export) {
                                 "', secret_length: '", secret_length, "'"));
       util::StatusOr<util::SecretData> sender_secret =
           (*sender_hpke_context)->Export(exporter_context, secret_length);
-      ASSERT_THAT(sender_secret.status(), IsOk());
+      ASSERT_THAT(sender_secret, IsOk());
 
       util::StatusOr<util::SecretData> recipient_secret =
           (*recipient_hpke_context)->Export(exporter_context, secret_length);
-      ASSERT_THAT(recipient_secret.status(), IsOk());
+      ASSERT_THAT(recipient_secret, IsOk());
 
       EXPECT_THAT(*sender_secret, Eq(*recipient_secret));
     }
@@ -124,19 +124,19 @@ TEST_P(HpkeContextTest, Export) {
 TEST_P(HpkeContextTest, OpenTruncatedCiphertextFails) {
   HpkeParams hpke_params = GetParam();
   util::StatusOr<HpkeTestParams> params = CreateHpkeTestParams(hpke_params);
-  ASSERT_THAT(params.status(), IsOk());
+  ASSERT_THAT(params, IsOk());
 
   util::StatusOr<std::unique_ptr<HpkeContext>> recipient_hpke_context =
       HpkeContext::SetupRecipient(
           hpke_params,
           util::SecretDataFromStringView(params->recipient_private_key),
           params->encapsulated_key, params->application_info);
-  ASSERT_THAT(recipient_hpke_context.status(), IsOk());
+  ASSERT_THAT(recipient_hpke_context, IsOk());
 
   util::StatusOr<std::string> plaintext =
       (*recipient_hpke_context)
           ->Open(params->ciphertext, params->associated_data);
-  ASSERT_THAT(plaintext.status(), IsOk());
+  ASSERT_THAT(plaintext, IsOk());
 
   const std::string truncated_ciphertext =
       params->ciphertext.substr(params->ciphertext.length() - 1);
@@ -149,19 +149,19 @@ TEST_P(HpkeContextTest, OpenTruncatedCiphertextFails) {
 TEST_P(HpkeContextTest, OpenModifiedCiphertextFails) {
   HpkeParams hpke_params = GetParam();
   util::StatusOr<HpkeTestParams> params = CreateHpkeTestParams(hpke_params);
-  ASSERT_THAT(params.status(), IsOk());
+  ASSERT_THAT(params, IsOk());
 
   util::StatusOr<std::unique_ptr<HpkeContext>> recipient_hpke_context =
       HpkeContext::SetupRecipient(
           hpke_params,
           util::SecretDataFromStringView(params->recipient_private_key),
           params->encapsulated_key, params->application_info);
-  ASSERT_THAT(recipient_hpke_context.status(), IsOk());
+  ASSERT_THAT(recipient_hpke_context, IsOk());
 
   util::StatusOr<std::string> plaintext =
       (*recipient_hpke_context)
           ->Open(params->ciphertext, params->associated_data);
-  ASSERT_THAT(plaintext.status(), IsOk());
+  ASSERT_THAT(plaintext, IsOk());
 
   const std::string modified_ciphertext =
       absl::StrCat(params->ciphertext, "modification");
@@ -174,19 +174,19 @@ TEST_P(HpkeContextTest, OpenModifiedCiphertextFails) {
 TEST_P(HpkeContextTest, OpenModifiedAssociatedDataFails) {
   HpkeParams hpke_params = GetParam();
   util::StatusOr<HpkeTestParams> params = CreateHpkeTestParams(hpke_params);
-  ASSERT_THAT(params.status(), IsOk());
+  ASSERT_THAT(params, IsOk());
 
   util::StatusOr<std::unique_ptr<HpkeContext>> recipient_hpke_context =
       HpkeContext::SetupRecipient(
           hpke_params,
           util::SecretDataFromStringView(params->recipient_private_key),
           params->encapsulated_key, params->application_info);
-  ASSERT_THAT(recipient_hpke_context.status(), IsOk());
+  ASSERT_THAT(recipient_hpke_context, IsOk());
 
   util::StatusOr<std::string> plaintext =
       (*recipient_hpke_context)
           ->Open(params->ciphertext, params->associated_data);
-  ASSERT_THAT(plaintext.status(), IsOk());
+  ASSERT_THAT(plaintext, IsOk());
 
   const std::string modified_associated_data =
       absl::StrCat(params->associated_data, "modification");
@@ -283,7 +283,7 @@ TEST(SplitPayloadTest, SplitPayloadSucceeds) {
       absl::StrCat(params.encapsulated_key, params.ciphertext);
   util::StatusOr<HpkePayloadView> hpke_payload =
       SplitPayload(HpkeKem::kX25519HkdfSha256, payload);
-  ASSERT_THAT(hpke_payload.status(), IsOk());
+  ASSERT_THAT(hpke_payload, IsOk());
   EXPECT_THAT(hpke_payload->encapsulated_key, Eq(params.encapsulated_key));
   EXPECT_THAT(hpke_payload->ciphertext, Eq(params.ciphertext));
 }

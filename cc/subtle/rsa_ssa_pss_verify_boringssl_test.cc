@@ -111,7 +111,7 @@ TEST(RsaSsaPssVerifyBoringSslTest, BasicVerify) {
 
   util::StatusOr<std::unique_ptr<RsaSsaPssVerifyBoringSsl>> verifier =
       RsaSsaPssVerifyBoringSsl::New(pub_key, params);
-  ASSERT_THAT(verifier.status(), IsOk());
+  ASSERT_THAT(verifier, IsOk());
   util::Status status =
       (*verifier)->Verify(kNistTestVector.signature, kNistTestVector.message);
   EXPECT_TRUE(status.ok()) << status << internal::GetSslErrors();
@@ -165,7 +165,7 @@ TEST(RsaSsaPssVerifyBoringSslTest, Modification) {
 
   util::StatusOr<std::unique_ptr<RsaSsaPssVerifyBoringSsl>> verifier =
       RsaSsaPssVerifyBoringSsl::New(pub_key, params);
-  ASSERT_THAT(verifier.status(), IsOk());
+  ASSERT_THAT(verifier, IsOk());
   // Modify the message.
   for (std::size_t i = 0; i < kNistTestVector.message.length(); i++) {
     std::string modified_message = kNistTestVector.message;
@@ -258,7 +258,7 @@ TEST_P(RsaSsaPssWycheproofTest, SignatureVerify) {
   RsaSsaPssWycheproofTestVector params = GetParam();
   util::StatusOr<std::unique_ptr<RsaSsaPssVerifyBoringSsl>> verifier =
       GetVerifier(params);
-  ASSERT_THAT(verifier.status(), IsOk());
+  ASSERT_THAT(verifier, IsOk());
   util::Status result = (*verifier)->Verify(params.sig, params.msg);
 
   if (params.expected == "valid") {

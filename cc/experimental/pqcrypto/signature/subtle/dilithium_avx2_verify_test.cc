@@ -103,22 +103,22 @@ TEST_P(DilithiumAvx2VerifyTest, BasicSignVerify) {
       key_pair = DilithiumPrivateKeyPqclean::GenerateKeyPair(
           test_case.key_size, test_case.seed_expansion);
 
-  ASSERT_THAT(key_pair.status(), IsOk());
+  ASSERT_THAT(key_pair, IsOk());
 
   // Create a new signer.
   util::StatusOr<std::unique_ptr<PublicKeySign>> signer =
       DilithiumAvx2Sign::New(key_pair->first);
-  ASSERT_THAT(signer.status(), IsOk());
+  ASSERT_THAT(signer, IsOk());
 
   // Create a new verifier.
   absl::StatusOr<std::unique_ptr<PublicKeyVerify>> verifier =
       DilithiumAvx2Verify::New(key_pair->second);
-  ASSERT_THAT(verifier.status(), IsOk());
+  ASSERT_THAT(verifier, IsOk());
 
   // Sign a message.
   std::string message = "message to be signed";
   absl::StatusOr<std::string> signature = (*std::move(signer))->Sign(message);
-  ASSERT_THAT(signature.status(), IsOk());
+  ASSERT_THAT(signature, IsOk());
 
   // Verify signature.
   Status status = (*verifier)->Verify(*signature, message);
@@ -138,22 +138,22 @@ TEST_P(DilithiumAvx2VerifyTest, FailsWithWrongMessage) {
       key_pair = DilithiumPrivateKeyPqclean::GenerateKeyPair(
           test_case.key_size, test_case.seed_expansion);
 
-  ASSERT_THAT(key_pair.status(), IsOk());
+  ASSERT_THAT(key_pair, IsOk());
 
   // Create a new signer.
   util::StatusOr<std::unique_ptr<PublicKeySign>> signer =
       DilithiumAvx2Sign::New(key_pair->first);
-  ASSERT_THAT(signer.status(), IsOk());
+  ASSERT_THAT(signer, IsOk());
 
   // Create a new verifier.
   absl::StatusOr<std::unique_ptr<PublicKeyVerify>> verifier =
       DilithiumAvx2Verify::New(key_pair->second);
-  ASSERT_THAT(verifier.status(), IsOk());
+  ASSERT_THAT(verifier, IsOk());
 
   // Sign a message.
   std::string message = "message to be signed";
   absl::StatusOr<std::string> signature = (*std::move(signer))->Sign(message);
-  ASSERT_THAT(signature.status(), IsOk());
+  ASSERT_THAT(signature, IsOk());
 
   // Verify signature.
   Status status = (*verifier)->Verify(*signature, "some bad message");
@@ -173,22 +173,22 @@ TEST_P(DilithiumAvx2VerifyTest, FailsWithWrongSignature) {
       key_pair = DilithiumPrivateKeyPqclean::GenerateKeyPair(
           test_case.key_size, test_case.seed_expansion);
 
-  ASSERT_THAT(key_pair.status(), IsOk());
+  ASSERT_THAT(key_pair, IsOk());
 
   // Create a new signer.
   util::StatusOr<std::unique_ptr<PublicKeySign>> signer =
       DilithiumAvx2Sign::New(key_pair->first);
-  ASSERT_THAT(signer.status(), IsOk());
+  ASSERT_THAT(signer, IsOk());
 
   // Create a new verifier.
   absl::StatusOr<std::unique_ptr<PublicKeyVerify>> verifier =
       DilithiumAvx2Verify::New(key_pair->second);
-  ASSERT_THAT(verifier.status(), IsOk());
+  ASSERT_THAT(verifier, IsOk());
 
   // Sign a message.
   std::string message = "message to be signed";
   absl::StatusOr<std::string> signature = (*std::move(signer))->Sign(message);
-  ASSERT_THAT(signature.status(), IsOk());
+  ASSERT_THAT(signature, IsOk());
 
   // Verify signature.
   Status status =
@@ -209,22 +209,22 @@ TEST_P(DilithiumAvx2VerifyTest, FailsWithByteFlipped) {
       key_pair = DilithiumPrivateKeyPqclean::GenerateKeyPair(
           test_case.key_size, test_case.seed_expansion);
 
-  ASSERT_THAT(key_pair.status(), IsOk());
+  ASSERT_THAT(key_pair, IsOk());
 
   // Create a new signer.
   util::StatusOr<std::unique_ptr<PublicKeySign>> signer =
       DilithiumAvx2Sign::New(key_pair->first);
-  ASSERT_THAT(signer.status(), IsOk());
+  ASSERT_THAT(signer, IsOk());
 
   // Create a new verifier.
   absl::StatusOr<std::unique_ptr<PublicKeyVerify>> verifier =
       DilithiumAvx2Verify::New(key_pair->second);
-  ASSERT_THAT(verifier.status(), IsOk());
+  ASSERT_THAT(verifier, IsOk());
 
   // Sign a message.
   std::string message = "message to be signed";
   absl::StatusOr<std::string> signature = (*std::move(signer))->Sign(message);
-  ASSERT_THAT(signature.status(), IsOk());
+  ASSERT_THAT(signature, IsOk());
 
   // Invalidate one signature byte.
   (*signature)[0] ^= 1;
@@ -247,7 +247,7 @@ TEST_P(DilithiumAvx2VerifyTest, FipsMode) {
       key_pair = DilithiumPrivateKeyPqclean::GenerateKeyPair(
           test_case.key_size, test_case.seed_expansion);
 
-  ASSERT_THAT(key_pair.status(), IsOk());
+  ASSERT_THAT(key_pair, IsOk());
 
   EXPECT_THAT(DilithiumAvx2Verify::New(key_pair->second).status(),
               StatusIs(absl::StatusCode::kInternal));
@@ -864,7 +864,7 @@ TEST(DilithiumAvx2VerifyTest, Vectors) {
     absl::StatusOr<std::unique_ptr<PublicKeyVerify>> verifier =
         DilithiumAvx2Verify::New(*DilithiumPublicKeyPqclean::NewPublicKey(
             v.public_key, DilithiumSeedExpansion::SEED_EXPANSION_SHAKE));
-    ASSERT_THAT(verifier.status(), IsOk());
+    ASSERT_THAT(verifier, IsOk());
 
     // Verify signature.
     Status status = (*verifier)->Verify(v.signature, v.message);
@@ -1420,7 +1420,7 @@ TEST(DilithiumAvx2VerifyTest, AesVectors) {
     absl::StatusOr<std::unique_ptr<PublicKeyVerify>> verifier =
         DilithiumAvx2Verify::New(*DilithiumPublicKeyPqclean::NewPublicKey(
             v.public_key, DilithiumSeedExpansion::SEED_EXPANSION_AES));
-    ASSERT_THAT(verifier.status(), IsOk());
+    ASSERT_THAT(verifier, IsOk());
 
     // Verify signature.
     Status status = (*verifier)->Verify(v.signature, v.message);

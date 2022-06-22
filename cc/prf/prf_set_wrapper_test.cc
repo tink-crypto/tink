@@ -81,7 +81,7 @@ class PrfSetWrapperTest : public ::testing::Test {
 
 TEST_F(PrfSetWrapperTest, NullPrfSet) {
   PrfSetWrapper wrapper;
-  EXPECT_THAT(wrapper.Wrap(nullptr).status(), Not(IsOk()));
+  EXPECT_THAT(wrapper.Wrap(nullptr), Not(IsOk()));
 }
 
 TEST_F(PrfSetWrapperTest, EmptyPrfSet) {
@@ -94,19 +94,19 @@ TEST_F(PrfSetWrapperTest, NonRawKeyType) {
   KeysetInfo::KeyInfo key_info = MakeKey(1);
   key_info.set_output_prefix_type(google::crypto::tink::OutputPrefixType::TINK);
   auto entry = AddPrf("output", key_info);
-  ASSERT_THAT(entry.status(), IsOk());
+  ASSERT_THAT(entry, IsOk());
   ASSERT_THAT(PrfSet()->set_primary(entry.value()), IsOk());
   PrfSetWrapper wrapper;
-  EXPECT_THAT(wrapper.Wrap(std::move(PrfSet())).status(), Not(IsOk()));
+  EXPECT_THAT(wrapper.Wrap(std::move(PrfSet())), Not(IsOk()));
 }
 
 TEST_F(PrfSetWrapperTest, WrapOkay) {
   auto entry = AddPrf("output", MakeKey(1));
-  ASSERT_THAT(entry.status(), IsOk());
+  ASSERT_THAT(entry, IsOk());
   ASSERT_THAT(PrfSet()->set_primary(entry.value()), IsOk());
   PrfSetWrapper wrapper;
   auto wrapped = wrapper.Wrap(std::move(PrfSet()));
-  ASSERT_THAT(wrapped.status(), IsOk());
+  ASSERT_THAT(wrapped, IsOk());
   EXPECT_THAT(wrapped.value()->ComputePrimary("input", 6),
               IsOkAndHolds(StrEq("output")));
 }
@@ -114,15 +114,15 @@ TEST_F(PrfSetWrapperTest, WrapOkay) {
 TEST_F(PrfSetWrapperTest, WrapTwo) {
   std::string primary_output("output");
   auto entry = AddPrf(primary_output, MakeKey(1));
-  ASSERT_THAT(entry.status(), IsOk());
+  ASSERT_THAT(entry, IsOk());
   ASSERT_THAT(PrfSet()->set_primary(entry.value()), IsOk());
 
-  ASSERT_THAT(AddPrf(primary_output, MakeKey(1)).status(), IsOk());
+  ASSERT_THAT(AddPrf(primary_output, MakeKey(1)), IsOk());
   std::string secondary_output("different");
-  ASSERT_THAT(AddPrf(secondary_output, MakeKey(2)).status(), IsOk());
+  ASSERT_THAT(AddPrf(secondary_output, MakeKey(2)), IsOk());
   PrfSetWrapper wrapper;
   auto wrapped_or = wrapper.Wrap(std::move(PrfSet()));
-  ASSERT_THAT(wrapped_or.status(), IsOk());
+  ASSERT_THAT(wrapped_or, IsOk());
   auto wrapped = std::move(wrapped_or.value());
   EXPECT_THAT(wrapped->ComputePrimary("input", 6),
               IsOkAndHolds(StrEq("output")));
