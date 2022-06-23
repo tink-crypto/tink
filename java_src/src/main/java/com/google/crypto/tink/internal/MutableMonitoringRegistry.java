@@ -32,19 +32,10 @@ public final class MutableMonitoringRegistry {
   }
 
   private static class DoNothingClient implements MonitoringClient {
-    private static class DoNothingLogger implements MonitoringClient.Logger {
-      @Override
-      public void log(int keyId, long numBytesAsInput) {}
-
-      @Override
-      public void logFailure() {}
-    }
-    private static final DoNothingLogger DO_NOTHING_LOGGER = new DoNothingLogger();
-
     @Override
     public MonitoringClient.Logger createLogger(
         MonitoringKeysetInfo keysetInfo, String primitive, String api) {
-      return DO_NOTHING_LOGGER;
+      return MonitoringUtil.DO_NOTHING_LOGGER;
     }
   }
   private static final DoNothingClient DO_NOTHING_CLIENT = new DoNothingClient();

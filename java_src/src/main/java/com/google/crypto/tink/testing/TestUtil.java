@@ -89,6 +89,7 @@ import java.security.spec.ECPoint;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import javax.annotation.Nullable;
 import javax.crypto.Cipher;
 
 /** Test helpers. */
@@ -140,28 +141,19 @@ public final class TestUtil {
   /** @return a {@code PrimitiveSet} from a {@code KeySet} */
   public static <P> PrimitiveSet<P> createPrimitiveSet(Keyset keyset, Class<P> inputClass)
       throws GeneralSecurityException {
-    PrimitiveSet.Builder<P> builder = PrimitiveSet.newBuilder(inputClass);
-    for (Keyset.Key key : keyset.getKeyList()) {
-      if (key.getStatus() == KeyStatusType.ENABLED) {
-        P primitive = Registry.getPrimitive(key.getKeyData(), inputClass);
-        if (key.getKeyId() == keyset.getPrimaryKeyId()) {
-          builder.addPrimaryPrimitive(primitive, key);
-        } else {
-          builder.addPrimitive(primitive, key);
-        }
-      }
-    }
-    return builder.build();
+    return createPrimitiveSetWithAnnotations(keyset, null, inputClass);
   }
 
   /**
    * @return a {@code PrimitiveSet} from a {@code KeySet}
    */
   public static <P> PrimitiveSet<P> createPrimitiveSetWithAnnotations(
-      Keyset keyset, MonitoringAnnotations annotations, Class<P> inputClass)
+      Keyset keyset, @Nullable MonitoringAnnotations annotations, Class<P> inputClass)
       throws GeneralSecurityException {
     PrimitiveSet.Builder<P> builder = PrimitiveSet.newBuilder(inputClass);
-    builder.setAnnotations(annotations);
+    if (annotations != null) {
+      builder.setAnnotations(annotations);
+    }
     for (Keyset.Key key : keyset.getKeyList()) {
       if (key.getStatus() == KeyStatusType.ENABLED) {
         P primitive = Registry.getPrimitive(key.getKeyData(), inputClass);
