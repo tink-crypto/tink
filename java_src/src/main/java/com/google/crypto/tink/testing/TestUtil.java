@@ -30,6 +30,7 @@ import com.google.crypto.tink.aead.AeadConfig;
 import com.google.crypto.tink.daead.DeterministicAeadConfig;
 import com.google.crypto.tink.hybrid.HybridKeyTemplates;
 import com.google.crypto.tink.mac.MacConfig;
+import com.google.crypto.tink.monitoring.MonitoringAnnotations;
 import com.google.crypto.tink.prf.PrfConfig;
 import com.google.crypto.tink.proto.AesCtrHmacAeadKey;
 import com.google.crypto.tink.proto.AesCtrHmacStreamingKey;
@@ -140,6 +141,27 @@ public final class TestUtil {
   public static <P> PrimitiveSet<P> createPrimitiveSet(Keyset keyset, Class<P> inputClass)
       throws GeneralSecurityException {
     PrimitiveSet.Builder<P> builder = PrimitiveSet.newBuilder(inputClass);
+    for (Keyset.Key key : keyset.getKeyList()) {
+      if (key.getStatus() == KeyStatusType.ENABLED) {
+        P primitive = Registry.getPrimitive(key.getKeyData(), inputClass);
+        if (key.getKeyId() == keyset.getPrimaryKeyId()) {
+          builder.addPrimaryPrimitive(primitive, key);
+        } else {
+          builder.addPrimitive(primitive, key);
+        }
+      }
+    }
+    return builder.build();
+  }
+
+  /**
+   * @return a {@code PrimitiveSet} from a {@code KeySet}
+   */
+  public static <P> PrimitiveSet<P> createPrimitiveSetWithAnnotations(
+      Keyset keyset, MonitoringAnnotations annotations, Class<P> inputClass)
+      throws GeneralSecurityException {
+    PrimitiveSet.Builder<P> builder = PrimitiveSet.newBuilder(inputClass);
+    builder.setAnnotations(annotations);
     for (Keyset.Key key : keyset.getKeyList()) {
       if (key.getStatus() == KeyStatusType.ENABLED) {
         P primitive = Registry.getPrimitive(key.getKeyData(), inputClass);
@@ -718,7 +740,7 @@ public final class TestUtil {
    * @return a list of pairs of mutated value and mutation description.
    */
   public static List<BytesMutation> generateMutations(byte[] bytes) {
-    List<BytesMutation> res = new ArrayList<BytesMutation>();
+    List<BytesMutation> res = new ArrayList<>();
 
     // Flip bits.
     for (int i = 0; i < bytes.length; i++) {

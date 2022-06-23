@@ -18,6 +18,7 @@ package com.google.crypto.tink.internal;
 
 import com.google.crypto.tink.KeyStatus;
 import com.google.crypto.tink.PrimitiveSet;
+import com.google.crypto.tink.monitoring.MonitoringClient;
 import com.google.crypto.tink.monitoring.MonitoringKeysetInfo;
 import com.google.crypto.tink.proto.KeyStatusType;
 import java.security.GeneralSecurityException;
@@ -26,6 +27,16 @@ import javax.annotation.Nullable;
 
 /** Some util functions needed to add monitoring to the Primitives. */
 public final class MonitoringUtil {
+
+  private static class DoNothingLogger implements MonitoringClient.Logger {
+    @Override
+    public void log(int keyId, long numBytesAsInput) {}
+
+    @Override
+    public void logFailure() {}
+  }
+
+  public static final MonitoringClient.Logger DO_NOTHING_LOGGER = new DoNothingLogger();
 
   private static KeyStatus parseStatus(KeyStatusType in) {
     switch (in) {

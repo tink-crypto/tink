@@ -93,4 +93,11 @@ public final class MonitoringUtilTest {
     assertThat(keysetInfo.getPrimaryKeyId()).isNull();
     assertThat(keysetInfo.getAnnotations().toMap()).isEmpty();
   }
+
+  @Test
+  public void doNothingLoggerWorks() throws Exception {
+    // We only test that calling the function doesn't throw any exceptions.
+    MonitoringUtil.DO_NOTHING_LOGGER.log(42, 1234);
+    MonitoringUtil.DO_NOTHING_LOGGER.logFailure();
+  }
 }
