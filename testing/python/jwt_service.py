@@ -25,6 +25,9 @@ from tink import cleartext_keyset_handle
 
 from tink import jwt
 
+from google.protobuf import duration_pb2
+from google.protobuf import timestamp_pb2
+
 from proto import testing_api_pb2
 from proto import testing_api_pb2_grpc
 
@@ -38,13 +41,13 @@ def _to_timestamp_tuple(t: datetime.datetime) -> Tuple[int, int]:
 
 
 def _from_timestamp_proto(
-    timestamp: testing_api_pb2.Timestamp) -> datetime.datetime:
+    timestamp: timestamp_pb2.Timestamp) -> datetime.datetime:
   t = timestamp.seconds + (timestamp.nanos / 1e9)
   return datetime.datetime.fromtimestamp(t, datetime.timezone.utc)
 
 
 def _from_duration_proto(
-    duration: testing_api_pb2.Duration) -> datetime.timedelta:
+    duration: duration_pb2.Duration) -> datetime.timedelta:
   return datetime.timedelta(seconds=duration.seconds)
 
 

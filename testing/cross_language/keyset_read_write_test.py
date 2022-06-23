@@ -23,7 +23,7 @@ from tink.proto import tink_pb2
 from util import key_util
 from util import testing_servers
 from google.protobuf import json_format
-from google.protobuf import text_format
+from google3.net.proto2.python.public import text_format
 
 # Contains keys with different status and output_prefix_type
 SYMMETRIC_KEYSET = r"""

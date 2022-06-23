@@ -16,7 +16,7 @@
 from absl.testing import absltest
 from absl.testing import parameterized
 
-from google.protobuf import text_format
+from google3.net.proto2.python.public import text_format
 from tink.proto import tink_pb2
 from util import key_util
 

@@ -33,6 +33,9 @@ java_library(
         "java/com/google/crypto/tink/testing/StreamingAeadServiceImpl.java",
     ],
     deps = [
+        "@com_google_protobuf//:duration_proto",
+        "@com_google_protobuf//:timestamp_proto",
+        "@com_google_protobuf//:wrappers_proto",
         ":testing_api_java_grpc",
         ":testing_api_java_proto",
         "@com_google_protobuf//:protobuf_java",

@@ -17,8 +17,12 @@
 // Implementation of a JWT Service.
 #include "jwt_impl.h"
 
+#include <ostream>
+#include <sstream>
+#include <memory>
 #include <string>
 #include <utility>
+#include <vector>
 
 #include "absl/time/time.h"
 #include "tink/binary_keyset_reader.h"
@@ -30,7 +34,6 @@
 #include "tink/jwt/jwt_public_key_verify.h"
 #include "tink/jwt/raw_jwt.h"
 #include "tink/util/status.h"
-#include "proto/testing_api.grpc.pb.h"
 
 namespace tink_testing_api {
 
@@ -47,17 +50,16 @@ using ::crypto::tink::VerifiedJwt;
 using ::crypto::tink::util::StatusOr;
 
 using ::crypto::tink::JwkSetToPublicKeysetHandle;
-using ::grpc::ServerContext;
 
-absl::Time TimestampToTime(tink_testing_api::Timestamp t) {
+absl::Time TimestampToTime(google::protobuf::Timestamp t) {
     return absl::FromUnixMillis(t.seconds() * 1000 + t.nanos() / 1000000);
 }
 
-Timestamp TimeToTimestamp(absl::Time time) {
+google::protobuf::Timestamp TimeToTimestamp(absl::Time time) {
   int64_t millis = absl::ToUnixMillis(time);
   int64_t seconds = millis / 1000;
   int32_t nanos = (millis - seconds * 1000) * 1000000;
-  Timestamp timestamp;
+  google::protobuf::Timestamp timestamp;
   timestamp.set_seconds(seconds);
   timestamp.set_nanos(nanos);
   return timestamp;

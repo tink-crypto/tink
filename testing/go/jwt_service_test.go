@@ -22,7 +22,10 @@ import (
 	"fmt"
 	"testing"
 
+	dpb "google.golang.org/protobuf/types/known/durationpb"
 	spb "google.golang.org/protobuf/types/known/structpb"
+	tpb "google.golang.org/protobuf/types/known/timestamppb"
+	wpb "google.golang.org/protobuf/types/known/wrapperspb"
 	"github.com/google/go-cmp/cmp"
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/testing/protocmp"
@@ -141,8 +144,8 @@ func TestJWTComputeMACWithInvalidKeysetFails(t *testing.T) {
 		t.Fatalf("genKeyset failed: %v", err)
 	}
 	rawJWT := &pb.JwtToken{
-		TypeHeader: &pb.StringValue{Value: "JWT"},
-		Issuer:     &pb.StringValue{Value: "issuer"},
+		TypeHeader: &wpb.StringValue{Value: "JWT"},
+		Issuer:     &wpb.StringValue{Value: "issuer"},
 	}
 	signResponse, err := jwtService.ComputeMacAndEncode(ctx, &pb.JwtSignRequest{Keyset: keyset, RawJwt: rawJWT})
 	if err != nil {
@@ -158,14 +161,14 @@ func TestJWTComputeAndVerifyMac(t *testing.T) {
 		{
 			tag: "all claims and custom claims",
 			rawJWT: &pb.JwtToken{
-				TypeHeader: &pb.StringValue{Value: "JWT"},
-				Issuer:     &pb.StringValue{Value: "issuer"},
-				Subject:    &pb.StringValue{Value: "subject"},
-				JwtId:      &pb.StringValue{Value: "tink"},
+				TypeHeader: &wpb.StringValue{Value: "JWT"},
+				Issuer:     &wpb.StringValue{Value: "issuer"},
+				Subject:    &wpb.StringValue{Value: "subject"},
+				JwtId:      &wpb.StringValue{Value: "tink"},
 				Audiences:  []string{"audience"},
-				Expiration: &pb.Timestamp{Seconds: 123456},
-				NotBefore:  &pb.Timestamp{Seconds: 12345},
-				IssuedAt:   &pb.Timestamp{Seconds: 1234},
+				Expiration: &tpb.Timestamp{Seconds: 123456},
+				NotBefore:  &tpb.Timestamp{Seconds: 12345},
+				IssuedAt:   &tpb.Timestamp{Seconds: 1234},
 				CustomClaims: map[string]*pb.JwtClaimValue{
 					"cc-null":   &pb.JwtClaimValue{Kind: &pb.JwtClaimValue_NullValue{}},
 					"cc-num":    &pb.JwtClaimValue{Kind: &pb.JwtClaimValue_NumberValue{NumberValue: 5.67}},
@@ -176,32 +179,32 @@ func TestJWTComputeAndVerifyMac(t *testing.T) {
 				},
 			},
 			validator: &pb.JwtValidator{
-				ExpectedTypeHeader: &pb.StringValue{Value: "JWT"},
-				ExpectedIssuer:     &pb.StringValue{Value: "issuer"},
-				ExpectedAudience:   &pb.StringValue{Value: "audience"},
-				Now:                &pb.Timestamp{Seconds: 12345},
-				ClockSkew:          &pb.Duration{Seconds: 0},
+				ExpectedTypeHeader: &wpb.StringValue{Value: "JWT"},
+				ExpectedIssuer:     &wpb.StringValue{Value: "issuer"},
+				ExpectedAudience:   &wpb.StringValue{Value: "audience"},
+				Now:                &tpb.Timestamp{Seconds: 12345},
+				ClockSkew:          &dpb.Duration{Seconds: 0},
 			},
 		},
 		{
 			tag: "without custom claims",
 			rawJWT: &pb.JwtToken{
-				TypeHeader: &pb.StringValue{Value: "JWT"},
-				Issuer:     &pb.StringValue{Value: "issuer"},
-				Subject:    &pb.StringValue{Value: "subject"},
+				TypeHeader: &wpb.StringValue{Value: "JWT"},
+				Issuer:     &wpb.StringValue{Value: "issuer"},
+				Subject:    &wpb.StringValue{Value: "subject"},
 				Audiences:  []string{"audience"},
 			},
 			validator: &pb.JwtValidator{
-				ExpectedTypeHeader:     &pb.StringValue{Value: "JWT"},
-				ExpectedIssuer:         &pb.StringValue{Value: "issuer"},
-				ExpectedAudience:       &pb.StringValue{Value: "audience"},
+				ExpectedTypeHeader:     &wpb.StringValue{Value: "JWT"},
+				ExpectedIssuer:         &wpb.StringValue{Value: "issuer"},
+				ExpectedAudience:       &wpb.StringValue{Value: "audience"},
 				AllowMissingExpiration: true,
 			},
 		},
 		{
 			tag: "without expiration",
 			rawJWT: &pb.JwtToken{
-				Subject: &pb.StringValue{Value: "subject"},
+				Subject: &wpb.StringValue{Value: "subject"},
 			},
 			validator: &pb.JwtValidator{
 				AllowMissingExpiration: true,
@@ -210,11 +213,11 @@ func TestJWTComputeAndVerifyMac(t *testing.T) {
 		{
 			tag: "clock skew",
 			rawJWT: &pb.JwtToken{
-				Expiration: &pb.Timestamp{Seconds: 1234},
+				Expiration: &tpb.Timestamp{Seconds: 1234},
 			},
 			validator: &pb.JwtValidator{
-				Now:       &pb.Timestamp{Seconds: 1235},
-				ClockSkew: &pb.Duration{Seconds: 2},
+				Now:       &tpb.Timestamp{Seconds: 1235},
+				ClockSkew: &dpb.Duration{Seconds: 2},
 			},
 		},
 	} {
@@ -267,10 +270,10 @@ func TestJWTVerifyMACFailures(t *testing.T) {
 		t.Fatalf("genKeyset failed: %v", err)
 	}
 	rawJWT := &pb.JwtToken{
-		TypeHeader: &pb.StringValue{Value: "JWT"},
-		Expiration: &pb.Timestamp{Seconds: 123456},
-		NotBefore:  &pb.Timestamp{Seconds: 12345},
-		IssuedAt:   &pb.Timestamp{Seconds: 1234},
+		TypeHeader: &wpb.StringValue{Value: "JWT"},
+		Expiration: &tpb.Timestamp{Seconds: 123456},
+		NotBefore:  &tpb.Timestamp{Seconds: 12345},
+		IssuedAt:   &tpb.Timestamp{Seconds: 1234},
 	}
 	signResponse, err := jwtService.ComputeMacAndEncode(ctx, &pb.JwtSignRequest{Keyset: keyset, RawJwt: rawJWT})
 	if err != nil {
@@ -281,8 +284,8 @@ func TestJWTVerifyMACFailures(t *testing.T) {
 		t.Fatalf("JwtSignResponse_Err: %v", err)
 	}
 	validator := &pb.JwtValidator{
-		ExpectedTypeHeader: &pb.StringValue{Value: "JWT"},
-		Now:                &pb.Timestamp{Seconds: 12345},
+		ExpectedTypeHeader: &wpb.StringValue{Value: "JWT"},
+		Now:                &tpb.Timestamp{Seconds: 12345},
 	}
 	verifyResponse, err := jwtService.VerifyMacAndDecode(ctx, &pb.JwtVerifyRequest{Keyset: keyset, SignedCompactJwt: compact, Validator: validator})
 	if err != nil {
@@ -295,22 +298,22 @@ func TestJWTVerifyMACFailures(t *testing.T) {
 		{
 			tag: "unexpected type header",
 			validator: &pb.JwtValidator{
-				ExpectedTypeHeader: &pb.StringValue{Value: "unexpected"},
-				Now:                &pb.Timestamp{Seconds: 12345},
+				ExpectedTypeHeader: &wpb.StringValue{Value: "unexpected"},
+				Now:                &tpb.Timestamp{Seconds: 12345},
 			},
 		},
 		{
 			tag: "expired token",
 			validator: &pb.JwtValidator{
-				ExpectedTypeHeader: &pb.StringValue{Value: "JWT"},
-				Now:                &pb.Timestamp{Seconds: 999999999999},
+				ExpectedTypeHeader: &wpb.StringValue{Value: "JWT"},
+				Now:                &tpb.Timestamp{Seconds: 999999999999},
 			},
 		},
 		{
 			tag: "expect issued in the past",
 			validator: &pb.JwtValidator{
-				ExpectedTypeHeader:    &pb.StringValue{Value: "JWT"},
-				Now:                   &pb.Timestamp{Seconds: 1233},
+				ExpectedTypeHeader:    &wpb.StringValue{Value: "JWT"},
+				Now:                   &tpb.Timestamp{Seconds: 1233},
 				ExpectIssuedInThePast: true,
 			},
 		},
@@ -341,7 +344,7 @@ func TestJWTPublicKeySignWithInvalidKeysetFails(t *testing.T) {
 		t.Fatalf("genKeyset failed: %v", err)
 	}
 	rawJWT := &pb.JwtToken{
-		Subject: &pb.StringValue{Value: "tink-subject"},
+		Subject: &wpb.StringValue{Value: "tink-subject"},
 	}
 	signResponse, err := jwtService.PublicKeySignAndEncode(ctx, &pb.JwtSignRequest{Keyset: privateKeyset, RawJwt: rawJWT})
 	if err != nil {
@@ -417,7 +420,7 @@ func TestJWTPublicKeyVerifyFails(t *testing.T) {
 		t.Fatalf("pubKeyset failed: %v", err)
 	}
 	rawJWT := &pb.JwtToken{
-		Subject: &pb.StringValue{Value: "tink-subject"},
+		Subject: &wpb.StringValue{Value: "tink-subject"},
 	}
 	signResponse, err := jwtService.PublicKeySignAndEncode(ctx, &pb.JwtSignRequest{Keyset: privateKeyset, RawJwt: rawJWT})
 	if err != nil {
@@ -428,7 +431,7 @@ func TestJWTPublicKeyVerifyFails(t *testing.T) {
 		t.Fatalf("JwtSignResponse_Err failed: %v", err)
 	}
 	validator := &pb.JwtValidator{
-		ExpectedTypeHeader: &pb.StringValue{Value: "JWT"},
+		ExpectedTypeHeader: &wpb.StringValue{Value: "JWT"},
 	}
 	verifyResponse, err := jwtService.PublicKeyVerifyAndDecode(ctx, &pb.JwtVerifyRequest{Keyset: publicKeyset, SignedCompactJwt: compact, Validator: validator})
 	if err != nil {
@@ -457,7 +460,7 @@ func TestJWTPublicKeySignAndEncodeVerifyAndDecode(t *testing.T) {
 		t.Fatalf("pubKeyset failed: %v", err)
 	}
 	rawJWT := &pb.JwtToken{
-		Subject: &pb.StringValue{Value: "tink-subject"},
+		Subject: &wpb.StringValue{Value: "tink-subject"},
 	}
 	signResponse, err := jwtService.PublicKeySignAndEncode(ctx, &pb.JwtSignRequest{Keyset: privateKeyset, RawJwt: rawJWT})
 	if err != nil {
