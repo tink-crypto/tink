@@ -8,6 +8,7 @@ cc_library(
     hdrs = ["hpke_context.h"],
     include_prefix = "tink/hybrid/internal",
     tags = ["requires_boringcrypto_update"],
+    visibility = ["//visibility:public"],
     deps = [
         ":hpke_context_boringssl",
         ":hpke_util",
