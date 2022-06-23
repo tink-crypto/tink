@@ -47,11 +47,15 @@ public final class ProtoKeyFormatSerializationTesterTest {
   private static MutableSerializationRegistry registry;
 
   private static class TestKeyFormat extends KeyFormat {
-    private final ByteString str;
+    private final ByteString strOfLength4;
     private final OutputPrefixType outputPrefixType;
 
-    public TestKeyFormat(ByteString str, OutputPrefixType outputPrefixType) {
-      this.str = str;
+    public TestKeyFormat(ByteString strOfLength4, OutputPrefixType outputPrefixType)
+        throws GeneralSecurityException {
+      if (strOfLength4.size() != 4) {
+        throw new GeneralSecurityException("Must have length 4 str");
+      }
+      this.strOfLength4 = strOfLength4;
       this.outputPrefixType = outputPrefixType;
     }
 
@@ -60,8 +64,9 @@ public final class ProtoKeyFormatSerializationTesterTest {
       return false;
     }
 
+    /** Returns a ByteString of length 4. */
     public ByteString getStr() {
-      return str;
+      return strOfLength4;
     }
 
     public OutputPrefixType getOutputPrefixType() {
@@ -74,12 +79,13 @@ public final class ProtoKeyFormatSerializationTesterTest {
         return false;
       }
       TestKeyFormat other = (TestKeyFormat) o;
-      return str.equals(other.str) && outputPrefixType.equals(other.outputPrefixType);
+      return strOfLength4.equals(other.strOfLength4)
+          && outputPrefixType.equals(other.outputPrefixType);
     }
 
     @Override
     public int hashCode() {
-      return Objects.hash(str, outputPrefixType);
+      return Objects.hash(strOfLength4, outputPrefixType);
     }
   }
 
@@ -127,7 +133,7 @@ public final class ProtoKeyFormatSerializationTesterTest {
 
   @Test
   public void testParseAndSerialize_testerWorksIfCorrect() throws Exception {
-    ByteString s = ByteString.copyFrom(new byte[] {1, 2, 3});
+    ByteString s = ByteString.copyFrom(new byte[] {1, 2, 3, 4});
     TestKeyFormat format = new TestKeyFormat(s, OutputPrefixType.TINK);
 
     TestProto proto = TestProto.newBuilder().setStr(format.getStr()).build();
@@ -139,7 +145,7 @@ public final class ProtoKeyFormatSerializationTesterTest {
 
   @Test
   public void testParseAndSerialize_testWrongOutputPrefix() throws Exception {
-    ByteString s = ByteString.copyFrom(new byte[] {1, 2, 3});
+    ByteString s = ByteString.copyFrom(new byte[] {1, 2, 3, 4});
     TestKeyFormat format = new TestKeyFormat(s, OutputPrefixType.TINK);
 
     TestProto proto = TestProto.newBuilder().setStr(format.getStr()).build();
@@ -155,11 +161,11 @@ public final class ProtoKeyFormatSerializationTesterTest {
 
   @Test
   public void testParseAndSerialize_testWrongProto() throws Exception {
-    ByteString s = ByteString.copyFrom(new byte[] {1, 2, 3});
+    ByteString s = ByteString.copyFrom(new byte[] {1, 2, 3, 4});
     TestKeyFormat format = new TestKeyFormat(s, OutputPrefixType.TINK);
 
     TestProto proto =
-        TestProto.newBuilder().setStr(ByteString.copyFrom(new byte[] {2, 3, 4})).build();
+        TestProto.newBuilder().setStr(ByteString.copyFrom(new byte[] {2, 3, 4, 5})).build();
 
     assertThrows(
         AssertionError.class, () -> tester.testParse(format, proto, OutputPrefixType.TINK));
@@ -172,7 +178,7 @@ public final class ProtoKeyFormatSerializationTesterTest {
 
   @Test
   public void testSerialize_testWrongTypeUrl() throws Exception {
-    ByteString s = ByteString.copyFrom(new byte[] {1, 2, 3});
+    ByteString s = ByteString.copyFrom(new byte[] {1, 2, 3, 4});
     TestKeyFormat format = new TestKeyFormat(s, OutputPrefixType.TINK);
 
     ProtoKeyFormatSerializationTester testerWrongTypeUrl =
@@ -183,5 +189,21 @@ public final class ProtoKeyFormatSerializationTesterTest {
     assertThrows(
         AssertionError.class,
         () -> testerWrongTypeUrl.testSerialize(format, proto, OutputPrefixType.TINK));
+  }
+
+  @Test
+  public void testParse_testParsingFails_works() throws Exception {
+    // This is a wrong length, so the parsing fails, so the test that the parsing fails succeeds.
+    ByteString s = ByteString.copyFrom(new byte[] {1, 2, 3, 4, 5});
+    TestProto proto = TestProto.newBuilder().setStr(s).build();
+    tester.testParsingFails(proto, OutputPrefixType.TINK);
+  }
+
+  @Test
+  public void testParse_testParsingFails_fails() throws Exception {
+    // This is the right length, so the parsing succeeds, so the test that the parsing fails fails.
+    ByteString s = ByteString.copyFrom(new byte[] {1, 2, 3, 4});
+    TestProto proto = TestProto.newBuilder().setStr(s).build();
+    assertThrows(AssertionError.class, () -> tester.testParsingFails(proto, OutputPrefixType.TINK));
   }
 }

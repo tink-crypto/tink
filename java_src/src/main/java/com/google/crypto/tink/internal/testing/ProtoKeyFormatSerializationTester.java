@@ -17,6 +17,7 @@
 package com.google.crypto.tink.internal.testing;
 
 import static com.google.common.truth.Truth.assertThat;
+import static org.junit.Assert.assertThrows;
 
 import com.google.crypto.tink.KeyFormat;
 import com.google.crypto.tink.internal.MutableSerializationRegistry;
@@ -25,6 +26,7 @@ import com.google.crypto.tink.proto.KeyTemplate;
 import com.google.crypto.tink.proto.OutputPrefixType;
 import com.google.protobuf.ExtensionRegistryLite;
 import com.google.protobuf.MessageLite;
+import java.security.GeneralSecurityException;
 
 /** Helps testing ProtoKeyFormat serialization methods. */
 public final class ProtoKeyFormatSerializationTester {
@@ -84,5 +86,19 @@ public final class ProtoKeyFormatSerializationTester {
       throws Exception {
     testParse(format, protoFormat, outputPrefixType);
     testSerialize(format, protoFormat, outputPrefixType);
+  }
+
+  /** Tests that the given serialized key format with the output prefix fails when being parsed. */
+  public void testParsingFails(MessageLite protoFormat, OutputPrefixType outputPrefixType)
+      throws Exception {
+    KeyTemplate template =
+        KeyTemplate.newBuilder()
+            .setTypeUrl(typeUrl)
+            .setOutputPrefixType(outputPrefixType)
+            .setValue(protoFormat.toByteString())
+            .build();
+    ProtoKeyFormatSerialization serialization = ProtoKeyFormatSerialization.create(template);
+    assertThrows(
+        GeneralSecurityException.class, () -> serializationRegistry.parseKeyFormat(serialization));
   }
 }
