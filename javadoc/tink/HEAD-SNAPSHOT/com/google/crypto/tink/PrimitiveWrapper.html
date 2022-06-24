@@ -147,7 +147,7 @@ var activeTableTab = "activeTableTab";
 </tr>
 <tr id="i2" class="altColor">
 <td class="colFirst"><code><a href="../../../../com/google/crypto/tink/PrimitiveWrapper.html" title="type parameter in PrimitiveWrapper">P</a></code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/crypto/tink/PrimitiveWrapper.html#wrap-com.google.crypto.tink.PrimitiveSet-">wrap</a></span>(<a href="../../../../com/google/crypto/tink/PrimitiveSet.html" title="class in com.google.crypto.tink">PrimitiveSet</a>&lt;<a href="../../../../com/google/crypto/tink/PrimitiveWrapper.html" title="type parameter in PrimitiveWrapper">B</a>&gt;&nbsp;set)</code>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/crypto/tink/PrimitiveWrapper.html#wrap-com.google.crypto.tink.PrimitiveSet-">wrap</a></span>(<a href="../../../../com/google/crypto/tink/PrimitiveSet.html" title="class in com.google.crypto.tink">PrimitiveSet</a>&lt;<a href="../../../../com/google/crypto/tink/PrimitiveWrapper.html" title="type parameter in PrimitiveWrapper">B</a>&gt;&nbsp;primitiveSet)</code>
 <div class="block">Wraps a <code>PrimitiveSet</code> and returns a single instance.</div>
 </td>
 </tr>
@@ -172,9 +172,11 @@ var activeTableTab = "activeTableTab";
 <ul class="blockList">
 <li class="blockList">
 <h4>wrap</h4>
-<pre><a href="../../../../com/google/crypto/tink/PrimitiveWrapper.html" title="type parameter in PrimitiveWrapper">P</a>&nbsp;wrap(<a href="../../../../com/google/crypto/tink/PrimitiveSet.html" title="class in com.google.crypto.tink">PrimitiveSet</a>&lt;<a href="../../../../com/google/crypto/tink/PrimitiveWrapper.html" title="type parameter in PrimitiveWrapper">B</a>&gt;&nbsp;set)
+<pre><a href="../../../../com/google/crypto/tink/PrimitiveWrapper.html" title="type parameter in PrimitiveWrapper">P</a>&nbsp;wrap(<a href="../../../../com/google/crypto/tink/PrimitiveSet.html" title="class in com.google.crypto.tink">PrimitiveSet</a>&lt;<a href="../../../../com/google/crypto/tink/PrimitiveWrapper.html" title="type parameter in PrimitiveWrapper">B</a>&gt;&nbsp;primitiveSet)
 throws <a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
 <div class="block">Wraps a <code>PrimitiveSet</code> and returns a single instance.
+
+ <p> This method gets called when a new primitive is created. <code>primitiveSet</code> is immutable.
 
  This has to be implemented when a new primitive type is added.</div>
 <dl>

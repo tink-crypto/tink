@@ -194,6 +194,8 @@ implements <a href="../../../../../com/google/crypto/tink/PrimitiveWrapper.html"
 <div class="block"><span class="descfrmTypeLabel">Description copied from interface:&nbsp;<code><a href="../../../../../com/google/crypto/tink/PrimitiveWrapper.html#wrap-com.google.crypto.tink.PrimitiveSet-">PrimitiveWrapper</a></code></span></div>
 <div class="block">Wraps a <code>PrimitiveSet</code> and returns a single instance.
 
+ <p> This method gets called when a new primitive is created. <code>primitiveSet</code> is immutable.
+
  This has to be implemented when a new primitive type is added.</div>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>

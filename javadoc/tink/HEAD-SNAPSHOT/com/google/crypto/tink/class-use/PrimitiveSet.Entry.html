@@ -105,7 +105,9 @@
 <td class="colFirst"><code><a href="../../../../../com/google/crypto/tink/PrimitiveSet.Entry.html" title="class in com.google.crypto.tink">PrimitiveSet.Entry</a>&lt;<a href="../../../../../com/google/crypto/tink/PrimitiveSet.html" title="type parameter in PrimitiveSet">P</a>&gt;</code></td>
 <td class="colLast"><span class="typeNameLabel">PrimitiveSet.</span><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/PrimitiveSet.html#addPrimitive-P-com.google.crypto.tink.proto.Keyset.Key-">addPrimitive</a></span>(<a href="../../../../../com/google/crypto/tink/PrimitiveSet.html" title="type parameter in PrimitiveSet">P</a>&nbsp;primitive,
             <a href="../../../../../com/google/crypto/tink/proto/Keyset.Key.html" title="class in com.google.crypto.tink.proto">Keyset.Key</a>&nbsp;key)</code>
-<div class="block">Creates an entry in the primitive table.</div>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;
+<div class="block"><span class="deprecationComment">use <code>Builder.addPrimitive</code> or <code>Builder.addPrimaryPrimitive</code> instead.</span></div>
+</div>
 </td>
 </tr>
 <tr class="rowColor">
@@ -130,12 +132,6 @@
 <td class="colLast"><span class="typeNameLabel">PrimitiveSet.</span><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/PrimitiveSet.html#getPrimitive-byte:A-">getPrimitive</a></span>(byte[]&nbsp;identifier)</code>&nbsp;</td>
 </tr>
 <tr class="altColor">
-<td class="colFirst"><code>protected <a href="https://docs.oracle.com/javase/8/docs/api/java/util/List.html?is-external=true" title="class or interface in java.util">List</a>&lt;<a href="../../../../../com/google/crypto/tink/PrimitiveSet.Entry.html" title="class in com.google.crypto.tink">PrimitiveSet.Entry</a>&lt;<a href="../../../../../com/google/crypto/tink/PrimitiveSet.html" title="type parameter in PrimitiveSet">P</a>&gt;&gt;</code></td>
-<td class="colLast"><span class="typeNameLabel">PrimitiveSet.</span><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/PrimitiveSet.html#getPrimitive-com.google.crypto.tink.proto.Keyset.Key-">getPrimitive</a></span>(<a href="../../../../../com/google/crypto/tink/proto/Keyset.Key.html" title="class in com.google.crypto.tink.proto">Keyset.Key</a>&nbsp;key)</code>
-<div class="block">Returns the entries with primitives identified by the ciphertext prefix of <code>key</code>.</div>
-</td>
-</tr>
-<tr class="rowColor">
 <td class="colFirst"><code><a href="https://docs.oracle.com/javase/8/docs/api/java/util/List.html?is-external=true" title="class or interface in java.util">List</a>&lt;<a href="../../../../../com/google/crypto/tink/PrimitiveSet.Entry.html" title="class in com.google.crypto.tink">PrimitiveSet.Entry</a>&lt;<a href="../../../../../com/google/crypto/tink/PrimitiveSet.html" title="type parameter in PrimitiveSet">P</a>&gt;&gt;</code></td>
 <td class="colLast"><span class="typeNameLabel">PrimitiveSet.</span><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/PrimitiveSet.html#getRawPrimitives--">getRawPrimitives</a></span>()</code>&nbsp;</td>
 </tr>
@@ -151,7 +147,9 @@
 <tr class="altColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><span class="typeNameLabel">PrimitiveSet.</span><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/PrimitiveSet.html#setPrimary-com.google.crypto.tink.PrimitiveSet.Entry-">setPrimary</a></span>(<a href="../../../../../com/google/crypto/tink/PrimitiveSet.Entry.html" title="class in com.google.crypto.tink">PrimitiveSet.Entry</a>&lt;<a href="../../../../../com/google/crypto/tink/PrimitiveSet.html" title="type parameter in PrimitiveSet">P</a>&gt;&nbsp;primary)</code>
-<div class="block">Sets given Entry <code>primary</code> as the primary one.</div>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;
+<div class="block"><span class="deprecationComment">use <code>Builder.addPrimaryPrimitive</code> instead.</span></div>
+</div>
 </td>
 </tr>
 </tbody>
