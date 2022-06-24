@@ -134,7 +134,7 @@ func (a *wrappedAead) Decrypt(ciphertext, associatedData []byte) ([]byte, error)
 				pt, err := p.Decrypt(ctNoPrefix, associatedData)
 				if err == nil {
 					if a.decLogger != nil {
-						a.decLogger.Log(entries[i].KeyID, len(ciphertext))
+						a.decLogger.Log(entries[i].KeyID, len(ctNoPrefix))
 					}
 					return pt, nil
 				}
