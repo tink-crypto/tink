@@ -17,8 +17,8 @@
     catch(err) {
     }
 //-->
-var methods = {"i0":10,"i1":10,"i2":10,"i3":10,"i4":10,"i5":10,"i6":10,"i7":9,"i8":10};
-var tabs = {65535:["t0","All Methods"],1:["t1","Static Methods"],2:["t2","Instance Methods"],8:["t4","Concrete Methods"]};
+var methods = {"i0":42,"i1":10,"i2":10,"i3":10,"i4":10,"i5":10,"i6":10,"i7":10,"i8":9,"i9":41,"i10":42};
+var tabs = {65535:["t0","All Methods"],1:["t1","Static Methods"],2:["t2","Instance Methods"],8:["t4","Concrete Methods"],32:["t6","Deprecated Methods"]};
 var altColor = "altColor";
 var rowColor = "rowColor";
 var tableTab = "tableTab";
@@ -49,7 +49,7 @@ var activeTableTab = "activeTableTab";
 <div class="subNav">
 <ul class="navList">
 <li><a href="../../../../com/google/crypto/tink/PemKeyType.html" title="enum in com.google.crypto.tink"><span class="typeNameLink">Prev&nbsp;Class</span></a></li>
-<li><a href="../../../../com/google/crypto/tink/PrimitiveSet.Entry.html" title="class in com.google.crypto.tink"><span class="typeNameLink">Next&nbsp;Class</span></a></li>
+<li><a href="../../../../com/google/crypto/tink/PrimitiveSet.Builder.html" title="class in com.google.crypto.tink"><span class="typeNameLink">Next&nbsp;Class</span></a></li>
 </ul>
 <ul class="navList">
 <li><a href="../../../../index.html?com/google/crypto/tink/PrimitiveSet.html" target="_top">Frames</a></li>
@@ -149,6 +149,12 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 </tr>
 <tr class="altColor">
 <td class="colFirst"><code>static class&nbsp;</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/crypto/tink/PrimitiveSet.Builder.html" title="class in com.google.crypto.tink">PrimitiveSet.Builder</a>&lt;<a href="../../../../com/google/crypto/tink/PrimitiveSet.Builder.html" title="type parameter in PrimitiveSet.Builder">P</a>&gt;</span></code>
+<div class="block">Builds an immutable PrimitiveSet.</div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>static class&nbsp;</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/crypto/tink/PrimitiveSet.Entry.html" title="class in com.google.crypto.tink">PrimitiveSet.Entry</a>&lt;<a href="../../../../com/google/crypto/tink/PrimitiveSet.Entry.html" title="type parameter in PrimitiveSet.Entry">P</a>&gt;</span></code>
 <div class="block">A single entry in the set.</div>
 </td>
@@ -163,7 +169,7 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 </a>
 <h3>Method Summary</h3>
 <table class="memberSummary" border="0" cellpadding="3" cellspacing="0" summary="Method Summary table, listing methods, and an explanation">
-<caption><span id="t0" class="activeTableTab"><span>All Methods</span><span class="tabEnd">&nbsp;</span></span><span id="t1" class="tableTab"><span><a href="javascript:show(1);">Static Methods</a></span><span class="tabEnd">&nbsp;</span></span><span id="t2" class="tableTab"><span><a href="javascript:show(2);">Instance Methods</a></span><span class="tabEnd">&nbsp;</span></span><span id="t4" class="tableTab"><span><a href="javascript:show(8);">Concrete Methods</a></span><span class="tabEnd">&nbsp;</span></span></caption>
+<caption><span id="t0" class="activeTableTab"><span>All Methods</span><span class="tabEnd">&nbsp;</span></span><span id="t1" class="tableTab"><span><a href="javascript:show(1);">Static Methods</a></span><span class="tabEnd">&nbsp;</span></span><span id="t2" class="tableTab"><span><a href="javascript:show(2);">Instance Methods</a></span><span class="tabEnd">&nbsp;</span></span><span id="t4" class="tableTab"><span><a href="javascript:show(8);">Concrete Methods</a></span><span class="tabEnd">&nbsp;</span></span><span id="t6" class="tableTab"><span><a href="javascript:show(32);">Deprecated Methods</a></span><span class="tabEnd">&nbsp;</span></span></caption>
 <tr>
 <th class="colFirst" scope="col">Modifier and Type</th>
 <th class="colLast" scope="col">Method and Description</th>
@@ -172,7 +178,9 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 <td class="colFirst"><code><a href="../../../../com/google/crypto/tink/PrimitiveSet.Entry.html" title="class in com.google.crypto.tink">PrimitiveSet.Entry</a>&lt;<a href="../../../../com/google/crypto/tink/PrimitiveSet.html" title="type parameter in PrimitiveSet">P</a>&gt;</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/crypto/tink/PrimitiveSet.html#addPrimitive-P-com.google.crypto.tink.proto.Keyset.Key-">addPrimitive</a></span>(<a href="../../../../com/google/crypto/tink/PrimitiveSet.html" title="type parameter in PrimitiveSet">P</a>&nbsp;primitive,
             <a href="../../../../com/google/crypto/tink/proto/Keyset.Key.html" title="class in com.google.crypto.tink.proto">Keyset.Key</a>&nbsp;key)</code>
-<div class="block">Creates an entry in the primitive table.</div>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;
+<div class="block"><span class="deprecationComment">use <code>Builder.addPrimitive</code> or <code>Builder.addPrimaryPrimitive</code> instead.</span></div>
+</div>
 </td>
 </tr>
 <tr id="i1" class="rowColor">
@@ -180,18 +188,16 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/crypto/tink/PrimitiveSet.html#getAll--">getAll</a></span>()</code>&nbsp;</td>
 </tr>
 <tr id="i2" class="altColor">
+<td class="colFirst"><code><a href="../../../../com/google/crypto/tink/monitoring/MonitoringAnnotations.html" title="class in com.google.crypto.tink.monitoring">MonitoringAnnotations</a></code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/crypto/tink/PrimitiveSet.html#getAnnotations--">getAnnotations</a></span>()</code>&nbsp;</td>
+</tr>
+<tr id="i3" class="rowColor">
 <td class="colFirst"><code><a href="../../../../com/google/crypto/tink/PrimitiveSet.Entry.html" title="class in com.google.crypto.tink">PrimitiveSet.Entry</a>&lt;<a href="../../../../com/google/crypto/tink/PrimitiveSet.html" title="type parameter in PrimitiveSet">P</a>&gt;</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/crypto/tink/PrimitiveSet.html#getPrimary--">getPrimary</a></span>()</code>&nbsp;</td>
 </tr>
-<tr id="i3" class="rowColor">
+<tr id="i4" class="altColor">
 <td class="colFirst"><code><a href="https://docs.oracle.com/javase/8/docs/api/java/util/List.html?is-external=true" title="class or interface in java.util">List</a>&lt;<a href="../../../../com/google/crypto/tink/PrimitiveSet.Entry.html" title="class in com.google.crypto.tink">PrimitiveSet.Entry</a>&lt;<a href="../../../../com/google/crypto/tink/PrimitiveSet.html" title="type parameter in PrimitiveSet">P</a>&gt;&gt;</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/crypto/tink/PrimitiveSet.html#getPrimitive-byte:A-">getPrimitive</a></span>(byte[]&nbsp;identifier)</code>&nbsp;</td>
-</tr>
-<tr id="i4" class="altColor">
-<td class="colFirst"><code>protected <a href="https://docs.oracle.com/javase/8/docs/api/java/util/List.html?is-external=true" title="class or interface in java.util">List</a>&lt;<a href="../../../../com/google/crypto/tink/PrimitiveSet.Entry.html" title="class in com.google.crypto.tink">PrimitiveSet.Entry</a>&lt;<a href="../../../../com/google/crypto/tink/PrimitiveSet.html" title="type parameter in PrimitiveSet">P</a>&gt;&gt;</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/crypto/tink/PrimitiveSet.html#getPrimitive-com.google.crypto.tink.proto.Keyset.Key-">getPrimitive</a></span>(<a href="../../../../com/google/crypto/tink/proto/Keyset.Key.html" title="class in com.google.crypto.tink.proto">Keyset.Key</a>&nbsp;key)</code>
-<div class="block">Returns the entries with primitives identified by the ciphertext prefix of <code>key</code>.</div>
-</td>
 </tr>
 <tr id="i5" class="rowColor">
 <td class="colFirst"><code><a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Class.html?is-external=true" title="class or interface in java.lang">Class</a>&lt;<a href="../../../../com/google/crypto/tink/PrimitiveSet.html" title="type parameter in PrimitiveSet">P</a>&gt;</code></td>
@@ -202,13 +208,27 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/crypto/tink/PrimitiveSet.html#getRawPrimitives--">getRawPrimitives</a></span>()</code>&nbsp;</td>
 </tr>
 <tr id="i7" class="rowColor">
-<td class="colFirst"><code>static &lt;P&gt;&nbsp;<a href="../../../../com/google/crypto/tink/PrimitiveSet.html" title="class in com.google.crypto.tink">PrimitiveSet</a>&lt;P&gt;</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/crypto/tink/PrimitiveSet.html#newPrimitiveSet-java.lang.Class-">newPrimitiveSet</a></span>(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Class.html?is-external=true" title="class or interface in java.lang">Class</a>&lt;P&gt;&nbsp;primitiveClass)</code>&nbsp;</td>
+<td class="colFirst"><code>boolean</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/crypto/tink/PrimitiveSet.html#hasAnnotations--">hasAnnotations</a></span>()</code>&nbsp;</td>
 </tr>
 <tr id="i8" class="altColor">
+<td class="colFirst"><code>static &lt;P&gt;&nbsp;<a href="../../../../com/google/crypto/tink/PrimitiveSet.Builder.html" title="class in com.google.crypto.tink">PrimitiveSet.Builder</a>&lt;P&gt;</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/crypto/tink/PrimitiveSet.html#newBuilder-java.lang.Class-">newBuilder</a></span>(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Class.html?is-external=true" title="class or interface in java.lang">Class</a>&lt;P&gt;&nbsp;primitiveClass)</code>&nbsp;</td>
+</tr>
+<tr id="i9" class="rowColor">
+<td class="colFirst"><code>static &lt;P&gt;&nbsp;<a href="../../../../com/google/crypto/tink/PrimitiveSet.html" title="class in com.google.crypto.tink">PrimitiveSet</a>&lt;P&gt;</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/crypto/tink/PrimitiveSet.html#newPrimitiveSet-java.lang.Class-">newPrimitiveSet</a></span>(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Class.html?is-external=true" title="class or interface in java.lang">Class</a>&lt;P&gt;&nbsp;primitiveClass)</code>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;
+<div class="block"><span class="deprecationComment">use <a href="../../../../com/google/crypto/tink/PrimitiveSet.Builder.html" title="class in com.google.crypto.tink"><code>PrimitiveSet.Builder</code></a> instead.</span></div>
+</div>
+</td>
+</tr>
+<tr id="i10" class="altColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/crypto/tink/PrimitiveSet.html#setPrimary-com.google.crypto.tink.PrimitiveSet.Entry-">setPrimary</a></span>(<a href="../../../../com/google/crypto/tink/PrimitiveSet.Entry.html" title="class in com.google.crypto.tink">PrimitiveSet.Entry</a>&lt;<a href="../../../../com/google/crypto/tink/PrimitiveSet.html" title="type parameter in PrimitiveSet">P</a>&gt;&nbsp;primary)</code>
-<div class="block">Sets given Entry <code>primary</code> as the primary one.</div>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;
+<div class="block"><span class="deprecationComment">use <code>Builder.addPrimaryPrimitive</code> instead.</span></div>
+</div>
 </td>
 </tr>
 </table>
@@ -239,11 +259,30 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 <ul class="blockList">
 <li class="blockList">
 <h4>getPrimary</h4>
-<pre>public&nbsp;<a href="../../../../com/google/crypto/tink/PrimitiveSet.Entry.html" title="class in com.google.crypto.tink">PrimitiveSet.Entry</a>&lt;<a href="../../../../com/google/crypto/tink/PrimitiveSet.html" title="type parameter in PrimitiveSet">P</a>&gt;&nbsp;getPrimary()</pre>
+<pre><a href="https://docs.oracle.com/javase/8/docs/api/javax/annotation/Nullable.html?is-external=true" title="class or interface in javax.annotation">@Nullable</a>
+public&nbsp;<a href="../../../../com/google/crypto/tink/PrimitiveSet.Entry.html" title="class in com.google.crypto.tink">PrimitiveSet.Entry</a>&lt;<a href="../../../../com/google/crypto/tink/PrimitiveSet.html" title="type parameter in PrimitiveSet">P</a>&gt;&nbsp;getPrimary()</pre>
 <dl>
 <dt><span class="returnLabel">Returns:</span></dt>
 <dd>the entry with the primary primitive.</dd>
 </dl>
+</li>
+</ul>
+<a name="hasAnnotations--">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>hasAnnotations</h4>
+<pre>public&nbsp;boolean&nbsp;hasAnnotations()</pre>
+</li>
+</ul>
+<a name="getAnnotations--">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>getAnnotations</h4>
+<pre>public&nbsp;<a href="../../../../com/google/crypto/tink/monitoring/MonitoringAnnotations.html" title="class in com.google.crypto.tink.monitoring">MonitoringAnnotations</a>&nbsp;getAnnotations()</pre>
 </li>
 </ul>
 <a name="getRawPrimitives--">
@@ -272,21 +311,6 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 </dl>
 </li>
 </ul>
-<a name="getPrimitive-com.google.crypto.tink.proto.Keyset.Key-">
-<!--   -->
-</a>
-<ul class="blockList">
-<li class="blockList">
-<h4>getPrimitive</h4>
-<pre>protected&nbsp;<a href="https://docs.oracle.com/javase/8/docs/api/java/util/List.html?is-external=true" title="class or interface in java.util">List</a>&lt;<a href="../../../../com/google/crypto/tink/PrimitiveSet.Entry.html" title="class in com.google.crypto.tink">PrimitiveSet.Entry</a>&lt;<a href="../../../../com/google/crypto/tink/PrimitiveSet.html" title="type parameter in PrimitiveSet">P</a>&gt;&gt;&nbsp;getPrimitive(<a href="../../../../com/google/crypto/tink/proto/Keyset.Key.html" title="class in com.google.crypto.tink.proto">Keyset.Key</a>&nbsp;key)
-                                            throws <a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
-<div class="block">Returns the entries with primitives identified by the ciphertext prefix of <code>key</code>.</div>
-<dl>
-<dt><span class="throwsLabel">Throws:</span></dt>
-<dd><code><a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></code></dd>
-</dl>
-</li>
-</ul>
 <a name="getAll--">
 <!--   -->
 </a>
@@ -306,7 +330,10 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 <ul class="blockList">
 <li class="blockList">
 <h4>newPrimitiveSet</h4>
-<pre>public static&nbsp;&lt;P&gt;&nbsp;<a href="../../../../com/google/crypto/tink/PrimitiveSet.html" title="class in com.google.crypto.tink">PrimitiveSet</a>&lt;P&gt;&nbsp;newPrimitiveSet(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Class.html?is-external=true" title="class or interface in java.lang">Class</a>&lt;P&gt;&nbsp;primitiveClass)</pre>
+<pre><a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Deprecated.html?is-external=true" title="class or interface in java.lang">@Deprecated</a>
+public static&nbsp;&lt;P&gt;&nbsp;<a href="../../../../com/google/crypto/tink/PrimitiveSet.html" title="class in com.google.crypto.tink">PrimitiveSet</a>&lt;P&gt;&nbsp;newPrimitiveSet(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Class.html?is-external=true" title="class or interface in java.lang">Class</a>&lt;P&gt;&nbsp;primitiveClass)</pre>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;<span class="deprecationComment">use <a href="../../../../com/google/crypto/tink/PrimitiveSet.Builder.html" title="class in com.google.crypto.tink"><code>PrimitiveSet.Builder</code></a> instead.</span></div>
+<div class="block">Creates a new mutable PrimitiveSet.</div>
 </li>
 </ul>
 <a name="setPrimary-com.google.crypto.tink.PrimitiveSet.Entry-">
@@ -315,8 +342,14 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 <ul class="blockList">
 <li class="blockList">
 <h4>setPrimary</h4>
-<pre>public&nbsp;void&nbsp;setPrimary(<a href="../../../../com/google/crypto/tink/PrimitiveSet.Entry.html" title="class in com.google.crypto.tink">PrimitiveSet.Entry</a>&lt;<a href="../../../../com/google/crypto/tink/PrimitiveSet.html" title="type parameter in PrimitiveSet">P</a>&gt;&nbsp;primary)</pre>
+<pre><a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Deprecated.html?is-external=true" title="class or interface in java.lang">@Deprecated</a>
+public&nbsp;void&nbsp;setPrimary(<a href="../../../../com/google/crypto/tink/PrimitiveSet.Entry.html" title="class in com.google.crypto.tink">PrimitiveSet.Entry</a>&lt;<a href="../../../../com/google/crypto/tink/PrimitiveSet.html" title="type parameter in PrimitiveSet">P</a>&gt;&nbsp;primary)</pre>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;<span class="deprecationComment">use <code>Builder.addPrimaryPrimitive</code> instead.</span></div>
 <div class="block">Sets given Entry <code>primary</code> as the primary one.</div>
+<dl>
+<dt><span class="throwsLabel">Throws:</span></dt>
+<dd><code><a href="https://docs.oracle.com/javase/8/docs/api/java/lang/IllegalStateException.html?is-external=true" title="class or interface in java.lang">IllegalStateException</a></code> - if object has been created by the <a href="../../../../com/google/crypto/tink/PrimitiveSet.Builder.html" title="class in com.google.crypto.tink"><code>PrimitiveSet.Builder</code></a>.</dd>
+</dl>
 </li>
 </ul>
 <a name="addPrimitive-java.lang.Object-com.google.crypto.tink.proto.Keyset.Key-">
@@ -327,14 +360,17 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 <ul class="blockList">
 <li class="blockList">
 <h4>addPrimitive</h4>
-<pre>public&nbsp;<a href="../../../../com/google/crypto/tink/PrimitiveSet.Entry.html" title="class in com.google.crypto.tink">PrimitiveSet.Entry</a>&lt;<a href="../../../../com/google/crypto/tink/PrimitiveSet.html" title="type parameter in PrimitiveSet">P</a>&gt;&nbsp;addPrimitive(<a href="../../../../com/google/crypto/tink/PrimitiveSet.html" title="type parameter in PrimitiveSet">P</a>&nbsp;primitive,
-                                          <a href="../../../../com/google/crypto/tink/proto/Keyset.Key.html" title="class in com.google.crypto.tink.proto">Keyset.Key</a>&nbsp;key)
-                                   throws <a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
+<pre><a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Deprecated.html?is-external=true" title="class or interface in java.lang">@Deprecated</a>
+public&nbsp;<a href="../../../../com/google/crypto/tink/PrimitiveSet.Entry.html" title="class in com.google.crypto.tink">PrimitiveSet.Entry</a>&lt;<a href="../../../../com/google/crypto/tink/PrimitiveSet.html" title="type parameter in PrimitiveSet">P</a>&gt;&nbsp;addPrimitive(<a href="../../../../com/google/crypto/tink/PrimitiveSet.html" title="type parameter in PrimitiveSet">P</a>&nbsp;primitive,
+                                                      <a href="../../../../com/google/crypto/tink/proto/Keyset.Key.html" title="class in com.google.crypto.tink.proto">Keyset.Key</a>&nbsp;key)
+                                               throws <a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;<span class="deprecationComment">use <code>Builder.addPrimitive</code> or <code>Builder.addPrimaryPrimitive</code> instead.</span></div>
 <div class="block">Creates an entry in the primitive table.</div>
 <dl>
 <dt><span class="returnLabel">Returns:</span></dt>
-<dd>the added entry</dd>
+<dd>the added <a href="../../../../com/google/crypto/tink/PrimitiveSet.Entry.html" title="class in com.google.crypto.tink"><code>PrimitiveSet.Entry</code></a></dd>
 <dt><span class="throwsLabel">Throws:</span></dt>
+<dd><code><a href="https://docs.oracle.com/javase/8/docs/api/java/lang/IllegalStateException.html?is-external=true" title="class or interface in java.lang">IllegalStateException</a></code> - if object has been created by the <a href="../../../../com/google/crypto/tink/PrimitiveSet.Builder.html" title="class in com.google.crypto.tink"><code>PrimitiveSet.Builder</code></a>.</dd>
 <dd><code><a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></code></dd>
 </dl>
 </li>
@@ -342,10 +378,19 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 <a name="getPrimitiveClass--">
 <!--   -->
 </a>
-<ul class="blockListLast">
+<ul class="blockList">
 <li class="blockList">
 <h4>getPrimitiveClass</h4>
 <pre>public&nbsp;<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Class.html?is-external=true" title="class or interface in java.lang">Class</a>&lt;<a href="../../../../com/google/crypto/tink/PrimitiveSet.html" title="type parameter in PrimitiveSet">P</a>&gt;&nbsp;getPrimitiveClass()</pre>
+</li>
+</ul>
+<a name="newBuilder-java.lang.Class-">
+<!--   -->
+</a>
+<ul class="blockListLast">
+<li class="blockList">
+<h4>newBuilder</h4>
+<pre>public static&nbsp;&lt;P&gt;&nbsp;<a href="../../../../com/google/crypto/tink/PrimitiveSet.Builder.html" title="class in com.google.crypto.tink">PrimitiveSet.Builder</a>&lt;P&gt;&nbsp;newBuilder(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Class.html?is-external=true" title="class or interface in java.lang">Class</a>&lt;P&gt;&nbsp;primitiveClass)</pre>
 </li>
 </ul>
 </li>
@@ -377,7 +422,7 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 <div class="subNav">
 <ul class="navList">
 <li><a href="../../../../com/google/crypto/tink/PemKeyType.html" title="enum in com.google.crypto.tink"><span class="typeNameLink">Prev&nbsp;Class</span></a></li>
-<li><a href="../../../../com/google/crypto/tink/PrimitiveSet.Entry.html" title="class in com.google.crypto.tink"><span class="typeNameLink">Next&nbsp;Class</span></a></li>
+<li><a href="../../../../com/google/crypto/tink/PrimitiveSet.Builder.html" title="class in com.google.crypto.tink"><span class="typeNameLink">Next&nbsp;Class</span></a></li>
 </ul>
 <ul class="navList">
 <li><a href="../../../../index.html?com/google/crypto/tink/PrimitiveSet.html" target="_top">Frames</a></li>

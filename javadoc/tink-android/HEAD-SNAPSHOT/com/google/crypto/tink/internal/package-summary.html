@@ -74,6 +74,47 @@
 <div class="contentContainer">
 <ul class="blockList">
 <li class="blockList">
+<table class="typeSummary" border="0" cellpadding="3" cellspacing="0" summary="Interface Summary table, listing interfaces, and an explanation">
+<caption><span>Interface Summary</span><span class="tabEnd">&nbsp;</span></caption>
+<tr>
+<th class="colFirst" scope="col">Interface</th>
+<th class="colLast" scope="col">Description</th>
+</tr>
+<tbody>
+<tr class="altColor">
+<td class="colFirst"><a href="../../../../../com/google/crypto/tink/internal/KeyFormatParser.KeyFormatParsingFunction.html" title="interface in com.google.crypto.tink.internal">KeyFormatParser.KeyFormatParsingFunction</a>&lt;SerializationT extends <a href="../../../../../com/google/crypto/tink/internal/Serialization.html" title="interface in com.google.crypto.tink.internal">Serialization</a>&gt;</td>
+<td class="colLast">
+<div class="block">A function which parses a KeyFormat object.</div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><a href="../../../../../com/google/crypto/tink/internal/KeyFormatSerializer.KeyFormatSerializationFunction.html" title="interface in com.google.crypto.tink.internal">KeyFormatSerializer.KeyFormatSerializationFunction</a>&lt;KeyFormatT extends <a href="../../../../../com/google/crypto/tink/KeyFormat.html" title="class in com.google.crypto.tink">KeyFormat</a>,SerializationT extends <a href="../../../../../com/google/crypto/tink/internal/Serialization.html" title="interface in com.google.crypto.tink.internal">Serialization</a>&gt;</td>
+<td class="colLast">
+<div class="block">A function which serializes a KeyFormat object.</div>
+</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><a href="../../../../../com/google/crypto/tink/internal/KeyParser.KeyParsingFunction.html" title="interface in com.google.crypto.tink.internal">KeyParser.KeyParsingFunction</a>&lt;SerializationT extends <a href="../../../../../com/google/crypto/tink/internal/Serialization.html" title="interface in com.google.crypto.tink.internal">Serialization</a>&gt;</td>
+<td class="colLast">
+<div class="block">A function which parses a key.</div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><a href="../../../../../com/google/crypto/tink/internal/KeySerializer.KeySerializationFunction.html" title="interface in com.google.crypto.tink.internal">KeySerializer.KeySerializationFunction</a>&lt;KeyT extends <a href="../../../../../com/google/crypto/tink/Key.html" title="class in com.google.crypto.tink">Key</a>,SerializationT extends <a href="../../../../../com/google/crypto/tink/internal/Serialization.html" title="interface in com.google.crypto.tink.internal">Serialization</a>&gt;</td>
+<td class="colLast">
+<div class="block">A function which serializes a key.</div>
+</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><a href="../../../../../com/google/crypto/tink/internal/Serialization.html" title="interface in com.google.crypto.tink.internal">Serialization</a></td>
+<td class="colLast">
+<div class="block">Represents either a serialized <code>Key</code> or a serialized <code>KeyFormat</code>.</div>
+</td>
+</tr>
+</tbody>
+</table>
+</li>
+<li class="blockList">
 <table class="typeSummary" border="0" cellpadding="3" cellspacing="0" summary="Class Summary table, listing classes, and an explanation">
 <caption><span>Class Summary</span><span class="tabEnd">&nbsp;</span></caption>
 <tr>
@@ -82,42 +123,90 @@
 </tr>
 <tbody>
 <tr class="altColor">
-<td class="colFirst"><a href="../../../../../com/google/crypto/tink/internal/ByteArray.html" title="class in com.google.crypto.tink.internal">ByteArray</a></td>
+<td class="colFirst"><a href="../../../../../com/google/crypto/tink/internal/KeyFormatParser.html" title="class in com.google.crypto.tink.internal">KeyFormatParser</a>&lt;SerializationT extends <a href="../../../../../com/google/crypto/tink/internal/Serialization.html" title="interface in com.google.crypto.tink.internal">Serialization</a>&gt;</td>
 <td class="colLast">
-<div class="block">Immutable Wrapper around a byte array.</div>
+<div class="block">Parses <code>Serialization</code> objects into <code>KeyFormat</code> objects of a certain kind.</div>
 </td>
 </tr>
 <tr class="rowColor">
+<td class="colFirst"><a href="../../../../../com/google/crypto/tink/internal/KeyFormatSerializer.html" title="class in com.google.crypto.tink.internal">KeyFormatSerializer</a>&lt;KeyFormatT extends <a href="../../../../../com/google/crypto/tink/KeyFormat.html" title="class in com.google.crypto.tink">KeyFormat</a>,SerializationT extends <a href="../../../../../com/google/crypto/tink/internal/Serialization.html" title="interface in com.google.crypto.tink.internal">Serialization</a>&gt;</td>
+<td class="colLast">
+<div class="block">Serializes <code>KeyFormat</code> objects into <code>Serialization</code> objects of a certain kind.</div>
+</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><a href="../../../../../com/google/crypto/tink/internal/KeyParser.html" title="class in com.google.crypto.tink.internal">KeyParser</a>&lt;SerializationT extends <a href="../../../../../com/google/crypto/tink/internal/Serialization.html" title="interface in com.google.crypto.tink.internal">Serialization</a>&gt;</td>
+<td class="colLast">
+<div class="block">Parses <code>Serialization</code> objects into <code>Key</code> objects of a certain kind.</div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><a href="../../../../../com/google/crypto/tink/internal/KeySerializer.html" title="class in com.google.crypto.tink.internal">KeySerializer</a>&lt;KeyT extends <a href="../../../../../com/google/crypto/tink/Key.html" title="class in com.google.crypto.tink">Key</a>,SerializationT extends <a href="../../../../../com/google/crypto/tink/internal/Serialization.html" title="interface in com.google.crypto.tink.internal">Serialization</a>&gt;</td>
+<td class="colLast">
+<div class="block">Serializes <code>Key</code> objects into <code>Serialization</code> objects of a certain kind.</div>
+</td>
+</tr>
+<tr class="altColor">
 <td class="colFirst"><a href="../../../../../com/google/crypto/tink/internal/KeyStatusTypeProtoConverter.html" title="class in com.google.crypto.tink.internal">KeyStatusTypeProtoConverter</a></td>
 <td class="colLast">
 <div class="block">Util functions to facilitate conversion between the <code>KeyHandle.KeyStatusType</code> enum and
  <a href="../../../../../com/google/crypto/tink/tinkkey/KeyHandle.KeyStatusType.html" title="enum in com.google.crypto.tink.tinkkey"><code>KeyHandle.KeyStatusType</code></a> proto.</div>
 </td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><a href="../../../../../com/google/crypto/tink/internal/KeyTemplateProtoConverter.html" title="class in com.google.crypto.tink.internal">KeyTemplateProtoConverter</a></td>
 <td class="colLast">
 <div class="block">KeyTemplateProtoConverter converts KeyTemplate to and from the binary proto format.</div>
 </td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><a href="../../../../../com/google/crypto/tink/internal/KeyTypeManager.html" title="class in com.google.crypto.tink.internal">KeyTypeManager</a>&lt;KeyProtoT extends com.google.protobuf.MessageLite&gt;</td>
 <td class="colLast">
 <div class="block">An object which collects all the operations which one can do on for a single key type, identified
  by a single KeyProto.</div>
 </td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><a href="../../../../../com/google/crypto/tink/internal/KeyTypeManager.KeyFactory.html" title="class in com.google.crypto.tink.internal">KeyTypeManager.KeyFactory</a>&lt;KeyFormatProtoT extends com.google.protobuf.MessageLite,KeyProtoT extends com.google.protobuf.MessageLite&gt;</td>
 <td class="colLast">
 <div class="block">A <code>KeyFactory</code> creates new keys from a given KeyFormat.</div>
 </td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><a href="../../../../../com/google/crypto/tink/internal/KeyTypeManager.KeyFactory.KeyFormat.html" title="class in com.google.crypto.tink.internal">KeyTypeManager.KeyFactory.KeyFormat</a>&lt;KeyFormatProtoT&gt;</td>
 <td class="colLast">
 <div class="block">A container that contains key format and other information that form key templates supported
  by this factory.</div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><a href="../../../../../com/google/crypto/tink/internal/LegacyProtoKey.html" title="class in com.google.crypto.tink.internal">LegacyProtoKey</a></td>
+<td class="colLast">
+<div class="block">Implements a Key for legacy types where no actual parser is present.</div>
+</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><a href="../../../../../com/google/crypto/tink/internal/LegacyProtoKeyFormat.html" title="class in com.google.crypto.tink.internal">LegacyProtoKeyFormat</a></td>
+<td class="colLast">
+<div class="block">Implements a KeyFormat for legacy types where no actual KeyFormat is present.</div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><a href="../../../../../com/google/crypto/tink/internal/MonitoringUtil.html" title="class in com.google.crypto.tink.internal">MonitoringUtil</a></td>
+<td class="colLast">
+<div class="block">Some util functions needed to add monitoring to the Primitives.</div>
+</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><a href="../../../../../com/google/crypto/tink/internal/MutableMonitoringRegistry.html" title="class in com.google.crypto.tink.internal">MutableMonitoringRegistry</a></td>
+<td class="colLast">
+<div class="block">A Registry for MonitoringClient.</div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><a href="../../../../../com/google/crypto/tink/internal/MutableSerializationRegistry.html" title="class in com.google.crypto.tink.internal">MutableSerializationRegistry</a></td>
+<td class="colLast">
+<div class="block">A Mutable version of the <a href="../../../../../com/google/crypto/tink/internal/SerializationRegistry.html" title="class in com.google.crypto.tink.internal"><code>SerializationRegistry</code></a>.</div>
 </td>
 </tr>
 <tr class="altColor">
@@ -131,6 +220,31 @@
 <td class="colLast">
 <div class="block">A PrivateKeyManager is like an <a href="../../../../../com/google/crypto/tink/internal/KeyTypeManager.html" title="class in com.google.crypto.tink.internal"><code>KeyTypeManager</code></a>, but additionally has a method to create a
  public key.</div>
+</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><a href="../../../../../com/google/crypto/tink/internal/ProtoKeyFormatSerialization.html" title="class in com.google.crypto.tink.internal">ProtoKeyFormatSerialization</a></td>
+<td class="colLast">
+<div class="block">Represents a <code>KeyFormat</code> object serialized with binary protobuf Serialization.</div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><a href="../../../../../com/google/crypto/tink/internal/ProtoKeySerialization.html" title="class in com.google.crypto.tink.internal">ProtoKeySerialization</a></td>
+<td class="colLast">
+<div class="block">* Represents a <code>Key</code> object serialized with binary protobuf Serialization.</div>
+</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><a href="../../../../../com/google/crypto/tink/internal/SerializationRegistry.html" title="class in com.google.crypto.tink.internal">SerializationRegistry</a></td>
+<td class="colLast">
+<div class="block">Allows registering <code>KeySerializer</code>, <code>KeyParser</code>, <code>KeyFormatSerializer</code>, and
+  objects, and parsing/serializing keys and key formats with such objects.</div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><a href="../../../../../com/google/crypto/tink/internal/SerializationRegistry.Builder.html" title="class in com.google.crypto.tink.internal">SerializationRegistry.Builder</a></td>
+<td class="colLast">
+<div class="block">Allows building SerializationRegistry objects.</div>
 </td>
 </tr>
 <tr class="altColor">

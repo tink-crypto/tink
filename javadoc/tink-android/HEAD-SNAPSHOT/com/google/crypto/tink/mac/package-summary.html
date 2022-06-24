@@ -43,7 +43,7 @@
 <div class="subNav">
 <ul class="navList">
 <li><a href="../../../../../com/google/crypto/tink/jwt/package-summary.html">Prev&nbsp;Package</a></li>
-<li><a href="../../../../../com/google/crypto/tink/prf/package-summary.html">Next&nbsp;Package</a></li>
+<li><a href="../../../../../com/google/crypto/tink/monitoring/package-summary.html">Next&nbsp;Package</a></li>
 </ul>
 <ul class="navList">
 <li><a href="../../../../../index.html?com/google/crypto/tink/mac/package-summary.html" target="_top">Frames</a></li>
@@ -82,18 +82,36 @@
 </tr>
 <tbody>
 <tr class="altColor">
+<td class="colFirst"><a href="../../../../../com/google/crypto/tink/mac/AesCmacKey.html" title="class in com.google.crypto.tink.mac">AesCmacKey</a></td>
+<td class="colLast">
+<div class="block">Represents a key computing AES-CMAC.</div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><a href="../../../../../com/google/crypto/tink/mac/AesCmacKeyFormat.html" title="class in com.google.crypto.tink.mac">AesCmacKeyFormat</a></td>
+<td class="colLast">
+<div class="block">Describes a format of an <a href="../../../../../com/google/crypto/tink/mac/AesCmacKey.html" title="class in com.google.crypto.tink.mac"><code>AesCmacKey</code></a>.</div>
+</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><a href="../../../../../com/google/crypto/tink/mac/AesCmacKeyFormat.Variant.html" title="class in com.google.crypto.tink.mac">AesCmacKeyFormat.Variant</a></td>
+<td class="colLast">
+<div class="block">Describes details of the mac computation.</div>
+</td>
+</tr>
+<tr class="rowColor">
 <td class="colFirst"><a href="../../../../../com/google/crypto/tink/mac/AesCmacKeyManager.html" title="class in com.google.crypto.tink.mac">AesCmacKeyManager</a></td>
 <td class="colLast">
 <div class="block">This key manager generates new <code>AesCmacKey</code> keys and produces new instances of <code>AesCmac</code>.</div>
 </td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><a href="../../../../../com/google/crypto/tink/mac/HmacKeyManager.html" title="class in com.google.crypto.tink.mac">HmacKeyManager</a></td>
 <td class="colLast">
 <div class="block">This key manager generates new <code>HmacKey</code> keys and produces new instances of <code>PrfHmacJce</code>.</div>
 </td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><a href="../../../../../com/google/crypto/tink/mac/MacConfig.html" title="class in com.google.crypto.tink.mac">MacConfig</a></td>
 <td class="colLast">
 <div class="block">Static methods and constants for registering with the <a href="../../../../../com/google/crypto/tink/Registry.html" title="class in com.google.crypto.tink"><code>Registry</code></a> all
@@ -101,13 +119,25 @@
  Tink.</div>
 </td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><a href="../../../../../com/google/crypto/tink/mac/MacFactory.html" title="class in com.google.crypto.tink.mac">MacFactory</a></td>
 <td class="colLast">Deprecated
 <div class="block"><span class="deprecationComment">Use <code>keysetHandle.GetPrimitive(Mac.class)</code> after registering the <code>MacWrapper</code> instead.</span></div>
 </td>
 </tr>
+<tr class="rowColor">
+<td class="colFirst"><a href="../../../../../com/google/crypto/tink/mac/MacKey.html" title="class in com.google.crypto.tink.mac">MacKey</a></td>
+<td class="colLast">
+<div class="block">Represents functions to compute and verify a cryptographic MAC.</div>
+</td>
+</tr>
 <tr class="altColor">
+<td class="colFirst"><a href="../../../../../com/google/crypto/tink/mac/MacKeyFormat.html" title="class in com.google.crypto.tink.mac">MacKeyFormat</a></td>
+<td class="colLast">
+<div class="block">Represents a description of a <a href="../../../../../com/google/crypto/tink/mac/MacKey.html" title="class in com.google.crypto.tink.mac"><code>MacKey</code></a> excluding the randomly chosen key material.</div>
+</td>
+</tr>
+<tr class="rowColor">
 <td class="colFirst"><a href="../../../../../com/google/crypto/tink/mac/MacKeyTemplates.html" title="class in com.google.crypto.tink.mac">MacKeyTemplates</a></td>
 <td class="colLast">Deprecated
 <div class="block"><span class="deprecationComment">use <a href="../../../../../com/google/crypto/tink/KeyTemplates.html#get-java.lang.String-"><code>KeyTemplates.get(java.lang.String)</code></a>, e.g.,
@@ -141,7 +171,7 @@
 <div class="subNav">
 <ul class="navList">
 <li><a href="../../../../../com/google/crypto/tink/jwt/package-summary.html">Prev&nbsp;Package</a></li>
-<li><a href="../../../../../com/google/crypto/tink/prf/package-summary.html">Next&nbsp;Package</a></li>
+<li><a href="../../../../../com/google/crypto/tink/monitoring/package-summary.html">Next&nbsp;Package</a></li>
 </ul>
 <ul class="navList">
 <li><a href="../../../../../index.html?com/google/crypto/tink/mac/package-summary.html" target="_top">Frames</a></li>

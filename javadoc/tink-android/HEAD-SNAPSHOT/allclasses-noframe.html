@@ -20,10 +20,13 @@
 <li><a href="com/google/crypto/tink/hybrid/subtle/AeadOrDaead.html" title="class in com.google.crypto.tink.hybrid.subtle">AeadOrDaead</a></li>
 <li><a href="com/google/crypto/tink/aead/AeadWrapper.html" title="class in com.google.crypto.tink.aead">AeadWrapper</a></li>
 <li><a href="com/google/crypto/tink/proto/AesCmac.html" title="class in com.google.crypto.tink.proto">AesCmac</a></li>
+<li><a href="com/google/crypto/tink/mac/AesCmacKey.html" title="class in com.google.crypto.tink.mac">AesCmacKey</a></li>
 <li><a href="com/google/crypto/tink/proto/AesCmacKey.html" title="class in com.google.crypto.tink.proto">AesCmacKey</a></li>
 <li><a href="com/google/crypto/tink/proto/AesCmacKey.Builder.html" title="class in com.google.crypto.tink.proto">AesCmacKey.Builder</a></li>
+<li><a href="com/google/crypto/tink/mac/AesCmacKeyFormat.html" title="class in com.google.crypto.tink.mac">AesCmacKeyFormat</a></li>
 <li><a href="com/google/crypto/tink/proto/AesCmacKeyFormat.html" title="class in com.google.crypto.tink.proto">AesCmacKeyFormat</a></li>
 <li><a href="com/google/crypto/tink/proto/AesCmacKeyFormat.Builder.html" title="class in com.google.crypto.tink.proto">AesCmacKeyFormat.Builder</a></li>
+<li><a href="com/google/crypto/tink/mac/AesCmacKeyFormat.Variant.html" title="class in com.google.crypto.tink.mac">AesCmacKeyFormat.Variant</a></li>
 <li><a href="com/google/crypto/tink/proto/AesCmacKeyFormatOrBuilder.html" title="interface in com.google.crypto.tink.proto"><span class="interfaceName">AesCmacKeyFormatOrBuilder</span></a></li>
 <li><a href="com/google/crypto/tink/mac/AesCmacKeyManager.html" title="class in com.google.crypto.tink.mac">AesCmacKeyManager</a></li>
 <li><a href="com/google/crypto/tink/proto/AesCmacKeyOrBuilder.html" title="interface in com.google.crypto.tink.proto"><span class="interfaceName">AesCmacKeyOrBuilder</span></a></li>
@@ -131,8 +134,8 @@
 <li><a href="com/google/crypto/tink/subtle/Base64.html" title="class in com.google.crypto.tink.subtle">Base64</a></li>
 <li><a href="com/google/crypto/tink/BinaryKeysetReader.html" title="class in com.google.crypto.tink">BinaryKeysetReader</a></li>
 <li><a href="com/google/crypto/tink/BinaryKeysetWriter.html" title="class in com.google.crypto.tink">BinaryKeysetWriter</a></li>
-<li><a href="com/google/crypto/tink/internal/ByteArray.html" title="class in com.google.crypto.tink.internal">ByteArray</a></li>
 <li><a href="com/google/crypto/tink/subtle/Bytes.html" title="class in com.google.crypto.tink.subtle">Bytes</a></li>
+<li><a href="com/google/crypto/tink/util/Bytes.html" title="class in com.google.crypto.tink.util">Bytes</a></li>
 <li><a href="com/google/crypto/tink/Catalogue.html" title="interface in com.google.crypto.tink"><span class="interfaceName">Catalogue</span></a></li>
 <li><a href="com/google/crypto/tink/proto/Chacha20Poly1305.html" title="class in com.google.crypto.tink.proto">Chacha20Poly1305</a></li>
 <li><a href="com/google/crypto/tink/subtle/ChaCha20Poly1305.html" title="class in com.google.crypto.tink.subtle">ChaCha20Poly1305</a></li>
@@ -382,17 +385,26 @@
 <li><a href="com/google/crypto/tink/proto/KeyData.KeyMaterialType.html" title="enum in com.google.crypto.tink.proto">KeyData.KeyMaterialType</a></li>
 <li><a href="com/google/crypto/tink/proto/KeyDataOrBuilder.html" title="interface in com.google.crypto.tink.proto"><span class="interfaceName">KeyDataOrBuilder</span></a></li>
 <li><a href="com/google/crypto/tink/KeyFormat.html" title="class in com.google.crypto.tink">KeyFormat</a></li>
+<li><a href="com/google/crypto/tink/internal/KeyFormatParser.html" title="class in com.google.crypto.tink.internal">KeyFormatParser</a></li>
+<li><a href="com/google/crypto/tink/internal/KeyFormatParser.KeyFormatParsingFunction.html" title="interface in com.google.crypto.tink.internal"><span class="interfaceName">KeyFormatParser.KeyFormatParsingFunction</span></a></li>
+<li><a href="com/google/crypto/tink/internal/KeyFormatSerializer.html" title="class in com.google.crypto.tink.internal">KeyFormatSerializer</a></li>
+<li><a href="com/google/crypto/tink/internal/KeyFormatSerializer.KeyFormatSerializationFunction.html" title="interface in com.google.crypto.tink.internal"><span class="interfaceName">KeyFormatSerializer.KeyFormatSerializationFunction</span></a></li>
 <li><a href="com/google/crypto/tink/tinkkey/KeyHandle.html" title="class in com.google.crypto.tink.tinkkey">KeyHandle</a></li>
 <li><a href="com/google/crypto/tink/tinkkey/KeyHandle.KeyStatusType.html" title="enum in com.google.crypto.tink.tinkkey">KeyHandle.KeyStatusType</a></li>
 <li><a href="com/google/crypto/tink/KeyManager.html" title="interface in com.google.crypto.tink"><span class="interfaceName">KeyManager</span></a></li>
+<li><a href="com/google/crypto/tink/internal/KeyParser.html" title="class in com.google.crypto.tink.internal">KeyParser</a></li>
+<li><a href="com/google/crypto/tink/internal/KeyParser.KeyParsingFunction.html" title="interface in com.google.crypto.tink.internal"><span class="interfaceName">KeyParser.KeyParsingFunction</span></a></li>
 <li><a href="com/google/crypto/tink/util/KeysDownloader.html" title="class in com.google.crypto.tink.util">KeysDownloader</a></li>
 <li><a href="com/google/crypto/tink/util/KeysDownloader.Builder.html" title="class in com.google.crypto.tink.util">KeysDownloader.Builder</a></li>
+<li><a href="com/google/crypto/tink/internal/KeySerializer.html" title="class in com.google.crypto.tink.internal">KeySerializer</a></li>
+<li><a href="com/google/crypto/tink/internal/KeySerializer.KeySerializationFunction.html" title="interface in com.google.crypto.tink.internal"><span class="interfaceName">KeySerializer.KeySerializationFunction</span></a></li>
 <li><a href="com/google/crypto/tink/proto/Keyset.html" title="class in com.google.crypto.tink.proto">Keyset</a></li>
 <li><a href="com/google/crypto/tink/proto/Keyset.Builder.html" title="class in com.google.crypto.tink.proto">Keyset.Builder</a></li>
 <li><a href="com/google/crypto/tink/proto/Keyset.Key.html" title="class in com.google.crypto.tink.proto">Keyset.Key</a></li>
 <li><a href="com/google/crypto/tink/proto/Keyset.Key.Builder.html" title="class in com.google.crypto.tink.proto">Keyset.Key.Builder</a></li>
 <li><a href="com/google/crypto/tink/proto/Keyset.KeyOrBuilder.html" title="interface in com.google.crypto.tink.proto"><span class="interfaceName">Keyset.KeyOrBuilder</span></a></li>
 <li><a href="com/google/crypto/tink/KeysetHandle.html" title="class in com.google.crypto.tink">KeysetHandle</a></li>
+<li><a href="com/google/crypto/tink/KeysetHandle.Entry.html" title="class in com.google.crypto.tink">KeysetHandle.Entry</a></li>
 <li><a href="com/google/crypto/tink/proto/KeysetInfo.html" title="class in com.google.crypto.tink.proto">KeysetInfo</a></li>
 <li><a href="com/google/crypto/tink/proto/KeysetInfo.Builder.html" title="class in com.google.crypto.tink.proto">KeysetInfo.Builder</a></li>
 <li><a href="com/google/crypto/tink/proto/KeysetInfo.KeyInfo.html" title="class in com.google.crypto.tink.proto">KeysetInfo.KeyInfo</a></li>
@@ -403,6 +415,7 @@
 <li><a href="com/google/crypto/tink/proto/KeysetOrBuilder.html" title="interface in com.google.crypto.tink.proto"><span class="interfaceName">KeysetOrBuilder</span></a></li>
 <li><a href="com/google/crypto/tink/KeysetReader.html" title="interface in com.google.crypto.tink"><span class="interfaceName">KeysetReader</span></a></li>
 <li><a href="com/google/crypto/tink/KeysetWriter.html" title="interface in com.google.crypto.tink"><span class="interfaceName">KeysetWriter</span></a></li>
+<li><a href="com/google/crypto/tink/KeyStatus.html" title="class in com.google.crypto.tink">KeyStatus</a></li>
 <li><a href="com/google/crypto/tink/proto/KeyStatusType.html" title="enum in com.google.crypto.tink.proto">KeyStatusType</a></li>
 <li><a href="com/google/crypto/tink/internal/KeyStatusTypeProtoConverter.html" title="class in com.google.crypto.tink.internal">KeyStatusTypeProtoConverter</a></li>
 <li><a href="com/google/crypto/tink/KeyTemplate.html" title="class in com.google.crypto.tink">KeyTemplate</a></li>
@@ -439,10 +452,24 @@
 <li><a href="com/google/crypto/tink/aead/KmsEnvelopeAeadKeyManager.html" title="class in com.google.crypto.tink.aead">KmsEnvelopeAeadKeyManager</a></li>
 <li><a href="com/google/crypto/tink/proto/KmsEnvelopeAeadKeyOrBuilder.html" title="interface in com.google.crypto.tink.proto"><span class="interfaceName">KmsEnvelopeAeadKeyOrBuilder</span></a></li>
 <li><a href="com/google/crypto/tink/subtle/Kwp.html" title="class in com.google.crypto.tink.subtle">Kwp</a></li>
+<li><a href="com/google/crypto/tink/internal/LegacyProtoKey.html" title="class in com.google.crypto.tink.internal">LegacyProtoKey</a></li>
+<li><a href="com/google/crypto/tink/internal/LegacyProtoKeyFormat.html" title="class in com.google.crypto.tink.internal">LegacyProtoKeyFormat</a></li>
 <li><a href="com/google/crypto/tink/Mac.html" title="interface in com.google.crypto.tink"><span class="interfaceName">Mac</span></a></li>
 <li><a href="com/google/crypto/tink/mac/MacConfig.html" title="class in com.google.crypto.tink.mac">MacConfig</a></li>
 <li><a href="com/google/crypto/tink/mac/MacFactory.html" title="class in com.google.crypto.tink.mac">MacFactory</a></li>
+<li><a href="com/google/crypto/tink/mac/MacKey.html" title="class in com.google.crypto.tink.mac">MacKey</a></li>
+<li><a href="com/google/crypto/tink/mac/MacKeyFormat.html" title="class in com.google.crypto.tink.mac">MacKeyFormat</a></li>
 <li><a href="com/google/crypto/tink/mac/MacKeyTemplates.html" title="class in com.google.crypto.tink.mac">MacKeyTemplates</a></li>
+<li><a href="com/google/crypto/tink/monitoring/MonitoringAnnotations.html" title="class in com.google.crypto.tink.monitoring">MonitoringAnnotations</a></li>
+<li><a href="com/google/crypto/tink/monitoring/MonitoringAnnotations.Builder.html" title="class in com.google.crypto.tink.monitoring">MonitoringAnnotations.Builder</a></li>
+<li><a href="com/google/crypto/tink/monitoring/MonitoringClient.html" title="interface in com.google.crypto.tink.monitoring"><span class="interfaceName">MonitoringClient</span></a></li>
+<li><a href="com/google/crypto/tink/monitoring/MonitoringClient.Logger.html" title="interface in com.google.crypto.tink.monitoring"><span class="interfaceName">MonitoringClient.Logger</span></a></li>
+<li><a href="com/google/crypto/tink/monitoring/MonitoringKeysetInfo.html" title="class in com.google.crypto.tink.monitoring">MonitoringKeysetInfo</a></li>
+<li><a href="com/google/crypto/tink/monitoring/MonitoringKeysetInfo.Builder.html" title="class in com.google.crypto.tink.monitoring">MonitoringKeysetInfo.Builder</a></li>
+<li><a href="com/google/crypto/tink/monitoring/MonitoringKeysetInfo.Entry.html" title="class in com.google.crypto.tink.monitoring">MonitoringKeysetInfo.Entry</a></li>
+<li><a href="com/google/crypto/tink/internal/MonitoringUtil.html" title="class in com.google.crypto.tink.internal">MonitoringUtil</a></li>
+<li><a href="com/google/crypto/tink/internal/MutableMonitoringRegistry.html" title="class in com.google.crypto.tink.internal">MutableMonitoringRegistry</a></li>
+<li><a href="com/google/crypto/tink/internal/MutableSerializationRegistry.html" title="class in com.google.crypto.tink.internal">MutableSerializationRegistry</a></li>
 <li><a href="com/google/crypto/tink/NoSecretKeysetHandle.html" title="class in com.google.crypto.tink">NoSecretKeysetHandle</a></li>
 <li><a href="com/google/crypto/tink/proto/OutputPrefixType.html" title="enum in com.google.crypto.tink.proto">OutputPrefixType</a></li>
 <li><a href="com/google/crypto/tink/PemKeyType.html" title="enum in com.google.crypto.tink">PemKeyType</a></li>
@@ -459,12 +486,15 @@
 <li><a href="com/google/crypto/tink/prf/PrfSetWrapper.html" title="class in com.google.crypto.tink.prf">PrfSetWrapper</a></li>
 <li><a href="com/google/crypto/tink/internal/PrimitiveFactory.html" title="class in com.google.crypto.tink.internal">PrimitiveFactory</a></li>
 <li><a href="com/google/crypto/tink/PrimitiveSet.html" title="class in com.google.crypto.tink">PrimitiveSet</a></li>
+<li><a href="com/google/crypto/tink/PrimitiveSet.Builder.html" title="class in com.google.crypto.tink">PrimitiveSet.Builder</a></li>
 <li><a href="com/google/crypto/tink/PrimitiveSet.Entry.html" title="class in com.google.crypto.tink">PrimitiveSet.Entry</a></li>
 <li><a href="com/google/crypto/tink/PrimitiveWrapper.html" title="interface in com.google.crypto.tink"><span class="interfaceName">PrimitiveWrapper</span></a></li>
 <li><a href="com/google/crypto/tink/PrivateKeyManager.html" title="interface in com.google.crypto.tink"><span class="interfaceName">PrivateKeyManager</span></a></li>
 <li><a href="com/google/crypto/tink/internal/PrivateKeyTypeManager.html" title="class in com.google.crypto.tink.internal">PrivateKeyTypeManager</a></li>
 <li><a href="com/google/crypto/tink/PrivilegedRegistry.html" title="class in com.google.crypto.tink">PrivilegedRegistry</a></li>
 <li><a href="com/google/crypto/tink/tinkkey/internal/ProtoKey.html" title="class in com.google.crypto.tink.tinkkey.internal">ProtoKey</a></li>
+<li><a href="com/google/crypto/tink/internal/ProtoKeyFormatSerialization.html" title="class in com.google.crypto.tink.internal">ProtoKeyFormatSerialization</a></li>
+<li><a href="com/google/crypto/tink/internal/ProtoKeySerialization.html" title="class in com.google.crypto.tink.internal">ProtoKeySerialization</a></li>
 <li><a href="com/google/crypto/tink/PublicKeySign.html" title="interface in com.google.crypto.tink"><span class="interfaceName">PublicKeySign</span></a></li>
 <li><a href="com/google/crypto/tink/signature/PublicKeySignConfig.html" title="class in com.google.crypto.tink.signature">PublicKeySignConfig</a></li>
 <li><a href="com/google/crypto/tink/signature/PublicKeySignFactory.html" title="class in com.google.crypto.tink.signature">PublicKeySignFactory</a></li>
@@ -514,10 +544,13 @@
 <li><a href="com/google/crypto/tink/subtle/RsaSsaPssSignJce.html" title="class in com.google.crypto.tink.subtle">RsaSsaPssSignJce</a></li>
 <li><a href="com/google/crypto/tink/signature/RsaSsaPssSignKeyManager.html" title="class in com.google.crypto.tink.signature">RsaSsaPssSignKeyManager</a></li>
 <li><a href="com/google/crypto/tink/subtle/RsaSsaPssVerifyJce.html" title="class in com.google.crypto.tink.subtle">RsaSsaPssVerifyJce</a></li>
-<li><a href="com/google/crypto/tink/util/SecretByteArray.html" title="class in com.google.crypto.tink.util">SecretByteArray</a></li>
+<li><a href="com/google/crypto/tink/util/SecretBytes.html" title="class in com.google.crypto.tink.util">SecretBytes</a></li>
 <li><a href="com/google/crypto/tink/SecretKeyAccess.html" title="class in com.google.crypto.tink">SecretKeyAccess</a></li>
 <li><a href="com/google/crypto/tink/tinkkey/SecretKeyAccess.html" title="class in com.google.crypto.tink.tinkkey">SecretKeyAccess</a></li>
 <li><a href="com/google/crypto/tink/subtle/SelfKeyTestValidators.html" title="class in com.google.crypto.tink.subtle">SelfKeyTestValidators</a></li>
+<li><a href="com/google/crypto/tink/internal/Serialization.html" title="interface in com.google.crypto.tink.internal"><span class="interfaceName">Serialization</span></a></li>
+<li><a href="com/google/crypto/tink/internal/SerializationRegistry.html" title="class in com.google.crypto.tink.internal">SerializationRegistry</a></li>
+<li><a href="com/google/crypto/tink/internal/SerializationRegistry.Builder.html" title="class in com.google.crypto.tink.internal">SerializationRegistry.Builder</a></li>
 <li><a href="com/google/crypto/tink/integration/android/SharedPrefKeysetReader.html" title="class in com.google.crypto.tink.integration.android">SharedPrefKeysetReader</a></li>
 <li><a href="com/google/crypto/tink/integration/android/SharedPrefKeysetWriter.html" title="class in com.google.crypto.tink.integration.android">SharedPrefKeysetWriter</a></li>
 <li><a href="com/google/crypto/tink/signature/SignatureConfig.html" title="class in com.google.crypto.tink.signature">SignatureConfig</a></li>

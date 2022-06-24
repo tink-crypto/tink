@@ -94,10 +94,14 @@
 <td class="colLast">&nbsp;</td>
 </tr>
 <tr class="rowColor">
-<td class="colFirst"><a href="#com.google.crypto.tink.subtle">com.google.crypto.tink.subtle</a></td>
+<td class="colFirst"><a href="#com.google.crypto.tink.monitoring">com.google.crypto.tink.monitoring</a></td>
 <td class="colLast">&nbsp;</td>
 </tr>
 <tr class="altColor">
+<td class="colFirst"><a href="#com.google.crypto.tink.subtle">com.google.crypto.tink.subtle</a></td>
+<td class="colLast">&nbsp;</td>
+</tr>
+<tr class="rowColor">
 <td class="colFirst"><a href="#com.google.crypto.tink.util">com.google.crypto.tink.util</a></td>
 <td class="colLast">&nbsp;</td>
 </tr>
@@ -133,6 +137,18 @@
 <td class="colFirst"><code>class&nbsp;</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/KeyFormat.html" title="class in com.google.crypto.tink">KeyFormat</a></span></code>
 <div class="block">Represents a cryptographic function without the actual key material.</div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>static class&nbsp;</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/KeysetHandle.Entry.html" title="class in com.google.crypto.tink">KeysetHandle.Entry</a></span></code>
+<div class="block">Represents a single entry in a keyset.</div>
+</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>class&nbsp;</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/KeyStatus.html" title="class in com.google.crypto.tink">KeyStatus</a></span></code>
+<div class="block">Represents the status of a key in a keyset.</div>
 </td>
 </tr>
 <tr class="rowColor">
@@ -192,6 +208,39 @@
 </tbody>
 </table>
 </li>
+<li class="blockList"><a name="com.google.crypto.tink.monitoring">
+<!--   -->
+</a>
+<h3>Uses of <a href="../../../../../../com/google/crypto/tink/annotations/Alpha.html" title="annotation in com.google.crypto.tink.annotations">Alpha</a> in <a href="../../../../../../com/google/crypto/tink/monitoring/package-summary.html">com.google.crypto.tink.monitoring</a></h3>
+<table class="useSummary" border="0" cellpadding="3" cellspacing="0" summary="Use table, listing classes, and an explanation">
+<caption><span>Classes in <a href="../../../../../../com/google/crypto/tink/monitoring/package-summary.html">com.google.crypto.tink.monitoring</a> with annotations of type <a href="../../../../../../com/google/crypto/tink/annotations/Alpha.html" title="annotation in com.google.crypto.tink.annotations">Alpha</a></span><span class="tabEnd">&nbsp;</span></caption>
+<tr>
+<th class="colFirst" scope="col">Modifier and Type</th>
+<th class="colLast" scope="col">Class and Description</th>
+</tr>
+<tbody>
+<tr class="altColor">
+<td class="colFirst"><code>class&nbsp;</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/monitoring/MonitoringAnnotations.html" title="class in com.google.crypto.tink.monitoring">MonitoringAnnotations</a></span></code>
+<div class="block">Immutable keyset annotations used by monitoring.</div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>interface&nbsp;</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/monitoring/MonitoringClient.html" title="interface in com.google.crypto.tink.monitoring">MonitoringClient</a></span></code>
+<div class="block">Interface for a monitoring client which can be registered with Tink.</div>
+</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>class&nbsp;</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/monitoring/MonitoringKeysetInfo.html" title="class in com.google.crypto.tink.monitoring">MonitoringKeysetInfo</a></span></code>
+<div class="block">Immutable representation of a Keyset in a certain point in time for the purpose of monitoring
+ operations involving cryptographic keys.</div>
+</td>
+</tr>
+</tbody>
+</table>
+</li>
 <li class="blockList"><a name="com.google.crypto.tink.subtle">
 <!--   -->
 </a>
@@ -226,7 +275,7 @@
 <tbody>
 <tr class="altColor">
 <td class="colFirst"><code>class&nbsp;</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/util/SecretByteArray.html" title="class in com.google.crypto.tink.util">SecretByteArray</a></span></code>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/util/SecretBytes.html" title="class in com.google.crypto.tink.util">SecretBytes</a></span></code>
 <div class="block">A class storing an immutable byte array, protecting the data via <a href="../../../../../../com/google/crypto/tink/SecretKeyAccess.html" title="class in com.google.crypto.tink"><code>SecretKeyAccess</code></a>.</div>
 </td>
 </tr>
