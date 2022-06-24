@@ -44,9 +44,9 @@ not equal, the function tries to output a meaningfull error message.
 
 from typing import Any, Optional
 
-from google3.net.proto2.python.public import descriptor
+from google.protobuf import descriptor
 from google.protobuf import message
-from google3.net.proto2.python.public import text_encoding
+from google.protobuf import text_encoding
 from tink.proto import aes_cmac_pb2
 from tink.proto import aes_cmac_prf_pb2
 from tink.proto import aes_ctr_hmac_aead_pb2
