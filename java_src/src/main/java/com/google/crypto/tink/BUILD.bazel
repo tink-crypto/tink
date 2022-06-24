@@ -602,6 +602,7 @@ java_library(
         "//src/main/java/com/google/crypto/tink/subtle:elliptic_curves",
         "//src/main/java/com/google/crypto/tink/subtle:enums",
         "//src/main/java/com/google/crypto/tink/subtle:subtle_util_cluster",
+        "@maven//:com_google_code_findbugs_jsr305",
     ],
 )
 
@@ -613,6 +614,7 @@ android_library(
         "//src/main/java/com/google/crypto/tink/subtle:elliptic_curves-android",
         "//src/main/java/com/google/crypto/tink/subtle:enums-android",
         "//src/main/java/com/google/crypto/tink/subtle:subtle_util_cluster-android",
+        "@maven//:com_google_code_findbugs_jsr305",
     ],
 )
 

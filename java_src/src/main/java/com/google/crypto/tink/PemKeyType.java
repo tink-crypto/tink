@@ -30,6 +30,7 @@ import java.security.interfaces.RSAKey;
 import java.security.spec.ECParameterSpec;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
+import javax.annotation.Nullable;
 
 /** PEM key types that Tink supports */
 public enum PemKeyType {
@@ -81,6 +82,7 @@ public enum PemKeyType {
    *
    * @return a {@link Key} or null if the reader doesn't contain a valid PEM.
    */
+  @Nullable
   public Key readKey(BufferedReader reader) throws IOException {
     String line = reader.readLine();
     while (line != null && !line.startsWith(BEGIN)) {
