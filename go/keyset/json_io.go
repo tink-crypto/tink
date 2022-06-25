@@ -68,7 +68,7 @@ func (bkr *JSONReader) readJSON(r io.Reader, msg proto.Message) error {
 	return bkr.j.Unmarshal(b, msg)
 }
 
-// JSONWriter serializes a keyset into binary proto format.
+// JSONWriter serializes a keyset into json format.
 type JSONWriter struct {
 	w io.Writer
 	j *protojson.MarshalOptions
