@@ -58,17 +58,21 @@ public final class ProtoKeySerializationTesterTest {
   }
 
   private static class TestKey extends Key {
-    private final ByteString str;
+    private final ByteString strOfLength4;
     private final OutputPrefixType outputPrefixType;
     private final KeyMaterialType keyMaterialType;
     @Nullable private final Integer idRequirement;
 
     public TestKey(
-        ByteString str,
+        ByteString strOfLength4,
         OutputPrefixType outputPrefixType,
         KeyMaterialType keyMaterialType,
-        @Nullable Integer idRequirement) {
-      this.str = str;
+        @Nullable Integer idRequirement)
+        throws GeneralSecurityException {
+      if (strOfLength4.size() != 4) {
+        throw new GeneralSecurityException("Str has to have length 4");
+      }
+      this.strOfLength4 = strOfLength4;
       this.outputPrefixType = outputPrefixType;
       this.keyMaterialType = keyMaterialType;
       this.idRequirement = idRequirement;
@@ -80,8 +84,9 @@ public final class ProtoKeySerializationTesterTest {
       return idRequirement;
     }
 
+    /** Returns a string of length exactly 4. */
     public ByteString getStr() {
-      return str;
+      return strOfLength4;
     }
 
     public OutputPrefixType getOutputPrefixType() {
@@ -98,7 +103,7 @@ public final class ProtoKeySerializationTesterTest {
         return false;
       }
       TestKey other = (TestKey) k;
-      return str.equals(other.str)
+      return strOfLength4.equals(other.strOfLength4)
           && outputPrefixType.equals(other.outputPrefixType)
           && keyMaterialType.equals(other.keyMaterialType)
           && Objects.equals(idRequirement, other.idRequirement);
@@ -162,7 +167,7 @@ public final class ProtoKeySerializationTesterTest {
 
   @Test
   public void testParseAndSerialize_testerWorksIfCorrect() throws Exception {
-    ByteString s = ByteString.copyFrom(new byte[] {1, 2, 3});
+    ByteString s = ByteString.copyFrom(new byte[] {1, 2, 3, 4});
     TestKey key =
         new TestKey(s, OutputPrefixType.TINK, KeyMaterialType.SYMMETRIC, /* idRequirement= */ 1357);
     TestProto proto = TestProto.newBuilder().setStr(s).build();
@@ -178,7 +183,7 @@ public final class ProtoKeySerializationTesterTest {
   // Same test as above, but with idRequirement == null
   @Test
   public void testParseAndSerialize_testerWorksIfCorrect_nullIdRequirement() throws Exception {
-    ByteString s = ByteString.copyFrom(new byte[] {1, 2, 3});
+    ByteString s = ByteString.copyFrom(new byte[] {1, 2, 3, 4});
     TestKey key =
         new TestKey(s, OutputPrefixType.RAW, KeyMaterialType.SYMMETRIC, /* idRequirement= */ null);
     TestProto proto = TestProto.newBuilder().setStr(s).build();
@@ -193,7 +198,7 @@ public final class ProtoKeySerializationTesterTest {
 
   @Test
   public void testParseAndSerialize_wrongKeyMaterialType_throws() throws Exception {
-    ByteString s = ByteString.copyFrom(new byte[] {1, 2, 3});
+    ByteString s = ByteString.copyFrom(new byte[] {1, 2, 3, 4});
     TestKey key =
         new TestKey(
             s,
@@ -222,12 +227,12 @@ public final class ProtoKeySerializationTesterTest {
   public void testParseAndSerialize_wrongValue_throws() throws Exception {
     TestKey key =
         new TestKey(
-            ByteString.copyFrom(new byte[] {1, 2, 3}),
+            ByteString.copyFrom(new byte[] {1, 2, 3, 4}),
             OutputPrefixType.TINK,
             KeyMaterialType.SYMMETRIC,
             /* idRequirement= */ 1357);
     TestProto proto =
-        TestProto.newBuilder().setStr(ByteString.copyFrom(new byte[] {2, 3, 4})).build();
+        TestProto.newBuilder().setStr(ByteString.copyFrom(new byte[] {2, 3, 4, 5})).build();
 
     ProtoKeySerializationTester tester =
         new ProtoKeySerializationTester(
@@ -247,7 +252,7 @@ public final class ProtoKeySerializationTesterTest {
 
   @Test
   public void testParseAndSerialize_testWrongIdRequirement_throws() throws Exception {
-    ByteString s = ByteString.copyFrom(new byte[] {1, 2, 3});
+    ByteString s = ByteString.copyFrom(new byte[] {1, 2, 3, 4});
     TestKey key =
         new TestKey(s, OutputPrefixType.TINK, KeyMaterialType.SYMMETRIC, /* idRequirement= */ 1357);
     TestProto proto = TestProto.newBuilder().setStr(s).build();
@@ -270,7 +275,7 @@ public final class ProtoKeySerializationTesterTest {
 
   @Test
   public void testParseAndSerialize_shouldRequireSecretKeyAccess_throws() throws Exception {
-    ByteString s = ByteString.copyFrom(new byte[] {1, 2, 3});
+    ByteString s = ByteString.copyFrom(new byte[] {1, 2, 3, 4});
     TestKey key =
         new TestKey(s, OutputPrefixType.TINK, KeyMaterialType.SYMMETRIC, /* idRequirement= */ 1357);
     TestProto proto = TestProto.newBuilder().setStr(s).build();
@@ -295,7 +300,7 @@ public final class ProtoKeySerializationTesterTest {
   @Test
   public void testParseAndSerialize_doesRequireSecretKeyAccess_works() throws Exception {
     globalRequireSecretKeyAccessOnParsingAndSerializing = true;
-    ByteString s = ByteString.copyFrom(new byte[] {1, 2, 3});
+    ByteString s = ByteString.copyFrom(new byte[] {1, 2, 3, 4});
     TestKey key =
         new TestKey(s, OutputPrefixType.TINK, KeyMaterialType.SYMMETRIC, /* idRequirement= */ 1357);
     TestProto proto = TestProto.newBuilder().setStr(s).build();
@@ -313,7 +318,7 @@ public final class ProtoKeySerializationTesterTest {
   public void testParseAndSerialize_functionsRequireAccessButTesterDoesNot_throws()
       throws Exception {
     globalRequireSecretKeyAccessOnParsingAndSerializing = true;
-    ByteString s = ByteString.copyFrom(new byte[] {1, 2, 3});
+    ByteString s = ByteString.copyFrom(new byte[] {1, 2, 3, 4});
     TestKey key =
         new TestKey(s, OutputPrefixType.TINK, KeyMaterialType.SYMMETRIC, /* idRequirement= */ 1357);
     TestProto proto = TestProto.newBuilder().setStr(s).build();
@@ -334,5 +339,31 @@ public final class ProtoKeySerializationTesterTest {
         () ->
             tester.testParseAndSerialize(
                 key, proto, OutputPrefixType.TINK, /* idRequirement= */ 1357));
+  }
+
+  @Test
+  public void testParsingFails_parsingFails_succeeds() throws Exception {
+    // Wrong length, so parsing will fail, so "testParsingFail" succeeds.
+    ByteString s = ByteString.copyFrom(new byte[] {1, 2, 3, 4, 5});
+    TestProto proto = TestProto.newBuilder().setStr(s).build();
+    ProtoKeySerializationTester tester =
+        new ProtoKeySerializationTester(
+            TYPE_URL, KeyMaterialType.SYMMETRIC, /* requiresSecretKeyAccess = */ false, registry);
+
+    tester.testParsingFails(proto, OutputPrefixType.TINK, /* idRequirement= */ 1357);
+  }
+
+  @Test
+  public void testParsingFails_parsingSucceeds_fails() throws Exception {
+    // Correct length, so parsing succeeds, so "testParsingFail" fails.
+    ByteString s = ByteString.copyFrom(new byte[] {1, 2, 3, 4});
+    TestProto proto = TestProto.newBuilder().setStr(s).build();
+    ProtoKeySerializationTester tester =
+        new ProtoKeySerializationTester(
+            TYPE_URL, KeyMaterialType.SYMMETRIC, /* requiresSecretKeyAccess = */ false, registry);
+
+    assertThrows(
+        AssertionError.class,
+        () -> tester.testParsingFails(proto, OutputPrefixType.TINK, /* idRequirement= */ 1357));
   }
 }

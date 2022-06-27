@@ -136,4 +136,16 @@ public final class ProtoKeySerializationTester {
     testParse(key, protoKey, outputPrefixType, idRequirement);
     testSerialize(key, protoKey, outputPrefixType, idRequirement);
   }
+
+  /** Tests that parsing fails for the given input. */
+  public void testParsingFails(
+      MessageLite protoKey, OutputPrefixType outputPrefixType, @Nullable Integer idRequirement)
+      throws Exception {
+    ProtoKeySerialization serialization =
+        ProtoKeySerialization.create(
+            typeUrl, protoKey.toByteString(), keyMaterialType, outputPrefixType, idRequirement);
+    assertThrows(
+        GeneralSecurityException.class,
+        () -> serializationRegistry.parseKey(serialization, InsecureSecretKeyAccess.get()));
+  }
 }
