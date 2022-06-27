@@ -36,10 +36,9 @@ public final class Bytes {
    */
   public static Bytes copyFrom(final byte[] data) {
     if (data == null) {
-      return null;
-    } else {
-      return copyFrom(data, 0, data.length);
+      throw new NullPointerException("data must be non-null");
     }
+    return copyFrom(data, 0, data.length);
   }
 
   /**
@@ -52,6 +51,9 @@ public final class Bytes {
    *     len}
    */
   public static Bytes copyFrom(final byte[] data, final int start, final int len) {
+    if (data == null) {
+      throw new NullPointerException("data must be non-null");
+    }
     return new Bytes(data, start, len);
   }
 
