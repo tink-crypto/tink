@@ -13,5 +13,5 @@ go_library(
 alias(
     name = "go_default_library",
     actual = ":monitoring",
-    visibility = ["//visibility:public"],
+    visibility = ["//:__subpackages__"],
 )

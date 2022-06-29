@@ -48,5 +48,5 @@ go_test(
 alias(
     name = "go_default_library",
     actual = ":subtle",
-    visibility = ["//visibility:public"],
+    visibility = ["//:__subpackages__"],
 )
