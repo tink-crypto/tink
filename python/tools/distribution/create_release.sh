@@ -39,18 +39,26 @@ readonly IMAGE="${IMAGE_NAME}@${IMAGE_DIGEST}"
 
 build_linux() {
   echo "### Building Linux binary wheels ###"
+  local -r tink_py_relative_path="${PWD##*/}"
+  local -r workdir="/tmp/tink/${tink_py_relative_path}"
 
   # Use signatures for getting images from registry (see
   # https://docs.docker.com/engine/security/trust/content_trust/).
   export DOCKER_CONTENT_TRUST=1
 
   # Build binary wheels.
-  docker run --volume "${TINK_PYTHON_ROOT_PATH}/..:/tmp/tink" --workdir /tmp/tink/python \
-    "${IMAGE}" /tmp/tink/python/tools/distribution/build_linux_binary_wheels.sh
+  docker run \
+    --volume "${TINK_PYTHON_ROOT_PATH}/..:/tmp/tink" \
+    --workdir "${workdir}" \
+    "${IMAGE}" \
+    "${workdir}/tools/distribution/build_linux_binary_wheels.sh"
 
   ## Test binary wheels.
-  docker run --volume "${TINK_PYTHON_ROOT_PATH}/..:/tmp/tink" --workdir /tmp/tink/python \
-    "${IMAGE}" /tmp/tink/python/tools/distribution/test_linux_binary_wheels.sh
+  docker run \
+    --volume "${TINK_PYTHON_ROOT_PATH}/..:/tmp/tink" \
+    --workdir "${workdir}" \
+    "${IMAGE}" \
+    "${workdir}/tools/distribution/test_linux_binary_wheels.sh"
 
   echo "### Building Linux source distribution ###"
   local sorted=( $( echo "${PYTHON_VERSIONS[@]}" \
