@@ -35,7 +35,7 @@ namespace tink {
 
 namespace {
 
-constexpr absl::string_view kPrimitive = "hybrid_encrypt";
+constexpr absl::string_view kPrimitive = "hybrid_decrypt";
 constexpr absl::string_view kDecryptApi = "decrypt";
 
 class HybridDecryptSetWrapper : public HybridDecrypt {
