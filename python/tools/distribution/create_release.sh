@@ -46,6 +46,10 @@ build_linux() {
   # https://docs.docker.com/engine/security/trust/content_trust/).
   export DOCKER_CONTENT_TRUST=1
 
+  # We use setup.py to build wheels; setup.py makes changes to the WORKSPACE
+  # file so we save a copy for backup.
+  cp WORKSPACE WORKSPACE.bak
+
   # Build binary wheels.
   docker run \
     --volume "${TINK_PYTHON_ROOT_PATH}/..:/tmp/tink" \
@@ -59,6 +63,12 @@ build_linux() {
     --workdir "${workdir}" \
     "${IMAGE}" \
     "${workdir}/tools/distribution/test_linux_binary_wheels.sh"
+
+  # Restore the original WORKSPACE.
+  mv WORKSPACE.bak WORKSPACE
+
+  # Docker runs as root so we transfer ownership to the non-root user.
+  sudo chown -R "$(id -un):$(id -gn)" "${TINK_PYTHON_ROOT_PATH}"
 
   echo "### Building Linux source distribution ###"
   local sorted=( $( echo "${PYTHON_VERSIONS[@]}" \
