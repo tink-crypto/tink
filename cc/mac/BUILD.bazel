@@ -142,7 +142,7 @@ cc_library(
     deps = [
         ":mac_key_format",
         "//:key",
-        "@com_google_absl//absl/status:statusor",
+        "//util:statusor",
     ],
 )
 

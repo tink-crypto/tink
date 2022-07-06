@@ -132,8 +132,8 @@ tink_cc_library(
     mac_key.h
   DEPS
     tink::mac::mac_key_format
-    absl::statusor
     tink::core::key
+    tink::util::statusor
 )
 
 # tests

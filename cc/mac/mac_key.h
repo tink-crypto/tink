@@ -19,9 +19,9 @@
 
 #include <string>
 
-#include "absl/status/statusor.h"
 #include "tink/key.h"
 #include "tink/mac/mac_key_format.h"
+#include "tink/util/statusor.h"
 
 namespace crypto {
 namespace tink {
@@ -40,7 +40,7 @@ class MacKey : public Key {
   // may be a prefix of another). To avoid this, built-in Tink keys use the
   // convention that the prefix is either '0x00<big endian key id>' or
   // '0x01<big endian key id>'.
-  virtual absl::StatusOr<std::string> GetOutputPrefix() const = 0;
+  virtual util::StatusOr<std::string> GetOutputPrefix() const = 0;
 
   const MacKeyFormat& GetKeyFormat() const override = 0;
 
