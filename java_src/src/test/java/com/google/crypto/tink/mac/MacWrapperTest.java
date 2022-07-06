@@ -224,12 +224,14 @@ public class MacWrapperTest {
     assertThat(tinkComputeEntry.getPrimitive()).isEqualTo("mac");
     assertThat(tinkComputeEntry.getApi()).isEqualTo("compute");
     assertThat(tinkComputeEntry.getNumBytesAsInput()).isEqualTo(plaintext.length);
+    assertThat(tinkComputeEntry.getKeysetInfo().getAnnotations()).isEqualTo(annotations);
 
     FakeMonitoringClient.LogEntry rawComputeEntry = logEntries.get(1);
     assertThat(rawComputeEntry.getKeyId()).isEqualTo(43);
     assertThat(rawComputeEntry.getPrimitive()).isEqualTo("mac");
     assertThat(rawComputeEntry.getApi()).isEqualTo("compute");
     assertThat(rawComputeEntry.getNumBytesAsInput()).isEqualTo(plaintext.length);
+    assertThat(rawComputeEntry.getKeysetInfo().getAnnotations()).isEqualTo(annotations);
 
     FakeMonitoringClient.LogEntry legacyComputeEntry = logEntries.get(2);
     assertThat(legacyComputeEntry.getKeyId()).isEqualTo(44);
@@ -237,18 +239,21 @@ public class MacWrapperTest {
     assertThat(legacyComputeEntry.getApi()).isEqualTo("compute");
     // legacy mac appends one byte to the input data, therefore the input length is one longer.
     assertThat(legacyComputeEntry.getNumBytesAsInput()).isEqualTo(plaintext.length + 1);
+    assertThat(legacyComputeEntry.getKeysetInfo().getAnnotations()).isEqualTo(annotations);
 
     FakeMonitoringClient.LogEntry tinkVerifyEntry = logEntries.get(3);
     assertThat(tinkVerifyEntry.getKeyId()).isEqualTo(42);
     assertThat(tinkVerifyEntry.getPrimitive()).isEqualTo("mac");
     assertThat(tinkVerifyEntry.getApi()).isEqualTo("verify");
     assertThat(tinkVerifyEntry.getNumBytesAsInput()).isEqualTo(plaintext.length);
+    assertThat(tinkVerifyEntry.getKeysetInfo().getAnnotations()).isEqualTo(annotations);
 
     FakeMonitoringClient.LogEntry rawVerifyEntry = logEntries.get(4);
     assertThat(rawVerifyEntry.getKeyId()).isEqualTo(43);
     assertThat(rawVerifyEntry.getPrimitive()).isEqualTo("mac");
     assertThat(rawVerifyEntry.getApi()).isEqualTo("verify");
     assertThat(rawVerifyEntry.getNumBytesAsInput()).isEqualTo(plaintext.length);
+    assertThat(rawVerifyEntry.getKeysetInfo().getAnnotations()).isEqualTo(annotations);
 
     FakeMonitoringClient.LogEntry legacyVerifyEntry = logEntries.get(5);
     assertThat(legacyVerifyEntry.getKeyId()).isEqualTo(44);
@@ -256,6 +261,7 @@ public class MacWrapperTest {
     assertThat(legacyVerifyEntry.getApi()).isEqualTo("verify");
     // legacy mac appends one byte to the input data, therefore the input length is one longer.
     assertThat(legacyVerifyEntry.getNumBytesAsInput()).isEqualTo(plaintext.length + 1);
+    assertThat(legacyVerifyEntry.getKeysetInfo().getAnnotations()).isEqualTo(annotations);
 
     List<FakeMonitoringClient.LogFailureEntry> failures =
         fakeMonitoringClient.getLogFailureEntries();
@@ -264,6 +270,7 @@ public class MacWrapperTest {
     assertThat(verifyFailure.getPrimitive()).isEqualTo("mac");
     assertThat(verifyFailure.getApi()).isEqualTo("verify");
     assertThat(verifyFailure.getKeysetInfo().getPrimaryKeyId()).isEqualTo(42);
+    assertThat(verifyFailure.getKeysetInfo().getAnnotations()).isEqualTo(annotations);
   }
 
   public static class AlwaysFailingMac implements Mac {
@@ -284,12 +291,11 @@ public class MacWrapperTest {
     MutableMonitoringRegistry.globalInstance().clear();
     MutableMonitoringRegistry.globalInstance().registerMonitoringClient(fakeMonitoringClient);
 
+    MonitoringAnnotations annotations =
+        MonitoringAnnotations.newBuilder().add("annotation_name", "annotation_value").build();
     PrimitiveSet<Mac> primitives =
         PrimitiveSet.newBuilder(Mac.class)
-            .setAnnotations(
-                MonitoringAnnotations.newBuilder()
-                    .add("annotation_name", "annotation_value")
-                    .build())
+            .setAnnotations(annotations)
             .addPrimaryPrimitive(
                 new AlwaysFailingMac(),
                 TestUtil.createKey(
@@ -319,13 +325,18 @@ public class MacWrapperTest {
     assertThat(compFailure.getPrimitive()).isEqualTo("mac");
     assertThat(compFailure.getApi()).isEqualTo("compute");
     assertThat(compFailure.getKeysetInfo().getPrimaryKeyId()).isEqualTo(42);
+    assertThat(compFailure.getKeysetInfo().getAnnotations()).isEqualTo(annotations);
+
     FakeMonitoringClient.LogFailureEntry verifyFailure = failures.get(1);
     assertThat(verifyFailure.getPrimitive()).isEqualTo("mac");
     assertThat(verifyFailure.getApi()).isEqualTo("verify");
     assertThat(verifyFailure.getKeysetInfo().getPrimaryKeyId()).isEqualTo(42);
+    assertThat(verifyFailure.getKeysetInfo().getAnnotations()).isEqualTo(annotations);
+
     FakeMonitoringClient.LogFailureEntry verifyFailure2 = failures.get(2);
     assertThat(verifyFailure2.getPrimitive()).isEqualTo("mac");
     assertThat(verifyFailure2.getApi()).isEqualTo("verify");
     assertThat(verifyFailure2.getKeysetInfo().getPrimaryKeyId()).isEqualTo(42);
+    assertThat(verifyFailure2.getKeysetInfo().getAnnotations()).isEqualTo(annotations);
   }
 }
