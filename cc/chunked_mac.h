@@ -28,29 +28,36 @@ namespace crypto {
 namespace tink {
 
 // Interface for a single Chunked MAC computation.
+//
+// WARNING: Although implementations of this interface are thread-compatible,
+// they are not thread-safe.  Thread-safety must be enforced by the caller.
 class ChunkedMacComputation {
  public:
   // Incrementally processes input `data` to update the internal state of the
-  // MAC computation.
+  // MAC computation.  Requires exclusive access.
   virtual util::Status Update(absl::string_view data) = 0;
 
   // Finalizes the MAC computation and returns the authentication tag.
   // After this method has been called, this object can no longer be used.
+  // Requires exclusive access.
   virtual util::StatusOr<std::string> ComputeMac() = 0;
 
   virtual ~ChunkedMacComputation() = default;
 };
 
 // Interface for a single Chunked MAC verification.
+//
+// WARNING: Although implementations of this interface are thread-compatible,
+// they are not thread-safe.  Thread-safety must be enforced by the caller.
 class ChunkedMacVerification {
  public:
   // Incrementally processes input `data` to update the internal state of the
-  // MAC verification.
+  // MAC verification.  Requires exclusive access.
   virtual util::Status Update(absl::string_view data) = 0;
 
   // Finalizes the MAC computation and returns OK if the tag is successfully
   // verified.  Otherwise, returns an error status.  After this method has been
-  // called, this object can no longer be used.
+  // called, this object can no longer be used.  Requires exclusive access.
   virtual util::Status VerifyMac() = 0;
 
   virtual ~ChunkedMacVerification() = default;
