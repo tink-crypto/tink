@@ -35,6 +35,11 @@ class ChunkedMacComputation {
  public:
   // Incrementally processes input `data` to update the internal state of the
   // MAC computation.  Requires exclusive access.
+  //
+  // Note that the following two update sequences are equivalent (i.e.,
+  // arbitrary slicing of the input data is allowed):
+  //   1.  Update("ab"),  Update("cd"), Update("ef")
+  //   2.  Update("abc"), Update("def")
   virtual util::Status Update(absl::string_view data) = 0;
 
   // Finalizes the MAC computation and returns the authentication tag.
@@ -53,6 +58,11 @@ class ChunkedMacVerification {
  public:
   // Incrementally processes input `data` to update the internal state of the
   // MAC verification.  Requires exclusive access.
+  //
+  // Note that the following two update sequences are equivalent (i.e.,
+  // arbitrary slicing of the input data is allowed):
+  //   1.  Update("ab"),  Update("cd"), Update("ef")
+  //   2.  Update("abc"), Update("def")
   virtual util::Status Update(absl::string_view data) = 0;
 
   // Finalizes the MAC computation and returns OK if the tag is successfully
