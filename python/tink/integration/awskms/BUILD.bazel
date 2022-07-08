@@ -40,6 +40,8 @@ py_test(
     name = "_aws_kms_aead_test",
     srcs = ["_aws_kms_aead_test.py"],
     data = ["//testdata:credentials"],
+    # This test require valid AWS KMS credentials so we set it as `manual`.
+    tags = ["manual"],
     srcs_version = "PY3",
     deps = [
         ":awskms",
