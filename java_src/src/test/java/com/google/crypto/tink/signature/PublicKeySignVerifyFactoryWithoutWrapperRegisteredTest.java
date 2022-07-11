@@ -1,4 +1,4 @@
-// Copyright 2017 Google Inc.
+// Copyright 2022 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -22,37 +22,33 @@ import com.google.crypto.tink.KeyTemplates;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.PublicKeySign;
 import com.google.crypto.tink.PublicKeyVerify;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
-/** Unit tests for {@link PublicKeySignFactory}. */
+/**
+ * Unit test for {@link PublicKeySignFactory} and {@link PublicKeyVerifyFactory}.
+ *
+ * <p>The test case in this file needs {@link Registry} to not have PublicKeySignWrapper registered.
+ * That's why it is in its own test file.
+ */
 @RunWith(JUnit4.class)
-public class PublicKeySignFactoryTest {
-
-  @BeforeClass
-  public static void setUp() throws Exception {
-    SignatureConfig.register();
-  }
+public class PublicKeySignVerifyFactoryWithoutWrapperRegisteredTest {
 
   @Test
   @SuppressWarnings("deprecation") // This is a test that the deprecated function works.
-  public void deprecatedPublicKeySignFactoryGetPrimitive_sameAs_keysetHandleGetPrimitive()
+  public void deprecatedFactoryGetPrimitive_whenWrapperHasNotBeenRegistered_works()
       throws Exception {
+    // Only register EcdsaSignKeyManager, but not the Sign and Verify wrappers.
+    EcdsaSignKeyManager.registerPair(/*newKeyAllowed=*/ true);
     KeysetHandle privateHandle = KeysetHandle.generateNew(KeyTemplates.get("ECDSA_P256"));
     KeysetHandle publicHandle = privateHandle.getPublicKeysetHandle();
 
-    PublicKeySign factorySigner = PublicKeySignFactory.getPrimitive(privateHandle);
-    PublicKeySign handleSigner = privateHandle.getPrimitive(PublicKeySign.class);
-
-    PublicKeyVerify verifier = publicHandle.getPrimitive(PublicKeyVerify.class);
+    PublicKeySign signer = PublicKeySignFactory.getPrimitive(privateHandle);
+    PublicKeyVerify verifier = PublicKeyVerifyFactory.getPrimitive(publicHandle);
 
     byte[] data = "data".getBytes(UTF_8);
-    byte[] factorySig = factorySigner.sign(data);
-    byte[] handleSig = handleSigner.sign(data);
-
-    verifier.verify(factorySig, data);
-    verifier.verify(handleSig, data);
+    byte[] sig = signer.sign(data);
+    verifier.verify(sig, data);
   }
 }
