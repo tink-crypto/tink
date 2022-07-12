@@ -312,6 +312,31 @@ public class PublicKeyVerifyWrapperTest {
     verifier.verify(sig2, data);
   }
 
+  @Theory
+  public void noPrimary_verifyWorks() throws Exception {
+    PublicKeySign signer =
+        new PublicKeySignWrapper()
+            .wrap(
+                TestUtil.createPrimitiveSet(
+                    TestUtil.createKeyset(
+                        getPrivateKey(ecdsaPrivateKey, /*keyId=*/ 123, OutputPrefixType.TINK)),
+                    PublicKeySign.class));
+    byte[] data = "data".getBytes(UTF_8);
+    byte[] sig = signer.sign(data);
+
+    Key publicKey =
+        getPublicKey(ecdsaPrivateKey.getPublicKey(), /*keyId=*/ 123, OutputPrefixType.TINK);
+    PublicKeyVerify verify = Registry.getPrimitive(publicKey.getKeyData(), PublicKeyVerify.class);
+    PrimitiveSet<PublicKeyVerify> verifyPrimitivesWithoutPrimary =
+        PrimitiveSet.newBuilder(PublicKeyVerify.class)
+            .addPrimitive(verify, publicKey)
+            .build();
+    PublicKeyVerify wrappedVerifier =
+        new PublicKeyVerifyWrapper().wrap(verifyPrimitivesWithoutPrimary);
+
+    wrappedVerifier.verify(sig, data);
+  }
+
   @DataPoints("nonRawOutputPrefixType")
   public static final OutputPrefixType[] NON_RAW_OUTPUT_PREFIX_TYPES =
       new OutputPrefixType[] {
