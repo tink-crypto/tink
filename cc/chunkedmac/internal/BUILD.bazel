@@ -7,7 +7,6 @@ cc_library(
     srcs = ["chunked_mac_impl.cc"],
     hdrs = ["chunked_mac_impl.h"],
     include_prefix = "tink/chunkedmac/internal",
-    visibility = ["//visibility:public"],
     deps = [
         "//:chunked_mac",
         "//proto:aes_cmac_cc_proto",
@@ -20,6 +19,25 @@ cc_library(
         "//util:status",
         "//util:statusor",
         "@boringssl//:crypto",
+        "@com_google_absl//absl/strings",
+    ],
+)
+
+cc_library(
+    name = "chunked_mac_wrapper",
+    srcs = ["chunked_mac_wrapper.cc"],
+    hdrs = ["chunked_mac_wrapper.h"],
+    include_prefix = "tink/chunkedmac/internal",
+    deps = [
+        "//:chunked_mac",
+        "//:crypto_format",
+        "//:primitive_set",
+        "//:primitive_wrapper",
+        "//internal:util",
+        "//proto:tink_cc_proto",
+        "//util:status",
+        "//util:statusor",
+        "@com_google_absl//absl/status",
         "@com_google_absl//absl/strings",
     ],
 )
@@ -40,6 +58,24 @@ cc_test(
         "//util:status",
         "//util:statusor",
         "//util:test_matchers",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "chunked_mac_wrapper_test",
+    size = "small",
+    srcs = ["chunked_mac_wrapper_test.cc"],
+    deps = [
+        ":chunked_mac_impl",
+        ":chunked_mac_wrapper",
+        "//:chunked_mac",
+        "//proto:tink_cc_proto",
+        "//subtle/mac:stateful_mac",
+        "//util:status",
+        "//util:statusor",
+        "//util:test_matchers",
+        "@com_google_absl//absl/strings",
         "@com_google_googletest//:gtest_main",
     ],
 )

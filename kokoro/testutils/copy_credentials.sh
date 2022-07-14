@@ -45,23 +45,20 @@ cp "${TINK_TEST_SERVICE_ACCOUNT}" "${TESTDATA_DIR}/credential.json"
 readonly AWS_KEY_ID="AKIATNYZMJOHVMN7MSYH"
 readonly AWS_KEY="$(cat ${AWS_TINK_TEST_SERVICE_ACCOUNT})"
 
-cat <<END \
-  | tee "${TESTDATA_DIR}/aws_credentials_cc.txt" \
-    "${TESTDATA_DIR}/credentials_aws.ini" \
-  > /dev/null
+cat <<END > "${TESTDATA_DIR}/aws/credentials.ini"
 [default]
 aws_access_key_id = ${AWS_KEY_ID}
 aws_secret_access_key = ${AWS_KEY}
 END
 
-cat <<END > "${TESTDATA_DIR}/credentials_aws.cred"
+cat <<END > "${TESTDATA_DIR}/aws/credentials.cred"
 [default]
 accessKey = ${AWS_KEY_ID}
 secretKey = ${AWS_KEY}
 END
 
 
-cat <<END > "${TESTDATA_DIR}/credentials_aws.csv"
+cat <<END > "${TESTDATA_DIR}/aws/credentials.csv"
 User name,Password,Access key ID,Secret access key,Console login link
 tink-user1,,${AWS_KEY_ID},${AWS_KEY},https://235739564943.signin.aws.amazon.com/console
 END

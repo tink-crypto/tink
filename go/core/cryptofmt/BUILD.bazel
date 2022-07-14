@@ -24,5 +24,5 @@ go_test(
 alias(
     name = "go_default_library",
     actual = ":cryptofmt",
-    visibility = ["//visibility:public"],
+    visibility = ["//:__subpackages__"],
 )

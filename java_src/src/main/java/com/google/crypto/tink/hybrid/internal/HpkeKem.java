@@ -29,8 +29,8 @@ interface HpkeKem {
   /**
    * Generates and encapsulates a shared secret using the {@code recipientPublicKey}. Returns a
    * {@link com.google.crypto.tink.hybrid.internal.HpkeKemEncapOutput} object that contains the raw
-   * shared secret and the encapsulated key. The HPKE RFC refers to this method as Encap(), which
-   * is used by the sender.
+   * shared secret and the encapsulated key. The HPKE RFC refers to this method as Encap(), which is
+   * used by the sender.
    *
    * @throws GeneralSecurityException when either the shared secret cannot be generated or the
    *     shared secret cannot be encapsulated.
@@ -44,7 +44,7 @@ interface HpkeKem {
    *
    * @throws GeneralSecurityException if the shared secret cannot be extracted.
    */
-  byte[] decapsulate(byte[] encapsulatedKey, byte[] recipientPrivateKey)
+  byte[] decapsulate(byte[] encapsulatedKey, HpkeKemPrivateKey recipientPrivateKey)
       throws GeneralSecurityException;
 
   /**

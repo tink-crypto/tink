@@ -850,6 +850,7 @@ cc_library(
         "//:streaming_mac",
         "//subtle/mac:stateful_mac",
         "//util:status",
+        "@boringssl//:crypto",
         "@com_google_absl//absl/memory",
         "@com_google_absl//absl/status",
     ],

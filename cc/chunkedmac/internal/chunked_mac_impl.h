@@ -44,7 +44,8 @@ class ChunkedMacComputationImpl : public ChunkedMacComputation {
   util::StatusOr<std::string> ComputeMac() override;
 
  private:
-  std::unique_ptr<subtle::StatefulMac> stateful_mac_;
+  const std::unique_ptr<subtle::StatefulMac> stateful_mac_;
+  util::Status status_ = util::OkStatus();
 };
 
 class ChunkedMacVerificationImpl : public ChunkedMacVerification {
@@ -58,8 +59,9 @@ class ChunkedMacVerificationImpl : public ChunkedMacVerification {
   util::Status VerifyMac() override;
 
  private:
-  std::unique_ptr<subtle::StatefulMac> stateful_mac_;
+  const std::unique_ptr<subtle::StatefulMac> stateful_mac_;
   const std::string tag_;
+  util::Status status_ = util::OkStatus();
 };
 
 class ChunkedMacImpl : public ChunkedMac {

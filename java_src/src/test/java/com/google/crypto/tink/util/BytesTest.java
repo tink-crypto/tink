@@ -17,6 +17,7 @@
 package com.google.crypto.tink.util;
 
 import static com.google.common.truth.Truth.assertThat;
+import static org.junit.Assert.assertThrows;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -107,5 +108,11 @@ public class BytesTest {
       b++;
     }
     assertThat(Bytes.copyFrom(new byte[] {(byte) b}).hashCode()).isNotEqualTo(hashCode);
+  }
+
+  @Test
+  public void testCopyFrom_null_throwsNPE() throws Exception {
+    assertThrows(NullPointerException.class, () -> Bytes.copyFrom(null));
+    assertThrows(NullPointerException.class, () -> Bytes.copyFrom(null, 0, 0));
   }
 }

@@ -18,6 +18,7 @@ sh_test(
     data = [
         ":test_lib",
         "//testdata:credentials",
+        "//testdata/aws:credentials",
         "//testing:aead_cli_java",
         "//testing/cc:aead_cli_cc",
         "//testing/go:aead_cli_go",

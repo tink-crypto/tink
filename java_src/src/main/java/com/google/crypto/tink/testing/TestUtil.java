@@ -121,7 +121,7 @@ public final class TestUtil {
 
   // This is a credential for the AWS service account with granted access to
   // {@code AWS_CRYPTO_URI}.
-  public static final String AWS_CREDS = "testdata/credentials_aws.cred";
+  public static final String AWS_CREDS = "testdata/aws/credentials.cred";
 
   /** A dummy Aead-implementation that just throws exception. */
   public static class DummyAead implements Aead {

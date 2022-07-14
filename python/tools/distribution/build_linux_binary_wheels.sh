@@ -34,7 +34,7 @@ PYTHON_VERSIONS["3.9"]="cp39-cp39"
 PYTHON_VERSIONS["3.10"]="cp310-cp310"
 readonly -A PYTHON_VERSIONS
 
-readonly TINK_PYTHON_ROOT_PATH="/tmp/tink/python"
+export TINK_PYTHON_ROOT_PATH="${PWD}"
 
 readonly BAZEL_VERSION="$(cat ${TINK_PYTHON_ROOT_PATH}/.bazelversion)"
 readonly PROTOC_VERSION="3.19.3"

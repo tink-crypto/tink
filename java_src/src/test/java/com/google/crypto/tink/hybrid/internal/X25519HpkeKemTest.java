@@ -84,7 +84,10 @@ public final class X25519HpkeKemTest {
     HpkeTestSetup testSetup = testVectors.get(testId).getTestSetup();
 
     X25519HpkeKem kem = new X25519HpkeKem(new HkdfHpkeKdf(MAC_ALGORITHM));
-    byte[] result = kem.decapsulate(testSetup.encapsulatedKey, testSetup.recipientPrivateKey);
+    byte[] result =
+        kem.decapsulate(
+            testSetup.encapsulatedKey,
+            X25519HpkeKemPrivateKey.fromBytes(testSetup.recipientPrivateKey));
     expect.that(result).isEqualTo(testSetup.sharedSecret);
   }
 
@@ -182,38 +185,28 @@ public final class X25519HpkeKemTest {
   }
 
   @Test
-  public void decapsulate_failsWithInvalidMacAlgorithm() {
+  public void decapsulate_failsWithInvalidMacAlgorithm() throws GeneralSecurityException {
     X25519HpkeKem kem = new X25519HpkeKem(new HkdfHpkeKdf("BadMac"));
     HpkeTestSetup testSetup = testVectors.get(getDefaultTestId()).getTestSetup();
     byte[] validEncapsulatedKey = testSetup.encapsulatedKey;
-    byte[] validRecipientPrivateKey = testSetup.recipientPrivateKey;
+    HpkeKemPrivateKey validRecipientPrivateKey =
+        X25519HpkeKemPrivateKey.fromBytes(testSetup.recipientPrivateKey);
     assertThrows(
         NoSuchAlgorithmException.class,
         () -> kem.decapsulate(validEncapsulatedKey, validRecipientPrivateKey));
   }
 
   @Test
-  public void decapsulate_failsWithInvalidEncapsulatedPublicKey() {
+  public void decapsulate_failsWithInvalidEncapsulatedPublicKey() throws GeneralSecurityException {
     X25519HpkeKem kem = new X25519HpkeKem(new HkdfHpkeKdf(MAC_ALGORITHM));
     HpkeTestSetup testSetup = testVectors.get(getDefaultTestId()).getTestSetup();
     byte[] invalidEncapsulatedKey =
         Arrays.copyOf(testSetup.encapsulatedKey, testSetup.encapsulatedKey.length + 2);
-    byte[] validRecipientPrivateKey = testSetup.recipientPrivateKey;
+    HpkeKemPrivateKey validRecipientPrivateKey =
+        X25519HpkeKemPrivateKey.fromBytes(testSetup.recipientPrivateKey);
     assertThrows(
         InvalidKeyException.class,
         () -> kem.decapsulate(invalidEncapsulatedKey, validRecipientPrivateKey));
-  }
-
-  @Test
-  public void decapsulate_failsWithInvalidRecipientPrivateKey() {
-    X25519HpkeKem kem = new X25519HpkeKem(new HkdfHpkeKdf(MAC_ALGORITHM));
-    HpkeTestSetup testSetup = testVectors.get(getDefaultTestId()).getTestSetup();
-    byte[] validEncapsulatedKey = testSetup.encapsulatedKey;
-    byte[] invalidRecipientPrivateKey =
-        Arrays.copyOf(testSetup.recipientPrivateKey, testSetup.recipientPrivateKey.length + 2);
-    assertThrows(
-        InvalidKeyException.class,
-        () -> kem.decapsulate(validEncapsulatedKey, invalidRecipientPrivateKey));
   }
 
   @Test

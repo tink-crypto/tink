@@ -257,10 +257,12 @@ public class AeadWrapperTest {
             .wrap(TestUtil.createPrimitiveSet(TestUtil.createKeyset(key2), Aead.class));
     byte[] ciphertext2 = aead2.encrypt(plaintext2, associatedData);
 
+    MonitoringAnnotations annotations =
+        MonitoringAnnotations.newBuilder().add("annotation_name", "annotation_value").build();
     PrimitiveSet<Aead> primitives =
         TestUtil.createPrimitiveSetWithAnnotations(
-            TestUtil.createKeyset(key1, key2),  // key1 is the primary key
-            MonitoringAnnotations.newBuilder().add("annotation_name", "annotation_value").build(),
+            TestUtil.createKeyset(key1, key2), // key1 is the primary key
+            annotations,
             Aead.class);
     Aead aead = new AeadWrapper().wrap(primitives);
 
@@ -279,6 +281,8 @@ public class AeadWrapperTest {
     assertThat(encEntry.getPrimitive()).isEqualTo("aead");
     assertThat(encEntry.getApi()).isEqualTo("encrypt");
     assertThat(encEntry.getNumBytesAsInput()).isEqualTo(plaintext.length);
+    assertThat(encEntry.getKeysetInfo().getAnnotations()).isEqualTo(annotations);
+
     FakeMonitoringClient.LogEntry decEntry = logEntries.get(1);
     assertThat(decEntry.getKeyId()).isEqualTo(42);
     assertThat(decEntry.getPrimitive()).isEqualTo("aead");
@@ -287,12 +291,15 @@ public class AeadWrapperTest {
     // to the ciphertext. This prefix is not included in getNumBytesAsInput.
     assertThat(decEntry.getNumBytesAsInput())
         .isEqualTo(ciphertext.length - CryptoFormat.NON_RAW_PREFIX_SIZE);
+    assertThat(decEntry.getKeysetInfo().getAnnotations()).isEqualTo(annotations);
+
     FakeMonitoringClient.LogEntry dec2Entry = logEntries.get(2);
     assertThat(dec2Entry.getKeyId()).isEqualTo(43);
     assertThat(dec2Entry.getPrimitive()).isEqualTo("aead");
     assertThat(dec2Entry.getApi()).isEqualTo("decrypt");
-    // ciphertext2 was encrypted with key1, which has a RAW ouput prefix.
+    // ciphertext2 was encrypted with key2, which has a RAW ouput prefix.
     assertThat(dec2Entry.getNumBytesAsInput()).isEqualTo(ciphertext2.length);
+    assertThat(dec2Entry.getKeysetInfo().getAnnotations()).isEqualTo(annotations);
 
     List<FakeMonitoringClient.LogFailureEntry> failures =
         fakeMonitoringClient.getLogFailureEntries();
@@ -301,6 +308,7 @@ public class AeadWrapperTest {
     assertThat(decFailure.getPrimitive()).isEqualTo("aead");
     assertThat(decFailure.getApi()).isEqualTo("decrypt");
     assertThat(decFailure.getKeysetInfo().getPrimaryKeyId()).isEqualTo(42);
+    assertThat(decFailure.getKeysetInfo().getAnnotations()).isEqualTo(annotations);
   }
 
   private static class AlwaysFailingAead implements Aead {
@@ -327,12 +335,11 @@ public class AeadWrapperTest {
     byte[] hmacKeyValue = Random.randBytes(HMAC_KEY_SIZE);
     int ivSize = 12;
     int tagSize = 16;
+    MonitoringAnnotations annotations =
+        MonitoringAnnotations.newBuilder().add("annotation_name", "annotation_value").build();
     PrimitiveSet<Aead> primitives =
         PrimitiveSet.newBuilder(Aead.class)
-            .setAnnotations(
-                MonitoringAnnotations.newBuilder()
-                    .add("annotation_name", "annotation_value")
-                    .build())
+            .setAnnotations(annotations)
             .addPrimaryPrimitive(
                 new AlwaysFailingAead(),
                 TestUtil.createKey(
@@ -358,10 +365,13 @@ public class AeadWrapperTest {
     assertThat(encFailure.getPrimitive()).isEqualTo("aead");
     assertThat(encFailure.getApi()).isEqualTo("encrypt");
     assertThat(encFailure.getKeysetInfo().getPrimaryKeyId()).isEqualTo(42);
+    assertThat(encFailure.getKeysetInfo().getAnnotations()).isEqualTo(annotations);
+
     FakeMonitoringClient.LogFailureEntry decFailure = failures.get(1);
     assertThat(decFailure.getPrimitive()).isEqualTo("aead");
     assertThat(decFailure.getApi()).isEqualTo("decrypt");
     assertThat(decFailure.getKeysetInfo().getPrimaryKeyId()).isEqualTo(42);
+    assertThat(decFailure.getKeysetInfo().getAnnotations()).isEqualTo(annotations);
   }
 
 }

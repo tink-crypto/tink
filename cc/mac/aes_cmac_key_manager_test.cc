@@ -15,8 +15,13 @@
 ////////////////////////////////////////////////////////////////////////////////
 #include "tink/mac/aes_cmac_key_manager.h"
 
+#include <memory>
+#include <string>
+
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include "tink/chunked_mac.h"
+#include "tink/mac.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "tink/util/test_matchers.h"
@@ -172,7 +177,7 @@ TEST(AesCmacKeyManagerTest, ValidateKeyTooShortTagSize) {
   EXPECT_THAT(AesCmacKeyManager().ValidateKey(key), Not(IsOk()));
 }
 
-TEST(AesCmacKeyManagerTest, GetPrimitive) {
+TEST(AesCmacKeyManagerTest, GetMacPrimitive) {
   AesCmacKeyFormat format = ValidKeyFormat();
   AesCmacKey key = AesCmacKeyManager().CreateKey(format).value();
   auto manager_mac_or = AesCmacKeyManager().GetPrimitive<Mac>(key);
@@ -186,6 +191,68 @@ TEST(AesCmacKeyManagerTest, GetPrimitive) {
   EXPECT_THAT(
       direct_mac_or.value()->VerifyMac(mac_value_or.value(), "some plaintext"),
       IsOk());
+}
+
+TEST(AesCmacKeyManagerTest, GetChunkedMacPrimitive) {
+  AesCmacKeyFormat format = ValidKeyFormat();
+  AesCmacKey key = AesCmacKeyManager().CreateKey(format).value();
+
+  util::StatusOr<std::unique_ptr<ChunkedMac>> chunked_mac =
+      AesCmacKeyManager().GetPrimitive<ChunkedMac>(key);
+  ASSERT_THAT(chunked_mac, IsOk());
+
+  util::StatusOr<std::unique_ptr<ChunkedMacComputation>> computation =
+      (*chunked_mac)->CreateComputation();
+  ASSERT_THAT(computation, IsOk());
+  ASSERT_THAT((*computation)->Update("abc"), IsOk());
+  ASSERT_THAT((*computation)->Update("xyz"), IsOk());
+  util::StatusOr<std::string> tag = (*computation)->ComputeMac();
+  ASSERT_THAT(tag, IsOk());
+
+  util::StatusOr<std::unique_ptr<ChunkedMacVerification>> verification =
+      (*chunked_mac)->CreateVerification(*tag);
+  ASSERT_THAT(verification, IsOk());
+  ASSERT_THAT((*verification)->Update("abc"), IsOk());
+  ASSERT_THAT((*verification)->Update("xyz"), IsOk());
+  EXPECT_THAT((*verification)->VerifyMac(), IsOk());
+}
+
+TEST(AesCmacKeyManagerTest, MixPrimitives) {
+  AesCmacKeyFormat format = ValidKeyFormat();
+  AesCmacKey key = AesCmacKeyManager().CreateKey(format).value();
+
+  util::StatusOr<std::unique_ptr<Mac>> mac =
+      AesCmacKeyManager().GetPrimitive<Mac>(key);
+  ASSERT_THAT(mac, IsOk());
+
+  util::StatusOr<std::unique_ptr<ChunkedMac>> chunked_mac =
+      AesCmacKeyManager().GetPrimitive<ChunkedMac>(key);
+  ASSERT_THAT(chunked_mac, IsOk());
+
+  // Compute tag with Mac.
+  util::StatusOr<std::string> tag = (*mac)->ComputeMac("abcxyz");
+  ASSERT_THAT(tag, IsOk());
+
+  // Compute chunked tag with ChunkedMac.
+  util::StatusOr<std::unique_ptr<ChunkedMacComputation>> computation =
+      (*chunked_mac)->CreateComputation();
+  ASSERT_THAT(computation, IsOk());
+  ASSERT_THAT((*computation)->Update("abc"), IsOk());
+  ASSERT_THAT((*computation)->Update("xyz"), IsOk());
+  util::StatusOr<std::string> chunked_tag = (*computation)->ComputeMac();
+  ASSERT_THAT(chunked_tag, IsOk());
+  ASSERT_THAT(*chunked_tag, Eq(*tag));  // Both primitives generated same tag.
+
+  // Verify chunked tag with Mac.
+  ASSERT_THAT((*mac)->VerifyMac(*chunked_tag, "abcxyz"), IsOk());
+
+  // Verify tag with ChunkedMac.
+  util::StatusOr<std::unique_ptr<ChunkedMacVerification>> verification =
+      (*chunked_mac)->CreateVerification(*tag);
+  ASSERT_THAT(verification, IsOk());
+  ASSERT_THAT((*verification)->Update("abc"), IsOk());
+  ASSERT_THAT((*verification)->Update("xyz"), IsOk());
+  EXPECT_THAT((*verification)->VerifyMac(), IsOk());
 }
 
 }  // namespace

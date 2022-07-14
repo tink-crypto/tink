@@ -34,6 +34,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Logger;
+import javax.annotation.Nullable;
 
 /**
  * A global container of key managers and catalogues.
@@ -816,6 +817,7 @@ public final class Registry {
    * primitive of type {@code wrappedPrimitive}. Returns {@code null} if no wrapper for this
    * primitive has been registered.
    */
+  @Nullable
   public static Class<?> getInputPrimitive(Class<?> wrappedPrimitive) {
     PrimitiveWrapper<?, ?> wrapper = primitiveWrapperMap.get(wrappedPrimitive);
     if (wrapper == null) {

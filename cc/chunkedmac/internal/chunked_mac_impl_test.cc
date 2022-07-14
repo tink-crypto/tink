@@ -155,6 +155,20 @@ TEST(ChunkedMacComputationImplTest, UpdateFails) {
   EXPECT_THAT(mac_computation.Update("data"), StatusIs(error_status.code()));
 }
 
+TEST(ChunkedMacComputationImplTest, OperationsFailAfterComputeMac) {
+  auto stateful_mac = absl::make_unique<MockStatefulMac>();
+  util::StatusOr<std::string> tag = std::string("tag");
+  EXPECT_CALL(*stateful_mac, Finalize()).WillOnce(Return(tag));
+  ChunkedMacComputationImpl mac_computation(std::move(stateful_mac));
+
+  EXPECT_THAT(mac_computation.ComputeMac(), IsOkAndHolds(*tag));
+
+  EXPECT_THAT(mac_computation.Update("data"),
+              StatusIs(absl::StatusCode::kFailedPrecondition));
+  EXPECT_THAT(mac_computation.ComputeMac().status(),
+              StatusIs(absl::StatusCode::kFailedPrecondition));
+}
+
 TEST(ChunkedMacComputationImplTest, ComputeMacSucceeds) {
   auto stateful_mac = absl::make_unique<MockStatefulMac>();
   util::StatusOr<std::string> tag = std::string("tag");
@@ -232,6 +246,20 @@ TEST(ChunkedMacVerificationImplTest, VerifyMacFailsWithFinalizeError) {
   ChunkedMacVerificationImpl mac_verification(std::move(stateful_mac), "tag");
 
   EXPECT_THAT(mac_verification.VerifyMac(), StatusIs(error_status.code()));
+}
+
+TEST(ChunkedMacVerificationImplTest, OperationsFailAfterVerifyMac) {
+  auto stateful_mac = absl::make_unique<MockStatefulMac>();
+  util::StatusOr<std::string> tag = std::string("tag");
+  EXPECT_CALL(*stateful_mac, Finalize()).WillOnce(Return(tag));
+  ChunkedMacVerificationImpl mac_verification(std::move(stateful_mac), *tag);
+
+  EXPECT_THAT(mac_verification.VerifyMac(), IsOk());
+
+  EXPECT_THAT(mac_verification.Update("data"),
+              StatusIs(absl::StatusCode::kFailedPrecondition));
+  EXPECT_THAT(mac_verification.VerifyMac(),
+              StatusIs(absl::StatusCode::kFailedPrecondition));
 }
 
 }  // namespace

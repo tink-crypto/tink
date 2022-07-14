@@ -21,7 +21,7 @@
 #include <utility>
 
 #include "absl/strings/string_view.h"
-#include "openssl/mem.h"
+#include "openssl/crypto.h"
 #include "tink/chunked_mac.h"
 #include "tink/subtle/mac/stateful_mac.h"
 #include "tink/subtle/stateful_cmac_boringssl.h"
@@ -41,18 +41,26 @@ using ::google::crypto::tink::AesCmacKey;
 using ::google::crypto::tink::HmacKey;
 
 util::Status ChunkedMacComputationImpl::Update(absl::string_view data) {
+  if (!status_.ok()) return status_;
   return stateful_mac_->Update(data);
 }
 
 util::StatusOr<std::string> ChunkedMacComputationImpl::ComputeMac() {
+  if (!status_.ok()) return status_;
+  status_ = util::Status(absl::StatusCode::kFailedPrecondition,
+                         "MAC computation already finalized.");
   return stateful_mac_->Finalize();
 }
 
 util::Status ChunkedMacVerificationImpl::Update(absl::string_view data) {
+  if (!status_.ok()) return status_;
   return stateful_mac_->Update(data);
 }
 
 util::Status ChunkedMacVerificationImpl::VerifyMac() {
+  if (!status_.ok()) return status_;
+  status_ = util::Status(absl::StatusCode::kFailedPrecondition,
+                         "MAC verification already finalized.");
   util::StatusOr<std::string> computed_mac = stateful_mac_->Finalize();
   if (!computed_mac.ok()) {
     return computed_mac.status();

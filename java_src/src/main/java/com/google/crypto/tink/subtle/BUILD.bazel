@@ -95,6 +95,7 @@ java_library(
         ":elliptic_curves",
         ":enums",
         ":subtle_util_cluster",
+        "@maven//:com_google_code_findbugs_jsr305",
     ],
 )
 
@@ -896,6 +897,7 @@ android_library(
         ":elliptic_curves-android",
         ":enums-android",
         ":subtle_util_cluster-android",
+        "@maven//:com_google_code_findbugs_jsr305",
     ],
 )
 
