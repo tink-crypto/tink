@@ -16,6 +16,7 @@
 
 package com.google.crypto.tink.signature;
 
+import static com.google.common.truth.Truth.assertThat;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.Assert.assertThrows;
 
@@ -23,6 +24,9 @@ import com.google.crypto.tink.PrimitiveSet;
 import com.google.crypto.tink.PublicKeySign;
 import com.google.crypto.tink.PublicKeyVerify;
 import com.google.crypto.tink.Registry;
+import com.google.crypto.tink.internal.MutableMonitoringRegistry;
+import com.google.crypto.tink.internal.testing.FakeMonitoringClient;
+import com.google.crypto.tink.monitoring.MonitoringAnnotations;
 import com.google.crypto.tink.proto.EcdsaPrivateKey;
 import com.google.crypto.tink.proto.EcdsaPublicKey;
 import com.google.crypto.tink.proto.EcdsaSignatureEncoding;
@@ -35,6 +39,7 @@ import com.google.crypto.tink.proto.OutputPrefixType;
 import com.google.crypto.tink.subtle.Bytes;
 import com.google.crypto.tink.testing.TestUtil;
 import java.security.GeneralSecurityException;
+import java.util.List;
 import org.junit.BeforeClass;
 import org.junit.experimental.theories.DataPoints;
 import org.junit.experimental.theories.FromDataPoints;
@@ -384,5 +389,106 @@ public class PublicKeyVerifyWrapperTest {
     byte[] data = "data".getBytes(UTF_8);
     byte[] sig = signer.sign(data);
     verifier.verify(sig, data);
+  }
+
+  @Theory
+  public void doesNotMonitorWithoutAnnotations() throws Exception {
+    FakeMonitoringClient fakeMonitoringClient = new FakeMonitoringClient();
+    MutableMonitoringRegistry.globalInstance().clear();
+    MutableMonitoringRegistry.globalInstance().registerMonitoringClient(fakeMonitoringClient);
+
+    PrimitiveSet<PublicKeySign> signPrimitives =
+        TestUtil.createPrimitiveSet(
+            TestUtil.createKeyset(
+                getPrivateKey(ecdsaPrivateKey, /*keyId=*/ 123, OutputPrefixType.TINK)),
+            PublicKeySign.class);
+    PublicKeySign signer = new PublicKeySignWrapper().wrap(signPrimitives);
+
+    PrimitiveSet<PublicKeyVerify> verifyPrimitives =
+        TestUtil.createPrimitiveSet(
+            TestUtil.createKeyset(
+                getPublicKey(
+                    ecdsaPrivateKey.getPublicKey(), /*keyId=*/ 123, OutputPrefixType.TINK)),
+            PublicKeyVerify.class);
+    PublicKeyVerify verifier = new PublicKeyVerifyWrapper().wrap(verifyPrimitives);
+
+    byte[] data = "data".getBytes(UTF_8);
+    byte[] sig = signer.sign(data);
+    verifier.verify(sig, data);
+
+    assertThat(fakeMonitoringClient.getLogEntries()).isEmpty();
+    assertThat(fakeMonitoringClient.getLogFailureEntries()).isEmpty();
+  }
+
+  @Theory
+  public void monitorsWithAnnotations() throws Exception {
+    FakeMonitoringClient fakeMonitoringClient = new FakeMonitoringClient();
+    MutableMonitoringRegistry.globalInstance().clear();
+    MutableMonitoringRegistry.globalInstance().registerMonitoringClient(fakeMonitoringClient);
+
+    MonitoringAnnotations annotations =
+        MonitoringAnnotations.newBuilder().add("annotation_name", "annotation_value").build();
+
+    Key privateKey = getPrivateKey(ecdsaPrivateKey, /*keyId=*/ 123, OutputPrefixType.TINK);
+    Key publicKey =
+        getPublicKey(ecdsaPrivateKey.getPublicKey(), /*keyId=*/ 123, OutputPrefixType.TINK);
+
+    Key privateKey2 = getPrivateKey(ecdsaPrivateKey, /*keyId=*/ 234, OutputPrefixType.LEGACY);
+    Key publicKey2 =
+        getPublicKey(ecdsaPrivateKey.getPublicKey(), /*keyId=*/ 234, OutputPrefixType.LEGACY);
+
+    byte[] data = "data".getBytes(UTF_8);
+
+    // Create for each key a signature. Note that signer and signer2 are not monitored.
+    PublicKeySign signer =
+        new PublicKeySignWrapper()
+            .wrap(
+                TestUtil.createPrimitiveSet(
+                    TestUtil.createKeyset(privateKey), PublicKeySign.class));
+    byte[] sig = signer.sign(data);
+    PublicKeySign signer2 =
+        new PublicKeySignWrapper()
+            .wrap(
+                TestUtil.createPrimitiveSet(
+                    TestUtil.createKeyset(privateKey2), PublicKeySign.class));
+    byte[] sig2 = signer2.sign(data);
+
+    PublicKeyVerify verifier =
+        new PublicKeyVerifyWrapper()
+            .wrap(
+                TestUtil.createPrimitiveSetWithAnnotations(
+                    TestUtil.createKeyset(publicKey, publicKey2),
+                    annotations,
+                    PublicKeyVerify.class));
+
+    verifier.verify(sig, data);
+    verifier.verify(sig2, data);
+    assertThrows(
+        GeneralSecurityException.class, () -> verifier.verify("invalid".getBytes(UTF_8), data));
+
+    List<FakeMonitoringClient.LogEntry> logEntries = fakeMonitoringClient.getLogEntries();
+    assertThat(logEntries).hasSize(2);
+    FakeMonitoringClient.LogEntry verify1Entry = logEntries.get(0);
+    assertThat(verify1Entry.getKeyId()).isEqualTo(123);
+    assertThat(verify1Entry.getPrimitive()).isEqualTo("public_key_verify");
+    assertThat(verify1Entry.getApi()).isEqualTo("verify");
+    assertThat(verify1Entry.getNumBytesAsInput()).isEqualTo(data.length);
+    assertThat(verify1Entry.getKeysetInfo().getAnnotations()).isEqualTo(annotations);
+
+    FakeMonitoringClient.LogEntry verify2Entry = logEntries.get(1);
+    assertThat(verify2Entry.getKeyId()).isEqualTo(234);
+    assertThat(verify2Entry.getPrimitive()).isEqualTo("public_key_verify");
+    assertThat(verify2Entry.getApi()).isEqualTo("verify");
+    // LEGACY adds an extra byte to data before it is signed.
+    assertThat(verify2Entry.getNumBytesAsInput()).isEqualTo(data.length + 1);
+    assertThat(verify2Entry.getKeysetInfo().getAnnotations()).isEqualTo(annotations);
+
+    List<FakeMonitoringClient.LogFailureEntry> failures =
+        fakeMonitoringClient.getLogFailureEntries();
+    assertThat(failures).hasSize(1);
+    FakeMonitoringClient.LogFailureEntry verifyFailure = failures.get(0);
+    assertThat(verifyFailure.getPrimitive()).isEqualTo("public_key_verify");
+    assertThat(verifyFailure.getApi()).isEqualTo("verify");
+    assertThat(verifyFailure.getKeysetInfo().getAnnotations()).isEqualTo(annotations);
   }
 }

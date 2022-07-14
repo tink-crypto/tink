@@ -20,6 +20,10 @@ import com.google.crypto.tink.PrimitiveSet;
 import com.google.crypto.tink.PrimitiveWrapper;
 import com.google.crypto.tink.PublicKeySign;
 import com.google.crypto.tink.Registry;
+import com.google.crypto.tink.internal.MonitoringUtil;
+import com.google.crypto.tink.internal.MutableMonitoringRegistry;
+import com.google.crypto.tink.monitoring.MonitoringClient;
+import com.google.crypto.tink.monitoring.MonitoringKeysetInfo;
 import com.google.crypto.tink.proto.OutputPrefixType;
 import com.google.crypto.tink.subtle.Bytes;
 import java.security.GeneralSecurityException;
@@ -38,8 +42,17 @@ public class PublicKeySignWrapper implements PrimitiveWrapper<PublicKeySign, Pub
   private static class WrappedPublicKeySign implements PublicKeySign {
     private final PrimitiveSet<PublicKeySign> primitives;
 
+    private final MonitoringClient.Logger logger;
+
     public WrappedPublicKeySign(final PrimitiveSet<PublicKeySign> primitives) {
       this.primitives = primitives;
+      if (primitives.hasAnnotations()) {
+        MonitoringClient client = MutableMonitoringRegistry.globalInstance().getMonitoringClient();
+        MonitoringKeysetInfo keysetInfo = MonitoringUtil.getMonitoringKeysetInfo(primitives);
+        this.logger = client.createLogger(keysetInfo, "public_key_sign", "sign");
+      } else {
+        this.logger = MonitoringUtil.DO_NOTHING_LOGGER;
+      }
     }
 
     @Override
@@ -48,9 +61,17 @@ public class PublicKeySignWrapper implements PrimitiveWrapper<PublicKeySign, Pub
       if (primitives.getPrimary().getOutputPrefixType().equals(OutputPrefixType.LEGACY)) {
         data2 = Bytes.concat(data, FORMAT_VERSION);
       }
-      return Bytes.concat(
-          primitives.getPrimary().getIdentifier(),
-          primitives.getPrimary().getPrimitive().sign(data2));
+      try {
+        byte[] output =
+            Bytes.concat(
+                primitives.getPrimary().getIdentifier(),
+                primitives.getPrimary().getPrimitive().sign(data2));
+        logger.log(primitives.getPrimary().getKeyId(), data2.length);
+        return output;
+      } catch (GeneralSecurityException e) {
+        logger.logFailure();
+        throw e;
+      }
     }
   }
 
