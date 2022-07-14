@@ -800,6 +800,7 @@ tink_cc_library(
   DEPS
     absl::memory
     absl::status
+    crypto
     tink::core::streaming_mac
     tink::subtle::mac::stateful_mac
     tink::util::status

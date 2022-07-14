@@ -203,7 +203,7 @@ TEST(StreamingMacImplTest, VerifySmallMacFail) {
   // Close stream and check result
   EXPECT_THAT(
       output_stream->CloseAndGetResult(),
-      StatusIs(absl::StatusCode::kInvalidArgument, HasSubstr("Incorrect MAC")));
+      StatusIs(absl::StatusCode::kInvalidArgument, HasSubstr("Invalid MAC")));
 }
 
 TEST(StreamingMacImplTest, VerifyRandMac) {
