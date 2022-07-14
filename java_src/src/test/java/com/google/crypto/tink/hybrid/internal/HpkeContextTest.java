@@ -20,6 +20,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 
 import com.google.common.io.Files;
 import com.google.common.truth.Expect;
+import com.google.crypto.tink.proto.HpkeParams;
 import com.google.crypto.tink.proto.HpkePrivateKey;
 import com.google.crypto.tink.proto.HpkePublicKey;
 import com.google.crypto.tink.subtle.Random;
@@ -51,7 +52,7 @@ public final class HpkeContextTest {
   public static void setUpTestVectors() throws IOException {
     String path = "testdata/testvectors/hpke_boringssl.json";
     if (TestUtil.isAndroid()) {
-      path = "/sdcard/googletest/test_runfiles/google3/" + path;  // Special prefix for Android.
+      path = "/sdcard/googletest/test_runfiles/google3/" + path; // Special prefix for Android.
     }
     testVectors = HpkeTestUtil.parseTestVectors(Files.newReader(new File(path), UTF_8));
   }
@@ -131,14 +132,23 @@ public final class HpkeContextTest {
     HpkePrivateKey recipientPrivateKey =
         HpkePrivateKey.newBuilder()
             .setPrivateKey(ByteString.copyFrom(testSetup.recipientPrivateKey))
+            .setPublicKey(
+                HpkePublicKey.newBuilder()
+                    .setParams(
+                        HpkeParams.newBuilder()
+                            .setKem(com.google.crypto.tink.proto.HpkeKem.DHKEM_X25519_HKDF_SHA256)
+                            .build())
+                    .build())
             .build();
 
     HpkeContext senderContext =
         HpkeContext.createSenderContext(recipientPublicKey, kem, kdf, aead, testSetup.info);
+
+    HpkeKemPrivateKey recipientKemPrivateKey = HpkeKemKeyFactory.createPrivate(recipientPrivateKey);
     HpkeContext recipientContext =
         HpkeContext.createRecipientContext(
             senderContext.getEncapsulatedKey(),
-            recipientPrivateKey,
+            recipientKemPrivateKey,
             kem,
             kdf,
             aead,

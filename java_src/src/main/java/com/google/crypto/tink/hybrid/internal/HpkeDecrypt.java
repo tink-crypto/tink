@@ -32,14 +32,14 @@ import java.util.Arrays;
 final class HpkeDecrypt implements HybridDecrypt {
   private static final byte[] EMPTY_ASSOCIATED_DATA = new byte[0];
 
-  private final HpkePrivateKey recipientPrivateKey;
+  private final HpkeKemPrivateKey recipientPrivateKey;
   private final HpkeKem kem;
   private final HpkeKdf kdf;
   private final HpkeAead aead;
   private final int encapsulatedKeyLength;
 
   private HpkeDecrypt(
-      HpkePrivateKey recipientPrivateKey,
+      HpkeKemPrivateKey recipientPrivateKey,
       HpkeKem kem,
       HpkeKdf kdf,
       HpkeAead aead,
@@ -84,7 +84,8 @@ final class HpkeDecrypt implements HybridDecrypt {
     HpkeKdf kdf = HpkePrimitiveFactory.createKdf(params);
     HpkeAead aead = HpkePrimitiveFactory.createAead(params);
     int encapsulatedKeyLength = encodingSizeInBytes(params.getKem());
-    return new HpkeDecrypt(recipientPrivateKey, kem, kdf, aead, encapsulatedKeyLength);
+    HpkeKemPrivateKey recipientKemPrivateKey = HpkeKemKeyFactory.createPrivate(recipientPrivateKey);
+    return new HpkeDecrypt(recipientKemPrivateKey, kem, kdf, aead, encapsulatedKeyLength);
   }
 
   @Override
