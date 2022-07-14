@@ -80,9 +80,11 @@ cc_library(
     hdrs = ["aes_cmac_key_manager.h"],
     include_prefix = "tink/mac",
     deps = [
+        "//:chunked_mac",
         "//:core/key_type_manager",
         "//:key_manager",
         "//:mac",
+        "//chunkedmac/internal:chunked_mac_impl",
         "//proto:aes_cmac_cc_proto",
         "//proto:tink_cc_proto",
         "//subtle:aes_cmac_boringssl",
@@ -106,8 +108,10 @@ cc_library(
     hdrs = ["hmac_key_manager.h"],
     include_prefix = "tink/mac",
     deps = [
+        "//:chunked_mac",
         "//:core/key_type_manager",
         "//:mac",
+        "//chunkedmac/internal:chunked_mac_impl",
         "//proto:common_cc_proto",
         "//proto:hmac_cc_proto",
         "//proto:tink_cc_proto",
@@ -239,6 +243,8 @@ cc_test(
     srcs = ["aes_cmac_key_manager_test.cc"],
     deps = [
         ":aes_cmac_key_manager",
+        "//:chunked_mac",
+        "//:mac",
         "//proto:aes_cmac_cc_proto",
         "//util:status",
         "//util:statusor",
@@ -253,6 +259,7 @@ cc_test(
     srcs = ["hmac_key_manager_test.cc"],
     deps = [
         ":hmac_key_manager",
+        "//:chunked_mac",
         "//:core/key_manager_impl",
         "//:mac",
         "//proto:hmac_cc_proto",

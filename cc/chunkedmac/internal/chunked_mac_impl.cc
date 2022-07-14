@@ -21,7 +21,7 @@
 #include <utility>
 
 #include "absl/strings/string_view.h"
-#include "openssl/mem.h"
+#include "openssl/crypto.h"
 #include "tink/chunked_mac.h"
 #include "tink/subtle/mac/stateful_mac.h"
 #include "tink/subtle/stateful_cmac_boringssl.h"

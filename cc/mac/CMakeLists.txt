@@ -75,9 +75,11 @@ tink_cc_library(
     absl::memory
     absl::status
     absl::strings
+    tink::core::chunked_mac
     tink::core::key_type_manager
     tink::core::key_manager
     tink::core::mac
+    tink::chunkedmac::internal::chunked_mac_impl
     tink::subtle::aes_cmac_boringssl
     tink::subtle::random
     tink::util::constants
@@ -100,8 +102,10 @@ tink_cc_library(
     absl::memory
     absl::status
     absl::strings
+    tink::core::chunked_mac
     tink::core::key_type_manager
     tink::core::mac
+    tink::chunkedmac::internal::chunked_mac_impl
     tink::subtle::hmac_boringssl
     tink::subtle::random
     tink::util::constants
@@ -225,6 +229,8 @@ tink_cc_test(
   DEPS
     tink::mac::aes_cmac_key_manager
     gmock
+    tink::core::chunked_mac
+    tink::core::mac
     tink::util::status
     tink::util::statusor
     tink::util::test_matchers
@@ -239,6 +245,7 @@ tink_cc_test(
     tink::mac::hmac_key_manager
     gmock
     absl::status
+    tink::core::chunked_mac
     tink::core::key_manager_impl
     tink::core::mac
     tink::util::istream_input_stream
