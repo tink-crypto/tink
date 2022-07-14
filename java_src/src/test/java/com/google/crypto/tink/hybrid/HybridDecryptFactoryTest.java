@@ -1,4 +1,4 @@
-// Copyright 2017 Google Inc.
+// Copyright 2022 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,19 +18,21 @@ package com.google.crypto.tink.hybrid;
 
 import static com.google.common.truth.Truth.assertThat;
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static org.junit.Assert.assertThrows;
 
 import com.google.crypto.tink.HybridDecrypt;
 import com.google.crypto.tink.HybridEncrypt;
 import com.google.crypto.tink.KeyTemplates;
 import com.google.crypto.tink.KeysetHandle;
+import java.security.GeneralSecurityException;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
-/** Tests for {@link HybridEncryptFactory}. */
+/** Tests for {@link HybridDecryptFactory}. */
 @RunWith(JUnit4.class)
-public class HybridEncryptFactoryTest {
+public class HybridDecryptFactoryTest {
   @BeforeClass
   public static void setUp() throws Exception {
     HybridConfig.register();
@@ -38,22 +40,32 @@ public class HybridEncryptFactoryTest {
 
   @Test
   @SuppressWarnings("deprecation") // This is a test that the deprecated function works.
-  public void deprecatedHybridEncryptFactoryGetPrimitive_sameAs_keysetHandleGetPrimitive()
+  public void deprecatedHybridDecryptFactoryGetPrimitive_sameAs_keysetHandleGetPrimitive()
       throws Exception {
     KeysetHandle privateHandle =
         KeysetHandle.generateNew(KeyTemplates.get("ECIES_P256_HKDF_HMAC_SHA256_AES128_GCM"));
     KeysetHandle publicHandle = privateHandle.getPublicKeysetHandle();
 
-    HybridEncrypt factoryEncrypter = HybridEncryptFactory.getPrimitive(publicHandle);
-    HybridEncrypt handleEncrypter = publicHandle.getPrimitive(HybridEncrypt.class);
+    HybridEncrypt encrypter = publicHandle.getPrimitive(HybridEncrypt.class);
 
-    HybridDecrypt decrypter = privateHandle.getPrimitive(HybridDecrypt.class);
+    HybridDecrypt factoryDecrypter = HybridDecryptFactory.getPrimitive(privateHandle);
+    HybridDecrypt handleDecrypter = privateHandle.getPrimitive(HybridDecrypt.class);
 
     byte[] plaintext = "plaintext".getBytes(UTF_8);
     byte[] contextInfo = "contextInfo".getBytes(UTF_8);
-    byte[] factoryCiphertext = factoryEncrypter.encrypt(plaintext, contextInfo);
-    byte[] handleCiphertext = handleEncrypter.encrypt(plaintext, contextInfo);
-    assertThat(decrypter.decrypt(factoryCiphertext, contextInfo)).isEqualTo(plaintext);
-    assertThat(decrypter.decrypt(handleCiphertext, contextInfo)).isEqualTo(plaintext);
+    byte[] ciphertext = encrypter.encrypt(plaintext, contextInfo);
+
+    assertThat(factoryDecrypter.decrypt(ciphertext, contextInfo)).isEqualTo(plaintext);
+    assertThat(handleDecrypter.decrypt(ciphertext, contextInfo)).isEqualTo(plaintext);
+
+    byte[] invalid = "invalid".getBytes(UTF_8);
+    assertThrows(
+        GeneralSecurityException.class, () -> factoryDecrypter.decrypt(ciphertext, invalid));
+    assertThrows(
+        GeneralSecurityException.class, () -> handleDecrypter.decrypt(ciphertext, invalid));
+    assertThrows(
+        GeneralSecurityException.class, () -> factoryDecrypter.decrypt(invalid, contextInfo));
+    assertThrows(
+        GeneralSecurityException.class, () -> handleDecrypter.decrypt(invalid, contextInfo));
   }
 }
