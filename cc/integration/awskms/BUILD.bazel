@@ -80,7 +80,7 @@ cc_test(
     size = "medium",
     srcs = ["aws_kms_client_test.cc"],
     copts = ["-Iexternal/gtest/include"],
-    data = ["//testdata:credentials"],
+    data = ["//testdata/aws:credentials"],
     deps = [
         ":aws_kms_client",
         "@aws_cpp_sdk//:aws_sdk_core",

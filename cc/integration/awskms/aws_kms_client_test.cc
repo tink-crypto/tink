@@ -46,7 +46,7 @@ TEST(AwsKmsClientTest, testBasic) {
   std::string aws_key2 = "aws-kms://arn:aws:kms:us-west-2:acc:other/key2";
   std::string non_aws_key = "gcp-kms:://some/gcp/key";
   std::string creds_file = std::string(getenv("TEST_SRCDIR")) +
-                           "/tink_cc_awskms/testdata/aws_credentials_cc.txt";
+                           "/tink_cc_awskms/testdata/aws/credentials.ini";
 
   {  // A client not bound to any particular key.
     auto client_result = AwsKmsClient::New("", creds_file);
@@ -70,7 +70,7 @@ TEST(AwsKmsClientTest, testBasic) {
 TEST(AwsKmsClientTest, ClientCreationAndRegistry) {
   std::string aws_key1 = "aws-kms://arn:aws:kms:us-east-1:acc:some/key1";
   std::string creds_file = absl::StrCat(
-      getenv("TEST_SRCDIR"), "/tink_cc_awskms/testdata/aws_credentials_cc.txt");
+      getenv("TEST_SRCDIR"), "/tink_cc_awskms/testdata/aws/credentials.ini");
 
   auto client_result = AwsKmsClient::RegisterNewClient(aws_key1, creds_file);
   EXPECT_THAT(client_result, IsOk());

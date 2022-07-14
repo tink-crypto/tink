@@ -9,8 +9,9 @@ The credentials are required in several formats expected by different APIs. For
 example, Java expects the credentials as a
 [properties file](https://docs.aws.amazon.com/AmazonS3/latest/dev/AuthUsingAcctOrUserCredentials.html).
 In order to cover all tests across all languages you will have to replace
-`aws_credentials_cc.txt`, `credentials_aws.cred`, `credentials_aws.csv` and
-`credentials_aws.ini`. These can be generated in a similar way to this [script](https://github.com/google/tink/blob/master/kokoro/copy_credentials.sh).
+`credentials.cred`, `credentials.csv` and `credentials.ini`. These
+can be generated in a similar way to this
+[script](https://github.com/google/tink/blob/master/kokoro/copy_credentials.sh).
 
 # GCP
 
