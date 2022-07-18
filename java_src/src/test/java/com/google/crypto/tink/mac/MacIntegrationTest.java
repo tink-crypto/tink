@@ -16,6 +16,7 @@
 
 package com.google.crypto.tink.mac;
 
+import static com.google.crypto.tink.testing.TestUtil.assertExceptionContains;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
@@ -24,6 +25,7 @@ import static org.junit.Assert.assertThrows;
 import com.google.crypto.tink.CryptoFormat;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.Mac;
+import com.google.crypto.tink.daead.DeterministicAeadConfig;
 import com.google.crypto.tink.proto.KeyStatusType;
 import com.google.crypto.tink.proto.Keyset.Key;
 import com.google.crypto.tink.proto.OutputPrefixType;
@@ -45,6 +47,7 @@ public class MacIntegrationTest {
   @BeforeClass
   public static void setUp() throws Exception {
     MacConfig.register();
+    DeterministicAeadConfig.register(); // need this for testInvalidKeyMaterial.
   }
 
   @Test
@@ -153,5 +156,30 @@ public class MacIntegrationTest {
     } catch (GeneralSecurityException e) {
       throw new AssertionError("Valid MAC, should not throw exception", e);
     }
+  }
+
+  @Test
+  public void testInvalidKeyMaterial() throws Exception {
+    Key valid =
+        TestUtil.createKey(
+            TestUtil.createHmacKeyData(Random.randBytes(HMAC_KEY_SIZE), 16),
+            42,
+            KeyStatusType.ENABLED,
+            OutputPrefixType.TINK);
+    Key invalid =
+        TestUtil.createKey(
+            TestUtil.createAesSivKeyData(64), 43, KeyStatusType.ENABLED, OutputPrefixType.TINK);
+
+    final KeysetHandle keysetHandle =
+        TestUtil.createKeysetHandle(TestUtil.createKeyset(valid, invalid));
+    GeneralSecurityException e =
+        assertThrows(GeneralSecurityException.class, () -> keysetHandle.getPrimitive(Mac.class));
+    assertExceptionContains(e, "com.google.crypto.tink.Mac not supported");
+
+    // invalid as the primary key.
+    final KeysetHandle keysetHandle2 =
+        TestUtil.createKeysetHandle(TestUtil.createKeyset(invalid, valid));
+    e = assertThrows(GeneralSecurityException.class, () -> keysetHandle2.getPrimitive(Mac.class));
+    assertExceptionContains(e, "com.google.crypto.tink.Mac not supported");
   }
 }
