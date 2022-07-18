@@ -98,6 +98,22 @@ java_test(
 )
 
 java_test(
+    name = "HpkeKemKeyFactoryTest",
+    size = "small",
+    srcs = ["HpkeKemKeyFactoryTest.java"],
+    deps = [
+        "//proto:hpke_java_proto",
+        "//src/main/java/com/google/crypto/tink/hybrid/internal:hpke_kem_key_factory",
+        "//src/main/java/com/google/crypto/tink/hybrid/internal:hpke_kem_private_key",
+        "//src/main/java/com/google/crypto/tink/subtle:x25519",
+        "//src/main/java/com/google/crypto/tink/util:bytes",
+        "@com_google_protobuf//:protobuf_javalite",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
     name = "HpkePrimitiveFactoryTest",
     size = "small",
     srcs = ["HpkePrimitiveFactoryTest.java"],
@@ -150,6 +166,19 @@ java_test(
         "//src/main/java/com/google/crypto/tink/subtle:random",
         "//src/main/java/com/google/crypto/tink/subtle:x25519",
         "@com_google_protobuf//:protobuf_javalite",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "X25519HpkeKemPrivateKeyTest",
+    size = "small",
+    srcs = ["X25519HpkeKemPrivateKeyTest.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink/hybrid/internal:x25519_hpke_kem_private_key",
+        "//src/main/java/com/google/crypto/tink/subtle:x25519",
+        "//src/main/java/com/google/crypto/tink/util:bytes",
         "@maven//:com_google_truth_truth",
         "@maven//:junit_junit",
     ],
