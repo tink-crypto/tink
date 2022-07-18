@@ -75,16 +75,27 @@ java_test(
     size = "small",
     srcs = ["DeterministicAeadFactoryTest.java"],
     deps = [
-        "//proto:tink_java_proto",
-        "//src/main/java/com/google/crypto/tink:crypto_format",
         "//src/main/java/com/google/crypto/tink:deterministic_aead",
+        "//src/main/java/com/google/crypto/tink:key_templates",
         "//src/main/java/com/google/crypto/tink:registry_cluster",
-        "//src/main/java/com/google/crypto/tink/aead:aead_config",
         "//src/main/java/com/google/crypto/tink/daead:deterministic_aead_config",
         "//src/main/java/com/google/crypto/tink/daead:deterministic_aead_factory",
-        "//src/main/java/com/google/crypto/tink/daead:deterministic_aead_key_templates",
-        "//src/main/java/com/google/crypto/tink/subtle:random",
-        "//src/main/java/com/google/crypto/tink/testing:test_util",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "DeterministicAeadFactoryWithoutWrapperRegisteredTest",
+    size = "small",
+    srcs = ["DeterministicAeadFactoryWithoutWrapperRegisteredTest.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink:deterministic_aead",
+        "//src/main/java/com/google/crypto/tink:key_templates",
+        "//src/main/java/com/google/crypto/tink:registry_cluster",
+        "//src/main/java/com/google/crypto/tink/daead:aes_siv_key_manager",
+        "//src/main/java/com/google/crypto/tink/daead:deterministic_aead_factory",
+        "@maven//:com_google_truth_truth",
         "@maven//:junit_junit",
     ],
 )

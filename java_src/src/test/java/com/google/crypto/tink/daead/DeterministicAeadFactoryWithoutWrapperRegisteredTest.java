@@ -1,4 +1,4 @@
-// Copyright 2017 Google Inc.
+// Copyright 2022 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,63 +18,41 @@ package com.google.crypto.tink.daead;
 
 import static com.google.common.truth.Truth.assertThat;
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static org.junit.Assert.assertThrows;
 
 import com.google.crypto.tink.DeterministicAead;
 import com.google.crypto.tink.KeyTemplates;
 import com.google.crypto.tink.KeysetHandle;
-import java.security.GeneralSecurityException;
 import javax.crypto.Cipher;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
-/** Tests for DeterministicAeadFactory. */
+/**
+ * Unit test for {@link AeadFactory}.
+ *
+ * <p>The test case in this file needs {@link Registry} to not have AeadWrapper registered. That's
+ * why it is in its own test file.
+ */
 @RunWith(JUnit4.class)
-public class DeterministicAeadFactoryTest {
-
-  @BeforeClass
-  public static void setUp() throws Exception {
-    DeterministicAeadConfig.register();
-  }
+public class DeterministicAeadFactoryWithoutWrapperRegisteredTest {
 
   @Test
   @SuppressWarnings("deprecation") // This is a test that the deprecated function works.
-  public void deprecatedDeterministicAeadFactoryGetPrimitive_sameAs_keysetHandleGetPrimitive()
+  public void deprecatedFactoryGetPrimitive_whenWrapperHasNotBeenRegistered_works()
       throws Exception {
     if (Cipher.getMaxAllowedKeyLength("AES") < 256) {
       // skip all tests.
       return;
     }
+    // Only register AesSivKeyManager, but not the DeterministicAeadWrapper.
+    AesSivKeyManager.register(/* newKeyAllowed = */ true);
     KeysetHandle handle = KeysetHandle.generateNew(KeyTemplates.get("AES256_SIV"));
 
-    DeterministicAead daead = handle.getPrimitive(DeterministicAead.class);
-    DeterministicAead factoryDAead = DeterministicAeadFactory.getPrimitive(handle);
+    DeterministicAead daead = DeterministicAeadFactory.getPrimitive(handle);
 
     byte[] plaintext = "plaintext".getBytes(UTF_8);
     byte[] associatedData = "associatedData".getBytes(UTF_8);
-
     byte[] ciphertext = daead.encryptDeterministically(plaintext, associatedData);
-    byte[] factoryCiphertext = factoryDAead.encryptDeterministically(plaintext, associatedData);
-
-    assertThat(factoryCiphertext).isEqualTo(ciphertext);
-
     assertThat(daead.decryptDeterministically(ciphertext, associatedData)).isEqualTo(plaintext);
-    assertThat(factoryDAead.decryptDeterministically(ciphertext, associatedData))
-        .isEqualTo(plaintext);
-
-    byte[] invalid = "invalid".getBytes(UTF_8);
-    assertThrows(
-        GeneralSecurityException.class, () -> daead.decryptDeterministically(ciphertext, invalid));
-    assertThrows(
-        GeneralSecurityException.class,
-        () -> factoryDAead.decryptDeterministically(ciphertext, invalid));
-    assertThrows(
-        GeneralSecurityException.class,
-        () -> daead.decryptDeterministically(invalid, associatedData));
-    assertThrows(
-        GeneralSecurityException.class,
-        () -> factoryDAead.decryptDeterministically(invalid, associatedData));
   }
 }
