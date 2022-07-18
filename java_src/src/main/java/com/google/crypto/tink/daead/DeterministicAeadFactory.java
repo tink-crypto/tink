@@ -40,7 +40,6 @@ import java.security.GeneralSecurityException;
 public final class DeterministicAeadFactory {
   /**
    * @return a DeterministicAead primitive from a {@code keysetHandle}.
-   * @throws GeneralSecurityException
    * @deprecated Use {@code keysetHandle.GetPrimitive(DeterministicAead.class)} after registering
    *     the {@code DeterministicAeadWrapper} instead.
    */

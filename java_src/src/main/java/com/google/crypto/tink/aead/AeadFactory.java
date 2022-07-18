@@ -41,7 +41,6 @@ import java.security.GeneralSecurityException;
 public final class AeadFactory {
   /**
    * @return a Aead primitive from a {@code keysetHandle}.
-   * @throws GeneralSecurityException
    * @deprecated Use {@code keysetHandle.GetPrimitive(Aead.class)} after registering the {@code
    *     AeadWrapper} instead.
    */
