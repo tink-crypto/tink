@@ -58,6 +58,29 @@ java_test(
 )
 
 java_test(
+    name = "HybridDecryptWrapperTest",
+    size = "small",
+    srcs = ["HybridDecryptWrapperTest.java"],
+    deps = [
+        "//proto:common_java_proto",
+        "//proto:ecies_aead_hkdf_java_proto",
+        "//proto:tink_java_proto",
+        "//src/main/java/com/google/crypto/tink:hybrid_decrypt",
+        "//src/main/java/com/google/crypto/tink:hybrid_encrypt",
+        "//src/main/java/com/google/crypto/tink:primitive_set",
+        "//src/main/java/com/google/crypto/tink:registry",
+        "//src/main/java/com/google/crypto/tink/aead:aead_key_templates",
+        "//src/main/java/com/google/crypto/tink/hybrid:hybrid_config",
+        "//src/main/java/com/google/crypto/tink/hybrid:hybrid_decrypt_wrapper",
+        "//src/main/java/com/google/crypto/tink/hybrid:hybrid_encrypt_wrapper",
+        "//src/main/java/com/google/crypto/tink/subtle:bytes",
+        "//src/main/java/com/google/crypto/tink/testing:test_util",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
     name = "HybridEncryptFactoryTest",
     size = "small",
     srcs = ["HybridEncryptFactoryTest.java"],
