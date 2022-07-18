@@ -1,4 +1,4 @@
-// Copyright 2017 Google Inc.
+// Copyright 2022 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,51 +18,36 @@ package com.google.crypto.tink.aead;
 
 import static com.google.common.truth.Truth.assertThat;
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static org.junit.Assert.assertThrows;
 
 import com.google.crypto.tink.Aead;
 import com.google.crypto.tink.KeyTemplates;
 import com.google.crypto.tink.KeysetHandle;
-import java.security.GeneralSecurityException;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
-/** Tests for AeadFactory. */
+/**
+ * Unit test for {@link AeadFactory}.
+ *
+ * <p>The test case in this file needs {@link Registry} to not have AeadWrapper registered. That's
+ * why it is in its own test file.
+ */
 @RunWith(JUnit4.class)
-public class AeadFactoryTest {
-
-  @BeforeClass
-  public static void setUp() throws Exception {
-    AeadConfig.register();
-  }
+public class AeadFactoryWithoutWrapperRegisteredTest {
 
   @Test
   @SuppressWarnings("deprecation") // This is a test that the deprecated function works.
-  public void deprecatedAeadFactoryGetPrimitive_sameAs_keysetHandleGetPrimitive() throws Exception {
+  public void deprecatedFactoryGetPrimitive_whenWrapperHasNotBeenRegistered_works()
+      throws Exception {
+    // Only register AesCtrHmacAeadKeyManager, but not the AeadWrapper.
+    AesCtrHmacAeadKeyManager.register(/*newKeyAllowed=*/ true);
     KeysetHandle handle = KeysetHandle.generateNew(KeyTemplates.get("AES128_CTR_HMAC_SHA256"));
 
-    Aead aead = handle.getPrimitive(Aead.class);
-    Aead factoryAead = AeadFactory.getPrimitive(handle);
+    Aead aead = AeadFactory.getPrimitive(handle);
 
     byte[] plaintext = "plaintext".getBytes(UTF_8);
     byte[] associatedData = "associatedData".getBytes(UTF_8);
-
     byte[] ciphertext = aead.encrypt(plaintext, associatedData);
-    byte[] factoryCiphertext = aead.encrypt(plaintext, associatedData);
-
     assertThat(aead.decrypt(ciphertext, associatedData)).isEqualTo(plaintext);
-    assertThat(aead.decrypt(factoryCiphertext, associatedData)).isEqualTo(plaintext);
-    assertThat(factoryAead.decrypt(ciphertext, associatedData)).isEqualTo(plaintext);
-    assertThat(factoryAead.decrypt(factoryCiphertext, associatedData)).isEqualTo(plaintext);
-
-    byte[] invalid = "invalid".getBytes(UTF_8);
-
-    assertThrows(GeneralSecurityException.class, () -> aead.decrypt(ciphertext, invalid));
-    assertThrows(GeneralSecurityException.class, () -> factoryAead.decrypt(ciphertext, invalid));
-    assertThrows(GeneralSecurityException.class, () -> aead.decrypt(invalid, associatedData));
-    assertThrows(
-        GeneralSecurityException.class, () -> factoryAead.decrypt(invalid, associatedData));
   }
 }
