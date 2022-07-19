@@ -33,6 +33,7 @@ tink_cc_library(
     absl::core_headers
     absl::memory
     tink::core::registry
+    tink::chunkedmac::internal::chunked_mac_wrapper
     tink::config::config_util
     tink::config::tink_fips
     tink::util::status
@@ -168,12 +169,14 @@ tink_cc_test(
   SRCS
     mac_config_test.cc
   DEPS
+    tink::mac::aes_cmac_key_manager
     tink::mac::hmac_key_manager
     tink::mac::mac_config
     tink::mac::mac_key_templates
     gmock
     absl::status
     crypto
+    tink::core::chunked_mac
     tink::core::config
     tink::core::keyset_handle
     tink::core::mac
