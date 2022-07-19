@@ -84,3 +84,39 @@ android_library(
         "@maven//:junit_junit",
     ],
 )
+
+java_library(
+    name = "key_format_with_serialization",
+    srcs = ["KeyFormatWithSerialization.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink:key_format",
+        "//src/main/java/com/google/crypto/tink/internal:proto_key_format_serialization",
+    ],
+)
+
+android_library(
+    name = "key_format_with_serialization-android",
+    srcs = ["KeyFormatWithSerialization.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink:key_format-android",
+        "//src/main/java/com/google/crypto/tink/internal:proto_key_format_serialization-android",
+    ],
+)
+
+java_library(
+    name = "key_with_serialization",
+    srcs = ["KeyWithSerialization.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink:key",
+        "//src/main/java/com/google/crypto/tink/internal:proto_key_serialization",
+    ],
+)
+
+android_library(
+    name = "key_with_serialization-android",
+    srcs = ["KeyWithSerialization.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink:key-android",
+        "//src/main/java/com/google/crypto/tink/internal:proto_key_serialization-android",
+    ],
+)
