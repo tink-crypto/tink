@@ -20,6 +20,8 @@ import static com.google.common.truth.Truth.assertThat;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 import com.google.crypto.tink.proto.KeyTemplate;
+import com.google.crypto.tink.proto.OutputPrefixType;
+import com.google.crypto.tink.proto.TestProto;
 import com.google.crypto.tink.util.Bytes;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -35,5 +37,19 @@ public final class ProtoKeyFormatSerializationTest {
     assertThat(serialization.getKeyTemplate()).isEqualTo(template);
     assertThat(serialization.getObjectIdentifier())
         .isEqualTo(Bytes.copyFrom("myTypeUrl".getBytes(UTF_8)));
+  }
+
+  @Test
+  public void testCreationFromParts_basic() throws Exception {
+    ProtoKeyFormatSerialization serialization =
+        ProtoKeyFormatSerialization.create(
+            "typeUrl", OutputPrefixType.RAW, TestProto.newBuilder().setNum(13234).build());
+    assertThat(serialization.getKeyTemplate().getTypeUrl()).isEqualTo("typeUrl");
+    assertThat(serialization.getObjectIdentifier())
+        .isEqualTo(Bytes.copyFrom("typeUrl".getBytes(UTF_8)));
+    assertThat(serialization.getKeyTemplate().getOutputPrefixType())
+        .isEqualTo(OutputPrefixType.RAW);
+    TestProto parsedProto = TestProto.parseFrom(serialization.getKeyTemplate().getValue());
+    assertThat(parsedProto.getNum()).isEqualTo(13234);
   }
 }

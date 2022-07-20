@@ -100,6 +100,7 @@ java_test(
     size = "small",
     srcs = ["ProtoKeyFormatSerializationTest.java"],
     deps = [
+        "//proto:test_proto_java_proto",
         "//proto:tink_java_proto",
         "//src/main/java/com/google/crypto/tink/internal:proto_key_format_serialization",
         "//src/main/java/com/google/crypto/tink/util:bytes",

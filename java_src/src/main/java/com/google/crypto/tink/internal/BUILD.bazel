@@ -206,6 +206,7 @@ java_library(
         ":serialization",
         "//proto:tink_java_proto",
         "//src/main/java/com/google/crypto/tink/util:bytes",
+        "@com_google_protobuf//:protobuf_javalite",
         "@maven//:com_google_errorprone_error_prone_annotations",
     ],
 )
@@ -230,6 +231,7 @@ android_library(
         ":serialization-android",
         "//proto:tink_java_proto_lite",
         "//src/main/java/com/google/crypto/tink/util:bytes-android",
+        "@com_google_protobuf//:protobuf_javalite",
         "@maven//:com_google_errorprone_error_prone_annotations",
     ],
 )
