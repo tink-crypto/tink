@@ -54,6 +54,7 @@ java_library(
         ":deterministic_aead_wrapper",
         "//proto:config_java_proto",
         "//src/main/java/com/google/crypto/tink/config:tink_fips",
+        "@maven//:com_google_errorprone_error_prone_annotations",
     ],
 )
 
@@ -65,6 +66,7 @@ android_library(
         ":deterministic_aead_wrapper-android",
         "//proto:config_java_proto_lite",
         "//src/main/java/com/google/crypto/tink/config:tink_fips-android",
+        "@maven//:com_google_errorprone_error_prone_annotations",
     ],
 )
 
