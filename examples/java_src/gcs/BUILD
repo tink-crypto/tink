@@ -28,7 +28,7 @@ sh_test(
         # Change this to your key
         "gcp-kms://projects/tink-test-infrastructure/locations/global/keyRings/unit-and-integration-testing/cryptoKeys/aead-key",
         # Change this to your credential
-        "$(rootpath //testdata:credential.json)",
+        "$(rootpath //testdata/gcp:credential.json)",
         # Change this to your project ID
         "tink-test-infrastructure",
         # Change this to your GCS bucket
@@ -37,7 +37,7 @@ sh_test(
     data = [
         ":gcs_envelope_aead_example",
         # Change this to your credential
-        "//testdata:credential.json",
+        "//testdata/gcp:credential.json",
     ],
     tags = [
         "manual",

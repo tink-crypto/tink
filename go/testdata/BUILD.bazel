@@ -2,19 +2,6 @@ package(default_visibility = ["//visibility:public"])
 
 licenses(["notice"])
 
-exports_files(srcs = ["credential.json"])
-
-filegroup(
-    name = "credentials",
-    testonly = 1,
-    srcs = [
-        "bad_gcp_credentials.json",
-        "bad_gcp_key_name.txt",
-        "credential.json",
-        "gcp_key_name.txt",
-    ],
-)
-
 filegroup(
     name = "ecies_keysets",
     testonly = 1,

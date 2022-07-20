@@ -113,7 +113,7 @@ public final class TestUtil {
 
   // This is a credential of a service account that is granted access to
   // {@code RESTRICTED_CRYPTO_KEY_URI}.
-  public static final String SERVICE_ACCOUNT_FILE = "testdata/credential.json";
+  public static final String SERVICE_ACCOUNT_FILE = "testdata/gcp/credential.json";
 
   // This AWS KMS CryptoKey is restricted to Google use only and {@code AWS_CREDS}.
   public static final String AWS_CRYPTO_URI =

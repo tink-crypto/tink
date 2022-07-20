@@ -31,7 +31,8 @@ import org.junit.runners.JUnit4;
 /** Tests for GcpKmsClient. */
 @RunWith(JUnit4.class)
 public final class GcpKmsClientTest {
-  private static final String CREDENTIAL_FILE_PATH = "testdata/credential.json";
+  private static final String CREDENTIAL_FILE_PATH =
+      "testdata/gcp/credential.json";
 
   @Before
   public void setUp() {

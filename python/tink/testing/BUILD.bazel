@@ -25,7 +25,7 @@ py_test(
     name = "helper_test",
     srcs = ["helper_test.py"],
     # This is used to check Tink Python testdata path.
-    data = ["//testdata:credentials"],
+    data = ["//testdata/gcp:credentials"],
     srcs_version = "PY3",
     deps = [
         ":helper",

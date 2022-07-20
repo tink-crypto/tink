@@ -39,7 +39,7 @@ if [[ ! -d "${TESTDATA_DIR}" ]]; then
   exit 1
 fi
 
-cp "${TINK_TEST_SERVICE_ACCOUNT}" "${TESTDATA_DIR}/credential.json"
+cp "${TINK_TEST_SERVICE_ACCOUNT}" "${TESTDATA_DIR}/gcp/credential.json"
 
 # Create the different format for the AWS credentials
 readonly AWS_KEY_ID="AKIATNYZMJOHVMN7MSYH"

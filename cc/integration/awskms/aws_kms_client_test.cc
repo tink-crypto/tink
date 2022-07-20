@@ -83,7 +83,7 @@ TEST(AwsKmsClientTest, ClientCreationInvalidRegistry) {
   std::string non_aws_key =
       "gcp-kms://projects/someProject/.../cryptoKeys/key1";
   std::string creds_file =
-      std::string(getenv("TEST_SRCDIR")) + "/tink_cc_awskms/testdata/credential.json";
+      std::string(getenv("TEST_SRCDIR")) + "/tink_cc_awskms/testdata/gcp/credential.json";
 
   auto client_result = AwsKmsClient::RegisterNewClient(non_aws_key, creds_file);
   EXPECT_THAT(client_result, StatusIs(absl::StatusCode::kInvalidArgument));

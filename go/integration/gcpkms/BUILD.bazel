@@ -31,7 +31,7 @@ go_test(
     data = [
         # Credentials can be injected into the test files included in these
         # targets.
-        "//testdata:credentials",
+        "//testdata/gcp:credentials",
         "//testdata:ecies_keysets",
         "@google_root_pem//file",  #keep
         "@wycheproof//testvectors:all",  #keep

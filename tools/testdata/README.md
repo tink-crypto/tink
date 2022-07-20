@@ -9,7 +9,7 @@ The credentials are required in several formats expected by different APIs. For
 example, Java expects the credentials as a
 [properties file](https://docs.aws.amazon.com/AmazonS3/latest/dev/AuthUsingAcctOrUserCredentials.html).
 In order to cover all tests across all languages you will have to replace
-`credentials.cred`, `credentials.csv` and `credentials.ini`. These
+`aws/credentials.cred`, `aws/credentials.csv` and `aws/credentials.ini`. These
 can be generated in a similar way to this
 [script](https://github.com/google/tink/blob/master/kokoro/copy_credentials.sh).
 
@@ -18,4 +18,4 @@ can be generated in a similar way to this
 For security reasons, all GCP credentials in this folder are invalid. If you
 want to run tests that depend on them, please create your own
 [Cloud KMS key](https://cloud.google.com/kms/docs/creating-keys), and copy the
-credentials to `credential.json` and the key URI to `gcp_key_name.txt`.
+credentials to `gcp/credential.json` and the key URI to `gcp/key_name.txt`.
