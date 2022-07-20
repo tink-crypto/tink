@@ -18,6 +18,7 @@ package testutil_test
 
 import (
 	"bytes"
+	"encoding/hex"
 	"testing"
 
 	"github.com/google/tink/go/subtle/random"
@@ -31,16 +32,16 @@ func TestDummyAEAD(t *testing.T) {
 
 	// try to encrypt/decrypt some data
 	data := []byte{0, 1, 1, 2, 3, 5}
-	additionalData := []byte{3, 1, 4, 1, 5}
+	associatedData := []byte{3, 1, 4, 1, 5}
 
 	dummy := &testutil.DummyAEAD{Name: "name"}
-	cipher, err := dummy.Encrypt(data, additionalData)
+	cipher, err := dummy.Encrypt(data, associatedData)
 	if err != nil {
-		t.Fatalf("DummyAEAD.Encrypt(%+v, %+v) gave error: %v", data, additionalData, err)
+		t.Fatalf("DummyAEAD.Encrypt(%+v, %+v) gave error: %v", data, associatedData, err)
 	}
-	decrypt, err := dummy.Decrypt(cipher, additionalData)
+	decrypt, err := dummy.Decrypt(cipher, associatedData)
 	if err != nil {
-		t.Fatalf("DummyAEAD.Decrypt(ciphertext, %+v) gave errr: %v", additionalData, err)
+		t.Fatalf("DummyAEAD.Decrypt(ciphertext, %+v) gave errr: %v", associatedData, err)
 	}
 	if !bytes.Equal(data, decrypt) {
 		t.Errorf("DummyAEAD round-tripped data %+v back to %+v", data, decrypt)
@@ -138,5 +139,21 @@ func TestAutocorrelationUniformString(t *testing.T) {
 	}
 	if err := testutil.ZTestAutocorrelationUniformString(random.GetRandomBytes(32)); err != nil {
 		t.Errorf("Expected random 32 byte string to show not autocorrelation: %v", err)
+	}
+}
+
+func TestGenerateMutations(t *testing.T) {
+	original := random.GetRandomBytes(8)
+	mutations := testutil.GenerateMutations(original)
+	seen := make(map[string]bool)
+	for i, mutation := range mutations {
+		if bytes.Compare(original, mutation) == 0 {
+			t.Errorf("Expected mutation %x to differ from original %x", mutation, original)
+		}
+		mutationHex := hex.EncodeToString(mutation)
+		if seen[mutationHex] {
+			t.Errorf("Mutation %d (%s) matches an earlier mutation", i, mutationHex)
+		}
+		seen[mutationHex] = true
 	}
 }

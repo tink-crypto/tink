@@ -14,14 +14,20 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "tink/hybrid_decrypt.h"
+#include "tink/cc/pybind/hybrid_decrypt.h"
+
+#include <string>
+#include <utility>
 
 #include "pybind11/pybind11.h"
+#include "tink/hybrid_decrypt.h"
 #include "tink/util/statusor.h"
-#include "tink/cc/pybind/status_casters.h"
+#include "tink/cc/pybind/tink_exception.h"
 
 namespace crypto {
 namespace tink {
+
+using pybind11::google_tink::TinkException;
 
 void PybindRegisterHybridDecrypt(pybind11::module* module) {
   namespace py = pybind11;
@@ -33,10 +39,14 @@ void PybindRegisterHybridDecrypt(pybind11::module* module) {
       .def(
           "decrypt",
           [](const HybridDecrypt& self, const py::bytes& ciphertext,
-             const py::bytes& context_info) -> util::StatusOr<py::bytes> {
+             const py::bytes& context_info) -> py::bytes {
             // TODO(b/145925674)
-            return self.Decrypt(std::string(ciphertext),
-                                std::string(context_info));
+            util::StatusOr<std::string> decrypt_result = self.Decrypt(
+                std::string(ciphertext), std::string(context_info));
+            if (!decrypt_result.ok()) {
+              throw TinkException(decrypt_result.status());
+            }
+            return *std::move(decrypt_result);
           },
           py::arg("ciphertext"), py::arg("context_info"));
 }

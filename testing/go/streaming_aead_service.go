@@ -25,7 +25,7 @@ import (
 	"github.com/google/tink/go/keyset"
 	"github.com/google/tink/go/streamingaead"
 	"github.com/google/tink/go/testkeyset"
-	pb "github.com/google/tink/proto/testing/testing_api_go_grpc"
+	pb "github.com/google/tink/testing/go/proto/testing_api_go_grpc"
 )
 
 const (
@@ -34,6 +34,7 @@ const (
 
 // StreamingAEADService implements the StreamingAead testing service.
 type StreamingAEADService struct {
+	pb.StreamingAeadServer
 }
 
 func (s *StreamingAEADService) Encrypt(ctx context.Context, req *pb.StreamingAeadEncryptRequest) (*pb.StreamingAeadEncryptResponse, error) {

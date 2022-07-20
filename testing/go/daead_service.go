@@ -23,11 +23,12 @@ import (
 	"github.com/google/tink/go/daead"
 	"github.com/google/tink/go/keyset"
 	"github.com/google/tink/go/testkeyset"
-	pb "github.com/google/tink/proto/testing/testing_api_go_grpc"
+	pb "github.com/google/tink/testing/go/proto/testing_api_go_grpc"
 )
 
 // DeterministicAEADService implements the DeterministicAead testing service.
 type DeterministicAEADService struct {
+	pb.DeterministicAeadServer
 }
 
 func (s *DeterministicAEADService) EncryptDeterministically(ctx context.Context, req *pb.DeterministicAeadEncryptRequest) (*pb.DeterministicAeadEncryptResponse, error) {

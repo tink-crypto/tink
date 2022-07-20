@@ -10,7 +10,7 @@ Tinkey requires Java 8 or later to run.
 ## Install from prebuilt binaries
 
 Download the latest version of Tinkey from
-https://storage.googleapis.com/tinkey/tinkey-1.5.0.tar.gz. This version should
+https://storage.googleapis.com/tinkey/tinkey-1.6.1.tar.gz. This version should
 work well on Linux, macOS and Windows.
 
 ## Install with Homebrew
@@ -69,7 +69,7 @@ tinkey create-keyset --key-template ECDSA_P256 --out private-keyset.cfg
 -   Add a new key to a keyset
 
 ```shell
-tinkey add-key --key-template ECDSA_P384 --in private-keyset.cfg \
+tinkey add-key --key-template ECDSA_P512 --in private-keyset.cfg \
 --out private-keyset.cfg
 ```
 

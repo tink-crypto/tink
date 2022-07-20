@@ -13,36 +13,41 @@
 # limitations under the License.
 """Interface for JwtPublicKeySign."""
 
-from __future__ import absolute_import
-from __future__ import division
-# Placeholder for import for type annotations
-from __future__ import print_function
-
 import abc
-from typing import Text
-
-import six
+from typing import Optional
 
 from tink.jwt import _raw_jwt
 
 
-@six.add_metaclass(abc.ABCMeta)
-class JwtPublicKeySign(object):
+class JwtPublicKeySign(metaclass=abc.ABCMeta):
   """Interface for creating a signed JWT.
 
   Sees RFC 7519 and RFC 7515. Security guarantees: similar to PublicKeySign.
   """
 
   @abc.abstractmethod
-  def sign_and_encode(self, token: _raw_jwt.RawJwt) -> Text:
+  def sign_and_encode(self, raw_jwt: _raw_jwt.RawJwt) -> str:
     """Computes a signature and encodes the token.
 
     Args:
-      token: The RawJwt token to be signed and encoded.
+      raw_jwt: The RawJwt token to be signed and encoded.
 
     Returns:
       The signed token encoded in the JWS compact serialization format.
     Raises:
       tink.TinkError if the operation fails.
     """
+    raise NotImplementedError()
+
+
+class JwtPublicKeySignInternal(metaclass=abc.ABCMeta):
+  """Internal interface for creating a signed JWT.
+
+  "kid" is an optional value that is set by the wrapper for keys with output
+  prefix TINK, and it is set to None for output prefix RAW.
+  """
+
+  @abc.abstractmethod
+  def sign_and_encode_with_kid(self, token: _raw_jwt.RawJwt,
+                               kid: Optional[str]) -> str:
     raise NotImplementedError()

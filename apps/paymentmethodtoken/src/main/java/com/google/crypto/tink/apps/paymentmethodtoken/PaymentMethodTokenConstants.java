@@ -21,7 +21,7 @@ import com.google.crypto.tink.subtle.Enums.HashType;
 import java.nio.charset.StandardCharsets;
 
 /** Various constants. */
-class PaymentMethodTokenConstants {
+final class PaymentMethodTokenConstants {
   public static final String GOOGLE_SENDER_ID = "Google";
   public static final String HMAC_SHA256_ALGO = "HmacSha256";
   public static final byte[] HKDF_EMPTY_SALT = new byte[0];
@@ -99,4 +99,6 @@ class PaymentMethodTokenConstants {
       throw new IllegalArgumentException("Unknown protocol version: " + protocolVersion);
     }
   }
+
+  private PaymentMethodTokenConstants() {}
 }

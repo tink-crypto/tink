@@ -16,14 +16,17 @@
 
 #include "tink/subtle/aes_gcm_boringssl.h"
 
+#include <memory>
 #include <utility>
 
 #include "absl/memory/memory.h"
-#include "openssl/aead.h"
-#include "tink/subtle/random.h"
-#include "tink/subtle/subtle_util.h"
-#include "tink/subtle/subtle_util_boringssl.h"
+#include "tink/aead/internal/aead_from_zero_copy.h"
+#include "tink/aead/internal/zero_copy_aead.h"
+#include "tink/aead/internal/zero_copy_aes_gcm_boringssl.h"
+#include "tink/internal/fips_utils.h"
+#include "tink/util/secret_data.h"
 #include "tink/util/status.h"
+#include "tink/util/statusor.h"
 
 namespace crypto {
 namespace tink {
@@ -31,64 +34,18 @@ namespace subtle {
 
 util::StatusOr<std::unique_ptr<Aead>> AesGcmBoringSsl::New(
     const util::SecretData& key) {
-  auto status = internal::CheckFipsCompatibility<AesGcmBoringSsl>();
-  if (!status.ok()) return status;
-
-  const EVP_AEAD* aead =
-      SubtleUtilBoringSSL::GetAesGcmAeadForKeySize(key.size());
-  if (aead == nullptr) {
-    return util::Status(util::error::INVALID_ARGUMENT, "invalid key size");
-  }
-  bssl::UniquePtr<EVP_AEAD_CTX> ctx(EVP_AEAD_CTX_new(
-      aead, key.data(), key.size(), EVP_AEAD_DEFAULT_TAG_LENGTH));
-  if (!ctx) {
-    return util::Status(util::error::INTERNAL,
-                        "could not initialize EVP_AEAD_CTX");
-  }
-  return {absl::WrapUnique(new AesGcmBoringSsl(std::move(ctx)))};
-}
-
-util::StatusOr<std::string> AesGcmBoringSsl::Encrypt(
-    absl::string_view plaintext, absl::string_view additional_data) const {
-  std::string result = Random::GetRandomBytes(kIvSizeInBytes);
-  ResizeStringUninitialized(
-      &result, kIvSizeInBytes + plaintext.size() + kTagSizeInBytes);
-  size_t len;
-  if (EVP_AEAD_CTX_seal(
-          ctx_.get(), reinterpret_cast<uint8_t*>(&result[kIvSizeInBytes]), &len,
-          plaintext.size() + kTagSizeInBytes,
-          reinterpret_cast<const uint8_t*>(&result[0]), kIvSizeInBytes,
-          reinterpret_cast<const uint8_t*>(plaintext.data()), plaintext.size(),
-          reinterpret_cast<const uint8_t*>(additional_data.data()),
-          additional_data.size()) != 1) {
-    return util::Status(util::error::INTERNAL, "Encryption failed");
-  }
-  return result;
-}
-
-util::StatusOr<std::string> AesGcmBoringSsl::Decrypt(
-    absl::string_view ciphertext, absl::string_view additional_data) const {
-  if (ciphertext.size() < kIvSizeInBytes + kTagSizeInBytes) {
-    return util::Status(util::error::INVALID_ARGUMENT, "Ciphertext too short");
+  util::Status status = internal::CheckFipsCompatibility<AesGcmBoringSsl>();
+  if (!status.ok()) {
+    return status;
   }
 
-  std::string result;
-  ResizeStringUninitialized(
-      &result, ciphertext.size() - kIvSizeInBytes - kTagSizeInBytes);
-  size_t len;
-  if (EVP_AEAD_CTX_open(
-          ctx_.get(), reinterpret_cast<uint8_t*>(&result[0]), &len,
-          result.size(),
-          // The nonce is the first |kIvSizeInBytes| bytes of |ciphertext|.
-          reinterpret_cast<const uint8_t*>(ciphertext.data()), kIvSizeInBytes,
-          // The input is the remainder.
-          reinterpret_cast<const uint8_t*>(ciphertext.data()) + kIvSizeInBytes,
-          ciphertext.size() - kIvSizeInBytes,
-          reinterpret_cast<const uint8_t*>(additional_data.data()),
-          additional_data.size()) != 1) {
-    return util::Status(util::error::INTERNAL, "Authentication failed");
+  util::StatusOr<std::unique_ptr<internal::ZeroCopyAead>> zero_copy_aead =
+      internal::ZeroCopyAesGcmBoringSsl::New(key);
+  if (!zero_copy_aead.ok()) {
+    return zero_copy_aead.status();
   }
-  return result;
+  return {absl::make_unique<internal::AeadFromZeroCopy>(
+      *std::move(zero_copy_aead))};
 }
 
 }  // namespace subtle

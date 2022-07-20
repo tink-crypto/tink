@@ -1,4 +1,4 @@
-// Copyright 2018 Google Inc.
+// Copyright 2018 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -19,10 +19,14 @@
 #include <fstream>
 #include <iostream>
 #include <memory>
+#include <string>
 
+#include "absl/status/status.h"
+#include "absl/strings/str_cat.h"
 #include "absl/strings/string_view.h"
 #include "include/rapidjson/document.h"
 #include "include/rapidjson/istreamwrapper.h"
+#include "tink/internal/test_file_util.h"
 #include "tink/subtle/common_enums.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
@@ -33,10 +37,11 @@ namespace subtle {
 
 namespace {
 
-// TODO: factor these helpers out to an "util"-class.
+// TODO(tholenst): factor these helpers out to an "util"-class.
 util::StatusOr<std::string> HexDecode(absl::string_view hex) {
   if (hex.size() % 2 != 0) {
-    return util::Status(util::error::INVALID_ARGUMENT, "Input has odd size.");
+    return util::Status(absl::StatusCode::kInvalidArgument,
+                        "Input has odd size.");
   }
   std::string decoded(hex.size() / 2, static_cast<char>(0));
   for (size_t i = 0; i < hex.size(); ++i) {
@@ -49,14 +54,15 @@ util::StatusOr<std::string> HexDecode(absl::string_view hex) {
     else if ('A' <= c && c <= 'F')
       val = c - 'A' + 10;
     else
-      return util::Status(util::error::INVALID_ARGUMENT, "Not hexadecimal");
+      return util::Status(absl::StatusCode::kInvalidArgument,
+                          "Not hexadecimal");
     decoded[i / 2] = (decoded[i / 2] << 4) | val;
   }
   return decoded;
 }
 
 std::string HexDecodeOrDie(absl::string_view hex) {
-  return HexDecode(hex).ValueOrDie();
+  return HexDecode(hex).value();
 }
 
 }  // namespace
@@ -72,15 +78,17 @@ std::string WycheproofUtil::GetBytes(const rapidjson::Value &val) {
 
 std::unique_ptr<rapidjson::Document> WycheproofUtil::ReadTestVectors(
     const std::string &filename) {
-  const std::string kTestVectors = "../wycheproof/testvectors/";
+  std::string test_vectors_path = crypto::tink::internal::RunfilesPath(
+      absl::StrCat(
+          "external/wycheproof/testvectors/", filename));
   std::ifstream input_stream;
-  input_stream.open(kTestVectors + filename);
+  input_stream.open(test_vectors_path);
   rapidjson::IStreamWrapper input(input_stream);
   std::unique_ptr<rapidjson::Document> root(
       new rapidjson::Document(rapidjson::kObjectType));
   if (root->ParseStream(input).HasParseError()) {
     std::cerr << "Failure parsing of test vectors from "
-              << kTestVectors + filename << "\n";
+              << test_vectors_path << std::endl;
     exit(1);
   }
   return root;
@@ -126,7 +134,7 @@ std::string WycheproofUtil::GetInteger(const rapidjson::Value &val) {
       hex = "0" + hex;
     }
   }
-  return HexDecode(hex).ValueOrDie();
+  return HexDecode(hex).value();
 }
 
 }  // namespace subtle

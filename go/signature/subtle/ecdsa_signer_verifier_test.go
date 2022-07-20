@@ -71,6 +71,19 @@ func TestSignVerify(t *testing.T) {
 	}
 }
 
+func TestECDSAInvalidPublicKey(t *testing.T) {
+	if _, err := subtleSignature.NewECDSAVerifier("SHA256", "NIST_P256", "IEEE_P1363", []byte{0, 32, 0}, []byte{0, 32}); err == nil {
+		t.Errorf("subtleSignature.NewECDSAVerifier() err = nil, want error")
+	}
+}
+
+func TestECDSAInvalidCurve(t *testing.T) {
+	priv, _ := ecdsa.GenerateKey(subtle.GetCurve("NIST_P256"), rand.Reader)
+	if _, err := subtleSignature.NewECDSAVerifier("SHA256", "INVALID", "IEEE_P1363", priv.X.Bytes(), priv.Y.Bytes()); err == nil {
+		t.Errorf("subtleSignature.NewECDSAVerifier() err = nil, want error")
+	}
+}
+
 func TestECDSAWycheproofCases(t *testing.T) {
 	testutil.SkipTestIfTestSrcDirIsNotSet(t)
 

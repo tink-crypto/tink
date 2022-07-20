@@ -22,19 +22,29 @@ option java_package = "com.google.crypto.tink.proto";
 option java_multiple_files = true;
 option go_package = "github.com/google/tink/proto/jwt_ecdsa_go_proto";
 
+// See https://datatracker.ietf.org/doc/html/rfc7518#section-3.4
 enum JwtEcdsaAlgorithm {
   ES_UNKNOWN = 0;
-  ES256 = 1;
-  ES384 = 2;
-  ES512 = 3;
+  ES256 = 1;  // ECDSA using P-256 and SHA-256
+  ES384 = 2;  // ECDSA using P-384 and SHA-384
+  ES512 = 3;  // ECDSA using P-521 and SHA-512
 }
 
 // key_type: type.googleapis.com/google.crypto.tink.JwtEcdsaPublicKey
 message JwtEcdsaPublicKey {
   uint32 version = 1;
   JwtEcdsaAlgorithm algorithm = 2;
+  // Affine coordinates of the public key in big-endian representation. The
+  // public key is a point (x, y) on the curve defined by algorithm.
   bytes x = 3;
   bytes y = 4;
+
+  // Optional, custom kid header value to be used with "RAW" keys.
+  // "TINK" keys with this value set will be rejected.
+  message CustomKid {
+    string value = 1;
+  }
+  CustomKid custom_kid = 5;
 }
 
 // key_type: type.googleapis.com/google.crypto.tink.JwtEcdsaPrivateKey

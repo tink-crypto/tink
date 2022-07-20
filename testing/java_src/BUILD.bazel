@@ -7,13 +7,13 @@ licenses(["notice"])
 java_proto_library(
     name = "testing_api_java_proto",
     testonly = 1,
-    deps = ["@tink_base//proto/testing:testing_api_proto"],
+    deps = ["//proto:testing_api_proto"],
 )
 
 java_grpc_library(
     name = "testing_api_java_grpc",
     testonly = 1,
-    srcs = ["@tink_base//proto/testing:testing_api_proto"],
+    srcs = ["//proto:testing_api_proto"],
     deps = [":testing_api_java_proto"],
 )
 
@@ -33,6 +33,9 @@ java_library(
         "java/com/google/crypto/tink/testing/StreamingAeadServiceImpl.java",
     ],
     deps = [
+        "@com_google_protobuf//:duration_proto",
+        "@com_google_protobuf//:timestamp_proto",
+        "@com_google_protobuf//:wrappers_proto",
         ":testing_api_java_grpc",
         ":testing_api_java_proto",
         "@com_google_protobuf//:protobuf_java",
@@ -50,6 +53,9 @@ java_library(
         "@tink_java//src/main/java/com/google/crypto/tink:json_keyset_reader",
         "@tink_java//src/main/java/com/google/crypto/tink:json_keyset_writer",
         "@tink_java//src/main/java/com/google/crypto/tink:key_template",
+        "@tink_java//src/main/java/com/google/crypto/tink:key_templates",
+        "@tink_java//src/main/java/com/google/crypto/tink:keyset_reader",
+        "@tink_java//src/main/java/com/google/crypto/tink:keyset_writer",
         "@tink_java//src/main/java/com/google/crypto/tink:mac",
         "@tink_java//src/main/java/com/google/crypto/tink:public_key_sign",
         "@tink_java//src/main/java/com/google/crypto/tink:public_key_verify",
@@ -57,6 +63,7 @@ java_library(
         "@tink_java//src/main/java/com/google/crypto/tink:streaming_aead",
         "@tink_java//src/main/java/com/google/crypto/tink:version",
         "@tink_java//src/main/java/com/google/crypto/tink/internal:key_template_proto_converter",
+        "@tink_java//src/main/java/com/google/crypto/tink/jwt:jwk_set_converter",
         "@tink_java//src/main/java/com/google/crypto/tink/jwt:jwt_invalid_exception",
         "@tink_java//src/main/java/com/google/crypto/tink/jwt:jwt_mac",
         "@tink_java//src/main/java/com/google/crypto/tink/jwt:jwt_mac_config",
@@ -67,6 +74,7 @@ java_library(
         "@tink_java//src/main/java/com/google/crypto/tink/jwt:raw_jwt",
         "@tink_java//src/main/java/com/google/crypto/tink/jwt:verified_jwt",
         "@tink_java//src/main/java/com/google/crypto/tink/prf:prf_set",
+        "@tink_java//src/main/java/com/google/crypto/tink/tinkkey:secret_key_access",
     ],
 )
 
@@ -88,11 +96,11 @@ java_binary(
         "@tink_java//src/main/java/com/google/crypto/tink/aead:aead_config",
         "@tink_java//src/main/java/com/google/crypto/tink/daead:deterministic_aead_config",
         "@tink_java//src/main/java/com/google/crypto/tink/hybrid:hybrid_config",
+        "@tink_java//src/main/java/com/google/crypto/tink/jwt:jwt_mac_config",
+        "@tink_java//src/main/java/com/google/crypto/tink/jwt:jwt_signature_config",
         "@tink_java//src/main/java/com/google/crypto/tink/mac:mac_config",
         "@tink_java//src/main/java/com/google/crypto/tink/prf:prf_config",
         "@tink_java//src/main/java/com/google/crypto/tink/signature:signature_config",
-        "@tink_java//src/main/java/com/google/crypto/tink/jwt:jwt_mac_config",
-        "@tink_java//src/main/java/com/google/crypto/tink/jwt:jwt_signature_config",
         "@tink_java//src/main/java/com/google/crypto/tink/streamingaead:streaming_aead_config",
         "@tink_java//src/main/java/com/google/crypto/tink/testing:fake_kms_client",
     ],
@@ -119,7 +127,8 @@ java_test(
         "@maven//:junit_junit",
         "@tink_java//proto:tink_java_proto",
         "@tink_java//src/main/java/com/google/crypto/tink:binary_keyset_reader",
-        "@tink_java//src/main/java/com/google/crypto/tink/aead:aes_gcm_key_manager",
+        "@tink_java//src/main/java/com/google/crypto/tink:key_template",
+        "@tink_java//src/main/java/com/google/crypto/tink:key_templates",
         "@tink_java//src/main/java/com/google/crypto/tink/config:tink_config",
         "@tink_java//src/main/java/com/google/crypto/tink/daead:aes_siv_key_manager",
         "@tink_java//src/main/java/com/google/crypto/tink/internal:key_template_proto_converter",
@@ -177,8 +186,8 @@ java_test(
         "@maven//:junit_junit",
         "@tink_java//proto:tink_java_proto",
         "@tink_java//src/main/java/com/google/crypto/tink:binary_keyset_reader",
+        "@tink_java//src/main/java/com/google/crypto/tink:key_templates",
         "@tink_java//src/main/java/com/google/crypto/tink/internal:key_template_proto_converter",
-        "@tink_java//src/main/java/com/google/crypto/tink/jwt:jwt_ecdsa_sign_key_manager",
         "@tink_java//src/main/java/com/google/crypto/tink/jwt:jwt_hmac_key_manager",
         "@tink_java//src/main/java/com/google/crypto/tink/jwt:jwt_mac_config",
         "@tink_java//src/main/java/com/google/crypto/tink/jwt:jwt_signature_config",

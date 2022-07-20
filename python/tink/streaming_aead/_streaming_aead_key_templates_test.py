@@ -13,10 +13,6 @@
 # limitations under the License.
 """Tests for tink.python.tink.streaming_aead_key_templates."""
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-
 from absl.testing import absltest
 from absl.testing import parameterized
 from tink.proto import aes_ctr_hmac_streaming_pb2
@@ -24,42 +20,23 @@ from tink.proto import aes_gcm_hkdf_streaming_pb2
 from tink.proto import common_pb2
 from tink.proto import tink_pb2
 from tink import streaming_aead
-from tink.testing import helper
 
 
 class StreamingAeadKeyTemplatesTest(parameterized.TestCase):
 
-  @parameterized.parameters([
-      ('AES128_GCM_HKDF_4KB',
-       streaming_aead.streaming_aead_key_templates.AES128_GCM_HKDF_4KB),
-      ('AES128_GCM_HKDF_1MB',
-       streaming_aead.streaming_aead_key_templates.AES128_GCM_HKDF_1MB),
-      ('AES256_GCM_HKDF_4KB',
-       streaming_aead.streaming_aead_key_templates.AES256_GCM_HKDF_4KB),
-      ('AES256_GCM_HKDF_1MB',
-       streaming_aead.streaming_aead_key_templates.AES256_GCM_HKDF_1MB),
-      ('AES128_CTR_HMAC_SHA256_4KB',
-       streaming_aead.streaming_aead_key_templates.AES128_CTR_HMAC_SHA256_4KB),
-      ('AES128_CTR_HMAC_SHA256_1MB',
-       streaming_aead.streaming_aead_key_templates.AES128_CTR_HMAC_SHA256_1MB),
-      ('AES256_CTR_HMAC_SHA256_4KB',
-       streaming_aead.streaming_aead_key_templates.AES256_CTR_HMAC_SHA256_4KB),
-      ('AES256_CTR_HMAC_SHA256_1MB',
-       streaming_aead.streaming_aead_key_templates.AES256_CTR_HMAC_SHA256_1MB),
-  ])
-  def test_template(self, template_name, template):
-    self.assertEqual(
-        template, helper.template_from_testdata(template_name, 'streamingaead'))
-
   def test_create_aes_gcm_hkdf_streaming_key_template(self):
     # Intentionally using 'weird' or invalid values for parameters,
     # to test that the function correctly puts them in the resulting template.
-    template = streaming_aead.streaming_aead_key_templates.create_aes_gcm_hkdf_streaming_key_template(
-        aes_key_size=42,
-        hash_type=common_pb2.HashType.SHA1,
-        derived_key_size=76,
-        ciphertext_segment_size=64,
-    )
+    template = None
+    with self.assertWarns(DeprecationWarning):
+      template = (
+          streaming_aead.streaming_aead_key_templates
+          .create_aes_gcm_hkdf_streaming_key_template(
+              aes_key_size=42,
+              hash_type=common_pb2.HashType.SHA1,
+              derived_key_size=76,
+              ciphertext_segment_size=64,
+          ))
     self.assertEqual(
         'type.googleapis.com/google.crypto.tink.AesGcmHkdfStreamingKey',
         template.type_url)
@@ -74,14 +51,18 @@ class StreamingAeadKeyTemplatesTest(parameterized.TestCase):
   def test_create_aes_ctr_hmac_streaming_key_template(self):
     # Intentionally using 'weird' or invalid values for parameters,
     # to test that the function correctly puts them in the resulting template.
-    template = streaming_aead.streaming_aead_key_templates.create_aes_ctr_hmac_streaming_key_template(
-        aes_key_size=42,
-        hkdf_hash_type=common_pb2.HashType.SHA1,
-        derived_key_size=76,
-        mac_hash_type=common_pb2.HashType.UNKNOWN_HASH,
-        tag_size=39,
-        ciphertext_segment_size=64,
-    )
+    template = None
+    with self.assertWarns(DeprecationWarning):
+      template = (
+          streaming_aead.streaming_aead_key_templates
+          .create_aes_ctr_hmac_streaming_key_template(
+              aes_key_size=42,
+              hkdf_hash_type=common_pb2.HashType.SHA1,
+              derived_key_size=76,
+              mac_hash_type=common_pb2.HashType.UNKNOWN_HASH,
+              tag_size=39,
+              ciphertext_segment_size=64,
+          ))
     self.assertEqual(
         'type.googleapis.com/google.crypto.tink.AesCtrHmacStreamingKey',
         template.type_url)

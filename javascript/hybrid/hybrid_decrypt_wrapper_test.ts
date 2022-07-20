@@ -27,7 +27,7 @@ describe('hybrid decrypt wrapper test', function() {
     try {
       await hybridDecrypt.decrypt(ciphertext);
       fail('Should throw an exception');
-    } catch (e) {
+    } catch (e: any) {
       expect(e.toString()).toBe(ExceptionText.cannotBeDecrypted());
     }
   });
@@ -123,7 +123,7 @@ describe('hybrid decrypt wrapper test', function() {
     try {
       await hybridDecrypt.decrypt(ciphertext);
       fail('An exception should be thrown.');
-    } catch (e) {
+    } catch (e: any) {
       expect(e.toString()).toBe(ExceptionText.cannotBeDecrypted());
     }
     const decryptedCiphertext =
@@ -152,7 +152,7 @@ describe('hybrid decrypt wrapper test', function() {
     try {
       await hybridDecrypt.decrypt(ciphertext);
       fail('An exception should be thrown.');
-    } catch (e) {
+    } catch (e: any) {
       expect(e.toString()).toBe(ExceptionText.cannotBeDecrypted());
     }
   });
@@ -165,7 +165,7 @@ describe('hybrid decrypt wrapper test', function() {
     try {
       await hybridDecrypt.decrypt(new Uint8Array(0));
       fail('An exception should be thrown.');
-    } catch (e) {
+    } catch (e: any) {
       expect(e.toString()).toBe(ExceptionText.cannotBeDecrypted());
     }
   });
@@ -266,7 +266,6 @@ class DummyHybridEncrypt extends HybridEncrypt {
     super();
   }
 
-  /** @override */
   async encrypt(plaintext: Uint8Array, opt_contextInfo?: Uint8Array) {
     const ciphertext = Bytes.concat(plaintext, this.ciphertextSuffix);
     if (opt_contextInfo) {
@@ -282,7 +281,6 @@ class DummyHybridDecrypt extends HybridDecrypt {
     super();
   }
 
-  /** @override */
   async decrypt(ciphertext: Uint8Array, opt_contextInfo?: Uint8Array) {
     if (opt_contextInfo) {
       const infoLength = opt_contextInfo.length;

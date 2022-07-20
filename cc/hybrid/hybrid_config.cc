@@ -18,13 +18,13 @@
 
 #include "absl/memory/memory.h"
 #include "tink/aead/aead_config.h"
-#include "tink/hybrid/ecies_aead_hkdf_private_key_manager.h"
-#include "tink/hybrid/ecies_aead_hkdf_public_key_manager.h"
 #include "tink/config/config_util.h"
 #include "tink/config/tink_fips.h"
-#include "tink/registry.h"
+#include "tink/hybrid/ecies_aead_hkdf_private_key_manager.h"
+#include "tink/hybrid/ecies_aead_hkdf_public_key_manager.h"
 #include "tink/hybrid/hybrid_decrypt_wrapper.h"
 #include "tink/hybrid/hybrid_encrypt_wrapper.h"
+#include "tink/registry.h"
 #include "tink/util/status.h"
 #include "proto/config.pb.h"
 
@@ -59,7 +59,6 @@ util::Status HybridConfig::Register() {
   }
 
   // Register non-FIPS key managers.
-  if (!status.ok()) return status;
   status = Registry::RegisterAsymmetricKeyManagers(
       absl::make_unique<EciesAeadHkdfPrivateKeyManager>(),
       absl::make_unique<EciesAeadHkdfPublicKeyManager>(), true);

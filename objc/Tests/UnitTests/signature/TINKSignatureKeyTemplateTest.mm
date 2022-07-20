@@ -25,6 +25,7 @@
 #include "proto/common.pb.h"
 #include "proto/tink.pb.h"
 
+#include "absl/status/status.h"
 #include "tink/util/status.h"
 
 @interface TINKSignatureKeyTemplatesTest : XCTestCase
@@ -119,7 +120,7 @@ static std::string const kTypeURLEd25519 =
                                                       error:&error];
   XCTAssertNil(tpl);
   XCTAssertNotNil(error);
-  XCTAssertTrue(error.code == crypto::tink::util::error::INVALID_ARGUMENT);
+  XCTAssertEqual((absl::StatusCode)error.code, absl::StatusCode::kInvalidArgument);
   XCTAssertTrue([error.localizedFailureReason containsString:@"Invalid TINKSignatureKeyTemplate"]);
 }
 

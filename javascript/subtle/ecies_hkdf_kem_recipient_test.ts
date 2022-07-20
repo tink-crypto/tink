@@ -23,8 +23,8 @@ describe('ecies hkdf kem recipient test', function() {
 
   it('encap decap', async function() {
     const keyPair = await EllipticCurves.generateKeyPair('ECDH', 'P-256');
-    const publicKey = await EllipticCurves.exportCryptoKey(keyPair.publicKey);
-    const privateKey = await EllipticCurves.exportCryptoKey(keyPair.privateKey);
+    const publicKey = await EllipticCurves.exportCryptoKey(keyPair.publicKey!);
+    const privateKey = await EllipticCurves.exportCryptoKey(keyPair.privateKey!);
     const sender = await senderFromJsonWebKey(publicKey);
     const recipient = await recipientFromJsonWebKey(privateKey);
     for (let i = 1; i < 20; i++) {
@@ -47,8 +47,9 @@ describe('ecies hkdf kem recipient test', function() {
 
   it('decap, non integer key size', async function() {
     const keyPair = await EllipticCurves.generateKeyPair('ECDH', 'P-256');
-    const publicKey = await EllipticCurves.exportCryptoKey(keyPair.publicKey);
-    const privateKey = await EllipticCurves.exportCryptoKey(keyPair.privateKey);
+    const publicKey = await EllipticCurves.exportCryptoKey(keyPair.publicKey!);
+    const privateKey =
+        await EllipticCurves.exportCryptoKey(keyPair.privateKey!);
     const sender = await senderFromJsonWebKey(publicKey);
     const recipient = await recipientFromJsonWebKey(privateKey);
     const keySizeInBytes = 16;
@@ -63,7 +64,10 @@ describe('ecies hkdf kem recipient test', function() {
       await recipient.decapsulate(
           kemKeyToken['token'], NaN, pointFormat, hkdfHash, hkdfInfo, hkdfSalt);
       fail('An exception should be thrown.');
-    } catch (e) {
+      // Preserving old behavior when moving to
+      // https://www.typescriptlang.org/tsconfig#useUnknownInCatchVariables
+      // tslint:disable-next-line:no-any
+    } catch (e: any) {
       expect(e.toString())
           .toBe('InvalidArgumentsException: size must be an integer');
     }
@@ -72,7 +76,10 @@ describe('ecies hkdf kem recipient test', function() {
       await recipient.decapsulate(
           kemKeyToken['token'], 1.8, pointFormat, hkdfHash, hkdfInfo, hkdfSalt);
       fail('An exception should be thrown.');
-    } catch (e) {
+      // Preserving old behavior when moving to
+      // https://www.typescriptlang.org/tsconfig#useUnknownInCatchVariables
+      // tslint:disable-next-line:no-any
+    } catch (e: any) {
       expect(e.toString())
           .toBe('InvalidArgumentsException: size must be an integer');
     }
@@ -81,7 +88,7 @@ describe('ecies hkdf kem recipient test', function() {
   it('new instance, invalid parameters', async function() {
     // Test newInstance with public key instead private key.
     const keyPair = await EllipticCurves.generateKeyPair('ECDH', 'P-256');
-    const publicKey = await EllipticCurves.exportCryptoKey(keyPair.publicKey);
+    const publicKey = await EllipticCurves.exportCryptoKey(keyPair.publicKey!);
     try {
       await recipientFromJsonWebKey(publicKey);
       fail('An exception should be thrown.');
@@ -126,9 +133,12 @@ describe('ecies hkdf kem recipient test', function() {
     // Test public key instead of private key.
     const keyPair = await EllipticCurves.generateKeyPair('ECDH', 'P-256');
     try {
-      new EciesHkdfKemRecipient(keyPair.publicKey);
+      new EciesHkdfKemRecipient(keyPair.publicKey!);
       fail('An exception should be thrown.');
-    } catch (e) {
+      // Preserving old behavior when moving to
+      // https://www.typescriptlang.org/tsconfig#useUnknownInCatchVariables
+      // tslint:disable-next-line:no-any
+    } catch (e: any) {
       expect(e.toString())
           .toBe('SecurityException: Expected crypto key of type: private.');
     }
@@ -151,13 +161,13 @@ describe('ecies hkdf kem recipient test', function() {
         const hkdfSalt = Random.randBytes(16);
 
         const publicKey =
-            await EllipticCurves.exportCryptoKey(keyPair.publicKey);
+            await EllipticCurves.exportCryptoKey(keyPair.publicKey!);
         const sender = await senderFromJsonWebKey(publicKey);
         const kemKeyToken = await sender.encapsulate(
             keySizeInBytes, pointFormat, hashType, hkdfInfo, hkdfSalt);
 
         const privateKey =
-            await EllipticCurves.exportCryptoKey(keyPair.privateKey);
+            await EllipticCurves.exportCryptoKey(keyPair.privateKey!);
         const recipient = await recipientFromJsonWebKey(privateKey);
         const key = await recipient.decapsulate(
             kemKeyToken['token'], keySizeInBytes, pointFormat, hashType,
@@ -181,7 +191,7 @@ describe('ecies hkdf kem recipient test', function() {
         const keyPair =
             await EllipticCurves.generateKeyPair('ECDH', curveString);
         const privateKey =
-            await EllipticCurves.exportCryptoKey(keyPair.privateKey);
+            await EllipticCurves.exportCryptoKey(keyPair.privateKey!);
         const recipient = await recipientFromJsonWebKey(privateKey);
         const keySizeInBytes = 32;
         const pointFormat = EllipticCurves.PointFormatType.UNCOMPRESSED;

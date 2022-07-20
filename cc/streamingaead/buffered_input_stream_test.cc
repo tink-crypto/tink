@@ -16,11 +16,15 @@
 
 #include "tink/streamingaead/buffered_input_stream.h"
 
+#include <algorithm>
 #include <sstream>
+#include <string>
+#include <utility>
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "absl/memory/memory.h"
+#include "absl/status/status.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/string_view.h"
 #include "tink/input_stream.h"
@@ -59,19 +63,20 @@ std::unique_ptr<InputStream> GetInputStream(absl::string_view contents) {
 util::Status ReadFromStream(InputStream* input_stream, int count,
                             std::string* output) {
   if (input_stream == nullptr || output == nullptr || count < 0) {
-    return util::Status(util::error::INTERNAL, "Illegal read from a stream");
+    return util::Status(absl::StatusCode::kInternal,
+                        "Illegal read from a stream");
   }
   const void* buffer;
   output->clear();
   int bytes_to_read = count;
   while (bytes_to_read > 0) {
     auto next_result = input_stream->Next(&buffer);
-    if (next_result.status().error_code() == util::error::OUT_OF_RANGE) {
+    if (next_result.status().code() == absl::StatusCode::kOutOfRange) {
       // End of stream.
-      return util::Status::OK;
+      return util::OkStatus();
     }
     if (!next_result.ok()) return next_result.status();
-    auto read_bytes = next_result.ValueOrDie();
+    auto read_bytes = next_result.value();
     auto used_bytes = std::min(read_bytes, bytes_to_read);
     if (used_bytes > 0) {
       output->append(
@@ -80,7 +85,7 @@ util::Status ReadFromStream(InputStream* input_stream, int count,
       if (bytes_to_read == 0) input_stream->BackUp(read_bytes - used_bytes);
     }
   }
-  return util::Status::OK;
+  return util::OkStatus();
 }
 
 TEST(BufferedInputStreamTest, ReadingAndRewinding) {
@@ -154,8 +159,8 @@ TEST(BufferedInputStreamTest, SingleBackup) {
       int pos = buf_stream->Position();
       auto next_result = buf_stream->Next(&buf);
       if (read_size < input_size) {
-        EXPECT_THAT(next_result.status(), IsOk());
-        auto next_size = next_result.ValueOrDie();
+        EXPECT_THAT(next_result, IsOk());
+        auto next_size = next_result.value();
         EXPECT_LE(next_size, kBufferSize);
         EXPECT_EQ(pos + next_size, buf_stream->Position());
         buf_stream->BackUp(next_size);
@@ -163,7 +168,7 @@ TEST(BufferedInputStreamTest, SingleBackup) {
         buf_stream->BackUp(input_size);
         EXPECT_EQ(pos, buf_stream->Position());
       } else {
-        EXPECT_EQ(util::error::OUT_OF_RANGE, next_result.status().error_code());
+        EXPECT_EQ(absl::StatusCode::kOutOfRange, next_result.status().code());
       }
 
       // Read the rest of the input.
@@ -186,8 +191,8 @@ TEST(BufferedInputStreamTest, SingleBackup) {
       pos = buf_stream->Position();
       next_result = buf_stream->Next(&buf);
       if (read_size < input_size) {
-        EXPECT_THAT(next_result.status(), IsOk());
-        auto next_size = next_result.ValueOrDie();
+        EXPECT_THAT(next_result, IsOk());
+        auto next_size = next_result.value();
         EXPECT_EQ(input_size - pos, next_size);
         EXPECT_EQ(input_size, buf_stream->Position());
         buf_stream->BackUp(next_size);
@@ -195,7 +200,7 @@ TEST(BufferedInputStreamTest, SingleBackup) {
         buf_stream->BackUp(input_size);
         EXPECT_EQ(pos, buf_stream->Position());
       } else {
-        EXPECT_EQ(util::error::OUT_OF_RANGE, next_result.status().error_code());
+        EXPECT_EQ(absl::StatusCode::kOutOfRange, next_result.status().code());
       }
 
       // Read the rest of the input.
@@ -217,8 +222,8 @@ TEST(BufferedInputStreamTest, MultipleBackups) {
 
   EXPECT_EQ(0, buf_stream->Position());
   auto next_result = buf_stream->Next(&buffer);
-  EXPECT_THAT(next_result.status(), IsOk());
-  auto next_size = next_result.ValueOrDie();
+  EXPECT_THAT(next_result, IsOk());
+  auto next_size = next_result.value();
   EXPECT_EQ(contents.substr(0, next_size),
             std::string(static_cast<const char*>(buffer), next_size));
 
@@ -233,8 +238,8 @@ TEST(BufferedInputStreamTest, MultipleBackups) {
 
   // Call Next(), it should return exactly the backed up bytes.
   next_result = buf_stream->Next(&buffer);
-  EXPECT_THAT(next_result.status(), IsOk());
-  EXPECT_EQ(total_backup_size, next_result.ValueOrDie());
+  EXPECT_THAT(next_result, IsOk());
+  EXPECT_EQ(total_backup_size, next_result.value());
   EXPECT_EQ(next_size, buf_stream->Position());
   EXPECT_EQ(contents.substr(next_size - total_backup_size, total_backup_size),
             std::string(static_cast<const char*>(buffer), total_backup_size));
@@ -254,7 +259,7 @@ TEST(BufferedInputStreamTest, DisableRewindingInitially) {
       EXPECT_EQ(0, buf_stream->Position());
       buf_stream->DisableRewinding();
       auto status = buf_stream->Rewind();
-      EXPECT_THAT(status, StatusIs(util::error::INVALID_ARGUMENT,
+      EXPECT_THAT(status, StatusIs(absl::StatusCode::kInvalidArgument,
                                    HasSubstr("rewinding is disabled")));
 
       // Read a prefix of the stream.
@@ -266,7 +271,7 @@ TEST(BufferedInputStreamTest, DisableRewindingInitially) {
 
       // Attempt rewidning again.
       status = buf_stream->Rewind();
-      EXPECT_THAT(status, StatusIs(util::error::INVALID_ARGUMENT,
+      EXPECT_THAT(status, StatusIs(absl::StatusCode::kInvalidArgument,
                                    HasSubstr("rewinding is disabled")));
 
       // Read the rest of the input.
@@ -302,7 +307,7 @@ TEST(BufferedInputStreamTest, DisableRewindingAfterRewind) {
       EXPECT_EQ(0, buf_stream->Position());
       buf_stream->DisableRewinding();
       status = buf_stream->Rewind();
-      EXPECT_THAT(status, StatusIs(util::error::INVALID_ARGUMENT,
+      EXPECT_THAT(status, StatusIs(absl::StatusCode::kInvalidArgument,
                                    HasSubstr("rewinding is disabled")));
       // Read the prefix again.
       status = ReadFromStream(buf_stream.get(), read_size, &prefix);

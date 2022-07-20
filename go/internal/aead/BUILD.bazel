@@ -1,0 +1,37 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+package(default_visibility = ["//:__subpackages__"])  # keep
+
+go_library(
+    name = "aead",
+    srcs = [
+        "aead.go",
+        "aes_gcm_insecure_iv.go",
+        "chacha20poly1305_insecure_nonce.go",
+    ],
+    importpath = "github.com/google/tink/go/internal/aead",
+    deps = ["@org_golang_x_crypto//chacha20poly1305"],
+)
+
+go_test(
+    name = "aead_test",
+    srcs = [
+        "aead_test.go",
+        "aes_gcm_insecure_iv_test.go",
+        "chacha20poly1305_insecure_nonce_test.go",
+        "chacha20poly1305_insecure_nonce_vectors_test.go",
+    ],
+    data = ["@wycheproof//testvectors:all"],
+    deps = [
+        ":aead",
+        "//subtle/random",
+        "//testutil",
+        "@org_golang_x_crypto//chacha20poly1305",
+    ],
+)
+
+alias(
+    name = "go_default_library",
+    actual = ":aead",
+    visibility = ["//:__subpackages__"],
+)

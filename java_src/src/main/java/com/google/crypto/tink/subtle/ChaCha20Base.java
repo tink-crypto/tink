@@ -30,7 +30,11 @@ import java.security.InvalidKeyException;
  *
  * <p>Concrete implementations of this class are meant to be used to construct an {@link
  * com.google.crypto.tink.Aead} with {@link com.google.crypto.tink.subtle.Poly1305}.
+ *
+ * @deprecated replaced by {@link com.google.crypto.tink.aead.internal.ChaCha20Util} and {@link
+ *     com.google.crypto.tink.aead.internal.InsecureNonceChaCha20Base}.
  */
+@Deprecated
 abstract class ChaCha20Base implements IndCpaCipher {
   public static final int BLOCK_SIZE_IN_INTS = 16;
   public static final int BLOCK_SIZE_IN_BYTES = BLOCK_SIZE_IN_INTS * 4;

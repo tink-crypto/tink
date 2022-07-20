@@ -18,13 +18,14 @@
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include "absl/status/status.h"
 #include "absl/strings/escaping.h"
-#include "openssl/base.h"
 #include "openssl/bn.h"
 #include "openssl/rsa.h"
 #include "tink/config/tink_fips.h"
+#include "tink/internal/rsa_util.h"
+#include "tink/internal/ssl_unique_ptr.h"
 #include "tink/subtle/rsa_ssa_pss_verify_boringssl.h"
-#include "tink/subtle/subtle_util_boringssl.h"
 #include "tink/util/test_matchers.h"
 
 namespace crypto {
@@ -40,16 +41,17 @@ using ::testing::Not;
 class RsaPssSignBoringsslTest : public ::testing::Test {
  public:
   RsaPssSignBoringsslTest() : rsa_f4_(BN_new()) {
-    EXPECT_TRUE(BN_set_u64(rsa_f4_.get(), RSA_F4));
-    EXPECT_THAT(SubtleUtilBoringSSL::GetNewRsaKeyPair(
-                    2048, rsa_f4_.get(), &private_key_, &public_key_),
-                IsOk());
+    EXPECT_TRUE(BN_set_word(rsa_f4_.get(), RSA_F4));
+    EXPECT_THAT(
+        internal::NewRsaKeyPair(/*modulus_size_in_bits=*/2048, rsa_f4_.get(),
+                                &private_key_, &public_key_),
+        IsOk());
   }
 
  protected:
-  bssl::UniquePtr<BIGNUM> rsa_f4_;
-  SubtleUtilBoringSSL::RsaPrivateKey private_key_;
-  SubtleUtilBoringSSL::RsaPublicKey public_key_;
+  internal::SslUniquePtr<BIGNUM> rsa_f4_;
+  internal::RsaPrivateKey private_key_;
+  internal::RsaPublicKey public_key_;
 };
 
 TEST_F(RsaPssSignBoringsslTest, EncodesPss) {
@@ -57,22 +59,21 @@ TEST_F(RsaPssSignBoringsslTest, EncodesPss) {
     GTEST_SKIP() << "Test not run in FIPS-only mode";
   }
 
-  SubtleUtilBoringSSL::RsaSsaPssParams params{/*sig_hash=*/HashType::SHA256,
-                                              /*mgf1_hash=*/HashType::SHA256,
-                                              /*salt_length=*/32};
+  internal::RsaSsaPssParams params{/*sig_hash=*/HashType::SHA256,
+                                   /*mgf1_hash=*/HashType::SHA256,
+                                   /*salt_length=*/32};
 
   auto signer_or = RsaSsaPssSignBoringSsl::New(private_key_, params);
-  ASSERT_THAT(signer_or.status(), IsOk());
+  ASSERT_THAT(signer_or, IsOk());
 
-  auto signature_or = signer_or.ValueOrDie()->Sign("testdata");
-  ASSERT_THAT(signature_or.status(), IsOk());
-  EXPECT_THAT(signature_or.ValueOrDie(), Not(IsEmpty()));
+  auto signature_or = signer_or.value()->Sign("testdata");
+  ASSERT_THAT(signature_or, IsOk());
+  EXPECT_THAT(signature_or.value(), Not(IsEmpty()));
 
   auto verifier_or = RsaSsaPssVerifyBoringSsl::New(public_key_, params);
-  ASSERT_THAT(verifier_or.status(), IsOk());
-  EXPECT_THAT(
-      verifier_or.ValueOrDie()->Verify(signature_or.ValueOrDie(), "testdata"),
-      IsOk());
+  ASSERT_THAT(verifier_or, IsOk());
+  EXPECT_THAT(verifier_or.value()->Verify(signature_or.value(), "testdata"),
+              IsOk());
 }
 
 TEST_F(RsaPssSignBoringsslTest, EncodesPssWithSeparateHashes) {
@@ -80,22 +81,21 @@ TEST_F(RsaPssSignBoringsslTest, EncodesPssWithSeparateHashes) {
     GTEST_SKIP() << "Test not run in FIPS-only mode";
   }
 
-  SubtleUtilBoringSSL::RsaSsaPssParams params{/*sig_hash=*/HashType::SHA256,
-                                              /*mgf1_hash=*/HashType::SHA1,
-                                              /*salt_length=*/32};
+  internal::RsaSsaPssParams params{/*sig_hash=*/HashType::SHA256,
+                                   /*mgf1_hash=*/HashType::SHA1,
+                                   /*salt_length=*/32};
 
   auto signer_or = RsaSsaPssSignBoringSsl::New(private_key_, params);
-  ASSERT_THAT(signer_or.status(), IsOk());
+  ASSERT_THAT(signer_or, IsOk());
 
-  auto signature_or = signer_or.ValueOrDie()->Sign("testdata");
-  ASSERT_THAT(signature_or.status(), IsOk());
-  EXPECT_THAT(signature_or.ValueOrDie(), Not(IsEmpty()));
+  auto signature_or = signer_or.value()->Sign("testdata");
+  ASSERT_THAT(signature_or, IsOk());
+  EXPECT_THAT(signature_or.value(), Not(IsEmpty()));
 
   auto verifier_or = RsaSsaPssVerifyBoringSsl::New(public_key_, params);
-  ASSERT_THAT(verifier_or.status(), IsOk());
-  EXPECT_THAT(
-      verifier_or.ValueOrDie()->Verify(signature_or.ValueOrDie(), "testdata"),
-      IsOk());
+  ASSERT_THAT(verifier_or, IsOk());
+  EXPECT_THAT(verifier_or.value()->Verify(signature_or.value(), "testdata"),
+              IsOk());
 }
 
 TEST_F(RsaPssSignBoringsslTest, RejectsInvalidPaddingHash) {
@@ -103,11 +103,11 @@ TEST_F(RsaPssSignBoringsslTest, RejectsInvalidPaddingHash) {
     GTEST_SKIP() << "Test not run in FIPS-only mode";
   }
 
-  SubtleUtilBoringSSL::RsaSsaPssParams params{
-      /*sig_hash=*/HashType::SHA256, /*mgf1_hash=*/HashType::UNKNOWN_HASH,
-      /*salt_length=*/0};
+  internal::RsaSsaPssParams params{/*sig_hash=*/HashType::SHA256,
+                                   /*mgf1_hash=*/HashType::UNKNOWN_HASH,
+                                   /*salt_length=*/0};
   ASSERT_THAT(RsaSsaPssSignBoringSsl::New(private_key_, params).status(),
-              StatusIs(util::error::UNIMPLEMENTED));
+              StatusIs(absl::StatusCode::kUnimplemented));
 }
 
 TEST_F(RsaPssSignBoringsslTest, RejectsUnsafePaddingHash) {
@@ -115,11 +115,11 @@ TEST_F(RsaPssSignBoringsslTest, RejectsUnsafePaddingHash) {
     GTEST_SKIP() << "Test not run in FIPS-only mode";
   }
 
-  SubtleUtilBoringSSL::RsaSsaPssParams params{/*sig_hash=*/HashType::SHA1,
-                                              /*mgf1_hash=*/HashType::SHA1,
-                                              /*salt_length=*/0};
+  internal::RsaSsaPssParams params{/*sig_hash=*/HashType::SHA1,
+                                   /*mgf1_hash=*/HashType::SHA1,
+                                   /*salt_length=*/0};
   ASSERT_THAT(RsaSsaPssSignBoringSsl::New(private_key_, params).status(),
-              StatusIs(util::error::INVALID_ARGUMENT));
+              StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
 TEST_F(RsaPssSignBoringsslTest, RejectsInvalidCrtParams) {
@@ -127,31 +127,34 @@ TEST_F(RsaPssSignBoringsslTest, RejectsInvalidCrtParams) {
     GTEST_SKIP() << "Test not run in FIPS-only mode";
   }
 
-  SubtleUtilBoringSSL::RsaSsaPssParams params{/*sig_hash=*/HashType::SHA256,
-                                              /*mgf1_hash=*/HashType::SHA256,
-                                              /*salt_length=*/32};
+  internal::RsaSsaPssParams params{/*sig_hash=*/HashType::SHA256,
+                                   /*mgf1_hash=*/HashType::SHA256,
+                                   /*salt_length=*/32};
   ASSERT_THAT(private_key_.crt, Not(IsEmpty()));
   ASSERT_THAT(private_key_.dq, Not(IsEmpty()));
   ASSERT_THAT(private_key_.dp, Not(IsEmpty()));
 
   // Flip a few bits in the CRT parameters; check that creation fails.
   {
-    SubtleUtilBoringSSL::RsaPrivateKey key = private_key_;
+    internal::RsaPrivateKey key = private_key_;
     key.crt[0] ^= 0x80;
     auto signer_or = RsaSsaPssSignBoringSsl::New(key, params);
-    EXPECT_THAT(signer_or.status(), StatusIs(util::error::INVALID_ARGUMENT));
+    EXPECT_THAT(signer_or.status(),
+                StatusIs(absl::StatusCode::kInvalidArgument));
   }
   {
-    SubtleUtilBoringSSL::RsaPrivateKey key = private_key_;
+    internal::RsaPrivateKey key = private_key_;
     key.dq[0] ^= 0x08;
     auto signer_or = RsaSsaPssSignBoringSsl::New(key, params);
-    EXPECT_THAT(signer_or.status(), StatusIs(util::error::INVALID_ARGUMENT));
+    EXPECT_THAT(signer_or.status(),
+                StatusIs(absl::StatusCode::kInvalidArgument));
   }
   {
-    SubtleUtilBoringSSL::RsaPrivateKey key = private_key_;
+    internal::RsaPrivateKey key = private_key_;
     key.dp[0] ^= 0x04;
     auto signer_or = RsaSsaPssSignBoringSsl::New(key, params);
-    EXPECT_THAT(signer_or.status(), StatusIs(util::error::INVALID_ARGUMENT));
+    EXPECT_THAT(signer_or.status(),
+                StatusIs(absl::StatusCode::kInvalidArgument));
   }
 }
 
@@ -162,45 +165,45 @@ TEST_F(RsaPssSignBoringsslTest, TestFipsFailWithoutBoringCrypto) {
         << "Test assumes kOnlyUseFips but BoringCrypto is unavailable.";
   }
 
-  SubtleUtilBoringSSL::RsaSsaPssParams params{/*sig_hash=*/HashType::SHA256,
-                                              /*mgf1_hash=*/HashType::SHA256,
-                                              /*salt_length=*/32};
+  internal::RsaSsaPssParams params{/*sig_hash=*/HashType::SHA256,
+                                   /*mgf1_hash=*/HashType::SHA256,
+                                   /*salt_length=*/32};
   EXPECT_THAT(RsaSsaPssSignBoringSsl::New(private_key_, params).status(),
-              StatusIs(util::error::INTERNAL));
+              StatusIs(absl::StatusCode::kInternal));
 }
 
 TEST_F(RsaPssSignBoringsslTest, TestRestrictedFipsModuli) {
   if (!IsFipsModeEnabled() || !FIPS_mode()) {
     GTEST_SKIP() << "Test assumes kOnlyUseFips and BoringCrypto.";
   }
-  SubtleUtilBoringSSL::RsaPrivateKey private_key;
-  SubtleUtilBoringSSL::RsaPublicKey public_key;
+  internal::RsaPrivateKey private_key;
+  internal::RsaPublicKey public_key;
 
-  EXPECT_THAT(SubtleUtilBoringSSL::GetNewRsaKeyPair(
-                  4096, rsa_f4_.get(), &private_key, &public_key),
+  EXPECT_THAT(internal::NewRsaKeyPair(/*modulus_size_in_bits=*/4096,
+                                      rsa_f4_.get(), &private_key, &public_key),
               IsOk());
 
-  SubtleUtilBoringSSL::RsaSsaPssParams params{/*sig_hash=*/HashType::SHA256,
-                                              /*mgf1_hash=*/HashType::SHA256,
-                                              /*salt_length=*/32};
+  internal::RsaSsaPssParams params{/*sig_hash=*/HashType::SHA256,
+                                   /*mgf1_hash=*/HashType::SHA256,
+                                   /*salt_length=*/32};
   EXPECT_THAT(RsaSsaPssSignBoringSsl::New(private_key, params).status(),
-              StatusIs(util::error::INTERNAL));
+              StatusIs(absl::StatusCode::kInternal));
 }
 
 TEST_F(RsaPssSignBoringsslTest, TestAllowedFipsModuli) {
   if (!IsFipsModeEnabled() || !FIPS_mode()) {
     GTEST_SKIP() << "Test assumes kOnlyUseFips and BoringCrypto.";
   }
-  SubtleUtilBoringSSL::RsaPrivateKey private_key;
-  SubtleUtilBoringSSL::RsaPublicKey public_key;
+  internal::RsaPrivateKey private_key;
+  internal::RsaPublicKey public_key;
 
-  EXPECT_THAT(SubtleUtilBoringSSL::GetNewRsaKeyPair(
-                  3072, rsa_f4_.get(), &private_key, &public_key),
+  EXPECT_THAT(internal::NewRsaKeyPair(/*modulus_size_in_bits=*/3072,
+                                      rsa_f4_.get(), &private_key, &public_key),
               IsOk());
 
-  SubtleUtilBoringSSL::RsaSsaPssParams params{/*sig_hash=*/HashType::SHA256,
-                                              /*mgf1_hash=*/HashType::SHA256,
-                                              /*salt_length=*/32};
+  internal::RsaSsaPssParams params{/*sig_hash=*/HashType::SHA256,
+                                   /*mgf1_hash=*/HashType::SHA256,
+                                   /*salt_length=*/32};
   EXPECT_THAT(RsaSsaPssSignBoringSsl::New(private_key, params).status(),
               IsOk());
 }

@@ -110,4 +110,6 @@ public final class Hkdf {
     byte[] hkdfInput = Bytes.concat(ephemeralPublicKeyBytes, sharedSecret);
     return Hkdf.computeHkdf(hmacAlgo, hkdfInput, hkdfSalt, hkdfInfo, keySizeInBytes);
   }
+
+  private Hkdf() {}
 }

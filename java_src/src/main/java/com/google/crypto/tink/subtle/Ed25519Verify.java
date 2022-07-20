@@ -17,7 +17,8 @@
 package com.google.crypto.tink.subtle;
 
 import com.google.crypto.tink.PublicKeyVerify;
-import com.google.crypto.tink.config.TinkFips;
+import com.google.crypto.tink.config.internal.TinkFipsUtil;
+import com.google.crypto.tink.util.Bytes;
 import java.security.GeneralSecurityException;
 
 /**
@@ -38,13 +39,13 @@ import java.security.GeneralSecurityException;
  * @since 1.1.0
  */
 public final class Ed25519Verify implements PublicKeyVerify {
-  public static final TinkFips.AlgorithmFipsCompatibility FIPS =
-      TinkFips.AlgorithmFipsCompatibility.ALGORITHM_NOT_FIPS;
+  public static final TinkFipsUtil.AlgorithmFipsCompatibility FIPS =
+      TinkFipsUtil.AlgorithmFipsCompatibility.ALGORITHM_NOT_FIPS;
 
   public static final int PUBLIC_KEY_LEN = Field25519.FIELD_LEN;
   public static final int SIGNATURE_LEN = Field25519.FIELD_LEN * 2;
 
-  private final ImmutableByteArray publicKey;
+  private final Bytes publicKey;
 
   public Ed25519Verify(final byte[] publicKey) {
     if (!FIPS.isCompatible()) {
@@ -59,7 +60,7 @@ public final class Ed25519Verify implements PublicKeyVerify {
       throw new IllegalArgumentException(
           String.format("Given public key's length is not %s.", PUBLIC_KEY_LEN));
     }
-    this.publicKey = ImmutableByteArray.of(publicKey);
+    this.publicKey = Bytes.copyFrom(publicKey);
   }
 
   @Override
@@ -68,7 +69,7 @@ public final class Ed25519Verify implements PublicKeyVerify {
       throw new GeneralSecurityException(
           String.format("The length of the signature is not %s.", SIGNATURE_LEN));
     }
-    if (!Ed25519.verify(data, signature, publicKey.getBytes())) {
+    if (!Ed25519.verify(data, signature, publicKey.toByteArray())) {
       throw new GeneralSecurityException("Signature check failed.");
     }
   }

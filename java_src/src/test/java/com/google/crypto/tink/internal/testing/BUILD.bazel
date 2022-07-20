@@ -1,0 +1,111 @@
+licenses(["notice"])
+
+java_test(
+    name = "FakeMonitoringClientTest",
+    size = "small",
+    srcs = ["FakeMonitoringClientTest.java"],
+    deps = [
+        "//proto:tink_java_proto",
+        "//src/main/java/com/google/crypto/tink:key_format",
+        "//src/main/java/com/google/crypto/tink:key_status",
+        "//src/main/java/com/google/crypto/tink/internal:legacy_proto_key_format",
+        "//src/main/java/com/google/crypto/tink/internal:proto_key_format_serialization",
+        "//src/main/java/com/google/crypto/tink/internal/testing:fake_monitoring_client",
+        "//src/main/java/com/google/crypto/tink/monitoring:monitoring_annotations",
+        "//src/main/java/com/google/crypto/tink/monitoring:monitoring_client",
+        "//src/main/java/com/google/crypto/tink/monitoring:monitoring_keyset_info",
+        "@com_google_protobuf//:protobuf_javalite",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "ProtoKeyFormatSerializationTesterTest",
+    size = "small",
+    srcs = ["ProtoKeyFormatSerializationTesterTest.java"],
+    deps = [
+        "//proto:test_proto_java_proto",
+        "//proto:tink_java_proto",
+        "//src/main/java/com/google/crypto/tink:key_format",
+        "//src/main/java/com/google/crypto/tink/internal:key_format_parser",
+        "//src/main/java/com/google/crypto/tink/internal:key_format_serializer",
+        "//src/main/java/com/google/crypto/tink/internal:mutable_serialization_registry",
+        "//src/main/java/com/google/crypto/tink/internal:proto_key_format_serialization",
+        "//src/main/java/com/google/crypto/tink/internal/testing:proto_key_format_serialization_tester",
+        "//src/main/java/com/google/crypto/tink/util:bytes",
+        "@com_google_protobuf//:protobuf_javalite",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "ProtoKeySerializationTesterTest",
+    size = "small",
+    srcs = ["ProtoKeySerializationTesterTest.java"],
+    deps = [
+        "//proto:test_proto_java_proto",
+        "//proto:tink_java_proto",
+        "//src/main/java/com/google/crypto/tink:key",
+        "//src/main/java/com/google/crypto/tink:key_format",
+        "//src/main/java/com/google/crypto/tink:secret_key_access",
+        "//src/main/java/com/google/crypto/tink/internal:key_parser",
+        "//src/main/java/com/google/crypto/tink/internal:key_serializer",
+        "//src/main/java/com/google/crypto/tink/internal:mutable_serialization_registry",
+        "//src/main/java/com/google/crypto/tink/internal:proto_key_serialization",
+        "//src/main/java/com/google/crypto/tink/internal/testing:proto_key_serialization_tester",
+        "//src/main/java/com/google/crypto/tink/util:bytes",
+        "@com_google_protobuf//:protobuf_javalite",
+        "@maven//:com_google_code_findbugs_jsr305",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "KeyFormatWithSerializationTest",
+    size = "small",
+    srcs = ["KeyFormatWithSerializationTest.java"],
+    deps = [
+        "//proto:tink_java_proto",
+        "//src/main/java/com/google/crypto/tink:key_format",
+        "//src/main/java/com/google/crypto/tink/internal:proto_key_format_serialization",
+        "//src/main/java/com/google/crypto/tink/internal/testing:key_format_with_serialization",
+        "@maven//:com_google_errorprone_error_prone_annotations",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "KeyWithSerializationTest",
+    size = "small",
+    srcs = ["KeyWithSerializationTest.java"],
+    deps = [
+        "//proto:tink_java_proto",
+        "//src/main/java/com/google/crypto/tink:key",
+        "//src/main/java/com/google/crypto/tink:key_format",
+        "//src/main/java/com/google/crypto/tink/internal:proto_key_serialization",
+        "//src/main/java/com/google/crypto/tink/internal/testing:key_with_serialization",
+        "@com_google_protobuf//:protobuf_javalite",
+        "@maven//:com_google_code_findbugs_jsr305",
+        "@maven//:com_google_errorprone_error_prone_annotations",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "AssertsTest",
+    size = "small",
+    srcs = ["AssertsTest.java"],
+    deps = [
+        "//proto:test_proto_java_proto",
+        "//proto:tink_java_proto",
+        "//src/main/java/com/google/crypto/tink/internal:proto_key_format_serialization",
+        "//src/main/java/com/google/crypto/tink/internal:proto_key_serialization",
+        "//src/main/java/com/google/crypto/tink/internal/testing:asserts",
+        "//src/main/java/com/google/crypto/tink/subtle:hex",
+        "@com_google_protobuf//:protobuf_javalite",
+        "@maven//:junit_junit",
+    ],
+)

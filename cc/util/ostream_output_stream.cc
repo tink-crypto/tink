@@ -21,8 +21,10 @@
 #include <cstring>
 #include <memory>
 #include <ostream>
+#include <utility>
 
 #include "absl/memory/memory.h"
+#include "absl/status/status.h"
 #include "tink/output_stream.h"
 #include "tink/util/errors.h"
 #include "tink/util/status.h"
@@ -41,7 +43,7 @@ OstreamOutputStream::OstreamOutputStream(std::unique_ptr<std::ostream> output,
   buffer_ = nullptr;
   position_ = 0;
   buffer_offset_ = 0;
-  status_ = Status::OK;
+  status_ = OkStatus();
 }
 
 crypto::tink::util::StatusOr<int> OstreamOutputStream::Next(void** data) {
@@ -75,8 +77,8 @@ crypto::tink::util::StatusOr<int> OstreamOutputStream::Next(void** data) {
       reinterpret_cast<char*>(buffer_.get()), buffer_size_);
   if (write_result == 0) {  // No data written or an I/O error occurred.
     if (output_->good()) return 0;
-    status_ = ToStatusF(util::error::INTERNAL,
-                        "I/O error upon write: %s", std::strerror(errno));
+    status_ = ToStatusF(absl::StatusCode::kInternal, "I/O error upon write: %s",
+                        std::strerror(errno));
     return status_;
   }
   // Some data was written, so we can return some portion of buffer_.
@@ -112,19 +114,19 @@ Status OstreamOutputStream::Close() {
     // Try to write the remaining bytes.
     output_->write(reinterpret_cast<char*>(buffer_.get()), count_in_buffer_);
     if (!output_->good()) {  // An I/O error occurred.
-      status_ = ToStatusF(
-          util::error::INTERNAL, "I/O error upon write: %d", errno);
+      status_ = ToStatusF(absl::StatusCode::kInternal,
+                          "I/O error upon write: %d", errno);
       return status_;
     }
   }
   output_->flush();
   if (!output_->good()) {
-    status_ = ToStatusF(
-        util::error::INTERNAL, "I/O error upon flushing: %d", errno);
+    status_ = ToStatusF(absl::StatusCode::kInternal,
+                        "I/O error upon flushing: %d", errno);
     return status_;
   }
-  status_ = Status(util::error::FAILED_PRECONDITION, "Stream closed");
-  return Status::OK;
+  status_ = Status(absl::StatusCode::kFailedPrecondition, "Stream closed");
+  return OkStatus();
 }
 
 int64_t OstreamOutputStream::Position() const {

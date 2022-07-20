@@ -16,6 +16,8 @@
  **************************************************************************
  */
 
+#ifdef __cplusplus
+
 #import "objc/TINKKeysetReader.h"
 
 #include "tink/keyset_reader.h"
@@ -30,3 +32,5 @@
 - (std::unique_ptr<crypto::tink::KeysetReader>)ccReader;
 
 @end
+
+#endif  // __cplusplus

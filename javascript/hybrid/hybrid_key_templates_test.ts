@@ -6,6 +6,7 @@
 
 import {AeadKeyTemplates} from '../aead/aead_key_templates';
 import {PbEciesAeadHkdfKeyFormat, PbEllipticCurveType, PbHashType, PbOutputPrefixType, PbPointFormat} from '../internal/proto';
+import {assertMessageEquals} from '../testing/internal/test_utils';
 
 import {EciesAeadHkdfPrivateKeyManager} from './ecies_aead_hkdf_private_key_manager';
 import {HybridKeyTemplates} from './hybrid_key_templates';
@@ -30,7 +31,7 @@ describe('hybrid key templates test', function() {
 
     // Test values in key format.
     const keyFormat =
-        PbEciesAeadHkdfKeyFormat.deserializeBinary(keyTemplate.getValue());
+        PbEciesAeadHkdfKeyFormat.deserializeBinary(keyTemplate.getValue_asU8());
     const params = keyFormat.getParams();
     expect(params!.getEcPointFormat()).toBe(expectedPointFormat);
 
@@ -41,7 +42,7 @@ describe('hybrid key templates test', function() {
 
     // Test DEM params.
     const demParams = params!.getDemParams();
-    expect(demParams!.getAeadDem()).toEqual(expectedAeadTemplate);
+    assertMessageEquals(demParams!.getAeadDem()!, expectedAeadTemplate);
 
     // Test that the template works with EciesAeadHkdfPrivateKeyManager.
     manager.getKeyFactory().newKey(keyTemplate.getValue_asU8());
@@ -67,7 +68,7 @@ describe('hybrid key templates test', function() {
 
     // Test values in key format.
     const keyFormat =
-        PbEciesAeadHkdfKeyFormat.deserializeBinary(keyTemplate.getValue());
+        PbEciesAeadHkdfKeyFormat.deserializeBinary(keyTemplate.getValue_asU8());
     const params = keyFormat.getParams();
     expect(params!.getEcPointFormat()).toBe(expectedPointFormat);
 
@@ -78,7 +79,7 @@ describe('hybrid key templates test', function() {
 
     // Test DEM params.
     const demParams = params!.getDemParams();
-    expect(demParams!.getAeadDem()).toEqual(expectedAeadTemplate);
+    assertMessageEquals(demParams!.getAeadDem()!, expectedAeadTemplate);
 
     // Test that the template works with EciesAeadHkdfPrivateKeyManager.
     manager.getKeyFactory().newKey(keyTemplate.getValue_asU8());

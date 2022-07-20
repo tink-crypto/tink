@@ -21,7 +21,6 @@ import static org.junit.Assert.assertThrows;
 
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.StreamingAead;
-import com.google.crypto.tink.daead.DeterministicAeadConfig;
 import com.google.crypto.tink.proto.KeyStatusType;
 import com.google.crypto.tink.proto.Keyset.Key;
 import com.google.crypto.tink.proto.OutputPrefixType;
@@ -29,7 +28,6 @@ import com.google.crypto.tink.subtle.Random;
 import com.google.crypto.tink.testing.StreamingTestUtil;
 import com.google.crypto.tink.testing.TestUtil;
 import java.io.IOException;
-import java.security.GeneralSecurityException;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -44,7 +42,6 @@ public class StreamingAeadFactoryTest {
   @BeforeClass
   public static void setUp() throws Exception {
     StreamingAeadConfig.register();
-    DeterministicAeadConfig.register(); // need this for testInvalidKeyMaterial.
   }
 
   @Test
@@ -141,32 +138,5 @@ public class StreamingAeadFactoryTest {
             IOException.class,
             () -> StreamingTestUtil.testEncryptionAndDecryption(anotherAead, primaryAead));
     assertExceptionContains(expected2, "No matching key");
-  }
-
-  @Test
-  public void testInvalidKeyMaterial() throws Exception {
-    Key valid =
-        TestUtil.createKey(
-            TestUtil.createAesGcmHkdfStreamingKeyData(
-                Random.randBytes(KDF_KEY_SIZE), AES_KEY_SIZE, 128),
-            42,
-            KeyStatusType.ENABLED,
-            OutputPrefixType.RAW);
-    Key invalid =
-        TestUtil.createKey(
-            TestUtil.createAesSivKeyData(64), 43, KeyStatusType.ENABLED, OutputPrefixType.TINK);
-
-    KeysetHandle keysetHandle = TestUtil.createKeysetHandle(TestUtil.createKeyset(valid, invalid));
-    GeneralSecurityException e =
-        assertThrows(
-            GeneralSecurityException.class, () -> StreamingAeadFactory.getPrimitive(keysetHandle));
-    assertExceptionContains(e, "com.google.crypto.tink.StreamingAead not supported");
-
-    // invalid as the primary key.
-    KeysetHandle keysetHandle2 = TestUtil.createKeysetHandle(TestUtil.createKeyset(invalid, valid));
-    GeneralSecurityException e2 =
-        assertThrows(
-            GeneralSecurityException.class, () -> StreamingAeadFactory.getPrimitive(keysetHandle2));
-    assertExceptionContains(e2, "com.google.crypto.tink.StreamingAead not supported");
   }
 }

@@ -28,7 +28,7 @@ describe('ecies aead hkdf hybrid encrypt test', function() {
 
   it('new instance, should work', async function() {
     const keyPair = await EllipticCurves.generateKeyPair('ECDH', 'P-256');
-    const publicKey = await EllipticCurves.exportCryptoKey(keyPair.publicKey);
+    const publicKey = await EllipticCurves.exportCryptoKey(keyPair.publicKey!);
     const hkdfHash = 'SHA-256';
     const pointFormat = EllipticCurves.PointFormatType.UNCOMPRESSED;
     const demHelper = new RegistryEciesAeadHkdfDemHelper(
@@ -51,9 +51,10 @@ describe('ecies aead hkdf hybrid encrypt test', function() {
                of [EllipticCurves.CurveType.P256, EllipticCurves.CurveType.P384,
                    EllipticCurves.CurveType.P521]) {
         const curveName = EllipticCurves.curveToString(curve);
-        const keyPair = await EllipticCurves.generateKeyPair('ECDH', curveName);
+        const keyPair =
+            await EllipticCurves.generateKeyPair('ECDH', curveName!);
         const publicKey =
-            await EllipticCurves.exportCryptoKey(keyPair.publicKey);
+            await EllipticCurves.exportCryptoKey(keyPair.publicKey!);
 
         const hybridEncrypt = await fromJsonWebKey(
             publicKey, hkdfHash, pointFormat, demHelper, hkdfSalt);

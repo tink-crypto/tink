@@ -24,7 +24,6 @@ const VERSION = 0;
  */
 class EcdsaPrivateKeyFactory implements KeyManager.PrivateKeyFactory {
   /**
-   * @override
    */
   async newKey(keyFormat: PbMessage|Uint8Array): Promise<PbEcdsaPrivateKey> {
     if (!keyFormat) {
@@ -41,15 +40,14 @@ class EcdsaPrivateKeyFactory implements KeyManager.PrivateKeyFactory {
     const curveName = EllipticCurves.curveToString(curveTypeSubtle);
     const keyPair = await EllipticCurves.generateKeyPair('ECDSA', curveName);
     const jsonPublicKey =
-        await EllipticCurves.exportCryptoKey(keyPair.publicKey);
+        await EllipticCurves.exportCryptoKey(keyPair.publicKey!);
     const jsonPrivateKey =
-        await EllipticCurves.exportCryptoKey(keyPair.privateKey);
+        await EllipticCurves.exportCryptoKey(keyPair.privateKey!);
     return EcdsaPrivateKeyFactory.jsonToProtoKey(
         jsonPrivateKey, jsonPublicKey, params);
   }
 
   /**
-   * @override
    */
   async newKeyData(serializedKeyFormat: Uint8Array): Promise<PbKeyData> {
     const key = await this.newKey(serializedKeyFormat);
@@ -61,7 +59,6 @@ class EcdsaPrivateKeyFactory implements KeyManager.PrivateKeyFactory {
     return keyData;
   }
 
-  /** @override */
   getPublicKeyData(serializedPrivateKey: Uint8Array) {
     const privateKey = deserializePrivateKey(serializedPrivateKey);
     const publicKey = privateKey.getPublicKey();
@@ -152,7 +149,6 @@ export class EcdsaPrivateKeyManager implements
       'type.googleapis.com/google.crypto.tink.EcdsaPrivateKey';
   keyFactory = new EcdsaPrivateKeyFactory();
 
-  /** @override */
   async getPrimitive(
       primitiveType: Constructor<PublicKeySign>, key: PbKeyData|PbMessage) {
     if (primitiveType !== this.getPrimitiveType()) {
@@ -177,27 +173,22 @@ export class EcdsaPrivateKeyManager implements
     return ecdsaSign.fromJsonWebKey(recepientPrivateKey, hash, encoding);
   }
 
-  /** @override */
   doesSupport(keyType: string) {
     return keyType === this.getKeyType();
   }
 
-  /** @override */
   getKeyType() {
     return EcdsaPrivateKeyManager.KEY_TYPE;
   }
 
-  /** @override */
   getPrimitiveType() {
     return EcdsaPrivateKeyManager.SUPPORTED_PRIMITIVE;
   }
 
-  /** @override */
   getVersion() {
     return VERSION;
   }
 
-  /** @override */
   getKeyFactory() {
     return this.keyFactory;
   }
@@ -236,7 +227,7 @@ function deserializePrivateKey(serializedPrivateKey: Uint8Array):
         'Input cannot be parsed as ' + EcdsaPrivateKeyManager.KEY_TYPE +
         ' key-proto.');
   }
-  if (!key.getPublicKey() || !key.getKeyValue()) {
+  if (!key.getPublicKey() || !key.getKeyValue_asU8()) {
     throw new SecurityException(
         'Input cannot be parsed as ' + EcdsaPrivateKeyManager.KEY_TYPE +
         ' key-proto.');

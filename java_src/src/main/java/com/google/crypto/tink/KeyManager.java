@@ -41,6 +41,10 @@ public interface KeyManager<P> {
    * Constructs an instance of P for the key given in {@code serializedKey}, which must be a
    * serialized key protocol buffer handled by this manager.
    *
+   * <p>For primitives of type {@code Mac}, {@code Aead}, {@code PublicKeySign}, {@code
+   * PublicKeyVerify}, {@code DeterministicAead}, {@code HybridEncrypt}, and {@code HybridDecrypt}
+   * this should be a primitive which <b>ignores</b> the output prefix and assumes "RAW".
+   *
    * @return the new constructed P
    * @throws GeneralSecurityException if the key given in {@code serializedKey} is corrupted or not
    *     supported
@@ -49,6 +53,10 @@ public interface KeyManager<P> {
 
   /**
    * Constructs an instance of P for the key given in {@code key}.
+   *
+   * <p>For primitives of type {@code Mac}, {@code Aead}, {@code PublicKeySign}, {@code
+   * PublicKeyVerify}, {@code DeterministicAead}, {@code HybridEncrypt}, and {@code HybridDecrypt}
+   * this should be a primitive which <b>ignores</b> the output prefix and assumes "RAW".
    *
    * @return the new constructed P
    * @throws GeneralSecurityException if the key given in {@code key} is corrupted or not supported

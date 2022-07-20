@@ -16,8 +16,12 @@
 
 #include "tink/subtle/prf/hkdf_streaming_prf.h"
 
+#include <string>
+#include <utility>
+
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include "absl/status/status.h"
 #include "tink/config/tink_fips.h"
 #include "tink/subtle/hkdf.h"
 #include "tink/subtle/random.h"
@@ -51,14 +55,14 @@ TEST(HkdfStreamingPrf, Basic) {
   }
   auto streaming_prf_or = HkdfStreamingPrf::New(
       SHA512, util::SecretDataFromStringView("key0123456"), "salt");
-  ASSERT_THAT(streaming_prf_or.status(), IsOk());
+  ASSERT_THAT(streaming_prf_or, IsOk());
 
   std::unique_ptr<InputStream> stream =
-      streaming_prf_or.ValueOrDie()->ComputePrf("input");
+      streaming_prf_or.value()->ComputePrf("input");
   auto result_or = ReadBytesFromStream(10, stream.get());
-  ASSERT_THAT(result_or.status(), IsOk());
+  ASSERT_THAT(result_or, IsOk());
 
-  EXPECT_THAT(result_or.ValueOrDie(), SizeIs(10));
+  EXPECT_THAT(result_or.value(), SizeIs(10));
 }
 
 TEST(HkdfStreamingPrf, DifferentInputsGiveDifferentvalues) {
@@ -67,19 +71,19 @@ TEST(HkdfStreamingPrf, DifferentInputsGiveDifferentvalues) {
   }
   auto streaming_prf_or = HkdfStreamingPrf::New(
       SHA512, util::SecretDataFromStringView("key0123456"), "salt");
-  ASSERT_THAT(streaming_prf_or.status(), IsOk());
+  ASSERT_THAT(streaming_prf_or, IsOk());
 
   std::unique_ptr<InputStream> stream =
-      streaming_prf_or.ValueOrDie()->ComputePrf("input");
+      streaming_prf_or.value()->ComputePrf("input");
   auto result_or = ReadBytesFromStream(10, stream.get());
-  ASSERT_THAT(result_or.status(), IsOk());
+  ASSERT_THAT(result_or, IsOk());
 
   // Different input.
   std::unique_ptr<InputStream> stream2 =
-      streaming_prf_or.ValueOrDie()->ComputePrf("input2");
+      streaming_prf_or.value()->ComputePrf("input2");
   auto result_or2 = ReadBytesFromStream(10, stream2.get());
-  ASSERT_THAT(result_or2.status(), IsOk());
-  EXPECT_THAT(result_or2.ValueOrDie(), Ne(result_or.ValueOrDie()));
+  ASSERT_THAT(result_or2, IsOk());
+  EXPECT_THAT(result_or2.value(), Ne(result_or.value()));
 }
 
 TEST(HkdfStreamingPrf, SameInputTwice) {
@@ -88,19 +92,19 @@ TEST(HkdfStreamingPrf, SameInputTwice) {
   }
   auto streaming_prf_or = HkdfStreamingPrf::New(
       SHA512, util::SecretDataFromStringView("key0123456"), "salt");
-  ASSERT_THAT(streaming_prf_or.status(), IsOk());
+  ASSERT_THAT(streaming_prf_or, IsOk());
 
   std::unique_ptr<InputStream> stream =
-      streaming_prf_or.ValueOrDie()->ComputePrf("input");
+      streaming_prf_or.value()->ComputePrf("input");
   auto result_or = ReadBytesFromStream(10, stream.get());
-  ASSERT_THAT(result_or.status(), IsOk());
+  ASSERT_THAT(result_or, IsOk());
 
   // Same input.
   std::unique_ptr<InputStream> stream2 =
-      streaming_prf_or.ValueOrDie()->ComputePrf("input");
+      streaming_prf_or.value()->ComputePrf("input");
   auto result_or2 = ReadBytesFromStream(10, stream2.get());
-  ASSERT_THAT(result_or2.status(), IsOk());
-  EXPECT_THAT(result_or2.ValueOrDie(), Eq(result_or.ValueOrDie()));
+  ASSERT_THAT(result_or2, IsOk());
+  EXPECT_THAT(result_or2.value(), Eq(result_or.value()));
 }
 
 // STREAM HANDLING TESTS =======================================================
@@ -115,26 +119,26 @@ TEST(HkdfStreamingPrf, BackupFullStream) {
   }
   auto streaming_prf_or = HkdfStreamingPrf::New(
       SHA256, util::SecretDataFromStringView("key0123456"), "salt");
-  ASSERT_THAT(streaming_prf_or.status(), IsOk());
+  ASSERT_THAT(streaming_prf_or, IsOk());
 
   std::unique_ptr<InputStream> stream =
-      streaming_prf_or.ValueOrDie()->ComputePrf("input");
+      streaming_prf_or.value()->ComputePrf("input");
 
   const void* data;
   crypto::tink::util::StatusOr<int> result = stream->Next(&data);
-  ASSERT_THAT(result.status(), IsOk());
-  int bytes_read = result.ValueOrDie();
+  ASSERT_THAT(result, IsOk());
+  int bytes_read = result.value();
   std::string first_read =
       std::string(static_cast<const char*>(data), bytes_read);
 
   stream->BackUp(bytes_read);
 
   result = stream->Next(&data);
-  ASSERT_THAT(result.status(), IsOk());
+  ASSERT_THAT(result, IsOk());
   // We typically read at least as many bytes the second time -- strictly
   // speaking this might not be satisfied by every InputStream, but it usually
   // will be.
-  ASSERT_THAT(result.ValueOrDie(), Ge(bytes_read));
+  ASSERT_THAT(result.value(), Ge(bytes_read));
 
   std::string second_read =
       std::string(static_cast<const char*>(data), bytes_read);
@@ -148,15 +152,15 @@ TEST(HkdfStreamingPrf, BackupHalf) {
   }
   auto streaming_prf_or = HkdfStreamingPrf::New(
       SHA256, util::SecretDataFromStringView("key0123456"), "salt");
-  ASSERT_THAT(streaming_prf_or.status(), IsOk());
+  ASSERT_THAT(streaming_prf_or, IsOk());
 
   std::unique_ptr<InputStream> stream =
-      streaming_prf_or.ValueOrDie()->ComputePrf("input");
+      streaming_prf_or.value()->ComputePrf("input");
 
   const void* data;
   crypto::tink::util::StatusOr<int> result = stream->Next(&data);
-  ASSERT_THAT(result.status(), IsOk());
-  int bytes_read = result.ValueOrDie();
+  ASSERT_THAT(result, IsOk());
+  int bytes_read = result.value();
   int backup_amount = bytes_read / 2;
   std::string first_read =
       std::string(static_cast<const char*>(data) + bytes_read - backup_amount,
@@ -165,11 +169,11 @@ TEST(HkdfStreamingPrf, BackupHalf) {
   stream->BackUp(backup_amount);
 
   result = stream->Next(&data);
-  ASSERT_THAT(result.status(), IsOk());
+  ASSERT_THAT(result, IsOk());
   // We typically read at least as many bytes the second time -- strictly
   // speaking this might not be satisfied by every InputStream, but it usually
   // will be.
-  ASSERT_THAT(result.ValueOrDie(), Ge(backup_amount));
+  ASSERT_THAT(result.value(), Ge(backup_amount));
 
   std::string second_read =
       std::string(static_cast<const char*>(data), backup_amount);
@@ -183,10 +187,10 @@ TEST(HkdfStreamingPrf, PositionOneRead) {
   }
   auto streaming_prf_or = HkdfStreamingPrf::New(
       SHA256, util::SecretDataFromStringView("key0123456"), "salt");
-  ASSERT_THAT(streaming_prf_or.status(), IsOk());
+  ASSERT_THAT(streaming_prf_or, IsOk());
 
   std::unique_ptr<InputStream> stream =
-      streaming_prf_or.ValueOrDie()->ComputePrf("input");
+      streaming_prf_or.value()->ComputePrf("input");
 
   EXPECT_THAT(stream->Position(), Eq(0));
 }
@@ -198,15 +202,15 @@ TEST(HkdfStreamingPrf, PositionSingleRead) {
   }
   auto streaming_prf_or = HkdfStreamingPrf::New(
       SHA256, util::SecretDataFromStringView("key0123456"), "salt");
-  ASSERT_THAT(streaming_prf_or.status(), IsOk());
+  ASSERT_THAT(streaming_prf_or, IsOk());
 
   std::unique_ptr<InputStream> stream =
-      streaming_prf_or.ValueOrDie()->ComputePrf("input");
+      streaming_prf_or.value()->ComputePrf("input");
 
   const void* data;
   crypto::tink::util::StatusOr<int> result = stream->Next(&data);
-  ASSERT_THAT(result.status(), IsOk());
-  EXPECT_THAT(stream->Position(), Eq(result.ValueOrDie()));
+  ASSERT_THAT(result, IsOk());
+  EXPECT_THAT(stream->Position(), Eq(result.value()));
 }
 
 // Tests that after Position is correct after a two reads.
@@ -216,20 +220,19 @@ TEST(HkdfStreamingPrf, PositionTwoReads) {
   }
   auto streaming_prf_or = HkdfStreamingPrf::New(
       SHA256, util::SecretDataFromStringView("key0123456"), "salt");
-  ASSERT_THAT(streaming_prf_or.status(), IsOk());
+  ASSERT_THAT(streaming_prf_or, IsOk());
 
   std::unique_ptr<InputStream> stream =
-      streaming_prf_or.ValueOrDie()->ComputePrf("input");
+      streaming_prf_or.value()->ComputePrf("input");
 
   const void* data;
   crypto::tink::util::StatusOr<int> result = stream->Next(&data);
-  ASSERT_THAT(result.status(), IsOk());
+  ASSERT_THAT(result, IsOk());
 
   crypto::tink::util::StatusOr<int> result2 = stream->Next(&data);
-  ASSERT_THAT(result.status(), IsOk());
+  ASSERT_THAT(result, IsOk());
 
-  EXPECT_THAT(stream->Position(),
-              Eq(result.ValueOrDie() + result2.ValueOrDie()));
+  EXPECT_THAT(stream->Position(), Eq(result.value() + result2.value()));
 }
 
 // Tests that we can backup the first read completely.
@@ -239,15 +242,15 @@ TEST(HkdfStreamingPrf, BackupSingleRead) {
   }
   auto streaming_prf_or = HkdfStreamingPrf::New(
       SHA256, util::SecretDataFromStringView("key0123456"), "salt");
-  ASSERT_THAT(streaming_prf_or.status(), IsOk());
+  ASSERT_THAT(streaming_prf_or, IsOk());
 
   std::unique_ptr<InputStream> stream =
-      streaming_prf_or.ValueOrDie()->ComputePrf("input");
+      streaming_prf_or.value()->ComputePrf("input");
 
   const void* data;
   crypto::tink::util::StatusOr<int> result = stream->Next(&data);
-  ASSERT_THAT(result.status(), IsOk());
-  stream->BackUp(result.ValueOrDie());
+  ASSERT_THAT(result, IsOk());
+  stream->BackUp(result.value());
   EXPECT_THAT(stream->Position(), Eq(0));
 }
 
@@ -258,21 +261,21 @@ TEST(HkdfStreamingPrf, BackupSecondRead) {
   }
   auto streaming_prf_or = HkdfStreamingPrf::New(
       SHA256, util::SecretDataFromStringView("key0123456"), "salt");
-  ASSERT_THAT(streaming_prf_or.status(), IsOk());
+  ASSERT_THAT(streaming_prf_or, IsOk());
 
   std::unique_ptr<InputStream> stream =
-      streaming_prf_or.ValueOrDie()->ComputePrf("input");
+      streaming_prf_or.value()->ComputePrf("input");
 
   const void* data;
   crypto::tink::util::StatusOr<int> result = stream->Next(&data);
-  ASSERT_THAT(result.status(), IsOk());
+  ASSERT_THAT(result, IsOk());
 
   crypto::tink::util::StatusOr<int> result2 = stream->Next(&data);
-  ASSERT_THAT(result.status(), IsOk());
+  ASSERT_THAT(result, IsOk());
 
-  stream->BackUp(result2.ValueOrDie());
+  stream->BackUp(result2.value());
 
-  EXPECT_THAT(stream->Position(), Eq(result.ValueOrDie()));
+  EXPECT_THAT(stream->Position(), Eq(result.value()));
 }
 
 // Tests that we can partially backup and position is correct.
@@ -282,19 +285,18 @@ TEST(HkdfStreamingPrf, PartialBackup) {
   }
   auto streaming_prf_or = HkdfStreamingPrf::New(
       SHA256, util::SecretDataFromStringView("key0123456"), "salt");
-  ASSERT_THAT(streaming_prf_or.status(), IsOk());
+  ASSERT_THAT(streaming_prf_or, IsOk());
 
   std::unique_ptr<InputStream> stream =
-      streaming_prf_or.ValueOrDie()->ComputePrf("input");
+      streaming_prf_or.value()->ComputePrf("input");
 
   const void* data;
   crypto::tink::util::StatusOr<int> result = stream->Next(&data);
-  ASSERT_THAT(result.status(), IsOk());
+  ASSERT_THAT(result, IsOk());
 
-  stream->BackUp(result.ValueOrDie() / 2);
+  stream->BackUp(result.value() / 2);
 
-  EXPECT_THAT(stream->Position(),
-              Eq(result.ValueOrDie() - result.ValueOrDie() / 2));
+  EXPECT_THAT(stream->Position(), Eq(result.value() - result.value() / 2));
 }
 
 // HKDF Specific tests =========================================================
@@ -305,16 +307,16 @@ TEST(HkdfStreamingPrf, ExhaustInput) {
   }
   auto streaming_prf_or = HkdfStreamingPrf::New(
       SHA512, util::SecretDataFromStringView("key0123456"), "salt");
-  ASSERT_THAT(streaming_prf_or.status(), IsOk());
+  ASSERT_THAT(streaming_prf_or, IsOk());
 
   const int max_output_length = 255 * (512 / 8);
   std::unique_ptr<InputStream> stream =
-      streaming_prf_or.ValueOrDie()->ComputePrf("input");
+      streaming_prf_or.value()->ComputePrf("input");
   auto result_or = ReadBytesFromStream(max_output_length, stream.get());
-  ASSERT_THAT(result_or.status(), IsOk());
-  EXPECT_THAT(result_or.ValueOrDie(), SizeIs(max_output_length));
+  ASSERT_THAT(result_or, IsOk());
+  EXPECT_THAT(result_or.value(), SizeIs(max_output_length));
   result_or = ReadBytesFromStream(50, stream.get());
-  ASSERT_THAT(result_or.status(), Not(IsOk()));
+  ASSERT_THAT(result_or, Not(IsOk()));
 }
 
 // TEST VECTORS AND COMPARISON =================================================
@@ -336,12 +338,12 @@ TEST(HkdfStreamingPrf, TestVector1) {
       "34007208d5b887185865");
 
   auto streaming_prf_or = HkdfStreamingPrf::New(hash, ikm, salt);
-  ASSERT_THAT(streaming_prf_or.status(), IsOk());
+  ASSERT_THAT(streaming_prf_or, IsOk());
   std::unique_ptr<InputStream> stream =
-      streaming_prf_or.ValueOrDie()->ComputePrf(info);
+      streaming_prf_or.value()->ComputePrf(info);
   auto result_or = ReadBytesFromStream(expected_result.size(), stream.get());
-  ASSERT_THAT(result_or.status(), IsOk());
-  EXPECT_THAT(result_or.ValueOrDie(), Eq(expected_result));
+  ASSERT_THAT(result_or, IsOk());
+  EXPECT_THAT(result_or.value(), Eq(expected_result));
 }
 
 crypto::tink::util::StatusOr<std::string> ComputeWithHkdfStreamingPrf(
@@ -352,7 +354,7 @@ crypto::tink::util::StatusOr<std::string> ComputeWithHkdfStreamingPrf(
     return streaming_prf_or.status();
   }
   std::unique_ptr<InputStream> stream =
-      streaming_prf_or.ValueOrDie()->ComputePrf(info);
+      streaming_prf_or.value()->ComputePrf(info);
   return ReadBytesFromStream(length, stream.get());
 }
 
@@ -390,8 +392,8 @@ TEST(HkdfStreamingPrf, TestVector2) {
 
   auto result_or = ComputeWithHkdfStreamingPrf(hash, std::move(ikm), salt, info,
                                                expected_result.size());
-  ASSERT_THAT(result_or.status(), IsOk());
-  EXPECT_THAT(result_or.ValueOrDie(), Eq(expected_result));
+  ASSERT_THAT(result_or, IsOk());
+  EXPECT_THAT(result_or.value(), Eq(expected_result));
 }
 
 TEST(HkdfStreamingPrf, TestVector3) {
@@ -411,8 +413,8 @@ TEST(HkdfStreamingPrf, TestVector3) {
 
   auto result_or = ComputeWithHkdfStreamingPrf(hash, std::move(ikm), salt, info,
                                                expected_result.size());
-  ASSERT_THAT(result_or.status(), IsOk());
-  EXPECT_THAT(result_or.ValueOrDie(), Eq(expected_result));
+  ASSERT_THAT(result_or, IsOk());
+  EXPECT_THAT(result_or.value(), Eq(expected_result));
 }
 
 TEST(HkdfStreamingPrf, TestVector4) {
@@ -432,8 +434,8 @@ TEST(HkdfStreamingPrf, TestVector4) {
 
   auto result_or = ComputeWithHkdfStreamingPrf(hash, std::move(ikm), salt, info,
                                                expected_result.size());
-  ASSERT_THAT(result_or.status(), IsOk());
-  EXPECT_THAT(result_or.ValueOrDie(), Eq(expected_result));
+  ASSERT_THAT(result_or, IsOk());
+  EXPECT_THAT(result_or.value(), Eq(expected_result));
 }
 
 TEST(HkdfStreamingPrf, TestVector5) {
@@ -470,8 +472,8 @@ TEST(HkdfStreamingPrf, TestVector5) {
 
   auto result_or = ComputeWithHkdfStreamingPrf(hash, std::move(ikm), salt, info,
                                                expected_result.size());
-  ASSERT_THAT(result_or.status(), IsOk());
-  EXPECT_THAT(result_or.ValueOrDie(), Eq(expected_result));
+  ASSERT_THAT(result_or, IsOk());
+  EXPECT_THAT(result_or.value(), Eq(expected_result));
 }
 
 TEST(HkdfStreamingPrf, TestVector6) {
@@ -491,8 +493,8 @@ TEST(HkdfStreamingPrf, TestVector6) {
 
   auto result_or = ComputeWithHkdfStreamingPrf(hash, std::move(ikm), salt, info,
                                                expected_result.size());
-  ASSERT_THAT(result_or.status(), IsOk());
-  EXPECT_THAT(result_or.ValueOrDie(), Eq(expected_result));
+  ASSERT_THAT(result_or, IsOk());
+  EXPECT_THAT(result_or.value(), Eq(expected_result));
 }
 
 TEST(HkdfStreamingPrf, TestVector7) {
@@ -513,8 +515,8 @@ TEST(HkdfStreamingPrf, TestVector7) {
 
   auto result_or = ComputeWithHkdfStreamingPrf(hash, std::move(ikm), salt, info,
                                                expected_result.size());
-  ASSERT_THAT(result_or.status(), IsOk());
-  EXPECT_THAT(result_or.ValueOrDie(), Eq(expected_result));
+  ASSERT_THAT(result_or, IsOk());
+  EXPECT_THAT(result_or.value(), Eq(expected_result));
 }
 
 TEST(HkdfStreamingPrf, TestAgainstHkdfUtil) {
@@ -528,14 +530,15 @@ TEST(HkdfStreamingPrf, TestAgainstHkdfUtil) {
 
   auto streaming_result_or = ComputeWithHkdfStreamingPrf(
       hash, ikm, salt, info, 456);
-  ASSERT_THAT(streaming_result_or.status(), IsOk());
+  ASSERT_THAT(streaming_result_or, IsOk());
 
   auto compute_hkdf_result_or =  Hkdf::ComputeHkdf(
       hash, ikm, salt, info, 456);
+  ASSERT_THAT(compute_hkdf_result_or, IsOk());
+
   util::SecretData compute_hkdf_result =
-      std::move(compute_hkdf_result_or).ValueOrDie();
-  ASSERT_THAT(compute_hkdf_result_or.status(), IsOk());
-  EXPECT_THAT(streaming_result_or.ValueOrDie(),
+      std::move(compute_hkdf_result_or).value();
+  EXPECT_THAT(streaming_result_or.value(),
               Eq(util::SecretDataAsStringView(compute_hkdf_result)));
 }
 
@@ -550,7 +553,7 @@ TEST(HkdfStreamingPrf, TestFipsOnly) {
   std::string info = Random::GetRandomBytes(345);
 
   EXPECT_THAT(HkdfStreamingPrf::New(hash, std::move(ikm), salt).status(),
-              StatusIs(util::error::INTERNAL));
+              StatusIs(absl::StatusCode::kInternal));
 }
 }  // namespace
 }  // namespace subtle

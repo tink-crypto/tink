@@ -1,4 +1,4 @@
-# Copyright 2019 Google LLC.
+# Copyright 2019 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,10 +14,6 @@
 
 """Tests for tink.python.tink.testing.helper."""
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-
 import os
 
 from absl.testing import absltest
@@ -27,16 +23,11 @@ from tink.testing import helper
 
 class HelperTest(absltest.TestCase):
 
-  def test_tink_root_path(self):
-    path = os.path.join(helper.tink_root_path(), 'testdata/credential.json')
+  def test_tink_py_testdata_path(self):
+    path = os.path.join(helper.tink_py_testdata_path(), 'gcp/credential.json')
     with open(path, mode='rt') as f:
       credential_json = f.read()
     self.assertNotEmpty(credential_json)
-
-  def test_template_from_testdata(self):
-    template = helper.template_from_testdata('AES128_GCM', 'aead')
-    self.assertEqual(template.type_url,
-                     'type.googleapis.com/google.crypto.tink.AesGcmKey')
 
   def test_fake_mac_success(self):
     mac = helper.FakeMac('Name')

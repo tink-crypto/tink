@@ -40,7 +40,7 @@ To get a quick overview of Tink design please take a look at
 presented at [Real World Crypto 2019](https://rwc.iacr.org/2019/).
 
 [devs_are_users_too_slides]: https://www.usenix.org/sites/default/files/conference/protected-files/hotsec15_slides_green.pdf
-[tink_talk_slides]: g3doc/Tink-a_cryptographic_library--RealWorldCrypto2019.pdf
+[tink_talk_slides]: docs/Tink-a_cryptographic_library--RealWorldCrypto2019.pdf
 [tink_talk_recording]: https://www.youtube.com/watch?v=pqev9r3rUJs&t=9665
 
 ## Current status
@@ -48,8 +48,8 @@ presented at [Real World Crypto 2019](https://rwc.iacr.org/2019/).
 [Java/Android](docs/JAVA-HOWTO.md), [C++](docs/CPP-HOWTO.md),
 [Obj-C](docs/OBJC-HOWTO.md), [Go](docs/GOLANG-HOWTO.md), and
 [Python](docs/PYTHON-HOWTO.md) are field tested and ready for production. The
-latest version is [1.6.0](https://github.com/google/tink/releases/tag/v1.6.0),
-released on 2021-05-17.
+latest version is [1.6.1](https://github.com/google/tink/releases/tag/v1.6.1),
+released on 2021-07-12.
 
 Javascript/Typescript is in an alpha state and should only be used for testing.
 
@@ -83,7 +83,7 @@ go get github.com/google/tink/go/...
 <dependency>
   <groupId>com.google.crypto.tink</groupId>
   <artifactId>tink</artifactId>
-  <version>1.6.0</version>
+  <version>1.6.1</version>
 </dependency>
 ```
 
@@ -91,7 +91,7 @@ go get github.com/google/tink/go/...
 
 ```
 dependencies {
-  implementation 'com.google.crypto.tink:tink-android:1.6.0'
+  implementation 'com.google.crypto.tink:tink-android:1.6.1'
 }
 ```
 
@@ -100,7 +100,7 @@ dependencies {
 ```sh
 cd /path/to/your/Xcode project/
 pod init
-pod 'Tink', '1.6.0'
+pod 'Tink', '1.6.1'
 pod install
 ```
 
@@ -116,7 +116,6 @@ pod install
 *   [Key Management](docs/KEY-MANAGEMENT.md)
 *   [Managing keys with Tinkey](docs/TINKEY.md)
 *   [Known Issues](docs/KNOWN-ISSUES.md)
-*   [Feature Roadmap](docs/ROADMAP.md)
 
 ## Community-driven ports
 
@@ -142,16 +141,21 @@ updates, you may want to subscribe to our
 
 Tink is maintained by (A-Z):
 
+-   Moreno Ambrosin
 -   Taymon Beal
 -   Daniel Bleichenbacher
+-   William Conner
 -   Thai Duong
 -   Thomas Holenstein
 -   Stefan Kölbl
 -   Charles Lee
+-   Cindy Lin
+-   Fernando Lobato Meeser
 -   Atul Luykx
 -   Rafael Misoczki
 -   Sophie Schmieg
 -   Laurent Simon
+-   Elizaveta Tretiakova
 -   Jürg Wullschleger
 
 Alumni:

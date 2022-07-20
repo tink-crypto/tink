@@ -16,6 +16,12 @@
 
 #include "tink/jwt/internal/jwt_public_key_verify_wrapper.h"
 
+#include <string>
+#include <utility>
+
+#include "absl/status/status.h"
+#include "tink/jwt/internal/jwt_format.h"
+#include "tink/jwt/internal/jwt_public_key_verify_internal.h"
 #include "tink/jwt/jwt_public_key_verify.h"
 #include "tink/primitive_set.h"
 #include "tink/util/status.h"
@@ -32,7 +38,7 @@ namespace {
 class JwtPublicKeyVerifySetWrapper : public JwtPublicKeyVerify {
  public:
   explicit JwtPublicKeyVerifySetWrapper(
-      std::unique_ptr<PrimitiveSet<JwtPublicKeyVerify>> jwt_verify_set)
+      std::unique_ptr<PrimitiveSet<JwtPublicKeyVerifyInternal>> jwt_verify_set)
       : jwt_verify_set_(std::move(jwt_verify_set)) {}
 
   crypto::tink::util::StatusOr<crypto::tink::VerifiedJwt> VerifyAndDecode(
@@ -42,43 +48,57 @@ class JwtPublicKeyVerifySetWrapper : public JwtPublicKeyVerify {
   ~JwtPublicKeyVerifySetWrapper() override {}
 
  private:
-  std::unique_ptr<PrimitiveSet<JwtPublicKeyVerify>> jwt_verify_set_;
+  std::unique_ptr<PrimitiveSet<JwtPublicKeyVerifyInternal>> jwt_verify_set_;
 };
 
-util::Status Validate(PrimitiveSet<JwtPublicKeyVerify>* jwt_verify_set) {
+util::Status Validate(
+    PrimitiveSet<JwtPublicKeyVerifyInternal>* jwt_verify_set) {
   if (jwt_verify_set == nullptr) {
-    return util::Status(util::error::INTERNAL,
+    return util::Status(absl::StatusCode::kInternal,
                         "jwt_verify_set must be non-NULL");
   }
   for (const auto* entry : jwt_verify_set->get_all()) {
     if ((entry->get_output_prefix_type() != OutputPrefixType::RAW) &&
         (entry->get_output_prefix_type() != OutputPrefixType::TINK)) {
-      return util::Status(util::error::INVALID_ARGUMENT,
+      return util::Status(absl::StatusCode::kInvalidArgument,
                           "all JWT keys must be either RAW or TINK");
     }
   }
-  return util::Status::OK;
+  return util::OkStatus();
 }
 
 util::StatusOr<crypto::tink::VerifiedJwt>
 JwtPublicKeyVerifySetWrapper::VerifyAndDecode(
     absl::string_view compact,
     const crypto::tink::JwtValidator& validator) const {
+  absl::optional<util::Status> interesting_status;
   for (const auto* entry : jwt_verify_set_->get_all()) {
-    JwtPublicKeyVerify& jwt_verify = entry->get_primitive();
-    auto verified_jwt_or = jwt_verify.VerifyAndDecode(compact, validator);
-    if (verified_jwt_or.ok()) {
-      return verified_jwt_or;
+    JwtPublicKeyVerifyInternal& jwt_verify = entry->get_primitive();
+    absl::optional<std::string> kid =
+        GetKid(entry->get_key_id(), entry->get_output_prefix_type());
+    util::StatusOr<VerifiedJwt> verified_jwt =
+        jwt_verify.VerifyAndDecodeWithKid(compact, validator, kid);
+    if (verified_jwt.ok()) {
+      return verified_jwt;
+    } else if (verified_jwt.status().code() !=
+               absl::StatusCode::kUnauthenticated) {
+      // errors that are not the result of a signature verification
+      interesting_status = verified_jwt.status();
     }
   }
-  return util::Status(util::error::INVALID_ARGUMENT, "verification failed");
+  if (interesting_status.has_value()) {
+    return *std::move(interesting_status);
+  }
+  return util::Status(absl::StatusCode::kInvalidArgument,
+                      "verification failed");
 }
 
 }  // namespace
 
 util::StatusOr<std::unique_ptr<JwtPublicKeyVerify>>
 JwtPublicKeyVerifyWrapper::Wrap(
-    std::unique_ptr<PrimitiveSet<JwtPublicKeyVerify>> jwt_verify_set) const {
+    std::unique_ptr<PrimitiveSet<JwtPublicKeyVerifyInternal>> jwt_verify_set)
+    const {
   util::Status status = Validate(jwt_verify_set.get());
   if (!status.ok()) return status;
   std::unique_ptr<JwtPublicKeyVerify> jwt_verify =

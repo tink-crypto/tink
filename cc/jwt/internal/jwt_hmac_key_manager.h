@@ -17,8 +17,10 @@
 #define TINK_JWT_INTERNAL_JWT_HMAC_KEY_MANAGER_H_
 
 #include <string>
+#include <utility>
 
 #include "absl/memory/memory.h"
+#include "absl/status/status.h"
 #include "absl/strings/str_cat.h"
 #include "tink/core/key_type_manager.h"
 #include "tink/jwt/internal/jwt_mac_impl.h"
@@ -67,20 +69,24 @@ class JwtHmacKeyManager
           algorithm = "HS512";
           break;
         default:
-          return util::Status(util::error::INVALID_ARGUMENT,
+          return util::Status(absl::StatusCode::kInvalidArgument,
                               "Unknown algorithm.");
       }
-      crypto::tink::util::StatusOr<std::unique_ptr<Mac>> mac_or =
+      crypto::tink::util::StatusOr<std::unique_ptr<Mac>> mac =
           subtle::HmacBoringSsl::New(
               util::Enums::ProtoToSubtle(hash_type), tag_size,
               util::SecretDataFromStringView(jwt_hmac_key.key_value()));
-      if (!mac_or.ok()) {
-        return mac_or.status();
+      if (!mac.ok()) {
+        return mac.status();
+      }
+      absl::optional<std::string> custom_kid = absl::nullopt;
+      if (jwt_hmac_key.has_custom_kid()) {
+        custom_kid = jwt_hmac_key.custom_kid().value();
       }
       std::unique_ptr<JwtMacInternal> jwt_mac =
-          absl::make_unique<jwt_internal::JwtMacImpl>(
-              std::move(mac_or.ValueOrDie()), algorithm);
-      return jwt_mac;
+          absl::make_unique<jwt_internal::JwtMacImpl>(*std::move(mac),
+                                                      algorithm, custom_kid);
+      return std::move(jwt_mac);
     }
   };
 
@@ -114,4 +120,4 @@ class JwtHmacKeyManager
 }  // namespace tink
 }  // namespace crypto
 
-#endif  // TINK_JWT_JWT_HMAC_KEY_MANAGER_H_
+#endif  // TINK_JWT_INTERNAL_JWT_HMAC_KEY_MANAGER_H_

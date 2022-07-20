@@ -20,7 +20,8 @@
 #include "absl/strings/str_cat.h"
 #include "openssl/bn.h"
 #include "openssl/rsa.h"
-#include "tink/subtle/subtle_util_boringssl.h"
+#include "tink/internal/bn_util.h"
+#include "tink/internal/ssl_unique_ptr.h"
 #include "tink/util/constants.h"
 #include "proto/common.pb.h"
 #include "proto/ecdsa.pb.h"
@@ -48,11 +49,11 @@ using google::crypto::tink::RsaSsaPssPrivateKey;
 
 std::unique_ptr<KeyTemplate> NewEcdsaKeyTemplate(
     HashType hash_type, EllipticCurveType curve_type,
-    EcdsaSignatureEncoding encoding) {
+    EcdsaSignatureEncoding encoding, OutputPrefixType output_prefix_type) {
   auto key_template = absl::make_unique<KeyTemplate>();
   key_template->set_type_url(
       absl::StrCat(kTypeGoogleapisCom, EcdsaPrivateKey().GetTypeName()));
-  key_template->set_output_prefix_type(OutputPrefixType::TINK);
+  key_template->set_output_prefix_type(output_prefix_type);
   EcdsaKeyFormat key_format;
   auto params = key_format.mutable_params();
   params->set_hash_type(hash_type);
@@ -60,6 +61,13 @@ std::unique_ptr<KeyTemplate> NewEcdsaKeyTemplate(
   params->set_encoding(encoding);
   key_format.SerializeToString(key_template->mutable_value());
   return key_template;
+}
+
+std::unique_ptr<KeyTemplate> NewEcdsaKeyTemplate(
+    HashType hash_type, EllipticCurveType curve_type,
+    EcdsaSignatureEncoding encoding) {
+  return NewEcdsaKeyTemplate(hash_type, curve_type, encoding,
+                             OutputPrefixType::TINK);
 }
 
 std::unique_ptr<KeyTemplate> NewRsaSsaPkcs1KeyTemplate(HashType hash_type,
@@ -73,11 +81,10 @@ std::unique_ptr<KeyTemplate> NewRsaSsaPkcs1KeyTemplate(HashType hash_type,
   auto params = key_format.mutable_params();
   params->set_hash_type(hash_type);
   key_format.set_modulus_size_in_bits(modulus_size_in_bits);
-  bssl::UniquePtr<BIGNUM> e(BN_new());
+  internal::SslUniquePtr<BIGNUM> e(BN_new());
   BN_set_word(e.get(), public_exponent);
   key_format.set_public_exponent(
-      subtle::SubtleUtilBoringSSL::bn2str(e.get(), BN_num_bytes(e.get()))
-          .ValueOrDie());
+      internal::BignumToString(e.get(), BN_num_bytes(e.get())).value());
   key_format.SerializeToString(key_template->mutable_value());
   return key_template;
 }
@@ -97,11 +104,10 @@ std::unique_ptr<KeyTemplate> NewRsaSsaPssKeyTemplate(HashType sig_hash,
   params->set_mgf1_hash(mgf1_hash);
   params->set_salt_length(salt_length);
   key_format.set_modulus_size_in_bits(modulus_size_in_bits);
-  bssl::UniquePtr<BIGNUM> e(BN_new());
+  internal::SslUniquePtr<BIGNUM> e(BN_new());
   BN_set_word(e.get(), public_exponent);
   key_format.set_public_exponent(
-      subtle::SubtleUtilBoringSSL::bn2str(e.get(), BN_num_bytes(e.get()))
-          .ValueOrDie());
+      internal::BignumToString(e.get(), BN_num_bytes(e.get())).value());
   key_format.SerializeToString(key_template->mutable_value());
   return key_template;
 }
@@ -117,8 +123,27 @@ const KeyTemplate& SignatureKeyTemplates::EcdsaP256() {
   return *key_template;
 }
 
+// Deprecated, use EcdsaP384Sha384() or EcdsaP384Sha512() instead.
 // static
 const KeyTemplate& SignatureKeyTemplates::EcdsaP384() {
+  static const KeyTemplate* key_template =
+      NewEcdsaKeyTemplate(HashType::SHA512, EllipticCurveType::NIST_P384,
+                          EcdsaSignatureEncoding::DER)
+          .release();
+  return *key_template;
+}
+
+// static
+const KeyTemplate& SignatureKeyTemplates::EcdsaP384Sha384() {
+  static const KeyTemplate* key_template =
+      NewEcdsaKeyTemplate(HashType::SHA384, EllipticCurveType::NIST_P384,
+                          EcdsaSignatureEncoding::DER)
+          .release();
+  return *key_template;
+}
+
+// static
+const KeyTemplate& SignatureKeyTemplates::EcdsaP384Sha512() {
   static const KeyTemplate* key_template =
       NewEcdsaKeyTemplate(HashType::SHA512, EllipticCurveType::NIST_P384,
                           EcdsaSignatureEncoding::DER)
@@ -131,6 +156,16 @@ const KeyTemplate& SignatureKeyTemplates::EcdsaP521() {
   static const KeyTemplate* key_template =
       NewEcdsaKeyTemplate(HashType::SHA512, EllipticCurveType::NIST_P521,
                           EcdsaSignatureEncoding::DER)
+          .release();
+  return *key_template;
+}
+
+// static
+const KeyTemplate& SignatureKeyTemplates::EcdsaP256Raw() {
+  static const KeyTemplate* key_template =
+      NewEcdsaKeyTemplate(HashType::SHA256, EllipticCurveType::NIST_P256,
+                          EcdsaSignatureEncoding::IEEE_P1363,
+                          OutputPrefixType::RAW)
           .release();
   return *key_template;
 }

@@ -19,7 +19,7 @@ package com.google.crypto.tink.testing;
 import static com.google.common.truth.Truth.assertThat;
 
 import com.google.crypto.tink.KeyTemplate;
-import com.google.crypto.tink.KeyTypeManager;
+import com.google.crypto.tink.internal.KeyTypeManager;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.MessageLite;
 

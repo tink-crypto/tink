@@ -16,11 +16,6 @@
 It reads the ciphertext from a given other file-like object, and decrypts it.
 """
 
-from __future__ import absolute_import
-from __future__ import division
-# Placeholder for import for type annotations
-from __future__ import print_function
-
 import io
 from typing import BinaryIO
 
@@ -49,7 +44,7 @@ class RawDecryptingStream(io.RawIOBase):
       close_ciphertext_source: Whether ciphertext_source should be closed when
         close() is called.
     """
-    super(RawDecryptingStream, self).__init__()
+    super().__init__()
     self._ciphertext_source = ciphertext_source
     self._close_ciphertext_source = close_ciphertext_source
     if not ciphertext_source.readable():
@@ -103,16 +98,8 @@ class RawDecryptingStream(io.RawIOBase):
         data = self._read_from_input_stream_adapter(size)
         if data:
           return data
-    except core.TinkError as e:
-      # We are checking if the exception was raised because of C++
-      # OUT_OF_RANGE status, which signals EOF.
-      wrapped_e = e.args[0]
-      if (isinstance(wrapped_e, tink_bindings.StatusNotOk) and
-          (wrapped_e.status.error_code() ==
-           tink_bindings.ErrorCode.OUT_OF_RANGE)):
-        return b''
-      else:
-        raise e
+    except tink_bindings.PythonTinkStreamFinishedException:
+      return b''
 
   def readinto(self, b: bytearray) -> int:
     """Read bytes into a pre-allocated bytes-like object b.
@@ -138,7 +125,7 @@ class RawDecryptingStream(io.RawIOBase):
       return
     if self._close_ciphertext_source:
       self._ciphertext_source.close()
-    super(RawDecryptingStream, self).close()
+    super().close()
 
   def readable(self) -> bool:
     """Return True if the stream can be read from."""

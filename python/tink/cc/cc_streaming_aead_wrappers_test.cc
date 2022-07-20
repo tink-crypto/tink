@@ -16,6 +16,8 @@
 
 #include "tink/cc/cc_streaming_aead_wrappers.h"
 
+#include <utility>
+
 #include "gtest/gtest.h"
 #include "tink/cc/test_util.h"
 

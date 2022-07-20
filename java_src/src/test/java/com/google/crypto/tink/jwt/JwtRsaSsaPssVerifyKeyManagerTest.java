@@ -18,7 +18,7 @@ package com.google.crypto.tink.jwt;
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertThrows;
 
-import com.google.crypto.tink.KeyTypeManager;
+import com.google.crypto.tink.internal.KeyTypeManager;
 import com.google.crypto.tink.proto.JwtRsaSsaPssAlgorithm;
 import com.google.crypto.tink.proto.JwtRsaSsaPssKeyFormat;
 import com.google.crypto.tink.proto.JwtRsaSsaPssPrivateKey;
@@ -28,32 +28,29 @@ import com.google.crypto.tink.testing.TestUtil;
 import com.google.protobuf.ByteString;
 import java.security.GeneralSecurityException;
 import java.security.spec.RSAKeyGenParameterSpec;
-import junitparams.JUnitParamsRunner;
-import junitparams.Parameters;
 import org.junit.Test;
+import org.junit.experimental.theories.DataPoints;
+import org.junit.experimental.theories.FromDataPoints;
+import org.junit.experimental.theories.Theories;
+import org.junit.experimental.theories.Theory;
 import org.junit.runner.RunWith;
 
 /** Unit tests for RsaSsaPssVerifyKeyManager. */
-@RunWith(JUnitParamsRunner.class)
+@RunWith(Theories.class)
 public final class JwtRsaSsaPssVerifyKeyManagerTest {
   private final JwtRsaSsaPssSignKeyManager signManager = new JwtRsaSsaPssSignKeyManager();
   private final KeyTypeManager.KeyFactory<JwtRsaSsaPssKeyFormat, JwtRsaSsaPssPrivateKey> factory =
       signManager.keyFactory();
   private final JwtRsaSsaPssVerifyKeyManager verifyManager = new JwtRsaSsaPssVerifyKeyManager();
 
-  private static Object[] parametersAlgoAndSize() {
-    return new Object[] {
-      new Object[] {JwtRsaSsaPssAlgorithm.PS256, 2048},
-      new Object[] {JwtRsaSsaPssAlgorithm.PS256, 3072},
-      new Object[] {JwtRsaSsaPssAlgorithm.PS256, 4096},
-      new Object[] {JwtRsaSsaPssAlgorithm.PS384, 2048},
-      new Object[] {JwtRsaSsaPssAlgorithm.PS384, 3072},
-      new Object[] {JwtRsaSsaPssAlgorithm.PS384, 4096},
-      new Object[] {JwtRsaSsaPssAlgorithm.PS512, 2048},
-      new Object[] {JwtRsaSsaPssAlgorithm.PS512, 3072},
-      new Object[] {JwtRsaSsaPssAlgorithm.PS512, 4096},
-    };
-  }
+  @DataPoints("algorithmParam")
+  public static final JwtRsaSsaPssAlgorithm[] ALGO_PARAMETER =
+      new JwtRsaSsaPssAlgorithm[] {
+        JwtRsaSsaPssAlgorithm.PS256, JwtRsaSsaPssAlgorithm.PS384, JwtRsaSsaPssAlgorithm.PS512
+      };
+
+  @DataPoints("size")
+  public static final int[] SIZE = new int[] {2048, 3072, 4096};
 
   @Test
   public void basics() throws Exception {
@@ -70,9 +67,12 @@ public final class JwtRsaSsaPssVerifyKeyManagerTest {
         () -> verifyManager.validateKey(JwtRsaSsaPssPublicKey.getDefaultInstance()));
   }
 
-  @Test
-  @Parameters(method = "parametersAlgoAndSize")
-  public void validateKey_ok(JwtRsaSsaPssAlgorithm algorithm, int keySize) throws Exception {
+  // Note: we use Theory as a parametrized test -- different from what the Theory framework intends.
+  @Theory
+  public void validateKey_ok(
+      @FromDataPoints("algorithmParam") JwtRsaSsaPssAlgorithm algorithm,
+      @FromDataPoints("size") int keySize)
+      throws Exception {
     if (TestUtil.isTsan()) {
       // factory.createKey is too slow in Tsan.
       return;

@@ -1,4 +1,4 @@
-# Copyright 2019 Google LLC.
+# Copyright 2019 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,9 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Tests for tink.python.tink.integration.aws_kms_aead."""
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
 
 import os
 
@@ -24,10 +21,10 @@ from tink import core
 from tink.integration import awskms
 from tink.testing import helper
 
-CREDENTIAL_PATH = os.path.join(helper.tink_root_path(),
-                               'testdata/aws_credentials_cc.txt')
-BAD_CREDENTIALS_PATH = os.path.join(helper.tink_root_path(),
-                                    'testdata/bad_aws_credentials_cc.txt')
+CREDENTIAL_PATH = os.path.join(helper.tink_py_testdata_path(),
+                               'aws/credentials.ini')
+BAD_CREDENTIALS_PATH = os.path.join(helper.tink_py_testdata_path(),
+                                    'aws/credentials_bad.ini')
 KEY_URI = 'aws-kms://arn:aws:kms:us-east-2:235739564943:key/3ee50705-5a82-4f5b-9753-05c4f473922f'
 BAD_KEY_URI = 'gcp-kms://projects/tink-test-infrastructure/locations/global/keyRings/unit-and-integration-testing/cryptoKeys/aead-key'
 

@@ -14,12 +14,13 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include <sstream>
-
 #include "tink/util/status.h"
 
-#include "absl/strings/str_cat.h"
+#include <sstream>
+#include <string>
+
 #include "absl/status/status.h"
+#include "absl/strings/str_cat.h"
 
 using ::std::ostream;
 
@@ -27,6 +28,7 @@ namespace crypto {
 namespace tink {
 namespace util {
 
+#ifndef TINK_USE_ABSL_STATUS
 namespace {
 
 
@@ -50,24 +52,32 @@ const Status& GetOk() {
 }  // namespace
 
 Status::Status(const ::absl::Status& status)
-    : code_(::crypto::tink::util::error::OK) {
+    : code_(absl::StatusCode::kOk) {
   if (status.ok()) return;
-  code_ = static_cast<::crypto::tink::util::error::Code>(status.code());
+  code_ = status.code();
   message_ = std::string(status.message());
 }
 
 Status::operator ::absl::Status() const {
   if (ok()) return ::absl::OkStatus();
-  return ::absl::Status(static_cast<absl::StatusCode>(code_), message_);
+  return ::absl::Status(code_, message_);
 }
 
-Status::Status() : code_(::crypto::tink::util::error::OK), message_("") {
+Status::Status() : code_(absl::StatusCode::kOk), message_("") {
 }
 
 Status::Status(::crypto::tink::util::error::Code error,
                const std::string& error_message)
-    : code_(error), message_(error_message) {
-  if (code_ == ::crypto::tink::util::error::OK) {
+    : code_(static_cast<absl::StatusCode>(error)), message_(error_message) {
+  if (code_ == absl::StatusCode::kOk) {
+    message_.clear();
+  }
+}
+
+Status::Status(absl::StatusCode code, absl::string_view error_message)
+    : code_(code),
+      message_(error_message) {
+  if (code_ == absl::StatusCode::kOk) {
     message_.clear();
   }
 }
@@ -83,7 +93,7 @@ const Status& Status::UNKNOWN = GetUnknown();
 const Status& Status::OK = GetOk();
 
 std::string Status::ToString() const {
-  if (code_ == ::crypto::tink::util::error::OK) {
+  if (code_ == absl::StatusCode::kOk) {
     return "OK";
   }
 
@@ -143,6 +153,8 @@ extern ostream& operator<<(ostream& os, const Status& other) {
   os << other.ToString();
   return os;
 }
+
+#endif  // TINK_USE_ABSL_STATUS
 
 
 }  // namespace util

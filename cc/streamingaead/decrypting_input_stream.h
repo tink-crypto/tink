@@ -18,13 +18,14 @@
 #define TINK_STREAMINGAEAD_DECRYPTING_INPUT_STREAM_H_
 
 #include <memory>
+#include <string>
 #include <vector>
 
 #include "tink/input_stream.h"
 #include "tink/primitive_set.h"
 #include "tink/streaming_aead.h"
-#include "tink/util/statusor.h"
 #include "tink/streamingaead/buffered_input_stream.h"
+#include "tink/util/statusor.h"
 
 namespace crypto {
 namespace tink {

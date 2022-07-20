@@ -16,18 +16,31 @@
 
 package com.google.crypto.tink;
 
+import com.google.crypto.tink.annotations.Alpha;
+import com.google.crypto.tink.internal.LegacyProtoKey;
+import com.google.crypto.tink.internal.MutableSerializationRegistry;
+import com.google.crypto.tink.internal.ProtoKeySerialization;
+import com.google.crypto.tink.monitoring.MonitoringAnnotations;
 import com.google.crypto.tink.proto.EncryptedKeyset;
 import com.google.crypto.tink.proto.KeyData;
 import com.google.crypto.tink.proto.KeyStatusType;
 import com.google.crypto.tink.proto.Keyset;
 import com.google.crypto.tink.proto.KeysetInfo;
+import com.google.crypto.tink.proto.OutputPrefixType;
 import com.google.crypto.tink.tinkkey.KeyAccess;
 import com.google.crypto.tink.tinkkey.KeyHandle;
+import com.google.crypto.tink.tinkkey.internal.InternalKeyHandle;
+import com.google.crypto.tink.tinkkey.internal.ProtoKey;
+import com.google.errorprone.annotations.Immutable;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.ExtensionRegistryLite;
 import com.google.protobuf.InvalidProtocolBufferException;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import javax.annotation.Nullable;
 
 /**
  * A KeysetHandle provides abstracted access to {@link Keyset}, to limit the exposure of actual
@@ -40,10 +53,124 @@ import java.security.GeneralSecurityException;
  * @since 1.0.0
  */
 public final class KeysetHandle {
+  /**
+   * Represents a single entry in a keyset.
+   *
+   * <p>An entry in a keyset consists of a key, its ID, and the {@link KeyStatus}. In addition,
+   * there is one key marked as a primary.
+   *
+   * <p>The ID should be considered unique (though currently Tink still accepts keysets with
+   * repeated IDs). The {@code KeyStatus} tells Tink whether the key should still be used or not.
+   * There should always be exactly one key which is marked as a primary, however, at the moment
+   * Tink still accepts keysets which have none. This will be changed in the future.
+   */
+  @Alpha
+  @Immutable
+  public static final class Entry {
+    private Entry(Key key, KeyStatus keyStatus, int id, boolean isPrimary) {
+      this.key = key;
+      this.keyStatus = keyStatus;
+      this.id = id;
+      this.isPrimary = isPrimary;
+    }
+
+    private final Key key;
+    private final KeyStatus keyStatus;
+    private final int id;
+    private final boolean isPrimary;
+    /**
+     * May return an internal class {@link com.google.crypto.tink.internal.LegacyProtoKey} in case
+     * there is no implementation of the corresponding key class yet.
+     */
+    public Key getKey() {
+      return key;
+    }
+
+    public KeyStatus getStatus() {
+      return keyStatus;
+    }
+
+    public int getId() {
+      return id;
+    }
+    /**
+     * Guaranteed to be true in exactly one entry.
+     *
+     * <p>Note: currently this may be false for all entries, since it is possible that keysets are
+     * parsed without a primary. In the future, such keysets will be rejected when the keyset is
+     * parsed.
+     */
+    public boolean isPrimary() {
+      return isPrimary;
+    }
+  }
+
+  private static KeyStatus parseStatus(KeyStatusType in) throws GeneralSecurityException {
+    switch (in) {
+      case ENABLED:
+        return KeyStatus.ENABLED;
+      case DISABLED:
+        return KeyStatus.DISABLED;
+      case DESTROYED:
+        return KeyStatus.DESTROYED;
+      default:
+        throw new GeneralSecurityException("Unknown key status");
+    }
+  }
+
+  private KeysetHandle.Entry entryByIndex(int i) {
+    Keyset.Key protoKey = keyset.getKey(i);
+    int id = protoKey.getKeyId();
+
+    @Nullable
+    Integer idRequirement = protoKey.getOutputPrefixType() == OutputPrefixType.RAW ? null : id;
+    ProtoKeySerialization protoKeySerialization;
+    try {
+      protoKeySerialization =
+          ProtoKeySerialization.create(
+              protoKey.getKeyData().getTypeUrl(),
+              protoKey.getKeyData().getValue(),
+              protoKey.getKeyData().getKeyMaterialType(),
+              protoKey.getOutputPrefixType(),
+              idRequirement);
+    } catch (GeneralSecurityException e) {
+      // Cannot happen -- this only happens if the idRequirement doesn't match OutputPrefixType
+      throw new IllegalStateException("Creating a protokey serialization failed", e);
+    }
+    Key key;
+    try {
+      key =
+          MutableSerializationRegistry.globalInstance()
+              .parseKey(protoKeySerialization, InsecureSecretKeyAccess.get());
+    } catch (GeneralSecurityException e) {
+      try {
+        key = new LegacyProtoKey(protoKeySerialization, InsecureSecretKeyAccess.get());
+      } catch (GeneralSecurityException e2) {
+        // Cannot happen -- this only throws if we have no access.
+        throw new IllegalStateException("Creating a LegacyProtoKey failed", e2);
+      }
+    }
+    KeyStatus status;
+    try {
+      status = parseStatus(protoKey.getStatus());
+    } catch (GeneralSecurityException e) {
+      // Possible if a status is wrongly set
+      throw new IllegalStateException("Parsing a status failed", e);
+    }
+    return new KeysetHandle.Entry(key, status, id, id == keyset.getPrimaryKeyId());
+  }
+
   private final Keyset keyset;
+  private final MonitoringAnnotations annotations;
 
   private KeysetHandle(Keyset keyset) {
     this.keyset = keyset;
+    this.annotations = MonitoringAnnotations.EMPTY;
+  }
+
+  private KeysetHandle(Keyset keyset, MonitoringAnnotations annotations) {
+    this.keyset = keyset;
+    this.annotations = annotations;
   }
 
   /**
@@ -55,9 +182,76 @@ public final class KeysetHandle {
     return new KeysetHandle(keyset);
   }
 
-  /** @return the actual keyset data. */
+  /**
+   * @return a new {@link KeysetHandle} from a {@code keyset} and {@code annotations}.
+   * @throws GeneralSecurityException if the keyset is null or empty.
+   */
+  static final KeysetHandle fromKeysetAndAnnotations(
+      Keyset keyset, MonitoringAnnotations annotations) throws GeneralSecurityException {
+    assertEnoughKeyMaterial(keyset);
+    return new KeysetHandle(keyset, annotations);
+  }
+
+  /**
+   * @return the actual keyset data.
+   */
   Keyset getKeyset() {
     return keyset;
+  }
+
+  /**
+   * Returns the unique entry where isPrimary() = true and getStatus() = ENABLED.
+   *
+   * <p>Note: currently this may throw IllegalStateException, since it is possible that keysets are
+   * parsed without a primary. In the future, such keysets will be rejected when the keyset is
+   * parsed.
+   */
+  public KeysetHandle.Entry getPrimary() {
+    for (int i = 0; i < keyset.getKeyCount(); ++i) {
+      if (keyset.getKey(i).getKeyId() == keyset.getPrimaryKeyId()) {
+        Entry result = entryByIndex(i);
+        if (result.getStatus() != KeyStatus.ENABLED) {
+          throw new IllegalStateException("Keyset has primary which isn't enabled");
+        }
+        return result;
+      }
+    }
+    throw new IllegalStateException("Keyset has no primary");
+  }
+
+  /** Returns the size of this keyset. */
+  public int size() {
+    return keyset.getKeyCount();
+  }
+
+  /**
+   * Returns the entry at index i. The order is preserved and depends on the order at which the
+   * entries were inserted when the KeysetHandle was built.
+   *
+   * <p>Currently, this may throw "IllegalStateException" in case the status entry of the Key in the
+   * keyset was wrongly set. In the future, Tink will throw at parsing time in this case.
+   *
+   * @throws IndexOutOfBoundsException if i < 0 or i >= size();
+   */
+  public KeysetHandle.Entry getAt(int i) {
+    if (i < 0 || i >= size()) {
+      throw new IndexOutOfBoundsException("Invalid index " + i + " for keyset of size " + size());
+    }
+    return entryByIndex(i);
+  }
+
+  /** Returns the keyset data as a list of {@link KeyHandle}s. */
+  public List<KeyHandle> getKeys() {
+    ArrayList<KeyHandle> result = new ArrayList<>();
+    for (Keyset.Key key : keyset.getKeyList()) {
+      KeyData keyData = key.getKeyData();
+      result.add(
+          new InternalKeyHandle(
+              new ProtoKey(keyData, KeyTemplate.fromProto(key.getOutputPrefixType())),
+              key.getStatus(),
+              key.getKeyId()));
+    }
+    return Collections.unmodifiableList(result);
   }
 
   /**
@@ -93,10 +287,16 @@ public final class KeysetHandle {
     return KeysetManager.withEmptyKeyset().rotate(keyTemplate.getProto()).getKeysetHandle();
   }
 
-  /** Creates a {@code KeysetHandle} that contains the single {@code KeyHandle} passed as input. */
+  /**
+   * Returns a {@code KeysetHandle} that contains the single {@code KeyHandle} passed as input.
+   *
+   * @deprecated Use {@code KeysetManager.withEmptyKeyset().add(keyHandle)
+   *     .setPrimary(keyHandle.getId()).getKeysetHandle()} instead.
+   */
+  @Deprecated
   public static final KeysetHandle createFromKey(KeyHandle keyHandle, KeyAccess access)
       throws GeneralSecurityException {
-    KeysetManager km = KeysetManager.withEmptyKeyset().add(keyHandle, access);
+    KeysetManager km = KeysetManager.withEmptyKeyset().add(keyHandle);
     km.setPrimary(km.getKeysetHandle().getKeysetInfo().getKeyInfo(0).getKeyId());
     return km.getKeysetHandle();
   }
@@ -113,9 +313,26 @@ public final class KeysetHandle {
    */
   public static final KeysetHandle read(KeysetReader reader, Aead masterKey)
       throws GeneralSecurityException, IOException {
+    return readWithAssociatedData(reader, masterKey, new byte[0]);
+  }
+
+  /**
+   * Tries to create a {@link KeysetHandle} from an encrypted keyset obtained via {@code reader},
+   * using the provided associated data.
+   *
+   * <p>Users that need to load cleartext keysets can use {@link CleartextKeysetHandle}.
+   *
+   * @return a new {@link KeysetHandle} from {@code encryptedKeysetProto} that was encrypted with
+   *     {@code masterKey}
+   * @throws GeneralSecurityException if cannot decrypt the keyset or it doesn't contain encrypted
+   *     key material
+   */
+  public static final KeysetHandle readWithAssociatedData(
+      KeysetReader reader, Aead masterKey, byte[] associatedData)
+      throws GeneralSecurityException, IOException {
     EncryptedKeyset encryptedKeyset = reader.readEncrypted();
     assertEnoughEncryptedKeyMaterial(encryptedKeyset);
-    return new KeysetHandle(decrypt(encryptedKeyset, masterKey));
+    return new KeysetHandle(decrypt(encryptedKeyset, masterKey, associatedData));
   }
 
   /**
@@ -126,15 +343,16 @@ public final class KeysetHandle {
    * load cleartext keysets can use {@link CleartextKeysetHandle}.
    *
    * @return a new {@link KeysetHandle} from {@code serialized} that is a serialized {@link Keyset}
-   * @throws GeneralSecurityException
+   * @throws GeneralSecurityException if the keyset is invalid
    */
+  @SuppressWarnings("UnusedException")
   public static final KeysetHandle readNoSecret(KeysetReader reader)
       throws GeneralSecurityException, IOException {
     try {
       Keyset keyset = reader.read();
       assertNoSecretKeyMaterial(keyset);
       return KeysetHandle.fromKeyset(keyset);
-    } catch (@SuppressWarnings("UnusedException") InvalidProtocolBufferException e) {
+    } catch (InvalidProtocolBufferException e) {
       // Do not propagate InvalidProtocolBufferException to guarantee no key material is leaked
       throw new GeneralSecurityException("invalid keyset");
     }
@@ -148,15 +366,16 @@ public final class KeysetHandle {
    * load cleartext keysets can use {@link CleartextKeysetHandle}.
    *
    * @return a new {@link KeysetHandle} from {@code serialized} that is a serialized {@link Keyset}
-   * @throws GeneralSecurityException
+   * @throws GeneralSecurityException if the keyset is invalid
    */
+  @SuppressWarnings("UnusedException")
   public static final KeysetHandle readNoSecret(final byte[] serialized)
       throws GeneralSecurityException {
     try {
       Keyset keyset = Keyset.parseFrom(serialized, ExtensionRegistryLite.getEmptyRegistry());
       assertNoSecretKeyMaterial(keyset);
       return KeysetHandle.fromKeyset(keyset);
-    } catch (@SuppressWarnings("UnusedException") InvalidProtocolBufferException e) {
+    } catch (InvalidProtocolBufferException e) {
       // Do not propagate InvalidProtocolBufferException to guarantee no key material is leaked
       throw new GeneralSecurityException("invalid keyset");
     }
@@ -165,7 +384,17 @@ public final class KeysetHandle {
   /** Serializes, encrypts with {@code masterKey} and writes the keyset to {@code outputStream}. */
   public void write(KeysetWriter keysetWriter, Aead masterKey)
       throws GeneralSecurityException, IOException {
-    EncryptedKeyset encryptedKeyset = encrypt(keyset, masterKey);
+    writeWithAssociatedData(keysetWriter, masterKey, new byte[0]);
+  }
+
+  /**
+   * Serializes, encrypts with {@code masterKey} and writes the keyset to {@code outputStream} using
+   * the provided associated data.
+   */
+  public void writeWithAssociatedData(
+      KeysetWriter keysetWriter, Aead masterKey, byte[] associatedData)
+      throws GeneralSecurityException, IOException {
+    EncryptedKeyset encryptedKeyset = encrypt(keyset, masterKey, associatedData);
     keysetWriter.write(encryptedKeyset);
     return;
   }
@@ -185,20 +414,20 @@ public final class KeysetHandle {
   }
 
   /** Encrypts the keyset with the {@link Aead} master key. */
-  private static EncryptedKeyset encrypt(Keyset keyset, Aead masterKey)
+  @SuppressWarnings("UnusedException")
+  private static EncryptedKeyset encrypt(Keyset keyset, Aead masterKey, byte[] associatedData)
       throws GeneralSecurityException {
-    byte[] encryptedKeyset =
-        masterKey.encrypt(keyset.toByteArray(), /* associatedData= */ new byte[0]);
+    byte[] encryptedKeyset = masterKey.encrypt(keyset.toByteArray(), associatedData);
     // Check if we can decrypt, to detect errors
     try {
       final Keyset keyset2 =
           Keyset.parseFrom(
-              masterKey.decrypt(encryptedKeyset, /* associatedData= */ new byte[0]),
+              masterKey.decrypt(encryptedKeyset, associatedData),
               ExtensionRegistryLite.getEmptyRegistry());
       if (!keyset2.equals(keyset)) {
         throw new GeneralSecurityException("cannot encrypt keyset");
       }
-    } catch (@SuppressWarnings("UnusedException") InvalidProtocolBufferException e) {
+    } catch (InvalidProtocolBufferException e) {
       // Do not propagate InvalidProtocolBufferException to guarantee no key material is leaked
       throw new GeneralSecurityException("invalid keyset, corrupted key material");
     }
@@ -209,19 +438,20 @@ public final class KeysetHandle {
   }
 
   /** Decrypts the encrypted keyset with the {@link Aead} master key. */
-  private static Keyset decrypt(EncryptedKeyset encryptedKeyset, Aead masterKey)
+  @SuppressWarnings("UnusedException")
+  private static Keyset decrypt(
+      EncryptedKeyset encryptedKeyset, Aead masterKey, byte[] associatedData)
       throws GeneralSecurityException {
     try {
       Keyset keyset =
           Keyset.parseFrom(
-              masterKey.decrypt(
-                  encryptedKeyset.getEncryptedKeyset().toByteArray(),
-                  /* associatedData= */ new byte[0]),
+              masterKey.decrypt(encryptedKeyset.getEncryptedKeyset().toByteArray(), associatedData),
               ExtensionRegistryLite.getEmptyRegistry());
       // check emptiness here too, in case the encrypted keys unwrapped to nothing?
       assertEnoughKeyMaterial(keyset);
       return keyset;
-    } catch (@SuppressWarnings("UnusedException") InvalidProtocolBufferException e) {
+    } catch (
+        InvalidProtocolBufferException e) {
       // Do not propagate InvalidProtocolBufferException to guarantee no key material is leaked
       throw new GeneralSecurityException("invalid keyset, corrupted key material");
     }
@@ -294,9 +524,9 @@ public final class KeysetHandle {
   /**
    * Validates that a keyset handle contains enough key material to build a keyset on.
    *
-   * @throws GeneralSecurityException
+   * @throws GeneralSecurityException if the validation fails
    */
-  public static void assertEnoughKeyMaterial(Keyset keyset) throws GeneralSecurityException {
+  private static void assertEnoughKeyMaterial(Keyset keyset) throws GeneralSecurityException {
     if (keyset == null || keyset.getKeyCount() <= 0) {
       throw new GeneralSecurityException("empty keyset");
     }
@@ -305,9 +535,9 @@ public final class KeysetHandle {
   /**
    * Validates that an encrypted keyset contains enough key material to build a keyset on.
    *
-   * @throws GeneralSecurityException
+   * @throws GeneralSecurityException if the validation fails
    */
-  public static void assertEnoughEncryptedKeyMaterial(EncryptedKeyset keyset)
+  private static void assertEnoughEncryptedKeyMaterial(EncryptedKeyset keyset)
       throws GeneralSecurityException {
     if (keyset == null || keyset.getEncryptedKeyset().size() == 0) {
       throw new GeneralSecurityException("empty keyset");
@@ -318,18 +548,19 @@ public final class KeysetHandle {
   private <B, P> P getPrimitiveWithKnownInputPrimitive(
       Class<P> classObject, Class<B> inputPrimitiveClassObject) throws GeneralSecurityException {
     Util.validateKeyset(keyset);
-    PrimitiveSet<B> primitives = PrimitiveSet.newPrimitiveSet(inputPrimitiveClassObject);
+    PrimitiveSet.Builder<B> builder = PrimitiveSet.newBuilder(inputPrimitiveClassObject);
+    builder.setAnnotations(annotations);
     for (Keyset.Key key : keyset.getKeyList()) {
       if (key.getStatus() == KeyStatusType.ENABLED) {
         B primitive = Registry.getPrimitive(key.getKeyData(), inputPrimitiveClassObject);
-        PrimitiveSet.Entry<B> entry = primitives.addPrimitive(primitive, key);
         if (key.getKeyId() == keyset.getPrimaryKeyId()) {
-          primitives.setPrimary(entry);
+          builder.addPrimaryPrimitive(primitive, key);
+        } else {
+          builder.addPrimitive(primitive, key);
         }
       }
     }
-
-    return Registry.wrap(primitives, classObject);
+    return Registry.wrap(builder.build(), classObject);
   }
 
   /**
@@ -339,8 +570,7 @@ public final class KeysetHandle {
   public <P> P getPrimitive(Class<P> targetClassObject) throws GeneralSecurityException {
     Class<?> inputPrimitiveClassObject = Registry.getInputPrimitive(targetClassObject);
     if (inputPrimitiveClassObject == null) {
-      throw new GeneralSecurityException(
-          "No wrapper found for " + targetClassObject.getName());
+      throw new GeneralSecurityException("No wrapper found for " + targetClassObject.getName());
     }
     return getPrimitiveWithKnownInputPrimitive(targetClassObject, inputPrimitiveClassObject);
   }
@@ -353,8 +583,10 @@ public final class KeysetHandle {
     int primaryKeyId = keyset.getPrimaryKeyId();
     for (Keyset.Key key : keyset.getKeyList()) {
       if (key.getKeyId() == primaryKeyId) {
-        return KeyHandle.createFromKey(
-            key.getKeyData(), KeyTemplate.fromProto(key.getOutputPrefixType()));
+        return new InternalKeyHandle(
+            new ProtoKey(key.getKeyData(), KeyTemplate.fromProto(key.getOutputPrefixType())),
+            key.getStatus(),
+            key.getKeyId());
       }
     }
     throw new GeneralSecurityException("No primary key found in keyset.");

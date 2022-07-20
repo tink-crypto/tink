@@ -13,6 +13,7 @@ cc_library(
     deps = [
         "//:config",
         "//:key_manager",
+        "//:registry",
         "//daead:deterministic_aead_config",
         "//hybrid:hybrid_config",
         "//prf:prf_config",
@@ -29,14 +30,34 @@ cc_library(
     srcs = ["config_util.cc"],
     hdrs = ["config_util.h"],
     include_prefix = "tink/config",
-    deps = [
-        "//proto:config_cc_proto",
-    ],
+    deps = ["//proto:config_cc_proto"],
 )
 
 bool_flag(
     name = "use_only_fips",
     build_setting_default = False,
+)
+
+bool_flag(
+    name = "tink_use_absl_status",
+    build_setting_default = False,
+)
+
+config_setting(
+    name = "absl_status_enabled",
+    flag_values = {"//config:tink_use_absl_status": "True"},
+    visibility = ["//visibility:public"],
+)
+
+bool_flag(
+    name = "tink_use_absl_statusor",
+    build_setting_default = False,
+)
+
+config_setting(
+    name = "absl_statusor_enabled",
+    flag_values = {"//config:tink_use_absl_statusor": "True"},
+    visibility = ["//visibility:public"],
 )
 
 cc_library(
@@ -46,10 +67,11 @@ cc_library(
     include_prefix = "tink/config",
     visibility = ["//visibility:public"],
     deps = [
-        "@com_google_absl//absl/base:core_headers",
-        "@boringssl//:crypto",
-        "//:registry",
+        "//internal:fips_utils",
+        "//internal:registry_impl",
         "//util:status",
+        "@boringssl//:crypto",
+        "@com_google_absl//absl/base:core_headers",
     ],
 )
 
@@ -59,7 +81,6 @@ cc_test(
     name = "tink_config_test",
     size = "small",
     srcs = ["tink_config_test.cc"],
-    copts = ["-Iexternal/gtest/include"],
     deps = [
         ":tink_config",
         "//:aead",
@@ -70,9 +91,11 @@ cc_test(
         "//:mac",
         "//:registry",
         "//:streaming_aead",
+        "//:tink_cc",
         "//aead:aes_gcm_key_manager",
         "//util:status",
         "//util:test_matchers",
+        "@com_google_absl//absl/status",
         "@com_google_googletest//:gtest_main",
     ],
 )
@@ -91,11 +114,8 @@ cc_test(
     name = "tink_fips_test",
     size = "small",
     srcs = ["tink_fips_test.cc"],
-    tags = [
-        "fips",
-    ],
+    tags = ["fips"],
     deps = [
-        ":tink_config",
         ":tink_fips",
         "//:registry",
         "//aead:aead_config",
@@ -103,6 +123,7 @@ cc_test(
         "//util:status",
         "//util:test_matchers",
         "@boringssl//:crypto",
+        "@com_google_absl//absl/status",
         "@com_google_googletest//:gtest_main",
     ],
 )

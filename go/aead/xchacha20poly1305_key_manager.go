@@ -20,7 +20,7 @@ import (
 	"fmt"
 
 	"golang.org/x/crypto/chacha20poly1305"
-	"github.com/golang/protobuf/proto"
+	"google.golang.org/protobuf/proto"
 	"github.com/google/tink/go/aead/subtle"
 	"github.com/google/tink/go/core/registry"
 	"github.com/google/tink/go/keyset"
@@ -44,11 +44,6 @@ type xChaCha20Poly1305KeyManager struct{}
 
 // Assert that xChaCha20Poly1305KeyManager implements the KeyManager interface.
 var _ registry.KeyManager = (*xChaCha20Poly1305KeyManager)(nil)
-
-// newXChaCha20Poly1305KeyManager creates a new xChaCha20Poly1305KeyManager.
-func newXChaCha20Poly1305KeyManager() *xChaCha20Poly1305KeyManager {
-	return new(xChaCha20Poly1305KeyManager)
-}
 
 // Primitive creates an XChaCha20Poly1305 subtle for the given serialized XChaCha20Poly1305Key proto.
 func (km *xChaCha20Poly1305KeyManager) Primitive(serializedKey []byte) (interface{}, error) {

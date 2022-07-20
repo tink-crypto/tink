@@ -40,7 +40,6 @@ import java.security.GeneralSecurityException;
 public final class PublicKeySignFactory {
   /**
    * @return a PublicKeySign primitive from a {@code keysetHandle}.
-   * @throws GeneralSecurityException
    * @deprecated Use {@code keysetHandle.GetPrimitive(PublicKeySign.class)} after registering the
    *     {@code PublicKeySignWrapper} instead.
    */
@@ -50,4 +49,6 @@ public final class PublicKeySignFactory {
     Registry.registerPrimitiveWrapper(new PublicKeySignWrapper());
     return keysetHandle.getPrimitive(PublicKeySign.class);
   }
+
+  private PublicKeySignFactory() {}
 }

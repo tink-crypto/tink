@@ -20,6 +20,7 @@
 #import "objc/core/TINKKeyTemplate_Internal.h"
 #import "objc/util/TINKErrors.h"
 
+#include "absl/status/status.h"
 #include "tink/util/status.h"
 #include "proto/tink.pb.h"
 
@@ -49,7 +50,7 @@
            @"Only instantiate from derived classes!");
   if (error) {
     *error =
-        TINKError(crypto::tink::util::error::INTERNAL, @"Only instantiate from derived classes!");
+        TINKError(absl::StatusCode::kInternal, @"Only instantiate from derived classes!");
   }
   return nil;
 }

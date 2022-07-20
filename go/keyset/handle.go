@@ -20,7 +20,8 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/golang/protobuf/proto"
+	"google.golang.org/protobuf/encoding/prototext"
+	"google.golang.org/protobuf/proto"
 
 	"github.com/google/tink/go/core/primitiveset"
 	"github.com/google/tink/go/core/registry"
@@ -67,11 +68,16 @@ func NewHandleWithNoSecrets(ks *tinkpb.Keyset) (*Handle, error) {
 
 // Read tries to create a Handle from an encrypted keyset obtained via reader.
 func Read(reader Reader, masterKey tink.AEAD) (*Handle, error) {
+	return ReadWithAssociatedData(reader, masterKey, []byte{})
+}
+
+// ReadWithAssociatedData tries to create a Handle from an encrypted keyset obtained via reader using the provided associated data.
+func ReadWithAssociatedData(reader Reader, masterKey tink.AEAD, associatedData []byte) (*Handle, error) {
 	encryptedKeyset, err := reader.ReadEncrypted()
 	if err != nil {
 		return nil, err
 	}
-	ks, err := decrypt(encryptedKeyset, masterKey)
+	ks, err := decrypt(encryptedKeyset, masterKey, associatedData)
 	if err != nil {
 		return nil, err
 	}
@@ -118,7 +124,11 @@ func (h *Handle) Public() (*Handle, error) {
 // String returns a string representation of the managed keyset.
 // The result does not contain any sensitive key material.
 func (h *Handle) String() string {
-	return proto.CompactTextString(getKeysetInfo(h.ks))
+	c, err := prototext.MarshalOptions{}.Marshal(getKeysetInfo(h.ks))
+	if err != nil {
+		return ""
+	}
+	return string(c)
 }
 
 // KeysetInfo returns KeysetInfo representation of the managed keyset.
@@ -129,7 +139,12 @@ func (h *Handle) KeysetInfo() *tinkpb.KeysetInfo {
 
 // Write encrypts and writes the enclosing keyset.
 func (h *Handle) Write(writer Writer, masterKey tink.AEAD) error {
-	encrypted, err := encrypt(h.ks, masterKey)
+	return h.WriteWithAssociatedData(writer, masterKey, []byte{})
+}
+
+// WriteWithAssociatedData encrypts and writes the enclosing keyset using the provided associated data.
+func (h *Handle) WriteWithAssociatedData(writer Writer, masterKey tink.AEAD, associatedData []byte) error {
+	encrypted, err := encrypt(h.ks, masterKey, associatedData)
 	if err != nil {
 		return err
 	}
@@ -234,11 +249,11 @@ func publicKeyData(privKeyData *tinkpb.KeyData) (*tinkpb.KeyData, error) {
 	return pkm.PublicKeyData(privKeyData.Value)
 }
 
-func decrypt(encryptedKeyset *tinkpb.EncryptedKeyset, masterKey tink.AEAD) (*tinkpb.Keyset, error) {
+func decrypt(encryptedKeyset *tinkpb.EncryptedKeyset, masterKey tink.AEAD, associatedData []byte) (*tinkpb.Keyset, error) {
 	if encryptedKeyset == nil || masterKey == nil {
 		return nil, fmt.Errorf("keyset.Handle: invalid encrypted keyset")
 	}
-	decrypted, err := masterKey.Decrypt(encryptedKeyset.EncryptedKeyset, []byte{})
+	decrypted, err := masterKey.Decrypt(encryptedKeyset.EncryptedKeyset, associatedData)
 	if err != nil {
 		return nil, fmt.Errorf("keyset.Handle: decryption failed: %s", err)
 	}
@@ -249,12 +264,12 @@ func decrypt(encryptedKeyset *tinkpb.EncryptedKeyset, masterKey tink.AEAD) (*tin
 	return keyset, nil
 }
 
-func encrypt(keyset *tinkpb.Keyset, masterKey tink.AEAD) (*tinkpb.EncryptedKeyset, error) {
+func encrypt(keyset *tinkpb.Keyset, masterKey tink.AEAD, associatedData []byte) (*tinkpb.EncryptedKeyset, error) {
 	serializedKeyset, err := proto.Marshal(keyset)
 	if err != nil {
 		return nil, errInvalidKeyset
 	}
-	encrypted, err := masterKey.Encrypt(serializedKeyset, []byte{})
+	encrypted, err := masterKey.Encrypt(serializedKeyset, associatedData)
 	if err != nil {
 		return nil, fmt.Errorf("keyset.Handle: encrypted failed: %s", err)
 	}

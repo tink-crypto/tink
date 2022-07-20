@@ -54,9 +54,9 @@ export class EciesHkdfKemSender {
     const ephemeralKeyPair =
         await EllipticCurves.generateKeyPair('ECDH', namedCurve);
     const sharedSecret = await EllipticCurves.computeEcdhSharedSecret(
-        ephemeralKeyPair.privateKey, this.publicKey);
+        ephemeralKeyPair.privateKey!, this.publicKey);
     const jwk =
-        await EllipticCurves.exportCryptoKey(ephemeralKeyPair.publicKey);
+        await EllipticCurves.exportCryptoKey(ephemeralKeyPair.publicKey!);
     const {crv} = jwk;
     if (!crv) {
       throw new SecurityException('Curve has to be defined.');

@@ -16,6 +16,9 @@
 #ifndef TINK_INTERNAL_KEYSET_WRAPPER_IMPL_H_
 #define TINK_INTERNAL_KEYSET_WRAPPER_IMPL_H_
 
+#include <string>
+
+#include "absl/container/flat_hash_map.h"
 #include "tink/internal/key_info.h"
 #include "tink/internal/keyset_wrapper.h"
 #include "tink/primitive_set.h"
@@ -26,6 +29,7 @@
 
 namespace crypto {
 namespace tink {
+namespace internal {
 
 template <typename P, typename Q>
 class KeysetWrapperImpl : public KeysetWrapper<Q> {
@@ -41,22 +45,23 @@ class KeysetWrapperImpl : public KeysetWrapper<Q> {
         transforming_wrapper_(*transforming_wrapper) {}
 
   crypto::tink::util::StatusOr<std::unique_ptr<Q>> Wrap(
-      const google::crypto::tink::Keyset& keyset) const override {
+      const google::crypto::tink::Keyset& keyset,
+      const absl::flat_hash_map<std::string, std::string>& annotations)
+      const override {
     crypto::tink::util::Status status = ValidateKeyset(keyset);
     if (!status.ok()) return status;
-    std::unique_ptr<PrimitiveSet<P>> primitives =
-        absl::make_unique<PrimitiveSet<P>>();
+    auto primitives = absl::make_unique<PrimitiveSet<P>>(annotations);
     for (const google::crypto::tink::Keyset::Key& key : keyset.key()) {
       if (key.status() != google::crypto::tink::KeyStatusType::ENABLED) {
         continue;
       }
       auto primitive = primitive_getter_(key.key_data());
       if (!primitive.ok()) return primitive.status();
-      auto entry = primitives->AddPrimitive(std::move(primitive.ValueOrDie()),
+      auto entry = primitives->AddPrimitive(std::move(primitive.value()),
                                             KeyInfoFromKey(key));
       if (!entry.ok()) return entry.status();
       if (key.key_id() == keyset.primary_key_id()) {
-        auto primary_result = primitives->set_primary(entry.ValueOrDie());
+        auto primary_result = primitives->set_primary(entry.value());
         if (!primary_result.ok()) return primary_result;
       }
     }
@@ -70,6 +75,7 @@ class KeysetWrapperImpl : public KeysetWrapper<Q> {
   const PrimitiveWrapper<P, Q>& transforming_wrapper_;
 };
 
+}  // namespace internal
 }  // namespace tink
 }  // namespace crypto
 

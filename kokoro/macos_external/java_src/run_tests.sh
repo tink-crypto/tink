@@ -14,17 +14,26 @@
 # limitations under the License.
 ################################################################################
 
-
 set -euo pipefail
-cd ${KOKORO_ARTIFACTS_DIR}/git/tink
-
-./kokoro/copy_credentials.sh
 
 export XCODE_VERSION=11.3
 export DEVELOPER_DIR="/Applications/Xcode_${XCODE_VERSION}.app/Contents/Developer"
 export ANDROID_HOME="/Users/kbuilder/Library/Android/sdk"
+export COURSIER_OPTS="-Djava.net.preferIPv6Addresses=true"
+
+declare -a TEST_FLAGS
+TEST_FLAGS=(
+  --strategy=TestRunner=standalone
+  --test_output=errors
+  --jvmopt="-Djava.net.preferIPv6Addresses=true"
+)
+readonly TEST_FLAGS
+
+cd ${KOKORO_ARTIFACTS_DIR}/git/tink
+./kokoro/testutils/copy_credentials.sh "java_src/testdata"
+./kokoro/testutils/update_android_sdk.sh
 
 cd java_src
 use_bazel.sh $(cat .bazelversion)
 bazel build ...
-bazel test --test_output=errors -- ...
+bazel test "${TEST_FLAGS[@]}" -- ...

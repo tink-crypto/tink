@@ -68,14 +68,12 @@ py_library(
     name = "_raw_streaming_aead",
     srcs = ["_raw_streaming_aead.py"],
     srcs_version = "PY3",
-    deps = [requirement("six")],
 )
 
 py_library(
     name = "_streaming_aead",
     srcs = ["_streaming_aead.py"],
     srcs_version = "PY3",
-    deps = [requirement("six")],
 )
 
 py_library(
@@ -87,7 +85,6 @@ py_library(
         ":_encrypting_stream",
         ":_raw_streaming_aead",
         ":_streaming_aead_wrapper",
-        requirement("six"),
         "//tink/cc/pybind:tink_bindings",
         "//tink/core",
     ],
@@ -129,9 +126,6 @@ py_test(
     name = "_streaming_aead_key_templates_test",
     timeout = "short",
     srcs = ["_streaming_aead_key_templates_test.py"],
-    data = [
-        "@tink_base//testdata/templates",
-    ],
     srcs_version = "PY3",
     deps = [
         ":streaming_aead",
@@ -140,7 +134,6 @@ py_test(
         "//tink/proto:aes_gcm_hkdf_streaming_py_pb2",
         "//tink/proto:common_py_pb2",
         "//tink/proto:tink_py_pb2",
-        "//tink/testing:helper",
     ],
 )
 
@@ -196,7 +189,6 @@ py_test(
     deps = [
         ":_rewindable_input_stream",
         requirement("absl-py"),
-        requirement("six"),
         "//tink/testing:bytes_io",
     ],
 )
@@ -217,6 +209,17 @@ py_test(
     deps = [
         ":_file_object_adapter",
         requirement("absl-py"),
-        requirement("six"),
+    ],
+)
+
+py_test(
+    name = "_pybind11_python_file_object_adapter_test",
+    timeout = "short",
+    srcs = ["_pybind11_python_file_object_adapter_test.py"],
+    srcs_version = "PY3",
+    deps = [
+        ":streaming_aead",
+        requirement("absl-py"),
+        "//tink:tink_python",
     ],
 )

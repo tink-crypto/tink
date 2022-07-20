@@ -23,12 +23,15 @@ import static org.junit.Assume.assumeFalse;
 
 import com.google.crypto.tink.CleartextKeysetHandle;
 import com.google.crypto.tink.KeyTemplate;
-import com.google.crypto.tink.KeyTypeManager;
+import com.google.crypto.tink.KeyTemplates;
 import com.google.crypto.tink.KeysetHandle;
+import com.google.crypto.tink.internal.KeyTypeManager;
 import com.google.crypto.tink.proto.JwtRsaSsaPssAlgorithm;
 import com.google.crypto.tink.proto.JwtRsaSsaPssKeyFormat;
 import com.google.crypto.tink.proto.JwtRsaSsaPssPrivateKey;
 import com.google.crypto.tink.proto.JwtRsaSsaPssPublicKey;
+import com.google.crypto.tink.proto.JwtRsaSsaPssPublicKey.CustomKid;
+import com.google.crypto.tink.proto.KeyData;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
 import com.google.crypto.tink.proto.Keyset;
 import com.google.crypto.tink.subtle.Base64;
@@ -49,14 +52,16 @@ import java.security.spec.RSAKeyGenParameterSpec;
 import java.security.spec.RSAPrivateCrtKeySpec;
 import java.util.Set;
 import java.util.TreeSet;
-import junitparams.JUnitParamsRunner;
-import junitparams.Parameters;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.experimental.theories.DataPoints;
+import org.junit.experimental.theories.FromDataPoints;
+import org.junit.experimental.theories.Theories;
+import org.junit.experimental.theories.Theory;
 import org.junit.runner.RunWith;
 
 /** Unit tests for JwtRsaSsaPssSignKeyManager. */
-@RunWith(JUnitParamsRunner.class)
+@RunWith(Theories.class)
 public class JwtRsaSsaPssSignKeyManagerTest {
   private final JwtRsaSsaPssSignKeyManager manager = new JwtRsaSsaPssSignKeyManager();
   private final KeyTypeManager.KeyFactory<JwtRsaSsaPssKeyFormat, JwtRsaSsaPssPrivateKey> factory =
@@ -76,37 +81,24 @@ public class JwtRsaSsaPssSignKeyManagerTest {
         .build();
   }
 
-  private static Object[] parametersAlgoAndSize() {
-    return new Object[] {
-      new Object[] {JwtRsaSsaPssAlgorithm.PS256, 2048},
-      new Object[] {JwtRsaSsaPssAlgorithm.PS256, 3072},
-      new Object[] {JwtRsaSsaPssAlgorithm.PS256, 4096},
-      new Object[] {JwtRsaSsaPssAlgorithm.PS384, 2048},
-      new Object[] {JwtRsaSsaPssAlgorithm.PS384, 3072},
-      new Object[] {JwtRsaSsaPssAlgorithm.PS384, 4096},
-      new Object[] {JwtRsaSsaPssAlgorithm.PS512, 2048},
-      new Object[] {JwtRsaSsaPssAlgorithm.PS512, 3072},
-      new Object[] {JwtRsaSsaPssAlgorithm.PS512, 4096},
-    };
-  }
+  @DataPoints("algorithmParam")
+  public static final JwtRsaSsaPssAlgorithm[] ALGO_PARAMETER =
+      new JwtRsaSsaPssAlgorithm[] {
+        JwtRsaSsaPssAlgorithm.PS256, JwtRsaSsaPssAlgorithm.PS384, JwtRsaSsaPssAlgorithm.PS512
+      };
 
-  private static Object[] templates() {
-    return new Object[] {
-      JwtRsaSsaPssSignKeyManager.jwtPs256_2048_F4_Template(),
-      JwtRsaSsaPssSignKeyManager.jwtPs256_3072_F4_Template(),
-      JwtRsaSsaPssSignKeyManager.jwtPs384_3072_F4_Template(),
-      JwtRsaSsaPssSignKeyManager.jwtPs512_4096_F4_Template(),
-      KeyTemplate.create(
-          new JwtRsaSsaPssSignKeyManager().getKeyType(),
-          JwtRsaSsaPssKeyFormat.newBuilder()
-              .setAlgorithm(JwtRsaSsaPssAlgorithm.PS256)
-              .setModulusSizeInBits(2048)
-              .setPublicExponent(ByteString.copyFrom(RSAKeyGenParameterSpec.F4.toByteArray()))
-              .build()
-              .toByteArray(),
-          KeyTemplate.OutputPrefixType.TINK),
-    };
-  }
+  @DataPoints("sizes")
+  public static final int[] SIZE = new int[] {2048, 3072, 4096};
+
+  @DataPoints("templates")
+  public static final String[] TEMPLATES =
+      new String[] {
+        "JWT_PS256_2048_F4",
+        "JWT_PS256_3072_F4",
+        "JWT_PS384_3072_F4",
+        "JWT_PS512_4096_F4",
+        "JWT_PS256_2048_F4_RAW",
+      };
 
   @Test
   public void basics() throws Exception {
@@ -123,12 +115,21 @@ public class JwtRsaSsaPssSignKeyManagerTest {
         () -> factory.validateKeyFormat(JwtRsaSsaPssKeyFormat.getDefaultInstance()));
   }
 
-  @Test
-  @Parameters(method = "parametersAlgoAndSize")
-  public void validateKeyFormat_ok(JwtRsaSsaPssAlgorithm algorithm, int keySize)
+  // Note: we use Theory as a parametrized test -- different from what the Theory framework intends.
+  @Theory
+  public void validateKeyFormat_ok(
+      @FromDataPoints("algorithmParam") JwtRsaSsaPssAlgorithm algorithm, int keySize)
       throws GeneralSecurityException {
     JwtRsaSsaPssKeyFormat format = createKeyFormat(algorithm, keySize, RSAKeyGenParameterSpec.F4);
     factory.validateKeyFormat(format);
+  }
+
+  @Test
+  public void testKeyFormatsAreValid() throws Exception {
+    for (KeyTypeManager.KeyFactory.KeyFormat<JwtRsaSsaPssKeyFormat> format :
+        factory.keyFormats().values()) {
+      factory.validateKeyFormat(format.keyFormat);
+    }
   }
 
   @Test
@@ -139,21 +140,8 @@ public class JwtRsaSsaPssSignKeyManagerTest {
     assertThrows(GeneralSecurityException.class, () -> factory.validateKeyFormat(format));
   }
 
-  private static Object[] parametersSmallPublicExponents() {
-    return new Object[] {
-      new Object[] {JwtRsaSsaPssAlgorithm.PS256, 3072},
-      new Object[] {JwtRsaSsaPssAlgorithm.PS256, 4096},
-      new Object[] {JwtRsaSsaPssAlgorithm.PS384, 2048},
-      new Object[] {JwtRsaSsaPssAlgorithm.PS384, 3072},
-      new Object[] {JwtRsaSsaPssAlgorithm.PS384, 4096},
-      new Object[] {JwtRsaSsaPssAlgorithm.PS512, 2048},
-      new Object[] {JwtRsaSsaPssAlgorithm.PS512, 3072},
-      new Object[] {JwtRsaSsaPssAlgorithm.PS512, 4096},
-    };
-  }
-
-  @Test
-  @Parameters(method = "parametersSmallPublicExponents")
+  // Note: we use Theory as a parametrized test -- different from what the Theory framework intends.
+  @Theory
   public void invalidKeyFormat_smallPublicExponents_throw(
       JwtRsaSsaPssAlgorithm algorithm, int keySize) throws GeneralSecurityException {
     JwtRsaSsaPssKeyFormat format =
@@ -188,22 +176,34 @@ public class JwtRsaSsaPssSignKeyManagerTest {
     assertEquals(crt, q.modInverse(p));
   }
 
-  @Test
-  @Parameters(method = "parametersAlgoAndSize")
-  public void createKeys_ok(JwtRsaSsaPssAlgorithm algorithm, int keySize) throws Exception {
-    assumeFalse(TestUtil.isTsan());  // creating keys is too slow in Tsan.
+  // Note: we use Theory as a parametrized test -- different from what the Theory framework intends.
+  @Theory
+  public void createKeys_ok(
+      @FromDataPoints("algorithmParam") JwtRsaSsaPssAlgorithm algorithm, int keySize)
+      throws Exception {
+    if (TestUtil.isTsan()) {
+      // creating keys is too slow in Tsan.
+      // We do not use assume because Theories expects to find something which is not skipped.
+      return;
+    }
     JwtRsaSsaPssKeyFormat format = createKeyFormat(algorithm, keySize, RSAKeyGenParameterSpec.F4);
     JwtRsaSsaPssPrivateKey key = factory.createKey(format);
     checkConsistency(key, format);
     checkKey(key);
   }
 
+  // This test needs to create several new keys, which is expensive. Therefore, we only do it for
+  // one set of parameters.
   @Test
-  @Parameters(method = "parametersAlgoAndSize")
-  public void createKey_alwaysNewElement_ok(JwtRsaSsaPssAlgorithm algorithm, int keySize)
+  public void createKey_alwaysNewElement_ok()
       throws Exception {
-    assumeFalse(TestUtil.isTsan());  // creating keys is too slow in Tsan.
-    JwtRsaSsaPssKeyFormat format = createKeyFormat(algorithm, keySize, RSAKeyGenParameterSpec.F4);
+    if (TestUtil.isTsan()) {
+      // creating keys is too slow in Tsan.
+      // We do not use assume because Theories expects to find something which is not skipped.
+      return;
+    }
+    JwtRsaSsaPssKeyFormat format =
+        createKeyFormat(JwtRsaSsaPssAlgorithm.PS256, 2048, RSAKeyGenParameterSpec.F4);
     Set<String> keys = new TreeSet<>();
     // Calls newKey multiple times and make sure that they generate different keys -- takes about a
     // second per key.
@@ -216,11 +216,16 @@ public class JwtRsaSsaPssSignKeyManagerTest {
     assertThat(keys).hasSize(2 * numTests);
   }
 
-  @Test
-  @Parameters(method = "parametersAlgoAndSize")
-  public void createCorruptedModulusPrimitive_throws(JwtRsaSsaPssAlgorithm algorithm, int keySize)
+  // Note: we use Theory as a parametrized test -- different from what the Theory framework intends.
+  @Theory
+  public void createCorruptedModulusPrimitive_throws(
+      @FromDataPoints("algorithmParam") JwtRsaSsaPssAlgorithm algorithm, int keySize)
       throws Exception {
-    assumeFalse(TestUtil.isTsan());  // creating keys is too slow in Tsan.
+    if (TestUtil.isTsan()) {
+      // creating keys is too slow in Tsan.
+      // We do not use assume because Theories expects to find something which is not skipped.
+      return;
+    }
     JwtRsaSsaPssKeyFormat format = createKeyFormat(algorithm, keySize, RSAKeyGenParameterSpec.F4);
     JwtRsaSsaPssPrivateKey originalKey = factory.createKey(format);
     byte[] originalN = originalKey.getPublicKey().getN().toByteArray();
@@ -263,7 +268,6 @@ public class JwtRsaSsaPssSignKeyManagerTest {
       KeyTemplate template, JwtRsaSsaPssAlgorithm algorithm, int moduloSize, int publicExponent)
       throws Exception {
     assertThat(template.getTypeUrl()).isEqualTo(new JwtRsaSsaPssSignKeyManager().getKeyType());
-    assertThat(template.getOutputPrefixType()).isEqualTo(KeyTemplate.OutputPrefixType.RAW);
     JwtRsaSsaPssKeyFormat format =
         JwtRsaSsaPssKeyFormat.parseFrom(
             template.getValue(), ExtensionRegistryLite.getEmptyRegistry());
@@ -275,77 +279,128 @@ public class JwtRsaSsaPssSignKeyManagerTest {
 
   @Test
   public void testJwtRsa2048AlgoRS256F4Template_ok() throws Exception {
-    KeyTemplate template = JwtRsaSsaPssSignKeyManager.jwtPs256_2048_F4_Template();
-    checkTemplate(template, JwtRsaSsaPssAlgorithm.PS256, 2048, 65537);
+    checkTemplate(KeyTemplates.get("JWT_PS256_2048_F4"), JwtRsaSsaPssAlgorithm.PS256, 2048, 65537);
+    checkTemplate(
+        KeyTemplates.get("JWT_PS256_2048_F4_RAW"), JwtRsaSsaPssAlgorithm.PS256, 2048, 65537);
   }
 
   @Test
   public void testJwtRsa4096AlgoRS512F4Template_ok() throws Exception {
-    KeyTemplate template = JwtRsaSsaPssSignKeyManager.jwtPs512_4096_F4_Template();
-    checkTemplate(template, JwtRsaSsaPssAlgorithm.PS512, 4096, 65537);
+    checkTemplate(KeyTemplates.get("JWT_PS512_4096_F4"), JwtRsaSsaPssAlgorithm.PS512, 4096, 65537);
+    checkTemplate(
+        KeyTemplates.get("JWT_PS512_4096_F4_RAW"), JwtRsaSsaPssAlgorithm.PS512, 4096, 65537);
   }
 
   @Test
   public void testJwtRsa3072AlgoRS384F4Template_ok() throws Exception {
-    KeyTemplate template = JwtRsaSsaPssSignKeyManager.jwtPs384_3072_F4_Template();
-    checkTemplate(template, JwtRsaSsaPssAlgorithm.PS384, 3072, 65537);
+    checkTemplate(KeyTemplates.get("JWT_PS384_3072_F4"), JwtRsaSsaPssAlgorithm.PS384, 3072, 65537);
+    checkTemplate(
+        KeyTemplates.get("JWT_PS384_3072_F4_RAW"), JwtRsaSsaPssAlgorithm.PS384, 3072, 65537);
   }
 
   @Test
   public void testJwtRsa3072AlgoRS256F4Template_ok() throws Exception {
-    KeyTemplate template = JwtRsaSsaPssSignKeyManager.jwtPs256_3072_F4_Template();
-    checkTemplate(template, JwtRsaSsaPssAlgorithm.PS256, 3072, 65537);
+    checkTemplate(KeyTemplates.get("JWT_PS256_3072_F4"), JwtRsaSsaPssAlgorithm.PS256, 3072, 65537);
+    checkTemplate(
+        KeyTemplates.get("JWT_PS256_3072_F4_RAW"), JwtRsaSsaPssAlgorithm.PS256, 3072, 65537);
   }
 
   @Test
-  @Parameters(method = "templates")
-  public void createSignVerify_success(KeyTemplate template) throws Exception {
-    assumeFalse(TestUtil.isTsan());  // creating keys is too slow in Tsan.
-    KeysetHandle handle = KeysetHandle.generateNew(template);
+  public void testTinkTemplatesAreTink() throws Exception {
+    assertThat(KeyTemplates.get("JWT_PS256_2048_F4").getOutputPrefixType())
+        .isEqualTo(KeyTemplate.OutputPrefixType.TINK);
+    assertThat(KeyTemplates.get("JWT_PS256_3072_F4").getOutputPrefixType())
+        .isEqualTo(KeyTemplate.OutputPrefixType.TINK);
+    assertThat(KeyTemplates.get("JWT_PS384_3072_F4").getOutputPrefixType())
+        .isEqualTo(KeyTemplate.OutputPrefixType.TINK);
+    assertThat(KeyTemplates.get("JWT_PS512_4096_F4").getOutputPrefixType())
+        .isEqualTo(KeyTemplate.OutputPrefixType.TINK);
+  }
+
+  @Test
+  public void testRawTemplatesAreRaw() throws Exception {
+    assertThat(KeyTemplates.get("JWT_PS256_2048_F4_RAW").getOutputPrefixType())
+        .isEqualTo(KeyTemplate.OutputPrefixType.RAW);
+    assertThat(KeyTemplates.get("JWT_PS256_3072_F4_RAW").getOutputPrefixType())
+        .isEqualTo(KeyTemplate.OutputPrefixType.RAW);
+    assertThat(KeyTemplates.get("JWT_PS384_3072_F4_RAW").getOutputPrefixType())
+        .isEqualTo(KeyTemplate.OutputPrefixType.RAW);
+    assertThat(KeyTemplates.get("JWT_PS512_4096_F4_RAW").getOutputPrefixType())
+        .isEqualTo(KeyTemplate.OutputPrefixType.RAW);
+  }
+
+  // Note: we use Theory as a parametrized test -- different from what the Theory framework intends.
+  @Theory
+  public void createSignVerify_success(@FromDataPoints("templates") String templateName)
+      throws Exception {
+    if (TestUtil.isTsan()) {
+      // creating keys is too slow in Tsan.
+      // We do not use assume because Theories expects to find something which is not skipped.
+      return;
+    }
+    KeysetHandle handle = KeysetHandle.generateNew(KeyTemplates.get(templateName));
     JwtPublicKeySign signer = handle.getPrimitive(JwtPublicKeySign.class);
     JwtPublicKeyVerify verifier =
         handle.getPublicKeysetHandle().getPrimitive(JwtPublicKeyVerify.class);
-    JwtValidator validator = new JwtValidator.Builder().build();
+    JwtValidator validator = JwtValidator.newBuilder().allowMissingExpiration().build();
 
-    RawJwt rawToken = new RawJwt.Builder().setIssuer("issuer").build();
+    RawJwt rawToken = RawJwt.newBuilder().setJwtId("jwtId").withoutExpiration().build();
     String signedCompact = signer.signAndEncode(rawToken);
     VerifiedJwt verifiedToken = verifier.verifyAndDecode(signedCompact, validator);
-    assertThat(verifiedToken.getIssuer()).isEqualTo("issuer");
+    assertThat(verifiedToken.getJwtId()).isEqualTo("jwtId");
    assertThat(verifiedToken.hasTypeHeader()).isFalse();
 
-    RawJwt rawTokenWithType = new RawJwt.Builder().setTypeHeader("typeHeader").build();
+    RawJwt rawTokenWithType =
+        RawJwt.newBuilder().setTypeHeader("typeHeader").withoutExpiration().build();
     String signedCompactWithType = signer.signAndEncode(rawTokenWithType);
-    VerifiedJwt verifiedTokenWithType = verifier.verifyAndDecode(signedCompactWithType, validator);
+    VerifiedJwt verifiedTokenWithType =
+        verifier.verifyAndDecode(
+            signedCompactWithType,
+            JwtValidator.newBuilder()
+                .expectTypeHeader("typeHeader")
+                .allowMissingExpiration()
+                .build());
     assertThat(verifiedTokenWithType.getTypeHeader()).isEqualTo("typeHeader");
   }
 
-  @Test
-  @Parameters(method = "templates")
-  public void createSignVerifyDifferentKey_throw(KeyTemplate template) throws Exception {
-    assumeFalse(TestUtil.isTsan());  // creating keys is too slow in Tsan.
+  // Note: we use Theory as a parametrized test -- different from what the Theory framework intends.
+  @Theory
+  public void createSignVerifyDifferentKey_throw(@FromDataPoints("templates") String templateName)
+      throws Exception {
+    if (TestUtil.isTsan()) {
+      // creating keys is too slow in Tsan.
+      // We do not use assume because Theories expects to find something which is not skipped.
+      return;
+    }
+    KeyTemplate template = KeyTemplates.get(templateName);
     KeysetHandle handle = KeysetHandle.generateNew(template);
     JwtPublicKeySign signer = handle.getPrimitive(JwtPublicKeySign.class);
-    RawJwt rawToken = new RawJwt.Builder().setIssuer("issuer").build();
+    RawJwt rawToken = RawJwt.newBuilder().setJwtId("id123").withoutExpiration().build();
     String signedCompact = signer.signAndEncode(rawToken);
 
     KeysetHandle otherHandle = KeysetHandle.generateNew(template);
     JwtPublicKeyVerify otherVerifier =
         otherHandle.getPublicKeysetHandle().getPrimitive(JwtPublicKeyVerify.class);
-    JwtValidator validator = new JwtValidator.Builder().build();
+    JwtValidator validator = JwtValidator.newBuilder().allowMissingExpiration().build();
     assertThrows(
         GeneralSecurityException.class,
         () -> otherVerifier.verifyAndDecode(signedCompact, validator));
   }
 
-  @Test
-  @Parameters(method = "templates")
-  public void createSignVerify_header_modification_throw(KeyTemplate template) throws Exception {
-    assumeFalse(TestUtil.isTsan());  // creating keys is too slow in Tsan.
-    KeysetHandle handle = KeysetHandle.generateNew(template);
+  // Note: we use Theory as a parametrized test -- different from what the Theory framework intends.
+  @Theory
+  public void createSignVerify_header_modification_throw(
+      @FromDataPoints("templates") String templateName) throws Exception {
+    if (TestUtil.isTsan()) {
+      // creating keys is too slow in Tsan.
+      // We do not use assume because Theories expects to find something which is not skipped.
+      return;
+    }
+    KeysetHandle handle = KeysetHandle.generateNew(KeyTemplates.get(templateName));
     JwtPublicKeySign signer = handle.getPrimitive(JwtPublicKeySign.class);
     JwtPublicKeyVerify verifier =
         handle.getPublicKeysetHandle().getPrimitive(JwtPublicKeyVerify.class);
-    RawJwt rawToken = new RawJwt.Builder().setIssuer("issuer").build();
+    RawJwt rawToken = RawJwt.newBuilder().setJwtId("id123").withoutExpiration().build();
     String signedCompact = signer.signAndEncode(rawToken);
 
     // Modify the header by adding a space at the end.
@@ -354,20 +409,25 @@ public class JwtRsaSsaPssSignKeyManagerTest {
     String headerBase64 = Base64.urlSafeEncode((header + " ").getBytes(UTF_8));
     String modifiedCompact = headerBase64 + "." + parts[1] + "." + parts[2];
 
-    JwtValidator validator = new JwtValidator.Builder().build();
+    JwtValidator validator = JwtValidator.newBuilder().allowMissingExpiration().build();
     assertThrows(
         GeneralSecurityException.class, () -> verifier.verifyAndDecode(modifiedCompact, validator));
   }
 
-  @Test
-  @Parameters(method = "templates")
-  public void createSignVerify_payload_modification_throw(KeyTemplate template) throws Exception {
-    assumeFalse(TestUtil.isTsan());  // creating keys is too slow in Tsan.
-    KeysetHandle handle = KeysetHandle.generateNew(template);
+  // Note: we use Theory as a parametrized test -- different from what the Theory framework intends.
+  @Theory
+  public void createSignVerify_payload_modification_throw(
+      @FromDataPoints("templates") String templateName) throws Exception {
+    if (TestUtil.isTsan()) {
+      // creating keys is too slow in Tsan.
+      // We do not use assume because Theories expects to find something which is not skipped.
+      return;
+    }
+    KeysetHandle handle = KeysetHandle.generateNew(KeyTemplates.get(templateName));
     JwtPublicKeySign signer = handle.getPrimitive(JwtPublicKeySign.class);
     JwtPublicKeyVerify verifier =
         handle.getPublicKeysetHandle().getPrimitive(JwtPublicKeyVerify.class);
-    RawJwt rawToken = new RawJwt.Builder().setIssuer("issuer").build();
+    RawJwt rawToken = RawJwt.newBuilder().setJwtId("id123").withoutExpiration().build();
     String signedCompact = signer.signAndEncode(rawToken);
 
     // Modify the payload by adding a space at the end.
@@ -376,7 +436,7 @@ public class JwtRsaSsaPssSignKeyManagerTest {
     String payloadBase64 = Base64.urlSafeEncode((payload + " ").getBytes(UTF_8));
     String modifiedCompact = parts[0] + "." + payloadBase64 + "." + parts[2];
 
-    JwtValidator validator = new JwtValidator.Builder().build();
+    JwtValidator validator = JwtValidator.newBuilder().allowMissingExpiration().build();
     assertThrows(
         GeneralSecurityException.class, () -> verifier.verifyAndDecode(modifiedCompact, validator));
   }
@@ -411,7 +471,7 @@ public class JwtRsaSsaPssSignKeyManagerTest {
   @Test
   public void createSignVerify_withDifferentHeaders() throws Exception {
     assumeFalse(TestUtil.isTsan());  // creating keys is too slow in Tsan.
-    KeyTemplate template = JwtRsaSsaPssSignKeyManager.jwtPs256_2048_F4_Template();
+    KeyTemplate template = KeyTemplates.get("JWT_PS256_2048_F4_RAW");
     KeysetHandle handle = KeysetHandle.generateNew(template);
     Keyset keyset = CleartextKeysetHandle.getKeyset(handle);
     JwtRsaSsaPssPrivateKey keyProto =
@@ -425,17 +485,19 @@ public class JwtRsaSsaPssSignKeyManagerTest {
     RsaSsaPssSignJce rawSigner = new RsaSsaPssSignJce(privateKey, hash, hash, saltLength);
     JwtPublicKeyVerify verifier =
         handle.getPublicKeysetHandle().getPrimitive(JwtPublicKeyVerify.class);
-    JwtValidator validator = new JwtValidator.Builder().build();
+    JwtValidator validator = JwtValidator.newBuilder().allowMissingExpiration().build();
 
     JsonObject payload = new JsonObject();
-    payload.addProperty(JwtNames.CLAIM_ISSUER, "issuer");
+    payload.addProperty("jti", "jwtId");
 
     // valid token, with "typ" set in the header
     JsonObject goodHeader = new JsonObject();
-    goodHeader.addProperty(JwtNames.HEADER_ALGORITHM, "PS256");
-    goodHeader.addProperty("typ", "JWT");
+    goodHeader.addProperty("alg", "PS256");
+    goodHeader.addProperty("typ", "typeHeader");
     String goodSignedCompact = generateSignedCompact(rawSigner, goodHeader, payload);
-    verifier.verifyAndDecode(goodSignedCompact, validator);
+    verifier.verifyAndDecode(
+        goodSignedCompact,
+        JwtValidator.newBuilder().expectTypeHeader("typeHeader").allowMissingExpiration().build());
 
     // invalid token with an empty header
     JsonObject emptyHeader = new JsonObject();
@@ -446,24 +508,197 @@ public class JwtRsaSsaPssSignKeyManagerTest {
 
     // invalid token with a valid but incorrect algorithm in the header
     JsonObject badAlgoHeader = new JsonObject();
-    badAlgoHeader.addProperty(JwtNames.HEADER_ALGORITHM, "RS256");
+    badAlgoHeader.addProperty("alg", "RS256");
     String badAlgoSignedCompact = generateSignedCompact(rawSigner, badAlgoHeader, payload);
     assertThrows(
         GeneralSecurityException.class,
         () -> verifier.verifyAndDecode(badAlgoSignedCompact, validator));
 
-    // token with an unknown "typ" in the header is valid
-    JsonObject unknownTypeHeader = new JsonObject();
-    unknownTypeHeader.addProperty(JwtNames.HEADER_ALGORITHM, "PS256");
-    unknownTypeHeader.addProperty("typ", "unknown");
-    String unknownTypeSignedCompact = generateSignedCompact(rawSigner, unknownTypeHeader, payload);
-    verifier.verifyAndDecode(unknownTypeSignedCompact, validator);
-
     // token with an unknown "kid" in the header is valid
     JsonObject unknownKidHeader = new JsonObject();
-    unknownKidHeader.addProperty(JwtNames.HEADER_ALGORITHM, "PS256");
+    unknownKidHeader.addProperty("alg", "PS256");
     unknownKidHeader.addProperty("kid", "unknown");
     String unknownKidSignedCompact = generateSignedCompact(rawSigner, unknownKidHeader, payload);
     verifier.verifyAndDecode(unknownKidSignedCompact, validator);
+  }
+
+  @Test
+  public void createSignVerifyTink_withDifferentHeaders() throws Exception {
+    assumeFalse(TestUtil.isTsan());  // creating keys is too slow in Tsan.
+    KeyTemplate template = KeyTemplates.get("JWT_PS256_2048_F4");
+    KeysetHandle handle = KeysetHandle.generateNew(template);
+    Keyset keyset = CleartextKeysetHandle.getKeyset(handle);
+    JwtRsaSsaPssPrivateKey keyProto =
+        JwtRsaSsaPssPrivateKey.parseFrom(
+            keyset.getKey(0).getKeyData().getValue(), ExtensionRegistryLite.getEmptyRegistry());
+    RSAPrivateCrtKey privateKey = createPrivateKey(keyProto);
+
+    JwtRsaSsaPssAlgorithm algorithm = keyProto.getPublicKey().getAlgorithm();
+    Enums.HashType hash = JwtRsaSsaPssVerifyKeyManager.hashForPssAlgorithm(algorithm);
+    int saltLength = JwtRsaSsaPssVerifyKeyManager.saltLengthForPssAlgorithm(algorithm);
+    RsaSsaPssSignJce rawSigner = new RsaSsaPssSignJce(privateKey, hash, hash, saltLength);
+    JwtPublicKeyVerify verifier =
+        handle.getPublicKeysetHandle().getPrimitive(JwtPublicKeyVerify.class);
+    JwtValidator validator = JwtValidator.newBuilder().allowMissingExpiration().build();
+    String kid =
+        JwtFormat.getKid(keyset.getKey(0).getKeyId(), keyset.getKey(0).getOutputPrefixType()).get();
+
+    JsonObject payload = new JsonObject();
+    payload.addProperty("jti", "jwtId");
+
+    // normal, valid token
+    JsonObject normalHeader = new JsonObject();
+    normalHeader.addProperty("alg", "PS256");
+    normalHeader.addProperty("kid", kid);
+    String validToken = generateSignedCompact(rawSigner, normalHeader, payload);
+    verifier.verifyAndDecode(validToken, validator);
+
+    // token without kid are rejected, even if they are valid.
+    JsonObject headerWithoutKid = new JsonObject();
+    headerWithoutKid.addProperty("alg", "PS256");
+    String tokenWithoutKid = generateSignedCompact(rawSigner, headerWithoutKid, payload);
+    assertThrows(
+        GeneralSecurityException.class, () -> verifier.verifyAndDecode(tokenWithoutKid, validator));
+
+    // token without algorithm in header
+    JsonObject headerWithoutAlg = new JsonObject();
+    headerWithoutAlg.addProperty("kid", kid);
+    String tokenWithoutAlg = generateSignedCompact(rawSigner, headerWithoutAlg, payload);
+    assertThrows(
+        GeneralSecurityException.class,
+        () -> verifier.verifyAndDecode(tokenWithoutAlg, validator));
+
+    // invalid token with an incorrect algorithm in the header
+    JsonObject headerWithBadAlg = new JsonObject();
+    headerWithBadAlg.addProperty("alg", "RS256");
+    headerWithBadAlg.addProperty("kid", kid);
+    String tokenWithBadAlg = generateSignedCompact(rawSigner, headerWithBadAlg, payload);
+    assertThrows(
+        GeneralSecurityException.class,
+        () -> verifier.verifyAndDecode(tokenWithBadAlg, validator));
+
+    // token with an unknown "kid" in the header is invalid
+    JsonObject headerWithUnknownKid = new JsonObject();
+    headerWithUnknownKid.addProperty("alg", "PS256");
+    headerWithUnknownKid.addProperty("kid", "unknown");
+    String tokenWithUnknownKid = generateSignedCompact(rawSigner, headerWithUnknownKid, payload);
+    assertThrows(
+        GeneralSecurityException.class,
+        () -> verifier.verifyAndDecode(tokenWithUnknownKid, validator));
+  }
+
+  /* Create a new keyset handle with the "custom_kid" value set. */
+  private KeysetHandle withCustomKid(KeysetHandle keysetHandle, String customKid)
+      throws Exception {
+    Keyset keyset = CleartextKeysetHandle.getKeyset(keysetHandle);
+    JwtRsaSsaPssPrivateKey privateKey =
+        JwtRsaSsaPssPrivateKey.parseFrom(
+            keyset.getKey(0).getKeyData().getValue(), ExtensionRegistryLite.getEmptyRegistry());
+    JwtRsaSsaPssPublicKey publicKeyWithKid =
+        privateKey.getPublicKey().toBuilder()
+            .setCustomKid(CustomKid.newBuilder().setValue(customKid).build())
+            .build();
+    JwtRsaSsaPssPrivateKey privateKeyWithKid =
+        privateKey.toBuilder().setPublicKey(publicKeyWithKid).build();
+    KeyData keyDataWithKid =
+        keyset.getKey(0).getKeyData().toBuilder()
+            .setValue(privateKeyWithKid.toByteString())
+            .build();
+    Keyset.Key keyWithKid = keyset.getKey(0).toBuilder().setKeyData(keyDataWithKid).build();
+    return CleartextKeysetHandle.fromKeyset(keyset.toBuilder().setKey(0, keyWithKid).build());
+  }
+
+  @Test
+  public void signAndVerifyWithCustomKid() throws Exception {
+    assumeFalse(TestUtil.isTsan()); // KeysetHandle.generateNew is too slow in Tsan.
+    KeyTemplate template = KeyTemplates.get("JWT_PS256_2048_F4_RAW");
+    KeysetHandle handleWithoutKid = KeysetHandle.generateNew(template);
+    KeysetHandle handleWithKid =
+        withCustomKid(handleWithoutKid, "Lorem ipsum dolor sit amet, consectetur adipiscing elit");
+
+    JwtPublicKeySign signerWithKid = handleWithKid.getPrimitive(JwtPublicKeySign.class);
+    JwtPublicKeySign signerWithoutKid = handleWithoutKid.getPrimitive(JwtPublicKeySign.class);
+    RawJwt rawToken = RawJwt.newBuilder().setJwtId("jwtId").withoutExpiration().build();
+    String signedCompactWithKid = signerWithKid.signAndEncode(rawToken);
+    String signedCompactWithoutKid = signerWithoutKid.signAndEncode(rawToken);
+
+    // Verify the kid in the header
+    String jsonHeaderWithKid = JwtFormat.splitSignedCompact(signedCompactWithKid).header;
+    String kid = JsonUtil.parseJson(jsonHeaderWithKid).get("kid").getAsString();
+    assertThat(kid).isEqualTo("Lorem ipsum dolor sit amet, consectetur adipiscing elit");
+    String jsonHeaderWithoutKid = JwtFormat.splitSignedCompact(signedCompactWithoutKid).header;
+    assertThat(JsonUtil.parseJson(jsonHeaderWithoutKid).has("kid")).isFalse();
+
+    JwtValidator validator = JwtValidator.newBuilder().allowMissingExpiration().build();
+    JwtPublicKeyVerify verifierWithoutKid =
+        handleWithoutKid.getPublicKeysetHandle().getPrimitive(JwtPublicKeyVerify.class);
+    JwtPublicKeyVerify verifierWithKid =
+        handleWithKid.getPublicKeysetHandle().getPrimitive(JwtPublicKeyVerify.class);
+
+    // Even if custom_kid is set, we don't require a "kid" in the header.
+    assertThat(verifierWithoutKid.verifyAndDecode(signedCompactWithKid, validator).getJwtId())
+        .isEqualTo("jwtId");
+    assertThat(verifierWithKid.verifyAndDecode(signedCompactWithKid, validator).getJwtId())
+        .isEqualTo("jwtId");
+
+    assertThat(verifierWithoutKid.verifyAndDecode(signedCompactWithoutKid, validator).getJwtId())
+        .isEqualTo("jwtId");
+    assertThat(verifierWithKid.verifyAndDecode(signedCompactWithoutKid, validator).getJwtId())
+        .isEqualTo("jwtId");
+  }
+
+  @Test
+  public void signAndVerifyWithWrongCustomKid_fails() throws Exception {
+    assumeFalse(TestUtil.isTsan()); // KeysetHandle.generateNew is too slow in Tsan.
+
+    KeyTemplate template = KeyTemplates.get("JWT_PS256_2048_F4_RAW");
+    KeysetHandle handleWithoutKid = KeysetHandle.generateNew(template);
+    KeysetHandle handleWithKid = withCustomKid(handleWithoutKid, "kid");
+    KeysetHandle handleWithWrongKid = withCustomKid(handleWithoutKid, "wrong kid");
+
+    JwtPublicKeySign signerWithKid = handleWithKid.getPrimitive(JwtPublicKeySign.class);
+    RawJwt rawToken = RawJwt.newBuilder().setJwtId("jwtId").withoutExpiration().build();
+    String signedCompactWithKid = signerWithKid.signAndEncode(rawToken);
+
+    JwtValidator validator = JwtValidator.newBuilder().allowMissingExpiration().build();
+    JwtPublicKeyVerify verifierWithWrongKid =
+        handleWithWrongKid.getPublicKeysetHandle().getPrimitive(JwtPublicKeyVerify.class);
+
+    assertThrows(
+        JwtInvalidException.class,
+        () -> verifierWithWrongKid.verifyAndDecode(signedCompactWithKid, validator));
+  }
+
+  @Test
+  public void signWithTinkKeyAndCustomKid_fails() throws Exception {
+    assumeFalse(TestUtil.isTsan()); // KeysetHandle.generateNew is too slow in Tsan.
+    KeyTemplate template = KeyTemplates.get("JWT_PS256_2048_F4");
+    KeysetHandle handle = KeysetHandle.generateNew(template);
+
+    // Create a new handle with the "kid" value set.
+    Keyset keyset = CleartextKeysetHandle.getKeyset(handle);
+    JwtRsaSsaPssPrivateKey privateKey =
+        JwtRsaSsaPssPrivateKey.parseFrom(
+            keyset.getKey(0).getKeyData().getValue(), ExtensionRegistryLite.getEmptyRegistry());
+    JwtRsaSsaPssPublicKey publicKeyWithKid =
+        privateKey.getPublicKey().toBuilder()
+            .setCustomKid(
+                CustomKid.newBuilder()
+                    .setValue("Lorem ipsum dolor sit amet, consectetur adipiscing elit")
+                    .build())
+            .build();
+    JwtRsaSsaPssPrivateKey privateKeyWithKid =
+        privateKey.toBuilder().setPublicKey(publicKeyWithKid).build();
+    KeyData keyDataWithKid =
+        keyset.getKey(0).getKeyData().toBuilder()
+            .setValue(privateKeyWithKid.toByteString())
+            .build();
+    Keyset.Key keyWithKid = keyset.getKey(0).toBuilder().setKeyData(keyDataWithKid).build();
+    KeysetHandle handleWithKid =
+        CleartextKeysetHandle.fromKeyset(keyset.toBuilder().setKey(0, keyWithKid).build());
+
+    JwtPublicKeySign signerWithKid = handleWithKid.getPrimitive(JwtPublicKeySign.class);
+    RawJwt rawToken = RawJwt.newBuilder().setJwtId("jwtId").withoutExpiration().build();
+    assertThrows(JwtInvalidException.class, () -> signerWithKid.signAndEncode(rawToken));
   }
 }

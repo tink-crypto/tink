@@ -1,0 +1,49 @@
+# package containing useful functions for hybrid encryption PQC primitives
+
+package(default_visibility = ["//:__subpackages__"])
+
+licenses(["notice"])
+
+cc_library(
+    name = "test_util",
+    testonly = 1,
+    srcs = ["test_util.cc"],
+    hdrs = ["test_util.h"],
+    include_prefix = "tink/experimental/pqcrypto/kem/util",
+    deps = [
+        "//aead:aes_ctr_hmac_aead_key_manager",
+        "//aead:aes_gcm_key_manager",
+        "//aead:xchacha20_poly1305_key_manager",
+        "//experimental/pqcrypto/kem/subtle:cecpq2_subtle_boringssl_util",
+        "//experimental/pqcrypto/proto:cecpq2_aead_hkdf_cc_proto",
+        "//proto:aes_ctr_cc_proto",
+        "//proto:aes_ctr_hmac_aead_cc_proto",
+        "//proto:hmac_cc_proto",
+        "//proto:xchacha20_poly1305_cc_proto",
+        "//subtle:subtle_util",
+        "//util:enums",
+        "@boringssl//:crypto",
+    ],
+)
+
+#tests
+
+cc_test(
+    name = "test_util_test",
+    srcs = ["test_util_test.cc"],
+    deps = [
+        ":test_util",
+        "//:hybrid_encrypt",
+        "//:registry",
+        "//aead:aes_gcm_key_manager",
+        "//experimental/pqcrypto/proto:cecpq2_aead_hkdf_cc_proto",
+        "//proto:aes_eax_cc_proto",
+        "//proto:common_cc_proto",
+        "//proto:tink_cc_proto",
+        "//util:status",
+        "//util:statusor",
+        "//util:test_matchers",
+        "//util:test_util",
+        "@com_google_googletest//:gtest_main",
+    ],
+)

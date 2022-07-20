@@ -1,7 +1,0 @@
-type_url: "type.googleapis.com/google.crypto.tink.AesSivKey"
-# value: [type.googleapis.com/google.crypto.tink.AesSivKeyFormat] {
-#   key_size: 64
-#   version: 0
-# }
-value: "\010@"
-output_prefix_type: TINK

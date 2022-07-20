@@ -16,22 +16,27 @@
 #ifndef TINK_AEAD_AES_GCM_KEY_MANAGER_H_
 #define TINK_AEAD_AES_GCM_KEY_MANAGER_H_
 
+#include <stdint.h>
+
+#include <memory>
 #include <string>
+#include <utility>
 
 #include "absl/memory/memory.h"
+#include "absl/status/status.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/string_view.h"
 #include "tink/aead.h"
 #include "tink/aead/cord_aead.h"
 #include "tink/aead/internal/cord_aes_gcm_boringssl.h"
 #include "tink/core/key_type_manager.h"
-#include "tink/key_manager.h"
+#include "tink/core/template_util.h"
+#include "tink/input_stream.h"
+#include "tink/internal/fips_utils.h"
 #include "tink/subtle/aes_gcm_boringssl.h"
 #include "tink/subtle/random.h"
 #include "tink/util/constants.h"
-#include "tink/util/errors.h"
 #include "tink/util/input_stream_util.h"
-#include "tink/util/protobuf_helper.h"
 #include "tink/util/secret_data.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
@@ -53,16 +58,17 @@ class AesGcmKeyManager
       auto aes_gcm_result = subtle::AesGcmBoringSsl::New(
           util::SecretDataFromStringView(key.key_value()));
       if (!aes_gcm_result.ok()) return aes_gcm_result.status();
-      return {std::move(aes_gcm_result.ValueOrDie())};
+      return {std::move(aes_gcm_result.value())};
     }
   };
   class CordAeadFactory : public PrimitiveFactory<CordAead> {
     crypto::tink::util::StatusOr<std::unique_ptr<CordAead>> Create(
         const google::crypto::tink::AesGcmKey& key) const override {
-      auto cord_aes_gcm_result = crypto::tink::CordAesGcmBoringSsl::New(
-          util::SecretDataFromStringView(key.key_value()));
+      auto cord_aes_gcm_result =
+          crypto::tink::internal::CordAesGcmBoringSsl::New(
+              util::SecretDataFromStringView(key.key_value()));
       if (!cord_aes_gcm_result.ok()) return cord_aes_gcm_result.status();
-      return {std::move(cord_aes_gcm_result.ValueOrDie())};
+      return {std::move(cord_aes_gcm_result.value())};
     }
   };
 
@@ -107,22 +113,22 @@ class AesGcmKeyManager
       const google::crypto::tink::AesGcmKeyFormat& key_format,
       InputStream* input_stream) const override {
     crypto::tink::util::Status status =
-      ValidateVersion(key_format.version(), get_version());
+        ValidateVersion(key_format.version(), get_version());
     if (!status.ok()) return status;
 
     crypto::tink::util::StatusOr<std::string> randomness =
         ReadBytesFromStream(key_format.key_size(), input_stream);
     if (!randomness.ok()) {
-      if (randomness.status().error_code() == util::error::OUT_OF_RANGE) {
+      if (randomness.status().code() == absl::StatusCode::kOutOfRange) {
         return crypto::tink::util::Status(
-            crypto::tink::util::error::INVALID_ARGUMENT,
+            absl::StatusCode::kInvalidArgument,
             "Could not get enough pseudorandomness from input stream");
       }
       return randomness.status();
     }
     google::crypto::tink::AesGcmKey key;
     key.set_version(get_version());
-    key.set_key_value(randomness.ValueOrDie());
+    key.set_key_value(randomness.value());
     return key;
   }
 

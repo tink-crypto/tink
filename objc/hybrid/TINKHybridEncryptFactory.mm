@@ -43,11 +43,11 @@
     return nil;
   }
   id<TINKHybridEncrypt> hybrid =
-      [[TINKHybridEncryptInternal alloc] initWithCCHybridEncrypt:std::move(st.ValueOrDie())];
+      [[TINKHybridEncryptInternal alloc] initWithCCHybridEncrypt:std::move(st.value())];
   if (!hybrid) {
     if (error) {
       *error = TINKStatusToError(crypto::tink::util::Status(
-          crypto::tink::util::error::RESOURCE_EXHAUSTED, "Cannot initialize TINKHybridEncrypt"));
+          absl::StatusCode::kResourceExhausted, "Cannot initialize TINKHybridEncrypt"));
     }
     return nil;
   }

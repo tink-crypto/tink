@@ -1,4 +1,4 @@
-# Copyright 2019 Google LLC.
+# Copyright 2019 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -20,10 +20,7 @@ tink_pb2.HmacKey, one can do:
 handle = keyset_handle.KeysetHandle(aead_key_templates.AES128_EAX).
 """
 
-from __future__ import absolute_import
-from __future__ import division
-# Placeholder for import for type annotations
-from __future__ import print_function
+import warnings
 
 from tink.proto import aes_siv_pb2
 from tink.proto import tink_pb2
@@ -32,7 +29,7 @@ from tink.proto import tink_pb2
 _AES_SIV_KEY_TYPE_URL = 'type.googleapis.com/google.crypto.tink.AesSivKey'
 
 
-def create_aes_siv_key_template(key_size: int) -> tink_pb2.KeyTemplate:
+def _create_aes_siv_key_template(key_size: int) -> tink_pb2.KeyTemplate:
   """Creates an AES EAX KeyTemplate, and fills in its values."""
   key_format = aes_siv_pb2.AesSivKeyFormat()
   key_format.key_size = key_size
@@ -43,4 +40,11 @@ def create_aes_siv_key_template(key_size: int) -> tink_pb2.KeyTemplate:
   return key_template
 
 
-AES256_SIV = create_aes_siv_key_template(key_size=64)
+AES256_SIV = _create_aes_siv_key_template(key_size=64)
+
+
+# Deprecated. Use the predefined constant AES256_SIV instead.
+def create_aes_siv_key_template(key_size: int) -> tink_pb2.KeyTemplate:
+  warnings.warn('The "create_aes_siv_key_template" function is deprecated.',
+                DeprecationWarning, 2)
+  return _create_aes_siv_key_template(key_size)

@@ -32,6 +32,7 @@
 #import "objc/aead/TINKAeadInternal.h"
 #import "objc/util/TINKStrings.h"
 
+#include "absl/status/status.h"
 #include "tink/binary_keyset_reader.h"
 #include "tink/util/status.h"
 #include "tink/util/test_keyset_handle.h"
@@ -181,7 +182,7 @@ static Keyset *gKeyset;
   TINKKeysetHandle *handle =
       [[TINKKeysetHandle alloc] initWithKeysetReader:reader andKey:wrongAead error:&error];
   XCTAssertNil(handle);
-  XCTAssertEqual(error.code, crypto::tink::util::error::INVALID_ARGUMENT);
+  XCTAssertEqual((absl::StatusCode)error.code, absl::StatusCode::kInvalidArgument);
 }
 
 - (void)testNoKeysetInCiphertext_Binary {
@@ -200,7 +201,7 @@ static Keyset *gKeyset;
   TINKKeysetHandle *handle =
       [[TINKKeysetHandle alloc] initWithKeysetReader:reader andKey:aead error:&error];
   XCTAssertNil(handle);
-  XCTAssertEqual(error.code, crypto::tink::util::error::INVALID_ARGUMENT);
+  XCTAssertEqual((absl::StatusCode)error.code, absl::StatusCode::kInvalidArgument);
 }
 
 - (void)testWrongCiphertext_Binary {
@@ -219,7 +220,7 @@ static Keyset *gKeyset;
   TINKKeysetHandle *handle =
       [[TINKKeysetHandle alloc] initWithKeysetReader:reader andKey:aead error:&error];
   XCTAssertNil(handle);
-  XCTAssertEqual(error.code, crypto::tink::util::error::INVALID_ARGUMENT);
+  XCTAssertEqual((absl::StatusCode)error.code, absl::StatusCode::kInvalidArgument);
 }
 
 - (void)testValidKeyTemplate {
@@ -265,7 +266,7 @@ static Keyset *gKeyset;
   NSError *error = nil;
   XCTAssertNil([[TINKKeysetHandle alloc] initWithKeysetReader:reader andKey:aead error:&error]);
   XCTAssertNotNil(error);
-  XCTAssertEqual(error.code, crypto::tink::util::error::RESOURCE_EXHAUSTED);
+  XCTAssertEqual((absl::StatusCode)error.code, absl::StatusCode::kResourceExhausted);
   XCTAssertTrue(
       [error.localizedFailureReason containsString:@"A KeysetReader can be used only once."]);
 }
@@ -292,7 +293,7 @@ static Keyset *gKeyset;
       [[TINKKeysetHandle alloc] initFromKeychainWithName:kBadKeysetName error:&error];
   XCTAssertNil(handle);
   XCTAssertNotNil(error);
-  XCTAssertEqual(error.code, crypto::tink::util::error::INVALID_ARGUMENT);
+  XCTAssertEqual((absl::StatusCode)error.code, absl::StatusCode::kInvalidArgument);
   XCTAssertTrue([error.localizedFailureReason
       containsString:@"Could not parse the input stream as a Keyset-proto."]);
 }
@@ -303,7 +304,7 @@ static Keyset *gKeyset;
       [[TINKKeysetHandle alloc] initFromKeychainWithName:kNonExistentKeysetName error:&error];
   XCTAssertNil(handle);
   XCTAssertNotNil(error);
-  XCTAssertEqual(error.code, crypto::tink::util::error::NOT_FOUND);
+  XCTAssertEqual((absl::StatusCode)error.code, absl::StatusCode::kNotFound);
   XCTAssertTrue([error.localizedFailureReason
       containsString:@"A keyset with the given name wasn't found in the keychain."]);
 }
@@ -424,7 +425,7 @@ static Keyset *gKeyset;
                                                                             error:&error];
   XCTAssertNil(publicHandle);
   XCTAssertNotNil(error);
-  XCTAssertTrue(error.code == crypto::tink::util::error::INVALID_ARGUMENT);
+  XCTAssertEqual((absl::StatusCode)error.code, absl::StatusCode::kInvalidArgument);
   XCTAssertTrue([error.localizedFailureReason
       containsString:@"Key material is not of type KeyData::ASYMMETRIC_PRIVATE"]);
 }
@@ -460,7 +461,7 @@ static Keyset *gKeyset;
                                                                         error:&error];
 
   XCTAssertNil(handle);
-  XCTAssertEqual(error.code, crypto::tink::util::error::FAILED_PRECONDITION);
+  XCTAssertEqual((absl::StatusCode)error.code, absl::StatusCode::kFailedPrecondition);
   XCTAssertTrue([error.localizedFailureReason
       containsString:@"Cannot create KeysetHandle with secret key material"]);
 }
@@ -476,7 +477,7 @@ static Keyset *gKeyset;
                                                                         error:&error];
 
   XCTAssertNil(handle);
-  XCTAssertEqual(error.code, crypto::tink::util::error::FAILED_PRECONDITION);
+  XCTAssertEqual((absl::StatusCode)error.code, absl::StatusCode::kFailedPrecondition);
   XCTAssertTrue([error.localizedFailureReason
       containsString:@"Cannot create KeysetHandle with secret key material"]);
 }
@@ -493,7 +494,7 @@ static Keyset *gKeyset;
                                                                         error:&error];
 
   XCTAssertNil(handle);
-  XCTAssertEqual(error.code, crypto::tink::util::error::FAILED_PRECONDITION);
+  XCTAssertEqual((absl::StatusCode)error.code, absl::StatusCode::kFailedPrecondition);
   XCTAssertTrue([error.localizedFailureReason
       containsString:@"Cannot create KeysetHandle with secret key material"]);
 }
@@ -520,7 +521,7 @@ static Keyset *gKeyset;
                                                                         error:&error];
 
   XCTAssertNil(handle);
-  XCTAssertEqual(error.code, crypto::tink::util::error::FAILED_PRECONDITION);
+  XCTAssertEqual((absl::StatusCode)error.code, absl::StatusCode::kFailedPrecondition);
   XCTAssertTrue([error.localizedFailureReason
       containsString:@"Cannot create KeysetHandle with secret key material"]);
 }
@@ -566,7 +567,7 @@ static Keyset *gKeyset;
   NSData *serializedKeysetNoSecret = [handle serializedKeysetNoSecret:&error];
   XCTAssertNil(serializedKeysetNoSecret);
   XCTAssertNotNil(error);
-  XCTAssertEqual(error.code, crypto::tink::util::error::FAILED_PRECONDITION);
+  XCTAssertEqual((absl::StatusCode)error.code, absl::StatusCode::kFailedPrecondition);
   XCTAssertTrue([error.localizedFailureReason
       containsString:@"Cannot create KeysetHandle with secret key material"]);
 }

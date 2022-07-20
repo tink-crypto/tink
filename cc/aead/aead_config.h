@@ -17,7 +17,7 @@
 #ifndef TINK_AEAD_AEAD_CONFIG_H_
 #define TINK_AEAD_AEAD_CONFIG_H_
 
-#include "absl/base/macros.h"
+#include "absl/base/attributes.h"
 #include "tink/util/status.h"
 #include "proto/config.pb.h"
 

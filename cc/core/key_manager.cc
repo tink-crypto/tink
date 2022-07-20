@@ -14,6 +14,9 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 #include "tink/key_manager.h"
+
+#include <memory>
+
 #include "absl/memory/memory.h"
 
 namespace crypto {

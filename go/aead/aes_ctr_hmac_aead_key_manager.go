@@ -20,7 +20,7 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/golang/protobuf/proto"
+	"google.golang.org/protobuf/proto"
 	"github.com/google/tink/go/aead/subtle"
 	"github.com/google/tink/go/keyset"
 	subtleMac "github.com/google/tink/go/mac/subtle"
@@ -46,11 +46,6 @@ var errInvalidAESCTRHMACAEADKeyFormat = fmt.Errorf("aes_ctr_hmac_aead_key_manage
 // aesCTRHMACAEADKeyManager is an implementation of KeyManager interface.
 // It generates new AESCTRHMACAEADKey keys and produces new instances of EncryptThenAuthenticate subtle.
 type aesCTRHMACAEADKeyManager struct{}
-
-// newAESCTRHMACAEADKeyManager creates a new aesCTRHMACAEADKeyManager.
-func newAESCTRHMACAEADKeyManager() *aesCTRHMACAEADKeyManager {
-	return new(aesCTRHMACAEADKeyManager)
-}
 
 // Primitive creates an AEAD for the given serialized AESCTRHMACAEADKey proto.
 func (km *aesCTRHMACAEADKeyManager) Primitive(serializedKey []byte) (interface{}, error) {

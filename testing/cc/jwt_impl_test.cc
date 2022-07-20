@@ -16,15 +16,17 @@
 
 #include "jwt_impl.h"
 
+#include <string>
+
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "tink/binary_keyset_writer.h"
 #include "tink/cleartext_keyset_handle.h"
+#include "tink/jwt/jwt_key_templates.h"
 #include "tink/jwt/jwt_mac_config.h"
 #include "tink/jwt/jwt_signature_config.h"
-#include "tink/jwt/jwt_key_templates.h"
-#include "proto/testing/testing_api.grpc.pb.h"
 #include "tink/util/test_matchers.h"
+#include "proto/testing_api.grpc.pb.h"
 
 namespace crypto {
 namespace tink {
@@ -33,27 +35,35 @@ namespace {
 using ::crypto::tink::BinaryKeysetWriter;
 using ::crypto::tink::CleartextKeysetHandle;
 using ::crypto::tink::KeysetHandle;
+using ::crypto::tink::test::IsOk;
 using ::google::crypto::tink::KeyTemplate;
+using ::testing::ElementsAre;
 using ::testing::Eq;
 using ::testing::IsEmpty;
-using ::crypto::tink::test::IsOk;
+using ::testing::Not;
+using ::tink_testing_api::JwtFromJwkSetRequest;
+using ::tink_testing_api::JwtFromJwkSetResponse;
 using ::tink_testing_api::JwtSignRequest;
 using ::tink_testing_api::JwtSignResponse;
+using ::tink_testing_api::JwtToJwkSetRequest;
+using ::tink_testing_api::JwtToJwkSetResponse;
+using ::tink_testing_api::JwtToken;
+using ::tink_testing_api::JwtValidator;
 using ::tink_testing_api::JwtVerifyRequest;
 using ::tink_testing_api::JwtVerifyResponse;
 
 std::string ValidKeyset() {
   const KeyTemplate& key_template = ::crypto::tink::JwtHs256Template();
-  auto handle_or = KeysetHandle::GenerateNew(key_template);
-  EXPECT_THAT(handle_or.status(), IsOk());
+  util::StatusOr<std::unique_ptr<KeysetHandle>> handle =
+      KeysetHandle::GenerateNew(key_template);
+  EXPECT_THAT(handle.status(), IsOk());
 
   std::stringbuf keyset;
-  auto writer_or =
+  util::StatusOr<std::unique_ptr<BinaryKeysetWriter>> writer =
       BinaryKeysetWriter::New(absl::make_unique<std::ostream>(&keyset));
-  EXPECT_THAT(writer_or.status(), IsOk());
+  EXPECT_THAT(writer.status(), IsOk());
 
-  auto status = CleartextKeysetHandle::Write(writer_or.ValueOrDie().get(),
-                                             *handle_or.ValueOrDie());
+  util::Status status = CleartextKeysetHandle::Write((*writer).get(), **handle);
   EXPECT_THAT(status, IsOk());
   return keyset.str();
 }
@@ -68,7 +78,7 @@ TEST_F(JwtImplMacTest, MacComputeVerifySuccess) {
   std::string keyset = ValidKeyset();
   JwtSignRequest comp_request;
   comp_request.set_keyset(keyset);
-  auto raw_jwt = comp_request.mutable_raw_jwt();
+  JwtToken* raw_jwt = comp_request.mutable_raw_jwt();
   raw_jwt->mutable_type_header()->set_value("type_header");
   raw_jwt->mutable_issuer()->set_value("issuer");
   raw_jwt->mutable_subject()->set_value("subject");
@@ -93,17 +103,18 @@ TEST_F(JwtImplMacTest, MacComputeVerifySuccess) {
   JwtVerifyRequest verify_request;
   verify_request.set_keyset(keyset);
   verify_request.set_signed_compact_jwt(comp_response.signed_compact_jwt());
-  auto validator = verify_request.mutable_validator();
-  validator->mutable_issuer()->set_value("issuer");
-  validator->mutable_audience()->set_value("audience2");
+  JwtValidator* validator = verify_request.mutable_validator();
+  validator->mutable_expected_type_header()->set_value("type_header");
+  validator->mutable_expected_issuer()->set_value("issuer");
+  validator->mutable_expected_audience()->set_value("audience2");
   validator->mutable_now()->set_seconds(23456);
   JwtVerifyResponse verify_response;
 
-  EXPECT_TRUE(
+  ASSERT_TRUE(
       jwt.VerifyMacAndDecode(nullptr, &verify_request, &verify_response).ok());
-  EXPECT_THAT(verify_response.err(), IsEmpty());
-  auto verified_jwt = verify_response.verified_jwt();
-  EXPECT_THAT(verified_jwt.type_header().value(), Eq("type_header"));
+  ASSERT_THAT(verify_response.err(), IsEmpty());
+  const JwtToken& verified_jwt = verify_response.verified_jwt();
+  EXPECT_EQ(verified_jwt.type_header().value(), "type_header");
   EXPECT_THAT(verified_jwt.issuer().value(), Eq("issuer"));
   EXPECT_THAT(verified_jwt.subject().value(), Eq("subject"));
   EXPECT_THAT(verified_jwt.audiences_size(), Eq(2));
@@ -111,7 +122,7 @@ TEST_F(JwtImplMacTest, MacComputeVerifySuccess) {
   EXPECT_THAT(verified_jwt.audiences(1), Eq("audience2"));
   EXPECT_THAT(verified_jwt.jwt_id().value(), Eq("jwt_id"));
   EXPECT_THAT(verified_jwt.not_before().seconds(), Eq(12345));
-  EXPECT_THAT(verified_jwt.not_before().nanos(), Eq(123000000));
+  EXPECT_THAT(verified_jwt.not_before().nanos(), Eq(0));
   EXPECT_THAT(verified_jwt.issued_at().seconds(), Eq(23456));
   EXPECT_THAT(verified_jwt.issued_at().nanos(), Eq(0));
   EXPECT_THAT(verified_jwt.expiration().seconds(), Eq(34567));
@@ -152,7 +163,8 @@ TEST_F(JwtImplMacTest, VerifyWithWrongIssuerFails) {
   JwtVerifyRequest verify_request;
   verify_request.set_keyset(keyset);
   verify_request.set_signed_compact_jwt(comp_response.signed_compact_jwt());
-  verify_request.mutable_validator()->mutable_issuer()->set_value("issuer");
+  verify_request.mutable_validator()->mutable_expected_issuer()->set_value(
+      "issuer");
   JwtVerifyResponse verify_response;
 
   EXPECT_TRUE(
@@ -165,29 +177,31 @@ class JwtImplSignatureTest : public ::testing::Test {
   static void SetUpTestSuite() { ASSERT_THAT(JwtSignatureRegister(), IsOk()); }
   void SetUp() override {
     const KeyTemplate& key_template = ::crypto::tink::JwtEs256Template();
-    auto handle_or = KeysetHandle::GenerateNew(key_template);
-    EXPECT_THAT(handle_or.status(), IsOk());
+    util::StatusOr<std::unique_ptr<KeysetHandle>> handle =
+        KeysetHandle::GenerateNew(key_template);
+    EXPECT_THAT(handle.status(), IsOk());
 
     std::stringbuf keyset;
-    auto writer_or =
+    util::StatusOr<std::unique_ptr<BinaryKeysetWriter>> writer =
         BinaryKeysetWriter::New(absl::make_unique<std::ostream>(&keyset));
-    EXPECT_THAT(writer_or.status(), IsOk());
+    EXPECT_THAT(writer.status(), IsOk());
 
-    auto status = CleartextKeysetHandle::Write(writer_or.ValueOrDie().get(),
-                                               *handle_or.ValueOrDie());
+    util::Status status =
+        CleartextKeysetHandle::Write((*writer).get(), **handle);
     EXPECT_THAT(status, IsOk());
     private_keyset_ = keyset.str();
 
-    auto pub_handle_or = handle_or.ValueOrDie()->GetPublicKeysetHandle();
-    EXPECT_THAT(pub_handle_or.status(), IsOk());
+    util::StatusOr<std::unique_ptr<crypto::tink::KeysetHandle>> pub_handle =
+        (*handle)->GetPublicKeysetHandle();
+    EXPECT_THAT(pub_handle.status(), IsOk());
 
     std::stringbuf pub_keyset;
-    auto pub_writer_or = BinaryKeysetWriter::New(
-        absl::make_unique<std::ostream>(&pub_keyset));
-    EXPECT_THAT(writer_or.status(), IsOk());
+    util::StatusOr<std::unique_ptr<BinaryKeysetWriter>> pub_writer =
+        BinaryKeysetWriter::New(absl::make_unique<std::ostream>(&pub_keyset));
+    EXPECT_THAT(writer.status(), IsOk());
 
-    auto pub_status = CleartextKeysetHandle::Write(
-        pub_writer_or.ValueOrDie().get(), *pub_handle_or.ValueOrDie());
+    util::Status pub_status =
+        CleartextKeysetHandle::Write(pub_writer->get(), **pub_handle);
     EXPECT_THAT(pub_status, IsOk());
     public_keyset_ = pub_keyset.str();
   }
@@ -199,7 +213,7 @@ TEST_F(JwtImplSignatureTest, SignVerifySuccess) {
   tink_testing_api::JwtImpl jwt;
   JwtSignRequest comp_request;
   comp_request.set_keyset(private_keyset_);
-  auto raw_jwt = comp_request.mutable_raw_jwt();
+  JwtToken* raw_jwt = comp_request.mutable_raw_jwt();
   raw_jwt->mutable_type_header()->set_value("type_header");
   raw_jwt->mutable_issuer()->set_value("issuer");
   raw_jwt->mutable_subject()->set_value("subject");
@@ -223,23 +237,23 @@ TEST_F(JwtImplSignatureTest, SignVerifySuccess) {
   JwtVerifyRequest verify_request;
   verify_request.set_keyset(public_keyset_);
   verify_request.set_signed_compact_jwt(comp_response.signed_compact_jwt());
-  auto validator = verify_request.mutable_validator();
-  validator->mutable_issuer()->set_value("issuer");
-  validator->mutable_audience()->set_value("audience2");
+  JwtValidator* validator = verify_request.mutable_validator();
+  validator->mutable_expected_type_header()->set_value("type_header");
+  validator->mutable_expected_issuer()->set_value("issuer");
+  validator->mutable_expected_audience()->set_value("audience2");
   validator->mutable_now()->set_seconds(23456);
   JwtVerifyResponse verify_response;
 
-  EXPECT_TRUE(
+  ASSERT_TRUE(
       jwt.PublicKeyVerifyAndDecode(nullptr, &verify_request, &verify_response)
           .ok());
-  EXPECT_THAT(verify_response.err(), IsEmpty());
-  auto verified_jwt = verify_response.verified_jwt();
-  EXPECT_THAT(verified_jwt.type_header().value(), Eq("type_header"));
+  ASSERT_THAT(verify_response.err(), IsEmpty());
+  const JwtToken& verified_jwt = verify_response.verified_jwt();
+  EXPECT_EQ(verified_jwt.type_header().value(), "type_header");
   EXPECT_THAT(verified_jwt.issuer().value(), Eq("issuer"));
   EXPECT_THAT(verified_jwt.subject().value(), Eq("subject"));
-  EXPECT_THAT(verified_jwt.audiences_size(), Eq(2));
-  EXPECT_THAT(verified_jwt.audiences(0), Eq("audience1"));
-  EXPECT_THAT(verified_jwt.audiences(1), Eq("audience2"));
+  ASSERT_THAT(verified_jwt.audiences(),
+              ElementsAre("audience1", "audience2"));
   EXPECT_THAT(verified_jwt.jwt_id().value(), Eq("jwt_id"));
   EXPECT_THAT(verified_jwt.not_before().seconds(), Eq(12345));
   EXPECT_THAT(verified_jwt.issued_at().seconds(), Eq(23456));
@@ -279,13 +293,84 @@ TEST_F(JwtImplSignatureTest, VerifyWithWrongIssuerFails) {
   JwtVerifyRequest verify_request;
   verify_request.set_keyset(public_keyset_);
   verify_request.set_signed_compact_jwt(comp_response.signed_compact_jwt());
-  verify_request.mutable_validator()->mutable_issuer()->set_value("issuer");
+  verify_request.mutable_validator()->mutable_expected_issuer()->set_value(
+      "issuer");
   JwtVerifyResponse verify_response;
 
   EXPECT_TRUE(
       jwt.PublicKeyVerifyAndDecode(nullptr, &verify_request, &verify_response)
           .ok());
   EXPECT_THAT(verify_response.err(), Not(IsEmpty()));
+}
+
+TEST_F(JwtImplSignatureTest, SignConvertToAndFromJwkVerifySuccess) {
+  tink_testing_api::JwtImpl jwt;
+
+  // Create a signed token
+  JwtSignRequest comp_request;
+  comp_request.set_keyset(private_keyset_);
+  JwtToken* raw_jwt = comp_request.mutable_raw_jwt();
+  raw_jwt->mutable_issuer()->set_value("issuer");
+  raw_jwt->mutable_expiration()->set_seconds(34567);
+  JwtSignResponse comp_response;
+  ASSERT_TRUE(
+      jwt.PublicKeySignAndEncode(nullptr, &comp_request, &comp_response).ok());
+  ASSERT_THAT(comp_response.err(), IsEmpty());
+
+  // Generate a JWK set from the public key
+  JwtToJwkSetRequest to_jwk_request;
+  to_jwk_request.set_keyset(public_keyset_);
+
+  JwtToJwkSetResponse to_jwk_response;
+  ASSERT_TRUE(jwt.ToJwkSet(nullptr, &to_jwk_request, &to_jwk_response).ok());
+  ASSERT_THAT(to_jwk_response.err(), IsEmpty());
+
+  // Generate a public keyset from the JWK set
+  JwtFromJwkSetRequest from_jwk_request;
+  from_jwk_request.set_jwk_set(to_jwk_response.jwk_set());
+
+  JwtFromJwkSetResponse from_jwk_response;
+  ASSERT_TRUE(
+      jwt.FromJwkSet(nullptr, &from_jwk_request, &from_jwk_response).ok());
+  ASSERT_THAT(from_jwk_response.err(), IsEmpty());
+
+  // Verify the token using the public keyset
+  JwtVerifyRequest verify_request;
+  verify_request.set_keyset(from_jwk_response.keyset());
+  verify_request.set_signed_compact_jwt(comp_response.signed_compact_jwt());
+  JwtValidator* validator = verify_request.mutable_validator();
+  validator->mutable_expected_issuer()->set_value("issuer");
+  validator->mutable_now()->set_seconds(23456);
+  JwtVerifyResponse verify_response;
+
+  ASSERT_TRUE(
+      jwt.PublicKeyVerifyAndDecode(nullptr, &verify_request, &verify_response)
+          .ok());
+  ASSERT_THAT(verify_response.err(), IsEmpty());
+  const JwtToken& verified_jwt = verify_response.verified_jwt();
+  EXPECT_THAT(verified_jwt.issuer().value(), Eq("issuer"));
+  EXPECT_THAT(verified_jwt.expiration().seconds(), Eq(34567));
+}
+
+TEST_F(JwtImplSignatureTest, FromJwkInvalidFails) {
+  tink_testing_api::JwtImpl jwt;
+  JwtFromJwkSetRequest from_jwk_request;
+  from_jwk_request.set_jwk_set("invalid");
+
+  JwtFromJwkSetResponse from_jwk_response;
+  ASSERT_TRUE(
+      jwt.FromJwkSet(nullptr, &from_jwk_request, &from_jwk_response).ok());
+  EXPECT_THAT(from_jwk_response.err(), Not(IsEmpty()));
+}
+
+TEST_F(JwtImplSignatureTest, ToJwkInvalidFails) {
+  tink_testing_api::JwtImpl jwt;
+  JwtToJwkSetRequest to_jwk_request;
+  to_jwk_request.set_keyset("invalid");
+
+  JwtToJwkSetResponse to_jwk_response;
+  ASSERT_TRUE(jwt.ToJwkSet(nullptr, &to_jwk_request, &to_jwk_response).ok());
+  EXPECT_THAT(to_jwk_response.err(), Not(IsEmpty()));
 }
 
 }  // namespace

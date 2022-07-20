@@ -16,6 +16,9 @@
 
 #include "tink/util/secret_data.h"
 
+#include <string>
+#include <utility>
+
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "absl/strings/string_view.h"
@@ -28,6 +31,24 @@ namespace {
 using ::testing::AnyOf;
 using ::testing::ElementsAreArray;
 using ::testing::Eq;
+
+
+constexpr int kEightKb = 8192;
+struct alignas(kEightKb) TwoMbAlignedStruct {
+  int data;
+};
+
+// If we don't have __cpp_aligned_new we currently do not support types
+// whose alginment requirement is greater than the default.
+#ifdef __cpp_aligned_new
+
+TEST(SecretUniqueptrTest, Alignment) {
+  SecretUniquePtr<TwoMbAlignedStruct> s =
+      MakeSecretUniquePtr<TwoMbAlignedStruct>();
+  EXPECT_THAT(reinterpret_cast<size_t>(s.get()) % kEightKb, Eq(0));
+}
+
+#endif
 
 TEST(SecretDataTest, OneByOneInsertion) {
   constexpr unsigned char kContents[] = {41, 42, 64, 12, 41, 0,

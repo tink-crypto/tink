@@ -1,0 +1,121 @@
+package(default_testonly = 1)
+
+licenses(["notice"])
+
+java_test(
+    name = "ChaCha20UtilTest",
+    size = "small",
+    srcs = ["ChaCha20UtilTest.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink/aead/internal:cha_cha20_util",
+        "//src/main/java/com/google/crypto/tink/testing:test_util",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "InsecureNonceAesGcmJceTest",
+    srcs = ["InsecureNonceAesGcmJceTest.java"],
+    data = ["@wycheproof//testvectors:all"],
+    tags = [
+        "fips",
+        "notsan",
+    ],
+    deps = [
+        "//src/main/java/com/google/crypto/tink/aead/internal:insecure_nonce_aes_gcm_jce",
+        "//src/main/java/com/google/crypto/tink/config:tink_fips",
+        "//src/main/java/com/google/crypto/tink/config/internal:tink_fips_util",
+        "//src/main/java/com/google/crypto/tink/subtle:bytes",
+        "//src/main/java/com/google/crypto/tink/subtle:hex",
+        "//src/main/java/com/google/crypto/tink/subtle:random",
+        "//src/main/java/com/google/crypto/tink/subtle:subtle_util_cluster",
+        "//src/main/java/com/google/crypto/tink/testing:test_util",
+        "//src/main/java/com/google/crypto/tink/testing:wycheproof_test_util",
+        "@maven//:com_google_code_gson_gson",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+        "@maven//:org_conscrypt_conscrypt_openjdk_uber",
+    ],
+)
+
+java_test(
+    name = "InsecureNonceChaCha20Test",
+    size = "small",
+    srcs = ["InsecureNonceChaCha20Test.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink/aead/internal:insecure_nonce_cha_cha20",
+        "//src/main/java/com/google/crypto/tink/subtle:hex",
+        "//src/main/java/com/google/crypto/tink/subtle:random",
+        "//src/main/java/com/google/crypto/tink/testing:test_util",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "InsecureNonceChaCha20Poly1305Test",
+    size = "small",
+    srcs = ["InsecureNonceChaCha20Poly1305Test.java"],
+    data = ["@wycheproof//testvectors:all"],
+    tags = [
+        "fips",
+        "notsan",
+    ],
+    deps = [
+        "//src/main/java/com/google/crypto/tink/aead/internal:insecure_nonce_cha_cha20_poly1305",
+        "//src/main/java/com/google/crypto/tink/config:tink_fips",
+        "//src/main/java/com/google/crypto/tink/subtle:bytes",
+        "//src/main/java/com/google/crypto/tink/subtle:hex",
+        "//src/main/java/com/google/crypto/tink/subtle:random",
+        "//src/main/java/com/google/crypto/tink/testing:test_util",
+        "//src/main/java/com/google/crypto/tink/testing:wycheproof_test_util",
+        "@maven//:com_google_code_gson_gson",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "InsecureNonceXChaCha20Poly1305Test",
+    size = "large",
+    srcs = ["InsecureNonceXChaCha20Poly1305Test.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink/aead/internal:insecure_nonce_x_cha_cha20_poly1305",
+        "//src/main/java/com/google/crypto/tink/aead/internal:poly1305",
+        "//src/main/java/com/google/crypto/tink/subtle:bytes",
+        "//src/main/java/com/google/crypto/tink/subtle:hex",
+        "//src/main/java/com/google/crypto/tink/subtle:random",
+        "//src/main/java/com/google/crypto/tink/testing:test_util",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "InsecureNonceXChaCha20Test",
+    size = "small",
+    srcs = ["InsecureNonceXChaCha20Test.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink/aead/internal:cha_cha20_util",
+        "//src/main/java/com/google/crypto/tink/aead/internal:insecure_nonce_x_cha_cha20",
+        "//src/main/java/com/google/crypto/tink/subtle:hex",
+        "//src/main/java/com/google/crypto/tink/subtle:random",
+        "//src/main/java/com/google/crypto/tink/testing:test_util",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "Poly1305Test",
+    size = "small",
+    srcs = ["Poly1305Test.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink/aead/internal:poly1305",
+        "//src/main/java/com/google/crypto/tink/subtle:random",
+        "//src/main/java/com/google/crypto/tink/testing:test_util",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)

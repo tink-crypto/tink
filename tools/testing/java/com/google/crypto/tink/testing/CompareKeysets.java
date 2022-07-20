@@ -52,8 +52,8 @@ final class CompareKeysets {
   }
 
   /**
-   * Finds a key in {@param keyList} for which {@link areEqualKeys} returns true, removes it, and
-   * returns true. If not such key exists returns false.
+   * Finds a key in {@code keyList} for which {@link equalKeys} returns true, removes it, and
+   * returns true. If no such key exists, returns false.
    */
   private static boolean findAndRemove(Keyset.Key key, List<Keyset.Key> keyList) throws Exception {
     for (Keyset.Key key2 : keyList) {

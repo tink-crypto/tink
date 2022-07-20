@@ -17,6 +17,8 @@
 #ifndef TINK_CATALOGUE_H_
 #define TINK_CATALOGUE_H_
 
+#include <string>
+
 #include "absl/base/macros.h"
 #include "tink/key_manager.h"
 #include "tink/util/statusor.h"

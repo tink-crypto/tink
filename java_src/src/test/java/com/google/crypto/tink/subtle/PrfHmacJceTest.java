@@ -23,6 +23,7 @@ import static org.junit.Assert.fail;
 
 import com.google.crypto.tink.Mac;
 import com.google.crypto.tink.config.TinkFips;
+import com.google.crypto.tink.config.internal.TinkFipsUtil;
 import com.google.crypto.tink.prf.Prf;
 import com.google.crypto.tink.testing.TestUtil;
 import java.security.GeneralSecurityException;
@@ -106,7 +107,7 @@ public class PrfHmacJceTest {
 
   @Test
   public void testMacTestVectors() throws Exception {
-    Assume.assumeTrue(!TinkFips.useOnlyFips() || TinkFips.fipsModuleAvailable());
+    Assume.assumeTrue(!TinkFips.useOnlyFips() || TinkFipsUtil.fipsModuleAvailable());
 
     for (MacTestVector t : HMAC_TEST_VECTORS) {
       Mac mac =
@@ -115,14 +116,14 @@ public class PrfHmacJceTest {
       try {
         mac.verifyMac(t.tag, t.message);
       } catch (GeneralSecurityException e) {
-        fail("Valid MAC, should not throw exception");
+        throw new AssertionError("Valid MAC, should not throw exception", e);
       }
     }
   }
 
   @Test
   public void testPrfUniformity() throws GeneralSecurityException {
-    Assume.assumeTrue(!TinkFips.useOnlyFips() || TinkFips.fipsModuleAvailable());
+    Assume.assumeTrue(!TinkFips.useOnlyFips() || TinkFipsUtil.fipsModuleAvailable());
 
     for (MacTestVector t : HMAC_TEST_VECTORS) {
       Prf prf = new PrfHmacJce(t.algName, new SecretKeySpec(t.key, "HMAC"));
@@ -138,7 +139,7 @@ public class PrfHmacJceTest {
 
   @Test
   public void testPrfPrefixOfMac() throws Exception {
-    Assume.assumeTrue(!TinkFips.useOnlyFips() || TinkFips.fipsModuleAvailable());
+    Assume.assumeTrue(!TinkFips.useOnlyFips() || TinkFipsUtil.fipsModuleAvailable());
 
     for (MacTestVector t : HMAC_TEST_VECTORS) {
       Prf prf = new PrfHmacJce(t.algName, new SecretKeySpec(t.key, "HMAC"));
@@ -153,7 +154,7 @@ public class PrfHmacJceTest {
 
   @Test
   public void testTagTruncation() throws Exception {
-    Assume.assumeTrue(!TinkFips.useOnlyFips() || TinkFips.fipsModuleAvailable());
+    Assume.assumeTrue(!TinkFips.useOnlyFips() || TinkFipsUtil.fipsModuleAvailable());
 
     for (MacTestVector t : HMAC_TEST_VECTORS) {
       Mac mac =
@@ -178,7 +179,7 @@ public class PrfHmacJceTest {
 
   @Test
   public void testBitFlipMessage() throws Exception {
-    Assume.assumeTrue(!TinkFips.useOnlyFips() || TinkFips.fipsModuleAvailable());
+    Assume.assumeTrue(!TinkFips.useOnlyFips() || TinkFipsUtil.fipsModuleAvailable());
 
     for (MacTestVector t : HMAC_TEST_VECTORS) {
       Mac mac =
@@ -206,7 +207,7 @@ public class PrfHmacJceTest {
 
   @Test
   public void testBitFlipTag() throws Exception {
-    Assume.assumeTrue(!TinkFips.useOnlyFips() || TinkFips.fipsModuleAvailable());
+    Assume.assumeTrue(!TinkFips.useOnlyFips() || TinkFipsUtil.fipsModuleAvailable());
 
     for (MacTestVector t : HMAC_TEST_VECTORS) {
       Mac mac =
@@ -237,7 +238,7 @@ public class PrfHmacJceTest {
 
   @Test
   public void testThrowExceptionIfKeySizeIsTooSmall() throws Exception {
-    Assume.assumeTrue(!TinkFips.useOnlyFips() || TinkFips.fipsModuleAvailable());
+    Assume.assumeTrue(!TinkFips.useOnlyFips() || TinkFipsUtil.fipsModuleAvailable());
 
     assertThrows(
         InvalidAlgorithmParameterException.class,
@@ -248,21 +249,11 @@ public class PrfHmacJceTest {
 
   @Test
   public void testThrowExceptionIfTagSizeIsTooSmall() throws Exception {
-    Assume.assumeTrue(!TinkFips.useOnlyFips() || TinkFips.fipsModuleAvailable());
+    Assume.assumeTrue(!TinkFips.useOnlyFips() || TinkFipsUtil.fipsModuleAvailable());
 
     testThrowExceptionIfTagSizeIsTooSmall("HMACSHA1");
     testThrowExceptionIfTagSizeIsTooSmall("HMACSHA256");
     testThrowExceptionIfTagSizeIsTooSmall("HMACSHA512");
-  }
-
-  @Test
-  public void testPrfAllowsSmallTagSizeCompute() throws Exception {
-    Assume.assumeTrue(!TinkFips.useOnlyFips() || TinkFips.fipsModuleAvailable());
-
-    testPrfNoExceptionIfTagSizeIsTooSmall("HMACSHA1");
-    testPrfNoExceptionIfTagSizeIsTooSmall("HMACSHA256");
-    testThrowExceptionIfTagSizeIsTooSmall("HMACSHA384");
-    testPrfNoExceptionIfTagSizeIsTooSmall("HMACSHA512");
   }
 
   private static void testThrowExceptionIfTagSizeIsTooSmall(String algoName) throws Exception {
@@ -276,6 +267,16 @@ public class PrfHmacJceTest {
     }
   }
 
+  @Test
+  public void testPrfAllowsSmallTagSizeCompute() throws Exception {
+    Assume.assumeTrue(!TinkFips.useOnlyFips() || TinkFipsUtil.fipsModuleAvailable());
+
+    testPrfNoExceptionIfTagSizeIsTooSmall("HMACSHA1");
+    testPrfNoExceptionIfTagSizeIsTooSmall("HMACSHA256");
+    testThrowExceptionIfTagSizeIsTooSmall("HMACSHA384");
+    testPrfNoExceptionIfTagSizeIsTooSmall("HMACSHA512");
+  }
+
   private static void testPrfNoExceptionIfTagSizeIsTooSmall(String algoName) throws Exception {
     for (int i = 0; i < PrfMac.MIN_TAG_SIZE_IN_BYTES; i++) {
       new PrfHmacJce(algoName, new SecretKeySpec(Random.randBytes(16), "HMAC"))
@@ -285,7 +286,7 @@ public class PrfHmacJceTest {
 
   @Test
   public void testThrowExceptionIfTagSizeIsTooLarge() throws Exception {
-    Assume.assumeTrue(!TinkFips.useOnlyFips() || TinkFips.fipsModuleAvailable());
+    Assume.assumeTrue(!TinkFips.useOnlyFips() || TinkFipsUtil.fipsModuleAvailable());
 
     testThrowExceptionIfTagSizeIsTooLarge("HMACSHA1", 21);
     testThrowExceptionIfTagSizeIsTooLarge("HMACSHA256", 33);
@@ -321,7 +322,7 @@ public class PrfHmacJceTest {
 
   @Test
   public void testFailIfFipsModuleNotAvailable() throws Exception {
-    Assume.assumeTrue(TinkFips.useOnlyFips() && !TinkFips.fipsModuleAvailable());
+    Assume.assumeTrue(TinkFips.useOnlyFips() && !TinkFipsUtil.fipsModuleAvailable());
 
     assertThrows(
         GeneralSecurityException.class,

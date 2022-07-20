@@ -1,4 +1,4 @@
-# Copyright 2019 Google LLC.
+# Copyright 2019 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,24 +13,18 @@
 # limitations under the License.
 """A client for AWS KMS."""
 
-from __future__ import absolute_import
-from __future__ import division
-# Placeholder for import for type annotations
-from __future__ import print_function
-
 import re
 
-from typing import Text
 
 from tink import aead
 from tink import core
 from tink.cc.pybind import tink_bindings
 
 
-class AwsKmsClient(object):
+class AwsKmsClient:
   """Basic AWS client for AEAD."""
 
-  def __init__(self, key_uri: Text, credentials_path: Text):
+  def __init__(self, key_uri: str, credentials_path: str):
     """Creates a new AwsKmsClient that is bound to the key specified in 'key_uri'.
 
     Uses the specifed credentials when communicating with the KMS. Either of
@@ -60,7 +54,7 @@ class AwsKmsClient(object):
 
     self.cc_client = tink_bindings.AwsKmsClient(key_uri, credentials_path)
 
-  def does_support(self, key_uri: Text) -> bool:
+  def does_support(self, key_uri: str) -> bool:
     """Returns true iff this client supports KMS key specified in 'key_uri'.
 
     Args:
@@ -72,7 +66,7 @@ class AwsKmsClient(object):
     return self.cc_client.does_support(key_uri)
 
   @core.use_tink_errors
-  def get_aead(self, key_uri: Text) -> aead.Aead:
+  def get_aead(self, key_uri: str) -> aead.Aead:
     """Returns an Aead-primitive backed by KMS key specified by 'key_uri'.
 
     Args:

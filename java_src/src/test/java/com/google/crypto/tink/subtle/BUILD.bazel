@@ -4,9 +4,8 @@ java_test(
     name = "Ed25519SignTest",
     size = "small",
     srcs = ["Ed25519SignTest.java"],
-    data = [
-        "@wycheproof//testvectors:all",
-    ],
+    data = ["@wycheproof//testvectors:all"],
+    tags = ["fips"],
     deps = [
         "//src/main/java/com/google/crypto/tink/config:tink_fips",
         "//src/main/java/com/google/crypto/tink/subtle:ed25519_sign",
@@ -24,11 +23,10 @@ java_test(
     name = "EcdsaVerifyJceTest",
     size = "small",
     srcs = ["EcdsaVerifyJceTest.java"],
-    data = [
-        "@wycheproof//testvectors:all",
-    ],
+    data = ["@wycheproof//testvectors:all"],
     deps = [
         "//src/main/java/com/google/crypto/tink/config:tink_fips",
+        "//src/main/java/com/google/crypto/tink/config/internal:tink_fips_util",
         "//src/main/java/com/google/crypto/tink/subtle:ecdsa_sign_jce",
         "//src/main/java/com/google/crypto/tink/subtle:ecdsa_verify_jce",
         "//src/main/java/com/google/crypto/tink/subtle:elliptic_curves",
@@ -49,6 +47,7 @@ java_test(
     srcs = ["EcdsaSignJceTest.java"],
     deps = [
         "//src/main/java/com/google/crypto/tink/config:tink_fips",
+        "//src/main/java/com/google/crypto/tink/config/internal:tink_fips_util",
         "//src/main/java/com/google/crypto/tink/subtle:ecdsa_sign_jce",
         "//src/main/java/com/google/crypto/tink/subtle:elliptic_curves",
         "//src/main/java/com/google/crypto/tink/subtle:enums",
@@ -62,9 +61,7 @@ java_test(
     name = "RsaSsaPssVerifyJceTest",
     size = "small",
     srcs = ["RsaSsaPssVerifyJceTest.java"],
-    data = [
-        "@wycheproof//testvectors:all",
-    ],
+    data = ["@wycheproof//testvectors:all"],
     deps = [
         "//src/main/java/com/google/crypto/tink/config:tink_fips",
         "//src/main/java/com/google/crypto/tink/subtle:enums",
@@ -94,7 +91,6 @@ java_test(
     srcs = ["EngineFactoryTest.java"],
     deps = [
         "//src/main/java/com/google/crypto/tink/subtle:subtle_util_cluster",
-        "@maven//:com_google_truth_truth",
         "@maven//:junit_junit",
     ],
 )
@@ -103,6 +99,7 @@ java_test(
     name = "EngineFactoryFipsTest",
     size = "small",
     srcs = ["EngineFactoryFipsTest.java"],
+    tags = ["fips"],
     deps = [
         "//src/main/java/com/google/crypto/tink/config:tink_fips",
         "//src/main/java/com/google/crypto/tink/subtle:subtle_util_cluster",
@@ -116,9 +113,8 @@ java_test(
     name = "Ed25519VerifyTest",
     size = "small",
     srcs = ["Ed25519VerifyTest.java"],
-    data = [
-        "@wycheproof//testvectors:all",
-    ],
+    data = ["@wycheproof//testvectors:all"],
+    tags = ["fips"],
     deps = [
         "//src/main/java/com/google/crypto/tink/config:tink_fips",
         "//src/main/java/com/google/crypto/tink/subtle:ed25519_verify",
@@ -182,6 +178,7 @@ java_test(
     srcs = ["RsaSsaPkcs1SignJceTest.java"],
     deps = [
         "//src/main/java/com/google/crypto/tink/config:tink_fips",
+        "//src/main/java/com/google/crypto/tink/config/internal:tink_fips_util",
         "//src/main/java/com/google/crypto/tink/subtle:enums",
         "//src/main/java/com/google/crypto/tink/subtle:random",
         "//src/main/java/com/google/crypto/tink/subtle:rsa_ssa_pkcs1_sign_jce",
@@ -210,9 +207,8 @@ java_test(
     name = "AesEaxJceTest",
     size = "small",
     srcs = ["AesEaxJceTest.java"],
-    data = [
-        "@wycheproof//testvectors:all",
-    ],
+    data = ["@wycheproof//testvectors:all"],
+    tags = ["fips"],
     deps = [
         "//src/main/java/com/google/crypto/tink/config:tink_fips",
         "//src/main/java/com/google/crypto/tink/subtle:aes_eax_jce",
@@ -267,17 +263,13 @@ java_test(
 
 java_test(
     name = "SelfKeyTestValidatorsTest",
-    size = "small",
     srcs = ["SelfKeyTestValidatorsTest.java"],
     deps = [
         "//src/main/java/com/google/crypto/tink/subtle:elliptic_curves",
         "//src/main/java/com/google/crypto/tink/subtle:enums",
         "//src/main/java/com/google/crypto/tink/subtle:selfkeytests_validators",
         "//src/main/java/com/google/crypto/tink/subtle:subtle_util_cluster",
-        "//src/main/java/com/google/crypto/tink/testing:test_util",
-        "@maven//:com_google_truth_truth",
         "@maven//:junit_junit",
-        "@maven//:pl_pragmatists_JUnitParams",
     ],
 )
 
@@ -310,9 +302,8 @@ java_test(
     name = "AesSivTest",
     size = "small",
     srcs = ["AesSivTest.java"],
-    data = [
-        "@wycheproof//testvectors:all",
-    ],
+    data = ["@wycheproof//testvectors:all"],
+    tags = ["fips"],
     deps = [
         "//src/main/java/com/google/crypto/tink:deterministic_aead",
         "//src/main/java/com/google/crypto/tink/config:tink_fips",
@@ -331,9 +322,11 @@ java_test(
     name = "PrfHmacJceTest",
     size = "small",
     srcs = ["PrfHmacJceTest.java"],
+    tags = ["fips"],
     deps = [
         "//src/main/java/com/google/crypto/tink:mac",
         "//src/main/java/com/google/crypto/tink/config:tink_fips",
+        "//src/main/java/com/google/crypto/tink/config/internal:tink_fips_util",
         "//src/main/java/com/google/crypto/tink/prf:prf_set",
         "//src/main/java/com/google/crypto/tink/subtle:hex",
         "//src/main/java/com/google/crypto/tink/subtle:prf_hmac_jce",
@@ -349,9 +342,7 @@ java_test(
     name = "KwpTest",
     size = "small",
     srcs = ["KwpTest.java"],
-    data = [
-        "@wycheproof//testvectors:all",
-    ],
+    data = ["@wycheproof//testvectors:all"],
     deps = [
         "//src/main/java/com/google/crypto/tink:key_wrap",
         "//src/main/java/com/google/crypto/tink/subtle:hex",
@@ -365,23 +356,14 @@ java_test(
 )
 
 java_test(
-    name = "ImmutableByteArrayTest",
-    size = "small",
-    srcs = ["ImmutableByteArrayTest.java"],
-    deps = [
-        "//src/main/java/com/google/crypto/tink/subtle:immutable_byte_array",
-        "@maven//:junit_junit",
-    ],
-)
-
-java_test(
     name = "ChaCha20Poly1305Test",
     size = "small",
     srcs = ["ChaCha20Poly1305Test.java"],
-    data = [
-        "@wycheproof//testvectors:all",
+    data = ["@wycheproof//testvectors:all"],
+    tags = [
+        "fips",
+        "notsan",
     ],
-    tags = ["notsan"],
     deps = [
         "//src/main/java/com/google/crypto/tink:aead",
         "//src/main/java/com/google/crypto/tink/config:tink_fips",
@@ -399,14 +381,15 @@ java_test(
 
 java_test(
     name = "AesGcmJceTest",
-    size = "medium",
     srcs = ["AesGcmJceTest.java"],
-    data = [
-        "@wycheproof//testvectors:all",
+    data = ["@wycheproof//testvectors:all"],
+    tags = [
+        "fips",
+        "notsan",
     ],
-    tags = ["notsan"],
     deps = [
         "//src/main/java/com/google/crypto/tink/config:tink_fips",
+        "//src/main/java/com/google/crypto/tink/config/internal:tink_fips_util",
         "//src/main/java/com/google/crypto/tink/subtle:aes_gcm_jce",
         "//src/main/java/com/google/crypto/tink/subtle:bytes",
         "//src/main/java/com/google/crypto/tink/subtle:hex",
@@ -425,6 +408,7 @@ java_test(
     name = "PrfAesCmacTest",
     size = "small",
     srcs = ["PrfAesCmacTest.java"],
+    tags = ["fips"],
     deps = [
         "//src/main/java/com/google/crypto/tink:mac",
         "//src/main/java/com/google/crypto/tink/config:tink_fips",
@@ -454,11 +438,10 @@ java_test(
     name = "RsaSsaPkcs1VerifyJceTest",
     size = "small",
     srcs = ["RsaSsaPkcs1VerifyJceTest.java"],
-    data = [
-        "@wycheproof//testvectors:all",
-    ],
+    data = ["@wycheproof//testvectors:all"],
     deps = [
         "//src/main/java/com/google/crypto/tink/config:tink_fips",
+        "//src/main/java/com/google/crypto/tink/config/internal:tink_fips_util",
         "//src/main/java/com/google/crypto/tink/subtle:enums",
         "//src/main/java/com/google/crypto/tink/subtle:hex",
         "//src/main/java/com/google/crypto/tink/subtle:rsa_ssa_pkcs1_verify_jce",
@@ -474,8 +457,10 @@ java_test(
     name = "AesCtrJceCipherTest",
     size = "small",
     srcs = ["AesCtrJceCipherTest.java"],
+    tags = ["fips"],
     deps = [
         "//src/main/java/com/google/crypto/tink/config:tink_fips",
+        "//src/main/java/com/google/crypto/tink/config/internal:tink_fips_util",
         "//src/main/java/com/google/crypto/tink/subtle:aes_ctr_jce_cipher",
         "//src/main/java/com/google/crypto/tink/subtle:random",
         "//src/main/java/com/google/crypto/tink/testing:test_util",
@@ -490,7 +475,6 @@ java_test(
     srcs = ["XChaCha20Test.java"],
     deps = [
         "//src/main/java/com/google/crypto/tink/subtle:bytes",
-        "//src/main/java/com/google/crypto/tink/subtle:cha_cha20",
         "//src/main/java/com/google/crypto/tink/subtle:hex",
         "//src/main/java/com/google/crypto/tink/subtle:ind_cpa_cipher",
         "//src/main/java/com/google/crypto/tink/subtle:random",
@@ -570,9 +554,7 @@ java_test(
     name = "EllipticCurvesTest",
     size = "small",
     srcs = ["EllipticCurvesTest.java"],
-    data = [
-        "@wycheproof//testvectors:all",
-    ],
+    data = ["@wycheproof//testvectors:all"],
     deps = [
         "//src/main/java/com/google/crypto/tink/subtle:elliptic_curves",
         "//src/main/java/com/google/crypto/tink/subtle:hex",
@@ -586,9 +568,11 @@ java_test(
 
 java_test(
     name = "AesCtrHmacStreamingTest",
-    size = "medium",
     srcs = ["AesCtrHmacStreamingTest.java"],
-    tags = ["notsan"],
+    tags = [
+        "fips",
+        "notsan",
+    ],
     deps = [
         "//src/main/java/com/google/crypto/tink/config:tink_fips",
         "//src/main/java/com/google/crypto/tink/subtle:aes_ctr_hmac_streaming",
@@ -642,12 +626,23 @@ java_test(
 )
 
 java_test(
+    name = "Curve25519Test",
+    size = "small",
+    srcs = ["Curve25519Test.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink/subtle:curve25519",
+        "//src/main/java/com/google/crypto/tink/subtle:field25519",
+        "//src/main/java/com/google/crypto/tink/testing:test_util",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
     name = "X25519Test",
     size = "small",
     srcs = ["X25519Test.java"],
-    data = [
-        "@wycheproof//testvectors:all",
-    ],
+    data = ["@wycheproof//testvectors:all"],
     deps = [
         "//src/main/java/com/google/crypto/tink/subtle:hex",
         "//src/main/java/com/google/crypto/tink/subtle:x25519",

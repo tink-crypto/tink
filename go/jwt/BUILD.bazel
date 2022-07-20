@@ -1,0 +1,92 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+licenses(["notice"])
+
+package(default_visibility = ["//:__subpackages__"])  # keep
+
+go_library(
+    name = "jwt",
+    srcs = [
+        "jwk_converter.go",
+        "jwt.go",
+        "jwt_ecdsa_signer_key_manager.go",
+        "jwt_ecdsa_verifier_key_manager.go",
+        "jwt_encoding.go",
+        "jwt_hmac_key_manager.go",
+        "jwt_key_templates.go",
+        "jwt_mac.go",
+        "jwt_mac_factory.go",
+        "jwt_mac_kid.go",
+        "jwt_signer.go",
+        "jwt_signer_factory.go",
+        "jwt_signer_kid.go",
+        "jwt_validator.go",
+        "jwt_verifier.go",
+        "jwt_verifier_factory.go",
+        "jwt_verifier_kid.go",
+        "raw_jwt.go",
+        "verified_jwt.go",
+    ],
+    importpath = "github.com/google/tink/go/jwt",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//core/primitiveset",
+        "//core/registry",
+        "//keyset",
+        "//mac/subtle",
+        "//proto/jwt_ecdsa_go_proto",
+        "//proto/jwt_hmac_go_proto",
+        "//proto/tink_go_proto",
+        "//signature/subtle",
+        "//subtle",
+        "//subtle/random",
+        "//tink",
+        "@org_golang_google_protobuf//proto",
+        "@org_golang_google_protobuf//types/known/structpb",
+    ],
+)
+
+go_test(
+    name = "jwt_test",
+    srcs = [
+        "jwk_converter_test.go",
+        "jwt_ecdsa_signer_key_manager_test.go",
+        "jwt_ecdsa_verifier_key_manager_test.go",
+        "jwt_encoding_test.go",
+        "jwt_hmac_key_manager_test.go",
+        "jwt_key_templates_test.go",
+        "jwt_mac_factory_test.go",
+        "jwt_mac_kid_test.go",
+        "jwt_signer_verifier_factory_test.go",
+        "jwt_signer_verifier_kid_test.go",
+        "jwt_validator_test.go",
+        "raw_jwt_test.go",
+        "verified_jwt_test.go",
+    ],
+    embed = [":jwt"],
+    deps = [
+        "//core/registry",
+        "//keyset",
+        "//mac/subtle",
+        "//proto/jwt_ecdsa_go_proto",
+        "//proto/jwt_hmac_go_proto",
+        "//proto/tink_go_proto",
+        "//signature",
+        "//signature/subtle",
+        "//subtle/random",
+        "//testkeyset",
+        "//testutil",
+        "//tink",
+        "@com_github_google_go_cmp//cmp",
+        "@com_github_google_go_cmp//cmp/cmpopts",
+        "@org_golang_google_protobuf//proto",
+        "@org_golang_google_protobuf//testing/protocmp",
+        "@org_golang_google_protobuf//types/known/structpb",
+    ],
+)
+
+alias(
+    name = "go_default_library",
+    actual = ":jwt",
+    visibility = ["//visibility:public"],
+)

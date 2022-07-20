@@ -16,7 +16,11 @@
 
 #include "tink/hybrid/ecies_aead_hkdf_hybrid_encrypt.h"
 
+#include <string>
+#include <utility>
+
 #include "absl/memory/memory.h"
+#include "absl/status/status.h"
 #include "absl/strings/str_cat.h"
 #include "tink/aead.h"
 #include "tink/util/enums.h"
@@ -34,7 +38,7 @@ namespace {
 util::Status Validate(const EciesAeadHkdfPublicKey& key) {
   if (key.x().empty() || !key.has_params()) {
     return util::Status(
-        util::error::INVALID_ARGUMENT,
+        absl::StatusCode::kInvalidArgument,
         "Invalid EciesAeadHkdfPublicKey: missing required fields.");
   }
 
@@ -42,16 +46,16 @@ util::Status Validate(const EciesAeadHkdfPublicKey& key) {
       key.params().kem_params().curve_type() == EllipticCurveType::CURVE25519) {
     if (!key.y().empty()) {
       return util::Status(
-          util::error::INVALID_ARGUMENT,
+          absl::StatusCode::kInvalidArgument,
           "Invalid EciesAeadHkdfPublicKey: has unexpected field.");
     }
   } else if (key.y().empty()) {
     return util::Status(
-        util::error::INVALID_ARGUMENT,
+        absl::StatusCode::kInvalidArgument,
         "Invalid EciesAeadHkdfPublicKey: missing required fields.");
   }
 
-  return util::Status::OK;
+  return util::OkStatus();
 }
 
 }  // namespace
@@ -73,8 +77,8 @@ util::StatusOr<std::unique_ptr<HybridEncrypt>> EciesAeadHkdfHybridEncrypt::New(
   if (!dem_result.ok()) return dem_result.status();
 
   return {absl::WrapUnique(new EciesAeadHkdfHybridEncrypt(
-      recipient_key, std::move(kem_result).ValueOrDie(),
-      std::move(dem_result).ValueOrDie()))};
+      recipient_key, std::move(kem_result).value(),
+      std::move(dem_result).value()))};
 }
 
 util::StatusOr<std::string> EciesAeadHkdfHybridEncrypt::Encrypt(
@@ -89,13 +93,13 @@ util::StatusOr<std::string> EciesAeadHkdfHybridEncrypt::Encrypt(
       util::Enums::ProtoToSubtle(
           recipient_key_.params().ec_point_format()));
   if (!kem_key_result.ok()) return kem_key_result.status();
-  auto kem_key = std::move(kem_key_result.ValueOrDie());
+  auto kem_key = std::move(kem_key_result.value());
 
   // Use the symmetric key to get an AEAD-primitive.
   auto aead_or_daead_result =
       dem_helper_->GetAeadOrDaead(kem_key->get_symmetric_key());
   if (!aead_or_daead_result.ok()) return aead_or_daead_result.status();
-  auto aead_or_daead = std::move(aead_or_daead_result.ValueOrDie());
+  auto aead_or_daead = std::move(aead_or_daead_result.value());
 
   // Do the actual encryption using the AEAD-primitive.
   auto encrypt_result = aead_or_daead->Encrypt(plaintext, "");  // empty aad
@@ -103,7 +107,7 @@ util::StatusOr<std::string> EciesAeadHkdfHybridEncrypt::Encrypt(
 
   // Prepend AEAD-ciphertext with a KEM component.
   std::string ciphertext =
-      absl::StrCat(kem_key->get_kem_bytes(), encrypt_result.ValueOrDie());
+      absl::StrCat(kem_key->get_kem_bytes(), encrypt_result.value());
   return ciphertext;
 }
 

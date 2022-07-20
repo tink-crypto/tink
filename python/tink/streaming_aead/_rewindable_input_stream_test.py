@@ -13,10 +13,6 @@
 # limitations under the License.
 """Tests for tink.python.tink.util.bytes_io."""
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-
 import io
 import tempfile
 from typing import BinaryIO, cast

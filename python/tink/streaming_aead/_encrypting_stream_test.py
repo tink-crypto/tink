@@ -1,6 +1,5 @@
 # Copyright 2020 Google LLC
 #
-# Lint as: python3
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -13,10 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Tests for tink.python.tink.streaming_aead.encrypting_stream."""
-
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
 
 import io
 from typing import cast

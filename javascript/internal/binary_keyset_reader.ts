@@ -25,7 +25,6 @@ export class BinaryKeysetReader implements KeysetReader {
     return new BinaryKeysetReader(serializedKeyset);
   }
 
-  /** @override */
   read() {
     let keyset: PbKeyset;
     try {
@@ -41,7 +40,6 @@ export class BinaryKeysetReader implements KeysetReader {
     return keyset;
   }
 
-  /** @override */
   readEncrypted(): PbEncryptedKeyset {
     throw new SecurityException('Not implemented yet.');
   }

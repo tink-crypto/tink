@@ -52,4 +52,6 @@ public final class DeterministicAeadKeyTemplates {
         .setOutputPrefixType(OutputPrefixType.TINK)
         .build();
   }
+
+  private DeterministicAeadKeyTemplates() {}
 }

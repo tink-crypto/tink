@@ -19,7 +19,7 @@ package com.google.crypto.tink.jwt;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 import com.google.crypto.tink.KeysetHandle;
-import com.google.crypto.tink.KeysetReader;
+import com.google.crypto.tink.KeysetManager;
 import com.google.crypto.tink.KeysetWriter;
 import com.google.crypto.tink.proto.EncryptedKeyset;
 import com.google.crypto.tink.proto.JwtEcdsaAlgorithm;
@@ -32,9 +32,13 @@ import com.google.crypto.tink.proto.KeyData;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
 import com.google.crypto.tink.proto.KeyStatusType;
 import com.google.crypto.tink.proto.Keyset;
+import com.google.crypto.tink.proto.KeysetInfo;
 import com.google.crypto.tink.proto.OutputPrefixType;
 import com.google.crypto.tink.subtle.Base64;
 import com.google.crypto.tink.tinkkey.KeyAccess;
+import com.google.crypto.tink.tinkkey.KeyHandle;
+import com.google.crypto.tink.tinkkey.internal.ProtoKey;
+import com.google.errorprone.annotations.InlineMe;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -51,19 +55,20 @@ import java.security.GeneralSecurityException;
 import java.util.Optional;
 
 /**
- * Provides functions to import and export Json Web Key (JWK) sets.
+ * Provides functions to import and export public Json Web Key (JWK) sets.
  *
- * <p>It currently supports public keys for algorithms ES256, ES384, ES512, RS256, RS384 and RS512.
+ * <p>The currently supported algorithms are ES256, ES384, ES512, RS256, RS384, RS512, PS256, PS384
+ * and PS512.
  */
 public final class JwkSetConverter {
 
   /**
-   * Converts a Tink KeysetHandle into a Json Web Key (JWK) set.
+   * Converts a Tink KeysetHandle with JWT public keys into a Json Web Key (JWK) set.
    *
-   * <p>Currently, only public keys for algorithms ES256, ES384, ES512, RS256, RS384 and RS512 are
-   * supported. JWK is defined in https://www.rfc-editor.org/rfc/rfc7517.txt.
+   * <p>The currently supported algorithms are ES256, ES384, ES512, RS256, RS384, RS512, PS256,
+   * PS384 and PS512. JWK is defined in https://www.rfc-editor.org/rfc/rfc7517.txt.
    */
-  public static String fromKeysetHandle(KeysetHandle handle, KeyAccess keyAccess)
+  public static String fromPublicKeysetHandle(KeysetHandle handle)
       throws IOException, GeneralSecurityException {
     ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
     handle.writeNoSecret(new JwkSetWriter(outputStream));
@@ -71,15 +76,52 @@ public final class JwkSetConverter {
   }
 
   /**
-   * Converts a Json Web Key (JWK) set into a Tink KeysetHandle.
+   * Converts a Json Web Key (JWK) set with public keys into a Tink KeysetHandle.
    *
-   * <p>It requires that all keys in the set have the "algo" field set. Currently, only public keys
-   * for algorithms ES256, ES384, ES512, RS256, RS384 and RS512 are supported. JWK is defined in
-   * https://www.rfc-editor.org/rfc/rfc7517.txt.
+   * <p>It requires that all keys in the set have the "alg" field set. The currently supported
+   * algorithms are ES256, ES384, ES512, RS256, RS384, RS512, PS256, PS384 and PS512. JWK is defined
+   * in https://www.rfc-editor.org/rfc/rfc7517.txt.
    */
-  public static KeysetHandle toKeysetHandle(String jwkSet, KeyAccess keyAccess)
+  public static KeysetHandle toPublicKeysetHandle(String jwkSet)
       throws IOException, GeneralSecurityException {
-    return KeysetHandle.readNoSecret(new JwkSetReader(jwkSet));
+    JsonObject jsonKeyset;
+    try {
+      JsonReader jsonReader = new JsonReader(new StringReader(jwkSet));
+      jsonReader.setLenient(false);
+      jsonKeyset = Streams.parse(jsonReader).getAsJsonObject();
+    } catch (IllegalStateException | JsonParseException | StackOverflowError ex) {
+      throw new IOException("JWK set is invalid JSON", ex);
+    }
+    KeysetManager manager = KeysetManager.withEmptyKeyset();
+    JsonArray jsonKeys = jsonKeyset.get("keys").getAsJsonArray();
+    for (JsonElement element : jsonKeys) {
+      JsonObject jsonKey = element.getAsJsonObject();
+      String algPrefix = getStringItem(jsonKey, "alg").substring(0, 2);
+      KeyData keyData;
+      switch (algPrefix) {
+        case "RS":
+          keyData = convertToRsaSsaPkcs1Key(jsonKey);
+          break;
+        case "PS":
+          keyData = convertToRsaSsaPssKey(jsonKey);
+          break;
+        case "ES":
+          keyData = convertToEcdsaKey(jsonKey);
+          break;
+        default:
+          throw new IOException("unexpected alg value: " + getStringItem(jsonKey, "alg"));
+      }
+      manager.add(
+          KeyHandle.createFromKey(
+              new ProtoKey(keyData, com.google.crypto.tink.KeyTemplate.OutputPrefixType.RAW),
+              KeyAccess.publicAccess()));
+    }
+    KeysetInfo info = manager.getKeysetHandle().getKeysetInfo();
+    if (info.getKeyInfoCount() <= 0) {
+      throw new IOException("empty keyset");
+    }
+    manager.setPrimary(info.getKeyInfo(0).getKeyId());
+    return manager.getKeysetHandle();
   }
 
   private static final String JWT_ECDSA_PUBLIC_KEY_URL =
@@ -183,6 +225,8 @@ public final class JwkSetConverter {
       Optional<String> kid = JwtFormat.getKid(key.getKeyId(), key.getOutputPrefixType());
       if (kid.isPresent()) {
         jsonKey.addProperty("kid", kid.get());
+      } else if (jwtEcdsaPublicKey.hasCustomKid()) {
+        jsonKey.addProperty("kid", jwtEcdsaPublicKey.getCustomKid().getValue());
       }
       return jsonKey;
     }
@@ -218,6 +262,8 @@ public final class JwkSetConverter {
       Optional<String> kid = JwtFormat.getKid(key.getKeyId(), key.getOutputPrefixType());
       if (kid.isPresent()) {
         jsonKey.addProperty("kid", kid.get());
+      } else if (jwtRsaSsaPkcs1PublicKey.hasCustomKid()) {
+        jsonKey.addProperty("kid", jwtRsaSsaPkcs1PublicKey.getCustomKid().getValue());
       }
       return jsonKey;
     }
@@ -253,245 +299,206 @@ public final class JwkSetConverter {
       Optional<String> kid = JwtFormat.getKid(key.getKeyId(), key.getOutputPrefixType());
       if (kid.isPresent()) {
         jsonKey.addProperty("kid", kid.get());
+      } else if (jwtRsaSsaPssPublicKey.hasCustomKid()) {
+        jsonKey.addProperty("kid", jwtRsaSsaPssPublicKey.getCustomKid().getValue());
       }
       return jsonKey;
     }
   }
 
-  private static final class JwkSetReader implements KeysetReader {
-    private final String input;
-
-    private JwkSetReader(String input) {
-      this.input = input;
+  private static String getStringItem(JsonObject obj, String name) throws IOException {
+    if (!obj.has(name)) {
+      throw new IOException(name + " not found");
     }
-
-    @Override
-    public Keyset read() throws IOException {
-      try {
-        JsonReader jsonReader = new JsonReader(new StringReader(input));
-        jsonReader.setLenient(false);
-        return convertKeyset(Streams.parse(jsonReader).getAsJsonObject());
-      } catch (IllegalStateException | JsonParseException | StackOverflowError ex) {
-        throw new IOException("invalid JSON: " + ex);
-      }
+    if (!obj.get(name).isJsonPrimitive() || !obj.get(name).getAsJsonPrimitive().isString()) {
+      throw new IOException(name + " is not a string");
     }
+    return obj.get(name).getAsString();
+  }
 
-    @Override
-    public EncryptedKeyset readEncrypted() {
-      throw new UnsupportedOperationException("EncryptedKeyset are not implemented");
+  private static void expectStringItem(JsonObject obj, String name, String expectedValue)
+      throws IOException {
+    String value = getStringItem(obj, name);
+    if (!value.equals(expectedValue)) {
+      throw new IOException("unexpected " + name + " value: " + value);
     }
+  }
 
-    private String getStringItem(JsonObject obj, String name) throws IOException {
-      if (!obj.has(name)) {
-        throw new IOException(name + " not found");
-      }
-      if (!obj.get(name).isJsonPrimitive() || !obj.get(name).getAsJsonPrimitive().isString()) {
-        throw new IOException(name + " is not a string");
-      }
-      return obj.get(name).getAsString();
+  private static void validateUseIsSig(JsonObject jsonKey) throws IOException {
+    if (!jsonKey.has("use")) {
+      return;
     }
+    expectStringItem(jsonKey, "use", "sig");
+  }
 
-    private void expectStringItem(JsonObject obj, String name, String expectedValue)
-        throws IOException {
-      String value = getStringItem(obj, name);
-      if (!value.equals(expectedValue)) {
-        throw new IOException("unexpected " + name + " value: " + value);
-      }
+  private static void validateKeyOpsIsVerify(JsonObject jsonKey) throws IOException {
+    if (!jsonKey.has("key_ops")) {
+      return;
     }
+    if (!jsonKey.get("key_ops").isJsonArray()) {
+      throw new IOException("key_ops is not an array");
+    }
+    JsonArray keyOps = jsonKey.get("key_ops").getAsJsonArray();
+    if (keyOps.size() != 1) {
+      throw new IOException("key_ops must contain exactly one element");
+    }
+    if (!keyOps.get(0).isJsonPrimitive() || !keyOps.get(0).getAsJsonPrimitive().isString()) {
+      throw new IOException("key_ops is not a string");
+    }
+    if (!keyOps.get(0).getAsString().equals("verify")) {
+      throw new IOException("unexpected keyOps value: " + keyOps.get(0).getAsString());
+    }
+  }
 
-    private void validateUseIsSig(JsonObject jsonKey) throws IOException {
-      if (!jsonKey.has("use")) {
-        return;
-      }
-      expectStringItem(jsonKey, "use", "sig");
+  private static KeyData convertToRsaSsaPkcs1Key(JsonObject jsonKey) throws IOException {
+    JwtRsaSsaPkcs1Algorithm algorithm;
+    switch (getStringItem(jsonKey, "alg")) {
+      case "RS256":
+        algorithm = JwtRsaSsaPkcs1Algorithm.RS256;
+        break;
+      case "RS384":
+        algorithm = JwtRsaSsaPkcs1Algorithm.RS384;
+        break;
+      case "RS512":
+        algorithm = JwtRsaSsaPkcs1Algorithm.RS512;
+        break;
+      default:
+        throw new IOException("Unknown Rsa Algorithm: " + getStringItem(jsonKey, "alg"));
     }
+    if (jsonKey.has("p")
+        || jsonKey.has("q")
+        || jsonKey.has("dp")
+        || jsonKey.has("dq")
+        || jsonKey.has("d")
+        || jsonKey.has("qi")) {
+      throw new UnsupportedOperationException("importing RSA private keys is not implemented");
+    }
+    expectStringItem(jsonKey, "kty", "RSA");
+    validateUseIsSig(jsonKey);
+    validateKeyOpsIsVerify(jsonKey);
+    JwtRsaSsaPkcs1PublicKey.Builder pkcs1PubKeyBuilder =
+        JwtRsaSsaPkcs1PublicKey.newBuilder()
+            .setVersion(0)
+            .setAlgorithm(algorithm)
+            .setE(ByteString.copyFrom(Base64.urlSafeDecode(getStringItem(jsonKey, "e"))))
+            .setN(ByteString.copyFrom(Base64.urlSafeDecode(getStringItem(jsonKey, "n"))));
+    if (jsonKey.has("kid")) {
+      pkcs1PubKeyBuilder.setCustomKid(
+          JwtRsaSsaPkcs1PublicKey.CustomKid.newBuilder()
+              .setValue(getStringItem(jsonKey, "kid"))
+              .build());
+    }
+    return KeyData.newBuilder()
+        .setTypeUrl(JWT_RSA_SSA_PKCS1_PUBLIC_KEY_URL)
+        .setValue(pkcs1PubKeyBuilder.build().toByteString())
+        .setKeyMaterialType(KeyMaterialType.ASYMMETRIC_PUBLIC)
+        .build();
+  }
 
-    private void validateKeyOpsIsVerify(JsonObject jsonKey) throws IOException {
-      if (!jsonKey.has("key_ops")) {
-        return;
-      }
-      JsonArray keyOps = jsonKey.get("key_ops").getAsJsonArray();
-      if (keyOps.size() != 1) {
-        throw new IOException("unexpected key_ops: " + keyOps);
-      }
-      if (!keyOps.get(0).isJsonPrimitive() || !keyOps.get(0).getAsJsonPrimitive().isString()) {
-        throw new IOException("key_ops is not a string");
-      }
-      if (!keyOps.get(0).getAsString().equals("verify")) {
-        throw new IOException("unexpected keyOps value: " + keyOps.get(0).getAsString());
-      }
+  private static KeyData convertToRsaSsaPssKey(JsonObject jsonKey) throws IOException {
+    JwtRsaSsaPssAlgorithm algorithm;
+    switch (getStringItem(jsonKey, "alg")) {
+      case "PS256":
+        algorithm = JwtRsaSsaPssAlgorithm.PS256;
+        break;
+      case "PS384":
+        algorithm = JwtRsaSsaPssAlgorithm.PS384;
+        break;
+      case "PS512":
+        algorithm = JwtRsaSsaPssAlgorithm.PS512;
+        break;
+      default:
+        throw new IOException("Unknown Rsa Algorithm: " + getStringItem(jsonKey, "alg"));
     }
+    if (jsonKey.has("p")
+        || jsonKey.has("q")
+        || jsonKey.has("dq")
+        || jsonKey.has("dq")
+        || jsonKey.has("d")
+        || jsonKey.has("qi")) {
+      throw new UnsupportedOperationException("importing RSA private keys is not implemented");
+    }
+    expectStringItem(jsonKey, "kty", "RSA");
+    validateUseIsSig(jsonKey);
+    validateKeyOpsIsVerify(jsonKey);
+    JwtRsaSsaPssPublicKey.Builder pssPubKeyBuilder =
+        JwtRsaSsaPssPublicKey.newBuilder()
+            .setVersion(0)
+            .setAlgorithm(algorithm)
+            .setE(ByteString.copyFrom(Base64.urlSafeDecode(getStringItem(jsonKey, "e"))))
+            .setN(ByteString.copyFrom(Base64.urlSafeDecode(getStringItem(jsonKey, "n"))));
+    if (jsonKey.has("kid")) {
+      pssPubKeyBuilder.setCustomKid(
+          JwtRsaSsaPssPublicKey.CustomKid.newBuilder()
+              .setValue(getStringItem(jsonKey, "kid"))
+              .build());
+    }
+    return KeyData.newBuilder()
+        .setTypeUrl(JWT_RSA_SSA_PSS_PUBLIC_KEY_URL)
+        .setValue(pssPubKeyBuilder.build().toByteString())
+        .setKeyMaterialType(KeyMaterialType.ASYMMETRIC_PUBLIC)
+        .build();
+  }
 
-    private Optional<Integer> getKeyId(JsonObject jsonKey) throws IOException {
-      if (!jsonKey.has("kid")) {
-        return Optional.empty();
-      }
-      return JwtFormat.getKeyId(getStringItem(jsonKey, "kid"));
+  private static KeyData convertToEcdsaKey(JsonObject jsonKey) throws IOException {
+    JwtEcdsaAlgorithm algorithm;
+    switch (getStringItem(jsonKey, "alg")) {
+      case "ES256":
+        expectStringItem(jsonKey, "crv", "P-256");
+        algorithm = JwtEcdsaAlgorithm.ES256;
+        break;
+      case "ES384":
+        expectStringItem(jsonKey, "crv", "P-384");
+        algorithm = JwtEcdsaAlgorithm.ES384;
+        break;
+      case "ES512":
+        expectStringItem(jsonKey, "crv", "P-521");
+        algorithm = JwtEcdsaAlgorithm.ES512;
+        break;
+      default:
+        throw new IOException("Unknown Ecdsa Algorithm: " + getStringItem(jsonKey, "alg"));
     }
+    if (jsonKey.has("d")) {
+      throw new UnsupportedOperationException("importing ECDSA private keys is not implemented");
+    }
+    expectStringItem(jsonKey, "kty", "EC");
+    validateUseIsSig(jsonKey);
+    validateKeyOpsIsVerify(jsonKey);
+    JwtEcdsaPublicKey.Builder ecdsaPubKeyBuilder =
+        JwtEcdsaPublicKey.newBuilder()
+            .setVersion(0)
+            .setAlgorithm(algorithm)
+            .setX(ByteString.copyFrom(Base64.urlSafeDecode(getStringItem(jsonKey, "x"))))
+            .setY(ByteString.copyFrom(Base64.urlSafeDecode(getStringItem(jsonKey, "y"))));
+    if (jsonKey.has("kid")) {
+      ecdsaPubKeyBuilder.setCustomKid(
+          JwtEcdsaPublicKey.CustomKid.newBuilder().setValue(getStringItem(jsonKey, "kid")).build());
+    }
+    return KeyData.newBuilder()
+        .setTypeUrl(JWT_ECDSA_PUBLIC_KEY_URL)
+        .setValue(ecdsaPubKeyBuilder.build().toByteString())
+        .setKeyMaterialType(KeyMaterialType.ASYMMETRIC_PUBLIC)
+        .build();
+  }
 
-    private Keyset convertKeyset(JsonObject jsonKeyset) throws IOException {
-      Keyset.Builder builder = Keyset.newBuilder();
-      JsonArray jsonKeys = jsonKeyset.get("keys").getAsJsonArray();
-      for (JsonElement element : jsonKeys) {
-        JsonObject jsonKey = element.getAsJsonObject();
-        String algPrefix = getStringItem(jsonKey, "alg").substring(0, 2);
-        switch (algPrefix) {
-          case "RS":
-            builder.addKey(convertToRsaSsaPkcs1Key(jsonKey));
-            break;
-          case "PS":
-            builder.addKey(convertToRsaSsaPssKey(jsonKey));
-            break;
-          case "ES":
-            builder.addKey(convertEcdsaKey(jsonKey));
-            break;
-          default:
-            throw new IOException("unexpected alg value: " + getStringItem(jsonKey, "alg"));
-        }
-      }
-      return builder.build();
-    }
+  /** @deprecated Use JwkSetConverter.fromPublicKeysetHandle(handle) instead. */
+  @InlineMe(
+      replacement = "JwkSetConverter.fromPublicKeysetHandle(handle)",
+      imports = "com.google.crypto.tink.jwt.JwkSetConverter")
+  @Deprecated
+  public static String fromKeysetHandle(KeysetHandle handle, KeyAccess keyAccess)
+      throws IOException, GeneralSecurityException {
+    return fromPublicKeysetHandle(handle);
+  }
 
-    private Keyset.Key createKeysetKey(KeyData keyData, Optional<Integer> keyId) {
-      if (keyId.isPresent()) {
-        return Keyset.Key.newBuilder()
-            .setStatus(KeyStatusType.ENABLED)
-            .setKeyId(keyId.get())
-            .setOutputPrefixType(OutputPrefixType.TINK)
-            .setKeyData(keyData)
-            .build();
-      } else {
-        return Keyset.Key.newBuilder()
-            .setStatus(KeyStatusType.ENABLED)
-            .setOutputPrefixType(OutputPrefixType.RAW)
-            .setKeyData(keyData)
-            .build();
-      }
-    }
-
-    private Keyset.Key convertToRsaSsaPkcs1Key(JsonObject jsonKey) throws IOException {
-      JwtRsaSsaPkcs1Algorithm algorithm;
-      switch (getStringItem(jsonKey, "alg")) {
-        case "RS256":
-          algorithm = JwtRsaSsaPkcs1Algorithm.RS256;
-          break;
-        case "RS384":
-          algorithm = JwtRsaSsaPkcs1Algorithm.RS384;
-          break;
-        case "RS512":
-          algorithm = JwtRsaSsaPkcs1Algorithm.RS512;
-          break;
-        default:
-          throw new IOException("Unknown Rsa Algorithm: " + getStringItem(jsonKey, "alg"));
-      }
-      if (jsonKey.has("p")
-          || jsonKey.has("q")
-          || jsonKey.has("dq")
-          || jsonKey.has("dq")
-          || jsonKey.has("d")
-          || jsonKey.has("qi")) {
-        throw new UnsupportedOperationException("importing RSA private keys is not implemented");
-      }
-      expectStringItem(jsonKey, "kty", "RSA");
-      validateUseIsSig(jsonKey);
-      validateKeyOpsIsVerify(jsonKey);
-      JwtRsaSsaPkcs1PublicKey pkcs1PubKey =
-          JwtRsaSsaPkcs1PublicKey.newBuilder()
-              .setVersion(0)
-              .setAlgorithm(algorithm)
-              .setE(ByteString.copyFrom(Base64.urlSafeDecode(getStringItem(jsonKey, "e"))))
-              .setN(ByteString.copyFrom(Base64.urlSafeDecode(getStringItem(jsonKey, "n"))))
-              .build();
-      KeyData keyData =
-          KeyData.newBuilder()
-              .setTypeUrl(JWT_RSA_SSA_PKCS1_PUBLIC_KEY_URL)
-              .setValue(pkcs1PubKey.toByteString())
-              .setKeyMaterialType(KeyMaterialType.ASYMMETRIC_PUBLIC)
-              .build();
-      return createKeysetKey(keyData, getKeyId(jsonKey));
-    }
-
-    private Keyset.Key convertToRsaSsaPssKey(JsonObject jsonKey) throws IOException {
-      JwtRsaSsaPssAlgorithm algorithm;
-      switch (getStringItem(jsonKey, "alg")) {
-        case "PS256":
-          algorithm = JwtRsaSsaPssAlgorithm.PS256;
-          break;
-        case "PS384":
-          algorithm = JwtRsaSsaPssAlgorithm.PS384;
-          break;
-        case "PS512":
-          algorithm = JwtRsaSsaPssAlgorithm.PS512;
-          break;
-        default:
-          throw new IOException("Unknown Rsa Algorithm: " + getStringItem(jsonKey, "alg"));
-      }
-      if (jsonKey.has("p")
-          || jsonKey.has("q")
-          || jsonKey.has("dq")
-          || jsonKey.has("dq")
-          || jsonKey.has("d")
-          || jsonKey.has("qi")) {
-        throw new UnsupportedOperationException("importing RSA private keys is not implemented");
-      }
-      expectStringItem(jsonKey, "kty", "RSA");
-      validateUseIsSig(jsonKey);
-      validateKeyOpsIsVerify(jsonKey);
-      JwtRsaSsaPssPublicKey pkcs1PubKey =
-          JwtRsaSsaPssPublicKey.newBuilder()
-              .setVersion(0)
-              .setAlgorithm(algorithm)
-              .setE(ByteString.copyFrom(Base64.urlSafeDecode(getStringItem(jsonKey, "e"))))
-              .setN(ByteString.copyFrom(Base64.urlSafeDecode(getStringItem(jsonKey, "n"))))
-              .build();
-      KeyData keyData =
-          KeyData.newBuilder()
-              .setTypeUrl(JWT_RSA_SSA_PSS_PUBLIC_KEY_URL)
-              .setValue(pkcs1PubKey.toByteString())
-              .setKeyMaterialType(KeyMaterialType.ASYMMETRIC_PUBLIC)
-              .build();
-      return createKeysetKey(keyData, getKeyId(jsonKey));
-    }
-
-    private Keyset.Key convertEcdsaKey(JsonObject jsonKey) throws IOException {
-      JwtEcdsaAlgorithm algorithm;
-      switch (getStringItem(jsonKey, "alg")) {
-        case "ES256":
-          expectStringItem(jsonKey, "crv", "P-256");
-          algorithm = JwtEcdsaAlgorithm.ES256;
-          break;
-        case "ES384":
-          expectStringItem(jsonKey, "crv", "P-384");
-          algorithm = JwtEcdsaAlgorithm.ES384;
-          break;
-        case "ES512":
-          expectStringItem(jsonKey, "crv", "P-521");
-          algorithm = JwtEcdsaAlgorithm.ES512;
-          break;
-        default:
-          throw new IOException("Unknown Ecdsa Algorithm: " + getStringItem(jsonKey, "alg"));
-      }
-      if (jsonKey.has("d")) {
-        throw new UnsupportedOperationException("importing ECDSA private keys is not implemented");
-      }
-      expectStringItem(jsonKey, "kty", "EC");
-      validateUseIsSig(jsonKey);
-      validateKeyOpsIsVerify(jsonKey);
-      JwtEcdsaPublicKey ecdsaPubKey =
-          JwtEcdsaPublicKey.newBuilder()
-              .setVersion(0)
-              .setAlgorithm(algorithm)
-              .setX(ByteString.copyFrom(Base64.urlSafeDecode(getStringItem(jsonKey, "x"))))
-              .setY(ByteString.copyFrom(Base64.urlSafeDecode(getStringItem(jsonKey, "y"))))
-              .build();
-      KeyData keyData =
-          KeyData.newBuilder()
-              .setTypeUrl(JWT_ECDSA_PUBLIC_KEY_URL)
-              .setValue(ecdsaPubKey.toByteString())
-              .setKeyMaterialType(KeyMaterialType.ASYMMETRIC_PUBLIC)
-              .build();
-      return createKeysetKey(keyData, getKeyId(jsonKey));
-    }
+  /** @deprecated Use JwkSetConverter.toPublicKeysetHandle(jwkSet) instead. */
+  @InlineMe(
+      replacement = "JwkSetConverter.toPublicKeysetHandle(jwkSet)",
+      imports = "com.google.crypto.tink.jwt.JwkSetConverter")
+  @Deprecated
+  public static KeysetHandle toKeysetHandle(String jwkSet, KeyAccess keyAccess)
+      throws IOException, GeneralSecurityException {
+    return toPublicKeysetHandle(jwkSet);
   }
 
   private JwkSetConverter() {}

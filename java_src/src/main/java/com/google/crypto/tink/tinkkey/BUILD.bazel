@@ -25,9 +25,7 @@ java_library(
 java_library(
     name = "key_access",
     srcs = ["KeyAccess.java"],
-    deps = [
-        "@maven//:com_google_errorprone_error_prone_annotations",
-    ],
+    deps = ["@maven//:com_google_errorprone_error_prone_annotations"],
 )
 
 java_library(
@@ -35,20 +33,12 @@ java_library(
     srcs = ["KeyHandle.java"],
     deps = [
         ":key_access",
-        ":proto_key",
         ":tink_key",
         "//proto:tink_java_proto",
         "//src/main/java/com/google/crypto/tink:key_template",
-    ],
-)
-
-java_library(
-    name = "proto_key",
-    srcs = ["ProtoKey.java"],
-    deps = [
-        ":tink_key",
-        "//proto:tink_java_proto",
-        "//src/main/java/com/google/crypto/tink:key_template",
+        "//src/main/java/com/google/crypto/tink:registry",
+        "//src/main/java/com/google/crypto/tink/internal:util",
+        "//src/main/java/com/google/crypto/tink/tinkkey/internal:proto_key",
         "@maven//:com_google_errorprone_error_prone_annotations",
     ],
 )
@@ -82,20 +72,12 @@ android_library(
     srcs = ["KeyHandle.java"],
     deps = [
         ":key_access-android",
-        ":proto_key-android",
         ":tink_key-android",
         "//proto:tink_java_proto_lite",
         "//src/main/java/com/google/crypto/tink:key_template-android",
-    ],
-)
-
-android_library(
-    name = "proto_key-android",
-    srcs = ["ProtoKey.java"],
-    deps = [
-        ":tink_key-android",
-        "//proto:tink_java_proto_lite",
-        "//src/main/java/com/google/crypto/tink:key_template-android",
+        "//src/main/java/com/google/crypto/tink:registry-android",
+        "//src/main/java/com/google/crypto/tink/internal:util-android",
+        "//src/main/java/com/google/crypto/tink/tinkkey/internal:proto_key-android",
         "@maven//:com_google_errorprone_error_prone_annotations",
     ],
 )

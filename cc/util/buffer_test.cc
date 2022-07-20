@@ -14,12 +14,14 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include <cstring>
-
 #include "tink/util/buffer.h"
+
+#include <cstring>
+#include <utility>
 
 #include "gtest/gtest.h"
 #include "absl/memory/memory.h"
+#include "absl/status/status.h"
 #include "absl/strings/str_cat.h"
 #include "tink/subtle/random.h"
 #include "tink/util/status.h"
@@ -39,8 +41,8 @@ TEST(BufferTest, ExternalMemoryBlock) {
     SCOPED_TRACE(absl::StrCat("buf_size = ", buf_size));
     auto mem_block = absl::make_unique<char[]>(buf_size);
     auto buf_result = Buffer::NewNonOwning(mem_block.get(), buf_size);
-    ASSERT_THAT(buf_result.status(), IsOk());
-    auto buf = std::move(buf_result.ValueOrDie());
+    ASSERT_THAT(buf_result, IsOk());
+    auto buf = std::move(buf_result.value());
     EXPECT_EQ(buf_size, buf->size());
     EXPECT_EQ(buf_size, buf->allocated_size());
     EXPECT_EQ(mem_block.get(), buf->get_mem_block());
@@ -61,8 +63,8 @@ TEST(BufferTest, InternalMemoryBlock) {
   for (auto buf_size : {1, 10, 100, 1000, 10000, 100000, 1000000}) {
     SCOPED_TRACE(absl::StrCat("buf_size = ", buf_size));
     auto buf_result = Buffer::New(buf_size);
-    ASSERT_THAT(buf_result.status(), IsOk());
-    auto buf = std::move(buf_result.ValueOrDie());
+    ASSERT_THAT(buf_result, IsOk());
+    auto buf = std::move(buf_result.value());
     EXPECT_EQ(buf_size, buf->size());
     EXPECT_EQ(buf_size, buf->allocated_size());
     for (auto new_size : {0, 1, buf_size/2, buf_size}) {
@@ -79,7 +81,7 @@ TEST(BufferTest, InternalMemoryBlock) {
 
 TEST(BufferTest, NullMemoryBlock) {
   auto buf_result = Buffer::NewNonOwning(nullptr, 42);
-  EXPECT_THAT(buf_result.status(), StatusIs(util::error::INVALID_ARGUMENT,
+  EXPECT_THAT(buf_result.status(), StatusIs(absl::StatusCode::kInvalidArgument,
                                             HasSubstr("non-null")));
 }
 
@@ -88,8 +90,9 @@ TEST(BufferTest, BadAllocatedSize_ExternalMemoryBlock) {
     SCOPED_TRACE(absl::StrCat("allocated_size = ", allocated_size));
     auto mem_block = absl::make_unique<char[]>(42);
     auto buf_result = Buffer::NewNonOwning(mem_block.get(), allocated_size);
-    EXPECT_THAT(buf_result.status(), StatusIs(util::error::INVALID_ARGUMENT,
-                                              HasSubstr("allocated_size")));
+    EXPECT_THAT(buf_result.status(),
+                StatusIs(absl::StatusCode::kInvalidArgument,
+                         HasSubstr("allocated_size")));
   }
 }
 
@@ -97,19 +100,20 @@ TEST(BufferTest, BadAllocatedSize_InternalMemoryBlock) {
   for (auto allocated_size : {-10, -1, 0}) {
     SCOPED_TRACE(absl::StrCat("allocated_size = ", allocated_size));
     auto buf_result = Buffer::New(allocated_size);
-    EXPECT_THAT(buf_result.status(), StatusIs(util::error::INVALID_ARGUMENT,
-                                              HasSubstr("allocated_size")));
+    EXPECT_THAT(buf_result.status(),
+                StatusIs(absl::StatusCode::kInvalidArgument,
+                         HasSubstr("allocated_size")));
   }
 }
 
 TEST(BufferTest, BadNewSize_ExternalMemoryBlock) {
   for (auto buf_size : {1, 10, 100, 1000, 10000}) {
     SCOPED_TRACE(absl::StrCat("buf_size = ", buf_size));
-    auto buf = std::move(Buffer::New(buf_size).ValueOrDie());
+    auto buf = std::move(Buffer::New(buf_size).value());
     for (auto new_size : {-10, -1, buf_size + 1, 2 * buf_size}) {
       SCOPED_TRACE(absl::StrCat("new_size = ", buf_size));
       EXPECT_THAT(buf->set_size(new_size),
-                  StatusIs(util::error::INVALID_ARGUMENT,
+                  StatusIs(absl::StatusCode::kInvalidArgument,
                            HasSubstr("new_size must satisfy")));
     }
   }
@@ -119,12 +123,12 @@ TEST(BufferTest, BadNewSize_InternalMemoryBlock) {
   for (auto buf_size : {1, 10, 100, 1000, 10000}) {
     SCOPED_TRACE(absl::StrCat("buf_size = ", buf_size));
     auto mem_block = absl::make_unique<char[]>(buf_size);
-    auto buf = std::move(
-        Buffer::NewNonOwning(mem_block.get(), buf_size).ValueOrDie());
+    auto buf =
+        std::move(Buffer::NewNonOwning(mem_block.get(), buf_size).value());
     for (auto new_size : {-10, -1, buf_size + 1, 2 * buf_size}) {
       SCOPED_TRACE(absl::StrCat("new_size = ", buf_size));
       EXPECT_THAT(buf->set_size(new_size),
-                  StatusIs(util::error::INVALID_ARGUMENT,
+                  StatusIs(absl::StatusCode::kInvalidArgument,
                            HasSubstr("new_size must satisfy")));
     }
   }

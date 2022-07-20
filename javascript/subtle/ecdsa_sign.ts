@@ -33,7 +33,6 @@ export class EcdsaSign extends PublicKeySign {
   }
 
   /**
-   * @override
    */
   async sign(message: Uint8Array): Promise<Uint8Array> {
     Validators.requireUint8Array(message);

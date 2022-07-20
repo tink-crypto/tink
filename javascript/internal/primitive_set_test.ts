@@ -22,7 +22,7 @@ describe('primitive set test', function() {
 
     try {
       primitiveSet.addPrimitive(primitive, key);
-    } catch (e) {
+    } catch (e: any) {
       expect(e.toString()).toBe(ExceptionText.unknownPrefixType());
       return;
     }
@@ -166,7 +166,7 @@ describe('primitive set test', function() {
 
     try {
       primitiveSet.setPrimary(entry);
-    } catch (e) {
+    } catch (e: any) {
       expect(e.toString()).toBe(ExceptionText.setPrimaryToMissingEntry());
       return;
     }
@@ -182,7 +182,7 @@ describe('primitive set test', function() {
 
     try {
       primitiveSet.setPrimary(primary);
-    } catch (e) {
+    } catch (e: any) {
       expect(e.toString()).toBe(ExceptionText.setPrimaryToDisabled());
       return;
     }
@@ -262,13 +262,11 @@ class ExceptionText {
 
 /** @final */
 class DummyAead1 extends Aead {
-  /** @override */
   encrypt(plaintext: Uint8Array, aad: Uint8Array): Promise<Uint8Array> {
     throw new SecurityException(
         'Not implemented, intentended just for testing.');
   }
 
-  /** @override */
   decrypt(ciphertext: Uint8Array, aad: Uint8Array): Promise<Uint8Array> {
     throw new SecurityException(
         'Not implemented, intentended just for testing.');
@@ -277,13 +275,11 @@ class DummyAead1 extends Aead {
 
 /** @final */
 class DummyAead2 extends Aead {
-  /** @override */
   encrypt(plaintext: Uint8Array, aad: Uint8Array): Promise<Uint8Array> {
     throw new SecurityException(
         'Not implemented, intentended just for testing.');
   }
 
-  /** @override */
   decrypt(ciphertext: Uint8Array, aad: Uint8Array): Promise<Uint8Array> {
     throw new SecurityException(
         'Not implemented, intentended just for testing.');

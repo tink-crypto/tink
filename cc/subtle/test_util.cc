@@ -16,6 +16,10 @@
 
 #include "tink/subtle/test_util.h"
 
+#include <algorithm>
+#include <string>
+
+#include "absl/status/status.h"
 
 namespace crypto {
 namespace tink {
@@ -36,7 +40,7 @@ util::Status WriteToStream(OutputStream* output_stream,
   while (remaining > 0) {
     auto next_result = output_stream->Next(&buffer);
     if (!next_result.ok()) return next_result.status();
-    available_space = next_result.ValueOrDie();
+    available_space = next_result.value();
     available_bytes = std::min(available_space, remaining);
     memcpy(buffer, contents.data() + pos, available_bytes);
     remaining -= available_bytes;
@@ -45,29 +49,30 @@ util::Status WriteToStream(OutputStream* output_stream,
   if (available_space > available_bytes) {
     output_stream->BackUp(available_space - available_bytes);
   }
-  return close_stream ? output_stream->Close() : util::Status::OK;
+  return close_stream ? output_stream->Close() : util::OkStatus();
 }
 
 util::Status ReadFromStream(InputStream* input_stream, std::string* output) {
   if (input_stream == nullptr || output == nullptr) {
-    return util::Status(util::error::INTERNAL, "Illegal read from a stream");
+    return util::Status(absl::StatusCode::kInternal,
+                        "Illegal read from a stream");
   }
   const void* buffer;
   output->clear();
   while (true) {
     auto next_result = input_stream->Next(&buffer);
-    if (next_result.status().error_code() == util::error::OUT_OF_RANGE) {
+    if (next_result.status().code() == absl::StatusCode::kOutOfRange) {
       // End of stream.
-      return util::Status::OK;
+      return util::OkStatus();
     }
     if (!next_result.ok()) return next_result.status();
-    auto read_bytes = next_result.ValueOrDie();
+    auto read_bytes = next_result.value();
     if (read_bytes > 0) {
       output->append(
           std::string(reinterpret_cast<const char*>(buffer), read_bytes));
     }
   }
-  return util::Status::OK;
+  return util::OkStatus();
 }
 
 }  // namespace test

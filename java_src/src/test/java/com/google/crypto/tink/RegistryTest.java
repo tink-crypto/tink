@@ -20,11 +20,18 @@ import static com.google.common.truth.Truth.assertThat;
 import static com.google.crypto.tink.testing.TestUtil.assertExceptionContains;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.Assert.assertThrows;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import com.google.crypto.tink.aead.AeadConfig;
 import com.google.crypto.tink.aead.AesEaxKeyManager;
+import com.google.crypto.tink.aead.AesGcmKeyManager;
 import com.google.crypto.tink.config.TinkConfig;
+import com.google.crypto.tink.config.TinkFips;
+import com.google.crypto.tink.config.internal.TinkFipsUtil;
+import com.google.crypto.tink.internal.KeyTypeManager;
+import com.google.crypto.tink.internal.PrimitiveFactory;
+import com.google.crypto.tink.internal.PrivateKeyTypeManager;
 import com.google.crypto.tink.mac.MacConfig;
 import com.google.crypto.tink.mac.MacKeyTemplates;
 import com.google.crypto.tink.proto.AesEaxKey;
@@ -40,6 +47,7 @@ import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
 import com.google.crypto.tink.proto.KeyStatusType;
 import com.google.crypto.tink.proto.Keyset;
 import com.google.crypto.tink.proto.OutputPrefixType;
+import com.google.crypto.tink.signature.EcdsaSignKeyManager;
 import com.google.crypto.tink.signature.SignatureKeyTemplates;
 import com.google.crypto.tink.subtle.AesEaxJce;
 import com.google.crypto.tink.subtle.AesGcmJce;
@@ -58,6 +66,7 @@ import java.security.GeneralSecurityException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import org.junit.Assume;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -151,24 +160,36 @@ public class RegistryTest {
 
   @Before
   public void setUp() throws GeneralSecurityException {
+    // All tests for the registry assume that if the tests are run in FIPS, that BoringSSL is
+    // built in FIPS mode. If BoringSSL is not built in FIPS mode, there aren't any key managers
+    // available which could be registered, therefore the tests would just fail.
+    Assume.assumeFalse(TinkFips.useOnlyFips() && !TinkFipsUtil.fipsModuleAvailable());
+
+    TinkFipsUtil.unsetFipsRestricted();
     Registry.reset();
     TinkConfig.register();
     Registry.registerPrimitiveWrapper(new AeadToEncryptOnlyWrapper());
   }
 
-  private void testGetKeyManager_shouldWork(String typeUrl, String className) throws Exception {
+  private void testGetKeyManagerShouldWork(String typeUrl, String className) throws Exception {
     assertThat(Registry.getKeyManager(typeUrl).getClass().toString()).contains(className);
   }
 
   @Test
   public void testGetKeyManager_legacy_shouldWork() throws Exception {
-    testGetKeyManager_shouldWork(AeadConfig.AES_CTR_HMAC_AEAD_TYPE_URL, "KeyManagerImpl");
-    testGetKeyManager_shouldWork(AeadConfig.AES_EAX_TYPE_URL, "KeyManagerImpl");
-    testGetKeyManager_shouldWork(MacConfig.HMAC_TYPE_URL, "KeyManagerImpl");
+    // Skip test if in FIPS mode, as EAX is not allowed in FipsMode.
+    Assume.assumeFalse(TinkFips.useOnlyFips());
+
+    testGetKeyManagerShouldWork(AeadConfig.AES_CTR_HMAC_AEAD_TYPE_URL, "KeyManagerImpl");
+    testGetKeyManagerShouldWork(AeadConfig.AES_EAX_TYPE_URL, "KeyManagerImpl");
+    testGetKeyManagerShouldWork(MacConfig.HMAC_TYPE_URL, "KeyManagerImpl");
   }
 
   @Test
   public void testGetKeyManager_shouldWorkAesEax() throws Exception {
+    // Skip test if in FIPS mode, as registerKeyManager() is not allowed in FipsMode.
+    Assume.assumeFalse(TinkFips.useOnlyFips());
+
     assertThat(
             Registry.getKeyManager(AeadConfig.AES_EAX_TYPE_URL, Aead.class).getClass().toString())
         .contains("KeyManagerImpl");
@@ -182,6 +203,9 @@ public class RegistryTest {
 
   @Test
   public void testGetKeyManager_legacy_wrongType_shouldThrowException() throws Exception {
+    // Skip test if in FIPS mode, as no provider available to instantiate.
+    Assume.assumeFalse(TinkFips.useOnlyFips());
+
     KeyManager<Aead> wrongType = Registry.getKeyManager(MacConfig.HMAC_TYPE_URL);
     HmacKey hmacKey = (HmacKey) Registry.newKey(MacKeyTemplates.HMAC_SHA256_128BITTAG);
 
@@ -240,22 +264,31 @@ public class RegistryTest {
   }
 
   @Test
-  public void testRegisterKeyManager_MoreRestrictedNewKeyAllowed_shouldWork() throws Exception {
+  public void testRegisterKeyManager_moreRestrictedNewKeyAllowed_shouldWork() throws Exception {
+    // Skip test if in FIPS mode, as registerKeyManager() is not allowed in FipsMode.
+    Assume.assumeFalse(TinkFips.useOnlyFips());
+
     String typeUrl = "someTypeUrl";
     Registry.registerKeyManager(new CustomAeadKeyManager(typeUrl));
     Registry.registerKeyManager(new CustomAeadKeyManager(typeUrl), false);
   }
 
   @Test
-  public void testRegisterKeyManager_SameNewKeyAllowed_shouldWork() throws Exception {
+  public void testRegisterKeyManager_sameNewKeyAllowed_shouldWork() throws Exception {
+    // Skip test if in FIPS mode, as registerKeyManager() is not allowed in FipsMode.
+    Assume.assumeFalse(TinkFips.useOnlyFips());
+
     String typeUrl = "someOtherTypeUrl";
     Registry.registerKeyManager(new CustomAeadKeyManager(typeUrl));
     Registry.registerKeyManager(new CustomAeadKeyManager(typeUrl), true);
   }
 
   @Test
-  public void testRegisterKeyManager_LessRestrictedNewKeyAllowed_shouldThrowException()
+  public void testRegisterKeyManager_lessRestrictedNewKeyAllowed_shouldThrowException()
       throws Exception {
+    // Skip test if in FIPS mode, as registerKeyManager() is not allowed in FipsMode.
+    Assume.assumeFalse(TinkFips.useOnlyFips());
+
     String typeUrl = "yetAnotherTypeUrl";
     Registry.registerKeyManager(new CustomAeadKeyManager(typeUrl), false);
 
@@ -267,6 +300,9 @@ public class RegistryTest {
   @Test
   public void testRegisterKeyManager_keyManagerFromAnotherClass_shouldThrowException()
       throws Exception {
+    // Skip test if in FIPS mode, as registerKeyManager() is not allowed in FipsMode.
+    Assume.assumeFalse(TinkFips.useOnlyFips());
+
     // This should not overwrite the existing manager.
     GeneralSecurityException e =
         assertThrows(
@@ -291,8 +327,11 @@ public class RegistryTest {
   }
 
   @Test
-  public void testRegisterKeyManager_deprecated_WithKeyTypeNotSupported_shouldThrowException()
+  public void testRegisterKeyManager_deprecated_withKeyTypeNotSupported_shouldThrowException()
       throws Exception {
+    // Skip test if in FIPS mode, as registerKeyManager() is not allowed in FipsMode.
+    Assume.assumeFalse(TinkFips.useOnlyFips());
+
     String typeUrl = "yetSomeOtherTypeUrl";
     String differentTypeUrl = "differentTypeUrl";
     GeneralSecurityException e =
@@ -303,8 +342,11 @@ public class RegistryTest {
   }
 
   @Test
-  public void testRegisterKeyManager_deprecated_MoreRestrictedNewKeyAllowed_shouldWork()
+  public void testRegisterKeyManager_deprecated_moreRestrictedNewKeyAllowed_shouldWork()
       throws Exception {
+    // Skip test if in FIPS mode, as registerKeyManager() is not allowed in FipsMode.
+    Assume.assumeFalse(TinkFips.useOnlyFips());
+
     String typeUrl = "typeUrl";
     Registry.registerKeyManager(typeUrl, new CustomAeadKeyManager(typeUrl));
 
@@ -316,8 +358,11 @@ public class RegistryTest {
   }
 
   @Test
-  public void testRegisterKeyManager_deprecated_LessRestrictedNewKeyAllowed_shouldThrowException()
+  public void testRegisterKeyManager_deprecated_lessRestrictedNewKeyAllowed_shouldThrowException()
       throws Exception {
+    // Skip test if in FIPS mode, as registerKeyManager() is not allowed in FipsMode.
+    Assume.assumeFalse(TinkFips.useOnlyFips());
+
     String typeUrl = "totallyDifferentTypeUrl";
     Registry.registerKeyManager(typeUrl, new CustomAeadKeyManager(typeUrl), false);
 
@@ -329,6 +374,9 @@ public class RegistryTest {
   @Test
   public void testRegisterKeyManager_deprecated_keyManagerFromAnotherClass_shouldThrowException()
       throws Exception {
+    // Skip test if in FIPS mode, as registerKeyManager() is not allowed in FipsMode.
+    Assume.assumeFalse(TinkFips.useOnlyFips());
+
     // This should not overwrite the existing manager.
     GeneralSecurityException e =
         assertThrows(
@@ -345,6 +393,9 @@ public class RegistryTest {
 
   @Test
   public void testGetPublicKeyData_shouldWork() throws Exception {
+    // Skip test if in FIPS mode, as no provider available to instantiate.
+    Assume.assumeFalse(TinkFips.useOnlyFips());
+
     KeyData privateKeyData = Registry.newKeyData(SignatureKeyTemplates.ECDSA_P256);
     KeyData publicKeyData = Registry.getPublicKeyData(privateKeyData.getTypeUrl(),
         privateKeyData.getValue());
@@ -370,9 +421,11 @@ public class RegistryTest {
     assertThat(Registry.getInputPrimitive(Aead.class)).isEqualTo(Aead.class);
   }
 
-
   @Test
-  public void testGetPrimitive_legacy_AesGcm_shouldWork() throws Exception {
+  public void testGetPrimitive_legacy_aesGcm_shouldWork() throws Exception {
+    // Skip test if in FIPS mode, as EAX is not allowed in FipsMode.
+    Assume.assumeFalse(TinkFips.useOnlyFips());
+
     AesEaxKey aesEaxKey =
         (AesEaxKey) Registry.newKey(AesEaxKeyManager.aes128EaxTemplate().getProto());
     KeyData aesEaxKeyData = Registry.newKeyData(AesEaxKeyManager.aes128EaxTemplate().getProto());
@@ -385,7 +438,10 @@ public class RegistryTest {
   }
 
   @Test
-  public void testGetPrimitive_AesGcm_shouldWork() throws Exception {
+  public void testGetPrimitive_aesGcm_shouldWork() throws Exception {
+    // Skip test if in FIPS mode, as EAX is not supported in FIPS mode.
+    Assume.assumeFalse(TinkFips.useOnlyFips());
+
     AesEaxKey aesEaxKey =
         (AesEaxKey) Registry.newKey(AesEaxKeyManager.aes128EaxTemplate().getProto());
     KeyData aesEaxKeyData = Registry.newKeyData(AesEaxKeyManager.aes128EaxTemplate().getProto());
@@ -398,7 +454,10 @@ public class RegistryTest {
   }
 
   @Test
-  public void testGetPrimitive_legacy_Hmac_shouldWork() throws Exception {
+  public void testGetPrimitive_legacy_hmac_shouldWork() throws Exception {
+    // Skip test if in FIPS mode, as no provider available to instantiate.
+    Assume.assumeFalse(TinkFips.useOnlyFips());
+
     com.google.crypto.tink.proto.KeyTemplate template = MacKeyTemplates.HMAC_SHA256_128BITTAG;
     HmacKey hmacKey = (HmacKey) Registry.newKey(template);
     KeyData hmacKeyData = Registry.newKeyData(template);
@@ -413,7 +472,10 @@ public class RegistryTest {
   }
 
   @Test
-  public void testGetPrimitive_Hmac_shouldWork() throws Exception {
+  public void testGetPrimitive_hmac_shouldWork() throws Exception {
+    // Skip test if in FIPS mode, as no provider available to instantiate.
+    Assume.assumeFalse(TinkFips.useOnlyFips());
+
     com.google.crypto.tink.proto.KeyTemplate template = MacKeyTemplates.HMAC_SHA256_128BITTAG;
     HmacKey hmacKey = (HmacKey) Registry.newKey(template);
     KeyData hmacKeyData = Registry.newKeyData(template);
@@ -431,6 +493,9 @@ public class RegistryTest {
   public void
       testNewKeyData_keyTemplateProto_registeredTypeUrl_returnsCustomAeadKeyManagerNewKeyData()
           throws Exception {
+    // Skip test if in FIPS mode, as registerKeyManager() is not allowed in FipsMode.
+    Assume.assumeFalse(TinkFips.useOnlyFips());
+
     String typeUrl = "testNewKeyDataTypeUrl";
     CustomAeadKeyManager km = new CustomAeadKeyManager(typeUrl);
     ByteString keyformat = ByteString.copyFromUtf8("testNewKeyDataKeyFormat");
@@ -448,6 +513,9 @@ public class RegistryTest {
   @Test
   public void testNewKeyData_keyTemplateProto_registeredTypeUrlNewKeyAllowedFalse_throwsException()
       throws Exception {
+    // Skip test if in FIPS mode, as registerKeyManager() is not allowed in FipsMode.
+    Assume.assumeFalse(TinkFips.useOnlyFips());
+
     String typeUrl = "testNewKeyDataTypeUrl";
     CustomAeadKeyManager km = new CustomAeadKeyManager(typeUrl);
     ByteString keyformat = ByteString.copyFromUtf8("testNewKeyDataKeyFormat");
@@ -481,6 +549,9 @@ public class RegistryTest {
   public void
       testNewKeyData_keyTemplateClass_registeredTypeUrl_returnsCustomAeadKeyManagerNewKeyData()
           throws Exception {
+    // Skip test if in FIPS mode, as registerKeyManager() is not allowed in FipsMode.
+    Assume.assumeFalse(TinkFips.useOnlyFips());
+
     String typeUrl = "testNewKeyDataTypeUrl";
     CustomAeadKeyManager km = new CustomAeadKeyManager(typeUrl);
     ByteString keyformat = ByteString.copyFromUtf8("testNewKeyDataKeyFormat");
@@ -496,6 +567,9 @@ public class RegistryTest {
   @Test
   public void testNewKeyData_keyTemplateClass_registeredTypeUrlNewKeyAllowedFalse_throwsException()
       throws Exception {
+    // Skip test if in FIPS mode, as registerKeyManager() is not allowed in FipsMode.
+    Assume.assumeFalse(TinkFips.useOnlyFips());
+
     String typeUrl = "testNewKeyDataTypeUrl";
     CustomAeadKeyManager km = new CustomAeadKeyManager(typeUrl);
     ByteString keyformat = ByteString.copyFromUtf8("testNewKeyDataKeyFormat");
@@ -650,6 +724,19 @@ public class RegistryTest {
         }
       };
     }
+
+    @Override
+    public TinkFipsUtil.AlgorithmFipsCompatibility fipsStatus() {
+      return TinkFipsUtil.AlgorithmFipsCompatibility.ALGORITHM_REQUIRES_BORINGCRYPTO;
+    }
+  }
+
+  // Same as TestKeyTypeManager, but not compatible with FIPS.
+  private static class TestKeyTypeManagerNonFips extends TestKeyTypeManager {
+    @Override
+    public TinkFipsUtil.AlgorithmFipsCompatibility fipsStatus() {
+      return TinkFipsUtil.AlgorithmFipsCompatibility.ALGORITHM_NOT_FIPS;
+    }
   }
 
   @Test
@@ -764,14 +851,14 @@ public class RegistryTest {
   }
 
   @Test
-  public void testRegisterKeyTypeManager_MoreRestrictedNewKeyAllowed_shouldWork() throws Exception {
+  public void testRegisterKeyTypeManager_moreRestrictedNewKeyAllowed_shouldWork() throws Exception {
     Registry.reset();
     Registry.registerKeyManager(new TestKeyTypeManager(), true);
     Registry.registerKeyManager(new TestKeyTypeManager(), false);
   }
 
   @Test
-  public void testRegisterKeyTypeManager_SameNewKeyAllowed_shouldWork() throws Exception {
+  public void testRegisterKeyTypeManager_sameNewKeyAllowed_shouldWork() throws Exception {
     Registry.reset();
     Registry.registerKeyManager(new TestKeyTypeManager(), true);
     Registry.registerKeyManager(new TestKeyTypeManager(), true);
@@ -780,7 +867,10 @@ public class RegistryTest {
   }
 
   @Test
-  public void testRegisterKeyTypeManager_LessRestrictedNewKeyAllowed_throws() throws Exception {
+  public void testRegisterKeyTypeManager_lessRestrictedNewKeyAllowed_throws() throws Exception {
+    // Skip test if in FIPS mode, as registerKeyManager() is not allowed in FipsMode.
+    Assume.assumeFalse(TinkFips.useOnlyFips());
+
     Registry.reset();
     Registry.registerKeyManager(new TestKeyTypeManager(), false);
     assertThrows(
@@ -789,7 +879,10 @@ public class RegistryTest {
   }
 
   @Test
-  public void testRegisterKeyTypeManager_DifferentClass_throws() throws Exception {
+  public void testRegisterKeyTypeManager_differentClass_throws() throws Exception {
+    // Skip test if in FIPS mode, as registerKeyManager() is not allowed in FipsMode.
+    Assume.assumeFalse(TinkFips.useOnlyFips());
+
     Registry.reset();
     Registry.registerKeyManager(new TestKeyTypeManager(), true);
     assertThrows(
@@ -798,7 +891,10 @@ public class RegistryTest {
   }
 
   @Test
-  public void testRegisterKeyTypeManager_AfterKeyManager_throws() throws Exception {
+  public void testRegisterKeyTypeManager_afterKeyManager_throws() throws Exception {
+    // Skip test if in FIPS mode, as registerKeyManager() is not allowed in FipsMode.
+    Assume.assumeFalse(TinkFips.useOnlyFips());
+
     Registry.reset();
     Registry.registerKeyManager(new CustomAeadKeyManager(new TestKeyTypeManager().getKeyType()));
     assertThrows(
@@ -807,7 +903,7 @@ public class RegistryTest {
   }
 
   @Test
-  public void testRegisterKeyTypeManager_BeforeKeyManager_throws() throws Exception {
+  public void testRegisterKeyTypeManager_beforeKeyManager_throws() throws Exception {
     Registry.reset();
     Registry.registerKeyManager(new TestKeyTypeManager(), true);
     assertThrows(
@@ -940,6 +1036,19 @@ public class RegistryTest {
     public Ed25519PublicKey parseKey(ByteString byteString) throws InvalidProtocolBufferException {
       return Ed25519PublicKey.parseFrom(byteString, ExtensionRegistryLite.getEmptyRegistry());
     }
+
+    @Override
+    public TinkFipsUtil.AlgorithmFipsCompatibility fipsStatus() {
+      return TinkFipsUtil.AlgorithmFipsCompatibility.ALGORITHM_REQUIRES_BORINGCRYPTO;
+    }
+  }
+
+  // Same as TestPublicKeyTypeManager, but not compatible with FIPS.
+  private static class TestPublicKeyTypeManagerNonFips extends TestPublicKeyTypeManager {
+    @Override
+    public TinkFipsUtil.AlgorithmFipsCompatibility fipsStatus() {
+      return TinkFipsUtil.AlgorithmFipsCompatibility.ALGORITHM_NOT_FIPS;
+    }
   }
 
   private static class PrivatePrimitiveA {}
@@ -1012,6 +1121,19 @@ public class RegistryTest {
     public Ed25519PublicKey getPublicKey(Ed25519PrivateKey privateKey) {
       return privateKey.getPublicKey();
     }
+
+    @Override
+    public TinkFipsUtil.AlgorithmFipsCompatibility fipsStatus() {
+      return TinkFipsUtil.AlgorithmFipsCompatibility.ALGORITHM_REQUIRES_BORINGCRYPTO;
+    }
+  }
+
+  // Same as TestPrivateKeyTypeManager, but not compatible with FIPS.
+  private static class TestPrivateKeyTypeManagerNonFips extends TestPrivateKeyTypeManager {
+    @Override
+    public TinkFipsUtil.AlgorithmFipsCompatibility fipsStatus() {
+      return TinkFipsUtil.AlgorithmFipsCompatibility.ALGORITHM_NOT_FIPS;
+    }
   }
 
   private static class TestPrivateKeyTypeManagerWithKeyFactory extends TestPrivateKeyTypeManager {
@@ -1029,8 +1151,9 @@ public class RegistryTest {
     }
 
     @Override
-    public KeyFactory<Ed25519KeyFormat, Ed25519PrivateKey> keyFactory() {
-      return new KeyFactory<Ed25519KeyFormat, Ed25519PrivateKey>(Ed25519KeyFormat.class) {
+    public KeyTypeManager.KeyFactory<Ed25519KeyFormat, Ed25519PrivateKey> keyFactory() {
+      return new KeyTypeManager.KeyFactory<Ed25519KeyFormat, Ed25519PrivateKey>(
+          Ed25519KeyFormat.class) {
         @Override
         public void validateKeyFormat(Ed25519KeyFormat format) throws GeneralSecurityException {}
 
@@ -1057,7 +1180,7 @@ public class RegistryTest {
         }
 
         @Override
-        public Map<String, KeyFactory.KeyFormat<Ed25519KeyFormat>> keyFormats() {
+        public Map<String, KeyTypeManager.KeyFactory.KeyFormat<Ed25519KeyFormat>> keyFormats() {
           return keyFormats;
         }
       };
@@ -1246,7 +1369,7 @@ public class RegistryTest {
   }
 
   @Test
-  public void testRegisterAssymmetricKeyManagers_MoreRestrictedNewKeyAllowed_shouldWork()
+  public void testRegisterAssymmetricKeyManagers_moreRestrictedNewKeyAllowed_shouldWork()
       throws Exception {
     Registry.reset();
 
@@ -1257,7 +1380,7 @@ public class RegistryTest {
   }
 
   @Test
-  public void testRegisterAssymmetricKeyManagers_SameNewKeyAllowed_shouldWork() throws Exception {
+  public void testRegisterAssymmetricKeyManagers_sameNewKeyAllowed_shouldWork() throws Exception {
     Registry.reset();
     Registry.registerAsymmetricKeyManagers(
         new TestPrivateKeyTypeManagerWithKeyFactory(), new TestPublicKeyTypeManager(), true);
@@ -1270,7 +1393,7 @@ public class RegistryTest {
   }
 
   @Test
-  public void testRegisterAssymmetricKeyManagers_LessRestrictedNewKeyAllowed_throws()
+  public void testRegisterAssymmetricKeyManagers_lessRestrictedNewKeyAllowed_throws()
       throws Exception {
     Registry.reset();
     Registry.registerAsymmetricKeyManagers(
@@ -1285,7 +1408,7 @@ public class RegistryTest {
   }
 
   @Test
-  public void testRegisterAssymmetricKeyManagers_PublicKeyManagerCanBeRegisteredAlone()
+  public void testRegisterAssymmetricKeyManagers_publicKeyManagerCanBeRegisteredAlone()
       throws Exception {
     Registry.reset();
     Registry.registerKeyManager(new TestPublicKeyTypeManager(), false);
@@ -1295,15 +1418,12 @@ public class RegistryTest {
   }
 
   @Test
-  public void testRegisterAssymmetricKeyManagers_PublicKeyManagerReRegister_getPublicKeyData()
+  public void testRegisterAssymmetricKeyManagers_getPublicKeyData_shouldWork()
       throws Exception {
     Registry.reset();
-    Registry.registerKeyManager(new TestPublicKeyTypeManager(), false);
     Registry.registerAsymmetricKeyManagers(
         new TestPrivateKeyTypeManager(), new TestPublicKeyTypeManager(), false);
-    Registry.registerKeyManager(new TestPublicKeyTypeManager(), false);
 
-    // Check that getPublicKeyData works now.
     Ed25519PrivateKey privateKey =
         Ed25519PrivateKey.newBuilder()
             .setKeyValue(ByteString.copyFrom(Random.randBytes(32)))
@@ -1322,7 +1442,58 @@ public class RegistryTest {
   }
 
   @Test
-  public void testRegisterAssymmetricKeyManagers_DifferentClassPrivateKey_throws()
+  public void testRegisterAsymmetricKeyManagersSeparately_getPublicKeyData_throws()
+      throws Exception {
+    Registry.reset();
+    // Register asymmetric key managers only with registerKeyManager.
+    Registry.registerKeyManager(new TestPrivateKeyTypeManager(), false);
+    Registry.registerKeyManager(new TestPublicKeyTypeManager(), false);
+
+    Ed25519PrivateKey privateKey =
+        Ed25519PrivateKey.newBuilder()
+            .setKeyValue(ByteString.copyFrom(Random.randBytes(32)))
+            .setPublicKey(
+                Ed25519PublicKey.newBuilder()
+                    .setKeyValue(ByteString.copyFrom(Random.randBytes(32))))
+            .build();
+    assertThrows(
+        GeneralSecurityException.class,
+        () ->
+            Registry.getPublicKeyData(
+            new TestPrivateKeyTypeManager().getKeyType(), privateKey.toByteString()));
+  }
+
+  @Test
+  public void testRegisterAssymmetricKeyManagersOnce_getPublicKeyData_shouldWork()
+      throws Exception {
+    Registry.reset();
+    // Register asymmetric key managers with registerAsymmetricKeyManagers and registerKeyManager.
+    Registry.registerKeyManager(new TestPrivateKeyTypeManager(), false);
+    Registry.registerKeyManager(new TestPublicKeyTypeManager(), false);
+    Registry.registerAsymmetricKeyManagers(
+        new TestPrivateKeyTypeManager(), new TestPublicKeyTypeManager(), false);
+    Registry.registerKeyManager(new TestPrivateKeyTypeManager(), false);
+    Registry.registerKeyManager(new TestPublicKeyTypeManager(), false);
+
+    Ed25519PrivateKey privateKey =
+        Ed25519PrivateKey.newBuilder()
+            .setKeyValue(ByteString.copyFrom(Random.randBytes(32)))
+            .setPublicKey(
+                Ed25519PublicKey.newBuilder()
+                    .setKeyValue(ByteString.copyFrom(Random.randBytes(32))))
+            .build();
+    KeyData publicKeyData =
+        Registry.getPublicKeyData(
+            new TestPrivateKeyTypeManager().getKeyType(), privateKey.toByteString());
+    assertThat(publicKeyData.getTypeUrl()).isEqualTo(new TestPublicKeyTypeManager().getKeyType());
+    Ed25519PublicKey publicKey =
+        Ed25519PublicKey.parseFrom(
+            publicKeyData.getValue(), ExtensionRegistryLite.getEmptyRegistry());
+    assertThat(publicKey.getKeyValue()).isEqualTo(privateKey.getPublicKey().getKeyValue());
+  }
+
+  @Test
+  public void testRegisterAssymmetricKeyManagers_differentClassPrivateKey_throws()
       throws Exception {
     Registry.reset();
     Registry.registerAsymmetricKeyManagers(
@@ -1331,12 +1502,12 @@ public class RegistryTest {
         GeneralSecurityException.class,
         () ->
             Registry.registerAsymmetricKeyManagers(
+                // Note: due to the {} this is a subclass of TestPrivateKeyTypeManager.
                 new TestPrivateKeyTypeManager() {}, new TestPublicKeyTypeManager(), false));
   }
 
   @Test
-  public void testRegisterAssymmetricKeyManagers_DifferentClassPublicKey_throws()
-      throws Exception {
+  public void testRegisterAssymmetricKeyManagers_differentClassPublicKey_throws() throws Exception {
     Registry.reset();
     Registry.registerAsymmetricKeyManagers(
         new TestPrivateKeyTypeManager(), new TestPublicKeyTypeManager(), false);
@@ -1373,7 +1544,7 @@ public class RegistryTest {
   }
 
   @Test
-  public void testRegisterAssymmetricKeyManagers_ThrowsWithDifferentPublicKeyManager()
+  public void testRegisterAssymmetricKeyManagers_throwsWithDifferentPublicKeyManager()
       throws Exception {
     Registry.reset();
     Registry.registerAsymmetricKeyManagers(
@@ -1466,7 +1637,7 @@ public class RegistryTest {
   }
 
   @Test
-  public void testAddCatalogue_MultiThreads_shouldWork() throws Exception {
+  public void testAddCatalogue_multiThreads_shouldWork() throws Exception {
     final boolean[] threwException = new boolean[3];
     Thread thread1 =
         new Thread(
@@ -1544,11 +1715,17 @@ public class RegistryTest {
 
   @Test
   public void testWrap_wrapperRegistered() throws Exception {
+    // Skip test if in FIPS mode, as EAX is not allowed in FipsMode.
+    Assume.assumeFalse(TinkFips.useOnlyFips());
+
     Registry.wrap(createAeadPrimitiveSet());
   }
 
   @Test
   public void testWrap_noWrapperRegistered_throws() throws Exception {
+    // Skip test if in FIPS mode, as EAX is not allowed in FipsMode.
+    Assume.assumeFalse(TinkFips.useOnlyFips());
+
     PrimitiveSet<Aead> aeadSet = createAeadPrimitiveSet();
     Registry.reset();
     GeneralSecurityException e =
@@ -1559,6 +1736,9 @@ public class RegistryTest {
 
   @Test
   public void testWrap_wrapAsEncryptOnly() throws Exception {
+    // Skip test if in FIPS mode, as EAX is not allowed in FipsMode.
+    Assume.assumeFalse(TinkFips.useOnlyFips());
+
     // Check that Registry.wrap can be assigned to an EncryptOnly (as there's a suppress warning).
     EncryptOnly encrypt = Registry.wrap(createAeadPrimitiveSet(), EncryptOnly.class);
     assertThat(encrypt).isNotNull();
@@ -1587,6 +1767,81 @@ public class RegistryTest {
                 }
               });
         });
+  }
+
+  @Test
+  public void testFips_succeedsOnEmptyRegistry() throws Exception {
+    Registry.reset();
+    Registry.restrictToFipsIfEmpty();
+    assertTrue(TinkFipsUtil.useOnlyFips());
+  }
+
+  @Test
+  public void testFips_failsOnNonEmptyRegistry() throws Exception {
+    assertThrows(GeneralSecurityException.class, Registry::restrictToFipsIfEmpty);
+  }
+
+  @Test
+  public void testFips_registerNonFipsKeyTypeManagerFails() throws Exception {
+    Assume.assumeTrue(TinkFipsUtil.fipsModuleAvailable());
+
+    Registry.reset();
+    Registry.restrictToFipsIfEmpty();
+
+    assertThrows(
+        GeneralSecurityException.class,
+        () -> Registry.registerKeyManager(new TestKeyTypeManagerNonFips(), true));
+  }
+
+
+  @Test
+  public void testFips_registerFipsKeyTypeManagerSucceeds() throws Exception {
+    Assume.assumeTrue(TinkFipsUtil.fipsModuleAvailable());
+
+    Registry.reset();
+    Registry.restrictToFipsIfEmpty();
+    AesGcmKeyManager.register(true);
+  }
+
+  @Test
+  public void testFips_registerNonFipsKeyTypeManagerAsymmetricFails() throws Exception {
+    Assume.assumeTrue(TinkFipsUtil.fipsModuleAvailable());
+
+    Registry.reset();
+    Registry.restrictToFipsIfEmpty();
+
+    assertThrows(
+        GeneralSecurityException.class,
+        () ->
+            Registry.registerAsymmetricKeyManagers(
+                new TestPrivateKeyTypeManagerNonFips(),
+                new TestPublicKeyTypeManagerNonFips(),
+                false));
+  }
+
+
+  @Test
+  public void testFips_registerFipsKeyTypeManagerAsymmetricSucceeds() throws Exception {
+    Assume.assumeTrue(TinkFipsUtil.fipsModuleAvailable());
+
+    Registry.reset();
+    Registry.restrictToFipsIfEmpty();
+
+    EcdsaSignKeyManager.registerPair(true);
+  }
+
+
+  @Test
+  public void testFips_registerFipsKeyManager_fails() throws Exception {
+    Assume.assumeTrue(TinkFipsUtil.fipsModuleAvailable());
+
+    Registry.reset();
+    Registry.restrictToFipsIfEmpty();
+
+    String typeUrl = "testNewKeyDataTypeUrl";
+    CustomAeadKeyManager km = new CustomAeadKeyManager(typeUrl);
+    assertThrows(
+        GeneralSecurityException.class, () -> Registry.registerKeyManager(km));
   }
 
   private static class FakeAead {}

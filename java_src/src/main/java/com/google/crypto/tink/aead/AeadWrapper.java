@@ -21,6 +21,10 @@ import com.google.crypto.tink.CryptoFormat;
 import com.google.crypto.tink.PrimitiveSet;
 import com.google.crypto.tink.PrimitiveWrapper;
 import com.google.crypto.tink.Registry;
+import com.google.crypto.tink.internal.MonitoringUtil;
+import com.google.crypto.tink.internal.MutableMonitoringRegistry;
+import com.google.crypto.tink.monitoring.MonitoringClient;
+import com.google.crypto.tink.monitoring.MonitoringKeysetInfo;
 import com.google.crypto.tink.subtle.Bytes;
 import java.security.GeneralSecurityException;
 import java.util.Arrays;
@@ -40,31 +44,53 @@ public class AeadWrapper implements PrimitiveWrapper<Aead, Aead> {
 
   private static class WrappedAead implements Aead {
     private final PrimitiveSet<Aead> pSet;
+    private final MonitoringClient.Logger encLogger;
+    private final MonitoringClient.Logger decLogger;
+
     private WrappedAead(PrimitiveSet<Aead> pSet) {
       this.pSet = pSet;
+      if (pSet.hasAnnotations()) {
+        MonitoringClient client = MutableMonitoringRegistry.globalInstance().getMonitoringClient();
+        MonitoringKeysetInfo keysetInfo = MonitoringUtil.getMonitoringKeysetInfo(pSet);
+        this.encLogger = client.createLogger(keysetInfo, "aead", "encrypt");
+        this.decLogger = client.createLogger(keysetInfo, "aead", "decrypt");
+      } else {
+        this.encLogger = MonitoringUtil.DO_NOTHING_LOGGER;
+        this.decLogger = MonitoringUtil.DO_NOTHING_LOGGER;
+      }
     }
 
     @Override
     public byte[] encrypt(final byte[] plaintext, final byte[] associatedData)
         throws GeneralSecurityException {
-      return Bytes.concat(
-          pSet.getPrimary().getIdentifier(),
-          pSet.getPrimary().getPrimitive().encrypt(plaintext, associatedData));
+      try {
+        byte[] output =
+            Bytes.concat(
+                pSet.getPrimary().getIdentifier(),
+                pSet.getPrimary().getPrimitive().encrypt(plaintext, associatedData));
+        encLogger.log(pSet.getPrimary().getKeyId(), plaintext.length);
+        return output;
+      } catch (GeneralSecurityException e) {
+        encLogger.logFailure();
+        throw e;
+      }
     }
 
     @Override
     public byte[] decrypt(final byte[] ciphertext, final byte[] associatedData)
         throws GeneralSecurityException {
       if (ciphertext.length > CryptoFormat.NON_RAW_PREFIX_SIZE) {
-        byte[] prefix = Arrays.copyOfRange(ciphertext, 0, CryptoFormat.NON_RAW_PREFIX_SIZE);
+        byte[] prefix = Arrays.copyOf(ciphertext, CryptoFormat.NON_RAW_PREFIX_SIZE);
         byte[] ciphertextNoPrefix =
             Arrays.copyOfRange(ciphertext, CryptoFormat.NON_RAW_PREFIX_SIZE, ciphertext.length);
         List<PrimitiveSet.Entry<Aead>> entries = pSet.getPrimitive(prefix);
         for (PrimitiveSet.Entry<Aead> entry : entries) {
           try {
-            return entry.getPrimitive().decrypt(ciphertextNoPrefix, associatedData);
+            byte[] result = entry.getPrimitive().decrypt(ciphertextNoPrefix, associatedData);
+            decLogger.log(entry.getKeyId(), ciphertextNoPrefix.length);
+            return result;
           } catch (GeneralSecurityException e) {
-            logger.info("ciphertext prefix matches a key, but cannot decrypt: " + e.toString());
+            logger.info("ciphertext prefix matches a key, but cannot decrypt: " + e);
             continue;
           }
         }
@@ -74,11 +100,14 @@ public class AeadWrapper implements PrimitiveWrapper<Aead, Aead> {
       List<PrimitiveSet.Entry<Aead>> entries = pSet.getRawPrimitives();
       for (PrimitiveSet.Entry<Aead> entry : entries) {
         try {
-          return entry.getPrimitive().decrypt(ciphertext, associatedData);
+          byte[] result = entry.getPrimitive().decrypt(ciphertext, associatedData);
+          decLogger.log(entry.getKeyId(), ciphertext.length);
+          return result;
         } catch (GeneralSecurityException e) {
           continue;
         }
       }
+      decLogger.logFailure();
       // nothing works.
       throw new GeneralSecurityException("decryption failed");
     }

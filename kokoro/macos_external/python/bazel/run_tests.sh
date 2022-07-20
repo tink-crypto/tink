@@ -14,23 +14,26 @@
 # limitations under the License.
 ################################################################################
 
-
 set -euo pipefail
-cd ${KOKORO_ARTIFACTS_DIR}/git/tink
 
-./kokoro/copy_credentials.sh
+if [[ -n "${KOKORO_ROOT:-}" ]]; then
+  cd "${KOKORO_ARTIFACTS_DIR}/git/tink"
+fi
 
-# Install protobuf pip packages
+./kokoro/testutils/copy_credentials.sh "python/testdata"
+# Install protobuf pip packages.
 pip3 install protobuf --user
 
-run_bazel_tests() {
-  (
-    cd python
-    use_bazel.sh $(cat .bazelversion)
+if [[ -n "${KOKORO_ROOT:-}" ]]; then
+  use_bazel.sh $(cat python/.bazelversion)
+fi
 
-    time bazel build -- ...
-    time bazel test --test_output=errors -- ...
-  )
-}
+# Run manual tests which rely on key material injected into the Kokoro
+# environement.
+MANUAL_TARGETS=()
+if [[ -n "${KOKORO_ROOT:-}" ]]; then
+  MANUAL_TARGETS+=( "//tink/integration/gcpkms:_gcp_kms_aead_test" )
+fi
+readonly MANUAL_TARGETS
 
-run_bazel_tests
+./kokoro/testutils/run_bazel_tests.sh python "${MANUAL_TARGETS[@]}"

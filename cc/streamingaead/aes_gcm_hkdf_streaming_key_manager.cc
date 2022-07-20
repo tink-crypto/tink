@@ -16,6 +16,9 @@
 
 #include "tink/streamingaead/aes_gcm_hkdf_streaming_key_manager.h"
 
+#include <string>
+
+#include "absl/status/status.h"
 #include "tink/subtle/aes_gcm_hkdf_stream_segment_encrypter.h"
 #include "tink/subtle/random.h"
 #include "tink/util/input_stream_util.h"
@@ -38,13 +41,14 @@ Status ValidateParams(const AesGcmHkdfStreamingParams& params) {
   if (!(params.hkdf_hash_type() == HashType::SHA1 ||
         params.hkdf_hash_type() == HashType::SHA256 ||
         params.hkdf_hash_type() == HashType::SHA512)) {
-    return Status(util::error::INVALID_ARGUMENT, "unsupported hkdf_hash_type");
+    return Status(absl::StatusCode::kInvalidArgument,
+                  "unsupported hkdf_hash_type");
   }
   int header_size = 1 + params.derived_key_size() +
       AesGcmHkdfStreamSegmentEncrypter::kNoncePrefixSizeInBytes;
   if (params.ciphertext_segment_size() <=
       header_size + AesGcmHkdfStreamSegmentEncrypter::kTagSizeInBytes) {
-    return Status(util::error::INVALID_ARGUMENT,
+    return Status(absl::StatusCode::kInvalidArgument,
                   "ciphertext_segment_size too small");
   }
   return ValidateAesKeySize(params.derived_key_size());
@@ -78,7 +82,7 @@ AesGcmHkdfStreamingKeyManager::DeriveKey(
   }
   AesGcmHkdfStreamingKey key;
   key.set_version(get_version());
-  key.set_key_value(randomness_or.ValueOrDie());
+  key.set_key_value(randomness_or.value());
   *key.mutable_params() = key_format.params();
   return key;
 }
@@ -88,7 +92,7 @@ Status AesGcmHkdfStreamingKeyManager::ValidateKey(
   Status status = ValidateVersion(key.version(), get_version());
   if (!status.ok()) return status;
   if (key.key_value().size() < key.params().derived_key_size()) {
-    return Status(util::error::INVALID_ARGUMENT,
+    return Status(absl::StatusCode::kInvalidArgument,
                   "key_value (i.e. ikm) too short");
   }
   return ValidateParams(key.params());
@@ -97,7 +101,7 @@ Status AesGcmHkdfStreamingKeyManager::ValidateKey(
 Status AesGcmHkdfStreamingKeyManager::ValidateKeyFormat(
     const AesGcmHkdfStreamingKeyFormat& key_format) const {
   if (key_format.key_size() < key_format.params().derived_key_size()) {
-    return Status(util::error::INVALID_ARGUMENT,
+    return Status(absl::StatusCode::kInvalidArgument,
                   "key_size must not be smaller than derived_key_size");
   }
   return ValidateParams(key_format.params());

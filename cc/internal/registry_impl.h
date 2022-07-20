@@ -17,6 +17,10 @@
 #define TINK_INTERNAL_REGISTRY_IMPL_H_
 
 #include <algorithm>
+#include <functional>
+#include <initializer_list>
+#include <memory>
+#include <string>
 #include <tuple>
 #include <typeindex>
 #include <typeinfo>
@@ -25,6 +29,7 @@
 #include "absl/base/thread_annotations.h"
 #include "absl/container/flat_hash_map.h"
 #include "absl/memory/memory.h"
+#include "absl/status/status.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/str_join.h"
 #include "absl/strings/string_view.h"
@@ -39,6 +44,7 @@
 #include "tink/internal/keyset_wrapper.h"
 #include "tink/internal/keyset_wrapper_impl.h"
 #include "tink/key_manager.h"
+#include "tink/monitoring/monitoring.h"
 #include "tink/primitive_set.h"
 #include "tink/primitive_wrapper.h"
 #include "tink/util/errors.h"
@@ -129,19 +135,35 @@ class RegistryImpl {
       std::unique_ptr<PrimitiveSet<P>> primitive_set) const
       ABSL_LOCKS_EXCLUDED(maps_mutex_);
 
+  // Wraps a `keyset` and annotates it with `annotations`.
   template <class P>
   crypto::tink::util::StatusOr<std::unique_ptr<P>> WrapKeyset(
-      const google::crypto::tink::Keyset& keyset) const
+      const google::crypto::tink::Keyset& keyset,
+      const absl::flat_hash_map<std::string, std::string>& annotations) const
       ABSL_LOCKS_EXCLUDED(maps_mutex_);
 
   crypto::tink::util::StatusOr<google::crypto::tink::KeyData> DeriveKey(
       const google::crypto::tink::KeyTemplate& key_template,
       InputStream* randomness) const ABSL_LOCKS_EXCLUDED(maps_mutex_);
 
-  void Reset() ABSL_LOCKS_EXCLUDED(maps_mutex_);
+  void Reset() ABSL_LOCKS_EXCLUDED(maps_mutex_, monitoring_factory_mutex_);
 
   crypto::tink::util::Status RestrictToFipsIfEmpty() const
       ABSL_LOCKS_EXCLUDED(maps_mutex_);
+
+  // Registers a `monitoring_factory`. Only one factory can be registered,
+  // subsequent calls to this method will return a kAlreadyExists error.
+  crypto::tink::util::Status RegisterMonitoringClientFactory(
+      std::unique_ptr<crypto::tink::MonitoringClientFactory> monitoring_factory)
+      ABSL_LOCKS_EXCLUDED(monitoring_factory_mutex_);
+
+  // Returns a pointer to the registered monitoring factory if any, and nullptr
+  // otherwise.
+  crypto::tink::MonitoringClientFactory* GetMonitoringClientFactory() const
+      ABSL_LOCKS_EXCLUDED(monitoring_factory_mutex_) {
+    absl::MutexLock lock(&monitoring_factory_mutex_);
+    return monitoring_factory_.get();
+  }
 
  private:
   // All information for a given type url.
@@ -224,7 +246,7 @@ class RegistryImpl {
       auto it = primitive_to_manager_.find(std::type_index(typeid(P)));
       if (it == primitive_to_manager_.end()) {
         return crypto::tink::util::Status(
-            crypto::tink::util::error::INVALID_ARGUMENT,
+            absl::StatusCode::kInvalidArgument,
             absl::StrCat(
                 "Primitive type ", typeid(P).name(),
                 " not among supported primitives ",
@@ -315,7 +337,7 @@ class RegistryImpl {
         const {
       if (q_type_index_ != std::type_index(typeid(Q))) {
         return crypto::tink::util::Status(
-            crypto::tink::util::error::INTERNAL,
+            absl::StatusCode::kInternal,
             "RegistryImpl::KeysetWrapper() called with wrong type");
       }
       return static_cast<KeysetWrapper<Q>*>(keyset_wrapper_.get());
@@ -329,13 +351,13 @@ class RegistryImpl {
         // directly or has a custom key manager for a primitive which has a
         // PrimitiveWrapper<P,Q> with P != Q.
         return crypto::tink::util::Status(
-            crypto::tink::util::error::FAILED_PRECONDITION,
+            absl::StatusCode::kFailedPrecondition,
             absl::StrCat("Cannot use primitive type ", typeid(P).name(),
                          " with a custom key manager."));
       }
       if (q_type_index_ != std::type_index(typeid(P))) {
         return crypto::tink::util::Status(
-            crypto::tink::util::error::INTERNAL,
+            absl::StatusCode::kInternal,
             "RegistryImpl::LegacyWrapper() called with wrong type");
       }
       return static_cast<const PrimitiveWrapper<P, P>*>(
@@ -417,6 +439,10 @@ class RegistryImpl {
 
   absl::flat_hash_map<std::string, LabelInfo> name_to_catalogue_map_
       ABSL_GUARDED_BY(maps_mutex_);
+
+  mutable absl::Mutex monitoring_factory_mutex_;
+  std::unique_ptr<crypto::tink::MonitoringClientFactory> monitoring_factory_
+      ABSL_GUARDED_BY(monitoring_factory_mutex_);
 };
 
 template <class P>
@@ -424,7 +450,7 @@ crypto::tink::util::Status RegistryImpl::AddCatalogue(
     absl::string_view catalogue_name, Catalogue<P>* catalogue) {
   if (catalogue == nullptr) {
     return crypto::tink::util::Status(
-        crypto::tink::util::error::INVALID_ARGUMENT,
+        absl::StatusCode::kInvalidArgument,
         "Parameter 'catalogue' must be non-null.");
   }
   std::shared_ptr<void> entry(catalogue);
@@ -435,7 +461,7 @@ crypto::tink::util::Status RegistryImpl::AddCatalogue(
         static_cast<Catalogue<P>*>(curr_catalogue->second.catalogue.get());
     if (std::type_index(typeid(*existing)) !=
         std::type_index(typeid(*catalogue))) {
-      return ToStatusF(crypto::tink::util::error::ALREADY_EXISTS,
+      return ToStatusF(absl::StatusCode::kAlreadyExists,
                        "A catalogue named '%s' has been already added.",
                        catalogue_name);
     }
@@ -445,7 +471,7 @@ crypto::tink::util::Status RegistryImpl::AddCatalogue(
         std::forward_as_tuple(std::move(entry), std::type_index(typeid(P)),
                               typeid(P).name()));
   }
-  return crypto::tink::util::Status::OK;
+  return crypto::tink::util::OkStatus();
 }
 
 template <class P>
@@ -454,11 +480,11 @@ crypto::tink::util::StatusOr<const Catalogue<P>*> RegistryImpl::get_catalogue(
   absl::MutexLock lock(&maps_mutex_);
   auto catalogue_entry = name_to_catalogue_map_.find(catalogue_name);
   if (catalogue_entry == name_to_catalogue_map_.end()) {
-    return ToStatusF(crypto::tink::util::error::NOT_FOUND,
+    return ToStatusF(absl::StatusCode::kNotFound,
                      "No catalogue named '%s' has been added.", catalogue_name);
   }
   if (catalogue_entry->second.type_id_name != typeid(P).name()) {
-    return ToStatusF(crypto::tink::util::error::INVALID_ARGUMENT,
+    return ToStatusF(absl::StatusCode::kInvalidArgument,
                      "Wrong Primitive type for catalogue named '%s': "
                      "got '%s', expected '%s'",
                      catalogue_name, typeid(P).name(),
@@ -472,13 +498,12 @@ crypto::tink::util::Status RegistryImpl::RegisterKeyManager(
     KeyManager<P>* manager, bool new_key_allowed) {
   auto owned_manager = absl::WrapUnique(manager);
   if (owned_manager == nullptr) {
-    return crypto::tink::util::Status(
-        crypto::tink::util::error::INVALID_ARGUMENT,
-        "Parameter 'manager' must be non-null.");
+    return crypto::tink::util::Status(absl::StatusCode::kInvalidArgument,
+                                      "Parameter 'manager' must be non-null.");
   }
   std::string type_url = owned_manager->get_key_type();
   if (!manager->DoesSupport(type_url)) {
-    return ToStatusF(crypto::tink::util::error::INVALID_ARGUMENT,
+    return ToStatusF(absl::StatusCode::kInvalidArgument,
                      "The manager does not support type '%s'.", type_url);
   }
   absl::MutexLock lock(&maps_mutex_);
@@ -494,7 +519,7 @@ crypto::tink::util::Status RegistryImpl::RegisterKeyManager(
         std::piecewise_construct, std::forward_as_tuple(type_url),
         std::forward_as_tuple(owned_manager.release(), new_key_allowed));
   }
-  return crypto::tink::util::Status::OK;
+  return crypto::tink::util::OkStatus();
 }
 
 template <class KeyProto, class KeyFormatProto, class PrimitiveList>
@@ -503,9 +528,8 @@ crypto::tink::util::Status RegistryImpl::RegisterKeyTypeManager(
         owned_manager,
     bool new_key_allowed) {
   if (owned_manager == nullptr) {
-    return crypto::tink::util::Status(
-        crypto::tink::util::error::INVALID_ARGUMENT,
-        "Parameter 'manager' must be non-null.");
+    return crypto::tink::util::Status(absl::StatusCode::kInvalidArgument,
+                                      "Parameter 'manager' must be non-null.");
   }
   std::string type_url = owned_manager->get_key_type();
   absl::MutexLock lock(&maps_mutex_);
@@ -515,7 +539,7 @@ crypto::tink::util::Status RegistryImpl::RegisterKeyTypeManager(
   auto fips_status = internal::ChecksFipsCompatibility(fips_compatible);
   if (!fips_status.ok()) {
     return crypto::tink::util::Status(
-        crypto::tink::util::error::INTERNAL,
+        absl::StatusCode::kInternal,
         absl::StrCat("Failed registering the key manager for ",
                      typeid(*owned_manager).name(),
                      " as it is not FIPS compatible."));
@@ -533,7 +557,7 @@ crypto::tink::util::Status RegistryImpl::RegisterKeyTypeManager(
         std::piecewise_construct, std::forward_as_tuple(type_url),
         std::forward_as_tuple(owned_manager.release(), new_key_allowed));
   }
-  return crypto::tink::util::Status::OK;
+  return crypto::tink::util::OkStatus();
 }
 
 template <class PrivateKeyProto, class KeyFormatProto, class PublicKeyProto,
@@ -548,12 +572,12 @@ crypto::tink::util::Status RegistryImpl::RegisterAsymmetricKeyManagers(
   auto owned_public_key_manager = absl::WrapUnique(public_key_manager);
   if (private_key_manager == nullptr) {
     return crypto::tink::util::Status(
-        crypto::tink::util::error::INVALID_ARGUMENT,
+        absl::StatusCode::kInvalidArgument,
         "Parameter 'private_key_manager' must be non-null.");
   }
   if (owned_public_key_manager == nullptr) {
     return crypto::tink::util::Status(
-        crypto::tink::util::error::INVALID_ARGUMENT,
+        absl::StatusCode::kInvalidArgument,
         "Parameter 'public_key_manager' must be non-null.");
   }
   std::string private_type_url = private_key_manager->get_key_type();
@@ -567,7 +591,7 @@ crypto::tink::util::Status RegistryImpl::RegisterAsymmetricKeyManagers(
 
   if (!private_fips_status.ok()) {
     return crypto::tink::util::Status(
-        crypto::tink::util::error::INTERNAL,
+        absl::StatusCode::kInternal,
         absl::StrCat("Failed registering the key manager for ",
                      typeid(*private_key_manager).name(),
                      " as it is not FIPS compatible."));
@@ -578,7 +602,7 @@ crypto::tink::util::Status RegistryImpl::RegisterAsymmetricKeyManagers(
 
   if (!public_fips_status.ok()) {
     return crypto::tink::util::Status(
-        crypto::tink::util::error::INTERNAL,
+        absl::StatusCode::kInternal,
         absl::StrCat("Failed registering the key manager for ",
                      typeid(*public_key_manager).name(),
                      " as it is not FIPS compatible."));
@@ -595,7 +619,7 @@ crypto::tink::util::Status RegistryImpl::RegisterAsymmetricKeyManagers(
 
   if (private_type_url == public_type_url) {
     return crypto::tink::util::Status(
-        crypto::tink::util::error::INVALID_ARGUMENT,
+        absl::StatusCode::kInvalidArgument,
         "Passed in key managers must have different get_key_type() results.");
   }
 
@@ -606,7 +630,7 @@ crypto::tink::util::Status RegistryImpl::RegisterAsymmetricKeyManagers(
 
   if (private_found && !public_found) {
     return crypto::tink::util::Status(
-        crypto::tink::util::error::INVALID_ARGUMENT,
+        absl::StatusCode::kInvalidArgument,
         absl::StrCat(
             "Private key manager corresponding to ",
             typeid(*private_key_manager).name(),
@@ -616,7 +640,7 @@ crypto::tink::util::Status RegistryImpl::RegisterAsymmetricKeyManagers(
   }
   if (!private_found && public_found) {
     return crypto::tink::util::Status(
-        crypto::tink::util::error::INVALID_ARGUMENT,
+        absl::StatusCode::kInvalidArgument,
         absl::StrCat("Key manager corresponding to ",
                      typeid(*public_key_manager).name(),
                      " was previously registered, but private key manager "
@@ -629,7 +653,7 @@ crypto::tink::util::Status RegistryImpl::RegisterAsymmetricKeyManagers(
     // implies public_found.
     if (!private_it->second.public_key_manager_type_index().has_value()) {
       return crypto::tink::util::Status(
-          crypto::tink::util::error::INVALID_ARGUMENT,
+          absl::StatusCode::kInvalidArgument,
           absl::StrCat("private key manager corresponding to ",
                        typeid(*private_key_manager).name(),
                        " is already registered without public key manager, "
@@ -638,7 +662,7 @@ crypto::tink::util::Status RegistryImpl::RegisterAsymmetricKeyManagers(
     if (*private_it->second.public_key_manager_type_index() !=
         std::type_index(typeid(*public_key_manager))) {
       return crypto::tink::util::Status(
-          crypto::tink::util::error::INVALID_ARGUMENT,
+          absl::StatusCode::kInvalidArgument,
           absl::StrCat(
               "private key manager corresponding to ",
               typeid(*private_key_manager).name(),
@@ -670,9 +694,8 @@ template <class P, class Q>
 crypto::tink::util::Status RegistryImpl::RegisterPrimitiveWrapper(
     PrimitiveWrapper<P, Q>* wrapper) {
   if (wrapper == nullptr) {
-    return crypto::tink::util::Status(
-        crypto::tink::util::error::INVALID_ARGUMENT,
-        "Parameter 'wrapper' must be non-null.");
+    return crypto::tink::util::Status(absl::StatusCode::kInvalidArgument,
+                                      "Parameter 'wrapper' must be non-null.");
   }
   std::unique_ptr<PrimitiveWrapper<P, Q>> entry(wrapper);
 
@@ -681,16 +704,16 @@ crypto::tink::util::Status RegistryImpl::RegisterPrimitiveWrapper(
   if (it != primitive_to_wrapper_.end()) {
     if (!it->second.HasSameType(*wrapper)) {
       return util::Status(
-          crypto::tink::util::error::ALREADY_EXISTS,
+          absl::StatusCode::kAlreadyExists,
           "A wrapper named for this primitive has already been added.");
     }
-    return crypto::tink::util::Status::OK;
+    return crypto::tink::util::OkStatus();
   }
   primitive_to_wrapper_.emplace(
       std::piecewise_construct,
       std::forward_as_tuple(std::type_index(typeid(Q))),
       std::forward_as_tuple(std::move(entry)));
-  return crypto::tink::util::Status::OK;
+  return crypto::tink::util::OkStatus();
 }
 
 template <class P>
@@ -699,7 +722,7 @@ RegistryImpl::get_key_manager(absl::string_view type_url) const {
   absl::MutexLock lock(&maps_mutex_);
   auto it = type_url_to_info_.find(type_url);
   if (it == type_url_to_info_.end()) {
-    return ToStatusF(crypto::tink::util::error::NOT_FOUND,
+    return ToStatusF(absl::StatusCode::kNotFound,
                      "No manager for type '%s' has been registered.", type_url);
   }
   return it->second.get_key_manager<P>(type_url);
@@ -710,7 +733,7 @@ crypto::tink::util::StatusOr<std::unique_ptr<P>> RegistryImpl::GetPrimitive(
     const google::crypto::tink::KeyData& key_data) const {
   auto key_manager_result = get_key_manager<P>(key_data.type_url());
   if (key_manager_result.ok()) {
-    return key_manager_result.ValueOrDie()->GetPrimitive(key_data);
+    return key_manager_result.value()->GetPrimitive(key_data);
   }
   return key_manager_result.status();
 }
@@ -720,7 +743,7 @@ crypto::tink::util::StatusOr<std::unique_ptr<P>> RegistryImpl::GetPrimitive(
     absl::string_view type_url, const portable_proto::MessageLite& key) const {
   auto key_manager_result = get_key_manager<P>(type_url);
   if (key_manager_result.ok()) {
-    return key_manager_result.ValueOrDie()->GetPrimitive(key);
+    return key_manager_result.value()->GetPrimitive(key);
   }
   return key_manager_result.status();
 }
@@ -732,7 +755,7 @@ RegistryImpl::GetLegacyWrapper() const {
   auto it = primitive_to_wrapper_.find(std::type_index(typeid(P)));
   if (it == primitive_to_wrapper_.end()) {
     return util::Status(
-        util::error::NOT_FOUND,
+        absl::StatusCode::kNotFound,
         absl::StrCat("No wrapper registered for type ", typeid(P).name()));
   }
   return it->second.GetLegacyWrapper<P>();
@@ -745,7 +768,7 @@ RegistryImpl::GetKeysetWrapper() const {
   auto it = primitive_to_wrapper_.find(std::type_index(typeid(P)));
   if (it == primitive_to_wrapper_.end()) {
     return util::Status(
-        util::error::NOT_FOUND,
+        absl::StatusCode::kNotFound,
         absl::StrCat("No wrapper registered for type ", typeid(P).name()));
   }
   return it->second.GetKeysetWrapper<P>();
@@ -756,7 +779,7 @@ crypto::tink::util::StatusOr<std::unique_ptr<P>> RegistryImpl::Wrap(
     std::unique_ptr<PrimitiveSet<P>> primitive_set) const {
   if (primitive_set == nullptr) {
     return crypto::tink::util::Status(
-        crypto::tink::util::error::INVALID_ARGUMENT,
+        absl::StatusCode::kInvalidArgument,
         "Parameter 'primitive_set' must be non-null.");
   }
   util::StatusOr<const PrimitiveWrapper<P, P>*> wrapper_result =
@@ -764,22 +787,19 @@ crypto::tink::util::StatusOr<std::unique_ptr<P>> RegistryImpl::Wrap(
   if (!wrapper_result.ok()) {
     return wrapper_result.status();
   }
-  crypto::tink::util::StatusOr<std::unique_ptr<P>> primitive_result =
-      wrapper_result.ValueOrDie()->Wrap(std::move(primitive_set));
-  return std::move(primitive_result);
+  return wrapper_result.value()->Wrap(std::move(primitive_set));
 }
 
 template <class P>
 crypto::tink::util::StatusOr<std::unique_ptr<P>> RegistryImpl::WrapKeyset(
-    const google::crypto::tink::Keyset& keyset) const {
-  util::StatusOr<const KeysetWrapper<P>*> wrapper_result =
+    const google::crypto::tink::Keyset& keyset,
+    const absl::flat_hash_map<std::string, std::string>& annotations) const {
+  crypto::tink::util::StatusOr<const KeysetWrapper<P>*> keyset_wrapper =
       GetKeysetWrapper<P>();
-  if (!wrapper_result.ok()) {
-    return wrapper_result.status();
+  if (!keyset_wrapper.ok()) {
+    return keyset_wrapper.status();
   }
-  crypto::tink::util::StatusOr<std::unique_ptr<P>> primitive_result =
-      wrapper_result.ValueOrDie()->Wrap(keyset);
-  return std::move(primitive_result);
+  return (*keyset_wrapper)->Wrap(keyset, annotations);
 }
 
 inline crypto::tink::util::Status RegistryImpl::RestrictToFipsIfEmpty() const {
@@ -788,7 +808,7 @@ inline crypto::tink::util::Status RegistryImpl::RestrictToFipsIfEmpty() const {
     SetFipsRestricted();
     return util::OkStatus();
   }
-  return util::Status(util::error::INTERNAL,
+  return util::Status(absl::StatusCode::kInternal,
                       "Could not set FIPS only mode. Registry is not empty.");
 }
 

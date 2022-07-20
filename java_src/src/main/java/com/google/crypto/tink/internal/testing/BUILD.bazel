@@ -1,0 +1,144 @@
+load("@build_bazel_rules_android//android:rules.bzl", "android_library")
+
+licenses(["notice"])
+
+package(
+    default_testonly = 1,
+    default_visibility = ["//visibility:public"],
+)
+
+java_library(
+    name = "fake_monitoring_client",
+    srcs = ["FakeMonitoringClient.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink/monitoring:monitoring_client",
+        "//src/main/java/com/google/crypto/tink/monitoring:monitoring_keyset_info",
+    ],
+)
+
+android_library(
+    name = "fake_monitoring_client-android",
+    srcs = ["FakeMonitoringClient.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink/monitoring:monitoring_client-android",
+        "//src/main/java/com/google/crypto/tink/monitoring:monitoring_keyset_info-android",
+    ],
+)
+
+java_library(
+    name = "proto_key_format_serialization_tester",
+    srcs = ["ProtoKeyFormatSerializationTester.java"],
+    deps = [
+        "//proto:tink_java_proto",
+        "//src/main/java/com/google/crypto/tink:key_format",
+        "//src/main/java/com/google/crypto/tink/internal:mutable_serialization_registry",
+        "//src/main/java/com/google/crypto/tink/internal:proto_key_format_serialization",
+        "@com_google_protobuf//:protobuf_javalite",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
+
+android_library(
+    name = "proto_key_format_serialization_tester-android",
+    srcs = ["ProtoKeyFormatSerializationTester.java"],
+    deps = [
+        "//proto:tink_java_proto_lite",
+        "//src/main/java/com/google/crypto/tink:key_format-android",
+        "//src/main/java/com/google/crypto/tink/internal:mutable_serialization_registry-android",
+        "//src/main/java/com/google/crypto/tink/internal:proto_key_format_serialization-android",
+        "@com_google_protobuf//:protobuf_javalite",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_library(
+    name = "proto_key_serialization_tester",
+    srcs = ["ProtoKeySerializationTester.java"],
+    deps = [
+        "//proto:tink_java_proto",
+        "//src/main/java/com/google/crypto/tink:insecure_secret_key_access",
+        "//src/main/java/com/google/crypto/tink:key",
+        "//src/main/java/com/google/crypto/tink/internal:mutable_serialization_registry",
+        "//src/main/java/com/google/crypto/tink/internal:proto_key_serialization",
+        "@com_google_protobuf//:protobuf_javalite",
+        "@maven//:com_google_code_findbugs_jsr305",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
+
+android_library(
+    name = "proto_key_serialization_tester-android",
+    srcs = ["ProtoKeySerializationTester.java"],
+    deps = [
+        "//proto:tink_java_proto_lite",
+        "//src/main/java/com/google/crypto/tink:insecure_secret_key_access-android",
+        "//src/main/java/com/google/crypto/tink:key-android",
+        "//src/main/java/com/google/crypto/tink/internal:mutable_serialization_registry-android",
+        "//src/main/java/com/google/crypto/tink/internal:proto_key_serialization-android",
+        "@com_google_protobuf//:protobuf_javalite",
+        "@maven//:com_google_code_findbugs_jsr305",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_library(
+    name = "key_format_with_serialization",
+    srcs = ["KeyFormatWithSerialization.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink:key_format",
+        "//src/main/java/com/google/crypto/tink/internal:proto_key_format_serialization",
+    ],
+)
+
+android_library(
+    name = "key_format_with_serialization-android",
+    srcs = ["KeyFormatWithSerialization.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink:key_format-android",
+        "//src/main/java/com/google/crypto/tink/internal:proto_key_format_serialization-android",
+    ],
+)
+
+java_library(
+    name = "key_with_serialization",
+    srcs = ["KeyWithSerialization.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink:key",
+        "//src/main/java/com/google/crypto/tink/internal:proto_key_serialization",
+    ],
+)
+
+android_library(
+    name = "key_with_serialization-android",
+    srcs = ["KeyWithSerialization.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink:key-android",
+        "//src/main/java/com/google/crypto/tink/internal:proto_key_serialization-android",
+    ],
+)
+
+java_library(
+    name = "asserts",
+    srcs = ["Asserts.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink/internal:proto_key_format_serialization",
+        "//src/main/java/com/google/crypto/tink/internal:proto_key_serialization",
+        "@com_google_protobuf//:protobuf_javalite",
+        "@maven//:com_google_truth_truth",
+    ],
+)
+
+android_library(
+    name = "asserts-android",
+    srcs = ["Asserts.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink/internal:proto_key_format_serialization-android",
+        "//src/main/java/com/google/crypto/tink/internal:proto_key_serialization-android",
+        "@com_google_protobuf//:protobuf_javalite",
+        "@maven//:com_google_truth_truth",
+    ],
+)

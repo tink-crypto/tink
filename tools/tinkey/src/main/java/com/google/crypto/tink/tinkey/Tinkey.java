@@ -18,6 +18,8 @@ package com.google.crypto.tink.tinkey;
 
 import com.google.crypto.tink.daead.DeterministicAeadConfig;
 import com.google.crypto.tink.hybrid.HybridConfig;
+import com.google.crypto.tink.jwt.JwtMacConfig;
+import com.google.crypto.tink.jwt.JwtSignatureConfig;
 import com.google.crypto.tink.prf.PrfConfig;
 import com.google.crypto.tink.signature.SignatureConfig;
 import com.google.crypto.tink.streamingaead.StreamingAeadConfig;
@@ -34,6 +36,8 @@ public final class Tinkey {
     PrfConfig.register();
     SignatureConfig.register();
     StreamingAeadConfig.register();
+    JwtSignatureConfig.register();
+    JwtMacConfig.register();
     // place holder for KeyderivationConfig. DO NOT EDIT.
     // place holder for Internal Prps. DO NOT EDIT.
     TinkeyCommands commands = new TinkeyCommands();

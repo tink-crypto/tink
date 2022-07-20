@@ -1,6 +1,6 @@
-load("@npm//@bazel/karma:index.bzl", "karma_web_test_suite")
+load("@npm//@bazel/concatjs:index.bzl", "karma_web_test_suite")
 load("@npm//@bazel/typescript:index.bzl", "ts_library")
-load("@tink_angular//:ng_package.bzl", "ng_package")
+load("@npm//@angular/bazel:index.bzl", "ng_package")
 
 package(default_visibility = ["//:__subpackages__"])
 
@@ -52,6 +52,7 @@ exports_files(
 
 ng_package(
     name = "tink-crypto",
+    package_name = "tink-crypto",
     srcs = [
         "package.json",
         "@tink_base//:README.md",

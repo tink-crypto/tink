@@ -35,7 +35,7 @@ mechanisms to authenticate the sender.
 
 Security guarantees
 
-The functionality of Hybrid Encryption is represented as a pair of primitives (interfaces):
+The functionality of Hybrid Encryption is represented as a pair of interfaces:
 HybridEncrypt for encryption of data, and HybridDecrypt for decryption.
 Implementations of these interfaces are secure against adaptive chosen ciphertext attacks. In
 addition to plaintext the encryption takes an extra parameter contextInfo, which
@@ -57,7 +57,7 @@ the ciphertext in various ways, for example:
       derivation function, cf. https://tools.ietf.org/html/rfc5869).
 */
 type HybridEncrypt interface {
-	// Encrypt operation: encrypts plaintext} binding contextInfo to the resulting
-	// ciphertext. Returns resulting ciphertext
+	// Encrypt operation: encrypts plaintext, binding contextInfo to the resulting
+	// ciphertext. Returns resulting ciphertext.
 	Encrypt(plaintext, contextInfo []byte) ([]byte, error)
 }

@@ -43,34 +43,12 @@ config_setting(
 )
 
 java_library(
-    name = "tink_fips_status",
-    srcs = select({
-        ":fips_enabled": ["TinkFipsEnabled.java"],
-        "//conditions:default": ["TinkFipsDisabled.java"],
-    }),
-    deps = select({
-        ":fips_enabled": [
-            "@maven//:org_conscrypt_conscrypt_openjdk_uber",
-        ],
-        "//conditions:default": [
-        ],
-    }),
-)
-
-android_library(
-    name = "tink_fips_status-android",
-    srcs = select({
-        ":fips_enabled": ["TinkFipsEnabled.java"],
-        "//conditions:default": ["TinkFipsDisabled.java"],
-    }),
-)
-
-java_library(
     name = "tink_fips",
     srcs = ["TinkFips.java"],
     visibility = ["//visibility:public"],
     deps = [
-        ":tink_fips_status",
+        "//src/main/java/com/google/crypto/tink:registry",
+        "//src/main/java/com/google/crypto/tink/config/internal:tink_fips_util",
     ],
 )
 
@@ -79,7 +57,7 @@ android_library(
     srcs = ["TinkFips.java"],
     visibility = ["//visibility:public"],
     deps = [
-        ":tink_fips_status-android",
-        "@maven//:org_conscrypt_conscrypt_openjdk_uber",
+        "//src/main/java/com/google/crypto/tink:registry-android",
+        "//src/main/java/com/google/crypto/tink/config/internal:tink_fips_util-android",
     ],
 )

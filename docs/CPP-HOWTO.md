@@ -17,7 +17,7 @@ examples](https://github.com/google/tink/tree/master/examples/cc).
 
 ### CMake
 
-Using Tink with CMake is supported, see [CMAKE-HOWTO](CMAKE-HOWTO.md) for for a
+Using Tink with CMake is supported, see [CMAKE-HOWTO](CMAKE-HOWTO.md) for a
 detailed description.
 
 ## Initializing Tink

@@ -26,13 +26,14 @@ import (
 	"fmt"
 	"math"
 
+	// Placeholder for internal crypto/cipher allowlist, please ignore.
 	// Placeholder for internal crypto/subtle allowlist, please ignore.
 )
 
 // AESSIV is an implementation of AES-SIV-CMAC as defined in
 // https://tools.ietf.org/html/rfc5297.
 //
-// AESSIV implements a deterministic encryption with additional data (i.e. the
+// AESSIV implements a deterministic encryption with associated data (i.e. the
 // DeterministicAEAD interface). Hence the implementation below is restricted
 // to one AD component.
 //
@@ -61,7 +62,9 @@ type AESSIV struct {
 const (
 	// AESSIVKeySize is the key size in bytes.
 	AESSIVKeySize = 64
-	maxInt        = int(^uint(0) >> 1)
+
+	intSize = 32 << (^uint(0) >> 63) // 32 or 64
+	maxInt  = 1<<(intSize-1) - 1
 )
 
 // NewAESSIV returns an AESSIV instance.
@@ -107,36 +110,34 @@ func multiplyByX(block []byte) {
 	block[aes.BlockSize-1] = (block[aes.BlockSize-1] << 1) ^ byte(subtle.ConstantTimeSelect(carry, 0x87, 0x00))
 }
 
-// EncryptDeterministically deterministically encrypts plaintext with
-// additionalData as additional authenticated data.
-func (asc *AESSIV) EncryptDeterministically(pt, aad []byte) ([]byte, error) {
-	if len(pt) > maxInt-aes.BlockSize {
+// EncryptDeterministically deterministically encrypts plaintext with associatedData.
+func (asc *AESSIV) EncryptDeterministically(plaintext, associatedData []byte) ([]byte, error) {
+	if len(plaintext) > maxInt-aes.BlockSize {
 		return nil, fmt.Errorf("aes_siv: plaintext too long")
 	}
 	siv := make([]byte, aes.BlockSize)
-	asc.s2v(pt, aad, siv)
+	asc.s2v(plaintext, associatedData, siv)
 
-	ct := make([]byte, len(pt)+aes.BlockSize)
+	ct := make([]byte, len(plaintext)+aes.BlockSize)
 	copy(ct[:aes.BlockSize], siv)
-	if err := asc.ctrCrypt(siv, pt, ct[aes.BlockSize:]); err != nil {
+	if err := asc.ctrCrypt(siv, plaintext, ct[aes.BlockSize:]); err != nil {
 		return nil, err
 	}
 
 	return ct, nil
 }
 
-// DecryptDeterministically deterministically decrypts ciphertext with
-// additionalData as additional authenticated data.
-func (asc *AESSIV) DecryptDeterministically(ct, aad []byte) ([]byte, error) {
-	if len(ct) < aes.BlockSize {
+// DecryptDeterministically deterministically decrypts ciphertext with associatedData.
+func (asc *AESSIV) DecryptDeterministically(ciphertext, associatedData []byte) ([]byte, error) {
+	if len(ciphertext) < aes.BlockSize {
 		return nil, errors.New("aes_siv: ciphertext is too short")
 	}
 
-	pt := make([]byte, len(ct)-aes.BlockSize)
-	siv := ct[:aes.BlockSize]
-	asc.ctrCrypt(siv, ct[aes.BlockSize:], pt)
+	pt := make([]byte, len(ciphertext)-aes.BlockSize)
+	siv := ciphertext[:aes.BlockSize]
+	asc.ctrCrypt(siv, ciphertext[aes.BlockSize:], pt)
 	s2v := make([]byte, aes.BlockSize)
-	asc.s2v(pt, aad, s2v)
+	asc.s2v(pt, associatedData, s2v)
 
 	diff := byte(0)
 	for i := 0; i < aes.BlockSize; i++ {
@@ -170,14 +171,14 @@ func (asc *AESSIV) ctrCrypt(siv, in, out []byte) error {
 
 // s2v is a Pseudo-Random Function (PRF) construction:
 // https://tools.ietf.org/html/rfc5297.
-func (asc *AESSIV) s2v(msg, aad, siv []byte) {
+func (asc *AESSIV) s2v(msg, ad, siv []byte) {
 	block := make([]byte, aes.BlockSize)
 	asc.cmac(block, block)
 	multiplyByX(block)
 
-	aadMac := make([]byte, aes.BlockSize)
-	asc.cmac(aad, aadMac)
-	xorBlock(aadMac, block)
+	adMac := make([]byte, aes.BlockSize)
+	asc.cmac(ad, adMac)
+	xorBlock(adMac, block)
 
 	if len(msg) >= aes.BlockSize {
 		asc.cmacLong(msg, block, siv)

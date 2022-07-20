@@ -18,6 +18,7 @@
 #define TINK_SIGNATURE_RSA_SSA_PKCS1_VERIFY_KEY_MANAGER_H_
 
 #include <algorithm>
+#include <string>
 #include <vector>
 
 #include "absl/memory/memory.h"

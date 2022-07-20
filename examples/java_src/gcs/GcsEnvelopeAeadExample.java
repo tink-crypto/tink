@@ -124,7 +124,7 @@ public final class GcsEnvelopeAeadExample {
       String gcsBlobPath = args[5];
       // This will bind the encryption to the location of the GCS blob. That if, if you rename or
       // move the blob to a different bucket, decryption will fail.
-      // See https://developers.google.com/tink/AEAD#associated_data.
+      // See https://developers.google.com/tink/aead#associated_data.
       byte[] associatedData = gcsBlobPath.getBytes(UTF_8);
       byte[] ciphertext = aead.encrypt(input, associatedData);
 

@@ -16,7 +16,9 @@
 
 #include "tink/util/file_random_access_stream.h"
 
+#include <string>
 #include <thread>  // NOLINT(build/c++11)
+#include <utility>
 
 #include "gtest/gtest.h"
 #include "absl/memory/memory.h"
@@ -36,7 +38,7 @@ namespace {
 util::Status ReadAll(RandomAccessStream* ra_stream, int chunk_size,
                      std::string* contents) {
   contents->clear();
-  auto buffer = std::move(Buffer::New(chunk_size).ValueOrDie());
+  auto buffer = std::move(Buffer::New(chunk_size).value());
   int64_t position = 0;
   auto status = ra_stream->PRead(position, chunk_size, buffer.get());
   while (status.ok()) {
@@ -44,7 +46,7 @@ util::Status ReadAll(RandomAccessStream* ra_stream, int chunk_size,
     position = contents->size();
     status = ra_stream->PRead(position, chunk_size, buffer.get());
   }
-  if (status.error_code() == util::error::OUT_OF_RANGE) {  // EOF
+  if (status.code() == absl::StatusCode::kOutOfRange) {  // EOF
     EXPECT_EQ(0, buffer->size());
   }
   return status;
@@ -59,8 +61,8 @@ void ReadAndVerifyChunk(RandomAccessStream* ra_stream,
   SCOPED_TRACE(absl::StrCat("stream_size = ", file_contents.size(),
                             ", position = ", position,
                             ", count = ", count));
-  auto buffer = std::move(Buffer::New(count).ValueOrDie());
-  int stream_size = ra_stream->size().ValueOrDie();
+  auto buffer = std::move(Buffer::New(count).value());
+  int stream_size = ra_stream->size().value();
   EXPECT_EQ(file_contents.size(), stream_size);
   auto status = ra_stream->PRead(position, count, buffer.get());
   EXPECT_TRUE(status.ok());
@@ -86,10 +88,10 @@ TEST(FileRandomAccessStreamTest, ReadingStreams) {
     std::string stream_contents;
     auto status = ReadAll(ra_stream.get(), 1 + (stream_size / 10),
                           &stream_contents);
-    EXPECT_EQ(util::error::OUT_OF_RANGE, status.error_code());
-    EXPECT_EQ("EOF", status.error_message());
+    EXPECT_EQ(absl::StatusCode::kOutOfRange, status.code());
+    EXPECT_EQ("EOF", status.message());
     EXPECT_EQ(file_contents, stream_contents);
-    EXPECT_EQ(stream_size, ra_stream->size().ValueOrDie());
+    EXPECT_EQ(stream_size, ra_stream->size().value());
   }
 }
 
@@ -102,13 +104,13 @@ TEST(FileRandomAccessStreamTest, ReadingStreamsTillLastByte) {
         test::GetTestFileDescriptor(filename, stream_size, &file_contents);
     EXPECT_EQ(stream_size, file_contents.size());
     auto ra_stream = absl::make_unique<util::FileRandomAccessStream>(input_fd);
-    auto buffer = std::move(Buffer::New(stream_size).ValueOrDie());
+    auto buffer = std::move(Buffer::New(stream_size).value());
 
     // Read from the beginning till the last byte.
     auto status = ra_stream->PRead(/* position = */ 0,
                                    stream_size, buffer.get());
     EXPECT_TRUE(status.ok());
-    EXPECT_EQ(stream_size, ra_stream->size().ValueOrDie());
+    EXPECT_EQ(stream_size, ra_stream->size().value());
     EXPECT_EQ(0, memcmp(&file_contents[0],
                         buffer->get_mem_block(), stream_size));
   }
@@ -146,13 +148,13 @@ TEST(FileRandomAccessStreamTest, NegativeReadPosition) {
         test::GetTestFileDescriptor(filename, stream_size, &file_contents);
     auto ra_stream = absl::make_unique<util::FileRandomAccessStream>(input_fd);
     int count = 42;
-    auto buffer = std::move(Buffer::New(count).ValueOrDie());
+    auto buffer = std::move(Buffer::New(count).value());
     for (auto position : {-100, -10, -1}) {
       SCOPED_TRACE(absl::StrCat("stream_size = ", stream_size,
                                 " position = ", position));
 
       auto status = ra_stream->PRead(position, count, buffer.get());
-      EXPECT_EQ(util::error::INVALID_ARGUMENT, status.error_code());
+      EXPECT_EQ(absl::StatusCode::kInvalidArgument, status.code());
     }
   }
 }
@@ -164,13 +166,13 @@ TEST(FileRandomAccessStreamTest, NotPositiveReadCount) {
     int input_fd =
         test::GetTestFileDescriptor(filename, stream_size, &file_contents);
     auto ra_stream = absl::make_unique<util::FileRandomAccessStream>(input_fd);
-    auto buffer = std::move(Buffer::New(42).ValueOrDie());
+    auto buffer = std::move(Buffer::New(42).value());
     int64_t position = 0;
     for (auto count : {-100, -10, -1, 0}) {
       SCOPED_TRACE(absl::StrCat("stream_size = ", stream_size,
                                 " count = ", count));
       auto status = ra_stream->PRead(position, count, buffer.get());
-      EXPECT_EQ(util::error::INVALID_ARGUMENT, status.error_code());
+      EXPECT_EQ(absl::StatusCode::kInvalidArgument, status.code());
     }
   }
 }
@@ -183,13 +185,13 @@ TEST(FileRandomAccessStreamTest, ReadPositionAfterEof) {
         test::GetTestFileDescriptor(filename, stream_size, &file_contents);
     auto ra_stream = absl::make_unique<util::FileRandomAccessStream>(input_fd);
     int count = 42;
-    auto buffer = std::move(Buffer::New(count).ValueOrDie());
+    auto buffer = std::move(Buffer::New(count).value());
     for (auto position : {stream_size + 1, stream_size + 10}) {
       SCOPED_TRACE(absl::StrCat("stream_size = ", stream_size,
                                 " position = ", position));
 
       auto status = ra_stream->PRead(position, count, buffer.get());
-      EXPECT_EQ(util::error::OUT_OF_RANGE, status.error_code());
+      EXPECT_EQ(absl::StatusCode::kOutOfRange, status.code());
       EXPECT_EQ(0, buffer->size());
     }
   }

@@ -16,7 +16,10 @@
 
 #include "tink/subtle/streaming_aead_decrypting_stream.h"
 
+#include <algorithm>
 #include <sstream>
+#include <string>
+#include <utility>
 #include <vector>
 
 #include "gtest/gtest.h"
@@ -24,8 +27,8 @@
 #include "absl/strings/str_cat.h"
 #include "absl/strings/string_view.h"
 #include "tink/input_stream.h"
-#include "tink/subtle/stream_segment_decrypter.h"
 #include "tink/subtle/random.h"
+#include "tink/subtle/stream_segment_decrypter.h"
 #include "tink/subtle/test_util.h"
 #include "tink/util/istream_input_stream.h"
 #include "tink/util/status.h"
@@ -62,7 +65,8 @@ std::unique_ptr<InputStream> GetDecryptingStream(
   // A reference to the segment decrypter, for later validation.
   refs->seg_dec = seg_dec.get();
   auto dec_stream = std::move(StreamingAeadDecryptingStream::New(
-      std::move(seg_dec), std::move(ct_source)).ValueOrDie());
+                                  std::move(seg_dec), std::move(ct_source))
+                                  .value());
   EXPECT_EQ(0, dec_stream->Position());
   return dec_stream;
 }
@@ -98,7 +102,7 @@ TEST_F(StreamingAeadDecryptingStreamTest, WritingStreams) {
           const void* buffer;
           auto next_result = dec_stream->Next(&buffer);
           EXPECT_TRUE(next_result.ok()) << next_result.status();
-          int buffer_size = next_result.ValueOrDie();
+          int buffer_size = next_result.value();
           int exp_buffer_size = pt_segment_size - (header_size + ct_offset);
           if (exp_buffer_size > pt_size) exp_buffer_size = pt_size;
           EXPECT_EQ(exp_buffer_size, buffer_size);
@@ -133,9 +137,9 @@ TEST_F(StreamingAeadDecryptingStreamTest, EmptyCiphertext) {
   const void* buffer;
   auto next_result = dec_stream->Next(&buffer);
   EXPECT_FALSE(next_result.ok());
-  EXPECT_EQ(next_result.status().error_code(), util::error::INVALID_ARGUMENT);
+  EXPECT_EQ(next_result.status().code(), absl::StatusCode::kInvalidArgument);
   EXPECT_PRED_FORMAT2(testing::IsSubstring, "Could not read stream header",
-                      next_result.status().error_message());
+                      std::string(next_result.status().message()));
 }
 
 TEST_F(StreamingAeadDecryptingStreamTest, InvalidStreamHeader) {
@@ -152,9 +156,9 @@ TEST_F(StreamingAeadDecryptingStreamTest, InvalidStreamHeader) {
   const void* buffer;
   auto next_result = dec_stream->Next(&buffer);
   EXPECT_FALSE(next_result.ok());
-  EXPECT_EQ(next_result.status().error_code(), util::error::INVALID_ARGUMENT);
+  EXPECT_EQ(next_result.status().code(), absl::StatusCode::kInvalidArgument);
   EXPECT_PRED_FORMAT2(testing::IsSubstring, "Invalid stream header",
-                      next_result.status().error_message());
+                      std::string(next_result.status().message()));
 }
 
 TEST_F(StreamingAeadDecryptingStreamTest, TruncatedLastSegment) {
@@ -176,9 +180,9 @@ TEST_F(StreamingAeadDecryptingStreamTest, TruncatedLastSegment) {
   std::string decrypted;
   auto status = test::ReadFromStream(dec_stream.get(), &decrypted);
   EXPECT_FALSE(status.ok());
-  EXPECT_EQ(status.error_code(), util::error::INVALID_ARGUMENT);
+  EXPECT_EQ(status.code(), absl::StatusCode::kInvalidArgument);
   EXPECT_PRED_FORMAT2(testing::IsSubstring, "unexpected last-segment marker",
-                      status.error_message());
+                      std::string(status.message()));
 }
 
 
@@ -202,7 +206,7 @@ TEST_F(StreamingAeadDecryptingStreamTest, OneSegmentPlaintext) {
   auto next_result = dec_stream->Next(&buffer);
   int buffer_size = pt_segment_size - header_size;
   EXPECT_TRUE(next_result.ok()) << next_result.status();
-  EXPECT_EQ(buffer_size, next_result.ValueOrDie());
+  EXPECT_EQ(buffer_size, next_result.value());
   EXPECT_EQ(buffer_size, dec_stream->Position());
   EXPECT_EQ(pt,
             std::string(reinterpret_cast<const char*>(buffer), buffer_size));
@@ -210,7 +214,7 @@ TEST_F(StreamingAeadDecryptingStreamTest, OneSegmentPlaintext) {
   // Try getting another segment.
   next_result = dec_stream->Next(&buffer);
   EXPECT_FALSE(next_result.ok());
-  EXPECT_EQ(util::error::OUT_OF_RANGE, next_result.status().error_code());
+  EXPECT_EQ(absl::StatusCode::kOutOfRange, next_result.status().code());
 }
 
 
@@ -236,7 +240,7 @@ TEST_F(StreamingAeadDecryptingStreamTest, OneSegmentAndOneBytePlaintext) {
   auto next_result = dec_stream->Next(&buffer);
   int buffer_size = pt_segment_size - header_size;
   EXPECT_TRUE(next_result.ok()) << next_result.status();
-  EXPECT_EQ(buffer_size, next_result.ValueOrDie());
+  EXPECT_EQ(buffer_size, next_result.value());
   EXPECT_EQ(buffer_size, dec_stream->Position());
   EXPECT_EQ(pt.substr(0, buffer_size),
             std::string(reinterpret_cast<const char*>(buffer), buffer_size));
@@ -244,14 +248,14 @@ TEST_F(StreamingAeadDecryptingStreamTest, OneSegmentAndOneBytePlaintext) {
   // Get the second segment.
   next_result = dec_stream->Next(&buffer);
   EXPECT_TRUE(next_result.ok()) << next_result.status();
-  EXPECT_EQ(1, next_result.ValueOrDie());
+  EXPECT_EQ(1, next_result.value());
   EXPECT_EQ(pt.size(), dec_stream->Position());
   EXPECT_EQ(pt.at(pt.size()-1), *(reinterpret_cast<const char*>(buffer)));
 
   // Try getting another segment.
   next_result = dec_stream->Next(&buffer);
   EXPECT_FALSE(next_result.ok());
-  EXPECT_EQ(util::error::OUT_OF_RANGE, next_result.status().error_code());
+  EXPECT_EQ(absl::StatusCode::kOutOfRange, next_result.status().code());
 }
 
 TEST_F(StreamingAeadDecryptingStreamTest, NextAfterBackUp) {
@@ -273,7 +277,7 @@ TEST_F(StreamingAeadDecryptingStreamTest, NextAfterBackUp) {
   auto next_result = dec_stream->Next(&buffer);
   int buffer_size = pt_segment_size - header_size;
   EXPECT_TRUE(next_result.ok()) << next_result.status();
-  EXPECT_EQ(buffer_size, next_result.ValueOrDie());
+  EXPECT_EQ(buffer_size, next_result.value());
   EXPECT_EQ(buffer_size, dec_stream->Position());
   EXPECT_EQ(pt.substr(0, buffer_size),
             std::string(reinterpret_cast<const char*>(buffer), buffer_size));
@@ -286,7 +290,7 @@ TEST_F(StreamingAeadDecryptingStreamTest, NextAfterBackUp) {
   EXPECT_EQ(buffer_size - backup_size, dec_stream->Position());
   next_result = dec_stream->Next(&buffer);
   EXPECT_TRUE(next_result.ok()) << next_result.status();
-  EXPECT_EQ(backup_size, next_result.ValueOrDie());
+  EXPECT_EQ(backup_size, next_result.value());
   EXPECT_EQ(buffer_size, dec_stream->Position());
   EXPECT_EQ(pt.substr(buffer_size - backup_size, backup_size),
             std::string(reinterpret_cast<const char*>(buffer), backup_size));
@@ -297,7 +301,7 @@ TEST_F(StreamingAeadDecryptingStreamTest, NextAfterBackUp) {
   EXPECT_EQ(buffer_size - backup2_size, dec_stream->Position());
   next_result = dec_stream->Next(&buffer);
   EXPECT_TRUE(next_result.ok()) << next_result.status();
-  EXPECT_EQ(backup2_size, next_result.ValueOrDie());
+  EXPECT_EQ(backup2_size, next_result.value());
   EXPECT_EQ(buffer_size, dec_stream->Position());
   EXPECT_EQ(pt.substr(buffer_size - backup2_size, backup2_size),
             std::string(reinterpret_cast<const char*>(buffer), backup2_size));
@@ -329,7 +333,7 @@ TEST_F(StreamingAeadDecryptingStreamTest, BackupAndPosition) {
   auto next_result = dec_stream->Next(&buffer);
   int buffer_size = pt_segment_size - header_size;
   EXPECT_TRUE(next_result.ok()) << next_result.status();
-  EXPECT_EQ(buffer_size, next_result.ValueOrDie());
+  EXPECT_EQ(buffer_size, next_result.value());
   EXPECT_EQ(buffer_size, dec_stream->Position());
   std::string decrypted_first_segment(reinterpret_cast<const char*>(buffer),
                                       buffer_size);
@@ -342,12 +346,12 @@ TEST_F(StreamingAeadDecryptingStreamTest, BackupAndPosition) {
     total_backup_size += std::max(0, backup_size);
     EXPECT_EQ(buffer_size - total_backup_size, dec_stream->Position());
   }
-  EXPECT_LT(total_backup_size, next_result.ValueOrDie());
+  EXPECT_LT(total_backup_size, next_result.value());
 
   // Call Next(), it should succeed (backuped bytes of 1st segment).
   next_result = dec_stream->Next(&buffer);
   EXPECT_TRUE(next_result.ok()) << next_result.status();
-  EXPECT_EQ(total_backup_size, next_result.ValueOrDie());
+  EXPECT_EQ(total_backup_size, next_result.value());
   EXPECT_EQ(buffer_size, dec_stream->Position());
 
   // BackUp() some bytes, again fewer than returned by Next().
@@ -358,12 +362,12 @@ TEST_F(StreamingAeadDecryptingStreamTest, BackupAndPosition) {
     total_backup_size += std::max(0, backup_size);
     EXPECT_EQ(buffer_size - total_backup_size, dec_stream->Position());
   }
-  EXPECT_LT(total_backup_size, next_result.ValueOrDie());
+  EXPECT_LT(total_backup_size, next_result.value());
 
   // Call Next(), it should succeed  (backuped bytes of 1st segment).
   next_result = dec_stream->Next(&buffer);
   EXPECT_TRUE(next_result.ok()) << next_result.status();
-  EXPECT_EQ(total_backup_size, next_result.ValueOrDie());
+  EXPECT_EQ(total_backup_size, next_result.value());
   EXPECT_EQ(buffer_size, dec_stream->Position());
 
   // Call Next() again, it should return a full block (2nd segment).
@@ -371,7 +375,7 @@ TEST_F(StreamingAeadDecryptingStreamTest, BackupAndPosition) {
   buffer_size = pt_segment_size;
   next_result = dec_stream->Next(&buffer);
   EXPECT_TRUE(next_result.ok()) << next_result.status();
-  EXPECT_EQ(buffer_size, next_result.ValueOrDie());
+  EXPECT_EQ(buffer_size, next_result.value());
   EXPECT_EQ(prev_position + buffer_size, dec_stream->Position());
 
   // BackUp a few times, with total over the returned buffer_size.
@@ -392,7 +396,7 @@ TEST_F(StreamingAeadDecryptingStreamTest, BackupAndPosition) {
   // Call Next() again, it should return a full segment (2nd segment);
   next_result = dec_stream->Next(&buffer);
   EXPECT_TRUE(next_result.ok()) << next_result.status();
-  EXPECT_EQ(buffer_size, next_result.ValueOrDie());
+  EXPECT_EQ(buffer_size, next_result.value());
   EXPECT_EQ(prev_position + buffer_size, dec_stream->Position());
   EXPECT_EQ(2 * pt_segment_size - header_size, dec_stream->Position());
 

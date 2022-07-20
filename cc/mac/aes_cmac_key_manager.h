@@ -19,7 +19,10 @@
 #include <string>
 
 #include "absl/memory/memory.h"
+#include "absl/status/status.h"
 #include "absl/strings/str_cat.h"
+#include "tink/chunked_mac.h"
+#include "tink/chunkedmac/internal/chunked_mac_impl.h"
 #include "tink/core/key_type_manager.h"
 #include "tink/key_manager.h"
 #include "tink/mac.h"
@@ -41,7 +44,7 @@ namespace tink {
 class AesCmacKeyManager
     : public KeyTypeManager<google::crypto::tink::AesCmacKey,
                             google::crypto::tink::AesCmacKeyFormat,
-                            List<Mac>> {
+                            List<Mac, ChunkedMac>> {
  public:
   class MacFactory : public PrimitiveFactory<Mac> {
     crypto::tink::util::StatusOr<std::unique_ptr<Mac>> Create(
@@ -52,8 +55,17 @@ class AesCmacKeyManager
     }
   };
 
+  class ChunkedMacFactory : public PrimitiveFactory<ChunkedMac> {
+    crypto::tink::util::StatusOr<std::unique_ptr<ChunkedMac>> Create(
+        const google::crypto::tink::AesCmacKey& key) const override {
+      return internal::NewChunkedCmac(key);
+    }
+  };
+
   AesCmacKeyManager()
-      : KeyTypeManager(absl::make_unique<AesCmacKeyManager::MacFactory>()) {}
+      : KeyTypeManager(
+            absl::make_unique<AesCmacKeyManager::MacFactory>(),
+            absl::make_unique<AesCmacKeyManager::ChunkedMacFactory>()) {}
 
   uint32_t get_version() const override { return 0; }
 
@@ -71,7 +83,7 @@ class AesCmacKeyManager
     if (!status.ok()) return status;
     if (key.key_value().size() != kKeySizeInBytes) {
       return crypto::tink::util::Status(
-          util::error::INVALID_ARGUMENT,
+          absl::StatusCode::kInvalidArgument,
           "Invalid AesCmacKey: key_value wrong length.");
     }
     return ValidateParams(key.params());
@@ -81,7 +93,7 @@ class AesCmacKeyManager
       const google::crypto::tink::AesCmacKeyFormat& key_format) const override {
     if (key_format.key_size() != kKeySizeInBytes) {
       return crypto::tink::util::Status(
-          crypto::tink::util::error::INVALID_ARGUMENT,
+          absl::StatusCode::kInvalidArgument,
           "Invalid AesCmacKeyFormat: invalid key_size.");
     }
     return ValidateParams(key_format.params());
@@ -101,12 +113,12 @@ class AesCmacKeyManager
   crypto::tink::util::Status ValidateParams(
       const google::crypto::tink::AesCmacParams& params) const {
     if (params.tag_size() < kMinTagSizeInBytes) {
-      return util::Status(util::error::INVALID_ARGUMENT,
+      return util::Status(absl::StatusCode::kInvalidArgument,
                           absl::StrCat("Invalid AesCmacParams: tag_size ",
                                        params.tag_size(), " is too small."));
     }
     if (params.tag_size() > kMaxTagSizeInBytes) {
-      return util::Status(util::error::INVALID_ARGUMENT,
+      return util::Status(absl::StatusCode::kInvalidArgument,
                           absl::StrCat("Invalid AesCmacParams: tag_size ",
                                        params.tag_size(), " is too big."));
     }

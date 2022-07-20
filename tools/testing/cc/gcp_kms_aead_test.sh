@@ -14,17 +14,14 @@
 # limitations under the License.
 ################################################################################
 
-# TODO(b/154273145): re-enable this.
-exit 0
-
-ROOT_DIR="$TEST_SRCDIR/tools"
-GCP_KMS_AEAD_CLI="$ROOT_DIR/testing/cc/gcp_kms_aead_cli"
-TEST_UTIL="$ROOT_DIR/testing/cross_language/test_util.sh"
-BASE_DIR="$TEST_SRCDIR/tink_base"
-GCP_KEY_NAME_FILE="$BASE_DIR/testdata/gcp_key_name.txt"
-CREDENTIALS_GCP_JSON_FILE="$BASE_DIR/testdata/credential.json"
-BAD_GCP_KEY_NAME_FILE="$BASE_DIR/testdata/bad_gcp_key_name.txt"
-BAD_CREDENTIALS_GCP_JSON_FILE="$BASE_DIR/testdata/bad_gcp_credentials.json"
+REPO_DIR="${TEST_SRCDIR}"
+TOOLS_DIR="${REPO_DIR}/tools"
+GCP_KMS_AEAD_CLI="${TOOLS_DIR}/testing/cc/gcp_kms_aead_cli"
+TEST_UTIL="${TOOLS_DIR}/testing/cross_language/test_util.sh"
+GCP_KEY_NAME_FILE="${TOOLS_DIR}/testdata/gcp/key_name.txt"
+CREDENTIALS_GCP_JSON_FILE="${TOOLS_DIR}/testdata/gcp/credential.json"
+BAD_GCP_KEY_NAME_FILE="${TOOLS_DIR}/testdata/gcp/key_name_bad.txt"
+BAD_CREDENTIALS_GCP_JSON_FILE="${TOOLS_DIR}/testdata/gcp/credential_bad.json"
 associated_data="some associated data"
 
 # Roots for GRPC
@@ -77,4 +74,4 @@ log_file="$TEST_TMPDIR/${test_name}.log"
 $GCP_KMS_AEAD_CLI $BAD_GCP_KEY_NAME_FILE $CREDENTIALS_GCP_JSON_FILE\
   encrypt $plaintext_file "$associated_data" $encrypted_file 2> $log_file
 
-assert_file_contains $log_file "Project" "not found"
+assert_file_contains $log_file "Permission" "denied" "or it may not exist"

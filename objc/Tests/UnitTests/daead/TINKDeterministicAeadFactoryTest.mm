@@ -27,6 +27,7 @@
 #import "objc/core/TINKKeysetHandle_Internal.h"
 #import "objc/util/TINKStrings.h"
 
+#include "absl/status/status.h"
 #include "tink/crypto_format.h"
 #include "tink/daead/aes_siv_key_manager.h"
 #include "tink/daead/deterministic_aead_config.h"
@@ -70,7 +71,7 @@ using google::crypto::tink::KeyStatusType;
                                                                                      error:&error];
   XCTAssertNil(aead);
   XCTAssertNotNil(error);
-  XCTAssertTrue(error.code == crypto::tink::util::error::INVALID_ARGUMENT);
+  XCTAssertEqual((absl::StatusCode)error.code, absl::StatusCode::kInvalidArgument);
   XCTAssertTrue([error.localizedFailureReason containsString:@"at least one key"]);
 }
 
@@ -83,15 +84,15 @@ using google::crypto::tink::KeyStatusType;
   // Prepare a Keyset.
   Keyset keyset;
   uint32_t key_id_1 = 1234543;
-  auto new_key = AesSivKeyManager().CreateKey(key_format).ValueOrDie();
+  auto new_key = AesSivKeyManager().CreateKey(key_format).value();
   AddTinkKey(key_type, key_id_1, new_key, KeyStatusType::ENABLED, KeyData::SYMMETRIC, &keyset);
 
   uint32_t key_id_2 = 726329;
-  new_key = AesSivKeyManager().CreateKey(key_format).ValueOrDie();
+  new_key = AesSivKeyManager().CreateKey(key_format).value();
   AddRawKey(key_type, key_id_2, new_key, KeyStatusType::ENABLED, KeyData::SYMMETRIC, &keyset);
 
   uint32_t key_id_3 = 7213743;
-  new_key = AesSivKeyManager().CreateKey(key_format).ValueOrDie();
+  new_key = AesSivKeyManager().CreateKey(key_format).value();
   AddTinkKey(key_type, key_id_3, new_key, KeyStatusType::ENABLED, KeyData::SYMMETRIC, &keyset);
 
   keyset.set_primary_key_id(key_id_3);
@@ -129,12 +130,12 @@ using google::crypto::tink::KeyStatusType;
   // Create raw ciphertext with 2nd key, and decrypt with Aead-instance.
   AesSivKey raw_key;
   XCTAssertTrue(raw_key.ParseFromString(keyset.key(1).key_data().value()));
-  auto raw_aead = std::move(AesSivKeyManager()
-                            .GetPrimitive<crypto::tink::DeterministicAead>(raw_key).ValueOrDie());
+  auto raw_aead =
+      std::move(AesSivKeyManager().GetPrimitive<crypto::tink::DeterministicAead>(raw_key).value());
   std::string raw_ciphertext = raw_aead
                                    ->EncryptDeterministically(absl::string_view("some_plaintext"),
                                                               absl::string_view("some_aad"))
-                                   .ValueOrDie();
+                                   .value();
   ciphertext = TINKStringToNSData(raw_ciphertext);
 
   decrypted = [aead decryptDeterministically:ciphertext withAssociatedData:aad error:&error];

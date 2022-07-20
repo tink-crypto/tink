@@ -16,8 +16,10 @@
 
 package com.google.crypto.tink.signature;
 
-import com.google.crypto.tink.KeyTypeManager;
 import com.google.crypto.tink.PublicKeyVerify;
+import com.google.crypto.tink.config.internal.TinkFipsUtil;
+import com.google.crypto.tink.internal.KeyTypeManager;
+import com.google.crypto.tink.internal.PrimitiveFactory;
 import com.google.crypto.tink.proto.EcdsaPublicKey;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
 import com.google.crypto.tink.signature.internal.SigUtil;
@@ -38,8 +40,7 @@ class EcdsaVerifyKeyManager extends KeyTypeManager<EcdsaPublicKey> {
   public EcdsaVerifyKeyManager() {
     super(
         EcdsaPublicKey.class,
-        new KeyTypeManager.PrimitiveFactory<PublicKeyVerify, EcdsaPublicKey>(
-            PublicKeyVerify.class) {
+        new PrimitiveFactory<PublicKeyVerify, EcdsaPublicKey>(PublicKeyVerify.class) {
           @Override
           public PublicKeyVerify getPrimitive(EcdsaPublicKey keyProto)
               throws GeneralSecurityException {
@@ -81,4 +82,9 @@ class EcdsaVerifyKeyManager extends KeyTypeManager<EcdsaPublicKey> {
     Validators.validateVersion(pubKey.getVersion(), getVersion());
     SigUtil.validateEcdsaParams(pubKey.getParams());
   }
+
+  @Override
+  public TinkFipsUtil.AlgorithmFipsCompatibility fipsStatus() {
+    return TinkFipsUtil.AlgorithmFipsCompatibility.ALGORITHM_REQUIRES_BORINGCRYPTO;
+  };
 }

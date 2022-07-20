@@ -17,6 +17,7 @@
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include "absl/status/status.h"
 #include "openssl/crypto.h"
 #include "tink/util/status.h"
 #include "tink/util/test_matchers.h"
@@ -59,7 +60,7 @@ TEST(FipsUtilsTest, CompatibilityInFipsMode) {
   }
 
   EXPECT_THAT(internal::CheckFipsCompatibility<FipsIncompatible>(),
-              StatusIs(util::error::INTERNAL));
+              StatusIs(absl::StatusCode::kInternal));
   EXPECT_THAT(
       internal::CheckFipsCompatibility<FipsCompatibleWithBoringCrypto>(),
       IsOk());
@@ -73,13 +74,13 @@ TEST(TinkFipsTest, CompatibilityInFipsModeWithoutBoringCrypto) {
   // In FIPS only mode compatibility checks should disallow algorithms
   // with the FipsCompatibility::kNone flag.
   EXPECT_THAT(internal::CheckFipsCompatibility<FipsIncompatible>(),
-              StatusIs(util::error::INTERNAL));
+              StatusIs(absl::StatusCode::kInternal));
 
   // FIPS validated implementations are not allowed if BoringCrypto is not
   // available.
   EXPECT_THAT(
       internal::CheckFipsCompatibility<FipsCompatibleWithBoringCrypto>(),
-      StatusIs(util::error::INTERNAL));
+      StatusIs(absl::StatusCode::kInternal));
 }
 
 }  // namespace

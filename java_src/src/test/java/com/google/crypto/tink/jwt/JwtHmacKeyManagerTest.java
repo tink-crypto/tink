@@ -19,15 +19,16 @@ package com.google.crypto.tink.jwt;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.crypto.tink.testing.KeyTypeManagerTestUtil.testKeyTemplateCompatible;
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static java.time.temporal.ChronoUnit.MILLIS;
 import static org.junit.Assert.assertThrows;
 
 import com.google.crypto.tink.CleartextKeysetHandle;
 import com.google.crypto.tink.KeyTemplate;
-import com.google.crypto.tink.KeyTypeManager;
+import com.google.crypto.tink.KeyTemplates;
 import com.google.crypto.tink.KeysetHandle;
+import com.google.crypto.tink.internal.KeyTypeManager;
 import com.google.crypto.tink.proto.JwtHmacAlgorithm;
 import com.google.crypto.tink.proto.JwtHmacKey;
+import com.google.crypto.tink.proto.JwtHmacKey.CustomKid;
 import com.google.crypto.tink.proto.JwtHmacKeyFormat;
 import com.google.crypto.tink.proto.KeyData;
 import com.google.crypto.tink.proto.KeyStatusType;
@@ -50,14 +51,15 @@ import java.time.ZoneOffset;
 import java.util.Set;
 import java.util.TreeSet;
 import javax.crypto.spec.SecretKeySpec;
-import junitparams.JUnitParamsRunner;
-import junitparams.Parameters;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.experimental.theories.DataPoint;
+import org.junit.experimental.theories.Theories;
+import org.junit.experimental.theories.Theory;
 import org.junit.runner.RunWith;
 
 /** Unit tests for {@link JwtHmacKeyManager}. */
-@RunWith(JUnitParamsRunner.class)
+@RunWith(Theories.class)
 public class JwtHmacKeyManagerTest {
   private final JwtHmacKeyManager manager = new JwtHmacKeyManager();
   private final KeyTypeManager.KeyFactory<JwtHmacKeyFormat, JwtHmacKey> factory =
@@ -68,13 +70,10 @@ public class JwtHmacKeyManagerTest {
     JwtMacConfig.register();
   }
 
-  private static Object[] templates() {
-    return new Object[] {
-      JwtHmacKeyManager.hs256Template(),
-      JwtHmacKeyManager.hs384Template(),
-      JwtHmacKeyManager.hs512Template(),
-    };
-  }
+  @DataPoint public static final String JWT_HS256 = "JWT_HS256";
+  @DataPoint public static final String JWT_HS384 = "JWT_HS384";
+  @DataPoint public static final String JWT_HS512 = "JWT_HS512";
+  @DataPoint public static final String JWT_HS256_RAW = "JWT_HS256_RAW";
 
   @Test
   public void validateKeyFormat_empty() throws Exception {
@@ -88,27 +87,61 @@ public class JwtHmacKeyManagerTest {
   }
 
   @Test
-  public void validateKeyFormat_sha256() throws Exception {
+  public void validateKeyFormat_hS256() throws Exception {
     factory.validateKeyFormat(makeJwtHmacKeyFormat(32, JwtHmacAlgorithm.HS256));
-  }
-
-  @Test
-  public void validateKeyFormat_sha512() throws Exception {
-    factory.validateKeyFormat(makeJwtHmacKeyFormat(32, JwtHmacAlgorithm.HS512));
-  }
-
-  @Test
-  public void validateKeyFormat_keySizeTooSmall_throws() throws Exception {
     assertThrows(
         GeneralSecurityException.class,
         () -> factory.validateKeyFormat(makeJwtHmacKeyFormat(31, JwtHmacAlgorithm.HS256)));
   }
 
   @Test
+  public void validateKeyFormat_hS384() throws Exception {
+    factory.validateKeyFormat(makeJwtHmacKeyFormat(48, JwtHmacAlgorithm.HS384));
+    assertThrows(
+        GeneralSecurityException.class,
+        () -> factory.validateKeyFormat(makeJwtHmacKeyFormat(47, JwtHmacAlgorithm.HS384)));
+  }
+
+  @Test
+  public void validateKeyFormat_hS512() throws Exception {
+    factory.validateKeyFormat(makeJwtHmacKeyFormat(64, JwtHmacAlgorithm.HS512));
+    assertThrows(
+        GeneralSecurityException.class,
+        () -> factory.validateKeyFormat(makeJwtHmacKeyFormat(63, JwtHmacAlgorithm.HS512)));
+  }
+
+  @Test
+  public void testKeyFormatsAreValid() throws Exception {
+    for (KeyTypeManager.KeyFactory.KeyFormat<JwtHmacKeyFormat> format :
+        factory.keyFormats().values()) {
+      factory.validateKeyFormat(format.keyFormat);
+    }
+  }
+
+  @Test
   public void createKey_valid() throws Exception {
     manager.validateKey(factory.createKey(makeJwtHmacKeyFormat(32, JwtHmacAlgorithm.HS256)));
-    manager.validateKey(factory.createKey(makeJwtHmacKeyFormat(32, JwtHmacAlgorithm.HS256)));
-    manager.validateKey(factory.createKey(makeJwtHmacKeyFormat(32, JwtHmacAlgorithm.HS512)));
+    manager.validateKey(factory.createKey(makeJwtHmacKeyFormat(48, JwtHmacAlgorithm.HS384)));
+    manager.validateKey(factory.createKey(makeJwtHmacKeyFormat(64, JwtHmacAlgorithm.HS512)));
+  }
+
+  @Test
+  public void createTooShortKey_invalid() throws Exception {
+    assertThrows(
+        GeneralSecurityException.class,
+        () ->
+            manager.validateKey(
+                factory.createKey(makeJwtHmacKeyFormat(31, JwtHmacAlgorithm.HS256))));
+    assertThrows(
+        GeneralSecurityException.class,
+        () ->
+            manager.validateKey(
+                factory.createKey(makeJwtHmacKeyFormat(47, JwtHmacAlgorithm.HS384))));
+    assertThrows(
+        GeneralSecurityException.class,
+        () ->
+            manager.validateKey(
+                factory.createKey(makeJwtHmacKeyFormat(63, JwtHmacAlgorithm.HS512))));
   }
 
   @Test
@@ -162,7 +195,43 @@ public class JwtHmacKeyManagerTest {
 
   @Test
   public void testHs256Template() throws Exception {
-    KeyTemplate template = JwtHmacKeyManager.hs256Template();
+    KeyTemplate template = KeyTemplates.get("JWT_HS256");
+    assertThat(template.getTypeUrl()).isEqualTo(manager.getKeyType());
+    assertThat(template.getOutputPrefixType()).isEqualTo(KeyTemplate.OutputPrefixType.TINK);
+    JwtHmacKeyFormat format =
+        JwtHmacKeyFormat.parseFrom(template.getValue(), ExtensionRegistryLite.getEmptyRegistry());
+
+    assertThat(format.getKeySize()).isEqualTo(32);
+    assertThat(format.getAlgorithm()).isEqualTo(JwtHmacAlgorithm.HS256);
+  }
+
+  @Test
+  public void testHs384Template() throws Exception {
+    KeyTemplate template = KeyTemplates.get("JWT_HS384");
+    assertThat(template.getTypeUrl()).isEqualTo(new JwtHmacKeyManager().getKeyType());
+    assertThat(template.getOutputPrefixType()).isEqualTo(KeyTemplate.OutputPrefixType.TINK);
+    JwtHmacKeyFormat format =
+        JwtHmacKeyFormat.parseFrom(template.getValue(), ExtensionRegistryLite.getEmptyRegistry());
+
+    assertThat(format.getKeySize()).isEqualTo(48);
+    assertThat(format.getAlgorithm()).isEqualTo(JwtHmacAlgorithm.HS384);
+  }
+
+  @Test
+  public void testHs512Template() throws Exception {
+    KeyTemplate template = KeyTemplates.get("JWT_HS512");
+    assertThat(template.getTypeUrl()).isEqualTo(new JwtHmacKeyManager().getKeyType());
+    assertThat(template.getOutputPrefixType()).isEqualTo(KeyTemplate.OutputPrefixType.TINK);
+    JwtHmacKeyFormat format =
+        JwtHmacKeyFormat.parseFrom(template.getValue(), ExtensionRegistryLite.getEmptyRegistry());
+
+    assertThat(format.getKeySize()).isEqualTo(64);
+    assertThat(format.getAlgorithm()).isEqualTo(JwtHmacAlgorithm.HS512);
+  }
+
+  @Test
+  public void testRawHs256Template() throws Exception {
+    KeyTemplate template = KeyTemplates.get("JWT_HS256_RAW");
     assertThat(template.getTypeUrl()).isEqualTo(manager.getKeyType());
     assertThat(template.getOutputPrefixType()).isEqualTo(KeyTemplate.OutputPrefixType.RAW);
     JwtHmacKeyFormat format =
@@ -173,74 +242,52 @@ public class JwtHmacKeyManagerTest {
   }
 
   @Test
-  public void testHs384Template() throws Exception {
-    KeyTemplate template = JwtHmacKeyManager.hs384Template();
-    assertThat(template.getTypeUrl()).isEqualTo(new JwtHmacKeyManager().getKeyType());
-    assertThat(template.getOutputPrefixType()).isEqualTo(KeyTemplate.OutputPrefixType.RAW);
-    JwtHmacKeyFormat format =
-        JwtHmacKeyFormat.parseFrom(template.getValue(), ExtensionRegistryLite.getEmptyRegistry());
-
-    assertThat(format.getKeySize()).isEqualTo(48);
-    assertThat(format.getAlgorithm()).isEqualTo(JwtHmacAlgorithm.HS384);
-  }
-
-  @Test
-  public void testHs512Template() throws Exception {
-    KeyTemplate template = JwtHmacKeyManager.hs512Template();
-    assertThat(template.getTypeUrl()).isEqualTo(new JwtHmacKeyManager().getKeyType());
-    assertThat(template.getOutputPrefixType()).isEqualTo(KeyTemplate.OutputPrefixType.RAW);
-    JwtHmacKeyFormat format =
-        JwtHmacKeyFormat.parseFrom(template.getValue(), ExtensionRegistryLite.getEmptyRegistry());
-
-    assertThat(format.getKeySize()).isEqualTo(64);
-    assertThat(format.getAlgorithm()).isEqualTo(JwtHmacAlgorithm.HS512);
-  }
-
-  @Test
   public void testKeyTemplateAndManagerCompatibility() throws Exception {
-    testKeyTemplateCompatible(manager, JwtHmacKeyManager.hs256Template());
-    testKeyTemplateCompatible(manager, JwtHmacKeyManager.hs384Template());
-    testKeyTemplateCompatible(manager, JwtHmacKeyManager.hs512Template());
+    testKeyTemplateCompatible(manager, KeyTemplates.get("JWT_HS256"));
+    testKeyTemplateCompatible(manager, KeyTemplates.get("JWT_HS384"));
+    testKeyTemplateCompatible(manager, KeyTemplates.get("JWT_HS512"));
+    testKeyTemplateCompatible(manager, KeyTemplates.get("JWT_HS512_RAW"));
   }
 
-  @Test
-  @Parameters(method = "templates")
-  public void createSignVerify_success(KeyTemplate template) throws Exception {
-    KeysetHandle handle = KeysetHandle.generateNew(template);
+  // Note: we use Theory as a parametrized test -- different from what the Theory framework intends.
+  @Theory
+  public void createSignVerify_success(String templateNames) throws Exception {
+    KeysetHandle handle = KeysetHandle.generateNew(KeyTemplates.get(templateNames));
     JwtMac primitive = handle.getPrimitive(JwtMac.class);
-    RawJwt rawToken = new RawJwt.Builder().setIssuer("issuer").build();
+    RawJwt rawToken = RawJwt.newBuilder().setJwtId("jwtId").withoutExpiration().build();
     String signedCompact = primitive.computeMacAndEncode(rawToken);
-    JwtValidator validator = new JwtValidator.Builder().build();
+    JwtValidator validator = JwtValidator.newBuilder().allowMissingExpiration().build();
     VerifiedJwt verifiedToken = primitive.verifyMacAndDecode(signedCompact, validator);
-    assertThat(verifiedToken.getIssuer()).isEqualTo("issuer");
+    assertThat(verifiedToken.getJwtId()).isEqualTo("jwtId");
   }
 
-  @Test
-  @Parameters(method = "templates")
-  public void createSignVerifyDifferentKey_throw(KeyTemplate template) throws Exception {
+  // Note: we use Theory as a parametrized test -- different from what the Theory framework intends.
+  @Theory
+  public void createSignVerifyDifferentKey_throw(String templateNames) throws Exception {
+    KeyTemplate template = KeyTemplates.get(templateNames);
     KeysetHandle handle = KeysetHandle.generateNew(template);
     JwtMac primitive = handle.getPrimitive(JwtMac.class);
-    RawJwt rawToken = new RawJwt.Builder().setIssuer("issuer").build();
+    RawJwt rawToken = RawJwt.newBuilder().setJwtId("jwtId").withoutExpiration().build();
     String compact = primitive.computeMacAndEncode(rawToken);
 
     KeysetHandle otherHandle = KeysetHandle.generateNew(template);
     JwtMac otherPrimitive = otherHandle.getPrimitive(JwtMac.class);
-    JwtValidator validator = new JwtValidator.Builder().build();
+    JwtValidator validator = JwtValidator.newBuilder().allowMissingExpiration().build();
     assertThrows(
         GeneralSecurityException.class,
         () -> otherPrimitive.verifyMacAndDecode(compact, validator));
   }
 
-  @Test
-  @Parameters(method = "templates")
-  public void createSignVerify_modifiedHeader_throw(KeyTemplate template) throws Exception {
-    KeysetHandle handle = KeysetHandle.generateNew(template);
+  // Note: we use Theory as a parametrized test -- different from what the Theory framework intends.
+  @Theory
+  public void createSignVerify_modifiedHeader_throw(String templateNames) throws Exception {
+    KeysetHandle handle = KeysetHandle.generateNew(KeyTemplates.get(templateNames));
     JwtMac mac = handle.getPrimitive(JwtMac.class);
 
     String jwtId = "user123";
-    RawJwt unverified = new RawJwt.Builder().setJwtId(jwtId).build();
+    RawJwt unverified = RawJwt.newBuilder().setJwtId(jwtId).withoutExpiration().build();
     String compact = mac.computeMacAndEncode(unverified);
-    JwtValidator validator = new JwtValidator.Builder().build();
+    JwtValidator validator = JwtValidator.newBuilder().allowMissingExpiration().build();
 
     String[] parts = compact.split("\\.", -1);
     byte[] header = Base64.urlSafeDecode(parts[0]);
@@ -254,16 +301,16 @@ public class JwtHmacKeyManagerTest {
     }
   }
 
-  @Test
-  @Parameters(method = "templates")
-  public void createSignVerify_modifiedPayload_throw(KeyTemplate template) throws Exception {
-    KeysetHandle handle = KeysetHandle.generateNew(template);
+  // Note: we use Theory as a parametrized test -- different from what the Theory framework intends.
+  @Theory
+  public void createSignVerify_modifiedPayload_throw(String templateNames) throws Exception {
+    KeysetHandle handle = KeysetHandle.generateNew(KeyTemplates.get(templateNames));
     JwtMac mac = handle.getPrimitive(JwtMac.class);
 
     String jwtId = "user123";
-    RawJwt unverified = new RawJwt.Builder().setJwtId(jwtId).build();
+    RawJwt unverified = RawJwt.newBuilder().setJwtId(jwtId).withoutExpiration().build();
     String compact = mac.computeMacAndEncode(unverified);
-    JwtValidator validator = new JwtValidator.Builder().build();
+    JwtValidator validator = JwtValidator.newBuilder().allowMissingExpiration().build();
 
     String[] parts = compact.split("\\.", -1);
     byte[] payload = Base64.urlSafeDecode(parts[1]);
@@ -277,16 +324,16 @@ public class JwtHmacKeyManagerTest {
     }
   }
 
-  @Test
-  @Parameters(method = "templates")
-  public void verify_modifiedSignature_shouldThrow(KeyTemplate template) throws Exception {
-    KeysetHandle handle = KeysetHandle.generateNew(template);
+  // Note: we use Theory as a parametrized test -- different from what the Theory framework intends.
+  @Theory
+  public void verify_modifiedSignature_shouldThrow(String templateNames) throws Exception {
+    KeysetHandle handle = KeysetHandle.generateNew(KeyTemplates.get(templateNames));
     JwtMac mac = handle.getPrimitive(JwtMac.class);
 
     String jwtId = "user123";
-    RawJwt unverified = new RawJwt.Builder().setJwtId(jwtId).build();
+    RawJwt unverified = RawJwt.newBuilder().setJwtId(jwtId).withoutExpiration().build();
     String compact = mac.computeMacAndEncode(unverified);
-    JwtValidator validator = new JwtValidator.Builder().build();
+    JwtValidator validator = JwtValidator.newBuilder().allowMissingExpiration().build();
 
     String[] parts = compact.split("\\.", -1);
     byte[] signature = Base64.urlSafeDecode(parts[1]);
@@ -302,7 +349,7 @@ public class JwtHmacKeyManagerTest {
 
   @Test
   public void computeVerify_canGetData() throws Exception {
-    KeyTemplate template = JwtHmacKeyManager.hs256Template();
+    KeyTemplate template = KeyTemplates.get("JWT_HS256");
     KeysetHandle handle = KeysetHandle.generateNew(template);
     JwtMac mac = handle.getPrimitive(JwtMac.class);
 
@@ -311,15 +358,22 @@ public class JwtHmacKeyManagerTest {
     String jwtId = "user123";
     double amount = 0.1;
     RawJwt unverified =
-        new RawJwt.Builder()
+        RawJwt.newBuilder()
             .setTypeHeader("myType")
             .setIssuer(issuer)
             .addAudience(audience)
             .setJwtId(jwtId)
             .addNumberClaim("amount", amount)
+            .withoutExpiration()
             .build();
     String compact = mac.computeMacAndEncode(unverified);
-    JwtValidator validator = new JwtValidator.Builder().setAudience(audience).build();
+    JwtValidator validator =
+        JwtValidator.newBuilder()
+            .expectTypeHeader("myType")
+            .expectIssuer(issuer)
+            .expectAudience(audience)
+            .allowMissingExpiration()
+            .build();
     VerifiedJwt token = mac.verifyMacAndDecode(compact, validator);
 
     assertThat(token.getTypeHeader()).isEqualTo("myType");
@@ -331,28 +385,28 @@ public class JwtHmacKeyManagerTest {
 
   @Test
   public void verify_expired_shouldThrow() throws Exception {
-    KeyTemplate template = JwtHmacKeyManager.hs256Template();
+    KeyTemplate template = KeyTemplates.get("JWT_HS256");
     KeysetHandle handle = KeysetHandle.generateNew(template);
     JwtMac mac = handle.getPrimitive(JwtMac.class);
 
     Clock clock1 = Clock.systemUTC();
     // This token expires in 1 minute in the future.
     RawJwt token =
-        new RawJwt.Builder()
+        RawJwt.newBuilder()
             .setExpiration(clock1.instant().plus(Duration.ofMinutes(1)))
             .build();
     String compact = mac.computeMacAndEncode(token);
 
     // Move the clock to 2 minutes in the future.
     Clock clock2 = Clock.offset(clock1, Duration.ofMinutes(2));
-    JwtValidator validator = new JwtValidator.Builder().setClock(clock2).build();
+    JwtValidator validator = JwtValidator.newBuilder().setClock(clock2).build();
 
     assertThrows(JwtInvalidException.class, () -> mac.verifyMacAndDecode(compact, validator));
   }
 
   @Test
   public void verify_notExpired_success() throws Exception {
-    KeyTemplate template = JwtHmacKeyManager.hs256Template();
+    KeyTemplate template = KeyTemplates.get("JWT_HS256");
     KeysetHandle handle = KeysetHandle.generateNew(template);
     JwtMac mac = handle.getPrimitive(JwtMac.class);
 
@@ -360,17 +414,17 @@ public class JwtHmacKeyManagerTest {
     // This token expires in 1 minute in the future.
     Instant expiration = clock.instant().plus(Duration.ofMinutes(1));
     RawJwt unverified =
-        new RawJwt.Builder().setExpiration(expiration).build();
+        RawJwt.newBuilder().setExpiration(expiration).build();
     String compact = mac.computeMacAndEncode(unverified);
-    JwtValidator validator = new JwtValidator.Builder().build();
+    JwtValidator validator = JwtValidator.newBuilder().build();
     VerifiedJwt token = mac.verifyMacAndDecode(compact, validator);
 
-    assertThat(token.getExpiration()).isEqualTo(expiration.truncatedTo(MILLIS));
+    assertThat(token.getExpiration()).isEqualTo(unverified.getExpiration());
   }
 
   @Test
   public void verify_notExpired_clockSkew_success() throws Exception {
-    KeyTemplate template = JwtHmacKeyManager.hs256Template();
+    KeyTemplate template = KeyTemplates.get("JWT_HS256");
     KeysetHandle handle = KeysetHandle.generateNew(template);
     JwtMac mac = handle.getPrimitive(JwtMac.class);
 
@@ -378,19 +432,19 @@ public class JwtHmacKeyManagerTest {
     // This token expires in 1 minutes in the future.
     Instant expiration = clock1.instant().plus(Duration.ofMinutes(1));
     RawJwt unverified =
-        new RawJwt.Builder().setExpiration(expiration).build();
+        RawJwt.newBuilder().setExpiration(expiration).build();
     String compact = mac.computeMacAndEncode(unverified);
 
     // A clock skew of 1 minute is allowed.
-    JwtValidator validator = new JwtValidator.Builder().setClockSkew(Duration.ofMinutes(1)).build();
+    JwtValidator validator = JwtValidator.newBuilder().setClockSkew(Duration.ofMinutes(1)).build();
     VerifiedJwt token = mac.verifyMacAndDecode(compact, validator);
 
-    assertThat(token.getExpiration()).isEqualTo(expiration.truncatedTo(MILLIS));
+    assertThat(token.getExpiration()).isEqualTo(unverified.getExpiration());
   }
 
   @Test
   public void verify_before_shouldThrow() throws Exception {
-    KeyTemplate template = JwtHmacKeyManager.hs256Template();
+    KeyTemplate template = KeyTemplates.get("JWT_HS256");
     KeysetHandle handle = KeysetHandle.generateNew(template);
     JwtMac mac = handle.getPrimitive(JwtMac.class);
 
@@ -398,17 +452,17 @@ public class JwtHmacKeyManagerTest {
     // This token cannot be used until 1 minute in the future.
     Instant notBefore = clock.instant().plus(Duration.ofMinutes(1));
     RawJwt unverified =
-        new RawJwt.Builder().setNotBefore(notBefore).build();
+        RawJwt.newBuilder().setNotBefore(notBefore).withoutExpiration().build();
     String compact = mac.computeMacAndEncode(unverified);
 
-    JwtValidator validator = new JwtValidator.Builder().build();
+    JwtValidator validator = JwtValidator.newBuilder().allowMissingExpiration().build();
 
     assertThrows(JwtInvalidException.class, () -> mac.verifyMacAndDecode(compact, validator));
   }
 
   @Test
   public void validate_notBefore_success() throws Exception {
-    KeyTemplate template = JwtHmacKeyManager.hs256Template();
+    KeyTemplate template = KeyTemplates.get("JWT_HS256");
     KeysetHandle handle = KeysetHandle.generateNew(template);
     JwtMac mac = handle.getPrimitive(JwtMac.class);
 
@@ -416,20 +470,21 @@ public class JwtHmacKeyManagerTest {
     // This token cannot be used until 1 minute in the future.
     Instant notBefore = clock1.instant().plus(Duration.ofMinutes(1));
     RawJwt unverified =
-        new RawJwt.Builder().setNotBefore(notBefore).build();
+        RawJwt.newBuilder().setNotBefore(notBefore).withoutExpiration().build();
     String compact = mac.computeMacAndEncode(unverified);
 
     // Move the clock to 2 minutes in the future.
     Clock clock2 = Clock.offset(clock1, Duration.ofMinutes(2));
-    JwtValidator validator = new JwtValidator.Builder().setClock(clock2).build();
+    JwtValidator validator =
+        JwtValidator.newBuilder().allowMissingExpiration().setClock(clock2).build();
     VerifiedJwt token = mac.verifyMacAndDecode(compact, validator);
 
-    assertThat(token.getNotBefore()).isEqualTo(notBefore.truncatedTo(MILLIS));
+    assertThat(token.getNotBefore()).isEqualTo(unverified.getNotBefore());
   }
 
   @Test
   public void validate_notBefore_clockSkew_success() throws Exception {
-    KeyTemplate template = JwtHmacKeyManager.hs256Template();
+    KeyTemplate template = KeyTemplates.get("JWT_HS256");
     KeysetHandle handle = KeysetHandle.generateNew(template);
     JwtMac mac = handle.getPrimitive(JwtMac.class);
 
@@ -437,67 +492,74 @@ public class JwtHmacKeyManagerTest {
     // This token cannot be used until 1 minute in the future.
     Instant notBefore = clock1.instant().plus(Duration.ofMinutes(1));
     RawJwt unverified =
-        new RawJwt.Builder().setNotBefore(notBefore).build();
+        RawJwt.newBuilder().setNotBefore(notBefore).withoutExpiration().build();
     String compact = mac.computeMacAndEncode(unverified);
 
     // A clock skew of 1 minute is allowed.
-    JwtValidator validator = new JwtValidator.Builder().setClockSkew(Duration.ofMinutes(1)).build();
+    JwtValidator validator =
+        JwtValidator.newBuilder()
+            .allowMissingExpiration()
+            .setClockSkew(Duration.ofMinutes(1))
+            .build();
     VerifiedJwt token = mac.verifyMacAndDecode(compact, validator);
 
-    assertThat(token.getNotBefore()).isEqualTo(notBefore.truncatedTo(MILLIS));
+    assertThat(token.getNotBefore()).isEqualTo(unverified.getNotBefore());
   }
 
   @Test
   public void verify_noAudienceInJwt_shouldThrow() throws Exception {
-    KeyTemplate template = JwtHmacKeyManager.hs256Template();
+    KeyTemplate template = KeyTemplates.get("JWT_HS256");
     KeysetHandle handle = KeysetHandle.generateNew(template);
     JwtMac mac = handle.getPrimitive(JwtMac.class);
 
-    RawJwt unverified = new RawJwt.Builder().build();
+    RawJwt unverified = RawJwt.newBuilder().withoutExpiration().build();
     String compact = mac.computeMacAndEncode(unverified);
-    JwtValidator validator = new JwtValidator.Builder().setAudience("foo").build();
+    JwtValidator validator =
+        JwtValidator.newBuilder().allowMissingExpiration().expectAudience("foo").build();
 
     assertThrows(JwtInvalidException.class, () -> mac.verifyMacAndDecode(compact, validator));
   }
 
   @Test
   public void verify_noAudienceInValidator_shouldThrow() throws Exception {
-    KeyTemplate template = JwtHmacKeyManager.hs256Template();
+    KeyTemplate template = KeyTemplates.get("JWT_HS256");
     KeysetHandle handle = KeysetHandle.generateNew(template);
     JwtMac mac = handle.getPrimitive(JwtMac.class);
 
     RawJwt unverified =
-        new RawJwt.Builder().addAudience("foo").build();
+        RawJwt.newBuilder().addAudience("foo").withoutExpiration().build();
     String compact = mac.computeMacAndEncode(unverified);
-    JwtValidator validator = new JwtValidator.Builder().build();
+    JwtValidator validator = JwtValidator.newBuilder().allowMissingExpiration().build();
 
     assertThrows(JwtInvalidException.class, () -> mac.verifyMacAndDecode(compact, validator));
   }
 
   @Test
   public void verify_wrongAudience_shouldThrow() throws Exception {
-    KeyTemplate template = JwtHmacKeyManager.hs256Template();
+    KeyTemplate template = KeyTemplates.get("JWT_HS256");
     KeysetHandle handle = KeysetHandle.generateNew(template);
     JwtMac mac = handle.getPrimitive(JwtMac.class);
 
     RawJwt unverified =
-        new RawJwt.Builder().addAudience("foo").build();
+        RawJwt.newBuilder().addAudience("foo").withoutExpiration().build();
     String compact = mac.computeMacAndEncode(unverified);
-    JwtValidator validator = new JwtValidator.Builder().setAudience("bar").build();
+    JwtValidator validator =
+        JwtValidator.newBuilder().allowMissingExpiration().expectAudience("bar").build();
 
     assertThrows(JwtInvalidException.class, () -> mac.verifyMacAndDecode(compact, validator));
   }
 
   @Test
   public void verify_audience_success() throws Exception {
-    KeyTemplate template = JwtHmacKeyManager.hs256Template();
+    KeyTemplate template = KeyTemplates.get("JWT_HS256");
     KeysetHandle handle = KeysetHandle.generateNew(template);
     JwtMac mac = handle.getPrimitive(JwtMac.class);
 
     RawJwt unverified =
-        new RawJwt.Builder().addAudience("foo").build();
+        RawJwt.newBuilder().addAudience("foo").withoutExpiration().build();
     String compact = mac.computeMacAndEncode(unverified);
-    JwtValidator validator = new JwtValidator.Builder().setAudience("foo").build();
+    JwtValidator validator =
+        JwtValidator.newBuilder().allowMissingExpiration().expectAudience("foo").build();
     VerifiedJwt token = mac.verifyMacAndDecode(compact, validator);
 
     assertThat(token.getAudiences()).containsExactly("foo");
@@ -505,17 +567,18 @@ public class JwtHmacKeyManagerTest {
 
   @Test
   public void verify_multipleAudiences_success() throws Exception {
-    KeyTemplate template = JwtHmacKeyManager.hs256Template();
+    KeyTemplate template = KeyTemplates.get("JWT_HS256");
     KeysetHandle handle = KeysetHandle.generateNew(template);
     JwtMac mac = handle.getPrimitive(JwtMac.class);
 
     RawJwt unverified =
-        new RawJwt.Builder()
+        RawJwt.newBuilder()
             .addAudience("foo")
-            .addAudience("bar")
+            .addAudience("bar").withoutExpiration()
             .build();
     String compact = mac.computeMacAndEncode(unverified);
-    JwtValidator validator = new JwtValidator.Builder().setAudience("bar").build();
+    JwtValidator validator =
+        JwtValidator.newBuilder().allowMissingExpiration().expectAudience("bar").build();
     VerifiedJwt token = mac.verifyMacAndDecode(compact, validator);
 
     assertThat(token.getAudiences()).containsExactly("foo", "bar");
@@ -531,8 +594,8 @@ public class JwtHmacKeyManagerTest {
   }
 
   @Test
-  public void createSignVerify_withDifferentHeaders() throws Exception {
-    KeyTemplate template = JwtHmacKeyManager.hs256Template();
+  public void createSignVerifyRaw_withDifferentHeaders() throws Exception {
+    KeyTemplate template = KeyTemplates.get("JWT_HS256_RAW");
     KeysetHandle handle = KeysetHandle.generateNew(template);
     Keyset keyset = CleartextKeysetHandle.getKeyset(handle);
     JwtHmacKey keyProto =
@@ -545,21 +608,23 @@ public class JwtHmacKeyManagerTest {
     JwtMac primitive = handle.getPrimitive(JwtMac.class);
 
     JsonObject payload = new JsonObject();
-    payload.addProperty(JwtNames.CLAIM_ISSUER, "issuer");
-    JwtValidator validator = new JwtValidator.Builder().build();
+    payload.addProperty("jti", "jwtId");
+    JwtValidator validator = JwtValidator.newBuilder().allowMissingExpiration().build();
 
     // Normal, valid signed compact.
     JsonObject normalHeader = new JsonObject();
-    normalHeader.addProperty(JwtNames.HEADER_ALGORITHM, "HS256");
+    normalHeader.addProperty("alg", "HS256");
     String normalSignedCompact = generateSignedCompact(rawPrimitive, normalHeader, payload);
     primitive.verifyMacAndDecode(normalSignedCompact, validator);
 
     // valid token, with "typ" set in the header
     JsonObject goodHeader = new JsonObject();
-    goodHeader.addProperty(JwtNames.HEADER_ALGORITHM, "HS256");
-    goodHeader.addProperty("typ", "JWT");
+    goodHeader.addProperty("alg", "HS256");
+    goodHeader.addProperty("typ", "typeHeader");
     String goodSignedCompact = generateSignedCompact(rawPrimitive, goodHeader, payload);
-    primitive.verifyMacAndDecode(goodSignedCompact, validator);
+    primitive.verifyMacAndDecode(
+        goodSignedCompact,
+        JwtValidator.newBuilder().expectTypeHeader("typeHeader").allowMissingExpiration().build());
 
     // invalid token with an empty header
     JsonObject emptyHeader = new JsonObject();
@@ -570,27 +635,84 @@ public class JwtHmacKeyManagerTest {
 
     // invalid token with a valid but incorrect algorithm in the header
     JsonObject badAlgoHeader = new JsonObject();
-    badAlgoHeader.addProperty(JwtNames.HEADER_ALGORITHM, "RS256");
+    badAlgoHeader.addProperty("alg", "RS256");
     String badAlgoSignedCompact = generateSignedCompact(rawPrimitive, badAlgoHeader, payload);
     assertThrows(
         GeneralSecurityException.class,
         () -> primitive.verifyMacAndDecode(badAlgoSignedCompact, validator));
 
-    // token with an unknown "typ" in the header is valid
-    JsonObject unknownTypeHeader = new JsonObject();
-    unknownTypeHeader.addProperty(JwtNames.HEADER_ALGORITHM, "HS256");
-    unknownTypeHeader.addProperty("typ", "unknown");
-    String unknownTypeSignedCompact = generateSignedCompact(
-        rawPrimitive, unknownTypeHeader, payload);
-    primitive.verifyMacAndDecode(unknownTypeSignedCompact, validator);
+    // for raw keys without customKid, the validation should work even if a "kid" header is present.
+    JsonObject headerWithUnknownKid = new JsonObject();
+    headerWithUnknownKid.addProperty("alg", "HS256");
+    headerWithUnknownKid.addProperty("kid", "unknown");
+    String tokenWithUnknownKid = generateSignedCompact(
+        rawPrimitive, headerWithUnknownKid, payload);
+    primitive.verifyMacAndDecode(tokenWithUnknownKid, validator);
+  }
+
+  @Test
+  public void createSignVerifyTink_withDifferentHeaders() throws Exception {
+    KeyTemplate template = KeyTemplates.get("JWT_HS256");
+    KeysetHandle handle = KeysetHandle.generateNew(template);
+    Keyset keyset = CleartextKeysetHandle.getKeyset(handle);
+    JwtHmacKey keyProto =
+        JwtHmacKey.parseFrom(
+            keyset.getKey(0).getKeyData().getValue(), ExtensionRegistryLite.getEmptyRegistry());
+    byte[] keyValue = keyProto.getKeyValue().toByteArray();
+    SecretKeySpec keySpec = new SecretKeySpec(keyValue, "HMAC");
+    PrfHmacJce prf = new PrfHmacJce("HMACSHA256", keySpec);
+    PrfMac rawPrimitive = new PrfMac(prf, prf.getMaxOutputLength());
+    JwtMac primitive = handle.getPrimitive(JwtMac.class);
+    String kid =
+        JwtFormat.getKid(keyset.getKey(0).getKeyId(), keyset.getKey(0).getOutputPrefixType()).get();
+
+    JsonObject payload = new JsonObject();
+    payload.addProperty("jti", "jwtId");
+    JwtValidator validator = JwtValidator.newBuilder().allowMissingExpiration().build();
+
+    // Normal, valid signed compact.
+    JsonObject normalHeader = new JsonObject();
+    normalHeader.addProperty("alg", "HS256");
+    normalHeader.addProperty("kid", kid);
+    String normalToken = generateSignedCompact(rawPrimitive, normalHeader, payload);
+    primitive.verifyMacAndDecode(normalToken, validator);
+
+    // valid token, with "typ" set in the header
+    JsonObject headerWithTyp = new JsonObject();
+    headerWithTyp.addProperty("alg", "HS256");
+    headerWithTyp.addProperty("typ", "typeHeader");
+    headerWithTyp.addProperty("kid", kid);
+    String tokenWithTyp = generateSignedCompact(rawPrimitive, headerWithTyp, payload);
+    primitive.verifyMacAndDecode(
+        tokenWithTyp,
+        JwtValidator.newBuilder().expectTypeHeader("typeHeader").allowMissingExpiration().build());
+
+    // invalid token without algorithm
+    JsonObject headerWithoutAlg = new JsonObject();
+    headerWithoutAlg.addProperty("kid", kid);
+    String tokenWithoutAlg = generateSignedCompact(rawPrimitive, headerWithoutAlg, payload);
+    assertThrows(
+        GeneralSecurityException.class,
+        () -> primitive.verifyMacAndDecode(tokenWithoutAlg, validator));
+
+    // invalid token with a valid but incorrect algorithm in the header
+    JsonObject headerWithBadAlg = new JsonObject();
+    headerWithBadAlg.addProperty("alg", "RS256");
+    headerWithBadAlg.addProperty("kid", kid);
+    String tokenWithBadAlg = generateSignedCompact(rawPrimitive, headerWithBadAlg, payload);
+    assertThrows(
+        GeneralSecurityException.class,
+        () -> primitive.verifyMacAndDecode(tokenWithBadAlg, validator));
 
     // token with an unknown "kid" in the header is valid
-    JsonObject unknownKidHeader = new JsonObject();
-    unknownKidHeader.addProperty(JwtNames.HEADER_ALGORITHM, "HS256");
-    unknownKidHeader.addProperty("typ", "unknown");
-    String unknownKidSignedCompact = generateSignedCompact(
-        rawPrimitive, unknownTypeHeader, payload);
-    primitive.verifyMacAndDecode(unknownKidSignedCompact, validator);
+    JsonObject headerWithUnknownKid = new JsonObject();
+    headerWithUnknownKid.addProperty("alg", "HS256");
+    headerWithUnknownKid.addProperty("kid", "unknown");
+    String tokenWithUnknownKid = generateSignedCompact(
+        rawPrimitive, headerWithUnknownKid, payload);
+    assertThrows(
+        GeneralSecurityException.class,
+        () -> primitive.verifyMacAndDecode(tokenWithUnknownKid, validator));
   }
 
   private static KeysetHandle getRfc7515ExampleKeysetHandle() throws Exception {
@@ -630,7 +752,7 @@ public class JwtHmacKeyManagerTest {
             + "gImh0dHA6Ly9leGFtcGxlLmNvbS9pc19yb290Ijp0cnVlfQ."
             + "dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk";
 
-    JwtValidator validator = new JwtValidator.Builder().build();
+    JwtValidator validator = JwtValidator.newBuilder().build();
     assertThrows(JwtInvalidException.class, () -> primitive.verifyMacAndDecode(compact, validator));
   }
 
@@ -650,11 +772,112 @@ public class JwtHmacKeyManagerTest {
     // One minute earlier than the expiration time of the sample token.
     String instant = "2011-03-22T18:42:00Z";
     Clock clock = Clock.fixed(Instant.parse(instant), ZoneOffset.UTC);
-    JwtValidator validator = new JwtValidator.Builder().setClock(clock).build();
+    JwtValidator validator =
+        JwtValidator.newBuilder()
+            .expectTypeHeader("JWT")
+            .expectIssuer("joe")
+            .setClock(clock)
+            .build();
 
     VerifiedJwt token = primitive.verifyMacAndDecode(compact, validator);
 
     assertThat(token.getIssuer()).isEqualTo("joe");
     assertThat(token.getBooleanClaim("http://example.com/is_root")).isTrue();
+  }
+
+  /* Create a new keyset handle with the "custom_kid" value set. */
+  private KeysetHandle withCustomKid(KeysetHandle keysetHandle, String customKid)
+      throws Exception {
+    Keyset keyset = CleartextKeysetHandle.getKeyset(keysetHandle);
+    JwtHmacKey hmacKey =
+        JwtHmacKey.parseFrom(
+            keyset.getKey(0).getKeyData().getValue(), ExtensionRegistryLite.getEmptyRegistry());
+    JwtHmacKey hmacKeyWithKid =
+        hmacKey.toBuilder()
+            .setCustomKid(CustomKid.newBuilder().setValue(customKid).build())
+            .build();
+    KeyData keyDataWithKid =
+        keyset.getKey(0).getKeyData().toBuilder().setValue(hmacKeyWithKid.toByteString()).build();
+    Keyset.Key keyWithKid = keyset.getKey(0).toBuilder().setKeyData(keyDataWithKid).build();
+    return CleartextKeysetHandle.fromKeyset(keyset.toBuilder().setKey(0, keyWithKid).build());
+  }
+
+  @Test
+  public void macWithCustomKid() throws Exception {
+    KeyTemplate template = KeyTemplates.get("JWT_HS256_RAW");
+    KeysetHandle handleWithoutKid = KeysetHandle.generateNew(template);
+    KeysetHandle handleWithKid =
+        withCustomKid(handleWithoutKid, "Lorem ipsum dolor sit amet, consectetur adipiscing elit");
+    JwtMac jwtMacWithoutKid = handleWithoutKid.getPrimitive(JwtMac.class);
+    JwtMac jwtMacWithKid = handleWithKid.getPrimitive(JwtMac.class);
+    JwtValidator validator = JwtValidator.newBuilder().allowMissingExpiration().build();
+
+    RawJwt rawToken = RawJwt.newBuilder().setJwtId("jwtId").withoutExpiration().build();
+    String compactWithKid = jwtMacWithKid.computeMacAndEncode(rawToken);
+    String compactWithoutKid = jwtMacWithoutKid.computeMacAndEncode(rawToken);
+
+    // Verify the kid in the header
+    String jsonHeaderWithKid = JwtFormat.splitSignedCompact(compactWithKid).header;
+    String kid = JsonUtil.parseJson(jsonHeaderWithKid).get("kid").getAsString();
+    assertThat(kid).isEqualTo("Lorem ipsum dolor sit amet, consectetur adipiscing elit");
+    String jsonHeaderWithoutKid = JwtFormat.splitSignedCompact(compactWithoutKid).header;
+    assertThat(JsonUtil.parseJson(jsonHeaderWithoutKid).has("kid")).isFalse();
+
+    // Even if custom_kid is set, we don't require a "kid" in the header.
+    assertThat(jwtMacWithKid.verifyMacAndDecode(compactWithKid, validator).getJwtId())
+        .isEqualTo("jwtId");
+    assertThat(jwtMacWithoutKid.verifyMacAndDecode(compactWithKid, validator).getJwtId())
+        .isEqualTo("jwtId");
+
+    assertThat(jwtMacWithKid.verifyMacAndDecode(compactWithoutKid, validator).getJwtId())
+        .isEqualTo("jwtId");
+    assertThat(jwtMacWithoutKid.verifyMacAndDecode(compactWithoutKid, validator).getJwtId())
+        .isEqualTo("jwtId");
+  }
+
+  @Test
+  public void macWithWrongCustomKid() throws Exception {
+    KeyTemplate template = KeyTemplates.get("JWT_HS256_RAW");
+    KeysetHandle handleWithoutKid = KeysetHandle.generateNew(template);
+    KeysetHandle handleWithKid = withCustomKid(handleWithoutKid, "kid");
+    KeysetHandle handleWithWrongKid = withCustomKid(handleWithoutKid, "wrong kid");
+    JwtMac jwtMacWithKid = handleWithKid.getPrimitive(JwtMac.class);
+    JwtMac jwtMacWithWrongKid = handleWithWrongKid.getPrimitive(JwtMac.class);
+    JwtValidator validator = JwtValidator.newBuilder().allowMissingExpiration().build();
+
+    RawJwt rawToken = RawJwt.newBuilder().setJwtId("jwtId").withoutExpiration().build();
+    String compactWithKid = jwtMacWithKid.computeMacAndEncode(rawToken);
+
+    assertThrows(
+        JwtInvalidException.class,
+        () -> jwtMacWithWrongKid.verifyMacAndDecode(compactWithKid, validator));
+  }
+
+  @Test
+  public void macWithTinkKeyAndCustomKid_fails() throws Exception {
+    KeyTemplate template = KeyTemplates.get("JWT_HS256");
+    KeysetHandle handle = KeysetHandle.generateNew(template);
+
+    // Create a new handle with the "kid" value set.
+    Keyset keyset = CleartextKeysetHandle.getKeyset(handle);
+    JwtHmacKey hmacKey =
+        JwtHmacKey.parseFrom(
+            keyset.getKey(0).getKeyData().getValue(), ExtensionRegistryLite.getEmptyRegistry());
+    JwtHmacKey hmacKeyWithKid =
+        hmacKey.toBuilder()
+            .setCustomKid(
+                CustomKid.newBuilder()
+                    .setValue("Lorem ipsum dolor sit amet, consectetur adipiscing elit")
+                    .build())
+            .build();
+    KeyData keyDataWithKid =
+        keyset.getKey(0).getKeyData().toBuilder().setValue(hmacKeyWithKid.toByteString()).build();
+    Keyset.Key keyWithKid = keyset.getKey(0).toBuilder().setKeyData(keyDataWithKid).build();
+    KeysetHandle handleWithKid =
+        CleartextKeysetHandle.fromKeyset(keyset.toBuilder().setKey(0, keyWithKid).build());
+
+    JwtMac jwtMacWithKid = handleWithKid.getPrimitive(JwtMac.class);
+    RawJwt rawToken = RawJwt.newBuilder().setJwtId("jwtId").withoutExpiration().build();
+    assertThrows(JwtInvalidException.class, () -> jwtMacWithKid.computeMacAndEncode(rawToken));
   }
 }

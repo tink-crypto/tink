@@ -18,12 +18,14 @@ package com.google.crypto.tink.jwt;
 
 import com.google.errorprone.annotations.Immutable;
 import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonPrimitive;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -31,9 +33,12 @@ import java.util.Optional;
 import java.util.Set;
 
 /**
- * A <a href="https://tools.ietf.org/html/rfc7519">JSON Web Token</a> (JWT) that can be signed or
- * MAC'ed to obtain a compact JWT.
- * It can also be a token that has been parsed from a compact JWT, but not yet verified.
+ * An unencoded and unsigned <a href="https://tools.ietf.org/html/rfc7519">JSON Web Token</a> (JWT).
+ *
+ * <p>It contains all payload claims and a subset of the headers. It does not contain any headers
+ * that depend on the key, such as "alg" or "kid", because these headers are chosen when the token
+ * is signed and encoded, and should not be chosen by the user. This ensures that the key can be
+ * changed without any changes to the user code.
  */
 @Immutable
 public final class RawJwt {
@@ -46,6 +51,14 @@ public final class RawJwt {
   private final Optional<String> typeHeader;
 
   private RawJwt(Builder builder) {
+    if (!builder.payload.has(JwtNames.CLAIM_EXPIRATION) && !builder.withoutExpiration) {
+      throw new IllegalArgumentException(
+          "neither setExpiration() nor withoutExpiration() was called");
+    }
+    if (builder.payload.has(JwtNames.CLAIM_EXPIRATION) && builder.withoutExpiration) {
+      throw new IllegalArgumentException(
+          "setExpiration() and withoutExpiration() must not be called together");
+    }
     this.typeHeader = builder.typeHeader;
     this.payload = builder.payload.deepCopy();
   }
@@ -91,12 +104,8 @@ public final class RawJwt {
     if (!this.payload.has(JwtNames.CLAIM_AUDIENCE)) {
       return;
     }
-    // if aud is a string, convert it to a JsonArray.
     if (this.payload.get(JwtNames.CLAIM_AUDIENCE).isJsonPrimitive()
         && this.payload.get(JwtNames.CLAIM_AUDIENCE).getAsJsonPrimitive().isString()) {
-      JsonArray audiences = new JsonArray();
-      audiences.add(this.payload.get(JwtNames.CLAIM_AUDIENCE).getAsString());
-      this.payload.add(JwtNames.CLAIM_AUDIENCE, audiences);
       return;
     }
 
@@ -114,13 +123,22 @@ public final class RawJwt {
     return new RawJwt(typeHeader, jsonPayload);
   }
 
+  /**
+   * Returns a new RawJwt.Builder.
+   */
+  public static Builder newBuilder() {
+    return new Builder();
+  }
+
   /** Builder for RawJwt */
   public static final class Builder {
     private Optional<String> typeHeader;
+    private boolean withoutExpiration;
     private final JsonObject payload;
 
-    public Builder() {
+    private Builder() {
       typeHeader = Optional.empty();
+      withoutExpiration = false;
       payload = new JsonObject();
     }
 
@@ -163,17 +181,75 @@ public final class RawJwt {
     }
 
     /**
+     * Sets the audience that the JWT is intended for.
+     *
+     * Sets the {@code aud} claim as a string. This method can't be used
+     * together with {@code setAudiences} or {@code addAudience}.
+     *
+     * <p>https://tools.ietf.org/html/rfc7519#section-4.1.3
+     */
+    public Builder setAudience(String value) {
+      if (payload.has(JwtNames.CLAIM_AUDIENCE)
+          && payload.get(JwtNames.CLAIM_AUDIENCE).isJsonArray()) {
+          throw new IllegalArgumentException(
+              "setAudience can't be used together with setAudiences or addAudience");
+      }
+      if (!JsonUtil.isValidString(value)) {
+        throw new IllegalArgumentException("invalid string");
+      }
+      payload.add(JwtNames.CLAIM_AUDIENCE, new JsonPrimitive(value));
+      return this;
+    }
+
+    /**
+     * Sets the audiences that the JWT is intended for.
+     *
+     * Sets the {@code aud} claim as an array of strings. This method can't be used
+     * together with {@code setAudience}.
+     *
+     * <p>https://tools.ietf.org/html/rfc7519#section-4.1.3
+     */
+    public Builder setAudiences(List<String> values) {
+      if (payload.has(JwtNames.CLAIM_AUDIENCE)
+              && !payload.get(JwtNames.CLAIM_AUDIENCE).isJsonArray()) {
+        throw new IllegalArgumentException("setAudiences can't be used together with setAudience");
+      }
+      if (values.isEmpty()) {
+        throw new IllegalArgumentException("audiences must not be empty");
+      }
+      JsonArray audiences = new JsonArray();
+      for (String value : values) {
+        if (!JsonUtil.isValidString(value)) {
+          throw new IllegalArgumentException("invalid string");
+        }
+        audiences.add(value);
+      }
+      payload.add(JwtNames.CLAIM_AUDIENCE, audiences);
+      return this;
+    }
+
+    /**
      * Adds an audience that the JWT is intended for.
+     *
+     * The {@code aud} claim will always be encoded as an array of strings. This method
+     * can't be used together with {@code setAudience}.
      *
      * <p>https://tools.ietf.org/html/rfc7519#section-4.1.3
      */
     public Builder addAudience(String value) {
       if (!JsonUtil.isValidString(value)) {
-        throw new IllegalArgumentException();
+        throw new IllegalArgumentException("invalid string");
       }
-      JsonArray audiences = new JsonArray();
+      JsonArray audiences;
       if (payload.has(JwtNames.CLAIM_AUDIENCE)) {
-        audiences = payload.get(JwtNames.CLAIM_AUDIENCE).getAsJsonArray();
+        JsonElement aud = payload.get(JwtNames.CLAIM_AUDIENCE);
+        if (!aud.isJsonArray()) {
+          throw new IllegalArgumentException(
+              "addAudience can't be used together with setAudience");
+        }
+        audiences = aud.getAsJsonArray();
+      } else {
+        audiences = new JsonArray();
       }
       audiences.add(value);
       payload.add(JwtNames.CLAIM_AUDIENCE, audiences);
@@ -194,13 +270,13 @@ public final class RawJwt {
     }
 
     private void setTimestampClaim(String name, Instant value) {
-      long millis = value.toEpochMilli();
-      if ((millis > MAX_TIMESTAMP_VALUE * 1000) || (millis < 0)) {
+      // We round the timestamp to a whole number. We always round down.
+      long timestamp = value.getEpochSecond();
+      if ((timestamp > MAX_TIMESTAMP_VALUE) || (timestamp < 0)) {
         throw new IllegalArgumentException(
             "timestamp of claim " + name + " is out of range");
       }
-      double doubleMillis = millis;
-      payload.add(name, new JsonPrimitive(doubleMillis / 1000));
+      payload.add(name, new JsonPrimitive(timestamp));
     }
 
     /**
@@ -215,6 +291,18 @@ public final class RawJwt {
      */
     public Builder setExpiration(Instant value) {
       setTimestampClaim(JwtNames.CLAIM_EXPIRATION, value);
+      return this;
+    }
+
+    /**
+     * Allow generating tokens without an expiration.
+     *
+     * <p>For most applications of JWT, an expiration date should be set. This function makes sure
+     * that this is not forgotten, by requiring to user to explicitly state that no expiration
+     * should be set.
+     */
+    public Builder withoutExpiration() {
+      this.withoutExpiration = true;
       return this;
     }
 
@@ -367,7 +455,7 @@ public final class RawJwt {
   boolean isNullClaim(String name) {
     JwtNames.validate(name);
     try {
-      return (JsonNull.INSTANCE.equals(payload.get(name)));
+      return JsonNull.INSTANCE.equals(payload.get(name));
     } catch (JsonParseException ex) {
       return false;
     }
@@ -449,11 +537,19 @@ public final class RawJwt {
     if (!hasAudiences()) {
       throw new JwtInvalidException("claim aud does not exist");
     }
-    if (!payload.get(JwtNames.CLAIM_AUDIENCE).isJsonArray()) {
-      throw new JwtInvalidException("claim aud is not a JSON array");
+    JsonElement aud = payload.get(JwtNames.CLAIM_AUDIENCE);
+    if (aud.isJsonPrimitive()) {
+      if (!aud.getAsJsonPrimitive().isString()) {
+        throw new JwtInvalidException(
+            String.format("invalid audience: got %s; want a string", aud));
+      }
+      return Collections.unmodifiableList(Arrays.asList(aud.getAsString()));
+    }
+    if (!aud.isJsonArray()) {
+      throw new JwtInvalidException("claim aud is not a string or a JSON array");
     }
 
-    JsonArray audiences = payload.get(JwtNames.CLAIM_AUDIENCE).getAsJsonArray();
+    JsonArray audiences = aud.getAsJsonArray();
     List<String> result = new ArrayList<>(audiences.size());
     for (int i = 0; i < audiences.size(); i++) {
       if (!audiences.get(i).isJsonPrimitive()
@@ -517,5 +613,18 @@ public final class RawJwt {
       }
     }
     return Collections.unmodifiableSet(names);
+  }
+
+  /**
+   * Returns a brief description of a RawJwt object. The exact details of the representation are
+   * unspecified and subject to change.
+   */
+  @Override
+  public String toString() {
+    JsonObject header = new JsonObject();
+    if (typeHeader.isPresent()) {
+      header.add("typ", new JsonPrimitive(typeHeader.get()));
+    }
+    return header + "." + payload;
   }
 }

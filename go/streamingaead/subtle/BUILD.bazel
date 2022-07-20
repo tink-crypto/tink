@@ -1,7 +1,7 @@
 load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
 
 go_library(
-    name = "go_default_library",
+    name = "subtle",
     srcs = [
         "aes_ctr_hmac.go",
         "aes_gcm_hkdf.go",
@@ -10,21 +10,29 @@ go_library(
     importpath = "github.com/google/tink/go/streamingaead/subtle",
     visibility = ["//visibility:public"],
     deps = [
-        "//aead/subtle:go_default_library",
-        "//mac/subtle:go_default_library",
-        "//streamingaead/subtle/noncebased:go_default_library",
-        "//subtle:go_default_library",
-        "//subtle/random:go_default_library",
+        "//aead/subtle",
+        "//mac/subtle",
+        "//streamingaead/subtle/noncebased",
+        "//subtle",
+        "//subtle/random",
     ],
 )
 
 go_test(
-    name = "go_default_test",
+    name = "subtle_test",
     srcs = [
         "aes_ctr_hmac_test.go",
         "aes_gcm_hkdf_test.go",
         "subtle_test.go",
     ],
-    embed = [":go_default_library"],
-    deps = ["//tink:go_default_library"],
+    deps = [
+        ":subtle",
+        "//tink",
+    ],
+)
+
+alias(
+    name = "go_default_library",
+    actual = ":subtle",
+    visibility = ["//visibility:public"],
 )

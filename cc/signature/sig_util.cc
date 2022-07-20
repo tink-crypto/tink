@@ -24,7 +24,7 @@ crypto::tink::util::Status SignAndVerify(const PublicKeySign* signer,
   static constexpr char kTestMessage[] = "Wycheproof and Tink.";
   auto sign_result = signer->Sign(kTestMessage);
   if (!sign_result.ok()) return sign_result.status();
-  return verifier->Verify(sign_result.ValueOrDie(), kTestMessage);
+  return verifier->Verify(sign_result.value(), kTestMessage);
 }
 
 }  // namespace tink

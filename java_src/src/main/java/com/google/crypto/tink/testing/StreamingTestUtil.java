@@ -47,7 +47,7 @@ import java.security.SecureRandom;
 import java.util.Arrays;
 
 /** Helpers for streaming tests. */
-public class StreamingTestUtil {
+public final class StreamingTestUtil {
   /**
    * Implements a SeekableByteChannel for testing.
    *
@@ -297,7 +297,7 @@ public class StreamingTestUtil {
     }
 
     @Override
-    public synchronized int read(byte[] b, int off, int len){
+    public synchronized int read(byte[] b, int off, int len) {
       return super.read(b, off, min(len, maxChunkSize));
     }
   }
@@ -325,26 +325,26 @@ public class StreamingTestUtil {
   public static void testEncryptionAndDecryption(
       StreamingAead encryptionStreamingAead, StreamingAead decryptionStreamingAead)
       throws Exception {
-    byte[] aad = Random.randBytes(15);
+    byte[] associatedData = Random.randBytes(15);
     // Short plaintext.
     byte[] shortPlaintext = Random.randBytes(10);
     testEncryptionAndDecryption(
-        encryptionStreamingAead, decryptionStreamingAead, shortPlaintext, aad);
+        encryptionStreamingAead, decryptionStreamingAead, shortPlaintext, associatedData);
     // Long plaintext.
     byte[] longPlaintext = Random.randBytes(1100);
     testEncryptionAndDecryption(
-        encryptionStreamingAead, decryptionStreamingAead, longPlaintext, aad);
+        encryptionStreamingAead, decryptionStreamingAead, longPlaintext, associatedData);
 
     // Even longer plaintext. A typical cache size for data types such as BufferedInputStream
     // is 8 kB. Hence, testing with inputs longer than this makes sense.
     byte[] evenLongerPlaintext = Random.randBytes(16000);
     testEncryptionAndDecryption(
-        encryptionStreamingAead, decryptionStreamingAead, evenLongerPlaintext, aad);
+        encryptionStreamingAead, decryptionStreamingAead, evenLongerPlaintext, associatedData);
 
     // Empty plaintext.
     byte[] empty = new byte[0];
     testEncryptionAndDecryption(
-        encryptionStreamingAead, decryptionStreamingAead, empty, aad);
+        encryptionStreamingAead, decryptionStreamingAead, empty, associatedData);
 
   }
 
@@ -356,19 +356,20 @@ public class StreamingTestUtil {
   /**
    * Tests encryption and decryption functionalities using {@code encryptionStreamingAead} for
    * encryption and {@code decryptionStreamingAead} for decryption on inputs {@code plaintext} and
-   * {@code aad}.
+   * {@code associatedData}.
    */
   public static void testEncryptionAndDecryption(
       StreamingAead encryptionStreamingAead,
       StreamingAead decryptionStreamingAead,
       byte[] plaintext,
-      byte[] aad)
+      byte[] associatedData)
       throws Exception {
 
     // Encrypt plaintext.
     ByteArrayOutputStream ciphertext = new ByteArrayOutputStream();
     WritableByteChannel encChannel =
-        encryptionStreamingAead.newEncryptingChannel(Channels.newChannel(ciphertext), aad);
+        encryptionStreamingAead.newEncryptingChannel(
+            Channels.newChannel(ciphertext), associatedData);
     encChannel.write(ByteBuffer.wrap(plaintext));
     encChannel.close();
 
@@ -376,7 +377,7 @@ public class StreamingTestUtil {
     {
       ByteBufferChannel ciphertextChannel = new ByteBufferChannel(ciphertext.toByteArray());
       ReadableByteChannel decChannel =
-          decryptionStreamingAead.newDecryptingChannel(ciphertextChannel, aad);
+          decryptionStreamingAead.newDecryptingChannel(ciphertextChannel, associatedData);
       ByteBuffer decrypted = ByteBuffer.allocate(plaintext.length);
       int unused = decChannel.read(decrypted);
 
@@ -389,7 +390,7 @@ public class StreamingTestUtil {
       ByteBufferChannel ciphertextChannel = new ByteBufferChannel(
           ciphertext.toByteArray(), /* */10, true);
       ReadableByteChannel decChannel =
-          decryptionStreamingAead.newDecryptingChannel(ciphertextChannel, aad);
+          decryptionStreamingAead.newDecryptingChannel(ciphertextChannel, associatedData);
       ByteBuffer decrypted = ByteBuffer.allocate(plaintext.length);
       do {
         int unused = decChannel.read(decrypted);
@@ -403,7 +404,7 @@ public class StreamingTestUtil {
       SeekableByteChannel ciphertextChannel =
           new SeekableByteBufferChannel(ciphertext.toByteArray());
       SeekableByteChannel decChannel =
-          decryptionStreamingAead.newSeekableDecryptingChannel(ciphertextChannel, aad);
+          decryptionStreamingAead.newSeekableDecryptingChannel(ciphertextChannel, associatedData);
       ByteBuffer decrypted = ByteBuffer.allocate(plaintext.length);
       int unused = decChannel.read(decrypted);
 
@@ -416,7 +417,7 @@ public class StreamingTestUtil {
       SeekableByteChannel ciphertextChannel =
           new SeekableByteBufferChannel(ciphertext.toByteArray(), 10);
       SeekableByteChannel decChannel =
-          decryptionStreamingAead.newSeekableDecryptingChannel(ciphertextChannel, aad);
+          decryptionStreamingAead.newSeekableDecryptingChannel(ciphertextChannel, associatedData);
       ByteBuffer decrypted = ByteBuffer.allocate(plaintext.length);
       do {
         int unused = decChannel.read(decrypted);
@@ -430,7 +431,7 @@ public class StreamingTestUtil {
       SeekableByteChannel ciphertextChannel =
           new SeekableByteBufferChannel(ciphertext.toByteArray(), 10);
       SeekableByteChannel decChannel =
-          decryptionStreamingAead.newSeekableDecryptingChannel(ciphertextChannel, aad);
+          decryptionStreamingAead.newSeekableDecryptingChannel(ciphertextChannel, associatedData);
       decChannel.position(5);
       assertEquals(5, decChannel.position());
 
@@ -447,7 +448,7 @@ public class StreamingTestUtil {
     // Decrypt ciphertext via InputStream.
     {
       InputStream ctStream = new ByteArrayInputStream(ciphertext.toByteArray());
-      InputStream decStream = decryptionStreamingAead.newDecryptingStream(ctStream, aad);
+      InputStream decStream = decryptionStreamingAead.newDecryptingStream(ctStream, associatedData);
       byte[] decrypted = new byte[plaintext.length];
       int decryptedLength = decStream.read(decrypted);
 
@@ -460,7 +461,7 @@ public class StreamingTestUtil {
     // Decrypt ciphertext via SmallChunksByteArrayInputStream.
     {
       InputStream ctStream = new SmallChunksByteArrayInputStream(ciphertext.toByteArray(), 10);
-      InputStream decStream = decryptionStreamingAead.newDecryptingStream(ctStream, aad);
+      InputStream decStream = decryptionStreamingAead.newDecryptingStream(ctStream, associatedData);
       byte[] decrypted = new byte[plaintext.length];
       int decryptedLength = decStream.read(decrypted);
 
@@ -472,7 +473,7 @@ public class StreamingTestUtil {
 
     // Encrypt with an OutputStream.
     ByteArrayOutputStream bos = new ByteArrayOutputStream();
-    OutputStream encStream = encryptionStreamingAead.newEncryptingStream(bos, aad);
+    OutputStream encStream = encryptionStreamingAead.newEncryptingStream(bos, associatedData);
     encStream.write(plaintext);
     encStream.close();
     byte[] ciphertext2 = bos.toByteArray();
@@ -481,7 +482,7 @@ public class StreamingTestUtil {
     {
       ByteBufferChannel ciphertextChannel = new ByteBufferChannel(ciphertext2);
       ReadableByteChannel decChannel =
-          decryptionStreamingAead.newDecryptingChannel(ciphertextChannel, aad);
+          decryptionStreamingAead.newDecryptingChannel(ciphertextChannel, associatedData);
       ByteBuffer decrypted = ByteBuffer.allocate(plaintext.length);
       int unused = decChannel.read(decrypted);
 
@@ -498,27 +499,66 @@ public class StreamingTestUtil {
    *
    * @param ags the streaming primitive
    * @param plaintext the plaintext to encrypt
-   * @param aad the additional data to authenticate
+   * @param associatedData the additional data to authenticate
    * @param firstSegmentOffset the offset of the first ciphertext segment
    * @return the ciphertext including a prefix of size ags.firstSegmentOffset
    */
   public static byte[] encryptWithChannel(
-      StreamingAead ags, byte[] plaintext, byte[] aad, int firstSegmentOffset) throws Exception {
+      StreamingAead ags, byte[] plaintext, byte[] associatedData, int firstSegmentOffset)
+      throws Exception {
     ByteArrayOutputStream bos = new ByteArrayOutputStream();
     WritableByteChannel ctChannel = Channels.newChannel(bos);
     ctChannel.write(ByteBuffer.allocate(firstSegmentOffset));
-    WritableByteChannel encChannel = ags.newEncryptingChannel(ctChannel, aad);
+    WritableByteChannel encChannel = ags.newEncryptingChannel(ctChannel, associatedData);
     encChannel.write(ByteBuffer.wrap(plaintext));
     encChannel.close();
     byte[] ciphertext = bos.toByteArray();
     return ciphertext;
   }
 
-  private static byte[] encryptWithStream(StreamingAead ags, byte[] plaintext, byte[] aad,
-      int firstSegmentOffset) throws Exception {
+  // Methods for testEncryptDecryptLong.
+
+  /**
+   * Reads everything from plaintext, encrypt it and writes the result to ciphertext. This method is
+   * used to test aynchronous encryption.
+   *
+   * @param ags the streaming encryption
+   * @param plaintext the channel containing the plaintext
+   * @param ciphertext the channel to which the ciphertext is written
+   * @param associatedData the additional data to authenticate
+   * @param chunkSize the size of blocks that are read and written. This size determines the
+   *     temporary memory used in this method but is independent of the streaming encryption.
+   * @throws RuntimeException if something goes wrong.
+   */
+  private static void encryptWithChannel(
+      StreamingAead ags,
+      ReadableByteChannel plaintext,
+      WritableByteChannel ciphertext,
+      byte[] associatedData,
+      int chunkSize) {
+    try (WritableByteChannel encChannel = ags.newEncryptingChannel(ciphertext, associatedData)) {
+      ByteBuffer chunk = ByteBuffer.allocate(chunkSize);
+      int read;
+      do {
+        chunk.clear();
+        read = plaintext.read(chunk);
+        if (read > 0) {
+          chunk.flip();
+          encChannel.write(chunk);
+        }
+      } while (read != -1);
+    } catch (Exception ex) {
+      // TODO(bleichen): What is the best way to chatch exceptions in threads?
+      throw new RuntimeException(ex);
+    }
+  }
+
+  private static byte[] encryptWithStream(
+      StreamingAead ags, byte[] plaintext, byte[] associatedData, int firstSegmentOffset)
+      throws Exception {
     ByteArrayOutputStream bos = new ByteArrayOutputStream();
     bos.write(new byte[firstSegmentOffset]);
-    OutputStream encChannel = ags.newEncryptingStream(bos, aad);
+    OutputStream encChannel = ags.newEncryptingStream(bos, associatedData);
     encChannel.write(plaintext);
     encChannel.close();
     byte[] ciphertext = bos.toByteArray();
@@ -532,9 +572,9 @@ public class StreamingTestUtil {
   private static void testEncryptDecryptWithChannel(
       StreamingAead ags, int firstSegmentOffset, int plaintextSize, int chunkSize)
       throws Exception {
-    byte[] aad = TestUtil.hexDecode("aabbccddeeff");
+    byte[] associatedData = TestUtil.hexDecode("aabbccddeeff");
     byte[] plaintext = generatePlaintext(plaintextSize);
-    byte[] ciphertext = encryptWithChannel(ags, plaintext, aad, firstSegmentOffset);
+    byte[] ciphertext = encryptWithChannel(ags, plaintext, associatedData, firstSegmentOffset);
 
     // Construct an InputStream from the ciphertext where the first
     // firstSegmentOffset bytes have already been read.
@@ -542,7 +582,7 @@ public class StreamingTestUtil {
         new SeekableByteBufferChannel(ciphertext).position(firstSegmentOffset);
 
     // Construct an InputStream that returns the plaintext.
-    ReadableByteChannel ptChannel = ags.newDecryptingChannel(ctChannel, aad);
+    ReadableByteChannel ptChannel = ags.newDecryptingChannel(ctChannel, associatedData);
     int decryptedSize = 0;
     while (true) {
       ByteBuffer chunk = ByteBuffer.allocate(chunkSize);
@@ -577,9 +617,9 @@ public class StreamingTestUtil {
   private static void testEncryptDecryptWithStream(
       StreamingAead ags, int firstSegmentOffset, int plaintextSize, int chunkSize)
       throws Exception {
-    byte[] aad = TestUtil.hexDecode("aabbccddeeff");
+    byte[] associatedData = TestUtil.hexDecode("aabbccddeeff");
     byte[] plaintext = generatePlaintext(plaintextSize);
-    byte[] ciphertext = encryptWithStream(ags, plaintext, aad, firstSegmentOffset);
+    byte[] ciphertext = encryptWithStream(ags, plaintext, associatedData, firstSegmentOffset);
 
     // Construct an InputStream from the ciphertext where the first
     // firstSegmentOffset bytes have already been read.
@@ -587,7 +627,7 @@ public class StreamingTestUtil {
     ctStream.read(new byte[firstSegmentOffset]);
 
     // Construct an InputStream that returns the plaintext.
-    InputStream ptStream = ags.newDecryptingStream(ctStream, aad);
+    InputStream ptStream = ags.newDecryptingStream(ctStream, associatedData);
     int decryptedSize = 0;
     while (true) {
       byte[] chunk = new byte[chunkSize];
@@ -619,13 +659,13 @@ public class StreamingTestUtil {
   /** Encrypt and then decrypt partially, and check that the result is the same. */
   public static void testEncryptDecryptRandomAccess(
       StreamingAead ags, int firstSegmentOffset, int plaintextSize) throws Exception {
-    byte[] aad = TestUtil.hexDecode("aabbccddeeff");
+    byte[] associatedData = TestUtil.hexDecode("aabbccddeeff");
     byte[] plaintext = generatePlaintext(plaintextSize);
-    byte[] ciphertext = encryptWithChannel(ags, plaintext, aad, firstSegmentOffset);
+    byte[] ciphertext = encryptWithChannel(ags, plaintext, associatedData, firstSegmentOffset);
 
     // Construct a channel with random access for the ciphertext.
     SeekableByteChannel bbc = new SeekableByteBufferChannel(ciphertext);
-    SeekableByteChannel ptChannel = ags.newSeekableDecryptingChannel(bbc, aad);
+    SeekableByteChannel ptChannel = ags.newSeekableDecryptingChannel(bbc, associatedData);
 
     for (int start = 0; start < plaintextSize; start += 1 + start / 2) {
       for (int length = 1; length < plaintextSize; length += 1 + length / 2) {
@@ -656,9 +696,9 @@ public class StreamingTestUtil {
   public static void testSkipWithStream(
       StreamingAead ags, int firstSegmentOffset, int plaintextSize, int chunkSize)
       throws Exception {
-    byte[] aad = TestUtil.hexDecode("aabbccddeeff");
+    byte[] associatedData = TestUtil.hexDecode("aabbccddeeff");
     byte[] plaintext = generatePlaintext(plaintextSize);
-    byte[] ciphertext = encryptWithStream(ags, plaintext, aad, firstSegmentOffset);
+    byte[] ciphertext = encryptWithStream(ags, plaintext, associatedData, firstSegmentOffset);
 
     // Runs this part twice skips the chunk number i if skipChunk == i % 2.
     for (int skipChunk = 0; skipChunk < 2; skipChunk++) {
@@ -668,7 +708,7 @@ public class StreamingTestUtil {
       ctStream.read(new byte[firstSegmentOffset]);
 
       // Construct an InputStream that returns the plaintext.
-      InputStream ptStream = ags.newDecryptingStream(ctStream, aad);
+      InputStream ptStream = ags.newDecryptingStream(ctStream, associatedData);
       int decryptedSize = 0;
       int chunkNumber = 0;
       while (true) {
@@ -713,7 +753,7 @@ public class StreamingTestUtil {
     // Checks whether skipping at the end of a broken ciphertext is detected.
     InputStream brokenCtStream = new ByteArrayInputStream(ciphertext, 0, ciphertext.length - 1);
     brokenCtStream.read(new byte[firstSegmentOffset]);
-    InputStream brokenPtStream = ags.newDecryptingStream(brokenCtStream, aad);
+    InputStream brokenPtStream = ags.newDecryptingStream(brokenCtStream, associatedData);
     try {
       brokenPtStream.skip(2 * plaintextSize);
       brokenPtStream.read();
@@ -727,32 +767,32 @@ public class StreamingTestUtil {
 
   private static void testEncryptSingleBytesWithChannel(StreamingAead ags, int plaintextSize)
       throws Exception {
-    byte[] aad = TestUtil.hexDecode("aabbccddeeff");
+    byte[] associatedData = TestUtil.hexDecode("aabbccddeeff");
     byte[] plaintext = generatePlaintext(plaintextSize);
     ByteArrayOutputStream bos = new ByteArrayOutputStream();
     WritableByteChannel ctChannel = Channels.newChannel(bos);
-    WritableByteChannel encChannel = ags.newEncryptingChannel(ctChannel, aad);
+    WritableByteChannel encChannel = ags.newEncryptingChannel(ctChannel, associatedData);
     OutputStream encStream = Channels.newOutputStream(encChannel);
     for (int i = 0; i < plaintext.length; i++) {
       encStream.write(plaintext[i]);
     }
     encStream.close();
-    isValidCiphertext(ags, plaintext, aad, bos.toByteArray());
+    isValidCiphertext(ags, plaintext, associatedData, bos.toByteArray());
   }
 
   private static void testEncryptSingleBytesWithStream(StreamingAead ags, int plaintextSize)
       throws Exception {
-    byte[] aad = TestUtil.hexDecode("aabbccddeeff");
+    byte[] associatedData = TestUtil.hexDecode("aabbccddeeff");
     byte[] plaintext = generatePlaintext(plaintextSize);
     ByteArrayOutputStream bos = new ByteArrayOutputStream();
     WritableByteChannel ctChannel = Channels.newChannel(bos);
-    WritableByteChannel encChannel = ags.newEncryptingChannel(ctChannel, aad);
+    WritableByteChannel encChannel = ags.newEncryptingChannel(ctChannel, associatedData);
     OutputStream encStream = Channels.newOutputStream(encChannel);
     for (int i = 0; i < plaintext.length; i++) {
       encStream.write(plaintext[i]);
     }
     encStream.close();
-    isValidCiphertext(ags, plaintext, aad, bos.toByteArray());
+    isValidCiphertext(ags, plaintext, associatedData, bos.toByteArray());
   }
 
   public static void testEncryptSingleBytes(StreamingAead ags, int plaintextSize) throws Exception {
@@ -766,14 +806,15 @@ public class StreamingTestUtil {
    * Encrypts and decrypts a with non-ASCII characters using CharsetEncoders and CharsetDecoders.
    */
   public static void testEncryptDecryptString(StreamingAead ags) throws Exception {
-    byte[] aad = TestUtil.hexDecode("aabbccddeeff");
+    byte[] associatedData = TestUtil.hexDecode("aabbccddeeff");
     String stringWithNonAsciiChars = "αβγδ áéíóúý ∀∑∊∫≅⊕⊄";
     int repetitions = 1000;
 
     // Encrypts a sequence of strings.
     ByteArrayOutputStream bos = new ByteArrayOutputStream();
     WritableByteChannel ctChannel = Channels.newChannel(bos);
-    Writer writer = Channels.newWriter(ags.newEncryptingChannel(ctChannel, aad), "UTF-8");
+    Writer writer =
+        Channels.newWriter(ags.newEncryptingChannel(ctChannel, associatedData), "UTF-8");
     for (int i = 0; i < repetitions; i++) {
       writer.write(stringWithNonAsciiChars);
     }
@@ -783,7 +824,8 @@ public class StreamingTestUtil {
     // Decrypts a sequence of strings.
     // channels.newReader does not always return the requested number of characters.
     SeekableByteChannel ctBuffer = new SeekableByteBufferChannel(ByteBuffer.wrap(ciphertext));
-    Reader reader = Channels.newReader(ags.newSeekableDecryptingChannel(ctBuffer, aad), "UTF-8");
+    Reader reader =
+        Channels.newReader(ags.newSeekableDecryptingChannel(ctBuffer, associatedData), "UTF-8");
     for (int i = 0; i < repetitions; i++) {
       char[] chunk = new char[stringWithNonAsciiChars.length()];
       int position = 0;
@@ -799,9 +841,10 @@ public class StreamingTestUtil {
   }
 
   public static void isValidCiphertext(
-      StreamingAead ags, byte[] plaintext, byte[] aad, byte[] ciphertext) throws Exception {
+      StreamingAead ags, byte[] plaintext, byte[] associatedData, byte[] ciphertext)
+      throws Exception {
     ByteBufferChannel ctChannel = new ByteBufferChannel(ciphertext);
-    ReadableByteChannel ptChannel = ags.newDecryptingChannel(ctChannel, aad);
+    ReadableByteChannel ptChannel = ags.newDecryptingChannel(ctChannel, associatedData);
     ByteBuffer decrypted = ByteBuffer.allocate(plaintext.length + 1);
     ptChannel.read(decrypted);
     decrypted.flip();
@@ -819,13 +862,13 @@ public class StreamingTestUtil {
       StreamingAead ags,
       int firstSegmentOffset,
       byte[] modifiedCiphertext,
-      byte[] aad,
+      byte[] associatedData,
       int chunkSize,
       byte[] plaintext)
       throws Exception {
     SeekableByteChannel ct = new SeekableByteBufferChannel(modifiedCiphertext);
     ct.position(firstSegmentOffset);
-    ReadableByteChannel ptChannel = ags.newDecryptingChannel(ct, aad);
+    ReadableByteChannel ptChannel = ags.newDecryptingChannel(ct, associatedData);
     int position = 0;
     int read;
     do {
@@ -852,16 +895,16 @@ public class StreamingTestUtil {
 
   public static void testModifiedCiphertext(
       StreamingAead ags, int segmentSize, int firstSegmentOffset) throws Exception {
-    byte[] aad = TestUtil.hexDecode("aabbccddeeff");
+    byte[] associatedData = TestUtil.hexDecode("aabbccddeeff");
     int plaintextSize = 512;
     byte[] plaintext = generatePlaintext(plaintextSize);
-    byte[] ciphertext = encryptWithChannel(ags, plaintext, aad, firstSegmentOffset);
+    byte[] ciphertext = encryptWithChannel(ags, plaintext, associatedData, firstSegmentOffset);
 
     // truncate the ciphertext
     for (int i = 0; i < ciphertext.length; i += 8) {
       byte[] truncatedCiphertext = Arrays.copyOf(ciphertext, i);
       tryDecryptModifiedCiphertext(
-          ags, firstSegmentOffset, truncatedCiphertext, aad, 128, plaintext);
+          ags, firstSegmentOffset, truncatedCiphertext, associatedData, 128, plaintext);
     }
 
     // Append stuff to ciphertext
@@ -869,7 +912,7 @@ public class StreamingTestUtil {
     for (int appendedBytes : sizes) {
       byte[] modifiedCiphertext = concatBytes(ciphertext, new byte[appendedBytes]);
       tryDecryptModifiedCiphertext(
-          ags, firstSegmentOffset, modifiedCiphertext, aad, 128, plaintext);
+          ags, firstSegmentOffset, modifiedCiphertext, associatedData, 128, plaintext);
     }
 
     // flip bits
@@ -877,7 +920,7 @@ public class StreamingTestUtil {
       byte[] modifiedCiphertext = Arrays.copyOf(ciphertext, ciphertext.length);
       modifiedCiphertext[pos] ^= (byte) 1;
       tryDecryptModifiedCiphertext(
-          ags, firstSegmentOffset, modifiedCiphertext, aad, 128, plaintext);
+          ags, firstSegmentOffset, modifiedCiphertext, associatedData, 128, plaintext);
     }
 
     // delete segments
@@ -887,7 +930,7 @@ public class StreamingTestUtil {
               Arrays.copyOf(ciphertext, segment * segmentSize),
               Arrays.copyOfRange(ciphertext, (segment + 1) * segmentSize, ciphertext.length));
       tryDecryptModifiedCiphertext(
-          ags, firstSegmentOffset, modifiedCiphertext, aad, 128, plaintext);
+          ags, firstSegmentOffset, modifiedCiphertext, associatedData, 128, plaintext);
     }
 
     // duplicate segments
@@ -897,16 +940,16 @@ public class StreamingTestUtil {
               Arrays.copyOf(ciphertext, (segment + 1) * segmentSize),
               Arrays.copyOfRange(ciphertext, segment * segmentSize, ciphertext.length));
       tryDecryptModifiedCiphertext(
-          ags, firstSegmentOffset, modifiedCiphertext, aad, 128, plaintext);
+          ags, firstSegmentOffset, modifiedCiphertext, associatedData, 128, plaintext);
     }
 
-    // Modify aad
-    // When the additional data is modified then any attempt to read plaintext must fail.
-    for (int pos = 0; pos < aad.length; pos++) {
-      byte[] modifiedAad = Arrays.copyOf(aad, aad.length);
-      modifiedAad[pos] ^= (byte) 1;
+    // Modify associatedData
+    // When the associated data is modified then any attempt to read plaintext must fail.
+    for (int pos = 0; pos < associatedData.length; pos++) {
+      byte[] modifiedAd = Arrays.copyOf(associatedData, associatedData.length);
+      modifiedAd[pos] ^= (byte) 1;
       tryDecryptModifiedCiphertext(
-          ags, firstSegmentOffset, ciphertext, modifiedAad, 128, new byte[0]);
+          ags, firstSegmentOffset, ciphertext, modifiedAd, 128, new byte[0]);
     }
   }
 
@@ -918,14 +961,15 @@ public class StreamingTestUtil {
    * affect the plaintext) or it must throw an IOException.
    */
   private static void tryDecryptModifiedCiphertextWithSeekableByteChannel(
-      StreamingAead ags, byte[] modifiedCiphertext, byte[] aad, byte[] plaintext) throws Exception {
+      StreamingAead ags, byte[] modifiedCiphertext, byte[] associatedData, byte[] plaintext)
+      throws Exception {
 
     SeekableByteChannel bbc = new SeekableByteBufferChannel(modifiedCiphertext);
     SeekableByteChannel ptChannel;
     // Failing in the constructor is valid in principle, but does not happen
     // with the current implementation. Hence we don't catch these exceptions at the moment.
     try {
-      ptChannel = ags.newSeekableDecryptingChannel(bbc, aad);
+      ptChannel = ags.newSeekableDecryptingChannel(bbc, associatedData);
     } catch (IOException | GeneralSecurityException ex) {
       return;
     }
@@ -963,29 +1007,32 @@ public class StreamingTestUtil {
 
   public static void testModifiedCiphertextWithSeekableByteChannel(
       StreamingAead ags, int segmentSize, int firstSegmentOffset) throws Exception {
-    byte[] aad = TestUtil.hexDecode("aabbccddeeff");
+    byte[] associatedData = TestUtil.hexDecode("aabbccddeeff");
     int plaintextSize = 2000;
     byte[] plaintext = generatePlaintext(plaintextSize);
-    byte[] ciphertext = encryptWithChannel(ags, plaintext, aad, firstSegmentOffset);
+    byte[] ciphertext = encryptWithChannel(ags, plaintext, associatedData, firstSegmentOffset);
 
     // truncate the ciphertext
     for (int i = 0; i < ciphertext.length; i += 64) {
       byte[] truncatedCiphertext = Arrays.copyOf(ciphertext, i);
-      tryDecryptModifiedCiphertextWithSeekableByteChannel(ags, truncatedCiphertext, aad, plaintext);
+      tryDecryptModifiedCiphertextWithSeekableByteChannel(
+          ags, truncatedCiphertext, associatedData, plaintext);
     }
 
     // Append stuff to ciphertext
     int[] sizes = new int[] {1, (segmentSize - ciphertext.length % segmentSize), segmentSize};
     for (int appendedBytes : sizes) {
       byte[] modifiedCiphertext = concatBytes(ciphertext, new byte[appendedBytes]);
-      tryDecryptModifiedCiphertextWithSeekableByteChannel(ags, modifiedCiphertext, aad, plaintext);
+      tryDecryptModifiedCiphertextWithSeekableByteChannel(
+          ags, modifiedCiphertext, associatedData, plaintext);
     }
 
     // flip bits
     for (int pos = firstSegmentOffset; pos < ciphertext.length; pos++) {
       byte[] modifiedCiphertext = Arrays.copyOf(ciphertext, ciphertext.length);
       modifiedCiphertext[pos] ^= (byte) 1;
-      tryDecryptModifiedCiphertextWithSeekableByteChannel(ags, modifiedCiphertext, aad, plaintext);
+      tryDecryptModifiedCiphertextWithSeekableByteChannel(
+          ags, modifiedCiphertext, associatedData, plaintext);
     }
 
     // delete segments
@@ -994,7 +1041,8 @@ public class StreamingTestUtil {
           concatBytes(
               Arrays.copyOf(ciphertext, segment * segmentSize),
               Arrays.copyOfRange(ciphertext, (segment + 1) * segmentSize, ciphertext.length));
-      tryDecryptModifiedCiphertextWithSeekableByteChannel(ags, modifiedCiphertext, aad, plaintext);
+      tryDecryptModifiedCiphertextWithSeekableByteChannel(
+          ags, modifiedCiphertext, associatedData, plaintext);
     }
 
     // duplicate segments
@@ -1003,55 +1051,17 @@ public class StreamingTestUtil {
           concatBytes(
               Arrays.copyOf(ciphertext, (segment + 1) * segmentSize),
               Arrays.copyOfRange(ciphertext, segment * segmentSize, ciphertext.length));
-      tryDecryptModifiedCiphertextWithSeekableByteChannel(ags, modifiedCiphertext, aad, plaintext);
+      tryDecryptModifiedCiphertextWithSeekableByteChannel(
+          ags, modifiedCiphertext, associatedData, plaintext);
     }
 
-    // Modify aad
-    // When the additional data is modified then any attempt to read plaintext must fail.
-    for (int pos = 0; pos < aad.length; pos++) {
-      byte[] modifiedAad = Arrays.copyOf(aad, aad.length);
+    // Modify associatedData
+    // When the associated data is modified then any attempt to read plaintext must fail.
+    for (int pos = 0; pos < associatedData.length; pos++) {
+      byte[] modifiedAad = Arrays.copyOf(associatedData, associatedData.length);
       modifiedAad[pos] ^= (byte) 1;
       tryDecryptModifiedCiphertextWithSeekableByteChannel(
           ags, ciphertext, modifiedAad, new byte[0]);
-    }
-  }
-
-  // Methods for testEncryptDecryptLong.
-
-  /**
-   * Reads everything from plaintext, encrypt it and writes the result to ciphertext. This method is
-   * used to test aynchronous encryption.
-   *
-   * @param ags the streaming encryption
-   * @param plaintext the channel containing the plaintext
-   * @param ciphertext the channel to which the ciphertext is written
-   * @param aad the additional data to authenticate
-   * @param chunkSize the size of blocks that are read and written. This size determines the
-   *     temporary memory used in this method but is independent of the streaming encryption.
-   * @throws RuntimeException if something goes wrong.
-   */
-  private static void encryptWithChannel(
-      StreamingAead ags,
-      ReadableByteChannel plaintext,
-      WritableByteChannel ciphertext,
-      byte[] aad,
-      int chunkSize) {
-    try {
-      WritableByteChannel encChannel = ags.newEncryptingChannel(ciphertext, aad);
-      ByteBuffer chunk = ByteBuffer.allocate(chunkSize);
-      int read;
-      do {
-        chunk.clear();
-        read = plaintext.read(chunk);
-        if (read > 0) {
-          chunk.flip();
-          encChannel.write(chunk);
-        }
-      } while (read != -1);
-      encChannel.close();
-    } catch (Exception ex) {
-      // TODO(bleichen): What is the best way to chatch exceptions in threads?
-      throw new java.lang.RuntimeException(ex);
     }
   }
 
@@ -1063,7 +1073,7 @@ public class StreamingTestUtil {
   private static ReadableByteChannel createCiphertextChannel(
       final StreamingAead ags,
       final ReadableByteChannel plaintext,
-      final byte[] aad,
+      final byte[] associatedData,
       final int chunkSize)
       throws Exception {
     PipedOutputStream output = new PipedOutputStream();
@@ -1073,7 +1083,7 @@ public class StreamingTestUtil {
             new Runnable() {
               @Override
               public void run() {
-                encryptWithChannel(ags, plaintext, ciphertext, aad, chunkSize);
+                encryptWithChannel(ags, plaintext, ciphertext, associatedData, chunkSize);
               }
             })
         .start();
@@ -1083,11 +1093,12 @@ public class StreamingTestUtil {
   /** Encrypt and decrypt a long ciphertext. */
   public static void testEncryptDecryptLong(StreamingAead ags, long plaintextSize)
       throws Exception {
-    byte[] aad = TestUtil.hexDecode("aabbccddeeff");
+    byte[] associatedData = TestUtil.hexDecode("aabbccddeeff");
     ReadableByteChannel plaintext = new PseudorandomReadableByteChannel(plaintextSize);
     ReadableByteChannel copy = new PseudorandomReadableByteChannel(plaintextSize);
-    ReadableByteChannel ciphertext = createCiphertextChannel(ags, plaintext, aad, 1 << 20);
-    ReadableByteChannel decrypted = ags.newDecryptingChannel(ciphertext, aad);
+    ReadableByteChannel ciphertext =
+        createCiphertextChannel(ags, plaintext, associatedData, 1 << 20);
+    ReadableByteChannel decrypted = ags.newDecryptingChannel(ciphertext, associatedData);
     byte[] chunk = new byte[1 << 15];
     int read;
     long decryptedBytes = 0;
@@ -1108,13 +1119,13 @@ public class StreamingTestUtil {
   /** Encrypt some plaintext to a file, then decrypt from the file */
   private static void testFileEncryptionWithChannel(
       StreamingAead ags, File tmpFile, int plaintextSize) throws Exception {
-    byte[] aad = TestUtil.hexDecode("aabbccddeeff");
+    byte[] associatedData = TestUtil.hexDecode("aabbccddeeff");
     SeekableByteBufferChannel plaintext =
         new SeekableByteBufferChannel(generatePlaintext(plaintextSize));
 
     // Encrypt to file
     WritableByteChannel bc =
-        ags.newEncryptingChannel(new FileOutputStream(tmpFile).getChannel(), aad);
+        ags.newEncryptingChannel(new FileOutputStream(tmpFile).getChannel(), associatedData);
     int chunkSize = 1000;
     ByteBuffer chunk = ByteBuffer.allocate(chunkSize);
     int read;
@@ -1131,7 +1142,7 @@ public class StreamingTestUtil {
     // Decrypt the whole file and compare to plaintext
     plaintext.rewind();
     ReadableByteChannel ptStream =
-        ags.newDecryptingChannel(new FileInputStream(tmpFile).getChannel(), aad);
+        ags.newDecryptingChannel(new FileInputStream(tmpFile).getChannel(), associatedData);
     int decryptedSize = 0;
     do {
       ByteBuffer decrypted = ByteBuffer.allocate(512);
@@ -1149,7 +1160,7 @@ public class StreamingTestUtil {
     // Decrypt file partially using FileChannel and compare to plaintext
     plaintext.rewind();
     SeekableByteChannel ptChannel =
-        ags.newSeekableDecryptingChannel(new FileInputStream(tmpFile).getChannel(), aad);
+        ags.newSeekableDecryptingChannel(new FileInputStream(tmpFile).getChannel(), associatedData);
     SecureRandom random = new SecureRandom();
     for (int samples = 0; samples < 100; samples++) {
       int start = random.nextInt(plaintextSize);
@@ -1182,11 +1193,11 @@ public class StreamingTestUtil {
    */
   private static void testFileEncryptionWithStream(
       StreamingAead ags, File tmpFile, int plaintextSize) throws Exception {
-    byte[] aad = TestUtil.hexDecode("aabbccddeeff");
+    byte[] associatedData = TestUtil.hexDecode("aabbccddeeff");
     byte[] pt = generatePlaintext(plaintextSize);
     FileOutputStream ctStream = new FileOutputStream(tmpFile);
     WritableByteChannel channel = Channels.newChannel(ctStream);
-    WritableByteChannel encChannel = ags.newEncryptingChannel(channel, aad);
+    WritableByteChannel encChannel = ags.newEncryptingChannel(channel, associatedData);
     OutputStream encStream = Channels.newOutputStream(encChannel);
 
     // Writing single bytes appears to be the most troubling case.
@@ -1197,7 +1208,7 @@ public class StreamingTestUtil {
 
     FileInputStream inpStream = new FileInputStream(tmpFile);
     ReadableByteChannel inpChannel = Channels.newChannel(inpStream);
-    ReadableByteChannel decryptedChannel = ags.newDecryptingChannel(inpChannel, aad);
+    ReadableByteChannel decryptedChannel = ags.newDecryptingChannel(inpChannel, associatedData);
     InputStream decrypted = Channels.newInputStream(decryptedChannel);
     int decryptedSize = 0;
     int read;
@@ -1225,4 +1236,6 @@ public class StreamingTestUtil {
     testFileEncryptionWithChannel(ags, tmpFile, plaintextSize);
     testFileEncryptionWithStream(ags, tmpFile, plaintextSize);
   }
+
+  private StreamingTestUtil() {}
 }

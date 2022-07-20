@@ -42,7 +42,6 @@ import java.security.GeneralSecurityException;
 public final class MacFactory {
   /**
    * @return a Mac primitive from a {@code keysetHandle}.
-   * @throws GeneralSecurityException
    * @deprecated Use {@code keysetHandle.GetPrimitive(Mac.class)} after registering the {@code
    *     MacWrapper} instead.
    */
@@ -51,4 +50,6 @@ public final class MacFactory {
     Registry.registerPrimitiveWrapper(new MacWrapper());
     return keysetHandle.getPrimitive(Mac.class);
   }
+
+  private MacFactory() {}
 }

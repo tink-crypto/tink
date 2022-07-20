@@ -9,13 +9,12 @@ cc_library(
     include_prefix = "tink/integration/gcpkms",
     visibility = ["//visibility:public"],
     deps = [
-        "//:aead",
-        "//:version",
-        "//util:errors",
-        "//util:status",
-        "//util:statusor",
         "@com_github_grpc_grpc//:grpc++",
+        "@com_google_absl//absl/status",
         "@com_google_googleapis//google/cloud/kms/v1:kms_cc_grpc",
+        "@tink_cc//:aead",
+        "@tink_cc//util:status",
+        "@tink_cc//util:statusor",
     ],
 )
 
@@ -27,14 +26,16 @@ cc_library(
     visibility = ["//visibility:public"],
     deps = [
         ":gcp_kms_aead",
-        "//:kms_client",
-        "//:kms_clients",
-        "//util:errors",
-        "//util:status",
-        "//util:statusor",
         "@com_github_grpc_grpc//:grpc++",
+        "@com_google_absl//absl/status",
         "@com_google_absl//absl/strings",
         "@com_google_absl//absl/synchronization",
+        "@tink_cc//:aead",
+        "@tink_cc//:kms_client",
+        "@tink_cc//:kms_clients",
+        "@tink_cc//:version",
+        "@tink_cc//util:status",
+        "@tink_cc//util:statusor",
     ],
 )
 
@@ -46,10 +47,9 @@ cc_test(
     srcs = ["gcp_kms_aead_test.cc"],
     deps = [
         ":gcp_kms_aead",
-        "//util:errors",
-        "//util:status",
-        "//util:statusor",
         "@com_google_googletest//:gtest_main",
+        "@tink_cc//util:status",
+        "@tink_cc//util:statusor",
     ],
 )
 
@@ -57,14 +57,14 @@ cc_test(
     name = "gcp_kms_client_test",
     size = "medium",
     srcs = ["gcp_kms_client_test.cc"],
-    data = ["@tink_base//testdata:credentials"],
+    data = ["//testdata/gcp:credentials"],
     deps = [
         ":gcp_kms_client",
-        "//util:errors",
-        "//util:status",
-        "//util:statusor",
-        "//util:test_matchers",
-        "//util:test_util",
+        "@com_google_absl//absl/status",
         "@com_google_googletest//:gtest_main",
+        "@tink_cc//util:status",
+        "@tink_cc//util:statusor",
+        "@tink_cc//util:test_matchers",
+        "@tink_cc//util:test_util",
     ],
 )

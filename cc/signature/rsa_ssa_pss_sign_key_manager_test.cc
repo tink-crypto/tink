@@ -16,15 +16,19 @@
 
 #include "tink/signature/rsa_ssa_pss_sign_key_manager.h"
 
+#include <string>
+
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "absl/container/flat_hash_set.h"
 #include "openssl/rsa.h"
+#include "tink/internal/bn_util.h"
+#include "tink/internal/rsa_util.h"
+#include "tink/internal/ssl_unique_ptr.h"
 #include "tink/public_key_sign.h"
 #include "tink/signature/rsa_ssa_pss_verify_key_manager.h"
 #include "tink/signature/signature_key_templates.h"
 #include "tink/subtle/rsa_ssa_pss_verify_boringssl.h"
-#include "tink/subtle/subtle_util_boringssl.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "tink/util/test_matchers.h"
@@ -35,7 +39,6 @@ namespace crypto {
 namespace tink {
 namespace {
 
-using ::crypto::tink::subtle::SubtleUtilBoringSSL;
 using ::crypto::tink::test::IsOk;
 using ::crypto::tink::util::StatusOr;
 using ::google::crypto::tink::HashType;
@@ -66,11 +69,10 @@ RsaSsaPssKeyFormat CreateKeyFormat(HashType sig_hash, HashType mgf1_hash,
   params->set_salt_length(salt_length);
   key_format.set_modulus_size_in_bits(modulus_size_in_bits);
 
-  bssl::UniquePtr<BIGNUM> e(BN_new());
+  internal::SslUniquePtr<BIGNUM> e(BN_new());
   BN_set_word(e.get(), public_exponent);
   key_format.set_public_exponent(
-      subtle::SubtleUtilBoringSSL::bn2str(e.get(), BN_num_bytes(e.get()))
-          .ValueOrDie());
+      internal::BignumToString(e.get(), BN_num_bytes(e.get())).value());
 
   return key_format;
 }
@@ -147,45 +149,57 @@ void CheckNewKey(const RsaSsaPssPrivateKey& private_key,
               Eq(key_format.params().salt_length()));
 
   EXPECT_THAT(key_format.public_exponent(), Eq(public_key.e()));
-  auto n = std::move(SubtleUtilBoringSSL::str2bn(public_key.n()).ValueOrDie());
-  auto d = std::move(SubtleUtilBoringSSL::str2bn(private_key.d()).ValueOrDie());
-  auto p = std::move(SubtleUtilBoringSSL::str2bn(private_key.p()).ValueOrDie());
-  auto q = std::move(SubtleUtilBoringSSL::str2bn(private_key.q()).ValueOrDie());
-  auto dp =
-      std::move(SubtleUtilBoringSSL::str2bn(private_key.dp()).ValueOrDie());
-  auto dq =
-      std::move(SubtleUtilBoringSSL::str2bn(private_key.dq()).ValueOrDie());
-  bssl::UniquePtr<BN_CTX> ctx(BN_CTX_new());
+
+  util::StatusOr<internal::SslUniquePtr<BIGNUM>> n =
+      internal::StringToBignum(public_key.n());
+  ASSERT_THAT(n, IsOk());
+  util::StatusOr<internal::SslUniquePtr<BIGNUM>> d =
+      internal::StringToBignum(private_key.d());
+  ASSERT_THAT(d, IsOk());
+  util::StatusOr<internal::SslUniquePtr<BIGNUM>> p =
+      internal::StringToBignum(private_key.p());
+  ASSERT_THAT(p, IsOk());
+  util::StatusOr<internal::SslUniquePtr<BIGNUM>> q =
+      internal::StringToBignum(private_key.q());
+  ASSERT_THAT(q, IsOk());
+  util::StatusOr<internal::SslUniquePtr<BIGNUM>> dp =
+      internal::StringToBignum(private_key.dp());
+  ASSERT_THAT(dp, IsOk());
+  util::StatusOr<internal::SslUniquePtr<BIGNUM>> dq =
+      internal::StringToBignum(private_key.dq());
+  ASSERT_THAT(dq, IsOk());
+
+  internal::SslUniquePtr<BN_CTX> ctx(BN_CTX_new());
 
   // Check n = p * q.
-  auto n_calc = bssl::UniquePtr<BIGNUM>(BN_new());
-  EXPECT_TRUE(BN_mul(n_calc.get(), p.get(), q.get(), ctx.get()));
-  EXPECT_TRUE(BN_equal_consttime(n_calc.get(), n.get()));
+  auto n_calc = internal::SslUniquePtr<BIGNUM>(BN_new());
+  EXPECT_TRUE(BN_mul(n_calc.get(), p->get(), q->get(), ctx.get()));
+  EXPECT_EQ(BN_cmp(n_calc.get(), n->get()), 0);
 
   // Check n size >= modulus_size_in_bits bit.
-  EXPECT_GE(BN_num_bits(n.get()), key_format.modulus_size_in_bits());
+  EXPECT_GE(BN_num_bits(n->get()), key_format.modulus_size_in_bits());
 
   // dp = d mod (p - 1)
-  auto pm1 = bssl::UniquePtr<BIGNUM>(BN_dup(p.get()));
+  auto pm1 = internal::SslUniquePtr<BIGNUM>(BN_dup(p->get()));
   EXPECT_TRUE(BN_sub_word(pm1.get(), 1));
-  auto dp_calc = bssl::UniquePtr<BIGNUM>(BN_new());
-  EXPECT_TRUE(BN_mod(dp_calc.get(), d.get(), pm1.get(), ctx.get()));
-  EXPECT_TRUE(BN_equal_consttime(dp_calc.get(), dp.get()));
+  auto dp_calc = internal::SslUniquePtr<BIGNUM>(BN_new());
+  EXPECT_TRUE(BN_mod(dp_calc.get(), d->get(), pm1.get(), ctx.get()));
+  EXPECT_EQ(BN_cmp(dp_calc.get(), dp->get()), 0);
 
   // dq = d mod (q - 1)
-  auto qm1 = bssl::UniquePtr<BIGNUM>(BN_dup(q.get()));
+  auto qm1 = internal::SslUniquePtr<BIGNUM>(BN_dup(q->get()));
   EXPECT_TRUE(BN_sub_word(qm1.get(), 1));
-  auto dq_calc = bssl::UniquePtr<BIGNUM>(BN_new());
-  EXPECT_TRUE(BN_mod(dq_calc.get(), d.get(), qm1.get(), ctx.get()));
-  EXPECT_TRUE(BN_equal_consttime(dq_calc.get(), dq.get()));
+  auto dq_calc = internal::SslUniquePtr<BIGNUM>(BN_new());
+  EXPECT_TRUE(BN_mod(dq_calc.get(), d->get(), qm1.get(), ctx.get()));
+  EXPECT_EQ(BN_cmp(dq_calc.get(), dq->get()), 0);
 }
 
 TEST(RsaSsaPssSignKeyManagerTest, CreateKey) {
   RsaSsaPssKeyFormat key_format = ValidKeyFormat();
   StatusOr<RsaSsaPssPrivateKey> private_key_or =
       RsaSsaPssSignKeyManager().CreateKey(key_format);
-  ASSERT_THAT(private_key_or.status(), IsOk());
-  CheckNewKey(private_key_or.ValueOrDie(), key_format);
+  ASSERT_THAT(private_key_or, IsOk());
+  CheckNewKey(private_key_or.value(), key_format);
 }
 
 TEST(RsaSsaPssSignKeyManagerTest, CreateKeySmallKey) {
@@ -194,8 +208,8 @@ TEST(RsaSsaPssSignKeyManagerTest, CreateKeySmallKey) {
 
   StatusOr<RsaSsaPssPrivateKey> private_key_or =
       RsaSsaPssSignKeyManager().CreateKey(key_format);
-  ASSERT_THAT(private_key_or.status(), IsOk());
-  CheckNewKey(private_key_or.ValueOrDie(), key_format);
+  ASSERT_THAT(private_key_or, IsOk());
+  CheckNewKey(private_key_or.value(), key_format);
 }
 
 TEST(RsaSsaPssSignKeyManagerTest, CreateKeyLargeKey) {
@@ -204,16 +218,15 @@ TEST(RsaSsaPssSignKeyManagerTest, CreateKeyLargeKey) {
 
   StatusOr<RsaSsaPssPrivateKey> private_key_or =
       RsaSsaPssSignKeyManager().CreateKey(key_format);
-  ASSERT_THAT(private_key_or.status(), IsOk());
-  CheckNewKey(private_key_or.ValueOrDie(), key_format);
+  ASSERT_THAT(private_key_or, IsOk());
+  CheckNewKey(private_key_or.value(), key_format);
 }
 
 TEST(RsaSsaPssSignKeyManagerTest, CreateKeyValid) {
   StatusOr<RsaSsaPssPrivateKey> key_or =
       RsaSsaPssSignKeyManager().CreateKey(ValidKeyFormat());
-  ASSERT_THAT(key_or.status(), IsOk());
-  EXPECT_THAT(RsaSsaPssSignKeyManager().ValidateKey(key_or.ValueOrDie()),
-              IsOk());
+  ASSERT_THAT(key_or, IsOk());
+  EXPECT_THAT(RsaSsaPssSignKeyManager().ValidateKey(key_or.value()), IsOk());
 }
 
 // Check that in a bunch of CreateKey calls all generated primes are distinct.
@@ -224,9 +237,9 @@ TEST(RsaSsaPssSignKeyManagerTest, CreateKeyAlwaysNewRsaPair) {
   for (int i = 0; i < num_generated_keys; ++i) {
     StatusOr<RsaSsaPssPrivateKey> key_or =
         RsaSsaPssSignKeyManager().CreateKey(ValidKeyFormat());
-    ASSERT_THAT(key_or.status(), IsOk());
-    keys.insert(key_or.ValueOrDie().p());
-    keys.insert(key_or.ValueOrDie().q());
+    ASSERT_THAT(key_or, IsOk());
+    keys.insert(key_or.value().p());
+    keys.insert(key_or.value().q());
   }
   EXPECT_THAT(keys, SizeIs(2 * num_generated_keys));
 }
@@ -234,16 +247,14 @@ TEST(RsaSsaPssSignKeyManagerTest, CreateKeyAlwaysNewRsaPair) {
 TEST(RsaSsaPssSignKeyManagerTest, GetPublicKey) {
   StatusOr<RsaSsaPssPrivateKey> key_or =
       RsaSsaPssSignKeyManager().CreateKey(ValidKeyFormat());
-  ASSERT_THAT(key_or.status(), IsOk());
+  ASSERT_THAT(key_or, IsOk());
   StatusOr<RsaSsaPssPublicKey> public_key_or =
-      RsaSsaPssSignKeyManager().GetPublicKey(key_or.ValueOrDie());
-  ASSERT_THAT(public_key_or.status(), IsOk());
-  EXPECT_THAT(public_key_or.ValueOrDie().version(),
-              Eq(key_or.ValueOrDie().public_key().version()));
-  EXPECT_THAT(public_key_or.ValueOrDie().n(),
-              Eq(key_or.ValueOrDie().public_key().n()));
-  EXPECT_THAT(public_key_or.ValueOrDie().e(),
-              Eq(key_or.ValueOrDie().public_key().e()));
+      RsaSsaPssSignKeyManager().GetPublicKey(key_or.value());
+  ASSERT_THAT(public_key_or, IsOk());
+  EXPECT_THAT(public_key_or.value().version(),
+              Eq(key_or.value().public_key().version()));
+  EXPECT_THAT(public_key_or.value().n(), Eq(key_or.value().public_key().n()));
+  EXPECT_THAT(public_key_or.value().e(), Eq(key_or.value().public_key().e()));
 }
 
 TEST(RsaSsaPssSignKeyManagerTest, Create) {
@@ -251,24 +262,24 @@ TEST(RsaSsaPssSignKeyManagerTest, Create) {
       CreateKeyFormat(HashType::SHA256, HashType::SHA256, 32, 3072, RSA_F4);
   StatusOr<RsaSsaPssPrivateKey> key_or =
       RsaSsaPssSignKeyManager().CreateKey(key_format);
-  ASSERT_THAT(key_or.status(), IsOk());
-  RsaSsaPssPrivateKey key = key_or.ValueOrDie();
+  ASSERT_THAT(key_or, IsOk());
+  RsaSsaPssPrivateKey key = key_or.value();
 
   auto signer_or = RsaSsaPssSignKeyManager().GetPrimitive<PublicKeySign>(key);
-  ASSERT_THAT(signer_or.status(), IsOk());
+  ASSERT_THAT(signer_or, IsOk());
 
-  subtle::SubtleUtilBoringSSL::RsaSsaPssParams params;
+  internal::RsaSsaPssParams params;
   params.sig_hash = subtle::HashType::SHA256;
   params.mgf1_hash = subtle::HashType::SHA256;
   params.salt_length = 32;
   auto direct_verifier_or = subtle::RsaSsaPssVerifyBoringSsl::New(
       {key.public_key().n(), key.public_key().e()}, params);
 
-  ASSERT_THAT(direct_verifier_or.status(), IsOk());
+  ASSERT_THAT(direct_verifier_or, IsOk());
 
   std::string message = "Some message";
-  EXPECT_THAT(direct_verifier_or.ValueOrDie()->Verify(
-                  signer_or.ValueOrDie()->Sign(message).ValueOrDie(), message),
+  EXPECT_THAT(direct_verifier_or.value()->Verify(
+                  signer_or.value()->Sign(message).value(), message),
               IsOk());
 }
 
@@ -277,30 +288,30 @@ TEST(RsaSsaPssSignKeyManagerTest, CreateWrongKey) {
       CreateKeyFormat(HashType::SHA256, HashType::SHA256, 32, 3072, RSA_F4);
   StatusOr<RsaSsaPssPrivateKey> key_or =
       RsaSsaPssSignKeyManager().CreateKey(key_format);
-  ASSERT_THAT(key_or.status(), IsOk());
-  RsaSsaPssPrivateKey key = key_or.ValueOrDie();
+  ASSERT_THAT(key_or, IsOk());
+  RsaSsaPssPrivateKey key = key_or.value();
 
   auto signer_or = RsaSsaPssSignKeyManager().GetPrimitive<PublicKeySign>(key);
 
   StatusOr<RsaSsaPssPrivateKey> second_key_or =
       RsaSsaPssSignKeyManager().CreateKey(key_format);
-  ASSERT_THAT(second_key_or.status(), IsOk());
-  RsaSsaPssPrivateKey second_key = second_key_or.ValueOrDie();
+  ASSERT_THAT(second_key_or, IsOk());
+  RsaSsaPssPrivateKey second_key = second_key_or.value();
 
-  ASSERT_THAT(signer_or.status(), IsOk());
+  ASSERT_THAT(signer_or, IsOk());
 
-  subtle::SubtleUtilBoringSSL::RsaSsaPssParams params;
+  internal::RsaSsaPssParams params;
   params.sig_hash = subtle::HashType::SHA256;
   params.mgf1_hash = subtle::HashType::SHA256;
   params.salt_length = 32;
   auto direct_verifier_or = subtle::RsaSsaPssVerifyBoringSsl::New(
       {second_key.public_key().n(), second_key.public_key().e()}, params);
 
-  ASSERT_THAT(direct_verifier_or.status(), IsOk());
+  ASSERT_THAT(direct_verifier_or, IsOk());
 
   std::string message = "Some message";
-  EXPECT_THAT(direct_verifier_or.ValueOrDie()->Verify(
-                  signer_or.ValueOrDie()->Sign(message).ValueOrDie(), message),
+  EXPECT_THAT(direct_verifier_or.value()->Verify(
+                  signer_or.value()->Sign(message).value(), message),
               Not(IsOk()));
 }
 

@@ -2,171 +2,416 @@ package(default_visibility = ["//:__subpackages__"])
 
 licenses(["notice"])
 
-# cc protos
+# ----------------------------------------
+# proto_library rules.
+# ----------------------------------------
+
+proto_library(
+    name = "common_proto",
+    srcs = ["common.proto"],
+    visibility = ["//visibility:public"],
+)
+
+proto_library(
+    name = "tink_proto",
+    srcs = ["tink.proto"],
+    visibility = ["//visibility:public"],
+)
+
+proto_library(
+    name = "config_proto",
+    srcs = ["config.proto"],
+    visibility = ["//visibility:public"],
+)
+
+proto_library(
+    name = "aes_siv_proto",
+    srcs = ["aes_siv.proto"],
+    visibility = ["//visibility:public"],
+)
+
+proto_library(
+    name = "rsa_ssa_pkcs1_proto",
+    srcs = ["rsa_ssa_pkcs1.proto"],
+    visibility = ["//visibility:public"],
+    deps = [":common_proto"],
+)
+
+proto_library(
+    name = "cached_dek_aead_proto",
+    srcs = ["cached_dek_aead.proto"],
+    visibility = ["//visibility:public"],
+)
+
+proto_library(
+    name = "cached_dek_envelope_proto",
+    srcs = ["cached_dek_envelope.proto"],
+    visibility = ["//visibility:public"],
+    deps = [":tink_proto"],
+)
+
+proto_library(
+    name = "rsa_ssa_pss_proto",
+    srcs = ["rsa_ssa_pss.proto"],
+    visibility = ["//visibility:public"],
+    deps = [":common_proto"],
+)
+
+proto_library(
+    name = "ecdsa_proto",
+    srcs = ["ecdsa.proto"],
+    visibility = ["//visibility:public"],
+    deps = [":common_proto"],
+)
+
+proto_library(
+    name = "jwt_rsa_ssa_pkcs1_proto",
+    srcs = ["jwt_rsa_ssa_pkcs1.proto"],
+    visibility = ["//visibility:public"],
+)
+
+proto_library(
+    name = "jwt_rsa_ssa_pss_proto",
+    srcs = ["jwt_rsa_ssa_pss.proto"],
+    visibility = ["//visibility:public"],
+)
+
+proto_library(
+    name = "jwt_ecdsa_proto",
+    srcs = ["jwt_ecdsa.proto"],
+    visibility = ["//visibility:public"],
+)
+
+proto_library(
+    name = "ed25519_proto",
+    srcs = ["ed25519.proto"],
+    visibility = ["//visibility:public"],
+)
+
+proto_library(
+    name = "aes_cmac_proto",
+    srcs = ["aes_cmac.proto"],
+    visibility = ["//visibility:public"],
+)
+
+proto_library(
+    name = "hmac_proto",
+    srcs = ["hmac.proto"],
+    visibility = ["//visibility:public"],
+    deps = [":common_proto"],
+)
+
+proto_library(
+    name = "jwt_hmac_proto",
+    srcs = ["jwt_hmac.proto"],
+    visibility = ["//visibility:public"],
+)
+
+proto_library(
+    name = "aes_ctr_proto",
+    srcs = ["aes_ctr.proto"],
+    visibility = ["//visibility:public"],
+)
+
+proto_library(
+    name = "aes_ctr_hmac_aead_proto",
+    srcs = ["aes_ctr_hmac_aead.proto"],
+    visibility = ["//visibility:public"],
+    deps = [
+        ":aes_ctr_proto",
+        ":hmac_proto",
+    ],
+)
+
+proto_library(
+    name = "aes_gcm_proto",
+    srcs = ["aes_gcm.proto"],
+    visibility = ["//visibility:public"],
+)
+
+proto_library(
+    name = "aes_gcm_siv_proto",
+    srcs = ["aes_gcm_siv.proto"],
+    visibility = ["//visibility:public"],
+)
+
+proto_library(
+    name = "aes_ctr_hmac_streaming_proto",
+    srcs = ["aes_ctr_hmac_streaming.proto"],
+    visibility = ["//visibility:public"],
+    deps = [
+        ":common_proto",
+        ":hmac_proto",
+    ],
+)
+
+proto_library(
+    name = "aes_gcm_hkdf_streaming_proto",
+    srcs = ["aes_gcm_hkdf_streaming.proto"],
+    visibility = ["//visibility:public"],
+    deps = [":common_proto"],
+)
+
+proto_library(
+    name = "aes_eax_proto",
+    srcs = ["aes_eax.proto"],
+    visibility = ["//visibility:public"],
+)
+
+proto_library(
+    name = "chacha20_poly1305_proto",
+    srcs = ["chacha20_poly1305.proto"],
+    visibility = ["//visibility:public"],
+)
+
+proto_library(
+    name = "kms_aead_proto",
+    srcs = ["kms_aead.proto"],
+    visibility = ["//visibility:public"],
+)
+
+proto_library(
+    name = "kms_envelope_proto",
+    srcs = ["kms_envelope.proto"],
+    visibility = ["//visibility:public"],
+    deps = [":tink_proto"],
+)
+
+proto_library(
+    name = "ecies_aead_hkdf_proto",
+    srcs = ["ecies_aead_hkdf.proto"],
+    visibility = ["//visibility:public"],
+    deps = [
+        ":common_proto",
+        ":tink_proto",
+    ],
+)
+
+proto_library(
+    name = "xchacha20_poly1305_proto",
+    srcs = ["xchacha20_poly1305.proto"],
+    visibility = ["//visibility:public"],
+)
+
+proto_library(
+    name = "hkdf_prf_proto",
+    srcs = ["hkdf_prf.proto"],
+    visibility = ["//visibility:public"],
+    deps = [":common_proto"],
+)
+
+proto_library(
+    name = "aes_cmac_prf_proto",
+    srcs = ["aes_cmac_prf.proto"],
+    visibility = ["//visibility:public"],
+)
+
+proto_library(
+    name = "hmac_prf_proto",
+    srcs = ["hmac_prf.proto"],
+    visibility = ["//visibility:public"],
+    deps = [":common_proto"],
+)
+
+proto_library(
+    name = "hpke_proto",
+    srcs = ["hpke.proto"],
+    visibility = ["//visibility:public"],
+)
+
+proto_library(
+    name = "prf_based_deriver_proto",
+    srcs = ["prf_based_deriver.proto"],
+    visibility = ["//visibility:public"],
+    deps = [":tink_proto"],
+)
+
+proto_library(
+    name = "empty_proto",
+    srcs = ["empty.proto"],
+    visibility = ["//visibility:public"],
+)
+
+proto_library(
+    name = "test_proto_proto",
+    testonly = True,
+    srcs = ["test_proto.proto"],
+    visibility = ["//visibility:public"],
+)
+
+# ----------------------------------------
+# cc_proto_library rules.
+# ----------------------------------------
 
 cc_proto_library(
     name = "common_cc_proto",
     visibility = ["//visibility:public"],
-    deps = ["@tink_base//proto:common_proto"],
+    deps = [":common_proto"],
 )
 
 cc_proto_library(
     name = "config_cc_proto",
-    deps = ["@tink_base//proto:config_proto"],
+    deps = [":config_proto"],
 )
 
 cc_proto_library(
     name = "tink_cc_proto",
     visibility = ["//visibility:public"],
-    deps = ["@tink_base//proto:tink_proto"],
+    deps = [":tink_proto"],
 )
 
 cc_proto_library(
     name = "aes_gcm_siv_cc_proto",
-    deps = ["@tink_base//proto:aes_gcm_siv_proto"],
+    deps = [":aes_gcm_siv_proto"],
 )
 
 cc_proto_library(
     name = "aes_siv_cc_proto",
     visibility = ["//visibility:public"],
-    deps = ["@tink_base//proto:aes_siv_proto"],
+    deps = [":aes_siv_proto"],
 )
 
 cc_proto_library(
     name = "hmac_cc_proto",
     visibility = ["//visibility:public"],
-    deps = ["@tink_base//proto:hmac_proto"],
+    deps = [":hmac_proto"],
 )
 
 cc_proto_library(
     name = "kms_envelope_cc_proto",
-    deps = ["@tink_base//proto:kms_envelope_proto"],
+    deps = [":kms_envelope_proto"],
 )
 
 cc_proto_library(
     name = "empty_cc_proto",
-    deps = ["@tink_base//proto:empty_proto"],
+    deps = [":empty_proto"],
 )
 
 cc_proto_library(
     name = "kms_aead_cc_proto",
-    deps = ["@tink_base//proto:kms_aead_proto"],
+    deps = [":kms_aead_proto"],
 )
 
 cc_proto_library(
     name = "aes_eax_cc_proto",
     visibility = ["//visibility:public"],
-    deps = ["@tink_base//proto:aes_eax_proto"],
+    deps = [":aes_eax_proto"],
 )
 
 cc_proto_library(
     name = "aes_gcm_cc_proto",
     visibility = ["//visibility:public"],
-    deps = ["@tink_base//proto:aes_gcm_proto"],
+    deps = [":aes_gcm_proto"],
 )
 
 cc_proto_library(
     name = "aes_ctr_cc_proto",
     visibility = ["//visibility:public"],
-    deps = ["@tink_base//proto:aes_ctr_proto"],
+    deps = [":aes_ctr_proto"],
 )
 
 cc_proto_library(
     name = "aes_ctr_hmac_aead_cc_proto",
     visibility = ["//visibility:public"],
-    deps = ["@tink_base//proto:aes_ctr_hmac_aead_proto"],
+    deps = [":aes_ctr_hmac_aead_proto"],
 )
 
 cc_proto_library(
     name = "aes_cmac_cc_proto",
-    deps = ["@tink_base//proto:aes_cmac_proto"],
+    deps = [":aes_cmac_proto"],
 )
 
 cc_proto_library(
     name = "xchacha20_poly1305_cc_proto",
     visibility = ["//visibility:public"],
-    deps = ["@tink_base//proto:xchacha20_poly1305_proto"],
+    deps = [":xchacha20_poly1305_proto"],
 )
 
 cc_proto_library(
     name = "rsa_ssa_pkcs1_cc_proto",
-    deps = ["@tink_base//proto:rsa_ssa_pkcs1_proto"],
+    deps = [":rsa_ssa_pkcs1_proto"],
 )
 
 cc_proto_library(
     name = "rsa_ssa_pss_cc_proto",
-    deps = ["@tink_base//proto:rsa_ssa_pss_proto"],
+    deps = [":rsa_ssa_pss_proto"],
 )
 
 cc_proto_library(
     name = "ecdsa_cc_proto",
-    deps = ["@tink_base//proto:ecdsa_proto"],
+    deps = [":ecdsa_proto"],
 )
 
 cc_proto_library(
     name = "ed25519_cc_proto",
-    deps = ["@tink_base//proto:ed25519_proto"],
+    deps = [":ed25519_proto"],
 )
 
 cc_proto_library(
     name = "ecies_aead_hkdf_cc_proto",
-    deps = ["@tink_base//proto:ecies_aead_hkdf_proto"],
+    deps = [":ecies_aead_hkdf_proto"],
 )
 
 cc_proto_library(
     name = "hkdf_prf_cc_proto",
-    deps = ["@tink_base//proto:hkdf_prf_proto"],
+    deps = [":hkdf_prf_proto"],
 )
 
 cc_proto_library(
     name = "prf_based_deriver_cc_proto",
-    deps = ["@tink_base//proto:prf_based_deriver_proto"],
+    deps = ["//proto:prf_based_deriver_proto"],
 )
 
 cc_proto_library(
     name = "aes_gcm_hkdf_streaming_cc_proto",
-    deps = ["@tink_base//proto:aes_gcm_hkdf_streaming_proto"],
+    deps = ["//proto:aes_gcm_hkdf_streaming_proto"],
 )
 
 cc_proto_library(
     name = "aes_cmac_prf_cc_proto",
-    deps = ["@tink_base//proto:aes_cmac_prf_proto"],
+    deps = ["//proto:aes_cmac_prf_proto"],
 )
 
 cc_proto_library(
     name = "hmac_prf_cc_proto",
-    deps = ["@tink_base//proto:hmac_prf_proto"],
+    deps = ["//proto:hmac_prf_proto"],
 )
 
 cc_proto_library(
     name = "jwt_hmac_cc_proto",
-    deps = ["@tink_base//proto:jwt_hmac_proto"],
+    deps = ["//proto:jwt_hmac_proto"],
 )
 
 cc_proto_library(
     name = "jwt_ecdsa_cc_proto",
-    deps = ["@tink_base//proto:jwt_ecdsa_proto"],
+    deps = ["//proto:jwt_ecdsa_proto"],
 )
 
 cc_proto_library(
     name = "jwt_rsa_ssa_pkcs1_cc_proto",
-    deps = ["@tink_base//proto:jwt_rsa_ssa_pkcs1_proto"],
+    deps = ["//proto:jwt_rsa_ssa_pkcs1_proto"],
 )
 
 cc_proto_library(
     name = "jwt_rsa_ssa_pss_cc_proto",
-    deps = ["@tink_base//proto:jwt_rsa_ssa_pss_proto"],
+    deps = ["//proto:jwt_rsa_ssa_pss_proto"],
 )
 
 cc_proto_library(
     name = "aes_ctr_hmac_streaming_cc_proto",
-    deps = ["@tink_base//proto:aes_ctr_hmac_streaming_proto"],
+    deps = ["//proto:aes_ctr_hmac_streaming_proto"],
 )
 
 cc_proto_library(
     name = "test_proto_cc_proto",
     testonly = True,
-    deps = ["@tink_base//proto:test_proto_proto"],
+    deps = ["//proto:test_proto_proto"],
+)
+
+cc_proto_library(
+    name = "hpke_cc_proto",
+    visibility = ["//visibility:public"],
+    deps = ["//proto:hpke_proto"],
 )
 
 filegroup(

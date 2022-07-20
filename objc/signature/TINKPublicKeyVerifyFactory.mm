@@ -43,11 +43,11 @@
     return nil;
   }
   id<TINKPublicKeyVerify> publicKeyVerify =
-      [[TINKPublicKeyVerifyInternal alloc] initWithCCPublicKeyVerify:std::move(st.ValueOrDie())];
+      [[TINKPublicKeyVerifyInternal alloc] initWithCCPublicKeyVerify:std::move(st.value())];
   if (!publicKeyVerify) {
     if (error) {
       *error = TINKStatusToError(crypto::tink::util::Status(
-          crypto::tink::util::error::RESOURCE_EXHAUSTED, "Cannot initialize TINKPublicKeyVerify"));
+          absl::StatusCode::kResourceExhausted, "Cannot initialize TINKPublicKeyVerify"));
     }
     return nil;
   }

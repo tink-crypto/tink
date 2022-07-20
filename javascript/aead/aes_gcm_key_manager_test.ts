@@ -26,7 +26,7 @@ describe('aes gcm key manager test', function() {
     try {
       manager.getKeyFactory().newKey(keyFormat);
       fail('An exception should be thrown.');
-    } catch (e) {
+    } catch (e: any) {
       expect(e.toString()).toBe(ExceptionText.invalidKeyFormat());
     }
   });
@@ -38,7 +38,7 @@ describe('aes gcm key manager test', function() {
     try {
       manager.getKeyFactory().newKey(keyFormat);
       fail('An exception should be thrown.');
-    } catch (e) {
+    } catch (e: any) {
       expect(e.toString()).toBe(ExceptionText.invalidSerializedKeyFormat());
     }
   });
@@ -56,7 +56,7 @@ describe('aes gcm key manager test', function() {
       try {
         manager.getKeyFactory().newKey(keyFormat);
         fail('An exception should be thrown.');
-      } catch (e) {
+      } catch (e: any) {
         expect(e.toString()).toBe(ExceptionText.unsupportedKeySize(keySize));
       }
     }
@@ -69,7 +69,7 @@ describe('aes gcm key manager test', function() {
 
     const key = manager.getKeyFactory().newKey(keyFormat);
 
-    expect(key.getKeyValue().length).toBe(keyFormat.getKeySize());
+    expect(key.getKeyValue_asU8().length).toBe(keyFormat.getKeySize());
   });
 
   it('new key, via serialized format proto', function() {
@@ -80,7 +80,7 @@ describe('aes gcm key manager test', function() {
 
     const key = manager.getKeyFactory().newKey(serializedKeyFormat);
 
-    expect(key.getKeyValue().length).toBe(keyFormat.getKeySize());
+    expect(key.getKeyValue_asU8().length).toBe(keyFormat.getKeySize());
   });
 
   /////////////////////////////////////////////////////////////////////////////
@@ -97,9 +97,9 @@ describe('aes gcm key manager test', function() {
     expect(keyData.getKeyMaterialType())
         .toBe(PbKeyData.KeyMaterialType.SYMMETRIC);
 
-    const key = PbAesGcmKey.deserializeBinary(keyData.getValue());
+    const key = PbAesGcmKey.deserializeBinary(keyData.getValue_asU8());
 
-    expect(key.getKeyValue().length).toBe(keyFormat.getKeySize());
+    expect(key.getKeyValue_asU8().length).toBe(keyFormat.getKeySize());
   });
 
   /////////////////////////////////////////////////////////////////////////////
@@ -112,7 +112,7 @@ describe('aes gcm key manager test', function() {
     try {
       await manager.getPrimitive(PRIMITIVE, keyData);
       fail('An exception should be thrown');
-    } catch (e) {
+    } catch (e: any) {
       expect(e.toString())
           .toBe(ExceptionText.unsupportedKeyType(keyData.getTypeUrl()));
     }
@@ -125,7 +125,7 @@ describe('aes gcm key manager test', function() {
     try {
       await manager.getPrimitive(PRIMITIVE, key);
       fail('An exception should be thrown');
-    } catch (e) {
+    } catch (e: any) {
       expect(e.toString()).toBe(ExceptionText.unsupportedKeyType());
     }
   });
@@ -138,7 +138,7 @@ describe('aes gcm key manager test', function() {
     try {
       await manager.getPrimitive(PRIMITIVE, key);
       fail('An exception should be thrown');
-    } catch (e) {
+    } catch (e: any) {
       expect(e.toString()).toBe(ExceptionText.versionOutOfBounds());
     }
   });
@@ -156,7 +156,7 @@ describe('aes gcm key manager test', function() {
       try {
         await manager.getPrimitive(PRIMITIVE, key);
         fail('An exception should be thrown');
-      } catch (e) {
+      } catch (e: any) {
         expect(e.toString()).toBe(ExceptionText.unsupportedKeySize(keySize));
       }
     }
@@ -164,13 +164,17 @@ describe('aes gcm key manager test', function() {
 
   it('get primitive, bad serialization', async function() {
     const manager = new AesGcmKeyManager();
-    const keyData = createTestKeyData().setValue(new Uint8Array([]));
+    const keyData = createTestKeyData().setValue(new Uint8Array([0]));
 
     try {
       await manager.getPrimitive(PRIMITIVE, keyData);
       fail('An exception should be thrown');
-    } catch (e) {
-      expect(e.toString()).toBe(ExceptionText.invalidSerializedKey());
+    } catch (e: any) {
+      let message = e.toString();
+      if (message === ExceptionText.unsupportedKeySize(0)) {
+        message = ExceptionText.invalidSerializedKey();
+      }
+      expect(message).toBe(ExceptionText.invalidSerializedKey());
     }
   });
 

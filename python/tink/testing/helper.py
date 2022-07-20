@@ -1,4 +1,4 @@
-# Copyright 2019 Google LLC.
+# Copyright 2019 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,13 +14,8 @@
 
 """This class implements helper functions for testing."""
 
-from __future__ import absolute_import
-from __future__ import division
-# Placeholder for import for type annotations
-from __future__ import print_function
-
 import os
-from typing import Text, Mapping, Optional
+from typing import Mapping
 
 from tink.proto import tink_pb2
 from tink import aead
@@ -30,54 +25,41 @@ from tink import hybrid
 from tink import mac
 from tink import prf
 from tink import signature as pk_signature
-from google.protobuf import text_format
+
+_RELATIVE_TESTDATA_PATH = 'tink_py/testdata'
 
 
-def tink_root_path() -> Text:
-  """Returns the path to the Tink root directory used for the test enviroment.
-
-     The path can be set in the TINK_SRC_PATH enviroment variable. If Bazel
-     is used the path is derived from the Bazel enviroment variables. If that
-     does not work, it generates the root path relative to the __file__ path.
-  """
-  root_paths = []
-  if 'TINK_SRC_PATH' in os.environ:
-    root_paths.append(os.environ['TINK_SRC_PATH'])
+def tink_py_testdata_path() -> str:
+  """Returns the path to the test data directory to be used for testing."""
+  # List of pairs <Env. variable, Path>.
+  testdata_paths = []
+  if 'TINK_PYTHON_ROOT_PATH' in os.environ:
+    testdata_paths.append(('TINK_PYTHON_ROOT_PATH',
+                           os.path.join(os.environ['TINK_PYTHON_ROOT_PATH'],
+                                        'testdata')))
   if 'TEST_SRCDIR' in os.environ:
-    # Bazel enviroment
-    root_paths.append(os.path.join(os.environ['TEST_SRCDIR'], 'tink_base'))
-    root_paths.append(os.path.join(os.environ['TEST_SRCDIR'],
-                                   'google3/third_party/tink'))
-  for root_path in root_paths:
-    # return the first root path that exists.
-    if os.path.exists(root_path):
-      return root_path
-  raise ValueError('Could not find path to Tink root directory. Make sure that '
-                   'TINK_SRC_PATH is set.')
+    testdata_paths.append(('TEST_SRCDIR',
+                           os.path.join(os.environ['TEST_SRCDIR'],
+                                        _RELATIVE_TESTDATA_PATH)))
+  for env_variable, testdata_path in testdata_paths:
+    # Return the first path that is encountered.
+    if not os.path.exists(testdata_path):
+      raise FileNotFoundError(f'Variable {env_variable} is set but has an ' +
+                              f'invalid path {testdata_path}')
+    return testdata_path
+  raise ValueError('No path environment variable set among ' +
+                   'TINK_PYTHON_ROOT_PATH, TEST_SRCDIR')
 
 
-def template_from_testdata(
-    template_name: Text,
-    dir_name: Optional[Text] = None) -> tink_pb2.KeyTemplate:
-  """Reads a template from the testdata."""
-  if dir_name:
-    path = os.path.join(tink_root_path(), 'testdata/templates', dir_name,
-                        template_name)
-  else:
-    path = os.path.join(tink_root_path(), 'testdata/templates', template_name)
-  with open(path, mode='rt') as f:
-    data = f.read()
-  return text_format.Parse(data, tink_pb2.KeyTemplate())
-
-
-def fake_key(value: bytes = b'fakevalue',
-             type_url: Text = 'fakeurl',
-             key_material_type: tink_pb2.KeyData.KeyMaterialType = tink_pb2
-             .KeyData.SYMMETRIC,
-             key_id: int = 1234,
-             status: tink_pb2.KeyStatusType = tink_pb2.ENABLED,
-             output_prefix_type: tink_pb2.OutputPrefixType = tink_pb2.TINK
-            ) -> tink_pb2.Keyset.Key:
+def fake_key(
+    value: bytes = b'fakevalue',
+    type_url: str = 'fakeurl',
+    key_material_type: tink_pb2.KeyData.KeyMaterialType = tink_pb2.KeyData
+    .SYMMETRIC,
+    key_id: int = 1234,
+    status: tink_pb2.KeyStatusType = tink_pb2.ENABLED,
+    output_prefix_type: tink_pb2.OutputPrefixType = tink_pb2.TINK
+) -> tink_pb2.Keyset.Key:
   """Returns a fake but valid key."""
   key = tink_pb2.Keyset.Key(
       key_id=key_id,
@@ -92,7 +74,7 @@ def fake_key(value: bytes = b'fakevalue',
 class FakeMac(mac.Mac):
   """A fake MAC implementation."""
 
-  def __init__(self, name: Text = 'FakeMac'):
+  def __init__(self, name: str = 'FakeMac'):
     self._name = name
 
   def compute_mac(self, data: bytes) -> bytes:
@@ -106,7 +88,7 @@ class FakeMac(mac.Mac):
 class FakeAead(aead.Aead):
   """A fake AEAD implementation."""
 
-  def __init__(self, name: Text = 'FakeAead'):
+  def __init__(self, name: str = 'FakeAead'):
     self._name = name
 
   def encrypt(self, plaintext: bytes, associated_data: bytes) -> bytes:
@@ -124,7 +106,7 @@ class FakeAead(aead.Aead):
 class FakeDeterministicAead(daead.DeterministicAead):
   """A fake Deterministic AEAD implementation."""
 
-  def __init__(self, name: Text = 'FakeDeterministicAead'):
+  def __init__(self, name: str = 'FakeDeterministicAead'):
     self._name = name
 
   def encrypt_deterministically(self, plaintext: bytes,
@@ -145,7 +127,7 @@ class FakeDeterministicAead(daead.DeterministicAead):
 class FakeHybridDecrypt(hybrid.HybridDecrypt):
   """A fake HybridEncrypt implementation."""
 
-  def __init__(self, name: Text = 'Hybrid'):
+  def __init__(self, name: str = 'Hybrid'):
     self._name = name
 
   def decrypt(self, ciphertext: bytes, context_info: bytes) -> bytes:
@@ -161,7 +143,7 @@ class FakeHybridDecrypt(hybrid.HybridDecrypt):
 class FakeHybridEncrypt(hybrid.HybridEncrypt):
   """A fake HybridEncrypt implementation."""
 
-  def __init__(self, name: Text = 'Hybrid'):
+  def __init__(self, name: str = 'Hybrid'):
     self._name = name
 
   def encrypt(self, plaintext: bytes, context_info: bytes) -> bytes:
@@ -171,7 +153,7 @@ class FakeHybridEncrypt(hybrid.HybridEncrypt):
 class FakePublicKeySign(pk_signature.PublicKeySign):
   """A fake PublicKeySign implementation."""
 
-  def __init__(self, name: Text = 'FakePublicKeySign'):
+  def __init__(self, name: str = 'FakePublicKeySign'):
     self._name = name
 
   def sign(self, data: bytes) -> bytes:
@@ -181,7 +163,7 @@ class FakePublicKeySign(pk_signature.PublicKeySign):
 class FakePublicKeyVerify(pk_signature.PublicKeyVerify):
   """A fake PublicKeyVerify implementation."""
 
-  def __init__(self, name: Text = 'FakePublicKeyVerify'):
+  def __init__(self, name: str = 'FakePublicKeyVerify'):
     self._name = name
 
   def verify(self, signature: bytes, data: bytes):
@@ -192,7 +174,7 @@ class FakePublicKeyVerify(pk_signature.PublicKeyVerify):
 class FakePrf(prf.Prf):
   """A fake Prf implementation."""
 
-  def __init__(self, name: Text = 'FakePrf'):
+  def __init__(self, name: str = 'FakePrf'):
     self._name = name
 
   def compute(self, input_data: bytes, output_length: int) -> bytes:
@@ -207,7 +189,7 @@ class FakePrf(prf.Prf):
 class FakePrfSet(prf.PrfSet):
   """A fake PrfSet implementation that contains exactly one Prf."""
 
-  def __init__(self, name: Text = 'FakePrf'):
+  def __init__(self, name: str = 'FakePrf'):
     self._prf = FakePrf(name)
 
   def primary_id(self) -> int:

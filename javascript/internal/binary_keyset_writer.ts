@@ -14,11 +14,14 @@ import {PbEncryptedKeyset, PbKeyset} from './proto';
  * @final
  */
 export class BinaryKeysetWriter implements KeysetWriter {
-  /** @override */
-  write(keyset: PbKeyset|PbEncryptedKeyset): Uint8Array {
-    if (!keyset) {
-      throw new SecurityException('keyset has to be non-null.');
+  encodeBinary(keyset: PbKeyset|PbEncryptedKeyset): Uint8Array {
+    // keep serializeBinary calls monomorphic
+    if (keyset instanceof PbKeyset) {
+      return keyset.serializeBinary();
     }
-    return keyset.serializeBinary();
+    if (keyset instanceof PbEncryptedKeyset) {
+      return keyset.serializeBinary();
+    }
+    throw new SecurityException('unexpected type for keyset.');
   }
 }

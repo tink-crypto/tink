@@ -13,7 +13,7 @@ import * as KeyManager from './key_manager';
 import {KeysetReader} from './keyset_reader';
 import {KeysetWriter} from './keyset_writer';
 import * as PrimitiveSet from './primitive_set';
-import {PbKeyMaterialType, PbKeyset, PbKeysetKey, PbKeyStatusType, PbKeyTemplate} from './proto';
+import {PbKeyData, PbKeyMaterialType, PbKeyset, PbKeysetKey, PbKeyStatusType, PbKeyTemplate} from './proto';
 import * as Registry from './registry';
 import * as Util from './util';
 
@@ -99,12 +99,76 @@ export class KeysetHandle {
   }
 
   /**
+   * Writes this keyset using `writer` if and only if the keyset doesn't contain
+   * any secret key material.
+   *
+   * This can be used to persist public keysets or envelope encryption keysets.
+   * Use `CleartextKeysetHandle` to persist keysets containing secret key
+   * material.
+   */
+  writeNoSecret(writer: KeysetWriter): Uint8Array {
+    assertNoSecretKeyMaterial(this.keyset_);
+    return writer.encodeBinary(this.keyset_);
+  }
+
+  /**
    * Returns the keyset held by this KeysetHandle.
    *
    */
   getKeyset(): PbKeyset {
     return this.keyset_;
   }
+
+  /**
+   * If the managed keyset contains private keys, returns a `KeysetHandle` of
+   * the public keys.
+   */
+  getPublicKeysetHandle(): KeysetHandle {
+    const publicKeyset = new PbKeyset();
+    for (const key of this.keyset_.getKeyList()) {
+      publicKeyset.addKey(key.clone().setKeyData(createPublicKeyData(
+          nonNull('Key data', key.getKeyData()))));
+    }
+    publicKeyset.setPrimaryKeyId(this.keyset_.getPrimaryKeyId());
+    return new KeysetHandle(publicKeyset);
+  }
+}
+
+function nonNull<T>(desc: string, value: T|null|undefined): T {
+  if (value == null) {
+    throw new SecurityException(`${desc} has to be non null.`);
+  }
+  return value;
+}
+
+function createPublicKeyData(privateKeyData: PbKeyData): PbKeyData {
+  if (privateKeyData.getKeyMaterialType() !==
+      PbKeyData.KeyMaterialType.ASYMMETRIC_PRIVATE) {
+    throw new SecurityException('The keyset contains a non-private key');
+  }
+  return Registry.getPublicKeyData(
+      privateKeyData.getTypeUrl(), privateKeyData.getValue_asU8());
+}
+
+/**
+ * Validates that `keyset` doesn't contain any secret key material.
+ *
+ * @throws SecurityException if `keyset` contains secret key material.
+ */
+function assertNoSecretKeyMaterial(keyset: PbKeyset) {
+  for (const key of keyset.getKeyList()) {
+    const keyData = nonNull('Key data', key.getKeyData());
+    if (isSecretKeyMaterialType(keyData.getKeyMaterialType())) {
+      throw new SecurityException('Keyset contains secret key material.');
+    }
+  }
+}
+
+/** Returns true if the key material type is secret. */
+function isSecretKeyMaterialType(type: PbKeyMaterialType) {
+  return type === PbKeyMaterialType.UNKNOWN_KEYMATERIAL ||
+      type === PbKeyMaterialType.SYMMETRIC ||
+      type === PbKeyMaterialType.ASYMMETRIC_PRIVATE;
 }
 
 /**
@@ -181,19 +245,6 @@ export function readNoSecret(reader: KeysetReader): KeysetHandle {
     throw new SecurityException('Reader has to be non-null.');
   }
   const keyset = reader.read();
-  const keyList = keyset.getKeyList();
-  for (const key of keyList) {
-    const keyData = key.getKeyData();
-    if (keyData) {
-      switch (keyData.getKeyMaterialType()) {
-        case PbKeyMaterialType.ASYMMETRIC_PUBLIC:
-
-        // fall through
-        case PbKeyMaterialType.REMOTE:
-          continue;
-      }
-    }
-    throw new SecurityException('Keyset contains secret key material.');
-  }
+  assertNoSecretKeyMaterial(keyset);
   return new KeysetHandle(keyset);
 }

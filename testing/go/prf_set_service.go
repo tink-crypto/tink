@@ -23,11 +23,12 @@ import (
 	"github.com/google/tink/go/keyset"
 	"github.com/google/tink/go/prf"
 	"github.com/google/tink/go/testkeyset"
-	pb "github.com/google/tink/proto/testing/testing_api_go_grpc"
+	pb "github.com/google/tink/testing/go/proto/testing_api_go_grpc"
 )
 
 // PrfSetService implements the PrfSet testing service.
 type PrfSetService struct {
+	pb.PrfSetServer
 }
 
 func (s *PrfSetService) KeyIds(ctx context.Context, req *pb.PrfSetKeyIdsRequest) (*pb.PrfSetKeyIdsResponse, error) {

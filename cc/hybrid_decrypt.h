@@ -17,6 +17,8 @@
 #ifndef TINK_HYBRID_DECRYPT_H_
 #define TINK_HYBRID_DECRYPT_H_
 
+#include <string>
+
 #include "absl/strings/string_view.h"
 #include "tink/util/statusor.h"
 

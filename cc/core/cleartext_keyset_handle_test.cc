@@ -17,6 +17,10 @@
 #include "tink/cleartext_keyset_handle.h"
 
 #include <istream>
+#include <memory>
+#include <ostream>
+#include <sstream>
+#include <utility>
 
 #include "gtest/gtest.h"
 #include "tink/binary_keyset_reader.h"
@@ -51,21 +55,21 @@ TEST_F(CleartextKeysetHandleTest, testRead) {
             KeyData::SYMMETRIC, &keyset);
   keyset.set_primary_key_id(42);
   {  // Reader that reads a valid keyset.
-    auto reader = std::move(
-        BinaryKeysetReader::New(keyset.SerializeAsString()).ValueOrDie());
+    auto reader =
+        std::move(BinaryKeysetReader::New(keyset.SerializeAsString()).value());
     auto result = CleartextKeysetHandle::Read(std::move(reader));
     EXPECT_TRUE(result.ok()) << result.status();
-    auto handle = std::move(result.ValueOrDie());
+    auto handle = std::move(result.value());
     EXPECT_EQ(keyset.SerializeAsString(),
               TestKeysetHandle::GetKeyset(*handle).SerializeAsString());
   }
 
   {  // Reader that fails upon read.
-    auto reader = std::move(
-        BinaryKeysetReader::New("invalid serialized keyset").ValueOrDie());
+    auto reader =
+        std::move(BinaryKeysetReader::New("invalid serialized keyset").value());
     auto result = CleartextKeysetHandle::Read(std::move(reader));
     EXPECT_FALSE(result.ok());
-    EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
+    EXPECT_EQ(absl::StatusCode::kInvalidArgument, result.status().code());
   }
 }
 
@@ -83,15 +87,15 @@ TEST_F(CleartextKeysetHandleTest, testWrite) {
   std::stringbuf buffer;
   std::unique_ptr<std::ostream> destination_stream(new std::ostream(&buffer));
   auto writer =
-      test::DummyKeysetWriter::New(std::move(destination_stream)).ValueOrDie();
+      test::DummyKeysetWriter::New(std::move(destination_stream)).value();
 
   // Write a valid keyset.
   EXPECT_EQ(CleartextKeysetHandle::Write(writer.get(), *(handle.get())),
-            util::Status::OK);
+            util::OkStatus());
 
   // Null writer.
   EXPECT_NE(CleartextKeysetHandle::Write(nullptr, *(handle.get())),
-            util::Status::OK);
+            util::OkStatus());
 }
 
 }  // namespace

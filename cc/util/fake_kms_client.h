@@ -18,6 +18,7 @@
 #define TINK_UTIL_FAKE_KMS_CLIENT_H_
 
 #include <memory>
+#include <string>
 
 #include "absl/strings/string_view.h"
 #include "tink/aead.h"

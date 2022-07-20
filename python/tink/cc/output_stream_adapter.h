@@ -18,6 +18,7 @@
 #define TINK_PYTHON_CC_OUTPUT_STREAM_ADAPTER_H_
 
 #include <memory>
+#include <utility>
 
 #include "absl/strings/string_view.h"
 #include "tink/output_stream.h"

@@ -27,9 +27,11 @@
 #ifndef TINK_SUBTLE_MAC_STATEFUL_MAC_H_
 #define TINK_SUBTLE_MAC_STATEFUL_MAC_H_
 
+#include <string>
+
+#include "absl/strings/string_view.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
-#include "absl/strings/string_view.h"
 
 namespace crypto {
 namespace tink {

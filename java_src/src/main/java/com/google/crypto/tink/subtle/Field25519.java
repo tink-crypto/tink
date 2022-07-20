@@ -609,4 +609,6 @@ final class Field25519 {
     // a >= 0 iff a >= b.
     return ~(a >> 31);
   }
+
+  private Field25519() {}
 }

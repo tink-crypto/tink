@@ -36,7 +36,7 @@ describe('ecdsa public key manager test', function() {
     try {
       manager.getKeyFactory().newKey(new Uint8Array(0));
       fail('An exception should be thrown.');
-    } catch (e) {
+    } catch (e: any) {
       expect(e.toString()).toBe(ExceptionText.notSupported());
     }
   });
@@ -47,7 +47,7 @@ describe('ecdsa public key manager test', function() {
     try {
       manager.getKeyFactory().newKeyData(new Uint8Array(0));
       fail('An exception should be thrown.');
-    } catch (e) {
+    } catch (e: any) {
       expect(e.toString()).toBe(ExceptionText.notSupported());
     }
   });
@@ -60,7 +60,7 @@ describe('ecdsa public key manager test', function() {
     try {
       await manager.getPrimitive(PRIMITIVE, keyData);
       fail('An exception should be thrown.');
-    } catch (e) {
+    } catch (e: any) {
       expect(e.toString())
           .toBe(ExceptionText.unsupportedKeyType(keyData.getTypeUrl()));
     }
@@ -72,7 +72,7 @@ describe('ecdsa public key manager test', function() {
     try {
       await manager.getPrimitive(PRIMITIVE, key);
       fail('An exception should be thrown.');
-    } catch (e) {
+    } catch (e: any) {
       expect(e.toString()).toBe(ExceptionText.unsupportedKeyType());
     }
   });
@@ -85,7 +85,7 @@ describe('ecdsa public key manager test', function() {
     try {
       await manager.getPrimitive(PRIMITIVE, key);
       fail('An exception should be thrown.');
-    } catch (e) {
+    } catch (e: any) {
       expect(e.toString()).toBe(ExceptionText.versionOutOfBounds());
     }
   });
@@ -97,7 +97,7 @@ describe('ecdsa public key manager test', function() {
     try {
       await manager.getPrimitive(PRIMITIVE, key);
       fail('An exception should be thrown.');
-    } catch (e) {
+    } catch (e: any) {
       expect(e.toString()).toBe(ExceptionText.missingParams());
     }
   });
@@ -111,7 +111,7 @@ describe('ecdsa public key manager test', function() {
     try {
       await manager.getPrimitive(PRIMITIVE, key);
       fail('An exception should be thrown.');
-    } catch (e) {
+    } catch (e: any) {
       expect(e.toString()).toBe(ExceptionText.unknownEncoding());
     }
     key.getParams()?.setEncoding(PbEcdsaSignatureEncoding.DER);
@@ -121,7 +121,7 @@ describe('ecdsa public key manager test', function() {
     try {
       await manager.getPrimitive(PRIMITIVE, key);
       fail('An exception should be thrown.');
-    } catch (e) {
+    } catch (e: any) {
       expect(e.toString()).toBe(ExceptionText.unknownHash());
     }
     key.getParams()?.setHashType(PbHashType.SHA256);
@@ -131,7 +131,7 @@ describe('ecdsa public key manager test', function() {
     try {
       await manager.getPrimitive(PRIMITIVE, key);
       fail('An exception should be thrown.');
-    } catch (e) {
+    } catch (e: any) {
       expect(e.toString()).toBe(ExceptionText.unknownCurve());
     }
 
@@ -140,7 +140,7 @@ describe('ecdsa public key manager test', function() {
     try {
       await manager.getPrimitive(PRIMITIVE, key);
       fail('An exception should be thrown.');
-    } catch (e) {
+    } catch (e: any) {
       expect(e.toString())
           .toBe(
               'SecurityException: expected SHA-384 or SHA-512 (because curve is P-384) but got SHA-256');
@@ -149,7 +149,7 @@ describe('ecdsa public key manager test', function() {
     try {
       await manager.getPrimitive(PRIMITIVE, key);
       fail('An exception should be thrown.');
-    } catch (e) {
+    } catch (e: any) {
       expect(e.toString())
           .toBe(
               'SecurityException: expected SHA-512 (because curve is P-521) but got SHA-256');
@@ -159,22 +159,22 @@ describe('ecdsa public key manager test', function() {
   it('get primitive, invalid key', async function() {
     const manager = new EcdsaPublicKeyManager();
     const key = await createKey();
-    const x = key.getX();
-    key.setX(new Uint8Array(0));
+    const x = key.getX_asU8();
+    key.setX(new Uint8Array([0]));
 
     try {
       await manager.getPrimitive(PRIMITIVE, key);
       fail('An exception should be thrown.');
-    } catch (e) {
+    } catch (e: any) {
       expect(ExceptionText.webCryptoErrors()).toContain(e.toString());
     }
 
     key.setX(x);
-    key.setY(new Uint8Array(0));
+    key.setY(new Uint8Array([0]));
     try {
       await manager.getPrimitive(PRIMITIVE, key);
       fail('An exception should be thrown.');
-    } catch (e) {
+    } catch (e: any) {
       expect(ExceptionText.webCryptoErrors()).toContain(e.toString());
     }
   });
@@ -190,7 +190,7 @@ describe('ecdsa public key manager test', function() {
       try {
         await manager.getPrimitive(PRIMITIVE, keyData);
         fail('An exception should be thrown ' + i.toString());
-      } catch (e) {
+      } catch (e: any) {
         expect(e.toString()).toBe(ExceptionText.invalidSerializedKey());
       }
     }
@@ -321,7 +321,7 @@ async function createKey(
           .setVersion(0)
           .setParams(createParams(opt_curveType, opt_hashType, opt_encoding));
   const keyPair = await EllipticCurves.generateKeyPair('ECDSA', curveName);
-  const publicKey = await EllipticCurves.exportCryptoKey(keyPair.publicKey);
+  const publicKey = await EllipticCurves.exportCryptoKey(keyPair.publicKey!);
   key.setX(
       Bytes.fromBase64(assertExists(publicKey['x']), /* opt_webSafe = */ true));
   key.setY(

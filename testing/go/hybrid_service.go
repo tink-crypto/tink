@@ -23,11 +23,12 @@ import (
 	"github.com/google/tink/go/hybrid"
 	"github.com/google/tink/go/keyset"
 	"github.com/google/tink/go/testkeyset"
-	pb "github.com/google/tink/proto/testing/testing_api_go_grpc"
+	pb "github.com/google/tink/testing/go/proto/testing_api_go_grpc"
 )
 
 // HybridService implements the Hybrid encryption and decryption testing service.
 type HybridService struct {
+	pb.HybridServer
 }
 
 func (s *HybridService) Encrypt(ctx context.Context, req *pb.HybridEncryptRequest) (*pb.HybridEncryptResponse, error) {

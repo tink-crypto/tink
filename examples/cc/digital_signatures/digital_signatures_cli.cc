@@ -48,11 +48,13 @@
 //     output-file: name of the file for the resulting output (valid/invalid)
 
 #include <iostream>
+#include <string>
+#include <utility>
 
-#include "digital_signatures/util.h"
-#include "tink/signature/signature_key_templates.h"
 #include "tink/public_key_sign.h"
 #include "tink/public_key_verify.h"
+#include "tink/signature/signature_key_templates.h"
+#include "digital_signatures/util.h"
 
 // Prints usage info.
 void PrintUsageInfo() {
@@ -78,11 +80,10 @@ void GeneratePrivateKey(const std::string& output_filename) {
       crypto::tink::KeysetHandle::GenerateNew(key_template);
   if (!new_keyset_handle_result.ok()) {
     std::clog << "Generating new keyset failed: "
-              << new_keyset_handle_result.status().error_message()
-              << std::endl;
+              << new_keyset_handle_result.status().message() << std::endl;
     exit(1);
   }
-  auto keyset_handle = std::move(new_keyset_handle_result.ValueOrDie());
+  auto keyset_handle = std::move(new_keyset_handle_result.value());
 
   std::clog << "Writing the keyset to file " << output_filename
             << "..." << std::endl;
@@ -104,12 +105,10 @@ void ExtractPublicKey(const std::string& private_keyset_filename,
       private_keyset_handle->GetPublicKeysetHandle();
   if (!new_keyset_handle_result.ok()) {
     std::clog << "Getting the keyset failed: "
-              << new_keyset_handle_result.status().error_message()
-              << std::endl;
+              << new_keyset_handle_result.status().message() << std::endl;
     exit(1);
   }
-  auto public_keyset_handle =
-      std::move(new_keyset_handle_result.ValueOrDie());
+  auto public_keyset_handle = std::move(new_keyset_handle_result.value());
 
   std::clog << "Writing the keyset to file " << output_filename
             << "..." << std::endl;
@@ -128,10 +127,10 @@ void Sign(const std::string& keyset_filename,
       keyset_handle->GetPrimitive<crypto::tink::PublicKeySign>();
   if (!primitive_result.ok()) {
     std::clog << "Getting PublicKeySign-primitive from the factory failed: "
-              << primitive_result.status().error_message() << std::endl;
+              << primitive_result.status().message() << std::endl;
     exit(1);
   }
-  auto public_key_sign = std::move(primitive_result.ValueOrDie());
+  auto public_key_sign = std::move(primitive_result.value());
 
   std::clog << "Signing message from file " << message_filename
             << " using private keyset from file " << keyset_filename
@@ -142,10 +141,10 @@ void Sign(const std::string& keyset_filename,
   auto sign_result = public_key_sign->Sign(message);
   if (!sign_result.ok()) {
     std::clog << "Error while signing the message: "
-              << sign_result.status().error_message() << std::endl;
+              << sign_result.status().message() << std::endl;
     exit(1);
   }
-  std::string signature = sign_result.ValueOrDie();
+  std::string signature = sign_result.value();
 
   std::clog << "Writing the resulting signature to file " << output_filename
             << "..." << std::endl;
@@ -165,11 +164,10 @@ void Verify(const std::string& keyset_filename,
       keyset_handle->GetPrimitive<crypto::tink::PublicKeyVerify>();
   if (!primitive_result.ok()) {
     std::clog << "Getting PublicKeyVerify-primitive from the factory "
-              << "failed: " << primitive_result.status().error_message()
-              << std::endl;
+              << "failed: " << primitive_result.status().message() << std::endl;
     exit(1);
   }
-  auto public_key_verify = std::move(primitive_result.ValueOrDie());
+  auto public_key_verify = std::move(primitive_result.value());
 
   std::clog << "Verifying signature from file " << signature_filename
             << " of the message from file " << message_filename
@@ -183,7 +181,7 @@ void Verify(const std::string& keyset_filename,
   auto verify_status = public_key_verify->Verify(signature, message);
   if (!verify_status.ok()) {
     std::clog << "Error while verifying the signature: "
-              << verify_status.error_message() << std::endl;
+              << verify_status.message() << std::endl;
     result = "invalid";
   } else {
     result = "valid";

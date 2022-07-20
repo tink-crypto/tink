@@ -2,8 +2,6 @@
 #   Tink (https://github.com/google/tink) is a small crypto library that
 #   provides a safe, simple, agile and fast way to accomplish some common
 #   crypto tasks.
-load("@rules_python//python:defs.bzl", "py_library")
-
 package(default_visibility = ["//:__subpackages__"])
 
 licenses(["notice"])
@@ -18,22 +16,4 @@ filegroup(
     name = "tink_version",
     srcs = ["tink_version.bzl"],
     visibility = ["//visibility:public"],
-)
-
-filegroup(
-    name = "cmake_source_files",
-    data = glob(["cmake/**"]) + [
-        "//cc",
-        "CMakeLists.txt",
-        "tink_version.cmake",
-    ],
-)
-
-py_library(
-    name = "tink_python",
-    srcs = ["__init__.py"],
-    visibility = ["//visibility:public"],
-    deps = [
-        "//python:tink",
-    ],
 )

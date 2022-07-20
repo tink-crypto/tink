@@ -26,6 +26,7 @@
 #include "proto/common.pb.h"
 #include "proto/tink.pb.h"
 
+#include "absl/status/status.h"
 #include "tink/util/status.h"
 
 @interface TINKHybridKeyTemplateTest : XCTestCase
@@ -43,7 +44,7 @@ static std::string const kTypeURL =
       [[TINKHybridKeyTemplate alloc] initWithKeyTemplate:TINKHybridKeyTemplates(-1) error:&error];
   XCTAssertNotNil(error);
   XCTAssertNil(keyTemplate);
-  XCTAssertEqual(error.code, crypto::tink::util::error::INVALID_ARGUMENT);
+  XCTAssertEqual((absl::StatusCode)error.code, absl::StatusCode::kInvalidArgument);
   NSDictionary *userInfo = [error userInfo];
   NSString *errorString = [userInfo objectForKey:NSLocalizedFailureReasonErrorKey];
   XCTAssertTrue([errorString containsString:@"Invalid TINKHybridKeyTemplate"]);

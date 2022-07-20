@@ -19,9 +19,11 @@ Currently, the following set of binary wheels are published:
 *   Linux
     *   Python 3.7
     *   Python 3.8
+    *   Python 3.9
 *   macOS
     *   Python 3.7
     *   Python 3.8
+    *   Python 3.9
 
 In addition to the binary wheels, a source distribution is also published. If
 `pip` does not find a suitable binary wheel for your environment, it will fall

@@ -22,6 +22,7 @@ import static org.junit.Assert.assertThrows;
 import com.google.crypto.tink.HybridDecrypt;
 import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.config.TinkFips;
+import com.google.crypto.tink.config.internal.TinkFipsUtil;
 import java.security.GeneralSecurityException;
 import org.junit.Assume;
 import org.junit.FixMethodOrder;
@@ -56,14 +57,26 @@ public class HybridConfigTest {
             GeneralSecurityException.class, () -> Registry.getCatalogue("tinkhybriddecrypt"));
     assertThat(e.toString()).contains("no catalogue found");
     assertThat(e.toString()).contains("HybridConfig.register()");
-    String typeUrl = "type.googleapis.com/google.crypto.tink.EciesAeadHkdfPrivateKey";
-    e = assertThrows(GeneralSecurityException.class, () -> Registry.getUntypedKeyManager(typeUrl));
+
+    String eciesPrivateKeyUrl = "type.googleapis.com/google.crypto.tink.EciesAeadHkdfPrivateKey";
+    e =
+        assertThrows(
+            GeneralSecurityException.class,
+            () -> Registry.getUntypedKeyManager(eciesPrivateKeyUrl));
+    assertThat(e.toString()).contains("No key manager found");
+
+    String hpkePrivateKeyUrl = "type.googleapis.com/google.crypto.tink.HpkePrivateKey";
+    e =
+        assertThrows(
+            GeneralSecurityException.class,
+            () -> Registry.getUntypedKeyManager(hpkePrivateKeyUrl));
     assertThat(e.toString()).contains("No key manager found");
 
     // Initialize the config.
     HybridConfig.register();
 
-    Registry.getKeyManager(typeUrl, HybridDecrypt.class);
+    Registry.getKeyManager(eciesPrivateKeyUrl, HybridDecrypt.class);
+    Registry.getKeyManager(hpkePrivateKeyUrl, HybridDecrypt.class);
 
     // Running init() manually again should succeed.
     HybridConfig.register();
@@ -79,6 +92,7 @@ public class HybridConfigTest {
     // Check if all key types are registered when not using FIPS mode.
     String[] keyTypeUrls = {
       "type.googleapis.com/google.crypto.tink.EciesAeadHkdfPrivateKey",
+      "type.googleapis.com/google.crypto.tink.HpkePrivateKey",
     };
 
     for (String typeUrl : keyTypeUrls) {
@@ -89,6 +103,7 @@ public class HybridConfigTest {
   @Test
   public void testFipsRegisterNonFipsKeys() throws Exception {
     Assume.assumeTrue(TinkFips.useOnlyFips());
+    Assume.assumeTrue(TinkFipsUtil.fipsModuleAvailable());
 
     // Register Hybrid key manager
     HybridConfig.register();
@@ -96,6 +111,7 @@ public class HybridConfigTest {
     // List of algorithms which are not part of FIPS and should not be registered.
     String[] keyTypeUrls = {
       "type.googleapis.com/google.crypto.tink.EciesAeadHkdfPrivateKey",
+      "type.googleapis.com/google.crypto.tink.HpkePrivateKey",
     };
 
     for (String typeUrl : keyTypeUrls) {

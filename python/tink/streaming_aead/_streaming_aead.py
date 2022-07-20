@@ -13,20 +13,11 @@
 # limitations under the License.
 """This module defines the interface for Streaming AEAD."""
 
-from __future__ import absolute_import
-from __future__ import division
-# Placeholder for import for type annotations
-from __future__ import print_function
-
 import abc
 from typing import BinaryIO
 
-# Special imports
-import six
 
-
-@six.add_metaclass(abc.ABCMeta)
-class StreamingAead(object):
+class StreamingAead(metaclass=abc.ABCMeta):
   """The interface for streaming authenticated encryption with associated data.
 
   Streaming encryption is typically used for encrypting large plaintexts such

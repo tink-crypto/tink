@@ -6,3 +6,8 @@ java_library(
     name = "alpha",
     srcs = ["Alpha.java"],
 )
+
+android_library(
+    name = "alpha-android",
+    srcs = ["Alpha.java"],
+)

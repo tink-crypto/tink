@@ -16,14 +16,19 @@
 
 #include "tink/jwt/internal/raw_jwt_rsa_ssa_pss_verify_key_manager.h"
 
+#include <string>
+
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include "absl/status/status.h"
 #include "absl/strings/escaping.h"
 #include "openssl/rsa.h"
-#include "tink/public_key_verify.h"
+#include "tink/internal/bn_util.h"
+#include "tink/internal/rsa_util.h"
+#include "tink/internal/ssl_unique_ptr.h"
 #include "tink/jwt/internal/raw_jwt_rsa_ssa_pss_sign_key_manager.h"
+#include "tink/public_key_verify.h"
 #include "tink/subtle/rsa_ssa_pss_sign_boringssl.h"
-#include "tink/subtle/subtle_util_boringssl.h"
 #include "tink/util/secret_data.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
@@ -37,14 +42,14 @@ namespace {
 using ::crypto::tink::test::IsOk;
 using ::crypto::tink::test::StatusIs;
 using ::crypto::tink::util::StatusOr;
-using ::google::crypto::tink::KeyData;
+using ::google::crypto::tink::JwtRsaSsaPssAlgorithm;
 using ::google::crypto::tink::JwtRsaSsaPssKeyFormat;
 using ::google::crypto::tink::JwtRsaSsaPssPrivateKey;
 using ::google::crypto::tink::JwtRsaSsaPssPublicKey;
-using ::google::crypto::tink::JwtRsaSsaPssAlgorithm;
+using ::google::crypto::tink::KeyData;
 using ::testing::Eq;
-using ::testing::Not;
 using ::testing::HasSubstr;
+using ::testing::Not;
 
 TEST(RawJwtRsaSsaPssVerifyKeyManagerTest, Basics) {
   EXPECT_THAT(RawJwtRsaSsaPssVerifyKeyManager().get_version(), Eq(0));
@@ -62,17 +67,16 @@ TEST(RawJwtRsaSsaPssVerifyKeyManagerTest, ValidateEmptyKey) {
 }
 
 JwtRsaSsaPssKeyFormat CreateKeyFormat(JwtRsaSsaPssAlgorithm algorithm,
-                                   int modulus_size_in_bits,
-                                   int public_exponent) {
+                                      int modulus_size_in_bits,
+                                      int public_exponent) {
   JwtRsaSsaPssKeyFormat key_format;
   key_format.set_algorithm(algorithm);
   key_format.set_modulus_size_in_bits(modulus_size_in_bits);
 
-  bssl::UniquePtr<BIGNUM> e(BN_new());
+  internal::SslUniquePtr<BIGNUM> e(BN_new());
   BN_set_word(e.get(), public_exponent);
   key_format.set_public_exponent(
-      subtle::SubtleUtilBoringSSL::bn2str(e.get(), BN_num_bytes(e.get()))
-          .ValueOrDie());
+      internal::BignumToString(e.get(), BN_num_bytes(e.get())).value());
 
   return key_format;
 }
@@ -82,10 +86,8 @@ JwtRsaSsaPssPublicKey CreateValidPublicKey() {
       RawJwtRsaSsaPssSignKeyManager()
           .CreateKey(
               CreateKeyFormat(JwtRsaSsaPssAlgorithm::PS256, 3072, RSA_F4))
-          .ValueOrDie();
-  return RawJwtRsaSsaPssSignKeyManager()
-      .GetPublicKey(private_key)
-      .ValueOrDie();
+          .value();
+  return RawJwtRsaSsaPssSignKeyManager().GetPublicKey(private_key).value();
 }
 
 // Checks that a public key generaed by the SignKeyManager is considered valid.
@@ -111,44 +113,44 @@ TEST(RawJwtRsaSsaPssVerifyKeyManagerTest, PublicKeyWithSmallModulusIsInvalid) {
   key.set_n("\x23");
   key.set_e("\x3");
   EXPECT_THAT(RawJwtRsaSsaPssVerifyKeyManager().ValidateKey(key),
-              StatusIs(util::error::INVALID_ARGUMENT,
+              StatusIs(absl::StatusCode::kInvalidArgument,
                        HasSubstr("only modulus size >= 2048")));
 }
 
 TEST(RsaSsaPssSignKeyManagerTest, Create) {
   JwtRsaSsaPssKeyFormat key_format =
       CreateKeyFormat(JwtRsaSsaPssAlgorithm::PS256, 3072, RSA_F4);
-  StatusOr<JwtRsaSsaPssPrivateKey> private_key_or =
+  StatusOr<JwtRsaSsaPssPrivateKey> private_key =
       RawJwtRsaSsaPssSignKeyManager().CreateKey(key_format);
-  ASSERT_THAT(private_key_or.status(), IsOk());
-  JwtRsaSsaPssPrivateKey private_key = private_key_or.ValueOrDie();
-  JwtRsaSsaPssPublicKey public_key =
-      RawJwtRsaSsaPssSignKeyManager().GetPublicKey(private_key).ValueOrDie();
+  ASSERT_THAT(private_key, IsOk());
+  StatusOr<JwtRsaSsaPssPublicKey> public_key =
+      RawJwtRsaSsaPssSignKeyManager().GetPublicKey(*private_key);
+  ASSERT_THAT(public_key, IsOk());
 
-  subtle::SubtleUtilBoringSSL::RsaPrivateKey private_key_subtle;
-  private_key_subtle.n = private_key.public_key().n();
-  private_key_subtle.e = private_key.public_key().e();
-  private_key_subtle.d = util::SecretDataFromStringView(private_key.d());
-  private_key_subtle.p = util::SecretDataFromStringView(private_key.p());
-  private_key_subtle.q = util::SecretDataFromStringView(private_key.q());
-  private_key_subtle.dp = util::SecretDataFromStringView(private_key.dp());
-  private_key_subtle.dq = util::SecretDataFromStringView(private_key.dq());
-  private_key_subtle.crt = util::SecretDataFromStringView(private_key.crt());
+  internal::RsaPrivateKey private_key_subtle;
+  private_key_subtle.n = private_key->public_key().n();
+  private_key_subtle.e = private_key->public_key().e();
+  private_key_subtle.d = util::SecretDataFromStringView(private_key->d());
+  private_key_subtle.p = util::SecretDataFromStringView(private_key->p());
+  private_key_subtle.q = util::SecretDataFromStringView(private_key->q());
+  private_key_subtle.dp = util::SecretDataFromStringView(private_key->dp());
+  private_key_subtle.dq = util::SecretDataFromStringView(private_key->dq());
+  private_key_subtle.crt = util::SecretDataFromStringView(private_key->crt());
 
-  auto direct_signer_or = subtle::RsaSsaPssSignBoringSsl::New(
-      private_key_subtle, {crypto::tink::subtle::HashType::SHA256,
-                           crypto::tink::subtle::HashType::SHA256, 32});
+  util::StatusOr<std::unique_ptr<PublicKeySign>> direct_signer =
+      subtle::RsaSsaPssSignBoringSsl::New(
+          private_key_subtle, {crypto::tink::subtle::HashType::SHA256,
+                               crypto::tink::subtle::HashType::SHA256, 32});
 
-  auto verifier_or =
+  util::StatusOr<std::unique_ptr<PublicKeyVerify>> verifier =
       RawJwtRsaSsaPssVerifyKeyManager().GetPrimitive<PublicKeyVerify>(
-          public_key);
-  ASSERT_THAT(verifier_or.status(), IsOk());
+          *public_key);
+  ASSERT_THAT(verifier, IsOk());
 
   std::string message = "Some message";
-  EXPECT_THAT(
-      verifier_or.ValueOrDie()->Verify(
-          direct_signer_or.ValueOrDie()->Sign(message).ValueOrDie(), message),
-      IsOk());
+  util::StatusOr<std::string> sig = (*direct_signer)->Sign(message);
+  ASSERT_THAT(sig, IsOk());
+  EXPECT_THAT((*verifier)->Verify(*sig, message), IsOk());
 }
 
 // Test vector from
@@ -196,15 +198,14 @@ TEST(RawJwtRsaSsaPssVerifyKeyManagerTest, TestVector) {
   key.set_version(0);
   key.set_n(nist_test_vector->n);
   key.set_e(nist_test_vector->e);
-  auto result =
+  util::StatusOr<std::unique_ptr<PublicKeyVerify>> verifier =
       RawJwtRsaSsaPssVerifyKeyManager().GetPrimitive<PublicKeyVerify>(key);
-  ASSERT_THAT(result.status(), IsOk());
-  EXPECT_THAT(result.ValueOrDie()->Verify(nist_test_vector->signature,
-                                          nist_test_vector->message),
+  ASSERT_THAT(verifier, IsOk());
+  EXPECT_THAT((*verifier)->Verify(nist_test_vector->signature,
+                                  nist_test_vector->message),
               IsOk());
 }
 
 }  // namespace
 }  // namespace tink
 }  // namespace crypto
-

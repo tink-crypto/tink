@@ -1,0 +1,9 @@
+package(default_visibility = ["//visibility:public"])
+
+licenses(["notice"])
+
+filegroup(
+    name = "hpke_boringssl",
+    testonly = 1,
+    srcs = ["hpke_boringssl.json"],
+)

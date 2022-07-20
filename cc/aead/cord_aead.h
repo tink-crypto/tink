@@ -17,8 +17,6 @@
 #define TINK_AEAD_CORD_AEAD_H_
 
 #include "absl/strings/cord.h"
-#include "absl/strings/string_view.h"
-#include "tink/util/status.h"
 #include "tink/util/statusor.h"
 
 namespace crypto {

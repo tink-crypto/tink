@@ -27,7 +27,10 @@ import java.util.Arrays;
  *
  * <p>The implementation is based on poly1305 implementation by Andrew Moon
  * (https://github.com/floodyberry/poly1305-donna) and released as public domain.
+ *
+ * @deprecated replaced by {@link com.google.crypto.tink.aead.internal.Poly1305}.
  */
+@Deprecated
 class Poly1305 {
 
   public static final int MAC_TAG_SIZE_IN_BYTES = 16;

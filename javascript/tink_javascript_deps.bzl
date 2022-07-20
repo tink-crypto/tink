@@ -5,26 +5,46 @@ load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 def tink_javascript_deps():
     """Load dependencies of TypeScript/JavaScript Tink."""
     if not native.existing_rule("build_bazel_rules_nodejs"):
-        # Release from 2020-08-18
+        # Release from 2021-10-11
         http_archive(
             name = "build_bazel_rules_nodejs",
-            url = "https://github.com/bazelbuild/rules_nodejs/releases/download/2.0.3/rules_nodejs-2.0.3.tar.gz",
-            sha256 = "10fffa29f687aa4d8eb6dfe8731ab5beb63811ab00981fc84a93899641fd4af1",
+            urls = ["https://github.com/bazelbuild/rules_nodejs/releases/download/4.4.0/rules_nodejs-4.4.0.tar.gz"],
+            sha256 = "c9c5d60d6234d65b06f86abd5edc60cadd1699f739ee49d33a099d2d67eb1ae8",
         )
 
     if not native.existing_rule("io_bazel_rules_closure"):
-        # Commit from 2020-06-26
+        # Tag from 2021-06-11
         http_archive(
             name = "io_bazel_rules_closure",
-            strip_prefix = "rules_closure-62746bdd1087c1198a81143e7d8ef3d144a43c0f",
-            url = "https://github.com/bazelbuild/rules_closure/archive/62746bdd1087c1198a81143e7d8ef3d144a43c0f.tar.gz",
-            sha256 = "9161f3b719008b223846b0df63c7674c6e2d67c81e052a9864f90736505c35f3",
+            strip_prefix = "rules_closure-0.12.0",
+            urls = ["https://github.com/bazelbuild/rules_closure/archive/0.12.0.tar.gz"],
+            sha256 = "9498e57368efb82b985db1ed426a767cbf1ba0398fd7aed632fc3908654e1b1e",
+        )
+
+    if not native.existing_rule("io_bazel_rules_webtesting"):
+        # Release from 2021-09-15
+        http_archive(
+            name = "io_bazel_rules_webtesting",
+            urls = ["https://github.com/bazelbuild/rules_webtesting/releases/download/0.3.5/rules_webtesting.tar.gz"],
+            sha256 = "e9abb7658b6a129740c0b3ef6f5a2370864e102a5ba5ffca2cea565829ed825a",
         )
 
     if not native.existing_rule("bazel_skylib"):
-        # Release from 2019-10-09
+        # Release from 2021-09-27
         http_archive(
             name = "bazel_skylib",
-            url = "https://github.com/bazelbuild/bazel-skylib/releases/download/1.0.2/bazel-skylib-1.0.2.tar.gz",
-            sha256 = "97e70364e9249702246c0e9444bccdc4b847bed1eb03c5a3ece4f83dfe6abc44",
+            urls = [
+                "https://github.com/bazelbuild/bazel-skylib/releases/download/1.1.1/bazel-skylib-1.1.1.tar.gz",
+                "https://mirror.bazel.build/github.com/bazelbuild/bazel-skylib/releases/download/1.1.1/bazel-skylib-1.1.1.tar.gz",
+            ],
+            sha256 = "c6966ec828da198c5d9adbaa94c05e3a1c7f21bd012a0b29ba8ddbccb2c93b0d",
+        )
+
+    if not native.existing_rule("wycheproof"):
+        # Commit from 2019-12-17
+        http_archive(
+            name = "wycheproof",
+            strip_prefix = "wycheproof-d8ed1ba95ac4c551db67f410c06131c3bc00a97c",
+            url = "https://github.com/google/wycheproof/archive/d8ed1ba95ac4c551db67f410c06131c3bc00a97c.zip",
+            sha256 = "eb1d558071acf1aa6d677d7f1cabec2328d1cf8381496c17185bd92b52ce7545",
         )

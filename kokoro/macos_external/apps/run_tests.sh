@@ -16,15 +16,17 @@
 
 
 set -euo pipefail
-cd ${KOKORO_ARTIFACTS_DIR}/git/tink
 
-./kokoro/copy_credentials.sh
+cd ${KOKORO_ARTIFACTS_DIR}/git/tink
 
 export XCODE_VERSION=11.3
 export DEVELOPER_DIR="/Applications/Xcode_${XCODE_VERSION}.app/Contents/Developer"
 export ANDROID_HOME="/Users/kbuilder/Library/Android/sdk"
+export COURSIER_OPTS="-Djava.net.preferIPv6Addresses=true"
+
+./kokoro/testutils/update_android_sdk.sh
 
 cd apps
 use_bazel.sh $(cat .bazelversion)
 time bazel build -- ...
-time bazel test -- ...
+time bazel test --test_output="errors" -- ...

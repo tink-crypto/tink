@@ -1,4 +1,4 @@
-# Copyright 2019 Google LLC.
+# Copyright 2019 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,9 +13,6 @@
 # limitations under the License.
 
 """Tests for tink.python.tink.integration.gcp_kms_aead."""
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
 
 import os
 
@@ -25,8 +22,8 @@ from tink import core
 from tink.integration import gcpkms
 from tink.testing import helper
 
-CREDENTIAL_PATH = os.path.join(helper.tink_root_path(),
-                               'testdata/credential.json')
+CREDENTIAL_PATH = os.path.join(helper.tink_py_testdata_path(),
+                               'gcp/credential.json')
 KEY_URI = 'gcp-kms://projects/tink-test-infrastructure/locations/global/keyRings/unit-and-integration-testing/cryptoKeys/aead-key'
 LOCAL_KEY_URI = 'gcp-kms://projects/tink-test-infrastructure/locations/europe-west1/keyRings/unit-and-integration-test/cryptoKeys/aead-key'
 BAD_KEY_URI = 'aws-kms://arn:aws:kms:us-east-2:235739564943:key/3ee50705-5a82-4f5b-9753-05c4f473922f'
@@ -89,6 +86,4 @@ class GcpKmsAeadTest(absltest.TestCase):
         aead.decrypt(corrupted_ciphertext, b'')
 
 if __name__ == '__main__':
-  # TODO(b/154273145): re-enable this.
-  pass
-  # absltest.main()
+  absltest.main()

@@ -19,8 +19,9 @@ package com.google.crypto.tink.jwt;
 import static java.nio.charset.StandardCharsets.US_ASCII;
 
 import com.google.crypto.tink.KeyTemplate;
-import com.google.crypto.tink.KeyTypeManager;
 import com.google.crypto.tink.Registry;
+import com.google.crypto.tink.internal.KeyTypeManager;
+import com.google.crypto.tink.internal.PrimitiveFactory;
 import com.google.crypto.tink.proto.JwtHmacAlgorithm;
 import com.google.crypto.tink.proto.JwtHmacKey;
 import com.google.crypto.tink.proto.JwtHmacKeyFormat;
@@ -36,6 +37,9 @@ import com.google.protobuf.ExtensionRegistryLite;
 import com.google.protobuf.InvalidProtocolBufferException;
 import java.io.InputStream;
 import java.security.GeneralSecurityException;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 import javax.crypto.spec.SecretKeySpec;
 
@@ -72,31 +76,58 @@ public final class JwtHmacKeyManager extends KeyTypeManager<JwtHmacKey> {
     }
   }
 
+  /** Returns the minimum key size in bytes.
+   *
+   * <p>These minimum key sizes are required by https://tools.ietf.org/html/rfc7518#section-3.2
+   */
+  private static final int getMinimumKeySizeInBytes(JwtHmacAlgorithm algorithm)
+      throws GeneralSecurityException {
+    switch (algorithm) {
+      case HS256:
+        return 32;
+      case HS384:
+        return 48;
+      case HS512:
+        return 64;
+      default:
+        throw new GeneralSecurityException("unknown algorithm");
+    }
+  }
+
   @Immutable
   private static final class JwtHmac implements JwtMacInternal {
     private final PrfMac prfMac;
     private final String algorithm;
+    private final Optional<String> customKidFromHmacKey;
 
-    public JwtHmac(String algorithm, PrfMac prfMac) {
+    public JwtHmac(String algorithm, Optional<String> customKidFromHmacKey, PrfMac prfMac) {
       this.algorithm = algorithm;
+      this.customKidFromHmacKey = customKidFromHmacKey;
       this.prfMac = prfMac;
     }
 
     @Override
     public String computeMacAndEncodeWithKid(RawJwt rawJwt, Optional<String> kid)
         throws GeneralSecurityException {
+      if (customKidFromHmacKey.isPresent()) {
+        if (kid.isPresent()) {
+          throw new JwtInvalidException("custom_kid can only be set for RAW keys.");
+        }
+        kid = customKidFromHmacKey;
+      }
       String unsignedCompact = JwtFormat.createUnsignedCompact(algorithm, kid, rawJwt);
       return JwtFormat.createSignedCompact(
           unsignedCompact, prfMac.computeMac(unsignedCompact.getBytes(US_ASCII)));
     }
 
     @Override
-    public VerifiedJwt verifyMacAndDecode(String compact, JwtValidator validator)
+    public VerifiedJwt verifyMacAndDecodeWithKid(
+        String compact, JwtValidator validator, Optional<String> kid)
         throws GeneralSecurityException {
       JwtFormat.Parts parts = JwtFormat.splitSignedCompact(compact);
       prfMac.verifyMac(parts.signatureOrMac, parts.unsignedCompact.getBytes(US_ASCII));
       JsonObject parsedHeader = JsonUtil.parseJson(parts.header);
-      JwtFormat.validateHeader(algorithm, parsedHeader);
+      JwtFormat.validateHeader(algorithm, kid, customKidFromHmacKey, parsedHeader);
       RawJwt token = RawJwt.fromJsonPayload(JwtFormat.getTypeHeader(parsedHeader), parts.payload);
       return validator.validate(token);
     }
@@ -113,14 +144,12 @@ public final class JwtHmacKeyManager extends KeyTypeManager<JwtHmacKey> {
             SecretKeySpec keySpec = new SecretKeySpec(keyValue, "HMAC");
             PrfHmacJce prf = new PrfHmacJce(getHmacAlgorithm(algorithm), keySpec);
             final PrfMac prfMac = new PrfMac(prf, prf.getMaxOutputLength());
-            return new JwtHmac(getAlgorithmName(algorithm), prfMac);
+            final Optional<String> customKid =
+                key.hasCustomKid() ? Optional.of(key.getCustomKid().getValue()) : Optional.empty();
+            return new JwtHmac(getAlgorithmName(algorithm), customKid, prfMac);
           }
         });
   }
-
-  /** Minimum key size in bytes. */
-  private static final int MIN_KEY_SIZE_IN_BYTES = 32;
-
   @Override
   public String getKeyType() {
     return "type.googleapis.com/google.crypto.tink.JwtHmacKey";
@@ -139,7 +168,7 @@ public final class JwtHmacKeyManager extends KeyTypeManager<JwtHmacKey> {
   @Override
   public void validateKey(JwtHmacKey key) throws GeneralSecurityException {
     Validators.validateVersion(key.getVersion(), getVersion());
-    if (key.getKeyValue().size() < MIN_KEY_SIZE_IN_BYTES) {
+    if (key.getKeyValue().size() < getMinimumKeySizeInBytes(key.getAlgorithm())) {
       throw new GeneralSecurityException("key too short");
     }
   }
@@ -154,7 +183,7 @@ public final class JwtHmacKeyManager extends KeyTypeManager<JwtHmacKey> {
     return new KeyFactory<JwtHmacKeyFormat, JwtHmacKey>(JwtHmacKeyFormat.class) {
       @Override
       public void validateKeyFormat(JwtHmacKeyFormat format) throws GeneralSecurityException {
-        if (format.getKeySize() < MIN_KEY_SIZE_IN_BYTES) {
+        if (format.getKeySize() < getMinimumKeySizeInBytes(format.getAlgorithm())) {
           throw new GeneralSecurityException("key too short");
         }
       }
@@ -179,6 +208,35 @@ public final class JwtHmacKeyManager extends KeyTypeManager<JwtHmacKey> {
           throws GeneralSecurityException {
         throw new UnsupportedOperationException();
       }
+
+      /**
+       * List of default templates to generate tokens with algorithms "HS256", "HS384" or "HS512".
+       * Use the template with the "_RAW" suffix if you want to generate tokens without a "kid"
+       * header.
+       */
+      @Override
+      public Map<String, KeyFactory.KeyFormat<JwtHmacKeyFormat>> keyFormats() {
+        Map<String, KeyFactory.KeyFormat<JwtHmacKeyFormat>> result = new HashMap<>();
+        result.put(
+            "JWT_HS256_RAW",
+            createKeyFormat(JwtHmacAlgorithm.HS256, 32, KeyTemplate.OutputPrefixType.RAW));
+        result.put(
+            "JWT_HS256",
+            createKeyFormat(JwtHmacAlgorithm.HS256, 32, KeyTemplate.OutputPrefixType.TINK));
+        result.put(
+            "JWT_HS384_RAW",
+            createKeyFormat(JwtHmacAlgorithm.HS384, 48, KeyTemplate.OutputPrefixType.RAW));
+        result.put(
+            "JWT_HS384",
+            createKeyFormat(JwtHmacAlgorithm.HS384, 48, KeyTemplate.OutputPrefixType.TINK));
+        result.put(
+            "JWT_HS512_RAW",
+            createKeyFormat(JwtHmacAlgorithm.HS512, 64, KeyTemplate.OutputPrefixType.RAW));
+        result.put(
+            "JWT_HS512",
+            createKeyFormat(JwtHmacAlgorithm.HS512, 64, KeyTemplate.OutputPrefixType.TINK));
+        return Collections.unmodifiableMap(result);
+      }
     };
   }
 
@@ -188,29 +246,36 @@ public final class JwtHmacKeyManager extends KeyTypeManager<JwtHmacKey> {
 
   /** Returns a {@link KeyTemplate} that generates new instances of HS256 256-bit keys. */
   public static final KeyTemplate hs256Template() {
-    return createTemplate(32, JwtHmacAlgorithm.HS256);
+    return createTemplate(JwtHmacAlgorithm.HS256, 32);
   }
 
   /** Returns a {@link KeyTemplate} that generates new instances of HS384 384-bit keys. */
   public static final KeyTemplate hs384Template() {
-    return createTemplate(48, JwtHmacAlgorithm.HS384);
+    return createTemplate(JwtHmacAlgorithm.HS384, 48);
   }
 
   /** Returns a {@link KeyTemplate} that generates new instances of HS512 384-bit keys. */
   public static final KeyTemplate hs512Template() {
-    return createTemplate(64, JwtHmacAlgorithm.HS512);
+    return createTemplate(JwtHmacAlgorithm.HS512, 64);
   }
 
   /**
    * @return a {@link KeyTemplate} containing a {@link JwtHmacKeyFormat} with some specified
    *     parameters.
    */
-  private static KeyTemplate createTemplate(int keySize, JwtHmacAlgorithm algorithm) {
+  private static KeyTemplate createTemplate(JwtHmacAlgorithm algorithm, int keySize) {
     JwtHmacKeyFormat format =
         JwtHmacKeyFormat.newBuilder().setAlgorithm(algorithm).setKeySize(keySize).build();
     return KeyTemplate.create(
         new JwtHmacKeyManager().getKeyType(),
         format.toByteArray(),
         KeyTemplate.OutputPrefixType.RAW);
+  }
+
+  private static KeyFactory.KeyFormat<JwtHmacKeyFormat> createKeyFormat(
+      JwtHmacAlgorithm algorithm, int keySize, KeyTemplate.OutputPrefixType prefixType) {
+    JwtHmacKeyFormat format =
+        JwtHmacKeyFormat.newBuilder().setAlgorithm(algorithm).setKeySize(keySize).build();
+    return new KeyFactory.KeyFormat<>(format, prefixType);
   }
 }

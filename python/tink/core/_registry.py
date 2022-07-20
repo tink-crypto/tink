@@ -1,4 +1,4 @@
-# Copyright 2019 Google LLC.
+# Copyright 2019 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,12 +14,7 @@
 
 """Tink Registry."""
 
-from __future__ import absolute_import
-from __future__ import division
-# Placeholder for import for type annotations
-from __future__ import print_function
-
-from typing import Any, Text, Tuple, Type, TypeVar
+from typing import Any, Tuple, Type, TypeVar
 
 from tink.proto import tink_pb2
 from tink.core import _key_manager
@@ -30,7 +25,7 @@ from tink.core import _tink_error
 P = TypeVar('P')
 
 
-class Registry(object):
+class Registry:
   """A global container of key managers.
 
   Registry maps supported key types to a corresponding KeyManager object,
@@ -45,7 +40,7 @@ class Registry(object):
   primitives for given keys or keysets.
   """
 
-  _key_managers = {}  # type: dict[Text, Tuple[_key_manager.KeyManager, bool]]
+  _key_managers = {}  # type: dict[str, Tuple[_key_manager.KeyManager, bool]]
   _wrappers = {}  # type: dict[Type, _primitive_wrapper.PrimitiveWrapper]
 
   @classmethod
@@ -56,7 +51,7 @@ class Registry(object):
 
   @classmethod
   def _key_manager_internal(
-      cls, type_url: Text) -> Tuple[_key_manager.KeyManager, bool]:
+      cls, type_url: str) -> Tuple[_key_manager.KeyManager, bool]:
     """Returns a key manager, new_key_allowed pair for the given type_url."""
     if type_url not in cls._key_managers:
       raise _tink_error.TinkError(
@@ -64,7 +59,7 @@ class Registry(object):
     return cls._key_managers[type_url]
 
   @classmethod
-  def key_manager(cls, type_url: Text) -> _key_manager.KeyManager:
+  def key_manager(cls, type_url: str) -> _key_manager.KeyManager:
     """Returns a key manager for the given type_url and primitive_class.
 
     Args:

@@ -1,0 +1,42 @@
+package(default_visibility = ["//visibility:public"])
+
+licenses(["notice"])
+
+filegroup(
+    name = "mac_test_keyset",
+    srcs = ["mac_test_keyset.json"],
+)
+
+cc_binary(
+    name = "mac_cli",
+    srcs = ["mac_cli.cc"],
+    deps = [
+        "@com_google_absl//absl/flags:flag",
+        "@com_google_absl//absl/flags:parse",
+        "@com_google_absl//absl/memory",
+        "@com_google_absl//absl/status",
+        "@com_google_absl//absl/strings",
+        "@tink_cc//:cleartext_keyset_handle",
+        "@tink_cc//:json_keyset_reader",
+        "@tink_cc//:keyset_handle",
+        "@tink_cc//:keyset_reader",
+        "@tink_cc//:mac",
+        "@tink_cc//config:tink_config",
+        "@tink_cc//mac:mac_config",
+        "@tink_cc//util:status",
+    ],
+)
+
+sh_test(
+    name = "mac_cli_test",
+    size = "small",
+    srcs = ["mac_cli_test.sh"],
+    args = [
+        "$(rootpath :mac_cli)",
+        "$(rootpath :mac_test_keyset)",
+    ],
+    data = [
+        ":mac_cli",
+        ":mac_test_keyset",
+    ],
+)

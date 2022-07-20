@@ -17,6 +17,8 @@
 #ifndef TINK_SUBTLE_HKDF_H_
 #define TINK_SUBTLE_HKDF_H_
 
+#include <string>
+
 #include "absl/strings/string_view.h"
 #include "tink/subtle/common_enums.h"
 #include "tink/util/secret_data.h"

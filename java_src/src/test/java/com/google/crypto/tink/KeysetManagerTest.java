@@ -21,6 +21,7 @@ import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import com.google.common.truth.Expect;
 import com.google.crypto.tink.aead.AesGcmKeyManager;
 import com.google.crypto.tink.config.TinkConfig;
 import com.google.crypto.tink.mac.MacKeyTemplates;
@@ -36,56 +37,47 @@ import com.google.crypto.tink.tinkkey.KeyAccess;
 import com.google.crypto.tink.tinkkey.KeyHandle;
 import com.google.crypto.tink.tinkkey.SecretKeyAccess;
 import com.google.crypto.tink.tinkkey.TinkKey;
+import com.google.crypto.tink.tinkkey.internal.ProtoKey;
 import com.google.protobuf.ExtensionRegistryLite;
 import java.security.GeneralSecurityException;
+import java.util.List;
 import org.junit.BeforeClass;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
-/**
- * Tests for KeysetManager.
- */
+/** Tests for KeysetManager. */
 @RunWith(JUnit4.class)
 public class KeysetManagerTest {
+
+  @Rule public final Expect expect = Expect.create();
+
   @BeforeClass
   public static void setUp() throws GeneralSecurityException {
     TinkConfig.register();
   }
 
   private Key createEnabledKey(int keyId) {
-    return Key.newBuilder()
-        .setKeyId(keyId)
-        .setStatus(KeyStatusType.ENABLED)
-        .build();
+    return Key.newBuilder().setKeyId(keyId).setStatus(KeyStatusType.ENABLED).build();
   }
 
   private Key createDisabledKey(int keyId) {
-    return Key.newBuilder()
-        .setKeyId(keyId)
-        .setStatus(KeyStatusType.DISABLED)
-        .build();
+    return Key.newBuilder().setKeyId(keyId).setStatus(KeyStatusType.DISABLED).build();
   }
 
   private Key createDestroyedKey(int keyId) {
-    return Key.newBuilder()
-        .setKeyId(keyId)
-        .setStatus(KeyStatusType.DESTROYED)
-        .build();
+    return Key.newBuilder().setKeyId(keyId).setStatus(KeyStatusType.DESTROYED).build();
   }
 
   private Key createUnknownStatusKey(int keyId) {
-    return Key.newBuilder()
-        .setKeyId(keyId)
-        .setStatus(KeyStatusType.UNKNOWN_STATUS)
-        .build();
+    return Key.newBuilder().setKeyId(keyId).setStatus(KeyStatusType.UNKNOWN_STATUS).build();
   }
 
   @Test
   public void testEnable_shouldEnableKey() throws Exception {
     int keyId = 42;
-    KeysetHandle handle = KeysetHandle.fromKeyset(
-        TestUtil.createKeyset(createDisabledKey(keyId)));
+    KeysetHandle handle = KeysetHandle.fromKeyset(TestUtil.createKeyset(createDisabledKey(keyId)));
     Keyset keyset =
         KeysetManager.withKeysetHandle(handle).enable(keyId).getKeysetHandle().getKeyset();
 
@@ -97,8 +89,8 @@ public class KeysetManagerTest {
   @Test
   public void testEnable_unknownStatus_shouldThrowException() throws Exception {
     int keyId = 42;
-    KeysetHandle handle = KeysetHandle.fromKeyset(
-        TestUtil.createKeyset(createUnknownStatusKey(keyId)));
+    KeysetHandle handle =
+        KeysetHandle.fromKeyset(TestUtil.createKeyset(createUnknownStatusKey(keyId)));
 
     GeneralSecurityException e =
         assertThrows(
@@ -110,8 +102,7 @@ public class KeysetManagerTest {
   @Test
   public void testEnable_keyDestroyed_shouldThrowException() throws Exception {
     int keyId = 42;
-    KeysetHandle handle = KeysetHandle.fromKeyset(
-        TestUtil.createKeyset(createDestroyedKey(keyId)));
+    KeysetHandle handle = KeysetHandle.fromKeyset(TestUtil.createKeyset(createDestroyedKey(keyId)));
 
     GeneralSecurityException e =
         assertThrows(
@@ -123,8 +114,7 @@ public class KeysetManagerTest {
   @Test
   public void testEnable_keyNotFound_shouldThrowException() throws Exception {
     int keyId = 42;
-    KeysetHandle handle = KeysetHandle.fromKeyset(
-        TestUtil.createKeyset(createDisabledKey(keyId)));
+    KeysetHandle handle = KeysetHandle.fromKeyset(TestUtil.createKeyset(createDisabledKey(keyId)));
 
     GeneralSecurityException e =
         assertThrows(
@@ -137,10 +127,10 @@ public class KeysetManagerTest {
   public void testSetPrimary_shouldSetPrimary() throws Exception {
     int primaryKeyId = 42;
     int newPrimaryKeyId = 43;
-    KeysetHandle handle = KeysetHandle.fromKeyset(
-        TestUtil.createKeyset(
-            createEnabledKey(primaryKeyId),
-            createEnabledKey(newPrimaryKeyId)));
+    KeysetHandle handle =
+        KeysetHandle.fromKeyset(
+            TestUtil.createKeyset(
+                createEnabledKey(primaryKeyId), createEnabledKey(newPrimaryKeyId)));
     Keyset keyset =
         KeysetManager.withKeysetHandle(handle)
             .setPrimary(newPrimaryKeyId)
@@ -155,10 +145,10 @@ public class KeysetManagerTest {
   public void testSetPrimary_keyNotFound_shouldThrowException() throws Exception {
     int primaryKeyId = 42;
     int newPrimaryKeyId = 43;
-    KeysetHandle handle = KeysetHandle.fromKeyset(
-        TestUtil.createKeyset(
-            createEnabledKey(primaryKeyId),
-            createEnabledKey(newPrimaryKeyId)));
+    KeysetHandle handle =
+        KeysetHandle.fromKeyset(
+            TestUtil.createKeyset(
+                createEnabledKey(primaryKeyId), createEnabledKey(newPrimaryKeyId)));
     GeneralSecurityException e =
         assertThrows(
             GeneralSecurityException.class,
@@ -170,10 +160,10 @@ public class KeysetManagerTest {
   public void testSetPrimary_keyDisabled_shouldThrowException() throws Exception {
     int primaryKeyId = 42;
     int newPrimaryKeyId = 43;
-    KeysetHandle handle = KeysetHandle.fromKeyset(
-        TestUtil.createKeyset(
-            createEnabledKey(primaryKeyId),
-            createDisabledKey(newPrimaryKeyId)));
+    KeysetHandle handle =
+        KeysetHandle.fromKeyset(
+            TestUtil.createKeyset(
+                createEnabledKey(primaryKeyId), createDisabledKey(newPrimaryKeyId)));
     GeneralSecurityException e =
         assertThrows(
             GeneralSecurityException.class,
@@ -185,10 +175,10 @@ public class KeysetManagerTest {
   public void testSetPrimary_keyDestroyed_shouldThrowException() throws Exception {
     int primaryKeyId = 42;
     int newPrimaryKeyId = 43;
-    KeysetHandle handle = KeysetHandle.fromKeyset(
-        TestUtil.createKeyset(
-            createEnabledKey(primaryKeyId),
-            createDestroyedKey(newPrimaryKeyId)));
+    KeysetHandle handle =
+        KeysetHandle.fromKeyset(
+            TestUtil.createKeyset(
+                createEnabledKey(primaryKeyId), createDestroyedKey(newPrimaryKeyId)));
     GeneralSecurityException e =
         assertThrows(
             GeneralSecurityException.class,
@@ -200,10 +190,10 @@ public class KeysetManagerTest {
   public void testSetPrimary_keyUnknownStatus_shouldThrowException() throws Exception {
     int primaryKeyId = 42;
     int newPrimaryKeyId = 43;
-    KeysetHandle handle = KeysetHandle.fromKeyset(
-        TestUtil.createKeyset(
-            createEnabledKey(primaryKeyId),
-            createUnknownStatusKey(newPrimaryKeyId)));
+    KeysetHandle handle =
+        KeysetHandle.fromKeyset(
+            TestUtil.createKeyset(
+                createEnabledKey(primaryKeyId), createUnknownStatusKey(newPrimaryKeyId)));
     GeneralSecurityException e =
         assertThrows(
             GeneralSecurityException.class,
@@ -216,10 +206,10 @@ public class KeysetManagerTest {
   public void testPromote_shouldPromote() throws Exception {
     int primaryKeyId = 42;
     int newPrimaryKeyId = 43;
-    KeysetHandle handle = KeysetHandle.fromKeyset(
-        TestUtil.createKeyset(
-            createEnabledKey(primaryKeyId),
-            createEnabledKey(newPrimaryKeyId)));
+    KeysetHandle handle =
+        KeysetHandle.fromKeyset(
+            TestUtil.createKeyset(
+                createEnabledKey(primaryKeyId), createEnabledKey(newPrimaryKeyId)));
     Keyset keyset =
         KeysetManager.withKeysetHandle(handle)
             .promote(newPrimaryKeyId)
@@ -234,10 +224,10 @@ public class KeysetManagerTest {
   public void testPromote_keyNotFound_shouldThrowException() throws Exception {
     int primaryKeyId = 42;
     int newPrimaryKeyId = 43;
-    KeysetHandle handle = KeysetHandle.fromKeyset(
-        TestUtil.createKeyset(
-            createEnabledKey(primaryKeyId),
-            createEnabledKey(newPrimaryKeyId)));
+    KeysetHandle handle =
+        KeysetHandle.fromKeyset(
+            TestUtil.createKeyset(
+                createEnabledKey(primaryKeyId), createEnabledKey(newPrimaryKeyId)));
     GeneralSecurityException e =
         assertThrows(
             GeneralSecurityException.class,
@@ -249,10 +239,10 @@ public class KeysetManagerTest {
   public void testPromote_keyDisabled_shouldThrowException() throws Exception {
     int primaryKeyId = 42;
     int newPrimaryKeyId = 43;
-    KeysetHandle handle = KeysetHandle.fromKeyset(
-        TestUtil.createKeyset(
-            createEnabledKey(primaryKeyId),
-            createDisabledKey(newPrimaryKeyId)));
+    KeysetHandle handle =
+        KeysetHandle.fromKeyset(
+            TestUtil.createKeyset(
+                createEnabledKey(primaryKeyId), createDisabledKey(newPrimaryKeyId)));
     GeneralSecurityException e =
         assertThrows(
             GeneralSecurityException.class,
@@ -264,10 +254,10 @@ public class KeysetManagerTest {
   public void testPromote_keyDestroyed_shouldThrowException() throws Exception {
     int primaryKeyId = 42;
     int newPrimaryKeyId = 43;
-    KeysetHandle handle = KeysetHandle.fromKeyset(
-        TestUtil.createKeyset(
-            createEnabledKey(primaryKeyId),
-            createDestroyedKey(newPrimaryKeyId)));
+    KeysetHandle handle =
+        KeysetHandle.fromKeyset(
+            TestUtil.createKeyset(
+                createEnabledKey(primaryKeyId), createDestroyedKey(newPrimaryKeyId)));
     GeneralSecurityException e =
         assertThrows(
             GeneralSecurityException.class,
@@ -279,10 +269,10 @@ public class KeysetManagerTest {
   public void testPromote_keyUnknownStatus_shouldThrowException() throws Exception {
     int primaryKeyId = 42;
     int newPrimaryKeyId = 43;
-    KeysetHandle handle = KeysetHandle.fromKeyset(
-        TestUtil.createKeyset(
-            createEnabledKey(primaryKeyId),
-            createUnknownStatusKey(newPrimaryKeyId)));
+    KeysetHandle handle =
+        KeysetHandle.fromKeyset(
+            TestUtil.createKeyset(
+                createEnabledKey(primaryKeyId), createUnknownStatusKey(newPrimaryKeyId)));
     GeneralSecurityException e =
         assertThrows(
             GeneralSecurityException.class,
@@ -294,10 +284,9 @@ public class KeysetManagerTest {
   public void testDisable_shouldDisableKey() throws Exception {
     int primaryKeyId = 42;
     int otherKeyId = 43;
-    KeysetHandle handle = KeysetHandle.fromKeyset(
-        TestUtil.createKeyset(
-            createEnabledKey(primaryKeyId),
-            createEnabledKey(otherKeyId)));
+    KeysetHandle handle =
+        KeysetHandle.fromKeyset(
+            TestUtil.createKeyset(createEnabledKey(primaryKeyId), createEnabledKey(otherKeyId)));
     Keyset keyset =
         KeysetManager.withKeysetHandle(handle).disable(otherKeyId).getKeysetHandle().getKeyset();
 
@@ -312,10 +301,9 @@ public class KeysetManagerTest {
   public void testDisable_keyIsPrimary_shouldThrowException() throws Exception {
     int primaryKeyId = 42;
     int otherKeyId = 43;
-    KeysetHandle handle = KeysetHandle.fromKeyset(
-        TestUtil.createKeyset(
-            createEnabledKey(primaryKeyId),
-            createEnabledKey(otherKeyId)));
+    KeysetHandle handle =
+        KeysetHandle.fromKeyset(
+            TestUtil.createKeyset(createEnabledKey(primaryKeyId), createEnabledKey(otherKeyId)));
     GeneralSecurityException e =
         assertThrows(
             GeneralSecurityException.class,
@@ -331,10 +319,9 @@ public class KeysetManagerTest {
   public void testDisable_keyDestroyed_shouldThrowException() throws Exception {
     int primaryKeyId = 42;
     int otherKeyId = 43;
-    KeysetHandle handle = KeysetHandle.fromKeyset(
-        TestUtil.createKeyset(
-            createEnabledKey(primaryKeyId),
-            createDestroyedKey(otherKeyId)));
+    KeysetHandle handle =
+        KeysetHandle.fromKeyset(
+            TestUtil.createKeyset(createEnabledKey(primaryKeyId), createDestroyedKey(otherKeyId)));
     GeneralSecurityException e =
         assertThrows(
             GeneralSecurityException.class,
@@ -349,8 +336,7 @@ public class KeysetManagerTest {
   @Test
   public void testDisable_keyNotFound_shouldThrowException() throws Exception {
     int keyId = 42;
-    KeysetHandle handle = KeysetHandle.fromKeyset(
-        TestUtil.createKeyset(createDisabledKey(keyId)));
+    KeysetHandle handle = KeysetHandle.fromKeyset(TestUtil.createKeyset(createDisabledKey(keyId)));
 
     GeneralSecurityException e =
         assertThrows(
@@ -363,10 +349,9 @@ public class KeysetManagerTest {
   public void testDestroy_shouldDestroyKey() throws Exception {
     int primaryKeyId = 42;
     int otherKeyId = 43;
-    KeysetHandle handle = KeysetHandle.fromKeyset(
-        TestUtil.createKeyset(
-            createEnabledKey(primaryKeyId),
-            createEnabledKey(otherKeyId)));
+    KeysetHandle handle =
+        KeysetHandle.fromKeyset(
+            TestUtil.createKeyset(createEnabledKey(primaryKeyId), createEnabledKey(otherKeyId)));
     Keyset keyset =
         KeysetManager.withKeysetHandle(handle).destroy(otherKeyId).getKeysetHandle().getKeyset();
 
@@ -382,10 +367,9 @@ public class KeysetManagerTest {
   public void testDestroy_keyIsPrimary_shouldThrowException() throws Exception {
     int primaryKeyId = 42;
     int otherKeyId = 43;
-    KeysetHandle handle = KeysetHandle.fromKeyset(
-        TestUtil.createKeyset(
-            createEnabledKey(primaryKeyId),
-            createEnabledKey(otherKeyId)));
+    KeysetHandle handle =
+        KeysetHandle.fromKeyset(
+            TestUtil.createKeyset(createEnabledKey(primaryKeyId), createEnabledKey(otherKeyId)));
     GeneralSecurityException e =
         assertThrows(
             GeneralSecurityException.class,
@@ -401,10 +385,10 @@ public class KeysetManagerTest {
   public void testDestroy_keyUnknownStatus_shouldThrowException() throws Exception {
     int primaryKeyId = 42;
     int otherKeyId = 43;
-    KeysetHandle handle = KeysetHandle.fromKeyset(
-        TestUtil.createKeyset(
-            createEnabledKey(primaryKeyId),
-            createUnknownStatusKey(otherKeyId)));
+    KeysetHandle handle =
+        KeysetHandle.fromKeyset(
+            TestUtil.createKeyset(
+                createEnabledKey(primaryKeyId), createUnknownStatusKey(otherKeyId)));
     GeneralSecurityException e =
         assertThrows(
             GeneralSecurityException.class,
@@ -419,8 +403,7 @@ public class KeysetManagerTest {
   @Test
   public void testDestroy_keyNotFound_shouldThrowException() throws Exception {
     int keyId = 42;
-    KeysetHandle handle = KeysetHandle.fromKeyset(
-        TestUtil.createKeyset(createDisabledKey(keyId)));
+    KeysetHandle handle = KeysetHandle.fromKeyset(TestUtil.createKeyset(createDisabledKey(keyId)));
 
     GeneralSecurityException e =
         assertThrows(
@@ -433,10 +416,9 @@ public class KeysetManagerTest {
   public void testDelete_shouldDeleteKey() throws Exception {
     int primaryKeyId = 42;
     int otherKeyId = 43;
-    KeysetHandle handle = KeysetHandle.fromKeyset(
-        TestUtil.createKeyset(
-            createEnabledKey(primaryKeyId),
-            createEnabledKey(otherKeyId)));
+    KeysetHandle handle =
+        KeysetHandle.fromKeyset(
+            TestUtil.createKeyset(createEnabledKey(primaryKeyId), createEnabledKey(otherKeyId)));
     Keyset keyset =
         KeysetManager.withKeysetHandle(handle).delete(otherKeyId).getKeysetHandle().getKeyset();
 
@@ -449,10 +431,9 @@ public class KeysetManagerTest {
   public void testDelete_keyIsPrimary_shouldThrowException() throws Exception {
     int primaryKeyId = 42;
     int otherKeyId = 43;
-    KeysetHandle handle = KeysetHandle.fromKeyset(
-        TestUtil.createKeyset(
-            createEnabledKey(primaryKeyId),
-            createEnabledKey(otherKeyId)));
+    KeysetHandle handle =
+        KeysetHandle.fromKeyset(
+            TestUtil.createKeyset(createEnabledKey(primaryKeyId), createEnabledKey(otherKeyId)));
     GeneralSecurityException e =
         assertThrows(
             GeneralSecurityException.class,
@@ -468,10 +449,9 @@ public class KeysetManagerTest {
   public void testDelete_keyNotFound_shouldThrowException() throws Exception {
     int keyId1 = 42;
     final int keyId2 = 43;
-    KeysetHandle handle = KeysetHandle.fromKeyset(
-        TestUtil.createKeyset(
-            createEnabledKey(keyId1),
-            createEnabledKey(keyId2)));
+    KeysetHandle handle =
+        KeysetHandle.fromKeyset(
+            TestUtil.createKeyset(createEnabledKey(keyId1), createEnabledKey(keyId2)));
 
     GeneralSecurityException e =
         assertThrows(
@@ -646,69 +626,116 @@ public class KeysetManagerTest {
   }
 
   @Test
-  public void add_newKeyset_shouldAddKey_keyHandle() throws Exception {
-    KeyTemplate kt = AesGcmKeyManager.aes128GcmTemplate();
-    KeyHandle kh = KeyHandle.createFromKey(Registry.newKeyData(kt), kt.getOutputPrefixType());
-    KeyAccess ka = SecretKeyAccess.insecureSecretAccess();
-    KeysetManager km = KeysetManager.withEmptyKeyset();
+  public void addKeyHandle_newKeyset_shouldAddKey() throws Exception {
+    KeyTemplate keyTemplate = KeyTemplates.get("AES256_GCM");
+    KeyHandle keyHandle = KeyHandle.generateNew(keyTemplate);
+    KeysetManager keysetManager = KeysetManager.withEmptyKeyset();
 
-    km = km.add(kh, ka);
+    keysetManager = keysetManager.add(keyHandle);
 
-    Keyset keyset = km.getKeysetHandle().getKeyset();
-    assertThat(keyset.getKeyCount()).isEqualTo(1);
-    // No primary key because add doesn't automatically promote the new key to primary.
-    assertThat(keyset.getPrimaryKeyId()).isEqualTo(0);
+    KeysetHandle keysetHandle = keysetManager.getKeysetHandle();
+    Keyset keyset = keysetHandle.getKeyset();
+    expect.that(keyset.getKeyCount()).isEqualTo(1);
     Keyset.Key key = keyset.getKey(0);
-    assertThat(key.getStatus()).isEqualTo(KeyStatusType.ENABLED);
-    assertThat(key.getOutputPrefixType()).isEqualTo(OutputPrefixType.TINK);
-    assertThat(key.hasKeyData()).isTrue();
-    assertThat(key.getKeyData().getTypeUrl()).isEqualTo(kt.getTypeUrl());
+    expect.that(key.getKeyId()).isEqualTo(keyHandle.getId());
+    expect.that(key.getStatus()).isEqualTo(KeyStatusType.ENABLED);
+    expect.that(key.getOutputPrefixType()).isEqualTo(OutputPrefixType.TINK);
+    expect.that(key.hasKeyData()).isTrue();
+    expect.that(key.getKeyData().getTypeUrl()).isEqualTo(keyTemplate.getTypeUrl());
     AesGcmKeyFormat aesGcmKeyFormat =
-        AesGcmKeyFormat.parseFrom(kt.getValue(), ExtensionRegistryLite.getEmptyRegistry());
+        AesGcmKeyFormat.parseFrom(keyTemplate.getValue(), ExtensionRegistryLite.getEmptyRegistry());
     AesGcmKey aesGcmKey =
         AesGcmKey.parseFrom(key.getKeyData().getValue(), ExtensionRegistryLite.getEmptyRegistry());
-    assertThat(aesGcmKey.getKeyValue().size()).isEqualTo(aesGcmKeyFormat.getKeySize());
+    expect.that(aesGcmKey.getKeyValue().size()).isEqualTo(aesGcmKeyFormat.getKeySize());
+    // No primary key because add doesn't automatically promote the new key to primary.
+    assertThrows(GeneralSecurityException.class, () -> keysetHandle.getPrimitive(Aead.class));
   }
 
   @Test
-  public void add_existingKeyset_shouldAddKey_keyHandle() throws Exception {
-    KeyTemplate kt1 = AesGcmKeyManager.aes128GcmTemplate();
-    KeysetManager km = KeysetManager.withEmptyKeyset().add(kt1);
-    KeyTemplate kt2 = AesGcmKeyManager.aes256GcmTemplate();
-    KeyHandle kh = KeyHandle.createFromKey(Registry.newKeyData(kt2), kt2.getOutputPrefixType());
-    KeyAccess ka = SecretKeyAccess.insecureSecretAccess();
+  public void addKeyHandle_existingKeyset_shouldAddKey() throws Exception {
+    KeyTemplate keyTemplate1 = KeyTemplates.get("AES128_GCM_RAW");
+    KeyHandle keyHandle1 = KeyHandle.generateNew(keyTemplate1);
+    KeysetManager keysetManager = KeysetManager.withEmptyKeyset().add(keyHandle1);
+    keysetManager.setPrimary(keyHandle1.getId());
+    KeyTemplate keyTemplate2 = KeyTemplates.get("AES256_GCM_RAW");
+    KeyHandle keyHandle2 = KeyHandle.generateNew(keyTemplate2);
 
-    km = km.add(kh, ka);
+    keysetManager = keysetManager.add(keyHandle2);
 
-    Keyset keyset = km.getKeysetHandle().getKeyset();
-    assertThat(keyset.getKeyCount()).isEqualTo(2);
-    // None of the keys are primary.
-    assertThat(keyset.getPrimaryKeyId()).isEqualTo(0);
+    Keyset keyset = keysetManager.getKeysetHandle().getKeyset();
+    expect.that(keyset.getKeyCount()).isEqualTo(2);
+    expect.that(keyset.getPrimaryKeyId()).isEqualTo(keyHandle1.getId());
     Keyset.Key key1 = keyset.getKey(0);
-    assertThat(key1.getStatus()).isEqualTo(KeyStatusType.ENABLED);
-    assertThat(key1.getOutputPrefixType()).isEqualTo(OutputPrefixType.TINK);
-    assertThat(key1.hasKeyData()).isTrue();
-    assertThat(key1.getKeyData().getTypeUrl()).isEqualTo(kt1.getTypeUrl());
+    expect.that(key1.getKeyId()).isEqualTo(keyHandle1.getId());
+    expect.that(key1.getStatus()).isEqualTo(KeyStatusType.ENABLED);
+    expect.that(key1.getOutputPrefixType()).isEqualTo(OutputPrefixType.RAW);
+    expect.that(key1.hasKeyData()).isTrue();
+    expect.that(key1.getKeyData().getTypeUrl()).isEqualTo(keyTemplate1.getTypeUrl());
     AesGcmKeyFormat aesGcmKeyFormat1 =
-        AesGcmKeyFormat.parseFrom(kt1.getValue(), ExtensionRegistryLite.getEmptyRegistry());
+        AesGcmKeyFormat.parseFrom(
+            keyTemplate1.getValue(), ExtensionRegistryLite.getEmptyRegistry());
     AesGcmKey aesGcmKey1 =
         AesGcmKey.parseFrom(key1.getKeyData().getValue(), ExtensionRegistryLite.getEmptyRegistry());
-    assertThat(aesGcmKey1.getKeyValue().size()).isEqualTo(aesGcmKeyFormat1.getKeySize());
+    expect.that(aesGcmKey1.getKeyValue().size()).isEqualTo(aesGcmKeyFormat1.getKeySize());
     Keyset.Key key2 = keyset.getKey(1);
-    assertThat(key2.getStatus()).isEqualTo(KeyStatusType.ENABLED);
-    assertThat(key2.getOutputPrefixType()).isEqualTo(OutputPrefixType.TINK);
-    assertThat(key2.hasKeyData()).isTrue();
-    assertThat(key2.getKeyData().getTypeUrl()).isEqualTo(kt2.getTypeUrl());
+    expect.that(key2.getKeyId()).isEqualTo(keyHandle2.getId());
+    expect.that(key2.getStatus()).isEqualTo(KeyStatusType.ENABLED);
+    expect.that(key2.getOutputPrefixType()).isEqualTo(OutputPrefixType.RAW);
+    expect.that(key2.hasKeyData()).isTrue();
+    expect.that(key2.getKeyData().getTypeUrl()).isEqualTo(keyTemplate2.getTypeUrl());
     AesGcmKeyFormat aesGcmKeyFormat2 =
-        AesGcmKeyFormat.parseFrom(kt2.getValue(), ExtensionRegistryLite.getEmptyRegistry());
+        AesGcmKeyFormat.parseFrom(
+            keyTemplate2.getValue(), ExtensionRegistryLite.getEmptyRegistry());
     AesGcmKey aesGcmKey2 =
         AesGcmKey.parseFrom(key2.getKeyData().getValue(), ExtensionRegistryLite.getEmptyRegistry());
-    assertThat(aesGcmKey2.getKeyValue().size()).isEqualTo(aesGcmKeyFormat2.getKeySize());
+    expect.that(aesGcmKey2.getKeyValue().size()).isEqualTo(aesGcmKeyFormat2.getKeySize());
   }
 
   @Test
-  public void add_unsupportedTinkKey_shouldThrow_keyHandle() throws Exception {
-    TinkKey tk =
+  public void addKeyHandle_fromKeysetWithDisabledKey_shouldCopyStatusCorrectly() throws Exception {
+    KeyTemplate keyTemplate = KeyTemplates.get("AES128_GCM_RAW");
+    KeysetManager keysetManager = KeysetManager.withEmptyKeyset();
+    for (int i = 0; i < 3; i++) {
+      keysetManager.add(keyTemplate);
+    }
+    keysetManager.disable(keysetManager.getKeysetHandle().getKeys().get(0).getId());
+    KeysetHandle keysetHandle = keysetManager.getKeysetHandle();
+    List<KeyHandle> keyList = keysetHandle.getKeys();
+    KeysetManager copiedKeysetManager = KeysetManager.withEmptyKeyset();
+
+    for (KeyHandle key : keyList) {
+      copiedKeysetManager.add(key);
+    }
+
+    KeysetHandle copiedKeysetHandle = copiedKeysetManager.getKeysetHandle();
+    List<KeyHandle> copiedKeyList = copiedKeysetHandle.getKeys();
+    expect.that(copiedKeyList.size()).isEqualTo(keyList.size());
+    for (int i = 0; i < copiedKeyList.size(); i++) {
+      KeyHandle copiedKeyHandle = copiedKeyList.get(i);
+      KeyHandle keyHandle = keyList.get(i);
+      expect.that(copiedKeyHandle.getStatus()).isEqualTo(keyHandle.getStatus());
+      expect.that(copiedKeyHandle.hasSecret()).isEqualTo(keyHandle.hasSecret());
+      expect.that(copiedKeyHandle.getId()).isEqualTo(keyHandle.getId());
+      ProtoKey copiedProtoKey =
+          (ProtoKey) copiedKeyHandle.getKey(SecretKeyAccess.insecureSecretAccess());
+      ProtoKey protoKey = (ProtoKey) keyHandle.getKey(SecretKeyAccess.insecureSecretAccess());
+      expect.that(copiedProtoKey.getOutputPrefixType()).isEqualTo(protoKey.getOutputPrefixType());
+      expect.that(copiedProtoKey.getProtoKey()).isEqualTo(protoKey.getProtoKey());
+    }
+  }
+
+  @Test
+  public void addKeyHandle_existingKeyset_collidingKeyIds_shouldThrow() throws Exception {
+    KeyTemplate keyTemplate1 = KeyTemplates.get("AES128_GCM_RAW");
+    KeyHandle keyHandle1 = KeyHandle.generateNew(keyTemplate1);
+    KeysetManager keysetManager = KeysetManager.withEmptyKeyset().add(keyHandle1);
+
+    assertThrows(GeneralSecurityException.class, () -> keysetManager.add(keyHandle1));
+  }
+
+  @Test
+  public void addKeyHandle_unsupportedTinkKey_shouldThrow() throws Exception {
+    TinkKey tinkKey =
         new TinkKey() {
           @Override
           public boolean hasSecret() {
@@ -720,11 +747,100 @@ public class KeysetManagerTest {
             throw new UnsupportedOperationException();
           }
         };
-    KeyAccess ka = KeyAccess.publicAccess();
-    KeyHandle kh = KeyHandle.createFromKey(tk, ka);
-    KeysetManager km = KeysetManager.withEmptyKeyset();
+    KeyHandle keyHandle = KeyHandle.createFromKey(tinkKey, KeyAccess.publicAccess());
+    KeysetManager keysetManager = KeysetManager.withEmptyKeyset();
 
-    assertThrows(UnsupportedOperationException.class, () -> km.add(kh, ka));
+    assertThrows(UnsupportedOperationException.class, () -> keysetManager.add(keyHandle));
+  }
+
+  @Test
+  public void addKeyHandleWithKeyAccess_newKeyset_shouldAddKey() throws Exception {
+    KeyTemplate keyTemplate = KeyTemplates.get("AES128_GCM");
+    KeyHandle keyHandle = KeyHandle.generateNew(keyTemplate);
+    KeyAccess keyAccess = SecretKeyAccess.insecureSecretAccess();
+    KeysetManager keysetManager = KeysetManager.withEmptyKeyset();
+
+    keysetManager = keysetManager.add(keyHandle, keyAccess);
+
+    KeysetHandle keysetHandle = keysetManager.getKeysetHandle();
+    Keyset keyset = keysetHandle.getKeyset();
+    expect.that(keyset.getKeyCount()).isEqualTo(1);
+    Keyset.Key key = keyset.getKey(0);
+    expect.that(key.getStatus()).isEqualTo(KeyStatusType.ENABLED);
+    expect.that(key.getOutputPrefixType()).isEqualTo(OutputPrefixType.TINK);
+    expect.that(key.hasKeyData()).isTrue();
+    expect.that(key.getKeyData().getTypeUrl()).isEqualTo(keyTemplate.getTypeUrl());
+    AesGcmKeyFormat aesGcmKeyFormat =
+        AesGcmKeyFormat.parseFrom(keyTemplate.getValue(), ExtensionRegistryLite.getEmptyRegistry());
+    AesGcmKey aesGcmKey =
+        AesGcmKey.parseFrom(key.getKeyData().getValue(), ExtensionRegistryLite.getEmptyRegistry());
+    expect.that(aesGcmKey.getKeyValue().size()).isEqualTo(aesGcmKeyFormat.getKeySize());
+    // No primary key because add doesn't automatically promote the new key to primary.
+    assertThrows(GeneralSecurityException.class, () -> keysetHandle.getPrimitive(Aead.class));
+  }
+
+  @Test
+  public void addKeyHandleWithKeyAccess_existingKeyset_shouldAddKey() throws Exception {
+    KeyTemplate keyTemplate1 = KeyTemplates.get("AES128_GCM");
+    KeysetManager keysetManager = KeysetManager.withEmptyKeyset().add(keyTemplate1);
+    KeyTemplate keyTemplate2 = KeyTemplates.get("AES256_GCM");
+    KeyAccess keyAccess = SecretKeyAccess.insecureSecretAccess();
+    KeyHandle keyHandle =
+        KeyHandle.createFromKey(
+            new ProtoKey(Registry.newKeyData(keyTemplate2), keyTemplate2.getOutputPrefixType()),
+            keyAccess);
+
+    keysetManager = keysetManager.add(keyHandle, keyAccess);
+
+    KeysetHandle keysetHandle = keysetManager.getKeysetHandle();
+    Keyset keyset = keysetHandle.getKeyset();
+    expect.that(keyset.getKeyCount()).isEqualTo(2);
+    Keyset.Key key1 = keyset.getKey(0);
+    expect.that(key1.getStatus()).isEqualTo(KeyStatusType.ENABLED);
+    expect.that(key1.getOutputPrefixType()).isEqualTo(OutputPrefixType.TINK);
+    expect.that(key1.hasKeyData()).isTrue();
+    expect.that(key1.getKeyData().getTypeUrl()).isEqualTo(keyTemplate1.getTypeUrl());
+    AesGcmKeyFormat aesGcmKeyFormat1 =
+        AesGcmKeyFormat.parseFrom(
+            keyTemplate1.getValue(), ExtensionRegistryLite.getEmptyRegistry());
+    AesGcmKey aesGcmKey1 =
+        AesGcmKey.parseFrom(key1.getKeyData().getValue(), ExtensionRegistryLite.getEmptyRegistry());
+    expect.that(aesGcmKey1.getKeyValue().size()).isEqualTo(aesGcmKeyFormat1.getKeySize());
+    Keyset.Key key2 = keyset.getKey(1);
+    expect.that(key2.getStatus()).isEqualTo(KeyStatusType.ENABLED);
+    expect.that(key2.getOutputPrefixType()).isEqualTo(OutputPrefixType.TINK);
+    expect.that(key2.hasKeyData()).isTrue();
+    expect.that(key2.getKeyData().getTypeUrl()).isEqualTo(keyTemplate2.getTypeUrl());
+    AesGcmKeyFormat aesGcmKeyFormat2 =
+        AesGcmKeyFormat.parseFrom(
+            keyTemplate2.getValue(), ExtensionRegistryLite.getEmptyRegistry());
+    AesGcmKey aesGcmKey2 =
+        AesGcmKey.parseFrom(key2.getKeyData().getValue(), ExtensionRegistryLite.getEmptyRegistry());
+    expect.that(aesGcmKey2.getKeyValue().size()).isEqualTo(aesGcmKeyFormat2.getKeySize());
+    // No primary key because add doesn't automatically promote the new key to primary.
+    assertThrows(GeneralSecurityException.class, () -> keysetHandle.getPrimitive(Aead.class));
+  }
+
+  @Test
+  public void addKeyHandleWithKeyAccess_unsupportedTinkKey_shouldThrow() throws Exception {
+    TinkKey tinkKey =
+        new TinkKey() {
+          @Override
+          public boolean hasSecret() {
+            return false;
+          }
+
+          @Override
+          public KeyTemplate getKeyTemplate() {
+            throw new UnsupportedOperationException();
+          }
+        };
+    KeyAccess keyAccess = KeyAccess.publicAccess();
+    KeyHandle keyHandle = KeyHandle.createFromKey(tinkKey, keyAccess);
+    KeysetManager keysetManager = KeysetManager.withEmptyKeyset();
+
+    assertThrows(
+        UnsupportedOperationException.class, () -> keysetManager.add(keyHandle, keyAccess));
   }
 
   @Test
@@ -781,27 +897,30 @@ public class KeysetManagerTest {
   @Test
   public void testThreadSafety_manipulateKeyset_shouldWork() throws Exception {
     final KeysetManager manager = KeysetManager.withEmptyKeyset();
-    Thread thread1 = new Thread(
-        new Runnable() {
-          @Override
-          public void run() {
-            manipulateKeyset(manager);
-          }
-        });
-    Thread thread2 = new Thread(
-        new Runnable() {
-          @Override
-          public void run() {
-            manipulateKeyset(manager);
-          }
-        });
-    Thread thread3 = new Thread(
-        new Runnable() {
-          @Override
-          public void run() {
-            manipulateKeyset(manager);
-          }
-        });
+    Thread thread1 =
+        new Thread(
+            new Runnable() {
+              @Override
+              public void run() {
+                manipulateKeyset(manager);
+              }
+            });
+    Thread thread2 =
+        new Thread(
+            new Runnable() {
+              @Override
+              public void run() {
+                manipulateKeyset(manager);
+              }
+            });
+    Thread thread3 =
+        new Thread(
+            new Runnable() {
+              @Override
+              public void run() {
+                manipulateKeyset(manager);
+              }
+            });
     thread1.start();
     thread2.start();
     thread3.start();
@@ -828,34 +947,38 @@ public class KeysetManagerTest {
     final int primaryKeyId = 42;
     final int keyId2 = 43;
     final int keyId3 = 44;
-    KeysetHandle handle = KeysetHandle.fromKeyset(
-        TestUtil.createKeyset(
-            createEnabledKey(primaryKeyId),
-            createEnabledKey(keyId2),
-            createDisabledKey(keyId3)));
+    KeysetHandle handle =
+        KeysetHandle.fromKeyset(
+            TestUtil.createKeyset(
+                createEnabledKey(primaryKeyId),
+                createEnabledKey(keyId2),
+                createDisabledKey(keyId3)));
     final KeysetManager manager = KeysetManager.withKeysetHandle(handle);
 
-    Thread thread1 = new Thread(
-        new Runnable() {
-          @Override
-          public void run() {
-            enableSetPrimaryKey(manager, primaryKeyId);
-          }
-        });
-    Thread thread2 = new Thread(
-        new Runnable() {
-          @Override
-          public void run() {
-            enableSetPrimaryKey(manager, keyId2);
-          }
-        });
-    Thread thread3 = new Thread(
-        new Runnable() {
-          @Override
-          public void run() {
-            enableSetPrimaryKey(manager, keyId3);
-          }
-        });
+    Thread thread1 =
+        new Thread(
+            new Runnable() {
+              @Override
+              public void run() {
+                enableSetPrimaryKey(manager, primaryKeyId);
+              }
+            });
+    Thread thread2 =
+        new Thread(
+            new Runnable() {
+              @Override
+              public void run() {
+                enableSetPrimaryKey(manager, keyId2);
+              }
+            });
+    Thread thread3 =
+        new Thread(
+            new Runnable() {
+              @Override
+              public void run() {
+                enableSetPrimaryKey(manager, keyId3);
+              }
+            });
     thread1.start();
     thread2.start();
     thread3.start();
@@ -885,27 +1008,30 @@ public class KeysetManagerTest {
     final int primaryKeyId = 42;
     final int keyId2 = 43;
     final int keyId3 = 44;
-    KeysetHandle handle = KeysetHandle.fromKeyset(
-        TestUtil.createKeyset(
-            createEnabledKey(primaryKeyId),
-            createEnabledKey(keyId2),
-            createDisabledKey(keyId3)));
+    KeysetHandle handle =
+        KeysetHandle.fromKeyset(
+            TestUtil.createKeyset(
+                createEnabledKey(primaryKeyId),
+                createEnabledKey(keyId2),
+                createDisabledKey(keyId3)));
     final KeysetManager manager = KeysetManager.withKeysetHandle(handle);
 
-    Thread thread2 = new Thread(
-        new Runnable() {
-          @Override
-          public void run() {
-            disableEnableSetPrimaryKey(manager, keyId2);
-          }
-        });
-    Thread thread3 = new Thread(
-        new Runnable() {
-          @Override
-          public void run() {
-            disableEnableSetPrimaryKey(manager, keyId3);
-          }
-        });
+    Thread thread2 =
+        new Thread(
+            new Runnable() {
+              @Override
+              public void run() {
+                disableEnableSetPrimaryKey(manager, keyId2);
+              }
+            });
+    Thread thread3 =
+        new Thread(
+            new Runnable() {
+              @Override
+              public void run() {
+                disableEnableSetPrimaryKey(manager, keyId3);
+              }
+            });
     thread2.start();
     thread3.start();
 
@@ -933,27 +1059,30 @@ public class KeysetManagerTest {
     final int primaryKeyId = 42;
     final int keyId2 = 43;
     final int keyId3 = 44;
-    KeysetHandle handle = KeysetHandle.fromKeyset(
-        TestUtil.createKeyset(
-            createEnabledKey(primaryKeyId),
-            createEnabledKey(keyId2),
-            createDisabledKey(keyId3)));
+    KeysetHandle handle =
+        KeysetHandle.fromKeyset(
+            TestUtil.createKeyset(
+                createEnabledKey(primaryKeyId),
+                createEnabledKey(keyId2),
+                createDisabledKey(keyId3)));
     final KeysetManager manager = KeysetManager.withKeysetHandle(handle);
 
-    Thread thread2 = new Thread(
-        new Runnable() {
-          @Override
-          public void run() {
-            enableDisableDeleteKey(manager, keyId2);
-          }
-        });
-    Thread thread3 = new Thread(
-        new Runnable() {
-          @Override
-          public void run() {
-            enableDisableDeleteKey(manager, keyId3);
-          }
-        });
+    Thread thread2 =
+        new Thread(
+            new Runnable() {
+              @Override
+              public void run() {
+                enableDisableDeleteKey(manager, keyId2);
+              }
+            });
+    Thread thread3 =
+        new Thread(
+            new Runnable() {
+              @Override
+              public void run() {
+                enableDisableDeleteKey(manager, keyId3);
+              }
+            });
     thread2.start();
     thread3.start();
 

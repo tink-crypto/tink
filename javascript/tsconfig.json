@@ -2,10 +2,10 @@
 // options.
 {
   "compilerOptions": {
-    // According to https://kangax.github.io/compat-table/es2016plus/, ES2017
-    // is the latest standard fully supported by Chrome, Firefox, and Safari as
-    // of 2020-08-24. It is also used in ts_library_from_closure.bzl.
-    "target": "ES2017",
-    "lib": ["ES2017", "DOM"]
+    // ES2020 (or later) is required since the subtle elliptic curve point
+    // compression functions depend on BigInt, which was added in ES2020.
+    // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/BigInt
+    "target": "ES2020",
+    "lib": ["ES2020", "DOM"]
   }
 }

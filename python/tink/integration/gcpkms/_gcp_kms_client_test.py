@@ -1,4 +1,4 @@
-# Copyright 2019 Google LLC.
+# Copyright 2019 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,9 +13,6 @@
 # limitations under the License.
 
 """Tests for tink.python.tink.integration.gcp_kms_client."""
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
 
 import os
 
@@ -25,8 +22,8 @@ from tink.integration import gcpkms
 from tink.testing import helper
 
 
-CREDENTIAL_PATH = os.path.join(helper.tink_root_path(),
-                               'testdata/credential.json')
+CREDENTIAL_PATH = os.path.join(helper.tink_py_testdata_path(),
+                               'gcp/credential.json')
 
 
 class GcpKmsClientTest(absltest.TestCase):

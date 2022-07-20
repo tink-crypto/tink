@@ -17,13 +17,15 @@
 #ifndef TINK_SUBTLE_AES_CTR_HMAC_STREAMING_H_
 #define TINK_SUBTLE_AES_CTR_HMAC_STREAMING_H_
 
+#include <memory>
+#include <string>
 #include <utility>
 #include <vector>
 
 #include "absl/strings/string_view.h"
 #include "openssl/evp.h"
-#include "tink/mac.h"
 #include "tink/internal/fips_utils.h"
+#include "tink/mac.h"
 #include "tink/subtle/common_enums.h"
 #include "tink/subtle/nonce_based_streaming_aead.h"
 #include "tink/subtle/stream_segment_decrypter.h"

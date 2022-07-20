@@ -21,7 +21,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/golang/protobuf/proto"
+	"google.golang.org/protobuf/proto"
 	"github.com/google/tink/go/aead/subtle"
 	"github.com/google/tink/go/core/registry"
 	"github.com/google/tink/go/subtle/random"
@@ -252,7 +252,7 @@ func validateAESGCMKey(key *gcmpb.AesGcmKey, format *gcmpb.AesGcmKeyFormat) erro
 
 func validateAESGCMPrimitive(p interface{}, key *gcmpb.AesGcmKey) error {
 	cipher := p.(*subtle.AESGCM)
-	if !bytes.Equal(cipher.Key, key.KeyValue) {
+	if !bytes.Equal(cipher.Key(), key.KeyValue) {
 		return fmt.Errorf("key and primitive don't match")
 	}
 	// try to encrypt and decrypt

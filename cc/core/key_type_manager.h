@@ -17,8 +17,11 @@
 #ifndef TINK_CORE_KEY_TYPE_MANAGER_H_
 #define TINK_CORE_KEY_TYPE_MANAGER_H_
 
+#include <string>
 #include <tuple>
+#include <typeinfo>
 
+#include "absl/status/status.h"
 #include "absl/strings/str_cat.h"
 #include "tink/core/template_util.h"
 #include "tink/input_stream.h"
@@ -56,7 +59,7 @@ class InternalKeyFactory {
   virtual crypto::tink::util::StatusOr<KeyProto> DeriveKey(
       const KeyFormatProto& key_format, InputStream* input_stream) const {
     return crypto::tink::util::Status(
-        crypto::tink::util::error::UNIMPLEMENTED,
+        absl::StatusCode::kUnimplemented,
         "Deriving key not implemented for this key type.");
   }
 };
@@ -154,7 +157,7 @@ class KeyTypeManager<KeyProtoParam, KeyFormatProtoParam, List<Primitives...>>
       util::StatusOr<std::unique_ptr<Primitive>>>::type
   GetPrimitiveImpl(const KeyProto& key) const {
     return util::Status(
-        util::error::INVALID_ARGUMENT,
+        absl::StatusCode::kInvalidArgument,
         absl::StrCat("No PrimitiveFactory was registered for type ",
                      typeid(Primitive).name()));
   }

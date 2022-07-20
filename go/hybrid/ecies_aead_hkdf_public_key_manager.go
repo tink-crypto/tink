@@ -21,7 +21,7 @@ import (
 	"fmt"
 	"math/big"
 
-	"github.com/golang/protobuf/proto"
+	"google.golang.org/protobuf/proto"
 	"github.com/google/tink/go/core/registry"
 	"github.com/google/tink/go/hybrid/subtle"
 	"github.com/google/tink/go/keyset"
@@ -45,11 +45,6 @@ type eciesAEADHKDFPublicKeyKeyManager struct{}
 
 // Assert that eciesAEADHKDFPublicKeyKeyManager implements the KeyManager interface.
 var _ registry.KeyManager = (*eciesAEADHKDFPublicKeyKeyManager)(nil)
-
-// newECIESAEADHKDFPublicKeyKeyManager creates a new aesGcmKeyManager.
-func newECIESAEADHKDFPublicKeyKeyManager() *eciesAEADHKDFPublicKeyKeyManager {
-	return new(eciesAEADHKDFPublicKeyKeyManager)
-}
 
 // Primitive creates an ECIESAEADHKDFPublicKey subtle for the given serialized ECIESAEADHKDFPublicKey proto.
 func (km *eciesAEADHKDFPublicKeyKeyManager) Primitive(serializedKey []byte) (interface{}, error) {

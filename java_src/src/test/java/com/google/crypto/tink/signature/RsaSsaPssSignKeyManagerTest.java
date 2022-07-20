@@ -21,9 +21,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
 
 import com.google.crypto.tink.KeyTemplate;
-import com.google.crypto.tink.KeyTypeManager;
 import com.google.crypto.tink.PublicKeySign;
 import com.google.crypto.tink.PublicKeyVerify;
+import com.google.crypto.tink.internal.KeyTypeManager;
 import com.google.crypto.tink.proto.HashType;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
 import com.google.crypto.tink.proto.RsaSsaPssKeyFormat;
@@ -99,14 +99,14 @@ public class RsaSsaPssSignKeyManagerTest {
   }
 
   @Test
-  public void validateKeyFormat_Sha512Allowed() throws Exception {
+  public void validateKeyFormat_sha512Allowed() throws Exception {
     RsaSsaPssKeyFormat format =
         createKeyFormat(HashType.SHA512, HashType.SHA512, 32, 3072, RSAKeyGenParameterSpec.F4);
     factory.validateKeyFormat(format);
   }
 
   @Test
-  public void validateKeyFormat_Sha1Disallowed_throws() throws Exception {
+  public void validateKeyFormat_sha1Disallowed_throws() throws Exception {
     RsaSsaPssKeyFormat format =
         createKeyFormat(HashType.SHA1, HashType.SHA1, 32, 3072, RSAKeyGenParameterSpec.F4);
     assertThrows(GeneralSecurityException.class, () -> factory.validateKeyFormat(format));

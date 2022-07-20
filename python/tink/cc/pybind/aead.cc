@@ -14,14 +14,20 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "tink/aead.h"
+#include "tink/cc/pybind/aead.h"
+
+#include <string>
+#include <utility>
 
 #include "pybind11/pybind11.h"
+#include "tink/aead.h"
 #include "tink/util/statusor.h"
-#include "tink/cc/pybind/status_casters.h"
+#include "tink/cc/pybind/tink_exception.h"
 
 namespace crypto {
 namespace tink {
+
+using pybind11::google_tink::TinkException;
 
 void PybindRegisterAead(pybind11::module* module) {
   namespace py = pybind11;
@@ -38,11 +44,14 @@ void PybindRegisterAead(pybind11::module* module) {
 
       .def(
           "encrypt",
-          [](const Aead& self, const py::bytes& plaintext,
-             const py::bytes& associated_data) -> util::StatusOr<py::bytes> {
-            // TODO(b/145925674)
-            return self.Encrypt(std::string(plaintext),
-                                std::string(associated_data));
+          [](const Aead &self, const py::bytes &plaintext,
+             const py::bytes &associated_data) -> py::bytes {
+            util::StatusOr<std::string> result = self.Encrypt(
+                std::string(plaintext), std::string(associated_data));
+            if (!result.ok()) {
+              throw TinkException(result.status());
+            }
+            return *std::move(result);
           },
           py::arg("plaintext"), py::arg("associated_data"),
           "Encrypts 'plaintext' with 'associated_data' as associated data, "
@@ -51,11 +60,15 @@ void PybindRegisterAead(pybind11::module* module) {
           "of the associated data, but does not guarantee its secrecy.")
       .def(
           "decrypt",
-          [](const Aead& self, const py::bytes& ciphertext,
-             const py::bytes& associated_data) -> util::StatusOr<py::bytes> {
+          [](const Aead &self, const py::bytes &ciphertext,
+             const py::bytes &associated_data) -> py::bytes {
             // TODO(b/145925674)
-            return self.Decrypt(std::string(ciphertext),
-                                std::string(associated_data));
+            util::StatusOr<std::string> result = self.Decrypt(
+                std::string(ciphertext), std::string(associated_data));
+            if (!result.ok()) {
+              throw TinkException(result.status());
+            }
+            return *std::move(result);
           },
           py::arg("ciphertext"), py::arg("associated_data"),
           "Decrypts 'ciphertext' with 'associated_data' as associated data, "

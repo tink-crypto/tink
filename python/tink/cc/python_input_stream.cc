@@ -21,6 +21,8 @@
 #include <string>
 
 #include "absl/memory/memory.h"
+#include "absl/status/status.h"
+#include "absl/strings/match.h"
 #include "tink/input_stream.h"
 #include "tink/subtle/subtle_util.h"
 #include "tink/util/status.h"
@@ -33,8 +35,8 @@ namespace tink {
 namespace {
 
 bool is_eof(const util::Status& status) {
-  return status.error_code() == util::error::UNKNOWN &&
-         status.error_message().find("EOFError") != std::string::npos;
+  return status.code() == absl::StatusCode::kUnknown &&
+         absl::StrContains(status.message(), "EOFError");
 }
 
 }  // namespace
@@ -66,16 +68,16 @@ util::StatusOr<int> PythonInputStream::Next(const void** data) {
   // Read new bytes to buffer_.
   auto read_result = adapter_->Read(buffer_.size());
   if (is_eof(read_result.status())) {
-    return status_ = util::Status(util::error::OUT_OF_RANGE, "EOF");
-  } else if (read_result.status().error_code() == util::error::OUT_OF_RANGE) {
+    return status_ = util::Status(absl::StatusCode::kOutOfRange, "EOF");
+  } else if (read_result.status().code() == absl::StatusCode::kOutOfRange) {
     // We need to change the error code because for InputStream OUT_OF_RANGE
     // status always means EOF.
-    return status_ = util::Status(util::error::UNKNOWN,
-                                  read_result.status().error_message());
+    return status_ = util::Status(absl::StatusCode::kUnknown,
+                                  read_result.status().message());
   } else if (!read_result.ok()) {
     return status_ = read_result.status();
   }
-  std::string read_string = read_result.ValueOrDie();
+  std::string read_string = read_result.value();
   int count_read = read_string.length();
   buffer_.replace(0, count_read, read_string);
   buffer_offset_ = 0;

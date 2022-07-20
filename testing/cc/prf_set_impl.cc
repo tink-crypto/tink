@@ -17,10 +17,13 @@
 // Implementation of a PrfSet Service.
 #include "prf_set_impl.h"
 
+#include <string>
+#include <utility>
+
 #include "tink/binary_keyset_reader.h"
 #include "tink/cleartext_keyset_handle.h"
 #include "tink/prf/prf_set.h"
-#include "proto/testing/testing_api.grpc.pb.h"
+#include "proto/testing_api.grpc.pb.h"
 
 namespace tink_testing_api {
 
@@ -35,24 +38,24 @@ using ::grpc::Status;
                                   PrfSetKeyIdsResponse* response) {
   auto reader_result = BinaryKeysetReader::New(request->keyset());
   if (!reader_result.ok()) {
-    response->set_err(reader_result.status().error_message());
+    response->set_err(std::string(reader_result.status().message()));
     return ::grpc::Status::OK;
   }
   auto handle_result =
-      CleartextKeysetHandle::Read(std::move(reader_result.ValueOrDie()));
+      CleartextKeysetHandle::Read(std::move(reader_result.value()));
   if (!handle_result.ok()) {
-    response->set_err(handle_result.status().error_message());
+    response->set_err(std::string(handle_result.status().message()));
     return ::grpc::Status::OK;
   }
   auto prf_set_result =
-      handle_result.ValueOrDie()->GetPrimitive<crypto::tink::PrfSet>();
+      handle_result.value()->GetPrimitive<crypto::tink::PrfSet>();
   if (!prf_set_result.ok()) {
-    response->set_err(prf_set_result.status().error_message());
+    response->set_err(std::string(prf_set_result.status().message()));
     return ::grpc::Status::OK;
   }
   auto* output = response->mutable_output();
-  output->set_primary_key_id(prf_set_result.ValueOrDie()->GetPrimaryId());
-  for (auto const& item : prf_set_result.ValueOrDie()->GetPrfs()) {
+  output->set_primary_key_id(prf_set_result.value()->GetPrimaryId());
+  for (auto const& item : prf_set_result.value()->GetPrfs()) {
     output->add_key_id(item.first);
   }
   return ::grpc::Status::OK;
@@ -64,22 +67,22 @@ using ::grpc::Status;
                                    PrfSetComputeResponse* response) {
   auto reader_result = BinaryKeysetReader::New(request->keyset());
   if (!reader_result.ok()) {
-    response->set_err(reader_result.status().error_message());
+    response->set_err(std::string(reader_result.status().message()));
     return ::grpc::Status::OK;
   }
   auto handle_result =
-      CleartextKeysetHandle::Read(std::move(reader_result.ValueOrDie()));
+      CleartextKeysetHandle::Read(std::move(reader_result.value()));
   if (!handle_result.ok()) {
-    response->set_err(handle_result.status().error_message());
+    response->set_err(std::string(handle_result.status().message()));
     return ::grpc::Status::OK;
   }
   auto prf_set_result =
-      handle_result.ValueOrDie()->GetPrimitive<crypto::tink::PrfSet>();
+      handle_result.value()->GetPrimitive<crypto::tink::PrfSet>();
   if (!prf_set_result.ok()) {
-    response->set_err(prf_set_result.status().error_message());
+    response->set_err(std::string(prf_set_result.status().message()));
     return ::grpc::Status::OK;
   }
-  auto prfs = prf_set_result.ValueOrDie()->GetPrfs();
+  auto prfs = prf_set_result.value()->GetPrfs();
   auto prf_it = prfs.find(request->key_id());
   if (prf_it == prfs.end()) {
     response->set_err("Unknown key ID.");
@@ -88,10 +91,10 @@ using ::grpc::Status;
   auto compute_result =
       prf_it->second->Compute(request->input_data(), request->output_length());
   if (!compute_result.ok()) {
-    response->set_err(compute_result.status().error_message());
+    response->set_err(std::string(compute_result.status().message()));
     return ::grpc::Status::OK;
   }
-  response->set_output(compute_result.ValueOrDie());
+  response->set_output(compute_result.value());
   return ::grpc::Status::OK;
 }
 

@@ -18,9 +18,11 @@
 
 #include <algorithm>
 #include <cstring>
+#include <utility>
 #include <vector>
 
 #include "absl/memory/memory.h"
+#include "absl/status/status.h"
 #include "tink/input_stream.h"
 #include "tink/util/errors.h"
 #include "tink/util/status.h"
@@ -44,7 +46,7 @@ BufferedInputStream::BufferedInputStream(
   after_rewind_ = false;
   rewinding_enabled_ = true;
   direct_access_ = false;
-  status_ = Status::OK;
+  status_ = util::OkStatus();
 }
 
 crypto::tink::util::StatusOr<int> BufferedInputStream::Next(const void** data) {
@@ -86,7 +88,7 @@ crypto::tink::util::StatusOr<int> BufferedInputStream::Next(const void** data) {
     status_ = next_result.status();
     return status_;
   }
-  size_t count_read = next_result.ValueOrDie();
+  size_t count_read = next_result.value();
   if (buffer_.size() < count_in_buffer_ + count_read) {
     buffer_.resize(buffer_.size() + std::max(buffer_.size(), count_read));
   }
@@ -120,9 +122,10 @@ void BufferedInputStream::DisableRewinding() {
 
 crypto::tink::util::Status BufferedInputStream::Rewind() {
   if (!rewinding_enabled_) {
-    return util::Status(util::error::INVALID_ARGUMENT, "rewinding is disabled");
+    return util::Status(absl::StatusCode::kInvalidArgument,
+                        "rewinding is disabled");
   }
-  if (status_.ok() || status_.error_code() == util::error::OUT_OF_RANGE) {
+  if (status_.ok() || status_.code() == absl::StatusCode::kOutOfRange) {
     status_ = util::OkStatus();
     position_ = 0;
     count_backedup_ = 0;

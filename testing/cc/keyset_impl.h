@@ -21,13 +21,22 @@
 #include <grpcpp/server_context.h>
 #include <grpcpp/support/status.h>
 
-#include "proto/testing/testing_api.grpc.pb.h"
+#include <string>
+
+#include "absl/container/flat_hash_map.h"
+#include "proto/tink.pb.h"
+#include "proto/testing_api.grpc.pb.h"
 
 namespace tink_testing_api {
 
 // A Keyset Service.
 class KeysetImpl final : public Keyset::Service {
  public:
+  // Returns the key template for the given template name.
+  grpc::Status GetTemplate(grpc::ServerContext* context,
+                           const KeysetTemplateRequest* request,
+                           KeysetTemplateResponse* response) override;
+
   // Generates a new keyset with one key from a template.
   grpc::Status Generate(grpc::ServerContext* context,
                         const KeysetGenerateRequest* request,
@@ -47,6 +56,21 @@ class KeysetImpl final : public Keyset::Service {
   grpc::Status FromJson(grpc::ServerContext* context,
                         const KeysetFromJsonRequest* request,
                         KeysetFromJsonResponse* response) override;
+
+  // Writes an encrypted keyset.
+  grpc::Status WriteEncrypted(grpc::ServerContext* context,
+                              const KeysetWriteEncryptedRequest* request,
+                              KeysetWriteEncryptedResponse* response) override;
+
+  // Reads an encrypted keyset.
+  grpc::Status ReadEncrypted(grpc::ServerContext* context,
+                             const KeysetReadEncryptedRequest* request,
+                             KeysetReadEncryptedResponse* response) override;
+  KeysetImpl();
+
+ private:
+  absl::flat_hash_map<std::string, google::crypto::tink::KeyTemplate>
+      key_templates_;
 };
 
 }  // namespace tink_testing_api

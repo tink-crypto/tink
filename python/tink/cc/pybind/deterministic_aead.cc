@@ -14,14 +14,20 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "tink/deterministic_aead.h"
+#include "tink/cc/pybind/deterministic_aead.h"
+
+#include <string>
+#include <utility>
 
 #include "pybind11/pybind11.h"
+#include "tink/deterministic_aead.h"
 #include "tink/util/statusor.h"
-#include "tink/cc/pybind/status_casters.h"
+#include "tink/cc/pybind/tink_exception.h"
 
 namespace crypto {
 namespace tink {
+
+using pybind11::google_tink::TinkException;
 
 void PybindRegisterDeterministicAead(pybind11::module* module) {
   namespace py = pybind11;
@@ -52,19 +58,29 @@ void PybindRegisterDeterministicAead(pybind11::module* module) {
       .def(
           "encrypt_deterministically",
           [](const DeterministicAead& self, const py::bytes& plaintext,
-             const py::bytes& associated_data) -> util::StatusOr<py::bytes> {
+             const py::bytes& associated_data) -> py::bytes {
             // TODO(b/145925674)
-            return self.EncryptDeterministically(std::string(plaintext),
-                                                 std::string(associated_data));
+            util::StatusOr<std::string> encrypt_result =
+                self.EncryptDeterministically(std::string(plaintext),
+                                              std::string(associated_data));
+            if (!encrypt_result.ok()) {
+              throw TinkException(encrypt_result.status());
+            }
+            return *std::move(encrypt_result);
           },
           py::arg("plaintext"), py::arg("associated_data"))
       .def(
           "decrypt_deterministically",
           [](const DeterministicAead& self, const py::bytes& ciphertext,
-             const py::bytes& associated_data) -> util::StatusOr<py::bytes> {
+             const py::bytes& associated_data) -> py::bytes {
             // TODO(b/145925674)
-            return self.DecryptDeterministically(std::string(ciphertext),
-                                                 std::string(associated_data));
+            util::StatusOr<std::string> decrypt_result =
+                self.DecryptDeterministically(std::string(ciphertext),
+                                              std::string(associated_data));
+            if (!decrypt_result.ok()) {
+              throw TinkException(decrypt_result.status());
+            }
+            return *std::move(decrypt_result);
           },
           py::arg("ciphertext"), py::arg("associated_data"));
 }

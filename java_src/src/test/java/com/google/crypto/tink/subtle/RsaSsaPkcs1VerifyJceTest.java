@@ -20,6 +20,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
 
 import com.google.crypto.tink.config.TinkFips;
+import com.google.crypto.tink.config.internal.TinkFipsUtil;
 import com.google.crypto.tink.subtle.Enums.HashType;
 import com.google.crypto.tink.testing.TestUtil;
 import com.google.crypto.tink.testing.WycheproofTestUtil;
@@ -78,13 +79,6 @@ public class RsaSsaPkcs1VerifyJceTest {
     testWycheproofVectors("../wycheproof/testvectors/rsa_signature_4096_sha512_test.json");
   }
 
-  @Test
-  public void testWycheproofVectors3072() throws Exception {
-    Assume.assumeTrue(!TinkFips.useOnlyFips() || TinkFips.fipsModuleAvailable());
-
-    testWycheproofVectors("../wycheproof/testvectors/rsa_signature_3072_sha512_test.json");
-  }
-
   private static void testWycheproofVectors(String fileName) throws Exception {
     JsonObject jsonObj = WycheproofTestUtil.readJson(fileName);
 
@@ -107,7 +101,8 @@ public class RsaSsaPkcs1VerifyJceTest {
           continue;
         }
         String tcId =
-            String.format("testcase %d (%s)",
+            String.format(
+                "testcase %d (%s)",
                 testcase.get("tcId").getAsInt(), testcase.get("comment").getAsString());
         RSAPublicKey pubKey = (RSAPublicKey) kf.generatePublic(x509keySpec);
 
@@ -132,6 +127,13 @@ public class RsaSsaPkcs1VerifyJceTest {
     assertEquals(0, errors);
   }
 
+  @Test
+  public void testWycheproofVectors3072() throws Exception {
+    Assume.assumeTrue(!TinkFips.useOnlyFips() || TinkFipsUtil.fipsModuleAvailable());
+
+    testWycheproofVectors("../wycheproof/testvectors/rsa_signature_3072_sha512_test.json");
+  }
+
   private static byte[] getMessage(JsonObject testcase) throws Exception {
     // Previous version of Wycheproof test vectors uses "message" while the new one uses "msg".
     if (testcase.has("msg")) {
@@ -143,7 +145,7 @@ public class RsaSsaPkcs1VerifyJceTest {
 
   @Test
   public void testFailIfFipsModuleNotAvailable() throws Exception {
-    Assume.assumeTrue(TinkFips.useOnlyFips() && !TinkFips.fipsModuleAvailable());
+    Assume.assumeTrue(TinkFips.useOnlyFips() && !TinkFipsUtil.fipsModuleAvailable());
 
     assertThrows(
         GeneralSecurityException.class,

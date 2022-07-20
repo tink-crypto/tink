@@ -13,11 +13,6 @@
 # limitations under the License.
 """Testing service API implementations in Python."""
 
-from __future__ import absolute_import
-from __future__ import division
-# Placeholder for import for type annotations
-from __future__ import print_function
-
 import io
 
 import grpc
@@ -26,14 +21,207 @@ from tink import aead
 from tink import cleartext_keyset_handle
 from tink import daead
 from tink import hybrid
+from tink import jwt
 from tink import mac
 from tink import prf
 from tink import signature
 from tink import streaming_aead
 from tink.proto import tink_pb2
-from proto.testing import testing_api_pb2
-from proto.testing import testing_api_pb2_grpc
 from tink.testing import bytes_io
+from proto import testing_api_pb2
+from proto import testing_api_pb2_grpc
+
+
+# All KeyTemplate (as Protobuf) defined in the Python API.
+_KEY_TEMPLATE = {
+    'AES128_EAX':
+        aead.aead_key_templates.AES128_EAX,
+    'AES128_EAX_RAW':
+        aead.aead_key_templates.AES128_EAX_RAW,
+    'AES256_EAX':
+        aead.aead_key_templates.AES256_EAX,
+    'AES256_EAX_RAW':
+        aead.aead_key_templates.AES256_EAX_RAW,
+    'AES128_GCM':
+        aead.aead_key_templates.AES128_GCM,
+    'AES128_GCM_RAW':
+        aead.aead_key_templates.AES128_GCM_RAW,
+    'AES256_GCM':
+        aead.aead_key_templates.AES256_GCM,
+    'AES256_GCM_RAW':
+        aead.aead_key_templates.AES256_GCM_RAW,
+    'AES128_GCM_SIV':
+        aead.aead_key_templates.AES128_GCM_SIV,
+    'AES128_GCM_SIV_RAW':
+        aead.aead_key_templates.AES128_GCM_SIV_RAW,
+    'AES256_GCM_SIV':
+        aead.aead_key_templates.AES256_GCM_SIV,
+    'AES256_GCM_SIV_RAW':
+        aead.aead_key_templates.AES256_GCM_SIV_RAW,
+    'AES128_CTR_HMAC_SHA256':
+        aead.aead_key_templates.AES128_CTR_HMAC_SHA256,
+    'AES128_CTR_HMAC_SHA256_RAW':
+        aead.aead_key_templates.AES128_CTR_HMAC_SHA256_RAW,
+    'AES256_CTR_HMAC_SHA256':
+        aead.aead_key_templates.AES256_CTR_HMAC_SHA256,
+    'AES256_CTR_HMAC_SHA256_RAW':
+        aead.aead_key_templates.AES256_CTR_HMAC_SHA256_RAW,
+    'XCHACHA20_POLY1305':
+        aead.aead_key_templates.XCHACHA20_POLY1305,
+    'XCHACHA20_POLY1305_RAW':
+        aead.aead_key_templates.XCHACHA20_POLY1305_RAW,
+    'AES256_SIV':
+        daead.deterministic_aead_key_templates.AES256_SIV,
+    'AES128_CTR_HMAC_SHA256_4KB':
+        streaming_aead.streaming_aead_key_templates.AES128_CTR_HMAC_SHA256_4KB,
+    'AES128_CTR_HMAC_SHA256_1MB':
+        streaming_aead.streaming_aead_key_templates.AES128_CTR_HMAC_SHA256_1MB,
+    'AES256_CTR_HMAC_SHA256_4KB':
+        streaming_aead.streaming_aead_key_templates.AES256_CTR_HMAC_SHA256_4KB,
+    'AES256_CTR_HMAC_SHA256_1MB':
+        streaming_aead.streaming_aead_key_templates.AES256_CTR_HMAC_SHA256_1MB,
+    'AES128_GCM_HKDF_4KB':
+        streaming_aead.streaming_aead_key_templates.AES128_GCM_HKDF_4KB,
+    'AES128_GCM_HKDF_1MB':
+        streaming_aead.streaming_aead_key_templates.AES128_GCM_HKDF_1MB,
+    'AES256_GCM_HKDF_4KB':
+        streaming_aead.streaming_aead_key_templates.AES256_GCM_HKDF_4KB,
+    'AES256_GCM_HKDF_1MB':
+        streaming_aead.streaming_aead_key_templates.AES256_GCM_HKDF_1MB,
+    'ECIES_P256_HKDF_HMAC_SHA256_AES128_GCM':
+        hybrid.hybrid_key_templates.ECIES_P256_HKDF_HMAC_SHA256_AES128_GCM,
+    'ECIES_P256_COMPRESSED_HKDF_HMAC_SHA256_AES128_GCM':
+        hybrid.hybrid_key_templates
+        .ECIES_P256_COMPRESSED_HKDF_HMAC_SHA256_AES128_GCM,
+    'ECIES_P256_HKDF_HMAC_SHA256_AES128_CTR_HMAC_SHA256':
+        hybrid.hybrid_key_templates
+        .ECIES_P256_HKDF_HMAC_SHA256_AES128_CTR_HMAC_SHA256,
+    'ECIES_P256_COMPRESSED_HKDF_HMAC_SHA256_AES128_CTR_HMAC_SHA256':
+        hybrid.hybrid_key_templates
+        .ECIES_P256_COMPRESSED_HKDF_HMAC_SHA256_AES128_CTR_HMAC_SHA256,
+    'DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_AES_128_GCM':
+        hybrid.hybrid_key_templates
+        .DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_AES_128_GCM,
+    'DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_AES_128_GCM_RAW':
+        hybrid.hybrid_key_templates
+        .DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_AES_128_GCM_RAW,
+    'DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_AES_256_GCM':
+        hybrid.hybrid_key_templates
+        .DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_AES_256_GCM,
+    'DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_AES_256_GCM_RAW':
+        hybrid.hybrid_key_templates
+        .DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_AES_256_GCM_RAW,
+    'DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_CHACHA20_POLY1305':
+        hybrid.hybrid_key_templates
+        .DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_CHACHA20_POLY1305,
+    'DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_CHACHA20_POLY1305_RAW':
+        hybrid.hybrid_key_templates
+        .DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_CHACHA20_POLY1305_RAW,
+    'AES_CMAC':
+        mac.mac_key_templates.AES_CMAC,
+    'HMAC_SHA256_128BITTAG':
+        mac.mac_key_templates.HMAC_SHA256_128BITTAG,
+    'HMAC_SHA256_256BITTAG':
+        mac.mac_key_templates.HMAC_SHA256_256BITTAG,
+    'HMAC_SHA512_256BITTAG':
+        mac.mac_key_templates.HMAC_SHA512_256BITTAG,
+    'HMAC_SHA512_512BITTAG':
+        mac.mac_key_templates.HMAC_SHA512_512BITTAG,
+    'ECDSA_P256':
+        signature.signature_key_templates.ECDSA_P256,
+    'ECDSA_P256_RAW':
+        signature.signature_key_templates.ECDSA_P256_RAW,
+    'ECDSA_P384':
+        signature.signature_key_templates.ECDSA_P384,
+    'ECDSA_P384_SHA384':
+        signature.signature_key_templates.ECDSA_P384_SHA384,
+    'ECDSA_P384_SHA512':
+        signature.signature_key_templates.ECDSA_P384_SHA512,
+    'ECDSA_P521':
+        signature.signature_key_templates.ECDSA_P521,
+    'ECDSA_P256_IEEE_P1363':
+        signature.signature_key_templates.ECDSA_P256_IEEE_P1363,
+    'ECDSA_P384_IEEE_P1363':
+        signature.signature_key_templates.ECDSA_P384_IEEE_P1363,
+    'ECDSA_P384_SHA384_IEEE_P1363':
+        signature.signature_key_templates.ECDSA_P384_SHA384_IEEE_P1363,
+    'ECDSA_P521_IEEE_P1363':
+        signature.signature_key_templates.ECDSA_P521_IEEE_P1363,
+    'ED25519':
+        signature.signature_key_templates.ED25519,
+    'RSA_SSA_PKCS1_3072_SHA256_F4':
+        signature.signature_key_templates.RSA_SSA_PKCS1_3072_SHA256_F4,
+    'RSA_SSA_PKCS1_4096_SHA512_F4':
+        signature.signature_key_templates.RSA_SSA_PKCS1_4096_SHA512_F4,
+    'RSA_SSA_PSS_3072_SHA256_SHA256_32_F4':
+        signature.signature_key_templates.RSA_SSA_PSS_3072_SHA256_SHA256_32_F4,
+    'RSA_SSA_PSS_4096_SHA512_SHA512_64_F4':
+        signature.signature_key_templates.RSA_SSA_PSS_4096_SHA512_SHA512_64_F4,
+    'AES_CMAC_PRF':
+        prf.prf_key_templates.AES_CMAC,
+    'HMAC_SHA256_PRF':
+        prf.prf_key_templates.HMAC_SHA256,
+    'HMAC_SHA512_PRF':
+        prf.prf_key_templates.HMAC_SHA512,
+    'HKDF_SHA256':
+        prf.prf_key_templates.HKDF_SHA256,
+    'JWT_HS256':
+        jwt.jwt_hs256_template(),
+    'JWT_HS256_RAW':
+        jwt.raw_jwt_hs256_template(),
+    'JWT_HS384':
+        jwt.jwt_hs384_template(),
+    'JWT_HS384_RAW':
+        jwt.raw_jwt_hs384_template(),
+    'JWT_HS512':
+        jwt.jwt_hs512_template(),
+    'JWT_HS512_RAW':
+        jwt.raw_jwt_hs512_template(),
+    'JWT_ES256':
+        jwt.jwt_es256_template(),
+    'JWT_ES256_RAW':
+        jwt.raw_jwt_es256_template(),
+    'JWT_ES384':
+        jwt.jwt_es384_template(),
+    'JWT_ES384_RAW':
+        jwt.raw_jwt_es384_template(),
+    'JWT_ES512':
+        jwt.jwt_es512_template(),
+    'JWT_ES512_RAW':
+        jwt.raw_jwt_es512_template(),
+    'JWT_RS256_2048_F4':
+        jwt.jwt_rs256_2048_f4_template(),
+    'JWT_RS256_2048_F4_RAW':
+        jwt.raw_jwt_rs256_2048_f4_template(),
+    'JWT_RS256_3072_F4':
+        jwt.jwt_rs256_3072_f4_template(),
+    'JWT_RS256_3072_F4_RAW':
+        jwt.raw_jwt_rs256_3072_f4_template(),
+    'JWT_RS384_3072_F4':
+        jwt.jwt_rs384_3072_f4_template(),
+    'JWT_RS384_3072_F4_RAW':
+        jwt.raw_jwt_rs384_3072_f4_template(),
+    'JWT_RS512_4096_F4':
+        jwt.jwt_rs512_4096_f4_template(),
+    'JWT_RS512_4096_F4_RAW':
+        jwt.raw_jwt_rs512_4096_f4_template(),
+    'JWT_PS256_2048_F4':
+        jwt.jwt_ps256_2048_f4_template(),
+    'JWT_PS256_2048_F4_RAW':
+        jwt.raw_jwt_ps256_2048_f4_template(),
+    'JWT_PS256_3072_F4':
+        jwt.jwt_ps256_3072_f4_template(),
+    'JWT_PS256_3072_F4_RAW':
+        jwt.raw_jwt_ps256_3072_f4_template(),
+    'JWT_PS384_3072_F4':
+        jwt.jwt_ps384_3072_f4_template(),
+    'JWT_PS384_3072_F4_RAW':
+        jwt.raw_jwt_ps384_3072_f4_template(),
+    'JWT_PS512_4096_F4':
+        jwt.jwt_ps512_4096_f4_template(),
+    'JWT_PS512_4096_F4_RAW':
+        jwt.raw_jwt_ps512_4096_f4_template(),
+}
 
 
 class MetadataServicer(testing_api_pb2_grpc.MetadataServicer):
@@ -42,12 +230,22 @@ class MetadataServicer(testing_api_pb2_grpc.MetadataServicer):
   def GetServerInfo(
       self, request: testing_api_pb2.ServerInfoRequest,
       context: grpc.ServicerContext) -> testing_api_pb2.ServerInfoResponse:
-    """Generates a keyset."""
+    """Returns information about the server."""
     return testing_api_pb2.ServerInfoResponse(language='python')
 
 
 class KeysetServicer(testing_api_pb2_grpc.KeysetServicer):
   """A service for testing Keyset operations."""
+
+  def GetTemplate(
+      self, request: testing_api_pb2.KeysetTemplateRequest,
+      context: grpc.ServicerContext) -> testing_api_pb2.KeysetTemplateResponse:
+    """Returns the key template for the given template name."""
+    if request.template_name not in _KEY_TEMPLATE:
+      return testing_api_pb2.KeysetTemplateResponse(
+          err='template %s not found' % request.template_name)
+    return  testing_api_pb2.KeysetTemplateResponse(
+        key_template=_KEY_TEMPLATE[request.template_name].SerializeToString())
 
   def Generate(
       self, request: testing_api_pb2.KeysetGenerateRequest,
@@ -108,6 +306,73 @@ class KeysetServicer(testing_api_pb2_grpc.KeysetServicer):
       return testing_api_pb2.KeysetFromJsonResponse(keyset=keyset.getvalue())
     except tink.TinkError as e:
       return testing_api_pb2.KeysetFromJsonResponse(err=str(e))
+
+  def ReadEncrypted(
+      self, request: testing_api_pb2.KeysetReadEncryptedRequest,
+      context: grpc.ServicerContext
+  ) -> testing_api_pb2.KeysetReadEncryptedResponse:
+    """Reads an encrypted keyset."""
+    try:
+      master_keyset_handle = cleartext_keyset_handle.read(
+          tink.BinaryKeysetReader(request.master_keyset))
+      master_aead = master_keyset_handle.primitive(aead.Aead)
+
+      if request.keyset_reader_type == testing_api_pb2.KEYSET_READER_BINARY:
+        reader = tink.BinaryKeysetReader(request.encrypted_keyset)
+      elif request.keyset_reader_type == testing_api_pb2.KEYSET_READER_JSON:
+        reader = tink.JsonKeysetReader(request.encrypted_keyset.decode('utf8'))
+      else:
+        raise ValueError('unknown keyset reader type')
+      if request.HasField('associated_data'):
+        keyset_handle = tink.read_keyset_handle_with_associated_data(
+            reader, master_aead, request.associated_data.value)
+      else:
+        keyset_handle = tink.read_keyset_handle(reader, master_aead)
+
+      keyset = io.BytesIO()
+      cleartext_keyset_handle.write(
+          tink.BinaryKeysetWriter(keyset), keyset_handle)
+      return testing_api_pb2.KeysetReadEncryptedResponse(
+          keyset=keyset.getvalue())
+    except tink.TinkError as e:
+      return testing_api_pb2.KeysetReadEncryptedResponse(err=str(e))
+
+  def WriteEncrypted(
+      self, request: testing_api_pb2.KeysetWriteEncryptedRequest,
+      context: grpc.ServicerContext
+  ) -> testing_api_pb2.KeysetWriteEncryptedResponse:
+    """Writes an encrypted keyset."""
+    try:
+      master_keyset_handle = cleartext_keyset_handle.read(
+          tink.BinaryKeysetReader(request.master_keyset))
+      keyset_handle = cleartext_keyset_handle.read(
+          tink.BinaryKeysetReader(request.keyset))
+      master_aead = master_keyset_handle.primitive(aead.Aead)
+
+      if request.keyset_writer_type == testing_api_pb2.KEYSET_WRITER_BINARY:
+        encrypted_keyset = io.BytesIO()
+        writer = tink.BinaryKeysetWriter(encrypted_keyset)
+        if request.HasField('associated_data'):
+          keyset_handle.write_with_associated_data(
+              writer, master_aead, request.associated_data.value)
+        else:
+          keyset_handle.write(writer, master_aead)
+        return testing_api_pb2.KeysetWriteEncryptedResponse(
+            encrypted_keyset=encrypted_keyset.getvalue())
+      elif request.keyset_writer_type == testing_api_pb2.KEYSET_WRITER_JSON:
+        encrypted_keyset = io.StringIO()
+        writer = tink.JsonKeysetWriter(encrypted_keyset)
+        if request.HasField('associated_data'):
+          keyset_handle.write_with_associated_data(
+              writer, master_aead, request.associated_data.value)
+        else:
+          keyset_handle.write(writer, master_aead)
+        return testing_api_pb2.KeysetWriteEncryptedResponse(
+            encrypted_keyset=encrypted_keyset.getvalue().encode('utf8'))
+      else:
+        raise ValueError('unknown keyset writer type')
+    except tink.TinkError as e:
+      return testing_api_pb2.KeysetWriteEncryptedResponse(err=str(e))
 
 
 class AeadServicer(testing_api_pb2_grpc.AeadServicer):

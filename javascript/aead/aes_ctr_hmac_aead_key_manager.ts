@@ -29,7 +29,6 @@ class AesCtrHmacAeadKeyFactory implements KeyManager.KeyFactory {
   ]);
 
   /**
-   * @override
    */
   newKey(keyFormat: PbMessage|Uint8Array) {
     let keyFormatProto: PbAesCtrHmacAeadKeyFormat;
@@ -71,7 +70,6 @@ class AesCtrHmacAeadKeyFactory implements KeyManager.KeyFactory {
   }
 
   /**
-   * @override
    */
   newKeyData(serializedKeyFormat: Uint8Array) {
     const key = (this.newKey(serializedKeyFormat));
@@ -88,7 +86,7 @@ class AesCtrHmacAeadKeyFactory implements KeyManager.KeyFactory {
    * Checks the parameters and size of a given keyFormat.
    *
    */
-  validateAesCtrKeyFormat(keyFormat: null|PbAesCtrKeyFormat):
+  validateAesCtrKeyFormat(keyFormat: undefined|null|PbAesCtrKeyFormat):
       {aesCtrParams: PbAesCtrParams, aesCtrKeySize: number, ivSize: number} {
     if (!keyFormat) {
       throw new SecurityException(
@@ -115,7 +113,7 @@ class AesCtrHmacAeadKeyFactory implements KeyManager.KeyFactory {
    * Checks the parameters and size of a given keyFormat.
    *
    */
-  validateHmacKeyFormat(keyFormat: null|PbHmacKeyFormat): {
+  validateHmacKeyFormat(keyFormat: undefined|null|PbHmacKeyFormat): {
     hmacParams: PbHmacParams,
     hmacKeySize: number,
     hashType: string,
@@ -178,7 +176,6 @@ export class AesCtrHmacAeadKeyManager implements KeyManager.KeyManager<Aead> {
   private readonly keyFactory = new AesCtrHmacAeadKeyFactory();
 
   /**
-   * @override
    */
   async getPrimitive(
       primitiveType: Constructor<Aead>, key: PbKeyData|PbMessage) {
@@ -196,7 +193,8 @@ export class AesCtrHmacAeadKeyManager implements KeyManager.KeyManager<Aead> {
             this.getKeyType() + '.');
       }
       try {
-        deserializedKey = PbAesCtrHmacAeadKey.deserializeBinary(key.getValue());
+        deserializedKey =
+            PbAesCtrHmacAeadKey.deserializeBinary(key.getValue_asU8());
       } catch (e) {
         throw new SecurityException(
             'Could not parse the key in key data as a serialized proto of ' +
@@ -224,35 +222,30 @@ export class AesCtrHmacAeadKeyManager implements KeyManager.KeyManager<Aead> {
   }
 
   /**
-   * @override
    */
   doesSupport(keyType: string) {
     return keyType === this.getKeyType();
   }
 
   /**
-   * @override
    */
   getKeyType() {
     return AesCtrHmacAeadKeyManager.KEY_TYPE;
   }
 
   /**
-   * @override
    */
   getPrimitiveType() {
     return AesCtrHmacAeadKeyManager.SUPPORTED_PRIMITIVE;
   }
 
   /**
-   * @override
    */
   getVersion() {
     return AesCtrHmacAeadKeyManager.VERSION;
   }
 
   /**
-   * @override
    */
   getKeyFactory() {
     return this.keyFactory;
@@ -263,7 +256,7 @@ export class AesCtrHmacAeadKeyManager implements KeyManager.KeyManager<Aead> {
    * Checks the parameters and size of a given AES-CTR key.
    *
    */
-  private validateAesCtrKey(key: null|PbAesCtrKey):
+  private validateAesCtrKey(key: undefined|null|PbAesCtrKey):
       {aesCtrKeyValue: Uint8Array, ivSize: number} {
     if (!key) {
       throw new SecurityException(
@@ -281,7 +274,7 @@ export class AesCtrHmacAeadKeyManager implements KeyManager.KeyManager<Aead> {
    * Checks the parameters and size of a given HMAC key.
    *
    */
-  private validateHmacKey(key: null|PbHmacKey):
+  private validateHmacKey(key: undefined|null|PbHmacKey):
       {hmacKeyValue: Uint8Array, hashType: string, tagSize: number} {
     if (!key) {
       throw new SecurityException(

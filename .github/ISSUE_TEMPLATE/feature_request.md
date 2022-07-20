@@ -7,21 +7,23 @@ assignees: 'thaidn, chuckx'
 
 **Help us help you**
 
-Please tell us more about
-[your Tink deployment](https://docs.google.com/forms/d/1mhHvyNJQgTXFDnqOermB7-BD8GQSyvtFPUAhILRbYcA/edit).
+Tell us more about
+[your Tink deployment](https://docs.google.com/forms/d/1mhHvyNJQgTXFDnqOermB7-BD8GQSyvtFPUAhILRbYcA/).
 
 **Is your feature request related to a problem?**
 
-Provide a description of what the problem is.
+If so, provide a description of the problem.
 
-**Describe the solution you'd like**
+**What sort of feature would you like to see?**
 
-A clear and concise description of what you want to happen.
+Describe your feature request. Or, how can we help solve the problem you noted
+above?
 
-**Describe alternatives you've considered**
+**Have you considered any alternative solutions?**
 
-Provide an explanation of any alternative solutions you've considered.
+Provide an explanation of any alternate requests or solutions and why your
+request is preferable.
 
-**Additional context**
+**Would you like to add additional context?**
 
-Add any other context about the feature request.
+Provide any other context about the feature request.

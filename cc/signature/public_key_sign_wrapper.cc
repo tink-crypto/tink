@@ -16,10 +16,17 @@
 
 #include "tink/signature/public_key_sign_wrapper.h"
 
+#include <string>
+#include <utility>
+
+#include "absl/status/status.h"
 #include "tink/crypto_format.h"
+#include "tink/internal/monitoring_util.h"
+#include "tink/internal/registry_impl.h"
+#include "tink/internal/util.h"
+#include "tink/monitoring/monitoring.h"
 #include "tink/primitive_set.h"
 #include "tink/public_key_sign.h"
-#include "tink/subtle/subtle_util_boringssl.h"
 #include "tink/util/statusor.h"
 #include "proto/tink.pb.h"
 
@@ -30,23 +37,28 @@ using google::crypto::tink::OutputPrefixType;
 
 namespace {
 
+constexpr absl::string_view kPrimitive = "public_key_sign";
+constexpr absl::string_view kSignApi = "sign";
+
 util::Status Validate(PrimitiveSet<PublicKeySign>* public_key_sign_set) {
   if (public_key_sign_set == nullptr) {
-    return util::Status(util::error::INTERNAL,
+    return util::Status(absl::StatusCode::kInternal,
                         "public_key_sign_set must be non-NULL");
   }
   if (public_key_sign_set->get_primary() == nullptr) {
-    return util::Status(util::error::INVALID_ARGUMENT,
+    return util::Status(absl::StatusCode::kInvalidArgument,
                         "public_key_sign_set has no primary");
   }
-  return util::Status::OK;
+  return util::OkStatus();
 }
 
 class PublicKeySignSetWrapper : public PublicKeySign {
  public:
   explicit PublicKeySignSetWrapper(
-      std::unique_ptr<PrimitiveSet<PublicKeySign>> public_key_sign_set)
-      : public_key_sign_set_(std::move(public_key_sign_set)) {}
+      std::unique_ptr<PrimitiveSet<PublicKeySign>> public_key_sign_set,
+      std::unique_ptr<MonitoringClient> monitoring_sign_client = nullptr)
+      : public_key_sign_set_(std::move(public_key_sign_set)),
+        monitoring_sign_client_(std::move(monitoring_sign_client)) {}
 
   crypto::tink::util::StatusOr<std::string> Sign(
       absl::string_view data) const override;
@@ -55,13 +67,14 @@ class PublicKeySignSetWrapper : public PublicKeySign {
 
  private:
   std::unique_ptr<PrimitiveSet<PublicKeySign>> public_key_sign_set_;
+  std::unique_ptr<MonitoringClient> monitoring_sign_client_;
 };
 
 util::StatusOr<std::string> PublicKeySignSetWrapper::Sign(
     absl::string_view data) const {
   // BoringSSL expects a non-null pointer for data,
   // regardless of whether the size is 0.
-  data = subtle::SubtleUtilBoringSSL::EnsureNonNull(data);
+  data = internal::EnsureStringNonNull(data);
 
   auto primary = public_key_sign_set_->get_primary();
   std::string local_data;
@@ -71,9 +84,18 @@ util::StatusOr<std::string> PublicKeySignSetWrapper::Sign(
     data = local_data;
   }
   auto sign_result = primary->get_primitive().Sign(data);
-  if (!sign_result.ok()) return sign_result.status();
+  if (!sign_result.ok()) {
+    if (monitoring_sign_client_ != nullptr) {
+      monitoring_sign_client_->LogFailure();
+    }
+    return sign_result.status();
+  }
+  if (monitoring_sign_client_ != nullptr) {
+    monitoring_sign_client_->Log(
+        public_key_sign_set_->get_primary()->get_key_id(), data.size());
+  }
   const std::string& key_id = primary->get_identifier();
-  return key_id + sign_result.ValueOrDie();
+  return key_id + sign_result.value();
 }
 
 }  // anonymous namespace
@@ -82,9 +104,31 @@ util::StatusOr<std::unique_ptr<PublicKeySign>> PublicKeySignWrapper::Wrap(
     std::unique_ptr<PrimitiveSet<PublicKeySign>> primitive_set) const {
   util::Status status = Validate(primitive_set.get());
   if (!status.ok()) return status;
-  std::unique_ptr<PublicKeySign> public_key_sign(
-      new PublicKeySignSetWrapper(std::move(primitive_set)));
-  return std::move(public_key_sign);
+
+  MonitoringClientFactory* const monitoring_factory =
+      internal::RegistryImpl::GlobalInstance().GetMonitoringClientFactory();
+
+  // Monitoring is not enabled. Create a wrapper without monitoring clients.
+  if (monitoring_factory == nullptr) {
+    return {
+        absl::make_unique<PublicKeySignSetWrapper>(std::move(primitive_set))};
+  }
+
+  util::StatusOr<MonitoringKeySetInfo> keyset_info =
+      internal::MonitoringKeySetInfoFromPrimitiveSet(*primitive_set);
+  if (!keyset_info.ok()) {
+    return keyset_info.status();
+  }
+
+  util::StatusOr<std::unique_ptr<MonitoringClient>> monitoring_sign_client =
+      monitoring_factory->New(
+          MonitoringContext(kPrimitive, kSignApi, *keyset_info));
+  if (!monitoring_sign_client.ok()) {
+    return monitoring_sign_client.status();
+  }
+
+  return {absl::make_unique<PublicKeySignSetWrapper>(
+      std::move(primitive_set), *std::move(monitoring_sign_client))};
 }
 
 }  // namespace tink

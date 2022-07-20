@@ -1,4 +1,4 @@
-# Copyright 2019 Google LLC.
+# Copyright 2019 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,11 +13,6 @@
 # limitations under the License.
 
 """Python wrapper of the wrapped C++ Hybrid En- and Decryption key manager."""
-
-from __future__ import absolute_import
-from __future__ import division
-# Placeholder for import for type annotations
-from __future__ import print_function
 
 from tink import core
 from tink.cc.pybind import tink_bindings
@@ -51,15 +46,21 @@ class _HybridEncryptCcToPyWrapper(_hybrid_encrypt.HybridEncrypt):
 def register():
   """Registers all Hybrid key managers and wrapper in the Python Registry."""
   tink_bindings.register()
+  tink_bindings.register_hpke()
 
+  # Register primitive wrappers.
+  core.Registry.register_primitive_wrapper(
+      _hybrid_wrapper.HybridDecryptWrapper())
+  core.Registry.register_primitive_wrapper(
+      _hybrid_wrapper.HybridEncryptWrapper())
+
+  # Register ECIES-AEAD-HKDF key managers.
   decrypt_type_url = (
       'type.googleapis.com/google.crypto.tink.EciesAeadHkdfPrivateKey')
   decrypt_key_manager = core.PrivateKeyManagerCcToPyWrapper(
       tink_bindings.HybridDecryptKeyManager.from_cc_registry(decrypt_type_url),
       _hybrid_decrypt.HybridDecrypt, _HybridDecryptCcToPyWrapper)
   core.Registry.register_key_manager(decrypt_key_manager, new_key_allowed=True)
-  core.Registry.register_primitive_wrapper(
-      _hybrid_wrapper.HybridDecryptWrapper())
 
   encrypt_type_url = (
       'type.googleapis.com/google.crypto.tink.EciesAeadHkdfPublicKey')
@@ -67,5 +68,22 @@ def register():
       tink_bindings.HybridEncryptKeyManager.from_cc_registry(encrypt_type_url),
       _hybrid_encrypt.HybridEncrypt, _HybridEncryptCcToPyWrapper)
   core.Registry.register_key_manager(encrypt_key_manager, new_key_allowed=True)
-  core.Registry.register_primitive_wrapper(
-      _hybrid_wrapper.HybridEncryptWrapper())
+
+  # Register HPKE key managers.
+  hpke_decrypt_type_url = (
+      'type.googleapis.com/google.crypto.tink.HpkePrivateKey')
+  hpke_decrypt_key_manager = core.PrivateKeyManagerCcToPyWrapper(
+      tink_bindings.HybridDecryptKeyManager.from_cc_registry(
+          hpke_decrypt_type_url), _hybrid_decrypt.HybridDecrypt,
+      _HybridDecryptCcToPyWrapper)
+  core.Registry.register_key_manager(
+      hpke_decrypt_key_manager, new_key_allowed=True)
+
+  hpke_encrypt_type_url = (
+      'type.googleapis.com/google.crypto.tink.HpkePublicKey')
+  hpke_encrypt_key_manager = core.KeyManagerCcToPyWrapper(
+      tink_bindings.HybridEncryptKeyManager.from_cc_registry(
+          hpke_encrypt_type_url), _hybrid_encrypt.HybridEncrypt,
+      _HybridEncryptCcToPyWrapper)
+  core.Registry.register_key_manager(
+      hpke_encrypt_key_manager, new_key_allowed=True)

@@ -15,8 +15,9 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 #include "tink/config.h"
-#include "tink/mac.h"
+
 #include "gtest/gtest.h"
+#include "tink/mac.h"
 #include "proto/config.pb.h"
 
 using google::crypto::tink::KeyTypeEntry;
@@ -33,18 +34,18 @@ TEST_F(ConfigTest, testValidation) {
 
   auto status = Config::Register<Mac>(entry);
   EXPECT_FALSE(status.ok());
-  EXPECT_EQ(util::error::INVALID_ARGUMENT, status.error_code());
+  EXPECT_EQ(absl::StatusCode::kInvalidArgument, status.code());
 
   entry.set_type_url("some key type");
   entry.set_catalogue_name("some catalogue");
   status = Config::Register<Mac>(entry);
   EXPECT_FALSE(status.ok());
-  EXPECT_EQ(util::error::INVALID_ARGUMENT, status.error_code());
+  EXPECT_EQ(absl::StatusCode::kInvalidArgument, status.code());
 
   entry.set_primitive_name("some primitive");
   status = Config::Register<Mac>(entry);
   EXPECT_FALSE(status.ok());
-  EXPECT_EQ(util::error::INVALID_ARGUMENT, status.error_code());
+  EXPECT_EQ(absl::StatusCode::kInvalidArgument, status.code());
 }
 
 

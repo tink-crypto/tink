@@ -20,7 +20,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/golang/protobuf/proto"
+	"google.golang.org/protobuf/proto"
 	"github.com/google/tink/go/aead/subtle"
 	"github.com/google/tink/go/keyset"
 	"github.com/google/tink/go/mac"
@@ -87,6 +87,53 @@ func TestRead(t *testing.T) {
 	}
 	if !proto.Equal(testkeyset.KeysetMaterial(h), testkeyset.KeysetMaterial(h2)) {
 		t.Fatalf("Decrypt failed: got %v, want %v", h2, h)
+	}
+}
+
+func TestReadWithAssociatedData(t *testing.T) {
+	masterKey, err := subtle.NewAESGCM([]byte(strings.Repeat("A", 32)))
+	if err != nil {
+		t.Fatalf("subtle.NewAESGCM(): %v", err)
+	}
+
+	// Create a keyset
+	keyData := testutil.NewKeyData("some type url", []byte{0}, tinkpb.KeyData_SYMMETRIC)
+	key := testutil.NewKey(keyData, tinkpb.KeyStatusType_ENABLED, 1, tinkpb.OutputPrefixType_TINK)
+	keySet := testutil.NewKeyset(1, []*tinkpb.Keyset_Key{key})
+	handle, _ := testkeyset.NewHandle(keySet)
+
+	memKeyset := &keyset.MemReaderWriter{}
+	if err := handle.WriteWithAssociatedData(memKeyset, masterKey, []byte{0x01, 0x02}); err != nil {
+		t.Fatalf("handle.Write(): %v", err)
+	}
+	handle2, err := keyset.ReadWithAssociatedData(memKeyset, masterKey, []byte{0x01, 0x02})
+	if err != nil {
+		t.Fatalf("keyset.Read(): %v", err)
+	}
+	if !proto.Equal(testkeyset.KeysetMaterial(handle), testkeyset.KeysetMaterial(handle2)) {
+		t.Errorf("Decrypt failed: got %v, want %v", handle2, handle)
+	}
+}
+
+func TestReadWithMismatchedAssociatedData(t *testing.T) {
+	masterKey, err := subtle.NewAESGCM([]byte(strings.Repeat("A", 32)))
+	if err != nil {
+		t.Fatalf("subtle.NewAESGCM(): %v", err)
+	}
+
+	// Create a keyset
+	keyData := testutil.NewKeyData("some type url", []byte{0}, tinkpb.KeyData_SYMMETRIC)
+	key := testutil.NewKey(keyData, tinkpb.KeyStatusType_ENABLED, 1, tinkpb.OutputPrefixType_TINK)
+	keySet := testutil.NewKeyset(1, []*tinkpb.Keyset_Key{key})
+	handle, _ := testkeyset.NewHandle(keySet)
+
+	memKeyset := &keyset.MemReaderWriter{}
+	if err := handle.WriteWithAssociatedData(memKeyset, masterKey, []byte{0x01, 0x02}); err != nil {
+		t.Fatalf("handle.Write(): %v", err)
+	}
+	_, err = keyset.ReadWithAssociatedData(memKeyset, masterKey, []byte{0x01, 0x03})
+	if err == nil {
+		t.Fatalf("keyset.Read() was expected to fail")
 	}
 }
 

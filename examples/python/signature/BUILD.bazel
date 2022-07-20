@@ -22,6 +22,26 @@ py_binary(
     ],
 )
 
+py_library(
+    name = "signature_basic",
+    srcs = ["signature_basic.py"],
+    deps = [
+        "@tink_py//tink:cleartext_keyset_handle",
+        "@tink_py//tink:tink_python",
+        "@tink_py//tink/signature",
+    ],
+)
+
+py_test(
+    name = "signature_basic_test",
+    srcs = ["signature_basic_test.py"],
+    python_version = "PY3",
+    deps = [
+        requirement("absl-py"),
+        ":signature_basic"
+    ],
+)
+
 sh_test(
     name = "signature_test",
     size = "small",

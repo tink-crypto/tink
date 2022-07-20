@@ -23,14 +23,12 @@ py_library(
     name = "_hybrid_decrypt",
     srcs = ["_hybrid_decrypt.py"],
     srcs_version = "PY3",
-    deps = [requirement("six")],
 )
 
 py_library(
     name = "_hybrid_encrypt",
     srcs = ["_hybrid_encrypt.py"],
     srcs_version = "PY3",
-    deps = [requirement("six")],
 )
 
 py_library(
@@ -58,6 +56,7 @@ py_test(
         "//tink/core",
         "//tink/proto:common_py_pb2",
         "//tink/proto:ecies_aead_hkdf_py_pb2",
+        "//tink/proto:hpke_py_pb2",
         "//tink/proto:tink_py_pb2",
     ],
 )
@@ -81,6 +80,7 @@ py_test(
     deps = [
         ":hybrid",
         requirement("absl-py"),
+        "//tink:cleartext_keyset_handle",
         "//tink:tink_python",
         "//tink/proto:tink_py_pb2",
         "//tink/testing:keyset_builder",
@@ -93,8 +93,10 @@ py_library(
     srcs_version = "PY3",
     deps = [
         "//tink/aead",
+        "//tink/daead",
         "//tink/proto:common_py_pb2",
         "//tink/proto:ecies_aead_hkdf_py_pb2",
+        "//tink/proto:hpke_py_pb2",
         "//tink/proto:tink_py_pb2",
     ],
 )
@@ -102,9 +104,6 @@ py_library(
 py_test(
     name = "_hybrid_key_templates_test",
     srcs = ["_hybrid_key_templates_test.py"],
-    data = [
-        "@tink_base//testdata/templates",
-    ],
     srcs_version = "PY3",
     deps = [
         ":hybrid",
@@ -112,7 +111,7 @@ py_test(
         "//tink/aead",
         "//tink/proto:common_py_pb2",
         "//tink/proto:ecies_aead_hkdf_py_pb2",
+        "//tink/proto:hpke_py_pb2",
         "//tink/proto:tink_py_pb2",
-        "//tink/testing:helper",
     ],
 )

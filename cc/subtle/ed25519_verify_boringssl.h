@@ -19,9 +19,12 @@
 
 #include <memory>
 #include <string>
+#include <utility>
 
 #include "absl/strings/string_view.h"
+#include "openssl/evp.h"
 #include "tink/internal/fips_utils.h"
+#include "tink/internal/ssl_unique_ptr.h"
 #include "tink/public_key_verify.h"
 #include "tink/util/statusor.h"
 
@@ -42,10 +45,10 @@ class Ed25519VerifyBoringSsl : public PublicKeyVerify {
       crypto::tink::internal::FipsCompatibility::kNotFips;
 
  private:
-  const std::string public_key_;
+  explicit Ed25519VerifyBoringSsl(internal::SslUniquePtr<EVP_PKEY> public_key)
+      : public_key_(std::move(public_key)) {}
 
-  explicit Ed25519VerifyBoringSsl(absl::string_view public_key)
-      : public_key_(public_key) {}
+  const internal::SslUniquePtr<EVP_PKEY> public_key_;
 };
 
 }  // namespace subtle

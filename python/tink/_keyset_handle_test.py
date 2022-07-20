@@ -1,4 +1,4 @@
-# Copyright 2019 Google LLC.
+# Copyright 2019 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,11 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Tests for tink.python.tink._keyset_handle."""
-
-from __future__ import absolute_import
-from __future__ import division
-# Placeholder for import for type annotations
-from __future__ import print_function
 
 import io
 
@@ -143,6 +138,32 @@ class KeysetHandleTest(absltest.TestCase):
     # Check that handle2 has the same primitive as handle.
     handle2.primitive(mac.Mac).verify_mac(
         handle.primitive(mac.Mac).compute_mac(b'data'), b'data')
+
+  def test_write_encrypted_with_associated_data(self):
+    handle = tink.new_keyset_handle(mac.mac_key_templates.HMAC_SHA256_128BITTAG)
+    # Encrypt the keyset with Aead.
+    master_key_aead = _master_key_aead()
+    output_stream = io.BytesIO()
+    writer = tink.BinaryKeysetWriter(output_stream)
+    handle.write_with_associated_data(writer, master_key_aead, b'01')
+    reader = tink.BinaryKeysetReader(output_stream.getvalue())
+    handle2 = tink.read_keyset_handle_with_associated_data(
+        reader, master_key_aead, b'01')
+    # Check that handle2 has the same primitive as handle.
+    handle2.primitive(mac.Mac).verify_mac(
+        handle.primitive(mac.Mac).compute_mac(b'data'), b'data')
+
+  def test_write_encrypted_with_mismatched_associated_data(self):
+    handle = tink.new_keyset_handle(mac.mac_key_templates.HMAC_SHA256_128BITTAG)
+    # Encrypt the keyset with Aead.
+    master_key_aead = _master_key_aead()
+    output_stream = io.BytesIO()
+    writer = tink.BinaryKeysetWriter(output_stream)
+    handle.write_with_associated_data(writer, master_key_aead, b'01')
+    reader = tink.BinaryKeysetReader(output_stream.getvalue())
+    with self.assertRaises(core.TinkError):
+      tink.read_keyset_handle_with_associated_data(reader, master_key_aead,
+                                                   b'02')
 
   def test_write_raises_error_when_encrypt_failed(self):
     handle = tink.new_keyset_handle(mac.mac_key_templates.HMAC_SHA256_128BITTAG)

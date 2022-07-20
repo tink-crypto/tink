@@ -27,6 +27,7 @@ cc_library(
         "//util:statusor",
         "//util:validation",
         "@com_google_absl//absl/memory",
+        "@com_google_absl//absl/status",
         "@com_google_absl//absl/strings",
     ],
 )
@@ -75,6 +76,7 @@ cc_library(
     visibility = ["//visibility:public"],
     deps = [
         "//util:statusor",
+        "@com_google_absl//absl/status",
         "@com_google_absl//absl/strings",
     ],
 )
@@ -91,6 +93,8 @@ cc_library(
         "//proto:tink_cc_proto",
         "//util:status",
         "//util:statusor",
+        "@com_google_absl//absl/memory",
+        "@com_google_absl//absl/status",
     ],
 )
 
@@ -103,19 +107,19 @@ cc_library(
         "//:key_manager",
         "//proto:aes_cmac_prf_cc_proto",
         "//proto:tink_cc_proto",
-        "//subtle",
-        "//subtle:common_enums",
         "//subtle:random",
         "//subtle:stateful_cmac_boringssl",
         "//subtle/prf:prf_set_util",
         "//util:constants",
         "//util:errors",
+        "//util:input_stream_util",
         "//util:protobuf_helper",
         "//util:secret_data",
         "//util:status",
         "//util:statusor",
         "//util:validation",
         "@com_google_absl//absl/memory",
+        "@com_google_absl//absl/status",
         "@com_google_absl//absl/strings",
     ],
 )
@@ -128,6 +132,7 @@ cc_library(
     deps = [
         "//:core/key_type_manager",
         "//:key_manager",
+        "//internal:fips_utils",
         "//proto:hmac_prf_cc_proto",
         "//proto:tink_cc_proto",
         "//subtle:common_enums",
@@ -144,6 +149,7 @@ cc_library(
         "//util:statusor",
         "//util:validation",
         "@com_google_absl//absl/memory",
+        "@com_google_absl//absl/status",
         "@com_google_absl//absl/strings",
     ],
 )
@@ -161,6 +167,7 @@ cc_test(
         "//util:istream_input_stream",
         "//util:secret_data",
         "//util:test_matchers",
+        "@com_google_absl//absl/status",
         "@com_google_googletest//:gtest_main",
     ],
 )
@@ -187,6 +194,8 @@ cc_test(
     deps = [
         ":prf_set",
         ":prf_set_wrapper",
+        "//:primitive_set",
+        "//proto:tink_cc_proto",
         "//util:statusor",
         "//util:test_matchers",
         "@com_google_absl//absl/memory",
@@ -242,6 +251,7 @@ cc_test(
         "//util:status",
         "//util:statusor",
         "//util:test_matchers",
+        "@com_google_absl//absl/status",
         "@com_google_googletest//:gtest_main",
     ],
 )
@@ -249,21 +259,42 @@ cc_test(
 cc_test(
     name = "prf_config_test",
     srcs = ["prf_config_test.cc"],
-    tags = [
-        "fips",
-    ],
+    tags = ["fips"],
     deps = [
         ":hmac_prf_key_manager",
         ":prf_config",
         ":prf_key_templates",
         ":prf_set",
         "//:config",
-        "//:registry",
+        "//:tink_cc",
         "//config:tink_fips",
         "//util:status",
         "//util:test_matchers",
         "//util:test_util",
         "@boringssl//:crypto",
+        "@com_google_absl//absl/status",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_library(
+    name = "failing_prfset",
+    srcs = ["failing_prfset.cc"],
+    hdrs = ["failing_prfset.h"],
+    include_prefix = "tink/prf",
+    deps = [
+        ":prf_set",
+        "@com_google_absl//absl/strings",
+    ],
+)
+
+cc_test(
+    name = "failing_prfset_test",
+    srcs = ["failing_prfset_test.cc"],
+    deps = [
+        ":failing_prfset",
+        "//util:test_matchers",
+        "@com_google_absl//absl/status",
         "@com_google_googletest//:gtest_main",
     ],
 )

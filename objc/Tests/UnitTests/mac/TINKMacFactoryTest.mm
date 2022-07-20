@@ -27,6 +27,7 @@
 #import "objc/core/TINKKeysetHandle_Internal.h"
 #import "objc/util/TINKStrings.h"
 
+#include "absl/status/status.h"
 #include "tink/crypto_format.h"
 #include "tink/keyset_handle.h"
 #include "tink/mac.h"
@@ -65,7 +66,7 @@ using google::crypto::tink::KeyStatusType;
   id<TINKMac> mac = [TINKMacFactory primitiveWithKeysetHandle:handle error:&error];
   XCTAssertNil(mac);
   XCTAssertNotNil(error);
-  XCTAssertTrue(error.code == crypto::tink::util::error::INVALID_ARGUMENT);
+  XCTAssertEqual((absl::StatusCode)error.code, absl::StatusCode::kInvalidArgument);
   XCTAssertTrue([error.localizedFailureReason containsString:@"at least one key"]);
 }
 
@@ -82,15 +83,15 @@ using google::crypto::tink::KeyStatusType;
   // Prepare a Keyset.
   Keyset keyset;
   uint32_t key_id_1 = 1234543;
-  HmacKey new_key = HmacKeyManager().CreateKey(key_format).ValueOrDie();
+  HmacKey new_key = HmacKeyManager().CreateKey(key_format).value();
   AddTinkKey(key_type, key_id_1, new_key, KeyStatusType::ENABLED, KeyData::SYMMETRIC, &keyset);
 
   uint32_t key_id_2 = 726329;
-  new_key = HmacKeyManager().CreateKey(key_format).ValueOrDie();
+  new_key = HmacKeyManager().CreateKey(key_format).value();
   AddRawKey(key_type, key_id_2, new_key, KeyStatusType::ENABLED, KeyData::SYMMETRIC, &keyset);
 
   uint32_t key_id_3 = 7213743;
-  new_key = HmacKeyManager().CreateKey(key_format).ValueOrDie();
+  new_key = HmacKeyManager().CreateKey(key_format).value();
   AddTinkKey(key_type, key_id_3, new_key, KeyStatusType::ENABLED, KeyData::SYMMETRIC, &keyset);
 
   keyset.set_primary_key_id(key_id_3);
@@ -123,14 +124,14 @@ using google::crypto::tink::KeyStatusType;
   XCTAssertFalse([mac verifyMac:computedMac
                         forData:[@"bad data for mac" dataUsingEncoding:NSUTF8StringEncoding]
                           error:&error]);
-  XCTAssertTrue(error.code == crypto::tink::util::error::INVALID_ARGUMENT);
+  XCTAssertEqual((absl::StatusCode)error.code, absl::StatusCode::kInvalidArgument);
   XCTAssertTrue([error.localizedFailureReason containsString:@"verification failed"]);
 
   // One more time with the wrong mac.
   XCTAssertFalse([mac verifyMac:[@"some bad mac value" dataUsingEncoding:NSUTF8StringEncoding]
                         forData:data
                           error:&error]);
-  XCTAssertTrue(error.code == crypto::tink::util::error::INVALID_ARGUMENT);
+  XCTAssertEqual((absl::StatusCode)error.code, absl::StatusCode::kInvalidArgument);
   XCTAssertTrue([error.localizedFailureReason containsString:@"verification failed"]);
 
   const char *dataBytes = (const char *)data.bytes;
@@ -152,7 +153,7 @@ using google::crypto::tink::KeyStatusType;
 
       XCTAssertFalse(
           [mac verifyMac:computedMac forData:[NSData dataWithData:mutableData] error:&error]);
-      XCTAssertTrue(error.code == crypto::tink::util::error::INVALID_ARGUMENT);
+      XCTAssertEqual((absl::StatusCode)error.code, absl::StatusCode::kInvalidArgument);
       XCTAssertTrue([error.localizedFailureReason containsString:@"verification failed"]);
     }
   }
@@ -175,7 +176,7 @@ using google::crypto::tink::KeyStatusType;
       mutableBytes[byteIndex] = flippedByte;
 
       XCTAssertFalse([mac verifyMac:[NSData dataWithData:mutableMac] forData:data error:&error]);
-      XCTAssertTrue(error.code == crypto::tink::util::error::INVALID_ARGUMENT);
+      XCTAssertEqual((absl::StatusCode)error.code, absl::StatusCode::kInvalidArgument);
       XCTAssertTrue([error.localizedFailureReason containsString:@"verification failed"]);
     }
   }

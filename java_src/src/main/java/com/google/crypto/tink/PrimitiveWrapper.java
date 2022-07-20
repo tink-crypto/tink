@@ -35,8 +35,10 @@ public interface PrimitiveWrapper<B, P> {
   /**
    * Wraps a {@code PrimitiveSet} and returns a single instance.
    *
+   * <p> This method gets called when a new primitive is created. {@code primitiveSet} is immutable.
+   *
    * This has to be implemented when a new primitive type is added. */
-  P wrap(PrimitiveSet<B> set) throws GeneralSecurityException;
+  P wrap(PrimitiveSet<B> primitiveSet) throws GeneralSecurityException;
 
   /**
    * Returns the primitive class object of the primitive managed. Used for internal management.

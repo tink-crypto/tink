@@ -17,8 +17,11 @@
 #ifndef TINK_UTIL_TEST_MATCHERS_H_
 #define TINK_UTIL_TEST_MATCHERS_H_
 
+#include <string>
+
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include "absl/status/status.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 
@@ -36,7 +39,8 @@ template <typename StatusOrType>
 class IsOkAndHoldsMatcherImpl
     : public ::testing::MatcherInterface<StatusOrType> {
  public:
-  using value_type = typename std::remove_reference<StatusOrType>::type::type;
+  using value_type =
+      typename std::remove_reference<StatusOrType>::type::value_type;
 
   template <typename InnerMatcher>
   explicit IsOkAndHoldsMatcherImpl(InnerMatcher&& inner_matcher)
@@ -62,13 +66,13 @@ class IsOkAndHoldsMatcherImpl
     }
 
     ::testing::StringMatchResultListener inner_listener;
-    const bool matches = inner_matcher_.MatchAndExplain(
-        actual_value.ValueOrDie(), &inner_listener);
+    const bool matches =
+        inner_matcher_.MatchAndExplain(*actual_value, &inner_listener);
     const std::string inner_explanation = inner_listener.str();
     if (!inner_explanation.empty()) {
       *result_listener << "which contains value "
-                       << ::testing::PrintToString(actual_value.ValueOrDie())
-                       << ", " << inner_explanation;
+                       << ::testing::PrintToString(*actual_value) << ", "
+                       << inner_explanation;
     }
     return matches;
   }
@@ -98,6 +102,15 @@ class IsOkAndHoldsMatcher {
 };
 }  // namespace internal
 
+inline std::string StatusToString(const util::Status& s) {
+  return s.ToString();
+}
+
+template <typename T>
+std::string StatusToString(const util::StatusOr<T>& s) {
+  return s.status().ToString();
+}
+
 // Matches a util::StatusOk() value.
 // This is better than EXPECT_TRUE(status.ok())
 // because the error message is a part of the failure messsage.
@@ -105,7 +118,7 @@ MATCHER(IsOk, "is a Status with an OK value") {
   if (arg.ok()) {
     return true;
   }
-  *result_listener << arg.ToString();
+  *result_listener << StatusToString(arg);
   return false;
 }
 
@@ -119,9 +132,13 @@ IsOkAndHolds(InnerMatcher&& inner_matcher) {
 }
 
 // Matches a Status with the specified 'code' as error_code().
+// TODO(lizatretyakova): remove the static_cast and fix the comment above to
+// use code() after all StatusIs usages are migrated to use absl::StatusCode.
 MATCHER_P(StatusIs, code,
-          "is a Status with a " + util::ErrorCodeString(code) + " code") {
-  if (arg.CanonicalCode() == code) {
+          "is a Status with a " +
+              absl::StatusCodeToString(static_cast<absl::StatusCode>(code)) +
+              " code") {
+  if (arg.code() == static_cast<absl::StatusCode>(code)) {
     return true;
   }
   *result_listener << ::testing::PrintToString(arg);
@@ -130,9 +147,11 @@ MATCHER_P(StatusIs, code,
 
 // Matches a Status whose error_code() equals 'code', and whose
 // error_message() matches 'message_macher'.
+// TODO(lizatretyakova): remove the static_cast and fix the comment above to
+// use code() after all StatusIs usages are migrated to use absl::StatusCode.
 MATCHER_P2(StatusIs, code, message_matcher, "") {
-  return (arg.CanonicalCode() == code) &&
-         testing::Matches(message_matcher)(arg.error_message());
+  return (arg.code() == static_cast<absl::StatusCode>(code)) &&
+         testing::Matches(message_matcher)(std::string(arg.message()));
 }
 
 // Matches a Keyset::Key with `key`.

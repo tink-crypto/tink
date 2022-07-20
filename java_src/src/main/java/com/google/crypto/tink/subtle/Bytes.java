@@ -179,4 +179,6 @@ public final class Bytes {
     }
     return value;
   }
+
+  private Bytes() {}
 }

@@ -17,10 +17,13 @@
 #include "tink/signature/signature_config.h"
 
 #include <list>
+#include <string>
+#include <utility>
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "absl/memory/memory.h"
+#include "absl/status/status.h"
 #include "openssl/crypto.h"
 #include "tink/config.h"
 #include "tink/config/tink_fips.h"
@@ -59,11 +62,11 @@ TEST_F(SignatureConfigTest, testBasic) {
   EXPECT_THAT(Registry::get_key_manager<PublicKeySign>(
                   RsaSsaPssSignKeyManager().get_key_type())
                   .status(),
-              StatusIs(util::error::NOT_FOUND));
+              StatusIs(absl::StatusCode::kNotFound));
   EXPECT_THAT(Registry::get_key_manager<PublicKeyVerify>(
                   RsaSsaPssVerifyKeyManager().get_key_type())
                   .status(),
-              StatusIs(util::error::NOT_FOUND));
+              StatusIs(absl::StatusCode::kNotFound));
   EXPECT_THAT(SignatureConfig::Register(), IsOk());
   EXPECT_THAT(Registry::get_key_manager<PublicKeySign>(
                   RsaSsaPssSignKeyManager().get_key_type())
@@ -95,20 +98,19 @@ TEST_F(SignatureConfigTest, PublicKeySignWrapperRegistered) {
           primitive_set
               ->AddPrimitive(absl::make_unique<DummyPublicKeySign>("dummy"),
                              key_info)
-              .ValueOrDie()),
+              .value()),
       IsOk());
 
   auto wrapped = Registry::Wrap(std::move(primitive_set));
 
   ASSERT_TRUE(wrapped.ok()) << wrapped.status();
-  auto signature_result = wrapped.ValueOrDie()->Sign("message");
+  auto signature_result = wrapped.value()->Sign("message");
   ASSERT_TRUE(signature_result.ok());
 
-  std::string prefix = CryptoFormat::GetOutputPrefix(key_info).ValueOrDie();
-  EXPECT_EQ(
-      signature_result.ValueOrDie(),
-      absl::StrCat(prefix,
-                   DummyPublicKeySign("dummy").Sign("message").ValueOrDie()));
+  std::string prefix = CryptoFormat::GetOutputPrefix(key_info).value();
+  EXPECT_EQ(signature_result.value(),
+            absl::StrCat(prefix,
+                         DummyPublicKeySign("dummy").Sign("message").value()));
 }
 
 
@@ -132,18 +134,16 @@ TEST_F(SignatureConfigTest, PublicKeyVerifyWrapperRegistered) {
           primitive_set
               ->AddPrimitive(absl::make_unique<DummyPublicKeyVerify>("dummy"),
                              key_info)
-              .ValueOrDie()),
+              .value()),
       IsOk());
-  std::string prefix = CryptoFormat::GetOutputPrefix(key_info).ValueOrDie();
-  std::string signature =
-      DummyPublicKeySign("dummy").Sign("message").ValueOrDie();
+  std::string prefix = CryptoFormat::GetOutputPrefix(key_info).value();
+  std::string signature = DummyPublicKeySign("dummy").Sign("message").value();
 
   auto wrapped = Registry::Wrap(std::move(primitive_set));
 
   ASSERT_TRUE(wrapped.ok()) << wrapped.status();
-  ASSERT_TRUE(wrapped.ValueOrDie()
-                  ->Verify(absl::StrCat(prefix, signature), "message")
-                  .ok());
+  ASSERT_TRUE(
+      wrapped.value()->Verify(absl::StrCat(prefix, signature), "message").ok());
 }
 
 // FIPS-only mode tests
@@ -182,7 +182,8 @@ TEST_F(SignatureConfigTest, RegisterFipsValidTemplates) {
   std::list<google::crypto::tink::KeyTemplate> fips_key_templates;
   fips_key_templates.push_back(SignatureKeyTemplates::EcdsaP256());
   fips_key_templates.push_back(SignatureKeyTemplates::EcdsaP256Ieee());
-  fips_key_templates.push_back(SignatureKeyTemplates::EcdsaP384());
+  fips_key_templates.push_back(SignatureKeyTemplates::EcdsaP384Sha384());
+  fips_key_templates.push_back(SignatureKeyTemplates::EcdsaP384Sha512());
   fips_key_templates.push_back(SignatureKeyTemplates::EcdsaP384Ieee());
   fips_key_templates.push_back(SignatureKeyTemplates::EcdsaP521());
   fips_key_templates.push_back(SignatureKeyTemplates::EcdsaP521Ieee());
@@ -192,7 +193,7 @@ TEST_F(SignatureConfigTest, RegisterFipsValidTemplates) {
       SignatureKeyTemplates::RsaSsaPss3072Sha256Sha256F4());
 
   for (auto key_template : fips_key_templates) {
-    EXPECT_THAT(KeysetHandle::GenerateNew(key_template).status(), IsOk());
+    EXPECT_THAT(KeysetHandle::GenerateNew(key_template), IsOk());
   }
 }
 

@@ -37,7 +37,7 @@ import org.junit.runners.JUnit4;
 @RunWith(JUnit4.class)
 public class SignatureKeyTemplatesTest {
   @Test
-  public void testECDSA_P256() throws Exception {
+  public void ecdsaP256() throws Exception {
     KeyTemplate template = SignatureKeyTemplates.ECDSA_P256;
     assertEquals(new EcdsaSignKeyManager().getKeyType(), template.getTypeUrl());
     assertEquals(OutputPrefixType.TINK, template.getOutputPrefixType());
@@ -51,7 +51,7 @@ public class SignatureKeyTemplatesTest {
   }
 
   @Test
-  public void testECDSA_P256_IEEE_P1363() throws Exception {
+  public void ecdsaP256Ieee() throws Exception {
     KeyTemplate template = SignatureKeyTemplates.ECDSA_P256_IEEE_P1363;
     assertEquals(new EcdsaSignKeyManager().getKeyType(), template.getTypeUrl());
     assertEquals(OutputPrefixType.TINK, template.getOutputPrefixType());
@@ -65,7 +65,7 @@ public class SignatureKeyTemplatesTest {
   }
 
   @Test
-  public void testECDSA_P256_IEEE_P1363_WITHOUT_PREFIX() throws Exception {
+  public void ecdsaP256IeeeWithoutPrefix() throws Exception {
     KeyTemplate template = SignatureKeyTemplates.ECDSA_P256_IEEE_P1363_WITHOUT_PREFIX;
     assertEquals(new EcdsaSignKeyManager().getKeyType(), template.getTypeUrl());
     assertEquals(OutputPrefixType.RAW, template.getOutputPrefixType());
@@ -79,7 +79,7 @@ public class SignatureKeyTemplatesTest {
   }
 
   @Test
-  public void testECDSA_P384() throws Exception {
+  public void ecdsaP384() throws Exception {
     KeyTemplate template = SignatureKeyTemplates.ECDSA_P384;
     assertEquals(new EcdsaSignKeyManager().getKeyType(), template.getTypeUrl());
     assertEquals(OutputPrefixType.TINK, template.getOutputPrefixType());
@@ -93,7 +93,7 @@ public class SignatureKeyTemplatesTest {
   }
 
   @Test
-  public void testECDSA_P384_IEEE_P1363() throws Exception {
+  public void ecdsaP384Ieee() throws Exception {
     KeyTemplate template = SignatureKeyTemplates.ECDSA_P384_IEEE_P1363;
     assertEquals(new EcdsaSignKeyManager().getKeyType(), template.getTypeUrl());
     assertEquals(OutputPrefixType.TINK, template.getOutputPrefixType());
@@ -107,7 +107,7 @@ public class SignatureKeyTemplatesTest {
   }
 
   @Test
-  public void testECDSA_P521_IEEE_P1363() throws Exception {
+  public void ecdsaP521Ieee() throws Exception {
     KeyTemplate template = SignatureKeyTemplates.ECDSA_P521_IEEE_P1363;
     assertEquals(new EcdsaSignKeyManager().getKeyType(), template.getTypeUrl());
     assertEquals(OutputPrefixType.TINK, template.getOutputPrefixType());
@@ -121,7 +121,7 @@ public class SignatureKeyTemplatesTest {
   }
 
   @Test
-  public void testCreateEcdsaKeyTemplate() throws Exception {
+  public void createEcdsaKeyTemplate() throws Exception {
     // Intentionally using "weird" or invalid values for parameters,
     // to test that the function correctly puts them in the resulting template.
     HashType hashType = HashType.SHA512;
@@ -141,7 +141,7 @@ public class SignatureKeyTemplatesTest {
   }
 
   @Test
-  public void testED25519() throws Exception {
+  public void ed25519() throws Exception {
     KeyTemplate template = SignatureKeyTemplates.ED25519;
     assertEquals(new Ed25519PrivateKeyManager().getKeyType(), template.getTypeUrl());
     assertEquals(OutputPrefixType.TINK, template.getOutputPrefixType());
@@ -149,7 +149,7 @@ public class SignatureKeyTemplatesTest {
   }
 
   @Test
-  public void testED25519WithRawOutput() throws Exception {
+  public void ed25519WithRawOutput() throws Exception {
     KeyTemplate template = SignatureKeyTemplates.ED25519WithRawOutput;
     assertEquals(new Ed25519PrivateKeyManager().getKeyType(), template.getTypeUrl());
     assertEquals(OutputPrefixType.RAW, template.getOutputPrefixType());
@@ -157,7 +157,7 @@ public class SignatureKeyTemplatesTest {
   }
 
   @Test
-  public void testRSA_SSA_PKCS1_3072_SHA256_F4() throws Exception {
+  public void rsaSsaPkcs1_3072() throws Exception {
     KeyTemplate template = SignatureKeyTemplates.RSA_SSA_PKCS1_3072_SHA256_F4;
     assertEquals(new RsaSsaPkcs1SignKeyManager().getKeyType(), template.getTypeUrl());
     assertEquals(OutputPrefixType.TINK, template.getOutputPrefixType());
@@ -173,7 +173,7 @@ public class SignatureKeyTemplatesTest {
   }
 
   @Test
-  public void testRSA_SSA_PKCS1_4096_SHA512_F4() throws Exception {
+  public void rsaSsaPkcs1_4096() throws Exception {
     KeyTemplate template = SignatureKeyTemplates.RSA_SSA_PKCS1_4096_SHA512_F4;
     assertEquals(new RsaSsaPkcs1SignKeyManager().getKeyType(), template.getTypeUrl());
     assertEquals(OutputPrefixType.TINK, template.getOutputPrefixType());
@@ -189,7 +189,7 @@ public class SignatureKeyTemplatesTest {
   }
 
   @Test
-  public void testRSA_SSA_PSS_3072_SHA256_SHA256_32_F4() throws Exception {
+  public void rsaSsaPss3072() throws Exception {
     KeyTemplate template = SignatureKeyTemplates.RSA_SSA_PSS_3072_SHA256_SHA256_32_F4;
     assertEquals(new RsaSsaPssSignKeyManager().getKeyType(), template.getTypeUrl());
     assertEquals(OutputPrefixType.TINK, template.getOutputPrefixType());
@@ -206,7 +206,7 @@ public class SignatureKeyTemplatesTest {
   }
 
   @Test
-  public void testRSA_SSA_PSS_4096_SHA512_SHA512_64_F4() throws Exception {
+  public void rsaSsaPss4096() throws Exception {
     KeyTemplate template = SignatureKeyTemplates.RSA_SSA_PSS_4096_SHA512_SHA512_64_F4;
     assertEquals(new RsaSsaPssSignKeyManager().getKeyType(), template.getTypeUrl());
     assertEquals(OutputPrefixType.TINK, template.getOutputPrefixType());

@@ -17,6 +17,7 @@
 #include "tink/mac/mac_config.h"
 
 #include "absl/memory/memory.h"
+#include "tink/chunkedmac/internal/chunked_mac_wrapper.h"
 #include "tink/config/config_util.h"
 #include "tink/config/tink_fips.h"
 #include "tink/mac/aes_cmac_key_manager.h"
@@ -39,9 +40,13 @@ const RegistryConfig& MacConfig::Latest() {
 
 // static
 util::Status MacConfig::Register() {
-  // Register primitive wrapper.
+  // Register primitive wrappers.
   auto status =
       Registry::RegisterPrimitiveWrapper(absl::make_unique<MacWrapper>());
+  if (!status.ok()) return status;
+
+  status = Registry::RegisterPrimitiveWrapper(
+      absl::make_unique<internal::ChunkedMacWrapper>());
   if (!status.ok()) return status;
 
   // Register key managers which utilize the FIPS validated BoringCrypto

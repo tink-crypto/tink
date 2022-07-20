@@ -1,0 +1,83 @@
+// Copyright 2017 Google Inc.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+////////////////////////////////////////////////////////////////////////////////
+
+// Definitions for Elliptic Curve Digital Signature Algorithm (ECDSA).
+syntax = "proto3";
+
+package google.crypto.tink;
+
+import "proto/common.proto";
+
+option java_package = "com.google.crypto.tink.proto";
+option java_multiple_files = true;
+option go_package = "github.com/google/tink/proto/ecdsa_go_proto";
+
+enum EcdsaSignatureEncoding {
+  UNKNOWN_ENCODING = 0;
+  // The signature's format is r || s, where r and s are zero-padded and have
+  // the same size in bytes as the order of the curve. For example, for NIST
+  // P-256 curve, r and s are zero-padded to 32 bytes.
+  IEEE_P1363 = 1;
+  // The signature is encoded using ASN.1
+  // (https://tools.ietf.org/html/rfc5480#appendix-A):
+  // ECDSA-Sig-Value :: = SEQUENCE {
+  //  r INTEGER,
+  //  s INTEGER
+  // }
+  DER = 2;
+}
+
+// Protos for Ecdsa.
+message EcdsaParams {
+  // Required.
+  HashType hash_type = 1;
+  // Required.
+  EllipticCurveType curve = 2;
+  // Required.
+  EcdsaSignatureEncoding encoding = 3;
+}
+
+// key_type: type.googleapis.com/google.crypto.tink.EcdsaPublicKey
+message EcdsaPublicKey {
+  // Required.
+  uint32 version = 1;
+  // Required.
+  EcdsaParams params = 2;
+  // Affine coordinates of the public key in bigendian representation. The
+  // public key is a point (x, y) on the curve defined by params.curve. For
+  // ECDH, it is crucial to verify whether the public key point (x, y) is on the
+  // private's key curve. For ECDSA, such verification is a defense in depth.
+  // Required.
+  bytes x = 3;
+  // Required.
+  bytes y = 4;
+}
+
+// key_type: type.googleapis.com/google.crypto.tink.EcdsaPrivateKey
+message EcdsaPrivateKey {
+  // Required.
+  uint32 version = 1;
+  // Required.
+  EcdsaPublicKey public_key = 2;
+  // Unsigned big integer in bigendian representation.
+  // Required.
+  bytes key_value = 3;
+}
+
+message EcdsaKeyFormat {
+  // Required.
+  EcdsaParams params = 2;
+}

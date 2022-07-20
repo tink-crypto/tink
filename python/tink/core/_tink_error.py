@@ -1,4 +1,4 @@
-# Copyright 2019 Google LLC.
+# Copyright 2019 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,13 +14,9 @@
 
 """This module defines basic exceptions in Tink."""
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-
 from tink.cc.pybind import tink_bindings
 
-KNOWN_STATUS_NOT_OK_TYPES = (tink_bindings.StatusNotOk,)
+KNOWN_STATUS_NOT_OK_TYPES = (tink_bindings.PythonTinkException,)
 
 
 def register_status_not_ok_type(status_not_ok_type):

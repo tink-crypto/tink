@@ -19,10 +19,12 @@
 #include <memory>
 #include <sstream>
 #include <string>
+#include <utility>
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "absl/memory/memory.h"
+#include "absl/status/status.h"
 #include "absl/strings/string_view.h"
 #include "tink/input_stream.h"
 #include "tink/subtle/prf/streaming_prf.h"
@@ -36,16 +38,12 @@ namespace subtle {
 namespace {
 
 using ::crypto::tink::test::IsOk;
-using ::crypto::tink::test::StatusIs;
 using ::testing::_;
 using ::testing::AnyNumber;
-using ::testing::Contains;
 using ::testing::DefaultValue;
 using ::testing::Eq;
-using ::testing::Gt;
 using ::testing::NiceMock;
 using ::testing::Not;
-using ::testing::Pair;
 using ::testing::Return;
 using ::testing::StrEq;
 
@@ -108,23 +106,23 @@ TEST_F(PrfFromStatefulMacFactoryTest, ComputePrf) {
   SetUpWithResult(util::OkStatus(), std::string("mock_stateful_mac"));
   auto output_result = prf()->Compute("test_input", 5);
   ASSERT_TRUE(output_result.ok()) << output_result.status();
-  EXPECT_THAT(output_result.ValueOrDie(), StrEq("mock_"));
+  EXPECT_THAT(output_result.value(), StrEq("mock_"));
 }
 
 TEST_F(PrfFromStatefulMacFactoryTest, ComputePrfUpdateFails) {
-  SetUpWithResult(util::Status(util::error::INTERNAL, "UpdateFailed"),
+  SetUpWithResult(util::Status(absl::StatusCode::kInternal, "UpdateFailed"),
                   std::string("mock_stateful_mac"));
   auto output_result = prf()->Compute("test_input", 5);
   EXPECT_FALSE(output_result.ok());
-  EXPECT_THAT(output_result.status().error_message(), StrEq("UpdateFailed"));
+  EXPECT_THAT(output_result.status().message(), Eq("UpdateFailed"));
 }
 
 TEST_F(PrfFromStatefulMacFactoryTest, ComputePrfFinalizeFails) {
   SetUpWithResult(util::OkStatus(),
-                  util::Status(util::error::INTERNAL, "FinalizeFailed"));
+                  util::Status(absl::StatusCode::kInternal, "FinalizeFailed"));
   auto output_result = prf()->Compute("test_input", 5);
   EXPECT_FALSE(output_result.ok());
-  EXPECT_THAT(output_result.status().error_message(), StrEq("FinalizeFailed"));
+  EXPECT_THAT(output_result.status().message(), Eq("FinalizeFailed"));
 }
 
 TEST_F(PrfFromStatefulMacFactoryTest, ComputePrfTooMuchOutputRequested) {
@@ -150,37 +148,37 @@ class PrfFromStreamingPrfTest : public ::testing::Test {
 
 TEST_F(PrfFromStreamingPrfTest, ComputePrfBasic) {
   auto output_result = prf()->Compute("input", 5);
-  ASSERT_THAT(output_result.status(), IsOk());
-  EXPECT_THAT(output_result.ValueOrDie(), StrEq("outpu"));
+  ASSERT_THAT(output_result, IsOk());
+  EXPECT_THAT(output_result.value(), StrEq("outpu"));
 }
 
 TEST_F(PrfFromStreamingPrfTest, ComputeTwice) {
   auto output_result = prf()->Compute("input", 5);
-  ASSERT_THAT(output_result.status(), IsOk());
-  EXPECT_THAT(output_result.ValueOrDie(), StrEq("outpu"));
+  ASSERT_THAT(output_result, IsOk());
+  EXPECT_THAT(output_result.value(), StrEq("outpu"));
   output_result = prf()->Compute("input", 5);
-  ASSERT_THAT(output_result.status(), IsOk());
-  EXPECT_THAT(output_result.ValueOrDie(), StrEq("outpu"));
+  ASSERT_THAT(output_result, IsOk());
+  EXPECT_THAT(output_result.value(), StrEq("outpu"));
 }
 
 TEST_F(PrfFromStreamingPrfTest, ComputeSubstring) {
   auto output_result = prf()->Compute("input", 5);
-  ASSERT_THAT(output_result.status(), IsOk());
-  EXPECT_THAT(output_result.ValueOrDie(), StrEq("outpu"));
+  ASSERT_THAT(output_result, IsOk());
+  EXPECT_THAT(output_result.value(), StrEq("outpu"));
   output_result = prf()->Compute("input", 6);
-  ASSERT_THAT(output_result.status(), IsOk());
-  EXPECT_THAT(output_result.ValueOrDie(), StrEq("output"));
+  ASSERT_THAT(output_result, IsOk());
+  EXPECT_THAT(output_result.value(), StrEq("output"));
   output_result = prf()->Compute("input", 2);
-  ASSERT_THAT(output_result.status(), IsOk());
-  EXPECT_THAT(output_result.ValueOrDie(), StrEq("ou"));
+  ASSERT_THAT(output_result, IsOk());
+  EXPECT_THAT(output_result.value(), StrEq("ou"));
 }
 
 TEST_F(PrfFromStreamingPrfTest, ComputeTooMuch) {
   auto output_result = prf()->Compute("input", 5);
-  ASSERT_THAT(output_result.status(), IsOk());
-  EXPECT_THAT(output_result.ValueOrDie(), StrEq("outpu"));
+  ASSERT_THAT(output_result, IsOk());
+  EXPECT_THAT(output_result.value(), StrEq("outpu"));
   output_result = prf()->Compute("input", 100);
-  EXPECT_THAT(output_result.status(), Not(IsOk()))
+  EXPECT_THAT(output_result, Not(IsOk()))
       << "Output should not be okay, too much output requested";
 }
 

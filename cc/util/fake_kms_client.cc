@@ -18,7 +18,10 @@
 #include <fstream>
 #include <iostream>
 #include <sstream>
+#include <string>
+#include <utility>
 
+#include "absl/status/status.h"
 #include "absl/strings/ascii.h"
 #include "absl/strings/escaping.h"
 #include "absl/strings/match.h"
@@ -65,8 +68,8 @@ StatusOr<std::unique_ptr<FakeKmsClient>> FakeKmsClient::New(
   if (!key_uri.empty()) {
     client->encoded_keyset_ = GetEncodedKeyset(key_uri);
     if (client->encoded_keyset_.empty()) {
-      return ToStatusF(util::error::INVALID_ARGUMENT, "Key '%s' not supported",
-                       key_uri);
+      return ToStatusF(absl::StatusCode::kInvalidArgument,
+                       "Key '%s' not supported", key_uri);
     }
   }
   return std::move(client);
@@ -83,29 +86,29 @@ StatusOr<std::unique_ptr<Aead>> FakeKmsClient::GetAead(
     absl::string_view key_uri) const {
   if (!DoesSupport(key_uri)) {
     if (!encoded_keyset_.empty()) {
-      return ToStatusF(util::error::INVALID_ARGUMENT,
+      return ToStatusF(absl::StatusCode::kInvalidArgument,
                        "This client is bound to a different key, and cannot "
                        "use key '%s'.",
                        key_uri);
     } else {
-      return ToStatusF(util::error::INVALID_ARGUMENT,
+      return ToStatusF(absl::StatusCode::kInvalidArgument,
                        "This client does not support key '%s'.", key_uri);
     }
   }
   std::string keyset;
   if (!absl::WebSafeBase64Unescape(GetEncodedKeyset(key_uri), &keyset)) {
-    return util::Status(util::error::INVALID_ARGUMENT, "Invalid Keyset");
+    return util::Status(absl::StatusCode::kInvalidArgument, "Invalid Keyset");
   }
   auto reader_result = BinaryKeysetReader::New(keyset);
   if (!reader_result.ok()) {
     return reader_result.status();
   }
   auto handle_result =
-      CleartextKeysetHandle::Read(std::move(reader_result.ValueOrDie()));
+      CleartextKeysetHandle::Read(std::move(reader_result.value()));
   if (!handle_result.ok()) {
     return handle_result.status();
   }
-  return handle_result.ValueOrDie()->GetPrimitive<crypto::tink::Aead>();
+  return handle_result.value()->GetPrimitive<crypto::tink::Aead>();
 }
 
 Status FakeKmsClient::RegisterNewClient(absl::string_view key_uri,
@@ -115,7 +118,7 @@ Status FakeKmsClient::RegisterNewClient(absl::string_view key_uri,
     return client_result.status();
   }
 
-  return KmsClients::Add(std::move(client_result.ValueOrDie()));
+  return KmsClients::Add(std::move(client_result.value()));
 }
 
 StatusOr<std::string> FakeKmsClient::CreateFakeKeyUri() {
@@ -131,8 +134,8 @@ StatusOr<std::string> FakeKmsClient::CreateFakeKeyUri() {
   if (!writer_result.ok()) {
     return writer_result.status();
   }
-  auto status = CleartextKeysetHandle::Write(writer_result.ValueOrDie().get(),
-                                             *handle_result.ValueOrDie());
+  auto status = CleartextKeysetHandle::Write(writer_result.value().get(),
+                                             *handle_result.value());
   if (!status.ok()) {
     return status;
   }

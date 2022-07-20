@@ -1,3 +1,5 @@
+load("@tink_py//tools/build_defs:tink_python_rules.bzl", "tink_pybind_library")
+
 package(default_visibility = ["//:__subpackages__"])
 
 licenses(["notice"])
@@ -7,17 +9,22 @@ cc_library(
     hdrs = ["cc_key_manager.h"],
     include_prefix = "tink/cc",
     deps = [
+        "//tink/cc/pybind:tink_exception",
+        "@com_google_absl//absl/memory",
+        "@com_google_absl//absl/status",
+        "@com_google_absl//absl/strings",
         "@tink_cc",
         "@tink_cc//util:status",
         "@tink_cc//util:statusor",
     ],
 )
 
-cc_library(
+tink_pybind_library(
     name = "cc_tink_config",
     srcs = ["cc_tink_config.cc"],
     hdrs = ["cc_tink_config.h"],
     deps = [
+        "//tink/cc/pybind:tink_exception",
         "@tink_cc",
         "@tink_cc//config:tink_config",
         "@tink_cc//util:status",
@@ -33,6 +40,20 @@ cc_library(
         "@tink_cc//jwt/internal:raw_jwt_ecdsa_sign_key_manager",
         "@tink_cc//jwt/internal:raw_jwt_ecdsa_verify_key_manager",
         "@tink_cc//jwt/internal:raw_jwt_hmac_key_manager",
+        "@tink_cc//jwt/internal:raw_jwt_rsa_ssa_pkcs1_sign_key_manager",
+        "@tink_cc//jwt/internal:raw_jwt_rsa_ssa_pkcs1_verify_key_manager",
+        "@tink_cc//jwt/internal:raw_jwt_rsa_ssa_pss_sign_key_manager",
+        "@tink_cc//jwt/internal:raw_jwt_rsa_ssa_pss_verify_key_manager",
+        "@tink_cc//util:status",
+    ],
+)
+
+cc_library(
+    name = "cc_hpke_config",
+    srcs = ["cc_hpke_config.cc"],
+    hdrs = ["cc_hpke_config.h"],
+    deps = [
+        "@tink_cc//hybrid:hpke_config",
         "@tink_cc//util:status",
     ],
 )
@@ -101,6 +122,7 @@ cc_test(
     deps = [
         ":output_stream_adapter",
         "@com_google_absl//absl/memory",
+        "@com_google_absl//absl/status",
         "@com_google_googletest//:gtest_main",
         "@tink_cc//:output_stream",
         "@tink_cc//subtle:random",
@@ -158,9 +180,9 @@ cc_library(
     include_prefix = "tink/cc",
     deps = [
         ":python_file_object_adapter",
-        "@com_google_absl//absl/base:core_headers",
         "@com_google_absl//absl/memory",
         "@com_google_absl//absl/strings",
+        "@com_google_absl//absl/status",
         "@tink_cc//:input_stream",
         "@tink_cc//subtle:subtle_util",
         "@tink_cc//util:status",
@@ -176,6 +198,7 @@ cc_test(
         ":python_input_stream",
         ":test_util",
         "@com_google_absl//absl/memory",
+        "@com_google_absl//absl/status",
         "@com_google_googletest//:gtest_main",
         "@tink_cc//subtle:random",
     ],

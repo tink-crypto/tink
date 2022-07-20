@@ -22,6 +22,7 @@ import static org.junit.Assert.assertThrows;
 import com.google.crypto.tink.Aead;
 import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.config.TinkFips;
+import com.google.crypto.tink.config.internal.TinkFipsUtil;
 import java.security.GeneralSecurityException;
 import org.junit.Assume;
 import org.junit.FixMethodOrder;
@@ -41,6 +42,8 @@ public class AeadConfigTest {
   // This test must run first.
   @Test
   public void aaaTestInitialization() throws Exception {
+    Assume.assumeFalse(TinkFips.useOnlyFips());
+
     GeneralSecurityException e =
         assertThrows(GeneralSecurityException.class, () -> Registry.getCatalogue("tinkmac"));
     assertThat(e.toString()).contains("no catalogue found");
@@ -89,6 +92,7 @@ public class AeadConfigTest {
   @Test
   public void testFipsRegisterFipsKeys() throws Exception {
     Assume.assumeTrue(TinkFips.useOnlyFips());
+    Assume.assumeTrue(TinkFipsUtil.fipsModuleAvailable());
 
     // Register AEAD key manager
     AeadConfig.register();
@@ -106,6 +110,7 @@ public class AeadConfigTest {
   @Test
   public void testFipsRegisterNonFipsKeys() throws Exception {
     Assume.assumeTrue(TinkFips.useOnlyFips());
+    Assume.assumeTrue(TinkFipsUtil.fipsModuleAvailable());
 
     // Register AEAD key manager
     AeadConfig.register();

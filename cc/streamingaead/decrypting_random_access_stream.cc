@@ -16,10 +16,13 @@
 
 #include "tink/streamingaead/decrypting_random_access_stream.h"
 
+#include <utility>
+
 #include "absl/memory/memory.h"
+#include "absl/status/status.h"
 #include "absl/synchronization/mutex.h"
-#include "tink/random_access_stream.h"
 #include "tink/primitive_set.h"
+#include "tink/random_access_stream.h"
 #include "tink/streaming_aead.h"
 #include "tink/streamingaead/shared_random_access_stream.h"
 #include "tink/util/buffer.h"
@@ -42,11 +45,11 @@ StatusOr<std::unique_ptr<RandomAccessStream>> DecryptingRandomAccessStream::New(
     std::unique_ptr<crypto::tink::RandomAccessStream> ciphertext_source,
     absl::string_view associated_data) {
   if (primitives == nullptr) {
-    return Status(util::error::INVALID_ARGUMENT,
+    return Status(absl::StatusCode::kInvalidArgument,
                   "primitives must be non-null.");
   }
   if (ciphertext_source == nullptr) {
-    return Status(util::error::INVALID_ARGUMENT,
+    return Status(absl::StatusCode::kInvalidArgument,
                   "ciphertext_source must be non-null.");
   }
   return {absl::WrapUnique(new DecryptingRandomAccessStream(
@@ -58,18 +61,19 @@ util::Status DecryptingRandomAccessStream::PRead(
     crypto::tink::util::Buffer* dest_buffer) {
   {  // "fast-track": quickly proceed if matching has been attempted/found.
     if (dest_buffer == nullptr) {
-      return util::Status(util::error::INVALID_ARGUMENT,
+      return util::Status(absl::StatusCode::kInvalidArgument,
                           "dest_buffer must be non-null");
     }
     if (count < 0) {
-      return util::Status(util::error::INVALID_ARGUMENT,
+      return util::Status(absl::StatusCode::kInvalidArgument,
                           "count cannot be negative");
     }
     if (count > dest_buffer->allocated_size()) {
-      return util::Status(util::error::INVALID_ARGUMENT, "buffer too small");
+      return util::Status(absl::StatusCode::kInvalidArgument,
+                          "buffer too small");
     }
     if (position < 0) {
-      return util::Status(util::error::INVALID_ARGUMENT,
+      return util::Status(absl::StatusCode::kInvalidArgument,
                           "position cannot be negative");
     }
     absl::ReaderMutexLock lock(&matching_mutex_);
@@ -77,7 +81,7 @@ util::Status DecryptingRandomAccessStream::PRead(
       return matching_stream_->PRead(position, count, dest_buffer);
     }
     if (attempted_matching_) {
-      return Status(util::error::INVALID_ARGUMENT,
+      return Status(absl::StatusCode::kInvalidArgument,
                     "Did not find a decrypter matching the ciphertext stream.");
     }
   }
@@ -89,15 +93,15 @@ util::Status DecryptingRandomAccessStream::PRead(
     return matching_stream_->PRead(position, count, dest_buffer);
   }
   if (attempted_matching_) {
-    return Status(util::error::INVALID_ARGUMENT,
+    return Status(absl::StatusCode::kInvalidArgument,
                   "Did not find a decrypter matching the ciphertext stream.");
   }
   attempted_matching_ = true;
   auto raw_primitives_result = primitives_->get_raw_primitives();
   if (!raw_primitives_result.ok()) {
-    return Status(util::error::INTERNAL, "No RAW primitives found");
+    return Status(absl::StatusCode::kInternal, "No RAW primitives found");
   }
-  for (auto& primitive : *(raw_primitives_result.ValueOrDie())) {
+  for (auto& primitive : *(raw_primitives_result.value())) {
     StreamingAead& streaming_aead = primitive->get_primitive();
     auto shared_ct = absl::make_unique<SharedRandomAccessStream>(
         ciphertext_source_.get());
@@ -105,17 +109,17 @@ util::Status DecryptingRandomAccessStream::PRead(
         streaming_aead.NewDecryptingRandomAccessStream(
             std::move(shared_ct), associated_data_);
     if (decrypting_stream_result.ok()) {
-      auto status = decrypting_stream_result.ValueOrDie()->PRead(
-          position, count, dest_buffer);
-      if (status.ok() || status.error_code() == util::error::OUT_OF_RANGE) {
+      auto status =
+          decrypting_stream_result.value()->PRead(position, count, dest_buffer);
+      if (status.ok() || status.code() == absl::StatusCode::kOutOfRange) {
         // Found a match.
-        matching_stream_ = std::move(decrypting_stream_result.ValueOrDie());
+        matching_stream_ = std::move(decrypting_stream_result.value());
         return status;
       }
     }
     // Not a match, try the next primitive.
   }
-  return Status(util::error::INVALID_ARGUMENT,
+  return Status(absl::StatusCode::kInvalidArgument,
                 "Could not find a decrypter matching the ciphertext stream.");
 }
 
@@ -125,7 +129,7 @@ StatusOr<int64_t> DecryptingRandomAccessStream::size() {
     return matching_stream_->size();
   }
   // TODO(b/139722894): attempt matching here?
-  return Status(util::error::UNAVAILABLE, "no matching found yet");
+  return Status(absl::StatusCode::kUnavailable, "no matching found yet");
 }
 
 }  // namespace streamingaead

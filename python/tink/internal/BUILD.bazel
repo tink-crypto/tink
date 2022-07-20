@@ -1,0 +1,22 @@
+load("@rules_python//python:defs.bzl", "py_library", "py_test")
+load("@tink_py_pip_deps//:requirements.bzl", "requirement")
+
+package(default_visibility = ["//:__subpackages__"])
+
+licenses(["notice"])
+
+py_library(
+    name = "big_integer_util",
+    srcs = ["big_integer_util.py"],
+    srcs_version = "PY3",
+)
+
+py_test(
+    name = "big_integer_util_test",
+    srcs = ["big_integer_util_test.py"],
+    srcs_version = "PY3",
+    deps = [
+        ":big_integer_util",
+        requirement("absl-py"),
+    ],
+)

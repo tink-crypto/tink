@@ -16,22 +16,27 @@
 #ifndef TINK_AEAD_XCHACHA20_POLY1305_KEY_MANAGER_H_
 #define TINK_AEAD_XCHACHA20_POLY1305_KEY_MANAGER_H_
 
+#include <stdint.h>
+
+#include <memory>
 #include <string>
 
 #include "absl/memory/memory.h"
+#include "absl/status/status.h"
 #include "absl/strings/str_cat.h"
 #include "tink/aead.h"
 #include "tink/core/key_type_manager.h"
+#include "tink/core/template_util.h"
+#include "tink/input_stream.h"
 #include "tink/subtle/random.h"
 #include "tink/subtle/xchacha20_poly1305_boringssl.h"
 #include "tink/util/constants.h"
-#include "tink/util/errors.h"
 #include "tink/util/input_stream_util.h"
-#include "tink/util/protobuf_helper.h"
 #include "tink/util/secret_data.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "tink/util/validation.h"
+#include "proto/tink.pb.h"
 #include "proto/xchacha20_poly1305.pb.h"
 
 namespace crypto {
@@ -70,17 +75,17 @@ class XChaCha20Poly1305KeyManager
     uint32_t key_size = key.key_value().size();
     if (key.key_value().size() != kKeySizeInBytes) {
       return crypto::tink::util::Status(
-          util::error::INVALID_ARGUMENT,
+          absl::StatusCode::kInvalidArgument,
           absl::StrCat("Invalid XChaCha20Poly1305Key: key_value has ", key_size,
                        " bytes; supported size: ", kKeySizeInBytes, " bytes."));
     }
-    return crypto::tink::util::Status::OK;
+    return crypto::tink::util::OkStatus();
   }
 
   crypto::tink::util::Status ValidateKeyFormat(
       const google::crypto::tink::XChaCha20Poly1305KeyFormat& key_format)
       const override {
-    return crypto::tink::util::Status::OK;
+    return crypto::tink::util::OkStatus();
   }
 
   crypto::tink::util::StatusOr<google::crypto::tink::XChaCha20Poly1305Key>
@@ -102,16 +107,16 @@ class XChaCha20Poly1305KeyManager
     crypto::tink::util::StatusOr<std::string> randomness =
         ReadBytesFromStream(kKeySizeInBytes, input_stream);
     if (!randomness.ok()) {
-      if (randomness.status().error_code() == util::error::OUT_OF_RANGE) {
+      if (randomness.status().code() == absl::StatusCode::kOutOfRange) {
         return crypto::tink::util::Status(
-            crypto::tink::util::error::INVALID_ARGUMENT,
+            absl::StatusCode::kInvalidArgument,
             "Could not get enough pseudorandomness from input stream");
       }
       return randomness.status();
     }
     google::crypto::tink::XChaCha20Poly1305Key key;
     key.set_version(get_version());
-    key.set_key_value(randomness.ValueOrDie());
+    key.set_key_value(randomness.value());
     return key;
   }
 

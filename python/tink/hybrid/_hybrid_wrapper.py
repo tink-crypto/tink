@@ -1,4 +1,4 @@
-# Copyright 2019 Google LLC.
+# Copyright 2019 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,11 +13,6 @@
 # limitations under the License.
 
 """HybridDecrypt wrapper."""
-
-from __future__ import absolute_import
-from __future__ import division
-# Placeholder for import for type annotations
-from __future__ import print_function
 
 from typing import Type
 from absl import logging
@@ -83,6 +78,8 @@ class _WrappedHybridEncrypt(_hybrid_encrypt.HybridEncrypt):
     self._primitive_set = pset
 
   def encrypt(self, plaintext: bytes, context_info: bytes) -> bytes:
+    if not self._primitive_set.primary():
+      raise core.TinkError('keyset without primary key')
     primary = self._primitive_set.primary()
     return primary.identifier + primary.primitive.encrypt(
         plaintext, context_info)

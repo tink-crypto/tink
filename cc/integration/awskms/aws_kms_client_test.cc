@@ -23,6 +23,7 @@
 #include "aws/core/Aws.h"
 #include "aws/kms/KMSClient.h"
 #include "gtest/gtest.h"
+#include "absl/status/status.h"
 #include "absl/strings/str_cat.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
@@ -45,12 +46,12 @@ TEST(AwsKmsClientTest, testBasic) {
   std::string aws_key2 = "aws-kms://arn:aws:kms:us-west-2:acc:other/key2";
   std::string non_aws_key = "gcp-kms:://some/gcp/key";
   std::string creds_file = std::string(getenv("TEST_SRCDIR")) +
-                           "/tink_base/testdata/aws_credentials_cc.txt";
+                           "/tink_cc_awskms/testdata/aws/credentials.ini";
 
   {  // A client not bound to any particular key.
     auto client_result = AwsKmsClient::New("", creds_file);
     EXPECT_TRUE(client_result.ok()) << client_result.status();
-    auto client = std::move(client_result.ValueOrDie());
+    auto client = std::move(client_result.value());
     EXPECT_TRUE(client->DoesSupport(aws_key1));
     EXPECT_TRUE(client->DoesSupport(aws_key2));
     EXPECT_FALSE(client->DoesSupport(non_aws_key));
@@ -59,7 +60,7 @@ TEST(AwsKmsClientTest, testBasic) {
   {  // A client bound to a specific AWS KMS key.
     auto client_result = AwsKmsClient::New(aws_key1, creds_file);
     EXPECT_TRUE(client_result.ok()) << client_result.status();
-    auto client = std::move(client_result.ValueOrDie());
+    auto client = std::move(client_result.value());
     EXPECT_TRUE(client->DoesSupport(aws_key1));
     EXPECT_FALSE(client->DoesSupport(aws_key2));
     EXPECT_FALSE(client->DoesSupport(non_aws_key));
@@ -69,23 +70,23 @@ TEST(AwsKmsClientTest, testBasic) {
 TEST(AwsKmsClientTest, ClientCreationAndRegistry) {
   std::string aws_key1 = "aws-kms://arn:aws:kms:us-east-1:acc:some/key1";
   std::string creds_file = absl::StrCat(
-      getenv("TEST_SRCDIR"), "/tink_base/testdata/aws_credentials_cc.txt");
+      getenv("TEST_SRCDIR"), "/tink_cc_awskms/testdata/aws/credentials.ini");
 
   auto client_result = AwsKmsClient::RegisterNewClient(aws_key1, creds_file);
   EXPECT_THAT(client_result, IsOk());
 
   auto registry_result = KmsClients::Get(aws_key1);
-  EXPECT_THAT(registry_result.status(), IsOk());
+  EXPECT_THAT(registry_result, IsOk());
 }
 
 TEST(AwsKmsClientTest, ClientCreationInvalidRegistry) {
   std::string non_aws_key =
       "gcp-kms://projects/someProject/.../cryptoKeys/key1";
   std::string creds_file =
-      std::string(getenv("TEST_SRCDIR")) + "/tink_base/testdata/credential.json";
+      std::string(getenv("TEST_SRCDIR")) + "/tink_cc_awskms/testdata/gcp/credential.json";
 
   auto client_result = AwsKmsClient::RegisterNewClient(non_aws_key, creds_file);
-  EXPECT_THAT(client_result, StatusIs(util::error::INVALID_ARGUMENT));
+  EXPECT_THAT(client_result, StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
 }  // namespace

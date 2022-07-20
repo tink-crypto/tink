@@ -108,7 +108,10 @@ describe('aes gcm test', function() {
       try {
         await aead.decrypt(c1, aad);
         fail('expected aead.decrypt to fail');
-      } catch (e) {
+        // Preserving old behavior when moving to
+        // https://www.typescriptlang.org/tsconfig#useUnknownInCatchVariables
+        // tslint:disable-next-line:no-any
+      } catch (e: any) {
         if (c1.length < 12 /* iv */ + 16 /* tag */) {
           expect(e.toString()).toBe('SecurityException: ciphertext too short');
         } else {

@@ -36,40 +36,74 @@
 include(HttpArchive)
 include(TinkUtil)
 
+# Creates an interface target from an imported one.
+#
+# Parameters:
+#   INTERFACE_TARGET Name of the interface target.
+#   IMPORTED_TARGET Name of the imported target (e.g., with find_package).
+#
+macro(_create_interface_target INTERFACE_TARGET IMPORTED_TARGET)
+  add_library(${INTERFACE_TARGET} INTERFACE)
+  target_link_libraries(${INTERFACE_TARGET} INTERFACE ${IMPORTED_TARGET})
+  target_include_directories(${INTERFACE_TARGET} INTERFACE ${IMPORTED_TARGET})
+endmacro()
+
 set(gtest_force_shared_crt ON CACHE BOOL "Tink dependency override" FORCE)
 
-http_archive(
-  NAME com_google_googletest
-  URL https://github.com/google/googletest/archive/eb9225ce361affe561592e0912320b9db84985d0.zip
-  SHA256 a7db7d1295ce46b93f3d1a90dbbc55a48409c00d19684fcd87823037add88118
-)
+if (NOT TINK_USE_INSTALLED_GOOGLETEST)
+  http_archive(
+    NAME com_google_googletest
+    URL https://github.com/google/googletest/archive/refs/tags/release-1.11.0.tar.gz
+    SHA256 b4870bf121ff7795ba20d20bcdd8627b8e088f2d1dab299a031c1034eddc93d5
+  )
+else()
+  # This uses the CMake's FindGTest module; if successful, this call to
+  # find_package generates the targets GTest::gmock, GTest::gtest and
+  # GTest::gtest_main.
+  find_package(GTest CONFIG REQUIRED)
+  _create_interface_target(gmock GTest::gmock)
+  _create_interface_target(gtest_main GTest::gtest_main)
+endif()
 
-http_archive(
-  NAME com_google_absl
-  URL https://github.com/abseil/abseil-cpp/archive/64461421222f8be8663c50e8e82c91c3f95a0d3c.zip
-  SHA256 41d725950d0d3ed4d00020881db84fdc79ac349d9b325ab010686c5a794a822e
-)
+if (NOT TINK_USE_INSTALLED_ABSEIL)
+  # Commit from 2021-12-03
+  http_archive(
+    NAME com_google_absl
+    URL https://github.com/abseil/abseil-cpp/archive/9336be04a242237cd41a525bedfcf3be1bb55377.zip
+    SHA256 368be019fc8d69a566ac2cf7a75262d5ba8f6409e3ef3cdbcf0106bdeb32e91c
+  )
+else()
+  # This is everything that needs to be done here. Abseil already defines its
+  # targets, which gets linked in tink_cc_(library|test).
+  find_package(absl REQUIRED)
+endif()
 
 http_archive(
   NAME wycheproof
-  URL https://github.com/google/wycheproof/archive/f89f4c53a8845fcefcdb9f14ee9191dbe167e3e3.zip
-  SHA256 b44bb0339ad149e6cdab1337445cf52440cbfc79684203a3db1c094d9ef8daea
+  URL https://github.com/google/wycheproof/archive/d8ed1ba95ac4c551db67f410c06131c3bc00a97c.zip
+  SHA256 eb1d558071acf1aa6d677d7f1cabec2328d1cf8381496c17185bd92b52ce7545
   DATA_ONLY
 )
 
 # Symlink the Wycheproof test data.
 # Paths are hard-coded in tests, which expects wycheproof/ in this location.
-add_directory_alias("${wycheproof_SOURCE_DIR}" "${CMAKE_CURRENT_BINARY_DIR}/cc/wycheproof")
+add_directory_alias("${wycheproof_SOURCE_DIR}" "${CMAKE_BINARY_DIR}/external/wycheproof")
 
-http_archive(
-  NAME boringssl
-  URL https://github.com/google/boringssl/archive/597b810379e126ae05d32c1d94b1a9464385acd0.zip
-  SHA256 c4e8414cb36e62d2fee451296cc864f7ad1a4670396c8a67e1ee77ae84cc4167
-  CMAKE_SUBDIR src
-)
+if (NOT TINK_USE_SYSTEM_OPENSSL)
+  http_archive(
+    NAME boringssl
+    URL https://github.com/google/boringssl/archive/88cdf7dd2dbce1ecb9057c183095103d83373abe.zip
+    SHA256 24092815136f956069fcfa5172166ad4e025166ce6fe500420c9e3e3c4f3da38
+    CMAKE_SUBDIR src
+  )
 
-# BoringSSL targets do not carry include directory info, this fixes it.
-target_include_directories(crypto PUBLIC "${boringssl_SOURCE_DIR}/src/include")
+  # BoringSSL targets do not carry include directory info, this fixes it.
+  target_include_directories(crypto PUBLIC "${boringssl_SOURCE_DIR}/src/include")
+else()
+  # Support for ED25519 was added from 1.1.1.
+  find_package(OpenSSL 1.1.1 REQUIRED)
+  _create_interface_target(crypto OpenSSL::Crypto)
+endif()
 
 set(RAPIDJSON_BUILD_DOC OFF CACHE BOOL "Tink dependency override" FORCE)
 set(RAPIDJSON_BUILD_EXAMPLES OFF CACHE BOOL "Tink dependency override" FORCE)
@@ -90,7 +124,7 @@ set(protobuf_BUILD_EXAMPLES OFF CACHE BOOL "Tink dependency override" FORCE)
 
 http_archive(
   NAME com_google_protobuf
-  URL https://github.com/google/protobuf/archive/v3.14.0.zip
-  SHA256 bf0e5070b4b99240183b29df78155eee335885e53a8af8683964579c214ad301
+  URL https://github.com/protocolbuffers/protobuf/archive/v3.19.3.zip
+  SHA256 6b6bf5cd8d0cca442745c4c3c9f527c83ad6ef35a405f64db5215889ac779b42
   CMAKE_SUBDIR cmake
 )

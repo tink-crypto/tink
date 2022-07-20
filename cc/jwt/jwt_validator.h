@@ -17,12 +17,14 @@
 #ifndef TINK_JWT_JWT_VALIDATOR_H_
 #define TINK_JWT_JWT_VALIDATOR_H_
 
+#include <string>
+
 #include "absl/strings/string_view.h"
 #include "absl/time/clock.h"
 #include "absl/time/time.h"
+#include "tink/jwt/raw_jwt.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
-#include "tink/jwt/raw_jwt.h"
 
 namespace crypto {
 namespace tink {
@@ -30,6 +32,8 @@ namespace tink {
 ///////////////////////////////////////////////////////////////////////////////
 // A JwtValidator defines how JSON Web Tokens (JWTs) should be validated.
 //
+
+class JwtValidatorBuilder;
 
 class JwtValidator {
  public:
@@ -42,15 +46,20 @@ class JwtValidator {
   util::Status Validate(crypto::tink::RawJwt const& raw_jwt) const;
 
  private:
-  explicit JwtValidator(absl::optional<absl::string_view> issuer,
-                        absl::optional<absl::string_view> subject,
-                        absl::optional<absl::string_view> audience,
-                        absl::Duration clock_skew,
-                        absl::optional<absl::Time> fixed_now);
+  util::Status ValidateTimestamps(crypto::tink::RawJwt const& raw_jwt) const;
+  util::Status ValidateTypeHeader(crypto::tink::RawJwt const& raw_jwt) const;
+  util::Status ValidateIssuer(crypto::tink::RawJwt const& raw_jwt) const;
+  util::Status ValidateAudiences(crypto::tink::RawJwt const& raw_jwt) const;
+  explicit JwtValidator(const JwtValidatorBuilder& builder);
   friend class JwtValidatorBuilder;
-  absl::optional<std::string> issuer_;
-  absl::optional<std::string> subject_;
-  absl::optional<std::string> audience_;
+  absl::optional<std::string> expected_type_header_;
+  absl::optional<std::string> expected_issuer_;
+  absl::optional<std::string> expected_audience_;
+  bool ignore_type_header_;
+  bool ignore_issuer_;
+  bool ignore_audiences_;
+  bool allow_missing_expiration_;
+  bool expect_issued_in_the_past_;
   absl::Duration clock_skew_;
   absl::optional<absl::Time> fixed_now_;
 };
@@ -65,19 +74,32 @@ class JwtValidatorBuilder {
   JwtValidatorBuilder(JwtValidatorBuilder&& other) = default;
   JwtValidatorBuilder& operator=(JwtValidatorBuilder&& other) = default;
 
-  JwtValidatorBuilder& SetIssuer(absl::string_view issuer);
-  JwtValidatorBuilder& SetSubject(absl::string_view subject);
-  JwtValidatorBuilder& SetAudience(absl::string_view audience);
+  JwtValidatorBuilder& ExpectTypeHeader(absl::string_view expected_type_header);
+  JwtValidatorBuilder& ExpectIssuer(absl::string_view expected_issuer);
+  JwtValidatorBuilder& ExpectAudience(absl::string_view expected_audience);
 
-  util::Status SetClockSkew(absl::Duration clock_skew);
+  JwtValidatorBuilder& IgnoreTypeHeader();
+  JwtValidatorBuilder& IgnoreIssuer();
+  JwtValidatorBuilder& IgnoreAudiences();
+
+  JwtValidatorBuilder& AllowMissingExpiration();
+  JwtValidatorBuilder& ExpectIssuedInThePast();
+
+  JwtValidatorBuilder& SetClockSkew(absl::Duration clock_skew);
   JwtValidatorBuilder& SetFixedNow(absl::Time fixed_now);
 
-  JwtValidator Build();
+  util::StatusOr<JwtValidator> Build();
 
  private:
-  absl::optional<std::string> issuer_;
-  absl::optional<std::string> subject_;
-  absl::optional<std::string> audience_;
+  friend class JwtValidator;
+  absl::optional<std::string> expected_type_header_;
+  absl::optional<std::string> expected_issuer_;
+  absl::optional<std::string> expected_audience_;
+  bool ignore_type_header_;
+  bool ignore_issuer_;
+  bool ignore_audiences_;
+  bool allow_missing_expiration_;
+  bool expect_issued_in_the_past_;
   absl::Duration clock_skew_;
   absl::optional<absl::Time> fixed_now_;
 };

@@ -21,7 +21,7 @@
 #include <string>
 #include <vector>
 
-#include "openssl/aead.h"
+#include "tink/aead/internal/ssl_aead.h"
 #include "tink/subtle/stream_segment_encrypter.h"
 #include "tink/util/secret_data.h"
 #include "tink/util/statusor.h"
@@ -78,40 +78,33 @@ class AesGcmHkdfStreamSegmentEncrypter : public StreamSegmentEncrypter {
     int ciphertext_segment_size;
   };
 
-  // A factory.
   static util::StatusOr<std::unique_ptr<StreamSegmentEncrypter>> New(
       Params params);
 
-  // Overridden methods of StreamSegmentEncrypter.
-  util::Status EncryptSegment(
-      const std::vector<uint8_t>& plaintext,
-      bool is_last_segment,
-      std::vector<uint8_t>* ciphertext_buffer) override;
+  util::Status EncryptSegment(const std::vector<uint8_t>& plaintext,
+                              bool is_last_segment,
+                              std::vector<uint8_t>* ciphertext_buffer) override;
 
-  const std::vector<uint8_t>& get_header() const override {
-    return header_;
-  }
-  int64_t get_segment_number() const override {
-    return segment_number_;
-  }
+  const std::vector<uint8_t>& get_header() const override { return header_; }
+  int64_t get_segment_number() const override { return segment_number_; }
   int get_plaintext_segment_size() const override;
   int get_ciphertext_segment_size() const override {
     return ciphertext_segment_size_;
   }
-  int get_ciphertext_offset() const override {
-    return ciphertext_offset_;
-  }
+  int get_ciphertext_offset() const override { return ciphertext_offset_; }
 
  protected:
-  void IncSegmentNumber() override {
-    segment_number_++;
-  }
+  void IncSegmentNumber() override { segment_number_++; }
 
  private:
-  AesGcmHkdfStreamSegmentEncrypter(bssl::UniquePtr<EVP_AEAD_CTX> ctx,
-                                   const Params& params);
+  AesGcmHkdfStreamSegmentEncrypter(
+      std::unique_ptr<internal::SslOneShotAead> aead, const Params& params);
 
-  bssl::UniquePtr<EVP_AEAD_CTX> ctx_;
+  // When OpenSSL is used, this uses a thread-safe implementation that makes a
+  // copy of the context for each EncryptSegment call, which may result in some
+  // extra latency compared to BoringSSL.
+  const std::unique_ptr<internal::SslOneShotAead> aead_;
+
   const std::string nonce_prefix_;
   const std::vector<uint8_t> header_;
   const int ciphertext_segment_size_;

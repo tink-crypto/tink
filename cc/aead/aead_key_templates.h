@@ -33,7 +33,7 @@ namespace tink {
 //   auto handle_result =
 //       KeysetHandle::GenerateNew(AeadKeyTemplates::Aes128Gcm());
 //   if (!handle_result.ok()) { /* fail with error */ }
-//   auto keyset_handle = std::move(handle_result.ValueOrDie());
+//   auto keyset_handle = std::move(handle_result.value());
 class AeadKeyTemplates {
  public:
   // Returns a KeyTemplate that generates new instances of AesEaxKey
@@ -59,6 +59,14 @@ class AeadKeyTemplates {
   //   - tag size: 16 bytes
   //   - OutputPrefixType: TINK
   static const google::crypto::tink::KeyTemplate& Aes128Gcm();
+
+  // Returns a KeyTemplate that generates new instances of AesGcmKey
+  // with the following parameters:
+  //   - key size: 16 bytes
+  //   - IV size: 12 bytes
+  //   - tag size: 16 bytes
+  //   - OutputPrefixType: RAW
+  static const google::crypto::tink::KeyTemplate& Aes128GcmNoPrefix();
 
   // Returns a KeyTemplate that generates new instances of AesGcmKey
   // with the following parameters:

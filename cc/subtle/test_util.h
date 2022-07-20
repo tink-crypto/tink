@@ -17,10 +17,12 @@
 #ifndef TINK_SUBTLE_TEST_UTIL_H_
 #define TINK_SUBTLE_TEST_UTIL_H_
 
+#include <memory>
 #include <string>
 #include <vector>
 
 #include "absl/memory/memory.h"
+#include "absl/status/status.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/string_view.h"
 #include "tink/input_stream.h"
@@ -113,7 +115,7 @@ class DummyStreamSegmentEncrypter : public StreamSegmentEncrypter {
         is_last_segment ? kLastSegment : kNotLastSegment;
     generated_output_size_ += ciphertext_buffer->size();
     IncSegmentNumber();
-    return util::Status::OK;
+    return util::OkStatus();
   }
 
   const std::vector<uint8_t>& get_header() const override {
@@ -173,10 +175,10 @@ class DummyStreamSegmentDecrypter : public StreamSegmentDecrypter {
   util::Status Init(const std::vector<uint8_t>& header) override {
     if (header_.size() != header.size() ||
         memcmp(header_.data(), header.data(), header_.size()) != 0) {
-      return util::Status(util::error::INVALID_ARGUMENT,
+      return util::Status(absl::StatusCode::kInvalidArgument,
                           "Invalid stream header");
     }
-    return util::Status::OK;
+    return util::OkStatus();
   }
 
   int get_header_size() const override {
@@ -189,13 +191,13 @@ class DummyStreamSegmentDecrypter : public StreamSegmentDecrypter {
       bool is_last_segment,
       std::vector<uint8_t>* plaintext_buffer) override {
     if (ciphertext.size() < DummyStreamSegmentEncrypter::kSegmentTagSize) {
-      return util::Status(util::error::INVALID_ARGUMENT,
+      return util::Status(absl::StatusCode::kInvalidArgument,
                           "Ciphertext segment too short");
     }
     if (ciphertext.back() !=
         (is_last_segment ? DummyStreamSegmentEncrypter::kLastSegment :
          DummyStreamSegmentEncrypter::kNotLastSegment)) {
-      return util::Status(util::error::INVALID_ARGUMENT,
+      return util::Status(absl::StatusCode::kInvalidArgument,
                           "unexpected last-segment marker");
     }
     int pt_size =
@@ -203,13 +205,13 @@ class DummyStreamSegmentDecrypter : public StreamSegmentDecrypter {
     if (memcmp(ciphertext.data() + pt_size,
                reinterpret_cast<const char*>(&segment_number),
                sizeof(segment_number)) != 0) {
-      return util::Status(util::error::INVALID_ARGUMENT,
+      return util::Status(absl::StatusCode::kInvalidArgument,
                           "wrong segment number");
     }
     plaintext_buffer->resize(pt_size);
     memcpy(plaintext_buffer->data(), ciphertext.data(), pt_size);
     generated_output_size_ += pt_size;
-    return util::Status::OK;
+    return util::OkStatus();
   }
 
 

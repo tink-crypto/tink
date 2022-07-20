@@ -17,10 +17,12 @@
 package com.google.crypto.tink.signature;
 
 import com.google.crypto.tink.KeyTemplate;
-import com.google.crypto.tink.KeyTypeManager;
-import com.google.crypto.tink.PrivateKeyTypeManager;
 import com.google.crypto.tink.PublicKeySign;
 import com.google.crypto.tink.Registry;
+import com.google.crypto.tink.config.internal.TinkFipsUtil;
+import com.google.crypto.tink.internal.KeyTypeManager;
+import com.google.crypto.tink.internal.PrimitiveFactory;
+import com.google.crypto.tink.internal.PrivateKeyTypeManager;
 import com.google.crypto.tink.proto.EcdsaKeyFormat;
 import com.google.crypto.tink.proto.EcdsaParams;
 import com.google.crypto.tink.proto.EcdsaPrivateKey;
@@ -56,7 +58,7 @@ public final class EcdsaSignKeyManager
     super(
         EcdsaPrivateKey.class,
         EcdsaPublicKey.class,
-        new KeyTypeManager.PrimitiveFactory<PublicKeySign, EcdsaPrivateKey>(PublicKeySign.class) {
+        new PrimitiveFactory<PublicKeySign, EcdsaPrivateKey>(PublicKeySign.class) {
           @Override
           public PublicKeySign getPrimitive(EcdsaPrivateKey key) throws GeneralSecurityException {
             ECPrivateKey privateKey =
@@ -116,8 +118,8 @@ public final class EcdsaSignKeyManager
   }
 
   @Override
-  public KeyFactory<EcdsaKeyFormat, EcdsaPrivateKey> keyFactory() {
-    return new KeyFactory<EcdsaKeyFormat, EcdsaPrivateKey>(EcdsaKeyFormat.class) {
+  public KeyTypeManager.KeyFactory<EcdsaKeyFormat, EcdsaPrivateKey> keyFactory() {
+    return new KeyTypeManager.KeyFactory<EcdsaKeyFormat, EcdsaPrivateKey>(EcdsaKeyFormat.class) {
       @Override
       public void validateKeyFormat(EcdsaKeyFormat format) throws GeneralSecurityException {
         SigUtil.validateEcdsaParams(format.getParams());
@@ -195,6 +197,7 @@ public final class EcdsaSignKeyManager
                 // Using IEEE_P1363 because a raw signature is a concatenation of r and s.
                 EcdsaSignatureEncoding.IEEE_P1363,
                 KeyTemplate.OutputPrefixType.RAW));
+        // TODO(b/140101381): This template is confusing and will be removed.
         result.put(
             "ECDSA_P384",
             createKeyFormat(
@@ -209,6 +212,20 @@ public final class EcdsaSignKeyManager
                 HashType.SHA512,
                 EllipticCurveType.NIST_P384,
                 EcdsaSignatureEncoding.IEEE_P1363,
+                KeyTemplate.OutputPrefixType.TINK));
+        result.put(
+            "ECDSA_P384_SHA512",
+            createKeyFormat(
+                HashType.SHA512,
+                EllipticCurveType.NIST_P384,
+                EcdsaSignatureEncoding.DER,
+                KeyTemplate.OutputPrefixType.TINK));
+        result.put(
+            "ECDSA_P384_SHA384",
+            createKeyFormat(
+                HashType.SHA384,
+                EllipticCurveType.NIST_P384,
+                EcdsaSignatureEncoding.DER,
                 KeyTemplate.OutputPrefixType.TINK));
         result.put(
             "ECDSA_P521",
@@ -229,6 +246,11 @@ public final class EcdsaSignKeyManager
       }
     };
   }
+
+  @Override
+  public TinkFipsUtil.AlgorithmFipsCompatibility fipsStatus() {
+    return TinkFipsUtil.AlgorithmFipsCompatibility.ALGORITHM_REQUIRES_BORINGCRYPTO;
+  };
 
   /**
    * Registers the {@link EcdsaSignKeyManager} and the {@link EcdsaVerifyKeyManager} with the

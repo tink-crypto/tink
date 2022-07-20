@@ -17,10 +17,13 @@
 // Implementation of a MAC Service.
 #include "mac_impl.h"
 
+#include <string>
+#include <utility>
+
 #include "tink/binary_keyset_reader.h"
 #include "tink/cleartext_keyset_handle.h"
 #include "tink/mac.h"
-#include "proto/testing/testing_api.grpc.pb.h"
+#include "proto/testing_api.grpc.pb.h"
 
 namespace tink_testing_api {
 
@@ -35,27 +38,26 @@ using ::grpc::Status;
                                    ComputeMacResponse* response) {
   auto reader_result = BinaryKeysetReader::New(request->keyset());
   if (!reader_result.ok()) {
-    response->set_err(reader_result.status().error_message());
+    response->set_err(std::string(reader_result.status().message()));
     return ::grpc::Status::OK;
   }
   auto handle_result =
-      CleartextKeysetHandle::Read(std::move(reader_result.ValueOrDie()));
+      CleartextKeysetHandle::Read(std::move(reader_result.value()));
   if (!handle_result.ok()) {
-    response->set_err(handle_result.status().error_message());
+    response->set_err(std::string(handle_result.status().message()));
     return ::grpc::Status::OK;
   }
-  auto mac_result =
-      handle_result.ValueOrDie()->GetPrimitive<crypto::tink::Mac>();
+  auto mac_result = handle_result.value()->GetPrimitive<crypto::tink::Mac>();
   if (!mac_result.ok()) {
-    response->set_err(mac_result.status().error_message());
+    response->set_err(std::string(mac_result.status().message()));
     return ::grpc::Status::OK;
   }
-  auto compute_result = mac_result.ValueOrDie()->ComputeMac(request->data());
+  auto compute_result = mac_result.value()->ComputeMac(request->data());
   if (!compute_result.ok()) {
-    response->set_err(compute_result.status().error_message());
+    response->set_err(std::string(compute_result.status().message()));
     return ::grpc::Status::OK;
   }
-  response->set_mac_value(compute_result.ValueOrDie());
+  response->set_mac_value(compute_result.value());
   return ::grpc::Status::OK;
 }
 
@@ -65,25 +67,24 @@ using ::grpc::Status;
                                   VerifyMacResponse* response) {
   auto reader_result = BinaryKeysetReader::New(request->keyset());
   if (!reader_result.ok()) {
-    response->set_err(reader_result.status().error_message());
+    response->set_err(std::string(reader_result.status().message()));
     return ::grpc::Status::OK;
   }
   auto handle_result =
-      CleartextKeysetHandle::Read(std::move(reader_result.ValueOrDie()));
+      CleartextKeysetHandle::Read(std::move(reader_result.value()));
   if (!handle_result.ok()) {
-    response->set_err(handle_result.status().error_message());
+    response->set_err(std::string(handle_result.status().message()));
     return ::grpc::Status::OK;
   }
-  auto mac_result =
-      handle_result.ValueOrDie()->GetPrimitive<crypto::tink::Mac>();
+  auto mac_result = handle_result.value()->GetPrimitive<crypto::tink::Mac>();
   if (!mac_result.ok()) {
-    response->set_err(mac_result.status().error_message());
+    response->set_err(std::string(mac_result.status().message()));
     return ::grpc::Status::OK;
   }
   auto status =
-      mac_result.ValueOrDie()->VerifyMac(request->mac_value(), request->data());
+      mac_result.value()->VerifyMac(request->mac_value(), request->data());
   if (!status.ok()) {
-    response->set_err(status.error_message());
+    response->set_err(std::string(status.message()));
     return ::grpc::Status::OK;
   }
   return ::grpc::Status::OK;

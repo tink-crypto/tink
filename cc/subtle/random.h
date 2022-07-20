@@ -21,6 +21,7 @@
 #include <string>
 
 #include "tink/util/secret_data.h"
+#include "tink/util/status.h"
 
 namespace crypto {
 namespace tink {
@@ -28,6 +29,8 @@ namespace subtle {
 
 class Random {
  public:
+  // Fills the given `buffer` with random bytes.
+  static util::Status GetRandomBytes(absl::Span<char> buffer);
   // Returns a random string of desired length.
   static std::string GetRandomBytes(size_t length);
   static uint32_t GetRandomUInt32();

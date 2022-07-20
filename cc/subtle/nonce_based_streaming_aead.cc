@@ -16,6 +16,8 @@
 
 #include "tink/subtle/nonce_based_streaming_aead.h"
 
+#include <utility>
+
 #include "absl/strings/string_view.h"
 #include "tink/input_stream.h"
 #include "tink/output_stream.h"
@@ -35,33 +37,33 @@ namespace subtle {
 crypto::tink::util::StatusOr<std::unique_ptr<crypto::tink::OutputStream>>
     NonceBasedStreamingAead::NewEncryptingStream(
         std::unique_ptr<crypto::tink::OutputStream> ciphertext_destination,
-        absl::string_view associated_data) {
+        absl::string_view associated_data) const {
   auto segment_encrypter_result = NewSegmentEncrypter(associated_data);
   if (!segment_encrypter_result.ok()) return segment_encrypter_result.status();
   return StreamingAeadEncryptingStream::New(
-      std::move(segment_encrypter_result.ValueOrDie()),
+      std::move(segment_encrypter_result.value()),
       std::move(ciphertext_destination));
 }
 
 crypto::tink::util::StatusOr<std::unique_ptr<crypto::tink::InputStream>>
     NonceBasedStreamingAead::NewDecryptingStream(
         std::unique_ptr<crypto::tink::InputStream> ciphertext_source,
-        absl::string_view associated_data) {
+        absl::string_view associated_data) const {
   auto segment_decrypter_result = NewSegmentDecrypter(associated_data);
   if (!segment_decrypter_result.ok()) return segment_decrypter_result.status();
   return StreamingAeadDecryptingStream::New(
-      std::move(segment_decrypter_result.ValueOrDie()),
+      std::move(segment_decrypter_result.value()),
       std::move(ciphertext_source));
 }
 
 crypto::tink::util::StatusOr<std::unique_ptr<crypto::tink::RandomAccessStream>>
     NonceBasedStreamingAead::NewDecryptingRandomAccessStream(
         std::unique_ptr<crypto::tink::RandomAccessStream> ciphertext_source,
-        absl::string_view associated_data) {
+        absl::string_view associated_data) const {
   auto segment_decrypter_result = NewSegmentDecrypter(associated_data);
   if (!segment_decrypter_result.ok()) return segment_decrypter_result.status();
   return DecryptingRandomAccessStream::New(
-      std::move(segment_decrypter_result.ValueOrDie()),
+      std::move(segment_decrypter_result.value()),
       std::move(ciphertext_source));
 }
 

@@ -16,10 +16,15 @@
 
 #include "tink/aead/cord_aead_wrapper.h"
 
+#include <memory>
+#include <string>
+#include <utility>
+
+#include "absl/status/status.h"
+#include "absl/strings/cord.h"
 #include "tink/aead/cord_aead.h"
 #include "tink/crypto_format.h"
 #include "tink/primitive_set.h"
-#include "tink/subtle/subtle_util_boringssl.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 
@@ -30,13 +35,14 @@ namespace {
 
 util::Status Validate(PrimitiveSet<CordAead>* aead_set) {
   if (aead_set == nullptr) {
-    return util::Status(util::error::INTERNAL, "aead_set must be non-NULL");
+    return util::Status(absl::StatusCode::kInternal,
+                        "aead_set must be non-NULL");
   }
   if (aead_set->get_primary() == nullptr) {
-    return util::Status(util::error::INVALID_ARGUMENT,
+    return util::Status(absl::StatusCode::kInvalidArgument,
                         "aead_set has no primary");
   }
-  return util::Status::OK;
+  return util::OkStatus();
 }
 
 class CordAeadSetWrapper : public CordAead {
@@ -63,7 +69,7 @@ util::StatusOr<absl::Cord> CordAeadSetWrapper::Encrypt(
   if (!encrypt_result.ok()) return encrypt_result.status();
   absl::Cord result;
   result.Append(aead_set_->get_primary()->get_identifier());
-  result.Append(encrypt_result.ValueOrDie());
+  result.Append(encrypt_result.value());
   return result;
 }
 
@@ -76,11 +82,11 @@ util::StatusOr<absl::Cord> CordAeadSetWrapper::Decrypt(
     if (primitives_result.ok()) {
       auto raw_ciphertext =
           ciphertext.Subcord(key_id.size(), ciphertext.size());
-      for (auto& aead_entry : *(primitives_result.ValueOrDie())) {
+      for (auto& aead_entry : *(primitives_result.value())) {
         CordAead& aead = aead_entry->get_primitive();
         auto decrypt_result = aead.Decrypt(raw_ciphertext, associated_data);
         if (decrypt_result.ok()) {
-          return std::move(decrypt_result.ValueOrDie());
+          return std::move(decrypt_result.value());
         } else {
           // LOG that a matching key didn't decrypt the ciphertext.
         }
@@ -91,15 +97,15 @@ util::StatusOr<absl::Cord> CordAeadSetWrapper::Decrypt(
   // No matching key succeeded with decryption, try all RAW keys.
   auto raw_primitives_result = aead_set_->get_raw_primitives();
   if (raw_primitives_result.ok()) {
-    for (auto& aead_entry : *(raw_primitives_result.ValueOrDie())) {
+    for (auto& aead_entry : *(raw_primitives_result.value())) {
       CordAead& aead = aead_entry->get_primitive();
       auto decrypt_result = aead.Decrypt(ciphertext, associated_data);
       if (decrypt_result.ok()) {
-        return std::move(decrypt_result.ValueOrDie());
+        return std::move(decrypt_result.value());
       }
     }
   }
-  return util::Status(util::error::INVALID_ARGUMENT, "decryption failed");
+  return util::Status(absl::StatusCode::kInvalidArgument, "decryption failed");
 }
 }  // anonymous namespace
 

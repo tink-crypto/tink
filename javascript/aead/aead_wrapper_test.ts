@@ -19,7 +19,9 @@ describe('aead wrapper test', function() {
     const primitiveSet = createPrimitiveSet(/* opt_withPrimary = */ false);
     try {
       new AeadWrapper().wrap(primitiveSet);
-    } catch (e) {
+    // This is an intentionally unsafe partial mock
+    // tslint:disable-next-line:no-any
+    } catch (e: any) {
       expect(e.toString()).toBe(ExceptionText.primitiveSetWithoutPrimary());
       return;
     }
@@ -54,7 +56,7 @@ describe('aead wrapper test', function() {
 
     try {
       await aead.decrypt(ciphertext);
-    } catch (e) {
+    } catch (e: any) {
       expect(e.toString()).toBe(ExceptionText.cannotBeDecrypted());
       return;
     }
@@ -140,7 +142,7 @@ describe('aead wrapper test', function() {
     // used to neither encryption nor decryption.
     try {
       await aead.decrypt(ciphertext);
-    } catch (e) {
+    } catch (e: any) {
       expect(e.toString()).toBe(ExceptionText.cannotBeDecrypted());
       return;
     }

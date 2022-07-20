@@ -13,10 +13,6 @@
 # limitations under the License.
 
 """StreamingAead package."""
-from __future__ import absolute_import
-from __future__ import division
-# Placeholder for import for type annotations
-from __future__ import print_function
 
 from tink.streaming_aead import _streaming_aead
 from tink.streaming_aead import _streaming_aead_key_manager

@@ -16,11 +16,14 @@
 
 #include "tink/binary_keyset_writer.h"
 
+#include <memory>
 #include <ostream>
 #include <sstream>
+#include <string>
+#include <utility>
 
-#include "tink/util/test_util.h"
 #include "gtest/gtest.h"
+#include "tink/util/test_util.h"
 #include "proto/tink.pb.h"
 
 using crypto::tink::test::AddRawKey;
@@ -37,7 +40,7 @@ namespace {
 
 class BinaryKeysetWriterTest : public ::testing::Test {
  protected:
-  void SetUp() {
+  void SetUp() override {
     Keyset::Key key;
     AddTinkKey("some key type", 42, key, KeyStatusType::ENABLED,
                KeyData::SYMMETRIC, &keyset_);
@@ -67,8 +70,8 @@ TEST_F(BinaryKeysetWriterTest, testWriterCreation) {
     std::unique_ptr<std::ostream> null_stream(nullptr);
     auto writer_result = BinaryKeysetWriter::New(std::move(null_stream));
     EXPECT_FALSE(writer_result.ok());
-    EXPECT_EQ(util::error::INVALID_ARGUMENT,
-              writer_result.status().error_code());
+    EXPECT_EQ(absl::StatusCode::kInvalidArgument,
+              writer_result.status().code());
   }
 
   {  // Stream with good keyset.
@@ -83,7 +86,7 @@ TEST_F(BinaryKeysetWriterTest, testWriteKeyset) {
   std::unique_ptr<std::ostream> destination_stream(new std::ostream(&buffer));
   auto writer_result = BinaryKeysetWriter::New(std::move(destination_stream));
   ASSERT_TRUE(writer_result.ok()) << writer_result.status();
-  auto writer = std::move(writer_result.ValueOrDie());
+  auto writer = std::move(writer_result.value());
   auto status = writer->Write(keyset_);
   EXPECT_TRUE(status.ok()) << status;
   EXPECT_EQ(binary_keyset_, buffer.str());
@@ -94,7 +97,7 @@ TEST_F(BinaryKeysetWriterTest, testWriteEncryptedKeyset) {
   std::unique_ptr<std::ostream> destination_stream(new std::ostream(&buffer));
   auto writer_result = BinaryKeysetWriter::New(std::move(destination_stream));
   ASSERT_TRUE(writer_result.ok()) << writer_result.status();
-  auto writer = std::move(writer_result.ValueOrDie());
+  auto writer = std::move(writer_result.value());
   auto status = writer->Write(encrypted_keyset_);
   EXPECT_TRUE(status.ok()) << status;
   EXPECT_EQ(binary_encrypted_keyset_, buffer.str());
@@ -106,16 +109,16 @@ TEST_F(BinaryKeysetWriterTest, testDestinationStreamErrors) {
   destination_stream->setstate(std::ostream::badbit);
   auto writer_result = BinaryKeysetWriter::New(std::move(destination_stream));
   ASSERT_TRUE(writer_result.ok()) << writer_result.status();
-  auto writer = std::move(writer_result.ValueOrDie());
+  auto writer = std::move(writer_result.value());
   {  // Write keyset.
     auto status = writer->Write(keyset_);
     EXPECT_FALSE(status.ok()) << status;
-    EXPECT_EQ(util::error::UNKNOWN, status.error_code());
+    EXPECT_EQ(absl::StatusCode::kUnknown, status.code());
   }
   {  // Write encrypted keyset.
     auto status = writer->Write(encrypted_keyset_);
     EXPECT_FALSE(status.ok()) << status;
-    EXPECT_EQ(util::error::UNKNOWN, status.error_code());
+    EXPECT_EQ(absl::StatusCode::kUnknown, status.code());
   }
 }
 

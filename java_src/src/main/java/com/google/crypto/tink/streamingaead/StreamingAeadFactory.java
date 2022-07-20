@@ -40,11 +40,12 @@ import java.security.GeneralSecurityException;
 public final class StreamingAeadFactory {
   /**
    * @return a StreamingAead primitive from a {@code keysetHandle}.
-   * @throws GeneralSecurityException
    */
   public static StreamingAead getPrimitive(KeysetHandle keysetHandle)
       throws GeneralSecurityException {
     Registry.registerPrimitiveWrapper(new StreamingAeadWrapper());
     return keysetHandle.getPrimitive(StreamingAead.class);
   }
+
+  private StreamingAeadFactory() {}
 }

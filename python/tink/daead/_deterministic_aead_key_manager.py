@@ -1,4 +1,4 @@
-# Copyright 2019 Google LLC.
+# Copyright 2019 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,11 +13,6 @@
 # limitations under the License.
 
 """Python wrapper of the wrapped C++ Deterministic AEAD key manager."""
-
-from __future__ import absolute_import
-from __future__ import division
-# Placeholder for import for type annotations
-from __future__ import print_function
 
 from tink import core
 from tink.cc.pybind import tink_bindings
@@ -45,7 +40,7 @@ class _DeterministicAeadCcToPyWrapper(_deterministic_aead.DeterministicAead):
 
 
 def register():
-  """Registers all Hybrid key managers and wrapper in the Python Registry."""
+  """Registers all deterministic AEAD key managers and the wrapper in the Python Registry."""
   tink_bindings.register()
 
   type_url = 'type.googleapis.com/google.crypto.tink.AesSivKey'

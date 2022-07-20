@@ -18,10 +18,11 @@
 #define TINK_INTEGRATION_GCPKMS_GCP_KMS_CLIENT_H_
 
 #include <memory>
+#include <string>
 
-#include "absl/strings/string_view.h"
 #include "google/cloud/kms/v1/service.grpc.pb.h"
 #include "grpcpp/channel.h"
+#include "absl/strings/string_view.h"
 #include "tink/aead.h"
 #include "tink/kms_client.h"
 #include "tink/util/status.h"

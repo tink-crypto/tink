@@ -1,0 +1,75 @@
+// Copyright 2021 Google LLC
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+///////////////////////////////////////////////////////////////////////////////
+syntax = "proto3";
+
+package google.crypto.tink;
+
+enum SphincsHashType {
+  HARAKA = 0;
+  SHA256 = 1;
+  SHAKE256 = 2;
+  UNKNOWN_HASH_TYPE = 3;
+};
+
+enum SphincsVariant {
+  ROBUST = 0;
+  SIMPLE = 1;
+  UNKNOWN_VARIANT = 2;
+};
+
+enum SphincsSignatureType {
+  FAST_SIGNING = 0;
+  SMALL_SIGNATURE = 1;
+  UNKNOWN_SIG_TYPE = 3;
+};
+
+// Protos for Sphincs Digital Signature Algorithm.
+message SphincsParams {
+  // Required
+  int32 key_size = 1;
+  // Required.
+  SphincsHashType hash_type = 2;
+  // Required.
+  SphincsVariant variant = 3;
+  // Required.
+  SphincsSignatureType sig_length_type = 4;
+}
+
+message SphincsKeyFormat {
+  uint32 version = 1;
+  // Required.
+  SphincsParams params = 2;
+}
+
+// key_type: type.googleapis.com/google.crypto.tink.SphincsPublicKey
+message SphincsPublicKey {
+  // Required.
+  uint32 version = 1;
+  // Required.
+  bytes key_value = 2;
+  // Required
+  SphincsParams params = 3;
+}
+
+// key_type: type.googleapis.com/google.crypto.tink.SphincsPrivateKey
+message SphincsPrivateKey {
+  // Required.
+  uint32 version = 1;
+  // Required.
+  bytes key_value = 2;
+  // The corresponding public key.
+  SphincsPublicKey public_key = 3;
+}

@@ -17,11 +17,14 @@
 // Implementation of a Signature Service
 #include "signature_impl.h"
 
+#include <string>
+#include <utility>
+
 #include "tink/binary_keyset_reader.h"
 #include "tink/cleartext_keyset_handle.h"
 #include "tink/public_key_sign.h"
 #include "tink/public_key_verify.h"
-#include "proto/testing/testing_api.grpc.pb.h"
+#include "proto/testing_api.grpc.pb.h"
 
 namespace tink_testing_api {
 
@@ -36,27 +39,27 @@ using ::grpc::Status;
                                    SignatureSignResponse* response) {
   auto reader_result = BinaryKeysetReader::New(request->private_keyset());
   if (!reader_result.ok()) {
-    response->set_err(reader_result.status().error_message());
+    response->set_err(std::string(reader_result.status().message()));
     return ::grpc::Status::OK;
   }
   auto private_handle_result =
-      CleartextKeysetHandle::Read(std::move(reader_result.ValueOrDie()));
+      CleartextKeysetHandle::Read(std::move(reader_result.value()));
   if (!private_handle_result.ok()) {
-    response->set_err(private_handle_result.status().error_message());
+    response->set_err(std::string(private_handle_result.status().message()));
     return ::grpc::Status::OK;
   }
-  auto signer_result = private_handle_result.ValueOrDie()
+  auto signer_result = private_handle_result.value()
                            ->GetPrimitive<crypto::tink::PublicKeySign>();
   if (!signer_result.ok()) {
-    response->set_err(signer_result.status().error_message());
+    response->set_err(std::string(signer_result.status().message()));
     return ::grpc::Status::OK;
   }
-  auto sign_result = signer_result.ValueOrDie()->Sign(request->data());
+  auto sign_result = signer_result.value()->Sign(request->data());
   if (!sign_result.ok()) {
-    response->set_err(sign_result.status().error_message());
+    response->set_err(std::string(sign_result.status().message()));
     return ::grpc::Status::OK;
   }
-  response->set_signature(sign_result.ValueOrDie());
+  response->set_signature(sign_result.value());
   return ::grpc::Status::OK;
 }
 
@@ -66,25 +69,25 @@ using ::grpc::Status;
                                      SignatureVerifyResponse* response) {
   auto reader_result = BinaryKeysetReader::New(request->public_keyset());
   if (!reader_result.ok()) {
-    response->set_err(reader_result.status().error_message());
+    response->set_err(std::string(reader_result.status().message()));
     return ::grpc::Status::OK;
   }
   auto public_handle_result =
-      CleartextKeysetHandle::Read(std::move(reader_result.ValueOrDie()));
+      CleartextKeysetHandle::Read(std::move(reader_result.value()));
   if (!public_handle_result.ok()) {
-    response->set_err(public_handle_result.status().error_message());
+    response->set_err(std::string(public_handle_result.status().message()));
     return ::grpc::Status::OK;
   }
-  auto verifier_result = public_handle_result.ValueOrDie()
+  auto verifier_result = public_handle_result.value()
                              ->GetPrimitive<crypto::tink::PublicKeyVerify>();
   if (!verifier_result.ok()) {
-    response->set_err(verifier_result.status().error_message());
+    response->set_err(std::string(verifier_result.status().message()));
     return ::grpc::Status::OK;
   }
-  auto status = verifier_result.ValueOrDie()->Verify(request->signature(),
-                                                     request->data());
+  auto status =
+      verifier_result.value()->Verify(request->signature(), request->data());
   if (!status.ok()) {
-    response->set_err(status.error_message());
+    response->set_err(std::string(status.message()));
     return ::grpc::Status::OK;
   }
   return ::grpc::Status::OK;

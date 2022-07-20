@@ -42,12 +42,12 @@
     }
     return nil;
   }
-  id<TINKDeterministicAead> aead = [[TINKDeterministicAeadInternal alloc]
-      initWithCCDeterministicAead:std::move(st.ValueOrDie())];
+  id<TINKDeterministicAead> aead =
+      [[TINKDeterministicAeadInternal alloc] initWithCCDeterministicAead:std::move(st.value())];
   if (!aead) {
     if (error) {
       *error = TINKStatusToError(
-          crypto::tink::util::Status(crypto::tink::util::error::RESOURCE_EXHAUSTED,
+          crypto::tink::util::Status(absl::StatusCode::kResourceExhausted,
                                      "Cannot initialize TINKDeterministicAead"));
     }
     return nil;

@@ -1,10 +1,11 @@
+load("@build_bazel_rules_apple//apple:ios.bzl", "ios_static_framework", "ios_unit_test")
+load("//:tink_version.bzl", "TINK_VERSION_LABEL")
+load("//:template_rule.bzl", "template_rule")
+
 licenses(["notice"])
 
 package(default_visibility = ["//tools/build_defs:internal_pkg"])
 
-load("@build_bazel_rules_apple//apple:ios.bzl", "ios_static_framework", "ios_unit_test")
-load("//:tink_version.bzl", "TINK_VERSION_LABEL")
-load("//tools:common.bzl", "template_rule")
 
 # public libraries
 
@@ -146,6 +147,7 @@ objc_library(
         "//cc:binary_keyset_reader",
         "//objc/util:errors",
         "//objc/util:strings",
+        "@com_google_absl//absl/status",
         "@com_google_absl//absl/strings",
     ],
 )
@@ -191,6 +193,7 @@ objc_library(
         "//cc:json_keyset_reader",
         "//objc/util:errors",
         "//objc/util:strings",
+        "@com_google_absl//absl/status",
         "@com_google_absl//absl/strings",
     ],
 )
@@ -207,6 +210,7 @@ objc_library(
         ":tink_cc_pb",
         "//cc/util:status",
         "//objc/util:errors",
+        "@com_google_absl//absl/status",
     ],
 )
 
@@ -234,6 +238,7 @@ objc_library(
         "//objc/util:errors",
         "//objc/util:strings",
         "@com_google_absl//absl/memory",
+        "@com_google_absl//absl/status",
         "@com_google_absl//absl/strings",
     ],
 )
@@ -344,6 +349,7 @@ objc_library(
         "//cc/aead:aead_key_templates",
         "//cc/util:status",
         "//objc/util:errors",
+        "@com_google_absl//absl/status",
     ],
 )
 
@@ -412,6 +418,7 @@ objc_library(
         "//cc/daead:deterministic_aead_key_templates",
         "//cc/util:status",
         "//objc/util:errors",
+        "@com_google_absl//absl/status",
     ],
 )
 
@@ -518,6 +525,7 @@ objc_library(
         "//cc/hybrid:hybrid_key_templates",
         "//cc/util:status",
         "//objc/util:errors",
+        "@com_google_absl//absl/status",
     ],
 )
 
@@ -587,6 +595,7 @@ objc_library(
         "//cc/mac:mac_key_templates",
         "//cc/util:status",
         "//objc/util:errors",
+        "@com_google_absl//absl/status",
     ],
 )
 
@@ -651,6 +660,7 @@ objc_library(
         "//cc/signature:signature_key_templates",
         "//cc/util:status",
         "//objc/util:errors",
+        "@com_google_absl//absl/status",
     ],
 )
 
@@ -752,6 +762,7 @@ objc_library(
         "//objc/util:test_helpers",
         "//proto:all_objc_proto",
         "@com_google_absl//absl/memory",
+        "@com_google_absl//absl/status",
         "@com_google_protobuf//:protobuf_lite",
     ],
 )

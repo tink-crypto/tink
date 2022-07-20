@@ -1,4 +1,4 @@
-// Copyright 2019 Google LLC.
+// Copyright 2019 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,12 +16,15 @@
 
 #include "tink/streamingaead/shared_random_access_stream.h"
 
+#include <string>
+#include <utility>
+
 #include "gtest/gtest.h"
 #include "absl/memory/memory.h"
 #include "absl/strings/str_cat.h"
 #include "tink/random_access_stream.h"
-#include "tink/util/file_random_access_stream.h"
 #include "tink/util/buffer.h"
+#include "tink/util/file_random_access_stream.h"
 #include "tink/util/status.h"
 #include "tink/util/test_util.h"
 
@@ -36,7 +39,7 @@ namespace {
 util::Status ReadAll(RandomAccessStream* ra_stream, int chunk_size,
                      std::string* contents) {
   contents->clear();
-  auto buffer = std::move(util::Buffer::New(chunk_size).ValueOrDie());
+  auto buffer = std::move(util::Buffer::New(chunk_size).value());
   int64_t position = 0;
   auto status = ra_stream->PRead(position, chunk_size, buffer.get());
   while (status.ok()) {
@@ -44,7 +47,7 @@ util::Status ReadAll(RandomAccessStream* ra_stream, int chunk_size,
     position = contents->size();
     status = ra_stream->PRead(position, chunk_size, buffer.get());
   }
-  if (status.error_code() == util::error::OUT_OF_RANGE) {  // EOF
+  if (status.code() == absl::StatusCode::kOutOfRange) {  // EOF
     EXPECT_EQ(0, buffer->size());
   }
   return status;
@@ -63,10 +66,10 @@ TEST(SharedRandomAccessStreamTest, ReadingStreams) {
     std::string stream_contents;
     auto status = ReadAll(&shared_stream, 1 + (stream_size / 10),
                           &stream_contents);
-    EXPECT_EQ(util::error::OUT_OF_RANGE, status.error_code());
-    EXPECT_EQ("EOF", status.error_message());
+    EXPECT_EQ(absl::StatusCode::kOutOfRange, status.code());
+    EXPECT_EQ("EOF", status.message());
     EXPECT_EQ(file_contents, stream_contents);
-    EXPECT_EQ(stream_size, shared_stream.size().ValueOrDie());
+    EXPECT_EQ(stream_size, shared_stream.size().value());
   }
 }
 

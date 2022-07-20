@@ -50,7 +50,7 @@ import java.util.List;
  * <h3>Usage</h3>
  *
  * <pre>{@code
- * import com.google.crypto.tink.subtle.PemKeyType;
+ * import com.google.crypto.tink.PemKeyType;
  *
  * String pem = ...;
  * PemKeyType type = ...;

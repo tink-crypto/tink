@@ -18,15 +18,17 @@
 #define TINK_SUBTLE_RSA_SSA_PKCS1_SIGN_BORINGSSL_H_
 
 #include <memory>
+#include <string>
+#include <utility>
 
 #include "absl/strings/string_view.h"
-#include "openssl/base.h"
 #include "openssl/ec.h"
 #include "openssl/rsa.h"
 #include "tink/internal/fips_utils.h"
+#include "tink/internal/rsa_util.h"
+#include "tink/internal/ssl_unique_ptr.h"
 #include "tink/public_key_sign.h"
 #include "tink/subtle/common_enums.h"
-#include "tink/subtle/subtle_util_boringssl.h"
 #include "tink/util/statusor.h"
 
 namespace crypto {
@@ -40,8 +42,8 @@ namespace subtle {
 class RsaSsaPkcs1SignBoringSsl : public PublicKeySign {
  public:
   static crypto::tink::util::StatusOr<std::unique_ptr<PublicKeySign>> New(
-      const SubtleUtilBoringSSL::RsaPrivateKey& private_key,
-      const SubtleUtilBoringSSL::RsaSsaPkcs1Params& params);
+      const internal::RsaPrivateKey& private_key,
+      const internal::RsaSsaPkcs1Params& params);
 
   // Computes the signature for 'data'.
   crypto::tink::util::StatusOr<std::string> Sign(
@@ -53,11 +55,11 @@ class RsaSsaPkcs1SignBoringSsl : public PublicKeySign {
       crypto::tink::internal::FipsCompatibility::kRequiresBoringCrypto;
 
  private:
-  RsaSsaPkcs1SignBoringSsl(bssl::UniquePtr<RSA> private_key,
+  RsaSsaPkcs1SignBoringSsl(internal::SslUniquePtr<RSA> private_key,
                            const EVP_MD* sig_hash)
       : private_key_(std::move(private_key)), sig_hash_(sig_hash) {}
 
-  const bssl::UniquePtr<RSA> private_key_;
+  const internal::SslUniquePtr<RSA> private_key_;
   const EVP_MD* const sig_hash_;  // Owned by BoringSSL.
 };
 

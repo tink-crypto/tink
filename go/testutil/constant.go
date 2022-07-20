@@ -29,6 +29,11 @@ const (
 	// AESGCMTypeURL is the type URL of AES-GCM keys that Tink supports.
 	AESGCMTypeURL = "type.googleapis.com/google.crypto.tink.AesGcmKey"
 
+	// AESGCMSIVKeyVersion is the maximal version of AES-GCM-SIV keys.
+	AESGCMSIVKeyVersion = 0
+	// AESGCMSIVTypeURL is the type URL of AES-GCM-SIV keys that Tink supports.
+	AESGCMSIVTypeURL = "type.googleapis.com/google.crypto.tink.AesGcmSivKey"
+
 	// ChaCha20Poly1305KeyVersion is the maximal version of ChaCha20Poly1305 keys that Tink supports.
 	ChaCha20Poly1305KeyVersion = 0
 	// ChaCha20Poly1305TypeURL is the type URL of ChaCha20Poly1305 keys.

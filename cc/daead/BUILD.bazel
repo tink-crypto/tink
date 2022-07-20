@@ -20,6 +20,8 @@ cc_library(
         "//util:status",
         "//util:statusor",
         "//util:validation",
+        "@com_google_absl//absl/memory",
+        "@com_google_absl//absl/status",
         "@com_google_absl//absl/strings",
     ],
 )
@@ -34,11 +36,14 @@ cc_library(
         "//:deterministic_aead",
         "//:primitive_set",
         "//:primitive_wrapper",
+        "//internal:monitoring_util",
+        "//internal:registry_impl",
+        "//internal:util",
+        "//monitoring",
         "//proto:tink_cc_proto",
-        "//subtle:subtle_util_boringssl",
         "//util:status",
         "//util:statusor",
-        "@com_google_absl//absl/memory",
+        "@com_google_absl//absl/status",
         "@com_google_absl//absl/strings",
     ],
 )
@@ -52,9 +57,9 @@ cc_library(
     deps = [
         ":aes_siv_key_manager",
         ":deterministic_aead_wrapper",
+        "//:registry",
         "//config:config_util",
         "//config:tink_fips",
-        "//mac:mac_config",
         "//proto:config_cc_proto",
         "//util:status",
         "@com_google_absl//absl/base:core_headers",
@@ -98,16 +103,16 @@ cc_test(
     name = "aes_siv_key_manager_test",
     size = "small",
     srcs = ["aes_siv_key_manager_test.cc"],
-    copts = ["-Iexternal/gtest/include"],
     deps = [
         ":aes_siv_key_manager",
-        "//:aead",
+        "//:deterministic_aead",
         "//proto:aes_siv_cc_proto",
         "//util:istream_input_stream",
         "//util:secret_data",
         "//util:status",
         "//util:statusor",
         "//util:test_matchers",
+        "@com_google_absl//absl/status",
         "@com_google_googletest//:gtest_main",
     ],
 )
@@ -116,16 +121,18 @@ cc_test(
     name = "deterministic_aead_wrapper_test",
     size = "small",
     srcs = ["deterministic_aead_wrapper_test.cc"],
-    copts = ["-Iexternal/gtest/include"],
     deps = [
         ":deterministic_aead_wrapper",
+        ":failing_daead",
         "//:deterministic_aead",
         "//:primitive_set",
-        "//proto:tink_cc_proto",
+        "//internal:registry_impl",
+        "//monitoring",
+        "//monitoring:monitoring_client_mocks",
         "//util:status",
         "//util:test_matchers",
         "//util:test_util",
-        "@com_google_absl//absl/memory",
+        "@com_google_absl//absl/status",
         "@com_google_googletest//:gtest_main",
     ],
 )
@@ -134,10 +141,7 @@ cc_test(
     name = "deterministic_aead_config_test",
     size = "small",
     srcs = ["deterministic_aead_config_test.cc"],
-    copts = ["-Iexternal/gtest/include"],
-    tags = [
-        "fips",
-    ],
+    tags = ["fips"],
     deps = [
         ":aes_siv_key_manager",
         ":deterministic_aead_config",
@@ -150,7 +154,7 @@ cc_test(
         "//util:status",
         "//util:test_matchers",
         "//util:test_util",
-        "@com_google_absl//absl/memory",
+        "@com_google_absl//absl/status",
         "@com_google_googletest//:gtest_main",
     ],
 )
@@ -159,17 +163,16 @@ cc_test(
     name = "deterministic_aead_factory_test",
     size = "small",
     srcs = ["deterministic_aead_factory_test.cc"],
-    copts = ["-Iexternal/gtest/include"],
     deps = [
         ":aes_siv_key_manager",
         ":deterministic_aead_config",
         ":deterministic_aead_factory",
+        "//:core/key_manager_impl",
         "//:crypto_format",
         "//:deterministic_aead",
         "//:keyset_handle",
         "//internal:key_info",
         "//proto:aes_siv_cc_proto",
-        "//proto:tink_cc_proto",
         "//util:status",
         "//util:test_keyset_handle",
         "//util:test_util",
@@ -181,7 +184,6 @@ cc_test(
     name = "deterministic_aead_key_templates_test",
     size = "small",
     srcs = ["deterministic_aead_key_templates_test.cc"],
-    copts = ["-Iexternal/gtest/include"],
     deps = [
         ":aes_siv_key_manager",
         ":deterministic_aead_key_templates",
@@ -189,6 +191,28 @@ cc_test(
         "//proto:aes_siv_cc_proto",
         "//proto:common_cc_proto",
         "//proto:tink_cc_proto",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_library(
+    name = "failing_daead",
+    srcs = ["failing_daead.cc"],
+    hdrs = ["failing_daead.h"],
+    include_prefix = "tink/daead",
+    deps = [
+        "//:deterministic_aead",
+        "@com_google_absl//absl/strings",
+    ],
+)
+
+cc_test(
+    name = "failing_daead_test",
+    srcs = ["failing_daead_test.cc"],
+    deps = [
+        ":failing_daead",
+        "//util:test_matchers",
+        "@com_google_absl//absl/status",
         "@com_google_googletest//:gtest_main",
     ],
 )

@@ -201,6 +201,11 @@ public final class PaymentMethodTokenSender {
       return this;
     }
 
+    public Builder recipientPublicKey(ECPublicKey val) throws GeneralSecurityException {
+      recipientPublicKey = val;
+      return this;
+    }
+
     /**
      * Sets the encryption public key of the recipient.
      *
@@ -210,11 +215,6 @@ public final class PaymentMethodTokenSender {
      */
     public Builder rawUncompressedRecipientPublicKey(String val) throws GeneralSecurityException {
       recipientPublicKey = PaymentMethodTokenUtil.rawUncompressedEcPublicKey(val);
-      return this;
-    }
-
-    public Builder recipientPublicKey(ECPublicKey val) throws GeneralSecurityException {
-      recipientPublicKey = val;
       return this;
     }
 

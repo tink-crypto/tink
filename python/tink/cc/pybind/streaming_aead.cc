@@ -14,9 +14,10 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "tink/streaming_aead.h"
+#include "tink/cc/pybind/streaming_aead.h"
 
 #include "pybind11/pybind11.h"
+#include "tink/streaming_aead.h"
 
 namespace crypto {
 namespace tink {

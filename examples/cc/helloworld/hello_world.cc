@@ -23,17 +23,19 @@
 //   associated-data:  a string to be used as assciated data
 //   output-file:  name of the file for the resulting output
 
-#include <iostream>
 #include <fstream>
+#include <iostream>
 #include <sstream>
+#include <string>
+#include <utility>
 
 #include "tink/aead.h"
 #include "tink/cleartext_keyset_handle.h"
 #include "tink/config.h"
+#include "tink/config/tink_config.h"
 #include "tink/json_keyset_reader.h"
 #include "tink/keyset_handle.h"
 #include "tink/keyset_reader.h"
-#include "tink/config/tink_config.h"
 
 namespace {
 
@@ -45,8 +47,8 @@ void InitTink() {
   std::clog << "Initializing Tink...\n";
   auto status = crypto::tink::TinkConfig::Register();
   if (!status.ok()) {
-    std::clog << "Initialization of Tink failed: "
-              << status.error_message() << std::endl;
+    std::clog << "Initialization of Tink failed: " << status.message()
+              << std::endl;
     exit(1);
   }
 }
@@ -62,10 +64,10 @@ std::unique_ptr<crypto::tink::KeysetReader> GetJsonKeysetReader(
       crypto::tink::JsonKeysetReader::New(std::move(keyset_stream));
   if (!keyset_reader_result.ok()) {
     std::clog << "Creation of the reader failed: "
-              << keyset_reader_result.status().error_message() << std::endl;
+              << keyset_reader_result.status().message() << std::endl;
     exit(1);
   }
-  return std::move(keyset_reader_result.ValueOrDie());
+  return std::move(keyset_reader_result.value());
 }
 
 // Creates a KeysetHandle that for a keyset read from the given file,
@@ -77,10 +79,10 @@ std::unique_ptr<crypto::tink::KeysetHandle> ReadKeyset(
       crypto::tink::CleartextKeysetHandle::Read(std::move(keyset_reader));
   if (!keyset_handle_result.ok()) {
     std::clog << "Reading the keyset failed: "
-              << keyset_handle_result.status().error_message() << std::endl;
+              << keyset_handle_result.status().message() << std::endl;
     exit(1);
   }
-  return std::move(keyset_handle_result.ValueOrDie());
+  return std::move(keyset_handle_result.value());
 }
 
 // Reads the specified file and returns the read content as a string.
@@ -147,11 +149,11 @@ int main(int argc, char** argv) {
   auto primitive_result = keyset_handle->GetPrimitive<crypto::tink::Aead>();
   if (!primitive_result.ok()) {
     std::clog << "Getting AEAD-primitive from the factory failed: "
-              << primitive_result.status().error_message() << std::endl;
+              << primitive_result.status().message() << std::endl;
     exit(1);
   }
   std::unique_ptr<crypto::tink::Aead> aead =
-      std::move(primitive_result.ValueOrDie());
+      std::move(primitive_result.value());
 
   // Read the input.
   std::string input = Read(input_filename);
@@ -163,18 +165,18 @@ int main(int argc, char** argv) {
     auto encrypt_result = aead->Encrypt(input, associated_data);
     if (!encrypt_result.ok()) {
       std::clog << "Error while encrypting the input:"
-                << encrypt_result.status().error_message() << std::endl;
+                << encrypt_result.status().message() << std::endl;
       exit(1);
     }
-    output = encrypt_result.ValueOrDie();
+    output = encrypt_result.value();
   } else {  // operation == "decrypt"
     auto decrypt_result = aead->Decrypt(input, associated_data);
     if (!decrypt_result.ok()) {
       std::clog << "Error while decrypting the input:"
-                << decrypt_result.status().error_message() << std::endl;
+                << decrypt_result.status().message() << std::endl;
       exit(1);
     }
-    output = decrypt_result.ValueOrDie();
+    output = decrypt_result.value();
   }
 
   // Write the output to the output file.

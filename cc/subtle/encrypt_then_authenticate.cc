@@ -18,18 +18,19 @@
 
 #include <cstdint>
 #include <string>
+#include <utility>
 #include <vector>
 
-#include "absl/strings/string_view.h"
+#include "absl/status/status.h"
 #include "absl/strings/str_cat.h"
+#include "absl/strings/string_view.h"
 #include "tink/aead.h"
+#include "tink/internal/util.h"
 #include "tink/mac.h"
 #include "tink/subtle/ind_cpa_cipher.h"
-#include "tink/subtle/subtle_util_boringssl.h"
 #include "tink/util/errors.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
-
 
 namespace crypto {
 namespace tink {
@@ -48,7 +49,8 @@ util::StatusOr<std::unique_ptr<Aead>> EncryptThenAuthenticate::New(
     std::unique_ptr<IndCpaCipher> ind_cpa_cipher, std::unique_ptr<Mac> mac,
     uint8_t tag_size) {
   if (tag_size < kMinTagSizeInBytes) {
-    return util::Status(util::error::INVALID_ARGUMENT, "tag size too small");
+    return util::Status(absl::StatusCode::kInvalidArgument,
+                        "tag size too small");
   }
   std::unique_ptr<Aead> aead(new EncryptThenAuthenticate(
       std::move(ind_cpa_cipher), std::move(mac), tag_size));
@@ -56,58 +58,63 @@ util::StatusOr<std::unique_ptr<Aead>> EncryptThenAuthenticate::New(
 }
 
 util::StatusOr<std::string> EncryptThenAuthenticate::Encrypt(
-    absl::string_view plaintext, absl::string_view additional_data) const {
-  // BoringSSL expects a non-null pointer for plaintext and additional_data,
+    absl::string_view plaintext, absl::string_view associated_data) const {
+  // BoringSSL expects a non-null pointer for plaintext and associated_data,
   // regardless of whether the size is 0.
-  plaintext = SubtleUtilBoringSSL::EnsureNonNull(plaintext);
-  additional_data = SubtleUtilBoringSSL::EnsureNonNull(additional_data);
+  plaintext = internal::EnsureStringNonNull(plaintext);
+  associated_data = internal::EnsureStringNonNull(associated_data);
 
-  uint64_t aad_size_in_bytes = additional_data.size();
-  uint64_t aad_size_in_bits = aad_size_in_bytes * 8;
-  if (aad_size_in_bits / 8 != aad_size_in_bytes /* overflow occured! */) {
-    return util::Status(util::error::INVALID_ARGUMENT,
-                        "additional data too long");
+  uint64_t associated_data_size_in_bytes = associated_data.size();
+  uint64_t associated_data_size_in_bits = associated_data_size_in_bytes * 8;
+  if (associated_data_size_in_bits / 8 !=
+      associated_data_size_in_bytes /* overflow occured! */) {
+    return util::Status(absl::StatusCode::kInvalidArgument,
+                        "associated data too long");
   }
 
   auto ct = ind_cpa_cipher_->Encrypt(plaintext);
   if (!ct.ok()) {
     return ct.status();
   }
-  std::string ciphertext(ct.ValueOrDie());
-  std::string toAuthData = absl::StrCat(additional_data, ciphertext,
-                                        longToBigEndianStr(aad_size_in_bits));
+  std::string ciphertext(ct.value());
+  std::string toAuthData =
+      absl::StrCat(associated_data, ciphertext,
+                   longToBigEndianStr(associated_data_size_in_bits));
 
   auto tag = mac_->ComputeMac(toAuthData);
   if (!tag.ok()) {
     return tag.status();
   }
-  if (tag.ValueOrDie().size() != tag_size_) {
-    return util::Status(util::error::INTERNAL, "invalid tag size");
+  if (tag.value().size() != tag_size_) {
+    return util::Status(absl::StatusCode::kInternal, "invalid tag size");
   }
-  return ciphertext.append(tag.ValueOrDie());
+  return ciphertext.append(tag.value());
 }
 
 util::StatusOr<std::string> EncryptThenAuthenticate::Decrypt(
-    absl::string_view ciphertext, absl::string_view additional_data) const {
-  // BoringSSL expects a non-null pointer for additional_data,
+    absl::string_view ciphertext, absl::string_view associated_data) const {
+  // BoringSSL expects a non-null pointer for associated_data,
   // regardless of whether the size is 0.
-  additional_data = SubtleUtilBoringSSL::EnsureNonNull(additional_data);
+  associated_data = internal::EnsureStringNonNull(associated_data);
 
   if (ciphertext.size() < tag_size_) {
-    return util::Status(util::error::INVALID_ARGUMENT, "ciphertext too short");
+    return util::Status(absl::StatusCode::kInvalidArgument,
+                        "ciphertext too short");
   }
 
-  uint64_t aad_size_in_bytes = additional_data.size();
-  uint64_t aad_size_in_bits = aad_size_in_bytes * 8;
-  if (aad_size_in_bits / 8 != aad_size_in_bytes /* overflow occured! */) {
-    return util::Status(util::error::INVALID_ARGUMENT,
+  uint64_t associated_data_size_in_bytes = associated_data.size();
+  uint64_t associated_data_size_in_bits = associated_data_size_in_bytes * 8;
+  if (associated_data_size_in_bits / 8 !=
+      associated_data_size_in_bytes /* overflow occured! */) {
+    return util::Status(absl::StatusCode::kInvalidArgument,
                         "additional data too long");
   }
 
   auto payload = ciphertext.substr(0, ciphertext.size() - tag_size_);
   auto tag = ciphertext.substr(ciphertext.size() - tag_size_, tag_size_);
-  std::string toAuthData = absl::StrCat(additional_data, payload,
-                                        longToBigEndianStr(aad_size_in_bits));
+  std::string toAuthData =
+      absl::StrCat(associated_data, payload,
+                   longToBigEndianStr(associated_data_size_in_bits));
 
   auto verified = mac_->VerifyMac(tag, toAuthData);
   if (!verified.ok()) {
@@ -119,7 +126,7 @@ util::StatusOr<std::string> EncryptThenAuthenticate::Decrypt(
     return pt.status();
   }
 
-  return pt.ValueOrDie();
+  return pt.value();
 }
 
 }  // namespace subtle

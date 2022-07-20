@@ -20,6 +20,7 @@
 #ifndef TINK_UTIL_STATUS_H_
 #define TINK_UTIL_STATUS_H_
 
+#include <ostream>
 #include <string>
 
 #include "absl/base/attributes.h"
@@ -29,11 +30,12 @@ namespace crypto {
 namespace tink {
 namespace util {
 
+#ifndef TINK_USE_ABSL_STATUS
+
 namespace error {
 
-
 // These values match the error codes in the codes.proto file of the original.
-enum Code {
+enum ABSL_DEPRECATED("Prefer using absl::StatusCode instead.") Code {
   // Not an error; returned on success
   OK = 0,
 
@@ -125,7 +127,6 @@ enum Code {
   UNAUTHENTICATED = 16,
 };
 
-
 }  // namespace error
 
 // TODO(tholenst) Remove this compile time flag in Tink 1.5. This should not be
@@ -144,28 +145,46 @@ class Status {
   // Make a Status from the specified error and message.
   Status(::crypto::tink::util::error::Code error,
          const std::string& error_message);
+  // Abseil-compatible constructor from an error and a message
+  Status(absl::StatusCode code, absl::string_view error_message);
+
+  Status(const Status& other) = default;
 
   Status& operator=(const Status& other);
 
   // Some pre-defined Status objects
+  ABSL_DEPRECATED("Use OkStatus() instead.")
   static const Status& OK;  // Identical to 0-arg constructor
+  ABSL_DEPRECATED("Use Status(absl::StatusCode::kCancelled, "") instead.")
   static const Status& CANCELLED;
+  ABSL_DEPRECATED("Use Status(absl::StatusCode::kUnknown, "") instead.")
   static const Status& UNKNOWN;
 
   // Accessors
   bool ok() const {
-    return code_ == ::crypto::tink::util::error::OK;
+    return code_ == absl::StatusCode::kOk;
   }
+  ABSL_DEPRECATED("Use its absl-compatible version code() instead.")
   int error_code() const {
-    return code_;
+    return static_cast<int>(code_);
   }
+  ABSL_DEPRECATED("Use its absl-compatible version code() instead.")
   ::crypto::tink::util::error::Code CanonicalCode() const {
-    return code_;
+    return static_cast<::crypto::tink::util::error::Code>(code_);
   }
+  ABSL_DEPRECATED("Use its absl-compatible version message() instead.")
   const std::string& error_message() const { return message_; }
 
-  bool operator==(const Status& x) const;
-  bool operator!=(const Status& x) const;
+  // Abseil-compatible accessors
+  absl::StatusCode code() const {
+    return static_cast<absl::StatusCode>(code_);
+  }
+  absl::string_view message() const {
+    return message_;
+  }
+
+  bool operator==(const Status& other) const;
+  bool operator!=(const Status& other) const;
 
   // NoOp
   void IgnoreError() const {
@@ -177,7 +196,7 @@ class Status {
   operator ::absl::Status() const;
 
  private:
-  ::crypto::tink::util::error::Code code_;
+  absl::StatusCode code_;
   std::string message_;
 };
 
@@ -194,6 +213,12 @@ extern std::string ErrorCodeString(crypto::tink::util::error::Code error);
 extern ::std::ostream& operator<<(::std::ostream& os,
                                   ::crypto::tink::util::error::Code code);
 extern ::std::ostream& operator<<(::std::ostream& os, const Status& other);
+
+#else
+
+using Status = absl::Status;
+
+#endif  // TINK_USE_ABSL_STATUS
 
 // Returns an OK status, equivalent to a default constructed instance.
 inline Status OkStatus() { return Status(); }

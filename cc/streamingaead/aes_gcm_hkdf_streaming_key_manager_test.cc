@@ -18,8 +18,10 @@
 
 #include <sstream>
 #include <string>
+#include <utility>
 
 #include "gtest/gtest.h"
+#include "absl/status/status.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/string_view.h"
 #include "tink/streaming_aead.h"
@@ -79,7 +81,7 @@ TEST(AesGcmHkdfStreamingKeyManagerTest, ValidateKeyDerivedKeySizes) {
       EXPECT_THAT(AesGcmHkdfStreamingKeyManager().ValidateKey(key), IsOk());
     } else {
       EXPECT_THAT(AesGcmHkdfStreamingKeyManager().ValidateKey(key),
-                  StatusIs(util::error::INVALID_ARGUMENT));
+                  StatusIs(absl::StatusCode::kInvalidArgument));
     }
   }
 }
@@ -92,7 +94,7 @@ TEST(AesGcmHkdfStreamingKeyManagerTest, ValidateKeyDerivedKeyWrongVersion) {
   key.mutable_params()->set_hkdf_hash_type(HashType::SHA256);
   key.mutable_params()->set_ciphertext_segment_size(1024);
   EXPECT_THAT(AesGcmHkdfStreamingKeyManager().ValidateKey(key),
-              StatusIs(util::error::INVALID_ARGUMENT));
+              StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
 TEST(AesGcmHkdfStreamingKeyManagerTest, GetPrimitive) {
@@ -108,7 +110,7 @@ TEST(AesGcmHkdfStreamingKeyManagerTest, GetPrimitive) {
 
   auto streaming_aead_from_manager_result =
       AesGcmHkdfStreamingKeyManager().GetPrimitive<StreamingAead>(key);
-  EXPECT_THAT(streaming_aead_from_manager_result.status(), IsOk());
+  EXPECT_THAT(streaming_aead_from_manager_result, IsOk());
 
   int derived_key_size = 16;
   int ciphertext_segment_size = 1024;
@@ -121,13 +123,13 @@ TEST(AesGcmHkdfStreamingKeyManagerTest, GetPrimitive) {
   params.ciphertext_offset = ciphertext_offset;
   auto streaming_aead_direct_result =
       subtle::AesGcmHkdfStreaming::New(std::move(params));
-  EXPECT_THAT(streaming_aead_direct_result.status(), IsOk());
+  EXPECT_THAT(streaming_aead_direct_result, IsOk());
 
   // Check that the two primitives are the same by encrypting with one, and
   // decrypting with the other.
   EXPECT_THAT(
-      EncryptThenDecrypt(streaming_aead_from_manager_result.ValueOrDie().get(),
-                         streaming_aead_direct_result.ValueOrDie().get(),
+      EncryptThenDecrypt(streaming_aead_from_manager_result.value().get(),
+                         streaming_aead_direct_result.value().get(),
                          subtle::Random::GetRandomBytes(10000),
                          "some associated data", ciphertext_offset),
       IsOk());
@@ -151,7 +153,7 @@ TEST(AesGcmHkdfStreamingKeyManagerTest, KeyType) {
 TEST(AesGcmHkdfStreamingKeyManagerTest, ValidateKeyFormatEmpty) {
   EXPECT_THAT(AesGcmHkdfStreamingKeyManager().ValidateKeyFormat(
                   AesGcmHkdfStreamingKeyFormat()),
-              StatusIs(util::error::INVALID_ARGUMENT));
+              StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
 TEST(AesGcmHkdfStreamingKeyManagerTest, ValidateKeyFormat) {
@@ -170,9 +172,9 @@ TEST(AesGcmHkdfStreamingKeyManagerTest, ValidateKeyFormatSmallKey) {
   key_format.mutable_params()->set_derived_key_size(32);
   key_format.mutable_params()->set_hkdf_hash_type(HashType::SHA256);
   key_format.mutable_params()->set_ciphertext_segment_size(1024);
-  EXPECT_THAT(
-      AesGcmHkdfStreamingKeyManager().ValidateKeyFormat(key_format),
-      StatusIs(util::error::INVALID_ARGUMENT, HasSubstr("derived_key_size")));
+  EXPECT_THAT(AesGcmHkdfStreamingKeyManager().ValidateKeyFormat(key_format),
+              StatusIs(absl::StatusCode::kInvalidArgument,
+                       HasSubstr("derived_key_size")));
 }
 
 TEST(AesGcmHkdfStreamingKeyManagerTest, ValidateKeyFormatWrongHash) {
@@ -180,9 +182,9 @@ TEST(AesGcmHkdfStreamingKeyManagerTest, ValidateKeyFormatWrongHash) {
   key_format.set_key_size(32);
   key_format.mutable_params()->set_derived_key_size(32);
   key_format.mutable_params()->set_ciphertext_segment_size(1024);
-  EXPECT_THAT(
-      AesGcmHkdfStreamingKeyManager().ValidateKeyFormat(key_format),
-      StatusIs(util::error::INVALID_ARGUMENT, HasSubstr("hkdf_hash_type")));
+  EXPECT_THAT(AesGcmHkdfStreamingKeyManager().ValidateKeyFormat(key_format),
+              StatusIs(absl::StatusCode::kInvalidArgument,
+                       HasSubstr("hkdf_hash_type")));
 }
 
 TEST(AesGcmHkdfStreamingKeyManagerTest, ValidateKeyFormatSmallSegment) {
@@ -192,7 +194,7 @@ TEST(AesGcmHkdfStreamingKeyManagerTest, ValidateKeyFormatSmallSegment) {
   key_format.mutable_params()->set_hkdf_hash_type(HashType::SHA256);
   key_format.mutable_params()->set_ciphertext_segment_size(45);
   EXPECT_THAT(AesGcmHkdfStreamingKeyManager().ValidateKeyFormat(key_format),
-              StatusIs(util::error::INVALID_ARGUMENT,
+              StatusIs(absl::StatusCode::kInvalidArgument,
                        HasSubstr("ciphertext_segment_size")));
 }
 
@@ -203,16 +205,15 @@ TEST(AesGcmHkdfStreamingKeyManagerTest, CreateKey) {
   key_format.mutable_params()->set_hkdf_hash_type(HashType::SHA256);
   key_format.mutable_params()->set_ciphertext_segment_size(1024);
   auto key_or = AesGcmHkdfStreamingKeyManager().CreateKey(key_format);
-  ASSERT_THAT(key_or.status(), IsOk());
-  EXPECT_THAT(key_or.ValueOrDie().version(), Eq(0));
-  EXPECT_THAT(key_or.ValueOrDie().params().ciphertext_segment_size(),
+  ASSERT_THAT(key_or, IsOk());
+  EXPECT_THAT(key_or.value().version(), Eq(0));
+  EXPECT_THAT(key_or.value().params().ciphertext_segment_size(),
               Eq(key_format.params().ciphertext_segment_size()));
-  EXPECT_THAT(key_or.ValueOrDie().params().derived_key_size(),
+  EXPECT_THAT(key_or.value().params().derived_key_size(),
               Eq(key_format.params().derived_key_size()));
-  EXPECT_THAT(key_or.ValueOrDie().params().hkdf_hash_type(),
+  EXPECT_THAT(key_or.value().params().hkdf_hash_type(),
               Eq(key_format.params().hkdf_hash_type()));
-  EXPECT_THAT(key_or.ValueOrDie().key_value().size(),
-              Eq(key_format.key_size()));
+  EXPECT_THAT(key_or.value().key_value().size(), Eq(key_format.key_size()));
 }
 
 TEST(AesGcmHkdfStreamingKeyManagerTest, DeriveKey) {
@@ -228,14 +229,14 @@ TEST(AesGcmHkdfStreamingKeyManagerTest, DeriveKey) {
 
   StatusOr<AesGcmHkdfStreamingKey> key_or =
       AesGcmHkdfStreamingKeyManager().DeriveKey(key_format, &input_stream);
-  ASSERT_THAT(key_or.status(), IsOk());
-  EXPECT_THAT(key_or.ValueOrDie().key_value(),
+  ASSERT_THAT(key_or, IsOk());
+  EXPECT_THAT(key_or.value().key_value(),
               Eq("01234567890123456789012345678901"));
-  EXPECT_THAT(key_or.ValueOrDie().params().derived_key_size(),
+  EXPECT_THAT(key_or.value().params().derived_key_size(),
               Eq(key_format.params().derived_key_size()));
-  EXPECT_THAT(key_or.ValueOrDie().params().hkdf_hash_type(),
+  EXPECT_THAT(key_or.value().params().hkdf_hash_type(),
               Eq(key_format.params().hkdf_hash_type()));
-  EXPECT_THAT(key_or.ValueOrDie().params().ciphertext_segment_size(),
+  EXPECT_THAT(key_or.value().params().ciphertext_segment_size(),
               Eq(key_format.params().ciphertext_segment_size()));
 }
 
@@ -267,10 +268,11 @@ TEST(AesGcmHkdfStreamingKeyManagerTest, DeriveKeyWrongVersion) {
   IstreamInputStream input_stream{absl::make_unique<std::stringstream>(
       "0123456789abcdef")};
 
-  ASSERT_THAT(AesGcmHkdfStreamingKeyManager()
-                  .DeriveKey(key_format, &input_stream)
-                  .status(),
-              StatusIs(util::error::INVALID_ARGUMENT, HasSubstr("version")));
+  ASSERT_THAT(
+      AesGcmHkdfStreamingKeyManager()
+          .DeriveKey(key_format, &input_stream)
+          .status(),
+      StatusIs(absl::StatusCode::kInvalidArgument, HasSubstr("version")));
 }
 
 }  // namespace

@@ -1,0 +1,16 @@
+{
+  "primaryKeyId":96504335,
+  "key": [
+    {
+      "keyData": {
+        "typeUrl":"type.googleapis.com/google.crypto.tink.JwtEcdsaPrivateKey",
+        "value":"EkYQARogDmw3kN7T6B0Bns5TmMquTQpVFlhvSeyzk8lu+r7beZAiIEv5oA4WPcdZRC9ZrdzrDacMxI/FKdPDaEF4HBZkIju8GiEAlsg6HHuBlZlpbniu0B6MIjnPbv0ETNKRqr3XYLJSizI=",
+        "keyMaterialType":"ASYMMETRIC_PRIVATE"
+      },
+      "status":"ENABLED",
+      "keyId":96504335,
+      "outputPrefixType":"TINK"
+    }
+  ]
+}
+

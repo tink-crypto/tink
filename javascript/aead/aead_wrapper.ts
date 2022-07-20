@@ -35,7 +35,6 @@ class WrappedAead extends Aead {
   }
 
   /**
-   * @override
    */
   async encrypt(plaintext: Uint8Array, opt_associatedData?: Uint8Array|null):
       Promise<Uint8Array> {
@@ -57,7 +56,6 @@ class WrappedAead extends Aead {
   }
 
   /**
-   * @override
    */
   async decrypt(ciphertext: Uint8Array, opt_associatedData?: Uint8Array|null):
       Promise<Uint8Array> {
@@ -116,14 +114,12 @@ class WrappedAead extends Aead {
 
 export class AeadWrapper implements PrimitiveWrapper<Aead> {
   /**
-   * @override
    */
   wrap(primitiveSet: PrimitiveSet.PrimitiveSet<Aead>): Aead {
     return WrappedAead.newAead(primitiveSet);
   }
 
   /**
-   * @override
    */
   getPrimitiveType(): Constructor<Aead> {
     return Aead;

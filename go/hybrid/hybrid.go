@@ -14,13 +14,12 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-// Package hybrid provides subtle implementations of the HKDF and EC primitives.
+// Package hybrid provides implementations of the Hybrid Encryption primitive.
 //
 // The functionality of Hybrid Encryption is represented as a pair of
-// primitives (interfaces):
+// interfaces:
 //
 //  * HybridEncrypt for encryption of data
-//
 //  * HybridDecrypt for decryption of data
 //
 // Implementations of these interfaces are secure against adaptive chosen
@@ -38,10 +37,17 @@ import (
 )
 
 func init() {
-	if err := registry.RegisterKeyManager(newECIESAEADHKDFPrivateKeyKeyManager()); err != nil {
+	if err := registry.RegisterKeyManager(new(hpkePublicKeyManager)); err != nil {
 		panic(fmt.Sprintf("hybrid.init() failed: %v", err))
 	}
-	if err := registry.RegisterKeyManager(newECIESAEADHKDFPublicKeyKeyManager()); err != nil {
+	if err := registry.RegisterKeyManager(new(hpkePrivateKeyManager)); err != nil {
+		panic(fmt.Sprintf("hybrid.init() failed: %v", err))
+	}
+
+	if err := registry.RegisterKeyManager(new(eciesAEADHKDFPrivateKeyKeyManager)); err != nil {
+		panic(fmt.Sprintf("hybrid.init() failed: %v", err))
+	}
+	if err := registry.RegisterKeyManager(new(eciesAEADHKDFPublicKeyKeyManager)); err != nil {
 		panic(fmt.Sprintf("hybrid.init() failed: %v", err))
 	}
 }

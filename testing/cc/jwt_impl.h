@@ -21,7 +21,7 @@
 #include <grpcpp/server_context.h>
 #include <grpcpp/support/status.h>
 
-#include "proto/testing/testing_api.grpc.pb.h"
+#include "proto/testing_api.grpc.pb.h"
 
 namespace tink_testing_api {
 
@@ -43,6 +43,14 @@ class JwtImpl final : public Jwt::Service {
   grpc::Status PublicKeyVerifyAndDecode(grpc::ServerContext* context,
                                   const JwtVerifyRequest* request,
                                   JwtVerifyResponse* response) override;
+
+  grpc::Status ToJwkSet(grpc::ServerContext* context,
+                        const JwtToJwkSetRequest* request,
+                        JwtToJwkSetResponse* response) override;
+
+  grpc::Status FromJwkSet(grpc::ServerContext* context,
+                          const JwtFromJwkSetRequest* request,
+                          JwtFromJwkSetResponse* response) override;
 };
 
 }  // namespace tink_testing_api

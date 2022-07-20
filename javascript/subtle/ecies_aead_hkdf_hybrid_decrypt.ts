@@ -68,7 +68,6 @@ export class EciesAeadHkdfHybridDecrypt extends HybridDecrypt {
    * Decrypts ciphertext using opt_contextInfo as info parameter of the
    * underlying HKDF.
    *
-   * @override
    */
   async decrypt(ciphertext: Uint8Array, associatedData?: Uint8Array) {
     if (ciphertext.length < this.headerSize) {

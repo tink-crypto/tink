@@ -19,6 +19,8 @@ package com.google.crypto.tink;
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertThrows;
 
+import com.google.crypto.tink.internal.KeyTypeManager;
+import com.google.crypto.tink.internal.PrimitiveFactory;
 import com.google.crypto.tink.proto.AesGcmKey;
 import com.google.crypto.tink.proto.AesGcmKeyFormat;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
@@ -112,14 +114,14 @@ public final class KeyManagerImplTest {
   }
 
   @Test
-  public void getPrimitive_ByteString_works() throws Exception {
+  public void getPrimitive_byteString_works() throws Exception {
     KeyManager<Aead> keyManager = new KeyManagerImpl<>(new TestKeyTypeManager(), Aead.class);
     MessageLite key = keyManager.newKey(AesGcmKeyFormat.newBuilder().setKeySize(16).build());
     keyManager.getPrimitive(key.toByteString());
   }
 
   @Test
-  public void getPrimitive_FakeAead_ByteString_works() throws Exception {
+  public void getPrimitive_fakeAead_byteString_works() throws Exception {
     KeyManager<FakeAead> fakeAeadKeyManager =
         new KeyManagerImpl<>(new TestKeyTypeManager(), FakeAead.class);
     MessageLite key =
@@ -135,7 +137,7 @@ public final class KeyManagerImplTest {
   }
 
   @Test
-  public void getPrimitive_ByteString_throwsInvalidKey() throws Exception {
+  public void getPrimitive_byteString_throwsInvalidKey() throws Exception {
     KeyManager<Aead> keyManager = new KeyManagerImpl<>(new TestKeyTypeManager(), Aead.class);
     MessageLite notAKey = AesGcmKey.getDefaultInstance();
     GeneralSecurityException e =
@@ -145,14 +147,14 @@ public final class KeyManagerImplTest {
   }
 
   @Test
-  public void getPrimitive_MessageLite_works() throws Exception {
+  public void getPrimitive_messageLite_works() throws Exception {
     KeyManager<Aead> keyManager = new KeyManagerImpl<>(new TestKeyTypeManager(), Aead.class);
     MessageLite key = keyManager.newKey(AesGcmKeyFormat.newBuilder().setKeySize(16).build());
     keyManager.getPrimitive(key);
   }
 
   @Test
-  public void getPrimitive_MessageLite_throwsIfVoid() throws Exception {
+  public void getPrimitive_messageLite_throwsIfVoid() throws Exception {
     KeyManager<Void> keyManager = new KeyManagerImpl<>(new TestKeyTypeManager(), Void.class);
     MessageLite key = keyManager.newKey(AesGcmKeyFormat.newBuilder().setKeySize(16).build());
     GeneralSecurityException e =
@@ -161,7 +163,7 @@ public final class KeyManagerImplTest {
   }
 
   @Test
-  public void getPrimitive_MessageLite_throwsWrongProto() throws Exception {
+  public void getPrimitive_messageLite_throwsWrongProto() throws Exception {
     KeyManager<Aead> keyManager = new KeyManagerImpl<>(new TestKeyTypeManager(), Aead.class);
     MessageLite notAKey = AesGcmKeyFormat.getDefaultInstance();
     GeneralSecurityException e =
@@ -170,7 +172,7 @@ public final class KeyManagerImplTest {
   }
 
   @Test
-  public void getPrimitive_MessageLite_throwsInvalidKey() throws Exception {
+  public void getPrimitive_messageLite_throwsInvalidKey() throws Exception {
     KeyManager<Aead> keyManager = new KeyManagerImpl<>(new TestKeyTypeManager(), Aead.class);
     MessageLite notAKey = AesGcmKey.getDefaultInstance();
     GeneralSecurityException e =
@@ -179,13 +181,13 @@ public final class KeyManagerImplTest {
   }
 
   @Test
-  public void newKey_ByteString_works() throws Exception {
+  public void newKey_byteString_works() throws Exception {
     KeyManager<Aead> keyManager = new KeyManagerImpl<>(new TestKeyTypeManager(), Aead.class);
     keyManager.newKey(AesGcmKeyFormat.newBuilder().setKeySize(16).build().toByteString());
   }
 
   @Test
-  public void newKey_ByteString_throwsInvalidKeySize() throws Exception {
+  public void newKey_byteString_throwsInvalidKeySize() throws Exception {
     KeyManager<Aead> keyManager = new KeyManagerImpl<>(new TestKeyTypeManager(), Aead.class);
     GeneralSecurityException e =
         assertThrows(
@@ -197,13 +199,13 @@ public final class KeyManagerImplTest {
   }
 
   @Test
-  public void newKey_MessageLite_works() throws Exception {
+  public void newKey_messageLite_works() throws Exception {
     KeyManager<Aead> keyManager = new KeyManagerImpl<>(new TestKeyTypeManager(), Aead.class);
     keyManager.newKey(AesGcmKeyFormat.newBuilder().setKeySize(16).build());
   }
 
   @Test
-  public void newKey_MessageLite_throwsWrongProto() throws Exception {
+  public void newKey_messageLite_throwsWrongProto() throws Exception {
     KeyManager<Aead> keyManager = new KeyManagerImpl<>(new TestKeyTypeManager(), Aead.class);
     GeneralSecurityException e =
         assertThrows(
@@ -213,7 +215,7 @@ public final class KeyManagerImplTest {
   }
 
   @Test
-  public void newKey_MessageLite_throwsInvalidKeySize() throws Exception {
+  public void newKey_messageLite_throwsInvalidKeySize() throws Exception {
     KeyManager<Aead> keyManager = new KeyManagerImpl<>(new TestKeyTypeManager(), Aead.class);
     GeneralSecurityException e =
         assertThrows(
@@ -326,14 +328,6 @@ public final class KeyManagerImplTest {
     public AesGcmKey parseKey(ByteString byteString) throws InvalidProtocolBufferException {
       return AesGcmKey.parseFrom(byteString, ExtensionRegistryLite.getEmptyRegistry());
     }
-  }
-
-  @Test
-  public void newKey_ByteString_throwsUnsupportedOperation() throws Exception {
-    KeyManager<Void> keyManager =
-        new KeyManagerImpl<>(new TestKeyTypeManagerWithoutKeyFactory(), Void.class);
-    assertThrows(
-        UnsupportedOperationException.class, () -> keyManager.newKey(ByteString.copyFromUtf8("")));
   }
 
   @Test

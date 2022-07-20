@@ -17,8 +17,10 @@
 package com.google.crypto.tink.testing;
 
 import com.google.crypto.tink.BinaryKeysetReader;
+import com.google.crypto.tink.BinaryKeysetWriter;
 import com.google.crypto.tink.CleartextKeysetHandle;
 import com.google.crypto.tink.KeysetHandle;
+import com.google.crypto.tink.jwt.JwkSetConverter;
 import com.google.crypto.tink.jwt.JwtInvalidException;
 import com.google.crypto.tink.jwt.JwtMac;
 import com.google.crypto.tink.jwt.JwtMacConfig;
@@ -28,19 +30,26 @@ import com.google.crypto.tink.jwt.JwtSignatureConfig;
 import com.google.crypto.tink.jwt.JwtValidator;
 import com.google.crypto.tink.jwt.RawJwt;
 import com.google.crypto.tink.jwt.VerifiedJwt;
-import com.google.crypto.tink.proto.testing.JwtClaimValue;
-import com.google.crypto.tink.proto.testing.JwtGrpc.JwtImplBase;
-import com.google.crypto.tink.proto.testing.JwtSignRequest;
-import com.google.crypto.tink.proto.testing.JwtSignResponse;
-import com.google.crypto.tink.proto.testing.JwtToken;
-import com.google.crypto.tink.proto.testing.JwtVerifyRequest;
-import com.google.crypto.tink.proto.testing.JwtVerifyResponse;
-import com.google.crypto.tink.proto.testing.NullValue;
-import com.google.crypto.tink.proto.testing.StringValue;
-import com.google.crypto.tink.proto.testing.Timestamp;
+import com.google.crypto.tink.proto.Keyset;
+import com.google.crypto.tink.testing.proto.JwtClaimValue;
+import com.google.crypto.tink.testing.proto.JwtFromJwkSetRequest;
+import com.google.crypto.tink.testing.proto.JwtFromJwkSetResponse;
+import com.google.crypto.tink.testing.proto.JwtGrpc.JwtImplBase;
+import com.google.crypto.tink.testing.proto.JwtSignRequest;
+import com.google.crypto.tink.testing.proto.JwtSignResponse;
+import com.google.crypto.tink.testing.proto.JwtToJwkSetRequest;
+import com.google.crypto.tink.testing.proto.JwtToJwkSetResponse;
+import com.google.crypto.tink.testing.proto.JwtToken;
+import com.google.crypto.tink.testing.proto.JwtVerifyRequest;
+import com.google.crypto.tink.testing.proto.JwtVerifyResponse;
+import com.google.crypto.tink.testing.proto.NullValue;
+import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
+import com.google.protobuf.StringValue;
+import com.google.protobuf.Timestamp;
 import io.grpc.Status;
 import io.grpc.stub.StreamObserver;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.time.Clock;
@@ -69,7 +78,7 @@ public final class JwtServiceImpl extends JwtImplBase {
   }
 
   private RawJwt convertJwtTokenToRawJwt(JwtToken token) throws JwtInvalidException {
-    RawJwt.Builder rawJwtBuilder = new RawJwt.Builder();
+    RawJwt.Builder rawJwtBuilder = RawJwt.newBuilder();
     if (token.hasTypeHeader()) {
       rawJwtBuilder.setTypeHeader(token.getTypeHeader().getValue());
     }
@@ -87,6 +96,8 @@ public final class JwtServiceImpl extends JwtImplBase {
     }
     if (token.hasExpiration()) {
       rawJwtBuilder.setExpiration(timestampToInstant(token.getExpiration()));
+    } else {
+      rawJwtBuilder.withoutExpiration();
     }
     if (token.hasNotBefore()) {
       rawJwtBuilder.setNotBefore(timestampToInstant(token.getNotBefore()));
@@ -241,16 +252,31 @@ public final class JwtServiceImpl extends JwtImplBase {
   }
 
   private JwtValidator convertProtoValidatorToValidator(
-      com.google.crypto.tink.proto.testing.JwtValidator validator) throws JwtInvalidException {
-    JwtValidator.Builder validatorBuilder = new JwtValidator.Builder();
-    if (validator.hasIssuer()) {
-      validatorBuilder.setIssuer(validator.getIssuer().getValue());
+      com.google.crypto.tink.testing.proto.JwtValidator validator) throws JwtInvalidException {
+    JwtValidator.Builder validatorBuilder = JwtValidator.newBuilder();
+    if (validator.hasExpectedTypeHeader()) {
+      validatorBuilder.expectTypeHeader(validator.getExpectedTypeHeader().getValue());
     }
-    if (validator.hasSubject()) {
-      validatorBuilder.setSubject(validator.getSubject().getValue());
+    if (validator.hasExpectedIssuer()) {
+      validatorBuilder.expectIssuer(validator.getExpectedIssuer().getValue());
     }
-    if (validator.hasAudience()) {
-      validatorBuilder.setAudience(validator.getAudience().getValue());
+    if (validator.hasExpectedAudience()) {
+      validatorBuilder.expectAudience(validator.getExpectedAudience().getValue());
+    }
+    if (validator.getIgnoreTypeHeader()) {
+      validatorBuilder.ignoreTypeHeader();
+    }
+    if (validator.getIgnoreIssuer()) {
+      validatorBuilder.ignoreIssuer();
+    }
+    if (validator.getIgnoreAudience()) {
+      validatorBuilder.ignoreAudiences();
+    }
+    if (validator.getAllowMissingExpiration()) {
+      validatorBuilder.allowMissingExpiration();
+    }
+    if (validator.getExpectIssuedInThePast()) {
+      validatorBuilder.expectIssuedInThePast();
     }
     if (validator.hasNow()) {
       Instant now = timestampToInstant(validator.getNow());
@@ -312,4 +338,50 @@ public final class JwtServiceImpl extends JwtImplBase {
     responseObserver.onCompleted();
   }
 
+  /** Converts a Tink JWT Keyset to a JWK set. */
+  @Override
+  public void toJwkSet(
+      JwtToJwkSetRequest request, StreamObserver<JwtToJwkSetResponse> responseObserver) {
+    JwtToJwkSetResponse response;
+    try {
+      KeysetHandle keysetHandle =
+          CleartextKeysetHandle.read(
+              BinaryKeysetReader.withBytes(request.getKeyset().toByteArray()));
+      String jwkSet = JwkSetConverter.fromPublicKeysetHandle(keysetHandle);
+      response = JwtToJwkSetResponse.newBuilder().setJwkSet(jwkSet).build();
+    } catch (GeneralSecurityException | InvalidProtocolBufferException e) {
+      response = JwtToJwkSetResponse.newBuilder().setErr(e.toString()).build();
+    } catch (IOException e) {
+      responseObserver.onError(Status.UNKNOWN.withDescription(e.getMessage()).asException());
+      return;
+    }
+    responseObserver.onNext(response);
+    responseObserver.onCompleted();
+  }
+
+  /** Converts a JWK set to a Tink JWT Keyset. */
+  @Override
+  public void fromJwkSet(
+      JwtFromJwkSetRequest request, StreamObserver<JwtFromJwkSetResponse> responseObserver) {
+    JwtFromJwkSetResponse response;
+    try {
+      KeysetHandle keysetHandle = JwkSetConverter.toPublicKeysetHandle(request.getJwkSet());
+
+      Keyset keyset = CleartextKeysetHandle.getKeyset(keysetHandle);
+      ByteArrayOutputStream keysetStream = new ByteArrayOutputStream();
+      BinaryKeysetWriter.withOutputStream(keysetStream).write(keyset);
+      keysetStream.close();
+      response =
+          JwtFromJwkSetResponse.newBuilder()
+              .setKeyset(ByteString.copyFrom(keysetStream.toByteArray()))
+              .build();
+    } catch (GeneralSecurityException | InvalidProtocolBufferException e) {
+      response = JwtFromJwkSetResponse.newBuilder().setErr(e.toString()).build();
+    } catch (IOException e) {
+      responseObserver.onError(Status.UNKNOWN.withDescription(e.getMessage()).asException());
+      return;
+    }
+    responseObserver.onNext(response);
+    responseObserver.onCompleted();
+  }
 }

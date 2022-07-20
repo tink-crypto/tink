@@ -17,9 +17,11 @@
 #include "tink/daead/deterministic_aead_config.h"
 
 #include <list>
+#include <utility>
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include "absl/status/status.h"
 #include "tink/config.h"
 #include "tink/config/tink_fips.h"
 #include "tink/daead/aes_siv_key_manager.h"
@@ -53,7 +55,7 @@ TEST_F(DeterministicAeadConfigTest, Basic) {
   EXPECT_THAT(Registry::get_key_manager<DeterministicAead>(
                   AesSivKeyManager().get_key_type())
                   .status(),
-              StatusIs(util::error::NOT_FOUND));
+              StatusIs(absl::StatusCode::kNotFound));
   EXPECT_THAT(DeterministicAeadConfig::Register(), IsOk());
   EXPECT_THAT(Registry::get_key_manager<DeterministicAead>(
                   AesSivKeyManager().get_key_type())
@@ -80,24 +82,24 @@ TEST_F(DeterministicAeadConfigTest, WrappersRegistered) {
           primitive_set
               ->AddPrimitive(absl::make_unique<DummyDeterministicAead>("dummy"),
                              key_info)
-              .ValueOrDie()),
+              .value()),
       IsOk());
 
   auto registry_wrapped = Registry::Wrap(std::move(primitive_set));
 
   ASSERT_TRUE(registry_wrapped.ok()) << registry_wrapped.status();
   auto encryption_result =
-      registry_wrapped.ValueOrDie()->EncryptDeterministically("secret", "");
+      registry_wrapped.value()->EncryptDeterministically("secret", "");
   ASSERT_TRUE(encryption_result.ok());
 
   auto decryption_result =
       DummyDeterministicAead("dummy").DecryptDeterministically(
-          encryption_result.ValueOrDie(), "");
+          encryption_result.value(), "");
   ASSERT_TRUE(decryption_result.status().ok());
-  EXPECT_THAT(decryption_result.ValueOrDie(), Eq("secret"));
+  EXPECT_THAT(decryption_result.value(), Eq("secret"));
 
   decryption_result = DummyDeterministicAead("dummy").DecryptDeterministically(
-      encryption_result.ValueOrDie(), "wrong");
+      encryption_result.value(), "wrong");
   EXPECT_FALSE(decryption_result.status().ok());
 }
 
@@ -115,7 +117,7 @@ TEST_F(DeterministicAeadConfigTest, RegisterFipsValidTemplates) {
   for (auto key_template : non_fips_key_templates) {
     auto new_keyset_handle_result = KeysetHandle::GenerateNew(key_template);
     EXPECT_THAT(new_keyset_handle_result.status(),
-               StatusIs(util::error::NOT_FOUND));
+               StatusIs(absl::StatusCode::kNotFound));
   }
 }
 

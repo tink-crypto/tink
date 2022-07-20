@@ -16,6 +16,8 @@
 
 #include "tink/jwt/internal/json_util.h"
 
+#include <string>
+
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "tink/util/test_matchers.h"
@@ -23,57 +25,58 @@
 
 using ::crypto::tink::test::IsOk;
 using ::crypto::tink::test::IsOkAndHolds;
+using ::google::protobuf::ListValue;
+using ::google::protobuf::Struct;
 
 namespace crypto {
 namespace tink {
 namespace jwt_internal {
 
 TEST(JsonUtil, ParseThenSerializeStructWtihStringListOk) {
-  auto proto_or =
+  util::StatusOr<Struct> proto =
       JsonStringToProtoStruct(R"({"some_key":["hello","world","!"]})");
-  ASSERT_THAT(proto_or.status(), IsOk());
-  google::protobuf::Struct proto = proto_or.ValueOrDie();
+  ASSERT_THAT(proto, IsOk());
 
-  ASSERT_THAT(ProtoStructToJsonString(proto),
+  ASSERT_THAT(ProtoStructToJsonString(*proto),
               IsOkAndHolds(R"({"some_key":["hello","world","!"]})"));
 }
 
 TEST(JsonUtil, ParseThenSerializeStructWtihNumberOk) {
-  auto proto_or = JsonStringToProtoStruct(R"({"some_key":-12345})");
-  ASSERT_THAT(proto_or.status(), IsOk());
-  google::protobuf::Struct proto = proto_or.ValueOrDie();
+  util::StatusOr<Struct> proto =
+      JsonStringToProtoStruct(R"({"some_key":-12345})");
+  ASSERT_THAT(proto, IsOk());
 
-  ASSERT_THAT(ProtoStructToJsonString(proto),
+  ASSERT_THAT(ProtoStructToJsonString(*proto),
               IsOkAndHolds(R"({"some_key":-12345})"));
 }
 
 TEST(JsonUtil, ParseThenSerializeStructWtihBoolOk) {
-  auto proto_or = JsonStringToProtoStruct(R"({"some_key":false})");
-  ASSERT_THAT(proto_or.status(), IsOk());
-  google::protobuf::Struct proto = proto_or.ValueOrDie();
+  util::StatusOr<Struct> proto =
+      JsonStringToProtoStruct(R"({"some_key":false})");
+  ASSERT_THAT(proto, IsOk());
 
-  ASSERT_THAT(ProtoStructToJsonString(proto),
+  ASSERT_THAT(ProtoStructToJsonString(*proto),
               IsOkAndHolds(R"({"some_key":false})"));
 }
 
 TEST(JsonUtil, ParseThenSerializeListOk) {
-  auto proto_or =
+  util::StatusOr<ListValue> proto =
       JsonStringToProtoList(R"(["hello", "world", 42, true])");
-  ASSERT_THAT(proto_or.status(), IsOk());
-  google::protobuf::ListValue proto = proto_or.ValueOrDie();
+  ASSERT_THAT(proto, IsOk());
 
-  ASSERT_THAT(ProtoListToJsonString(proto),
+  ASSERT_THAT(ProtoListToJsonString(*proto),
               IsOkAndHolds(R"(["hello","world",42,true])"));
 }
 
 TEST(JsonUtil, ParseInvalidStructTokenNotOk) {
-  auto proto_or = JsonStringToProtoStruct(R"({"some_key":false)");
-  ASSERT_FALSE(proto_or.ok());
+  util::StatusOr<Struct> proto =
+      JsonStringToProtoStruct(R"({"some_key":false)");
+  ASSERT_FALSE(proto.ok());
 }
 
 TEST(JsonUtil, ParseInvalidListTokenNotOk) {
-  auto proto_or = JsonStringToProtoStruct(R"(["one", )");
-  ASSERT_FALSE(proto_or.ok());
+  util::StatusOr<Struct> proto = JsonStringToProtoStruct(R"(["one", )");
+  ASSERT_FALSE(proto.ok());
 }
 
 TEST(JsonUtil, parseRecursiveJsonStringFails) {
@@ -85,34 +88,33 @@ TEST(JsonUtil, parseRecursiveJsonStringFails) {
   for (int i = 0; i < 10000; i++) {
     recursive_json.append("}");
   }
-  auto proto_or = JsonStringToProtoStruct(recursive_json);
-  EXPECT_FALSE(proto_or.ok());
+  util::StatusOr<Struct> proto = JsonStringToProtoStruct(recursive_json);
+  EXPECT_FALSE(proto.ok());
 }
 
 TEST(JsonUtil, ParseStructWithoutQuotesOk) {
   // TODO(b/360366279) Make parsing stricter that this is not allowed.
-  auto proto_or = JsonStringToProtoStruct(R"({some_key:false})");
-  ASSERT_THAT(proto_or.status(), IsOk());
-  google::protobuf::Struct proto = proto_or.ValueOrDie();
-  ASSERT_THAT(ProtoStructToJsonString(proto),
+  util::StatusOr<Struct> proto = JsonStringToProtoStruct(R"({some_key:false})");
+  ASSERT_THAT(proto, IsOk());
+  ASSERT_THAT(ProtoStructToJsonString(*proto),
               IsOkAndHolds(R"({"some_key":false})"));
 }
 
 TEST(JsonUtil, ParseListWithoutQuotesNotOk) {
-  auto proto_or = JsonStringToProtoList(R"([one,two])");
-  EXPECT_FALSE(proto_or.ok());
+  util::StatusOr<ListValue> proto = JsonStringToProtoList(R"([one,two])");
+  EXPECT_FALSE(proto.ok());
 }
 
 TEST(JsonUtil, ParseStructWithCommentNotOk) {
-  auto proto_or =
+  util::StatusOr<Struct> proto =
       JsonStringToProtoStruct(R"({"some_key":false /* comment */})");
-  EXPECT_FALSE(proto_or.ok());
+  EXPECT_FALSE(proto.ok());
 }
 
 TEST(JsonUtil, ParseListWithCommentNotOk) {
-  auto proto_or =
+  util::StatusOr<ListValue> proto =
       JsonStringToProtoList(R"(["hello", "world" /* comment */])");
-  EXPECT_FALSE(proto_or.ok());
+  EXPECT_FALSE(proto.ok());
 }
 
 }  // namespace jwt_internal

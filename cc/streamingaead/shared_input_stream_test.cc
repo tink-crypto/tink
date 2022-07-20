@@ -16,11 +16,15 @@
 
 #include "tink/streamingaead/shared_input_stream.h"
 
+#include <algorithm>
 #include <sstream>
+#include <string>
+#include <utility>
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "absl/memory/memory.h"
+#include "absl/status/status.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/string_view.h"
 #include "tink/input_stream.h"
@@ -58,19 +62,20 @@ std::unique_ptr<InputStream> GetInputStream(absl::string_view contents) {
 util::Status ReadFromStream(InputStream* input_stream, int count,
                             std::string* output) {
   if (input_stream == nullptr || output == nullptr || count < 0) {
-    return util::Status(util::error::INTERNAL, "Illegal read from a stream");
+    return util::Status(absl::StatusCode::kInternal,
+                        "Illegal read from a stream");
   }
   const void* buffer;
   output->clear();
   int bytes_to_read = count;
   while (bytes_to_read > 0) {
     auto next_result = input_stream->Next(&buffer);
-    if (next_result.status().error_code() == util::error::OUT_OF_RANGE) {
+    if (next_result.status().code() == absl::StatusCode::kOutOfRange) {
       // End of stream.
-      return util::Status::OK;
+      return util::OkStatus();
     }
     if (!next_result.ok()) return next_result.status();
-    auto read_bytes = next_result.ValueOrDie();
+    auto read_bytes = next_result.value();
     auto used_bytes = std::min(read_bytes, bytes_to_read);
     if (used_bytes > 0) {
       output->append(
@@ -79,7 +84,7 @@ util::Status ReadFromStream(InputStream* input_stream, int count,
       if (bytes_to_read == 0) input_stream->BackUp(read_bytes - used_bytes);
     }
   }
-  return util::Status::OK;
+  return util::OkStatus();
 }
 
 TEST(SharedInputStreamTest, BasicOperations) {
@@ -154,8 +159,8 @@ TEST(SharedInputStreamTest, SingleBackup) {
         int pos = shared_stream->Position();
         auto next_result = shared_stream->Next(&buf);
         if (read_size < input_size) {
-          EXPECT_THAT(next_result.status(), IsOk());
-          auto next_size = next_result.ValueOrDie();
+          EXPECT_THAT(next_result, IsOk());
+          auto next_size = next_result.value();
           EXPECT_EQ(pos + next_size, shared_stream->Position());
           shared_stream->BackUp(next_size);
           EXPECT_EQ(pos, shared_stream->Position());
@@ -163,7 +168,7 @@ TEST(SharedInputStreamTest, SingleBackup) {
           EXPECT_EQ(pos, shared_stream->Position());
         } else {
           EXPECT_THAT(next_result.status(),
-                      StatusIs(util::error::OUT_OF_RANGE));
+                      StatusIs(absl::StatusCode::kOutOfRange));
         }
 
         // Read the rest of the input.
@@ -201,8 +206,8 @@ TEST(SharedInputStreamTest, MultipleBackups) {
 
     const void* buffer;
     auto next_result = shared_stream->Next(&buffer);
-    EXPECT_THAT(next_result.status(), IsOk());
-    auto next_size = next_result.ValueOrDie();
+    EXPECT_THAT(next_result, IsOk());
+    auto next_size = next_result.value();
     EXPECT_EQ(contents.substr(0, next_size),
               std::string(static_cast<const char*>(buffer), next_size));
 
@@ -218,8 +223,8 @@ TEST(SharedInputStreamTest, MultipleBackups) {
 
     // Call Next(), it should return exactly the backed up bytes.
     next_result = shared_stream->Next(&buffer);
-    EXPECT_THAT(next_result.status(), IsOk());
-    EXPECT_EQ(total_backup_size, next_result.ValueOrDie());
+    EXPECT_THAT(next_result, IsOk());
+    EXPECT_EQ(total_backup_size, next_result.value());
     EXPECT_EQ(next_size, shared_stream->Position());
     EXPECT_EQ(buffered_stream->Position(), shared_stream->Position());
     EXPECT_EQ(contents.substr(next_size - total_backup_size, total_backup_size),

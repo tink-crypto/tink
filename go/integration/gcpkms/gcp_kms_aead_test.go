@@ -14,7 +14,7 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-package gcpkms
+package gcpkms_test
 
 import (
 	"bytes"
@@ -27,6 +27,7 @@ import (
 	// context is used to cancel outstanding requests
 	"github.com/google/tink/go/aead"
 	"github.com/google/tink/go/core/registry"
+	"github.com/google/tink/go/integration/gcpkms"
 	"github.com/google/tink/go/keyset"
 	"github.com/google/tink/go/subtle/random"
 	"github.com/google/tink/go/tink"
@@ -37,7 +38,7 @@ const (
 )
 
 var (
-	credFile = "tink_base/testdata/credential.json"
+	credFile = "tink_go/testdata/gcp/credential.json"
 )
 
 func init() {
@@ -54,7 +55,7 @@ func setupKMS(t *testing.T) {
 		t.Skip("TEST_SRCDIR not set")
 	}
 
-	g, err := NewClientWithCredentials(keyURI, filepath.Join(srcDir, credFile))
+	g, err := gcpkms.NewClientWithCredentials(keyURI, filepath.Join(srcDir, credFile))
 	if err != nil {
 		t.Errorf("error setting up gcp client: %v", err)
 	}
@@ -81,8 +82,7 @@ func basicAEADTest(t *testing.T, a tink.AEAD) error {
 	return nil
 }
 
-// TODO(b/154273145): re-enable this.
-func testBasicAead(t *testing.T) {
+func TestBasicAead(t *testing.T) {
 	setupKMS(t)
 	dek := aead.AES128CTRHMACSHA256KeyTemplate()
 	kh, err := keyset.NewHandle(aead.KMSEnvelopeAEADKeyTemplate(keyURI, dek))

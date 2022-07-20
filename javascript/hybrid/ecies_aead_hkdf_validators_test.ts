@@ -31,7 +31,7 @@ describe('ecies aead hkdf validators test', function() {
     try {
       EciesAeadHkdfValidators.validateParams(invalidParams);
       fail('An exception should be thrown.');
-    } catch (e) {
+    } catch (e: any) {
       expect(e.toString()).toBe(ExceptionText.missingKemParams());
     }
   });
@@ -43,7 +43,7 @@ describe('ecies aead hkdf validators test', function() {
     try {
       EciesAeadHkdfValidators.validateParams(invalidParams);
       fail('An exception should be thrown.');
-    } catch (e) {
+    } catch (e: any) {
       expect(e.toString()).toBe(ExceptionText.unknownHashType());
     }
   });
@@ -56,7 +56,7 @@ describe('ecies aead hkdf validators test', function() {
     try {
       EciesAeadHkdfValidators.validateParams(invalidParams);
       fail('An exception should be thrown.');
-    } catch (e) {
+    } catch (e: any) {
       expect(e.toString()).toBe(ExceptionText.unknownCurveType());
     }
   });
@@ -67,7 +67,7 @@ describe('ecies aead hkdf validators test', function() {
     try {
       EciesAeadHkdfValidators.validateParams(invalidParams);
       fail('An exception should be thrown.');
-    } catch (e) {
+    } catch (e: any) {
       expect(e.toString()).toBe(ExceptionText.missingDemParams());
     }
   });
@@ -79,7 +79,7 @@ describe('ecies aead hkdf validators test', function() {
     try {
       EciesAeadHkdfValidators.validateParams(invalidParams);
       fail('An exception should be thrown.');
-    } catch (e) {
+    } catch (e: any) {
       expect(e.toString()).toBe(ExceptionText.missingAeadTemplate());
     }
   });
@@ -94,7 +94,7 @@ describe('ecies aead hkdf validators test', function() {
        try {
          EciesAeadHkdfValidators.validateParams(invalidParams);
          fail('An exception should be thrown.');
-       } catch (e) {
+       } catch (e: any) {
          expect(e.toString())
              .toBe(ExceptionText.unsupportedKeyTemplate(unsupportedTypeUrl));
        }
@@ -107,7 +107,7 @@ describe('ecies aead hkdf validators test', function() {
     try {
       EciesAeadHkdfValidators.validateParams(invalidParams);
       fail('An exception should be thrown.');
-    } catch (e) {
+    } catch (e: any) {
       expect(e.toString()).toBe(ExceptionText.unknownPointFormat());
     }
   });
@@ -147,7 +147,7 @@ describe('ecies aead hkdf validators test', function() {
     try {
       EciesAeadHkdfValidators.validateKeyFormat(invalidKeyFormat);
       fail('An exception should be thrown.');
-    } catch (e) {
+    } catch (e: any) {
       expect(e.toString()).toBe(ExceptionText.missingFormatParams());
     }
   });
@@ -162,7 +162,7 @@ describe('ecies aead hkdf validators test', function() {
     try {
       EciesAeadHkdfValidators.validateKeyFormat(invalidKeyFormat);
       fail('An exception should be thrown.');
-    } catch (e) {
+    } catch (e: any) {
       expect(e.toString()).toBe(ExceptionText.missingDemParams());
     }
     invalidKeyFormat.getParams()?.setDemParams(createDemParams());
@@ -173,7 +173,7 @@ describe('ecies aead hkdf validators test', function() {
     try {
       EciesAeadHkdfValidators.validateKeyFormat(invalidKeyFormat);
       fail('An exception should be thrown.');
-    } catch (e) {
+    } catch (e: any) {
       expect(e.toString()).toBe(ExceptionText.unknownHashType());
     }
   });
@@ -184,7 +184,7 @@ describe('ecies aead hkdf validators test', function() {
     try {
       EciesAeadHkdfValidators.validatePublicKey(invalidPublicKey, 0);
       fail('An exception should be thrown.');
-    } catch (e) {
+    } catch (e: any) {
       expect(e.toString()).toBe(ExceptionText.missingKeyParams());
     }
   });
@@ -197,7 +197,7 @@ describe('ecies aead hkdf validators test', function() {
     try {
       EciesAeadHkdfValidators.validatePublicKey(invalidPublicKey, 0);
       fail('An exception should be thrown.');
-    } catch (e) {
+    } catch (e: any) {
       expect(e.toString()).toBe(ExceptionText.missingXY());
     }
 
@@ -206,7 +206,7 @@ describe('ecies aead hkdf validators test', function() {
     try {
       EciesAeadHkdfValidators.validatePublicKey(invalidPublicKey, 0);
       fail('An exception should be thrown.');
-    } catch (e) {
+    } catch (e: any) {
       expect(e.toString()).toBe(ExceptionText.missingXY());
     }
 
@@ -216,7 +216,7 @@ describe('ecies aead hkdf validators test', function() {
     try {
       EciesAeadHkdfValidators.validatePublicKey(invalidPublicKey, 0);
       fail('An exception should be thrown.');
-    } catch (e) {
+    } catch (e: any) {
       expect(e.toString()).toBe(ExceptionText.missingXY());
     }
   });
@@ -230,7 +230,7 @@ describe('ecies aead hkdf validators test', function() {
     try {
       EciesAeadHkdfValidators.validatePublicKey(invalidPublicKey, 0);
       fail('An exception should be thrown.');
-    } catch (e) {
+    } catch (e: any) {
       expect(e.toString()).toBe(ExceptionText.missingDemParams());
     }
     invalidPublicKey.getParams()?.setDemParams(createDemParams());
@@ -241,7 +241,7 @@ describe('ecies aead hkdf validators test', function() {
     try {
       EciesAeadHkdfValidators.validatePublicKey(invalidPublicKey, 0);
       fail('An exception should be thrown.');
-    } catch (e) {
+    } catch (e: any) {
       expect(e.toString()).toBe(ExceptionText.unknownHashType());
     }
   });
@@ -253,7 +253,7 @@ describe('ecies aead hkdf validators test', function() {
       EciesAeadHkdfValidators.validatePublicKey(
           invalidPublicKey, managerVersion);
       fail('An exception should be thrown.');
-    } catch (e) {
+    } catch (e: any) {
       expect(e.toString())
           .toBe(ExceptionText.versionOutOfBounds(managerVersion));
     }
@@ -264,7 +264,7 @@ describe('ecies aead hkdf validators test', function() {
     try {
       EciesAeadHkdfValidators.validatePrivateKey(invalidPrivateKey, 0, 0);
       fail('An exception should be thrown.');
-    } catch (e) {
+    } catch (e: any) {
       expect(e.toString()).toBe(ExceptionText.missingPublicKey());
     }
   });
@@ -275,7 +275,7 @@ describe('ecies aead hkdf validators test', function() {
     try {
       EciesAeadHkdfValidators.validatePrivateKey(invalidPrivateKey, 0, 0);
       fail('An exception should be thrown.');
-    } catch (e) {
+    } catch (e: any) {
       expect(e.toString()).toBe(ExceptionText.missingKeyParams());
     }
   });
@@ -292,7 +292,7 @@ describe('ecies aead hkdf validators test', function() {
       EciesAeadHkdfValidators.validatePrivateKey(
           invalidPrivateKey, managerVersion, managerVersion);
       fail('An exception should be thrown.');
-    } catch (e) {
+    } catch (e: any) {
       expect(e.toString())
           .toBe(ExceptionText.versionOutOfBounds(managerVersion));
     }
@@ -401,7 +401,8 @@ async function createPrivateKey(
       new PbEciesAeadHkdfPublicKey().setVersion(0).setParams(createParams(
           opt_curveType, opt_hashType, opt_keyTemplate, opt_pointFormat));
   const keyPair = await EllipticCurves.generateKeyPair('ECDH', curveName);
-  const jsonPublicKey = await EllipticCurves.exportCryptoKey(keyPair.publicKey);
+  const jsonPublicKey =
+      await EllipticCurves.exportCryptoKey(keyPair.publicKey!);
   publicKeyProto.setX(Bytes.fromBase64(
       assertExists(jsonPublicKey['x']), /* opt_webSafe = */ true));
   publicKeyProto.setY(Bytes.fromBase64(
@@ -412,7 +413,7 @@ async function createPrivateKey(
       new PbEciesAeadHkdfPrivateKey().setVersion(0).setPublicKey(
           publicKeyProto);
   const jsonPrivateKey =
-      await EllipticCurves.exportCryptoKey(keyPair.privateKey);
+      await EllipticCurves.exportCryptoKey(keyPair.privateKey!);
   privateKeyProto.setKeyValue(Bytes.fromBase64(
       assertExists(jsonPrivateKey['d']), /* opt_webSafe = */ true));
 

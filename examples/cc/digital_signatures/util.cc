@@ -16,17 +16,19 @@
 
 #include "digital_signatures/util.h"
 
-#include <iostream>
 #include <fstream>
+#include <iostream>
+#include <string>
+#include <utility>
 
 #include "tink/binary_keyset_reader.h"
 #include "tink/binary_keyset_writer.h"
 #include "tink/cleartext_keyset_handle.h"
+#include "tink/config.h"
+#include "tink/config/tink_config.h"
+#include "tink/keyset_handle.h"
 #include "tink/keyset_reader.h"
 #include "tink/keyset_writer.h"
-#include "tink/config.h"
-#include "tink/keyset_handle.h"
-#include "tink/config/tink_config.h"
 #include "tink/util/status.h"
 
 using crypto::tink::BinaryKeysetReader;
@@ -45,10 +47,10 @@ std::unique_ptr<KeysetReader> Util::GetBinaryKeysetReader(
   auto keyset_reader_result = BinaryKeysetReader::New(std::move(keyset_stream));
   if (!keyset_reader_result.ok()) {
     std::clog << "Creation of the BinaryKeysetReader failed: "
-              << keyset_reader_result.status().error_message() << std::endl;
+              << keyset_reader_result.status().message() << std::endl;
     exit(1);
   }
-  return std::move(keyset_reader_result.ValueOrDie());
+  return std::move(keyset_reader_result.value());
 }
 
 // static
@@ -59,10 +61,10 @@ std::unique_ptr<KeysetWriter> Util::GetBinaryKeysetWriter(
   auto keyset_writer_result = BinaryKeysetWriter::New(std::move(keyset_stream));
   if (!keyset_writer_result.ok()) {
     std::clog << "Creation of the BinaryKeysetWriter failed: "
-              << keyset_writer_result.status().error_message() << std::endl;
+              << keyset_writer_result.status().message() << std::endl;
     exit(1);
   }
-  return std::move(keyset_writer_result.ValueOrDie());
+  return std::move(keyset_writer_result.value());
 }
 
 // static
@@ -72,10 +74,10 @@ std::unique_ptr<KeysetHandle> Util::ReadKeyset(const std::string& filename) {
       CleartextKeysetHandle::Read(std::move(keyset_reader));
   if (!keyset_handle_result.ok()) {
     std::clog << "Reading the keyset failed: "
-              << keyset_handle_result.status().error_message() << std::endl;
+              << keyset_handle_result.status().message() << std::endl;
     exit(1);
   }
-  return std::move(keyset_handle_result.ValueOrDie());
+  return std::move(keyset_handle_result.value());
 }
 
 // static
@@ -85,8 +87,7 @@ void Util::WriteKeyset(const std::unique_ptr<KeysetHandle>& keyset_handle,
   auto status = CleartextKeysetHandle::Write(keyset_writer.get(),
                                              *keyset_handle);
   if (!status.ok()) {
-    std::clog << "Writing the keyset failed: "
-              << status.error_message() << std::endl;
+    std::clog << "Writing the keyset failed: " << status.message() << std::endl;
     exit(1);
   }
 }
@@ -95,8 +96,8 @@ void Util::WriteKeyset(const std::unique_ptr<KeysetHandle>& keyset_handle,
 void Util::InitTink() {
   auto status = TinkConfig::Register();
   if (!status.ok()) {
-    std::clog << "Initialization of Tink failed: "
-              << status.error_message() << std::endl;
+    std::clog << "Initialization of Tink failed: " << status.message()
+              << std::endl;
     exit(1);
   }
 }

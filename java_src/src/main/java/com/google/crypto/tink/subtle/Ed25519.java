@@ -1613,4 +1613,6 @@ final class Ed25519 {
     }
     return true;
   }
+
+  private Ed25519() {}
 }

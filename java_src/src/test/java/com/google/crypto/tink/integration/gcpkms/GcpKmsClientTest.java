@@ -21,7 +21,9 @@ import static org.junit.Assert.assertThrows;
 
 import com.google.crypto.tink.KmsClient;
 import com.google.crypto.tink.KmsClients;
+import com.google.crypto.tink.KmsClientsTestUtil;
 import java.util.Optional;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -29,7 +31,13 @@ import org.junit.runners.JUnit4;
 /** Tests for GcpKmsClient. */
 @RunWith(JUnit4.class)
 public final class GcpKmsClientTest {
-  private static final String CREDENTIAL_FILE_PATH = "../tink_base/testdata/credential.json";
+  private static final String CREDENTIAL_FILE_PATH =
+      "testdata/gcp/credential.json";
+
+  @Before
+  public void setUp() {
+    KmsClientsTestUtil.reset();
+  }
 
   @Test
   public void register() throws Exception {

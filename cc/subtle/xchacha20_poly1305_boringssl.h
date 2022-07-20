@@ -18,11 +18,12 @@
 #define TINK_SUBTLE_XCHACHA20_POLY1305_BORINGSSL_H_
 
 #include <memory>
+#include <string>
 #include <utility>
 
 #include "absl/strings/string_view.h"
-#include "openssl/base.h"
 #include "tink/aead.h"
+#include "tink/aead/internal/ssl_aead.h"
 #include "tink/internal/fips_utils.h"
 #include "tink/util/secret_data.h"
 #include "tink/util/status.h"
@@ -43,25 +44,21 @@ class XChacha20Poly1305BoringSsl : public Aead {
 
   crypto::tink::util::StatusOr<std::string> Encrypt(
       absl::string_view plaintext,
-      absl::string_view additional_data) const override;
+      absl::string_view associated_data) const override;
 
   crypto::tink::util::StatusOr<std::string> Decrypt(
       absl::string_view ciphertext,
-      absl::string_view additional_data) const override;
+      absl::string_view associated_data) const override;
 
   static constexpr crypto::tink::internal::FipsCompatibility kFipsStatus =
       crypto::tink::internal::FipsCompatibility::kNotFips;
 
  private:
-  // The following constants are in bytes.
-  static constexpr int kNonceSize = 24;
-  static constexpr int kTagSize = 16;
+  explicit XChacha20Poly1305BoringSsl(
+      std::unique_ptr<internal::SslOneShotAead> aead)
+      : aead_(std::move(aead)) {}
 
-  XChacha20Poly1305BoringSsl(util::SecretData key, const EVP_AEAD* aead)
-      : key_(std::move(key)), aead_(aead) {}
-
-  const util::SecretData key_;
-  const EVP_AEAD* const aead_;
+  const std::unique_ptr<internal::SslOneShotAead> aead_;
 };
 
 }  // namespace subtle

@@ -17,7 +17,9 @@
 #ifndef TINK_AEAD_AEAD_FACTORY_H_
 #define TINK_AEAD_AEAD_FACTORY_H_
 
-#include "absl/base/macros.h"
+#include <memory>
+
+#include "absl/base/attributes.h"
 #include "tink/aead.h"
 #include "tink/key_manager.h"
 #include "tink/keyset_handle.h"

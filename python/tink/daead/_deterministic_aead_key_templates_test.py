@@ -1,4 +1,4 @@
-# Copyright 2019 Google LLC.
+# Copyright 2019 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,32 +14,23 @@
 
 """Tests for tink.python.tink.deterministic_aead_key_templates."""
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-
 from absl.testing import absltest
 from absl.testing import parameterized
 from tink.proto import aes_siv_pb2
 from tink.proto import tink_pb2
 from tink import daead
-from tink.testing import helper
 
 
 class DeterministicAeadKeyTemplatesTest(parameterized.TestCase):
 
-  @parameterized.parameters([
-      ('AES256_SIV', daead.deterministic_aead_key_templates.AES256_SIV),
-  ])
-  def test_template(self, template_name, template):
-    self.assertEqual(template,
-                     helper.template_from_testdata(template_name, 'daead'))
-
   def test_create_aes_siv_key_template(self):
     # Intentionally using 'weird' or invalid values for parameters,
     # to test that the function correctly puts them in the resulting template.
-    template = (daead.deterministic_aead_key_templates
-                .create_aes_siv_key_template(key_size=42))
+    template = None
+    with self.assertWarns(DeprecationWarning):
+      template = (
+          daead.deterministic_aead_key_templates.create_aes_siv_key_template(
+              key_size=42))
     self.assertEqual('type.googleapis.com/google.crypto.tink.AesSivKey',
                      template.type_url)
     self.assertEqual(tink_pb2.TINK, template.output_prefix_type)

@@ -44,12 +44,10 @@ describe('registry test', function() {
      function() {
        class DummyPrimitiveWrapper1Alternative implements
            PrimitiveWrapper<DummyPrimitive1> {
-         /** @override */
          wrap(): DummyPrimitive1 {
            throw new Error();
          }
 
-         /** @override */
          getPrimitiveType() {
            return DummyPrimitive1;
          }
@@ -60,7 +58,7 @@ describe('registry test', function() {
          Registry.registerPrimitiveWrapper(
              new DummyPrimitiveWrapper1Alternative());
          fail('An exception should be thrown.');
-       } catch (e) {
+       } catch (e: any) {
          expect(e.toString())
              .toBe(
                  'SecurityException: primitive wrapper for type ' +
@@ -99,7 +97,7 @@ describe('registry test', function() {
     try {
       Registry.registerKeyManager(new DummyKeyManager1(keyType));
       Registry.registerKeyManager(new DummyKeyManager2(keyType));
-    } catch (e) {
+    } catch (e: any) {
       expect(e.toString())
           .toBe(ExceptionText.keyManagerOverwrittingAttempt(keyType));
       return;
@@ -123,7 +121,7 @@ describe('registry test', function() {
        Registry.registerKeyManager(keyManager1, false);
        try {
          await Registry.newKeyData(keyTemplate);
-       } catch (e) {
+       } catch (e: any) {
          expect(e.toString()).toBe(ExceptionText.newKeyForbidden(keyType));
          return;
        }
@@ -144,14 +142,14 @@ describe('registry test', function() {
        try {
          Registry.registerKeyManager(keyManager1);
          fail('An exception should be thrown.');
-       } catch (e) {
+       } catch (e: any) {
          expect(e.toString())
              .toBe(ExceptionText.prohibitedChangeToLessRestricted(
                  keyManager1.getKeyType()));
        }
        try {
          await Registry.newKeyData(keyTemplate);
-       } catch (e) {
+       } catch (e: any) {
          expect(e.toString()).toBe(ExceptionText.newKeyForbidden(keyType));
          return;
        }
@@ -187,7 +185,7 @@ describe('registry test', function() {
 
     try {
       Registry.getKeyManager(keyType);
-    } catch (e) {
+    } catch (e: any) {
       expect(e.toString()).toBe(ExceptionText.notRegisteredKeyType(keyType));
       return;
     }
@@ -204,7 +202,7 @@ describe('registry test', function() {
     Registry.registerKeyManager(keyManager1);
     try {
       await Registry.newKeyData(keyTemplate);
-    } catch (e) {
+    } catch (e: any) {
       expect(e.toString())
           .toBe(ExceptionText.notRegisteredKeyType(differentKeyType));
       return;
@@ -220,7 +218,7 @@ describe('registry test', function() {
     Registry.registerKeyManager(keyManager1, false);
     try {
       await Registry.newKeyData(keyTemplate);
-    } catch (e) {
+    } catch (e: any) {
       expect(e.toString())
           .toBe(ExceptionText.newKeyForbidden(keyManager1.getKeyType()));
       return;
@@ -271,17 +269,17 @@ describe('registry test', function() {
     const keyData = await Registry.newKeyData(keyTemplate);
 
     // Checks that correct AES CTR HMAC AEAD key was returned.
-    const keyFormat =
-        PbAesCtrHmacAeadKeyFormat.deserializeBinary(keyTemplate.getValue());
-    const key = PbAesCtrHmacAeadKey.deserializeBinary(keyData.getValue());
+    const keyFormat = PbAesCtrHmacAeadKeyFormat.deserializeBinary(
+        keyTemplate.getValue_asU8());
+    const key = PbAesCtrHmacAeadKey.deserializeBinary(keyData.getValue_asU8());
     // Check AES CTR key.
     expect(keyFormat.getAesCtrKeyFormat()?.getKeySize())
-        .toBe(key.getAesCtrKey()?.getKeyValue().length);
+        .toBe(key.getAesCtrKey()?.getKeyValue_asU8().length);
     expect(keyFormat.getAesCtrKeyFormat()?.getParams())
         .toEqual(key.getAesCtrKey()?.getParams());
     // Check HMAC key.
     expect(keyFormat.getHmacKeyFormat()?.getKeySize())
-        .toBe(key.getHmacKey()?.getKeyValue().length);
+        .toBe(key.getHmacKey()?.getKeyValue_asU8().length);
     expect(keyFormat.getHmacKeyFormat()?.getParams())
         .toEqual(key.getHmacKey()?.getParams());
   });
@@ -295,7 +293,7 @@ describe('registry test', function() {
     try {
       await Registry.newKey(keyTemplate);
       fail('An exception should be thrown.');
-    } catch (e) {
+    } catch (e: any) {
       expect(e.toString())
           .toBe(ExceptionText.notRegisteredKeyType(notRegisteredKeyType));
     }
@@ -309,7 +307,7 @@ describe('registry test', function() {
     try {
       await Registry.newKey(keyTemplate);
       fail('An exception should be thrown.');
-    } catch (e) {
+    } catch (e: any) {
       expect(e.toString())
           .toBe(ExceptionText.newKeyForbidden(keyManager.getKeyType()));
     }
@@ -352,16 +350,16 @@ describe('registry test', function() {
         await Registry.newKey(keyTemplate), PbAesCtrHmacAeadKey);
 
     // Checks that correct AES CTR HMAC AEAD key was returned.
-    const keyFormat =
-        PbAesCtrHmacAeadKeyFormat.deserializeBinary(keyTemplate.getValue());
+    const keyFormat = PbAesCtrHmacAeadKeyFormat.deserializeBinary(
+        keyTemplate.getValue_asU8());
     // Check AES CTR key.
     expect(keyFormat.getAesCtrKeyFormat()?.getKeySize())
-        .toBe(key.getAesCtrKey()?.getKeyValue().length);
+        .toBe(key.getAesCtrKey()?.getKeyValue_asU8().length);
     expect(keyFormat.getAesCtrKeyFormat()?.getParams())
         .toEqual(key.getAesCtrKey()?.getParams());
     // Check HMAC key.
     expect(keyFormat.getHmacKeyFormat()?.getKeySize())
-        .toBe(key.getHmacKey()?.getKeyValue().length);
+        .toBe(key.getHmacKey()?.getKeyValue_asU8().length);
     expect(keyFormat.getHmacKeyFormat()?.getParams())
         .toEqual(key.getHmacKey()?.getParams());
   });
@@ -375,7 +373,7 @@ describe('registry test', function() {
 
     try {
       await Registry.getPrimitive(Aead, keyData, anotherType);
-    } catch (e) {
+    } catch (e: any) {
       expect(e.toString())
           .toBe(ExceptionText.keyTypesAreNotMatching(keyDataType, anotherType));
       return;
@@ -388,7 +386,7 @@ describe('registry test', function() {
     try {
       await Registry.getPrimitive(Aead, new PbHmacParams());
       fail('An exception should be thrown.');
-    } catch (e) {
+    } catch (e: any) {
       expect(e.toString()).toBe(ExceptionText.keyTypeNotDefined());
     }
   });
@@ -399,7 +397,7 @@ describe('registry test', function() {
 
     try {
       await Registry.getPrimitive(Aead, keyData);
-    } catch (e) {
+    } catch (e: any) {
       expect(e.toString())
           .toBe(ExceptionText.notRegisteredKeyType(keyDataType));
       return;
@@ -423,7 +421,7 @@ describe('registry test', function() {
     Registry.registerKeyManager(manager);
     const keyTemplate = createAesCtrHmacAeadTestKeyTemplate();
     const keyData = await Registry.newKeyData(keyTemplate);
-    const key = PbAesCtrHmacAeadKey.deserializeBinary(keyData.getValue());
+    const key = PbAesCtrHmacAeadKey.deserializeBinary(keyData.getValue_asU8());
 
     const primitive = await Registry.getPrimitive(
         manager.getPrimitiveType(), key, keyData.getTypeUrl());
@@ -435,11 +433,11 @@ describe('registry test', function() {
     Registry.registerKeyManager(manager);
     const keyTemplate = createAesCtrHmacAeadTestKeyTemplate();
     const keyData = await Registry.newKeyData(keyTemplate);
-    const key = PbAesCtrHmacAeadKey.deserializeBinary(keyData.getValue());
+    const key = PbAesCtrHmacAeadKey.deserializeBinary(keyData.getValue_asU8());
 
     try {
       await Registry.getPrimitive(Mac, key, keyData.getTypeUrl());
-    } catch (e) {
+    } catch (e: any) {
       expect(e.toString().includes(ExceptionText.getPrimitiveBadPrimitive()))
           .toBe(true);
       return;
@@ -454,7 +452,7 @@ describe('registry test', function() {
       try {
         Registry.getPublicKeyData(notPrivateTypeUrl, new Uint8Array(8));
         fail('An exception should be thrown.');
-      } catch (e) {
+      } catch (e: any) {
         expect(e.toString())
             .toBe(ExceptionText.notPrivateKeyFactory(notPrivateTypeUrl));
       }
@@ -466,7 +464,7 @@ describe('registry test', function() {
       try {
         Registry.getPublicKeyData(typeUrl, new Uint8Array(10));
         fail('An exception should be thrown.');
-      } catch (e) {
+      } catch (e: any) {
         expect(e.toString()).toBe(ExceptionText.couldNotParse(typeUrl));
       }
     });
@@ -476,7 +474,7 @@ describe('registry test', function() {
       const privateKeyData = await Registry.newKeyData(
           HybridKeyTemplates.eciesP256HkdfHmacSha256Aes128Gcm());
       const privateKey = PbEciesAeadHkdfPrivateKey.deserializeBinary(
-          privateKeyData.getValue());
+          privateKeyData.getValue_asU8());
 
       const publicKeyData = Registry.getPublicKeyData(
           privateKeyData.getTypeUrl(), privateKeyData.getValue_asU8());
@@ -605,7 +603,6 @@ class DummyKeyFactory implements KeyManager.KeyFactory {
       private readonly newKeyMethodResult = new Uint8Array(10)) {}
 
   /**
-   * @override
    */
   newKey(keyFormat: PbMessage|Uint8Array) {
     const key = new PbAesCtrKey().setKeyValue(this.newKeyMethodResult);
@@ -613,7 +610,6 @@ class DummyKeyFactory implements KeyManager.KeyFactory {
   }
 
   /**
-   * @override
    */
   newKeyData(serializedKeyFormat: Uint8Array) {
     const keyData =
@@ -636,19 +632,16 @@ abstract class DummyPrimitive2 {
 
 // Primitive implementations for testing purposes.
 class DummyPrimitive1Impl1 extends DummyPrimitive1 {
-  /** @override */
   operation1() {
     return 1;
   }
 }
 class DummyPrimitive1Impl2 extends DummyPrimitive1 {
-  /** @override */
   operation1() {
     return 2;
   }
 }
 class DummyPrimitive2Impl extends DummyPrimitive2 {
-  /** @override */
   operation2() {
     return 'dummy';
   }
@@ -667,33 +660,27 @@ class DummyKeyManager1 implements KeyManager.KeyManager<DummyPrimitive1> {
     this.KEY_FACTORY = new DummyKeyFactory(keyType);
   }
 
-  /** @override */
   async getPrimitive(
       primitiveType: Constructor<DummyKeyManager1>, key: PbKeyData|PbMessage) {
     return this.primitive;
   }
 
-  /** @override */
   doesSupport(keyType: string) {
     return keyType === this.getKeyType();
   }
 
-  /** @override */
   getKeyType() {
     return this.keyType;
   }
 
-  /** @override */
   getPrimitiveType(): Constructor<DummyPrimitive1> {
     return this.primitiveType;
   }
 
-  /** @override */
   getVersion(): number {
     throw new SecurityException('Not implemented, only for testing purposes.');
   }
 
-  /** @override */
   getKeyFactory() {
     return this.KEY_FACTORY;
   }
@@ -710,33 +697,27 @@ class DummyKeyManager2 implements KeyManager.KeyManager<DummyPrimitive2> {
     this.KEY_FACTORY = new DummyKeyFactory(keyType);
   }
 
-  /** @override */
   async getPrimitive(
       primitiveType: Constructor<DummyKeyManager2>, key: PbKeyData|PbMessage) {
     return this.primitive;
   }
 
-  /** @override */
   doesSupport(keyType: string) {
     return keyType === this.getKeyType();
   }
 
-  /** @override */
   getKeyType() {
     return this.keyType;
   }
 
-  /** @override */
   getPrimitiveType() {
     return this.primitiveType;
   }
 
-  /** @override */
   getVersion(): number {
     throw new SecurityException('Not implemented, only for testing purposes.');
   }
 
-  /** @override */
   getKeyFactory() {
     return this.KEY_FACTORY;
   }
@@ -751,34 +732,28 @@ class DummyKeyManagerForNewKeyTests implements KeyManager.KeyManager<string> {
     this.KEY_FACTORY = new DummyKeyFactory(keyType, opt_newKeyMethodResult);
   }
 
-  /** @override */
   async getPrimitive(
       primitiveType: Constructor<DummyKeyManagerForNewKeyTests>,
       key: PbKeyData|PbMessage): Promise<string> {
     throw new SecurityException('Not implemented, function is not needed.');
   }
 
-  /** @override */
   doesSupport(keyType: string) {
     return keyType === this.getKeyType();
   }
 
-  /** @override */
   getKeyType() {
     return this.keyType;
   }
 
-  /** @override */
   getPrimitiveType(): never {
     throw new SecurityException('Not implemented, function is not needed.');
   }
 
-  /** @override */
   getVersion(): never {
     throw new SecurityException('Not implemented, function is not needed.');
   }
 
-  /** @override */
   getKeyFactory() {
     return this.KEY_FACTORY;
   }
@@ -792,12 +767,10 @@ class DummyPrimitiveWrapper1 implements PrimitiveWrapper<DummyPrimitive1> {
       private readonly primitive: DummyPrimitive1,
       private readonly primitiveType: Constructor<DummyPrimitive1>) {}
 
-  /** @override */
   wrap(primitiveSet: PrimitiveSet.PrimitiveSet<DummyPrimitive1>) {
     return this.primitive;
   }
 
-  /** @override */
   getPrimitiveType() {
     return this.primitiveType;
   }
@@ -809,12 +782,10 @@ class DummyPrimitiveWrapper2 implements PrimitiveWrapper<DummyPrimitive2> {
       private readonly primitive: DummyPrimitive2,
       private readonly primitiveType: Constructor<DummyPrimitive2>) {}
 
-  /** @override */
   wrap(primitiveSet: PrimitiveSet.PrimitiveSet<DummyPrimitive2>) {
     return this.primitive;
   }
 
-  /** @override */
   getPrimitiveType() {
     return this.primitiveType;
   }

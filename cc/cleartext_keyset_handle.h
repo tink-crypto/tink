@@ -32,11 +32,11 @@ namespace tink {
 // loading cleartext keysets, thus its usage should be restricted.
 class CleartextKeysetHandle {
  public:
-  // Creates a KeysetHandle with a keyset obtained via |reader|.
+  // Creates a KeysetHandle with a keyset obtained via `reader`.
   static crypto::tink::util::StatusOr<std::unique_ptr<KeysetHandle>> Read(
       std::unique_ptr<KeysetReader> reader);
 
-  // Writes the keyset in the given |keyset_handle| to the |writer| which must
+  // Writes the keyset in the given `keyset_handle` to the `writer` which must
   // be non-null.
   static crypto::tink::util::Status Write(KeysetWriter* writer,
                                           const KeysetHandle& keyset_handle);

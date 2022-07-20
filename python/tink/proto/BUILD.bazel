@@ -206,6 +206,14 @@ py_proto_library(
 )
 
 py_proto_library(
+    name = "hpke_py_pb2",
+    srcs = [
+        "hpke.proto",
+    ],
+    visibility = ["//visibility:public"],
+)
+
+py_proto_library(
     name = "xchacha20_poly1305_py_pb2",
     srcs = [
         "xchacha20_poly1305.proto",

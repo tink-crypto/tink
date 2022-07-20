@@ -16,6 +16,8 @@
  **************************************************************************
  */
 
+#ifdef __cplusplus
+
 #import "objc/TINKKeyTemplate.h"
 
 #include "proto/tink.pb.h"
@@ -27,3 +29,5 @@
 - (google::crypto::tink::KeyTemplate *)ccKeyTemplate;
 
 @end
+
+#endif  // __cplusplus

@@ -16,9 +16,12 @@
 
 #include "tink/signature/ed25519_sign_key_manager.h"
 
+#include <string>
+
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "absl/container/flat_hash_set.h"
+#include "absl/status/status.h"
 #include "tink/public_key_sign.h"
 #include "tink/registry.h"
 #include "tink/signature/ed25519_verify_key_manager.h"
@@ -63,8 +66,8 @@ TEST(Ed25519SignKeyManagerTest, ValidateKeyFormat) {
 TEST(Ed25519SignKeyManagerTest, CreateKey) {
   StatusOr<Ed25519PrivateKey> key_or =
       Ed25519SignKeyManager().CreateKey(Ed25519KeyFormat());
-  ASSERT_THAT(key_or.status(), IsOk());
-  Ed25519PrivateKey key = key_or.ValueOrDie();
+  ASSERT_THAT(key_or, IsOk());
+  Ed25519PrivateKey key = key_or.value();
 
   EXPECT_THAT(key.version(), Eq(0));
 
@@ -77,8 +80,8 @@ TEST(Ed25519SignKeyManagerTest, CreateKey) {
 TEST(Ed25519SignKeyManagerTest, CreateKeyValid) {
   StatusOr<Ed25519PrivateKey> key_or =
       Ed25519SignKeyManager().CreateKey(Ed25519KeyFormat());
-  ASSERT_THAT(key_or.status(), IsOk());
-  EXPECT_THAT(Ed25519SignKeyManager().ValidateKey(key_or.ValueOrDie()), IsOk());
+  ASSERT_THAT(key_or, IsOk());
+  EXPECT_THAT(Ed25519SignKeyManager().ValidateKey(key_or.value()), IsOk());
 }
 
 TEST(Ed25519SignKeyManagerTest, CreateKeyAlwaysNew) {
@@ -87,8 +90,8 @@ TEST(Ed25519SignKeyManagerTest, CreateKeyAlwaysNew) {
   for (int i = 0; i < num_tests; ++i) {
     StatusOr<Ed25519PrivateKey> key_or =
         Ed25519SignKeyManager().CreateKey(Ed25519KeyFormat());
-    ASSERT_THAT(key_or.status(), IsOk());
-    keys.insert(key_or.ValueOrDie().key_value());
+    ASSERT_THAT(key_or, IsOk());
+    keys.insert(key_or.value().key_value());
   }
   EXPECT_THAT(keys, SizeIs(num_tests));
 }
@@ -96,55 +99,55 @@ TEST(Ed25519SignKeyManagerTest, CreateKeyAlwaysNew) {
 TEST(Ed25519SignKeyManagerTest, GetPublicKey) {
   StatusOr<Ed25519PrivateKey> key_or =
       Ed25519SignKeyManager().CreateKey(Ed25519KeyFormat());
-  ASSERT_THAT(key_or.status(), IsOk());
+  ASSERT_THAT(key_or, IsOk());
   StatusOr<Ed25519PublicKey> public_key_or =
-      Ed25519SignKeyManager().GetPublicKey(key_or.ValueOrDie());
-  ASSERT_THAT(public_key_or.status(), IsOk());
-  EXPECT_THAT(public_key_or.ValueOrDie().version(),
-              Eq(key_or.ValueOrDie().public_key().version()));
-  EXPECT_THAT(public_key_or.ValueOrDie().key_value(),
-              Eq(key_or.ValueOrDie().public_key().key_value()));
+      Ed25519SignKeyManager().GetPublicKey(key_or.value());
+  ASSERT_THAT(public_key_or, IsOk());
+  EXPECT_THAT(public_key_or.value().version(),
+              Eq(key_or.value().public_key().version()));
+  EXPECT_THAT(public_key_or.value().key_value(),
+              Eq(key_or.value().public_key().key_value()));
 }
 
 TEST(Ed25519SignKeyManagerTest, Create) {
   StatusOr<Ed25519PrivateKey> key_or =
       Ed25519SignKeyManager().CreateKey(Ed25519KeyFormat());
-  ASSERT_THAT(key_or.status(), IsOk());
-  Ed25519PrivateKey key = key_or.ValueOrDie();
+  ASSERT_THAT(key_or, IsOk());
+  Ed25519PrivateKey key = key_or.value();
 
   auto signer_or =
       Ed25519SignKeyManager().GetPrimitive<PublicKeySign>(key);
-  ASSERT_THAT(signer_or.status(), IsOk());
+  ASSERT_THAT(signer_or, IsOk());
 
   auto direct_verifier_or =
       subtle::Ed25519VerifyBoringSsl::New(key.public_key().key_value());
 
-  ASSERT_THAT(direct_verifier_or.status(), IsOk());
+  ASSERT_THAT(direct_verifier_or, IsOk());
 
   std::string message = "Some message";
-  EXPECT_THAT(direct_verifier_or.ValueOrDie()->Verify(
-                  signer_or.ValueOrDie()->Sign(message).ValueOrDie(), message),
+  EXPECT_THAT(direct_verifier_or.value()->Verify(
+                  signer_or.value()->Sign(message).value(), message),
               IsOk());
 }
 
 TEST(Ed25519SignKeyManagerTest, CreateDifferentKey) {
   StatusOr<Ed25519PrivateKey> key_or =
       Ed25519SignKeyManager().CreateKey(Ed25519KeyFormat());
-  ASSERT_THAT(key_or.status(), IsOk());
-  Ed25519PrivateKey key = key_or.ValueOrDie();
+  ASSERT_THAT(key_or, IsOk());
+  Ed25519PrivateKey key = key_or.value();
 
   auto signer_or =
       Ed25519SignKeyManager().GetPrimitive<PublicKeySign>(key);
-  ASSERT_THAT(signer_or.status(), IsOk());
+  ASSERT_THAT(signer_or, IsOk());
 
   auto direct_verifier_or =
       subtle::Ed25519VerifyBoringSsl::New("01234567890123456789012345678901");
 
-  ASSERT_THAT(direct_verifier_or.status(), IsOk());
+  ASSERT_THAT(direct_verifier_or, IsOk());
 
   std::string message = "Some message";
-  EXPECT_THAT(direct_verifier_or.ValueOrDie()->Verify(
-                  signer_or.ValueOrDie()->Sign(message).ValueOrDie(), message),
+  EXPECT_THAT(direct_verifier_or.value()->Verify(
+                  signer_or.value()->Sign(message).value(), message),
               Not(IsOk()));
 }
 
@@ -156,8 +159,8 @@ TEST(Ed25519SignKeyManagerTest, DeriveKey) {
 
   StatusOr<Ed25519PrivateKey> key_or =
       Ed25519SignKeyManager().DeriveKey(format, &input_stream);
-  ASSERT_THAT(key_or.status(), IsOk());
-  EXPECT_THAT(key_or.ValueOrDie().key_value(),
+  ASSERT_THAT(key_or, IsOk());
+  EXPECT_THAT(key_or.value().key_value(),
               Eq("0123456789abcdef0123456789abcdef"));
 }
 
@@ -168,17 +171,17 @@ TEST(Ed25519SignKeyManagerTest, DeriveKeySignVerify) {
       absl::make_unique<std::stringstream>("0123456789abcdef0123456789abcdef")};
 
   Ed25519PrivateKey key =
-      Ed25519SignKeyManager().DeriveKey(format, &input_stream).ValueOrDie();
+      Ed25519SignKeyManager().DeriveKey(format, &input_stream).value();
   auto signer_or = Ed25519SignKeyManager().GetPrimitive<PublicKeySign>(key);
-  ASSERT_THAT(signer_or.status(), IsOk());
+  ASSERT_THAT(signer_or, IsOk());
 
   std::string message = "Some message";
-  auto signature = signer_or.ValueOrDie()->Sign(message).ValueOrDie();
+  auto signature = signer_or.value()->Sign(message).value();
 
   auto verifier_or =
       Ed25519VerifyKeyManager().GetPrimitive<PublicKeyVerify>(key.public_key());
 
-  EXPECT_THAT(verifier_or.ValueOrDie()->Verify(signature, message), IsOk());
+  EXPECT_THAT(verifier_or.value()->Verify(signature, message), IsOk());
 }
 
 TEST(Ed25519SignKeyManagerTest, DeriveKeyNotEnoughRandomness) {
@@ -188,7 +191,7 @@ TEST(Ed25519SignKeyManagerTest, DeriveKeyNotEnoughRandomness) {
       absl::make_unique<std::stringstream>("tooshort")};
 
   ASSERT_THAT(Ed25519SignKeyManager().DeriveKey(format, &input_stream).status(),
-              test::StatusIs(util::error::INVALID_ARGUMENT));
+              test::StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
 }  // namespace

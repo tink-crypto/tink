@@ -1,4 +1,4 @@
-// Copyright 2021 Google LLC.
+// Copyright 2021 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,6 +16,9 @@
 
 #include "tink/jwt/internal/jwt_public_key_sign_impl.h"
 
+#include <string>
+
+#include "absl/status/status.h"
 #include "absl/strings/escaping.h"
 #include "absl/strings/str_split.h"
 #include "tink/jwt/internal/jwt_format.h"
@@ -28,25 +31,36 @@ util::StatusOr<std::string> JwtPublicKeySignImpl::SignAndEncodeWithKid(
     const RawJwt& token, absl::optional<absl::string_view> kid) const {
   absl::optional<std::string> type_header;
   if (token.HasTypeHeader()) {
-    util::StatusOr<std::string> type_or = token.GetTypeHeader();
-    if (!type_or.ok()) {
-      return type_or.status();
+    util::StatusOr<std::string> type = token.GetTypeHeader();
+    if (!type.ok()) {
+      return type.status();
     }
-    type_header = type_or.ValueOrDie();
+    type_header = *type;
   }
-  std::string encoded_header = CreateHeader(algorithm_, type_header, kid);
-  util::StatusOr<std::string> payload_or = token.GetJsonPayload();
-  if (!payload_or.ok()) {
-    return payload_or.status();
+  if (custom_kid_.has_value()) {
+    if (kid.has_value()) {
+      return util::Status(absl::StatusCode::kInvalidArgument,
+                          "TINK keys are not allowed to have a kid value set.");
+    }
+    kid = *custom_kid_;
   }
-  std::string encoded_payload = EncodePayload(payload_or.ValueOrDie());
+  util::StatusOr<std::string> encoded_header =
+      CreateHeader(algorithm_, type_header, kid);
+  if (!encoded_header.ok()) {
+    return encoded_header.status();
+  }
+  util::StatusOr<std::string> payload = token.GetJsonPayload();
+  if (!payload.ok()) {
+    return payload.status();
+  }
+  std::string encoded_payload = EncodePayload(*payload);
   std::string unsigned_token =
-      absl::StrCat(encoded_header, ".", encoded_payload);
-  util::StatusOr<std::string> tag_or = sign_->Sign(unsigned_token);
-  if (!tag_or.ok()) {
-    return tag_or.status();
+      absl::StrCat(*encoded_header, ".", encoded_payload);
+  util::StatusOr<std::string> tag = sign_->Sign(unsigned_token);
+  if (!tag.ok()) {
+    return tag.status();
   }
-  std::string encoded_tag = EncodeSignature(tag_or.ValueOrDie());
+  std::string encoded_tag = EncodeSignature(*tag);
   return absl::StrCat(unsigned_token, ".", encoded_tag);
 }
 

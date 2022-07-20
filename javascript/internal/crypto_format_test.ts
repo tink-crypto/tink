@@ -25,7 +25,7 @@ describe('crypto format test', function() {
 
     try {
       CryptoFormat.getOutputPrefix(key);
-    } catch (e) {
+    } catch (e: any) {
       expect(e.toString())
           .toBe('SecurityException: Unsupported key prefix type.');
       return;
@@ -43,7 +43,7 @@ describe('crypto format test', function() {
       key.setKeyId(invalidKeyIds[i]);
       try {
         CryptoFormat.getOutputPrefix(key);
-      } catch (e) {
+      } catch (e: any) {
         expect(e.toString())
             .toBe(
                 'InvalidArgumentsException: Number has to be unsigned 32-bit integer.');

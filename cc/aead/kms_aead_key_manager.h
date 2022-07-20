@@ -16,18 +16,25 @@
 #ifndef TINK_AEAD_KMS_AEAD_KEY_MANAGER_H_
 #define TINK_AEAD_KMS_AEAD_KEY_MANAGER_H_
 
+#include <stdint.h>
+
+#include <memory>
 #include <string>
 
 #include "absl/memory/memory.h"
+#include "absl/status/status.h"
 #include "absl/strings/str_cat.h"
 #include "tink/aead.h"
 #include "tink/core/key_type_manager.h"
+#include "tink/core/template_util.h"
+#include "tink/kms_client.h"
 #include "tink/kms_clients.h"
 #include "tink/util/constants.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "tink/util/validation.h"
 #include "proto/kms_aead.pb.h"
+#include "proto/tink.pb.h"
 
 namespace crypto {
 namespace tink {
@@ -43,7 +50,7 @@ class KmsAeadKeyManager
       const auto& key_uri = kms_aead_key.params().key_uri();
       auto kms_client_result = KmsClients::Get(key_uri);
       if (!kms_client_result.ok()) return kms_client_result.status();
-      return kms_client_result.ValueOrDie()->GetAead(key_uri);
+      return kms_client_result.value()->GetAead(key_uri);
     }
   };
 
@@ -69,8 +76,8 @@ class KmsAeadKeyManager
   crypto::tink::util::Status ValidateKeyFormat(
       const google::crypto::tink::KmsAeadKeyFormat& key_format) const override {
     if (key_format.key_uri().empty()) {
-      return crypto::tink::util::Status(
-          crypto::tink::util::error::INVALID_ARGUMENT, "Missing key_uri.");
+      return crypto::tink::util::Status(absl::StatusCode::kInvalidArgument,
+                                        "Missing key_uri.");
     }
     return util::OkStatus();
   }

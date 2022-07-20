@@ -13,16 +13,12 @@
 # limitations under the License.
 """Python primitive set wrapper for the JwtMac primitive."""
 
-from __future__ import absolute_import
-from __future__ import division
-# Placeholder for import for type annotations
-from __future__ import print_function
-
-from typing import Optional, Text, Type
+from typing import Type
 
 from tink.proto import tink_pb2
 from tink import core
 from tink.jwt import _jwt_error
+from tink.jwt import _jwt_format
 from tink.jwt import _jwt_mac
 from tink.jwt import _jwt_validator
 from tink.jwt import _raw_jwt
@@ -35,7 +31,7 @@ class _WrappedJwtMac(_jwt_mac.JwtMac):
   def __init__(self, pset: core.PrimitiveSet):
     self._primitive_set = pset
 
-  def compute_mac_and_encode(self, raw_jwt: _raw_jwt.RawJwt) -> Text:
+  def compute_mac_and_encode(self, raw_jwt: _raw_jwt.RawJwt) -> str:
     """Computes a MAC and encodes the token.
 
     Args:
@@ -47,12 +43,11 @@ class _WrappedJwtMac(_jwt_mac.JwtMac):
       tink.TinkError if the operation fails.
     """
     primary = self._primitive_set.primary()
-    if primary.output_prefix_type != tink_pb2.RAW:
-      raise core.TinkError('unexpected output prefix type')
-    return primary.primitive.compute_mac_and_encode(raw_jwt)
+    kid = _jwt_format.get_kid(primary.key_id, primary.output_prefix_type)
+    return primary.primitive.compute_mac_and_encode_with_kid(raw_jwt, kid)
 
   def verify_mac_and_decode(
-      self, compact: Text,
+      self, compact: str,
       validator: _jwt_validator.JwtValidator) -> _verified_jwt.VerifiedJwt:
     """Verifies, validates and decodes a MACed compact JWT token.
 
@@ -66,30 +61,41 @@ class _WrappedJwtMac(_jwt_mac.JwtMac):
       tink.TinkError if the operation fails.
     """
     interesting_error = None
-    for entry in self._primitive_set.raw_primitives():
-      try:
-        return entry.primitive.verify_mac_and_decode(compact, validator)
-      except core.TinkError as e:
-        if isinstance(e, _jwt_error.JwtInvalidError):
-          interesting_error = e
-        pass
+    for entries in self._primitive_set.all():
+      for entry in entries:
+        try:
+          kid = _jwt_format.get_kid(entry.key_id, entry.output_prefix_type)
+          return entry.primitive.verify_mac_and_decode_with_kid(
+              compact, validator, kid)
+        except core.TinkError as e:
+          if isinstance(e, _jwt_error.JwtInvalidError):
+            interesting_error = e
+          pass
     if interesting_error:
       raise interesting_error
     raise core.TinkError('invalid MAC')
 
 
-class _Wrapper(core.PrimitiveWrapper[_jwt_mac.JwtMac, _jwt_mac.JwtMac]):
+def _validate_primitive_set(pset: core.PrimitiveSet):
+  for entries in pset.all():
+    for entry in entries:
+      if (entry.output_prefix_type != tink_pb2.RAW and
+          entry.output_prefix_type != tink_pb2.TINK):
+        raise core.TinkError('unsupported OutputPrefixType')
+
+
+class _Wrapper(core.PrimitiveWrapper[_jwt_mac.JwtMacInternal, _jwt_mac.JwtMac]):
   """A wrapper for JwtMac."""
 
-  def wrap(self, pset: core.PrimitiveSet) -> Optional[_jwt_mac.JwtMac]:
-
+  def wrap(self, pset: core.PrimitiveSet) -> _jwt_mac.JwtMac:
+    _validate_primitive_set(pset)
     return _WrappedJwtMac(pset)
 
   def primitive_class(self) -> Type[_jwt_mac.JwtMac]:
     return _jwt_mac.JwtMac
 
-  def input_primitive_class(self) -> Type[_jwt_mac.JwtMac]:
-    return _jwt_mac.JwtMac
+  def input_primitive_class(self) -> Type[_jwt_mac.JwtMacInternal]:
+    return _jwt_mac.JwtMacInternal
 
 
 def register():

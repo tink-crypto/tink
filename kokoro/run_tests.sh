@@ -21,7 +21,6 @@ set -e
 # Display commands to stderr.
 set -x
 
-./kokoro/copy_credentials.sh
 
 readonly PLATFORM="$(uname | tr '[:upper:]' '[:lower:]')"
 
@@ -36,12 +35,27 @@ run_linux_tests() {
   shift 1
   local manual_targets=("$@")
 
+  # This is needed to handle recent Chrome distributions on macOS which have
+  # paths with spaces.
+  #
+  # Context:
+  # https://github.com/bazelbuild/bazel/issues/4327#issuecomment-627422865
+  local -a BAZEL_FLAGS
+  if [[ "${PLATFORM}" == 'darwin' && "${workspace_dir}" == 'javascript' ]]; then
+    BAZEL_FLAGS+=( --experimental_inprocess_symlink_creation )
+  fi
+  readonly BAZEL_FLAGS
+
   local -a TEST_FLAGS=( --strategy=TestRunner=standalone --test_output=all )
+  if [[ "${PLATFORM}" == 'darwin' ]]; then
+    TEST_FLAGS+=( --jvmopt="-Djava.net.preferIPv6Addresses=true" )
+  fi
   readonly TEST_FLAGS
   (
     cd "${workspace_dir}"
-    time bazel build -- ... || fail_with_debug_output
-    time bazel test "${TEST_FLAGS[@]}" -- ... || fail_with_debug_output
+    time bazel build "${BAZEL_FLAGS[@]}" -- ... || fail_with_debug_output
+    time bazel test "${BAZEL_FLAGS[@]}" "${TEST_FLAGS[@]}" -- ... \
+      || fail_with_debug_output
     if (( ${#manual_targets[@]} > 0 )); then
       time bazel test "${TEST_FLAGS[@]}"  -- "${manual_targets[@]}" \
         || fail_with_debug_output
@@ -50,13 +64,18 @@ run_linux_tests() {
 }
 
 run_all_linux_tests() {
-  run_linux_tests "cc"
-  run_linux_tests "java_src"
-  run_linux_tests "go"
-  run_linux_tests "python"
+  # TODO(b/228529710): Update using an easier to maintain approach to test
+  # parity.
+  if [[ "${KOKORO_JOB_NAME:-}" =~ ^tink/github ]]; then
+    run_linux_tests "cc"
+    run_linux_tests "java_src"
+    run_linux_tests "go"
+    run_linux_tests "python"
+    run_linux_tests "tools"
+    run_linux_tests "apps"
+  fi
+
   run_linux_tests "javascript"
-  run_linux_tests "tools"
-  run_linux_tests "apps"
   run_linux_tests "examples/cc"
 
   local -a MANUAL_EXAMPLE_JAVA_TARGETS
@@ -89,10 +108,6 @@ run_all_linux_tests() {
 }
 
 run_macos_tests() {
-  # Default values for iOS SDK and Xcode. Can be overriden by another script.
-  : "${IOS_SDK_VERSION:=13.2}"
-  : "${XCODE_VERSION:=11.3}"
-
   local -a BAZEL_FLAGS=(
     --compilation_mode=dbg --dynamic_mode=off --cpu=ios_x86_64
     --ios_cpu=x86_64 --experimental_enable_objc_cc_deps
@@ -125,7 +140,8 @@ install_tink_via_pip() {
 
   # Check if we can build Tink python package.
   pip3 install "${PIP_FLAGS[@]}" --upgrade pip
-  pip3 install "${PIP_FLAGS[@]}" --upgrade setuptools
+  # TODO(b/219813176): Remove once Kokoro environment is compatible.
+  pip3 install "${PIP_FLAGS[@]}" --upgrade 'setuptools==60.9.0'
   pip3 install "${PIP_FLAGS[@]}" ./python
 
   # Install dependencies for the examples/python tests
@@ -133,7 +149,7 @@ install_tink_via_pip() {
 }
 
 install_temp_protoc() {
-  local protoc_version='3.14.0'
+  local protoc_version='3.19.3'
   local protoc_platform
   case "${PLATFORM}" in
     'linux')
@@ -152,42 +168,79 @@ install_temp_protoc() {
   local -r protoc_tmpdir=$(mktemp -dt tink-protoc.XXXXXX)
   (
     cd "${protoc_tmpdir}"
-    curl -OL "${protoc_url}"
+    curl -OLsS "${protoc_url}"
     unzip ${protoc_zip} bin/protoc
   )
   export PATH="${protoc_tmpdir}/bin:${PATH}"
 }
 
+#######################################
+# Test Maven packages.
+# Globals:
+#   PLATFORM
+#   KOKORO_JOB_NAME
+# Arguments:
+#   None
+#######################################
+test_maven_packages() {
+  # Only test in the Ubuntu environment.
+  if [[ "${PLATFORM}" != "linux" ]]; then
+    return
+  fi
+
+  local -a maven_script_flags
+  if [[ "${KOKORO_JOB_NAME:-}" != "tink/github/gcp_ubuntu/continuous" ]]; then
+    # Unless running the GitHub continuous job, deploy and test Maven packages
+    # locally.
+    #
+    # Otherwise, snapshots will be published to the Maven Central repository.
+    maven_script_flags+=( -l )
+  fi
+  readonly maven_script_flags
+
+  ./maven/publish_snapshot.sh "${maven_script_flags[@]}"
+  ./maven/test_snapshot.sh "${maven_script_flags[@]}"
+}
+
 main() {
   # Initialization for Kokoro environments.
   if [[ -n "${KOKORO_ROOT}" ]]; then
+    cd "${KOKORO_ARTIFACTS_DIR}"/git*/tink*
+
     use_bazel.sh $(cat .bazelversion)
 
     # Install protoc into a temporary directory.
     install_temp_protoc
 
     if [[ "${PLATFORM}" == 'linux' ]]; then
-      # Install a more recent Python.
-      : "${PYTHON_VERSION:=3.7.1}"
-      (
-        # Update the Python version list.
-        cd /home/kbuilder/.pyenv/plugins/python-build/../..
-        git pull
-        # TODO(b/187879867): Remove once pyenv issue is resolved.
-        git checkout 783870759566a77d09b426e0305bc0993a522765
-      )
-      eval "$(pyenv init -)"
-      pyenv install -v "${PYTHON_VERSION}"
-      pyenv global "${PYTHON_VERSION}"
+      # Install a more recent Python. Sourcing required to update callers
+      # environment.
+      source ./kokoro/testutils/install_python3.sh
     fi
 
     if [[ "${PLATFORM}" == 'darwin' ]]; then
+      # Default values for iOS SDK and Xcode. Can be overriden by another script.
+      : "${IOS_SDK_VERSION:=13.2}"
+      : "${XCODE_VERSION:=11.3}"
+
       export DEVELOPER_DIR="/Applications/Xcode_${XCODE_VERSION}.app/Contents/Developer"
       export ANDROID_HOME="/Users/kbuilder/Library/Android/sdk"
+      export COURSIER_OPTS="-Djava.net.preferIPv6Addresses=true"
 
       # TODO(b/155225382): Avoid modifying the sytem Python installation.
       pip3 install --user protobuf
     fi
+
+    ./kokoro/testutils/copy_credentials.sh "examples/java_src/testdata"
+    ./kokoro/testutils/copy_credentials.sh "examples/python/testdata"
+    ./kokoro/testutils/copy_credentials.sh "go/testdata"
+    ./kokoro/testutils/copy_credentials.sh "java_src/testdata"
+    ./kokoro/testutils/copy_credentials.sh "python/testdata"
+    ./kokoro/testutils/copy_credentials.sh "tools/testdata"
+
+    ./kokoro/testutils/update_android_sdk.sh
+    # Sourcing required to update callers environment.
+    source ./kokoro/testutils/install_go.sh
   fi
 
   # Verify required environment variables.
@@ -209,8 +262,7 @@ main() {
   echo "using java binary: $(which java)"
   java -version
 
-  echo "using go: $(which go)"
-  go version
+  echo "Using go binary from $(which go): $(go version)"
 
   echo "using python: $(which python)"
   python --version
@@ -232,6 +284,8 @@ main() {
     # run_macos_tests
     echo "*** ObjC tests not enabled yet."
   fi
+
+  test_maven_packages
 }
 
 main "$@"

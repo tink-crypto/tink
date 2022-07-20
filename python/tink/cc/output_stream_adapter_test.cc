@@ -18,10 +18,13 @@
 
 #include <algorithm>
 #include <sstream>
+#include <string>
+#include <utility>
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "absl/memory/memory.h"
+#include "absl/status/status.h"
 #include "tink/output_stream.h"
 #include "tink/subtle/random.h"
 #include "tink/util/ostream_output_stream.h"
@@ -45,7 +48,7 @@ TEST(OutputStreamAdapterTest, Basic) {
   auto adapter = GetOutputStreamAdapter(-1, &buffer_ref);
   auto write_result = adapter->Write("something");
   ASSERT_TRUE(write_result.status().ok());
-  EXPECT_EQ(write_result.ValueOrDie(), 9);
+  EXPECT_EQ(write_result.value(), 9);
   EXPECT_TRUE(adapter->Close().ok());
   EXPECT_EQ(buffer_ref->str(), "something");
 }
@@ -55,13 +58,13 @@ TEST(OutputStreamAdapterTest, MultipleWrite) {
   auto adapter = GetOutputStreamAdapter(-1, &buffer_ref);
   auto write_result = adapter->Write("something");
   ASSERT_TRUE(write_result.status().ok());
-  EXPECT_EQ(write_result.ValueOrDie(), 9);
+  EXPECT_EQ(write_result.value(), 9);
   write_result = adapter->Write("123");
   ASSERT_TRUE(write_result.status().ok());
-  EXPECT_EQ(write_result.ValueOrDie(), 3);
+  EXPECT_EQ(write_result.value(), 3);
   write_result = adapter->Write("456");
   ASSERT_TRUE(write_result.status().ok());
-  EXPECT_EQ(write_result.ValueOrDie(), 3);
+  EXPECT_EQ(write_result.value(), 3);
   EXPECT_TRUE(adapter->Close().ok());
   EXPECT_EQ(buffer_ref->str(), "something123456");
 }
@@ -71,8 +74,9 @@ TEST(OutputStreamAdapterTest, WriteAfterClose) {
   auto adapter = GetOutputStreamAdapter(-1, &buffer_ref);
   ASSERT_TRUE(adapter->Close().ok());
   auto status = adapter->Write("something").status();
-  EXPECT_EQ(status.error_code(), util::error::FAILED_PRECONDITION);
-  EXPECT_THAT(status.error_message(), testing::HasSubstr("Stream closed"));
+  EXPECT_EQ(status.code(), absl::StatusCode::kFailedPrecondition);
+  EXPECT_THAT(std::string(status.message()),
+              testing::HasSubstr("Stream closed"));
 }
 
 // In this test size of the OstreamOutputStream buffer is smaller than the
@@ -83,7 +87,7 @@ TEST(OutputStreamAdapterTest, MultipleNext) {
   std::string data = subtle::Random::GetRandomBytes(35);
   auto write_result = adapter->Write(data);
   ASSERT_TRUE(write_result.status().ok());
-  EXPECT_EQ(write_result.ValueOrDie(), 35);
+  EXPECT_EQ(write_result.value(), 35);
   EXPECT_TRUE(adapter->Close().ok());
   EXPECT_EQ(buffer_ref->str(), data);
 }

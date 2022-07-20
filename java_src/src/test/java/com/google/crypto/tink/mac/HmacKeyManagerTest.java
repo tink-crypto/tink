@@ -21,8 +21,8 @@ import static com.google.crypto.tink.testing.KeyTypeManagerTestUtil.testKeyTempl
 import static org.junit.Assert.assertThrows;
 
 import com.google.crypto.tink.KeyTemplate;
-import com.google.crypto.tink.KeyTypeManager;
 import com.google.crypto.tink.Mac;
+import com.google.crypto.tink.internal.KeyTypeManager;
 import com.google.crypto.tink.proto.HashType;
 import com.google.crypto.tink.proto.HmacKey;
 import com.google.crypto.tink.proto.HmacKeyFormat;
@@ -142,7 +142,7 @@ public class HmacKeyManagerTest {
   public void createKey_multipleTimes() throws Exception {
     HmacKeyFormat keyFormat = makeHmacKeyFormat(16, 10, HashType.SHA256);
     int numKeys = 100;
-    Set<String> keys = new TreeSet<String>();
+    Set<String> keys = new TreeSet<>();
     for (int i = 0; i < numKeys; ++i) {
       keys.add(TestUtil.hexEncode(factory.createKey(keyFormat).getKeyValue().toByteArray()));
     }

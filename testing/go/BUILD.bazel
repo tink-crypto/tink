@@ -10,8 +10,8 @@ licenses(["notice"])
 
 go_grpc_library(
     name = "testing_api_go_grpc",
-    importpath = "github.com/google/tink/proto/testing/testing_api_go_grpc",
-    deps = ["@tink_base//proto/testing:testing_api_proto"],
+    importpath = "github.com/google/tink/testing/go/proto/testing_api_go_grpc",
+    protos = ["//proto:testing_api_proto"],
 )
 
 go_library(
@@ -20,6 +20,7 @@ go_library(
         "aead_service.go",
         "daead_service.go",
         "hybrid_service.go",
+        "jwt_service.go",
         "keyset_service.go",
         "mac_service.go",
         "metadata_service.go",
@@ -30,14 +31,18 @@ go_library(
     importpath = "github.com/google/tink/testing/go/services",
     deps = [
         ":testing_api_go_grpc",
-        "@com_github_golang_protobuf//proto:go_default_library",
+        "@org_golang_google_protobuf//proto:go_default_library",
+        "@org_golang_google_protobuf//types/known/structpb:go_default_library",
+        "@org_golang_google_protobuf//types/known/timestamppb:go_default_library",
+        "@org_golang_google_protobuf//types/known/wrapperspb:go_default_library",
         "@tink_go//aead:go_default_library",
         "@tink_go//daead:go_default_library",
         "@tink_go//hybrid:go_default_library",
+        "@tink_go//jwt:go_default_library",
         "@tink_go//keyset:go_default_library",
         "@tink_go//mac:go_default_library",
         "@tink_go//prf:go_default_library",
-        "@tink_go//proto:tink_go_proto",
+        "@tink_go//proto/tink_go_proto:go_default_library",
         "@tink_go//signature:go_default_library",
         "@tink_go//streamingaead:go_default_library",
         "@tink_go//testkeyset:go_default_library",
@@ -47,14 +52,24 @@ go_library(
 go_test(
     name = "services_test",
     size = "small",
-    srcs = ["services_test.go"],
+    srcs = [
+        "jwt_service_test.go",
+        "services_test.go",
+    ],
     deps = [
         ":services",
         ":testing_api_go_grpc",
-        "@com_github_golang_protobuf//proto:go_default_library",
+        "@com_github_google_go_cmp//cmp:go_default_library",
+        "@org_golang_google_protobuf//proto:go_default_library",
+        "@org_golang_google_protobuf//testing/protocmp:go_default_library",
+        "@org_golang_google_protobuf//types/known/durationpb:go_default_library",
+        "@org_golang_google_protobuf//types/known/structpb:go_default_library",
+        "@org_golang_google_protobuf//types/known/timestamppb:go_default_library",
+        "@org_golang_google_protobuf//types/known/wrapperspb:go_default_library",
         "@tink_go//aead:go_default_library",
         "@tink_go//daead:go_default_library",
         "@tink_go//hybrid:go_default_library",
+        "@tink_go//jwt:go_default_library",
         "@tink_go//keyset:go_default_library",
         "@tink_go//mac:go_default_library",
         "@tink_go//prf:go_default_library",
@@ -71,8 +86,8 @@ go_binary(
     deps = [
         ":services",
         ":testing_api_go_grpc",
+        "@org_golang_google_grpc//:go_default_library",
         "@tink_go//core/registry:go_default_library",
         "@tink_go//testing/fakekms:go_default_library",
-        "@org_golang_google_grpc//:go_default_library",
     ],
 )

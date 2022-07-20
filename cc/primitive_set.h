@@ -17,10 +17,13 @@
 #ifndef TINK_PRIMITIVE_SET_H_
 #define TINK_PRIMITIVE_SET_H_
 
+#include <string>
 #include <unordered_map>
 #include <vector>
 
+#include "absl/container/flat_hash_map.h"
 #include "absl/memory/memory.h"
+#include "absl/status/status.h"
 #include "absl/synchronization/mutex.h"
 #include "tink/crypto_format.h"
 #include "tink/util/errors.h"
@@ -59,19 +62,20 @@ class PrimitiveSet {
         std::unique_ptr<P> primitive,
         const google::crypto::tink::KeysetInfo::KeyInfo& key_info) {
       if (key_info.status() != google::crypto::tink::KeyStatusType::ENABLED) {
-        return util::Status(crypto::tink::util::error::INVALID_ARGUMENT,
+        return util::Status(absl::StatusCode::kInvalidArgument,
                             "The key must be ENABLED.");
       }
       auto identifier_result = CryptoFormat::GetOutputPrefix(key_info);
       if (!identifier_result.ok()) return identifier_result.status();
       if (primitive == nullptr) {
-        return util::Status(crypto::tink::util::error::INVALID_ARGUMENT,
+        return util::Status(absl::StatusCode::kInvalidArgument,
                             "The primitive must be non-null.");
       }
-      std::string identifier = identifier_result.ValueOrDie();
+      std::string identifier = identifier_result.value();
       return absl::WrapUnique(new Entry(std::move(primitive), identifier,
                                         key_info.status(), key_info.key_id(),
-                                        key_info.output_prefix_type()));
+                                        key_info.output_prefix_type(),
+                                        key_info.type_url()));
     }
 
     P2& get_primitive() const { return *primitive_; }
@@ -86,27 +90,37 @@ class PrimitiveSet {
       return output_prefix_type_;
     }
 
+    absl::string_view get_key_type_url() const { return key_type_url_; }
+
    private:
     Entry(std::unique_ptr<P2> primitive, const std::string& identifier,
           google::crypto::tink::KeyStatusType status, uint32_t key_id,
-          google::crypto::tink::OutputPrefixType output_prefix_type)
+          google::crypto::tink::OutputPrefixType output_prefix_type,
+          absl::string_view key_type_url)
         : primitive_(std::move(primitive)),
           identifier_(identifier),
           status_(status),
           key_id_(key_id),
-          output_prefix_type_(output_prefix_type) {}
+          output_prefix_type_(output_prefix_type),
+          key_type_url_(key_type_url) {}
 
     std::unique_ptr<P> primitive_;
     std::string identifier_;
     google::crypto::tink::KeyStatusType status_;
     uint32_t key_id_;
     google::crypto::tink::OutputPrefixType output_prefix_type_;
+    const std::string key_type_url_;
   };
 
   typedef std::vector<std::unique_ptr<Entry<P>>> Primitives;
 
   // Constructs an empty PrimitiveSet.
-  PrimitiveSet<P>() : primary_(nullptr) {}
+  // Note: This is equivalent to PrimitiveSet<P>(/*annotations=*/{}).
+  PrimitiveSet<P>() = default;
+  // Constructs an empty PrimitiveSet with `annotations`.
+  explicit PrimitiveSet<P>(
+      const absl::flat_hash_map<std::string, std::string>& annotations)
+      : annotations_(annotations) {}
 
   // Adds 'primitive' to this set for the specified 'key'.
   crypto::tink::util::StatusOr<Entry<P>*> AddPrimitive(
@@ -116,8 +130,8 @@ class PrimitiveSet {
     if (!entry_or.ok()) return entry_or.status();
 
     absl::MutexLock lock(&primitives_mutex_);
-    std::string identifier = entry_or.ValueOrDie()->get_identifier();
-    primitives_[identifier].push_back(std::move(entry_or.ValueOrDie()));
+    std::string identifier = entry_or.value()->get_identifier();
+    primitives_[identifier].push_back(std::move(entry_or.value()));
     return primitives_[identifier].back().get();
   }
 
@@ -128,7 +142,7 @@ class PrimitiveSet {
     typename CiphertextPrefixToPrimitivesMap::iterator found =
         primitives_.find(std::string(identifier));
     if (found == primitives_.end()) {
-      return ToStatusF(crypto::tink::util::error::NOT_FOUND,
+      return ToStatusF(absl::StatusCode::kNotFound,
                        "No primitives found for identifier '%s'.", identifier);
     }
     return &(found->second);
@@ -142,22 +156,22 @@ class PrimitiveSet {
   // Sets the given 'primary' as the primary primitive of this set.
   crypto::tink::util::Status set_primary(Entry<P>* primary) {
     if (!primary) {
-      return util::Status(crypto::tink::util::error::INVALID_ARGUMENT,
+      return util::Status(absl::StatusCode::kInvalidArgument,
                           "The primary primitive must be non-null.");
     }
     if (primary->get_status() != google::crypto::tink::KeyStatusType::ENABLED) {
-      return util::Status(crypto::tink::util::error::INVALID_ARGUMENT,
+      return util::Status(absl::StatusCode::kInvalidArgument,
                           "Primary has to be enabled.");
     }
     auto entries_result = get_primitives(primary->get_identifier());
     if (!entries_result.ok()) {
-      return util::Status(crypto::tink::util::error::INVALID_ARGUMENT,
+      return util::Status(absl::StatusCode::kInvalidArgument,
                           "Primary cannot be set to an entry which is "
                           "not held by this primitive set.");
     }
 
     primary_ = primary;
-    return crypto::tink::util::Status::OK;
+    return crypto::tink::util::OkStatus();
   }
 
   // Returns the entry with the primary primitive.
@@ -175,13 +189,21 @@ class PrimitiveSet {
     return result;
   }
 
+  const absl::flat_hash_map<std::string, std::string>& get_annotations() const {
+    return annotations_;
+  }
+
  private:
   typedef std::unordered_map<std::string, Primitives>
       CiphertextPrefixToPrimitivesMap;
-  Entry<P>* primary_;  // the Entry<P> object is owned by primitives_
+  // The Entry<P> object is owned by primitives_
+  Entry<P>* primary_ = nullptr;
   mutable absl::Mutex primitives_mutex_;
   CiphertextPrefixToPrimitivesMap primitives_
       ABSL_GUARDED_BY(primitives_mutex_);
+
+  // Annotations for the set of primitives.
+  const absl::flat_hash_map<std::string, std::string> annotations_;
 };
 
 }  // namespace tink

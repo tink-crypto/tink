@@ -18,9 +18,10 @@ package com.google.crypto.tink.jwt;
 import static java.nio.charset.StandardCharsets.US_ASCII;
 
 import com.google.crypto.tink.KeyTemplate;
-import com.google.crypto.tink.KeyTypeManager;
-import com.google.crypto.tink.PrivateKeyTypeManager;
 import com.google.crypto.tink.Registry;
+import com.google.crypto.tink.internal.KeyTypeManager;
+import com.google.crypto.tink.internal.PrimitiveFactory;
+import com.google.crypto.tink.internal.PrivateKeyTypeManager;
 import com.google.crypto.tink.proto.JwtRsaSsaPssAlgorithm;
 import com.google.crypto.tink.proto.JwtRsaSsaPssKeyFormat;
 import com.google.crypto.tink.proto.JwtRsaSsaPssPrivateKey;
@@ -44,6 +45,9 @@ import java.security.interfaces.RSAPublicKey;
 import java.security.spec.RSAKeyGenParameterSpec;
 import java.security.spec.RSAPrivateCrtKeySpec;
 import java.security.spec.RSAPublicKeySpec;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -87,7 +91,7 @@ public final class JwtRsaSsaPssSignKeyManager
   }
 
   private static class JwtPublicKeySignFactory
-      extends KeyTypeManager.PrimitiveFactory<JwtPublicKeySignInternal, JwtRsaSsaPssPrivateKey> {
+      extends PrimitiveFactory<JwtPublicKeySignInternal, JwtRsaSsaPssPrivateKey> {
     public JwtPublicKeySignFactory() {
       super(JwtPublicKeySignInternal.class);
     }
@@ -102,11 +106,21 @@ public final class JwtRsaSsaPssSignKeyManager
       int saltLength = JwtRsaSsaPssVerifyKeyManager.saltLengthForPssAlgorithm(algorithm);
       final RsaSsaPssSignJce signer = new RsaSsaPssSignJce(privateKey, hash, hash, saltLength);
       final String algorithmName = algorithm.name();
+      final Optional<String> customKid =
+          keyProto.getPublicKey().hasCustomKid()
+              ? Optional.of(keyProto.getPublicKey().getCustomKid().getValue())
+              : Optional.empty();
 
       return new JwtPublicKeySignInternal() {
         @Override
         public String signAndEncodeWithKid(RawJwt rawJwt, Optional<String> kid)
             throws GeneralSecurityException {
+          if (customKid.isPresent()) {
+            if (kid.isPresent()) {
+              throw new JwtInvalidException("custom_kid can only be set for RAW keys.");
+            }
+            kid = customKid;
+          }
           String unsignedCompact = JwtFormat.createUnsignedCompact(algorithmName, kid, rawJwt);
           return JwtFormat.createSignedCompact(
               unsignedCompact, signer.sign(unsignedCompact.getBytes(US_ASCII)));
@@ -155,8 +169,8 @@ public final class JwtRsaSsaPssSignKeyManager
   }
 
   @Override
-  public KeyFactory<JwtRsaSsaPssKeyFormat, JwtRsaSsaPssPrivateKey> keyFactory() {
-    return new KeyFactory<JwtRsaSsaPssKeyFormat, JwtRsaSsaPssPrivateKey>(
+  public KeyTypeManager.KeyFactory<JwtRsaSsaPssKeyFormat, JwtRsaSsaPssPrivateKey> keyFactory() {
+    return new KeyTypeManager.KeyFactory<JwtRsaSsaPssKeyFormat, JwtRsaSsaPssPrivateKey>(
         JwtRsaSsaPssKeyFormat.class) {
       @Override
       public void validateKeyFormat(JwtRsaSsaPssKeyFormat keyFormat)
@@ -212,8 +226,76 @@ public final class JwtRsaSsaPssSignKeyManager
             .setCrt(ByteString.copyFrom(privKey.getCrtCoefficient().toByteArray()))
             .build();
       }
+
+      /**
+       * List of default templates to generate tokens with algorithms "PS256", "PS384" or "PS512".
+       * Use the template with the "_RAW" suffix if you want to generate tokens without a "kid"
+       * header.
+       */
+      @Override
+      public Map<String, KeyFactory.KeyFormat<JwtRsaSsaPssKeyFormat>> keyFormats() {
+        Map<String, KeyFactory.KeyFormat<JwtRsaSsaPssKeyFormat>> result = new HashMap<>();
+        result.put(
+            "JWT_PS256_2048_F4_RAW",
+            createKeyFormat(
+                JwtRsaSsaPssAlgorithm.PS256,
+                2048,
+                RSAKeyGenParameterSpec.F4,
+                KeyTemplate.OutputPrefixType.RAW));
+        result.put(
+            "JWT_PS256_2048_F4",
+            createKeyFormat(
+                JwtRsaSsaPssAlgorithm.PS256,
+                2048,
+                RSAKeyGenParameterSpec.F4,
+                KeyTemplate.OutputPrefixType.TINK));
+        result.put(
+            "JWT_PS256_3072_F4_RAW",
+            createKeyFormat(
+                JwtRsaSsaPssAlgorithm.PS256,
+                3072,
+                RSAKeyGenParameterSpec.F4,
+                KeyTemplate.OutputPrefixType.RAW));
+        result.put(
+            "JWT_PS256_3072_F4",
+            createKeyFormat(
+                JwtRsaSsaPssAlgorithm.PS256,
+                3072,
+                RSAKeyGenParameterSpec.F4,
+                KeyTemplate.OutputPrefixType.TINK));
+        result.put(
+            "JWT_PS384_3072_F4_RAW",
+            createKeyFormat(
+                JwtRsaSsaPssAlgorithm.PS384,
+                3072,
+                RSAKeyGenParameterSpec.F4,
+                KeyTemplate.OutputPrefixType.RAW));
+        result.put(
+            "JWT_PS384_3072_F4",
+            createKeyFormat(
+                JwtRsaSsaPssAlgorithm.PS384,
+                3072,
+                RSAKeyGenParameterSpec.F4,
+                KeyTemplate.OutputPrefixType.TINK));
+        result.put(
+            "JWT_PS512_4096_F4_RAW",
+            createKeyFormat(
+                JwtRsaSsaPssAlgorithm.PS512,
+                4096,
+                RSAKeyGenParameterSpec.F4,
+                KeyTemplate.OutputPrefixType.RAW));
+        result.put(
+            "JWT_PS512_4096_F4",
+            createKeyFormat(
+                JwtRsaSsaPssAlgorithm.PS512,
+                4096,
+                RSAKeyGenParameterSpec.F4,
+                KeyTemplate.OutputPrefixType.TINK));
+        return Collections.unmodifiableMap(result);
+      }
     };
   }
+
   /**
    * Registers the {@link RsaSsaPssSignKeyManager} and the {@link RsaSsaPssVerifyKeyManager} with
    * the registry, so that the the RsaSsaPss-Keys can be used with Tink.
@@ -222,74 +304,18 @@ public final class JwtRsaSsaPssSignKeyManager
     Registry.registerAsymmetricKeyManagers(
         new JwtRsaSsaPssSignKeyManager(), new JwtRsaSsaPssVerifyKeyManager(), newKeyAllowed);
   }
-  /**
-   * Returns a {@link KeyTemplate} that generates new instances of JWT PS256 key pairs:
-   *
-   * <ul>
-   *   <li>Hash function: SHA256.
-   *   <li>Modulus size: 2048 bit.
-   *   <li>Public exponent: 65537 (aka F4).
-   *   <li>Prefix type: {@link KeyTemplate.OutputPrefixType#RAW}.
-   * </ul>
-   */
-  public static final KeyTemplate jwtPs256_2048_F4_Template() {
-    return createKeyTemplate(JwtRsaSsaPssAlgorithm.PS256, 2048, RSAKeyGenParameterSpec.F4);
-  }
 
-  /**
-   * Returns a {@link KeyTemplate} that generates new instances of JWT PS256 key pairs:
-   *
-   * <ul>
-   *   <li>Hash function: SHA256.
-   *   <li>Modulus size: 3072 bit.
-   *   <li>Public exponent: 65537 (aka F4).
-   *   <li>Prefix type: {@link KeyTemplate.OutputPrefixType#RAW}.
-   * </ul>
-   */
-  public static final KeyTemplate jwtPs256_3072_F4_Template() {
-    return createKeyTemplate(JwtRsaSsaPssAlgorithm.PS256, 3072, RSAKeyGenParameterSpec.F4);
-  }
-  /**
-   * Returns a {@link KeyTemplate} that generates new instances of JWT PS384 key pairs:
-   *
-   * <ul>
-   *   <li>Hash function: SHA384.
-   *   <li>Modulus size: 3072 bit.
-   *   <li>Public exponent: 65537 (aka F4).
-   *   <li>Prefix type: {@link KeyTemplate.OutputPrefixType#RAW} (no prefix).
-   * </ul>
-   */
-  public static final KeyTemplate jwtPs384_3072_F4_Template() {
-    return createKeyTemplate(JwtRsaSsaPssAlgorithm.PS384, 3072, RSAKeyGenParameterSpec.F4);
-  }
-  /**
-   * Returns a {@link KeyTemplate} that generates new instances of JWT key pairs:
-   *
-   * <ul>
-   *   <li>Hash function: SHA512.
-   *   <li>Modulus size: 4096 bit.
-   *   <li>Public exponent: 65537 (aka F4).
-   *   <li>Prefix type: {@link KeyTemplate.OutputPrefixType#RAW}.
-   * </ul>
-   */
-  public static final KeyTemplate jwtPs512_4096_F4_Template() {
-    return createKeyTemplate(JwtRsaSsaPssAlgorithm.PS512, 4096, RSAKeyGenParameterSpec.F4);
-  }
-  /**
-   * Returns a {@link KeyTemplate} containing a {@link RsaSsaPssKeyFormat} with some specified
-   * parameters.
-   */
-  private static KeyTemplate createKeyTemplate(
-      JwtRsaSsaPssAlgorithm algorithm, int modulusSize, BigInteger publicExponent) {
+  private static KeyFactory.KeyFormat<JwtRsaSsaPssKeyFormat> createKeyFormat(
+      JwtRsaSsaPssAlgorithm algorithm,
+      int modulusSize,
+      BigInteger publicExponent,
+      KeyTemplate.OutputPrefixType prefixType) {
     JwtRsaSsaPssKeyFormat format =
         JwtRsaSsaPssKeyFormat.newBuilder()
             .setAlgorithm(algorithm)
             .setModulusSizeInBits(modulusSize)
             .setPublicExponent(ByteString.copyFrom(publicExponent.toByteArray()))
             .build();
-    return KeyTemplate.create(
-        new JwtRsaSsaPssSignKeyManager().getKeyType(),
-        format.toByteArray(),
-        KeyTemplate.OutputPrefixType.RAW);
+    return new KeyFactory.KeyFormat<>(format, prefixType);
   }
 }

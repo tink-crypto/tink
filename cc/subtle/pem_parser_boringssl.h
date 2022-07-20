@@ -16,7 +16,11 @@
 #ifndef TINK_SUBTLE_PEM_PARSER_BORINGSSL_H_
 #define TINK_SUBTLE_PEM_PARSER_BORINGSSL_H_
 
+#include <memory>
+#include <string>
+
 #include "absl/strings/string_view.h"
+#include "tink/internal/rsa_util.h"
 #include "tink/subtle/subtle_util_boringssl.h"
 #include "tink/util/statusor.h"
 
@@ -29,24 +33,24 @@ namespace subtle {
 class PemParser {
  public:
   // Parses a given PEM serialized RSA public key `pem_serialized_key` into a
-  // SubtleUtilBoringSSL::RsaPublicKey.
-  static util::StatusOr<std::unique_ptr<SubtleUtilBoringSSL::RsaPublicKey>>
+  // internal::RsaPublicKey.
+  static util::StatusOr<std::unique_ptr<internal::RsaPublicKey>>
   ParseRsaPublicKey(absl::string_view pem_serialized_key);
 
   // Parses a given PEM serialized RSA private key `pem_serialized_key` into a
-  // SubtleUtilBoringSSL::RsaPublicKey.
-  static util::StatusOr<std::unique_ptr<SubtleUtilBoringSSL::RsaPrivateKey>>
+  // internal::RsaPublicKey.
+  static util::StatusOr<std::unique_ptr<internal::RsaPrivateKey>>
   ParseRsaPrivateKey(absl::string_view pem_serialized_key);
 
-  // Writes a given SubtleUtilBoringSSL::RsaPublicKey `rsa_key` into a PEM
+  // Writes a given internal::RsaPublicKey `rsa_key` into a PEM
   // serialized RSA public key.
   static util::StatusOr<std::string> WriteRsaPublicKey(
-      const SubtleUtilBoringSSL::RsaPublicKey& rsa_key);
+      const internal::RsaPublicKey& rsa_public_key);
 
-  // Writes a given SubtleUtilBoringSSL::RsaPrivateKey `rsa_key` into a PEM
+  // Writes a given internal::RsaPrivateKey `rsa_key` into a PEM
   // serialized RSA private key.
   static util::StatusOr<std::string> WriteRsaPrivateKey(
-      const SubtleUtilBoringSSL::RsaPrivateKey& rsa_key);
+      const internal::RsaPrivateKey& rsa_private_key);
 
   // Parses a given PEM serialized EC public key `pem_serialized_key` into a
   // SubtleUtilBoringSSL::EcKey.

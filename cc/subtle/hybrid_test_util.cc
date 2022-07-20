@@ -16,6 +16,8 @@
 
 #include "tink/subtle/hybrid_test_util.h"
 
+#include "absl/status/status.h"
+
 namespace crypto {
 namespace tink {
 
@@ -25,12 +27,11 @@ crypto::tink::util::Status HybridEncryptThenDecrypt(
   auto ciphertext = encrypter->Encrypt(plaintext, context_info);
   if (!ciphertext.ok()) return ciphertext.status();
 
-  auto decryption =
-      decrypter->Decrypt(ciphertext.ValueOrDie(), context_info);
+  auto decryption = decrypter->Decrypt(ciphertext.value(), context_info);
   if (!decryption.ok()) return decryption.status();
 
-  if (decryption.ValueOrDie() != plaintext) {
-    return crypto::tink::util::Status(util::error::INVALID_ARGUMENT,
+  if (decryption.value() != plaintext) {
+    return crypto::tink::util::Status(absl::StatusCode::kInvalidArgument,
                                       "decryption and encryption differ");
   }
   return util::OkStatus();

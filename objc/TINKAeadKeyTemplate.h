@@ -86,6 +86,24 @@ typedef NS_ENUM(NSInteger, TINKAeadKeyTemplates) {
    *    OutputPrefixType: TINK
    */
   TINKXChaCha20Poly1305 = 7,
+
+  /**
+   * AesGcmKey with the following parameters:
+   *   Key size: 32 bytes
+   *   IV size: 12 bytes
+   *   Tag size: 16 bytes
+   *   OutputPrefixType: RAW
+   */
+  TINKAes256GcmNoPrefix = 8,
+
+  /**
+   * AesGcmKey with the following parameters:
+   *   Key size: 16 bytes
+   *   IV size: 12 bytes
+   *   Tag size: 16 bytes
+   *   OutputPrefixType: RAW
+   */
+  TINKAes128GcmNoPrefix = 9,
 };
 
 NS_ASSUME_NONNULL_BEGIN
@@ -120,8 +138,7 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @interface TINKAeadKeyTemplate : TINKKeyTemplate
 
-- (instancetype)init
-    __attribute__((unavailable("Use -initWithKeyTemplate:error: instead.")));
+- (instancetype)init __attribute__((unavailable("Use -initWithKeyTemplate:error: instead.")));
 
 /**
  * Creates a TINKAeadKeyTemplate that can be used to generate aead keysets.

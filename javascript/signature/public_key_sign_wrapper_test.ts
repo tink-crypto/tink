@@ -19,7 +19,7 @@ describe('public key sign wrapper test', function() {
     try {
       new PublicKeySignWrapper().wrap(primitiveSet);
       fail('Should throw an exception.');
-    } catch (e) {
+    } catch (e: any) {
       expect(e.toString())
           .toBe('SecurityException: Primary has to be non-null.');
     }
@@ -125,7 +125,6 @@ function createDummyPrimitiveSet(opt_withPrimary: boolean = true):
 
 /** @final */
 class DummyPublicKeySign extends PublicKeySign {
-  /** @override */
   async sign(data: Uint8Array) {
     return data;
   }

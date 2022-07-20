@@ -16,11 +16,15 @@
 #ifndef TINK_INTERNAL_KEYSET_WRAPPER_H_
 #define TINK_INTERNAL_KEYSET_WRAPPER_H_
 
+#include <string>
+
+#include "absl/container/flat_hash_map.h"
 #include "tink/util/statusor.h"
 #include "proto/tink.pb.h"
 
 namespace crypto {
 namespace tink {
+namespace internal {
 
 // A Keyset wrapper wraps a Tink Keyset into a set of primitives. This is a
 // Tink internal object, which is created from a PrimitiveWrapper.
@@ -39,11 +43,15 @@ class KeysetWrapper {
  public:
   virtual ~KeysetWrapper() {}
 
+  // Wraps a given `keyset` with annotations `annotations`.
   virtual crypto::tink::util::StatusOr<std::unique_ptr<Primitive>> Wrap(
-      const google::crypto::tink::Keyset& keyset) const = 0;
+      const google::crypto::tink::Keyset& keyset,
+      const absl::flat_hash_map<std::string, std::string>& annotations)
+      const = 0;
 };
 
+}  // namespace internal
 }  // namespace tink
 }  // namespace crypto
 
-#endif  // TINK_CORE_KEYSET_WRAPPER_H_
+#endif  // TINK_INTERNAL_KEYSET_WRAPPER_H_

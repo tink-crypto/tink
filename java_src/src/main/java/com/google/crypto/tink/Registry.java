@@ -16,6 +16,9 @@
 
 package com.google.crypto.tink;
 
+import com.google.crypto.tink.config.internal.TinkFipsUtil;
+import com.google.crypto.tink.internal.KeyTypeManager;
+import com.google.crypto.tink.internal.PrivateKeyTypeManager;
 import com.google.crypto.tink.proto.KeyData;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
@@ -27,10 +30,11 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Logger;
+import javax.annotation.Nullable;
 
 /**
  * A global container of key managers and catalogues.
@@ -75,8 +79,8 @@ import java.util.logging.Logger;
 public final class Registry {
   private static final Logger logger = Logger.getLogger(Registry.class.getName());
 
-  private static final ConcurrentMap<String, KeyManagerContainer> keyManagerMap =
-      new ConcurrentHashMap<>(); // typeUrl -> KeyManager mapping
+  private static final AtomicReference<KeyManagerRegistry> keyManagerRegistry =
+      new AtomicReference<>(new KeyManagerRegistry());
 
   private static final ConcurrentMap<String, KeyDeriverContainer> keyDeriverMap =
       new ConcurrentHashMap<>(); // typeUrl -> deriver (created out of KeyTypeManager).
@@ -92,187 +96,6 @@ public final class Registry {
 
   private static final ConcurrentMap<String, KeyTemplate> keyTemplateMap =
       new ConcurrentHashMap<>(); // name -> KeyTemplate mapping
-
-  /**
-   * A container which either is constructed from a {@link KeyTypeManager} or from a {@link
-   * KeyManager}.
-   */
-  private static interface KeyManagerContainer {
-    /**
-     * Returns the KeyManager for the given primitive or throws if the given primitive is not in
-     * supportedPrimitives.
-     */
-    <P> KeyManager<P> getKeyManager(Class<P> primitiveClass) throws GeneralSecurityException;
-
-    /** Returns some KeyManager from the given one. */
-    KeyManager<?> getUntypedKeyManager();
-
-    /**
-     * The Class object corresponding to the actual KeyTypeManager/KeyManager used to build this
-     * object.
-     */
-    Class<?> getImplementingClass();
-
-    /**
-     * The primitives supported by the underlying {@link KeyTypeManager} resp. {@link KeyManager}.
-     */
-    Set<Class<?>> supportedPrimitives();
-
-    /**
-     * The Class object corresponding to the public key manager when this key manager was registered
-     * as first argument with "registerAsymmetricKeyManagers". Null otherwise.
-     */
-    Class<?> publicKeyManagerClassOrNull();
-
-    /**
-     * Parses a key into a corresponding message lite. Only works if the key type has been
-     * registered with a KeyTypeManager, returns null otherwise.
-     *
-     * <p>Can throw exceptions if validation fails or if parsing fails.
-     */
-    MessageLite parseKey(ByteString serializedKey)
-        throws GeneralSecurityException, InvalidProtocolBufferException;
-  }
-
-  private static <P> KeyManagerContainer createContainerFor(KeyManager<P> keyManager) {
-    final KeyManager<P> localKeyManager = keyManager;
-    return new KeyManagerContainer() {
-      @Override
-      public <Q> KeyManager<Q> getKeyManager(Class<Q> primitiveClass)
-          throws GeneralSecurityException {
-        if (!localKeyManager.getPrimitiveClass().equals(primitiveClass)) {
-          throw new InternalError(
-              "This should never be called, as we always first check supportedPrimitives.");
-        }
-        @SuppressWarnings("unchecked") // We checked equality of the primitiveClass objects.
-        KeyManager<Q> result = (KeyManager<Q>) localKeyManager;
-        return result;
-      }
-
-      @Override
-      public KeyManager<?> getUntypedKeyManager() {
-        return localKeyManager;
-      }
-
-      @Override
-      public Class<?> getImplementingClass() {
-        return localKeyManager.getClass();
-      }
-
-      @Override
-      public Set<Class<?>> supportedPrimitives() {
-        return Collections.<Class<?>>singleton(localKeyManager.getPrimitiveClass());
-      }
-
-      @Override
-      public Class<?> publicKeyManagerClassOrNull() {
-        return null;
-      }
-
-      @Override
-      public MessageLite parseKey(ByteString serializedKey)
-          throws GeneralSecurityException, InvalidProtocolBufferException {
-        return null;
-      }
-    };
-  }
-
-  private static <KeyProtoT extends MessageLite> KeyManagerContainer createContainerFor(
-      KeyTypeManager<KeyProtoT> keyManager) {
-    final KeyTypeManager<KeyProtoT> localKeyManager = keyManager;
-    return new KeyManagerContainer() {
-      @Override
-      public <Q> KeyManager<Q> getKeyManager(Class<Q> primitiveClass)
-          throws GeneralSecurityException {
-        try {
-          return new KeyManagerImpl<>(localKeyManager, primitiveClass);
-        } catch (IllegalArgumentException e) {
-          throw new GeneralSecurityException("Primitive type not supported", e);
-        }
-      }
-
-      @Override
-      public KeyManager<?> getUntypedKeyManager() {
-        return new KeyManagerImpl<>(
-            localKeyManager, localKeyManager.firstSupportedPrimitiveClass());
-      }
-
-      @Override
-      public Class<?> getImplementingClass() {
-        return localKeyManager.getClass();
-      }
-
-      @Override
-      public Set<Class<?>> supportedPrimitives() {
-        return localKeyManager.supportedPrimitives();
-      }
-
-      @Override
-      public Class<?> publicKeyManagerClassOrNull() {
-        return null;
-      }
-
-      @Override
-      public MessageLite parseKey(ByteString serializedKey)
-          throws GeneralSecurityException, InvalidProtocolBufferException {
-        KeyProtoT result = localKeyManager.parseKey(serializedKey);
-        localKeyManager.validateKey(result);
-        return result;
-      }
-    };
-  }
-
-  private static <KeyProtoT extends MessageLite, PublicKeyProtoT extends MessageLite>
-      KeyManagerContainer createPrivateKeyContainerFor(
-          final PrivateKeyTypeManager<KeyProtoT, PublicKeyProtoT> privateKeyTypeManager,
-          final KeyTypeManager<PublicKeyProtoT> publicKeyTypeManager) {
-    final PrivateKeyTypeManager<KeyProtoT, PublicKeyProtoT> localPrivateKeyManager =
-        privateKeyTypeManager;
-    final KeyTypeManager<PublicKeyProtoT> localPublicKeyManager = publicKeyTypeManager;
-    return new KeyManagerContainer() {
-      @Override
-      public <Q> KeyManager<Q> getKeyManager(Class<Q> primitiveClass)
-          throws GeneralSecurityException {
-        try {
-          return new PrivateKeyManagerImpl<>(
-              localPrivateKeyManager, localPublicKeyManager, primitiveClass);
-        } catch (IllegalArgumentException e) {
-          throw new GeneralSecurityException("Primitive type not supported", e);
-        }
-      }
-
-      @Override
-      public KeyManager<?> getUntypedKeyManager() {
-        return new PrivateKeyManagerImpl<>(
-            localPrivateKeyManager,
-            localPublicKeyManager,
-            localPrivateKeyManager.firstSupportedPrimitiveClass());
-      }
-
-      @Override
-      public Class<?> getImplementingClass() {
-        return localPrivateKeyManager.getClass();
-      }
-
-      @Override
-      public Set<Class<?>> supportedPrimitives() {
-        return localPrivateKeyManager.supportedPrimitives();
-      }
-
-      @Override
-      public Class<?> publicKeyManagerClassOrNull() {
-        return localPublicKeyManager.getClass();
-      }
-
-      @Override
-      public MessageLite parseKey(ByteString serializedKey)
-          throws GeneralSecurityException, InvalidProtocolBufferException {
-        KeyProtoT result = localPrivateKeyManager.parseKey(serializedKey);
-        localPrivateKeyManager.validateKey(result);
-        return result;
-      }
-    };
-  }
 
   private static interface KeyDeriverContainer {
     KeyData deriveKey(ByteString serializedKeyFormat, InputStream stream)
@@ -311,14 +134,6 @@ public final class Registry {
     };
   }
 
-  private static synchronized KeyManagerContainer getKeyManagerContainerOrThrow(String typeUrl)
-      throws GeneralSecurityException {
-    if (!keyManagerMap.containsKey(typeUrl)) {
-      throw new GeneralSecurityException("No key manager found for key type " + typeUrl);
-    }
-    return keyManagerMap.get(typeUrl);
-  }
-
   /**
    * Resets the registry.
    *
@@ -328,7 +143,7 @@ public final class Registry {
    * <p>This method is intended for testing.
    */
   static synchronized void reset() {
-    keyManagerMap.clear();
+    keyManagerRegistry.set(new KeyManagerRegistry());
     keyDeriverMap.clear();
     newKeyAllowedMap.clear();
     catalogueMap.clear();
@@ -407,16 +222,6 @@ public final class Registry {
   }
 
   /**
-   * Helper method to check if an instance is not null; taken from guava's Precondition.java
-   */
-  private static <T> T checkNotNull(T reference) {
-    if (reference == null) {
-      throw new NullPointerException();
-    }
-    return reference;
-  }
-
-  /**
    * Tries to register {@code manager} for {@code manager.getKeyType()}. Users can generate new keys
    * with this manager using the {@link Registry#newKey} methods.
    *
@@ -424,9 +229,9 @@ public final class Registry {
    * key manager aren't instances of the same class, or the existing key manager could not create
    * new keys. Otherwise registration succeeds.
    *
-   * @throws GeneralSecurityException if there's an existing key manager is not an instance
-   *     of the class of {@code manager}, or the registration tries to re-enable the generation
-   *     of new keys.
+   * @throws GeneralSecurityException if there's an existing key manager is not an instance of the
+   *     class of {@code manager}, or the registration tries to re-enable the generation of new
+   *     keys.
    */
   public static synchronized <P> void registerKeyManager(final KeyManager<P> manager)
       throws GeneralSecurityException {
@@ -434,90 +239,33 @@ public final class Registry {
   }
 
   /**
-   * Throws a general security exception if one of these conditions holds:
-   *
-   * <ul>
-   *   <li>There is already a key manager registered for {@code typeURL}, and at least one of the
-   *       following is true:
-   *       <ul>
-   *         <li>The class implementing the existing key manager differs from the given one.
-   *         <li>The value of {@code newKeyAllowed} currently registered is false, but the input
-   *             parameter is true.
-   *       </ul>
-   *   <li>The {@code newKeyAllowed} flag is true, and at least one of the following is true:
-   *       <ul>
-   *         <li>The key manager was already registered, but it contains new key templates.
-   *         <li>The key manager is new, but it contains existing key templates.
-   */
-  private static synchronized <KeyProtoT extends MessageLite, KeyFormatProtoT extends MessageLite>
-      void ensureKeyManagerInsertable(
-          String typeUrl,
-          Class<?> implementingClass,
-          Map<String, KeyTypeManager.KeyFactory.KeyFormat<KeyFormatProtoT>> keyFormats,
-          boolean newKeyAllowed)
-          throws GeneralSecurityException {
-    KeyManagerContainer container = keyManagerMap.get(typeUrl);
-    if (container != null && !container.getImplementingClass().equals(implementingClass)) {
-      logger.warning("Attempted overwrite of a registered key manager for key type " + typeUrl);
-      throw new GeneralSecurityException(
-          String.format(
-              "typeUrl (%s) is already registered with %s, cannot be re-registered with %s",
-              typeUrl, container.getImplementingClass().getName(), implementingClass.getName()));
-    }
-    if (newKeyAllowed && newKeyAllowedMap.containsKey(typeUrl) && !newKeyAllowedMap.get(typeUrl)) {
-      throw new GeneralSecurityException("New keys are already disallowed for key type " + typeUrl);
-    }
-
-    if (newKeyAllowed) {
-      if (keyManagerMap.containsKey(typeUrl)) {
-        // When re-inserting an already present KeyTypeManager, no new key templates should be
-        // present.
-        for (Map.Entry<String, KeyTypeManager.KeyFactory.KeyFormat<KeyFormatProtoT>> entry :
-            keyFormats.entrySet()) {
-          if (!keyTemplateMap.containsKey(entry.getKey())) {
-            throw new GeneralSecurityException(
-                "Attempted to register a new key template "
-                    + entry.getKey()
-                    + " from an existing key manager of type "
-                    + typeUrl);
-          }
-        }
-      } else {
-        // Check that new key managers can't overwrite existing key templates.
-        for (Map.Entry<String, KeyTypeManager.KeyFactory.KeyFormat<KeyFormatProtoT>> entry :
-            keyFormats.entrySet()) {
-
-          if (keyTemplateMap.containsKey(entry.getKey())) {
-            throw new GeneralSecurityException(
-                "Attempted overwrite of a registered key template " + entry.getKey());
-          }
-        }
-      }
-    }
-  }
-
-  /**
    * Tries to register {@code manager} for {@code manager.getKeyType()}. If {@code newKeyAllowed} is
    * true, users can generate new keys with this manager using the {@link Registry#newKey} methods.
    *
    * <p>If there is an existing key manager, throws an exception if {@code manager} and the existing
    * key manager aren't instances of the same class, or if {@code newKeyAllowed} is true while the
-   * existing key manager could not create new keys.  Otherwise registration succeeds.
+   * existing key manager could not create new keys. Otherwise registration succeeds.
    *
-   * @throws GeneralSecurityException if there's an existing key manager is not an instance
-   *     of the class of {@code manager}, or the registration tries to re-enable the generation
-   *     of new keys.
+   * @throws GeneralSecurityException if there's an existing key manager is not an instance of the
+   *     class of {@code manager}, or the registration tries to re-enable the generation of new
+   *     keys.
    */
   public static synchronized <P> void registerKeyManager(
       final KeyManager<P> manager, boolean newKeyAllowed) throws GeneralSecurityException {
     if (manager == null) {
       throw new IllegalArgumentException("key manager must be non-null.");
     }
+    KeyManagerRegistry newKeyManagerRegistry = new KeyManagerRegistry(keyManagerRegistry.get());
+    newKeyManagerRegistry.registerKeyManager(manager);
+
+    if (!TinkFipsUtil.AlgorithmFipsCompatibility.ALGORITHM_NOT_FIPS.isCompatible()) {
+      throw new GeneralSecurityException("Registering key managers is not supported in FIPS mode");
+    }
     String typeUrl = manager.getKeyType();
     // Use an empty key format because old-style key managers don't export their key formats
-    ensureKeyManagerInsertable(typeUrl, manager.getClass(), Collections.emptyMap(), newKeyAllowed);
-    keyManagerMap.putIfAbsent(typeUrl, createContainerFor(manager));
+    ensureKeyManagerInsertable(typeUrl, Collections.emptyMap(), newKeyAllowed);
     newKeyAllowedMap.put(typeUrl, Boolean.valueOf(newKeyAllowed));
+    keyManagerRegistry.set(newKeyManagerRegistry);
   }
 
   /**
@@ -535,6 +283,8 @@ public final class Registry {
    *     class of {@code manager}, or the registration tries to re-enable the generation of new
    *     keys.
    * @throws GeneralSecurityException if there's an existing key template.
+   * @throws GeneralSecurityException if the key manager is not compatible with the restrictions in
+   *     FIPS-mode.
    */
   public static synchronized <KeyProtoT extends MessageLite> void registerKeyManager(
       final KeyTypeManager<KeyProtoT> manager, boolean newKeyAllowed)
@@ -542,117 +292,22 @@ public final class Registry {
     if (manager == null) {
       throw new IllegalArgumentException("key manager must be non-null.");
     }
+    KeyManagerRegistry newKeyManagerRegistry = new KeyManagerRegistry(keyManagerRegistry.get());
+    newKeyManagerRegistry.registerKeyManager(manager);
     String typeUrl = manager.getKeyType();
     ensureKeyManagerInsertable(
         typeUrl,
-        manager.getClass(),
         newKeyAllowed ? manager.keyFactory().keyFormats() : Collections.emptyMap(),
         newKeyAllowed);
 
-    if (!keyManagerMap.containsKey(typeUrl)) {
-      keyManagerMap.put(typeUrl, createContainerFor(manager));
+    if (!keyManagerRegistry.get().typeUrlExists(typeUrl)) {
       keyDeriverMap.put(typeUrl, createDeriverFor(manager));
       if (newKeyAllowed) {
         registerKeyTemplates(typeUrl, manager.keyFactory().keyFormats());
       }
     }
     newKeyAllowedMap.put(typeUrl, Boolean.valueOf(newKeyAllowed));
-  }
-
-  /**
-   * Tries to register {@code manager} for {@code manager.getKeyType()}. If {@code newKeyAllowed} is
-   * true, users can generate new keys with this manager using the {@link Registry#newKey} methods.
-   *
-   * <p>If {@code newKeyAllowed} is true, also tries to register the key templates supported by
-   * {@code manager}.
-   *
-   * <p>If there is an existing key manager, throws an exception if {@code manager} and the existing
-   * key manager aren't instances of the same class, or if {@code newKeyAllowed} is true while the
-   * existing key manager could not create new keys. Otherwise registration succeeds.
-   *
-   * @throws GeneralSecurityException if there's an existing key manager is not an instance of the
-   *     class of {@code manager}, or the registration tries to re-enable the generation of new
-   *     keys.
-   * @throws GeneralSecurityException if there's an existing key template.
-   */
-  public static synchronized <KeyProtoT extends MessageLite, PublicKeyProtoT extends MessageLite>
-      void registerAsymmetricKeyManagers(
-          final PrivateKeyTypeManager<KeyProtoT, PublicKeyProtoT> privateKeyTypeManager,
-          final KeyTypeManager<PublicKeyProtoT> publicKeyTypeManager,
-          boolean newKeyAllowed)
-          throws GeneralSecurityException {
-    if (privateKeyTypeManager == null || publicKeyTypeManager == null) {
-      throw new IllegalArgumentException("given key managers must be non-null.");
-    }
-    String privateTypeUrl = privateKeyTypeManager.getKeyType();
-    String publicTypeUrl = publicKeyTypeManager.getKeyType();
-    ensureKeyManagerInsertable(
-        privateTypeUrl,
-        privateKeyTypeManager.getClass(),
-        newKeyAllowed ? privateKeyTypeManager.keyFactory().keyFormats() : Collections.emptyMap(),
-        newKeyAllowed);
-    // No key format because a public key manager cannot create new keys
-    ensureKeyManagerInsertable(
-        publicTypeUrl, publicKeyTypeManager.getClass(), Collections.emptyMap(), false);
-    if (privateTypeUrl.equals(publicTypeUrl)) {
-      throw new GeneralSecurityException("Private and public key type must be different.");
-    }
-
-    if (keyManagerMap.containsKey(privateTypeUrl)) {
-      Class<?> existingPublicKeyManagerClass =
-          keyManagerMap.get(privateTypeUrl).publicKeyManagerClassOrNull();
-      if (existingPublicKeyManagerClass != null) {
-        if (!existingPublicKeyManagerClass
-            .getName()
-            .equals(publicKeyTypeManager.getClass().getName())) {
-          logger.warning(
-              "Attempted overwrite of a registered key manager for key type "
-                  + privateTypeUrl
-                  + " with inconsistent public key type "
-                  + publicTypeUrl);
-          throw new GeneralSecurityException(
-              String.format(
-                  "public key manager corresponding to %s is already registered with %s, cannot"
-                      + " be re-registered with %s",
-                  privateKeyTypeManager.getClass().getName(),
-                  existingPublicKeyManagerClass.getName(),
-                  publicKeyTypeManager.getClass().getName()));
-        }
-      }
-    }
-
-    if (!keyManagerMap.containsKey(privateTypeUrl)
-        || keyManagerMap.get(privateTypeUrl).publicKeyManagerClassOrNull() == null) {
-      keyManagerMap.put(
-          privateTypeUrl,
-          createPrivateKeyContainerFor(privateKeyTypeManager, publicKeyTypeManager));
-      keyDeriverMap.put(privateTypeUrl, createDeriverFor(privateKeyTypeManager));
-      if (newKeyAllowed) {
-        registerKeyTemplates(
-            privateKeyTypeManager.getKeyType(), privateKeyTypeManager.keyFactory().keyFormats());
-      }
-    }
-    newKeyAllowedMap.put(privateTypeUrl, newKeyAllowed);
-    if (!keyManagerMap.containsKey(publicTypeUrl)) {
-      keyManagerMap.put(publicTypeUrl, createContainerFor(publicKeyTypeManager));
-      // We do not allow key derivation for public key types. It doesn't seem like this would make
-      // sense.
-    }
-    newKeyAllowedMap.put(publicTypeUrl, false);
-  }
-
-  private static <KeyFormatProtoT extends MessageLite> void registerKeyTemplates(
-      String typeUrl,
-      Map<String, KeyTypeManager.KeyFactory.KeyFormat<KeyFormatProtoT>> keyFormats) {
-    for (Map.Entry<String, KeyTypeManager.KeyFactory.KeyFormat<KeyFormatProtoT>> entry :
-        keyFormats.entrySet()) {
-      keyTemplateMap.put(
-          entry.getKey(),
-          KeyTemplate.create(
-              typeUrl,
-              entry.getValue().keyFormat.toByteArray(),
-              entry.getValue().outputPrefixType));
-    }
+    keyManagerRegistry.set(newKeyManagerRegistry);
   }
 
   /**
@@ -692,10 +347,128 @@ public final class Registry {
       throw new IllegalArgumentException("key manager must be non-null.");
     }
     if (!typeUrl.equals(manager.getKeyType())) {
-      throw new GeneralSecurityException("Manager does not support key type "
-          + typeUrl + ".");
+      throw new GeneralSecurityException("Manager does not support key type " + typeUrl + ".");
     }
     registerKeyManager(manager, newKeyAllowed);
+  }
+
+  /**
+   * Throws a general security exception if one of these conditions holds:
+   *
+   * <ul>
+   *   <li>There is already a key manager registered for {@code typeURL}, and at least one of the
+   *       following is true:
+   *       <ul>
+   *         <li>The class implementing the existing key manager differs from the given one.
+   *         <li>The value of {@code newKeyAllowed} currently registered is false, but the input
+   *             parameter is true.
+   *       </ul>
+   *   <li>The {@code newKeyAllowed} flag is true, and at least one of the following is true:
+   *       <ul>
+   *         <li>The key manager was already registered, but it contains new key templates.
+   *         <li>The key manager is new, but it contains existing key templates.
+   */
+  private static synchronized <KeyProtoT extends MessageLite, KeyFormatProtoT extends MessageLite>
+      void ensureKeyManagerInsertable(
+          String typeUrl,
+          Map<String, KeyTypeManager.KeyFactory.KeyFormat<KeyFormatProtoT>> keyFormats,
+          boolean newKeyAllowed)
+          throws GeneralSecurityException {
+    if (newKeyAllowed && newKeyAllowedMap.containsKey(typeUrl) && !newKeyAllowedMap.get(typeUrl)) {
+      throw new GeneralSecurityException("New keys are already disallowed for key type " + typeUrl);
+    }
+
+    if (newKeyAllowed) {
+      if (keyManagerRegistry.get().typeUrlExists(typeUrl)) {
+        // When re-inserting an already present KeyTypeManager, no new key templates should be
+        // present.
+        for (Map.Entry<String, KeyTypeManager.KeyFactory.KeyFormat<KeyFormatProtoT>> entry :
+            keyFormats.entrySet()) {
+          if (!keyTemplateMap.containsKey(entry.getKey())) {
+            throw new GeneralSecurityException(
+                "Attempted to register a new key template "
+                    + entry.getKey()
+                    + " from an existing key manager of type "
+                    + typeUrl);
+          }
+        }
+      } else {
+        // Check that new key managers can't overwrite existing key templates.
+        for (Map.Entry<String, KeyTypeManager.KeyFactory.KeyFormat<KeyFormatProtoT>> entry :
+            keyFormats.entrySet()) {
+
+          if (keyTemplateMap.containsKey(entry.getKey())) {
+            throw new GeneralSecurityException(
+                "Attempted overwrite of a registered key template " + entry.getKey());
+          }
+        }
+      }
+    }
+  }
+
+  /**
+   * Tries to register {@code manager} for {@code manager.getKeyType()}. If {@code newKeyAllowed} is
+   * true, users can generate new keys with this manager using the {@link Registry#newKey} methods.
+   *
+   * <p>If {@code newKeyAllowed} is true, also tries to register the key templates supported by
+   * {@code manager}.
+   *
+   * <p>If there is an existing key manager, throws an exception if {@code manager} and the existing
+   * key manager aren't instances of the same class, or if {@code newKeyAllowed} is true while the
+   * existing key manager could not create new keys. Otherwise registration succeeds.
+   *
+   * @throws GeneralSecurityException if there's an existing key manager is not an instance of the
+   *     class of {@code manager}, or the registration tries to re-enable the generation of new
+   *     keys.
+   * @throws GeneralSecurityException if there's an existing key template.
+   */
+  public static synchronized <KeyProtoT extends MessageLite, PublicKeyProtoT extends MessageLite>
+      void registerAsymmetricKeyManagers(
+          final PrivateKeyTypeManager<KeyProtoT, PublicKeyProtoT> privateKeyTypeManager,
+          final KeyTypeManager<PublicKeyProtoT> publicKeyTypeManager,
+          boolean newKeyAllowed)
+          throws GeneralSecurityException {
+    if (privateKeyTypeManager == null || publicKeyTypeManager == null) {
+      throw new IllegalArgumentException("given key managers must be non-null.");
+    }
+    KeyManagerRegistry newKeyManagerRegistry = new KeyManagerRegistry(keyManagerRegistry.get());
+    newKeyManagerRegistry.registerAsymmetricKeyManagers(
+        privateKeyTypeManager, publicKeyTypeManager);
+
+    String privateTypeUrl = privateKeyTypeManager.getKeyType();
+    String publicTypeUrl = publicKeyTypeManager.getKeyType();
+    ensureKeyManagerInsertable(
+        privateTypeUrl,
+        newKeyAllowed ? privateKeyTypeManager.keyFactory().keyFormats() : Collections.emptyMap(),
+        newKeyAllowed);
+    // No key format because a public key manager cannot create new keys
+    ensureKeyManagerInsertable(publicTypeUrl, Collections.emptyMap(), false);
+
+    if (!keyManagerRegistry.get().typeUrlExists(privateTypeUrl)) {
+      keyDeriverMap.put(privateTypeUrl, createDeriverFor(privateKeyTypeManager));
+      if (newKeyAllowed) {
+        registerKeyTemplates(
+            privateKeyTypeManager.getKeyType(), privateKeyTypeManager.keyFactory().keyFormats());
+      }
+    }
+    newKeyAllowedMap.put(privateTypeUrl, newKeyAllowed);
+    newKeyAllowedMap.put(publicTypeUrl, false);
+
+    keyManagerRegistry.set(newKeyManagerRegistry);
+  }
+
+  private static <KeyFormatProtoT extends MessageLite> void registerKeyTemplates(
+      String typeUrl,
+      Map<String, KeyTypeManager.KeyFactory.KeyFormat<KeyFormatProtoT>> keyFormats) {
+    for (Map.Entry<String, KeyTypeManager.KeyFactory.KeyFormat<KeyFormatProtoT>> entry :
+        keyFormats.entrySet()) {
+      keyTemplateMap.put(
+          entry.getKey(),
+          KeyTemplate.create(
+              typeUrl,
+              entry.getValue().keyFormat.toByteArray(),
+              entry.getValue().outputPrefixType));
+    }
   }
 
   /**
@@ -737,58 +510,24 @@ public final class Registry {
 
   /**
    * @return a {@link KeyManager} for the given {@code typeUrl} (if found).
-   * @deprecated Use {@code getKeyManager(typeUrl, Primitive.class)} or
-   * {@code getUntypedKeyManager typeUrl} instead.
+   * @deprecated Use {@code getKeyManager(typeUrl, Primitive.class)} or {@code getUntypedKeyManager
+   *     typeUrl} instead.
    */
   @Deprecated
   public static <P> KeyManager<P> getKeyManager(String typeUrl) throws GeneralSecurityException {
-    return getKeyManagerInternal(typeUrl, null);
-  }
-
-  /** @return a {@link KeyManager} for the given {@code typeUrl} (if found). */
-  public static KeyManager<?> getUntypedKeyManager(String typeUrl)
-      throws GeneralSecurityException {
-    KeyManagerContainer container = getKeyManagerContainerOrThrow(typeUrl);
-    return container.getUntypedKeyManager();
+    return keyManagerRegistry.get().getKeyManager(typeUrl);
   }
 
   /** @return a {@link KeyManager} for the given {@code typeUrl} (if found). */
   public static <P> KeyManager<P> getKeyManager(String typeUrl, Class<P> primitiveClass)
       throws GeneralSecurityException {
-    return getKeyManagerInternal(typeUrl, checkNotNull(primitiveClass));
+    return keyManagerRegistry.get().getKeyManager(typeUrl, primitiveClass);
   }
 
-  private static String toCommaSeparatedString(Set<Class<?>> setOfClasses) {
-    StringBuilder b = new StringBuilder();
-    boolean first = true;
-    for (Class<?> clazz : setOfClasses) {
-      if (!first) {
-        b.append(", ");
-      }
-      b.append(clazz.getCanonicalName());
-      first = false;
-    }
-    return b.toString();
-  }
-
-  private static <P> KeyManager<P> getKeyManagerInternal(String typeUrl, Class<P> primitiveClass)
+  /** @return a {@link KeyManager} for the given {@code typeUrl} (if found). */
+  public static KeyManager<?> getUntypedKeyManager(String typeUrl)
       throws GeneralSecurityException {
-    KeyManagerContainer container = getKeyManagerContainerOrThrow(typeUrl);
-    if (primitiveClass == null) {
-      @SuppressWarnings("unchecked")  // Only called from deprecated functions; unavoidable there.
-      KeyManager<P> result = (KeyManager<P>) container.getUntypedKeyManager();
-      return result;
-    }
-    if (container.supportedPrimitives().contains(primitiveClass)) {
-      return container.getKeyManager(primitiveClass);
-    }
-    throw new GeneralSecurityException(
-        "Primitive type "
-            + primitiveClass.getName()
-            + " not supported by key manager of type "
-            + container.getImplementingClass()
-            + ", supported primitives: "
-            + toCommaSeparatedString(container.supportedPrimitives()));
+    return keyManagerRegistry.get().getUntypedKeyManager(typeUrl);
   }
 
   /**
@@ -801,9 +540,8 @@ public final class Registry {
    *
    * @return a new {@link KeyData}
    */
-  public static synchronized KeyData
-      newKeyData(com.google.crypto.tink.proto.KeyTemplate keyTemplate)
-      throws GeneralSecurityException {
+  public static synchronized KeyData newKeyData(
+      com.google.crypto.tink.proto.KeyTemplate keyTemplate) throws GeneralSecurityException {
     KeyManager<?> manager = getUntypedKeyManager(keyTemplate.getTypeUrl());
     if (newKeyAllowedMap.get(keyTemplate.getTypeUrl()).booleanValue()) {
       return manager.newKeyData(keyTemplate.getValue());
@@ -919,7 +657,8 @@ public final class Registry {
   @SuppressWarnings("TypeParameterUnusedInFormals")
   public static <P> P getPrimitive(String typeUrl, MessageLite key)
       throws GeneralSecurityException {
-    return getPrimitiveInternal(typeUrl, key, null);
+    KeyManager<P> manager = keyManagerRegistry.get().getKeyManager(typeUrl);
+    return manager.getPrimitive(key);
   }
 
   /**
@@ -932,12 +671,7 @@ public final class Registry {
    */
   public static <P> P getPrimitive(String typeUrl, MessageLite key, Class<P> primitiveClass)
       throws GeneralSecurityException {
-    return getPrimitiveInternal(typeUrl, key, checkNotNull(primitiveClass));
-  }
-
-  private static <P> P getPrimitiveInternal(
-      String typeUrl, MessageLite key, Class<P> primitiveClass) throws GeneralSecurityException {
-    KeyManager<P> manager = getKeyManagerInternal(typeUrl, primitiveClass);
+    KeyManager<P> manager = keyManagerRegistry.get().getKeyManager(typeUrl, primitiveClass);
     return manager.getPrimitive(key);
   }
 
@@ -954,7 +688,8 @@ public final class Registry {
   @SuppressWarnings("TypeParameterUnusedInFormals")
   public static <P> P getPrimitive(String typeUrl, ByteString serializedKey)
       throws GeneralSecurityException {
-    return getPrimitiveInternal(typeUrl, serializedKey, null);
+    KeyManager<P> manager = keyManagerRegistry.get().getKeyManager(typeUrl);
+    return manager.getPrimitive(serializedKey);
   }
 
   /**
@@ -968,13 +703,7 @@ public final class Registry {
   public static <P> P getPrimitive(
       String typeUrl, ByteString serializedKey, Class<P> primitiveClass)
       throws GeneralSecurityException {
-    return getPrimitiveInternal(typeUrl, serializedKey, checkNotNull(primitiveClass));
-  }
-
-  private static <P> P getPrimitiveInternal(
-      String typeUrl, ByteString serializedKey, Class<P> primitiveClass)
-      throws GeneralSecurityException {
-    KeyManager<P> manager = getKeyManagerInternal(typeUrl, primitiveClass);
+    KeyManager<P> manager = keyManagerRegistry.get().getKeyManager(typeUrl, primitiveClass);
     return manager.getPrimitive(serializedKey);
   }
 
@@ -993,6 +722,7 @@ public final class Registry {
       throws GeneralSecurityException {
     return getPrimitive(typeUrl, ByteString.copyFrom(serializedKey));
   }
+
   /**
    * Convenience method for creating a new primitive for the key given in {@code serializedKey}.
    *
@@ -1071,9 +801,7 @@ public final class Registry {
    */
   public static synchronized List<String> keyTemplates() {
     List<String> results = new ArrayList<>();
-    for (String name : keyTemplateMap.keySet()) {
-      results.add(name);
-    }
+    results.addAll(keyTemplateMap.keySet());
 
     return Collections.unmodifiableList(results);
   }
@@ -1089,6 +817,7 @@ public final class Registry {
    * primitive of type {@code wrappedPrimitive}. Returns {@code null} if no wrapper for this
    * primitive has been registered.
    */
+  @Nullable
   public static Class<?> getInputPrimitive(Class<?> wrappedPrimitive) {
     PrimitiveWrapper<?, ?> wrapper = primitiveWrapperMap.get(wrappedPrimitive);
     if (wrapper == null) {
@@ -1104,8 +833,20 @@ public final class Registry {
    */
   static MessageLite parseKeyData(KeyData keyData)
       throws GeneralSecurityException, InvalidProtocolBufferException {
-    KeyManagerContainer container = getKeyManagerContainerOrThrow(keyData.getTypeUrl());
-    return container.parseKey(keyData.getValue());
+    return keyManagerRegistry.get().parseKeyData(keyData);
+  }
+
+  /**
+   * Tries to enable the FIPS restrictions if the Registry is empty.
+   *
+   * @throws GeneralSecurityException if any key manager has already been registered.
+   */
+  public static synchronized void restrictToFipsIfEmpty() throws GeneralSecurityException {
+    if (keyManagerRegistry.get().isEmpty()) {
+      TinkFipsUtil.setFipsRestricted();
+      return;
+    }
+    throw new GeneralSecurityException("Could not enable FIPS mode as Registry is not empty.");
   }
 
   private Registry() {}

@@ -17,22 +17,27 @@
 #ifndef TINK_JWT_INTERNAL_JWT_PUBLIC_KEY_SIGN_INTERNAL_H_
 #define TINK_JWT_INTERNAL_JWT_PUBLIC_KEY_SIGN_INTERNAL_H_
 
+#include <string>
+
 #include "absl/strings/string_view.h"
+#include "tink/jwt/raw_jwt.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
-#include "tink/jwt/raw_jwt.h"
 
 namespace crypto {
 namespace tink {
 
 ///////////////////////////////////////////////////////////////////////////////
-// Interface for signing JWT.
+// Internal interface for signing JWT.
 //
 // Sees RFC 7519 and RFC 7515. Security guarantees: similar to PublicKeySign.
 class JwtPublicKeySignInternal {
  public:
   // Computes a signature, and encodes the JWT and the signature in the JWS
   // compact serialization format.
+  //
+  // When `kid` has a value, the token will have a kid header. `kid` is set by
+  // the primitive wrapper based on the output prefix type and the key id.
   virtual crypto::tink::util::StatusOr<std::string> SignAndEncodeWithKid(
       const RawJwt& token, absl::optional<absl::string_view> kid) const = 0;
 

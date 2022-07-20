@@ -16,22 +16,27 @@
 
 #include "tink/aead/kms_envelope_aead_key_manager.h"
 
-#include "absl/strings/match.h"
-#include "absl/strings/str_cat.h"
+#include <stdlib.h>
+
+#include <memory>
+#include <string>
+
+#include "gmock/gmock.h"
+#include "gtest/gtest.h"
+#include "absl/memory/memory.h"
+#include "absl/status/status.h"
 #include "tink/aead.h"
+#include "tink/aead/aead_key_templates.h"
 #include "tink/aead/aes_eax_key_manager.h"
 #include "tink/aead/kms_envelope_aead.h"
-#include "tink/registry.h"
 #include "tink/kms_client.h"
 #include "tink/kms_clients.h"
-#include "tink/aead/aead_config.h"
-#include "tink/aead/aead_key_templates.h"
+#include "tink/registry.h"
 #include "tink/subtle/aead_test_util.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
-#include "tink/util/test_util.h"
 #include "tink/util/test_matchers.h"
-#include "gtest/gtest.h"
+#include "tink/util/test_util.h"
 #include "proto/kms_envelope.pb.h"
 #include "proto/tink.pb.h"
 
@@ -60,7 +65,7 @@ TEST(KmsEnvelopeAeadKeyManagerTest, Basics) {
 
 TEST(KmsEnvelopeAeadKeyManagerTest, ValidateEmptyKey) {
   EXPECT_THAT(KmsEnvelopeAeadKeyManager().ValidateKey(KmsEnvelopeAeadKey()),
-              StatusIs(util::error::INVALID_ARGUMENT));
+              StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
 TEST(KmsEnvelopeAeadKeyManagerTest, ValidateValidKey) {
@@ -93,7 +98,7 @@ TEST(KmsEnvelopeAeadKeyManagerTest, ValidateNoUri) {
 TEST(KmsEnvelopeAeadKeyManagerTest, ValidateKeyFormatEmptyKey) {
   EXPECT_THAT(
       KmsEnvelopeAeadKeyManager().ValidateKeyFormat(KmsEnvelopeAeadKeyFormat()),
-      StatusIs(util::error::INVALID_ARGUMENT));
+      StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
 TEST(KmsEnvelopeAeadKeyManagerTest, ValidateKeyFormatValidKey) {
@@ -123,9 +128,9 @@ TEST(KmsEnvelopeAeadKeyManagerTest, CreateKey) {
   key_format.set_kek_uri("Some uri");
   *key_format.mutable_dek_template() = AeadKeyTemplates::Aes128Eax();
   auto key_or = KmsEnvelopeAeadKeyManager().CreateKey(key_format);
-  ASSERT_THAT(key_or.status(), IsOk());
-  EXPECT_THAT(key_or.ValueOrDie().params().kek_uri(), Eq(key_format.kek_uri()));
-  EXPECT_THAT(key_or.ValueOrDie().params().dek_template().value(),
+  ASSERT_THAT(key_or, IsOk());
+  EXPECT_THAT(key_or.value().params().kek_uri(), Eq(key_format.kek_uri()));
+  EXPECT_THAT(key_or.value().params().dek_template().value(),
               Eq(key_format.dek_template().value()));
 }
 
@@ -157,17 +162,16 @@ TEST_F(KmsEnvelopeAeadKeyManagerCreateTest, CreateAead) {
       AeadKeyTemplates::Aes128Eax();
 
   auto kms_aead = KmsEnvelopeAeadKeyManager().GetPrimitive<Aead>(key);
-  ASSERT_THAT(kms_aead.status(), IsOk());
+  ASSERT_THAT(kms_aead, IsOk());
 
   auto direct_aead =
       KmsEnvelopeAead::New(key.params().dek_template(),
                            absl::make_unique<DummyAead>("prefix1:some_key1"));
-  ASSERT_THAT(direct_aead.status(), IsOk());
+  ASSERT_THAT(direct_aead, IsOk());
 
-  EXPECT_THAT(
-      EncryptThenDecrypt(*kms_aead.ValueOrDie(),
-                         *direct_aead.ValueOrDie(), "plaintext", "aad"),
-      IsOk());
+  EXPECT_THAT(EncryptThenDecrypt(*kms_aead.value(), *direct_aead.value(),
+                                 "plaintext", "aad"),
+              IsOk());
 }
 
 TEST_F(KmsEnvelopeAeadKeyManagerCreateTest, CreateAeadWrongKeyName) {
@@ -178,7 +182,7 @@ TEST_F(KmsEnvelopeAeadKeyManagerCreateTest, CreateAeadWrongKeyName) {
       AeadKeyTemplates::Aes128Eax();
 
   auto kms_aead = KmsEnvelopeAeadKeyManager().GetPrimitive<Aead>(key);
-  ASSERT_THAT(kms_aead.status(), Not(IsOk()));
+  ASSERT_THAT(kms_aead, Not(IsOk()));
 }
 
 TEST_F(KmsEnvelopeAeadKeyManagerCreateTest, CreateAeadWrongTypeUrl) {
@@ -191,7 +195,7 @@ TEST_F(KmsEnvelopeAeadKeyManagerCreateTest, CreateAeadWrongTypeUrl) {
       "Some unkonwn type url");
 
   auto kms_aead = KmsEnvelopeAeadKeyManager().GetPrimitive<Aead>(key);
-  ASSERT_THAT(kms_aead.status(), Not(IsOk()));
+  ASSERT_THAT(kms_aead, Not(IsOk()));
 }
 
 TEST_F(KmsEnvelopeAeadKeyManagerCreateTest, CreateAeadWrongPrefix) {
@@ -202,7 +206,7 @@ TEST_F(KmsEnvelopeAeadKeyManagerCreateTest, CreateAeadWrongPrefix) {
       AeadKeyTemplates::Aes128Eax();
 
   auto kms_aead = KmsEnvelopeAeadKeyManager().GetPrimitive<Aead>(key);
-  ASSERT_THAT(kms_aead.status(), Not(IsOk()));
+  ASSERT_THAT(kms_aead, Not(IsOk()));
 }
 
 TEST_F(KmsEnvelopeAeadKeyManagerCreateTest, CreateAeadUnboundKey) {
@@ -213,17 +217,16 @@ TEST_F(KmsEnvelopeAeadKeyManagerCreateTest, CreateAeadUnboundKey) {
       AeadKeyTemplates::Aes128Eax();
 
   auto kms_aead = KmsEnvelopeAeadKeyManager().GetPrimitive<Aead>(key);
-  ASSERT_THAT(kms_aead.status(), IsOk());
+  ASSERT_THAT(kms_aead, IsOk());
 
   auto direct_aead =
       KmsEnvelopeAead::New(key.params().dek_template(),
                            absl::make_unique<DummyAead>("prefix2:some_key2"));
-  ASSERT_THAT(direct_aead.status(), IsOk());
+  ASSERT_THAT(direct_aead, IsOk());
 
-  EXPECT_THAT(
-      EncryptThenDecrypt(*kms_aead.ValueOrDie(),
-                         *direct_aead.ValueOrDie(), "plaintext", "aad"),
-      IsOk());
+  EXPECT_THAT(EncryptThenDecrypt(*kms_aead.value(), *direct_aead.value(),
+                                 "plaintext", "aad"),
+              IsOk());
 }
 
 }  // namespace

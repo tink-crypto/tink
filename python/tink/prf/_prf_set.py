@@ -13,19 +13,11 @@
 # limitations under the License.
 """This module defines the interface for PrfSet."""
 
-from __future__ import absolute_import
-from __future__ import division
-# Placeholder for import for type annotations
-from __future__ import print_function
-
 import abc
 from typing import Mapping
-# Special imports
-import six
 
 
-@six.add_metaclass(abc.ABCMeta)
-class Prf(object):
+class Prf(metaclass=abc.ABCMeta):
   """An element of a pseudo random function family, selected by a key.
 
   The PRF interface is an abstraction for an element of a pseudo random function
@@ -67,8 +59,7 @@ class Prf(object):
     raise NotImplementedError()
 
 
-@six.add_metaclass(abc.ABCMeta)
-class PrfSet(object):
+class PrfSet(metaclass=abc.ABCMeta):
   """A Tink Keyset can be converted into a set of PRFs using this primitive.
 
   Every key in the keyset corresponds to a PRF in the PrfSet. Every PRF in the

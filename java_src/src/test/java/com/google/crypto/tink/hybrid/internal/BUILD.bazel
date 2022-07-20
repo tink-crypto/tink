@@ -1,0 +1,209 @@
+package(default_testonly = 1)
+
+licenses(["notice"])
+
+java_test(
+    name = "AesGcmHpkeAeadTest",
+    size = "small",
+    srcs = ["AesGcmHpkeAeadTest.java"],
+    data = ["//testdata/testvectors:hpke_boringssl"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink/hybrid/internal:aes_gcm_hpke_aead",
+        "//src/main/java/com/google/crypto/tink/hybrid/internal:hpke_util",
+        "//src/main/java/com/google/crypto/tink/testing:hpke_test_util",
+        "//src/main/java/com/google/crypto/tink/testing:test_util",
+        "@maven//:com_google_guava_guava",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "ChaCha20Poly1305HpkeAeadTest",
+    size = "small",
+    srcs = ["ChaCha20Poly1305HpkeAeadTest.java"],
+    data = ["//testdata/testvectors:hpke_boringssl"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink/hybrid/internal:chacha20_poly1305_hpke_aead",
+        "//src/main/java/com/google/crypto/tink/hybrid/internal:hpke_util",
+        "//src/main/java/com/google/crypto/tink/testing:hpke_test_util",
+        "//src/main/java/com/google/crypto/tink/testing:test_util",
+        "@maven//:com_google_guava_guava",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "HkdfHpkeKdfTest",
+    size = "small",
+    srcs = ["HkdfHpkeKdfTest.java"],
+    data = ["//testdata/testvectors:hpke_boringssl"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink/hybrid/internal:hkdf_hpke_kdf",
+        "//src/main/java/com/google/crypto/tink/hybrid/internal:hpke_util",
+        "//src/main/java/com/google/crypto/tink/subtle:bytes",
+        "//src/main/java/com/google/crypto/tink/subtle:hex",
+        "//src/main/java/com/google/crypto/tink/subtle:x25519",
+        "//src/main/java/com/google/crypto/tink/testing:hpke_test_util",
+        "//src/main/java/com/google/crypto/tink/testing:test_util",
+        "@maven//:com_google_guava_guava",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "HpkeContextTest",
+    size = "small",
+    srcs = ["HpkeContextTest.java"],
+    data = ["//testdata/testvectors:hpke_boringssl"],
+    deps = [
+        "//proto:hpke_java_proto",
+        "//src/main/java/com/google/crypto/tink/hybrid/internal:hpke_aead",
+        "//src/main/java/com/google/crypto/tink/hybrid/internal:hpke_context",
+        "//src/main/java/com/google/crypto/tink/hybrid/internal:hpke_kdf",
+        "//src/main/java/com/google/crypto/tink/hybrid/internal:hpke_kem",
+        "//src/main/java/com/google/crypto/tink/hybrid/internal:hpke_kem_key_factory",
+        "//src/main/java/com/google/crypto/tink/hybrid/internal:hpke_kem_private_key",
+        "//src/main/java/com/google/crypto/tink/hybrid/internal:hpke_primitive_factory",
+        "//src/main/java/com/google/crypto/tink/hybrid/internal:hpke_util",
+        "//src/main/java/com/google/crypto/tink/subtle:random",
+        "//src/main/java/com/google/crypto/tink/testing:hpke_test_util",
+        "//src/main/java/com/google/crypto/tink/testing:test_util",
+        "@com_google_protobuf//:protobuf_javalite",
+        "@maven//:com_google_guava_guava",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "HpkeEncryptDecryptTest",
+    size = "small",
+    srcs = ["HpkeEncryptDecryptTest.java"],
+    deps = [
+        "//proto:hpke_java_proto",
+        "//src/main/java/com/google/crypto/tink:hybrid_decrypt",
+        "//src/main/java/com/google/crypto/tink:hybrid_encrypt",
+        "//src/main/java/com/google/crypto/tink/hybrid/internal:hpke_decrypt",
+        "//src/main/java/com/google/crypto/tink/hybrid/internal:hpke_encrypt",
+        "//src/main/java/com/google/crypto/tink/subtle:bytes",
+        "//src/main/java/com/google/crypto/tink/subtle:random",
+        "//src/main/java/com/google/crypto/tink/subtle:x25519",
+        "@com_google_protobuf//:protobuf_javalite",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "HpkeKemKeyFactoryTest",
+    size = "small",
+    srcs = ["HpkeKemKeyFactoryTest.java"],
+    data = ["//testdata/testvectors:hpke_boringssl"],
+    deps = [
+        "//proto:hpke_java_proto",
+        "//src/main/java/com/google/crypto/tink/hybrid/internal:hpke_kem_key_factory",
+        "//src/main/java/com/google/crypto/tink/hybrid/internal:hpke_kem_private_key",
+        "//src/main/java/com/google/crypto/tink/hybrid/internal:hpke_util",
+        "//src/main/java/com/google/crypto/tink/subtle:hex",
+        "//src/main/java/com/google/crypto/tink/testing:hpke_test_util",
+        "//src/main/java/com/google/crypto/tink/testing:test_util",
+        "@com_google_protobuf//:protobuf_javalite",
+        "@maven//:com_google_guava_guava",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "HpkePrimitiveFactoryTest",
+    size = "small",
+    srcs = ["HpkePrimitiveFactoryTest.java"],
+    deps = [
+        "//proto:hpke_java_proto",
+        "//src/main/java/com/google/crypto/tink/hybrid/internal:aes_gcm_hpke_aead",
+        "//src/main/java/com/google/crypto/tink/hybrid/internal:hkdf_hpke_kdf",
+        "//src/main/java/com/google/crypto/tink/hybrid/internal:hpke_aead",
+        "//src/main/java/com/google/crypto/tink/hybrid/internal:hpke_kdf",
+        "//src/main/java/com/google/crypto/tink/hybrid/internal:hpke_kem",
+        "//src/main/java/com/google/crypto/tink/hybrid/internal:hpke_primitive_factory",
+        "//src/main/java/com/google/crypto/tink/hybrid/internal:hpke_util",
+        "//src/main/java/com/google/crypto/tink/hybrid/internal:x25519_hpke_kem",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "HpkePrivateKeyManagerTest",
+    size = "small",
+    srcs = ["HpkePrivateKeyManagerTest.java"],
+    deps = [
+        "//proto:hpke_java_proto",
+        "//proto:tink_java_proto",
+        "//src/main/java/com/google/crypto/tink:hybrid_decrypt",
+        "//src/main/java/com/google/crypto/tink:hybrid_encrypt",
+        "//src/main/java/com/google/crypto/tink:registry",
+        "//src/main/java/com/google/crypto/tink/hybrid/internal:hpke_encrypt",
+        "//src/main/java/com/google/crypto/tink/hybrid/internal:hpke_private_key_manager",
+        "//src/main/java/com/google/crypto/tink/hybrid/internal:hpke_public_key_manager",
+        "//src/main/java/com/google/crypto/tink/internal:key_type_manager",
+        "//src/main/java/com/google/crypto/tink/subtle:random",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "HpkePublicKeyManagerTest",
+    size = "small",
+    srcs = ["HpkePublicKeyManagerTest.java"],
+    deps = [
+        "//proto:hpke_java_proto",
+        "//proto:tink_java_proto",
+        "//src/main/java/com/google/crypto/tink:hybrid_decrypt",
+        "//src/main/java/com/google/crypto/tink:hybrid_encrypt",
+        "//src/main/java/com/google/crypto/tink/hybrid/internal:hpke_decrypt",
+        "//src/main/java/com/google/crypto/tink/hybrid/internal:hpke_public_key_manager",
+        "//src/main/java/com/google/crypto/tink/subtle:random",
+        "//src/main/java/com/google/crypto/tink/subtle:x25519",
+        "@com_google_protobuf//:protobuf_javalite",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "X25519HpkeKemPrivateKeyTest",
+    size = "small",
+    srcs = ["X25519HpkeKemPrivateKeyTest.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink/hybrid/internal:x25519_hpke_kem_private_key",
+        "//src/main/java/com/google/crypto/tink/subtle:x25519",
+        "//src/main/java/com/google/crypto/tink/util:bytes",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "X25519HpkeKemTest",
+    size = "small",
+    srcs = ["X25519HpkeKemTest.java"],
+    data = ["//testdata/testvectors:hpke_boringssl"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink/hybrid/internal:hkdf_hpke_kdf",
+        "//src/main/java/com/google/crypto/tink/hybrid/internal:hpke_kem_encap_output",
+        "//src/main/java/com/google/crypto/tink/hybrid/internal:hpke_kem_private_key",
+        "//src/main/java/com/google/crypto/tink/hybrid/internal:hpke_util",
+        "//src/main/java/com/google/crypto/tink/hybrid/internal:x25519_hpke_kem",
+        "//src/main/java/com/google/crypto/tink/hybrid/internal:x25519_hpke_kem_private_key",
+        "//src/main/java/com/google/crypto/tink/testing:hpke_test_util",
+        "//src/main/java/com/google/crypto/tink/testing:test_util",
+        "@maven//:com_google_guava_guava",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)

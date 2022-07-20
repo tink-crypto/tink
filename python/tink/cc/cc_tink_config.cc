@@ -1,4 +1,4 @@
-// Copyright 2019 Google LLC.
+// Copyright 2019 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,13 +16,20 @@
 
 #include "tink/cc/cc_tink_config.h"
 
+#include <utility>
+
 #include "tink/config/tink_config.h"
+#include "tink/util/status.h"
+#include "tink/cc/pybind/tink_exception.h"
 
 namespace crypto {
 namespace tink {
 
-util::Status CcTinkConfigRegister() {
-  return TinkConfig::Register();
+void CcTinkConfigRegister() {
+  util::Status result = TinkConfig::Register();
+  if (!result.ok()) {
+    throw pybind11::google_tink::TinkException(result);
+  }
 }
 
 }  // namespace tink

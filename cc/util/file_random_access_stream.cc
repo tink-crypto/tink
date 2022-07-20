@@ -21,6 +21,7 @@
 #include <algorithm>
 
 #include "absl/memory/memory.h"
+#include "absl/status/status.h"
 #include "tink/random_access_stream.h"
 #include "tink/util/buffer.h"
 #include "tink/util/errors.h"
@@ -55,18 +56,18 @@ FileRandomAccessStream::FileRandomAccessStream(int file_descriptor) {
 Status FileRandomAccessStream::PRead(int64_t position, int count,
                                      Buffer* dest_buffer) {
   if (dest_buffer == nullptr) {
-    return util::Status(util::error::INVALID_ARGUMENT,
+    return util::Status(absl::StatusCode::kInvalidArgument,
                         "dest_buffer must be non-null");
   }
   if (count <= 0) {
-    return util::Status(util::error::INVALID_ARGUMENT,
+    return util::Status(absl::StatusCode::kInvalidArgument,
                         "count must be positive");
   }
   if (count > dest_buffer->allocated_size()) {
-    return util::Status(util::error::INVALID_ARGUMENT, "buffer too small");
+    return util::Status(absl::StatusCode::kInvalidArgument, "buffer too small");
   }
   if (position < 0) {
-    return util::Status(util::error::INVALID_ARGUMENT,
+    return util::Status(absl::StatusCode::kInvalidArgument,
                         "position cannot be negative");
   }
   crypto::tink::util::Status status = dest_buffer->set_size(count);
@@ -74,15 +75,15 @@ Status FileRandomAccessStream::PRead(int64_t position, int count,
   int read_count = pread(fd_, dest_buffer->get_mem_block(), count, position);
   if (read_count == 0) {
     dest_buffer->set_size(0).IgnoreError();
-    return Status(util::error::OUT_OF_RANGE, "EOF");
+    return Status(absl::StatusCode::kOutOfRange, "EOF");
   }
   if (read_count < 0) {
     dest_buffer->set_size(0).IgnoreError();
-    return ToStatusF(util::error::UNKNOWN, "I/O error: %d", errno);
+    return ToStatusF(absl::StatusCode::kUnknown, "I/O error: %d", errno);
   }
   status = dest_buffer->set_size(read_count);
   if (!status.ok()) return status;
-  return Status::OK;
+  return util::OkStatus();
 }
 
 FileRandomAccessStream::~FileRandomAccessStream() {
@@ -92,7 +93,7 @@ FileRandomAccessStream::~FileRandomAccessStream() {
 StatusOr<int64_t> FileRandomAccessStream::size() {
   struct stat s;
   if (fstat(fd_, &s) == -1) {
-    return Status(util::error::UNAVAILABLE, "size unavailable");
+    return Status(absl::StatusCode::kUnavailable, "size unavailable");
   } else {
     return s.st_size;
   }

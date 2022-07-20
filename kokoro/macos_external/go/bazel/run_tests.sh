@@ -14,15 +14,29 @@
 # limitations under the License.
 ################################################################################
 
-
 set -euo pipefail
 
-cd "${KOKORO_ARTIFACTS_DIR}/git/tink"
+if [[ -n "${KOKORO_ROOT:-}" ]]; then
+  cd "${KOKORO_ARTIFACTS_DIR}/git/tink"
+  use_bazel.sh "$(cat go/.bazelversion)"
+fi
 
-./kokoro/copy_credentials.sh
+./kokoro/testutils/copy_credentials.sh "go/testdata"
+# Sourcing required to update callers environment.
+source ./kokoro/testutils/install_go.sh
 
-cd go/
+echo "Using go binary from $(which go): $(go version)"
 
-use_bazel.sh "$(cat .bazelversion)"
-time bazel build -- ...
-time bazel test -- ...
+./kokoro/testutils/check_go_generated_files_up_to_date.sh go/
+
+MANUAL_TARGETS=()
+# Run manual tests that rely on test data only available via Bazel.
+if [[ -n "${KOKORO_ROOT:-}" ]]; then
+  MANUAL_TARGETS+=(
+    "//integration/gcpkms:gcpkms_test"
+    "//integration/awskms:awskms_test"
+  )
+fi
+readonly MANUAL_TARGETS
+
+./kokoro/testutils/run_bazel_tests.sh go "${MANUAL_TARGETS[@]}"

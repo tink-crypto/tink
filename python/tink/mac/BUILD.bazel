@@ -21,7 +21,6 @@ py_library(
     name = "_mac",
     srcs = ["_mac.py"],
     srcs_version = "PY3",
-    deps = [requirement("six")],
 )
 
 py_library(
@@ -92,9 +91,6 @@ py_library(
 py_test(
     name = "_mac_key_templates_test",
     srcs = ["_mac_key_templates_test.py"],
-    data = [
-        "@tink_base//testdata/templates",
-    ],
     srcs_version = "PY3",
     deps = [
         ":mac",
@@ -102,6 +98,5 @@ py_test(
         "//tink/proto:common_py_pb2",
         "//tink/proto:hmac_py_pb2",
         "//tink/proto:tink_py_pb2",
-        "//tink/testing:helper",
     ],
 )

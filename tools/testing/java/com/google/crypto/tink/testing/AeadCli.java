@@ -44,8 +44,8 @@ public class AeadCli {
     String associatedDataFile = args[3];
     String outputFilename = args[4];
 
-    GcpKmsClient.register(Optional.empty(), Optional.of("../tink_base/" + TestUtil.SERVICE_ACCOUNT_FILE));
-    AwsKmsClient.register(Optional.of(TestUtil.AWS_CRYPTO_URI), Optional.of("../tink_base/" + TestUtil.AWS_CREDS));
+    GcpKmsClient.register(Optional.empty(), Optional.of(TestUtil.SERVICE_ACCOUNT_FILE));
+    AwsKmsClient.register(Optional.of(TestUtil.AWS_CRYPTO_URI), Optional.of(TestUtil.AWS_CREDS));
     AeadConfig.register();
 
     if (!(operation.equals("encrypt") || operation.equals("decrypt"))) {

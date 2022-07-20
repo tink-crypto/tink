@@ -1,0 +1,67 @@
+load("@build_bazel_rules_android//android:rules.bzl", "android_library")
+
+licenses(["notice"])
+
+package(default_visibility = ["//visibility:public"])
+
+java_library(
+    name = "monitoring_keyset_info",
+    srcs = ["MonitoringKeysetInfo.java"],
+    deps = [
+        ":monitoring_annotations",
+        "//src/main/java/com/google/crypto/tink:key_format",
+        "//src/main/java/com/google/crypto/tink:key_status",
+        "//src/main/java/com/google/crypto/tink/annotations:alpha",
+        "@maven//:com_google_code_findbugs_jsr305",
+        "@maven//:com_google_errorprone_error_prone_annotations",
+    ],
+)
+
+android_library(
+    name = "monitoring_keyset_info-android",
+    srcs = ["MonitoringKeysetInfo.java"],
+    deps = [
+        ":monitoring_annotations-android",
+        "//src/main/java/com/google/crypto/tink:key_format-android",
+        "//src/main/java/com/google/crypto/tink:key_status-android",
+        "//src/main/java/com/google/crypto/tink/annotations:alpha-android",
+        "@maven//:com_google_code_findbugs_jsr305",
+        "@maven//:com_google_errorprone_error_prone_annotations",
+    ],
+)
+
+java_library(
+    name = "monitoring_client",
+    srcs = ["MonitoringClient.java"],
+    deps = [
+        ":monitoring_keyset_info",
+        "//src/main/java/com/google/crypto/tink/annotations:alpha",
+    ],
+)
+
+android_library(
+    name = "monitoring_client-android",
+    srcs = ["MonitoringClient.java"],
+    deps = [
+        ":monitoring_keyset_info-android",
+        "//src/main/java/com/google/crypto/tink/annotations:alpha-android",
+    ],
+)
+
+java_library(
+    name = "monitoring_annotations",
+    srcs = ["MonitoringAnnotations.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink/annotations:alpha",
+        "@maven//:com_google_errorprone_error_prone_annotations",
+    ],
+)
+
+android_library(
+    name = "monitoring_annotations-android",
+    srcs = ["MonitoringAnnotations.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink/annotations:alpha-android",
+        "@maven//:com_google_errorprone_error_prone_annotations",
+    ],
+)

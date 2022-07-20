@@ -30,7 +30,7 @@ import (
 	"strings"
 
 	"golang.org/x/crypto/ed25519"
-	"github.com/golang/protobuf/proto"
+	"google.golang.org/protobuf/proto"
 	"github.com/google/tink/go/core/registry"
 	subtledaead "github.com/google/tink/go/daead/subtle"
 	subtlehybrid "github.com/google/tink/go/hybrid/subtle"
@@ -45,6 +45,7 @@ import (
 	ctrhmacpb "github.com/google/tink/go/proto/aes_ctr_hmac_streaming_go_proto"
 	gcmpb "github.com/google/tink/go/proto/aes_gcm_go_proto"
 	gcmhkdfpb "github.com/google/tink/go/proto/aes_gcm_hkdf_streaming_go_proto"
+	gcmsivpb "github.com/google/tink/go/proto/aes_gcm_siv_go_proto"
 	aspb "github.com/google/tink/go/proto/aes_siv_go_proto"
 	commonpb "github.com/google/tink/go/proto/common_go_proto"
 	ecdsapb "github.com/google/tink/go/proto/ecdsa_go_proto"
@@ -90,8 +91,8 @@ func (km *DummyAEADKeyManager) TypeURL() string {
 
 // DummyAEAD is a dummy implementation of AEAD interface. It "encrypts" data
 // with a simple serialization capturing the dummy name, plaintext, and
-// additional data, and "decrypts" it by reversing this and checking that the
-// name and additional data match.
+// associated data, and "decrypts" it by reversing this and checking that the
+// name and associated data match.
 type DummyAEAD struct {
 	Name string
 }
@@ -99,17 +100,17 @@ type DummyAEAD struct {
 type dummyAEADData struct {
 	Name           string
 	Plaintext      []byte
-	AdditionalData []byte
+	AssociatedData []byte
 }
 
 // Encrypt encrypts the plaintext.
-func (a *DummyAEAD) Encrypt(plaintext []byte, additionalData []byte) ([]byte, error) {
+func (a *DummyAEAD) Encrypt(plaintext []byte, associatedData []byte) ([]byte, error) {
 	buf := new(bytes.Buffer)
 	encoder := gob.NewEncoder(buf)
 	err := encoder.Encode(dummyAEADData{
 		Name:           a.Name,
 		Plaintext:      plaintext,
-		AdditionalData: additionalData,
+		AssociatedData: associatedData,
 	})
 	if err != nil {
 		return nil, fmt.Errorf("dummy aead encrypt: %v", err)
@@ -118,16 +119,80 @@ func (a *DummyAEAD) Encrypt(plaintext []byte, additionalData []byte) ([]byte, er
 }
 
 // Decrypt decrypts the ciphertext.
-func (a *DummyAEAD) Decrypt(ciphertext []byte, additionalData []byte) ([]byte, error) {
+func (a *DummyAEAD) Decrypt(ciphertext []byte, associatedData []byte) ([]byte, error) {
 	data := dummyAEADData{}
 	decoder := gob.NewDecoder(bytes.NewBuffer(ciphertext))
 	if err := decoder.Decode(&data); err != nil {
 		return nil, fmt.Errorf("dummy aead decrypt: invalid data: %v", err)
 	}
-	if data.Name != a.Name || !bytes.Equal(data.AdditionalData, additionalData) {
-		return nil, errors.New("dummy aead encrypt: name/additional data mismatch")
+	if data.Name != a.Name || !bytes.Equal(data.AssociatedData, associatedData) {
+		return nil, errors.New("dummy aead encrypt: name/associated data mismatch")
 	}
 	return data.Plaintext, nil
+}
+
+// AlwaysFailingAead fails encryption and decryption operations.
+type AlwaysFailingAead struct {
+	Error error
+}
+
+var _ (tink.AEAD) = (*AlwaysFailingAead)(nil)
+
+// NewAlwaysFailingAead creates a new always failing AEAD.
+func NewAlwaysFailingAead(err error) tink.AEAD {
+	return &AlwaysFailingAead{Error: err}
+}
+
+// Encrypt returns an error on encryption.
+func (a *AlwaysFailingAead) Encrypt(plaintext []byte, associatedData []byte) ([]byte, error) {
+	return nil, fmt.Errorf("AlwaysFailingAead will always fail on encryption: %v", a.Error)
+}
+
+// Decrypt returns an error on decryption.
+func (a *AlwaysFailingAead) Decrypt(ciphertext []byte, associatedData []byte) ([]byte, error) {
+	return nil, fmt.Errorf("AlwaysFailingAead will always fail on decryption: %v", a.Error)
+}
+
+// TestKeyManager is key manager which can be setup to return an arbitrary primitive for a type URL
+// useful for testing.
+type TestKeyManager struct {
+	primitive interface{}
+	typeURL   string
+}
+
+var _ registry.KeyManager = (*TestKeyManager)(nil)
+
+// NewTestKeyManager creates a new key manager that returns a specific primitive for a typeURL.
+func NewTestKeyManager(primitive interface{}, typeURL string) registry.KeyManager {
+	return &TestKeyManager{
+		primitive: primitive,
+		typeURL:   typeURL,
+	}
+}
+
+// Primitive constructs a primitive instance for the key given input key.
+func (km *TestKeyManager) Primitive(serializedKey []byte) (interface{}, error) {
+	return km.primitive, nil
+}
+
+// NewKey generates a new key according to specification in serializedKeyFormat.
+func (km *TestKeyManager) NewKey(serializedKeyFormat []byte) (proto.Message, error) {
+	return nil, fmt.Errorf("TestKeyManager: not implemented")
+}
+
+// NewKeyData generates a new KeyData according to specification in serializedkeyFormat.
+func (km *TestKeyManager) NewKeyData(serializedKeyFormat []byte) (*tinkpb.KeyData, error) {
+	return nil, fmt.Errorf("TestKeyManager: not implemented")
+}
+
+// DoesSupport returns true if this KeyManager supports key type identified by typeURL.
+func (km *TestKeyManager) DoesSupport(typeURL string) bool {
+	return typeURL == km.typeURL
+}
+
+// TypeURL returns the type URL.
+func (km *TestKeyManager) TypeURL() string {
+	return km.typeURL
 }
 
 // DummySigner is a dummy implementation of the Signer interface.
@@ -168,7 +233,7 @@ type DummyMAC struct {
 	Name string
 }
 
-// ComputeMAC computes message authentication code (MAC) for {@code data}.
+// ComputeMAC computes a message authentication code (MAC) for data.
 func (h *DummyMAC) ComputeMAC(data []byte) ([]byte, error) {
 	var m []byte
 	m = append(m, data...)
@@ -176,7 +241,8 @@ func (h *DummyMAC) ComputeMAC(data []byte) ([]byte, error) {
 	return m, nil
 }
 
-// VerifyMAC verifies whether {@code mac} is a correct authentication code (MAC) for {@code data}.
+// VerifyMAC verifies whether mac is a correct message authentication code
+// (MAC) for data.
 func (h *DummyMAC) VerifyMAC(mac []byte, data []byte) error {
 	return nil
 }
@@ -199,6 +265,12 @@ func (d *DummyKMSClient) GetAEAD(keyURI string) (tink.AEAD, error) {
 // NewTestAESGCMKeyset creates a new Keyset containing an AESGCMKey.
 func NewTestAESGCMKeyset(primaryOutputPrefixType tinkpb.OutputPrefixType) *tinkpb.Keyset {
 	keyData := NewAESGCMKeyData(16)
+	return NewTestKeyset(keyData, primaryOutputPrefixType)
+}
+
+// NewTestAESGCMSIVKeyset creates a new Keyset containing an AESGCMSIVKey.
+func NewTestAESGCMSIVKeyset(primaryOutputPrefixType tinkpb.OutputPrefixType) *tinkpb.Keyset {
+	keyData := NewAESGCMSIVKeyData(16)
 	return NewTestKeyset(keyData, primaryOutputPrefixType)
 }
 
@@ -359,6 +431,31 @@ func NewAESGCMKeyData(keySize uint32) *tinkpb.KeyData {
 // NewAESGCMKeyFormat returns a new AESGCMKeyFormat.
 func NewAESGCMKeyFormat(keySize uint32) *gcmpb.AesGcmKeyFormat {
 	return &gcmpb.AesGcmKeyFormat{
+		KeySize: keySize,
+	}
+}
+
+// NewAESGCMSIVKey creates a randomly generated AESGCMSIVKey.
+func NewAESGCMSIVKey(keyVersion uint32, keySize uint32) *gcmsivpb.AesGcmSivKey {
+	keyValue := random.GetRandomBytes(keySize)
+	return &gcmsivpb.AesGcmSivKey{
+		Version:  keyVersion,
+		KeyValue: keyValue,
+	}
+}
+
+// NewAESGCMSIVKeyData creates a KeyData containing a randomly generated AESGCMSIVKey.
+func NewAESGCMSIVKeyData(keySize uint32) *tinkpb.KeyData {
+	serializedKey, err := proto.Marshal(NewAESGCMSIVKey(AESGCMKeyVersion, keySize))
+	if err != nil {
+		log.Fatalf("NewAESGCMSIVKeyData(keySize=%d): Failed serializing proto; err=%v", keySize, err)
+	}
+	return NewKeyData(AESGCMTypeURL, serializedKey, tinkpb.KeyData_SYMMETRIC)
+}
+
+// NewAESGCMSIVKeyFormat returns a new AESGCMKeyFormat.
+func NewAESGCMSIVKeyFormat(keySize uint32) *gcmsivpb.AesGcmSivKeyFormat {
+	return &gcmsivpb.AesGcmSivKeyFormat{
 		KeySize: keySize,
 	}
 }
@@ -654,11 +751,10 @@ func NewKeyset(primaryKeyID uint32,
 
 // GenerateMutations generates different byte mutations for a given byte array.
 func GenerateMutations(src []byte) (all [][]byte) {
-	n := make([]byte, len(src))
-
 	// Flip bits
 	for i := 0; i < len(src); i++ {
 		for j := 0; j < 8; j++ {
+			n := make([]byte, len(src))
 			copy(n, src)
 			n[i] = n[i] ^ (1 << uint8(j))
 			all = append(all, n)
@@ -666,7 +762,8 @@ func GenerateMutations(src []byte) (all [][]byte) {
 	}
 
 	//truncate bytes
-	for i := 0; i < len(src); i++ {
+	for i := 1; i < len(src); i++ {
+		n := make([]byte, len(src[i:]))
 		copy(n, src[i:])
 		all = append(all, n)
 	}

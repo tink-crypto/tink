@@ -49,11 +49,11 @@ class AesEaxAesni : public Aead {
 
   crypto::tink::util::StatusOr<std::string> Encrypt(
       absl::string_view plaintext,
-      absl::string_view additional_data) const override;
+      absl::string_view associated_data) const override;
 
   crypto::tink::util::StatusOr<std::string> Decrypt(
       absl::string_view ciphertext,
-      absl::string_view additional_data) const override;
+      absl::string_view associated_data) const override;
 
  protected:
   // The tag size is fixed for this implementation.
@@ -62,11 +62,11 @@ class AesEaxAesni : public Aead {
   static constexpr size_t kBlockSize = 16;
 
   virtual bool RawEncrypt(absl::string_view nonce, absl::string_view in,
-                          absl::string_view additional_data,
+                          absl::string_view associated_data,
                           absl::Span<uint8_t> ciphertext) const;
 
   virtual bool RawDecrypt(absl::string_view nonce, absl::string_view in,
-                          absl::string_view additional_data,
+                          absl::string_view associated_data,
                           absl::Span<uint8_t> plaintext) const;
 
  private:

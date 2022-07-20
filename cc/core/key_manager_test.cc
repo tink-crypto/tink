@@ -14,8 +14,12 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 #include "tink/key_manager.h"
+
+#include <memory>
+
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include "absl/status/status.h"
 #include "tink/util/status.h"
 #include "tink/util/test_matchers.h"
 #include "proto/empty.pb.h"
@@ -29,24 +33,24 @@ using ::crypto::tink::test::StatusIs;
 
 TEST(AlwaysFailingFactoryTest, NewKeyFromProtoLite) {
   std::unique_ptr<KeyFactory> factory = KeyFactory::AlwaysFailingFactory(
-      util::Status(crypto::tink::util::error::ALREADY_EXISTS, ""));
+      util::Status(absl::StatusCode::kAlreadyExists, ""));
   google::crypto::tink::Empty empty_proto;
   EXPECT_THAT(factory->NewKey(empty_proto).status(),
-              StatusIs(util::error::ALREADY_EXISTS));
+              StatusIs(absl::StatusCode::kAlreadyExists));
 }
 
 TEST(AlwaysFailingFactoryTest, NewKeyFromStringView) {
   std::unique_ptr<KeyFactory> factory = KeyFactory::AlwaysFailingFactory(
-      util::Status(crypto::tink::util::error::ALREADY_EXISTS, ""));
+      util::Status(absl::StatusCode::kAlreadyExists, ""));
   EXPECT_THAT(factory->NewKey("").status(),
-              StatusIs(util::error::ALREADY_EXISTS));
+              StatusIs(absl::StatusCode::kAlreadyExists));
 }
 
 TEST(AlwaysFailingFactoryTest, NewKeyData) {
   std::unique_ptr<KeyFactory> factory = KeyFactory::AlwaysFailingFactory(
-      util::Status(crypto::tink::util::error::ALREADY_EXISTS, ""));
+      util::Status(absl::StatusCode::kAlreadyExists, ""));
   EXPECT_THAT(factory->NewKeyData("").status(),
-              StatusIs(util::error::ALREADY_EXISTS));
+              StatusIs(absl::StatusCode::kAlreadyExists));
 }
 
 }  // namespace

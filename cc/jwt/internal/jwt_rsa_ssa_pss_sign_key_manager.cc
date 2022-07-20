@@ -1,4 +1,4 @@
-// Copyright 2021 Google LLC.
+// Copyright 2021 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,6 +14,9 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 #include "tink/jwt/internal/jwt_rsa_ssa_pss_sign_key_manager.h"
+
+#include <string>
+#include <utility>
 
 #include "tink/jwt/internal/jwt_public_key_sign_impl.h"
 #include "tink/jwt/internal/jwt_rsa_ssa_pss_verify_key_manager.h"
@@ -31,20 +34,24 @@ using google::crypto::tink::JwtRsaSsaPssPublicKey;
 StatusOr<std::unique_ptr<JwtPublicKeySignInternal>>
 JwtRsaSsaPssSignKeyManager::PublicKeySignFactory::Create(
     const JwtRsaSsaPssPrivateKey& jwt_rsa_ssa_pss_private_key) const {
-  StatusOr<std::string> name_or = JwtRsaSsaPssVerifyKeyManager::AlgorithmName(
+  StatusOr<std::string> name = JwtRsaSsaPssVerifyKeyManager::AlgorithmName(
       jwt_rsa_ssa_pss_private_key.public_key().algorithm());
-  if (!name_or.ok()) {
-    return name_or.status();
+  if (!name.ok()) {
+    return name.status();
   }
-  StatusOr<std::unique_ptr<PublicKeySign>> sign_or =
+  StatusOr<std::unique_ptr<PublicKeySign>> sign =
       raw_key_manager_.GetPrimitive<PublicKeySign>(jwt_rsa_ssa_pss_private_key);
-  if (!sign_or.ok()) {
-    return sign_or.status();
+  if (!sign.ok()) {
+    return sign.status();
+  }
+  absl::optional<absl::string_view> custom_kid = absl::nullopt;
+  if (jwt_rsa_ssa_pss_private_key.public_key().has_custom_kid()) {
+    custom_kid = jwt_rsa_ssa_pss_private_key.public_key().custom_kid().value();
   }
   std::unique_ptr<JwtPublicKeySignInternal> jwt_public_key_sign =
-      absl::make_unique<jwt_internal::JwtPublicKeySignImpl>(
-          std::move(sign_or.ValueOrDie()), name_or.ValueOrDie());
-  return jwt_public_key_sign;
+      absl::make_unique<jwt_internal::JwtPublicKeySignImpl>(*std::move(sign),
+                                                            *name, custom_kid);
+  return std::move(jwt_public_key_sign);
 }
 
 uint32_t JwtRsaSsaPssSignKeyManager::get_version() const {

@@ -23,11 +23,12 @@ import (
 	"github.com/google/tink/go/keyset"
 	"github.com/google/tink/go/signature"
 	"github.com/google/tink/go/testkeyset"
-	pb "github.com/google/tink/proto/testing/testing_api_go_grpc"
+	pb "github.com/google/tink/testing/go/proto/testing_api_go_grpc"
 )
 
 // SignatureService implements the Signature testing service.
 type SignatureService struct {
+	pb.SignatureServer
 }
 
 func (s *SignatureService) Sign(ctx context.Context, req *pb.SignatureSignRequest) (*pb.SignatureSignResponse, error) {

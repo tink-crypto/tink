@@ -49,7 +49,7 @@ class StreamingAead {
       std::unique_ptr<crypto::tink::OutputStream>>
   NewEncryptingStream(
       std::unique_ptr<crypto::tink::OutputStream> ciphertext_destination,
-      absl::string_view associated_data) = 0;
+      absl::string_view associated_data) const = 0;
 
   // Returns a wrapper around 'ciphertext_source', such that reading
   // via the wrapper leads to AEAD-decryption of the underlying ciphertext,
@@ -60,7 +60,7 @@ class StreamingAead {
       std::unique_ptr<crypto::tink::InputStream>>
   NewDecryptingStream(
       std::unique_ptr<crypto::tink::InputStream> ciphertext_source,
-      absl::string_view associated_data) = 0;
+      absl::string_view associated_data) const = 0;
 
   // Returns a wrapper around 'ciphertext_source', such that reading
   // via the wrapper leads to AEAD-decryption of the underlying ciphertext,
@@ -75,7 +75,7 @@ class StreamingAead {
       std::unique_ptr<crypto::tink::RandomAccessStream>>
   NewDecryptingRandomAccessStream(
       std::unique_ptr<crypto::tink::RandomAccessStream> ciphertext_source,
-      absl::string_view associated_data) = 0;
+      absl::string_view associated_data) const = 0;
 
   virtual ~StreamingAead() {}
 };

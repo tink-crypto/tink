@@ -52,4 +52,6 @@ public final class Hex {
     }
     return result;
   }
+
+  private Hex() {}
 }

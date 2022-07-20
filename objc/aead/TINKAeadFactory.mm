@@ -41,11 +41,11 @@
     }
     return nil;
   }
-  id<TINKAead> aead = [[TINKAeadInternal alloc] initWithCCAead:std::move(st.ValueOrDie())];
+  id<TINKAead> aead = [[TINKAeadInternal alloc] initWithCCAead:std::move(st.value())];
   if (!aead) {
     if (error) {
       *error = TINKStatusToError(crypto::tink::util::Status(
-          crypto::tink::util::error::RESOURCE_EXHAUSTED, "Cannot initialize TINKAead"));
+          absl::StatusCode::kResourceExhausted, "Cannot initialize TINKAead"));
     }
     return nil;
   }

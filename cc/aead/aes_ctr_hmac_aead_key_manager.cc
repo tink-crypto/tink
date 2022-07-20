@@ -16,28 +16,32 @@
 
 #include "tink/aead/aes_ctr_hmac_aead_key_manager.h"
 
+#include <cstdint>
+#include <functional>
 #include <map>
+#include <memory>
+#include <string>
+#include <utility>
 
-#include "absl/base/casts.h"
+#include "absl/status/status.h"
+#include "absl/status/statusor.h"
 #include "absl/strings/str_cat.h"
 #include "tink/aead.h"
-#include "tink/key_manager.h"
 #include "tink/mac.h"
 #include "tink/mac/hmac_key_manager.h"
-#include "tink/registry.h"
 #include "tink/subtle/aes_ctr_boringssl.h"
 #include "tink/subtle/encrypt_then_authenticate.h"
-#include "tink/subtle/hmac_boringssl.h"
+#include "tink/subtle/ind_cpa_cipher.h"
 #include "tink/subtle/random.h"
 #include "tink/util/enums.h"
-#include "tink/util/errors.h"
-#include "tink/util/protobuf_helper.h"
 #include "tink/util/secret_data.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "tink/util/validation.h"
+#include "proto/aes_ctr.pb.h"
 #include "proto/aes_ctr_hmac_aead.pb.h"
-#include "proto/tink.pb.h"
+#include "proto/common.pb.h"
+#include "proto/hmac.pb.h"
 
 namespace crypto {
 namespace tink {
@@ -74,7 +78,7 @@ StatusOr<AesCtrHmacAeadKey> AesCtrHmacAeadKeyManager::CreateKey(
   if (!hmac_key_or.status().ok()) {
     return hmac_key_or.status();
   }
-  *aes_ctr_hmac_aead_key.mutable_hmac_key() = hmac_key_or.ValueOrDie();
+  *aes_ctr_hmac_aead_key.mutable_hmac_key() = hmac_key_or.value();
 
   return aes_ctr_hmac_aead_key;
 }
@@ -90,12 +94,12 @@ StatusOr<std::unique_ptr<Aead>> AesCtrHmacAeadKeyManager::AeadFactory::Create(
   if (!hmac_result.ok()) return hmac_result.status();
 
   auto cipher_res = subtle::EncryptThenAuthenticate::New(
-      std::move(aes_ctr_result.ValueOrDie()),
-      std::move(hmac_result.ValueOrDie()), key.hmac_key().params().tag_size());
+      std::move(aes_ctr_result.value()), std::move(hmac_result.value()),
+      key.hmac_key().params().tag_size());
   if (!cipher_res.ok()) {
     return cipher_res.status();
   }
-  return std::move(cipher_res.ValueOrDie());
+  return std::move(cipher_res.value());
 }
 
 Status AesCtrHmacAeadKeyManager::ValidateKey(
@@ -115,7 +119,7 @@ Status AesCtrHmacAeadKeyManager::ValidateKey(
   }
   if (aes_ctr_key.params().iv_size() < kMinIvSizeInBytes ||
       aes_ctr_key.params().iv_size() > 16) {
-    return util::Status(util::error::INVALID_ARGUMENT,
+    return util::Status(absl::StatusCode::kInvalidArgument,
                         "Invalid AesCtrHmacAeadKey: IV size out of range.");
   }
   return HmacKeyManager().ValidateKey(key.hmac_key());
@@ -132,7 +136,7 @@ Status AesCtrHmacAeadKeyManager::ValidateKeyFormat(
   if (aes_ctr_key_format.params().iv_size() < kMinIvSizeInBytes ||
       aes_ctr_key_format.params().iv_size() > 16) {
     return util::Status(
-        util::error::INVALID_ARGUMENT,
+        absl::StatusCode::kInvalidArgument,
         "Invalid AesCtrHmacAeadKeyFormat: IV size out of range.");
   }
 
@@ -140,15 +144,14 @@ Status AesCtrHmacAeadKeyManager::ValidateKeyFormat(
   auto hmac_key_format = key_format.hmac_key_format();
   if (hmac_key_format.key_size() < kMinKeySizeInBytes) {
     return util::Status(
-        util::error::INVALID_ARGUMENT,
+        absl::StatusCode::kInvalidArgument,
         "Invalid AesCtrHmacAeadKeyFormat: HMAC key_size is too small.");
   }
   auto params = hmac_key_format.params();
   if (params.tag_size() < kMinTagSizeInBytes) {
-    return util::Status(util::error::INVALID_ARGUMENT,
+    return util::Status(absl::StatusCode::kInvalidArgument,
                         absl::StrCat("Invalid HmacParams: tag_size ",
-                                     params.tag_size(),
-                                     " is too small."));
+                                     params.tag_size(), " is too small."));
   }
   std::map<HashType, uint32_t> max_tag_size = {{HashType::SHA1, 20},
                                                {HashType::SHA224, 28},
@@ -156,18 +159,17 @@ Status AesCtrHmacAeadKeyManager::ValidateKeyFormat(
                                                {HashType::SHA384, 48},
                                                {HashType::SHA512, 64}};
   if (max_tag_size.find(params.hash()) == max_tag_size.end()) {
-    return util::Status(util::error::INVALID_ARGUMENT,
-                        absl::StrCat("Invalid HmacParams: HashType '",
-                                     Enums::HashName(params.hash()),
-                                     "' not supported."));
+    return util::Status(
+        absl::StatusCode::kInvalidArgument,
+        absl::StrCat("Invalid HmacParams: HashType '",
+                     Enums::HashName(params.hash()), "' not supported."));
   } else {
     if (params.tag_size() > max_tag_size[params.hash()]) {
-      return util::Status(util::error::INVALID_ARGUMENT,
-                          absl::StrCat("Invalid HmacParams: tag_size ",
-                                       params.tag_size(),
-                                       " is too big for HashType '",
-                                       Enums::HashName(params.hash()),
-                                       "'."));
+      return util::Status(
+          absl::StatusCode::kInvalidArgument,
+          absl::StrCat("Invalid HmacParams: tag_size ", params.tag_size(),
+                       " is too big for HashType '",
+                       Enums::HashName(params.hash()), "'."));
     }
   }
 

@@ -13,8 +13,7 @@
 # limitations under the License.
 """Cross-language tests for the PrfSet primitive."""
 
-# Placeholder for import for type annotations
-from typing import Iterable, Text
+from typing import Iterable
 
 from absl.testing import absltest
 from absl.testing import parameterized
@@ -33,7 +32,7 @@ OUTPUT_LENGTHS = [
 ]
 
 
-def all_prf_key_template_names() -> Iterable[Text]:
+def all_prf_key_template_names() -> Iterable[str]:
   """Yields all PRF key template names."""
   for key_type in supported_key_types.PRF_KEY_TYPES:
     for key_template_name in supported_key_types.KEY_TEMPLATE_NAMES[key_type]:
@@ -48,7 +47,7 @@ def all_prf_key_template_names_with_some_output_length():
         yield (key_template_name, output_length)
 
 
-def gen_keyset(key_template_name: Text) -> bytes:
+def gen_keyset(key_template_name: str) -> bytes:
   builder = keyset_builder.new_keyset_builder()
   primary_key_id = builder.add_new_key(
       supported_key_types.KEY_TEMPLATE[key_template_name])

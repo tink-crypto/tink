@@ -16,42 +16,44 @@
 
 package com.google.crypto.tink.subtle;
 
+import com.google.crypto.tink.aead.internal.InsecureNonceChaCha20;
+import java.nio.ByteBuffer;
+import java.security.GeneralSecurityException;
 import java.security.InvalidKeyException;
+import java.util.Arrays;
 
 /**
  * A stream cipher, as described in RFC 8439 https://tools.ietf.org/html/rfc8439, section 2.4.
  *
  * <p>This cipher is meant to be used to construct an AEAD with Poly1305.
  */
-class ChaCha20 extends ChaCha20Base {
+class ChaCha20 implements IndCpaCipher {
+  static final int NONCE_LENGTH_IN_BYTES = 12;
+
+  private final InsecureNonceChaCha20 cipher;
+
   ChaCha20(final byte[] key, int initialCounter) throws InvalidKeyException {
-    super(key, initialCounter);
+    cipher = new InsecureNonceChaCha20(key, initialCounter);
   }
 
   @Override
-  int[] createInitialState(final int[] nonce, int counter) {
-    if (nonce.length != nonceSizeInBytes() / 4) {
-      throw new IllegalArgumentException(
-          String.format("ChaCha20 uses 96-bit nonces, but got a %d-bit nonce", nonce.length * 32));
+  public byte[] encrypt(final byte[] plaintext) throws GeneralSecurityException {
+    ByteBuffer output = ByteBuffer.allocate(NONCE_LENGTH_IN_BYTES + plaintext.length);
+    byte[] nonce = Random.randBytes(NONCE_LENGTH_IN_BYTES);
+    output.put(nonce); // Prepend nonce to ciphertext output.
+    cipher.encrypt(output, nonce, plaintext);
+    return output.array();
+  }
+
+  @Override
+  public byte[] decrypt(final byte[] ciphertext) throws GeneralSecurityException {
+    if (ciphertext.length < NONCE_LENGTH_IN_BYTES) {
+      throw new GeneralSecurityException("ciphertext too short");
     }
-    // Set the initial state based on https://tools.ietf.org/html/rfc8439#section-2.3
-    int[] state = new int[ChaCha20Base.BLOCK_SIZE_IN_INTS];
-    // The first four words (0-3) are constants: 0x61707865, 0x3320646e, 0x79622d32, 0x6b206574.
-    // The next eight words (4-11) are taken from the 256-bit key by reading the bytes in
-    // little-endian order, in 4-byte chunks.
-    ChaCha20Base.setSigmaAndKey(state, this.key);
-    // Word 12 is a block counter. Since each block is 64-byte, a 32-bit word is enough for 256
-    // gigabytes of data. Ref: https://tools.ietf.org/html/rfc8439#section-2.3.
-    state[12] = counter;
-    // Words 13-15 are a nonce, which must not be repeated for the same key. The 13th word is the
-    // first 32 bits of the input nonce taken as a little-endian integer, while the 15th word is the
-    // last 32 bits.
-    System.arraycopy(nonce, 0, state, 13, nonce.length);
-    return state;
-  }
-
-  @Override
-  int nonceSizeInBytes() {
-    return 12;
+    byte[] nonce = Arrays.copyOf(ciphertext, NONCE_LENGTH_IN_BYTES);
+    ByteBuffer rawCiphertext =
+        ByteBuffer.wrap(
+            ciphertext, NONCE_LENGTH_IN_BYTES, ciphertext.length - NONCE_LENGTH_IN_BYTES);
+    return cipher.decrypt(nonce, rawCiphertext);
   }
 }

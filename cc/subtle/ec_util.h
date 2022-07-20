@@ -17,7 +17,8 @@
 #ifndef TINK_SUBTLE_EC_UTIL_H_
 #define TINK_SUBTLE_EC_UTIL_H_
 
-#include "absl/strings/string_view.h"
+#include "absl/base/macros.h"
+#include "tink/internal/ec_util.h"
 #include "tink/subtle/common_enums.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
@@ -30,12 +31,22 @@ class EcUtil {
  public:
   // Returns the encoding size of a point on the specified elliptic curve
   // when the given 'point_format' is used.
-  static crypto::tink::util::StatusOr<uint32_t> EncodingSizeInBytes(
-      EllipticCurveType curve_type, EcPointFormat point_format);
+  ABSL_DEPRECATED("Use of this function is dicouraged outside Tink.")
+  static inline crypto::tink::util::StatusOr<uint32_t> EncodingSizeInBytes(
+      EllipticCurveType curve_type, EcPointFormat point_format) {
+    return internal::EcPointEncodingSizeInBytes(curve_type, point_format);
+  }
 
   // Returns the size (in bytes) of an element of the field over which
   // the curve is defined.
-  static uint32_t FieldSizeInBytes(EllipticCurveType curve_type);
+  ABSL_DEPRECATED("Use of this function is dicouraged outside Tink.")
+  static inline uint32_t FieldSizeInBytes(EllipticCurveType curve_type) {
+    util::StatusOr<int32_t> size = internal::EcFieldSizeInBytes(curve_type);
+    if (!size.ok()) {
+      return 0;
+    }
+    return *size;
+  }
 };
 
 }  // namespace subtle

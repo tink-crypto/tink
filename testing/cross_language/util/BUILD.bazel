@@ -11,7 +11,7 @@ licenses(["notice"])
 
 python_grpc_library(
     name = "testing_api_python_library",
-    deps = ["@tink_base//proto/testing:testing_api_proto"],
+    protos = ["//proto:testing_api_proto"],
 )
 
 py_library(
@@ -84,7 +84,6 @@ py_library(
         ":_primitives",
         ":testing_api_python_library",
         "@com_google_protobuf//:protobuf_python",
-        "@tink_py//tink/testing:helper",
         requirement("absl-py"),
         "@org_python_pypi_portpicker//:portpicker",
     ],
@@ -114,5 +113,53 @@ py_test(
         "@tink_py//tink/proto:tink_py_pb2",
         "@tink_py//tink/signature",
         "@tink_py//tink/streaming_aead",
+    ],
+)
+
+py_library(
+    name = "key_util",
+    srcs = ["key_util.py"],
+    srcs_version = "PY3",
+    deps = [
+        "@com_google_protobuf//:protobuf_python",
+        "@tink_py//tink/proto:aes_cmac_prf_py_pb2",
+        "@tink_py//tink/proto:aes_cmac_py_pb2",
+        "@tink_py//tink/proto:aes_ctr_hmac_aead_py_pb2",
+        "@tink_py//tink/proto:aes_ctr_hmac_streaming_py_pb2",
+        "@tink_py//tink/proto:aes_eax_py_pb2",
+        "@tink_py//tink/proto:aes_gcm_hkdf_streaming_py_pb2",
+        "@tink_py//tink/proto:aes_gcm_py_pb2",
+        "@tink_py//tink/proto:aes_gcm_siv_py_pb2",
+        "@tink_py//tink/proto:aes_siv_py_pb2",
+        "@tink_py//tink/proto:chacha20_poly1305_py_pb2",
+        "@tink_py//tink/proto:ecdsa_py_pb2",
+        "@tink_py//tink/proto:ecies_aead_hkdf_py_pb2",
+        "@tink_py//tink/proto:ed25519_py_pb2",
+        "@tink_py//tink/proto:hkdf_prf_py_pb2",
+        "@tink_py//tink/proto:hmac_prf_py_pb2",
+        "@tink_py//tink/proto:hmac_py_pb2",
+        "@tink_py//tink/proto:hpke_py_pb2",
+        "@tink_py//tink/proto:jwt_ecdsa_py_pb2",
+        "@tink_py//tink/proto:jwt_hmac_py_pb2",
+        "@tink_py//tink/proto:jwt_rsa_ssa_pkcs1_py_pb2",
+        "@tink_py//tink/proto:jwt_rsa_ssa_pss_py_pb2",
+        "@tink_py//tink/proto:kms_aead_py_pb2",
+        "@tink_py//tink/proto:kms_envelope_py_pb2",
+        "@tink_py//tink/proto:rsa_ssa_pkcs1_py_pb2",
+        "@tink_py//tink/proto:rsa_ssa_pss_py_pb2",
+        "@tink_py//tink/proto:xchacha20_poly1305_py_pb2",
+    ],
+)
+
+py_test(
+    name = "key_util_test",
+    srcs = ["key_util_test.py"],
+    python_version = "PY3",
+    srcs_version = "PY3",
+    deps = [
+        ":key_util",
+        "@com_google_protobuf//:protobuf_python",
+        requirement("absl-py"),
+        "@tink_py//tink/proto:tink_py_pb2",
     ],
 )

@@ -101,7 +101,7 @@ public class PrfSetWrapperTest {
 
     @Test
     public void testWrapEmptyThrows() throws Exception {
-      final PrimitiveSet<Prf> primitiveSet = PrimitiveSet.newPrimitiveSet(Prf.class);
+      final PrimitiveSet<Prf> primitiveSet = PrimitiveSet.newBuilder(Prf.class).build();
 
       assertThrows(
           GeneralSecurityException.class,
@@ -129,8 +129,8 @@ public class PrfSetWrapperTest {
             return new byte[0];
           }
         };
-    final PrimitiveSet<Prf> primitiveSet = PrimitiveSet.newPrimitiveSet(Prf.class);
-    primitiveSet.addPrimitive(unusedPrf, primary);
+    final PrimitiveSet<Prf> primitiveSet =
+        PrimitiveSet.newBuilder(Prf.class).addPrimitive(unusedPrf, primary).build();
     // Note: Added a primary key but did not call primitiveSet.setPrimary().
 
     assertThrows(

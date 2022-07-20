@@ -8,6 +8,7 @@ objc_library(
     hdrs = ["TINKErrors.h"],
     deps = [
         "//cc/util:status",
+        "@com_google_absl//absl/status",
     ],
 )
 

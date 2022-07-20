@@ -38,7 +38,6 @@ export interface KeyFactory {
 }
 
 export interface PrivateKeyFactory extends KeyFactory {
-  /** @override */
   getPublicKeyData(serializedPrivateKey: Uint8Array): PbKeyData;
 }
 

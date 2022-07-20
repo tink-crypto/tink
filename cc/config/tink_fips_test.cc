@@ -17,6 +17,7 @@
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include "absl/status/status.h"
 #include "openssl/crypto.h"
 #include "tink/aead/aead_config.h"
 #include "tink/internal/fips_utils.h"
@@ -68,18 +69,22 @@ TEST(TinkFipsTest, CompatibilityChecksWithBoringCrypto) {
     GTEST_SKIP() << "Test only run if BoringCrypto module is available.";
   }
 
+  Registry::Reset();
+
   // Tink is not build in FIPS mode, but the FIPS mode is enabled at runtime.
   EXPECT_THAT(crypto::tink::RestrictToFips(), IsOk());
 
   // In FIPS only mode compatibility checks should disallow algorithms
   // with the FipsCompatibility::kNone flag.
   EXPECT_THAT(internal::CheckFipsCompatibility<FipsIncompatible>(),
-              StatusIs(util::error::INTERNAL));
+              StatusIs(absl::StatusCode::kInternal));
 
   // FIPS validated implementations should still be allowed.
   EXPECT_THAT(
       internal::CheckFipsCompatibility<FipsCompatibleWithBoringCrypto>(),
       IsOk());
+
+  internal::UnSetFipsRestricted();
 }
 
 TEST(TinkFipsTest, CompatibilityChecksWithoutBoringCrypto) {
@@ -87,19 +92,23 @@ TEST(TinkFipsTest, CompatibilityChecksWithoutBoringCrypto) {
     GTEST_SKIP() << "Test only run if BoringCrypto module is not available.";
   }
 
+  Registry::Reset();
+
   // Tink is not build in FIPS mode, but the FIPS mode is enabled at runtime.
   EXPECT_THAT(crypto::tink::RestrictToFips(), IsOk());
 
   // In FIPS only mode compatibility checks should disallow algorithms
   // with the FipsCompatibility::kNone flag.
   EXPECT_THAT(internal::CheckFipsCompatibility<FipsIncompatible>(),
-              StatusIs(util::error::INTERNAL));
+              StatusIs(absl::StatusCode::kInternal));
 
   // FIPS validated implementations are not allowed if BoringCrypto is not
   // available.
   EXPECT_THAT(
       internal::CheckFipsCompatibility<FipsCompatibleWithBoringCrypto>(),
-      StatusIs(util::error::INTERNAL));
+      StatusIs(absl::StatusCode::kInternal));
+
+  internal::UnSetFipsRestricted();
 }
 
 TEST(TinkFipsTest, FailIfRegistryNotEmpty) {
@@ -111,7 +120,8 @@ TEST(TinkFipsTest, FailIfRegistryNotEmpty) {
   internal::UnSetFipsRestricted();
 
   EXPECT_THAT(AeadConfig::Register(), IsOk());
-  EXPECT_THAT(crypto::tink::RestrictToFips(), StatusIs(util::error::INTERNAL));
+  EXPECT_THAT(crypto::tink::RestrictToFips(),
+              StatusIs(absl::StatusCode::kInternal));
 }
 
 }  // namespace

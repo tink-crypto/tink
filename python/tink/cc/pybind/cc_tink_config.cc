@@ -14,9 +14,10 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "tink/cc/cc_tink_config.h"
+#include "tink/cc/pybind/cc_tink_config.h"
 
-#include "tink/cc/pybind/status_casters.h"
+#include "pybind11/pybind11.h"
+#include "tink/cc/cc_tink_config.h"
 
 namespace crypto {
 namespace tink {

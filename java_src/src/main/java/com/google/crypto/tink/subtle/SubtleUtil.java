@@ -24,7 +24,7 @@ import java.security.MessageDigest;
 import java.util.Arrays;
 
 /** Helper methods. */
-public class SubtleUtil {
+public final class SubtleUtil {
 
   /**
    * Returns the Ecdsa algorithm name corresponding to a hash type.
@@ -172,4 +172,6 @@ public class SubtleUtil {
     }
     buffer.putInt((int) value);
   }
+
+  private SubtleUtil() {}
 }

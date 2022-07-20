@@ -20,7 +20,7 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/golang/protobuf/proto"
+	"google.golang.org/protobuf/proto"
 	"github.com/google/tink/go/keyset"
 	"github.com/google/tink/go/prf/subtle"
 	"github.com/google/tink/go/subtle/random"
@@ -39,11 +39,6 @@ var errInvalidHMACPRFKeyFormat = errors.New("hmac_prf_key_manager: invalid key f
 
 // hmacprfKeyManager generates new HMAC PRF keys and produces new instances of HMAC.
 type hmacprfKeyManager struct{}
-
-// newHMACPRFKeyManager returns a new hmacprfKeyManager.
-func newHMACPRFKeyManager() *hmacprfKeyManager {
-	return new(hmacprfKeyManager)
-}
 
 // Primitive constructs a HMAC instance for the given serialized HMACKey.
 func (km *hmacprfKeyManager) Primitive(serializedKey []byte) (interface{}, error) {
