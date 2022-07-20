@@ -94,3 +94,18 @@ java_test(
     ],
 )
 
+java_test(
+    name = "AssertsTest",
+    size = "small",
+    srcs = ["AssertsTest.java"],
+    deps = [
+        "//proto:test_proto_java_proto",
+        "//proto:tink_java_proto",
+        "//src/main/java/com/google/crypto/tink/internal:proto_key_format_serialization",
+        "//src/main/java/com/google/crypto/tink/internal:proto_key_serialization",
+        "//src/main/java/com/google/crypto/tink/internal/testing:asserts",
+        "//src/main/java/com/google/crypto/tink/subtle:hex",
+        "@com_google_protobuf//:protobuf_javalite",
+        "@maven//:junit_junit",
+    ],
+)
