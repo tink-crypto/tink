@@ -35,6 +35,8 @@ public final class HpkeUtil {
 
   // HPKE KDF algorithm identifiers.
   public static final byte[] HKDF_SHA256_KDF_ID = intToByteArray(2, 0x1);
+  public static final byte[] HKDF_SHA384_KDF_ID = intToByteArray(2, 0x2);
+  public static final byte[] HKDF_SHA512_KDF_ID = intToByteArray(2, 0x3);
 
   // HPKE AEAD algorithm identifiers.
   public static final byte[] AES_128_GCM_AEAD_ID = intToByteArray(2, 0x1);

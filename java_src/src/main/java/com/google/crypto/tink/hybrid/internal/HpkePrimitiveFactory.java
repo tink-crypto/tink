@@ -48,6 +48,10 @@ final class HpkePrimitiveFactory {
   static HpkeKdf createKdf(byte[] kdfId) {
     if (Arrays.equals(kdfId, HpkeUtil.HKDF_SHA256_KDF_ID)) {
       return new HkdfHpkeKdf("HmacSha256");
+    } else if (Arrays.equals(kdfId, HpkeUtil.HKDF_SHA384_KDF_ID)) {
+      return new HkdfHpkeKdf("HmacSha384");
+    } else if (Arrays.equals(kdfId, HpkeUtil.HKDF_SHA512_KDF_ID)) {
+      return new HkdfHpkeKdf("HmacSha512");
     }
     throw new IllegalArgumentException("Unrecognized HPKE KDF identifier");
   }
@@ -59,6 +63,10 @@ final class HpkePrimitiveFactory {
   static HpkeKdf createKdf(HpkeParams params) {
     if (params.getKdf() == com.google.crypto.tink.proto.HpkeKdf.HKDF_SHA256) {
       return new HkdfHpkeKdf("HmacSha256");
+    } else if (params.getKdf() == com.google.crypto.tink.proto.HpkeKdf.HKDF_SHA384) {
+      return new HkdfHpkeKdf("HmacSha384");
+    } else if (params.getKdf() == com.google.crypto.tink.proto.HpkeKdf.HKDF_SHA512) {
+      return new HkdfHpkeKdf("HmacSha512");
     }
     throw new IllegalArgumentException("Unrecognized HPKE KDF identifier");
   }

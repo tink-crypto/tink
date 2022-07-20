@@ -145,7 +145,7 @@ public final class HkdfHpkeKdfTest {
         kdf,
         HpkeUtil.BASE_MODE,
         HpkeUtil.X25519_HKDF_SHA256_KEM_ID,
-        HpkeUtil.intToByteArray(2, 0x3), // HKDF-SHA-512 algorithm identifier.
+        HpkeUtil.HKDF_SHA512_KDF_ID,
         HpkeUtil.AES_128_GCM_AEAD_ID);
   }
 
@@ -169,7 +169,7 @@ public final class HkdfHpkeKdfTest {
         kdf,
         HpkeUtil.BASE_MODE,
         HpkeUtil.X25519_HKDF_SHA256_KEM_ID,
-        HpkeUtil.intToByteArray(2, 0x3), // HKDF-SHA-512 algorithm identifier.
+        HpkeUtil.HKDF_SHA512_KDF_ID,
         HpkeUtil.AES_128_GCM_AEAD_ID,
         AES_128_GCM_KEY_LENGTH,
         AES_128_GCM_NONCE_LENGTH);
