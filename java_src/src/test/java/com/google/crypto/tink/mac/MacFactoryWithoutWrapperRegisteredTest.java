@@ -1,4 +1,4 @@
-// Copyright 2017 Google Inc.
+// Copyright 2022 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,48 +17,35 @@
 package com.google.crypto.tink.mac;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static org.junit.Assert.assertThrows;
 
 import com.google.crypto.tink.KeyTemplates;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.Mac;
-import java.security.GeneralSecurityException;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
-/** Tests for {@link MacFactory}. */
+/**
+ * Unit test for {@link MacFactory}.
+ *
+ * <p>The test case in this file needs {@link Registry} to not have {@link MacWrapper} registered.
+ * That's why it is in its own test file.
+ */
 @RunWith(JUnit4.class)
-public class MacFactoryTest {
-
-  @BeforeClass
-  public static void setUp() throws Exception {
-    MacConfig.register();
-  }
+public class MacFactoryWithoutWrapperRegisteredTest {
 
   @Test
   @SuppressWarnings("deprecation") // This is a test that the deprecated function works.
-  public void deprecatedMacFactoryGetPrimitive_sameAs_keysetHandleGetPrimitive() throws Exception {
+  public void deprecatedFactoryGetPrimitive_whenWrapperHasNotBeenRegistered_works()
+      throws Exception {
+    // Only register HmacKeyManager, but not the MacWrapper.
+    HmacKeyManager.register(/* newKeyAllowed = */ true);
     KeysetHandle handle = KeysetHandle.generateNew(KeyTemplates.get("HMAC_SHA256_128BITTAG"));
 
-    Mac mac = handle.getPrimitive(Mac.class);
-    Mac factoryMac = MacFactory.getPrimitive(handle);
+    Mac mac = MacFactory.getPrimitive(handle);
 
     byte[] data = "data".getBytes(UTF_8);
     byte[] tag = mac.computeMac(data);
-    byte[] factoryTag = factoryMac.computeMac(data);
-
     mac.verifyMac(tag, data);
-    factoryMac.verifyMac(tag, data);
-    mac.verifyMac(factoryTag, data);
-    factoryMac.verifyMac(factoryTag, data);
-
-    byte[] invalid = "invalid".getBytes(UTF_8);
-
-    assertThrows(GeneralSecurityException.class, () -> mac.verifyMac(tag, invalid));
-    assertThrows(GeneralSecurityException.class, () -> factoryMac.verifyMac(tag, invalid));
-    assertThrows(GeneralSecurityException.class, () -> mac.verifyMac(invalid, data));
-    assertThrows(GeneralSecurityException.class, () -> factoryMac.verifyMac(invalid, data));
   }
 }
