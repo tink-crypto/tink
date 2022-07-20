@@ -32,6 +32,9 @@ public final class HpkeUtil {
 
   // HPKE KEM algorithm identifiers.
   public static final byte[] X25519_HKDF_SHA256_KEM_ID = intToByteArray(2, 0x20);
+  public static final byte[] P256_HKDF_SHA256_KEM_ID = intToByteArray(2, 0x10);
+  public static final byte[] P384_HKDF_SHA384_KEM_ID = intToByteArray(2, 0x11);
+  public static final byte[] P521_HKDF_SHA512_KEM_ID = intToByteArray(2, 0x12);
 
   // HPKE KDF algorithm identifiers.
   public static final byte[] HKDF_SHA256_KDF_ID = intToByteArray(2, 0x1);
