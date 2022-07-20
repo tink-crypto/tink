@@ -264,9 +264,11 @@ public static final&nbsp;<a href="../../../../../com/google/crypto/tink/proto/Re
 <ul class="blockList">
 <li class="blockList">
 <h4>init</h4>
-<pre><a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Deprecated.html?is-external=true" title="class or interface in java.lang">@Deprecated</a>
+<pre>@InlineMe(replacement="DeterministicAeadConfig.register()",
+          imports="com.google.crypto.tink.daead.DeterministicAeadConfig")
+ <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Deprecated.html?is-external=true" title="class or interface in java.lang">@Deprecated</a>
 public static&nbsp;void&nbsp;init()
-                             throws <a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
+                                                                                                                                                                    throws <a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
 <div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;<span class="deprecationComment">use <a href="../../../../../com/google/crypto/tink/daead/DeterministicAeadConfig.html#register--"><code>register()</code></a></span></div>
 <div class="block">Tries to register with the <a href="../../../../../com/google/crypto/tink/Registry.html" title="class in com.google.crypto.tink"><code>Registry</code></a> all instances of <a href="../../../../../com/google/crypto/tink/Catalogue.html" title="interface in com.google.crypto.tink"><code>Catalogue</code></a> needed to handle DeterministicAead key types supported in
  Tink.
