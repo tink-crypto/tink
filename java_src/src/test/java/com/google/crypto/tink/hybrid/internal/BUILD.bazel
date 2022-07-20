@@ -6,7 +6,7 @@ java_test(
     name = "AesGcmHpkeAeadTest",
     size = "small",
     srcs = ["AesGcmHpkeAeadTest.java"],
-    data = ["//testdata:hpke_boringssl_test_vectors"],
+    data = ["//testdata/testvectors:hpke_boringssl"],
     deps = [
         "//src/main/java/com/google/crypto/tink/hybrid/internal:aes_gcm_hpke_aead",
         "//src/main/java/com/google/crypto/tink/hybrid/internal:hpke_util",
@@ -22,7 +22,7 @@ java_test(
     name = "ChaCha20Poly1305HpkeAeadTest",
     size = "small",
     srcs = ["ChaCha20Poly1305HpkeAeadTest.java"],
-    data = ["//testdata:hpke_boringssl_test_vectors"],
+    data = ["//testdata/testvectors:hpke_boringssl"],
     deps = [
         "//src/main/java/com/google/crypto/tink/hybrid/internal:chacha20_poly1305_hpke_aead",
         "//src/main/java/com/google/crypto/tink/hybrid/internal:hpke_util",
@@ -38,7 +38,7 @@ java_test(
     name = "HkdfHpkeKdfTest",
     size = "small",
     srcs = ["HkdfHpkeKdfTest.java"],
-    data = ["//testdata:hpke_boringssl_test_vectors"],
+    data = ["//testdata/testvectors:hpke_boringssl"],
     deps = [
         "//src/main/java/com/google/crypto/tink/hybrid/internal:hkdf_hpke_kdf",
         "//src/main/java/com/google/crypto/tink/hybrid/internal:hpke_util",
@@ -57,7 +57,7 @@ java_test(
     name = "HpkeContextTest",
     size = "small",
     srcs = ["HpkeContextTest.java"],
-    data = ["//testdata:hpke_boringssl_test_vectors"],
+    data = ["//testdata/testvectors:hpke_boringssl"],
     deps = [
         "//proto:hpke_java_proto",
         "//src/main/java/com/google/crypto/tink/hybrid/internal:hpke_aead",
@@ -188,7 +188,7 @@ java_test(
     name = "X25519HpkeKemTest",
     size = "small",
     srcs = ["X25519HpkeKemTest.java"],
-    data = ["//testdata:hpke_boringssl_test_vectors"],
+    data = ["//testdata/testvectors:hpke_boringssl"],
     deps = [
         "//src/main/java/com/google/crypto/tink/hybrid/internal:hkdf_hpke_kdf",
         "//src/main/java/com/google/crypto/tink/hybrid/internal:hpke_kem_encap_output",

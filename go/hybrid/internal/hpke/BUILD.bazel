@@ -41,7 +41,7 @@ go_test(
         "primitive_factory_test.go",
         "x25519_kem_test.go",
     ],
-    data = ["//testdata:hpke_boringssl_test_vectors"],
+    data = ["//testdata/testvectors:hpke_boringssl"],
     embed = [":hpke"],
     deps = [
         "//proto/hpke_go_proto",
