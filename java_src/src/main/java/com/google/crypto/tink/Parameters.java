@@ -29,12 +29,13 @@ import com.google.errorprone.annotations.Immutable;
 @Alpha
 public abstract class Parameters {
   /**
-   * Returns true if a key created with this format has to have a certain ID when it is in a keyset.
+   * Returns true if a key created with the parameters in this object has to have a certain ID when
+   * it is in a keyset.
    *
    * <p>In Tink, certain keys change their behavior depending on the key id (for example, an {@link
    * Aead} object can prefix the ciphertext with the big endian encoding of the key id). If this is
-   * the case, such a key should require a unique id in {@link Key#getIdRequirement} and return
-   * true here.
+   * the case, such a key should require a unique id in {@link Key#getIdRequirement} and return true
+   * here.
    */
   public abstract boolean hasIdRequirement();
 }
