@@ -1,4 +1,4 @@
-// Copyright 2017 Google Inc.
+// Copyright 2022 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -20,29 +20,29 @@ import com.google.crypto.tink.KeyTemplates;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.StreamingAead;
 import com.google.crypto.tink.testing.StreamingTestUtil;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
-/** Tests for StreamingAeadFactory. */
+/**
+ * Unit test for {@link StreamingAeadFactory}.
+ *
+ * <p>The test case in this file needs {@link Registry} to not have {@link StreamingAeadWrapper}
+ * registered. That's why it is in its own test file.
+ */
 @RunWith(JUnit4.class)
-public class StreamingAeadFactoryTest {
-
-  @BeforeClass
-  public static void setUp() throws Exception {
-    StreamingAeadConfig.register();
-  }
+public class StreamingAeadFactoryWithoutWrapperRegisteredTest {
 
   @Test
   @SuppressWarnings("deprecation") // This is a test that the deprecated function works.
-  public void deprecatedMacFactoryGetPrimitive_sameAs_keysetHandleGetPrimitive() throws Exception {
+  public void deprecatedFactoryGetPrimitive_whenWrapperHasNotBeenRegistered_works()
+      throws Exception {
+    // Only register AesCtrHmacStreamingKeyManager, but not the StreamingAeadWrapper.
+    AesCtrHmacStreamingKeyManager.register(/* newKeyAllowed = */ true);
     KeysetHandle handle = KeysetHandle.generateNew(KeyTemplates.get("AES128_CTR_HMAC_SHA256_4KB"));
 
-    StreamingAead streamingAead = handle.getPrimitive(StreamingAead.class);
-    StreamingAead factoryStreamingAead = StreamingAeadFactory.getPrimitive(handle);
+    StreamingAead streamingAead = StreamingAeadFactory.getPrimitive(handle);
 
-    StreamingTestUtil.testEncryptionAndDecryption(streamingAead, factoryStreamingAead);
-    StreamingTestUtil.testEncryptionAndDecryption(factoryStreamingAead, streamingAead);
+    StreamingTestUtil.testEncryptionAndDecryption(streamingAead);
   }
 }
