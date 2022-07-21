@@ -57,16 +57,16 @@ public final class KeyTesterTest {
 
   private static class TestKey extends Key {
     private final int id;
-    private final TestParameters format;
+    private final TestParameters parameters;
 
-    public TestKey(int id, TestParameters format) {
+    public TestKey(int id, TestParameters parameters) {
       this.id = id;
-      this.format = format;
+      this.parameters = parameters;
     }
 
     public TestKey(int id) {
       this.id = id;
-      this.format = new TestParameters(0);
+      this.parameters = new TestParameters(0);
     }
 
     @Override
@@ -77,23 +77,23 @@ public final class KeyTesterTest {
     @Override
     @Nullable
     public Integer getIdRequirementOrNull() {
-      return format.hasIdRequirement() ? id : null;
+      return parameters.hasIdRequirement() ? id : null;
     }
 
     @Override
     public Parameters getParameters() {
-      return format;
+      return parameters;
     }
   }
 
   @Test
   public void keyTester_works() throws Exception {
-    TestParameters format0 = new TestParameters(0);
-    TestParameters format1 = new TestParameters(1);
+    TestParameters parameters0 = new TestParameters(0);
+    TestParameters parameters1 = new TestParameters(1);
     new KeyTester()
-        .addEqualityGroup("Group 0a", new TestKey(0, format0), new TestKey(0, format0))
-        .addEqualityGroup("Group 0b", new TestKey(1, format0), new TestKey(1, format0))
-        .addEqualityGroup("Group 1", new TestKey(2, format1), new TestKey(2, format1))
+        .addEqualityGroup("Group 0a", new TestKey(0, parameters0), new TestKey(0, parameters0))
+        .addEqualityGroup("Group 0b", new TestKey(1, parameters0), new TestKey(1, parameters0))
+        .addEqualityGroup("Group 1", new TestKey(2, parameters1), new TestKey(2, parameters1))
         .doTests();
   }
 
@@ -118,19 +118,19 @@ public final class KeyTesterTest {
   }
 
   @Test
-  public void sameKeyGroupDifferentFormat_throws() throws Exception {
-    TestParameters format0 = new TestParameters(0);
-    TestParameters format1 = new TestParameters(1);
+  public void sameKeyGroupDifferentParameters_throws() throws Exception {
+    TestParameters parameters0 = new TestParameters(0);
+    TestParameters parameters1 = new TestParameters(1);
     KeyTester tester =
         new KeyTester()
-            .addEqualityGroup("MyGroup0", new TestKey(0, format0), new TestKey(0, format1));
+            .addEqualityGroup("MyGroup0", new TestKey(0, parameters0), new TestKey(0, parameters1));
     assertThrows(AssertionError.class, tester::doTests);
   }
 
   @Test
-  public void sameKeyGroupFormats_differentHashCode_throws() throws Exception {
-    TestParameters format0 = new TestParameters(0);
-    TestParameters format1 =
+  public void sameKeyGroup_parametersDifferentHashCode_throws() throws Exception {
+    TestParameters parameters0 = new TestParameters(0);
+    TestParameters parameters1 =
         new TestParameters(0) {
           @Override
           public int hashCode() {
@@ -139,14 +139,14 @@ public final class KeyTesterTest {
         };
     KeyTester tester =
         new KeyTester()
-            .addEqualityGroup("MyGroup0", new TestKey(0, format0), new TestKey(0, format1));
+            .addEqualityGroup("MyGroup0", new TestKey(0, parameters0), new TestKey(0, parameters1));
     assertThrows(AssertionError.class, tester::doTests);
   }
 
   @Test
-  public void sameKeyGroupFormats_differentIdRequirements_throws() throws Exception {
-    TestParameters format0 = new TestParameters(0);
-    TestParameters format1 =
+  public void sameKeyGroup_parametersDifferentIdRequirements_throws() throws Exception {
+    TestParameters parameters0 = new TestParameters(0);
+    TestParameters parameters1 =
         new TestParameters(0) {
           @Override
           public boolean hasIdRequirement() {
@@ -155,7 +155,7 @@ public final class KeyTesterTest {
         };
     KeyTester tester =
         new KeyTester()
-            .addEqualityGroup("MyGroup0", new TestKey(0, format0), new TestKey(0, format1));
+            .addEqualityGroup("MyGroup0", new TestKey(0, parameters0), new TestKey(0, parameters1));
     assertThrows(AssertionError.class, tester::doTests);
   }
 
@@ -167,19 +167,19 @@ public final class KeyTesterTest {
 
   @Test
   public void testIdRequirementTrue_isOk() throws Exception {
-    TestParameters format =
+    TestParameters parameters =
         new TestParameters(1) {
           @Override
           public boolean hasIdRequirement() {
             return true;
           }
         };
-    new KeyTester().addEqualityGroup("", new TestKey(0, format)).doTests();
+    new KeyTester().addEqualityGroup("", new TestKey(0, parameters)).doTests();
   }
 
   @Test
   public void testIdRequirementInconsistent_throws() throws Exception {
-    TestParameters format =
+    TestParameters parameters =
         new TestParameters(1) {
           @Override
           public boolean hasIdRequirement() {
@@ -187,7 +187,7 @@ public final class KeyTesterTest {
           }
         };
     TestKey key =
-        new TestKey(10, format) {
+        new TestKey(10, parameters) {
           @Override
           @Nullable
           public Integer getIdRequirementOrNull() {
@@ -200,7 +200,7 @@ public final class KeyTesterTest {
 
   @Test
   public void testIdRequirementInconsistent2_throws() throws Exception {
-    TestParameters format =
+    TestParameters parameters =
         new TestParameters(1) {
           @Override
           public boolean hasIdRequirement() {
@@ -208,7 +208,7 @@ public final class KeyTesterTest {
           }
         };
     TestKey key =
-        new TestKey(10, format) {
+        new TestKey(10, parameters) {
           @Override
           @Nullable
           public Integer getIdRequirementOrNull() {

@@ -20,19 +20,19 @@ import com.google.crypto.tink.Parameters;
 import com.google.crypto.tink.internal.ProtoParametersSerialization;
 
 /**
- * Represents a {@link KeyFormat} together with a corresponding {@link ProtoParametersSerialization}
- * for testing.
+ * Represents a {@link Parameters} object together with a corresponding {@link
+ * ProtoParametersSerialization} for testing.
  */
-public class KeyFormatWithSerialization {
-  /** Constructs a new KeyFormatWithSerialization. */
-  public KeyFormatWithSerialization(
-      Parameters parameters, ProtoParametersSerialization serializedFormat) {
+public class ParametersWithSerialization {
+  /** Constructs a new ParametersWithSerialization. */
+  public ParametersWithSerialization(
+      Parameters parameters, ProtoParametersSerialization serializedParameters) {
     this.parameters = parameters;
-    this.serializedFormat = serializedFormat;
+    this.serializedParameters = serializedParameters;
   }
 
   private final Parameters parameters;
-  private final ProtoParametersSerialization serializedFormat;
+  private final ProtoParametersSerialization serializedParameters;
 
   /** Returns the {@link Parameters}. */
   public Parameters getParameters() {
@@ -40,12 +40,12 @@ public class KeyFormatWithSerialization {
   }
 
   /** Returns the {@link ProtoParametersSerialization}. */
-  public ProtoParametersSerialization getSerializedFormat() {
-    return serializedFormat;
+  public ProtoParametersSerialization getSerializedParameters() {
+    return serializedParameters;
   }
 
   @Override
   public String toString() {
-    return parameters.toString() + ", " + serializedFormat.toString();
+    return parameters.toString() + ", " + serializedParameters.toString();
   }
 }

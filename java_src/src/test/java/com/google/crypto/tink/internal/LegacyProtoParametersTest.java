@@ -36,8 +36,8 @@ public final class LegacyProtoParametersTest {
             .setValue(ByteString.EMPTY)
             .build();
     ProtoParametersSerialization serialization = ProtoParametersSerialization.create(template);
-    LegacyProtoParameters format = new LegacyProtoParameters(serialization);
-    assertThat(format.getSerialization()).isSameInstanceAs(serialization);
+    LegacyProtoParameters parameters = new LegacyProtoParameters(serialization);
+    assertThat(parameters.getSerialization()).isSameInstanceAs(serialization);
   }
 
   private static LegacyProtoParameters fromBuilder(KeyTemplate.Builder builder) {

@@ -27,7 +27,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
 @RunWith(JUnit4.class)
-public final class KeyFormatWithSerializationTest {
+public final class ParametersWithSerializationTest {
   @Immutable
   private static final class TestParameters extends Parameters {
     public TestParameters() {}
@@ -40,12 +40,13 @@ public final class KeyFormatWithSerializationTest {
 
   @Test
   public void testAll() throws Exception {
-    Parameters keyFormat = new TestParameters();
+    Parameters parameters = new TestParameters();
     ProtoParametersSerialization serialization =
         ProtoParametersSerialization.create(KeyTemplate.getDefaultInstance());
-    KeyFormatWithSerialization formatWithSerialization =
-        new KeyFormatWithSerialization(keyFormat, serialization);
-    assertThat(formatWithSerialization.getParameters()).isSameInstanceAs(keyFormat);
-    assertThat(formatWithSerialization.getSerializedFormat()).isSameInstanceAs(serialization);
+    ParametersWithSerialization parametersWithSerialization =
+        new ParametersWithSerialization(parameters, serialization);
+    assertThat(parametersWithSerialization.getParameters()).isSameInstanceAs(parameters);
+    assertThat(parametersWithSerialization.getSerializedParameters())
+        .isSameInstanceAs(serialization);
   }
 }

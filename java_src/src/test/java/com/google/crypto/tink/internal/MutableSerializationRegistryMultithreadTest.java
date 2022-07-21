@@ -174,22 +174,22 @@ public final class MutableSerializationRegistryMultithreadTest {
     return new TestKey1();
   }
 
-  private static TestSerializationA serializeParameters1ToA(TestParameters1 keyFormat)
+  private static TestSerializationA serializeParameters1ToA(TestParameters1 parameters)
       throws GeneralSecurityException {
     return new TestSerializationA(A_1);
   }
 
-  private static TestSerializationA serializeParameters2ToA(TestParameters2 keyFormat)
+  private static TestSerializationA serializeParameters2ToA(TestParameters2 parameters)
       throws GeneralSecurityException {
     return new TestSerializationA(A_2);
   }
 
-  private static TestSerializationB serializeParameters1ToB(TestParameters1 keyFormat)
+  private static TestSerializationB serializeParameters1ToB(TestParameters1 parameters)
       throws GeneralSecurityException {
     return new TestSerializationB(B_1);
   }
 
-  private static TestSerializationB serializeParameters2ToB(TestParameters2 keyFormat)
+  private static TestSerializationB serializeParameters2ToB(TestParameters2 parameters)
       throws GeneralSecurityException {
     return new TestSerializationB(B_2);
   }
@@ -308,7 +308,7 @@ public final class MutableSerializationRegistryMultithreadTest {
                 throw new RuntimeException(e);
               }
             }));
-    // =============================== More threads doing the same thing, this time for key formats.
+    // =============================== More threads doing the same thing, this time for parameters.
     futures.add(
         threadPool.submit(
             () -> {

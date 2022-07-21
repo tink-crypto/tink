@@ -26,8 +26,8 @@ android_library(
 )
 
 java_library(
-    name = "key_format_with_serialization",
-    srcs = ["KeyFormatWithSerialization.java"],
+    name = "parameters_with_serialization",
+    srcs = ["ParametersWithSerialization.java"],
     deps = [
         "//src/main/java/com/google/crypto/tink:parameters",
         "//src/main/java/com/google/crypto/tink/internal:proto_parameters_serialization",
@@ -35,8 +35,8 @@ java_library(
 )
 
 android_library(
-    name = "key_format_with_serialization-android",
-    srcs = ["KeyFormatWithSerialization.java"],
+    name = "parameters_with_serialization-android",
+    srcs = ["ParametersWithSerialization.java"],
     deps = [
         "//src/main/java/com/google/crypto/tink:parameters-android",
         "//src/main/java/com/google/crypto/tink/internal:proto_parameters_serialization-android",

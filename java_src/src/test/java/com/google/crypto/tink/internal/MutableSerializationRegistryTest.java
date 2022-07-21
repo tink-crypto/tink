@@ -315,7 +315,7 @@ public final class MutableSerializationRegistryTest {
   }
 
   @Test
-  public void test_registerAllFormatSerializers_checkDispatch() throws Exception {
+  public void test_registerAllParametersSerializers_checkDispatch() throws Exception {
     MutableSerializationRegistry registry = new MutableSerializationRegistry();
     registry.registerParametersSerializer(
         ParametersSerializer.create(
@@ -360,7 +360,7 @@ public final class MutableSerializationRegistryTest {
   }
 
   @Test
-  public void test_registerAllFormatParsers_checkDispatch() throws Exception {
+  public void test_registerAllParametersParsers_checkDispatch() throws Exception {
     MutableSerializationRegistry registry = new MutableSerializationRegistry();
     registry.registerParametersParser(
         ParametersParser.create(

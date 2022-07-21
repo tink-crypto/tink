@@ -33,7 +33,7 @@ import org.junit.runners.JUnit4;
 @RunWith(JUnit4.class)
 public final class AssertsTest {
   @Test
-  public void testEqualFormat() throws Exception {
+  public void testEqualParameters() throws Exception {
     ProtoParametersSerialization serialization1 =
         ProtoParametersSerialization.create(
             KeyTemplate.newBuilder()
@@ -52,7 +52,7 @@ public final class AssertsTest {
   }
 
   @Test
-  public void testEqualFormat_differentEncoding() throws Exception {
+  public void testEqualParameters_differentEncoding() throws Exception {
     // Encoding, 0x0800, in binary: 0000 1000 0000 0000
     //                              |----||-| |-------|
     //                               (1)  (2)  (3):
@@ -78,7 +78,7 @@ public final class AssertsTest {
   }
 
   @Test
-  public void testEqualFormat_differentOrder() throws Exception {
+  public void testEqualParameters_differentOrder() throws Exception {
     // Encoding, 0x0801, in binary: 0000 1000 0000 0001
     //                              |----||-| |-------|
     //                               (1)  (2)  (3):
@@ -111,7 +111,7 @@ public final class AssertsTest {
   }
 
   @Test
-  public void testDifferentFormat_outputPrefix_throws() throws Exception {
+  public void testDifferentParameters_outputPrefix_throws() throws Exception {
     ProtoParametersSerialization serialization1 =
         ProtoParametersSerialization.create(
             KeyTemplate.newBuilder()
@@ -133,7 +133,7 @@ public final class AssertsTest {
   }
 
   @Test
-  public void testDifferentFormat_typeUrl_throws() throws Exception {
+  public void testDifferentParameters_typeUrl_throws() throws Exception {
     ProtoParametersSerialization serialization1 =
         ProtoParametersSerialization.create(
             KeyTemplate.newBuilder()
@@ -155,7 +155,7 @@ public final class AssertsTest {
   }
 
   @Test
-  public void testDifferentFormat_value_throws() throws Exception {
+  public void testDifferentParameters_value_throws() throws Exception {
     ProtoParametersSerialization serialization1 =
         ProtoParametersSerialization.create(
             KeyTemplate.newBuilder()
@@ -177,7 +177,7 @@ public final class AssertsTest {
   }
 
   @Test
-  public void testEqualFormat_unparseable_throws() throws Exception {
+  public void testEqualParameters_unparseable_throws() throws Exception {
     // Proto messages start with a VarInt, which always ends with a byte with most significant bit
     // unset. 0x80 is hence invalid.
     ProtoParametersSerialization serialization1 =

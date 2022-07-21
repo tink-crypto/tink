@@ -291,7 +291,7 @@ public final class SerializationRegistry {
 
     if (!parametersParserMap.containsKey(index)) {
       throw new GeneralSecurityException(
-          "No Key Format Parser for requested key type " + index + " available");
+          "No Parameters Parser for requested key type " + index + " available");
     }
     @SuppressWarnings("unchecked") // We know we only insert like this.
     ParametersParser<SerializationT> parser =
@@ -300,7 +300,7 @@ public final class SerializationRegistry {
   }
 
   /**
-   * Serializes a given KeyFormat into a "SerializationT" object.
+   * Serializes a given Parameters object into a "SerializationT" object.
    *
    * <p>This will look up a previously registered serializer for the requested {@code
    * SerializationT} class and the passed in key type, and then call serializeKey on the result.

@@ -587,7 +587,7 @@ public final class SerializationRegistryTest {
   }
 
   @Test
-  public void test_registerSameFormatSerializerTwice_works() throws Exception {
+  public void test_registerSameParametersSerializerTwice_works() throws Exception {
     ParametersSerializer<TestParameters1, TestSerializationA> testSerializer =
         ParametersSerializer.create(
             SerializationRegistryTest::serializeParameters1ToA,
@@ -600,7 +600,7 @@ public final class SerializationRegistryTest {
   }
 
   @Test
-  public void test_registerDifferentSerializerWithSameFormatType_throws() throws Exception {
+  public void test_registerDifferentSerializerWithSameParametersType_throws() throws Exception {
     ParametersSerializer<TestParameters1, TestSerializationA> testSerializer1 =
         ParametersSerializer.create(
             SerializationRegistryTest::serializeParameters1ToA,
@@ -619,7 +619,7 @@ public final class SerializationRegistryTest {
   }
 
   @Test
-  public void test_registerDifferentSerializerWithDifferentFormatType_works() throws Exception {
+  public void test_registerDifferentSerializerWithDifferentParametersType_works() throws Exception {
     ParametersSerializer<TestParameters1, TestSerializationA> testSerializer1 =
         ParametersSerializer.create(
             SerializationRegistryTest::serializeParameters1ToA,
@@ -656,7 +656,7 @@ public final class SerializationRegistryTest {
   }
 
   @Test
-  public void test_registerAllFormatSerializers_checkDispatch() throws Exception {
+  public void test_registerAllParametersSerializers_checkDispatch() throws Exception {
     SerializationRegistry registry =
         new SerializationRegistry.Builder()
             .registerParametersSerializer(
@@ -735,17 +735,16 @@ public final class SerializationRegistryTest {
         () -> registry2.serializeParameters(new TestParameters1(), TestSerializationA.class));
   }
 
-  // ========================================================================Parameters parsing
-  // tests
+  // ====================================================================== Parameters parsing tests
   @Test
-  public void test_registerFormatParserAndGet() throws Exception {
+  public void test_registerParametersParserAndGet() throws Exception {
     SerializationRegistry registry =
         new SerializationRegistry.Builder()
-            .registerKeyParser(
-                KeyParser.create(
-                    SerializationRegistryTest::parseAToKey1, A_1, TestSerializationA.class))
+            .registerParametersParser(
+                ParametersParser.create(
+                    SerializationRegistryTest::parseAToParameters1, A_1, TestSerializationA.class))
             .build();
-    assertThat(registry.parseKey(new TestSerializationA(A_1), ACCESS)).isNotNull();
+    assertThat(registry.parseParameters(new TestSerializationA(A_1))).isNotNull();
   }
 
   @Test
@@ -757,7 +756,7 @@ public final class SerializationRegistryTest {
   }
 
   @Test
-  public void test_registerSameFormatParserTwice_works() throws Exception {
+  public void test_registerSameParametersParserTwice_works() throws Exception {
     ParametersParser<TestSerializationA> testParser =
         ParametersParser.create(
             SerializationRegistryTest::parseAToParameters1, A_1, TestSerializationA.class);
@@ -783,7 +782,7 @@ public final class SerializationRegistryTest {
   }
 
   @Test
-  public void test_registerDifferentFormatParsersWithDifferentSerializationType_works()
+  public void test_registerDifferentParametersParsersWithDifferentSerializationType_works()
       throws Exception {
     ParametersParser<TestSerializationA> testParser1 =
         ParametersParser.create(
@@ -798,7 +797,7 @@ public final class SerializationRegistryTest {
   }
 
   @Test
-  public void test_registerDifferentFormatParsersWithDifferentKeyType_works() throws Exception {
+  public void test_registerDifferentParametersParsersWithDifferentKeyType_works() throws Exception {
     ParametersParser<TestSerializationA> testParser1 =
         ParametersParser.create(
             SerializationRegistryTest::parseAToParameters1, A_1, TestSerializationA.class);
@@ -812,7 +811,7 @@ public final class SerializationRegistryTest {
   }
 
   @Test
-  public void test_registerAllFormatParsers_checkDispatch() throws Exception {
+  public void test_registerAllParametersParsers_checkDispatch() throws Exception {
     SerializationRegistry registry =
         new SerializationRegistry.Builder()
             .registerParametersParser(
@@ -839,7 +838,7 @@ public final class SerializationRegistryTest {
   }
 
   @Test
-  public void test_copyWorksForFormatParsers() throws Exception {
+  public void test_copyWorksForParametersParsers() throws Exception {
     SerializationRegistry registry =
         new SerializationRegistry.Builder()
             .registerParametersParser(

@@ -21,14 +21,14 @@ java_test(
 )
 
 java_test(
-    name = "KeyFormatWithSerializationTest",
+    name = "ParametersWithSerializationTest",
     size = "small",
-    srcs = ["KeyFormatWithSerializationTest.java"],
+    srcs = ["ParametersWithSerializationTest.java"],
     deps = [
         "//proto:tink_java_proto",
         "//src/main/java/com/google/crypto/tink:parameters",
         "//src/main/java/com/google/crypto/tink/internal:proto_parameters_serialization",
-        "//src/main/java/com/google/crypto/tink/internal/testing:key_format_with_serialization",
+        "//src/main/java/com/google/crypto/tink/internal/testing:parameters_with_serialization",
         "@maven//:com_google_errorprone_error_prone_annotations",
         "@maven//:com_google_truth_truth",
         "@maven//:junit_junit",

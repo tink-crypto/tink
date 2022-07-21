@@ -33,7 +33,7 @@ public abstract class ParametersParser<SerializationT extends Serialization> {
    * <p>This interface exists only so we have a type we can reference in {@link #create}. Users
    * should not use this directly; see the explanation in {@link #create}.
    */
-  public interface KeyFormatParsingFunction<SerializationT extends Serialization> {
+  public interface ParametersParsingFunction<SerializationT extends Serialization> {
     Parameters parseParameters(SerializationT serialization) throws GeneralSecurityException;
   }
 
@@ -98,7 +98,7 @@ public abstract class ParametersParser<SerializationT extends Serialization> {
    * @param serializationClass The class object corresponding to {@code SerializationT}
    */
   public static <SerializationT extends Serialization> ParametersParser<SerializationT> create(
-      KeyFormatParsingFunction<SerializationT> function,
+      ParametersParsingFunction<SerializationT> function,
       Bytes objectIdentifier,
       Class<SerializationT> serializationClass) {
     return new ParametersParser<SerializationT>(objectIdentifier, serializationClass) {
