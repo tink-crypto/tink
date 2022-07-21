@@ -511,22 +511,22 @@ public final class SerializationRegistryTest {
   // ================================================================================================
   // PARAMETERS TESTS
   // ================================================================================================
-  private static TestSerializationA serializeKeyFormat1ToA(TestParameters1 keyFormat)
+  private static TestSerializationA serializeParameters1ToA(TestParameters1 keyFormat)
       throws GeneralSecurityException {
     return new TestSerializationA(A_1);
   }
 
-  private static TestSerializationA serializeKeyFormat2ToA(TestParameters2 keyFormat)
+  private static TestSerializationA serializeParameters2ToA(TestParameters2 keyFormat)
       throws GeneralSecurityException {
     return new TestSerializationA(A_2);
   }
 
-  private static TestSerializationB serializeKeyFormat1ToB(TestParameters1 keyFormat)
+  private static TestSerializationB serializeParameters1ToB(TestParameters1 keyFormat)
       throws GeneralSecurityException {
     return new TestSerializationB(B_1);
   }
 
-  private static TestSerializationB serializeKeyFormat2ToB(TestParameters2 keyFormat)
+  private static TestSerializationB serializeParameters2ToB(TestParameters2 keyFormat)
       throws GeneralSecurityException {
     return new TestSerializationB(B_2);
   }
@@ -565,16 +565,16 @@ public final class SerializationRegistryTest {
 
   // ParametersSerialization tests
   @Test
-  public void test_registerKeyFormatSerializerAndGet() throws Exception {
+  public void test_registerParametersSerializerAndGet() throws Exception {
     SerializationRegistry registry =
         new SerializationRegistry.Builder()
-            .registerKeyFormatSerializer(
-                KeyFormatSerializer.create(
-                    SerializationRegistryTest::serializeKeyFormat1ToA,
+            .registerParametersSerializer(
+                ParametersSerializer.create(
+                    SerializationRegistryTest::serializeParameters1ToA,
                     TestParameters1.class,
                     TestSerializationA.class))
             .build();
-    assertThat(registry.serializeKeyFormat(new TestParameters1(), TestSerializationA.class))
+    assertThat(registry.serializeParameters(new TestParameters1(), TestSerializationA.class))
         .isNotNull();
   }
 
@@ -583,75 +583,75 @@ public final class SerializationRegistryTest {
     SerializationRegistry registry = new SerializationRegistry.Builder().build();
     assertThrows(
         GeneralSecurityException.class,
-        () -> registry.serializeKeyFormat(new TestParameters1(), TestSerializationA.class));
+        () -> registry.serializeParameters(new TestParameters1(), TestSerializationA.class));
   }
 
   @Test
   public void test_registerSameFormatSerializerTwice_works() throws Exception {
-    KeyFormatSerializer<TestParameters1, TestSerializationA> testSerializer =
-        KeyFormatSerializer.create(
-            SerializationRegistryTest::serializeKeyFormat1ToA,
+    ParametersSerializer<TestParameters1, TestSerializationA> testSerializer =
+        ParametersSerializer.create(
+            SerializationRegistryTest::serializeParameters1ToA,
             TestParameters1.class,
             TestSerializationA.class);
     new SerializationRegistry.Builder()
-        .registerKeyFormatSerializer(testSerializer)
-        .registerKeyFormatSerializer(testSerializer)
+        .registerParametersSerializer(testSerializer)
+        .registerParametersSerializer(testSerializer)
         .build();
   }
 
   @Test
   public void test_registerDifferentSerializerWithSameFormatType_throws() throws Exception {
-    KeyFormatSerializer<TestParameters1, TestSerializationA> testSerializer1 =
-        KeyFormatSerializer.create(
-            SerializationRegistryTest::serializeKeyFormat1ToA,
+    ParametersSerializer<TestParameters1, TestSerializationA> testSerializer1 =
+        ParametersSerializer.create(
+            SerializationRegistryTest::serializeParameters1ToA,
             TestParameters1.class,
             TestSerializationA.class);
-    KeyFormatSerializer<TestParameters1, TestSerializationA> testSerializer2 =
-        KeyFormatSerializer.create(
-            SerializationRegistryTest::serializeKeyFormat1ToA,
+    ParametersSerializer<TestParameters1, TestSerializationA> testSerializer2 =
+        ParametersSerializer.create(
+            SerializationRegistryTest::serializeParameters1ToA,
             TestParameters1.class,
             TestSerializationA.class);
     SerializationRegistry.Builder builder = new SerializationRegistry.Builder();
-    builder.registerKeyFormatSerializer(testSerializer1);
+    builder.registerParametersSerializer(testSerializer1);
     assertThrows(
         GeneralSecurityException.class,
-        () -> builder.registerKeyFormatSerializer(testSerializer2).build());
+        () -> builder.registerParametersSerializer(testSerializer2).build());
   }
 
   @Test
   public void test_registerDifferentSerializerWithDifferentFormatType_works() throws Exception {
-    KeyFormatSerializer<TestParameters1, TestSerializationA> testSerializer1 =
-        KeyFormatSerializer.create(
-            SerializationRegistryTest::serializeKeyFormat1ToA,
+    ParametersSerializer<TestParameters1, TestSerializationA> testSerializer1 =
+        ParametersSerializer.create(
+            SerializationRegistryTest::serializeParameters1ToA,
             TestParameters1.class,
             TestSerializationA.class);
-    KeyFormatSerializer<TestParameters2, TestSerializationA> testSerializer2 =
-        KeyFormatSerializer.create(
-            SerializationRegistryTest::serializeKeyFormat2ToA,
+    ParametersSerializer<TestParameters2, TestSerializationA> testSerializer2 =
+        ParametersSerializer.create(
+            SerializationRegistryTest::serializeParameters2ToA,
             TestParameters2.class,
             TestSerializationA.class);
     new SerializationRegistry.Builder()
-        .registerKeyFormatSerializer(testSerializer1)
-        .registerKeyFormatSerializer(testSerializer2)
+        .registerParametersSerializer(testSerializer1)
+        .registerParametersSerializer(testSerializer2)
         .build();
   }
 
   @Test
   public void test_registerDifferentSerializerWithDifferentFormatSerializationType_works()
       throws Exception {
-    KeyFormatSerializer<TestParameters1, TestSerializationA> testSerializer1 =
-        KeyFormatSerializer.create(
-            SerializationRegistryTest::serializeKeyFormat1ToA,
+    ParametersSerializer<TestParameters1, TestSerializationA> testSerializer1 =
+        ParametersSerializer.create(
+            SerializationRegistryTest::serializeParameters1ToA,
             TestParameters1.class,
             TestSerializationA.class);
-    KeyFormatSerializer<TestParameters2, TestSerializationA> testSerializer2 =
-        KeyFormatSerializer.create(
-            SerializationRegistryTest::serializeKeyFormat2ToA,
+    ParametersSerializer<TestParameters2, TestSerializationA> testSerializer2 =
+        ParametersSerializer.create(
+            SerializationRegistryTest::serializeParameters2ToA,
             TestParameters2.class,
             TestSerializationA.class);
     new SerializationRegistry.Builder()
-        .registerKeyFormatSerializer(testSerializer1)
-        .registerKeyFormatSerializer(testSerializer2)
+        .registerParametersSerializer(testSerializer1)
+        .registerParametersSerializer(testSerializer2)
         .build();
   }
 
@@ -659,45 +659,45 @@ public final class SerializationRegistryTest {
   public void test_registerAllFormatSerializers_checkDispatch() throws Exception {
     SerializationRegistry registry =
         new SerializationRegistry.Builder()
-            .registerKeyFormatSerializer(
-                KeyFormatSerializer.create(
-                    SerializationRegistryTest::serializeKeyFormat1ToA,
+            .registerParametersSerializer(
+                ParametersSerializer.create(
+                    SerializationRegistryTest::serializeParameters1ToA,
                     TestParameters1.class,
                     TestSerializationA.class))
-            .registerKeyFormatSerializer(
-                KeyFormatSerializer.create(
-                    SerializationRegistryTest::serializeKeyFormat1ToB,
+            .registerParametersSerializer(
+                ParametersSerializer.create(
+                    SerializationRegistryTest::serializeParameters1ToB,
                     TestParameters1.class,
                     TestSerializationB.class))
-            .registerKeyFormatSerializer(
-                KeyFormatSerializer.create(
-                    SerializationRegistryTest::serializeKeyFormat2ToA,
+            .registerParametersSerializer(
+                ParametersSerializer.create(
+                    SerializationRegistryTest::serializeParameters2ToA,
                     TestParameters2.class,
                     TestSerializationA.class))
-            .registerKeyFormatSerializer(
-                KeyFormatSerializer.create(
-                    SerializationRegistryTest::serializeKeyFormat2ToB,
+            .registerParametersSerializer(
+                ParametersSerializer.create(
+                    SerializationRegistryTest::serializeParameters2ToB,
                     TestParameters2.class,
                     TestSerializationB.class))
             .build();
     assertThat(
             registry
-                .serializeKeyFormat(new TestParameters1(), TestSerializationA.class)
+                .serializeParameters(new TestParameters1(), TestSerializationA.class)
                 .getObjectIdentifier())
         .isEqualTo(A_1);
     assertThat(
             registry
-                .serializeKeyFormat(new TestParameters2(), TestSerializationA.class)
+                .serializeParameters(new TestParameters2(), TestSerializationA.class)
                 .getObjectIdentifier())
         .isEqualTo(A_2);
     assertThat(
             registry
-                .serializeKeyFormat(new TestParameters1(), TestSerializationB.class)
+                .serializeParameters(new TestParameters1(), TestSerializationB.class)
                 .getObjectIdentifier())
         .isEqualTo(B_1);
     assertThat(
             registry
-                .serializeKeyFormat(new TestParameters2(), TestSerializationB.class)
+                .serializeParameters(new TestParameters2(), TestSerializationB.class)
                 .getObjectIdentifier())
         .isEqualTo(B_2);
   }
@@ -706,14 +706,14 @@ public final class SerializationRegistryTest {
   public void test_formatSerializer_copyWorks() throws Exception {
     SerializationRegistry registry =
         new SerializationRegistry.Builder()
-            .registerKeyFormatSerializer(
-                KeyFormatSerializer.create(
-                    SerializationRegistryTest::serializeKeyFormat1ToA,
+            .registerParametersSerializer(
+                ParametersSerializer.create(
+                    SerializationRegistryTest::serializeParameters1ToA,
                     TestParameters1.class,
                     TestSerializationA.class))
             .build();
     SerializationRegistry registry2 = new SerializationRegistry.Builder(registry).build();
-    assertThat(registry2.serializeKeyFormat(new TestParameters1(), TestSerializationA.class))
+    assertThat(registry2.serializeParameters(new TestParameters1(), TestSerializationA.class))
         .isNotNull();
   }
 
@@ -722,17 +722,17 @@ public final class SerializationRegistryTest {
     SerializationRegistry registry1 = new SerializationRegistry.Builder().build();
     SerializationRegistry.Builder builder = new SerializationRegistry.Builder(registry1);
     SerializationRegistry registry2 = builder.build();
-    builder.registerKeyFormatSerializer(
-        KeyFormatSerializer.create(
-            SerializationRegistryTest::serializeKeyFormat1ToA,
+    builder.registerParametersSerializer(
+        ParametersSerializer.create(
+            SerializationRegistryTest::serializeParameters1ToA,
             TestParameters1.class,
             TestSerializationA.class));
     assertThrows(
         GeneralSecurityException.class,
-        () -> registry1.serializeKeyFormat(new TestParameters1(), TestSerializationA.class));
+        () -> registry1.serializeParameters(new TestParameters1(), TestSerializationA.class));
     assertThrows(
         GeneralSecurityException.class,
-        () -> registry2.serializeKeyFormat(new TestParameters1(), TestSerializationA.class));
+        () -> registry2.serializeParameters(new TestParameters1(), TestSerializationA.class));
   }
 
   // ========================================================================Parameters parsing
@@ -752,60 +752,62 @@ public final class SerializationRegistryTest {
   public void test_formatParse_emptyRegistry_throws() throws Exception {
     SerializationRegistry registry = new SerializationRegistry.Builder().build();
     assertThrows(
-        GeneralSecurityException.class, () -> registry.parseKeyFormat(new TestSerializationA(A_1)));
+        GeneralSecurityException.class,
+        () -> registry.parseParameters(new TestSerializationA(A_1)));
   }
 
   @Test
   public void test_registerSameFormatParserTwice_works() throws Exception {
-    KeyFormatParser<TestSerializationA> testParser =
-        KeyFormatParser.create(
+    ParametersParser<TestSerializationA> testParser =
+        ParametersParser.create(
             SerializationRegistryTest::parseAToParameters1, A_1, TestSerializationA.class);
     new SerializationRegistry.Builder()
-        .registerKeyFormatParser(testParser)
-        .registerKeyFormatParser(testParser)
+        .registerParametersParser(testParser)
+        .registerParametersParser(testParser)
         .build();
   }
 
   @Test
   public void test_registerDifferentParsersWithSameParametersType_throws() throws Exception {
-    KeyFormatParser<TestSerializationA> testParser1 =
-        KeyFormatParser.create(
+    ParametersParser<TestSerializationA> testParser1 =
+        ParametersParser.create(
             SerializationRegistryTest::parseAToParameters1, A_1, TestSerializationA.class);
-    KeyFormatParser<TestSerializationA> testParser2 =
-        KeyFormatParser.create(
+    ParametersParser<TestSerializationA> testParser2 =
+        ParametersParser.create(
             SerializationRegistryTest::parseAToParameters1, A_1, TestSerializationA.class);
     SerializationRegistry.Builder builder = new SerializationRegistry.Builder();
-    builder.registerKeyFormatParser(testParser1);
+    builder.registerParametersParser(testParser1);
     assertThrows(
-        GeneralSecurityException.class, () -> builder.registerKeyFormatParser(testParser2).build());
+        GeneralSecurityException.class,
+        () -> builder.registerParametersParser(testParser2).build());
   }
 
   @Test
   public void test_registerDifferentFormatParsersWithDifferentSerializationType_works()
       throws Exception {
-    KeyFormatParser<TestSerializationA> testParser1 =
-        KeyFormatParser.create(
+    ParametersParser<TestSerializationA> testParser1 =
+        ParametersParser.create(
             SerializationRegistryTest::parseAToParameters1, A_1, TestSerializationA.class);
-    KeyFormatParser<TestSerializationB> testParser2 =
-        KeyFormatParser.create(
+    ParametersParser<TestSerializationB> testParser2 =
+        ParametersParser.create(
             SerializationRegistryTest::parseBToParameters1, B_1, TestSerializationB.class);
     new SerializationRegistry.Builder()
-        .registerKeyFormatParser(testParser1)
-        .registerKeyFormatParser(testParser2)
+        .registerParametersParser(testParser1)
+        .registerParametersParser(testParser2)
         .build();
   }
 
   @Test
   public void test_registerDifferentFormatParsersWithDifferentKeyType_works() throws Exception {
-    KeyFormatParser<TestSerializationA> testParser1 =
-        KeyFormatParser.create(
+    ParametersParser<TestSerializationA> testParser1 =
+        ParametersParser.create(
             SerializationRegistryTest::parseAToParameters1, A_1, TestSerializationA.class);
-    KeyFormatParser<TestSerializationA> testParser2 =
-        KeyFormatParser.create(
+    ParametersParser<TestSerializationA> testParser2 =
+        ParametersParser.create(
             SerializationRegistryTest::parseAToParameters2, A_2, TestSerializationA.class);
     new SerializationRegistry.Builder()
-        .registerKeyFormatParser(testParser1)
-        .registerKeyFormatParser(testParser2)
+        .registerParametersParser(testParser1)
+        .registerParametersParser(testParser2)
         .build();
   }
 
@@ -813,26 +815,26 @@ public final class SerializationRegistryTest {
   public void test_registerAllFormatParsers_checkDispatch() throws Exception {
     SerializationRegistry registry =
         new SerializationRegistry.Builder()
-            .registerKeyFormatParser(
-                KeyFormatParser.create(
+            .registerParametersParser(
+                ParametersParser.create(
                     SerializationRegistryTest::parseAToParameters1, A_1, TestSerializationA.class))
-            .registerKeyFormatParser(
-                KeyFormatParser.create(
+            .registerParametersParser(
+                ParametersParser.create(
                     SerializationRegistryTest::parseBToParameters1, B_1, TestSerializationB.class))
-            .registerKeyFormatParser(
-                KeyFormatParser.create(
+            .registerParametersParser(
+                ParametersParser.create(
                     SerializationRegistryTest::parseAToParameters2, A_2, TestSerializationA.class))
-            .registerKeyFormatParser(
-                KeyFormatParser.create(
+            .registerParametersParser(
+                ParametersParser.create(
                     SerializationRegistryTest::parseBToParameters2, B_2, TestSerializationB.class))
             .build();
-    assertThat(registry.parseKeyFormat(new TestSerializationA(A_1)))
+    assertThat(registry.parseParameters(new TestSerializationA(A_1)))
         .isInstanceOf(TestParameters1.class);
-    assertThat(registry.parseKeyFormat(new TestSerializationA(A_2)))
+    assertThat(registry.parseParameters(new TestSerializationA(A_2)))
         .isInstanceOf(TestParameters2.class);
-    assertThat(registry.parseKeyFormat(new TestSerializationB(B_1)))
+    assertThat(registry.parseParameters(new TestSerializationB(B_1)))
         .isInstanceOf(TestParameters1.class);
-    assertThat(registry.parseKeyFormat(new TestSerializationB(B_2)))
+    assertThat(registry.parseParameters(new TestSerializationB(B_2)))
         .isInstanceOf(TestParameters2.class);
   }
 
@@ -840,12 +842,12 @@ public final class SerializationRegistryTest {
   public void test_copyWorksForFormatParsers() throws Exception {
     SerializationRegistry registry =
         new SerializationRegistry.Builder()
-            .registerKeyFormatParser(
-                KeyFormatParser.create(
+            .registerParametersParser(
+                ParametersParser.create(
                     SerializationRegistryTest::parseAToParameters1, A_1, TestSerializationA.class))
             .build();
     SerializationRegistry registry2 = new SerializationRegistry.Builder(registry).build();
-    assertThat(registry2.parseKeyFormat(new TestSerializationA(A_1))).isNotNull();
+    assertThat(registry2.parseParameters(new TestSerializationA(A_1))).isNotNull();
   }
 
   @Test
@@ -855,15 +857,15 @@ public final class SerializationRegistryTest {
     SerializationRegistry registry2 = builder.build();
 
     builder
-        .registerKeyFormatParser(
-            KeyFormatParser.create(
+        .registerParametersParser(
+            ParametersParser.create(
                 SerializationRegistryTest::parseAToParameters1, A_1, TestSerializationA.class))
         .build();
     assertThrows(
         GeneralSecurityException.class,
-        () -> registry1.parseKeyFormat(new TestSerializationA(A_1)));
+        () -> registry1.parseParameters(new TestSerializationA(A_1)));
     assertThrows(
         GeneralSecurityException.class,
-        () -> registry2.parseKeyFormat(new TestSerializationA(A_1)));
+        () -> registry2.parseParameters(new TestSerializationA(A_1)));
   }
 }

@@ -262,22 +262,22 @@ public final class MutableSerializationRegistryTest {
   // ================================================================================================
   // PARAMETERS TESTS
   // ================================================================================================
-  private static TestSerializationA serializeKeyFormat1ToA(TestParameters1 keyFormat)
+  private static TestSerializationA serializeParameters1ToA(TestParameters1 parameters)
       throws GeneralSecurityException {
     return new TestSerializationA(A_1);
   }
 
-  private static TestSerializationA serializeKeyFormat2ToA(TestParameters2 keyFormat)
+  private static TestSerializationA serializeParameters2ToA(TestParameters2 parameters)
       throws GeneralSecurityException {
     return new TestSerializationA(A_2);
   }
 
-  private static TestSerializationB serializeKeyFormat1ToB(TestParameters1 keyFormat)
+  private static TestSerializationB serializeParameters1ToB(TestParameters1 parameters)
       throws GeneralSecurityException {
     return new TestSerializationB(B_1);
   }
 
-  private static TestSerializationB serializeKeyFormat2ToB(TestParameters2 keyFormat)
+  private static TestSerializationB serializeParameters2ToB(TestParameters2 parameters)
       throws GeneralSecurityException {
     return new TestSerializationB(B_2);
   }
@@ -317,44 +317,44 @@ public final class MutableSerializationRegistryTest {
   @Test
   public void test_registerAllFormatSerializers_checkDispatch() throws Exception {
     MutableSerializationRegistry registry = new MutableSerializationRegistry();
-    registry.registerKeyFormatSerializer(
-        KeyFormatSerializer.create(
-            MutableSerializationRegistryTest::serializeKeyFormat1ToA,
+    registry.registerParametersSerializer(
+        ParametersSerializer.create(
+            MutableSerializationRegistryTest::serializeParameters1ToA,
             TestParameters1.class,
             TestSerializationA.class));
-    registry.registerKeyFormatSerializer(
-        KeyFormatSerializer.create(
-            MutableSerializationRegistryTest::serializeKeyFormat1ToB,
+    registry.registerParametersSerializer(
+        ParametersSerializer.create(
+            MutableSerializationRegistryTest::serializeParameters1ToB,
             TestParameters1.class,
             TestSerializationB.class));
-    registry.registerKeyFormatSerializer(
-        KeyFormatSerializer.create(
-            MutableSerializationRegistryTest::serializeKeyFormat2ToA,
+    registry.registerParametersSerializer(
+        ParametersSerializer.create(
+            MutableSerializationRegistryTest::serializeParameters2ToA,
             TestParameters2.class,
             TestSerializationA.class));
-    registry.registerKeyFormatSerializer(
-        KeyFormatSerializer.create(
-            MutableSerializationRegistryTest::serializeKeyFormat2ToB,
+    registry.registerParametersSerializer(
+        ParametersSerializer.create(
+            MutableSerializationRegistryTest::serializeParameters2ToB,
             TestParameters2.class,
             TestSerializationB.class));
     assertThat(
             registry
-                .serializeKeyFormat(new TestParameters1(), TestSerializationA.class)
+                .serializeParameters(new TestParameters1(), TestSerializationA.class)
                 .getObjectIdentifier())
         .isEqualTo(A_1);
     assertThat(
             registry
-                .serializeKeyFormat(new TestParameters2(), TestSerializationA.class)
+                .serializeParameters(new TestParameters2(), TestSerializationA.class)
                 .getObjectIdentifier())
         .isEqualTo(A_2);
     assertThat(
             registry
-                .serializeKeyFormat(new TestParameters1(), TestSerializationB.class)
+                .serializeParameters(new TestParameters1(), TestSerializationB.class)
                 .getObjectIdentifier())
         .isEqualTo(B_1);
     assertThat(
             registry
-                .serializeKeyFormat(new TestParameters2(), TestSerializationB.class)
+                .serializeParameters(new TestParameters2(), TestSerializationB.class)
                 .getObjectIdentifier())
         .isEqualTo(B_2);
   }
@@ -362,25 +362,25 @@ public final class MutableSerializationRegistryTest {
   @Test
   public void test_registerAllFormatParsers_checkDispatch() throws Exception {
     MutableSerializationRegistry registry = new MutableSerializationRegistry();
-    registry.registerKeyFormatParser(
-        KeyFormatParser.create(
+    registry.registerParametersParser(
+        ParametersParser.create(
             MutableSerializationRegistryTest::parseAToParameters1, A_1, TestSerializationA.class));
-    registry.registerKeyFormatParser(
-        KeyFormatParser.create(
+    registry.registerParametersParser(
+        ParametersParser.create(
             MutableSerializationRegistryTest::parseBToParameters1, B_1, TestSerializationB.class));
-    registry.registerKeyFormatParser(
-        KeyFormatParser.create(
+    registry.registerParametersParser(
+        ParametersParser.create(
             MutableSerializationRegistryTest::parseAToParameters2, A_2, TestSerializationA.class));
-    registry.registerKeyFormatParser(
-        KeyFormatParser.create(
+    registry.registerParametersParser(
+        ParametersParser.create(
             MutableSerializationRegistryTest::parseBToParameters2, B_2, TestSerializationB.class));
-    assertThat(registry.parseKeyFormat(new TestSerializationA(A_1)))
+    assertThat(registry.parseParameters(new TestSerializationA(A_1)))
         .isInstanceOf(TestParameters1.class);
-    assertThat(registry.parseKeyFormat(new TestSerializationA(A_2)))
+    assertThat(registry.parseParameters(new TestSerializationA(A_2)))
         .isInstanceOf(TestParameters2.class);
-    assertThat(registry.parseKeyFormat(new TestSerializationB(B_1)))
+    assertThat(registry.parseParameters(new TestSerializationB(B_1)))
         .isInstanceOf(TestParameters1.class);
-    assertThat(registry.parseKeyFormat(new TestSerializationB(B_2)))
+    assertThat(registry.parseParameters(new TestSerializationB(B_2)))
         .isInstanceOf(TestParameters2.class);
   }
 }

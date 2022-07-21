@@ -26,12 +26,12 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
-/** Tests for {@link KeyFormatParser}. */
+/** Tests for {@link ParametersParser}. */
 @RunWith(JUnit4.class)
-public final class KeyFormatParserTest {
+public final class ParametersParserTest {
 
   @Immutable
-  private static class ExampleKeyFormat extends Parameters {
+  private static class ExampleParameters extends Parameters {
     @Override
     public boolean hasIdRequirement() {
       return false;
@@ -46,30 +46,30 @@ public final class KeyFormatParserTest {
     }
   }
 
-  private static ExampleKeyFormat parse(ExampleSerialization serialization)
+  private static ExampleParameters parse(ExampleSerialization serialization)
       throws GeneralSecurityException {
-    return new ExampleKeyFormat();
+    return new ExampleParameters();
   }
 
   @Test
   public void createParser_works() throws Exception {
-    KeyFormatParser.create(
-        KeyFormatParserTest::parse, Bytes.copyFrom(new byte[0]), ExampleSerialization.class);
+    ParametersParser.create(
+        ParametersParserTest::parse, Bytes.copyFrom(new byte[0]), ExampleSerialization.class);
   }
 
   @Test
   public void createParser_parseKey_works() throws Exception {
-    KeyFormatParser<ExampleSerialization> parser =
-        KeyFormatParser.create(
-            KeyFormatParserTest::parse, Bytes.copyFrom(new byte[0]), ExampleSerialization.class);
-    assertThat(parser.parseKeyFormat(new ExampleSerialization())).isNotNull();
+    ParametersParser<ExampleSerialization> parser =
+        ParametersParser.create(
+            ParametersParserTest::parse, Bytes.copyFrom(new byte[0]), ExampleSerialization.class);
+    assertThat(parser.parseParameters(new ExampleSerialization())).isNotNull();
   }
 
   @Test
   public void createParser_classes_work() throws Exception {
-    KeyFormatParser<ExampleSerialization> parser =
-        KeyFormatParser.create(
-            KeyFormatParserTest::parse,
+    ParametersParser<ExampleSerialization> parser =
+        ParametersParser.create(
+            ParametersParserTest::parse,
             Bytes.copyFrom(new byte[] {1, 2, 3}),
             ExampleSerialization.class);
     assertThat(parser.getObjectIdentifier()).isEqualTo(Bytes.copyFrom(new byte[] {1, 2, 3}));

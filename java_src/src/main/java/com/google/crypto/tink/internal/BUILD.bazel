@@ -253,10 +253,10 @@ java_library(
     name = "serialization_registry",
     srcs = ["SerializationRegistry.java"],
     deps = [
-        ":key_format_parser",
-        ":key_format_serializer",
         ":key_parser",
         ":key_serializer",
+        ":parameters_parser",
+        ":parameters_serializer",
         ":serialization",
         "//src/main/java/com/google/crypto/tink:key",
         "//src/main/java/com/google/crypto/tink:parameters",
@@ -270,10 +270,10 @@ android_library(
     name = "serialization_registry-android",
     srcs = ["SerializationRegistry.java"],
     deps = [
-        ":key_format_parser-android",
-        ":key_format_serializer-android",
         ":key_parser-android",
         ":key_serializer-android",
+        ":parameters_parser-android",
+        ":parameters_serializer-android",
         ":serialization-android",
         "//src/main/java/com/google/crypto/tink:key-android",
         "//src/main/java/com/google/crypto/tink:parameters-android",
@@ -284,8 +284,8 @@ android_library(
 )
 
 java_library(
-    name = "key_format_parser",
-    srcs = ["KeyFormatParser.java"],
+    name = "parameters_parser",
+    srcs = ["ParametersParser.java"],
     deps = [
         ":serialization",
         "//src/main/java/com/google/crypto/tink:parameters",
@@ -294,8 +294,8 @@ java_library(
 )
 
 android_library(
-    name = "key_format_parser-android",
-    srcs = ["KeyFormatParser.java"],
+    name = "parameters_parser-android",
+    srcs = ["ParametersParser.java"],
     deps = [
         ":serialization-android",
         "//src/main/java/com/google/crypto/tink:parameters-android",
@@ -304,8 +304,8 @@ android_library(
 )
 
 java_library(
-    name = "key_format_serializer",
-    srcs = ["KeyFormatSerializer.java"],
+    name = "parameters_serializer",
+    srcs = ["ParametersSerializer.java"],
     deps = [
         ":serialization",
         "//src/main/java/com/google/crypto/tink:parameters",
@@ -313,8 +313,8 @@ java_library(
 )
 
 android_library(
-    name = "key_format_serializer-android",
-    srcs = ["KeyFormatSerializer.java"],
+    name = "parameters_serializer-android",
+    srcs = ["ParametersSerializer.java"],
     deps = [
         ":serialization-android",
         "//src/main/java/com/google/crypto/tink:parameters-android",
@@ -375,10 +375,10 @@ java_library(
     name = "mutable_serialization_registry",
     srcs = ["MutableSerializationRegistry.java"],
     deps = [
-        ":key_format_parser",
-        ":key_format_serializer",
         ":key_parser",
         ":key_serializer",
+        ":parameters_parser",
+        ":parameters_serializer",
         ":serialization",
         ":serialization_registry",
         "//src/main/java/com/google/crypto/tink:key",
@@ -392,10 +392,10 @@ android_library(
     name = "mutable_serialization_registry-android",
     srcs = ["MutableSerializationRegistry.java"],
     deps = [
-        ":key_format_parser-android",
-        ":key_format_serializer-android",
         ":key_parser-android",
         ":key_serializer-android",
+        ":parameters_parser-android",
+        ":parameters_serializer-android",
         ":serialization-android",
         ":serialization_registry-android",
         "//src/main/java/com/google/crypto/tink:key-android",

@@ -26,12 +26,12 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
-/** Tests for {@link KeyFormatSerializer}. */
+/** Tests for {@link ParametersSerializer}. */
 @RunWith(JUnit4.class)
-public final class KeyFormatSerializerTest {
+public final class ParametersSerializerTest {
 
   @Immutable
-  private static class ExampleKeyFormat extends Parameters {
+  private static class ExampleParameters extends Parameters {
     @Override
     public boolean hasIdRequirement() {
       return false;
@@ -46,31 +46,35 @@ public final class KeyFormatSerializerTest {
     }
   }
 
-  private static ExampleSerialization serialize(ExampleKeyFormat k)
+  private static ExampleSerialization serialize(ExampleParameters k)
       throws GeneralSecurityException {
     return new ExampleSerialization();
   }
 
   @Test
   public void createSerializer_works() throws Exception {
-    KeyFormatSerializer.create(
-        KeyFormatSerializerTest::serialize, ExampleKeyFormat.class, ExampleSerialization.class);
+    ParametersSerializer.create(
+        ParametersSerializerTest::serialize, ExampleParameters.class, ExampleSerialization.class);
   }
 
   @Test
   public void createSerializer_serializeKey_works() throws Exception {
-    KeyFormatSerializer<ExampleKeyFormat, ExampleSerialization> serializer =
-        KeyFormatSerializer.create(
-            KeyFormatSerializerTest::serialize, ExampleKeyFormat.class, ExampleSerialization.class);
-    assertThat(serializer.serializeKeyFormat(new ExampleKeyFormat())).isNotNull();
+    ParametersSerializer<ExampleParameters, ExampleSerialization> serializer =
+        ParametersSerializer.create(
+            ParametersSerializerTest::serialize,
+            ExampleParameters.class,
+            ExampleSerialization.class);
+    assertThat(serializer.serializeParameters(new ExampleParameters())).isNotNull();
   }
 
   @Test
   public void createSerializer_classes_work() throws Exception {
-    KeyFormatSerializer<ExampleKeyFormat, ExampleSerialization> serializer =
-        KeyFormatSerializer.create(
-            KeyFormatSerializerTest::serialize, ExampleKeyFormat.class, ExampleSerialization.class);
-    assertThat(serializer.getParametersClass()).isEqualTo(ExampleKeyFormat.class);
+    ParametersSerializer<ExampleParameters, ExampleSerialization> serializer =
+        ParametersSerializer.create(
+            ParametersSerializerTest::serialize,
+            ExampleParameters.class,
+            ExampleSerialization.class);
+    assertThat(serializer.getParametersClass()).isEqualTo(ExampleParameters.class);
     assertThat(serializer.getSerializationClass()).isEqualTo(ExampleSerialization.class);
   }
 }

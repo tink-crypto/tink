@@ -25,7 +25,7 @@ import java.security.GeneralSecurityException;
  * <p>This class should eventually be in Tinks public API -- however, it might still change before
  * that.
  */
-public abstract class KeyFormatSerializer<
+public abstract class ParametersSerializer<
     ParametersT extends Parameters, SerializationT extends Serialization> {
   /**
    * A function which serializes a Parameters object.
@@ -33,21 +33,21 @@ public abstract class KeyFormatSerializer<
    * <p>This interface exists only so we have a type we can reference in {@link #create}. Users
    * should not use this directly; see the explanation in {@link #create}.
    */
-  public interface KeyFormatSerializationFunction<
+  public interface ParametersSerializationFunction<
       ParametersT extends Parameters, SerializationT extends Serialization> {
-    SerializationT serializeKeyFormat(ParametersT key) throws GeneralSecurityException;
+    SerializationT serializeParameters(ParametersT key) throws GeneralSecurityException;
   }
 
   private final Class<ParametersT> parametersClass;
   private final Class<SerializationT> serializationClass;
 
-  private KeyFormatSerializer(
+  private ParametersSerializer(
       Class<ParametersT> parametersClass, Class<SerializationT> serializationClass) {
     this.parametersClass = parametersClass;
     this.serializationClass = serializationClass;
   }
 
-  public abstract SerializationT serializeKeyFormat(ParametersT parameters)
+  public abstract SerializationT serializeParameters(ParametersT parameters)
       throws GeneralSecurityException;
 
   public Class<ParametersT> getParametersClass() {
@@ -59,9 +59,9 @@ public abstract class KeyFormatSerializer<
   }
 
   /**
-   * Creates a KeyFormatSerializer object.
+   * Creates a ParametersSerializer object.
    *
-   * <p>In order to create a KeyFormatSerializer object, one typically writes a function
+   * <p>In order to create a ParametersSerializer object, one typically writes a function
    *
    * <pre>{@code
    * class MyClass {
@@ -72,25 +72,25 @@ public abstract class KeyFormatSerializer<
    * }
    * }</pre>
    *
-   * This function can then be used to create a {@code KeyFormatSerializer}:
+   * This function can then be used to create a {@code ParametersSerializer}:
    *
    * <pre>{@code
-   * KeyFormatSerializer<MyParameters, MySerialization> serializer =
-   *       KeyFormatSerializer.create(MyClass::serializeParameters, MyParameters.class,
+   * ParametersSerializer<MyParameters, MySerialization> serializer =
+   *       ParametersSerializer.create(MyClass::serializeParameters, MyParameters.class,
    *                                  MySerialization.class);
    * }</pre>
    */
   public static <ParametersT extends Parameters, SerializationT extends Serialization>
-      KeyFormatSerializer<ParametersT, SerializationT> create(
-          KeyFormatSerializationFunction<ParametersT, SerializationT> function,
+      ParametersSerializer<ParametersT, SerializationT> create(
+          ParametersSerializationFunction<ParametersT, SerializationT> function,
           Class<ParametersT> parametersClass,
           Class<SerializationT> serializationClass) {
-    return new KeyFormatSerializer<ParametersT, SerializationT>(
+    return new ParametersSerializer<ParametersT, SerializationT>(
         parametersClass, serializationClass) {
       @Override
-      public SerializationT serializeKeyFormat(ParametersT parameters)
+      public SerializationT serializeParameters(ParametersT parameters)
           throws GeneralSecurityException {
-        return function.serializeKeyFormat(parameters);
+        return function.serializeParameters(parameters);
       }
     };
   }

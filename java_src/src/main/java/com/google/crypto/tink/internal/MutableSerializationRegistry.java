@@ -86,11 +86,12 @@ public final class MutableSerializationRegistry {
    * exception is thrown, and the object is unchanged.
    */
   public synchronized <ParametersT extends Parameters, SerializationT extends Serialization>
-      void registerKeyFormatSerializer(KeyFormatSerializer<ParametersT, SerializationT> serializer)
+      void registerParametersSerializer(
+          ParametersSerializer<ParametersT, SerializationT> serializer)
           throws GeneralSecurityException {
     SerializationRegistry newRegistry =
         new SerializationRegistry.Builder(registry.get())
-            .registerKeyFormatSerializer(serializer)
+            .registerParametersSerializer(serializer)
             .build();
     registry.set(newRegistry);
   }
@@ -103,10 +104,10 @@ public final class MutableSerializationRegistry {
    * already been registered, this checks if they are the same. If they are, the call is ignored,
    * otherwise an exception is thrown, and the object is unchanged.
    */
-  public synchronized <SerializationT extends Serialization> void registerKeyFormatParser(
-      KeyFormatParser<SerializationT> parser) throws GeneralSecurityException {
+  public synchronized <SerializationT extends Serialization> void registerParametersParser(
+      ParametersParser<SerializationT> parser) throws GeneralSecurityException {
     SerializationRegistry newRegistry =
-        new SerializationRegistry.Builder(registry.get()).registerKeyFormatParser(parser).build();
+        new SerializationRegistry.Builder(registry.get()).registerParametersParser(parser).build();
     registry.set(newRegistry);
   }
 
@@ -136,27 +137,27 @@ public final class MutableSerializationRegistry {
   }
 
   /**
-   * Parses the given serialization into a KeyFormat.
+   * Parses the given serialization into a Parameters object.
    *
    * <p>This will look up a previously registered parser for the passed in {@code SerializationT}
    * class, and the used object identifier (as indicated by {@code
    * serializedKey.getObjectIdentifier()}), and then parse the object with this parsers.
    */
-  public <SerializationT extends Serialization> Parameters parseKeyFormat(
-      SerializationT serializedKeyFormat) throws GeneralSecurityException {
-    return registry.get().parseKeyFormat(serializedKeyFormat);
+  public <SerializationT extends Serialization> Parameters parseParameters(
+      SerializationT serializedParameters) throws GeneralSecurityException {
+    return registry.get().parseParameters(serializedParameters);
   }
 
   /**
-   * Serializes a given KeyFormat into a "SerializationT" object.
+   * Serializes a given Parameters object into a "SerializationT" object.
    *
    * <p>This will look up a previously registered serializer for the requested {@code
    * SerializationT} class and the passed in key type, and then call serializeKey on the result.
    */
   public <ParametersT extends Parameters, SerializationT extends Serialization>
-      SerializationT serializeKeyFormat(
+      SerializationT serializeParameters(
           ParametersT parameters, Class<SerializationT> serializationClass)
           throws GeneralSecurityException {
-    return registry.get().serializeKeyFormat(parameters, serializationClass);
+    return registry.get().serializeParameters(parameters, serializationClass);
   }
 }

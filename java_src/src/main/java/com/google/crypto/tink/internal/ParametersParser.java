@@ -21,12 +21,12 @@ import com.google.crypto.tink.util.Bytes;
 import java.security.GeneralSecurityException;
 
 /**
- * Parses {@code Serialization} objects into {@code KeyFormat} objects of a certain kind.
+ * Parses {@code Serialization} objects into {@code Parameters} objects of a certain kind.
  *
  * <p>This class should eventually be in Tinks public API -- however, it might still change before
  * that.
  */
-public abstract class KeyFormatParser<SerializationT extends Serialization> {
+public abstract class ParametersParser<SerializationT extends Serialization> {
   /**
    * A function which parses a Parameters object.
    *
@@ -34,13 +34,13 @@ public abstract class KeyFormatParser<SerializationT extends Serialization> {
    * should not use this directly; see the explanation in {@link #create}.
    */
   public interface KeyFormatParsingFunction<SerializationT extends Serialization> {
-    Parameters parseKeyFormat(SerializationT serialization) throws GeneralSecurityException;
+    Parameters parseParameters(SerializationT serialization) throws GeneralSecurityException;
   }
 
   private final Bytes objectIdentifier;
   private final Class<SerializationT> serializationClass;
 
-  private KeyFormatParser(Bytes objectIdentifier, Class<SerializationT> serializationClass) {
+  private ParametersParser(Bytes objectIdentifier, Class<SerializationT> serializationClass) {
     this.objectIdentifier = objectIdentifier;
     this.serializationClass = serializationClass;
   }
@@ -51,7 +51,7 @@ public abstract class KeyFormatParser<SerializationT extends Serialization> {
    * <p>This function is usually called with a Serialization matching the result of {@link
    * getObjectIdentifier}. However, implementations should check that this is the case.
    */
-  public abstract Parameters parseKeyFormat(SerializationT serialization)
+  public abstract Parameters parseParameters(SerializationT serialization)
       throws GeneralSecurityException;
 
   /**
@@ -59,7 +59,7 @@ public abstract class KeyFormatParser<SerializationT extends Serialization> {
    *
    * <p>The object identifier is a unique identifier per registry for this object (in the standard
    * proto serialization, it is the typeUrl). In other words, when registering a {@code
-   * KeyFormatParser}, the registry will invoke this to get the handled object identifier. In order
+   * ParametersParser}, the registry will invoke this to get the handled object identifier. In order
    * to parse an object of type {@code SerializationT}, the registry will then obtain the {@code
    * objectIdentifier} of this serialization object, and call the parser corresponding to this
    * object.
@@ -73,39 +73,39 @@ public abstract class KeyFormatParser<SerializationT extends Serialization> {
   }
 
   /**
-   * Creates a KeyFormatParser object.
+   * Creates a ParametersParser object.
    *
-   * <p>In order to create a KeyFormatParser object, one typically writes a function
+   * <p>In order to create a ParametersParser object, one typically writes a function
    *
    * <pre>{@code
    * class MyClass {
-   *   private static MyKeyFormat parse(MySerialization keyFormatSerialization)
+   *   private static MyParameters parse(MySerialization parametersSerialization)
    *             throws GeneralSecurityException {
    *     ...
    *   }
    * }
    * }</pre>
    *
-   * This function can then be used to create a {@code KeyFormatParser}:
+   * This function can then be used to create a {@code ParametersParser}:
    *
    * <pre>{@code
-   * KeyFormatParser<MySerialization> parser =
-   *       KeyFormatParser.create(MyClass::parse, objectIdentifier, MySerialization.class);
+   * ParametersParser<MySerialization> parser =
+   *       ParametersParser.create(MyClass::parse, objectIdentifier, MySerialization.class);
    * }</pre>
    *
    * @param function The function used to parse a KeyFormat
    * @param objectIdentifier The identifier to be returned by {@link #getObjectIdentifier}
    * @param serializationClass The class object corresponding to {@code SerializationT}
    */
-  public static <SerializationT extends Serialization> KeyFormatParser<SerializationT> create(
+  public static <SerializationT extends Serialization> ParametersParser<SerializationT> create(
       KeyFormatParsingFunction<SerializationT> function,
       Bytes objectIdentifier,
       Class<SerializationT> serializationClass) {
-    return new KeyFormatParser<SerializationT>(objectIdentifier, serializationClass) {
+    return new ParametersParser<SerializationT>(objectIdentifier, serializationClass) {
       @Override
-      public Parameters parseKeyFormat(SerializationT serialization)
+      public Parameters parseParameters(SerializationT serialization)
           throws GeneralSecurityException {
-        return function.parseKeyFormat(serialization);
+        return function.parseParameters(serialization);
       }
     };
   }
