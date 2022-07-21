@@ -14,14 +14,31 @@
 # limitations under the License.
 ################################################################################
 
-
 set -euo pipefail
+
 cd ${KOKORO_ARTIFACTS_DIR}/git/tink
 
-./kokoro/copy_credentials.sh
-./kokoro/update_android_sdk.sh
+./kokoro/testutils/copy_credentials.sh "tools/testdata"
+./kokoro/testutils/update_android_sdk.sh
+# Sourcing required to update callers environment.
+source ./kokoro/testutils/install_python3.sh
+source ./kokoro/testutils/install_go.sh
+
+echo "Using go binary from $(which go): $(go version)"
 
 cd tools
 use_bazel.sh $(cat .bazelversion)
 time bazel build -- ...
 time bazel test --test_output=errors -- ...
+
+# Run manual tests which rely on key material injected into the Kokoro
+# environement.
+if [[ -n "${KOKORO_ROOT}" ]]; then
+  declare -a MANUAL_TARGETS
+  MANUAL_TARGETS=(
+    "//testing/cc:gcp_kms_aead_test"
+    "//testing/cross_language:aead_envelope_test"
+  )
+  readonly MANUAL_TARGETS
+  time bazel test --test_output=errors -- "${MANUAL_TARGETS[@]}"
+fi

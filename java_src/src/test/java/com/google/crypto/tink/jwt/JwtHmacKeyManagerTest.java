@@ -24,8 +24,8 @@ import static org.junit.Assert.assertThrows;
 import com.google.crypto.tink.CleartextKeysetHandle;
 import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.KeyTemplates;
-import com.google.crypto.tink.KeyTypeManager;
 import com.google.crypto.tink.KeysetHandle;
+import com.google.crypto.tink.internal.KeyTypeManager;
 import com.google.crypto.tink.proto.JwtHmacAlgorithm;
 import com.google.crypto.tink.proto.JwtHmacKey;
 import com.google.crypto.tink.proto.JwtHmacKey.CustomKid;
@@ -51,14 +51,15 @@ import java.time.ZoneOffset;
 import java.util.Set;
 import java.util.TreeSet;
 import javax.crypto.spec.SecretKeySpec;
-import junitparams.JUnitParamsRunner;
-import junitparams.Parameters;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.experimental.theories.DataPoint;
+import org.junit.experimental.theories.Theories;
+import org.junit.experimental.theories.Theory;
 import org.junit.runner.RunWith;
 
 /** Unit tests for {@link JwtHmacKeyManager}. */
-@RunWith(JUnitParamsRunner.class)
+@RunWith(Theories.class)
 public class JwtHmacKeyManagerTest {
   private final JwtHmacKeyManager manager = new JwtHmacKeyManager();
   private final KeyTypeManager.KeyFactory<JwtHmacKeyFormat, JwtHmacKey> factory =
@@ -69,14 +70,10 @@ public class JwtHmacKeyManagerTest {
     JwtMacConfig.register();
   }
 
-  private static Object[] templates() {
-    return new Object[] {
-      "JWT_HS256",
-      "JWT_HS384",
-      "JWT_HS512",
-      "JWT_HS256_RAW",
-    };
-  }
+  @DataPoint public static final String JWT_HS256 = "JWT_HS256";
+  @DataPoint public static final String JWT_HS384 = "JWT_HS384";
+  @DataPoint public static final String JWT_HS512 = "JWT_HS512";
+  @DataPoint public static final String JWT_HS256_RAW = "JWT_HS256_RAW";
 
   @Test
   public void validateKeyFormat_empty() throws Exception {
@@ -90,20 +87,27 @@ public class JwtHmacKeyManagerTest {
   }
 
   @Test
-  public void validateKeyFormat_sha256() throws Exception {
+  public void validateKeyFormat_hS256() throws Exception {
     factory.validateKeyFormat(makeJwtHmacKeyFormat(32, JwtHmacAlgorithm.HS256));
-  }
-
-  @Test
-  public void validateKeyFormat_sha512() throws Exception {
-    factory.validateKeyFormat(makeJwtHmacKeyFormat(32, JwtHmacAlgorithm.HS512));
-  }
-
-  @Test
-  public void validateKeyFormat_keySizeTooSmall_throws() throws Exception {
     assertThrows(
         GeneralSecurityException.class,
         () -> factory.validateKeyFormat(makeJwtHmacKeyFormat(31, JwtHmacAlgorithm.HS256)));
+  }
+
+  @Test
+  public void validateKeyFormat_hS384() throws Exception {
+    factory.validateKeyFormat(makeJwtHmacKeyFormat(48, JwtHmacAlgorithm.HS384));
+    assertThrows(
+        GeneralSecurityException.class,
+        () -> factory.validateKeyFormat(makeJwtHmacKeyFormat(47, JwtHmacAlgorithm.HS384)));
+  }
+
+  @Test
+  public void validateKeyFormat_hS512() throws Exception {
+    factory.validateKeyFormat(makeJwtHmacKeyFormat(64, JwtHmacAlgorithm.HS512));
+    assertThrows(
+        GeneralSecurityException.class,
+        () -> factory.validateKeyFormat(makeJwtHmacKeyFormat(63, JwtHmacAlgorithm.HS512)));
   }
 
   @Test
@@ -117,8 +121,27 @@ public class JwtHmacKeyManagerTest {
   @Test
   public void createKey_valid() throws Exception {
     manager.validateKey(factory.createKey(makeJwtHmacKeyFormat(32, JwtHmacAlgorithm.HS256)));
-    manager.validateKey(factory.createKey(makeJwtHmacKeyFormat(32, JwtHmacAlgorithm.HS256)));
-    manager.validateKey(factory.createKey(makeJwtHmacKeyFormat(32, JwtHmacAlgorithm.HS512)));
+    manager.validateKey(factory.createKey(makeJwtHmacKeyFormat(48, JwtHmacAlgorithm.HS384)));
+    manager.validateKey(factory.createKey(makeJwtHmacKeyFormat(64, JwtHmacAlgorithm.HS512)));
+  }
+
+  @Test
+  public void createTooShortKey_invalid() throws Exception {
+    assertThrows(
+        GeneralSecurityException.class,
+        () ->
+            manager.validateKey(
+                factory.createKey(makeJwtHmacKeyFormat(31, JwtHmacAlgorithm.HS256))));
+    assertThrows(
+        GeneralSecurityException.class,
+        () ->
+            manager.validateKey(
+                factory.createKey(makeJwtHmacKeyFormat(47, JwtHmacAlgorithm.HS384))));
+    assertThrows(
+        GeneralSecurityException.class,
+        () ->
+            manager.validateKey(
+                factory.createKey(makeJwtHmacKeyFormat(63, JwtHmacAlgorithm.HS512))));
   }
 
   @Test
@@ -226,8 +249,8 @@ public class JwtHmacKeyManagerTest {
     testKeyTemplateCompatible(manager, KeyTemplates.get("JWT_HS512_RAW"));
   }
 
-  @Test
-  @Parameters(method = "templates")
+  // Note: we use Theory as a parametrized test -- different from what the Theory framework intends.
+  @Theory
   public void createSignVerify_success(String templateNames) throws Exception {
     KeysetHandle handle = KeysetHandle.generateNew(KeyTemplates.get(templateNames));
     JwtMac primitive = handle.getPrimitive(JwtMac.class);
@@ -238,8 +261,8 @@ public class JwtHmacKeyManagerTest {
     assertThat(verifiedToken.getJwtId()).isEqualTo("jwtId");
   }
 
-  @Test
-  @Parameters(method = "templates")
+  // Note: we use Theory as a parametrized test -- different from what the Theory framework intends.
+  @Theory
   public void createSignVerifyDifferentKey_throw(String templateNames) throws Exception {
     KeyTemplate template = KeyTemplates.get(templateNames);
     KeysetHandle handle = KeysetHandle.generateNew(template);
@@ -255,8 +278,8 @@ public class JwtHmacKeyManagerTest {
         () -> otherPrimitive.verifyMacAndDecode(compact, validator));
   }
 
-  @Test
-  @Parameters(method = "templates")
+  // Note: we use Theory as a parametrized test -- different from what the Theory framework intends.
+  @Theory
   public void createSignVerify_modifiedHeader_throw(String templateNames) throws Exception {
     KeysetHandle handle = KeysetHandle.generateNew(KeyTemplates.get(templateNames));
     JwtMac mac = handle.getPrimitive(JwtMac.class);
@@ -278,8 +301,8 @@ public class JwtHmacKeyManagerTest {
     }
   }
 
-  @Test
-  @Parameters(method = "templates")
+  // Note: we use Theory as a parametrized test -- different from what the Theory framework intends.
+  @Theory
   public void createSignVerify_modifiedPayload_throw(String templateNames) throws Exception {
     KeysetHandle handle = KeysetHandle.generateNew(KeyTemplates.get(templateNames));
     JwtMac mac = handle.getPrimitive(JwtMac.class);
@@ -301,8 +324,8 @@ public class JwtHmacKeyManagerTest {
     }
   }
 
-  @Test
-  @Parameters(method = "templates")
+  // Note: we use Theory as a parametrized test -- different from what the Theory framework intends.
+  @Theory
   public void verify_modifiedSignature_shouldThrow(String templateNames) throws Exception {
     KeysetHandle handle = KeysetHandle.generateNew(KeyTemplates.get(templateNames));
     JwtMac mac = handle.getPrimitive(JwtMac.class);

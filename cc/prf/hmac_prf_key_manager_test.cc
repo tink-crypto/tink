@@ -84,15 +84,12 @@ TEST(HmacPrfKeyManagerTest, CreateKey) {
   key_format.set_key_size(16);
   key_format.mutable_params()->set_hash(HashType::SHA512);
   auto hmac_key_or = HmacPrfKeyManager().CreateKey(key_format);
-  ASSERT_THAT(hmac_key_or.status(), IsOk());
-  EXPECT_EQ(hmac_key_or.ValueOrDie().version(), 0);
-  EXPECT_EQ(hmac_key_or.ValueOrDie().params().hash(),
-            key_format.params().hash());
-  EXPECT_THAT(hmac_key_or.ValueOrDie().key_value(),
-              SizeIs(key_format.key_size()));
+  ASSERT_THAT(hmac_key_or, IsOk());
+  EXPECT_EQ(hmac_key_or.value().version(), 0);
+  EXPECT_EQ(hmac_key_or.value().params().hash(), key_format.params().hash());
+  EXPECT_THAT(hmac_key_or.value().key_value(), SizeIs(key_format.key_size()));
 
-  EXPECT_THAT(HmacPrfKeyManager().ValidateKey(hmac_key_or.ValueOrDie()),
-              IsOk());
+  EXPECT_THAT(HmacPrfKeyManager().ValidateKey(hmac_key_or.value()), IsOk());
 }
 
 TEST(HmacPrfKeyManagerTest, ValidKey) {
@@ -126,9 +123,9 @@ TEST(HmacPrfKeyManagerTest, DeriveKey) {
 
   StatusOr<HmacPrfKey> key_or =
       HmacPrfKeyManager().DeriveKey(format, &input_stream);
-  ASSERT_THAT(key_or.status(), IsOk());
-  EXPECT_EQ(key_or.ValueOrDie().key_value(), "0123456789abcdefghijklm");
-  EXPECT_EQ(key_or.ValueOrDie().params().hash(), format.params().hash());
+  ASSERT_THAT(key_or, IsOk());
+  EXPECT_EQ(key_or.value().key_value(), "0123456789abcdefghijklm");
+  EXPECT_EQ(key_or.value().params().hash(), format.params().hash());
 }
 
 TEST(HmacPrfKeyManagerTest, DeriveKeyNotEnoughRandomness) {
@@ -162,22 +159,20 @@ TEST(HmacPrfKeyManagerTest, GetPrimitive) {
   HmacPrfKeyFormat key_format;
   key_format.mutable_params()->set_hash(HashType::SHA256);
   key_format.set_key_size(16);
-  HmacPrfKey key = HmacPrfKeyManager().CreateKey(key_format).ValueOrDie();
+  HmacPrfKey key = HmacPrfKeyManager().CreateKey(key_format).value();
   auto manager_mac_or = HmacPrfKeyManager().GetPrimitive<Prf>(key);
-  ASSERT_THAT(manager_mac_or.status(), IsOk());
-  auto prf_value_or =
-      manager_mac_or.ValueOrDie()->Compute("some plaintext", 16);
-  ASSERT_THAT(prf_value_or.status(), IsOk());
+  ASSERT_THAT(manager_mac_or, IsOk());
+  auto prf_value_or = manager_mac_or.value()->Compute("some plaintext", 16);
+  ASSERT_THAT(prf_value_or, IsOk());
 
   auto direct_prf_or = subtle::HmacBoringSsl::New(
       util::Enums::ProtoToSubtle(key.params().hash()), 16,
       util::SecretDataFromStringView(key.key_value()));
-  ASSERT_THAT(direct_prf_or.status(), IsOk());
+  ASSERT_THAT(direct_prf_or, IsOk());
   auto direct_prf_value_or =
-      direct_prf_or.ValueOrDie()->ComputeMac("some plaintext");
-  ASSERT_THAT(direct_prf_value_or.status(), IsOk());
-  EXPECT_THAT(direct_prf_value_or.ValueOrDie(),
-              StartsWith(prf_value_or.ValueOrDie()));
+      direct_prf_or.value()->ComputeMac("some plaintext");
+  ASSERT_THAT(direct_prf_value_or, IsOk());
+  EXPECT_THAT(direct_prf_value_or.value(), StartsWith(prf_value_or.value()));
 }
 
 }  // namespace

@@ -27,9 +27,9 @@ from tink import prf
 from tink import signature
 from tink import streaming_aead
 
-from proto.testing import testing_api_pb2_grpc
-
 from tink.testing import fake_kms
+
+from proto import testing_api_pb2_grpc
 
 import jwt_service
 import services

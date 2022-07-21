@@ -18,6 +18,7 @@
 #include <algorithm>
 #include <cstdint>
 #include <cstring>
+#include <memory>
 #include <string>
 #include <utility>
 
@@ -287,6 +288,22 @@ util::Status SslNewKeyPairFromEcKey(SslEvpPkeyType key_type,
   return util::OkStatus();
 }
 
+util::StatusOr<std::string> SslEcdsaSignatureToBytes(
+    const ECDSA_SIG *ecdsa_signature) {
+  if (ecdsa_signature == nullptr) {
+    return util::Status(absl::StatusCode::kInvalidArgument,
+                        "ECDSA signature is null");
+  }
+  uint8_t *der = nullptr;
+  int der_len = i2d_ECDSA_SIG(ecdsa_signature, &der);
+  if (der_len <= 0) {
+    return util::Status(absl::StatusCode::kInternal, "i2d_ECDSA_SIG failed");
+  }
+  auto result = std::string(reinterpret_cast<char *>(der), der_len);
+  OPENSSL_free(der);
+  return result;
+}
+
 }  // namespace
 
 util::StatusOr<int32_t> EcFieldSizeInBytes(EllipticCurveType curve_type) {
@@ -407,7 +424,7 @@ util::StatusOr<std::unique_ptr<X25519Key>> NewX25519Key() {
   if (!res.ok()) {
     return res;
   }
-  return key;
+  return std::move(key);
 }
 
 EcKey EcKeyFromX25519Key(const X25519Key *x25519_key) {
@@ -506,6 +523,27 @@ util::StatusOr<util::SecretData> ComputeX25519SharedSecret(
                         "Secret generation failed");
   }
   return shared_secret;
+}
+
+util::StatusOr<std::unique_ptr<X25519Key>> X25519KeyFromPrivateKey(
+    const util::SecretData &private_key) {
+  if (private_key.size() != X25519KeyPrivKeySize()) {
+    return util::Status(absl::StatusCode::kInvalidArgument,
+                        "Invalid length for private key");
+  }
+
+  internal::SslUniquePtr<EVP_PKEY> pkey(
+      EVP_PKEY_new_raw_private_key(SslEvpPkeyType::kX25519Key, nullptr,
+                                   private_key.data(), private_key.size()));
+  auto key = absl::make_unique<X25519Key>();
+  util::Status res = SslNewKeyPairFromEcKey(
+      SslEvpPkeyType::kX25519Key, *pkey,
+      absl::MakeSpan(key->private_key, X25519KeyPrivKeySize()),
+      absl::MakeSpan(key->public_value, X25519KeyPubKeySize()));
+  if (!res.ok()) {
+    return res;
+  }
+  return std::move(key);
 }
 
 util::StatusOr<std::string> EcPointEncode(EllipticCurveType curve,
@@ -709,22 +747,7 @@ util::StatusOr<std::string> EcSignatureIeeeToDer(const EC_GROUP *group,
   r->release();
   s->release();
 
-  uint8_t *der = nullptr;
-#ifdef OPENSSL_IS_BORINGSSL
-  size_t der_len = 0;
-  if (!ECDSA_SIG_to_bytes(&der, &der_len, ecdsa.get())) {
-    return util::Status(absl::StatusCode::kInternal,
-                        "ECDSA_SIG_to_bytes failed");
-  }
-#else
-  int der_len = i2d_ECDSA_SIG(ecdsa.get(), &der);
-  if (der_len <= 0) {
-    return util::Status(absl::StatusCode::kInternal, "i2d_ECDSA_SIG failed");
-  }
-#endif
-  auto result = std::string(reinterpret_cast<char *>(der), der_len);
-  OPENSSL_free(der);
-  return result;
+  return SslEcdsaSignatureToBytes(ecdsa.get());
 }
 
 }  // namespace internal

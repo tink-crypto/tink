@@ -34,8 +34,6 @@ namespace crypto {
 namespace tink {
 namespace internal {
 
-using ::google::crypto::tink::HpkeParams;
-
 util::StatusOr<std::unique_ptr<HpkeDecryptBoringSsl>> HpkeDecryptBoringSsl::New(
     const google::crypto::tink::HpkeParams& params,
     const HpkeKeyBoringSsl& hpke_key, absl::string_view encapsulated_key,
@@ -46,13 +44,13 @@ util::StatusOr<std::unique_ptr<HpkeDecryptBoringSsl>> HpkeDecryptBoringSsl::New(
   if (!status.ok()) {
     return status;
   }
-  return hpke_decrypt;
+  return std::move(hpke_decrypt);
 }
 
-util::Status HpkeDecryptBoringSsl::Init(const HpkeParams& params,
-                                        const HpkeKeyBoringSsl& hpke_key,
-                                        absl::string_view encapsulated_key,
-                                        absl::string_view context_info) {
+util::Status HpkeDecryptBoringSsl::Init(
+    const google::crypto::tink::HpkeParams& params,
+    const HpkeKeyBoringSsl& hpke_key, absl::string_view encapsulated_key,
+    absl::string_view context_info) {
   util::StatusOr<const EVP_HPKE_KEM *> kem = KemParam(params);
   if (!kem.ok()) {
     return kem.status();

@@ -16,6 +16,8 @@
 
 #include "tink/experimental/pqcrypto/signature/dilithium_key_template.h"
 
+#include <string>
+
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "tink/core/key_manager_impl.h"
@@ -24,15 +26,14 @@
 #include "tink/experimental/pqcrypto/signature/dilithium_verify_key_manager.h"
 #include "tink/util/test_matchers.h"
 #include "proto/tink.pb.h"
-#include "proto/tink.proto.h"
 
 extern "C" {
-#include "third_party/pqclean/crypto_sign/dilithium2/avx2/api.h"
-#include "third_party/pqclean/crypto_sign/dilithium2aes/avx2/api.h"
-#include "third_party/pqclean/crypto_sign/dilithium3/avx2/api.h"
-#include "third_party/pqclean/crypto_sign/dilithium3aes/avx2/api.h"
-#include "third_party/pqclean/crypto_sign/dilithium5/avx2/api.h"
-#include "third_party/pqclean/crypto_sign/dilithium5aes/avx2/api.h"
+#include "third_party/pqclean/crypto_sign/dilithium2/api.h"
+#include "third_party/pqclean/crypto_sign/dilithium2aes/api.h"
+#include "third_party/pqclean/crypto_sign/dilithium3/api.h"
+#include "third_party/pqclean/crypto_sign/dilithium3aes/api.h"
+#include "third_party/pqclean/crypto_sign/dilithium5/api.h"
+#include "third_party/pqclean/crypto_sign/dilithium5aes/api.h"
 }
 
 namespace crypto {
@@ -100,28 +101,28 @@ TEST_P(DilithiumKeyTemplateTest, KeyManagerCompatibility) {
 
   util::StatusOr<std::unique_ptr<portable_proto::MessageLite>> new_key_result =
       key_manager->get_key_factory().NewKey(key_format);
-  EXPECT_THAT(new_key_result.status(), IsOk());
+  EXPECT_THAT(new_key_result, IsOk());
 }
 
 INSTANTIATE_TEST_SUITE_P(
     DilithiumKeyTemplateTests, DilithiumKeyTemplateTest,
     testing::ValuesIn<DilithiumKeyTemplateTestCase>(
-        {{"Dilithium2", PQCLEAN_DILITHIUM2_AVX2_CRYPTO_SECRETKEYBYTES,
+        {{"Dilithium2", PQCLEAN_DILITHIUM2_CRYPTO_SECRETKEYBYTES,
           DilithiumSeedExpansion::SEED_EXPANSION_SHAKE,
           Dilithium2KeyTemplate()},
-         {"Dilithium3", PQCLEAN_DILITHIUM3_AVX2_CRYPTO_SECRETKEYBYTES,
+         {"Dilithium3", PQCLEAN_DILITHIUM3_CRYPTO_SECRETKEYBYTES,
           DilithiumSeedExpansion::SEED_EXPANSION_SHAKE,
           Dilithium3KeyTemplate()},
-         {"Dilithium5", PQCLEAN_DILITHIUM5_AVX2_CRYPTO_SECRETKEYBYTES,
+         {"Dilithium5", PQCLEAN_DILITHIUM5_CRYPTO_SECRETKEYBYTES,
           DilithiumSeedExpansion::SEED_EXPANSION_SHAKE,
           Dilithium5KeyTemplate()},
-         {"Dilithium2Aes", PQCLEAN_DILITHIUM2AES_AVX2_CRYPTO_SECRETKEYBYTES,
+         {"Dilithium2Aes", PQCLEAN_DILITHIUM2AES_CRYPTO_SECRETKEYBYTES,
           DilithiumSeedExpansion::SEED_EXPANSION_AES,
           Dilithium2AesKeyTemplate()},
-         {"Dilithium3Aes", PQCLEAN_DILITHIUM3AES_AVX2_CRYPTO_SECRETKEYBYTES,
+         {"Dilithium3Aes", PQCLEAN_DILITHIUM3AES_CRYPTO_SECRETKEYBYTES,
           DilithiumSeedExpansion::SEED_EXPANSION_AES,
           Dilithium3AesKeyTemplate()},
-         {"Dilithium5Aes", PQCLEAN_DILITHIUM5AES_AVX2_CRYPTO_SECRETKEYBYTES,
+         {"Dilithium5Aes", PQCLEAN_DILITHIUM5AES_CRYPTO_SECRETKEYBYTES,
           DilithiumSeedExpansion::SEED_EXPANSION_AES,
           Dilithium5AesKeyTemplate()}}),
     [](const testing::TestParamInfo<DilithiumKeyTemplateTest::ParamType>&

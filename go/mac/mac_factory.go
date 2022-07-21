@@ -28,7 +28,8 @@ import (
 )
 
 const (
-	maxInt = int(^uint(0) >> 1)
+	intSize = 32 << (^uint(0) >> 63) // 32 or 64
+	maxInt  = 1<<(intSize-1) - 1
 )
 
 // New creates a MAC primitive from the given keyset handle.
@@ -82,7 +83,7 @@ func (m *wrappedMAC) ComputeMAC(data []byte) ([]byte, error) {
 	}
 	if m.ps.Primary.PrefixType == tinkpb.OutputPrefixType_LEGACY {
 		d := data
-		if len(d) == maxInt {
+		if len(d) >= maxInt {
 			return nil, fmt.Errorf("mac_factory: data too long")
 		}
 		data = make([]byte, 0, len(d)+1)
@@ -121,7 +122,7 @@ func (m *wrappedMAC) VerifyMAC(mac, data []byte) error {
 			}
 			if entry.PrefixType == tinkpb.OutputPrefixType_LEGACY {
 				d := data
-				if len(d) == maxInt {
+				if len(d) >= maxInt {
 					return fmt.Errorf("mac_factory: data too long")
 				}
 				data = make([]byte, 0, len(d)+1)

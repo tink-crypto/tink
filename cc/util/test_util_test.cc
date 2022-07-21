@@ -47,7 +47,7 @@ TEST(AsKeyDataTest, Basic) {
 }
 
 TEST(DummyTests, Aead) {
-  EXPECT_THAT(DummyAead("dummy").Encrypt("foo", "bar").ValueOrDie(),
+  EXPECT_THAT(DummyAead("dummy").Encrypt("foo", "bar").value(),
               Eq("5:3:dummybarfoo"));
 }
 
@@ -57,7 +57,7 @@ TEST(DummyTests, AeadCord) {
   absl::Cord aad;
   aad.Append("bar");
 
-  EXPECT_THAT(DummyCordAead("dummy").Encrypt(plaintext, aad).ValueOrDie(),
+  EXPECT_THAT(DummyCordAead("dummy").Encrypt(plaintext, aad).value(),
               Eq("5:3:dummybarfoo"));
 }
 
@@ -71,7 +71,7 @@ TEST(DummyTests, AeadCordMultipleChunks) {
   aad.Append("a");
   aad.Append("r");
 
-  EXPECT_THAT(DummyCordAead("dummy").Encrypt(plaintext, aad).ValueOrDie(),
+  EXPECT_THAT(DummyCordAead("dummy").Encrypt(plaintext, aad).value(),
               Eq("5:3:dummybarfoo"));
 }
 

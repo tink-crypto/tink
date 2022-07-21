@@ -13,8 +13,8 @@
 // limitations under the License.
 //
 ///////////////////////////////////////////////////////////////////////////////
-#ifndef TINK_INTERNAL_UNIQUE_PTR_OPENSSL_H_
-#define TINK_INTERNAL_UNIQUE_PTR_OPENSSL_H_
+#ifndef TINK_INTERNAL_SSL_UNIQUE_PTR_H_
+#define TINK_INTERNAL_SSL_UNIQUE_PTR_H_
 
 #include <memory>
 // Every header in BoringSSL includes base.h, which in turn defines
@@ -27,6 +27,7 @@
 #include "openssl/cmac.h"
 #include "openssl/ec.h"
 #include "openssl/evp.h"
+#include "openssl/hmac.h"
 #include "openssl/rsa.h"
 #endif
 
@@ -56,6 +57,10 @@ struct Deleter {
 };
 
 // Here are all the custom deleters.
+template <>
+struct Deleter<BIO> {
+  void operator()(BIO* ptr) { BIO_free(ptr); }
+};
 template <>
 struct Deleter<EVP_CIPHER_CTX> {
   void operator()(EVP_CIPHER_CTX* ptr) { EVP_CIPHER_CTX_free(ptr); }
@@ -104,6 +109,10 @@ template <>
 struct Deleter<EVP_MD_CTX> {
   void operator()(EVP_MD_CTX* ptr) { EVP_MD_CTX_free(ptr); }
 };
+template <>
+struct Deleter<HMAC_CTX> {
+  void operator()(HMAC_CTX* ptr) { HMAC_CTX_free(ptr); }
+};
 
 template <typename T>
 using SslUniquePtr = std::unique_ptr<T, Deleter<T> >;
@@ -114,4 +123,4 @@ using SslUniquePtr = std::unique_ptr<T, Deleter<T> >;
 }  // namespace tink
 }  // namespace crypto
 
-#endif  // TINK_INTERNAL_UNIQUE_PTR_OPENSSL_H_
+#endif  // TINK_INTERNAL_SSL_UNIQUE_PTR_H_

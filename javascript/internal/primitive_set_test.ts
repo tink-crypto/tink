@@ -22,7 +22,7 @@ describe('primitive set test', function() {
 
     try {
       primitiveSet.addPrimitive(primitive, key);
-    } catch (e) {
+    } catch (e: any) {
       expect(e.toString()).toBe(ExceptionText.unknownPrefixType());
       return;
     }
@@ -166,7 +166,7 @@ describe('primitive set test', function() {
 
     try {
       primitiveSet.setPrimary(entry);
-    } catch (e) {
+    } catch (e: any) {
       expect(e.toString()).toBe(ExceptionText.setPrimaryToMissingEntry());
       return;
     }
@@ -182,7 +182,7 @@ describe('primitive set test', function() {
 
     try {
       primitiveSet.setPrimary(primary);
-    } catch (e) {
+    } catch (e: any) {
       expect(e.toString()).toBe(ExceptionText.setPrimaryToDisabled());
       return;
     }

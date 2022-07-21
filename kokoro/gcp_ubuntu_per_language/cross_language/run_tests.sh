@@ -19,22 +19,6 @@ set -euo pipefail
 
 CURRENT_BAZEL_VERSION=""
 
-install_python3() {
-  : "${PYTHON_VERSION:=3.7.1}"
-
-  # Update python version list.
-  (
-    cd /home/kbuilder/.pyenv/plugins/python-build/../..
-    git pull
-    # TODO(b/187879867): Remove once pyenv issue is resolved.
-    git checkout 783870759566a77d09b426e0305bc0993a522765
-  )
-  # Install Python.
-  eval "$(pyenv init -)"
-  pyenv install -v "${PYTHON_VERSION}"
-  pyenv global "${PYTHON_VERSION}"
-}
-
 use_bazel() {
   local candidate_version="$1"
   if [[ "${candidate_version}" != "${CURRENT_BAZEL_VERSION}" ]]; then
@@ -49,10 +33,12 @@ use_bazel() {
 
 main() {
   if [[ -n "${KOKORO_ROOT:-}" ]] ; then
-    install_python3
     cd "${KOKORO_ARTIFACTS_DIR}/git/tink"
-    ./kokoro/copy_credentials.sh
-    ./kokoro/update_android_sdk.sh
+    ./kokoro/testutils/copy_credentials.sh "tools/testdata"
+    ./kokoro/testutils/update_android_sdk.sh
+    # Sourcing required to update callers environment.
+    source ./kokoro/testutils/install_python3.sh
+    source ./kokoro/testutils/install_go.sh
   fi
   (
     cd testing/cc
@@ -80,12 +66,14 @@ main() {
     time bazel test --test_output=errors -- ...
   )
 
-  local TINK_SRC_PATH="${PWD}"
+  local TINK_CROSS_LANG_ROOT_PATH="${PWD}/testing"
   (
     cd testing/cross_language
     use_bazel "$(cat .bazelversion)"
     time bazel test \
-      --test_env TINK_SRC_PATH="${TINK_SRC_PATH}" --test_output=errors -- ...
+      --test_env TINK_CROSS_LANG_ROOT_PATH="${TINK_CROSS_LANG_ROOT_PATH}" \
+      --test_output=errors \
+      -- ...
   )
 }
 

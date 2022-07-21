@@ -49,6 +49,7 @@ tink_cc_library(
     tink::proto::aes_ctr_hmac_streaming_cc_proto
     tink::proto::aes_gcm_hkdf_streaming_cc_proto
     tink::proto::common_cc_proto
+    tink::proto::hmac_cc_proto
     tink::proto::tink_cc_proto
 )
 
@@ -103,6 +104,7 @@ tink_cc_library(
     tink::util::statusor
     tink::util::validation
     tink::proto::aes_ctr_hmac_streaming_cc_proto
+    tink::proto::hmac_cc_proto
     tink::proto::tink_cc_proto
 )
 

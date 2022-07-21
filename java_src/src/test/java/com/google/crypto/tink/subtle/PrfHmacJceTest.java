@@ -116,7 +116,7 @@ public class PrfHmacJceTest {
       try {
         mac.verifyMac(t.tag, t.message);
       } catch (GeneralSecurityException e) {
-        fail("Valid MAC, should not throw exception");
+        throw new AssertionError("Valid MAC, should not throw exception", e);
       }
     }
   }
@@ -256,16 +256,6 @@ public class PrfHmacJceTest {
     testThrowExceptionIfTagSizeIsTooSmall("HMACSHA512");
   }
 
-  @Test
-  public void testPrfAllowsSmallTagSizeCompute() throws Exception {
-    Assume.assumeTrue(!TinkFips.useOnlyFips() || TinkFipsUtil.fipsModuleAvailable());
-
-    testPrfNoExceptionIfTagSizeIsTooSmall("HMACSHA1");
-    testPrfNoExceptionIfTagSizeIsTooSmall("HMACSHA256");
-    testThrowExceptionIfTagSizeIsTooSmall("HMACSHA384");
-    testPrfNoExceptionIfTagSizeIsTooSmall("HMACSHA512");
-  }
-
   private static void testThrowExceptionIfTagSizeIsTooSmall(String algoName) throws Exception {
     for (int i = 0; i < PrfMac.MIN_TAG_SIZE_IN_BYTES; i++) {
       try {
@@ -275,6 +265,16 @@ public class PrfHmacJceTest {
         // expected.
       }
     }
+  }
+
+  @Test
+  public void testPrfAllowsSmallTagSizeCompute() throws Exception {
+    Assume.assumeTrue(!TinkFips.useOnlyFips() || TinkFipsUtil.fipsModuleAvailable());
+
+    testPrfNoExceptionIfTagSizeIsTooSmall("HMACSHA1");
+    testPrfNoExceptionIfTagSizeIsTooSmall("HMACSHA256");
+    testThrowExceptionIfTagSizeIsTooSmall("HMACSHA384");
+    testPrfNoExceptionIfTagSizeIsTooSmall("HMACSHA512");
   }
 
   private static void testPrfNoExceptionIfTagSizeIsTooSmall(String algoName) throws Exception {

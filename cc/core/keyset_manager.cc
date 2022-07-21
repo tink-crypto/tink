@@ -16,7 +16,9 @@
 
 #include "tink/keyset_manager.h"
 
+#include <memory>
 #include <random>
+#include <utility>
 
 #include "absl/memory/memory.h"
 #include "absl/status/status.h"

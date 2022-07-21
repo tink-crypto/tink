@@ -30,7 +30,7 @@ fi
 # Clang 7.0.1
 CLANG_PLATFORM="x86_64-linux-gnu-ubuntu-16.04"
 CLANG_SHA256SUM=02ad925add5b2b934d64c3dd5cbd1b2002258059f7d962993ba7f16524c3089c
-wget https://releases.llvm.org/7.0.1/clang%2bllvm-7.0.1-"${CLANG_PLATFORM}".tar.xz
+curl -OLsS https://releases.llvm.org/7.0.1/clang+llvm-7.0.1-"${CLANG_PLATFORM}".tar.xz
 echo "${CLANG_SHA256SUM}" clang+llvm-7.0.1-"${CLANG_PLATFORM}".tar.xz | sha256sum --check
 
 tar -xf clang+llvm-7.0.1-"${CLANG_PLATFORM}".tar.xz
@@ -44,7 +44,7 @@ export PATH="${PWD}/clang+llvm-7.0.1-${CLANG_PLATFORM}/bin:${PATH}"
 # Go 1.12.7
 GO_PLATFORM="linux-amd64"
 GO_SHA256SUM="66d83bfb5a9ede000e33c6579a91a29e6b101829ad41fffb5c5bb6c900e109d9"
-wget https://dl.google.com/go/go1.12.7."${GO_PLATFORM}".tar.gz
+curl -OLsS https://dl.google.com/go/go1.12.7."${GO_PLATFORM}".tar.gz
 echo "${GO_SHA256SUM}" go1.12.7."${GO_PLATFORM}".tar.gz | sha256sum --check
 tar -xf go1.12.7."${GO_PLATFORM}".tar.gz
 rm go1.12.7."${GO_PLATFORM}".tar.gz
@@ -53,7 +53,7 @@ export PATH="${PWD}/go/bin:${PATH}"
 
 # Ninja 1.9.0
 NINJA_SHA256SUM="1b1235f2b0b4df55ac6d80bbe681ea3639c9d2c505c7ff2159a3daf63d196305"
-wget https://github.com/ninja-build/ninja/releases/download/v1.9.0/ninja-linux.zip
+curl -OLsS https://github.com/ninja-build/ninja/releases/download/v1.9.0/ninja-linux.zip
 echo "${NINJA_SHA256SUM}" ninja-linux.zip | sha256sum --check
 
 unzip ninja-linux.zip
@@ -67,7 +67,7 @@ export PATH="${PWD}:${PATH}"
 BORINGSSL_SHA256SUM="3b5fdf23274d4179c2077b5e8fa625d9debd7a390aac1d165b7e47234f648bb8"
 
 # Download archive and verify checksum
-wget https://commondatastorage.googleapis.com/chromium-boringssl-fips/boringssl-ae223d6138807a13006342edfeef32e813246b39.tar.xz
+curl -OLsS https://commondatastorage.googleapis.com/chromium-boringssl-fips/boringssl-ae223d6138807a13006342edfeef32e813246b39.tar.xz
 echo "${BORINGSSL_SHA256SUM}" boringssl-ae223d6138807a13006342edfeef32e813246b39.tar.xz | sha256sum --check
 
 tar -xf boringssl-ae223d6138807a13006342edfeef32e813246b39.tar.xz

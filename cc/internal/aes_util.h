@@ -43,6 +43,16 @@ crypto::tink::util::Status AesCtr128Crypt(absl::string_view data,
                                           const AES_KEY* key,
                                           absl::Span<char> out);
 
+// Returns a pointer to an AES-CTR EVP_CIPHER for the given key size
+// `key_size_in_bytes`.
+util::StatusOr<const EVP_CIPHER*> GetAesCtrCipherForKeySize(
+    uint32_t key_size_in_bytes);
+
+// Returns a pointer to an AES-CBC EVP_CIPHER for the given key size
+// `key_size_in_bytes`.
+util::StatusOr<const EVP_CIPHER*> GetAesCbcCipherForKeySize(
+    uint32_t key_size_in_bytes);
+
 }  // namespace internal
 }  // namespace tink
 }  // namespace crypto

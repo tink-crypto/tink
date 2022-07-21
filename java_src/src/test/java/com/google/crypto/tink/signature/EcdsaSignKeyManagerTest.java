@@ -21,8 +21,8 @@ import static com.google.crypto.tink.testing.KeyTypeManagerTestUtil.testKeyTempl
 import static org.junit.Assert.assertThrows;
 
 import com.google.crypto.tink.KeyTemplate;
-import com.google.crypto.tink.KeyTypeManager;
 import com.google.crypto.tink.PublicKeySign;
+import com.google.crypto.tink.internal.KeyTypeManager;
 import com.google.crypto.tink.proto.EcdsaKeyFormat;
 import com.google.crypto.tink.proto.EcdsaParams;
 import com.google.crypto.tink.proto.EcdsaPrivateKey;

@@ -16,6 +16,7 @@
 
 #include "tink/hybrid/ecies_aead_hkdf_hybrid_decrypt.h"
 
+#include <string>
 #include <utility>
 
 #include "absl/memory/memory.h"
@@ -78,8 +79,8 @@ util::StatusOr<std::unique_ptr<HybridDecrypt>> EciesAeadHkdfHybridDecrypt::New(
   if (!dem_result.ok()) return dem_result.status();
 
   return {absl::WrapUnique(new EciesAeadHkdfHybridDecrypt(
-      recipient_key.public_key().params(), std::move(kem_result).ValueOrDie(),
-      std::move(dem_result).ValueOrDie()))};
+      recipient_key.public_key().params(), std::move(kem_result).value(),
+      std::move(dem_result).value()))};
 }
 
 util::StatusOr<std::string> EciesAeadHkdfHybridDecrypt::Decrypt(
@@ -90,7 +91,7 @@ util::StatusOr<std::string> EciesAeadHkdfHybridDecrypt::Decrypt(
           recipient_key_params_.kem_params().curve_type()),
       util::Enums::ProtoToSubtle(recipient_key_params_.ec_point_format()));
   if (!header_size_result.ok()) return header_size_result.status();
-  auto header_size = header_size_result.ValueOrDie();
+  auto header_size = header_size_result.value();
   if (ciphertext.size() < header_size) {
     return util::Status(absl::StatusCode::kInvalidArgument,
                         "ciphertext too short");
@@ -105,19 +106,19 @@ util::StatusOr<std::string> EciesAeadHkdfHybridDecrypt::Decrypt(
       dem_helper_->dem_key_size_in_bytes(),
       util::Enums::ProtoToSubtle(recipient_key_params_.ec_point_format()));
   if (!symmetric_key_result.ok()) return symmetric_key_result.status();
-  auto symmetric_key = std::move(symmetric_key_result.ValueOrDie());
+  auto symmetric_key = std::move(symmetric_key_result.value());
 
   // Use the symmetric key to get an AEAD-primitive.
   auto aead_or_daead_result = dem_helper_->GetAeadOrDaead(symmetric_key);
   if (!aead_or_daead_result.ok()) return aead_or_daead_result.status();
-  auto aead_or_daead = std::move(aead_or_daead_result.ValueOrDie());
+  auto aead_or_daead = std::move(aead_or_daead_result.value());
 
   // Do the actual decryption using the AEAD-primitive.
   auto decrypt_result =
       aead_or_daead->Decrypt(ciphertext.substr(header_size), "");  // empty aad
   if (!decrypt_result.ok()) return decrypt_result.status();
 
-  return decrypt_result.ValueOrDie();
+  return decrypt_result.value();
 }
 
 }  // namespace tink

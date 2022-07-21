@@ -94,6 +94,11 @@ class RawJwtTest(absltest.TestCase):
     self.assertTrue(token.has_jwt_id())
     self.assertEqual(token.jwt_id(), 'JWT ID')
 
+  def test_audience(self):
+    token = jwt.new_raw_jwt(audience='bob', without_expiration=True)
+    self.assertTrue(token.has_audiences())
+    self.assertEqual(token.audiences(), ['bob'])
+
   def test_audiences(self):
     token = jwt.new_raw_jwt(audiences=['bob', 'eve'], without_expiration=True)
     self.assertTrue(token.has_audiences())
@@ -261,6 +266,10 @@ class RawJwtTest(absltest.TestCase):
             'object': {'one': {'two': 3}}
         })
 
+  def test_string_audience_payload(self):
+    token = jwt.new_raw_jwt(audience='bob', without_expiration=True)
+    self.assertEqual(json.loads(token.json_payload()), {'aud': 'bob'})
+
   def test_from_to_payload(self):
     payload = {
         'iss': 'Issuer',
@@ -291,10 +300,22 @@ class RawJwtTest(absltest.TestCase):
     token = jwt.new_raw_jwt(expiration=expiration)
     self.assertEqual(token.json_payload(), '{"exp":123}')
 
-  def test_from_to_payload_with_string_audience(self):
+  def test_from_to_payload_with_string_audience_perserves_string(self):
     payload = {
         'iss': 'Issuer',
         'aud': 'bob',
+    }
+    token = jwt.RawJwt._from_json(None, json.dumps(payload))
+    expected = {
+        'iss': 'Issuer',
+        'aud': 'bob',
+    }
+    self.assertEqual(json.loads(token.json_payload()), expected)
+
+  def test_from_to_payload_with_list_audience_perserves_list(self):
+    payload = {
+        'iss': 'Issuer',
+        'aud': ['bob'],
     }
     token = jwt.RawJwt._from_json(None, json.dumps(payload))
     expected = {

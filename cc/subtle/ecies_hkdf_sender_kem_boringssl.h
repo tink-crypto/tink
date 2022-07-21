@@ -17,9 +17,12 @@
 #ifndef TINK_SUBTLE_ECIES_HKDF_SENDER_KEM_BORINGSSL_H_
 #define TINK_SUBTLE_ECIES_HKDF_SENDER_KEM_BORINGSSL_H_
 
+#include <memory>
+#include <string>
+#include <utility>
+
 #include "absl/strings/string_view.h"
-#include "openssl/curve25519.h"
-#include "openssl/ec.h"
+#include "openssl/evp.h"
 #include "tink/internal/fips_utils.h"
 #include "tink/internal/ssl_unique_ptr.h"
 #include "tink/subtle/common_enums.h"
@@ -125,9 +128,9 @@ class EciesHkdfX25519SendKemBoringSsl : public EciesHkdfSenderKemBoringSsl {
 
  private:
   explicit EciesHkdfX25519SendKemBoringSsl(
-      const std::string& peer_public_value);
+      internal::SslUniquePtr<EVP_PKEY> peer_public_key);
 
-  uint8_t peer_public_value_[X25519_PUBLIC_VALUE_LEN];
+  const internal::SslUniquePtr<EVP_PKEY> peer_public_key_;
 };
 
 }  // namespace subtle

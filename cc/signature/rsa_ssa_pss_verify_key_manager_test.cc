@@ -16,6 +16,8 @@
 
 #include "tink/signature/rsa_ssa_pss_verify_key_manager.h"
 
+#include <string>
+
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "absl/status/status.h"
@@ -77,7 +79,7 @@ RsaSsaPssKeyFormat CreateKeyFormat(HashType sig_hash, HashType mgf1_hash,
   internal::SslUniquePtr<BIGNUM> e(BN_new());
   BN_set_word(e.get(), public_exponent);
   key_format.set_public_exponent(
-      internal::BignumToString(e.get(), BN_num_bytes(e.get())).ValueOrDie());
+      internal::BignumToString(e.get(), BN_num_bytes(e.get())).value());
 
   return key_format;
 }
@@ -87,13 +89,13 @@ RsaSsaPssKeyFormat ValidKeyFormat() {
 }
 
 RsaSsaPssPrivateKey CreateValidPrivateKey() {
-  return RsaSsaPssSignKeyManager().CreateKey(ValidKeyFormat()).ValueOrDie();
+  return RsaSsaPssSignKeyManager().CreateKey(ValidKeyFormat()).value();
 }
 
 RsaSsaPssPublicKey CreateValidPublicKey() {
   return RsaSsaPssSignKeyManager()
       .GetPublicKey(CreateValidPrivateKey())
-      .ValueOrDie();
+      .value();
 }
 
 // Checks that a public key generaed by the SignKeyManager is considered valid.
@@ -149,10 +151,10 @@ TEST(RsaSsaPssSignKeyManagerTest, Create) {
       CreateKeyFormat(HashType::SHA256, HashType::SHA256, 32, 3072, RSA_F4);
   StatusOr<RsaSsaPssPrivateKey> private_key_or =
       RsaSsaPssSignKeyManager().CreateKey(key_format);
-  ASSERT_THAT(private_key_or.status(), IsOk());
-  RsaSsaPssPrivateKey private_key = private_key_or.ValueOrDie();
+  ASSERT_THAT(private_key_or, IsOk());
+  RsaSsaPssPrivateKey private_key = private_key_or.value();
   RsaSsaPssPublicKey public_key =
-      RsaSsaPssSignKeyManager().GetPublicKey(private_key).ValueOrDie();
+      RsaSsaPssSignKeyManager().GetPublicKey(private_key).value();
 
   internal::RsaPrivateKey private_key_subtle;
   private_key_subtle.n = private_key.public_key().n();
@@ -170,13 +172,12 @@ TEST(RsaSsaPssSignKeyManagerTest, Create) {
 
   auto verifier_or =
       RsaSsaPssVerifyKeyManager().GetPrimitive<PublicKeyVerify>(public_key);
-  ASSERT_THAT(verifier_or.status(), IsOk());
+  ASSERT_THAT(verifier_or, IsOk());
 
   std::string message = "Some message";
-  EXPECT_THAT(
-      verifier_or.ValueOrDie()->Verify(
-          direct_signer_or.ValueOrDie()->Sign(message).ValueOrDie(), message),
-      IsOk());
+  EXPECT_THAT(verifier_or.value()->Verify(
+                  direct_signer_or.value()->Sign(message).value(), message),
+              IsOk());
 }
 
 // Test vector from
@@ -231,9 +232,9 @@ TEST(RsaSsaPssVerifyKeyManagerTest, TestVector) {
   key.set_n(nist_test_vector->n);
   key.set_e(nist_test_vector->e);
   auto result = RsaSsaPssVerifyKeyManager().GetPrimitive<PublicKeyVerify>(key);
-  ASSERT_THAT(result.status(), IsOk());
-  EXPECT_THAT(result.ValueOrDie()->Verify(nist_test_vector->signature,
-                                          nist_test_vector->message),
+  ASSERT_THAT(result, IsOk());
+  EXPECT_THAT(result.value()->Verify(nist_test_vector->signature,
+                                     nist_test_vector->message),
               IsOk());
 }
 

@@ -1,34 +1,46 @@
 workspace(name = "tink_py")
 
 local_repository(
-    name = "tink_base",
-    path = "..",
+    name = "tink_cc",
+    path = "../cc",
 )
 
 local_repository(
-    name = "tink_cc",
-    path = "../cc",
+    name = "tink_cc_awskms",
+    path = "../cc/integration/awskms",
+)
+
+local_repository(
+    name = "tink_cc_gcpkms",
+    path = "../cc/integration/gcpkms",
 )
 
 # Need to load rules_python earlier as proto uses an older version which is
 # incompatible with our Python implementation will load
 load("@tink_py//:tink_py_deps.bzl", "tink_py_deps")
+
 tink_py_deps()
 
 load("@tink_py//:tink_py_deps_init.bzl", "tink_py_deps_init")
+
 tink_py_deps_init("tink_py")
 
-load("@tink_py_pip_deps//:requirements.bzl", "pip_install")
-pip_install()
-
-load("@tink_base//:tink_base_deps.bzl", "tink_base_deps")
-tink_base_deps()
-
-load("@tink_base//:tink_base_deps_init.bzl", "tink_base_deps_init")
-tink_base_deps_init()
-
 load("@tink_cc//:tink_cc_deps.bzl", "tink_cc_deps")
+
 tink_cc_deps()
 
 load("@tink_cc//:tink_cc_deps_init.bzl", "tink_cc_deps_init")
+
 tink_cc_deps_init()
+
+load("@tink_cc_awskms//:tink_cc_awskms_deps.bzl", "tink_cc_awskms_deps")
+
+tink_cc_awskms_deps()
+
+load("@tink_cc_gcpkms//:tink_cc_gcpkms_deps.bzl", "tink_cc_gcpkms_deps")
+
+tink_cc_gcpkms_deps()
+
+load("@tink_cc_gcpkms//:tink_cc_gcpkms_deps_init.bzl", "tink_cc_gcpkms_deps_init")
+
+tink_cc_gcpkms_deps_init()

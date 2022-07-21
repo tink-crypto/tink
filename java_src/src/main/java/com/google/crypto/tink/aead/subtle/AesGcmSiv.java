@@ -1,18 +1,18 @@
 // Copyright 2017 Google Inc.
-// //
-// // Licensed under the Apache License, Version 2.0 (the "License");
-// // you may not use this file except in compliance with the License.
-// // You may obtain a copy of the License at
-// //
-// //      http://www.apache.org/licenses/LICENSE-2.0
-// //
-// // Unless required by applicable law or agreed to in writing, software
-// // distributed under the License is distributed on an "AS IS" BASIS,
-// // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// // See the License for the specific language governing permissions and
-// // limitations under the License.
-// //
-// ////////////////////////////////////////////////////////////////////////////////
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+////////////////////////////////////////////////////////////////////////////////
 
 package com.google.crypto.tink.aead.subtle;
 
@@ -33,9 +33,9 @@ import javax.crypto.spec.SecretKeySpec;
 /**
  * This primitive implements AES-GCM-SIV (as defined in RFC 8452) using JCE.
  *
- * <p>This encryption mode is intended for authenticated encryption with additional authenticated
- * data. A major security problem with AES-GCM is that reusing the same nonce twice leaks the
- * authentication key. AES-GCM-SIV on the other hand has been designed to avoid this vulnerability.
+ * <p>This encryption mode is intended for authenticated encryption with associated data. A major
+ * security problem with AES-GCM is that reusing the same nonce twice leaks the authentication key.
+ * AES-GCM-SIV on the other hand has been designed to avoid this vulnerability.
  *
  * <p>This encryption requires a JCE provider that supports the <code>AES/GCM-SIV/NoPadding</code>
  * transformation such as <a href="https://conscrypt.org">Conscrypt</a>. using JCE.
@@ -65,11 +65,11 @@ public final class AesGcmSiv implements Aead {
     keySpec = new SecretKeySpec(key, "AES");
   }
 
-  @Override
   /**
    * On Android KitKat (API level 19) this method does not support non null or non empty {@code
    * associatedData}. It might not work at all in older versions.
    */
+  @Override
   public byte[] encrypt(final byte[] plaintext, final byte[] associatedData)
       throws GeneralSecurityException {
     // Check that ciphertext is not longer than the max. size of a Java array.
@@ -101,11 +101,11 @@ public final class AesGcmSiv implements Aead {
     return ciphertext;
   }
 
-  @Override
   /**
    * On Android KitKat (API level 19) this method does not support non null or non empty {@code
    * associatedData}. It might not work at all in older versions.
    */
+  @Override
   public byte[] decrypt(final byte[] ciphertext, final byte[] associatedData)
       throws GeneralSecurityException {
     if (ciphertext.length < IV_SIZE_IN_BYTES + TAG_SIZE_IN_BYTES) {

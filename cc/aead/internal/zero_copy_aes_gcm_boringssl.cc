@@ -17,6 +17,7 @@
 #include "tink/aead/internal/zero_copy_aes_gcm_boringssl.h"
 
 #include <cstdint>
+#include <memory>
 #include <utility>
 
 #include "absl/memory/memory.h"

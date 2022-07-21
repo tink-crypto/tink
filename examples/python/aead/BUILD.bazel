@@ -19,6 +19,26 @@ py_binary(
     ],
 )
 
+py_library(
+    name = "aead_basic",
+    srcs = ["aead_basic.py"],
+    deps = [
+        "@tink_py//tink:cleartext_keyset_handle",
+        "@tink_py//tink:tink_python",
+        "@tink_py//tink/aead",
+    ],
+)
+
+py_test(
+    name = "aead_basic_test",
+    srcs = ["aead_basic_test.py"],
+    python_version = "PY3",
+    deps = [
+        requirement("absl-py"),
+        ":aead_basic"
+    ],
+)
+
 sh_test(
     name = "aead_test",
     size = "small",

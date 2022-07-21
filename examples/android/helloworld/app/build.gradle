@@ -22,9 +22,7 @@ android {
    }
 }
 
-repositories {
-    maven { url "https://oss.sonatype.org/content/repositories/snapshots" }
-}
+apply from: "maven_${mavenLocation}.gradle"
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])

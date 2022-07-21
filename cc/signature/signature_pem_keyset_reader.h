@@ -17,6 +17,7 @@
 #ifndef TINK_SIGNATURE_SIGNATURE_PEM_KEYSET_READER_H_
 #define TINK_SIGNATURE_SIGNATURE_PEM_KEYSET_READER_H_
 
+#include <string>
 #include <utility>
 #include <vector>
 
@@ -28,15 +29,17 @@
 namespace crypto {
 namespace tink {
 
-// Type of key. Currently, only RSA keys are supported.
-// TODO(ambrosin): Add EC keys persing.
+// Type of key.
+//
+// Currently, PEM_EC only supports PublicKeyVerify.
 enum PemKeyType { PEM_RSA, PEM_EC };
 
 // Algorithm to use with this key.
 enum PemAlgorithm {
   RSASSA_PSS,
   RSASSA_PKCS1,
-  ECDSA_IEEE  // Represents the NIST_P256 curve with IEEE_P1363 encoding
+  ECDSA_IEEE,  // NIST_P256 curve with IEEE_P1363 encoding
+  ECDSA_DER  // NIST_P256 curve with DER encoding
 };
 
 // Common set of parameters for the PEM key.
@@ -91,7 +94,7 @@ class SignaturePemKeysetReader : public KeysetReader {
 // if (!reader_statusor.ok()) /* handle failure */
 //
 // auto keyset_handle_statusor =
-//     CleartextKeysetHandle::Read(reader_statusor.ValueOrDie());
+//     CleartextKeysetHandle::Read(*reader_statusor);
 class SignaturePemKeysetReaderBuilder {
  public:
   // Type of reader to build. The builder type depends on the primitive

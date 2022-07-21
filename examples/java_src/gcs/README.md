@@ -57,10 +57,11 @@ cd tink/examples/java_src
 bazel build ...
 ```
 
-You can then encrypt a file and upload to GCS:
+Encrypt a file and upload it to GCS:
 
 ```shell
 echo "some data" > testdata.txt
+
 ./bazel-bin/gcs/gcs_envelope_aead_example \
     encrypt \
     gcp-kms://my-cloud-kms-key-uri \
@@ -70,10 +71,10 @@ echo "some data" > testdata.txt
 
 ```
 
-or download a file from GCS and decrypt it:
+Download a file from GCS and decrypt it:
 
 ```shell
-./bazel-bin/gcs/gcs_envelope_aead_example
+./bazel-bin/gcs/gcs_envelope_aead_example \
     decrypt \
     gcp-kms://my-key-uri \
     my-service-account.json \

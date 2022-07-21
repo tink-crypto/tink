@@ -19,6 +19,8 @@
 #include <cstddef>
 #include <memory>
 #include <random>
+#include <string>
+#include <utility>
 
 #include "absl/memory/memory.h"
 #include "absl/status/status.h"
@@ -77,7 +79,7 @@ util::Status SetRsaSsaPssParameters(const PemKeyParams& pem_parameters,
   parameters->set_sig_hash(pem_parameters.hash_type);
   auto salt_len_or = util::Enums::HashLength(pem_parameters.hash_type);
   if (!salt_len_or.ok()) return salt_len_or.status();
-  parameters->set_salt_length(salt_len_or.ValueOrDie());
+  parameters->set_salt_length(salt_len_or.value());
 
   return util::OkStatus();
 }
@@ -92,18 +94,34 @@ util::Status SetEcdsaParameters(const PemKeyParams& pem_parameters,
   }
 
   if (pem_parameters.hash_type != HashType::SHA256 ||
-      pem_parameters.key_size_in_bits != 256 ||
-      pem_parameters.algorithm != PemAlgorithm::ECDSA_IEEE) {
+      pem_parameters.key_size_in_bits != 256) {
     return util::Status(
         absl::StatusCode::kInvalidArgument,
         "Only NIST_P256 ECDSA supported. Parameters should contain "
-        "SHA256, 256 bit key size and ECDSA_IEEE algorithm.");
+        "SHA256 and 256 bit key size.");
   }
 
   parameters->set_hash_type(pem_parameters.hash_type);
   parameters->set_curve(EllipticCurveType::NIST_P256);
-  parameters->set_encoding(
-      google::crypto::tink::EcdsaSignatureEncoding::IEEE_P1363);
+
+  switch (pem_parameters.algorithm) {
+    case PemAlgorithm::ECDSA_IEEE: {
+      parameters->set_encoding(
+          google::crypto::tink::EcdsaSignatureEncoding::IEEE_P1363);
+      break;
+    }
+    case PemAlgorithm::ECDSA_DER: {
+      parameters->set_encoding(
+          google::crypto::tink::EcdsaSignatureEncoding::DER);
+      break;
+    }
+    default: {
+      return util::Status(
+          absl::StatusCode::kInvalidArgument,
+          "Only ECDSA supported. The algorithm parameter should be "
+          "ECDSA_IEEE or ECDSA_DER.");
+    }
+  }
 
   return util::OkStatus();
 }
@@ -210,7 +228,7 @@ util::Status AddRsaSsaPrivateKey(const PemKey& pem_key, Keyset* keyset) {
   if (!private_key_subtle_or.ok()) return private_key_subtle_or.status();
 
   std::unique_ptr<internal::RsaPrivateKey> private_key_subtle =
-      std::move(private_key_subtle_or).ValueOrDie();
+      std::move(private_key_subtle_or).value();
 
   size_t modulus_size = private_key_subtle->n.length() * 8;
   if (pem_key.parameters.key_size_in_bits != modulus_size) {
@@ -226,7 +244,7 @@ util::Status AddRsaSsaPrivateKey(const PemKey& pem_key, Keyset* keyset) {
       auto private_key_proto_or = NewRsaSsaPrivateKey(
           *private_key_subtle, key_manager.get_version(), pem_key.parameters);
       if (!private_key_proto_or.ok()) return private_key_proto_or.status();
-      RsaSsaPssPrivateKey private_key_proto = private_key_proto_or.ValueOrDie();
+      RsaSsaPssPrivateKey private_key_proto = private_key_proto_or.value();
 
       // Validate the key.
       auto key_validation_status = key_manager.ValidateKey(private_key_proto);
@@ -271,7 +289,7 @@ util::Status AddEcdsaPublicKey(const PemKey& pem_key, Keyset* keyset) {
   if (!public_key_subtle_or.ok()) return public_key_subtle_or.status();
 
   std::unique_ptr<internal::EcKey> public_key_subtle =
-      std::move(public_key_subtle_or).ValueOrDie();
+      std::move(public_key_subtle_or).value();
 
   EcdsaPublicKey ecdsa_key;
   EcdsaVerifyKeyManager key_manager;
@@ -305,7 +323,7 @@ util::Status AddRsaSsaPublicKey(const PemKey& pem_key, Keyset* keyset) {
   if (!public_key_subtle_or.ok()) return public_key_subtle_or.status();
 
   std::unique_ptr<internal::RsaPublicKey> public_key_subtle =
-      std::move(public_key_subtle_or).ValueOrDie();
+      std::move(public_key_subtle_or).value();
 
   // Check key length is as expected.
   size_t modulus_size = public_key_subtle->n.length() * 8;
@@ -424,7 +442,7 @@ util::StatusOr<std::unique_ptr<Keyset>> PublicKeySignPemKeysetReader::Read() {
   // Set the 1st key as primary.
   keyset->set_primary_key_id(keyset->key(0).key_id());
 
-  return keyset;
+  return std::move(keyset);
 }
 
 util::StatusOr<std::unique_ptr<Keyset>> PublicKeyVerifyPemKeysetReader::Read() {
@@ -451,7 +469,7 @@ util::StatusOr<std::unique_ptr<Keyset>> PublicKeyVerifyPemKeysetReader::Read() {
   // Set the 1st key as primary.
   keyset->set_primary_key_id(keyset->key(0).key_id());
 
-  return keyset;
+  return std::move(keyset);
 }
 
 util::StatusOr<std::unique_ptr<EncryptedKeyset>>

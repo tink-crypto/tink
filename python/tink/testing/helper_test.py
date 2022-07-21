@@ -23,8 +23,8 @@ from tink.testing import helper
 
 class HelperTest(absltest.TestCase):
 
-  def test_tink_root_path(self):
-    path = os.path.join(helper.tink_root_path(), 'testdata/credential.json')
+  def test_tink_py_testdata_path(self):
+    path = os.path.join(helper.tink_py_testdata_path(), 'gcp/credential.json')
     with open(path, mode='rt') as f:
       credential_json = f.read()
     self.assertNotEmpty(credential_json)

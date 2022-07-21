@@ -35,8 +35,6 @@ namespace crypto {
 namespace tink {
 namespace internal {
 
-using ::google::crypto::tink::HpkeParams;
-
 util::StatusOr<std::unique_ptr<HpkeEncryptBoringSsl>> HpkeEncryptBoringSsl::New(
     const google::crypto::tink::HpkeParams& params,
     absl::string_view recipient_public_key, absl::string_view context_info) {
@@ -46,7 +44,7 @@ util::StatusOr<std::unique_ptr<HpkeEncryptBoringSsl>> HpkeEncryptBoringSsl::New(
   if (!status.ok()) {
     return status;
   }
-  return hpke_encrypt;
+  return std::move(hpke_encrypt);
 }
 
 util::StatusOr<std::unique_ptr<HpkeEncryptBoringSsl>>
@@ -60,7 +58,7 @@ HpkeEncryptBoringSsl::NewForTesting(
   if (!status.ok()) {
     return status;
   }
-  return hpke_encrypt;
+  return std::move(hpke_encrypt);
 }
 
 util::Status HpkeEncryptBoringSsl::Init(
@@ -133,7 +131,6 @@ util::StatusOr<std::string> HpkeEncryptBoringSsl::EncapsulateKeyThenEncrypt(
   subtle::ResizeStringUninitialized(
       &ciphertext, enc_size + plaintext.size() +
                        EVP_HPKE_CTX_max_overhead(sender_ctx_.get()));
-  absl::c_copy(encapsulated_key_, ciphertext.begin());
   size_t max_out_len = ciphertext.size() - enc_size;
   size_t ciphertext_size;
   if (!EVP_HPKE_CTX_seal(

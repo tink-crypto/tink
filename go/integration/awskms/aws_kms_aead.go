@@ -43,9 +43,9 @@ func newAWSAEAD(keyURI string, kms kmsiface.KMSAPI) *AWSAEAD {
 	}
 }
 
-// Encrypt AEAD encrypts the plaintext data and uses addtionaldata from authentication.
-func (a *AWSAEAD) Encrypt(plaintext, additionalData []byte) ([]byte, error) {
-	ad := hex.EncodeToString(additionalData)
+// Encrypt encrypts the plaintext with associatedData.
+func (a *AWSAEAD) Encrypt(plaintext, associatedData []byte) ([]byte, error) {
+	ad := hex.EncodeToString(associatedData)
 	req := &kms.EncryptInput{
 		KeyId:             aws.String(a.keyURI),
 		Plaintext:         plaintext,
@@ -65,7 +65,7 @@ func (a *AWSAEAD) Encrypt(plaintext, additionalData []byte) ([]byte, error) {
 	return resp.CiphertextBlob, nil
 }
 
-// Decrypt AEAD decrypts the data and verified the additional data.
+// Decrypt AEAD decrypts the data and verified the associated data.
 //
 // Returns an error if the KeyId field in the response does not match the KeyURI
 // provided when creating the client. If we don't do this, the possibility exists
@@ -75,8 +75,8 @@ func (a *AWSAEAD) Encrypt(plaintext, additionalData []byte) ([]byte, error) {
 // This check is disabled if AWSAEAD.keyURI is not in key ARN format.
 //
 // See https://docs.aws.amazon.com/kms/latest/developerguide/concepts.html#key-id.
-func (a *AWSAEAD) Decrypt(ciphertext, additionalData []byte) ([]byte, error) {
-	ad := hex.EncodeToString(additionalData)
+func (a *AWSAEAD) Decrypt(ciphertext, associatedData []byte) ([]byte, error) {
+	ad := hex.EncodeToString(associatedData)
 	req := &kms.DecryptInput{
 		KeyId:             aws.String(a.keyURI),
 		CiphertextBlob:    ciphertext,

@@ -16,6 +16,7 @@
 
 #include "tink/hybrid/ecies_aead_hkdf_dem_helper.h"
 
+#include <string>
 #include <utility>
 
 #include "absl/memory/memory.h"
@@ -27,9 +28,11 @@
 #include "tink/util/errors.h"
 #include "tink/util/protobuf_helper.h"
 #include "tink/util/statusor.h"
+#include "proto/aes_ctr.pb.h"
 #include "proto/aes_ctr_hmac_aead.pb.h"
 #include "proto/aes_gcm.pb.h"
 #include "proto/aes_siv.pb.h"
+#include "proto/hmac.pb.h"
 #include "proto/tink.pb.h"
 #include "proto/xchacha20_poly1305.pb.h"
 
@@ -64,8 +67,7 @@ class EciesAeadHkdfDemHelperImpl : public EciesAeadHkdfDemHelper {
           "No manager for DEM key type '%s' found in the registry.",
           dem_type_url);
     }
-    const KeyManager<EncryptionPrimitive>* key_manager =
-        key_manager_or.ValueOrDie();
+    const KeyManager<EncryptionPrimitive>* key_manager = key_manager_or.value();
     return {absl::make_unique<EciesAeadHkdfDemHelperImpl<EncryptionPrimitive>>(
         key_manager, dem_key_template, key_params)};
   }
@@ -87,7 +89,7 @@ class EciesAeadHkdfDemHelperImpl : public EciesAeadHkdfDemHelper {
     }
     auto key_or = key_manager_->get_key_factory().NewKey(key_template_.value());
     if (!key_or.ok()) return key_or.status();
-    auto key = std::move(key_or).ValueOrDie();
+    auto key = std::move(key_or).value();
     if (!ReplaceKeyBytes(symmetric_key_value, key.get())) {
       return util::Status(absl::StatusCode::kInternal,
                           "Generation of DEM-key failed.");
@@ -98,7 +100,7 @@ class EciesAeadHkdfDemHelperImpl : public EciesAeadHkdfDemHelper {
     ZeroKeyBytes(key.get());
 
     if (!primitive_or.ok()) return primitive_or.status();
-    return absl::make_unique<AeadOrDaead>(std::move(primitive_or.ValueOrDie()));
+    return absl::make_unique<AeadOrDaead>(std::move(primitive_or.value()));
   }
 
  private:
@@ -155,7 +157,7 @@ util::StatusOr<std::unique_ptr<const EciesAeadHkdfDemHelper>>
 EciesAeadHkdfDemHelper::New(const KeyTemplate& dem_key_template) {
   auto key_params_or = GetKeyParams(dem_key_template);
   if (!key_params_or.ok()) return key_params_or.status();
-  DemKeyParams key_params = key_params_or.ValueOrDie();
+  DemKeyParams key_params = key_params_or.value();
   const std::string& dem_type_url = dem_key_template.type_url();
 
   if (key_params.key_type == AES_SIV_KEY) {

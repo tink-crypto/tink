@@ -15,6 +15,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include "tink/core/private_key_manager_impl.h"
 
+#include <memory>
 #include <string>
 
 #include "gmock/gmock.h"
@@ -144,7 +145,7 @@ TEST(PrivateKeyManagerImplTest, FactoryNewKeyFromMessage) {
 
   EcdsaKeyFormat key_format;
   key_format.mutable_params()->set_encoding(EcdsaSignatureEncoding::DER);
-  auto key = key_manager->get_key_factory().NewKey(key_format).ValueOrDie();
+  auto key = key_manager->get_key_factory().NewKey(key_format).value();
   EXPECT_THAT(
       dynamic_cast<EcdsaPrivateKey&>(*key).public_key().params().encoding(),
       Eq(EcdsaSignatureEncoding::DER));
@@ -163,7 +164,7 @@ TEST(PrivateKeyManagerImplTest, GetPublicKeyData) {
   auto key_data =
       dynamic_cast<const PrivateKeyFactory&>(key_manager->get_key_factory())
           .GetPublicKeyData(private_key.SerializeAsString())
-          .ValueOrDie();
+          .value();
   ASSERT_THAT(key_data->type_url(), Eq(public_km.get_key_type()));
   EcdsaPublicKey public_key;
   public_key.ParseFromString(key_data->value());
@@ -200,7 +201,7 @@ TEST(PrivateKeyManagerImplTest, PublicKeyManagerCanHaveShortLifetime) {
 
   EcdsaKeyFormat key_format;
   key_format.mutable_params()->set_encoding(EcdsaSignatureEncoding::DER);
-  auto key = key_manager->get_key_factory().NewKey(key_format).ValueOrDie();
+  auto key = key_manager->get_key_factory().NewKey(key_format).value();
   EXPECT_THAT(
       dynamic_cast<EcdsaPrivateKey&>(*key).public_key().params().encoding(),
       Eq(EcdsaSignatureEncoding::DER));

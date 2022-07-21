@@ -17,6 +17,8 @@
 #ifndef TINK_UTIL_TEST_MATCHERS_H_
 #define TINK_UTIL_TEST_MATCHERS_H_
 
+#include <string>
+
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "absl/status/status.h"
@@ -37,7 +39,8 @@ template <typename StatusOrType>
 class IsOkAndHoldsMatcherImpl
     : public ::testing::MatcherInterface<StatusOrType> {
  public:
-  using value_type = typename std::remove_reference<StatusOrType>::type::type;
+  using value_type =
+      typename std::remove_reference<StatusOrType>::type::value_type;
 
   template <typename InnerMatcher>
   explicit IsOkAndHoldsMatcherImpl(InnerMatcher&& inner_matcher)
@@ -63,13 +66,13 @@ class IsOkAndHoldsMatcherImpl
     }
 
     ::testing::StringMatchResultListener inner_listener;
-    const bool matches = inner_matcher_.MatchAndExplain(
-        actual_value.ValueOrDie(), &inner_listener);
+    const bool matches =
+        inner_matcher_.MatchAndExplain(*actual_value, &inner_listener);
     const std::string inner_explanation = inner_listener.str();
     if (!inner_explanation.empty()) {
       *result_listener << "which contains value "
-                       << ::testing::PrintToString(actual_value.ValueOrDie())
-                       << ", " << inner_explanation;
+                       << ::testing::PrintToString(*actual_value) << ", "
+                       << inner_explanation;
     }
     return matches;
   }
@@ -99,6 +102,15 @@ class IsOkAndHoldsMatcher {
 };
 }  // namespace internal
 
+inline std::string StatusToString(const util::Status& s) {
+  return s.ToString();
+}
+
+template <typename T>
+std::string StatusToString(const util::StatusOr<T>& s) {
+  return s.status().ToString();
+}
+
 // Matches a util::StatusOk() value.
 // This is better than EXPECT_TRUE(status.ok())
 // because the error message is a part of the failure messsage.
@@ -106,7 +118,7 @@ MATCHER(IsOk, "is a Status with an OK value") {
   if (arg.ok()) {
     return true;
   }
-  *result_listener << arg.ToString();
+  *result_listener << StatusToString(arg);
   return false;
 }
 

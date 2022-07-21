@@ -1,9 +1,9 @@
-# Java example: working with cleartext keysets
+# Java cleartext keysets example
 
 This example shows how to generate or load a cleartext keyset, obtain a
 primitive, and use the primitive to do crypto.
 
-WARNING: this is not recommended, consider protecting your keysets with a key
+WARNING: This is not recommended, consider protecting your keysets with a key
 management system.
 
 ## Build and run
@@ -16,13 +16,13 @@ cd tink/examples/java_src
 bazel build ...
 ```
 
-You can generate a cleartext keyset:
+Generate a cleartext keyset:
 
 ```shell
 ./bazel-bin/cleartextkeyset/cleartext_keyset_example generate aes128_gcm_test_keyset.json
 ```
 
-You can then encrypt a file with the resulting keyset:
+Encrypt a file with the resulting keyset:
 
 ```shell
 echo "some data" > testdata.txt
@@ -31,7 +31,7 @@ echo "some data" > testdata.txt
     testdata.txt testdata.txt.encrypted
 ```
 
-or decrypt the file with:
+Decrypt the file with the resulting keyset:
 
 ```shell
 ./bazel-bin/cleartextkeyset/cleartext_keyset_example decrypt \

@@ -18,17 +18,15 @@
 
 #include "tink/util/constants.h"
 #include "proto/experimental/pqcrypto/dilithium.pb.h"
-#include "proto/experimental/pqcrypto/dilithium.proto.h"
 #include "proto/tink.pb.h"
-#include "proto/tink.proto.h"
 
 extern "C" {
-#include "third_party/pqclean/crypto_sign/dilithium2/avx2/api.h"
-#include "third_party/pqclean/crypto_sign/dilithium3/avx2/api.h"
-#include "third_party/pqclean/crypto_sign/dilithium5/avx2/api.h"
-#include "third_party/pqclean/crypto_sign/dilithium2aes/avx2/api.h"
-#include "third_party/pqclean/crypto_sign/dilithium3aes/avx2/api.h"
-#include "third_party/pqclean/crypto_sign/dilithium5aes/avx2/api.h"
+#include "third_party/pqclean/crypto_sign/dilithium2/api.h"
+#include "third_party/pqclean/crypto_sign/dilithium2aes/api.h"
+#include "third_party/pqclean/crypto_sign/dilithium3/api.h"
+#include "third_party/pqclean/crypto_sign/dilithium3aes/api.h"
+#include "third_party/pqclean/crypto_sign/dilithium5/api.h"
+#include "third_party/pqclean/crypto_sign/dilithium5aes/api.h"
 }
 
 namespace crypto {
@@ -62,42 +60,42 @@ KeyTemplate* NewDilithiumKeyTemplate(int32 key_size,
 
 const google::crypto::tink::KeyTemplate& Dilithium2KeyTemplate() {
   static const KeyTemplate* key_template =
-      NewDilithiumKeyTemplate(PQCLEAN_DILITHIUM2_AVX2_CRYPTO_SECRETKEYBYTES,
+      NewDilithiumKeyTemplate(PQCLEAN_DILITHIUM2_CRYPTO_SECRETKEYBYTES,
                               DilithiumSeedExpansion::SEED_EXPANSION_SHAKE);
   return *key_template;
 }
 
 const google::crypto::tink::KeyTemplate& Dilithium3KeyTemplate() {
   static const KeyTemplate* key_template =
-      NewDilithiumKeyTemplate(PQCLEAN_DILITHIUM3_AVX2_CRYPTO_SECRETKEYBYTES,
+      NewDilithiumKeyTemplate(PQCLEAN_DILITHIUM3_CRYPTO_SECRETKEYBYTES,
                               DilithiumSeedExpansion::SEED_EXPANSION_SHAKE);
   return *key_template;
 }
 
 const google::crypto::tink::KeyTemplate& Dilithium5KeyTemplate() {
   static const KeyTemplate* key_template =
-      NewDilithiumKeyTemplate(PQCLEAN_DILITHIUM5_AVX2_CRYPTO_SECRETKEYBYTES,
+      NewDilithiumKeyTemplate(PQCLEAN_DILITHIUM5_CRYPTO_SECRETKEYBYTES,
                               DilithiumSeedExpansion::SEED_EXPANSION_SHAKE);
   return *key_template;
 }
 
 const google::crypto::tink::KeyTemplate& Dilithium2AesKeyTemplate() {
   static const KeyTemplate* key_template =
-      NewDilithiumKeyTemplate(PQCLEAN_DILITHIUM2AES_AVX2_CRYPTO_SECRETKEYBYTES,
+      NewDilithiumKeyTemplate(PQCLEAN_DILITHIUM2AES_CRYPTO_SECRETKEYBYTES,
                               DilithiumSeedExpansion::SEED_EXPANSION_AES);
   return *key_template;
 }
 
 const google::crypto::tink::KeyTemplate& Dilithium3AesKeyTemplate() {
   static const KeyTemplate* key_template =
-      NewDilithiumKeyTemplate(PQCLEAN_DILITHIUM3AES_AVX2_CRYPTO_SECRETKEYBYTES,
+      NewDilithiumKeyTemplate(PQCLEAN_DILITHIUM3AES_CRYPTO_SECRETKEYBYTES,
                               DilithiumSeedExpansion::SEED_EXPANSION_AES);
   return *key_template;
 }
 
 const google::crypto::tink::KeyTemplate& Dilithium5AesKeyTemplate() {
   static const KeyTemplate* key_template =
-      NewDilithiumKeyTemplate(PQCLEAN_DILITHIUM5AES_AVX2_CRYPTO_SECRETKEYBYTES,
+      NewDilithiumKeyTemplate(PQCLEAN_DILITHIUM5AES_CRYPTO_SECRETKEYBYTES,
                               DilithiumSeedExpansion::SEED_EXPANSION_AES);
   return *key_template;
 }

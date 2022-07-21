@@ -14,16 +14,20 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
+#include "tink/kms_clients.h"
+
+#include <memory>
+#include <string>
+
+#include "gtest/gtest.h"
 #include "absl/status/status.h"
 #include "absl/strings/string_view.h"
 #include "tink/aead.h"
-#include "tink/kms_clients.h"
 #include "tink/kms_client.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
-#include "tink/util/test_util.h"
 #include "tink/util/test_matchers.h"
-#include "gtest/gtest.h"
+#include "tink/util/test_util.h"
 
 namespace crypto {
 namespace tink {
@@ -60,9 +64,9 @@ TEST(KmsClientsTest, AddAndGet) {
       absl::make_unique<DummyKmsClient>(data_1.prefix, data_1.uri));
   EXPECT_THAT(status, IsOk());
   auto client_result = KmsClients::Get(data_1.uri);
-  EXPECT_THAT(client_result.status(), IsOk());
-  EXPECT_TRUE(client_result.ValueOrDie()->DoesSupport(data_1.uri));
-  EXPECT_FALSE(client_result.ValueOrDie()->DoesSupport(data_2.uri));
+  EXPECT_THAT(client_result, IsOk());
+  EXPECT_TRUE(client_result.value()->DoesSupport(data_1.uri));
+  EXPECT_FALSE(client_result.value()->DoesSupport(data_2.uri));
 
   // Verify there is no client for data_2.
   client_result = KmsClients::Get(data_2.uri);
@@ -73,10 +77,9 @@ TEST(KmsClientsTest, AddAndGet) {
       absl::make_unique<DummyKmsClient>(data_2.prefix, data_2.uri));
   EXPECT_THAT(status, IsOk());
   client_result = KmsClients::Get(data_2.uri);
-  EXPECT_THAT(client_result.status(), IsOk());
-  EXPECT_TRUE(client_result.ValueOrDie()->DoesSupport(data_2.uri));
-  EXPECT_FALSE(client_result.ValueOrDie()->DoesSupport(data_1.uri));
-
+  EXPECT_THAT(client_result, IsOk());
+  EXPECT_TRUE(client_result.value()->DoesSupport(data_2.uri));
+  EXPECT_FALSE(client_result.value()->DoesSupport(data_1.uri));
 
   // Verify there is no client for data_3.
   client_result = KmsClients::Get(data_3.uri);
@@ -87,21 +90,21 @@ TEST(KmsClientsTest, AddAndGet) {
       absl::make_unique<DummyKmsClient>(data_3.prefix, data_3.uri));
   EXPECT_THAT(status, IsOk());
   client_result = KmsClients::Get(data_3.uri);
-  EXPECT_THAT(client_result.status(), IsOk());
-  EXPECT_TRUE(client_result.ValueOrDie()->DoesSupport(data_3.uri));
-  EXPECT_FALSE(client_result.ValueOrDie()->DoesSupport(data_2.uri));
-  EXPECT_FALSE(client_result.ValueOrDie()->DoesSupport(data_1.uri));
+  EXPECT_THAT(client_result, IsOk());
+  EXPECT_TRUE(client_result.value()->DoesSupport(data_3.uri));
+  EXPECT_FALSE(client_result.value()->DoesSupport(data_2.uri));
+  EXPECT_FALSE(client_result.value()->DoesSupport(data_1.uri));
 
   // Verify that clients for data_1 and data_2 are still present.
   client_result = KmsClients::Get(data_1.uri);
-  EXPECT_THAT(client_result.status(), IsOk());
-  EXPECT_TRUE(client_result.ValueOrDie()->DoesSupport(data_1.uri));
-  EXPECT_FALSE(client_result.ValueOrDie()->DoesSupport(data_2.uri));
+  EXPECT_THAT(client_result, IsOk());
+  EXPECT_TRUE(client_result.value()->DoesSupport(data_1.uri));
+  EXPECT_FALSE(client_result.value()->DoesSupport(data_2.uri));
 
   client_result = KmsClients::Get(data_2.uri);
-  EXPECT_THAT(client_result.status(), IsOk());
-  EXPECT_TRUE(client_result.ValueOrDie()->DoesSupport(data_2.uri));
-  EXPECT_FALSE(client_result.ValueOrDie()->DoesSupport(data_1.uri));
+  EXPECT_THAT(client_result, IsOk());
+  EXPECT_TRUE(client_result.value()->DoesSupport(data_2.uri));
+  EXPECT_FALSE(client_result.value()->DoesSupport(data_1.uri));
 }
 
 

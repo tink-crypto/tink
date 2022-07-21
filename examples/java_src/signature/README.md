@@ -23,11 +23,13 @@ tinkey create-public-keyset --in signature_test_private_keyset.json \
 git clone https://github.com/google/tink
 cd tink/examples/java_src
 bazel build ...
+
 echo "some data" > data.txt
 touch signature_file.txt
 
 ./bazel-bin/signature/signature_example sign \
     ./signature/signature_test_private_keyset.json data.txt signature_file.txt
+
 ./bazel-bin/signature/signature_example verify \
     ./signature/signature_test_public_keyset.json data.txt signature_file.txt
 ```

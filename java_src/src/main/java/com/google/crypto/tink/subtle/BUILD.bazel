@@ -37,8 +37,10 @@ java_library(
     srcs = ["ChaCha20Poly1305.java"],
     deps = [
         ":cha_cha20",
-        ":cha_cha20_base",
-        ":cha_cha20_poly1305_base",
+        ":random",
+        "//src/main/java/com/google/crypto/tink:aead",
+        "//src/main/java/com/google/crypto/tink/aead/internal:insecure_nonce_cha_cha20_poly1305",
+        "//src/main/java/com/google/crypto/tink/aead/internal:poly1305",
     ],
 )
 
@@ -76,7 +78,7 @@ java_library(
     deps = [
         ":elliptic_curves",
         ":hkdf",
-        ":immutable_byte_array",
+        "//src/main/java/com/google/crypto/tink/util:bytes",
     ],
 )
 
@@ -93,6 +95,7 @@ java_library(
         ":elliptic_curves",
         ":enums",
         ":subtle_util_cluster",
+        "@maven//:com_google_code_findbugs_jsr305",
     ],
 )
 
@@ -130,11 +133,6 @@ java_library(
 )
 
 java_library(
-    name = "immutable_byte_array",
-    srcs = ["ImmutableByteArray.java"],
-)
-
-java_library(
     name = "elliptic_curves",
     srcs = ["EllipticCurves.java"],
     deps = [":subtle_util_cluster"],
@@ -143,9 +141,7 @@ java_library(
 java_library(
     name = "ecies_aead_hkdf_dem_helper",
     srcs = ["EciesAeadHkdfDemHelper.java"],
-    deps = [
-        "//src/main/java/com/google/crypto/tink/hybrid/subtle:aead_or_daead",
-    ],
+    deps = ["//src/main/java/com/google/crypto/tink/hybrid/subtle:aead_or_daead"],
 )
 
 java_library(
@@ -292,8 +288,6 @@ java_library(
     srcs = ["AesGcmJce.java"],
     deps = [
         ":random",
-        ":subtle_util_cluster",
-        ":validators",
         "//src/main/java/com/google/crypto/tink:aead",
         "//src/main/java/com/google/crypto/tink/aead/internal:insecure_nonce_aes_gcm_jce",
         "//src/main/java/com/google/crypto/tink/config/internal:tink_fips_util",
@@ -349,9 +343,9 @@ java_library(
     deps = [
         ":ed25519_cluster",
         ":field25519",
-        ":immutable_byte_array",
         "//src/main/java/com/google/crypto/tink:public_key_verify",
         "//src/main/java/com/google/crypto/tink/config/internal:tink_fips_util",
+        "//src/main/java/com/google/crypto/tink/util:bytes",
     ],
 )
 
@@ -369,7 +363,11 @@ java_library(
 java_library(
     name = "x_cha_cha20",
     srcs = ["XChaCha20.java"],
-    deps = [":cha_cha20_base"],
+    deps = [
+        ":ind_cpa_cipher",
+        ":random",
+        "//src/main/java/com/google/crypto/tink/aead/internal:insecure_nonce_x_cha_cha20",
+    ],
 )
 
 java_library(
@@ -394,7 +392,11 @@ java_library(
 java_library(
     name = "cha_cha20",
     srcs = ["ChaCha20.java"],
-    deps = [":cha_cha20_base"],
+    deps = [
+        ":ind_cpa_cipher",
+        ":random",
+        "//src/main/java/com/google/crypto/tink/aead/internal:insecure_nonce_cha_cha20",
+    ],
 )
 
 java_library(
@@ -413,9 +415,7 @@ java_library(
 java_library(
     name = "rewindable_readable_byte_channel",
     srcs = ["RewindableReadableByteChannel.java"],
-    deps = [
-        "@maven//:com_google_code_findbugs_jsr305",
-    ],
+    deps = ["@maven//:com_google_code_findbugs_jsr305"],
 )
 
 java_library(
@@ -470,9 +470,11 @@ java_library(
     name = "x_cha_cha20_poly1305",
     srcs = ["XChaCha20Poly1305.java"],
     deps = [
-        ":cha_cha20_base",
-        ":cha_cha20_poly1305_base",
+        ":random",
         ":x_cha_cha20",
+        "//src/main/java/com/google/crypto/tink:aead",
+        "//src/main/java/com/google/crypto/tink/aead/internal:insecure_nonce_x_cha_cha20_poly1305",
+        "//src/main/java/com/google/crypto/tink/aead/internal:poly1305",
     ],
 )
 
@@ -513,6 +515,7 @@ java_library(
         ":stream_segment_decrypter",
         ":stream_segment_encrypter",
         "//src/main/java/com/google/crypto/tink:streaming_aead",
+        "@maven//:androidx_annotation_annotation",
     ],
 )
 
@@ -541,5 +544,550 @@ java_library(
         ":curve25519",
         ":field25519",
         ":subtle_util_cluster",
+    ],
+)
+
+android_library(
+    name = "engine_wrapper-android",
+    srcs = ["EngineWrapper.java"],
+)
+
+android_library(
+    name = "aes_ctr_hmac_streaming-android",
+    srcs = ["AesCtrHmacStreaming.java"],
+    deps = [
+        ":bytes-android",
+        ":hkdf-android",
+        ":nonce_based_streaming_aead_cluster-android",
+        ":random-android",
+        ":stream_segment_decrypter-android",
+        ":stream_segment_encrypter-android",
+        ":subtle_util_cluster-android",
+        ":validators-android",
+        "//src/main/java/com/google/crypto/tink/config/internal:tink_fips_util-android",
+    ],
+)
+
+android_library(
+    name = "aes_ctr_jce_cipher-android",
+    srcs = ["AesCtrJceCipher.java"],
+    deps = [
+        ":ind_cpa_cipher-android",
+        ":random-android",
+        ":subtle_util_cluster-android",
+        ":validators-android",
+        "//src/main/java/com/google/crypto/tink/config/internal:tink_fips_util-android",
+    ],
+)
+
+android_library(
+    name = "aes_gcm_hkdf_streaming-android",
+    srcs = ["AesGcmHkdfStreaming.java"],
+    deps = [
+        ":hkdf-android",
+        ":nonce_based_streaming_aead_cluster-android",
+        ":random-android",
+        ":stream_segment_decrypter-android",
+        ":stream_segment_encrypter-android",
+        ":subtle_util_cluster-android",
+        ":validators-android",
+    ],
+)
+
+android_library(
+    name = "aes_gcm_jce-android",
+    srcs = ["AesGcmJce.java"],
+    deps = [
+        ":random-android",
+        "//src/main/java/com/google/crypto/tink:aead-android",
+        "//src/main/java/com/google/crypto/tink/aead/internal:insecure_nonce_aes_gcm_jce-android",
+        "//src/main/java/com/google/crypto/tink/config/internal:tink_fips_util-android",
+    ],
+)
+
+android_library(
+    name = "aes_siv-android",
+    srcs = ["AesSiv.java"],
+    deps = [
+        ":aes_util-android",
+        ":bytes-android",
+        ":prf_aes_cmac-android",
+        ":subtle_util_cluster-android",
+        "//src/main/java/com/google/crypto/tink:deterministic_aead-android",
+        "//src/main/java/com/google/crypto/tink/config/internal:tink_fips_util-android",
+    ],
+)
+
+android_library(
+    name = "aes_util-android",
+    srcs = ["AesUtil.java"],
+)
+
+android_library(
+    name = "base64-android",
+    srcs = ["Base64.java"],
+)
+
+android_library(
+    name = "bytes-android",
+    srcs = ["Bytes.java"],
+)
+
+android_library(
+    name = "cha_cha20-android",
+    srcs = ["ChaCha20.java"],
+    deps = [
+        ":ind_cpa_cipher-android",
+        ":random-android",
+        "//src/main/java/com/google/crypto/tink/aead/internal:insecure_nonce_cha_cha20-android",
+    ],
+)
+
+android_library(
+    name = "cha_cha20_base-android",
+    srcs = ["ChaCha20Base.java"],
+    deps = [
+        ":bytes-android",
+        ":ind_cpa_cipher-android",
+        ":random-android",
+    ],
+)
+
+android_library(
+    name = "cha_cha20_poly1305-android",
+    srcs = ["ChaCha20Poly1305.java"],
+    deps = [
+        ":cha_cha20-android",
+        ":random-android",
+        "//src/main/java/com/google/crypto/tink:aead-android",
+        "//src/main/java/com/google/crypto/tink/aead/internal:insecure_nonce_cha_cha20_poly1305-android",
+        "//src/main/java/com/google/crypto/tink/aead/internal:poly1305-android",
+    ],
+)
+
+android_library(
+    name = "cha_cha20_poly1305_base-android",
+    srcs = ["ChaCha20Poly1305Base.java"],
+    deps = [
+        ":cha_cha20_base-android",
+        ":poly1305-android",
+        "//src/main/java/com/google/crypto/tink:aead-android",
+        "//src/main/java/com/google/crypto/tink/config/internal:tink_fips_util-android",
+    ],
+)
+
+android_library(
+    name = "curve25519-android",
+    srcs = ["Curve25519.java"],
+    deps = [
+        ":bytes-android",
+        ":field25519-android",
+        ":hex-android",
+        "//src/main/java/com/google/crypto/tink/annotations:alpha-android",
+    ],
+)
+
+android_library(
+    name = "ecdsa_sign_jce-android",
+    srcs = ["EcdsaSignJce.java"],
+    deps = [
+        ":elliptic_curves-android",
+        ":enums-android",
+        ":subtle_util_cluster-android",
+        "//src/main/java/com/google/crypto/tink:public_key_sign-android",
+        "//src/main/java/com/google/crypto/tink/config/internal:tink_fips_util-android",
+        "@maven//:com_google_errorprone_error_prone_annotations",
+    ],
+)
+
+android_library(
+    name = "ecdsa_verify_jce-android",
+    srcs = ["EcdsaVerifyJce.java"],
+    deps = [
+        ":elliptic_curves-android",
+        ":enums-android",
+        ":subtle_util_cluster-android",
+        "//src/main/java/com/google/crypto/tink:public_key_verify-android",
+        "//src/main/java/com/google/crypto/tink/config/internal:tink_fips_util-android",
+        "@maven//:com_google_errorprone_error_prone_annotations",
+    ],
+)
+
+android_library(
+    name = "ecies_aead_hkdf_dem_helper-android",
+    srcs = ["EciesAeadHkdfDemHelper.java"],
+    deps = ["//src/main/java/com/google/crypto/tink/hybrid/subtle:aead_or_daead-android"],
+)
+
+android_library(
+    name = "ecies_aead_hkdf_hybrid_decrypt-android",
+    srcs = ["EciesAeadHkdfHybridDecrypt.java"],
+    deps = [
+        ":ecies_aead_hkdf_dem_helper-android",
+        ":ecies_hkdf_recipient_kem-android",
+        ":elliptic_curves-android",
+        "//src/main/java/com/google/crypto/tink:hybrid_decrypt-android",
+        "//src/main/java/com/google/crypto/tink/hybrid/subtle:aead_or_daead-android",
+    ],
+)
+
+android_library(
+    name = "ecies_aead_hkdf_hybrid_encrypt-android",
+    srcs = ["EciesAeadHkdfHybridEncrypt.java"],
+    deps = [
+        ":ecies_aead_hkdf_dem_helper-android",
+        ":ecies_hkdf_sender_kem-android",
+        ":elliptic_curves-android",
+        "//src/main/java/com/google/crypto/tink:hybrid_encrypt-android",
+        "//src/main/java/com/google/crypto/tink/hybrid/subtle:aead_or_daead-android",
+    ],
+)
+
+android_library(
+    name = "ecies_hkdf_recipient_kem-android",
+    srcs = ["EciesHkdfRecipientKem.java"],
+    deps = [
+        ":elliptic_curves-android",
+        ":hkdf-android",
+    ],
+)
+
+android_library(
+    name = "ecies_hkdf_sender_kem-android",
+    srcs = ["EciesHkdfSenderKem.java"],
+    deps = [
+        ":elliptic_curves-android",
+        ":hkdf-android",
+        "//src/main/java/com/google/crypto/tink/util:bytes-android",
+    ],
+)
+
+android_library(
+    name = "ed25519_cluster-android",
+    srcs = [
+        "Ed25519.java",
+        "Ed25519Constants.java",
+    ],
+    deps = [
+        ":bytes-android",
+        ":curve25519-android",
+        ":field25519-android",
+        ":subtle_util_cluster-android",
+    ],
+)
+
+android_library(
+    name = "ed25519_sign-android",
+    srcs = ["Ed25519Sign.java"],
+    deps = [
+        ":ed25519_cluster-android",
+        ":field25519-android",
+        ":random-android",
+        "//src/main/java/com/google/crypto/tink:public_key_sign-android",
+        "//src/main/java/com/google/crypto/tink/config/internal:tink_fips_util-android",
+    ],
+)
+
+android_library(
+    name = "aes_eax_jce-android",
+    srcs = ["AesEaxJce.java"],
+    deps = [
+        ":random-android",
+        ":subtle_util_cluster-android",
+        ":validators-android",
+        "//src/main/java/com/google/crypto/tink:aead",
+        "//src/main/java/com/google/crypto/tink/config/internal:tink_fips_util-android",
+    ],
+)
+
+android_library(
+    name = "ed25519_verify-android",
+    srcs = ["Ed25519Verify.java"],
+    deps = [
+        ":ed25519_cluster-android",
+        ":field25519-android",
+        "//src/main/java/com/google/crypto/tink:public_key_verify-android",
+        "//src/main/java/com/google/crypto/tink/config/internal:tink_fips_util-android",
+        "//src/main/java/com/google/crypto/tink/util:bytes-android",
+    ],
+)
+
+android_library(
+    name = "elliptic_curves-android",
+    srcs = ["EllipticCurves.java"],
+    deps = [":subtle_util_cluster-android"],
+)
+
+android_library(
+    name = "encrypt_then_authenticate-android",
+    srcs = ["EncryptThenAuthenticate.java"],
+    deps = [
+        ":aes_ctr_jce_cipher-android",
+        ":bytes-android",
+        ":ind_cpa_cipher-android",
+        ":prf_hmac_jce-android",
+        ":prf_mac-android",
+        "//src/main/java/com/google/crypto/tink:aead-android",
+        "//src/main/java/com/google/crypto/tink:mac-android",
+    ],
+)
+
+android_library(
+    name = "enums-android",
+    srcs = ["Enums.java"],
+)
+
+android_library(
+    name = "field25519-android",
+    srcs = ["Field25519.java"],
+    deps = ["//src/main/java/com/google/crypto/tink/annotations:alpha-android"],
+)
+
+android_library(
+    name = "hex-android",
+    srcs = ["Hex.java"],
+)
+
+android_library(
+    name = "hkdf-android",
+    srcs = ["Hkdf.java"],
+    deps = [
+        ":bytes-android",
+        ":subtle_util_cluster-android",
+    ],
+)
+
+android_library(
+    name = "ind_cpa_cipher-android",
+    srcs = ["IndCpaCipher.java"],
+)
+
+android_library(
+    name = "kwp-android",
+    srcs = ["Kwp.java"],
+    deps = [
+        ":subtle_util_cluster-android",
+        "//src/main/java/com/google/crypto/tink:key_wrap-android",
+    ],
+)
+
+android_library(
+    name = "nonce_based_streaming_aead_cluster-android",
+    srcs = [
+        "NonceBasedStreamingAead.java",
+        "StreamingAeadDecryptingChannel.java",
+        "StreamingAeadDecryptingStream.java",
+        "StreamingAeadEncryptingChannel.java",
+        "StreamingAeadEncryptingStream.java",
+        "StreamingAeadSeekableDecryptingChannel.java",
+    ],
+    deps = [
+        ":stream_segment_decrypter-android",
+        ":stream_segment_encrypter-android",
+        "//src/main/java/com/google/crypto/tink:streaming_aead-android",
+        "@maven//:androidx_annotation_annotation",
+    ],
+)
+
+android_library(
+    name = "pem_key_type-android",
+    srcs = ["PemKeyType.java"],
+    deps = [
+        ":base64-android",
+        ":elliptic_curves-android",
+        ":enums-android",
+        ":subtle_util_cluster-android",
+        "@maven//:com_google_code_findbugs_jsr305",
+    ],
+)
+
+android_library(
+    name = "poly1305-android",
+    srcs = ["Poly1305.java"],
+    deps = [":bytes-android"],
+)
+
+android_library(
+    name = "prf_aes_cmac-android",
+    srcs = ["PrfAesCmac.java"],
+    deps = [
+        ":aes_util-android",
+        ":bytes-android",
+        ":subtle_util_cluster-android",
+        ":validators-android",
+        "//src/main/java/com/google/crypto/tink/config/internal:tink_fips_util-android",
+        "//src/main/java/com/google/crypto/tink/prf:prf_set-android",
+        "@maven//:com_google_errorprone_error_prone_annotations",
+    ],
+)
+
+android_library(
+    name = "prf_hmac_jce-android",
+    srcs = ["PrfHmacJce.java"],
+    deps = [
+        ":subtle_util_cluster-android",
+        "//src/main/java/com/google/crypto/tink/config/internal:tink_fips_util-android",
+        "//src/main/java/com/google/crypto/tink/prf:prf_set-android",
+        "@maven//:com_google_errorprone_error_prone_annotations",
+    ],
+)
+
+android_library(
+    name = "prf_mac-android",
+    srcs = ["PrfMac.java"],
+    deps = [
+        ":bytes-android",
+        "//src/main/java/com/google/crypto/tink:mac-android",
+        "//src/main/java/com/google/crypto/tink/prf:prf_set-android",
+        "@maven//:com_google_errorprone_error_prone_annotations",
+    ],
+)
+
+android_library(
+    name = "random-android",
+    srcs = ["Random.java"],
+)
+
+android_library(
+    name = "rewindable_readable_byte_channel-android",
+    srcs = ["RewindableReadableByteChannel.java"],
+    deps = ["@maven//:com_google_code_findbugs_jsr305"],
+)
+
+android_library(
+    name = "rsa_ssa_pkcs1_sign_jce-android",
+    srcs = ["RsaSsaPkcs1SignJce.java"],
+    deps = [
+        ":enums-android",
+        ":subtle_util_cluster-android",
+        ":validators-android",
+        "//src/main/java/com/google/crypto/tink:public_key_sign-android",
+        "//src/main/java/com/google/crypto/tink/config/internal:tink_fips_util-android",
+        "@maven//:com_google_errorprone_error_prone_annotations",
+    ],
+)
+
+android_library(
+    name = "rsa_ssa_pkcs1_verify_jce-android",
+    srcs = ["RsaSsaPkcs1VerifyJce.java"],
+    deps = [
+        ":bytes-android",
+        ":enums-android",
+        ":hex-android",
+        ":subtle_util_cluster-android",
+        ":validators-android",
+        "//src/main/java/com/google/crypto/tink:public_key_verify-android",
+        "//src/main/java/com/google/crypto/tink/config/internal:tink_fips_util-android",
+        "@maven//:com_google_errorprone_error_prone_annotations",
+    ],
+)
+
+android_library(
+    name = "rsa_ssa_pss_sign_jce-android",
+    srcs = ["RsaSsaPssSignJce.java"],
+    deps = [
+        ":enums-android",
+        ":random-android",
+        ":subtle_util_cluster-android",
+        ":validators-android",
+        "//src/main/java/com/google/crypto/tink:public_key_sign-android",
+        "//src/main/java/com/google/crypto/tink/config/internal:tink_fips_util-android",
+        "@maven//:com_google_errorprone_error_prone_annotations",
+    ],
+)
+
+android_library(
+    name = "rsa_ssa_pss_verify_jce-android",
+    srcs = ["RsaSsaPssVerifyJce.java"],
+    deps = [
+        ":bytes-android",
+        ":enums-android",
+        ":subtle_util_cluster-android",
+        ":validators-android",
+        "//src/main/java/com/google/crypto/tink:public_key_verify-android",
+        "//src/main/java/com/google/crypto/tink/config/internal:tink_fips_util-android",
+        "@maven//:com_google_errorprone_error_prone_annotations",
+    ],
+)
+
+android_library(
+    name = "selfkeytests_validators-android",
+    srcs = ["SelfKeyTestValidators.java"],
+    deps = [
+        ":ecdsa_sign_jce-android",
+        ":ecdsa_verify_jce-android",
+        ":elliptic_curves-android",
+        ":enums-android",
+        ":rsa_ssa_pkcs1_sign_jce-android",
+        ":rsa_ssa_pkcs1_verify_jce-android",
+        ":rsa_ssa_pss_sign_jce-android",
+        ":rsa_ssa_pss_verify_jce-android",
+        "@com_google_protobuf//:protobuf_javalite",
+    ],
+)
+
+android_library(
+    name = "stream_segment_decrypter-android",
+    srcs = ["StreamSegmentDecrypter.java"],
+)
+
+android_library(
+    name = "stream_segment_encrypter-android",
+    srcs = ["StreamSegmentEncrypter.java"],
+)
+
+android_library(
+    name = "subtle_util_cluster-android",
+    srcs = [
+        "EngineFactory.java",
+        "SubtleUtil.java",
+    ],
+    deps = [
+        ":engine_wrapper-android",
+        ":enums-android",
+        ":validators-android",
+        "//src/main/java/com/google/crypto/tink/config/internal:tink_fips_util-android",
+    ],
+)
+
+android_library(
+    name = "validators-android",
+    srcs = ["Validators.java"],
+    deps = [
+        ":enums-android",
+        "//src/main/java/com/google/crypto/tink/config/internal:tink_fips_util-android",
+    ],
+)
+
+android_library(
+    name = "x25519-android",
+    srcs = ["X25519.java"],
+    deps = [
+        ":curve25519-android",
+        ":field25519-android",
+        ":random-android",
+        "//src/main/java/com/google/crypto/tink/annotations:alpha-android",
+    ],
+)
+
+android_library(
+    name = "x_cha_cha20-android",
+    srcs = ["XChaCha20.java"],
+    deps = [
+        ":ind_cpa_cipher-android",
+        ":random-android",
+        "//src/main/java/com/google/crypto/tink/aead/internal:insecure_nonce_x_cha_cha20-android",
+    ],
+)
+
+android_library(
+    name = "x_cha_cha20_poly1305-android",
+    srcs = ["XChaCha20Poly1305.java"],
+    deps = [
+        ":random-android",
+        ":x_cha_cha20-android",
+        "//src/main/java/com/google/crypto/tink:aead-android",
+        "//src/main/java/com/google/crypto/tink/aead/internal:insecure_nonce_x_cha_cha20_poly1305-android",
+        "//src/main/java/com/google/crypto/tink/aead/internal:poly1305-android",
     ],
 )

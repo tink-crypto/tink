@@ -16,6 +16,9 @@
 
 #include "tink/experimental/pqcrypto/signature/signature_config.h"
 
+#include <string>
+#include <utility>
+
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "tink/config/tink_fips.h"
@@ -66,21 +69,21 @@ TEST_F(PcqSignatureConfigTest, PublicKeySignWrapperRegistered) {
   auto primitive_set = absl::make_unique<PrimitiveSet<PublicKeySign>>();
   auto add_primitive = primitive_set->AddPrimitive(
       absl::make_unique<DummyPublicKeySign>("dummy"), key_info);
-  ASSERT_THAT(add_primitive.status(), IsOk());
+  ASSERT_THAT(add_primitive, IsOk());
   ASSERT_THAT(primitive_set->set_primary(*add_primitive), IsOk());
 
   util::StatusOr<std::unique_ptr<crypto::tink::PublicKeySign>> wrapped =
       Registry::Wrap(std::move(primitive_set));
-  ASSERT_THAT(wrapped.status(), IsOk());
+  ASSERT_THAT(wrapped, IsOk());
 
   util::StatusOr<std::string> signature_result = (*wrapped)->Sign("message");
-  ASSERT_THAT(signature_result.status(), IsOk());
+  ASSERT_THAT(signature_result, IsOk());
 
   util::StatusOr<std::string> prefix = CryptoFormat::GetOutputPrefix(key_info);
-  ASSERT_THAT(prefix.status(), IsOk());
+  ASSERT_THAT(prefix, IsOk());
   util::StatusOr<std::string> signature =
       DummyPublicKeySign("dummy").Sign("message");
-  ASSERT_THAT(signature.status(), IsOk());
+  ASSERT_THAT(signature, IsOk());
 
   EXPECT_EQ(*signature_result, absl::StrCat(*prefix, *signature));
 }
@@ -102,18 +105,18 @@ TEST_F(PcqSignatureConfigTest, PublicKeyVerifyWrapperRegistered) {
   auto primitive_set = absl::make_unique<PrimitiveSet<PublicKeyVerify>>();
   auto add_primitive = primitive_set->AddPrimitive(
       absl::make_unique<DummyPublicKeyVerify>("dummy"), key_info);
-  ASSERT_THAT(add_primitive.status(), IsOk());
+  ASSERT_THAT(add_primitive, IsOk());
   ASSERT_THAT(primitive_set->set_primary(*add_primitive), IsOk());
 
   util::StatusOr<std::unique_ptr<crypto::tink::PublicKeyVerify>> wrapped =
       Registry::Wrap(std::move(primitive_set));
-  ASSERT_THAT(wrapped.status(), IsOk());
+  ASSERT_THAT(wrapped, IsOk());
 
   util::StatusOr<std::string> prefix = CryptoFormat::GetOutputPrefix(key_info);
-  ASSERT_THAT(prefix.status(), IsOk());
+  ASSERT_THAT(prefix, IsOk());
   util::StatusOr<std::string> signature =
       DummyPublicKeySign("dummy").Sign("message");
-  ASSERT_THAT(signature.status(), IsOk());
+  ASSERT_THAT(signature, IsOk());
 
   ASSERT_THAT((*wrapped)->Verify(absl::StrCat(*prefix, *signature), "message"),
               IsOk());

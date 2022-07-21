@@ -16,8 +16,11 @@
 
 #include "tink/json_keyset_writer.h"
 
+#include <memory>
 #include <ostream>
 #include <sstream>
+#include <string>
+#include <utility>
 
 #include "gtest/gtest.h"
 #include "absl/strings/escaping.h"
@@ -154,7 +157,7 @@ TEST_F(JsonKeysetWriterTest, testWriteKeyset) {
   std::unique_ptr<std::ostream> destination_stream(new std::ostream(&buffer));
   auto writer_result = JsonKeysetWriter::New(std::move(destination_stream));
   ASSERT_TRUE(writer_result.ok()) << writer_result.status();
-  auto writer = std::move(writer_result.ValueOrDie());
+  auto writer = std::move(writer_result.value());
   auto status = writer->Write(keyset_);
   EXPECT_TRUE(status.ok()) << status;
   rapidjson::Document json_keyset(rapidjson::kObjectType);
@@ -167,16 +170,16 @@ TEST_F(JsonKeysetWriterTest, testWriteAndReadKeyset) {
   std::unique_ptr<std::ostream> destination_stream(new std::ostream(&buffer));
   auto writer_result = JsonKeysetWriter::New(std::move(destination_stream));
   ASSERT_TRUE(writer_result.ok()) << writer_result.status();
-  auto writer = std::move(writer_result.ValueOrDie());
+  auto writer = std::move(writer_result.value());
   auto status = writer->Write(keyset_);
   EXPECT_TRUE(status.ok()) << status;
 
   auto reader_result = JsonKeysetReader::New(buffer.str());
   EXPECT_TRUE(reader_result.ok()) << reader_result.status();
-  auto reader = std::move(reader_result.ValueOrDie());
+  auto reader = std::move(reader_result.value());
   auto read_result = reader->Read();
   EXPECT_TRUE(read_result.ok()) << read_result.status();
-  auto keyset = std::move(read_result.ValueOrDie());
+  auto keyset = std::move(read_result.value());
   EXPECT_EQ(keyset_.SerializeAsString(), keyset->SerializeAsString());
 }
 
@@ -185,7 +188,7 @@ TEST_F(JsonKeysetWriterTest, testWriteEncryptedKeyset) {
   std::unique_ptr<std::ostream> destination_stream(new std::ostream(&buffer));
   auto writer_result = JsonKeysetWriter::New(std::move(destination_stream));
   ASSERT_TRUE(writer_result.ok()) << writer_result.status();
-  auto writer = std::move(writer_result.ValueOrDie());
+  auto writer = std::move(writer_result.value());
   auto status = writer->Write(encrypted_keyset_);
   EXPECT_TRUE(status.ok()) << status;
   rapidjson::Document json_encrypted_keyset(rapidjson::kObjectType);
@@ -206,16 +209,16 @@ TEST_F(JsonKeysetWriterTest, testWriteAndReadEncryptedKeyset) {
   std::unique_ptr<std::ostream> destination_stream(new std::ostream(&buffer));
   auto writer_result = JsonKeysetWriter::New(std::move(destination_stream));
   ASSERT_TRUE(writer_result.ok()) << writer_result.status();
-  auto writer = std::move(writer_result.ValueOrDie());
+  auto writer = std::move(writer_result.value());
   auto status = writer->Write(encrypted_keyset_);
   EXPECT_TRUE(status.ok()) << status;
 
   auto reader_result = JsonKeysetReader::New(buffer.str());
   EXPECT_TRUE(reader_result.ok()) << reader_result.status();
-  auto reader = std::move(reader_result.ValueOrDie());
+  auto reader = std::move(reader_result.value());
   auto read_result = reader->ReadEncrypted();
   EXPECT_TRUE(read_result.ok()) << read_result.status();
-  auto encrypted_keyset = std::move(read_result.ValueOrDie());
+  auto encrypted_keyset = std::move(read_result.value());
   EXPECT_EQ(encrypted_keyset_.SerializeAsString(),
             encrypted_keyset->SerializeAsString());
 }
@@ -226,7 +229,7 @@ TEST_F(JsonKeysetWriterTest, testDestinationStreamErrors) {
   destination_stream->setstate(std::ostream::badbit);
   auto writer_result = JsonKeysetWriter::New(std::move(destination_stream));
   ASSERT_TRUE(writer_result.ok()) << writer_result.status();
-  auto writer = std::move(writer_result.ValueOrDie());
+  auto writer = std::move(writer_result.value());
   {  // Write keyset.
     auto status = writer->Write(keyset_);
     EXPECT_FALSE(status.ok()) << status;
@@ -248,8 +251,8 @@ TEST_F(JsonKeysetWriterTest, WriteLargeKeyId) {
   std::stringbuf buffer;
   std::unique_ptr<std::ostream> destination_stream(new std::ostream(&buffer));
   auto writer_result = JsonKeysetWriter::New(std::move(destination_stream));
-  ASSERT_THAT(writer_result.status(), IsOk());
-  auto writer = std::move(writer_result.ValueOrDie());
+  ASSERT_THAT(writer_result, IsOk());
+  auto writer = std::move(writer_result.value());
   ASSERT_THAT(writer->Write(keyset), IsOk());
   EXPECT_THAT(buffer.str(), HasSubstr("\"primaryKeyId\": 4123456789"));
   EXPECT_THAT(buffer.str(), HasSubstr("\"keyId\": 4123456789"));

@@ -65,7 +65,8 @@ abstract class InsecureNonceChaCha20Base {
     return ciphertext.array();
   }
 
-  void encrypt(ByteBuffer output, final byte[] nonce, final byte[] plaintext)
+  /** Encrypts {@code plaintext} using {@code nonce} and writes result to {@code output}. */
+  public void encrypt(ByteBuffer output, final byte[] nonce, final byte[] plaintext)
       throws GeneralSecurityException {
     if (output.remaining() < plaintext.length) {
       throw new IllegalArgumentException("Given ByteBuffer output is too small");
@@ -79,7 +80,8 @@ abstract class InsecureNonceChaCha20Base {
     return decrypt(nonce, ByteBuffer.wrap(ciphertext));
   }
 
-  byte[] decrypt(final byte[] nonce, ByteBuffer ciphertext) throws GeneralSecurityException {
+  /** Decrypts {@code ciphertext} using {@code nonce}. */
+  public byte[] decrypt(final byte[] nonce, ByteBuffer ciphertext) throws GeneralSecurityException {
     ByteBuffer plaintext = ByteBuffer.allocate(ciphertext.remaining());
     process(nonce, plaintext, ciphertext);
     return plaintext.array();

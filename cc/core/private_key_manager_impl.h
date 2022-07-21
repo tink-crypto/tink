@@ -16,6 +16,9 @@
 #ifndef TINK_CORE_PRIVATE_KEY_MANAGER_IMPL_H_
 #define TINK_CORE_PRIVATE_KEY_MANAGER_IMPL_H_
 
+#include <string>
+#include <utility>
+
 #include "absl/status/status.h"
 #include "tink/core/key_manager_impl.h"
 #include "tink/core/private_key_type_manager.h"
@@ -81,7 +84,7 @@ class PrivateKeyFactoryImpl : public PrivateKeyFactory {
         private_key_manager_->GetPublicKey(private_key);
     if (!public_key_result.ok()) return public_key_result.status();
     key_data->set_type_url(public_key_type_);
-    key_data->set_value(public_key_result.ValueOrDie().SerializeAsString());
+    key_data->set_value(public_key_result.value().SerializeAsString());
     key_data->set_key_material_type(public_key_material_type_);
     return std::move(key_data);
   }

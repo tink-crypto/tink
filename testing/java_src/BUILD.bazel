@@ -7,13 +7,13 @@ licenses(["notice"])
 java_proto_library(
     name = "testing_api_java_proto",
     testonly = 1,
-    deps = ["@tink_base//proto/testing:testing_api_proto"],
+    deps = ["//proto:testing_api_proto"],
 )
 
 java_grpc_library(
     name = "testing_api_java_grpc",
     testonly = 1,
-    srcs = ["@tink_base//proto/testing:testing_api_proto"],
+    srcs = ["//proto:testing_api_proto"],
     deps = [":testing_api_java_proto"],
 )
 
@@ -33,6 +33,9 @@ java_library(
         "java/com/google/crypto/tink/testing/StreamingAeadServiceImpl.java",
     ],
     deps = [
+        "@com_google_protobuf//:duration_proto",
+        "@com_google_protobuf//:timestamp_proto",
+        "@com_google_protobuf//:wrappers_proto",
         ":testing_api_java_grpc",
         ":testing_api_java_proto",
         "@com_google_protobuf//:protobuf_java",
@@ -51,6 +54,8 @@ java_library(
         "@tink_java//src/main/java/com/google/crypto/tink:json_keyset_writer",
         "@tink_java//src/main/java/com/google/crypto/tink:key_template",
         "@tink_java//src/main/java/com/google/crypto/tink:key_templates",
+        "@tink_java//src/main/java/com/google/crypto/tink:keyset_reader",
+        "@tink_java//src/main/java/com/google/crypto/tink:keyset_writer",
         "@tink_java//src/main/java/com/google/crypto/tink:mac",
         "@tink_java//src/main/java/com/google/crypto/tink:public_key_sign",
         "@tink_java//src/main/java/com/google/crypto/tink:public_key_verify",
@@ -123,7 +128,7 @@ java_test(
         "@tink_java//proto:tink_java_proto",
         "@tink_java//src/main/java/com/google/crypto/tink:binary_keyset_reader",
         "@tink_java//src/main/java/com/google/crypto/tink:key_template",
-        "@tink_java//src/main/java/com/google/crypto/tink/aead:aes_gcm_key_manager",
+        "@tink_java//src/main/java/com/google/crypto/tink:key_templates",
         "@tink_java//src/main/java/com/google/crypto/tink/config:tink_config",
         "@tink_java//src/main/java/com/google/crypto/tink/daead:aes_siv_key_manager",
         "@tink_java//src/main/java/com/google/crypto/tink/internal:key_template_proto_converter",

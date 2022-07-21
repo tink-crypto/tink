@@ -17,14 +17,21 @@ syntax = "proto3";
 
 package google.crypto.tink;
 
+option java_package = "com.google.crypto.tink.proto";
+option java_multiple_files = true;
+
 message TestProto {
   uint64 num = 1;
-  bytes str = 2;  // placeholder for ctype
+  bytes str = 2;  // Placeholder for ctype.
 }
 
 message NestedTestProto {
   TestProto a = 1;
   TestProto b = 2;
   uint64 num = 3;
-  bytes str = 4;  // placeholder for ctype
+  bytes str = 4;  // Placeholder for ctype.
+}
+
+message TestProtoWithoutCtype {
+  bytes str = 1;
 }

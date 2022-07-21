@@ -16,16 +16,25 @@
 
 #include "tink/aead/xchacha20_poly1305_key_manager.h"
 
+#include <memory>
+#include <sstream>
+#include <string>
+
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include "absl/memory/memory.h"
 #include "absl/status/status.h"
 #include "tink/aead.h"
+#include "tink/internal/ssl_util.h"
 #include "tink/subtle/aead_test_util.h"
+#include "tink/subtle/xchacha20_poly1305_boringssl.h"
 #include "tink/util/istream_input_stream.h"
 #include "tink/util/secret_data.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "tink/util/test_matchers.h"
+#include "proto/tink.pb.h"
+#include "proto/xchacha20_poly1305.pb.h"
 
 namespace crypto {
 namespace tink {
@@ -101,9 +110,9 @@ TEST(XChaCha20Poly1305KeyManagerTest, CreateKey) {
   StatusOr<XChaCha20Poly1305Key> key_or =
       XChaCha20Poly1305KeyManager().CreateKey(XChaCha20Poly1305KeyFormat());
 
-  ASSERT_THAT(key_or.status(), IsOk());
-  EXPECT_THAT(key_or.ValueOrDie().key_value(), SizeIs(32));
-  EXPECT_THAT(key_or.ValueOrDie().version(), Eq(0));
+  ASSERT_THAT(key_or, IsOk());
+  EXPECT_THAT(key_or.value().key_value(), SizeIs(32));
+  EXPECT_THAT(key_or.value().version(), Eq(0));
 }
 
 TEST(XChaCha20Poly1305KeyManagerTest, DeriveKey) {
@@ -114,9 +123,9 @@ TEST(XChaCha20Poly1305KeyManagerTest, DeriveKey) {
   StatusOr<XChaCha20Poly1305Key> key_or =
       XChaCha20Poly1305KeyManager().DeriveKey(format, &input_stream);
 
-  ASSERT_THAT(key_or.status(), IsOk());
-  EXPECT_THAT(key_or.ValueOrDie().key_value(), SizeIs(32));
-  EXPECT_THAT(key_or.ValueOrDie().version(), Eq(0));
+  ASSERT_THAT(key_or, IsOk());
+  EXPECT_THAT(key_or.value().key_value(), SizeIs(32));
+  EXPECT_THAT(key_or.value().version(), Eq(0));
 }
 
 TEST(XChaCha20Poly1305KeyManagerTest, DeriveKeyFromLongSeed) {
@@ -127,8 +136,8 @@ TEST(XChaCha20Poly1305KeyManagerTest, DeriveKeyFromLongSeed) {
   format.set_version(0);
   auto key_or = XChaCha20Poly1305KeyManager().DeriveKey(format, &input_stream);
 
-  ASSERT_THAT(key_or.status(), IsOk());
-  EXPECT_THAT(key_or.ValueOrDie().key_value(),
+  ASSERT_THAT(key_or, IsOk());
+  EXPECT_THAT(key_or.value().key_value(),
               Eq("0123456789abcdef0123456789abcdef"));
 }
 
@@ -161,30 +170,44 @@ TEST(XChaCha20Poly1305KeyManagerTest, CreateKeyValid) {
   StatusOr<XChaCha20Poly1305Key> key_or =
       XChaCha20Poly1305KeyManager().CreateKey(XChaCha20Poly1305KeyFormat());
 
-  ASSERT_THAT(key_or.status(), IsOk());
-  EXPECT_THAT(XChaCha20Poly1305KeyManager().ValidateKey(key_or.ValueOrDie()),
+  ASSERT_THAT(key_or, IsOk());
+  EXPECT_THAT(XChaCha20Poly1305KeyManager().ValidateKey(key_or.value()),
               IsOk());
 }
 
-TEST(XChaCha20Poly1305KeyManagerTest, CreateAead) {
-  StatusOr<XChaCha20Poly1305Key> key_or =
+TEST(XChaCha20Poly1305KeyManagerTest, CreateAeadFailsWithOpenSsl) {
+  if (internal::IsBoringSsl()) {
+    GTEST_SKIP() << "OpenSSL-only test, skipping because Tink uses BoringSSL";
+  }
+  StatusOr<XChaCha20Poly1305Key> key =
       XChaCha20Poly1305KeyManager().CreateKey(XChaCha20Poly1305KeyFormat());
-  ASSERT_THAT(key_or.status(), IsOk());
+  ASSERT_THAT(key, IsOk());
+  EXPECT_THAT(XChaCha20Poly1305KeyManager().GetPrimitive<Aead>(*key).status(),
+              Not(IsOk()));
+  EXPECT_THAT(subtle::XChacha20Poly1305BoringSsl::New(
+                  util::SecretDataFromStringView(key->key_value()))
+                  .status(),
+              Not(IsOk()));
+}
 
-  StatusOr<std::unique_ptr<Aead>> aead_or =
-      XChaCha20Poly1305KeyManager().GetPrimitive<Aead>(key_or.ValueOrDie());
+TEST(XChaCha20Poly1305KeyManagerTest, CreateAeadSucceedsWithBoringSsl) {
+  if (!internal::IsBoringSsl()) {
+    GTEST_SKIP() << "XChaCha20-Poly1305 is not supported when OpenSSL is used";
+  }
+  StatusOr<XChaCha20Poly1305Key> key =
+      XChaCha20Poly1305KeyManager().CreateKey(XChaCha20Poly1305KeyFormat());
+  ASSERT_THAT(key, IsOk());
 
-  ASSERT_THAT(aead_or.status(), IsOk());
+  StatusOr<std::unique_ptr<Aead>> aead =
+      XChaCha20Poly1305KeyManager().GetPrimitive<Aead>(*key);
+  ASSERT_THAT(aead, IsOk());
 
-  StatusOr<std::unique_ptr<Aead>> direct_aead_or =
+  StatusOr<std::unique_ptr<Aead>> direct_aead =
       subtle::XChacha20Poly1305BoringSsl::New(
-          util::SecretDataFromStringView(key_or.ValueOrDie().key_value()));
-  ASSERT_THAT(direct_aead_or.status(), IsOk());
-
-  ASSERT_THAT(
-      EncryptThenDecrypt(*aead_or.ValueOrDie(),
-                         *direct_aead_or.ValueOrDie(), "message", "aad"),
-      IsOk());
+          util::SecretDataFromStringView(key->key_value()));
+  ASSERT_THAT(direct_aead, IsOk());
+  EXPECT_THAT(EncryptThenDecrypt(**aead, **direct_aead, "message", "aad"),
+              IsOk());
 }
 
 }  // namespace

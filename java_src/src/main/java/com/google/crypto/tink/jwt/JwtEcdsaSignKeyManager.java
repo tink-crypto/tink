@@ -18,9 +18,10 @@ package com.google.crypto.tink.jwt;
 import static java.nio.charset.StandardCharsets.US_ASCII;
 
 import com.google.crypto.tink.KeyTemplate;
-import com.google.crypto.tink.KeyTypeManager;
-import com.google.crypto.tink.PrivateKeyTypeManager;
 import com.google.crypto.tink.Registry;
+import com.google.crypto.tink.internal.KeyTypeManager;
+import com.google.crypto.tink.internal.PrimitiveFactory;
+import com.google.crypto.tink.internal.PrivateKeyTypeManager;
 import com.google.crypto.tink.proto.JwtEcdsaAlgorithm;
 import com.google.crypto.tink.proto.JwtEcdsaKeyFormat;
 import com.google.crypto.tink.proto.JwtEcdsaPrivateKey;
@@ -54,7 +55,7 @@ public final class JwtEcdsaSignKeyManager
     extends PrivateKeyTypeManager<JwtEcdsaPrivateKey, JwtEcdsaPublicKey> {
 
   private static class JwtPublicKeySignFactory
-      extends KeyTypeManager.PrimitiveFactory<JwtPublicKeySignInternal, JwtEcdsaPrivateKey> {
+      extends PrimitiveFactory<JwtPublicKeySignInternal, JwtEcdsaPrivateKey> {
     public JwtPublicKeySignFactory() {
       super(JwtPublicKeySignInternal.class);
     }
@@ -147,8 +148,9 @@ public final class JwtEcdsaSignKeyManager
   }
 
   @Override
-  public KeyFactory<JwtEcdsaKeyFormat, JwtEcdsaPrivateKey> keyFactory() {
-    return new KeyFactory<JwtEcdsaKeyFormat, JwtEcdsaPrivateKey>(JwtEcdsaKeyFormat.class) {
+  public KeyTypeManager.KeyFactory<JwtEcdsaKeyFormat, JwtEcdsaPrivateKey> keyFactory() {
+    return new KeyTypeManager.KeyFactory<JwtEcdsaKeyFormat, JwtEcdsaPrivateKey>(
+        JwtEcdsaKeyFormat.class) {
       @Override
       public void validateKeyFormat(JwtEcdsaKeyFormat format) throws GeneralSecurityException {
         JwtEcdsaVerifyKeyManager.validateEcdsaAlgorithm(format.getAlgorithm());

@@ -33,7 +33,7 @@ namespace tink {
 //   auto handle_result = KeysetHandle::GenerateNew(
 //        HybridKeyTemplates::EciesP256HkdfHmacSha256Aes128Gcm());
 //   if (!handle_result.ok()) { /* fail with error */ }
-//   auto keyset_handle = std::move(handle_result.ValueOrDie());
+//   auto keyset_handle = std::move(handle_result.value());
 class HybridKeyTemplates {
  public:
   // Returns a KeyTemplate that generates new instances of
@@ -187,6 +187,15 @@ class HybridKeyTemplates {
   // HpkePrivateKey with the following parameters:
   //   - KEM: ECDH over curve 25519 plus HKDF-SHA256
   //   - KDF: HKDF-SHA256
+  //   - AEAD: AES-128-GCM
+  //   - OutputPrefixType: RAW
+  static const google::crypto::tink::KeyTemplate&
+  HpkeX25519HkdfSha256Aes128GcmRaw();
+
+  // Returns a KeyTemplate that generates new instances of
+  // HpkePrivateKey with the following parameters:
+  //   - KEM: ECDH over curve 25519 plus HKDF-SHA256
+  //   - KDF: HKDF-SHA256
   //   - AEAD: AES-256-GCM
   //   - OutputPrefixType: TINK
   static const google::crypto::tink::KeyTemplate&
@@ -196,10 +205,28 @@ class HybridKeyTemplates {
   // HpkePrivateKey with the following parameters:
   //   - KEM: ECDH over curve 25519 plus HKDF-SHA256
   //   - KDF: HKDF-SHA256
+  //   - AEAD: AES-256-GCM
+  //   - OutputPrefixType: RAW
+  static const google::crypto::tink::KeyTemplate&
+  HpkeX25519HkdfSha256Aes256GcmRaw();
+
+  // Returns a KeyTemplate that generates new instances of
+  // HpkePrivateKey with the following parameters:
+  //   - KEM: ECDH over curve 25519 plus HKDF-SHA256
+  //   - KDF: HKDF-SHA256
   //   - AEAD: ChaCha20-Poly1305
   //   - OutputPrefixType: TINK
   static const google::crypto::tink::KeyTemplate&
   HpkeX25519HkdfSha256ChaCha20Poly1305();
+
+  // Returns a KeyTemplate that generates new instances of
+  // HpkePrivateKey with the following parameters:
+  //   - KEM: ECDH over curve 25519 plus HKDF-SHA256
+  //   - KDF: HKDF-SHA256
+  //   - AEAD: ChaCha20-Poly1305
+  //   - OutputPrefixType: RAW
+  static const google::crypto::tink::KeyTemplate&
+  HpkeX25519HkdfSha256ChaCha20Poly1305Raw();
 };
 
 }  // namespace tink

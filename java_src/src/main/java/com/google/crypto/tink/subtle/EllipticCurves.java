@@ -203,7 +203,7 @@ public final class EllipticCurves {
     } catch (IllegalArgumentException | NullPointerException ex) {
       // The Java security providers on Android K and Android L might throw these unchecked
       // exceptions, converting them to a checked one to not crash the JVM.
-      throw new GeneralSecurityException(ex.toString());
+      throw new GeneralSecurityException(ex);
     }
   }
 
@@ -960,7 +960,7 @@ public final class EllipticCurves {
     } catch (IllegalStateException ex) {
       // Due to CVE-2017-10176 some versions of OpenJDK might throw this unchecked exception,
       // converting it to a checked one to not crash the JVM. See also b/73760761.
-      throw new GeneralSecurityException(ex.toString());
+      throw new GeneralSecurityException(ex);
     }
   }
 

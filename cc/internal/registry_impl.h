@@ -17,6 +17,10 @@
 #define TINK_INTERNAL_REGISTRY_IMPL_H_
 
 #include <algorithm>
+#include <functional>
+#include <initializer_list>
+#include <memory>
+#include <string>
 #include <tuple>
 #include <typeindex>
 #include <typeinfo>
@@ -40,6 +44,7 @@
 #include "tink/internal/keyset_wrapper.h"
 #include "tink/internal/keyset_wrapper_impl.h"
 #include "tink/key_manager.h"
+#include "tink/monitoring/monitoring.h"
 #include "tink/primitive_set.h"
 #include "tink/primitive_wrapper.h"
 #include "tink/util/errors.h"
@@ -130,19 +135,35 @@ class RegistryImpl {
       std::unique_ptr<PrimitiveSet<P>> primitive_set) const
       ABSL_LOCKS_EXCLUDED(maps_mutex_);
 
+  // Wraps a `keyset` and annotates it with `annotations`.
   template <class P>
   crypto::tink::util::StatusOr<std::unique_ptr<P>> WrapKeyset(
-      const google::crypto::tink::Keyset& keyset) const
+      const google::crypto::tink::Keyset& keyset,
+      const absl::flat_hash_map<std::string, std::string>& annotations) const
       ABSL_LOCKS_EXCLUDED(maps_mutex_);
 
   crypto::tink::util::StatusOr<google::crypto::tink::KeyData> DeriveKey(
       const google::crypto::tink::KeyTemplate& key_template,
       InputStream* randomness) const ABSL_LOCKS_EXCLUDED(maps_mutex_);
 
-  void Reset() ABSL_LOCKS_EXCLUDED(maps_mutex_);
+  void Reset() ABSL_LOCKS_EXCLUDED(maps_mutex_, monitoring_factory_mutex_);
 
   crypto::tink::util::Status RestrictToFipsIfEmpty() const
       ABSL_LOCKS_EXCLUDED(maps_mutex_);
+
+  // Registers a `monitoring_factory`. Only one factory can be registered,
+  // subsequent calls to this method will return a kAlreadyExists error.
+  crypto::tink::util::Status RegisterMonitoringClientFactory(
+      std::unique_ptr<crypto::tink::MonitoringClientFactory> monitoring_factory)
+      ABSL_LOCKS_EXCLUDED(monitoring_factory_mutex_);
+
+  // Returns a pointer to the registered monitoring factory if any, and nullptr
+  // otherwise.
+  crypto::tink::MonitoringClientFactory* GetMonitoringClientFactory() const
+      ABSL_LOCKS_EXCLUDED(monitoring_factory_mutex_) {
+    absl::MutexLock lock(&monitoring_factory_mutex_);
+    return monitoring_factory_.get();
+  }
 
  private:
   // All information for a given type url.
@@ -418,6 +439,10 @@ class RegistryImpl {
 
   absl::flat_hash_map<std::string, LabelInfo> name_to_catalogue_map_
       ABSL_GUARDED_BY(maps_mutex_);
+
+  mutable absl::Mutex monitoring_factory_mutex_;
+  std::unique_ptr<crypto::tink::MonitoringClientFactory> monitoring_factory_
+      ABSL_GUARDED_BY(monitoring_factory_mutex_);
 };
 
 template <class P>
@@ -708,7 +733,7 @@ crypto::tink::util::StatusOr<std::unique_ptr<P>> RegistryImpl::GetPrimitive(
     const google::crypto::tink::KeyData& key_data) const {
   auto key_manager_result = get_key_manager<P>(key_data.type_url());
   if (key_manager_result.ok()) {
-    return key_manager_result.ValueOrDie()->GetPrimitive(key_data);
+    return key_manager_result.value()->GetPrimitive(key_data);
   }
   return key_manager_result.status();
 }
@@ -718,7 +743,7 @@ crypto::tink::util::StatusOr<std::unique_ptr<P>> RegistryImpl::GetPrimitive(
     absl::string_view type_url, const portable_proto::MessageLite& key) const {
   auto key_manager_result = get_key_manager<P>(type_url);
   if (key_manager_result.ok()) {
-    return key_manager_result.ValueOrDie()->GetPrimitive(key);
+    return key_manager_result.value()->GetPrimitive(key);
   }
   return key_manager_result.status();
 }
@@ -762,22 +787,19 @@ crypto::tink::util::StatusOr<std::unique_ptr<P>> RegistryImpl::Wrap(
   if (!wrapper_result.ok()) {
     return wrapper_result.status();
   }
-  crypto::tink::util::StatusOr<std::unique_ptr<P>> primitive_result =
-      wrapper_result.ValueOrDie()->Wrap(std::move(primitive_set));
-  return std::move(primitive_result);
+  return wrapper_result.value()->Wrap(std::move(primitive_set));
 }
 
 template <class P>
 crypto::tink::util::StatusOr<std::unique_ptr<P>> RegistryImpl::WrapKeyset(
-    const google::crypto::tink::Keyset& keyset) const {
-  util::StatusOr<const KeysetWrapper<P>*> wrapper_result =
+    const google::crypto::tink::Keyset& keyset,
+    const absl::flat_hash_map<std::string, std::string>& annotations) const {
+  crypto::tink::util::StatusOr<const KeysetWrapper<P>*> keyset_wrapper =
       GetKeysetWrapper<P>();
-  if (!wrapper_result.ok()) {
-    return wrapper_result.status();
+  if (!keyset_wrapper.ok()) {
+    return keyset_wrapper.status();
   }
-  crypto::tink::util::StatusOr<std::unique_ptr<P>> primitive_result =
-      wrapper_result.ValueOrDie()->Wrap(keyset);
-  return std::move(primitive_result);
+  return (*keyset_wrapper)->Wrap(keyset, annotations);
 }
 
 inline crypto::tink::util::Status RegistryImpl::RestrictToFipsIfEmpty() const {

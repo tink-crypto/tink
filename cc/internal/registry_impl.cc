@@ -15,7 +15,10 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include "tink/internal/registry_impl.h"
 
+#include <utility>
+
 #include "absl/status/status.h"
+#include "tink/monitoring/monitoring.h"
 #include "tink/util/errors.h"
 #include "tink/util/statusor.h"
 #include "proto/tink.pb.h"
@@ -27,6 +30,8 @@ using google::crypto::tink::KeyTemplate;
 namespace crypto {
 namespace tink {
 namespace internal {
+
+using ::crypto::tink::MonitoringClientFactory;
 
 StatusOr<const RegistryImpl::KeyTypeInfo*> RegistryImpl::get_key_type_info(
     absl::string_view type_url) const {
@@ -43,13 +48,13 @@ StatusOr<std::unique_ptr<KeyData>> RegistryImpl::NewKeyData(
     const KeyTemplate& key_template) const {
   auto key_type_info_or = get_key_type_info(key_template.type_url());
   if (!key_type_info_or.ok()) return key_type_info_or.status();
-  if (!key_type_info_or.ValueOrDie()->new_key_allowed()) {
+  if (!key_type_info_or.value()->new_key_allowed()) {
     return crypto::tink::util::Status(
         absl::StatusCode::kInvalidArgument,
         absl::StrCat("KeyManager for type ", key_template.type_url(),
                      " does not allow for creation of new keys."));
   }
-  return key_type_info_or.ValueOrDie()->key_factory().NewKeyData(
+  return key_type_info_or.value()->key_factory().NewKeyData(
       key_template.value());
 }
 
@@ -59,7 +64,7 @@ StatusOr<std::unique_ptr<KeyData>> RegistryImpl::GetPublicKeyData(
   auto key_type_info_or = get_key_type_info(type_url);
   if (!key_type_info_or.ok()) return key_type_info_or.status();
   auto factory = dynamic_cast<const PrivateKeyFactory*>(
-      &key_type_info_or.ValueOrDie()->key_factory());
+      &key_type_info_or.value()->key_factory());
   if (factory == nullptr) {
     return ToStatusF(absl::StatusCode::kInvalidArgument,
                      "KeyManager for type '%s' does not have "
@@ -97,21 +102,38 @@ RegistryImpl::DeriveKey(const google::crypto::tink::KeyTemplate& key_template,
                         InputStream* randomness) const {
   auto key_type_info_or = get_key_type_info(key_template.type_url());
   if (!key_type_info_or.ok()) return key_type_info_or.status();
-  if (!key_type_info_or.ValueOrDie()->key_deriver()) {
+  if (!key_type_info_or.value()->key_deriver()) {
     return crypto::tink::util::Status(
         absl::StatusCode::kInvalidArgument,
         absl::StrCat("Manager for type '", key_template.type_url(),
                      "' cannot derive keys."));
   }
-  return key_type_info_or.ValueOrDie()->key_deriver()(key_template.value(),
-                                                      randomness);
+  return key_type_info_or.value()->key_deriver()(key_template.value(),
+                                                 randomness);
+}
+
+util::Status RegistryImpl::RegisterMonitoringClientFactory(
+    std::unique_ptr<MonitoringClientFactory> factory) {
+  absl::MutexLock lock(&monitoring_factory_mutex_);
+  if (monitoring_factory_ != nullptr) {
+    return util::Status(absl::StatusCode::kAlreadyExists,
+                        "A monitoring factory is already registered");
+  }
+  monitoring_factory_ = std::move(factory);
+  return util::OkStatus();
 }
 
 void RegistryImpl::Reset() {
-  absl::MutexLock lock(&maps_mutex_);
-  type_url_to_info_.clear();
-  name_to_catalogue_map_.clear();
-  primitive_to_wrapper_.clear();
+  {
+    absl::MutexLock lock(&maps_mutex_);
+    type_url_to_info_.clear();
+    name_to_catalogue_map_.clear();
+    primitive_to_wrapper_.clear();
+  }
+  {
+    absl::MutexLock lock(&monitoring_factory_mutex_);
+    monitoring_factory_.reset();
+  }
 }
 
 }  // namespace internal

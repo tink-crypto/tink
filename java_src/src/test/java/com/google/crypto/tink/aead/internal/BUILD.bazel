@@ -16,12 +16,12 @@ java_test(
 
 java_test(
     name = "InsecureNonceAesGcmJceTest",
-    size = "medium",
     srcs = ["InsecureNonceAesGcmJceTest.java"],
-    data = [
-        "@wycheproof//testvectors:all",
+    data = ["@wycheproof//testvectors:all"],
+    tags = [
+        "fips",
+        "notsan",
     ],
-    tags = ["notsan"],
     deps = [
         "//src/main/java/com/google/crypto/tink/aead/internal:insecure_nonce_aes_gcm_jce",
         "//src/main/java/com/google/crypto/tink/config:tink_fips",
@@ -57,10 +57,11 @@ java_test(
     name = "InsecureNonceChaCha20Poly1305Test",
     size = "small",
     srcs = ["InsecureNonceChaCha20Poly1305Test.java"],
-    data = [
-        "@wycheproof//testvectors:all",
+    data = ["@wycheproof//testvectors:all"],
+    tags = [
+        "fips",
+        "notsan",
     ],
-    tags = ["notsan"],
     deps = [
         "//src/main/java/com/google/crypto/tink/aead/internal:insecure_nonce_cha_cha20_poly1305",
         "//src/main/java/com/google/crypto/tink/config:tink_fips",

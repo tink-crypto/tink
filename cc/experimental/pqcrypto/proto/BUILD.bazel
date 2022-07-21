@@ -1,13 +1,14 @@
-# package containing C++ protos for experimental PQC primitives
-
+# Package containing C++ protos for experimental PQC primitives.
 package(default_visibility = ["//:__subpackages__"])
 
 licenses(["notice"])
 
-# cc protos
+# ----------------------------------------
+# cc_proto_library rules.
+# ----------------------------------------
 
 cc_proto_library(
     name = "cecpq2_aead_hkdf_cc_proto",
     visibility = ["//visibility:public"],
-    deps = ["@tink_base//proto/experimental/pqcrypto:cecpq2_aead_hkdf_proto"],
+    deps = ["//proto/experimental/pqcrypto:cecpq2_aead_hkdf_proto"],
 )

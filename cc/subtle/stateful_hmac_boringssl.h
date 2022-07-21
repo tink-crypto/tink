@@ -17,6 +17,10 @@
 #ifndef TINK_SUBTLE_STATEFUL_HMAC_BORINGSSL_H_
 #define TINK_SUBTLE_STATEFUL_HMAC_BORINGSSL_H_
 
+#include <memory>
+#include <string>
+#include <utility>
+
 #include "openssl/evp.h"
 #include "openssl/hmac.h"
 #include "tink/internal/ssl_unique_ptr.h"

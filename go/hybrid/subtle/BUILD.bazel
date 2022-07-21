@@ -3,7 +3,7 @@ load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
 package(default_visibility = ["//:__subpackages__"])  # keep
 
 go_library(
-    name = "go_default_library",
+    name = "subtle",
     srcs = [
         "ecies_aead_hkdf_dem_helper.go",
         "ecies_aead_hkdf_hybrid_decrypt.go",
@@ -11,24 +11,42 @@ go_library(
         "ecies_hkdf_recipient_kem.go",
         "ecies_hkdf_sender_kem.go",
         "elliptic_curves.go",
+        "public_key.go",
         "subtle.go",
     ],
     importpath = "github.com/google/tink/go/hybrid/subtle",
     deps = [
-        "//subtle:go_default_library",
-        "//tink:go_default_library",
+        "//keyset",
+        "//proto/hpke_go_proto",
+        "//proto/tink_go_proto",
+        "//subtle",
+        "//tink",
+        "@org_golang_google_protobuf//proto",
     ],
 )
 
 go_test(
-    name = "go_default_test",
+    name = "subtle_test",
     srcs = [
         "elliptic_curves_test.go",
+        "public_key_test.go",
         "subtle_test.go",
     ],
     data = ["@wycheproof//testvectors:all"],
     deps = [
-        ":go_default_library",
-        "//testutil:go_default_library",
+        ":subtle",
+        "//hybrid",
+        "//keyset",
+        "//proto/hpke_go_proto",
+        "//proto/tink_go_proto",
+        "//subtle/random",
+        "//testutil",
+        "@org_golang_google_protobuf//proto",
     ],
+)
+
+alias(
+    name = "go_default_library",
+    actual = ":subtle",
+    visibility = ["//:__subpackages__"],
 )

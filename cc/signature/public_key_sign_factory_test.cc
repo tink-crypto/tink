@@ -16,6 +16,9 @@
 
 #include "tink/signature/public_key_sign_factory.h"
 
+#include <string>
+#include <utility>
+
 #include "gtest/gtest.h"
 #include "tink/config.h"
 #include "tink/crypto_format.h"
@@ -94,12 +97,12 @@ TEST_F(PublicKeySignFactoryTest, testPrimitive) {
       *TestKeysetHandle::GetKeysetHandle(keyset));
   EXPECT_TRUE(public_key_sign_result.ok())
       << public_key_sign_result.status();
-  auto public_key_sign = std::move(public_key_sign_result.ValueOrDie());
+  auto public_key_sign = std::move(public_key_sign_result.value());
 
   std::string data = "some data to sign";
   auto sign_result = public_key_sign->Sign(data);
   EXPECT_TRUE(sign_result.ok()) << sign_result.status();
-  EXPECT_NE(data, sign_result.ValueOrDie());
+  EXPECT_NE(data, sign_result.value());
 }
 
 }  // namespace

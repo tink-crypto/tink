@@ -27,6 +27,7 @@
 #include "absl/strings/string_view.h"
 #include "absl/types/span.h"
 #include "openssl/aes.h"
+#include "openssl/evp.h"
 #include "tink/subtle/subtle_util.h"
 #include "tink/util/secret_data.h"
 #include "tink/util/statusor.h"
@@ -38,6 +39,7 @@ namespace internal {
 namespace {
 
 using ::crypto::tink::test::IsOk;
+using ::crypto::tink::test::IsOkAndHolds;
 using ::crypto::tink::test::StatusIs;
 using ::testing::HasSubstr;
 using ::testing::Not;
@@ -148,6 +150,32 @@ TEST_F(AesCtrTest, AesCtrDecryptInPlace) {
                      aes_key_.get(), absl::MakeSpan(inout)),
       IsOk());
   EXPECT_EQ(inout, test_vector_.plaintext);
+}
+
+TEST(AesUtilTest, GetAesCtrCipherForKeySize) {
+  for (int i = 0; i < 64; i++) {
+    util::StatusOr<const EVP_CIPHER*> cipher = GetAesCtrCipherForKeySize(i);
+    if (i == 16) {
+      EXPECT_THAT(cipher, IsOkAndHolds(EVP_aes_128_ctr()));
+    } else if (i == 32) {
+      EXPECT_THAT(cipher, IsOkAndHolds(EVP_aes_256_ctr()));
+    } else {
+      EXPECT_THAT(cipher, Not(IsOk()));
+    }
+  }
+}
+
+TEST(AesUtilTest, GetAesCbcCipherForKeySize) {
+  for (int i = 0; i < 64; i++) {
+    util::StatusOr<const EVP_CIPHER*> cipher = GetAesCbcCipherForKeySize(i);
+    if (i == 16) {
+      EXPECT_THAT(cipher, IsOkAndHolds(EVP_aes_128_cbc()));
+    } else if (i == 32) {
+      EXPECT_THAT(cipher, IsOkAndHolds(EVP_aes_256_cbc()));
+    } else {
+      EXPECT_THAT(cipher, Not(IsOk()));
+    }
+  }
 }
 
 }  // namespace

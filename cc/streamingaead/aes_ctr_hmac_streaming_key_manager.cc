@@ -16,6 +16,8 @@
 
 #include "tink/streamingaead/aes_ctr_hmac_streaming_key_manager.h"
 
+#include <string>
+
 #include "absl/status/status.h"
 #include "tink/subtle/aes_ctr_hmac_streaming.h"
 #include "tink/subtle/random.h"
@@ -100,7 +102,7 @@ AesCtrHmacStreamingKeyManager::DeriveKey(
   }
   AesCtrHmacStreamingKey key;
   key.set_version(get_version());
-  key.set_key_value(randomness_or.ValueOrDie());
+  key.set_key_value(randomness_or.value());
   *key.mutable_params() = key_format.params();
   return key;
 }

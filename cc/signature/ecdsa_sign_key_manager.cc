@@ -16,6 +16,9 @@
 
 #include "tink/signature/ecdsa_sign_key_manager.h"
 
+#include <string>
+#include <utility>
+
 #include "absl/memory/memory.h"
 #include "absl/status/status.h"
 #include "absl/strings/string_view.h"
@@ -50,7 +53,7 @@ StatusOr<EcdsaPrivateKey> EcdsaSignKeyManager::CreateKey(
   auto ec_key_result = internal::NewEcKey(
       util::Enums::ProtoToSubtle(ecdsa_key_format.params().curve()));
   if (!ec_key_result.ok()) return ec_key_result.status();
-  auto ec_key = ec_key_result.ValueOrDie();
+  auto ec_key = ec_key_result.value();
 
   // Build EcdsaPrivateKey.
   EcdsaPrivateKey ecdsa_private_key;
@@ -142,7 +145,7 @@ EcdsaSignKeyManager::PublicKeySignFactory::Create(
       ec_key, Enums::ProtoToSubtle(public_key.params().hash_type()),
       Enums::ProtoToSubtle(public_key.params().encoding()));
   if (!result.ok()) return result.status();
-  return {std::move(result.ValueOrDie())};
+  return {std::move(result.value())};
 }
 
 Status EcdsaSignKeyManager::ValidateKey(const EcdsaPrivateKey& key) const {

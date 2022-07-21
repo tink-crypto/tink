@@ -26,20 +26,20 @@ import java.util.Arrays;
 /**
  * Hybrid Public Key Encryption (HPKE) decryption.
  *
- * <p>HPKE I.-D.: https://www.ietf.org/archive/id/draft-irtf-cfrg-hpke-12.html
+ * <p>HPKE RFC: https://www.rfc-editor.org/rfc/rfc9180.html
  */
 @Immutable
-public final class HpkeDecrypt implements HybridDecrypt {
+final class HpkeDecrypt implements HybridDecrypt {
   private static final byte[] EMPTY_ASSOCIATED_DATA = new byte[0];
 
-  private final HpkePrivateKey recipientPrivateKey;
+  private final HpkeKemPrivateKey recipientPrivateKey;
   private final HpkeKem kem;
   private final HpkeKdf kdf;
   private final HpkeAead aead;
   private final int encapsulatedKeyLength;
 
   private HpkeDecrypt(
-      HpkePrivateKey recipientPrivateKey,
+      HpkeKemPrivateKey recipientPrivateKey,
       HpkeKem kem,
       HpkeKdf kdf,
       HpkeAead aead,
@@ -55,7 +55,7 @@ public final class HpkeDecrypt implements HybridDecrypt {
    * Returns the encapsulated key length (in bytes) for the specified {@code kemProtoEnum}. This
    * value corresponds to the 'Nenc' column in the following table.
    *
-   * <p>https://www.ietf.org/archive/id/draft-irtf-cfrg-hpke-12.html#name-key-encapsulation-mechanism.
+   * <p>https://www.rfc-editor.org/rfc/rfc9180.html#name-key-encapsulation-mechanism.
    */
   private static int encodingSizeInBytes(com.google.crypto.tink.proto.HpkeKem kemProtoEnum) {
     switch (kemProtoEnum) {
@@ -68,7 +68,7 @@ public final class HpkeDecrypt implements HybridDecrypt {
   }
 
   /** Returns an HPKE decryption primitive created from {@code recipientPrivateKey} */
-  public static HpkeDecrypt createHpkeDecrypt(HpkePrivateKey recipientPrivateKey)
+  static HpkeDecrypt createHpkeDecrypt(HpkePrivateKey recipientPrivateKey)
       throws GeneralSecurityException {
     if (!recipientPrivateKey.hasPublicKey()) {
       throw new IllegalArgumentException("HpkePrivateKey is missing public_key field.");
@@ -84,7 +84,8 @@ public final class HpkeDecrypt implements HybridDecrypt {
     HpkeKdf kdf = HpkePrimitiveFactory.createKdf(params);
     HpkeAead aead = HpkePrimitiveFactory.createAead(params);
     int encapsulatedKeyLength = encodingSizeInBytes(params.getKem());
-    return new HpkeDecrypt(recipientPrivateKey, kem, kdf, aead, encapsulatedKeyLength);
+    HpkeKemPrivateKey recipientKemPrivateKey = HpkeKemKeyFactory.createPrivate(recipientPrivateKey);
+    return new HpkeDecrypt(recipientKemPrivateKey, kem, kdf, aead, encapsulatedKeyLength);
   }
 
   @Override

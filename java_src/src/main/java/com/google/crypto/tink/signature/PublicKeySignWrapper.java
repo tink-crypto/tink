@@ -20,6 +20,10 @@ import com.google.crypto.tink.PrimitiveSet;
 import com.google.crypto.tink.PrimitiveWrapper;
 import com.google.crypto.tink.PublicKeySign;
 import com.google.crypto.tink.Registry;
+import com.google.crypto.tink.internal.MonitoringUtil;
+import com.google.crypto.tink.internal.MutableMonitoringRegistry;
+import com.google.crypto.tink.monitoring.MonitoringClient;
+import com.google.crypto.tink.monitoring.MonitoringKeysetInfo;
 import com.google.crypto.tink.proto.OutputPrefixType;
 import com.google.crypto.tink.subtle.Bytes;
 import java.security.GeneralSecurityException;
@@ -32,24 +36,42 @@ import java.security.GeneralSecurityException;
  * with the primary key.
  */
 public class PublicKeySignWrapper implements PrimitiveWrapper<PublicKeySign, PublicKeySign> {
+
+  private static final byte[] FORMAT_VERSION = new byte[] {0};
+
   private static class WrappedPublicKeySign implements PublicKeySign {
     private final PrimitiveSet<PublicKeySign> primitives;
 
+    private final MonitoringClient.Logger logger;
+
     public WrappedPublicKeySign(final PrimitiveSet<PublicKeySign> primitives) {
       this.primitives = primitives;
+      if (primitives.hasAnnotations()) {
+        MonitoringClient client = MutableMonitoringRegistry.globalInstance().getMonitoringClient();
+        MonitoringKeysetInfo keysetInfo = MonitoringUtil.getMonitoringKeysetInfo(primitives);
+        this.logger = client.createLogger(keysetInfo, "public_key_sign", "sign");
+      } else {
+        this.logger = MonitoringUtil.DO_NOTHING_LOGGER;
+      }
     }
 
     @Override
     public byte[] sign(final byte[] data) throws GeneralSecurityException {
+      byte[] data2 = data;
       if (primitives.getPrimary().getOutputPrefixType().equals(OutputPrefixType.LEGACY)) {
-        byte[] formatVersion = new byte[] {0};
-        return Bytes.concat(
-            primitives.getPrimary().getIdentifier(),
-            primitives.getPrimary().getPrimitive().sign(Bytes.concat(data, formatVersion)));
+        data2 = Bytes.concat(data, FORMAT_VERSION);
       }
-      return Bytes.concat(
-          primitives.getPrimary().getIdentifier(),
-          primitives.getPrimary().getPrimitive().sign(data));
+      try {
+        byte[] output =
+            Bytes.concat(
+                primitives.getPrimary().getIdentifier(),
+                primitives.getPrimary().getPrimitive().sign(data2));
+        logger.log(primitives.getPrimary().getKeyId(), data2.length);
+        return output;
+      } catch (GeneralSecurityException e) {
+        logger.logFailure();
+        throw e;
+      }
     }
   }
 

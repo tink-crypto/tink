@@ -21,8 +21,8 @@ from tink import core
 from tink.integration import awskms
 from tink.testing import helper
 
-CREDENTIAL_PATH = os.path.join(helper.tink_root_path(),
-                               'testdata/aws_credentials_cc.txt')
+CREDENTIAL_PATH = os.path.join(helper.tink_py_testdata_path(),
+                               'aws/credentials.ini')
 KEY_URI = 'aws-kms://arn:aws:kms:us-east-2:235739564943:key/3ee50705-5a82-4f5b-9753-05c4f473922f'
 BAD_KEY_URI = 'gcp-kms://projects/tink-test-infrastructure/locations/global/keyRings/unit-and-integration-testing/cryptoKeys/aead-key'
 

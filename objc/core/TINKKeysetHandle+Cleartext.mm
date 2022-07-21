@@ -50,7 +50,7 @@
     return nil;
   }
 
-  return [[TINKKeysetHandle alloc] initWithCCKeysetHandle:std::move(st.ValueOrDie())];
+  return [[TINKKeysetHandle alloc] initWithCCKeysetHandle:std::move(st.value())];
 }
 
 - (NSData *)serializedKeyset {

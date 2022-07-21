@@ -9,8 +9,6 @@ class Tinkey < Formula
   url "https://storage.googleapis.com/tinkey/tinkey-1.6.1.tar.gz"
   sha256 "156e902e212f55b6747a55f92da69a7e10bcbd00f8942bc1568c0e7caefff3e1"
 
-  bottle :unneeded
-
   def install
     bin.install "tinkey"
     bin.install "tinkey_deploy.jar"

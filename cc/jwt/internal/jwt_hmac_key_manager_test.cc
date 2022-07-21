@@ -47,7 +47,6 @@ using ::crypto::tink::util::StatusOr;
 using ::google::crypto::tink::JwtHmacAlgorithm;
 using ::google::crypto::tink::JwtHmacKey;
 using ::google::crypto::tink::JwtHmacKeyFormat;
-using ::google::crypto::tink::KeyData;
 using ::testing::Eq;
 using ::testing::Not;
 using ::testing::SizeIs;
@@ -71,42 +70,40 @@ TEST(JwtHmacKeyManagerTest, ValidateEmptyKeyFormat) {
               Not(IsOk()));
 }
 
-TEST(JwtHmacKeyManagerTest, ValidKeyFormatHS256) {
+TEST(RawJwtHmacKeyManagerTest, ValidateHS256KeyFormat) {
   JwtHmacKeyFormat key_format;
   key_format.set_algorithm(JwtHmacAlgorithm::HS256);
   key_format.set_key_size(32);
   EXPECT_THAT(JwtHmacKeyManager().ValidateKeyFormat(key_format), IsOk());
+  key_format.set_key_size(31);
+  EXPECT_THAT(JwtHmacKeyManager().ValidateKeyFormat(key_format), Not(IsOk()));
 }
 
-TEST(JwtHmacKeyManagerTest, ValidateKeyFormatHS384) {
+TEST(RawJwtHmacKeyManagerTest, ValidateHS384KeyFormat) {
   JwtHmacKeyFormat key_format;
   key_format.set_algorithm(JwtHmacAlgorithm::HS384);
-  key_format.set_key_size(32);
+  key_format.set_key_size(48);
   EXPECT_THAT(JwtHmacKeyManager().ValidateKeyFormat(key_format), IsOk());
+  key_format.set_key_size(47);
+  EXPECT_THAT(JwtHmacKeyManager().ValidateKeyFormat(key_format), Not(IsOk()));
 }
 
-TEST(JwtHmacKeyManagerTest, ValidateKeyFormatHS512) {
+TEST(RawJwtHmacKeyManagerTest, ValidateHS512KeyFormat) {
   JwtHmacKeyFormat key_format;
   key_format.set_algorithm(JwtHmacAlgorithm::HS512);
-  key_format.set_key_size(32);
+  key_format.set_key_size(64);
   EXPECT_THAT(JwtHmacKeyManager().ValidateKeyFormat(key_format), IsOk());
-}
-
-TEST(JwtHmacKeyManagerTest, KeyTooShort) {
-  JwtHmacKeyFormat key_format;
-  key_format.set_algorithm(JwtHmacAlgorithm::HS256);
-
-  key_format.set_key_size(31);
+  key_format.set_key_size(63);
   EXPECT_THAT(JwtHmacKeyManager().ValidateKeyFormat(key_format), Not(IsOk()));
 }
 
 TEST(JwtHmacKeyManagerTest, CreateKey) {
   JwtHmacKeyFormat key_format;
   key_format.set_key_size(32);
-  key_format.set_algorithm(JwtHmacAlgorithm::HS512);
+  key_format.set_algorithm(JwtHmacAlgorithm::HS256);
   util::StatusOr<google::crypto::tink::JwtHmacKey> key =
       JwtHmacKeyManager().CreateKey(key_format);
-  ASSERT_THAT(key.status(), IsOk());
+  ASSERT_THAT(key, IsOk());
   EXPECT_EQ(key->version(), 0);
   EXPECT_EQ(key->algorithm(), key_format.algorithm());
   EXPECT_THAT(key->key_value(), SizeIs(key_format.key_size()));
@@ -123,41 +120,39 @@ TEST(JwtHmacKeyManagerTest, ValidateKeyWithUnknownAlgorithm_fails) {
   EXPECT_FALSE(JwtHmacKeyManager().ValidateKey(key).ok());
 }
 
-TEST(JwtHmacKeyManagerTest, ValidateKeySha256) {
+TEST(JwtHmacKeyManagerTest, ValidateHS256Key) {
   JwtHmacKey key;
   key.set_version(0);
   key.set_algorithm(JwtHmacAlgorithm::HS256);
-  key.set_key_value("0123456789abcdef0123456789abcdef");
-
+  key.set_key_value("0123456789abcdef0123456789abcdef");  // 32 bytes
   EXPECT_THAT(JwtHmacKeyManager().ValidateKey(key), IsOk());
+  key.set_key_value("0123456789abcdef0123456789abcde");  // 31 bytes
+  EXPECT_THAT(JwtHmacKeyManager().ValidateKey(key), Not(IsOk()));
 }
 
-TEST(JwtHmacKeyManagerTest, ValidateKeySha384) {
+TEST(JwtHmacKeyManagerTest, ValidateHS384Key) {
   JwtHmacKey key;
   key.set_version(0);
   key.set_algorithm(JwtHmacAlgorithm::HS384);
-  key.set_key_value("0123456789abcdef0123456789abcdef");
-
+  key.set_key_value(
+      "0123456789abcdef0123456789abcdef0123456789abcdef");  // 48 bytes
   EXPECT_THAT(JwtHmacKeyManager().ValidateKey(key), IsOk());
+  key.set_key_value(
+      "0123456789abcdef0123456789abcdef0123456789abcde");  // 47 bytes
+  EXPECT_THAT(JwtHmacKeyManager().ValidateKey(key), Not(IsOk()));
 }
 
-TEST(JwtHmacKeyManagerTest, ValidateKeySha512) {
+TEST(JwtHmacKeyManagerTest, ValidateHS512Key) {
   JwtHmacKey key;
   key.set_version(0);
   key.set_algorithm(JwtHmacAlgorithm::HS512);
-  key.set_key_value("0123456789abcdef0123456789abcdef");
-
-  EXPECT_THAT(JwtHmacKeyManager().ValidateKey(key), IsOk());
-}
-
-TEST(JwtHmacKeyManagerTest, ValidateKeyTooShort) {
-  JwtHmacKey key;
-  key.set_version(0);
-  key.set_algorithm(JwtHmacAlgorithm::HS256);
-  key.set_key_value("0123456789abcdef0123456789abcde");
-
+  key.set_key_value(  // 64 bytes
+      "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef");
+  key.set_key_value(  // 63 bytes
+      "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcde");
   EXPECT_THAT(JwtHmacKeyManager().ValidateKey(key), Not(IsOk()));
 }
+
 
 TEST(JwtHmacKeyManagerTest, DeriveKeyIsNotImplemented) {
   JwtHmacKeyFormat format;
@@ -178,29 +173,29 @@ TEST(JwtHmacKeyManagerTest, GetAndUsePrimitive) {
   key_format.set_algorithm(JwtHmacAlgorithm::HS256);
   util::StatusOr<google::crypto::tink::JwtHmacKey> key =
       JwtHmacKeyManager().CreateKey(key_format);
-  ASSERT_THAT(key.status(), IsOk());
+  ASSERT_THAT(key, IsOk());
 
   util::StatusOr<std::unique_ptr<JwtMacInternal>> jwt_mac =
       JwtHmacKeyManager().GetPrimitive<JwtMacInternal>(*key);
-  ASSERT_THAT(jwt_mac.status(), IsOk());
+  ASSERT_THAT(jwt_mac, IsOk());
 
   util::StatusOr<RawJwt> raw_jwt =
       RawJwtBuilder().SetIssuer("issuer").WithoutExpiration().Build();
-  ASSERT_THAT(raw_jwt.status(), IsOk());
+  ASSERT_THAT(raw_jwt, IsOk());
 
   util::StatusOr<std::string> compact =
       (*jwt_mac)->ComputeMacAndEncodeWithKid(*raw_jwt, /*kid=*/absl::nullopt);
-  ASSERT_THAT(compact.status(), IsOk());
+  ASSERT_THAT(compact, IsOk());
   util::StatusOr<JwtValidator> validator = JwtValidatorBuilder()
                                                .ExpectIssuer("issuer")
                                                .AllowMissingExpiration()
                                                .Build();
-  ASSERT_THAT(validator.status(), IsOk());
+  ASSERT_THAT(validator, IsOk());
 
   util::StatusOr<VerifiedJwt> verified_jwt =
       (*jwt_mac)->VerifyMacAndDecodeWithKid(*compact, *validator,
                                             /*kid=*/absl::nullopt);
-  ASSERT_THAT(verified_jwt.status(), IsOk());
+  ASSERT_THAT(verified_jwt, IsOk());
   util::StatusOr<std::string> issuer = verified_jwt->GetIssuer();
   EXPECT_THAT(issuer, IsOkAndHolds("issuer"));
 }
@@ -211,28 +206,28 @@ TEST(JwtHmacKeyManagerTest, GetAndUsePrimitiveWithKid) {
   key_format.set_algorithm(JwtHmacAlgorithm::HS256);
   util::StatusOr<google::crypto::tink::JwtHmacKey> key =
       JwtHmacKeyManager().CreateKey(key_format);
-  ASSERT_THAT(key.status(), IsOk());
+  ASSERT_THAT(key, IsOk());
 
   util::StatusOr<std::unique_ptr<JwtMacInternal>> jwt_mac =
       JwtHmacKeyManager().GetPrimitive<JwtMacInternal>(*key);
-  ASSERT_THAT(jwt_mac.status(), IsOk());
+  ASSERT_THAT(jwt_mac, IsOk());
 
   util::StatusOr<RawJwt> raw_jwt =
       RawJwtBuilder().SetIssuer("issuer").WithoutExpiration().Build();
-  ASSERT_THAT(raw_jwt.status(), IsOk());
+  ASSERT_THAT(raw_jwt, IsOk());
 
   util::StatusOr<std::string> token_with_kid =
       (*jwt_mac)->ComputeMacAndEncodeWithKid(*raw_jwt, /*kid=*/"kid-123");
-  ASSERT_THAT(token_with_kid.status(), IsOk());
+  ASSERT_THAT(token_with_kid, IsOk());
   util::StatusOr<std::string> token_without_kid =
       (*jwt_mac)->ComputeMacAndEncodeWithKid(*raw_jwt, /*kid=*/absl::nullopt);
-  ASSERT_THAT(token_without_kid.status(), IsOk());
+  ASSERT_THAT(token_without_kid, IsOk());
 
   util::StatusOr<JwtValidator> validator = JwtValidatorBuilder()
                                                .ExpectIssuer("issuer")
                                                .AllowMissingExpiration()
                                                .Build();
-  ASSERT_THAT(validator.status(), IsOk());
+  ASSERT_THAT(validator, IsOk());
 
   // A token with kid only fails if the wrong kid is passed.
   ASSERT_THAT((*jwt_mac)
@@ -269,26 +264,26 @@ TEST(JwtHmacKeyManagerTest, GetAndUsePrimitiveWithCustomKid) {
   key_format.set_key_size(32);
   key_format.set_algorithm(JwtHmacAlgorithm::HS256);
   util::StatusOr<JwtHmacKey> key = JwtHmacKeyManager().CreateKey(key_format);
-  ASSERT_THAT(key.status(), IsOk());
+  ASSERT_THAT(key, IsOk());
   key->mutable_custom_kid()->set_value(
       "Lorem ipsum dolor sit amet, consectetur adipiscing elit");
 
   util::StatusOr<std::unique_ptr<JwtMacInternal>> jwt_mac =
       JwtHmacKeyManager().GetPrimitive<JwtMacInternal>(*key);
-  ASSERT_THAT(jwt_mac.status(), IsOk());
+  ASSERT_THAT(jwt_mac, IsOk());
 
   util::StatusOr<RawJwt> raw_jwt =
       RawJwtBuilder().SetIssuer("issuer").WithoutExpiration().Build();
-  ASSERT_THAT(raw_jwt.status(), IsOk());
+  ASSERT_THAT(raw_jwt, IsOk());
 
   util::StatusOr<std::string> compact =
       (*jwt_mac)->ComputeMacAndEncodeWithKid(*raw_jwt, /*kid=*/absl::nullopt);
-  ASSERT_THAT(compact.status(), IsOk());
+  ASSERT_THAT(compact, IsOk());
   util::StatusOr<JwtValidator> validator = JwtValidatorBuilder()
                                                .ExpectIssuer("issuer")
                                                .AllowMissingExpiration()
                                                .Build();
-  ASSERT_THAT(validator.status(), IsOk());
+  ASSERT_THAT(validator, IsOk());
   // parse header and check "kid"
   std::vector<absl::string_view> parts = absl::StrSplit(*compact, '.');
   ASSERT_THAT(parts.size(), Eq(3));
@@ -296,7 +291,7 @@ TEST(JwtHmacKeyManagerTest, GetAndUsePrimitiveWithCustomKid) {
   ASSERT_TRUE(DecodeHeader(parts[0], &json_header));
   util::StatusOr<google::protobuf::Struct> header =
       JsonStringToProtoStruct(json_header);
-  ASSERT_THAT(header.status(), IsOk());
+  ASSERT_THAT(header, IsOk());
   auto it = header->fields().find("kid");
   ASSERT_FALSE(it == header->fields().end());
   EXPECT_THAT(it->second.string_value(),
@@ -306,9 +301,9 @@ TEST(JwtHmacKeyManagerTest, GetAndUsePrimitiveWithCustomKid) {
   util::StatusOr<VerifiedJwt> verified_jwt =
       (*jwt_mac)->VerifyMacAndDecodeWithKid(*compact, *validator,
                                             /*kid=*/absl::nullopt);
-  ASSERT_THAT(verified_jwt.status(), IsOk());
+  ASSERT_THAT(verified_jwt, IsOk());
   util::StatusOr<std::string> issuer = verified_jwt->GetIssuer();
-  ASSERT_THAT(issuer.status(), IsOk());
+  ASSERT_THAT(issuer, IsOk());
   EXPECT_THAT(*issuer, testing::Eq("issuer"));
 
   // passing a kid when custom_kid is set should fail
@@ -331,7 +326,7 @@ TEST(JwtHmacKeyManagerTest, ValidateTokenWithFixedKey) {
   key.set_key_value(key_value);
   util::StatusOr<std::unique_ptr<JwtMacInternal>> jwt_mac =
       JwtHmacKeyManager().GetPrimitive<JwtMacInternal>(key);
-  ASSERT_THAT(jwt_mac.status(), IsOk());
+  ASSERT_THAT(jwt_mac, IsOk());
 
   std::string compact =
       "eyJ0eXAiOiJKV1QiLA0KICJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJqb2UiLA0KICJleH"
@@ -343,18 +338,18 @@ TEST(JwtHmacKeyManagerTest, ValidateTokenWithFixedKey) {
           .ExpectIssuer("joe")
           .SetFixedNow(absl::FromUnixSeconds(12345))
           .Build();
-  ASSERT_THAT(validator.status(), IsOk());
+  ASSERT_THAT(validator, IsOk());
 
   util::StatusOr<VerifiedJwt> verified_jwt =
       (*jwt_mac)->VerifyMacAndDecodeWithKid(compact, *validator,
                                             /*kid=*/absl::nullopt);
-  ASSERT_THAT(verified_jwt.status(), IsOk());
+  ASSERT_THAT(verified_jwt, IsOk());
   EXPECT_THAT(verified_jwt->GetIssuer(), IsOkAndHolds("joe"));
   EXPECT_THAT(verified_jwt->GetBooleanClaim("http://example.com/is_root"),
               IsOkAndHolds(true));
 
   util::StatusOr<JwtValidator> validator_now = JwtValidatorBuilder().Build();
-  ASSERT_THAT(validator_now.status(), IsOk());
+  ASSERT_THAT(validator_now, IsOk());
   EXPECT_THAT((*jwt_mac)
                   ->VerifyMacAndDecodeWithKid(compact, *validator_now,
                                               /*kid=*/absl::nullopt)

@@ -114,9 +114,9 @@ TEST_F(EnumsTest, testHashType) {
 }
 
 TEST_F(EnumsTest, testHashSize) {
-  EXPECT_EQ(Enums::HashLength(pb::HashType::SHA256).ValueOrDie(), 32);
-  EXPECT_EQ(Enums::HashLength(pb::HashType::SHA384).ValueOrDie(), 48);
-  EXPECT_EQ(Enums::HashLength(pb::HashType::SHA512).ValueOrDie(), 64);
+  EXPECT_EQ(Enums::HashLength(pb::HashType::SHA256).value(), 32);
+  EXPECT_EQ(Enums::HashLength(pb::HashType::SHA384).value(), 48);
+  EXPECT_EQ(Enums::HashLength(pb::HashType::SHA512).value(), 64);
   EXPECT_TRUE(!Enums::HashLength(pb::HashType::UNKNOWN_HASH).ok());
   EXPECT_TRUE(!Enums::HashLength(pb::HashType::SHA1).ok());
 }

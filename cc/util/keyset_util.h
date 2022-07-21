@@ -24,7 +24,7 @@
 namespace crypto {
 namespace tink {
 
-// Generate a new random key ID not previously used in |keyset|.
+// Generate a new random key ID not previously used in `keyset`.
 uint32_t GenerateUnusedKeyId(const google::crypto::tink::Keyset& keyset);
 
 }  // namespace tink

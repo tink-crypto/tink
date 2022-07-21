@@ -16,12 +16,17 @@
 
 #include "tink/subtle/stateful_cmac_boringssl.h"
 
+#include <string>
+#include <utility>
+
 #include "absl/memory/memory.h"
 #include "absl/status/status.h"
 #include "openssl/evp.h"
+#include "tink/internal/aes_util.h"
 #include "tink/internal/ssl_unique_ptr.h"
 #include "tink/internal/util.h"
 #include "tink/util/status.h"
+#include "tink/util/statusor.h"
 
 namespace crypto {
 namespace tink {
@@ -29,17 +34,10 @@ namespace subtle {
 
 util::StatusOr<std::unique_ptr<StatefulMac>> StatefulCmacBoringSsl::New(
     uint32_t tag_size, const util::SecretData& key_value) {
-  const EVP_CIPHER* cipher;
-  switch (key_value.size()) {
-    case 16:
-      cipher = EVP_aes_128_cbc();
-      break;
-    case 32:
-      cipher = EVP_aes_256_cbc();
-      break;
-    default:
-      return util::Status(absl::StatusCode::kInvalidArgument,
-                          "invalid key size");
+  util::StatusOr<const EVP_CIPHER*> cipher =
+      internal::GetAesCbcCipherForKeySize(key_value.size());
+  if (!cipher.ok()) {
+    return cipher.status();
   }
   if (tag_size > kMaxTagSize) {
     return util::Status(absl::StatusCode::kInvalidArgument, "invalid tag size");
@@ -49,7 +47,7 @@ util::StatusOr<std::unique_ptr<StatefulMac>> StatefulCmacBoringSsl::New(
   internal::SslUniquePtr<CMAC_CTX> ctx(CMAC_CTX_new());
 
   // Initialize the CMAC
-  if (!CMAC_Init(ctx.get(), key_value.data(), key_value.size(), cipher,
+  if (!CMAC_Init(ctx.get(), key_value.data(), key_value.size(), *cipher,
                  nullptr /* engine */)) {
     return util::Status(absl::StatusCode::kFailedPrecondition,
                         "CMAC initialization failed");

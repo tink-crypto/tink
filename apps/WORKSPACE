@@ -1,23 +1,22 @@
 workspace(name = "tink_apps")
 
 local_repository(
-    name = "tink_base",
-    path = "..",
-)
-
-local_repository(
     name = "tink_java",
     path = "../java_src",
 )
 
-load("@tink_base//:tink_base_deps.bzl", "tink_base_deps")
-tink_base_deps()
-
-load("@tink_base//:tink_base_deps_init.bzl", "tink_base_deps_init")
-tink_base_deps_init()
-
-load("@tink_java//:tink_java_deps.bzl", "tink_java_deps")
+load("@tink_java//:tink_java_deps.bzl", "tink_java_deps", "TINK_MAVEN_ARTIFACTS")
 tink_java_deps()
 
 load("@tink_java//:tink_java_deps_init.bzl", "tink_java_deps_init")
 tink_java_deps_init()
+
+load("@rules_jvm_external//:defs.bzl", "maven_install")
+
+maven_install(
+    artifacts = TINK_MAVEN_ARTIFACTS,
+    repositories = [
+        "https://maven.google.com",
+        "https://repo1.maven.org/maven2",
+    ],
+)

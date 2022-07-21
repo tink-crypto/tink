@@ -17,21 +17,45 @@
 
 set -euo pipefail
 
-cd ${KOKORO_ARTIFACTS_DIR}/git/tink
-./kokoro/copy_credentials.sh
 
 export XCODE_VERSION=11.3
 export DEVELOPER_DIR="/Applications/Xcode_${XCODE_VERSION}.app/Contents/Developer"
 export ANDROID_HOME="/Users/kbuilder/Library/Android/sdk"
 export COURSIER_OPTS="-Djava.net.preferIPv6Addresses=true"
 
-./kokoro/copy_credentials.sh
-./kokoro/update_android_sdk.sh
+cd "${KOKORO_ARTIFACTS_DIR}/git/tink"
+./kokoro/testutils/copy_credentials.sh "tools/testdata"
+./kokoro/testutils/update_android_sdk.sh
+# Sourcing required to update callers environment.
+source ./kokoro/testutils/install_go.sh
+
+echo "Using go binary from $(which go): $(go version)"
 
 # TODO(b/155225382): Avoid modifying the sytem Python installation.
 pip3 install --user protobuf
 
 cd tools
 use_bazel.sh $(cat .bazelversion)
+
+declare -a TEST_FLAGS
+TEST_FLAGS=(
+  --strategy=TestRunner=standalone
+  --test_output=errors
+  --jvmopt="-Djava.net.preferIPv6Addresses=true"
+)
+readonly TEST_FLAGS
+
 time bazel build -- ...
-time bazel test --test_output=errors -- ...
+time bazel test "${TEST_FLAGS[@]}" -- ...
+
+# Run manual tests which rely on key material injected into the Kokoro
+# environement.
+if [[ -n "${KOKORO_ROOT}" ]]; then
+  declare -a MANUAL_TARGETS
+  MANUAL_TARGETS=(
+    "//testing/cc:gcp_kms_aead_test"
+    "//testing/cross_language:aead_envelope_test"
+  )
+  readonly MANUAL_TARGETS
+  time bazel test "${TEST_FLAGS[@]}" -- "${MANUAL_TARGETS[@]}"
+fi

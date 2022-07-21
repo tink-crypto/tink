@@ -16,6 +16,8 @@
 
 #include "tink/signature/ecdsa_verify_key_manager.h"
 
+#include <string>
+
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "absl/status/status.h"
@@ -70,13 +72,11 @@ EcdsaPrivateKey CreateValidPrivateKey() {
   params->set_hash_type(HashType::SHA256);
   params->set_curve(EllipticCurveType::NIST_P256);
   params->set_encoding(EcdsaSignatureEncoding::DER);
-  return EcdsaSignKeyManager().CreateKey(key_format).ValueOrDie();
+  return EcdsaSignKeyManager().CreateKey(key_format).value();
 }
 
 EcdsaPublicKey CreateValidPublicKey() {
-  return EcdsaSignKeyManager()
-      .GetPublicKey(CreateValidPrivateKey())
-      .ValueOrDie();
+  return EcdsaSignKeyManager().GetPublicKey(CreateValidPrivateKey()).value();
 }
 
 // Checks that a public key generaed by the SignKeyManager is considered valid.
@@ -164,7 +164,7 @@ TEST(EcdsaSignKeyManagerTest, ValidateParamsBadHashP521) {
 TEST(EcdsaSignKeyManagerTest, Create) {
   EcdsaPrivateKey private_key = CreateValidPrivateKey();
   EcdsaPublicKey public_key =
-      EcdsaSignKeyManager().GetPublicKey(private_key).ValueOrDie();
+      EcdsaSignKeyManager().GetPublicKey(private_key).value();
 
   internal::EcKey ec_key;
   ec_key.curve = Enums::ProtoToSubtle(public_key.params().curve());
@@ -175,24 +175,23 @@ TEST(EcdsaSignKeyManagerTest, Create) {
   auto direct_signer_or = subtle::EcdsaSignBoringSsl::New(
       ec_key, Enums::ProtoToSubtle(public_key.params().hash_type()),
       Enums::ProtoToSubtle(public_key.params().encoding()));
-  ASSERT_THAT(direct_signer_or.status(), IsOk());
+  ASSERT_THAT(direct_signer_or, IsOk());
 
   auto verifier_or =
       EcdsaVerifyKeyManager().GetPrimitive<PublicKeyVerify>(public_key);
-  ASSERT_THAT(verifier_or.status(), IsOk());
+  ASSERT_THAT(verifier_or, IsOk());
 
   std::string message = "Some message";
-  EXPECT_THAT(
-      verifier_or.ValueOrDie()->Verify(
-          direct_signer_or.ValueOrDie()->Sign(message).ValueOrDie(), message),
-      IsOk());
+  EXPECT_THAT(verifier_or.value()->Verify(
+                  direct_signer_or.value()->Sign(message).value(), message),
+              IsOk());
 }
 
 TEST(EcdsaSignKeyManagerTest, CreateDifferentPrivateKey) {
   EcdsaPrivateKey private_key = CreateValidPrivateKey();
   // Note: we create a new key in the next line.
   EcdsaPublicKey public_key =
-      EcdsaSignKeyManager().GetPublicKey(CreateValidPrivateKey()).ValueOrDie();
+      EcdsaSignKeyManager().GetPublicKey(CreateValidPrivateKey()).value();
 
   internal::EcKey ec_key;
   ec_key.curve = Enums::ProtoToSubtle(public_key.params().curve());
@@ -203,17 +202,16 @@ TEST(EcdsaSignKeyManagerTest, CreateDifferentPrivateKey) {
   auto direct_signer_or = subtle::EcdsaSignBoringSsl::New(
       ec_key, Enums::ProtoToSubtle(public_key.params().hash_type()),
       Enums::ProtoToSubtle(public_key.params().encoding()));
-  ASSERT_THAT(direct_signer_or.status(), IsOk());
+  ASSERT_THAT(direct_signer_or, IsOk());
 
   auto verifier_or =
       EcdsaVerifyKeyManager().GetPrimitive<PublicKeyVerify>(public_key);
-  ASSERT_THAT(verifier_or.status(), IsOk());
+  ASSERT_THAT(verifier_or, IsOk());
 
   std::string message = "Some message";
-  EXPECT_THAT(
-      verifier_or.ValueOrDie()->Verify(
-          direct_signer_or.ValueOrDie()->Sign(message).ValueOrDie(), message),
-      Not(IsOk()));
+  EXPECT_THAT(verifier_or.value()->Verify(
+                  direct_signer_or.value()->Sign(message).value(), message),
+              Not(IsOk()));
 }
 
 }  // namespace

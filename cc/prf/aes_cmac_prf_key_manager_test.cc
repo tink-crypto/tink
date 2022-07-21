@@ -16,6 +16,7 @@
 #include "tink/prf/aes_cmac_prf_key_manager.h"
 
 #include <sstream>
+#include <string>
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
@@ -102,49 +103,47 @@ TEST(AesCmacPrfKeyManagerTest, ValidateKeyFormatKeySizes) {
 
 TEST(AesCmacPrfKeyManagerTest, CreateKey) {
   AesCmacPrfKeyFormat format = ValidKeyFormat();
-  ASSERT_THAT(AesCmacPrfKeyManager().CreateKey(format).status(), IsOk());
-  AesCmacPrfKey key = AesCmacPrfKeyManager().CreateKey(format).ValueOrDie();
+  ASSERT_THAT(AesCmacPrfKeyManager().CreateKey(format), IsOk());
+  AesCmacPrfKey key = AesCmacPrfKeyManager().CreateKey(format).value();
   EXPECT_THAT(key.version(), Eq(0));
   EXPECT_THAT(key.key_value(), SizeIs(format.key_size()));
 }
 
 TEST(AesCmacPrfKeyManagerTest, ValidateKey) {
   AesCmacPrfKeyFormat format = ValidKeyFormat();
-  AesCmacPrfKey key = AesCmacPrfKeyManager().CreateKey(format).ValueOrDie();
+  AesCmacPrfKey key = AesCmacPrfKeyManager().CreateKey(format).value();
   EXPECT_THAT(AesCmacPrfKeyManager().ValidateKey(key), IsOk());
 }
 
 TEST(AesCmacPrfKeyManagerTest, ValidateKeyInvalidVersion) {
   AesCmacPrfKeyFormat format = ValidKeyFormat();
-  AesCmacPrfKey key = AesCmacPrfKeyManager().CreateKey(format).ValueOrDie();
+  AesCmacPrfKey key = AesCmacPrfKeyManager().CreateKey(format).value();
   key.set_version(1);
   EXPECT_THAT(AesCmacPrfKeyManager().ValidateKey(key), Not(IsOk()));
 }
 
 TEST(AesCmacPrfKeyManagerTest, ValidateKeyShortKey) {
   AesCmacPrfKeyFormat format = ValidKeyFormat();
-  AesCmacPrfKey key = AesCmacPrfKeyManager().CreateKey(format).ValueOrDie();
+  AesCmacPrfKey key = AesCmacPrfKeyManager().CreateKey(format).value();
   key.set_key_value("0123456789abcdef");
   EXPECT_THAT(AesCmacPrfKeyManager().ValidateKey(key), Not(IsOk()));
 }
 
 TEST(AesCmacPrfKeyManagerTest, GetPrimitive) {
   AesCmacPrfKeyFormat format = ValidKeyFormat();
-  AesCmacPrfKey key = AesCmacPrfKeyManager().CreateKey(format).ValueOrDie();
+  AesCmacPrfKey key = AesCmacPrfKeyManager().CreateKey(format).value();
   auto manager_prf_or = AesCmacPrfKeyManager().GetPrimitive<Prf>(key);
-  ASSERT_THAT(manager_prf_or.status(), IsOk());
-  auto prf_value_or =
-      manager_prf_or.ValueOrDie()->Compute("some plaintext", 16);
-  ASSERT_THAT(prf_value_or.status(), IsOk());
+  ASSERT_THAT(manager_prf_or, IsOk());
+  auto prf_value_or = manager_prf_or.value()->Compute("some plaintext", 16);
+  ASSERT_THAT(prf_value_or, IsOk());
 
   auto direct_prf_or = subtle::AesCmacBoringSsl::New(
       util::SecretDataFromStringView(key.key_value()), 16);
-  ASSERT_THAT(direct_prf_or.status(), IsOk());
+  ASSERT_THAT(direct_prf_or, IsOk());
   auto direct_prf_value_or =
-      direct_prf_or.ValueOrDie()->ComputeMac("some plaintext");
-  ASSERT_THAT(direct_prf_value_or.status(), IsOk());
-  EXPECT_THAT(direct_prf_value_or.ValueOrDie(),
-              StrEq(prf_value_or.ValueOrDie()));
+      direct_prf_or.value()->ComputeMac("some plaintext");
+  ASSERT_THAT(direct_prf_value_or, IsOk());
+  EXPECT_THAT(direct_prf_value_or.value(), StrEq(prf_value_or.value()));
 }
 
 TEST(AesCmacPrfKeyManagerTest, DeriveKeyValid) {
@@ -152,8 +151,8 @@ TEST(AesCmacPrfKeyManagerTest, DeriveKeyValid) {
   auto inputstream = GetInputStreamForString(bytes);
   auto key_or =
       AesCmacPrfKeyManager().DeriveKey(ValidKeyFormat(), inputstream.get());
-  ASSERT_THAT(key_or.status(), IsOk());
-  AesCmacPrfKey key = key_or.ValueOrDie();
+  ASSERT_THAT(key_or, IsOk());
+  AesCmacPrfKey key = key_or.value();
   EXPECT_THAT(key.version(), Eq(AesCmacPrfKeyManager().get_version()));
   EXPECT_THAT(key.key_value(), Eq(bytes));
 }
@@ -163,7 +162,7 @@ TEST(AesCmacPrfKeyManagerTest, DeriveKeyNotEnoughRandomness) {
   auto inputstream = GetInputStreamForString(bytes);
   auto key_or =
       AesCmacPrfKeyManager().DeriveKey(ValidKeyFormat(), inputstream.get());
-  EXPECT_THAT(key_or.status(), Not(IsOk()));
+  EXPECT_THAT(key_or, Not(IsOk()));
 }
 
 TEST(AesCmacPrfKeyManagerTest, DeriveKeyInvalidFormat) {
@@ -172,7 +171,7 @@ TEST(AesCmacPrfKeyManagerTest, DeriveKeyInvalidFormat) {
   auto format = ValidKeyFormat();
   format.set_key_size(12);
   auto key_or = AesCmacPrfKeyManager().DeriveKey(format, inputstream.get());
-  EXPECT_THAT(key_or.status(), Not(IsOk()));
+  EXPECT_THAT(key_or, Not(IsOk()));
 }
 
 TEST(AesCmacPrfKeyManagerTest, DeriveKeyInvalidVersion) {
@@ -182,7 +181,7 @@ TEST(AesCmacPrfKeyManagerTest, DeriveKeyInvalidVersion) {
   auto inputstream = GetInputStreamForString(bytes);
   auto key_or =
       AesCmacPrfKeyManager().DeriveKey(format, inputstream.get());
-  EXPECT_THAT(key_or.status(), Not(IsOk()));
+  EXPECT_THAT(key_or, Not(IsOk()));
 }
 
 }  // namespace

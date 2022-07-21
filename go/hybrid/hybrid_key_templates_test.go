@@ -14,12 +14,13 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-package hybrid
+package hybrid_test
 
 import (
 	"bytes"
 	"testing"
 
+	"github.com/google/tink/go/hybrid"
 	"github.com/google/tink/go/keyset"
 	tinkpb "github.com/google/tink/go/proto/tink_go_proto"
 )
@@ -30,9 +31,21 @@ func TestKeyTemplates(t *testing.T) {
 		template *tinkpb.KeyTemplate
 	}{
 		{name: "ECIES_P256_HKDF_HMAC_SHA256_AES128_GCM",
-			template: ECIESHKDFAES128GCMKeyTemplate()},
+			template: hybrid.ECIESHKDFAES128GCMKeyTemplate()},
 		{name: "ECIES_P256_HKDF_HMAC_SHA256_AES128_CTR_HMAC_SHA256",
-			template: ECIESHKDFAES128CTRHMACSHA256KeyTemplate()},
+			template: hybrid.ECIESHKDFAES128CTRHMACSHA256KeyTemplate()},
+		{name: "DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_AES_128_GCM",
+			template: hybrid.DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_AES_128_GCM_Key_Template()},
+		{name: "DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_AES_128_GCM_RAW",
+			template: hybrid.DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_AES_128_GCM_Raw_Key_Template()},
+		{name: "DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_AES_256_GCM",
+			template: hybrid.DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_AES_256_GCM_Key_Template()},
+		{name: "DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_AES_256_GCM_RAW",
+			template: hybrid.DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_AES_256_GCM_Raw_Key_Template()},
+		{name: "DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_CHACHA20_POLY1305",
+			template: hybrid.DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_CHACHA20_POLY1305_Key_Template()},
+		{name: "DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_CHACHA20_POLY1305_RAW",
+			template: hybrid.DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_CHACHA20_POLY1305_Raw_Key_Template()},
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
@@ -44,13 +57,13 @@ func TestKeyTemplates(t *testing.T) {
 			if err != nil {
 				t.Fatalf("privateHandle.Public() failed: %s", err)
 			}
-			enc, err := NewHybridEncrypt(publicHandle)
+			enc, err := hybrid.NewHybridEncrypt(publicHandle)
 			if err != nil {
-				t.Fatalf("NewHybridEncrypt(publicHandle) failed: %s", err)
+				t.Fatalf("NewHybridEncrypt(publicHandle) err = %v, want nil", err)
 			}
-			dec, err := NewHybridDecrypt(privateHandle)
+			dec, err := hybrid.NewHybridDecrypt(privateHandle)
 			if err != nil {
-				t.Fatalf("NewHybridDecrypt(privateHandle) failed: %s", err)
+				t.Fatalf("NewHybridDecrypt(privateHandle) err = %v, want nil", err)
 			}
 			var testInputs = []struct {
 				plaintext []byte
@@ -98,11 +111,11 @@ func TestKeyTemplates(t *testing.T) {
 			for _, ti := range testInputs {
 				ciphertext, err := enc.Encrypt(ti.plaintext, ti.context1)
 				if err != nil {
-					t.Fatalf("enc.Encrypt(ti.plaintext, ti.context1) failed: %s", err)
+					t.Fatalf("enc.Encrypt(ti.plaintext, ti.context1) err = %v, want nil", err)
 				}
 				decrypted, err := dec.Decrypt(ciphertext, ti.context2)
 				if err != nil {
-					t.Fatalf("dec.Decrypt(ciphertext, ti.context2) failed: %s", err)
+					t.Fatalf("dec.Decrypt(ciphertext, ti.context2) err = %v, want nil", err)
 				}
 				if !bytes.Equal(ti.plaintext, decrypted) {
 					t.Errorf("decrypted data doesn't match plaintext, got: %q, want: %q", decrypted, ti.plaintext)

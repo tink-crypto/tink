@@ -17,6 +17,7 @@
 #include "tink/cc/input_stream_adapter.h"
 
 #include <algorithm>
+#include <string>
 
 #include "absl/strings/str_cat.h"
 #include "absl/strings/string_view.h"
@@ -30,7 +31,7 @@ util::StatusOr<std::string> InputStreamAdapter::Read(int64_t size) {
   const void* buffer;
   auto next_result = stream_->Next(&buffer);
   if (!next_result.ok()) return next_result.status();
-  int available = next_result.ValueOrDie();
+  int available = next_result.value();
   int read_count =
       size < 0 ? available : std::min(static_cast<int64_t>(available), size);
   if (read_count < available) stream_->BackUp(available - read_count);

@@ -46,6 +46,15 @@ using google::crypto::tink::XChaCha20Poly1305KeyFormat;
   XCTAssertTrue(tpl.ccKeyTemplate->output_prefix_type() ==
                 google::crypto::tink::OutputPrefixType::TINK);
 
+  // AES-128 GCM RAW
+  tpl = [[TINKAeadKeyTemplate alloc] initWithKeyTemplate:TINKAes128GcmNoPrefix error:&error];
+  XCTAssertNil(error);
+  XCTAssertNotNil(tpl);
+
+  XCTAssertTrue(tpl.ccKeyTemplate->type_url() == kTypeURL);
+  XCTAssertTrue(tpl.ccKeyTemplate->output_prefix_type() ==
+                google::crypto::tink::OutputPrefixType::RAW);
+
   // AES-256 GCM
   tpl = [[TINKAeadKeyTemplate alloc] initWithKeyTemplate:TINKAes256Gcm error:&error];
   XCTAssertNil(error);

@@ -20,7 +20,7 @@ describe('util test', function() {
 
     try {
       Util.validateKey(key);
-    } catch (e) {
+    } catch (e: any) {
       expect(e.toString())
           .toBe(ExceptionText.InvalidKeyMissingKeyData(key.getKeyId()));
       return;
@@ -34,7 +34,7 @@ describe('util test', function() {
 
     try {
       Util.validateKey(key);
-    } catch (e) {
+    } catch (e: any) {
       expect(e.toString())
           .toBe(ExceptionText.InvalidKeyUnknownPrefix(key.getKeyId()));
       return;
@@ -47,7 +47,7 @@ describe('util test', function() {
 
     try {
       Util.validateKey(key);
-    } catch (e) {
+    } catch (e: any) {
       expect(e.toString())
           .toBe(ExceptionText.InvalidKeyUnknownStatus(key.getKeyId()));
       return;
@@ -69,7 +69,7 @@ describe('util test', function() {
 
     try {
       Util.validateKeyset(keyset);
-    } catch (e) {
+    } catch (e: any) {
       expect(e.toString()).toBe(ExceptionText.InvalidKeysetMissingKeys());
       return;
     }
@@ -84,7 +84,7 @@ describe('util test', function() {
 
     try {
       Util.validateKeyset(keyset);
-    } catch (e) {
+    } catch (e: any) {
       expect(e.toString()).toBe(ExceptionText.InvalidKeysetDisabledPrimary());
       return;
     }
@@ -101,7 +101,7 @@ describe('util test', function() {
 
     try {
       Util.validateKeyset(keyset);
-    } catch (e) {
+    } catch (e: any) {
       expect(e.toString()).toBe(ExceptionText.InvalidKeysetMultiplePrimaries());
       return;
     }
@@ -116,7 +116,7 @@ describe('util test', function() {
 
     try {
       Util.validateKeyset(keyset);
-    } catch (e) {
+    } catch (e: any) {
       expect(e.toString())
           .toBe(ExceptionText.InvalidKeyUnknownStatus(key.getKeyId()));
       return;

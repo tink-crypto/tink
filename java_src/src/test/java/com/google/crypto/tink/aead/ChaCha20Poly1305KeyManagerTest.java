@@ -24,7 +24,7 @@ import static org.junit.Assert.assertThrows;
 
 import com.google.crypto.tink.Aead;
 import com.google.crypto.tink.KeyTemplate;
-import com.google.crypto.tink.KeyTypeManager;
+import com.google.crypto.tink.internal.KeyTypeManager;
 import com.google.crypto.tink.proto.ChaCha20Poly1305Key;
 import com.google.crypto.tink.proto.ChaCha20Poly1305KeyFormat;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;

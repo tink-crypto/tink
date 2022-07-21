@@ -1,4 +1,4 @@
-# C++ Digital Signatures CLI
+# C++ JWT Signatures CLI
 
 This is a command-line utility for generating JSON Web Token (JWT) keys, and
 creating and verifying JWTs.

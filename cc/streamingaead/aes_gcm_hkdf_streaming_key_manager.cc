@@ -16,6 +16,8 @@
 
 #include "tink/streamingaead/aes_gcm_hkdf_streaming_key_manager.h"
 
+#include <string>
+
 #include "absl/status/status.h"
 #include "tink/subtle/aes_gcm_hkdf_stream_segment_encrypter.h"
 #include "tink/subtle/random.h"
@@ -80,7 +82,7 @@ AesGcmHkdfStreamingKeyManager::DeriveKey(
   }
   AesGcmHkdfStreamingKey key;
   key.set_version(get_version());
-  key.set_key_value(randomness_or.ValueOrDie());
+  key.set_key_value(randomness_or.value());
   *key.mutable_params() = key_format.params();
   return key;
 }

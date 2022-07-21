@@ -1,0 +1,24 @@
+package(default_visibility = ["//:__subpackages__"])
+
+licenses(["notice"])
+
+cc_library(
+    name = "monitoring",
+    hdrs = ["monitoring.h"],
+    include_prefix = "tink/monitoring",
+    deps = [
+        "//util:statusor",
+        "@com_google_absl//absl/container:flat_hash_map",
+    ],
+)
+
+cc_library(
+    name = "monitoring_client_mocks",
+    testonly = 1,
+    hdrs = ["monitoring_client_mocks.h"],
+    include_prefix = "tink/monitoring",
+    deps = [
+        ":monitoring",
+        "@com_google_googletest//:gtest",
+    ],
+)

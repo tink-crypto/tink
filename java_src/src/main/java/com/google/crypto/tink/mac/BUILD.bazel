@@ -12,10 +12,11 @@ java_library(
         "//proto:hmac_java_proto",
         "//proto:tink_java_proto",
         "//src/main/java/com/google/crypto/tink:key_template",
-        "//src/main/java/com/google/crypto/tink:key_type_manager",
         "//src/main/java/com/google/crypto/tink:mac",
         "//src/main/java/com/google/crypto/tink:registry",
         "//src/main/java/com/google/crypto/tink/config/internal:tink_fips_util",
+        "//src/main/java/com/google/crypto/tink/internal:key_type_manager",
+        "//src/main/java/com/google/crypto/tink/internal:primitive_factory",
         "//src/main/java/com/google/crypto/tink/subtle:prf_hmac_jce",
         "//src/main/java/com/google/crypto/tink/subtle:prf_mac",
         "//src/main/java/com/google/crypto/tink/subtle:random",
@@ -32,14 +33,15 @@ android_library(
         "//proto:hmac_java_proto_lite",
         "//proto:tink_java_proto_lite",
         "//src/main/java/com/google/crypto/tink:key_template-android",
-        "//src/main/java/com/google/crypto/tink:key_type_manager-android",
-        "//src/main/java/com/google/crypto/tink:mac",
+        "//src/main/java/com/google/crypto/tink:mac-android",
         "//src/main/java/com/google/crypto/tink:registry-android",
         "//src/main/java/com/google/crypto/tink/config/internal:tink_fips_util-android",
-        "//src/main/java/com/google/crypto/tink/subtle:prf_hmac_jce",
-        "//src/main/java/com/google/crypto/tink/subtle:prf_mac",
-        "//src/main/java/com/google/crypto/tink/subtle:random",
-        "//src/main/java/com/google/crypto/tink/subtle:validators",
+        "//src/main/java/com/google/crypto/tink/internal:key_type_manager-android",
+        "//src/main/java/com/google/crypto/tink/internal:primitive_factory-android",
+        "//src/main/java/com/google/crypto/tink/subtle:prf_hmac_jce-android",
+        "//src/main/java/com/google/crypto/tink/subtle:prf_mac-android",
+        "//src/main/java/com/google/crypto/tink/subtle:random-android",
+        "//src/main/java/com/google/crypto/tink/subtle:validators-android",
         "@com_google_protobuf//:protobuf_javalite",
     ],
 )
@@ -60,7 +62,7 @@ android_library(
     srcs = ["MacFactory.java"],
     deps = [
         ":mac_wrapper-android",
-        "//src/main/java/com/google/crypto/tink:mac",
+        "//src/main/java/com/google/crypto/tink:mac-android",
         "//src/main/java/com/google/crypto/tink:registry-android",
         "//src/main/java/com/google/crypto/tink:registry_cluster-android",
     ],
@@ -102,6 +104,10 @@ java_library(
         "//src/main/java/com/google/crypto/tink:primitive_set",
         "//src/main/java/com/google/crypto/tink:primitive_wrapper",
         "//src/main/java/com/google/crypto/tink:registry",
+        "//src/main/java/com/google/crypto/tink/internal:monitoring_util",
+        "//src/main/java/com/google/crypto/tink/internal:mutable_monitoring_registry",
+        "//src/main/java/com/google/crypto/tink/monitoring:monitoring_client",
+        "//src/main/java/com/google/crypto/tink/monitoring:monitoring_keyset_info",
         "//src/main/java/com/google/crypto/tink/subtle:bytes",
     ],
 )
@@ -112,11 +118,15 @@ android_library(
     deps = [
         "//proto:tink_java_proto_lite",
         "//src/main/java/com/google/crypto/tink:crypto_format-android",
-        "//src/main/java/com/google/crypto/tink:mac",
+        "//src/main/java/com/google/crypto/tink:mac-android",
         "//src/main/java/com/google/crypto/tink:primitive_set-android",
         "//src/main/java/com/google/crypto/tink:primitive_wrapper-android",
         "//src/main/java/com/google/crypto/tink:registry-android",
-        "//src/main/java/com/google/crypto/tink/subtle:bytes",
+        "//src/main/java/com/google/crypto/tink/internal:monitoring_util-android",
+        "//src/main/java/com/google/crypto/tink/internal:mutable_monitoring_registry-android",
+        "//src/main/java/com/google/crypto/tink/monitoring:monitoring_client-android",
+        "//src/main/java/com/google/crypto/tink/monitoring:monitoring_keyset_info-android",
+        "//src/main/java/com/google/crypto/tink/subtle:bytes-android",
     ],
 )
 
@@ -151,9 +161,10 @@ java_library(
         "//proto:aes_cmac_java_proto",
         "//proto:tink_java_proto",
         "//src/main/java/com/google/crypto/tink:key_template",
-        "//src/main/java/com/google/crypto/tink:key_type_manager",
         "//src/main/java/com/google/crypto/tink:mac",
         "//src/main/java/com/google/crypto/tink:registry",
+        "//src/main/java/com/google/crypto/tink/internal:key_type_manager",
+        "//src/main/java/com/google/crypto/tink/internal:primitive_factory",
         "//src/main/java/com/google/crypto/tink/subtle:prf_aes_cmac",
         "//src/main/java/com/google/crypto/tink/subtle:prf_mac",
         "//src/main/java/com/google/crypto/tink/subtle:random",
@@ -169,13 +180,140 @@ android_library(
         "//proto:aes_cmac_java_proto_lite",
         "//proto:tink_java_proto_lite",
         "//src/main/java/com/google/crypto/tink:key_template-android",
-        "//src/main/java/com/google/crypto/tink:key_type_manager-android",
-        "//src/main/java/com/google/crypto/tink:mac",
+        "//src/main/java/com/google/crypto/tink:mac-android",
         "//src/main/java/com/google/crypto/tink:registry-android",
-        "//src/main/java/com/google/crypto/tink/subtle:prf_aes_cmac",
-        "//src/main/java/com/google/crypto/tink/subtle:prf_mac",
-        "//src/main/java/com/google/crypto/tink/subtle:random",
-        "//src/main/java/com/google/crypto/tink/subtle:validators",
+        "//src/main/java/com/google/crypto/tink/internal:key_type_manager-android",
+        "//src/main/java/com/google/crypto/tink/internal:primitive_factory-android",
+        "//src/main/java/com/google/crypto/tink/subtle:prf_aes_cmac-android",
+        "//src/main/java/com/google/crypto/tink/subtle:prf_mac-android",
+        "//src/main/java/com/google/crypto/tink/subtle:random-android",
+        "//src/main/java/com/google/crypto/tink/subtle:validators-android",
         "@com_google_protobuf//:protobuf_javalite",
     ],
+)
+
+java_library(
+    name = "mac_key",
+    srcs = ["MacKey.java"],
+    deps = [
+        ":mac_parameters",
+        "//src/main/java/com/google/crypto/tink:key",
+        "//src/main/java/com/google/crypto/tink/util:bytes",
+    ],
+)
+
+android_library(
+    name = "mac_key-android",
+    srcs = ["MacKey.java"],
+    deps = [
+        ":mac_parameters-android",
+        "//src/main/java/com/google/crypto/tink:key-android",
+        "//src/main/java/com/google/crypto/tink/util:bytes-android",
+    ],
+)
+
+java_library(
+    name = "mac_parameters",
+    srcs = ["MacParameters.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink:parameters",
+        "@maven//:com_google_errorprone_error_prone_annotations",
+    ],
+)
+
+android_library(
+    name = "mac_parameters-android",
+    srcs = ["MacParameters.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink:parameters-android",
+        "@maven//:com_google_errorprone_error_prone_annotations",
+    ],
+)
+
+java_library(
+    name = "aes_cmac_key",
+    srcs = ["AesCmacKey.java"],
+    deps = [
+        ":aes_cmac_parameters",
+        ":mac_key",
+        "//src/main/java/com/google/crypto/tink:accesses_partial_key",
+        "//src/main/java/com/google/crypto/tink:key",
+        "//src/main/java/com/google/crypto/tink/util:bytes",
+        "//src/main/java/com/google/crypto/tink/util:secret_bytes",
+        "@maven//:com_google_code_findbugs_jsr305",
+        "@maven//:com_google_errorprone_error_prone_annotations",
+    ],
+)
+
+android_library(
+    name = "aes_cmac_key-android",
+    srcs = ["AesCmacKey.java"],
+    deps = [
+        ":aes_cmac_parameters-android",
+        ":mac_key-android",
+        "//src/main/java/com/google/crypto/tink:accesses_partial_key-android",
+        "//src/main/java/com/google/crypto/tink:key-android",
+        "//src/main/java/com/google/crypto/tink/util:bytes-android",
+        "//src/main/java/com/google/crypto/tink/util:secret_bytes-android",
+        "@maven//:com_google_code_findbugs_jsr305",
+        "@maven//:com_google_errorprone_error_prone_annotations",
+    ],
+)
+
+java_library(
+    name = "aes_cmac_parameters",
+    srcs = ["AesCmacParameters.java"],
+    deps = [
+        ":mac_parameters",
+        "@maven//:com_google_errorprone_error_prone_annotations",
+    ],
+)
+
+android_library(
+    name = "aes_cmac_parameters-android",
+    srcs = ["AesCmacParameters.java"],
+    deps = [
+        ":mac_parameters-android",
+        "@maven//:com_google_errorprone_error_prone_annotations",
+    ],
+)
+
+java_library(
+    name = "chunked_mac",
+    srcs = ["ChunkedMac.java"],
+    deps = [
+        ":chunked_mac_computation",
+        ":chunked_mac_verification",
+        "@maven//:com_google_errorprone_error_prone_annotations",
+    ],
+)
+
+android_library(
+    name = "chunked_mac-android",
+    srcs = ["ChunkedMac.java"],
+    deps = [
+        ":chunked_mac_computation-android",
+        ":chunked_mac_verification-android",
+        "@maven//:com_google_errorprone_error_prone_annotations",
+    ],
+)
+
+java_library(
+    name = "chunked_mac_computation",
+    srcs = ["ChunkedMacComputation.java"],
+)
+
+android_library(
+    name = "chunked_mac_computation-android",
+    srcs = ["ChunkedMacComputation.java"],
+)
+
+java_library(
+    name = "chunked_mac_verification",
+    srcs = ["ChunkedMacVerification.java"],
+)
+
+android_library(
+    name = "chunked_mac_verification-android",
+    srcs = ["ChunkedMacVerification.java"],
 )

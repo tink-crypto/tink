@@ -21,9 +21,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
 
 import com.google.crypto.tink.KeyTemplate;
-import com.google.crypto.tink.KeyTypeManager;
 import com.google.crypto.tink.PublicKeySign;
 import com.google.crypto.tink.PublicKeyVerify;
+import com.google.crypto.tink.internal.KeyTypeManager;
 import com.google.crypto.tink.proto.HashType;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
 import com.google.crypto.tink.proto.RsaSsaPkcs1KeyFormat;

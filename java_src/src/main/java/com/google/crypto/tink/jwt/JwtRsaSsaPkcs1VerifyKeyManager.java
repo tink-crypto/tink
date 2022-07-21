@@ -17,7 +17,8 @@ package com.google.crypto.tink.jwt;
 
 import static java.nio.charset.StandardCharsets.US_ASCII;
 
-import com.google.crypto.tink.KeyTypeManager;
+import com.google.crypto.tink.internal.KeyTypeManager;
+import com.google.crypto.tink.internal.PrimitiveFactory;
 import com.google.crypto.tink.proto.JwtRsaSsaPkcs1Algorithm;
 import com.google.crypto.tink.proto.JwtRsaSsaPkcs1PublicKey;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
@@ -69,7 +70,7 @@ class JwtRsaSsaPkcs1VerifyKeyManager extends KeyTypeManager<JwtRsaSsaPkcs1Public
   public JwtRsaSsaPkcs1VerifyKeyManager() {
     super(
         JwtRsaSsaPkcs1PublicKey.class,
-        new KeyTypeManager.PrimitiveFactory<JwtPublicKeyVerifyInternal, JwtRsaSsaPkcs1PublicKey>(
+        new PrimitiveFactory<JwtPublicKeyVerifyInternal, JwtRsaSsaPkcs1PublicKey>(
             JwtPublicKeyVerifyInternal.class) {
           @Override
           public JwtPublicKeyVerifyInternal getPrimitive(JwtRsaSsaPkcs1PublicKey keyProto)

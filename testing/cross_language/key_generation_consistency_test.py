@@ -16,6 +16,7 @@
 import itertools
 from typing import Iterable, Tuple
 
+from absl import logging
 from absl.testing import absltest
 from absl.testing import parameterized
 
@@ -29,6 +30,7 @@ from tink import signature
 
 from tink.proto import common_pb2
 from tink.proto import ecdsa_pb2
+from tink.proto import jwt_hmac_pb2
 from tink.proto import tink_pb2
 from util import supported_key_types
 from util import testing_servers
@@ -151,6 +153,36 @@ def hmac_test_cases() -> TestCasesType:
   for tag_size in [9, 10, 16, 20, 21, 24, 32, 33, 64, 65]:
     for hash_type in HASH_TYPES:
       yield _test_case(tag_size=tag_size, hash_type=hash_type)
+
+
+def jwt_hmac_test_cases() -> TestCasesType:
+  def _test_case(
+      algorithm: jwt_hmac_pb2.JwtHmacAlgorithm, key_size: int,
+      output_prefix_type: tink_pb2.OutputPrefixType
+  ) -> Tuple[str, tink_pb2.KeyTemplate]:
+    key_format = jwt_hmac_pb2.JwtHmacKeyFormat(
+        algorithm=algorithm, key_size=key_size)
+    template = tink_pb2.KeyTemplate(
+        type_url='type.googleapis.com/google.crypto.tink.JwtHmacKey',
+        value=key_format.SerializeToString(),
+        output_prefix_type=output_prefix_type)
+    return ('JwtHmacKey(%d,%s,%s)' %
+            (key_size, jwt_hmac_pb2.JwtHmacAlgorithm.Name(algorithm),
+             tink_pb2.OutputPrefixType.Name(output_prefix_type)), template)
+  yield _test_case(jwt_hmac_pb2.HS256, 31, tink_pb2.RAW)
+  yield _test_case(jwt_hmac_pb2.HS256, 32, tink_pb2.RAW)
+  yield _test_case(jwt_hmac_pb2.HS256, 32, tink_pb2.TINK)
+  yield _test_case(jwt_hmac_pb2.HS256, 33, tink_pb2.RAW)
+
+  yield _test_case(jwt_hmac_pb2.HS384, 47, tink_pb2.RAW)
+  yield _test_case(jwt_hmac_pb2.HS384, 48, tink_pb2.RAW)
+  yield _test_case(jwt_hmac_pb2.HS384, 48, tink_pb2.TINK)
+  yield _test_case(jwt_hmac_pb2.HS384, 49, tink_pb2.RAW)
+
+  yield _test_case(jwt_hmac_pb2.HS512, 63, tink_pb2.RAW)
+  yield _test_case(jwt_hmac_pb2.HS512, 64, tink_pb2.RAW)
+  yield _test_case(jwt_hmac_pb2.HS512, 64, tink_pb2.TINK)
+  yield _test_case(jwt_hmac_pb2.HS512, 65, tink_pb2.RAW)
 
 
 def aes_cmac_test_cases() -> TestCasesType:
@@ -351,6 +383,7 @@ class KeyGenerationConsistencyTest(parameterized.TestCase):
                       aes_gcm_siv_test_cases(),
                       aes_ctr_hmac_aead_test_cases(),
                       hmac_test_cases(),
+                      jwt_hmac_test_cases(),
                       aes_cmac_test_cases(),
                       aes_cmac_prf_test_cases(),
                       hmac_prf_test_cases(),
@@ -386,7 +419,8 @@ class KeyGenerationConsistencyTest(parameterized.TestCase):
     if failures not in [0, len(supported_langs)]:
       self.fail('key generation for template %s is inconsistent: %s' %
                 (name, results))
-
+    logging.info('Key generation status: %s',
+                 'Success' if failures == 0 else 'Fail')
 
 if __name__ == '__main__':
   absltest.main()

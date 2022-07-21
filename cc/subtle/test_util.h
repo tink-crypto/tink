@@ -17,6 +17,7 @@
 #ifndef TINK_SUBTLE_TEST_UTIL_H_
 #define TINK_SUBTLE_TEST_UTIL_H_
 
+#include <memory>
 #include <string>
 #include <vector>
 

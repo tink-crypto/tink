@@ -18,6 +18,7 @@
 
 #include <algorithm>
 #include <cstring>
+#include <utility>
 
 #include "absl/memory/memory.h"
 #include "absl/status/status.h"
@@ -49,7 +50,7 @@ util::Status WriteToStream(const std::vector<uint8_t>& contents,
   while (remaining > 0) {
     auto next_result = output_stream->Next(&buffer);
     if (!next_result.ok()) return next_result.status();
-    available_space = next_result.ValueOrDie();
+    available_space = next_result.value();
     available_bytes = std::min(available_space, remaining);
     memcpy(buffer, contents.data() + pos, available_bytes);
     remaining -= available_bytes;

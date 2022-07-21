@@ -16,6 +16,9 @@
 
 #include "tink/hybrid/hybrid_encrypt_factory.h"
 
+#include <string>
+#include <utility>
+
 #include "gtest/gtest.h"
 #include "tink/config.h"
 #include "tink/crypto_format.h"
@@ -92,7 +95,7 @@ TEST_F(HybridEncryptFactoryTest, testPrimitive) {
   auto hybrid_encrypt_result = HybridEncryptFactory::GetPrimitive(
       *TestKeysetHandle::GetKeysetHandle(keyset));
   EXPECT_TRUE(hybrid_encrypt_result.ok()) << hybrid_encrypt_result.status();
-  auto hybrid_encrypt = std::move(hybrid_encrypt_result.ValueOrDie());
+  auto hybrid_encrypt = std::move(hybrid_encrypt_result.value());
 
   // Test the resulting HybridEncrypt-instance.
   std::string plaintext = "some plaintext";

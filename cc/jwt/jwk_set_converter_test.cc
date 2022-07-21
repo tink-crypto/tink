@@ -399,21 +399,21 @@ TEST_P(JwkSetConverterTest, ToAndFromPublicKeysetHandleIsIdentical) {
   // Convert JWK set to KeysetHandle
   util::StatusOr<std::unique_ptr<KeysetHandle>> keyset_handle =
       JwkSetToPublicKeysetHandle(jwk_set);
-  ASSERT_THAT(keyset_handle.status(), IsOk());
+  ASSERT_THAT(keyset_handle, IsOk());
 
   // Convert KeysetHandle to JWK set
   util::StatusOr<std::string> output =
       JwkSetFromPublicKeysetHandle(**keyset_handle);
-  ASSERT_THAT(output.status(), IsOk());
+  ASSERT_THAT(output, IsOk());
 
   // Check that output is the same as jwk_set. The order of the elements may
   // have changed.
   util::StatusOr<google::protobuf::Struct> output_struct =
       jwt_internal::JsonStringToProtoStruct(*output);
-  ASSERT_THAT(output_struct.status(), IsOk());
+  ASSERT_THAT(output_struct, IsOk());
   util::StatusOr<google::protobuf::Struct> expected_struct =
       jwt_internal::JsonStringToProtoStruct(jwk_set);
-  ASSERT_THAT(expected_struct.status(), IsOk());
+  ASSERT_THAT(expected_struct, IsOk());
 
   std::string differences;
   MessageDifferencer message_differencer;
@@ -444,30 +444,30 @@ TEST_P(JwkSetToPublicKeysetHandleTest, VerifyValidJwtWithSuccess) {
   // Create a valid jwt using the private key
   util::StatusOr<std::unique_ptr<KeysetReader>> reader =
       JsonKeysetReader::New(private_keyset);
-  EXPECT_THAT(reader.status(), IsOk());
+  EXPECT_THAT(reader, IsOk());
   util::StatusOr<std::unique_ptr<KeysetHandle>> private_handle =
       CleartextKeysetHandle::Read(std::move(*reader));
-  EXPECT_THAT(private_handle.status(), IsOk());
+  EXPECT_THAT(private_handle, IsOk());
 
   util::StatusOr<std::unique_ptr<JwtPublicKeySign>> sign =
       (*private_handle)->GetPrimitive<JwtPublicKeySign>();
-  ASSERT_THAT(sign.status(), IsOk());
+  ASSERT_THAT(sign, IsOk());
 
   util::StatusOr<RawJwt> raw_jwt =
       RawJwtBuilder().SetIssuer("issuer").WithoutExpiration().Build();
-  ASSERT_THAT(raw_jwt.status(), IsOk());
+  ASSERT_THAT(raw_jwt, IsOk());
 
   util::StatusOr<std::string> compact = (*sign)->SignAndEncode(*raw_jwt);
-  ASSERT_THAT(compact.status(), IsOk());
+  ASSERT_THAT(compact, IsOk());
 
   // verify the JWT using the JWK public keys
   util::StatusOr<std::unique_ptr<KeysetHandle>> public_handle =
       JwkSetToPublicKeysetHandle(jwk_public_keyset);
-  ASSERT_THAT(public_handle.status(), IsOk());
+  ASSERT_THAT(public_handle, IsOk());
 
   util::StatusOr<std::unique_ptr<JwtPublicKeyVerify>> verify =
       (*public_handle)->GetPrimitive<JwtPublicKeyVerify>();
-  ASSERT_THAT(verify.status(), IsOk());
+  ASSERT_THAT(verify, IsOk());
 
   util::StatusOr<JwtValidator> validator = JwtValidatorBuilder()
                                                .ExpectIssuer("issuer")
@@ -475,7 +475,7 @@ TEST_P(JwkSetToPublicKeysetHandleTest, VerifyValidJwtWithSuccess) {
                                                .Build();
   util::StatusOr<VerifiedJwt> verified_jwt =
       (*verify)->VerifyAndDecode(*compact, *validator);
-  ASSERT_THAT(verified_jwt.status(), IsOk());
+  ASSERT_THAT(verified_jwt, IsOk());
   EXPECT_THAT(verified_jwt->GetIssuer(), IsOkAndHolds("issuer"));
 }
 
@@ -513,7 +513,7 @@ INSTANTIATE_TEST_SUITE_P(
 
 TEST_F(JwkSetToPublicKeysetHandleTest, InvalidJsonFails) {
   std::string invalid_json = R"({[}])";
-  EXPECT_THAT(JwkSetToPublicKeysetHandle(invalid_json).status(), Not(IsOk()));
+  EXPECT_THAT(JwkSetToPublicKeysetHandle(invalid_json), Not(IsOk()));
 }
 
 TEST_F(JwkSetToPublicKeysetHandleTest, Rs256WithSmallModulusGetPrimitiveFails) {
@@ -532,10 +532,10 @@ TEST_F(JwkSetToPublicKeysetHandleTest, Rs256WithSmallModulusGetPrimitiveFails) {
   // So JwkSetToPublicKeysetHandle succeeds, but GetPrimitive fails.
   util::StatusOr<std::unique_ptr<KeysetHandle>> public_handle =
       JwkSetToPublicKeysetHandle(jwt_set);
-  ASSERT_THAT(public_handle.status(), IsOk());
+  ASSERT_THAT(public_handle, IsOk());
   util::StatusOr<std::unique_ptr<JwtPublicKeyVerify>> verify =
       (*public_handle)->GetPrimitive<JwtPublicKeyVerify>();
-  EXPECT_THAT(verify.status(), Not(IsOk()));
+  EXPECT_THAT(verify, Not(IsOk()));
 }
 
 TEST_F(JwkSetToPublicKeysetHandleTest, Rs256CorrectlySetsKid) {
@@ -552,7 +552,7 @@ TEST_F(JwkSetToPublicKeysetHandleTest, Rs256CorrectlySetsKid) {
     })";
   util::StatusOr<std::unique_ptr<KeysetHandle>> public_handle =
       JwkSetToPublicKeysetHandle(jwt_set);
-  EXPECT_THAT(public_handle.status(), IsOk());
+  EXPECT_THAT(public_handle, IsOk());
   const google::crypto::tink::Keyset &keyset =
       CleartextKeysetHandle::GetKeyset(**public_handle);
   ASSERT_THAT(keyset.key_size(), Eq(1));
@@ -572,7 +572,7 @@ TEST_F(JwkSetToPublicKeysetHandleTest, Rs256WithoutOptionalFieldsSucceeds) {
        "alg":"RS256",
       }]
     })";
-  EXPECT_THAT(JwkSetToPublicKeysetHandle(jwt_set).status(), IsOk());
+  EXPECT_THAT(JwkSetToPublicKeysetHandle(jwt_set), IsOk());
 }
 
 TEST_F(JwkSetToPublicKeysetHandleTest, Rs256WithoutKtyFails) {
@@ -586,7 +586,7 @@ TEST_F(JwkSetToPublicKeysetHandleTest, Rs256WithoutKtyFails) {
        "kid":"DfpE4Q"
       }]
     })";
-  EXPECT_THAT(JwkSetToPublicKeysetHandle(jwt_set).status(), Not(IsOk()));
+  EXPECT_THAT(JwkSetToPublicKeysetHandle(jwt_set), Not(IsOk()));
 }
 
 TEST_F(JwkSetToPublicKeysetHandleTest, Rs256WithoutAlgFails) {
@@ -600,7 +600,7 @@ TEST_F(JwkSetToPublicKeysetHandleTest, Rs256WithoutAlgFails) {
        "kid":"DfpE4Q"
       }]
     })";
-  EXPECT_THAT(JwkSetToPublicKeysetHandle(jwt_set).status(), Not(IsOk()));
+  EXPECT_THAT(JwkSetToPublicKeysetHandle(jwt_set), Not(IsOk()));
 }
 
 TEST_F(JwkSetToPublicKeysetHandleTest, Rs256InvalidKtyFails) {
@@ -615,7 +615,7 @@ TEST_F(JwkSetToPublicKeysetHandleTest, Rs256InvalidKtyFails) {
        "kid":"DfpE4Q"
       }]
     })";
-  EXPECT_THAT(JwkSetToPublicKeysetHandle(jwt_set).status(), Not(IsOk()));
+  EXPECT_THAT(JwkSetToPublicKeysetHandle(jwt_set), Not(IsOk()));
 }
 
 TEST_F(JwkSetToPublicKeysetHandleTest, Rs256InvalidAlgFails) {
@@ -630,7 +630,7 @@ TEST_F(JwkSetToPublicKeysetHandleTest, Rs256InvalidAlgFails) {
        "kid":"DfpE4Q"
       }]
     })";
-  EXPECT_THAT(JwkSetToPublicKeysetHandle(jwt_set).status(), Not(IsOk()));
+  EXPECT_THAT(JwkSetToPublicKeysetHandle(jwt_set), Not(IsOk()));
 }
 
 TEST_F(JwkSetToPublicKeysetHandleTest, Rs256InvalidKeyOpsFails) {
@@ -645,7 +645,7 @@ TEST_F(JwkSetToPublicKeysetHandleTest, Rs256InvalidKeyOpsFails) {
        "kid":"DfpE4Q"
       }]
     })";
-  EXPECT_THAT(JwkSetToPublicKeysetHandle(jwt_set).status(), Not(IsOk()));
+  EXPECT_THAT(JwkSetToPublicKeysetHandle(jwt_set), Not(IsOk()));
 }
 
 TEST_F(JwkSetToPublicKeysetHandleTest, Rs256InvalidKeyOpsTypeFails) {
@@ -660,7 +660,7 @@ TEST_F(JwkSetToPublicKeysetHandleTest, Rs256InvalidKeyOpsTypeFails) {
        "kid":"DfpE4Q"
       }]
     })";
-  EXPECT_THAT(JwkSetToPublicKeysetHandle(jwt_set).status(), Not(IsOk()));
+  EXPECT_THAT(JwkSetToPublicKeysetHandle(jwt_set), Not(IsOk()));
 }
 
 TEST_F(JwkSetToPublicKeysetHandleTest, Rs256InvalidUseFails) {
@@ -675,7 +675,7 @@ TEST_F(JwkSetToPublicKeysetHandleTest, Rs256InvalidUseFails) {
        "kid":"DfpE4Q"
       }]
     })";
-  EXPECT_THAT(JwkSetToPublicKeysetHandle(jwt_set).status(), Not(IsOk()));
+  EXPECT_THAT(JwkSetToPublicKeysetHandle(jwt_set), Not(IsOk()));
 }
 
 TEST_F(JwkSetToPublicKeysetHandleTest, Rs256WithoutModulusFails) {
@@ -689,7 +689,7 @@ TEST_F(JwkSetToPublicKeysetHandleTest, Rs256WithoutModulusFails) {
        "kid":"DfpE4Q"
       }]
     })";
-  EXPECT_THAT(JwkSetToPublicKeysetHandle(jwt_set).status(), Not(IsOk()));
+  EXPECT_THAT(JwkSetToPublicKeysetHandle(jwt_set), Not(IsOk()));
 }
 
 TEST_F(JwkSetToPublicKeysetHandleTest, Rs256WithoutExponentFails) {
@@ -703,7 +703,7 @@ TEST_F(JwkSetToPublicKeysetHandleTest, Rs256WithoutExponentFails) {
        "kid":"DfpE4Q"
       }]
     })";
-  EXPECT_THAT(JwkSetToPublicKeysetHandle(jwt_set).status(), Not(IsOk()));
+  EXPECT_THAT(JwkSetToPublicKeysetHandle(jwt_set), Not(IsOk()));
 }
 
 TEST_F(JwkSetToPublicKeysetHandleTest, Es256WithSmallXFails) {
@@ -720,10 +720,10 @@ TEST_F(JwkSetToPublicKeysetHandleTest, Es256WithSmallXFails) {
   // So JwkSetToPublicKeysetHandle succeeds, but GetPrimitive fails.
   util::StatusOr<std::unique_ptr<KeysetHandle>> public_handle =
       JwkSetToPublicKeysetHandle(jwt_set);
-  ASSERT_THAT(public_handle.status(), IsOk());
+  ASSERT_THAT(public_handle, IsOk());
   util::StatusOr<std::unique_ptr<JwtPublicKeyVerify>> verify =
       (*public_handle)->GetPrimitive<JwtPublicKeyVerify>();
-  EXPECT_THAT(verify.status(), Not(IsOk()));
+  EXPECT_THAT(verify, Not(IsOk()));
 }
 
 TEST_F(JwkSetToPublicKeysetHandleTest, Es256WithSmallYFails) {
@@ -740,10 +740,10 @@ TEST_F(JwkSetToPublicKeysetHandleTest, Es256WithSmallYFails) {
   // So JwkSetToPublicKeysetHandle succeeds, but GetPrimitive fails.
   util::StatusOr<std::unique_ptr<KeysetHandle>> public_handle =
       JwkSetToPublicKeysetHandle(jwt_set);
-  ASSERT_THAT(public_handle.status(), IsOk());
+  ASSERT_THAT(public_handle, IsOk());
   util::StatusOr<std::unique_ptr<JwtPublicKeyVerify>> verify =
       (*public_handle)->GetPrimitive<JwtPublicKeyVerify>();
-  EXPECT_THAT(verify.status(), Not(IsOk()));
+  EXPECT_THAT(verify, Not(IsOk()));
 }
 
 TEST_F(JwkSetToPublicKeysetHandleTest, Es256CorrectlySetsKid) {
@@ -758,7 +758,7 @@ TEST_F(JwkSetToPublicKeysetHandleTest, Es256CorrectlySetsKid) {
   })";
   util::StatusOr<std::unique_ptr<KeysetHandle>> public_handle =
       JwkSetToPublicKeysetHandle(jwt_set);
-  EXPECT_THAT(public_handle.status(), IsOk());
+  EXPECT_THAT(public_handle, IsOk());
   const google::crypto::tink::Keyset &keyset =
       CleartextKeysetHandle::GetKeyset(**public_handle);
   ASSERT_THAT(keyset.key_size(), Eq(1));
@@ -780,7 +780,7 @@ TEST_F(JwkSetToPublicKeysetHandleTest, Es256WithoutOptionalFieldsSucceeds) {
   })";
   util::StatusOr<std::unique_ptr<KeysetHandle>> public_handle =
       JwkSetToPublicKeysetHandle(jwt_set);
-  EXPECT_THAT(public_handle.status(), IsOk());
+  EXPECT_THAT(public_handle, IsOk());
 }
 
 TEST_F(JwkSetToPublicKeysetHandleTest, Es256WithoutKtyFails) {
@@ -792,7 +792,7 @@ TEST_F(JwkSetToPublicKeysetHandleTest, Es256WithoutKtyFails) {
     "use":"sig","alg":"ES256","key_ops":["verify"],
     "kid":"EhuduQ"}]
   })";
-  EXPECT_THAT(JwkSetToPublicKeysetHandle(jwt_set).status(), Not(IsOk()));
+  EXPECT_THAT(JwkSetToPublicKeysetHandle(jwt_set), Not(IsOk()));
 }
 
 TEST_F(JwkSetToPublicKeysetHandleTest, Es256WithoutAlgFails) {
@@ -805,7 +805,7 @@ TEST_F(JwkSetToPublicKeysetHandleTest, Es256WithoutAlgFails) {
     "use":"sig","key_ops":["verify"],
     "kid":"EhuduQ"}]
   })";
-  EXPECT_THAT(JwkSetToPublicKeysetHandle(jwt_set).status(), Not(IsOk()));
+  EXPECT_THAT(JwkSetToPublicKeysetHandle(jwt_set), Not(IsOk()));
 }
 
 TEST_F(JwkSetToPublicKeysetHandleTest, Es256WithoutCrvFails) {
@@ -817,7 +817,7 @@ TEST_F(JwkSetToPublicKeysetHandleTest, Es256WithoutCrvFails) {
     "use":"sig","alg":"ES256","key_ops":["verify"],
     "kid":"EhuduQ"}]
   })";
-  EXPECT_THAT(JwkSetToPublicKeysetHandle(jwt_set).status(), Not(IsOk()));
+  EXPECT_THAT(JwkSetToPublicKeysetHandle(jwt_set), Not(IsOk()));
 }
 
 TEST_F(JwkSetToPublicKeysetHandleTest, Es256InvalidKtyFails) {
@@ -830,7 +830,7 @@ TEST_F(JwkSetToPublicKeysetHandleTest, Es256InvalidKtyFails) {
     "use":"sig","alg":"ES256","key_ops":["verify"],
     "kid":"EhuduQ"}]
   })";
-  EXPECT_THAT(JwkSetToPublicKeysetHandle(jwt_set).status(), Not(IsOk()));
+  EXPECT_THAT(JwkSetToPublicKeysetHandle(jwt_set), Not(IsOk()));
 }
 
 TEST_F(JwkSetToPublicKeysetHandleTest, Es256InvalidAlgFails) {
@@ -843,7 +843,7 @@ TEST_F(JwkSetToPublicKeysetHandleTest, Es256InvalidAlgFails) {
     "use":"sig","alg":"ES257","key_ops":["verify"],
     "kid":"EhuduQ"}]
   })";
-  EXPECT_THAT(JwkSetToPublicKeysetHandle(jwt_set).status(), Not(IsOk()));
+  EXPECT_THAT(JwkSetToPublicKeysetHandle(jwt_set), Not(IsOk()));
 }
 
 TEST_F(JwkSetToPublicKeysetHandleTest, Es256InvalidKeyOpsFails) {
@@ -856,7 +856,7 @@ TEST_F(JwkSetToPublicKeysetHandleTest, Es256InvalidKeyOpsFails) {
     "use":"sig","alg":"ES256","key_ops":["verify "],
     "kid":"EhuduQ"}]
   })";
-  EXPECT_THAT(JwkSetToPublicKeysetHandle(jwt_set).status(), Not(IsOk()));
+  EXPECT_THAT(JwkSetToPublicKeysetHandle(jwt_set), Not(IsOk()));
 }
 
 TEST_F(JwkSetToPublicKeysetHandleTest, Es256InvalidKeyOpsTypeFails) {
@@ -869,7 +869,7 @@ TEST_F(JwkSetToPublicKeysetHandleTest, Es256InvalidKeyOpsTypeFails) {
     "use":"sig","alg":"ES256","key_ops":"verify",
     "kid":"EhuduQ"}]
   })";
-  EXPECT_THAT(JwkSetToPublicKeysetHandle(jwt_set).status(), Not(IsOk()));
+  EXPECT_THAT(JwkSetToPublicKeysetHandle(jwt_set), Not(IsOk()));
 }
 
 TEST_F(JwkSetToPublicKeysetHandleTest, Es256InvalidUseFails) {
@@ -882,7 +882,7 @@ TEST_F(JwkSetToPublicKeysetHandleTest, Es256InvalidUseFails) {
     "use":"zag","alg":"ES256","key_ops":["verify"],
     "kid":"EhuduQ"}]
   })";
-  EXPECT_THAT(JwkSetToPublicKeysetHandle(jwt_set).status(), Not(IsOk()));
+  EXPECT_THAT(JwkSetToPublicKeysetHandle(jwt_set), Not(IsOk()));
 }
 
 TEST_F(JwkSetToPublicKeysetHandleTest, Es256WithoutXFails) {
@@ -894,7 +894,7 @@ TEST_F(JwkSetToPublicKeysetHandleTest, Es256WithoutXFails) {
     "use":"sig","alg":"ES256","key_ops":["verify"],
     "kid":"EhuduQ"}]
   })";
-  EXPECT_THAT(JwkSetToPublicKeysetHandle(jwt_set).status(), Not(IsOk()));
+  EXPECT_THAT(JwkSetToPublicKeysetHandle(jwt_set), Not(IsOk()));
 }
 
 TEST_F(JwkSetToPublicKeysetHandleTest, Es256WithoutYFails) {
@@ -906,7 +906,7 @@ TEST_F(JwkSetToPublicKeysetHandleTest, Es256WithoutYFails) {
     "use":"sig","alg":"ES256","key_ops":["verify"],
     "kid":"EhuduQ"}]
   })";
-  EXPECT_THAT(JwkSetToPublicKeysetHandle(jwt_set).status(), Not(IsOk()));
+  EXPECT_THAT(JwkSetToPublicKeysetHandle(jwt_set), Not(IsOk()));
 }
 
 TEST_F(JwkSetToPublicKeysetHandleTest, Es256PrivateKeyFails) {
@@ -914,12 +914,12 @@ TEST_F(JwkSetToPublicKeysetHandleTest, Es256PrivateKeyFails) {
     "keys":[{
     "kty":"EC",
     "crv":"P-256",
-    "alg":"ES256"
+    "alg":"ES256",
     "x":"SVqB4JcUD6lsfvqMr-OKUNUphdNn64Eay60978ZlL74",
     "y":"lf0u0pMj4lGAzZix5u4Cm5CMQIgMNpkwy163wtKYVKI",
     "d":"0g5vAEKzugrXaRbgKG0Tj2qJ5lMP4Bezds1_sTybkfk"
   })";
-  EXPECT_THAT(JwkSetToPublicKeysetHandle(jwt_set).status(), Not(IsOk()));
+  EXPECT_THAT(JwkSetToPublicKeysetHandle(jwt_set), Not(IsOk()));
 }
 
 TEST(JwkSetFromPublicKeysetHandleTest,
@@ -941,22 +941,22 @@ TEST(JwkSetFromPublicKeysetHandleTest,
   })";
   util::StatusOr<std::unique_ptr<KeysetReader>> reader =
       JsonKeysetReader::New(public_keyset_with_tink_output_prefix);
-  ASSERT_THAT(reader.status(), IsOk());
+  ASSERT_THAT(reader, IsOk());
   util::StatusOr<std::unique_ptr<KeysetHandle>> keyset_handle =
       CleartextKeysetHandle::Read(std::move(*reader));
-  ASSERT_THAT(keyset_handle.status(), IsOk());
+  ASSERT_THAT(keyset_handle, IsOk());
 
   util::StatusOr<std::string> jwk_set =
       JwkSetFromPublicKeysetHandle(**keyset_handle);
-  ASSERT_THAT(jwk_set.status(), IsOk());
+  ASSERT_THAT(jwk_set, IsOk());
 
   // Check that jwk_set is equalivalent to kEs256JwkPublicKey.
   util::StatusOr<google::protobuf::Struct> output_struct =
       jwt_internal::JsonStringToProtoStruct(*jwk_set);
-  ASSERT_THAT(output_struct.status(), IsOk());
+  ASSERT_THAT(output_struct, IsOk());
   util::StatusOr<google::protobuf::Struct> expected_struct =
       jwt_internal::JsonStringToProtoStruct(kEs256JwkPublicKey);
-  ASSERT_THAT(expected_struct.status(), IsOk());
+  ASSERT_THAT(expected_struct, IsOk());
 
   std::string differences;
   MessageDifferencer message_differencer;
@@ -984,22 +984,22 @@ TEST(JwkSetFromPublicKeysetHandleTest,
   })";
   util::StatusOr<std::unique_ptr<KeysetReader>> reader =
       JsonKeysetReader::New(public_keyset_with_tink_output_prefix);
-  ASSERT_THAT(reader.status(), IsOk());
+  ASSERT_THAT(reader, IsOk());
   util::StatusOr<std::unique_ptr<KeysetHandle>> keyset_handle =
       CleartextKeysetHandle::Read(std::move(*reader));
-  ASSERT_THAT(keyset_handle.status(), IsOk());
+  ASSERT_THAT(keyset_handle, IsOk());
 
   util::StatusOr<std::string> jwk_set =
       JwkSetFromPublicKeysetHandle(**keyset_handle);
-  ASSERT_THAT(jwk_set.status(), IsOk());
+  ASSERT_THAT(jwk_set, IsOk());
 
   // Check that jwk_set is equalivalent to kRs256JwkPublicKey.
   util::StatusOr<google::protobuf::Struct> output_struct =
       jwt_internal::JsonStringToProtoStruct(*jwk_set);
-  ASSERT_THAT(output_struct.status(), IsOk());
+  ASSERT_THAT(output_struct, IsOk());
   util::StatusOr<google::protobuf::Struct> expected_struct =
       jwt_internal::JsonStringToProtoStruct(kRs256JwkPublicKey);
-  ASSERT_THAT(expected_struct.status(), IsOk());
+  ASSERT_THAT(expected_struct, IsOk());
 
   std::string differences;
   MessageDifferencer message_differencer;
@@ -1026,14 +1026,14 @@ TEST(JwkSetFromPublicKeysetHandleTest, WithLegacyOutputPrefixFails) {
   })";
   util::StatusOr<std::unique_ptr<KeysetReader>> reader =
       JsonKeysetReader::New(public_keyset_with_bad_output_prefix);
-  ASSERT_THAT(reader.status(), IsOk());
+  ASSERT_THAT(reader, IsOk());
   util::StatusOr<std::unique_ptr<KeysetHandle>> keyset_handle =
       CleartextKeysetHandle::Read(std::move(*reader));
-  ASSERT_THAT(keyset_handle.status(), IsOk());
+  ASSERT_THAT(keyset_handle, IsOk());
 
   util::StatusOr<std::string> jwk_set =
       JwkSetFromPublicKeysetHandle(**keyset_handle);
-  EXPECT_THAT(jwk_set.status(), Not(IsOk()));
+  EXPECT_THAT(jwk_set, Not(IsOk()));
 }
 
 TEST(JwkSetFromPublicKeysetHandleTest, WithInvalidKeyMaterialTypeFails) {
@@ -1054,14 +1054,14 @@ TEST(JwkSetFromPublicKeysetHandleTest, WithInvalidKeyMaterialTypeFails) {
   })";
   util::StatusOr<std::unique_ptr<KeysetReader>> reader =
       JsonKeysetReader::New(public_keyset_with_invalid_key_material_type);
-  ASSERT_THAT(reader.status(), IsOk());
+  ASSERT_THAT(reader, IsOk());
   util::StatusOr<std::unique_ptr<KeysetHandle>> keyset_handle =
       CleartextKeysetHandle::Read(std::move(*reader));
-  ASSERT_THAT(keyset_handle.status(), IsOk());
+  ASSERT_THAT(keyset_handle, IsOk());
 
   util::StatusOr<std::string> jwk_set =
       JwkSetFromPublicKeysetHandle(**keyset_handle);
-  EXPECT_THAT(jwk_set.status(), Not(IsOk()));
+  EXPECT_THAT(jwk_set, Not(IsOk()));
 }
 
 TEST(JwkSetFromPublicKeysetHandleTest, WithUnknownTypeUrlFails) {
@@ -1082,14 +1082,14 @@ TEST(JwkSetFromPublicKeysetHandleTest, WithUnknownTypeUrlFails) {
   })";
   util::StatusOr<std::unique_ptr<KeysetReader>> reader =
       JsonKeysetReader::New(public_keyset_with_invalid_key_material_type);
-  ASSERT_THAT(reader.status(), IsOk());
+  ASSERT_THAT(reader, IsOk());
   util::StatusOr<std::unique_ptr<KeysetHandle>> keyset_handle =
       CleartextKeysetHandle::Read(std::move(*reader));
-  ASSERT_THAT(keyset_handle.status(), IsOk());
+  ASSERT_THAT(keyset_handle, IsOk());
 
   util::StatusOr<std::string> jwk_set =
       JwkSetFromPublicKeysetHandle(**keyset_handle);
-  EXPECT_THAT(jwk_set.status(), Not(IsOk()));
+  EXPECT_THAT(jwk_set, Not(IsOk()));
 }
 
 TEST(JwkSetFromPublicKeysetHandleTest, EcdsaWithUnknownAlgorithmFails) {
@@ -1110,14 +1110,14 @@ TEST(JwkSetFromPublicKeysetHandleTest, EcdsaWithUnknownAlgorithmFails) {
 })";
   util::StatusOr<std::unique_ptr<KeysetReader>> reader =
       JsonKeysetReader::New(public_keyset_with_unknown_algorithm);
-  ASSERT_THAT(reader.status(), IsOk());
+  ASSERT_THAT(reader, IsOk());
   util::StatusOr<std::unique_ptr<KeysetHandle>> keyset_handle =
       CleartextKeysetHandle::Read(std::move(*reader));
-  ASSERT_THAT(keyset_handle.status(), IsOk());
+  ASSERT_THAT(keyset_handle, IsOk());
 
   util::StatusOr<std::string> jwk_set =
       JwkSetFromPublicKeysetHandle(**keyset_handle);
-  EXPECT_THAT(jwk_set.status(), Not(IsOk()));
+  EXPECT_THAT(jwk_set, Not(IsOk()));
 }
 
 TEST(JwkSetFromPublicKeysetHandleTest,
@@ -1139,14 +1139,14 @@ TEST(JwkSetFromPublicKeysetHandleTest,
   })";
   util::StatusOr<std::unique_ptr<KeysetReader>> reader =
       JsonKeysetReader::New(public_keyset_with_unknown_algorithm);
-  ASSERT_THAT(reader.status(), IsOk());
+  ASSERT_THAT(reader, IsOk());
   util::StatusOr<std::unique_ptr<KeysetHandle>> keyset_handle =
       CleartextKeysetHandle::Read(std::move(*reader));
-  ASSERT_THAT(keyset_handle.status(), IsOk());
+  ASSERT_THAT(keyset_handle, IsOk());
 
   util::StatusOr<std::string> jwk_set =
       JwkSetFromPublicKeysetHandle(**keyset_handle);
-  EXPECT_THAT(jwk_set.status(), Not(IsOk()));
+  EXPECT_THAT(jwk_set, Not(IsOk()));
 }
 
 }  // namespace

@@ -16,10 +16,15 @@
 
 #include "tink/aead/kms_aead_key_manager.h"
 
+#include <stdlib.h>
+
+#include <memory>
+#include <string>
+
+#include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include "absl/memory/memory.h"
 #include "absl/status/status.h"
-#include "absl/strings/match.h"
-#include "absl/strings/str_cat.h"
 #include "tink/aead.h"
 #include "tink/kms_client.h"
 #include "tink/kms_clients.h"
@@ -29,6 +34,7 @@
 #include "tink/util/test_matchers.h"
 #include "tink/util/test_util.h"
 #include "proto/kms_aead.pb.h"
+#include "proto/tink.pb.h"
 
 namespace crypto {
 namespace tink {
@@ -97,8 +103,8 @@ TEST(KmsAeadKeyManagerTest, CreateKey) {
   KmsAeadKeyFormat key_format;
   key_format.set_key_uri("Some uri");
   auto key_or = KmsAeadKeyManager().CreateKey(key_format);
-  ASSERT_THAT(key_or.status(), IsOk());
-  EXPECT_THAT(key_or.ValueOrDie().params().key_uri(), Eq(key_format.key_uri()));
+  ASSERT_THAT(key_or, IsOk());
+  EXPECT_THAT(key_or.value().params().key_uri(), Eq(key_format.key_uri()));
 }
 
 class KmsAeadKeyManagerCreateTest : public ::testing::Test {
@@ -122,13 +128,13 @@ TEST_F(KmsAeadKeyManagerCreateTest, CreateAead) {
   key.mutable_params()->set_key_uri("prefix1:some_key1");
 
   auto kms_aead = KmsAeadKeyManager().GetPrimitive<Aead>(key);
-  ASSERT_THAT(kms_aead.status(), IsOk());
+  ASSERT_THAT(kms_aead, IsOk());
 
   DummyAead direct_aead("prefix1:some_key1");
 
-  EXPECT_THAT(EncryptThenDecrypt(*kms_aead.ValueOrDie(), direct_aead,
-                                 "plaintext", "aad"),
-              IsOk());
+  EXPECT_THAT(
+      EncryptThenDecrypt(*kms_aead.value(), direct_aead, "plaintext", "aad"),
+      IsOk());
 }
 
 TEST_F(KmsAeadKeyManagerCreateTest, CreateAeadWrongKeyName) {
@@ -137,7 +143,7 @@ TEST_F(KmsAeadKeyManagerCreateTest, CreateAeadWrongKeyName) {
   key.mutable_params()->set_key_uri("prefix1:some_other_key");
 
   auto kms_aead = KmsAeadKeyManager().GetPrimitive<Aead>(key);
-  ASSERT_THAT(kms_aead.status(), Not(IsOk()));
+  ASSERT_THAT(kms_aead, Not(IsOk()));
 }
 
 TEST_F(KmsAeadKeyManagerCreateTest, CreateAeadWrongPrefix) {
@@ -146,7 +152,7 @@ TEST_F(KmsAeadKeyManagerCreateTest, CreateAeadWrongPrefix) {
   key.mutable_params()->set_key_uri("non-existing-prefix:some_key1");
 
   auto kms_aead = KmsAeadKeyManager().GetPrimitive<Aead>(key);
-  ASSERT_THAT(kms_aead.status(), Not(IsOk()));
+  ASSERT_THAT(kms_aead, Not(IsOk()));
 }
 
 TEST_F(KmsAeadKeyManagerCreateTest, CreateAeadUnboundKey) {
@@ -155,13 +161,13 @@ TEST_F(KmsAeadKeyManagerCreateTest, CreateAeadUnboundKey) {
   key.mutable_params()->set_key_uri("prefix2:some_key2");
 
   auto kms_aead = KmsAeadKeyManager().GetPrimitive<Aead>(key);
-  ASSERT_THAT(kms_aead.status(), IsOk());
+  ASSERT_THAT(kms_aead, IsOk());
 
   DummyAead direct_aead("prefix2:some_key2");
 
-  EXPECT_THAT(EncryptThenDecrypt(*kms_aead.ValueOrDie(), direct_aead,
-                                 "plaintext", "aad"),
-              IsOk());
+  EXPECT_THAT(
+      EncryptThenDecrypt(*kms_aead.value(), direct_aead, "plaintext", "aad"),
+      IsOk());
 }
 
 }  // namespace

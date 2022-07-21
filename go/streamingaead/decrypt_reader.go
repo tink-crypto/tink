@@ -17,7 +17,6 @@
 package streamingaead
 
 import (
-	"bytes"
 	"errors"
 	"io"
 
@@ -55,7 +54,7 @@ func (dr *decryptReader) Read(p []byte) (n int, err error) {
 	}
 
 	dr.matchAttempted = true
-	cr := dr.cr
+	ur := &unreader{r: dr.cr}
 
 	// find proper key to decrypt ciphertext
 	for _, e := range entries {
@@ -64,11 +63,8 @@ func (dr *decryptReader) Read(p []byte) (n int, err error) {
 			continue
 		}
 
-		var buf bytes.Buffer
-		tee := io.TeeReader(cr, &buf)
-
 		read := func() (io.Reader, int, error) {
-			r, err := sa.NewDecryptingReader(tee, dr.aad)
+			r, err := sa.NewDecryptingReader(ur, dr.aad)
 			if err != nil {
 				return nil, 0, err
 			}
@@ -82,10 +78,50 @@ func (dr *decryptReader) Read(p []byte) (n int, err error) {
 		r, n, err := read()
 		if err == nil {
 			dr.mr = r
+			ur.disable()
 			return n, nil
 		}
 
-		cr = io.MultiReader(&buf, cr)
+		ur.unread()
 	}
 	return 0, errKeyNotFound
+}
+
+// unreader wraps a reader and keeps a copy of everything that's read so it can
+// be unread and read again. When no additional unreads are needed, the buffer
+// can be disabled and the memory released.
+type unreader struct {
+	r        io.Reader
+	buf      []byte
+	pos      int
+	disabled bool
+}
+
+func (u *unreader) Read(buf []byte) (int, error) {
+	if len(u.buf) != u.pos {
+		n := copy(buf, u.buf[u.pos:])
+		u.pos += n
+		return n, nil
+	}
+	n, err := u.r.Read(buf)
+	if u.disabled {
+		u.buf = nil
+		u.pos = 0
+	} else {
+		u.buf = append(u.buf, buf[:n]...)
+		u.pos = len(u.buf)
+	}
+	return n, err
+}
+
+// unread starts the reader over again. A copy of all read data will be returned
+// by `Read()` before the wrapped reader is read from again.
+func (u *unreader) unread() {
+	u.pos = 0
+}
+
+// disable ensures the buffer is released for garbage collection once it's no
+// longer needed.
+func (u *unreader) disable() {
+	u.disabled = true
 }

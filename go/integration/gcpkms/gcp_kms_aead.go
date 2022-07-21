@@ -40,12 +40,12 @@ func newGCPAEAD(keyURI string, kms *cloudkms.Service) tink.AEAD {
 	}
 }
 
-// Encrypt AEAD encrypts the plaintext data and uses addtionaldata from authentication.
-func (a *gcpAEAD) Encrypt(plaintext, additionalData []byte) ([]byte, error) {
+// Encrypt encrypts the plaintext with associatedData.
+func (a *gcpAEAD) Encrypt(plaintext, associatedData []byte) ([]byte, error) {
 
 	req := &cloudkms.EncryptRequest{
 		Plaintext:                   base64.URLEncoding.EncodeToString(plaintext),
-		AdditionalAuthenticatedData: base64.URLEncoding.EncodeToString(additionalData),
+		AdditionalAuthenticatedData: base64.URLEncoding.EncodeToString(associatedData),
 	}
 	resp, err := a.kms.Projects.Locations.KeyRings.CryptoKeys.Encrypt(a.keyURI, req).Do()
 	if err != nil {
@@ -55,12 +55,12 @@ func (a *gcpAEAD) Encrypt(plaintext, additionalData []byte) ([]byte, error) {
 	return base64.StdEncoding.DecodeString(resp.Ciphertext)
 }
 
-// Decrypt AEAD decrypts the data and verified the additional data.
-func (a *gcpAEAD) Decrypt(ciphertext, additionalData []byte) ([]byte, error) {
+// Decrypt decrypts ciphertext with with associatedData.
+func (a *gcpAEAD) Decrypt(ciphertext, associatedData []byte) ([]byte, error) {
 
 	req := &cloudkms.DecryptRequest{
 		Ciphertext:                  base64.URLEncoding.EncodeToString(ciphertext),
-		AdditionalAuthenticatedData: base64.URLEncoding.EncodeToString(additionalData),
+		AdditionalAuthenticatedData: base64.URLEncoding.EncodeToString(associatedData),
 	}
 	resp, err := a.kms.Projects.Locations.KeyRings.CryptoKeys.Decrypt(a.keyURI, req).Do()
 	if err != nil {

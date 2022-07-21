@@ -48,17 +48,18 @@ namespace {
 
 constexpr int kMinKeySizeInBytes = 32;
 
-Status ValidateHmacAlgorithm(const JwtHmacAlgorithm& algorithm) {
+StatusOr<int> MinimumKeySize(const JwtHmacAlgorithm& algorithm) {
   switch (algorithm) {
     case JwtHmacAlgorithm::HS256:
+      return 32;
     case JwtHmacAlgorithm::HS384:
+      return 48;
     case JwtHmacAlgorithm::HS512:
-      return util::OkStatus();
+      return 64;
     default:
       return Status(absl::StatusCode::kInvalidArgument,
                     "Unsupported algorithm.");
   }
-  return util::OkStatus();
 }
 
 }  // namespace
@@ -83,21 +84,29 @@ StatusOr<JwtHmacKey> RawJwtHmacKeyManager::DeriveKey(
 Status RawJwtHmacKeyManager::ValidateKey(const JwtHmacKey& key) const {
   Status status = ValidateVersion(key.version(), get_version());
   if (!status.ok()) return status;
-  if (key.key_value().size() < kMinKeySizeInBytes) {
+  StatusOr<int> min_key_size = MinimumKeySize(key.algorithm());
+  if (!min_key_size.ok()) {
+    return min_key_size.status();
+  }
+  if (key.key_value().size() < *min_key_size) {
     return util::Status(absl::StatusCode::kInvalidArgument,
                         "Invalid JwtHmacKey: key_value is too short.");
   }
-  return ValidateHmacAlgorithm(key.algorithm());
+  return util::OkStatus();
 }
 
 // static
 Status RawJwtHmacKeyManager::ValidateKeyFormat(
     const JwtHmacKeyFormat& key_format) const {
-  if (key_format.key_size() < kMinKeySizeInBytes) {
+  StatusOr<int> min_key_size = MinimumKeySize(key_format.algorithm());
+  if (!min_key_size.ok()) {
+    return min_key_size.status();
+  }
+  if (key_format.key_size() < *min_key_size) {
     return util::Status(absl::StatusCode::kInvalidArgument,
                         "Invalid HmacKeyFormat: key_size is too small.");
   }
-  return ValidateHmacAlgorithm(key_format.algorithm());
+  return util::OkStatus();
 }
 
 }  // namespace jwt_internal

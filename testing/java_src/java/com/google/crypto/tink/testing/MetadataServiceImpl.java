@@ -17,9 +17,9 @@
 package com.google.crypto.tink.testing;
 
 import com.google.crypto.tink.Version;
-import com.google.crypto.tink.proto.testing.MetadataGrpc.MetadataImplBase;
-import com.google.crypto.tink.proto.testing.ServerInfoRequest;
-import com.google.crypto.tink.proto.testing.ServerInfoResponse;
+import com.google.crypto.tink.testing.proto.MetadataGrpc.MetadataImplBase;
+import com.google.crypto.tink.testing.proto.ServerInfoRequest;
+import com.google.crypto.tink.testing.proto.ServerInfoResponse;
 import io.grpc.stub.StreamObserver;
 import java.security.GeneralSecurityException;
 

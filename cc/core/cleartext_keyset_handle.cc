@@ -17,6 +17,8 @@
 #include "tink/cleartext_keyset_handle.h"
 
 #include <istream>
+#include <memory>
+#include <utility>
 
 #include "absl/status/status.h"
 #include "tink/keyset_handle.h"
@@ -42,7 +44,7 @@ util::StatusOr<std::unique_ptr<KeysetHandle>> CleartextKeysetHandle::Read(
                      keyset_result.status().message());
   }
   std::unique_ptr<KeysetHandle> handle(
-      new KeysetHandle(std::move(keyset_result.ValueOrDie())));
+      new KeysetHandle(std::move(keyset_result.value())));
   return std::move(handle);
 }
 

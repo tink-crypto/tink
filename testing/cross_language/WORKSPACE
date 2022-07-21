@@ -3,11 +3,6 @@ workspace(name = "testing_python")
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
 local_repository(
-    name = "tink_base",
-    path = "../..",
-)
-
-local_repository(
     name = "tink_py",
     path = "../../python",
 )
@@ -15,6 +10,16 @@ local_repository(
 local_repository(
     name = "tink_cc",
     path = "../../cc",
+)
+
+local_repository(
+    name = "tink_cc_awskms",
+    path = "../../cc/integration/awskms",
+)
+
+local_repository(
+    name = "tink_cc_gcpkms",
+    path = "../../cc/integration/gcpkms",
 )
 
 # NOTE: The Python dependencies have to be loaded first, as they rely on a
@@ -25,20 +30,23 @@ tink_py_deps()
 load("@tink_py//:tink_py_deps_init.bzl", "tink_py_deps_init")
 tink_py_deps_init("tink_py")
 
-load("@tink_py_pip_deps//:requirements.bzl", tink_pip_install = "pip_install")
-tink_pip_install()
-
-load("@tink_base//:tink_base_deps.bzl", "tink_base_deps")
-tink_base_deps()
-
-load("@tink_base//:tink_base_deps_init.bzl", "tink_base_deps_init")
-tink_base_deps_init()
-
 load("@tink_cc//:tink_cc_deps.bzl", "tink_cc_deps")
 tink_cc_deps()
 
 load("@tink_cc//:tink_cc_deps_init.bzl", "tink_cc_deps_init")
 tink_cc_deps_init()
+
+load("@tink_cc_awskms//:tink_cc_awskms_deps.bzl", "tink_cc_awskms_deps")
+
+tink_cc_awskms_deps()
+
+load("@tink_cc_gcpkms//:tink_cc_gcpkms_deps.bzl", "tink_cc_gcpkms_deps")
+
+tink_cc_gcpkms_deps()
+
+load("@tink_cc_gcpkms//:tink_cc_gcpkms_deps_init.bzl", "tink_cc_gcpkms_deps_init")
+
+tink_cc_gcpkms_deps_init()
 
 # Release from 2021-10-26
 http_archive(
@@ -77,25 +85,14 @@ load("@com_github_grpc_grpc//bazel:grpc_deps.bzl", "grpc_deps")
 
 grpc_deps()
 
-load("@rules_python//python:repositories.bzl", "py_repositories")
-py_repositories()
+load("@rules_python//python:pip.bzl", "pip_install")
 
-load("@rules_python//python:pip.bzl", "pip_repositories", "pip3_import")
-pip_repositories()
-
-pip3_import(
-   name = "pip_deps",
-   requirements = "//:requirements.txt",
+pip_install(
+    name = "pip_deps",
+    requirements = "//:requirements.txt",
 )
 
-load("@pip_deps//:requirements.bzl", "pip_install")
-pip_install()
-
-pip3_import(
+pip_install(
     name = "rules_proto_grpc_py3_deps",
     requirements = "@rules_proto_grpc//python:requirements.txt",
 )
-
-load("@rules_proto_grpc_py3_deps//:requirements.bzl", pip3_install="pip_install")
-pip3_install()
-

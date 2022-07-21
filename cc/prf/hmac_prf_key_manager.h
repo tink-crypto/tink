@@ -18,6 +18,7 @@
 
 #include <algorithm>
 #include <memory>
+#include <string>
 #include <vector>
 
 #include "absl/memory/memory.h"

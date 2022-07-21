@@ -64,17 +64,16 @@ TEST_F(RsaPssSignBoringsslTest, EncodesPss) {
                                    /*salt_length=*/32};
 
   auto signer_or = RsaSsaPssSignBoringSsl::New(private_key_, params);
-  ASSERT_THAT(signer_or.status(), IsOk());
+  ASSERT_THAT(signer_or, IsOk());
 
-  auto signature_or = signer_or.ValueOrDie()->Sign("testdata");
-  ASSERT_THAT(signature_or.status(), IsOk());
-  EXPECT_THAT(signature_or.ValueOrDie(), Not(IsEmpty()));
+  auto signature_or = signer_or.value()->Sign("testdata");
+  ASSERT_THAT(signature_or, IsOk());
+  EXPECT_THAT(signature_or.value(), Not(IsEmpty()));
 
   auto verifier_or = RsaSsaPssVerifyBoringSsl::New(public_key_, params);
-  ASSERT_THAT(verifier_or.status(), IsOk());
-  EXPECT_THAT(
-      verifier_or.ValueOrDie()->Verify(signature_or.ValueOrDie(), "testdata"),
-      IsOk());
+  ASSERT_THAT(verifier_or, IsOk());
+  EXPECT_THAT(verifier_or.value()->Verify(signature_or.value(), "testdata"),
+              IsOk());
 }
 
 TEST_F(RsaPssSignBoringsslTest, EncodesPssWithSeparateHashes) {
@@ -87,17 +86,16 @@ TEST_F(RsaPssSignBoringsslTest, EncodesPssWithSeparateHashes) {
                                    /*salt_length=*/32};
 
   auto signer_or = RsaSsaPssSignBoringSsl::New(private_key_, params);
-  ASSERT_THAT(signer_or.status(), IsOk());
+  ASSERT_THAT(signer_or, IsOk());
 
-  auto signature_or = signer_or.ValueOrDie()->Sign("testdata");
-  ASSERT_THAT(signature_or.status(), IsOk());
-  EXPECT_THAT(signature_or.ValueOrDie(), Not(IsEmpty()));
+  auto signature_or = signer_or.value()->Sign("testdata");
+  ASSERT_THAT(signature_or, IsOk());
+  EXPECT_THAT(signature_or.value(), Not(IsEmpty()));
 
   auto verifier_or = RsaSsaPssVerifyBoringSsl::New(public_key_, params);
-  ASSERT_THAT(verifier_or.status(), IsOk());
-  EXPECT_THAT(
-      verifier_or.ValueOrDie()->Verify(signature_or.ValueOrDie(), "testdata"),
-      IsOk());
+  ASSERT_THAT(verifier_or, IsOk());
+  EXPECT_THAT(verifier_or.value()->Verify(signature_or.value(), "testdata"),
+              IsOk());
 }
 
 TEST_F(RsaPssSignBoringsslTest, RejectsInvalidPaddingHash) {

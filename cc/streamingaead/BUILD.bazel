@@ -55,6 +55,7 @@ cc_library(
         "//proto:aes_ctr_hmac_streaming_cc_proto",
         "//proto:aes_gcm_hkdf_streaming_cc_proto",
         "//proto:common_cc_proto",
+        "//proto:hmac_cc_proto",
         "//proto:tink_cc_proto",
     ],
 )
@@ -97,6 +98,7 @@ cc_library(
         "//:core/key_type_manager",
         "//:streaming_aead",
         "//proto:aes_ctr_hmac_streaming_cc_proto",
+        "//proto:hmac_cc_proto",
         "//proto:tink_cc_proto",
         "//subtle:aes_ctr_hmac_streaming",
         "//subtle:random",

@@ -75,17 +75,17 @@ TEST_F(MacFactoryTest, testPrimitive) {
   // Prepare a Keyset.
   Keyset keyset;
   uint32_t key_id_1 = 1234543;
-  auto new_key = std::move(key_factory.NewKey(key_format).ValueOrDie());
+  auto new_key = std::move(key_factory.NewKey(key_format).value());
   AddTinkKey(key_type, key_id_1, *new_key, KeyStatusType::ENABLED,
              KeyData::SYMMETRIC, &keyset);
 
   uint32_t key_id_2 = 726329;
-  new_key = std::move(key_factory.NewKey(key_format).ValueOrDie());
+  new_key = std::move(key_factory.NewKey(key_format).value());
   AddRawKey(key_type, key_id_2, *new_key, KeyStatusType::ENABLED,
             KeyData::SYMMETRIC, &keyset);
 
   uint32_t key_id_3 = 7213743;
-  new_key = std::move(key_factory.NewKey(key_format).ValueOrDie());
+  new_key = std::move(key_factory.NewKey(key_format).value());
   AddTinkKey(key_type, key_id_3, *new_key, KeyStatusType::ENABLED,
              KeyData::SYMMETRIC, &keyset);
 
@@ -98,16 +98,16 @@ TEST_F(MacFactoryTest, testPrimitive) {
   auto mac_result =
       MacFactory::GetPrimitive(*TestKeysetHandle::GetKeysetHandle(keyset));
   EXPECT_TRUE(mac_result.ok()) << mac_result.status();
-  auto mac = std::move(mac_result.ValueOrDie());
+  auto mac = std::move(mac_result.value());
 
   // Test the resulting Mac-instance.
   std::string data = "some_data_for_mac";
 
   auto compute_mac_result = mac->ComputeMac(data);
   EXPECT_TRUE(compute_mac_result.ok()) << compute_mac_result.status();
-  std::string mac_value = compute_mac_result.ValueOrDie();
+  std::string mac_value = compute_mac_result.value();
   std::string prefix =
-      CryptoFormat::GetOutputPrefix(KeyInfoFromKey(keyset.key(2))).ValueOrDie();
+      CryptoFormat::GetOutputPrefix(KeyInfoFromKey(keyset.key(2))).value();
   EXPECT_PRED_FORMAT2(testing::IsSubstring, prefix, mac_value);
 
   util::Status status = mac->VerifyMac(mac_value, data);
@@ -126,9 +126,9 @@ TEST_F(MacFactoryTest, testPrimitive) {
                       std::string(status.message()));
 
   // Create raw MAC value with 2nd key, and verify with Mac-instance.
-  auto raw_mac = std::move(
-      key_manager->GetPrimitive(keyset.key(1).key_data()).ValueOrDie());
-  std::string raw_mac_value = raw_mac->ComputeMac(data).ValueOrDie();
+  auto raw_mac =
+      std::move(key_manager->GetPrimitive(keyset.key(1).key_data()).value());
+  std::string raw_mac_value = raw_mac->ComputeMac(data).value();
   status = mac->VerifyMac(raw_mac_value, data);
   EXPECT_TRUE(status.ok()) << status;
 }

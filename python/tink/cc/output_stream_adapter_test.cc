@@ -18,6 +18,8 @@
 
 #include <algorithm>
 #include <sstream>
+#include <string>
+#include <utility>
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
@@ -46,7 +48,7 @@ TEST(OutputStreamAdapterTest, Basic) {
   auto adapter = GetOutputStreamAdapter(-1, &buffer_ref);
   auto write_result = adapter->Write("something");
   ASSERT_TRUE(write_result.status().ok());
-  EXPECT_EQ(write_result.ValueOrDie(), 9);
+  EXPECT_EQ(write_result.value(), 9);
   EXPECT_TRUE(adapter->Close().ok());
   EXPECT_EQ(buffer_ref->str(), "something");
 }
@@ -56,13 +58,13 @@ TEST(OutputStreamAdapterTest, MultipleWrite) {
   auto adapter = GetOutputStreamAdapter(-1, &buffer_ref);
   auto write_result = adapter->Write("something");
   ASSERT_TRUE(write_result.status().ok());
-  EXPECT_EQ(write_result.ValueOrDie(), 9);
+  EXPECT_EQ(write_result.value(), 9);
   write_result = adapter->Write("123");
   ASSERT_TRUE(write_result.status().ok());
-  EXPECT_EQ(write_result.ValueOrDie(), 3);
+  EXPECT_EQ(write_result.value(), 3);
   write_result = adapter->Write("456");
   ASSERT_TRUE(write_result.status().ok());
-  EXPECT_EQ(write_result.ValueOrDie(), 3);
+  EXPECT_EQ(write_result.value(), 3);
   EXPECT_TRUE(adapter->Close().ok());
   EXPECT_EQ(buffer_ref->str(), "something123456");
 }
@@ -85,7 +87,7 @@ TEST(OutputStreamAdapterTest, MultipleNext) {
   std::string data = subtle::Random::GetRandomBytes(35);
   auto write_result = adapter->Write(data);
   ASSERT_TRUE(write_result.status().ok());
-  EXPECT_EQ(write_result.ValueOrDie(), 35);
+  EXPECT_EQ(write_result.value(), 35);
   EXPECT_TRUE(adapter->Close().ok());
   EXPECT_EQ(buffer_ref->str(), data);
 }

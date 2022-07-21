@@ -16,6 +16,8 @@
 
 #include "tink/hybrid/hybrid_key_templates.h"
 
+#include <string>
+
 #include "absl/strings/string_view.h"
 #include "tink/aead/aead_key_templates.h"
 #include "tink/daead/deterministic_aead_key_templates.h"
@@ -223,10 +225,26 @@ const KeyTemplate& HybridKeyTemplates::HpkeX25519HkdfSha256Aes128Gcm() {
 }
 
 // static
+const KeyTemplate& HybridKeyTemplates::HpkeX25519HkdfSha256Aes128GcmRaw() {
+  static const KeyTemplate* key_template = NewHpkeKeyTemplate(
+      HpkeKem::DHKEM_X25519_HKDF_SHA256, HpkeKdf::HKDF_SHA256,
+      HpkeAead::AES_128_GCM, OutputPrefixType::RAW);
+  return *key_template;
+}
+
+// static
 const KeyTemplate& HybridKeyTemplates::HpkeX25519HkdfSha256Aes256Gcm() {
   static const KeyTemplate* key_template = NewHpkeKeyTemplate(
       HpkeKem::DHKEM_X25519_HKDF_SHA256, HpkeKdf::HKDF_SHA256,
       HpkeAead::AES_256_GCM, OutputPrefixType::TINK);
+  return *key_template;
+}
+
+// static
+const KeyTemplate& HybridKeyTemplates::HpkeX25519HkdfSha256Aes256GcmRaw() {
+  static const KeyTemplate* key_template = NewHpkeKeyTemplate(
+      HpkeKem::DHKEM_X25519_HKDF_SHA256, HpkeKdf::HKDF_SHA256,
+      HpkeAead::AES_256_GCM, OutputPrefixType::RAW);
   return *key_template;
 }
 
@@ -236,6 +254,15 @@ HybridKeyTemplates::HpkeX25519HkdfSha256ChaCha20Poly1305() {
   static const KeyTemplate* key_template = NewHpkeKeyTemplate(
       HpkeKem::DHKEM_X25519_HKDF_SHA256, HpkeKdf::HKDF_SHA256,
       HpkeAead::CHACHA20_POLY1305, OutputPrefixType::TINK);
+  return *key_template;
+}
+
+// static
+const KeyTemplate&
+HybridKeyTemplates::HpkeX25519HkdfSha256ChaCha20Poly1305Raw() {
+  static const KeyTemplate* key_template = NewHpkeKeyTemplate(
+      HpkeKem::DHKEM_X25519_HKDF_SHA256, HpkeKdf::HKDF_SHA256,
+      HpkeAead::CHACHA20_POLY1305, OutputPrefixType::RAW);
   return *key_template;
 }
 

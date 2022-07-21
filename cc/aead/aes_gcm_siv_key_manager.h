@@ -16,21 +16,25 @@
 #ifndef TINK_AEAD_AES_GCM_SIV_KEY_MANAGER_H_
 #define TINK_AEAD_AES_GCM_SIV_KEY_MANAGER_H_
 
+#include <stdint.h>
+
+#include <memory>
 #include <string>
 
 #include "absl/memory/memory.h"
 #include "absl/strings/str_cat.h"
 #include "tink/aead.h"
 #include "tink/core/key_type_manager.h"
+#include "tink/core/template_util.h"
 #include "tink/subtle/aes_gcm_siv_boringssl.h"
 #include "tink/subtle/random.h"
 #include "tink/util/constants.h"
-#include "tink/util/protobuf_helper.h"
 #include "tink/util/secret_data.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "tink/util/validation.h"
 #include "proto/aes_gcm_siv.pb.h"
+#include "proto/tink.pb.h"
 
 namespace crypto {
 namespace tink {

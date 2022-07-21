@@ -22,7 +22,10 @@ import (
 	"github.com/google/tink/go/core/cryptofmt"
 	"github.com/google/tink/go/core/primitiveset"
 	"github.com/google/tink/go/core/registry"
+	"github.com/google/tink/go/internal/internalregistry"
+	"github.com/google/tink/go/internal/monitoringutil"
 	"github.com/google/tink/go/keyset"
+	"github.com/google/tink/go/monitoring"
 	"github.com/google/tink/go/tink"
 )
 
@@ -45,7 +48,9 @@ func NewWithKeyManager(h *keyset.Handle, km registry.KeyManager) (tink.AEAD, err
 // wrappedAead is an AEAD implementation that uses the underlying primitive set for encryption
 // and decryption.
 type wrappedAead struct {
-	ps *primitiveset.PrimitiveSet
+	ps        *primitiveset.PrimitiveSet
+	encLogger monitoring.Logger
+	decLogger monitoring.Logger
 }
 
 func newWrappedAead(ps *primitiveset.PrimitiveSet) (*wrappedAead, error) {
@@ -60,38 +65,64 @@ func newWrappedAead(ps *primitiveset.PrimitiveSet) (*wrappedAead, error) {
 			}
 		}
 	}
-
-	ret := new(wrappedAead)
-	ret.ps = ps
-
-	return ret, nil
+	wa := &wrappedAead{ps: ps}
+	client := internalregistry.GetMonitoringClient()
+	if client == nil {
+		return wa, nil
+	}
+	keysetInfo, err := monitoringutil.KeysetInfoFromPrimitiveSet(ps)
+	if err != nil {
+		return nil, err
+	}
+	wa.encLogger, err = client.NewLogger(&monitoring.Context{
+		Primitive:   "aead",
+		APIFunction: "encrypt",
+		KeysetInfo:  keysetInfo,
+	})
+	if err != nil {
+		return nil, err
+	}
+	wa.decLogger, err = client.NewLogger(&monitoring.Context{
+		Primitive:   "aead",
+		APIFunction: "decrypt",
+		KeysetInfo:  keysetInfo,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return wa, nil
 }
 
-// Encrypt encrypts the given plaintext with the given additional authenticated data.
+// Encrypt encrypts the given plaintext with the given associatedData.
 // It returns the concatenation of the primary's identifier and the ciphertext.
-func (a *wrappedAead) Encrypt(pt, ad []byte) ([]byte, error) {
+func (a *wrappedAead) Encrypt(plaintext, associatedData []byte) ([]byte, error) {
 	primary := a.ps.Primary
 	p, ok := (primary.Primitive).(tink.AEAD)
 	if !ok {
 		return nil, fmt.Errorf("aead_factory: not an AEAD primitive")
 	}
-
-	ct, err := p.Encrypt(pt, ad)
+	ct, err := p.Encrypt(plaintext, associatedData)
 	if err != nil {
+		if a.encLogger != nil {
+			a.encLogger.LogFailure()
+		}
 		return nil, err
+	}
+	if a.encLogger != nil {
+		a.encLogger.Log(primary.KeyID, len(plaintext))
 	}
 	return append([]byte(primary.Prefix), ct...), nil
 }
 
 // Decrypt decrypts the given ciphertext and authenticates it with the given
-// additional authenticated data. It returns the corresponding plaintext if the
+// associatedData. It returns the corresponding plaintext if the
 // ciphertext is authenticated.
-func (a *wrappedAead) Decrypt(ct, ad []byte) ([]byte, error) {
+func (a *wrappedAead) Decrypt(ciphertext, associatedData []byte) ([]byte, error) {
 	// try non-raw keys
 	prefixSize := cryptofmt.NonRawPrefixSize
-	if len(ct) > prefixSize {
-		prefix := ct[:prefixSize]
-		ctNoPrefix := ct[prefixSize:]
+	if len(ciphertext) > prefixSize {
+		prefix := ciphertext[:prefixSize]
+		ctNoPrefix := ciphertext[prefixSize:]
 		entries, err := a.ps.EntriesForPrefix(string(prefix))
 		if err == nil {
 			for i := 0; i < len(entries); i++ {
@@ -100,8 +131,11 @@ func (a *wrappedAead) Decrypt(ct, ad []byte) ([]byte, error) {
 					return nil, fmt.Errorf("aead_factory: not an AEAD primitive")
 				}
 
-				pt, err := p.Decrypt(ctNoPrefix, ad)
+				pt, err := p.Decrypt(ctNoPrefix, associatedData)
 				if err == nil {
+					if a.decLogger != nil {
+						a.decLogger.Log(entries[i].KeyID, len(ctNoPrefix))
+					}
 					return pt, nil
 				}
 			}
@@ -116,12 +150,18 @@ func (a *wrappedAead) Decrypt(ct, ad []byte) ([]byte, error) {
 				return nil, fmt.Errorf("aead_factory: not an AEAD primitive")
 			}
 
-			pt, err := p.Decrypt(ct, ad)
+			pt, err := p.Decrypt(ciphertext, associatedData)
 			if err == nil {
+				if a.decLogger != nil {
+					a.decLogger.Log(entries[i].KeyID, len(ciphertext))
+				}
 				return pt, nil
 			}
 		}
 	}
 	// nothing worked
+	if a.decLogger != nil {
+		a.decLogger.LogFailure()
+	}
 	return nil, fmt.Errorf("aead_factory: decryption failed")
 }

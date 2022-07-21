@@ -20,7 +20,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertThrows;
 
 import com.google.crypto.tink.KeyTemplate;
-import com.google.crypto.tink.KeyTypeManager;
+import com.google.crypto.tink.internal.KeyTypeManager;
 import com.google.crypto.tink.proto.AesGcmKey;
 import com.google.crypto.tink.proto.AesGcmKeyFormat;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;

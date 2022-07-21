@@ -48,34 +48,34 @@ TEST_P(JwtMacKeyTemplatesTest, CreateComputeVerify) {
 
   util::StatusOr<std::unique_ptr<crypto::tink::KeysetHandle>> keyset_handle =
       KeysetHandle::GenerateNew(key_template);
-  ASSERT_THAT(keyset_handle.status(), IsOk());
+  ASSERT_THAT(keyset_handle, IsOk());
   util::StatusOr<std::unique_ptr<crypto::tink::JwtMac>> jwt_mac =
       (*keyset_handle)->GetPrimitive<JwtMac>();
-  ASSERT_THAT(jwt_mac.status(), IsOk());
+  ASSERT_THAT(jwt_mac, IsOk());
 
   util::StatusOr<RawJwt> raw_jwt =
       RawJwtBuilder().SetIssuer("issuer").WithoutExpiration().Build();
-  ASSERT_THAT(raw_jwt.status(), IsOk());
+  ASSERT_THAT(raw_jwt, IsOk());
 
   util::StatusOr<std::string> compact =
       (*jwt_mac)->ComputeMacAndEncode(*raw_jwt);
-  ASSERT_THAT(compact.status(), IsOk());
+  ASSERT_THAT(compact, IsOk());
 
   util::StatusOr<JwtValidator> validator = JwtValidatorBuilder()
                                                .ExpectIssuer("issuer")
                                                .AllowMissingExpiration()
                                                .Build();
-  ASSERT_THAT(validator.status(), IsOk());
+  ASSERT_THAT(validator, IsOk());
   util::StatusOr<VerifiedJwt> verified_jwt =
       (*jwt_mac)->VerifyMacAndDecode(*compact, *validator);
-  ASSERT_THAT(verified_jwt.status(), IsOk());
+  ASSERT_THAT(verified_jwt, IsOk());
   EXPECT_THAT(verified_jwt->GetIssuer(), test::IsOkAndHolds("issuer"));
 
   util::StatusOr<JwtValidator> validator2 = JwtValidatorBuilder()
                                                 .ExpectIssuer("unknown")
                                                 .AllowMissingExpiration()
                                                 .Build();
-  ASSERT_THAT(validator2.status(), IsOk());
+  ASSERT_THAT(validator2, IsOk());
   EXPECT_FALSE((*jwt_mac)->VerifyMacAndDecode(*compact, *validator2).ok());
 }
 
@@ -93,39 +93,39 @@ TEST_P(JwtSignatureKeyTemplatesTest, CreateComputeVerify) {
 
   util::StatusOr<std::unique_ptr<KeysetHandle>> private_handle =
       KeysetHandle::GenerateNew(key_template);
-  ASSERT_THAT(private_handle.status(), IsOk());
+  ASSERT_THAT(private_handle, IsOk());
   util::StatusOr<std::unique_ptr<JwtPublicKeySign>> sign =
       (*private_handle)->GetPrimitive<JwtPublicKeySign>();
-  ASSERT_THAT(sign.status(), IsOk());
+  ASSERT_THAT(sign, IsOk());
   util::StatusOr<std::unique_ptr<KeysetHandle>> public_handle =
       (*private_handle)->GetPublicKeysetHandle();
-  ASSERT_THAT(public_handle.status(), IsOk());
+  ASSERT_THAT(public_handle, IsOk());
   util::StatusOr<std::unique_ptr<JwtPublicKeyVerify>> verify =
       (*public_handle)->GetPrimitive<JwtPublicKeyVerify>();
-  ASSERT_THAT(verify.status(), IsOk());
+  ASSERT_THAT(verify, IsOk());
 
   util::StatusOr<RawJwt> raw_jwt =
       RawJwtBuilder().SetIssuer("issuer").WithoutExpiration().Build();
-  ASSERT_THAT(raw_jwt.status(), IsOk());
+  ASSERT_THAT(raw_jwt, IsOk());
 
   util::StatusOr<std::string> compact = (*sign)->SignAndEncode(*raw_jwt);
-  ASSERT_THAT(compact.status(), IsOk());
+  ASSERT_THAT(compact, IsOk());
 
   util::StatusOr<JwtValidator> validator = JwtValidatorBuilder()
                                .ExpectIssuer("issuer")
                                .AllowMissingExpiration()
                                .Build();
-  ASSERT_THAT(validator.status(), IsOk());
+  ASSERT_THAT(validator, IsOk());
   util::StatusOr<VerifiedJwt> verified_jwt =
       (*verify)->VerifyAndDecode(*compact, *validator);
-  ASSERT_THAT(verified_jwt.status(), IsOk());
+  ASSERT_THAT(verified_jwt, IsOk());
   EXPECT_THAT(verified_jwt->GetIssuer(), test::IsOkAndHolds("issuer"));
 
   util::StatusOr<JwtValidator>  validator2 = JwtValidatorBuilder()
                                 .ExpectIssuer("unknown")
                                 .AllowMissingExpiration()
                                 .Build();
-  ASSERT_THAT(validator.status(), IsOk());
+  ASSERT_THAT(validator, IsOk());
   EXPECT_FALSE((*verify)->VerifyAndDecode(*compact, *validator2).ok());
 }
 

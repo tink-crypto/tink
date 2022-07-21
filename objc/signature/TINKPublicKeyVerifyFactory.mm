@@ -43,7 +43,7 @@
     return nil;
   }
   id<TINKPublicKeyVerify> publicKeyVerify =
-      [[TINKPublicKeyVerifyInternal alloc] initWithCCPublicKeyVerify:std::move(st.ValueOrDie())];
+      [[TINKPublicKeyVerifyInternal alloc] initWithCCPublicKeyVerify:std::move(st.value())];
   if (!publicKeyVerify) {
     if (error) {
       *error = TINKStatusToError(crypto::tink::util::Status(

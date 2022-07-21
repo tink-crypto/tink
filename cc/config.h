@@ -17,6 +17,8 @@
 #ifndef TINK_CONFIG_H_
 #define TINK_CONFIG_H_
 
+#include <string>
+
 #include "absl/status/status.h"
 #include "absl/strings/ascii.h"
 #include "tink/aead/aead_config.h"

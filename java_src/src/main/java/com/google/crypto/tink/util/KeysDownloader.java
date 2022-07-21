@@ -31,6 +31,7 @@ import java.io.Reader;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.Charset;
+import java.util.Locale;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.regex.Matcher;
@@ -266,7 +267,7 @@ public class KeysDownloader {
   private static void validate(String url) {
     try {
       URL tmp = new URL(url);
-      if (!tmp.getProtocol().toLowerCase().equals("https")) {
+      if (!tmp.getProtocol().toLowerCase(Locale.US).equals("https")) {
         throw new IllegalArgumentException("url must point to a HTTPS server");
       }
     } catch (MalformedURLException ex) {

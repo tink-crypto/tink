@@ -27,8 +27,8 @@
 #include "tink/util/statusor.h"
 
 extern "C" {
-#include "third_party/pqclean/crypto_sign/falcon-1024/avx2/api.h"
-#include "third_party/pqclean/crypto_sign/falcon-512/avx2/api.h"
+#include "third_party/pqclean/crypto_sign/falcon-1024/api.h"
+#include "third_party/pqclean/crypto_sign/falcon-512/api.h"
 }
 
 namespace crypto {
@@ -52,23 +52,23 @@ util::StatusOr<std::string> FalconSign::Sign(absl::string_view data) const {
 
   switch (key_size) {
     case kFalcon512PrivateKeySize: {
-      signature.resize(PQCLEAN_FALCON512_AVX2_CRYPTO_BYTES, '0');
-      result = PQCLEAN_FALCON512_AVX2_crypto_sign_signature(
+      signature.resize(PQCLEAN_FALCON512_CRYPTO_BYTES, '0');
+      result = PQCLEAN_FALCON512_crypto_sign_signature(
           reinterpret_cast<uint8_t *>(signature.data()), &sig_length,
           reinterpret_cast<const uint8_t *>(data.data()), data.size(),
           reinterpret_cast<const uint8_t *>(private_key_.GetKey().data()));
-      if (sig_length > PQCLEAN_FALCON512_AVX2_CRYPTO_BYTES) {
+      if (sig_length > PQCLEAN_FALCON512_CRYPTO_BYTES) {
         result = -1;
       }
       break;
     }
     case kFalcon1024PrivateKeySize: {
-      signature.resize(PQCLEAN_FALCON1024_AVX2_CRYPTO_BYTES, '0');
-      result = PQCLEAN_FALCON1024_AVX2_crypto_sign_signature(
+      signature.resize(PQCLEAN_FALCON1024_CRYPTO_BYTES, '0');
+      result = PQCLEAN_FALCON1024_crypto_sign_signature(
           reinterpret_cast<uint8_t *>(signature.data()), &sig_length,
           reinterpret_cast<const uint8_t *>(data.data()), data.size(),
           reinterpret_cast<const uint8_t *>(private_key_.GetKey().data()));
-      if (sig_length > PQCLEAN_FALCON1024_AVX2_CRYPTO_BYTES) {
+      if (sig_length > PQCLEAN_FALCON1024_CRYPTO_BYTES) {
         result = -1;
       }
       break;

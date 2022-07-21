@@ -18,6 +18,7 @@
 
 #include <list>
 #include <sstream>
+#include <utility>
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
@@ -91,7 +92,7 @@ TEST_F(StreamingAeadConfigTest, WrappersRegistered) {
           primitive_set
               ->AddPrimitive(absl::make_unique<DummyStreamingAead>("dummy"),
                              key_info)
-              .ValueOrDie()),
+              .value()),
       IsOk());
 
   auto primitive_result = Registry::Wrap(std::move(primitive_set));

@@ -14,48 +14,29 @@
 # limitations under the License.
 ################################################################################
 
-
 set -euo pipefail
-cd ${KOKORO_ARTIFACTS_DIR}/git/tink
 
-./kokoro/copy_credentials.sh
+if [[ -n "${KOKORO_ROOT:-}" ]]; then
+  cd "${KOKORO_ARTIFACTS_DIR}/git/tink"
+fi
 
-install_python3() {
-  : "${PYTHON_VERSION:=3.7.1}"
+./kokoro/testutils/copy_credentials.sh "python/testdata"
+# Sourcing required to update callers environment.
+source ./kokoro/testutils/install_python3.sh
 
-  # Update python version list.
-  (
-    cd /home/kbuilder/.pyenv/plugins/python-build/../..
-    git pull
-    # TODO(b/187879867): Remove once pyenv issue is resolved.
-    git checkout 783870759566a77d09b426e0305bc0993a522765
+if [[ -n "${KOKORO_ROOT:-}" ]]; then
+  use_bazel.sh $(cat python/.bazelversion)
+fi
+
+# Run manual tests which rely on key material injected into the Kokoro
+# environement.
+MANUAL_TARGETS=()
+if [[ -n "${KOKORO_ROOT:-}" ]]; then
+  MANUAL_TARGETS+=(
+    "//tink/integration/awskms:_aws_kms_aead_test"
+    "//tink/integration/gcpkms:_gcp_kms_aead_test"
   )
-  # Install Python.
-  eval "$(pyenv init -)"
-  pyenv install -v "${PYTHON_VERSION}"
-  pyenv global "${PYTHON_VERSION}"
-}
+fi
+readonly MANUAL_TARGETS
 
-run_bazel_tests() {
-  (
-    cd python
-    use_bazel.sh $(cat .bazelversion)
-
-    time bazel build -- ...
-    time bazel test --test_output=errors -- ...
-
-    # Run manual tests which rely on key material injected into the Kokoro
-    # environement.
-    if [[ -n "${KOKORO_ROOT}" ]]; then
-      declare -a MANUAL_TARGETS
-      MANUAL_TARGETS=(
-        "//tink/integration/gcpkms:_gcp_kms_aead_test"
-      )
-      readonly MANUAL_TARGETS
-      time bazel test --test_output=errors -- "${MANUAL_TARGETS[@]}"
-    fi
-  )
-}
-
-install_python3
-run_bazel_tests
+./kokoro/testutils/run_bazel_tests.sh python "${MANUAL_TARGETS[@]}"

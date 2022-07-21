@@ -24,11 +24,11 @@ import java.util.Arrays;
 
 /** Diffie-Hellman-based X25519-HKDF HPKE KEM variant. */
 @Immutable
-public final class X25519HpkeKem implements HpkeKem {
+final class X25519HpkeKem implements HpkeKem {
   private final HkdfHpkeKdf hkdf;
 
   /** Construct X25519-HKDF HPKE KEM using {@code hkdf}. */
-  public X25519HpkeKem(HkdfHpkeKdf hkdf) {
+  X25519HpkeKem(HkdfHpkeKdf hkdf) {
     this.hkdf = hkdf;
   }
 
@@ -63,11 +63,13 @@ public final class X25519HpkeKem implements HpkeKem {
   }
 
   @Override
-  public byte[] decapsulate(byte[] encapsulatedKey, byte[] recipientPrivateKey)
+  public byte[] decapsulate(byte[] encapsulatedKey, HpkeKemPrivateKey recipientPrivateKey)
       throws GeneralSecurityException {
-    byte[] dhSharedSecret = X25519.computeSharedSecret(recipientPrivateKey, encapsulatedKey);
-    byte[] recipientPublicKey = X25519.publicFromPrivate(recipientPrivateKey);
-    return deriveKemSharedSecret(dhSharedSecret, encapsulatedKey, recipientPublicKey);
+    byte[] dhSharedSecret =
+        X25519.computeSharedSecret(
+            recipientPrivateKey.getSerializedPrivate().toByteArray(), encapsulatedKey);
+    return deriveKemSharedSecret(
+        dhSharedSecret, encapsulatedKey, recipientPrivateKey.getSerializedPublic().toByteArray());
   }
 
   @Override

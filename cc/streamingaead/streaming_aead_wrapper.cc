@@ -16,13 +16,15 @@
 
 #include "tink/streamingaead/streaming_aead_wrapper.h"
 
+#include <utility>
+
 #include "absl/status/status.h"
-#include "tink/streaming_aead.h"
 #include "tink/crypto_format.h"
 #include "tink/input_stream.h"
 #include "tink/output_stream.h"
 #include "tink/primitive_set.h"
 #include "tink/random_access_stream.h"
+#include "tink/streaming_aead.h"
 #include "tink/streamingaead/decrypting_input_stream.h"
 #include "tink/streamingaead/decrypting_random_access_stream.h"
 #include "tink/util/status.h"

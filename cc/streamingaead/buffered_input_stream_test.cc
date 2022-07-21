@@ -16,7 +16,10 @@
 
 #include "tink/streamingaead/buffered_input_stream.h"
 
+#include <algorithm>
 #include <sstream>
+#include <string>
+#include <utility>
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
@@ -73,7 +76,7 @@ util::Status ReadFromStream(InputStream* input_stream, int count,
       return util::OkStatus();
     }
     if (!next_result.ok()) return next_result.status();
-    auto read_bytes = next_result.ValueOrDie();
+    auto read_bytes = next_result.value();
     auto used_bytes = std::min(read_bytes, bytes_to_read);
     if (used_bytes > 0) {
       output->append(
@@ -156,8 +159,8 @@ TEST(BufferedInputStreamTest, SingleBackup) {
       int pos = buf_stream->Position();
       auto next_result = buf_stream->Next(&buf);
       if (read_size < input_size) {
-        EXPECT_THAT(next_result.status(), IsOk());
-        auto next_size = next_result.ValueOrDie();
+        EXPECT_THAT(next_result, IsOk());
+        auto next_size = next_result.value();
         EXPECT_LE(next_size, kBufferSize);
         EXPECT_EQ(pos + next_size, buf_stream->Position());
         buf_stream->BackUp(next_size);
@@ -188,8 +191,8 @@ TEST(BufferedInputStreamTest, SingleBackup) {
       pos = buf_stream->Position();
       next_result = buf_stream->Next(&buf);
       if (read_size < input_size) {
-        EXPECT_THAT(next_result.status(), IsOk());
-        auto next_size = next_result.ValueOrDie();
+        EXPECT_THAT(next_result, IsOk());
+        auto next_size = next_result.value();
         EXPECT_EQ(input_size - pos, next_size);
         EXPECT_EQ(input_size, buf_stream->Position());
         buf_stream->BackUp(next_size);
@@ -219,8 +222,8 @@ TEST(BufferedInputStreamTest, MultipleBackups) {
 
   EXPECT_EQ(0, buf_stream->Position());
   auto next_result = buf_stream->Next(&buffer);
-  EXPECT_THAT(next_result.status(), IsOk());
-  auto next_size = next_result.ValueOrDie();
+  EXPECT_THAT(next_result, IsOk());
+  auto next_size = next_result.value();
   EXPECT_EQ(contents.substr(0, next_size),
             std::string(static_cast<const char*>(buffer), next_size));
 
@@ -235,8 +238,8 @@ TEST(BufferedInputStreamTest, MultipleBackups) {
 
   // Call Next(), it should return exactly the backed up bytes.
   next_result = buf_stream->Next(&buffer);
-  EXPECT_THAT(next_result.status(), IsOk());
-  EXPECT_EQ(total_backup_size, next_result.ValueOrDie());
+  EXPECT_THAT(next_result, IsOk());
+  EXPECT_EQ(total_backup_size, next_result.value());
   EXPECT_EQ(next_size, buf_stream->Position());
   EXPECT_EQ(contents.substr(next_size - total_backup_size, total_backup_size),
             std::string(static_cast<const char*>(buffer), total_backup_size));

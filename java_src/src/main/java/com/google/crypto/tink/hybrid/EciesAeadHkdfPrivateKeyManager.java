@@ -19,11 +19,12 @@ package com.google.crypto.tink.hybrid;
 import com.google.crypto.tink.HybridDecrypt;
 import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.KeyTemplates;
-import com.google.crypto.tink.KeyTypeManager;
-import com.google.crypto.tink.PrivateKeyTypeManager;
 import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.aead.AesCtrHmacAeadKeyManager;
 import com.google.crypto.tink.aead.AesGcmKeyManager;
+import com.google.crypto.tink.internal.KeyTypeManager;
+import com.google.crypto.tink.internal.PrimitiveFactory;
+import com.google.crypto.tink.internal.PrivateKeyTypeManager;
 import com.google.crypto.tink.proto.EcPointFormat;
 import com.google.crypto.tink.proto.EciesAeadDemParams;
 import com.google.crypto.tink.proto.EciesAeadHkdfKeyFormat;
@@ -61,8 +62,7 @@ public final class EciesAeadHkdfPrivateKeyManager
     super(
         EciesAeadHkdfPrivateKey.class,
         EciesAeadHkdfPublicKey.class,
-        new KeyTypeManager.PrimitiveFactory<HybridDecrypt, EciesAeadHkdfPrivateKey>(
-            HybridDecrypt.class) {
+        new PrimitiveFactory<HybridDecrypt, EciesAeadHkdfPrivateKey>(HybridDecrypt.class) {
           @Override
           public HybridDecrypt getPrimitive(EciesAeadHkdfPrivateKey recipientKeyProto)
               throws GeneralSecurityException {
@@ -122,8 +122,8 @@ public final class EciesAeadHkdfPrivateKeyManager
   }
 
   @Override
-  public KeyFactory<EciesAeadHkdfKeyFormat, EciesAeadHkdfPrivateKey> keyFactory() {
-    return new KeyFactory<EciesAeadHkdfKeyFormat, EciesAeadHkdfPrivateKey>(
+  public KeyTypeManager.KeyFactory<EciesAeadHkdfKeyFormat, EciesAeadHkdfPrivateKey> keyFactory() {
+    return new KeyTypeManager.KeyFactory<EciesAeadHkdfKeyFormat, EciesAeadHkdfPrivateKey>(
         EciesAeadHkdfKeyFormat.class) {
       @Override
       public void validateKeyFormat(EciesAeadHkdfKeyFormat eciesKeyFormat)

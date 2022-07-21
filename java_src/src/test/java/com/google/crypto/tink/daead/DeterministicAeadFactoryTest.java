@@ -16,25 +16,15 @@
 
 package com.google.crypto.tink.daead;
 
-import static com.google.crypto.tink.testing.TestUtil.assertExceptionContains;
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
+import static com.google.common.truth.Truth.assertThat;
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.Assert.assertThrows;
-import static org.junit.Assert.fail;
 
-import com.google.crypto.tink.CryptoFormat;
 import com.google.crypto.tink.DeterministicAead;
+import com.google.crypto.tink.KeyTemplates;
 import com.google.crypto.tink.KeysetHandle;
-import com.google.crypto.tink.aead.AeadConfig;
-import com.google.crypto.tink.proto.KeyStatusType;
-import com.google.crypto.tink.proto.Keyset.Key;
-import com.google.crypto.tink.proto.OutputPrefixType;
-import com.google.crypto.tink.subtle.Random;
-import com.google.crypto.tink.testing.TestUtil;
 import java.security.GeneralSecurityException;
-import java.util.Arrays;
 import javax.crypto.Cipher;
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -43,188 +33,48 @@ import org.junit.runners.JUnit4;
 /** Tests for DeterministicAeadFactory. */
 @RunWith(JUnit4.class)
 public class DeterministicAeadFactoryTest {
-  private Integer[] keySizeInBytes;
 
   @BeforeClass
   public static void setUp() throws Exception {
-    AeadConfig.register(); // need this for testInvalidKeyMaterial.
     DeterministicAeadConfig.register();
   }
 
-  @Before
-  public void setUp2() throws Exception {
+  @Test
+  @SuppressWarnings("deprecation") // This is a test that the deprecated function works.
+  public void deprecatedDeterministicAeadFactoryGetPrimitive_sameAs_keysetHandleGetPrimitive()
+      throws Exception {
     if (Cipher.getMaxAllowedKeyLength("AES") < 256) {
-      System.out.println(
-          "Unlimited Strength Jurisdiction Policy Files are required"
-              + " but not installed. Skip all DeterministicAeadFactory tests");
-      keySizeInBytes = new Integer[] {};
-    } else {
-      keySizeInBytes = new Integer[] {64};
+      // skip all tests.
+      return;
     }
-  }
+    KeysetHandle handle = KeysetHandle.generateNew(KeyTemplates.get("AES256_SIV"));
 
-  @Test
-  public void testEncrytDecrypt() throws Exception {
-    KeysetHandle keysetHandle = KeysetHandle.generateNew(DeterministicAeadKeyTemplates.AES256_SIV);
-    DeterministicAead aead = DeterministicAeadFactory.getPrimitive(keysetHandle);
-    byte[] plaintext = Random.randBytes(20);
-    byte[] associatedData = Random.randBytes(20);
-    byte[] ciphertext = aead.encryptDeterministically(plaintext, associatedData);
-    byte[] ciphertext2 = aead.encryptDeterministically(plaintext, associatedData);
-    byte[] decrypted = aead.decryptDeterministically(ciphertext, associatedData);
-    byte[] decrypted2 = aead.decryptDeterministically(ciphertext2, associatedData);
+    DeterministicAead daead = handle.getPrimitive(DeterministicAead.class);
+    DeterministicAead factoryDAead = DeterministicAeadFactory.getPrimitive(handle);
 
-    assertArrayEquals(ciphertext, ciphertext2);
-    assertArrayEquals(plaintext, decrypted);
-    assertArrayEquals(plaintext, decrypted2);
-  }
+    byte[] plaintext = "plaintext".getBytes(UTF_8);
+    byte[] associatedData = "associatedData".getBytes(UTF_8);
 
-  @Test
-  public void testMultipleKeys() throws Exception {
-    for (int keySize : keySizeInBytes) {
-      testMultipleKeys(keySize);
-    }
-  }
-
-  private static void testMultipleKeys(int keySize) throws Exception {
-    Key primary =
-        TestUtil.createKey(
-            TestUtil.createAesSivKeyData(keySize),
-            42,
-            KeyStatusType.ENABLED,
-            OutputPrefixType.TINK);
-    Key raw =
-        TestUtil.createKey(
-            TestUtil.createAesSivKeyData(keySize), 43, KeyStatusType.ENABLED, OutputPrefixType.RAW);
-    Key legacy =
-        TestUtil.createKey(
-            TestUtil.createAesSivKeyData(keySize),
-            44,
-            KeyStatusType.ENABLED,
-            OutputPrefixType.LEGACY);
-    Key tink =
-        TestUtil.createKey(
-            TestUtil.createAesSivKeyData(keySize),
-            45,
-            KeyStatusType.ENABLED,
-            OutputPrefixType.TINK);
-    KeysetHandle keysetHandle =
-        TestUtil.createKeysetHandle(TestUtil.createKeyset(primary, raw, legacy, tink));
-
-    DeterministicAead daead = DeterministicAeadFactory.getPrimitive(keysetHandle);
-    byte[] plaintext = Random.randBytes(20);
-    byte[] associatedData = Random.randBytes(20);
     byte[] ciphertext = daead.encryptDeterministically(plaintext, associatedData);
-    byte[] prefix = Arrays.copyOfRange(ciphertext, 0, CryptoFormat.NON_RAW_PREFIX_SIZE);
-    assertArrayEquals(prefix, CryptoFormat.getOutputPrefix(primary));
-    assertArrayEquals(plaintext, daead.decryptDeterministically(ciphertext, associatedData));
-    assertEquals(CryptoFormat.NON_RAW_PREFIX_SIZE + plaintext.length + 16, ciphertext.length);
+    byte[] factoryCiphertext = factoryDAead.encryptDeterministically(plaintext, associatedData);
 
-    // encrypt with a non-primary RAW key and decrypt with the keyset
-    KeysetHandle keysetHandle2 =
-        TestUtil.createKeysetHandle(TestUtil.createKeyset(raw, legacy, tink));
-    DeterministicAead daead2 = DeterministicAeadFactory.getPrimitive(keysetHandle2);
-    ciphertext = daead2.encryptDeterministically(plaintext, associatedData);
-    assertArrayEquals(plaintext, daead.decryptDeterministically(ciphertext, associatedData));
+    assertThat(factoryCiphertext).isEqualTo(ciphertext);
 
-    // encrypt with a random key not in the keyset, decrypt with the keyset should fail
-    Key random =
-        TestUtil.createKey(
-            TestUtil.createAesSivKeyData(keySize),
-            44,
-            KeyStatusType.ENABLED,
-            OutputPrefixType.TINK);
-    keysetHandle2 = TestUtil.createKeysetHandle(TestUtil.createKeyset(random));
-    daead2 = DeterministicAeadFactory.getPrimitive(keysetHandle2);
-    ciphertext = daead2.encryptDeterministically(plaintext, associatedData);
-    try {
-      daead.decryptDeterministically(ciphertext, associatedData);
-      fail("Expected GeneralSecurityException");
-    } catch (GeneralSecurityException e) {
-      assertExceptionContains(e, "decryption failed");
-    }
-  }
+    assertThat(daead.decryptDeterministically(ciphertext, associatedData)).isEqualTo(plaintext);
+    assertThat(factoryDAead.decryptDeterministically(ciphertext, associatedData))
+        .isEqualTo(plaintext);
 
-  @Test
-  public void testRawKeyAsPrimary() throws Exception {
-    for (int keySize : keySizeInBytes) {
-      testRawKeyAsPrimary(keySize);
-    }
-  }
-
-  private static void testRawKeyAsPrimary(int keySize) throws Exception {
-    Key primary =
-        TestUtil.createKey(
-            TestUtil.createAesSivKeyData(keySize), 42, KeyStatusType.ENABLED, OutputPrefixType.RAW);
-    Key raw =
-        TestUtil.createKey(
-            TestUtil.createAesSivKeyData(keySize), 43, KeyStatusType.ENABLED, OutputPrefixType.RAW);
-    Key legacy =
-        TestUtil.createKey(
-            TestUtil.createAesSivKeyData(keySize),
-            44,
-            KeyStatusType.ENABLED,
-            OutputPrefixType.LEGACY);
-    KeysetHandle keysetHandle =
-        TestUtil.createKeysetHandle(TestUtil.createKeyset(primary, raw, legacy));
-
-    DeterministicAead daead = DeterministicAeadFactory.getPrimitive(keysetHandle);
-    byte[] plaintext = Random.randBytes(20);
-    byte[] associatedData = Random.randBytes(20);
-    byte[] ciphertext = daead.encryptDeterministically(plaintext, associatedData);
-
-    assertArrayEquals(plaintext, daead.decryptDeterministically(ciphertext, associatedData));
-    assertEquals(CryptoFormat.RAW_PREFIX_SIZE + plaintext.length + 16, ciphertext.length);
-  }
-
-  @Test
-  public void testSmallPlaintextWithRawKey() throws Exception {
-    for (int keySize : keySizeInBytes) {
-      testSmallPlaintextWithRawKey(keySize);
-    }
-  }
-
-  private static void testSmallPlaintextWithRawKey(int keySize) throws Exception {
-    Key primary =
-        TestUtil.createKey(
-            TestUtil.createAesSivKeyData(keySize), 42, KeyStatusType.ENABLED, OutputPrefixType.RAW);
-    KeysetHandle keysetHandle = TestUtil.createKeysetHandle(TestUtil.createKeyset(primary));
-
-    DeterministicAead daead = DeterministicAeadFactory.getPrimitive(keysetHandle);
-    byte[] plaintext = Random.randBytes(1);
-    byte[] associatedData = Random.randBytes(20);
-    byte[] ciphertext = daead.encryptDeterministically(plaintext, associatedData);
-
-    assertArrayEquals(plaintext, daead.decryptDeterministically(ciphertext, associatedData));
-    assertEquals(CryptoFormat.RAW_PREFIX_SIZE + plaintext.length + 16, ciphertext.length);
-  }
-
-  @Test
-  public void testInvalidKeyMaterial() throws Exception {
-    Key valid =
-        TestUtil.createKey(
-            TestUtil.createAesSivKeyData(64), 42, KeyStatusType.ENABLED, OutputPrefixType.TINK);
-    Key invalid =
-        TestUtil.createKey(
-            TestUtil.createAesCtrHmacAeadKeyData(
-                Random.randBytes(16), 12, Random.randBytes(16), 16),
-            43,
-            KeyStatusType.ENABLED,
-            OutputPrefixType.RAW);
-
-    KeysetHandle keysetHandle = TestUtil.createKeysetHandle(TestUtil.createKeyset(valid, invalid));
-    GeneralSecurityException e =
-        assertThrows(
-            GeneralSecurityException.class,
-            () -> DeterministicAeadFactory.getPrimitive(keysetHandle));
-    assertExceptionContains(e, "com.google.crypto.tink.DeterministicAead not supported");
-
-    // invalid as the primary key.
-    KeysetHandle keysetHandle2 = TestUtil.createKeysetHandle(TestUtil.createKeyset(invalid, valid));
-    GeneralSecurityException e2 =
-        assertThrows(
-            GeneralSecurityException.class,
-            () -> DeterministicAeadFactory.getPrimitive(keysetHandle2));
-    assertExceptionContains(e2, "com.google.crypto.tink.DeterministicAead not supported");
+    byte[] invalid = "invalid".getBytes(UTF_8);
+    assertThrows(
+        GeneralSecurityException.class, () -> daead.decryptDeterministically(ciphertext, invalid));
+    assertThrows(
+        GeneralSecurityException.class,
+        () -> factoryDAead.decryptDeterministically(ciphertext, invalid));
+    assertThrows(
+        GeneralSecurityException.class,
+        () -> daead.decryptDeterministically(invalid, associatedData));
+    assertThrows(
+        GeneralSecurityException.class,
+        () -> factoryDAead.decryptDeterministically(invalid, associatedData));
   }
 }

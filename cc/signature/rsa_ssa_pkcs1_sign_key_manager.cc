@@ -16,6 +16,8 @@
 
 #include "tink/signature/rsa_ssa_pkcs1_sign_key_manager.h"
 
+#include <string>
+
 #include "absl/memory/memory.h"
 #include "absl/status/status.h"
 #include "absl/strings/string_view.h"
@@ -119,7 +121,7 @@ RsaSsaPkcs1SignKeyManager::PublicKeySignFactory::Create(
       private_key.public_key());
   if (!verifier.ok()) return verifier.status();
   auto sign_verify_result =
-      SignAndVerify(signer.ValueOrDie().get(), verifier.ValueOrDie().get());
+      SignAndVerify(signer.value().get(), verifier.value().get());
   if (!sign_verify_result.ok()) {
     return util::Status(absl::StatusCode::kInternal,
                         "security bug: signing with private key followed by "

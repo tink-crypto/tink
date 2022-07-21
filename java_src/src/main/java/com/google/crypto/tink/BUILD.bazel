@@ -1,6 +1,6 @@
 load("@build_bazel_rules_android//android:rules.bzl", "android_library")
-load("@tink_base//:tink_version.bzl", "TINK_VERSION_LABEL")
-load("@tink_base//tools:common.bzl", "template_rule")
+load("//:tink_version.bzl", "TINK_VERSION_LABEL")
+load("//:template_rule.bzl", "template_rule")
 
 licenses(["notice"])
 
@@ -145,7 +145,7 @@ android_library(
     deps = [
         ":keyset_writer-android",
         "//proto:tink_java_proto_lite",
-        "//src/main/java/com/google/crypto/tink/subtle:base64",
+        "//src/main/java/com/google/crypto/tink/subtle:base64-android",
         "@maven//:com_google_code_gson_gson",
     ],
 )
@@ -202,7 +202,7 @@ android_library(
         ":keyset_reader-android",
         ":util-android",
         "//proto:tink_java_proto_lite",
-        "//src/main/java/com/google/crypto/tink/subtle:base64",
+        "//src/main/java/com/google/crypto/tink/subtle:base64-android",
         "@com_google_protobuf//:protobuf_javalite",
         "@maven//:com_google_code_gson_gson",
     ],
@@ -231,7 +231,6 @@ android_library(
 java_library(
     name = "privileged_registry",
     srcs = ["PrivilegedRegistry.java"],
-    visibility = ["//visibility:public"],
     deps = [
         ":registry",
         "//proto:tink_java_proto",
@@ -242,34 +241,9 @@ java_library(
 android_library(
     name = "privileged_registry-android",
     srcs = ["PrivilegedRegistry.java"],
-    visibility = ["//visibility:public"],
     deps = [
         ":registry-android",
         "//proto:tink_java_proto_lite",
-        "@com_google_protobuf//:protobuf_javalite",
-    ],
-)
-
-java_library(
-    name = "key_type_manager",
-    srcs = ["KeyTypeManager.java"],
-    deps = [
-        ":key_template",
-        "//proto:tink_java_proto",
-        "//src/main/java/com/google/crypto/tink/annotations:alpha",
-        "//src/main/java/com/google/crypto/tink/config/internal:tink_fips_util",
-        "@com_google_protobuf//:protobuf_javalite",
-    ],
-)
-
-android_library(
-    name = "key_type_manager-android",
-    srcs = ["KeyTypeManager.java"],
-    deps = [
-        ":key_template-android",
-        "//proto:tink_java_proto_lite",
-        "//src/main/java/com/google/crypto/tink/annotations:alpha",
-        "//src/main/java/com/google/crypto/tink/config/internal:tink_fips_util-android",
         "@com_google_protobuf//:protobuf_javalite",
     ],
 )
@@ -339,11 +313,11 @@ java_library(
     srcs = ["PrivateKeyManagerImpl.java"],
     deps = [
         ":key_manager_impl",
-        ":key_type_manager",
         ":private_key_manager",
-        ":private_key_type_manager",
         "//proto:tink_java_proto",
         "//src/main/java/com/google/crypto/tink/annotations:alpha",
+        "//src/main/java/com/google/crypto/tink/internal:key_type_manager",
+        "//src/main/java/com/google/crypto/tink/internal:private_key_type_manager",
         "@com_google_protobuf//:protobuf_javalite",
     ],
 )
@@ -353,11 +327,11 @@ android_library(
     srcs = ["PrivateKeyManagerImpl.java"],
     deps = [
         ":key_manager_impl-android",
-        ":key_type_manager-android",
         ":private_key_manager-android",
-        ":private_key_type_manager-android",
         "//proto:tink_java_proto_lite",
-        "//src/main/java/com/google/crypto/tink/annotations:alpha",
+        "//src/main/java/com/google/crypto/tink/annotations:alpha-android",
+        "//src/main/java/com/google/crypto/tink/internal:key_type_manager-android",
+        "//src/main/java/com/google/crypto/tink/internal:private_key_type_manager-android",
         "@com_google_protobuf//:protobuf_javalite",
     ],
 )
@@ -404,26 +378,6 @@ android_library(
         ":keyset_writer-android",
         ":registry_cluster-android",
         "//proto:tink_java_proto_lite",
-        "@com_google_protobuf//:protobuf_javalite",
-    ],
-)
-
-java_library(
-    name = "private_key_type_manager",
-    srcs = ["PrivateKeyTypeManager.java"],
-    deps = [
-        ":key_type_manager",
-        "//src/main/java/com/google/crypto/tink/annotations:alpha",
-        "@com_google_protobuf//:protobuf_javalite",
-    ],
-)
-
-android_library(
-    name = "private_key_type_manager-android",
-    srcs = ["PrivateKeyTypeManager.java"],
-    deps = [
-        ":key_type_manager-android",
-        "//src/main/java/com/google/crypto/tink/annotations:alpha",
         "@com_google_protobuf//:protobuf_javalite",
     ],
 )
@@ -481,9 +435,9 @@ java_library(
     srcs = ["KeyManagerImpl.java"],
     deps = [
         ":key_manager",
-        ":key_type_manager",
         "//proto:tink_java_proto",
         "//src/main/java/com/google/crypto/tink/annotations:alpha",
+        "//src/main/java/com/google/crypto/tink/internal:key_type_manager",
         "@com_google_protobuf//:protobuf_javalite",
     ],
 )
@@ -493,9 +447,9 @@ android_library(
     srcs = ["KeyManagerImpl.java"],
     deps = [
         ":key_manager-android",
-        ":key_type_manager-android",
         "//proto:tink_java_proto_lite",
-        "//src/main/java/com/google/crypto/tink/annotations:alpha",
+        "//src/main/java/com/google/crypto/tink/annotations:alpha-android",
+        "//src/main/java/com/google/crypto/tink/internal:key_type_manager-android",
         "@com_google_protobuf//:protobuf_javalite",
     ],
 )
@@ -505,8 +459,13 @@ java_library(
     srcs = ["PrimitiveSet.java"],
     deps = [
         ":crypto_format",
+        ":parameters",
         "//proto:tink_java_proto",
+        "//src/main/java/com/google/crypto/tink/annotations:alpha",
+        "//src/main/java/com/google/crypto/tink/monitoring:monitoring_annotations",
         "//src/main/java/com/google/crypto/tink/subtle:hex",
+        "@maven//:com_google_code_findbugs_jsr305",
+        "@maven//:com_google_errorprone_error_prone_annotations",
     ],
 )
 
@@ -515,52 +474,53 @@ android_library(
     srcs = ["PrimitiveSet.java"],
     deps = [
         ":crypto_format-android",
+        ":parameters-android",
         "//proto:tink_java_proto_lite",
-        "//src/main/java/com/google/crypto/tink/subtle:hex",
+        "//src/main/java/com/google/crypto/tink/annotations:alpha-android",
+        "//src/main/java/com/google/crypto/tink/monitoring:monitoring_annotations-android",
+        "//src/main/java/com/google/crypto/tink/subtle:hex-android",
+        "@maven//:com_google_code_findbugs_jsr305",
+        "@maven//:com_google_errorprone_error_prone_annotations",
     ],
 )
 
 java_library(
     name = "registry",
-    srcs = [
-        "Registry.java",
-    ],
+    srcs = ["Registry.java"],
     deps = [
         ":catalogue",
         ":key_manager",
-        ":key_manager_impl",
+        ":key_manager_registry",
         ":key_template",
-        ":key_type_manager",
         ":primitive_set",
         ":primitive_wrapper",
         ":private_key_manager",
-        ":private_key_manager_impl",
-        ":private_key_type_manager",
         "//proto:tink_java_proto",
         "//src/main/java/com/google/crypto/tink/config/internal:tink_fips_util",
+        "//src/main/java/com/google/crypto/tink/internal:key_type_manager",
+        "//src/main/java/com/google/crypto/tink/internal:private_key_type_manager",
         "@com_google_protobuf//:protobuf_javalite",
+        "@maven//:com_google_code_findbugs_jsr305",
     ],
 )
 
 android_library(
     name = "registry-android",
-    srcs = [
-        "Registry.java",
-    ],
+    srcs = ["Registry.java"],
     deps = [
         ":catalogue-android",
         ":key_manager-android",
-        ":key_manager_impl-android",
+        ":key_manager_registry-android",
         ":key_template-android",
-        ":key_type_manager-android",
         ":primitive_set-android",
         ":primitive_wrapper-android",
         ":private_key_manager-android",
-        ":private_key_manager_impl-android",
-        ":private_key_type_manager-android",
         "//proto:tink_java_proto_lite",
         "//src/main/java/com/google/crypto/tink/config/internal:tink_fips_util-android",
+        "//src/main/java/com/google/crypto/tink/internal:key_type_manager-android",
+        "//src/main/java/com/google/crypto/tink/internal:private_key_type_manager-android",
         "@com_google_protobuf//:protobuf_javalite",
+        "@maven//:com_google_code_findbugs_jsr305",
     ],
 )
 
@@ -572,6 +532,9 @@ java_library(
     ],
     deps = [
         ":aead",
+        ":insecure_secret_key_access",
+        ":key",
+        ":key_status",
         ":key_template",
         ":keyset_reader",
         ":keyset_writer",
@@ -579,8 +542,13 @@ java_library(
         ":registry",
         ":util",
         "//proto:tink_java_proto",
+        "//src/main/java/com/google/crypto/tink/annotations:alpha",
         "//src/main/java/com/google/crypto/tink/internal:key_status_type_proto_converter",
+        "//src/main/java/com/google/crypto/tink/internal:legacy_proto_key",
+        "//src/main/java/com/google/crypto/tink/internal:mutable_serialization_registry",
+        "//src/main/java/com/google/crypto/tink/internal:proto_key_serialization",
         "//src/main/java/com/google/crypto/tink/internal:util",
+        "//src/main/java/com/google/crypto/tink/monitoring:monitoring_annotations",
         "//src/main/java/com/google/crypto/tink/tinkkey:key_access",
         "//src/main/java/com/google/crypto/tink/tinkkey:key_handle",
         "//src/main/java/com/google/crypto/tink/tinkkey:secret_key_access",
@@ -588,6 +556,7 @@ java_library(
         "//src/main/java/com/google/crypto/tink/tinkkey/internal:proto_key",
         "@com_google_protobuf//:protobuf_javalite",
         "@maven//:com_google_code_findbugs_jsr305",
+        "@maven//:com_google_errorprone_error_prone_annotations",
     ],
 )
 
@@ -598,7 +567,10 @@ android_library(
         "KeysetManager.java",
     ],
     deps = [
-        ":aead",
+        ":aead-android",
+        ":insecure_secret_key_access-android",
+        ":key-android",
+        ":key_status-android",
         ":key_template-android",
         ":keyset_reader-android",
         ":keyset_writer-android",
@@ -606,9 +578,13 @@ android_library(
         ":registry-android",
         ":util-android",
         "//proto:tink_java_proto_lite",
+        "//src/main/java/com/google/crypto/tink/annotations:alpha-android",
         "//src/main/java/com/google/crypto/tink/internal:key_status_type_proto_converter-android",
-
+        "//src/main/java/com/google/crypto/tink/internal:legacy_proto_key-android",
+        "//src/main/java/com/google/crypto/tink/internal:mutable_serialization_registry-android",
+        "//src/main/java/com/google/crypto/tink/internal:proto_key_serialization-android",
         "//src/main/java/com/google/crypto/tink/internal:util-android",
+        "//src/main/java/com/google/crypto/tink/monitoring:monitoring_annotations-android",
         "//src/main/java/com/google/crypto/tink/tinkkey:key_access-android",
         "//src/main/java/com/google/crypto/tink/tinkkey:key_handle-android",
         "//src/main/java/com/google/crypto/tink/tinkkey:secret_key_access-android",
@@ -616,10 +592,11 @@ android_library(
         "//src/main/java/com/google/crypto/tink/tinkkey/internal:proto_key-android",
         "@com_google_protobuf//:protobuf_javalite",
         "@maven//:com_google_code_findbugs_jsr305",
+        "@maven//:com_google_errorprone_error_prone_annotations",
     ],
 )
 
-android_library(
+java_library(
     name = "pem_key_type",
     srcs = ["PemKeyType.java"],
     deps = [
@@ -627,6 +604,19 @@ android_library(
         "//src/main/java/com/google/crypto/tink/subtle:elliptic_curves",
         "//src/main/java/com/google/crypto/tink/subtle:enums",
         "//src/main/java/com/google/crypto/tink/subtle:subtle_util_cluster",
+        "@maven//:com_google_code_findbugs_jsr305",
+    ],
+)
+
+android_library(
+    name = "pem_key_type-android",
+    srcs = ["PemKeyType.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink/subtle:base64-android",
+        "//src/main/java/com/google/crypto/tink/subtle:elliptic_curves-android",
+        "//src/main/java/com/google/crypto/tink/subtle:enums-android",
+        "//src/main/java/com/google/crypto/tink/subtle:subtle_util_cluster-android",
+        "@maven//:com_google_code_findbugs_jsr305",
     ],
 )
 
@@ -642,4 +632,211 @@ template_rule(
 java_library(
     name = "version",
     srcs = [":version_java"],
+)
+
+java_library(
+    name = "insecure_secret_key_access",
+    srcs = ["InsecureSecretKeyAccess.java"],
+    deps = [
+        ":secret_key_access",
+        "//src/main/java/com/google/crypto/tink/annotations:alpha",
+        "@maven//:com_google_errorprone_error_prone_annotations",
+    ],
+)
+
+android_library(
+    name = "insecure_secret_key_access-android",
+    srcs = ["InsecureSecretKeyAccess.java"],
+    deps = [
+        ":secret_key_access-android",
+        "//src/main/java/com/google/crypto/tink/annotations:alpha-android",
+        "@maven//:com_google_errorprone_error_prone_annotations",
+    ],
+)
+
+java_library(
+    name = "secret_key_access",
+    srcs = ["SecretKeyAccess.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink/annotations:alpha",
+        "@maven//:com_google_code_findbugs_jsr305",
+        "@maven//:com_google_errorprone_error_prone_annotations",
+    ],
+)
+
+android_library(
+    name = "secret_key_access-android",
+    srcs = ["SecretKeyAccess.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink/annotations:alpha-android",
+        "@maven//:com_google_code_findbugs_jsr305",
+        "@maven//:com_google_errorprone_error_prone_annotations",
+    ],
+)
+
+java_library(
+    name = "accesses_partial_key",
+    srcs = ["AccessesPartialKey.java"],
+)
+
+android_library(
+    name = "accesses_partial_key-android",
+    srcs = ["AccessesPartialKey.java"],
+)
+
+java_library(
+    name = "key",
+    srcs = ["Key.java"],
+    deps = [
+        ":parameters",
+        "//src/main/java/com/google/crypto/tink/annotations:alpha",
+        "@maven//:com_google_code_findbugs_jsr305",
+        "@maven//:com_google_errorprone_error_prone_annotations",
+    ],
+)
+
+android_library(
+    name = "key-android",
+    srcs = ["Key.java"],
+    deps = [
+        ":parameters-android",
+        "//src/main/java/com/google/crypto/tink/annotations:alpha-android",
+        "@maven//:com_google_code_findbugs_jsr305",
+        "@maven//:com_google_errorprone_error_prone_annotations",
+    ],
+)
+
+java_library(
+    name = "parameters",
+    srcs = ["Parameters.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink/annotations:alpha",
+        "@maven//:com_google_errorprone_error_prone_annotations",
+    ],
+)
+
+android_library(
+    name = "parameters-android",
+    srcs = ["Parameters.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink/annotations:alpha-android",
+        "@maven//:com_google_errorprone_error_prone_annotations",
+    ],
+)
+
+java_library(
+    name = "key_manager_registry",
+    srcs = ["KeyManagerRegistry.java"],
+    deps = [
+        ":key_manager",
+        ":key_manager_impl",
+        ":private_key_manager_impl",
+        "//proto:tink_java_proto",
+        "//src/main/java/com/google/crypto/tink/config/internal:tink_fips_util",
+        "//src/main/java/com/google/crypto/tink/internal:key_type_manager",
+        "//src/main/java/com/google/crypto/tink/internal:private_key_type_manager",
+        "@com_google_protobuf//:protobuf_javalite",
+    ],
+)
+
+android_library(
+    name = "key_manager_registry-android",
+    srcs = ["KeyManagerRegistry.java"],
+    deps = [
+        ":key_manager-android",
+        ":key_manager_impl-android",
+        ":private_key_manager_impl-android",
+        "//proto:tink_java_proto_lite",
+        "//src/main/java/com/google/crypto/tink/config/internal:tink_fips_util-android",
+        "//src/main/java/com/google/crypto/tink/internal:key_type_manager-android",
+        "//src/main/java/com/google/crypto/tink/internal:private_key_type_manager-android",
+        "@com_google_protobuf//:protobuf_javalite",
+    ],
+)
+
+android_library(
+    name = "aead-android",
+    srcs = ["Aead.java"],
+)
+
+android_library(
+    name = "deterministic_aead-android",
+    srcs = ["DeterministicAead.java"],
+)
+
+android_library(
+    name = "hybrid_decrypt-android",
+    srcs = ["HybridDecrypt.java"],
+)
+
+android_library(
+    name = "hybrid_encrypt-android",
+    srcs = ["HybridEncrypt.java"],
+)
+
+android_library(
+    name = "key_wrap-android",
+    srcs = ["KeyWrap.java"],
+)
+
+android_library(
+    name = "kms_client-android",
+    srcs = ["KmsClient.java"],
+    deps = [":aead-android"],
+)
+
+android_library(
+    name = "kms_clients-android",
+    srcs = ["KmsClients.java"],
+    deps = [":kms_client-android"],
+)
+
+android_library(
+    name = "kms_clients_test_util-android",
+    testonly = 1,
+    srcs = ["KmsClientsTestUtil.java"],
+    deps = [":kms_clients-android"],
+)
+
+android_library(
+    name = "mac-android",
+    srcs = ["Mac.java"],
+)
+
+android_library(
+    name = "public_key_sign-android",
+    srcs = ["PublicKeySign.java"],
+)
+
+android_library(
+    name = "public_key_verify-android",
+    srcs = ["PublicKeyVerify.java"],
+)
+
+android_library(
+    name = "streaming_aead-android",
+    srcs = ["StreamingAead.java"],
+)
+
+android_library(
+    name = "version-android",
+    srcs = [":version_java"],
+)
+
+java_library(
+    name = "key_status",
+    srcs = ["KeyStatus.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink/annotations:alpha",
+        "@maven//:com_google_errorprone_error_prone_annotations",
+    ],
+)
+
+android_library(
+    name = "key_status-android",
+    srcs = ["KeyStatus.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink/annotations:alpha-android",
+        "@maven//:com_google_errorprone_error_prone_annotations",
+    ],
 )

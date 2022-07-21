@@ -43,7 +43,7 @@
     return nil;
   }
   id<TINKHybridDecrypt> hybrid =
-      [[TINKHybridDecryptInternal alloc] initWithCCHybridDecrypt:std::move(st.ValueOrDie())];
+      [[TINKHybridDecryptInternal alloc] initWithCCHybridDecrypt:std::move(st.value())];
   if (!hybrid) {
     if (error) {
       *error = TINKStatusToError(crypto::tink::util::Status(

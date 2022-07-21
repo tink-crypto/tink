@@ -43,7 +43,6 @@ using ::google::crypto::tink::JwtRsaSsaPssAlgorithm;
 using ::google::crypto::tink::JwtRsaSsaPssKeyFormat;
 using ::google::crypto::tink::JwtRsaSsaPssPrivateKey;
 using ::google::crypto::tink::JwtRsaSsaPssPublicKey;
-using ::google::crypto::tink::KeyData;
 using ::testing::Eq;
 using ::testing::Not;
 
@@ -60,7 +59,7 @@ JwtRsaSsaPssKeyFormat CreateKeyFormat(JwtRsaSsaPssAlgorithm algorithm,
   internal::SslUniquePtr<BIGNUM> e(BN_new());
   BN_set_word(e.get(), public_exponent);
   key_format.set_public_exponent(
-      internal::BignumToString(e.get(), BN_num_bytes(e.get())).ValueOrDie());
+      internal::BignumToString(e.get(), BN_num_bytes(e.get())).value());
   return key_format;
 }
 
@@ -124,7 +123,7 @@ TEST(JwtRsaSsaPssSignVerifyKeyManagerTest, CreatePrivateKeyAndValidate) {
       CreateKeyFormat(JwtRsaSsaPssAlgorithm::PS256, 2048, RSA_F4);
   util::StatusOr<JwtRsaSsaPssPrivateKey> key =
       JwtRsaSsaPssSignKeyManager().CreateKey(key_format);
-  ASSERT_THAT(key.status(), IsOk());
+  ASSERT_THAT(key, IsOk());
   EXPECT_EQ(key->version(), 0);
   EXPECT_EQ(key->public_key().algorithm(), key_format.algorithm());
   EXPECT_THAT(JwtRsaSsaPssSignKeyManager().ValidateKey(*key), IsOk());
@@ -139,7 +138,7 @@ TEST(JwtRsaSsaPssSignVerifyKeyManagerTest, CreatePublicKeyAndValidate) {
       CreateKeyFormat(JwtRsaSsaPssAlgorithm::PS256, 2048, RSA_F4);
   util::StatusOr<JwtRsaSsaPssPrivateKey> key =
       JwtRsaSsaPssSignKeyManager().CreateKey(key_format);
-  ASSERT_THAT(key.status(), IsOk());
+  ASSERT_THAT(key, IsOk());
   util::StatusOr<JwtRsaSsaPssPublicKey> public_key =
       JwtRsaSsaPssSignKeyManager().GetPublicKey(*key);
   EXPECT_THAT(JwtRsaSsaPssVerifyKeyManager().ValidateKey(*public_key), IsOk());
@@ -154,33 +153,33 @@ TEST(JwtRsaSsaPssSignVerifyKeyManagerTest, GetAndUsePrimitives) {
       CreateKeyFormat(JwtRsaSsaPssAlgorithm::PS256, 2048, RSA_F4);
   util::StatusOr<JwtRsaSsaPssPrivateKey> key =
       JwtRsaSsaPssSignKeyManager().CreateKey(key_format);
-  ASSERT_THAT(key.status(), IsOk());
+  ASSERT_THAT(key, IsOk());
 
   util::StatusOr<std::unique_ptr<JwtPublicKeySignInternal>> sign =
       JwtRsaSsaPssSignKeyManager().GetPrimitive<JwtPublicKeySignInternal>(*key);
-  ASSERT_THAT(sign.status(), IsOk());
+  ASSERT_THAT(sign, IsOk());
 
   util::StatusOr<RawJwt> raw_jwt =
       RawJwtBuilder().SetIssuer("issuer").WithoutExpiration().Build();
-  ASSERT_THAT(raw_jwt.status(), IsOk());
+  ASSERT_THAT(raw_jwt, IsOk());
 
   util::StatusOr<std::string> compact =
       (*sign)->SignAndEncodeWithKid(*raw_jwt, /*kid=*/absl::nullopt);
-  ASSERT_THAT(compact.status(), IsOk());
+  ASSERT_THAT(compact, IsOk());
 
   util::StatusOr<JwtValidator> validator = JwtValidatorBuilder()
                                                .ExpectIssuer("issuer")
                                                .AllowMissingExpiration()
                                                .Build();
-  ASSERT_THAT(validator.status(), IsOk());
+  ASSERT_THAT(validator, IsOk());
   util::StatusOr<std::unique_ptr<JwtPublicKeyVerifyInternal>> verify =
       JwtRsaSsaPssVerifyKeyManager().GetPrimitive<JwtPublicKeyVerifyInternal>(
           key->public_key());
-  ASSERT_THAT(verify.status(), IsOk());
+  ASSERT_THAT(verify, IsOk());
 
   util::StatusOr<VerifiedJwt> verified_jwt = (*verify)->VerifyAndDecodeWithKid(
       *compact, *validator, /*kid=*/absl::nullopt);
-  ASSERT_THAT(verified_jwt.status(), IsOk());
+  ASSERT_THAT(verified_jwt, IsOk());
   util::StatusOr<std::string> issuer = verified_jwt->GetIssuer();
   ASSERT_THAT(issuer, IsOkAndHolds("issuer"));
 
@@ -193,7 +192,7 @@ TEST(JwtRsaSsaPssSignVerifyKeyManagerTest, GetAndUsePrimitives) {
                                                 .ExpectIssuer("unknown")
                                                 .AllowMissingExpiration()
                                                 .Build();
-  ASSERT_THAT(validator2.status(), IsOk());
+  ASSERT_THAT(validator2, IsOk());
   EXPECT_FALSE(
       (*verify)
           ->VerifyAndDecodeWithKid(*compact, *validator2, /*kid=*/absl::nullopt)
@@ -202,7 +201,7 @@ TEST(JwtRsaSsaPssSignVerifyKeyManagerTest, GetAndUsePrimitives) {
   // Token with kid header
   util::StatusOr<std::string> token_with_kid =
       (*sign)->SignAndEncodeWithKid(*raw_jwt, kTestKid);
-  ASSERT_THAT(compact.status(), IsOk());
+  ASSERT_THAT(compact, IsOk());
   EXPECT_THAT((*verify)
                   ->VerifyAndDecodeWithKid(*token_with_kid, *validator,
                                            /*kid=*/absl::nullopt)
@@ -225,21 +224,21 @@ TEST(JwtRsaSsaPkcs1SignVerifyKeyManagerTest, GetAndUsePrimitivesWithCustomKid) {
       CreateKeyFormat(JwtRsaSsaPssAlgorithm::PS256, 2048, RSA_F4);
   util::StatusOr<JwtRsaSsaPssPrivateKey> key =
       JwtRsaSsaPssSignKeyManager().CreateKey(key_format);
-  ASSERT_THAT(key.status(), IsOk());
+  ASSERT_THAT(key, IsOk());
   key->mutable_public_key()->mutable_custom_kid()->set_value(
       "Lorem ipsum dolor sit amet, consectetur adipiscing elit");
 
   util::StatusOr<std::unique_ptr<JwtPublicKeySignInternal>> sign =
       JwtRsaSsaPssSignKeyManager().GetPrimitive<JwtPublicKeySignInternal>(*key);
-  ASSERT_THAT(sign.status(), IsOk());
+  ASSERT_THAT(sign, IsOk());
 
   util::StatusOr<RawJwt> raw_jwt =
       RawJwtBuilder().SetIssuer("issuer").WithoutExpiration().Build();
-  ASSERT_THAT(raw_jwt.status(), IsOk());
+  ASSERT_THAT(raw_jwt, IsOk());
 
   util::StatusOr<std::string> compact =
       (*sign)->SignAndEncodeWithKid(*raw_jwt, /*kid=*/absl::nullopt);
-  ASSERT_THAT(compact.status(), IsOk());
+  ASSERT_THAT(compact, IsOk());
 
   // parse header and check "kid"
   std::vector<absl::string_view> parts = absl::StrSplit(*compact, '.');
@@ -248,7 +247,7 @@ TEST(JwtRsaSsaPkcs1SignVerifyKeyManagerTest, GetAndUsePrimitivesWithCustomKid) {
   ASSERT_TRUE(DecodeHeader(parts[0], &json_header));
   util::StatusOr<google::protobuf::Struct> header =
       JsonStringToProtoStruct(json_header);
-  ASSERT_THAT(header.status(), IsOk());
+  ASSERT_THAT(header, IsOk());
   auto it = header->fields().find("kid");
   ASSERT_FALSE(it == header->fields().end());
   EXPECT_THAT(it->second.string_value(),
@@ -259,17 +258,17 @@ TEST(JwtRsaSsaPkcs1SignVerifyKeyManagerTest, GetAndUsePrimitivesWithCustomKid) {
                                                .ExpectIssuer("issuer")
                                                .AllowMissingExpiration()
                                                .Build();
-  ASSERT_THAT(validator.status(), IsOk());
+  ASSERT_THAT(validator, IsOk());
   util::StatusOr<std::unique_ptr<JwtPublicKeyVerifyInternal>> verify =
       JwtRsaSsaPssVerifyKeyManager().GetPrimitive<JwtPublicKeyVerifyInternal>(
           key->public_key());
-  ASSERT_THAT(verify.status(), IsOk());
+  ASSERT_THAT(verify, IsOk());
 
   util::StatusOr<VerifiedJwt> verified_jwt = (*verify)->VerifyAndDecodeWithKid(
       *compact, *validator, /*kid=*/absl::nullopt);
-  ASSERT_THAT(verified_jwt.status(), IsOk());
+  ASSERT_THAT(verified_jwt, IsOk());
   util::StatusOr<std::string> issuer = verified_jwt->GetIssuer();
-  ASSERT_THAT(issuer.status(), IsOk());
+  ASSERT_THAT(issuer, IsOk());
   EXPECT_THAT(*issuer, Eq("issuer"));
 
   // passing a kid when custom_kid is set should fail
@@ -282,11 +281,11 @@ TEST(JwtRsaSsaPkcs1SignVerifyKeyManagerTest, GetAndUsePrimitivesWithCustomKid) {
 
   // Test that custom kid is verified: validation should fail with other kid.
   key->mutable_public_key()->mutable_custom_kid()->set_value("other kid");
-  ASSERT_THAT(validator.status(), IsOk());
+  ASSERT_THAT(validator, IsOk());
   util::StatusOr<std::unique_ptr<JwtPublicKeyVerifyInternal>> other_verify =
       JwtRsaSsaPssVerifyKeyManager().GetPrimitive<JwtPublicKeyVerifyInternal>(
           key->public_key());
-  ASSERT_THAT(other_verify.status(), IsOk());
+  ASSERT_THAT(other_verify, IsOk());
   EXPECT_THAT(
       (*other_verify)
           ->VerifyAndDecodeWithKid(*compact, *validator, /*kid=*/absl::nullopt)
@@ -299,31 +298,31 @@ TEST(JwtRsaSsaPssSignVerifyKeyManagerTest, VerifyFailsWithDifferentKey) {
       CreateKeyFormat(JwtRsaSsaPssAlgorithm::PS256, 2048, RSA_F4);
   util::StatusOr<JwtRsaSsaPssPrivateKey> key1 =
       JwtRsaSsaPssSignKeyManager().CreateKey(key_format);
-  ASSERT_THAT(key1.status(), IsOk());
+  ASSERT_THAT(key1, IsOk());
 
   util::StatusOr<JwtRsaSsaPssPrivateKey> key2 =
       JwtRsaSsaPssSignKeyManager().CreateKey(key_format);
-  ASSERT_THAT(key2.status(), IsOk());
+  ASSERT_THAT(key2, IsOk());
   util::StatusOr<std::unique_ptr<JwtPublicKeySignInternal>> sign1 =
       JwtRsaSsaPssSignKeyManager().GetPrimitive<JwtPublicKeySignInternal>(
           *key1);
-  ASSERT_THAT(sign1.status(), IsOk());
+  ASSERT_THAT(sign1, IsOk());
 
   util::StatusOr<RawJwt> raw_jwt =
       RawJwtBuilder().SetIssuer("issuer").WithoutExpiration().Build();
-  ASSERT_THAT(raw_jwt.status(), IsOk());
+  ASSERT_THAT(raw_jwt, IsOk());
 
   util::StatusOr<std::string> compact =
       (*sign1)->SignAndEncodeWithKid(*raw_jwt, /*kid=*/absl::nullopt);
-  ASSERT_THAT(compact.status(), IsOk());
+  ASSERT_THAT(compact, IsOk());
 
   util::StatusOr<JwtValidator> validator =
       JwtValidatorBuilder().AllowMissingExpiration().Build();
-  ASSERT_THAT(validator.status(), IsOk());
+  ASSERT_THAT(validator, IsOk());
   util::StatusOr<std::unique_ptr<JwtPublicKeyVerifyInternal>> verify2 =
       JwtRsaSsaPssVerifyKeyManager().GetPrimitive<JwtPublicKeyVerifyInternal>(
           key2->public_key());
-  ASSERT_THAT(verify2.status(), IsOk());
+  ASSERT_THAT(verify2, IsOk());
 
   EXPECT_THAT(
       (*verify2)

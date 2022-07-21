@@ -20,15 +20,18 @@
 #include <cstring>
 #include <memory>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include "absl/algorithm/container.h"
 #include "absl/base/config.h"
 #include "absl/memory/memory.h"
 #include "absl/status/status.h"
+#include "absl/types/span.h"
 #include "openssl/err.h"
 #include "openssl/evp.h"
 #include "tink/aead.h"
+#include "tink/internal/aes_util.h"
 #include "tink/internal/util.h"
 #include "tink/subtle/random.h"
 #include "tink/subtle/subtle_util.h"
@@ -88,7 +91,7 @@ crypto::tink::util::StatusOr<util::SecretUniquePtr<AES_KEY>> InitAesKey(
     return util::Status(absl::StatusCode::kInvalidArgument,
                         "Invalid key value");
   }
-  return aeskey;
+  return std::move(aeskey);
 }
 
 }  // namespace
@@ -157,8 +160,8 @@ crypto::tink::util::StatusOr<std::unique_ptr<Aead>> AesEaxBoringSsl::New(
   if (!aeskey_or.ok()) {
     return aeskey_or.status();
   }
-  return {absl::WrapUnique(new AesEaxBoringSsl(
-      std::move(aeskey_or).ValueOrDie(), nonce_size_in_bytes))};
+  return {absl::WrapUnique(
+      new AesEaxBoringSsl(std::move(aeskey_or).value(), nonce_size_in_bytes))};
 }
 
 AesEaxBoringSsl::Block AesEaxBoringSsl::Pad(
@@ -216,37 +219,33 @@ AesEaxBoringSsl::Block AesEaxBoringSsl::Omac(absl::Span<const uint8_t> data,
   return mac;
 }
 
-void AesEaxBoringSsl::CtrCrypt(const Block& N, absl::Span<const uint8_t> in,
-                               uint8_t* out) const {
-  // in.data() MUST NOT be null
+util::Status AesEaxBoringSsl::CtrCrypt(const Block& N, absl::string_view in,
+                               absl::Span<char> out) const {
   // Make a copy of N, since BoringSsl changes ctr.
   uint8_t ctr[kBlockSize];
   std::copy_n(N.begin(), kBlockSize, ctr);
-  unsigned int num = 0;
-  Block ecount_buf;
-  ecount_buf.fill(0);
-  AES_ctr128_encrypt(in.data(), out, in.size(), aeskey_.get(), ctr,
-                     ecount_buf.data(), &num);
+  return internal::AesCtr128Crypt(in, ctr, aeskey_.get(), out);
 }
 
 crypto::tink::util::StatusOr<std::string> AesEaxBoringSsl::Encrypt(
-    absl::string_view plaintext, absl::string_view additional_data) const {
-  // BoringSSL expects a non-null pointer for plaintext and additional_data,
+    absl::string_view plaintext, absl::string_view associated_data) const {
+  // BoringSSL expects a non-null pointer for plaintext and associated_data,
   // regardless of whether the size is 0.
   plaintext = internal::EnsureStringNonNull(plaintext);
-  additional_data = internal::EnsureStringNonNull(additional_data);
+  associated_data = internal::EnsureStringNonNull(associated_data);
 
   size_t ciphertext_size = plaintext.size() + nonce_size_ + kTagSize;
   std::string ciphertext;
   ResizeStringUninitialized(&ciphertext, ciphertext_size);
   const std::string nonce = Random::GetRandomBytes(nonce_size_);
   const Block N = Omac(nonce, 0);
-  const Block H = Omac(additional_data, 1);
+  const Block H = Omac(associated_data, 1);
   uint8_t* ct_start = reinterpret_cast<uint8_t*>(&ciphertext[nonce_size_]);
-  CtrCrypt(N,
-           absl::MakeSpan(reinterpret_cast<const uint8_t*>(plaintext.data()),
-                          plaintext.size()),
-           ct_start);
+  util::Status res =
+      CtrCrypt(N, plaintext, absl::MakeSpan(ciphertext).subspan(nonce_size_));
+  if (!res.ok()) {
+    return res;
+  }
   Block mac = Omac(absl::MakeSpan(ct_start, plaintext.size()), 2);
   XorBlock(N.data(), &mac);
   XorBlock(H.data(), &mac);
@@ -256,10 +255,10 @@ crypto::tink::util::StatusOr<std::string> AesEaxBoringSsl::Encrypt(
 }
 
 crypto::tink::util::StatusOr<std::string> AesEaxBoringSsl::Decrypt(
-    absl::string_view ciphertext, absl::string_view additional_data) const {
-  // BoringSSL expects a non-null pointer for additional_data,
+    absl::string_view ciphertext, absl::string_view associated_data) const {
+  // BoringSSL expects a non-null pointer for associated_data,
   // regardless of whether the size is 0.
-  additional_data = internal::EnsureStringNonNull(additional_data);
+  associated_data = internal::EnsureStringNonNull(associated_data);
 
   size_t ct_size = ciphertext.size();
   if (ct_size < nonce_size_ + kTagSize) {
@@ -271,7 +270,7 @@ crypto::tink::util::StatusOr<std::string> AesEaxBoringSsl::Decrypt(
   absl::string_view encrypted = ciphertext.substr(nonce_size_, out_size);
   absl::string_view tag = ciphertext.substr(ct_size - kTagSize, kTagSize);
   const Block N = Omac(nonce, 0);
-  const Block H = Omac(additional_data, 1);
+  const Block H = Omac(associated_data, 1);
   Block mac = Omac(encrypted, 2);
   XorBlock(N.data(), &mac);
   XorBlock(H.data(), &mac);
@@ -279,13 +278,13 @@ crypto::tink::util::StatusOr<std::string> AesEaxBoringSsl::Decrypt(
   if (!EqualBlocks(mac.data(), sig)) {
     return util::Status(absl::StatusCode::kInvalidArgument, "Tag mismatch");
   }
-  std::string res;
-  ResizeStringUninitialized(&res, out_size);
-  CtrCrypt(N,
-           absl::MakeSpan(reinterpret_cast<const uint8_t*>(encrypted.data()),
-                          encrypted.size()),
-           reinterpret_cast<uint8_t*>(&res[0]));
-  return res;
+  std::string plaintext;
+  ResizeStringUninitialized(&plaintext, out_size);
+  util::Status res = CtrCrypt(N, encrypted, absl::MakeSpan(plaintext));
+  if (!res.ok()) {
+    return res;
+  }
+  return plaintext;
 }
 
 }  // namespace subtle

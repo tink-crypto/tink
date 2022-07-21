@@ -16,150 +16,43 @@
 
 package com.google.crypto.tink.signature;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertThrows;
-import static org.junit.Assert.fail;
+import static java.nio.charset.StandardCharsets.UTF_8;
 
-import com.google.crypto.tink.CryptoFormat;
+import com.google.crypto.tink.KeyTemplates;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.PublicKeySign;
 import com.google.crypto.tink.PublicKeyVerify;
-import com.google.crypto.tink.proto.EcdsaPrivateKey;
-import com.google.crypto.tink.proto.EcdsaSignatureEncoding;
-import com.google.crypto.tink.proto.EllipticCurveType;
-import com.google.crypto.tink.proto.HashType;
-import com.google.crypto.tink.proto.KeyData;
-import com.google.crypto.tink.proto.KeyStatusType;
-import com.google.crypto.tink.proto.Keyset.Key;
-import com.google.crypto.tink.proto.OutputPrefixType;
-import com.google.crypto.tink.subtle.Random;
-import com.google.crypto.tink.testing.TestUtil;
-import java.security.GeneralSecurityException;
-import java.util.Arrays;
-import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
 /** Unit tests for {@link PublicKeySignFactory}. */
 @RunWith(JUnit4.class)
-// TODO(quannguyen): Add more tests.
 public class PublicKeySignFactoryTest {
 
-  @Before
-  public void setUp() throws Exception {
+  @BeforeClass
+  public static void setUp() throws Exception {
     SignatureConfig.register();
   }
 
   @Test
-  public void testMultipleKeys() throws Exception {
-    EcdsaPrivateKey tinkPrivateKey =
-        TestUtil.generateEcdsaPrivKey(
-            EllipticCurveType.NIST_P521, HashType.SHA512, EcdsaSignatureEncoding.DER);
-    Key tink =
-        TestUtil.createKey(
-            TestUtil.createKeyData(
-                tinkPrivateKey,
-                new EcdsaSignKeyManager().getKeyType(),
-                KeyData.KeyMaterialType.ASYMMETRIC_PRIVATE),
-            1,
-            KeyStatusType.ENABLED,
-            OutputPrefixType.TINK);
+  @SuppressWarnings("deprecation") // This is a test that the deprecated function works.
+  public void deprecatedPublicKeySignFactoryGetPrimitive_sameAs_keysetHandleGetPrimitive()
+      throws Exception {
+    KeysetHandle privateHandle = KeysetHandle.generateNew(KeyTemplates.get("ECDSA_P256"));
+    KeysetHandle publicHandle = privateHandle.getPublicKeysetHandle();
 
-    EcdsaPrivateKey legacyPrivateKey =
-        TestUtil.generateEcdsaPrivKey(
-            EllipticCurveType.NIST_P256, HashType.SHA256, EcdsaSignatureEncoding.DER);
-    Key legacy =
-        TestUtil.createKey(
-            TestUtil.createKeyData(
-                legacyPrivateKey,
-                new EcdsaSignKeyManager().getKeyType(),
-                KeyData.KeyMaterialType.ASYMMETRIC_PRIVATE),
-            2,
-            KeyStatusType.ENABLED,
-            OutputPrefixType.LEGACY);
+    PublicKeySign factorySigner = PublicKeySignFactory.getPrimitive(privateHandle);
+    PublicKeySign handleSigner = privateHandle.getPrimitive(PublicKeySign.class);
 
-    EcdsaPrivateKey rawPrivateKey =
-        TestUtil.generateEcdsaPrivKey(
-            EllipticCurveType.NIST_P384, HashType.SHA512, EcdsaSignatureEncoding.DER);
-    Key raw =
-        TestUtil.createKey(
-            TestUtil.createKeyData(
-                rawPrivateKey,
-                new EcdsaSignKeyManager().getKeyType(),
-                KeyData.KeyMaterialType.ASYMMETRIC_PRIVATE),
-            3,
-            KeyStatusType.ENABLED,
-            OutputPrefixType.RAW);
+    PublicKeyVerify verifier = publicHandle.getPrimitive(PublicKeyVerify.class);
 
-    EcdsaPrivateKey crunchyPrivateKey =
-        TestUtil.generateEcdsaPrivKey(
-            EllipticCurveType.NIST_P384, HashType.SHA512, EcdsaSignatureEncoding.DER);
-    Key crunchy =
-        TestUtil.createKey(
-            TestUtil.createKeyData(
-                crunchyPrivateKey,
-                new EcdsaSignKeyManager().getKeyType(),
-                KeyData.KeyMaterialType.ASYMMETRIC_PRIVATE),
-            4,
-            KeyStatusType.ENABLED,
-            OutputPrefixType.CRUNCHY);
+    byte[] data = "data".getBytes(UTF_8);
+    byte[] factorySig = factorySigner.sign(data);
+    byte[] handleSig = handleSigner.sign(data);
 
-    Key[] keys = new Key[] {tink, legacy, raw, crunchy};
-    EcdsaPrivateKey[] privateKeys =
-        new EcdsaPrivateKey[] {tinkPrivateKey, legacyPrivateKey, rawPrivateKey, crunchyPrivateKey};
-
-    int j = keys.length;
-    for (int i = 0; i < j; i++) {
-      KeysetHandle keysetHandle =
-          TestUtil.createKeysetHandle(
-              TestUtil.createKeyset(
-                  keys[i], keys[(i + 1) % j], keys[(i + 2) % j], keys[(i + 3) % j]));
-      // Signs with the primary private key.
-      PublicKeySign signer = PublicKeySignFactory.getPrimitive(keysetHandle);
-      byte[] plaintext = Random.randBytes(1211);
-      byte[] sig = signer.sign(plaintext);
-      if (keys[i].getOutputPrefixType() != OutputPrefixType.RAW) {
-        byte[] prefix = Arrays.copyOfRange(sig, 0, CryptoFormat.NON_RAW_PREFIX_SIZE);
-        assertArrayEquals(prefix, CryptoFormat.getOutputPrefix(keys[i]));
-      }
-
-      // Verifying with the primary public key should work.
-      PublicKeyVerify verifier =
-          PublicKeyVerifyFactory.getPrimitive(
-              TestUtil.createKeysetHandle(
-                  TestUtil.createKeyset(
-                      TestUtil.createKey(
-                          TestUtil.createKeyData(
-                              privateKeys[i].getPublicKey(),
-                              new EcdsaVerifyKeyManager().getKeyType(),
-                              KeyData.KeyMaterialType.ASYMMETRIC_PUBLIC),
-                          keys[i].getKeyId(),
-                          KeyStatusType.ENABLED,
-                          keys[i].getOutputPrefixType()))));
-      try {
-        verifier.verify(sig, plaintext);
-      } catch (GeneralSecurityException ex) {
-        fail("Valid signature, should not throw exception");
-      }
-
-      // Verifying with a random public key should fail.
-      EcdsaPrivateKey randomPrivKey =
-          TestUtil.generateEcdsaPrivKey(
-              EllipticCurveType.NIST_P521, HashType.SHA512, EcdsaSignatureEncoding.DER);
-      final PublicKeyVerify verifier2 =
-          PublicKeyVerifyFactory.getPrimitive(
-              TestUtil.createKeysetHandle(
-                  TestUtil.createKeyset(
-                      TestUtil.createKey(
-                          TestUtil.createKeyData(
-                              randomPrivKey.getPublicKey(),
-                              new EcdsaVerifyKeyManager().getKeyType(),
-                              KeyData.KeyMaterialType.ASYMMETRIC_PUBLIC),
-                          keys[i].getKeyId(),
-                          KeyStatusType.ENABLED,
-                          keys[i].getOutputPrefixType()))));
-      assertThrows(GeneralSecurityException.class, () -> verifier2.verify(sig, plaintext));
-    }
+    verifier.verify(factorySig, data);
+    verifier.verify(handleSig, data);
   }
 }

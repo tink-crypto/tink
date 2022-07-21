@@ -107,9 +107,9 @@ cc_library(
         "//:key_manager",
         "//proto:aes_cmac_prf_cc_proto",
         "//proto:tink_cc_proto",
-        "//subtle/prf:prf_set_util",
         "//subtle:random",
         "//subtle:stateful_cmac_boringssl",
+        "//subtle/prf:prf_set_util",
         "//util:constants",
         "//util:errors",
         "//util:input_stream_util",
@@ -135,10 +135,10 @@ cc_library(
         "//internal:fips_utils",
         "//proto:hmac_prf_cc_proto",
         "//proto:tink_cc_proto",
-        "//subtle/prf:prf_set_util",
         "//subtle:common_enums",
         "//subtle:random",
         "//subtle:stateful_hmac_boringssl",
+        "//subtle/prf:prf_set_util",
         "//util:constants",
         "//util:enums",
         "//util:errors",
@@ -272,6 +272,28 @@ cc_test(
         "//util:test_matchers",
         "//util:test_util",
         "@boringssl//:crypto",
+        "@com_google_absl//absl/status",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_library(
+    name = "failing_prfset",
+    srcs = ["failing_prfset.cc"],
+    hdrs = ["failing_prfset.h"],
+    include_prefix = "tink/prf",
+    deps = [
+        ":prf_set",
+        "@com_google_absl//absl/strings",
+    ],
+)
+
+cc_test(
+    name = "failing_prfset_test",
+    srcs = ["failing_prfset_test.cc"],
+    deps = [
+        ":failing_prfset",
+        "//util:test_matchers",
         "@com_google_absl//absl/status",
         "@com_google_googletest//:gtest_main",
     ],

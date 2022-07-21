@@ -18,6 +18,7 @@
 
 #include <algorithm>
 #include <cstring>
+#include <utility>
 #include <vector>
 
 #include "absl/memory/memory.h"
@@ -87,7 +88,7 @@ crypto::tink::util::StatusOr<int> BufferedInputStream::Next(const void** data) {
     status_ = next_result.status();
     return status_;
   }
-  size_t count_read = next_result.ValueOrDie();
+  size_t count_read = next_result.value();
   if (buffer_.size() < count_in_buffer_ + count_read) {
     buffer_.resize(buffer_.size() + std::max(buffer_.size(), count_read));
   }

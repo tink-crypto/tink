@@ -294,7 +294,86 @@ describe('elliptic curves test', function() {
     }
   });
 
-  it('point encode decode', function() {
+  it('point encode, compressed', () => {
+    for (const test of TEST_VECTORS) {
+      const format = EllipticCurves.formatFromString(test.format);
+      if (format !== EllipticCurves.PointFormatType.COMPRESSED) {
+        // TODO(b/214598739): Investigate compatibility of other formats with
+        // Java test vectors.
+        continue;
+      }
+      const point: JsonWebKey = {
+        kty: 'EC',
+        crv: test.curve,
+        x: Bytes.toBase64(
+            EllipticCurves.integerToByteArray(BigInt('0x' + test.x)),
+            /* websafe = */ true),
+        y: Bytes.toBase64(
+            EllipticCurves.integerToByteArray(BigInt('0x' + test.y)),
+            /* websafe = */ true),
+        ext: true,
+      };
+
+      const encodedPoint =
+          EllipticCurves.pointEncode(assertExists(point.crv), format, point);
+
+      expect(Bytes.toHex(encodedPoint)).toEqual(test.encoded);
+    }
+  });
+
+  it('point decode, compressed', () => {
+    for (const test of TEST_VECTORS) {
+      const format = EllipticCurves.formatFromString(test.format);
+      if (format !== EllipticCurves.PointFormatType.COMPRESSED) {
+        // TODO(b/214598739): Investigate compatibility of other formats with
+        // Java test vectors.
+        continue;
+      }
+      const decodedPoint = EllipticCurves.pointDecode(
+          test.curve, format, Bytes.fromHex(test.encoded));
+      // NOTE: Any leading zero inserted by Bytes.toHex() must be removed.
+      const decodedX =
+          Bytes.toHex(Bytes.fromBase64(assertExists(decodedPoint.x), true))
+              .replace(/^0?/, '');
+      const decodedY =
+          Bytes.toHex(Bytes.fromBase64(assertExists(decodedPoint.y), true))
+              .replace(/^0?/, '');
+
+      expect(decodedX).toEqual(test.x);
+      expect(decodedY).toEqual(test.y);
+    }
+  });
+
+  it('point encode decode', () => {
+    for (const test of TEST_VECTORS) {
+      const format = EllipticCurves.formatFromString(test.format);
+      if (format !== EllipticCurves.PointFormatType.COMPRESSED) {
+        // TODO(b/214598739): Investigate compatibility of other formats with
+        // Java test vectors.
+        continue;
+      }
+      const point: JsonWebKey = {
+        kty: 'EC',
+        crv: test.curve,
+        x: Bytes.toBase64(
+            EllipticCurves.integerToByteArray(BigInt('0x' + test.x)),
+            /* websafe = */ true),
+        y: Bytes.toBase64(
+            EllipticCurves.integerToByteArray(BigInt('0x' + test.y)),
+            /* websafe = */ true),
+        ext: true,
+      };
+
+      const encodedPoint =
+          EllipticCurves.pointEncode(assertExists(point.crv), format, point);
+      const decodedPoint = EllipticCurves.pointDecode(
+          assertExists(point.crv), format, encodedPoint);
+
+      expect(decodedPoint).toEqual(point);
+    }
+  });
+
+  it('point encode decode, random points', () => {
     for (const format of
              [EllipticCurves.PointFormatType.UNCOMPRESSED,
               EllipticCurves.PointFormatType.DO_NOT_USE_CRUNCHY_UNCOMPRESSED]) {
@@ -508,3 +587,273 @@ const INVALID_DER_ECDSA_SIGNATURES: string[] = [
   '30060201ff020101',    // no extra zero when highest bit of r is set
   '30060201010201ff',    // no extra zero when highest bit of s is set
 ];
+
+// Following test vectors copied from 'testVectors2' variable in
+// /src/test/java/com/google/crypto/tink/subtle/EllipticCurvesTest.java.
+class TestVector {
+  constructor(
+      readonly curve: string, readonly format: string, readonly x: string,
+      readonly y: string, readonly encoded: string) {}
+}
+
+const TEST_VECTORS:
+    TestVector[] =
+        [
+          new TestVector(
+              /* curve = */ 'P-256',
+              /* format = */ 'UNCOMPRESSED',
+              /* x = */
+              'b0cfc7bc02fc980d858077552947ffb449b10df8949dee4e56fe21e016dcb25a',
+              /* y = */
+              '1886ccdca5487a6772f9401888203f90587cc00a730e2b83d5c6f89b3b568df7',
+              /* encoded = */
+              '04b0cfc7bc02fc980d858077552947ffb449b10df8949dee4e56fe21e016dcb25a1886ccdca5487a6772f9401888203f90587cc00a730e2b83d5c6f89b3b568df7',
+              ),
+          new TestVector(
+              /* curve = */ 'P-256',
+              /* format = */ 'DO_NOT_USE_CRUNCHY_UNCOMPRESSED',
+              /* x = */
+              'b0cfc7bc02fc980d858077552947ffb449b10df8949dee4e56fe21e016dcb25a',
+              /* y = */
+              '1886ccdca5487a6772f9401888203f90587cc00a730e2b83d5c6f89b3b568df7',
+              /* encoded = */
+              'b0cfc7bc02fc980d858077552947ffb449b10df8949dee4e56fe21e016dcb25a1886ccdca5487a6772f9401888203f90587cc00a730e2b83d5c6f89b3b568df7',
+              ),
+          new TestVector(
+              /* curve = */ 'P-256',
+              /* format = */ 'COMPRESSED',
+              /* x = */
+              'b0cfc7bc02fc980d858077552947ffb449b10df8949dee4e56fe21e016dcb25a',
+              /* y = */
+              '1886ccdca5487a6772f9401888203f90587cc00a730e2b83d5c6f89b3b568df7',
+              /* encoded = */
+              '03b0cfc7bc02fc980d858077552947ffb449b10df8949dee4e56fe21e016dcb25a',
+              ),
+          new TestVector(
+              /* curve = */ 'P-256',
+              /* format = */ 'UNCOMPRESSED',
+              /* x = */ '0',
+              /* y = */
+              '66485c780e2f83d72433bd5d84a06bb6541c2af31dae871728bf856a174f93f4',
+              /* encoded = */
+              '04000000000000000000000000000000000000000000000000000000000000000066485c780e2f83d72433bd5d84a06bb6541c2af31dae871728bf856a174f93f4',
+              ),
+          new TestVector(
+              /* curve = */ 'P-256',
+              /* format = */ 'DO_NOT_USE_CRUNCHY_UNCOMPRESSED',
+              /* x = */ '0',
+              /* y = */
+              '66485c780e2f83d72433bd5d84a06bb6541c2af31dae871728bf856a174f93f4',
+              /* encoded = */
+              '000000000000000000000000000000000000000000000000000000000000000066485c780e2f83d72433bd5d84a06bb6541c2af31dae871728bf856a174f93f4',
+              ),
+          new TestVector(
+              /* curve = */ 'P-256',
+              /* format = */ 'COMPRESSED',
+              /* x = */ '0',
+              /* y = */
+              '66485c780e2f83d72433bd5d84a06bb6541c2af31dae871728bf856a174f93f4',
+              /* encoded = */
+              '020000000000000000000000000000000000000000000000000000000000000000',
+              ),
+          new TestVector(
+              /* curve = */ 'P-256',
+              /* format = */ 'UNCOMPRESSED',
+              /* x = */
+              'ffffffff00000001000000000000000000000000fffffffffffffffffffffffc',
+              /* y = */
+              '19719bebf6aea13f25c96dfd7c71f5225d4c8fc09eb5a0ab9f39e9178e55c121',
+              /* encoded = */
+              '04ffffffff00000001000000000000000000000000fffffffffffffffffffffffc19719bebf6aea13f25c96dfd7c71f5225d4c8fc09eb5a0ab9f39e9178e55c121',
+              ),
+          new TestVector(
+              /* curve = */ 'P-256',
+              /* format = */ 'DO_NOT_USE_CRUNCHY_UNCOMPRESSED',
+              /* x = */
+              'ffffffff00000001000000000000000000000000fffffffffffffffffffffffc',
+              /* y = */
+              '19719bebf6aea13f25c96dfd7c71f5225d4c8fc09eb5a0ab9f39e9178e55c121',
+              /* encoded = */
+              'ffffffff00000001000000000000000000000000fffffffffffffffffffffffc19719bebf6aea13f25c96dfd7c71f5225d4c8fc09eb5a0ab9f39e9178e55c121',
+              ),
+          new TestVector(
+              /* curve = */ 'P-256',
+              /* format = */ 'COMPRESSED',
+              /* x = */
+              'ffffffff00000001000000000000000000000000fffffffffffffffffffffffc',
+              /* y = */
+              '19719bebf6aea13f25c96dfd7c71f5225d4c8fc09eb5a0ab9f39e9178e55c121',
+              /* encoded = */
+              '03ffffffff00000001000000000000000000000000fffffffffffffffffffffffc',
+              ),
+          new TestVector(
+              /* curve = */ 'P-384',
+              /* format = */ 'UNCOMPRESSED',
+              /* x = */
+              'aa87ca22be8b05378eb1c71ef320ad746e1d3b628ba79b9859f741e082542a385502f25dbf55296c3a545e3872760ab7',
+              /* y = */
+              '3617de4a96262c6f5d9e98bf9292dc29f8f41dbd289a147ce9da3113b5f0b8c00a60b1ce1d7e819d7a431d7c90ea0e5f',
+              /* encoded = */
+              '04aa87ca22be8b05378eb1c71ef320ad746e1d3b628ba79b9859f741e082542a385502f25dbf55296c3a545e3872760ab73617de4a96262c6f5d9e98bf9292dc29f8f41dbd289a147ce9da3113b5f0b8c00a60b1ce1d7e819d7a431d7c90ea0e5f',
+              ),
+          new TestVector(
+              /* curve = */ 'P-384',
+              /* format = */ 'COMPRESSED',
+              /* x = */
+              'aa87ca22be8b05378eb1c71ef320ad746e1d3b628ba79b9859f741e082542a385502f25dbf55296c3a545e3872760ab7',
+              /* y = */
+              '3617de4a96262c6f5d9e98bf9292dc29f8f41dbd289a147ce9da3113b5f0b8c00a60b1ce1d7e819d7a431d7c90ea0e5f',
+              /* encoded = */
+              '03aa87ca22be8b05378eb1c71ef320ad746e1d3b628ba79b9859f741e082542a385502f25dbf55296c3a545e3872760ab7',
+              ),
+          new TestVector(
+              /* curve = */ 'P-384',
+              /* format = */ 'UNCOMPRESSED',
+              /* x = */ '0',
+              /* y = */
+              '3cf99ef04f51a5ea630ba3f9f960dd593a14c9be39fd2bd215d3b4b08aaaf86bbf927f2c46e52ab06fb742b8850e521e',
+              /* encoded = */
+              '040000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000003cf99ef04f51a5ea630ba3f9f960dd593a14c9be39fd2bd215d3b4b08aaaf86bbf927f2c46e52ab06fb742b8850e521e',
+              ),
+          new TestVector(
+              /* curve = */ 'P-384',
+              /* format = */ 'COMPRESSED',
+              /* x = */ '0',
+              /* y = */
+              '3cf99ef04f51a5ea630ba3f9f960dd593a14c9be39fd2bd215d3b4b08aaaf86bbf927f2c46e52ab06fb742b8850e521e',
+              /* encoded = */
+              '02000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000',
+              ),
+          new TestVector(
+              /* curve = */ 'P-384',
+              /* format = */ 'UNCOMPRESSED',
+              /* x = */ '2',
+              /* y = */
+              '732152442fb6ee5c3e6ce1d920c059bc623563814d79042b903ce60f1d4487fccd450a86da03f3e6ed525d02017bfdb3',
+              /* encoded = */
+              '04000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000002732152442fb6ee5c3e6ce1d920c059bc623563814d79042b903ce60f1d4487fccd450a86da03f3e6ed525d02017bfdb3',
+              ),
+          new TestVector(
+              /* curve = */ 'P-384',
+              /* format = */ 'COMPRESSED',
+              /* x = */ '2',
+              /* y = */
+              '732152442fb6ee5c3e6ce1d920c059bc623563814d79042b903ce60f1d4487fccd450a86da03f3e6ed525d02017bfdb3',
+              /* encoded = */
+              '03000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000002',
+              ),
+          new TestVector(
+              /* curve = */ 'P-384',
+              /* format = */ 'UNCOMPRESSED',
+              /* x = */
+              'fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffeffffffff0000000000000000fffffffc',
+              /* y = */
+              '2de9de09a95b74e6b2c430363e1afb8dff7164987a8cfe0a0d5139250ac02f797f81092a9bdc0e09b574a8f43bf80c17',
+              /* encoded = */
+              '04fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffeffffffff0000000000000000fffffffc2de9de09a95b74e6b2c430363e1afb8dff7164987a8cfe0a0d5139250ac02f797f81092a9bdc0e09b574a8f43bf80c17',
+              ),
+          new TestVector(
+              /* curve = */ 'P-384',
+              /* format = */ 'COMPRESSED',
+              /* x = */
+              'fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffeffffffff0000000000000000fffffffc',
+              /* y = */
+              '2de9de09a95b74e6b2c430363e1afb8dff7164987a8cfe0a0d5139250ac02f797f81092a9bdc0e09b574a8f43bf80c17',
+              /* encoded = */
+              '03fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffeffffffff0000000000000000fffffffc',
+              ),
+          new TestVector(
+              /* curve = */ 'P-521',
+              /* format = */ 'UNCOMPRESSED',
+              /* x = */
+              'c6858e06b70404e9cd9e3ecb662395b4429c648139053fb521f828af606b4d3dbaa14b5e77efe75928fe1dc127a2ffa8de3348b3c1856a429bf97e7e31c2e5bd66',
+              /* y = */
+              '11839296a789a3bc0045c8a5fb42c7d1bd998f54449579b446817afbd17273e662c97ee72995ef42640c550b9013fad0761353c7086a272c24088be94769fd16650',
+              /* encoded = */
+              '0400c6858e06b70404e9cd9e3ecb662395b4429c648139053fb521f828af606b4d3dbaa14b5e77efe75928fe1dc127a2ffa8de3348b3c1856a429bf97e7e31c2e5bd66011839296a789a3bc0045c8a5fb42c7d1bd998f54449579b446817afbd17273e662c97ee72995ef42640c550b9013fad0761353c7086a272c24088be94769fd16650',
+              ),
+          new TestVector(
+              /* curve = */ 'P-521',
+              /* format = */ 'COMPRESSED',
+              /* x = */
+              'c6858e06b70404e9cd9e3ecb662395b4429c648139053fb521f828af606b4d3dbaa14b5e77efe75928fe1dc127a2ffa8de3348b3c1856a429bf97e7e31c2e5bd66',
+              /* y = */
+              '11839296a789a3bc0045c8a5fb42c7d1bd998f54449579b446817afbd17273e662c97ee72995ef42640c550b9013fad0761353c7086a272c24088be94769fd16650',
+              /* encoded = */
+              '0200c6858e06b70404e9cd9e3ecb662395b4429c648139053fb521f828af606b4d3dbaa14b5e77efe75928fe1dc127a2ffa8de3348b3c1856a429bf97e7e31c2e5bd66',
+              ),
+          new TestVector(
+              /* curve = */ 'P-521',
+              /* format = */ 'UNCOMPRESSED',
+              /* x = */ '0',
+              /* y = */
+              'd20ec9fea6b577c10d26ca1bb446f40b299e648b1ad508aad068896fee3f8e614bc63054d5772bf01a65d412e0bcaa8e965d2f5d332d7f39f846d440ae001f4f87',
+              /* encoded = */
+              '0400000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000d20ec9fea6b577c10d26ca1bb446f40b299e648b1ad508aad068896fee3f8e614bc63054d5772bf01a65d412e0bcaa8e965d2f5d332d7f39f846d440ae001f4f87',
+              ),
+          new TestVector(
+              /* curve = */ 'P-521',
+              /* format = */ 'COMPRESSED',
+              /* x = */ '0',
+              /* y = */
+              'd20ec9fea6b577c10d26ca1bb446f40b299e648b1ad508aad068896fee3f8e614bc63054d5772bf01a65d412e0bcaa8e965d2f5d332d7f39f846d440ae001f4f87',
+              /* encoded = */
+              '03000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000',
+              ),
+          new TestVector(
+              /* curve = */ 'P-521',
+              /* format = */ 'UNCOMPRESSED',
+              /* x = */ '1',
+              /* y = */
+              '10e59be93c4f269c0269c79e2afd65d6aeaa9b701eacc194fb3ee03df47849bf550ec636ebee0ddd4a16f1cd9406605af38f584567770e3f272d688c832e843564',
+              /* encoded = */
+              '040000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000010010e59be93c4f269c0269c79e2afd65d6aeaa9b701eacc194fb3ee03df47849bf550ec636ebee0ddd4a16f1cd9406605af38f584567770e3f272d688c832e843564',
+              ),
+          new TestVector(
+              /* curve = */ 'P-521',
+              /* format = */ 'COMPRESSED',
+              /* x = */ '1',
+              /* y = */
+              '10e59be93c4f269c0269c79e2afd65d6aeaa9b701eacc194fb3ee03df47849bf550ec636ebee0ddd4a16f1cd9406605af38f584567770e3f272d688c832e843564',
+              /* encoded = */
+              '02000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001',
+              ),
+          new TestVector(
+              /* curve = */ 'P-521',
+              /* format = */ 'UNCOMPRESSED',
+              /* x = */ '2',
+              /* y = */
+              'd9254fdf800496acb33790b103c5ee9fac12832fe546c632225b0f7fce3da4574b1a879b623d722fa8fc34d5fc2a8731aad691a9a8bb8b554c95a051d6aa505acf',
+              /* encoded = */
+              '0400000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000200d9254fdf800496acb33790b103c5ee9fac12832fe546c632225b0f7fce3da4574b1a879b623d722fa8fc34d5fc2a8731aad691a9a8bb8b554c95a051d6aa505acf',
+              ),
+          new TestVector(
+              /* curve = */ 'P-521',
+              /* format = */ 'COMPRESSED',
+              /* x = */ '2',
+              /* y = */
+              'd9254fdf800496acb33790b103c5ee9fac12832fe546c632225b0f7fce3da4574b1a879b623d722fa8fc34d5fc2a8731aad691a9a8bb8b554c95a051d6aa505acf',
+              /* encoded = */
+              '03000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000002',
+              ),
+          new TestVector(
+              /* curve = */ 'P-521',
+              /* format = */ 'UNCOMPRESSED',
+              /* x = */
+              '1fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffd',
+              /* y = */
+              '10e59be93c4f269c0269c79e2afd65d6aeaa9b701eacc194fb3ee03df47849bf550ec636ebee0ddd4a16f1cd9406605af38f584567770e3f272d688c832e843564',
+              /* encoded = */
+              '0401fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffd0010e59be93c4f269c0269c79e2afd65d6aeaa9b701eacc194fb3ee03df47849bf550ec636ebee0ddd4a16f1cd9406605af38f584567770e3f272d688c832e843564',
+              ),
+          new TestVector(
+              /* curve = */ 'P-521',
+              /* format = */ 'COMPRESSED',
+              /* x = */
+              '1fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffd',
+              /* y = */
+              '10e59be93c4f269c0269c79e2afd65d6aeaa9b701eacc194fb3ee03df47849bf550ec636ebee0ddd4a16f1cd9406605af38f584567770e3f272d688c832e843564',
+              /* encoded = */
+              '0201fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffd',
+              )
+        ];

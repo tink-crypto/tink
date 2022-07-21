@@ -16,6 +16,9 @@
 
 #include "tink/hybrid/ecies_aead_hkdf_hybrid_encrypt.h"
 
+#include <string>
+#include <utility>
+
 #include "gtest/gtest.h"
 #include "absl/memory/memory.h"
 #include "tink/aead/aes_gcm_key_manager.h"
@@ -83,8 +86,8 @@ TEST_F(EciesAeadHkdfHybridEncryptTest, testInvalidKeys) {
 
   {  // Unsupported DEM key type.
     EllipticCurveType curve = EllipticCurveType::NIST_P256;
-    auto test_key = internal::NewEcKey(
-        util::Enums::ProtoToSubtle(curve)).ValueOrDie();
+    auto test_key =
+        internal::NewEcKey(util::Enums::ProtoToSubtle(curve)).value();
     EciesAeadHkdfPublicKey recipient_key;
     recipient_key.set_version(0);
     recipient_key.set_x(test_key.pub_x);
@@ -138,7 +141,7 @@ TEST_F(EciesAeadHkdfHybridEncryptTest, testBasic) {
           ASSERT_TRUE(result.ok()) << result.status()
                                    << ecies_key.SerializeAsString();
           std::unique_ptr<HybridEncrypt> hybrid_encrypt(
-              std::move(result.ValueOrDie()));
+              std::move(result.value()));
 
           // Use the primitive.
           auto encrypt_result =

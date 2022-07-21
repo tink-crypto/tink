@@ -31,7 +31,7 @@ You can then encrypt a file with:
 $ echo "some data" > testdata.txt
 
 $ ./bazel-bin/streaming_aead/streaming_aead --mode encrypt \
-    --keyset_path streaming_aead_keyset.json \
+    --keyset_path ./streaming_aead/streaming_aead_keyset.json \
     --input_path testdata.txt \
     --output_path testdata.txt.ciphertext
 ```
@@ -40,7 +40,7 @@ And then decrypt the the output with:
 
 ```shell
 $ ./bazel-bin/streaming_aead/streaming_aead --mode decrypt \
-    --keyset_path streaming_aead_keyset.json \
+    --keyset_path ./streaming_aead/streaming_aead_keyset.json \
     --input_path testdata.txt.ciphertext \
     --output_path testdata.txt.plaintext
 

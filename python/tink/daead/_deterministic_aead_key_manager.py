@@ -40,7 +40,7 @@ class _DeterministicAeadCcToPyWrapper(_deterministic_aead.DeterministicAead):
 
 
 def register():
-  """Registers all Hybrid key managers and wrapper in the Python Registry."""
+  """Registers all deterministic AEAD key managers and the wrapper in the Python Registry."""
   tink_bindings.register()
 
   type_url = 'type.googleapis.com/google.crypto.tink.AesSivKey'

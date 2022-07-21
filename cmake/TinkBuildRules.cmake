@@ -34,11 +34,6 @@
 
 include(CMakeParseArguments)
 
-if (NOT ${CMAKE_VERSION} VERSION_LESS 3.9)
-  include(GoogleTest)
-endif()
-
-
 if (TINK_BUILD_TESTS)
   enable_testing()
 endif()
@@ -48,12 +43,17 @@ if (NOT DEFINED TINK_GENFILE_DIR)
 endif()
 
 if (NOT DEFINED TINK_CXX_STANDARD)
- set(TINK_CXX_STANDARD 11)
+  set(TINK_CXX_STANDARD 11)
+  if (DEFINED CMAKE_CXX_STANDARD_REQUIRED AND CMAKE_CXX_STANDARD_REQUIRED AND DEFINED CMAKE_CXX_STANDARD)
+    set(TINK_CXX_STANDARD ${CMAKE_CXX_STANDARD})
+  endif()
 endif()
 
 list(APPEND TINK_INCLUDE_DIRS "${TINK_GENFILE_DIR}")
 
 set(TINK_IDE_FOLDER "Tink")
+
+set(TINK_TARGET_EXCLUDE_IF_OPENSSL "exclude_if_openssl")
 
 # Declare the beginning of a new Tink library namespace.
 #
@@ -96,13 +96,21 @@ function(tink_cc_library)
   cmake_parse_arguments(PARSE_ARGV 0 tink_cc_library
     "PUBLIC"
     "NAME"
-    "SRCS;DEPS"
+    "SRCS;DEPS;TAGS"
   )
 
   if (NOT DEFINED TINK_MODULE)
     message(FATAL_ERROR
             "TINK_MODULE not defined, perhaps you are missing a tink_module() statement?")
   endif()
+
+  # Check if this target must be skipped. Currently the only reason for this to
+  # happen is incompatibility with OpenSSL, when used.
+  foreach(_tink_cc_library_tag ${tink_cc_library_TAGS})
+    if (${_tink_cc_library_tag} STREQUAL ${TINK_TARGET_EXCLUDE_IF_OPENSSL} AND TINK_USE_SYSTEM_OPENSSL)
+      return()
+    endif()
+  endforeach()
 
   # We replace :: with __ in targets, because :: may not appear in target names.
   # However, the module name should still span multiple name spaces.
@@ -161,7 +169,7 @@ function(tink_cc_test)
   cmake_parse_arguments(PARSE_ARGV 0 tink_cc_test
     ""
     "NAME"
-    "SRCS;DEPS;DATA"
+    "SRCS;DEPS;DATA;TAGS"
   )
 
   if (NOT TINK_BUILD_TESTS)
@@ -171,6 +179,14 @@ function(tink_cc_test)
   if (NOT DEFINED TINK_MODULE)
     message(FATAL_ERROR "TINK_MODULE not defined")
   endif()
+
+  # Check if this target must be skipped. Currently the only reason for this to
+  # happen is incompatibility with OpenSSL, when used.
+  foreach(_tink_cc_test_tag ${tink_cc_test_TAGS})
+    if (${_tink_cc_test_tag} STREQUAL ${TINK_TARGET_EXCLUDE_IF_OPENSSL} AND TINK_USE_SYSTEM_OPENSSL)
+      return()
+    endif()
+  endforeach()
 
   # We replace :: with __ in targets, because :: may not appear in target names.
   # However, the module name should still span multiple name spaces.
@@ -192,11 +208,9 @@ function(tink_cc_test)
   set_property(TARGET ${_target_name} PROPERTY CXX_STANDARD ${TINK_CXX_STANDARD})
   set_property(TARGET ${_target_name} PROPERTY CXX_STANDARD_REQUIRED true)
 
-  if (${CMAKE_VERSION} VERSION_LESS 3.9)
-    add_test(NAME ${_target_name} COMMAND ${_target_name} WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
-  else()
-    gtest_discover_tests(${_target_name} WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
-  endif()
+  # Note: This was preferred over using gtest_discover_tests because of [1].
+  # [1] https://gitlab.kitware.com/cmake/cmake/-/issues/23039
+  add_test(NAME ${_target_name} COMMAND ${_target_name} WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
 endfunction(tink_cc_test)
 
 # Declare a C++ Proto library.

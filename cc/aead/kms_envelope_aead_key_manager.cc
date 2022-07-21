@@ -16,19 +16,15 @@
 
 #include "tink/aead/kms_envelope_aead_key_manager.h"
 
+#include <memory>
+#include <string>
 #include <utility>
 
-#include "absl/memory/memory.h"
-#include "absl/strings/string_view.h"
 #include "tink/aead.h"
 #include "tink/aead/kms_envelope_aead.h"
 #include "tink/kms_client.h"
 #include "tink/kms_clients.h"
-#include "tink/util/errors.h"
-#include "tink/util/protobuf_helper.h"
-#include "tink/util/status.h"
 #include "tink/util/statusor.h"
-#include "tink/util/validation.h"
 #include "proto/kms_envelope.pb.h"
 
 namespace crypto {
@@ -42,10 +38,10 @@ StatusOr<std::unique_ptr<Aead>> KmsEnvelopeAeadKeyManager::AeadFactory::Create(
   const auto& kek_uri = key.params().kek_uri();
   auto kms_client_result = KmsClients::Get(kek_uri);
   if (!kms_client_result.ok()) return kms_client_result.status();
-  auto aead_result = kms_client_result.ValueOrDie()->GetAead(kek_uri);
+  auto aead_result = kms_client_result.value()->GetAead(kek_uri);
   if (!aead_result.ok()) return aead_result.status();
   return KmsEnvelopeAead::New(key.params().dek_template(),
-                              std::move(aead_result.ValueOrDie()));
+                              std::move(aead_result.value()));
 }
 
 }  // namespace tink

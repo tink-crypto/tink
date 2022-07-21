@@ -17,44 +17,39 @@ import os
 import subprocess
 import time
 
-from typing import List
+from typing import List, Optional
 from absl import logging
 import grpc
 import portpicker
 
 from tink.proto import tink_pb2
-from proto.testing import testing_api_pb2
-from proto.testing import testing_api_pb2_grpc
-from tink.testing import helper
 from util import _primitives
+from proto import testing_api_pb2
+from proto import testing_api_pb2_grpc
 
-# Server paths are relative to tink_root_path(), which can be set manually by:
-# bazel test util:testing_servers_test --test_env TINK_SRC_PATH=/tmp/tink
+# Server paths are relative to a root folder where all the server are located.
+# It can be set manually as follows:
+#   bazel test util:testing_servers_test \
+#     --test_env TINK_CROSS_LANG_ROOT_PATH=<path to the root folder>
 _SERVER_PATHS = {
-    'cc': [
-        'testing/cc/bazel-bin/testing_server',
-        'testing/cc/testing_server'
-    ],
-    'go': [
-        'testing/go/bazel-bin/testing_server_/testing_server',
-        'testing/go/testing_server'
-    ],
+    'cc': ['cc/bazel-bin/testing_server', 'cc/testing_server'],
+    'go': ['go/bazel-bin/testing_server_/testing_server', 'go/testing_server'],
     'java': [
-        'testing/java_src/bazel-bin/testing_server_deploy.jar',
-        'testing/java_src/testing_server'
+        'java_src/bazel-bin/testing_server_deploy.jar',
+        'java_src/testing_server'
     ],
-    'python': [
-        'testing/python/bazel-bin/testing_server',
-        'testing/python/testing_server',
-    ]
+    'python': ['python/bazel-bin/testing_server', 'python/testing_server']
 }
 
 # All languages that have a testing server
 LANGUAGES = list(_SERVER_PATHS.keys())
 
-# location of the testing_server java binary, relative to tink_root_path()
-_JAVA_PATH = (
-    'testing/java_src/bazel-bin/testing_server.runfiles/local_jdk/bin/java')
+KEYSET_READER_WRITER_TYPES = [('KEYSET_READER_BINARY', 'KEYSET_WRITER_BINARY'),
+                              ('KEYSET_READER_JSON', 'KEYSET_WRITER_JSON')]
+
+# location of the testing_server java binary, relative to the root folder where
+# all the server are located.
+_JAVA_PATH = ('java_src/bazel-bin/testing_server.runfiles/local_jdk/bin/java')
 
 _PRIMITIVE_STUBS = {
     'aead': testing_api_pb2_grpc.AeadStub,
@@ -78,13 +73,47 @@ SUPPORTED_LANGUAGES_BY_PRIMITIVE = {
     'mac': ['cc', 'go', 'java', 'python'],
     'signature': ['cc', 'go', 'java', 'python'],
     'prf': ['cc', 'java', 'go', 'python'],
-    'jwt': ['cc', 'java', 'python'],
+    'jwt': ['cc', 'java', 'go', 'python'],
 }
+
+_RELATIVE_ROOT_PATH = 'tink_base/testing'
+
+
+def _root_path() -> str:
+  """Return the root path where server binaries are located.
+
+  This root path can be set in the TINK_CROSS_LANG_ROOT_PATH enviroment
+  variable. If TINK_CROSS_LANG_ROOT_PATH is not set, the root path is calculated
+  from the TEST_SRCDIR enviroment variable.
+
+  Returns:
+    The root path of the cross language tests servers.
+  Raises:
+    ValueError if no variables are set.
+    FileNotFoundError if a variable is set but the path is invalid.
+  """
+
+  def _check_path_exists_or_fail(path, env_variable):
+    """Returns the path if it eixts, otherwise raises a FileNotFoundError."""
+    if os.path.exists(path):
+      return path
+    raise FileNotFoundError(f'Variable {env_variable} is set but has an ' +
+                            f'invalid path {path}')
+
+  if 'TINK_CROSS_LANG_ROOT_PATH' in os.environ:
+    return _check_path_exists_or_fail(os.environ['TINK_CROSS_LANG_ROOT_PATH'],
+                                      'TINK_CROSS_LANG_ROOT_PATH')
+  if 'TEST_SRCDIR' in os.environ:
+    return _check_path_exists_or_fail(
+        os.path.join(os.environ['TEST_SRCDIR'], _RELATIVE_ROOT_PATH),
+        'TEST_SRCDIR')
+
+  raise ValueError('No root path environment variable set')
 
 
 def _server_path(lang: str) -> str:
   """Returns the path where the server binary is located."""
-  root_dir = helper.tink_root_path()
+  root_dir = _root_path()
   for relative_server_path in _SERVER_PATHS[lang]:
     server_path = os.path.join(root_dir, relative_server_path)
     logging.info('try path: %s', server_path)
@@ -96,7 +125,7 @@ def _server_path(lang: str) -> str:
 def _server_cmd(lang: str, port: int) -> List[str]:
   server_path = _server_path(lang)
   if lang == 'java' and server_path.endswith('.jar'):
-    java_path = os.path.join(helper.tink_root_path(), _JAVA_PATH)
+    java_path = os.path.join(_root_path(), _JAVA_PATH)
     return [java_path, '-jar', server_path, '--port', '%d' % port]
   else:
     return [server_path, '--port', '%d' % port]
@@ -125,18 +154,18 @@ class _TestingServers():
       logging.info('cmd = %s', cmd)
       try:
         output_dir = os.environ['TEST_UNDECLARED_OUTPUTS_DIR']
-      except KeyError:
+      except KeyError as e:
         raise RuntimeError(
             'Could not start %s server, TEST_UNDECLARED_OUTPUTS_DIR environment'
-            'variable must be set')
+            'variable must be set') from e
       output_file = '%s-%s-%s' % (test_name, lang, 'server.log')
       output_path = os.path.join(output_dir, output_file)
       logging.info('writing server output to %s', output_path)
       try:
         self._output_file[lang] = open(output_path, 'w+')
-      except IOError:
+      except IOError as e:
         logging.info('unable to open server output file %s', output_path)
-        raise RuntimeError('Could not start %s server' % lang)
+        raise RuntimeError('Could not start %s server' % lang) from e
       self._server[lang] = subprocess.Popen(
           cmd, stdout=self._output_file[lang], stderr=subprocess.STDOUT)
       logging.info('%s server started on port %d with pid: %d.',
@@ -146,12 +175,12 @@ class _TestingServers():
     for lang in LANGUAGES:
       try:
         grpc.channel_ready_future(self._channel[lang]).result(timeout=30)
-      except:
+      except Exception as e:
         logging.info('Timeout while connecting to server %s', lang)
         self._server[lang].kill()
         out, err = self._server[lang].communicate()
-        raise RuntimeError(
-            'Could not start %s server, output=%s, err=%s' % (lang, out, err))
+        raise RuntimeError('Could not start %s server, output=%s, err=%s' %
+                           (lang, out, err)) from e
       self._metadata_stub[lang] = testing_api_pb2_grpc.MetadataStub(
           self._channel[lang])
       self._keyset_stub[lang] = testing_api_pb2_grpc.KeysetStub(
@@ -269,6 +298,25 @@ def keyset_to_json(lang: str, keyset: bytes) -> str:
 def keyset_from_json(lang: str, json_keyset: str) -> bytes:
   global _ts
   return _primitives.keyset_from_json(_ts.keyset_stub(lang), json_keyset)
+
+
+def keyset_read_encrypted(lang: str, encrypted_keyset: bytes,
+                          master_keyset: bytes,
+                          associated_data: Optional[bytes],
+                          keyset_reader_type: str) -> bytes:
+  global _ts
+  return _primitives.keyset_read_encrypted(
+      _ts.keyset_stub(lang), encrypted_keyset, master_keyset, associated_data,
+      keyset_reader_type)
+
+
+def keyset_write_encrypted(lang: str, keyset: bytes, master_keyset: bytes,
+                           associated_data: Optional[bytes],
+                           keyset_writer_type: str) -> bytes:
+  global _ts
+  return _primitives.keyset_write_encrypted(
+      _ts.keyset_stub(lang), keyset, master_keyset, associated_data,
+      keyset_writer_type)
 
 
 def jwk_set_to_keyset(lang: str, jwk_set: str) -> bytes:

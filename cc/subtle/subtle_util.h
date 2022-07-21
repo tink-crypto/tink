@@ -24,7 +24,7 @@ namespace crypto {
 namespace tink {
 namespace subtle {
 
-// Returnes big endian order representation of |val|.
+// Returnes big endian order representation of `val`.
 std::string BigEndian32(uint32_t val);
 
 // Like string::resize, but the newly allocated storage may be left

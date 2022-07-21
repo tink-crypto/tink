@@ -11,5 +11,20 @@ nogo(
     visibility = ["//visibility:public"],
 )
 
-# gazelle:prefix github.com/google/tink
-gazelle(name = "gazelle")
+# gazelle:prefix github.com/google/tink/go
+gazelle(
+    name = "gazelle",
+    args = [
+        "-go_naming_convention=import_alias",
+    ],
+)
+
+gazelle(
+    name = "gazelle-update-repos",
+    args = [
+        "-from_file=go.mod",
+        "-to_macro=deps.bzl%go_dependencies",
+        "-prune",
+    ],
+    command = "update-repos",
+)

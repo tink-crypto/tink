@@ -17,6 +17,8 @@
 #include "tink/util/statusor.h"
 
 #include <memory>
+#include <string>
+#include <utility>
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
@@ -93,11 +95,15 @@ TEST(StatusOrTest, WithNoDefaultConstructor) {
 TEST(StatusOrTest, AssignToErrorStatus) {
   StatusOr<std::string> error_initially =
       Status(absl::StatusCode::kInvalidArgument, "Error message");
-  ASSERT_THAT(error_initially.status(), Not(IsOk()));
+  ASSERT_THAT(error_initially, Not(IsOk()));
   StatusOr<std::string> ok_initially = std::string("Hi");
   error_initially = ok_initially;
-  ASSERT_THAT(error_initially.status(), IsOk());
+  ASSERT_THAT(error_initially, IsOk());
+  ASSERT_THAT(error_initially.value(), Eq("Hi"));
+
+#ifndef TINK_USE_ABSL_STATUSOR
   ASSERT_THAT(error_initially.ValueOrDie(), Eq("Hi"));
+#endif
 }
 
 // This tests that when we assign to something which is previously an error and
@@ -107,18 +113,41 @@ TEST(StatusOrTest, AssignToErrorStatus) {
 TEST(StatusOrTest, AssignToErrorStatusImplicitConvertible) {
   StatusOr<std::string> error_initially =
       Status(absl::StatusCode::kInvalidArgument, "Error message");
-  ASSERT_THAT(error_initially.status(), Not(IsOk()));
+  ASSERT_THAT(error_initially, Not(IsOk()));
   StatusOr<char const*> ok_initially = "Hi";
   error_initially = ok_initially;
-  ASSERT_THAT(error_initially.status(), IsOk());
+  ASSERT_THAT(error_initially, IsOk());
+  ASSERT_THAT(error_initially.value(), Eq("Hi"));
+
+#ifndef TINK_USE_ABSL_STATUSOR
   ASSERT_THAT(error_initially.ValueOrDie(), Eq("Hi"));
+#endif
 }
 
-TEST(StatusOrTest, MoveOutMoveOnly) {
+#ifndef TINK_USE_ABSL_STATUSOR
+TEST(StatusOrTest, MoveOutMoveOnlyValueOrDie) {
   StatusOr<std::unique_ptr<int>> status_or_unique_ptr_int =
       absl::make_unique<int>(10);
   std::unique_ptr<int> ten = std::move(status_or_unique_ptr_int.ValueOrDie());
   ASSERT_THAT(*ten, Eq(10));
+}
+#endif
+
+TEST(StatusOrTest, MoveOutMoveOnlyValue) {
+  StatusOr<std::unique_ptr<int>> status_or_unique_ptr_int =
+      absl::make_unique<int>(10);
+  std::unique_ptr<int> ten = std::move(status_or_unique_ptr_int.value());
+  ASSERT_THAT(*ten, Eq(10));
+}
+
+TEST(STatusOrTest, CallValueOnConst) {
+  const StatusOr<int> const_status_or_ten = 10;
+  ASSERT_THAT(const_status_or_ten.value(), Eq(10));
+}
+
+TEST(StatusOrTest, CallValueOnConstTemp) {
+  const StatusOr<int> const_status_or_ten = 10;
+  ASSERT_THAT(std::move(const_status_or_ten).value(), Eq(10));
 }
 
 TEST(StatusOrTest, TestValueConst) {

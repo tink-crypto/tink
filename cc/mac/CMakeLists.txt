@@ -12,7 +12,10 @@ tink_cc_library(
     tink::core::mac
     tink::core::primitive_set
     tink::core::primitive_wrapper
+    tink::internal::monitoring_util
+    tink::internal::registry_impl
     tink::internal::util
+    tink::monitoring::monitoring
     tink::util::status
     tink::util::statusor
     tink::proto::tink_cc_proto
@@ -30,6 +33,7 @@ tink_cc_library(
     absl::core_headers
     absl::memory
     tink::core::registry
+    tink::chunkedmac::internal::chunked_mac_wrapper
     tink::config::config_util
     tink::config::tink_fips
     tink::util::status
@@ -72,9 +76,11 @@ tink_cc_library(
     absl::memory
     absl::status
     absl::strings
+    tink::core::chunked_mac
     tink::core::key_type_manager
     tink::core::key_manager
     tink::core::mac
+    tink::chunkedmac::internal::chunked_mac_impl
     tink::subtle::aes_cmac_boringssl
     tink::subtle::random
     tink::util::constants
@@ -97,8 +103,10 @@ tink_cc_library(
     absl::memory
     absl::status
     absl::strings
+    tink::core::chunked_mac
     tink::core::key_type_manager
     tink::core::mac
+    tink::chunkedmac::internal::chunked_mac_impl
     tink::subtle::hmac_boringssl
     tink::subtle::random
     tink::util::constants
@@ -115,6 +123,24 @@ tink_cc_library(
     tink::proto::tink_cc_proto
 )
 
+tink_cc_library(
+  NAME mac_parameters
+  SRCS
+    mac_parameters.h
+  DEPS
+    tink::core::parameters
+)
+
+tink_cc_library(
+  NAME mac_key
+  SRCS
+    mac_key.h
+  DEPS
+    tink::mac::mac_parameters
+    tink::core::key
+    tink::util::statusor
+)
+
 # tests
 
 tink_cc_test(
@@ -122,12 +148,16 @@ tink_cc_test(
   SRCS
     mac_wrapper_test.cc
   DEPS
+    tink::mac::failing_mac
     tink::mac::mac_wrapper
     gmock
     absl::strings
     tink::core::crypto_format
     tink::core::mac
     tink::core::primitive_set
+    tink::internal::registry_impl
+    tink::monitoring::monitoring
+    tink::monitoring::monitoring_client_mocks
     tink::util::status
     tink::util::test_matchers
     tink::util::test_util
@@ -139,12 +169,14 @@ tink_cc_test(
   SRCS
     mac_config_test.cc
   DEPS
+    tink::mac::aes_cmac_key_manager
     tink::mac::hmac_key_manager
     tink::mac::mac_config
     tink::mac::mac_key_templates
     gmock
     absl::status
     crypto
+    tink::core::chunked_mac
     tink::core::config
     tink::core::keyset_handle
     tink::core::mac
@@ -200,6 +232,8 @@ tink_cc_test(
   DEPS
     tink::mac::aes_cmac_key_manager
     gmock
+    tink::core::chunked_mac
+    tink::core::mac
     tink::util::status
     tink::util::statusor
     tink::util::test_matchers
@@ -214,6 +248,7 @@ tink_cc_test(
     tink::mac::hmac_key_manager
     gmock
     absl::status
+    tink::core::chunked_mac
     tink::core::key_manager_impl
     tink::core::mac
     tink::util::istream_input_stream
@@ -222,4 +257,25 @@ tink_cc_test(
     tink::util::statusor
     tink::util::test_matchers
     tink::proto::hmac_cc_proto
+)
+
+tink_cc_library(
+  NAME failing_mac
+  SRCS
+    failing_mac.cc
+    failing_mac.h
+  DEPS
+    absl::strings
+    tink::core::mac
+)
+
+tink_cc_test(
+  NAME failing_mac_test
+  SRCS
+    failing_mac_test.cc
+  DEPS
+    tink::mac::failing_mac
+    gmock
+    absl::status
+    tink::util::test_matchers
 )

@@ -17,6 +17,8 @@
 #ifndef TINK_PUBLIC_KEY_SIGN_H_
 #define TINK_PUBLIC_KEY_SIGN_H_
 
+#include <string>
+
 #include "absl/strings/string_view.h"
 #include "tink/util/statusor.h"
 

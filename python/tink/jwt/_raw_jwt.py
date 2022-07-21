@@ -89,15 +89,15 @@ class RawJwt:
             'timestamp of claim %s is out of range' % name)
 
   def _validate_audience_claim(self):
+    """The 'aud' claim must either be a string or a list of strings."""
     if 'aud' in self._payload:
       audiences = self._payload['aud']
       if isinstance(audiences, str):
-        self._payload['aud'] = [audiences]
         return
       if not isinstance(audiences, list) or not audiences:
-        raise _jwt_error.JwtInvalidError('audiences must be a non-empty list')
+        raise _jwt_error.JwtInvalidError('audiences cannot be an empty list')
       if not all(isinstance(value, str) for value in audiences):
-        raise _jwt_error.JwtInvalidError('audiences must only contain Text')
+        raise _jwt_error.JwtInvalidError('audiences must only contain strings')
 
   # TODO(juerg): Consider adding a raw_ prefix to all access methods
   def has_type_header(self) -> bool:
@@ -124,7 +124,10 @@ class RawJwt:
     return 'aud' in self._payload
 
   def audiences(self) -> List[str]:
-    return list(self._payload['aud'])
+    aud = self._payload['aud']
+    if isinstance(aud, str):
+      return [aud]
+    return list(aud)
 
   def has_jwt_id(self) -> bool:
     return 'jti' in self._payload
@@ -171,6 +174,7 @@ class RawJwt:
              type_header: Optional[str] = None,
              issuer: Optional[str] = None,
              subject: Optional[str] = None,
+             audience: Optional[str] = None,
              audiences: Optional[List[str]] = None,
              jwt_id: Optional[str] = None,
              expiration: Optional[datetime.datetime] = None,
@@ -184,6 +188,9 @@ class RawJwt:
     if expiration and without_expiration:
       raise ValueError(
           'expiration and without_expiration cannot be set at the same time')
+    if audience is not None and audiences is not None:
+      raise _jwt_error.JwtInvalidError(
+          'audience and audiences cannot be set at the same time')
     payload = {}
     if issuer:
       payload['iss'] = issuer
@@ -191,6 +198,8 @@ class RawJwt:
       payload['sub'] = subject
     if jwt_id is not None:
       payload['jti'] = jwt_id
+    if audience is not None:
+      payload['aud'] = audience
     if audiences is not None:
       payload['aud'] = copy.copy(audiences)
     if expiration:
@@ -228,6 +237,7 @@ def new_raw_jwt(*,
                 type_header: Optional[str] = None,
                 issuer: Optional[str] = None,
                 subject: Optional[str] = None,
+                audience: Optional[str] = None,
                 audiences: Optional[List[str]] = None,
                 jwt_id: Optional[str] = None,
                 expiration: Optional[datetime.datetime] = None,
@@ -240,6 +250,7 @@ def new_raw_jwt(*,
       type_header=type_header,
       issuer=issuer,
       subject=subject,
+      audience=audience,
       audiences=audiences,
       jwt_id=jwt_id,
       expiration=expiration,

@@ -16,6 +16,7 @@
 
 from typing import cast
 from absl.testing import absltest
+from absl.testing import parameterized
 from tink.proto import aes_eax_pb2
 from tink.proto import aes_siv_pb2
 from tink.proto import common_pb2
@@ -23,6 +24,7 @@ from tink.proto import ecdsa_pb2
 from tink.proto import ecies_aead_hkdf_pb2
 from tink.proto import hmac_pb2
 from tink.proto import hmac_prf_pb2
+from tink.proto import hpke_pb2
 from tink.proto import jwt_ecdsa_pb2
 from tink.proto import jwt_hmac_pb2
 from tink.proto import tink_pb2
@@ -34,6 +36,7 @@ from tink.cc.pybind import tink_bindings
 def setUpModule():
   tink_bindings.register()
   tink_bindings.register_jwt()
+  tink_bindings.register_hpke()
 
 
 class AeadKeyManagerTest(absltest.TestCase):
@@ -69,7 +72,7 @@ class AeadKeyManagerTest(absltest.TestCase):
 
   def test_invalid_params_raise_exception(self):
     key_template = self.new_aes_eax_key_template(9, 16)
-    with self.assertRaises(tink_bindings.StatusNotOk):
+    with self.assertRaises(tink_bindings.PythonTinkException):
       self.key_manager.new_key_data(key_template)
 
   def test_encrypt_decrypt(self):
@@ -115,7 +118,7 @@ class DeterministicAeadKeyManagerTest(absltest.TestCase):
 
   def test_invalid_params_raise_exception(self):
     key_template = self.new_aes_siv_key_template(65)
-    with self.assertRaises(tink_bindings.StatusNotOk):
+    with self.assertRaises(tink_bindings.PythonTinkException):
       self.key_manager.new_key_data(key_template)
 
   def test_encrypt_decrypt(self):
@@ -156,7 +159,7 @@ class HybridKeyManagerTest(absltest.TestCase):
                      common_pb2.NIST_P256)
 
   def test_new_key_data_invalid_params_raise_exception(self):
-    with self.assertRaisesRegex(tink_bindings.StatusNotOk,
+    with self.assertRaisesRegex(tink_bindings.PythonTinkException,
                                 'Unsupported elliptic curve'):
       self.hybrid_decrypt_key_manager().new_key_data(
           hybrid.hybrid_key_templates.create_ecies_aead_hkdf_key_template(
@@ -185,8 +188,109 @@ class HybridKeyManagerTest(absltest.TestCase):
         hybrid.hybrid_key_templates.ECIES_P256_HKDF_HMAC_SHA256_AES128_GCM
         .SerializeToString())
     hybrid_decrypt = decrypt_key_manager.primitive(key_data)
-    with self.assertRaisesRegex(tink_bindings.StatusNotOk,
+    with self.assertRaisesRegex(tink_bindings.PythonTinkException,
                                 'ciphertext too short'):
+      hybrid_decrypt.decrypt(b'bad ciphertext', b'some context info')
+
+
+class HpkeKeyManagerTest(parameterized.TestCase):
+
+  def hybrid_decrypt_key_manager(self):
+    return tink_bindings.HybridDecryptKeyManager.from_cc_registry(
+        'type.googleapis.com/google.crypto.tink.HpkePrivateKey')
+
+  def hybrid_encrypt_key_manager(self):
+    return tink_bindings.HybridEncryptKeyManager.from_cc_registry(
+        'type.googleapis.com/google.crypto.tink.HpkePublicKey')
+
+  def test_new_key_data(self):
+    key_manager = self.hybrid_decrypt_key_manager()
+    key_data = tink_pb2.KeyData.FromString(
+        key_manager.new_key_data(
+            hybrid.hybrid_key_templates
+            .DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_AES_128_GCM.SerializeToString(
+            )))
+    self.assertEqual(key_data.type_url, key_manager.key_type())
+    self.assertEqual(key_data.key_material_type,
+                     tink_pb2.KeyData.ASYMMETRIC_PRIVATE)
+    key = hpke_pb2.HpkePrivateKey.FromString(key_data.value)
+    self.assertLen(key.private_key, 32)  # HPKE 'Nsk' parameter length  = 32
+    self.assertEqual(key.public_key.params.kem,
+                     hpke_pb2.DHKEM_X25519_HKDF_SHA256)
+    self.assertEqual(key.public_key.params.kdf, hpke_pb2.HKDF_SHA256)
+    self.assertEqual(key.public_key.params.aead, hpke_pb2.AES_128_GCM)
+
+  def test_new_key_data_invalid_kem_raise_exception(self):
+    with self.assertRaisesRegex(tink_bindings.PythonTinkException,
+                                'Invalid KEM param.'):
+      self.hybrid_decrypt_key_manager().new_key_data(
+          hybrid.hybrid_key_templates._create_hpke_key_template(
+              hpke_kem=hpke_pb2.KEM_UNKNOWN,
+              hpke_kdf=hpke_pb2.HKDF_SHA256,
+              hpke_aead=hpke_pb2.AES_128_GCM,
+              output_prefix_type=tink_pb2.TINK).SerializeToString())
+
+  def test_new_key_data_invalid_kdf_raise_exception(self):
+    with self.assertRaisesRegex(tink_bindings.PythonTinkException,
+                                'Invalid KDF param.'):
+      self.hybrid_decrypt_key_manager().new_key_data(
+          hybrid.hybrid_key_templates._create_hpke_key_template(
+              hpke_kem=hpke_pb2.DHKEM_X25519_HKDF_SHA256,
+              hpke_kdf=hpke_pb2.KDF_UNKNOWN,
+              hpke_aead=hpke_pb2.AES_128_GCM,
+              output_prefix_type=tink_pb2.TINK).SerializeToString())
+
+  def test_new_key_data_invalid_aead_raise_exception(self):
+    with self.assertRaisesRegex(tink_bindings.PythonTinkException,
+                                'Invalid AEAD param.'):
+      self.hybrid_decrypt_key_manager().new_key_data(
+          hybrid.hybrid_key_templates._create_hpke_key_template(
+              hpke_kem=hpke_pb2.DHKEM_X25519_HKDF_SHA256,
+              hpke_kdf=hpke_pb2.HKDF_SHA256,
+              hpke_aead=hpke_pb2.AEAD_UNKNOWN,
+              output_prefix_type=tink_pb2.TINK).SerializeToString())
+
+  def test_encrypt_decrypt(self):
+    decrypt_key_manager = self.hybrid_decrypt_key_manager()
+    encrypt_key_manager = self.hybrid_encrypt_key_manager()
+    key_data = decrypt_key_manager.new_key_data(
+        hybrid.hybrid_key_templates
+        .DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_AES_128_GCM.SerializeToString())
+    public_key_data = decrypt_key_manager.public_key_data(key_data)
+    hybrid_encrypt = encrypt_key_manager.primitive(public_key_data)
+    ciphertext = hybrid_encrypt.encrypt(b'some plaintext', b'some context info')
+    hybrid_decrypt = decrypt_key_manager.primitive(key_data)
+    self.assertEqual(
+        hybrid_decrypt.decrypt(ciphertext, b'some context info'),
+        b'some plaintext')
+
+  @parameterized.parameters(
+      [tink_pb2.TINK, tink_pb2.RAW, tink_pb2.CRUNCHY, tink_pb2.LEGACY])
+  def test_encrypt_decrypt_by_prefix(self, prefix):
+    decrypt_key_manager = self.hybrid_decrypt_key_manager()
+    encrypt_key_manager = self.hybrid_encrypt_key_manager()
+    key_data = decrypt_key_manager.new_key_data(
+        hybrid.hybrid_key_templates._create_hpke_key_template(
+            hpke_kem=hpke_pb2.DHKEM_X25519_HKDF_SHA256,
+            hpke_kdf=hpke_pb2.HKDF_SHA256,
+            hpke_aead=hpke_pb2.AES_128_GCM,
+            output_prefix_type=prefix).SerializeToString())
+    public_key_data = decrypt_key_manager.public_key_data(key_data)
+    hybrid_encrypt = encrypt_key_manager.primitive(public_key_data)
+    ciphertext = hybrid_encrypt.encrypt(b'some plaintext', b'some context info')
+    hybrid_decrypt = decrypt_key_manager.primitive(key_data)
+    self.assertEqual(
+        hybrid_decrypt.decrypt(ciphertext, b'some context info'),
+        b'some plaintext')
+
+  def test_decrypt_fails(self):
+    decrypt_key_manager = self.hybrid_decrypt_key_manager()
+    key_data = decrypt_key_manager.new_key_data(
+        hybrid.hybrid_key_templates
+        .DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_AES_128_GCM.SerializeToString())
+    hybrid_decrypt = decrypt_key_manager.primitive(key_data)
+    with self.assertRaisesRegex(tink_bindings.PythonTinkException,
+                                'Ciphertext is too short.'):
       hybrid_decrypt.decrypt(b'bad ciphertext', b'some context info')
 
 
@@ -224,7 +328,7 @@ class MacKeyManagerTest(absltest.TestCase):
 
   def test_invalid_params_raise_exception(self):
     key_template = self.new_hmac_key_template(common_pb2.SHA256, 9, 16)
-    with self.assertRaises(tink_bindings.StatusNotOk):
+    with self.assertRaises(tink_bindings.PythonTinkException):
       self.key_manager.new_key_data(key_template)
 
   def test_mac_success(self):
@@ -241,7 +345,7 @@ class MacKeyManagerTest(absltest.TestCase):
     mac = self.key_manager.primitive(
         self.key_manager.new_key_data(
             self.new_hmac_key_template(common_pb2.SHA256, 16, 16)))
-    with self.assertRaisesRegex(tink_bindings.StatusNotOk,
+    with self.assertRaisesRegex(tink_bindings.PythonTinkException,
                                 'verification failed'):
       mac.verify_mac(b'0123456789ABCDEF', b'data')
 
@@ -278,7 +382,7 @@ class JwtMacKeyManagerTest(absltest.TestCase):
 
   def test_too_short_key_size_raises_exception(self):
     key_template = self.new_jwt_hmac_key_template(jwt_hmac_pb2.HS256, 31)
-    with self.assertRaises(tink_bindings.StatusNotOk):
+    with self.assertRaises(tink_bindings.PythonTinkException):
       self.key_manager.new_key_data(key_template)
 
   def test_mac_success(self):
@@ -295,7 +399,7 @@ class JwtMacKeyManagerTest(absltest.TestCase):
     mac = self.key_manager.primitive(
         self.key_manager.new_key_data(
             self.new_jwt_hmac_key_template(jwt_hmac_pb2.HS256, 32)))
-    with self.assertRaisesRegex(tink_bindings.StatusNotOk,
+    with self.assertRaisesRegex(tink_bindings.PythonTinkException,
                                 'verification failed'):
       mac.verify_mac(b'0123456789ABCDEF0123456789ABCDEF', b'data')
 
@@ -335,7 +439,7 @@ class PrfKeyManagerTest(absltest.TestCase):
   def test_invalid_params_raise_exception(self):
     key_template = self.new_hmac_prf_key_template(
         hash_type=common_pb2.SHA256, key_size=7)
-    with self.assertRaises(tink_bindings.StatusNotOk):
+    with self.assertRaises(tink_bindings.PythonTinkException):
       self.key_manager.new_key_data(key_template)
 
   def test_prf_success(self):
@@ -352,7 +456,7 @@ class PrfKeyManagerTest(absltest.TestCase):
         self.key_manager.new_key_data(
             self.new_hmac_prf_key_template(
                 hash_type=common_pb2.SHA256, key_size=16)))
-    with self.assertRaises(tink_bindings.StatusNotOk):
+    with self.assertRaises(tink_bindings.PythonTinkException):
       _ = prf.compute(b'input_data', output_length=12345)
 
 
@@ -408,7 +512,8 @@ class PublicKeySignVerifyKeyManagerTest(absltest.TestCase):
   def test_new_key_data_verify(self):
     key_template = self.new_ecdsa_key_template(
         common_pb2.SHA256, common_pb2.NIST_P256, ecdsa_pb2.DER, True)
-    with self.assertRaisesRegex(tink_bindings.StatusNotOk, 'not supported'):
+    with self.assertRaisesRegex(tink_bindings.PythonTinkException,
+                                'not supported'):
       self.key_manager_verify.new_key_data(key_template)
 
   def test_signature_success(self):
@@ -440,11 +545,11 @@ class PublicKeySignVerifyKeyManagerTest(absltest.TestCase):
     data = b'data'
     signature = signer.sign(data)
 
-    with self.assertRaisesRegex(tink_bindings.StatusNotOk,
+    with self.assertRaisesRegex(tink_bindings.PythonTinkException,
                                 'Signature is not valid'):
       verifier.verify(signature, b'wrongdata')
 
-    with self.assertRaisesRegex(tink_bindings.StatusNotOk,
+    with self.assertRaisesRegex(tink_bindings.PythonTinkException,
                                 'Signature is not valid'):
       verifier.verify(b'wrongsignature', data)
 
@@ -466,7 +571,8 @@ class JwtPublicKeySignVerifyKeyManagerTest(absltest.TestCase):
     key_template.type_url = (
         'type.googleapis.com/google.crypto.tink.JwtEcdsaPublicKey')
     key_template.value = key_format.SerializeToString()
-    with self.assertRaisesRegex(tink_bindings.StatusNotOk, 'not supported'):
+    with self.assertRaisesRegex(tink_bindings.PythonTinkException,
+                                'not supported'):
       self.key_manager_verify.new_key_data(key_template.SerializeToString())
 
   def test_signature_success(self):
@@ -487,10 +593,10 @@ class JwtPublicKeySignVerifyKeyManagerTest(absltest.TestCase):
     signature = signer.sign(data)
     verifier.verify(signature, data)
 
-    with self.assertRaises(tink_bindings.StatusNotOk):
+    with self.assertRaises(tink_bindings.PythonTinkException):
       verifier.verify(signature, b'wrongdata')
 
-    with self.assertRaises(tink_bindings.StatusNotOk):
+    with self.assertRaises(tink_bindings.PythonTinkException):
       verifier.verify(b'wrongsignature', data)
 
 

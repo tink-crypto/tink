@@ -91,7 +91,7 @@ TEST(RawJwtEcdsaSignKeyManagerTest, CreateKey) {
   JwtEcdsaKeyFormat format = CreateValidEs256KeyFormat();
   StatusOr<JwtEcdsaPrivateKey> key =
       RawJwtEcdsaSignKeyManager().CreateKey(format);
-  ASSERT_THAT(key.status(), IsOk());
+  ASSERT_THAT(key, IsOk());
 
   EXPECT_THAT(key->version(), Eq(0));
 
@@ -109,14 +109,14 @@ TEST(RawJwtEcdsaSignKeyManagerTest, CreateKeyValid) {
   JwtEcdsaKeyFormat format = CreateValidEs256KeyFormat();
   StatusOr<JwtEcdsaPrivateKey> key =
       RawJwtEcdsaSignKeyManager().CreateKey(format);
-  ASSERT_THAT(key.status(), IsOk());
+  ASSERT_THAT(key, IsOk());
   EXPECT_THAT(RawJwtEcdsaSignKeyManager().ValidateKey(*key),
               IsOk());
 }
 
 JwtEcdsaPrivateKey CreateValidEs256Key() {
   JwtEcdsaKeyFormat format = CreateValidEs256KeyFormat();
-  return RawJwtEcdsaSignKeyManager().CreateKey(format).ValueOrDie();
+  return RawJwtEcdsaSignKeyManager().CreateKey(format).value();
 }
 
 TEST(RawJwtEcdsaSignKeyManagerTest, ValidateKey) {
@@ -137,7 +137,7 @@ TEST(RawJwtEcdsaSignKeyManagerTest, GetPublicKey) {
   StatusOr<JwtEcdsaPublicKey> public_key =
       RawJwtEcdsaSignKeyManager().GetPublicKey(key);
 
-  ASSERT_THAT(public_key.status(), IsOk());
+  ASSERT_THAT(public_key, IsOk());
 
   EXPECT_THAT(public_key->version(), Eq(key.public_key().version()));
   EXPECT_THAT(public_key->algorithm(),
@@ -151,11 +151,11 @@ TEST(RawJwtEcdsaSignKeyManagerTest, Create) {
   JwtEcdsaPrivateKey private_key = CreateValidEs256Key();
   util::StatusOr<JwtEcdsaPublicKey> public_key =
       RawJwtEcdsaSignKeyManager().GetPublicKey(private_key);
-  ASSERT_THAT(public_key.status(), IsOk());
+  ASSERT_THAT(public_key, IsOk());
 
   util::StatusOr<std::unique_ptr<PublicKeySign>> signer =
       RawJwtEcdsaSignKeyManager().GetPrimitive<PublicKeySign>(private_key);
-  ASSERT_THAT(signer.status(), IsOk());
+  ASSERT_THAT(signer, IsOk());
 
   internal::EcKey ec_key;
   ec_key.curve = Enums::ProtoToSubtle(EllipticCurveType::NIST_P256);
@@ -165,11 +165,11 @@ TEST(RawJwtEcdsaSignKeyManagerTest, Create) {
       direct_verifier = subtle::EcdsaVerifyBoringSsl::New(
           ec_key, Enums::ProtoToSubtle(HashType::SHA256),
           subtle::EcdsaSignatureEncoding::IEEE_P1363);
-  ASSERT_THAT(direct_verifier.status(), IsOk());
+  ASSERT_THAT(direct_verifier, IsOk());
 
   std::string message = "Some message";
   util::StatusOr<std::string> sig = (*signer)->Sign(message);
-  ASSERT_THAT(sig.status(), IsOk());
+  ASSERT_THAT(sig, IsOk());
   EXPECT_THAT((*direct_verifier)->Verify(*sig, message), IsOk());
 }
 
@@ -181,7 +181,7 @@ TEST(RawJwtEcdsaSignKeyManagerTest, CreateDifferentKey) {
 
   util::StatusOr<std::unique_ptr<PublicKeySign>> signer =
       RawJwtEcdsaSignKeyManager().GetPrimitive<PublicKeySign>(private_key);
-  ASSERT_THAT(signer.status(), IsOk());
+  ASSERT_THAT(signer, IsOk());
 
   internal::EcKey ec_key;
   ec_key.curve = Enums::ProtoToSubtle(EllipticCurveType::NIST_P256);
@@ -191,11 +191,11 @@ TEST(RawJwtEcdsaSignKeyManagerTest, CreateDifferentKey) {
       direct_verifier = subtle::EcdsaVerifyBoringSsl::New(
           ec_key, Enums::ProtoToSubtle(HashType::SHA256),
           subtle::EcdsaSignatureEncoding::IEEE_P1363);
-  ASSERT_THAT(direct_verifier.status(), IsOk());
+  ASSERT_THAT(direct_verifier, IsOk());
 
   std::string message = "Some message";
   util::StatusOr<std::string> sig = (*signer)->Sign(message);
-  ASSERT_THAT(sig.status(), IsOk());
+  ASSERT_THAT(sig, IsOk());
   EXPECT_THAT((*direct_verifier)->Verify(*sig, message), Not(IsOk()));
 }
 

@@ -18,47 +18,45 @@
 
 #include "tink/util/constants.h"
 #include "proto/experimental/pqcrypto/sphincs.pb.h"
-#include "proto/experimental/pqcrypto/sphincs.proto.h"
 #include "proto/tink.pb.h"
-#include "proto/tink.proto.h"
 
 extern "C" {
-#include "third_party/pqclean/crypto_sign/sphincs-haraka-128f-robust/aesni/api.h"
-#include "third_party/pqclean/crypto_sign/sphincs-haraka-128f-simple/aesni/api.h"
-#include "third_party/pqclean/crypto_sign/sphincs-haraka-128s-robust/aesni/api.h"
-#include "third_party/pqclean/crypto_sign/sphincs-haraka-128s-simple/aesni/api.h"
-#include "third_party/pqclean/crypto_sign/sphincs-haraka-192f-robust/aesni/api.h"
-#include "third_party/pqclean/crypto_sign/sphincs-haraka-192f-simple/aesni/api.h"
-#include "third_party/pqclean/crypto_sign/sphincs-haraka-192s-robust/aesni/api.h"
-#include "third_party/pqclean/crypto_sign/sphincs-haraka-192s-simple/aesni/api.h"
-#include "third_party/pqclean/crypto_sign/sphincs-haraka-256f-robust/aesni/api.h"
-#include "third_party/pqclean/crypto_sign/sphincs-haraka-256f-simple/aesni/api.h"
-#include "third_party/pqclean/crypto_sign/sphincs-haraka-256s-robust/aesni/api.h"
-#include "third_party/pqclean/crypto_sign/sphincs-haraka-256s-simple/aesni/api.h"
-#include "third_party/pqclean/crypto_sign/sphincs-sha256-128f-robust/avx2/api.h"
-#include "third_party/pqclean/crypto_sign/sphincs-sha256-128f-simple/avx2/api.h"
-#include "third_party/pqclean/crypto_sign/sphincs-sha256-128s-robust/avx2/api.h"
-#include "third_party/pqclean/crypto_sign/sphincs-sha256-128s-simple/avx2/api.h"
-#include "third_party/pqclean/crypto_sign/sphincs-sha256-192f-robust/avx2/api.h"
-#include "third_party/pqclean/crypto_sign/sphincs-sha256-192f-simple/avx2/api.h"
-#include "third_party/pqclean/crypto_sign/sphincs-sha256-192s-robust/avx2/api.h"
-#include "third_party/pqclean/crypto_sign/sphincs-sha256-192s-simple/avx2/api.h"
-#include "third_party/pqclean/crypto_sign/sphincs-sha256-256f-robust/avx2/api.h"
-#include "third_party/pqclean/crypto_sign/sphincs-sha256-256f-simple/avx2/api.h"
-#include "third_party/pqclean/crypto_sign/sphincs-sha256-256s-robust/avx2/api.h"
-#include "third_party/pqclean/crypto_sign/sphincs-sha256-256s-simple/avx2/api.h"
-#include "third_party/pqclean/crypto_sign/sphincs-shake256-128f-robust/avx2/api.h"
-#include "third_party/pqclean/crypto_sign/sphincs-shake256-128f-simple/avx2/api.h"
-#include "third_party/pqclean/crypto_sign/sphincs-shake256-128s-robust/avx2/api.h"
-#include "third_party/pqclean/crypto_sign/sphincs-shake256-128s-simple/avx2/api.h"
-#include "third_party/pqclean/crypto_sign/sphincs-shake256-192f-robust/avx2/api.h"
-#include "third_party/pqclean/crypto_sign/sphincs-shake256-192f-simple/avx2/api.h"
-#include "third_party/pqclean/crypto_sign/sphincs-shake256-192s-robust/avx2/api.h"
-#include "third_party/pqclean/crypto_sign/sphincs-shake256-192s-simple/avx2/api.h"
-#include "third_party/pqclean/crypto_sign/sphincs-shake256-256f-robust/avx2/api.h"
-#include "third_party/pqclean/crypto_sign/sphincs-shake256-256f-simple/avx2/api.h"
-#include "third_party/pqclean/crypto_sign/sphincs-shake256-256s-robust/avx2/api.h"
-#include "third_party/pqclean/crypto_sign/sphincs-shake256-256s-simple/avx2/api.h"
+#include "third_party/pqclean/crypto_sign/sphincs-haraka-128f-robust/api.h"
+#include "third_party/pqclean/crypto_sign/sphincs-haraka-128f-simple/api.h"
+#include "third_party/pqclean/crypto_sign/sphincs-haraka-128s-robust/api.h"
+#include "third_party/pqclean/crypto_sign/sphincs-haraka-128s-simple/api.h"
+#include "third_party/pqclean/crypto_sign/sphincs-haraka-192f-robust/api.h"
+#include "third_party/pqclean/crypto_sign/sphincs-haraka-192f-simple/api.h"
+#include "third_party/pqclean/crypto_sign/sphincs-haraka-192s-robust/api.h"
+#include "third_party/pqclean/crypto_sign/sphincs-haraka-192s-simple/api.h"
+#include "third_party/pqclean/crypto_sign/sphincs-haraka-256f-robust/api.h"
+#include "third_party/pqclean/crypto_sign/sphincs-haraka-256f-simple/api.h"
+#include "third_party/pqclean/crypto_sign/sphincs-haraka-256s-robust/api.h"
+#include "third_party/pqclean/crypto_sign/sphincs-haraka-256s-simple/api.h"
+#include "third_party/pqclean/crypto_sign/sphincs-sha256-128f-robust/api.h"
+#include "third_party/pqclean/crypto_sign/sphincs-sha256-128f-simple/api.h"
+#include "third_party/pqclean/crypto_sign/sphincs-sha256-128s-robust/api.h"
+#include "third_party/pqclean/crypto_sign/sphincs-sha256-128s-simple/api.h"
+#include "third_party/pqclean/crypto_sign/sphincs-sha256-192f-robust/api.h"
+#include "third_party/pqclean/crypto_sign/sphincs-sha256-192f-simple/api.h"
+#include "third_party/pqclean/crypto_sign/sphincs-sha256-192s-robust/api.h"
+#include "third_party/pqclean/crypto_sign/sphincs-sha256-192s-simple/api.h"
+#include "third_party/pqclean/crypto_sign/sphincs-sha256-256f-robust/api.h"
+#include "third_party/pqclean/crypto_sign/sphincs-sha256-256f-simple/api.h"
+#include "third_party/pqclean/crypto_sign/sphincs-sha256-256s-robust/api.h"
+#include "third_party/pqclean/crypto_sign/sphincs-sha256-256s-simple/api.h"
+#include "third_party/pqclean/crypto_sign/sphincs-shake256-128f-robust/api.h"
+#include "third_party/pqclean/crypto_sign/sphincs-shake256-128f-simple/api.h"
+#include "third_party/pqclean/crypto_sign/sphincs-shake256-128s-robust/api.h"
+#include "third_party/pqclean/crypto_sign/sphincs-shake256-128s-simple/api.h"
+#include "third_party/pqclean/crypto_sign/sphincs-shake256-192f-robust/api.h"
+#include "third_party/pqclean/crypto_sign/sphincs-shake256-192f-simple/api.h"
+#include "third_party/pqclean/crypto_sign/sphincs-shake256-192s-robust/api.h"
+#include "third_party/pqclean/crypto_sign/sphincs-shake256-192s-simple/api.h"
+#include "third_party/pqclean/crypto_sign/sphincs-shake256-256f-robust/api.h"
+#include "third_party/pqclean/crypto_sign/sphincs-shake256-256f-simple/api.h"
+#include "third_party/pqclean/crypto_sign/sphincs-shake256-256s-robust/api.h"
+#include "third_party/pqclean/crypto_sign/sphincs-shake256-256s-simple/api.h"
 }
 
 namespace crypto {
@@ -100,7 +98,7 @@ KeyTemplate* NewSphincsKeyTemplate(int32 private_key_size,
 const google::crypto::tink::KeyTemplate&
 Sphincs_Haraka_128_F_Robust_KeyTemplate() {
   static const KeyTemplate* key_template = NewSphincsKeyTemplate(
-      PQCLEAN_SPHINCSHARAKA128FROBUST_AESNI_CRYPTO_SECRETKEYBYTES,
+      PQCLEAN_SPHINCSHARAKA128FROBUST_CRYPTO_SECRETKEYBYTES,
       SphincsHashType::HARAKA, SphincsVariant::ROBUST,
       SphincsSignatureType::FAST_SIGNING);
   return *key_template;
@@ -109,7 +107,7 @@ Sphincs_Haraka_128_F_Robust_KeyTemplate() {
 const google::crypto::tink::KeyTemplate&
 Sphincs_Haraka_128_F_Simple_KeyTemplate() {
   static const KeyTemplate* key_template = NewSphincsKeyTemplate(
-      PQCLEAN_SPHINCSHARAKA128FSIMPLE_AESNI_CRYPTO_SECRETKEYBYTES,
+      PQCLEAN_SPHINCSHARAKA128FSIMPLE_CRYPTO_SECRETKEYBYTES,
       SphincsHashType::HARAKA, SphincsVariant::SIMPLE,
       SphincsSignatureType::FAST_SIGNING);
   return *key_template;
@@ -118,7 +116,7 @@ Sphincs_Haraka_128_F_Simple_KeyTemplate() {
 const google::crypto::tink::KeyTemplate&
 Sphincs_Haraka_128_S_Robust_KeyTemplate() {
   static const KeyTemplate* key_template = NewSphincsKeyTemplate(
-      PQCLEAN_SPHINCSHARAKA128SROBUST_AESNI_CRYPTO_SECRETKEYBYTES,
+      PQCLEAN_SPHINCSHARAKA128SROBUST_CRYPTO_SECRETKEYBYTES,
       SphincsHashType::HARAKA, SphincsVariant::ROBUST,
       SphincsSignatureType::SMALL_SIGNATURE);
   return *key_template;
@@ -127,7 +125,7 @@ Sphincs_Haraka_128_S_Robust_KeyTemplate() {
 const google::crypto::tink::KeyTemplate&
 Sphincs_Haraka_128_S_Simple_KeyTemplate() {
   static const KeyTemplate* key_template = NewSphincsKeyTemplate(
-      PQCLEAN_SPHINCSHARAKA128SSIMPLE_AESNI_CRYPTO_SECRETKEYBYTES,
+      PQCLEAN_SPHINCSHARAKA128SSIMPLE_CRYPTO_SECRETKEYBYTES,
       SphincsHashType::HARAKA, SphincsVariant::SIMPLE,
       SphincsSignatureType::SMALL_SIGNATURE);
   return *key_template;
@@ -136,7 +134,7 @@ Sphincs_Haraka_128_S_Simple_KeyTemplate() {
 const google::crypto::tink::KeyTemplate&
 Sphincs_Haraka_192_F_Robust_KeyTemplate() {
   static const KeyTemplate* key_template = NewSphincsKeyTemplate(
-      PQCLEAN_SPHINCSHARAKA192FROBUST_AESNI_CRYPTO_SECRETKEYBYTES,
+      PQCLEAN_SPHINCSHARAKA192FROBUST_CRYPTO_SECRETKEYBYTES,
       SphincsHashType::HARAKA, SphincsVariant::ROBUST,
       SphincsSignatureType::FAST_SIGNING);
   return *key_template;
@@ -145,7 +143,7 @@ Sphincs_Haraka_192_F_Robust_KeyTemplate() {
 const google::crypto::tink::KeyTemplate&
 Sphincs_Haraka_192_F_Simple_KeyTemplate() {
   static const KeyTemplate* key_template = NewSphincsKeyTemplate(
-      PQCLEAN_SPHINCSHARAKA192FSIMPLE_AESNI_CRYPTO_SECRETKEYBYTES,
+      PQCLEAN_SPHINCSHARAKA192FSIMPLE_CRYPTO_SECRETKEYBYTES,
       SphincsHashType::HARAKA, SphincsVariant::SIMPLE,
       SphincsSignatureType::FAST_SIGNING);
   return *key_template;
@@ -154,7 +152,7 @@ Sphincs_Haraka_192_F_Simple_KeyTemplate() {
 const google::crypto::tink::KeyTemplate&
 Sphincs_Haraka_192_S_Robust_KeyTemplate() {
   static const KeyTemplate* key_template = NewSphincsKeyTemplate(
-      PQCLEAN_SPHINCSHARAKA192SROBUST_AESNI_CRYPTO_SECRETKEYBYTES,
+      PQCLEAN_SPHINCSHARAKA192SROBUST_CRYPTO_SECRETKEYBYTES,
       SphincsHashType::HARAKA, SphincsVariant::ROBUST,
       SphincsSignatureType::SMALL_SIGNATURE);
   return *key_template;
@@ -163,7 +161,7 @@ Sphincs_Haraka_192_S_Robust_KeyTemplate() {
 const google::crypto::tink::KeyTemplate&
 Sphincs_Haraka_192_S_Simple_KeyTemplate() {
   static const KeyTemplate* key_template = NewSphincsKeyTemplate(
-      PQCLEAN_SPHINCSHARAKA192SSIMPLE_AESNI_CRYPTO_SECRETKEYBYTES,
+      PQCLEAN_SPHINCSHARAKA192SSIMPLE_CRYPTO_SECRETKEYBYTES,
       SphincsHashType::HARAKA, SphincsVariant::SIMPLE,
       SphincsSignatureType::SMALL_SIGNATURE);
   return *key_template;
@@ -172,7 +170,7 @@ Sphincs_Haraka_192_S_Simple_KeyTemplate() {
 const google::crypto::tink::KeyTemplate&
 Sphincs_Haraka_256_F_Robust_KeyTemplate() {
   static const KeyTemplate* key_template = NewSphincsKeyTemplate(
-      PQCLEAN_SPHINCSHARAKA256FROBUST_AESNI_CRYPTO_SECRETKEYBYTES,
+      PQCLEAN_SPHINCSHARAKA256FROBUST_CRYPTO_SECRETKEYBYTES,
       SphincsHashType::HARAKA, SphincsVariant::ROBUST,
       SphincsSignatureType::FAST_SIGNING);
   return *key_template;
@@ -181,7 +179,7 @@ Sphincs_Haraka_256_F_Robust_KeyTemplate() {
 const google::crypto::tink::KeyTemplate&
 Sphincs_Haraka_256_F_Simple_KeyTemplate() {
   static const KeyTemplate* key_template = NewSphincsKeyTemplate(
-      PQCLEAN_SPHINCSHARAKA256FSIMPLE_AESNI_CRYPTO_SECRETKEYBYTES,
+      PQCLEAN_SPHINCSHARAKA256FSIMPLE_CRYPTO_SECRETKEYBYTES,
       SphincsHashType::HARAKA, SphincsVariant::SIMPLE,
       SphincsSignatureType::FAST_SIGNING);
   return *key_template;
@@ -190,7 +188,7 @@ Sphincs_Haraka_256_F_Simple_KeyTemplate() {
 const google::crypto::tink::KeyTemplate&
 Sphincs_Haraka_256_S_Robust_KeyTemplate() {
   static const KeyTemplate* key_template = NewSphincsKeyTemplate(
-      PQCLEAN_SPHINCSHARAKA256SROBUST_AESNI_CRYPTO_SECRETKEYBYTES,
+      PQCLEAN_SPHINCSHARAKA256SROBUST_CRYPTO_SECRETKEYBYTES,
       SphincsHashType::HARAKA, SphincsVariant::ROBUST,
       SphincsSignatureType::SMALL_SIGNATURE);
   return *key_template;
@@ -199,7 +197,7 @@ Sphincs_Haraka_256_S_Robust_KeyTemplate() {
 const google::crypto::tink::KeyTemplate&
 Sphincs_Haraka_256_S_Simple_KeyTemplate() {
   static const KeyTemplate* key_template = NewSphincsKeyTemplate(
-      PQCLEAN_SPHINCSHARAKA256SSIMPLE_AESNI_CRYPTO_SECRETKEYBYTES,
+      PQCLEAN_SPHINCSHARAKA256SSIMPLE_CRYPTO_SECRETKEYBYTES,
       SphincsHashType::HARAKA, SphincsVariant::SIMPLE,
       SphincsSignatureType::SMALL_SIGNATURE);
   return *key_template;
@@ -209,7 +207,7 @@ Sphincs_Haraka_256_S_Simple_KeyTemplate() {
 const google::crypto::tink::KeyTemplate&
 Sphincs_Sha256_128_F_Robust_KeyTemplate() {
   static const KeyTemplate* key_template = NewSphincsKeyTemplate(
-      PQCLEAN_SPHINCSSHA256128FROBUST_AVX2_CRYPTO_SECRETKEYBYTES,
+      PQCLEAN_SPHINCSSHA256128FROBUST_CRYPTO_SECRETKEYBYTES,
       SphincsHashType::SHA256, SphincsVariant::ROBUST,
       SphincsSignatureType::FAST_SIGNING);
   return *key_template;
@@ -218,7 +216,7 @@ Sphincs_Sha256_128_F_Robust_KeyTemplate() {
 const google::crypto::tink::KeyTemplate&
 Sphincs_Sha256_128_F_Simple_KeyTemplate() {
   static const KeyTemplate* key_template = NewSphincsKeyTemplate(
-      PQCLEAN_SPHINCSSHA256128FSIMPLE_AVX2_CRYPTO_SECRETKEYBYTES,
+      PQCLEAN_SPHINCSSHA256128FSIMPLE_CRYPTO_SECRETKEYBYTES,
       SphincsHashType::SHA256, SphincsVariant::SIMPLE,
       SphincsSignatureType::FAST_SIGNING);
   return *key_template;
@@ -227,7 +225,7 @@ Sphincs_Sha256_128_F_Simple_KeyTemplate() {
 const google::crypto::tink::KeyTemplate&
 Sphincs_Sha256_128_S_Robust_KeyTemplate() {
   static const KeyTemplate* key_template = NewSphincsKeyTemplate(
-      PQCLEAN_SPHINCSSHA256128SROBUST_AVX2_CRYPTO_SECRETKEYBYTES,
+      PQCLEAN_SPHINCSSHA256128SROBUST_CRYPTO_SECRETKEYBYTES,
       SphincsHashType::SHA256, SphincsVariant::ROBUST,
       SphincsSignatureType::SMALL_SIGNATURE);
   return *key_template;
@@ -236,7 +234,7 @@ Sphincs_Sha256_128_S_Robust_KeyTemplate() {
 const google::crypto::tink::KeyTemplate&
 Sphincs_Sha256_128_S_Simple_KeyTemplate() {
   static const KeyTemplate* key_template = NewSphincsKeyTemplate(
-      PQCLEAN_SPHINCSSHA256128SSIMPLE_AVX2_CRYPTO_SECRETKEYBYTES,
+      PQCLEAN_SPHINCSSHA256128SSIMPLE_CRYPTO_SECRETKEYBYTES,
       SphincsHashType::SHA256, SphincsVariant::SIMPLE,
       SphincsSignatureType::SMALL_SIGNATURE);
   return *key_template;
@@ -245,7 +243,7 @@ Sphincs_Sha256_128_S_Simple_KeyTemplate() {
 const google::crypto::tink::KeyTemplate&
 Sphincs_Sha256_192_F_Robust_KeyTemplate() {
   static const KeyTemplate* key_template = NewSphincsKeyTemplate(
-      PQCLEAN_SPHINCSSHA256192FROBUST_AVX2_CRYPTO_SECRETKEYBYTES,
+      PQCLEAN_SPHINCSSHA256192FROBUST_CRYPTO_SECRETKEYBYTES,
       SphincsHashType::SHA256, SphincsVariant::ROBUST,
       SphincsSignatureType::FAST_SIGNING);
   return *key_template;
@@ -254,7 +252,7 @@ Sphincs_Sha256_192_F_Robust_KeyTemplate() {
 const google::crypto::tink::KeyTemplate&
 Sphincs_Sha256_192_F_Simple_KeyTemplate() {
   static const KeyTemplate* key_template = NewSphincsKeyTemplate(
-      PQCLEAN_SPHINCSSHA256192FSIMPLE_AVX2_CRYPTO_SECRETKEYBYTES,
+      PQCLEAN_SPHINCSSHA256192FSIMPLE_CRYPTO_SECRETKEYBYTES,
       SphincsHashType::SHA256, SphincsVariant::SIMPLE,
       SphincsSignatureType::FAST_SIGNING);
   return *key_template;
@@ -263,7 +261,7 @@ Sphincs_Sha256_192_F_Simple_KeyTemplate() {
 const google::crypto::tink::KeyTemplate&
 Sphincs_Sha256_192_S_Robust_KeyTemplate() {
   static const KeyTemplate* key_template = NewSphincsKeyTemplate(
-      PQCLEAN_SPHINCSSHA256192SROBUST_AVX2_CRYPTO_SECRETKEYBYTES,
+      PQCLEAN_SPHINCSSHA256192SROBUST_CRYPTO_SECRETKEYBYTES,
       SphincsHashType::SHA256, SphincsVariant::ROBUST,
       SphincsSignatureType::SMALL_SIGNATURE);
   return *key_template;
@@ -272,7 +270,7 @@ Sphincs_Sha256_192_S_Robust_KeyTemplate() {
 const google::crypto::tink::KeyTemplate&
 Sphincs_Sha256_192_S_Simple_KeyTemplate() {
   static const KeyTemplate* key_template = NewSphincsKeyTemplate(
-      PQCLEAN_SPHINCSSHA256192SSIMPLE_AVX2_CRYPTO_SECRETKEYBYTES,
+      PQCLEAN_SPHINCSSHA256192SSIMPLE_CRYPTO_SECRETKEYBYTES,
       SphincsHashType::SHA256, SphincsVariant::SIMPLE,
       SphincsSignatureType::SMALL_SIGNATURE);
   return *key_template;
@@ -281,7 +279,7 @@ Sphincs_Sha256_192_S_Simple_KeyTemplate() {
 const google::crypto::tink::KeyTemplate&
 Sphincs_Sha256_256_F_Robust_KeyTemplate() {
   static const KeyTemplate* key_template = NewSphincsKeyTemplate(
-      PQCLEAN_SPHINCSSHA256256FROBUST_AVX2_CRYPTO_SECRETKEYBYTES,
+      PQCLEAN_SPHINCSSHA256256FROBUST_CRYPTO_SECRETKEYBYTES,
       SphincsHashType::SHA256, SphincsVariant::ROBUST,
       SphincsSignatureType::FAST_SIGNING);
   return *key_template;
@@ -290,7 +288,7 @@ Sphincs_Sha256_256_F_Robust_KeyTemplate() {
 const google::crypto::tink::KeyTemplate&
 Sphincs_Sha256_256_F_Simple_KeyTemplate() {
   static const KeyTemplate* key_template = NewSphincsKeyTemplate(
-      PQCLEAN_SPHINCSSHA256256FSIMPLE_AVX2_CRYPTO_SECRETKEYBYTES,
+      PQCLEAN_SPHINCSSHA256256FSIMPLE_CRYPTO_SECRETKEYBYTES,
       SphincsHashType::SHA256, SphincsVariant::SIMPLE,
       SphincsSignatureType::FAST_SIGNING);
   return *key_template;
@@ -299,7 +297,7 @@ Sphincs_Sha256_256_F_Simple_KeyTemplate() {
 const google::crypto::tink::KeyTemplate&
 Sphincs_Sha256_256_S_Robust_KeyTemplate() {
   static const KeyTemplate* key_template = NewSphincsKeyTemplate(
-      PQCLEAN_SPHINCSSHA256256SROBUST_AVX2_CRYPTO_SECRETKEYBYTES,
+      PQCLEAN_SPHINCSSHA256256SROBUST_CRYPTO_SECRETKEYBYTES,
       SphincsHashType::SHA256, SphincsVariant::ROBUST,
       SphincsSignatureType::SMALL_SIGNATURE);
   return *key_template;
@@ -308,7 +306,7 @@ Sphincs_Sha256_256_S_Robust_KeyTemplate() {
 const google::crypto::tink::KeyTemplate&
 Sphincs_Sha256_256_S_Simple_KeyTemplate() {
   static const KeyTemplate* key_template = NewSphincsKeyTemplate(
-      PQCLEAN_SPHINCSSHA256256SSIMPLE_AVX2_CRYPTO_SECRETKEYBYTES,
+      PQCLEAN_SPHINCSSHA256256SSIMPLE_CRYPTO_SECRETKEYBYTES,
       SphincsHashType::SHA256, SphincsVariant::SIMPLE,
       SphincsSignatureType::SMALL_SIGNATURE);
   return *key_template;
@@ -318,7 +316,7 @@ Sphincs_Sha256_256_S_Simple_KeyTemplate() {
 const google::crypto::tink::KeyTemplate&
 Sphincs_Shake256_128_F_Robust_KeyTemplate() {
   static const KeyTemplate* key_template = NewSphincsKeyTemplate(
-      PQCLEAN_SPHINCSSHAKE256128FROBUST_AVX2_CRYPTO_SECRETKEYBYTES,
+      PQCLEAN_SPHINCSSHAKE256128FROBUST_CRYPTO_SECRETKEYBYTES,
       SphincsHashType::SHAKE256, SphincsVariant::ROBUST,
       SphincsSignatureType::FAST_SIGNING);
   return *key_template;
@@ -327,7 +325,7 @@ Sphincs_Shake256_128_F_Robust_KeyTemplate() {
 const google::crypto::tink::KeyTemplate&
 Sphincs_Shake256_128_F_Simple_KeyTemplate() {
   static const KeyTemplate* key_template = NewSphincsKeyTemplate(
-      PQCLEAN_SPHINCSSHAKE256128FSIMPLE_AVX2_CRYPTO_SECRETKEYBYTES,
+      PQCLEAN_SPHINCSSHAKE256128FSIMPLE_CRYPTO_SECRETKEYBYTES,
       SphincsHashType::SHAKE256, SphincsVariant::SIMPLE,
       SphincsSignatureType::FAST_SIGNING);
   return *key_template;
@@ -336,7 +334,7 @@ Sphincs_Shake256_128_F_Simple_KeyTemplate() {
 const google::crypto::tink::KeyTemplate&
 Sphincs_Shake256_128_S_Robust_KeyTemplate() {
   static const KeyTemplate* key_template = NewSphincsKeyTemplate(
-      PQCLEAN_SPHINCSSHAKE256128SROBUST_AVX2_CRYPTO_SECRETKEYBYTES,
+      PQCLEAN_SPHINCSSHAKE256128SROBUST_CRYPTO_SECRETKEYBYTES,
       SphincsHashType::SHAKE256, SphincsVariant::ROBUST,
       SphincsSignatureType::SMALL_SIGNATURE);
   return *key_template;
@@ -345,7 +343,7 @@ Sphincs_Shake256_128_S_Robust_KeyTemplate() {
 const google::crypto::tink::KeyTemplate&
 Sphincs_Shake256_128_S_Simple_KeyTemplate() {
   static const KeyTemplate* key_template = NewSphincsKeyTemplate(
-      PQCLEAN_SPHINCSSHAKE256128SSIMPLE_AVX2_CRYPTO_SECRETKEYBYTES,
+      PQCLEAN_SPHINCSSHAKE256128SSIMPLE_CRYPTO_SECRETKEYBYTES,
       SphincsHashType::SHAKE256, SphincsVariant::SIMPLE,
       SphincsSignatureType::SMALL_SIGNATURE);
   return *key_template;
@@ -354,7 +352,7 @@ Sphincs_Shake256_128_S_Simple_KeyTemplate() {
 const google::crypto::tink::KeyTemplate&
 Sphincs_Shake256_192_F_Robust_KeyTemplate() {
   static const KeyTemplate* key_template = NewSphincsKeyTemplate(
-      PQCLEAN_SPHINCSSHAKE256192FROBUST_AVX2_CRYPTO_SECRETKEYBYTES,
+      PQCLEAN_SPHINCSSHAKE256192FROBUST_CRYPTO_SECRETKEYBYTES,
       SphincsHashType::SHAKE256, SphincsVariant::ROBUST,
       SphincsSignatureType::FAST_SIGNING);
   return *key_template;
@@ -363,7 +361,7 @@ Sphincs_Shake256_192_F_Robust_KeyTemplate() {
 const google::crypto::tink::KeyTemplate&
 Sphincs_Shake256_192_F_Simple_KeyTemplate() {
   static const KeyTemplate* key_template = NewSphincsKeyTemplate(
-      PQCLEAN_SPHINCSSHAKE256192FSIMPLE_AVX2_CRYPTO_SECRETKEYBYTES,
+      PQCLEAN_SPHINCSSHAKE256192FSIMPLE_CRYPTO_SECRETKEYBYTES,
       SphincsHashType::SHAKE256, SphincsVariant::SIMPLE,
       SphincsSignatureType::FAST_SIGNING);
   return *key_template;
@@ -372,7 +370,7 @@ Sphincs_Shake256_192_F_Simple_KeyTemplate() {
 const google::crypto::tink::KeyTemplate&
 Sphincs_Shake256_192_S_Robust_KeyTemplate() {
   static const KeyTemplate* key_template = NewSphincsKeyTemplate(
-      PQCLEAN_SPHINCSSHAKE256192SROBUST_AVX2_CRYPTO_SECRETKEYBYTES,
+      PQCLEAN_SPHINCSSHAKE256192SROBUST_CRYPTO_SECRETKEYBYTES,
       SphincsHashType::SHAKE256, SphincsVariant::ROBUST,
       SphincsSignatureType::SMALL_SIGNATURE);
   return *key_template;
@@ -381,7 +379,7 @@ Sphincs_Shake256_192_S_Robust_KeyTemplate() {
 const google::crypto::tink::KeyTemplate&
 Sphincs_Shake256_192_S_Simple_KeyTemplate() {
   static const KeyTemplate* key_template = NewSphincsKeyTemplate(
-      PQCLEAN_SPHINCSSHAKE256192SSIMPLE_AVX2_CRYPTO_SECRETKEYBYTES,
+      PQCLEAN_SPHINCSSHAKE256192SSIMPLE_CRYPTO_SECRETKEYBYTES,
       SphincsHashType::SHAKE256, SphincsVariant::SIMPLE,
       SphincsSignatureType::SMALL_SIGNATURE);
   return *key_template;
@@ -390,7 +388,7 @@ Sphincs_Shake256_192_S_Simple_KeyTemplate() {
 const google::crypto::tink::KeyTemplate&
 Sphincs_Shake256_256_F_Robust_KeyTemplate() {
   static const KeyTemplate* key_template = NewSphincsKeyTemplate(
-      PQCLEAN_SPHINCSSHAKE256256FROBUST_AVX2_CRYPTO_SECRETKEYBYTES,
+      PQCLEAN_SPHINCSSHAKE256256FROBUST_CRYPTO_SECRETKEYBYTES,
       SphincsHashType::SHAKE256, SphincsVariant::ROBUST,
       SphincsSignatureType::FAST_SIGNING);
   return *key_template;
@@ -399,7 +397,7 @@ Sphincs_Shake256_256_F_Robust_KeyTemplate() {
 const google::crypto::tink::KeyTemplate&
 Sphincs_Shake256_256_F_Simple_KeyTemplate() {
   static const KeyTemplate* key_template = NewSphincsKeyTemplate(
-      PQCLEAN_SPHINCSSHAKE256256FSIMPLE_AVX2_CRYPTO_SECRETKEYBYTES,
+      PQCLEAN_SPHINCSSHAKE256256FSIMPLE_CRYPTO_SECRETKEYBYTES,
       SphincsHashType::SHAKE256, SphincsVariant::SIMPLE,
       SphincsSignatureType::FAST_SIGNING);
   return *key_template;
@@ -408,7 +406,7 @@ Sphincs_Shake256_256_F_Simple_KeyTemplate() {
 const google::crypto::tink::KeyTemplate&
 Sphincs_Shake256_256_S_Robust_KeyTemplate() {
   static const KeyTemplate* key_template = NewSphincsKeyTemplate(
-      PQCLEAN_SPHINCSSHAKE256256SROBUST_AVX2_CRYPTO_SECRETKEYBYTES,
+      PQCLEAN_SPHINCSSHAKE256256SROBUST_CRYPTO_SECRETKEYBYTES,
       SphincsHashType::SHAKE256, SphincsVariant::ROBUST,
       SphincsSignatureType::SMALL_SIGNATURE);
   return *key_template;
@@ -417,7 +415,7 @@ Sphincs_Shake256_256_S_Robust_KeyTemplate() {
 const google::crypto::tink::KeyTemplate&
 Sphincs_Shake256_256_S_Simple_KeyTemplate() {
   static const KeyTemplate* key_template = NewSphincsKeyTemplate(
-      PQCLEAN_SPHINCSSHAKE256256SSIMPLE_AVX2_CRYPTO_SECRETKEYBYTES,
+      PQCLEAN_SPHINCSSHAKE256256SSIMPLE_CRYPTO_SECRETKEYBYTES,
       SphincsHashType::SHAKE256, SphincsVariant::SIMPLE,
       SphincsSignatureType::SMALL_SIGNATURE);
   return *key_template;

@@ -78,14 +78,15 @@ public class StreamingAeadThreadSafetyTest {
    *
    * @param stream the streaming primitive
    * @param plaintext the plaintext to encrypt
-   * @param aad the additional data to authenticate
+   * @param associatedData the additional data to authenticate
    * @return the ciphertext including a prefix of size ags.firstSegmentOffset
    */
-  private byte[] encrypt(StreamingAead stream, byte[] plaintext, byte[] aad) throws Exception {
+  private byte[] encrypt(StreamingAead stream, byte[] plaintext, byte[] associatedData)
+      throws Exception {
     ByteArrayOutputStream bos = new ByteArrayOutputStream();
     WritableByteChannel ctChannel = Channels.newChannel(bos);
     // ctChannel.write(ByteBuffer.allocate(stream.getFirstSegmentOffset()));
-    WritableByteChannel encChannel = stream.newEncryptingChannel(ctChannel, aad);
+    WritableByteChannel encChannel = stream.newEncryptingChannel(ctChannel, associatedData);
     encChannel.write(ByteBuffer.wrap(plaintext));
     encChannel.close();
     byte[] ciphertext = bos.toByteArray();
@@ -139,12 +140,13 @@ public class StreamingAeadThreadSafetyTest {
    * channel is used concurrently we expect the following behaviour: (1) All bytes are read (2) The
    * thread sanitizer does not find anything.
    */
-  public void testDecryption(StreamingAead stream, byte[] aad, int chunkSize) throws Exception {
+  public void testDecryption(StreamingAead stream, byte[] associatedData, int chunkSize)
+      throws Exception {
     int numberOfThreads = 10;
     int plaintextSize = 5432; // The plaintext size for each thread.
-    byte[] ciphertext = encrypt(stream, new byte[numberOfThreads * plaintextSize], aad);
+    byte[] ciphertext = encrypt(stream, new byte[numberOfThreads * plaintextSize], associatedData);
     SeekableByteChannel ctChannel = new SeekableByteBufferChannel(ciphertext);
-    SeekableByteChannel decChannel = stream.newSeekableDecryptingChannel(ctChannel, aad);
+    SeekableByteChannel decChannel = stream.newSeekableDecryptingChannel(ctChannel, associatedData);
 
     ExceptionHandler exceptionHandler = new ExceptionHandler();
     Thread[] thread = new Thread[numberOfThreads];
@@ -168,23 +170,23 @@ public class StreamingAeadThreadSafetyTest {
   @Test
   public void testDecryptionAesGcm() throws Exception {
     byte[] ikm = TestUtil.hexDecode("000102030405060708090a0b0c0d0e0f");
-    byte[] aad = TestUtil.hexDecode("aabbccddeeff");
+    byte[] associatedData = TestUtil.hexDecode("aabbccddeeff");
     int keySize = 16;
     int segmentSize = 512;
     AesGcmHkdfStreaming ags = new AesGcmHkdfStreaming(ikm, "HmacSha256", keySize, segmentSize, 0);
-    testDecryption(ags, aad, 64);
+    testDecryption(ags, associatedData, 64);
   }
 
   @Test
   public void testDecryptionAesCtrHmac() throws Exception {
     byte[] ikm = TestUtil.hexDecode("000102030405060708090a0b0c0d0e0f");
-    byte[] aad = TestUtil.hexDecode("aabbccddeeff");
+    byte[] associatedData = TestUtil.hexDecode("aabbccddeeff");
     int keySize = 16;
     int tagSize = 12;
     int segmentSize = 512;
     AesCtrHmacStreaming stream = new AesCtrHmacStreaming(
         ikm, "HmacSha256", keySize, "HmacSha256", tagSize, segmentSize, 0);
-    testDecryption(stream, aad, 64);
+    testDecryption(stream, associatedData, 64);
   }
 
   /** A thread that writes a number of chunks consisting of the same plaintextByte to a channel. */
@@ -239,10 +241,12 @@ public class StreamingAeadThreadSafetyTest {
    * has valid format. (2) All plaintext is encrypted. (3) The thread sanitizer does not find
    * anything.
    */
-  public void testEncryption(StreamingAead stream, byte[] aad, int chunkSize, int numberOfChunks)
+  public void testEncryption(
+      StreamingAead stream, byte[] associatedData, int chunkSize, int numberOfChunks)
       throws Exception {
     ByteArrayOutputStream bos = new ByteArrayOutputStream();
-    WritableByteChannel encChannel = stream.newEncryptingChannel(Channels.newChannel(bos), aad);
+    WritableByteChannel encChannel =
+        stream.newEncryptingChannel(Channels.newChannel(bos), associatedData);
     int numberOfThreads = 10;
     Thread[] thread = new Thread[numberOfThreads];
     ExceptionHandler exceptionHandler = new ExceptionHandler();
@@ -260,7 +264,7 @@ public class StreamingAeadThreadSafetyTest {
     encChannel.close();
     byte[] ciphertext = bos.toByteArray();
     ReadableByteChannel ctChannel = new ByteBufferChannel(ciphertext);
-    ReadableByteChannel ptChannel = stream.newDecryptingChannel(ctChannel, aad);
+    ReadableByteChannel ptChannel = stream.newDecryptingChannel(ctChannel, associatedData);
     ByteBuffer decrypted = ByteBuffer.allocate(numberOfThreads * chunkSize * numberOfChunks + 1);
     ptChannel.read(decrypted);
 
@@ -281,45 +285,45 @@ public class StreamingAeadThreadSafetyTest {
   @Test
   public void testEncryptionAesGcm() throws Exception {
     byte[] ikm = TestUtil.hexDecode("000102030405060708090a0b0c0d0e0f");
-    byte[] aad = TestUtil.hexDecode("aabbccddeeff");
+    byte[] associatedData = TestUtil.hexDecode("aabbccddeeff");
     int keySize = 16;
     int segmentSize = 512;
     AesGcmHkdfStreaming ags = new AesGcmHkdfStreaming(ikm, "HmacSha256", keySize, segmentSize, 0);
-    testEncryption(ags, aad, 129, 20);
+    testEncryption(ags, associatedData, 129, 20);
   }
 
   @Test
   public void testEncryptionAesCtrHmac() throws Exception {
     byte[] ikm = TestUtil.hexDecode("000102030405060708090a0b0c0d0e0f");
-    byte[] aad = TestUtil.hexDecode("aabbccddeeff");
+    byte[] associatedData = TestUtil.hexDecode("aabbccddeeff");
     int keySize = 16;
     int tagSize = 12;
     int segmentSize = 512;
     AesCtrHmacStreaming stream = new AesCtrHmacStreaming(
         ikm, "HmacSha256", keySize, "HmacSha256", tagSize, segmentSize, 0);
-    testEncryption(stream, aad, 128, 20);
+    testEncryption(stream, associatedData, 128, 20);
   }
 
   @Test
   public void testEncryptionLargeChunks() throws Exception {
     byte[] ikm = TestUtil.hexDecode("000102030405060708090a0b0c0d0e0f");
-    byte[] aad = TestUtil.hexDecode("aabbccddeeff");
+    byte[] associatedData = TestUtil.hexDecode("aabbccddeeff");
     int keySize = 16;
     int segmentSize = 512;
     int chunkSize = 2048; // the size for each concurrent read.
     AesGcmHkdfStreaming ags = new AesGcmHkdfStreaming(ikm, "HmacSha256", keySize, segmentSize, 0);
-    testEncryption(ags, aad, chunkSize, 2);
+    testEncryption(ags, associatedData, chunkSize, 2);
   }
 
   @Test
   public void testEncryptionSmallChunks() throws Exception {
     byte[] ikm = TestUtil.hexDecode("000102030405060708090a0b0c0d0e0f");
-    byte[] aad = TestUtil.hexDecode("aabbccddeeff");
+    byte[] associatedData = TestUtil.hexDecode("aabbccddeeff");
     int keySize = 16;
     int segmentSize = 512;
     int chunkSize = 3; // the size for each concurrent read.
     AesGcmHkdfStreaming ags = new AesGcmHkdfStreaming(ikm, "HmacSha256", keySize, segmentSize, 0);
-    testEncryption(ags, aad, chunkSize, 1000);
+    testEncryption(ags, associatedData, chunkSize, 1000);
   }
 
   /**
@@ -393,8 +397,8 @@ public class StreamingAeadThreadSafetyTest {
    * test here only checks whether the operations are atomic. E.g. a read should read contiuous
    * bytes.
    */
-  public void testRandomAccessDecryption(StreamingAead stream, byte[] aad, int plaintextSize)
-      throws Exception {
+  public void testRandomAccessDecryption(
+      StreamingAead stream, byte[] associatedData, int plaintextSize) throws Exception {
     int numberOfReads = 128;
     int numberOfThreads = 10;
     byte[] plaintext = new byte[plaintextSize];
@@ -403,9 +407,9 @@ public class StreamingAeadThreadSafetyTest {
       // plaintext is from a continuous part of the plaintext.
       plaintext[i] = (byte) i;
     }
-    byte[] ciphertext = encrypt(stream, plaintext, aad);
+    byte[] ciphertext = encrypt(stream, plaintext, associatedData);
     SeekableByteChannel ctChannel = new SeekableByteBufferChannel(ciphertext);
-    SeekableByteChannel decChannel = stream.newSeekableDecryptingChannel(ctChannel, aad);
+    SeekableByteChannel decChannel = stream.newSeekableDecryptingChannel(ctChannel, associatedData);
 
     ExceptionHandler exceptionHandler = new ExceptionHandler();
     Thread[] thread = new Thread[numberOfThreads];
@@ -425,24 +429,24 @@ public class StreamingAeadThreadSafetyTest {
   @Test
   public void testRandomAccessAesGcm() throws Exception {
     byte[] ikm = TestUtil.hexDecode("000102030405060708090a0b0c0d0e0f");
-    byte[] aad = TestUtil.hexDecode("aabbccddeeff");
+    byte[] associatedData = TestUtil.hexDecode("aabbccddeeff");
     int keySize = 16;
     int segmentSize = 503;
     int plaintextSize = 7654;
     AesGcmHkdfStreaming ags = new AesGcmHkdfStreaming(ikm, "HmacSha256", keySize, segmentSize, 0);
-    testRandomAccessDecryption(ags, aad, plaintextSize);
+    testRandomAccessDecryption(ags, associatedData, plaintextSize);
   }
 
   @Test
   public void testRandomAccessAesCtrHmac() throws Exception {
     byte[] ikm = TestUtil.hexDecode("000102030405060708090a0b0c0d0e0f");
-    byte[] aad = TestUtil.hexDecode("aabbccddeeff");
+    byte[] associatedData = TestUtil.hexDecode("aabbccddeeff");
     int keySize = 16;
     int tagSize = 12;
     int segmentSize = 479;
     int plaintextSize = 7654;
     AesCtrHmacStreaming stream = new AesCtrHmacStreaming(
         ikm, "HmacSha256", keySize, "HmacSha256", tagSize, segmentSize, 0);
-    testDecryption(stream, aad, plaintextSize);
+    testDecryption(stream, associatedData, plaintextSize);
   }
 }

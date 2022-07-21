@@ -24,6 +24,7 @@
 #include <cmath>
 #include <cstdint>
 #include <cstdlib>
+#include <string>
 
 #include "absl/memory/memory.h"
 #include "absl/status/status.h"
@@ -34,21 +35,23 @@
 #include "tink/aead/xchacha20_poly1305_key_manager.h"
 #include "tink/cleartext_keyset_handle.h"
 #include "tink/daead/aes_siv_key_manager.h"
+#include "tink/internal/ec_util.h"
 #include "tink/keyset_handle.h"
 #include "tink/subtle/common_enums.h"
 #include "tink/subtle/random.h"
-#include "tink/internal/ec_util.h"
 #include "tink/util/enums.h"
 #include "tink/util/protobuf_helper.h"
 #include "tink/util/secret_data.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
+#include "proto/aes_ctr.pb.h"
 #include "proto/aes_ctr_hmac_aead.pb.h"
 #include "proto/aes_siv.pb.h"
 #include "proto/common.pb.h"
 #include "proto/ecdsa.pb.h"
 #include "proto/ecies_aead_hkdf.pb.h"
 #include "proto/ed25519.pb.h"
+#include "proto/hmac.pb.h"
 #include "proto/tink.pb.h"
 #include "proto/xchacha20_poly1305.pb.h"
 
@@ -166,7 +169,7 @@ util::StatusOr<std::string> HexDecode(absl::string_view hex) {
 }
 
 std::string HexDecodeOrDie(absl::string_view hex) {
-  return HexDecode(hex).ValueOrDie();
+  return HexDecode(hex).value();
 }
 
 std::string HexEncode(absl::string_view bytes) {
@@ -262,8 +265,7 @@ EciesAeadHkdfPrivateKey GetEciesAeadHkdfTestKey(
     google::crypto::tink::EllipticCurveType curve_type,
     google::crypto::tink::EcPointFormat ec_point_format,
     google::crypto::tink::HashType hash_type) {
-  auto test_key = internal::NewEcKey(
-      Enums::ProtoToSubtle(curve_type)).ValueOrDie();
+  auto test_key = internal::NewEcKey(Enums::ProtoToSubtle(curve_type)).value();
   EciesAeadHkdfPrivateKey ecies_key;
   ecies_key.set_version(0);
   ecies_key.set_key_value(
@@ -378,8 +380,7 @@ EcdsaPrivateKey GetEcdsaTestPrivateKey(
     google::crypto::tink::EllipticCurveType curve_type,
     google::crypto::tink::HashType hash_type,
     google::crypto::tink::EcdsaSignatureEncoding encoding) {
-  auto test_key = internal::NewEcKey(
-      Enums::ProtoToSubtle(curve_type)).ValueOrDie();
+  auto test_key = internal::NewEcKey(Enums::ProtoToSubtle(curve_type)).value();
   EcdsaPrivateKey ecdsa_key;
   ecdsa_key.set_version(0);
   ecdsa_key.set_key_value(
@@ -396,7 +397,7 @@ EcdsaPrivateKey GetEcdsaTestPrivateKey(
 }
 
 Ed25519PrivateKey GetEd25519TestPrivateKey() {
-  auto test_key = internal::NewEd25519Key().ValueOrDie();
+  auto test_key = internal::NewEd25519Key().value();
   Ed25519PrivateKey ed25519_key;
   ed25519_key.set_version(0);
   ed25519_key.set_key_value(test_key->private_key);

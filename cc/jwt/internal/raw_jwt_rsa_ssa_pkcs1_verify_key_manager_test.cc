@@ -80,7 +80,7 @@ JwtRsaSsaPkcs1KeyFormat CreateKeyFormat(JwtRsaSsaPkcs1Algorithm algorithm,
   internal::SslUniquePtr<BIGNUM> e(BN_new());
   BN_set_word(e.get(), public_exponent);
   key_format.set_public_exponent(
-      internal::BignumToString(e.get(), BN_num_bytes(e.get())).ValueOrDie());
+      internal::BignumToString(e.get(), BN_num_bytes(e.get())).value());
   return key_format;
 }
 
@@ -89,15 +89,13 @@ JwtRsaSsaPkcs1KeyFormat ValidKeyFormat() {
 }
 
 JwtRsaSsaPkcs1PrivateKey CreateValidPrivateKey() {
-  return RawJwtRsaSsaPkcs1SignKeyManager()
-      .CreateKey(ValidKeyFormat())
-      .ValueOrDie();
+  return RawJwtRsaSsaPkcs1SignKeyManager().CreateKey(ValidKeyFormat()).value();
 }
 
 JwtRsaSsaPkcs1PublicKey CreateValidPublicKey() {
   return RawJwtRsaSsaPkcs1SignKeyManager()
       .GetPublicKey(CreateValidPrivateKey())
-      .ValueOrDie();
+      .value();
 }
 
 // Checks that a public key generaed by the SignKeyManager is considered valid.
@@ -134,10 +132,10 @@ TEST(JwtRsaSsaPkcs1SignKeyManagerTest, Create) {
       CreateKeyFormat(JwtRsaSsaPkcs1Algorithm::RS256, 3072, RSA_F4);
   StatusOr<JwtRsaSsaPkcs1PrivateKey> private_key =
       RawJwtRsaSsaPkcs1SignKeyManager().CreateKey(key_format);
-  ASSERT_THAT(private_key.status(), IsOk());
+  ASSERT_THAT(private_key, IsOk());
   StatusOr<JwtRsaSsaPkcs1PublicKey> public_key =
       RawJwtRsaSsaPkcs1SignKeyManager().GetPublicKey(*private_key);
-  ASSERT_THAT(public_key.status(), IsOk());
+  ASSERT_THAT(public_key, IsOk());
 
   internal::RsaPrivateKey private_key_subtle;
   private_key_subtle.n = private_key->public_key().n();
@@ -156,11 +154,11 @@ TEST(JwtRsaSsaPkcs1SignKeyManagerTest, Create) {
   util::StatusOr<std::unique_ptr<PublicKeyVerify>> verifier =
       RawJwtRsaSsaPkcs1VerifyKeyManager().GetPrimitive<PublicKeyVerify>(
           *public_key);
-  ASSERT_THAT(verifier.status(), IsOk());
+  ASSERT_THAT(verifier, IsOk());
 
   std::string message = "Some message";
   util::StatusOr<std::string> sig = (*direct_signer)->Sign(message);
-  ASSERT_THAT(sig.status(), IsOk());
+  ASSERT_THAT(sig, IsOk());
   EXPECT_THAT((*verifier)->Verify(*sig, message), IsOk());
 }
 
@@ -209,7 +207,7 @@ TEST(RawJwtRsaSsaPkcs1VerifyKeyManagerTest, NistTestVector) {
   key.set_e(nist_test_vector.e);
   util::StatusOr<std::unique_ptr<PublicKeyVerify>> verifier =
       RawJwtRsaSsaPkcs1VerifyKeyManager().GetPrimitive<PublicKeyVerify>(key);
-  EXPECT_THAT(verifier.status(), IsOk());
+  EXPECT_THAT(verifier, IsOk());
   EXPECT_THAT(
       (*verifier)->Verify(nist_test_vector.signature, nist_test_vector.message),
       IsOk());

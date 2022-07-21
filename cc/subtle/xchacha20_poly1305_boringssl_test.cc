@@ -45,7 +45,7 @@ constexpr int kTagSizeInBytes = 16;
 constexpr absl::string_view kKey256Hex =
     "000102030405060708090a0b0c0d0e0f000102030405060708090a0b0c0d0e0f";
 constexpr absl::string_view kMessage = "Some data to encrypt.";
-constexpr absl::string_view kAdditionalData = "Some data to authenticate.";
+constexpr absl::string_view kAssociatedData = "Some data to authenticate.";
 
 using ::crypto::tink::test::IsOk;
 using ::crypto::tink::test::StatusIs;
@@ -69,23 +69,23 @@ TEST(XChacha20Poly1305BoringSslTest, EncryptDecrypt) {
   } else {
     util::StatusOr<std::unique_ptr<Aead>> aead =
         XChacha20Poly1305BoringSsl::New(key);
-    ASSERT_THAT(aead.status(), IsOk());
+    ASSERT_THAT(aead, IsOk());
 
     util::StatusOr<std::string> ciphertext =
-        (*aead)->Encrypt(kMessage, kAdditionalData);
-    ASSERT_THAT(ciphertext.status(), IsOk());
+        (*aead)->Encrypt(kMessage, kAssociatedData);
+    ASSERT_THAT(ciphertext, IsOk());
     EXPECT_THAT(*ciphertext,
                 SizeIs(kMessage.size() + kNonceSizeInBytes + kTagSizeInBytes));
     util::StatusOr<std::string> plaintext =
-        (*aead)->Decrypt(*ciphertext, kAdditionalData);
-    ASSERT_THAT(plaintext.status(), IsOk());
+        (*aead)->Decrypt(*ciphertext, kAssociatedData);
+    ASSERT_THAT(plaintext, IsOk());
     EXPECT_EQ(*plaintext, kMessage);
   }
 }
 
-// Test decryption with a known ciphertext, message, AAD and key tuple to make
-// sure this is using the correct algorithm. The values are taken from the test
-// vector tcId 1 of the Wycheproof tests:
+// Test decryption with a known ciphertext, message, associated_data and key
+// tuple to make sure this is using the correct algorithm. The values are taken
+// from the test vector tcId 1 of the Wycheproof tests:
 // https://github.com/google/wycheproof/blob/master/testvectors/xchacha20_poly1305_test.json#L21
 TEST(XChacha20Poly1305BoringSslTest, SimpleDecrypt) {
   if (!internal::IsBoringSsl()) {
@@ -108,17 +108,18 @@ TEST(XChacha20Poly1305BoringSslTest, SimpleDecrypt) {
   std::string iv = absl::HexStringToBytes(
       "404142434445464748494a4b4c4d4e4f5051525354555657");
   std::string tag = absl::HexStringToBytes("c0875924c1c7987947deafd8780acf49");
-  std::string aad = absl::HexStringToBytes("50515253c0c1c2c3c4c5c6c7");
+  std::string associated_data =
+      absl::HexStringToBytes("50515253c0c1c2c3c4c5c6c7");
   util::SecretData key = util::SecretDataFromStringView(absl::HexStringToBytes(
       "808182838485868788898a8b8c8d8e8f909192939495969798999a9b9c9d9e9f"));
 
   util::StatusOr<std::unique_ptr<Aead>> aead =
       XChacha20Poly1305BoringSsl::New(key);
-  ASSERT_THAT(aead.status(), IsOk());
+  ASSERT_THAT(aead, IsOk());
 
   util::StatusOr<std::string> plaintext =
-      (*aead)->Decrypt(absl::StrCat(iv, raw_ciphertext, tag), aad);
-  ASSERT_THAT(plaintext.status(), IsOk());
+      (*aead)->Decrypt(absl::StrCat(iv, raw_ciphertext, tag), associated_data);
+  ASSERT_THAT(plaintext, IsOk());
   EXPECT_EQ(*plaintext, message);
 }
 
@@ -134,12 +135,12 @@ TEST(XChacha20Poly1305BoringSslTest, DecryptFailsIfCiphertextTooSmall) {
       util::SecretDataFromStringView(absl::HexStringToBytes(kKey256Hex));
   util::StatusOr<std::unique_ptr<Aead>> aead =
       XChacha20Poly1305BoringSsl::New(key);
-  ASSERT_THAT(aead.status(), IsOk());
+  ASSERT_THAT(aead, IsOk());
 
   for (int i = 1; i < kNonceSizeInBytes + kTagSizeInBytes; i++) {
     std::string ciphertext;
     ResizeStringUninitialized(&ciphertext, i);
-    EXPECT_THAT((*aead)->Decrypt(ciphertext, kAdditionalData).status(),
+    EXPECT_THAT((*aead)->Decrypt(ciphertext, kAssociatedData).status(),
                 StatusIs(absl::StatusCode::kInvalidArgument));
   }
 }
@@ -185,7 +186,7 @@ TEST_P(XChacha20Poly1305BoringSslWycheproofTest, Decrypt) {
   util::SecretData key = util::SecretDataFromStringView(test_vector.key);
   util::StatusOr<std::unique_ptr<Aead>> cipher =
       XChacha20Poly1305BoringSsl::New(key);
-  ASSERT_THAT(cipher.status(), IsOk());
+  ASSERT_THAT(cipher, IsOk());
   std::string ciphertext =
       absl::StrCat(test_vector.nonce, test_vector.ct, test_vector.tag);
   util::StatusOr<std::string> plaintext =

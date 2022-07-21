@@ -25,7 +25,6 @@
 #include "tink/jwt/jwt_mac_config.h"
 #include "tink/jwt/jwt_signature_config.h"
 #include "tink/util/fake_kms_client.h"
-#include "proto/testing/testing_api.grpc.pb.h"
 #include "aead_impl.h"
 #include "deterministic_aead_impl.h"
 #include "hybrid_impl.h"
@@ -36,6 +35,7 @@
 #include "prf_set_impl.h"
 #include "signature_impl.h"
 #include "streaming_aead_impl.h"
+#include "proto/testing_api.grpc.pb.h"
 
 ABSL_FLAG(int, port, 23456, "the port");
 

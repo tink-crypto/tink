@@ -16,9 +16,12 @@
 
 #include "tink/json_keyset_writer.h"
 
-#include <ostream>
 #include <istream>
+#include <memory>
+#include <ostream>
 #include <sstream>
+#include <string>
+#include <utility>
 
 #include "absl/status/status.h"
 #include "absl/strings/escaping.h"
@@ -30,7 +33,6 @@
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "proto/tink.pb.h"
-
 
 namespace crypto {
 namespace tink {
@@ -201,14 +203,14 @@ util::StatusOr<std::unique_ptr<JsonKeysetWriter>> JsonKeysetWriter::New(
 util::Status JsonKeysetWriter::Write(const Keyset& keyset) {
   auto json_string_result = ToJsonString(keyset);
   if (!json_string_result.ok()) return json_string_result.status();
-  return WriteData(json_string_result.ValueOrDie(), destination_stream_.get());
+  return WriteData(json_string_result.value(), destination_stream_.get());
 }
 
 util::Status JsonKeysetWriter::Write(
     const EncryptedKeyset& encrypted_keyset) {
   auto json_string_result = ToJsonString(encrypted_keyset);
   if (!json_string_result.ok()) return json_string_result.status();
-  return WriteData(json_string_result.ValueOrDie(), destination_stream_.get());
+  return WriteData(json_string_result.value(), destination_stream_.get());
 }
 
 }  // namespace tink

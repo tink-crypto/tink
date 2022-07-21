@@ -18,7 +18,7 @@
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
-#include "proto/testing/testing_api.grpc.pb.h"
+#include "proto/testing_api.grpc.pb.h"
 
 namespace crypto {
 namespace tink {

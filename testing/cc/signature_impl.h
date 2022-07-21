@@ -21,7 +21,7 @@
 #include <grpcpp/server_context.h>
 #include <grpcpp/support/status.h>
 
-#include "proto/testing/testing_api.grpc.pb.h"
+#include "proto/testing_api.grpc.pb.h"
 
 namespace tink_testing_api {
 

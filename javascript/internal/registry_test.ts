@@ -58,7 +58,7 @@ describe('registry test', function() {
          Registry.registerPrimitiveWrapper(
              new DummyPrimitiveWrapper1Alternative());
          fail('An exception should be thrown.');
-       } catch (e) {
+       } catch (e: any) {
          expect(e.toString())
              .toBe(
                  'SecurityException: primitive wrapper for type ' +
@@ -97,7 +97,7 @@ describe('registry test', function() {
     try {
       Registry.registerKeyManager(new DummyKeyManager1(keyType));
       Registry.registerKeyManager(new DummyKeyManager2(keyType));
-    } catch (e) {
+    } catch (e: any) {
       expect(e.toString())
           .toBe(ExceptionText.keyManagerOverwrittingAttempt(keyType));
       return;
@@ -121,7 +121,7 @@ describe('registry test', function() {
        Registry.registerKeyManager(keyManager1, false);
        try {
          await Registry.newKeyData(keyTemplate);
-       } catch (e) {
+       } catch (e: any) {
          expect(e.toString()).toBe(ExceptionText.newKeyForbidden(keyType));
          return;
        }
@@ -142,14 +142,14 @@ describe('registry test', function() {
        try {
          Registry.registerKeyManager(keyManager1);
          fail('An exception should be thrown.');
-       } catch (e) {
+       } catch (e: any) {
          expect(e.toString())
              .toBe(ExceptionText.prohibitedChangeToLessRestricted(
                  keyManager1.getKeyType()));
        }
        try {
          await Registry.newKeyData(keyTemplate);
-       } catch (e) {
+       } catch (e: any) {
          expect(e.toString()).toBe(ExceptionText.newKeyForbidden(keyType));
          return;
        }
@@ -185,7 +185,7 @@ describe('registry test', function() {
 
     try {
       Registry.getKeyManager(keyType);
-    } catch (e) {
+    } catch (e: any) {
       expect(e.toString()).toBe(ExceptionText.notRegisteredKeyType(keyType));
       return;
     }
@@ -202,7 +202,7 @@ describe('registry test', function() {
     Registry.registerKeyManager(keyManager1);
     try {
       await Registry.newKeyData(keyTemplate);
-    } catch (e) {
+    } catch (e: any) {
       expect(e.toString())
           .toBe(ExceptionText.notRegisteredKeyType(differentKeyType));
       return;
@@ -218,7 +218,7 @@ describe('registry test', function() {
     Registry.registerKeyManager(keyManager1, false);
     try {
       await Registry.newKeyData(keyTemplate);
-    } catch (e) {
+    } catch (e: any) {
       expect(e.toString())
           .toBe(ExceptionText.newKeyForbidden(keyManager1.getKeyType()));
       return;
@@ -293,7 +293,7 @@ describe('registry test', function() {
     try {
       await Registry.newKey(keyTemplate);
       fail('An exception should be thrown.');
-    } catch (e) {
+    } catch (e: any) {
       expect(e.toString())
           .toBe(ExceptionText.notRegisteredKeyType(notRegisteredKeyType));
     }
@@ -307,7 +307,7 @@ describe('registry test', function() {
     try {
       await Registry.newKey(keyTemplate);
       fail('An exception should be thrown.');
-    } catch (e) {
+    } catch (e: any) {
       expect(e.toString())
           .toBe(ExceptionText.newKeyForbidden(keyManager.getKeyType()));
     }
@@ -373,7 +373,7 @@ describe('registry test', function() {
 
     try {
       await Registry.getPrimitive(Aead, keyData, anotherType);
-    } catch (e) {
+    } catch (e: any) {
       expect(e.toString())
           .toBe(ExceptionText.keyTypesAreNotMatching(keyDataType, anotherType));
       return;
@@ -386,7 +386,7 @@ describe('registry test', function() {
     try {
       await Registry.getPrimitive(Aead, new PbHmacParams());
       fail('An exception should be thrown.');
-    } catch (e) {
+    } catch (e: any) {
       expect(e.toString()).toBe(ExceptionText.keyTypeNotDefined());
     }
   });
@@ -397,7 +397,7 @@ describe('registry test', function() {
 
     try {
       await Registry.getPrimitive(Aead, keyData);
-    } catch (e) {
+    } catch (e: any) {
       expect(e.toString())
           .toBe(ExceptionText.notRegisteredKeyType(keyDataType));
       return;
@@ -437,7 +437,7 @@ describe('registry test', function() {
 
     try {
       await Registry.getPrimitive(Mac, key, keyData.getTypeUrl());
-    } catch (e) {
+    } catch (e: any) {
       expect(e.toString().includes(ExceptionText.getPrimitiveBadPrimitive()))
           .toBe(true);
       return;
@@ -452,7 +452,7 @@ describe('registry test', function() {
       try {
         Registry.getPublicKeyData(notPrivateTypeUrl, new Uint8Array(8));
         fail('An exception should be thrown.');
-      } catch (e) {
+      } catch (e: any) {
         expect(e.toString())
             .toBe(ExceptionText.notPrivateKeyFactory(notPrivateTypeUrl));
       }
@@ -464,7 +464,7 @@ describe('registry test', function() {
       try {
         Registry.getPublicKeyData(typeUrl, new Uint8Array(10));
         fail('An exception should be thrown.');
-      } catch (e) {
+      } catch (e: any) {
         expect(e.toString()).toBe(ExceptionText.couldNotParse(typeUrl));
       }
     });

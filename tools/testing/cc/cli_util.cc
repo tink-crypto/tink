@@ -16,9 +16,12 @@
 
 #include "testing/cc/cli_util.h"
 
+#include <algorithm>
 #include <fstream>
 #include <iostream>
 #include <sstream>
+#include <string>
+#include <utility>
 
 #include "absl/status/status.h"
 #include "tink/binary_keyset_reader.h"
@@ -76,7 +79,7 @@ void WriteToStream(OutputStream* output_stream, const void* contents,
                 << std::endl;
       exit(1);
     }
-    available_space = next_result.ValueOrDie();
+    available_space = next_result.value();
     available_bytes = std::min(available_space, remaining);
     memcpy(buffer, reinterpret_cast<const char*>(contents) + pos,
            available_bytes);
@@ -102,7 +105,7 @@ std::unique_ptr<KeysetReader> CliUtil::GetBinaryKeysetReader(
               << keyset_reader_result.status().message() << std::endl;
     exit(1);
   }
-  return std::move(keyset_reader_result.ValueOrDie());
+  return std::move(keyset_reader_result.value());
 }
 
 // static
@@ -117,7 +120,7 @@ std::unique_ptr<KeysetReader> CliUtil::GetJsonKeysetReader(
               << keyset_reader_result.status().message() << std::endl;
     exit(1);
   }
-  return std::move(keyset_reader_result.ValueOrDie());
+  return std::move(keyset_reader_result.value());
 }
 
 // static
@@ -132,7 +135,7 @@ std::unique_ptr<KeysetWriter> CliUtil::GetBinaryKeysetWriter(
               << keyset_writer_result.status().message() << std::endl;
     exit(1);
   }
-  return std::move(keyset_writer_result.ValueOrDie());
+  return std::move(keyset_writer_result.value());
 }
 
 // static
@@ -147,7 +150,7 @@ std::unique_ptr<KeysetWriter> CliUtil::GetJsonKeysetWriter(
               << keyset_writer_result.status().message() << std::endl;
     exit(1);
   }
-  return std::move(keyset_writer_result.ValueOrDie());
+  return std::move(keyset_writer_result.value());
 }
 
 // static
@@ -160,7 +163,7 @@ std::unique_ptr<KeysetHandle> CliUtil::ReadKeyset(const std::string& filename) {
               << keyset_handle_result.status().message() << std::endl;
     exit(1);
   }
-  return std::move(keyset_handle_result.ValueOrDie());
+  return std::move(keyset_handle_result.value());
 }
 
 // static
@@ -191,21 +194,20 @@ void CliUtil::InitTink() {
 
   Status aws_result = InitAws();
   if (!aws_result.ok()) {
-    std::clog << aws_result.error_message() << std::endl;
+    std::clog << aws_result.message() << std::endl;
   }
 }
 
 // static
 Status CliUtil::InitGcp() {
   std::string creds_file = std::string(getenv("TEST_SRCDIR")) +
-                           "/tink_base/testdata/credential.json";
+                           "/tools/testdata/gcp/credential.json";
   auto client_result = GcpKmsClient::New("", creds_file);
   if (!client_result.ok()) {
     return Status(absl::StatusCode::kInternal,
                   "Failed to connect to GCP client.");
   }
-  auto client_add_result =
-      KmsClients::Add(std::move(client_result.ValueOrDie()));
+  auto client_add_result = KmsClients::Add(std::move(client_result.value()));
   if (!client_add_result.ok()) {
     return Status(absl::StatusCode::kInternal, "Failed to add KMS client.");
   }
@@ -215,14 +217,14 @@ Status CliUtil::InitGcp() {
 // static
 Status CliUtil::InitAws() {
   std::string creds_file = std::string(getenv("TEST_SRCDIR")) +
-                           "/tink_base/testdata/aws_credentials_cc.txt";
+                           "/tools/testdata/aws/credentials.ini";
   auto client_result = AwsKmsClient::New("", creds_file);
   if (!client_result.ok()) {
     return Status(crypto::tink::util::error::INTERNAL,
                         "Failed to connect to AWS client.");
   }
   auto client_add_result =
-      KmsClients::Add(std::move(client_result.ValueOrDie()));
+      KmsClients::Add(std::move(client_result.value()));
   if (!client_add_result.ok()) {
     return Status(crypto::tink::util::error::INTERNAL,
                         "Failed to add KMS client.");
@@ -283,7 +285,7 @@ void CliUtil::CopyStream(InputStream* input_stream,
                 << std::endl;
       exit(1);
     }
-    auto read_bytes = next_result.ValueOrDie();
+    auto read_bytes = next_result.value();
     if (read_bytes > 0) {
       WriteToStream(output_stream, in_buffer, read_bytes);
     }

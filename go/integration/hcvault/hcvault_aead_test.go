@@ -13,7 +13,7 @@
 // limitations under the License.
 //
 ////////////////////////////////////////////////////////////////////////////////
-package hcvault
+package hcvault_test
 
 import (
 	"bytes"
@@ -28,6 +28,8 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+
+	"github.com/google/tink/go/integration/hcvault"
 )
 
 const (
@@ -44,7 +46,7 @@ func TestVaultAEAD_Encrypt(t *testing.T) {
 	port, stopFunc := newServer(t)
 	defer stopFunc()
 
-	client, err := NewClient(
+	client, err := hcvault.NewClient(
 		fmt.Sprintf("hcvault://localhost:%d/", port),
 		&tls.Config{InsecureSkipVerify: true},
 		token,
@@ -74,7 +76,7 @@ func TestVaultAEAD_Decrypt(t *testing.T) {
 	port, stopFunc := newServer(t)
 	defer stopFunc()
 
-	client, err := NewClient(
+	client, err := hcvault.NewClient(
 		fmt.Sprintf("hcvault://localhost:%d/", port),
 		&tls.Config{InsecureSkipVerify: true},
 		token,

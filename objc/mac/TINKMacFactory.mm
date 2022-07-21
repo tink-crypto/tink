@@ -41,7 +41,7 @@
     }
     return nil;
   }
-  id<TINKMac> mac = [[TINKMacInternal alloc] initWithCCMac:std::move(st.ValueOrDie())];
+  id<TINKMac> mac = [[TINKMacInternal alloc] initWithCCMac:std::move(st.value())];
   if (!mac) {
     if (error) {
       *error = TINKStatusToError(crypto::tink::util::Status(

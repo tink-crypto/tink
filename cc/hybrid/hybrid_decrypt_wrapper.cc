@@ -16,10 +16,16 @@
 
 #include "tink/hybrid/hybrid_decrypt_wrapper.h"
 
+#include <string>
+#include <utility>
+
 #include "absl/status/status.h"
 #include "tink/crypto_format.h"
 #include "tink/hybrid_decrypt.h"
+#include "tink/internal/monitoring_util.h"
+#include "tink/internal/registry_impl.h"
 #include "tink/internal/util.h"
+#include "tink/monitoring/monitoring.h"
 #include "tink/primitive_set.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
@@ -29,11 +35,17 @@ namespace tink {
 
 namespace {
 
+constexpr absl::string_view kPrimitive = "hybrid_decrypt";
+constexpr absl::string_view kDecryptApi = "decrypt";
+
 class HybridDecryptSetWrapper : public HybridDecrypt {
  public:
   explicit HybridDecryptSetWrapper(
-      std::unique_ptr<PrimitiveSet<HybridDecrypt>> hybrid_decrypt_set)
-      : hybrid_decrypt_set_(std::move(hybrid_decrypt_set)) {}
+      std::unique_ptr<PrimitiveSet<HybridDecrypt>> hybrid_decrypt_set,
+      std::unique_ptr<MonitoringClient> monitoring_decryption_client = nullptr)
+      : hybrid_decrypt_set_(std::move(hybrid_decrypt_set)),
+        monitoring_decryption_client_(std::move(monitoring_decryption_client)) {
+  }
 
   crypto::tink::util::StatusOr<std::string> Decrypt(
       absl::string_view ciphertext,
@@ -43,6 +55,7 @@ class HybridDecryptSetWrapper : public HybridDecrypt {
 
  private:
   std::unique_ptr<PrimitiveSet<HybridDecrypt>> hybrid_decrypt_set_;
+  std::unique_ptr<MonitoringClient> monitoring_decryption_client_;
 };
 
 util::StatusOr<std::string> HybridDecryptSetWrapper::Decrypt(
@@ -58,12 +71,16 @@ util::StatusOr<std::string> HybridDecryptSetWrapper::Decrypt(
     if (primitives_result.ok()) {
       absl::string_view raw_ciphertext =
           ciphertext.substr(CryptoFormat::kNonRawPrefixSize);
-      for (auto& hybrid_decrypt_entry : *(primitives_result.ValueOrDie())) {
+      for (auto& hybrid_decrypt_entry : *(primitives_result.value())) {
         HybridDecrypt& hybrid_decrypt = hybrid_decrypt_entry->get_primitive();
         auto decrypt_result =
             hybrid_decrypt.Decrypt(raw_ciphertext, context_info);
         if (decrypt_result.ok()) {
-          return std::move(decrypt_result.ValueOrDie());
+          if (monitoring_decryption_client_ != nullptr) {
+            monitoring_decryption_client_->Log(
+                hybrid_decrypt_entry->get_key_id(), ciphertext.size());
+          }
+          return std::move(decrypt_result.value());
         } else {
           // LOG that a matching key didn't decrypt the ciphertext.
         }
@@ -74,13 +91,16 @@ util::StatusOr<std::string> HybridDecryptSetWrapper::Decrypt(
   // No matching key succeeded with decryption, try all RAW keys.
   auto raw_primitives_result = hybrid_decrypt_set_->get_raw_primitives();
   if (raw_primitives_result.ok()) {
-    for (auto& hybrid_decrypt_entry : *(raw_primitives_result.ValueOrDie())) {
+    for (auto& hybrid_decrypt_entry : *(raw_primitives_result.value())) {
       HybridDecrypt& hybrid_decrypt = hybrid_decrypt_entry->get_primitive();
       auto decrypt_result = hybrid_decrypt.Decrypt(ciphertext, context_info);
       if (decrypt_result.ok()) {
-        return std::move(decrypt_result.ValueOrDie());
+        return std::move(decrypt_result.value());
       }
     }
+  }
+  if (monitoring_decryption_client_ != nullptr) {
+    monitoring_decryption_client_->LogFailure();
   }
   return util::Status(absl::StatusCode::kInvalidArgument, "decryption failed");
 }
@@ -104,9 +124,31 @@ util::StatusOr<std::unique_ptr<HybridDecrypt>> HybridDecryptWrapper::Wrap(
     std::unique_ptr<PrimitiveSet<HybridDecrypt>> primitive_set) const {
   util::Status status = Validate(primitive_set.get());
   if (!status.ok()) return status;
-  std::unique_ptr<HybridDecrypt> hybrid_decrypt(
-      new HybridDecryptSetWrapper(std::move(primitive_set)));
-  return std::move(hybrid_decrypt);
+
+  MonitoringClientFactory* const monitoring_factory =
+      internal::RegistryImpl::GlobalInstance().GetMonitoringClientFactory();
+
+  // Monitoring is not enabled. Create a wrapper without monitoring clients.
+  if (monitoring_factory == nullptr) {
+    return {
+        absl::make_unique<HybridDecryptSetWrapper>(std::move(primitive_set))};
+  }
+
+  util::StatusOr<MonitoringKeySetInfo> keyset_info =
+      internal::MonitoringKeySetInfoFromPrimitiveSet(*primitive_set);
+  if (!keyset_info.ok()) {
+    return keyset_info.status();
+  }
+
+  util::StatusOr<std::unique_ptr<MonitoringClient>>
+      monitoring_decryption_client = monitoring_factory->New(
+          MonitoringContext(kPrimitive, kDecryptApi, *keyset_info));
+  if (!monitoring_decryption_client.ok()) {
+    return monitoring_decryption_client.status();
+  }
+
+  return {absl::make_unique<HybridDecryptSetWrapper>(
+      std::move(primitive_set), *std::move(monitoring_decryption_client))};
 }
 
 }  // namespace tink

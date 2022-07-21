@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import {PbKeyData, PbKeyset, PbKeysetKey, PbKeyStatusType, PbOutputPrefixType} from '../../internal/proto';
+import {PbKeyData, PbKeyMaterialType, PbKeyset, PbKeysetKey, PbKeyStatusType, PbMessage, PbOutputPrefixType} from '../../internal/proto';
 
 /**
  * Returns its input type-narrowed not to be null or undefined. Throws a failed
@@ -42,8 +42,9 @@ export function assertInstanceof<T>(
  *
  */
 export function createKey(
-    keyId: number = 305419896, legacy: boolean = false,
-    enabled: boolean = true): PbKeysetKey {
+    keyId: number = 305419896, legacy: boolean = false, enabled: boolean = true,
+    keyMaterialType: PbKeyMaterialType =
+        PbKeyData.KeyMaterialType.SYMMETRIC): PbKeysetKey {
   const key = new PbKeysetKey();
   if (enabled) {
     key.setStatus(PbKeyStatusType.ENABLED);
@@ -59,7 +60,7 @@ export function createKey(
   const keyData = (new PbKeyData())
                       .setTypeUrl('someTypeUrl')
                       .setValue(new Uint8Array(10))
-                      .setKeyMaterialType(PbKeyData.KeyMaterialType.SYMMETRIC);
+                      .setKeyMaterialType(keyMaterialType);
   key.setKeyData(keyData);
   return key;
 }
@@ -69,16 +70,22 @@ export function createKey(
  *
  *
  */
-export function createKeyset(keysetSize: number = 20): PbKeyset {
+export function createKeyset(
+    keysetSize: number = 20, keyMaterialType?: PbKeyMaterialType): PbKeyset {
   const keyset = new PbKeyset();
   for (let i = 0; i < keysetSize; i++) {
     const key = createKey(
         /* legacy = */
         i + 1, i % 2 < 1,
         /* enabled = */
-        i % 4 < 2);
+        i % 4 < 2, keyMaterialType);
     keyset.addKey(key);
   }
   keyset.setPrimaryKeyId(1);
   return keyset;
+}
+
+/** Asserts that two protos are equal. */
+export function assertMessageEquals<T extends PbMessage>(m1: T, m2: T) {
+  expect(PbMessage.equals(m1, m2)).toBeTrue();
 }

@@ -1,9 +1,11 @@
 add_subdirectory(aead)
+add_subdirectory(chunkedmac)
 add_subdirectory(config)
 add_subdirectory(daead)
 add_subdirectory(hybrid)
 add_subdirectory(internal)
 add_subdirectory(mac)
+add_subdirectory(monitoring)
 add_subdirectory(jwt)
 add_subdirectory(prf)
 add_subdirectory(signature)
@@ -13,134 +15,137 @@ add_subdirectory(util)
 
 tink_module(core)
 
-# configuration settings for the build
-option(USE_ONLY_FIPS "Enables the FIPS only mode in Tink" OFF)
+# Configuration settings for the build.
+
+if (TINK_USE_ABSL_STATUS)
+    target_compile_definitions(tink_util_status PUBLIC TINK_USE_ABSL_STATUS)
+endif()
+if (TINK_USE_ABSL_STATUSOR)
+    target_compile_definitions(tink_util_statusor INTERFACE TINK_USE_ABSL_STATUSOR)
+endif()
 if(USE_ONLY_FIPS)
-    add_definitions(-DTINK_USE_ONLY_FIPS)
+    target_compile_definitions(tink_internal_fips_utils PUBLIC TINK_USE_ONLY_FIPS)
 endif()
 
-# public libraries
+# Public libraries.
 
 set(TINK_VERSION_H "${TINK_GENFILE_DIR}/tink/version.h")
-
-set(TINK_PUBLIC_APIS
-  aead.h
-  aead_config.h
-  aead_factory.h
-  aead_key_templates.h
-  binary_keyset_reader.h
-  binary_keyset_writer.h
-  catalogue.h
-  config.h
-  deterministic_aead.h
-  deterministic_aead_config.h
-  deterministic_aead_factory.h
-  deterministic_aead_key_templates.h
-  hybrid_config.h
-  hybrid_decrypt.h
-  hybrid_decrypt_factory.h
-  hybrid_encrypt.h
-  hybrid_encrypt_factory.h
-  hybrid_key_templates.h
-  input_stream.h
-  json_keyset_reader.h
-  json_keyset_writer.h
-  key_manager.h
-  keyset_handle.h
-  keyset_manager.h
-  keyset_reader.h
-  keyset_writer.h
-  kms_client.h
-  mac.h
-  mac_config.h
-  mac_factory.h
-  mac_key_templates.h
-  output_stream_with_result.h
-  output_stream.h
-  public_key_sign.h
-  public_key_sign_factory.h
-  public_key_verify.h
-  public_key_verify_factory.h
-  random_access_stream.h
-  registry.h
-  signature_config.h
-  signature_key_templates.h
-  streaming_aead.h
-  streaming_aead_config.h
-  streaming_aead_key_templates.h
-  streaming_mac.h
-  tink_config.h
-  "${TINK_VERSION_H}"
-)
-
-set(TINK_PUBLIC_API_DEPS
-  tink::core::aead
-  tink::core::binary_keyset_reader
-  tink::core::binary_keyset_writer
-  tink::core::cleartext_keyset_handle
-  tink::core::deterministic_aead
-  tink::core::hybrid_decrypt
-  tink::core::hybrid_encrypt
-  tink::core::input_stream
-  tink::core::json_keyset_reader
-  tink::core::json_keyset_writer
-  tink::core::key_manager
-  tink::core::keyset_handle
-  tink::core::keyset_manager
-  tink::core::keyset_reader
-  tink::core::keyset_writer
-  tink::core::kms_client
-  tink::core::output_stream_with_result
-  tink::core::output_stream
-  tink::core::public_key_sign
-  tink::core::public_key_verify
-  tink::core::mac
-  tink::core::primitive_set
-  tink::core::random_access_stream
-  tink::core::registry
-  tink::core::streaming_aead
-  tink::core::streaming_mac
-  tink::core::version
-  tink::aead::aead_config
-  tink::aead::aead_factory
-  tink::aead::aead_key_templates
-  tink::config::tink_config
-  tink::daead::deterministic_aead_config
-  tink::daead::deterministic_aead_factory
-  tink::daead::deterministic_aead_key_templates
-  tink::hybrid::hybrid_config
-  tink::hybrid::hybrid_decrypt_factory
-  tink::hybrid::hybrid_encrypt_factory
-  tink::hybrid::hybrid_key_templates
-  tink::internal::key_info
-  tink::internal::registry_impl
-  tink::mac::mac_config
-  tink::mac::mac_factory
-  tink::mac::mac_key_templates
-  tink::signature::public_key_sign_factory
-  tink::signature::public_key_verify_factory
-  tink::signature::signature_config
-  tink::signature::signature_key_templates
-  tink::streamingaead::streaming_aead_config
-  tink::streamingaead::streaming_aead_key_templates
-  tink::util::buffer
-  tink::util::errors
-  tink::util::protobuf_helper
-  tink::util::status
-  tink::util::statusor
-  tink::util::validation
-  absl::base
-  absl::memory
-  absl::strings
-  absl::synchronization
-)
 
 tink_cc_library(
   NAME cc
   SRCS
-    ${TINK_PUBLIC_APIS}
+    aead.h
+    aead_config.h
+    aead_factory.h
+    aead_key_templates.h
+    binary_keyset_reader.h
+    binary_keyset_writer.h
+    catalogue.h
+    cleartext_keyset_handle.h
+    config.h
+    deterministic_aead.h
+    deterministic_aead_config.h
+    deterministic_aead_factory.h
+    deterministic_aead_key_templates.h
+    hybrid_config.h
+    hybrid_decrypt.h
+    hybrid_decrypt_factory.h
+    hybrid_encrypt.h
+    hybrid_encrypt_factory.h
+    hybrid_key_templates.h
+    input_stream.h
+    json_keyset_reader.h
+    json_keyset_writer.h
+    key_manager.h
+    keyset_handle.h
+    keyset_manager.h
+    keyset_reader.h
+    keyset_writer.h
+    kms_client.h
+    mac.h
+    mac_config.h
+    mac_factory.h
+    mac_key_templates.h
+    output_stream.h
+    output_stream_with_result.h
+    public_key_sign.h
+    public_key_sign_factory.h
+    public_key_verify.h
+    public_key_verify_factory.h
+    random_access_stream.h
+    registry.h
+    signature_config.h
+    signature_key_templates.h
+    streaming_aead.h
+    streaming_aead_config.h
+    streaming_aead_key_templates.h
+    streaming_mac.h
+    tink_config.h
+    "${TINK_VERSION_H}"
   DEPS
-    ${TINK_PUBLIC_API_DEPS}
+    tink::core::aead
+    tink::core::binary_keyset_reader
+    tink::core::binary_keyset_writer
+    tink::core::cleartext_keyset_handle
+    tink::core::deterministic_aead
+    tink::core::hybrid_decrypt
+    tink::core::hybrid_encrypt
+    tink::core::input_stream
+    tink::core::json_keyset_reader
+    tink::core::json_keyset_writer
+    tink::core::key_manager
+    tink::core::keyset_handle
+    tink::core::keyset_manager
+    tink::core::keyset_reader
+    tink::core::keyset_writer
+    tink::core::kms_client
+    tink::core::mac
+    tink::core::output_stream
+    tink::core::output_stream_with_result
+    tink::core::primitive_set
+    tink::core::public_key_sign
+    tink::core::public_key_verify
+    tink::core::random_access_stream
+    tink::core::registry
+    tink::core::streaming_aead
+    tink::core::streaming_mac
+    tink::core::version
+    absl::core_headers
+    absl::flat_hash_map
+    absl::memory
+    absl::status
+    absl::strings
+    absl::synchronization
+    tink::aead::aead_config
+    tink::aead::aead_factory
+    tink::aead::aead_key_templates
+    tink::config::tink_config
+    tink::daead::deterministic_aead_config
+    tink::daead::deterministic_aead_factory
+    tink::daead::deterministic_aead_key_templates
+    tink::hybrid::hybrid_config
+    tink::hybrid::hybrid_decrypt_factory
+    tink::hybrid::hybrid_encrypt_factory
+    tink::hybrid::hybrid_key_templates
+    tink::internal::key_info
+    tink::internal::registry_impl
+    tink::mac::mac_config
+    tink::mac::mac_factory
+    tink::mac::mac_key_templates
+    tink::signature::public_key_sign_factory
+    tink::signature::public_key_verify_factory
+    tink::signature::signature_config
+    tink::signature::signature_key_templates
+    tink::streamingaead::streaming_aead_config
+    tink::streamingaead::streaming_aead_key_templates
+    tink::util::buffer
+    tink::util::errors
+    tink::util::protobuf_helper
+    tink::util::status
+    tink::util::statusor
+    tink::util::validation
+    tink::proto::config_cc_proto
+    tink::proto::tink_cc_proto
   PUBLIC
 )
 
@@ -220,6 +225,16 @@ tink_cc_library(
     streaming_mac.h
   DEPS
     tink::core::output_stream_with_result
+    absl::strings
+    tink::util::status
+    tink::util::statusor
+)
+
+tink_cc_library(
+  NAME chunked_mac
+  SRCS
+    chunked_mac.h
+  DEPS
     absl::strings
     tink::util::status
     tink::util::statusor
@@ -410,6 +425,7 @@ tink_cc_library(
     primitive_set.h
   DEPS
     tink::core::crypto_format
+    absl::flat_hash_map
     absl::memory
     absl::status
     absl::synchronization
@@ -433,12 +449,14 @@ tink_cc_library(
     registry.h
   DEPS
     absl::strings
-    tink::config::tink_fips
     tink::internal::registry_impl
     tink::util::status
     tink::util::statusor
 )
 
+# Generate TINK_VERSION_H from version.h.templ. TINK_VERSION_LABEL is
+# substituted in version.h.templ with the value of PROJECT_VERSION.
+set(TINK_VERSION_LABEL "${PROJECT_VERSION}")
 configure_file(version.h.templ "${TINK_VERSION_H}")
 
 tink_cc_library(
@@ -461,6 +479,7 @@ tink_cc_library(
     tink::core::primitive_set
     tink::core::registry
     absl::core_headers
+    absl::flat_hash_map
     absl::memory
     absl::status
     absl::strings
@@ -623,6 +642,35 @@ tink_cc_library(
 
 add_library(tink::core::secret_key_access_testonly ALIAS tink_internal_core_secret_key_access)
 
+tink_cc_library(
+  NAME parameters
+  SRCS
+    parameters.h
+)
+
+tink_cc_library(
+  NAME key
+  SRCS
+    key.h
+  DEPS
+    tink::core::parameters
+    absl::optional
+)
+
+tink_cc_library(
+  NAME insecure_secret_key_access
+  SRCS
+    insecure_secret_key_access.h
+  DEPS
+    tink::core::secret_key_access_token
+)
+
+tink_cc_library(
+  NAME secret_key_access_token
+  SRCS
+    secret_key_access_token.h
+)
+
 # tests
 
 tink_cc_test(
@@ -723,8 +771,11 @@ tink_cc_test(
     tink::core::json_keyset_reader
     tink::core::json_keyset_writer
     tink::core::keyset_handle
+    tink::core::primitive_set
+    tink::core::primitive_wrapper
     gmock
     absl::status
+    absl::strings
     tink::aead::aead_key_templates
     tink::aead::aead_wrapper
     tink::aead::aes_gcm_key_manager
@@ -732,6 +783,7 @@ tink_cc_test(
     tink::signature::ecdsa_sign_key_manager
     tink::signature::signature_key_templates
     tink::util::protobuf_helper
+    tink::util::status
     tink::util::test_keyset_handle
     tink::util::test_matchers
     tink::util::test_util

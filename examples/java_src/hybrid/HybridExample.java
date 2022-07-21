@@ -29,7 +29,7 @@ import java.nio.file.Files;
 import java.security.GeneralSecurityException;
 
 /**
- * A command-line utility for digitally signing and verifying a file.
+ * A command-line utility for hybrid encryption.
  *
  * <p>It loads cleartext keys from disk - this is not recommended!
  *

@@ -16,6 +16,8 @@
 
 #include "tink/daead/deterministic_aead_key_templates.h"
 
+#include <string>
+
 #include "gtest/gtest.h"
 #include "tink/core/key_manager_impl.h"
 #include "tink/daead/aes_siv_key_manager.h"

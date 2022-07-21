@@ -55,7 +55,7 @@ RsaSsaPkcs1VerifyKeyManager::PublicKeyVerifyFactory::Create(
   auto rsa_ssa_pkcs1_result =
       subtle::RsaSsaPkcs1VerifyBoringSsl::New(rsa_pub_key, params);
   if (!rsa_ssa_pkcs1_result.ok()) return rsa_ssa_pkcs1_result.status();
-  return {std::move(rsa_ssa_pkcs1_result.ValueOrDie())};
+  return {std::move(rsa_ssa_pkcs1_result.value())};
 }
 
 util::Status RsaSsaPkcs1VerifyKeyManager::ValidateParams(

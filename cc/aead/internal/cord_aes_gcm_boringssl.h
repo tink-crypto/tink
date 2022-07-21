@@ -18,6 +18,7 @@
 #define TINK_AEAD_INTERNAL_CORD_AES_GCM_BORINGSSL_H_
 
 #include <memory>
+#include <utility>
 
 #include "absl/strings/string_view.h"
 #include "openssl/evp.h"
@@ -37,10 +38,10 @@ class CordAesGcmBoringSsl : public CordAead {
       util::SecretData key_value);
 
   crypto::tink::util::StatusOr<absl::Cord> Encrypt(
-      absl::Cord plaintext, absl::Cord additional_data) const override;
+      absl::Cord plaintext, absl::Cord associated_data) const override;
 
   crypto::tink::util::StatusOr<absl::Cord> Decrypt(
-      absl::Cord ciphertext, absl::Cord additional_data) const override;
+      absl::Cord ciphertext, absl::Cord associated_data) const override;
 
  private:
   explicit CordAesGcmBoringSsl(internal::SslUniquePtr<EVP_CIPHER_CTX> context)

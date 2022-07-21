@@ -6,7 +6,10 @@ cc_library(
     name = "streaming_prf",
     hdrs = ["streaming_prf.h"],
     include_prefix = "tink/subtle/prf",
-    deps = ["//:input_stream"],
+    deps = [
+        "//:input_stream",
+        "@com_google_absl//absl/strings",
+    ],
 )
 
 cc_library(
@@ -16,8 +19,7 @@ cc_library(
     include_prefix = "tink/subtle/prf",
     deps = [
         ":streaming_prf",
-        "//:input_stream",
-        "//config:tink_fips",
+        "//internal:fips_utils",
         "//internal:md_util",
         "//internal:ssl_unique_ptr",
         "//subtle",
@@ -68,6 +70,7 @@ cc_library(
 cc_test(
     name = "hkdf_streaming_prf_test",
     srcs = ["hkdf_streaming_prf_test.cc"],
+    tags = ["fips"],
     deps = [
         ":hkdf_streaming_prf",
         "//config:tink_fips",

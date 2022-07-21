@@ -16,6 +16,8 @@
 
 #include "tink/hybrid/hybrid_key_templates.h"
 
+#include <string>
+
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "tink/aead/aead_key_templates.h"
@@ -480,6 +482,32 @@ TEST_F(HybridKeyTemplatesTest, HpkeX25519HkdfSha256Aes128Gcm) {
   EXPECT_THAT(key_manager.ValidateKeyFormat(key_format), IsOk());
 }
 
+TEST_F(HybridKeyTemplatesTest, HpkeX25519HkdfSha256Aes128GcmRaw) {
+  // Check that returned template is correct.
+  std::string type_url =
+      "type.googleapis.com/google.crypto.tink.HpkePrivateKey";
+  const KeyTemplate& key_template =
+      HybridKeyTemplates::HpkeX25519HkdfSha256Aes128GcmRaw();
+  EXPECT_EQ(type_url, key_template.type_url());
+  EXPECT_EQ(OutputPrefixType::RAW, key_template.output_prefix_type());
+  HpkeKeyFormat key_format;
+  ASSERT_TRUE(key_format.ParseFromString(key_template.value()));
+  ASSERT_TRUE(key_format.has_params());
+  EXPECT_THAT(key_format.params().kem(), Eq(HpkeKem::DHKEM_X25519_HKDF_SHA256));
+  EXPECT_THAT(key_format.params().kdf(), Eq(HpkeKdf::HKDF_SHA256));
+  EXPECT_THAT(key_format.params().aead(), Eq(HpkeAead::AES_128_GCM));
+
+  // Check that reference to the same object is returned.
+  const KeyTemplate& key_template_2 =
+      HybridKeyTemplates::HpkeX25519HkdfSha256Aes128GcmRaw();
+  EXPECT_EQ(&key_template, &key_template_2);
+
+  // Check that the template works with the key manager.
+  HpkePrivateKeyManager key_manager;
+  EXPECT_EQ(key_manager.get_key_type(), key_template.type_url());
+  EXPECT_THAT(key_manager.ValidateKeyFormat(key_format), IsOk());
+}
+
 TEST_F(HybridKeyTemplatesTest, HpkeX25519HkdfSha256Aes256Gcm) {
   // Check that returned template is correct.
   std::string type_url =
@@ -506,6 +534,32 @@ TEST_F(HybridKeyTemplatesTest, HpkeX25519HkdfSha256Aes256Gcm) {
   EXPECT_THAT(key_manager.ValidateKeyFormat(key_format), IsOk());
 }
 
+TEST_F(HybridKeyTemplatesTest, HpkeX25519HkdfSha256Aes256GcmRaw) {
+  // Check that returned template is correct.
+  std::string type_url =
+      "type.googleapis.com/google.crypto.tink.HpkePrivateKey";
+  const KeyTemplate& key_template =
+      HybridKeyTemplates::HpkeX25519HkdfSha256Aes256GcmRaw();
+  EXPECT_EQ(type_url, key_template.type_url());
+  EXPECT_EQ(OutputPrefixType::RAW, key_template.output_prefix_type());
+  HpkeKeyFormat key_format;
+  ASSERT_TRUE(key_format.ParseFromString(key_template.value()));
+  ASSERT_TRUE(key_format.has_params());
+  EXPECT_THAT(key_format.params().kem(), Eq(HpkeKem::DHKEM_X25519_HKDF_SHA256));
+  EXPECT_THAT(key_format.params().kdf(), Eq(HpkeKdf::HKDF_SHA256));
+  EXPECT_THAT(key_format.params().aead(), Eq(HpkeAead::AES_256_GCM));
+
+  // Check that reference to the same object is returned.
+  const KeyTemplate& key_template_2 =
+      HybridKeyTemplates::HpkeX25519HkdfSha256Aes256GcmRaw();
+  EXPECT_EQ(&key_template, &key_template_2);
+
+  // Check that the template works with the key manager.
+  HpkePrivateKeyManager key_manager;
+  EXPECT_EQ(key_manager.get_key_type(), key_template.type_url());
+  EXPECT_THAT(key_manager.ValidateKeyFormat(key_format), IsOk());
+}
+
 TEST_F(HybridKeyTemplatesTest, HpkeX25519HkdfSha256ChaCha20Poly1305) {
   // Check that returned template is correct.
   std::string type_url =
@@ -524,6 +578,32 @@ TEST_F(HybridKeyTemplatesTest, HpkeX25519HkdfSha256ChaCha20Poly1305) {
   // Check that reference to the same object is returned.
   const KeyTemplate& key_template_2 =
       HybridKeyTemplates::HpkeX25519HkdfSha256ChaCha20Poly1305();
+  EXPECT_EQ(&key_template, &key_template_2);
+
+  // Check that the template works with the key manager.
+  HpkePrivateKeyManager key_manager;
+  EXPECT_EQ(key_manager.get_key_type(), key_template.type_url());
+  EXPECT_THAT(key_manager.ValidateKeyFormat(key_format), IsOk());
+}
+
+TEST_F(HybridKeyTemplatesTest, HpkeX25519HkdfSha256ChaCha20Poly1305Raw) {
+  // Check that returned template is correct.
+  std::string type_url =
+      "type.googleapis.com/google.crypto.tink.HpkePrivateKey";
+  const KeyTemplate& key_template =
+      HybridKeyTemplates::HpkeX25519HkdfSha256ChaCha20Poly1305Raw();
+  EXPECT_EQ(type_url, key_template.type_url());
+  EXPECT_EQ(OutputPrefixType::RAW, key_template.output_prefix_type());
+  HpkeKeyFormat key_format;
+  ASSERT_TRUE(key_format.ParseFromString(key_template.value()));
+  ASSERT_TRUE(key_format.has_params());
+  EXPECT_THAT(key_format.params().kem(), Eq(HpkeKem::DHKEM_X25519_HKDF_SHA256));
+  EXPECT_THAT(key_format.params().kdf(), Eq(HpkeKdf::HKDF_SHA256));
+  EXPECT_THAT(key_format.params().aead(), Eq(HpkeAead::CHACHA20_POLY1305));
+
+  // Check that reference to the same object is returned.
+  const KeyTemplate& key_template_2 =
+      HybridKeyTemplates::HpkeX25519HkdfSha256ChaCha20Poly1305Raw();
   EXPECT_EQ(&key_template, &key_template_2);
 
   // Check that the template works with the key manager.

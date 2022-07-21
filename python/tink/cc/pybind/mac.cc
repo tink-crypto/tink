@@ -14,14 +14,21 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "tink/mac.h"
+#include "tink/cc/pybind/mac.h"
+
+#include <string>
+#include <utility>
 
 #include "pybind11/pybind11.h"
+#include "tink/mac.h"
 #include "tink/util/status.h"
-#include "tink/cc/pybind/status_casters.h"
+#include "tink/cc/pybind/tink_exception.h"
 
 namespace crypto {
 namespace tink {
+
+using crypto::tink::util::StatusOr;
+using pybind11::google_tink::TinkException;
 
 void PybindRegisterMac(pybind11::module* module) {
   namespace py = pybind11;
@@ -38,10 +45,13 @@ void PybindRegisterMac(pybind11::module* module) {
 
       .def(
           "compute_mac",
-          [](const Mac& self,
-             const py::bytes& data) -> util::StatusOr<py::bytes> {
+          [](const Mac& self, const py::bytes& data) -> py::bytes {
             // TODO(b/145925674)
-            return self.ComputeMac(std::string(data));
+            StatusOr<std::string> result = self.ComputeMac(std::string(data));
+            if (!result.ok()) {
+              throw TinkException(result.status());
+            }
+            return *std::move(result);
           },
           py::arg("data"),
           "Computes and returns the message authentication code (MAC) for "
@@ -49,9 +59,12 @@ void PybindRegisterMac(pybind11::module* module) {
       .def(
           "verify_mac",
           [](const Mac& self, const py::bytes& mac,
-             const py::bytes& data) -> util::Status {
-            // TODO(b/145925674)
-            return self.VerifyMac(std::string(mac), std::string(data));
+             const py::bytes& data) -> void {
+            util::Status result =
+                self.VerifyMac(std::string(mac), std::string(data));
+            if (!result.ok()) {
+              throw TinkException(result);
+            }
           },
           py::arg("mac"), py::arg("data"),
           "Verifies if 'mac' is a correct authentication code (MAC) for "

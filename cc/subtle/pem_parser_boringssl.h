@@ -16,6 +16,9 @@
 #ifndef TINK_SUBTLE_PEM_PARSER_BORINGSSL_H_
 #define TINK_SUBTLE_PEM_PARSER_BORINGSSL_H_
 
+#include <memory>
+#include <string>
+
 #include "absl/strings/string_view.h"
 #include "tink/internal/rsa_util.h"
 #include "tink/subtle/subtle_util_boringssl.h"

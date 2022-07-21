@@ -78,6 +78,8 @@ class _WrappedHybridEncrypt(_hybrid_encrypt.HybridEncrypt):
     self._primitive_set = pset
 
   def encrypt(self, plaintext: bytes, context_info: bytes) -> bytes:
+    if not self._primitive_set.primary():
+      raise core.TinkError('keyset without primary key')
     primary = self._primitive_set.primary()
     return primary.identifier + primary.primitive.encrypt(
         plaintext, context_info)

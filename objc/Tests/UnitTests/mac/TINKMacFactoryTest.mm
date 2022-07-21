@@ -83,15 +83,15 @@ using google::crypto::tink::KeyStatusType;
   // Prepare a Keyset.
   Keyset keyset;
   uint32_t key_id_1 = 1234543;
-  HmacKey new_key = HmacKeyManager().CreateKey(key_format).ValueOrDie();
+  HmacKey new_key = HmacKeyManager().CreateKey(key_format).value();
   AddTinkKey(key_type, key_id_1, new_key, KeyStatusType::ENABLED, KeyData::SYMMETRIC, &keyset);
 
   uint32_t key_id_2 = 726329;
-  new_key = HmacKeyManager().CreateKey(key_format).ValueOrDie();
+  new_key = HmacKeyManager().CreateKey(key_format).value();
   AddRawKey(key_type, key_id_2, new_key, KeyStatusType::ENABLED, KeyData::SYMMETRIC, &keyset);
 
   uint32_t key_id_3 = 7213743;
-  new_key = HmacKeyManager().CreateKey(key_format).ValueOrDie();
+  new_key = HmacKeyManager().CreateKey(key_format).value();
   AddTinkKey(key_type, key_id_3, new_key, KeyStatusType::ENABLED, KeyData::SYMMETRIC, &keyset);
 
   keyset.set_primary_key_id(key_id_3);

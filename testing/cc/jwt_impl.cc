@@ -17,20 +17,23 @@
 // Implementation of a JWT Service.
 #include "jwt_impl.h"
 
+#include <ostream>
+#include <sstream>
+#include <memory>
 #include <string>
 #include <utility>
+#include <vector>
 
 #include "absl/time/time.h"
 #include "tink/binary_keyset_reader.h"
 #include "tink/binary_keyset_writer.h"
 #include "tink/cleartext_keyset_handle.h"
+#include "tink/jwt/jwk_set_converter.h"
 #include "tink/jwt/jwt_mac.h"
 #include "tink/jwt/jwt_public_key_sign.h"
 #include "tink/jwt/jwt_public_key_verify.h"
 #include "tink/jwt/raw_jwt.h"
 #include "tink/util/status.h"
-#include "tink/jwt/jwk_set_converter.h"
-#include "proto/testing/testing_api.grpc.pb.h"
 
 namespace tink_testing_api {
 
@@ -47,17 +50,16 @@ using ::crypto::tink::VerifiedJwt;
 using ::crypto::tink::util::StatusOr;
 
 using ::crypto::tink::JwkSetToPublicKeysetHandle;
-using ::grpc::ServerContext;
 
-absl::Time TimestampToTime(tink_testing_api::Timestamp t) {
+absl::Time TimestampToTime(google::protobuf::Timestamp t) {
     return absl::FromUnixMillis(t.seconds() * 1000 + t.nanos() / 1000000);
 }
 
-Timestamp TimeToTimestamp(absl::Time time) {
+google::protobuf::Timestamp TimeToTimestamp(absl::Time time) {
   int64_t millis = absl::ToUnixMillis(time);
   int64_t seconds = millis / 1000;
   int32_t nanos = (millis - seconds * 1000) * 1000000;
-  Timestamp timestamp;
+  google::protobuf::Timestamp timestamp;
   timestamp.set_seconds(seconds);
   timestamp.set_nanos(nanos);
   return timestamp;
@@ -117,35 +119,34 @@ JwtToken VerifiedJwtToProto(const crypto::tink::VerifiedJwt& verified_jwt) {
   JwtToken token;
   if (verified_jwt.HasTypeHeader()) {
     token.mutable_type_header()->set_value(
-        verified_jwt.GetTypeHeader().ValueOrDie());
+        verified_jwt.GetTypeHeader().value());
   }
   if (verified_jwt.HasIssuer()) {
-    token.mutable_issuer()->set_value(verified_jwt.GetIssuer().ValueOrDie());
+    token.mutable_issuer()->set_value(verified_jwt.GetIssuer().value());
   }
   if (verified_jwt.HasSubject()) {
-    token.mutable_subject()->set_value(verified_jwt.GetSubject().ValueOrDie());
+    token.mutable_subject()->set_value(verified_jwt.GetSubject().value());
   }
   if (verified_jwt.HasAudiences()) {
-    std::vector<std::string> audiences =
-        verified_jwt.GetAudiences().ValueOrDie();
+    std::vector<std::string> audiences = verified_jwt.GetAudiences().value();
     for (const std::string& audience : audiences) {
       token.add_audiences(audience);
     }
   }
   if (verified_jwt.HasJwtId()) {
-    token.mutable_jwt_id()->set_value(verified_jwt.GetJwtId().ValueOrDie());
+    token.mutable_jwt_id()->set_value(verified_jwt.GetJwtId().value());
   }
   if (verified_jwt.HasExpiration()) {
     *token.mutable_expiration() =
-        TimeToTimestamp(verified_jwt.GetExpiration().ValueOrDie());
+        TimeToTimestamp(verified_jwt.GetExpiration().value());
   }
   if (verified_jwt.HasIssuedAt()) {
     *token.mutable_issued_at() =
-        TimeToTimestamp(verified_jwt.GetIssuedAt().ValueOrDie());
+        TimeToTimestamp(verified_jwt.GetIssuedAt().value());
   }
   if (verified_jwt.HasNotBefore()) {
     *token.mutable_not_before() =
-        TimeToTimestamp(verified_jwt.GetNotBefore().ValueOrDie());
+        TimeToTimestamp(verified_jwt.GetNotBefore().value());
   }
   std::vector<std::string> names = verified_jwt.CustomClaimNames();
   for (const std::string& name : names) {
@@ -154,19 +155,19 @@ JwtToken VerifiedJwtToProto(const crypto::tink::VerifiedJwt& verified_jwt) {
           NullValue::NULL_VALUE);
     } else if (verified_jwt.HasBooleanClaim(name)) {
       (*token.mutable_custom_claims())[name].set_bool_value(
-          verified_jwt.GetBooleanClaim(name).ValueOrDie());
+          verified_jwt.GetBooleanClaim(name).value());
     } else if (verified_jwt.HasNumberClaim(name)) {
       (*token.mutable_custom_claims())[name].set_number_value(
-          verified_jwt.GetNumberClaim(name).ValueOrDie());
+          verified_jwt.GetNumberClaim(name).value());
     } else if (verified_jwt.HasStringClaim(name)) {
       (*token.mutable_custom_claims())[name].set_string_value(
-          verified_jwt.GetStringClaim(name).ValueOrDie());
+          verified_jwt.GetStringClaim(name).value());
     } else if (verified_jwt.HasJsonObjectClaim(name)) {
       (*token.mutable_custom_claims())[name].set_json_object_value(
-          verified_jwt.GetJsonObjectClaim(name).ValueOrDie());
+          verified_jwt.GetJsonObjectClaim(name).value());
     } else if (verified_jwt.HasJsonArrayClaim(name)) {
       (*token.mutable_custom_claims())[name].set_json_array_value(
-          verified_jwt.GetJsonArrayClaim(name).ValueOrDie());
+          verified_jwt.GetJsonArrayClaim(name).value());
     }
   }
   return token;
@@ -377,20 +378,20 @@ grpc::Status JwtImpl::PublicKeyVerifyAndDecode(grpc::ServerContext* context,
   StatusOr<std::unique_ptr<KeysetHandle>> keyset_handle =
       JwkSetToPublicKeysetHandle(request->jwk_set());
   if (!keyset_handle.ok()) {
-    response->set_err(keyset_handle.status().error_message());
+    response->set_err(std::string(keyset_handle.status().message()));
     return ::grpc::Status::OK;
   }
   std::stringbuf keyset;
   StatusOr<std::unique_ptr<crypto::tink::BinaryKeysetWriter>> writer =
       BinaryKeysetWriter::New(absl::make_unique<std::ostream>(&keyset));
   if (!writer.ok()) {
-    response->set_err(writer.status().error_message());
+    response->set_err(std::string(writer.status().message()));
     return ::grpc::Status::OK;
   }
   crypto::tink::util::Status status =
       CleartextKeysetHandle::Write(writer->get(), **keyset_handle);
   if (!status.ok()) {
-    response->set_err(status.error_message());
+    response->set_err(std::string(status.message()));
     return ::grpc::Status::OK;
   }
   response->set_keyset(keyset.str());

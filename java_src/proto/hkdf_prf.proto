@@ -1,0 +1,44 @@
+// Copyright 2019 Google LLC
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+////////////////////////////////////////////////////////////////////////////////
+
+syntax = "proto3";
+
+package google.crypto.tink;
+
+import "proto/common.proto";
+
+option java_package = "com.google.crypto.tink.proto";
+option java_multiple_files = true;
+option go_package = "github.com/google/tink/proto/hkdf_prf_proto";
+
+message HkdfPrfParams {
+  HashType hash = 1;
+  // Salt, optional in RFC 5869. Using "" is equivalent to zeros of length up to
+  // the block length of the HMac.
+  bytes salt = 2;
+}
+
+message HkdfPrfKey {
+  uint32 version = 1;
+  HkdfPrfParams params = 2;
+  bytes key_value = 3;
+}
+
+message HkdfPrfKeyFormat {
+  HkdfPrfParams params = 1;
+  uint32 key_size = 2;
+  uint32 version = 3;
+}

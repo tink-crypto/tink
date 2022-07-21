@@ -10,7 +10,7 @@ The key material was generated with:
 
 ```shell
 tinkey create-keyset --key-template HMAC_SHA256_256BITTAG --out-format JSON \
---out mac_test_keyset.json
+    --out mac_test_keyset.json
 ```
 
 ## Build and run
@@ -21,11 +21,13 @@ tinkey create-keyset --key-template HMAC_SHA256_256BITTAG --out-format JSON \
 git clone https://github.com/google/tink
 cd tink/examples/java_src
 bazel build ...
+
 echo "some data" > data.txt
 touch mac_file.txt
 
 ./bazel-bin/mac/mac_example compute \
     ./mac/mac_test_keyset.json data.txt mac_file.txt
+
 ./bazel-bin/mac/mac_example verify \
     ./mac/mac_test_keyset.json data.txt mac_file.txt
 ```

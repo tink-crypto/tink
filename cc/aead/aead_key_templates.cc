@@ -19,14 +19,15 @@
 #include <string>
 
 #include "absl/strings/string_view.h"
+#include "proto/aes_ctr.pb.h"
 #include "proto/aes_ctr_hmac_aead.pb.h"
 #include "proto/aes_eax.pb.h"
 #include "proto/aes_gcm.pb.h"
 #include "proto/aes_gcm_siv.pb.h"
 #include "proto/common.pb.h"
+#include "proto/hmac.pb.h"
 #include "proto/kms_envelope.pb.h"
 #include "proto/tink.pb.h"
-#include "proto/xchacha20_poly1305.pb.h"
 
 using google::crypto::tink::AesCtrHmacAeadKeyFormat;
 using google::crypto::tink::AesEaxKeyFormat;
@@ -128,6 +129,13 @@ const KeyTemplate& AeadKeyTemplates::Aes256Eax() {
 const KeyTemplate& AeadKeyTemplates::Aes128Gcm() {
   static const KeyTemplate* key_template =
       NewAesGcmKeyTemplate(/* key_size_in_bytes= */ 16, OutputPrefixType::TINK);
+  return *key_template;
+}
+
+// static
+const KeyTemplate& AeadKeyTemplates::Aes128GcmNoPrefix() {
+  static const KeyTemplate* key_template =
+      NewAesGcmKeyTemplate(/* key_size_in_bytes= */ 16, OutputPrefixType::RAW);
   return *key_template;
 }
 

@@ -27,9 +27,9 @@
 #include "tink/util/protobuf_helper.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
+#include "proto/common.pb.h"
 #include "proto/jwt_rsa_ssa_pss.pb.h"
 #include "proto/tink.pb.h"
-#include "proto/common.pb.h"
 
 namespace crypto {
 namespace tink {

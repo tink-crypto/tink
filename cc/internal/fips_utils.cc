@@ -26,9 +26,9 @@ namespace tink {
 namespace internal {
 
 #ifdef TINK_USE_ONLY_FIPS
-const bool kUseOnlyFips = true;
+ABSL_CONST_INIT const bool kUseOnlyFips = true;
 #else
-const bool kUseOnlyFips = false;
+ABSL_CONST_INIT const bool kUseOnlyFips = false;
 #endif
 
 static std::atomic<bool> is_fips_restricted(false);

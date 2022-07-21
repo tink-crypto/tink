@@ -16,6 +16,9 @@
 
 #include "tink/util/file_output_stream.h"
 
+#include <algorithm>
+#include <string>
+
 #include "gtest/gtest.h"
 #include "absl/memory/memory.h"
 #include "absl/strings/str_cat.h"
@@ -40,7 +43,7 @@ util::Status WriteToStream(util::FileOutputStream* output_stream,
   while (remaining > 0) {
     auto next_result = output_stream->Next(&buffer);
     if (!next_result.ok()) return next_result.status();
-    available_space = next_result.ValueOrDie();
+    available_space = next_result.value();
     available_bytes = std::min(available_space, remaining);
     memcpy(buffer, contents.data() + pos, available_bytes);
     remaining -= available_bytes;
@@ -82,7 +85,7 @@ TEST_F(FileOutputStreamTest, CustomBufferSizes) {
     void* buffer;
     auto next_result = output_stream->Next(&buffer);
     EXPECT_TRUE(next_result.ok()) << next_result.status();
-    EXPECT_EQ(buffer_size, next_result.ValueOrDie());
+    EXPECT_EQ(buffer_size, next_result.value());
     output_stream->BackUp(buffer_size);
     auto status = WriteToStream(output_stream.get(), stream_contents);
     EXPECT_TRUE(status.ok()) << status;
@@ -107,7 +110,7 @@ TEST_F(FileOutputStreamTest, BackupAndPosition) {
   EXPECT_EQ(0, output_stream->Position());
   auto next_result = output_stream->Next(&buffer);
   EXPECT_TRUE(next_result.ok()) << next_result.status();
-  EXPECT_EQ(buffer_size, next_result.ValueOrDie());
+  EXPECT_EQ(buffer_size, next_result.value());
   EXPECT_EQ(buffer_size, output_stream->Position());
   std::memcpy(buffer, stream_contents.data(), buffer_size);
 
@@ -119,7 +122,7 @@ TEST_F(FileOutputStreamTest, BackupAndPosition) {
     total_backup_size += std::max(0, backup_size);
     EXPECT_EQ(buffer_size - total_backup_size, output_stream->Position());
   }
-  EXPECT_LT(total_backup_size, next_result.ValueOrDie());
+  EXPECT_LT(total_backup_size, next_result.value());
 
   // Call Next(), it should succeed.
   next_result = output_stream->Next(&buffer);
@@ -133,7 +136,7 @@ TEST_F(FileOutputStreamTest, BackupAndPosition) {
     total_backup_size += std::max(0, backup_size);
     EXPECT_EQ(buffer_size - total_backup_size, output_stream->Position());
   }
-  EXPECT_LT(total_backup_size, next_result.ValueOrDie());
+  EXPECT_LT(total_backup_size, next_result.value());
 
   // Call Next(), it should succeed;
   next_result = output_stream->Next(&buffer);
@@ -143,7 +146,7 @@ TEST_F(FileOutputStreamTest, BackupAndPosition) {
   auto prev_position = output_stream->Position();
   next_result = output_stream->Next(&buffer);
   EXPECT_TRUE(next_result.ok()) << next_result.status();
-  EXPECT_EQ(buffer_size, next_result.ValueOrDie());
+  EXPECT_EQ(buffer_size, next_result.value());
   EXPECT_EQ(prev_position + buffer_size, output_stream->Position());
   std::memcpy(buffer, stream_contents.data() + buffer_size, buffer_size);
 
@@ -164,7 +167,7 @@ TEST_F(FileOutputStreamTest, BackupAndPosition) {
   // Call Next() again, it should return a full block.
   next_result = output_stream->Next(&buffer);
   EXPECT_TRUE(next_result.ok()) << next_result.status();
-  EXPECT_EQ(buffer_size, next_result.ValueOrDie());
+  EXPECT_EQ(buffer_size, next_result.value());
   EXPECT_EQ(prev_position + buffer_size, output_stream->Position());
   std::memcpy(buffer, stream_contents.data() + buffer_size, buffer_size);
 

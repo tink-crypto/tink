@@ -93,9 +93,9 @@ android_library(
     name = "insecure_nonce_aes_gcm_jce-android",
     srcs = ["InsecureNonceAesGcmJce.java"],
     deps = [
-        "//src/main/java/com/google/crypto/tink/config/internal:tink_fips_util",
-        "//src/main/java/com/google/crypto/tink/subtle:subtle_util_cluster",
-        "//src/main/java/com/google/crypto/tink/subtle:validators",
+        "//src/main/java/com/google/crypto/tink/config/internal:tink_fips_util-android",
+        "//src/main/java/com/google/crypto/tink/subtle:subtle_util_cluster-android",
+        "//src/main/java/com/google/crypto/tink/subtle:validators-android",
     ],
 )
 
@@ -113,7 +113,7 @@ android_library(
     srcs = ["InsecureNonceChaCha20Base.java"],
     deps = [
         ":cha_cha20_util-android",
-        "//src/main/java/com/google/crypto/tink/subtle:bytes",
+        "//src/main/java/com/google/crypto/tink/subtle:bytes-android",
     ],
 )
 
@@ -159,5 +159,5 @@ android_library(
 android_library(
     name = "poly1305-android",
     srcs = ["Poly1305.java"],
-    deps = ["//src/main/java/com/google/crypto/tink/subtle:bytes"],
+    deps = ["//src/main/java/com/google/crypto/tink/subtle:bytes-android"],
 )

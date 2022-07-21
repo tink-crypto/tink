@@ -18,6 +18,8 @@
 #define TINK_HYBRID_ECIES_AEAD_HKDF_HYBRID_ENCRYPT_H_
 
 #include <memory>
+#include <string>
+#include <utility>
 
 #include "tink/hybrid/ecies_aead_hkdf_dem_helper.h"
 #include "tink/hybrid_encrypt.h"

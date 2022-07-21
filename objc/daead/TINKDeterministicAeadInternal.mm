@@ -65,7 +65,7 @@
     return nil;
   }
 
-  return TINKStringToNSData(st.ValueOrDie());
+  return TINKStringToNSData(st.value());
 }
 
 - (NSData *)decryptDeterministically:(NSData *)ciphertext
@@ -87,7 +87,7 @@
     return nil;
   }
 
-  return TINKStringToNSData(st.ValueOrDie());
+  return TINKStringToNSData(st.value());
 }
 
 - (nullable crypto::tink::DeterministicAead *)ccDeterministicAead {

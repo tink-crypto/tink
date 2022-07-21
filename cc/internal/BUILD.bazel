@@ -16,6 +16,7 @@ cc_library(
     deps = [
         "//proto:tink_cc_proto",
         "//util:statusor",
+        "@com_google_absl//absl/container:flat_hash_map",
     ],
 )
 
@@ -51,6 +52,7 @@ cc_library(
         "//proto:tink_cc_proto",
         "//util:statusor",
         "//util:validation",
+        "@com_google_absl//absl/container:flat_hash_map",
     ],
 )
 
@@ -86,6 +88,7 @@ cc_library(
         "//:key_manager",
         "//:primitive_set",
         "//:primitive_wrapper",
+        "//monitoring",
         "//proto:tink_cc_proto",
         "//util:errors",
         "//util:protobuf_helper",
@@ -158,6 +161,7 @@ cc_library(
         ":bn_util",
         ":err_util",
         ":ssl_unique_ptr",
+        ":ssl_util",
         "//config:tink_fips",
         "//subtle:common_enums",
         "//util:errors",
@@ -227,11 +231,14 @@ cc_test(
     srcs = ["keyset_wrapper_impl_test.cc"],
     deps = [
         ":keyset_wrapper_impl",
+        "//:primitive_set",
         "//:primitive_wrapper",
         "//proto:tink_cc_proto",
+        "//util:statusor",
         "//util:test_matchers",
         "//util:test_util",
         "@com_google_absl//absl/container:flat_hash_map",
+        "@com_google_absl//absl/memory",
         "@com_google_absl//absl/status",
         "@com_google_absl//absl/strings",
         "@com_google_googletest//:gtest_main",
@@ -266,6 +273,8 @@ cc_test(
         "//config:tink_fips",
         "//hybrid:ecies_aead_hkdf_private_key_manager",
         "//hybrid:ecies_aead_hkdf_public_key_manager",
+        "//monitoring",
+        "//monitoring:monitoring_client_mocks",
         "//proto:aes_ctr_hmac_aead_cc_proto",
         "//proto:aes_gcm_cc_proto",
         "//proto:common_cc_proto",
@@ -334,23 +343,25 @@ cc_test(
 
 cc_test(
     name = "rsa_util_test",
-    size = "small",
+    size = "large",
     srcs = ["rsa_util_test.cc"],
     deps = [
         ":bn_util",
         ":rsa_util",
         ":ssl_unique_ptr",
+        "//subtle:random",
         "//util:status",
         "//util:statusor",
         "//util:test_matchers",
         "@boringssl//:crypto",
+        "@com_google_absl//absl/strings",
         "@com_google_googletest//:gtest_main",
     ],
 )
 
 cc_test(
     name = "ec_util_test",
-    size = "small",
+    size = "large",
     srcs = ["ec_util_test.cc"],
     data = [
         "@wycheproof//testvectors:ecdh",
@@ -362,6 +373,7 @@ cc_test(
         ":ec_util",
         ":fips_utils",
         ":ssl_unique_ptr",
+        ":ssl_util",
         "//subtle:common_enums",
         "//subtle:subtle_util",
         "//subtle:wycheproof_util",
@@ -422,6 +434,35 @@ cc_test(
         "@com_google_absl//absl/status",
         "@com_google_absl//absl/strings",
         "@com_google_absl//absl/types:span",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_library(
+    name = "monitoring_util",
+    hdrs = ["monitoring_util.h"],
+    include_prefix = "tink/internal",
+    deps = [
+        "//:primitive_set",
+        "//monitoring",
+        "//proto:tink_cc_proto",
+        "//util:statusor",
+        "@com_google_absl//absl/container:flat_hash_map",
+        "@com_google_absl//absl/status",
+    ],
+)
+
+cc_test(
+    name = "monitoring_util_test",
+    srcs = ["monitoring_util_test.cc"],
+    deps = [
+        ":monitoring_util",
+        "//:primitive_set",
+        "//monitoring",
+        "//proto:tink_cc_proto",
+        "//util:test_matchers",
+        "@com_google_absl//absl/status",
+        "@com_google_absl//absl/strings",
         "@com_google_googletest//:gtest_main",
     ],
 )

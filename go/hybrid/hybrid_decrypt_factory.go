@@ -68,15 +68,14 @@ func newWrappedHybridDecrypt(ps *primitiveset.PrimitiveSet) (*wrappedHybridDecry
 	return ret, nil
 }
 
-// Decrypt decrypts the given ciphertext and authenticates it with the given
-// additional authenticated data. It returns the corresponding plaintext if the
-// ciphertext is authenticated.
-func (a *wrappedHybridDecrypt) Decrypt(ct, ad []byte) ([]byte, error) {
+// Decrypt decrypts the given ciphertext, verifying the integrity of contextInfo.
+// It returns the corresponding plaintext if the ciphertext is authenticated.
+func (a *wrappedHybridDecrypt) Decrypt(ciphertext, contextInfo []byte) ([]byte, error) {
 	// try non-raw keys
 	prefixSize := cryptofmt.NonRawPrefixSize
-	if len(ct) > prefixSize {
-		prefix := ct[:prefixSize]
-		ctNoPrefix := ct[prefixSize:]
+	if len(ciphertext) > prefixSize {
+		prefix := ciphertext[:prefixSize]
+		ctNoPrefix := ciphertext[prefixSize:]
 		entries, err := a.ps.EntriesForPrefix(string(prefix))
 		if err == nil {
 			for i := 0; i < len(entries); i++ {
@@ -85,7 +84,7 @@ func (a *wrappedHybridDecrypt) Decrypt(ct, ad []byte) ([]byte, error) {
 					return nil, fmt.Errorf("hybrid_factory: not a HybridDecrypt primitive")
 				}
 
-				pt, err := p.Decrypt(ctNoPrefix, ad)
+				pt, err := p.Decrypt(ctNoPrefix, contextInfo)
 				if err == nil {
 					return pt, nil
 				}
@@ -102,7 +101,7 @@ func (a *wrappedHybridDecrypt) Decrypt(ct, ad []byte) ([]byte, error) {
 				return nil, fmt.Errorf("hybrid_factory: not a HybridDecrypt primitive")
 			}
 
-			pt, err := p.Decrypt(ct, ad)
+			pt, err := p.Decrypt(ciphertext, contextInfo)
 			if err == nil {
 				return pt, nil
 			}

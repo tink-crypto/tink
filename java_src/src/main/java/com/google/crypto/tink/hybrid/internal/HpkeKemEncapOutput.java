@@ -19,20 +19,20 @@ package com.google.crypto.tink.hybrid.internal;
 /**
  * Helper class that wraps output from HPKE KEM Encap() method.
  */
-public final class HpkeKemEncapOutput {
+final class HpkeKemEncapOutput {
   private final byte[] sharedSecret;
   private final byte[] encapsulatedKey;
 
-  public HpkeKemEncapOutput(byte[] sharedSecret, byte[] encapsulatedKey) {
+  HpkeKemEncapOutput(byte[] sharedSecret, byte[] encapsulatedKey) {
     this.sharedSecret = sharedSecret;
     this.encapsulatedKey = encapsulatedKey;
   }
 
-  public byte[] getSharedSecret() {
+  byte[] getSharedSecret() {
     return sharedSecret;
   }
 
-  public byte[] getEncapsulatedKey() {
+  byte[] getEncapsulatedKey() {
     return encapsulatedKey;
   }
 }

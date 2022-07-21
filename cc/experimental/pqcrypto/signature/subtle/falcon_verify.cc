@@ -27,8 +27,8 @@
 #include "tink/util/statusor.h"
 
 extern "C" {
-#include "third_party/pqclean/crypto_sign/falcon-1024/avx2/api.h"
-#include "third_party/pqclean/crypto_sign/falcon-512/avx2/api.h"
+#include "third_party/pqclean/crypto_sign/falcon-1024/api.h"
+#include "third_party/pqclean/crypto_sign/falcon-512/api.h"
 }
 
 namespace crypto {
@@ -52,14 +52,14 @@ util::Status FalconVerify::Verify(absl::string_view signature,
 
   switch (key_size) {
     case kFalcon512PublicKeySize: {
-      result = PQCLEAN_FALCON512_AVX2_crypto_sign_verify(
+      result = PQCLEAN_FALCON512_crypto_sign_verify(
           reinterpret_cast<const uint8_t *>(signature.data()), signature.size(),
           reinterpret_cast<const uint8_t *>(data.data()), data.size(),
           reinterpret_cast<const uint8_t *>(public_key_.GetKey().data()));
       break;
     }
     case kFalcon1024PublicKeySize: {
-      result = PQCLEAN_FALCON1024_AVX2_crypto_sign_verify(
+      result = PQCLEAN_FALCON1024_crypto_sign_verify(
           reinterpret_cast<const uint8_t *>(signature.data()), signature.size(),
           reinterpret_cast<const uint8_t *>(data.data()), data.size(),
           reinterpret_cast<const uint8_t *>(public_key_.GetKey().data()));

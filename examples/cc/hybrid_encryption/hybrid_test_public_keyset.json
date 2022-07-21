@@ -1,0 +1,15 @@
+{
+  "primaryKeyId": 958452012,
+  "key": [
+    {
+      "keyData": {
+        "typeUrl": "type.googleapis.com/google.crypto.tink.HpkePublicKey",
+        "value": "EgYIARABGAIaIFVkKZkKM++I3AKeVjg9+iogUO9TFQqZ9olnzs1i7Sle",
+        "keyMaterialType": "ASYMMETRIC_PUBLIC"
+      },
+      "status": "ENABLED",
+      "keyId": 958452012,
+      "outputPrefixType": "TINK"
+    }
+  ]
+}

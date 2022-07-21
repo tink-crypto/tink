@@ -83,7 +83,7 @@ StatusOr<HmacKey> HmacKeyManager::DeriveKey(
   HmacKey hmac_key;
   hmac_key.set_version(get_version());
   *(hmac_key.mutable_params()) = hmac_key_format.params();
-  hmac_key.set_key_value(randomness.ValueOrDie());
+  hmac_key.set_key_value(randomness.value());
   return hmac_key;
 }
 

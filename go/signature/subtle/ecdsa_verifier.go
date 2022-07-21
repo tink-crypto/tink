@@ -51,6 +51,9 @@ func NewECDSAVerifierFromPublicKey(hashAlg string, encoding string, publicKey *e
 	if publicKey.Curve == nil {
 		return nil, errors.New("ecdsa_verifier: invalid curve")
 	}
+	if !publicKey.Curve.IsOnCurve(publicKey.X, publicKey.Y) {
+		return nil, fmt.Errorf("ecdsa_verifier: invalid public key")
+	}
 	curve := subtle.ConvertCurveName(publicKey.Curve.Params().Name)
 	if err := ValidateECDSAParams(hashAlg, curve, encoding); err != nil {
 		return nil, fmt.Errorf("ecdsa_verifier: %s", err)

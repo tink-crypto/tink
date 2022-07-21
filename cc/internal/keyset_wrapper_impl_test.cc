@@ -15,12 +15,19 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include "tink/internal/keyset_wrapper_impl.h"
 
+#include <memory>
+#include <string>
+#include <utility>
+
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "absl/container/flat_hash_map.h"
+#include "absl/memory/memory.h"
 #include "absl/status/status.h"
 #include "absl/strings/match.h"
+#include "tink/primitive_set.h"
 #include "tink/primitive_wrapper.h"
+#include "tink/util/statusor.h"
 #include "tink/util/test_matchers.h"
 #include "tink/util/test_util.h"
 #include "proto/tink.pb.h"
@@ -33,9 +40,12 @@ namespace {
 
 using ::crypto::tink::test::AddKeyData;
 using ::crypto::tink::test::IsOk;
+using ::crypto::tink::test::IsOkAndHolds;
+using ::google::crypto::tink::Keyset;
 using ::testing::HasSubstr;
 using ::testing::Not;
 using ::testing::Pair;
+using ::testing::Pointee;
 using ::testing::UnorderedElementsAre;
 
 using InputPrimitive = std::string;
@@ -57,7 +67,7 @@ class Wrapper : public PrimitiveWrapper<InputPrimitive, OutputPrimitive> {
         result->back().second.append(" (primary)");
       }
     }
-    return result;
+    return std::move(result);
   }
 };
 
@@ -99,10 +109,10 @@ TEST(KeysetWrapperImplTest, Basic) {
   keyset.set_primary_key_id(222);
 
   util::StatusOr<std::unique_ptr<OutputPrimitive>> wrapped =
-      wrapper_or->Wrap(keyset);
+      wrapper_or->Wrap(keyset, /*annotations=*/{});
 
-  ASSERT_THAT(wrapped.status(), IsOk());
-  ASSERT_THAT(*wrapped.ValueOrDie(),
+  ASSERT_THAT(wrapped, IsOk());
+  ASSERT_THAT(*wrapped.value(),
               UnorderedElementsAre(Pair(111, "one"), Pair(222, "two (primary)"),
                                    Pair(333, "three")));
 }
@@ -118,9 +128,9 @@ TEST(KeysetWrapperImplTest, FailingGetPrimitive) {
   keyset.set_primary_key_id(1);
 
   util::StatusOr<std::unique_ptr<OutputPrimitive>> wrapped =
-      wrapper_or->Wrap(keyset);
+      wrapper_or->Wrap(keyset, /*annotations=*/{});
 
-  ASSERT_THAT(wrapped.status(), Not(IsOk()));
+  ASSERT_THAT(wrapped, Not(IsOk()));
   ASSERT_THAT(std::string(wrapped.status().message()), HasSubstr("error:two"));
 }
 
@@ -132,9 +142,9 @@ TEST(KeysetWrapperImplTest, ValidatesKeyset) {
       absl::make_unique<KeysetWrapperImpl<InputPrimitive, OutputPrimitive>>(
           &wrapper, &CreateIn);
   util::StatusOr<std::unique_ptr<OutputPrimitive>> wrapped =
-      wrapper_or->Wrap(google::crypto::tink::Keyset());
+      wrapper_or->Wrap(google::crypto::tink::Keyset(), /*annotations=*/{});
 
-  ASSERT_THAT(wrapped.status(), Not(IsOk()));
+  ASSERT_THAT(wrapped, Not(IsOk()));
 }
 
 // This test checks that only enabled keys are used to create the primitive set.
@@ -150,12 +160,65 @@ TEST(KeysetWrapperImplTest, OnlyEnabled) {
   // KeyId 333 is index 2.
   keyset.mutable_key(2)->set_status(google::crypto::tink::DISABLED);
   util::StatusOr<std::unique_ptr<OutputPrimitive>> wrapped =
-      wrapper_or->Wrap(keyset);
+      wrapper_or->Wrap(keyset, /*annotations=*/{});
 
-  ASSERT_THAT(wrapped.status(), IsOk());
-  ASSERT_THAT(*wrapped.ValueOrDie(),
+  ASSERT_THAT(wrapped, IsOk());
+  ASSERT_THAT(*wrapped.value(),
               UnorderedElementsAre(Pair(111, "one"), Pair(222, "two (primary)"),
                                    Pair(444, "four")));
+}
+
+// Mock PrimitiveWrapper with input primitive I and output primitive O.
+template <class I, class O>
+class MockWrapper : public PrimitiveWrapper<I, O> {
+ public:
+  MOCK_METHOD(util::StatusOr<std::unique_ptr<O>>, Wrap,
+              (std::unique_ptr<PrimitiveSet<I>> primitive_set),
+              (const, override));
+};
+
+// Returns a valid output primitive.
+std::unique_ptr<OutputPrimitive> GetOutputPrimitiveForTesting() {
+  auto output_primitive = absl::make_unique<OutputPrimitive>();
+  output_primitive->push_back({111, "one"});
+  output_primitive->push_back({222, "two (primary)"});
+  output_primitive->push_back({333, "three"});
+  output_primitive->push_back({444, "four"});
+  return output_primitive;
+}
+
+// Tests that annotations are correctly passed on to the generated PrimitiveSet.
+TEST(KeysetWrapperImplTest, WrapWithAnnotationCorrectlyWrittenToPrimitiveSet) {
+  MockWrapper<InputPrimitive, OutputPrimitive> wrapper;
+  auto keyset_wrapper =
+      absl::make_unique<KeysetWrapperImpl<InputPrimitive, OutputPrimitive>>(
+          &wrapper, CreateIn);
+  Keyset keyset = CreateKeyset(
+      /*keydata=*/{{111, "one"}, {222, "two"}, {333, "three"}, {444, "four"}});
+  keyset.set_primary_key_id(222);
+  const absl::flat_hash_map<std::string, std::string> kExpectedAnnotations = {
+      {"key1", "value1"}, {"key2", "value2"}};
+
+  absl::flat_hash_map<std::string, std::string> generated_annotations;
+  EXPECT_CALL(wrapper, Wrap(testing::_))
+      .WillOnce(
+          [&generated_annotations](std::unique_ptr<PrimitiveSet<InputPrimitive>>
+                                       generated_primitive_set) {
+            // We are interested to check if the annotations are what we
+            // expected, so we copy them to `generated_annotations`.
+            generated_annotations = generated_primitive_set->get_annotations();
+            // Return a valid output primitive.
+            return GetOutputPrimitiveForTesting();
+          });
+
+  util::StatusOr<std::unique_ptr<OutputPrimitive>> wrapped_primitive =
+      keyset_wrapper->Wrap(keyset, kExpectedAnnotations);
+
+  EXPECT_EQ(generated_annotations, kExpectedAnnotations);
+  EXPECT_THAT(wrapped_primitive,
+              IsOkAndHolds(Pointee(UnorderedElementsAre(
+                  Pair(111, "one"), Pair(222, "two (primary)"),
+                  Pair(333, "three"), Pair(444, "four")))));
 }
 
 }  // namespace

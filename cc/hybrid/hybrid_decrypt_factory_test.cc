@@ -16,6 +16,9 @@
 
 #include "tink/hybrid/hybrid_decrypt_factory.h"
 
+#include <string>
+#include <utility>
+
 #include "gtest/gtest.h"
 #include "absl/memory/memory.h"
 #include "tink/config.h"
@@ -96,39 +99,37 @@ TEST_F(HybridDecryptFactoryTest, testPrimitive) {
   auto ecies_key_manager = absl::make_unique<EciesAeadHkdfPublicKeyManager>();
   std::unique_ptr<HybridEncrypt> ecies_1 = std::move(
       ecies_key_manager->GetPrimitive<HybridEncrypt>(ecies_key_1.public_key())
-          .ValueOrDie());
+          .value());
   std::unique_ptr<HybridEncrypt> ecies_2 = std::move(
       ecies_key_manager->GetPrimitive<HybridEncrypt>(ecies_key_2.public_key())
-          .ValueOrDie());
+          .value());
 
   // Create a KeysetHandle and use it with the factory.
   auto hybrid_decrypt_result = HybridDecryptFactory::GetPrimitive(
       *TestKeysetHandle::GetKeysetHandle(keyset));
   EXPECT_TRUE(hybrid_decrypt_result.ok()) << hybrid_decrypt_result.status();
-  auto hybrid_decrypt = std::move(hybrid_decrypt_result.ValueOrDie());
+  auto hybrid_decrypt = std::move(hybrid_decrypt_result.value());
 
   // Test the resulting HybridDecrypt-instance.
   std::string plaintext = "some plaintext";
   std::string context_info = "some context info";
   auto ciphertext_1 =
-      CryptoFormat::GetOutputPrefix(KeyInfoFromKey(keyset.key(0)))
-          .ValueOrDie() +
-      ecies_1->Encrypt(plaintext, context_info).ValueOrDie();
+      CryptoFormat::GetOutputPrefix(KeyInfoFromKey(keyset.key(0))).value() +
+      ecies_1->Encrypt(plaintext, context_info).value();
   auto ciphertext_2 =
-      CryptoFormat::GetOutputPrefix(KeyInfoFromKey(keyset.key(1)))
-          .ValueOrDie() +
-      ecies_2->Encrypt(plaintext, context_info).ValueOrDie();
+      CryptoFormat::GetOutputPrefix(KeyInfoFromKey(keyset.key(1))).value() +
+      ecies_2->Encrypt(plaintext, context_info).value();
 
   {  // Regular decryption with key_1.
     auto decrypt_result = hybrid_decrypt->Decrypt(ciphertext_1, context_info);
     EXPECT_TRUE(decrypt_result.ok()) << decrypt_result.status();
-    EXPECT_EQ(plaintext, decrypt_result.ValueOrDie());
+    EXPECT_EQ(plaintext, decrypt_result.value());
   }
 
   {  // Regular decryption with key_2.
     auto decrypt_result = hybrid_decrypt->Decrypt(ciphertext_2, context_info);
     EXPECT_TRUE(decrypt_result.ok()) << decrypt_result.status();
-    EXPECT_EQ(plaintext, decrypt_result.ValueOrDie());
+    EXPECT_EQ(plaintext, decrypt_result.value());
   }
 
   {  // Wrong context_info.

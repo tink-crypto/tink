@@ -14,17 +14,28 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "tink/cc/cc_jwt_config.h"
+#include "tink/cc/pybind/cc_jwt_config.h"
 
-#include "tink/cc/pybind/status_casters.h"
+#include <utility>
+
+#include "pybind11/pybind11.h"
+#include "tink/cc/cc_jwt_config.h"
+#include "tink/cc/pybind/tink_exception.h"
 
 namespace crypto {
 namespace tink {
 
+using pybind11::google_tink::TinkException;
+
 void PybindRegisterCcJwtConfig(pybind11::module* module) {
   namespace py = pybind11;
   py::module& m = *module;
-  m.def("register_jwt", CcJwtConfigRegister);
+  m.def("register_jwt", []() -> void {
+    util::Status result = CcJwtConfigRegister();
+    if (!result.ok()) {
+      throw TinkException(result);
+    }
+  });
 }
 
 }  // namespace tink

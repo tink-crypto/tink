@@ -24,9 +24,8 @@ py_library(
 py_test(
     name = "helper_test",
     srcs = ["helper_test.py"],
-    data = [
-        "@tink_base//testdata:credentials",
-    ],
+    # This is used to check Tink Python testdata path.
+    data = ["//testdata/gcp:credentials"],
     srcs_version = "PY3",
     deps = [
         ":helper",
@@ -48,7 +47,6 @@ py_test(
     deps = [
         ":bytes_io",
         requirement("absl-py"),
-        requirement("six"),  # needed by absl-py
     ],
 )
 

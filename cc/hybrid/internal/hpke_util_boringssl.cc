@@ -20,6 +20,7 @@
 #include "absl/strings/str_cat.h"
 #include "openssl/base.h"
 #include "openssl/hpke.h"
+#include "tink/hybrid/internal/hpke_util.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "proto/hpke.pb.h"
@@ -28,14 +29,21 @@ namespace crypto {
 namespace tink {
 namespace internal {
 
-using ::google::crypto::tink::HpkeAead;
-using ::google::crypto::tink::HpkeKdf;
-using ::google::crypto::tink::HpkeKem;
-using ::google::crypto::tink::HpkeParams;
+util::StatusOr<const EVP_HPKE_KEM*> KemParam(const HpkeParams& params) {
+  switch (params.kem) {
+    case HpkeKem::kX25519HkdfSha256:
+      return EVP_hpke_x25519_hkdf_sha256();
+    default:
+      return util::Status(
+          absl::StatusCode::kInvalidArgument,
+          absl::StrCat("Unsupported HPKE KEM algorithm: ", params.kem));
+  }
+}
 
-util::StatusOr<const EVP_HPKE_KEM *> KemParam(const HpkeKem& kem) {
+util::StatusOr<const EVP_HPKE_KEM*> KemParam(
+    const google::crypto::tink::HpkeKem& kem) {
   switch (kem) {
-    case HpkeKem::DHKEM_X25519_HKDF_SHA256:
+    case google::crypto::tink::HpkeKem::DHKEM_X25519_HKDF_SHA256:
       return EVP_hpke_x25519_hkdf_sha256();
     default:
       return util::Status(
@@ -44,13 +52,26 @@ util::StatusOr<const EVP_HPKE_KEM *> KemParam(const HpkeKem& kem) {
   }
 }
 
-util::StatusOr<const EVP_HPKE_KEM *> KemParam(const HpkeParams& params) {
+util::StatusOr<const EVP_HPKE_KEM*> KemParam(
+    const google::crypto::tink::HpkeParams& params) {
   return KemParam(params.kem());
 }
 
-util::StatusOr<const EVP_HPKE_KDF *> KdfParam(const HpkeParams& params) {
+util::StatusOr<const EVP_HPKE_KDF*> KdfParam(const HpkeParams& params) {
+  switch (params.kdf) {
+    case HpkeKdf::kHkdfSha256:
+      return EVP_hpke_hkdf_sha256();
+    default:
+      return util::Status(
+          absl::StatusCode::kInvalidArgument,
+          absl::StrCat("Unsupported HPKE KDF algorithm: ", params.kdf));
+  }
+}
+
+util::StatusOr<const EVP_HPKE_KDF*> KdfParam(
+    const google::crypto::tink::HpkeParams& params) {
   switch (params.kdf()) {
-    case HpkeKdf::HKDF_SHA256:
+    case google::crypto::tink::HpkeKdf::HKDF_SHA256:
       return EVP_hpke_hkdf_sha256();
     default:
       return util::Status(
@@ -59,13 +80,29 @@ util::StatusOr<const EVP_HPKE_KDF *> KdfParam(const HpkeParams& params) {
   }
 }
 
-util::StatusOr<const EVP_HPKE_AEAD *> AeadParam(const HpkeParams& params) {
-  switch (params.aead()) {
-    case HpkeAead::AES_128_GCM:
+util::StatusOr<const EVP_HPKE_AEAD*> AeadParam(const HpkeParams& params) {
+  switch (params.aead) {
+    case HpkeAead::kAes128Gcm:
       return EVP_hpke_aes_128_gcm();
-    case HpkeAead::AES_256_GCM:
+    case HpkeAead::kAes256Gcm:
       return EVP_hpke_aes_256_gcm();
-    case HpkeAead::CHACHA20_POLY1305:
+    case HpkeAead::kChaCha20Poly1305:
+      return EVP_hpke_chacha20_poly1305();
+    default:
+      return util::Status(
+          absl::StatusCode::kInvalidArgument,
+          absl::StrCat("Unsupported HPKE AEAD algorithm: ", params.aead));
+  }
+}
+
+util::StatusOr<const EVP_HPKE_AEAD*> AeadParam(
+    const google::crypto::tink::HpkeParams& params) {
+  switch (params.aead()) {
+    case google::crypto::tink::HpkeAead::AES_128_GCM:
+      return EVP_hpke_aes_128_gcm();
+    case google::crypto::tink::HpkeAead::AES_256_GCM:
+      return EVP_hpke_aes_256_gcm();
+    case google::crypto::tink::HpkeAead::CHACHA20_POLY1305:
       return EVP_hpke_chacha20_poly1305();
     default:
       return util::Status(

@@ -84,17 +84,17 @@ TEST(AesSivKeyManagerTest, CreateKey) {
   AesSivKeyFormat format;
   format.set_key_size(64);
   auto key_or = AesSivKeyManager().CreateKey(format);
-  ASSERT_THAT(key_or.status(), IsOk());
-  EXPECT_THAT(key_or.ValueOrDie().key_value(), SizeIs(format.key_size()));
-  EXPECT_THAT(key_or.ValueOrDie().version(), Eq(0));
+  ASSERT_THAT(key_or, IsOk());
+  EXPECT_THAT(key_or.value().key_value(), SizeIs(format.key_size()));
+  EXPECT_THAT(key_or.value().version(), Eq(0));
 }
 
 TEST(AesSivKeyManagerTest, CreateKeyIsValid) {
   AesSivKeyFormat format;
   format.set_key_size(64);
   auto key_or = AesSivKeyManager().CreateKey(format);
-  ASSERT_THAT(key_or.status(), IsOk());
-  EXPECT_THAT(AesSivKeyManager().ValidateKey(key_or.ValueOrDie()), IsOk());
+  ASSERT_THAT(key_or, IsOk());
+  EXPECT_THAT(AesSivKeyManager().ValidateKey(key_or.value()), IsOk());
 }
 
 TEST(AesSivKeyManagerTest, MultipleCreateCallsCreateDifferentKeys) {
@@ -102,11 +102,10 @@ TEST(AesSivKeyManagerTest, MultipleCreateCallsCreateDifferentKeys) {
   AesSivKeyManager manager;
   format.set_key_size(64);
   auto key1_or = manager.CreateKey(format);
-  ASSERT_THAT(key1_or.status(), IsOk());
+  ASSERT_THAT(key1_or, IsOk());
   auto key2_or = manager.CreateKey(format);
-  ASSERT_THAT(key2_or.status(), IsOk());
-  EXPECT_THAT(key1_or.ValueOrDie().key_value(),
-              Ne(key2_or.ValueOrDie().key_value()));
+  ASSERT_THAT(key2_or, IsOk());
+  EXPECT_THAT(key1_or.value().key_value(), Ne(key2_or.value().key_value()));
 }
 
 TEST(AesSivKeyManagerTest, DeriveKey) {
@@ -117,9 +116,9 @@ TEST(AesSivKeyManagerTest, DeriveKey) {
   format.set_version(0);
   auto key_or = AesSivKeyManager().DeriveKey(format, &input_stream);
 
-  ASSERT_THAT(key_or.status(), IsOk());
-  EXPECT_THAT(key_or.ValueOrDie().key_value(), SizeIs(64));
-  EXPECT_THAT(key_or.ValueOrDie().version(), Eq(0));
+  ASSERT_THAT(key_or, IsOk());
+  EXPECT_THAT(key_or.value().key_value(), SizeIs(64));
+  EXPECT_THAT(key_or.value().version(), Eq(0));
 }
 
 TEST(AesSivKeyManagerTest, DeriveKeyFromLongSeed) {
@@ -131,9 +130,9 @@ TEST(AesSivKeyManagerTest, DeriveKeyFromLongSeed) {
   format.set_version(0);
   auto key_or = AesSivKeyManager().DeriveKey(format, &input_stream);
 
-  ASSERT_THAT(key_or.status(), IsOk());
+  ASSERT_THAT(key_or, IsOk());
   EXPECT_THAT(
-      key_or.ValueOrDie().key_value(),
+      key_or.value().key_value(),
       Eq("0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"));
 }
 
@@ -191,23 +190,22 @@ TEST(AesSivKeyManagerTest, GetPrimitive) {
   AesSivKeyFormat format;
   format.set_key_size(64);
   auto key_or = AesSivKeyManager().CreateKey(format);
-  ASSERT_THAT(key_or.status(), IsOk());
+  ASSERT_THAT(key_or, IsOk());
   auto daead_or =
-      AesSivKeyManager().GetPrimitive<DeterministicAead>(key_or.ValueOrDie());
-  ASSERT_THAT(daead_or.status(), IsOk());
+      AesSivKeyManager().GetPrimitive<DeterministicAead>(key_or.value());
+  ASSERT_THAT(daead_or, IsOk());
 
   auto direct_daead_or = subtle::AesSivBoringSsl::New(
-      util::SecretDataFromStringView(key_or.ValueOrDie().key_value()));
-  ASSERT_THAT(direct_daead_or.status(), IsOk());
+      util::SecretDataFromStringView(key_or.value().key_value()));
+  ASSERT_THAT(direct_daead_or, IsOk());
 
   auto encryption_or =
-      daead_or.ValueOrDie()->EncryptDeterministically("123", "abcd");
-  ASSERT_THAT(encryption_or.status(), IsOk());
+      daead_or.value()->EncryptDeterministically("123", "abcd");
+  ASSERT_THAT(encryption_or, IsOk());
   auto direct_encryption_or =
-      direct_daead_or.ValueOrDie()->EncryptDeterministically("123", "abcd");
-  ASSERT_THAT(direct_encryption_or.status(), IsOk());
-  ASSERT_THAT(encryption_or.ValueOrDie(),
-              Eq(direct_encryption_or.ValueOrDie()));
+      direct_daead_or.value()->EncryptDeterministically("123", "abcd");
+  ASSERT_THAT(direct_encryption_or, IsOk());
+  ASSERT_THAT(encryption_or.value(), Eq(direct_encryption_or.value()));
 }
 
 }  // namespace

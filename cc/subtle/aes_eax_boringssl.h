@@ -19,13 +19,15 @@
 
 #include <array>
 #include <memory>
+#include <string>
+#include <utility>
 
 #include "absl/strings/string_view.h"
 #include "absl/types/span.h"
 #include "openssl/aes.h"
 #include "openssl/evp.h"
-#include "tink/internal/fips_utils.h"
 #include "tink/aead.h"
+#include "tink/internal/fips_utils.h"
 #include "tink/util/secret_data.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
@@ -45,11 +47,11 @@ class AesEaxBoringSsl : public Aead {
 
   crypto::tink::util::StatusOr<std::string> Encrypt(
       absl::string_view plaintext,
-      absl::string_view additional_data) const override;
+      absl::string_view associated_data) const override;
 
   crypto::tink::util::StatusOr<std::string> Decrypt(
       absl::string_view ciphertext,
-      absl::string_view additional_data) const override;
+      absl::string_view associated_data) const override;
 
   static constexpr crypto::tink::internal::FipsCompatibility kFipsStatus =
       crypto::tink::internal::FipsCompatibility::kNotFips;
@@ -105,12 +107,12 @@ class AesEaxBoringSsl : public Aead {
   // is represented by a pointer and its length.
   Block Omac(absl::Span<const uint8_t> data, int tag) const;
 
-  // Encrypts or decrypts some data using CTR mode. N are 16 bytes, which
-  // are the result of an OMAC computation over the nonce.
-  // in are the bytes that are encrypted or decrypted. out is the encrypted rsp.
-  // decrypted value. size determines the size of in and result.
-  void CtrCrypt(const Block& N, absl::Span<const uint8_t> in,
-                uint8_t* out) const;
+  // Encrypts or decrypts some data using CTR mode. `N` is the 16 bytes result
+  // of an OMAC computation over the nonce. `in` are the bytes that are
+  // encrypted or decrypted, and the result is written to `out`. `in`.data()
+  // MUST NOT be null.
+  crypto::tink::util::Status CtrCrypt(const Block& N, absl::string_view in,
+                                      absl::Span<char> out) const;
 
   const util::SecretUniquePtr<AES_KEY> aeskey_;
   const size_t nonce_size_;

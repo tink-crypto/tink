@@ -14,9 +14,12 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "absl/status/status.h"
 #include "tink/subtle/test_util.h"
 
+#include <algorithm>
+#include <string>
+
+#include "absl/status/status.h"
 
 namespace crypto {
 namespace tink {
@@ -37,7 +40,7 @@ util::Status WriteToStream(OutputStream* output_stream,
   while (remaining > 0) {
     auto next_result = output_stream->Next(&buffer);
     if (!next_result.ok()) return next_result.status();
-    available_space = next_result.ValueOrDie();
+    available_space = next_result.value();
     available_bytes = std::min(available_space, remaining);
     memcpy(buffer, contents.data() + pos, available_bytes);
     remaining -= available_bytes;
@@ -63,7 +66,7 @@ util::Status ReadFromStream(InputStream* input_stream, std::string* output) {
       return util::OkStatus();
     }
     if (!next_result.ok()) return next_result.status();
-    auto read_bytes = next_result.ValueOrDie();
+    auto read_bytes = next_result.value();
     if (read_bytes > 0) {
       output->append(
           std::string(reinterpret_cast<const char*>(buffer), read_bytes));

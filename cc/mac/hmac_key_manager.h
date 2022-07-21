@@ -20,6 +20,8 @@
 
 #include "absl/memory/memory.h"
 #include "absl/strings/str_cat.h"
+#include "tink/chunked_mac.h"
+#include "tink/chunkedmac/internal/chunked_mac_impl.h"
 #include "tink/core/key_type_manager.h"
 #include "tink/mac.h"
 #include "tink/subtle/hmac_boringssl.h"
@@ -38,7 +40,8 @@ namespace tink {
 
 class HmacKeyManager
     : public KeyTypeManager<google::crypto::tink::HmacKey,
-                            google::crypto::tink::HmacKeyFormat, List<Mac>> {
+                            google::crypto::tink::HmacKeyFormat,
+                            List<Mac, ChunkedMac>> {
  public:
   class MacFactory : public PrimitiveFactory<Mac> {
     crypto::tink::util::StatusOr<std::unique_ptr<Mac>> Create(
@@ -50,7 +53,16 @@ class HmacKeyManager
     }
   };
 
-  HmacKeyManager() : KeyTypeManager(absl::make_unique<MacFactory>()) {}
+  class ChunkedMacFactory : public PrimitiveFactory<ChunkedMac> {
+    crypto::tink::util::StatusOr<std::unique_ptr<ChunkedMac>> Create(
+        const google::crypto::tink::HmacKey& hmac_key) const override {
+      return internal::NewChunkedHmac(hmac_key);
+    }
+  };
+
+  HmacKeyManager()
+      : KeyTypeManager(absl::make_unique<MacFactory>(),
+                       absl::make_unique<ChunkedMacFactory>()) {}
 
   uint32_t get_version() const override { return 0; }
 

@@ -19,14 +19,15 @@
 #include <fstream>
 #include <iostream>
 #include <memory>
+#include <string>
 
 #include "absl/status/status.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/string_view.h"
 #include "include/rapidjson/document.h"
 #include "include/rapidjson/istreamwrapper.h"
-#include "tink/subtle/common_enums.h"
 #include "tink/internal/test_file_util.h"
+#include "tink/subtle/common_enums.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 
@@ -36,7 +37,7 @@ namespace subtle {
 
 namespace {
 
-// TODO: factor these helpers out to an "util"-class.
+// TODO(tholenst): factor these helpers out to an "util"-class.
 util::StatusOr<std::string> HexDecode(absl::string_view hex) {
   if (hex.size() % 2 != 0) {
     return util::Status(absl::StatusCode::kInvalidArgument,
@@ -61,7 +62,7 @@ util::StatusOr<std::string> HexDecode(absl::string_view hex) {
 }
 
 std::string HexDecodeOrDie(absl::string_view hex) {
-  return HexDecode(hex).ValueOrDie();
+  return HexDecode(hex).value();
 }
 
 }  // namespace
@@ -133,7 +134,7 @@ std::string WycheproofUtil::GetInteger(const rapidjson::Value &val) {
       hex = "0" + hex;
     }
   }
-  return HexDecode(hex).ValueOrDie();
+  return HexDecode(hex).value();
 }
 
 }  // namespace subtle

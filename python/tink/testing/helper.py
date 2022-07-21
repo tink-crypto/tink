@@ -26,28 +26,29 @@ from tink import mac
 from tink import prf
 from tink import signature as pk_signature
 
+_RELATIVE_TESTDATA_PATH = 'tink_py/testdata'
 
-def tink_root_path() -> str:
-  """Returns the path to the Tink root directory used for the test enviroment.
 
-     The path can be set in the TINK_SRC_PATH enviroment variable. If Bazel
-     is used the path is derived from the Bazel environment variables. If that
-     does not work, it generates the root path relative to the __file__ path.
-  """
-  root_paths = []
-  if 'TINK_SRC_PATH' in os.environ:
-    root_paths.append(os.environ['TINK_SRC_PATH'])
+def tink_py_testdata_path() -> str:
+  """Returns the path to the test data directory to be used for testing."""
+  # List of pairs <Env. variable, Path>.
+  testdata_paths = []
+  if 'TINK_PYTHON_ROOT_PATH' in os.environ:
+    testdata_paths.append(('TINK_PYTHON_ROOT_PATH',
+                           os.path.join(os.environ['TINK_PYTHON_ROOT_PATH'],
+                                        'testdata')))
   if 'TEST_SRCDIR' in os.environ:
-    # Bazel environment
-    root_paths.append(os.path.join(os.environ['TEST_SRCDIR'], 'tink_base'))
-    root_paths.append(os.path.join(os.environ['TEST_SRCDIR'],
-                                   'google3/third_party/tink'))
-  for root_path in root_paths:
-    # return the first root path that exists.
-    if os.path.exists(root_path):
-      return root_path
-  raise ValueError('Could not find path to Tink root directory. Make sure that '
-                   'TINK_SRC_PATH is set.')
+    testdata_paths.append(('TEST_SRCDIR',
+                           os.path.join(os.environ['TEST_SRCDIR'],
+                                        _RELATIVE_TESTDATA_PATH)))
+  for env_variable, testdata_path in testdata_paths:
+    # Return the first path that is encountered.
+    if not os.path.exists(testdata_path):
+      raise FileNotFoundError(f'Variable {env_variable} is set but has an ' +
+                              f'invalid path {testdata_path}')
+    return testdata_path
+  raise ValueError('No path environment variable set among ' +
+                   'TINK_PYTHON_ROOT_PATH, TEST_SRCDIR')
 
 
 def fake_key(

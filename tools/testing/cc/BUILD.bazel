@@ -9,7 +9,10 @@ cc_library(
     name = "cli_util",
     srcs = ["cli_util.cc"],
     hdrs = ["cli_util.h"],
-    data = ["@tink_base//testdata:credentials"],
+    data = [
+        "//testdata/aws:credentials",
+        "//testdata/gcp:credentials",
+    ],
     deps = [
         "@com_google_absl//absl/memory",
         "@com_google_absl//absl/strings",
@@ -20,9 +23,9 @@ cc_library(
         "@tink_cc//:json_keyset_writer",
         "@tink_cc//:kms_clients",
         "@tink_cc//config:tink_config",
-        "@tink_cc//integration/awskms:aws_kms_client",
-        "@tink_cc//integration/gcpkms:gcp_kms_client",
         "@tink_cc//util:status",
+        "@tink_cc_awskms//:aws_kms_client",
+        "@tink_cc_gcpkms//:gcp_kms_client",
     ],
 )
 
@@ -33,9 +36,9 @@ cc_binary(
         ":cli_util",
         "@aws_cpp_sdk//:aws_sdk_core",
         "@tink_cc",
-        "@tink_cc//integration/awskms:aws_crypto",
-        "@tink_cc//integration/awskms:aws_kms_aead",
-        "@tink_cc//integration/awskms:aws_kms_client",
+        "@tink_cc_awskms//:aws_crypto",
+        "@tink_cc_awskms//:aws_kms_aead",
+        "@tink_cc_awskms//:aws_kms_client",
     ],
 )
 
@@ -45,8 +48,8 @@ cc_binary(
     deps = [
         ":cli_util",
         "@tink_cc",
-        "@tink_cc//integration/gcpkms:gcp_kms_aead",
-        "@tink_cc//integration/gcpkms:gcp_kms_client",
+        "@tink_cc_gcpkms//:gcp_kms_aead",
+        "@tink_cc_gcpkms//:gcp_kms_client",
     ],
 )
 
@@ -67,8 +70,9 @@ sh_test(
     ],
     data = [
         ":aws_kms_aead_cli",
+        "//testdata/aws:bad_credentials",
+        "//testdata/aws:credentials",
         "//testing/cross_language:test_lib",
-        "@tink_base//testdata:credentials",
     ],
     tags = ["no_rbe"],
 )
@@ -81,9 +85,10 @@ sh_test(
     ],
     data = [
         ":gcp_kms_aead_cli",
+        "//testdata/gcp:bad_credentials",
+        "//testdata/gcp:credentials",
         "//testing/cross_language:test_lib",
         "@google_root_pem//file",
-        "@tink_base//testdata:credentials",
     ],
-    tags = ["no_rbe"],
+    tags = ["manual"],
 )

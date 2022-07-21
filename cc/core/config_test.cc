@@ -15,8 +15,9 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 #include "tink/config.h"
-#include "tink/mac.h"
+
 #include "gtest/gtest.h"
+#include "tink/mac.h"
 #include "proto/config.pb.h"
 
 using google::crypto::tink::KeyTypeEntry;

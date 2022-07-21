@@ -36,6 +36,8 @@ tink_cc_library(
     tink::hybrid::internal::hpke_private_key_manager
     tink::hybrid::internal::hpke_public_key_manager
     tink::util::status
+  TAGS
+    exclude_if_openssl
 )
 
 tink_cc_library(
@@ -50,7 +52,10 @@ tink_cc_library(
     tink::core::hybrid_decrypt
     tink::core::primitive_set
     tink::core::primitive_wrapper
+    tink::internal::monitoring_util
+    tink::internal::registry_impl
     tink::internal::util
+    tink::monitoring::monitoring
     tink::util::status
     tink::util::statusor
     tink::proto::tink_cc_proto
@@ -68,7 +73,10 @@ tink_cc_library(
     tink::core::hybrid_encrypt
     tink::core::primitive_set
     tink::core::primitive_wrapper
+    tink::internal::monitoring_util
+    tink::internal::registry_impl
     tink::internal::util
+    tink::monitoring::monitoring
     tink::util::status
     tink::util::statusor
     tink::proto::tink_cc_proto
@@ -138,9 +146,11 @@ tink_cc_library(
     tink::util::protobuf_helper
     tink::util::secret_data
     tink::util::statusor
+    tink::proto::aes_ctr_cc_proto
     tink::proto::aes_ctr_hmac_aead_cc_proto
     tink::proto::aes_gcm_cc_proto
     tink::proto::aes_siv_cc_proto
+    tink::proto::hmac_cc_proto
     tink::proto::tink_cc_proto
     tink::proto::xchacha20_poly1305_cc_proto
 )
@@ -278,6 +288,8 @@ tink_cc_test(
     tink::util::status
     tink::util::test_matchers
     tink::util::test_util
+  TAGS
+    exclude_if_openssl
 )
 
 tink_cc_test(
@@ -285,10 +297,16 @@ tink_cc_test(
   SRCS
     hybrid_decrypt_wrapper_test.cc
   DEPS
+    tink::hybrid::failing_hybrid
     tink::hybrid::hybrid_decrypt_wrapper
     gmock
+    absl::strings
     tink::core::hybrid_decrypt
+    tink::core::hybrid_encrypt
     tink::core::primitive_set
+    tink::internal::registry_impl
+    tink::monitoring::monitoring
+    tink::monitoring::monitoring_client_mocks
     tink::util::status
     tink::util::test_matchers
     tink::util::test_util
@@ -300,10 +318,15 @@ tink_cc_test(
   SRCS
     hybrid_encrypt_wrapper_test.cc
   DEPS
+    tink::hybrid::failing_hybrid
     tink::hybrid::hybrid_encrypt_wrapper
     gmock
+    absl::status
     tink::core::hybrid_encrypt
     tink::core::primitive_set
+    tink::internal::registry_impl
+    tink::monitoring::monitoring
+    tink::monitoring::monitoring_client_mocks
     tink::util::status
     tink::util::test_matchers
     tink::util::test_util
@@ -368,6 +391,8 @@ tink_cc_test(
     tink::proto::ecies_aead_hkdf_cc_proto
     tink::proto::hpke_cc_proto
     tink::proto::tink_cc_proto
+  TAGS
+    exclude_if_openssl
 )
 
 tink_cc_test(
@@ -402,6 +427,7 @@ tink_cc_test(
     tink::aead::xchacha20_poly1305_key_manager
     tink::daead::aes_siv_key_manager
     tink::internal::ec_util
+    tink::internal::ssl_util
     tink::subtle::random
     tink::util::enums
     tink::util::statusor
@@ -478,4 +504,26 @@ tink_cc_test(
     tink::proto::common_cc_proto
     tink::proto::ecies_aead_hkdf_cc_proto
     tink::proto::tink_cc_proto
+)
+
+tink_cc_library(
+  NAME failing_hybrid
+  SRCS
+    failing_hybrid.cc
+    failing_hybrid.h
+  DEPS
+    absl::strings
+    tink::core::hybrid_decrypt
+    tink::core::hybrid_encrypt
+)
+
+tink_cc_test(
+  NAME failing_hybrid_test
+  SRCS
+    failing_hybrid_test.cc
+  DEPS
+    tink::hybrid::failing_hybrid
+    gmock
+    absl::status
+    tink::util::test_matchers
 )

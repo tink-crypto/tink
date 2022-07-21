@@ -28,6 +28,8 @@ namespace crypto {
 namespace tink {
 namespace util {
 
+#ifndef TINK_USE_ABSL_STATUSOR
+
 #ifndef CPP_TINK_TEMPORARY_STATUS_MUST_NOT_USE_RESULT
 template <typename T>
 class ABSL_MUST_USE_RESULT StatusOr;
@@ -101,6 +103,25 @@ class StatusOr {
     return *std::move(value_);
   }
 
+  // Returns value if ok(), otherwise crashes if exceptions are disabled OR
+  // throws if exceptions are enabled.
+  inline const T& value() const& {
+    if (!ok()) AbortWithMessageFrom(status_);
+    return *value_;
+  }
+  inline T& value() & {
+    if (!ok()) AbortWithMessageFrom(status_);
+    return *value_;
+  }
+  inline const T&& value() const&& {
+    if (!ok()) AbortWithMessageFrom(std::move(status_));
+    return *std::move(value_);
+  }
+  inline T&& value() && {
+    if (!ok()) AbortWithMessageFrom(std::move(status_));
+    return *std::move(value_);
+  }
+
   // Implicitly convertible to absl::StatusOr. Implicit conversions explicitly
   // allowed by style arbiter waiver in cl/351594378.
   operator ::absl::StatusOr<T>() const&;  // NOLINT
@@ -149,6 +170,13 @@ class StatusOr {
       std::_Exit(1);
     }
   }
+
+  void AbortWithMessageFrom(crypto::tink::util::Status status) const {
+    std::cerr << "Attempting to fetch value instead of handling error\n";
+    std::cerr << status.ToString();
+    std::abort();
+  }
+
 
   Status status_;
   absl::optional<T> value_;
@@ -230,6 +258,12 @@ StatusOr<T>::operator ::absl::StatusOr<T>() && {
   return std::move(*value_);
 }
 
+#else
+
+template <typename T>
+using StatusOr = absl::StatusOr<T>;
+
+#endif  // TINK_USE_ABSL_STATUSOR
 
 }  // namespace util
 }  // namespace tink

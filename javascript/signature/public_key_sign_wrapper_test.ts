@@ -19,7 +19,7 @@ describe('public key sign wrapper test', function() {
     try {
       new PublicKeySignWrapper().wrap(primitiveSet);
       fail('Should throw an exception.');
-    } catch (e) {
+    } catch (e: any) {
       expect(e.toString())
           .toBe('SecurityException: Primary has to be non-null.');
     }

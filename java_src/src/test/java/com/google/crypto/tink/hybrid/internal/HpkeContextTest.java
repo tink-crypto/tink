@@ -19,8 +19,8 @@ package com.google.crypto.tink.hybrid.internal;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 import com.google.common.io.Files;
-import com.google.common.io.Resources;
 import com.google.common.truth.Expect;
+import com.google.crypto.tink.proto.HpkeParams;
 import com.google.crypto.tink.proto.HpkePrivateKey;
 import com.google.crypto.tink.proto.HpkePublicKey;
 import com.google.crypto.tink.subtle.Random;
@@ -31,7 +31,6 @@ import com.google.crypto.tink.testing.HpkeTestUtil;
 import com.google.crypto.tink.testing.HpkeTestVector;
 import com.google.crypto.tink.testing.TestUtil;
 import com.google.protobuf.ByteString;
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
@@ -51,20 +50,11 @@ public final class HpkeContextTest {
 
   @BeforeClass
   public static void setUpTestVectors() throws IOException {
-    BufferedReader reader = null;
+    String path = "testdata/testvectors/hpke_boringssl.json";
     if (TestUtil.isAndroid()) {
-      reader =
-          Files.newReader(
-              new File(
-                  "/sdcard/googletest/test_runfiles/google3/" // Special prefix for Android.
-                      + "third_party/tink/java_src/src/test/java/com/google/crypto/tink/"
-                      + "hybrid/internal/testdata/test_vectors.json"),
-              UTF_8);
-    } else {
-      String path = "com/google/crypto/tink/hybrid/internal/testdata/test_vectors.json";
-      reader = Resources.asCharSource(Resources.getResource(path), UTF_8).openBufferedStream();
+      path = "/sdcard/googletest/test_runfiles/google3/" + path; // Special prefix for Android.
     }
-    testVectors = HpkeTestUtil.parseTestVectors(reader);
+    testVectors = HpkeTestUtil.parseTestVectors(Files.newReader(new File(path), UTF_8));
   }
 
   private HpkeTestVector getTestVector(byte[] mode, byte[] kemId, byte[] kdfId, byte[] aeadId) {
@@ -142,14 +132,23 @@ public final class HpkeContextTest {
     HpkePrivateKey recipientPrivateKey =
         HpkePrivateKey.newBuilder()
             .setPrivateKey(ByteString.copyFrom(testSetup.recipientPrivateKey))
+            .setPublicKey(
+                HpkePublicKey.newBuilder()
+                    .setParams(
+                        HpkeParams.newBuilder()
+                            .setKem(com.google.crypto.tink.proto.HpkeKem.DHKEM_X25519_HKDF_SHA256)
+                            .build())
+                    .build())
             .build();
 
     HpkeContext senderContext =
         HpkeContext.createSenderContext(recipientPublicKey, kem, kdf, aead, testSetup.info);
+
+    HpkeKemPrivateKey recipientKemPrivateKey = HpkeKemKeyFactory.createPrivate(recipientPrivateKey);
     HpkeContext recipientContext =
         HpkeContext.createRecipientContext(
             senderContext.getEncapsulatedKey(),
-            recipientPrivateKey,
+            recipientKemPrivateKey,
             kem,
             kdf,
             aead,

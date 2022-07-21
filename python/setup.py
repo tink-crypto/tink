@@ -121,7 +121,7 @@ def _patch_workspace(workspace_content):
   Args:
     workspace_content: The original tink/python WORKSPACE.
   Returns:
-    The workspace_content using http_archive for tink_base and tink_cc.
+    The workspace_content using http_archive for tink_cc.
   """
 
   if 'TINK_PYTHON_SETUPTOOLS_OVERRIDE_BASE_PATH' in os.environ:
@@ -141,12 +141,17 @@ def _patch_workspace(workspace_content):
 def _patch_with_local_path(workspace_content, base_path):
   """Replaces the base paths in the local_repository() rules."""
 
-  workspace_content = re.sub(r'(?<="tink_base",\n    path = ").*(?=\n)',
-                             base_path + '",  # Modified by setup.py',
-                             workspace_content)
   workspace_content = re.sub(r'(?<="tink_cc",\n    path = ").*(?=\n)',
                              base_path + '/cc",  # Modified by setup.py',
                              workspace_content)
+  workspace_content = re.sub(
+      r'(?<="tink_cc_awskms",\n    path = ").*(?=\n)',
+      base_path + '/cc/integration/awskms",  # Modified by setup.py',
+      workspace_content)
+  workspace_content = re.sub(
+      r'(?<="tink_cc_gcpkms",\n    path = ").*(?=\n)',
+      base_path + '/cc/integration/gcpkms",  # Modified by setup.py',
+      workspace_content)
   return workspace_content
 
 
@@ -159,14 +164,6 @@ def _patch_with_http_archive(workspace_content, filename, prefix):
   workspace_content = '\n'.join([workspace_lines[0], http_archive_load] +
                                 workspace_lines[1:])
 
-  base = textwrap.dedent(
-      '''\
-      local_repository(
-          name = "tink_base",
-          path = "..",
-      )
-      ''')
-
   cc = textwrap.dedent(
       '''\
       local_repository(
@@ -175,15 +172,21 @@ def _patch_with_http_archive(workspace_content, filename, prefix):
       )
       ''')
 
-  base_patched = textwrap.dedent(
+  cc_awskms = textwrap.dedent(
       '''\
-      # Modified by setup.py
-      http_archive(
-          name = "tink_base",
-          urls = ["https://github.com/google/tink/archive/{}"],
-          strip_prefix = "{}/",
+      local_repository(
+          name = "tink_cc_awskms",
+          path = "../cc/integration/awskms",
       )
-      '''.format(filename, prefix))
+      ''')
+
+  cc_gcpkms = textwrap.dedent(
+      '''\
+      local_repository(
+          name = "tink_cc_gcpkms",
+          path = "../cc/integration/gcpkms",
+      )
+      ''')
 
   cc_patched = textwrap.dedent(
       '''\
@@ -195,8 +198,29 @@ def _patch_with_http_archive(workspace_content, filename, prefix):
       )
       '''.format(filename, prefix))
 
-  workspace_content = workspace_content.replace(base, base_patched)
+  cc_awskms_patched = textwrap.dedent(
+      '''\
+      # Modified by setup.py
+      http_archive(
+          name = "tink_cc_awskms",
+          urls = ["https://github.com/google/tink/archive/{}"],
+          strip_prefix = "{}/cc/integration/awskms",
+      )
+      '''.format(filename, prefix))
+
+  cc_gcpkms_patched = textwrap.dedent(
+      '''\
+      # Modified by setup.py
+      http_archive(
+          name = "tink_cc_gcpkms",
+          urls = ["https://github.com/google/tink/archive/{}"],
+          strip_prefix = "{}/cc/integration/gcpkms",
+      )
+      '''.format(filename, prefix))
+
   workspace_content = workspace_content.replace(cc, cc_patched)
+  workspace_content = workspace_content.replace(cc_awskms, cc_awskms_patched)
+  workspace_content = workspace_content.replace(cc_gcpkms, cc_gcpkms_patched)
   return workspace_content
 
 
@@ -227,7 +251,7 @@ class BuildBazelExtension(build_ext.build_ext):
     build_ext.build_ext.run(self)
 
   def bazel_build(self, ext):
-    # Change WORKSPACE to include tink_base and tink_cc from an archive
+    # Change WORKSPACE to include tink_cc from an archive
     with open('WORKSPACE', 'r') as f:
       workspace_contents = f.read()
     with open('WORKSPACE', 'w') as f:

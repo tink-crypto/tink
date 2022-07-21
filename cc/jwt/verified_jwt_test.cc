@@ -95,10 +95,10 @@ TEST(VerifiedJwt, GetTypeIssuerSubjectJwtIdOK) {
                                           .SetJwtId("jwt_id")
                                           .WithoutExpiration()
                                           .Build();
-  ASSERT_THAT(raw_jwt.status(), IsOk());
+  ASSERT_THAT(raw_jwt, IsOk());
   util::StatusOr<crypto::tink::VerifiedJwt> jwt =
       CreateVerifiedJwt(*raw_jwt);
-  ASSERT_THAT(jwt.status(), IsOk());
+  ASSERT_THAT(jwt, IsOk());
 
   EXPECT_TRUE(jwt->HasTypeHeader());
   EXPECT_THAT(jwt->GetTypeHeader(), IsOkAndHolds("typeHeader"));
@@ -119,25 +119,25 @@ TEST(VerifiedJwt, TimestampsOK) {
           .SetIssuedAt(now)
           .SetExpiration(now + absl::Seconds(300))
           .Build();
-  ASSERT_THAT(raw_jwt.status(), IsOk());
+  ASSERT_THAT(raw_jwt, IsOk());
   util::StatusOr<crypto::tink::VerifiedJwt> jwt = CreateVerifiedJwt(*raw_jwt);
-  ASSERT_THAT(jwt.status(), IsOk());
+  ASSERT_THAT(jwt, IsOk());
 
   EXPECT_TRUE(jwt->HasNotBefore());
   util::StatusOr<absl::Time> nbf = jwt->GetNotBefore();
-  ASSERT_THAT(nbf.status(), IsOk());
+  ASSERT_THAT(nbf, IsOk());
   EXPECT_LT(*nbf, now - absl::Seconds(299));
   EXPECT_GT(*nbf, now - absl::Seconds(301));
 
   EXPECT_TRUE(jwt->HasIssuedAt());
   util::StatusOr<absl::Time> iat = jwt->GetIssuedAt();
-  ASSERT_THAT(iat.status(), IsOk());
+  ASSERT_THAT(iat, IsOk());
   EXPECT_LT(*iat, now + absl::Seconds(1));
   EXPECT_GT(*iat, now - absl::Seconds(1));
 
   EXPECT_TRUE(jwt->HasExpiration());
   util::StatusOr<absl::Time> exp = jwt->GetExpiration();
-  ASSERT_THAT(exp.status(), IsOk());
+  ASSERT_THAT(exp, IsOk());
   EXPECT_LT(*exp, now + absl::Seconds(301));
   EXPECT_GT(*exp, now + absl::Seconds(299));
 }
@@ -148,9 +148,9 @@ TEST(VerifiedJwt, GetAudiencesOK) {
                                           .AddAudience("audience2")
                                           .WithoutExpiration()
                                           .Build();
-  ASSERT_THAT(raw_jwt.status(), IsOk());
+  ASSERT_THAT(raw_jwt, IsOk());
   util::StatusOr<VerifiedJwt> jwt = CreateVerifiedJwt(*raw_jwt);
-  ASSERT_THAT(jwt.status(), IsOk());
+  ASSERT_THAT(jwt, IsOk());
 
   std::vector<std::string> expected = {"audience1", "audience2"};
   EXPECT_TRUE(jwt->HasAudiences());
@@ -168,9 +168,9 @@ TEST(VerifiedJwt, GetCustomClaimOK) {
           .AddJsonObjectClaim("object_claim", R"({ "number": 123.456})")
           .AddJsonArrayClaim("array_claim", R"([1, "one", 1.2, true])")
           .Build();
-  ASSERT_THAT(raw_jwt.status(), IsOk());
+  ASSERT_THAT(raw_jwt, IsOk());
   util::StatusOr<VerifiedJwt> jwt = CreateVerifiedJwt(*raw_jwt);
-  ASSERT_THAT(jwt.status(), IsOk());
+  ASSERT_THAT(jwt, IsOk());
 
   EXPECT_TRUE(jwt->IsNullClaim("null_claim"));
   EXPECT_TRUE(jwt->HasBooleanClaim("boolean_claim"));
@@ -202,9 +202,9 @@ TEST(VerifiedJwt, HasCustomClaimIsFalseForWrongType) {
           .AddNumberClaim("number_claim", 123.456)
           .AddStringClaim("string_claim", "a string")
           .Build();
-  ASSERT_THAT(raw_jwt.status(), IsOk());
+  ASSERT_THAT(raw_jwt, IsOk());
   util::StatusOr<VerifiedJwt> jwt = CreateVerifiedJwt(*raw_jwt);
-  ASSERT_THAT(jwt.status(), IsOk());
+  ASSERT_THAT(jwt, IsOk());
 
   EXPECT_FALSE(jwt->IsNullClaim("boolean_claim"));
   EXPECT_FALSE(jwt->HasBooleanClaim("number_claim"));
@@ -223,9 +223,9 @@ TEST(VerifiedJwt, HasAlwaysReturnsFalseForRegisteredClaims) {
           .SetIssuedAt(now)
           .SetExpiration(now + absl::Seconds(300))
           .Build();
-  ASSERT_THAT(raw_jwt.status(), IsOk());
+  ASSERT_THAT(raw_jwt, IsOk());
   util::StatusOr<VerifiedJwt> jwt = CreateVerifiedJwt(*raw_jwt);
-  ASSERT_THAT(jwt.status(), IsOk());
+  ASSERT_THAT(jwt, IsOk());
 
   EXPECT_FALSE(jwt->HasStringClaim("iss"));
   EXPECT_FALSE(jwt->HasStringClaim("sub"));
@@ -248,9 +248,9 @@ TEST(VerifiedJwt, GetRegisteredCustomClaimNotOK) {
           .SetIssuedAt(now)
           .SetExpiration(now + absl::Seconds(300))
           .Build();
-  ASSERT_THAT(raw_jwt.status(), IsOk());
+  ASSERT_THAT(raw_jwt, IsOk());
   util::StatusOr<VerifiedJwt> jwt = CreateVerifiedJwt(*raw_jwt);
-  ASSERT_THAT(jwt.status(), IsOk());
+  ASSERT_THAT(jwt, IsOk());
 
   EXPECT_FALSE(jwt->GetStringClaim("iss").ok());
   EXPECT_FALSE(jwt->GetStringClaim("sub").ok());
@@ -263,9 +263,9 @@ TEST(VerifiedJwt, GetRegisteredCustomClaimNotOK) {
 TEST(VerifiedJwt, EmptyTokenHasAndIsReturnsFalse) {
   util::StatusOr<RawJwt> raw_jwt =
       RawJwtBuilder().WithoutExpiration().Build();
-  ASSERT_THAT(raw_jwt.status(), IsOk());
+  ASSERT_THAT(raw_jwt, IsOk());
   util::StatusOr<VerifiedJwt> jwt = CreateVerifiedJwt(*raw_jwt);
-  ASSERT_THAT(jwt.status(), IsOk());
+  ASSERT_THAT(jwt, IsOk());
 
   EXPECT_FALSE(jwt->HasTypeHeader());
   EXPECT_FALSE(jwt->HasIssuer());
@@ -286,9 +286,9 @@ TEST(VerifiedJwt, EmptyTokenHasAndIsReturnsFalse) {
 TEST(VerifiedJwt, EmptyTokenGetReturnsNotOK) {
   util::StatusOr<RawJwt> raw_jwt =
       RawJwtBuilder().WithoutExpiration().Build();
-  ASSERT_THAT(raw_jwt.status(), IsOk());
+  ASSERT_THAT(raw_jwt, IsOk());
   util::StatusOr<VerifiedJwt> jwt = CreateVerifiedJwt(*raw_jwt);
-  ASSERT_THAT(jwt.status(), IsOk());
+  ASSERT_THAT(jwt, IsOk());
 
   EXPECT_FALSE(jwt->GetTypeHeader().ok());
   EXPECT_FALSE(jwt->GetIssuer().ok());
@@ -309,9 +309,9 @@ TEST(VerifiedJwt, EmptyTokenGetReturnsNotOK) {
 TEST(VerifiedJwt, GetJsonPayload) {
   util::StatusOr<RawJwt> raw_jwt =
       RawJwtBuilder().SetIssuer("issuer").WithoutExpiration().Build();
-  ASSERT_THAT(raw_jwt.status(), IsOk());
+  ASSERT_THAT(raw_jwt, IsOk());
   util::StatusOr<VerifiedJwt> jwt = CreateVerifiedJwt(*raw_jwt);
-  ASSERT_THAT(jwt.status(), IsOk());
+  ASSERT_THAT(jwt, IsOk());
 
   EXPECT_THAT(jwt->GetJsonPayload(), IsOkAndHolds(R"({"iss":"issuer"})"));
 }
@@ -319,9 +319,9 @@ TEST(VerifiedJwt, GetJsonPayload) {
 TEST(VerifiedJwt, MoveMakesCopy) {
   util::StatusOr<RawJwt> raw_jwt =
       RawJwtBuilder().SetIssuer("issuer").WithoutExpiration().Build();
-  ASSERT_THAT(raw_jwt.status(), IsOk());
+  ASSERT_THAT(raw_jwt, IsOk());
   util::StatusOr<VerifiedJwt> jwt = CreateVerifiedJwt(*raw_jwt);
-  ASSERT_THAT(jwt.status(), IsOk());
+  ASSERT_THAT(jwt, IsOk());
   VerifiedJwt jwt1 = *jwt;
   VerifiedJwt jwt2 = std::move(jwt1);
   // We want that a VerifiedJwt object remains a valid object, even after

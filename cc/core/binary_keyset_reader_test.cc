@@ -16,12 +16,16 @@
 
 #include "tink/binary_keyset_reader.h"
 
+#include <ios>
 #include <iostream>
 #include <istream>
+#include <memory>
 #include <sstream>
+#include <string>
+#include <utility>
 
-#include "tink/util/test_util.h"
 #include "gtest/gtest.h"
+#include "tink/util/test_util.h"
 #include "proto/tink.pb.h"
 
 using crypto::tink::test::AddRawKey;
@@ -38,7 +42,7 @@ namespace {
 
 class BinaryKeysetReaderTest : public ::testing::Test {
  protected:
-  void SetUp() {
+  void SetUp() override {
     Keyset::Key key;
     AddTinkKey("some key type", 42, key, KeyStatusType::ENABLED,
                KeyData::SYMMETRIC, &keyset_);
@@ -103,17 +107,17 @@ TEST_F(BinaryKeysetReaderTest, testReadFromString) {
   {  // Good string.
     auto reader_result = BinaryKeysetReader::New(good_serialized_keyset_);
     EXPECT_TRUE(reader_result.ok()) << reader_result.status();
-    auto reader = std::move(reader_result.ValueOrDie());
+    auto reader = std::move(reader_result.value());
     auto read_result = reader->Read();
     EXPECT_TRUE(read_result.ok()) << read_result.status();
-    auto keyset = std::move(read_result.ValueOrDie());
+    auto keyset = std::move(read_result.value());
     EXPECT_EQ(good_serialized_keyset_, keyset->SerializeAsString());
   }
 
   {  // Bad string.
     auto reader_result = BinaryKeysetReader::New(bad_serialized_keyset_);
     EXPECT_TRUE(reader_result.ok()) << reader_result.status();
-    auto reader = std::move(reader_result.ValueOrDie());
+    auto reader = std::move(reader_result.value());
     auto read_result = reader->Read();
     EXPECT_FALSE(read_result.ok());
     EXPECT_EQ(absl::StatusCode::kInvalidArgument, read_result.status().code());
@@ -126,10 +130,10 @@ TEST_F(BinaryKeysetReaderTest, testReadFromStream) {
         std::string(good_serialized_keyset_), std::ios_base::in));
     auto reader_result = BinaryKeysetReader::New(std::move(good_keyset_stream));
     EXPECT_TRUE(reader_result.ok()) << reader_result.status();
-    auto reader = std::move(reader_result.ValueOrDie());
+    auto reader = std::move(reader_result.value());
     auto read_result = reader->Read();
     EXPECT_TRUE(read_result.ok()) << read_result.status();
-    auto keyset = std::move(read_result.ValueOrDie());
+    auto keyset = std::move(read_result.value());
     EXPECT_EQ(good_serialized_keyset_, keyset->SerializeAsString());
   }
 
@@ -138,7 +142,7 @@ TEST_F(BinaryKeysetReaderTest, testReadFromStream) {
         std::string(bad_serialized_keyset_), std::ios_base::in));
     auto reader_result = BinaryKeysetReader::New(std::move(bad_keyset_stream));
     EXPECT_TRUE(reader_result.ok()) << reader_result.status();
-    auto reader = std::move(reader_result.ValueOrDie());
+    auto reader = std::move(reader_result.value());
     auto read_result = reader->Read();
     EXPECT_FALSE(read_result.ok());
     EXPECT_EQ(absl::StatusCode::kInvalidArgument, read_result.status().code());
@@ -150,10 +154,10 @@ TEST_F(BinaryKeysetReaderTest, testReadEncryptedFromString) {
     auto reader_result =
         BinaryKeysetReader::New(good_serialized_encrypted_keyset_);
     EXPECT_TRUE(reader_result.ok()) << reader_result.status();
-    auto reader = std::move(reader_result.ValueOrDie());
+    auto reader = std::move(reader_result.value());
     auto read_encrypted_result = reader->ReadEncrypted();
     EXPECT_TRUE(read_encrypted_result.ok()) << read_encrypted_result.status();
-    auto encrypted_keyset = std::move(read_encrypted_result.ValueOrDie());
+    auto encrypted_keyset = std::move(read_encrypted_result.value());
     EXPECT_EQ(good_serialized_encrypted_keyset_,
               encrypted_keyset->SerializeAsString());
   }
@@ -161,7 +165,7 @@ TEST_F(BinaryKeysetReaderTest, testReadEncryptedFromString) {
   {  // Bad string.
     auto reader_result = BinaryKeysetReader::New(bad_serialized_keyset_);
     EXPECT_TRUE(reader_result.ok()) << reader_result.status();
-    auto reader = std::move(reader_result.ValueOrDie());
+    auto reader = std::move(reader_result.value());
     auto read_encrypted_result = reader->ReadEncrypted();
     EXPECT_FALSE(read_encrypted_result.ok());
     EXPECT_EQ(absl::StatusCode::kInvalidArgument,
@@ -177,10 +181,10 @@ TEST_F(BinaryKeysetReaderTest, testReadEncryptedFromStream) {
     auto reader_result =
         BinaryKeysetReader::New(std::move(good_encrypted_keyset_stream));
     EXPECT_TRUE(reader_result.ok()) << reader_result.status();
-    auto reader = std::move(reader_result.ValueOrDie());
+    auto reader = std::move(reader_result.value());
     auto read_encrypted_result = reader->ReadEncrypted();
     EXPECT_TRUE(read_encrypted_result.ok()) << read_encrypted_result.status();
-    auto encrypted_keyset = std::move(read_encrypted_result.ValueOrDie());
+    auto encrypted_keyset = std::move(read_encrypted_result.value());
     EXPECT_EQ(good_serialized_encrypted_keyset_,
               encrypted_keyset->SerializeAsString());
   }
@@ -190,7 +194,7 @@ TEST_F(BinaryKeysetReaderTest, testReadEncryptedFromStream) {
         std::string(bad_serialized_keyset_), std::ios_base::in));
     auto reader_result = BinaryKeysetReader::New(std::move(bad_keyset_stream));
     EXPECT_TRUE(reader_result.ok()) << reader_result.status();
-    auto reader = std::move(reader_result.ValueOrDie());
+    auto reader = std::move(reader_result.value());
     auto read_encrypted_result = reader->ReadEncrypted();
     EXPECT_FALSE(read_encrypted_result.ok());
     EXPECT_EQ(absl::StatusCode::kInvalidArgument,

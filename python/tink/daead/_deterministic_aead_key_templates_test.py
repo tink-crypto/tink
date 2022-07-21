@@ -26,8 +26,11 @@ class DeterministicAeadKeyTemplatesTest(parameterized.TestCase):
   def test_create_aes_siv_key_template(self):
     # Intentionally using 'weird' or invalid values for parameters,
     # to test that the function correctly puts them in the resulting template.
-    template = (daead.deterministic_aead_key_templates
-                .create_aes_siv_key_template(key_size=42))
+    template = None
+    with self.assertWarns(DeprecationWarning):
+      template = (
+          daead.deterministic_aead_key_templates.create_aes_siv_key_template(
+              key_size=42))
     self.assertEqual('type.googleapis.com/google.crypto.tink.AesSivKey',
                      template.type_url)
     self.assertEqual(tink_pb2.TINK, template.output_prefix_type)

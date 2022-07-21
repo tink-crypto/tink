@@ -5,7 +5,7 @@ package(default_visibility = ["//:__subpackages__"])  # keep
 licenses(["notice"])  # keep
 
 go_library(
-    name = "go_default_library",
+    name = "registry",
     srcs = [
         "key_manager.go",
         "kms_client.go",
@@ -15,27 +15,32 @@ go_library(
     importpath = "github.com/google/tink/go/core/registry",
     visibility = ["//visibility:public"],
     deps = [
-        "//proto:tink_go_proto",
-        "//tink:go_default_library",
-        "@org_golang_google_protobuf//proto:go_default_library",
+        "//proto/tink_go_proto",
+        "//tink",
+        "@org_golang_google_protobuf//proto",
     ],
 )
 
 go_test(
-    name = "tink_test",
-    size = "small",
+    name = "registry_test",
     srcs = ["registry_test.go"],
     deps = [
-        "//aead:go_default_library",
-        "//core/registry:go_default_library",
-        "//mac:go_default_library",
-        "//mac/subtle:go_default_library",
-        "//testing/fakekms:go_default_library",
-        "//proto:aes_gcm_go_proto",
-        "//proto:common_go_proto",
-        "//proto:hmac_go_proto",
-        "//proto:tink_go_proto",
-        "//testutil:go_default_library",
-        "@org_golang_google_protobuf//proto:go_default_library",
+        ":registry",
+        "//aead",
+        "//mac",
+        "//mac/subtle",
+        "//proto/aes_gcm_go_proto",
+        "//proto/common_go_proto",
+        "//proto/hmac_go_proto",
+        "//proto/tink_go_proto",
+        "//testing/fakekms",
+        "//testutil",
+        "@org_golang_google_protobuf//proto",
     ],
+)
+
+alias(
+    name = "go_default_library",
+    actual = ":registry",
+    visibility = ["//visibility:public"],
 )

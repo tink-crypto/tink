@@ -16,30 +16,32 @@
 
 #include "tink/aead/aes_ctr_hmac_aead_key_manager.h"
 
+#include <cstdint>
+#include <functional>
 #include <map>
+#include <memory>
+#include <string>
 #include <utility>
 
-#include "absl/base/casts.h"
 #include "absl/status/status.h"
+#include "absl/status/statusor.h"
 #include "absl/strings/str_cat.h"
 #include "tink/aead.h"
-#include "tink/key_manager.h"
 #include "tink/mac.h"
 #include "tink/mac/hmac_key_manager.h"
-#include "tink/registry.h"
 #include "tink/subtle/aes_ctr_boringssl.h"
 #include "tink/subtle/encrypt_then_authenticate.h"
-#include "tink/subtle/hmac_boringssl.h"
+#include "tink/subtle/ind_cpa_cipher.h"
 #include "tink/subtle/random.h"
 #include "tink/util/enums.h"
-#include "tink/util/errors.h"
-#include "tink/util/protobuf_helper.h"
 #include "tink/util/secret_data.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "tink/util/validation.h"
+#include "proto/aes_ctr.pb.h"
 #include "proto/aes_ctr_hmac_aead.pb.h"
-#include "proto/tink.pb.h"
+#include "proto/common.pb.h"
+#include "proto/hmac.pb.h"
 
 namespace crypto {
 namespace tink {
@@ -76,7 +78,7 @@ StatusOr<AesCtrHmacAeadKey> AesCtrHmacAeadKeyManager::CreateKey(
   if (!hmac_key_or.status().ok()) {
     return hmac_key_or.status();
   }
-  *aes_ctr_hmac_aead_key.mutable_hmac_key() = hmac_key_or.ValueOrDie();
+  *aes_ctr_hmac_aead_key.mutable_hmac_key() = hmac_key_or.value();
 
   return aes_ctr_hmac_aead_key;
 }
@@ -92,12 +94,12 @@ StatusOr<std::unique_ptr<Aead>> AesCtrHmacAeadKeyManager::AeadFactory::Create(
   if (!hmac_result.ok()) return hmac_result.status();
 
   auto cipher_res = subtle::EncryptThenAuthenticate::New(
-      std::move(aes_ctr_result.ValueOrDie()),
-      std::move(hmac_result.ValueOrDie()), key.hmac_key().params().tag_size());
+      std::move(aes_ctr_result.value()), std::move(hmac_result.value()),
+      key.hmac_key().params().tag_size());
   if (!cipher_res.ok()) {
     return cipher_res.status();
   }
-  return std::move(cipher_res.ValueOrDie());
+  return std::move(cipher_res.value());
 }
 
 Status AesCtrHmacAeadKeyManager::ValidateKey(

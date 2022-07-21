@@ -16,30 +16,36 @@
 
 #include "tink/aead/aead_key_templates.h"
 
+#include <memory>
 #include <string>
 #include <utility>
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include "absl/status/status.h"
+#include "absl/status/statusor.h"
 #include "tink/aead.h"
 #include "tink/aead/aead_config.h"
 #include "tink/aead/aes_ctr_hmac_aead_key_manager.h"
 #include "tink/aead/aes_eax_key_manager.h"
 #include "tink/aead/aes_gcm_key_manager.h"
 #include "tink/aead/aes_gcm_siv_key_manager.h"
-#include "tink/aead/kms_envelope_aead.h"
 #include "tink/aead/kms_envelope_aead_key_manager.h"
 #include "tink/aead/xchacha20_poly1305_key_manager.h"
 #include "tink/core/key_manager_impl.h"
+#include "tink/key_manager.h"
 #include "tink/keyset_handle.h"
 #include "tink/subtle/aead_test_util.h"
 #include "tink/util/fake_kms_client.h"
+#include "tink/util/status.h"
 #include "tink/util/test_matchers.h"
+#include "proto/aes_ctr.pb.h"
 #include "proto/aes_ctr_hmac_aead.pb.h"
 #include "proto/aes_eax.pb.h"
 #include "proto/aes_gcm.pb.h"
 #include "proto/aes_gcm_siv.pb.h"
 #include "proto/common.pb.h"
+#include "proto/hmac.pb.h"
 #include "proto/kms_envelope.pb.h"
 #include "proto/tink.pb.h"
 #include "proto/xchacha20_poly1305.pb.h"
@@ -109,6 +115,37 @@ TEST(AeadKeyTemplatesTest, testAesEaxKeyTemplates) {
         key_manager->get_key_factory().NewKey(key_template.value());
     EXPECT_TRUE(new_key_result.ok()) << new_key_result.status();
   }
+}
+
+TEST(Aes128GcmNoPrefix, Basics) {
+  EXPECT_THAT(AeadKeyTemplates::Aes128GcmNoPrefix().type_url(),
+              Eq("type.googleapis.com/google.crypto.tink.AesGcmKey"));
+  EXPECT_THAT(AeadKeyTemplates::Aes128GcmNoPrefix().type_url(),
+              Eq(AesGcmKeyManager().get_key_type()));
+}
+
+TEST(Aes128GcmNoPrefix, OutputPrefixType) {
+  EXPECT_THAT(AeadKeyTemplates::Aes128GcmNoPrefix().output_prefix_type(),
+              Eq(OutputPrefixType::RAW));
+}
+
+TEST(Aes128GcmNoPrefix, MultipleCallsSameReference) {
+  EXPECT_THAT(AeadKeyTemplates::Aes128GcmNoPrefix(),
+              Ref(AeadKeyTemplates::Aes128GcmNoPrefix()));
+}
+
+TEST(Aes128GcmNoPrefix, WorksWithKeyTypeManager) {
+  const KeyTemplate& key_template = AeadKeyTemplates::Aes128GcmNoPrefix();
+  AesGcmKeyFormat key_format;
+  EXPECT_TRUE(key_format.ParseFromString(key_template.value()));
+  EXPECT_THAT(AesGcmKeyManager().ValidateKeyFormat(key_format), IsOk());
+}
+
+TEST(Aes128GcmNoPrefix, CheckValues) {
+  const KeyTemplate& key_template = AeadKeyTemplates::Aes128GcmNoPrefix();
+  AesGcmKeyFormat key_format;
+  EXPECT_TRUE(key_format.ParseFromString(key_template.value()));
+  EXPECT_THAT(key_format.key_size(), Eq(16));
 }
 
 TEST(Aes256GcmNoPrefix, Basics) {
@@ -364,7 +401,7 @@ TEST(AeadKeyTemplatesTest, testKmsEnvelopeAeadMultipleKeysSameKek) {
 
   auto kek_uri_result = test::FakeKmsClient::CreateFakeKeyUri();
   EXPECT_TRUE(kek_uri_result.ok()) << kek_uri_result.status();
-  std::string kek_uri = kek_uri_result.ValueOrDie();
+  std::string kek_uri = kek_uri_result.value();
   auto register_fake_kms_client_status = test::FakeKmsClient::RegisterNewClient(
       kek_uri, /* credentials_path= */ "");
 
@@ -376,19 +413,19 @@ TEST(AeadKeyTemplatesTest, testKmsEnvelopeAeadMultipleKeysSameKek) {
       AeadKeyTemplates::KmsEnvelopeAead(kek_uri, dek_template);
   auto handle_result1 = KeysetHandle::GenerateNew(key_template1);
   EXPECT_TRUE(handle_result1.ok());
-  auto handle1 = std::move(handle_result1.ValueOrDie());
+  auto handle1 = std::move(handle_result1.value());
   auto aead_result1 = handle1->GetPrimitive<Aead>();
   EXPECT_TRUE(aead_result1.ok());
-  auto aead1 = std::move(aead_result1.ValueOrDie());
+  auto aead1 = std::move(aead_result1.value());
 
   const KeyTemplate& key_template2 =
       AeadKeyTemplates::KmsEnvelopeAead(kek_uri, dek_template);
   auto handle_result2 = KeysetHandle::GenerateNew(key_template2);
   EXPECT_TRUE(handle_result2.ok());
-  auto handle2 = std::move(handle_result2.ValueOrDie());
+  auto handle2 = std::move(handle_result2.value());
   auto aead_result2 = handle2->GetPrimitive<Aead>();
   EXPECT_TRUE(aead_result2.ok());
-  auto aead2 = std::move(aead_result2.ValueOrDie());
+  auto aead2 = std::move(aead_result2.value());
 
   EXPECT_THAT(EncryptThenDecrypt(*aead1, *aead2, "message", "aad"), IsOk());
 }

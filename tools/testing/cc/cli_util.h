@@ -17,8 +17,9 @@
 #ifndef TOOLS_TESTING_CC_CLI_UTIL_H_
 #define TOOLS_TESTING_CC_CLI_UTIL_H_
 
-#include <iostream>
 #include <fstream>
+#include <iostream>
+#include <string>
 
 #include "tink/input_stream.h"
 #include "tink/keyset_handle.h"

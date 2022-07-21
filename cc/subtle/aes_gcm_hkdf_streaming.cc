@@ -78,7 +78,7 @@ AesGcmHkdfStreaming::NewSegmentEncrypter(
   auto hkdf_result = Hkdf::ComputeHkdf(hkdf_hash_, ikm_, params.salt,
                                        associated_data, derived_key_size_);
   if (!hkdf_result.ok()) return hkdf_result.status();
-  params.key = std::move(hkdf_result).ValueOrDie();
+  params.key = std::move(hkdf_result).value();
   params.ciphertext_offset = ciphertext_offset_;
   params.ciphertext_segment_size = ciphertext_segment_size_;
   return AesGcmHkdfStreamSegmentEncrypter::New(std::move(params));

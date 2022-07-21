@@ -16,21 +16,48 @@
 
 package com.google.crypto.tink.subtle;
 
+import com.google.crypto.tink.Aead;
+import com.google.crypto.tink.aead.internal.InsecureNonceXChaCha20Poly1305;
+import com.google.crypto.tink.aead.internal.Poly1305;
+import java.nio.ByteBuffer;
 import java.security.GeneralSecurityException;
-import java.security.InvalidKeyException;
+import java.util.Arrays;
 
 /**
  * XChaCha20Poly1305 AEAD construction, as described in
  * https://tools.ietf.org/html/draft-arciszewski-xchacha-01.
  */
-public final class XChaCha20Poly1305 extends ChaCha20Poly1305Base {
+public final class XChaCha20Poly1305 implements Aead {
+  private final InsecureNonceXChaCha20Poly1305 cipher;
+
   public XChaCha20Poly1305(final byte[] key) throws GeneralSecurityException {
-    super(key);
+    cipher = new InsecureNonceXChaCha20Poly1305(key);
   }
 
   @Override
-  ChaCha20Base newChaCha20Instance(final byte[] key, int initialCounter)
-      throws InvalidKeyException {
-    return new XChaCha20(key, initialCounter);
+  public byte[] encrypt(final byte[] plaintext, final byte[] associatedData)
+      throws GeneralSecurityException {
+    ByteBuffer output =
+        ByteBuffer.allocate(
+            XChaCha20.NONCE_LENGTH_IN_BYTES + plaintext.length + Poly1305.MAC_TAG_SIZE_IN_BYTES);
+    byte[] nonce = Random.randBytes(XChaCha20.NONCE_LENGTH_IN_BYTES);
+    output.put(nonce); // Prepend nonce to ciphertext output.
+    cipher.encrypt(output, nonce, plaintext, associatedData);
+    return output.array();
+  }
+
+  @Override
+  public byte[] decrypt(final byte[] ciphertext, final byte[] associatedData)
+      throws GeneralSecurityException {
+    if (ciphertext.length < XChaCha20.NONCE_LENGTH_IN_BYTES + Poly1305.MAC_TAG_SIZE_IN_BYTES) {
+      throw new GeneralSecurityException("ciphertext too short");
+    }
+    byte[] nonce = Arrays.copyOf(ciphertext, XChaCha20.NONCE_LENGTH_IN_BYTES);
+    ByteBuffer rawCiphertext =
+        ByteBuffer.wrap(
+            ciphertext,
+            XChaCha20.NONCE_LENGTH_IN_BYTES,
+            ciphertext.length - XChaCha20.NONCE_LENGTH_IN_BYTES);
+    return cipher.decrypt(rawCiphertext, nonce, associatedData);
   }
 }

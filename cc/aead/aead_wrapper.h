@@ -17,12 +17,12 @@
 #ifndef TINK_AEAD_AEAD_WRAPPER_H_
 #define TINK_AEAD_AEAD_WRAPPER_H_
 
-#include "absl/strings/string_view.h"
+#include <memory>
+
 #include "tink/aead.h"
 #include "tink/primitive_set.h"
 #include "tink/primitive_wrapper.h"
 #include "tink/util/statusor.h"
-#include "proto/tink.pb.h"
 
 namespace crypto {
 namespace tink {

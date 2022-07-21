@@ -16,6 +16,8 @@
 
 #include "tink/experimental/pqcrypto/signature/falcon_key_template.h"
 
+#include <string>
+
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "tink/core/key_manager_impl.h"
@@ -25,7 +27,6 @@
 #include "tink/experimental/pqcrypto/signature/subtle/falcon_subtle_utils.h"
 #include "tink/util/test_matchers.h"
 #include "proto/tink.pb.h"
-#include "proto/tink.proto.h"
 
 namespace crypto {
 namespace tink {
@@ -78,7 +79,7 @@ TEST_P(FalconKeyTemplateTest, KeyManagerCompatibility) {
 
   util::StatusOr<std::unique_ptr<portable_proto::MessageLite>> new_key_result =
       key_manager->get_key_factory().NewKey(key_format);
-  EXPECT_THAT(new_key_result.status(), IsOk());
+  EXPECT_THAT(new_key_result, IsOk());
 }
 
 INSTANTIATE_TEST_SUITE_P(
