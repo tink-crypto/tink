@@ -22,6 +22,7 @@ from tink.jwt import _raw_jwt
 
 class VerifiedJwt:
   """A decoded and verified JSON Web Token (JWT).
+
   A new instance of this class is returned as the result of a sucessfully
   verification of a MACed or signed compact JWT.
 

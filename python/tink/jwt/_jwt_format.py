@@ -62,19 +62,6 @@ def base64_decode(encoded_data: bytes) -> bytes:
     raise _jwt_error.JwtInvalidError('invalid base64 encoding')
 
 
-def validate_all_strings(json_data: Any):
-  """Recursively visits all strings and raises UnicodeEncodeError if invalid."""
-  if isinstance(json_data, str):
-    # We use encode('utf8') to validate that the string is valid.
-    json_data.encode('utf8')
-  if isinstance(json_data, list):
-    for item in json_data:
-      validate_all_strings(item)
-  if isinstance(json_data, dict):
-    for key, value in json_data.items():
-      key.encode('utf8')
-      validate_all_strings(value)
-
 def _validate_algorithm(algorithm: str) -> None:
   if algorithm not in _VALID_ALGORITHMS:
     raise _jwt_error.JwtInvalidError('Invalid algorithm %s' % algorithm)
