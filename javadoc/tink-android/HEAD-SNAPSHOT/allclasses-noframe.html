@@ -23,13 +23,13 @@
 <li><a href="com/google/crypto/tink/mac/AesCmacKey.html" title="class in com.google.crypto.tink.mac">AesCmacKey</a></li>
 <li><a href="com/google/crypto/tink/proto/AesCmacKey.html" title="class in com.google.crypto.tink.proto">AesCmacKey</a></li>
 <li><a href="com/google/crypto/tink/proto/AesCmacKey.Builder.html" title="class in com.google.crypto.tink.proto">AesCmacKey.Builder</a></li>
-<li><a href="com/google/crypto/tink/mac/AesCmacKeyFormat.html" title="class in com.google.crypto.tink.mac">AesCmacKeyFormat</a></li>
 <li><a href="com/google/crypto/tink/proto/AesCmacKeyFormat.html" title="class in com.google.crypto.tink.proto">AesCmacKeyFormat</a></li>
 <li><a href="com/google/crypto/tink/proto/AesCmacKeyFormat.Builder.html" title="class in com.google.crypto.tink.proto">AesCmacKeyFormat.Builder</a></li>
-<li><a href="com/google/crypto/tink/mac/AesCmacKeyFormat.Variant.html" title="class in com.google.crypto.tink.mac">AesCmacKeyFormat.Variant</a></li>
 <li><a href="com/google/crypto/tink/proto/AesCmacKeyFormatOrBuilder.html" title="interface in com.google.crypto.tink.proto"><span class="interfaceName">AesCmacKeyFormatOrBuilder</span></a></li>
 <li><a href="com/google/crypto/tink/mac/AesCmacKeyManager.html" title="class in com.google.crypto.tink.mac">AesCmacKeyManager</a></li>
 <li><a href="com/google/crypto/tink/proto/AesCmacKeyOrBuilder.html" title="interface in com.google.crypto.tink.proto"><span class="interfaceName">AesCmacKeyOrBuilder</span></a></li>
+<li><a href="com/google/crypto/tink/mac/AesCmacParameters.html" title="class in com.google.crypto.tink.mac">AesCmacParameters</a></li>
+<li><a href="com/google/crypto/tink/mac/AesCmacParameters.Variant.html" title="class in com.google.crypto.tink.mac">AesCmacParameters.Variant</a></li>
 <li><a href="com/google/crypto/tink/proto/AesCmacParams.html" title="class in com.google.crypto.tink.proto">AesCmacParams</a></li>
 <li><a href="com/google/crypto/tink/proto/AesCmacParams.Builder.html" title="class in com.google.crypto.tink.proto">AesCmacParams.Builder</a></li>
 <li><a href="com/google/crypto/tink/proto/AesCmacParamsOrBuilder.html" title="interface in com.google.crypto.tink.proto"><span class="interfaceName">AesCmacParamsOrBuilder</span></a></li>
@@ -146,6 +146,9 @@
 <li><a href="com/google/crypto/tink/proto/ChaCha20Poly1305KeyFormatOrBuilder.html" title="interface in com.google.crypto.tink.proto"><span class="interfaceName">ChaCha20Poly1305KeyFormatOrBuilder</span></a></li>
 <li><a href="com/google/crypto/tink/aead/ChaCha20Poly1305KeyManager.html" title="class in com.google.crypto.tink.aead">ChaCha20Poly1305KeyManager</a></li>
 <li><a href="com/google/crypto/tink/proto/ChaCha20Poly1305KeyOrBuilder.html" title="interface in com.google.crypto.tink.proto"><span class="interfaceName">ChaCha20Poly1305KeyOrBuilder</span></a></li>
+<li><a href="com/google/crypto/tink/mac/ChunkedMac.html" title="interface in com.google.crypto.tink.mac"><span class="interfaceName">ChunkedMac</span></a></li>
+<li><a href="com/google/crypto/tink/mac/ChunkedMacComputation.html" title="interface in com.google.crypto.tink.mac"><span class="interfaceName">ChunkedMacComputation</span></a></li>
+<li><a href="com/google/crypto/tink/mac/ChunkedMacVerification.html" title="interface in com.google.crypto.tink.mac"><span class="interfaceName">ChunkedMacVerification</span></a></li>
 <li><a href="com/google/crypto/tink/CleartextKeysetHandle.html" title="class in com.google.crypto.tink">CleartextKeysetHandle</a></li>
 <li><a href="com/google/crypto/tink/proto/Common.html" title="class in com.google.crypto.tink.proto">Common</a></li>
 <li><a href="com/google/crypto/tink/Config.html" title="class in com.google.crypto.tink">Config</a></li>
@@ -384,11 +387,6 @@
 <li><a href="com/google/crypto/tink/proto/KeyData.Builder.html" title="class in com.google.crypto.tink.proto">KeyData.Builder</a></li>
 <li><a href="com/google/crypto/tink/proto/KeyData.KeyMaterialType.html" title="enum in com.google.crypto.tink.proto">KeyData.KeyMaterialType</a></li>
 <li><a href="com/google/crypto/tink/proto/KeyDataOrBuilder.html" title="interface in com.google.crypto.tink.proto"><span class="interfaceName">KeyDataOrBuilder</span></a></li>
-<li><a href="com/google/crypto/tink/KeyFormat.html" title="class in com.google.crypto.tink">KeyFormat</a></li>
-<li><a href="com/google/crypto/tink/internal/KeyFormatParser.html" title="class in com.google.crypto.tink.internal">KeyFormatParser</a></li>
-<li><a href="com/google/crypto/tink/internal/KeyFormatParser.KeyFormatParsingFunction.html" title="interface in com.google.crypto.tink.internal"><span class="interfaceName">KeyFormatParser.KeyFormatParsingFunction</span></a></li>
-<li><a href="com/google/crypto/tink/internal/KeyFormatSerializer.html" title="class in com.google.crypto.tink.internal">KeyFormatSerializer</a></li>
-<li><a href="com/google/crypto/tink/internal/KeyFormatSerializer.KeyFormatSerializationFunction.html" title="interface in com.google.crypto.tink.internal"><span class="interfaceName">KeyFormatSerializer.KeyFormatSerializationFunction</span></a></li>
 <li><a href="com/google/crypto/tink/tinkkey/KeyHandle.html" title="class in com.google.crypto.tink.tinkkey">KeyHandle</a></li>
 <li><a href="com/google/crypto/tink/tinkkey/KeyHandle.KeyStatusType.html" title="enum in com.google.crypto.tink.tinkkey">KeyHandle.KeyStatusType</a></li>
 <li><a href="com/google/crypto/tink/KeyManager.html" title="interface in com.google.crypto.tink"><span class="interfaceName">KeyManager</span></a></li>
@@ -453,13 +451,13 @@
 <li><a href="com/google/crypto/tink/proto/KmsEnvelopeAeadKeyOrBuilder.html" title="interface in com.google.crypto.tink.proto"><span class="interfaceName">KmsEnvelopeAeadKeyOrBuilder</span></a></li>
 <li><a href="com/google/crypto/tink/subtle/Kwp.html" title="class in com.google.crypto.tink.subtle">Kwp</a></li>
 <li><a href="com/google/crypto/tink/internal/LegacyProtoKey.html" title="class in com.google.crypto.tink.internal">LegacyProtoKey</a></li>
-<li><a href="com/google/crypto/tink/internal/LegacyProtoKeyFormat.html" title="class in com.google.crypto.tink.internal">LegacyProtoKeyFormat</a></li>
+<li><a href="com/google/crypto/tink/internal/LegacyProtoParameters.html" title="class in com.google.crypto.tink.internal">LegacyProtoParameters</a></li>
 <li><a href="com/google/crypto/tink/Mac.html" title="interface in com.google.crypto.tink"><span class="interfaceName">Mac</span></a></li>
 <li><a href="com/google/crypto/tink/mac/MacConfig.html" title="class in com.google.crypto.tink.mac">MacConfig</a></li>
 <li><a href="com/google/crypto/tink/mac/MacFactory.html" title="class in com.google.crypto.tink.mac">MacFactory</a></li>
 <li><a href="com/google/crypto/tink/mac/MacKey.html" title="class in com.google.crypto.tink.mac">MacKey</a></li>
-<li><a href="com/google/crypto/tink/mac/MacKeyFormat.html" title="class in com.google.crypto.tink.mac">MacKeyFormat</a></li>
 <li><a href="com/google/crypto/tink/mac/MacKeyTemplates.html" title="class in com.google.crypto.tink.mac">MacKeyTemplates</a></li>
+<li><a href="com/google/crypto/tink/mac/MacParameters.html" title="class in com.google.crypto.tink.mac">MacParameters</a></li>
 <li><a href="com/google/crypto/tink/monitoring/MonitoringAnnotations.html" title="class in com.google.crypto.tink.monitoring">MonitoringAnnotations</a></li>
 <li><a href="com/google/crypto/tink/monitoring/MonitoringAnnotations.Builder.html" title="class in com.google.crypto.tink.monitoring">MonitoringAnnotations.Builder</a></li>
 <li><a href="com/google/crypto/tink/monitoring/MonitoringClient.html" title="interface in com.google.crypto.tink.monitoring"><span class="interfaceName">MonitoringClient</span></a></li>
@@ -472,6 +470,11 @@
 <li><a href="com/google/crypto/tink/internal/MutableSerializationRegistry.html" title="class in com.google.crypto.tink.internal">MutableSerializationRegistry</a></li>
 <li><a href="com/google/crypto/tink/NoSecretKeysetHandle.html" title="class in com.google.crypto.tink">NoSecretKeysetHandle</a></li>
 <li><a href="com/google/crypto/tink/proto/OutputPrefixType.html" title="enum in com.google.crypto.tink.proto">OutputPrefixType</a></li>
+<li><a href="com/google/crypto/tink/Parameters.html" title="class in com.google.crypto.tink">Parameters</a></li>
+<li><a href="com/google/crypto/tink/internal/ParametersParser.html" title="class in com.google.crypto.tink.internal">ParametersParser</a></li>
+<li><a href="com/google/crypto/tink/internal/ParametersParser.ParametersParsingFunction.html" title="interface in com.google.crypto.tink.internal"><span class="interfaceName">ParametersParser.ParametersParsingFunction</span></a></li>
+<li><a href="com/google/crypto/tink/internal/ParametersSerializer.html" title="class in com.google.crypto.tink.internal">ParametersSerializer</a></li>
+<li><a href="com/google/crypto/tink/internal/ParametersSerializer.ParametersSerializationFunction.html" title="interface in com.google.crypto.tink.internal"><span class="interfaceName">ParametersSerializer.ParametersSerializationFunction</span></a></li>
 <li><a href="com/google/crypto/tink/PemKeyType.html" title="enum in com.google.crypto.tink">PemKeyType</a></li>
 <li><a href="com/google/crypto/tink/subtle/PemKeyType.html" title="enum in com.google.crypto.tink.subtle">PemKeyType</a></li>
 <li><a href="com/google/crypto/tink/aead/internal/Poly1305.html" title="class in com.google.crypto.tink.aead.internal">Poly1305</a></li>
@@ -493,8 +496,8 @@
 <li><a href="com/google/crypto/tink/internal/PrivateKeyTypeManager.html" title="class in com.google.crypto.tink.internal">PrivateKeyTypeManager</a></li>
 <li><a href="com/google/crypto/tink/PrivilegedRegistry.html" title="class in com.google.crypto.tink">PrivilegedRegistry</a></li>
 <li><a href="com/google/crypto/tink/tinkkey/internal/ProtoKey.html" title="class in com.google.crypto.tink.tinkkey.internal">ProtoKey</a></li>
-<li><a href="com/google/crypto/tink/internal/ProtoKeyFormatSerialization.html" title="class in com.google.crypto.tink.internal">ProtoKeyFormatSerialization</a></li>
 <li><a href="com/google/crypto/tink/internal/ProtoKeySerialization.html" title="class in com.google.crypto.tink.internal">ProtoKeySerialization</a></li>
+<li><a href="com/google/crypto/tink/internal/ProtoParametersSerialization.html" title="class in com.google.crypto.tink.internal">ProtoParametersSerialization</a></li>
 <li><a href="com/google/crypto/tink/PublicKeySign.html" title="interface in com.google.crypto.tink"><span class="interfaceName">PublicKeySign</span></a></li>
 <li><a href="com/google/crypto/tink/signature/PublicKeySignConfig.html" title="class in com.google.crypto.tink.signature">PublicKeySignConfig</a></li>
 <li><a href="com/google/crypto/tink/signature/PublicKeySignFactory.html" title="class in com.google.crypto.tink.signature">PublicKeySignFactory</a></li>

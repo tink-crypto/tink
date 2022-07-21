@@ -49,7 +49,7 @@ var activeTableTab = "activeTableTab";
 <div class="subNav">
 <ul class="navList">
 <li>Prev&nbsp;Class</li>
-<li><a href="../../../../../com/google/crypto/tink/mac/AesCmacKeyFormat.html" title="class in com.google.crypto.tink.mac"><span class="typeNameLink">Next&nbsp;Class</span></a></li>
+<li><a href="../../../../../com/google/crypto/tink/mac/AesCmacKeyManager.html" title="class in com.google.crypto.tink.mac"><span class="typeNameLink">Next&nbsp;Class</span></a></li>
 </ul>
 <ul class="navList">
 <li><a href="../../../../../index.html?com/google/crypto/tink/mac/AesCmacKey.html" target="_top">Frames</a></li>
@@ -144,14 +144,14 @@ extends <a href="../../../../../com/google/crypto/tink/mac/MacKey.html" title="c
 </tr>
 <tr id="i0" class="altColor">
 <td class="colFirst"><code>static <a href="../../../../../com/google/crypto/tink/mac/AesCmacKey.html" title="class in com.google.crypto.tink.mac">AesCmacKey</a></code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/mac/AesCmacKey.html#create-com.google.crypto.tink.mac.AesCmacKeyFormat-com.google.crypto.tink.util.SecretBytes-">create</a></span>(<a href="../../../../../com/google/crypto/tink/mac/AesCmacKeyFormat.html" title="class in com.google.crypto.tink.mac">AesCmacKeyFormat</a>&nbsp;format,
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/mac/AesCmacKey.html#create-com.google.crypto.tink.mac.AesCmacParameters-com.google.crypto.tink.util.SecretBytes-">create</a></span>(<a href="../../../../../com/google/crypto/tink/mac/AesCmacParameters.html" title="class in com.google.crypto.tink.mac">AesCmacParameters</a>&nbsp;parameters,
       <a href="../../../../../com/google/crypto/tink/util/SecretBytes.html" title="class in com.google.crypto.tink.util">SecretBytes</a>&nbsp;aesKey)</code>
 <div class="block">Creates a new AES-CMAC key with an empty prefix.</div>
 </td>
 </tr>
 <tr id="i1" class="rowColor">
 <td class="colFirst"><code>static <a href="../../../../../com/google/crypto/tink/mac/AesCmacKey.html" title="class in com.google.crypto.tink.mac">AesCmacKey</a></code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/mac/AesCmacKey.html#createForKeyset-com.google.crypto.tink.mac.AesCmacKeyFormat-com.google.crypto.tink.util.SecretBytes-java.lang.Integer-">createForKeyset</a></span>(<a href="../../../../../com/google/crypto/tink/mac/AesCmacKeyFormat.html" title="class in com.google.crypto.tink.mac">AesCmacKeyFormat</a>&nbsp;format,
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/mac/AesCmacKey.html#createForKeyset-com.google.crypto.tink.mac.AesCmacParameters-com.google.crypto.tink.util.SecretBytes-java.lang.Integer-">createForKeyset</a></span>(<a href="../../../../../com/google/crypto/tink/mac/AesCmacParameters.html" title="class in com.google.crypto.tink.mac">AesCmacParameters</a>&nbsp;parameters,
                <a href="../../../../../com/google/crypto/tink/util/SecretBytes.html" title="class in com.google.crypto.tink.util">SecretBytes</a>&nbsp;aesKeyBytes,
                <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Integer.html?is-external=true" title="class or interface in java.lang">Integer</a>&nbsp;idRequirement)</code>
 <div class="block">Creates a new AES-CMAC key for use in a keyset.</div>
@@ -176,15 +176,15 @@ extends <a href="../../../../../com/google/crypto/tink/mac/MacKey.html" title="c
 </td>
 </tr>
 <tr id="i5" class="rowColor">
-<td class="colFirst"><code><a href="../../../../../com/google/crypto/tink/mac/AesCmacKeyFormat.html" title="class in com.google.crypto.tink.mac">AesCmacKeyFormat</a></code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/mac/AesCmacKey.html#getKeyFormat--">getKeyFormat</a></span>()</code>
-<div class="block">Returns the key format of this key.</div>
-</td>
-</tr>
-<tr id="i6" class="altColor">
 <td class="colFirst"><code><a href="../../../../../com/google/crypto/tink/util/Bytes.html" title="class in com.google.crypto.tink.util">Bytes</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/mac/AesCmacKey.html#getOutputPrefix--">getOutputPrefix</a></span>()</code>
 <div class="block">Returns a <a href="../../../../../com/google/crypto/tink/util/Bytes.html" title="class in com.google.crypto.tink.util"><code>Bytes</code></a> instance which is prefixed to every mac tag.</div>
+</td>
+</tr>
+<tr id="i6" class="altColor">
+<td class="colFirst"><code><a href="../../../../../com/google/crypto/tink/mac/AesCmacParameters.html" title="class in com.google.crypto.tink.mac">AesCmacParameters</a></code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/mac/AesCmacKey.html#getParameters--">getParameters</a></span>()</code>
+<div class="block">Returns the parameters of this key.</div>
 </td>
 </tr>
 </table>
@@ -209,13 +209,13 @@ extends <a href="../../../../../com/google/crypto/tink/mac/MacKey.html" title="c
 <!--   -->
 </a>
 <h3>Method Detail</h3>
-<a name="create-com.google.crypto.tink.mac.AesCmacKeyFormat-com.google.crypto.tink.util.SecretBytes-">
+<a name="create-com.google.crypto.tink.mac.AesCmacParameters-com.google.crypto.tink.util.SecretBytes-">
 <!--   -->
 </a>
 <ul class="blockList">
 <li class="blockList">
 <h4>create</h4>
-<pre>public static&nbsp;<a href="../../../../../com/google/crypto/tink/mac/AesCmacKey.html" title="class in com.google.crypto.tink.mac">AesCmacKey</a>&nbsp;create(<a href="../../../../../com/google/crypto/tink/mac/AesCmacKeyFormat.html" title="class in com.google.crypto.tink.mac">AesCmacKeyFormat</a>&nbsp;format,
+<pre>public static&nbsp;<a href="../../../../../com/google/crypto/tink/mac/AesCmacKey.html" title="class in com.google.crypto.tink.mac">AesCmacKey</a>&nbsp;create(<a href="../../../../../com/google/crypto/tink/mac/AesCmacParameters.html" title="class in com.google.crypto.tink.mac">AesCmacParameters</a>&nbsp;parameters,
                                 <a href="../../../../../com/google/crypto/tink/util/SecretBytes.html" title="class in com.google.crypto.tink.util">SecretBytes</a>&nbsp;aesKey)
                          throws <a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
 <div class="block">Creates a new AES-CMAC key with an empty prefix.</div>
@@ -225,13 +225,13 @@ extends <a href="../../../../../com/google/crypto/tink/mac/MacKey.html" title="c
 </dl>
 </li>
 </ul>
-<a name="createForKeyset-com.google.crypto.tink.mac.AesCmacKeyFormat-com.google.crypto.tink.util.SecretBytes-java.lang.Integer-">
+<a name="createForKeyset-com.google.crypto.tink.mac.AesCmacParameters-com.google.crypto.tink.util.SecretBytes-java.lang.Integer-">
 <!--   -->
 </a>
 <ul class="blockList">
 <li class="blockList">
 <h4>createForKeyset</h4>
-<pre>public static&nbsp;<a href="../../../../../com/google/crypto/tink/mac/AesCmacKey.html" title="class in com.google.crypto.tink.mac">AesCmacKey</a>&nbsp;createForKeyset(<a href="../../../../../com/google/crypto/tink/mac/AesCmacKeyFormat.html" title="class in com.google.crypto.tink.mac">AesCmacKeyFormat</a>&nbsp;format,
+<pre>public static&nbsp;<a href="../../../../../com/google/crypto/tink/mac/AesCmacKey.html" title="class in com.google.crypto.tink.mac">AesCmacKey</a>&nbsp;createForKeyset(<a href="../../../../../com/google/crypto/tink/mac/AesCmacParameters.html" title="class in com.google.crypto.tink.mac">AesCmacParameters</a>&nbsp;parameters,
                                          <a href="../../../../../com/google/crypto/tink/util/SecretBytes.html" title="class in com.google.crypto.tink.util">SecretBytes</a>&nbsp;aesKeyBytes,
                                          <a href="https://docs.oracle.com/javase/8/docs/api/javax/annotation/Nullable.html?is-external=true" title="class or interface in javax.annotation">@Nullable</a>
                                          <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Integer.html?is-external=true" title="class or interface in java.lang">Integer</a>&nbsp;idRequirement)
@@ -279,18 +279,18 @@ extends <a href="../../../../../com/google/crypto/tink/mac/MacKey.html" title="c
 </dl>
 </li>
 </ul>
-<a name="getKeyFormat--">
+<a name="getParameters--">
 <!--   -->
 </a>
 <ul class="blockList">
 <li class="blockList">
-<h4>getKeyFormat</h4>
-<pre>public&nbsp;<a href="../../../../../com/google/crypto/tink/mac/AesCmacKeyFormat.html" title="class in com.google.crypto.tink.mac">AesCmacKeyFormat</a>&nbsp;getKeyFormat()</pre>
-<div class="block"><span class="descfrmTypeLabel">Description copied from class:&nbsp;<code><a href="../../../../../com/google/crypto/tink/mac/MacKey.html#getKeyFormat--">MacKey</a></code></span></div>
-<div class="block">Returns the key format of this key.</div>
+<h4>getParameters</h4>
+<pre>public&nbsp;<a href="../../../../../com/google/crypto/tink/mac/AesCmacParameters.html" title="class in com.google.crypto.tink.mac">AesCmacParameters</a>&nbsp;getParameters()</pre>
+<div class="block"><span class="descfrmTypeLabel">Description copied from class:&nbsp;<code><a href="../../../../../com/google/crypto/tink/mac/MacKey.html#getParameters--">MacKey</a></code></span></div>
+<div class="block">Returns the parameters of this key.</div>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
-<dd><code><a href="../../../../../com/google/crypto/tink/mac/MacKey.html#getKeyFormat--">getKeyFormat</a></code>&nbsp;in class&nbsp;<code><a href="../../../../../com/google/crypto/tink/mac/MacKey.html" title="class in com.google.crypto.tink.mac">MacKey</a></code></dd>
+<dd><code><a href="../../../../../com/google/crypto/tink/mac/MacKey.html#getParameters--">getParameters</a></code>&nbsp;in class&nbsp;<code><a href="../../../../../com/google/crypto/tink/mac/MacKey.html" title="class in com.google.crypto.tink.mac">MacKey</a></code></dd>
 </dl>
 </li>
 </ul>
@@ -364,7 +364,7 @@ public&nbsp;<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Integer
 <div class="subNav">
 <ul class="navList">
 <li>Prev&nbsp;Class</li>
-<li><a href="../../../../../com/google/crypto/tink/mac/AesCmacKeyFormat.html" title="class in com.google.crypto.tink.mac"><span class="typeNameLink">Next&nbsp;Class</span></a></li>
+<li><a href="../../../../../com/google/crypto/tink/mac/AesCmacKeyManager.html" title="class in com.google.crypto.tink.mac"><span class="typeNameLink">Next&nbsp;Class</span></a></li>
 </ul>
 <ul class="navList">
 <li><a href="../../../../../index.html?com/google/crypto/tink/mac/AesCmacKey.html" target="_top">Frames</a></li>

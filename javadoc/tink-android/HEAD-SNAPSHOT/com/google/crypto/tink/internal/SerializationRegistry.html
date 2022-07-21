@@ -110,7 +110,7 @@ var activeTableTab = "activeTableTab";
 <br>
 <pre>public final class <span class="typeNameLabel">SerializationRegistry</span>
 extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a></pre>
-<div class="block">Allows registering <code>KeySerializer</code>, <code>KeyParser</code>, <code>KeyFormatSerializer</code>, and
+<div class="block">Allows registering <code>KeySerializer</code>, <code>KeyParser</code>, <code>ParametersSerializer</code>, and
   objects, and parsing/serializing keys and key formats with such objects.</div>
 </li>
 </ul>
@@ -159,9 +159,9 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 </td>
 </tr>
 <tr id="i1" class="rowColor">
-<td class="colFirst"><code>&lt;SerializationT extends <a href="../../../../../com/google/crypto/tink/internal/Serialization.html" title="interface in com.google.crypto.tink.internal">Serialization</a>&gt;<br><a href="../../../../../com/google/crypto/tink/KeyFormat.html" title="class in com.google.crypto.tink">KeyFormat</a></code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/internal/SerializationRegistry.html#parseKeyFormat-SerializationT-">parseKeyFormat</a></span>(SerializationT&nbsp;serializedKeyFormat)</code>
-<div class="block">Parses the given serialization into a KeyFormat.</div>
+<td class="colFirst"><code>&lt;SerializationT extends <a href="../../../../../com/google/crypto/tink/internal/Serialization.html" title="interface in com.google.crypto.tink.internal">Serialization</a>&gt;<br><a href="../../../../../com/google/crypto/tink/Parameters.html" title="class in com.google.crypto.tink">Parameters</a></code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/internal/SerializationRegistry.html#parseParameters-SerializationT-">parseParameters</a></span>(SerializationT&nbsp;serializedParameters)</code>
+<div class="block">Parses the given serialization into a Parameters.</div>
 </td>
 </tr>
 <tr id="i2" class="altColor">
@@ -173,10 +173,10 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 </td>
 </tr>
 <tr id="i3" class="rowColor">
-<td class="colFirst"><code>&lt;KeyFormatT extends <a href="../../../../../com/google/crypto/tink/KeyFormat.html" title="class in com.google.crypto.tink">KeyFormat</a>,SerializationT extends <a href="../../../../../com/google/crypto/tink/internal/Serialization.html" title="interface in com.google.crypto.tink.internal">Serialization</a>&gt;<br>SerializationT</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/internal/SerializationRegistry.html#serializeKeyFormat-KeyFormatT-java.lang.Class-">serializeKeyFormat</a></span>(KeyFormatT&nbsp;keyFormat,
-                  <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Class.html?is-external=true" title="class or interface in java.lang">Class</a>&lt;SerializationT&gt;&nbsp;serializationClass)</code>
-<div class="block">Serializes a given KeyFormat into a "SerializationT" object.</div>
+<td class="colFirst"><code>&lt;ParametersT extends <a href="../../../../../com/google/crypto/tink/Parameters.html" title="class in com.google.crypto.tink">Parameters</a>,SerializationT extends <a href="../../../../../com/google/crypto/tink/internal/Serialization.html" title="interface in com.google.crypto.tink.internal">Serialization</a>&gt;<br>SerializationT</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/internal/SerializationRegistry.html#serializeParameters-ParametersT-java.lang.Class-">serializeParameters</a></span>(ParametersT&nbsp;parameters,
+                   <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Class.html?is-external=true" title="class or interface in java.lang">Class</a>&lt;SerializationT&gt;&nbsp;serializationClass)</code>
+<div class="block">Serializes a given Parameters object into a "SerializationT" object.</div>
 </td>
 </tr>
 </table>
@@ -245,17 +245,17 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 </dl>
 </li>
 </ul>
-<a name="parseKeyFormat-com.google.crypto.tink.internal.Serialization-">
+<a name="parseParameters-com.google.crypto.tink.internal.Serialization-">
 <!--   -->
-</a><a name="parseKeyFormat-SerializationT-">
+</a><a name="parseParameters-SerializationT-">
 <!--   -->
 </a>
 <ul class="blockList">
 <li class="blockList">
-<h4>parseKeyFormat</h4>
-<pre>public&nbsp;&lt;SerializationT extends <a href="../../../../../com/google/crypto/tink/internal/Serialization.html" title="interface in com.google.crypto.tink.internal">Serialization</a>&gt;&nbsp;<a href="../../../../../com/google/crypto/tink/KeyFormat.html" title="class in com.google.crypto.tink">KeyFormat</a>&nbsp;parseKeyFormat(SerializationT&nbsp;serializedKeyFormat)
-                                                                throws <a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
-<div class="block">Parses the given serialization into a KeyFormat.
+<h4>parseParameters</h4>
+<pre>public&nbsp;&lt;SerializationT extends <a href="../../../../../com/google/crypto/tink/internal/Serialization.html" title="interface in com.google.crypto.tink.internal">Serialization</a>&gt;&nbsp;<a href="../../../../../com/google/crypto/tink/Parameters.html" title="class in com.google.crypto.tink">Parameters</a>&nbsp;parseParameters(SerializationT&nbsp;serializedParameters)
+                                                                  throws <a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
+<div class="block">Parses the given serialization into a Parameters.
 
  <p>This will look up a previously registered parser for the passed in <code>SerializationT</code>
  class, and the used object identifier (as indicated by <code>serializedKey.getObjectIdentifier()</code>), and then parse the object with this parsers.</div>
@@ -265,18 +265,18 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 </dl>
 </li>
 </ul>
-<a name="serializeKeyFormat-com.google.crypto.tink.KeyFormat-java.lang.Class-">
+<a name="serializeParameters-com.google.crypto.tink.Parameters-java.lang.Class-">
 <!--   -->
-</a><a name="serializeKeyFormat-KeyFormatT-java.lang.Class-">
+</a><a name="serializeParameters-ParametersT-java.lang.Class-">
 <!--   -->
 </a>
 <ul class="blockListLast">
 <li class="blockList">
-<h4>serializeKeyFormat</h4>
-<pre>public&nbsp;&lt;KeyFormatT extends <a href="../../../../../com/google/crypto/tink/KeyFormat.html" title="class in com.google.crypto.tink">KeyFormat</a>,SerializationT extends <a href="../../../../../com/google/crypto/tink/internal/Serialization.html" title="interface in com.google.crypto.tink.internal">Serialization</a>&gt;&nbsp;SerializationT&nbsp;serializeKeyFormat(KeyFormatT&nbsp;keyFormat,
-                                                                                                             <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Class.html?is-external=true" title="class or interface in java.lang">Class</a>&lt;SerializationT&gt;&nbsp;serializationClass)
-                                                                                                      throws <a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
-<div class="block">Serializes a given KeyFormat into a "SerializationT" object.
+<h4>serializeParameters</h4>
+<pre>public&nbsp;&lt;ParametersT extends <a href="../../../../../com/google/crypto/tink/Parameters.html" title="class in com.google.crypto.tink">Parameters</a>,SerializationT extends <a href="../../../../../com/google/crypto/tink/internal/Serialization.html" title="interface in com.google.crypto.tink.internal">Serialization</a>&gt;&nbsp;SerializationT&nbsp;serializeParameters(ParametersT&nbsp;parameters,
+                                                                                                                <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Class.html?is-external=true" title="class or interface in java.lang">Class</a>&lt;SerializationT&gt;&nbsp;serializationClass)
+                                                                                                         throws <a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
+<div class="block">Serializes a given Parameters object into a "SerializationT" object.
 
  <p>This will look up a previously registered serializer for the requested <code>SerializationT</code> class and the passed in key type, and then call serializeKey on the result.</div>
 <dl>

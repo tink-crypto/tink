@@ -123,11 +123,11 @@ public @interface <span class="memberNameLabel">AccessesPartialKey</span></pre>
       public static SecretBytes exportHmacKey(HmacKey key) {
         // The caller of this method can only handle keys without prefix, SHA256, 20 byte tags,
         // and 32 byte keys.
-        if (key.getKeyFormat().getVariant() != HmacKeyFormat.Variant.NO_PREFIX ||
-            key.getKeyFormat().getHashType() != HmacKeyFormat.Hash.SHA_256 ||
-            key.getKeyFormat().getTagSizeBytes() != 20 ||
-            key.getKeyFormat().getKeySizeBytes() != 32) {
-          throw new IllegalArgumentException("KeyFormat not supported by receiver.");
+        if (key.getParameters().getVariant() != HmacParameters.Variant.NO_PREFIX ||
+            key.getParameters().getHashType() != HMacParameters.Hash.SHA_256 ||
+            key.getParameters().getTagSizeBytes() != 20 ||
+            key.getParameters().getKeySizeBytes() != 32) {
+          throw new IllegalArgumentException("Parameters not supported by receiver.");
         }
         return key.getKeyBytes();
       }

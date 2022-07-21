@@ -309,7 +309,7 @@
 <li type="circle">com.google.crypto.tink.hybrid.subtle.<a href="com/google/crypto/tink/hybrid/subtle/AeadOrDaead.html" title="class in com.google.crypto.tink.hybrid.subtle"><span class="typeNameLink">AeadOrDaead</span></a></li>
 <li type="circle">com.google.crypto.tink.aead.<a href="com/google/crypto/tink/aead/AeadWrapper.html" title="class in com.google.crypto.tink.aead"><span class="typeNameLink">AeadWrapper</span></a> (implements com.google.crypto.tink.<a href="com/google/crypto/tink/PrimitiveWrapper.html" title="interface in com.google.crypto.tink">PrimitiveWrapper</a>&lt;B,P&gt;)</li>
 <li type="circle">com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/AesCmac.html" title="class in com.google.crypto.tink.proto"><span class="typeNameLink">AesCmac</span></a></li>
-<li type="circle">com.google.crypto.tink.mac.<a href="com/google/crypto/tink/mac/AesCmacKeyFormat.Variant.html" title="class in com.google.crypto.tink.mac"><span class="typeNameLink">AesCmacKeyFormat.Variant</span></a></li>
+<li type="circle">com.google.crypto.tink.mac.<a href="com/google/crypto/tink/mac/AesCmacParameters.Variant.html" title="class in com.google.crypto.tink.mac"><span class="typeNameLink">AesCmacParameters.Variant</span></a></li>
 <li type="circle">com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/AesCmacPrf.html" title="class in com.google.crypto.tink.proto"><span class="typeNameLink">AesCmacPrf</span></a></li>
 <li type="circle">com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/AesCtr.html" title="class in com.google.crypto.tink.proto"><span class="typeNameLink">AesCtr</span></a></li>
 <li type="circle">com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/AesCtrHmacAead.html" title="class in com.google.crypto.tink.proto"><span class="typeNameLink">AesCtrHmacAead</span></a></li>
@@ -416,18 +416,6 @@
 </ul>
 </li>
 <li type="circle">com.google.crypto.tink.tinkkey.<a href="com/google/crypto/tink/tinkkey/KeyAccess.html" title="class in com.google.crypto.tink.tinkkey"><span class="typeNameLink">KeyAccess</span></a></li>
-<li type="circle">com.google.crypto.tink.<a href="com/google/crypto/tink/KeyFormat.html" title="class in com.google.crypto.tink"><span class="typeNameLink">KeyFormat</span></a>
-<ul>
-<li type="circle">com.google.crypto.tink.internal.<a href="com/google/crypto/tink/internal/LegacyProtoKeyFormat.html" title="class in com.google.crypto.tink.internal"><span class="typeNameLink">LegacyProtoKeyFormat</span></a></li>
-<li type="circle">com.google.crypto.tink.mac.<a href="com/google/crypto/tink/mac/MacKeyFormat.html" title="class in com.google.crypto.tink.mac"><span class="typeNameLink">MacKeyFormat</span></a>
-<ul>
-<li type="circle">com.google.crypto.tink.mac.<a href="com/google/crypto/tink/mac/AesCmacKeyFormat.html" title="class in com.google.crypto.tink.mac"><span class="typeNameLink">AesCmacKeyFormat</span></a></li>
-</ul>
-</li>
-</ul>
-</li>
-<li type="circle">com.google.crypto.tink.internal.<a href="com/google/crypto/tink/internal/KeyFormatParser.html" title="class in com.google.crypto.tink.internal"><span class="typeNameLink">KeyFormatParser</span></a>&lt;SerializationT&gt;</li>
-<li type="circle">com.google.crypto.tink.internal.<a href="com/google/crypto/tink/internal/KeyFormatSerializer.html" title="class in com.google.crypto.tink.internal"><span class="typeNameLink">KeyFormatSerializer</span></a>&lt;KeyFormatT,SerializationT&gt;</li>
 <li type="circle">com.google.crypto.tink.tinkkey.<a href="com/google/crypto/tink/tinkkey/KeyHandle.html" title="class in com.google.crypto.tink.tinkkey"><span class="typeNameLink">KeyHandle</span></a>
 <ul>
 <li type="circle">com.google.crypto.tink.tinkkey.internal.<a href="com/google/crypto/tink/tinkkey/internal/InternalKeyHandle.html" title="class in com.google.crypto.tink.tinkkey.internal"><span class="typeNameLink">InternalKeyHandle</span></a></li>
@@ -500,6 +488,18 @@
 <li type="circle">com.google.crypto.tink.internal.<a href="com/google/crypto/tink/internal/MutableMonitoringRegistry.html" title="class in com.google.crypto.tink.internal"><span class="typeNameLink">MutableMonitoringRegistry</span></a></li>
 <li type="circle">com.google.crypto.tink.internal.<a href="com/google/crypto/tink/internal/MutableSerializationRegistry.html" title="class in com.google.crypto.tink.internal"><span class="typeNameLink">MutableSerializationRegistry</span></a></li>
 <li type="circle">com.google.crypto.tink.<a href="com/google/crypto/tink/NoSecretKeysetHandle.html" title="class in com.google.crypto.tink"><span class="typeNameLink">NoSecretKeysetHandle</span></a></li>
+<li type="circle">com.google.crypto.tink.<a href="com/google/crypto/tink/Parameters.html" title="class in com.google.crypto.tink"><span class="typeNameLink">Parameters</span></a>
+<ul>
+<li type="circle">com.google.crypto.tink.internal.<a href="com/google/crypto/tink/internal/LegacyProtoParameters.html" title="class in com.google.crypto.tink.internal"><span class="typeNameLink">LegacyProtoParameters</span></a></li>
+<li type="circle">com.google.crypto.tink.mac.<a href="com/google/crypto/tink/mac/MacParameters.html" title="class in com.google.crypto.tink.mac"><span class="typeNameLink">MacParameters</span></a>
+<ul>
+<li type="circle">com.google.crypto.tink.mac.<a href="com/google/crypto/tink/mac/AesCmacParameters.html" title="class in com.google.crypto.tink.mac"><span class="typeNameLink">AesCmacParameters</span></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li type="circle">com.google.crypto.tink.internal.<a href="com/google/crypto/tink/internal/ParametersParser.html" title="class in com.google.crypto.tink.internal"><span class="typeNameLink">ParametersParser</span></a>&lt;SerializationT&gt;</li>
+<li type="circle">com.google.crypto.tink.internal.<a href="com/google/crypto/tink/internal/ParametersSerializer.html" title="class in com.google.crypto.tink.internal"><span class="typeNameLink">ParametersSerializer</span></a>&lt;ParametersT,SerializationT&gt;</li>
 <li type="circle">com.google.crypto.tink.aead.internal.<a href="com/google/crypto/tink/aead/internal/Poly1305.html" title="class in com.google.crypto.tink.aead.internal"><span class="typeNameLink">Poly1305</span></a></li>
 <li type="circle">com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/PrfAesCmac.html" title="class in com.google.crypto.tink.subtle"><span class="typeNameLink">PrfAesCmac</span></a> (implements com.google.crypto.tink.prf.<a href="com/google/crypto/tink/prf/Prf.html" title="interface in com.google.crypto.tink.prf">Prf</a>)</li>
 <li type="circle">com.google.crypto.tink.prf.<a href="com/google/crypto/tink/prf/PrfConfig.html" title="class in com.google.crypto.tink.prf"><span class="typeNameLink">PrfConfig</span></a></li>
@@ -515,8 +515,8 @@
 <li type="circle">com.google.crypto.tink.<a href="com/google/crypto/tink/PrimitiveSet.Entry.html" title="class in com.google.crypto.tink"><span class="typeNameLink">PrimitiveSet.Entry</span></a>&lt;P&gt;</li>
 <li type="circle">com.google.crypto.tink.<a href="com/google/crypto/tink/PrivilegedRegistry.html" title="class in com.google.crypto.tink"><span class="typeNameLink">PrivilegedRegistry</span></a></li>
 <li type="circle">com.google.crypto.tink.tinkkey.internal.<a href="com/google/crypto/tink/tinkkey/internal/ProtoKey.html" title="class in com.google.crypto.tink.tinkkey.internal"><span class="typeNameLink">ProtoKey</span></a> (implements com.google.crypto.tink.tinkkey.<a href="com/google/crypto/tink/tinkkey/TinkKey.html" title="interface in com.google.crypto.tink.tinkkey">TinkKey</a>)</li>
-<li type="circle">com.google.crypto.tink.internal.<a href="com/google/crypto/tink/internal/ProtoKeyFormatSerialization.html" title="class in com.google.crypto.tink.internal"><span class="typeNameLink">ProtoKeyFormatSerialization</span></a> (implements com.google.crypto.tink.internal.<a href="com/google/crypto/tink/internal/Serialization.html" title="interface in com.google.crypto.tink.internal">Serialization</a>)</li>
 <li type="circle">com.google.crypto.tink.internal.<a href="com/google/crypto/tink/internal/ProtoKeySerialization.html" title="class in com.google.crypto.tink.internal"><span class="typeNameLink">ProtoKeySerialization</span></a> (implements com.google.crypto.tink.internal.<a href="com/google/crypto/tink/internal/Serialization.html" title="interface in com.google.crypto.tink.internal">Serialization</a>)</li>
+<li type="circle">com.google.crypto.tink.internal.<a href="com/google/crypto/tink/internal/ProtoParametersSerialization.html" title="class in com.google.crypto.tink.internal"><span class="typeNameLink">ProtoParametersSerialization</span></a> (implements com.google.crypto.tink.internal.<a href="com/google/crypto/tink/internal/Serialization.html" title="interface in com.google.crypto.tink.internal">Serialization</a>)</li>
 <li type="circle">com.google.crypto.tink.signature.<a href="com/google/crypto/tink/signature/PublicKeySignConfig.html" title="class in com.google.crypto.tink.signature"><span class="typeNameLink">PublicKeySignConfig</span></a></li>
 <li type="circle">com.google.crypto.tink.signature.<a href="com/google/crypto/tink/signature/PublicKeySignFactory.html" title="class in com.google.crypto.tink.signature"><span class="typeNameLink">PublicKeySignFactory</span></a></li>
 <li type="circle">com.google.crypto.tink.signature.<a href="com/google/crypto/tink/signature/PublicKeySignWrapper.html" title="class in com.google.crypto.tink.signature"><span class="typeNameLink">PublicKeySignWrapper</span></a> (implements com.google.crypto.tink.<a href="com/google/crypto/tink/PrimitiveWrapper.html" title="interface in com.google.crypto.tink">PrimitiveWrapper</a>&lt;B,P&gt;)</li>
@@ -585,6 +585,9 @@
 <li type="circle">com.google.crypto.tink.<a href="com/google/crypto/tink/Aead.html" title="interface in com.google.crypto.tink"><span class="typeNameLink">Aead</span></a></li>
 <li type="circle">com.google.crypto.tink.aead.subtle.<a href="com/google/crypto/tink/aead/subtle/AeadFactory.html" title="interface in com.google.crypto.tink.aead.subtle"><span class="typeNameLink">AeadFactory</span></a></li>
 <li type="circle">com.google.crypto.tink.<a href="com/google/crypto/tink/Catalogue.html" title="interface in com.google.crypto.tink"><span class="typeNameLink">Catalogue</span></a>&lt;P&gt;</li>
+<li type="circle">com.google.crypto.tink.mac.<a href="com/google/crypto/tink/mac/ChunkedMac.html" title="interface in com.google.crypto.tink.mac"><span class="typeNameLink">ChunkedMac</span></a></li>
+<li type="circle">com.google.crypto.tink.mac.<a href="com/google/crypto/tink/mac/ChunkedMacComputation.html" title="interface in com.google.crypto.tink.mac"><span class="typeNameLink">ChunkedMacComputation</span></a></li>
+<li type="circle">com.google.crypto.tink.mac.<a href="com/google/crypto/tink/mac/ChunkedMacVerification.html" title="interface in com.google.crypto.tink.mac"><span class="typeNameLink">ChunkedMacVerification</span></a></li>
 <li type="circle">com.google.crypto.tink.<a href="com/google/crypto/tink/DeterministicAead.html" title="interface in com.google.crypto.tink"><span class="typeNameLink">DeterministicAead</span></a></li>
 <li type="circle">com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/EciesAeadHkdfDemHelper.html" title="interface in com.google.crypto.tink.subtle"><span class="typeNameLink">EciesAeadHkdfDemHelper</span></a></li>
 <li type="circle">com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/EngineWrapper.html" title="interface in com.google.crypto.tink.subtle"><span class="typeNameLink">EngineWrapper</span></a>&lt;T&gt;</li>
@@ -596,8 +599,6 @@
 <li type="circle">com.google.crypto.tink.jwt.<a href="com/google/crypto/tink/jwt/JwtPublicKeySignInternal.html" title="interface in com.google.crypto.tink.jwt"><span class="typeNameLink">JwtPublicKeySignInternal</span></a></li>
 <li type="circle">com.google.crypto.tink.jwt.<a href="com/google/crypto/tink/jwt/JwtPublicKeyVerify.html" title="interface in com.google.crypto.tink.jwt"><span class="typeNameLink">JwtPublicKeyVerify</span></a></li>
 <li type="circle">com.google.crypto.tink.jwt.<a href="com/google/crypto/tink/jwt/JwtPublicKeyVerifyInternal.html" title="interface in com.google.crypto.tink.jwt"><span class="typeNameLink">JwtPublicKeyVerifyInternal</span></a></li>
-<li type="circle">com.google.crypto.tink.internal.<a href="com/google/crypto/tink/internal/KeyFormatParser.KeyFormatParsingFunction.html" title="interface in com.google.crypto.tink.internal"><span class="typeNameLink">KeyFormatParser.KeyFormatParsingFunction</span></a>&lt;SerializationT&gt;</li>
-<li type="circle">com.google.crypto.tink.internal.<a href="com/google/crypto/tink/internal/KeyFormatSerializer.KeyFormatSerializationFunction.html" title="interface in com.google.crypto.tink.internal"><span class="typeNameLink">KeyFormatSerializer.KeyFormatSerializationFunction</span></a>&lt;KeyFormatT,SerializationT&gt;</li>
 <li type="circle">com.google.crypto.tink.<a href="com/google/crypto/tink/KeyManager.html" title="interface in com.google.crypto.tink"><span class="typeNameLink">KeyManager</span></a>&lt;P&gt;
 <ul>
 <li type="circle">com.google.crypto.tink.<a href="com/google/crypto/tink/PrivateKeyManager.html" title="interface in com.google.crypto.tink"><span class="typeNameLink">PrivateKeyManager</span></a>&lt;P&gt;</li>
@@ -707,6 +708,8 @@
 </li>
 <li type="circle">com.google.crypto.tink.monitoring.<a href="com/google/crypto/tink/monitoring/MonitoringClient.html" title="interface in com.google.crypto.tink.monitoring"><span class="typeNameLink">MonitoringClient</span></a></li>
 <li type="circle">com.google.crypto.tink.monitoring.<a href="com/google/crypto/tink/monitoring/MonitoringClient.Logger.html" title="interface in com.google.crypto.tink.monitoring"><span class="typeNameLink">MonitoringClient.Logger</span></a></li>
+<li type="circle">com.google.crypto.tink.internal.<a href="com/google/crypto/tink/internal/ParametersParser.ParametersParsingFunction.html" title="interface in com.google.crypto.tink.internal"><span class="typeNameLink">ParametersParser.ParametersParsingFunction</span></a>&lt;SerializationT&gt;</li>
+<li type="circle">com.google.crypto.tink.internal.<a href="com/google/crypto/tink/internal/ParametersSerializer.ParametersSerializationFunction.html" title="interface in com.google.crypto.tink.internal"><span class="typeNameLink">ParametersSerializer.ParametersSerializationFunction</span></a>&lt;ParametersT,SerializationT&gt;</li>
 <li type="circle">com.google.crypto.tink.prf.<a href="com/google/crypto/tink/prf/Prf.html" title="interface in com.google.crypto.tink.prf"><span class="typeNameLink">Prf</span></a></li>
 <li type="circle">com.google.crypto.tink.<a href="com/google/crypto/tink/PrimitiveWrapper.html" title="interface in com.google.crypto.tink"><span class="typeNameLink">PrimitiveWrapper</span></a>&lt;B,P&gt;</li>
 <li type="circle">com.google.crypto.tink.<a href="com/google/crypto/tink/PublicKeySign.html" title="interface in com.google.crypto.tink"><span class="typeNameLink">PublicKeySign</span></a></li>
@@ -731,7 +734,6 @@
 <ul>
 <li type="circle">com.google.crypto.tink.<a href="com/google/crypto/tink/PemKeyType.html" title="enum in com.google.crypto.tink"><span class="typeNameLink">PemKeyType</span></a></li>
 <li type="circle">com.google.crypto.tink.<a href="com/google/crypto/tink/KeyTemplate.OutputPrefixType.html" title="enum in com.google.crypto.tink"><span class="typeNameLink">KeyTemplate.OutputPrefixType</span></a></li>
-<li type="circle">com.google.crypto.tink.tinkkey.<a href="com/google/crypto/tink/tinkkey/KeyHandle.KeyStatusType.html" title="enum in com.google.crypto.tink.tinkkey"><span class="typeNameLink">KeyHandle.KeyStatusType</span></a></li>
 <li type="circle">com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/JwtHmacAlgorithm.html" title="enum in com.google.crypto.tink.proto"><span class="typeNameLink">JwtHmacAlgorithm</span></a> (implements com.google.protobuf.Internal.EnumLite)</li>
 <li type="circle">com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/JwtRsaSsaPssAlgorithm.html" title="enum in com.google.crypto.tink.proto"><span class="typeNameLink">JwtRsaSsaPssAlgorithm</span></a> (implements com.google.protobuf.Internal.EnumLite)</li>
 <li type="circle">com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/JwtRsaSsaPkcs1Algorithm.html" title="enum in com.google.crypto.tink.proto"><span class="typeNameLink">JwtRsaSsaPkcs1Algorithm</span></a> (implements com.google.protobuf.Internal.EnumLite)</li>
@@ -746,12 +748,13 @@
 <li type="circle">com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/OutputPrefixType.html" title="enum in com.google.crypto.tink.proto"><span class="typeNameLink">OutputPrefixType</span></a> (implements com.google.protobuf.Internal.EnumLite)</li>
 <li type="circle">com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/KeyStatusType.html" title="enum in com.google.crypto.tink.proto"><span class="typeNameLink">KeyStatusType</span></a> (implements com.google.protobuf.Internal.EnumLite)</li>
 <li type="circle">com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/KeyData.KeyMaterialType.html" title="enum in com.google.crypto.tink.proto"><span class="typeNameLink">KeyData.KeyMaterialType</span></a> (implements com.google.protobuf.Internal.EnumLite)</li>
-<li type="circle">com.google.crypto.tink.config.internal.<a href="com/google/crypto/tink/config/internal/TinkFipsUtil.AlgorithmFipsCompatibility.html" title="enum in com.google.crypto.tink.config.internal"><span class="typeNameLink">TinkFipsUtil.AlgorithmFipsCompatibility</span></a></li>
 <li type="circle">com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/PemKeyType.html" title="enum in com.google.crypto.tink.subtle"><span class="typeNameLink">PemKeyType</span></a></li>
 <li type="circle">com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/Enums.HashType.html" title="enum in com.google.crypto.tink.subtle"><span class="typeNameLink">Enums.HashType</span></a></li>
 <li type="circle">com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/EllipticCurves.PointFormatType.html" title="enum in com.google.crypto.tink.subtle"><span class="typeNameLink">EllipticCurves.PointFormatType</span></a></li>
 <li type="circle">com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/EllipticCurves.CurveType.html" title="enum in com.google.crypto.tink.subtle"><span class="typeNameLink">EllipticCurves.CurveType</span></a></li>
 <li type="circle">com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/EllipticCurves.EcdsaEncoding.html" title="enum in com.google.crypto.tink.subtle"><span class="typeNameLink">EllipticCurves.EcdsaEncoding</span></a></li>
+<li type="circle">com.google.crypto.tink.tinkkey.<a href="com/google/crypto/tink/tinkkey/KeyHandle.KeyStatusType.html" title="enum in com.google.crypto.tink.tinkkey"><span class="typeNameLink">KeyHandle.KeyStatusType</span></a></li>
+<li type="circle">com.google.crypto.tink.config.internal.<a href="com/google/crypto/tink/config/internal/TinkFipsUtil.AlgorithmFipsCompatibility.html" title="enum in com.google.crypto.tink.config.internal"><span class="typeNameLink">TinkFipsUtil.AlgorithmFipsCompatibility</span></a></li>
 </ul>
 </li>
 </ul>

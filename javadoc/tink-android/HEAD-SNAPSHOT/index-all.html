@@ -146,7 +146,7 @@
 <div class="block"><span class="deprecationComment">Catalogues are no longer supported.</span></div>
 </div>
 </dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/monitoring/MonitoringKeysetInfo.Builder.html#addEntry-com.google.crypto.tink.KeyStatus-int-com.google.crypto.tink.KeyFormat-">addEntry(KeyStatus, int, KeyFormat)</a></span> - Method in class com.google.crypto.tink.monitoring.<a href="com/google/crypto/tink/monitoring/MonitoringKeysetInfo.Builder.html" title="class in com.google.crypto.tink.monitoring">MonitoringKeysetInfo.Builder</a></dt>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/monitoring/MonitoringKeysetInfo.Builder.html#addEntry-com.google.crypto.tink.KeyStatus-int-com.google.crypto.tink.Parameters-">addEntry(KeyStatus, int, Parameters)</a></span> - Method in class com.google.crypto.tink.monitoring.<a href="com/google/crypto/tink/monitoring/MonitoringKeysetInfo.Builder.html" title="class in com.google.crypto.tink.monitoring">MonitoringKeysetInfo.Builder</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RegistryConfig.Builder.html#addEntry-com.google.crypto.tink.proto.KeyTypeEntry-">addEntry(KeyTypeEntry)</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RegistryConfig.Builder.html" title="class in com.google.crypto.tink.proto">RegistryConfig.Builder</a></dt>
 <dd>
@@ -646,10 +646,6 @@
 <div class="block">
  key_type: type.googleapis.com/google.crypto.tink.AesCmacKey</div>
 </dd>
-<dt><a href="com/google/crypto/tink/mac/AesCmacKeyFormat.html" title="class in com.google.crypto.tink.mac"><span class="typeNameLink">AesCmacKeyFormat</span></a> - Class in <a href="com/google/crypto/tink/mac/package-summary.html">com.google.crypto.tink.mac</a></dt>
-<dd>
-<div class="block">Describes a format of an <a href="com/google/crypto/tink/mac/AesCmacKey.html" title="class in com.google.crypto.tink.mac"><code>AesCmacKey</code></a>.</div>
-</dd>
 <dt><a href="com/google/crypto/tink/proto/AesCmacKeyFormat.html" title="class in com.google.crypto.tink.proto"><span class="typeNameLink">AesCmacKeyFormat</span></a> - Class in <a href="com/google/crypto/tink/proto/package-summary.html">com.google.crypto.tink.proto</a></dt>
 <dd>
 <div class="block">Protobuf type <code>google.crypto.tink.AesCmacKeyFormat</code></div>
@@ -657,10 +653,6 @@
 <dt><a href="com/google/crypto/tink/proto/AesCmacKeyFormat.Builder.html" title="class in com.google.crypto.tink.proto"><span class="typeNameLink">AesCmacKeyFormat.Builder</span></a> - Class in <a href="com/google/crypto/tink/proto/package-summary.html">com.google.crypto.tink.proto</a></dt>
 <dd>
 <div class="block">Protobuf type <code>google.crypto.tink.AesCmacKeyFormat</code></div>
-</dd>
-<dt><a href="com/google/crypto/tink/mac/AesCmacKeyFormat.Variant.html" title="class in com.google.crypto.tink.mac"><span class="typeNameLink">AesCmacKeyFormat.Variant</span></a> - Class in <a href="com/google/crypto/tink/mac/package-summary.html">com.google.crypto.tink.mac</a></dt>
-<dd>
-<div class="block">Describes details of the mac computation.</div>
 </dd>
 <dt><a href="com/google/crypto/tink/proto/AesCmacKeyFormatOrBuilder.html" title="interface in com.google.crypto.tink.proto"><span class="typeNameLink">AesCmacKeyFormatOrBuilder</span></a> - Interface in <a href="com/google/crypto/tink/proto/package-summary.html">com.google.crypto.tink.proto</a></dt>
 <dd>&nbsp;</dd>
@@ -670,6 +662,14 @@
 </dd>
 <dt><a href="com/google/crypto/tink/proto/AesCmacKeyOrBuilder.html" title="interface in com.google.crypto.tink.proto"><span class="typeNameLink">AesCmacKeyOrBuilder</span></a> - Interface in <a href="com/google/crypto/tink/proto/package-summary.html">com.google.crypto.tink.proto</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="com/google/crypto/tink/mac/AesCmacParameters.html" title="class in com.google.crypto.tink.mac"><span class="typeNameLink">AesCmacParameters</span></a> - Class in <a href="com/google/crypto/tink/mac/package-summary.html">com.google.crypto.tink.mac</a></dt>
+<dd>
+<div class="block">Describes the parameters of an <a href="com/google/crypto/tink/mac/AesCmacKey.html" title="class in com.google.crypto.tink.mac"><code>AesCmacKey</code></a>.</div>
+</dd>
+<dt><a href="com/google/crypto/tink/mac/AesCmacParameters.Variant.html" title="class in com.google.crypto.tink.mac"><span class="typeNameLink">AesCmacParameters.Variant</span></a> - Class in <a href="com/google/crypto/tink/mac/package-summary.html">com.google.crypto.tink.mac</a></dt>
+<dd>
+<div class="block">Describes details of the mac computation.</div>
+</dd>
 <dt><a href="com/google/crypto/tink/proto/AesCmacParams.html" title="class in com.google.crypto.tink.proto"><span class="typeNameLink">AesCmacParams</span></a> - Class in <a href="com/google/crypto/tink/proto/package-summary.html">com.google.crypto.tink.proto</a></dt>
 <dd>
 <div class="block">Protobuf type <code>google.crypto.tink.AesCmacParams</code></div>
@@ -1263,6 +1263,18 @@
 <div class="block"><span class="deprecatedLabel">Deprecated.</span>
 <div class="block"><span class="deprecationComment">use <code>KeyTemplates.get("CHACHA20_POLY1305")</code></span></div>
 </div>
+</dd>
+<dt><a href="com/google/crypto/tink/mac/ChunkedMac.html" title="interface in com.google.crypto.tink.mac"><span class="typeNameLink">ChunkedMac</span></a> - Interface in <a href="com/google/crypto/tink/mac/package-summary.html">com.google.crypto.tink.mac</a></dt>
+<dd>
+<div class="block">An interface representing Streaming MAC.</div>
+</dd>
+<dt><a href="com/google/crypto/tink/mac/ChunkedMacComputation.html" title="interface in com.google.crypto.tink.mac"><span class="typeNameLink">ChunkedMacComputation</span></a> - Interface in <a href="com/google/crypto/tink/mac/package-summary.html">com.google.crypto.tink.mac</a></dt>
+<dd>
+<div class="block">An interface representing a computation of the Streaming MAC.</div>
+</dd>
+<dt><a href="com/google/crypto/tink/mac/ChunkedMacVerification.html" title="interface in com.google.crypto.tink.mac"><span class="typeNameLink">ChunkedMacVerification</span></a> - Interface in <a href="com/google/crypto/tink/mac/package-summary.html">com.google.crypto.tink.mac</a></dt>
+<dd>
+<div class="block">An interface representing a verification of the Streaming MAC.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/subtle/EngineFactory.html#CIPHER">CIPHER</a></span> - Static variable in class com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/EngineFactory.html" title="class in com.google.crypto.tink.subtle">EngineFactory</a></dt>
 <dd>&nbsp;</dd>
@@ -2506,6 +2518,10 @@
 <dd>
 <div class="block">Computes Poly1305 MAC over <code>data</code> using <code>key</code>.</div>
 </dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/mac/ChunkedMacComputation.html#computeMac--">computeMac()</a></span> - Method in interface com.google.crypto.tink.mac.<a href="com/google/crypto/tink/mac/ChunkedMacComputation.html" title="interface in com.google.crypto.tink.mac">ChunkedMacComputation</a></dt>
+<dd>
+<div class="block">Computes a tag for the provided data.</div>
+</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/Mac.html#computeMac-byte:A-">computeMac(byte[])</a></span> - Method in interface com.google.crypto.tink.<a href="com/google/crypto/tink/Mac.html" title="interface in com.google.crypto.tink">Mac</a></dt>
 <dd>
 <div class="block">Computes message authentication code (MAC) for <code>data</code>.</div>
@@ -2561,14 +2577,6 @@
 <dd>
 <div class="block">Creates a new SecretBytes with the contents given in <code>value</code>.</div>
 </dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/internal/KeyFormatParser.html#create-com.google.crypto.tink.internal.KeyFormatParser.KeyFormatParsingFunction-com.google.crypto.tink.util.Bytes-java.lang.Class-">create(KeyFormatParser.KeyFormatParsingFunction&lt;SerializationT&gt;, Bytes, Class&lt;SerializationT&gt;)</a></span> - Static method in class com.google.crypto.tink.internal.<a href="com/google/crypto/tink/internal/KeyFormatParser.html" title="class in com.google.crypto.tink.internal">KeyFormatParser</a></dt>
-<dd>
-<div class="block">Creates a KeyFormatParser object.</div>
-</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/internal/KeyFormatSerializer.html#create-com.google.crypto.tink.internal.KeyFormatSerializer.KeyFormatSerializationFunction-java.lang.Class-java.lang.Class-">create(KeyFormatSerializer.KeyFormatSerializationFunction&lt;KeyFormatT, SerializationT&gt;, Class&lt;KeyFormatT&gt;, Class&lt;SerializationT&gt;)</a></span> - Static method in class com.google.crypto.tink.internal.<a href="com/google/crypto/tink/internal/KeyFormatSerializer.html" title="class in com.google.crypto.tink.internal">KeyFormatSerializer</a></dt>
-<dd>
-<div class="block">Creates a KeyFormatSerializer object.</div>
-</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/internal/KeyParser.html#create-com.google.crypto.tink.internal.KeyParser.KeyParsingFunction-com.google.crypto.tink.util.Bytes-java.lang.Class-">create(KeyParser.KeyParsingFunction&lt;SerializationT&gt;, Bytes, Class&lt;SerializationT&gt;)</a></span> - Static method in class com.google.crypto.tink.internal.<a href="com/google/crypto/tink/internal/KeyParser.html" title="class in com.google.crypto.tink.internal">KeyParser</a></dt>
 <dd>
 <div class="block">Creates a KeyParser object.</div>
@@ -2577,23 +2585,31 @@
 <dd>
 <div class="block">Creates a KeySerializer object.</div>
 </dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/internal/ProtoKeyFormatSerialization.html#create-java.lang.String-com.google.crypto.tink.proto.OutputPrefixType-com.google.protobuf.MessageLite-">create(String, OutputPrefixType, MessageLite)</a></span> - Static method in class com.google.crypto.tink.internal.<a href="com/google/crypto/tink/internal/ProtoKeyFormatSerialization.html" title="class in com.google.crypto.tink.internal">ProtoKeyFormatSerialization</a></dt>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/internal/ParametersParser.html#create-com.google.crypto.tink.internal.ParametersParser.ParametersParsingFunction-com.google.crypto.tink.util.Bytes-java.lang.Class-">create(ParametersParser.ParametersParsingFunction&lt;SerializationT&gt;, Bytes, Class&lt;SerializationT&gt;)</a></span> - Static method in class com.google.crypto.tink.internal.<a href="com/google/crypto/tink/internal/ParametersParser.html" title="class in com.google.crypto.tink.internal">ParametersParser</a></dt>
 <dd>
-<div class="block">Creates a new <code>ProtoKeyFormatSerialization</code> object from the individual parts.</div>
+<div class="block">Creates a ParametersParser object.</div>
 </dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/internal/ProtoKeyFormatSerialization.html#create-com.google.crypto.tink.proto.KeyTemplate-">create(KeyTemplate)</a></span> - Static method in class com.google.crypto.tink.internal.<a href="com/google/crypto/tink/internal/ProtoKeyFormatSerialization.html" title="class in com.google.crypto.tink.internal">ProtoKeyFormatSerialization</a></dt>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/internal/ParametersSerializer.html#create-com.google.crypto.tink.internal.ParametersSerializer.ParametersSerializationFunction-java.lang.Class-java.lang.Class-">create(ParametersSerializer.ParametersSerializationFunction&lt;ParametersT, SerializationT&gt;, Class&lt;ParametersT&gt;, Class&lt;SerializationT&gt;)</a></span> - Static method in class com.google.crypto.tink.internal.<a href="com/google/crypto/tink/internal/ParametersSerializer.html" title="class in com.google.crypto.tink.internal">ParametersSerializer</a></dt>
 <dd>
-<div class="block">Creates a new <code>ProtoKeyFormatSerialization</code> object.</div>
+<div class="block">Creates a ParametersSerializer object.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/internal/ProtoKeySerialization.html#create-java.lang.String-com.google.protobuf.ByteString-com.google.crypto.tink.proto.KeyData.KeyMaterialType-com.google.crypto.tink.proto.OutputPrefixType-java.lang.Integer-">create(String, ByteString, KeyData.KeyMaterialType, OutputPrefixType, Integer)</a></span> - Static method in class com.google.crypto.tink.internal.<a href="com/google/crypto/tink/internal/ProtoKeySerialization.html" title="class in com.google.crypto.tink.internal">ProtoKeySerialization</a></dt>
 <dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/internal/ProtoParametersSerialization.html#create-java.lang.String-com.google.crypto.tink.proto.OutputPrefixType-com.google.protobuf.MessageLite-">create(String, OutputPrefixType, MessageLite)</a></span> - Static method in class com.google.crypto.tink.internal.<a href="com/google/crypto/tink/internal/ProtoParametersSerialization.html" title="class in com.google.crypto.tink.internal">ProtoParametersSerialization</a></dt>
+<dd>
+<div class="block">Creates a new <code>ProtoParametersSerialization</code> object from the individual parts.</div>
+</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/internal/ProtoParametersSerialization.html#create-com.google.crypto.tink.proto.KeyTemplate-">create(KeyTemplate)</a></span> - Static method in class com.google.crypto.tink.internal.<a href="com/google/crypto/tink/internal/ProtoParametersSerialization.html" title="class in com.google.crypto.tink.internal">ProtoParametersSerialization</a></dt>
+<dd>
+<div class="block">Creates a new <code>ProtoParametersSerialization</code> object.</div>
+</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/KeyTemplate.html#create-java.lang.String-byte:A-com.google.crypto.tink.KeyTemplate.OutputPrefixType-">create(String, byte[], KeyTemplate.OutputPrefixType)</a></span> - Static method in class com.google.crypto.tink.<a href="com/google/crypto/tink/KeyTemplate.html" title="class in com.google.crypto.tink">KeyTemplate</a></dt>
 <dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/mac/AesCmacKey.html#create-com.google.crypto.tink.mac.AesCmacKeyFormat-com.google.crypto.tink.util.SecretBytes-">create(AesCmacKeyFormat, SecretBytes)</a></span> - Static method in class com.google.crypto.tink.mac.<a href="com/google/crypto/tink/mac/AesCmacKey.html" title="class in com.google.crypto.tink.mac">AesCmacKey</a></dt>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/mac/AesCmacKey.html#create-com.google.crypto.tink.mac.AesCmacParameters-com.google.crypto.tink.util.SecretBytes-">create(AesCmacParameters, SecretBytes)</a></span> - Static method in class com.google.crypto.tink.mac.<a href="com/google/crypto/tink/mac/AesCmacKey.html" title="class in com.google.crypto.tink.mac">AesCmacKey</a></dt>
 <dd>
 <div class="block">Creates a new AES-CMAC key with an empty prefix.</div>
 </dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/mac/AesCmacKeyFormat.html#create-int-">create(int)</a></span> - Static method in class com.google.crypto.tink.mac.<a href="com/google/crypto/tink/mac/AesCmacKeyFormat.html" title="class in com.google.crypto.tink.mac">AesCmacKeyFormat</a></dt>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/mac/AesCmacParameters.html#create-int-">create(int)</a></span> - Static method in class com.google.crypto.tink.mac.<a href="com/google/crypto/tink/mac/AesCmacParameters.html" title="class in com.google.crypto.tink.mac">AesCmacParameters</a></dt>
 <dd>
 <div class="block">Equivalent to <code>createForKeysetWithCryptographicTagSize(tagSize, Variant.NO_PREFIX);</code></div>
 </dd>
@@ -2628,6 +2644,10 @@
 <dd>
 <div class="block"><span class="deprecatedLabel">Deprecated.</span></div>
 &nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/mac/ChunkedMac.html#createComputation--">createComputation()</a></span> - Method in interface com.google.crypto.tink.mac.<a href="com/google/crypto/tink/mac/ChunkedMac.html" title="interface in com.google.crypto.tink.mac">ChunkedMac</a></dt>
+<dd>
+<div class="block">Creates an instance of a single Chunked MAC computation.</div>
+</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/signature/SignatureKeyTemplates.html#createEcdsaKeyTemplate-com.google.crypto.tink.proto.HashType-com.google.crypto.tink.proto.EllipticCurveType-com.google.crypto.tink.proto.EcdsaSignatureEncoding-com.google.crypto.tink.proto.OutputPrefixType-">createEcdsaKeyTemplate(HashType, EllipticCurveType, EcdsaSignatureEncoding, OutputPrefixType)</a></span> - Static method in class com.google.crypto.tink.signature.<a href="com/google/crypto/tink/signature/SignatureKeyTemplates.html" title="class in com.google.crypto.tink.signature">SignatureKeyTemplates</a></dt>
 <dd>
 <div class="block"><span class="deprecatedLabel">Deprecated.</span></div>
@@ -2640,13 +2660,13 @@
 <dd>
 <div class="block"><span class="deprecatedLabel">Deprecated.</span></div>
 &nbsp;</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/mac/AesCmacKey.html#createForKeyset-com.google.crypto.tink.mac.AesCmacKeyFormat-com.google.crypto.tink.util.SecretBytes-java.lang.Integer-">createForKeyset(AesCmacKeyFormat, SecretBytes, Integer)</a></span> - Static method in class com.google.crypto.tink.mac.<a href="com/google/crypto/tink/mac/AesCmacKey.html" title="class in com.google.crypto.tink.mac">AesCmacKey</a></dt>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/mac/AesCmacKey.html#createForKeyset-com.google.crypto.tink.mac.AesCmacParameters-com.google.crypto.tink.util.SecretBytes-java.lang.Integer-">createForKeyset(AesCmacParameters, SecretBytes, Integer)</a></span> - Static method in class com.google.crypto.tink.mac.<a href="com/google/crypto/tink/mac/AesCmacKey.html" title="class in com.google.crypto.tink.mac">AesCmacKey</a></dt>
 <dd>
 <div class="block">Creates a new AES-CMAC key for use in a keyset.</div>
 </dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/mac/AesCmacKeyFormat.html#createForKeysetWithCryptographicTagSize-int-com.google.crypto.tink.mac.AesCmacKeyFormat.Variant-">createForKeysetWithCryptographicTagSize(int, AesCmacKeyFormat.Variant)</a></span> - Static method in class com.google.crypto.tink.mac.<a href="com/google/crypto/tink/mac/AesCmacKeyFormat.html" title="class in com.google.crypto.tink.mac">AesCmacKeyFormat</a></dt>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/mac/AesCmacParameters.html#createForKeysetWithCryptographicTagSize-int-com.google.crypto.tink.mac.AesCmacParameters.Variant-">createForKeysetWithCryptographicTagSize(int, AesCmacParameters.Variant)</a></span> - Static method in class com.google.crypto.tink.mac.<a href="com/google/crypto/tink/mac/AesCmacParameters.html" title="class in com.google.crypto.tink.mac">AesCmacParameters</a></dt>
 <dd>
-<div class="block">Creates a new key format object.</div>
+<div class="block">Creates a new parameters object.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/KeysetHandle.html#createFromKey-com.google.crypto.tink.tinkkey.KeyHandle-com.google.crypto.tink.tinkkey.KeyAccess-">createFromKey(KeyHandle, KeyAccess)</a></span> - Static method in class com.google.crypto.tink.<a href="com/google/crypto/tink/KeysetHandle.html" title="class in com.google.crypto.tink">KeysetHandle</a></dt>
 <dd>
@@ -2707,6 +2727,10 @@
 <dd>
 <div class="block"><span class="deprecatedLabel">Deprecated.</span></div>
 &nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/mac/ChunkedMac.html#createVerification-byte:A-">createVerification(byte[])</a></span> - Method in interface com.google.crypto.tink.mac.<a href="com/google/crypto/tink/mac/ChunkedMac.html" title="interface in com.google.crypto.tink.mac">ChunkedMac</a></dt>
+<dd>
+<div class="block">Creates an instance of a single Chunked MAC verification.</div>
+</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/subtle/Base64.html#CRLF">CRLF</a></span> - Static variable in class com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/Base64.html" title="class in com.google.crypto.tink.subtle">Base64</a></dt>
 <dd>
 <div class="block">Encoder flag bit to indicate lines should be terminated with a CRLF pair instead of just an LF.</div>
@@ -2719,7 +2743,7 @@
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssPrivateKey.html#CRT_FIELD_NUMBER">CRT_FIELD_NUMBER</a></span> - Static variable in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssPrivateKey.html" title="class in com.google.crypto.tink.proto">RsaSsaPssPrivateKey</a></dt>
 <dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/mac/AesCmacKeyFormat.Variant.html#CRUNCHY">CRUNCHY</a></span> - Static variable in class com.google.crypto.tink.mac.<a href="com/google/crypto/tink/mac/AesCmacKeyFormat.Variant.html" title="class in com.google.crypto.tink.mac">AesCmacKeyFormat.Variant</a></dt>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/mac/AesCmacParameters.Variant.html#CRUNCHY">CRUNCHY</a></span> - Static variable in class com.google.crypto.tink.mac.<a href="com/google/crypto/tink/mac/AesCmacParameters.Variant.html" title="class in com.google.crypto.tink.mac">AesCmacParameters.Variant</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/OutputPrefixType.html#CRUNCHY_VALUE">CRUNCHY_VALUE</a></span> - Static variable in enum com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/OutputPrefixType.html" title="enum in com.google.crypto.tink.proto">OutputPrefixType</a></dt>
 <dd>
@@ -3829,9 +3853,9 @@
 <dd>
 <div class="block">Best effort fix-timing array comparison.</div>
 </dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/internal/LegacyProtoKeyFormat.html#equals-java.lang.Object-">equals(Object)</a></span> - Method in class com.google.crypto.tink.internal.<a href="com/google/crypto/tink/internal/LegacyProtoKeyFormat.html" title="class in com.google.crypto.tink.internal">LegacyProtoKeyFormat</a></dt>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/internal/LegacyProtoParameters.html#equals-java.lang.Object-">equals(Object)</a></span> - Method in class com.google.crypto.tink.internal.<a href="com/google/crypto/tink/internal/LegacyProtoParameters.html" title="class in com.google.crypto.tink.internal">LegacyProtoParameters</a></dt>
 <dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/mac/AesCmacKeyFormat.html#equals-java.lang.Object-">equals(Object)</a></span> - Method in class com.google.crypto.tink.mac.<a href="com/google/crypto/tink/mac/AesCmacKeyFormat.html" title="class in com.google.crypto.tink.mac">AesCmacKeyFormat</a></dt>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/mac/AesCmacParameters.html#equals-java.lang.Object-">equals(Object)</a></span> - Method in class com.google.crypto.tink.mac.<a href="com/google/crypto/tink/mac/AesCmacParameters.html" title="class in com.google.crypto.tink.mac">AesCmacParameters</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/monitoring/MonitoringAnnotations.html#equals-java.lang.Object-">equals(Object)</a></span> - Method in class com.google.crypto.tink.monitoring.<a href="com/google/crypto/tink/monitoring/MonitoringAnnotations.html" title="class in com.google.crypto.tink.monitoring">MonitoringAnnotations</a></dt>
 <dd>&nbsp;</dd>
@@ -4535,7 +4559,7 @@
 <div class="block">
  Chinese Remainder Theorem coefficient q^(-1) mod p.</div>
 </dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/mac/AesCmacKeyFormat.html#getCryptographicTagSizeBytes--">getCryptographicTagSizeBytes()</a></span> - Method in class com.google.crypto.tink.mac.<a href="com/google/crypto/tink/mac/AesCmacKeyFormat.html" title="class in com.google.crypto.tink.mac">AesCmacKeyFormat</a></dt>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/mac/AesCmacParameters.html#getCryptographicTagSizeBytes--">getCryptographicTagSizeBytes()</a></span> - Method in class com.google.crypto.tink.mac.<a href="com/google/crypto/tink/mac/AesCmacParameters.html" title="class in com.google.crypto.tink.mac">AesCmacParameters</a></dt>
 <dd>
 <div class="block">Returns the size of the tag which is computed cryptographically from the message.</div>
 </dd>
@@ -5870,27 +5894,6 @@
 <div class="block">
  Contains the actual, instantiation specific key proto.</div>
 </dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/internal/LegacyProtoKey.html#getKeyFormat--">getKeyFormat()</a></span> - Method in class com.google.crypto.tink.internal.<a href="com/google/crypto/tink/internal/LegacyProtoKey.html" title="class in com.google.crypto.tink.internal">LegacyProtoKey</a></dt>
-<dd>
-<div class="block">Unsupported.</div>
-</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/Key.html#getKeyFormat--">getKeyFormat()</a></span> - Method in class com.google.crypto.tink.<a href="com/google/crypto/tink/Key.html" title="class in com.google.crypto.tink">Key</a></dt>
-<dd>
-<div class="block">Returns a <a href="com/google/crypto/tink/KeyFormat.html" title="class in com.google.crypto.tink"><code>KeyFormat</code></a> object containing all the information about the key which is not
- randomly chosen.</div>
-</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/mac/AesCmacKey.html#getKeyFormat--">getKeyFormat()</a></span> - Method in class com.google.crypto.tink.mac.<a href="com/google/crypto/tink/mac/AesCmacKey.html" title="class in com.google.crypto.tink.mac">AesCmacKey</a></dt>
-<dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/mac/MacKey.html#getKeyFormat--">getKeyFormat()</a></span> - Method in class com.google.crypto.tink.mac.<a href="com/google/crypto/tink/mac/MacKey.html" title="class in com.google.crypto.tink.mac">MacKey</a></dt>
-<dd>
-<div class="block">Returns the key format of this key.</div>
-</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/monitoring/MonitoringKeysetInfo.Entry.html#getKeyFormat--">getKeyFormat()</a></span> - Method in class com.google.crypto.tink.monitoring.<a href="com/google/crypto/tink/monitoring/MonitoringKeysetInfo.Entry.html" title="class in com.google.crypto.tink.monitoring">MonitoringKeysetInfo.Entry</a></dt>
-<dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/PrimitiveSet.Entry.html#getKeyFormat--">getKeyFormat()</a></span> - Method in class com.google.crypto.tink.<a href="com/google/crypto/tink/PrimitiveSet.Entry.html" title="class in com.google.crypto.tink">PrimitiveSet.Entry</a></dt>
-<dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/internal/KeyFormatSerializer.html#getKeyFormatClass--">getKeyFormatClass()</a></span> - Method in class com.google.crypto.tink.internal.<a href="com/google/crypto/tink/internal/KeyFormatSerializer.html" title="class in com.google.crypto.tink.internal">KeyFormatSerializer</a></dt>
-<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/internal/KeyTypeManager.KeyFactory.html#getKeyFormatClass--">getKeyFormatClass()</a></span> - Method in class com.google.crypto.tink.internal.<a href="com/google/crypto/tink/internal/KeyTypeManager.KeyFactory.html" title="class in com.google.crypto.tink.internal">KeyTypeManager.KeyFactory</a></dt>
 <dd>
 <div class="block">Returns the class corresponding to the key format protobuffer.</div>
@@ -6276,7 +6279,7 @@
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/aead/subtle/AesGcmFactory.html#getKeySizeInBytes--">getKeySizeInBytes()</a></span> - Method in class com.google.crypto.tink.aead.subtle.<a href="com/google/crypto/tink/aead/subtle/AesGcmFactory.html" title="class in com.google.crypto.tink.aead.subtle">AesGcmFactory</a></dt>
 <dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/internal/ProtoKeyFormatSerialization.html#getKeyTemplate--">getKeyTemplate()</a></span> - Method in class com.google.crypto.tink.internal.<a href="com/google/crypto/tink/internal/ProtoKeyFormatSerialization.html" title="class in com.google.crypto.tink.internal">ProtoKeyFormatSerialization</a></dt>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/internal/ProtoParametersSerialization.html#getKeyTemplate--">getKeyTemplate()</a></span> - Method in class com.google.crypto.tink.internal.<a href="com/google/crypto/tink/internal/ProtoParametersSerialization.html" title="class in com.google.crypto.tink.internal">ProtoParametersSerialization</a></dt>
 <dd>
 <div class="block">The contents of the field value in the message com.google.crypto.tink.proto.KeyData.</div>
 </dd>
@@ -6871,21 +6874,21 @@
 <dd>
 <div class="block">Returns the non-registered claim of name <code>name</code> and type Number.</div>
 </dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/internal/KeyFormatParser.html#getObjectIdentifier--">getObjectIdentifier()</a></span> - Method in class com.google.crypto.tink.internal.<a href="com/google/crypto/tink/internal/KeyFormatParser.html" title="class in com.google.crypto.tink.internal">KeyFormatParser</a></dt>
-<dd>
-<div class="block">Returns the <code>objectIdentifier</code> for this serialization.</div>
-</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/internal/KeyParser.html#getObjectIdentifier--">getObjectIdentifier()</a></span> - Method in class com.google.crypto.tink.internal.<a href="com/google/crypto/tink/internal/KeyParser.html" title="class in com.google.crypto.tink.internal">KeyParser</a></dt>
 <dd>
 <div class="block">Returns the <code>objectIdentifier</code> for this serialization.</div>
 </dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/internal/ProtoKeyFormatSerialization.html#getObjectIdentifier--">getObjectIdentifier()</a></span> - Method in class com.google.crypto.tink.internal.<a href="com/google/crypto/tink/internal/ProtoKeyFormatSerialization.html" title="class in com.google.crypto.tink.internal">ProtoKeyFormatSerialization</a></dt>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/internal/ParametersParser.html#getObjectIdentifier--">getObjectIdentifier()</a></span> - Method in class com.google.crypto.tink.internal.<a href="com/google/crypto/tink/internal/ParametersParser.html" title="class in com.google.crypto.tink.internal">ParametersParser</a></dt>
 <dd>
-<div class="block">The typeUrl.</div>
+<div class="block">Returns the <code>objectIdentifier</code> for this serialization.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/internal/ProtoKeySerialization.html#getObjectIdentifier--">getObjectIdentifier()</a></span> - Method in class com.google.crypto.tink.internal.<a href="com/google/crypto/tink/internal/ProtoKeySerialization.html" title="class in com.google.crypto.tink.internal">ProtoKeySerialization</a></dt>
 <dd>
 <div class="block">The object identifier.</div>
+</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/internal/ProtoParametersSerialization.html#getObjectIdentifier--">getObjectIdentifier()</a></span> - Method in class com.google.crypto.tink.internal.<a href="com/google/crypto/tink/internal/ProtoParametersSerialization.html" title="class in com.google.crypto.tink.internal">ProtoParametersSerialization</a></dt>
+<dd>
+<div class="block">The typeUrl.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/internal/Serialization.html#getObjectIdentifier--">getObjectIdentifier()</a></span> - Method in interface com.google.crypto.tink.internal.<a href="com/google/crypto/tink/internal/Serialization.html" title="interface in com.google.crypto.tink.internal">Serialization</a></dt>
 <dd>
@@ -7067,6 +7070,27 @@
 <div class="block">
  The following parameters are used to optimize RSA signature computation.</div>
 </dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/internal/LegacyProtoKey.html#getParameters--">getParameters()</a></span> - Method in class com.google.crypto.tink.internal.<a href="com/google/crypto/tink/internal/LegacyProtoKey.html" title="class in com.google.crypto.tink.internal">LegacyProtoKey</a></dt>
+<dd>
+<div class="block">Unsupported.</div>
+</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/Key.html#getParameters--">getParameters()</a></span> - Method in class com.google.crypto.tink.<a href="com/google/crypto/tink/Key.html" title="class in com.google.crypto.tink">Key</a></dt>
+<dd>
+<div class="block">Returns a <a href="com/google/crypto/tink/Parameters.html" title="class in com.google.crypto.tink"><code>Parameters</code></a> object containing all the information about the key which is not
+ randomly chosen.</div>
+</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/mac/AesCmacKey.html#getParameters--">getParameters()</a></span> - Method in class com.google.crypto.tink.mac.<a href="com/google/crypto/tink/mac/AesCmacKey.html" title="class in com.google.crypto.tink.mac">AesCmacKey</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/mac/MacKey.html#getParameters--">getParameters()</a></span> - Method in class com.google.crypto.tink.mac.<a href="com/google/crypto/tink/mac/MacKey.html" title="class in com.google.crypto.tink.mac">MacKey</a></dt>
+<dd>
+<div class="block">Returns the parameters of this key.</div>
+</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/monitoring/MonitoringKeysetInfo.Entry.html#getParameters--">getParameters()</a></span> - Method in class com.google.crypto.tink.monitoring.<a href="com/google/crypto/tink/monitoring/MonitoringKeysetInfo.Entry.html" title="class in com.google.crypto.tink.monitoring">MonitoringKeysetInfo.Entry</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/PrimitiveSet.Entry.html#getParameters--">getParameters()</a></span> - Method in class com.google.crypto.tink.<a href="com/google/crypto/tink/PrimitiveSet.Entry.html" title="class in com.google.crypto.tink">PrimitiveSet.Entry</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/internal/ParametersSerializer.html#getParametersClass--">getParametersClass()</a></span> - Method in class com.google.crypto.tink.internal.<a href="com/google/crypto/tink/internal/ParametersSerializer.html" title="class in com.google.crypto.tink.internal">ParametersSerializer</a></dt>
+<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/AesCmacKey.Builder.html#getParams--">getParams()</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/AesCmacKey.Builder.html" title="class in com.google.crypto.tink.proto">AesCmacKey.Builder</a></dt>
 <dd>
 <div class="block"><code>.google.crypto.tink.AesCmacParams params = 3;</code></div>
@@ -8023,17 +8047,17 @@
 <dd>
 <div class="block">Returns the protokeyserialization with which this object was created.</div>
 </dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/internal/LegacyProtoKeyFormat.html#getSerialization--">getSerialization()</a></span> - Method in class com.google.crypto.tink.internal.<a href="com/google/crypto/tink/internal/LegacyProtoKeyFormat.html" title="class in com.google.crypto.tink.internal">LegacyProtoKeyFormat</a></dt>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/internal/LegacyProtoParameters.html#getSerialization--">getSerialization()</a></span> - Method in class com.google.crypto.tink.internal.<a href="com/google/crypto/tink/internal/LegacyProtoParameters.html" title="class in com.google.crypto.tink.internal">LegacyProtoParameters</a></dt>
 <dd>
 <div class="block">returns the serialization which was used to create this object.</div>
 </dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/internal/KeyFormatParser.html#getSerializationClass--">getSerializationClass()</a></span> - Method in class com.google.crypto.tink.internal.<a href="com/google/crypto/tink/internal/KeyFormatParser.html" title="class in com.google.crypto.tink.internal">KeyFormatParser</a></dt>
-<dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/internal/KeyFormatSerializer.html#getSerializationClass--">getSerializationClass()</a></span> - Method in class com.google.crypto.tink.internal.<a href="com/google/crypto/tink/internal/KeyFormatSerializer.html" title="class in com.google.crypto.tink.internal">KeyFormatSerializer</a></dt>
-<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/internal/KeyParser.html#getSerializationClass--">getSerializationClass()</a></span> - Method in class com.google.crypto.tink.internal.<a href="com/google/crypto/tink/internal/KeyParser.html" title="class in com.google.crypto.tink.internal">KeyParser</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/internal/KeySerializer.html#getSerializationClass--">getSerializationClass()</a></span> - Method in class com.google.crypto.tink.internal.<a href="com/google/crypto/tink/internal/KeySerializer.html" title="class in com.google.crypto.tink.internal">KeySerializer</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/internal/ParametersParser.html#getSerializationClass--">getSerializationClass()</a></span> - Method in class com.google.crypto.tink.internal.<a href="com/google/crypto/tink/internal/ParametersParser.html" title="class in com.google.crypto.tink.internal">ParametersParser</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/internal/ParametersSerializer.html#getSerializationClass--">getSerializationClass()</a></span> - Method in class com.google.crypto.tink.internal.<a href="com/google/crypto/tink/internal/ParametersSerializer.html" title="class in com.google.crypto.tink.internal">ParametersSerializer</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssParams.Builder.html#getSigHash--">getSigHash()</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssParams.Builder.html" title="class in com.google.crypto.tink.proto">RsaSsaPssParams.Builder</a></dt>
 <dd>
@@ -8175,7 +8199,7 @@
 <dd>
 <div class="block">Returns a <a href="com/google/crypto/tink/proto/KeyTypeEntry.html" title="class in com.google.crypto.tink.proto"><code>KeyTypeEntry</code></a> for Tink key types with the specified properties.</div>
 </dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/mac/AesCmacKeyFormat.html#getTotalTagSizeBytes--">getTotalTagSizeBytes()</a></span> - Method in class com.google.crypto.tink.mac.<a href="com/google/crypto/tink/mac/AesCmacKeyFormat.html" title="class in com.google.crypto.tink.mac">AesCmacKeyFormat</a></dt>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/mac/AesCmacParameters.html#getTotalTagSizeBytes--">getTotalTagSizeBytes()</a></span> - Method in class com.google.crypto.tink.mac.<a href="com/google/crypto/tink/mac/AesCmacParameters.html" title="class in com.google.crypto.tink.mac">AesCmacParameters</a></dt>
 <dd>
 <div class="block">Returns the size of the security relevant tag plus the size of the prefix with which this key
  prefixes every tag.</div>
@@ -8458,7 +8482,7 @@
 <dd>
 <div class="block"><code>string value = 1;</code></div>
 </dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/mac/AesCmacKeyFormat.html#getVariant--">getVariant()</a></span> - Method in class com.google.crypto.tink.mac.<a href="com/google/crypto/tink/mac/AesCmacKeyFormat.html" title="class in com.google.crypto.tink.mac">AesCmacKeyFormat</a></dt>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/mac/AesCmacParameters.html#getVariant--">getVariant()</a></span> - Method in class com.google.crypto.tink.mac.<a href="com/google/crypto/tink/mac/AesCmacParameters.html" title="class in com.google.crypto.tink.mac">AesCmacParameters</a></dt>
 <dd>
 <div class="block">Returns a variant object.</div>
 </dd>
@@ -9414,9 +9438,9 @@
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPkcs1Params.html#HASH_TYPE_FIELD_NUMBER">HASH_TYPE_FIELD_NUMBER</a></span> - Static variable in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPkcs1Params.html" title="class in com.google.crypto.tink.proto">RsaSsaPkcs1Params</a></dt>
 <dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/internal/LegacyProtoKeyFormat.html#hashCode--">hashCode()</a></span> - Method in class com.google.crypto.tink.internal.<a href="com/google/crypto/tink/internal/LegacyProtoKeyFormat.html" title="class in com.google.crypto.tink.internal">LegacyProtoKeyFormat</a></dt>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/internal/LegacyProtoParameters.html#hashCode--">hashCode()</a></span> - Method in class com.google.crypto.tink.internal.<a href="com/google/crypto/tink/internal/LegacyProtoParameters.html" title="class in com.google.crypto.tink.internal">LegacyProtoParameters</a></dt>
 <dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/mac/AesCmacKeyFormat.html#hashCode--">hashCode()</a></span> - Method in class com.google.crypto.tink.mac.<a href="com/google/crypto/tink/mac/AesCmacKeyFormat.html" title="class in com.google.crypto.tink.mac">AesCmacKeyFormat</a></dt>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/mac/AesCmacParameters.html#hashCode--">hashCode()</a></span> - Method in class com.google.crypto.tink.mac.<a href="com/google/crypto/tink/mac/AesCmacParameters.html" title="class in com.google.crypto.tink.mac">AesCmacParameters</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/monitoring/MonitoringAnnotations.html#hashCode--">hashCode()</a></span> - Method in class com.google.crypto.tink.monitoring.<a href="com/google/crypto/tink/monitoring/MonitoringAnnotations.html" title="class in com.google.crypto.tink.monitoring">MonitoringAnnotations</a></dt>
 <dd>&nbsp;</dd>
@@ -9469,14 +9493,15 @@
 <dd>
 <div class="block">Protobuf enum <code>google.crypto.tink.HashType</code></div>
 </dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/internal/LegacyProtoKeyFormat.html#hasIdRequirement--">hasIdRequirement()</a></span> - Method in class com.google.crypto.tink.internal.<a href="com/google/crypto/tink/internal/LegacyProtoKeyFormat.html" title="class in com.google.crypto.tink.internal">LegacyProtoKeyFormat</a></dt>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/internal/LegacyProtoParameters.html#hasIdRequirement--">hasIdRequirement()</a></span> - Method in class com.google.crypto.tink.internal.<a href="com/google/crypto/tink/internal/LegacyProtoParameters.html" title="class in com.google.crypto.tink.internal">LegacyProtoParameters</a></dt>
 <dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/KeyFormat.html#hasIdRequirement--">hasIdRequirement()</a></span> - Method in class com.google.crypto.tink.<a href="com/google/crypto/tink/KeyFormat.html" title="class in com.google.crypto.tink">KeyFormat</a></dt>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/mac/AesCmacParameters.html#hasIdRequirement--">hasIdRequirement()</a></span> - Method in class com.google.crypto.tink.mac.<a href="com/google/crypto/tink/mac/AesCmacParameters.html" title="class in com.google.crypto.tink.mac">AesCmacParameters</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/Parameters.html#hasIdRequirement--">hasIdRequirement()</a></span> - Method in class com.google.crypto.tink.<a href="com/google/crypto/tink/Parameters.html" title="class in com.google.crypto.tink">Parameters</a></dt>
 <dd>
-<div class="block">Returns true if a key created with this format has to have a certain ID when it is in a keyset.</div>
+<div class="block">Returns true if a key created with the parameters in this object has to have a certain ID when
+ it is in a keyset.</div>
 </dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/mac/AesCmacKeyFormat.html#hasIdRequirement--">hasIdRequirement()</a></span> - Method in class com.google.crypto.tink.mac.<a href="com/google/crypto/tink/mac/AesCmacKeyFormat.html" title="class in com.google.crypto.tink.mac">AesCmacKeyFormat</a></dt>
-<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/jwt/VerifiedJwt.html#hasIssuedAt--">hasIssuedAt()</a></span> - Method in class com.google.crypto.tink.jwt.<a href="com/google/crypto/tink/jwt/VerifiedJwt.html" title="class in com.google.crypto.tink.jwt">VerifiedJwt</a></dt>
 <dd>
 <div class="block">Returns true iff the <code>iat</code> claim is present.</div>
@@ -11227,31 +11252,9 @@
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/internal/KeyTypeManager.KeyFactory.KeyFormat.html#keyFormat">keyFormat</a></span> - Variable in class com.google.crypto.tink.internal.<a href="com/google/crypto/tink/internal/KeyTypeManager.KeyFactory.KeyFormat.html" title="class in com.google.crypto.tink.internal">KeyTypeManager.KeyFactory.KeyFormat</a></dt>
 <dd>&nbsp;</dd>
-<dt><a href="com/google/crypto/tink/KeyFormat.html" title="class in com.google.crypto.tink"><span class="typeNameLink">KeyFormat</span></a> - Class in <a href="com/google/crypto/tink/package-summary.html">com.google.crypto.tink</a></dt>
-<dd>
-<div class="block">Represents a cryptographic function without the actual key material.</div>
-</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/KeyFormat.html#KeyFormat--">KeyFormat()</a></span> - Constructor for class com.google.crypto.tink.<a href="com/google/crypto/tink/KeyFormat.html" title="class in com.google.crypto.tink">KeyFormat</a></dt>
-<dd>&nbsp;</dd>
-<dt><a href="com/google/crypto/tink/internal/KeyFormatParser.html" title="class in com.google.crypto.tink.internal"><span class="typeNameLink">KeyFormatParser</span></a>&lt;<a href="com/google/crypto/tink/internal/KeyFormatParser.html" title="type parameter in KeyFormatParser">SerializationT</a> extends <a href="com/google/crypto/tink/internal/Serialization.html" title="interface in com.google.crypto.tink.internal">Serialization</a>&gt; - Class in <a href="com/google/crypto/tink/internal/package-summary.html">com.google.crypto.tink.internal</a></dt>
-<dd>
-<div class="block">Parses <code>Serialization</code> objects into <code>KeyFormat</code> objects of a certain kind.</div>
-</dd>
-<dt><a href="com/google/crypto/tink/internal/KeyFormatParser.KeyFormatParsingFunction.html" title="interface in com.google.crypto.tink.internal"><span class="typeNameLink">KeyFormatParser.KeyFormatParsingFunction</span></a>&lt;<a href="com/google/crypto/tink/internal/KeyFormatParser.KeyFormatParsingFunction.html" title="type parameter in KeyFormatParser.KeyFormatParsingFunction">SerializationT</a> extends <a href="com/google/crypto/tink/internal/Serialization.html" title="interface in com.google.crypto.tink.internal">Serialization</a>&gt; - Interface in <a href="com/google/crypto/tink/internal/package-summary.html">com.google.crypto.tink.internal</a></dt>
-<dd>
-<div class="block">A function which parses a KeyFormat object.</div>
-</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/internal/KeyTypeManager.KeyFactory.html#keyFormats--">keyFormats()</a></span> - Method in class com.google.crypto.tink.internal.<a href="com/google/crypto/tink/internal/KeyTypeManager.KeyFactory.html" title="class in com.google.crypto.tink.internal">KeyTypeManager.KeyFactory</a></dt>
 <dd>
 <div class="block">Returns supported key formats and their names.</div>
-</dd>
-<dt><a href="com/google/crypto/tink/internal/KeyFormatSerializer.html" title="class in com.google.crypto.tink.internal"><span class="typeNameLink">KeyFormatSerializer</span></a>&lt;<a href="com/google/crypto/tink/internal/KeyFormatSerializer.html" title="type parameter in KeyFormatSerializer">KeyFormatT</a> extends <a href="com/google/crypto/tink/KeyFormat.html" title="class in com.google.crypto.tink">KeyFormat</a>,<a href="com/google/crypto/tink/internal/KeyFormatSerializer.html" title="type parameter in KeyFormatSerializer">SerializationT</a> extends <a href="com/google/crypto/tink/internal/Serialization.html" title="interface in com.google.crypto.tink.internal">Serialization</a>&gt; - Class in <a href="com/google/crypto/tink/internal/package-summary.html">com.google.crypto.tink.internal</a></dt>
-<dd>
-<div class="block">Serializes <code>KeyFormat</code> objects into <code>Serialization</code> objects of a certain kind.</div>
-</dd>
-<dt><a href="com/google/crypto/tink/internal/KeyFormatSerializer.KeyFormatSerializationFunction.html" title="interface in com.google.crypto.tink.internal"><span class="typeNameLink">KeyFormatSerializer.KeyFormatSerializationFunction</span></a>&lt;<a href="com/google/crypto/tink/internal/KeyFormatSerializer.KeyFormatSerializationFunction.html" title="type parameter in KeyFormatSerializer.KeyFormatSerializationFunction">KeyFormatT</a> extends <a href="com/google/crypto/tink/KeyFormat.html" title="class in com.google.crypto.tink">KeyFormat</a>,<a href="com/google/crypto/tink/internal/KeyFormatSerializer.KeyFormatSerializationFunction.html" title="type parameter in KeyFormatSerializer.KeyFormatSerializationFunction">SerializationT</a> extends <a href="com/google/crypto/tink/internal/Serialization.html" title="interface in com.google.crypto.tink.internal">Serialization</a>&gt; - Interface in <a href="com/google/crypto/tink/internal/package-summary.html">com.google.crypto.tink.internal</a></dt>
-<dd>
-<div class="block">A function which serializes a KeyFormat object.</div>
 </dd>
 <dt><a href="com/google/crypto/tink/tinkkey/KeyHandle.html" title="class in com.google.crypto.tink.tinkkey"><span class="typeNameLink">KeyHandle</span></a> - Class in <a href="com/google/crypto/tink/tinkkey/package-summary.html">com.google.crypto.tink.tinkkey</a></dt>
 <dd>
@@ -11650,7 +11653,7 @@
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/streamingaead/StreamingAeadConfig.html#LATEST">LATEST</a></span> - Static variable in class com.google.crypto.tink.streamingaead.<a href="com/google/crypto/tink/streamingaead/StreamingAeadConfig.html" title="class in com.google.crypto.tink.streamingaead">StreamingAeadConfig</a></dt>
 <dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/mac/AesCmacKeyFormat.Variant.html#LEGACY">LEGACY</a></span> - Static variable in class com.google.crypto.tink.mac.<a href="com/google/crypto/tink/mac/AesCmacKeyFormat.Variant.html" title="class in com.google.crypto.tink.mac">AesCmacKeyFormat.Variant</a></dt>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/mac/AesCmacParameters.Variant.html#LEGACY">LEGACY</a></span> - Static variable in class com.google.crypto.tink.mac.<a href="com/google/crypto/tink/mac/AesCmacParameters.Variant.html" title="class in com.google.crypto.tink.mac">AesCmacParameters.Variant</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/CryptoFormat.html#LEGACY_PREFIX_SIZE">LEGACY_PREFIX_SIZE</a></span> - Static variable in class com.google.crypto.tink.<a href="com/google/crypto/tink/CryptoFormat.html" title="class in com.google.crypto.tink">CryptoFormat</a></dt>
 <dd>
@@ -11670,13 +11673,13 @@
 <dd>
 <div class="block">Creates a new LegacyProtoKey object.</div>
 </dd>
-<dt><a href="com/google/crypto/tink/internal/LegacyProtoKeyFormat.html" title="class in com.google.crypto.tink.internal"><span class="typeNameLink">LegacyProtoKeyFormat</span></a> - Class in <a href="com/google/crypto/tink/internal/package-summary.html">com.google.crypto.tink.internal</a></dt>
+<dt><a href="com/google/crypto/tink/internal/LegacyProtoParameters.html" title="class in com.google.crypto.tink.internal"><span class="typeNameLink">LegacyProtoParameters</span></a> - Class in <a href="com/google/crypto/tink/internal/package-summary.html">com.google.crypto.tink.internal</a></dt>
 <dd>
 <div class="block">Implements a KeyFormat for legacy types where no actual KeyFormat is present.</div>
 </dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/internal/LegacyProtoKeyFormat.html#LegacyProtoKeyFormat-com.google.crypto.tink.internal.ProtoKeyFormatSerialization-">LegacyProtoKeyFormat(ProtoKeyFormatSerialization)</a></span> - Constructor for class com.google.crypto.tink.internal.<a href="com/google/crypto/tink/internal/LegacyProtoKeyFormat.html" title="class in com.google.crypto.tink.internal">LegacyProtoKeyFormat</a></dt>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/internal/LegacyProtoParameters.html#LegacyProtoParameters-com.google.crypto.tink.internal.ProtoParametersSerialization-">LegacyProtoParameters(ProtoParametersSerialization)</a></span> - Constructor for class com.google.crypto.tink.internal.<a href="com/google/crypto/tink/internal/LegacyProtoParameters.html" title="class in com.google.crypto.tink.internal">LegacyProtoParameters</a></dt>
 <dd>
-<div class="block">Creates a new LegacyProtoKeyFormat object.</div>
+<div class="block">Creates a new LegacyProtoParameters object.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/monitoring/MonitoringClient.Logger.html#log-int-long-">log(int, long)</a></span> - Method in interface com.google.crypto.tink.monitoring.<a href="com/google/crypto/tink/monitoring/MonitoringClient.Logger.html" title="interface in com.google.crypto.tink.monitoring">MonitoringClient.Logger</a></dt>
 <dd>&nbsp;</dd>
@@ -11716,12 +11719,6 @@
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/mac/MacKey.html#MacKey--">MacKey()</a></span> - Constructor for class com.google.crypto.tink.mac.<a href="com/google/crypto/tink/mac/MacKey.html" title="class in com.google.crypto.tink.mac">MacKey</a></dt>
 <dd>&nbsp;</dd>
-<dt><a href="com/google/crypto/tink/mac/MacKeyFormat.html" title="class in com.google.crypto.tink.mac"><span class="typeNameLink">MacKeyFormat</span></a> - Class in <a href="com/google/crypto/tink/mac/package-summary.html">com.google.crypto.tink.mac</a></dt>
-<dd>
-<div class="block">Represents a description of a <a href="com/google/crypto/tink/mac/MacKey.html" title="class in com.google.crypto.tink.mac"><code>MacKey</code></a> excluding the randomly chosen key material.</div>
-</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/mac/MacKeyFormat.html#MacKeyFormat--">MacKeyFormat()</a></span> - Constructor for class com.google.crypto.tink.mac.<a href="com/google/crypto/tink/mac/MacKeyFormat.html" title="class in com.google.crypto.tink.mac">MacKeyFormat</a></dt>
-<dd>&nbsp;</dd>
 <dt><a href="com/google/crypto/tink/mac/MacKeyTemplates.html" title="class in com.google.crypto.tink.mac"><span class="typeNameLink">MacKeyTemplates</span></a> - Class in <a href="com/google/crypto/tink/mac/package-summary.html">com.google.crypto.tink.mac</a></dt>
 <dd>
 <div class="block"><span class="deprecatedLabel">Deprecated.</span>
@@ -11729,6 +11726,12 @@
      KeyTemplates.get("HMAC_SHA256_128BITTAG")</span></div>
 </div>
 </dd>
+<dt><a href="com/google/crypto/tink/mac/MacParameters.html" title="class in com.google.crypto.tink.mac"><span class="typeNameLink">MacParameters</span></a> - Class in <a href="com/google/crypto/tink/mac/package-summary.html">com.google.crypto.tink.mac</a></dt>
+<dd>
+<div class="block">Represents a description of a <a href="com/google/crypto/tink/mac/MacKey.html" title="class in com.google.crypto.tink.mac"><code>MacKey</code></a> excluding the randomly chosen key material.</div>
+</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/mac/MacParameters.html#MacParameters--">MacParameters()</a></span> - Constructor for class com.google.crypto.tink.mac.<a href="com/google/crypto/tink/mac/MacParameters.html" title="class in com.google.crypto.tink.mac">MacParameters</a></dt>
+<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/EciesAeadDemParams.Builder.html#mergeAeadDem-com.google.crypto.tink.proto.KeyTemplate-">mergeAeadDem(KeyTemplate)</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/EciesAeadDemParams.Builder.html" title="class in com.google.crypto.tink.proto">EciesAeadDemParams.Builder</a></dt>
 <dd>
 <div class="block">
@@ -12528,7 +12531,7 @@
 <dd>
 <div class="block">Encoder flag bit to omit the padding '=' characters at the end of the output (if any).</div>
 </dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/mac/AesCmacKeyFormat.Variant.html#NO_PREFIX">NO_PREFIX</a></span> - Static variable in class com.google.crypto.tink.mac.<a href="com/google/crypto/tink/mac/AesCmacKeyFormat.Variant.html" title="class in com.google.crypto.tink.mac">AesCmacKeyFormat.Variant</a></dt>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/mac/AesCmacParameters.Variant.html#NO_PREFIX">NO_PREFIX</a></span> - Static variable in class com.google.crypto.tink.mac.<a href="com/google/crypto/tink/mac/AesCmacParameters.Variant.html" title="class in com.google.crypto.tink.mac">AesCmacParameters.Variant</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/subtle/Base64.html#NO_WRAP">NO_WRAP</a></span> - Static variable in class com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/Base64.html" title="class in com.google.crypto.tink.subtle">Base64</a></dt>
 <dd>
@@ -12588,6 +12591,28 @@
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssPrivateKey.html#P_FIELD_NUMBER">P_FIELD_NUMBER</a></span> - Static variable in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssPrivateKey.html" title="class in com.google.crypto.tink.proto">RsaSsaPssPrivateKey</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="com/google/crypto/tink/Parameters.html" title="class in com.google.crypto.tink"><span class="typeNameLink">Parameters</span></a> - Class in <a href="com/google/crypto/tink/package-summary.html">com.google.crypto.tink</a></dt>
+<dd>
+<div class="block">Represents a cryptographic function without the actual key material.</div>
+</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/Parameters.html#Parameters--">Parameters()</a></span> - Constructor for class com.google.crypto.tink.<a href="com/google/crypto/tink/Parameters.html" title="class in com.google.crypto.tink">Parameters</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="com/google/crypto/tink/internal/ParametersParser.html" title="class in com.google.crypto.tink.internal"><span class="typeNameLink">ParametersParser</span></a>&lt;<a href="com/google/crypto/tink/internal/ParametersParser.html" title="type parameter in ParametersParser">SerializationT</a> extends <a href="com/google/crypto/tink/internal/Serialization.html" title="interface in com.google.crypto.tink.internal">Serialization</a>&gt; - Class in <a href="com/google/crypto/tink/internal/package-summary.html">com.google.crypto.tink.internal</a></dt>
+<dd>
+<div class="block">Parses <code>Serialization</code> objects into <code>Parameters</code> objects of a certain kind.</div>
+</dd>
+<dt><a href="com/google/crypto/tink/internal/ParametersParser.ParametersParsingFunction.html" title="interface in com.google.crypto.tink.internal"><span class="typeNameLink">ParametersParser.ParametersParsingFunction</span></a>&lt;<a href="com/google/crypto/tink/internal/ParametersParser.ParametersParsingFunction.html" title="type parameter in ParametersParser.ParametersParsingFunction">SerializationT</a> extends <a href="com/google/crypto/tink/internal/Serialization.html" title="interface in com.google.crypto.tink.internal">Serialization</a>&gt; - Interface in <a href="com/google/crypto/tink/internal/package-summary.html">com.google.crypto.tink.internal</a></dt>
+<dd>
+<div class="block">A function which parses a Parameters object.</div>
+</dd>
+<dt><a href="com/google/crypto/tink/internal/ParametersSerializer.html" title="class in com.google.crypto.tink.internal"><span class="typeNameLink">ParametersSerializer</span></a>&lt;<a href="com/google/crypto/tink/internal/ParametersSerializer.html" title="type parameter in ParametersSerializer">ParametersT</a> extends <a href="com/google/crypto/tink/Parameters.html" title="class in com.google.crypto.tink">Parameters</a>,<a href="com/google/crypto/tink/internal/ParametersSerializer.html" title="type parameter in ParametersSerializer">SerializationT</a> extends <a href="com/google/crypto/tink/internal/Serialization.html" title="interface in com.google.crypto.tink.internal">Serialization</a>&gt; - Class in <a href="com/google/crypto/tink/internal/package-summary.html">com.google.crypto.tink.internal</a></dt>
+<dd>
+<div class="block">Serializes <code>Parameters</code> objects into <code>Serialization</code> objects of a certain kind.</div>
+</dd>
+<dt><a href="com/google/crypto/tink/internal/ParametersSerializer.ParametersSerializationFunction.html" title="interface in com.google.crypto.tink.internal"><span class="typeNameLink">ParametersSerializer.ParametersSerializationFunction</span></a>&lt;<a href="com/google/crypto/tink/internal/ParametersSerializer.ParametersSerializationFunction.html" title="type parameter in ParametersSerializer.ParametersSerializationFunction">ParametersT</a> extends <a href="com/google/crypto/tink/Parameters.html" title="class in com.google.crypto.tink">Parameters</a>,<a href="com/google/crypto/tink/internal/ParametersSerializer.ParametersSerializationFunction.html" title="type parameter in ParametersSerializer.ParametersSerializationFunction">SerializationT</a> extends <a href="com/google/crypto/tink/internal/Serialization.html" title="interface in com.google.crypto.tink.internal">Serialization</a>&gt; - Interface in <a href="com/google/crypto/tink/internal/package-summary.html">com.google.crypto.tink.internal</a></dt>
+<dd>
+<div class="block">A function which serializes a Parameters object.</div>
+</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/AesCmacKey.html#PARAMS_FIELD_NUMBER">PARAMS_FIELD_NUMBER</a></span> - Static variable in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/AesCmacKey.html" title="class in com.google.crypto.tink.proto">AesCmacKey</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/AesCmacKeyFormat.html#PARAMS_FIELD_NUMBER">PARAMS_FIELD_NUMBER</a></span> - Static variable in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/AesCmacKeyFormat.html" title="class in com.google.crypto.tink.proto">AesCmacKeyFormat</a></dt>
@@ -14966,23 +14991,23 @@
 <dd>
 <div class="block">Returns the key proto in the keyData if a corresponding key type manager was registered.</div>
 </dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/internal/KeyFormatParser.KeyFormatParsingFunction.html#parseKeyFormat-SerializationT-">parseKeyFormat(SerializationT)</a></span> - Method in interface com.google.crypto.tink.internal.<a href="com/google/crypto/tink/internal/KeyFormatParser.KeyFormatParsingFunction.html" title="interface in com.google.crypto.tink.internal">KeyFormatParser.KeyFormatParsingFunction</a></dt>
-<dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/internal/KeyFormatParser.html#parseKeyFormat-SerializationT-">parseKeyFormat(SerializationT)</a></span> - Method in class com.google.crypto.tink.internal.<a href="com/google/crypto/tink/internal/KeyFormatParser.html" title="class in com.google.crypto.tink.internal">KeyFormatParser</a></dt>
-<dd>
-<div class="block">Parses a serialization into a KeyFormat.</div>
-</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/internal/KeyTypeManager.KeyFactory.html#parseKeyFormat-com.google.protobuf.ByteString-">parseKeyFormat(ByteString)</a></span> - Method in class com.google.crypto.tink.internal.<a href="com/google/crypto/tink/internal/KeyTypeManager.KeyFactory.html" title="class in com.google.crypto.tink.internal">KeyTypeManager.KeyFactory</a></dt>
 <dd>
 <div class="block">Parses a serialized key proto.</div>
 </dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/internal/MutableSerializationRegistry.html#parseKeyFormat-SerializationT-">parseKeyFormat(SerializationT)</a></span> - Method in class com.google.crypto.tink.internal.<a href="com/google/crypto/tink/internal/MutableSerializationRegistry.html" title="class in com.google.crypto.tink.internal">MutableSerializationRegistry</a></dt>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/internal/MutableSerializationRegistry.html#parseParameters-SerializationT-">parseParameters(SerializationT)</a></span> - Method in class com.google.crypto.tink.internal.<a href="com/google/crypto/tink/internal/MutableSerializationRegistry.html" title="class in com.google.crypto.tink.internal">MutableSerializationRegistry</a></dt>
 <dd>
-<div class="block">Parses the given serialization into a KeyFormat.</div>
+<div class="block">Parses the given serialization into a Parameters object.</div>
 </dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/internal/SerializationRegistry.html#parseKeyFormat-SerializationT-">parseKeyFormat(SerializationT)</a></span> - Method in class com.google.crypto.tink.internal.<a href="com/google/crypto/tink/internal/SerializationRegistry.html" title="class in com.google.crypto.tink.internal">SerializationRegistry</a></dt>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/internal/ParametersParser.ParametersParsingFunction.html#parseParameters-SerializationT-">parseParameters(SerializationT)</a></span> - Method in interface com.google.crypto.tink.internal.<a href="com/google/crypto/tink/internal/ParametersParser.ParametersParsingFunction.html" title="interface in com.google.crypto.tink.internal">ParametersParser.ParametersParsingFunction</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/internal/ParametersParser.html#parseParameters-SerializationT-">parseParameters(SerializationT)</a></span> - Method in class com.google.crypto.tink.internal.<a href="com/google/crypto/tink/internal/ParametersParser.html" title="class in com.google.crypto.tink.internal">ParametersParser</a></dt>
 <dd>
-<div class="block">Parses the given serialization into a KeyFormat.</div>
+<div class="block">Parses a serialization into a KeyFormat.</div>
+</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/internal/SerializationRegistry.html#parseParameters-SerializationT-">parseParameters(SerializationT)</a></span> - Method in class com.google.crypto.tink.internal.<a href="com/google/crypto/tink/internal/SerializationRegistry.html" title="class in com.google.crypto.tink.internal">SerializationRegistry</a></dt>
+<dd>
+<div class="block">Parses the given serialization into a Parameters.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/AesCmacKey.html#parser--">parser()</a></span> - Static method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/AesCmacKey.html" title="class in com.google.crypto.tink.proto">AesCmacKey</a></dt>
 <dd>&nbsp;</dd>
@@ -15335,13 +15360,13 @@
 <div class="block">Constructs a ProtoKey with <code>hasSecret()</code> returning true if the input <code>KeyData</code> has
  key material of type UNKNOWN_KEYMATERIAL, SYMMETRIC, or ASYMMETRIC_PRIVATE.</div>
 </dd>
-<dt><a href="com/google/crypto/tink/internal/ProtoKeyFormatSerialization.html" title="class in com.google.crypto.tink.internal"><span class="typeNameLink">ProtoKeyFormatSerialization</span></a> - Class in <a href="com/google/crypto/tink/internal/package-summary.html">com.google.crypto.tink.internal</a></dt>
-<dd>
-<div class="block">Represents a <code>KeyFormat</code> object serialized with binary protobuf Serialization.</div>
-</dd>
 <dt><a href="com/google/crypto/tink/internal/ProtoKeySerialization.html" title="class in com.google.crypto.tink.internal"><span class="typeNameLink">ProtoKeySerialization</span></a> - Class in <a href="com/google/crypto/tink/internal/package-summary.html">com.google.crypto.tink.internal</a></dt>
 <dd>
 <div class="block">* Represents a <code>Key</code> object serialized with binary protobuf Serialization.</div>
+</dd>
+<dt><a href="com/google/crypto/tink/internal/ProtoParametersSerialization.html" title="class in com.google.crypto.tink.internal"><span class="typeNameLink">ProtoParametersSerialization</span></a> - Class in <a href="com/google/crypto/tink/internal/package-summary.html">com.google.crypto.tink.internal</a></dt>
+<dd>
+<div class="block">Represents a <code>Parameters</code> object serialized with binary protobuf Serialization.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/JwtRsaSsaPssAlgorithm.html#PS256_VALUE">PS256_VALUE</a></span> - Static variable in enum com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/JwtRsaSsaPssAlgorithm.html" title="enum in com.google.crypto.tink.proto">JwtRsaSsaPssAlgorithm</a></dt>
 <dd>
@@ -15843,22 +15868,6 @@
 <dd>
 <div class="block">Tries to register <code>manager</code> for <code>manager.getKeyType()</code>.</div>
 </dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/internal/MutableSerializationRegistry.html#registerKeyFormatParser-com.google.crypto.tink.internal.KeyFormatParser-">registerKeyFormatParser(KeyFormatParser&lt;SerializationT&gt;)</a></span> - Method in class com.google.crypto.tink.internal.<a href="com/google/crypto/tink/internal/MutableSerializationRegistry.html" title="class in com.google.crypto.tink.internal">MutableSerializationRegistry</a></dt>
-<dd>
-<div class="block">Registers a key parser for later use in <a href="com/google/crypto/tink/internal/MutableSerializationRegistry.html#parseKey-SerializationT-com.google.crypto.tink.SecretKeyAccess-"><code>MutableSerializationRegistry.parseKey(SerializationT, com.google.crypto.tink.SecretKeyAccess)</code></a>.</div>
-</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/internal/SerializationRegistry.Builder.html#registerKeyFormatParser-com.google.crypto.tink.internal.KeyFormatParser-">registerKeyFormatParser(KeyFormatParser&lt;SerializationT&gt;)</a></span> - Method in class com.google.crypto.tink.internal.<a href="com/google/crypto/tink/internal/SerializationRegistry.Builder.html" title="class in com.google.crypto.tink.internal">SerializationRegistry.Builder</a></dt>
-<dd>
-<div class="block">Registers a key parser for later use in <a href="com/google/crypto/tink/internal/SerializationRegistry.html#parseKey-SerializationT-com.google.crypto.tink.SecretKeyAccess-"><code>SerializationRegistry.parseKey(SerializationT, com.google.crypto.tink.SecretKeyAccess)</code></a>.</div>
-</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/internal/MutableSerializationRegistry.html#registerKeyFormatSerializer-com.google.crypto.tink.internal.KeyFormatSerializer-">registerKeyFormatSerializer(KeyFormatSerializer&lt;KeyFormatT, SerializationT&gt;)</a></span> - Method in class com.google.crypto.tink.internal.<a href="com/google/crypto/tink/internal/MutableSerializationRegistry.html" title="class in com.google.crypto.tink.internal">MutableSerializationRegistry</a></dt>
-<dd>
-<div class="block">Registers a key serializer for later use in <a href="com/google/crypto/tink/internal/MutableSerializationRegistry.html#serializeKey-KeyT-java.lang.Class-com.google.crypto.tink.SecretKeyAccess-"><code>MutableSerializationRegistry.serializeKey(KeyT, java.lang.Class&lt;SerializationT&gt;, com.google.crypto.tink.SecretKeyAccess)</code></a>.</div>
-</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/internal/SerializationRegistry.Builder.html#registerKeyFormatSerializer-com.google.crypto.tink.internal.KeyFormatSerializer-">registerKeyFormatSerializer(KeyFormatSerializer&lt;KeyFormatT, SerializationT&gt;)</a></span> - Method in class com.google.crypto.tink.internal.<a href="com/google/crypto/tink/internal/SerializationRegistry.Builder.html" title="class in com.google.crypto.tink.internal">SerializationRegistry.Builder</a></dt>
-<dd>
-<div class="block">Registers a key serializer for later use in <a href="com/google/crypto/tink/internal/SerializationRegistry.html#serializeKey-KeyT-java.lang.Class-com.google.crypto.tink.SecretKeyAccess-"><code>SerializationRegistry.serializeKey(KeyT, java.lang.Class&lt;SerializationT&gt;, com.google.crypto.tink.SecretKeyAccess)</code></a>.</div>
-</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/Registry.html#registerKeyManager-com.google.crypto.tink.KeyManager-">registerKeyManager(KeyManager&lt;P&gt;)</a></span> - Static method in class com.google.crypto.tink.<a href="com/google/crypto/tink/Registry.html" title="class in com.google.crypto.tink">Registry</a></dt>
 <dd>
 <div class="block">Tries to register <code>manager</code> for <code>manager.getKeyType()</code>.</div>
@@ -15949,6 +15958,22 @@
 <dd>
 <div class="block">Registers the <a href="com/google/crypto/tink/signature/RsaSsaPssSignKeyManager.html" title="class in com.google.crypto.tink.signature"><code>RsaSsaPssSignKeyManager</code></a> and the <code>RsaSsaPssVerifyKeyManager</code> with
  the registry, so that the the RsaSsaPss-Keys can be used with Tink.</div>
+</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/internal/MutableSerializationRegistry.html#registerParametersParser-com.google.crypto.tink.internal.ParametersParser-">registerParametersParser(ParametersParser&lt;SerializationT&gt;)</a></span> - Method in class com.google.crypto.tink.internal.<a href="com/google/crypto/tink/internal/MutableSerializationRegistry.html" title="class in com.google.crypto.tink.internal">MutableSerializationRegistry</a></dt>
+<dd>
+<div class="block">Registers a key parser for later use in <a href="com/google/crypto/tink/internal/MutableSerializationRegistry.html#parseKey-SerializationT-com.google.crypto.tink.SecretKeyAccess-"><code>MutableSerializationRegistry.parseKey(SerializationT, com.google.crypto.tink.SecretKeyAccess)</code></a>.</div>
+</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/internal/SerializationRegistry.Builder.html#registerParametersParser-com.google.crypto.tink.internal.ParametersParser-">registerParametersParser(ParametersParser&lt;SerializationT&gt;)</a></span> - Method in class com.google.crypto.tink.internal.<a href="com/google/crypto/tink/internal/SerializationRegistry.Builder.html" title="class in com.google.crypto.tink.internal">SerializationRegistry.Builder</a></dt>
+<dd>
+<div class="block">Registers a key parser for later use in <a href="com/google/crypto/tink/internal/SerializationRegistry.html#parseKey-SerializationT-com.google.crypto.tink.SecretKeyAccess-"><code>SerializationRegistry.parseKey(SerializationT, com.google.crypto.tink.SecretKeyAccess)</code></a>.</div>
+</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/internal/MutableSerializationRegistry.html#registerParametersSerializer-com.google.crypto.tink.internal.ParametersSerializer-">registerParametersSerializer(ParametersSerializer&lt;ParametersT, SerializationT&gt;)</a></span> - Method in class com.google.crypto.tink.internal.<a href="com/google/crypto/tink/internal/MutableSerializationRegistry.html" title="class in com.google.crypto.tink.internal">MutableSerializationRegistry</a></dt>
+<dd>
+<div class="block">Registers a key serializer for later use in <a href="com/google/crypto/tink/internal/MutableSerializationRegistry.html#serializeKey-KeyT-java.lang.Class-com.google.crypto.tink.SecretKeyAccess-"><code>MutableSerializationRegistry.serializeKey(KeyT, java.lang.Class&lt;SerializationT&gt;, com.google.crypto.tink.SecretKeyAccess)</code></a>.</div>
+</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/internal/SerializationRegistry.Builder.html#registerParametersSerializer-com.google.crypto.tink.internal.ParametersSerializer-">registerParametersSerializer(ParametersSerializer&lt;ParametersT, SerializationT&gt;)</a></span> - Method in class com.google.crypto.tink.internal.<a href="com/google/crypto/tink/internal/SerializationRegistry.Builder.html" title="class in com.google.crypto.tink.internal">SerializationRegistry.Builder</a></dt>
+<dd>
+<div class="block">Registers a key serializer for later use in <a href="com/google/crypto/tink/internal/SerializationRegistry.html#serializeKey-KeyT-java.lang.Class-com.google.crypto.tink.SecretKeyAccess-"><code>SerializationRegistry.serializeKey(KeyT, java.lang.Class&lt;SerializationT&gt;, com.google.crypto.tink.SecretKeyAccess)</code></a>.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/Registry.html#registerPrimitiveWrapper-com.google.crypto.tink.PrimitiveWrapper-">registerPrimitiveWrapper(PrimitiveWrapper&lt;B, P&gt;)</a></span> - Static method in class com.google.crypto.tink.<a href="com/google/crypto/tink/Registry.html" title="class in com.google.crypto.tink">Registry</a></dt>
 <dd>
@@ -16334,7 +16359,7 @@
 </dd>
 <dt><a href="com/google/crypto/tink/internal/SerializationRegistry.html" title="class in com.google.crypto.tink.internal"><span class="typeNameLink">SerializationRegistry</span></a> - Class in <a href="com/google/crypto/tink/internal/package-summary.html">com.google.crypto.tink.internal</a></dt>
 <dd>
-<div class="block">Allows registering <code>KeySerializer</code>, <code>KeyParser</code>, <code>KeyFormatSerializer</code>, and
+<div class="block">Allows registering <code>KeySerializer</code>, <code>KeyParser</code>, <code>ParametersSerializer</code>, and
   objects, and parsing/serializing keys and key formats with such objects.</div>
 </dd>
 <dt><a href="com/google/crypto/tink/internal/SerializationRegistry.Builder.html" title="class in com.google.crypto.tink.internal"><span class="typeNameLink">SerializationRegistry.Builder</span></a> - Class in <a href="com/google/crypto/tink/internal/package-summary.html">com.google.crypto.tink.internal</a></dt>
@@ -16353,17 +16378,17 @@
 <dd>
 <div class="block">Serializes a given Key into a "SerializationT" object.</div>
 </dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/internal/KeyFormatSerializer.KeyFormatSerializationFunction.html#serializeKeyFormat-KeyFormatT-">serializeKeyFormat(KeyFormatT)</a></span> - Method in interface com.google.crypto.tink.internal.<a href="com/google/crypto/tink/internal/KeyFormatSerializer.KeyFormatSerializationFunction.html" title="interface in com.google.crypto.tink.internal">KeyFormatSerializer.KeyFormatSerializationFunction</a></dt>
-<dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/internal/KeyFormatSerializer.html#serializeKeyFormat-KeyFormatT-">serializeKeyFormat(KeyFormatT)</a></span> - Method in class com.google.crypto.tink.internal.<a href="com/google/crypto/tink/internal/KeyFormatSerializer.html" title="class in com.google.crypto.tink.internal">KeyFormatSerializer</a></dt>
-<dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/internal/MutableSerializationRegistry.html#serializeKeyFormat-KeyFormatT-java.lang.Class-">serializeKeyFormat(KeyFormatT, Class&lt;SerializationT&gt;)</a></span> - Method in class com.google.crypto.tink.internal.<a href="com/google/crypto/tink/internal/MutableSerializationRegistry.html" title="class in com.google.crypto.tink.internal">MutableSerializationRegistry</a></dt>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/internal/MutableSerializationRegistry.html#serializeParameters-ParametersT-java.lang.Class-">serializeParameters(ParametersT, Class&lt;SerializationT&gt;)</a></span> - Method in class com.google.crypto.tink.internal.<a href="com/google/crypto/tink/internal/MutableSerializationRegistry.html" title="class in com.google.crypto.tink.internal">MutableSerializationRegistry</a></dt>
 <dd>
-<div class="block">Serializes a given KeyFormat into a "SerializationT" object.</div>
+<div class="block">Serializes a given Parameters object into a "SerializationT" object.</div>
 </dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/internal/SerializationRegistry.html#serializeKeyFormat-KeyFormatT-java.lang.Class-">serializeKeyFormat(KeyFormatT, Class&lt;SerializationT&gt;)</a></span> - Method in class com.google.crypto.tink.internal.<a href="com/google/crypto/tink/internal/SerializationRegistry.html" title="class in com.google.crypto.tink.internal">SerializationRegistry</a></dt>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/internal/ParametersSerializer.ParametersSerializationFunction.html#serializeParameters-ParametersT-">serializeParameters(ParametersT)</a></span> - Method in interface com.google.crypto.tink.internal.<a href="com/google/crypto/tink/internal/ParametersSerializer.ParametersSerializationFunction.html" title="interface in com.google.crypto.tink.internal">ParametersSerializer.ParametersSerializationFunction</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/internal/ParametersSerializer.html#serializeParameters-ParametersT-">serializeParameters(ParametersT)</a></span> - Method in class com.google.crypto.tink.internal.<a href="com/google/crypto/tink/internal/ParametersSerializer.html" title="class in com.google.crypto.tink.internal">ParametersSerializer</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/internal/SerializationRegistry.html#serializeParameters-ParametersT-java.lang.Class-">serializeParameters(ParametersT, Class&lt;SerializationT&gt;)</a></span> - Method in class com.google.crypto.tink.internal.<a href="com/google/crypto/tink/internal/SerializationRegistry.html" title="class in com.google.crypto.tink.internal">SerializationRegistry</a></dt>
 <dd>
-<div class="block">Serializes a given KeyFormat into a "SerializationT" object.</div>
+<div class="block">Serializes a given Parameters object into a "SerializationT" object.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/HpkeParams.Builder.html#setAead-com.google.crypto.tink.proto.HpkeAead-">setAead(HpkeAead)</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/HpkeParams.Builder.html" title="class in com.google.crypto.tink.proto">HpkeParams.Builder</a></dt>
 <dd>
@@ -18228,7 +18253,7 @@
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/subtle/EngineWrapper.TCipher.html#TCipher--">TCipher()</a></span> - Constructor for class com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/EngineWrapper.TCipher.html" title="class in com.google.crypto.tink.subtle">EngineWrapper.TCipher</a></dt>
 <dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/mac/AesCmacKeyFormat.Variant.html#TINK">TINK</a></span> - Static variable in class com.google.crypto.tink.mac.<a href="com/google/crypto/tink/mac/AesCmacKeyFormat.Variant.html" title="class in com.google.crypto.tink.mac">AesCmacKeyFormat.Variant</a></dt>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/mac/AesCmacParameters.Variant.html#TINK">TINK</a></span> - Static variable in class com.google.crypto.tink.mac.<a href="com/google/crypto/tink/mac/AesCmacParameters.Variant.html" title="class in com.google.crypto.tink.mac">AesCmacParameters.Variant</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/google/crypto/tink/proto/Tink.html" title="class in com.google.crypto.tink.proto"><span class="typeNameLink">Tink</span></a> - Class in <a href="com/google/crypto/tink/proto/package-summary.html">com.google.crypto.tink.proto</a></dt>
 <dd>&nbsp;</dd>
@@ -18395,7 +18420,7 @@
 <div class="block">Returns the RSA SSA (Signature with Appendix) PKCS1 algorithm name corresponding to a hash
  type.</div>
 </dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/internal/LegacyProtoKeyFormat.html#toString--">toString()</a></span> - Method in class com.google.crypto.tink.internal.<a href="com/google/crypto/tink/internal/LegacyProtoKeyFormat.html" title="class in com.google.crypto.tink.internal">LegacyProtoKeyFormat</a></dt>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/internal/LegacyProtoParameters.html#toString--">toString()</a></span> - Method in class com.google.crypto.tink.internal.<a href="com/google/crypto/tink/internal/LegacyProtoParameters.html" title="class in com.google.crypto.tink.internal">LegacyProtoParameters</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/jwt/JwtValidator.html#toString--">toString()</a></span> - Method in class com.google.crypto.tink.jwt.<a href="com/google/crypto/tink/jwt/JwtValidator.html" title="class in com.google.crypto.tink.jwt">JwtValidator</a></dt>
 <dd>
@@ -18415,9 +18440,9 @@
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/KeyStatus.html#toString--">toString()</a></span> - Method in class com.google.crypto.tink.<a href="com/google/crypto/tink/KeyStatus.html" title="class in com.google.crypto.tink">KeyStatus</a></dt>
 <dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/mac/AesCmacKeyFormat.html#toString--">toString()</a></span> - Method in class com.google.crypto.tink.mac.<a href="com/google/crypto/tink/mac/AesCmacKeyFormat.html" title="class in com.google.crypto.tink.mac">AesCmacKeyFormat</a></dt>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/mac/AesCmacParameters.html#toString--">toString()</a></span> - Method in class com.google.crypto.tink.mac.<a href="com/google/crypto/tink/mac/AesCmacParameters.html" title="class in com.google.crypto.tink.mac">AesCmacParameters</a></dt>
 <dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/mac/AesCmacKeyFormat.Variant.html#toString--">toString()</a></span> - Method in class com.google.crypto.tink.mac.<a href="com/google/crypto/tink/mac/AesCmacKeyFormat.Variant.html" title="class in com.google.crypto.tink.mac">AesCmacKeyFormat.Variant</a></dt>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/mac/AesCmacParameters.Variant.html#toString--">toString()</a></span> - Method in class com.google.crypto.tink.mac.<a href="com/google/crypto/tink/mac/AesCmacParameters.Variant.html" title="class in com.google.crypto.tink.mac">AesCmacParameters.Variant</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/monitoring/MonitoringAnnotations.html#toString--">toString()</a></span> - Method in class com.google.crypto.tink.monitoring.<a href="com/google/crypto/tink/monitoring/MonitoringAnnotations.html" title="class in com.google.crypto.tink.monitoring">MonitoringAnnotations</a></dt>
 <dd>&nbsp;</dd>
@@ -18492,6 +18517,14 @@
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/subtle/Kwp.html#unwrap-byte:A-">unwrap(byte[])</a></span> - Method in class com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/Kwp.html" title="class in com.google.crypto.tink.subtle">Kwp</a></dt>
 <dd>
 <div class="block">Unwraps a wrapped key.</div>
+</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/mac/ChunkedMacComputation.html#update-java.nio.ByteBuffer-">update(ByteBuffer)</a></span> - Method in interface com.google.crypto.tink.mac.<a href="com/google/crypto/tink/mac/ChunkedMacComputation.html" title="interface in com.google.crypto.tink.mac">ChunkedMacComputation</a></dt>
+<dd>
+<div class="block">Processes the next chunk of input, represented by <code>ByteBuffer data</code>.</div>
+</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/mac/ChunkedMacVerification.html#update-java.nio.ByteBuffer-">update(ByteBuffer)</a></span> - Method in interface com.google.crypto.tink.mac.<a href="com/google/crypto/tink/mac/ChunkedMacVerification.html" title="interface in com.google.crypto.tink.mac">ChunkedMacVerification</a></dt>
+<dd>
+<div class="block">Processes the next chunk of input, represented by <code>ByteBuffer data</code>.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/subtle/Base64.html#URL_SAFE">URL_SAFE</a></span> - Static variable in class com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/Base64.html" title="class in com.google.crypto.tink.subtle">Base64</a></dt>
 <dd>
@@ -18973,6 +19006,10 @@ the order they are declared.</div>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/aead/internal/Poly1305.html#verifyMac-byte:A-byte:A-byte:A-">verifyMac(byte[], byte[], byte[])</a></span> - Static method in class com.google.crypto.tink.aead.internal.<a href="com/google/crypto/tink/aead/internal/Poly1305.html" title="class in com.google.crypto.tink.aead.internal">Poly1305</a></dt>
 <dd>
 <div class="block">Verifies Poly1305  over <code>data</code> using <code>key</code>.</div>
+</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/mac/ChunkedMacVerification.html#verifyMac--">verifyMac()</a></span> - Method in interface com.google.crypto.tink.mac.<a href="com/google/crypto/tink/mac/ChunkedMacVerification.html" title="interface in com.google.crypto.tink.mac">ChunkedMacVerification</a></dt>
+<dd>
+<div class="block">Verifies that the provided data matches the tag.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/Mac.html#verifyMac-byte:A-byte:A-">verifyMac(byte[], byte[])</a></span> - Method in interface com.google.crypto.tink.<a href="com/google/crypto/tink/Mac.html" title="interface in com.google.crypto.tink">Mac</a></dt>
 <dd>
