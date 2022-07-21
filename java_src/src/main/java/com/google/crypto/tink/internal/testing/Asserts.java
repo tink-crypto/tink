@@ -18,8 +18,8 @@ package com.google.crypto.tink.internal.testing;
 
 import static com.google.common.truth.Truth.assertThat;
 
-import com.google.crypto.tink.internal.ProtoKeyFormatSerialization;
 import com.google.crypto.tink.internal.ProtoKeySerialization;
+import com.google.crypto.tink.internal.ProtoParametersSerialization;
 import com.google.protobuf.ExtensionRegistryLite;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.MessageLite;
@@ -28,18 +28,18 @@ import com.google.protobuf.Parser;
 /** Contains static assertion functions for Tink. */
 public final class Asserts {
   /**
-   * Throws an assertion error if two {@link ProtoKeyFormatSerialization} objects are not equal.
+   * Throws an assertion error if two {@link ProtoParametersSerialization} objects are not equal.
    *
    * <p>Because ProtoSerialization is not deterministic, this requires a parser for the proto
-   * message embedded in the {@code ProtoKeyFormatSerialization}.
+   * message embedded in the {@code ProtoParametersSerialization}.
    *
    * <p>Equality of the protos is decided by message equality, see {@link
    * com.google.protobuf.Message#equals}.
    */
   public static void assertEqualWhenValueParsed(
       Parser<? extends MessageLite> parser,
-      ProtoKeyFormatSerialization one,
-      ProtoKeyFormatSerialization two) {
+      ProtoParametersSerialization one,
+      ProtoParametersSerialization two) {
     assertThat(one.getKeyTemplate().getTypeUrl()).isEqualTo(two.getKeyTemplate().getTypeUrl());
     assertThat(one.getKeyTemplate().getOutputPrefixType())
         .isEqualTo(two.getKeyTemplate().getOutputPrefixType());
@@ -56,10 +56,10 @@ public final class Asserts {
     }
   }
   /**
-   * Throws an assertion error if two {@link ProtoKeyFormatSerialization} objects are not equal.
+   * Throws an assertion error if two {@link ProtoParametersSerialization} objects are not equal.
    *
    * <p>Because ProtoSerialization is not deterministic, this requires a parser for the proto
-   * message embedded in the {@code ProtoKeyFormatSerialization}.
+   * message embedded in the {@code ProtoParametersSerialization}.
    *
    * <p>Equality of the protos is decided by message equality, see {@link
    * com.google.protobuf.Message#equals}.

@@ -25,23 +25,23 @@ import com.google.errorprone.annotations.Immutable;
 import com.google.protobuf.MessageLite;
 
 /**
- * Represents a {@code KeyFormat} object serialized with binary protobuf Serialization.
+ * Represents a {@code Parameters} object serialized with binary protobuf Serialization.
  *
- * <p>{@code ProtoKeyFormatSerialization} objects fully describe a {@code KeyFormat} object, but
+ * <p>{@code ProtoParametersSerialization} objects fully describe a {@code Parameters} object, but
  * tailored for protocol buffer serialization.
  */
 @Immutable
-public final class ProtoKeyFormatSerialization implements Serialization {
+public final class ProtoParametersSerialization implements Serialization {
   private final Bytes objectIdentifier;
   private final KeyTemplate keyTemplate;
 
-  private ProtoKeyFormatSerialization(KeyTemplate keyTemplate) {
+  private ProtoParametersSerialization(KeyTemplate keyTemplate) {
     this.keyTemplate = keyTemplate;
     this.objectIdentifier = Bytes.copyFrom(keyTemplate.getTypeUrl().getBytes(UTF_8));
   }
 
-  /** Creates a new {@code ProtoKeyFormatSerialization} object from the individual parts. */
-  public static ProtoKeyFormatSerialization create(
+  /** Creates a new {@code ProtoParametersSerialization} object from the individual parts. */
+  public static ProtoParametersSerialization create(
       String typeUrl, OutputPrefixType outputPrefixType, MessageLite value) {
     return create(
         KeyTemplate.newBuilder()
@@ -51,9 +51,9 @@ public final class ProtoKeyFormatSerialization implements Serialization {
             .build());
   }
 
-  /** Creates a new {@code ProtoKeyFormatSerialization} object. */
-  public static ProtoKeyFormatSerialization create(KeyTemplate keyTemplate) {
-    return new ProtoKeyFormatSerialization(keyTemplate);
+  /** Creates a new {@code ProtoParametersSerialization} object. */
+  public static ProtoParametersSerialization create(KeyTemplate keyTemplate) {
+    return new ProtoParametersSerialization(keyTemplate);
   }
 
   /** The contents of the field value in the message com.google.crypto.tink.proto.KeyData. */

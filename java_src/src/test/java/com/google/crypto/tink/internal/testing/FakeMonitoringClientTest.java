@@ -21,8 +21,8 @@ import static org.junit.Assert.assertThrows;
 
 import com.google.crypto.tink.KeyStatus;
 import com.google.crypto.tink.Parameters;
-import com.google.crypto.tink.internal.LegacyProtoKeyFormat;
-import com.google.crypto.tink.internal.ProtoKeyFormatSerialization;
+import com.google.crypto.tink.internal.LegacyProtoParameters;
+import com.google.crypto.tink.internal.ProtoParametersSerialization;
 import com.google.crypto.tink.monitoring.MonitoringAnnotations;
 import com.google.crypto.tink.monitoring.MonitoringClient;
 import com.google.crypto.tink.monitoring.MonitoringKeysetInfo;
@@ -37,15 +37,15 @@ import org.junit.runners.JUnit4;
 @RunWith(JUnit4.class)
 public final class FakeMonitoringClientTest {
 
-  Parameters makeLegacyProtoKeyFormat(String typeUrl) {
+  Parameters makeLegacyProtoParameters(String typeUrl) {
     KeyTemplate template =
         KeyTemplate.newBuilder()
             .setTypeUrl(typeUrl)
             .setOutputPrefixType(OutputPrefixType.TINK)
             .setValue(ByteString.EMPTY)
             .build();
-    ProtoKeyFormatSerialization serialization = ProtoKeyFormatSerialization.create(template);
-    return new LegacyProtoKeyFormat(serialization);
+    ProtoParametersSerialization serialization = ProtoParametersSerialization.create(template);
+    return new LegacyProtoParameters(serialization);
   }
 
   @Test
@@ -53,10 +53,12 @@ public final class FakeMonitoringClientTest {
     FakeMonitoringClient client = new FakeMonitoringClient();
     MonitoringKeysetInfo keysetInfo =
         MonitoringKeysetInfo.newBuilder()
-            .setAnnotations(MonitoringAnnotations.newBuilder()
-                .add("annotation_name", "annotation_value").build())
-            .addEntry(KeyStatus.ENABLED, 123, makeLegacyProtoKeyFormat("typeUrl123"))
-            .addEntry(KeyStatus.ENABLED, 234, makeLegacyProtoKeyFormat("typeUrl234"))
+            .setAnnotations(
+                MonitoringAnnotations.newBuilder()
+                    .add("annotation_name", "annotation_value")
+                    .build())
+            .addEntry(KeyStatus.ENABLED, 123, makeLegacyProtoParameters("typeUrl123"))
+            .addEntry(KeyStatus.ENABLED, 234, makeLegacyProtoParameters("typeUrl234"))
             .setPrimaryKeyId(123)
             .build();
     MonitoringClient.Logger encLogger = client.createLogger(keysetInfo, "aead", "encrypt");
@@ -83,10 +85,12 @@ public final class FakeMonitoringClientTest {
     FakeMonitoringClient client = new FakeMonitoringClient();
     MonitoringKeysetInfo keysetInfo =
         MonitoringKeysetInfo.newBuilder()
-            .setAnnotations(MonitoringAnnotations.newBuilder()
-                .add("annotation_name", "annotation_value").build())
-            .addEntry(KeyStatus.ENABLED, 123, makeLegacyProtoKeyFormat("typeUrl123"))
-            .addEntry(KeyStatus.ENABLED, 234, makeLegacyProtoKeyFormat("typeUrl234"))
+            .setAnnotations(
+                MonitoringAnnotations.newBuilder()
+                    .add("annotation_name", "annotation_value")
+                    .build())
+            .addEntry(KeyStatus.ENABLED, 123, makeLegacyProtoParameters("typeUrl123"))
+            .addEntry(KeyStatus.ENABLED, 234, makeLegacyProtoParameters("typeUrl234"))
             .setPrimaryKeyId(123)
             .build();
     MonitoringClient.Logger encLogger = client.createLogger(keysetInfo, "aead", "encrypt");
@@ -110,10 +114,12 @@ public final class FakeMonitoringClientTest {
     FakeMonitoringClient client = new FakeMonitoringClient();
     MonitoringKeysetInfo info =
         MonitoringKeysetInfo.newBuilder()
-            .setAnnotations(MonitoringAnnotations.newBuilder()
-                .add("annotation_name", "annotation_value").build())
-            .addEntry(KeyStatus.ENABLED, 123, makeLegacyProtoKeyFormat("typeUrl123"))
-            .addEntry(KeyStatus.ENABLED, 234, makeLegacyProtoKeyFormat("typeUrl234"))
+            .setAnnotations(
+                MonitoringAnnotations.newBuilder()
+                    .add("annotation_name", "annotation_value")
+                    .build())
+            .addEntry(KeyStatus.ENABLED, 123, makeLegacyProtoParameters("typeUrl123"))
+            .addEntry(KeyStatus.ENABLED, 234, makeLegacyProtoParameters("typeUrl234"))
             .setPrimaryKeyId(123)
             .build();
     MonitoringClient.Logger encLogger = client.createLogger(info, "aead", "encrypt");
@@ -138,7 +144,7 @@ public final class FakeMonitoringClientTest {
     FakeMonitoringClient client = new FakeMonitoringClient();
     MonitoringKeysetInfo info =
         MonitoringKeysetInfo.newBuilder()
-            .addEntry(KeyStatus.ENABLED, 123, makeLegacyProtoKeyFormat("typeUrl123"))
+            .addEntry(KeyStatus.ENABLED, 123, makeLegacyProtoParameters("typeUrl123"))
             .setPrimaryKeyId(123)
             .build();
     MonitoringClient.Logger encLogger = client.createLogger(info, "aead", "encrypt");

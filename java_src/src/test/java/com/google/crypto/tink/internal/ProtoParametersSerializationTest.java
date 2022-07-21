@@ -27,13 +27,13 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
-/** Tests for {@code ProtoKeyFormatSerialization} */
+/** Tests for {@code ProtoParametersSerialization} */
 @RunWith(JUnit4.class)
-public final class ProtoKeyFormatSerializationTest {
+public final class ProtoParametersSerializationTest {
   @Test
   public void testCreationAndValues_basic() throws Exception {
     KeyTemplate template = KeyTemplate.newBuilder().setTypeUrl("myTypeUrl").build();
-    ProtoKeyFormatSerialization serialization = ProtoKeyFormatSerialization.create(template);
+    ProtoParametersSerialization serialization = ProtoParametersSerialization.create(template);
     assertThat(serialization.getKeyTemplate()).isEqualTo(template);
     assertThat(serialization.getObjectIdentifier())
         .isEqualTo(Bytes.copyFrom("myTypeUrl".getBytes(UTF_8)));
@@ -41,8 +41,8 @@ public final class ProtoKeyFormatSerializationTest {
 
   @Test
   public void testCreationFromParts_basic() throws Exception {
-    ProtoKeyFormatSerialization serialization =
-        ProtoKeyFormatSerialization.create(
+    ProtoParametersSerialization serialization =
+        ProtoParametersSerialization.create(
             "typeUrl", OutputPrefixType.RAW, TestProto.newBuilder().setNum(13234).build());
     assertThat(serialization.getKeyTemplate().getTypeUrl()).isEqualTo("typeUrl");
     assertThat(serialization.getObjectIdentifier())

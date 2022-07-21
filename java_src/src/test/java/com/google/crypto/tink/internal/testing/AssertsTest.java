@@ -18,8 +18,8 @@ package com.google.crypto.tink.internal.testing;
 
 import static org.junit.Assert.assertThrows;
 
-import com.google.crypto.tink.internal.ProtoKeyFormatSerialization;
 import com.google.crypto.tink.internal.ProtoKeySerialization;
+import com.google.crypto.tink.internal.ProtoParametersSerialization;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
 import com.google.crypto.tink.proto.KeyTemplate;
 import com.google.crypto.tink.proto.OutputPrefixType;
@@ -34,15 +34,15 @@ import org.junit.runners.JUnit4;
 public final class AssertsTest {
   @Test
   public void testEqualFormat() throws Exception {
-    ProtoKeyFormatSerialization serialization1 =
-        ProtoKeyFormatSerialization.create(
+    ProtoParametersSerialization serialization1 =
+        ProtoParametersSerialization.create(
             KeyTemplate.newBuilder()
                 .setOutputPrefixType(OutputPrefixType.RAW)
                 .setTypeUrl("TYPE_URL")
                 .setValue(TestProto.newBuilder().setNum(1).build().toByteString())
                 .build());
-    ProtoKeyFormatSerialization serialization2 =
-        ProtoKeyFormatSerialization.create(
+    ProtoParametersSerialization serialization2 =
+        ProtoParametersSerialization.create(
             KeyTemplate.newBuilder()
                 .setOutputPrefixType(OutputPrefixType.RAW)
                 .setTypeUrl("TYPE_URL")
@@ -60,15 +60,15 @@ public final class AssertsTest {
     // (2): Wire type 0 (Varint)
     // (3): Value 0.
     // This is the same as the default value, which has empty encoding.
-    ProtoKeyFormatSerialization serialization1 =
-        ProtoKeyFormatSerialization.create(
+    ProtoParametersSerialization serialization1 =
+        ProtoParametersSerialization.create(
             KeyTemplate.newBuilder()
                 .setOutputPrefixType(OutputPrefixType.RAW)
                 .setTypeUrl("TYPE_URL")
                 .setValue(ByteString.copyFrom(Hex.decode("0800")))
                 .build());
-    ProtoKeyFormatSerialization serialization2 =
-        ProtoKeyFormatSerialization.create(
+    ProtoParametersSerialization serialization2 =
+        ProtoParametersSerialization.create(
             KeyTemplate.newBuilder()
                 .setOutputPrefixType(OutputPrefixType.RAW)
                 .setTypeUrl("TYPE_URL")
@@ -93,15 +93,15 @@ public final class AssertsTest {
     // (2): Wire type 2 (Length Delimeted)
     // (3): Varint (length): 1
     // (4): Data (0x00)
-    ProtoKeyFormatSerialization serialization1 =
-        ProtoKeyFormatSerialization.create(
+    ProtoParametersSerialization serialization1 =
+        ProtoParametersSerialization.create(
             KeyTemplate.newBuilder()
                 .setOutputPrefixType(OutputPrefixType.RAW)
                 .setTypeUrl("TYPE_URL")
                 .setValue(ByteString.copyFrom(Hex.decode("0801120100")))
                 .build());
-    ProtoKeyFormatSerialization serialization2 =
-        ProtoKeyFormatSerialization.create(
+    ProtoParametersSerialization serialization2 =
+        ProtoParametersSerialization.create(
             KeyTemplate.newBuilder()
                 .setOutputPrefixType(OutputPrefixType.RAW)
                 .setTypeUrl("TYPE_URL")
@@ -112,15 +112,15 @@ public final class AssertsTest {
 
   @Test
   public void testDifferentFormat_outputPrefix_throws() throws Exception {
-    ProtoKeyFormatSerialization serialization1 =
-        ProtoKeyFormatSerialization.create(
+    ProtoParametersSerialization serialization1 =
+        ProtoParametersSerialization.create(
             KeyTemplate.newBuilder()
                 .setOutputPrefixType(OutputPrefixType.RAW)
                 .setTypeUrl("TYPE_URL")
                 .setValue(TestProto.newBuilder().setNum(1).build().toByteString())
                 .build());
-    ProtoKeyFormatSerialization serialization2 =
-        ProtoKeyFormatSerialization.create(
+    ProtoParametersSerialization serialization2 =
+        ProtoParametersSerialization.create(
             KeyTemplate.newBuilder()
                 .setOutputPrefixType(OutputPrefixType.TINK)
                 .setTypeUrl("TYPE_URL")
@@ -134,15 +134,15 @@ public final class AssertsTest {
 
   @Test
   public void testDifferentFormat_typeUrl_throws() throws Exception {
-    ProtoKeyFormatSerialization serialization1 =
-        ProtoKeyFormatSerialization.create(
+    ProtoParametersSerialization serialization1 =
+        ProtoParametersSerialization.create(
             KeyTemplate.newBuilder()
                 .setOutputPrefixType(OutputPrefixType.RAW)
                 .setTypeUrl("TYPE_URL1")
                 .setValue(TestProto.newBuilder().setNum(1).build().toByteString())
                 .build());
-    ProtoKeyFormatSerialization serialization2 =
-        ProtoKeyFormatSerialization.create(
+    ProtoParametersSerialization serialization2 =
+        ProtoParametersSerialization.create(
             KeyTemplate.newBuilder()
                 .setOutputPrefixType(OutputPrefixType.RAW)
                 .setTypeUrl("TYPE_URL2")
@@ -156,15 +156,15 @@ public final class AssertsTest {
 
   @Test
   public void testDifferentFormat_value_throws() throws Exception {
-    ProtoKeyFormatSerialization serialization1 =
-        ProtoKeyFormatSerialization.create(
+    ProtoParametersSerialization serialization1 =
+        ProtoParametersSerialization.create(
             KeyTemplate.newBuilder()
                 .setOutputPrefixType(OutputPrefixType.RAW)
                 .setTypeUrl("TYPE_URL")
                 .setValue(TestProto.newBuilder().setNum(1).build().toByteString())
                 .build());
-    ProtoKeyFormatSerialization serialization2 =
-        ProtoKeyFormatSerialization.create(
+    ProtoParametersSerialization serialization2 =
+        ProtoParametersSerialization.create(
             KeyTemplate.newBuilder()
                 .setOutputPrefixType(OutputPrefixType.RAW)
                 .setTypeUrl("TYPE_URL")
@@ -180,15 +180,15 @@ public final class AssertsTest {
   public void testEqualFormat_unparseable_throws() throws Exception {
     // Proto messages start with a VarInt, which always ends with a byte with most significant bit
     // unset. 0x80 is hence invalid.
-    ProtoKeyFormatSerialization serialization1 =
-        ProtoKeyFormatSerialization.create(
+    ProtoParametersSerialization serialization1 =
+        ProtoParametersSerialization.create(
             KeyTemplate.newBuilder()
                 .setOutputPrefixType(OutputPrefixType.RAW)
                 .setTypeUrl("TYPE_URL")
                 .setValue(ByteString.copyFrom(new byte[] {(byte) 0x80}))
                 .build());
-    ProtoKeyFormatSerialization serialization2 =
-        ProtoKeyFormatSerialization.create(
+    ProtoParametersSerialization serialization2 =
+        ProtoParametersSerialization.create(
             KeyTemplate.newBuilder()
                 .setOutputPrefixType(OutputPrefixType.RAW)
                 .setTypeUrl("TYPE_URL")

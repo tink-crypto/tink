@@ -96,13 +96,13 @@ java_test(
 )
 
 java_test(
-    name = "ProtoKeyFormatSerializationTest",
+    name = "ProtoParametersSerializationTest",
     size = "small",
-    srcs = ["ProtoKeyFormatSerializationTest.java"],
+    srcs = ["ProtoParametersSerializationTest.java"],
     deps = [
         "//proto:test_proto_java_proto",
         "//proto:tink_java_proto",
-        "//src/main/java/com/google/crypto/tink/internal:proto_key_format_serialization",
+        "//src/main/java/com/google/crypto/tink/internal:proto_parameters_serialization",
         "//src/main/java/com/google/crypto/tink/util:bytes",
         "@maven//:com_google_truth_truth",
         "@maven//:junit_junit",
@@ -177,13 +177,13 @@ java_test(
 )
 
 java_test(
-    name = "LegacyProtoKeyFormatTest",
+    name = "LegacyProtoParametersTest",
     size = "small",
-    srcs = ["LegacyProtoKeyFormatTest.java"],
+    srcs = ["LegacyProtoParametersTest.java"],
     deps = [
         "//proto:tink_java_proto",
-        "//src/main/java/com/google/crypto/tink/internal:legacy_proto_key_format",
-        "//src/main/java/com/google/crypto/tink/internal:proto_key_format_serialization",
+        "//src/main/java/com/google/crypto/tink/internal:legacy_proto_parameters",
+        "//src/main/java/com/google/crypto/tink/internal:proto_parameters_serialization",
         "@com_google_protobuf//:protobuf_javalite",
         "@maven//:com_google_truth_truth",
         "@maven//:junit_junit",

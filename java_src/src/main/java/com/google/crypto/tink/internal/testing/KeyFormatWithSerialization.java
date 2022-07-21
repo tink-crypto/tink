@@ -17,30 +17,30 @@
 package com.google.crypto.tink.internal.testing;
 
 import com.google.crypto.tink.Parameters;
-import com.google.crypto.tink.internal.ProtoKeyFormatSerialization;
+import com.google.crypto.tink.internal.ProtoParametersSerialization;
 
 /**
- * Represents a {@link KeyFormat} together with a corresponding {@ProtoKeyFormatSerialization} for
- * testing.
+ * Represents a {@link KeyFormat} together with a corresponding {@link ProtoParametersSerialization}
+ * for testing.
  */
 public class KeyFormatWithSerialization {
   /** Constructs a new KeyFormatWithSerialization. */
   public KeyFormatWithSerialization(
-      Parameters parameters, ProtoKeyFormatSerialization serializedFormat) {
+      Parameters parameters, ProtoParametersSerialization serializedFormat) {
     this.parameters = parameters;
     this.serializedFormat = serializedFormat;
   }
 
   private final Parameters parameters;
-  private final ProtoKeyFormatSerialization serializedFormat;
+  private final ProtoParametersSerialization serializedFormat;
 
   /** Returns the {@link Parameters}. */
   public Parameters getParameters() {
     return parameters;
   }
 
-  /** Returns the {@link ProtoKeyFormatSerialization}. */
-  public ProtoKeyFormatSerialization getSerializedFormat() {
+  /** Returns the {@link ProtoParametersSerialization}. */
+  public ProtoParametersSerialization getSerializedFormat() {
     return serializedFormat;
   }
 

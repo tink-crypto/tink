@@ -21,8 +21,8 @@ import static org.junit.Assert.assertThrows;
 
 import com.google.crypto.tink.KeyStatus;
 import com.google.crypto.tink.Parameters;
-import com.google.crypto.tink.internal.LegacyProtoKeyFormat;
-import com.google.crypto.tink.internal.ProtoKeyFormatSerialization;
+import com.google.crypto.tink.internal.LegacyProtoParameters;
+import com.google.crypto.tink.internal.ProtoParametersSerialization;
 import com.google.crypto.tink.proto.KeyTemplate;
 import com.google.crypto.tink.proto.OutputPrefixType;
 import com.google.protobuf.ByteString;
@@ -36,23 +36,23 @@ import org.junit.runners.JUnit4;
 @RunWith(JUnit4.class)
 public final class MonitoringKeysetInfoTest {
 
-  Parameters makeLegacyProtoKeyFormat(String typeUrl) {
+  Parameters makeLegacyProtoParameters(String typeUrl) {
     KeyTemplate template =
         KeyTemplate.newBuilder()
             .setTypeUrl(typeUrl)
             .setOutputPrefixType(OutputPrefixType.TINK)
             .setValue(ByteString.EMPTY)
             .build();
-    ProtoKeyFormatSerialization serialization = ProtoKeyFormatSerialization.create(template);
-    return new LegacyProtoKeyFormat(serialization);
+    ProtoParametersSerialization serialization = ProtoParametersSerialization.create(template);
+    return new LegacyProtoParameters(serialization);
   }
 
   @Test
   public void addAndGetEntry() throws Exception {
-    Parameters keyFormat = makeLegacyProtoKeyFormat("typeUrl123");
+    Parameters keyFormat = makeLegacyProtoParameters("typeUrl123");
     MonitoringKeysetInfo info =
         MonitoringKeysetInfo.newBuilder()
-            .addEntry(KeyStatus.ENABLED, 123, makeLegacyProtoKeyFormat("typeUrl123"))
+            .addEntry(KeyStatus.ENABLED, 123, makeLegacyProtoParameters("typeUrl123"))
             .setPrimaryKeyId(123)
             .build();
     assertThat(info.getEntries()).hasSize(1);
@@ -66,8 +66,8 @@ public final class MonitoringKeysetInfoTest {
   public void addEntries() throws Exception  {
     MonitoringKeysetInfo info =
         MonitoringKeysetInfo.newBuilder()
-            .addEntry(KeyStatus.ENABLED, 123, makeLegacyProtoKeyFormat("typeUrl123"))
-            .addEntry(KeyStatus.ENABLED, 234, makeLegacyProtoKeyFormat("typeUrl234"))
+            .addEntry(KeyStatus.ENABLED, 123, makeLegacyProtoParameters("typeUrl123"))
+            .addEntry(KeyStatus.ENABLED, 234, makeLegacyProtoParameters("typeUrl234"))
             .setPrimaryKeyId(123)
             .build();
     assertThat(info.getEntries()).hasSize(2);
@@ -77,8 +77,8 @@ public final class MonitoringKeysetInfoTest {
   public void addSameEntryTwice() throws Exception  {
     MonitoringKeysetInfo info =
         MonitoringKeysetInfo.newBuilder()
-            .addEntry(KeyStatus.ENABLED, 123, makeLegacyProtoKeyFormat("typeUrl123"))
-            .addEntry(KeyStatus.ENABLED, 123, makeLegacyProtoKeyFormat("typeUrl123"))
+            .addEntry(KeyStatus.ENABLED, 123, makeLegacyProtoParameters("typeUrl123"))
+            .addEntry(KeyStatus.ENABLED, 123, makeLegacyProtoParameters("typeUrl123"))
             .setPrimaryKeyId(123)
             .build();
     // entries are a list, so we can add the same entry twice.
@@ -99,7 +99,7 @@ public final class MonitoringKeysetInfoTest {
     MonitoringKeysetInfo info =
         MonitoringKeysetInfo.newBuilder()
             .setAnnotations(monitoringAnnotations)
-            .addEntry(KeyStatus.ENABLED, 123, makeLegacyProtoKeyFormat("typeUrl123"))
+            .addEntry(KeyStatus.ENABLED, 123, makeLegacyProtoParameters("typeUrl123"))
             .setPrimaryKeyId(123)
             .build();
     HashMap<String, String> expected = new HashMap<>();
@@ -114,7 +114,7 @@ public final class MonitoringKeysetInfoTest {
   public void primaryIsNullIfItIsNotSet() throws Exception  {
     MonitoringKeysetInfo info =
         MonitoringKeysetInfo.newBuilder()
-            .addEntry(KeyStatus.ENABLED, 123, makeLegacyProtoKeyFormat("typeUrl123"))
+            .addEntry(KeyStatus.ENABLED, 123, makeLegacyProtoParameters("typeUrl123"))
             .build();
     assertThat(info.getPrimaryKeyId()).isNull();
   }
@@ -125,7 +125,7 @@ public final class MonitoringKeysetInfoTest {
         GeneralSecurityException.class,
         () ->
             MonitoringKeysetInfo.newBuilder()
-                .addEntry(KeyStatus.ENABLED, 123, makeLegacyProtoKeyFormat("typeUrl123"))
+                .addEntry(KeyStatus.ENABLED, 123, makeLegacyProtoParameters("typeUrl123"))
                 .setPrimaryKeyId(124)
                 .build());
     assertThrows(
@@ -140,7 +140,7 @@ public final class MonitoringKeysetInfoTest {
   public void entriesAreNotModifiable() throws Exception {
     MonitoringKeysetInfo info =
         MonitoringKeysetInfo.newBuilder()
-            .addEntry(KeyStatus.ENABLED, 123, makeLegacyProtoKeyFormat("typeUrl123"))
+            .addEntry(KeyStatus.ENABLED, 123, makeLegacyProtoParameters("typeUrl123"))
             .setPrimaryKeyId(123)
             .setAnnotations(
                 MonitoringAnnotations.newBuilder()
@@ -149,7 +149,7 @@ public final class MonitoringKeysetInfoTest {
             .build();
     MonitoringKeysetInfo info2 =
         MonitoringKeysetInfo.newBuilder()
-            .addEntry(KeyStatus.ENABLED, 234, makeLegacyProtoKeyFormat("typeUrl234"))
+            .addEntry(KeyStatus.ENABLED, 234, makeLegacyProtoParameters("typeUrl234"))
             .setPrimaryKeyId(234)
             .build();
     assertThrows(
@@ -166,14 +166,14 @@ public final class MonitoringKeysetInfoTest {
         MonitoringAnnotations.newBuilder().add("annotation_name2", "annotation_value2").build();
     MonitoringKeysetInfo.Builder builder =
         MonitoringKeysetInfo.newBuilder()
-            .addEntry(KeyStatus.ENABLED, 123, makeLegacyProtoKeyFormat("typeUrl123"))
+            .addEntry(KeyStatus.ENABLED, 123, makeLegacyProtoParameters("typeUrl123"))
             .setPrimaryKeyId(123)
             .setAnnotations(annotations);
     builder.build();
     assertThrows(IllegalStateException.class, () -> builder.setAnnotations(annotations));
     assertThrows(
         IllegalStateException.class,
-        () -> builder.addEntry(KeyStatus.ENABLED, 234, makeLegacyProtoKeyFormat("typeUrl234")));
+        () -> builder.addEntry(KeyStatus.ENABLED, 234, makeLegacyProtoParameters("typeUrl234")));
     assertThrows(IllegalStateException.class, () -> builder.setPrimaryKeyId(123));
   }
 
@@ -185,8 +185,8 @@ public final class MonitoringKeysetInfoTest {
                 MonitoringAnnotations.newBuilder()
                     .add("annotation_name1", "annotation_value1")
                     .build())
-            .addEntry(KeyStatus.ENABLED, 123, makeLegacyProtoKeyFormat("typeUrl123"))
-            .addEntry(KeyStatus.DISABLED, 234, makeLegacyProtoKeyFormat("typeUrl234"))
+            .addEntry(KeyStatus.ENABLED, 123, makeLegacyProtoParameters("typeUrl123"))
+            .addEntry(KeyStatus.DISABLED, 234, makeLegacyProtoParameters("typeUrl234"))
             .setPrimaryKeyId(123)
             .build();
     assertThat(info.toString())
@@ -206,8 +206,8 @@ public final class MonitoringKeysetInfoTest {
                     .add("annotation_name1", "annotation_value1")
                     .add("annotation_name2", "annotation_value2")
                     .build())
-            .addEntry(KeyStatus.ENABLED, 123, makeLegacyProtoKeyFormat("typeUrl123"))
-            .addEntry(KeyStatus.ENABLED, 234, makeLegacyProtoKeyFormat("typeUrl234"))
+            .addEntry(KeyStatus.ENABLED, 123, makeLegacyProtoParameters("typeUrl123"))
+            .addEntry(KeyStatus.ENABLED, 234, makeLegacyProtoParameters("typeUrl234"))
             .setPrimaryKeyId(123)
             .build();
     MonitoringKeysetInfo infoWithAnnotationsInOtherOrder =
@@ -217,8 +217,8 @@ public final class MonitoringKeysetInfoTest {
                     .add("annotation_name2", "annotation_value2")
                     .add("annotation_name1", "annotation_value1")
                     .build())
-            .addEntry(KeyStatus.ENABLED, 123, makeLegacyProtoKeyFormat("typeUrl123"))
-            .addEntry(KeyStatus.ENABLED, 234, makeLegacyProtoKeyFormat("typeUrl234"))
+            .addEntry(KeyStatus.ENABLED, 123, makeLegacyProtoParameters("typeUrl123"))
+            .addEntry(KeyStatus.ENABLED, 234, makeLegacyProtoParameters("typeUrl234"))
             .setPrimaryKeyId(123)
             .build();
     MonitoringKeysetInfo infoWithEntriesInOtherOrder =
@@ -228,8 +228,8 @@ public final class MonitoringKeysetInfoTest {
                     .add("annotation_name1", "annotation_value1")
                     .add("annotation_name2", "annotation_value2")
                     .build())
-            .addEntry(KeyStatus.ENABLED, 234, makeLegacyProtoKeyFormat("typeUrl234"))
-            .addEntry(KeyStatus.ENABLED, 123, makeLegacyProtoKeyFormat("typeUrl123"))
+            .addEntry(KeyStatus.ENABLED, 234, makeLegacyProtoParameters("typeUrl234"))
+            .addEntry(KeyStatus.ENABLED, 123, makeLegacyProtoParameters("typeUrl123"))
             .setPrimaryKeyId(123)
             .build();
     MonitoringKeysetInfo infoWithOtherAnnotations =
@@ -239,8 +239,8 @@ public final class MonitoringKeysetInfoTest {
                     .add("annotation_name1", "annotation_value1")
                     .add("annotation_name3", "annotation_value3")
                     .build())
-            .addEntry(KeyStatus.ENABLED, 123, makeLegacyProtoKeyFormat("typeUrl123"))
-            .addEntry(KeyStatus.ENABLED, 234, makeLegacyProtoKeyFormat("typeUrl234"))
+            .addEntry(KeyStatus.ENABLED, 123, makeLegacyProtoParameters("typeUrl123"))
+            .addEntry(KeyStatus.ENABLED, 234, makeLegacyProtoParameters("typeUrl234"))
             .setPrimaryKeyId(123)
             .build();
     MonitoringKeysetInfo infoWithOtherPrimaryKeyId =
@@ -250,8 +250,8 @@ public final class MonitoringKeysetInfoTest {
                     .add("annotation_name1", "annotation_value1")
                     .add("annotation_name2", "annotation_value2")
                     .build())
-            .addEntry(KeyStatus.ENABLED, 123, makeLegacyProtoKeyFormat("typeUrl123"))
-            .addEntry(KeyStatus.ENABLED, 234, makeLegacyProtoKeyFormat("typeUrl234"))
+            .addEntry(KeyStatus.ENABLED, 123, makeLegacyProtoParameters("typeUrl123"))
+            .addEntry(KeyStatus.ENABLED, 234, makeLegacyProtoParameters("typeUrl234"))
             .setPrimaryKeyId(234)
             .build();
     // annotations are a map. They can be added in any order.

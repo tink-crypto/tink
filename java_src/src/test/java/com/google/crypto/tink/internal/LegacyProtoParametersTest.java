@@ -26,7 +26,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
 @RunWith(JUnit4.class)
-public final class LegacyProtoKeyFormatTest {
+public final class LegacyProtoParametersTest {
   @Test
   public void create_works() {
     KeyTemplate template =
@@ -35,13 +35,13 @@ public final class LegacyProtoKeyFormatTest {
             .setOutputPrefixType(OutputPrefixType.TINK)
             .setValue(ByteString.EMPTY)
             .build();
-    ProtoKeyFormatSerialization serialization = ProtoKeyFormatSerialization.create(template);
-    LegacyProtoKeyFormat format = new LegacyProtoKeyFormat(serialization);
+    ProtoParametersSerialization serialization = ProtoParametersSerialization.create(template);
+    LegacyProtoParameters format = new LegacyProtoParameters(serialization);
     assertThat(format.getSerialization()).isSameInstanceAs(serialization);
   }
 
-  private static LegacyProtoKeyFormat fromBuilder(KeyTemplate.Builder builder) {
-    return new LegacyProtoKeyFormat(ProtoKeyFormatSerialization.create(builder.build()));
+  private static LegacyProtoParameters fromBuilder(KeyTemplate.Builder builder) {
+    return new LegacyProtoParameters(ProtoParametersSerialization.create(builder.build()));
   }
 
   @Test

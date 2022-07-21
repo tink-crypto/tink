@@ -23,11 +23,11 @@ import java.util.Objects;
 
 /** Implements a KeyFormat for legacy types where no actual KeyFormat is present. */
 @Immutable
-public final class LegacyProtoKeyFormat extends Parameters {
-  private final ProtoKeyFormatSerialization serialization;
+public final class LegacyProtoParameters extends Parameters {
+  private final ProtoParametersSerialization serialization;
 
-  /** Creates a new LegacyProtoKeyFormat object. */
-  public LegacyProtoKeyFormat(ProtoKeyFormatSerialization serialization) {
+  /** Creates a new LegacyProtoParameters object. */
+  public LegacyProtoParameters(ProtoParametersSerialization serialization) {
     this.serialization = serialization;
   }
 
@@ -37,16 +37,16 @@ public final class LegacyProtoKeyFormat extends Parameters {
   }
 
   /** returns the serialization which was used to create this object. */
-  public ProtoKeyFormatSerialization getSerialization() {
+  public ProtoParametersSerialization getSerialization() {
     return serialization;
   }
 
   @Override
   public boolean equals(Object o) {
-    if (!(o instanceof LegacyProtoKeyFormat)) {
+    if (!(o instanceof LegacyProtoParameters)) {
       return false;
     }
-    ProtoKeyFormatSerialization other = ((LegacyProtoKeyFormat) o).serialization;
+    ProtoParametersSerialization other = ((LegacyProtoParameters) o).serialization;
     return serialization
             .getKeyTemplate()
             .getOutputPrefixType()

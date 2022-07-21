@@ -19,7 +19,7 @@ package com.google.crypto.tink.internal.testing;
 import static com.google.common.truth.Truth.assertThat;
 
 import com.google.crypto.tink.Parameters;
-import com.google.crypto.tink.internal.ProtoKeyFormatSerialization;
+import com.google.crypto.tink.internal.ProtoParametersSerialization;
 import com.google.crypto.tink.proto.KeyTemplate;
 import com.google.errorprone.annotations.Immutable;
 import org.junit.Test;
@@ -41,8 +41,8 @@ public final class KeyFormatWithSerializationTest {
   @Test
   public void testAll() throws Exception {
     Parameters keyFormat = new TestParameters();
-    ProtoKeyFormatSerialization serialization =
-        ProtoKeyFormatSerialization.create(KeyTemplate.getDefaultInstance());
+    ProtoParametersSerialization serialization =
+        ProtoParametersSerialization.create(KeyTemplate.getDefaultInstance());
     KeyFormatWithSerialization formatWithSerialization =
         new KeyFormatWithSerialization(keyFormat, serialization);
     assertThat(formatWithSerialization.getParameters()).isSameInstanceAs(keyFormat);

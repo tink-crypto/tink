@@ -30,7 +30,7 @@ java_library(
     srcs = ["KeyFormatWithSerialization.java"],
     deps = [
         "//src/main/java/com/google/crypto/tink:parameters",
-        "//src/main/java/com/google/crypto/tink/internal:proto_key_format_serialization",
+        "//src/main/java/com/google/crypto/tink/internal:proto_parameters_serialization",
     ],
 )
 
@@ -39,7 +39,7 @@ android_library(
     srcs = ["KeyFormatWithSerialization.java"],
     deps = [
         "//src/main/java/com/google/crypto/tink:parameters-android",
-        "//src/main/java/com/google/crypto/tink/internal:proto_key_format_serialization-android",
+        "//src/main/java/com/google/crypto/tink/internal:proto_parameters_serialization-android",
     ],
 )
 
@@ -65,8 +65,8 @@ java_library(
     name = "asserts",
     srcs = ["Asserts.java"],
     deps = [
-        "//src/main/java/com/google/crypto/tink/internal:proto_key_format_serialization",
         "//src/main/java/com/google/crypto/tink/internal:proto_key_serialization",
+        "//src/main/java/com/google/crypto/tink/internal:proto_parameters_serialization",
         "@com_google_protobuf//:protobuf_javalite",
         "@maven//:com_google_truth_truth",
     ],
@@ -76,8 +76,8 @@ android_library(
     name = "asserts-android",
     srcs = ["Asserts.java"],
     deps = [
-        "//src/main/java/com/google/crypto/tink/internal:proto_key_format_serialization-android",
         "//src/main/java/com/google/crypto/tink/internal:proto_key_serialization-android",
+        "//src/main/java/com/google/crypto/tink/internal:proto_parameters_serialization-android",
         "@com_google_protobuf//:protobuf_javalite",
         "@maven//:com_google_truth_truth",
     ],
