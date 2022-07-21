@@ -176,6 +176,29 @@ java_test(
 )
 
 java_test(
+    name = "NistCurvesHpkeKemTest",
+    size = "small",
+    srcs = ["NistCurvesHpkeKemTest.java"],
+    data = ["//testdata/testvectors:hpke_boringssl"],
+    deps = [
+        "//proto:hpke_java_proto",
+        "//src/main/java/com/google/crypto/tink/hybrid/internal:hpke_kem_encap_output",
+        "//src/main/java/com/google/crypto/tink/hybrid/internal:hpke_kem_key_factory",
+        "//src/main/java/com/google/crypto/tink/hybrid/internal:hpke_kem_private_key",
+        "//src/main/java/com/google/crypto/tink/hybrid/internal:hpke_util",
+        "//src/main/java/com/google/crypto/tink/hybrid/internal:nist_curves_hpke_kem",
+        "//src/main/java/com/google/crypto/tink/hybrid/internal:nist_curves_hpke_kem_private_key",
+        "//src/main/java/com/google/crypto/tink/subtle:elliptic_curves",
+        "//src/main/java/com/google/crypto/tink/testing:hpke_test_util",
+        "//src/main/java/com/google/crypto/tink/testing:test_util",
+        "@com_google_protobuf//:protobuf_javalite",
+        "@maven//:com_google_guava_guava",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
     name = "X25519HpkeKemPrivateKeyTest",
     size = "small",
     srcs = ["X25519HpkeKemPrivateKeyTest.java"],

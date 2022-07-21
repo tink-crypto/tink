@@ -198,6 +198,21 @@ java_library(
 )
 
 java_library(
+    name = "nist_curves_hpke_kem",
+    srcs = ["NistCurvesHpkeKem.java"],
+    deps = [
+        ":hkdf_hpke_kdf",
+        ":hpke_kem",
+        ":hpke_kem_encap_output",
+        ":hpke_kem_private_key",
+        ":hpke_util",
+        "//src/main/java/com/google/crypto/tink/subtle:bytes",
+        "//src/main/java/com/google/crypto/tink/subtle:elliptic_curves",
+        "@maven//:com_google_errorprone_error_prone_annotations",
+    ],
+)
+
+java_library(
     name = "nist_curves_hpke_kem_private_key",
     srcs = ["NistCurvesHpkeKemPrivateKey.java"],
     deps = [
@@ -426,6 +441,21 @@ android_library(
     deps = [
         "//proto:hpke_java_proto_lite",
         "//src/main/java/com/google/crypto/tink/subtle:bytes-android",
+    ],
+)
+
+android_library(
+    name = "nist_curves_hpke_kem-android",
+    srcs = ["NistCurvesHpkeKem.java"],
+    deps = [
+        ":hkdf_hpke_kdf-android",
+        ":hpke_kem-android",
+        ":hpke_kem_encap_output-android",
+        ":hpke_kem_private_key-android",
+        ":hpke_util-android",
+        "//src/main/java/com/google/crypto/tink/subtle:bytes-android",
+        "//src/main/java/com/google/crypto/tink/subtle:elliptic_curves-android",
+        "@maven//:com_google_errorprone_error_prone_annotations",
     ],
 )
 
