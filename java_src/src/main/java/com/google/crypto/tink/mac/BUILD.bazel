@@ -277,3 +277,43 @@ android_library(
         "@maven//:com_google_errorprone_error_prone_annotations",
     ],
 )
+
+java_library(
+    name = "chunked_mac",
+    srcs = ["ChunkedMac.java"],
+    deps = [
+        ":chunked_mac_computation",
+        ":chunked_mac_verification",
+        "@maven//:com_google_errorprone_error_prone_annotations",
+    ],
+)
+
+android_library(
+    name = "chunked_mac-android",
+    srcs = ["ChunkedMac.java"],
+    deps = [
+        ":chunked_mac_computation-android",
+        ":chunked_mac_verification-android",
+        "@maven//:com_google_errorprone_error_prone_annotations",
+    ],
+)
+
+java_library(
+    name = "chunked_mac_computation",
+    srcs = ["ChunkedMacComputation.java"],
+)
+
+android_library(
+    name = "chunked_mac_computation-android",
+    srcs = ["ChunkedMacComputation.java"],
+)
+
+java_library(
+    name = "chunked_mac_verification",
+    srcs = ["ChunkedMacVerification.java"],
+)
+
+android_library(
+    name = "chunked_mac_verification-android",
+    srcs = ["ChunkedMacVerification.java"],
+)
