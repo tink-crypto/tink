@@ -22,7 +22,7 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 
 import com.google.crypto.tink.InsecureSecretKeyAccess;
 import com.google.crypto.tink.Key;
-import com.google.crypto.tink.KeyFormat;
+import com.google.crypto.tink.Parameters;
 import com.google.crypto.tink.SecretKeyAccess;
 import com.google.crypto.tink.util.Bytes;
 import com.google.errorprone.annotations.Immutable;
@@ -49,7 +49,7 @@ public final class MutableSerializationRegistryMultithreadTest {
   private static final Bytes B_2 = Bytes.copyFrom("2".getBytes(UTF_8));
 
   @Immutable
-  private static final class TestKeyFormat1 extends KeyFormat {
+  private static final class TestParameters1 extends Parameters {
     @Override
     public boolean hasIdRequirement() {
       return false;
@@ -57,7 +57,7 @@ public final class MutableSerializationRegistryMultithreadTest {
   }
 
   @Immutable
-  private static final class TestKeyFormat2 extends KeyFormat {
+  private static final class TestParameters2 extends Parameters {
     @Override
     public boolean hasIdRequirement() {
       return false;
@@ -67,7 +67,7 @@ public final class MutableSerializationRegistryMultithreadTest {
   @Immutable
   private static final class TestKey1 extends Key {
     @Override
-    public KeyFormat getKeyFormat() {
+    public Parameters getParameters() {
       throw new UnsupportedOperationException("Not needed in test");
     }
 
@@ -86,7 +86,7 @@ public final class MutableSerializationRegistryMultithreadTest {
   @Immutable
   private static final class TestKey2 extends Key {
     @Override
-    public KeyFormat getKeyFormat() {
+    public Parameters getParameters() {
       throw new UnsupportedOperationException("Not needed in test");
     }
 
@@ -174,40 +174,40 @@ public final class MutableSerializationRegistryMultithreadTest {
     return new TestKey1();
   }
 
-  private static TestSerializationA serializeKeyFormat1ToA(TestKeyFormat1 keyFormat)
+  private static TestSerializationA serializeKeyFormat1ToA(TestParameters1 keyFormat)
       throws GeneralSecurityException {
     return new TestSerializationA(A_1);
   }
 
-  private static TestSerializationA serializeKeyFormat2ToA(TestKeyFormat2 keyFormat)
+  private static TestSerializationA serializeKeyFormat2ToA(TestParameters2 keyFormat)
       throws GeneralSecurityException {
     return new TestSerializationA(A_2);
   }
 
-  private static TestSerializationB serializeKeyFormat1ToB(TestKeyFormat1 keyFormat)
+  private static TestSerializationB serializeKeyFormat1ToB(TestParameters1 keyFormat)
       throws GeneralSecurityException {
     return new TestSerializationB(B_1);
   }
 
-  private static TestSerializationB serializeKeyFormat2ToB(TestKeyFormat2 keyFormat)
+  private static TestSerializationB serializeKeyFormat2ToB(TestParameters2 keyFormat)
       throws GeneralSecurityException {
     return new TestSerializationB(B_2);
   }
 
-  private static KeyFormat parseAToKeyFormat1(TestSerializationA serialization)
+  private static Parameters parseAToKeyFormat1(TestSerializationA serialization)
       throws GeneralSecurityException {
     if (!A_1.equals(serialization.getObjectIdentifier())) {
       throw new GeneralSecurityException("Wrong object identifier");
     }
-    return new TestKeyFormat1();
+    return new TestParameters1();
   }
 
-  private static KeyFormat parseBToKeyFormat1(TestSerializationB serialization)
+  private static Parameters parseBToKeyFormat1(TestSerializationB serialization)
       throws GeneralSecurityException {
     if (!B_1.equals(serialization.getObjectIdentifier())) {
       throw new GeneralSecurityException("Wrong object identifier");
     }
-    return new TestKeyFormat1();
+    return new TestParameters1();
   }
 
   private static final int REPETITIONS = 1000;
@@ -230,7 +230,7 @@ public final class MutableSerializationRegistryMultithreadTest {
     registry.registerKeyFormatSerializer(
         KeyFormatSerializer.create(
             MutableSerializationRegistryMultithreadTest::serializeKeyFormat1ToA,
-            TestKeyFormat1.class,
+            TestParameters1.class,
             TestSerializationA.class));
     registry.registerKeyFormatParser(
         KeyFormatParser.create(
@@ -341,17 +341,17 @@ public final class MutableSerializationRegistryMultithreadTest {
                 registry.registerKeyFormatSerializer(
                     KeyFormatSerializer.create(
                         MutableSerializationRegistryMultithreadTest::serializeKeyFormat2ToA,
-                        TestKeyFormat2.class,
+                        TestParameters2.class,
                         TestSerializationA.class));
                 registry.registerKeyFormatSerializer(
                     KeyFormatSerializer.create(
                         MutableSerializationRegistryMultithreadTest::serializeKeyFormat2ToB,
-                        TestKeyFormat2.class,
+                        TestParameters2.class,
                         TestSerializationB.class));
                 registry.registerKeyFormatSerializer(
                     KeyFormatSerializer.create(
                         MutableSerializationRegistryMultithreadTest::serializeKeyFormat1ToB,
-                        TestKeyFormat1.class,
+                        TestParameters1.class,
                         TestSerializationB.class));
               } catch (GeneralSecurityException e) {
                 throw new RuntimeException(e);
@@ -374,7 +374,7 @@ public final class MutableSerializationRegistryMultithreadTest {
             () -> {
               try {
                 for (int i = 0; i < REPETITIONS; ++i) {
-                  registry.serializeKeyFormat(new TestKeyFormat1(), TestSerializationA.class);
+                  registry.serializeKeyFormat(new TestParameters1(), TestSerializationA.class);
                 }
               } catch (GeneralSecurityException e) {
                 throw new RuntimeException(e);

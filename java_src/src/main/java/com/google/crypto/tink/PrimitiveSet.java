@@ -54,11 +54,11 @@ import javax.annotation.Nullable;
  */
 public final class PrimitiveSet<P> {
 
-  // A simple implementation of KeyFormat.
+  // A simple implementation of Parameters.
   // Consider renaming this class and moving it into internal. And use it in LegacyProtoKey.
   @Immutable
   @Alpha
-  private static class SimpleKeyFormat extends KeyFormat {
+  private static class SimpleKeyFormat extends Parameters {
 
     private final String typeUrl;
     private final OutputPrefixType outputPrefixType;
@@ -115,7 +115,7 @@ public final class PrimitiveSet<P> {
     private final OutputPrefixType outputPrefixType;
     // The id of the key.
     private final int keyId;
-    private final KeyFormat keyFormat;
+    private final Parameters parameters;
 
     Entry(
         P primitive,
@@ -123,13 +123,13 @@ public final class PrimitiveSet<P> {
         KeyStatusType status,
         OutputPrefixType outputPrefixType,
         int keyId,
-        KeyFormat keyFormat) {
+        Parameters parameters) {
       this.primitive = primitive;
       this.identifier = Arrays.copyOf(identifier, identifier.length);
       this.status = status;
       this.outputPrefixType = outputPrefixType;
       this.keyId = keyId;
-      this.keyFormat = keyFormat;
+      this.parameters = parameters;
     }
 
     /**
@@ -163,8 +163,8 @@ public final class PrimitiveSet<P> {
       return keyId;
     }
 
-    public KeyFormat getKeyFormat() {
-      return keyFormat;
+    public Parameters getParameters() {
+      return parameters;
     }
   }
 
@@ -285,7 +285,7 @@ public final class PrimitiveSet<P> {
     if (key.getStatus() != KeyStatusType.ENABLED) {
       throw new GeneralSecurityException("only ENABLED key is allowed");
     }
-    KeyFormat keyFormat =
+    Parameters parameters =
         new SimpleKeyFormat(key.getKeyData().getTypeUrl(), key.getOutputPrefixType());
     Entry<P> entry =
         new Entry<P>(
@@ -294,7 +294,7 @@ public final class PrimitiveSet<P> {
             key.getStatus(),
             key.getOutputPrefixType(),
             key.getKeyId(),
-            keyFormat);
+            parameters);
     List<Entry<P>> list = new ArrayList<>();
     list.add(entry);
     // Cannot use byte[] as keys in hash map, convert to Prefix wrapper class.
@@ -371,7 +371,7 @@ public final class PrimitiveSet<P> {
       if (key.getStatus() != KeyStatusType.ENABLED) {
         throw new GeneralSecurityException("only ENABLED key is allowed");
       }
-      KeyFormat keyFormat =
+      Parameters parameters =
           new SimpleKeyFormat(key.getKeyData().getTypeUrl(), key.getOutputPrefixType());
       Entry<P> entry =
           new Entry<P>(
@@ -380,7 +380,7 @@ public final class PrimitiveSet<P> {
               key.getStatus(),
               key.getOutputPrefixType(),
               key.getKeyId(),
-              keyFormat);
+              parameters);
       List<Entry<P>> list = new ArrayList<>();
       list.add(entry);
       // Cannot use byte[] as keys in hash map, convert to Prefix wrapper class.

@@ -19,7 +19,7 @@ package com.google.crypto.tink.internal.testing;
 import static java.nio.charset.StandardCharsets.US_ASCII;
 import static org.junit.Assert.assertThrows;
 
-import com.google.crypto.tink.KeyFormat;
+import com.google.crypto.tink.Parameters;
 import com.google.crypto.tink.internal.KeyFormatParser;
 import com.google.crypto.tink.internal.KeyFormatSerializer;
 import com.google.crypto.tink.internal.MutableSerializationRegistry;
@@ -46,7 +46,7 @@ public final class ProtoKeyFormatSerializationTesterTest {
   private static ProtoKeyFormatSerializationTester tester;
   private static MutableSerializationRegistry registry;
 
-  private static class TestKeyFormat extends KeyFormat {
+  private static class TestKeyFormat extends Parameters {
     private final ByteString strOfLength4;
     private final OutputPrefixType outputPrefixType;
 
@@ -99,7 +99,7 @@ public final class ProtoKeyFormatSerializationTesterTest {
             .build());
   }
 
-  private static TestKeyFormat parseKeyFormat(ProtoKeyFormatSerialization serialization)
+  private static TestKeyFormat parseParameters(ProtoKeyFormatSerialization serialization)
       throws GeneralSecurityException {
     if (!serialization.getKeyTemplate().getTypeUrl().equals(TYPE_URL)) {
       throw new IllegalArgumentException("Wrong type URL");
@@ -120,7 +120,7 @@ public final class ProtoKeyFormatSerializationTesterTest {
     registry = new MutableSerializationRegistry();
     registry.registerKeyFormatParser(
         KeyFormatParser.create(
-            ProtoKeyFormatSerializationTesterTest::parseKeyFormat,
+            ProtoKeyFormatSerializationTesterTest::parseParameters,
             TYPE_URL_BYTES,
             ProtoKeyFormatSerialization.class));
     registry.registerKeyFormatSerializer(

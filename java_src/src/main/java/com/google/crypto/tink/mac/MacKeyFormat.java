@@ -16,9 +16,9 @@
 
 package com.google.crypto.tink.mac;
 
-import com.google.crypto.tink.KeyFormat;
+import com.google.crypto.tink.Parameters;
 import com.google.errorprone.annotations.Immutable;
 
 /** Represents a description of a {@link MacKey} excluding the randomly chosen key material. */
 @Immutable
-public abstract class MacKeyFormat extends KeyFormat {}
+public abstract class MacKeyFormat extends Parameters {}

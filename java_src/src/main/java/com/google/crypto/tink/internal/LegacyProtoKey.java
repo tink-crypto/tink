@@ -17,7 +17,7 @@
 package com.google.crypto.tink.internal;
 
 import com.google.crypto.tink.Key;
-import com.google.crypto.tink.KeyFormat;
+import com.google.crypto.tink.Parameters;
 import com.google.crypto.tink.SecretKeyAccess;
 import com.google.crypto.tink.subtle.Bytes;
 import com.google.errorprone.annotations.Immutable;
@@ -106,7 +106,7 @@ public final class LegacyProtoKey extends Key {
 
   /** Unsupported. */
   @Override
-  public KeyFormat getKeyFormat() {
-    throw new UnsupportedOperationException("Cannot get key format on LegacyProtoKey");
+  public Parameters getParameters() {
+    throw new UnsupportedOperationException("Cannot get parameters on LegacyProtoKey");
   }
 }

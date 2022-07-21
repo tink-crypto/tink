@@ -19,8 +19,8 @@ package com.google.crypto.tink.internal.testing;
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertThrows;
 
-import com.google.crypto.tink.KeyFormat;
 import com.google.crypto.tink.KeyStatus;
+import com.google.crypto.tink.Parameters;
 import com.google.crypto.tink.internal.LegacyProtoKeyFormat;
 import com.google.crypto.tink.internal.ProtoKeyFormatSerialization;
 import com.google.crypto.tink.monitoring.MonitoringAnnotations;
@@ -37,7 +37,7 @@ import org.junit.runners.JUnit4;
 @RunWith(JUnit4.class)
 public final class FakeMonitoringClientTest {
 
-  KeyFormat makeLegacyProtoKeyFormat(String typeUrl) {
+  Parameters makeLegacyProtoKeyFormat(String typeUrl) {
     KeyTemplate template =
         KeyTemplate.newBuilder()
             .setTypeUrl(typeUrl)

@@ -21,7 +21,7 @@ import static org.junit.Assert.assertThrows;
 
 import com.google.crypto.tink.InsecureSecretKeyAccess;
 import com.google.crypto.tink.Key;
-import com.google.crypto.tink.KeyFormat;
+import com.google.crypto.tink.Parameters;
 import com.google.crypto.tink.SecretKeyAccess;
 import com.google.crypto.tink.util.Bytes;
 import com.google.errorprone.annotations.Immutable;
@@ -49,7 +49,7 @@ public final class KeySerializerTest {
     }
 
     @Override
-    public KeyFormat getKeyFormat() {
+    public Parameters getParameters() {
       throw new UnsupportedOperationException("Not needed in test");
     }
   }

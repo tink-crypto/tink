@@ -720,7 +720,7 @@ public class KeysetHandleTest {
     }
 
     @Override
-    public KeyFormat getKeyFormat() {
+    public Parameters getParameters() {
       throw new UnsupportedOperationException("Not needed in test");
     }
 

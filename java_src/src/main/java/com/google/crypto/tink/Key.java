@@ -38,13 +38,13 @@ import javax.annotation.Nullable;
 @Alpha
 public abstract class Key {
   /**
-   * Returns a {@link KeyFormat} object containing all the information about the key which is not
+   * Returns a {@link Parameters} object containing all the information about the key which is not
    * randomly chosen.
    *
-   * <p>Implementations need to ensure that {@code getKeyFormat().hasIdRequirement()} returns true
+   * <p>Implementations need to ensure that {@code getParameters().hasIdRequirement()} returns true
    * if and only if {@code getIdRequirementOrNull} is non-null.
    */
-  public abstract KeyFormat getKeyFormat();
+  public abstract Parameters getParameters();
 
   /**
    * Returns null if this key has no id requirement, otherwise the required id.

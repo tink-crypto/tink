@@ -61,11 +61,11 @@ public final class AesCmacKeyTest {
 
   @Test
   public void getKeyFormat() throws Exception {
-    assertThat(AesCmacKey.create(noPrefixFormat, SecretBytes.randomBytes(32)).getKeyFormat())
+    assertThat(AesCmacKey.create(noPrefixFormat, SecretBytes.randomBytes(32)).getParameters())
         .isEqualTo(noPrefixFormat);
     assertThat(
             AesCmacKey.createForKeyset(tinkFormat, SecretBytes.randomBytes(32), 1907)
-                .getKeyFormat())
+                .getParameters())
         .isEqualTo(tinkFormat);
   }
 

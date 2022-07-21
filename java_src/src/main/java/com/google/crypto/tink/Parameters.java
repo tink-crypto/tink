@@ -22,12 +22,12 @@ import com.google.errorprone.annotations.Immutable;
 /**
  * Represents a cryptographic function without the actual key material.
  *
- * <p>In Tink, a Key represents a set of cryptographic functions. The KeyFormat class contains all
+ * <p>In Tink, a Key represents a set of cryptographic functions. The Parameters class contains all
  * the information about the function which is not randomly chosen with each instance.
  */
 @Immutable
 @Alpha
-public abstract class KeyFormat {
+public abstract class Parameters {
   /**
    * Returns true if a key created with this format has to have a certain ID when it is in a keyset.
    *

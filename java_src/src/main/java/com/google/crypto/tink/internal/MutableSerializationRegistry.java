@@ -17,7 +17,7 @@
 package com.google.crypto.tink.internal;
 
 import com.google.crypto.tink.Key;
-import com.google.crypto.tink.KeyFormat;
+import com.google.crypto.tink.Parameters;
 import com.google.crypto.tink.SecretKeyAccess;
 import java.security.GeneralSecurityException;
 import java.util.concurrent.atomic.AtomicReference;
@@ -85,8 +85,8 @@ public final class MutableSerializationRegistry {
    * registered, this checks if they are the same. If they are, the call is ignored, otherwise an
    * exception is thrown, and the object is unchanged.
    */
-  public synchronized <KeyFormatT extends KeyFormat, SerializationT extends Serialization>
-      void registerKeyFormatSerializer(KeyFormatSerializer<KeyFormatT, SerializationT> serializer)
+  public synchronized <ParametersT extends Parameters, SerializationT extends Serialization>
+      void registerKeyFormatSerializer(KeyFormatSerializer<ParametersT, SerializationT> serializer)
           throws GeneralSecurityException {
     SerializationRegistry newRegistry =
         new SerializationRegistry.Builder(registry.get())
@@ -142,7 +142,7 @@ public final class MutableSerializationRegistry {
    * class, and the used object identifier (as indicated by {@code
    * serializedKey.getObjectIdentifier()}), and then parse the object with this parsers.
    */
-  public <SerializationT extends Serialization> KeyFormat parseKeyFormat(
+  public <SerializationT extends Serialization> Parameters parseKeyFormat(
       SerializationT serializedKeyFormat) throws GeneralSecurityException {
     return registry.get().parseKeyFormat(serializedKeyFormat);
   }
@@ -153,10 +153,10 @@ public final class MutableSerializationRegistry {
    * <p>This will look up a previously registered serializer for the requested {@code
    * SerializationT} class and the passed in key type, and then call serializeKey on the result.
    */
-  public <KeyFormatT extends KeyFormat, SerializationT extends Serialization>
+  public <ParametersT extends Parameters, SerializationT extends Serialization>
       SerializationT serializeKeyFormat(
-          KeyFormatT keyFormat, Class<SerializationT> serializationClass)
+          ParametersT parameters, Class<SerializationT> serializationClass)
           throws GeneralSecurityException {
-    return registry.get().serializeKeyFormat(keyFormat, serializationClass);
+    return registry.get().serializeKeyFormat(parameters, serializationClass);
   }
 }

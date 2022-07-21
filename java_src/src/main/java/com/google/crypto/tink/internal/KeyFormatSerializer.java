@@ -16,42 +16,42 @@
 
 package com.google.crypto.tink.internal;
 
-import com.google.crypto.tink.KeyFormat;
+import com.google.crypto.tink.Parameters;
 import java.security.GeneralSecurityException;
 
 /**
- * Serializes {@code KeyFormat} objects into {@code Serialization} objects of a certain kind.
+ * Serializes {@code Parameters} objects into {@code Serialization} objects of a certain kind.
  *
  * <p>This class should eventually be in Tinks public API -- however, it might still change before
  * that.
  */
 public abstract class KeyFormatSerializer<
-    KeyFormatT extends KeyFormat, SerializationT extends Serialization> {
+    ParametersT extends Parameters, SerializationT extends Serialization> {
   /**
-   * A function which serializes a KeyFormat object.
+   * A function which serializes a Parameters object.
    *
    * <p>This interface exists only so we have a type we can reference in {@link #create}. Users
    * should not use this directly; see the explanation in {@link #create}.
    */
   public interface KeyFormatSerializationFunction<
-      KeyFormatT extends KeyFormat, SerializationT extends Serialization> {
-    SerializationT serializeKeyFormat(KeyFormatT key) throws GeneralSecurityException;
+      ParametersT extends Parameters, SerializationT extends Serialization> {
+    SerializationT serializeKeyFormat(ParametersT key) throws GeneralSecurityException;
   }
 
-  private final Class<KeyFormatT> keyFormatClass;
+  private final Class<ParametersT> parametersClass;
   private final Class<SerializationT> serializationClass;
 
   private KeyFormatSerializer(
-      Class<KeyFormatT> keyFormatClass, Class<SerializationT> serializationClass) {
-    this.keyFormatClass = keyFormatClass;
+      Class<ParametersT> parametersClass, Class<SerializationT> serializationClass) {
+    this.parametersClass = parametersClass;
     this.serializationClass = serializationClass;
   }
 
-  public abstract SerializationT serializeKeyFormat(KeyFormatT keyFormat)
+  public abstract SerializationT serializeKeyFormat(ParametersT parameters)
       throws GeneralSecurityException;
 
-  public Class<KeyFormatT> getKeyFormatClass() {
-    return keyFormatClass;
+  public Class<ParametersT> getParametersClass() {
+    return parametersClass;
   }
 
   public Class<SerializationT> getSerializationClass() {
@@ -65,7 +65,7 @@ public abstract class KeyFormatSerializer<
    *
    * <pre>{@code
    * class MyClass {
-   *   private static MySerialization serializeKeyFormat(MyKeyFormat keyFormat)
+   *   private static MySerialization serializeParameters(MyParameters Parameters)
    *             throws GeneralSecurityException {
    *     ...
    *   }
@@ -75,21 +75,22 @@ public abstract class KeyFormatSerializer<
    * This function can then be used to create a {@code KeyFormatSerializer}:
    *
    * <pre>{@code
-   * KeyFormatSerializer<MyKeyFormat, MySerialization> serializer =
-   *       KeyFormatSerializer.create(MyClass::serializeKeyFormat, MyKeyFormat.class,
+   * KeyFormatSerializer<MyParameters, MySerialization> serializer =
+   *       KeyFormatSerializer.create(MyClass::serializeParameters, MyParameters.class,
    *                                  MySerialization.class);
    * }</pre>
    */
-  public static <KeyFormatT extends KeyFormat, SerializationT extends Serialization>
-      KeyFormatSerializer<KeyFormatT, SerializationT> create(
-          KeyFormatSerializationFunction<KeyFormatT, SerializationT> function,
-          Class<KeyFormatT> keyFormatClass,
+  public static <ParametersT extends Parameters, SerializationT extends Serialization>
+      KeyFormatSerializer<ParametersT, SerializationT> create(
+          KeyFormatSerializationFunction<ParametersT, SerializationT> function,
+          Class<ParametersT> parametersClass,
           Class<SerializationT> serializationClass) {
-    return new KeyFormatSerializer<KeyFormatT, SerializationT>(keyFormatClass, serializationClass) {
+    return new KeyFormatSerializer<ParametersT, SerializationT>(
+        parametersClass, serializationClass) {
       @Override
-      public SerializationT serializeKeyFormat(KeyFormatT keyFormat)
+      public SerializationT serializeKeyFormat(ParametersT parameters)
           throws GeneralSecurityException {
-        return function.serializeKeyFormat(keyFormat);
+        return function.serializeKeyFormat(parameters);
       }
     };
   }

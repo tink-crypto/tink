@@ -20,7 +20,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertThrows;
 
 import com.google.crypto.tink.Key;
-import com.google.crypto.tink.KeyFormat;
+import com.google.crypto.tink.Parameters;
 import javax.annotation.Nullable;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -29,10 +29,10 @@ import org.junit.runners.JUnit4;
 /** Tests for {@link KeyTester}. */
 @RunWith(JUnit4.class)
 public final class KeyTesterTest {
-  private static class TestKeyFormat extends KeyFormat {
+  private static class TestParameters extends Parameters {
     private final int hashCode;
 
-    public TestKeyFormat(int hashCode) {
+    public TestParameters(int hashCode) {
       this.hashCode = hashCode;
     }
 
@@ -48,25 +48,25 @@ public final class KeyTesterTest {
 
     @Override
     public boolean equals(Object o) {
-      if (!(o instanceof TestKeyFormat)) {
+      if (!(o instanceof TestParameters)) {
         return false;
       }
-      return ((TestKeyFormat) o).hashCode == hashCode;
+      return ((TestParameters) o).hashCode == hashCode;
     }
   }
 
   private static class TestKey extends Key {
     private final int id;
-    private final TestKeyFormat format;
+    private final TestParameters format;
 
-    public TestKey(int id, TestKeyFormat format) {
+    public TestKey(int id, TestParameters format) {
       this.id = id;
       this.format = format;
     }
 
     public TestKey(int id) {
       this.id = id;
-      this.format = new TestKeyFormat(0);
+      this.format = new TestParameters(0);
     }
 
     @Override
@@ -81,15 +81,15 @@ public final class KeyTesterTest {
     }
 
     @Override
-    public KeyFormat getKeyFormat() {
+    public Parameters getParameters() {
       return format;
     }
   }
 
   @Test
   public void keyTester_works() throws Exception {
-    TestKeyFormat format0 = new TestKeyFormat(0);
-    TestKeyFormat format1 = new TestKeyFormat(1);
+    TestParameters format0 = new TestParameters(0);
+    TestParameters format1 = new TestParameters(1);
     new KeyTester()
         .addEqualityGroup("Group 0a", new TestKey(0, format0), new TestKey(0, format0))
         .addEqualityGroup("Group 0b", new TestKey(1, format0), new TestKey(1, format0))
@@ -119,8 +119,8 @@ public final class KeyTesterTest {
 
   @Test
   public void sameKeyGroupDifferentFormat_throws() throws Exception {
-    TestKeyFormat format0 = new TestKeyFormat(0);
-    TestKeyFormat format1 = new TestKeyFormat(1);
+    TestParameters format0 = new TestParameters(0);
+    TestParameters format1 = new TestParameters(1);
     KeyTester tester =
         new KeyTester()
             .addEqualityGroup("MyGroup0", new TestKey(0, format0), new TestKey(0, format1));
@@ -129,9 +129,9 @@ public final class KeyTesterTest {
 
   @Test
   public void sameKeyGroupFormats_differentHashCode_throws() throws Exception {
-    TestKeyFormat format0 = new TestKeyFormat(0);
-    TestKeyFormat format1 =
-        new TestKeyFormat(0) {
+    TestParameters format0 = new TestParameters(0);
+    TestParameters format1 =
+        new TestParameters(0) {
           @Override
           public int hashCode() {
             return 12345;
@@ -145,9 +145,9 @@ public final class KeyTesterTest {
 
   @Test
   public void sameKeyGroupFormats_differentIdRequirements_throws() throws Exception {
-    TestKeyFormat format0 = new TestKeyFormat(0);
-    TestKeyFormat format1 =
-        new TestKeyFormat(0) {
+    TestParameters format0 = new TestParameters(0);
+    TestParameters format1 =
+        new TestParameters(0) {
           @Override
           public boolean hasIdRequirement() {
             return true;
@@ -167,8 +167,8 @@ public final class KeyTesterTest {
 
   @Test
   public void testIdRequirementTrue_isOk() throws Exception {
-    TestKeyFormat format =
-        new TestKeyFormat(1) {
+    TestParameters format =
+        new TestParameters(1) {
           @Override
           public boolean hasIdRequirement() {
             return true;
@@ -179,8 +179,8 @@ public final class KeyTesterTest {
 
   @Test
   public void testIdRequirementInconsistent_throws() throws Exception {
-    TestKeyFormat format =
-        new TestKeyFormat(1) {
+    TestParameters format =
+        new TestParameters(1) {
           @Override
           public boolean hasIdRequirement() {
             return true;
@@ -200,8 +200,8 @@ public final class KeyTesterTest {
 
   @Test
   public void testIdRequirementInconsistent2_throws() throws Exception {
-    TestKeyFormat format =
-        new TestKeyFormat(1) {
+    TestParameters format =
+        new TestParameters(1) {
           @Override
           public boolean hasIdRequirement() {
             return false;

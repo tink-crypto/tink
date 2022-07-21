@@ -259,7 +259,7 @@ public class PrimitiveSetTest {
   }
 
   @Test
-  public void testEntryGetKeyFormatToString() throws Exception {
+  public void testEntryGetParametersToString() throws Exception {
     PrimitiveSet<Mac> pset = PrimitiveSet.newPrimitiveSet(Mac.class);
     Key key1 =
         Key.newBuilder()
@@ -271,12 +271,12 @@ public class PrimitiveSetTest {
     pset.addPrimitive(new DummyMac1(), key1);
 
     PrimitiveSet.Entry<Mac> entry = pset.getPrimitive(key1).get(0);
-    assertThat(entry.getKeyFormat().toString())
+    assertThat(entry.getParameters().toString())
         .isEqualTo("(typeUrl=typeUrl1, outputPrefixType=TINK)");
 
     PrimitiveSet<Mac> pset2 =
         PrimitiveSet.newBuilder(Mac.class).addPrimaryPrimitive(new DummyMac1(), key1).build();
-    assertThat(pset2.getPrimitive(key1).get(0).getKeyFormat().toString())
+    assertThat(pset2.getPrimitive(key1).get(0).getParameters().toString())
         .isEqualTo("(typeUrl=typeUrl1, outputPrefixType=TINK)");
   }
 

@@ -19,8 +19,8 @@ package com.google.crypto.tink.monitoring;
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertThrows;
 
-import com.google.crypto.tink.KeyFormat;
 import com.google.crypto.tink.KeyStatus;
+import com.google.crypto.tink.Parameters;
 import com.google.crypto.tink.internal.LegacyProtoKeyFormat;
 import com.google.crypto.tink.internal.ProtoKeyFormatSerialization;
 import com.google.crypto.tink.proto.KeyTemplate;
@@ -36,7 +36,7 @@ import org.junit.runners.JUnit4;
 @RunWith(JUnit4.class)
 public final class MonitoringKeysetInfoTest {
 
-  KeyFormat makeLegacyProtoKeyFormat(String typeUrl) {
+  Parameters makeLegacyProtoKeyFormat(String typeUrl) {
     KeyTemplate template =
         KeyTemplate.newBuilder()
             .setTypeUrl(typeUrl)
@@ -49,7 +49,7 @@ public final class MonitoringKeysetInfoTest {
 
   @Test
   public void addAndGetEntry() throws Exception {
-    KeyFormat keyFormat = makeLegacyProtoKeyFormat("typeUrl123");
+    Parameters keyFormat = makeLegacyProtoKeyFormat("typeUrl123");
     MonitoringKeysetInfo info =
         MonitoringKeysetInfo.newBuilder()
             .addEntry(KeyStatus.ENABLED, 123, makeLegacyProtoKeyFormat("typeUrl123"))
@@ -192,8 +192,8 @@ public final class MonitoringKeysetInfoTest {
     assertThat(info.toString())
         .isEqualTo(
             "(annotations={annotation_name1=annotation_value1}, entries=[(status=ENABLED,"
-                + " keyId=123, keyFormat='(typeUrl=typeUrl123, outputPrefixType=TINK)'),"
-                + " (status=DISABLED, keyId=234, keyFormat='(typeUrl=typeUrl234,"
+                + " keyId=123, parameters='(typeUrl=typeUrl123, outputPrefixType=TINK)'),"
+                + " (status=DISABLED, keyId=234, parameters='(typeUrl=typeUrl234,"
                 + " outputPrefixType=TINK)')], primaryKeyId=123)");
   }
 

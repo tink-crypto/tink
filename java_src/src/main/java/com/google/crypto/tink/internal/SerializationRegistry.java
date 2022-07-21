@@ -17,7 +17,7 @@
 package com.google.crypto.tink.internal;
 
 import com.google.crypto.tink.Key;
-import com.google.crypto.tink.KeyFormat;
+import com.google.crypto.tink.Parameters;
 import com.google.crypto.tink.SecretKeyAccess;
 import com.google.crypto.tink.util.Bytes;
 import java.security.GeneralSecurityException;
@@ -114,12 +114,12 @@ public final class SerializationRegistry {
      * already been registered, this checks if they are the same. If they are, the call is ignored,
      * otherwise an exception is thrown.
      */
-    public <KeyFormatT extends KeyFormat, SerializationT extends Serialization>
+    public <ParametersT extends Parameters, SerializationT extends Serialization>
         Builder registerKeyFormatSerializer(
-            KeyFormatSerializer<KeyFormatT, SerializationT> serializer)
+            KeyFormatSerializer<ParametersT, SerializationT> serializer)
             throws GeneralSecurityException {
       SerializerIndex index =
-          new SerializerIndex(serializer.getKeyFormatClass(), serializer.getSerializationClass());
+          new SerializerIndex(serializer.getParametersClass(), serializer.getSerializationClass());
       if (keyFormatSerializerMap.containsKey(index)) {
         KeyFormatSerializer<?, ?> existingSerializer = keyFormatSerializerMap.get(index);
         if (!existingSerializer.equals(serializer) || !serializer.equals(existingSerializer)) {
@@ -283,7 +283,7 @@ public final class SerializationRegistry {
    * class, and the used object identifier (as indicated by {@code
    * serializedKey.getObjectIdentifier()}), and then parse the object with this parsers.
    */
-  public <SerializationT extends Serialization> KeyFormat parseKeyFormat(
+  public <SerializationT extends Serialization> Parameters parseKeyFormat(
       SerializationT serializedKeyFormat) throws GeneralSecurityException {
     ParserIndex index =
         new ParserIndex(serializedKeyFormat.getClass(), serializedKeyFormat.getObjectIdentifier());
@@ -304,17 +304,17 @@ public final class SerializationRegistry {
    * <p>This will look up a previously registered serializer for the requested {@code
    * SerializationT} class and the passed in key type, and then call serializeKey on the result.
    */
-  public <KeyFormatT extends KeyFormat, SerializationT extends Serialization>
+  public <ParametersT extends Parameters, SerializationT extends Serialization>
       SerializationT serializeKeyFormat(
-          KeyFormatT keyFormat, Class<SerializationT> serializationClass)
+          ParametersT keyFormat, Class<SerializationT> serializationClass)
           throws GeneralSecurityException {
     SerializerIndex index = new SerializerIndex(keyFormat.getClass(), serializationClass);
     if (!keyFormatSerializerMap.containsKey(index)) {
       throw new GeneralSecurityException("No Key Format serializer for " + index + " available");
     }
     @SuppressWarnings("unchecked") // We know we only insert like this.
-    KeyFormatSerializer<KeyFormatT, SerializationT> serializer =
-        (KeyFormatSerializer<KeyFormatT, SerializationT>) keyFormatSerializerMap.get(index);
+    KeyFormatSerializer<ParametersT, SerializationT> serializer =
+        (KeyFormatSerializer<ParametersT, SerializationT>) keyFormatSerializerMap.get(index);
     return serializer.serializeKeyFormat(keyFormat);
   }
 }

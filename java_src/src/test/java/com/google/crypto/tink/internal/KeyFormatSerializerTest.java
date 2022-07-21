@@ -18,7 +18,7 @@ package com.google.crypto.tink.internal;
 
 import static com.google.common.truth.Truth.assertThat;
 
-import com.google.crypto.tink.KeyFormat;
+import com.google.crypto.tink.Parameters;
 import com.google.crypto.tink.util.Bytes;
 import com.google.errorprone.annotations.Immutable;
 import java.security.GeneralSecurityException;
@@ -31,7 +31,7 @@ import org.junit.runners.JUnit4;
 public final class KeyFormatSerializerTest {
 
   @Immutable
-  private static class ExampleKeyFormat extends KeyFormat {
+  private static class ExampleKeyFormat extends Parameters {
     @Override
     public boolean hasIdRequirement() {
       return false;
@@ -70,7 +70,7 @@ public final class KeyFormatSerializerTest {
     KeyFormatSerializer<ExampleKeyFormat, ExampleSerialization> serializer =
         KeyFormatSerializer.create(
             KeyFormatSerializerTest::serialize, ExampleKeyFormat.class, ExampleSerialization.class);
-    assertThat(serializer.getKeyFormatClass()).isEqualTo(ExampleKeyFormat.class);
+    assertThat(serializer.getParametersClass()).isEqualTo(ExampleKeyFormat.class);
     assertThat(serializer.getSerializationClass()).isEqualTo(ExampleSerialization.class);
   }
 }

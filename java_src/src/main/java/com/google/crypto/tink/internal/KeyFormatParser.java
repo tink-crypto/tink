@@ -16,7 +16,7 @@
 
 package com.google.crypto.tink.internal;
 
-import com.google.crypto.tink.KeyFormat;
+import com.google.crypto.tink.Parameters;
 import com.google.crypto.tink.util.Bytes;
 import java.security.GeneralSecurityException;
 
@@ -28,13 +28,13 @@ import java.security.GeneralSecurityException;
  */
 public abstract class KeyFormatParser<SerializationT extends Serialization> {
   /**
-   * A function which parses a KeyFormat object.
+   * A function which parses a Parameters object.
    *
    * <p>This interface exists only so we have a type we can reference in {@link #create}. Users
    * should not use this directly; see the explanation in {@link #create}.
    */
   public interface KeyFormatParsingFunction<SerializationT extends Serialization> {
-    KeyFormat parseKeyFormat(SerializationT serialization) throws GeneralSecurityException;
+    Parameters parseKeyFormat(SerializationT serialization) throws GeneralSecurityException;
   }
 
   private final Bytes objectIdentifier;
@@ -51,7 +51,7 @@ public abstract class KeyFormatParser<SerializationT extends Serialization> {
    * <p>This function is usually called with a Serialization matching the result of {@link
    * getObjectIdentifier}. However, implementations should check that this is the case.
    */
-  public abstract KeyFormat parseKeyFormat(SerializationT serialization)
+  public abstract Parameters parseKeyFormat(SerializationT serialization)
       throws GeneralSecurityException;
 
   /**
@@ -103,7 +103,7 @@ public abstract class KeyFormatParser<SerializationT extends Serialization> {
       Class<SerializationT> serializationClass) {
     return new KeyFormatParser<SerializationT>(objectIdentifier, serializationClass) {
       @Override
-      public KeyFormat parseKeyFormat(SerializationT serialization)
+      public Parameters parseKeyFormat(SerializationT serialization)
           throws GeneralSecurityException {
         return function.parseKeyFormat(serialization);
       }

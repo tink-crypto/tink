@@ -19,7 +19,7 @@ package com.google.crypto.tink.internal.testing;
 import static com.google.common.truth.Truth.assertThat;
 
 import com.google.crypto.tink.Key;
-import com.google.crypto.tink.KeyFormat;
+import com.google.crypto.tink.Parameters;
 import com.google.crypto.tink.internal.ProtoKeySerialization;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
 import com.google.crypto.tink.proto.OutputPrefixType;
@@ -37,7 +37,7 @@ public final class KeyWithSerializationTest {
     public TestKey() {}
 
     @Override
-    public KeyFormat getKeyFormat() {
+    public Parameters getParameters() {
       throw new UnsupportedOperationException("Not needed in test");
     }
 

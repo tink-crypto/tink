@@ -19,7 +19,7 @@ package com.google.crypto.tink.internal.testing;
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertThrows;
 
-import com.google.crypto.tink.KeyFormat;
+import com.google.crypto.tink.Parameters;
 import com.google.crypto.tink.internal.MutableSerializationRegistry;
 import com.google.crypto.tink.internal.ProtoKeyFormatSerialization;
 import com.google.crypto.tink.proto.KeyTemplate;
@@ -49,7 +49,7 @@ public final class ProtoKeyFormatSerializationTester {
    * {@code protoFormat}.
    */
   public void testParse(
-      KeyFormat format, MessageLite protoFormat, OutputPrefixType outputPrefixType)
+      Parameters parameters, MessageLite protoFormat, OutputPrefixType outputPrefixType)
       throws Exception {
     KeyTemplate template =
         KeyTemplate.newBuilder()
@@ -58,7 +58,7 @@ public final class ProtoKeyFormatSerializationTester {
             .setValue(protoFormat.toByteString())
             .build();
     ProtoKeyFormatSerialization serialization = ProtoKeyFormatSerialization.create(template);
-    assertThat(serializationRegistry.parseKeyFormat(serialization)).isEqualTo(format);
+    assertThat(serializationRegistry.parseKeyFormat(serialization)).isEqualTo(parameters);
   }
 
   /**
@@ -66,7 +66,7 @@ public final class ProtoKeyFormatSerializationTester {
    * the given {@code protoFormat}, and a {@code outputPrefixType} which equals the given one.
    */
   public void testSerialize(
-      KeyFormat format, MessageLite protoFormat, OutputPrefixType outputPrefixType)
+      Parameters format, MessageLite protoFormat, OutputPrefixType outputPrefixType)
       throws Exception {
     ProtoKeyFormatSerialization serialized =
         serializationRegistry.serializeKeyFormat(format, ProtoKeyFormatSerialization.class);
@@ -82,7 +82,7 @@ public final class ProtoKeyFormatSerializationTester {
 
   /** Runs {@link #testParse} and {#link testSerialize}. */
   public void testParseAndSerialize(
-      KeyFormat format, MessageLite protoFormat, OutputPrefixType outputPrefixType)
+      Parameters format, MessageLite protoFormat, OutputPrefixType outputPrefixType)
       throws Exception {
     testParse(format, protoFormat, outputPrefixType);
     testSerialize(format, protoFormat, outputPrefixType);

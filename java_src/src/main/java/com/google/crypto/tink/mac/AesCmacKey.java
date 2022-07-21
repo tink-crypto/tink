@@ -33,13 +33,13 @@ import javax.annotation.Nullable;
  * bits) only.
  */
 public final class AesCmacKey extends MacKey {
-  private final AesCmacKeyFormat format;
+  private final AesCmacKeyFormat parameters;
   private final SecretBytes aesKeyBytes;
   @Nullable private final Integer idRequirement;
 
   private AesCmacKey(
-      AesCmacKeyFormat format, SecretBytes aesKeyBytes, @Nullable Integer idRequirement) {
-    this.format = format;
+      AesCmacKeyFormat parameters, SecretBytes aesKeyBytes, @Nullable Integer idRequirement) {
+    this.parameters = parameters;
     this.aesKeyBytes = aesKeyBytes;
     this.idRequirement = idRequirement;
   }
@@ -102,22 +102,22 @@ public final class AesCmacKey extends MacKey {
 
   @Override
   public Bytes getOutputPrefix() {
-    if (format.getVariant() == AesCmacKeyFormat.Variant.NO_PREFIX) {
+    if (parameters.getVariant() == AesCmacKeyFormat.Variant.NO_PREFIX) {
       return Bytes.copyFrom(new byte[] {});
     }
-    if (format.getVariant() == AesCmacKeyFormat.Variant.LEGACY
-        || format.getVariant() == AesCmacKeyFormat.Variant.CRUNCHY) {
+    if (parameters.getVariant() == AesCmacKeyFormat.Variant.LEGACY
+        || parameters.getVariant() == AesCmacKeyFormat.Variant.CRUNCHY) {
       return Bytes.copyFrom(ByteBuffer.allocate(5).put((byte) 0).putInt(idRequirement).array());
     }
-    if (format.getVariant() == AesCmacKeyFormat.Variant.TINK) {
+    if (parameters.getVariant() == AesCmacKeyFormat.Variant.TINK) {
       return Bytes.copyFrom(ByteBuffer.allocate(5).put((byte) 1).putInt(idRequirement).array());
     }
-    throw new IllegalStateException("Unknown AesCmacKeyFormat.Variant: " + format.getVariant());
+    throw new IllegalStateException("Unknown AesCmacKeyFormat.Variant: " + parameters.getVariant());
   }
 
   @Override
-  public AesCmacKeyFormat getKeyFormat() {
-    return format;
+  public AesCmacKeyFormat getParameters() {
+    return parameters;
   }
 
   @Override
@@ -132,7 +132,7 @@ public final class AesCmacKey extends MacKey {
       return false;
     }
     AesCmacKey that = (AesCmacKey) o;
-    return that.format.equals(format)
+    return that.parameters.equals(parameters)
         && that.aesKeyBytes.equalsSecretBytes(aesKeyBytes)
         && Objects.equals(that.idRequirement, idRequirement);
   }

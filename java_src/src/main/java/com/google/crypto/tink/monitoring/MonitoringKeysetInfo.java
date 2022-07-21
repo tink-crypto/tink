@@ -16,8 +16,8 @@
 
 package com.google.crypto.tink.monitoring;
 
-import com.google.crypto.tink.KeyFormat;
 import com.google.crypto.tink.KeyStatus;
+import com.google.crypto.tink.Parameters;
 import com.google.crypto.tink.annotations.Alpha;
 import com.google.errorprone.annotations.Immutable;
 import java.security.GeneralSecurityException;
@@ -42,7 +42,7 @@ public final class MonitoringKeysetInfo {
   public static final class Entry {
     private final KeyStatus status;
     private final int keyId;
-    private final KeyFormat keyFormat;
+    private final Parameters parameters;
 
     public KeyStatus getStatus() {
       return status;
@@ -52,14 +52,14 @@ public final class MonitoringKeysetInfo {
       return keyId;
     }
 
-    public KeyFormat getKeyFormat() {
-      return keyFormat;
+    public Parameters getKeyFormat() {
+      return parameters;
     }
 
-    private Entry(KeyStatus status, int keyId, KeyFormat keyFormat) {
+    private Entry(KeyStatus status, int keyId, Parameters parameters) {
       this.status = status;
       this.keyId = keyId;
-      this.keyFormat = keyFormat;
+      this.parameters = parameters;
     }
 
     @Override
@@ -70,18 +70,18 @@ public final class MonitoringKeysetInfo {
       Entry entry = (Entry) obj;
       return this.status == entry.status
           && this.keyId == entry.keyId
-          && this.keyFormat.equals(entry.keyFormat);
+          && this.parameters.equals(entry.parameters);
     }
 
     @Override
     public int hashCode() {
-      return Objects.hash(status, keyId, keyFormat.hashCode());
+      return Objects.hash(status, keyId, parameters.hashCode());
     }
 
     @Override
     public String toString() {
       return String.format(
-          "(status=%s, keyId=%s, keyFormat='%s')", this.status, this.keyId, this.keyFormat);
+          "(status=%s, keyId=%s, parameters='%s')", this.status, this.keyId, this.parameters);
     }
   }
 
@@ -101,11 +101,11 @@ public final class MonitoringKeysetInfo {
       return this;
     }
 
-    public Builder addEntry(KeyStatus status, int keyId, KeyFormat keyFormat) {
+    public Builder addEntry(KeyStatus status, int keyId, Parameters parameters) {
       if (builderEntries == null) {
         throw new IllegalStateException("addEntry cannot be called after build()");
       }
-      builderEntries.add(new Entry(status, keyId, keyFormat));
+      builderEntries.add(new Entry(status, keyId, parameters));
       return this;
     }
 

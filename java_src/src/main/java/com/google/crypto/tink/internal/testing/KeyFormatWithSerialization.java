@@ -16,7 +16,7 @@
 
 package com.google.crypto.tink.internal.testing;
 
-import com.google.crypto.tink.KeyFormat;
+import com.google.crypto.tink.Parameters;
 import com.google.crypto.tink.internal.ProtoKeyFormatSerialization;
 
 /**
@@ -26,17 +26,17 @@ import com.google.crypto.tink.internal.ProtoKeyFormatSerialization;
 public class KeyFormatWithSerialization {
   /** Constructs a new KeyFormatWithSerialization. */
   public KeyFormatWithSerialization(
-      KeyFormat format, ProtoKeyFormatSerialization serializedFormat) {
-    this.format = format;
+      Parameters parameters, ProtoKeyFormatSerialization serializedFormat) {
+    this.parameters = parameters;
     this.serializedFormat = serializedFormat;
   }
 
-  private final KeyFormat format;
+  private final Parameters parameters;
   private final ProtoKeyFormatSerialization serializedFormat;
 
-  /** Returns the {@link KeyFormat}. */
-  public KeyFormat getFormat() {
-    return format;
+  /** Returns the {@link Parameters}. */
+  public Parameters getParameters() {
+    return parameters;
   }
 
   /** Returns the {@link ProtoKeyFormatSerialization}. */
@@ -46,6 +46,6 @@ public class KeyFormatWithSerialization {
 
   @Override
   public String toString() {
-    return format.toString() + ", " + serializedFormat.toString();
+    return parameters.toString() + ", " + serializedFormat.toString();
   }
 }

@@ -16,14 +16,14 @@
 
 package com.google.crypto.tink.internal;
 
-import com.google.crypto.tink.KeyFormat;
+import com.google.crypto.tink.Parameters;
 import com.google.crypto.tink.proto.OutputPrefixType;
 import com.google.errorprone.annotations.Immutable;
 import java.util.Objects;
 
 /** Implements a KeyFormat for legacy types where no actual KeyFormat is present. */
 @Immutable
-public final class LegacyProtoKeyFormat extends KeyFormat {
+public final class LegacyProtoKeyFormat extends Parameters {
   private final ProtoKeyFormatSerialization serialization;
 
   /** Creates a new LegacyProtoKeyFormat object. */
