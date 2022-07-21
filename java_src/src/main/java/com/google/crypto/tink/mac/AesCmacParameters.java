@@ -21,7 +21,7 @@ import java.security.GeneralSecurityException;
 import java.util.Objects;
 
 /** Describes a format of an {@link AesCmacKey}. */
-public final class AesCmacKeyFormat extends MacKeyFormat {
+public final class AesCmacParameters extends MacParameters {
   /**
    * Describes details of the mac computation.
    *
@@ -50,13 +50,13 @@ public final class AesCmacKeyFormat extends MacKeyFormat {
   private final int tagSizeBytes;
   private final Variant variant;
 
-  private AesCmacKeyFormat(int tagSizeBytes, Variant variant) {
+  private AesCmacParameters(int tagSizeBytes, Variant variant) {
     this.tagSizeBytes = tagSizeBytes;
     this.variant = variant;
   }
 
   /** Equivalent to {@code createForKeysetWithCryptographicTagSize(tagSize, Variant.NO_PREFIX);} */
-  public static AesCmacKeyFormat create(int tagSize) throws GeneralSecurityException {
+  public static AesCmacParameters create(int tagSize) throws GeneralSecurityException {
     return createForKeysetWithCryptographicTagSize(tagSize, Variant.NO_PREFIX);
   }
 
@@ -65,12 +65,12 @@ public final class AesCmacKeyFormat extends MacKeyFormat {
    *
    * @throws GeneralSecurityException if tagSizeBytes not in {10, …, 16}.
    */
-  public static AesCmacKeyFormat createForKeysetWithCryptographicTagSize(
+  public static AesCmacParameters createForKeysetWithCryptographicTagSize(
       int tagSizeBytes, Variant variant) throws GeneralSecurityException {
     if (tagSizeBytes < 10 || 16 < tagSizeBytes) {
-      throw new GeneralSecurityException("Invalid tag size for AesCmacKeyFormat: " + tagSizeBytes);
+      throw new GeneralSecurityException("Invalid tag size for AesCmacParameters: " + tagSizeBytes);
     }
-    return new AesCmacKeyFormat(tagSizeBytes, variant);
+    return new AesCmacParameters(tagSizeBytes, variant);
   }
 
   /**
@@ -110,10 +110,10 @@ public final class AesCmacKeyFormat extends MacKeyFormat {
 
   @Override
   public boolean equals(Object o) {
-    if (!(o instanceof AesCmacKeyFormat)) {
+    if (!(o instanceof AesCmacParameters)) {
       return false;
     }
-    AesCmacKeyFormat that = (AesCmacKeyFormat) o;
+    AesCmacParameters that = (AesCmacParameters) o;
     return that.getTotalTagSizeBytes() == getTotalTagSizeBytes()
         && that.getVariant() == getVariant();
   }

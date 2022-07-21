@@ -29,22 +29,22 @@ import org.junit.runners.JUnit4;
 
 @RunWith(JUnit4.class)
 public final class AesCmacKeyTest {
-  private static final AesCmacKeyFormat.Variant NO_PREFIX = AesCmacKeyFormat.Variant.NO_PREFIX;
-  private static final AesCmacKeyFormat.Variant TINK = AesCmacKeyFormat.Variant.TINK;
-  private static final AesCmacKeyFormat.Variant LEGACY = AesCmacKeyFormat.Variant.LEGACY;
-  private static final AesCmacKeyFormat.Variant CRUNCHY = AesCmacKeyFormat.Variant.CRUNCHY;
+  private static final AesCmacParameters.Variant NO_PREFIX = AesCmacParameters.Variant.NO_PREFIX;
+  private static final AesCmacParameters.Variant TINK = AesCmacParameters.Variant.TINK;
+  private static final AesCmacParameters.Variant LEGACY = AesCmacParameters.Variant.LEGACY;
+  private static final AesCmacParameters.Variant CRUNCHY = AesCmacParameters.Variant.CRUNCHY;
 
-  private static AesCmacKeyFormat tinkFormat;
-  private static AesCmacKeyFormat legacyFormat;
-  private static AesCmacKeyFormat crunchyFormat;
-  private static AesCmacKeyFormat noPrefixFormat;
+  private static AesCmacParameters tinkFormat;
+  private static AesCmacParameters legacyFormat;
+  private static AesCmacParameters crunchyFormat;
+  private static AesCmacParameters noPrefixFormat;
 
   @BeforeClass
   public static void setUpFormats() throws Exception {
-    tinkFormat = AesCmacKeyFormat.createForKeysetWithCryptographicTagSize(10, TINK);
-    legacyFormat = AesCmacKeyFormat.createForKeysetWithCryptographicTagSize(10, LEGACY);
-    crunchyFormat = AesCmacKeyFormat.createForKeysetWithCryptographicTagSize(10, CRUNCHY);
-    noPrefixFormat = AesCmacKeyFormat.createForKeysetWithCryptographicTagSize(10, NO_PREFIX);
+    tinkFormat = AesCmacParameters.createForKeysetWithCryptographicTagSize(10, TINK);
+    legacyFormat = AesCmacParameters.createForKeysetWithCryptographicTagSize(10, LEGACY);
+    crunchyFormat = AesCmacParameters.createForKeysetWithCryptographicTagSize(10, CRUNCHY);
+    noPrefixFormat = AesCmacParameters.createForKeysetWithCryptographicTagSize(10, NO_PREFIX);
   }
 
   @Test

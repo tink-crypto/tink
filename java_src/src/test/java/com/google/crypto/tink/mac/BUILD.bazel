@@ -142,11 +142,11 @@ java_test(
 )
 
 java_test(
-    name = "AesCmacKeyFormatTest",
+    name = "AesCmacParametersTest",
     size = "small",
-    srcs = ["AesCmacKeyFormatTest.java"],
+    srcs = ["AesCmacParametersTest.java"],
     deps = [
-        "//src/main/java/com/google/crypto/tink/mac:aes_cmac_key_format",
+        "//src/main/java/com/google/crypto/tink/mac:aes_cmac_parameters",
         "@maven//:com_google_truth_truth",
         "@maven//:junit_junit",
     ],
@@ -159,7 +159,7 @@ java_test(
     deps = [
         "//src/main/java/com/google/crypto/tink/internal:key_tester",
         "//src/main/java/com/google/crypto/tink/mac:aes_cmac_key",
-        "//src/main/java/com/google/crypto/tink/mac:aes_cmac_key_format",
+        "//src/main/java/com/google/crypto/tink/mac:aes_cmac_parameters",
         "//src/main/java/com/google/crypto/tink/util:secret_bytes",
         "@maven//:com_google_truth_truth",
         "@maven//:junit_junit",

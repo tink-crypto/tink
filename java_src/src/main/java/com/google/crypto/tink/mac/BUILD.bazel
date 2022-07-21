@@ -196,7 +196,7 @@ java_library(
     name = "mac_key",
     srcs = ["MacKey.java"],
     deps = [
-        ":mac_key_format",
+        ":mac_parameters",
         "//src/main/java/com/google/crypto/tink:key",
         "//src/main/java/com/google/crypto/tink/util:bytes",
     ],
@@ -206,15 +206,15 @@ android_library(
     name = "mac_key-android",
     srcs = ["MacKey.java"],
     deps = [
-        ":mac_key_format-android",
+        ":mac_parameters-android",
         "//src/main/java/com/google/crypto/tink:key-android",
         "//src/main/java/com/google/crypto/tink/util:bytes-android",
     ],
 )
 
 java_library(
-    name = "mac_key_format",
-    srcs = ["MacKeyFormat.java"],
+    name = "mac_parameters",
+    srcs = ["MacParameters.java"],
     deps = [
         "//src/main/java/com/google/crypto/tink:parameters",
         "@maven//:com_google_errorprone_error_prone_annotations",
@@ -222,8 +222,8 @@ java_library(
 )
 
 android_library(
-    name = "mac_key_format-android",
-    srcs = ["MacKeyFormat.java"],
+    name = "mac_parameters-android",
+    srcs = ["MacParameters.java"],
     deps = [
         "//src/main/java/com/google/crypto/tink:parameters-android",
         "@maven//:com_google_errorprone_error_prone_annotations",
@@ -234,7 +234,7 @@ java_library(
     name = "aes_cmac_key",
     srcs = ["AesCmacKey.java"],
     deps = [
-        ":aes_cmac_key_format",
+        ":aes_cmac_parameters",
         ":mac_key",
         "//src/main/java/com/google/crypto/tink:accesses_partial_key",
         "//src/main/java/com/google/crypto/tink:key",
@@ -249,7 +249,7 @@ android_library(
     name = "aes_cmac_key-android",
     srcs = ["AesCmacKey.java"],
     deps = [
-        ":aes_cmac_key_format-android",
+        ":aes_cmac_parameters-android",
         ":mac_key-android",
         "//src/main/java/com/google/crypto/tink:accesses_partial_key-android",
         "//src/main/java/com/google/crypto/tink:key-android",
@@ -261,19 +261,19 @@ android_library(
 )
 
 java_library(
-    name = "aes_cmac_key_format",
-    srcs = ["AesCmacKeyFormat.java"],
+    name = "aes_cmac_parameters",
+    srcs = ["AesCmacParameters.java"],
     deps = [
-        ":mac_key_format",
+        ":mac_parameters",
         "@maven//:com_google_errorprone_error_prone_annotations",
     ],
 )
 
 android_library(
-    name = "aes_cmac_key_format-android",
-    srcs = ["AesCmacKeyFormat.java"],
+    name = "aes_cmac_parameters-android",
+    srcs = ["AesCmacParameters.java"],
     deps = [
-        ":mac_key_format-android",
+        ":mac_parameters-android",
         "@maven//:com_google_errorprone_error_prone_annotations",
     ],
 )

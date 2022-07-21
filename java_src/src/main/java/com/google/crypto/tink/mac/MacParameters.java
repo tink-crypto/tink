@@ -21,4 +21,4 @@ import com.google.errorprone.annotations.Immutable;
 
 /** Represents a description of a {@link MacKey} excluding the randomly chosen key material. */
 @Immutable
-public abstract class MacKeyFormat extends Parameters {}
+public abstract class MacParameters extends Parameters {}

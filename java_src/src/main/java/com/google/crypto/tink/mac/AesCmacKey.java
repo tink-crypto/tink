@@ -33,12 +33,12 @@ import javax.annotation.Nullable;
  * bits) only.
  */
 public final class AesCmacKey extends MacKey {
-  private final AesCmacKeyFormat parameters;
+  private final AesCmacParameters parameters;
   private final SecretBytes aesKeyBytes;
   @Nullable private final Integer idRequirement;
 
   private AesCmacKey(
-      AesCmacKeyFormat parameters, SecretBytes aesKeyBytes, @Nullable Integer idRequirement) {
+      AesCmacParameters parameters, SecretBytes aesKeyBytes, @Nullable Integer idRequirement) {
     this.parameters = parameters;
     this.aesKeyBytes = aesKeyBytes;
     this.idRequirement = idRequirement;
@@ -50,7 +50,7 @@ public final class AesCmacKey extends MacKey {
       link = "https://developers.google.com/tink/design/access_control#accessing_partial_keys",
       allowedOnPath = ".*Test\\.java",
       allowlistAnnotations = {AccessesPartialKey.class})
-  public static AesCmacKey create(AesCmacKeyFormat format, SecretBytes aesKey)
+  public static AesCmacKey create(AesCmacParameters format, SecretBytes aesKey)
       throws GeneralSecurityException {
     if (aesKey.size() != 32) {
       throw new GeneralSecurityException("Invalid key size");
@@ -73,7 +73,7 @@ public final class AesCmacKey extends MacKey {
       allowedOnPath = ".*Test\\.java",
       allowlistAnnotations = {AccessesPartialKey.class})
   public static AesCmacKey createForKeyset(
-      AesCmacKeyFormat format, SecretBytes aesKeyBytes, @Nullable Integer idRequirement)
+      AesCmacParameters format, SecretBytes aesKeyBytes, @Nullable Integer idRequirement)
       throws GeneralSecurityException {
     if (aesKeyBytes.size() != 32) {
       throw new GeneralSecurityException("Invalid key size");
@@ -102,21 +102,22 @@ public final class AesCmacKey extends MacKey {
 
   @Override
   public Bytes getOutputPrefix() {
-    if (parameters.getVariant() == AesCmacKeyFormat.Variant.NO_PREFIX) {
+    if (parameters.getVariant() == AesCmacParameters.Variant.NO_PREFIX) {
       return Bytes.copyFrom(new byte[] {});
     }
-    if (parameters.getVariant() == AesCmacKeyFormat.Variant.LEGACY
-        || parameters.getVariant() == AesCmacKeyFormat.Variant.CRUNCHY) {
+    if (parameters.getVariant() == AesCmacParameters.Variant.LEGACY
+        || parameters.getVariant() == AesCmacParameters.Variant.CRUNCHY) {
       return Bytes.copyFrom(ByteBuffer.allocate(5).put((byte) 0).putInt(idRequirement).array());
     }
-    if (parameters.getVariant() == AesCmacKeyFormat.Variant.TINK) {
+    if (parameters.getVariant() == AesCmacParameters.Variant.TINK) {
       return Bytes.copyFrom(ByteBuffer.allocate(5).put((byte) 1).putInt(idRequirement).array());
     }
-    throw new IllegalStateException("Unknown AesCmacKeyFormat.Variant: " + parameters.getVariant());
+    throw new IllegalStateException(
+        "Unknown AesCmacParameters.Variant: " + parameters.getVariant());
   }
 
   @Override
-  public AesCmacKeyFormat getParameters() {
+  public AesCmacParameters getParameters() {
     return parameters;
   }
 

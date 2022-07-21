@@ -35,5 +35,5 @@ public abstract class MacKey extends Key {
   public abstract Bytes getOutputPrefix();
   /** Returns the key format of this key. */
   @Override
-  public abstract MacKeyFormat getParameters();
+  public abstract MacParameters getParameters();
 }
