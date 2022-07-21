@@ -643,9 +643,9 @@ tink_cc_library(
 add_library(tink::core::secret_key_access_testonly ALIAS tink_internal_core_secret_key_access)
 
 tink_cc_library(
-  NAME key_format
+  NAME parameters
   SRCS
-    key_format.h
+    parameters.h
 )
 
 tink_cc_library(
@@ -653,7 +653,7 @@ tink_cc_library(
   SRCS
     key.h
   DEPS
-    tink::core::key_format
+    tink::core::parameters
     absl::optional
 )
 

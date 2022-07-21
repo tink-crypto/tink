@@ -686,8 +686,8 @@ cc_library(
 )
 
 cc_library(
-    name = "key_format",
-    hdrs = ["key_format.h"],
+    name = "parameters",
+    hdrs = ["parameters.h"],
     include_prefix = "tink",
 )
 
@@ -696,7 +696,7 @@ cc_library(
     hdrs = ["key.h"],
     include_prefix = "tink",
     deps = [
-        ":key_format",
+        ":parameters",
         "@com_google_absl//absl/types:optional",
     ],
 )

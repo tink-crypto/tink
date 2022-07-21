@@ -89,7 +89,7 @@ PrimitiveSetInputPrimitive<std::string> NewPrimitiveSetInputPrimitive(
 MATCHER_P(MonitoringKeySetInfoEntryEq, other, "") {
   return arg.GetStatus() == other.GetStatus() &&
          arg.GetKeyId() == other.GetKeyId() &&
-         arg.GetKeyFormatAsString() == other.GetKeyFormatAsString();
+         arg.GetParametersAsString() == other.GetParametersAsString();
 }
 
 TEST(MonitoringUtilTest, MonitoringKeySetInfoFromPrimitiveSetValid) {

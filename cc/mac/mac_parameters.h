@@ -14,18 +14,18 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-#ifndef TINK_MAC_MAC_KEY_FORMAT_H_
-#define TINK_MAC_MAC_KEY_FORMAT_H_
+#ifndef TINK_MAC_MAC_PARAMETERS_H_
+#define TINK_MAC_MAC_PARAMETERS_H_
 
-#include "tink/key_format.h"
+#include "tink/parameters.h"
 
 namespace crypto {
 namespace tink {
 
 // `MacKey` description without the randomly chosen key material.
-class MacKeyFormat : public KeyFormat {};
+class MacParameters : public Parameters {};
 
 }  // namespace tink
 }  // namespace crypto
 
-#endif  // TINK_MAC_MAC_KEY_FORMAT_H_
+#endif  // TINK_MAC_MAC_PARAMETERS_H_

@@ -134,10 +134,10 @@ cc_library(
 )
 
 cc_library(
-    name = "mac_key_format",
-    hdrs = ["mac_key_format.h"],
+    name = "mac_parameters",
+    hdrs = ["mac_parameters.h"],
     include_prefix = "tink/mac",
-    deps = ["//:key_format"],
+    deps = ["//:parameters"],
 )
 
 cc_library(
@@ -145,7 +145,7 @@ cc_library(
     hdrs = ["mac_key.h"],
     include_prefix = "tink/mac",
     deps = [
-        ":mac_key_format",
+        ":mac_parameters",
         "//:key",
         "//util:statusor",
     ],

@@ -124,11 +124,11 @@ tink_cc_library(
 )
 
 tink_cc_library(
-  NAME mac_key_format
+  NAME mac_parameters
   SRCS
-    mac_key_format.h
+    mac_parameters.h
   DEPS
-    tink::core::key_format
+    tink::core::parameters
 )
 
 tink_cc_library(
@@ -136,7 +136,7 @@ tink_cc_library(
   SRCS
     mac_key.h
   DEPS
-    tink::mac::mac_key_format
+    tink::mac::mac_parameters
     tink::core::key
     tink::util::statusor
 )

@@ -20,7 +20,7 @@
 #include <string>
 
 #include "tink/key.h"
-#include "tink/mac/mac_key_format.h"
+#include "tink/mac/mac_parameters.h"
 #include "tink/util/statusor.h"
 
 namespace crypto {
@@ -42,7 +42,7 @@ class MacKey : public Key {
   // '0x01<big endian key id>'.
   virtual util::StatusOr<std::string> GetOutputPrefix() const = 0;
 
-  const MacKeyFormat& GetKeyFormat() const override = 0;
+  const MacParameters& GetParameters() const override = 0;
 
   bool operator==(const Key& other) const override = 0;
 };
