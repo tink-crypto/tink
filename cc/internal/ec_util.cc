@@ -525,6 +525,27 @@ util::StatusOr<util::SecretData> ComputeX25519SharedSecret(
   return shared_secret;
 }
 
+util::StatusOr<std::unique_ptr<X25519Key>> X25519KeyFromPrivateKey(
+    const util::SecretData &private_key) {
+  if (private_key.size() != X25519KeyPrivKeySize()) {
+    return util::Status(absl::StatusCode::kInvalidArgument,
+                        "Invalid length for private key");
+  }
+
+  internal::SslUniquePtr<EVP_PKEY> pkey(
+      EVP_PKEY_new_raw_private_key(SslEvpPkeyType::kX25519Key, nullptr,
+                                   private_key.data(), private_key.size()));
+  auto key = absl::make_unique<X25519Key>();
+  util::Status res = SslNewKeyPairFromEcKey(
+      SslEvpPkeyType::kX25519Key, *pkey,
+      absl::MakeSpan(key->private_key, X25519KeyPrivKeySize()),
+      absl::MakeSpan(key->public_value, X25519KeyPubKeySize()));
+  if (!res.ok()) {
+    return res;
+  }
+  return std::move(key);
+}
+
 util::StatusOr<std::string> EcPointEncode(EllipticCurveType curve,
                                           EcPointFormat format,
                                           const EC_POINT *point) {

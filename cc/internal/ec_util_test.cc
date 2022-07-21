@@ -17,6 +17,7 @@
 
 #include <memory>
 #include <string>
+#include <vector>
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
@@ -234,6 +235,87 @@ TEST(EcUtilTest, X25519KeyToEcKeyAndBack) {
       ElementsAreArray(absl::MakeSpan((*roundtrip_key)->public_value,
                                       X25519KeyPubKeySize())));
 }
+
+TEST(EcUtilTest, X25519KeyFromRandomPrivateKey) {
+  util::StatusOr<std::unique_ptr<X25519Key>> x25519_key = NewX25519Key();
+  ASSERT_THAT(x25519_key, IsOk());
+
+  absl::Span<uint8_t> pkey_span =
+      absl::MakeSpan((*x25519_key)->private_key, X25519KeyPrivKeySize());
+  util::StatusOr<std::unique_ptr<X25519Key>> roundtrip_key =
+      X25519KeyFromPrivateKey({pkey_span.begin(), pkey_span.end()});
+  ASSERT_THAT(roundtrip_key, IsOk());
+  EXPECT_THAT(
+      absl::MakeSpan((*x25519_key)->private_key, X25519KeyPrivKeySize()),
+      ElementsAreArray(absl::MakeSpan((*roundtrip_key)->private_key,
+                                      X25519KeyPrivKeySize())));
+  EXPECT_THAT(
+      absl::MakeSpan((*x25519_key)->public_value, X25519KeyPubKeySize()),
+      ElementsAreArray(absl::MakeSpan((*roundtrip_key)->public_value,
+                                      X25519KeyPubKeySize())));
+}
+
+struct X25519FunctionTestVector {
+  std::string private_key;
+  std::string expected_public_key;
+};
+
+// Returns some X25519 test vectors taken from
+// https://datatracker.ietf.org/doc/html/rfc7748.
+std::vector<X25519FunctionTestVector> GetX25519FunctionTestVectors() {
+  return {
+      // https://datatracker.ietf.org/doc/html/rfc7748#section-5.2
+      {
+          /*private_key=*/
+          absl::HexStringToBytes("090000000000000000000000000000000000000000000"
+                                 "0000000000000000000"),
+          /*expected_public_key=*/
+          absl::HexStringToBytes("422c8e7a6227d7bca1350b3e2bb7279f7897b87bb6854"
+                                 "b783c60e80311ae3079"),
+      },
+      // https://datatracker.ietf.org/doc/html/rfc7748#section-6.1; Alice
+      {
+          /*private_key=*/
+          absl::HexStringToBytes("77076d0a7318a57d3c16c17251b26645df4c2f87ebc09"
+                                 "92ab177fba51db92c2a"),
+          /*expected_public_key=*/
+          absl::HexStringToBytes("8520f0098930a754748b7ddcb43ef75a0dbf3a0d26381"
+                                 "af4eba4a98eaa9b4e6a"),
+      },
+      // https://datatracker.ietf.org/doc/html/rfc7748#section-6.1; Bob
+      {
+          /*private_key=*/
+          absl::HexStringToBytes("5dab087e624a8a4b79e17f8b83800ee66f3bb1292618b"
+                                 "6fd1c2f8b27ff88e0eb"),
+          /*expected_public_key=*/
+          absl::HexStringToBytes("de9edb7d7b7dc1b4d35b61c2ece435373f8343c85b786"
+                                 "74dadfc7e146f882b4f"),
+      },
+      // Locally made up test vector
+      {
+          /*private_key=*/
+          "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          /*expected_public_key=*/
+          absl::HexStringToBytes("4049502db92ca2342c3f92dac5d6de7c85db5df5407a5"
+                                 "b4996ce39f2efb7e827"),
+      },
+  };
+}
+
+using X25519FunctionTest = TestWithParam<X25519FunctionTestVector>;
+
+TEST_P(X25519FunctionTest, ComputeX25519PublicKey) {
+  X25519FunctionTestVector test_vector = GetParam();
+
+  util::StatusOr<std::unique_ptr<X25519Key>> key = X25519KeyFromPrivateKey(
+      util::SecretDataFromStringView(test_vector.private_key));
+  ASSERT_THAT(key, IsOk());
+  EXPECT_THAT(absl::MakeSpan((*key)->public_value, X25519KeyPubKeySize()),
+              ElementsAreArray(test_vector.expected_public_key));
+}
+
+INSTANTIATE_TEST_SUITE_P(X25519SharedSecretTests, X25519FunctionTest,
+                         ValuesIn(GetX25519FunctionTestVectors()));
 
 struct X25519SharedSecretTestVector {
   std::string private_key;
