@@ -49,7 +49,7 @@ var activeTableTab = "activeTableTab";
 <div class="subNav">
 <ul class="navList">
 <li><a href="../../../../com/google/crypto/tink/JsonKeysetWriter.html" title="class in com.google.crypto.tink"><span class="typeNameLink">Prev&nbsp;Class</span></a></li>
-<li><a href="../../../../com/google/crypto/tink/KeyFormat.html" title="class in com.google.crypto.tink"><span class="typeNameLink">Next&nbsp;Class</span></a></li>
+<li><a href="../../../../com/google/crypto/tink/KeyManager.html" title="interface in com.google.crypto.tink"><span class="typeNameLink">Next&nbsp;Class</span></a></li>
 </ul>
 <ul class="navList">
 <li><a href="../../../../index.html?com/google/crypto/tink/Key.html" target="_top">Frames</a></li>
@@ -176,9 +176,9 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 </td>
 </tr>
 <tr id="i2" class="altColor">
-<td class="colFirst"><code>abstract <a href="../../../../com/google/crypto/tink/KeyFormat.html" title="class in com.google.crypto.tink">KeyFormat</a></code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/crypto/tink/Key.html#getKeyFormat--">getKeyFormat</a></span>()</code>
-<div class="block">Returns a <a href="../../../../com/google/crypto/tink/KeyFormat.html" title="class in com.google.crypto.tink"><code>KeyFormat</code></a> object containing all the information about the key which is not
+<td class="colFirst"><code>abstract <a href="../../../../com/google/crypto/tink/Parameters.html" title="class in com.google.crypto.tink">Parameters</a></code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/crypto/tink/Key.html#getParameters--">getParameters</a></span>()</code>
+<div class="block">Returns a <a href="../../../../com/google/crypto/tink/Parameters.html" title="class in com.google.crypto.tink"><code>Parameters</code></a> object containing all the information about the key which is not
  randomly chosen.</div>
 </td>
 </tr>
@@ -221,17 +221,17 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 <!--   -->
 </a>
 <h3>Method Detail</h3>
-<a name="getKeyFormat--">
+<a name="getParameters--">
 <!--   -->
 </a>
 <ul class="blockList">
 <li class="blockList">
-<h4>getKeyFormat</h4>
-<pre>public abstract&nbsp;<a href="../../../../com/google/crypto/tink/KeyFormat.html" title="class in com.google.crypto.tink">KeyFormat</a>&nbsp;getKeyFormat()</pre>
-<div class="block">Returns a <a href="../../../../com/google/crypto/tink/KeyFormat.html" title="class in com.google.crypto.tink"><code>KeyFormat</code></a> object containing all the information about the key which is not
+<h4>getParameters</h4>
+<pre>public abstract&nbsp;<a href="../../../../com/google/crypto/tink/Parameters.html" title="class in com.google.crypto.tink">Parameters</a>&nbsp;getParameters()</pre>
+<div class="block">Returns a <a href="../../../../com/google/crypto/tink/Parameters.html" title="class in com.google.crypto.tink"><code>Parameters</code></a> object containing all the information about the key which is not
  randomly chosen.
 
- <p>Implementations need to ensure that <code>getKeyFormat().hasIdRequirement()</code> returns true
+ <p>Implementations need to ensure that <code>getParameters().hasIdRequirement()</code> returns true
  if and only if <code>getIdRequirementOrNull</code> is non-null.</div>
 </li>
 </ul>
@@ -295,7 +295,7 @@ public abstract&nbsp;<a href="https://docs.oracle.com/javase/8/docs/api/java/lan
 <div class="subNav">
 <ul class="navList">
 <li><a href="../../../../com/google/crypto/tink/JsonKeysetWriter.html" title="class in com.google.crypto.tink"><span class="typeNameLink">Prev&nbsp;Class</span></a></li>
-<li><a href="../../../../com/google/crypto/tink/KeyFormat.html" title="class in com.google.crypto.tink"><span class="typeNameLink">Next&nbsp;Class</span></a></li>
+<li><a href="../../../../com/google/crypto/tink/KeyManager.html" title="interface in com.google.crypto.tink"><span class="typeNameLink">Next&nbsp;Class</span></a></li>
 </ul>
 <ul class="navList">
 <li><a href="../../../../index.html?com/google/crypto/tink/Key.html" target="_top">Frames</a></li>

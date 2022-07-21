@@ -103,30 +103,6 @@
 <tbody>
 <tr class="altColor">
 <td class="colFirst"><code>class&nbsp;</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/internal/KeyFormatParser.html" title="class in com.google.crypto.tink.internal">KeyFormatParser</a>&lt;SerializationT extends <a href="../../../../../../com/google/crypto/tink/internal/Serialization.html" title="interface in com.google.crypto.tink.internal">Serialization</a>&gt;</span></code>
-<div class="block">Parses <code>Serialization</code> objects into <code>KeyFormat</code> objects of a certain kind.</div>
-</td>
-</tr>
-<tr class="rowColor">
-<td class="colFirst"><code>static interface&nbsp;</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/internal/KeyFormatParser.KeyFormatParsingFunction.html" title="interface in com.google.crypto.tink.internal">KeyFormatParser.KeyFormatParsingFunction</a>&lt;SerializationT extends <a href="../../../../../../com/google/crypto/tink/internal/Serialization.html" title="interface in com.google.crypto.tink.internal">Serialization</a>&gt;</span></code>
-<div class="block">A function which parses a KeyFormat object.</div>
-</td>
-</tr>
-<tr class="altColor">
-<td class="colFirst"><code>class&nbsp;</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/internal/KeyFormatSerializer.html" title="class in com.google.crypto.tink.internal">KeyFormatSerializer</a>&lt;KeyFormatT extends <a href="../../../../../../com/google/crypto/tink/KeyFormat.html" title="class in com.google.crypto.tink">KeyFormat</a>,SerializationT extends <a href="../../../../../../com/google/crypto/tink/internal/Serialization.html" title="interface in com.google.crypto.tink.internal">Serialization</a>&gt;</span></code>
-<div class="block">Serializes <code>KeyFormat</code> objects into <code>Serialization</code> objects of a certain kind.</div>
-</td>
-</tr>
-<tr class="rowColor">
-<td class="colFirst"><code>static interface&nbsp;</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/internal/KeyFormatSerializer.KeyFormatSerializationFunction.html" title="interface in com.google.crypto.tink.internal">KeyFormatSerializer.KeyFormatSerializationFunction</a>&lt;KeyFormatT extends <a href="../../../../../../com/google/crypto/tink/KeyFormat.html" title="class in com.google.crypto.tink">KeyFormat</a>,SerializationT extends <a href="../../../../../../com/google/crypto/tink/internal/Serialization.html" title="interface in com.google.crypto.tink.internal">Serialization</a>&gt;</span></code>
-<div class="block">A function which serializes a KeyFormat object.</div>
-</td>
-</tr>
-<tr class="altColor">
-<td class="colFirst"><code>class&nbsp;</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/internal/KeyParser.html" title="class in com.google.crypto.tink.internal">KeyParser</a>&lt;SerializationT extends <a href="../../../../../../com/google/crypto/tink/internal/Serialization.html" title="interface in com.google.crypto.tink.internal">Serialization</a>&gt;</span></code>
 <div class="block">Parses <code>Serialization</code> objects into <code>Key</code> objects of a certain kind.</div>
 </td>
@@ -149,6 +125,30 @@
 <div class="block">A function which serializes a key.</div>
 </td>
 </tr>
+<tr class="altColor">
+<td class="colFirst"><code>class&nbsp;</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/internal/ParametersParser.html" title="class in com.google.crypto.tink.internal">ParametersParser</a>&lt;SerializationT extends <a href="../../../../../../com/google/crypto/tink/internal/Serialization.html" title="interface in com.google.crypto.tink.internal">Serialization</a>&gt;</span></code>
+<div class="block">Parses <code>Serialization</code> objects into <code>Parameters</code> objects of a certain kind.</div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>static interface&nbsp;</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/internal/ParametersParser.ParametersParsingFunction.html" title="interface in com.google.crypto.tink.internal">ParametersParser.ParametersParsingFunction</a>&lt;SerializationT extends <a href="../../../../../../com/google/crypto/tink/internal/Serialization.html" title="interface in com.google.crypto.tink.internal">Serialization</a>&gt;</span></code>
+<div class="block">A function which parses a Parameters object.</div>
+</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>class&nbsp;</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/internal/ParametersSerializer.html" title="class in com.google.crypto.tink.internal">ParametersSerializer</a>&lt;ParametersT extends <a href="../../../../../../com/google/crypto/tink/Parameters.html" title="class in com.google.crypto.tink">Parameters</a>,SerializationT extends <a href="../../../../../../com/google/crypto/tink/internal/Serialization.html" title="interface in com.google.crypto.tink.internal">Serialization</a>&gt;</span></code>
+<div class="block">Serializes <code>Parameters</code> objects into <code>Serialization</code> objects of a certain kind.</div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>static interface&nbsp;</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/internal/ParametersSerializer.ParametersSerializationFunction.html" title="interface in com.google.crypto.tink.internal">ParametersSerializer.ParametersSerializationFunction</a>&lt;ParametersT extends <a href="../../../../../../com/google/crypto/tink/Parameters.html" title="class in com.google.crypto.tink">Parameters</a>,SerializationT extends <a href="../../../../../../com/google/crypto/tink/internal/Serialization.html" title="interface in com.google.crypto.tink.internal">Serialization</a>&gt;</span></code>
+<div class="block">A function which serializes a Parameters object.</div>
+</td>
+</tr>
 </tbody>
 </table>
 <table class="useSummary" border="0" cellpadding="3" cellspacing="0" summary="Use table, listing classes, and an explanation">
@@ -160,14 +160,14 @@
 <tbody>
 <tr class="altColor">
 <td class="colFirst"><code>class&nbsp;</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/internal/ProtoKeyFormatSerialization.html" title="class in com.google.crypto.tink.internal">ProtoKeyFormatSerialization</a></span></code>
-<div class="block">Represents a <code>KeyFormat</code> object serialized with binary protobuf Serialization.</div>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/internal/ProtoKeySerialization.html" title="class in com.google.crypto.tink.internal">ProtoKeySerialization</a></span></code>
+<div class="block">* Represents a <code>Key</code> object serialized with binary protobuf Serialization.</div>
 </td>
 </tr>
 <tr class="rowColor">
 <td class="colFirst"><code>class&nbsp;</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/internal/ProtoKeySerialization.html" title="class in com.google.crypto.tink.internal">ProtoKeySerialization</a></span></code>
-<div class="block">* Represents a <code>Key</code> object serialized with binary protobuf Serialization.</div>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/internal/ProtoParametersSerialization.html" title="class in com.google.crypto.tink.internal">ProtoParametersSerialization</a></span></code>
+<div class="block">Represents a <code>Parameters</code> object serialized with binary protobuf Serialization.</div>
 </td>
 </tr>
 </tbody>
@@ -179,22 +179,6 @@
 <th class="colLast" scope="col">Method and Description</th>
 </tr>
 <tbody>
-<tr class="altColor">
-<td class="colFirst"><code>static &lt;SerializationT extends <a href="../../../../../../com/google/crypto/tink/internal/Serialization.html" title="interface in com.google.crypto.tink.internal">Serialization</a>&gt;<br><a href="../../../../../../com/google/crypto/tink/internal/KeyFormatParser.html" title="class in com.google.crypto.tink.internal">KeyFormatParser</a>&lt;SerializationT&gt;</code></td>
-<td class="colLast"><span class="typeNameLabel">KeyFormatParser.</span><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/internal/KeyFormatParser.html#create-com.google.crypto.tink.internal.KeyFormatParser.KeyFormatParsingFunction-com.google.crypto.tink.util.Bytes-java.lang.Class-">create</a></span>(<a href="../../../../../../com/google/crypto/tink/internal/KeyFormatParser.KeyFormatParsingFunction.html" title="interface in com.google.crypto.tink.internal">KeyFormatParser.KeyFormatParsingFunction</a>&lt;SerializationT&gt;&nbsp;function,
-      <a href="../../../../../../com/google/crypto/tink/util/Bytes.html" title="class in com.google.crypto.tink.util">Bytes</a>&nbsp;objectIdentifier,
-      <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Class.html?is-external=true" title="class or interface in java.lang">Class</a>&lt;SerializationT&gt;&nbsp;serializationClass)</code>
-<div class="block">Creates a KeyFormatParser object.</div>
-</td>
-</tr>
-<tr class="rowColor">
-<td class="colFirst"><code>static &lt;KeyFormatT extends <a href="../../../../../../com/google/crypto/tink/KeyFormat.html" title="class in com.google.crypto.tink">KeyFormat</a>,SerializationT extends <a href="../../../../../../com/google/crypto/tink/internal/Serialization.html" title="interface in com.google.crypto.tink.internal">Serialization</a>&gt;<br><a href="../../../../../../com/google/crypto/tink/internal/KeyFormatSerializer.html" title="class in com.google.crypto.tink.internal">KeyFormatSerializer</a>&lt;KeyFormatT,SerializationT&gt;</code></td>
-<td class="colLast"><span class="typeNameLabel">KeyFormatSerializer.</span><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/internal/KeyFormatSerializer.html#create-com.google.crypto.tink.internal.KeyFormatSerializer.KeyFormatSerializationFunction-java.lang.Class-java.lang.Class-">create</a></span>(<a href="../../../../../../com/google/crypto/tink/internal/KeyFormatSerializer.KeyFormatSerializationFunction.html" title="interface in com.google.crypto.tink.internal">KeyFormatSerializer.KeyFormatSerializationFunction</a>&lt;KeyFormatT,SerializationT&gt;&nbsp;function,
-      <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Class.html?is-external=true" title="class or interface in java.lang">Class</a>&lt;KeyFormatT&gt;&nbsp;keyFormatClass,
-      <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Class.html?is-external=true" title="class or interface in java.lang">Class</a>&lt;SerializationT&gt;&nbsp;serializationClass)</code>
-<div class="block">Creates a KeyFormatSerializer object.</div>
-</td>
-</tr>
 <tr class="altColor">
 <td class="colFirst"><code>static &lt;SerializationT extends <a href="../../../../../../com/google/crypto/tink/internal/Serialization.html" title="interface in com.google.crypto.tink.internal">Serialization</a>&gt;<br><a href="../../../../../../com/google/crypto/tink/internal/KeyParser.html" title="class in com.google.crypto.tink.internal">KeyParser</a>&lt;SerializationT&gt;</code></td>
 <td class="colLast"><span class="typeNameLabel">KeyParser.</span><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/internal/KeyParser.html#create-com.google.crypto.tink.internal.KeyParser.KeyParsingFunction-com.google.crypto.tink.util.Bytes-java.lang.Class-">create</a></span>(<a href="../../../../../../com/google/crypto/tink/internal/KeyParser.KeyParsingFunction.html" title="interface in com.google.crypto.tink.internal">KeyParser.KeyParsingFunction</a>&lt;SerializationT&gt;&nbsp;function,
@@ -212,6 +196,22 @@
 </td>
 </tr>
 <tr class="altColor">
+<td class="colFirst"><code>static &lt;SerializationT extends <a href="../../../../../../com/google/crypto/tink/internal/Serialization.html" title="interface in com.google.crypto.tink.internal">Serialization</a>&gt;<br><a href="../../../../../../com/google/crypto/tink/internal/ParametersParser.html" title="class in com.google.crypto.tink.internal">ParametersParser</a>&lt;SerializationT&gt;</code></td>
+<td class="colLast"><span class="typeNameLabel">ParametersParser.</span><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/internal/ParametersParser.html#create-com.google.crypto.tink.internal.ParametersParser.ParametersParsingFunction-com.google.crypto.tink.util.Bytes-java.lang.Class-">create</a></span>(<a href="../../../../../../com/google/crypto/tink/internal/ParametersParser.ParametersParsingFunction.html" title="interface in com.google.crypto.tink.internal">ParametersParser.ParametersParsingFunction</a>&lt;SerializationT&gt;&nbsp;function,
+      <a href="../../../../../../com/google/crypto/tink/util/Bytes.html" title="class in com.google.crypto.tink.util">Bytes</a>&nbsp;objectIdentifier,
+      <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Class.html?is-external=true" title="class or interface in java.lang">Class</a>&lt;SerializationT&gt;&nbsp;serializationClass)</code>
+<div class="block">Creates a ParametersParser object.</div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>static &lt;ParametersT extends <a href="../../../../../../com/google/crypto/tink/Parameters.html" title="class in com.google.crypto.tink">Parameters</a>,SerializationT extends <a href="../../../../../../com/google/crypto/tink/internal/Serialization.html" title="interface in com.google.crypto.tink.internal">Serialization</a>&gt;<br><a href="../../../../../../com/google/crypto/tink/internal/ParametersSerializer.html" title="class in com.google.crypto.tink.internal">ParametersSerializer</a>&lt;ParametersT,SerializationT&gt;</code></td>
+<td class="colLast"><span class="typeNameLabel">ParametersSerializer.</span><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/internal/ParametersSerializer.html#create-com.google.crypto.tink.internal.ParametersSerializer.ParametersSerializationFunction-java.lang.Class-java.lang.Class-">create</a></span>(<a href="../../../../../../com/google/crypto/tink/internal/ParametersSerializer.ParametersSerializationFunction.html" title="interface in com.google.crypto.tink.internal">ParametersSerializer.ParametersSerializationFunction</a>&lt;ParametersT,SerializationT&gt;&nbsp;function,
+      <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Class.html?is-external=true" title="class or interface in java.lang">Class</a>&lt;ParametersT&gt;&nbsp;parametersClass,
+      <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Class.html?is-external=true" title="class or interface in java.lang">Class</a>&lt;SerializationT&gt;&nbsp;serializationClass)</code>
+<div class="block">Creates a ParametersSerializer object.</div>
+</td>
+</tr>
+<tr class="altColor">
 <td class="colFirst"><code>&lt;SerializationT extends <a href="../../../../../../com/google/crypto/tink/internal/Serialization.html" title="interface in com.google.crypto.tink.internal">Serialization</a>&gt;<br><a href="../../../../../../com/google/crypto/tink/Key.html" title="class in com.google.crypto.tink">Key</a></code></td>
 <td class="colLast"><span class="typeNameLabel">SerializationRegistry.</span><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/internal/SerializationRegistry.html#parseKey-SerializationT-com.google.crypto.tink.SecretKeyAccess-">parseKey</a></span>(SerializationT&nbsp;serializedKey,
         <a href="../../../../../../com/google/crypto/tink/SecretKeyAccess.html" title="class in com.google.crypto.tink">SecretKeyAccess</a>&nbsp;access)</code>
@@ -226,39 +226,15 @@
 </td>
 </tr>
 <tr class="altColor">
-<td class="colFirst"><code>&lt;SerializationT extends <a href="../../../../../../com/google/crypto/tink/internal/Serialization.html" title="interface in com.google.crypto.tink.internal">Serialization</a>&gt;<br><a href="../../../../../../com/google/crypto/tink/KeyFormat.html" title="class in com.google.crypto.tink">KeyFormat</a></code></td>
-<td class="colLast"><span class="typeNameLabel">SerializationRegistry.</span><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/internal/SerializationRegistry.html#parseKeyFormat-SerializationT-">parseKeyFormat</a></span>(SerializationT&nbsp;serializedKeyFormat)</code>
-<div class="block">Parses the given serialization into a KeyFormat.</div>
+<td class="colFirst"><code>&lt;SerializationT extends <a href="../../../../../../com/google/crypto/tink/internal/Serialization.html" title="interface in com.google.crypto.tink.internal">Serialization</a>&gt;<br><a href="../../../../../../com/google/crypto/tink/Parameters.html" title="class in com.google.crypto.tink">Parameters</a></code></td>
+<td class="colLast"><span class="typeNameLabel">SerializationRegistry.</span><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/internal/SerializationRegistry.html#parseParameters-SerializationT-">parseParameters</a></span>(SerializationT&nbsp;serializedParameters)</code>
+<div class="block">Parses the given serialization into a Parameters.</div>
 </td>
 </tr>
 <tr class="rowColor">
-<td class="colFirst"><code>&lt;SerializationT extends <a href="../../../../../../com/google/crypto/tink/internal/Serialization.html" title="interface in com.google.crypto.tink.internal">Serialization</a>&gt;<br><a href="../../../../../../com/google/crypto/tink/KeyFormat.html" title="class in com.google.crypto.tink">KeyFormat</a></code></td>
-<td class="colLast"><span class="typeNameLabel">MutableSerializationRegistry.</span><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/internal/MutableSerializationRegistry.html#parseKeyFormat-SerializationT-">parseKeyFormat</a></span>(SerializationT&nbsp;serializedKeyFormat)</code>
-<div class="block">Parses the given serialization into a KeyFormat.</div>
-</td>
-</tr>
-<tr class="altColor">
-<td class="colFirst"><code>&lt;SerializationT extends <a href="../../../../../../com/google/crypto/tink/internal/Serialization.html" title="interface in com.google.crypto.tink.internal">Serialization</a>&gt;<br><a href="../../../../../../com/google/crypto/tink/internal/SerializationRegistry.Builder.html" title="class in com.google.crypto.tink.internal">SerializationRegistry.Builder</a></code></td>
-<td class="colLast"><span class="typeNameLabel">SerializationRegistry.Builder.</span><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/internal/SerializationRegistry.Builder.html#registerKeyFormatParser-com.google.crypto.tink.internal.KeyFormatParser-">registerKeyFormatParser</a></span>(<a href="../../../../../../com/google/crypto/tink/internal/KeyFormatParser.html" title="class in com.google.crypto.tink.internal">KeyFormatParser</a>&lt;SerializationT&gt;&nbsp;parser)</code>
-<div class="block">Registers a key parser for later use in <a href="../../../../../../com/google/crypto/tink/internal/SerializationRegistry.html#parseKey-SerializationT-com.google.crypto.tink.SecretKeyAccess-"><code>SerializationRegistry.parseKey(SerializationT, com.google.crypto.tink.SecretKeyAccess)</code></a>.</div>
-</td>
-</tr>
-<tr class="rowColor">
-<td class="colFirst"><code>&lt;SerializationT extends <a href="../../../../../../com/google/crypto/tink/internal/Serialization.html" title="interface in com.google.crypto.tink.internal">Serialization</a>&gt;<br>void</code></td>
-<td class="colLast"><span class="typeNameLabel">MutableSerializationRegistry.</span><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/internal/MutableSerializationRegistry.html#registerKeyFormatParser-com.google.crypto.tink.internal.KeyFormatParser-">registerKeyFormatParser</a></span>(<a href="../../../../../../com/google/crypto/tink/internal/KeyFormatParser.html" title="class in com.google.crypto.tink.internal">KeyFormatParser</a>&lt;SerializationT&gt;&nbsp;parser)</code>
-<div class="block">Registers a key parser for later use in <a href="../../../../../../com/google/crypto/tink/internal/MutableSerializationRegistry.html#parseKey-SerializationT-com.google.crypto.tink.SecretKeyAccess-"><code>MutableSerializationRegistry.parseKey(SerializationT, com.google.crypto.tink.SecretKeyAccess)</code></a>.</div>
-</td>
-</tr>
-<tr class="altColor">
-<td class="colFirst"><code>&lt;KeyFormatT extends <a href="../../../../../../com/google/crypto/tink/KeyFormat.html" title="class in com.google.crypto.tink">KeyFormat</a>,SerializationT extends <a href="../../../../../../com/google/crypto/tink/internal/Serialization.html" title="interface in com.google.crypto.tink.internal">Serialization</a>&gt;<br><a href="../../../../../../com/google/crypto/tink/internal/SerializationRegistry.Builder.html" title="class in com.google.crypto.tink.internal">SerializationRegistry.Builder</a></code></td>
-<td class="colLast"><span class="typeNameLabel">SerializationRegistry.Builder.</span><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/internal/SerializationRegistry.Builder.html#registerKeyFormatSerializer-com.google.crypto.tink.internal.KeyFormatSerializer-">registerKeyFormatSerializer</a></span>(<a href="../../../../../../com/google/crypto/tink/internal/KeyFormatSerializer.html" title="class in com.google.crypto.tink.internal">KeyFormatSerializer</a>&lt;KeyFormatT,SerializationT&gt;&nbsp;serializer)</code>
-<div class="block">Registers a key serializer for later use in <a href="../../../../../../com/google/crypto/tink/internal/SerializationRegistry.html#serializeKey-KeyT-java.lang.Class-com.google.crypto.tink.SecretKeyAccess-"><code>SerializationRegistry.serializeKey(KeyT, java.lang.Class&lt;SerializationT&gt;, com.google.crypto.tink.SecretKeyAccess)</code></a>.</div>
-</td>
-</tr>
-<tr class="rowColor">
-<td class="colFirst"><code>&lt;KeyFormatT extends <a href="../../../../../../com/google/crypto/tink/KeyFormat.html" title="class in com.google.crypto.tink">KeyFormat</a>,SerializationT extends <a href="../../../../../../com/google/crypto/tink/internal/Serialization.html" title="interface in com.google.crypto.tink.internal">Serialization</a>&gt;<br>void</code></td>
-<td class="colLast"><span class="typeNameLabel">MutableSerializationRegistry.</span><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/internal/MutableSerializationRegistry.html#registerKeyFormatSerializer-com.google.crypto.tink.internal.KeyFormatSerializer-">registerKeyFormatSerializer</a></span>(<a href="../../../../../../com/google/crypto/tink/internal/KeyFormatSerializer.html" title="class in com.google.crypto.tink.internal">KeyFormatSerializer</a>&lt;KeyFormatT,SerializationT&gt;&nbsp;serializer)</code>
-<div class="block">Registers a key serializer for later use in <a href="../../../../../../com/google/crypto/tink/internal/MutableSerializationRegistry.html#serializeKey-KeyT-java.lang.Class-com.google.crypto.tink.SecretKeyAccess-"><code>MutableSerializationRegistry.serializeKey(KeyT, java.lang.Class&lt;SerializationT&gt;, com.google.crypto.tink.SecretKeyAccess)</code></a>.</div>
+<td class="colFirst"><code>&lt;SerializationT extends <a href="../../../../../../com/google/crypto/tink/internal/Serialization.html" title="interface in com.google.crypto.tink.internal">Serialization</a>&gt;<br><a href="../../../../../../com/google/crypto/tink/Parameters.html" title="class in com.google.crypto.tink">Parameters</a></code></td>
+<td class="colLast"><span class="typeNameLabel">MutableSerializationRegistry.</span><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/internal/MutableSerializationRegistry.html#parseParameters-SerializationT-">parseParameters</a></span>(SerializationT&nbsp;serializedParameters)</code>
+<div class="block">Parses the given serialization into a Parameters object.</div>
 </td>
 </tr>
 <tr class="altColor">
@@ -286,6 +262,30 @@
 </td>
 </tr>
 <tr class="altColor">
+<td class="colFirst"><code>&lt;SerializationT extends <a href="../../../../../../com/google/crypto/tink/internal/Serialization.html" title="interface in com.google.crypto.tink.internal">Serialization</a>&gt;<br><a href="../../../../../../com/google/crypto/tink/internal/SerializationRegistry.Builder.html" title="class in com.google.crypto.tink.internal">SerializationRegistry.Builder</a></code></td>
+<td class="colLast"><span class="typeNameLabel">SerializationRegistry.Builder.</span><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/internal/SerializationRegistry.Builder.html#registerParametersParser-com.google.crypto.tink.internal.ParametersParser-">registerParametersParser</a></span>(<a href="../../../../../../com/google/crypto/tink/internal/ParametersParser.html" title="class in com.google.crypto.tink.internal">ParametersParser</a>&lt;SerializationT&gt;&nbsp;parser)</code>
+<div class="block">Registers a key parser for later use in <a href="../../../../../../com/google/crypto/tink/internal/SerializationRegistry.html#parseKey-SerializationT-com.google.crypto.tink.SecretKeyAccess-"><code>SerializationRegistry.parseKey(SerializationT, com.google.crypto.tink.SecretKeyAccess)</code></a>.</div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>&lt;SerializationT extends <a href="../../../../../../com/google/crypto/tink/internal/Serialization.html" title="interface in com.google.crypto.tink.internal">Serialization</a>&gt;<br>void</code></td>
+<td class="colLast"><span class="typeNameLabel">MutableSerializationRegistry.</span><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/internal/MutableSerializationRegistry.html#registerParametersParser-com.google.crypto.tink.internal.ParametersParser-">registerParametersParser</a></span>(<a href="../../../../../../com/google/crypto/tink/internal/ParametersParser.html" title="class in com.google.crypto.tink.internal">ParametersParser</a>&lt;SerializationT&gt;&nbsp;parser)</code>
+<div class="block">Registers a key parser for later use in <a href="../../../../../../com/google/crypto/tink/internal/MutableSerializationRegistry.html#parseKey-SerializationT-com.google.crypto.tink.SecretKeyAccess-"><code>MutableSerializationRegistry.parseKey(SerializationT, com.google.crypto.tink.SecretKeyAccess)</code></a>.</div>
+</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>&lt;ParametersT extends <a href="../../../../../../com/google/crypto/tink/Parameters.html" title="class in com.google.crypto.tink">Parameters</a>,SerializationT extends <a href="../../../../../../com/google/crypto/tink/internal/Serialization.html" title="interface in com.google.crypto.tink.internal">Serialization</a>&gt;<br><a href="../../../../../../com/google/crypto/tink/internal/SerializationRegistry.Builder.html" title="class in com.google.crypto.tink.internal">SerializationRegistry.Builder</a></code></td>
+<td class="colLast"><span class="typeNameLabel">SerializationRegistry.Builder.</span><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/internal/SerializationRegistry.Builder.html#registerParametersSerializer-com.google.crypto.tink.internal.ParametersSerializer-">registerParametersSerializer</a></span>(<a href="../../../../../../com/google/crypto/tink/internal/ParametersSerializer.html" title="class in com.google.crypto.tink.internal">ParametersSerializer</a>&lt;ParametersT,SerializationT&gt;&nbsp;serializer)</code>
+<div class="block">Registers a key serializer for later use in <a href="../../../../../../com/google/crypto/tink/internal/SerializationRegistry.html#serializeKey-KeyT-java.lang.Class-com.google.crypto.tink.SecretKeyAccess-"><code>SerializationRegistry.serializeKey(KeyT, java.lang.Class&lt;SerializationT&gt;, com.google.crypto.tink.SecretKeyAccess)</code></a>.</div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>&lt;ParametersT extends <a href="../../../../../../com/google/crypto/tink/Parameters.html" title="class in com.google.crypto.tink">Parameters</a>,SerializationT extends <a href="../../../../../../com/google/crypto/tink/internal/Serialization.html" title="interface in com.google.crypto.tink.internal">Serialization</a>&gt;<br>void</code></td>
+<td class="colLast"><span class="typeNameLabel">MutableSerializationRegistry.</span><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/internal/MutableSerializationRegistry.html#registerParametersSerializer-com.google.crypto.tink.internal.ParametersSerializer-">registerParametersSerializer</a></span>(<a href="../../../../../../com/google/crypto/tink/internal/ParametersSerializer.html" title="class in com.google.crypto.tink.internal">ParametersSerializer</a>&lt;ParametersT,SerializationT&gt;&nbsp;serializer)</code>
+<div class="block">Registers a key serializer for later use in <a href="../../../../../../com/google/crypto/tink/internal/MutableSerializationRegistry.html#serializeKey-KeyT-java.lang.Class-com.google.crypto.tink.SecretKeyAccess-"><code>MutableSerializationRegistry.serializeKey(KeyT, java.lang.Class&lt;SerializationT&gt;, com.google.crypto.tink.SecretKeyAccess)</code></a>.</div>
+</td>
+</tr>
+<tr class="altColor">
 <td class="colFirst"><code>&lt;KeyT extends <a href="../../../../../../com/google/crypto/tink/Key.html" title="class in com.google.crypto.tink">Key</a>,SerializationT extends <a href="../../../../../../com/google/crypto/tink/internal/Serialization.html" title="interface in com.google.crypto.tink.internal">Serialization</a>&gt;<br>SerializationT</code></td>
 <td class="colLast"><span class="typeNameLabel">SerializationRegistry.</span><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/internal/SerializationRegistry.html#serializeKey-KeyT-java.lang.Class-com.google.crypto.tink.SecretKeyAccess-">serializeKey</a></span>(KeyT&nbsp;key,
             <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Class.html?is-external=true" title="class or interface in java.lang">Class</a>&lt;SerializationT&gt;&nbsp;serializationClass,
@@ -302,17 +302,17 @@
 </td>
 </tr>
 <tr class="altColor">
-<td class="colFirst"><code>&lt;KeyFormatT extends <a href="../../../../../../com/google/crypto/tink/KeyFormat.html" title="class in com.google.crypto.tink">KeyFormat</a>,SerializationT extends <a href="../../../../../../com/google/crypto/tink/internal/Serialization.html" title="interface in com.google.crypto.tink.internal">Serialization</a>&gt;<br>SerializationT</code></td>
-<td class="colLast"><span class="typeNameLabel">SerializationRegistry.</span><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/internal/SerializationRegistry.html#serializeKeyFormat-KeyFormatT-java.lang.Class-">serializeKeyFormat</a></span>(KeyFormatT&nbsp;keyFormat,
-                  <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Class.html?is-external=true" title="class or interface in java.lang">Class</a>&lt;SerializationT&gt;&nbsp;serializationClass)</code>
-<div class="block">Serializes a given KeyFormat into a "SerializationT" object.</div>
+<td class="colFirst"><code>&lt;ParametersT extends <a href="../../../../../../com/google/crypto/tink/Parameters.html" title="class in com.google.crypto.tink">Parameters</a>,SerializationT extends <a href="../../../../../../com/google/crypto/tink/internal/Serialization.html" title="interface in com.google.crypto.tink.internal">Serialization</a>&gt;<br>SerializationT</code></td>
+<td class="colLast"><span class="typeNameLabel">SerializationRegistry.</span><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/internal/SerializationRegistry.html#serializeParameters-ParametersT-java.lang.Class-">serializeParameters</a></span>(ParametersT&nbsp;parameters,
+                   <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Class.html?is-external=true" title="class or interface in java.lang">Class</a>&lt;SerializationT&gt;&nbsp;serializationClass)</code>
+<div class="block">Serializes a given Parameters object into a "SerializationT" object.</div>
 </td>
 </tr>
 <tr class="rowColor">
-<td class="colFirst"><code>&lt;KeyFormatT extends <a href="../../../../../../com/google/crypto/tink/KeyFormat.html" title="class in com.google.crypto.tink">KeyFormat</a>,SerializationT extends <a href="../../../../../../com/google/crypto/tink/internal/Serialization.html" title="interface in com.google.crypto.tink.internal">Serialization</a>&gt;<br>SerializationT</code></td>
-<td class="colLast"><span class="typeNameLabel">MutableSerializationRegistry.</span><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/internal/MutableSerializationRegistry.html#serializeKeyFormat-KeyFormatT-java.lang.Class-">serializeKeyFormat</a></span>(KeyFormatT&nbsp;keyFormat,
-                  <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Class.html?is-external=true" title="class or interface in java.lang">Class</a>&lt;SerializationT&gt;&nbsp;serializationClass)</code>
-<div class="block">Serializes a given KeyFormat into a "SerializationT" object.</div>
+<td class="colFirst"><code>&lt;ParametersT extends <a href="../../../../../../com/google/crypto/tink/Parameters.html" title="class in com.google.crypto.tink">Parameters</a>,SerializationT extends <a href="../../../../../../com/google/crypto/tink/internal/Serialization.html" title="interface in com.google.crypto.tink.internal">Serialization</a>&gt;<br>SerializationT</code></td>
+<td class="colLast"><span class="typeNameLabel">MutableSerializationRegistry.</span><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/internal/MutableSerializationRegistry.html#serializeParameters-ParametersT-java.lang.Class-">serializeParameters</a></span>(ParametersT&nbsp;parameters,
+                   <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Class.html?is-external=true" title="class or interface in java.lang">Class</a>&lt;SerializationT&gt;&nbsp;serializationClass)</code>
+<div class="block">Serializes a given Parameters object into a "SerializationT" object.</div>
 </td>
 </tr>
 </tbody>

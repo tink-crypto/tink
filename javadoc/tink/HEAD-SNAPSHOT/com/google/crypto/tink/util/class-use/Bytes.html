@@ -111,19 +111,19 @@
 <tbody>
 <tr class="altColor">
 <td class="colFirst"><code><a href="../../../../../../com/google/crypto/tink/util/Bytes.html" title="class in com.google.crypto.tink.util">Bytes</a></code></td>
-<td class="colLast"><span class="typeNameLabel">ProtoKeyFormatSerialization.</span><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/internal/ProtoKeyFormatSerialization.html#getObjectIdentifier--">getObjectIdentifier</a></span>()</code>
+<td class="colLast"><span class="typeNameLabel">ProtoParametersSerialization.</span><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/internal/ProtoParametersSerialization.html#getObjectIdentifier--">getObjectIdentifier</a></span>()</code>
 <div class="block">The typeUrl.</div>
 </td>
 </tr>
 <tr class="rowColor">
 <td class="colFirst"><code><a href="../../../../../../com/google/crypto/tink/util/Bytes.html" title="class in com.google.crypto.tink.util">Bytes</a></code></td>
-<td class="colLast"><span class="typeNameLabel">KeyParser.</span><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/internal/KeyParser.html#getObjectIdentifier--">getObjectIdentifier</a></span>()</code>
+<td class="colLast"><span class="typeNameLabel">ParametersParser.</span><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/internal/ParametersParser.html#getObjectIdentifier--">getObjectIdentifier</a></span>()</code>
 <div class="block">Returns the <code>objectIdentifier</code> for this serialization.</div>
 </td>
 </tr>
 <tr class="altColor">
 <td class="colFirst"><code><a href="../../../../../../com/google/crypto/tink/util/Bytes.html" title="class in com.google.crypto.tink.util">Bytes</a></code></td>
-<td class="colLast"><span class="typeNameLabel">KeyFormatParser.</span><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/internal/KeyFormatParser.html#getObjectIdentifier--">getObjectIdentifier</a></span>()</code>
+<td class="colLast"><span class="typeNameLabel">KeyParser.</span><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/internal/KeyParser.html#getObjectIdentifier--">getObjectIdentifier</a></span>()</code>
 <div class="block">Returns the <code>objectIdentifier</code> for this serialization.</div>
 </td>
 </tr>
@@ -149,19 +149,19 @@
 </tr>
 <tbody>
 <tr class="altColor">
-<td class="colFirst"><code>static &lt;SerializationT extends <a href="../../../../../../com/google/crypto/tink/internal/Serialization.html" title="interface in com.google.crypto.tink.internal">Serialization</a>&gt;<br><a href="../../../../../../com/google/crypto/tink/internal/KeyFormatParser.html" title="class in com.google.crypto.tink.internal">KeyFormatParser</a>&lt;SerializationT&gt;</code></td>
-<td class="colLast"><span class="typeNameLabel">KeyFormatParser.</span><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/internal/KeyFormatParser.html#create-com.google.crypto.tink.internal.KeyFormatParser.KeyFormatParsingFunction-com.google.crypto.tink.util.Bytes-java.lang.Class-">create</a></span>(<a href="../../../../../../com/google/crypto/tink/internal/KeyFormatParser.KeyFormatParsingFunction.html" title="interface in com.google.crypto.tink.internal">KeyFormatParser.KeyFormatParsingFunction</a>&lt;SerializationT&gt;&nbsp;function,
-      <a href="../../../../../../com/google/crypto/tink/util/Bytes.html" title="class in com.google.crypto.tink.util">Bytes</a>&nbsp;objectIdentifier,
-      <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Class.html?is-external=true" title="class or interface in java.lang">Class</a>&lt;SerializationT&gt;&nbsp;serializationClass)</code>
-<div class="block">Creates a KeyFormatParser object.</div>
-</td>
-</tr>
-<tr class="rowColor">
 <td class="colFirst"><code>static &lt;SerializationT extends <a href="../../../../../../com/google/crypto/tink/internal/Serialization.html" title="interface in com.google.crypto.tink.internal">Serialization</a>&gt;<br><a href="../../../../../../com/google/crypto/tink/internal/KeyParser.html" title="class in com.google.crypto.tink.internal">KeyParser</a>&lt;SerializationT&gt;</code></td>
 <td class="colLast"><span class="typeNameLabel">KeyParser.</span><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/internal/KeyParser.html#create-com.google.crypto.tink.internal.KeyParser.KeyParsingFunction-com.google.crypto.tink.util.Bytes-java.lang.Class-">create</a></span>(<a href="../../../../../../com/google/crypto/tink/internal/KeyParser.KeyParsingFunction.html" title="interface in com.google.crypto.tink.internal">KeyParser.KeyParsingFunction</a>&lt;SerializationT&gt;&nbsp;function,
       <a href="../../../../../../com/google/crypto/tink/util/Bytes.html" title="class in com.google.crypto.tink.util">Bytes</a>&nbsp;objectIdentifier,
       <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Class.html?is-external=true" title="class or interface in java.lang">Class</a>&lt;SerializationT&gt;&nbsp;serializationClass)</code>
 <div class="block">Creates a KeyParser object.</div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>static &lt;SerializationT extends <a href="../../../../../../com/google/crypto/tink/internal/Serialization.html" title="interface in com.google.crypto.tink.internal">Serialization</a>&gt;<br><a href="../../../../../../com/google/crypto/tink/internal/ParametersParser.html" title="class in com.google.crypto.tink.internal">ParametersParser</a>&lt;SerializationT&gt;</code></td>
+<td class="colLast"><span class="typeNameLabel">ParametersParser.</span><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/internal/ParametersParser.html#create-com.google.crypto.tink.internal.ParametersParser.ParametersParsingFunction-com.google.crypto.tink.util.Bytes-java.lang.Class-">create</a></span>(<a href="../../../../../../com/google/crypto/tink/internal/ParametersParser.ParametersParsingFunction.html" title="interface in com.google.crypto.tink.internal">ParametersParser.ParametersParsingFunction</a>&lt;SerializationT&gt;&nbsp;function,
+      <a href="../../../../../../com/google/crypto/tink/util/Bytes.html" title="class in com.google.crypto.tink.util">Bytes</a>&nbsp;objectIdentifier,
+      <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Class.html?is-external=true" title="class or interface in java.lang">Class</a>&lt;SerializationT&gt;&nbsp;serializationClass)</code>
+<div class="block">Creates a ParametersParser object.</div>
 </td>
 </tr>
 </tbody>

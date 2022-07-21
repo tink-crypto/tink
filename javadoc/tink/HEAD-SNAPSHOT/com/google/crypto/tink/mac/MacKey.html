@@ -49,7 +49,7 @@ var activeTableTab = "activeTableTab";
 <div class="subNav">
 <ul class="navList">
 <li><a href="../../../../../com/google/crypto/tink/mac/MacFactory.html" title="class in com.google.crypto.tink.mac"><span class="typeNameLink">Prev&nbsp;Class</span></a></li>
-<li><a href="../../../../../com/google/crypto/tink/mac/MacKeyFormat.html" title="class in com.google.crypto.tink.mac"><span class="typeNameLink">Next&nbsp;Class</span></a></li>
+<li><a href="../../../../../com/google/crypto/tink/mac/MacKeyTemplates.html" title="class in com.google.crypto.tink.mac"><span class="typeNameLink">Next&nbsp;Class</span></a></li>
 </ul>
 <ul class="navList">
 <li><a href="../../../../../index.html?com/google/crypto/tink/mac/MacKey.html" target="_top">Frames</a></li>
@@ -156,15 +156,15 @@ extends <a href="../../../../../com/google/crypto/tink/Key.html" title="class in
 <th class="colLast" scope="col">Method and Description</th>
 </tr>
 <tr id="i0" class="altColor">
-<td class="colFirst"><code>abstract <a href="../../../../../com/google/crypto/tink/mac/MacKeyFormat.html" title="class in com.google.crypto.tink.mac">MacKeyFormat</a></code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/mac/MacKey.html#getKeyFormat--">getKeyFormat</a></span>()</code>
-<div class="block">Returns the key format of this key.</div>
-</td>
-</tr>
-<tr id="i1" class="rowColor">
 <td class="colFirst"><code>abstract <a href="../../../../../com/google/crypto/tink/util/Bytes.html" title="class in com.google.crypto.tink.util">Bytes</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/mac/MacKey.html#getOutputPrefix--">getOutputPrefix</a></span>()</code>
 <div class="block">Returns a <a href="../../../../../com/google/crypto/tink/util/Bytes.html" title="class in com.google.crypto.tink.util"><code>Bytes</code></a> instance which is prefixed to every mac tag.</div>
+</td>
+</tr>
+<tr id="i1" class="rowColor">
+<td class="colFirst"><code>abstract <a href="../../../../../com/google/crypto/tink/mac/MacParameters.html" title="class in com.google.crypto.tink.mac">MacParameters</a></code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/mac/MacKey.html#getParameters--">getParameters</a></span>()</code>
+<div class="block">Returns the parameters of this key.</div>
 </td>
 </tr>
 </table>
@@ -231,17 +231,17 @@ extends <a href="../../../../../com/google/crypto/tink/Key.html" title="class in
  '0x01<big endian key id>'. See the Tink keys for details.</div>
 </li>
 </ul>
-<a name="getKeyFormat--">
+<a name="getParameters--">
 <!--   -->
 </a>
 <ul class="blockListLast">
 <li class="blockList">
-<h4>getKeyFormat</h4>
-<pre>public abstract&nbsp;<a href="../../../../../com/google/crypto/tink/mac/MacKeyFormat.html" title="class in com.google.crypto.tink.mac">MacKeyFormat</a>&nbsp;getKeyFormat()</pre>
-<div class="block">Returns the key format of this key.</div>
+<h4>getParameters</h4>
+<pre>public abstract&nbsp;<a href="../../../../../com/google/crypto/tink/mac/MacParameters.html" title="class in com.google.crypto.tink.mac">MacParameters</a>&nbsp;getParameters()</pre>
+<div class="block">Returns the parameters of this key.</div>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
-<dd><code><a href="../../../../../com/google/crypto/tink/Key.html#getKeyFormat--">getKeyFormat</a></code>&nbsp;in class&nbsp;<code><a href="../../../../../com/google/crypto/tink/Key.html" title="class in com.google.crypto.tink">Key</a></code></dd>
+<dd><code><a href="../../../../../com/google/crypto/tink/Key.html#getParameters--">getParameters</a></code>&nbsp;in class&nbsp;<code><a href="../../../../../com/google/crypto/tink/Key.html" title="class in com.google.crypto.tink">Key</a></code></dd>
 </dl>
 </li>
 </ul>
@@ -274,7 +274,7 @@ extends <a href="../../../../../com/google/crypto/tink/Key.html" title="class in
 <div class="subNav">
 <ul class="navList">
 <li><a href="../../../../../com/google/crypto/tink/mac/MacFactory.html" title="class in com.google.crypto.tink.mac"><span class="typeNameLink">Prev&nbsp;Class</span></a></li>
-<li><a href="../../../../../com/google/crypto/tink/mac/MacKeyFormat.html" title="class in com.google.crypto.tink.mac"><span class="typeNameLink">Next&nbsp;Class</span></a></li>
+<li><a href="../../../../../com/google/crypto/tink/mac/MacKeyTemplates.html" title="class in com.google.crypto.tink.mac"><span class="typeNameLink">Next&nbsp;Class</span></a></li>
 </ul>
 <ul class="navList">
 <li><a href="../../../../../index.html?com/google/crypto/tink/mac/MacKey.html" target="_top">Frames</a></li>

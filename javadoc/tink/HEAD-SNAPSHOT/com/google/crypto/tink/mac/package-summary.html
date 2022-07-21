@@ -74,6 +74,35 @@
 <div class="contentContainer">
 <ul class="blockList">
 <li class="blockList">
+<table class="typeSummary" border="0" cellpadding="3" cellspacing="0" summary="Interface Summary table, listing interfaces, and an explanation">
+<caption><span>Interface Summary</span><span class="tabEnd">&nbsp;</span></caption>
+<tr>
+<th class="colFirst" scope="col">Interface</th>
+<th class="colLast" scope="col">Description</th>
+</tr>
+<tbody>
+<tr class="altColor">
+<td class="colFirst"><a href="../../../../../com/google/crypto/tink/mac/ChunkedMac.html" title="interface in com.google.crypto.tink.mac">ChunkedMac</a></td>
+<td class="colLast">
+<div class="block">An interface representing Streaming MAC.</div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><a href="../../../../../com/google/crypto/tink/mac/ChunkedMacComputation.html" title="interface in com.google.crypto.tink.mac">ChunkedMacComputation</a></td>
+<td class="colLast">
+<div class="block">An interface representing a computation of the Streaming MAC.</div>
+</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><a href="../../../../../com/google/crypto/tink/mac/ChunkedMacVerification.html" title="interface in com.google.crypto.tink.mac">ChunkedMacVerification</a></td>
+<td class="colLast">
+<div class="block">An interface representing a verification of the Streaming MAC.</div>
+</td>
+</tr>
+</tbody>
+</table>
+</li>
+<li class="blockList">
 <table class="typeSummary" border="0" cellpadding="3" cellspacing="0" summary="Class Summary table, listing classes, and an explanation">
 <caption><span>Class Summary</span><span class="tabEnd">&nbsp;</span></caption>
 <tr>
@@ -88,21 +117,21 @@
 </td>
 </tr>
 <tr class="rowColor">
-<td class="colFirst"><a href="../../../../../com/google/crypto/tink/mac/AesCmacKeyFormat.html" title="class in com.google.crypto.tink.mac">AesCmacKeyFormat</a></td>
-<td class="colLast">
-<div class="block">Describes a format of an <a href="../../../../../com/google/crypto/tink/mac/AesCmacKey.html" title="class in com.google.crypto.tink.mac"><code>AesCmacKey</code></a>.</div>
-</td>
-</tr>
-<tr class="altColor">
-<td class="colFirst"><a href="../../../../../com/google/crypto/tink/mac/AesCmacKeyFormat.Variant.html" title="class in com.google.crypto.tink.mac">AesCmacKeyFormat.Variant</a></td>
-<td class="colLast">
-<div class="block">Describes details of the mac computation.</div>
-</td>
-</tr>
-<tr class="rowColor">
 <td class="colFirst"><a href="../../../../../com/google/crypto/tink/mac/AesCmacKeyManager.html" title="class in com.google.crypto.tink.mac">AesCmacKeyManager</a></td>
 <td class="colLast">
 <div class="block">This key manager generates new <code>AesCmacKey</code> keys and produces new instances of <code>AesCmac</code>.</div>
+</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><a href="../../../../../com/google/crypto/tink/mac/AesCmacParameters.html" title="class in com.google.crypto.tink.mac">AesCmacParameters</a></td>
+<td class="colLast">
+<div class="block">Describes the parameters of an <a href="../../../../../com/google/crypto/tink/mac/AesCmacKey.html" title="class in com.google.crypto.tink.mac"><code>AesCmacKey</code></a>.</div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><a href="../../../../../com/google/crypto/tink/mac/AesCmacParameters.Variant.html" title="class in com.google.crypto.tink.mac">AesCmacParameters.Variant</a></td>
+<td class="colLast">
+<div class="block">Describes details of the mac computation.</div>
 </td>
 </tr>
 <tr class="altColor">
@@ -132,16 +161,16 @@
 </td>
 </tr>
 <tr class="altColor">
-<td class="colFirst"><a href="../../../../../com/google/crypto/tink/mac/MacKeyFormat.html" title="class in com.google.crypto.tink.mac">MacKeyFormat</a></td>
-<td class="colLast">
-<div class="block">Represents a description of a <a href="../../../../../com/google/crypto/tink/mac/MacKey.html" title="class in com.google.crypto.tink.mac"><code>MacKey</code></a> excluding the randomly chosen key material.</div>
-</td>
-</tr>
-<tr class="rowColor">
 <td class="colFirst"><a href="../../../../../com/google/crypto/tink/mac/MacKeyTemplates.html" title="class in com.google.crypto.tink.mac">MacKeyTemplates</a></td>
 <td class="colLast">Deprecated
 <div class="block"><span class="deprecationComment">use <a href="../../../../../com/google/crypto/tink/KeyTemplates.html#get-java.lang.String-"><code>KeyTemplates.get(java.lang.String)</code></a>, e.g.,
      KeyTemplates.get("HMAC_SHA256_128BITTAG")</span></div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><a href="../../../../../com/google/crypto/tink/mac/MacParameters.html" title="class in com.google.crypto.tink.mac">MacParameters</a></td>
+<td class="colLast">
+<div class="block">Represents a description of a <a href="../../../../../com/google/crypto/tink/mac/MacKey.html" title="class in com.google.crypto.tink.mac"><code>MacKey</code></a> excluding the randomly chosen key material.</div>
 </td>
 </tr>
 </tbody>

@@ -85,13 +85,6 @@
 <li type="circle">com.google.crypto.tink.internal.<a href="../../../../../com/google/crypto/tink/internal/LegacyProtoKey.html" title="class in com.google.crypto.tink.internal"><span class="typeNameLink">LegacyProtoKey</span></a></li>
 </ul>
 </li>
-<li type="circle">com.google.crypto.tink.<a href="../../../../../com/google/crypto/tink/KeyFormat.html" title="class in com.google.crypto.tink"><span class="typeNameLink">KeyFormat</span></a>
-<ul>
-<li type="circle">com.google.crypto.tink.internal.<a href="../../../../../com/google/crypto/tink/internal/LegacyProtoKeyFormat.html" title="class in com.google.crypto.tink.internal"><span class="typeNameLink">LegacyProtoKeyFormat</span></a></li>
-</ul>
-</li>
-<li type="circle">com.google.crypto.tink.internal.<a href="../../../../../com/google/crypto/tink/internal/KeyFormatParser.html" title="class in com.google.crypto.tink.internal"><span class="typeNameLink">KeyFormatParser</span></a>&lt;SerializationT&gt;</li>
-<li type="circle">com.google.crypto.tink.internal.<a href="../../../../../com/google/crypto/tink/internal/KeyFormatSerializer.html" title="class in com.google.crypto.tink.internal"><span class="typeNameLink">KeyFormatSerializer</span></a>&lt;KeyFormatT,SerializationT&gt;</li>
 <li type="circle">com.google.crypto.tink.internal.<a href="../../../../../com/google/crypto/tink/internal/KeyParser.html" title="class in com.google.crypto.tink.internal"><span class="typeNameLink">KeyParser</span></a>&lt;SerializationT&gt;</li>
 <li type="circle">com.google.crypto.tink.internal.<a href="../../../../../com/google/crypto/tink/internal/KeySerializer.html" title="class in com.google.crypto.tink.internal"><span class="typeNameLink">KeySerializer</span></a>&lt;KeyT,SerializationT&gt;</li>
 <li type="circle">com.google.crypto.tink.internal.<a href="../../../../../com/google/crypto/tink/internal/KeyStatusTypeProtoConverter.html" title="class in com.google.crypto.tink.internal"><span class="typeNameLink">KeyStatusTypeProtoConverter</span></a></li>
@@ -106,9 +99,16 @@
 <li type="circle">com.google.crypto.tink.internal.<a href="../../../../../com/google/crypto/tink/internal/MonitoringUtil.html" title="class in com.google.crypto.tink.internal"><span class="typeNameLink">MonitoringUtil</span></a></li>
 <li type="circle">com.google.crypto.tink.internal.<a href="../../../../../com/google/crypto/tink/internal/MutableMonitoringRegistry.html" title="class in com.google.crypto.tink.internal"><span class="typeNameLink">MutableMonitoringRegistry</span></a></li>
 <li type="circle">com.google.crypto.tink.internal.<a href="../../../../../com/google/crypto/tink/internal/MutableSerializationRegistry.html" title="class in com.google.crypto.tink.internal"><span class="typeNameLink">MutableSerializationRegistry</span></a></li>
+<li type="circle">com.google.crypto.tink.<a href="../../../../../com/google/crypto/tink/Parameters.html" title="class in com.google.crypto.tink"><span class="typeNameLink">Parameters</span></a>
+<ul>
+<li type="circle">com.google.crypto.tink.internal.<a href="../../../../../com/google/crypto/tink/internal/LegacyProtoParameters.html" title="class in com.google.crypto.tink.internal"><span class="typeNameLink">LegacyProtoParameters</span></a></li>
+</ul>
+</li>
+<li type="circle">com.google.crypto.tink.internal.<a href="../../../../../com/google/crypto/tink/internal/ParametersParser.html" title="class in com.google.crypto.tink.internal"><span class="typeNameLink">ParametersParser</span></a>&lt;SerializationT&gt;</li>
+<li type="circle">com.google.crypto.tink.internal.<a href="../../../../../com/google/crypto/tink/internal/ParametersSerializer.html" title="class in com.google.crypto.tink.internal"><span class="typeNameLink">ParametersSerializer</span></a>&lt;ParametersT,SerializationT&gt;</li>
 <li type="circle">com.google.crypto.tink.internal.<a href="../../../../../com/google/crypto/tink/internal/PrimitiveFactory.html" title="class in com.google.crypto.tink.internal"><span class="typeNameLink">PrimitiveFactory</span></a>&lt;PrimitiveT,KeyProtoT&gt;</li>
-<li type="circle">com.google.crypto.tink.internal.<a href="../../../../../com/google/crypto/tink/internal/ProtoKeyFormatSerialization.html" title="class in com.google.crypto.tink.internal"><span class="typeNameLink">ProtoKeyFormatSerialization</span></a> (implements com.google.crypto.tink.internal.<a href="../../../../../com/google/crypto/tink/internal/Serialization.html" title="interface in com.google.crypto.tink.internal">Serialization</a>)</li>
 <li type="circle">com.google.crypto.tink.internal.<a href="../../../../../com/google/crypto/tink/internal/ProtoKeySerialization.html" title="class in com.google.crypto.tink.internal"><span class="typeNameLink">ProtoKeySerialization</span></a> (implements com.google.crypto.tink.internal.<a href="../../../../../com/google/crypto/tink/internal/Serialization.html" title="interface in com.google.crypto.tink.internal">Serialization</a>)</li>
+<li type="circle">com.google.crypto.tink.internal.<a href="../../../../../com/google/crypto/tink/internal/ProtoParametersSerialization.html" title="class in com.google.crypto.tink.internal"><span class="typeNameLink">ProtoParametersSerialization</span></a> (implements com.google.crypto.tink.internal.<a href="../../../../../com/google/crypto/tink/internal/Serialization.html" title="interface in com.google.crypto.tink.internal">Serialization</a>)</li>
 <li type="circle">com.google.crypto.tink.internal.<a href="../../../../../com/google/crypto/tink/internal/SerializationRegistry.html" title="class in com.google.crypto.tink.internal"><span class="typeNameLink">SerializationRegistry</span></a></li>
 <li type="circle">com.google.crypto.tink.internal.<a href="../../../../../com/google/crypto/tink/internal/SerializationRegistry.Builder.html" title="class in com.google.crypto.tink.internal"><span class="typeNameLink">SerializationRegistry.Builder</span></a></li>
 <li type="circle">com.google.crypto.tink.internal.<a href="../../../../../com/google/crypto/tink/internal/Util.html" title="class in com.google.crypto.tink.internal"><span class="typeNameLink">Util</span></a></li>
@@ -117,10 +117,10 @@
 </ul>
 <h2 title="Interface Hierarchy">Interface Hierarchy</h2>
 <ul>
-<li type="circle">com.google.crypto.tink.internal.<a href="../../../../../com/google/crypto/tink/internal/KeyFormatParser.KeyFormatParsingFunction.html" title="interface in com.google.crypto.tink.internal"><span class="typeNameLink">KeyFormatParser.KeyFormatParsingFunction</span></a>&lt;SerializationT&gt;</li>
-<li type="circle">com.google.crypto.tink.internal.<a href="../../../../../com/google/crypto/tink/internal/KeyFormatSerializer.KeyFormatSerializationFunction.html" title="interface in com.google.crypto.tink.internal"><span class="typeNameLink">KeyFormatSerializer.KeyFormatSerializationFunction</span></a>&lt;KeyFormatT,SerializationT&gt;</li>
 <li type="circle">com.google.crypto.tink.internal.<a href="../../../../../com/google/crypto/tink/internal/KeyParser.KeyParsingFunction.html" title="interface in com.google.crypto.tink.internal"><span class="typeNameLink">KeyParser.KeyParsingFunction</span></a>&lt;SerializationT&gt;</li>
 <li type="circle">com.google.crypto.tink.internal.<a href="../../../../../com/google/crypto/tink/internal/KeySerializer.KeySerializationFunction.html" title="interface in com.google.crypto.tink.internal"><span class="typeNameLink">KeySerializer.KeySerializationFunction</span></a>&lt;KeyT,SerializationT&gt;</li>
+<li type="circle">com.google.crypto.tink.internal.<a href="../../../../../com/google/crypto/tink/internal/ParametersParser.ParametersParsingFunction.html" title="interface in com.google.crypto.tink.internal"><span class="typeNameLink">ParametersParser.ParametersParsingFunction</span></a>&lt;SerializationT&gt;</li>
+<li type="circle">com.google.crypto.tink.internal.<a href="../../../../../com/google/crypto/tink/internal/ParametersSerializer.ParametersSerializationFunction.html" title="interface in com.google.crypto.tink.internal"><span class="typeNameLink">ParametersSerializer.ParametersSerializationFunction</span></a>&lt;ParametersT,SerializationT&gt;</li>
 <li type="circle">com.google.crypto.tink.internal.<a href="../../../../../com/google/crypto/tink/internal/Serialization.html" title="interface in com.google.crypto.tink.internal"><span class="typeNameLink">Serialization</span></a></li>
 </ul>
 </div>
