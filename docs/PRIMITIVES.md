@@ -58,15 +58,16 @@ JavaScript is currently under development.
 | PRF                | HKDF-SHA2                         | yes      | yes                 | yes               | **no**          | yes        | yes        |
 |                    | HMAC-SHA2                         | yes      | yes                 | yes               | **no**          | yes        | yes        |
 |                    | AES-CMAC                          | yes      | yes                 | yes               | **no**          | yes        | yes        |
-| Digital Signatures | ECDSA over NIST curves            | yes      | yes                 | yes (*)           | yes             | yes        | yes        |
+| Digital Signatures | ECDSA over NIST curves            | yes      | yes                 | yes \*            | yes             | yes        | yes        |
 |                    | Ed25519                           | yes      | yes                 | yes               | yes             | yes        | yes        |
 |                    | RSA-SSA-PKCS1                     | yes      | yes                 | yes               | yes             | **no**     | yes        |
 |                    | RSA-SSA-PSS                       | yes      | yes                 | yes               | yes             | **no**     | yes        |
-| Hybrid Encryption  | ECIES with AEAD                   | yes      | yes                 | yes               | yes             | yes        | yes        |
+| Hybrid Encryption  | HPKE                              | yes      | yes                 | **no**            | **no**          | yes        | yes        |
+|                    | ECIES with AEAD                   | yes      | yes                 | yes               | yes             | yes        | yes        |
 |                    | ECIES with DeterministicAEAD      | yes      | yes                 | yes               | **no**          | yes        | yes        |
 |                    | HKDF                              | yes      | yes                 | yes               | yes             | yes        | yes        |
 
-(*) EC key creation from seed (`DeriveKey`) is unsupported.
+\* EC key creation from seed (`DeriveKey`) is unsupported.
 
 ## General properties of all primitives
 
