@@ -38,11 +38,11 @@ public final class AesCmacParametersTest {
 
   @Test
   public void testAesCmacParameters_basic() throws Exception {
-    AesCmacParameters format = AesCmacParameters.create(16);
-    assertThat(format.getCryptographicTagSizeBytes()).isEqualTo(16);
-    assertThat(format.getTotalTagSizeBytes()).isEqualTo(16);
-    assertThat(format.getVariant()).isEqualTo(NO_PREFIX);
-    assertThat(format.hasIdRequirement()).isFalse();
+    AesCmacParameters parameters = AesCmacParameters.create(16);
+    assertThat(parameters.getCryptographicTagSizeBytes()).isEqualTo(16);
+    assertThat(parameters.getTotalTagSizeBytes()).isEqualTo(16);
+    assertThat(parameters.getVariant()).isEqualTo(NO_PREFIX);
+    assertThat(parameters.hasIdRequirement()).isFalse();
   }
 
   @Test

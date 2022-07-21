@@ -50,15 +50,16 @@ public final class AesCmacKey extends MacKey {
       link = "https://developers.google.com/tink/design/access_control#accessing_partial_keys",
       allowedOnPath = ".*Test\\.java",
       allowlistAnnotations = {AccessesPartialKey.class})
-  public static AesCmacKey create(AesCmacParameters format, SecretBytes aesKey)
+  public static AesCmacKey create(AesCmacParameters parameters, SecretBytes aesKey)
       throws GeneralSecurityException {
     if (aesKey.size() != 32) {
       throw new GeneralSecurityException("Invalid key size");
     }
-    if (format.hasIdRequirement()) {
-      throw new GeneralSecurityException("Must use createForKeyset for format with ID requirement");
+    if (parameters.hasIdRequirement()) {
+      throw new GeneralSecurityException(
+          "Must use createForKeyset for parameters with ID requirement");
     }
-    return new AesCmacKey(format, aesKey, null);
+    return new AesCmacKey(parameters, aesKey, null);
   }
 
   /**
@@ -73,21 +74,21 @@ public final class AesCmacKey extends MacKey {
       allowedOnPath = ".*Test\\.java",
       allowlistAnnotations = {AccessesPartialKey.class})
   public static AesCmacKey createForKeyset(
-      AesCmacParameters format, SecretBytes aesKeyBytes, @Nullable Integer idRequirement)
+      AesCmacParameters parameters, SecretBytes aesKeyBytes, @Nullable Integer idRequirement)
       throws GeneralSecurityException {
     if (aesKeyBytes.size() != 32) {
       throw new GeneralSecurityException("Invalid key size");
     }
-    if (format.hasIdRequirement() && idRequirement == null) {
+    if (parameters.hasIdRequirement() && idRequirement == null) {
       throw new GeneralSecurityException(
           "Cannot create key without ID requirement with format with ID requirement");
     }
-    if (!format.hasIdRequirement() && idRequirement != null) {
+    if (!parameters.hasIdRequirement() && idRequirement != null) {
       throw new GeneralSecurityException(
           "Cannot create key with ID requirement with format without ID requirement");
     }
 
-    return new AesCmacKey(format, aesKeyBytes, idRequirement);
+    return new AesCmacKey(parameters, aesKeyBytes, idRequirement);
   }
 
   /** Returns the underlying AES key. */

@@ -58,7 +58,7 @@ public final class PrimitiveSet<P> {
   // Consider renaming this class and moving it into internal. And use it in LegacyProtoKey.
   @Immutable
   @Alpha
-  private static class SimpleKeyFormat extends Parameters {
+  private static class SimpleParameters extends Parameters {
 
     private final String typeUrl;
     private final OutputPrefixType outputPrefixType;
@@ -93,7 +93,7 @@ public final class PrimitiveSet<P> {
           "(typeUrl=%s, outputPrefixType=%s)", typeUrl, outputPrefixToString(outputPrefixType));
     }
 
-    private SimpleKeyFormat(String typeUrl, OutputPrefixType outputPrefixType) {
+    private SimpleParameters(String typeUrl, OutputPrefixType outputPrefixType) {
       this.typeUrl = typeUrl;
       this.outputPrefixType = outputPrefixType;
     }
@@ -286,7 +286,7 @@ public final class PrimitiveSet<P> {
       throw new GeneralSecurityException("only ENABLED key is allowed");
     }
     Parameters parameters =
-        new SimpleKeyFormat(key.getKeyData().getTypeUrl(), key.getOutputPrefixType());
+        new SimpleParameters(key.getKeyData().getTypeUrl(), key.getOutputPrefixType());
     Entry<P> entry =
         new Entry<P>(
             primitive,
@@ -372,7 +372,7 @@ public final class PrimitiveSet<P> {
         throw new GeneralSecurityException("only ENABLED key is allowed");
       }
       Parameters parameters =
-          new SimpleKeyFormat(key.getKeyData().getTypeUrl(), key.getOutputPrefixType());
+          new SimpleParameters(key.getKeyData().getTypeUrl(), key.getOutputPrefixType());
       Entry<P> entry =
           new Entry<P>(
               primitive,

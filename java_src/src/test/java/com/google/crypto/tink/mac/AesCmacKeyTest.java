@@ -34,48 +34,49 @@ public final class AesCmacKeyTest {
   private static final AesCmacParameters.Variant LEGACY = AesCmacParameters.Variant.LEGACY;
   private static final AesCmacParameters.Variant CRUNCHY = AesCmacParameters.Variant.CRUNCHY;
 
-  private static AesCmacParameters tinkFormat;
-  private static AesCmacParameters legacyFormat;
-  private static AesCmacParameters crunchyFormat;
-  private static AesCmacParameters noPrefixFormat;
+  private static AesCmacParameters tinkParameters;
+  private static AesCmacParameters legacyParameters;
+  private static AesCmacParameters crunchyParameters;
+  private static AesCmacParameters noPrefixParameters;
 
   @BeforeClass
-  public static void setUpFormats() throws Exception {
-    tinkFormat = AesCmacParameters.createForKeysetWithCryptographicTagSize(10, TINK);
-    legacyFormat = AesCmacParameters.createForKeysetWithCryptographicTagSize(10, LEGACY);
-    crunchyFormat = AesCmacParameters.createForKeysetWithCryptographicTagSize(10, CRUNCHY);
-    noPrefixFormat = AesCmacParameters.createForKeysetWithCryptographicTagSize(10, NO_PREFIX);
+  public static void setUpParameters() throws Exception {
+    tinkParameters = AesCmacParameters.createForKeysetWithCryptographicTagSize(10, TINK);
+    legacyParameters = AesCmacParameters.createForKeysetWithCryptographicTagSize(10, LEGACY);
+    crunchyParameters = AesCmacParameters.createForKeysetWithCryptographicTagSize(10, CRUNCHY);
+    noPrefixParameters = AesCmacParameters.createForKeysetWithCryptographicTagSize(10, NO_PREFIX);
   }
 
   @Test
   public void create_works() throws Exception {
-    AesCmacKey.create(noPrefixFormat, SecretBytes.randomBytes(32));
-    AesCmacKey.createForKeyset(tinkFormat, SecretBytes.randomBytes(32), 1907);
+    AesCmacKey.create(noPrefixParameters, SecretBytes.randomBytes(32));
+    AesCmacKey.createForKeyset(tinkParameters, SecretBytes.randomBytes(32), 1907);
   }
 
   @Test
   public void getAesKey() throws Exception {
     SecretBytes aesKey = SecretBytes.randomBytes(32);
-    assertThat(AesCmacKey.create(noPrefixFormat, aesKey).getAesKey()).isEqualTo(aesKey);
+    assertThat(AesCmacKey.create(noPrefixParameters, aesKey).getAesKey()).isEqualTo(aesKey);
   }
 
   @Test
-  public void getKeyFormat() throws Exception {
-    assertThat(AesCmacKey.create(noPrefixFormat, SecretBytes.randomBytes(32)).getParameters())
-        .isEqualTo(noPrefixFormat);
+  public void getParameters() throws Exception {
+    assertThat(AesCmacKey.create(noPrefixParameters, SecretBytes.randomBytes(32)).getParameters())
+        .isEqualTo(noPrefixParameters);
     assertThat(
-            AesCmacKey.createForKeyset(tinkFormat, SecretBytes.randomBytes(32), 1907)
+            AesCmacKey.createForKeyset(tinkParameters, SecretBytes.randomBytes(32), 1907)
                 .getParameters())
-        .isEqualTo(tinkFormat);
+        .isEqualTo(tinkParameters);
   }
 
   @Test
   public void getIdRequirement() throws Exception {
     assertThat(
-            AesCmacKey.create(noPrefixFormat, SecretBytes.randomBytes(32)).getIdRequirementOrNull())
+            AesCmacKey.create(noPrefixParameters, SecretBytes.randomBytes(32))
+                .getIdRequirementOrNull())
         .isNull();
     assertThat(
-            AesCmacKey.createForKeyset(tinkFormat, SecretBytes.randomBytes(32), 1907)
+            AesCmacKey.createForKeyset(tinkParameters, SecretBytes.randomBytes(32), 1907)
                 .getIdRequirementOrNull())
         .isEqualTo(1907);
   }
@@ -85,22 +86,22 @@ public final class AesCmacKeyTest {
     // Wrong keylength
     assertThrows(
         GeneralSecurityException.class,
-        () -> AesCmacKey.create(noPrefixFormat, SecretBytes.randomBytes(16)));
+        () -> AesCmacKey.create(noPrefixParameters, SecretBytes.randomBytes(16)));
     assertThrows(
         GeneralSecurityException.class,
-        () -> AesCmacKey.createForKeyset(tinkFormat, SecretBytes.randomBytes(16), 199045));
+        () -> AesCmacKey.createForKeyset(tinkParameters, SecretBytes.randomBytes(16), 199045));
     // Must use createForKeyset if we have id requirement
     assertThrows(
         GeneralSecurityException.class,
-        () -> AesCmacKey.create(tinkFormat, SecretBytes.randomBytes(32)));
+        () -> AesCmacKey.create(tinkParameters, SecretBytes.randomBytes(32)));
     // Must give ID with IDRequirement
     assertThrows(
         GeneralSecurityException.class,
-        () -> AesCmacKey.createForKeyset(tinkFormat, SecretBytes.randomBytes(32), null));
+        () -> AesCmacKey.createForKeyset(tinkParameters, SecretBytes.randomBytes(32), null));
     // Must not give ID without IDRequirement
     assertThrows(
         GeneralSecurityException.class,
-        () -> AesCmacKey.createForKeyset(noPrefixFormat, SecretBytes.randomBytes(32), 123));
+        () -> AesCmacKey.createForKeyset(noPrefixParameters, SecretBytes.randomBytes(32), 123));
   }
 
   @Test
@@ -110,28 +111,28 @@ public final class AesCmacKeyTest {
     new KeyTester()
         .addEqualityGroup(
             "No prefix, key1",
-            AesCmacKey.create(noPrefixFormat, key1),
-            AesCmacKey.createForKeyset(noPrefixFormat, key1, /* idRequirement=*/ null))
+            AesCmacKey.create(noPrefixParameters, key1),
+            AesCmacKey.createForKeyset(noPrefixParameters, key1, /* idRequirement=*/ null))
         .addEqualityGroup(
             "No prefix, key2",
-            AesCmacKey.create(noPrefixFormat, key2),
-            AesCmacKey.createForKeyset(noPrefixFormat, key2, /* idRequirement=*/ null))
+            AesCmacKey.create(noPrefixParameters, key2),
+            AesCmacKey.createForKeyset(noPrefixParameters, key2, /* idRequirement=*/ null))
         .addEqualityGroup(
             "Tink 1907 key1",
-            AesCmacKey.createForKeyset(tinkFormat, key1, 1907),
-            AesCmacKey.createForKeyset(tinkFormat, key1, 1907))
+            AesCmacKey.createForKeyset(tinkParameters, key1, 1907),
+            AesCmacKey.createForKeyset(tinkParameters, key1, 1907))
         .addEqualityGroup(
             "Tink 1908 key1",
-            AesCmacKey.createForKeyset(tinkFormat, key1, 1908),
-            AesCmacKey.createForKeyset(tinkFormat, key1, 1908))
+            AesCmacKey.createForKeyset(tinkParameters, key1, 1908),
+            AesCmacKey.createForKeyset(tinkParameters, key1, 1908))
         .addEqualityGroup(
             "Legacy 1907 key1",
-            AesCmacKey.createForKeyset(legacyFormat, key1, 1907),
-            AesCmacKey.createForKeyset(legacyFormat, key1, 1907))
+            AesCmacKey.createForKeyset(legacyParameters, key1, 1907),
+            AesCmacKey.createForKeyset(legacyParameters, key1, 1907))
         .addEqualityGroup(
             "Crunchy 1907 key1",
-            AesCmacKey.createForKeyset(crunchyFormat, key1, 1907),
-            AesCmacKey.createForKeyset(crunchyFormat, key1, 1907))
+            AesCmacKey.createForKeyset(crunchyParameters, key1, 1907),
+            AesCmacKey.createForKeyset(crunchyParameters, key1, 1907))
         .doTests();
   }
 }

@@ -33,7 +33,7 @@ public abstract class MacKey extends Key {
    * '0x01<big endian key id>'. See the Tink keys for details.
    */
   public abstract Bytes getOutputPrefix();
-  /** Returns the key format of this key. */
+  /** Returns the parameters of this key. */
   @Override
   public abstract MacParameters getParameters();
 }

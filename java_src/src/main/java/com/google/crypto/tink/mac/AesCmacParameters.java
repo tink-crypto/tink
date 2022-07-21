@@ -20,7 +20,7 @@ import com.google.errorprone.annotations.Immutable;
 import java.security.GeneralSecurityException;
 import java.util.Objects;
 
-/** Describes a format of an {@link AesCmacKey}. */
+/** Describes the parameters of an {@link AesCmacKey}. */
 public final class AesCmacParameters extends MacParameters {
   /**
    * Describes details of the mac computation.
@@ -61,7 +61,7 @@ public final class AesCmacParameters extends MacParameters {
   }
 
   /**
-   * Creates a new key format object.
+   * Creates a new parameters object.
    *
    * @throws GeneralSecurityException if tagSizeBytes not in {10, …, 16}.
    */
@@ -130,6 +130,6 @@ public final class AesCmacParameters extends MacParameters {
 
   @Override
   public String toString() {
-    return "AES-CMAC Key Format (variant: " + variant + ", " + tagSizeBytes + "-byte tags)";
+    return "AES-CMAC Parameters (variant: " + variant + ", " + tagSizeBytes + "-byte tags)";
   }
 }
