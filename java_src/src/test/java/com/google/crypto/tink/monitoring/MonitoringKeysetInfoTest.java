@@ -49,7 +49,7 @@ public final class MonitoringKeysetInfoTest {
 
   @Test
   public void addAndGetEntry() throws Exception {
-    Parameters keyFormat = makeLegacyProtoParameters("typeUrl123");
+    Parameters parameters = makeLegacyProtoParameters("typeUrl123");
     MonitoringKeysetInfo info =
         MonitoringKeysetInfo.newBuilder()
             .addEntry(KeyStatus.ENABLED, 123, makeLegacyProtoParameters("typeUrl123"))
@@ -59,7 +59,7 @@ public final class MonitoringKeysetInfoTest {
     MonitoringKeysetInfo.Entry entry = info.getEntries().get(0);
     assertThat(entry.getStatus()).isEqualTo(KeyStatus.ENABLED);
     assertThat(entry.getKeyId()).isEqualTo(123);
-    assertThat(entry.getKeyFormat()).isEqualTo(keyFormat);
+    assertThat(entry.getParameters()).isEqualTo(parameters);
   }
 
   @Test

@@ -55,7 +55,7 @@ public final class MonitoringUtilTest {
     assertThat(entries).hasSize(1);
     assertThat(entries.get(0).getStatus()).isEqualTo(KeyStatus.ENABLED);
     assertThat(entries.get(0).getKeyId()).isEqualTo(42);
-    assertThat(entries.get(0).getKeyFormat().toString())
+    assertThat(entries.get(0).getParameters().toString())
         .isEqualTo(
             "(typeUrl=type.googleapis.com/google.crypto.tink.AesGcmKey, outputPrefixType=TINK)");
   }

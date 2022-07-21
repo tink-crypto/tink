@@ -52,7 +52,7 @@ public final class MonitoringKeysetInfo {
       return keyId;
     }
 
-    public Parameters getKeyFormat() {
+    public Parameters getParameters() {
       return parameters;
     }
 
