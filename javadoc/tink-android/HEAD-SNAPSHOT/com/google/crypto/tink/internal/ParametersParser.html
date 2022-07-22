@@ -174,7 +174,7 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 <tr id="i3" class="rowColor">
 <td class="colFirst"><code>abstract <a href="../../../../../com/google/crypto/tink/Parameters.html" title="class in com.google.crypto.tink">Parameters</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/internal/ParametersParser.html#parseParameters-SerializationT-">parseParameters</a></span>(<a href="../../../../../com/google/crypto/tink/internal/ParametersParser.html" title="type parameter in ParametersParser">SerializationT</a>&nbsp;serialization)</code>
-<div class="block">Parses a serialization into a KeyFormat.</div>
+<div class="block">Parses a serialization into a <a href="../../../../../com/google/crypto/tink/Parameters.html" title="class in com.google.crypto.tink"><code>Parameters</code></a> object.</div>
 </td>
 </tr>
 </table>
@@ -209,7 +209,7 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 <h4>parseParameters</h4>
 <pre>public abstract&nbsp;<a href="../../../../../com/google/crypto/tink/Parameters.html" title="class in com.google.crypto.tink">Parameters</a>&nbsp;parseParameters(<a href="../../../../../com/google/crypto/tink/internal/ParametersParser.html" title="type parameter in ParametersParser">SerializationT</a>&nbsp;serialization)
                                     throws <a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
-<div class="block">Parses a serialization into a KeyFormat.
+<div class="block">Parses a serialization into a <a href="../../../../../com/google/crypto/tink/Parameters.html" title="class in com.google.crypto.tink"><code>Parameters</code></a> object.
 
  <p>This function is usually called with a Serialization matching the result of <code>getObjectIdentifier</code>. However, implementations should check that this is the case.</div>
 <dl>
@@ -272,7 +272,7 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
  </code></pre></div>
 <dl>
 <dt><span class="paramLabel">Parameters:</span></dt>
-<dd><code>function</code> - The function used to parse a KeyFormat</dd>
+<dd><code>function</code> - The function used to parse a <a href="../../../../../com/google/crypto/tink/Parameters.html" title="class in com.google.crypto.tink"><code>Parameters</code></a> object.</dd>
 <dd><code>objectIdentifier</code> - The identifier to be returned by <a href="../../../../../com/google/crypto/tink/internal/ParametersParser.html#getObjectIdentifier--"><code>getObjectIdentifier()</code></a></dd>
 <dd><code>serializationClass</code> - The class object corresponding to <code>SerializationT</code></dd>
 </dl>
