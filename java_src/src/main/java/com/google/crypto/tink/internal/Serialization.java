@@ -20,7 +20,7 @@ import com.google.crypto.tink.util.Bytes;
 import com.google.errorprone.annotations.Immutable;
 
 /**
- * Represents either a serialized {@code Key} or a serialized {@code KeyFormat}.
+ * Represents either a serialized {@code Key} or a serialized {@code Parameters} object.
  *
  * <p>Serialization objects are used within Tink to serialize keys, keysets, and key formats. For
  * each serialization method (e.g., for binary protobuf serialization), one subclass of this must be

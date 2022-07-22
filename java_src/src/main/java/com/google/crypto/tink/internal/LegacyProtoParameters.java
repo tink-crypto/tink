@@ -21,7 +21,7 @@ import com.google.crypto.tink.proto.OutputPrefixType;
 import com.google.errorprone.annotations.Immutable;
 import java.util.Objects;
 
-/** Implements a KeyFormat for legacy types where no actual KeyFormat is present. */
+/** Implements a Parameters object for legacy types where no actual Parameters object is present. */
 @Immutable
 public final class LegacyProtoParameters extends Parameters {
   private final ProtoParametersSerialization serialization;

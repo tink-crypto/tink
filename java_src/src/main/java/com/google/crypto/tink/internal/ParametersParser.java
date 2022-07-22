@@ -46,7 +46,7 @@ public abstract class ParametersParser<SerializationT extends Serialization> {
   }
 
   /**
-   * Parses a serialization into a KeyFormat.
+   * Parses a serialization into a {@link Parameters} object.
    *
    * <p>This function is usually called with a Serialization matching the result of {@link
    * getObjectIdentifier}. However, implementations should check that this is the case.
@@ -93,7 +93,7 @@ public abstract class ParametersParser<SerializationT extends Serialization> {
    *       ParametersParser.create(MyClass::parse, objectIdentifier, MySerialization.class);
    * }</pre>
    *
-   * @param function The function used to parse a KeyFormat
+   * @param function The function used to parse a {@link Parameters} object.
    * @param objectIdentifier The identifier to be returned by {@link #getObjectIdentifier}
    * @param serializationClass The class object corresponding to {@code SerializationT}
    */

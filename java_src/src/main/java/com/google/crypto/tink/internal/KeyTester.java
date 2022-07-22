@@ -106,8 +106,8 @@ public final class KeyTester {
    *   <li>For each individual key {@code k}, we check consistency of {@code getIdRequirementOrNull}
    *       and {@code k.getParameters().hasIdRequirement()}.
    *   <li>For each pair {@code k1, k2} of keys in the same group, we check that {@code
-   *       k1.equalsKey(k2)}, that {@code k1.getKeyFormat().equals(k2.getKeyFormat())}, that {@code
-   *       k1.getParameters().hashCode() == k2.getKeyFormat().hashCode()}, and that {@code
+   *       k1.equalsKey(k2)}, that {@code k1.getParameters().equals(k2.getParameters())}, that
+   *       {@code k1.getParameters().hashCode() == k2.getParameters().hashCode()}, and that {@code
    *       Object.equals(k1.getIdRequirementOrNull(), k2.getIdRequirementOrNull())}.
    *   <li>For each pair {@code k1, k2} of keys in different groups, we check that {@code
    *       k1.equalsKey(k2)} is false.

@@ -511,22 +511,22 @@ public final class SerializationRegistryTest {
   // ================================================================================================
   // PARAMETERS TESTS
   // ================================================================================================
-  private static TestSerializationA serializeParameters1ToA(TestParameters1 keyFormat)
+  private static TestSerializationA serializeParameters1ToA(TestParameters1 parameters)
       throws GeneralSecurityException {
     return new TestSerializationA(A_1);
   }
 
-  private static TestSerializationA serializeParameters2ToA(TestParameters2 keyFormat)
+  private static TestSerializationA serializeParameters2ToA(TestParameters2 parameters)
       throws GeneralSecurityException {
     return new TestSerializationA(A_2);
   }
 
-  private static TestSerializationB serializeParameters1ToB(TestParameters1 keyFormat)
+  private static TestSerializationB serializeParameters1ToB(TestParameters1 parameters)
       throws GeneralSecurityException {
     return new TestSerializationB(B_1);
   }
 
-  private static TestSerializationB serializeParameters2ToB(TestParameters2 keyFormat)
+  private static TestSerializationB serializeParameters2ToB(TestParameters2 parameters)
       throws GeneralSecurityException {
     return new TestSerializationB(B_2);
   }
