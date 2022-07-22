@@ -165,3 +165,30 @@ java_test(
         "@maven//:junit_junit",
     ],
 )
+
+java_test(
+    name = "AesCmacProtoSerializationTest",
+    size = "small",
+    srcs = ["AesCmacProtoSerializationTest.java"],
+    deps = [
+        "//proto:aes_cmac_java_proto",
+        "//proto:tink_java_proto",
+        "//src/main/java/com/google/crypto/tink:insecure_secret_key_access",
+        "//src/main/java/com/google/crypto/tink:key",
+        "//src/main/java/com/google/crypto/tink:parameters",
+        "//src/main/java/com/google/crypto/tink/internal:mutable_serialization_registry",
+        "//src/main/java/com/google/crypto/tink/internal:proto_key_serialization",
+        "//src/main/java/com/google/crypto/tink/internal:proto_parameters_serialization",
+        "//src/main/java/com/google/crypto/tink/internal/testing:asserts",
+        "//src/main/java/com/google/crypto/tink/internal/testing:key_with_serialization",
+        "//src/main/java/com/google/crypto/tink/internal/testing:parameters_with_serialization",
+        "//src/main/java/com/google/crypto/tink/mac:aes_cmac_key",
+        "//src/main/java/com/google/crypto/tink/mac:aes_cmac_parameters",
+        "//src/main/java/com/google/crypto/tink/mac:aes_cmac_proto_serialization",
+        "//src/main/java/com/google/crypto/tink/util:secret_bytes",
+        "@com_google_protobuf//:protobuf_javalite",
+        "@maven//:com_google_code_findbugs_jsr305",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)

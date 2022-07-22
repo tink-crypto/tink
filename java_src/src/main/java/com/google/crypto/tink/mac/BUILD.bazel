@@ -317,3 +317,51 @@ android_library(
     name = "chunked_mac_verification-android",
     srcs = ["ChunkedMacVerification.java"],
 )
+
+java_library(
+    name = "aes_cmac_proto_serialization",
+    srcs = ["AesCmacProtoSerialization.java"],
+    deps = [
+        ":aes_cmac_key",
+        ":aes_cmac_parameters",
+        "//proto:aes_cmac_java_proto",
+        "//proto:tink_java_proto",
+        "//src/main/java/com/google/crypto/tink:accesses_partial_key",
+        "//src/main/java/com/google/crypto/tink:secret_key_access",
+        "//src/main/java/com/google/crypto/tink/internal:key_parser",
+        "//src/main/java/com/google/crypto/tink/internal:key_serializer",
+        "//src/main/java/com/google/crypto/tink/internal:mutable_serialization_registry",
+        "//src/main/java/com/google/crypto/tink/internal:parameters_parser",
+        "//src/main/java/com/google/crypto/tink/internal:parameters_serializer",
+        "//src/main/java/com/google/crypto/tink/internal:proto_key_serialization",
+        "//src/main/java/com/google/crypto/tink/internal:proto_parameters_serialization",
+        "//src/main/java/com/google/crypto/tink/util:bytes",
+        "//src/main/java/com/google/crypto/tink/util:secret_bytes",
+        "@com_google_protobuf//:protobuf_javalite",
+        "@maven//:com_google_code_findbugs_jsr305",
+    ],
+)
+
+android_library(
+    name = "aes_cmac_proto_serialization-android",
+    srcs = ["AesCmacProtoSerialization.java"],
+    deps = [
+        ":aes_cmac_key-android",
+        ":aes_cmac_parameters-android",
+        "//proto:aes_cmac_java_proto_lite",
+        "//proto:tink_java_proto_lite",
+        "//src/main/java/com/google/crypto/tink:accesses_partial_key-android",
+        "//src/main/java/com/google/crypto/tink:secret_key_access-android",
+        "//src/main/java/com/google/crypto/tink/internal:key_parser-android",
+        "//src/main/java/com/google/crypto/tink/internal:key_serializer-android",
+        "//src/main/java/com/google/crypto/tink/internal:mutable_serialization_registry-android",
+        "//src/main/java/com/google/crypto/tink/internal:parameters_parser-android",
+        "//src/main/java/com/google/crypto/tink/internal:parameters_serializer-android",
+        "//src/main/java/com/google/crypto/tink/internal:proto_key_serialization-android",
+        "//src/main/java/com/google/crypto/tink/internal:proto_parameters_serialization-android",
+        "//src/main/java/com/google/crypto/tink/util:bytes-android",
+        "//src/main/java/com/google/crypto/tink/util:secret_bytes-android",
+        "@com_google_protobuf//:protobuf_javalite",
+        "@maven//:com_google_code_findbugs_jsr305",
+    ],
+)
