@@ -130,6 +130,7 @@ java_test(
         "//src/main/java/com/google/crypto/tink/hybrid/internal:hpke_kem",
         "//src/main/java/com/google/crypto/tink/hybrid/internal:hpke_primitive_factory",
         "//src/main/java/com/google/crypto/tink/hybrid/internal:hpke_util",
+        "//src/main/java/com/google/crypto/tink/hybrid/internal:nist_curves_hpke_kem",
         "//src/main/java/com/google/crypto/tink/hybrid/internal:x25519_hpke_kem",
         "@maven//:com_google_truth_truth",
         "@maven//:junit_junit",
