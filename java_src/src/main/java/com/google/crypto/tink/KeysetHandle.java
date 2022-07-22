@@ -118,46 +118,57 @@ public final class KeysetHandle {
     }
   }
 
-  private KeysetHandle.Entry entryByIndex(int i) {
-    Keyset.Key protoKey = keyset.getKey(i);
+  private static ProtoKeySerialization toProtoKeySerialization(Keyset.Key protoKey) {
     int id = protoKey.getKeyId();
-
     @Nullable
     Integer idRequirement = protoKey.getOutputPrefixType() == OutputPrefixType.RAW ? null : id;
-    ProtoKeySerialization protoKeySerialization;
     try {
-      protoKeySerialization =
-          ProtoKeySerialization.create(
-              protoKey.getKeyData().getTypeUrl(),
-              protoKey.getKeyData().getValue(),
-              protoKey.getKeyData().getKeyMaterialType(),
-              protoKey.getOutputPrefixType(),
-              idRequirement);
+      return ProtoKeySerialization.create(
+          protoKey.getKeyData().getTypeUrl(),
+          protoKey.getKeyData().getValue(),
+          protoKey.getKeyData().getKeyMaterialType(),
+          protoKey.getOutputPrefixType(),
+          idRequirement);
     } catch (GeneralSecurityException e) {
       // Cannot happen -- this only happens if the idRequirement doesn't match OutputPrefixType
       throw new IllegalStateException("Creating a protokey serialization failed", e);
     }
-    Key key;
+  }
+
+  /**
+   * Returns a Key object from a protoKeySerialization, even if no parser has been registerd.
+   *
+   * <p>Falling back is useful because we want users to be able to call {@code #getAt} even for key
+   * types for which we did not yet register a parser; in this case we simply fall back to return a
+   * LegacyProtoKey.
+   */
+  private static Key parseWithLegacyFallback(ProtoKeySerialization protoKeySerialization) {
     try {
-      key =
-          MutableSerializationRegistry.globalInstance()
-              .parseKey(protoKeySerialization, InsecureSecretKeyAccess.get());
+      return MutableSerializationRegistry.globalInstance()
+          .parseKey(protoKeySerialization, InsecureSecretKeyAccess.get());
     } catch (GeneralSecurityException e) {
       try {
-        key = new LegacyProtoKey(protoKeySerialization, InsecureSecretKeyAccess.get());
+        return new LegacyProtoKey(protoKeySerialization, InsecureSecretKeyAccess.get());
       } catch (GeneralSecurityException e2) {
         // Cannot happen -- this only throws if we have no access.
         throw new IllegalStateException("Creating a LegacyProtoKey failed", e2);
       }
     }
-    KeyStatus status;
+  }
+
+  private KeysetHandle.Entry entryByIndex(int i) {
+    Keyset.Key protoKey = keyset.getKey(i);
+    int id = protoKey.getKeyId();
+
+    ProtoKeySerialization protoKeySerialization = toProtoKeySerialization(protoKey);
+    Key key = parseWithLegacyFallback(protoKeySerialization);
     try {
-      status = parseStatus(protoKey.getStatus());
+      return new KeysetHandle.Entry(
+          key, parseStatus(protoKey.getStatus()), id, id == keyset.getPrimaryKeyId());
     } catch (GeneralSecurityException e) {
-      // Possible if a status is wrongly set
-      throw new IllegalStateException("Parsing a status failed", e);
+      // Cannot happen -- this only happens if protoKey.getStatus() fails.
+      throw new IllegalStateException("Creating an entry failed", e);
     }
-    return new KeysetHandle.Entry(key, status, id, id == keyset.getPrimaryKeyId());
   }
 
   private final Keyset keyset;
