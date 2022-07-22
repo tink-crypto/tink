@@ -266,23 +266,6 @@ java_test(
 )
 
 java_test(
-    name = "AeadIntegrationTest",
-    size = "small",
-    srcs = ["AeadIntegrationTest.java"],
-    deps = [
-        "//proto:tink_java_proto",
-        "//src/main/java/com/google/crypto/tink:aead",
-        "//src/main/java/com/google/crypto/tink:crypto_format",
-        "//src/main/java/com/google/crypto/tink:registry_cluster",
-        "//src/main/java/com/google/crypto/tink/aead:aead_config",
-        "//src/main/java/com/google/crypto/tink/daead:deterministic_aead_config",
-        "//src/main/java/com/google/crypto/tink/subtle:random",
-        "//src/main/java/com/google/crypto/tink/testing:test_util",
-        "@maven//:junit_junit",
-    ],
-)
-
-java_test(
     name = "XChaCha20Poly1305KeyManagerTest",
     size = "small",
     srcs = ["XChaCha20Poly1305KeyManagerTest.java"],
@@ -298,6 +281,24 @@ java_test(
         "//src/main/java/com/google/crypto/tink/testing:key_type_manager_test_util",
         "//src/main/java/com/google/crypto/tink/testing:test_util",
         "@com_google_protobuf//:protobuf_javalite",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "AeadTest",
+    size = "small",
+    srcs = ["AeadTest.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink:aead",
+        "//src/main/java/com/google/crypto/tink:cleartext_keyset_handle",
+        "//src/main/java/com/google/crypto/tink:deterministic_aead",
+        "//src/main/java/com/google/crypto/tink:json_keyset_reader",
+        "//src/main/java/com/google/crypto/tink:key_templates",
+        "//src/main/java/com/google/crypto/tink:registry_cluster",
+        "//src/main/java/com/google/crypto/tink/aead:aead_config",
+        "//src/main/java/com/google/crypto/tink/daead:deterministic_aead_config",
         "@maven//:com_google_truth_truth",
         "@maven//:junit_junit",
     ],
