@@ -151,6 +151,32 @@ cc_library(
     ],
 )
 
+cc_library(
+    name = "failing_mac",
+    testonly = 1,
+    srcs = ["failing_mac.cc"],
+    hdrs = ["failing_mac.h"],
+    include_prefix = "tink/mac",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//:mac",
+        "@com_google_absl//absl/strings",
+    ],
+)
+
+cc_library(
+    name = "aes_cmac_parameters",
+    srcs = ["aes_cmac_parameters.cc"],
+    hdrs = ["aes_cmac_parameters.h"],
+    include_prefix = "tink/mac",
+    deps = [
+        ":mac_parameters",
+        "//:crypto_format",
+        "//util:status",
+        "//util:statusor",
+    ],
+)
+
 # tests
 
 cc_test(
@@ -276,19 +302,6 @@ cc_test(
     ],
 )
 
-cc_library(
-    name = "failing_mac",
-    testonly = 1,
-    srcs = ["failing_mac.cc"],
-    hdrs = ["failing_mac.h"],
-    include_prefix = "tink/mac",
-    visibility = ["//visibility:public"],
-    deps = [
-        "//:mac",
-        "@com_google_absl//absl/strings",
-    ],
-)
-
 cc_test(
     name = "failing_mac_test",
     srcs = ["failing_mac_test.cc"],
@@ -296,6 +309,18 @@ cc_test(
         ":failing_mac",
         "//util:test_matchers",
         "@com_google_absl//absl/status",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "aes_cmac_parameters_test",
+    size = "small",
+    srcs = ["aes_cmac_parameters_test.cc"],
+    deps = [
+        ":aes_cmac_parameters",
+        "//util:statusor",
+        "//util:test_matchers",
         "@com_google_googletest//:gtest_main",
     ],
 )

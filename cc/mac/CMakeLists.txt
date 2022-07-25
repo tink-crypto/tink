@@ -143,6 +143,28 @@ tink_cc_library(
     tink::util::statusor
 )
 
+tink_cc_library(
+  NAME failing_mac
+  SRCS
+    failing_mac.cc
+    failing_mac.h
+  DEPS
+    absl::strings
+    tink::core::mac
+)
+
+tink_cc_library(
+  NAME aes_cmac_parameters
+  SRCS
+    aes_cmac_parameters.cc
+    aes_cmac_parameters.h
+  DEPS
+    tink::mac::mac_parameters
+    tink::core::crypto_format
+    tink::util::status
+    tink::util::statusor
+)
+
 # tests
 
 tink_cc_test(
@@ -261,16 +283,6 @@ tink_cc_test(
     tink::proto::hmac_cc_proto
 )
 
-tink_cc_library(
-  NAME failing_mac
-  SRCS
-    failing_mac.cc
-    failing_mac.h
-  DEPS
-    absl::strings
-    tink::core::mac
-)
-
 tink_cc_test(
   NAME failing_mac_test
   SRCS
@@ -279,5 +291,16 @@ tink_cc_test(
     tink::mac::failing_mac
     gmock
     absl::status
+    tink::util::test_matchers
+)
+
+tink_cc_test(
+  NAME aes_cmac_parameters_test
+  SRCS
+    aes_cmac_parameters_test.cc
+  DEPS
+    tink::mac::aes_cmac_parameters
+    gmock
+    tink::util::statusor
     tink::util::test_matchers
 )
