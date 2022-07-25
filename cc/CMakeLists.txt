@@ -1,5 +1,4 @@
 add_subdirectory(aead)
-add_subdirectory(chunkedmac)
 add_subdirectory(config)
 add_subdirectory(daead)
 add_subdirectory(hybrid)
