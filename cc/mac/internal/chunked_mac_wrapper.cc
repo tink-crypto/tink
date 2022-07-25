@@ -14,7 +14,7 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "tink/chunkedmac/internal/chunked_mac_wrapper.h"
+#include "tink/mac/internal/chunked_mac_wrapper.h"
 
 #include <memory>
 #include <string>

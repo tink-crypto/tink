@@ -17,11 +17,11 @@
 #include "tink/mac/mac_config.h"
 
 #include "absl/memory/memory.h"
-#include "tink/chunkedmac/internal/chunked_mac_wrapper.h"
 #include "tink/config/config_util.h"
 #include "tink/config/tink_fips.h"
 #include "tink/mac/aes_cmac_key_manager.h"
 #include "tink/mac/hmac_key_manager.h"
+#include "tink/mac/internal/chunked_mac_wrapper.h"
 #include "tink/mac/mac_wrapper.h"
 #include "tink/registry.h"
 #include "tink/util/status.h"

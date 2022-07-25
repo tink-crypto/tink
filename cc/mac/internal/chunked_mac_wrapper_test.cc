@@ -14,7 +14,7 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "tink/chunkedmac/internal/chunked_mac_wrapper.h"
+#include "tink/mac/internal/chunked_mac_wrapper.h"
 
 #include <memory>
 #include <string>
@@ -24,7 +24,7 @@
 #include "gtest/gtest.h"
 #include "absl/strings/str_cat.h"
 #include "tink/chunked_mac.h"
-#include "tink/chunkedmac/internal/chunked_mac_impl.h"
+#include "tink/mac/internal/chunked_mac_impl.h"
 #include "tink/subtle/mac/stateful_mac.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"

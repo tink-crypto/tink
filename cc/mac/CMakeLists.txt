@@ -1,5 +1,7 @@
 tink_module(mac)
 
+add_subdirectory(internal)
+
 tink_cc_library(
   NAME mac_wrapper
   SRCS
@@ -33,9 +35,9 @@ tink_cc_library(
     absl::core_headers
     absl::memory
     tink::core::registry
-    tink::chunkedmac::internal::chunked_mac_wrapper
     tink::config::config_util
     tink::config::tink_fips
+    tink::mac::internal::chunked_mac_wrapper
     tink::util::status
     tink::proto::config_cc_proto
 )
@@ -80,7 +82,7 @@ tink_cc_library(
     tink::core::key_type_manager
     tink::core::key_manager
     tink::core::mac
-    tink::chunkedmac::internal::chunked_mac_impl
+    tink::mac::internal::chunked_mac_impl
     tink::subtle::aes_cmac_boringssl
     tink::subtle::random
     tink::util::constants
@@ -106,7 +108,7 @@ tink_cc_library(
     tink::core::chunked_mac
     tink::core::key_type_manager
     tink::core::mac
-    tink::chunkedmac::internal::chunked_mac_impl
+    tink::mac::internal::chunked_mac_impl
     tink::subtle::hmac_boringssl
     tink::subtle::random
     tink::util::constants
