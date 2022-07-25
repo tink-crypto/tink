@@ -1093,10 +1093,13 @@ const SphincsHelperPqclean &GetSphincsHelperPqclean(int hash_type, int variant,
   static std::vector<std::unique_ptr<SphincsHelperPqclean>>
       *sphincs_helper_pqclean = new std::vector(GetSphincsPqcleanHelperArray());
 
+  // Note that we have to adjust the enum values for hash_type, variant and
+  // signature_length to start at 0. In the proto the 0 entry is for UNSPECIFIED
+  // values, but here we require the valid enum values to start at index 0.
   return *sphincs_helper_pqclean->at(
-      hash_type * NUM_VARIANTS * NUM_KEY_SIZES * NUM_SIG_LENGTHS +
-      key_size * NUM_VARIANTS * NUM_SIG_LENGTHS + variant * NUM_SIG_LENGTHS +
-      signature_length);
+      (hash_type - 1) * NUM_VARIANTS * NUM_KEY_SIZES * NUM_SIG_LENGTHS +
+      key_size * NUM_VARIANTS * NUM_SIG_LENGTHS +
+      (variant - 1) * NUM_SIG_LENGTHS + (signature_length - 1));
 }
 
 }  // namespace subtle

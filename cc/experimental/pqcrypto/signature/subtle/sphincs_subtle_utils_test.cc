@@ -163,7 +163,7 @@ TEST_P(SphincsUtilsTest, ValidParams) {
 
 TEST(SphincsUtilsTest, InvalidHashType) {
     SphincsParamsPqclean params = {
-      .hash_type = SphincsHashType::UNKNOWN_HASH_TYPE,
+      .hash_type = SphincsHashType::HASH_TYPE_UNSPECIFIED,
       .variant = SphincsVariant::ROBUST,
       .sig_length_type = SphincsSignatureType::FAST_SIGNING,
       .private_key_size = kSphincsPrivateKeySize64,
@@ -175,7 +175,7 @@ TEST(SphincsUtilsTest, InvalidHashType) {
 TEST(SphincsUtilsTest, InvalidVariant) {
     SphincsParamsPqclean params = {
       .hash_type = SphincsHashType::HARAKA,
-      .variant = SphincsVariant::UNKNOWN_VARIANT,
+      .variant = SphincsVariant::VARIANT_UNSPECIFIED,
       .sig_length_type = SphincsSignatureType::FAST_SIGNING,
       .private_key_size = kSphincsPrivateKeySize64,
   };
@@ -187,7 +187,7 @@ TEST(SphincsUtilsTest, InvalidSignatureType) {
     SphincsParamsPqclean params = {
       .hash_type = SphincsHashType::HARAKA,
       .variant = SphincsVariant::ROBUST,
-      .sig_length_type = SphincsSignatureType::UNKNOWN_SIG_TYPE,
+      .sig_length_type = SphincsSignatureType::SIG_TYPE_UNSPECIFIED,
       .private_key_size = kSphincsPrivateKeySize64,
   };
 

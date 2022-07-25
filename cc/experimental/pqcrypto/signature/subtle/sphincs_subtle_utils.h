@@ -40,22 +40,22 @@ const int kSphincsPublicKeySize48 = 48;
 const int kSphincsPublicKeySize64 = 64;
 
 enum SphincsHashType {
-  HARAKA = 0,
-  SHA256 = 1,
-  SHAKE256 = 2,
-  UNKNOWN_HASH_TYPE = 3,
+  HASH_TYPE_UNSPECIFIED = 0,
+  HARAKA = 1,
+  SHA256 = 2,
+  SHAKE256 = 3,
 };
 
 enum SphincsVariant {
-  ROBUST = 0,
-  SIMPLE = 1,
-  UNKNOWN_VARIANT = 3,
+  VARIANT_UNSPECIFIED = 0,
+  ROBUST = 1,
+  SIMPLE = 2,
 };
 
 enum SphincsSignatureType {
-  FAST_SIGNING = 0,
-  SMALL_SIGNATURE = 1,
-  UNKNOWN_SIG_TYPE = 3,
+  SIG_TYPE_UNSPECIFIED = 0,
+  FAST_SIGNING = 1,
+  SMALL_SIGNATURE = 2,
 };
 
 struct SphincsParamsPqclean {

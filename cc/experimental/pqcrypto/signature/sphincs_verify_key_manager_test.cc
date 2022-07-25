@@ -149,7 +149,7 @@ TEST_P(SphincsVerifyKeyManagerTest, InvalidParam) {
   params->set_key_size(test_case.private_key_size);
   params->set_hash_type(test_case.hash_type);
   params->set_variant(test_case.variant);
-  params->set_sig_length_type(SphincsSignatureType::UNKNOWN_SIG_TYPE);
+  params->set_sig_length_type(SphincsSignatureType::SIG_TYPE_UNSPECIFIED);
 
   EXPECT_THAT(SphincsVerifyKeyManager().ValidateParams(*params), Not(IsOk()));
 }
@@ -167,8 +167,9 @@ TEST_P(SphincsVerifyKeyManagerTest, PublicKeyValid) {
 
 TEST(SphincsVerifyKeyManagerTest, PublicKeyInvalidParams) {
   StatusOr<SphincsPublicKey> public_key = CreateValidPublicKey(
-      subtle::kSphincsPrivateKeySize64, SphincsHashType::UNKNOWN_HASH_TYPE,
-      SphincsVariant::UNKNOWN_VARIANT, SphincsSignatureType::UNKNOWN_SIG_TYPE);
+      subtle::kSphincsPrivateKeySize64, SphincsHashType::HASH_TYPE_UNSPECIFIED,
+      SphincsVariant::VARIANT_UNSPECIFIED,
+      SphincsSignatureType::SIG_TYPE_UNSPECIFIED);
   EXPECT_THAT(public_key, Not(IsOk()));
 }
 

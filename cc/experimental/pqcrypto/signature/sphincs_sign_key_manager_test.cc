@@ -139,8 +139,9 @@ TEST_P(SphincsSignKeyManagerTest, ValidKeyFormat) {
 
 TEST(SphincsSignKeyManagerTest, InvalidKeyFormat) {
   StatusOr<SphincsKeyFormat> key_format = CreateValidKeyFormat(
-      subtle::kSphincsPrivateKeySize64, SphincsHashType::UNKNOWN_HASH_TYPE,
-      SphincsVariant::UNKNOWN_VARIANT, SphincsSignatureType::UNKNOWN_SIG_TYPE);
+      subtle::kSphincsPrivateKeySize64, SphincsHashType::HASH_TYPE_UNSPECIFIED,
+      SphincsVariant::VARIANT_UNSPECIFIED,
+      SphincsSignatureType::SIG_TYPE_UNSPECIFIED);
   ASSERT_THAT(key_format, IsOk());
 
   EXPECT_THAT(SphincsSignKeyManager().ValidateKeyFormat(*key_format),
@@ -183,8 +184,9 @@ TEST_P(SphincsSignKeyManagerTest, PrivateKeyWrongVersion) {
 
 TEST(SphincsSignKeyManagerTest, CreateKeyInvalidParams) {
   StatusOr<SphincsKeyFormat> key_format = CreateValidKeyFormat(
-      subtle::kSphincsPrivateKeySize64, SphincsHashType::UNKNOWN_HASH_TYPE,
-      SphincsVariant::UNKNOWN_VARIANT, SphincsSignatureType::UNKNOWN_SIG_TYPE);
+      subtle::kSphincsPrivateKeySize64, SphincsHashType::HASH_TYPE_UNSPECIFIED,
+      SphincsVariant::VARIANT_UNSPECIFIED,
+      SphincsSignatureType::SIG_TYPE_UNSPECIFIED);
   ASSERT_THAT(key_format, IsOk());
 
   StatusOr<SphincsPrivateKey> private_key =
