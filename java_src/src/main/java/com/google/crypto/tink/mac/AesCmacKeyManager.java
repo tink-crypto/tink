@@ -160,7 +160,6 @@ public final class AesCmacKeyManager extends KeyTypeManager<AesCmacKey> {
 
   public static void register(boolean newKeyAllowed) throws GeneralSecurityException {
     Registry.registerKeyManager(new AesCmacKeyManager(), newKeyAllowed);
-    AesCmacProtoSerialization.register();
   }
 
   /**

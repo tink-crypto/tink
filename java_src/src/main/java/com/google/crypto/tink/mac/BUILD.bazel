@@ -158,7 +158,6 @@ java_library(
     name = "aes_cmac_key_manager",
     srcs = ["AesCmacKeyManager.java"],
     deps = [
-        ":aes_cmac_proto_serialization",
         "//proto:aes_cmac_java_proto",
         "//proto:tink_java_proto",
         "//src/main/java/com/google/crypto/tink:key_template",
@@ -178,7 +177,6 @@ android_library(
     name = "aes_cmac_key_manager-android",
     srcs = ["AesCmacKeyManager.java"],
     deps = [
-        ":aes_cmac_proto_serialization-android",
         "//proto:aes_cmac_java_proto_lite",
         "//proto:tink_java_proto_lite",
         "//src/main/java/com/google/crypto/tink:key_template-android",
