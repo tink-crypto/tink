@@ -537,6 +537,7 @@ cc_library(
         "//util:errors",
         "//util:status",
         "//util:statusor",
+        "@com_google_absl//absl/container:flat_hash_map",
         "@com_google_absl//absl/status",
     ],
 )

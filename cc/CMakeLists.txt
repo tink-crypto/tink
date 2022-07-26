@@ -496,6 +496,7 @@ tink_cc_library(
   DEPS
     tink::core::keyset_handle
     tink::core::keyset_reader
+    absl::flat_hash_map
     absl::status
     tink::util::errors
     tink::util::status
