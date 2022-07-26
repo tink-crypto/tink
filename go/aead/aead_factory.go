@@ -103,14 +103,10 @@ func (a *wrappedAead) Encrypt(plaintext, associatedData []byte) ([]byte, error) 
 	}
 	ct, err := p.Encrypt(plaintext, associatedData)
 	if err != nil {
-		if a.encLogger != nil {
-			a.encLogger.LogFailure()
-		}
+		a.encLogger.LogFailure()
 		return nil, err
 	}
-	if a.encLogger != nil {
-		a.encLogger.Log(primary.KeyID, len(plaintext))
-	}
+	a.encLogger.Log(primary.KeyID, len(plaintext))
 	return append([]byte(primary.Prefix), ct...), nil
 }
 
@@ -133,9 +129,7 @@ func (a *wrappedAead) Decrypt(ciphertext, associatedData []byte) ([]byte, error)
 
 				pt, err := p.Decrypt(ctNoPrefix, associatedData)
 				if err == nil {
-					if a.decLogger != nil {
-						a.decLogger.Log(entries[i].KeyID, len(ctNoPrefix))
-					}
+					a.decLogger.Log(entries[i].KeyID, len(ctNoPrefix))
 					return pt, nil
 				}
 			}
@@ -152,16 +146,12 @@ func (a *wrappedAead) Decrypt(ciphertext, associatedData []byte) ([]byte, error)
 
 			pt, err := p.Decrypt(ciphertext, associatedData)
 			if err == nil {
-				if a.decLogger != nil {
-					a.decLogger.Log(entries[i].KeyID, len(ciphertext))
-				}
+				a.decLogger.Log(entries[i].KeyID, len(ciphertext))
 				return pt, nil
 			}
 		}
 	}
 	// nothing worked
-	if a.decLogger != nil {
-		a.decLogger.LogFailure()
-	}
+	a.decLogger.LogFailure()
 	return nil, fmt.Errorf("aead_factory: decryption failed")
 }

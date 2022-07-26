@@ -27,14 +27,34 @@ import (
 
 var (
 	monitoringClientMu sync.RWMutex
-	monitoringClient   monitoring.Client = nil
+	monitoringClient   monitoring.Client = defaultClient
 )
+
+type doNothingLogger struct{}
+
+var _ monitoring.Logger = (*doNothingLogger)(nil)
+
+func (l *doNothingLogger) Log(uint32, int) {}
+
+func (l *doNothingLogger) LogFailure() {}
+
+var defaultLogger = &doNothingLogger{}
+
+type doNothingClient struct{}
+
+var _ monitoring.Client = (*doNothingClient)(nil)
+
+func (c *doNothingClient) NewLogger(*monitoring.Context) (monitoring.Logger, error) {
+	return defaultLogger, nil
+}
+
+var defaultClient = &doNothingClient{}
 
 // RegisterMonitoringClient registers a client that can create loggers.
 func RegisterMonitoringClient(client monitoring.Client) error {
 	monitoringClientMu.Lock()
 	defer monitoringClientMu.Unlock()
-	if monitoringClient != nil {
+	if monitoringClient != nil && monitoringClient != defaultClient {
 		return fmt.Errorf("monitoring client is already registered")
 	}
 	monitoringClient = client
@@ -45,12 +65,10 @@ func RegisterMonitoringClient(client monitoring.Client) error {
 func ClearMonitoringClient() {
 	monitoringClientMu.Lock()
 	defer monitoringClientMu.Unlock()
-	monitoringClient = nil
+	monitoringClient = defaultClient
 }
 
 // GetMonitoringClient returns the registered monitoring client.
-// The return value of this function can be nil, indicating there
-// isn't any monitoring client registered.
 func GetMonitoringClient() monitoring.Client {
 	return monitoringClient
 }

@@ -48,21 +48,38 @@ func TestRegisterTwiceFailsMonitoringClient(t *testing.T) {
 	}
 }
 
+func TestDefaultMonitoringLogger(t *testing.T) {
+	defaultClient := internalregistry.GetMonitoringClient()
+	defaultLogger, err := defaultClient.NewLogger(nil)
+	if err != nil {
+		t.Fatalf("defaultClient.NewLogger() err = %v, want nil", err)
+	}
+	defaultLogger.Log(0, 0)
+	defaultLogger.LogFailure()
+}
+
 func TestClearMonitoringClient(t *testing.T) {
+	defer internalregistry.ClearMonitoringClient()
 	fakeClient := &fakemonitoring.Client{
 		Name: "fake-monitor-client-1",
 	}
+	defaultClient := internalregistry.GetMonitoringClient()
 	if err := internalregistry.RegisterMonitoringClient(fakeClient); err != nil {
 		t.Fatalf("internalregistry.RegisterMonitoringClient() err = %v, want nil", err)
 	}
-	internalregistry.ClearMonitoringClient()
 	got := internalregistry.GetMonitoringClient()
-	if got != nil {
-		t.Errorf("internalregistry.GetMonitoringClient() = %v, want nil", got)
+	if got != fakeClient {
+		t.Errorf("internalregistry.GetMonitoringClient() = %v, want %v", got, fakeClient)
+	}
+	internalregistry.ClearMonitoringClient()
+	got = internalregistry.GetMonitoringClient()
+	if got != defaultClient {
+		t.Errorf("internalregistry.GetMonitoringClient() = %v, want %v", got, defaultClient)
 	}
 }
 
 func TestClearReRegisterMonitoringClient(t *testing.T) {
+	defer internalregistry.ClearMonitoringClient()
 	fakeClient := &fakemonitoring.Client{
 		Name: "fake-monitor-client-1",
 	}
@@ -70,11 +87,14 @@ func TestClearReRegisterMonitoringClient(t *testing.T) {
 		t.Fatalf("internalregistry.RegisterMonitoringClient() err = %v, want nil", err)
 	}
 	internalregistry.ClearMonitoringClient()
-	got := internalregistry.GetMonitoringClient()
-	if got != nil {
-		t.Fatalf("internalregistry.GetMonitoringClient() = %v, want nil", got)
+	fakeClient2 := &fakemonitoring.Client{
+		Name: "fake-monitor-client-2",
 	}
-	if err := internalregistry.RegisterMonitoringClient(fakeClient); err != nil {
+	if err := internalregistry.RegisterMonitoringClient(fakeClient2); err != nil {
 		t.Errorf("internalregistry.RegisterMonitoringClient() err = %v, want nil", err)
+	}
+	got := internalregistry.GetMonitoringClient()
+	if got != fakeClient2 {
+		t.Errorf("internalregistry.GetMonitoringClient() = %v, want %v", got, fakeClient2)
 	}
 }
