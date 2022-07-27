@@ -161,7 +161,7 @@ TEST(AesGcmKeyManagerTest, Create16ByteKey) {
 
   StatusOr<AesGcmKey> key_or = AesGcmKeyManager().CreateKey(format);
 
-  ASSERT_THAT(key_or.status(), IsOk());
+  ASSERT_THAT(key_or, IsOk());
   EXPECT_THAT(key_or.value().key_value().size(), Eq(format.key_size()));
 }
 
@@ -171,7 +171,7 @@ TEST(AesGcmKeyManagerTest, Create32ByteKey) {
 
   StatusOr<AesGcmKey> key_or = AesGcmKeyManager().CreateKey(format);
 
-  ASSERT_THAT(key_or.status(), IsOk());
+  ASSERT_THAT(key_or, IsOk());
   EXPECT_THAT(key_or.value().key_value().size(), Eq(format.key_size()));
 }
 
@@ -179,17 +179,17 @@ TEST(AesGcmKeyManagerTest, CreateAead) {
   AesGcmKeyFormat format;
   format.set_key_size(32);
   StatusOr<AesGcmKey> key_or = AesGcmKeyManager().CreateKey(format);
-  ASSERT_THAT(key_or.status(), IsOk());
+  ASSERT_THAT(key_or, IsOk());
 
   StatusOr<std::unique_ptr<Aead>> aead_or =
       AesGcmKeyManager().GetPrimitive<Aead>(key_or.value());
 
-  ASSERT_THAT(aead_or.status(), IsOk());
+  ASSERT_THAT(aead_or, IsOk());
 
   StatusOr<std::unique_ptr<Aead>> boring_ssl_aead_or =
       subtle::AesGcmBoringSsl::New(
           util::SecretDataFromStringView(key_or.value().key_value()));
-  ASSERT_THAT(boring_ssl_aead_or.status(), IsOk());
+  ASSERT_THAT(boring_ssl_aead_or, IsOk());
 
   ASSERT_THAT(EncryptThenDecrypt(*aead_or.value(), *boring_ssl_aead_or.value(),
                                  "message", "aad"),
@@ -200,17 +200,17 @@ TEST(AesGcmKeyManagerTest, CreateCordAead) {
   AesGcmKeyFormat format;
   format.set_key_size(32);
   StatusOr<AesGcmKey> key_or = AesGcmKeyManager().CreateKey(format);
-  ASSERT_THAT(key_or.status(), IsOk());
+  ASSERT_THAT(key_or, IsOk());
 
   StatusOr<std::unique_ptr<CordAead>> aead_or =
       AesGcmKeyManager().GetPrimitive<CordAead>(key_or.value());
 
-  ASSERT_THAT(aead_or.status(), IsOk());
+  ASSERT_THAT(aead_or, IsOk());
 
   StatusOr<std::unique_ptr<CordAead>> boring_ssl_aead_or =
       CordAesGcmBoringSsl::New(
           util::SecretDataFromStringView(key_or.value().key_value()));
-  ASSERT_THAT(boring_ssl_aead_or.status(), IsOk());
+  ASSERT_THAT(boring_ssl_aead_or, IsOk());
 
   ASSERT_THAT(EncryptThenDecrypt(*aead_or.value(), *boring_ssl_aead_or.value(),
                                  "message", "aad"),
@@ -227,7 +227,7 @@ TEST(AesGcmKeyManagerTest, DeriveShortKey) {
 
   StatusOr<AesGcmKey> key_or =
       AesGcmKeyManager().DeriveKey(format, &input_stream);
-  ASSERT_THAT(key_or.status(), IsOk());
+  ASSERT_THAT(key_or, IsOk());
   EXPECT_THAT(key_or.value().key_value(), Eq("0123456789abcdef"));
 }
 
@@ -241,7 +241,7 @@ TEST(AesGcmKeyManagerTest, DeriveLongKey) {
 
   StatusOr<AesGcmKey> key_or =
       AesGcmKeyManager().DeriveKey(format, &input_stream);
-  ASSERT_THAT(key_or.status(), IsOk());
+  ASSERT_THAT(key_or, IsOk());
   EXPECT_THAT(key_or.value().key_value(),
               Eq("0123456789abcdef0123456789abcdef"));
 }

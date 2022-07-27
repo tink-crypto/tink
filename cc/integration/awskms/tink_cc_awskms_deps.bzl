@@ -53,11 +53,11 @@ def tink_cc_awskms_deps():
         )
 
     if not native.existing_rule("zlib"):
-        # Releaes from 2017-01-15; still most recent release on 2019-10-18
+        # Releaes from 2022-03-27.
         http_archive(
             name = "zlib",
-            url = "https://mirror.bazel.build/zlib.net/zlib-1.2.11.tar.gz",
-            sha256 = "c3e5e9fdd5004dcb542feda5ee4f0ff0744628baf8ed2dd5d66f8ca1197cb1a1",
-            strip_prefix = "zlib-1.2.11",
+            url = "https://mirror.bazel.build/zlib.net/zlib-1.2.12.tar.gz",
+            sha256 = "91844808532e5ce316b3c010929493c0244f3d37593afd6de04f71821d5136d9",
+            strip_prefix = "zlib-1.2.12",
             build_file = "@tink_cc_awskms//:third_party/zlib.BUILD.bazel",
         )

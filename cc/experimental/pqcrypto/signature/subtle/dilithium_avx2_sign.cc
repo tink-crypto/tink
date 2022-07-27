@@ -32,12 +32,12 @@
 #include "tink/util/statusor.h"
 
 extern "C" {
-#include "third_party/pqclean/crypto_sign/dilithium2/avx2/api.h"
-#include "third_party/pqclean/crypto_sign/dilithium2aes/avx2/api.h"
-#include "third_party/pqclean/crypto_sign/dilithium3/avx2/api.h"
-#include "third_party/pqclean/crypto_sign/dilithium3aes/avx2/api.h"
-#include "third_party/pqclean/crypto_sign/dilithium5/avx2/api.h"
-#include "third_party/pqclean/crypto_sign/dilithium5aes/avx2/api.h"
+#include "third_party/pqclean/crypto_sign/dilithium2/api.h"
+#include "third_party/pqclean/crypto_sign/dilithium2aes/api.h"
+#include "third_party/pqclean/crypto_sign/dilithium3/api.h"
+#include "third_party/pqclean/crypto_sign/dilithium3aes/api.h"
+#include "third_party/pqclean/crypto_sign/dilithium5/api.h"
+#include "third_party/pqclean/crypto_sign/dilithium5aes/api.h"
 }
 
 namespace crypto {
@@ -52,17 +52,17 @@ util::StatusOr<std::unique_ptr<PublicKeySign>> DilithiumAvx2Sign::New(
 
   int32_t key_size = private_key.GetKeyData().size();
 
-  if (key_size != PQCLEAN_DILITHIUM2_AVX2_CRYPTO_SECRETKEYBYTES &&
-      key_size != PQCLEAN_DILITHIUM3_AVX2_CRYPTO_SECRETKEYBYTES &&
-      key_size != PQCLEAN_DILITHIUM5_AVX2_CRYPTO_SECRETKEYBYTES) {
+  if (key_size != PQCLEAN_DILITHIUM2_CRYPTO_SECRETKEYBYTES &&
+      key_size != PQCLEAN_DILITHIUM3_CRYPTO_SECRETKEYBYTES &&
+      key_size != PQCLEAN_DILITHIUM5_CRYPTO_SECRETKEYBYTES) {
     return util::Status(
         absl::StatusCode::kInvalidArgument,
         absl::StrFormat("Invalid private key size (%d). "
                         "The only valid sizes are %d, %d, %d.",
                         private_key.GetKeyData().size(),
-                        PQCLEAN_DILITHIUM2_AVX2_CRYPTO_SECRETKEYBYTES,
-                        PQCLEAN_DILITHIUM3_AVX2_CRYPTO_SECRETKEYBYTES,
-                        PQCLEAN_DILITHIUM5_AVX2_CRYPTO_SECRETKEYBYTES));
+                        PQCLEAN_DILITHIUM2_CRYPTO_SECRETKEYBYTES,
+                        PQCLEAN_DILITHIUM3_CRYPTO_SECRETKEYBYTES,
+                        PQCLEAN_DILITHIUM5_CRYPTO_SECRETKEYBYTES));
   }
 
   return {absl::WrapUnique(new DilithiumAvx2Sign(std::move(private_key)))};
@@ -76,11 +76,11 @@ util::StatusOr<std::string> DilithiumAvx2Sign::Sign(
   int result = 1;
 
   switch (key_size) {
-    case PQCLEAN_DILITHIUM2_AVX2_CRYPTO_SECRETKEYBYTES: {
+    case PQCLEAN_DILITHIUM2_CRYPTO_SECRETKEYBYTES: {
       switch (private_key_.GetSeedExpansion()) {
         case DilithiumSeedExpansion::SEED_EXPANSION_AES: {
-          signature.resize(PQCLEAN_DILITHIUM2AES_AVX2_CRYPTO_BYTES, '0');
-          result = PQCLEAN_DILITHIUM2AES_AVX2_crypto_sign_signature(
+          signature.resize(PQCLEAN_DILITHIUM2AES_CRYPTO_BYTES, '0');
+          result = PQCLEAN_DILITHIUM2AES_crypto_sign_signature(
               reinterpret_cast<uint8_t *>(signature.data()), &sig_length,
               reinterpret_cast<const uint8_t *>(data.data()), data.size(),
               reinterpret_cast<const uint8_t *>(
@@ -88,8 +88,8 @@ util::StatusOr<std::string> DilithiumAvx2Sign::Sign(
           break;
         }
         case DilithiumSeedExpansion::SEED_EXPANSION_SHAKE: {
-          signature.resize(PQCLEAN_DILITHIUM2_AVX2_CRYPTO_BYTES, '0');
-          result = PQCLEAN_DILITHIUM2_AVX2_crypto_sign_signature(
+          signature.resize(PQCLEAN_DILITHIUM2_CRYPTO_BYTES, '0');
+          result = PQCLEAN_DILITHIUM2_crypto_sign_signature(
               reinterpret_cast<uint8_t *>(signature.data()), &sig_length,
               reinterpret_cast<const uint8_t *>(data.data()), data.size(),
               reinterpret_cast<const uint8_t *>(
@@ -104,11 +104,11 @@ util::StatusOr<std::string> DilithiumAvx2Sign::Sign(
       }
       break;
     }
-    case PQCLEAN_DILITHIUM3_AVX2_CRYPTO_SECRETKEYBYTES: {
+    case PQCLEAN_DILITHIUM3_CRYPTO_SECRETKEYBYTES: {
       switch (private_key_.GetSeedExpansion()) {
         case DilithiumSeedExpansion::SEED_EXPANSION_AES: {
-          signature.resize(PQCLEAN_DILITHIUM3AES_AVX2_CRYPTO_BYTES, '0');
-          result = PQCLEAN_DILITHIUM3AES_AVX2_crypto_sign_signature(
+          signature.resize(PQCLEAN_DILITHIUM3AES_CRYPTO_BYTES, '0');
+          result = PQCLEAN_DILITHIUM3AES_crypto_sign_signature(
               reinterpret_cast<uint8_t *>(signature.data()), &sig_length,
               reinterpret_cast<const uint8_t *>(data.data()), data.size(),
               reinterpret_cast<const uint8_t *>(
@@ -116,8 +116,8 @@ util::StatusOr<std::string> DilithiumAvx2Sign::Sign(
           break;
         }
         case DilithiumSeedExpansion::SEED_EXPANSION_SHAKE: {
-          signature.resize(PQCLEAN_DILITHIUM3_AVX2_CRYPTO_BYTES, '0');
-          result = PQCLEAN_DILITHIUM3_AVX2_crypto_sign_signature(
+          signature.resize(PQCLEAN_DILITHIUM3_CRYPTO_BYTES, '0');
+          result = PQCLEAN_DILITHIUM3_crypto_sign_signature(
               reinterpret_cast<uint8_t *>(signature.data()), &sig_length,
               reinterpret_cast<const uint8_t *>(data.data()), data.size(),
               reinterpret_cast<const uint8_t *>(
@@ -131,11 +131,11 @@ util::StatusOr<std::string> DilithiumAvx2Sign::Sign(
       }
       break;
     }
-    case PQCLEAN_DILITHIUM5_AVX2_CRYPTO_SECRETKEYBYTES: {
+    case PQCLEAN_DILITHIUM5_CRYPTO_SECRETKEYBYTES: {
       switch (private_key_.GetSeedExpansion()) {
         case DilithiumSeedExpansion::SEED_EXPANSION_AES: {
-          signature.resize(PQCLEAN_DILITHIUM5AES_AVX2_CRYPTO_BYTES, '0');
-          result = PQCLEAN_DILITHIUM5AES_AVX2_crypto_sign_signature(
+          signature.resize(PQCLEAN_DILITHIUM5AES_CRYPTO_BYTES, '0');
+          result = PQCLEAN_DILITHIUM5AES_crypto_sign_signature(
               reinterpret_cast<uint8_t *>(signature.data()), &sig_length,
               reinterpret_cast<const uint8_t *>(data.data()), data.size(),
               reinterpret_cast<const uint8_t *>(
@@ -143,8 +143,8 @@ util::StatusOr<std::string> DilithiumAvx2Sign::Sign(
           break;
         }
         case DilithiumSeedExpansion::SEED_EXPANSION_SHAKE: {
-          signature.resize(PQCLEAN_DILITHIUM5_AVX2_CRYPTO_BYTES, '0');
-          result = PQCLEAN_DILITHIUM5_AVX2_crypto_sign_signature(
+          signature.resize(PQCLEAN_DILITHIUM5_CRYPTO_BYTES, '0');
+          result = PQCLEAN_DILITHIUM5_crypto_sign_signature(
               reinterpret_cast<uint8_t *>(signature.data()), &sig_length,
               reinterpret_cast<const uint8_t *>(data.data()), data.size(),
               reinterpret_cast<const uint8_t *>(

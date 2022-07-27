@@ -8,6 +8,7 @@ java_test(
         "//proto:tink_java_proto",
         "//src/main/java/com/google/crypto/tink:registry_cluster",
         "//src/main/java/com/google/crypto/tink:streaming_aead",
+        "//src/main/java/com/google/crypto/tink/daead:deterministic_aead_config",
         "//src/main/java/com/google/crypto/tink/streamingaead:streaming_aead_config",
         "//src/main/java/com/google/crypto/tink/subtle:random",
         "//src/main/java/com/google/crypto/tink/testing:streaming_test_util",
@@ -50,15 +51,27 @@ java_test(
     size = "small",
     srcs = ["StreamingAeadFactoryTest.java"],
     deps = [
-        "//proto:tink_java_proto",
+        "//src/main/java/com/google/crypto/tink:key_templates",
         "//src/main/java/com/google/crypto/tink:registry_cluster",
         "//src/main/java/com/google/crypto/tink:streaming_aead",
-        "//src/main/java/com/google/crypto/tink/daead:deterministic_aead_config",
         "//src/main/java/com/google/crypto/tink/streamingaead:streaming_aead_config",
         "//src/main/java/com/google/crypto/tink/streamingaead:streaming_aead_factory",
-        "//src/main/java/com/google/crypto/tink/subtle:random",
         "//src/main/java/com/google/crypto/tink/testing:streaming_test_util",
-        "//src/main/java/com/google/crypto/tink/testing:test_util",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "StreamingAeadFactoryWithoutWrapperRegisteredTest",
+    size = "small",
+    srcs = ["StreamingAeadFactoryWithoutWrapperRegisteredTest.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink:key_templates",
+        "//src/main/java/com/google/crypto/tink:registry_cluster",
+        "//src/main/java/com/google/crypto/tink:streaming_aead",
+        "//src/main/java/com/google/crypto/tink/streamingaead:aes_ctr_hmac_streaming_key_manager",
+        "//src/main/java/com/google/crypto/tink/streamingaead:streaming_aead_factory",
+        "//src/main/java/com/google/crypto/tink/testing:streaming_test_util",
         "@maven//:junit_junit",
     ],
 )

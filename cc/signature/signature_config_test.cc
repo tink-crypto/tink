@@ -193,7 +193,7 @@ TEST_F(SignatureConfigTest, RegisterFipsValidTemplates) {
       SignatureKeyTemplates::RsaSsaPss3072Sha256Sha256F4());
 
   for (auto key_template : fips_key_templates) {
-    EXPECT_THAT(KeysetHandle::GenerateNew(key_template).status(), IsOk());
+    EXPECT_THAT(KeysetHandle::GenerateNew(key_template), IsOk());
   }
 }
 

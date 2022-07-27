@@ -37,7 +37,10 @@ tink_cc_library(
     tink::core::deterministic_aead
     tink::core::primitive_set
     tink::core::primitive_wrapper
+    tink::internal::monitoring_util
+    tink::internal::registry_impl
     tink::internal::util
+    tink::monitoring::monitoring
     tink::util::status
     tink::util::statusor
     tink::proto::tink_cc_proto
@@ -112,10 +115,14 @@ tink_cc_test(
     deterministic_aead_wrapper_test.cc
   DEPS
     tink::daead::deterministic_aead_wrapper
+    tink::daead::failing_daead
     gmock
-    absl::memory
+    absl::status
     tink::core::deterministic_aead
     tink::core::primitive_set
+    tink::internal::registry_impl
+    tink::monitoring::monitoring
+    tink::monitoring::monitoring_client_mocks
     tink::util::status
     tink::util::test_matchers
     tink::util::test_util
@@ -173,4 +180,25 @@ tink_cc_test(
     tink::proto::aes_siv_cc_proto
     tink::proto::common_cc_proto
     tink::proto::tink_cc_proto
+)
+
+tink_cc_library(
+  NAME failing_daead
+  SRCS
+    failing_daead.cc
+    failing_daead.h
+  DEPS
+    absl::strings
+    tink::core::deterministic_aead
+)
+
+tink_cc_test(
+  NAME failing_daead_test
+  SRCS
+    failing_daead_test.cc
+  DEPS
+    tink::daead::failing_daead
+    gmock
+    absl::status
+    tink::util::test_matchers
 )

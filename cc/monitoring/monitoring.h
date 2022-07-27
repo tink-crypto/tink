@@ -44,30 +44,30 @@ class MonitoringKeySetInfo {
     };
 
     // Constructs a new KeySet entry with a given `status`, `key_id` and key
-    // format `key_format_as_string`.
+    // format `parameters_as_string`.
     Entry(KeyStatus status, uint32_t key_id,
-          absl::string_view key_format_as_string)
+          absl::string_view parameters_as_string)
         : status_(status),
           key_id_(key_id),
-          key_format_as_string_(key_format_as_string) {}
+          parameters_as_string_(parameters_as_string) {}
 
     // Returns the status of this entry.
     KeyStatus GetStatus() const { return status_; }
     // Returns the ID of the entry within the keyset.
     uint32_t GetKeyId() const { return key_id_; }
-    // Returns the key format in a serialized form.
+    // Returns the parameters in a serialized form.
     //
-    // *WARNING* the actual content of `key_format_as_string_` is considered
+    // *WARNING* the actual content of `parameters_as_string_` is considered
     // unstable and might change in future versions of Tink. A user should not
     // rely on a specific representation of the key_format.
-    std::string GetKeyFormatAsString() const { return key_format_as_string_; }
+    std::string GetParametersAsString() const { return parameters_as_string_; }
 
    private:
     const KeyStatus status_;
     // Identifies a key within a keyset.
     const uint32_t key_id_;
-    // This field stores information about the key format.
-    const std::string key_format_as_string_;
+    // This field stores information about the parameters.
+    const std::string parameters_as_string_;
   };
 
   // Constructs a MonitoringKeySetInfo object with the given
@@ -112,7 +112,7 @@ class MonitoringContext {
   // Returns the API function.
   std::string GetApi() const { return api_function_; }
   // Returns a constant reference to the keyset info.
-  const MonitoringKeySetInfo& GetKeySetInfo() { return keyset_info_; }
+  const MonitoringKeySetInfo& GetKeySetInfo() const { return keyset_info_; }
 
  private:
   const std::string primitive_;

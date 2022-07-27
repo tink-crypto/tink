@@ -229,6 +229,18 @@ cc_library(
 )
 
 cc_library(
+    name = "chunked_mac",
+    hdrs = ["chunked_mac.h"],
+    include_prefix = "tink",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//util:status",
+        "//util:statusor",
+        "@com_google_absl//absl/strings",
+    ],
+)
+
+cc_library(
     name = "hybrid_decrypt",
     hdrs = ["hybrid_decrypt.h"],
     include_prefix = "tink",
@@ -525,6 +537,7 @@ cc_library(
         "//util:errors",
         "//util:status",
         "//util:statusor",
+        "@com_google_absl//absl/container:flat_hash_map",
         "@com_google_absl//absl/status",
     ],
 )
@@ -674,8 +687,8 @@ cc_library(
 )
 
 cc_library(
-    name = "key_format",
-    hdrs = ["key_format.h"],
+    name = "parameters",
+    hdrs = ["parameters.h"],
     include_prefix = "tink",
 )
 
@@ -684,9 +697,22 @@ cc_library(
     hdrs = ["key.h"],
     include_prefix = "tink",
     deps = [
-        ":key_format",
+        ":parameters",
         "@com_google_absl//absl/types:optional",
     ],
+)
+
+cc_library(
+    name = "secret_key_access_token",
+    hdrs = ["secret_key_access_token.h"],
+    include_prefix = "tink",
+)
+
+cc_library(
+    name = "insecure_secret_key_access",
+    hdrs = ["insecure_secret_key_access.h"],
+    include_prefix = "tink",
+    deps = [":secret_key_access_token"],
 )
 
 # tests

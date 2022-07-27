@@ -110,7 +110,7 @@ TEST(XChaCha20Poly1305KeyManagerTest, CreateKey) {
   StatusOr<XChaCha20Poly1305Key> key_or =
       XChaCha20Poly1305KeyManager().CreateKey(XChaCha20Poly1305KeyFormat());
 
-  ASSERT_THAT(key_or.status(), IsOk());
+  ASSERT_THAT(key_or, IsOk());
   EXPECT_THAT(key_or.value().key_value(), SizeIs(32));
   EXPECT_THAT(key_or.value().version(), Eq(0));
 }
@@ -123,7 +123,7 @@ TEST(XChaCha20Poly1305KeyManagerTest, DeriveKey) {
   StatusOr<XChaCha20Poly1305Key> key_or =
       XChaCha20Poly1305KeyManager().DeriveKey(format, &input_stream);
 
-  ASSERT_THAT(key_or.status(), IsOk());
+  ASSERT_THAT(key_or, IsOk());
   EXPECT_THAT(key_or.value().key_value(), SizeIs(32));
   EXPECT_THAT(key_or.value().version(), Eq(0));
 }
@@ -136,7 +136,7 @@ TEST(XChaCha20Poly1305KeyManagerTest, DeriveKeyFromLongSeed) {
   format.set_version(0);
   auto key_or = XChaCha20Poly1305KeyManager().DeriveKey(format, &input_stream);
 
-  ASSERT_THAT(key_or.status(), IsOk());
+  ASSERT_THAT(key_or, IsOk());
   EXPECT_THAT(key_or.value().key_value(),
               Eq("0123456789abcdef0123456789abcdef"));
 }
@@ -170,7 +170,7 @@ TEST(XChaCha20Poly1305KeyManagerTest, CreateKeyValid) {
   StatusOr<XChaCha20Poly1305Key> key_or =
       XChaCha20Poly1305KeyManager().CreateKey(XChaCha20Poly1305KeyFormat());
 
-  ASSERT_THAT(key_or.status(), IsOk());
+  ASSERT_THAT(key_or, IsOk());
   EXPECT_THAT(XChaCha20Poly1305KeyManager().ValidateKey(key_or.value()),
               IsOk());
 }
@@ -181,7 +181,7 @@ TEST(XChaCha20Poly1305KeyManagerTest, CreateAeadFailsWithOpenSsl) {
   }
   StatusOr<XChaCha20Poly1305Key> key =
       XChaCha20Poly1305KeyManager().CreateKey(XChaCha20Poly1305KeyFormat());
-  ASSERT_THAT(key.status(), IsOk());
+  ASSERT_THAT(key, IsOk());
   EXPECT_THAT(XChaCha20Poly1305KeyManager().GetPrimitive<Aead>(*key).status(),
               Not(IsOk()));
   EXPECT_THAT(subtle::XChacha20Poly1305BoringSsl::New(
@@ -196,16 +196,16 @@ TEST(XChaCha20Poly1305KeyManagerTest, CreateAeadSucceedsWithBoringSsl) {
   }
   StatusOr<XChaCha20Poly1305Key> key =
       XChaCha20Poly1305KeyManager().CreateKey(XChaCha20Poly1305KeyFormat());
-  ASSERT_THAT(key.status(), IsOk());
+  ASSERT_THAT(key, IsOk());
 
   StatusOr<std::unique_ptr<Aead>> aead =
       XChaCha20Poly1305KeyManager().GetPrimitive<Aead>(*key);
-  ASSERT_THAT(aead.status(), IsOk());
+  ASSERT_THAT(aead, IsOk());
 
   StatusOr<std::unique_ptr<Aead>> direct_aead =
       subtle::XChacha20Poly1305BoringSsl::New(
           util::SecretDataFromStringView(key->key_value()));
-  ASSERT_THAT(direct_aead.status(), IsOk());
+  ASSERT_THAT(direct_aead, IsOk());
   EXPECT_THAT(EncryptThenDecrypt(**aead, **direct_aead, "message", "aad"),
               IsOk());
 }

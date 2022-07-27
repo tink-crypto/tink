@@ -83,6 +83,10 @@ EcKey EcKeyFromX25519Key(const X25519Key *x25519_key);
 crypto::tink::util::StatusOr<util::SecretData> ComputeX25519SharedSecret(
     EVP_PKEY *private_key, EVP_PKEY *peer_public_key);
 
+// Computes the corresponding public+private key for the supplied private key.
+crypto::tink::util::StatusOr<std::unique_ptr<X25519Key>>
+X25519KeyFromPrivateKey(const crypto::tink::util::SecretData &private_key);
+
 // Ed25519Key Utils.
 
 // Returns a new ED25519 key.

@@ -23,6 +23,7 @@ py_test(
         "@tink_py//tink/proto:common_py_pb2",
         "@tink_py//tink/proto:ecdsa_py_pb2",
         "@tink_py//tink/proto:tink_py_pb2",
+        "@tink_py//tink/proto:jwt_hmac_py_pb2",
         "@tink_py//tink/signature",
     ],
 )

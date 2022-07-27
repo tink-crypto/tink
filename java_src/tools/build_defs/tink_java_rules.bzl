@@ -34,7 +34,7 @@ def tink_android_test(name, srcs, deps, shard_count = 1, data = [], min_version 
         srcs = srcs,
         name = native_multidex_binary,
         deps = deps,
-        manifest = "//third_party/tink/java_src/src/androidtest:AndroidManifest.xml",
+        manifest = "//third_party/tink/java_src/src/androidtest:AndroidManifest_native_multidex.xml",
         testonly = 1,
         multidex = "native",
         javacopts = [
@@ -49,7 +49,7 @@ def tink_android_test(name, srcs, deps, shard_count = 1, data = [], min_version 
         srcs = srcs,
         name = legacy_multidex_binary,
         deps = deps_copy,
-        manifest = "//third_party/tink/java_src/src/androidtest:AndroidManifest.xml",
+        manifest = "//third_party/tink/java_src/src/androidtest:AndroidManifest_legacy_multidex.xml",
         testonly = 1,
         multidex = "legacy",
         javacopts = [

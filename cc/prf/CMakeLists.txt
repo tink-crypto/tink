@@ -261,3 +261,24 @@ tink_cc_test(
     tink::util::test_matchers
     tink::util::test_util
 )
+
+tink_cc_library(
+  NAME failing_prfset
+  SRCS
+    failing_prfset.cc
+    failing_prfset.h
+  DEPS
+    tink::prf::prf_set
+    absl::strings
+)
+
+tink_cc_test(
+  NAME failing_prfset_test
+  SRCS
+    failing_prfset_test.cc
+  DEPS
+    tink::prf::failing_prfset
+    gmock
+    absl::status
+    tink::util::test_matchers
+)

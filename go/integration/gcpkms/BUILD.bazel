@@ -16,6 +16,7 @@ go_library(
         "//core/registry",
         "//tink",
         "@org_golang_google_api//cloudkms/v1:cloudkms",
+        "@org_golang_google_api//option",
         "@org_golang_x_oauth2//:oauth2",
         "@org_golang_x_oauth2//google",
     ],
@@ -30,8 +31,8 @@ go_test(
     data = [
         # Credentials can be injected into the test files included in these
         # targets.
-        "//testdata:credentials",
-        "//testdata:ecies_keysets",
+        "//testdata/gcp:credentials",
+        "//testdata/keysets:ecies",
         "@google_root_pem//file",  #keep
         "@wycheproof//testvectors:all",  #keep
     ],

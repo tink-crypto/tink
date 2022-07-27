@@ -60,7 +60,7 @@ TEST(AeadFromZeroCopyTest, EncryptSucceeds) {
 
   AeadFromZeroCopy aead(std::move(mock_zero_copy_aead));
   StatusOr<std::string> ciphertext = aead.Encrypt(kPlaintext, kAssociatedData);
-  ASSERT_THAT(ciphertext.status(), IsOk());
+  ASSERT_THAT(ciphertext, IsOk());
   EXPECT_EQ(*ciphertext, kCiphertext);
 }
 
@@ -90,7 +90,7 @@ TEST(AeadFromZeroCopyTest, DecryptSucceeds) {
 
   AeadFromZeroCopy aead(std::move(mock_zero_copy_aead));
   StatusOr<std::string> plaintext = aead.Decrypt(kCiphertext, kAssociatedData);
-  ASSERT_THAT(plaintext.status(), IsOk());
+  ASSERT_THAT(plaintext, IsOk());
   EXPECT_EQ(*plaintext, kPlaintext);
 }
 

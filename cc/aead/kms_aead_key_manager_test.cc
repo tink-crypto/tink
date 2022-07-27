@@ -103,7 +103,7 @@ TEST(KmsAeadKeyManagerTest, CreateKey) {
   KmsAeadKeyFormat key_format;
   key_format.set_key_uri("Some uri");
   auto key_or = KmsAeadKeyManager().CreateKey(key_format);
-  ASSERT_THAT(key_or.status(), IsOk());
+  ASSERT_THAT(key_or, IsOk());
   EXPECT_THAT(key_or.value().params().key_uri(), Eq(key_format.key_uri()));
 }
 
@@ -128,7 +128,7 @@ TEST_F(KmsAeadKeyManagerCreateTest, CreateAead) {
   key.mutable_params()->set_key_uri("prefix1:some_key1");
 
   auto kms_aead = KmsAeadKeyManager().GetPrimitive<Aead>(key);
-  ASSERT_THAT(kms_aead.status(), IsOk());
+  ASSERT_THAT(kms_aead, IsOk());
 
   DummyAead direct_aead("prefix1:some_key1");
 
@@ -143,7 +143,7 @@ TEST_F(KmsAeadKeyManagerCreateTest, CreateAeadWrongKeyName) {
   key.mutable_params()->set_key_uri("prefix1:some_other_key");
 
   auto kms_aead = KmsAeadKeyManager().GetPrimitive<Aead>(key);
-  ASSERT_THAT(kms_aead.status(), Not(IsOk()));
+  ASSERT_THAT(kms_aead, Not(IsOk()));
 }
 
 TEST_F(KmsAeadKeyManagerCreateTest, CreateAeadWrongPrefix) {
@@ -152,7 +152,7 @@ TEST_F(KmsAeadKeyManagerCreateTest, CreateAeadWrongPrefix) {
   key.mutable_params()->set_key_uri("non-existing-prefix:some_key1");
 
   auto kms_aead = KmsAeadKeyManager().GetPrimitive<Aead>(key);
-  ASSERT_THAT(kms_aead.status(), Not(IsOk()));
+  ASSERT_THAT(kms_aead, Not(IsOk()));
 }
 
 TEST_F(KmsAeadKeyManagerCreateTest, CreateAeadUnboundKey) {
@@ -161,7 +161,7 @@ TEST_F(KmsAeadKeyManagerCreateTest, CreateAeadUnboundKey) {
   key.mutable_params()->set_key_uri("prefix2:some_key2");
 
   auto kms_aead = KmsAeadKeyManager().GetPrimitive<Aead>(key);
-  ASSERT_THAT(kms_aead.status(), IsOk());
+  ASSERT_THAT(kms_aead, IsOk());
 
   DummyAead direct_aead("prefix2:some_key2");
 

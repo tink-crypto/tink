@@ -53,7 +53,7 @@ def base64_decode(encoded_data: bytes) -> bytes:
     if not _is_valid_urlsafe_base64_char(c):
       raise _jwt_error.JwtInvalidError('invalid base64 encoding')
   # base64.urlsafe_b64decode requires padding, but does not mind too much
-  # padding. So we simply add the maximum ammount of padding needed.
+  # padding. So we simply add the maximum amount of padding needed.
   padded_encoded_data = encoded_data + b'==='
   try:
     return base64.urlsafe_b64decode(padded_encoded_data)

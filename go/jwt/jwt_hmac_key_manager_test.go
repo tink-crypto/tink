@@ -72,8 +72,16 @@ var invalidKeyFormatTestCases = []jwtKeyManagerTestCase{
 		keyFormat: generateKeyFormat(32, jwtmacpb.JwtHmacAlgorithm_HS_UNKNOWN),
 	},
 	{
-		tag:       "invalid key size",
+		tag:       "invalid HS256 key size",
 		keyFormat: generateKeyFormat(31, jwtmacpb.JwtHmacAlgorithm_HS256),
+	},
+	{
+		tag:       "invalid HS384 key size",
+		keyFormat: generateKeyFormat(47, jwtmacpb.JwtHmacAlgorithm_HS384),
+	},
+	{
+		tag:       "invalid HS512 key size",
+		keyFormat: generateKeyFormat(63, jwtmacpb.JwtHmacAlgorithm_HS512),
 	},
 	{
 		tag:       "empty key format",
@@ -132,7 +140,7 @@ var validKeyFormatTestCases = []jwtKeyManagerTestCase{
 	},
 	{
 		tag:       "SHA512 hash algorithm",
-		keyFormat: generateKeyFormat(48, jwtmacpb.JwtHmacAlgorithm_HS512),
+		keyFormat: generateKeyFormat(64, jwtmacpb.JwtHmacAlgorithm_HS512),
 	},
 }
 
@@ -259,6 +267,38 @@ func TestGetPrimitiveWithValidKeys(t *testing.T) {
 				t.Errorf("verifiedJWT.Audiences() = %q, want ['tink-aud']", audiences)
 			}
 
+		})
+	}
+}
+
+func TestGetPrimitiveWithInvalidKeys(t *testing.T) {
+	for _, tc := range []jwtKeyManagerTestCase{
+		{
+			tag: "HS256",
+			key: generateKey(31, 0, jwtmacpb.JwtHmacAlgorithm_HS256, nil),
+		},
+		{
+			tag: "HS384",
+			key: generateKey(47, 0, jwtmacpb.JwtHmacAlgorithm_HS384, nil),
+		},
+		{
+			tag: "HS512",
+			key: generateKey(63, 0, jwtmacpb.JwtHmacAlgorithm_HS512, nil),
+		},
+	} {
+		t.Run(tc.tag, func(t *testing.T) {
+			km, err := registry.GetKeyManager(typeURL)
+			if err != nil {
+				t.Fatalf("registry.GetKeyManager(%q) err=%q, want nil", typeURL, err)
+			}
+			serializedKey, err := proto.Marshal(tc.key)
+			if err != nil {
+				t.Fatalf("proto.Marshal(tc.key) err =%q, want nil", err)
+			}
+			_, err = km.Primitive(serializedKey)
+			if err == nil {
+				t.Error("km.Primitive(serializedKey) err = nil, want error")
+			}
 		})
 	}
 }

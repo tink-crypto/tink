@@ -87,20 +87,27 @@ public class JwtHmacKeyManagerTest {
   }
 
   @Test
-  public void validateKeyFormat_sha256() throws Exception {
+  public void validateKeyFormat_hS256() throws Exception {
     factory.validateKeyFormat(makeJwtHmacKeyFormat(32, JwtHmacAlgorithm.HS256));
-  }
-
-  @Test
-  public void validateKeyFormat_sha512() throws Exception {
-    factory.validateKeyFormat(makeJwtHmacKeyFormat(32, JwtHmacAlgorithm.HS512));
-  }
-
-  @Test
-  public void validateKeyFormat_keySizeTooSmall_throws() throws Exception {
     assertThrows(
         GeneralSecurityException.class,
         () -> factory.validateKeyFormat(makeJwtHmacKeyFormat(31, JwtHmacAlgorithm.HS256)));
+  }
+
+  @Test
+  public void validateKeyFormat_hS384() throws Exception {
+    factory.validateKeyFormat(makeJwtHmacKeyFormat(48, JwtHmacAlgorithm.HS384));
+    assertThrows(
+        GeneralSecurityException.class,
+        () -> factory.validateKeyFormat(makeJwtHmacKeyFormat(47, JwtHmacAlgorithm.HS384)));
+  }
+
+  @Test
+  public void validateKeyFormat_hS512() throws Exception {
+    factory.validateKeyFormat(makeJwtHmacKeyFormat(64, JwtHmacAlgorithm.HS512));
+    assertThrows(
+        GeneralSecurityException.class,
+        () -> factory.validateKeyFormat(makeJwtHmacKeyFormat(63, JwtHmacAlgorithm.HS512)));
   }
 
   @Test
@@ -114,8 +121,27 @@ public class JwtHmacKeyManagerTest {
   @Test
   public void createKey_valid() throws Exception {
     manager.validateKey(factory.createKey(makeJwtHmacKeyFormat(32, JwtHmacAlgorithm.HS256)));
-    manager.validateKey(factory.createKey(makeJwtHmacKeyFormat(32, JwtHmacAlgorithm.HS256)));
-    manager.validateKey(factory.createKey(makeJwtHmacKeyFormat(32, JwtHmacAlgorithm.HS512)));
+    manager.validateKey(factory.createKey(makeJwtHmacKeyFormat(48, JwtHmacAlgorithm.HS384)));
+    manager.validateKey(factory.createKey(makeJwtHmacKeyFormat(64, JwtHmacAlgorithm.HS512)));
+  }
+
+  @Test
+  public void createTooShortKey_invalid() throws Exception {
+    assertThrows(
+        GeneralSecurityException.class,
+        () ->
+            manager.validateKey(
+                factory.createKey(makeJwtHmacKeyFormat(31, JwtHmacAlgorithm.HS256))));
+    assertThrows(
+        GeneralSecurityException.class,
+        () ->
+            manager.validateKey(
+                factory.createKey(makeJwtHmacKeyFormat(47, JwtHmacAlgorithm.HS384))));
+    assertThrows(
+        GeneralSecurityException.class,
+        () ->
+            manager.validateKey(
+                factory.createKey(makeJwtHmacKeyFormat(63, JwtHmacAlgorithm.HS512))));
   }
 
   @Test

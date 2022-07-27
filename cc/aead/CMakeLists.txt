@@ -611,3 +611,24 @@ tink_cc_test(
     tink::util::test_util
     tink::proto::tink_cc_proto
 )
+
+tink_cc_library(
+  NAME failing_aead
+  SRCS
+    failing_aead.cc
+    failing_aead.h
+  DEPS
+    absl::strings
+    tink::core::aead
+)
+
+tink_cc_test(
+  NAME failing_aead_test
+  SRCS
+    failing_aead_test.cc
+  DEPS
+    tink::aead::failing_aead
+    gmock
+    absl::status
+    tink::util::test_matchers
+)

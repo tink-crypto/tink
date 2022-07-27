@@ -199,6 +199,8 @@ public final class RegistryMultithreadTest {
     }
   }
 
+  private static final int REPETITIONS = 1000;
+
   @Test
   public void registerAndGetKeyManager_works() throws Exception {
     ExecutorService threadPool = Executors.newFixedThreadPool(4);
@@ -213,8 +215,7 @@ public final class RegistryMultithreadTest {
         threadPool.submit(
             () -> {
               try {
-
-                for (int i = 0; i < 100; ++i) {
+                for (int i = 0; i < REPETITIONS; ++i) {
                   Registry.registerKeyManager(new TestKeyManager("KeyManager" + i), false);
                 }
               } catch (GeneralSecurityException e) {
@@ -225,7 +226,7 @@ public final class RegistryMultithreadTest {
         threadPool.submit(
             () -> {
               try {
-                for (int i = 0; i < 100; ++i) {
+                for (int i = 0; i < REPETITIONS; ++i) {
                   Registry.registerKeyManager(new TestKeyTypeManager("KeyTypeManager" + i), false);
                 }
               } catch (GeneralSecurityException e) {
@@ -236,7 +237,7 @@ public final class RegistryMultithreadTest {
         threadPool.submit(
             () -> {
               try {
-                for (int i = 0; i < 100; ++i) {
+                for (int i = 0; i < REPETITIONS; ++i) {
                   Registry.registerAsymmetricKeyManagers(
                       new TestPrivateKeyTypeManager("Private" + i),
                       new TestPublicKeyTypeManager("Public" + i),
@@ -250,7 +251,7 @@ public final class RegistryMultithreadTest {
         threadPool.submit(
             () -> {
               try {
-                for (int i = 0; i < 100; ++i) {
+                for (int i = 0; i < REPETITIONS; ++i) {
 
                   Registry.getKeyManager("KeyManagerStart");
                   Registry.getKeyManager("KeyTypeManagerStart");

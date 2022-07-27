@@ -123,22 +123,22 @@ void CheckNewKey(const JwtRsaSsaPkcs1PrivateKey& private_key,
 
   util::StatusOr<internal::SslUniquePtr<BIGNUM>> n =
       internal::StringToBignum(public_key.n());
-  ASSERT_THAT(n.status(), IsOk());
+  ASSERT_THAT(n, IsOk());
   util::StatusOr<internal::SslUniquePtr<BIGNUM>> d =
       internal::StringToBignum(private_key.d());
-  ASSERT_THAT(d.status(), IsOk());
+  ASSERT_THAT(d, IsOk());
   util::StatusOr<internal::SslUniquePtr<BIGNUM>> p =
       internal::StringToBignum(private_key.p());
-  ASSERT_THAT(p.status(), IsOk());
+  ASSERT_THAT(p, IsOk());
   util::StatusOr<internal::SslUniquePtr<BIGNUM>> q =
       internal::StringToBignum(private_key.q());
-  ASSERT_THAT(q.status(), IsOk());
+  ASSERT_THAT(q, IsOk());
   util::StatusOr<internal::SslUniquePtr<BIGNUM>> dp =
       internal::StringToBignum(private_key.dp());
-  ASSERT_THAT(dp.status(), IsOk());
+  ASSERT_THAT(dp, IsOk());
   util::StatusOr<internal::SslUniquePtr<BIGNUM>> dq =
       internal::StringToBignum(private_key.dq());
-  ASSERT_THAT(dq.status(), IsOk());
+  ASSERT_THAT(dq, IsOk());
   internal::SslUniquePtr<BN_CTX> ctx(BN_CTX_new());
 
   // Check n = p * q.
@@ -170,7 +170,7 @@ TEST(JwtRsaSsaPkcs1SignKeyManagerTest, CreateRs256Key) {
       CreateKeyFormat(JwtRsaSsaPkcs1Algorithm::RS256, 3072, RSA_F4);
   StatusOr<JwtRsaSsaPkcs1PrivateKey> private_key =
       RawJwtRsaSsaPkcs1SignKeyManager().CreateKey(key_format);
-  ASSERT_THAT(private_key.status(), IsOk());
+  ASSERT_THAT(private_key, IsOk());
   EXPECT_THAT(RawJwtRsaSsaPkcs1SignKeyManager().ValidateKey(*private_key),
               IsOk());
   CheckNewKey(*private_key, key_format);
@@ -182,7 +182,7 @@ TEST(JwtRsaSsaPkcs1SignKeyManagerTest, CreateSmallRs256Key) {
 
   StatusOr<JwtRsaSsaPkcs1PrivateKey> private_key =
       RawJwtRsaSsaPkcs1SignKeyManager().CreateKey(key_format);
-  ASSERT_THAT(private_key.status(), IsOk());
+  ASSERT_THAT(private_key, IsOk());
   EXPECT_THAT(RawJwtRsaSsaPkcs1SignKeyManager().ValidateKey(*private_key),
               IsOk());
   CheckNewKey(*private_key, key_format);
@@ -194,7 +194,7 @@ TEST(JwtRsaSsaPkcs1SignKeyManagerTest, CreateKeyLargeRs512Key) {
 
   StatusOr<JwtRsaSsaPkcs1PrivateKey> private_key =
       RawJwtRsaSsaPkcs1SignKeyManager().CreateKey(key_format);
-  ASSERT_THAT(private_key.status(), IsOk());
+  ASSERT_THAT(private_key, IsOk());
   EXPECT_THAT(RawJwtRsaSsaPkcs1SignKeyManager().ValidateKey(*private_key),
               IsOk());
   CheckNewKey(*private_key, key_format);
@@ -210,7 +210,7 @@ TEST(JwtRsaSsaPkcs1SignKeyManagerTest, CreateKeyAlwaysNewRsaPair) {
   for (int i = 0; i < num_generated_keys; ++i) {
     StatusOr<JwtRsaSsaPkcs1PrivateKey> key =
         RawJwtRsaSsaPkcs1SignKeyManager().CreateKey(key_format);
-    ASSERT_THAT(key.status(), IsOk());
+    ASSERT_THAT(key, IsOk());
     keys.insert(key->p());
     keys.insert(key->q());
   }
@@ -222,10 +222,10 @@ TEST(JwtRsaSsaPkcs1SignKeyManagerTest, GetPublicKey) {
       CreateKeyFormat(JwtRsaSsaPkcs1Algorithm::RS256, 2048, RSA_F4);
   StatusOr<JwtRsaSsaPkcs1PrivateKey> key =
       RawJwtRsaSsaPkcs1SignKeyManager().CreateKey(key_format);
-  ASSERT_THAT(key.status(), IsOk());
+  ASSERT_THAT(key, IsOk());
   StatusOr<JwtRsaSsaPkcs1PublicKey> public_key =
       RawJwtRsaSsaPkcs1SignKeyManager().GetPublicKey(*key);
-  ASSERT_THAT(public_key.status(), IsOk());
+  ASSERT_THAT(public_key, IsOk());
   EXPECT_THAT(public_key->version(), Eq(key->public_key().version()));
   EXPECT_THAT(public_key->algorithm(), Eq(key->public_key().algorithm()));
   EXPECT_THAT(public_key->n(), Eq(key->public_key().n()));
@@ -237,21 +237,21 @@ TEST(JwtRsaSsaPkcs1SignKeyManagerTest, Create) {
       CreateKeyFormat(JwtRsaSsaPkcs1Algorithm::RS256, 3072, RSA_F4);
   StatusOr<JwtRsaSsaPkcs1PrivateKey> key =
       RawJwtRsaSsaPkcs1SignKeyManager().CreateKey(key_format);
-  ASSERT_THAT(key.status(), IsOk());
+  ASSERT_THAT(key, IsOk());
 
   util::StatusOr<std::unique_ptr<PublicKeySign>> signer =
       RawJwtRsaSsaPkcs1SignKeyManager().GetPrimitive<PublicKeySign>(*key);
-  ASSERT_THAT(signer.status(), IsOk());
+  ASSERT_THAT(signer, IsOk());
 
   util::StatusOr<std::unique_ptr<RsaSsaPkcs1VerifyBoringSsl>> direct_verifier =
       subtle::RsaSsaPkcs1VerifyBoringSsl::New(
           {key->public_key().n(), key->public_key().e()},
           {subtle::HashType::SHA256});
-  ASSERT_THAT(direct_verifier.status(), IsOk());
+  ASSERT_THAT(direct_verifier, IsOk());
 
   std::string message = "Some message";
   util::StatusOr<std::string> sig = (*signer)->Sign(message);
-  ASSERT_THAT(sig.status(), IsOk());
+  ASSERT_THAT(sig, IsOk());
   EXPECT_THAT((*direct_verifier)->Verify(*sig, message), IsOk());
 }
 

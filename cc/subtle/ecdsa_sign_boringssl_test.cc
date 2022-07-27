@@ -143,7 +143,7 @@ TEST_F(EcdsaSignBoringSslTest, testSignatureSizesWithIEEE_P1364Encoding) {
     // Check signature size.
     util::StatusOr<int32_t> field_size_in_bytes =
         internal::EcFieldSizeInBytes(curve);
-    ASSERT_THAT(field_size_in_bytes.status(), IsOk());
+    ASSERT_THAT(field_size_in_bytes, IsOk());
     EXPECT_EQ(signature.size(), 2 * (*field_size_in_bytes));
   }
 }

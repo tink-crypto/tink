@@ -27,8 +27,8 @@ import (
 	"google.golang.org/grpc"
 	"github.com/google/tink/go/core/registry"
 	"github.com/google/tink/go/testing/fakekms"
-	pbgrpc "github.com/google/tink/proto/testing/testing_api_go_grpc"
 	"github.com/google/tink/testing/go/services"
+	pbgrpc "github.com/google/tink/testing/go/proto/testing_api_go_grpc"
 )
 
 var (

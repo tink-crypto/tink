@@ -20,6 +20,7 @@
 #include <string>
 
 #include "absl/strings/escaping.h"
+#include "tink/hybrid/internal/hpke_util.h"
 #include "tink/util/statusor.h"
 #include "proto/hpke.pb.h"
 
@@ -36,6 +37,8 @@ struct HpkeTestParams {
   std::string ciphertext;             // ct
   std::string recipient_private_key;  // skRm
   std::string encapsulated_key;       // enc
+  std::vector<std::string> exported_contexts;
+  std::vector<std::string> exported_values;
 
   explicit HpkeTestParams(const absl::string_view* test_vector)
       : recipient_public_key(absl::HexStringToBytes(test_vector[0])),
@@ -45,7 +48,13 @@ struct HpkeTestParams {
         associated_data(absl::HexStringToBytes(test_vector[4])),
         ciphertext(absl::HexStringToBytes(test_vector[5])),
         recipient_private_key(absl::HexStringToBytes(test_vector[6])),
-        encapsulated_key(absl::HexStringToBytes(test_vector[7])) {}
+        encapsulated_key(absl::HexStringToBytes(test_vector[7])),
+        exported_contexts({absl::HexStringToBytes(test_vector[8]),
+                           absl::HexStringToBytes(test_vector[9]),
+                           absl::HexStringToBytes(test_vector[10])}),
+        exported_values({absl::HexStringToBytes(test_vector[11]),
+                         absl::HexStringToBytes(test_vector[12]),
+                         absl::HexStringToBytes(test_vector[13])}) {}
 };
 
 // Returns an HpkeTestParams struct for the following HPKE parameters:
@@ -55,6 +64,10 @@ HpkeTestParams DefaultHpkeTestParams();
 // Creates an HpkeTestParams struct for the specified HpkeParams protobuf.
 util::StatusOr<HpkeTestParams> CreateHpkeTestParams(
     const google::crypto::tink::HpkeParams& params);
+
+// Creates an HpkeTestParams struct for the specified HpkeParams struct.
+util::StatusOr<HpkeTestParams> CreateHpkeTestParams(
+    const HpkeParams& params);
 
 // Creates an HpkeParams protobuf from `kem`, `kdf`, and `aead`.
 google::crypto::tink::HpkeParams CreateHpkeParams(

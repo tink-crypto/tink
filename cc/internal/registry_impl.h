@@ -787,9 +787,7 @@ crypto::tink::util::StatusOr<std::unique_ptr<P>> RegistryImpl::Wrap(
   if (!wrapper_result.ok()) {
     return wrapper_result.status();
   }
-  crypto::tink::util::StatusOr<std::unique_ptr<P>> primitive_result =
-      wrapper_result.value()->Wrap(std::move(primitive_set));
-  return std::move(primitive_result);
+  return wrapper_result.value()->Wrap(std::move(primitive_set));
 }
 
 template <class P>

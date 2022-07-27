@@ -58,12 +58,12 @@ INSTANTIATE_TEST_SUITE_P(
 TEST_P(HpkeEncryptTest, SetupSenderContextAndEncrypt) {
   HpkeParams hpke_params = GetParam();
   util::StatusOr<HpkeTestParams> params = CreateHpkeTestParams(hpke_params);
-  ASSERT_THAT(params.status(), IsOk());
+  ASSERT_THAT(params, IsOk());
   HpkePublicKey recipient_key =
       CreateHpkePublicKey(hpke_params, params->recipient_public_key);
   util::StatusOr<std::unique_ptr<HybridEncrypt>> hpke_encrypt =
       HpkeEncrypt::New(recipient_key);
-  ASSERT_THAT(hpke_encrypt.status(), IsOk());
+  ASSERT_THAT(hpke_encrypt, IsOk());
 
   std::vector<std::string> plaintexts = {"", params->plaintext};
   std::vector<std::string> context_infos = {"", params->application_info};
@@ -73,7 +73,7 @@ TEST_P(HpkeEncryptTest, SetupSenderContextAndEncrypt) {
                                 context_info, "'"));
       util::StatusOr<std::string> encryption =
           (*hpke_encrypt)->Encrypt(plaintext, context_info);
-      ASSERT_THAT(encryption.status(), IsOk());
+      ASSERT_THAT(encryption, IsOk());
     }
   }
 }
@@ -97,7 +97,7 @@ TEST_P(HpkeEncryptWithBadParamTest, BadParamFails) {
       CreateHpkePublicKey(hpke_params, params.recipient_public_key);
   util::StatusOr<std::unique_ptr<HybridEncrypt>> hpke_encrypt =
       HpkeEncrypt::New(recipient_key);
-  ASSERT_THAT(hpke_encrypt.status(), IsOk());
+  ASSERT_THAT(hpke_encrypt, IsOk());
 
   util::StatusOr<std::string> encryption =
       (*hpke_encrypt)->Encrypt(params.plaintext, params.application_info);

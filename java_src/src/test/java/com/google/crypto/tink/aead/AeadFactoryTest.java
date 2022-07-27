@@ -16,22 +16,14 @@
 
 package com.google.crypto.tink.aead;
 
-import static com.google.crypto.tink.testing.TestUtil.assertExceptionContains;
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
+import static com.google.common.truth.Truth.assertThat;
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.Assert.assertThrows;
 
 import com.google.crypto.tink.Aead;
-import com.google.crypto.tink.CryptoFormat;
+import com.google.crypto.tink.KeyTemplates;
 import com.google.crypto.tink.KeysetHandle;
-import com.google.crypto.tink.daead.DeterministicAeadConfig;
-import com.google.crypto.tink.proto.KeyStatusType;
-import com.google.crypto.tink.proto.Keyset.Key;
-import com.google.crypto.tink.proto.OutputPrefixType;
-import com.google.crypto.tink.subtle.Random;
-import com.google.crypto.tink.testing.TestUtil;
 import java.security.GeneralSecurityException;
-import java.util.Arrays;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -40,190 +32,37 @@ import org.junit.runners.JUnit4;
 /** Tests for AeadFactory. */
 @RunWith(JUnit4.class)
 public class AeadFactoryTest {
-  private static final int AES_KEY_SIZE = 16;
-  private static final int HMAC_KEY_SIZE = 20;
 
   @BeforeClass
   public static void setUp() throws Exception {
     AeadConfig.register();
-    DeterministicAeadConfig.register(); // need this for testInvalidKeyMaterial.
   }
 
   @Test
-  public void testBasicAesCtrHmacAead() throws Exception {
-    byte[] aesCtrKeyValue = Random.randBytes(AES_KEY_SIZE);
-    byte[] hmacKeyValue = Random.randBytes(HMAC_KEY_SIZE);
-    int ivSize = 12;
-    int tagSize = 16;
-    KeysetHandle keysetHandle =
-        TestUtil.createKeysetHandle(
-            TestUtil.createKeyset(
-                TestUtil.createKey(
-                    TestUtil.createAesCtrHmacAeadKeyData(
-                        aesCtrKeyValue, ivSize, hmacKeyValue, tagSize),
-                    42,
-                    KeyStatusType.ENABLED,
-                    OutputPrefixType.TINK)));
-    TestUtil.runBasicAeadTests(keysetHandle.getPrimitive(Aead.class));
-  }
+  @SuppressWarnings("deprecation") // This is a test that the deprecated function works.
+  public void deprecatedAeadFactoryGetPrimitive_sameAs_keysetHandleGetPrimitive() throws Exception {
+    KeysetHandle handle = KeysetHandle.generateNew(KeyTemplates.get("AES128_CTR_HMAC_SHA256"));
 
-  @Test
-  public void testMultipleKeys() throws Exception {
-    byte[] aesCtrKeyValue = Random.randBytes(AES_KEY_SIZE);
-    byte[] hmacKeyValue = Random.randBytes(HMAC_KEY_SIZE);
-    int ivSize = 12;
-    int tagSize = 16;
+    Aead aead = handle.getPrimitive(Aead.class);
+    Aead factoryAead = AeadFactory.getPrimitive(handle);
 
-    Key primary =
-        TestUtil.createKey(
-            TestUtil.createAesCtrHmacAeadKeyData(aesCtrKeyValue, ivSize, hmacKeyValue, tagSize),
-            42,
-            KeyStatusType.ENABLED,
-            OutputPrefixType.TINK);
-    Key raw =
-        TestUtil.createKey(
-            TestUtil.createAesCtrHmacAeadKeyData(aesCtrKeyValue, ivSize, hmacKeyValue, tagSize),
-            43,
-            KeyStatusType.ENABLED,
-            OutputPrefixType.RAW);
-    Key legacy =
-        TestUtil.createKey(
-            TestUtil.createAesCtrHmacAeadKeyData(aesCtrKeyValue, ivSize, hmacKeyValue, tagSize),
-            44,
-            KeyStatusType.ENABLED,
-            OutputPrefixType.LEGACY);
+    byte[] plaintext = "plaintext".getBytes(UTF_8);
+    byte[] associatedData = "associatedData".getBytes(UTF_8);
 
-    Key tink =
-        TestUtil.createKey(
-            TestUtil.createAesCtrHmacAeadKeyData(aesCtrKeyValue, ivSize, hmacKeyValue, tagSize),
-            45,
-            KeyStatusType.ENABLED,
-            OutputPrefixType.TINK);
-
-    KeysetHandle keysetHandle =
-        TestUtil.createKeysetHandle(TestUtil.createKeyset(primary, raw, legacy, tink));
-    Aead aead = keysetHandle.getPrimitive(Aead.class);
-    byte[] plaintext = Random.randBytes(20);
-    byte[] associatedData = Random.randBytes(20);
     byte[] ciphertext = aead.encrypt(plaintext, associatedData);
-    byte[] prefix = Arrays.copyOfRange(ciphertext, 0, CryptoFormat.NON_RAW_PREFIX_SIZE);
+    byte[] factoryCiphertext = aead.encrypt(plaintext, associatedData);
 
-    assertArrayEquals(prefix, CryptoFormat.getOutputPrefix(primary));
-    assertArrayEquals(plaintext, aead.decrypt(ciphertext, associatedData));
-    assertEquals(
-        CryptoFormat.NON_RAW_PREFIX_SIZE + plaintext.length + ivSize + tagSize, ciphertext.length);
+    assertThat(aead.decrypt(ciphertext, associatedData)).isEqualTo(plaintext);
+    assertThat(aead.decrypt(factoryCiphertext, associatedData)).isEqualTo(plaintext);
+    assertThat(factoryAead.decrypt(ciphertext, associatedData)).isEqualTo(plaintext);
+    assertThat(factoryAead.decrypt(factoryCiphertext, associatedData)).isEqualTo(plaintext);
 
-    // encrypt with a non-primary RAW key and decrypt with the keyset
-    KeysetHandle keysetHandle2 =
-        TestUtil.createKeysetHandle(TestUtil.createKeyset(raw, legacy, tink));
-    Aead aead2 = keysetHandle2.getPrimitive(Aead.class);
-    ciphertext = aead2.encrypt(plaintext, associatedData);
-    assertArrayEquals(plaintext, aead.decrypt(ciphertext, associatedData));
+    byte[] invalid = "invalid".getBytes(UTF_8);
 
-    // encrypt with a random key not in the keyset, decrypt with the keyset should fail
-    byte[] aesCtrKeyValue2 = Random.randBytes(AES_KEY_SIZE);
-    byte[] hmacKeyValue2 = Random.randBytes(HMAC_KEY_SIZE);
-    Key random =
-        TestUtil.createKey(
-            TestUtil.createAesCtrHmacAeadKeyData(aesCtrKeyValue2, ivSize, hmacKeyValue2, tagSize),
-            44,
-            KeyStatusType.ENABLED,
-            OutputPrefixType.TINK);
-    keysetHandle2 = TestUtil.createKeysetHandle(TestUtil.createKeyset(random));
-    aead2 = keysetHandle2.getPrimitive(Aead.class);
-    final byte[] ciphertext2 = aead2.encrypt(plaintext, associatedData);
-    GeneralSecurityException e =
-        assertThrows(
-            GeneralSecurityException.class, () -> aead.decrypt(ciphertext2, associatedData));
-    assertExceptionContains(e, "decryption failed");
-  }
-
-  @Test
-  public void testRawKeyAsPrimary() throws Exception {
-    byte[] aesCtrKeyValue = Random.randBytes(AES_KEY_SIZE);
-    byte[] hmacKeyValue = Random.randBytes(HMAC_KEY_SIZE);
-    int ivSize = 12;
-    int tagSize = 16;
-
-    Key primary =
-        TestUtil.createKey(
-            TestUtil.createAesCtrHmacAeadKeyData(aesCtrKeyValue, ivSize, hmacKeyValue, tagSize),
-            42,
-            KeyStatusType.ENABLED,
-            OutputPrefixType.RAW);
-    Key raw =
-        TestUtil.createKey(
-            TestUtil.createAesCtrHmacAeadKeyData(aesCtrKeyValue, ivSize, hmacKeyValue, tagSize),
-            43,
-            KeyStatusType.ENABLED,
-            OutputPrefixType.RAW);
-    Key legacy =
-        TestUtil.createKey(
-            TestUtil.createAesCtrHmacAeadKeyData(aesCtrKeyValue, ivSize, hmacKeyValue, tagSize),
-            44,
-            KeyStatusType.ENABLED,
-            OutputPrefixType.LEGACY);
-    KeysetHandle keysetHandle =
-        TestUtil.createKeysetHandle(TestUtil.createKeyset(primary, raw, legacy));
-    Aead aead = keysetHandle.getPrimitive(Aead.class);
-    byte[] plaintext = Random.randBytes(20);
-    byte[] associatedData = Random.randBytes(20);
-    byte[] ciphertext = aead.encrypt(plaintext, associatedData);
-    assertArrayEquals(plaintext, aead.decrypt(ciphertext, associatedData));
-    assertEquals(
-        CryptoFormat.RAW_PREFIX_SIZE + plaintext.length + ivSize + tagSize, ciphertext.length);
-  }
-
-  @Test
-  public void testSmallPlaintextWithRawKey() throws Exception {
-    byte[] aesCtrKeyValue = Random.randBytes(AES_KEY_SIZE);
-    byte[] hmacKeyValue = Random.randBytes(HMAC_KEY_SIZE);
-    int ivSize = 12;
-    int tagSize = 16;
-
-    Key primary =
-        TestUtil.createKey(
-            TestUtil.createAesCtrHmacAeadKeyData(aesCtrKeyValue, ivSize, hmacKeyValue, tagSize),
-            42,
-            KeyStatusType.ENABLED,
-            OutputPrefixType.RAW);
-    KeysetHandle keysetHandle = TestUtil.createKeysetHandle(TestUtil.createKeyset(primary));
-    Aead aead = keysetHandle.getPrimitive(Aead.class);
-    byte[] plaintext = Random.randBytes(1);
-    byte[] associatedData = Random.randBytes(20);
-    byte[] ciphertext = aead.encrypt(plaintext, associatedData);
-    assertArrayEquals(plaintext, aead.decrypt(ciphertext, associatedData));
-    assertEquals(
-        CryptoFormat.RAW_PREFIX_SIZE + plaintext.length + ivSize + tagSize, ciphertext.length);
-  }
-
-  @Test
-  public void testInvalidKeyMaterial() throws Exception {
-    byte[] aesCtrKeyValue = Random.randBytes(AES_KEY_SIZE);
-    byte[] hmacKeyValue = Random.randBytes(HMAC_KEY_SIZE);
-    int ivSize = 12;
-    int tagSize = 16;
-
-    Key valid =
-        TestUtil.createKey(
-            TestUtil.createAesCtrHmacAeadKeyData(aesCtrKeyValue, ivSize, hmacKeyValue, tagSize),
-            42,
-            KeyStatusType.ENABLED,
-            OutputPrefixType.RAW);
-    Key invalid =
-        TestUtil.createKey(
-            TestUtil.createAesSivKeyData(64), 43, KeyStatusType.ENABLED, OutputPrefixType.TINK);
-
-    final KeysetHandle keysetHandle =
-        TestUtil.createKeysetHandle(TestUtil.createKeyset(valid, invalid));
-    GeneralSecurityException e =
-        assertThrows(GeneralSecurityException.class, () -> keysetHandle.getPrimitive(Aead.class));
-    assertExceptionContains(e, "com.google.crypto.tink.DeterministicAead");
-
-    // invalid as the primary key.
-    final KeysetHandle keysetHandle2 =
-        TestUtil.createKeysetHandle(TestUtil.createKeyset(invalid, valid));
-    e = assertThrows(GeneralSecurityException.class, () -> keysetHandle2.getPrimitive(Aead.class));
-    assertExceptionContains(e, "com.google.crypto.tink.DeterministicAead");
+    assertThrows(GeneralSecurityException.class, () -> aead.decrypt(ciphertext, invalid));
+    assertThrows(GeneralSecurityException.class, () -> factoryAead.decrypt(ciphertext, invalid));
+    assertThrows(GeneralSecurityException.class, () -> aead.decrypt(invalid, associatedData));
+    assertThrows(
+        GeneralSecurityException.class, () -> factoryAead.decrypt(invalid, associatedData));
   }
 }

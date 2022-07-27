@@ -28,42 +28,42 @@
 #include "proto/tink.pb.h"
 
 extern "C" {
-#include "third_party/pqclean/crypto_sign/sphincs-haraka-128f-robust/aesni/api.h"
-#include "third_party/pqclean/crypto_sign/sphincs-haraka-128f-simple/aesni/api.h"
-#include "third_party/pqclean/crypto_sign/sphincs-haraka-128s-robust/aesni/api.h"
-#include "third_party/pqclean/crypto_sign/sphincs-haraka-128s-simple/aesni/api.h"
-#include "third_party/pqclean/crypto_sign/sphincs-haraka-192f-robust/aesni/api.h"
-#include "third_party/pqclean/crypto_sign/sphincs-haraka-192f-simple/aesni/api.h"
-#include "third_party/pqclean/crypto_sign/sphincs-haraka-192s-robust/aesni/api.h"
-#include "third_party/pqclean/crypto_sign/sphincs-haraka-192s-simple/aesni/api.h"
-#include "third_party/pqclean/crypto_sign/sphincs-haraka-256f-robust/aesni/api.h"
-#include "third_party/pqclean/crypto_sign/sphincs-haraka-256f-simple/aesni/api.h"
-#include "third_party/pqclean/crypto_sign/sphincs-haraka-256s-robust/aesni/api.h"
-#include "third_party/pqclean/crypto_sign/sphincs-haraka-256s-simple/aesni/api.h"
-#include "third_party/pqclean/crypto_sign/sphincs-sha256-128f-robust/avx2/api.h"
-#include "third_party/pqclean/crypto_sign/sphincs-sha256-128f-simple/avx2/api.h"
-#include "third_party/pqclean/crypto_sign/sphincs-sha256-128s-robust/avx2/api.h"
-#include "third_party/pqclean/crypto_sign/sphincs-sha256-128s-simple/avx2/api.h"
-#include "third_party/pqclean/crypto_sign/sphincs-sha256-192f-robust/avx2/api.h"
-#include "third_party/pqclean/crypto_sign/sphincs-sha256-192f-simple/avx2/api.h"
-#include "third_party/pqclean/crypto_sign/sphincs-sha256-192s-robust/avx2/api.h"
-#include "third_party/pqclean/crypto_sign/sphincs-sha256-192s-simple/avx2/api.h"
-#include "third_party/pqclean/crypto_sign/sphincs-sha256-256f-robust/avx2/api.h"
-#include "third_party/pqclean/crypto_sign/sphincs-sha256-256f-simple/avx2/api.h"
-#include "third_party/pqclean/crypto_sign/sphincs-sha256-256s-robust/avx2/api.h"
-#include "third_party/pqclean/crypto_sign/sphincs-sha256-256s-simple/avx2/api.h"
-#include "third_party/pqclean/crypto_sign/sphincs-shake256-128f-robust/avx2/api.h"
-#include "third_party/pqclean/crypto_sign/sphincs-shake256-128f-simple/avx2/api.h"
-#include "third_party/pqclean/crypto_sign/sphincs-shake256-128s-robust/avx2/api.h"
-#include "third_party/pqclean/crypto_sign/sphincs-shake256-128s-simple/avx2/api.h"
-#include "third_party/pqclean/crypto_sign/sphincs-shake256-192f-robust/avx2/api.h"
-#include "third_party/pqclean/crypto_sign/sphincs-shake256-192f-simple/avx2/api.h"
-#include "third_party/pqclean/crypto_sign/sphincs-shake256-192s-robust/avx2/api.h"
-#include "third_party/pqclean/crypto_sign/sphincs-shake256-192s-simple/avx2/api.h"
-#include "third_party/pqclean/crypto_sign/sphincs-shake256-256f-robust/avx2/api.h"
-#include "third_party/pqclean/crypto_sign/sphincs-shake256-256f-simple/avx2/api.h"
-#include "third_party/pqclean/crypto_sign/sphincs-shake256-256s-robust/avx2/api.h"
-#include "third_party/pqclean/crypto_sign/sphincs-shake256-256s-simple/avx2/api.h"
+#include "third_party/pqclean/crypto_sign/sphincs-haraka-128f-robust/api.h"
+#include "third_party/pqclean/crypto_sign/sphincs-haraka-128f-simple/api.h"
+#include "third_party/pqclean/crypto_sign/sphincs-haraka-128s-robust/api.h"
+#include "third_party/pqclean/crypto_sign/sphincs-haraka-128s-simple/api.h"
+#include "third_party/pqclean/crypto_sign/sphincs-haraka-192f-robust/api.h"
+#include "third_party/pqclean/crypto_sign/sphincs-haraka-192f-simple/api.h"
+#include "third_party/pqclean/crypto_sign/sphincs-haraka-192s-robust/api.h"
+#include "third_party/pqclean/crypto_sign/sphincs-haraka-192s-simple/api.h"
+#include "third_party/pqclean/crypto_sign/sphincs-haraka-256f-robust/api.h"
+#include "third_party/pqclean/crypto_sign/sphincs-haraka-256f-simple/api.h"
+#include "third_party/pqclean/crypto_sign/sphincs-haraka-256s-robust/api.h"
+#include "third_party/pqclean/crypto_sign/sphincs-haraka-256s-simple/api.h"
+#include "third_party/pqclean/crypto_sign/sphincs-sha256-128f-robust/api.h"
+#include "third_party/pqclean/crypto_sign/sphincs-sha256-128f-simple/api.h"
+#include "third_party/pqclean/crypto_sign/sphincs-sha256-128s-robust/api.h"
+#include "third_party/pqclean/crypto_sign/sphincs-sha256-128s-simple/api.h"
+#include "third_party/pqclean/crypto_sign/sphincs-sha256-192f-robust/api.h"
+#include "third_party/pqclean/crypto_sign/sphincs-sha256-192f-simple/api.h"
+#include "third_party/pqclean/crypto_sign/sphincs-sha256-192s-robust/api.h"
+#include "third_party/pqclean/crypto_sign/sphincs-sha256-192s-simple/api.h"
+#include "third_party/pqclean/crypto_sign/sphincs-sha256-256f-robust/api.h"
+#include "third_party/pqclean/crypto_sign/sphincs-sha256-256f-simple/api.h"
+#include "third_party/pqclean/crypto_sign/sphincs-sha256-256s-robust/api.h"
+#include "third_party/pqclean/crypto_sign/sphincs-sha256-256s-simple/api.h"
+#include "third_party/pqclean/crypto_sign/sphincs-shake256-128f-robust/api.h"
+#include "third_party/pqclean/crypto_sign/sphincs-shake256-128f-simple/api.h"
+#include "third_party/pqclean/crypto_sign/sphincs-shake256-128s-robust/api.h"
+#include "third_party/pqclean/crypto_sign/sphincs-shake256-128s-simple/api.h"
+#include "third_party/pqclean/crypto_sign/sphincs-shake256-192f-robust/api.h"
+#include "third_party/pqclean/crypto_sign/sphincs-shake256-192f-simple/api.h"
+#include "third_party/pqclean/crypto_sign/sphincs-shake256-192s-robust/api.h"
+#include "third_party/pqclean/crypto_sign/sphincs-shake256-192s-simple/api.h"
+#include "third_party/pqclean/crypto_sign/sphincs-shake256-256f-robust/api.h"
+#include "third_party/pqclean/crypto_sign/sphincs-shake256-256f-simple/api.h"
+#include "third_party/pqclean/crypto_sign/sphincs-shake256-256s-robust/api.h"
+#include "third_party/pqclean/crypto_sign/sphincs-shake256-256s-simple/api.h"
 }
 
 namespace crypto {
@@ -132,7 +132,7 @@ TEST_P(SphincsKeyTemplateTest, KeyManagerCompatibility) {
 
   util::StatusOr<std::unique_ptr<portable_proto::MessageLite>> new_key_result =
       key_manager->get_key_factory().NewKey(key_format);
-  EXPECT_THAT(new_key_result.status(), IsOk());
+  EXPECT_THAT(new_key_result, IsOk());
 }
 
 INSTANTIATE_TEST_SUITE_P(
@@ -140,155 +140,155 @@ INSTANTIATE_TEST_SUITE_P(
     testing::ValuesIn<SphincsTestCase>(
         {{"SPHINCSHARAKA128FROBUST", SphincsHashType::HARAKA,
           SphincsVariant::ROBUST, SphincsSignatureType::FAST_SIGNING,
-          PQCLEAN_SPHINCSHARAKA128FROBUST_AESNI_CRYPTO_SECRETKEYBYTES,
+          PQCLEAN_SPHINCSHARAKA128FROBUST_CRYPTO_SECRETKEYBYTES,
           Sphincs_Haraka_128_F_Robust_KeyTemplate()},
          {"SPHINCSHARAKA128SROBUST", SphincsHashType::HARAKA,
           SphincsVariant::ROBUST, SphincsSignatureType::SMALL_SIGNATURE,
-          PQCLEAN_SPHINCSHARAKA128SROBUST_AESNI_CRYPTO_SECRETKEYBYTES,
+          PQCLEAN_SPHINCSHARAKA128SROBUST_CRYPTO_SECRETKEYBYTES,
           Sphincs_Haraka_128_S_Robust_KeyTemplate()},
          {"SPHINCSHARAKA128FSIMPLE", SphincsHashType::HARAKA,
           SphincsVariant::SIMPLE, SphincsSignatureType::FAST_SIGNING,
-          PQCLEAN_SPHINCSHARAKA128FSIMPLE_AESNI_CRYPTO_SECRETKEYBYTES,
+          PQCLEAN_SPHINCSHARAKA128FSIMPLE_CRYPTO_SECRETKEYBYTES,
           Sphincs_Haraka_128_F_Simple_KeyTemplate()},
          {"SPHINCSHARAKA128SSIMPLE", SphincsHashType::HARAKA,
           SphincsVariant::SIMPLE, SphincsSignatureType::SMALL_SIGNATURE,
-          PQCLEAN_SPHINCSHARAKA128SSIMPLE_AESNI_CRYPTO_SECRETKEYBYTES,
+          PQCLEAN_SPHINCSHARAKA128SSIMPLE_CRYPTO_SECRETKEYBYTES,
           Sphincs_Haraka_128_S_Simple_KeyTemplate()},
 
          {"SPHINCSHARAKA192FROBUST", SphincsHashType::HARAKA,
           SphincsVariant::ROBUST, SphincsSignatureType::FAST_SIGNING,
-          PQCLEAN_SPHINCSHARAKA192FROBUST_AESNI_CRYPTO_SECRETKEYBYTES,
+          PQCLEAN_SPHINCSHARAKA192FROBUST_CRYPTO_SECRETKEYBYTES,
           Sphincs_Haraka_192_F_Robust_KeyTemplate()},
          {"SPHINCSHARAKA192SROBUST", SphincsHashType::HARAKA,
           SphincsVariant::ROBUST, SphincsSignatureType::SMALL_SIGNATURE,
-          PQCLEAN_SPHINCSHARAKA192SROBUST_AESNI_CRYPTO_SECRETKEYBYTES,
+          PQCLEAN_SPHINCSHARAKA192SROBUST_CRYPTO_SECRETKEYBYTES,
           Sphincs_Haraka_192_S_Robust_KeyTemplate()},
          {"SPHINCSHARAKA192FSIMPLE", SphincsHashType::HARAKA,
           SphincsVariant::SIMPLE, SphincsSignatureType::FAST_SIGNING,
-          PQCLEAN_SPHINCSHARAKA192FSIMPLE_AESNI_CRYPTO_SECRETKEYBYTES,
+          PQCLEAN_SPHINCSHARAKA192FSIMPLE_CRYPTO_SECRETKEYBYTES,
           Sphincs_Haraka_192_F_Simple_KeyTemplate()},
          {"SPHINCSHARAKA192SSIMPLE", SphincsHashType::HARAKA,
           SphincsVariant::SIMPLE, SphincsSignatureType::SMALL_SIGNATURE,
-          PQCLEAN_SPHINCSHARAKA192SSIMPLE_AESNI_CRYPTO_SECRETKEYBYTES,
+          PQCLEAN_SPHINCSHARAKA192SSIMPLE_CRYPTO_SECRETKEYBYTES,
           Sphincs_Haraka_192_S_Simple_KeyTemplate()},
 
          {"SPHINCSHARAKA256FROBUST", SphincsHashType::HARAKA,
           SphincsVariant::ROBUST, SphincsSignatureType::FAST_SIGNING,
-          PQCLEAN_SPHINCSHARAKA256FROBUST_AESNI_CRYPTO_SECRETKEYBYTES,
+          PQCLEAN_SPHINCSHARAKA256FROBUST_CRYPTO_SECRETKEYBYTES,
           Sphincs_Haraka_256_F_Robust_KeyTemplate()},
          {"SPHINCSHARAKA256SROBUST", SphincsHashType::HARAKA,
           SphincsVariant::ROBUST, SphincsSignatureType::SMALL_SIGNATURE,
-          PQCLEAN_SPHINCSHARAKA256SROBUST_AESNI_CRYPTO_SECRETKEYBYTES,
+          PQCLEAN_SPHINCSHARAKA256SROBUST_CRYPTO_SECRETKEYBYTES,
           Sphincs_Haraka_256_S_Robust_KeyTemplate()},
          {"SPHINCSHARAKA256FSIMPLE", SphincsHashType::HARAKA,
           SphincsVariant::SIMPLE, SphincsSignatureType::FAST_SIGNING,
-          PQCLEAN_SPHINCSHARAKA256FSIMPLE_AESNI_CRYPTO_SECRETKEYBYTES,
+          PQCLEAN_SPHINCSHARAKA256FSIMPLE_CRYPTO_SECRETKEYBYTES,
           Sphincs_Haraka_256_F_Simple_KeyTemplate()},
          {"SPHINCSHARAKA256SSIMPLE", SphincsHashType::HARAKA,
           SphincsVariant::SIMPLE, SphincsSignatureType::SMALL_SIGNATURE,
-          PQCLEAN_SPHINCSHARAKA256SSIMPLE_AESNI_CRYPTO_SECRETKEYBYTES,
+          PQCLEAN_SPHINCSHARAKA256SSIMPLE_CRYPTO_SECRETKEYBYTES,
           Sphincs_Haraka_256_S_Simple_KeyTemplate()},
 
          {"SPHINCSSHA256128FROBUST", SphincsHashType::SHA256,
           SphincsVariant::ROBUST, SphincsSignatureType::FAST_SIGNING,
-          PQCLEAN_SPHINCSSHA256128FROBUST_AVX2_CRYPTO_SECRETKEYBYTES,
+          PQCLEAN_SPHINCSSHA256128FROBUST_CRYPTO_SECRETKEYBYTES,
           Sphincs_Sha256_128_F_Robust_KeyTemplate()},
          {"SPHINCSSHA256128SROBUST", SphincsHashType::SHA256,
           SphincsVariant::ROBUST, SphincsSignatureType::SMALL_SIGNATURE,
-          PQCLEAN_SPHINCSSHA256128SROBUST_AVX2_CRYPTO_SECRETKEYBYTES,
+          PQCLEAN_SPHINCSSHA256128SROBUST_CRYPTO_SECRETKEYBYTES,
           Sphincs_Sha256_128_S_Robust_KeyTemplate()},
          {"SPHINCSSHA256128FSIMPLE", SphincsHashType::SHA256,
           SphincsVariant::SIMPLE, SphincsSignatureType::FAST_SIGNING,
-          PQCLEAN_SPHINCSSHA256128FSIMPLE_AVX2_CRYPTO_SECRETKEYBYTES,
+          PQCLEAN_SPHINCSSHA256128FSIMPLE_CRYPTO_SECRETKEYBYTES,
           Sphincs_Sha256_128_F_Simple_KeyTemplate()},
          {"SPHINCSSHA256128SSIMPLE", SphincsHashType::SHA256,
           SphincsVariant::SIMPLE, SphincsSignatureType::SMALL_SIGNATURE,
-          PQCLEAN_SPHINCSSHA256128SSIMPLE_AVX2_CRYPTO_SECRETKEYBYTES,
+          PQCLEAN_SPHINCSSHA256128SSIMPLE_CRYPTO_SECRETKEYBYTES,
           Sphincs_Sha256_128_S_Simple_KeyTemplate()},
 
          {"SPHINCSSHA256192FROBUST", SphincsHashType::SHA256,
           SphincsVariant::ROBUST, SphincsSignatureType::FAST_SIGNING,
-          PQCLEAN_SPHINCSSHA256192FROBUST_AVX2_CRYPTO_SECRETKEYBYTES,
+          PQCLEAN_SPHINCSSHA256192FROBUST_CRYPTO_SECRETKEYBYTES,
           Sphincs_Sha256_192_F_Robust_KeyTemplate()},
          {"SPHINCSSHA256192SROBUST", SphincsHashType::SHA256,
           SphincsVariant::ROBUST, SphincsSignatureType::SMALL_SIGNATURE,
-          PQCLEAN_SPHINCSSHA256192SROBUST_AVX2_CRYPTO_SECRETKEYBYTES,
+          PQCLEAN_SPHINCSSHA256192SROBUST_CRYPTO_SECRETKEYBYTES,
           Sphincs_Sha256_192_S_Robust_KeyTemplate()},
          {"SPHINCSSHA256192FSIMPLE", SphincsHashType::SHA256,
           SphincsVariant::SIMPLE, SphincsSignatureType::FAST_SIGNING,
-          PQCLEAN_SPHINCSSHA256192FSIMPLE_AVX2_CRYPTO_SECRETKEYBYTES,
+          PQCLEAN_SPHINCSSHA256192FSIMPLE_CRYPTO_SECRETKEYBYTES,
           Sphincs_Sha256_192_F_Simple_KeyTemplate()},
          {"SPHINCSSHA256192SSIMPLE", SphincsHashType::SHA256,
           SphincsVariant::SIMPLE, SphincsSignatureType::SMALL_SIGNATURE,
-          PQCLEAN_SPHINCSSHA256192SSIMPLE_AVX2_CRYPTO_SECRETKEYBYTES,
+          PQCLEAN_SPHINCSSHA256192SSIMPLE_CRYPTO_SECRETKEYBYTES,
           Sphincs_Sha256_192_S_Simple_KeyTemplate()},
 
          {"SPHINCSSHA256256FROBUST", SphincsHashType::SHA256,
           SphincsVariant::ROBUST, SphincsSignatureType::FAST_SIGNING,
-          PQCLEAN_SPHINCSSHA256256FROBUST_AVX2_CRYPTO_SECRETKEYBYTES,
+          PQCLEAN_SPHINCSSHA256256FROBUST_CRYPTO_SECRETKEYBYTES,
           Sphincs_Sha256_256_F_Robust_KeyTemplate()},
          {"SPHINCSSHA256256SROBUST", SphincsHashType::SHA256,
           SphincsVariant::ROBUST, SphincsSignatureType::SMALL_SIGNATURE,
-          PQCLEAN_SPHINCSSHA256256SROBUST_AVX2_CRYPTO_SECRETKEYBYTES,
+          PQCLEAN_SPHINCSSHA256256SROBUST_CRYPTO_SECRETKEYBYTES,
           Sphincs_Sha256_256_S_Robust_KeyTemplate()},
          {"SPHINCSSHA256256FSIMPLE", SphincsHashType::SHA256,
           SphincsVariant::SIMPLE, SphincsSignatureType::FAST_SIGNING,
-          PQCLEAN_SPHINCSSHA256256FSIMPLE_AVX2_CRYPTO_SECRETKEYBYTES,
+          PQCLEAN_SPHINCSSHA256256FSIMPLE_CRYPTO_SECRETKEYBYTES,
           Sphincs_Sha256_256_F_Simple_KeyTemplate()},
          {"SPHINCSSHA256256SSIMPLE", SphincsHashType::SHA256,
           SphincsVariant::SIMPLE, SphincsSignatureType::SMALL_SIGNATURE,
-          PQCLEAN_SPHINCSSHA256256SSIMPLE_AVX2_CRYPTO_SECRETKEYBYTES,
+          PQCLEAN_SPHINCSSHA256256SSIMPLE_CRYPTO_SECRETKEYBYTES,
           Sphincs_Sha256_256_S_Simple_KeyTemplate()},
 
          {"SPHINCSSHAKE256128FROBUST", SphincsHashType::SHAKE256,
           SphincsVariant::ROBUST, SphincsSignatureType::FAST_SIGNING,
-          PQCLEAN_SPHINCSSHAKE256128FROBUST_AVX2_CRYPTO_SECRETKEYBYTES,
+          PQCLEAN_SPHINCSSHAKE256128FROBUST_CRYPTO_SECRETKEYBYTES,
           Sphincs_Shake256_128_F_Robust_KeyTemplate()},
          {"SPHINCSSHAKE256128SROBUST", SphincsHashType::SHAKE256,
           SphincsVariant::ROBUST, SphincsSignatureType::SMALL_SIGNATURE,
-          PQCLEAN_SPHINCSSHAKE256128SROBUST_AVX2_CRYPTO_SECRETKEYBYTES,
+          PQCLEAN_SPHINCSSHAKE256128SROBUST_CRYPTO_SECRETKEYBYTES,
           Sphincs_Shake256_128_S_Robust_KeyTemplate()},
          {"SPHINCSSHAKE256128FSIMPLE", SphincsHashType::SHAKE256,
           SphincsVariant::SIMPLE, SphincsSignatureType::FAST_SIGNING,
-          PQCLEAN_SPHINCSSHAKE256128FSIMPLE_AVX2_CRYPTO_SECRETKEYBYTES,
+          PQCLEAN_SPHINCSSHAKE256128FSIMPLE_CRYPTO_SECRETKEYBYTES,
           Sphincs_Shake256_128_F_Simple_KeyTemplate()},
          {"SPHINCSSHAKE256128SSIMPLE", SphincsHashType::SHAKE256,
           SphincsVariant::SIMPLE, SphincsSignatureType::SMALL_SIGNATURE,
-          PQCLEAN_SPHINCSSHAKE256128SSIMPLE_AVX2_CRYPTO_SECRETKEYBYTES,
+          PQCLEAN_SPHINCSSHAKE256128SSIMPLE_CRYPTO_SECRETKEYBYTES,
           Sphincs_Shake256_128_S_Simple_KeyTemplate()},
 
          {"SPHINCSSHAKE256192FROBUST", SphincsHashType::SHAKE256,
           SphincsVariant::ROBUST, SphincsSignatureType::FAST_SIGNING,
-          PQCLEAN_SPHINCSSHAKE256192FROBUST_AVX2_CRYPTO_SECRETKEYBYTES,
+          PQCLEAN_SPHINCSSHAKE256192FROBUST_CRYPTO_SECRETKEYBYTES,
           Sphincs_Shake256_192_F_Robust_KeyTemplate()},
          {"SPHINCSSHAKE256192SROBUST", SphincsHashType::SHAKE256,
           SphincsVariant::ROBUST, SphincsSignatureType::SMALL_SIGNATURE,
-          PQCLEAN_SPHINCSSHAKE256192SROBUST_AVX2_CRYPTO_SECRETKEYBYTES,
+          PQCLEAN_SPHINCSSHAKE256192SROBUST_CRYPTO_SECRETKEYBYTES,
           Sphincs_Shake256_192_S_Robust_KeyTemplate()},
          {"SPHINCSSHAKE256192FSIMPLE", SphincsHashType::SHAKE256,
           SphincsVariant::SIMPLE, SphincsSignatureType::FAST_SIGNING,
-          PQCLEAN_SPHINCSSHAKE256192FSIMPLE_AVX2_CRYPTO_SECRETKEYBYTES,
+          PQCLEAN_SPHINCSSHAKE256192FSIMPLE_CRYPTO_SECRETKEYBYTES,
           Sphincs_Shake256_192_F_Simple_KeyTemplate()},
          {"SPHINCSSHAKE256192SSIMPLE", SphincsHashType::SHAKE256,
           SphincsVariant::SIMPLE, SphincsSignatureType::SMALL_SIGNATURE,
-          PQCLEAN_SPHINCSSHAKE256192SSIMPLE_AVX2_CRYPTO_SECRETKEYBYTES,
+          PQCLEAN_SPHINCSSHAKE256192SSIMPLE_CRYPTO_SECRETKEYBYTES,
           Sphincs_Shake256_192_S_Simple_KeyTemplate()},
 
          {"SPHINCSSHAKE256256FROBUST", SphincsHashType::SHAKE256,
           SphincsVariant::ROBUST, SphincsSignatureType::FAST_SIGNING,
-          PQCLEAN_SPHINCSSHAKE256256FROBUST_AVX2_CRYPTO_SECRETKEYBYTES,
+          PQCLEAN_SPHINCSSHAKE256256FROBUST_CRYPTO_SECRETKEYBYTES,
           Sphincs_Shake256_256_F_Robust_KeyTemplate()},
          {"SPHINCSSHAKE256256SROBUST", SphincsHashType::SHAKE256,
           SphincsVariant::ROBUST, SphincsSignatureType::SMALL_SIGNATURE,
-          PQCLEAN_SPHINCSSHAKE256256SROBUST_AVX2_CRYPTO_SECRETKEYBYTES,
+          PQCLEAN_SPHINCSSHAKE256256SROBUST_CRYPTO_SECRETKEYBYTES,
           Sphincs_Shake256_256_S_Robust_KeyTemplate()},
          {"SPHINCSSHAKE256256FSIMPLE", SphincsHashType::SHAKE256,
           SphincsVariant::SIMPLE, SphincsSignatureType::FAST_SIGNING,
-          PQCLEAN_SPHINCSSHAKE256256FSIMPLE_AVX2_CRYPTO_SECRETKEYBYTES,
+          PQCLEAN_SPHINCSSHAKE256256FSIMPLE_CRYPTO_SECRETKEYBYTES,
           Sphincs_Shake256_256_F_Simple_KeyTemplate()},
          {"SPHINCSSHAKE256256SSIMPLE", SphincsHashType::SHAKE256,
           SphincsVariant::SIMPLE, SphincsSignatureType::SMALL_SIGNATURE,
-          PQCLEAN_SPHINCSSHAKE256256SSIMPLE_AVX2_CRYPTO_SECRETKEYBYTES,
+          PQCLEAN_SPHINCSSHAKE256256SSIMPLE_CRYPTO_SECRETKEYBYTES,
           Sphincs_Shake256_256_S_Simple_KeyTemplate()}}),
     [](const testing::TestParamInfo<SphincsKeyTemplateTest::ParamType>& info) {
       return info.param.test_name;

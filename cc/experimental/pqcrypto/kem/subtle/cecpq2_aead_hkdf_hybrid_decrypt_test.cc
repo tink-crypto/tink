@@ -225,7 +225,7 @@ google::crypto::tink::Cecpq2AeadHkdfPrivateKey CreateValidKey() {
 TEST_F(Cecpq2AeadHkdfHybridDecryptTest, ValidKey) {
   google::crypto::tink::Cecpq2AeadHkdfPrivateKey recipient_key =
       CreateValidKey();
-  EXPECT_THAT(Cecpq2AeadHkdfHybridDecrypt::New(recipient_key).status(), IsOk());
+  EXPECT_THAT(Cecpq2AeadHkdfHybridDecrypt::New(recipient_key), IsOk());
 }
 
 TEST_F(Cecpq2AeadHkdfHybridDecryptTest, InvalidKeyNoFieldsSet) {

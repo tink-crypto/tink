@@ -95,7 +95,7 @@ TEST_P(SslOneShotAeadLargeInputsTest, EncryptDecryptLargeInput) {
   util::StatusOr<std::unique_ptr<SslOneShotAead>> aead = CipherFromName(
       test_param.cipher, util::SecretDataFromStringView(
                              absl::HexStringToBytes(test_param.key_hex)));
-  ASSERT_THAT(aead.status(), IsOk());
+  ASSERT_THAT(aead, IsOk());
 
   std::string iv = absl::HexStringToBytes(test_param.iv_hex);
   std::string ciphertext_buffer;
@@ -107,7 +107,7 @@ TEST_P(SslOneShotAeadLargeInputsTest, EncryptDecryptLargeInput) {
   ASSERT_GE(ciphertext_buffer.size(), large_input.size() + test_param.tag_size);
   util::StatusOr<int64_t> res = (*aead)->Encrypt(
       large_input, kAad, iv, absl::MakeSpan(ciphertext_buffer));
-  ASSERT_THAT(res.status(), IsOk());
+  ASSERT_THAT(res, IsOk());
   EXPECT_EQ(*res, large_input.size() + test_param.tag_size);
 
   // Decrypt.
@@ -115,7 +115,7 @@ TEST_P(SslOneShotAeadLargeInputsTest, EncryptDecryptLargeInput) {
   subtle::ResizeStringUninitialized(&plaintext_buff, large_input.size());
   util::StatusOr<int64_t> written_bytes = (*aead)->Decrypt(
       ciphertext_buffer, kAad, iv, absl::MakeSpan(plaintext_buff));
-  ASSERT_THAT(written_bytes.status(), IsOk());
+  ASSERT_THAT(written_bytes, IsOk());
   EXPECT_EQ(*written_bytes, large_input.size());
   EXPECT_EQ(plaintext_buff, large_input);
 }

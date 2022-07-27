@@ -108,7 +108,7 @@ TEST(AesEaxKeyManagerTest, CreateKey) {
   format.set_key_size(32);
   format.mutable_params()->set_iv_size(16);
   auto key_or = AesEaxKeyManager().CreateKey(format);
-  ASSERT_THAT(key_or.status(), IsOk());
+  ASSERT_THAT(key_or, IsOk());
   EXPECT_THAT(key_or.value().key_value(), SizeIs(format.key_size()));
   EXPECT_THAT(key_or.value().params().iv_size(), Eq(format.params().iv_size()));
 }
@@ -118,7 +118,7 @@ TEST(AesEaxKeyManagerTest, CreateKeyIsValid) {
   format.set_key_size(32);
   format.mutable_params()->set_iv_size(16);
   auto key_or = AesEaxKeyManager().CreateKey(format);
-  ASSERT_THAT(key_or.status(), IsOk());
+  ASSERT_THAT(key_or, IsOk());
   EXPECT_THAT(AesEaxKeyManager().ValidateKey(key_or.value()), IsOk());
 }
 
@@ -128,9 +128,9 @@ TEST(AesEaxKeyManagerTest, MultipleCreateCallsCreateDifferentKeys) {
   format.set_key_size(32);
   format.mutable_params()->set_iv_size(16);
   auto key1_or = manager.CreateKey(format);
-  ASSERT_THAT(key1_or.status(), IsOk());
+  ASSERT_THAT(key1_or, IsOk());
   auto key2_or = manager.CreateKey(format);
-  ASSERT_THAT(key2_or.status(), IsOk());
+  ASSERT_THAT(key2_or, IsOk());
   EXPECT_THAT(key1_or.value().key_value(), Ne(key2_or.value().key_value()));
 }
 
@@ -178,18 +178,18 @@ TEST(AesGcmKeyManagerTest, CreateAead) {
   format.set_key_size(32);
   format.mutable_params()->set_iv_size(16);
   StatusOr<AesEaxKey> key_or = AesEaxKeyManager().CreateKey(format);
-  ASSERT_THAT(key_or.status(), IsOk());
+  ASSERT_THAT(key_or, IsOk());
 
   StatusOr<std::unique_ptr<Aead>> aead_or =
       AesEaxKeyManager().GetPrimitive<Aead>(key_or.value());
 
-  ASSERT_THAT(aead_or.status(), IsOk());
+  ASSERT_THAT(aead_or, IsOk());
 
   StatusOr<std::unique_ptr<Aead>> boring_ssl_aead_or =
       subtle::AesEaxBoringSsl::New(
           util::SecretDataFromStringView(key_or.value().key_value()),
           key_or.value().params().iv_size());
-  ASSERT_THAT(boring_ssl_aead_or.status(), IsOk());
+  ASSERT_THAT(boring_ssl_aead_or, IsOk());
 
   ASSERT_THAT(EncryptThenDecrypt(*aead_or.value(), *boring_ssl_aead_or.value(),
                                  "message", "aad"),

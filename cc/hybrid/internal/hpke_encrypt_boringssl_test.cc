@@ -58,12 +58,12 @@ INSTANTIATE_TEST_SUITE_P(
 TEST_P(HpkeEncapsulateKeyThenEncryptBoringSslTest, EncapsulateKeyThenEncrypt) {
   HpkeParams hpke_params = GetParam();
   util::StatusOr<HpkeTestParams> params = CreateHpkeTestParams(hpke_params);
-  ASSERT_THAT(params.status(), IsOk());
+  ASSERT_THAT(params, IsOk());
   util::StatusOr<std::unique_ptr<HpkeEncryptBoringSsl>> hpke_encrypt =
       HpkeEncryptBoringSsl::NewForTesting(
           hpke_params, params->recipient_public_key, params->application_info,
           params->seed_for_testing);
-  ASSERT_THAT(hpke_encrypt.status(), IsOk());
+  ASSERT_THAT(hpke_encrypt, IsOk());
   util::StatusOr<std::string> ciphertext =
       (*hpke_encrypt)
           ->EncapsulateKeyThenEncrypt(params->plaintext,

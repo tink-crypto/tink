@@ -78,7 +78,7 @@ java_library(
     deps = [
         ":elliptic_curves",
         ":hkdf",
-        "//src/main/java/com/google/crypto/tink/internal:byte_array",
+        "//src/main/java/com/google/crypto/tink/util:bytes",
     ],
 )
 
@@ -95,6 +95,7 @@ java_library(
         ":elliptic_curves",
         ":enums",
         ":subtle_util_cluster",
+        "@maven//:com_google_code_findbugs_jsr305",
     ],
 )
 
@@ -344,7 +345,7 @@ java_library(
         ":field25519",
         "//src/main/java/com/google/crypto/tink:public_key_verify",
         "//src/main/java/com/google/crypto/tink/config/internal:tink_fips_util",
-        "//src/main/java/com/google/crypto/tink/internal:byte_array",
+        "//src/main/java/com/google/crypto/tink/util:bytes",
     ],
 )
 
@@ -514,6 +515,7 @@ java_library(
         ":stream_segment_decrypter",
         ":stream_segment_encrypter",
         "//src/main/java/com/google/crypto/tink:streaming_aead",
+        "@maven//:androidx_annotation_annotation",
     ],
 )
 
@@ -756,7 +758,7 @@ android_library(
     deps = [
         ":elliptic_curves-android",
         ":hkdf-android",
-        "//src/main/java/com/google/crypto/tink/internal:byte_array-android",
+        "//src/main/java/com/google/crypto/tink/util:bytes-android",
     ],
 )
 
@@ -806,7 +808,7 @@ android_library(
         ":field25519-android",
         "//src/main/java/com/google/crypto/tink:public_key_verify-android",
         "//src/main/java/com/google/crypto/tink/config/internal:tink_fips_util-android",
-        "//src/main/java/com/google/crypto/tink/internal:byte_array-android",
+        "//src/main/java/com/google/crypto/tink/util:bytes-android",
     ],
 )
 
@@ -883,6 +885,7 @@ android_library(
         ":stream_segment_decrypter-android",
         ":stream_segment_encrypter-android",
         "//src/main/java/com/google/crypto/tink:streaming_aead-android",
+        "@maven//:androidx_annotation_annotation",
     ],
 )
 
@@ -894,6 +897,7 @@ android_library(
         ":elliptic_curves-android",
         ":enums-android",
         ":subtle_util_cluster-android",
+        "@maven//:com_google_code_findbugs_jsr305",
     ],
 )
 

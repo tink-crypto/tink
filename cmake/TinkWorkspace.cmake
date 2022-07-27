@@ -92,8 +92,8 @@ add_directory_alias("${wycheproof_SOURCE_DIR}" "${CMAKE_BINARY_DIR}/external/wyc
 if (NOT TINK_USE_SYSTEM_OPENSSL)
   http_archive(
     NAME boringssl
-    URL https://github.com/google/boringssl/archive/7686eb8ac9bc60198cbc8354fcba7f54c02792ec.zip
-    SHA256 73a7bc71f95f3259ddedc6cb5ba45d02f2359c43e75af354928b0471a428bb84
+    URL https://github.com/google/boringssl/archive/88cdf7dd2dbce1ecb9057c183095103d83373abe.zip
+    SHA256 24092815136f956069fcfa5172166ad4e025166ce6fe500420c9e3e3c4f3da38
     CMAKE_SUBDIR src
   )
 

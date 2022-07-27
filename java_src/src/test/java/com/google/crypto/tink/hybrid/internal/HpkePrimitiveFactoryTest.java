@@ -23,19 +23,76 @@ import com.google.crypto.tink.proto.HpkeParams;
 import java.security.GeneralSecurityException;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.experimental.theories.DataPoints;
+import org.junit.experimental.theories.FromDataPoints;
+import org.junit.experimental.theories.Theories;
+import org.junit.experimental.theories.Theory;
 import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
 
 /** Unit tests for {@link HpkePrimitiveFactory}. */
-@RunWith(JUnit4.class)
+@RunWith(Theories.class)
 public final class HpkePrimitiveFactoryTest {
   @Rule public final Expect expect = Expect.create();
 
+  private static final class KdfParameter {
+    final byte[] id;
+    final com.google.crypto.tink.proto.HpkeKdf hpkeKdf;
+
+    KdfParameter(byte[] id, com.google.crypto.tink.proto.HpkeKdf hpkeKdf) {
+      this.id = id;
+      this.hpkeKdf = hpkeKdf;
+    }
+  }
+
+  @DataPoints("kdfParameters")
+  public static final KdfParameter[] KDF_PARAMETERS =
+      new KdfParameter[] {
+        new KdfParameter(
+            HpkeUtil.HKDF_SHA256_KDF_ID, com.google.crypto.tink.proto.HpkeKdf.HKDF_SHA256),
+        new KdfParameter(
+            HpkeUtil.HKDF_SHA384_KDF_ID, com.google.crypto.tink.proto.HpkeKdf.HKDF_SHA384),
+        new KdfParameter(
+            HpkeUtil.HKDF_SHA512_KDF_ID, com.google.crypto.tink.proto.HpkeKdf.HKDF_SHA512),
+      };
+
+  private static final class NistCurveKemParameter {
+    final byte[] id;
+    final com.google.crypto.tink.proto.HpkeKem hpkeKem;
+
+    NistCurveKemParameter(byte[] id, com.google.crypto.tink.proto.HpkeKem hpkeKem) {
+      this.id = id;
+      this.hpkeKem = hpkeKem;
+    }
+  }
+
+  @DataPoints("nistCurveKemParameters")
+  public static final NistCurveKemParameter[] NIST_KEM_PARAMETERS =
+      new NistCurveKemParameter[] {
+        new NistCurveKemParameter(
+            HpkeUtil.P256_HKDF_SHA256_KEM_ID,
+            com.google.crypto.tink.proto.HpkeKem.DHKEM_P256_HKDF_SHA256),
+        new NistCurveKemParameter(
+            HpkeUtil.P384_HKDF_SHA384_KEM_ID,
+            com.google.crypto.tink.proto.HpkeKem.DHKEM_P384_HKDF_SHA384),
+        new NistCurveKemParameter(
+            HpkeUtil.P521_HKDF_SHA512_KEM_ID,
+            com.google.crypto.tink.proto.HpkeKem.DHKEM_P521_HKDF_SHA512),
+      };
+
   @Test
-  public void createKem_fromValidKemId_succeeds() throws GeneralSecurityException {
+  public void createKem_fromValidKemId_x25519HkdfSha256_succeeds() throws GeneralSecurityException {
     HpkeKem kem = HpkePrimitiveFactory.createKem(HpkeUtil.X25519_HKDF_SHA256_KEM_ID);
     expect.that(kem).isInstanceOf(X25519HpkeKem.class);
     expect.that(kem.getKemId()).isEqualTo(HpkeUtil.X25519_HKDF_SHA256_KEM_ID);
+  }
+
+  @Theory
+  public void createKem_fromValidKemId_NistKem_succeeds(
+      @FromDataPoints("nistCurveKemParameters") NistCurveKemParameter nistKemParameter)
+      throws GeneralSecurityException {
+    HpkeKem kem = HpkePrimitiveFactory.createKem(nistKemParameter.id);
+    expect.that(kem).isInstanceOf(NistCurvesHpkeKem.class);
+    expect.that(kem.getKemId()).isEqualTo(nistKemParameter.id);
   }
 
   @Test
@@ -46,7 +103,8 @@ public final class HpkePrimitiveFactoryTest {
   }
 
   @Test
-  public void createKem_fromValidHpkeParams_succeeds() throws GeneralSecurityException {
+  public void createKem_fromValidHpkeParams_x25519HkdfSha256_succeeds()
+      throws GeneralSecurityException {
     HpkeParams params =
         HpkeParams.newBuilder()
             .setKem(com.google.crypto.tink.proto.HpkeKem.DHKEM_X25519_HKDF_SHA256)
@@ -56,6 +114,16 @@ public final class HpkePrimitiveFactoryTest {
     expect.that(kem.getKemId()).isEqualTo(HpkeUtil.X25519_HKDF_SHA256_KEM_ID);
   }
 
+  @Theory
+  public void createKem_fromValidHpkeParams_nistCurveKem_succeeds(
+      @FromDataPoints("nistCurveKemParameters") NistCurveKemParameter nistKemParameter)
+      throws GeneralSecurityException {
+    HpkeParams params = HpkeParams.newBuilder().setKem(nistKemParameter.hpkeKem).build();
+    HpkeKem kem = HpkePrimitiveFactory.createKem(params);
+    expect.that(kem).isInstanceOf(NistCurvesHpkeKem.class);
+    expect.that(kem.getKemId()).isEqualTo(nistKemParameter.id);
+  }
+
   @Test
   public void createKem_fromInvalidHpkeParams_fails() {
     HpkeParams params =
@@ -63,11 +131,12 @@ public final class HpkePrimitiveFactoryTest {
     assertThrows(IllegalArgumentException.class, () -> HpkePrimitiveFactory.createKem(params));
   }
 
-  @Test
-  public void createKdf_fromValidKdfId_succeeds() throws GeneralSecurityException {
-    HpkeKdf kdf = HpkePrimitiveFactory.createKdf(HpkeUtil.HKDF_SHA256_KDF_ID);
+  @Theory
+  public void createKdf_fromValidKdfId_succeeds(
+      @FromDataPoints("kdfParameters") KdfParameter kdfParameter) throws GeneralSecurityException {
+    HpkeKdf kdf = HpkePrimitiveFactory.createKdf(kdfParameter.id);
     expect.that(kdf).isInstanceOf(HkdfHpkeKdf.class);
-    expect.that(kdf.getKdfId()).isEqualTo(HpkeUtil.HKDF_SHA256_KDF_ID);
+    expect.that(kdf.getKdfId()).isEqualTo(kdfParameter.id);
   }
 
   @Test
@@ -77,13 +146,13 @@ public final class HpkePrimitiveFactoryTest {
         IllegalArgumentException.class, () -> HpkePrimitiveFactory.createKdf(invalidKdfId));
   }
 
-  @Test
-  public void createKdf_fromValidHpkeParams_succeeds() throws GeneralSecurityException {
-    HpkeParams params =
-        HpkeParams.newBuilder().setKdf(com.google.crypto.tink.proto.HpkeKdf.HKDF_SHA256).build();
+  @Theory
+  public void createKdf_fromValidHpkeParams_succeeds(
+      @FromDataPoints("kdfParameters") KdfParameter kdfParameter) throws GeneralSecurityException {
+    HpkeParams params = HpkeParams.newBuilder().setKdf(kdfParameter.hpkeKdf).build();
     HpkeKdf kdf = HpkePrimitiveFactory.createKdf(params);
     expect.that(kdf).isInstanceOf(HkdfHpkeKdf.class);
-    expect.that(kdf.getKdfId()).isEqualTo(HpkeUtil.HKDF_SHA256_KDF_ID);
+    expect.that(kdf.getKdfId()).isEqualTo(kdfParameter.id);
   }
 
   @Test

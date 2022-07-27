@@ -131,6 +131,70 @@ func (a *DummyAEAD) Decrypt(ciphertext []byte, associatedData []byte) ([]byte, e
 	return data.Plaintext, nil
 }
 
+// AlwaysFailingAead fails encryption and decryption operations.
+type AlwaysFailingAead struct {
+	Error error
+}
+
+var _ (tink.AEAD) = (*AlwaysFailingAead)(nil)
+
+// NewAlwaysFailingAead creates a new always failing AEAD.
+func NewAlwaysFailingAead(err error) tink.AEAD {
+	return &AlwaysFailingAead{Error: err}
+}
+
+// Encrypt returns an error on encryption.
+func (a *AlwaysFailingAead) Encrypt(plaintext []byte, associatedData []byte) ([]byte, error) {
+	return nil, fmt.Errorf("AlwaysFailingAead will always fail on encryption: %v", a.Error)
+}
+
+// Decrypt returns an error on decryption.
+func (a *AlwaysFailingAead) Decrypt(ciphertext []byte, associatedData []byte) ([]byte, error) {
+	return nil, fmt.Errorf("AlwaysFailingAead will always fail on decryption: %v", a.Error)
+}
+
+// TestKeyManager is key manager which can be setup to return an arbitrary primitive for a type URL
+// useful for testing.
+type TestKeyManager struct {
+	primitive interface{}
+	typeURL   string
+}
+
+var _ registry.KeyManager = (*TestKeyManager)(nil)
+
+// NewTestKeyManager creates a new key manager that returns a specific primitive for a typeURL.
+func NewTestKeyManager(primitive interface{}, typeURL string) registry.KeyManager {
+	return &TestKeyManager{
+		primitive: primitive,
+		typeURL:   typeURL,
+	}
+}
+
+// Primitive constructs a primitive instance for the key given input key.
+func (km *TestKeyManager) Primitive(serializedKey []byte) (interface{}, error) {
+	return km.primitive, nil
+}
+
+// NewKey generates a new key according to specification in serializedKeyFormat.
+func (km *TestKeyManager) NewKey(serializedKeyFormat []byte) (proto.Message, error) {
+	return nil, fmt.Errorf("TestKeyManager: not implemented")
+}
+
+// NewKeyData generates a new KeyData according to specification in serializedkeyFormat.
+func (km *TestKeyManager) NewKeyData(serializedKeyFormat []byte) (*tinkpb.KeyData, error) {
+	return nil, fmt.Errorf("TestKeyManager: not implemented")
+}
+
+// DoesSupport returns true if this KeyManager supports key type identified by typeURL.
+func (km *TestKeyManager) DoesSupport(typeURL string) bool {
+	return typeURL == km.typeURL
+}
+
+// TypeURL returns the type URL.
+func (km *TestKeyManager) TypeURL() string {
+	return km.typeURL
+}
+
 // DummySigner is a dummy implementation of the Signer interface.
 type DummySigner struct {
 	aead DummyAEAD

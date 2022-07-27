@@ -23,10 +23,12 @@ import (
 	"time"
 
 	spb "google.golang.org/protobuf/types/known/structpb"
+	tpb "google.golang.org/protobuf/types/known/timestamppb"
+	wpb "google.golang.org/protobuf/types/known/wrapperspb"
 	"github.com/google/tink/go/jwt"
 	"github.com/google/tink/go/keyset"
 	"github.com/google/tink/go/testkeyset"
-	pb "github.com/google/tink/proto/testing/testing_api_go_grpc"
+	pb "github.com/google/tink/testing/go/proto/testing_api_go_grpc"
 )
 
 // JWTService implements the JWT testing service.
@@ -34,7 +36,7 @@ type JWTService struct {
 	pb.JwtServer
 }
 
-func refString(s *pb.StringValue) *string {
+func refString(s *wpb.StringValue) *string {
 	if s == nil {
 		return nil
 	}
@@ -42,7 +44,7 @@ func refString(s *pb.StringValue) *string {
 	return &v
 }
 
-func refTime(t *pb.Timestamp) *time.Time {
+func refTime(t *tpb.Timestamp) *time.Time {
 	if t == nil {
 		return nil
 	}
@@ -149,7 +151,7 @@ func tokenFromProto(t *pb.JwtToken) (*jwt.RawJWT, error) {
 	return jwt.NewRawJWT(opts)
 }
 
-func toStringValue(present bool, getValue func() (string, error), val **pb.StringValue) error {
+func toStringValue(present bool, getValue func() (string, error), val **wpb.StringValue) error {
 	if !present {
 		return nil
 	}
@@ -157,11 +159,11 @@ func toStringValue(present bool, getValue func() (string, error), val **pb.Strin
 	if err != nil {
 		return err
 	}
-	*val = &pb.StringValue{Value: v}
+	*val = &wpb.StringValue{Value: v}
 	return nil
 }
 
-func toTimeValue(present bool, getValue func() (time.Time, error), val **pb.Timestamp) error {
+func toTimeValue(present bool, getValue func() (time.Time, error), val **tpb.Timestamp) error {
 	if !present {
 		return nil
 	}
@@ -169,7 +171,7 @@ func toTimeValue(present bool, getValue func() (time.Time, error), val **pb.Time
 	if err != nil {
 		return err
 	}
-	*val = &pb.Timestamp{Seconds: v.Unix()}
+	*val = &tpb.Timestamp{Seconds: v.Unix()}
 	return nil
 }
 

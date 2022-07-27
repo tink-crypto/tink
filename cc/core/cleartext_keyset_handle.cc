@@ -18,8 +18,10 @@
 
 #include <istream>
 #include <memory>
+#include <string>
 #include <utility>
 
+#include "absl/container/flat_hash_map.h"
 #include "absl/status/status.h"
 #include "tink/keyset_handle.h"
 #include "tink/keyset_reader.h"
@@ -36,15 +38,17 @@ namespace tink {
 
 // static
 util::StatusOr<std::unique_ptr<KeysetHandle>> CleartextKeysetHandle::Read(
-    std::unique_ptr<KeysetReader> reader) {
+    std::unique_ptr<KeysetReader> reader,
+    const absl::flat_hash_map<std::string, std::string>&
+        monitoring_annotations) {
   auto keyset_result = reader->Read();
   if (!keyset_result.ok()) {
     return ToStatusF(absl::StatusCode::kInvalidArgument,
                      "Error reading keyset data: %s",
                      keyset_result.status().message());
   }
-  std::unique_ptr<KeysetHandle> handle(
-      new KeysetHandle(std::move(keyset_result.value())));
+  std::unique_ptr<KeysetHandle> handle(new KeysetHandle(
+      std::move(keyset_result.value()), monitoring_annotations));
   return std::move(handle);
 }
 

@@ -18,7 +18,7 @@ import grpc
 
 from tink import jwt
 
-from proto.testing import testing_api_pb2
+from proto import testing_api_pb2
 import jwt_service
 import services
 

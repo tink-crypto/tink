@@ -17,6 +17,9 @@ syntax = "proto3";
 
 package google.crypto.tink;
 
+option java_package = "com.google.crypto.tink.proto";
+option java_multiple_files = true;
+
 message TestProto {
   uint64 num = 1;
   bytes str = 2;  // Placeholder for ctype.

@@ -14,5 +14,5 @@ go_library(
 alias(
     name = "go_default_library",
     actual = ":aes_ctr_go_proto",
-    visibility = ["//visibility:public"],
+    visibility = ["//:__subpackages__"],
 )

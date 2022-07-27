@@ -17,6 +17,7 @@
 package com.google.crypto.tink.hybrid.internal;
 
 import com.google.crypto.tink.proto.HpkeParams;
+import com.google.crypto.tink.subtle.EllipticCurves;
 import java.security.GeneralSecurityException;
 import java.util.Arrays;
 
@@ -26,9 +27,15 @@ import java.util.Arrays;
  */
 final class HpkePrimitiveFactory {
   /** Returns an {@link HpkeKem} primitive corresponding to {@code kemId}. */
-  static HpkeKem createKem(byte[] kemId) {
+  static HpkeKem createKem(byte[] kemId) throws GeneralSecurityException {
     if (Arrays.equals(kemId, HpkeUtil.X25519_HKDF_SHA256_KEM_ID)) {
       return new X25519HpkeKem(new HkdfHpkeKdf("HmacSha256"));
+    } else if (Arrays.equals(kemId, HpkeUtil.P256_HKDF_SHA256_KEM_ID)) {
+      return NistCurvesHpkeKem.fromCurve(EllipticCurves.CurveType.NIST_P256);
+    } else if (Arrays.equals(kemId, HpkeUtil.P384_HKDF_SHA384_KEM_ID)) {
+      return NistCurvesHpkeKem.fromCurve(EllipticCurves.CurveType.NIST_P384);
+    } else if (Arrays.equals(kemId, HpkeUtil.P521_HKDF_SHA512_KEM_ID)) {
+      return NistCurvesHpkeKem.fromCurve(EllipticCurves.CurveType.NIST_P521);
     }
     throw new IllegalArgumentException("Unrecognized HPKE KEM identifier");
   }
@@ -37,9 +44,15 @@ final class HpkePrimitiveFactory {
    * Returns an {@link HpkeKem} primitive corresponding to {@link
    * com.google.crypto.tink.proto.HpkeParams#getKem()}.
    */
-  static HpkeKem createKem(HpkeParams params) {
+  static HpkeKem createKem(HpkeParams params) throws GeneralSecurityException {
     if (params.getKem() == com.google.crypto.tink.proto.HpkeKem.DHKEM_X25519_HKDF_SHA256) {
       return new X25519HpkeKem(new HkdfHpkeKdf("HmacSha256"));
+    } else if (params.getKem() == com.google.crypto.tink.proto.HpkeKem.DHKEM_P256_HKDF_SHA256) {
+      return NistCurvesHpkeKem.fromCurve(EllipticCurves.CurveType.NIST_P256);
+    } else if (params.getKem() == com.google.crypto.tink.proto.HpkeKem.DHKEM_P384_HKDF_SHA384) {
+      return NistCurvesHpkeKem.fromCurve(EllipticCurves.CurveType.NIST_P384);
+    } else if (params.getKem() == com.google.crypto.tink.proto.HpkeKem.DHKEM_P521_HKDF_SHA512) {
+      return NistCurvesHpkeKem.fromCurve(EllipticCurves.CurveType.NIST_P521);
     }
     throw new IllegalArgumentException("Unrecognized HPKE KEM identifier");
   }
@@ -48,6 +61,10 @@ final class HpkePrimitiveFactory {
   static HpkeKdf createKdf(byte[] kdfId) {
     if (Arrays.equals(kdfId, HpkeUtil.HKDF_SHA256_KDF_ID)) {
       return new HkdfHpkeKdf("HmacSha256");
+    } else if (Arrays.equals(kdfId, HpkeUtil.HKDF_SHA384_KDF_ID)) {
+      return new HkdfHpkeKdf("HmacSha384");
+    } else if (Arrays.equals(kdfId, HpkeUtil.HKDF_SHA512_KDF_ID)) {
+      return new HkdfHpkeKdf("HmacSha512");
     }
     throw new IllegalArgumentException("Unrecognized HPKE KDF identifier");
   }
@@ -59,6 +76,10 @@ final class HpkePrimitiveFactory {
   static HpkeKdf createKdf(HpkeParams params) {
     if (params.getKdf() == com.google.crypto.tink.proto.HpkeKdf.HKDF_SHA256) {
       return new HkdfHpkeKdf("HmacSha256");
+    } else if (params.getKdf() == com.google.crypto.tink.proto.HpkeKdf.HKDF_SHA384) {
+      return new HkdfHpkeKdf("HmacSha384");
+    } else if (params.getKdf() == com.google.crypto.tink.proto.HpkeKdf.HKDF_SHA512) {
+      return new HkdfHpkeKdf("HmacSha512");
     }
     throw new IllegalArgumentException("Unrecognized HPKE KDF identifier");
   }

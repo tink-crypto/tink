@@ -63,7 +63,7 @@ TEST(StatefulCmacBoringSslTest, CmacEmptyInputRegularTagSize) {
       util::SecretDataFromStringView(absl::HexStringToBytes(kKeyHex));
   util::StatusOr<std::unique_ptr<StatefulMac>> cmac =
       StatefulCmacBoringSsl::New(kTagSize, key);
-  ASSERT_THAT(cmac.status(), IsOk());
+  ASSERT_THAT(cmac, IsOk());
   EXPECT_THAT(
       (*cmac)->Finalize(),
       IsOkAndHolds(absl::HexStringToBytes(kCmacOnEmptyInputRegularTagSizeHex)));
@@ -74,7 +74,7 @@ TEST(StatefulCmacBoringSslTest, CmacEmptyInputSmallTag) {
       util::SecretDataFromStringView(absl::HexStringToBytes(kKeyHex));
   util::StatusOr<std::unique_ptr<StatefulMac>> cmac =
       StatefulCmacBoringSsl::New(kSmallTagSize, key);
-  ASSERT_THAT(cmac.status(), IsOk());
+  ASSERT_THAT(cmac, IsOk());
   EXPECT_THAT(
       (*cmac)->Finalize(),
       IsOkAndHolds(absl::HexStringToBytes(kCmacOnEmptyInputSmallTagSizeHex)));
@@ -85,7 +85,7 @@ TEST(StatefulCmacBoringSslTest, CmacSomeDataRegularTagSize) {
       util::SecretDataFromStringView(absl::HexStringToBytes(kKeyHex));
   util::StatusOr<std::unique_ptr<StatefulMac>> cmac =
       StatefulCmacBoringSsl::New(kTagSize, key);
-  ASSERT_THAT(cmac.status(), IsOk());
+  ASSERT_THAT(cmac, IsOk());
   EXPECT_THAT((*cmac)->Update(kData), IsOk());
   EXPECT_THAT(
       (*cmac)->Finalize(),
@@ -97,7 +97,7 @@ TEST(StatefulCmacBoringSslTest, CmacSomeDataSmallTag) {
       util::SecretDataFromStringView(absl::HexStringToBytes(kKeyHex));
   util::StatusOr<std::unique_ptr<StatefulMac>> cmac =
       StatefulCmacBoringSsl::New(kSmallTagSize, key);
-  ASSERT_THAT(cmac.status(), IsOk());
+  ASSERT_THAT(cmac, IsOk());
   EXPECT_THAT((*cmac)->Update(kData), IsOk());
   EXPECT_THAT((*cmac)->Finalize(),
               IsOkAndHolds(absl::HexStringToBytes(kCmacOnDataSmallTagSizeHex)));
@@ -109,7 +109,7 @@ TEST(StatefulCmacBoringSslTest,
       util::SecretDataFromStringView(absl::HexStringToBytes(kKeyHex));
   util::StatusOr<std::unique_ptr<StatefulMac>> cmac =
       StatefulCmacBoringSsl::New(kTagSize, key);
-  ASSERT_THAT(cmac.status(), IsOk());
+  ASSERT_THAT(cmac, IsOk());
   for (const std::string &token : {"Some ", "data ", "to ", "test."}) {
     EXPECT_THAT((*cmac)->Update(token), IsOk());
   }
@@ -124,7 +124,7 @@ TEST(StatefulCmacBoringSslTest,
       util::SecretDataFromStringView(absl::HexStringToBytes(kKeyHex));
   util::StatusOr<std::unique_ptr<StatefulMac>> cmac =
       StatefulCmacBoringSsl::New(kSmallTagSize, key);
-  ASSERT_THAT(cmac.status(), IsOk());
+  ASSERT_THAT(cmac, IsOk());
   for (const std::string &token : {"Some ", "data ", "to ", "test."}) {
     EXPECT_THAT((*cmac)->Update(token), IsOk());
   }
@@ -137,7 +137,7 @@ TEST(StatefulCmacFactoryTest, FactoryGeneratesValidInstances) {
       kTagSize,
       util::SecretDataFromStringView(absl::HexStringToBytes(kKeyHex)));
   util::StatusOr<std::unique_ptr<StatefulMac>> cmac = factory->Create();
-  ASSERT_THAT(cmac.status(), IsOk());
+  ASSERT_THAT(cmac, IsOk());
   EXPECT_THAT((*cmac)->Update(kData), IsOk());
   EXPECT_THAT(
       (*cmac)->Finalize(),
@@ -188,7 +188,7 @@ TEST_P(StatefulCmacBoringSslWycheproofTest, WycheproofTest) {
       StatefulCmacBoringSsl::New(
           test_vector.tag.length(),
           util::SecretDataFromStringView(test_vector.key));
-  ASSERT_THAT(cmac.status(), IsOk());
+  ASSERT_THAT(cmac, IsOk());
   EXPECT_THAT((*cmac)->Update(test_vector.msg), IsOk());
 
   if (test_vector.expected_result == "invalid") {

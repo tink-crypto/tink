@@ -19,7 +19,7 @@ package services
 import (
 	"context"
 
-	pb "github.com/google/tink/proto/testing/testing_api_go_grpc"
+	pb "github.com/google/tink/testing/go/proto/testing_api_go_grpc"
 )
 
 // MetadataService implements the Keyset testing service.

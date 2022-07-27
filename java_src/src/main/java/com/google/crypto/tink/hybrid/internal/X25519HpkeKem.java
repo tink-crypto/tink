@@ -63,11 +63,13 @@ final class X25519HpkeKem implements HpkeKem {
   }
 
   @Override
-  public byte[] decapsulate(byte[] encapsulatedKey, byte[] recipientPrivateKey)
+  public byte[] decapsulate(byte[] encapsulatedKey, HpkeKemPrivateKey recipientPrivateKey)
       throws GeneralSecurityException {
-    byte[] dhSharedSecret = X25519.computeSharedSecret(recipientPrivateKey, encapsulatedKey);
-    byte[] recipientPublicKey = X25519.publicFromPrivate(recipientPrivateKey);
-    return deriveKemSharedSecret(dhSharedSecret, encapsulatedKey, recipientPublicKey);
+    byte[] dhSharedSecret =
+        X25519.computeSharedSecret(
+            recipientPrivateKey.getSerializedPrivate().toByteArray(), encapsulatedKey);
+    return deriveKemSharedSecret(
+        dhSharedSecret, encapsulatedKey, recipientPrivateKey.getSerializedPublic().toByteArray());
   }
 
   @Override

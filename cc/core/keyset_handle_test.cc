@@ -246,7 +246,7 @@ TEST_F(KeysetHandleTest, ReadEncryptedWithAnnotations) {
       BinaryKeysetReader::New(encrypted_keyset.SerializeAsString());
   util::StatusOr<std::unique_ptr<KeysetHandle>> keyset_handle =
       KeysetHandle::Read(*std::move(reader), aead, kAnnotations);
-  ASSERT_THAT(keyset_handle.status(), IsOk());
+  ASSERT_THAT(keyset_handle, IsOk());
 
   // In order to validate annotations are set correctly, we need acceess to the
   // generated primitive set, which is populated by KeysetWrapperImpl and passed
@@ -274,7 +274,7 @@ TEST_F(KeysetHandleTest, ReadEncryptedWithAnnotations) {
                   /*new_key_allowed=*/true),
               IsOk());
 
-  ASSERT_THAT((*keyset_handle)->GetPrimitive<Aead>().status(), IsOk());
+  ASSERT_THAT((*keyset_handle)->GetPrimitive<Aead>(), IsOk());
   EXPECT_EQ(generated_annotations, kAnnotations);
   // This is needed to cleanup mocks.
   Registry::Reset();
@@ -421,7 +421,7 @@ TEST_F(KeysetHandleTest, ReadEncryptedKeysetWithAssociatedDataGoodKeyset) {
       BinaryKeysetReader::New(encrypted_keyset.SerializeAsString()).value());
   util::StatusOr<std::unique_ptr<KeysetHandle>> result =
       KeysetHandle::ReadWithAssociatedData(std::move(reader), aead, "aad");
-  EXPECT_THAT(result.status(), IsOk());
+  EXPECT_THAT(result, IsOk());
   auto handle = std::move(result.value());
   EXPECT_EQ(keyset.SerializeAsString(),
             TestKeysetHandle::GetKeyset(*handle).SerializeAsString());
@@ -443,7 +443,7 @@ TEST_F(KeysetHandleTest, ReadEncryptedWithAssociatedDataAndAnnotations) {
   util::StatusOr<std::unique_ptr<KeysetHandle>> keyset_handle =
       KeysetHandle::ReadWithAssociatedData(*std::move(reader), aead,
                                            kAssociatedData, kAnnotations);
-  ASSERT_THAT(keyset_handle.status(), IsOk());
+  ASSERT_THAT(keyset_handle, IsOk());
 
   auto primitive_wrapper = absl::make_unique<MockAeadPrimitiveWrapper>();
   absl::flat_hash_map<std::string, std::string> generated_annotations;
@@ -467,7 +467,7 @@ TEST_F(KeysetHandleTest, ReadEncryptedWithAssociatedDataAndAnnotations) {
                   /*new_key_allowed=*/true),
               IsOk());
 
-  ASSERT_THAT((*keyset_handle)->GetPrimitive<Aead>().status(), IsOk());
+  ASSERT_THAT((*keyset_handle)->GetPrimitive<Aead>(), IsOk());
   EXPECT_EQ(generated_annotations, kAnnotations);
   // This is needed to cleanup mocks.
   Registry::Reset();
@@ -490,7 +490,7 @@ TEST_F(KeysetHandleTest, ReadEncryptedKeysetWithAssociatedDataWrongAad) {
       BinaryKeysetReader::New(encrypted_keyset.SerializeAsString()).value());
   auto result = KeysetHandle::ReadWithAssociatedData(std::move(reader), aead,
                                                      "different");
-  EXPECT_THAT(result.status(), Not(IsOk()));
+  EXPECT_THAT(result, Not(IsOk()));
   EXPECT_EQ(absl::StatusCode::kInvalidArgument, result.status().code());
 }
 
@@ -510,7 +510,7 @@ TEST_F(KeysetHandleTest, ReadEncryptedKeysetWithAssociatedDataEmptyAad) {
   auto reader = std::move(
       BinaryKeysetReader::New(encrypted_keyset.SerializeAsString()).value());
   auto result = KeysetHandle::Read(std::move(reader), aead);
-  EXPECT_THAT(result.status(), Not(IsOk()));
+  EXPECT_THAT(result, Not(IsOk()));
   EXPECT_EQ(absl::StatusCode::kInvalidArgument, result.status().code());
 }
 
@@ -578,7 +578,7 @@ TEST_F(KeysetHandleTest, GenerateNewWithAnnotations) {
   // The template used doesn't make any different w.r.t. annotations.
   util::StatusOr<std::unique_ptr<KeysetHandle>> keyset_handle =
       KeysetHandle::GenerateNew(AeadKeyTemplates::Aes128Gcm(), kAnnotations);
-  ASSERT_THAT(keyset_handle.status(), IsOk());
+  ASSERT_THAT(keyset_handle, IsOk());
   auto primitive_wrapper = absl::make_unique<MockAeadPrimitiveWrapper>();
   absl::flat_hash_map<std::string, std::string> generated_annotations;
   EXPECT_CALL(*primitive_wrapper, Wrap(_))
@@ -598,7 +598,7 @@ TEST_F(KeysetHandleTest, GenerateNewWithAnnotations) {
                   true),
               IsOk());
 
-  EXPECT_THAT((*keyset_handle)->GetPrimitive<Aead>().status(), IsOk());
+  EXPECT_THAT((*keyset_handle)->GetPrimitive<Aead>(), IsOk());
   EXPECT_EQ(generated_annotations, kAnnotations);
   // This is needed to cleanup mocks.
   Registry::Reset();
@@ -809,7 +809,7 @@ TEST_F(KeysetHandleTest, ReadNoSecret) {
             KeyData::REMOTE, &keyset);
   keyset.set_primary_key_id(42);
   auto handle_result = KeysetHandle::ReadNoSecret(keyset.SerializeAsString());
-  ASSERT_THAT(handle_result.status(), IsOk());
+  ASSERT_THAT(handle_result, IsOk());
   std::unique_ptr<KeysetHandle>& keyset_handle = handle_result.value();
 
   const Keyset& result = CleartextKeysetHandle::GetKeyset(*keyset_handle);
@@ -827,7 +827,7 @@ TEST_F(KeysetHandleTest, ReadNoSecretWithAnnotations) {
   Keyset keyset = GetPublicTestKeyset();
   util::StatusOr<std::unique_ptr<KeysetHandle>> keyset_handle =
       KeysetHandle::ReadNoSecret(keyset.SerializeAsString(), kAnnotations);
-  ASSERT_THAT(keyset_handle.status(), IsOk());
+  ASSERT_THAT(keyset_handle, IsOk());
   auto primitive_wrapper = absl::make_unique<MockAeadPrimitiveWrapper>();
   absl::flat_hash_map<std::string, std::string> generated_annotations;
   EXPECT_CALL(*primitive_wrapper, Wrap(_))
@@ -850,7 +850,7 @@ TEST_F(KeysetHandleTest, ReadNoSecretWithAnnotations) {
                   /*new_key_allowed=*/true),
               IsOk());
 
-  EXPECT_THAT((*keyset_handle)->GetPrimitive<Aead>().status(), IsOk());
+  EXPECT_THAT((*keyset_handle)->GetPrimitive<Aead>(), IsOk());
   EXPECT_EQ(generated_annotations, kAnnotations);
   // This is needed to cleanup mocks.
   Registry::Reset();

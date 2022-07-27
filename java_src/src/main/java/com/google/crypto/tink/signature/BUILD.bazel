@@ -110,6 +110,10 @@ java_library(
         "//src/main/java/com/google/crypto/tink:primitive_wrapper",
         "//src/main/java/com/google/crypto/tink:public_key_sign",
         "//src/main/java/com/google/crypto/tink:registry",
+        "//src/main/java/com/google/crypto/tink/internal:monitoring_util",
+        "//src/main/java/com/google/crypto/tink/internal:mutable_monitoring_registry",
+        "//src/main/java/com/google/crypto/tink/monitoring:monitoring_client",
+        "//src/main/java/com/google/crypto/tink/monitoring:monitoring_keyset_info",
         "//src/main/java/com/google/crypto/tink/subtle:bytes",
     ],
 )
@@ -194,6 +198,10 @@ java_library(
         "//src/main/java/com/google/crypto/tink:primitive_wrapper",
         "//src/main/java/com/google/crypto/tink:public_key_verify",
         "//src/main/java/com/google/crypto/tink:registry",
+        "//src/main/java/com/google/crypto/tink/internal:monitoring_util",
+        "//src/main/java/com/google/crypto/tink/internal:mutable_monitoring_registry",
+        "//src/main/java/com/google/crypto/tink/monitoring:monitoring_client",
+        "//src/main/java/com/google/crypto/tink/monitoring:monitoring_keyset_info",
         "//src/main/java/com/google/crypto/tink/subtle:bytes",
     ],
 )
@@ -392,6 +400,10 @@ android_library(
         "//src/main/java/com/google/crypto/tink:primitive_wrapper-android",
         "//src/main/java/com/google/crypto/tink:public_key_sign-android",
         "//src/main/java/com/google/crypto/tink:registry-android",
+        "//src/main/java/com/google/crypto/tink/internal:monitoring_util-android",
+        "//src/main/java/com/google/crypto/tink/internal:mutable_monitoring_registry-android",
+        "//src/main/java/com/google/crypto/tink/monitoring:monitoring_client-android",
+        "//src/main/java/com/google/crypto/tink/monitoring:monitoring_keyset_info-android",
         "//src/main/java/com/google/crypto/tink/subtle:bytes-android",
     ],
 )
@@ -476,6 +488,10 @@ android_library(
         "//src/main/java/com/google/crypto/tink:primitive_wrapper-android",
         "//src/main/java/com/google/crypto/tink:public_key_verify-android",
         "//src/main/java/com/google/crypto/tink:registry-android",
+        "//src/main/java/com/google/crypto/tink/internal:monitoring_util-android",
+        "//src/main/java/com/google/crypto/tink/internal:mutable_monitoring_registry-android",
+        "//src/main/java/com/google/crypto/tink/monitoring:monitoring_client-android",
+        "//src/main/java/com/google/crypto/tink/monitoring:monitoring_keyset_info-android",
         "//src/main/java/com/google/crypto/tink/subtle:bytes-android",
     ],
 )

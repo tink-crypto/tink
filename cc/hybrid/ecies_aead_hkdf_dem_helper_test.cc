@@ -77,14 +77,14 @@ TEST(EciesAeadHkdfDemHelperTest, DemHelperWithSomeAeadKeyType) {
   dem_key_template.set_value(key_format.SerializeAsString());
 
   auto dem_helper_or = EciesAeadHkdfDemHelper::New(dem_key_template);
-  ASSERT_THAT(dem_helper_or.status(), IsOk());
+  ASSERT_THAT(dem_helper_or, IsOk());
   auto dem_helper = std::move(dem_helper_or.value());
 
   util::SecretData key128 = util::SecretDataFromStringView(
       test::HexDecodeOrDie("000102030405060708090a0b0c0d0e0f"));
   StatusOr<std::unique_ptr<AeadOrDaead>> aead_or_daead_result_or =
       dem_helper->GetAeadOrDaead(key128);
-  ASSERT_THAT(aead_or_daead_result_or.status(), IsOk());
+  ASSERT_THAT(aead_or_daead_result_or, IsOk());
 
   auto aead_or_daead = std::move(aead_or_daead_result_or.value());
   EXPECT_THAT(EncryptThenDecrypt(*aead_or_daead, "test_plaintext", "test_ad"),
@@ -104,7 +104,7 @@ TEST(EciesAeadHkdfDemHelperTest, DemHelperWithSomeDeterministicAeadKeyType) {
   dem_key_template.set_value(key_format.SerializeAsString());
 
   auto dem_helper_or = EciesAeadHkdfDemHelper::New(dem_key_template);
-  ASSERT_THAT(dem_helper_or.status(), IsOk());
+  ASSERT_THAT(dem_helper_or, IsOk());
   auto dem_helper = std::move(dem_helper_or.value());
 
   util::SecretData key128 = util::SecretDataFromStringView(test::HexDecodeOrDie(
@@ -112,7 +112,7 @@ TEST(EciesAeadHkdfDemHelperTest, DemHelperWithSomeDeterministicAeadKeyType) {
       "0405060708090a0b0c0d0e0f000102030405060708090a0b0c0d0e0f"));
   StatusOr<std::unique_ptr<AeadOrDaead>> aead_or_daead_result_or =
       dem_helper->GetAeadOrDaead(key128);
-  ASSERT_THAT(aead_or_daead_result_or.status(), IsOk());
+  ASSERT_THAT(aead_or_daead_result_or, IsOk());
 
   auto aead_or_daead = std::move(aead_or_daead_result_or.value());
   EXPECT_THAT(EncryptThenDecrypt(*aead_or_daead, "test_plaintext", "test_ad"),

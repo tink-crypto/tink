@@ -24,7 +24,7 @@
 #include "tink/aead/aead_key_templates.h"
 #include "tink/binary_keyset_writer.h"
 #include "tink/cleartext_keyset_handle.h"
-#include "proto/testing/testing_api.grpc.pb.h"
+#include "proto/testing_api.grpc.pb.h"
 
 namespace crypto {
 namespace tink {

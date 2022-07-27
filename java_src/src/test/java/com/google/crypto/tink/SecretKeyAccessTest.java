@@ -20,7 +20,6 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertThrows;
 
 import java.security.GeneralSecurityException;
-import java.util.Optional;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -35,17 +34,13 @@ public final class SecretKeyAccessTest {
 
   @Test
   public void testRequireAccess_worksAndReturnsObject() throws Exception {
-    assertThat(SecretKeyAccess.requireAccess(Optional.of(InsecureSecretKeyAccess.get())))
+    assertThat(SecretKeyAccess.requireAccess(InsecureSecretKeyAccess.get()))
         .isEqualTo(InsecureSecretKeyAccess.get());
   }
 
   @Test
-  public void testRequireAccess_throwsIfEmpty() throws Exception {
+  public void testRequireAccess_throwsIfNull() throws Exception {
     assertThrows(
-        GeneralSecurityException.class, () -> SecretKeyAccess.requireAccess(Optional.empty()));
-    // Optionals cannot be null: Optional.ofNullable(null) returns an absent value.
-    assertThrows(
-        GeneralSecurityException.class,
-        () -> SecretKeyAccess.requireAccess(Optional.ofNullable(null)));
+        GeneralSecurityException.class, () -> SecretKeyAccess.requireAccess(/* access = */ null));
   }
 }

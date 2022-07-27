@@ -4,7 +4,7 @@ java_test(
     name = "GcpKmsClientTest",
     size = "small",
     srcs = ["GcpKmsClientTest.java"],
-    data = ["//testdata:credential.json"],
+    data = ["//testdata/gcp:credential.json"],
     runtime_deps = [
         "@maven//:com_fasterxml_jackson_core_jackson_core",
     ],
@@ -22,7 +22,7 @@ java_test(
     name = "KmsAeadKeyManagerWithGcpTest",
     size = "small",
     srcs = ["KmsAeadKeyManagerWithGcpTest.java"],
-    data = ["//testdata:credentials"],
+    data = ["//testdata/gcp:credentials"],
     tags = ["no_rbe"],
     deps = [
         "//src/main/java/com/google/crypto/tink:aead",
@@ -39,7 +39,7 @@ java_test(
     name = "KmsEnvelopeAeadKeyManagerWithGcpTest",
     size = "small",
     srcs = ["KmsEnvelopeAeadKeyManagerWithGcpTest.java"],
-    data = ["//testdata:credentials"],
+    data = ["//testdata/gcp:credentials"],
     tags = ["no_rbe"],
     deps = [
         "//proto:tink_java_proto",

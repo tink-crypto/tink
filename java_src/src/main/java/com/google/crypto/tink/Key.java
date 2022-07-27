@@ -18,7 +18,7 @@ package com.google.crypto.tink;
 
 import com.google.crypto.tink.annotations.Alpha;
 import com.google.errorprone.annotations.Immutable;
-import java.util.Optional;
+import javax.annotation.Nullable;
 
 /**
  * Represents a cryptographic object.
@@ -38,23 +38,24 @@ import java.util.Optional;
 @Alpha
 public abstract class Key {
   /**
-   * Returns a {@link KeyFormat} object containing all the information about the key which is not
+   * Returns a {@link Parameters} object containing all the information about the key which is not
    * randomly chosen.
    *
-   * <p>Implementations need to ensure that {@code getKeyFormat().hasIdRequirement()} returns true
-   * if and only if {@code getIdRequirement} has a value.
+   * <p>Implementations need to ensure that {@code getParameters().hasIdRequirement()} returns true
+   * if and only if {@code getIdRequirementOrNull} is non-null.
    */
-  public abstract KeyFormat getKeyFormat();
+  public abstract Parameters getParameters();
 
   /**
-   * Returns an empty {@code Optional} if this key has no id requirement, otherwise the required id.
+   * Returns null if this key has no id requirement, otherwise the required id.
    *
    * <p>Some keys, when they are in a keyset, are required to have a certain ID to work properly.
    * This comes from the fact that Tink in some cases prefixes ciphertexts or signatures with the
    * string {@code 0x01<id>}, where the ID is encoded in big endian (see the documentation of the
    * key type for details), in which case the key requires a certain ID.
    */
-  public abstract Optional<Integer> getIdRequirement();
+  @Nullable
+  public abstract Integer getIdRequirementOrNull();
 
   /**
    * Returns true if the key is equal to the passed in key.

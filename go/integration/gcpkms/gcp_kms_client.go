@@ -28,6 +28,7 @@ import (
 	"strings"
 
 	"google.golang.org/api/cloudkms/v1"
+	"google.golang.org/api/option"
 	"golang.org/x/oauth2/google"
 	"golang.org/x/oauth2"
 	"github.com/google/tink/go/core/registry"
@@ -51,8 +52,30 @@ type gcpClient struct {
 
 var _ registry.KMSClient = (*gcpClient)(nil)
 
+// NewClientWithOptions returns a new GCP KMS client with provided Google API
+// options to handle keys with uriPrefix prefix.
+// uriPrefix must have the following format: 'gcp-kms://[:path]'.
+func NewClientWithOptions(ctx context.Context, uriPrefix string, opts ...option.ClientOption) (registry.KMSClient, error) {
+	if !strings.HasPrefix(strings.ToLower(uriPrefix), gcpPrefix) {
+		return nil, fmt.Errorf("uriPrefix must start with %s", gcpPrefix)
+	}
+
+	opts = append(opts, option.WithUserAgent(tinkUserAgent))
+	kmsService, err := cloudkms.NewService(ctx, opts...)
+	if err != nil {
+		return nil, err
+	}
+
+	return &gcpClient{
+		keyURIPrefix: uriPrefix,
+		kms:          kmsService,
+	}, nil
+}
+
 // ClientConfig defines the configuration that can be provided to configure
 // a GCP KMS client.
+//
+// Deprecated: Use NewClientWithOptions instead to provide client options.
 type ClientConfig struct {
 	// HTTP transport for use with the GCP KMS client.
 	// If it is nil, default config will be used.
@@ -63,6 +86,9 @@ type ClientConfig struct {
 // using the provided ClientConfig.
 // It will use default credentials to handle keys with uriPrefix prefix.
 // uriPrefix must have the following format: 'gcp-kms://[:path]'.
+//
+// Deprecated: Use NewClientWithOptions instead.
+// To provide a custom HTTP client, use option.WithHTTPClient.
 func NewClientWithConfig(uriPrefix string, config *ClientConfig) (registry.KMSClient, error) {
 	if !strings.HasPrefix(strings.ToLower(uriPrefix), gcpPrefix) {
 		return nil, fmt.Errorf("uriPrefix must start with %s", gcpPrefix)
@@ -95,6 +121,8 @@ func NewClientWithConfig(uriPrefix string, config *ClientConfig) (registry.KMSCl
 // NewClient returns a new GCP KMS client which will use default
 // credentials to handle keys with uriPrefix prefix.
 // uriPrefix must have the following format: 'gcp-kms://[:path]'.
+//
+// Deprecated: Use NewClientWithOptions instead.
 func NewClient(uriPrefix string) (registry.KMSClient, error) {
 	return NewClientWithConfig(uriPrefix, nil)
 }
@@ -102,6 +130,9 @@ func NewClient(uriPrefix string) (registry.KMSClient, error) {
 // NewClientWithCredentials returns a new GCP KMS client which will use given
 // credentials to handle keys with uriPrefix prefix.
 // uriPrefix must have the following format: 'gcp-kms://[:path]'.
+//
+// Deprecated: Use NewClientWithOptions instead.
+// To provide a credential file, use option.WithCredentialsFile.
 func NewClientWithCredentials(uriPrefix string, credentialPath string) (registry.KMSClient, error) {
 	if !strings.HasPrefix(strings.ToLower(uriPrefix), gcpPrefix) {
 		return nil, fmt.Errorf("uriPrefix must start with %s", gcpPrefix)

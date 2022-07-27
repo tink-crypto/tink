@@ -18,6 +18,7 @@ package com.google.crypto.tink.daead;
 
 import com.google.crypto.tink.config.TinkFips;
 import com.google.crypto.tink.proto.RegistryConfig;
+import com.google.errorprone.annotations.InlineMe;
 import java.security.GeneralSecurityException;
 
 /**
@@ -50,7 +51,7 @@ public final class DeterministicAeadConfig {
 
   static {
     try {
-      init();
+      register();
     } catch (GeneralSecurityException e) {
       throw new ExceptionInInitializerError(e);
     }
@@ -66,6 +67,9 @@ public final class DeterministicAeadConfig {
    *
    * @deprecated use {@link #register}
    */
+  @InlineMe(
+      replacement = "DeterministicAeadConfig.register()",
+      imports = "com.google.crypto.tink.daead.DeterministicAeadConfig")
   @Deprecated
   public static void init() throws GeneralSecurityException {
     register();

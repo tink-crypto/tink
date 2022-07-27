@@ -37,7 +37,6 @@ import java.io.BufferedReader;
 import java.io.StringReader;
 import java.security.interfaces.ECPublicKey;
 import java.security.interfaces.RSAPublicKey;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -45,9 +44,6 @@ import org.junit.runners.JUnit4;
 /** Unit tests for SignaturePemKeysetReader */
 @RunWith(JUnit4.class)
 public final class SignaturePemKeysetReaderTest {
-
-  @Before
-  public void setUp() {}
 
   @Test
   public void read_oneRSAPublicKey_shouldWork() throws Exception {

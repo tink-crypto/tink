@@ -61,7 +61,7 @@ GetComputeMacOutputStream() {
       absl::make_unique<StreamingMacImpl>(std::move(mac_factory));
   util::StatusOr<std::unique_ptr<OutputStreamWithResult<std::string>>>
       stream_status = streaming_mac->NewComputeMacOutputStream();
-  EXPECT_THAT(stream_status.status(), IsOk());
+  EXPECT_THAT(stream_status, IsOk());
   return std::move(*stream_status);
 }
 
@@ -75,7 +75,7 @@ std::unique_ptr<OutputStreamWithResult<util::Status>> GetVerifyMacOutputStream(
       absl::make_unique<StreamingMacImpl>(std::move(mac_factory));
   util::StatusOr<std::unique_ptr<OutputStreamWithResult<util::Status>>>
       stream_status = streaming_mac->NewVerifyMacOutputStream(expected_mac);
-  EXPECT_THAT(stream_status.status(), IsOk());
+  EXPECT_THAT(stream_status, IsOk());
   return std::move(*stream_status);
 }
 
@@ -85,7 +85,7 @@ TEST(StreamingMacImplTest, ComputeEmptyMac) {
 
   // Close stream and check result
   auto close_status = output_stream->CloseAndGetResult();
-  EXPECT_THAT(close_status.status(), IsOk());
+  EXPECT_THAT(close_status, IsOk());
   EXPECT_EQ(*close_status, expected_mac);
 }
 
@@ -102,7 +102,7 @@ TEST(StreamingMacImplTest, ComputeSmallMac) {
 
   // Close stream and check result
   auto close_status = output_stream->CloseAndGetResult();
-  EXPECT_THAT(close_status.status(), IsOk());
+  EXPECT_THAT(close_status, IsOk());
   EXPECT_EQ(*close_status, expected_mac);
 }
 
@@ -122,7 +122,7 @@ TEST(StreamingMacImplTest, ComputeRandMac) {
 
     // Close stream and check result
     auto close_status = output_stream->CloseAndGetResult();
-    EXPECT_THAT(close_status.status(), IsOk());
+    EXPECT_THAT(close_status, IsOk());
     EXPECT_EQ(*close_status, expected_mac);
   }
 }
@@ -134,7 +134,7 @@ TEST(StreamingMacImplTest, ComputeCheckStreamPosition) {
   // Check position in first buffer returned by Next();
   void* buffer;
   util::StatusOr<int> next_result = output_stream->Next(&buffer);
-  EXPECT_THAT(next_result.status(), IsOk());
+  EXPECT_THAT(next_result, IsOk());
   int buffer_size = *next_result;
   EXPECT_EQ(buffer_size, output_stream->Position());
 
@@ -203,7 +203,7 @@ TEST(StreamingMacImplTest, VerifySmallMacFail) {
   // Close stream and check result
   EXPECT_THAT(
       output_stream->CloseAndGetResult(),
-      StatusIs(absl::StatusCode::kInvalidArgument, HasSubstr("Incorrect MAC")));
+      StatusIs(absl::StatusCode::kInvalidArgument, HasSubstr("Invalid MAC")));
 }
 
 TEST(StreamingMacImplTest, VerifyRandMac) {
@@ -234,7 +234,7 @@ TEST(StreamingMacImplTest, VerifyCheckStreamPosition) {
   // Check position in first buffer returned by Next();
   void* buffer;
   util::StatusOr<int> next_result = output_stream->Next(&buffer);
-  EXPECT_THAT(next_result.status(), IsOk());
+  EXPECT_THAT(next_result, IsOk());
   int buffer_size = *next_result;
   EXPECT_EQ(buffer_size, output_stream->Position());
 

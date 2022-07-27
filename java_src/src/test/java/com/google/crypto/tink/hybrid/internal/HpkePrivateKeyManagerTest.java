@@ -35,11 +35,14 @@ import com.google.crypto.tink.subtle.Random;
 import java.security.GeneralSecurityException;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.experimental.theories.DataPoints;
+import org.junit.experimental.theories.FromDataPoints;
+import org.junit.experimental.theories.Theories;
+import org.junit.experimental.theories.Theory;
 import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
 
 /** Unit tests for {@link HpkePrivateKeyManager}. */
-@RunWith(JUnit4.class)
+@RunWith(Theories.class)
 public final class HpkePrivateKeyManagerTest {
   private HpkePrivateKeyManager manager;
   private KeyTypeManager.KeyFactory<HpkeKeyFormat, HpkePrivateKey> factory;
@@ -105,32 +108,38 @@ public final class HpkePrivateKeyManagerTest {
     assertThrows(GeneralSecurityException.class, () -> factory.validateKeyFormat(format));
   }
 
-  @Test
-  public void keyFormats() throws Exception {
-    factory.validateKeyFormat(
-        factory.keyFormats().get("DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_AES_128_GCM").keyFormat);
-    factory.validateKeyFormat(
-        factory.keyFormats().get("DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_AES_128_GCM_RAW").keyFormat);
-    factory.validateKeyFormat(
-        factory.keyFormats().get("DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_AES_256_GCM").keyFormat);
-    factory.validateKeyFormat(
-        factory.keyFormats().get("DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_AES_256_GCM_RAW").keyFormat);
-    factory.validateKeyFormat(
-        factory
-            .keyFormats()
-            .get("DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_CHACHA20_POLY1305")
-            .keyFormat);
-    factory.validateKeyFormat(
-        factory
-            .keyFormats()
-            .get("DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_CHACHA20_POLY1305_RAW")
-            .keyFormat);
+  @DataPoints("templateNames")
+  public static final String[] KEY_TEMPLATES =
+      new String[] {
+        "DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_AES_128_GCM",
+        "DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_AES_128_GCM_RAW",
+        "DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_AES_256_GCM",
+        "DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_AES_256_GCM_RAW",
+        "DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_CHACHA20_POLY1305",
+        "DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_CHACHA20_POLY1305_RAW",
+        "DHKEM_P256_HKDF_SHA256_HKDF_SHA256_AES_128_GCM",
+        "DHKEM_P256_HKDF_SHA256_HKDF_SHA256_AES_128_GCM_RAW",
+        "DHKEM_P256_HKDF_SHA256_HKDF_SHA256_AES_256_GCM",
+        "DHKEM_P256_HKDF_SHA256_HKDF_SHA256_AES_256_GCM_RAW",
+        "DHKEM_P384_HKDF_SHA384_HKDF_SHA384_AES_128_GCM",
+        "DHKEM_P384_HKDF_SHA384_HKDF_SHA384_AES_128_GCM_RAW",
+        "DHKEM_P384_HKDF_SHA384_HKDF_SHA384_AES_256_GCM",
+        "DHKEM_P384_HKDF_SHA384_HKDF_SHA384_AES_256_GCM_RAW",
+        "DHKEM_P521_HKDF_SHA512_HKDF_SHA512_AES_128_GCM",
+        "DHKEM_P521_HKDF_SHA512_HKDF_SHA512_AES_128_GCM_RAW",
+        "DHKEM_P521_HKDF_SHA512_HKDF_SHA512_AES_256_GCM",
+        "DHKEM_P521_HKDF_SHA512_HKDF_SHA512_AES_256_GCM_RAW",
+      };
+
+  @Theory
+  public void keyFormats(@FromDataPoints("templateNames") String template) throws Exception {
+    factory.validateKeyFormat(factory.keyFormats().get(template).keyFormat);
   }
 
-  @Test
-  public void createKey_succeeds() throws Exception {
-    HpkeKeyFormat format =
-        factory.keyFormats().get("DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_AES_128_GCM").keyFormat;
+  @Theory
+  public void createKey_succeeds(@FromDataPoints("templateNames") String template)
+      throws Exception {
+    HpkeKeyFormat format = factory.keyFormats().get(template).keyFormat;
     HpkePrivateKey key = factory.createKey(format);
 
     assertThat(key.getVersion()).isEqualTo(manager.getVersion());
@@ -139,10 +148,10 @@ public final class HpkePrivateKeyManagerTest {
     assertThat(key.getPrivateKey()).isNotEmpty();
   }
 
-  @Test
-  public void validateKey_succeeds() throws Exception {
-    HpkeKeyFormat format =
-        factory.keyFormats().get("DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_AES_128_GCM").keyFormat;
+  @Theory
+  public void validateKey_succeeds(@FromDataPoints("templateNames") String template)
+      throws Exception {
+    HpkeKeyFormat format = factory.keyFormats().get(template).keyFormat;
 
     manager.validateKey(factory.createKey(format));
   }

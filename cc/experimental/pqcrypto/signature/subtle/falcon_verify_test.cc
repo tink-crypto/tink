@@ -34,8 +34,8 @@
 #include "tink/util/test_matchers.h"
 
 extern "C" {
-#include "third_party/pqclean/crypto_sign/falcon-1024/avx2/api.h"
-#include "third_party/pqclean/crypto_sign/falcon-512/avx2/api.h"
+#include "third_party/pqclean/crypto_sign/falcon-1024/api.h"
+#include "third_party/pqclean/crypto_sign/falcon-512/api.h"
 }
 
 namespace crypto {
@@ -65,22 +65,22 @@ TEST_P(FalconVerifyTest, BasicSignVerify) {
   // Generate falcon key pair.
   util::StatusOr<FalconKeyPair> key_pair =
       GenerateFalconKeyPair(test_case.private_key_size);
-  ASSERT_THAT(key_pair.status(), IsOk());
+  ASSERT_THAT(key_pair, IsOk());
 
   // Create a new signer.
   util::StatusOr<std::unique_ptr<PublicKeySign>> signer =
       FalconSign::New(key_pair->GetPrivateKey());
-  ASSERT_THAT(signer.status(), IsOk());
+  ASSERT_THAT(signer, IsOk());
 
   // Sign a message.
   std::string message = "message to be signed";
   util::StatusOr<std::string> signature = (*signer)->Sign(message);
-  ASSERT_THAT(signature.status(), IsOk());
+  ASSERT_THAT(signature, IsOk());
 
   // Create a new verifier.
   absl::StatusOr<std::unique_ptr<PublicKeyVerify>> verifier =
       FalconVerify::New(key_pair->GetPublicKey());
-  ASSERT_THAT(verifier.status(), IsOk());
+  ASSERT_THAT(verifier, IsOk());
 
   // Verify signature.
   Status status = (*verifier)->Verify(*signature, message);
@@ -97,22 +97,22 @@ TEST_P(FalconVerifyTest, FailsWithWrongSignature) {
   // Generate falcon key pair.
   util::StatusOr<FalconKeyPair> key_pair =
       GenerateFalconKeyPair(test_case.private_key_size);
-  ASSERT_THAT(key_pair.status(), IsOk());
+  ASSERT_THAT(key_pair, IsOk());
 
   // Create a new signer.
   util::StatusOr<std::unique_ptr<PublicKeySign>> signer =
       FalconSign::New(key_pair->GetPrivateKey());
-  ASSERT_THAT(signer.status(), IsOk());
+  ASSERT_THAT(signer, IsOk());
 
   // Sign a message.
   std::string message = "message to be signed";
   util::StatusOr<std::string> signature = (*signer)->Sign(message);
-  ASSERT_THAT(signature.status(), IsOk());
+  ASSERT_THAT(signature, IsOk());
 
   // Create a new verifier.
   absl::StatusOr<std::unique_ptr<PublicKeyVerify>> verifier =
       FalconVerify::New(key_pair->GetPublicKey());
-  ASSERT_THAT(verifier.status(), IsOk());
+  ASSERT_THAT(verifier, IsOk());
 
   // Verify signature.
   Status status =
@@ -130,22 +130,22 @@ TEST_P(FalconVerifyTest, FailsWithWrongMessage) {
   // Generate falcon key pair.
   util::StatusOr<FalconKeyPair> key_pair =
       GenerateFalconKeyPair(test_case.private_key_size);
-  ASSERT_THAT(key_pair.status(), IsOk());
+  ASSERT_THAT(key_pair, IsOk());
 
   // Create a new signer.
   util::StatusOr<std::unique_ptr<PublicKeySign>> signer =
       FalconSign::New(key_pair->GetPrivateKey());
-  ASSERT_THAT(signer.status(), IsOk());
+  ASSERT_THAT(signer, IsOk());
 
   // Sign a message.
   std::string message = "message to be signed";
   util::StatusOr<std::string> signature = (*signer)->Sign(message);
-  ASSERT_THAT(signature.status(), IsOk());
+  ASSERT_THAT(signature, IsOk());
 
   // Create a new verifier.
   absl::StatusOr<std::unique_ptr<PublicKeyVerify>> verifier =
       FalconVerify::New(key_pair->GetPublicKey());
-  ASSERT_THAT(verifier.status(), IsOk());
+  ASSERT_THAT(verifier, IsOk());
 
   // Verify signature.
   Status status = (*verifier)->Verify(*signature, "some bad message");
@@ -162,22 +162,22 @@ TEST_P(FalconVerifyTest, FailsWithBytesFlipped) {
   // Generate falcon key pair.
   util::StatusOr<FalconKeyPair> key_pair =
       GenerateFalconKeyPair(test_case.private_key_size);
-  ASSERT_THAT(key_pair.status(), IsOk());
+  ASSERT_THAT(key_pair, IsOk());
 
   // Create a new signer.
   util::StatusOr<std::unique_ptr<PublicKeySign>> signer =
       FalconSign::New(key_pair->GetPrivateKey());
-  ASSERT_THAT(signer.status(), IsOk());
+  ASSERT_THAT(signer, IsOk());
 
   // Sign a message.
   std::string message = "message to be signed";
   util::StatusOr<std::string> signature = (*signer)->Sign(message);
-  ASSERT_THAT(signature.status(), IsOk());
+  ASSERT_THAT(signature, IsOk());
 
   // Create a new verifier.
   absl::StatusOr<std::unique_ptr<PublicKeyVerify>> verifier =
       FalconVerify::New(key_pair->GetPublicKey());
-  ASSERT_THAT(verifier.status(), IsOk());
+  ASSERT_THAT(verifier, IsOk());
 
   // Invalidate one signature byte.
   (*signature)[0] ^= 1;
@@ -197,7 +197,7 @@ TEST_P(FalconVerifyTest, FipsMode) {
   // Generate falcon key pair.
   util::StatusOr<FalconKeyPair> key_pair =
       GenerateFalconKeyPair(test_case.private_key_size);
-  ASSERT_THAT(key_pair.status(), IsOk());
+  ASSERT_THAT(key_pair, IsOk());
 
   // Create a new signer.
   EXPECT_THAT(FalconVerify::New(key_pair->GetPublicKey()).status(),
@@ -207,9 +207,9 @@ TEST_P(FalconVerifyTest, FipsMode) {
 INSTANTIATE_TEST_SUITE_P(
     FalconVerifyTests, FalconVerifyTest,
     testing::ValuesIn<FalconTestCase>({{"Falcon512", kFalcon512PrivateKeySize,
-                                        PQCLEAN_FALCON512_AVX2_CRYPTO_BYTES},
+                                        PQCLEAN_FALCON512_CRYPTO_BYTES},
                                        {"Falcon1024", kFalcon1024PrivateKeySize,
-                                        PQCLEAN_FALCON1024_AVX2_CRYPTO_BYTES}}),
+                                        PQCLEAN_FALCON1024_CRYPTO_BYTES}}),
     [](const testing::TestParamInfo<FalconVerifyTest::ParamType>& info) {
       return info.param.test_name;
     });

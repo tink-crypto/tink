@@ -41,8 +41,8 @@ const (
 )
 
 var (
-	credFile    = "tink_go/testdata/credentials_aws.csv"
-	credINIFile = "tink_go/testdata/credentials_aws.ini"
+	credFile    = "tink_go/testdata/aws/credentials.csv"
+	credINIFile = "tink_go/testdata/aws/credentials.ini"
 )
 
 func init() {

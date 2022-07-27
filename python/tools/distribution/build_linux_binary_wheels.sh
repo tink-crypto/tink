@@ -25,15 +25,19 @@ set -euo pipefail
 #   ["<Python version>"]="<python tag>-<abi tag>"
 # where:
 #   <Python version> = language version, e.g "3.7"
-#   <python tag-<abi tag> = tags as specified in in PEP 491, e.g. "cp37-37m"
+#   <python tag>, <abi tag> = as defined at
+#       https://packaging.python.org/en/latest/specifications/, e.g. "cp37-37m"
 declare -A PYTHON_VERSIONS
 PYTHON_VERSIONS["3.7"]="cp37-cp37m"
 PYTHON_VERSIONS["3.8"]="cp38-cp38"
 PYTHON_VERSIONS["3.9"]="cp39-cp39"
+PYTHON_VERSIONS["3.10"]="cp310-cp310"
 readonly -A PYTHON_VERSIONS
 
-readonly BAZEL_VERSION='4.2.2'
-readonly PROTOC_VERSION='3.19.3'
+export TINK_PYTHON_ROOT_PATH="${PWD}"
+
+readonly BAZEL_VERSION="$(cat ${TINK_PYTHON_ROOT_PATH}/.bazelversion)"
+readonly PROTOC_VERSION="3.19.3"
 
 # Get dependencies which are needed for building Tink.
 
@@ -48,7 +52,7 @@ curl -OL "https://github.com/protocolbuffers/protobuf/releases/download/v${PROTO
 unzip -o "${PROTOC_ZIP}" -d /usr/local bin/protoc
 
 # Setup required for Tink.
-export TINK_PYTHON_SETUPTOOLS_OVERRIDE_BASE_PATH="/tmp/tink"
+export TINK_PYTHON_SETUPTOOLS_OVERRIDE_BASE_PATH="${TINK_PYTHON_ROOT_PATH}/.."
 
 # Workaround for grpc which expects a python2 installation, which is not present
 # in the manylinux2014 container. Cannot be an empty string, otherwise Bazel

@@ -28,52 +28,46 @@ import (
 )
 
 const (
+	// HPKE public key length from
+	// https://www.rfc-editor.org/rfc/rfc9180.html#section-7.1.
+	hpkeX25519HKDFSHA256PubKeyLen = 32
+
 	hpkePublicKeyTypeURL  = "type.googleapis.com/google.crypto.tink.HpkePublicKey"
 	hpkePrivateKeyTypeURL = "type.googleapis.com/google.crypto.tink.HpkePrivateKey"
 )
 
-// PublicKeyFromPrimaryKey returns the public key bytes from handle's primary
-// key if 1) the primary key's key data matches template and 2) template is
-// listed as a supported below.
+// SerializePrimaryPublicKey serializes a public keyset handle's primary key if
+// the primary key is a public key and matches both the template argument and a
+// supported template.
 //
-// Supported key templates include:
-//   * DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_CHACHA20_POLY1305_Raw_Key_Template,
-//     which specifically returns the KEM-encoding (i.e. SerializePublicKey() in
-//     https://www.rfc-editor.org/rfc/rfc9180.html#section-4-2.1.2.3)
-func PublicKeyFromPrimaryKey(handle *keyset.Handle, template *tinkpb.KeyTemplate) ([]byte, error) {
-	// Verify key template.
-	if template.GetTypeUrl() != hpkePrivateKeyTypeURL {
-		return nil, fmt.Errorf("template does not have key type URL %s", hpkePrivateKeyTypeURL)
-	}
-	if template.GetOutputPrefixType() != tinkpb.OutputPrefixType_RAW {
-		return nil, errors.New("template does not have raw output prefix type")
-	}
-	templateKeyFormat := &hpkepb.HpkeKeyFormat{}
-	if err := proto.Unmarshal(template.GetValue(), templateKeyFormat); err != nil {
-		return nil, fmt.Errorf("failed to unmarshal HpkeKeyFormat: %v", err)
-	}
-	if err := supportedHPKEParams(templateKeyFormat.GetParams()); err != nil {
-		return nil, err
+// Supported templates are the same as KeysetHandleFromSerializedPublicKey's:
+//   - DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_CHACHA20_POLY1305_Raw_Key_Template,
+//     which returns the KEM-encoding of the public key, i.e. SerializePublicKey
+//     in https://www.rfc-editor.org/rfc/rfc9180.html#section-7.1.1.
+func SerializePrimaryPublicKey(handle *keyset.Handle, template *tinkpb.KeyTemplate) ([]byte, error) {
+	templateParams, err := hpkeParamsFromTemplate(template)
+	if err != nil {
+		return nil, fmt.Errorf("failed to verify key template: %v", err)
 	}
 
 	// Create keyset from handle.
-	keysetBytes := new(bytes.Buffer)
-	if err := handle.WriteWithNoSecrets(keyset.NewBinaryWriter(keysetBytes)); err != nil {
+	w := new(bytes.Buffer)
+	if err := handle.WriteWithNoSecrets(keyset.NewBinaryWriter(w)); err != nil {
 		return nil, fmt.Errorf("failed to write key: %v", err)
 	}
-	keyset := &tinkpb.Keyset{}
-	if err := proto.Unmarshal(keysetBytes.Bytes(), keyset); err != nil {
-		return nil, fmt.Errorf("failed to unmarshal Keyset: %v", err)
+	ks := &tinkpb.Keyset{}
+	if err := proto.Unmarshal(w.Bytes(), ks); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal Keyset %v: %v", ks, err)
 	}
-	if len(keyset.GetKey()) < 1 {
+	if len(ks.GetKey()) < 1 {
 		return nil, errors.New("empty keyset")
 	}
 
 	// Verify and return handle's primary key.
-	for _, key := range keyset.GetKey() {
+	for _, key := range ks.GetKey() {
 		if key.GetStatus() != tinkpb.KeyStatusType_ENABLED ||
 			key.GetOutputPrefixType() != tinkpb.OutputPrefixType_RAW ||
-			key.GetKeyId() != keyset.GetPrimaryKeyId() {
+			key.GetKeyId() != ks.GetPrimaryKeyId() {
 			continue
 		}
 
@@ -87,11 +81,11 @@ func PublicKeyFromPrimaryKey(handle *keyset.Handle, template *tinkpb.KeyTemplate
 
 		hpkeKey := &hpkepb.HpkePublicKey{}
 		if err := proto.Unmarshal(keyData.GetValue(), hpkeKey); err != nil {
-			return nil, fmt.Errorf("failed to unmarshal HpkePublicKey: %v", err)
+			return nil, fmt.Errorf("failed to unmarshal HpkePublicKey %v: %v", hpkeKey, err)
 		}
 		// Check equality between HPKE params in handle's primary key and in
 		// template, as template's params have already been verified.
-		if !proto.Equal(templateKeyFormat.GetParams(), hpkeKey.GetParams()) {
+		if !proto.Equal(templateParams, hpkeKey.GetParams()) {
 			return nil, errors.New("HPKE params in handle and template are not equal")
 		}
 
@@ -101,17 +95,78 @@ func PublicKeyFromPrimaryKey(handle *keyset.Handle, template *tinkpb.KeyTemplate
 	return nil, errors.New("no valid primary HPKE public key in keyset")
 }
 
-// supportedHPKEParams implements the restrictions on HPKE params enforced by
-// PublicKeyFromPrimaryKey's supported key templates.
-func supportedHPKEParams(params *hpkepb.HpkeParams) error {
+// KeysetHandleFromSerializedPublicKey returns a keyset handle containing a
+// primary key that has the specified pubKeyBytes and matches template.
+//
+// Supported templates are the same as PublicKeyFromPrimaryKey's:
+//   - DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_CHACHA20_POLY1305_Raw_Key_Template,
+//     which requires pubKeyBytes to be the KEM-encoding of the public key, i.e.
+//     SerializePublicKey in
+//     https://www.rfc-editor.org/rfc/rfc9180.html#section-7.1.1.
+func KeysetHandleFromSerializedPublicKey(pubKeyBytes []byte, template *tinkpb.KeyTemplate) (*keyset.Handle, error) {
+	params, err := hpkeParamsFromTemplate(template)
+	if err != nil {
+		return nil, fmt.Errorf("failed to verify key template: %v", err)
+	}
+	if len(pubKeyBytes) != hpkeX25519HKDFSHA256PubKeyLen {
+		return nil, fmt.Errorf("pubKeyBytes length is %d but should be %d", len(pubKeyBytes), hpkeX25519HKDFSHA256PubKeyLen)
+	}
+
+	pubKey := &hpkepb.HpkePublicKey{
+		Version:   0,
+		Params:    params,
+		PublicKey: pubKeyBytes,
+	}
+	serializedPubKey, err := proto.Marshal(pubKey)
+	if err != nil {
+		return nil, fmt.Errorf("failed to marshal HpkePublicKey %v: %v", pubKey, err)
+	}
+	ks := &tinkpb.Keyset{
+		PrimaryKeyId: 1,
+		Key: []*tinkpb.Keyset_Key{
+			{
+				KeyData: &tinkpb.KeyData{
+					TypeUrl:         hpkePublicKeyTypeURL,
+					Value:           serializedPubKey,
+					KeyMaterialType: tinkpb.KeyData_ASYMMETRIC_PUBLIC,
+				},
+				Status:           tinkpb.KeyStatusType_ENABLED,
+				KeyId:            1,
+				OutputPrefixType: tinkpb.OutputPrefixType_RAW,
+			},
+		},
+	}
+
+	return keyset.NewHandleWithNoSecrets(ks)
+}
+
+// hpkeParamsFromTemplate returns HPKE params after verifying that template is
+// supported.
+//
+// Supported templates include:
+//   - DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_CHACHA20_POLY1305_Raw_Key_Template.
+func hpkeParamsFromTemplate(template *tinkpb.KeyTemplate) (*hpkepb.HpkeParams, error) {
+	if template.GetTypeUrl() != hpkePrivateKeyTypeURL {
+		return nil, fmt.Errorf("not key type URL %s", hpkePrivateKeyTypeURL)
+	}
+	if template.GetOutputPrefixType() != tinkpb.OutputPrefixType_RAW {
+		return nil, errors.New("not raw output prefix type")
+	}
+	keyFormat := &hpkepb.HpkeKeyFormat{}
+	if err := proto.Unmarshal(template.GetValue(), keyFormat); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal HpkeKeyFormat(%v): %v", template.GetValue(), err)
+	}
+
+	params := keyFormat.GetParams()
 	if kem := params.GetKem(); kem != hpkepb.HpkeKem_DHKEM_X25519_HKDF_SHA256 {
-		return fmt.Errorf("HPKE KEM %s not supported", kem)
+		return nil, fmt.Errorf("HPKE KEM %s not supported", kem)
 	}
 	if kdf := params.GetKdf(); kdf != hpkepb.HpkeKdf_HKDF_SHA256 {
-		return fmt.Errorf("HPKE KDF %s not supported", kdf)
+		return nil, fmt.Errorf("HPKE KDF %s not supported", kdf)
 	}
 	if aead := params.GetAead(); aead != hpkepb.HpkeAead_CHACHA20_POLY1305 {
-		return fmt.Errorf("HPKE AEAD %s not supported", aead)
+		return nil, fmt.Errorf("HPKE AEAD %s not supported", aead)
 	}
-	return nil
+
+	return params, nil
 }

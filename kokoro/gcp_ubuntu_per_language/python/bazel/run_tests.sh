@@ -32,7 +32,10 @@ fi
 # environement.
 MANUAL_TARGETS=()
 if [[ -n "${KOKORO_ROOT:-}" ]]; then
-  MANUAL_TARGETS+=( "//tink/integration/gcpkms:_gcp_kms_aead_test" )
+  MANUAL_TARGETS+=(
+    "//tink/integration/awskms:_aws_kms_aead_test"
+    "//tink/integration/gcpkms:_gcp_kms_aead_test"
+  )
 fi
 readonly MANUAL_TARGETS
 

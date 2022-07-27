@@ -24,44 +24,84 @@ declare -a PYTHON_VERSIONS=
 PYTHON_VERSIONS+=("3.7")
 PYTHON_VERSIONS+=("3.8")
 PYTHON_VERSIONS+=("3.9")
+PYTHON_VERSIONS+=("3.10")
 readonly PYTHON_VERSIONS
 
 readonly PLATFORM="$(uname | tr '[:upper:]' '[:lower:]')"
 
-export TINK_SRC_PATH="${PWD}/.."
-readonly TINK_VERSION="$(grep ^TINK "${TINK_SRC_PATH}/python/VERSION" \
+export TINK_PYTHON_ROOT_PATH="${PWD}"
+readonly TINK_VERSION="$(grep ^TINK "${TINK_PYTHON_ROOT_PATH}/VERSION" \
   | awk '{gsub(/"/, "", $3); print $3}')"
 
 readonly IMAGE_NAME="quay.io/pypa/manylinux2014_x86_64"
-readonly IMAGE_DIGEST="sha256:d4604fe14cb0d691031f202ee7daf240e6d463297b060e2de60994d82a8f22ac"
+readonly IMAGE_DIGEST="sha256:31d7d1cbbb8ea93ac64c3113bceaa0e9e13d65198229a25eee16dc70e8bf9cf7"
 readonly IMAGE="${IMAGE_NAME}@${IMAGE_DIGEST}"
 
-build_linux() {
-  echo "### Building Linux binary wheels ###"
-
+#######################################
+# Builds Tink Python built distribution (Wheel) [1].
+#
+# This function must be called from within the Tink Python's root folder.
+#
+# [1] https://packaging.python.org/en/latest/glossary/#term-Built-Distribution
+# Globals:
+#   None
+# Arguments:
+#   None
+#######################################
+__create_and_test_wheels_for_linux() {
+  echo "### Building and testing Linux binary wheels ###"
+  local -r tink_py_relative_path="${PWD##*/}"
+  local -r workdir="/tmp/tink/${tink_py_relative_path}"
   # Use signatures for getting images from registry (see
   # https://docs.docker.com/engine/security/trust/content_trust/).
   export DOCKER_CONTENT_TRUST=1
 
+  # We use setup.py to build wheels; setup.py makes changes to the WORKSPACE
+  # file so we save a copy for backup.
+  cp WORKSPACE WORKSPACE.bak
+
   # Build binary wheels.
-  docker run --volume "${TINK_SRC_PATH}:/tmp/tink" --workdir /tmp/tink/python \
-    "${IMAGE}" /tmp/tink/python/tools/distribution/build_linux_binary_wheels.sh
+  docker run \
+    --volume "${TINK_PYTHON_ROOT_PATH}/..:/tmp/tink" \
+    --workdir "${workdir}" \
+    "${IMAGE}" \
+    "${workdir}/tools/distribution/build_linux_binary_wheels.sh"
 
   ## Test binary wheels.
-  docker run --volume "${TINK_SRC_PATH}:/tmp/tink" --workdir /tmp/tink/python \
-    "${IMAGE}" /tmp/tink/python/tools/distribution/test_linux_binary_wheels.sh
+  docker run \
+    --volume "${TINK_PYTHON_ROOT_PATH}/..:/tmp/tink" \
+    --workdir "${workdir}" \
+    "${IMAGE}" \
+    "${workdir}/tools/distribution/test_linux_binary_wheels.sh"
 
-  echo "### Building Linux source distribution ###"
+  # Docker runs as root so we transfer ownership to the non-root user.
+  sudo chown -R "$(id -un):$(id -gn)" "${TINK_PYTHON_ROOT_PATH}"
+  # Restore the original WORKSPACE.
+  mv WORKSPACE.bak WORKSPACE
+}
+
+#######################################
+# Builds Tink Python source distribution [1].
+#
+# This function must be called from within the Tink Python's root folder.
+#
+# [1] https://packaging.python.org/en/latest/glossary/#term-Source-Distribution-or-sdist
+# Globals:
+#   PYTHON_VERSIONS
+# Arguments:
+#   None
+#######################################
+__create_and_test_sdist_for_linux() {
+  echo "### Building and testing Linux source distribution ###"
   local sorted=( $( echo "${PYTHON_VERSIONS[@]}" \
     | xargs -n1 | sort -V | xargs ) )
   local latest="${sorted[${#sorted[@]}-1]}"
   enable_py_version "${latest}"
 
   # Build source distribution.
-  export TINK_PYTHON_SETUPTOOLS_OVERRIDE_BASE_PATH="${TINK_SRC_PATH}"
-  python3 setup.py sdist
+  export TINK_PYTHON_SETUPTOOLS_OVERRIDE_BASE_PATH="${TINK_PYTHON_ROOT_PATH}/.."
+  python3 setup.py sdist --owner=root --group=root
   local sdist_filename="tink-${TINK_VERSION}.tar.gz"
-  set_owner_within_tar "dist/${sdist_filename}"
   cp "dist/${sdist_filename}" release/
 
   # Test install from source distribution.
@@ -73,7 +113,32 @@ build_linux() {
     | xargs -0 -n1 python3
 }
 
-build_macos() {
+#######################################
+# Creates a Tink Python distribution for Linux.
+#
+# This function must be called from within the Tink Python's root folder.
+#
+# Globals:
+#   None
+# Arguments:
+#   None
+#######################################
+create_distribution_for_linux() {
+  __create_and_test_wheels_for_linux
+  __create_and_test_sdist_for_linux
+}
+
+#######################################
+# Creates a Tink Python distribution for MacOS.
+#
+# This function must be called from within the Tink Python's root folder.
+#
+# Globals:
+#   PYTHON_VERSIONS
+# Arguments:
+#   None
+#######################################
+create_distribution_for_macos() {
   echo "### Building macOS binary wheels ###"
 
   for v in "${PYTHON_VERSIONS[@]}"; do
@@ -104,30 +169,14 @@ enable_py_version() {
   python3 -m pip install --upgrade wheel
 }
 
-# setuptools does not replicate the distutils feature of explicitly setting
-# user/group ownership on the files within the source distribution archive.
-#
-# This function is an easy workaround that doesn't require monkey-patching
-# setuptools. This behavior is desired to produce deterministic release
-# artifacts.
-set_owner_within_tar() {
-  local tar_file="$1"
-  local tmp_dir="$(mktemp -d tink-py-tar-XXXXXX)"
-  tar -C "${tmp_dir}" -xzf "${tar_file}"
-  local tink_dir="$(basename $(ls -d ${tmp_dir}/tink*))"
-  tar -C "${tmp_dir}" -czf "${tar_file}" \
-    --owner=root --group=root "${tink_dir}"
-  rm -r "${tmp_dir}"
-}
-
 main() {
   eval "$(pyenv init -)"
   mkdir -p release
 
   if [[ "${PLATFORM}" == 'linux' ]]; then
-    build_linux
+    create_distribution_for_linux
   elif [[ "${PLATFORM}" == 'darwin' ]]; then
-    build_macos
+    create_distribution_for_macos
   else
     echo "${PLATFORM} is not a supported platform."
     exit 1

@@ -34,9 +34,9 @@
 #include "tink/util/validation.h"
 
 extern "C" {
-#include "third_party/pqclean/crypto_sign/dilithium2/avx2/api.h"
-#include "third_party/pqclean/crypto_sign/dilithium3/avx2/api.h"
-#include "third_party/pqclean/crypto_sign/dilithium5/avx2/api.h"
+#include "third_party/pqclean/crypto_sign/dilithium2/api.h"
+#include "third_party/pqclean/crypto_sign/dilithium3/api.h"
+#include "third_party/pqclean/crypto_sign/dilithium5/api.h"
 }
 
 namespace crypto {
@@ -96,12 +96,9 @@ Status DilithiumSignKeyManager::ValidateKey(
     const DilithiumPrivateKey& key) const {
   Status status = ValidateVersion(key.version(), get_version());
   if (!status.ok()) return status;
-  if (key.key_value().length() !=
-          PQCLEAN_DILITHIUM2_AVX2_CRYPTO_SECRETKEYBYTES &&
-      key.key_value().length() !=
-          PQCLEAN_DILITHIUM3_AVX2_CRYPTO_SECRETKEYBYTES &&
-      key.key_value().length() !=
-          PQCLEAN_DILITHIUM5_AVX2_CRYPTO_SECRETKEYBYTES) {
+  if (key.key_value().length() != PQCLEAN_DILITHIUM2_CRYPTO_SECRETKEYBYTES &&
+      key.key_value().length() != PQCLEAN_DILITHIUM3_CRYPTO_SECRETKEYBYTES &&
+      key.key_value().length() != PQCLEAN_DILITHIUM5_CRYPTO_SECRETKEYBYTES) {
     return Status(absl::StatusCode::kInvalidArgument,
                   "Invalid dilithium private key size.");
   }

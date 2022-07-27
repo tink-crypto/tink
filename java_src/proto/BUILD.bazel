@@ -573,3 +573,15 @@ java_lite_proto_library(
     name = "hpke_java_proto_lite",
     deps = [":hpke_proto"],
 )
+
+java_proto_library(
+    name = "test_proto_java_proto",
+    testonly = True,
+    deps = [":test_proto_proto"],
+)
+
+java_lite_proto_library(
+    name = "test_proto_java_proto_lite",
+    testonly = True,
+    deps = [":test_proto_proto"],
+)

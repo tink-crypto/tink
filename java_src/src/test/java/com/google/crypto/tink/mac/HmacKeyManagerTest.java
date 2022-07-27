@@ -142,7 +142,7 @@ public class HmacKeyManagerTest {
   public void createKey_multipleTimes() throws Exception {
     HmacKeyFormat keyFormat = makeHmacKeyFormat(16, 10, HashType.SHA256);
     int numKeys = 100;
-    Set<String> keys = new TreeSet<String>();
+    Set<String> keys = new TreeSet<>();
     for (int i = 0; i < numKeys; ++i) {
       keys.add(TestUtil.hexEncode(factory.createKey(keyFormat).getKeyValue().toByteArray()));
     }

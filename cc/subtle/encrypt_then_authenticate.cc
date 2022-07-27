@@ -69,7 +69,7 @@ util::StatusOr<std::string> EncryptThenAuthenticate::Encrypt(
   if (associated_data_size_in_bits / 8 !=
       associated_data_size_in_bytes /* overflow occured! */) {
     return util::Status(absl::StatusCode::kInvalidArgument,
-                        "additional data too long");
+                        "associated data too long");
   }
 
   auto ct = ind_cpa_cipher_->Encrypt(plaintext);

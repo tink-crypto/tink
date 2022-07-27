@@ -16,18 +16,24 @@
 
 package com.google.crypto.tink;
 
+import static com.google.common.truth.Truth.assertThat;
 import static com.google.crypto.tink.testing.TestUtil.assertExceptionContains;
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
 
 import com.google.crypto.tink.config.TinkConfig;
-import com.google.crypto.tink.mac.MacKeyTemplates;
-import com.google.crypto.tink.proto.KeyTemplate;
+import com.google.crypto.tink.internal.MutableMonitoringRegistry;
+import com.google.crypto.tink.internal.testing.FakeMonitoringClient;
+import com.google.crypto.tink.monitoring.MonitoringAnnotations;
 import com.google.crypto.tink.proto.Keyset;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -44,7 +50,7 @@ public class CleartextKeysetHandleTest {
   @Test
   public void testParse() throws Exception {
     // Create a keyset that contains a single HmacKey.
-    KeyTemplate template = MacKeyTemplates.HMAC_SHA256_128BITTAG;
+    KeyTemplate template = KeyTemplates.get("HMAC_SHA256_128BITTAG");
     KeysetHandle handle = KeysetHandle.generateNew(template);
     Keyset keyset = CleartextKeysetHandle.getKeyset(handle);
     handle = CleartextKeysetHandle.parseFrom(keyset.toByteArray());
@@ -55,9 +61,9 @@ public class CleartextKeysetHandleTest {
   @Test
   public void testRead() throws Exception {
     // Create a keyset that contains a single HmacKey.
-    KeyTemplate template = MacKeyTemplates.HMAC_SHA256_128BITTAG;
-    KeysetManager manager = KeysetManager.withEmptyKeyset().rotate(template);
-    Keyset keyset1 = manager.getKeysetHandle().getKeyset();
+    KeyTemplate template = KeyTemplates.get("HMAC_SHA256_128BITTAG");
+    KeysetHandle handle = KeysetHandle.generateNew(template);
+    Keyset keyset1 = handle.getKeyset();
 
     KeysetHandle handle1 =
         CleartextKeysetHandle.read(BinaryKeysetReader.withBytes(keyset1.toByteArray()));
@@ -73,25 +79,37 @@ public class CleartextKeysetHandleTest {
   }
 
   @Test
-  public void testWrite() throws Exception {
+  public void testWriteRead_samePrimitive() throws Exception {
     // Create a keyset that contains a single HmacKey.
-    KeyTemplate template = MacKeyTemplates.HMAC_SHA256_128BITTAG;
-    KeysetHandle handle = KeysetManager.withEmptyKeyset().rotate(template).getKeysetHandle();
+    KeysetHandle handle = KeysetHandle.generateNew(KeyTemplates.get("HMAC_SHA256_128BITTAG"));
+
     ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
     KeysetWriter writer = BinaryKeysetWriter.withOutputStream(outputStream);
     CleartextKeysetHandle.write(handle, writer);
-    ByteArrayInputStream inputStream = new ByteArrayInputStream(outputStream.toByteArray());
-    KeysetReader reader = BinaryKeysetReader.withInputStream(inputStream);
-    KeysetHandle handle2 = CleartextKeysetHandle.read(reader);
-    assertEquals(handle.getKeyset(), handle2.getKeyset());
+    byte[] serializedKeyset = outputStream.toByteArray();
+
+    ByteArrayInputStream inputStream1 = new ByteArrayInputStream(serializedKeyset);
+    KeysetReader reader1 = BinaryKeysetReader.withInputStream(inputStream1);
+    KeysetHandle readHandle1 = CleartextKeysetHandle.read(reader1);
+
+    ByteArrayInputStream inputStream2 = new ByteArrayInputStream(serializedKeyset);
+    KeysetReader reader2 = BinaryKeysetReader.withInputStream(inputStream2);
+    KeysetHandle readHandle2 = CleartextKeysetHandle.read(reader2, new HashMap<String, String>());
+
+    // Check that the handle returned by CleartextKeysetHandle.read generates the same MAC.
+    Mac mac = handle.getPrimitive(Mac.class);
+    Mac readMac1 = readHandle1.getPrimitive(Mac.class);
+    Mac readMac2 = readHandle2.getPrimitive(Mac.class);
+    byte[] data = "data".getBytes(UTF_8);
+    assertThat(readMac1.computeMac(data)).isEqualTo(mac.computeMac(data));
+    assertThat(readMac2.computeMac(data)).isEqualTo(mac.computeMac(data));
   }
 
   @Test
   public void testReadInvalidKeyset() throws Exception {
     // Create a keyset that contains a single HmacKey.
-    KeyTemplate template = MacKeyTemplates.HMAC_SHA256_128BITTAG;
-    KeysetManager manager = KeysetManager.withEmptyKeyset().rotate(template);
-    Keyset keyset = manager.getKeysetHandle().getKeyset();
+    KeyTemplate template = KeyTemplates.get("HMAC_SHA256_128BITTAG");
+    Keyset keyset = KeysetHandle.generateNew(template).getKeyset();
 
     byte[] proto = keyset.toByteArray();
     proto[0] = (byte) ~proto[0];
@@ -99,6 +117,13 @@ public class CleartextKeysetHandleTest {
         IOException.class,
         () -> {
           KeysetHandle unused = CleartextKeysetHandle.read(BinaryKeysetReader.withBytes(proto));
+        });
+    assertThrows(
+        IOException.class,
+        () -> {
+          KeysetHandle unused =
+              CleartextKeysetHandle.read(
+                  BinaryKeysetReader.withBytes(proto), new HashMap<String, String>());
         });
   }
 
@@ -113,12 +138,44 @@ public class CleartextKeysetHandleTest {
     GeneralSecurityException e2 =
         assertThrows(
             GeneralSecurityException.class,
-            () -> CleartextKeysetHandle.read(BinaryKeysetReader.withBytes(new byte[0])));
+            () ->
+                CleartextKeysetHandle.read(
+                    BinaryKeysetReader.withBytes(new byte[0]), new HashMap<String, String>()));
     assertExceptionContains(e2, "empty keyset");
 
     GeneralSecurityException e3 =
         assertThrows(
             GeneralSecurityException.class, () -> CleartextKeysetHandle.parseFrom(new byte[0]));
     assertExceptionContains(e3, "empty keyset");
+  }
+
+  @Test
+  public void testReadWithAnnotations_getLoggedByMonitoringClient() throws Exception {
+    FakeMonitoringClient fakeMonitoringClient = new FakeMonitoringClient();
+    MutableMonitoringRegistry.globalInstance().clear();
+    MutableMonitoringRegistry.globalInstance().registerMonitoringClient(fakeMonitoringClient);
+
+    // Generate a serialized keyset
+    ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+    CleartextKeysetHandle.write(
+        KeysetHandle.generateNew(KeyTemplates.get("HMAC_SHA256_128BITTAG")),
+        BinaryKeysetWriter.withOutputStream(outputStream));
+    byte[] serializedKeyset = outputStream.toByteArray();
+
+    Map<String, String> annotations = new HashMap<>();
+    annotations.put("annotation_name", "annotation_value");
+    KeysetHandle handle =
+        CleartextKeysetHandle.read(BinaryKeysetReader.withBytes(serializedKeyset), annotations);
+
+    // Trigger monitoring event and verify that it gets logged with the annotations are set.
+    Mac mac = handle.getPrimitive(Mac.class);
+    byte[] unused = mac.computeMac("data".getBytes(UTF_8));
+
+    List<FakeMonitoringClient.LogEntry> logEntries = fakeMonitoringClient.getLogEntries();
+    assertThat(logEntries).hasSize(1);
+    FakeMonitoringClient.LogEntry entry = logEntries.get(0);
+    MonitoringAnnotations expectedAnnotations =
+        MonitoringAnnotations.newBuilder().add("annotation_name", "annotation_value").build();
+    assertThat(entry.getKeysetInfo().getAnnotations()).isEqualTo(expectedAnnotations);
   }
 }

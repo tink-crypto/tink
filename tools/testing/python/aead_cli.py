@@ -41,10 +41,10 @@ from tink.integration import gcpkms
 
 FLAGS = flags.FLAGS
 AWS_CREDENTIAL_PATH = os.path.join(os.environ['TEST_SRCDIR'],
-                                   'tools/testdata/aws_credentials_cc.txt')
+                                   'tools/testdata/aws/credentials.ini')
 AWS_KEY_URI = 'aws-kms://arn:aws:kms:us-east-2:235739564943:key/3ee50705-5a82-4f5b-9753-05c4f473922f'
 GCP_CREDENTIAL_PATH = os.path.join(os.environ['TEST_SRCDIR'],
-                                   'tools/testdata/credential.json')
+                                   'tools/testdata/gcp/credential.json')
 GCP_KEY_URI = 'gcp-kms://projects/tink-test-infrastructure/locations/global/keyRings/unit-and-integration-testing/cryptoKeys/aead-key'
 
 

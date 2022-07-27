@@ -64,7 +64,7 @@ TEST(KmsClientsTest, AddAndGet) {
       absl::make_unique<DummyKmsClient>(data_1.prefix, data_1.uri));
   EXPECT_THAT(status, IsOk());
   auto client_result = KmsClients::Get(data_1.uri);
-  EXPECT_THAT(client_result.status(), IsOk());
+  EXPECT_THAT(client_result, IsOk());
   EXPECT_TRUE(client_result.value()->DoesSupport(data_1.uri));
   EXPECT_FALSE(client_result.value()->DoesSupport(data_2.uri));
 
@@ -77,7 +77,7 @@ TEST(KmsClientsTest, AddAndGet) {
       absl::make_unique<DummyKmsClient>(data_2.prefix, data_2.uri));
   EXPECT_THAT(status, IsOk());
   client_result = KmsClients::Get(data_2.uri);
-  EXPECT_THAT(client_result.status(), IsOk());
+  EXPECT_THAT(client_result, IsOk());
   EXPECT_TRUE(client_result.value()->DoesSupport(data_2.uri));
   EXPECT_FALSE(client_result.value()->DoesSupport(data_1.uri));
 
@@ -90,19 +90,19 @@ TEST(KmsClientsTest, AddAndGet) {
       absl::make_unique<DummyKmsClient>(data_3.prefix, data_3.uri));
   EXPECT_THAT(status, IsOk());
   client_result = KmsClients::Get(data_3.uri);
-  EXPECT_THAT(client_result.status(), IsOk());
+  EXPECT_THAT(client_result, IsOk());
   EXPECT_TRUE(client_result.value()->DoesSupport(data_3.uri));
   EXPECT_FALSE(client_result.value()->DoesSupport(data_2.uri));
   EXPECT_FALSE(client_result.value()->DoesSupport(data_1.uri));
 
   // Verify that clients for data_1 and data_2 are still present.
   client_result = KmsClients::Get(data_1.uri);
-  EXPECT_THAT(client_result.status(), IsOk());
+  EXPECT_THAT(client_result, IsOk());
   EXPECT_TRUE(client_result.value()->DoesSupport(data_1.uri));
   EXPECT_FALSE(client_result.value()->DoesSupport(data_2.uri));
 
   client_result = KmsClients::Get(data_2.uri);
-  EXPECT_THAT(client_result.status(), IsOk());
+  EXPECT_THAT(client_result, IsOk());
   EXPECT_TRUE(client_result.value()->DoesSupport(data_2.uri));
   EXPECT_FALSE(client_result.value()->DoesSupport(data_1.uri));
 }

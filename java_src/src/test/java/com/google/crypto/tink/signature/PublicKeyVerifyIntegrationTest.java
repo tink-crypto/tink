@@ -17,7 +17,6 @@
 package com.google.crypto.tink.signature;
 
 import static org.junit.Assert.assertThrows;
-import static org.junit.Assert.fail;
 
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.PublicKeySign;
@@ -132,7 +131,7 @@ public class PublicKeyVerifyIntegrationTest {
         try {
           verifier.verify(sig, plaintext);
         } catch (GeneralSecurityException ex) {
-          fail("Valid signature, should not throw exception: " + k);
+          throw new AssertionError("Valid signature, should not throw exception: " + k, ex);
         }
       }
 

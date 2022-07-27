@@ -52,7 +52,10 @@ tink_cc_library(
     tink::core::hybrid_decrypt
     tink::core::primitive_set
     tink::core::primitive_wrapper
+    tink::internal::monitoring_util
+    tink::internal::registry_impl
     tink::internal::util
+    tink::monitoring::monitoring
     tink::util::status
     tink::util::statusor
     tink::proto::tink_cc_proto
@@ -70,7 +73,10 @@ tink_cc_library(
     tink::core::hybrid_encrypt
     tink::core::primitive_set
     tink::core::primitive_wrapper
+    tink::internal::monitoring_util
+    tink::internal::registry_impl
     tink::internal::util
+    tink::monitoring::monitoring
     tink::util::status
     tink::util::statusor
     tink::proto::tink_cc_proto
@@ -291,10 +297,16 @@ tink_cc_test(
   SRCS
     hybrid_decrypt_wrapper_test.cc
   DEPS
+    tink::hybrid::failing_hybrid
     tink::hybrid::hybrid_decrypt_wrapper
     gmock
+    absl::strings
     tink::core::hybrid_decrypt
+    tink::core::hybrid_encrypt
     tink::core::primitive_set
+    tink::internal::registry_impl
+    tink::monitoring::monitoring
+    tink::monitoring::monitoring_client_mocks
     tink::util::status
     tink::util::test_matchers
     tink::util::test_util
@@ -306,10 +318,15 @@ tink_cc_test(
   SRCS
     hybrid_encrypt_wrapper_test.cc
   DEPS
+    tink::hybrid::failing_hybrid
     tink::hybrid::hybrid_encrypt_wrapper
     gmock
+    absl::status
     tink::core::hybrid_encrypt
     tink::core::primitive_set
+    tink::internal::registry_impl
+    tink::monitoring::monitoring
+    tink::monitoring::monitoring_client_mocks
     tink::util::status
     tink::util::test_matchers
     tink::util::test_util
@@ -487,4 +504,26 @@ tink_cc_test(
     tink::proto::common_cc_proto
     tink::proto::ecies_aead_hkdf_cc_proto
     tink::proto::tink_cc_proto
+)
+
+tink_cc_library(
+  NAME failing_hybrid
+  SRCS
+    failing_hybrid.cc
+    failing_hybrid.h
+  DEPS
+    absl::strings
+    tink::core::hybrid_decrypt
+    tink::core::hybrid_encrypt
+)
+
+tink_cc_test(
+  NAME failing_hybrid_test
+  SRCS
+    failing_hybrid_test.cc
+  DEPS
+    tink::hybrid::failing_hybrid
+    gmock
+    absl::status
+    tink::util::test_matchers
 )

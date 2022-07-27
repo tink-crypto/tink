@@ -74,7 +74,7 @@ class ZeroCopyAesGcmBoringSslTest : public testing::Test {
         util::SecretDataFromStringView(absl::HexStringToBytes(kKey128Hex));
     util::StatusOr<std::unique_ptr<ZeroCopyAead>> cipher =
         ZeroCopyAesGcmBoringSsl::New(key);
-    ASSERT_THAT(cipher.status(), IsOk());
+    ASSERT_THAT(cipher, IsOk());
     cipher_ = std::move(*cipher);
   }
 
@@ -94,7 +94,7 @@ TEST_F(ZeroCopyAesGcmBoringSslTest, EncryptDecrypt) {
       &ciphertext, cipher_->MaxEncryptionSize(kMessage.size()));
   util::StatusOr<int64_t> ciphertext_size =
       cipher_->Encrypt(kMessage, kAssociatedData, absl::MakeSpan(ciphertext));
-  ASSERT_THAT(ciphertext_size.status(), IsOk());
+  ASSERT_THAT(ciphertext_size, IsOk());
   EXPECT_EQ(*ciphertext_size,
             kIvSizeInBytes + kMessage.size() + kTagSizeInBytes);
   std::string plaintext;
@@ -103,7 +103,7 @@ TEST_F(ZeroCopyAesGcmBoringSslTest, EncryptDecrypt) {
   util::StatusOr<int64_t> plaintext_size =
       cipher_->Decrypt(ciphertext, kAssociatedData, absl::MakeSpan(plaintext));
 
-  ASSERT_THAT(plaintext_size.status(), IsOk());
+  ASSERT_THAT(plaintext_size, IsOk());
   EXPECT_EQ(plaintext, kMessage);
 }
 
@@ -113,7 +113,7 @@ TEST_F(ZeroCopyAesGcmBoringSslTest, DecryptEncodedCiphertext) {
   util::StatusOr<int64_t> plaintext_size =
       cipher_->Decrypt(absl::HexStringToBytes(kEncodedCiphertext),
                        kAssociatedData, absl::MakeSpan(plaintext));
-  ASSERT_THAT(plaintext_size.status(), IsOk());
+  ASSERT_THAT(plaintext_size, IsOk());
   EXPECT_EQ(plaintext.substr(0, *plaintext_size), kMessage);
 }
 
@@ -189,7 +189,7 @@ TEST_P(ZeroCopyAesGcmBoringSslWycheproofTest, Decrypt) {
   util::SecretData key = util::SecretDataFromStringView(test_vector.key);
   util::StatusOr<std::unique_ptr<ZeroCopyAead>> cipher =
       ZeroCopyAesGcmBoringSsl::New(key);
-  ASSERT_THAT(cipher.status(), IsOk());
+  ASSERT_THAT(cipher, IsOk());
   std::string ciphertext =
       absl::StrCat(test_vector.nonce, test_vector.ct, test_vector.tag);
   std::string plaintext;

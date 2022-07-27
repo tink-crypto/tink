@@ -66,7 +66,7 @@ google::crypto::tink::Cecpq2AeadHkdfPublicKey CreateValidKey() {
 TEST(Cecpq2AeadHkdfHybridEncryptTest, ValidKey) {
   google::crypto::tink::Cecpq2AeadHkdfPublicKey sender_key = CreateValidKey();
   auto result = Cecpq2AeadHkdfHybridEncrypt::New(sender_key);
-  EXPECT_THAT(result.status(), IsOk());
+  EXPECT_THAT(result, IsOk());
 }
 
 TEST(Cecpq2AeadHkdfHybridEncryptTest, InvalidKeyNoFieldSet) {
@@ -99,7 +99,7 @@ TEST(Cecpq2AeadHkdfHybridEncryptTest, InvalidKeyUnsupportedEcType) {
 TEST(Cecpq2AeadHkdfHybridEncryptTest, InvalidKeyUnsupportedDemKeyType) {
   auto status_or_cecpq2_key =
       pqc::GenerateCecpq2Keypair(subtle::EllipticCurveType::CURVE25519);
-  ASSERT_THAT(status_or_cecpq2_key.status(), IsOk());
+  ASSERT_THAT(status_or_cecpq2_key, IsOk());
   auto cecpq2_key_pair = std::move(status_or_cecpq2_key).value();
 
   google::crypto::tink::Cecpq2AeadHkdfPublicKey sender_key = CreateValidKey();
@@ -153,13 +153,13 @@ TEST(Cecpq2AeadHkdfHybridEncryptTest, Basic) {
               ->set_type_url(
                   "type.googleapis.com/google.crypto.tink.AesGcmKey");
           auto key_or = Cecpq2AeadHkdfHybridEncrypt::New(cecpq2_key);
-          ASSERT_THAT(key_or.status(), IsOk());
+          ASSERT_THAT(key_or, IsOk());
           std::unique_ptr<HybridEncrypt> hybrid_encrypt(
               std::move(key_or.value()));
           // Use the primitive
           auto encrypt_result =
               hybrid_encrypt->Encrypt(plaintext, context_info);
-          EXPECT_THAT(encrypt_result.status(), IsOk());
+          EXPECT_THAT(encrypt_result, IsOk());
         }
       }
     }

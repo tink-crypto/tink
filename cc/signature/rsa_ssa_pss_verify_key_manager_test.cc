@@ -151,7 +151,7 @@ TEST(RsaSsaPssSignKeyManagerTest, Create) {
       CreateKeyFormat(HashType::SHA256, HashType::SHA256, 32, 3072, RSA_F4);
   StatusOr<RsaSsaPssPrivateKey> private_key_or =
       RsaSsaPssSignKeyManager().CreateKey(key_format);
-  ASSERT_THAT(private_key_or.status(), IsOk());
+  ASSERT_THAT(private_key_or, IsOk());
   RsaSsaPssPrivateKey private_key = private_key_or.value();
   RsaSsaPssPublicKey public_key =
       RsaSsaPssSignKeyManager().GetPublicKey(private_key).value();
@@ -172,7 +172,7 @@ TEST(RsaSsaPssSignKeyManagerTest, Create) {
 
   auto verifier_or =
       RsaSsaPssVerifyKeyManager().GetPrimitive<PublicKeyVerify>(public_key);
-  ASSERT_THAT(verifier_or.status(), IsOk());
+  ASSERT_THAT(verifier_or, IsOk());
 
   std::string message = "Some message";
   EXPECT_THAT(verifier_or.value()->Verify(
@@ -232,7 +232,7 @@ TEST(RsaSsaPssVerifyKeyManagerTest, TestVector) {
   key.set_n(nist_test_vector->n);
   key.set_e(nist_test_vector->e);
   auto result = RsaSsaPssVerifyKeyManager().GetPrimitive<PublicKeyVerify>(key);
-  ASSERT_THAT(result.status(), IsOk());
+  ASSERT_THAT(result, IsOk());
   EXPECT_THAT(result.value()->Verify(nist_test_vector->signature,
                                      nist_test_vector->message),
               IsOk());

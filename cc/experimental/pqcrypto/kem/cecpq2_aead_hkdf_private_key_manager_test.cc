@@ -242,17 +242,17 @@ TEST(Cecpq2AeadHkdfPrivateKeyManagerTest, Create) {
   auto decrypt_or =
       Cecpq2AeadHkdfPrivateKeyManager().GetPrimitive<HybridDecrypt>(
           private_key);
-  ASSERT_THAT(decrypt_or.status(), IsOk());
+  ASSERT_THAT(decrypt_or, IsOk());
   auto encrypt_or = Cecpq2AeadHkdfHybridEncrypt::New(public_key);
-  ASSERT_THAT(encrypt_or.status(), IsOk());
+  ASSERT_THAT(encrypt_or, IsOk());
 
   std::string plaintext = "some text";
   std::string context_info = "some aad";
   auto ciphertext = encrypt_or.value()->Encrypt(plaintext, context_info);
-  ASSERT_THAT(ciphertext.status(), IsOk());
+  ASSERT_THAT(ciphertext, IsOk());
   auto decryption =
       decrypt_or.value()->Decrypt(ciphertext.value(), context_info);
-  ASSERT_THAT(decryption.status(), IsOk());
+  ASSERT_THAT(decryption, IsOk());
   ASSERT_EQ(decryption.value(), plaintext);
 }
 
@@ -269,17 +269,17 @@ TEST(Cecpq2AeadHkdfPrivateKeyManagerTest, CreateDifferentKey) {
   auto decrypt_or =
       Cecpq2AeadHkdfPrivateKeyManager().GetPrimitive<HybridDecrypt>(
           private_key);
-  ASSERT_THAT(decrypt_or.status(), IsOk());
+  ASSERT_THAT(decrypt_or, IsOk());
   auto encrypt_or = Cecpq2AeadHkdfHybridEncrypt::New(public_key);
-  ASSERT_THAT(encrypt_or.status(), IsOk());
+  ASSERT_THAT(encrypt_or, IsOk());
 
   std::string plaintext = "some text";
   std::string context_info = "some aad";
   auto ciphertext = encrypt_or.value()->Encrypt(plaintext, context_info);
-  ASSERT_THAT(ciphertext.status(), IsOk());
+  ASSERT_THAT(ciphertext, IsOk());
   auto decryption =
       decrypt_or.value()->Decrypt(ciphertext.value(), context_info);
-  ASSERT_THAT(decryption.status(), Not(IsOk()));
+  ASSERT_THAT(decryption, Not(IsOk()));
 }
 
 TEST(Cecpq2AeadHkdfPrivateKeyManagerTest, ValidatePrivateKeyVersion) {

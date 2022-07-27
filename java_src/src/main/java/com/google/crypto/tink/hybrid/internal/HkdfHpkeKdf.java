@@ -110,6 +110,10 @@ final class HkdfHpkeKdf implements HpkeKdf {
     switch (macAlgorithm) {
       case "HmacSha256":
         return HpkeUtil.HKDF_SHA256_KDF_ID;
+      case "HmacSha384":
+        return HpkeUtil.HKDF_SHA384_KDF_ID;
+      case "HmacSha512":
+        return HpkeUtil.HKDF_SHA512_KDF_ID;
       default:
         throw new GeneralSecurityException("Could not determine HPKE KDF ID");
     }

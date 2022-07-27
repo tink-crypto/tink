@@ -27,12 +27,11 @@ py_library(
 py_test(
     name = "_gcp_kms_client_test",
     srcs = ["_gcp_kms_client_test.py"],
-    data = ["//testdata:credentials"],
+    data = ["//testdata/gcp:credentials"],
     srcs_version = "PY3",
     deps = [
         ":gcpkms",
         "//tink/testing:helper",
-        requirement("six"),  # needed by absl-py
         requirement("absl-py"),
     ],
 )
@@ -41,7 +40,7 @@ py_test(
     name = "_gcp_kms_aead_test",
     srcs = ["_gcp_kms_aead_test.py"],
     data = [
-        "//testdata:credentials",
+        "//testdata/gcp:credentials",
         "@google_root_pem//file",
     ],
     srcs_version = "PY3",
@@ -49,7 +48,6 @@ py_test(
     deps = [
         ":gcpkms",
         "//tink/testing:helper",
-        requirement("six"),  # needed by absl-py
         requirement("absl-py"),
     ],
 )

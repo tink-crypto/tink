@@ -173,7 +173,7 @@ TEST(HkdfPrfKeyManagerTest, CreateKey) {
   key_format.set_key_size(32);
   key_format.mutable_params()->set_hash(::google::crypto::tink::SHA256);
   auto key_or = HkdfPrfKeyManager().CreateKey(key_format);
-  ASSERT_THAT(key_or.status(), IsOk());
+  ASSERT_THAT(key_or, IsOk());
   EXPECT_THAT(key_or.value().key_value(), SizeIs(32));
   EXPECT_THAT(key_or.value().params().hash(),
               Eq(::google::crypto::tink::SHA256));
@@ -186,7 +186,7 @@ TEST(HkdfPrfKeyManagerTest, CreateKeyDifferetSize) {
   key_format.set_key_size(77);
   key_format.mutable_params()->set_hash(::google::crypto::tink::SHA256);
   auto key_or = HkdfPrfKeyManager().CreateKey(key_format);
-  ASSERT_THAT(key_or.status(), IsOk());
+  ASSERT_THAT(key_or, IsOk());
   EXPECT_THAT(key_or.value().key_value(), SizeIs(77));
 }
 
@@ -195,7 +195,7 @@ TEST(HkdfPrfKeyManagerTest, CreateKeyDifferetHash) {
   key_format.set_key_size(32);
   key_format.mutable_params()->set_hash(::google::crypto::tink::SHA512);
   auto key_or = HkdfPrfKeyManager().CreateKey(key_format);
-  ASSERT_THAT(key_or.status(), IsOk());
+  ASSERT_THAT(key_or, IsOk());
   EXPECT_THAT(key_or.value().params().hash(),
               Eq(::google::crypto::tink::SHA512));
 }
@@ -206,7 +206,7 @@ TEST(HkdfPrfKeyManagerTest, CreateKeyDifferetSalt) {
   key_format.mutable_params()->set_hash(::google::crypto::tink::SHA512);
   key_format.mutable_params()->set_salt("saltstring");
   auto key_or = HkdfPrfKeyManager().CreateKey(key_format);
-  ASSERT_THAT(key_or.status(), IsOk());
+  ASSERT_THAT(key_or, IsOk());
   EXPECT_THAT(key_or.value().params().salt(), Eq("saltstring"));
 }
 
@@ -216,12 +216,12 @@ TEST(HkdfPrfKeyManagerTest, CreatePrf) {
   key_format.mutable_params()->set_hash(::google::crypto::tink::SHA256);
   key_format.mutable_params()->set_salt("salt string");
   auto key_or = HkdfPrfKeyManager().CreateKey(key_format);
-  ASSERT_THAT(key_or.status(), IsOk());
+  ASSERT_THAT(key_or, IsOk());
 
   StatusOr<std::unique_ptr<StreamingPrf>> prf_or =
       HkdfPrfKeyManager().GetPrimitive<StreamingPrf>(key_or.value());
 
-  ASSERT_THAT(prf_or.status(), IsOk());
+  ASSERT_THAT(prf_or, IsOk());
 
   StatusOr<std::unique_ptr<StreamingPrf>> direct_prf =
       subtle::HkdfStreamingPrf::New(
@@ -229,7 +229,7 @@ TEST(HkdfPrfKeyManagerTest, CreatePrf) {
           util::SecretDataFromStringView(key_or.value().key_value()),
           "salt string");
 
-  ASSERT_THAT(direct_prf.status(), IsOk());
+  ASSERT_THAT(direct_prf, IsOk());
 
   std::unique_ptr<InputStream> input =
       prf_or.value()->ComputePrf("input string");
@@ -239,8 +239,8 @@ TEST(HkdfPrfKeyManagerTest, CreatePrf) {
   auto output_or = ReadBytesFromStream(100, input.get());
   auto direct_output_or = ReadBytesFromStream(100, direct_input.get());
 
-  ASSERT_THAT(output_or.status(), IsOk());
-  ASSERT_THAT(direct_output_or.status(), IsOk());
+  ASSERT_THAT(output_or, IsOk());
+  ASSERT_THAT(direct_output_or, IsOk());
   EXPECT_THAT(output_or.value(), Eq(direct_output_or.value()));
 }
 
@@ -255,7 +255,7 @@ TEST(HkdfPrfKeyManagerTest, DeriveKey) {
 
   StatusOr<HkdfPrfKey> key_or =
       HkdfPrfKeyManager().DeriveKey(format, &input_stream);
-  ASSERT_THAT(key_or.status(), IsOk());
+  ASSERT_THAT(key_or, IsOk());
   EXPECT_THAT(key_or.value().key_value(),
               Eq("0123456789abcdef0123456789abcdef"));
   EXPECT_THAT(key_or.value().params().hash(), Eq(format.params().hash()));
@@ -294,12 +294,12 @@ TEST(HkdfPrfKeyManagerTest, CreatePrfSet) {
   key_format.mutable_params()->set_hash(::google::crypto::tink::SHA256);
   key_format.mutable_params()->set_salt("salt string");
   auto key_or = HkdfPrfKeyManager().CreateKey(key_format);
-  ASSERT_THAT(key_or.status(), IsOk());
+  ASSERT_THAT(key_or, IsOk());
 
   StatusOr<std::unique_ptr<Prf>> prf_or =
       HkdfPrfKeyManager().GetPrimitive<Prf>(key_or.value());
 
-  ASSERT_THAT(prf_or.status(), IsOk());
+  ASSERT_THAT(prf_or, IsOk());
 
   StatusOr<std::unique_ptr<StreamingPrf>> direct_streaming_prf =
       subtle::HkdfStreamingPrf::New(
@@ -307,7 +307,7 @@ TEST(HkdfPrfKeyManagerTest, CreatePrfSet) {
           util::SecretDataFromStringView(key_or.value().key_value()),
           "salt string");
 
-  ASSERT_THAT(direct_streaming_prf.status(), IsOk());
+  ASSERT_THAT(direct_streaming_prf, IsOk());
   auto direct_prf = subtle::CreatePrfFromStreamingPrf(
       std::move(direct_streaming_prf.value()));
 
@@ -316,8 +316,8 @@ TEST(HkdfPrfKeyManagerTest, CreatePrfSet) {
   util::StatusOr<std::string> direct_output_or =
       direct_prf->Compute("input string", 100);
 
-  ASSERT_THAT(output_or.status(), IsOk());
-  ASSERT_THAT(direct_output_or.status(), IsOk());
+  ASSERT_THAT(output_or, IsOk());
+  ASSERT_THAT(direct_output_or, IsOk());
   EXPECT_THAT(output_or.value(), Eq(direct_output_or.value()));
 }
 

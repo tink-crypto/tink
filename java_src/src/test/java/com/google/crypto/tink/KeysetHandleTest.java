@@ -23,7 +23,16 @@ import static org.junit.Assert.assertThrows;
 import com.google.common.truth.Expect;
 import com.google.crypto.tink.aead.AesEaxKeyManager;
 import com.google.crypto.tink.config.TinkConfig;
+import com.google.crypto.tink.internal.KeyParser;
 import com.google.crypto.tink.internal.KeyStatusTypeProtoConverter;
+import com.google.crypto.tink.internal.LegacyProtoKey;
+import com.google.crypto.tink.internal.MonitoringUtil;
+import com.google.crypto.tink.internal.MutableMonitoringRegistry;
+import com.google.crypto.tink.internal.MutableSerializationRegistry;
+import com.google.crypto.tink.internal.ProtoKeySerialization;
+import com.google.crypto.tink.internal.testing.FakeMonitoringClient;
+import com.google.crypto.tink.monitoring.MonitoringAnnotations;
+import com.google.crypto.tink.monitoring.MonitoringClient;
 import com.google.crypto.tink.proto.AesEaxKey;
 import com.google.crypto.tink.proto.AesEaxKeyFormat;
 import com.google.crypto.tink.proto.EcdsaPrivateKey;
@@ -42,6 +51,9 @@ import com.google.crypto.tink.tinkkey.KeyAccess;
 import com.google.crypto.tink.tinkkey.KeyHandle;
 import com.google.crypto.tink.tinkkey.SecretKeyAccess;
 import com.google.crypto.tink.tinkkey.internal.ProtoKey;
+import com.google.crypto.tink.util.Bytes;
+import com.google.errorprone.annotations.Immutable;
+import com.google.protobuf.ByteString;
 import com.google.protobuf.ExtensionRegistryLite;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -51,6 +63,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
+import javax.annotation.Nullable;
 import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
@@ -68,14 +81,29 @@ public class KeysetHandleTest {
   }
 
   private static class AeadToEncryptOnlyWrapper implements PrimitiveWrapper<Aead, EncryptOnly> {
+    private static class EncryptOnlyWithMonitoring implements EncryptOnly {
+
+      private final MonitoringClient.Logger logger;
+      private final PrimitiveSet<Aead> primitiveSet;
+
+      EncryptOnlyWithMonitoring(PrimitiveSet<Aead> primitiveSet) {
+        this.primitiveSet = primitiveSet;
+        MonitoringClient client = MutableMonitoringRegistry.globalInstance().getMonitoringClient();
+        logger =
+            client.createLogger(
+                MonitoringUtil.getMonitoringKeysetInfo(primitiveSet), "encrypt_only", "encrypt");
+      }
+
+      @Override
+      public byte[] encrypt(final byte[] plaintext) throws GeneralSecurityException {
+        logger.log(primitiveSet.getPrimary().getKeyId(), plaintext.length);
+        return primitiveSet.getPrimary().getPrimitive().encrypt(plaintext, new byte[0]);
+      }
+    }
+
     @Override
     public EncryptOnly wrap(PrimitiveSet<Aead> set) throws GeneralSecurityException {
-      return new EncryptOnly() {
-        @Override
-        public byte[] encrypt(final byte[] plaintext) throws GeneralSecurityException {
-          return set.getPrimary().getPrimitive().encrypt(plaintext, new byte[0]);
-        }
-      };
+      return new EncryptOnlyWithMonitoring(set);
     }
 
     @Override
@@ -404,6 +432,31 @@ public class KeysetHandleTest {
   }
 
   @Test
+  public void monitoringClientGetsAnnotationsWithKeysetInfo() throws Exception {
+    MutableMonitoringRegistry.globalInstance().clear();
+    FakeMonitoringClient fakeMonitoringClient = new FakeMonitoringClient();
+    MutableMonitoringRegistry.globalInstance().registerMonitoringClient(fakeMonitoringClient);
+
+    Keyset keyset =
+        TestUtil.createKeyset(
+            TestUtil.createKey(
+                TestUtil.createAesGcmKeyData(
+                    TestUtil.hexDecode("000102030405060708090a0b0c0d0e0f")),
+                42,
+                KeyStatusType.ENABLED,
+                OutputPrefixType.TINK));
+    byte[] message = Random.randBytes(123);
+    MonitoringAnnotations annotations =
+        MonitoringAnnotations.newBuilder().add("annotation_name", "annotation_value").build();
+    KeysetHandle handleWithAnnotations = KeysetHandle.fromKeysetAndAnnotations(keyset, annotations);
+    EncryptOnly encryptOnlyWithAnnotations = handleWithAnnotations.getPrimitive(EncryptOnly.class);
+    encryptOnlyWithAnnotations.encrypt(message);
+    List<FakeMonitoringClient.LogEntry> entries = fakeMonitoringClient.getLogEntries();
+    assertThat(entries).hasSize(1);
+    assertThat(entries.get(0).getKeysetInfo().getAnnotations()).isEqualTo(annotations);
+  }
+
+  @Test
   public void readNoSecret_shouldWork() throws Exception {
     KeysetHandle privateHandle = KeysetHandle.generateNew(SignatureKeyTemplates.ECDSA_P256);
     Keyset keyset = privateHandle.getPublicKeysetHandle().getKeyset();
@@ -514,5 +567,210 @@ public class KeysetHandleTest {
     KeysetHandle ksh = KeysetManager.withEmptyKeyset().add(kt1).add(kt2).getKeysetHandle();
 
     assertThrows(GeneralSecurityException.class, ksh::primaryKey);
+  }
+
+  @Test
+  public void testGetAt_singleKey_works() throws Exception {
+    Keyset keyset =
+        TestUtil.createKeyset(
+            TestUtil.createKey(
+                TestUtil.createHmacKeyData("01234567890123456".getBytes(UTF_8), 16),
+                42,
+                KeyStatusType.ENABLED,
+                OutputPrefixType.TINK));
+    KeysetHandle handle = KeysetHandle.fromKeyset(keyset);
+    assertThat(handle.size()).isEqualTo(1);
+    KeysetHandle.Entry entry = handle.getAt(0);
+    assertThat(entry.getId()).isEqualTo(42);
+    assertThat(entry.getStatus()).isEqualTo(KeyStatus.ENABLED);
+    assertThat(entry.isPrimary()).isTrue();
+    assertThat(entry.getKey().getClass()).isEqualTo(LegacyProtoKey.class);
+  }
+
+  @Test
+  public void testGetAt_multipleKeys_works() throws Exception {
+    Keyset.Key key1 =
+        TestUtil.createKey(
+            TestUtil.createHmacKeyData("01234567890123456".getBytes(UTF_8), 16),
+            42,
+            KeyStatusType.DISABLED,
+            OutputPrefixType.TINK);
+    Keyset.Key key2 =
+        TestUtil.createKey(
+            TestUtil.createHmacKeyData("abcdefghijklmnopq".getBytes(UTF_8), 32),
+            44,
+            KeyStatusType.ENABLED,
+            OutputPrefixType.CRUNCHY);
+    Keyset.Key key3 =
+        TestUtil.createKey(
+            TestUtil.createHmacKeyData("ABCDEFGHIJKLMNOPQ".getBytes(UTF_8), 32),
+            46,
+            KeyStatusType.DESTROYED,
+            OutputPrefixType.TINK);
+    Keyset keyset = TestUtil.createKeyset(key1, key2, key3);
+    KeysetHandle handle =
+        KeysetHandle.fromKeyset(Keyset.newBuilder(keyset).setPrimaryKeyId(44).build());
+
+    assertThat(handle.size()).isEqualTo(3);
+    assertThat(handle.getAt(0).getId()).isEqualTo(42);
+    assertThat(handle.getAt(0).getStatus()).isEqualTo(KeyStatus.DISABLED);
+    assertThat(handle.getAt(0).isPrimary()).isFalse();
+
+    assertThat(handle.getAt(1).getId()).isEqualTo(44);
+    assertThat(handle.getAt(1).getStatus()).isEqualTo(KeyStatus.ENABLED);
+    assertThat(handle.getAt(1).isPrimary()).isTrue();
+
+    assertThat(handle.getAt(2).getId()).isEqualTo(46);
+    assertThat(handle.getAt(2).getStatus()).isEqualTo(KeyStatus.DESTROYED);
+    assertThat(handle.getAt(2).isPrimary()).isFalse();
+  }
+
+  @Test
+  public void testPrimary_multipleKeys_works() throws Exception {
+    Keyset.Key key1 =
+        TestUtil.createKey(
+            TestUtil.createHmacKeyData("01234567890123456".getBytes(UTF_8), 16),
+            42,
+            KeyStatusType.ENABLED,
+            OutputPrefixType.TINK);
+    Keyset.Key key2 =
+        TestUtil.createKey(
+            TestUtil.createHmacKeyData("abcdefghijklmnopq".getBytes(UTF_8), 32),
+            44,
+            KeyStatusType.ENABLED,
+            OutputPrefixType.CRUNCHY);
+    Keyset.Key key3 =
+        TestUtil.createKey(
+            TestUtil.createHmacKeyData("ABCDEFGHIJKLMNOPQ".getBytes(UTF_8), 32),
+            46,
+            KeyStatusType.ENABLED,
+            OutputPrefixType.TINK);
+    Keyset keyset = TestUtil.createKeyset(key1, key2, key3);
+    KeysetHandle handle =
+        KeysetHandle.fromKeyset(Keyset.newBuilder(keyset).setPrimaryKeyId(44).build());
+    KeysetHandle.Entry primary = handle.getPrimary();
+    assertThat(primary.getId()).isEqualTo(44);
+    assertThat(primary.getStatus()).isEqualTo(KeyStatus.ENABLED);
+    assertThat(primary.isPrimary()).isTrue();
+  }
+
+  @Test
+  public void testGetPrimary_noPrimary_throws() throws Exception {
+    Keyset.Key key1 =
+        TestUtil.createKey(
+            TestUtil.createHmacKeyData("01234567890123456".getBytes(UTF_8), 16),
+            42,
+            KeyStatusType.ENABLED,
+            OutputPrefixType.TINK);
+    Keyset keyset = TestUtil.createKeyset(key1);
+    KeysetHandle handle =
+        KeysetHandle.fromKeyset(Keyset.newBuilder(keyset).setPrimaryKeyId(77).build());
+
+    assertThrows(IllegalStateException.class, handle::getPrimary);
+  }
+
+  @Test
+  public void testGetPrimary_disabledPrimary_throws() throws Exception {
+    Keyset.Key key1 =
+        TestUtil.createKey(
+            TestUtil.createHmacKeyData("01234567890123456".getBytes(UTF_8), 16),
+            42,
+            KeyStatusType.DISABLED,
+            OutputPrefixType.TINK);
+    Keyset keyset = TestUtil.createKeyset(key1);
+    KeysetHandle handle =
+        KeysetHandle.fromKeyset(Keyset.newBuilder(keyset).setPrimaryKeyId(16).build());
+
+    assertThrows(IllegalStateException.class, handle::getPrimary);
+  }
+
+  @Test
+  public void testGetAt_indexOutOfBounds_throws() throws Exception {
+    Keyset.Key key1 =
+        TestUtil.createKey(
+            TestUtil.createHmacKeyData("01234567890123456".getBytes(UTF_8), 16),
+            42,
+            KeyStatusType.ENABLED,
+            OutputPrefixType.TINK);
+    KeysetHandle handle = KeysetHandle.fromKeyset(TestUtil.createKeyset(key1));
+
+    assertThrows(IndexOutOfBoundsException.class, () -> handle.getAt(-1));
+    assertThrows(IndexOutOfBoundsException.class, () -> handle.getAt(1));
+  }
+
+  @Test
+  public void testGetAt_wrongStatus_throws() throws Exception {
+    Keyset.Key key1 =
+        TestUtil.createKey(
+            TestUtil.createHmacKeyData("01234567890123456".getBytes(UTF_8), 16),
+            42,
+            KeyStatusType.UNKNOWN_STATUS,
+            OutputPrefixType.TINK);
+    KeysetHandle handle = KeysetHandle.fromKeyset(TestUtil.createKeyset(key1));
+
+    assertThrows(IllegalStateException.class, () -> handle.getAt(0));
+  }
+
+  @Immutable
+  private static final class TestKey extends Key {
+    private final ByteString keymaterial;
+
+    public TestKey(ByteString keymaterial) {
+      this.keymaterial = keymaterial;
+    }
+
+    @Override
+    public Parameters getParameters() {
+      throw new UnsupportedOperationException("Not needed in test");
+    }
+
+    @Override
+    @Nullable
+    public Integer getIdRequirementOrNull() {
+      throw new UnsupportedOperationException("Not needed in test");
+    }
+
+    @Override
+    public boolean equalsKey(Key other) {
+      throw new UnsupportedOperationException("Not needed in test");
+    }
+
+    public ByteString getKeyMaterial() {
+      return keymaterial;
+    }
+  }
+
+  private static TestKey parseTestKey(
+      ProtoKeySerialization serialization,
+      @Nullable com.google.crypto.tink.SecretKeyAccess access) {
+    return new TestKey(serialization.getValue());
+  }
+
+  /**
+   * Tests that key parsing via the serialization registry works as expected.
+   *
+   * <p>NOTE: This adds a parser to the MutableSerializationRegistry, which no other test uses.
+   */
+  @Test
+  public void testKeysAreParsed() throws Exception {
+    ByteString value = ByteString.copyFromUtf8("some value");
+    // NOTE: This adds a parser to the MutableSerializationRegistry, which no other test uses.
+    MutableSerializationRegistry.globalInstance()
+        .registerKeyParser(
+            KeyParser.create(
+                KeysetHandleTest::parseTestKey,
+                Bytes.copyFrom("testKeyTypeUrl".getBytes(UTF_8)),
+                ProtoKeySerialization.class));
+    Keyset keyset =
+        Keyset.newBuilder()
+            .setPrimaryKeyId(1)
+            .addKey(
+                Keyset.Key.newBuilder()
+                    .setKeyId(1)
+                    .setStatus(KeyStatusType.ENABLED)
+                    .setKeyData(KeyData.newBuilder().setTypeUrl("testKeyTypeUrl").setValue(value)))
+            .build();
+    KeysetHandle handle = KeysetHandle.fromKeyset(keyset);
+    assertThat(((TestKey) handle.getPrimary().getKey()).getKeyMaterial()).isEqualTo(value);
   }
 }

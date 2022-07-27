@@ -60,7 +60,12 @@ run_bazel_tests() {
   (
     cd "${workspace_dir}"
     time bazel build -- ... || fail_with_debug_output
-    time bazel test "${TEST_FLAGS[@]}" -- ... || fail_with_debug_output
+    time bazel test "${TEST_FLAGS[@]}" -- ...
+    # Exit code 4 means targets build correctly but no tests were found. See
+    # https://bazel.build/docs/scripts#exit-codes.
+    if (( $? != 0 && $? != 4 )); then
+      fail_with_debug_output
+    fi
     # Run specific manual targets.
     if (( ${#manual_targets[@]} > 0 )); then
       time bazel test "${TEST_FLAGS[@]}"  -- "${manual_targets[@]}" \

@@ -33,10 +33,12 @@ public final class KeyTemplates {
    * @since 1.6.0
    */
   public static KeyTemplate get(String name) throws GeneralSecurityException {
-    if (!Registry.keyTemplateMap().containsKey(name)) {
+    KeyTemplate result = Registry.keyTemplateMap().get(name);
+    if (result == null) {
       throw new GeneralSecurityException("cannot find key template: " + name);
+    } else {
+      return result;
     }
-    return Registry.keyTemplateMap().get(name);
   }
 
   private KeyTemplates() {}

@@ -178,7 +178,7 @@ TEST(AesCtrHmacAeadKeyManagerTest, CreateKey) {
   AesCtrHmacAeadKeyFormat key_format = CreateValidKeyFormat();
   StatusOr<AesCtrHmacAeadKey> key_or =
       AesCtrHmacAeadKeyManager().CreateKey(key_format);
-  ASSERT_THAT(key_or.status(), IsOk());
+  ASSERT_THAT(key_or, IsOk());
   const AesCtrHmacAeadKey& key = key_or.value();
   EXPECT_THAT(AesCtrHmacAeadKeyManager().ValidateKey(key),
               IsOk());
@@ -199,23 +199,23 @@ TEST(AesCtrHmacAeadKeyManagerTest, CreateAead) {
 
   StatusOr<std::unique_ptr<Aead>> aead_or =
       AesCtrHmacAeadKeyManager().GetPrimitive<Aead>(key);
-  ASSERT_THAT(aead_or.status(), IsOk());
+  ASSERT_THAT(aead_or, IsOk());
 
   auto direct_aes_ctr_or = subtle::AesCtrBoringSsl::New(
       util::SecretDataFromStringView(key.aes_ctr_key().key_value()),
       key.aes_ctr_key().params().iv_size());
-  ASSERT_THAT(direct_aes_ctr_or.status(), IsOk());
+  ASSERT_THAT(direct_aes_ctr_or, IsOk());
 
   auto direct_hmac_or = subtle::HmacBoringSsl::New(
       util::Enums::ProtoToSubtle(key.hmac_key().params().hash()),
       key.hmac_key().params().tag_size(),
       util::SecretDataFromStringView(key.hmac_key().key_value()));
-  ASSERT_THAT(direct_hmac_or.status(), IsOk());
+  ASSERT_THAT(direct_hmac_or, IsOk());
 
   auto direct_aead_or = subtle::EncryptThenAuthenticate::New(
       std::move(direct_aes_ctr_or.value()), std::move(direct_hmac_or.value()),
       key.hmac_key().params().tag_size());
-  ASSERT_THAT(direct_aead_or.status(), IsOk());
+  ASSERT_THAT(direct_aead_or, IsOk());
 
   EXPECT_THAT(EncryptThenDecrypt(*aead_or.value(), *direct_aead_or.value(),
                                  "message", "aad"),

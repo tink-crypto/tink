@@ -24,7 +24,7 @@
 #include "tink/cleartext_keyset_handle.h"
 #include "tink/hybrid_decrypt.h"
 #include "tink/hybrid_encrypt.h"
-#include "proto/testing/testing_api.grpc.pb.h"
+#include "proto/testing_api.grpc.pb.h"
 
 namespace tink_testing_api {
 

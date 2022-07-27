@@ -429,7 +429,7 @@ TEST_F(PrimitiveSetTest, GetAll) {
       CreateKey(0x02020202, OutputPrefixType::TINK,
                 KeyStatusType::ENABLED, /*type_url=*/
                 "type.googleapis.com/google.crypto.tink.AesCmacKey"));
-  ASSERT_THAT(entry_or.status(), IsOk());
+  ASSERT_THAT(entry_or, IsOk());
   EXPECT_THAT(pset.set_primary(entry_or.value()), IsOk());
 
   EXPECT_THAT(
@@ -453,7 +453,7 @@ TEST_F(PrimitiveSetTest, GetAll) {
   std::vector<MacIdAndTypeUrl> mac_id_and_type;
   for (auto* entry : pset.get_all()) {
     auto mac_or = entry->get_primitive().ComputeMac("");
-    ASSERT_THAT(mac_or.status(), IsOk());
+    ASSERT_THAT(mac_or, IsOk());
     mac_id_and_type.push_back({mac_or.value(), entry->get_identifier(),
                                std::string(entry->get_key_type_url())});
   }

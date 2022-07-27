@@ -21,6 +21,10 @@ import com.google.crypto.tink.DeterministicAead;
 import com.google.crypto.tink.PrimitiveSet;
 import com.google.crypto.tink.PrimitiveWrapper;
 import com.google.crypto.tink.Registry;
+import com.google.crypto.tink.internal.MonitoringUtil;
+import com.google.crypto.tink.internal.MutableMonitoringRegistry;
+import com.google.crypto.tink.monitoring.MonitoringClient;
+import com.google.crypto.tink.monitoring.MonitoringKeysetInfo;
 import com.google.crypto.tink.subtle.Bytes;
 import java.security.GeneralSecurityException;
 import java.util.Arrays;
@@ -41,38 +45,59 @@ public class DeterministicAeadWrapper
   private static final Logger logger = Logger.getLogger(DeterministicAeadWrapper.class.getName());
 
   private static class WrappedDeterministicAead implements DeterministicAead {
-    private PrimitiveSet<DeterministicAead> primitives;
+    private final PrimitiveSet<DeterministicAead> primitives;
+
+    private final MonitoringClient.Logger encLogger;
+    private final MonitoringClient.Logger decLogger;
 
     public WrappedDeterministicAead(PrimitiveSet<DeterministicAead> primitives) {
       this.primitives = primitives;
+      if (primitives.hasAnnotations()) {
+        MonitoringClient client = MutableMonitoringRegistry.globalInstance().getMonitoringClient();
+        MonitoringKeysetInfo keysetInfo = MonitoringUtil.getMonitoringKeysetInfo(primitives);
+        this.encLogger = client.createLogger(keysetInfo, "daead", "encrypt");
+        this.decLogger = client.createLogger(keysetInfo, "daead", "decrypt");
+      } else {
+        this.encLogger = MonitoringUtil.DO_NOTHING_LOGGER;
+        this.decLogger = MonitoringUtil.DO_NOTHING_LOGGER;
+      }
     }
 
     @Override
     public byte[] encryptDeterministically(final byte[] plaintext, final byte[] associatedData)
         throws GeneralSecurityException {
-      return Bytes.concat(
-          primitives.getPrimary().getIdentifier(),
-          primitives
-              .getPrimary()
-              .getPrimitive()
-              .encryptDeterministically(plaintext, associatedData));
+      try {
+        byte[] output =
+            Bytes.concat(
+                primitives.getPrimary().getIdentifier(),
+                primitives
+                    .getPrimary()
+                    .getPrimitive()
+                    .encryptDeterministically(plaintext, associatedData));
+        encLogger.log(primitives.getPrimary().getKeyId(), plaintext.length);
+        return output;
+      } catch (GeneralSecurityException e) {
+        encLogger.logFailure();
+        throw e;
+      }
     }
 
     @Override
     public byte[] decryptDeterministically(final byte[] ciphertext, final byte[] associatedData)
         throws GeneralSecurityException {
       if (ciphertext.length > CryptoFormat.NON_RAW_PREFIX_SIZE) {
-        byte[] prefix = Arrays.copyOfRange(ciphertext, 0, CryptoFormat.NON_RAW_PREFIX_SIZE);
+        byte[] prefix = Arrays.copyOf(ciphertext, CryptoFormat.NON_RAW_PREFIX_SIZE);
         byte[] ciphertextNoPrefix =
             Arrays.copyOfRange(ciphertext, CryptoFormat.NON_RAW_PREFIX_SIZE, ciphertext.length);
         List<PrimitiveSet.Entry<DeterministicAead>> entries = primitives.getPrimitive(prefix);
         for (PrimitiveSet.Entry<DeterministicAead> entry : entries) {
           try {
-            return entry
-                .getPrimitive()
-                .decryptDeterministically(ciphertextNoPrefix, associatedData);
+            byte[] output =
+                entry.getPrimitive().decryptDeterministically(ciphertextNoPrefix, associatedData);
+            decLogger.log(entry.getKeyId(), ciphertextNoPrefix.length);
+            return output;
           } catch (GeneralSecurityException e) {
-            logger.info("ciphertext prefix matches a key, but cannot decrypt: " + e.toString());
+            logger.info("ciphertext prefix matches a key, but cannot decrypt: " + e);
             continue;
           }
         }
@@ -82,12 +107,15 @@ public class DeterministicAeadWrapper
       List<PrimitiveSet.Entry<DeterministicAead>> entries = primitives.getRawPrimitives();
       for (PrimitiveSet.Entry<DeterministicAead> entry : entries) {
         try {
-          return entry.getPrimitive().decryptDeterministically(ciphertext, associatedData);
+          byte[] output = entry.getPrimitive().decryptDeterministically(ciphertext, associatedData);
+          decLogger.log(entry.getKeyId(), ciphertext.length);
+          return output;
         } catch (GeneralSecurityException e) {
           continue;
         }
       }
       // nothing works.
+      decLogger.logFailure();
       throw new GeneralSecurityException("decryption failed");
     }
   }
