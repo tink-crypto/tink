@@ -157,6 +157,8 @@ type rsaSSAPKCS1Case struct {
 }
 
 func TestRSASSAPKCS1WycheproofCases(t *testing.T) {
+	testutil.SkipTestIfTestSrcDirIsNotSet(t)
+
 	testsRan := 0
 	for _, v := range []string{
 		"rsa_signature_2048_sha256_test.json",
