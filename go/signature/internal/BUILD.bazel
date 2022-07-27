@@ -1,0 +1,24 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "internal",
+    srcs = ["rsa.go"],
+    importpath = "github.com/google/tink/go/signature/internal",
+    visibility = ["//signature:__subpackages__"],
+    deps = ["//subtle"],
+)
+
+alias(
+    name = "go_default_library",
+    actual = ":internal",
+    visibility = ["//signature:__subpackages__"],
+)
+
+go_test(
+    name = "internal_test",
+    srcs = ["rsa_test.go"],
+    data = [
+        "@wycheproof//testvectors:all",
+    ],
+    deps = [":internal"],
+)
