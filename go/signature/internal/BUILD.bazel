@@ -2,10 +2,17 @@ load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
 
 go_library(
     name = "internal",
-    srcs = ["rsa.go"],
+    srcs = [
+        "rsa.go",
+        "rsassapkcs1_signer.go",
+        "rsassapkcs1_verifier.go",
+    ],
     importpath = "github.com/google/tink/go/signature/internal",
     visibility = ["//signature:__subpackages__"],
-    deps = ["//subtle"],
+    deps = [
+        "//subtle",
+        "//tink",
+    ],
 )
 
 alias(
@@ -16,9 +23,17 @@ alias(
 
 go_test(
     name = "internal_test",
-    srcs = ["rsa_test.go"],
+    srcs = [
+        "rsa_test.go",
+        "rsassapkcs1_signer_verifier_test.go",
+    ],
     data = [
         "@wycheproof//testvectors:all",
     ],
-    deps = [":internal"],
+    deps = [
+        ":internal",
+        "//subtle",
+        "//subtle/random",
+        "//testutil",
+    ],
 )
