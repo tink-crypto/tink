@@ -59,6 +59,7 @@ go_test(
         "jwt_mac_kid_test.go",
         "jwt_signer_verifier_factory_test.go",
         "jwt_signer_verifier_kid_test.go",
+        "jwt_test.go",
         "jwt_validator_test.go",
         "raw_jwt_test.go",
         "verified_jwt_test.go",
