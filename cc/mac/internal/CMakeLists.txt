@@ -73,3 +73,20 @@ tink_cc_test(
     tink::util::test_matchers
     tink::proto::tink_cc_proto
 )
+
+tink_cc_test(
+  NAME chunked_mac_test
+  SRCS
+    chunked_mac_test.cc
+  DEPS
+    gmock
+    tink::core::chunked_mac
+    tink::core::keyset_handle
+    tink::core::mac
+    tink::mac::mac_config
+    tink::mac::mac_key_templates
+    tink::util::status
+    tink::util::statusor
+    tink::util::test_matchers
+    tink::proto::tink_cc_proto
+)
