@@ -128,7 +128,7 @@ TEST(EcdsaSignKeyManagerTest, ValidateKeyFormatBadHashP521) {
 TEST(EcdsaSignKeyManagerTest, CreateKey) {
   EcdsaKeyFormat format = CreateValidKeyFormat();
   StatusOr<EcdsaPrivateKey> key_or = EcdsaSignKeyManager().CreateKey(format);
-  ASSERT_THAT(key_or.status(), IsOk());
+  ASSERT_THAT(key_or, IsOk());
   EcdsaPrivateKey key = key_or.value();
 
   EXPECT_THAT(key.version(), Eq(0));
@@ -149,7 +149,7 @@ TEST(EcdsaSignKeyManagerTest, CreateKey) {
 TEST(EcdsaSignKeyManagerTest, CreateKeyValid) {
   EcdsaKeyFormat format = CreateValidKeyFormat();
   StatusOr<EcdsaPrivateKey> key_or = EcdsaSignKeyManager().CreateKey(format);
-  ASSERT_THAT(key_or.status(), IsOk());
+  ASSERT_THAT(key_or, IsOk());
   EXPECT_THAT(EcdsaSignKeyManager().ValidateKey(key_or.value()), IsOk());
 }
 
@@ -198,7 +198,7 @@ TEST(EcdsaSignKeyManagerTest, GetPublicKey) {
   StatusOr<EcdsaPublicKey> public_key_or =
       EcdsaSignKeyManager().GetPublicKey(key);
 
-  ASSERT_THAT(public_key_or.status(), IsOk());
+  ASSERT_THAT(public_key_or, IsOk());
   EcdsaPublicKey public_key = public_key_or.value();
 
   EXPECT_THAT(public_key.version(), Eq(key.public_key().version()));
@@ -220,7 +220,7 @@ TEST(EcdsaSignKeyManagerTest, Create) {
 
   auto signer_or =
       EcdsaSignKeyManager().GetPrimitive<PublicKeySign>(private_key);
-  ASSERT_THAT(signer_or.status(), IsOk());
+  ASSERT_THAT(signer_or, IsOk());
 
   internal::EcKey ec_key;
   ec_key.curve = Enums::ProtoToSubtle(public_key.params().curve());
@@ -229,7 +229,7 @@ TEST(EcdsaSignKeyManagerTest, Create) {
   auto direct_verifier_or = subtle::EcdsaVerifyBoringSsl::New(
       ec_key, Enums::ProtoToSubtle(public_key.params().hash_type()),
       Enums::ProtoToSubtle(public_key.params().encoding()));
-  ASSERT_THAT(direct_verifier_or.status(), IsOk());
+  ASSERT_THAT(direct_verifier_or, IsOk());
 
   std::string message = "Some message";
   EXPECT_THAT(direct_verifier_or.value()->Verify(
@@ -245,7 +245,7 @@ TEST(EcdsaSignKeyManagerTest, CreateDifferentKey) {
 
   auto signer_or =
       EcdsaSignKeyManager().GetPrimitive<PublicKeySign>(private_key);
-  ASSERT_THAT(signer_or.status(), IsOk());
+  ASSERT_THAT(signer_or, IsOk());
 
   internal::EcKey ec_key;
   ec_key.curve = Enums::ProtoToSubtle(public_key.params().curve());
@@ -254,7 +254,7 @@ TEST(EcdsaSignKeyManagerTest, CreateDifferentKey) {
   auto direct_verifier_or = subtle::EcdsaVerifyBoringSsl::New(
       ec_key, Enums::ProtoToSubtle(public_key.params().hash_type()),
       Enums::ProtoToSubtle(public_key.params().encoding()));
-  ASSERT_THAT(direct_verifier_or.status(), IsOk());
+  ASSERT_THAT(direct_verifier_or, IsOk());
 
   std::string message = "Some message";
   EXPECT_THAT(direct_verifier_or.value()->Verify(
@@ -286,19 +286,19 @@ TEST(EcdsaSignKeyManagerTest, DeriveKeySignVerifySucceedsWithBoringSsl) {
 
   util::StatusOr<EcdsaPrivateKey> key =
       EcdsaSignKeyManager().DeriveKey(format, &input_stream);
-  ASSERT_THAT(key.status(), IsOk());
+  ASSERT_THAT(key, IsOk());
 
   util::StatusOr<std::unique_ptr<PublicKeySign>> signer =
       EcdsaSignKeyManager().GetPrimitive<PublicKeySign>(*key);
-  ASSERT_THAT(signer.status(), IsOk());
+  ASSERT_THAT(signer, IsOk());
 
   constexpr absl::string_view kMessage = "Some message";
   util::StatusOr<std::string> signature = (*signer)->Sign(kMessage);
-  ASSERT_THAT(signature.status(), IsOk());
+  ASSERT_THAT(signature, IsOk());
 
   util::StatusOr<std::unique_ptr<PublicKeyVerify>> verifier =
       EcdsaVerifyKeyManager().GetPrimitive<PublicKeyVerify>(key->public_key());
-  ASSERT_THAT(verifier.status(), IsOk());
+  ASSERT_THAT(verifier, IsOk());
   EXPECT_THAT((*verifier)->Verify(*signature, kMessage), IsOk());
 }
 
@@ -389,7 +389,7 @@ TEST_P(NistCurveParamsDeriveTest, TestVectors) {
 
   util::StatusOr<EcdsaPrivateKey> private_key =
       EcdsaSignKeyManager().DeriveKey(key_format, &input_stream);
-  ASSERT_THAT(private_key.status(), IsOk());
+  ASSERT_THAT(private_key, IsOk());
   EXPECT_THAT(private_key->key_value(),
               Eq(test::HexDecodeOrDie(std::get<2>(GetParam()))));
 }

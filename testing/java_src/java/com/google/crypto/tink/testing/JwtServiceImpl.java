@@ -31,22 +31,22 @@ import com.google.crypto.tink.jwt.JwtValidator;
 import com.google.crypto.tink.jwt.RawJwt;
 import com.google.crypto.tink.jwt.VerifiedJwt;
 import com.google.crypto.tink.proto.Keyset;
-import com.google.crypto.tink.proto.testing.JwtClaimValue;
-import com.google.crypto.tink.proto.testing.JwtFromJwkSetRequest;
-import com.google.crypto.tink.proto.testing.JwtFromJwkSetResponse;
-import com.google.crypto.tink.proto.testing.JwtGrpc.JwtImplBase;
-import com.google.crypto.tink.proto.testing.JwtSignRequest;
-import com.google.crypto.tink.proto.testing.JwtSignResponse;
-import com.google.crypto.tink.proto.testing.JwtToJwkSetRequest;
-import com.google.crypto.tink.proto.testing.JwtToJwkSetResponse;
-import com.google.crypto.tink.proto.testing.JwtToken;
-import com.google.crypto.tink.proto.testing.JwtVerifyRequest;
-import com.google.crypto.tink.proto.testing.JwtVerifyResponse;
-import com.google.crypto.tink.proto.testing.NullValue;
-import com.google.crypto.tink.proto.testing.StringValue;
-import com.google.crypto.tink.proto.testing.Timestamp;
+import com.google.crypto.tink.testing.proto.JwtClaimValue;
+import com.google.crypto.tink.testing.proto.JwtFromJwkSetRequest;
+import com.google.crypto.tink.testing.proto.JwtFromJwkSetResponse;
+import com.google.crypto.tink.testing.proto.JwtGrpc.JwtImplBase;
+import com.google.crypto.tink.testing.proto.JwtSignRequest;
+import com.google.crypto.tink.testing.proto.JwtSignResponse;
+import com.google.crypto.tink.testing.proto.JwtToJwkSetRequest;
+import com.google.crypto.tink.testing.proto.JwtToJwkSetResponse;
+import com.google.crypto.tink.testing.proto.JwtToken;
+import com.google.crypto.tink.testing.proto.JwtVerifyRequest;
+import com.google.crypto.tink.testing.proto.JwtVerifyResponse;
+import com.google.crypto.tink.testing.proto.NullValue;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
+import com.google.protobuf.StringValue;
+import com.google.protobuf.Timestamp;
 import io.grpc.Status;
 import io.grpc.stub.StreamObserver;
 import java.io.ByteArrayOutputStream;
@@ -252,7 +252,7 @@ public final class JwtServiceImpl extends JwtImplBase {
   }
 
   private JwtValidator convertProtoValidatorToValidator(
-      com.google.crypto.tink.proto.testing.JwtValidator validator) throws JwtInvalidException {
+      com.google.crypto.tink.testing.proto.JwtValidator validator) throws JwtInvalidException {
     JwtValidator.Builder validatorBuilder = JwtValidator.newBuilder();
     if (validator.hasExpectedTypeHeader()) {
       validatorBuilder.expectTypeHeader(validator.getExpectedTypeHeader().getValue());

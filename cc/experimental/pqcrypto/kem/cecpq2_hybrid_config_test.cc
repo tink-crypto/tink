@@ -97,9 +97,9 @@ TEST_F(Cecpq2HybridConfigTest, EncryptWrapperRegistered) {
 
   auto wrapped = Registry::Wrap(std::move(primitive_set));
 
-  ASSERT_THAT(wrapped.status(), IsOk());
+  ASSERT_THAT(wrapped, IsOk());
   auto encryption_result = wrapped.value()->Encrypt("secret", "");
-  ASSERT_THAT(encryption_result.status(), IsOk());
+  ASSERT_THAT(encryption_result, IsOk());
 
   std::string prefix = CryptoFormat::GetOutputPrefix(key_info).value();
   EXPECT_EQ(
@@ -132,7 +132,7 @@ TEST_F(Cecpq2HybridConfigTest, DecryptWrapperRegistered) {
 
   auto wrapped = Registry::Wrap(std::move(primitive_set));
 
-  ASSERT_THAT(wrapped.status(), IsOk());
+  ASSERT_THAT(wrapped, IsOk());
 
   std::string prefix = CryptoFormat::GetOutputPrefix(key_info).value();
   std::string encryption =

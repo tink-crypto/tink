@@ -30,56 +30,47 @@ import (
 	tinkpb "github.com/google/tink/go/proto/tink_go_proto"
 )
 
-func TestPublicKeyFromPrimaryKey(t *testing.T) {
+func TestHPKEPublicKeySerialization(t *testing.T) {
+	// Obtain private and public keyset handles via key template.
 	keyTemplate := hybrid.DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_CHACHA20_POLY1305_Raw_Key_Template()
-	privKH, err := keyset.NewHandle(keyTemplate)
+	privHandle, err := keyset.NewHandle(keyTemplate)
 	if err != nil {
 		t.Fatalf("NewHandle(%v) err = %v, want nil", keyTemplate, err)
 	}
-	pubKH, err := privKH.Public()
+	pubHandle, err := privHandle.Public()
 	if err != nil {
 		t.Fatalf("Public() err = %v, want nil", err)
 	}
 
-	pubKeyBytes, err := subtle.PublicKeyFromPrimaryKey(pubKH, keyTemplate)
+	// Export public key as bytes.
+	pubKeyBytes, err := subtle.SerializePrimaryPublicKey(pubHandle, keyTemplate)
 	if err != nil {
-		t.Fatalf("PublicKeyFromPrimaryKey(%v) err = %v, want nil", pubKH, err)
+		t.Fatalf("SerializePrimaryPublicKey(%v) err = %v, want nil", pubHandle, err)
 	}
 
-	// Construct a public key handle with the public key bytes.
-	typeURL := "type.googleapis.com/google.crypto.tink.HpkePublicKey"
-	kd, err := keyDataFromBytes(t, pubKeyBytes, hpkepb.HpkeAead_CHACHA20_POLY1305, typeURL)
+	// Import public key bytes as keyset handle.
+	gotPubHandle, err := subtle.KeysetHandleFromSerializedPublicKey(pubKeyBytes, keyTemplate)
 	if err != nil {
-		t.Fatalf("keyDataFromBytes(%v, %v, %v) err = %v, want nil", pubKeyBytes, hpkepb.HpkeAead_CHACHA20_POLY1305, typeURL, err)
-	}
-	ks := testutil.NewKeyset(12345, []*tinkpb.Keyset_Key{
-		// Primary key.
-		testutil.NewKey(kd, tinkpb.KeyStatusType_ENABLED, 12345, tinkpb.OutputPrefixType_RAW),
-		// Non-primary key.
-		testutil.NewKey(kd, tinkpb.KeyStatusType_ENABLED, 19, tinkpb.OutputPrefixType_RAW),
-	})
-	gotPubKH, err := keyset.NewHandleWithNoSecrets(ks)
-	if err != nil {
-		t.Fatalf("NewHandleWithNoSecrets(%v) err = %v, want nil", ks, err)
+		t.Fatalf("KeysetHandleFromSerializedPublicKey(%v, %v) err = %v, want nil", pubKeyBytes, keyTemplate, err)
 	}
 
 	plaintext := random.GetRandomBytes(200)
 	ctxInfo := random.GetRandomBytes(100)
 
-	// Encrypt with public key handle constructed from public key bytes.
-	enc, err := hybrid.NewHybridEncrypt(gotPubKH)
+	// Encrypt with public keyset handle constructed from public key bytes.
+	enc, err := hybrid.NewHybridEncrypt(gotPubHandle)
 	if err != nil {
-		t.Fatalf("NewHybridEncrypt(%v) err = %v, want nil", gotPubKH, err)
+		t.Fatalf("NewHybridEncrypt(%v) err = %v, want nil", gotPubHandle, err)
 	}
 	ciphertext, err := enc.Encrypt(plaintext, ctxInfo)
 	if err != nil {
 		t.Fatalf("Encrypt(%x, %x) err = %v, want nil", plaintext, ctxInfo, err)
 	}
 
-	// Decrypt ciphertext with original private key handle.
-	dec, err := hybrid.NewHybridDecrypt(privKH)
+	// Decrypt with original private keyset handle.
+	dec, err := hybrid.NewHybridDecrypt(privHandle)
 	if err != nil {
-		t.Fatalf("NewHybridDecrypt(%v) err = %v, want nil", privKH, err)
+		t.Fatalf("NewHybridDecrypt(%v) err = %v, want nil", privHandle, err)
 	}
 	gotPlaintext, err := dec.Decrypt(ciphertext, ctxInfo)
 	if err != nil {
@@ -90,13 +81,13 @@ func TestPublicKeyFromPrimaryKey(t *testing.T) {
 	}
 }
 
-func TestPublicKeyFromPrimaryKeyInvalidTemplateFails(t *testing.T) {
+func TestSerializePrimaryPublicKeyInvalidTemplateFails(t *testing.T) {
 	keyTemplate := hybrid.DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_CHACHA20_POLY1305_Raw_Key_Template()
-	privKH, err := keyset.NewHandle(keyTemplate)
+	privHandle, err := keyset.NewHandle(keyTemplate)
 	if err != nil {
 		t.Fatalf("NewHandle(%v) err = %v, want nil", keyTemplate, err)
 	}
-	pubKH, err := privKH.Public()
+	pubHandle, err := privHandle.Public()
 	if err != nil {
 		t.Fatalf("Public() err = %v, want nil", err)
 	}
@@ -118,27 +109,27 @@ func TestPublicKeyFromPrimaryKeyInvalidTemplateFails(t *testing.T) {
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			if _, err := subtle.PublicKeyFromPrimaryKey(pubKH, test.template); err == nil {
-				t.Errorf("PublicKeyFromPrimaryKey(%v, %v) err = nil, want error", pubKH, test.template)
+			if _, err := subtle.SerializePrimaryPublicKey(pubHandle, test.template); err == nil {
+				t.Errorf("SerializePrimaryPublicKey(%v, %v) err = nil, want error", pubHandle, test.template)
 			}
 		})
 	}
 }
 
-func TestPublicKeyFromPrimaryKeyInvalidHandleFails(t *testing.T) {
+func TestSerializePrimaryPublicKeyInvalidHandleFails(t *testing.T) {
 	// Build valid key data.
 	keyTemplate := hybrid.DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_CHACHA20_POLY1305_Raw_Key_Template()
-	privKH, err := keyset.NewHandle(keyTemplate)
+	privHandle, err := keyset.NewHandle(keyTemplate)
 	if err != nil {
 		t.Fatalf("NewHandle(%v) err = %v, want nil", keyTemplate, err)
 	}
-	pubKH, err := privKH.Public()
+	pubHandle, err := privHandle.Public()
 	if err != nil {
 		t.Fatalf("Public() err = %v, want nil", err)
 	}
-	pubKeyBytes, err := subtle.PublicKeyFromPrimaryKey(pubKH, keyTemplate)
+	pubKeyBytes, err := subtle.SerializePrimaryPublicKey(pubHandle, keyTemplate)
 	if err != nil {
-		t.Fatalf("PublicKeyFromPrimaryKey(%v, %v) err = %v, want nil", pubKH, keyTemplate, err)
+		t.Fatalf("SerializePrimaryPublicKey(%v, %v) err = %v, want nil", pubHandle, keyTemplate, err)
 	}
 	typeURL := "type.googleapis.com/google.crypto.tink.HpkePublicKey"
 	validKD, err := keyDataFromBytes(t, pubKeyBytes, hpkepb.HpkeAead_CHACHA20_POLY1305, typeURL)
@@ -205,8 +196,47 @@ func TestPublicKeyFromPrimaryKeyInvalidHandleFails(t *testing.T) {
 			if err != nil {
 				t.Fatalf("NewHandleWithNoSecrets(%v) err = %v, want nil", ks, err)
 			}
-			if _, err := subtle.PublicKeyFromPrimaryKey(handle, keyTemplate); err == nil {
-				t.Errorf("PublicKeyFromPrimaryKey(%v, %v) err = nil, want error", handle, keyTemplate)
+			if _, err := subtle.SerializePrimaryPublicKey(handle, keyTemplate); err == nil {
+				t.Errorf("SerializePrimaryPublicKey(%v, %v) err = nil, want error", handle, keyTemplate)
+			}
+		})
+	}
+}
+
+func TestKeysetHandleFromSerializedPublicKeyInvalidTemplateFails(t *testing.T) {
+	keyTemplate := hybrid.DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_CHACHA20_POLY1305_Raw_Key_Template()
+	privHandle, err := keyset.NewHandle(keyTemplate)
+	if err != nil {
+		t.Fatalf("NewHandle(%v) err = %v, want nil", keyTemplate, err)
+	}
+	pubHandle, err := privHandle.Public()
+	if err != nil {
+		t.Fatalf("Public() err = %v, want nil", err)
+	}
+	pubKeyBytes, err := subtle.SerializePrimaryPublicKey(pubHandle, keyTemplate)
+	if err != nil {
+		t.Fatalf("SerializePrimaryPublicKey(%v) err = %v, want nil", pubHandle, err)
+	}
+
+	tests := []struct {
+		name     string
+		template *tinkpb.KeyTemplate
+	}{
+		{"AES_128_GCM", hybrid.DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_AES_128_GCM_Key_Template()},
+		{"AES_128_GCM_Raw", hybrid.DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_AES_128_GCM_Raw_Key_Template()},
+		{"AES_256_GCM", hybrid.DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_AES_256_GCM_Key_Template()},
+		{"AES_256_GCM_Raw", hybrid.DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_AES_256_GCM_Raw_Key_Template()},
+		{"CHACHA20_POLY1305", hybrid.DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_CHACHA20_POLY1305_Key_Template()},
+		{"invalid type URL", &tinkpb.KeyTemplate{
+			TypeUrl:          "type.googleapis.com/google.crypto.tink.EciesAeadHkdfPrivateKey",
+			Value:            keyTemplate.GetValue(),
+			OutputPrefixType: tinkpb.OutputPrefixType_RAW,
+		}},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			if _, err := subtle.KeysetHandleFromSerializedPublicKey(pubKeyBytes, test.template); err == nil {
+				t.Errorf("KeysetHandleFromSerializedPublicKey(%v, %v) err = nil, want error", pubKeyBytes, test.template)
 			}
 		})
 	}

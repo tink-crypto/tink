@@ -201,7 +201,7 @@ void CliUtil::InitTink() {
 // static
 Status CliUtil::InitGcp() {
   std::string creds_file = std::string(getenv("TEST_SRCDIR")) +
-                           "/tools/testdata/credential.json";
+                           "/tools/testdata/gcp/credential.json";
   auto client_result = GcpKmsClient::New("", creds_file);
   if (!client_result.ok()) {
     return Status(absl::StatusCode::kInternal,
@@ -217,7 +217,7 @@ Status CliUtil::InitGcp() {
 // static
 Status CliUtil::InitAws() {
   std::string creds_file = std::string(getenv("TEST_SRCDIR")) +
-                           "/tools/testdata/aws_credentials_cc.txt";
+                           "/tools/testdata/aws/credentials.ini";
   auto client_result = AwsKmsClient::New("", creds_file);
   if (!client_result.ok()) {
     return Status(crypto::tink::util::error::INTERNAL,

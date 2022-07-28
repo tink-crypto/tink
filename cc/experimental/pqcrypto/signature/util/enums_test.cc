@@ -71,9 +71,9 @@ TEST_F(EnumsTest, SphincsHashType) {
             EnumsPqcrypto::SubtleToProto(subtle::SphincsHashType::SHA256));
   EXPECT_EQ(pb::SphincsHashType::SHAKE256,
             EnumsPqcrypto::SubtleToProto(subtle::SphincsHashType::SHAKE256));
-  EXPECT_EQ(
-      pb::SphincsHashType::UNKNOWN_HASH_TYPE,
-      EnumsPqcrypto::SubtleToProto(subtle::SphincsHashType::UNKNOWN_HASH_TYPE));
+  EXPECT_EQ(pb::SphincsHashType::HASH_TYPE_UNSPECIFIED,
+            EnumsPqcrypto::SubtleToProto(
+                subtle::SphincsHashType::HASH_TYPE_UNSPECIFIED));
 
   EXPECT_EQ(subtle::SphincsHashType::HARAKA,
             EnumsPqcrypto::ProtoToSubtle(pb::SphincsHashType::HARAKA));
@@ -82,8 +82,8 @@ TEST_F(EnumsTest, SphincsHashType) {
   EXPECT_EQ(subtle::SphincsHashType::SHAKE256,
             EnumsPqcrypto::ProtoToSubtle(pb::SphincsHashType::SHAKE256));
   EXPECT_EQ(
-      subtle::SphincsHashType::UNKNOWN_HASH_TYPE,
-      EnumsPqcrypto::ProtoToSubtle(pb::SphincsHashType::UNKNOWN_HASH_TYPE));
+      subtle::SphincsHashType::HASH_TYPE_UNSPECIFIED,
+      EnumsPqcrypto::ProtoToSubtle(pb::SphincsHashType::HASH_TYPE_UNSPECIFIED));
 
   // Check that enum conversion covers the entire range of the proto-enum.
   int count = 0;
@@ -104,16 +104,17 @@ TEST_F(EnumsTest, SphincsVariant) {
             EnumsPqcrypto::SubtleToProto(subtle::SphincsVariant::ROBUST));
   EXPECT_EQ(pb::SphincsVariant::SIMPLE,
             EnumsPqcrypto::SubtleToProto(subtle::SphincsVariant::SIMPLE));
-  EXPECT_EQ(
-      pb::SphincsVariant::UNKNOWN_VARIANT,
-      EnumsPqcrypto::SubtleToProto(subtle::SphincsVariant::UNKNOWN_VARIANT));
+  EXPECT_EQ(pb::SphincsVariant::VARIANT_UNSPECIFIED,
+            EnumsPqcrypto::SubtleToProto(
+                subtle::SphincsVariant::VARIANT_UNSPECIFIED));
 
   EXPECT_EQ(subtle::SphincsVariant::ROBUST,
             EnumsPqcrypto::ProtoToSubtle(pb::SphincsVariant::ROBUST));
   EXPECT_EQ(subtle::SphincsVariant::SIMPLE,
             EnumsPqcrypto::ProtoToSubtle(pb::SphincsVariant::SIMPLE));
-  EXPECT_EQ(subtle::SphincsVariant::UNKNOWN_VARIANT,
-            EnumsPqcrypto::ProtoToSubtle(pb::SphincsVariant::UNKNOWN_VARIANT));
+  EXPECT_EQ(
+      subtle::SphincsVariant::VARIANT_UNSPECIFIED,
+      EnumsPqcrypto::ProtoToSubtle(pb::SphincsVariant::VARIANT_UNSPECIFIED));
 
   // Check that enum conversion covers the entire range of the proto-enum.
   int count = 0;
@@ -136,9 +137,9 @@ TEST_F(EnumsTest, SphincsSignatureType) {
   EXPECT_EQ(pb::SphincsSignatureType::SMALL_SIGNATURE,
             EnumsPqcrypto::SubtleToProto(
                 subtle::SphincsSignatureType::SMALL_SIGNATURE));
-  EXPECT_EQ(pb::SphincsSignatureType::UNKNOWN_SIG_TYPE,
+  EXPECT_EQ(pb::SphincsSignatureType::SIG_TYPE_UNSPECIFIED,
             EnumsPqcrypto::SubtleToProto(
-                subtle::SphincsSignatureType::UNKNOWN_SIG_TYPE));
+                subtle::SphincsSignatureType::SIG_TYPE_UNSPECIFIED));
 
   EXPECT_EQ(
       subtle::SphincsSignatureType::FAST_SIGNING,
@@ -146,9 +147,9 @@ TEST_F(EnumsTest, SphincsSignatureType) {
   EXPECT_EQ(
       subtle::SphincsSignatureType::SMALL_SIGNATURE,
       EnumsPqcrypto::ProtoToSubtle(pb::SphincsSignatureType::SMALL_SIGNATURE));
-  EXPECT_EQ(
-      subtle::SphincsSignatureType::UNKNOWN_SIG_TYPE,
-      EnumsPqcrypto::ProtoToSubtle(pb::SphincsSignatureType::UNKNOWN_SIG_TYPE));
+  EXPECT_EQ(subtle::SphincsSignatureType::SIG_TYPE_UNSPECIFIED,
+            EnumsPqcrypto::ProtoToSubtle(
+                pb::SphincsSignatureType::SIG_TYPE_UNSPECIFIED));
 
   // Check that enum conversion covers the entire range of the proto-enum.
   int count = 0;

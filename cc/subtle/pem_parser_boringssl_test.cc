@@ -428,7 +428,7 @@ class PemParserRsaTest : public Test {
   void ExpectBnEqual(absl::string_view bn_str, const BIGNUM *bn) {
     util::StatusOr<std::string> expected_bn_str =
         internal::BignumToString(bn, BN_num_bytes(bn));
-    ASSERT_THAT(expected_bn_str.status(), IsOk());
+    ASSERT_THAT(expected_bn_str, IsOk());
     EXPECT_EQ(bn_str, *expected_bn_str);
   }
 
@@ -456,7 +456,7 @@ void Corrupt(ContainerType *container) {
 TEST_F(PemParserRsaTest, ReadRsaPublicKey) {
   auto key = PemParser::ParseRsaPublicKey(
       absl::string_view(pem_rsa_pub_key_.data(), pem_rsa_pub_key_.size()));
-  ASSERT_THAT(key.status(), IsOk()) << internal::GetSslErrors();
+  ASSERT_THAT(key, IsOk()) << internal::GetSslErrors();
 
   // Verify exponent and modulus are correctly set.
   const BIGNUM *e_bn, *n_bn;
@@ -469,7 +469,7 @@ TEST_F(PemParserRsaTest, ReadRsaPublicKey) {
 TEST_F(PemParserRsaTest, ReadRsaPrivatekey) {
   auto key_statusor = PemParser::ParseRsaPrivateKey(
       absl::string_view(pem_rsa_prv_key_.data(), pem_rsa_prv_key_.size()));
-  ASSERT_THAT(key_statusor.status(), IsOk()) << internal::GetSslErrors();
+  ASSERT_THAT(key_statusor, IsOk()) << internal::GetSslErrors();
 
   // Verify exponents and modulus.
   auto key = *std::move(key_statusor);
@@ -516,7 +516,7 @@ TEST_P(ParametrizedPemParserRsaTest, WriteRsaPrivateKey) {
       absl::HexStringToBytes(test_vector.coefficient_hex_str));
 
   util::StatusOr<std::string> pem_result = PemParser::WriteRsaPrivateKey(key);
-  EXPECT_THAT(pem_result.status(), IsOk()) << internal::GetSslErrors();
+  EXPECT_THAT(pem_result, IsOk()) << internal::GetSslErrors();
   EXPECT_EQ(absl::StripAsciiWhitespace(*pem_result), test_vector.private_pem);
 }
 
@@ -527,7 +527,7 @@ TEST_P(ParametrizedPemParserRsaTest, WriteRsaPublicKey) {
   key.e = absl::HexStringToBytes(test_vector.public_exponent_hex_str);
 
   auto pem_result = PemParser::WriteRsaPublicKey(key);
-  EXPECT_THAT(pem_result.status(), IsOk());
+  EXPECT_THAT(pem_result, IsOk());
   EXPECT_EQ(absl::StripAsciiWhitespace(*pem_result), test_vector.public_pem);
 }
 
@@ -560,7 +560,7 @@ TEST_P(ParametrizedPemParserEcTest, ReadEcPublicKeySuccess) {
   auto ecdsa_key = PemParser::ParseEcPublicKey(
       absl::StripAsciiWhitespace(test_vector.pub_pem));
 
-  EXPECT_THAT(ecdsa_key.status(), IsOk()) << internal::GetSslErrors();
+  EXPECT_THAT(ecdsa_key, IsOk()) << internal::GetSslErrors();
 
   auto x_hex_result = absl::BytesToHexString(ecdsa_key->get()->pub_x);
   auto y_hex_result = absl::BytesToHexString(ecdsa_key->get()->pub_y);
@@ -575,7 +575,7 @@ TEST_P(ParametrizedPemParserEcTest, ReadEcPrivateKeySuccess) {
       PemParser::ParseEcPrivateKey(
           absl::StripAsciiWhitespace(test_vector.priv_pem));
 
-  EXPECT_THAT(ecdsa_key.status(), IsOk()) << internal::GetSslErrors();
+  EXPECT_THAT(ecdsa_key, IsOk()) << internal::GetSslErrors();
 
   std::string x_hex = absl::BytesToHexString((*ecdsa_key)->pub_x);
   std::string y_hex = absl::BytesToHexString((*ecdsa_key)->pub_y);
@@ -621,7 +621,7 @@ TEST_P(ParametrizedPemParserEcTest, WriteEcPublicKeySucceeds) {
   // Check that converting the public key with WriteEcPublicKey() succeeds.
   util::StatusOr<std::string> pem_material =
       PemParser::WriteEcPublicKey(ec_key);
-  ASSERT_THAT(pem_material.status(), IsOk()) << internal::GetSslErrors();
+  ASSERT_THAT(pem_material, IsOk()) << internal::GetSslErrors();
   EXPECT_EQ(absl::StripAsciiWhitespace(*pem_material),
             absl::StripAsciiWhitespace(test_vector.pub_pem));
 }
@@ -639,7 +639,7 @@ TEST_P(ParametrizedPemParserEcTest, WriteEcPrivateKeySucceeds) {
   // Check that converting the private key with WriteEcPrivateKey() succeeds.
   util::StatusOr<std::string> pem_material =
       PemParser::WriteEcPrivateKey(ec_key);
-  ASSERT_THAT(pem_material.status(), IsOk());
+  ASSERT_THAT(pem_material, IsOk());
   EXPECT_EQ(absl::StripAsciiWhitespace(*pem_material),
             absl::StripAsciiWhitespace(test_vector.priv_pem));
 }
@@ -651,13 +651,13 @@ INSTANTIATE_TEST_SUITE_P(ParametrizedPemParserEcTest,
 TEST(PemParserEcTest, NewKeyWriteAndReadPublicKeySuccess) {
   util::StatusOr<SubtleUtilBoringSSL::EcKey> ec_key =
       SubtleUtilBoringSSL::GetNewEcKey(EllipticCurveType::NIST_P256);
-  ASSERT_THAT(ec_key.status(), IsOk());
+  ASSERT_THAT(ec_key, IsOk());
 
   util::StatusOr<std::string> public_pem = PemParser::WriteEcPublicKey(*ec_key);
-  ASSERT_THAT(public_pem.status(), IsOk());
+  ASSERT_THAT(public_pem, IsOk());
   util::StatusOr<std::unique_ptr<SubtleUtilBoringSSL::EcKey>> public_key =
       PemParser::ParseEcPublicKey(*public_pem);
-  EXPECT_THAT(public_key.status(), IsOk()) << internal::GetSslErrors();
+  EXPECT_THAT(public_key, IsOk()) << internal::GetSslErrors();
   EXPECT_EQ((*public_key)->pub_x, ec_key->pub_x);
   EXPECT_EQ((*public_key)->pub_y, ec_key->pub_y);
   EXPECT_EQ((*public_key)->curve, ec_key->curve);
@@ -666,14 +666,14 @@ TEST(PemParserEcTest, NewKeyWriteAndReadPublicKeySuccess) {
 TEST(PemParserEcTest, NewKeyWriteAndReadPrivateKeySuccess) {
   util::StatusOr<SubtleUtilBoringSSL::EcKey> ec_key =
       SubtleUtilBoringSSL::GetNewEcKey(EllipticCurveType::NIST_P256);
-  ASSERT_THAT(ec_key.status(), IsOk());
+  ASSERT_THAT(ec_key, IsOk());
 
   util::StatusOr<std::string> private_pem =
       PemParser::WriteEcPrivateKey(*ec_key);
-  ASSERT_THAT(private_pem.status(), IsOk());
+  ASSERT_THAT(private_pem, IsOk());
   util::StatusOr<std::unique_ptr<SubtleUtilBoringSSL::EcKey>> parsed_ec_key =
       PemParser::ParseEcPrivateKey(*private_pem);
-  EXPECT_THAT(parsed_ec_key.status(), IsOk()) << internal::GetSslErrors();
+  EXPECT_THAT(parsed_ec_key, IsOk()) << internal::GetSslErrors();
 
   EXPECT_EQ((*parsed_ec_key)->pub_x, ec_key->pub_x);
   EXPECT_EQ((*parsed_ec_key)->pub_y, ec_key->pub_y);
@@ -792,7 +792,7 @@ GTi1cWyqIwzGqfw8ZGejtvg4SAGulZ7/MWVCZV51C6JakfY1v3z24BQG1m50jMs=
 TEST(PemParserEcTest, WriteEcPublicKeyWithBadXFails) {
   util::StatusOr<SubtleUtilBoringSSL::EcKey> ec_key_statusor =
       SubtleUtilBoringSSL::GetNewEcKey(subtle::NIST_P256);
-  ASSERT_THAT(ec_key_statusor.status(), IsOk());
+  ASSERT_THAT(ec_key_statusor, IsOk());
   SubtleUtilBoringSSL::EcKey ec_key = *ec_key_statusor;
   Corrupt(&ec_key.pub_x);
   // Bad coordinates should generate a BoringSSL/OpenSSL's internal error.
@@ -803,7 +803,7 @@ TEST(PemParserEcTest, WriteEcPublicKeyWithBadXFails) {
 TEST(PemParserEcTest, WriteEcPublicKeyWithBadYFails) {
   util::StatusOr<SubtleUtilBoringSSL::EcKey> ec_key_statusor =
       SubtleUtilBoringSSL::GetNewEcKey(subtle::NIST_P256);
-  ASSERT_THAT(ec_key_statusor.status(), IsOk());
+  ASSERT_THAT(ec_key_statusor, IsOk());
   SubtleUtilBoringSSL::EcKey ec_key = *ec_key_statusor;
   Corrupt(&ec_key.pub_y);
   EXPECT_THAT(PemParser::WriteEcPublicKey(ec_key).status(),
@@ -813,7 +813,7 @@ TEST(PemParserEcTest, WriteEcPublicKeyWithBadYFails) {
 TEST(PemParserEcTest, WriteEcPrivateKeyWithBadPrivFails) {
   util::StatusOr<SubtleUtilBoringSSL::EcKey> ec_key_statusor =
       SubtleUtilBoringSSL::GetNewEcKey(subtle::NIST_P256);
-  ASSERT_THAT(ec_key_statusor.status(), IsOk());
+  ASSERT_THAT(ec_key_statusor, IsOk());
   SubtleUtilBoringSSL::EcKey ec_key = *ec_key_statusor;
   std::string priv = std::string(util::SecretDataAsStringView(ec_key.priv));
   Corrupt(&priv);

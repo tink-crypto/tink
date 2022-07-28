@@ -31,10 +31,9 @@ namespace crypto {
 namespace tink {
 namespace internal {
 
-using ::google::crypto::tink::HpkeKem;
-
 util::StatusOr<std::unique_ptr<HpkeKeyBoringSsl>> HpkeKeyBoringSsl::New(
-    const HpkeKem& kem, absl::string_view recipient_private_key) {
+    const google::crypto::tink::HpkeKem& kem,
+    absl::string_view recipient_private_key) {
   std::unique_ptr<HpkeKeyBoringSsl> hpke_key =
       absl::WrapUnique(new HpkeKeyBoringSsl(kem));
   util::Status status = hpke_key->Init(recipient_private_key);

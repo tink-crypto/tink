@@ -126,16 +126,16 @@ export class KeysetHandle {
   getPublicKeysetHandle(): KeysetHandle {
     const publicKeyset = new PbKeyset();
     for (const key of this.keyset_.getKeyList()) {
-      publicKeyset.addKey(key.clone().setKeyData(
-          createPublicKeyData(nonNull('Key data', key.getKeyData()))));
+      publicKeyset.addKey(key.clone().setKeyData(createPublicKeyData(
+          nonNull('Key data', key.getKeyData()))));
     }
     publicKeyset.setPrimaryKeyId(this.keyset_.getPrimaryKeyId());
     return new KeysetHandle(publicKeyset);
   }
 }
 
-function nonNull<T>(desc: string, value: T|null): T {
-  if (value === null) {
+function nonNull<T>(desc: string, value: T|null|undefined): T {
+  if (value == null) {
     throw new SecurityException(`${desc} has to be non null.`);
   }
   return value;

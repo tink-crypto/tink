@@ -16,15 +16,25 @@
 
 package com.google.crypto.tink;
 
+
+import com.google.crypto.tink.annotations.Alpha;
+import com.google.crypto.tink.internal.LegacyProtoKey;
+import com.google.crypto.tink.internal.LegacyProtoParameters;
+import com.google.crypto.tink.internal.MutableSerializationRegistry;
+import com.google.crypto.tink.internal.ProtoKeySerialization;
+import com.google.crypto.tink.internal.ProtoParametersSerialization;
+import com.google.crypto.tink.monitoring.MonitoringAnnotations;
 import com.google.crypto.tink.proto.EncryptedKeyset;
 import com.google.crypto.tink.proto.KeyData;
 import com.google.crypto.tink.proto.KeyStatusType;
 import com.google.crypto.tink.proto.Keyset;
 import com.google.crypto.tink.proto.KeysetInfo;
+import com.google.crypto.tink.proto.OutputPrefixType;
 import com.google.crypto.tink.tinkkey.KeyAccess;
 import com.google.crypto.tink.tinkkey.KeyHandle;
 import com.google.crypto.tink.tinkkey.internal.InternalKeyHandle;
 import com.google.crypto.tink.tinkkey.internal.ProtoKey;
+import com.google.errorprone.annotations.Immutable;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.ExtensionRegistryLite;
 import com.google.protobuf.InvalidProtocolBufferException;
@@ -32,7 +42,10 @@ import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import javax.annotation.Nullable;
 
 /**
  * A KeysetHandle provides abstracted access to {@link Keyset}, to limit the exposure of actual
@@ -45,10 +58,526 @@ import java.util.List;
  * @since 1.0.0
  */
 public final class KeysetHandle {
+  /**
+   * Used to create new {@code KeysetHandle} objects.
+   *
+   * <p>A builder can be used to create a new {@code KeysetHandle} object. To create a builder with
+   * an empty keyset, one calls {@code KeysetHandle.newBuilder();}. To create a builder from an
+   * existing keyset, one calls {@code KeysetHandle.newBuilder(keyset);}.
+   *
+   * <p>To add a new key to a {@code Builder}, one calls {@link #addEntry} with a KeysetEntry
+   * object. Such objects can be created
+   *
+   * <ul>
+   *   <li>From a named {@link Parameters} with {@link
+   *       KeysetHandle#generateEntryFromParametersName},
+   *   <li>From a {@link Parameters} object, with {@link KeysetHandle#generateEntryFromParameters},
+   *   <li>By importing an existing key, with {@link KeysetHandle#importKey}
+   * </ul>
+   *
+   * . 7
+   *
+   * <p>All these functions return a {@code KeysetBuilder.Entry}. It is necessary to assign an ID to
+   * a new entry by calling one of {@link Entry#withNextId}, {@link Entry#withFixedId}, or {@link
+   * Entry#withRandomId}. The exception is when an existing key which has an id requirement is
+   * imported (in which case the required ID is used).
+   *
+   * <p>It is possible to set the status of an entry by calling {@link Entry#setStatus}. The Status
+   * defaults to {@code ENABLED}.
+   *
+   * <p>It is possible to set whether an entry is the primary by calling {@link Entry#makePrimary}.
+   * The user must ensure that once {@link #build} is called, a primary has been set.
+   */
+  public static final class Builder {
+    private static class KeyIdStrategy {
+      private static final KeyIdStrategy RANDOM_ID = new KeyIdStrategy();
+      private final int fixedId;
+
+      private KeyIdStrategy() {
+        this.fixedId = 0;
+      }
+
+      private KeyIdStrategy(int id) {
+        this.fixedId = id;
+      }
+
+      private static KeyIdStrategy randomId() {
+        return RANDOM_ID;
+      }
+
+      private static KeyIdStrategy fixedId(int id) {
+        return new KeyIdStrategy(id);
+      }
+
+      private int getFixedId() {
+        return fixedId;
+      }
+    }
+
+    /**
+     * One entry, representing a single key, in a Keyset.Builder.
+     *
+     * <p>This is the analogue of {@link Keyset.Entry} for a builder.
+     *
+     * <p>Users will have to ensure that each entry has an ID, and one entry is a primary. See
+     * {@link KeysetHandle.Builder#build} for details).
+     */
+    public static final class Entry {
+      // When "build" is called, for exactly one entry "isPrimary" needs to be set, and it should
+      // be enabled.
+      private boolean isPrimary;
+      // Set to ENABLED by default.
+      private KeyStatus keyStatus = KeyStatus.ENABLED;
+
+      // Exactly one of key and parameters will be non-null (set in the constructor).
+      @Nullable private final Key key;
+      @Nullable private final Parameters parameters;
+      // strategy must be non-null when the keyset is built.
+      private KeyIdStrategy strategy = null;
+
+      // The Builder which this Entry is part of. Each entry can be part of only one builder.
+      // When constructing a new entry, it is not part of any builder.
+      @Nullable private KeysetHandle.Builder builder = null;
+
+      private Entry(Key key) {
+        this.key = key;
+        this.parameters = null;
+      }
+
+      private Entry(Parameters parameters) {
+        this.key = null;
+        this.parameters = parameters;
+      }
+
+      /**
+       * Marks that this entry is the primary key.
+       *
+       * <p>Other entries in the same keyset will be marked as non-primary if this Entry has already
+       * been added to a builder, otherwise they will marked as non-primary once this entry is added
+       * to a builder.
+       */
+      public Entry makePrimary() {
+        if (builder != null) {
+          builder.clearPrimary();
+        }
+        isPrimary = true;
+        return this;
+      }
+
+      /** Returns whether this entry has been marked as a primary. */
+      public boolean isPrimary() {
+        return isPrimary;
+      }
+
+      /** Sets the status of this entry. */
+      public Entry setStatus(KeyStatus status) {
+        keyStatus = status;
+        return this;
+      }
+
+      /** Returns the status of this entry. */
+      public KeyStatus getStatus() {
+        return keyStatus;
+      }
+
+      /** Tells Tink to assign a fixed id when this keyset is built. */
+      public Entry withFixedId(int id) {
+        this.strategy = KeyIdStrategy.fixedId(id);
+        return this;
+      }
+
+      /**
+       * Tells Tink to assign an unused uniform random id when this keyset is built.
+       *
+       * <p>Using {@code withRandomId} is invalid for an entry with an imported or preexisting key,
+       * which has an ID requirement.
+       *
+       * <p>If an entry is marked as {@code withRandomId}, all subsequent entries also need to be
+       * marked with {@code withRandomId}, or else calling {@code build()} will fail.
+       */
+      public Entry withRandomId() {
+        this.strategy = KeyIdStrategy.randomId();
+        return this;
+      }
+    }
+
+    private final List<KeysetHandle.Builder.Entry> entries = new ArrayList<>();
+
+    private void clearPrimary() {
+      for (Builder.Entry entry : entries) {
+        entry.isPrimary = false;
+      }
+    }
+
+    /** Adds an entry to a keyset */
+    public KeysetHandle.Builder addEntry(KeysetHandle.Builder.Entry entry) {
+      if (entry.builder != null) {
+        throw new IllegalStateException("Entry has already been added to a KeysetHandle.Builder");
+      }
+      if (entry.isPrimary) {
+        clearPrimary();
+      }
+      entry.builder = this;
+      entries.add(entry);
+      return this;
+    }
+
+    /** Returns the number of entries in this builder. */
+    public int size() {
+      return entries.size();
+    }
+
+    /**
+     * Returns the entry at index i, 0 <= i < size().
+     *
+     * @throws IndexOutOfBoundsException if i < 0 or i >= size();
+     */
+    public Builder.Entry getAt(int i) {
+      return entries.get(i);
+    }
+
+    /** Removes the entry at index {@code i}. */
+    public Builder.Entry removeAt(int i) {
+      return entries.remove(i);
+    }
+
+    private static void checkIdAssignments(List<KeysetHandle.Builder.Entry> entries)
+        throws GeneralSecurityException {
+      // We want "withRandomId"-entries after fixed id, as otherwise it might be that we randomly
+      // pick a number which is later specified as "withFixedId". Looking forward is deemed too
+      // complicated, especially if in the future we want different strategies (such as
+      // "withNextId").
+      for (int i = 0; i < entries.size() - 1; ++i) {
+        if (entries.get(i).strategy == KeyIdStrategy.RANDOM_ID
+            && entries.get(i + 1).strategy != KeyIdStrategy.RANDOM_ID) {
+          throw new GeneralSecurityException(
+              "Entries with 'withRandomId()' may only be followed by other entries with"
+                  + " 'withRandomId()'.");
+        }
+      }
+    }
+
+    private static int randomIdNotInSet(Set<Integer> ids) {
+      int id = 0;
+      while (id == 0 || ids.contains(id)) {
+        id = com.google.crypto.tink.internal.Util.randKeyId();
+      }
+      return id;
+    }
+
+    private static Keyset.Key createKeyFromParameters(
+        Parameters parameters, int id, KeyStatusType keyStatusType)
+        throws GeneralSecurityException {
+      ProtoParametersSerialization serializedParameters;
+      if (parameters instanceof LegacyProtoParameters) {
+        serializedParameters = ((LegacyProtoParameters) parameters).getSerialization();
+      } else {
+        serializedParameters =
+            MutableSerializationRegistry.globalInstance()
+                .serializeParameters(parameters, ProtoParametersSerialization.class);
+      }
+      KeyData keyData = Registry.newKeyData(serializedParameters.getKeyTemplate());
+      return Keyset.Key.newBuilder()
+          .setKeyId(id)
+          .setStatus(keyStatusType)
+          .setKeyData(keyData)
+          .setOutputPrefixType(serializedParameters.getKeyTemplate().getOutputPrefixType())
+          .build();
+    }
+
+    private static int getNextIdFromBuilderEntry(
+        KeysetHandle.Builder.Entry builderEntry, Set<Integer> idsSoFar)
+        throws GeneralSecurityException {
+      int id = 0;
+      if (builderEntry.strategy == null) {
+        throw new GeneralSecurityException("No ID was set (with withFixedId or withRandomId)");
+      }
+      if (builderEntry.strategy == KeyIdStrategy.RANDOM_ID) {
+        id = randomIdNotInSet(idsSoFar);
+      } else {
+        id = builderEntry.strategy.getFixedId();
+      }
+      return id;
+    }
+
+    private static Keyset.Key createKeysetKeyFromBuilderEntry(
+        KeysetHandle.Builder.Entry builderEntry, int id) throws GeneralSecurityException {
+      if (builderEntry.key == null) {
+        return createKeyFromParameters(
+            builderEntry.parameters, id, serializeStatus(builderEntry.getStatus()));
+      } else {
+        ProtoKeySerialization serializedKey;
+        if (builderEntry.key instanceof LegacyProtoKey) {
+          serializedKey =
+              ((LegacyProtoKey) builderEntry.key).getSerialization(InsecureSecretKeyAccess.get());
+        } else {
+          serializedKey =
+              MutableSerializationRegistry.globalInstance()
+                  .serializeKey(
+                      builderEntry.key, ProtoKeySerialization.class, InsecureSecretKeyAccess.get());
+        }
+        @Nullable Integer idRequirement = serializedKey.getIdRequirementOrNull();
+        if (idRequirement != null && idRequirement != id) {
+          throw new GeneralSecurityException("Wrong ID set for key with ID requirement");
+        }
+        return toKeysetKey(id, serializeStatus(builderEntry.getStatus()), serializedKey);
+      }
+    }
+
+    /**
+     * Creates a new {@code KeysetHandle}.
+     *
+     * <p>Throws a {@code GeneralSecurityException} if one of the following holds
+     *
+     * <ul>
+     *   <li>No entry was marked as primary
+     *   <li>There is an entry in which the ID has not been set and which did not have a predefined
+     *       ID (see {@link Builder.Entry}).
+     *   <li>There is a {@code withRandomId}-entry which is followed by a non {@code
+     *       withRandomId}-entry
+     *   <li>There are two entries with the same {@code withFixedId} (including pre-existing keys
+     *       and imported keys which have an id requirement).
+     *   <li>There is a {@code withNextId} entry, but there previously was an entry which has an ID
+     *       of {@code MAX_INTEGER}.
+     * </ul>
+     */
+    public KeysetHandle build() throws GeneralSecurityException {
+      Keyset.Builder keysetBuilder = Keyset.newBuilder();
+      Integer primaryId = null;
+
+      checkIdAssignments(entries);
+      Set<Integer> idsSoFar = new HashSet<>();
+      for (KeysetHandle.Builder.Entry builderEntry : entries) {
+        if (builderEntry.keyStatus == null) {
+          throw new GeneralSecurityException("Key Status not set.");
+        }
+        int id = getNextIdFromBuilderEntry(builderEntry, idsSoFar);
+        if (idsSoFar.contains(id)) {
+          throw new GeneralSecurityException("Id " + id + " is used twice in the keyset");
+        }
+        idsSoFar.add(id);
+
+        Keyset.Key keysetKey = createKeysetKeyFromBuilderEntry(builderEntry, id);
+        keysetBuilder.addKey(keysetKey);
+        if (builderEntry.isPrimary) {
+          if (primaryId != null) {
+            throw new GeneralSecurityException("Two primaries were set");
+          }
+          primaryId = id;
+        }
+      }
+      if (primaryId == null) {
+        throw new GeneralSecurityException("No primary was set");
+      }
+      keysetBuilder.setPrimaryKeyId(primaryId);
+      return new KeysetHandle(keysetBuilder.build());
+    }
+  }
+
+  /**
+   * Represents a single entry in a keyset.
+   *
+   * <p>An entry in a keyset consists of a key, its ID, and the {@link KeyStatus}. In addition,
+   * there is one key marked as a primary.
+   *
+   * <p>The ID should be considered unique (though currently Tink still accepts keysets with
+   * repeated IDs). The {@code KeyStatus} tells Tink whether the key should still be used or not.
+   * There should always be exactly one key which is marked as a primary, however, at the moment
+   * Tink still accepts keysets which have none. This will be changed in the future.
+   */
+  @Alpha
+  @Immutable
+  public static final class Entry {
+    private Entry(Key key, KeyStatus keyStatus, int id, boolean isPrimary) {
+      this.key = key;
+      this.keyStatus = keyStatus;
+      this.id = id;
+      this.isPrimary = isPrimary;
+    }
+
+    private final Key key;
+    private final KeyStatus keyStatus;
+    private final int id;
+    private final boolean isPrimary;
+    /**
+     * May return an internal class {@link com.google.crypto.tink.internal.LegacyProtoKey} in case
+     * there is no implementation of the corresponding key class yet.
+     */
+    public Key getKey() {
+      return key;
+    }
+
+    public KeyStatus getStatus() {
+      return keyStatus;
+    }
+
+    public int getId() {
+      return id;
+    }
+    /**
+     * Guaranteed to be true in exactly one entry.
+     *
+     * <p>Note: currently this may be false for all entries, since it is possible that keysets are
+     * parsed without a primary. In the future, such keysets will be rejected when the keyset is
+     * parsed.
+     */
+    public boolean isPrimary() {
+      return isPrimary;
+    }
+  }
+
+  private static KeyStatus parseStatus(KeyStatusType in) throws GeneralSecurityException {
+    switch (in) {
+      case ENABLED:
+        return KeyStatus.ENABLED;
+      case DISABLED:
+        return KeyStatus.DISABLED;
+      case DESTROYED:
+        return KeyStatus.DESTROYED;
+      default:
+        throw new GeneralSecurityException("Unknown key status");
+    }
+  }
+
+  private static KeyStatusType serializeStatus(KeyStatus in) {
+    if (KeyStatus.ENABLED.equals(in)) {
+      return KeyStatusType.ENABLED;
+    }
+    if (KeyStatus.DISABLED.equals(in)) {
+      return KeyStatusType.DISABLED;
+    }
+    if (KeyStatus.DESTROYED.equals(in)) {
+      return KeyStatusType.DESTROYED;
+    }
+    throw new IllegalStateException("Unknown key status");
+  }
+
+  private static Keyset.Key toKeysetKey(
+      int id, KeyStatusType status, ProtoKeySerialization protoKeySerialization) {
+    return Keyset.Key.newBuilder()
+        .setKeyData(
+            KeyData.newBuilder()
+                .setTypeUrl(protoKeySerialization.getTypeUrl())
+                .setValue(protoKeySerialization.getValue())
+                .setKeyMaterialType(protoKeySerialization.getKeyMaterialType()))
+        .setStatus(status)
+        .setKeyId(id)
+        .setOutputPrefixType(protoKeySerialization.getOutputPrefixType())
+        .build();
+  }
+
+  static ProtoKeySerialization toProtoKeySerialization(Keyset.Key protoKey) {
+    int id = protoKey.getKeyId();
+    @Nullable
+    Integer idRequirement = protoKey.getOutputPrefixType() == OutputPrefixType.RAW ? null : id;
+    try {
+      return ProtoKeySerialization.create(
+          protoKey.getKeyData().getTypeUrl(),
+          protoKey.getKeyData().getValue(),
+          protoKey.getKeyData().getKeyMaterialType(),
+          protoKey.getOutputPrefixType(),
+          idRequirement);
+    } catch (GeneralSecurityException e) {
+      // Cannot happen -- this only happens if the idRequirement doesn't match OutputPrefixType
+      throw new IllegalStateException("Creating a protokey serialization failed", e);
+    }
+  }
+
+  /**
+   * Returns a Key object from a protoKeySerialization, even if no parser has been registerd.
+   *
+   * <p>Falling back is useful because we want users to be able to call {@code #getAt} even for key
+   * types for which we did not yet register a parser; in this case we simply fall back to return a
+   * LegacyProtoKey.
+   */
+  private static Key parseWithLegacyFallback(ProtoKeySerialization protoKeySerialization) {
+    try {
+      return MutableSerializationRegistry.globalInstance()
+          .parseKey(protoKeySerialization, InsecureSecretKeyAccess.get());
+    } catch (GeneralSecurityException e) {
+      try {
+        return new LegacyProtoKey(protoKeySerialization, InsecureSecretKeyAccess.get());
+      } catch (GeneralSecurityException e2) {
+        // Cannot happen -- this only throws if we have no access.
+        throw new IllegalStateException("Creating a LegacyProtoKey failed", e2);
+      }
+    }
+  }
+
+  /**
+   * Returns a Parameters object from a protoKeySerialization, even if no parser has been registerd.
+   *
+   * <p>Falling back is useful because we need to have a parameters object even if no parser is
+   * registered (e.g. for when we create a Key from a key template/parameters name object).
+   */
+  private static Parameters parseWithLegacyFallback(
+      ProtoParametersSerialization protoParametersSerialization) {
+    try {
+      return MutableSerializationRegistry.globalInstance()
+          .parseParameters(protoParametersSerialization);
+    } catch (GeneralSecurityException e) {
+      return new LegacyProtoParameters(protoParametersSerialization);
+    }
+  }
+
+  private KeysetHandle.Entry entryByIndex(int i) {
+    Keyset.Key protoKey = keyset.getKey(i);
+    int id = protoKey.getKeyId();
+
+    ProtoKeySerialization protoKeySerialization = toProtoKeySerialization(protoKey);
+    Key key = parseWithLegacyFallback(protoKeySerialization);
+    try {
+      return new KeysetHandle.Entry(
+          key, parseStatus(protoKey.getStatus()), id, id == keyset.getPrimaryKeyId());
+    } catch (GeneralSecurityException e) {
+      // Cannot happen -- this only happens if protoKey.getStatus() fails.
+      throw new IllegalStateException("Creating an entry failed", e);
+    }
+  }
+
+  /**
+   * Creates a new entry with a fixed key.
+   *
+   * <p>If the Key has an IdRequirement, the default will be fixed to this ID. Otherwise, the user
+   * has to specify the ID to be used and call one of {@code withFixedId(i)}, {@code
+   * withRandomId()}, or {@code withNextId()} should on the returned entry.
+   */
+  public static KeysetHandle.Builder.Entry importKey(Key key) {
+    KeysetHandle.Builder.Entry importedEntry = new KeysetHandle.Builder.Entry(key);
+    @Nullable Integer requirement = key.getIdRequirementOrNull();
+    if (requirement != null) {
+      importedEntry.withFixedId(requirement);
+    }
+    return importedEntry;
+  }
+
+  public static KeysetHandle.Builder.Entry generateEntryFromParametersName(String namedParameters)
+      throws GeneralSecurityException {
+    if (!Registry.keyTemplateMap().containsKey(namedParameters)) {
+      throw new GeneralSecurityException("cannot find key template: " + namedParameters);
+    }
+    KeyTemplate template = Registry.keyTemplateMap().get(namedParameters);
+    ProtoParametersSerialization serialization =
+        ProtoParametersSerialization.create(template.getProto());
+    Parameters parameters = parseWithLegacyFallback(serialization);
+    return new KeysetHandle.Builder.Entry(parameters);
+  }
+
+  public static KeysetHandle.Builder.Entry generateEntryFromParameters(Parameters parameters) {
+    return new KeysetHandle.Builder.Entry(parameters);
+  }
+
   private final Keyset keyset;
+  private final MonitoringAnnotations annotations;
 
   private KeysetHandle(Keyset keyset) {
     this.keyset = keyset;
+    this.annotations = MonitoringAnnotations.EMPTY;
+  }
+
+  private KeysetHandle(Keyset keyset, MonitoringAnnotations annotations) {
+    this.keyset = keyset;
+    this.annotations = annotations;
   }
 
   /**
@@ -60,9 +589,83 @@ public final class KeysetHandle {
     return new KeysetHandle(keyset);
   }
 
-  /** @return the actual keyset data. */
+  /**
+   * @return a new {@link KeysetHandle} from a {@code keyset} and {@code annotations}.
+   * @throws GeneralSecurityException if the keyset is null or empty.
+   */
+  static final KeysetHandle fromKeysetAndAnnotations(
+      Keyset keyset, MonitoringAnnotations annotations) throws GeneralSecurityException {
+    assertEnoughKeyMaterial(keyset);
+    return new KeysetHandle(keyset, annotations);
+  }
+
+  /**
+   * @return the actual keyset data.
+   */
   Keyset getKeyset() {
     return keyset;
+  }
+
+  /** Creates a new builder. */
+  public static Builder newBuilder() {
+    return new Builder();
+  }
+
+  /** Creates a new builder, initially containing all entries from {@code handle}. */
+  public static Builder newBuilder(KeysetHandle handle) {
+    Builder builder = new Builder();
+    for (int i = 0; i < handle.size(); ++i) {
+      KeysetHandle.Entry entry = handle.entryByIndex(i);
+      KeysetHandle.Builder.Entry builderEntry =
+          importKey(entry.getKey()).withFixedId(entry.getId());
+      builderEntry.setStatus(entry.getStatus());
+      if (entry.isPrimary()) {
+        builderEntry.makePrimary();
+      }
+      builder.addEntry(builderEntry);
+    }
+    return builder;
+  }
+
+  /**
+   * Returns the unique entry where isPrimary() = true and getStatus() = ENABLED.
+   *
+   * <p>Note: currently this may throw IllegalStateException, since it is possible that keysets are
+   * parsed without a primary. In the future, such keysets will be rejected when the keyset is
+   * parsed.
+   */
+  public KeysetHandle.Entry getPrimary() {
+    for (int i = 0; i < keyset.getKeyCount(); ++i) {
+      if (keyset.getKey(i).getKeyId() == keyset.getPrimaryKeyId()) {
+        KeysetHandle.Entry result = entryByIndex(i);
+        if (result.getStatus() != KeyStatus.ENABLED) {
+          throw new IllegalStateException("Keyset has primary which isn't enabled");
+        }
+        return result;
+      }
+    }
+    throw new IllegalStateException("Keyset has no primary");
+  }
+
+  /** Returns the size of this keyset. */
+  public int size() {
+    return keyset.getKeyCount();
+  }
+
+  /**
+   * Returns the entry at index i. The order is preserved and depends on the order at which the
+   * entries were inserted when the KeysetHandle was built.
+   *
+   * <p>Currently, this may throw "IllegalStateException" in case the status entry of the Key in the
+   * keyset was wrongly set. In the future, Tink will throw at parsing time in this case.
+   *
+   * @throws IndexOutOfBoundsException if i < 0 or i >= size();
+   */
+  public KeysetHandle.Entry getAt(int i) {
+    if (i < 0 || i >= size()) {
+      throw new IndexOutOfBoundsException("Invalid index " + i + " for keyset of size " + size());
+    }
+    return entryByIndex(i);
   }
 
   /** Returns the keyset data as a list of {@link KeyHandle}s. */
@@ -168,17 +771,16 @@ public final class KeysetHandle {
    * load cleartext keysets can use {@link CleartextKeysetHandle}.
    *
    * @return a new {@link KeysetHandle} from {@code serialized} that is a serialized {@link Keyset}
-   * @throws GeneralSecurityException
+   * @throws GeneralSecurityException if the keyset is invalid
    */
+  @SuppressWarnings("UnusedException")
   public static final KeysetHandle readNoSecret(KeysetReader reader)
       throws GeneralSecurityException, IOException {
     try {
       Keyset keyset = reader.read();
       assertNoSecretKeyMaterial(keyset);
       return KeysetHandle.fromKeyset(keyset);
-    } catch (
-        @SuppressWarnings("UnusedException")
-        InvalidProtocolBufferException e) {
+    } catch (InvalidProtocolBufferException e) {
       // Do not propagate InvalidProtocolBufferException to guarantee no key material is leaked
       throw new GeneralSecurityException("invalid keyset");
     }
@@ -192,17 +794,16 @@ public final class KeysetHandle {
    * load cleartext keysets can use {@link CleartextKeysetHandle}.
    *
    * @return a new {@link KeysetHandle} from {@code serialized} that is a serialized {@link Keyset}
-   * @throws GeneralSecurityException
+   * @throws GeneralSecurityException if the keyset is invalid
    */
+  @SuppressWarnings("UnusedException")
   public static final KeysetHandle readNoSecret(final byte[] serialized)
       throws GeneralSecurityException {
     try {
       Keyset keyset = Keyset.parseFrom(serialized, ExtensionRegistryLite.getEmptyRegistry());
       assertNoSecretKeyMaterial(keyset);
       return KeysetHandle.fromKeyset(keyset);
-    } catch (
-        @SuppressWarnings("UnusedException")
-        InvalidProtocolBufferException e) {
+    } catch (InvalidProtocolBufferException e) {
       // Do not propagate InvalidProtocolBufferException to guarantee no key material is leaked
       throw new GeneralSecurityException("invalid keyset");
     }
@@ -241,6 +842,7 @@ public final class KeysetHandle {
   }
 
   /** Encrypts the keyset with the {@link Aead} master key. */
+  @SuppressWarnings("UnusedException")
   private static EncryptedKeyset encrypt(Keyset keyset, Aead masterKey, byte[] associatedData)
       throws GeneralSecurityException {
     byte[] encryptedKeyset = masterKey.encrypt(keyset.toByteArray(), associatedData);
@@ -253,9 +855,7 @@ public final class KeysetHandle {
       if (!keyset2.equals(keyset)) {
         throw new GeneralSecurityException("cannot encrypt keyset");
       }
-    } catch (
-        @SuppressWarnings("UnusedException")
-        InvalidProtocolBufferException e) {
+    } catch (InvalidProtocolBufferException e) {
       // Do not propagate InvalidProtocolBufferException to guarantee no key material is leaked
       throw new GeneralSecurityException("invalid keyset, corrupted key material");
     }
@@ -266,6 +866,7 @@ public final class KeysetHandle {
   }
 
   /** Decrypts the encrypted keyset with the {@link Aead} master key. */
+  @SuppressWarnings("UnusedException")
   private static Keyset decrypt(
       EncryptedKeyset encryptedKeyset, Aead masterKey, byte[] associatedData)
       throws GeneralSecurityException {
@@ -278,7 +879,6 @@ public final class KeysetHandle {
       assertEnoughKeyMaterial(keyset);
       return keyset;
     } catch (
-        @SuppressWarnings("UnusedException")
         InvalidProtocolBufferException e) {
       // Do not propagate InvalidProtocolBufferException to guarantee no key material is leaked
       throw new GeneralSecurityException("invalid keyset, corrupted key material");
@@ -298,7 +898,7 @@ public final class KeysetHandle {
     Keyset.Builder keysetBuilder = Keyset.newBuilder();
     for (Keyset.Key key : keyset.getKeyList()) {
       KeyData keyData = createPublicKeyData(key.getKeyData());
-      keysetBuilder.addKey(Keyset.Key.newBuilder().mergeFrom(key).setKeyData(keyData).build());
+      keysetBuilder.addKey(key.toBuilder().setKeyData(keyData).build());
     }
     keysetBuilder.setPrimaryKeyId(keyset.getPrimaryKeyId());
     return new KeysetHandle(keysetBuilder.build());
@@ -352,7 +952,7 @@ public final class KeysetHandle {
   /**
    * Validates that a keyset handle contains enough key material to build a keyset on.
    *
-   * @throws GeneralSecurityException
+   * @throws GeneralSecurityException if the validation fails
    */
   private static void assertEnoughKeyMaterial(Keyset keyset) throws GeneralSecurityException {
     if (keyset == null || keyset.getKeyCount() <= 0) {
@@ -363,7 +963,7 @@ public final class KeysetHandle {
   /**
    * Validates that an encrypted keyset contains enough key material to build a keyset on.
    *
-   * @throws GeneralSecurityException
+   * @throws GeneralSecurityException if the validation fails
    */
   private static void assertEnoughEncryptedKeyMaterial(EncryptedKeyset keyset)
       throws GeneralSecurityException {
@@ -376,18 +976,19 @@ public final class KeysetHandle {
   private <B, P> P getPrimitiveWithKnownInputPrimitive(
       Class<P> classObject, Class<B> inputPrimitiveClassObject) throws GeneralSecurityException {
     Util.validateKeyset(keyset);
-    PrimitiveSet<B> primitives = PrimitiveSet.newPrimitiveSet(inputPrimitiveClassObject);
+    PrimitiveSet.Builder<B> builder = PrimitiveSet.newBuilder(inputPrimitiveClassObject);
+    builder.setAnnotations(annotations);
     for (Keyset.Key key : keyset.getKeyList()) {
       if (key.getStatus() == KeyStatusType.ENABLED) {
         B primitive = Registry.getPrimitive(key.getKeyData(), inputPrimitiveClassObject);
-        PrimitiveSet.Entry<B> entry = primitives.addPrimitive(primitive, key);
         if (key.getKeyId() == keyset.getPrimaryKeyId()) {
-          primitives.setPrimary(entry);
+          builder.addPrimaryPrimitive(primitive, key);
+        } else {
+          builder.addPrimitive(primitive, key);
         }
       }
     }
-
-    return Registry.wrap(primitives, classObject);
+    return Registry.wrap(builder.build(), classObject);
   }
 
   /**

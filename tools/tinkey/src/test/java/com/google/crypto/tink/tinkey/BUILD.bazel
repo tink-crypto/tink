@@ -4,7 +4,7 @@ java_test(
     name = "CreatePublicKeysetCommandTest",
     size = "small",
     srcs = ["CreatePublicKeysetCommandTest.java"],
-    data = ["//testdata:credentials"],
+    data = ["//testdata/gcp:credentials"],
     deps = [
         "//tinkey/src/main/java/com/google/crypto/tink/tinkey:create_public_keyset_command",
         "//tinkey/src/main/java/com/google/crypto/tink/tinkey:tinkey_util",
@@ -31,7 +31,7 @@ java_test(
     name = "CreateKeysetCommandTest",
     size = "small",
     srcs = ["CreateKeysetCommandTest.java"],
-    data = ["//testdata:credentials"],
+    data = ["//testdata/gcp:credentials"],
     deps = [
         "//tinkey/src/main/java/com/google/crypto/tink/tinkey:create_keyset_command",
         "//tinkey/src/main/java/com/google/crypto/tink/tinkey:tinkey_util",
@@ -49,7 +49,7 @@ java_test(
     name = "AddKeyCommandTest",
     size = "small",
     srcs = ["AddKeyCommandTest.java"],
-    data = ["//testdata:credentials"],
+    data = ["//testdata/gcp:credentials"],
     deps = [
         "//tinkey/src/main/java/com/google/crypto/tink/tinkey:add_key_command",
         "//tinkey/src/main/java/com/google/crypto/tink/tinkey:tinkey_util",
@@ -68,7 +68,7 @@ java_test(
     name = "RotateKeysetCommandTest",
     size = "small",
     srcs = ["RotateKeysetCommandTest.java"],
-    data = ["//testdata:credentials"],
+    data = ["//testdata/gcp:credentials"],
     deps = [
         "//tinkey/src/main/java/com/google/crypto/tink/tinkey:rotate_keyset_command",
         "//tinkey/src/main/java/com/google/crypto/tink/tinkey:tinkey_util",

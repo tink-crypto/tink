@@ -23,7 +23,7 @@ import (
 	"github.com/google/tink/go/keyset"
 	"github.com/google/tink/go/mac"
 	"github.com/google/tink/go/testkeyset"
-	pb "github.com/google/tink/proto/testing/testing_api_go_grpc"
+	pb "github.com/google/tink/testing/go/proto/testing_api_go_grpc"
 )
 
 // MacService implements the MAC testing service.

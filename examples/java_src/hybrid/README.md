@@ -26,19 +26,21 @@ cd tink/examples/java_src
 bazel build ...
 ```
 
-You can then encrypt a file:
+Encrypt a file:
 
 ```shell
 echo "some data" > testdata.txt
 ./bazel-bin/hybrid/hybrid_example encrypt \
-    hybrid_test_public_keyset.json testdata.txt testdata.txt.encrypted
+    ./hybrid/hybrid_test_public_keyset.json \
+    testdata.txt testdata.txt.encrypted
 ```
 
-or decrypt the file:
+Decrypt a file:
 
 ```shell
 ./bazel-bin/hybrid/hybrid_example decrypt \
-    hybrid_test_private_keyset.json testdata.txt.encrypted \
-    testdata.txt.decrypted
-$ diff testdata.txt testdata.txt.decrypted
+    ./hybrid/hybrid_test_private_keyset.json \
+    testdata.txt.encrypted testdata.txt.decrypted
+
+diff testdata.txt testdata.txt.decrypted
 ```

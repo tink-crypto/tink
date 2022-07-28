@@ -160,7 +160,7 @@ TEST(AesUtilTest, GetAesCtrCipherForKeySize) {
     } else if (i == 32) {
       EXPECT_THAT(cipher, IsOkAndHolds(EVP_aes_256_ctr()));
     } else {
-      EXPECT_THAT(cipher.status(), Not(IsOk()));
+      EXPECT_THAT(cipher, Not(IsOk()));
     }
   }
 }
@@ -173,7 +173,7 @@ TEST(AesUtilTest, GetAesCbcCipherForKeySize) {
     } else if (i == 32) {
       EXPECT_THAT(cipher, IsOkAndHolds(EVP_aes_256_cbc()));
     } else {
-      EXPECT_THAT(cipher.status(), Not(IsOk()));
+      EXPECT_THAT(cipher, Not(IsOk()));
     }
   }
 }

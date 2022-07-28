@@ -230,6 +230,16 @@ tink_cc_library(
 )
 
 tink_cc_library(
+  NAME chunked_mac
+  SRCS
+    chunked_mac.h
+  DEPS
+    absl::strings
+    tink::util::status
+    tink::util::statusor
+)
+
+tink_cc_library(
   NAME hybrid_decrypt
   SRCS
     hybrid_decrypt.h
@@ -486,6 +496,7 @@ tink_cc_library(
   DEPS
     tink::core::keyset_handle
     tink::core::keyset_reader
+    absl::flat_hash_map
     absl::status
     tink::util::errors
     tink::util::status
@@ -632,9 +643,9 @@ tink_cc_library(
 add_library(tink::core::secret_key_access_testonly ALIAS tink_internal_core_secret_key_access)
 
 tink_cc_library(
-  NAME key_format
+  NAME parameters
   SRCS
-    key_format.h
+    parameters.h
 )
 
 tink_cc_library(
@@ -642,8 +653,22 @@ tink_cc_library(
   SRCS
     key.h
   DEPS
-    tink::core::key_format
+    tink::core::parameters
     absl::optional
+)
+
+tink_cc_library(
+  NAME insecure_secret_key_access
+  SRCS
+    insecure_secret_key_access.h
+  DEPS
+    tink::core::secret_key_access_token
+)
+
+tink_cc_library(
+  NAME secret_key_access_token
+  SRCS
+    secret_key_access_token.h
 )
 
 # tests

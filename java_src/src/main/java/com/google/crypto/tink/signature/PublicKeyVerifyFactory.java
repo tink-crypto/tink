@@ -40,7 +40,6 @@ import java.security.GeneralSecurityException;
 public final class PublicKeyVerifyFactory {
   /**
    * @return a PublicKeyVerify primitive from a {@code keysetHandle}.
-   * @throws GeneralSecurityException
    * @deprecated Use {@code keysetHandle.GetPrimitive(PublicKeyVerify.class)} after registering the
    *     {@code PublicKeyVerifyWrapper} instead.
    */

@@ -56,15 +56,15 @@ INSTANTIATE_TEST_SUITE_P(
 TEST_P(HpkeDecryptBoringSslTest, SetupSenderContextAndDecrypt) {
   HpkeParams hpke_params = GetParam();
   util::StatusOr<HpkeTestParams> params = CreateHpkeTestParams(hpke_params);
-  ASSERT_THAT(params.status(), IsOk());
+  ASSERT_THAT(params, IsOk());
   util::StatusOr<std::unique_ptr<HpkeKeyBoringSsl>> hpke_key =
       HpkeKeyBoringSsl::New(hpke_params.kem(), params->recipient_private_key);
-  ASSERT_THAT(hpke_key.status(), IsOk());
+  ASSERT_THAT(hpke_key, IsOk());
   util::StatusOr<std::unique_ptr<HpkeDecryptBoringSsl>> hpke_decrypt =
       HpkeDecryptBoringSsl::New(hpke_params, **hpke_key,
                                 params->encapsulated_key,
                                 params->application_info);
-  ASSERT_THAT(hpke_decrypt.status(), IsOk());
+  ASSERT_THAT(hpke_decrypt, IsOk());
   util::StatusOr<std::string> plaintext =
       (*hpke_decrypt)->Decrypt(params->ciphertext, params->associated_data);
   ASSERT_THAT(plaintext, IsOkAndHolds(params->plaintext));
@@ -86,7 +86,7 @@ TEST_P(HpkeDecryptBoringSslWithBadParamTest, BadParamsFails) {
   HpkeTestParams params = DefaultHpkeTestParams();
   util::StatusOr<std::unique_ptr<HpkeKeyBoringSsl>> hpke_key =
       HpkeKeyBoringSsl::New(hpke_params.kem(), params.recipient_private_key);
-  ASSERT_THAT(hpke_key.status(), IsOk());
+  ASSERT_THAT(hpke_key, IsOk());
   util::StatusOr<std::unique_ptr<HpkeDecryptBoringSsl>> hpke_decrypt =
       HpkeDecryptBoringSsl::New(hpke_params, **hpke_key,
                                 params.encapsulated_key,

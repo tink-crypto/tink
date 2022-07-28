@@ -48,7 +48,6 @@ py_test(
     deps = [
         ":tink_config",
         ":tink_python",
-        requirement("six"),  # needed by absl-py
         requirement("absl-py"),
         "//tink/aead",
         "//tink/core",
@@ -76,7 +75,6 @@ py_test(
     srcs_version = "PY3",
     deps = [
         ":tink_python",
-        requirement("six"),  # needed by absl-py
         requirement("absl-py"),
         "//tink/core",
         "//tink/proto:tink_py_pb2",
@@ -100,7 +98,6 @@ py_test(
     srcs_version = "PY3",
     deps = [
         ":tink_python",
-        requirement("six"),  # needed by absl-py
         requirement("absl-py"),
         "//tink/core",
         "//tink/proto:tink_py_pb2",
@@ -128,7 +125,6 @@ py_test(
     srcs_version = "PY3",
     deps = [
         ":tink_config",
-        requirement("six"),  # needed by absl-py
         requirement("absl-py"),
         "//tink:tink_python",
         "//tink/aead",
@@ -158,7 +154,6 @@ py_test(
     deps = [
         ":secret_key_access",
         ":tink_python",
-        requirement("six"),  # needed by absl-py
         requirement("absl-py"),
     ],
 )
@@ -183,7 +178,6 @@ py_test(
         ":cleartext_keyset_handle",
         ":tink_config",
         ":tink_python",
-        requirement("six"),  # needed by absl-py
         requirement("absl-py"),
         "//tink/core",
         "//tink/mac",

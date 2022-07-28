@@ -39,9 +39,9 @@ import (
 
 var (
 	gcpURI      = "gcp-kms://projects/tink-test-infrastructure/locations/global/keyRings/unit-and-integration-testing/cryptoKeys/aead-key"
-	gcpCredFile = filepath.Join(os.Getenv("TEST_SRCDIR"), "tools/testdata/credential.json")
+	gcpCredFile = filepath.Join(os.Getenv("TEST_SRCDIR"), "tools/testdata/gcp/credential.json")
 	awsURI      = "aws-kms://arn:aws:kms:us-east-2:235739564943:key/3ee50705-5a82-4f5b-9753-05c4f473922f"
-	awsCredFile = filepath.Join(os.Getenv("TEST_SRCDIR"), "tools/testdata/credentials_aws.csv")
+	awsCredFile = filepath.Join(os.Getenv("TEST_SRCDIR"), "tools/testdata/aws/credentials.csv")
 )
 
 func init() {

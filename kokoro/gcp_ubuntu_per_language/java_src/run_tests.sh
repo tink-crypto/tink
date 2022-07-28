@@ -67,14 +67,21 @@ test_build_bazel_file() {
     "${all_aws_kms_libs}" \
     "${all_gcp_kms_libs}" > java_src/BUILD.bazel.generated
 
+  buildifier java_src/BUILD.bazel.generated
+
   if ! cmp -s java_src/BUILD.bazel java_src/BUILD.bazel.generated ; then
     echo "Files BUILD.bazel and BUILD.bazel.generated are different."
-    echo "=============== BROKEN file //third_party/tink/java_src/BUILD.bazel. Should be: "
+    echo "#=============== BROKEN file //third_party/tink/java_src/BUILD.bazel. Should be: "
     cat java_src/BUILD.bazel.generated
-    echo "=============== END BROKEN file //third_party/tink/java_src/BUILD.bazel."
-    echo "=============== BEGIN DIFF"
-    diff java_src/BUILD.bazel java_src/BUILD.bazel.generated
-    echo "=============== END DIFF"
+    echo "#=============== END BROKEN file //third_party/tink/java_src/BUILD.bazel."
+    echo "#=============== To fix this, run (from <Your CitC Client>/google3): "
+    echo "g4 open third_party/tink/java_src/BUILD.bazel"
+    echo "patch third_party/tink/java_src/BUILD.bazel<<END_OF_PATCH"
+    ## We run under "set -e", so exit on error. Diff returns a non-zero exit
+    ## status we flip it here.
+    ! diff java_src/BUILD.bazel java_src/BUILD.bazel.generated
+    echo "END_OF_PATCH"
+    echo "#=============== End of command"
     exit 1
   fi
 }

@@ -25,6 +25,9 @@
 #include "tink/internal/util.h"
 #include "tink/mac.h"
 #include "tink/primitive_set.h"
+#include "tink/internal/monitoring_util.h"
+#include "tink/internal/registry_impl.h"
+#include "tink/monitoring/monitoring.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "proto/tink.pb.h"
@@ -36,10 +39,19 @@ using google::crypto::tink::OutputPrefixType;
 
 namespace {
 
+constexpr absl::string_view kPrimitive = "mac";
+constexpr absl::string_view kComputeApi = "compute";
+constexpr absl::string_view kVerifyApi = "verify";
+
 class MacSetWrapper : public Mac {
  public:
-  explicit MacSetWrapper(std::unique_ptr<PrimitiveSet<Mac>> mac_set)
-      : mac_set_(std::move(mac_set)) {}
+  explicit MacSetWrapper(
+      std::unique_ptr<PrimitiveSet<Mac>> mac_set,
+      std::unique_ptr<MonitoringClient> monitoring_compute_client = nullptr,
+      std::unique_ptr<MonitoringClient> monitoring_verify_client = nullptr)
+      : mac_set_(std::move(mac_set)),
+        monitoring_compute_client_(std::move(monitoring_compute_client)),
+        monitoring_verify_client_(std::move(monitoring_verify_client)) {}
 
   crypto::tink::util::StatusOr<std::string> ComputeMac(
       absl::string_view data) const override;
@@ -51,6 +63,8 @@ class MacSetWrapper : public Mac {
 
  private:
   std::unique_ptr<PrimitiveSet<Mac>> mac_set_;
+  std::unique_ptr<MonitoringClient> monitoring_compute_client_;
+  std::unique_ptr<MonitoringClient> monitoring_verify_client_;
 };
 
 util::Status Validate(PrimitiveSet<Mac>* mac_set) {
@@ -80,7 +94,16 @@ util::StatusOr<std::string> MacSetWrapper::ComputeMac(
     data = local_data;
   }
   auto compute_mac_result = primary->get_primitive().ComputeMac(data);
-  if (!compute_mac_result.ok()) return compute_mac_result.status();
+  if (!compute_mac_result.ok()) {
+    if (monitoring_compute_client_ != nullptr) {
+      monitoring_compute_client_->LogFailure();
+    }
+    return compute_mac_result.status();
+  }
+  if (monitoring_compute_client_ != nullptr) {
+    monitoring_compute_client_->Log(mac_set_->get_primary()->get_key_id(),
+                                    data.size());
+  }
   const std::string& key_id = primary->get_identifier();
   return key_id + compute_mac_result.value();
 }
@@ -109,6 +132,10 @@ util::Status MacSetWrapper::VerifyMac(
         util::Status status =
             mac.VerifyMac(raw_mac_value, view_on_data_or_legacy_data);
         if (status.ok()) {
+          if (monitoring_verify_client_ != nullptr) {
+            monitoring_verify_client_->Log(mac_entry->get_key_id(),
+                                           data.size());
+          }
           return status;
         } else {
           // TODO(przydatek): LOG that a matching key didn't verify the MAC.
@@ -124,10 +151,17 @@ util::Status MacSetWrapper::VerifyMac(
       Mac& mac = mac_entry->get_primitive();
       util::Status status = mac.VerifyMac(mac_value, data);
       if (status.ok()) {
+        if (monitoring_verify_client_ != nullptr) {
+          monitoring_verify_client_->Log(mac_entry->get_key_id(), data.size());
+        }
         return status;
       }
     }
   }
+  if (monitoring_verify_client_ != nullptr) {
+    monitoring_verify_client_->LogFailure();
+  }
+
   return util::Status(absl::StatusCode::kInvalidArgument,
                       "verification failed");
 }
@@ -135,11 +169,41 @@ util::Status MacSetWrapper::VerifyMac(
 }  // namespace
 
 util::StatusOr<std::unique_ptr<Mac>> MacWrapper::Wrap(
-      std::unique_ptr<PrimitiveSet<Mac>> mac_set) const {
+    std::unique_ptr<PrimitiveSet<Mac>> mac_set) const {
   util::Status status = Validate(mac_set.get());
   if (!status.ok()) return status;
-  std::unique_ptr<Mac> mac(new MacSetWrapper(std::move(mac_set)));
-  return std::move(mac);
+
+  MonitoringClientFactory* const monitoring_factory =
+      internal::RegistryImpl::GlobalInstance().GetMonitoringClientFactory();
+
+  // Monitoring is not enabled. Create a wrapper without monitoring clients.
+  if (monitoring_factory == nullptr) {
+    return {absl::make_unique<MacSetWrapper>(std::move(mac_set))};
+  }
+
+  util::StatusOr<MonitoringKeySetInfo> keyset_info =
+      internal::MonitoringKeySetInfoFromPrimitiveSet(*mac_set);
+  if (!keyset_info.ok()) {
+    return keyset_info.status();
+  }
+
+  util::StatusOr<std::unique_ptr<MonitoringClient>> monitoring_compute_client =
+      monitoring_factory->New(
+          MonitoringContext(kPrimitive, kComputeApi, *keyset_info));
+  if (!monitoring_compute_client.ok()) {
+    return monitoring_compute_client.status();
+  }
+
+  util::StatusOr<std::unique_ptr<MonitoringClient>> monitoring_verify_client =
+      monitoring_factory->New(
+          MonitoringContext(kPrimitive, kVerifyApi, *keyset_info));
+  if (!monitoring_verify_client.ok()) {
+    return monitoring_verify_client.status();
+  }
+
+  return {absl::make_unique<MacSetWrapper>(
+      std::move(mac_set), *std::move(monitoring_compute_client),
+      *std::move(monitoring_verify_client))};
 }
 
 }  // namespace tink

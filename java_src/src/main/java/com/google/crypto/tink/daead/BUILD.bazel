@@ -54,6 +54,7 @@ java_library(
         ":deterministic_aead_wrapper",
         "//proto:config_java_proto",
         "//src/main/java/com/google/crypto/tink/config:tink_fips",
+        "@maven//:com_google_errorprone_error_prone_annotations",
     ],
 )
 
@@ -65,6 +66,7 @@ android_library(
         ":deterministic_aead_wrapper-android",
         "//proto:config_java_proto_lite",
         "//src/main/java/com/google/crypto/tink/config:tink_fips-android",
+        "@maven//:com_google_errorprone_error_prone_annotations",
     ],
 )
 
@@ -77,6 +79,10 @@ java_library(
         "//src/main/java/com/google/crypto/tink:primitive_set",
         "//src/main/java/com/google/crypto/tink:primitive_wrapper",
         "//src/main/java/com/google/crypto/tink:registry",
+        "//src/main/java/com/google/crypto/tink/internal:monitoring_util",
+        "//src/main/java/com/google/crypto/tink/internal:mutable_monitoring_registry",
+        "//src/main/java/com/google/crypto/tink/monitoring:monitoring_client",
+        "//src/main/java/com/google/crypto/tink/monitoring:monitoring_keyset_info",
         "//src/main/java/com/google/crypto/tink/subtle:bytes",
     ],
 )
@@ -90,6 +96,10 @@ android_library(
         "//src/main/java/com/google/crypto/tink:primitive_set-android",
         "//src/main/java/com/google/crypto/tink:primitive_wrapper-android",
         "//src/main/java/com/google/crypto/tink:registry-android",
+        "//src/main/java/com/google/crypto/tink/internal:monitoring_util-android",
+        "//src/main/java/com/google/crypto/tink/internal:mutable_monitoring_registry-android",
+        "//src/main/java/com/google/crypto/tink/monitoring:monitoring_client-android",
+        "//src/main/java/com/google/crypto/tink/monitoring:monitoring_keyset_info-android",
         "//src/main/java/com/google/crypto/tink/subtle:bytes-android",
     ],
 )

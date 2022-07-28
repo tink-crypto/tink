@@ -66,16 +66,16 @@ TEST(AesGcmSivBoringSslTest, EncryptDecrypt) {
                 StatusIs(absl::StatusCode::kUnimplemented));
   } else {
     util::StatusOr<std::unique_ptr<Aead>> aead = AesGcmSivBoringSsl::New(key);
-    ASSERT_THAT(aead.status(), IsOk());
+    ASSERT_THAT(aead, IsOk());
 
     util::StatusOr<std::string> ciphertext =
         (*aead)->Encrypt(kMessage, kAssociatedData);
-    ASSERT_THAT(ciphertext.status(), IsOk());
+    ASSERT_THAT(ciphertext, IsOk());
     EXPECT_THAT(*ciphertext,
                 SizeIs(kMessage.size() + kIvSizeInBytes + kTagSizeInBytes));
     util::StatusOr<std::string> plaintext =
         (*aead)->Decrypt(*ciphertext, kAssociatedData);
-    ASSERT_THAT(plaintext.status(), IsOk());
+    ASSERT_THAT(plaintext, IsOk());
     EXPECT_EQ(*plaintext, kMessage);
   }
 }
@@ -91,7 +91,7 @@ TEST(AesGcmSivBoringSslTest, DecryptFailsIfCiphertextTooSmall) {
   util::SecretData key =
       util::SecretDataFromStringView(absl::HexStringToBytes(kKey256Hex));
   util::StatusOr<std::unique_ptr<Aead>> aead = AesGcmSivBoringSsl::New(key);
-  ASSERT_THAT(aead.status(), IsOk());
+  ASSERT_THAT(aead, IsOk());
 
   for (int i = 1; i < kIvSizeInBytes + kTagSizeInBytes; i++) {
     std::string ciphertext;
@@ -146,7 +146,7 @@ TEST_P(AesGcmSivBoringSslWycheproofTest, Decrypt) {
   internal::WycheproofTestVector test_vector = GetParam();
   util::SecretData key = util::SecretDataFromStringView(test_vector.key);
   util::StatusOr<std::unique_ptr<Aead>> cipher = AesGcmSivBoringSsl::New(key);
-  ASSERT_THAT(cipher.status(), IsOk());
+  ASSERT_THAT(cipher, IsOk());
   std::string ciphertext =
       absl::StrCat(test_vector.nonce, test_vector.ct, test_vector.tag);
   util::StatusOr<std::string> plaintext =

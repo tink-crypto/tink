@@ -89,7 +89,7 @@ TEST_F(PrfConfigTest, RegisterFipsValidTemplates) {
 
   for (auto key_template : fips_key_templates) {
     auto new_keyset_handle_result = KeysetHandle::GenerateNew(key_template);
-    EXPECT_THAT(new_keyset_handle_result.status(), IsOk());
+    EXPECT_THAT(new_keyset_handle_result, IsOk());
   }
 }
 

@@ -26,12 +26,12 @@
 #include "tink/util/statusor.h"
 
 extern "C" {
-#include "third_party/pqclean/crypto_sign/dilithium2/avx2/api.h"
-#include "third_party/pqclean/crypto_sign/dilithium2aes/avx2/api.h"
-#include "third_party/pqclean/crypto_sign/dilithium3/avx2/api.h"
-#include "third_party/pqclean/crypto_sign/dilithium3aes/avx2/api.h"
-#include "third_party/pqclean/crypto_sign/dilithium5/avx2/api.h"
-#include "third_party/pqclean/crypto_sign/dilithium5aes/avx2/api.h"
+#include "third_party/pqclean/crypto_sign/dilithium2/api.h"
+#include "third_party/pqclean/crypto_sign/dilithium2aes/api.h"
+#include "third_party/pqclean/crypto_sign/dilithium3/api.h"
+#include "third_party/pqclean/crypto_sign/dilithium3aes/api.h"
+#include "third_party/pqclean/crypto_sign/dilithium5/api.h"
+#include "third_party/pqclean/crypto_sign/dilithium5aes/api.h"
 }
 
 namespace crypto {
@@ -56,18 +56,18 @@ DilithiumPrivateKeyPqclean::GenerateKeyPair(
   // Check if the key_size parameter is correct.
   switch (private_key_size) {
     // Dilithium2.
-    case PQCLEAN_DILITHIUM2_AVX2_CRYPTO_SECRETKEYBYTES: {
+    case PQCLEAN_DILITHIUM2_CRYPTO_SECRETKEYBYTES: {
       switch (seed_expansion) {
         case DilithiumSeedExpansion::SEED_EXPANSION_AES: {
-          public_key.resize(PQCLEAN_DILITHIUM2AES_AVX2_CRYPTO_PUBLICKEYBYTES);
-          PQCLEAN_DILITHIUM2AES_AVX2_crypto_sign_keypair(
+          public_key.resize(PQCLEAN_DILITHIUM2AES_CRYPTO_PUBLICKEYBYTES);
+          PQCLEAN_DILITHIUM2AES_crypto_sign_keypair(
               reinterpret_cast<uint8_t*>(public_key.data()),
               reinterpret_cast<uint8_t*>(private_key.data()));
           break;
         }
         case DilithiumSeedExpansion::SEED_EXPANSION_SHAKE: {
-          public_key.resize(PQCLEAN_DILITHIUM2_AVX2_CRYPTO_PUBLICKEYBYTES);
-          PQCLEAN_DILITHIUM2_AVX2_crypto_sign_keypair(
+          public_key.resize(PQCLEAN_DILITHIUM2_CRYPTO_PUBLICKEYBYTES);
+          PQCLEAN_DILITHIUM2_crypto_sign_keypair(
               reinterpret_cast<uint8_t*>(public_key.data()),
               reinterpret_cast<uint8_t*>(private_key.data()));
           break;
@@ -80,18 +80,18 @@ DilithiumPrivateKeyPqclean::GenerateKeyPair(
       break;
     }
     // Dilithium3.
-    case PQCLEAN_DILITHIUM3_AVX2_CRYPTO_SECRETKEYBYTES: {
+    case PQCLEAN_DILITHIUM3_CRYPTO_SECRETKEYBYTES: {
       switch (seed_expansion) {
         case DilithiumSeedExpansion::SEED_EXPANSION_AES: {
-          public_key.resize(PQCLEAN_DILITHIUM3AES_AVX2_CRYPTO_PUBLICKEYBYTES);
-          PQCLEAN_DILITHIUM3AES_AVX2_crypto_sign_keypair(
+          public_key.resize(PQCLEAN_DILITHIUM3AES_CRYPTO_PUBLICKEYBYTES);
+          PQCLEAN_DILITHIUM3AES_crypto_sign_keypair(
               reinterpret_cast<uint8_t*>(public_key.data()),
               reinterpret_cast<uint8_t*>(private_key.data()));
           break;
         }
         case DilithiumSeedExpansion::SEED_EXPANSION_SHAKE: {
-          public_key.resize(PQCLEAN_DILITHIUM3_AVX2_CRYPTO_PUBLICKEYBYTES);
-          PQCLEAN_DILITHIUM3_AVX2_crypto_sign_keypair(
+          public_key.resize(PQCLEAN_DILITHIUM3_CRYPTO_PUBLICKEYBYTES);
+          PQCLEAN_DILITHIUM3_crypto_sign_keypair(
               reinterpret_cast<uint8_t*>(public_key.data()),
               reinterpret_cast<uint8_t*>(private_key.data()));
           break;
@@ -104,18 +104,18 @@ DilithiumPrivateKeyPqclean::GenerateKeyPair(
       break;
     }
     // Dilithium5.
-    case PQCLEAN_DILITHIUM5_AVX2_CRYPTO_SECRETKEYBYTES: {
+    case PQCLEAN_DILITHIUM5_CRYPTO_SECRETKEYBYTES: {
       switch (seed_expansion) {
         case DilithiumSeedExpansion::SEED_EXPANSION_AES: {
-          public_key.resize(PQCLEAN_DILITHIUM5AES_AVX2_CRYPTO_PUBLICKEYBYTES);
-          PQCLEAN_DILITHIUM5AES_AVX2_crypto_sign_keypair(
+          public_key.resize(PQCLEAN_DILITHIUM5AES_CRYPTO_PUBLICKEYBYTES);
+          PQCLEAN_DILITHIUM5AES_crypto_sign_keypair(
               reinterpret_cast<uint8_t*>(public_key.data()),
               reinterpret_cast<uint8_t*>(private_key.data()));
           break;
         }
         case DilithiumSeedExpansion::SEED_EXPANSION_SHAKE: {
-          public_key.resize(PQCLEAN_DILITHIUM5_AVX2_CRYPTO_PUBLICKEYBYTES);
-          PQCLEAN_DILITHIUM5_AVX2_crypto_sign_keypair(
+          public_key.resize(PQCLEAN_DILITHIUM5_CRYPTO_PUBLICKEYBYTES);
+          PQCLEAN_DILITHIUM5_crypto_sign_keypair(
               reinterpret_cast<uint8_t*>(public_key.data()),
               reinterpret_cast<uint8_t*>(private_key.data()));
           break;
@@ -134,9 +134,9 @@ DilithiumPrivateKeyPqclean::GenerateKeyPair(
           absl::StrFormat("Invalid private key size (%d). "
                           "The only valid sizes are %d, %d, %d.",
                           private_key_size,
-                          PQCLEAN_DILITHIUM2_AVX2_CRYPTO_SECRETKEYBYTES,
-                          PQCLEAN_DILITHIUM3_AVX2_CRYPTO_SECRETKEYBYTES,
-                          PQCLEAN_DILITHIUM5_AVX2_CRYPTO_SECRETKEYBYTES));
+                          PQCLEAN_DILITHIUM2_CRYPTO_SECRETKEYBYTES,
+                          PQCLEAN_DILITHIUM3_CRYPTO_SECRETKEYBYTES,
+                          PQCLEAN_DILITHIUM5_CRYPTO_SECRETKEYBYTES));
     }
   }
 

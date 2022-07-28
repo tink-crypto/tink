@@ -222,7 +222,7 @@ TEST(CreateDeriverFunctionForTest, KeyMaterialAndKeyType) {
   AesGcmKeyFormat key_format;
   key_format.set_key_size(16);
   auto key_or = deriver(key_format.SerializeAsString(), nullptr);
-  ASSERT_THAT(key_or.status(), IsOk());
+  ASSERT_THAT(key_or, IsOk());
   EXPECT_THAT(key_or.value().key_material_type(),
               Eq(ExampleKeyTypeManager().key_material_type()));
   EXPECT_THAT(key_or.value().type_url(),

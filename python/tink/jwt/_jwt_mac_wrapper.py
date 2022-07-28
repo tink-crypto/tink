@@ -13,7 +13,7 @@
 # limitations under the License.
 """Python primitive set wrapper for the JwtMac primitive."""
 
-from typing import Optional, Type
+from typing import Type
 
 from tink.proto import tink_pb2
 from tink import core
@@ -87,7 +87,7 @@ def _validate_primitive_set(pset: core.PrimitiveSet):
 class _Wrapper(core.PrimitiveWrapper[_jwt_mac.JwtMacInternal, _jwt_mac.JwtMac]):
   """A wrapper for JwtMac."""
 
-  def wrap(self, pset: core.PrimitiveSet) -> Optional[_jwt_mac.JwtMac]:
+  def wrap(self, pset: core.PrimitiveSet) -> _jwt_mac.JwtMac:
     _validate_primitive_set(pset)
     return _WrappedJwtMac(pset)
 

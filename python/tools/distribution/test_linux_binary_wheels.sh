@@ -36,7 +36,7 @@ readonly -A PYTHON_VERSIONS
 # Keep in sync with the output of the auditwheel tool.
 readonly PLATFORM_TAG_SET="manylinux_2_17_x86_64.manylinux2014_x86_64"
 
-export TINK_SRC_PATH="/tmp/tink"
+export TINK_PYTHON_ROOT_PATH="${PWD}"
 
 # Required to fix https://github.com/pypa/manylinux/issues/357.
 export LD_LIBRARY_PATH="/usr/local/lib"

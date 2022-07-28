@@ -175,11 +175,11 @@ TEST(EcdsaSignKeyManagerTest, Create) {
   auto direct_signer_or = subtle::EcdsaSignBoringSsl::New(
       ec_key, Enums::ProtoToSubtle(public_key.params().hash_type()),
       Enums::ProtoToSubtle(public_key.params().encoding()));
-  ASSERT_THAT(direct_signer_or.status(), IsOk());
+  ASSERT_THAT(direct_signer_or, IsOk());
 
   auto verifier_or =
       EcdsaVerifyKeyManager().GetPrimitive<PublicKeyVerify>(public_key);
-  ASSERT_THAT(verifier_or.status(), IsOk());
+  ASSERT_THAT(verifier_or, IsOk());
 
   std::string message = "Some message";
   EXPECT_THAT(verifier_or.value()->Verify(
@@ -202,11 +202,11 @@ TEST(EcdsaSignKeyManagerTest, CreateDifferentPrivateKey) {
   auto direct_signer_or = subtle::EcdsaSignBoringSsl::New(
       ec_key, Enums::ProtoToSubtle(public_key.params().hash_type()),
       Enums::ProtoToSubtle(public_key.params().encoding()));
-  ASSERT_THAT(direct_signer_or.status(), IsOk());
+  ASSERT_THAT(direct_signer_or, IsOk());
 
   auto verifier_or =
       EcdsaVerifyKeyManager().GetPrimitive<PublicKeyVerify>(public_key);
-  ASSERT_THAT(verifier_or.status(), IsOk());
+  ASSERT_THAT(verifier_or, IsOk());
 
   std::string message = "Some message";
   EXPECT_THAT(verifier_or.value()->Verify(

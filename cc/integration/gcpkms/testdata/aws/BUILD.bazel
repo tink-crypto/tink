@@ -1,0 +1,25 @@
+package(default_visibility = ["//visibility:public"])
+
+licenses(["notice"])
+
+filegroup(
+    name = "credentials",
+    testonly = 1,
+    srcs = [
+        "credentials.cred",
+        "credentials.csv",
+        "credentials.ini",
+        "key_arn.txt",
+    ],
+)
+
+filegroup(
+    name = "bad_credentials",
+    testonly = 1,
+    srcs = [
+        "access_keys_bad.csv",
+        "credentials_bad.csv",
+        "credentials_bad.ini",
+        "key_arn_bad.txt",
+    ],
+)

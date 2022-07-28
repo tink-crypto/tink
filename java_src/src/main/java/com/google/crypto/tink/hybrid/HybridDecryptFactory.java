@@ -39,7 +39,6 @@ import java.security.GeneralSecurityException;
 public final class HybridDecryptFactory {
   /**
    * @return a HybridDecrypt primitive from a {@code keysetHandle}.
-   * @throws GeneralSecurityException
    * @deprecated Use {@code keysetHandle.GetPrimitive(HybridDecrypt.class)} after registering the
    *     {@code HybridDecryptWrapper} instead.
    */

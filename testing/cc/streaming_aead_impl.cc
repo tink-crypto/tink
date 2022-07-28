@@ -28,7 +28,7 @@
 #include "tink/util/istream_input_stream.h"
 #include "tink/util/ostream_output_stream.h"
 #include "tink/util/status.h"
-#include "proto/testing/testing_api.grpc.pb.h"
+#include "proto/testing_api.grpc.pb.h"
 
 namespace tink_testing_api {
 

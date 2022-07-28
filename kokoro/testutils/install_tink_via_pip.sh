@@ -27,40 +27,43 @@
 #       use_bazel.sh "$(cat <path to version file>/.bazelversion)"
 #
 # Usage:
-#   source ./kokoro/testutils/install_tink_via_pip.sh <path to tink root>
+#   source ./kokoro/testutils/install_tink_via_pip.sh <path to tink python root>
 
 install_tink_via_pip() {
-  local tink_root_path="${1}"
-  # Keep track of the current directory to cd back to it later.
-  readonly local current_dir="${PWD}"
-  cd "${tink_root_path}"
-  readonly local platform="$(uname | tr '[:upper:]' '[:lower:]')"
-  local -a pip_flags
-  if [[ "${platform}" == 'darwin' ]]; then
-    pip_flags=( --user )
-  fi
-  readonly pip_flags
+  local tink_py_path="${1}"
+  (
+    cd "${tink_py_path}"
+    readonly local platform="$(uname | tr '[:upper:]' '[:lower:]')"
+    local setuptools_requirements="setuptools"
+    local -a pip_flags
+    if [[ "${platform}" == 'darwin' ]]; then
+      # On MacOS we need to use the --user flag as otherwise pip will complain
+      # about permissions.
+      pip_flags=( --user )
+      # TODO(b/219813176): Remove once Kokoro environment is compatible.
+      setuptools_requirements="setuptools==60.9.0"
+    fi
+    readonly pip_flags
 
-  # Set path to Tink base folder.
-  export TINK_PYTHON_SETUPTOOLS_OVERRIDE_BASE_PATH="${PWD}"
+    # Set base path to the Tink Python's dependencies.
+    export TINK_PYTHON_SETUPTOOLS_OVERRIDE_BASE_PATH="${PWD}/.."
 
-  # Temporary disable treating unset variables generating errors to avoid old
-  # versions of bash generating errors when expanding empty pip_flags array.
-  set +u
-  # Check if we can build Tink python package.
-  pip3 install "${pip_flags[@]}" --upgrade pip
-  # TODO(b/219813176): Remove once Kokoro environment is compatible.
-  pip3 install "${pip_flags[@]}" --upgrade 'setuptools==60.9.0'
-  pip3 install "${pip_flags[@]}" ./python
-  # Install dependencies for the examples/python tests
-  pip3 install "${pip_flags[@]}" google-cloud-storage
-  set -u
-  cd "${current_dir}"
+    # Temporary disable treating unset variables generating errors to avoid old
+    # versions of bash generating errors when expanding empty pip_flags array.
+    set +u
+    # Check if we can build Tink python package.
+    pip3 install "${pip_flags[@]}" --upgrade pip
+    pip3 install "${pip_flags[@]}" --upgrade "${setuptools_requirements}"
+    pip3 install "${pip_flags[@]}" .
+    # Install dependencies for the examples/python tests
+    pip3 install "${pip_flags[@]}" google-cloud-storage
+    set -u
+  )
 }
 
 if [[ -n "${KOKORO_ROOT:-}" ]] ; then
   if (( "$#" < 1 )); then
-    echo "Tink root path must be specified" >&2
+    echo "Tink Python folder path must be specified" >&2
     exit 1
   fi
   install_tink_via_pip "$@"

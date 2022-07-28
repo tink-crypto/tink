@@ -23,7 +23,7 @@ from tink.testing import helper
 
 
 CREDENTIAL_PATH = os.path.join(helper.tink_py_testdata_path(),
-                               'credential.json')
+                               'gcp/credential.json')
 
 
 class GcpKmsClientTest(absltest.TestCase):

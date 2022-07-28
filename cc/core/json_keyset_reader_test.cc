@@ -304,10 +304,10 @@ TEST_F(JsonKeysetReaderTest, ReadLargeKeyId) {
                        absl::Base64Escape(gcm_key_.SerializeAsString()),
                        absl::Base64Escape(eax_key_.SerializeAsString()));
   auto reader_result = JsonKeysetReader::New(json_serialization);
-  ASSERT_THAT(reader_result.status(), IsOk());
+  ASSERT_THAT(reader_result, IsOk());
   auto reader = std::move(reader_result.value());
   auto read_result = reader->Read();
-  ASSERT_THAT(read_result.status(), IsOk());
+  ASSERT_THAT(read_result, IsOk());
   auto keyset = std::move(read_result.value());
   EXPECT_THAT(keyset->primary_key_id(), Eq(4294967275));
 }
@@ -343,10 +343,10 @@ TEST_F(JsonKeysetReaderTest, ReadNegativeKeyId) {
                        absl::Base64Escape(gcm_key_.SerializeAsString()),
                        absl::Base64Escape(eax_key_.SerializeAsString()));
   auto reader_result = JsonKeysetReader::New(json_serialization);
-  ASSERT_THAT(reader_result.status(), IsOk());
+  ASSERT_THAT(reader_result, IsOk());
   auto reader = std::move(reader_result.value());
   auto read_result = reader->Read();
-  EXPECT_THAT(read_result.status(), Not(IsOk()));
+  EXPECT_THAT(read_result, Not(IsOk()));
 }
 
 }  // namespace

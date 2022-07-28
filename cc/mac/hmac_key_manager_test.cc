@@ -16,10 +16,14 @@
 
 #include "tink/mac/hmac_key_manager.h"
 
+#include <memory>
+#include <string>
+
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "absl/status/status.h"
 #include "tink/core/key_manager_impl.h"
+#include "tink/chunked_mac.h"
 #include "tink/mac.h"
 #include "tink/util/istream_input_stream.h"
 #include "tink/util/secret_data.h"
@@ -39,6 +43,7 @@ using ::google::crypto::tink::HashType;
 using ::google::crypto::tink::HmacKey;
 using ::google::crypto::tink::HmacKeyFormat;
 using ::google::crypto::tink::KeyData;
+using ::testing::Eq;
 using ::testing::HasSubstr;
 using ::testing::Not;
 using ::testing::SizeIs;
@@ -153,7 +158,7 @@ TEST(HmacKeyManagerTest, CreateKey) {
   key_format.mutable_params()->set_tag_size(10);
   key_format.mutable_params()->set_hash(HashType::SHA512);
   auto hmac_key_or = HmacKeyManager().CreateKey(key_format);
-  ASSERT_THAT(hmac_key_or.status(), IsOk());
+  ASSERT_THAT(hmac_key_or, IsOk());
   EXPECT_EQ(hmac_key_or.value().version(), 0);
   EXPECT_EQ(hmac_key_or.value().params().hash(), key_format.params().hash());
   EXPECT_EQ(hmac_key_or.value().params().tag_size(),
@@ -256,7 +261,7 @@ TEST(HmacKeyManagerTest, DeriveKey) {
       absl::make_unique<std::stringstream>("0123456789abcdefghijklmnop")};
 
   StatusOr<HmacKey> key_or = HmacKeyManager().DeriveKey(format, &input_stream);
-  ASSERT_THAT(key_or.status(), IsOk());
+  ASSERT_THAT(key_or, IsOk());
   EXPECT_EQ(key_or.value().key_value(), "0123456789abcdefghijklm");
   EXPECT_EQ(key_or.value().params().hash(), format.params().hash());
   EXPECT_EQ(key_or.value().params().tag_size(), format.params().tag_size());
@@ -291,24 +296,92 @@ TEST(HmacKeyManagerTest, DeriveKeyWrongVersion) {
       StatusIs(absl::StatusCode::kInvalidArgument, HasSubstr("version")));
 }
 
-TEST(HmacKeyManagerTest, GetPrimitive) {
+TEST(HmacKeyManagerTest, GetMacPrimitive) {
   HmacKeyFormat key_format;
   key_format.mutable_params()->set_tag_size(16);
   key_format.mutable_params()->set_hash(HashType::SHA256);
   key_format.set_key_size(16);
   HmacKey key = HmacKeyManager().CreateKey(key_format).value();
   auto manager_mac_or = HmacKeyManager().GetPrimitive<Mac>(key);
-  ASSERT_THAT(manager_mac_or.status(), IsOk());
+  ASSERT_THAT(manager_mac_or, IsOk());
   auto mac_value_or = manager_mac_or.value()->ComputeMac("some plaintext");
-  ASSERT_THAT(mac_value_or.status(), IsOk());
+  ASSERT_THAT(mac_value_or, IsOk());
 
   auto direct_mac_or = subtle::HmacBoringSsl::New(
       util::Enums::ProtoToSubtle(key.params().hash()), key.params().tag_size(),
       util::SecretDataFromStringView(key.key_value()));
-  ASSERT_THAT(direct_mac_or.status(), IsOk());
+  ASSERT_THAT(direct_mac_or, IsOk());
   EXPECT_THAT(
       direct_mac_or.value()->VerifyMac(mac_value_or.value(), "some plaintext"),
       IsOk());
+}
+
+TEST(HmacKeyManagerTest, GetChunkedMacPrimitive) {
+  HmacKeyFormat key_format;
+  key_format.mutable_params()->set_tag_size(16);
+  key_format.mutable_params()->set_hash(HashType::SHA256);
+  key_format.set_key_size(16);
+  HmacKey key = HmacKeyManager().CreateKey(key_format).value();
+
+  util::StatusOr<std::unique_ptr<ChunkedMac>> chunked_mac =
+      HmacKeyManager().GetPrimitive<ChunkedMac>(key);
+  ASSERT_THAT(chunked_mac, IsOk());
+
+  util::StatusOr<std::unique_ptr<ChunkedMacComputation>> computation =
+      (*chunked_mac)->CreateComputation();
+  ASSERT_THAT(computation, IsOk());
+  ASSERT_THAT((*computation)->Update("abc"), IsOk());
+  ASSERT_THAT((*computation)->Update("xyz"), IsOk());
+  util::StatusOr<std::string> tag = (*computation)->ComputeMac();
+  ASSERT_THAT(tag, IsOk());
+
+  util::StatusOr<std::unique_ptr<ChunkedMacVerification>> verification =
+      (*chunked_mac)->CreateVerification(*tag);
+  ASSERT_THAT(verification, IsOk());
+  ASSERT_THAT((*verification)->Update("abc"), IsOk());
+  ASSERT_THAT((*verification)->Update("xyz"), IsOk());
+  EXPECT_THAT((*verification)->VerifyMac(), IsOk());
+}
+
+TEST(HmacKeyManagerTest, MixPrimitives) {
+  HmacKeyFormat key_format;
+  key_format.mutable_params()->set_tag_size(16);
+  key_format.mutable_params()->set_hash(HashType::SHA256);
+  key_format.set_key_size(16);
+  HmacKey key = HmacKeyManager().CreateKey(key_format).value();
+
+  util::StatusOr<std::unique_ptr<Mac>> mac =
+      HmacKeyManager().GetPrimitive<Mac>(key);
+  ASSERT_THAT(mac, IsOk());
+
+  util::StatusOr<std::unique_ptr<ChunkedMac>> chunked_mac =
+      HmacKeyManager().GetPrimitive<ChunkedMac>(key);
+  ASSERT_THAT(chunked_mac, IsOk());
+
+  // Compute tag with Mac.
+  util::StatusOr<std::string> tag = (*mac)->ComputeMac("abcxyz");
+  ASSERT_THAT(tag, IsOk());
+
+  // Compute chunked tag with ChunkedMac.
+  util::StatusOr<std::unique_ptr<ChunkedMacComputation>> computation =
+      (*chunked_mac)->CreateComputation();
+  ASSERT_THAT(computation, IsOk());
+  ASSERT_THAT((*computation)->Update("abc"), IsOk());
+  ASSERT_THAT((*computation)->Update("xyz"), IsOk());
+  util::StatusOr<std::string> chunked_tag = (*computation)->ComputeMac();
+  ASSERT_THAT(chunked_tag, IsOk());
+  ASSERT_THAT(*chunked_tag, Eq(*tag));  // Both primitives generated same tag.
+
+  // Verify chunked tag with Mac.
+  ASSERT_THAT((*mac)->VerifyMac(*chunked_tag, "abcxyz"), IsOk());
+
+  // Verify tag with ChunkedMac.
+  util::StatusOr<std::unique_ptr<ChunkedMacVerification>> verification =
+      (*chunked_mac)->CreateVerification(*tag);
+  ASSERT_THAT(verification, IsOk());
+  ASSERT_THAT((*verification)->Update("abc"), IsOk());
+  ASSERT_THAT((*verification)->Update("xyz"), IsOk());
+  EXPECT_THAT((*verification)->VerifyMac(), IsOk());
 }
 
 }  // namespace

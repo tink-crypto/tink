@@ -73,7 +73,7 @@ util::StatusOr<std::unique_ptr<JwtMacInternal>> CreateJwtMac() {
 
 TEST(JwtMacImplTest, CreateAndValidateToken) {
   util::StatusOr<std::unique_ptr<JwtMacInternal>> jwt_mac = CreateJwtMac();
-  ASSERT_THAT(jwt_mac.status(), IsOk());
+  ASSERT_THAT(jwt_mac, IsOk());
 
   absl::Time now = absl::Now();
   util::StatusOr<RawJwt> raw_jwt = RawJwtBuilder()
@@ -83,28 +83,28 @@ TEST(JwtMacImplTest, CreateAndValidateToken) {
                                        .SetIssuedAt(now)
                                        .SetExpiration(now + absl::Seconds(300))
                                        .Build();
-  ASSERT_THAT(raw_jwt.status(), IsOk());
+  ASSERT_THAT(raw_jwt, IsOk());
   EXPECT_TRUE(raw_jwt->HasTypeHeader());
   EXPECT_THAT(raw_jwt->GetTypeHeader(), IsOkAndHolds("typeHeader"));
 
   util::StatusOr<std::string> compact =
       (*jwt_mac)->ComputeMacAndEncodeWithKid(*raw_jwt, /*kid=*/absl::nullopt);
-  ASSERT_THAT(compact.status(), IsOk());
+  ASSERT_THAT(compact, IsOk());
 
   util::StatusOr<JwtValidator> validator =
       JwtValidatorBuilder().ExpectTypeHeader("typeHeader").Build();
-  ASSERT_THAT(validator.status(), IsOk());
+  ASSERT_THAT(validator, IsOk());
 
   util::StatusOr<VerifiedJwt> verified_jwt =
       (*jwt_mac)->VerifyMacAndDecodeWithKid(*compact, *validator,
                                             /*kid=*/absl::nullopt);
-  ASSERT_THAT(verified_jwt.status(), IsOk());
+  ASSERT_THAT(verified_jwt, IsOk());
   EXPECT_THAT(verified_jwt->GetTypeHeader(), IsOkAndHolds("typeHeader"));
   EXPECT_THAT(verified_jwt->GetJwtId(), IsOkAndHolds("id123"));
 
   util::StatusOr<JwtValidator> validator2 =
       JwtValidatorBuilder().ExpectIssuer("unknown").Build();
-  ASSERT_THAT(validator2.status(), IsOk());
+  ASSERT_THAT(validator2, IsOk());
   EXPECT_FALSE((*jwt_mac)
                    ->VerifyMacAndDecodeWithKid(*compact, *validator2,
                                                /*kid=*/absl::nullopt)
@@ -113,7 +113,7 @@ TEST(JwtMacImplTest, CreateAndValidateToken) {
 
 TEST(JwtMacImplTest, CreateAndValidateTokenWithKid) {
   util::StatusOr<std::unique_ptr<JwtMacInternal>> jwt_mac = CreateJwtMac();
-  ASSERT_THAT(jwt_mac.status(), IsOk());
+  ASSERT_THAT(jwt_mac, IsOk());
 
   absl::Time now = absl::Now();
   util::StatusOr<RawJwt> raw_jwt = RawJwtBuilder()
@@ -123,22 +123,22 @@ TEST(JwtMacImplTest, CreateAndValidateTokenWithKid) {
                                        .SetIssuedAt(now)
                                        .SetExpiration(now + absl::Seconds(300))
                                        .Build();
-  ASSERT_THAT(raw_jwt.status(), IsOk());
+  ASSERT_THAT(raw_jwt, IsOk());
   EXPECT_TRUE(raw_jwt->HasTypeHeader());
   EXPECT_THAT(raw_jwt->GetTypeHeader(), IsOkAndHolds("typeHeader"));
 
   util::StatusOr<std::string> compact =
       (*jwt_mac)->ComputeMacAndEncodeWithKid(*raw_jwt, "kid-123");
-  ASSERT_THAT(compact.status(), IsOk());
+  ASSERT_THAT(compact, IsOk());
 
   util::StatusOr<JwtValidator> validator =
       JwtValidatorBuilder().ExpectTypeHeader("typeHeader").Build();
-  ASSERT_THAT(validator.status(), IsOk());
+  ASSERT_THAT(validator, IsOk());
 
   util::StatusOr<VerifiedJwt> verified_jwt =
       (*jwt_mac)->VerifyMacAndDecodeWithKid(*compact, *validator,
                                             /*kid=*/"kid-123");
-  ASSERT_THAT(verified_jwt.status(), IsOk());
+  ASSERT_THAT(verified_jwt, IsOk());
   EXPECT_THAT(verified_jwt->GetTypeHeader(), IsOkAndHolds("typeHeader"));
   EXPECT_THAT(verified_jwt->GetJwtId(), IsOkAndHolds("id123"));
 
@@ -163,14 +163,14 @@ TEST(JwtMacImplTest, CreateAndValidateTokenWithKid) {
   ASSERT_TRUE(DecodeHeader(parts[0], &json_header));
   util::StatusOr<google::protobuf::Struct> header =
       JsonStringToProtoStruct(json_header);
-  ASSERT_THAT(header.status(), IsOk());
+  ASSERT_THAT(header, IsOk());
   EXPECT_THAT(header->fields().find("kid")->second.string_value(),
               Eq("kid-123"));
 }
 
 TEST(JwtMacImplTest, ValidateFixedToken) {
   util::StatusOr<std::unique_ptr<JwtMacInternal>> jwt_mac = CreateJwtMac();
-  ASSERT_THAT(jwt_mac.status(), IsOk());
+  ASSERT_THAT(jwt_mac, IsOk());
 
   // token that expired in 2011
   std::string compact =
@@ -183,20 +183,20 @@ TEST(JwtMacImplTest, ValidateFixedToken) {
           .ExpectIssuer("joe")
           .SetFixedNow(absl::FromUnixSeconds(12345))
           .Build();
-  ASSERT_THAT(validator_1970.status(), IsOk());
+  ASSERT_THAT(validator_1970, IsOk());
 
   // verification succeeds because token was valid 1970
   util::StatusOr<VerifiedJwt> verified_jwt =
       (*jwt_mac)->VerifyMacAndDecodeWithKid(compact, *validator_1970,
                                             /*kid=*/absl::nullopt);
-  ASSERT_THAT(verified_jwt.status(), IsOk());
+  ASSERT_THAT(verified_jwt, IsOk());
   EXPECT_THAT(verified_jwt->GetIssuer(), IsOkAndHolds("joe"));
   EXPECT_THAT(verified_jwt->GetBooleanClaim("http://example.com/is_root"),
               IsOkAndHolds(true));
 
   // verification fails because token is expired
   util::StatusOr<JwtValidator> validator_now = JwtValidatorBuilder().Build();
-  ASSERT_THAT(validator_now.status(), IsOk());
+  ASSERT_THAT(validator_now, IsOk());
   EXPECT_FALSE((*jwt_mac)
                    ->VerifyMacAndDecodeWithKid(compact, *validator_now,
                                                /*kid=*/absl::nullopt)
@@ -215,10 +215,10 @@ TEST(JwtMacImplTest, ValidateFixedToken) {
 
 TEST(JwtMacImplTest, ValidateInvalidTokens) {
   util::StatusOr<std::unique_ptr<JwtMacInternal>> jwt_mac = CreateJwtMac();
-  ASSERT_THAT(jwt_mac.status(), IsOk());
+  ASSERT_THAT(jwt_mac, IsOk());
 
   util::StatusOr<JwtValidator> validator = JwtValidatorBuilder().Build();
-  ASSERT_THAT(validator.status(), IsOk());
+  ASSERT_THAT(validator, IsOk());
 
   EXPECT_FALSE((*jwt_mac)
                    ->VerifyMacAndDecodeWithKid("eyJhbGciOiJIUzI1NiJ9.e30.abc.",

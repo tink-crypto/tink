@@ -13,7 +13,7 @@
 # limitations under the License.
 """Python primitive set wrapper for the JwtMac primitive."""
 
-from typing import Optional, Type
+from typing import Type
 
 from tink.proto import tink_pb2
 from tink import core
@@ -76,9 +76,8 @@ class _JwtPublicKeySignWrapper(
                           _jwt_public_key_sign.JwtPublicKeySign]):
   """A wrapper for JwtPublicKeySign."""
 
-  def wrap(
-      self, pset: core.PrimitiveSet
-  ) -> Optional[_jwt_public_key_sign.JwtPublicKeySign]:
+  def wrap(self,
+           pset: core.PrimitiveSet) -> _jwt_public_key_sign.JwtPublicKeySign:
     _validate_primitive_set(pset)
     return _WrappedJwtPublicKeySign(pset)
 
@@ -96,8 +95,8 @@ class _JwtPublicKeyVerifyWrapper(
   """A wrapper for JwtPublicKeyVerify."""
 
   def wrap(
-      self, pset: core.PrimitiveSet
-  ) -> Optional[_jwt_public_key_verify.JwtPublicKeyVerify]:
+      self,
+      pset: core.PrimitiveSet) -> _jwt_public_key_verify.JwtPublicKeyVerify:
     _validate_primitive_set(pset)
     return _WrappedJwtPublicKeyVerify(pset)
 

@@ -1,4 +1,5 @@
 load("@io_bazel_rules_go//go:def.bzl", "go_binary")
+
 package(default_visibility = ["//:__subpackages__"])
 
 licenses(["notice"])
@@ -8,7 +9,7 @@ go_binary(
     testonly = 1,  # keep
     srcs = ["aead_cli.go"],
     out = "aead_cli_go",
-    data = ["//testdata:credentials"],
+    data = ["//testdata/gcp:credentials"],
     deps = [
         "@tink_go//aead:go_default_library",
         "@tink_go//core/registry:go_default_library",
@@ -42,12 +43,16 @@ go_binary(
         "@tink_go//testkeyset:go_default_library",
     ],
 )
+
 go_binary(
     name = "generate_envelope_keyset",
     testonly = 1,  # keep
     srcs = ["generate_envelope_keyset.go"],
     out = "generate_envelope_keyset",
-    data = ["//testdata:credentials"],
+    data = [
+        "//testdata/aws:credentials",
+        "//testdata/gcp:credentials",
+    ],
     tags = ["no_rbe"],
     deps = [
         "@tink_go//aead:go_default_library",

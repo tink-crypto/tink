@@ -237,9 +237,9 @@ TEST(EciesAeadHkdfPrivateKeyManagerTest, Create) {
 
   auto decrypt_or =
       EciesAeadHkdfPrivateKeyManager().GetPrimitive<HybridDecrypt>(private_key);
-  ASSERT_THAT(decrypt_or.status(), IsOk());
+  ASSERT_THAT(decrypt_or, IsOk());
   auto encrypt_or = EciesAeadHkdfHybridEncrypt::New(public_key);
-  ASSERT_THAT(encrypt_or.status(), IsOk());
+  ASSERT_THAT(encrypt_or, IsOk());
 
   ASSERT_THAT(HybridEncryptThenDecrypt(encrypt_or.value().get(),
                                        decrypt_or.value().get(), "some text",
@@ -258,9 +258,9 @@ TEST(EciesAeadHkdfPrivateKeyManagerTest, CreateDifferentKey) {
 
   auto decrypt_or =
       EciesAeadHkdfPrivateKeyManager().GetPrimitive<HybridDecrypt>(private_key);
-  ASSERT_THAT(decrypt_or.status(), IsOk());
+  ASSERT_THAT(decrypt_or, IsOk());
   auto encrypt_or = EciesAeadHkdfHybridEncrypt::New(public_key);
-  ASSERT_THAT(encrypt_or.status(), IsOk());
+  ASSERT_THAT(encrypt_or, IsOk());
 
   ASSERT_THAT(HybridEncryptThenDecrypt(encrypt_or.value().get(),
                                        decrypt_or.value().get(), "some text",

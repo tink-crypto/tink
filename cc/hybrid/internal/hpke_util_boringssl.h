@@ -18,6 +18,7 @@
 #define TINK_HYBRID_INTERNAL_HPKE_UTIL_BORINGSSL_H_
 
 #include "openssl/hpke.h"
+#include "tink/hybrid/internal/hpke_util.h"
 #include "tink/util/statusor.h"
 #include "proto/hpke.pb.h"
 
@@ -25,16 +26,22 @@ namespace crypto {
 namespace tink {
 namespace internal {
 
-util::StatusOr<const EVP_HPKE_KEM *> KemParam(
+util::StatusOr<const EVP_HPKE_KEM*> KemParam(
     const google::crypto::tink::HpkeKem& kem);
 
-util::StatusOr<const EVP_HPKE_KEM *> KemParam(
+util::StatusOr<const EVP_HPKE_KEM*> KemParam(const HpkeParams& params);
+
+util::StatusOr<const EVP_HPKE_KEM*> KemParam(
     const google::crypto::tink::HpkeParams& params);
 
-util::StatusOr<const EVP_HPKE_KDF *> KdfParam(
+util::StatusOr<const EVP_HPKE_KDF*> KdfParam(const HpkeParams& params);
+
+util::StatusOr<const EVP_HPKE_KDF*> KdfParam(
     const google::crypto::tink::HpkeParams& params);
 
-util::StatusOr<const EVP_HPKE_AEAD *> AeadParam(
+util::StatusOr<const EVP_HPKE_AEAD*> AeadParam(const HpkeParams& params);
+
+util::StatusOr<const EVP_HPKE_AEAD*> AeadParam(
     const google::crypto::tink::HpkeParams& params);
 
 }  // namespace internal

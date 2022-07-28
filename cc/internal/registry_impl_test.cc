@@ -479,7 +479,7 @@ TEST_F(RegistryTest, GetKeyManagerRemainsValid) {
 
   crypto::tink::util::StatusOr<const KeyManager<Aead>*> key_manager =
       Registry::get_key_manager<Aead>(key_type);
-  ASSERT_THAT(key_manager.status(), IsOk());
+  ASSERT_THAT(key_manager, IsOk());
   EXPECT_THAT(Registry::RegisterKeyManager(
                   absl::make_unique<TestAeadKeyManager>(key_type), true),
               IsOk());
@@ -526,7 +526,7 @@ TEST_F(RegistryTest, testAddCatalogue) {
   EXPECT_EQ(absl::StatusCode::kAlreadyExists, status.code()) << status;
 
   // Check the catalogue is still present.
-  EXPECT_THAT(Registry::get_catalogue<Aead>(catalogue_name).status(), IsOk());
+  EXPECT_THAT(Registry::get_catalogue<Aead>(catalogue_name), IsOk());
 }
 
 TEST_F(RegistryTest, testGettingPrimitives) {
@@ -916,7 +916,7 @@ TEST_F(RegistryTest, KeysetWrappingTest) {
   crypto::tink::util::StatusOr<std::unique_ptr<AeadVariant>> aead_variant =
       RegistryImpl::GlobalInstance().WrapKeyset<AeadVariant>(
           keyset, /*annotations=*/{});
-  EXPECT_THAT(aead_variant.status(), IsOk());
+  EXPECT_THAT(aead_variant, IsOk());
   EXPECT_THAT(aead_variant.value()->get(), Eq(raw_key));
 }
 
@@ -941,7 +941,7 @@ TEST_F(RegistryTest, TransformingKeysetWrappingTest) {
   crypto::tink::util::StatusOr<std::unique_ptr<std::string>> string_primitive =
       RegistryImpl::GlobalInstance().WrapKeyset<std::string>(
           keyset, /*annotations=*/{});
-  EXPECT_THAT(string_primitive.status(), IsOk());
+  EXPECT_THAT(string_primitive, IsOk());
   EXPECT_THAT(*string_primitive.value(), Eq(raw_key));
 }
 
@@ -1109,7 +1109,7 @@ TEST_F(RegistryTest, GetKeyManagerRemainsValidForKeyTypeManagers) {
 
   crypto::tink::util::StatusOr<const KeyManager<Aead>*> key_manager =
       Registry::get_key_manager<Aead>(ExampleKeyTypeManager().get_key_type());
-  ASSERT_THAT(key_manager.status(), IsOk());
+  ASSERT_THAT(key_manager, IsOk());
   EXPECT_THAT(Registry::RegisterKeyTypeManager(
                   absl::make_unique<ExampleKeyTypeManager>(), true),
               IsOk());
@@ -1157,7 +1157,7 @@ TEST_F(RegistryTest, KeyTypeManagerNewKeyInvalidSize) {
   key_template.set_type_url("type.googleapis.com/google.crypto.tink.AesGcmKey");
   key_template.set_value(format.SerializeAsString());
 
-  EXPECT_THAT(Registry::NewKeyData(key_template).status(), IsOk());
+  EXPECT_THAT(Registry::NewKeyData(key_template), IsOk());
 }
 
 TEST_F(RegistryTest, KeyTypeManagerDeriveKey) {
@@ -1181,7 +1181,7 @@ TEST_F(RegistryTest, KeyTypeManagerDeriveKey) {
 
   auto key_data_or =
       RegistryImpl::GlobalInstance().DeriveKey(key_template, &input_stream);
-  ASSERT_THAT(key_data_or.status(), IsOk());
+  ASSERT_THAT(key_data_or, IsOk());
   EXPECT_THAT(key_data_or.value().type_url(), Eq(key_template.type_url()));
   AesGcmKey key;
   EXPECT_TRUE(key.ParseFromString(key_data_or.value().value()));
@@ -1215,7 +1215,7 @@ TEST_F(RegistryTest, KeyTypeManagerDeriveKeyRegisterTwice) {
 
   auto key_data_or =
       RegistryImpl::GlobalInstance().DeriveKey(key_template, &input_stream);
-  ASSERT_THAT(key_data_or.status(), IsOk());
+  ASSERT_THAT(key_data_or, IsOk());
   EXPECT_THAT(key_data_or.value().type_url(), Eq(key_template.type_url()));
   AesGcmKey key;
   EXPECT_TRUE(key.ParseFromString(key_data_or.value().value()));

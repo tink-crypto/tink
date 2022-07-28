@@ -58,7 +58,7 @@ pb::SphincsHashType EnumsPqcrypto::SubtleToProto(subtle::SphincsHashType type) {
     case subtle::SphincsHashType::SHAKE256:
       return pb::SphincsHashType::SHAKE256;
     default:
-      return pb::SphincsHashType::UNKNOWN_HASH_TYPE;
+      return pb::SphincsHashType::HASH_TYPE_UNSPECIFIED;
   }
 }
 
@@ -72,7 +72,7 @@ subtle::SphincsHashType EnumsPqcrypto::ProtoToSubtle(pb::SphincsHashType type) {
     case pb::SphincsHashType::SHAKE256:
       return subtle::SphincsHashType::SHAKE256;
     default:
-      return subtle::SphincsHashType::UNKNOWN_HASH_TYPE;
+      return subtle::SphincsHashType::HASH_TYPE_UNSPECIFIED;
   }
 }
 
@@ -85,7 +85,7 @@ pb::SphincsVariant EnumsPqcrypto::SubtleToProto(
     case subtle::SphincsVariant::SIMPLE:
       return pb::SphincsVariant::SIMPLE;
     default:
-      return pb::SphincsVariant::UNKNOWN_VARIANT;
+      return pb::SphincsVariant::VARIANT_UNSPECIFIED;
   }
 }
 
@@ -98,7 +98,7 @@ subtle::SphincsVariant EnumsPqcrypto::ProtoToSubtle(
     case pb::SphincsVariant::SIMPLE:
       return subtle::SphincsVariant::SIMPLE;
     default:
-      return subtle::SphincsVariant::UNKNOWN_VARIANT;
+      return subtle::SphincsVariant::VARIANT_UNSPECIFIED;
   }
 }
 
@@ -111,7 +111,7 @@ pb::SphincsSignatureType EnumsPqcrypto::SubtleToProto(
     case subtle::SphincsSignatureType::SMALL_SIGNATURE:
       return pb::SphincsSignatureType::SMALL_SIGNATURE;
     default:
-      return pb::SphincsSignatureType::UNKNOWN_SIG_TYPE;
+      return pb::SphincsSignatureType::SIG_TYPE_UNSPECIFIED;
   }
 }
 
@@ -124,7 +124,7 @@ subtle::SphincsSignatureType EnumsPqcrypto::ProtoToSubtle(
     case pb::SphincsSignatureType::SMALL_SIGNATURE:
       return subtle::SphincsSignatureType::SMALL_SIGNATURE;
     default:
-      return subtle::SphincsSignatureType::UNKNOWN_SIG_TYPE;
+      return subtle::SphincsSignatureType::SIG_TYPE_UNSPECIFIED;
   }
 }
 

@@ -65,14 +65,14 @@ TEST_F(RsaPkcs1SignBoringsslTest, EncodesPkcs1) {
   internal::RsaSsaPkcs1Params params{/*sig_hash=*/HashType::SHA256};
 
   auto signer_or = RsaSsaPkcs1SignBoringSsl::New(private_key_, params);
-  ASSERT_THAT(signer_or.status(), IsOk());
+  ASSERT_THAT(signer_or, IsOk());
 
   auto signature_or = signer_or.value()->Sign("testdata");
-  ASSERT_THAT(signature_or.status(), IsOk());
+  ASSERT_THAT(signature_or, IsOk());
   EXPECT_THAT(signature_or.value(), Not(IsEmpty()));
 
   auto verifier_or = RsaSsaPkcs1VerifyBoringSsl::New(public_key_, params);
-  ASSERT_THAT(verifier_or.status(), IsOk());
+  ASSERT_THAT(verifier_or, IsOk());
   EXPECT_THAT(verifier_or.value()->Verify(signature_or.value(), "testdata"),
               IsOk());
 }
@@ -85,14 +85,14 @@ TEST_F(RsaPkcs1SignBoringsslTest, EncodesPkcs1WithSeparateHashes) {
   internal::RsaSsaPkcs1Params params{/*sig_hash=*/HashType::SHA256};
 
   auto signer_or = RsaSsaPkcs1SignBoringSsl::New(private_key_, params);
-  ASSERT_THAT(signer_or.status(), IsOk());
+  ASSERT_THAT(signer_or, IsOk());
 
   auto signature_or = signer_or.value()->Sign("testdata");
-  ASSERT_THAT(signature_or.status(), IsOk());
+  ASSERT_THAT(signature_or, IsOk());
   EXPECT_THAT(signature_or.value(), Not(IsEmpty()));
 
   auto verifier_or = RsaSsaPkcs1VerifyBoringSsl::New(public_key_, params);
-  ASSERT_THAT(verifier_or.status(), IsOk());
+  ASSERT_THAT(verifier_or, IsOk());
   EXPECT_THAT(verifier_or.value()->Verify(signature_or.value(), "testdata"),
               IsOk());
 }

@@ -57,32 +57,33 @@ public final class KeyTester {
   }
 
   private static void testSingleKey(String keyIdentifier, Key key) {
-    if (key.getKeyFormat().hasIdRequirement()) {
+    if (key.getParameters().hasIdRequirement()) {
       assertWithMessage(
               keyIdentifier
-                  + " has a format with IdRequirement, but getIdRequirement returns an empty"
-                  + " optional")
-          .that(key.getIdRequirement().isPresent())
-          .isTrue();
+                  + " has parameters with IdRequirement, but getIdRequirementOrNull returns null")
+          .that(key.getIdRequirementOrNull())
+          .isNotNull();
     } else {
       assertWithMessage(
               keyIdentifier
-                  + " has a format without IdRequirement, but getIdRequirement returns an optional"
-                  + " with value")
-          .that(key.getIdRequirement().isPresent())
-          .isFalse();
+                  + " has parameters without IdRequirement, but getIdRequirementOrNull returns a"
+                  + " non-null value")
+          .that(key.getIdRequirementOrNull())
+          .isNull();
     }
   }
 
   private static void testSameGroupKeys(String keysIdentifier, Key key1, Key key2) {
     assertWithMessage(keysIdentifier + " are not equal: ").that(key1.equalsKey(key2)).isTrue();
     assertWithMessage(keysIdentifier + " have different ID requirements: ")
-        .that(key1.getIdRequirement())
-        .isEqualTo(key2.getIdRequirement());
-    assertWithMessage(keysIdentifier + " have different key format: ")
-        .that(key1.getKeyFormat()).isEqualTo(key2.getKeyFormat());
-    assertWithMessage(keysIdentifier + " have key formats with different hashCode values: ")
-        .that(key1.getKeyFormat().hashCode()).isEqualTo(key2.getKeyFormat().hashCode());
+        .that(key1.getIdRequirementOrNull())
+        .isEqualTo(key2.getIdRequirementOrNull());
+    assertWithMessage(keysIdentifier + " have different parameters: ")
+        .that(key1.getParameters())
+        .isEqualTo(key2.getParameters());
+    assertWithMessage(keysIdentifier + " have parameters with different hashCode values: ")
+        .that(key1.getParameters().hashCode())
+        .isEqualTo(key2.getParameters().hashCode());
   }
 
   private static void testDifferentGroupKeys(
@@ -102,12 +103,12 @@ public final class KeyTester {
    * <p>This tests the following properties on the previously configured equality groups:
    *
    * <ul>
-   *   <li>For each individual key {@code k}, we check consistency of {@code getIdRequirement} and
-   *       {@code k.getKeyFormat().hasIdRequirement()}.
+   *   <li>For each individual key {@code k}, we check consistency of {@code getIdRequirementOrNull}
+   *       and {@code k.getParameters().hasIdRequirement()}.
    *   <li>For each pair {@code k1, k2} of keys in the same group, we check that {@code
-   *       k1.equalsKey(k2)}, that {@code k1.getKeyFormat().equals(k2.getKeyFormat())}, that {@code
-   *       k1.getKeyFormat().hashCode() == k2.getKeyFormat().hashCode()}, and that {@code
-   *       k1.getIdRequirement().equals(k2.getIdRequirement())}.
+   *       k1.equalsKey(k2)}, that {@code k1.getParameters().equals(k2.getParameters())}, that
+   *       {@code k1.getParameters().hashCode() == k2.getParameters().hashCode()}, and that {@code
+   *       Object.equals(k1.getIdRequirementOrNull(), k2.getIdRequirementOrNull())}.
    *   <li>For each pair {@code k1, k2} of keys in different groups, we check that {@code
    *       k1.equalsKey(k2)} is false.
    * </ul>

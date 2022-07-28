@@ -37,7 +37,7 @@ TEST(AeadUtilTest, GetAesGcmCipherForKeySize) {
     } else if (i == 32) {
       EXPECT_THAT(cipher, IsOkAndHolds(EVP_aes_256_gcm()));
     } else {
-      EXPECT_THAT(cipher.status(), Not(IsOk()));
+      EXPECT_THAT(cipher, Not(IsOk()));
     }
   }
 }
@@ -52,7 +52,7 @@ TEST(AeadUtilTest, GetAesAeadForKeySize) {
     } else if (i == 32) {
       EXPECT_THAT(cipher, IsOkAndHolds(EVP_aead_aes_256_gcm()));
     } else {
-      EXPECT_THAT(cipher.status(), Not(IsOk()));
+      EXPECT_THAT(cipher, Not(IsOk()));
     }
   }
 }
@@ -66,7 +66,7 @@ TEST(AeadUtilTest, GetAesGcmSivAeadCipherForKeySize) {
     } else if (i == 32) {
       EXPECT_THAT(cipher, IsOkAndHolds(EVP_aead_aes_256_gcm_siv()));
     } else {
-      EXPECT_THAT(cipher.status(), Not(IsOk()));
+      EXPECT_THAT(cipher, Not(IsOk()));
     }
   }
 }

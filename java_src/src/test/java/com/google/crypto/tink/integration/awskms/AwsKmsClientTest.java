@@ -36,7 +36,7 @@ import org.junit.runners.JUnit4;
 @RunWith(JUnit4.class)
 public final class AwsKmsClientTest {
   private static final String CREDENTIAL_FILE_PATH =
-      "testdata/credentials_aws.cred";
+      "testdata/aws/credentials.cred";
   private static final AWSCredentialsProvider CREDENTIALS_PROVIDER =
       new PropertiesFileCredentialsProvider(CREDENTIAL_FILE_PATH);
 

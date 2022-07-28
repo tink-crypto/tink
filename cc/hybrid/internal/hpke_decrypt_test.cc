@@ -76,12 +76,12 @@ INSTANTIATE_TEST_SUITE_P(
 TEST_P(HpkeDecryptTest, SetupRecipientContextAndDecrypt) {
   HpkeParams hpke_params = GetParam();
   util::StatusOr<HpkeTestParams> params = CreateHpkeTestParams(hpke_params);
-  ASSERT_THAT(params.status(), IsOk());
+  ASSERT_THAT(params, IsOk());
   HpkePrivateKey recipient_key =
       CreateHpkePrivateKey(hpke_params, params->recipient_private_key);
   util::StatusOr<std::unique_ptr<HybridDecrypt>> hpke_decrypt =
       HpkeDecrypt::New(recipient_key);
-  ASSERT_THAT(hpke_decrypt.status(), IsOk());
+  ASSERT_THAT(hpke_decrypt, IsOk());
 
   std::vector<std::string> inputs = {"", params->plaintext};
   std::vector<std::string> context_infos = {"", params->application_info};
@@ -91,7 +91,7 @@ TEST_P(HpkeDecryptTest, SetupRecipientContextAndDecrypt) {
                                 context_info, "'"));
       util::StatusOr<std::string> ciphertext = Encrypt(
           hpke_params, params->recipient_public_key, input, context_info);
-      ASSERT_THAT(ciphertext.status(), IsOk());
+      ASSERT_THAT(ciphertext, IsOk());
       util::StatusOr<std::string> plaintext =
           (*hpke_decrypt)->Decrypt(*ciphertext, context_info);
       ASSERT_THAT(plaintext, IsOkAndHolds(input));
@@ -116,7 +116,7 @@ TEST_P(HpkeDecryptWithBadParamTest, BadParamsFails) {
       CreateHpkePrivateKey(bad_params, params.recipient_private_key);
   util::StatusOr<std::unique_ptr<HybridDecrypt>> hpke_decrypt =
       HpkeDecrypt::New(recipient_key);
-  ASSERT_THAT(hpke_decrypt.status(), IsOk());
+  ASSERT_THAT(hpke_decrypt, IsOk());
 
   util::StatusOr<std::string> decryption =
       (*hpke_decrypt)->Decrypt(params.ciphertext, params.application_info);
@@ -148,7 +148,7 @@ TEST(HpkeDecryptWithShortCiphertextTest, ShortCiphertextFails) {
       CreateHpkePrivateKey(hpke_params, params.recipient_private_key);
   util::StatusOr<std::unique_ptr<HybridDecrypt>> hpke_decrypt =
       HpkeDecrypt::New(recipient_key);
-  ASSERT_THAT(hpke_decrypt.status(), IsOk());
+  ASSERT_THAT(hpke_decrypt, IsOk());
 
   util::StatusOr<std::string> plaintext =
       (*hpke_decrypt)->Decrypt("short ciphertext", "associated data");
@@ -165,11 +165,11 @@ TEST(HpkeDecryptWithBadCiphertextTest, BadCiphertextFails) {
       CreateHpkePrivateKey(hpke_params, params.recipient_private_key);
   util::StatusOr<std::unique_ptr<HybridDecrypt>> hpke_decrypt =
       HpkeDecrypt::New(recipient_key);
-  ASSERT_THAT(hpke_decrypt.status(), IsOk());
+  ASSERT_THAT(hpke_decrypt, IsOk());
   util::StatusOr<std::string> ciphertext =
       Encrypt(hpke_params, params.recipient_public_key, params.plaintext,
               params.application_info);
-  ASSERT_THAT(ciphertext.status(), IsOk());
+  ASSERT_THAT(ciphertext, IsOk());
 
   util::StatusOr<std::string> plaintext =
       (*hpke_decrypt)
@@ -188,11 +188,11 @@ TEST(HpkeDecryptWithBadAssociatedDataTest, BadAssociatedDataFails) {
       CreateHpkePrivateKey(hpke_params, params.recipient_private_key);
   util::StatusOr<std::unique_ptr<HybridDecrypt>> hpke_decrypt =
       HpkeDecrypt::New(recipient_key);
-  ASSERT_THAT(hpke_decrypt.status(), IsOk());
+  ASSERT_THAT(hpke_decrypt, IsOk());
   util::StatusOr<std::string> ciphertext =
       Encrypt(hpke_params, params.recipient_public_key, params.plaintext,
               params.application_info);
-  ASSERT_THAT(ciphertext.status(), IsOk());
+  ASSERT_THAT(ciphertext, IsOk());
 
   util::StatusOr<std::string> plaintext =
       (*hpke_decrypt)

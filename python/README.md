@@ -15,8 +15,7 @@ Google Assistant, Firebase, the Android Search App, etc.
 
 ## Documentation
 
-For an overview of using Tink in Python, see the
-[Python HOW-TO](../docs/PYTHON-HOWTO.md).
+For an overview of using Tink in Python, see https://developers.google.com/tink.
 
 In addition, there are illustrative [examples of using Tink
 Python](https://github.com/google/tink/tree/master/examples/python/) which can

@@ -49,7 +49,7 @@ TEST_P(FalconUtilsTest, FalconKeyGeneration) {
   // Generate falcon key pair.
   util::StatusOr<FalconKeyPair> key_pair =
       GenerateFalconKeyPair(test_case.private_key_size);
-  ASSERT_THAT(key_pair.status(), IsOk());
+  ASSERT_THAT(key_pair, IsOk());
 
   // Check keys size.
   EXPECT_EQ(key_pair->GetPrivateKey().GetKey().size(),
@@ -64,7 +64,7 @@ TEST_P(FalconUtilsTest, DifferentContent) {
   // Generate falcon key pair.
   util::StatusOr<FalconKeyPair> key_pair =
       GenerateFalconKeyPair(test_case.private_key_size);
-  ASSERT_THAT(key_pair.status(), IsOk());
+  ASSERT_THAT(key_pair, IsOk());
 
   // Check keys content is different.
   EXPECT_NE(util::SecretDataAsStringView(key_pair->GetPrivateKey().GetKey()),
@@ -119,7 +119,7 @@ TEST(FalconUtilsTest, InvalidPubliceKey) {
   util::StatusOr<FalconPublicKeyPqclean> public_key =
       FalconPublicKeyPqclean::NewPublicKey(bad_public_key_data);
 
-  EXPECT_THAT(public_key.status(), Not(IsOk()));
+  EXPECT_THAT(public_key, Not(IsOk()));
 }
 
 INSTANTIATE_TEST_SUITE_P(

@@ -170,8 +170,8 @@ TEST(AesCtrBoringSslTest, TestFipsOnly) {
   util::SecretData key256 = util::SecretDataFromStringView(test::HexDecodeOrDie(
       "000102030405060708090a0b0c0d0e0f000102030405060708090a0b0c0d0e0f"));
 
-  EXPECT_THAT(subtle::AesCtrBoringSsl::New(key128, 16).status(), IsOk());
-  EXPECT_THAT(subtle::AesCtrBoringSsl::New(key256, 16).status(), IsOk());
+  EXPECT_THAT(subtle::AesCtrBoringSsl::New(key128, 16), IsOk());
+  EXPECT_THAT(subtle::AesCtrBoringSsl::New(key256, 16), IsOk());
 }
 
 TEST(AesCtrBoringSslTest, TestFipsFailWithoutBoringCrypto) {

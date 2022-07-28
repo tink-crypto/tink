@@ -23,16 +23,21 @@ cd tink/examples/java_src
 bazel build ...
 ```
 
-You can then encrypt a file
+Encrypt a file:
 
 ```shell
 echo "some data" > testdata.txt
-./bazel-bin/streamingaead/streamingaead_example encrypt testdata.txt testdata.txt.encrypted
+./bazel-bin/streamingaead/streamingaead_example encrypt \
+    ./streamingaead/streaming_aead_test_keyset.json \
+    testdata.txt testdata.txt.encrypted
 ```
 
-or decrypt the file with
+Decrypt a file:
 
 ```shell
-./bazel-bin/streamingaead/streamingaead_example decrypt testdata.txt.encrypted testdata.txt.decrypted
-$ diff testdata.txt testdata.txt.decrypted
+./bazel-bin/streamingaead/streamingaead_example decrypt \
+    ./streamingaead/streaming_aead_test_keyset.json \
+    testdata.txt.encrypted testdata.txt.decrypted
+
+diff testdata.txt testdata.txt.decrypted
 ```

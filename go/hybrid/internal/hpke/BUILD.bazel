@@ -41,7 +41,7 @@ go_test(
         "primitive_factory_test.go",
         "x25519_kem_test.go",
     ],
-    data = [":testdata"],
+    data = ["//testdata/testvectors:hpke_boringssl"],
     embed = [":hpke"],
     deps = [
         "//proto/hpke_go_proto",
@@ -51,13 +51,8 @@ go_test(
     ],
 )
 
-filegroup(
-    name = "testdata",
-    srcs = ["testdata/boringssl_hpke_test_vectors.json"],
-)
-
 alias(
     name = "go_default_library",
     actual = ":hpke",
-    visibility = ["//visibility:public"],
+    visibility = ["//:__subpackages__"],
 )

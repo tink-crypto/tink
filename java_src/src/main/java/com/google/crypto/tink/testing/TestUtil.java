@@ -30,6 +30,7 @@ import com.google.crypto.tink.aead.AeadConfig;
 import com.google.crypto.tink.daead.DeterministicAeadConfig;
 import com.google.crypto.tink.hybrid.HybridKeyTemplates;
 import com.google.crypto.tink.mac.MacConfig;
+import com.google.crypto.tink.monitoring.MonitoringAnnotations;
 import com.google.crypto.tink.prf.PrfConfig;
 import com.google.crypto.tink.proto.AesCtrHmacAeadKey;
 import com.google.crypto.tink.proto.AesCtrHmacStreamingKey;
@@ -88,6 +89,7 @@ import java.security.spec.ECPoint;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import javax.annotation.Nullable;
 import javax.crypto.Cipher;
 
 /** Test helpers. */
@@ -111,7 +113,7 @@ public final class TestUtil {
 
   // This is a credential of a service account that is granted access to
   // {@code RESTRICTED_CRYPTO_KEY_URI}.
-  public static final String SERVICE_ACCOUNT_FILE = "testdata/credential.json";
+  public static final String SERVICE_ACCOUNT_FILE = "testdata/gcp/credential.json";
 
   // This AWS KMS CryptoKey is restricted to Google use only and {@code AWS_CREDS}.
   public static final String AWS_CRYPTO_URI =
@@ -119,7 +121,7 @@ public final class TestUtil {
 
   // This is a credential for the AWS service account with granted access to
   // {@code AWS_CRYPTO_URI}.
-  public static final String AWS_CREDS = "testdata/credentials_aws.cred";
+  public static final String AWS_CREDS = "testdata/aws/credentials.cred";
 
   /** A dummy Aead-implementation that just throws exception. */
   public static class DummyAead implements Aead {
@@ -139,17 +141,30 @@ public final class TestUtil {
   /** @return a {@code PrimitiveSet} from a {@code KeySet} */
   public static <P> PrimitiveSet<P> createPrimitiveSet(Keyset keyset, Class<P> inputClass)
       throws GeneralSecurityException {
-    PrimitiveSet<P> primitives = PrimitiveSet.newPrimitiveSet(inputClass);
+    return createPrimitiveSetWithAnnotations(keyset, null, inputClass);
+  }
+
+  /**
+   * @return a {@code PrimitiveSet} from a {@code KeySet}
+   */
+  public static <P> PrimitiveSet<P> createPrimitiveSetWithAnnotations(
+      Keyset keyset, @Nullable MonitoringAnnotations annotations, Class<P> inputClass)
+      throws GeneralSecurityException {
+    PrimitiveSet.Builder<P> builder = PrimitiveSet.newBuilder(inputClass);
+    if (annotations != null) {
+      builder.setAnnotations(annotations);
+    }
     for (Keyset.Key key : keyset.getKeyList()) {
       if (key.getStatus() == KeyStatusType.ENABLED) {
         P primitive = Registry.getPrimitive(key.getKeyData(), inputClass);
-        PrimitiveSet.Entry<P> entry = primitives.addPrimitive(primitive, key);
         if (key.getKeyId() == keyset.getPrimaryKeyId()) {
-          primitives.setPrimary(entry);
+          builder.addPrimaryPrimitive(primitive, key);
+        } else {
+          builder.addPrimitive(primitive, key);
         }
       }
     }
-    return primitives;
+    return builder.build();
   }
 
   /** @return a {@code Keyset} from a {@code handle}. */
@@ -717,7 +732,7 @@ public final class TestUtil {
    * @return a list of pairs of mutated value and mutation description.
    */
   public static List<BytesMutation> generateMutations(byte[] bytes) {
-    List<BytesMutation> res = new ArrayList<BytesMutation>();
+    List<BytesMutation> res = new ArrayList<>();
 
     // Flip bits.
     for (int i = 0; i < bytes.length; i++) {

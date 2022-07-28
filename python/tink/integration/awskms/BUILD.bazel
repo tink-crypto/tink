@@ -27,12 +27,14 @@ py_library(
 py_test(
     name = "_aws_kms_client_test",
     srcs = ["_aws_kms_client_test.py"],
-    data = ["//testdata:credentials"],
+    data = [
+        "//testdata/aws:credentials",
+        "//testdata/aws:bad_credentials",
+    ],
     srcs_version = "PY3",
     deps = [
         ":awskms",
         "//tink/testing:helper",
-        requirement("six"),  # needed by absl-py
         requirement("absl-py"),
     ],
 )
@@ -40,12 +42,16 @@ py_test(
 py_test(
     name = "_aws_kms_aead_test",
     srcs = ["_aws_kms_aead_test.py"],
-    data = ["//testdata:credentials"],
+    data = [
+        "//testdata/aws:credentials",
+        "//testdata/aws:bad_credentials",
+    ],
+    # This test require valid AWS KMS credentials so we set it as `manual`.
+    tags = ["manual"],
     srcs_version = "PY3",
     deps = [
         ":awskms",
         "//tink/testing:helper",
-        requirement("six"),  # needed by absl-py
         requirement("absl-py"),
     ],
 )

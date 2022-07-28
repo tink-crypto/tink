@@ -3,9 +3,9 @@
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive", "http_file")
 
 TINK_MAVEN_ARTIFACTS = [
-    "args4j:args4j:2.33",
     "com.amazonaws:aws-java-sdk-core:1.12.182",
     "com.amazonaws:aws-java-sdk-kms:1.12.182",
+    "androidx.annotation:annotation:1.3.0",
     "com.google.auto:auto-common:1.2.1",
     "com.google.auto.service:auto-service:1.0.1",
     "com.google.auto.service:auto-service-annotations:1.0.1",
@@ -37,7 +37,7 @@ def tink_java_deps():
             name = "google_root_pem",
             executable = 0,
             urls = ["https://pki.goog/roots.pem"],
-            sha256 = "a9bebf3c3d65d4d421b7e2adbd8600ede614e9e2cc0a05fb2a652f147d7802f3",
+            sha256 = "9c9b9685ad319b9747c3fe69b46a61c11a0efabdfa09ca6a8b0c3da421036d27",
         )
 
     # Basic rules we need to add to bazel.

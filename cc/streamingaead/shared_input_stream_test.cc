@@ -159,7 +159,7 @@ TEST(SharedInputStreamTest, SingleBackup) {
         int pos = shared_stream->Position();
         auto next_result = shared_stream->Next(&buf);
         if (read_size < input_size) {
-          EXPECT_THAT(next_result.status(), IsOk());
+          EXPECT_THAT(next_result, IsOk());
           auto next_size = next_result.value();
           EXPECT_EQ(pos + next_size, shared_stream->Position());
           shared_stream->BackUp(next_size);
@@ -206,7 +206,7 @@ TEST(SharedInputStreamTest, MultipleBackups) {
 
     const void* buffer;
     auto next_result = shared_stream->Next(&buffer);
-    EXPECT_THAT(next_result.status(), IsOk());
+    EXPECT_THAT(next_result, IsOk());
     auto next_size = next_result.value();
     EXPECT_EQ(contents.substr(0, next_size),
               std::string(static_cast<const char*>(buffer), next_size));
@@ -223,7 +223,7 @@ TEST(SharedInputStreamTest, MultipleBackups) {
 
     // Call Next(), it should return exactly the backed up bytes.
     next_result = shared_stream->Next(&buffer);
-    EXPECT_THAT(next_result.status(), IsOk());
+    EXPECT_THAT(next_result, IsOk());
     EXPECT_EQ(total_backup_size, next_result.value());
     EXPECT_EQ(next_size, shared_stream->Position());
     EXPECT_EQ(buffered_stream->Position(), shared_stream->Position());

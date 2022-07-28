@@ -94,15 +94,14 @@ enum OutputPrefixType {
 }
 
 // Each *Key proto by convention contains a version field, which
-// identifies the version of implementation that can work with this key.
+// identifies the version of the key.
 //   message SomeInstantiationKey {
 //     uint32 version = 1;
 //     ...
 //   }
-// Version is a monotonic counter: each implementation of a primitive
-// has its associated "current version", which starts at 0 and is incremented
-// upon updates of the code/key proto.  A key with version n needs
-// an implementation version n or higher to work.
+// If a key type does not mention anything else, only version 0 is currently
+// specified. An implementation must only accept keys with versions it knows,
+// and must reject all keys with unknown version.
 
 // For public key primitives, the public and private keys are distinct entities
 // and represent distinct primitives.  However, by convention, the private key

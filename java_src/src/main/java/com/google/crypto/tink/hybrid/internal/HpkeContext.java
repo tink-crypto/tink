@@ -16,7 +16,6 @@
 
 package com.google.crypto.tink.hybrid.internal;
 
-import com.google.crypto.tink.proto.HpkePrivateKey;
 import com.google.crypto.tink.proto.HpkePublicKey;
 import com.google.crypto.tink.subtle.Bytes;
 import com.google.crypto.tink.subtle.SubtleUtil;
@@ -113,14 +112,13 @@ final class HpkeContext {
    */
   static HpkeContext createRecipientContext(
       byte[] encapsulatedKey,
-      HpkePrivateKey recipientPrivateKey,
+      HpkeKemPrivateKey recipientPrivateKey,
       HpkeKem kem,
       HpkeKdf kdf,
       HpkeAead aead,
       byte[] info)
       throws GeneralSecurityException {
-    byte[] sharedSecret =
-        kem.decapsulate(encapsulatedKey, recipientPrivateKey.getPrivateKey().toByteArray());
+    byte[] sharedSecret = kem.decapsulate(encapsulatedKey, recipientPrivateKey);
     return createContext(encapsulatedKey, sharedSecret, kem, kdf, aead, info);
   }
 

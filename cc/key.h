@@ -18,7 +18,7 @@
 #define TINK_KEY_H_
 
 #include "absl/types/optional.h"
-#include "tink/key_format.h"
+#include "tink/parameters.h"
 
 namespace crypto {
 namespace tink {
@@ -39,12 +39,12 @@ namespace tink {
 // minimum.
 class Key {
  public:
-  // Returns a `KeyFormat` object containing all the information about the key
+  // Returns a `Parameters` object containing all the information about the key
   // that is not randomly chosen.
   //
-  // Implementations should ensure that 'GetKeyFormat().HasIdRequirement()`
+  // Implementations should ensure that 'GetParameters().HasIdRequirement()`
   // returns true if and only if `GetIdRequirement()` has a non-empty value.
-  virtual const KeyFormat& GetKeyFormat() const = 0;
+  virtual const Parameters& GetParameters() const = 0;
 
   // Returns the required id if this key has an id requirement.  Otherwise,
   // returns an empty value if the key can have an arbitrary id.

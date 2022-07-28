@@ -34,12 +34,12 @@
 #include "tink/util/test_matchers.h"
 
 extern "C" {
-#include "third_party/pqclean/crypto_sign/dilithium2/avx2/api.h"
-#include "third_party/pqclean/crypto_sign/dilithium2aes/avx2/api.h"
-#include "third_party/pqclean/crypto_sign/dilithium3/avx2/api.h"
-#include "third_party/pqclean/crypto_sign/dilithium3aes/avx2/api.h"
-#include "third_party/pqclean/crypto_sign/dilithium5/avx2/api.h"
-#include "third_party/pqclean/crypto_sign/dilithium5aes/avx2/api.h"
+#include "third_party/pqclean/crypto_sign/dilithium2/api.h"
+#include "third_party/pqclean/crypto_sign/dilithium2aes/api.h"
+#include "third_party/pqclean/crypto_sign/dilithium3/api.h"
+#include "third_party/pqclean/crypto_sign/dilithium3aes/api.h"
+#include "third_party/pqclean/crypto_sign/dilithium5/api.h"
+#include "third_party/pqclean/crypto_sign/dilithium5aes/api.h"
 }
 
 namespace crypto {
@@ -118,7 +118,7 @@ TEST_P(DilithiumVerifyKeyManagerTest, PublicKeyValid) {
 
   StatusOr<DilithiumPublicKey> public_key = CreateValidPublicKey(
       test_case.private_key_size, test_case.seed_expansion);
-  ASSERT_THAT(public_key.status(), IsOk());
+  ASSERT_THAT(public_key, IsOk());
 
   EXPECT_THAT(DilithiumVerifyKeyManager().ValidateKey(*public_key), IsOk());
 }
@@ -128,7 +128,7 @@ TEST_P(DilithiumVerifyKeyManagerTest, PublicKeyWrongVersion) {
 
   StatusOr<DilithiumPublicKey> public_key = CreateValidPublicKey(
       test_case.private_key_size, test_case.seed_expansion);
-  ASSERT_THAT(public_key.status(), IsOk());
+  ASSERT_THAT(public_key, IsOk());
 
   public_key->set_version(1);
   EXPECT_THAT(DilithiumVerifyKeyManager().ValidateKey(*public_key),
@@ -140,9 +140,9 @@ TEST_P(DilithiumVerifyKeyManagerTest, PublicKeyWrongKeyLength) {
 
   StatusOr<DilithiumPublicKey> public_key = CreateValidPublicKey(
       test_case.private_key_size, test_case.seed_expansion);
-  ASSERT_THAT(public_key.status(), IsOk());
+  ASSERT_THAT(public_key, IsOk());
 
-  for (int keysize = 0; keysize < PQCLEAN_DILITHIUM2_AVX2_CRYPTO_PUBLICKEYBYTES;
+  for (int keysize = 0; keysize < PQCLEAN_DILITHIUM2_CRYPTO_PUBLICKEYBYTES;
        keysize++) {
     public_key->set_key_value(std::string(keysize, '@'));
     EXPECT_THAT(DilithiumVerifyKeyManager().ValidateKey(*public_key),
@@ -155,29 +155,29 @@ TEST_P(DilithiumVerifyKeyManagerTest, Create) {
 
   StatusOr<DilithiumPrivateKey> private_key = CreateValidPrivateKey(
       test_case.private_key_size, test_case.seed_expansion);
-  ASSERT_THAT(private_key.status(), IsOk());
+  ASSERT_THAT(private_key, IsOk());
 
   StatusOr<DilithiumPublicKey> public_key =
       DilithiumSignKeyManager().GetPublicKey(*private_key);
-  ASSERT_THAT(public_key.status(), IsOk());
+  ASSERT_THAT(public_key, IsOk());
 
   util::StatusOr<DilithiumPrivateKeyPqclean> dilithium_private_key =
       DilithiumPrivateKeyPqclean::NewPrivateKey(
           util::SecretDataFromStringView(private_key->key_value()),
           EnumsPqcrypto::ProtoToSubtle(test_case.seed_expansion));
-  ASSERT_THAT(dilithium_private_key.status(), IsOk());
+  ASSERT_THAT(dilithium_private_key, IsOk());
 
   util::StatusOr<std::unique_ptr<PublicKeySign>> direct_signer =
       subtle::DilithiumAvx2Sign::New(*dilithium_private_key);
-  ASSERT_THAT(direct_signer.status(), IsOk());
+  ASSERT_THAT(direct_signer, IsOk());
 
   util::StatusOr<std::unique_ptr<PublicKeyVerify>> verifier =
       DilithiumVerifyKeyManager().GetPrimitive<PublicKeyVerify>(*public_key);
-  ASSERT_THAT(verifier.status(), IsOk());
+  ASSERT_THAT(verifier, IsOk());
 
   std::string message = "Some message";
   util::StatusOr<std::string> signature = (*direct_signer)->Sign(message);
-  ASSERT_THAT(signature.status(), IsOk());
+  ASSERT_THAT(signature, IsOk());
   EXPECT_THAT((*verifier)->Verify(*signature, message), IsOk());
 }
 
@@ -186,56 +186,56 @@ TEST_P(DilithiumVerifyKeyManagerTest, CreateDifferentPublicKey) {
 
   StatusOr<DilithiumPrivateKey> private_key = CreateValidPrivateKey(
       test_case.private_key_size, test_case.seed_expansion);
-  ASSERT_THAT(private_key.status(), IsOk());
+  ASSERT_THAT(private_key, IsOk());
 
   // Create a new public key derived from a diffferent private key.
   StatusOr<DilithiumPrivateKey> new_private_key = CreateValidPrivateKey(
       test_case.private_key_size, test_case.seed_expansion);
-  ASSERT_THAT(new_private_key.status(), IsOk());
+  ASSERT_THAT(new_private_key, IsOk());
   StatusOr<DilithiumPublicKey> public_key =
       DilithiumSignKeyManager().GetPublicKey(*new_private_key);
-  ASSERT_THAT(public_key.status(), IsOk());
+  ASSERT_THAT(public_key, IsOk());
 
   util::StatusOr<DilithiumPrivateKeyPqclean> dilithium_private_key =
       DilithiumPrivateKeyPqclean::NewPrivateKey(
           util::SecretDataFromStringView(private_key->key_value()),
           EnumsPqcrypto::ProtoToSubtle(test_case.seed_expansion));
-  ASSERT_THAT(dilithium_private_key.status(), IsOk());
+  ASSERT_THAT(dilithium_private_key, IsOk());
 
   util::StatusOr<std::unique_ptr<PublicKeySign>> direct_signer =
       subtle::DilithiumAvx2Sign::New(*dilithium_private_key);
-  ASSERT_THAT(direct_signer.status(), IsOk());
+  ASSERT_THAT(direct_signer, IsOk());
 
   util::StatusOr<std::unique_ptr<PublicKeyVerify>> verifier =
       DilithiumVerifyKeyManager().GetPrimitive<PublicKeyVerify>(*public_key);
-  ASSERT_THAT(verifier.status(), IsOk());
+  ASSERT_THAT(verifier, IsOk());
 
   std::string message = "Some message";
   util::StatusOr<std::string> signature = (*direct_signer)->Sign(message);
-  ASSERT_THAT(signature.status(), IsOk());
+  ASSERT_THAT(signature, IsOk());
   EXPECT_THAT((*verifier)->Verify(*signature, message), Not(IsOk()));
 }
 
 INSTANTIATE_TEST_SUITE_P(
     DilithiumVerifyKeyManagerTests, DilithiumVerifyKeyManagerTest,
     testing::ValuesIn<DilithiumTestCase>({
-        {"Dilithium2", PQCLEAN_DILITHIUM2_AVX2_CRYPTO_SECRETKEYBYTES,
-         PQCLEAN_DILITHIUM2_AVX2_CRYPTO_PUBLICKEYBYTES,
+        {"Dilithium2", PQCLEAN_DILITHIUM2_CRYPTO_SECRETKEYBYTES,
+         PQCLEAN_DILITHIUM2_CRYPTO_PUBLICKEYBYTES,
          DilithiumSeedExpansion::SEED_EXPANSION_SHAKE},
-        {"Dilithium3", PQCLEAN_DILITHIUM3_AVX2_CRYPTO_SECRETKEYBYTES,
-         PQCLEAN_DILITHIUM3_AVX2_CRYPTO_PUBLICKEYBYTES,
+        {"Dilithium3", PQCLEAN_DILITHIUM3_CRYPTO_SECRETKEYBYTES,
+         PQCLEAN_DILITHIUM3_CRYPTO_PUBLICKEYBYTES,
          DilithiumSeedExpansion::SEED_EXPANSION_SHAKE},
-        {"Dilithium5", PQCLEAN_DILITHIUM5_AVX2_CRYPTO_SECRETKEYBYTES,
-         PQCLEAN_DILITHIUM5_AVX2_CRYPTO_PUBLICKEYBYTES,
+        {"Dilithium5", PQCLEAN_DILITHIUM5_CRYPTO_SECRETKEYBYTES,
+         PQCLEAN_DILITHIUM5_CRYPTO_PUBLICKEYBYTES,
          DilithiumSeedExpansion::SEED_EXPANSION_SHAKE},
-        {"Dilithium2Aes", PQCLEAN_DILITHIUM2AES_AVX2_CRYPTO_SECRETKEYBYTES,
-         PQCLEAN_DILITHIUM2AES_AVX2_CRYPTO_PUBLICKEYBYTES,
+        {"Dilithium2Aes", PQCLEAN_DILITHIUM2AES_CRYPTO_SECRETKEYBYTES,
+         PQCLEAN_DILITHIUM2AES_CRYPTO_PUBLICKEYBYTES,
          DilithiumSeedExpansion::SEED_EXPANSION_AES},
-        {"Dilithium3Aes", PQCLEAN_DILITHIUM3AES_AVX2_CRYPTO_SECRETKEYBYTES,
-         PQCLEAN_DILITHIUM3AES_AVX2_CRYPTO_PUBLICKEYBYTES,
+        {"Dilithium3Aes", PQCLEAN_DILITHIUM3AES_CRYPTO_SECRETKEYBYTES,
+         PQCLEAN_DILITHIUM3AES_CRYPTO_PUBLICKEYBYTES,
          DilithiumSeedExpansion::SEED_EXPANSION_AES},
-        {"Dilithium5Aes", PQCLEAN_DILITHIUM5AES_AVX2_CRYPTO_SECRETKEYBYTES,
-         PQCLEAN_DILITHIUM5AES_AVX2_CRYPTO_PUBLICKEYBYTES,
+        {"Dilithium5Aes", PQCLEAN_DILITHIUM5AES_CRYPTO_SECRETKEYBYTES,
+         PQCLEAN_DILITHIUM5AES_CRYPTO_PUBLICKEYBYTES,
          DilithiumSeedExpansion::SEED_EXPANSION_AES},
     }),
     [](const testing::TestParamInfo<DilithiumVerifyKeyManagerTest::ParamType>&

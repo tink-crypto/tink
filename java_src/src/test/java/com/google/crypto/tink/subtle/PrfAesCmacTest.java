@@ -127,9 +127,12 @@ public class PrfAesCmacTest {
     // Test with random keys.
     for (MacTestVector t : CMAC_TEST_VECTORS) {
       Mac mac = new PrfMac(new PrfAesCmac(Random.randBytes(t.key.length)), t.tag.length);
-      for (int j = 1; j < t.tag.length; j++) {
-        byte[] modifiedTag = Arrays.copyOf(t.tag, t.tag.length - j);
-        assertThrows(GeneralSecurityException.class, () -> mac.verifyMac(modifiedTag, t.message));
+      for (int b = 0; b < t.message.length; b++) {
+        for (int bit = 0; bit < 8; bit++) {
+          byte[] modifiedMessage = Arrays.copyOf(t.message, t.message.length);
+          modifiedMessage[b] = (byte) (modifiedMessage[b] ^ (1 << bit));
+          assertThrows(GeneralSecurityException.class, () -> mac.verifyMac(t.tag, modifiedMessage));
+        }
       }
     }
   }

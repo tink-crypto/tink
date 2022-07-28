@@ -24,7 +24,7 @@
 #include "tink/cleartext_keyset_handle.h"
 #include "tink/signature/signature_config.h"
 #include "tink/signature/signature_key_templates.h"
-#include "proto/testing/testing_api.grpc.pb.h"
+#include "proto/testing_api.grpc.pb.h"
 
 namespace crypto {
 namespace tink {

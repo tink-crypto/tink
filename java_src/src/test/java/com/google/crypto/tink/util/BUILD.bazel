@@ -13,12 +13,23 @@ java_test(
 )
 
 java_test(
-    name = "SecretByteArrayTest",
+    name = "SecretBytesTest",
     size = "small",
-    srcs = ["SecretByteArrayTest.java"],
+    srcs = ["SecretBytesTest.java"],
     deps = [
         "//src/main/java/com/google/crypto/tink:insecure_secret_key_access",
-        "//src/main/java/com/google/crypto/tink/util:secret_byte_array",
+        "//src/main/java/com/google/crypto/tink/util:secret_bytes",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "BytesTest",
+    size = "small",
+    srcs = ["BytesTest.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink/util:bytes",
         "@maven//:com_google_truth_truth",
         "@maven//:junit_junit",
     ],

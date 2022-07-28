@@ -56,14 +56,14 @@ TEST(KmsEnvelopeAeadTest, BasicEncryptDecrypt) {
   auto remote_aead = absl::make_unique<DummyAead>(remote_aead_name);
 
   auto aead_result = KmsEnvelopeAead::New(dek_template, std::move(remote_aead));
-  EXPECT_THAT(aead_result.status(), IsOk());
+  EXPECT_THAT(aead_result, IsOk());
   auto aead = std::move(aead_result.value());
   std::string message = "Some data to encrypt.";
   std::string aad = "Some data to authenticate.";
   auto encrypt_result = aead->Encrypt(message, aad);
-  EXPECT_THAT(encrypt_result.status(), IsOk());
+  EXPECT_THAT(encrypt_result, IsOk());
   auto decrypt_result = aead->Decrypt(encrypt_result.value(), aad);
-  EXPECT_THAT(decrypt_result.status(), IsOk());
+  EXPECT_THAT(decrypt_result, IsOk());
   EXPECT_EQ(decrypt_result.value(), message);
 }
 
@@ -103,12 +103,12 @@ TEST(KmsEnvelopeAeadTest, DecryptionErrors) {
   auto remote_aead = absl::make_unique<DummyAead>(remote_aead_name);
 
   auto aead_result = KmsEnvelopeAead::New(dek_template, std::move(remote_aead));
-  EXPECT_THAT(aead_result.status(), IsOk());
+  EXPECT_THAT(aead_result, IsOk());
   auto aead = std::move(aead_result.value());
   std::string message = "Some data to encrypt.";
   std::string aad = "Some data to authenticate.";
   auto encrypt_result = aead->Encrypt(message, aad);
-  EXPECT_THAT(encrypt_result.status(), IsOk());
+  EXPECT_THAT(encrypt_result, IsOk());
   auto ct = encrypt_result.value();
 
   // Empty ciphertext.
@@ -155,13 +155,13 @@ TEST(KmsEnvelopeAeadTest, KeyFormat) {
 
   // Create envelope AEAD and encrypt some data.
   auto aead_result = KmsEnvelopeAead::New(dek_template, std::move(remote_aead));
-  EXPECT_THAT(aead_result.status(), IsOk());
+  EXPECT_THAT(aead_result, IsOk());
 
   auto aead = std::move(aead_result.value());
   std::string message = "Some data to encrypt.";
   std::string aad = "Some data to authenticate.";
   auto encrypt_result = aead->Encrypt(message, aad);
-  EXPECT_THAT(encrypt_result.status(), IsOk());
+  EXPECT_THAT(encrypt_result, IsOk());
   auto ct = encrypt_result.value();
 
   // Recover DEK from ciphertext

@@ -1,0 +1,31 @@
+package(default_visibility = ["//visibility:public"])
+
+licenses(["notice"])
+
+filegroup(
+    name = "ecies",
+    testonly = 1,
+    srcs = [
+        # Generated with
+        # tinkey create \
+        # --key-template ECIES_P256_HKDF_HMAC_SHA256_AES128_CTR_HMAC_SHA256 \
+        # --out testdata/keysets/ecies_private_keyset2.bin \
+        # --out-format BINARY
+        "ecies_private_keyset.bin",
+
+        # Generated with
+        # tinkey create \
+        # --key-template ECIES_P256_HKDF_HMAC_SHA256_AES128_GCM \
+        # --out testdata/keysets/ecies_private_keyset2.bin \
+        # --out-format BINARY
+        "ecies_private_keyset2.bin",
+
+        # tinkey create-public-keyset \
+        # --in testdata/keysets/ecies_private_keyset.bin \
+        # --in-form BINARY \
+        # --out testdata/keysets/ecies_public_keyset.bin \
+        # --out-form BINARY
+        "ecies_public_keyset.bin",
+        "ecies_public_keyset2.bin",
+    ],
+)

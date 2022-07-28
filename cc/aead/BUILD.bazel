@@ -649,3 +649,27 @@ cc_test(
         "@com_google_googletest//:gtest_main",
     ],
 )
+
+cc_library(
+    name = "failing_aead",
+    testonly = 1,
+    srcs = ["failing_aead.cc"],
+    hdrs = ["failing_aead.h"],
+    include_prefix = "tink/aead",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//:aead",
+        "@com_google_absl//absl/strings",
+    ],
+)
+
+cc_test(
+    name = "failing_aead_test",
+    srcs = ["failing_aead_test.cc"],
+    deps = [
+        ":failing_aead",
+        "//util:test_matchers",
+        "@com_google_absl//absl/status",
+        "@com_google_googletest//:gtest_main",
+    ],
+)

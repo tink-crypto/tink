@@ -103,7 +103,7 @@ std::string GetCiphertext(StreamingAead* saead, absl::string_view pt,
   // Compute the ciphertext.
   auto enc_stream_result =
       saead->NewEncryptingStream(std::move(ct_destination), aad);
-  EXPECT_THAT(enc_stream_result.status(), IsOk());
+  EXPECT_THAT(enc_stream_result, IsOk());
   EXPECT_THAT(WriteToStream(enc_stream_result.value().get(), pt), IsOk());
 
   return ct_buf->str();
@@ -191,7 +191,7 @@ TEST(DecryptingRandomAccessStreamTest, TooManySegments) {
   auto dec_stream_result = DecryptingRandomAccessStream::New(
       std::move(seg_decrypter),
       absl::make_unique<DummyRandomAccessStream>(ciphertext_size, ct_offset));
-  EXPECT_THAT(dec_stream_result.status(), IsOk());
+  EXPECT_THAT(dec_stream_result, IsOk());
   auto dec_stream = std::move(dec_stream_result.value());
 
   auto result = dec_stream->size();
@@ -218,7 +218,7 @@ TEST(DecryptingRandomAccessStreamTest, BasicDecryption) {
               pt_segment_size, header_size, ct_offset);
           auto dec_stream_result = DecryptingRandomAccessStream::New(
               std::move(seg_decrypter), std::move(ciphertext));
-          EXPECT_THAT(dec_stream_result.status(), IsOk());
+          EXPECT_THAT(dec_stream_result, IsOk());
           auto dec_stream = std::move(dec_stream_result.value());
           EXPECT_EQ(pt_size, dec_stream->size().value());
           std::string decrypted;
@@ -250,7 +250,7 @@ TEST(DecryptingRandomAccessStreamTest, SelectiveDecryption) {
               pt_segment_size, header_size, ct_offset);
           auto dec_stream_result = DecryptingRandomAccessStream::New(
               std::move(seg_decrypter), std::move(ciphertext));
-          EXPECT_THAT(dec_stream_result.status(), IsOk());
+          EXPECT_THAT(dec_stream_result, IsOk());
           auto dec_stream = std::move(dec_stream_result.value());
           for (int position : {0, 1, 2, pt_size / 2, pt_size - 1}) {
             for (int chunk_size : {1, pt_size / 2, pt_size}) {
@@ -312,7 +312,7 @@ TEST(DecryptingRandomAccessStreamTest, TruncatedCiphertextDecryption) {
                       pt_segment_size, header_size, ct_offset);
               auto dec_stream_result = DecryptingRandomAccessStream::New(
                   std::move(per_stream_seg_decrypter), std::move(trunc_ct));
-              EXPECT_THAT(dec_stream_result.status(), IsOk());
+              EXPECT_THAT(dec_stream_result, IsOk());
               auto dec_stream = std::move(dec_stream_result.value());
               auto buffer = std::move(util::Buffer::New(chunk_size).value());
               auto status =
@@ -344,7 +344,7 @@ TEST(DecryptingRandomAccessStreamTest, OutOfRangeDecryption) {
             pt_segment_size, header_size, ct_offset);
         auto dec_stream_result = DecryptingRandomAccessStream::New(
             std::move(seg_decrypter), std::move(ciphertext));
-        EXPECT_THAT(dec_stream_result.status(), IsOk());
+        EXPECT_THAT(dec_stream_result, IsOk());
         auto dec_stream = std::move(dec_stream_result.value());
         int chunk_size = 1;
         auto buffer = std::move(util::Buffer::New(chunk_size).value());
@@ -382,7 +382,7 @@ TEST(DecryptingRandomAccessStreamTest, WrongCiphertext) {
         pt_segment_size, header_size, ct_offset);
     auto dec_stream_result = DecryptingRandomAccessStream::New(
         std::move(seg_decrypter), std::move(wrong_ct));
-    EXPECT_THAT(dec_stream_result.status(), IsOk());
+    EXPECT_THAT(dec_stream_result, IsOk());
     auto dec_stream = std::move(dec_stream_result.value());
     std::string decrypted;
     int chunk_size = 1;

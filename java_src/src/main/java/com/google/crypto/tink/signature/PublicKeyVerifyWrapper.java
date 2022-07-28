@@ -21,6 +21,10 @@ import com.google.crypto.tink.PrimitiveSet;
 import com.google.crypto.tink.PrimitiveWrapper;
 import com.google.crypto.tink.PublicKeyVerify;
 import com.google.crypto.tink.Registry;
+import com.google.crypto.tink.internal.MonitoringUtil;
+import com.google.crypto.tink.internal.MutableMonitoringRegistry;
+import com.google.crypto.tink.monitoring.MonitoringClient;
+import com.google.crypto.tink.monitoring.MonitoringKeysetInfo;
 import com.google.crypto.tink.proto.OutputPrefixType;
 import com.google.crypto.tink.subtle.Bytes;
 import java.security.GeneralSecurityException;
@@ -41,11 +45,22 @@ import java.util.logging.Logger;
 class PublicKeyVerifyWrapper implements PrimitiveWrapper<PublicKeyVerify, PublicKeyVerify> {
   private static final Logger logger = Logger.getLogger(PublicKeyVerifyWrapper.class.getName());
 
+  private static final byte[] FORMAT_VERSION = new byte[] {0};
+
   private static class WrappedPublicKeyVerify implements PublicKeyVerify {
     private final PrimitiveSet<PublicKeyVerify> primitives;
 
+    private final MonitoringClient.Logger monitoringLogger;
+
     public WrappedPublicKeyVerify(PrimitiveSet<PublicKeyVerify> primitives) {
       this.primitives = primitives;
+      if (primitives.hasAnnotations()) {
+        MonitoringClient client = MutableMonitoringRegistry.globalInstance().getMonitoringClient();
+        MonitoringKeysetInfo keysetInfo = MonitoringUtil.getMonitoringKeysetInfo(primitives);
+        this.monitoringLogger = client.createLogger(keysetInfo, "public_key_verify", "verify");
+      } else {
+        this.monitoringLogger = MonitoringUtil.DO_NOTHING_LOGGER;
+      }
     }
 
     @Override
@@ -53,6 +68,7 @@ class PublicKeyVerifyWrapper implements PrimitiveWrapper<PublicKeyVerify, Public
       if (signature.length <= CryptoFormat.NON_RAW_PREFIX_SIZE) {
         // This also rejects raw signatures with size of 4 bytes or fewer. We're not aware of any
         // schemes that output signatures that small.
+        monitoringLogger.logFailure();
         throw new GeneralSecurityException("signature too short");
       }
       byte[] prefix = Arrays.copyOf(signature, CryptoFormat.NON_RAW_PREFIX_SIZE);
@@ -60,18 +76,17 @@ class PublicKeyVerifyWrapper implements PrimitiveWrapper<PublicKeyVerify, Public
           Arrays.copyOfRange(signature, CryptoFormat.NON_RAW_PREFIX_SIZE, signature.length);
       List<PrimitiveSet.Entry<PublicKeyVerify>> entries = primitives.getPrimitive(prefix);
       for (PrimitiveSet.Entry<PublicKeyVerify> entry : entries) {
+        byte[] data2 = data;
+        if (entry.getOutputPrefixType().equals(OutputPrefixType.LEGACY)) {
+          data2 = Bytes.concat(data2, FORMAT_VERSION);
+        }
         try {
-          if (entry.getOutputPrefixType().equals(OutputPrefixType.LEGACY)) {
-            final byte[] formatVersion = new byte[] {0};
-            final byte[] dataWithFormatVersion = Bytes.concat(data, formatVersion);
-            entry.getPrimitive().verify(sigNoPrefix, dataWithFormatVersion);
-          } else {
-            entry.getPrimitive().verify(sigNoPrefix, data);
-          }
+          entry.getPrimitive().verify(sigNoPrefix, data2);
+          monitoringLogger.log(entry.getKeyId(), data2.length);
           // If there is no exception, the signature is valid and we can return.
           return;
         } catch (GeneralSecurityException e) {
-          logger.info("signature prefix matches a key, but cannot verify: " + e.toString());
+          logger.info("signature prefix matches a key, but cannot verify: " + e);
           // Ignored as we want to continue verification with the remaining keys.
         }
       }
@@ -81,6 +96,7 @@ class PublicKeyVerifyWrapper implements PrimitiveWrapper<PublicKeyVerify, Public
       for (PrimitiveSet.Entry<PublicKeyVerify> entry : entries) {
         try {
           entry.getPrimitive().verify(signature, data);
+          monitoringLogger.log(entry.getKeyId(), data.length);
           // If there is no exception, the signature is valid and we can return.
           return;
         } catch (GeneralSecurityException e) {
@@ -88,6 +104,7 @@ class PublicKeyVerifyWrapper implements PrimitiveWrapper<PublicKeyVerify, Public
         }
       }
       // nothing works.
+      monitoringLogger.logFailure();
       throw new GeneralSecurityException("invalid signature");
     }
   }

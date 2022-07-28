@@ -41,7 +41,6 @@ py_test(
     srcs_version = "PY3",
     deps = [
         ":prf",
-        requirement("six"),  # needed by absl-py
         requirement("absl-py"),
         "//tink:tink_python",
         "//tink/core",
@@ -70,7 +69,6 @@ py_test(
     deps = [
         ":_prf_set_wrapper",
         ":prf",
-        requirement("six"),  # needed by absl-py
         requirement("absl-py"),
         "//tink:tink_python",
         "//tink/testing:keyset_builder",

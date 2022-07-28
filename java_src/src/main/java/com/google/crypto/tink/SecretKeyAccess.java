@@ -21,7 +21,7 @@ import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.errorprone.annotations.CheckReturnValue;
 import com.google.errorprone.annotations.Immutable;
 import java.security.GeneralSecurityException;
-import java.util.Optional;
+import javax.annotation.Nullable;
 
 /**
  * Represents access to secret key material.
@@ -51,22 +51,18 @@ public final class SecretKeyAccess {
 
   private static final SecretKeyAccess INSTANCE = new SecretKeyAccess();
 
-  /**
-   *  Package visibility restricted for {@link InsecureSecretKeyAccess}.
-   */
+  /** Package visibility restricted for {@link InsecureSecretKeyAccess}. */
   static SecretKeyAccess instance() {
     return INSTANCE;
   }
 
-  /** Throws an exception if the passed in optional is empty, otherwise returns the contents. */
+  /** Throws an exception if the passed in SecretKeyAccess is null, otherwise returns it. */
   @CanIgnoreReturnValue
-  public static SecretKeyAccess requireAccess(Optional<SecretKeyAccess> in)
+  public static SecretKeyAccess requireAccess(@Nullable SecretKeyAccess access)
       throws GeneralSecurityException {
-    // Using in.orElseThrow currently fails to compile on some android versions with
-    // error: unreported exception Throwable; must be caught or declared to be thrown
-    if (!in.isPresent()) {
+    if (access == null) {
       throw new GeneralSecurityException("SecretKeyAccess is required");
     }
-    return in.get();
+    return access;
   }
 }

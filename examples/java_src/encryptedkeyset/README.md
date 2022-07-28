@@ -1,4 +1,4 @@
-# Java example: working with encrypted keysets
+# Java encrypted keysets example
 
 This example shows how to generate or load an encrypted keyset, obtain a
 primitive, and use the primitive to do crypto.
@@ -27,34 +27,40 @@ cd tink/examples/java_src
 bazel build ...
 ```
 
-You can generate an encrypted keyset:
+Generate an encrypted keyset:
 
 ```shell
 # Replace `<my-key-uri>` in `gcp-kms://<my-key-uri>` with your key URI, and
 # my-service-account.json with your service account's credential JSON file.
-./bazel-bin/encryptedkeyset/encrypted_keyset_example generate \
+./bazel-bin/encryptedkeyset/encrypted_keyset_example \
+    generate \
     aes128_gcm_test_encrypted_keyset.json \
     gcp-kms://<my-key-uri> \
     my-service-account.json
 ```
 
-You can then encrypt a file:
+Encrypt a file:
 
 ```shell
 echo "some data" > testdata.txt
-./bazel-bin/encryptedkeyset/encrypted_keyset_example encrypt \
+
+./bazel-bin/encryptedkeyset/encrypted_keyset_example \
+    encrypt \
     aes128_gcm_test_encrypted_keyset.json \
     gcp-kms://<my-key-uri> \
     my-service-account.json \
     testdata.txt testdata.txt.encrypted
 ```
 
-or decrypt the file with:
+Decrypt a file:
 
 ```shell
-./bazel-bin/encryptedkeyset/encrypted_keyset_example decrypt \
+./bazel-bin/encryptedkeyset/encrypted_keyset_example \
+    decrypt \
+    aes128_gcm_test_encrypted_keyset.json \
     gcp-kms://<my-key-uri> \
     my-service-account.json \
     testdata.txt.encrypted testdata.txt.decrypted
-$ diff testdata.txt testdata.txt.decrypted
+
+diff testdata.txt testdata.txt.decrypted
 ```

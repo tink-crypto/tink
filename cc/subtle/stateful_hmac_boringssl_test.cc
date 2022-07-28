@@ -49,10 +49,10 @@ void EmptyHmac(HashType hash_type, uint32_t tag_size, std::string key,
                std::string expected) {
   auto hmac_result = StatefulHmacBoringSsl::New(
       hash_type, tag_size, util::SecretDataFromStringView(key));
-  EXPECT_THAT(hmac_result.status(), IsOk());
+  EXPECT_THAT(hmac_result, IsOk());
   auto hmac = std::move(hmac_result.value());
   auto result = hmac->Finalize();
-  EXPECT_THAT(result.status(), IsOk());
+  EXPECT_THAT(result, IsOk());
 
   auto tag = result.value();
   EXPECT_EQ(tag.size(), tag_size);
@@ -81,13 +81,13 @@ void BasicHmac(HashType hash_type, uint32_t tag_size, std::string key,
                std::string data, std::string expected) {
   auto hmac_result = StatefulHmacBoringSsl::New(
       hash_type, tag_size, util::SecretDataFromStringView(key));
-  EXPECT_THAT(hmac_result.status(), IsOk());
+  EXPECT_THAT(hmac_result, IsOk());
   auto hmac = std::move(hmac_result.value());
 
   auto update_result = hmac->Update(data);
   EXPECT_THAT(update_result, IsOk());
   auto result = hmac->Finalize();
-  EXPECT_THAT(result.status(), IsOk());
+  EXPECT_THAT(result, IsOk());
 
   auto tag = result.value();
   EXPECT_EQ(tag.size(), tag_size);
@@ -118,7 +118,7 @@ void MultipleUpdateHmac(HashType hash_type, uint32_t tag_size, std::string key,
                         std::string data4, std::string expected) {
   auto hmac_result = StatefulHmacBoringSsl::New(
       hash_type, tag_size, util::SecretDataFromStringView(key));
-  EXPECT_THAT(hmac_result.status(), IsOk());
+  EXPECT_THAT(hmac_result, IsOk());
   auto hmac = std::move(hmac_result.value());
 
   auto update_1 = hmac->Update(data1);
@@ -131,7 +131,7 @@ void MultipleUpdateHmac(HashType hash_type, uint32_t tag_size, std::string key,
   EXPECT_THAT(update_4, IsOk());
 
   auto result = hmac->Finalize();
-  EXPECT_THAT(result.status(), IsOk());
+  EXPECT_THAT(result, IsOk());
 
   auto tag = result.value();
   EXPECT_EQ(tag.size(), tag_size);
@@ -172,7 +172,7 @@ TEST(StatefulHmacBoringSslTest, testInvalidKeySizes) {
     auto hmac_result = StatefulHmacBoringSsl::New(
         HashType::SHA256, tag_size, util::SecretDataFromStringView(key));
     if (keysize >= 16) {
-      EXPECT_THAT(hmac_result.status(), IsOk());
+      EXPECT_THAT(hmac_result, IsOk());
     } else {
       EXPECT_THAT(hmac_result.status(),
                   StatusIs(absl::StatusCode::kInvalidArgument,
@@ -191,11 +191,11 @@ TEST(StatefulCmacFactoryTest, createsObjects) {
   auto factory = absl::make_unique<StatefulHmacBoringSslFactory>(
       HashType::SHA256, kTagSize, util::SecretDataFromStringView(key));
   auto stateful_hmac_or = factory->Create();
-  ASSERT_THAT(stateful_hmac_or.status(), IsOk());
+  ASSERT_THAT(stateful_hmac_or, IsOk());
   auto stateful_hmac = std::move(stateful_hmac_or.value());
   EXPECT_THAT(stateful_hmac->Update(data), IsOk());
   auto output_or = stateful_hmac->Finalize();
-  ASSERT_THAT(output_or.status(), IsOk());
+  ASSERT_THAT(output_or, IsOk());
   auto output = output_or.value();
   EXPECT_THAT(output, StrEq(expected));
 }
@@ -213,14 +213,14 @@ class StatefulHmacBoringSslTestVectorTest
     std::string msg = test::HexDecodeOrDie(msg_hex);
     auto create_result = StatefulHmacBoringSsl::New(
         HashType::SHA1, tag.size(), util::SecretDataFromStringView(key));
-    EXPECT_THAT(create_result.status(), IsOk());
+    EXPECT_THAT(create_result, IsOk());
     auto hmac = std::move(create_result.value());
 
     auto update_result = hmac->Update(msg);
     EXPECT_THAT(update_result, IsOk());
 
     auto finalize_result = hmac->Finalize();
-    EXPECT_THAT(finalize_result.status(), IsOk());
+    EXPECT_THAT(finalize_result, IsOk());
     auto result = finalize_result.value();
 
     EXPECT_EQ(result, tag);
@@ -251,7 +251,7 @@ bool WycheproofTest(const rapidjson::Document &root, HashType hash_type) {
 
       auto create_result =
           StatefulHmacBoringSsl::New(hash_type, tag.length(), key);
-      EXPECT_THAT(create_result.status(), IsOk());
+      EXPECT_THAT(create_result, IsOk());
       auto hmac = std::move(create_result.value());
 
       auto update_result = hmac->Update(msg);

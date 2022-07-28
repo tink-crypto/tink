@@ -22,6 +22,7 @@ from tink import aead
 from tink.proto import tink_pb2
 from util import key_util
 from util import testing_servers
+from google.protobuf import json_format
 from google.protobuf import text_format
 
 # Contains keys with different status and output_prefix_type
@@ -225,8 +226,53 @@ class KeysetReadWriteTest(parameterized.TestCase):
         self, tink_pb2.Keyset.FromString(keyset),
         tink_pb2.Keyset.FromString(decrypted_keyset))
 
-  # TODO(b/213462711): Add a test_read_encrypted_ignores_keyset_info_json test
+  @parameterized.parameters(testing_servers.LANGUAGES)
+  def test_read_encrypted_ignores_keyset_info_json(self, lang):
+    # Use an arbitrary AEAD template that's supported in all languages,
+    # and use an arbitrary language to generate the keyset_encryption_keyset.
+    keyset_encryption_keyset = testing_servers.new_keyset(
+        'cc', aead.aead_key_templates.AES128_GCM)
+    # Also, generate an arbitrary keyset.
+    keyset = testing_servers.new_keyset('cc',
+                                        aead.aead_key_templates.AES128_GCM)
+    associated_data = b'associated_data'
 
+    encrypted_keyset = testing_servers.keyset_write_encrypted(
+        lang, keyset, keyset_encryption_keyset, associated_data,
+        'KEYSET_WRITER_JSON')
+
+    # encrypted_keyset is a JSON serialized tink_pb2.EncryptedKeyset
+    parsed_encrypted_keyset = json_format.Parse(encrypted_keyset,
+                                                tink_pb2.EncryptedKeyset())
+
+    # Note that some implementations (currently C++) do not set keyset_info.
+    # But we require that values are correct when they are set.
+    if parsed_encrypted_keyset.HasField('keyset_info'):
+      self.assertLen(parsed_encrypted_keyset.keyset_info.key_info, 1)
+      self.assertEqual(parsed_encrypted_keyset.keyset_info.primary_key_id,
+                       parsed_encrypted_keyset.keyset_info.key_info[0].key_id)
+
+    # keyset_info should be ignored when reading a keyset.
+    # To test this, we add something invalid and check that read still works.
+    # Some languages (C++ and Java) however do check that the fields of
+    # keyset_info are present. So we have to set all required fields here.
+    parsed_encrypted_keyset.keyset_info.key_info.append(
+        tink_pb2.KeysetInfo.KeyInfo(
+            type_url='invalid',
+            status=tink_pb2.ENABLED,
+            key_id=123,
+            output_prefix_type=tink_pb2.LEGACY))
+    parsed_encrypted_keyset.keyset_info.primary_key_id = 123
+    modified_encrypted_keyset = json_format.MessageToJson(
+        parsed_encrypted_keyset).encode('utf8')
+
+    decrypted_keyset = testing_servers.keyset_read_encrypted(
+        lang, modified_encrypted_keyset, keyset_encryption_keyset,
+        associated_data, 'KEYSET_READER_JSON')
+    # Both keyset and decrypted_keyset are serialized tink_pb2.Keyset.
+    key_util.assert_tink_proto_equal(
+        self, tink_pb2.Keyset.FromString(keyset),
+        tink_pb2.Keyset.FromString(decrypted_keyset))
 
 if __name__ == '__main__':
   absltest.main()

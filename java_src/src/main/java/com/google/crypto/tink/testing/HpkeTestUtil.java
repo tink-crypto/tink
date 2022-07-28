@@ -53,8 +53,7 @@ public final class HpkeTestUtil {
               testObject.get("kdf_id").getAsInt(),
               testObject.get("aead_id").getAsInt());
       // Filter out test vectors for unsupported modes and/or KEMs.
-      if (Arrays.equals(testId.mode, HpkeUtil.BASE_MODE)
-          && Arrays.equals(testId.kemId, HpkeUtil.X25519_HKDF_SHA256_KEM_ID)) {
+      if (Arrays.equals(testId.mode, HpkeUtil.BASE_MODE)) {
         HpkeTestSetup testSetup =
             new HpkeTestSetup(
                 testObject.get("info").getAsString(),

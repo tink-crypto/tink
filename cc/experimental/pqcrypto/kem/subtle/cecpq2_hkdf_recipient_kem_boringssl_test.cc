@@ -185,7 +185,7 @@ TEST(Cecpq2HkdfRecipientKemBoringSslTest, TestNotPostQuantumSecureKeyLength) {
       util::SecretDataFromStringView(
           test::HexDecodeOrDie(kCecpq2X25519PrivateKeyHex)),
       std::move(hrss_private_key_seed));
-  ASSERT_THAT(cecpq2_recipient_kem_or.status(), IsOk());
+  ASSERT_THAT(cecpq2_recipient_kem_or, IsOk());
   auto cecpq2_recipient_kem = std::move(cecpq2_recipient_kem_or).value();
 
   // Recovering the symmetric key
@@ -212,7 +212,7 @@ TEST(Cecpq2HkdfRecipientKemBoringSslTest, TestRecipientFlowSuccess) {
       util::SecretDataFromStringView(
           test::HexDecodeOrDie(kCecpq2X25519PrivateKeyHex)),
       std::move(hrss_private_key_seed));
-  ASSERT_THAT(cecpq2_recipient_kem_or.status(), IsOk());
+  ASSERT_THAT(cecpq2_recipient_kem_or, IsOk());
   auto cecpq2_recipient_kem = std::move(cecpq2_recipient_kem_or).value();
 
   // Recovering the symmetric key
@@ -220,7 +220,7 @@ TEST(Cecpq2HkdfRecipientKemBoringSslTest, TestRecipientFlowSuccess) {
       test::HexDecodeOrDie(kCecpq2KemBytes), HashType::SHA256,
       test::HexDecodeOrDie(kSaltHex), test::HexDecodeOrDie(kInfoHex), out_len,
       EcPointFormat::COMPRESSED);
-  ASSERT_THAT(kem_key_or.status(), IsOk());
+  ASSERT_THAT(kem_key_or, IsOk());
 
   // The generated symmetric key should match the expected one
   EXPECT_EQ(kCorrectSharedSecret,
@@ -249,14 +249,14 @@ TEST(Cecpq2HkdfRecipientKemBoringSslTest, TestRecipientFlowFailure) {
       util::SecretDataFromStringView(
           test::HexDecodeOrDie(kCecpq2X25519PrivateKeyHex)),
       std::move(hrss_private_key_seed));
-  ASSERT_THAT(cecpq2_recipient_kem_or.status(), IsOk());
+  ASSERT_THAT(cecpq2_recipient_kem_or, IsOk());
   auto cecpq2_recipient_kem = std::move(cecpq2_recipient_kem_or).value();
 
   // Recovering the symmetric key
   auto kem_key_or = cecpq2_recipient_kem->GenerateKey(
       kem_bytes_modified, HashType::SHA256, test::HexDecodeOrDie(kSaltHex),
       test::HexDecodeOrDie(kInfoHex), out_len, EcPointFormat::COMPRESSED);
-  ASSERT_THAT(kem_key_or.status(), IsOk());
+  ASSERT_THAT(kem_key_or, IsOk());
 
   // The produced symmetric key should match the one produced by CECPQ2 in case
   // of HRSS decapsulation failure for the altered HRSS kem_bytes

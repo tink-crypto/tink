@@ -247,7 +247,7 @@ TEST(SignaturePemKeysetReaderTest, ReadEncryptedUnsupported) {
                               .hash_type = HashType::SHA384}});
 
   auto keyset_reader_or = builder.Build();
-  ASSERT_THAT(keyset_reader_or.status(), IsOk());
+  ASSERT_THAT(keyset_reader_or, IsOk());
   std::unique_ptr<KeysetReader> keyset_reader =
       std::move(keyset_reader_or).value();
 
@@ -272,12 +272,12 @@ TEST(SignaturePemKeysetReaderTest, ReadRsaCorrectPublicKey) {
                               .hash_type = HashType::SHA256}});
 
   auto keyset_reader_or = builder.Build();
-  ASSERT_THAT(keyset_reader_or.status(), IsOk());
+  ASSERT_THAT(keyset_reader_or, IsOk());
   std::unique_ptr<KeysetReader> keyset_reader =
       std::move(keyset_reader_or).value();
 
   auto keyset_or = keyset_reader->Read();
-  ASSERT_THAT(keyset_or.status(), IsOk());
+  ASSERT_THAT(keyset_or, IsOk());
   std::unique_ptr<Keyset> keyset = std::move(keyset_or).value();
 
   // Key manager to validate key type and key material type.
@@ -301,7 +301,7 @@ TEST(SignaturePemKeysetReaderTest, ReadRsaCorrectPublicKey) {
   util::StatusOr<RsaSsaPssPublicKey> rsa_ssa_pss_pub_key =
       GetRsaSsaPssPublicKeyProto(kRsaPublicKey2048, HashType::SHA384,
                                  verify_key_manager.get_version());
-  ASSERT_THAT(rsa_ssa_pss_pub_key.status(), IsOk());
+  ASSERT_THAT(rsa_ssa_pss_pub_key, IsOk());
   expected_keydata1->set_value(rsa_ssa_pss_pub_key->SerializeAsString());
   EXPECT_THAT(keyset->key(0), EqualsKey(expected_key1));
 
@@ -320,7 +320,7 @@ TEST(SignaturePemKeysetReaderTest, ReadRsaCorrectPublicKey) {
   util::StatusOr<RsaSsaPssPublicKey> rsa_ssa_pss_pub_key2 =
       GetRsaSsaPssPublicKeyProto(kRsaPublicKey2048, HashType::SHA256,
                                  verify_key_manager.get_version());
-  ASSERT_THAT(rsa_ssa_pss_pub_key2.status(), IsOk());
+  ASSERT_THAT(rsa_ssa_pss_pub_key2, IsOk());
   expected_keydata2->set_value(rsa_ssa_pss_pub_key2->SerializeAsString());
 
   EXPECT_THAT(keyset->key(1), EqualsKey(expected_key2));
@@ -342,12 +342,12 @@ TEST(SignaturePemKeysetReaderTest, ReadRsaCorrectPrivateKey) {
                               .hash_type = HashType::SHA384}});
 
   auto keyset_reader_or = builder.Build();
-  ASSERT_THAT(keyset_reader_or.status(), IsOk());
+  ASSERT_THAT(keyset_reader_or, IsOk());
   std::unique_ptr<KeysetReader> keyset_reader =
       std::move(keyset_reader_or).value();
 
   auto keyset_or = keyset_reader->Read();
-  ASSERT_THAT(keyset_or.status(), IsOk());
+  ASSERT_THAT(keyset_or, IsOk());
   std::unique_ptr<Keyset> keyset = std::move(keyset_or).value();
 
   EXPECT_THAT(keyset->key(), SizeIs(2));
@@ -371,7 +371,7 @@ TEST(SignaturePemKeysetReaderTest, ReadRsaCorrectPrivateKey) {
   util::StatusOr<RsaSsaPssPrivateKey> rsa_pss_private_key1 =
       GetRsaSsaPssPrivateKeyProto(kRsaPrivateKey2048, HashType::SHA256,
                                   sign_key_manager.get_version());
-  ASSERT_THAT(rsa_pss_private_key1.status(), IsOk());
+  ASSERT_THAT(rsa_pss_private_key1, IsOk());
   expected_keydata1->set_value(rsa_pss_private_key1->SerializeAsString());
   EXPECT_THAT(keyset->key(0), EqualsKey(expected_key1));
 
@@ -389,7 +389,7 @@ TEST(SignaturePemKeysetReaderTest, ReadRsaCorrectPrivateKey) {
   util::StatusOr<RsaSsaPssPrivateKey> rsa_pss_private_key2 =
       GetRsaSsaPssPrivateKeyProto(kRsaPrivateKey2048, HashType::SHA384,
                                   sign_key_manager.get_version());
-  ASSERT_THAT(rsa_pss_private_key2.status(), IsOk());
+  ASSERT_THAT(rsa_pss_private_key2, IsOk());
   expected_keydata2->set_value(rsa_pss_private_key2->SerializeAsString());
   EXPECT_THAT(keyset->key(1), EqualsKey(expected_key2));
 }
@@ -406,7 +406,7 @@ TEST(SignaturePemKeysetReaderTest, ReadRsaPrivateKeyKeyTypeMismatch) {
                               .hash_type = HashType::SHA384}});
 
   auto keyset_reader_or = builder.Build();
-  ASSERT_THAT(keyset_reader_or.status(), IsOk());
+  ASSERT_THAT(keyset_reader_or, IsOk());
   std::unique_ptr<KeysetReader> keyset_reader =
       std::move(keyset_reader_or).value();
 
@@ -427,7 +427,7 @@ TEST(SignaturePemKeysetReaderTest, ReadRsaPublicKeyKeyTypeMismatch) {
                               .hash_type = HashType::SHA256}});
 
   auto keyset_reader_or = builder.Build();
-  ASSERT_THAT(keyset_reader_or.status(), IsOk());
+  ASSERT_THAT(keyset_reader_or, IsOk());
   std::unique_ptr<KeysetReader> keyset_reader =
       std::move(keyset_reader_or).value();
 
@@ -447,7 +447,7 @@ TEST(SignaturePemKeysetReaderTest, ReadRsaPublicKeyTooSmall) {
                               .hash_type = HashType::SHA256}});
 
   auto keyset_reader_or = builder.Build();
-  ASSERT_THAT(keyset_reader_or.status(), IsOk());
+  ASSERT_THAT(keyset_reader_or, IsOk());
   std::unique_ptr<KeysetReader> keyset_reader =
       std::move(keyset_reader_or).value();
 
@@ -468,7 +468,7 @@ TEST(SignaturePemKeysetReaderTest, ReadRsaPublicKeySizeMismatch) {
                               .hash_type = HashType::SHA256}});
 
   auto keyset_reader_or = builder.Build();
-  ASSERT_THAT(keyset_reader_or.status(), IsOk());
+  ASSERT_THAT(keyset_reader_or, IsOk());
   std::unique_ptr<KeysetReader> keyset_reader =
       std::move(keyset_reader_or).value();
 
@@ -488,7 +488,7 @@ TEST(SignaturePemKeysetReaderTest, ReadRsaPublicKeyInvalidHashType) {
                               .hash_type = HashType::SHA1}});
 
   auto keyset_reader_or = builder.Build();
-  ASSERT_THAT(keyset_reader_or.status(), IsOk());
+  ASSERT_THAT(keyset_reader_or, IsOk());
   std::unique_ptr<KeysetReader> keyset_reader =
       std::move(keyset_reader_or).value();
 
@@ -513,10 +513,10 @@ TEST(SignaturePemKeysetReaderTest, ReadECDSACorrectPublicKey) {
                               .hash_type = HashType::SHA256}});
 
   auto reader = builder.Build();
-  ASSERT_THAT(reader.status(), IsOk());
+  ASSERT_THAT(reader, IsOk());
 
   auto keyset_read = reader->get()->Read();
-  ASSERT_THAT(keyset_read.status(), IsOk());
+  ASSERT_THAT(keyset_read, IsOk());
   std::unique_ptr<Keyset> keyset = std::move(keyset_read).value();
 
   // Key manager to validate key type and key material type.
@@ -572,7 +572,7 @@ TEST(SignaturePemKeysetReaderTest, ReadECDSAWrongHashType) {
                               .hash_type = HashType::SHA512}});
 
   auto reader = builder.Build();
-  ASSERT_THAT(reader.status(), IsOk());
+  ASSERT_THAT(reader, IsOk());
   auto keyset_read = reader->get()->Read();
   ASSERT_THAT(keyset_read.status(),
               StatusIs(absl::StatusCode::kInvalidArgument));
@@ -589,7 +589,7 @@ TEST(SignaturePemKeysetReaderTest, ReadECDSAWrongKeySize) {
                               .hash_type = HashType::SHA256}});
 
   auto reader = builder.Build();
-  ASSERT_THAT(reader.status(), IsOk());
+  ASSERT_THAT(reader, IsOk());
   auto keyset_read = reader->get()->Read();
   ASSERT_THAT(keyset_read.status(),
               StatusIs(absl::StatusCode::kInvalidArgument));
@@ -606,7 +606,7 @@ TEST(SignaturePemKeysetReaderTest, ReadECDSAWrongAlgorithm) {
                               .hash_type = HashType::SHA256}});
 
   auto reader = builder.Build();
-  ASSERT_THAT(reader.status(), IsOk());
+  ASSERT_THAT(reader, IsOk());
   auto keyset_read = reader->get()->Read();
   ASSERT_THAT(keyset_read.status(),
               StatusIs(absl::StatusCode::kInvalidArgument));
@@ -623,7 +623,7 @@ TEST(SignaturePemKeysetReaderTest, ReadEd25519ShouldFail) {
                               .hash_type = HashType::SHA256}});
 
   auto reader = builder.Build();
-  ASSERT_THAT(reader.status(), IsOk());
+  ASSERT_THAT(reader, IsOk());
   auto keyset_read = reader->get()->Read();
   ASSERT_THAT(keyset_read.status(),
               StatusIs(absl::StatusCode::kInvalidArgument));
@@ -640,7 +640,7 @@ TEST(SignaturePemKeysetReaderTest, ReadSecp256k1ShouldFail) {
                               .hash_type = HashType::SHA256}});
 
   auto reader = builder.Build();
-  ASSERT_THAT(reader.status(), IsOk());
+  ASSERT_THAT(reader, IsOk());
   auto keyset_read = reader->get()->Read();
   // With BoringSSL parsing of the PEM key fails when an unsupported curve is
   // used [1]; Supported curves are defined here [2]. Tink doesn't distinguish
@@ -671,7 +671,7 @@ TEST(SignaturePemKeysetReaderTest, ReadEcdsaP384ShouldFail) {
                               .hash_type = HashType::SHA384}});
 
   auto reader = builder.Build();
-  ASSERT_THAT(reader.status(), IsOk());
+  ASSERT_THAT(reader, IsOk());
   auto keyset_read = reader->get()->Read();
   ASSERT_THAT(keyset_read.status(),
               StatusIs(absl::StatusCode::kInvalidArgument));

@@ -119,7 +119,7 @@ TEST(RawJwtHmacKeyManagerTest, CreateKeyWithSha256) {
   key_format.set_key_size(32);
   key_format.set_algorithm(JwtHmacAlgorithm::HS256);
   auto hmac_key_or = RawJwtHmacKeyManager().CreateKey(key_format);
-  ASSERT_THAT(hmac_key_or.status(), IsOk());
+  ASSERT_THAT(hmac_key_or, IsOk());
   EXPECT_THAT(hmac_key_or.value().version(), Eq(0));
   EXPECT_THAT(hmac_key_or.value().algorithm(), Eq(key_format.algorithm()));
   EXPECT_THAT(hmac_key_or.value().key_value(), SizeIs(key_format.key_size()));
@@ -132,7 +132,7 @@ TEST(RawJwtHmacKeyManagerTest, CreateKeyWithSha384) {
   key_format.set_key_size(48);
   key_format.set_algorithm(JwtHmacAlgorithm::HS384);
   auto hmac_key_or = RawJwtHmacKeyManager().CreateKey(key_format);
-  ASSERT_THAT(hmac_key_or.status(), IsOk());
+  ASSERT_THAT(hmac_key_or, IsOk());
   EXPECT_THAT(hmac_key_or.value().version(), Eq(0));
   EXPECT_THAT(hmac_key_or.value().algorithm(), Eq(key_format.algorithm()));
   EXPECT_THAT(hmac_key_or.value().key_value(), SizeIs(key_format.key_size()));
@@ -145,7 +145,7 @@ TEST(RawJwtHmacKeyManagerTest, CreateKeyWithSha512) {
   key_format.set_key_size(64);
   key_format.set_algorithm(JwtHmacAlgorithm::HS512);
   auto key_or = RawJwtHmacKeyManager().CreateKey(key_format);
-  ASSERT_THAT(key_or.status(), IsOk());
+  ASSERT_THAT(key_or, IsOk());
   EXPECT_THAT(key_or.value().version(), Eq(0));
   EXPECT_THAT(key_or.value().algorithm(), Eq(key_format.algorithm()));
   EXPECT_THAT(key_or.value().key_value(), SizeIs(key_format.key_size()));
@@ -231,7 +231,7 @@ TEST(RawJwtHmacKeyManagerTest, GetPrimitiveFromNewKeysetHandle) {
   ASSERT_TRUE(mac_result.ok()) << mac_result.status();
   std::unique_ptr<Mac> mac = std::move(mac_result.value());
   auto tag_or = mac->ComputeMac("some plaintext");
-  ASSERT_THAT(tag_or.status(), IsOk());
+  ASSERT_THAT(tag_or, IsOk());
   EXPECT_THAT(mac->VerifyMac(tag_or.value(), "some plaintext"), IsOk());
 }
 

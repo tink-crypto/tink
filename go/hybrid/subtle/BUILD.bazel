@@ -15,6 +15,7 @@ go_library(
         "subtle.go",
     ],
     importpath = "github.com/google/tink/go/hybrid/subtle",
+    visibility = ["//visibility:public"],  # keep; used by non-Tink library
     deps = [
         "//keyset",
         "//proto/hpke_go_proto",
@@ -48,5 +49,5 @@ go_test(
 alias(
     name = "go_default_library",
     actual = ":subtle",
-    visibility = ["//visibility:public"],
+    visibility = ["//visibility:public"],  # keep; used by non-Tink library
 )

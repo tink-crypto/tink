@@ -102,6 +102,15 @@ class IsOkAndHoldsMatcher {
 };
 }  // namespace internal
 
+inline std::string StatusToString(const util::Status& s) {
+  return s.ToString();
+}
+
+template <typename T>
+std::string StatusToString(const util::StatusOr<T>& s) {
+  return s.status().ToString();
+}
+
 // Matches a util::StatusOk() value.
 // This is better than EXPECT_TRUE(status.ok())
 // because the error message is a part of the failure messsage.
@@ -109,7 +118,7 @@ MATCHER(IsOk, "is a Status with an OK value") {
   if (arg.ok()) {
     return true;
   }
-  *result_listener << arg.ToString();
+  *result_listener << StatusToString(arg);
   return false;
 }
 

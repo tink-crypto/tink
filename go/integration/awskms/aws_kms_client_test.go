@@ -64,7 +64,7 @@ func TestNewClientWithCredentialsWithGoodCredentialsCsv(t *testing.T) {
 	if !ok {
 		t.Skip("TEST_SRCDIR not set")
 	}
-	goodCsvCredFile := filepath.Join(srcDir, "tink_go/testdata/credentials_aws.csv")
+	goodCsvCredFile := filepath.Join(srcDir, "tink_go/testdata/aws/credentials.csv")
 
 	_, err := awskms.NewClientWithCredentials(uriPrefix, goodCsvCredFile)
 	if err != nil {
@@ -79,7 +79,7 @@ func TestNewClientWithCredentialsWithGoodCredentialsIni(t *testing.T) {
 	if !ok {
 		t.Skip("TEST_SRCDIR not set")
 	}
-	credINIFile := filepath.Join(srcDir, "tink_go/testdata/credentials_aws.cred")
+	credINIFile := filepath.Join(srcDir, "tink_go/testdata/aws/credentials.cred")
 
 	_, err := awskms.NewClientWithCredentials(uriPrefix, credINIFile)
 	if err != nil {
@@ -94,7 +94,7 @@ func TestNewClientWithCredentialsWithBadCredentials(t *testing.T) {
 	if !ok {
 		t.Skip("TEST_SRCDIR not set")
 	}
-	badCredFile := filepath.Join(srcDir, "tink_go/testdata/bad_access_keys_aws.csv")
+	badCredFile := filepath.Join(srcDir, "tink_go/testdata/aws/access_keys_bad.csv")
 
 	_, err := awskms.NewClientWithCredentials(uriPrefix, badCredFile)
 	if err == nil {
