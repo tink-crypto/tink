@@ -46,10 +46,24 @@ func TestNewValidatorFailure(t *testing.T) {
 			},
 		},
 		{
+			tag: "combining ExpectedAudience and IgnoreAudiences",
+			validatorOpts: &jwt.ValidatorOpts{
+				ExpectedAudience: refString("should fail"),
+				IgnoreAudiences:  true,
+			},
+		},
+		{
 			tag: "combining ExpectedAudiences and IgnoreAudiences",
 			validatorOpts: &jwt.ValidatorOpts{
 				ExpectedAudiences: refString("should fail"),
 				IgnoreAudiences:   true,
+			},
+		},
+		{
+			tag: "both ExpectedAudience and ExpectedAudiences are set",
+			validatorOpts: &jwt.ValidatorOpts{
+				ExpectedAudience:  refString("aud"),
+				ExpectedAudiences: refString("aud"),
 			},
 		},
 		{
@@ -199,11 +213,32 @@ func TestValidationFailures(t *testing.T) {
 			},
 			validatorOpts: &jwt.ValidatorOpts{
 				AllowMissingExpiration: true,
+				ExpectedAudience:       refString("tink-audience"),
+			},
+		},
+		{
+			tag: "audience required but no specified, deprecated",
+			tokenOpts: &jwt.RawJWTOptions{
+				WithoutExpiration: true,
+			},
+			validatorOpts: &jwt.ValidatorOpts{
+				AllowMissingExpiration: true,
 				ExpectedAudiences:      refString("tink-audience"),
 			},
 		},
 		{
 			tag: "invalid audience",
+			tokenOpts: &jwt.RawJWTOptions{
+				WithoutExpiration: true,
+				Audience:          refString("tink-audience"),
+			},
+			validatorOpts: &jwt.ValidatorOpts{
+				AllowMissingExpiration: true,
+				ExpectedAudience:       refString("audience"),
+			},
+		},
+		{
+			tag: "invalid audience, deprecated",
 			tokenOpts: &jwt.RawJWTOptions{
 				WithoutExpiration: true,
 				Audience:          refString("tink-audience"),
@@ -399,6 +434,17 @@ func TestValidationSuccess(t *testing.T) {
 		},
 		{
 			tag: "expected audience",
+			tokenOpts: &jwt.RawJWTOptions{
+				WithoutExpiration: true,
+				Audience:          refString("audience"),
+			},
+			validatorOpts: &jwt.ValidatorOpts{
+				AllowMissingExpiration: true,
+				ExpectedAudience:       refString("audience"),
+			},
+		},
+		{
+			tag: "deprecated expected audiences",
 			tokenOpts: &jwt.RawJWTOptions{
 				WithoutExpiration: true,
 				Audience:          refString("audience"),

@@ -29,7 +29,8 @@ const (
 type ValidatorOpts struct {
 	ExpectedTypeHeader *string
 	ExpectedIssuer     *string
-	ExpectedAudiences  *string
+	ExpectedAudiences  *string // deprecated. Use ExpectedAudience instead.
+	ExpectedAudience   *string
 
 	IgnoreTypeHeader bool
 	IgnoreAudiences  bool
@@ -52,13 +53,20 @@ func NewValidator(opts *ValidatorOpts) (*Validator, error) {
 	if opts == nil {
 		return nil, fmt.Errorf("ValidatorOpts can't be nil")
 	}
+	if opts.ExpectedAudiences != nil {
+		if opts.ExpectedAudience != nil {
+			return nil, fmt.Errorf("ExpectedAudiences and ExpectedAudience can't be set at the same time")
+		}
+		opts.ExpectedAudience = opts.ExpectedAudiences
+		opts.ExpectedAudiences = nil
+	}
 	if opts.ExpectedTypeHeader != nil && opts.IgnoreTypeHeader {
 		return nil, fmt.Errorf("ExpectedTypeHeader and IgnoreTypeHeader cannot be used together")
 	}
 	if opts.ExpectedIssuer != nil && opts.IgnoreIssuer {
 		return nil, fmt.Errorf("ExpectedIssuer and IgnoreIssuer cannot be used together")
 	}
-	if opts.ExpectedAudiences != nil && opts.IgnoreAudiences {
+	if opts.ExpectedAudience != nil && opts.IgnoreAudiences {
 		return nil, fmt.Errorf("ExpectedAudience and IgnoreAudience cannot be used together")
 	}
 	if opts.ClockSkew.Minutes() > jwtMaxClockSkewMinutes {
@@ -165,7 +173,7 @@ func (v *Validator) validateIssuer(rawJWT *RawJWT) error {
 }
 
 func (v *Validator) validateAudiences(rawJWT *RawJWT) error {
-	skip, err := validateFieldPresence(v.opts.IgnoreAudiences, rawJWT.HasAudiences(), v.opts.ExpectedAudiences != nil)
+	skip, err := validateFieldPresence(v.opts.IgnoreAudiences, rawJWT.HasAudiences(), v.opts.ExpectedAudience != nil)
 	if err != nil {
 		return err
 	}
@@ -177,7 +185,7 @@ func (v *Validator) validateAudiences(rawJWT *RawJWT) error {
 		return err
 	}
 	for i, aud := range audiences {
-		if aud == *v.opts.ExpectedAudiences {
+		if aud == *v.opts.ExpectedAudience {
 			break
 		}
 		if i == len(audiences)-1 {

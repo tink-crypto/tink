@@ -274,7 +274,7 @@ func validatorFromProto(v *pb.JwtValidator) (*jwt.Validator, error) {
 	}
 	opts := &jwt.ValidatorOpts{
 		ExpectedTypeHeader:     refString(v.GetExpectedTypeHeader()),
-		ExpectedAudiences:      refString(v.GetExpectedAudience()),
+		ExpectedAudience:       refString(v.GetExpectedAudience()),
 		ExpectedIssuer:         refString(v.GetExpectedIssuer()),
 		ExpectIssuedInThePast:  v.GetExpectIssuedInThePast(),
 		AllowMissingExpiration: v.GetAllowMissingExpiration(),
