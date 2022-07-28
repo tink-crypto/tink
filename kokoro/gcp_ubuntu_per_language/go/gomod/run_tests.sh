@@ -56,6 +56,6 @@ for go_module_directory in "${GO_MODULE_DIRECTORIES[@]}"; do
   ./kokoro/testutils/run_go_mod_tests.sh \
     "${REPO_URL_PREFIX}/${go_module_directory}" \
     "${REPO_DIR}/${go_module_directory}" \
-    "${TMP_DIR}" \
-    "${TINK_VERSION}"
+    "${TINK_VERSION}" \
+    "master"
 done
