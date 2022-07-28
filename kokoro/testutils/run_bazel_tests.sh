@@ -24,17 +24,22 @@
 #     <workspace directory> \
 #     [<manual target> <manual target> ...]
 
+# Note: -E extends the trap to shell functions, command substitutions, and
+# commands executed in a subshell environment.
+set -eEo pipefail
+# Print some debug output on error before exiting.
+trap print_debug_output ERR
+
 #######################################
-# Print some debugging output then fail.
+# Print some debugging output.
 # Globals:
 #   None
 # Arguments:
 #   None
 #######################################
-fail_with_debug_output() {
+print_debug_output() {
   ls -l
-  df -h /
-  exit 1
+  df -h
 }
 
 #######################################
@@ -49,7 +54,6 @@ run_bazel_tests() {
   local workspace_dir="$1"
   shift 1
   local manual_targets=("$@")
-
   readonly PLATFORM="$(uname | tr '[:upper:]' '[:lower:]')"
 
   local -a TEST_FLAGS=( --strategy=TestRunner=standalone --test_output=all )
@@ -59,17 +63,17 @@ run_bazel_tests() {
   readonly TEST_FLAGS
   (
     cd "${workspace_dir}"
-    time bazel build -- ... || fail_with_debug_output
-    time bazel test "${TEST_FLAGS[@]}" -- ...
+    time bazel build -- ...
     # Exit code 4 means targets build correctly but no tests were found. See
     # https://bazel.build/docs/scripts#exit-codes.
-    if (( $? != 0 && $? != 4 )); then
-      fail_with_debug_output
+    bazel_test_return=0
+    time bazel test "${TEST_FLAGS[@]}" -- ... || bazel_test_return="$?"
+    if (( $bazel_test_return != 0 && $bazel_test_return != 4 )); then
+      return "${bazel_test_return}"
     fi
     # Run specific manual targets.
     if (( ${#manual_targets[@]} > 0 )); then
-      time bazel test "${TEST_FLAGS[@]}"  -- "${manual_targets[@]}" \
-        || fail_with_debug_output
+      time bazel test "${TEST_FLAGS[@]}"  -- "${manual_targets[@]}"
     fi
   )
 }
