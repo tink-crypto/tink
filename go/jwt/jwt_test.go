@@ -68,7 +68,7 @@ func Example_signAndVerify() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	validator, err := jwt.NewValidator(&jwt.ValidatorOpts{ExpectedAudiences: &audience})
+	validator, err := jwt.NewValidator(&jwt.ValidatorOpts{ExpectedAudience: &audience})
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -122,7 +122,7 @@ func Example_computeMACAndVerify() {
 	}
 
 	// Verify the MAC.
-	validator, err := jwt.NewValidator(&jwt.ValidatorOpts{ExpectedAudiences: &audience})
+	validator, err := jwt.NewValidator(&jwt.ValidatorOpts{ExpectedAudience: &audience})
 	if err != nil {
 		log.Fatal(err)
 	}

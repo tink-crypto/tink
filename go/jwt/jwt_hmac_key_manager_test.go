@@ -212,7 +212,7 @@ func TestGetPrimitiveWithValidKeys(t *testing.T) {
 	if err != nil {
 		t.Fatalf("NewRawJWT() err = %v, want nil", err)
 	}
-	validator, err := NewValidator(&ValidatorOpts{AllowMissingExpiration: true, ExpectedAudiences: refString("tink-aud")})
+	validator, err := NewValidator(&ValidatorOpts{AllowMissingExpiration: true, ExpectedAudience: refString("tink-aud")})
 	if err != nil {
 		t.Fatalf("NewValidator() err = %v, want nil", err)
 	}

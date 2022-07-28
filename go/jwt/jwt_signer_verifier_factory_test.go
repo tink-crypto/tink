@@ -139,7 +139,7 @@ func TestFactoryVerifyWithDifferentKeyFails(t *testing.T) {
 	if err != nil {
 		t.Fatalf("jwt.NewRawJWT() err = %v, want nil", err)
 	}
-	validator, err := jwt.NewValidator(&jwt.ValidatorOpts{AllowMissingExpiration: true, ExpectedAudiences: refString("tink-audience")})
+	validator, err := jwt.NewValidator(&jwt.ValidatorOpts{AllowMissingExpiration: true, ExpectedAudience: refString("tink-audience")})
 	if err != nil {
 		t.Fatalf("jwt.NewValidator() err = %v, want nil", err)
 	}
