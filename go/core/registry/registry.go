@@ -94,6 +94,8 @@ func NewKey(kt *tinkpb.KeyTemplate) (proto.Message, error) {
 }
 
 // PrimitiveFromKeyData creates a new primitive for the key given in the given KeyData.
+// Note that the returned primitive does not add/remove the output prefix.
+// It is the caller's responsibility to handle this correctly, based on the key's output_prefix_type.
 func PrimitiveFromKeyData(kd *tinkpb.KeyData) (interface{}, error) {
 	if kd == nil {
 		return nil, fmt.Errorf("registry.PrimitiveFromKeyData: invalid key data")
@@ -103,6 +105,8 @@ func PrimitiveFromKeyData(kd *tinkpb.KeyData) (interface{}, error) {
 
 // Primitive creates a new primitive for the given serialized key using the KeyManager
 // identified by the given typeURL.
+// Note that the returned primitive does not add/remove the output prefix.
+// It is the caller's responsibility to handle this correctly, based on the key's output_prefix_type.
 func Primitive(typeURL string, sk []byte) (interface{}, error) {
 	if len(sk) == 0 {
 		return nil, fmt.Errorf("registry.Primitive: invalid serialized key")
