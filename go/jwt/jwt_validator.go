@@ -29,7 +29,6 @@ const (
 type ValidatorOpts struct {
 	ExpectedTypeHeader *string
 	ExpectedIssuer     *string
-	ExpectedAudiences  *string // deprecated. Use ExpectedAudience instead.
 	ExpectedAudience   *string
 
 	IgnoreTypeHeader bool
@@ -41,6 +40,9 @@ type ValidatorOpts struct {
 
 	ClockSkew time.Duration
 	FixedNow  time.Time
+
+	// Deprecated: Use ExpectedAudience instead.
+	ExpectedAudiences *string
 }
 
 // Validator defines how JSON Web Tokens (JWT) should be validated.
