@@ -16,6 +16,7 @@
 
 package com.google.crypto.tink;
 
+import androidx.annotation.RequiresApi;
 import com.google.crypto.tink.proto.EncryptedKeyset;
 import com.google.crypto.tink.proto.KeyData;
 import com.google.crypto.tink.proto.Keyset;
@@ -71,6 +72,7 @@ public final class JsonKeysetWriter implements KeysetWriter {
    *
    * <p>This method only works on Android API level 26 or newer.
    */
+  @RequiresApi(26) // https://developer.android.com/reference/java/nio/file/Path
   public static KeysetWriter withPath(Path path) throws IOException {
     return withFile(path.toFile());
   }

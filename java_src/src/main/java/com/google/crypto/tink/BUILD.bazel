@@ -136,6 +136,7 @@ java_library(
         ":keyset_writer",
         "//proto:tink_java_proto",
         "//src/main/java/com/google/crypto/tink/subtle:base64",
+        "@maven//:androidx_annotation_annotation",
         "@maven//:com_google_code_gson_gson",
     ],
 )
@@ -147,6 +148,7 @@ android_library(
         ":keyset_writer-android",
         "//proto:tink_java_proto_lite",
         "//src/main/java/com/google/crypto/tink/subtle:base64-android",
+        "@maven//:androidx_annotation_annotation",
         "@maven//:com_google_code_gson_gson",
     ],
 )
@@ -192,6 +194,7 @@ java_library(
         "//proto:tink_java_proto",
         "//src/main/java/com/google/crypto/tink/subtle:base64",
         "@com_google_protobuf//:protobuf_javalite",
+        "@maven//:androidx_annotation_annotation",
         "@maven//:com_google_code_gson_gson",
     ],
 )
@@ -205,6 +208,7 @@ android_library(
         "//proto:tink_java_proto_lite",
         "//src/main/java/com/google/crypto/tink/subtle:base64-android",
         "@com_google_protobuf//:protobuf_javalite",
+        "@maven//:androidx_annotation_annotation",
         "@maven//:com_google_code_gson_gson",
     ],
 )
