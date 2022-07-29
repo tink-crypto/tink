@@ -22,22 +22,54 @@
 # Usage:
 #   ./kokoro/testutils/run_cmake_tests.sh \
 #     <project directory> \
-#     [additional CMake parameters]
+#     [<additional CMake param> <additional CMake param> ...]
 
-readonly CMAKE_PROJECT_DIR="$1"
-shift 1
-# Read the additional parameters if any.
-readonly ADDITIONAL_CMAKE_PARAMETERS=("$@")
+set -eEo pipefail
 
-readonly CMAKE_PARAMETERS=(
-  -DTINK_BUILD_TESTS=ON
-  -DCMAKE_CXX_STANDARD=11
-  "${ADDITIONAL_CMAKE_PARAMETERS[@]}"
-)
-readonly TINK_CMAKE_PROJECT_DIR="$(pwd)/${CMAKE_PROJECT_DIR}"
-readonly CMAKE_BUILD_DIR="$(mktemp -dt cmake-build.XXXXXX)"
-cd "${CMAKE_BUILD_DIR}"
-cmake --version
-cmake "${TINK_CMAKE_PROJECT_DIR}" "${CMAKE_PARAMETERS[@]}"
-make -j"$(nproc)" all
-CTEST_OUTPUT_ON_FAILURE=1 make test
+usage() {
+  echo "Usage: $0 <project directory> \\"
+  echo "         [<additional CMake param> <additional CMake param> ...]"
+  exit 1
+}
+
+CMAKE_PROJECT_DIR=
+ADDITIONAL_CMAKE_PARAMETERS=
+
+#######################################
+# Process command line arguments.
+#
+# Globals:
+#   PROJECT_DIRECTORY
+#
+#######################################
+process_args() {
+  CMAKE_PROJECT_DIR="$1"
+  readonly CMAKE_PROJECT_DIR
+
+  if [[ -z "${CMAKE_PROJECT_DIR}" ]]; then
+    usage
+  fi
+
+  shift 1
+  ADDITIONAL_CMAKE_PARAMETERS=("$@")
+  readonly ADDITIONAL_CMAKE_PARAMETERS
+}
+
+main() {
+  process_args "$@"
+  local -r cmake_parameters=(
+    -DTINK_BUILD_TESTS=ON
+    -DCMAKE_CXX_STANDARD=11
+    "${ADDITIONAL_CMAKE_PARAMETERS[@]}"
+  )
+  # We need an absolute path to the CMake project directory.
+  local -r tink_cmake_project_dir="$(pwd)/$(basename ${CMAKE_PROJECT_DIR})"
+  local -r cmake_build_dir="$(mktemp -dt cmake-build.XXXXXX)"
+  cd "${cmake_build_dir}"
+  cmake --version
+  cmake "${tink_cmake_project_dir}" "${cmake_parameters[@]}"
+  make -j"$(nproc)" all
+  CTEST_OUTPUT_ON_FAILURE=1 make test
+}
+
+main "$@"
