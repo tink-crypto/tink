@@ -16,6 +16,7 @@ java_library(
 java_library(
     name = "streaming_aead",
     srcs = ["StreamingAead.java"],
+    deps = ["@maven//:androidx_annotation_annotation"],
 )
 
 java_library(
@@ -826,6 +827,7 @@ android_library(
 android_library(
     name = "streaming_aead-android",
     srcs = ["StreamingAead.java"],
+    deps = ["@maven//:androidx_annotation_annotation"],
 )
 
 android_library(

@@ -29,6 +29,7 @@ import java.util.Arrays;
  * An instance of {@link SeekableByteChannel} that allows random access to the plaintext of some
  * ciphertext.
  */
+@RequiresApi(24) // https://developer.android.com/reference/java/nio/channels/SeekableByteChannel
 class StreamingAeadSeekableDecryptingChannel implements SeekableByteChannel {
   // Each plaintext segment has 16 bytes more of memory than the actual plaintext that it contains.
   // This is a workaround for an incompatibility between Conscrypt and OpenJDK in their
@@ -168,7 +169,6 @@ class StreamingAeadSeekableDecryptingChannel implements SeekableByteChannel {
    * @throws IOException if the header was incorrectly formatted or if there was an exception during
    *     the key derivation.
    */
-  @RequiresApi(24)
   private boolean tryReadHeader() throws IOException {
     ciphertextChannel.position(header.position() + firstSegmentOffset);
     ciphertextChannel.read(header);
