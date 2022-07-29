@@ -246,8 +246,9 @@ implements <a href="../../../../com/google/crypto/tink/KeysetWriter.html" title=
 <ul class="blockList">
 <li class="blockList">
 <h4>withPath</h4>
-<pre>public static&nbsp;<a href="../../../../com/google/crypto/tink/KeysetWriter.html" title="interface in com.google.crypto.tink">KeysetWriter</a>&nbsp;withPath(<a href="https://docs.oracle.com/javase/8/docs/api/java/nio/file/Path.html?is-external=true" title="class or interface in java.nio.file">Path</a>&nbsp;path)
-                             throws <a href="https://docs.oracle.com/javase/8/docs/api/java/io/IOException.html?is-external=true" title="class or interface in java.io">IOException</a></pre>
+<pre>@RequiresApi(value=26)
+public static&nbsp;<a href="../../../../com/google/crypto/tink/KeysetWriter.html" title="interface in com.google.crypto.tink">KeysetWriter</a>&nbsp;withPath(<a href="https://docs.oracle.com/javase/8/docs/api/java/nio/file/Path.html?is-external=true" title="class or interface in java.nio.file">Path</a>&nbsp;path)
+                                                    throws <a href="https://docs.oracle.com/javase/8/docs/api/java/io/IOException.html?is-external=true" title="class or interface in java.io">IOException</a></pre>
 <div class="block">Static method to create a JsonKeysetWriter that writes to a file path.
 
  <p>This method only works on Android API level 26 or newer.</div>

@@ -289,10 +289,11 @@ var activeTableTab = "activeTableTab";
 <ul class="blockList">
 <li class="blockList">
 <h4>newSeekableDecryptingChannel</h4>
-<pre><a href="https://docs.oracle.com/javase/8/docs/api/java/nio/channels/SeekableByteChannel.html?is-external=true" title="class or interface in java.nio.channels">SeekableByteChannel</a>&nbsp;newSeekableDecryptingChannel(<a href="https://docs.oracle.com/javase/8/docs/api/java/nio/channels/SeekableByteChannel.html?is-external=true" title="class or interface in java.nio.channels">SeekableByteChannel</a>&nbsp;ciphertextSource,
-                                                 byte[]&nbsp;associatedData)
-                                          throws <a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a>,
-                                                 <a href="https://docs.oracle.com/javase/8/docs/api/java/io/IOException.html?is-external=true" title="class or interface in java.io">IOException</a></pre>
+<pre>@RequiresApi(value=24)
+<a href="https://docs.oracle.com/javase/8/docs/api/java/nio/channels/SeekableByteChannel.html?is-external=true" title="class or interface in java.nio.channels">SeekableByteChannel</a>&nbsp;newSeekableDecryptingChannel(<a href="https://docs.oracle.com/javase/8/docs/api/java/nio/channels/SeekableByteChannel.html?is-external=true" title="class or interface in java.nio.channels">SeekableByteChannel</a>&nbsp;ciphertextSource,
+                                                                        byte[]&nbsp;associatedData)
+                                                                 throws <a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a>,
+                                                                        <a href="https://docs.oracle.com/javase/8/docs/api/java/io/IOException.html?is-external=true" title="class or interface in java.io">IOException</a></pre>
 <div class="block">Returns a SeekableByteChannel that allows to access the plaintext.
 
  <p>This method does not work on Android Marshmallow (API level 23) or older because these
