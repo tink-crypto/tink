@@ -30,30 +30,45 @@ set -eEo pipefail
 # Print some debug output on error before exiting.
 trap print_debug_output ERR
 
+usage() {
+  echo "Usage: $0 <workspace directory> [<manual target> <manual target> ...]"
+  exit 1
+}
+
+WORKSPACE_DIR=
+MANUAL_TARGETS=
+
+#######################################
+# Process command line arguments.
+#
+# Globals:
+#   WORKSPACE_DIR
+#   MANUAL_TARGETS
+#######################################
+process_args() {
+  WORKSPACE_DIR="$1"
+  readonly WORKSPACE_DIR
+
+  if [[ -z "${WORKSPACE_DIR}" ]]; then
+    usage
+  fi
+
+  shift 1
+  MANUAL_TARGETS=("$@")
+  readonly MANUAL_TARGETS
+}
+
 #######################################
 # Print some debugging output.
-# Globals:
-#   None
-# Arguments:
-#   None
 #######################################
 print_debug_output() {
   ls -l
   df -h
 }
 
-#######################################
-# Runs the tests contained in the given Bazel workspace.
-# Globals:
-#   None
-# Arguments:
-#   workspace_dir: The workspace directory path.
-#   manual_targets: (optional) Additional manual test targets.
-#######################################
-run_bazel_tests() {
-  local workspace_dir="$1"
-  shift 1
-  local manual_targets=("$@")
+main() {
+  process_args "$@"
+
   readonly PLATFORM="$(uname | tr '[:upper:]' '[:lower:]')"
 
   local -a TEST_FLAGS=( --strategy=TestRunner=standalone --test_output=all )
@@ -62,7 +77,7 @@ run_bazel_tests() {
   fi
   readonly TEST_FLAGS
   (
-    cd "${workspace_dir}"
+    cd "${WORKSPACE_DIR}"
     time bazel build -- ...
     # Exit code 4 means targets build correctly but no tests were found. See
     # https://bazel.build/docs/scripts#exit-codes.
@@ -72,10 +87,10 @@ run_bazel_tests() {
       return "${bazel_test_return}"
     fi
     # Run specific manual targets.
-    if (( ${#manual_targets[@]} > 0 )); then
-      time bazel test "${TEST_FLAGS[@]}"  -- "${manual_targets[@]}"
+    if (( ${#MANUAL_TARGETS[@]} > 0 )); then
+      time bazel test "${TEST_FLAGS[@]}"  -- "${MANUAL_TARGETS[@]}"
     fi
   )
 }
 
-run_bazel_tests "$@"
+main "$@"
