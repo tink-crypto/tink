@@ -19,6 +19,7 @@ package com.google.crypto.tink;
 import static com.google.common.truth.Truth.assertThat;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.Assert.assertThrows;
+import static org.junit.Assume.assumeFalse;
 
 import com.google.common.truth.Expect;
 import com.google.crypto.tink.aead.AesEaxKeyManager;
@@ -860,6 +861,8 @@ public class KeysetHandleTest {
   // Tests that withRandomId avoids collisions. We use 2^16 keys to make collision likely. The test
   // is about 4 seconds like this.
   public void testBuilder_withRandomId_doesNotHaveCollisions() throws Exception {
+    // Test takes longer on Android; and a simple Java test suffices.
+    assumeFalse(TestUtil.isAndroid());
     int numNonPrimaryKeys = 2 << 16;
     KeysetHandle.Builder builder = KeysetHandle.newBuilder();
     builder.addEntry(
