@@ -16,7 +16,6 @@
 
 package com.google.crypto.tink.mac;
 
-import static java.nio.charset.StandardCharsets.US_ASCII;
 
 import com.google.crypto.tink.AccessesPartialKey;
 import com.google.crypto.tink.SecretKeyAccess;
@@ -35,6 +34,7 @@ import com.google.crypto.tink.util.SecretBytes;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.ExtensionRegistryLite;
 import com.google.protobuf.InvalidProtocolBufferException;
+import java.io.UnsupportedEncodingException;
 import java.security.GeneralSecurityException;
 import javax.annotation.Nullable;
 
@@ -45,7 +45,18 @@ import javax.annotation.Nullable;
 @SuppressWarnings("UnnecessarilyFullyQualified") // Fully specifying proto types is more readable
 final class AesCmacProtoSerialization {
   private static final String TYPE_URL = "type.googleapis.com/google.crypto.tink.AesCmacKey";
-  private static final Bytes TYPE_URL_BYTES = Bytes.copyFrom(TYPE_URL.getBytes(US_ASCII));
+
+  // TODO(tholenst): move this to a Tink-internal utility function and avoid getBytes completely
+  // (since it ignores non-ascii anyhow) and make errors into an InternalTinkError.
+  private static final Bytes toBytesAscii(String s) {
+    try {
+      return Bytes.copyFrom(s.getBytes("ASCII"));
+    } catch (UnsupportedEncodingException e) {
+      throw new IllegalArgumentException(e);
+    }
+  }
+
+  private static final Bytes TYPE_URL_BYTES = toBytesAscii(TYPE_URL);
   private static final ParametersSerializer<AesCmacParameters, ProtoParametersSerialization>
       PARAMETERS_SERIALIZER =
           ParametersSerializer.create(
