@@ -42,4 +42,6 @@ func init() {
 	if err := registry.RegisterKeyManager(new(ed25519VerifierKeyManager)); err != nil {
 		panic(fmt.Sprintf("signature.init() failed: %v", err))
 	}
+
+
 }
