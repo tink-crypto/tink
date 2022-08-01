@@ -34,17 +34,15 @@ namespace tink {
 namespace integration {
 namespace awskms {
 
-
 // AwsKmsClient is an implementation of KmsClient for
 // <a href="https://aws.amazon.com/kms/">AWS KMS</a>
-class AwsKmsClient : public crypto::tink::KmsClient  {
+class AwsKmsClient : public crypto::tink::KmsClient {
  public:
-  // Creates a new AwsKmsClient that is bound to the key specified in 'key_uri',
-  // and that uses the specifed credentials when communicating with the KMS.
+  // Creates a new AwsKmsClient that is bound to the key specified in `key_uri`,
+  // if not empty, and that uses the credentials in `credentials_path`, if not
+  // empty, or the default ones to authenticate to the KMS.
   //
-  // Either of arguments can be empty.
-  // If 'key_uri' is empty, then the client is not bound to any particular key.
-  // If 'credential_path' is empty, then default credentials will be used.
+  // If `key_uri` is empty, then the client is not bound to any particular key.
   static crypto::tink::util::StatusOr<std::unique_ptr<AwsKmsClient>>
   New(absl::string_view key_uri, absl::string_view credentials_path);
 
@@ -52,16 +50,22 @@ class AwsKmsClient : public crypto::tink::KmsClient  {
   static crypto::tink::util::Status RegisterNewClient(
       absl::string_view key_uri, absl::string_view credentials_path);
 
-  // Returns true iff this client does support KMS key specified by 'key_uri'.
+  // Returns true if: (1) `key_uri` is a valid AWS KMS key URI, and (2) the
+  // resulting AWS key ARN is equals to key_arn_, in case this client is bound
+  // to a specific key.
   bool DoesSupport(absl::string_view key_uri) const override;
 
-  // Returns an Aead-primitive backed by KMS key specified by 'key_uri',
-  // provided that this KmsClient does support 'key_uri'.
+  // Returns an Aead-primitive backed by KMS key specified by `key_uri`,
+  // provided that this KmsClient does support `key_uri`.
   crypto::tink::util::StatusOr<std::unique_ptr<Aead>>
   GetAead(absl::string_view key_uri) const override;
 
  private:
-  AwsKmsClient() {}
+  AwsKmsClient(absl::string_view key_arn, Aws::Auth::AWSCredentials credentials)
+      : key_arn_(key_arn), credentials_(credentials) {}
+  AwsKmsClient(Aws::Auth::AWSCredentials credentials)
+      : credentials_(credentials) {}
+
   // Initializes AWS API.
   static void InitAwsApi();
   static bool aws_api_is_initialized_;
@@ -71,7 +75,6 @@ class AwsKmsClient : public crypto::tink::KmsClient  {
   Aws::Auth::AWSCredentials credentials_;
   std::shared_ptr<Aws::KMS::KMSClient> aws_client_;
 };
-
 
 }  // namespace awskms
 }  // namespace integration

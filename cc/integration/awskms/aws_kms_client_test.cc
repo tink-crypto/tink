@@ -30,63 +30,63 @@
 #include "tink/util/test_matchers.h"
 #include "tink/util/test_util.h"
 
-using ::crypto::tink::test::IsOk;
-using ::crypto::tink::test::StatusIs;
-
 namespace crypto {
 namespace tink {
 namespace integration {
 namespace awskms {
 namespace {
 
-using crypto::tink::integration::awskms::AwsKmsClient;
+using ::crypto::tink::integration::awskms::AwsKmsClient;
+using ::crypto::tink::test::IsOk;
+using ::crypto::tink::test::IsOkAndHolds;
+using ::crypto::tink::test::StatusIs;
+using ::testing::IsNull;
+using ::testing::Not;
 
-TEST(AwsKmsClientTest, testBasic) {
-  std::string aws_key1 = "aws-kms://arn:aws:kms:us-east-1:acc:some/key1";
-  std::string aws_key2 = "aws-kms://arn:aws:kms:us-west-2:acc:other/key2";
-  std::string non_aws_key = "gcp-kms:://some/gcp/key";
-  std::string creds_file = std::string(getenv("TEST_SRCDIR")) +
-                           "/tink_cc_awskms/testdata/aws/credentials.ini";
+constexpr absl::string_view kAwsKey1 =
+    "aws-kms://arn:aws:kms:us-east-1:acc:some/key1";
+constexpr absl::string_view kAwsKey2 =
+    "aws-kms://arn:aws:kms:us-east-1:acc:some/key2";
+constexpr absl::string_view kNonAwsKey = "gcp-kms:://some/gcp/key";
 
-  {  // A client not bound to any particular key.
-    auto client_result = AwsKmsClient::New("", creds_file);
-    EXPECT_TRUE(client_result.ok()) << client_result.status();
-    auto client = std::move(client_result.value());
-    EXPECT_TRUE(client->DoesSupport(aws_key1));
-    EXPECT_TRUE(client->DoesSupport(aws_key2));
-    EXPECT_FALSE(client->DoesSupport(non_aws_key));
-  }
-
-  {  // A client bound to a specific AWS KMS key.
-    auto client_result = AwsKmsClient::New(aws_key1, creds_file);
-    EXPECT_TRUE(client_result.ok()) << client_result.status();
-    auto client = std::move(client_result.value());
-    EXPECT_TRUE(client->DoesSupport(aws_key1));
-    EXPECT_FALSE(client->DoesSupport(aws_key2));
-    EXPECT_FALSE(client->DoesSupport(non_aws_key));
-  }
-}
-
-TEST(AwsKmsClientTest, ClientCreationAndRegistry) {
-  std::string aws_key1 = "aws-kms://arn:aws:kms:us-east-1:acc:some/key1";
-  std::string creds_file = absl::StrCat(
-      getenv("TEST_SRCDIR"), "/tink_cc_awskms/testdata/aws/credentials.ini");
-
-  auto client_result = AwsKmsClient::RegisterNewClient(aws_key1, creds_file);
-  EXPECT_THAT(client_result, IsOk());
-
-  auto registry_result = KmsClients::Get(aws_key1);
-  EXPECT_THAT(registry_result, IsOk());
-}
-
-TEST(AwsKmsClientTest, ClientCreationInvalidRegistry) {
-  std::string non_aws_key =
-      "gcp-kms://projects/someProject/.../cryptoKeys/key1";
+TEST(AwsKmsClientTest, CreateClientNotBoundToSpecificKeySupportsAllValidKeys) {
   std::string creds_file =
-      std::string(getenv("TEST_SRCDIR")) + "/tink_cc_awskms/testdata/gcp/credential.json";
+      absl::StrCat(getenv("TEST_SRCDIR"), "/tink_cc_awskms/testdata/aws/credentials.ini");
+  util::StatusOr<std::unique_ptr<AwsKmsClient>> client =
+      AwsKmsClient::New(/*key_uri=*/"", creds_file);
+  ASSERT_THAT(client, IsOk());
+  EXPECT_TRUE((*client)->DoesSupport(kAwsKey1));
+  EXPECT_TRUE((*client)->DoesSupport(kAwsKey2));
+  EXPECT_FALSE((*client)->DoesSupport(kNonAwsKey));
+}
 
-  auto client_result = AwsKmsClient::RegisterNewClient(non_aws_key, creds_file);
-  EXPECT_THAT(client_result, StatusIs(absl::StatusCode::kInvalidArgument));
+// Test that a client that is bound to a specific key does not support a
+// different key URI.
+TEST(AwsKmsClientTest, CreateClientBoundToSpecificKeySupportOnlyOneKey) {
+  std::string creds_file =
+      absl::StrCat(getenv("TEST_SRCDIR"), "/tink_cc_awskms/testdata/aws/credentials.ini");
+  util::StatusOr<std::unique_ptr<AwsKmsClient>> client =
+      AwsKmsClient::New(kAwsKey1, creds_file);
+  ASSERT_THAT(client, IsOk());
+  EXPECT_TRUE((*client)->DoesSupport(kAwsKey1));
+  EXPECT_FALSE((*client)->DoesSupport(kAwsKey2));
+  EXPECT_FALSE((*client)->DoesSupport(kNonAwsKey));
+}
+
+TEST(AwsKmsClientTest, RegisterKmsClient) {
+  std::string creds_file =
+      absl::StrCat(getenv("TEST_SRCDIR"), "/tink_cc_awskms/testdata/aws/credentials.ini");
+  ASSERT_THAT(AwsKmsClient::RegisterNewClient(kAwsKey1, creds_file), IsOk());
+  util::StatusOr<const KmsClient*> kms_client = KmsClients::Get(kAwsKey1);
+  EXPECT_THAT(kms_client, IsOkAndHolds(Not(IsNull())));
+}
+
+TEST(AwsKmsClientTest, RegisterKmsClientFailsWhenKeyIsInvalid) {
+  std::string creds_file = absl::StrCat(getenv("TEST_SRCDIR"),
+                                        "/tink_cc_awskms/testdata/gcp/credentials.json");
+  auto client = AwsKmsClient::RegisterNewClient(
+      "gcp-kms://projects/someProject/.../cryptoKeys/key1", creds_file);
+  EXPECT_THAT(client, StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
 }  // namespace
