@@ -26,7 +26,6 @@ import (
 	"github.com/google/tink/go/core/registry"
 	"github.com/google/tink/go/keyset"
 	"github.com/google/tink/go/signature/internal"
-	commonpb "github.com/google/tink/go/proto/common_go_proto"
 	rsassapkcs1pb "github.com/google/tink/go/proto/rsa_ssa_pkcs1_go_proto"
 	tinkpb "github.com/google/tink/go/proto/tink_go_proto"
 )
@@ -61,7 +60,6 @@ func (km *rsaSSAPKCS1VerifierKeyManager) Primitive(serializedKey []byte) (interf
 	if err := keyset.ValidateKeyVersion(key.Version, rsaSSAPKCS1VerifierKeyVersion); err != nil {
 		return nil, err
 	}
-
 	e := new(big.Int).SetBytes(key.E)
 	if !e.IsInt64() {
 		return nil, fmt.Errorf("rsassapkcs1_verifier_key_manager: public exponent can't fit in 64 bit number")
@@ -70,7 +68,7 @@ func (km *rsaSSAPKCS1VerifierKeyManager) Primitive(serializedKey []byte) (interf
 		E: int(e.Int64()),
 		N: new(big.Int).SetBytes(key.N),
 	}
-	return internal.New_RSA_SSA_PKCS1_Verifier(commonpb.HashType_name[int32(key.Params.HashType)], keyData)
+	return internal.New_RSA_SSA_PKCS1_Verifier(hashName(key.Params.HashType), keyData)
 }
 
 func (km *rsaSSAPKCS1VerifierKeyManager) NewKey(serializedKeyFormat []byte) (proto.Message, error) {

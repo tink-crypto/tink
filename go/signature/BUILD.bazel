@@ -12,6 +12,8 @@ go_library(
         "ed25519_signer_key_manager.go",
         "ed25519_verifier_key_manager.go",
         "proto.go",
+        "rsa.go",
+        "rsassapkcs1_signer_key_manager.go",
         "rsassapkcs1_verifier_key_manager.go",
         "signature.go",
         "signature_key_templates.go",
@@ -46,6 +48,7 @@ go_test(
         "ecdsa_verifier_key_manager_test.go",
         "ed25519_signer_key_manager_test.go",
         "ed25519_verifier_key_manager_test.go",
+        "rsassapkcs1_signer_key_manager_test.go",
         "rsassapkcs1_verifier_key_manager_test.go",
         "signature_factory_test.go",
         "signature_key_templates_test.go",
@@ -66,7 +69,9 @@ go_test(
         "//subtle/random",
         "//testkeyset",
         "//testutil",
+        "@com_github_google_go_cmp//cmp",
         "@org_golang_google_protobuf//proto",
+        "@org_golang_google_protobuf//testing/protocmp",
     ],
 )
 
