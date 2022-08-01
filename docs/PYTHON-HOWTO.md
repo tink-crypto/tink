@@ -282,13 +282,13 @@ mac.register()
 keyset_handle = tink.new_keyset_handle(mac.mac_key_templates.HMAC_SHA256_128BITTAG)
 
 # 2. Get the primitive.
-mac = keyset_handle.primitive(mac.Mac)
+mac_primitive = keyset_handle.primitive(mac.Mac)
 
 # 3. Use the primitive to compute a tag,
-tag = mac.compute_mac(data)
+tag = mac_primitive.compute_mac(data)
 
 # ... or to verify a tag.
-mac.verify_mac(tag, data)
+mac_primitive.verify_mac(tag, data)
 ```
 
 ### Hybrid Encryption
