@@ -217,8 +217,16 @@ cc_library(
 
 cc_library(
     name = "hpke_util",
+    srcs = ["hpke_util.cc"],
     hdrs = ["hpke_util.h"],
     include_prefix = "tink/hybrid/internal",
+    deps = [
+        "//internal:ec_util",
+        "//proto:hpke_cc_proto",
+        "//subtle:common_enums",
+        "//util:statusor",
+        "@com_google_absl//absl/strings",
+    ],
 )
 
 cc_library(
@@ -456,6 +464,19 @@ cc_test(
         "//util:test_matchers",
         "//util:test_util",
         "@boringssl//:crypto",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "hpke_util_test",
+    size = "small",
+    srcs = ["hpke_util_test.cc"],
+    deps = [
+        ":hpke_test_util",
+        ":hpke_util",
+        "//proto:hpke_cc_proto",
+        "//util:test_matchers",
         "@com_google_googletest//:gtest_main",
     ],
 )

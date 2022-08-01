@@ -17,6 +17,9 @@
 #ifndef TINK_HYBRID_INTERNAL_HPKE_UTIL_H_
 #define TINK_HYBRID_INTERNAL_HPKE_UTIL_H_
 
+#include "tink/util/statusor.h"
+#include "proto/hpke.pb.h"
+
 namespace crypto {
 namespace tink {
 namespace internal {
@@ -46,6 +49,14 @@ struct HpkeParams {
   HpkeKdf kdf;
   HpkeAead aead;
 };
+
+// Converts a google::crypto::tink::HpkeParams proto to an HpkeParams struct.
+util::StatusOr<HpkeParams> HpkeParamsProtoToStruct(
+    google::crypto::tink::HpkeParams params);
+
+// Returns the encapsulated key length (in bytes) for the specified `kem`.
+util::StatusOr<int32_t> HpkeEncapsulatedKeyLength(
+    google::crypto::tink::HpkeKem kem);
 
 }  // namespace internal
 }  // namespace tink

@@ -207,7 +207,14 @@ tink_cc_library(
 tink_cc_library(
   NAME hpke_util
   SRCS
+    hpke_util.cc
     hpke_util.h
+  DEPS
+    absl::strings
+    tink::internal::ec_util
+    tink::subtle::common_enums
+    tink::util::statusor
+    tink::proto::hpke_cc_proto
   TAGS
     exclude_if_openssl
 )
@@ -446,6 +453,20 @@ tink_cc_test(
     crypto
     tink::util::test_matchers
     tink::util::test_util
+    tink::proto::hpke_cc_proto
+  TAGS
+    exclude_if_openssl
+)
+
+tink_cc_test(
+  NAME hpke_util_test
+  SRCS
+    hpke_util_test.cc
+  DEPS
+    tink::hybrid::internal::hpke_test_util
+    tink::hybrid::internal::hpke_util
+    gmock
+    tink::util::test_matchers
     tink::proto::hpke_cc_proto
   TAGS
     exclude_if_openssl
