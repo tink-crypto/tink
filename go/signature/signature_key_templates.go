@@ -20,6 +20,7 @@ import (
 	"google.golang.org/protobuf/proto"
 	commonpb "github.com/google/tink/go/proto/common_go_proto"
 	ecdsapb "github.com/google/tink/go/proto/ecdsa_go_proto"
+	rsppb "github.com/google/tink/go/proto/rsa_ssa_pkcs1_go_proto"
 	tinkpb "github.com/google/tink/go/proto/tink_go_proto"
 )
 
@@ -44,6 +45,7 @@ func ECDSAP256KeyTemplate() *tinkpb.KeyTemplate {
 //   - Curve: NIST P-256
 //   - Signature encoding: DER
 //   - Output prefix type: RAW
+//
 // Note that this template uses a different encoding than ESDSA_P256_RAW in Tinkey.
 func ECDSAP256KeyWithoutPrefixTemplate() *tinkpb.KeyTemplate {
 	return createECDSAKeyTemplate(commonpb.HashType_SHA256,
@@ -70,6 +72,7 @@ func ECDSAP256RawKeyTemplate() *tinkpb.KeyTemplate {
 //   - Curve: NIST P-384
 //   - Signature encoding: DER
 //   - Output prefix type: TINK
+//
 // DEPRECATED. Use ECDSAP384SHA384KeyTemplate() or ECDSAP384SHA512KeyTemplate() instead.
 func ECDSAP384KeyTemplate() *tinkpb.KeyTemplate {
 	return createECDSAKeyTemplate(commonpb.HashType_SHA512,
@@ -172,4 +175,60 @@ func ED25519KeyWithoutPrefixTemplate() *tinkpb.KeyTemplate {
 		TypeUrl:          ed25519SignerTypeURL,
 		OutputPrefixType: tinkpb.OutputPrefixType_RAW,
 	}
+}
+
+func create_RSA_SSA_PKCS1_Template(prefixType tinkpb.OutputPrefixType, hashType commonpb.HashType, modulusSizeInBits uint32) *tinkpb.KeyTemplate {
+	keyFormat := &rsppb.RsaSsaPkcs1KeyFormat{
+		Params: &rsppb.RsaSsaPkcs1Params{
+			HashType: hashType,
+		},
+		ModulusSizeInBits: modulusSizeInBits,
+		PublicExponent:    []byte{0x01, 0x00, 0x01},
+	}
+	serializedFormat, _ := proto.Marshal(keyFormat)
+	return &tinkpb.KeyTemplate{
+		TypeUrl:          rsaSSAPKCS1SignerTypeURL,
+		OutputPrefixType: prefixType,
+		Value:            serializedFormat,
+	}
+}
+
+// RSA_SSA_PKCS1_3072_SHA256_F4_Key_Template is a KeyTemplate that generates a new RSA SSA PKCS1 private key with the following
+// parameters:
+//   - Modulus size in bits: 3072.
+//   - Hash function: SHA256.
+//   - Public Exponent: 65537 (aka F4).
+//   - OutputPrefixType: TINK
+func RSA_SSA_PKCS1_3072_SHA256_F4_Key_Template() *tinkpb.KeyTemplate {
+	return create_RSA_SSA_PKCS1_Template(tinkpb.OutputPrefixType_TINK, commonpb.HashType_SHA256, 3072)
+}
+
+// RSA_SSA_PKCS1_3072_SHA256_F4_RAW_Key_Template is a KeyTemplate that generates a new RSA SSA PKCS1 private key with the following
+// parameters:
+//   - Modulus size in bits: 3072.
+//   - Hash function: SHA256.
+//   - Public Exponent: 65537 (aka F4).
+//   - OutputPrefixType: RAW
+func RSA_SSA_PKCS1_3072_SHA256_F4_RAW_Key_Template() *tinkpb.KeyTemplate {
+	return create_RSA_SSA_PKCS1_Template(tinkpb.OutputPrefixType_RAW, commonpb.HashType_SHA256, 3072)
+}
+
+// RSA_SSA_PKCS1_4096_SHA512_F4_Key_Template is a KeyTemplate that generates a new RSA SSA PKCS1 private key with the following
+// parameters:
+//   - Modulus size in bits: 4096.
+//   - Hash function: SHA512.
+//   - Public Exponent: 65537 (aka F4).
+//   - OutputPrefixType: TINK
+func RSA_SSA_PKCS1_4096_SHA512_F4_Key_Template() *tinkpb.KeyTemplate {
+	return create_RSA_SSA_PKCS1_Template(tinkpb.OutputPrefixType_TINK, commonpb.HashType_SHA512, 4096)
+}
+
+// RSA_SSA_PKCS1_4096_SHA512_F4_RAW_Key_Template is a KeyTemplate that generates a new RSA SSA PKCS1 private key with the following
+// parameters:
+//   - Modulus size in bits: 4096.
+//   - Hash function: SHA512.
+//   - Public Exponent: 65537 (aka F4).
+//   - OutputPrefixType: RAW
+func RSA_SSA_PKCS1_4096_SHA512_F4_RAW_Key_Template() *tinkpb.KeyTemplate {
+	return create_RSA_SSA_PKCS1_Template(tinkpb.OutputPrefixType_RAW, commonpb.HashType_SHA512, 4096)
 }

@@ -43,12 +43,6 @@ var (
 
 type rsaSSAPKCS1SignerKeyManager struct{}
 
-// NewRSASSAPKCS1SignerKeyManager returns a new signer key manager instance:
-// TODO(b/173082704): Delete in CL/463428483, only used for temporary testing to avoid test breakage.
-func NewRSASSAPKCS1SignerKeyManager() registry.KeyManager {
-	return &rsaSSAPKCS1SignerKeyManager{}
-}
-
 var _ registry.PrivateKeyManager = (*rsaSSAPKCS1SignerKeyManager)(nil)
 
 func (km *rsaSSAPKCS1SignerKeyManager) Primitive(serializedKey []byte) (interface{}, error) {

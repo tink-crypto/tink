@@ -95,7 +95,7 @@ SUPPORTED_LANGUAGES = {
     'HmacKey': ['cc', 'java', 'go', 'python'],
     'EcdsaPrivateKey': ['cc', 'java', 'go', 'python'],
     'Ed25519PrivateKey': ['cc', 'java', 'go', 'python'],
-    'RsaSsaPkcs1PrivateKey': ['cc', 'java', 'python'],
+    'RsaSsaPkcs1PrivateKey': ['cc', 'java', 'go', 'python'],
     'RsaSsaPssPrivateKey': ['cc', 'java', 'python'],
     'AesCmacPrfKey': ['cc', 'java', 'go', 'python'],
     'HmacPrfKey': ['cc', 'java', 'go', 'python'],

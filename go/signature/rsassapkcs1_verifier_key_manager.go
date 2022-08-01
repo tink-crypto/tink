@@ -41,12 +41,6 @@ var (
 
 type rsaSSAPKCS1VerifierKeyManager struct{}
 
-// NewRSASSAPKCS1VerifierKeyManager returns a new verifier key manager instance:
-// TODO(b/173082704): Delete in CL/463428483, only used for temporary testing to avoid test breakage.
-func NewRSASSAPKCS1VerifierKeyManager() registry.KeyManager {
-	return &rsaSSAPKCS1VerifierKeyManager{}
-}
-
 var _ registry.KeyManager = (*rsaSSAPKCS1VerifierKeyManager)(nil)
 
 func (km *rsaSSAPKCS1VerifierKeyManager) Primitive(serializedKey []byte) (interface{}, error) {

@@ -46,11 +46,19 @@ func TestKeyTemplates(t *testing.T) {
 			template: signature.ECDSAP384KeyWithoutPrefixTemplate()},
 		{name: "ECDSA_P521_NO_PREFIX",
 			template: signature.ECDSAP521KeyWithoutPrefixTemplate()},
+		{name: "RSA_SSA_PKCS1_3072_SHA256_F4",
+			template: signature.RSA_SSA_PKCS1_3072_SHA256_F4_Key_Template()},
+		{name: "RSA_SSA_PKCS1_3072_SHA256_F4_RAW",
+			template: signature.RSA_SSA_PKCS1_3072_SHA256_F4_RAW_Key_Template()},
+		{name: "RSA_SSA_PKCS1_4096_SHA512_F4",
+			template: signature.RSA_SSA_PKCS1_4096_SHA512_F4_Key_Template()},
+		{name: "RSA_SSA_PKCS1_4096_SHA512_F4_RAW",
+			template: signature.RSA_SSA_PKCS1_4096_SHA512_F4_RAW_Key_Template()},
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			if err := testSignVerify(tc.template); err != nil {
-				t.Errorf("%v", err)
+				t.Error(err)
 			}
 		})
 	}
