@@ -62,6 +62,7 @@ tink_cc_library(
   DEPS
     tink::hybrid::internal::hpke_key_boringssl
     tink::hybrid::internal::hpke_util_boringssl
+    absl::core_headers
     absl::status
     absl::strings
     crypto
@@ -97,6 +98,7 @@ tink_cc_library(
   DEPS
     tink::hybrid::internal::hpke_util_boringssl
     absl::algorithm_container
+    absl::core_headers
     absl::status
     absl::strings
     crypto
@@ -115,6 +117,7 @@ tink_cc_library(
     hpke_key_boringssl.h
   DEPS
     tink::hybrid::internal::hpke_util_boringssl
+    absl::core_headers
     absl::status
     crypto
     tink::util::status

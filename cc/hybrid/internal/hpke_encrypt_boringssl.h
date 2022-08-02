@@ -21,6 +21,7 @@
 #include <string>
 #include <utility>
 
+#include "absl/base/attributes.h"
 #include "openssl/hpke.h"
 #include "tink/util/statusor.h"
 #include "proto/hpke.pb.h"
@@ -29,7 +30,7 @@ namespace crypto {
 namespace tink {
 namespace internal {
 
-class HpkeEncryptBoringSsl {
+class ABSL_DEPRECATED("Use HpkeContext.") HpkeEncryptBoringSsl {
  public:
   // Sets up an HPKE sender context.  Returns an error if initialization
   // fails.  Otherwise, returns a unique pointer to the sender context.
