@@ -19,8 +19,6 @@ package com.google.crypto.tink.integration.android;
 import android.content.Context;
 import android.os.Build;
 import android.util.Log;
-import androidx.annotation.ChecksSdkIntAtLeast;
-import androidx.annotation.RequiresApi;
 import com.google.crypto.tink.Aead;
 import com.google.crypto.tink.CleartextKeysetHandle;
 import com.google.crypto.tink.KeyTemplate;
@@ -172,7 +170,6 @@ public final class AndroidKeysetManager {
      * <p>Only master keys stored in Android Keystore is supported. The URI must start with {@code
      * android-keystore://}.
      */
-    @RequiresApi(23)
     public Builder withMasterKeyUri(String val) {
       if (!val.startsWith(AndroidKeystoreKmsClient.PREFIX)) {
         throw new IllegalArgumentException(
@@ -491,7 +488,6 @@ public final class AndroidKeysetManager {
     }
   }
 
-  @ChecksSdkIntAtLeast(api = Build.VERSION_CODES.M)
   private static boolean isAtLeastM() {
     return Build.VERSION.SDK_INT >= Build.VERSION_CODES.M;
   }
