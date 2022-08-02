@@ -264,3 +264,13 @@ java_test(
         "@maven//:junit_junit",
     ],
 )
+
+java_test(
+    name = "TinkBugExceptionTest",
+    size = "small",
+    srcs = ["TinkBugExceptionTest.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink/internal:tink_bug_exception",
+        "@maven//:junit_junit",
+    ],
+)

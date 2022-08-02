@@ -450,3 +450,13 @@ android_library(
         "@maven//:com_google_code_findbugs_jsr305",
     ],
 )
+
+java_library(
+    name = "tink_bug_exception",
+    srcs = ["TinkBugException.java"],
+)
+
+android_library(
+    name = "tink_bug_exception-android",
+    srcs = ["TinkBugException.java"],
+)

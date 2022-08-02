@@ -23,6 +23,7 @@ import com.google.crypto.tink.internal.LegacyProtoParameters;
 import com.google.crypto.tink.internal.MutableSerializationRegistry;
 import com.google.crypto.tink.internal.ProtoKeySerialization;
 import com.google.crypto.tink.internal.ProtoParametersSerialization;
+import com.google.crypto.tink.internal.TinkBugException;
 import com.google.crypto.tink.monitoring.MonitoringAnnotations;
 import com.google.crypto.tink.proto.EncryptedKeyset;
 import com.google.crypto.tink.proto.KeyData;
@@ -479,7 +480,7 @@ public final class KeysetHandle {
           idRequirement);
     } catch (GeneralSecurityException e) {
       // Cannot happen -- this only happens if the idRequirement doesn't match OutputPrefixType
-      throw new IllegalStateException("Creating a protokey serialization failed", e);
+      throw new TinkBugException("Creating a protokey serialization failed", e);
     }
   }
 
@@ -499,7 +500,7 @@ public final class KeysetHandle {
         return new LegacyProtoKey(protoKeySerialization, InsecureSecretKeyAccess.get());
       } catch (GeneralSecurityException e2) {
         // Cannot happen -- this only throws if we have no access.
-        throw new IllegalStateException("Creating a LegacyProtoKey failed", e2);
+        throw new TinkBugException("Creating a LegacyProtoKey failed", e2);
       }
     }
   }
@@ -530,7 +531,8 @@ public final class KeysetHandle {
       return new KeysetHandle.Entry(
           key, parseStatus(protoKey.getStatus()), id, id == keyset.getPrimaryKeyId());
     } catch (GeneralSecurityException e) {
-      // Cannot happen -- this only happens if protoKey.getStatus() fails.
+      // This may happen if a keyset without status makes it here; we should reject
+      // such keysets earlier instead.
       throw new IllegalStateException("Creating an entry failed", e);
     }
   }
