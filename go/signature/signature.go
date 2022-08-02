@@ -17,7 +17,7 @@
 // Package signature provides implementations of the Signer and Verifier
 // primitives.
 //
-// To sign data using Tink you can use ECDSA or ED25519 key templates.
+// To sign data using Tink you can use ECDSA, ED25519 or RSA-SSA-PKCS1 key templates.
 package signature
 
 import (
