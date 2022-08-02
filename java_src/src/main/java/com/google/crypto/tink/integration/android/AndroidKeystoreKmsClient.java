@@ -20,6 +20,8 @@ import android.os.Build;
 import android.security.keystore.KeyGenParameterSpec;
 import android.security.keystore.KeyProperties;
 import android.util.Log;
+import androidx.annotation.ChecksSdkIntAtLeast;
+import androidx.annotation.RequiresApi;
 import com.google.crypto.tink.Aead;
 import com.google.crypto.tink.KmsClient;
 import com.google.crypto.tink.subtle.Random;
@@ -41,6 +43,7 @@ import javax.crypto.KeyGenerator;
  *
  * @since 1.0.0
  */
+@RequiresApi(23)
 public final class AndroidKeystoreKmsClient implements KmsClient {
   private static final String TAG = AndroidKeystoreKmsClient.class.getSimpleName();
   private static final int WAIT_TIME_MILLISECONDS_BEFORE_RETRY = 20;
@@ -255,6 +258,7 @@ public final class AndroidKeystoreKmsClient implements KmsClient {
     return aead;
   }
 
+  @ChecksSdkIntAtLeast(api = Build.VERSION_CODES.M)
   private static boolean isAtLeastM() {
     return Build.VERSION.SDK_INT >= Build.VERSION_CODES.M;
   }
