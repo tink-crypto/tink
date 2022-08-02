@@ -76,7 +76,7 @@ run_all_linux_tests() {
   fi
 
   run_linux_tests "javascript"
-  run_linux_tests "examples/cc"
+  run_linux_tests "cc/examples"
 
   local -a MANUAL_EXAMPLE_JAVA_TARGETS
   if [[ -n "${KOKORO_ROOT}" ]]; then

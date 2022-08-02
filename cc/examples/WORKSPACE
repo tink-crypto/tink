@@ -19,14 +19,13 @@ workspace(name = "examples_cc")
 
 local_repository(
     name = "tink_cc",
-    path = "../../cc",
+    path = "../",
 )
 # http_archive(
 #     name = "tink_cc",
 #     urls = ["https://github.com/google/tink/archive/master.zip"],
 #     strip_prefix = "tink-master/cc",
 # )
-
 
 # Load Tink dependencies.
 

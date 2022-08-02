@@ -13,7 +13,7 @@ obtaining a primitive, and using the primitive to do crypto.
 
 ```shell
 git clone https://github.com/google/tink
-cd tink/examples/cc
+cd tink/cc/examples
 bazel build ...
 echo "a message" > message.txt
 ./bazel-bin/digital_signatures/digital_signatures_cli gen-private-key private_keyset.bin

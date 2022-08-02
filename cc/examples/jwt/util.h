@@ -14,8 +14,8 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef EXAMPLES_CC_JWT_UTIL_H_
-#define EXAMPLES_CC_JWT_UTIL_H_
+#ifndef TINK_EXAMPLES_JWT_UTIL_H_
+#define TINK_EXAMPLES_JWT_UTIL_H_
 
 #include <fstream>
 #include <iostream>
@@ -44,4 +44,4 @@ std::string ReadFile(absl::string_view filename);
 // In case of errors writes a log message and aborts.
 void WriteFile(absl::string_view output, absl::string_view filename);
 
-#endif  // EXAMPLES_CC_JWT_UTIL_H_
+#endif  // TINK_EXAMPLES_JWT_UTIL_H_

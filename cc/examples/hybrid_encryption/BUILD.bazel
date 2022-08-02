@@ -65,7 +65,8 @@ cc_binary(
         "@tink_cc//:keyset_reader",
         "@tink_cc//config:tink_config",
         "@tink_cc//hybrid:hpke_config",
-        "@tink_cc//util:status",    ],
+        "@tink_cc//util:status",
+    ],
 )
 
 sh_test(

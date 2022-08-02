@@ -1,3 +1,5 @@
 # Ignore AWS-KMS and Cloud KMS integrations which are in thier own WORKSPACEs.
 integration/awskms
 integration/gcpkms
+# Ignore examples.
+examples

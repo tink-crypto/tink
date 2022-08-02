@@ -13,7 +13,7 @@ obtaining a primitive, and using the primitive to do crypto.
 ```shell
 # Build the code.
 git clone https://github.com/google/tink
-cd tink/examples/cc
+cd tink/cc/examples
 bazel build ...
 
 # Create some input.
@@ -45,7 +45,7 @@ cat foo-decrypted.txt
 
 # Clone the Tink repository.
 git clone https://github.com/google/tink
-cd tink/examples/cc/helloworld
+cd tink/cc/examples/helloworld
 
 # Build the hello world example.
 (

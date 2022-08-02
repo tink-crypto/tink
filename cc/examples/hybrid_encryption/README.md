@@ -13,7 +13,7 @@ obtaining a primitive, and using the primitive to do crypto.
 
 ```shell
 git clone https://github.com/google/tink
-cd tink/examples/cc
+cd tink/cc/examples
 bazel build ...
 echo "a message" > message.txt
 echo "context" > context_info.txt

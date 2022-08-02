@@ -12,7 +12,7 @@ obtaining a primitive, and using the primitive to do crypto.
 
 ```shell
 git clone https://github.com/google/tink
-cd tink/examples/cc
+cd tink/cc/examples
 bazel build ...
 ./bazel-bin/jwt/jwt_signature_cli gen-private-key private_keyset.bin
 ./bazel-bin/jwt/jwt_signature_cli get-public-key private_keyset.bin \
