@@ -16,6 +16,7 @@
 
 package com.google.crypto.tink.internal;
 
+import com.google.crypto.tink.util.Bytes;
 import java.security.SecureRandom;
 
 /** Helper functions used throughout Tink, for Tink internal use only. */
@@ -36,6 +37,29 @@ public final class Util {
               | (rand[3] & 0xff);
     }
     return result;
+  }
+
+  private static final byte toByteFromPrintableAscii(char c) {
+    if (c < '!' || c > '~') {
+      throw new TinkBugException("Not a printable ASCII character: " + c);
+    }
+    return (byte) c;
+  }
+
+  /**
+   * Converts a string {@code s} to a corresponding {@link Bytes} object.
+   *
+   * <p>The string must contain only printable ASCII characters; calling it in any other way is a
+   * considered a bug in Tink. Spaces are not allowed.
+   *
+   * @throws TinkBugException if s contains a character which is not a printable ASCII character.
+   */
+  public static final Bytes toBytesFromPrintableAscii(String s) {
+    byte[] result = new byte[s.length()];
+    for (int i = 0; i < s.length(); ++i) {
+      result[i] = toByteFromPrintableAscii(s.charAt(i));
+    }
+    return Bytes.copyFrom(result);
   }
 
   private Util() {}

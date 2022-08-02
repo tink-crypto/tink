@@ -16,7 +16,9 @@
 package com.google.crypto.tink.internal;
 
 import static com.google.common.truth.Truth.assertThat;
+import static org.junit.Assert.assertThrows;
 
+import com.google.crypto.tink.util.Bytes;
 import java.util.stream.IntStream;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -31,5 +33,21 @@ public final class UtilTest {
     assertThat(
             (int) IntStream.range(0, 4).map(unused -> Util.randKeyId()).boxed().distinct().count())
         .isAtLeast(2);
+  }
+
+  @Test
+  public void toBytesFromPrintableAscii_works() throws Exception {
+    String pureAsciiString =
+        "!\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~";
+    Bytes pureAsciiBytes = Bytes.copyFrom(pureAsciiString.getBytes("ASCII"));
+    assertThat(Util.toBytesFromPrintableAscii(pureAsciiString)).isEqualTo(pureAsciiBytes);
+  }
+
+  @Test
+  public void toBytesFromPrintableAscii_nonAscii_throws() throws Exception {
+    assertThrows(TinkBugException.class, () -> Util.toBytesFromPrintableAscii("\n"));
+    assertThrows(TinkBugException.class, () -> Util.toBytesFromPrintableAscii(" "));
+    assertThrows(TinkBugException.class, () -> Util.toBytesFromPrintableAscii("\0x7f"));
+    assertThrows(TinkBugException.class, () -> Util.toBytesFromPrintableAscii("ö"));
   }
 }

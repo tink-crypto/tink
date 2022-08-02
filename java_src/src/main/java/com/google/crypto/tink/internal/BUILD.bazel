@@ -38,11 +38,19 @@ android_library(
 java_library(
     name = "util",
     srcs = ["Util.java"],
+    deps = [
+        ":tink_bug_exception",
+        "//src/main/java/com/google/crypto/tink/util:bytes",
+    ],
 )
 
 android_library(
     name = "util-android",
     srcs = ["Util.java"],
+    deps = [
+        ":tink_bug_exception-android",
+        "//src/main/java/com/google/crypto/tink/util:bytes-android",
+    ],
 )
 
 java_library(
