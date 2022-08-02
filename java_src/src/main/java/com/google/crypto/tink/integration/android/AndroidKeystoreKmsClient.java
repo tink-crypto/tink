@@ -20,6 +20,8 @@ import android.os.Build;
 import android.security.keystore.KeyGenParameterSpec;
 import android.security.keystore.KeyProperties;
 import android.util.Log;
+import androidx.annotation.ChecksSdkIntAtLeast;
+import androidx.annotation.RequiresApi;
 import com.google.crypto.tink.Aead;
 import com.google.crypto.tink.KmsClient;
 import com.google.crypto.tink.subtle.Random;
@@ -53,6 +55,7 @@ public final class AndroidKeystoreKmsClient implements KmsClient {
   @GuardedBy("this")
   private KeyStore keyStore;
 
+  @RequiresApi(23)
   public AndroidKeystoreKmsClient() throws GeneralSecurityException {
     this(new Builder());
   }
@@ -64,6 +67,7 @@ public final class AndroidKeystoreKmsClient implements KmsClient {
    * @deprecated use {@link AndroidKeystoreKmsClient.Builder}.
    */
   @Deprecated
+  @RequiresApi(23)
   public AndroidKeystoreKmsClient(String uri) {
     this(new Builder().setKeyUri(uri));
   }
@@ -78,6 +82,7 @@ public final class AndroidKeystoreKmsClient implements KmsClient {
     String keyUri = null;
     KeyStore keyStore = null;
 
+    @RequiresApi(23)
     public Builder() {
       if (!isAtLeastM()) {
         throw new IllegalStateException("need Android Keystore on Android M or newer");
@@ -91,6 +96,7 @@ public final class AndroidKeystoreKmsClient implements KmsClient {
       }
     }
 
+    @RequiresApi(23)
     public Builder setKeyUri(String val) {
       if (val == null || !val.toLowerCase(Locale.US).startsWith(PREFIX)) {
         throw new IllegalArgumentException("val must start with " + PREFIX);
@@ -100,6 +106,7 @@ public final class AndroidKeystoreKmsClient implements KmsClient {
     }
 
     /** This is for testing only */
+    @RequiresApi(23)
     public Builder setKeyStore(KeyStore val) {
       if (val == null) {
         throw new IllegalArgumentException("val cannot be null");
@@ -119,6 +126,7 @@ public final class AndroidKeystoreKmsClient implements KmsClient {
    *     AndroidKeystoreKmsClient#PREFIX}.
    */
   @Override
+  @RequiresApi(23)
   public synchronized boolean doesSupport(String uri) {
     if (this.keyUri != null && this.keyUri.equals(uri)) {
       return true;
@@ -132,6 +140,7 @@ public final class AndroidKeystoreKmsClient implements KmsClient {
    * <p>Note that Android Keystore doesn't need credentials, thus the credential path is unused.
    */
   @Override
+  @RequiresApi(23)
   public KmsClient withCredentials(String unused) throws GeneralSecurityException {
     return new AndroidKeystoreKmsClient();
   }
@@ -142,6 +151,7 @@ public final class AndroidKeystoreKmsClient implements KmsClient {
    * <p>Note that Android Keystore does not use credentials.
    */
   @Override
+  @RequiresApi(23)
   public KmsClient withDefaultCredentials() throws GeneralSecurityException {
     return new AndroidKeystoreKmsClient();
   }
@@ -156,8 +166,8 @@ public final class AndroidKeystoreKmsClient implements KmsClient {
   public synchronized Aead getAead(String uri) throws GeneralSecurityException {
     if (this.keyUri != null && !this.keyUri.equals(uri)) {
       throw new GeneralSecurityException(
-          String.format("this client is bound to %s, cannot load keys bound to %s",
-              this.keyUri, uri));
+          String.format(
+              "this client is bound to %s, cannot load keys bound to %s", this.keyUri, uri));
     }
     Aead aead =
         new AndroidKeystoreAesGcm(
@@ -199,6 +209,7 @@ public final class AndroidKeystoreKmsClient implements KmsClient {
    *
    * <p>At the moment it can generate only AES256-GCM keys.
    */
+  @RequiresApi(Build.VERSION_CODES.M)
   public static Aead getOrGenerateNewAeadKey(String keyUri)
       throws GeneralSecurityException, IOException {
     AndroidKeystoreKmsClient client = new AndroidKeystoreKmsClient();
@@ -214,8 +225,8 @@ public final class AndroidKeystoreKmsClient implements KmsClient {
    *
    * <p>At the moment it can generate only AES256-GCM keys.
    */
-  public static void generateNewAeadKey(String keyUri)
-      throws GeneralSecurityException {
+  @RequiresApi(Build.VERSION_CODES.M)
+  public static void generateNewAeadKey(String keyUri) throws GeneralSecurityException {
     AndroidKeystoreKmsClient client = new AndroidKeystoreKmsClient();
     if (client.hasKey(keyUri)) {
       throw new IllegalArgumentException(
@@ -226,15 +237,15 @@ public final class AndroidKeystoreKmsClient implements KmsClient {
     }
 
     String keyId = Validators.validateKmsKeyUriAndRemovePrefix(PREFIX, keyUri);
-    KeyGenerator keyGenerator = KeyGenerator.getInstance(
-        KeyProperties.KEY_ALGORITHM_AES, "AndroidKeyStore");
+    KeyGenerator keyGenerator =
+        KeyGenerator.getInstance(KeyProperties.KEY_ALGORITHM_AES, "AndroidKeyStore");
     KeyGenParameterSpec spec =
-        new KeyGenParameterSpec.Builder(keyId,
-            KeyProperties.PURPOSE_ENCRYPT | KeyProperties.PURPOSE_DECRYPT)
-                .setKeySize(256)
-                .setBlockModes(KeyProperties.BLOCK_MODE_GCM)
-                .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE)
-                .build();
+        new KeyGenParameterSpec.Builder(
+                keyId, KeyProperties.PURPOSE_ENCRYPT | KeyProperties.PURPOSE_DECRYPT)
+            .setKeySize(256)
+            .setBlockModes(KeyProperties.BLOCK_MODE_GCM)
+            .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE)
+            .build();
     keyGenerator.init(spec);
     keyGenerator.generateKey();
   }
@@ -255,6 +266,7 @@ public final class AndroidKeystoreKmsClient implements KmsClient {
     return aead;
   }
 
+  @ChecksSdkIntAtLeast(api = Build.VERSION_CODES.M)
   private static boolean isAtLeastM() {
     return Build.VERSION.SDK_INT >= Build.VERSION_CODES.M;
   }

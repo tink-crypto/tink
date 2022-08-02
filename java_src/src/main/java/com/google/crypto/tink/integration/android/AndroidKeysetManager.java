@@ -19,6 +19,7 @@ package com.google.crypto.tink.integration.android;
 import android.content.Context;
 import android.os.Build;
 import android.util.Log;
+import androidx.annotation.ChecksSdkIntAtLeast;
 import com.google.crypto.tink.Aead;
 import com.google.crypto.tink.CleartextKeysetHandle;
 import com.google.crypto.tink.KeyTemplate;
@@ -332,7 +333,9 @@ public final class AndroidKeysetManager {
     }
   }
 
-  /** @return a {@link KeysetHandle} of the managed keyset */
+  /**
+   * @return a {@link KeysetHandle} of the managed keyset
+   */
   public synchronized KeysetHandle getKeysetHandle() throws GeneralSecurityException {
     return keysetManager.getKeysetHandle();
   }
@@ -469,6 +472,7 @@ public final class AndroidKeysetManager {
     }
   }
 
+  @ChecksSdkIntAtLeast(api = Build.VERSION_CODES.M)
   private boolean shouldUseKeystore() {
     return masterKey != null && isAtLeastM();
   }
@@ -488,6 +492,7 @@ public final class AndroidKeysetManager {
     }
   }
 
+  @ChecksSdkIntAtLeast(api = Build.VERSION_CODES.M)
   private static boolean isAtLeastM() {
     return Build.VERSION.SDK_INT >= Build.VERSION_CODES.M;
   }
