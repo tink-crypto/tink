@@ -16,14 +16,16 @@
 
 #include "tink/hybrid/internal/hpke_encrypt.h"
 
+#include <memory>
 #include <string>
+#include <vector>
 
 #include "gtest/gtest.h"
 #include "absl/status/status.h"
+#include "absl/strings/str_cat.h"
 #include "tink/hybrid/internal/hpke_test_util.h"
-#include "tink/util/status.h"
+#include "tink/hybrid/internal/hpke_util.h"
 #include "tink/util/test_matchers.h"
-#include "tink/util/test_util.h"
 #include "proto/hpke.pb.h"
 
 namespace crypto {
@@ -36,13 +38,17 @@ using ::crypto::tink::internal::CreateHpkeTestParams;
 using ::crypto::tink::internal::DefaultHpkeTestParams;
 using ::crypto::tink::internal::HpkeTestParams;
 using ::crypto::tink::test::IsOk;
+using ::crypto::tink::test::IsOkAndHolds;
 using ::crypto::tink::test::StatusIs;
 using ::google::crypto::tink::HpkeAead;
 using ::google::crypto::tink::HpkeKdf;
 using ::google::crypto::tink::HpkeKem;
 using ::google::crypto::tink::HpkeParams;
 using ::google::crypto::tink::HpkePublicKey;
+using ::testing::SizeIs;
 using ::testing::Values;
+
+constexpr int kTagLength = 16;  // Tag length (in bytes) for GCM and Poly1305.
 
 class HpkeEncryptTest : public testing::TestWithParam<HpkeParams> {};
 
@@ -57,6 +63,10 @@ INSTANTIATE_TEST_SUITE_P(
 
 TEST_P(HpkeEncryptTest, SetupSenderContextAndEncrypt) {
   HpkeParams hpke_params = GetParam();
+  util::StatusOr<uint32_t> encapsulated_key_length =
+      internal::HpkeEncapsulatedKeyLength(hpke_params.kem());
+  ASSERT_THAT(encapsulated_key_length, IsOk());
+
   util::StatusOr<HpkeTestParams> params = CreateHpkeTestParams(hpke_params);
   ASSERT_THAT(params, IsOk());
   HpkePublicKey recipient_key =
@@ -71,9 +81,12 @@ TEST_P(HpkeEncryptTest, SetupSenderContextAndEncrypt) {
     for (const std::string& context_info : context_infos) {
       SCOPED_TRACE(absl::StrCat("plaintext: '", plaintext, "', context_info: '",
                                 context_info, "'"));
-      util::StatusOr<std::string> encryption =
+      int expected_ciphertext_length =
+          *encapsulated_key_length + plaintext.size() + kTagLength;
+      util::StatusOr<std::string> encryption_result =
           (*hpke_encrypt)->Encrypt(plaintext, context_info);
-      ASSERT_THAT(encryption, IsOk());
+      EXPECT_THAT(encryption_result,
+                  IsOkAndHolds(SizeIs(expected_ciphertext_length)));
     }
   }
 }
@@ -99,10 +112,10 @@ TEST_P(HpkeEncryptWithBadParamTest, BadParamFails) {
       HpkeEncrypt::New(recipient_key);
   ASSERT_THAT(hpke_encrypt, IsOk());
 
-  util::StatusOr<std::string> encryption =
+  util::StatusOr<std::string> encryption_result =
       (*hpke_encrypt)->Encrypt(params.plaintext, params.application_info);
 
-  ASSERT_THAT(encryption.status(),
+  EXPECT_THAT(encryption_result.status(),
               StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
@@ -117,7 +130,7 @@ TEST(HpkeEncryptWithZeroLengthPublicKey, ZeroLengthPublicKeyFails) {
   util::StatusOr<std::unique_ptr<HybridEncrypt>> hpke_encrypt =
       HpkeEncrypt::New(recipient_key);
 
-  ASSERT_THAT(hpke_encrypt.status(),
+  EXPECT_THAT(hpke_encrypt.status(),
               StatusIs(absl::StatusCode::kInvalidArgument));
 }
 

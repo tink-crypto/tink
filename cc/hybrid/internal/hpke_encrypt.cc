@@ -16,11 +16,12 @@
 
 #include "tink/hybrid/internal/hpke_encrypt.h"
 
+#include <memory>
 #include <string>
 
 #include "absl/status/status.h"
-#include "absl/strings/str_cat.h"
-#include "tink/hybrid/internal/hpke_encrypt_boringssl.h"
+#include "tink/hybrid/internal/hpke_context.h"
+#include "tink/hybrid/internal/hpke_util.h"
 #include "proto/hpke.pb.h"
 
 namespace crypto {
@@ -43,15 +44,21 @@ util::StatusOr<std::unique_ptr<HybridEncrypt>> HpkeEncrypt::New(
 
 util::StatusOr<std::string> HpkeEncrypt::Encrypt(
     absl::string_view plaintext, absl::string_view context_info) const {
-  util::StatusOr<std::unique_ptr<internal::HpkeEncryptBoringSsl>>
-      sender_context = internal::HpkeEncryptBoringSsl::New(
-          recipient_public_key_.params(), recipient_public_key_.public_key(),
-          context_info);
-  if (!sender_context.ok()) {
-    return sender_context.status();
-  }
-  return (*sender_context)
-      ->EncapsulateKeyThenEncrypt(plaintext, /*associated_data=*/"");
+  util::StatusOr<internal::HpkeParams> params =
+      internal::HpkeParamsProtoToStruct(recipient_public_key_.params());
+  if (!params.ok()) return params.status();
+
+  util::StatusOr<std::unique_ptr<internal::HpkeContext>> sender_context =
+      internal::HpkeContext::SetupSender(
+          *params, recipient_public_key_.public_key(), context_info);
+  if (!sender_context.ok()) return sender_context.status();
+
+  util::StatusOr<std::string> ciphertext =
+      (*sender_context)->Seal(plaintext, /*associated_data=*/"");
+  if (!ciphertext.ok()) return ciphertext.status();
+
+  return internal::ConcatenatePayload((*sender_context)->EncapsulatedKey(),
+                                      *ciphertext);
 }
 
 }  // namespace tink

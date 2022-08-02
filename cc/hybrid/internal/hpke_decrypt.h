@@ -21,9 +21,8 @@
 #include <string>
 #include <utility>
 
-#include "tink/hybrid/internal/hpke_decrypt_boringssl.h"
-#include "tink/hybrid/internal/hpke_key_boringssl.h"
 #include "tink/hybrid_decrypt.h"
+#include "tink/util/secret_data.h"
 #include "tink/util/statusor.h"
 #include "proto/hpke.pb.h"
 
@@ -32,6 +31,12 @@ namespace tink {
 
 class HpkeDecrypt : public HybridDecrypt {
  public:
+  // Copyable and movable.
+  HpkeDecrypt(const HpkeDecrypt& other) = default;
+  HpkeDecrypt& operator=(const HpkeDecrypt& other) = default;
+  HpkeDecrypt(HpkeDecrypt&& other) = default;
+  HpkeDecrypt& operator=(HpkeDecrypt&& other) = default;
+
   static crypto::tink::util::StatusOr<std::unique_ptr<HybridDecrypt>> New(
       const google::crypto::tink::HpkePrivateKey& recipient_private_key);
 
@@ -41,14 +46,12 @@ class HpkeDecrypt : public HybridDecrypt {
 
  private:
   HpkeDecrypt(const google::crypto::tink::HpkeParams& hpke_params,
-              std::unique_ptr<crypto::tink::internal::HpkeKeyBoringSsl>
-                  recipient_private_key)
+              const util::SecretData& recipient_private_key)
       : hpke_params_(hpke_params),
-        recipient_private_key_(std::move(recipient_private_key)){}
+        recipient_private_key_(recipient_private_key) {}
 
   google::crypto::tink::HpkeParams hpke_params_;
-  std::unique_ptr<crypto::tink::internal::HpkeKeyBoringSsl>
-      recipient_private_key_;
+  util::SecretData recipient_private_key_;
 };
 
 }  // namespace tink

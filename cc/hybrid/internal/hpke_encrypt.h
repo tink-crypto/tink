@@ -20,7 +20,6 @@
 #include <memory>
 #include <string>
 
-#include "tink/hybrid/internal/hpke_encrypt_boringssl.h"
 #include "tink/hybrid_encrypt.h"
 #include "tink/util/statusor.h"
 #include "proto/hpke.pb.h"
@@ -30,6 +29,12 @@ namespace tink {
 
 class HpkeEncrypt : public HybridEncrypt {
  public:
+  // Copyable and movable.
+  HpkeEncrypt(const HpkeEncrypt& other) = default;
+  HpkeEncrypt& operator=(const HpkeEncrypt& other) = default;
+  HpkeEncrypt(HpkeEncrypt&& other) = default;
+  HpkeEncrypt& operator=(HpkeEncrypt&& other) = default;
+
   static crypto::tink::util::StatusOr<std::unique_ptr<HybridEncrypt>> New(
       const google::crypto::tink::HpkePublicKey& recipient_public_key);
 

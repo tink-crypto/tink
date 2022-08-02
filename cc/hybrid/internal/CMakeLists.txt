@@ -42,13 +42,11 @@ tink_cc_library(
     hpke_decrypt.cc
     hpke_decrypt.h
   DEPS
-    tink::hybrid::internal::hpke_decrypt_boringssl
-    tink::hybrid::internal::hpke_key_boringssl
+    tink::hybrid::internal::hpke_context
+    tink::hybrid::internal::hpke_util
     absl::status
-    absl::strings
     tink::core::hybrid_decrypt
-    tink::internal::ec_util
-    tink::subtle::common_enums
+    tink::util::secret_data
     tink::util::status
     tink::util::statusor
     tink::proto::hpke_cc_proto
@@ -81,9 +79,9 @@ tink_cc_library(
     hpke_encrypt.cc
     hpke_encrypt.h
   DEPS
-    tink::hybrid::internal::hpke_encrypt_boringssl
+    tink::hybrid::internal::hpke_context
+    tink::hybrid::internal::hpke_util
     absl::status
-    absl::strings
     tink::core::hybrid_encrypt
     tink::util::statusor
     tink::proto::hpke_cc_proto
@@ -326,9 +324,8 @@ tink_cc_test(
     gmock
     absl::status
     absl::strings
-    tink::util::status
+    tink::util::statusor
     tink::util::test_matchers
-    tink::util::test_util
     tink::proto::hpke_cc_proto
   TAGS
     exclude_if_openssl
@@ -360,11 +357,11 @@ tink_cc_test(
   DEPS
     tink::hybrid::internal::hpke_encrypt
     tink::hybrid::internal::hpke_test_util
+    tink::hybrid::internal::hpke_util
     gmock
     absl::status
-    tink::util::status
+    absl::strings
     tink::util::test_matchers
-    tink::util::test_util
     tink::proto::hpke_cc_proto
   TAGS
     exclude_if_openssl
