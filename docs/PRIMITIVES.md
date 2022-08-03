@@ -49,7 +49,7 @@ JavaScript is currently under development.
 |                    | AES-EAX                           | yes      | yes                 | yes               | yes             | **no**     | yes        |
 |                    | KMS Envelope                      | yes      | yes                 | yes               | **no**          | yes        | yes        |
 |                    | CHACHA20-POLY1305                 | yes      | **no**              | **no**            | **no**          | yes        | **no**     |
-|                    | XCHACHA-POLY1305                  | yes      | yes                 | **no**            | yes             | yes        | yes        |
+|                    | XCHACHA20-POLY1305                | yes      | yes                 | **no**            | yes             | yes        | yes        |
 | Streaming AEAD     | AES-GCM-HKDF-STREAMING            | yes      | yes                 | yes               | **no**          | yes        | yes        |
 |                    | AES-CTR-HMAC-STREAMING            | yes      | yes                 | yes               | **no**          | yes        | yes        |
 | Deterministic AEAD | AES-SIV                           | yes      | yes                 | yes               | yes             | yes        | yes        |

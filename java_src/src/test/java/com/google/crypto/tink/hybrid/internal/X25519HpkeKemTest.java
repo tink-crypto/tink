@@ -110,7 +110,7 @@ public final class X25519HpkeKemTest {
   }
 
   @Test
-  public void encapsulate_succeedsWithX25519HkdfSha256ChaChaPoly1305()
+  public void encapsulate_succeedsWithX25519HkdfSha256ChaCha20Poly1305()
       throws GeneralSecurityException {
     encapsulate(
         HpkeUtil.BASE_MODE,
@@ -165,7 +165,7 @@ public final class X25519HpkeKemTest {
   }
 
   @Test
-  public void decapsulate_succeedsWithX25519HkdfSha256ChaChaPoly1305()
+  public void decapsulate_succeedsWithX25519HkdfSha256ChaCha20Poly1305()
       throws GeneralSecurityException {
     decapsulate(
         HpkeUtil.BASE_MODE,
