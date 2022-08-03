@@ -18,6 +18,7 @@ package com.google.crypto.tink.internal;
 
 import com.google.crypto.tink.util.Bytes;
 import java.security.SecureRandom;
+import javax.annotation.Nullable;
 
 /** Helper functions used throughout Tink, for Tink internal use only. */
 public final class Util {
@@ -60,6 +61,12 @@ public final class Util {
       result[i] = toByteFromPrintableAscii(s.charAt(i));
     }
     return Bytes.copyFrom(result);
+  }
+
+  /** Returns the current Andrdoid API level as integer or null if we do not run on Android. */
+  @Nullable
+  public static Integer getAndroidApiLevel() {
+    return BuildDispatchedCode.getApiLevel();
   }
 
   private Util() {}

@@ -50,4 +50,15 @@ public final class UtilTest {
     assertThrows(TinkBugException.class, () -> Util.toBytesFromPrintableAscii("\0x7f"));
     assertThrows(TinkBugException.class, () -> Util.toBytesFromPrintableAscii("ö"));
   }
+
+  @Test
+  public void testGetAndroidApiLevel() throws Exception {
+    try {
+      Class<?> buildVersion = Class.forName("android.os.Build$VERSION");
+      int expectedVersion = buildVersion.getDeclaredField("SDK_INT").getInt(null);
+      assertThat(Util.getAndroidApiLevel()).isEqualTo(expectedVersion);
+    } catch (ReflectiveOperationException e) {
+      assertThat(Util.getAndroidApiLevel()).isEqualTo(null);
+    }
+  }
 }

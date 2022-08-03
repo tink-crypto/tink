@@ -1,0 +1,9 @@
+licenses(["notice"])
+
+package(default_visibility = ["//:__subpackages__"])
+
+android_library(
+    name = "build_dispatched_code",
+    srcs = ["BuildDispatchedCode.java"],
+    deps = ["@maven//:com_google_code_findbugs_jsr305"],
+)

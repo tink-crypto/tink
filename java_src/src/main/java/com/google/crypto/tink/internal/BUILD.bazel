@@ -39,8 +39,10 @@ java_library(
     name = "util",
     srcs = ["Util.java"],
     deps = [
+        ":build_dispatched_code",
         ":tink_bug_exception",
         "//src/main/java/com/google/crypto/tink/util:bytes",
+        "@maven//:com_google_code_findbugs_jsr305",
     ],
 )
 
@@ -50,6 +52,8 @@ android_library(
     deps = [
         ":tink_bug_exception-android",
         "//src/main/java/com/google/crypto/tink/util:bytes-android",
+        "//src_android/main/java/com/google/crypto/tink/internal:build_dispatched_code",
+        "@maven//:com_google_code_findbugs_jsr305",
     ],
 )
 
@@ -467,4 +471,10 @@ java_library(
 android_library(
     name = "tink_bug_exception-android",
     srcs = ["TinkBugException.java"],
+)
+
+java_library(
+    name = "build_dispatched_code",
+    srcs = ["BuildDispatchedCode.java"],
+    deps = ["@maven//:com_google_code_findbugs_jsr305"],
 )

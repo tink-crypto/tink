@@ -16,12 +16,14 @@
 
 package com.google.crypto.tink.subtle;
 
+import com.google.crypto.tink.internal.Util;
 import com.google.crypto.tink.subtle.Enums.HashType;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.security.GeneralSecurityException;
 import java.security.MessageDigest;
 import java.util.Arrays;
+import javax.annotation.Nullable;
 
 /** Helper methods. */
 public final class SubtleUtil {
@@ -86,14 +88,19 @@ public final class SubtleUtil {
     return "The Android Project".equals(System.getProperty("java.vendor"));
   }
 
-  /** Returns the Android API level or -1 if Tink isn't running on Android */
+  /**
+   * Returns the Android API level or -1 if Tink isn't running on Android.
+   *
+   * @deprecated Please reimplement this method in your code instead. From within Tink, use {@code
+   *     Util.getAndroidApiLevel} directly.
+   */
+  @Deprecated
   public static int androidApiLevel() {
-    try {
-      Class<?> buildVersion = Class.forName("android.os.Build$VERSION");
-      return buildVersion.getDeclaredField("SDK_INT").getInt(null);
-    } catch (ClassNotFoundException | NoSuchFieldException | IllegalAccessException e) {
-      return -1;
+    @Nullable Integer androidApiLevel = Util.getAndroidApiLevel();
+    if (androidApiLevel != null) {
+      return androidApiLevel;
     }
+    return -1;
   }
 
   /**

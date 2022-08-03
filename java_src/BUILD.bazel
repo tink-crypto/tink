@@ -137,6 +137,7 @@ gen_maven_jar_rules(
         "//src/main/java/com/google/crypto/tink/hybrid/subtle:rsa_kem",
         "//src/main/java/com/google/crypto/tink/hybrid/subtle:rsa_kem_hybrid_decrypt",
         "//src/main/java/com/google/crypto/tink/hybrid/subtle:rsa_kem_hybrid_encrypt",
+        "//src/main/java/com/google/crypto/tink/internal:build_dispatched_code",
         "//src/main/java/com/google/crypto/tink/internal:key_parser",
         "//src/main/java/com/google/crypto/tink/internal:key_serializer",
         "//src/main/java/com/google/crypto/tink/internal:key_status_type_proto_converter",
