@@ -1,1 +1,3 @@
-This folder contains applications that depend on or extend Tink's functionality.
+# Tink Java Apps
+
+It contains extensions and applications of Tink Java.
