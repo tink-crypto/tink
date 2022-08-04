@@ -168,6 +168,33 @@ public final class PrimitiveSet<P> {
     }
   }
 
+  private static <P> Entry<P> addEntryToMap(
+      P primitive, Keyset.Key key, ConcurrentMap<Prefix, List<Entry<P>>> primitives)
+      throws GeneralSecurityException {
+    Parameters parameters =
+        new SimpleParameters(key.getKeyData().getTypeUrl(), key.getOutputPrefixType());
+    Entry<P> entry =
+        new Entry<P>(
+            primitive,
+            CryptoFormat.getOutputPrefix(key),
+            key.getStatus(),
+            key.getOutputPrefixType(),
+            key.getKeyId(),
+            parameters);
+    List<Entry<P>> list = new ArrayList<>();
+    list.add(entry);
+    // Cannot use byte[] as keys in hash map, convert to Prefix wrapper class.
+    Prefix identifier = new Prefix(entry.getIdentifier());
+    List<Entry<P>> existing = primitives.put(identifier, Collections.unmodifiableList(list));
+    if (existing != null) {
+      List<Entry<P>> newList = new ArrayList<>();
+      newList.addAll(existing);
+      newList.add(entry);
+      primitives.put(identifier, Collections.unmodifiableList(newList));
+    }
+    return entry;
+  }
+
   /** @return the entry with the primary primitive. */
   @Nullable
   public Entry<P> getPrimary() {
@@ -285,28 +312,7 @@ public final class PrimitiveSet<P> {
     if (key.getStatus() != KeyStatusType.ENABLED) {
       throw new GeneralSecurityException("only ENABLED key is allowed");
     }
-    Parameters parameters =
-        new SimpleParameters(key.getKeyData().getTypeUrl(), key.getOutputPrefixType());
-    Entry<P> entry =
-        new Entry<P>(
-            primitive,
-            CryptoFormat.getOutputPrefix(key),
-            key.getStatus(),
-            key.getOutputPrefixType(),
-            key.getKeyId(),
-            parameters);
-    List<Entry<P>> list = new ArrayList<>();
-    list.add(entry);
-    // Cannot use byte[] as keys in hash map, convert to Prefix wrapper class.
-    Prefix identifier = new Prefix(entry.getIdentifier());
-    List<Entry<P>> existing = primitives.put(identifier, Collections.unmodifiableList(list));
-    if (existing != null) {
-      List<Entry<P>> newList = new ArrayList<>();
-      newList.addAll(existing);
-      newList.add(entry);
-      primitives.put(identifier, Collections.unmodifiableList(newList));
-    }
-    return entry;
+    return addEntryToMap(primitive, key, primitives);
   }
 
   public Class<P> getPrimitiveClass() {
@@ -371,27 +377,7 @@ public final class PrimitiveSet<P> {
       if (key.getStatus() != KeyStatusType.ENABLED) {
         throw new GeneralSecurityException("only ENABLED key is allowed");
       }
-      Parameters parameters =
-          new SimpleParameters(key.getKeyData().getTypeUrl(), key.getOutputPrefixType());
-      Entry<P> entry =
-          new Entry<P>(
-              primitive,
-              CryptoFormat.getOutputPrefix(key),
-              key.getStatus(),
-              key.getOutputPrefixType(),
-              key.getKeyId(),
-              parameters);
-      List<Entry<P>> list = new ArrayList<>();
-      list.add(entry);
-      // Cannot use byte[] as keys in hash map, convert to Prefix wrapper class.
-      Prefix identifier = new Prefix(entry.getIdentifier());
-      List<Entry<P>> existing = primitives.put(identifier, Collections.unmodifiableList(list));
-      if (existing != null) {
-        List<Entry<P>> newList = new ArrayList<>();
-        newList.addAll(existing);
-        newList.add(entry);
-        primitives.put(identifier, Collections.unmodifiableList(newList));
-      }
+      Entry<P> entry = addEntryToMap(primitive, key, primitives);
       if (asPrimary) {
         if (this.primary != null) {
           throw new IllegalStateException("you cannot set two primary primitives");
