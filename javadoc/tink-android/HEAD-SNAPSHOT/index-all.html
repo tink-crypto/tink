@@ -1066,7 +1066,9 @@
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/subtle/SubtleUtil.html#androidApiLevel--">androidApiLevel()</a></span> - Static method in class com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/SubtleUtil.html" title="class in com.google.crypto.tink.subtle">SubtleUtil</a></dt>
 <dd>
-<div class="block">Returns the Android API level or -1 if Tink isn't running on Android</div>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>
+<div class="block"><span class="deprecationComment">Please reimplement this method in your code instead. From within Tink, use <code>Util.getAndroidApiLevel</code> directly.</span></div>
+</div>
 </dd>
 <dt><a href="com/google/crypto/tink/integration/android/AndroidKeysetManager.html" title="class in com.google.crypto.tink.integration.android"><span class="typeNameLink">AndroidKeysetManager</span></a> - Class in <a href="com/google/crypto/tink/integration/android/package-summary.html">com.google.crypto.tink.integration.android</a></dt>
 <dd>
@@ -4384,6 +4386,10 @@
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/PrimitiveSet.html#getAll--">getAll()</a></span> - Method in class com.google.crypto.tink.<a href="com/google/crypto/tink/PrimitiveSet.html" title="class in com.google.crypto.tink">PrimitiveSet</a></dt>
 <dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/internal/Util.html#getAndroidApiLevel--">getAndroidApiLevel()</a></span> - Static method in class com.google.crypto.tink.internal.<a href="com/google/crypto/tink/internal/Util.html" title="class in com.google.crypto.tink.internal">Util</a></dt>
+<dd>
+<div class="block">Returns the current Andrdoid API level as integer or null if we do not run on Android.</div>
+</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/monitoring/MonitoringKeysetInfo.html#getAnnotations--">getAnnotations()</a></span> - Method in class com.google.crypto.tink.monitoring.<a href="com/google/crypto/tink/monitoring/MonitoringKeysetInfo.html" title="class in com.google.crypto.tink.monitoring">MonitoringKeysetInfo</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/PrimitiveSet.html#getAnnotations--">getAnnotations()</a></span> - Method in class com.google.crypto.tink.<a href="com/google/crypto/tink/PrimitiveSet.html" title="class in com.google.crypto.tink">PrimitiveSet</a></dt>
@@ -18395,6 +18401,22 @@
 <dd>
 <div class="block">Version of the current Tink release.</div>
 </dd>
+<dt><a href="com/google/crypto/tink/internal/TinkBugException.html" title="class in com.google.crypto.tink.internal"><span class="typeNameLink">TinkBugException</span></a> - Exception in <a href="com/google/crypto/tink/internal/package-summary.html">com.google.crypto.tink.internal</a></dt>
+<dd>
+<div class="block">An exception to be thrown in case there is a bug in Tink.</div>
+</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/internal/TinkBugException.html#TinkBugException-java.lang.String-">TinkBugException(String)</a></span> - Constructor for exception com.google.crypto.tink.internal.<a href="com/google/crypto/tink/internal/TinkBugException.html" title="class in com.google.crypto.tink.internal">TinkBugException</a></dt>
+<dd>
+<div class="block">Constructs a new TinkBugException with the specified detail message.</div>
+</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/internal/TinkBugException.html#TinkBugException-java.lang.String-java.lang.Throwable-">TinkBugException(String, Throwable)</a></span> - Constructor for exception com.google.crypto.tink.internal.<a href="com/google/crypto/tink/internal/TinkBugException.html" title="class in com.google.crypto.tink.internal">TinkBugException</a></dt>
+<dd>
+<div class="block">Constructs a new TinkBugException with the specified detail message and cause.</div>
+</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/internal/TinkBugException.html#TinkBugException-java.lang.Throwable-">TinkBugException(Throwable)</a></span> - Constructor for exception com.google.crypto.tink.internal.<a href="com/google/crypto/tink/internal/TinkBugException.html" title="class in com.google.crypto.tink.internal">TinkBugException</a></dt>
+<dd>
+<div class="block">Constructs a new TinkBugException as a wrapper on a root cause</div>
+</dd>
 <dt><a href="com/google/crypto/tink/config/TinkConfig.html" title="class in com.google.crypto.tink.config"><span class="typeNameLink">TinkConfig</span></a> - Class in <a href="com/google/crypto/tink/config/package-summary.html">com.google.crypto.tink.config</a></dt>
 <dd>
 <div class="block"><span class="deprecatedLabel">Deprecated.</span>
@@ -18435,6 +18457,10 @@
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/util/SecretBytes.html#toByteArray-com.google.crypto.tink.SecretKeyAccess-">toByteArray(SecretKeyAccess)</a></span> - Method in class com.google.crypto.tink.util.<a href="com/google/crypto/tink/util/SecretBytes.html" title="class in com.google.crypto.tink.util">SecretBytes</a></dt>
 <dd>
 <div class="block">Returns a copy of the bytes wrapped by this object.</div>
+</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/internal/Util.html#toBytesFromPrintableAscii-java.lang.String-">toBytesFromPrintableAscii(String)</a></span> - Static method in class com.google.crypto.tink.internal.<a href="com/google/crypto/tink/internal/Util.html" title="class in com.google.crypto.tink.internal">Util</a></dt>
+<dd>
+<div class="block">Converts a string <code>s</code> to a corresponding <a href="com/google/crypto/tink/util/Bytes.html" title="class in com.google.crypto.tink.util"><code>Bytes</code></a> object.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/signature/internal/SigUtil.html#toCurveType-com.google.crypto.tink.proto.EllipticCurveType-">toCurveType(EllipticCurveType)</a></span> - Static method in class com.google.crypto.tink.signature.internal.<a href="com/google/crypto/tink/signature/internal/SigUtil.html" title="class in com.google.crypto.tink.signature.internal">SigUtil</a></dt>
 <dd>
