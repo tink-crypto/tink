@@ -22,7 +22,7 @@ $ tinkey create-public-keyset --in hybrid_test_private_keyset.json \
 
 ```shell
 $ git clone https://github.com/google/tink
-$ cd tink/examples/python
+$ cd tink/python/examples
 $ bazel build ...
 ```
 

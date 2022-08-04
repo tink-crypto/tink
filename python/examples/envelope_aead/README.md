@@ -35,7 +35,7 @@ This envelope encryption example uses a Cloud KMS key as a key-encryption key
 
 ```shell
 $ git clone https://github.com/google/tink
-$ cd tink/examples/python
+$ cd tink/python/examples
 $ bazel build ...
 ```
 

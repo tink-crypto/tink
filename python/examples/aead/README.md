@@ -19,7 +19,7 @@ $ tinkey create-keyset --key-template AES128_GCM --out-format JSON \
 
 ```shell
 $ git clone https://github.com/google/tink
-$ cd tink/examples/python
+$ cd tink/python/examples
 $ bazel build ...
 ```
 

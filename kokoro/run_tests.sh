@@ -104,7 +104,7 @@ run_all_linux_tests() {
     )
   fi
   readonly MANUAL_EXAMPLE_PYTHON_TARGETS
-  run_linux_tests "examples/python" "${MANUAL_EXAMPLE_PYTHON_TARGETS[@]}"
+  run_linux_tests "python/examples" "${MANUAL_EXAMPLE_PYTHON_TARGETS[@]}"
 }
 
 run_macos_tests() {
@@ -232,9 +232,9 @@ main() {
     fi
 
     ./kokoro/testutils/copy_credentials.sh "examples/java_src/testdata"
-    ./kokoro/testutils/copy_credentials.sh "examples/python/testdata"
     ./kokoro/testutils/copy_credentials.sh "go/testdata"
     ./kokoro/testutils/copy_credentials.sh "java_src/testdata"
+    ./kokoro/testutils/copy_credentials.sh "python/examples/testdata"
     ./kokoro/testutils/copy_credentials.sh "python/testdata"
     ./kokoro/testutils/copy_credentials.sh "tools/testdata"
 

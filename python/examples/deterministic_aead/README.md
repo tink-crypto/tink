@@ -19,7 +19,7 @@ $ tinkey create-keyset --key-template AES256_SIV --out-format JSON \
 
 ```shell
 $ git clone https://github.com/google/tink
-$ cd tink/examples/python
+$ cd tink/python/examples
 $ bazel build ...
 ```
 

@@ -23,7 +23,7 @@ Build the examples:
 
 ```shell
 $ git clone https://github.com/google/tink
-$ cd tink/examples/python
+$ cd tink/python/examples
 $ bazel build ...
 ```
 
