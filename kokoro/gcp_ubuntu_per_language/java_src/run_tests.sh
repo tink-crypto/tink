@@ -36,6 +36,8 @@ set -euo pipefail
 test_build_bazel_file() {
   pushd java_src
   local main_dir="//src/main/java/com/google/crypto/tink"
+  # src_android contains android_library targets where the source file differes for java and android.
+  local android_dir="//src_android/main/java/com/google/crypto/tink"
   local integration_dir="${main_dir}/integration"
 
   # Targets in //src/main/java/com/google/crypto/tink of type "java_library",
@@ -49,6 +51,12 @@ test_build_bazel_file() {
   # excluding testonly targets
   local all_android_libs="$(mktemp)"
   bazel query "kind(android_library,${main_dir}/...) except attr(testonly,1,${main_dir}/...)" > "${all_android_libs}"
+
+  # Targets in //src_android/main/java/com/google/crypto/tink of type "android_library",
+  # excluding:
+  #   * testonly targets
+  bazel query "kind(android_library,${android_dir}/...) except attr(testonly,1,${main_dir}/...)" >> "${all_android_libs}"
+
 
   # Targets in //src/main/java/com/google/crypto/tink/integration/awskms of
   # type "java_library"

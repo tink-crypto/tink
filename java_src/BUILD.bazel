@@ -606,6 +606,7 @@ gen_maven_jar_rules(
         "//src/main/java/com/google/crypto/tink/util:bytes-android",
         "//src/main/java/com/google/crypto/tink/util:keys_downloader-android",
         "//src/main/java/com/google/crypto/tink/util:secret_bytes-android",
+        "//src_android/main/java/com/google/crypto/tink/internal:build_dispatched_code",
     ],
 )
 
