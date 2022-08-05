@@ -1,4 +1,4 @@
-workspace(name = "examples_java")
+workspace(name = "tink_java_examples")
 
 # The local_repository() rule is used below because the workspaces referenced
 # are all located within the Tink git repository.
@@ -18,7 +18,7 @@ workspace(name = "examples_java")
 
 local_repository(
     name = "tink_java",
-    path = "../../java_src",
+    path = "../",
 )
 # http_archive(
 #     name = "tink_java",

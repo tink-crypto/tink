@@ -67,7 +67,7 @@ test_java_snapshot() {
   local -r test_util="tools/testing/cross_language/test_util.sh"
   source "${test_util}" || exit 1
 
-  local -r pom_file="examples/java_src/helloworld/pom.xml"
+  local -r pom_file="java_src/examples/helloworld/pom.xml"
 
   mvn "${mvn_flags[@]}" package -f "${pom_file}"
 

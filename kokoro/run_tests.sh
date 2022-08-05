@@ -87,7 +87,7 @@ run_all_linux_tests() {
     )
   fi
   readonly MANUAL_EXAMPLE_JAVA_TARGETS
-  run_linux_tests "examples/java_src" "${MANUAL_EXAMPLE_JAVA_TARGETS[@]}"
+  run_linux_tests "java_src/examples" "${MANUAL_EXAMPLE_JAVA_TARGETS[@]}"
 
   ## Install Tink and its dependencies via pip for the examples/python tests.
   install_tink_via_pip
@@ -231,8 +231,8 @@ main() {
       pip3 install --user protobuf
     fi
 
-    ./kokoro/testutils/copy_credentials.sh "examples/java_src/testdata"
     ./kokoro/testutils/copy_credentials.sh "go/testdata"
+    ./kokoro/testutils/copy_credentials.sh "java_src/examples/testdata"
     ./kokoro/testutils/copy_credentials.sh "java_src/testdata"
     ./kokoro/testutils/copy_credentials.sh "python/examples/testdata"
     ./kokoro/testutils/copy_credentials.sh "python/testdata"
