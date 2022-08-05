@@ -1,0 +1,12 @@
+licenses(["notice"])
+
+java_test(
+    name = "AesUtilTest",
+    size = "small",
+    srcs = ["AesUtilTest.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink/mac/internal:aes_util",
+        "//src/main/java/com/google/crypto/tink/subtle:hex",
+        "@maven//:junit_junit",
+    ],
+)

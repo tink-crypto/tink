@@ -14,7 +14,7 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-package com.google.crypto.tink.subtle;
+package com.google.crypto.tink.mac.internal;
 
 import java.util.Arrays;
 
@@ -25,7 +25,7 @@ import java.util.Arrays;
  * <p>Beware: some of the functions here are specific to the representation used for AES-CMAC and
  * SIV, as described in their RFCs. These might not work if used in other contexts.
  */
-final class AesUtil {
+public final class AesUtil {
 
   public static final int BLOCK_SIZE = 16;
 
@@ -36,7 +36,7 @@ final class AesUtil {
    * @param value an arrays of 16 bytes representing an element of GF(2^128) using bigendian byte
    * order.
    */
-  static byte[] dbl(final byte[] value) {
+  public static byte[] dbl(final byte[] value) {
     if (value.length != BLOCK_SIZE) {
       throw new IllegalArgumentException("value must be a block.");
     }
@@ -68,7 +68,7 @@ final class AesUtil {
    * @param x The array to pad (will be copied)
    * @return The padded array.
    */
-  static byte[] cmacPad(final byte[] x) {
+  public static byte[] cmacPad(final byte[] x) {
     if (x.length >= BLOCK_SIZE) {
       throw new IllegalArgumentException("x must be smaller than a block.");
     }

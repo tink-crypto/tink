@@ -1,0 +1,13 @@
+licenses(["notice"])
+
+package(default_visibility = ["//visibility:public"])
+
+java_library(
+    name = "aes_util",
+    srcs = ["AesUtil.java"],
+)
+
+android_library(
+    name = "aes_util-android",
+    srcs = ["AesUtil.java"],
+)

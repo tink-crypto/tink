@@ -6,11 +6,11 @@ java_library(
     name = "prf_aes_cmac",
     srcs = ["PrfAesCmac.java"],
     deps = [
-        ":aes_util",
         ":bytes",
         ":subtle_util_cluster",
         ":validators",
         "//src/main/java/com/google/crypto/tink/config/internal:tink_fips_util",
+        "//src/main/java/com/google/crypto/tink/mac/internal:aes_util",
         "//src/main/java/com/google/crypto/tink/prf:prf_set",
         "@maven//:com_google_errorprone_error_prone_annotations",
     ],
@@ -80,11 +80,6 @@ java_library(
         ":hkdf",
         "//src/main/java/com/google/crypto/tink/util:bytes",
     ],
-)
-
-java_library(
-    name = "aes_util",
-    srcs = ["AesUtil.java"],
 )
 
 java_library(
@@ -218,12 +213,12 @@ java_library(
     name = "aes_siv",
     srcs = ["AesSiv.java"],
     deps = [
-        ":aes_util",
         ":bytes",
         ":prf_aes_cmac",
         ":subtle_util_cluster",
         "//src/main/java/com/google/crypto/tink:deterministic_aead",
         "//src/main/java/com/google/crypto/tink/config/internal:tink_fips_util",
+        "//src/main/java/com/google/crypto/tink/mac/internal:aes_util",
     ],
 )
 
@@ -611,18 +606,13 @@ android_library(
     name = "aes_siv-android",
     srcs = ["AesSiv.java"],
     deps = [
-        ":aes_util-android",
         ":bytes-android",
         ":prf_aes_cmac-android",
         ":subtle_util_cluster-android",
         "//src/main/java/com/google/crypto/tink:deterministic_aead-android",
         "//src/main/java/com/google/crypto/tink/config/internal:tink_fips_util-android",
+        "//src/main/java/com/google/crypto/tink/mac/internal:aes_util-android",
     ],
-)
-
-android_library(
-    name = "aes_util-android",
-    srcs = ["AesUtil.java"],
 )
 
 android_library(
@@ -913,11 +903,11 @@ android_library(
     name = "prf_aes_cmac-android",
     srcs = ["PrfAesCmac.java"],
     deps = [
-        ":aes_util-android",
         ":bytes-android",
         ":subtle_util_cluster-android",
         ":validators-android",
         "//src/main/java/com/google/crypto/tink/config/internal:tink_fips_util-android",
+        "//src/main/java/com/google/crypto/tink/mac/internal:aes_util-android",
         "//src/main/java/com/google/crypto/tink/prf:prf_set-android",
         "@maven//:com_google_errorprone_error_prone_annotations",
     ],
