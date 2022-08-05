@@ -484,49 +484,14 @@ public final class KeysetHandle {
     }
   }
 
-  /**
-   * Returns a Key object from a protoKeySerialization, even if no parser has been registerd.
-   *
-   * <p>Falling back is useful because we want users to be able to call {@code #getAt} even for key
-   * types for which we did not yet register a parser; in this case we simply fall back to return a
-   * LegacyProtoKey.
-   */
-  private static Key parseWithLegacyFallback(ProtoKeySerialization protoKeySerialization) {
-    try {
-      return MutableSerializationRegistry.globalInstance()
-          .parseKey(protoKeySerialization, InsecureSecretKeyAccess.get());
-    } catch (GeneralSecurityException e) {
-      try {
-        return new LegacyProtoKey(protoKeySerialization, InsecureSecretKeyAccess.get());
-      } catch (GeneralSecurityException e2) {
-        // Cannot happen -- this only throws if we have no access.
-        throw new TinkBugException("Creating a LegacyProtoKey failed", e2);
-      }
-    }
-  }
-
-  /**
-   * Returns a Parameters object from a protoKeySerialization, even if no parser has been registerd.
-   *
-   * <p>Falling back is useful because we need to have a parameters object even if no parser is
-   * registered (e.g. for when we create a Key from a key template/parameters name object).
-   */
-  private static Parameters parseWithLegacyFallback(
-      ProtoParametersSerialization protoParametersSerialization) {
-    try {
-      return MutableSerializationRegistry.globalInstance()
-          .parseParameters(protoParametersSerialization);
-    } catch (GeneralSecurityException e) {
-      return new LegacyProtoParameters(protoParametersSerialization);
-    }
-  }
-
   private KeysetHandle.Entry entryByIndex(int i) {
     Keyset.Key protoKey = keyset.getKey(i);
     int id = protoKey.getKeyId();
 
     ProtoKeySerialization protoKeySerialization = toProtoKeySerialization(protoKey);
-    Key key = parseWithLegacyFallback(protoKeySerialization);
+    Key key =
+        MutableSerializationRegistry.globalInstance()
+            .parseKeyWithLegacyFallback(protoKeySerialization, InsecureSecretKeyAccess.get());
     try {
       return new KeysetHandle.Entry(
           key, parseStatus(protoKey.getStatus()), id, id == keyset.getPrimaryKeyId());
@@ -561,7 +526,9 @@ public final class KeysetHandle {
     KeyTemplate template = Registry.keyTemplateMap().get(namedParameters);
     ProtoParametersSerialization serialization =
         ProtoParametersSerialization.create(template.getProto());
-    Parameters parameters = parseWithLegacyFallback(serialization);
+    Parameters parameters =
+        MutableSerializationRegistry.globalInstance()
+            .parseParametersWithLegacyFallback(serialization);
     return new KeysetHandle.Builder.Entry(parameters);
   }
 

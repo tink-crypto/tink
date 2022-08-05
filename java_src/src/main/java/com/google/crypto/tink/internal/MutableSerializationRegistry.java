@@ -125,6 +125,33 @@ public final class MutableSerializationRegistry {
   }
 
   /**
+   * Returns a Key object from a protoKeySerialization, even if no parser has been registered.
+   *
+   * <p>Falling back is useful because we want users to be able to call {@code #getAt} even for key
+   * types for which we did not yet register a parser; in this case we simply fall back to return a
+   * LegacyProtoKey.
+   *
+   * <p>This always requires SecretKeyAccess. This guarantees that it cannot fail (every
+   * ProtoKeySerialization can be parsed into a LegacyProtoKey).
+   */
+  public Key parseKeyWithLegacyFallback(
+      ProtoKeySerialization protoKeySerialization, SecretKeyAccess access) {
+    if (access == null) {
+      throw new NullPointerException("access cannot be null");
+    }
+    try {
+      return parseKey(protoKeySerialization, access);
+    } catch (GeneralSecurityException e) {
+      try {
+        return new LegacyProtoKey(protoKeySerialization, access);
+      } catch (GeneralSecurityException e2) {
+        // Cannot happen -- this only throws if we have no access.
+        throw new TinkBugException("Creating a LegacyProtoKey failed", e2);
+      }
+    }
+  }
+
+  /**
    * Serializes a given Key into a "SerializationT" object.
    *
    * <p>This will look up a previously registered serializer for the requested {@code
@@ -146,6 +173,22 @@ public final class MutableSerializationRegistry {
   public <SerializationT extends Serialization> Parameters parseParameters(
       SerializationT serializedParameters) throws GeneralSecurityException {
     return registry.get().parseParameters(serializedParameters);
+  }
+
+  /**
+   * Returns a Parameters object from a protoKeySerialization, even if no parser has been
+   * registered.
+   *
+   * <p>Falling back is useful because we need to have a parameters object even if no parser is
+   * registered (e.g. for when we create a Key from a key template/parameters name object).
+   */
+  public Parameters parseParametersWithLegacyFallback(
+      ProtoParametersSerialization protoParametersSerialization) {
+    try {
+      return parseParameters(protoParametersSerialization);
+    } catch (GeneralSecurityException e) {
+      return new LegacyProtoParameters(protoParametersSerialization);
+    }
   }
 
   /**
