@@ -13,6 +13,7 @@ com.google.crypto.tink.integration.android
 com.google.crypto.tink.internal
 com.google.crypto.tink.jwt
 com.google.crypto.tink.mac
+com.google.crypto.tink.mac.internal
 com.google.crypto.tink.monitoring
 com.google.crypto.tink.prf
 com.google.crypto.tink.proto

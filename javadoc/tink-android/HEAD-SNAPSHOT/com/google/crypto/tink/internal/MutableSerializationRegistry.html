@@ -17,7 +17,7 @@
     catch(err) {
     }
 //-->
-var methods = {"i0":9,"i1":10,"i2":10,"i3":10,"i4":10,"i5":10,"i6":10,"i7":10,"i8":10};
+var methods = {"i0":9,"i1":10,"i2":10,"i3":10,"i4":10,"i5":10,"i6":10,"i7":10,"i8":10,"i9":10,"i10":10};
 var tabs = {65535:["t0","All Methods"],1:["t1","Static Methods"],2:["t2","Instance Methods"],8:["t4","Concrete Methods"]};
 var altColor = "altColor";
 var rowColor = "rowColor";
@@ -165,36 +165,50 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 </td>
 </tr>
 <tr id="i2" class="altColor">
+<td class="colFirst"><code><a href="../../../../../com/google/crypto/tink/Key.html" title="class in com.google.crypto.tink">Key</a></code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/internal/MutableSerializationRegistry.html#parseKeyWithLegacyFallback-com.google.crypto.tink.internal.ProtoKeySerialization-com.google.crypto.tink.SecretKeyAccess-">parseKeyWithLegacyFallback</a></span>(<a href="../../../../../com/google/crypto/tink/internal/ProtoKeySerialization.html" title="class in com.google.crypto.tink.internal">ProtoKeySerialization</a>&nbsp;protoKeySerialization,
+                          <a href="../../../../../com/google/crypto/tink/SecretKeyAccess.html" title="class in com.google.crypto.tink">SecretKeyAccess</a>&nbsp;access)</code>
+<div class="block">Returns a Key object from a protoKeySerialization, even if no parser has been registered.</div>
+</td>
+</tr>
+<tr id="i3" class="rowColor">
 <td class="colFirst"><code>&lt;SerializationT extends <a href="../../../../../com/google/crypto/tink/internal/Serialization.html" title="interface in com.google.crypto.tink.internal">Serialization</a>&gt;<br><a href="../../../../../com/google/crypto/tink/Parameters.html" title="class in com.google.crypto.tink">Parameters</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/internal/MutableSerializationRegistry.html#parseParameters-SerializationT-">parseParameters</a></span>(SerializationT&nbsp;serializedParameters)</code>
 <div class="block">Parses the given serialization into a Parameters object.</div>
 </td>
 </tr>
-<tr id="i3" class="rowColor">
+<tr id="i4" class="altColor">
+<td class="colFirst"><code><a href="../../../../../com/google/crypto/tink/Parameters.html" title="class in com.google.crypto.tink">Parameters</a></code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/internal/MutableSerializationRegistry.html#parseParametersWithLegacyFallback-com.google.crypto.tink.internal.ProtoParametersSerialization-">parseParametersWithLegacyFallback</a></span>(<a href="../../../../../com/google/crypto/tink/internal/ProtoParametersSerialization.html" title="class in com.google.crypto.tink.internal">ProtoParametersSerialization</a>&nbsp;protoParametersSerialization)</code>
+<div class="block">Returns a Parameters object from a protoKeySerialization, even if no parser has been
+ registered.</div>
+</td>
+</tr>
+<tr id="i5" class="rowColor">
 <td class="colFirst"><code>&lt;SerializationT extends <a href="../../../../../com/google/crypto/tink/internal/Serialization.html" title="interface in com.google.crypto.tink.internal">Serialization</a>&gt;<br>void</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/internal/MutableSerializationRegistry.html#registerKeyParser-com.google.crypto.tink.internal.KeyParser-">registerKeyParser</a></span>(<a href="../../../../../com/google/crypto/tink/internal/KeyParser.html" title="class in com.google.crypto.tink.internal">KeyParser</a>&lt;SerializationT&gt;&nbsp;parser)</code>
 <div class="block">Registers a key parser for later use in <a href="../../../../../com/google/crypto/tink/internal/MutableSerializationRegistry.html#parseKey-SerializationT-com.google.crypto.tink.SecretKeyAccess-"><code>parseKey(SerializationT, com.google.crypto.tink.SecretKeyAccess)</code></a>.</div>
 </td>
 </tr>
-<tr id="i4" class="altColor">
+<tr id="i6" class="altColor">
 <td class="colFirst"><code>&lt;KeyT extends <a href="../../../../../com/google/crypto/tink/Key.html" title="class in com.google.crypto.tink">Key</a>,SerializationT extends <a href="../../../../../com/google/crypto/tink/internal/Serialization.html" title="interface in com.google.crypto.tink.internal">Serialization</a>&gt;<br>void</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/internal/MutableSerializationRegistry.html#registerKeySerializer-com.google.crypto.tink.internal.KeySerializer-">registerKeySerializer</a></span>(<a href="../../../../../com/google/crypto/tink/internal/KeySerializer.html" title="class in com.google.crypto.tink.internal">KeySerializer</a>&lt;KeyT,SerializationT&gt;&nbsp;serializer)</code>
 <div class="block">Registers a key serializer for later use in <a href="../../../../../com/google/crypto/tink/internal/MutableSerializationRegistry.html#serializeKey-KeyT-java.lang.Class-com.google.crypto.tink.SecretKeyAccess-"><code>serializeKey(KeyT, java.lang.Class&lt;SerializationT&gt;, com.google.crypto.tink.SecretKeyAccess)</code></a>.</div>
 </td>
 </tr>
-<tr id="i5" class="rowColor">
+<tr id="i7" class="rowColor">
 <td class="colFirst"><code>&lt;SerializationT extends <a href="../../../../../com/google/crypto/tink/internal/Serialization.html" title="interface in com.google.crypto.tink.internal">Serialization</a>&gt;<br>void</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/internal/MutableSerializationRegistry.html#registerParametersParser-com.google.crypto.tink.internal.ParametersParser-">registerParametersParser</a></span>(<a href="../../../../../com/google/crypto/tink/internal/ParametersParser.html" title="class in com.google.crypto.tink.internal">ParametersParser</a>&lt;SerializationT&gt;&nbsp;parser)</code>
 <div class="block">Registers a key parser for later use in <a href="../../../../../com/google/crypto/tink/internal/MutableSerializationRegistry.html#parseKey-SerializationT-com.google.crypto.tink.SecretKeyAccess-"><code>parseKey(SerializationT, com.google.crypto.tink.SecretKeyAccess)</code></a>.</div>
 </td>
 </tr>
-<tr id="i6" class="altColor">
+<tr id="i8" class="altColor">
 <td class="colFirst"><code>&lt;ParametersT extends <a href="../../../../../com/google/crypto/tink/Parameters.html" title="class in com.google.crypto.tink">Parameters</a>,SerializationT extends <a href="../../../../../com/google/crypto/tink/internal/Serialization.html" title="interface in com.google.crypto.tink.internal">Serialization</a>&gt;<br>void</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/internal/MutableSerializationRegistry.html#registerParametersSerializer-com.google.crypto.tink.internal.ParametersSerializer-">registerParametersSerializer</a></span>(<a href="../../../../../com/google/crypto/tink/internal/ParametersSerializer.html" title="class in com.google.crypto.tink.internal">ParametersSerializer</a>&lt;ParametersT,SerializationT&gt;&nbsp;serializer)</code>
 <div class="block">Registers a key serializer for later use in <a href="../../../../../com/google/crypto/tink/internal/MutableSerializationRegistry.html#serializeKey-KeyT-java.lang.Class-com.google.crypto.tink.SecretKeyAccess-"><code>serializeKey(KeyT, java.lang.Class&lt;SerializationT&gt;, com.google.crypto.tink.SecretKeyAccess)</code></a>.</div>
 </td>
 </tr>
-<tr id="i7" class="rowColor">
+<tr id="i9" class="rowColor">
 <td class="colFirst"><code>&lt;KeyT extends <a href="../../../../../com/google/crypto/tink/Key.html" title="class in com.google.crypto.tink">Key</a>,SerializationT extends <a href="../../../../../com/google/crypto/tink/internal/Serialization.html" title="interface in com.google.crypto.tink.internal">Serialization</a>&gt;<br>SerializationT</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/internal/MutableSerializationRegistry.html#serializeKey-KeyT-java.lang.Class-com.google.crypto.tink.SecretKeyAccess-">serializeKey</a></span>(KeyT&nbsp;key,
             <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Class.html?is-external=true" title="class or interface in java.lang">Class</a>&lt;SerializationT&gt;&nbsp;serializationClass,
@@ -202,7 +216,7 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 <div class="block">Serializes a given Key into a "SerializationT" object.</div>
 </td>
 </tr>
-<tr id="i8" class="altColor">
+<tr id="i10" class="altColor">
 <td class="colFirst"><code>&lt;ParametersT extends <a href="../../../../../com/google/crypto/tink/Parameters.html" title="class in com.google.crypto.tink">Parameters</a>,SerializationT extends <a href="../../../../../com/google/crypto/tink/internal/Serialization.html" title="interface in com.google.crypto.tink.internal">Serialization</a>&gt;<br>SerializationT</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/internal/MutableSerializationRegistry.html#serializeParameters-ParametersT-java.lang.Class-">serializeParameters</a></span>(ParametersT&nbsp;parameters,
                    <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Class.html?is-external=true" title="class or interface in java.lang">Class</a>&lt;SerializationT&gt;&nbsp;serializationClass)</code>
@@ -355,6 +369,24 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 </dl>
 </li>
 </ul>
+<a name="parseKeyWithLegacyFallback-com.google.crypto.tink.internal.ProtoKeySerialization-com.google.crypto.tink.SecretKeyAccess-">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>parseKeyWithLegacyFallback</h4>
+<pre>public&nbsp;<a href="../../../../../com/google/crypto/tink/Key.html" title="class in com.google.crypto.tink">Key</a>&nbsp;parseKeyWithLegacyFallback(<a href="../../../../../com/google/crypto/tink/internal/ProtoKeySerialization.html" title="class in com.google.crypto.tink.internal">ProtoKeySerialization</a>&nbsp;protoKeySerialization,
+                                      <a href="../../../../../com/google/crypto/tink/SecretKeyAccess.html" title="class in com.google.crypto.tink">SecretKeyAccess</a>&nbsp;access)</pre>
+<div class="block">Returns a Key object from a protoKeySerialization, even if no parser has been registered.
+
+ <p>Falling back is useful because we want users to be able to call <code>#getAt</code> even for key
+ types for which we did not yet register a parser; in this case we simply fall back to return a
+ LegacyProtoKey.
+
+ <p>This always requires SecretKeyAccess. This guarantees that it cannot fail (every
+ ProtoKeySerialization can be parsed into a LegacyProtoKey).</div>
+</li>
+</ul>
 <a name="serializeKey-com.google.crypto.tink.Key-java.lang.Class-com.google.crypto.tink.SecretKeyAccess-">
 <!--   -->
 </a><a name="serializeKey-KeyT-java.lang.Class-com.google.crypto.tink.SecretKeyAccess-">
@@ -395,6 +427,20 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 <dt><span class="throwsLabel">Throws:</span></dt>
 <dd><code><a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></code></dd>
 </dl>
+</li>
+</ul>
+<a name="parseParametersWithLegacyFallback-com.google.crypto.tink.internal.ProtoParametersSerialization-">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>parseParametersWithLegacyFallback</h4>
+<pre>public&nbsp;<a href="../../../../../com/google/crypto/tink/Parameters.html" title="class in com.google.crypto.tink">Parameters</a>&nbsp;parseParametersWithLegacyFallback(<a href="../../../../../com/google/crypto/tink/internal/ProtoParametersSerialization.html" title="class in com.google.crypto.tink.internal">ProtoParametersSerialization</a>&nbsp;protoParametersSerialization)</pre>
+<div class="block">Returns a Parameters object from a protoKeySerialization, even if no parser has been
+ registered.
+
+ <p>Falling back is useful because we need to have a parameters object even if no parser is
+ registered (e.g. for when we create a Key from a key template/parameters name object).</div>
 </li>
 </ul>
 <a name="serializeParameters-com.google.crypto.tink.Parameters-java.lang.Class-">
