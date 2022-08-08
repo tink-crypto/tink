@@ -118,55 +118,55 @@ ts_library(
 
 closure_proto_library(
     name = "aes_cmac_closure_proto",
-    deps = ["@tink_base//proto:aes_cmac_proto"],
+    deps = ["//proto:aes_cmac_proto"],
 )
 
 closure_proto_library(
     name = "aes_ctr_hmac_aead_closure_proto",
-    deps = ["@tink_base//proto:aes_ctr_hmac_aead_proto"],
+    deps = ["//proto:aes_ctr_hmac_aead_proto"],
 )
 
 closure_proto_library(
     name = "aes_ctr_closure_proto",
-    deps = ["@tink_base//proto:aes_ctr_proto"],
+    deps = ["//proto:aes_ctr_proto"],
 )
 
 closure_proto_library(
     name = "aes_gcm_closure_proto",
-    deps = ["@tink_base//proto:aes_gcm_proto"],
+    deps = ["//proto:aes_gcm_proto"],
 )
 
 closure_proto_library(
     name = "aes_gcm_siv_closure_proto",
-    deps = ["@tink_base//proto:aes_gcm_siv_proto"],
+    deps = ["//proto:aes_gcm_siv_proto"],
 )
 
 closure_proto_library(
     name = "common_closure_proto",
-    deps = ["@tink_base//proto:common_proto"],
+    deps = ["//proto:common_proto"],
 )
 
 closure_proto_library(
     name = "ecdsa_closure_proto",
-    deps = ["@tink_base//proto:ecdsa_proto"],
+    deps = ["//proto:ecdsa_proto"],
 )
 
 closure_proto_library(
     name = "ecies_aead_hkdf_closure_proto",
-    deps = ["@tink_base//proto:ecies_aead_hkdf_proto"],
+    deps = ["//proto:ecies_aead_hkdf_proto"],
 )
 
 closure_proto_library(
     name = "hmac_closure_proto",
-    deps = ["@tink_base//proto:hmac_proto"],
+    deps = ["//proto:hmac_proto"],
 )
 
 closure_proto_library(
     name = "tink_closure_proto",
-    deps = ["@tink_base//proto:tink_proto"],
+    deps = ["//proto:tink_proto"],
 )
 
 closure_proto_library(
     name = "xchacha20_poly1305_closure_proto",
-    deps = ["@tink_base//proto:xchacha20_poly1305_proto"],
+    deps = ["//proto:xchacha20_poly1305_proto"],
 )

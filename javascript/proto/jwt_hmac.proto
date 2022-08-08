@@ -1,0 +1,51 @@
+// Copyright 2020 Google LLC
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+////////////////////////////////////////////////////////////////////////////////
+
+syntax = "proto3";
+
+package google.crypto.tink;
+
+option java_package = "com.google.crypto.tink.proto";
+option java_multiple_files = true;
+option go_package = "github.com/google/tink/proto/jwt_hmac_go_proto";
+
+// See https://datatracker.ietf.org/doc/html/rfc7518#section-3.2
+enum JwtHmacAlgorithm {
+  HS_UNKNOWN = 0;
+  HS256 = 1;  // HMAC using SHA-256
+  HS384 = 2;  // HMAC using SHA-384
+  HS512 = 3;  // HMAC using SHA-512
+}
+
+// key_type: type.googleapis.com/google.crypto.tink.JwtHmacKey
+message JwtHmacKey {
+  uint32 version = 1;
+  JwtHmacAlgorithm algorithm = 2;
+  bytes key_value = 3;
+
+  // Optional, custom kid header value to be used with "RAW" keys.
+  // "TINK" keys with this value set will be rejected.
+  message CustomKid {
+    string value = 1;
+  }
+  CustomKid custom_kid = 4;
+}
+
+message JwtHmacKeyFormat {
+  uint32 version = 1;
+  JwtHmacAlgorithm algorithm = 2;
+  uint32 key_size = 3;
+}

@@ -55,7 +55,7 @@ ng_package(
     package_name = "tink-crypto",
     srcs = [
         "package.json",
-        "@tink_base//:README.md",
+        "README.md",
     ],
     entry_point = ":index.ts",
     deps = [":javascript"],

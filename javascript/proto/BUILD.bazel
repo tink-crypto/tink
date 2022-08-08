@@ -1,0 +1,410 @@
+licenses(["notice"])
+
+# -----------------------------------------------
+# common
+# -----------------------------------------------
+proto_library(
+    name = "common_proto",
+    srcs = [
+        "common.proto",
+    ],
+    visibility = ["//visibility:public"],
+)
+
+# -----------------------------------------------
+# tink
+# -----------------------------------------------
+proto_library(
+    name = "tink_proto",
+    srcs = [
+        "tink.proto",
+    ],
+    visibility = ["//visibility:public"],
+)
+
+# -----------------------------------------------
+# config
+# -----------------------------------------------
+proto_library(
+    name = "config_proto",
+    srcs = [
+        "config.proto",
+    ],
+    visibility = ["//visibility:public"],
+)
+
+# -----------------------------------------------
+# aes-siv
+# -----------------------------------------------
+proto_library(
+    name = "aes_siv_proto",
+    srcs = [
+        "aes_siv.proto",
+    ],
+    visibility = ["//visibility:public"],
+)
+
+# -----------------------------------------------
+# rsa_ssa_pkcs1
+# -----------------------------------------------
+proto_library(
+    name = "rsa_ssa_pkcs1_proto",
+    srcs = [
+        "rsa_ssa_pkcs1.proto",
+    ],
+    visibility = ["//visibility:public"],
+    deps = [
+        ":common_proto",
+    ],
+)
+
+# -----------------------------------------------
+# cached_dek_aead
+# -----------------------------------------------
+proto_library(
+    name = "cached_dek_aead_proto",
+    srcs = [
+        "cached_dek_aead.proto",
+    ],
+    visibility = ["//visibility:public"],
+)
+
+# -----------------------------------------------
+# cached_dek_envelope
+# -----------------------------------------------
+proto_library(
+    name = "cached_dek_envelope_proto",
+    srcs = [
+        "cached_dek_envelope.proto",
+    ],
+    visibility = ["//visibility:public"],
+    deps = [":tink_proto"],
+)
+
+# -----------------------------------------------
+# rsa_ssa_pss
+# -----------------------------------------------
+proto_library(
+    name = "rsa_ssa_pss_proto",
+    srcs = [
+        "rsa_ssa_pss.proto",
+    ],
+    visibility = ["//visibility:public"],
+    deps = [
+        ":common_proto",
+    ],
+)
+
+# -----------------------------------------------
+# ecdsa
+# -----------------------------------------------
+proto_library(
+    name = "ecdsa_proto",
+    srcs = [
+        "ecdsa.proto",
+    ],
+    visibility = ["//visibility:public"],
+    deps = [
+        ":common_proto",
+    ],
+)
+
+# -----------------------------------------------
+# jwt_rsa_ssa_pkcs1
+# -----------------------------------------------
+proto_library(
+    name = "jwt_rsa_ssa_pkcs1_proto",
+    srcs = [
+        "jwt_rsa_ssa_pkcs1.proto",
+    ],
+    visibility = ["//visibility:public"],
+)
+
+# -----------------------------------------------
+# jwt_rsa_ssa_pss
+# -----------------------------------------------
+proto_library(
+    name = "jwt_rsa_ssa_pss_proto",
+    srcs = [
+        "jwt_rsa_ssa_pss.proto",
+    ],
+    visibility = ["//visibility:public"],
+)
+
+# -----------------------------------------------
+# jwt_ecdsa
+# -----------------------------------------------
+proto_library(
+    name = "jwt_ecdsa_proto",
+    srcs = [
+        "jwt_ecdsa.proto",
+    ],
+    visibility = ["//visibility:public"],
+)
+
+# -----------------------------------------------
+# ed25519
+# -----------------------------------------------
+proto_library(
+    name = "ed25519_proto",
+    srcs = [
+        "ed25519.proto",
+    ],
+    visibility = ["//visibility:public"],
+)
+
+# -----------------------------------------------
+# aes_cmac
+# -----------------------------------------------
+proto_library(
+    name = "aes_cmac_proto",
+    srcs = [
+        "aes_cmac.proto",
+    ],
+    visibility = ["//visibility:public"],
+)
+
+# -----------------------------------------------
+# hmac
+# -----------------------------------------------
+proto_library(
+    name = "hmac_proto",
+    srcs = [
+        "hmac.proto",
+    ],
+    visibility = ["//visibility:public"],
+    deps = [":common_proto"],
+)
+
+# -----------------------------------------------
+# JWT hmac
+# -----------------------------------------------
+proto_library(
+    name = "jwt_hmac_proto",
+    srcs = [
+        "jwt_hmac.proto",
+    ],
+    visibility = ["//visibility:public"],
+)
+
+# -----------------------------------------------
+# aes_ctr
+# -----------------------------------------------
+proto_library(
+    name = "aes_ctr_proto",
+    srcs = [
+        "aes_ctr.proto",
+    ],
+    visibility = ["//visibility:public"],
+)
+
+# -----------------------------------------------
+# -----------------------------------------------
+# aes_ctr_hmac_aead
+# -----------------------------------------------
+proto_library(
+    name = "aes_ctr_hmac_aead_proto",
+    srcs = [
+        "aes_ctr_hmac_aead.proto",
+    ],
+    visibility = ["//visibility:public"],
+    deps = [
+        ":aes_ctr_proto",
+        ":hmac_proto",
+    ],
+)
+
+# -----------------------------------------------
+# aes_gcm
+# -----------------------------------------------
+proto_library(
+    name = "aes_gcm_proto",
+    srcs = [
+        "aes_gcm.proto",
+    ],
+    visibility = ["//visibility:public"],
+)
+
+# -----------------------------------------------
+# aes_gcm_siv
+# -----------------------------------------------
+proto_library(
+    name = "aes_gcm_siv_proto",
+    srcs = [
+        "aes_gcm_siv.proto",
+    ],
+    visibility = ["//visibility:public"],
+)
+
+# -----------------------------------------------
+# aes_ctr_hmac_streaming
+# -----------------------------------------------
+proto_library(
+    name = "aes_ctr_hmac_streaming_proto",
+    srcs = ["aes_ctr_hmac_streaming.proto"],
+    visibility = ["//visibility:public"],
+    deps = [
+        ":common_proto",
+        ":hmac_proto",
+    ],
+)
+
+# -----------------------------------------------
+# aes_gcm_hkdf_streaming
+# -----------------------------------------------
+proto_library(
+    name = "aes_gcm_hkdf_streaming_proto",
+    srcs = ["aes_gcm_hkdf_streaming.proto"],
+    visibility = ["//visibility:public"],
+    deps = [":common_proto"],
+)
+
+# -----------------------------------------------
+# aes_eax
+# -----------------------------------------------
+proto_library(
+    name = "aes_eax_proto",
+    srcs = [
+        "aes_eax.proto",
+    ],
+    visibility = ["//visibility:public"],
+)
+
+# -----------------------------------------------
+# chacha20_poly1305
+# -----------------------------------------------
+proto_library(
+    name = "chacha20_poly1305_proto",
+    srcs = [
+        "chacha20_poly1305.proto",
+    ],
+    visibility = ["//visibility:public"],
+)
+
+# -----------------------------------------------
+# kms_aead
+# -----------------------------------------------
+proto_library(
+    name = "kms_aead_proto",
+    srcs = [
+        "kms_aead.proto",
+    ],
+    visibility = ["//visibility:public"],
+)
+
+# -----------------------------------------------
+# kms_envelope
+# -----------------------------------------------
+proto_library(
+    name = "kms_envelope_proto",
+    srcs = [
+        "kms_envelope.proto",
+    ],
+    visibility = ["//visibility:public"],
+    deps = [":tink_proto"],
+)
+
+# -----------------------------------------------
+# ecies_aead_hkdf
+# -----------------------------------------------
+proto_library(
+    name = "ecies_aead_hkdf_proto",
+    srcs = [
+        "ecies_aead_hkdf.proto",
+    ],
+    visibility = ["//visibility:public"],
+    deps = [
+        ":common_proto",
+        ":tink_proto",
+    ],
+)
+
+# -----------------------------------------------
+# XChacha20 with Poly1305
+# -----------------------------------------------
+proto_library(
+    name = "xchacha20_poly1305_proto",
+    srcs = [
+        "xchacha20_poly1305.proto",
+    ],
+    visibility = ["//visibility:public"],
+)
+
+# -----------------------------------------------
+# Hkdf prf
+# -----------------------------------------------
+proto_library(
+    name = "hkdf_prf_proto",
+    srcs = [
+        "hkdf_prf.proto",
+    ],
+    visibility = ["//visibility:public"],
+    deps = [":common_proto"],
+)
+
+# -----------------------------------------------
+# aes_cmac_prf
+# -----------------------------------------------
+proto_library(
+    name = "aes_cmac_prf_proto",
+    srcs = [
+        "aes_cmac_prf.proto",
+    ],
+    visibility = ["//visibility:public"],
+)
+
+# -----------------------------------------------
+# hmac_prf
+# -----------------------------------------------
+proto_library(
+    name = "hmac_prf_proto",
+    srcs = [
+        "hmac_prf.proto",
+    ],
+    visibility = ["//visibility:public"],
+    deps = [":common_proto"],
+)
+
+# -----------------------------------------------
+# hpke
+# -----------------------------------------------
+proto_library(
+    name = "hpke_proto",
+    srcs = [
+        "hpke.proto",
+    ],
+    visibility = ["//visibility:public"],
+)
+
+# ----------------------------------------------------------------------------
+# prf_based_deriver
+# ----------------------------------------------------------------------------
+proto_library(
+    name = "prf_based_deriver_proto",
+    srcs = ["prf_based_deriver.proto"],
+    visibility = ["//visibility:public"],
+    deps = [":tink_proto"],
+)
+
+# -----------------------------------------------
+# empty
+# -----------------------------------------------
+proto_library(
+    name = "empty_proto",
+    srcs = [
+        "empty.proto",
+    ],
+    visibility = ["//visibility:public"],
+)
+
+# ----------------------------------------------------------------------------
+# test_proto
+# ----------------------------------------------------------------------------
+proto_library(
+    name = "test_proto_proto",
+    testonly = True,
+    srcs = [
+        "test_proto.proto",
+    ],
+    visibility = ["//visibility:public"],
+)

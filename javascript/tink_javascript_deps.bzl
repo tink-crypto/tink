@@ -4,6 +4,21 @@ load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
 def tink_javascript_deps():
     """Load dependencies of TypeScript/JavaScript Tink."""
+
+    # proto
+    # proto_library, cc_proto_library and java_proto_library rules implicitly depend
+    # on @com_google_protobuf//:proto, @com_google_protobuf//:cc_toolchain and
+    # @com_google_protobuf//:java_toolchain, respectively.
+    # This statement defines the @com_google_protobuf repo.
+    # Release from 2021-06-08
+    if not native.existing_rule("com_google_protobuf"):
+        http_archive(
+            name = "com_google_protobuf",
+            strip_prefix = "protobuf-3.19.3",
+            urls = ["https://github.com/protocolbuffers/protobuf/archive/v3.19.3.zip"],
+            sha256 = "6b6bf5cd8d0cca442745c4c3c9f527c83ad6ef35a405f64db5215889ac779b42",
+        )
+
     if not native.existing_rule("build_bazel_rules_nodejs"):
         # Release from 2021-10-11
         http_archive(
@@ -29,6 +44,7 @@ def tink_javascript_deps():
             sha256 = "e9abb7658b6a129740c0b3ef6f5a2370864e102a5ba5ffca2cea565829ed825a",
         )
 
+    # Basic rules we need to add to bazel.
     if not native.existing_rule("bazel_skylib"):
         # Release from 2021-09-27
         http_archive(
