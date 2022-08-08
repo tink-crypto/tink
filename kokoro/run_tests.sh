@@ -64,9 +64,12 @@ run_linux_tests() {
 }
 
 run_all_linux_tests() {
-  # TODO(b/228529710): Update using an easier to maintain approach to test
-  # parity.
-  if [[ "${KOKORO_JOB_NAME:-}" =~ ^tink/github ]]; then
+  # Only run these tests if exeucting a Kokoro GitHub continuous integration
+  # job or if running locally (e.g. as part of release.sh).
+  #
+  # TODO(b/228529710): Use an easier to maintain approach to test parity.
+  if [[ "${KOKORO_JOB_NAME:-}" =~ ^tink/github \
+      || -z "${KOKORO_JOB_NAME+x}" ]]; then
     run_linux_tests "cc"
     run_linux_tests "java_src"
     run_linux_tests "go"
