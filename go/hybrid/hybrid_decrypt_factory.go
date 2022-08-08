@@ -33,7 +33,8 @@ func NewHybridDecrypt(h *keyset.Handle) (tink.HybridDecrypt, error) {
 
 // NewHybridDecryptWithKeyManager returns an HybridDecrypt primitive from the given keyset handle
 // and custom key manager.
-// Deprecated: register the KeyManager and use New above.
+//
+// Deprecated: Use [NewHybridDecrypt].
 func NewHybridDecryptWithKeyManager(h *keyset.Handle, km registry.KeyManager) (tink.HybridDecrypt, error) {
 	ps, err := h.PrimitivesWithKeyManager(km)
 	if err != nil {

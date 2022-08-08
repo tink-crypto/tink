@@ -32,7 +32,8 @@ func NewSigner(h *keyset.Handle) (tink.Signer, error) {
 }
 
 // NewSignerWithKeyManager returns a Signer primitive from the given keyset handle and custom key manager.
-// Deprecated: register the KeyManager and use New above.
+//
+// Deprecated: Use [NewSigner].
 func NewSignerWithKeyManager(h *keyset.Handle, km registry.KeyManager) (tink.Signer, error) {
 	ps, err := h.PrimitivesWithKeyManager(km)
 	if err != nil {

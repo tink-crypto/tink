@@ -32,7 +32,8 @@ func New(h *keyset.Handle) (tink.StreamingAEAD, error) {
 }
 
 // NewWithKeyManager returns a StreamingAEAD primitive from the given keyset handle and custom key manager.
-// Deprecated: register the KeyManager and use New above.
+//
+// Deprecated: Use [New].
 func NewWithKeyManager(h *keyset.Handle, km registry.KeyManager) (tink.StreamingAEAD, error) {
 	ps, err := h.PrimitivesWithKeyManager(km)
 	if err != nil {

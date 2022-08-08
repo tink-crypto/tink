@@ -73,7 +73,7 @@ func ECDSAP256RawKeyTemplate() *tinkpb.KeyTemplate {
 //   - Signature encoding: DER
 //   - Output prefix type: TINK
 //
-// DEPRECATED. Use ECDSAP384SHA384KeyTemplate() or ECDSAP384SHA512KeyTemplate() instead.
+// Deprecated: Use [ECDSAP384SHA384KeyTemplate] or [ECDSAP384SHA512KeyTemplate] instead.
 func ECDSAP384KeyTemplate() *tinkpb.KeyTemplate {
 	return createECDSAKeyTemplate(commonpb.HashType_SHA512,
 		commonpb.EllipticCurveType_NIST_P384,

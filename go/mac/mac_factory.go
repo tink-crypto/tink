@@ -38,7 +38,8 @@ func New(h *keyset.Handle) (tink.MAC, error) {
 }
 
 // NewWithKeyManager creates a MAC primitive from the given keyset handle and a custom key manager.
-// Deprecated: register the KeyManager and use New above.
+//
+// Deprecated: Use [New].
 func NewWithKeyManager(h *keyset.Handle, km registry.KeyManager) (tink.MAC, error) {
 	ps, err := h.PrimitivesWithKeyManager(km)
 	if err != nil {
