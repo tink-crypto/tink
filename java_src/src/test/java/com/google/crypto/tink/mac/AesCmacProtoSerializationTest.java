@@ -298,7 +298,7 @@ public final class AesCmacProtoSerializationTest {
         // Wrong Type URL -- not sure if this should be tested; this won't even get to the code
         // under test.
         ProtoKeySerialization.create(
-            "Wrong type url",
+            "WrongTypeUrl",
             createProtoKey(16, AES_KEY_AS_BYTE_STRING).toByteString(),
             KeyMaterialType.SYMMETRIC,
             OutputPrefixType.TINK,
