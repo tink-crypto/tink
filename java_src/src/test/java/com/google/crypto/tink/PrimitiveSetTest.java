@@ -23,6 +23,7 @@ import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
 
+import com.google.crypto.tink.internal.LegacyProtoKey;
 import com.google.crypto.tink.monitoring.MonitoringAnnotations;
 import com.google.crypto.tink.proto.KeyData;
 import com.google.crypto.tink.proto.KeyStatusType;
@@ -110,8 +111,7 @@ public class PrimitiveSetTest {
     assertThat(entries).hasSize(1);
     entry = entries.get(0);
     assertEquals(
-        DummyMac2.class.getSimpleName(),
-        new String(entry.getPrimitive().computeMac(null), UTF_8));
+        DummyMac2.class.getSimpleName(), new String(entry.getPrimitive().computeMac(null), UTF_8));
     assertEquals(KeyStatusType.ENABLED, entry.getStatus());
     assertThat(entry.getIdentifier()).isEmpty();
     assertArrayEquals(CryptoFormat.getOutputPrefix(key2), entry.getIdentifier());
@@ -129,8 +129,7 @@ public class PrimitiveSetTest {
 
     entry = pset.getPrimary();
     assertEquals(
-        DummyMac2.class.getSimpleName(),
-        new String(entry.getPrimitive().computeMac(null), UTF_8));
+        DummyMac2.class.getSimpleName(), new String(entry.getPrimitive().computeMac(null), UTF_8));
     assertEquals(KeyStatusType.ENABLED, entry.getStatus());
     assertArrayEquals(CryptoFormat.getOutputPrefix(key2), entry.getIdentifier());
     assertEquals(2, entry.getKeyId());
@@ -194,8 +193,7 @@ public class PrimitiveSetTest {
     assertThat(entries).hasSize(1);
     entry = entries.get(0);
     assertEquals(
-        DummyMac2.class.getSimpleName(),
-        new String(entry.getPrimitive().computeMac(null), UTF_8));
+        DummyMac2.class.getSimpleName(), new String(entry.getPrimitive().computeMac(null), UTF_8));
     assertEquals(KeyStatusType.ENABLED, entry.getStatus());
     assertThat(entry.getIdentifier()).isEmpty();
     assertArrayEquals(CryptoFormat.getOutputPrefix(key2), entry.getIdentifier());
@@ -213,8 +211,7 @@ public class PrimitiveSetTest {
 
     entry = pset.getPrimary();
     assertEquals(
-        DummyMac2.class.getSimpleName(),
-        new String(entry.getPrimitive().computeMac(null), UTF_8));
+        DummyMac2.class.getSimpleName(), new String(entry.getPrimitive().computeMac(null), UTF_8));
     assertEquals(KeyStatusType.ENABLED, entry.getStatus());
     assertArrayEquals(CryptoFormat.getOutputPrefix(key2), entry.getIdentifier());
     assertEquals(2, entry.getKeyId());
@@ -252,9 +249,7 @@ public class PrimitiveSetTest {
             .setOutputPrefixType(OutputPrefixType.TINK)
             .build();
     PrimitiveSet<Mac> pset =
-        PrimitiveSet.newBuilder(Mac.class)
-            .addPrimitive(new DummyMac1(), key)
-            .build();
+        PrimitiveSet.newBuilder(Mac.class).addPrimitive(new DummyMac1(), key).build();
     assertThat(pset.getPrimary()).isNull();
   }
 
@@ -278,6 +273,26 @@ public class PrimitiveSetTest {
         PrimitiveSet.newBuilder(Mac.class).addPrimaryPrimitive(new DummyMac1(), key1).build();
     assertThat(pset2.getPrimitive(key1).get(0).getParameters().toString())
         .isEqualTo("(typeUrl=typeUrl1, outputPrefixType=TINK)");
+  }
+
+  @Test
+  public void testEntryGetKey() throws Exception {
+    PrimitiveSet.Builder<Mac> builder = PrimitiveSet.newBuilder(Mac.class);
+    Key key1 =
+        Key.newBuilder()
+            .setKeyId(1)
+            .setStatus(KeyStatusType.ENABLED)
+            .setOutputPrefixType(OutputPrefixType.TINK)
+            .setKeyData(KeyData.newBuilder().setTypeUrl("typeUrl1").build())
+            .build();
+    builder.addPrimitive(new DummyMac1(), key1);
+    PrimitiveSet<Mac> pset = builder.build();
+    com.google.crypto.tink.Key key = pset.getPrimitive(key1).get(0).getKey();
+
+    assertThat(key).isInstanceOf(LegacyProtoKey.class);
+    LegacyProtoKey legacyProtoKey = (LegacyProtoKey) key;
+    assertThat(legacyProtoKey.getSerialization(InsecureSecretKeyAccess.get()).getTypeUrl())
+        .isEqualTo("typeUrl1");
   }
 
   @Test

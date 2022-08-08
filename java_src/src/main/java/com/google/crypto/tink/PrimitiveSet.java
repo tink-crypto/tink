@@ -17,6 +17,9 @@
 package com.google.crypto.tink;
 
 import com.google.crypto.tink.annotations.Alpha;
+import com.google.crypto.tink.internal.LegacyProtoKey;
+import com.google.crypto.tink.internal.MutableSerializationRegistry;
+import com.google.crypto.tink.internal.ProtoKeySerialization;
 import com.google.crypto.tink.monitoring.MonitoringAnnotations;
 import com.google.crypto.tink.proto.KeyStatusType;
 import com.google.crypto.tink.proto.Keyset;
@@ -115,6 +118,7 @@ public final class PrimitiveSet<P> {
     private final OutputPrefixType outputPrefixType;
     // The id of the key.
     private final int keyId;
+    private final Key key;
     private final Parameters parameters;
 
     Entry(
@@ -123,12 +127,14 @@ public final class PrimitiveSet<P> {
         KeyStatusType status,
         OutputPrefixType outputPrefixType,
         int keyId,
+        Key key,
         Parameters parameters) {
       this.primitive = primitive;
       this.identifier = Arrays.copyOf(identifier, identifier.length);
       this.status = status;
       this.outputPrefixType = outputPrefixType;
       this.keyId = keyId;
+      this.key = key;
       this.parameters = parameters;
     }
 
@@ -163,6 +169,10 @@ public final class PrimitiveSet<P> {
       return keyId;
     }
 
+    public Key getKey() {
+      return key;
+    }
+
     public Parameters getParameters() {
       return parameters;
     }
@@ -171,8 +181,26 @@ public final class PrimitiveSet<P> {
   private static <P> Entry<P> addEntryToMap(
       P primitive, Keyset.Key key, ConcurrentMap<Prefix, List<Entry<P>>> primitives)
       throws GeneralSecurityException {
-    Parameters parameters =
-        new SimpleParameters(key.getKeyData().getTypeUrl(), key.getOutputPrefixType());
+    @Nullable Integer idRequirement = key.getKeyId();
+    if (key.getOutputPrefixType() == OutputPrefixType.RAW) {
+      idRequirement = null;
+    }
+    Key keyObject =
+        MutableSerializationRegistry.globalInstance()
+            .parseKeyWithLegacyFallback(
+                ProtoKeySerialization.create(
+                    key.getKeyData().getTypeUrl(),
+                    key.getKeyData().getValue(),
+                    key.getKeyData().getKeyMaterialType(),
+                    key.getOutputPrefixType(),
+                    idRequirement),
+                InsecureSecretKeyAccess.get());
+    Parameters parameters;
+    if (keyObject instanceof LegacyProtoKey) {
+      parameters = new SimpleParameters(key.getKeyData().getTypeUrl(), key.getOutputPrefixType());
+    } else {
+      parameters = keyObject.getParameters();
+    }
     Entry<P> entry =
         new Entry<P>(
             primitive,
@@ -180,6 +208,7 @@ public final class PrimitiveSet<P> {
             key.getStatus(),
             key.getOutputPrefixType(),
             key.getKeyId(),
+            keyObject,
             parameters);
     List<Entry<P>> list = new ArrayList<>();
     list.add(entry);
