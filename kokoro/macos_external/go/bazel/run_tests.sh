@@ -21,7 +21,7 @@ if [[ -n "${KOKORO_ROOT:-}" ]]; then
   use_bazel.sh "$(cat go/.bazelversion)"
 fi
 
-./kokoro/testutils/copy_credentials.sh "go/testdata"
+./kokoro/testutils/copy_credentials.sh "go/testdata" "all"
 # Sourcing required to update callers environment.
 source ./kokoro/testutils/install_go.sh
 

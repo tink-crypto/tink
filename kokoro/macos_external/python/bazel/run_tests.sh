@@ -20,7 +20,7 @@ if [[ -n "${KOKORO_ROOT:-}" ]]; then
   cd "${KOKORO_ARTIFACTS_DIR}/git/tink"
 fi
 
-./kokoro/testutils/copy_credentials.sh "python/testdata"
+./kokoro/testutils/copy_credentials.sh "python/testdata" "gcp"
 # Install protobuf pip packages.
 pip3 install protobuf --user
 

@@ -99,7 +99,7 @@ if [[ -n "${KOKORO_ROOT:-}" ]] ; then
   use_bazel.sh "$(cat java_src/.bazelversion)"
 fi
 
-./kokoro/testutils/copy_credentials.sh "java_src/testdata"
+./kokoro/testutils/copy_credentials.sh "java_src/testdata" "all"
 ./kokoro/testutils/update_android_sdk.sh
 
 # Run manual tests which rely on key material injected into the Kokoro

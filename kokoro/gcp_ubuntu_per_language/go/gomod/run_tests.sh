@@ -23,7 +23,7 @@ if [[ -n "${KOKORO_ROOT:-}" ]]; then
 fi
 readonly REPO_DIR
 
-./kokoro/testutils/copy_credentials.sh "go/testdata"
+./kokoro/testutils/copy_credentials.sh "go/testdata" "all"
 ./kokoro/testutils/update_certs.sh
 # Sourcing required to update callers environment.
 source ./kokoro/testutils/install_go.sh

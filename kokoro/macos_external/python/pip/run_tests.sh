@@ -22,7 +22,7 @@ if [[ -n "${KOKORO_ROOT:-}" ]]; then
   use_bazel.sh "$(cat python/.bazelversion)"
 fi
 
-./kokoro/testutils/copy_credentials.sh "python/testdata"
+./kokoro/testutils/copy_credentials.sh "python/testdata" "all"
 source ./kokoro/testutils/install_protoc.sh
 source ./kokoro/testutils/install_tink_via_pip.sh "${PWD}/python"
 

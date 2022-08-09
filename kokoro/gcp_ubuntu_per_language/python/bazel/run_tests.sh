@@ -20,7 +20,7 @@ if [[ -n "${KOKORO_ROOT:-}" ]]; then
   cd "${KOKORO_ARTIFACTS_DIR}/git/tink"
 fi
 
-./kokoro/testutils/copy_credentials.sh "python/testdata"
+./kokoro/testutils/copy_credentials.sh "python/testdata" "all"
 # Sourcing required to update callers environment.
 source ./kokoro/testutils/install_python3.sh
 

@@ -19,7 +19,7 @@ set -euo pipefail
 REPO_DIR="${KOKORO_ARTIFACTS_DIR}/git/tink"
 
 cd "${REPO_DIR}"
-./kokoro/testutils/copy_credentials.sh "go/testdata"
+./kokoro/testutils/copy_credentials.sh "go/testdata" "all"
 # Sourcing required to update callers environment.
 source ./kokoro/testutils/install_go.sh
 

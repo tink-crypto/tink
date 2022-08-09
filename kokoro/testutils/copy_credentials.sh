@@ -16,49 +16,111 @@
 ####################################################################################
 
 # This script takes credentials injected into the environment via the Kokoro job
-# configuration and copies them to the expected locations to facilitate
-# continuous integration testing.
+# configuration and copies them to the expected locations.
+#
+# The second argument indicates whether all KMS service credentials should be
+# copied (all) or only credentials for a specific KMS service (gcp|aws).
 #
 # Usage insructions:
 #
-#   ./kokoro/testutils/copy_credentials.sh <testdata dir>
+#   ./kokoro/testutils/copy_credentials.sh <testdata dir> <all|aws|gcp>
+#
 
-if [[ -z "${KOKORO_ROOT}" ]]; then
-  exit 0
-fi
+TESTDATA_DIR=
+KMS_SERVICE=
 
-readonly TESTDATA_DIR="${1}"
+#######################################
+# Process command line arguments.
+#
+# Globals:
+#   TESTDATA_DIR
+#   KMS_SERVICE
+#######################################
+process_args() {
+  TESTDATA_DIR="$1"
+  readonly TESTDATA_DIR
+  KMS_SERVICE="$2"
+  readonly KMS_SERVICE
 
-if [[ -z "${TESTDATA_DIR}" ]]; then
-  echo "Testdata directory must be set" >&2
-  exit 1
-fi
+  if [[ -z "${TESTDATA_DIR}" ]]; then
+    echo "Testdata directory must be set" >&2
+    exit 1
+  fi
 
-if [[ ! -d "${TESTDATA_DIR}" ]]; then
-  echo "Testdata directory \"${TESTDATA_DIR}\" doesn't exist" >&2
-  exit 1
-fi
+  if [[ ! -d "${TESTDATA_DIR}" ]]; then
+    echo "Testdata directory \"${TESTDATA_DIR}\" doesn't exist" >&2
+    exit 1
+  fi
 
-cp "${TINK_TEST_SERVICE_ACCOUNT}" "${TESTDATA_DIR}/gcp/credential.json"
+  if [[ -z "${KMS_SERVICE}" ]]; then
+    echo "KMS service must be specified" >&2
+    exit 1
+  fi
+}
 
-# Create the different format for the AWS credentials
-readonly AWS_KEY_ID="AKIATNYZMJOHVMN7MSYH"
-readonly AWS_KEY="$(cat ${AWS_TINK_TEST_SERVICE_ACCOUNT})"
+#######################################
+# Copy GCP credentials.
+#
+# Globals:
+#   TESTDATA_DIR
+#   TINK_TEST_SERVICE_ACCOUNT
+#######################################
+copy_gcp_credentials() {
+  cp "${TINK_TEST_SERVICE_ACCOUNT}" "${TESTDATA_DIR}/gcp/credential.json"
+}
 
-cat <<END > "${TESTDATA_DIR}/aws/credentials.ini"
+#######################################
+# Copy AWS credentials.
+#
+# Globals:
+#   TESTDATA_DIR
+#   AWS_TINK_TEST_SERVICE_ACCOUNT
+#######################################
+copy_aws_credentials() {
+  # Create the different format for the AWS credentials
+  local -r aws_key_id="AKIATNYZMJOHVMN7MSYH"
+  local -r aws_key="$(cat ${AWS_TINK_TEST_SERVICE_ACCOUNT})"
+
+  cat <<END > "${TESTDATA_DIR}/aws/credentials.ini"
 [default]
-aws_access_key_id = ${AWS_KEY_ID}
-aws_secret_access_key = ${AWS_KEY}
+aws_access_key_id = ${aws_key_id}
+aws_secret_access_key = ${aws_key}
 END
 
-cat <<END > "${TESTDATA_DIR}/aws/credentials.cred"
+  cat <<END > "${TESTDATA_DIR}/aws/credentials.cred"
 [default]
-accessKey = ${AWS_KEY_ID}
-secretKey = ${AWS_KEY}
+accessKey = ${aws_key_id}
+secretKey = ${aws_key}
 END
 
-
-cat <<END > "${TESTDATA_DIR}/aws/credentials.csv"
+  cat <<END > "${TESTDATA_DIR}/aws/credentials.csv"
 User name,Password,Access key ID,Secret access key,Console login link
-tink-user1,,${AWS_KEY_ID},${AWS_KEY},https://235739564943.signin.aws.amazon.com/console
+tink-user1,,${aws_key_id},${aws_key},https://235739564943.signin.aws.amazon.com/console
 END
+}
+
+main() {
+  if [[ -z "${KOKORO_ROOT}" ]]; then
+    exit 0
+  fi
+
+  process_args "$@"
+
+  case "${KMS_SERVICE}" in
+    aws)
+      copy_aws_credentials
+      ;;
+    gcp)
+      copy_gcp_credentials
+      ;;
+    all)
+      copy_aws_credentials
+      copy_gcp_credentials
+      ;;
+    *)
+      echo "Invalid KMS service \"${KMS_SERVICE}\"" >&2
+      exit 1
+  esac
+}
+
+main "$@"

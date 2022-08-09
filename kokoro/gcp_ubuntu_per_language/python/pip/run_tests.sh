@@ -23,7 +23,7 @@ if [[ -n "${KOKORO_ROOT:-}" ]]; then
   use_bazel.sh "$(cat python/.bazelversion)"
 fi
 
-./kokoro/testutils/copy_credentials.sh "python/testdata"
+./kokoro/testutils/copy_credentials.sh "python/testdata" "all"
 # Sourcing required to update callers environment.
 source ./kokoro/testutils/install_python3.sh
 source ./kokoro/testutils/install_protoc.sh
