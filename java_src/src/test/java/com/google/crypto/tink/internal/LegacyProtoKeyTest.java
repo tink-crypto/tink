@@ -47,6 +47,22 @@ public final class LegacyProtoKeyTest {
   }
 
   @Test
+  public void testLegacyProtoKey_getParameters() throws Exception {
+    ProtoKeySerialization serialization =
+        ProtoKeySerialization.create(
+            "myTypeUrl",
+            ByteString.EMPTY,
+            KeyMaterialType.SYMMETRIC,
+            OutputPrefixType.RAW,
+            /*idRequirement = */ null);
+    LegacyProtoKey key = new LegacyProtoKey(serialization, ACCESS);
+    assertThat(key.getSerialization(ACCESS)).isSameInstanceAs(serialization);
+
+    assertThat(key.getParameters().toString()).contains("typeUrl=myTypeUrl");
+    assertThat(key.getParameters().toString()).contains("outputPrefixType=RAW");
+  }
+
+  @Test
   public void testGetIdRequirementOrNull() throws Exception {
     // RAW
     LegacyProtoKey key =

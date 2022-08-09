@@ -19,6 +19,7 @@ package com.google.crypto.tink.internal;
 import com.google.crypto.tink.Key;
 import com.google.crypto.tink.Parameters;
 import com.google.crypto.tink.SecretKeyAccess;
+import com.google.crypto.tink.proto.OutputPrefixType;
 import com.google.crypto.tink.subtle.Bytes;
 import com.google.errorprone.annotations.Immutable;
 import java.security.GeneralSecurityException;
@@ -28,6 +29,53 @@ import javax.annotation.Nullable;
 /** Implements a Key for legacy types where no actual parser is present. */
 @Immutable
 public final class LegacyProtoKey extends Key {
+  /**
+   * An implementation of Parameters which is returned by LegacyProtoKey.
+   *
+   * <p>In contrast to LegacyProtoParameters, this cannot be used to create a new LegacyProtoKey
+   * object.
+   */
+  @Immutable
+  private static class LegacyProtoParametersNotForCreation extends Parameters {
+    private final String typeUrl;
+    private final OutputPrefixType outputPrefixType;
+
+    @Override
+    public boolean hasIdRequirement() {
+      return outputPrefixType != OutputPrefixType.RAW;
+    }
+
+    // This function is needed because LiteProto do not have a good toString function.
+    private static String outputPrefixToString(OutputPrefixType outputPrefixType) {
+      switch (outputPrefixType) {
+        case TINK:
+          return "TINK";
+        case LEGACY:
+          return "LEGACY";
+        case RAW:
+          return "RAW";
+        case CRUNCHY:
+          return "CRUNCHY";
+        default:
+          return "UNKNOWN";
+      }
+    }
+
+    /**
+     * Returns the string representation. The exact details are unspecified and subject to change.
+     */
+    @Override
+    public String toString() {
+      return String.format(
+          "(typeUrl=%s, outputPrefixType=%s)", typeUrl, outputPrefixToString(outputPrefixType));
+    }
+
+    private LegacyProtoParametersNotForCreation(String typeUrl, OutputPrefixType outputPrefixType) {
+      this.typeUrl = typeUrl;
+      this.outputPrefixType = outputPrefixType;
+    }
+  }
+
   private final ProtoKeySerialization serialization;
 
   private static void throwIfMissingAccess(
@@ -104,9 +152,15 @@ public final class LegacyProtoKey extends Key {
     return serialization;
   }
 
-  /** Unsupported. */
+  /**
+   * Returns a LegacyParametersNotForCreation object.
+   *
+   * <p>Note: this is different from the {@code LegacyProtoParameters} object which was used to
+   * create this key. One cannot use the returned object to create a new key.
+   */
   @Override
   public Parameters getParameters() {
-    throw new UnsupportedOperationException("Cannot get parameters on LegacyProtoKey");
+    return new LegacyProtoParametersNotForCreation(
+        serialization.getTypeUrl(), serialization.getOutputPrefixType());
   }
 }

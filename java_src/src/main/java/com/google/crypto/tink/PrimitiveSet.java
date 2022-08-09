@@ -16,8 +16,6 @@
 
 package com.google.crypto.tink;
 
-import com.google.crypto.tink.annotations.Alpha;
-import com.google.crypto.tink.internal.LegacyProtoKey;
 import com.google.crypto.tink.internal.MutableSerializationRegistry;
 import com.google.crypto.tink.internal.ProtoKeySerialization;
 import com.google.crypto.tink.monitoring.MonitoringAnnotations;
@@ -25,7 +23,6 @@ import com.google.crypto.tink.proto.KeyStatusType;
 import com.google.crypto.tink.proto.Keyset;
 import com.google.crypto.tink.proto.OutputPrefixType;
 import com.google.crypto.tink.subtle.Hex;
-import com.google.errorprone.annotations.Immutable;
 import java.security.GeneralSecurityException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -57,51 +54,6 @@ import javax.annotation.Nullable;
  */
 public final class PrimitiveSet<P> {
 
-  // A simple implementation of Parameters.
-  // Consider renaming this class and moving it into internal. And use it in LegacyProtoKey.
-  @Immutable
-  @Alpha
-  private static class SimpleParameters extends Parameters {
-
-    private final String typeUrl;
-    private final OutputPrefixType outputPrefixType;
-
-    @Override
-    public boolean hasIdRequirement() {
-      return outputPrefixType != OutputPrefixType.RAW;
-    }
-
-    // This function is needed because LiteProto do not have a good toString function.
-    private static String outputPrefixToString(OutputPrefixType outputPrefixType) {
-      switch (outputPrefixType) {
-        case TINK:
-          return "TINK";
-        case LEGACY:
-          return "LEGACY";
-        case RAW:
-          return "RAW";
-        case CRUNCHY:
-          return "CRUNCHY";
-        default:
-          return "UNKNOWN";
-      }
-    }
-
-    /**
-     * Returns the string representation. The exact details are unspecified and subject to change.
-     */
-    @Override
-    public String toString() {
-      return String.format(
-          "(typeUrl=%s, outputPrefixType=%s)", typeUrl, outputPrefixToString(outputPrefixType));
-    }
-
-    private SimpleParameters(String typeUrl, OutputPrefixType outputPrefixType) {
-      this.typeUrl = typeUrl;
-      this.outputPrefixType = outputPrefixType;
-    }
-  }
-
   /**
    * A single entry in the set. In addition to the actual primitive it holds also some extra
    * information about the primitive.
@@ -119,7 +71,6 @@ public final class PrimitiveSet<P> {
     // The id of the key.
     private final int keyId;
     private final Key key;
-    private final Parameters parameters;
 
     Entry(
         P primitive,
@@ -127,15 +78,13 @@ public final class PrimitiveSet<P> {
         KeyStatusType status,
         OutputPrefixType outputPrefixType,
         int keyId,
-        Key key,
-        Parameters parameters) {
+        Key key) {
       this.primitive = primitive;
       this.identifier = Arrays.copyOf(identifier, identifier.length);
       this.status = status;
       this.outputPrefixType = outputPrefixType;
       this.keyId = keyId;
       this.key = key;
-      this.parameters = parameters;
     }
 
     /**
@@ -174,7 +123,7 @@ public final class PrimitiveSet<P> {
     }
 
     public Parameters getParameters() {
-      return parameters;
+      return key.getParameters();
     }
   }
 
@@ -195,12 +144,6 @@ public final class PrimitiveSet<P> {
                     key.getOutputPrefixType(),
                     idRequirement),
                 InsecureSecretKeyAccess.get());
-    Parameters parameters;
-    if (keyObject instanceof LegacyProtoKey) {
-      parameters = new SimpleParameters(key.getKeyData().getTypeUrl(), key.getOutputPrefixType());
-    } else {
-      parameters = keyObject.getParameters();
-    }
     Entry<P> entry =
         new Entry<P>(
             primitive,
@@ -208,8 +151,7 @@ public final class PrimitiveSet<P> {
             key.getStatus(),
             key.getOutputPrefixType(),
             key.getKeyId(),
-            keyObject,
-            parameters);
+            keyObject);
     List<Entry<P>> list = new ArrayList<>();
     list.add(entry);
     // Cannot use byte[] as keys in hash map, convert to Prefix wrapper class.

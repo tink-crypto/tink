@@ -342,6 +342,7 @@ java_library(
     srcs = ["LegacyProtoKey.java"],
     deps = [
         ":proto_key_serialization",
+        "//proto:tink_java_proto",
         "//src/main/java/com/google/crypto/tink:key",
         "//src/main/java/com/google/crypto/tink:parameters",
         "//src/main/java/com/google/crypto/tink:secret_key_access",
@@ -356,6 +357,7 @@ android_library(
     srcs = ["LegacyProtoKey.java"],
     deps = [
         ":proto_key_serialization-android",
+        "//proto:tink_java_proto_lite",
         "//src/main/java/com/google/crypto/tink:key-android",
         "//src/main/java/com/google/crypto/tink:parameters-android",
         "//src/main/java/com/google/crypto/tink:secret_key_access-android",
