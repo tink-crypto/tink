@@ -86,7 +86,7 @@ run_all_linux_tests() {
     run_linux_tests "python"
 
     local -a MANUAL_TOOLS_TARGETS
-    if [[ -n "{KOKORO_ROOT}" ]]; then
+    if [[ -n "${KOKORO_ROOT}" ]]; then
       MANUAL_TOOLS_TARGETS+=(
         "//testing/cc:aws_kms_aead_test"
         "//testing/cc:gcp_kms_aead_test"
