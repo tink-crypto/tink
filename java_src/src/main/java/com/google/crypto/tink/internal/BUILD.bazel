@@ -216,6 +216,7 @@ java_library(
     srcs = ["ProtoParametersSerialization.java"],
     deps = [
         ":serialization",
+        ":util",
         "//proto:tink_java_proto",
         "//src/main/java/com/google/crypto/tink/util:bytes",
         "@com_google_protobuf//:protobuf_javalite",
@@ -242,6 +243,7 @@ android_library(
     srcs = ["ProtoParametersSerialization.java"],
     deps = [
         ":serialization-android",
+        ":util-android",
         "//proto:tink_java_proto_lite",
         "//src/main/java/com/google/crypto/tink/util:bytes-android",
         "@com_google_protobuf//:protobuf_javalite",

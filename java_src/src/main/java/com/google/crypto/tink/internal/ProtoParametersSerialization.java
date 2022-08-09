@@ -16,7 +16,7 @@
 
 package com.google.crypto.tink.internal;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
+import static com.google.crypto.tink.internal.Util.toBytesFromPrintableAscii;
 
 import com.google.crypto.tink.proto.KeyTemplate;
 import com.google.crypto.tink.proto.OutputPrefixType;
@@ -37,7 +37,7 @@ public final class ProtoParametersSerialization implements Serialization {
 
   private ProtoParametersSerialization(KeyTemplate keyTemplate) {
     this.keyTemplate = keyTemplate;
-    this.objectIdentifier = Bytes.copyFrom(keyTemplate.getTypeUrl().getBytes(UTF_8));
+    this.objectIdentifier = toBytesFromPrintableAscii(keyTemplate.getTypeUrl());
   }
 
   /** Creates a new {@code ProtoParametersSerialization} object from the individual parts. */
