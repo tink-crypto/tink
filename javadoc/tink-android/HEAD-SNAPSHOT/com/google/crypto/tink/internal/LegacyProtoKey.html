@@ -170,7 +170,7 @@ extends <a href="../../../../../com/google/crypto/tink/Key.html" title="class in
 <tr id="i2" class="altColor">
 <td class="colFirst"><code><a href="../../../../../com/google/crypto/tink/Parameters.html" title="class in com.google.crypto.tink">Parameters</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/internal/LegacyProtoKey.html#getParameters--">getParameters</a></span>()</code>
-<div class="block">Unsupported.</div>
+<div class="block">Returns a LegacyParametersNotForCreation object.</div>
 </td>
 </tr>
 <tr id="i3" class="rowColor">
@@ -297,7 +297,10 @@ public&nbsp;<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Integer
 <li class="blockList">
 <h4>getParameters</h4>
 <pre>public&nbsp;<a href="../../../../../com/google/crypto/tink/Parameters.html" title="class in com.google.crypto.tink">Parameters</a>&nbsp;getParameters()</pre>
-<div class="block">Unsupported.</div>
+<div class="block">Returns a LegacyParametersNotForCreation object.
+
+ <p>Note: this is different from the <code>LegacyProtoParameters</code> object which was used to
+ create this key. One cannot use the returned object to create a new key.</div>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
 <dd><code><a href="../../../../../com/google/crypto/tink/Key.html#getParameters--">getParameters</a></code>&nbsp;in class&nbsp;<code><a href="../../../../../com/google/crypto/tink/Key.html" title="class in com.google.crypto.tink">Key</a></code></dd>
