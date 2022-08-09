@@ -381,6 +381,24 @@ class JwtTest(parameterized.TestCase):
       jwt_mac.verify_mac_and_decode(token, val4)
 
   @parameterized.parameters(SUPPORTED_LANGUAGES)
+  def test_duplicated_issuer(self, lang):
+    token = generate_token('{"alg":"HS256"}', '{"iss":"joe", "iss":"jane"}')
+    jwt_mac = testing_servers.jwt_mac(lang, KEYSET)
+
+    if lang != 'java' and lang != 'python':
+      validator_with_second_issuer = jwt.new_validator(
+          ignore_issuer=True, allow_missing_expiration=True)
+      with self.assertRaises(tink.TinkError):
+        jwt_mac.verify_mac_and_decode(token, validator_with_second_issuer)
+    else:
+      # Currently, this is accepted in Java and Python, and always the last
+      # entry is used.
+      # TODO(b/241828611): This should be rejected.
+      validator_with_second_issuer = jwt.new_validator(
+          expected_issuer='jane', allow_missing_expiration=True)
+      jwt_mac.verify_mac_and_decode(token, validator_with_second_issuer)
+
+  @parameterized.parameters(SUPPORTED_LANGUAGES)
   def test_verify_empty_string_issuer(self, lang):
     token = generate_token('{"alg":"HS256"}', '{"iss":""}')
     jwt_mac = testing_servers.jwt_mac(lang, KEYSET)
@@ -434,6 +452,14 @@ class JwtTest(parameterized.TestCase):
     # The JSON string contains "\uD834", which gets decoded into an invalid
     # UTF16 character.
     token = generate_token('{"alg":"HS256"}', '{"jti":"\\uD834"}')
+    jwt_mac = testing_servers.jwt_mac(lang, KEYSET)
+    with self.assertRaises(tink.TinkError):
+      jwt_mac.verify_mac_and_decode(token, EMPTY_VALIDATOR)
+
+  @parameterized.parameters(SUPPORTED_LANGUAGES)
+  def test_verify_with_invalid_json_escaped_utf16_in_claim_name(self, lang):
+    token = generate_token('{"alg":"HS256"}',
+                           '{"\\uD800\\uD800claim":"value"}')
     jwt_mac = testing_servers.jwt_mac(lang, KEYSET)
     with self.assertRaises(tink.TinkError):
       jwt_mac.verify_mac_and_decode(token, EMPTY_VALIDATOR)
