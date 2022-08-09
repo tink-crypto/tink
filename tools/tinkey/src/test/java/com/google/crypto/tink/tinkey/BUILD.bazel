@@ -32,6 +32,11 @@ java_test(
     size = "small",
     srcs = ["CreateKeysetCommandTest.java"],
     data = ["//testdata/gcp:credentials"],
+    tags = [
+        "manual",
+        "no_rbe",
+        "requires-network",
+    ],
     deps = [
         "//tinkey/src/main/java/com/google/crypto/tink/tinkey:create_keyset_command",
         "//tinkey/src/main/java/com/google/crypto/tink/tinkey:tinkey_util",
@@ -50,6 +55,11 @@ java_test(
     size = "small",
     srcs = ["AddKeyCommandTest.java"],
     data = ["//testdata/gcp:credentials"],
+    tags = [
+        "manual",
+        "no_rbe",
+        "requires-network",
+    ],
     deps = [
         "//tinkey/src/main/java/com/google/crypto/tink/tinkey:add_key_command",
         "//tinkey/src/main/java/com/google/crypto/tink/tinkey:tinkey_util",
@@ -69,6 +79,11 @@ java_test(
     size = "small",
     srcs = ["RotateKeysetCommandTest.java"],
     data = ["//testdata/gcp:credentials"],
+    tags = [
+        "manual",
+        "no_rbe",
+        "requires-network",
+    ],
     deps = [
         "//tinkey/src/main/java/com/google/crypto/tink/tinkey:rotate_keyset_command",
         "//tinkey/src/main/java/com/google/crypto/tink/tinkey:tinkey_util",

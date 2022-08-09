@@ -84,7 +84,22 @@ run_all_linux_tests() {
 
     run_linux_tests "go"
     run_linux_tests "python"
-    run_linux_tests "tools"
+
+    local -a MANUAL_TOOLS_TARGETS
+    if [[ -n "{KOKORO_ROOT}" ]]; then
+      MANUAL_TOOLS_TARGETS+=(
+        "//testing/cc:aws_kms_aead_test"
+        "//testing/cc:gcp_kms_aead_test"
+        "//testing/cross_language:aead_envelope_test"
+        "//tinkey/src/test/java/com/google/crypto/tink/tinkey:AddKeyCommandTest"
+        "//tinkey/src/test/java/com/google/crypto/tink/tinkey:CreateKeysetCommandTest"
+        "//tinkey/src/test/java/com/google/crypto/tink/tinkey:CreatePublicKeysetCommandTest"
+        "//tinkey/src/test/java/com/google/crypto/tink/tinkey:RotateKeysetCommandTest"
+      )
+    fi
+    readonly MANUAL_TOOLS_TARGETS
+    run_linux_tests "tools" "${MANUAL_TOOLS_TARGETS[@]}"
+
     run_linux_tests "apps"
   fi
 

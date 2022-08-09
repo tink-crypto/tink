@@ -74,7 +74,11 @@ sh_test(
         "//testdata/aws:credentials",
         "//testing/cross_language:test_lib",
     ],
-    tags = ["no_rbe"],
+    tags = [
+        "manual",
+        "no_rbe",
+        "requires-network",
+    ],
 )
 
 sh_test(
@@ -90,5 +94,9 @@ sh_test(
         "//testing/cross_language:test_lib",
         "@google_root_pem//file",
     ],
-    tags = ["manual"],
+    tags = [
+        "manual",
+        "no_rbe",
+        "requires-network",
+    ],
 )
