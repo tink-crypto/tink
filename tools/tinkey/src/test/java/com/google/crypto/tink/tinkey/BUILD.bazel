@@ -5,6 +5,11 @@ java_test(
     size = "small",
     srcs = ["CreatePublicKeysetCommandTest.java"],
     data = ["//testdata/gcp:credentials"],
+    tags = [
+        "manual",
+        "no_rbe",
+        "requires-network",
+    ],
     deps = [
         "//tinkey/src/main/java/com/google/crypto/tink/tinkey:create_public_keyset_command",
         "//tinkey/src/main/java/com/google/crypto/tink/tinkey:tinkey_util",
