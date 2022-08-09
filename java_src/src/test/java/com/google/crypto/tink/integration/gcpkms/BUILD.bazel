@@ -23,7 +23,11 @@ java_test(
     size = "small",
     srcs = ["KmsAeadKeyManagerWithGcpTest.java"],
     data = ["//testdata/gcp:credentials"],
-    tags = ["no_rbe"],
+    tags = [
+        "manual",
+        "no_rbe",
+        "requires-network",
+    ],
     deps = [
         "//src/main/java/com/google/crypto/tink:aead",
         "//src/main/java/com/google/crypto/tink:registry_cluster",
@@ -40,7 +44,11 @@ java_test(
     size = "small",
     srcs = ["KmsEnvelopeAeadKeyManagerWithGcpTest.java"],
     data = ["//testdata/gcp:credentials"],
-    tags = ["no_rbe"],
+    tags = [
+        "manual",
+        "no_rbe",
+        "requires-network",
+    ],
     deps = [
         "//proto:tink_java_proto",
         "//src/main/java/com/google/crypto/tink:aead",

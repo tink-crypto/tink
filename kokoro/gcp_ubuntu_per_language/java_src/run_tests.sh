@@ -96,15 +96,23 @@ test_build_bazel_file() {
 
 if [[ -n "${KOKORO_ROOT:-}" ]] ; then
   cd "${KOKORO_ARTIFACTS_DIR}/git/tink"
+  use_bazel.sh "$(cat java_src/.bazelversion)"
 fi
 
 ./kokoro/testutils/copy_credentials.sh "java_src/testdata"
 ./kokoro/testutils/update_android_sdk.sh
 
-pushd java_src
-use_bazel.sh "$(cat .bazelversion)"
-bazel build ...
-bazel test --test_output=errors -- ...
-popd
+# Run manual tests which rely on key material injected into the Kokoro
+# environement.
+MANUAL_TARGETS=()
+if [[ -n "${KOKORO_ROOT:-}" ]]; then
+  MANUAL_TARGETS+=(
+    "//src/test/java/com/google/crypto/tink/integration/gcpkms:KmsAeadKeyManagerWithGcpTest"
+    "//src/test/java/com/google/crypto/tink/integration/gcpkms:KmsEnvelopeAeadKeyManagerWithGcpTest"
+  )
+fi
+readonly MANUAL_TARGETS
+
+./kokoro/testutils/run_bazel_tests.sh java_src "${MANUAL_TARGETS[@]}"
 
 test_build_bazel_file

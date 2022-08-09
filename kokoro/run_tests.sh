@@ -71,7 +71,17 @@ run_all_linux_tests() {
   if [[ "${KOKORO_JOB_NAME:-}" =~ ^tink/github \
       || -z "${KOKORO_JOB_NAME+x}" ]]; then
     run_linux_tests "cc"
-    run_linux_tests "java_src"
+
+    local -a MANUAL_JAVA_TARGETS
+    if [[ -n "${KOKORO_ROOT}" ]]; then
+      MANUAL_JAVA_TARGETS+=(
+        "//src/test/java/com/google/crypto/tink/integration/gcpkms:KmsAeadKeyManagerWithGcpTest"
+        "//src/test/java/com/google/crypto/tink/integration/gcpkms:KmsEnvelopeAeadKeyManagerWithGcpTest"
+      )
+    fi
+    readonly MANUAL_JAVA_TARGETS
+    run_linux_tests "java_src" "${MANUAL_JAVA_TARGETS[@]}"
+
     run_linux_tests "go"
     run_linux_tests "python"
     run_linux_tests "tools"
