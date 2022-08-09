@@ -98,6 +98,7 @@ java_library(
     name = "mac_wrapper",
     srcs = ["MacWrapper.java"],
     deps = [
+        ":mac_key",
         "//proto:tink_java_proto",
         "//src/main/java/com/google/crypto/tink:crypto_format",
         "//src/main/java/com/google/crypto/tink:mac",
@@ -109,6 +110,7 @@ java_library(
         "//src/main/java/com/google/crypto/tink/monitoring:monitoring_client",
         "//src/main/java/com/google/crypto/tink/monitoring:monitoring_keyset_info",
         "//src/main/java/com/google/crypto/tink/subtle:bytes",
+        "//src/main/java/com/google/crypto/tink/util:bytes",
     ],
 )
 
@@ -116,6 +118,7 @@ android_library(
     name = "mac_wrapper-android",
     srcs = ["MacWrapper.java"],
     deps = [
+        ":mac_key-android",
         "//proto:tink_java_proto_lite",
         "//src/main/java/com/google/crypto/tink:crypto_format-android",
         "//src/main/java/com/google/crypto/tink:mac-android",
@@ -127,6 +130,7 @@ android_library(
         "//src/main/java/com/google/crypto/tink/monitoring:monitoring_client-android",
         "//src/main/java/com/google/crypto/tink/monitoring:monitoring_keyset_info-android",
         "//src/main/java/com/google/crypto/tink/subtle:bytes-android",
+        "//src/main/java/com/google/crypto/tink/util:bytes-android",
     ],
 )
 

@@ -26,7 +26,7 @@ import com.google.crypto.tink.internal.MutableMonitoringRegistry;
 import com.google.crypto.tink.monitoring.MonitoringClient;
 import com.google.crypto.tink.monitoring.MonitoringKeysetInfo;
 import com.google.crypto.tink.proto.OutputPrefixType;
-import com.google.crypto.tink.subtle.Bytes;
+import com.google.crypto.tink.util.Bytes;
 import java.security.GeneralSecurityException;
 import java.util.Arrays;
 import java.util.List;
@@ -68,11 +68,11 @@ class MacWrapper implements PrimitiveWrapper<Mac, Mac> {
     public byte[] computeMac(final byte[] data) throws GeneralSecurityException {
       byte[] data2 = data;
       if (primitives.getPrimary().getOutputPrefixType().equals(OutputPrefixType.LEGACY)) {
-        data2 = Bytes.concat(data, FORMAT_VERSION);
+        data2 = com.google.crypto.tink.subtle.Bytes.concat(data, FORMAT_VERSION);
       }
       try {
         byte[] output =
-            Bytes.concat(
+            com.google.crypto.tink.subtle.Bytes.concat(
                 primitives.getPrimary().getIdentifier(),
                 primitives.getPrimary().getPrimitive().computeMac(data2));
         computeLogger.log(primitives.getPrimary().getKeyId(), data2.length);
@@ -97,7 +97,7 @@ class MacWrapper implements PrimitiveWrapper<Mac, Mac> {
       for (PrimitiveSet.Entry<Mac> entry : entries) {
         byte[] data2 = data;
         if (entry.getOutputPrefixType().equals(OutputPrefixType.LEGACY)) {
-          data2 = Bytes.concat(data, FORMAT_VERSION);
+          data2 = com.google.crypto.tink.subtle.Bytes.concat(data, FORMAT_VERSION);
         }
         try {
           entry.getPrimitive().verifyMac(macNoPrefix, data2);
@@ -128,10 +128,33 @@ class MacWrapper implements PrimitiveWrapper<Mac, Mac> {
     }
   }
 
+  private void validateMacKeyPrefixes(PrimitiveSet<Mac> primitives)
+      throws GeneralSecurityException {
+    for (List<PrimitiveSet.Entry<Mac>> entryList : primitives.getAll()) {
+      for (PrimitiveSet.Entry<Mac> entry : entryList) {
+        if (entry.getKey() instanceof MacKey) {
+          MacKey macKey = (MacKey) entry.getKey();
+          Bytes expectedOutputPrefix = Bytes.copyFrom(entry.getIdentifier());
+          if (!expectedOutputPrefix.equals(macKey.getOutputPrefix())) {
+            throw new GeneralSecurityException(
+                "Mac Key with parameters "
+                    + macKey.getParameters()
+                    + " has wrong output prefix ("
+                    + macKey.getOutputPrefix()
+                    + ") instead of ("
+                    + expectedOutputPrefix
+                    + ")");
+          }
+        }
+      }
+    }
+  }
+
   MacWrapper() {}
 
   @Override
   public Mac wrap(final PrimitiveSet<Mac> primitives) throws GeneralSecurityException {
+    validateMacKeyPrefixes(primitives);
     return new WrappedMac(primitives);
   }
 

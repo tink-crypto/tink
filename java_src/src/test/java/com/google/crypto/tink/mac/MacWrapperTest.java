@@ -17,6 +17,7 @@
 package com.google.crypto.tink.mac;
 
 import static com.google.common.truth.Truth.assertThat;
+import static com.google.crypto.tink.internal.Util.toBytesFromPrintableAscii;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertThrows;
@@ -24,24 +25,32 @@ import static org.junit.Assert.assertThrows;
 import com.google.crypto.tink.CryptoFormat;
 import com.google.crypto.tink.Mac;
 import com.google.crypto.tink.PrimitiveSet;
+import com.google.crypto.tink.SecretKeyAccess;
+import com.google.crypto.tink.internal.KeyParser;
 import com.google.crypto.tink.internal.MutableMonitoringRegistry;
+import com.google.crypto.tink.internal.MutableSerializationRegistry;
+import com.google.crypto.tink.internal.ProtoKeySerialization;
 import com.google.crypto.tink.internal.testing.FakeMonitoringClient;
 import com.google.crypto.tink.monitoring.MonitoringAnnotations;
+import com.google.crypto.tink.proto.KeyData;
+import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
 import com.google.crypto.tink.proto.KeyStatusType;
 import com.google.crypto.tink.proto.Keyset.Key;
 import com.google.crypto.tink.proto.OutputPrefixType;
 import com.google.crypto.tink.subtle.Bytes;
 import com.google.crypto.tink.subtle.Random;
 import com.google.crypto.tink.testing.TestUtil;
+import com.google.protobuf.ByteString;
 import java.security.GeneralSecurityException;
 import java.util.Arrays;
 import java.util.List;
+import javax.annotation.Nullable;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
-/** Tests for MacFactory. */
+/** Tests for MacWrapper. */
 @RunWith(JUnit4.class)
 public class MacWrapperTest {
   private static final int HMAC_KEY_SIZE = 20;
@@ -338,5 +347,89 @@ public class MacWrapperTest {
     assertThat(verifyFailure2.getApi()).isEqualTo("verify");
     assertThat(verifyFailure2.getKeysetInfo().getPrimaryKeyId()).isEqualTo(42);
     assertThat(verifyFailure2.getKeysetInfo().getAnnotations()).isEqualTo(annotations);
+  }
+
+  // Returns a key whose output prefix is taken from
+  private static com.google.crypto.tink.Key parseKeyWithProgrammableOutputPrefix(
+      ProtoKeySerialization serialization, @Nullable SecretKeyAccess access) {
+    com.google.crypto.tink.util.Bytes outputPrefix =
+        com.google.crypto.tink.util.Bytes.copyFrom(serialization.getValue().toByteArray());
+    return new MacKey() {
+      @Override
+      public com.google.crypto.tink.util.Bytes getOutputPrefix() {
+        return outputPrefix;
+      }
+
+      @Override
+      public MacParameters getParameters() {
+        return new MacParameters() {
+          @Override
+          public boolean hasIdRequirement() {
+            throw new UnsupportedOperationException("Not needed in test");
+          }
+        };
+      }
+
+      @Override
+      public Integer getIdRequirementOrNull() {
+        throw new UnsupportedOperationException("Not needed in test");
+      }
+
+      @Override
+      public boolean equalsKey(com.google.crypto.tink.Key k) {
+        throw new UnsupportedOperationException("Not needed in test");
+      }
+    };
+  }
+
+  private static final String TYPE_URL_FOR_PROGRAMMABLE_KEY = "typeUrlForProgrammableKey";
+  @BeforeClass
+  public static void registerProgrammableOutputPrefixKey() throws Exception {
+    MutableSerializationRegistry.globalInstance()
+        .registerKeyParser(
+            KeyParser.create(
+                MacWrapperTest::parseKeyWithProgrammableOutputPrefix,
+                toBytesFromPrintableAscii(TYPE_URL_FOR_PROGRAMMABLE_KEY),
+                ProtoKeySerialization.class));
+  }
+
+  @Test
+  public void correctOutputPrefixInKey_creatingWorks() throws Exception {
+    Key key =
+        Key.newBuilder()
+            .setOutputPrefixType(OutputPrefixType.TINK)
+            .setKeyData(
+                KeyData.newBuilder()
+                    .setTypeUrl(TYPE_URL_FOR_PROGRAMMABLE_KEY)
+                    .setValue(ByteString.copyFrom(new byte[] {0x01, 0x01, 0x02, 0x03, 0x04}))
+                    .setKeyMaterialType(KeyMaterialType.SYMMETRIC))
+            .setKeyId(0x01020304)
+            .setStatus(KeyStatusType.ENABLED)
+            .build();
+    // Wrapping would throw before any mac is computed, so we can use any Mac for the test.
+    PrimitiveSet<Mac> primitives =
+        PrimitiveSet.newBuilder(Mac.class).addPrimaryPrimitive(new AlwaysFailingMac(), key).build();
+    new MacWrapper().wrap(primitives);
+  }
+
+  @Test
+  public void wrongOutputPrefixInKey_creationFails() throws Exception {
+    Key key =
+        Key.newBuilder()
+            .setOutputPrefixType(OutputPrefixType.TINK)
+            .setKeyData(
+                KeyData.newBuilder()
+                    .setTypeUrl(TYPE_URL_FOR_PROGRAMMABLE_KEY)
+                    .setValue(ByteString.copyFrom(new byte[] {0x01, 0x01, 0x02, 0x03, 0x04}))
+                    .setKeyMaterialType(KeyMaterialType.SYMMETRIC))
+            .setKeyId(0x01020305)
+            .setStatus(KeyStatusType.ENABLED)
+            .build();
+    // Wrapping throws before any mac is computed, so we can use an AlwaysFailingMac for the test.
+    PrimitiveSet<Mac> primitives =
+        PrimitiveSet.newBuilder(Mac.class).addPrimaryPrimitive(new AlwaysFailingMac(), key).build();
+    GeneralSecurityException e =
+        assertThrows(GeneralSecurityException.class, () -> new MacWrapper().wrap(primitives));
+    assertThat(e).hasMessageThat().contains("has wrong output prefix");
   }
 }
