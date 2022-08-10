@@ -14,5 +14,5 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-// Package internal implements digital signatures.
-package internal
+// Package signature provides internal implementations of the Signer and Verifier primitives.
+package signature

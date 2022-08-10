@@ -24,7 +24,7 @@ import (
 
 	"google.golang.org/protobuf/proto"
 	"github.com/google/tink/go/core/registry"
-	"github.com/google/tink/go/signature/internal"
+	internal "github.com/google/tink/go/internal/signature"
 	"github.com/google/tink/go/subtle/random"
 	commonpb "github.com/google/tink/go/proto/common_go_proto"
 	rsassapkcs1pb "github.com/google/tink/go/proto/rsa_ssa_pkcs1_go_proto"

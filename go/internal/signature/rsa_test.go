@@ -14,12 +14,12 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-package internal_test
+package signature_test
 
 import (
 	"testing"
 
-	"github.com/google/tink/go/signature/internal"
+	internal "github.com/google/tink/go/internal/signature"
 )
 
 func TestValidatePublicExponent(t *testing.T) {
