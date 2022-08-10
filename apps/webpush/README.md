@@ -4,9 +4,9 @@ This Tink app is an implementation of [RFC 8291 - Message Encryption for Web
 Push](https://tools.ietf.org/html/rfc8291).
 
 The most recent release is
-[1.6.1](https://github.com/google/tink/releases/tag/v1.6.1), released
-2021-07-12. API docs can be found
-[here](https://google.github.io/tink/javadoc/apps-webpush/1.6.1).
+[1.7.0](https://github.com/google/tink/releases/tag/v1.7.0), released
+2022-08-09. API docs can be found
+[here](https://google.github.io/tink/javadoc/apps-webpush/1.7.0).
 
 ## Installation
 
@@ -16,7 +16,7 @@ To add a dependency using Maven:
 <dependency>
   <groupId>com.google.crypto.tink</groupId>
   <artifactId>apps-webpush</artifactId>
-  <version>1.6.1</version>
+  <version>1.7.0</version>
 </dependency>
 ```
 
@@ -24,7 +24,7 @@ To add a dependency using Gradle:
 
 ```
 dependencies {
-  implementation 'com.google.crypto.tink:apps-webpush:1.6.1'
+  implementation 'com.google.crypto.tink:apps-webpush:1.7.0'
 }
 ```
 

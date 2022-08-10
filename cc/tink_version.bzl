@@ -1,2 +1,2 @@
 """ Version of the current release of Tink """
-TINK_VERSION_LABEL = "1.6.1"
+TINK_VERSION_LABEL = "1.7.0"

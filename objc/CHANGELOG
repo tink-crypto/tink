@@ -1,3 +1,7 @@
+Version 1.7.0
+==================================
+Publishing CocoaPod using XCFramework format with arm64 (M1) support.
+
 Version 1.6.1
 ==================================
 No changes to the Obj-C implementation since 1.6.0.

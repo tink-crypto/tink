@@ -48,8 +48,8 @@ presented at [Real World Crypto 2019](https://rwc.iacr.org/2019/).
 [Java/Android](docs/JAVA-HOWTO.md), [C++](docs/CPP-HOWTO.md),
 [Obj-C](docs/OBJC-HOWTO.md), [Go](docs/GOLANG-HOWTO.md), and
 [Python](docs/PYTHON-HOWTO.md) are field tested and ready for production. The
-latest version is [1.6.1](https://github.com/google/tink/releases/tag/v1.6.1),
-released on 2021-07-12.
+latest version is [1.7.0](https://github.com/google/tink/releases/tag/v1.7.0),
+released on 2022-08-09.
 
 Javascript/Typescript is in an alpha state and should only be used for testing.
 
@@ -83,7 +83,7 @@ go get github.com/google/tink/go/...
 <dependency>
   <groupId>com.google.crypto.tink</groupId>
   <artifactId>tink</artifactId>
-  <version>1.6.1</version>
+  <version>1.7.0</version>
 </dependency>
 ```
 
@@ -91,7 +91,7 @@ go get github.com/google/tink/go/...
 
 ```
 dependencies {
-  implementation 'com.google.crypto.tink:tink-android:1.6.1'
+  implementation 'com.google.crypto.tink:tink-android:1.7.0'
 }
 ```
 
@@ -100,7 +100,7 @@ dependencies {
 ```sh
 cd /path/to/your/Xcode project/
 pod init
-pod 'Tink', '1.6.1'
+pod 'Tink', '1.7.0'
 pod install
 ```
 
