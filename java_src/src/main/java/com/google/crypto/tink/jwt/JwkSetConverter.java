@@ -70,8 +70,13 @@ public final class JwkSetConverter {
    */
   public static String fromPublicKeysetHandle(KeysetHandle handle)
       throws IOException, GeneralSecurityException {
+    // We never throw a IOException anymore, but keep it in the interface for compatibility.
     ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-    handle.writeNoSecret(new JwkSetWriter(outputStream));
+    try {
+      handle.writeNoSecret(new JwkSetWriter(outputStream));
+    } catch (IOException e) {
+      throw new GeneralSecurityException(e);
+    }
     return outputStream.toString();
   }
 
@@ -84,13 +89,14 @@ public final class JwkSetConverter {
    */
   public static KeysetHandle toPublicKeysetHandle(String jwkSet)
       throws IOException, GeneralSecurityException {
+    // We never throw a IOException anymore, but keep it in the interface for compatibility.
     JsonObject jsonKeyset;
     try {
       JsonReader jsonReader = new JsonReader(new StringReader(jwkSet));
       jsonReader.setLenient(false);
       jsonKeyset = Streams.parse(jsonReader).getAsJsonObject();
     } catch (IllegalStateException | JsonParseException | StackOverflowError ex) {
-      throw new IOException("JWK set is invalid JSON", ex);
+      throw new GeneralSecurityException("JWK set is invalid JSON", ex);
     }
     KeysetManager manager = KeysetManager.withEmptyKeyset();
     JsonArray jsonKeys = jsonKeyset.get("keys").getAsJsonArray();
@@ -109,7 +115,8 @@ public final class JwkSetConverter {
           keyData = convertToEcdsaKey(jsonKey);
           break;
         default:
-          throw new IOException("unexpected alg value: " + getStringItem(jsonKey, "alg"));
+          throw new GeneralSecurityException(
+              "unexpected alg value: " + getStringItem(jsonKey, "alg"));
       }
       manager.add(
           KeyHandle.createFromKey(
@@ -118,7 +125,7 @@ public final class JwkSetConverter {
     }
     KeysetInfo info = manager.getKeysetHandle().getKeysetInfo();
     if (info.getKeyInfoCount() <= 0) {
-      throw new IOException("empty keyset");
+      throw new GeneralSecurityException("empty keyset");
     }
     manager.setPrimary(info.getKeyInfo(0).getKeyId());
     return manager.getKeysetHandle();
@@ -306,51 +313,52 @@ public final class JwkSetConverter {
     }
   }
 
-  private static String getStringItem(JsonObject obj, String name) throws IOException {
+  private static String getStringItem(JsonObject obj, String name) throws GeneralSecurityException {
     if (!obj.has(name)) {
-      throw new IOException(name + " not found");
+      throw new GeneralSecurityException(name + " not found");
     }
     if (!obj.get(name).isJsonPrimitive() || !obj.get(name).getAsJsonPrimitive().isString()) {
-      throw new IOException(name + " is not a string");
+      throw new GeneralSecurityException(name + " is not a string");
     }
     return obj.get(name).getAsString();
   }
 
   private static void expectStringItem(JsonObject obj, String name, String expectedValue)
-      throws IOException {
+      throws GeneralSecurityException {
     String value = getStringItem(obj, name);
     if (!value.equals(expectedValue)) {
-      throw new IOException("unexpected " + name + " value: " + value);
+      throw new GeneralSecurityException("unexpected " + name + " value: " + value);
     }
   }
 
-  private static void validateUseIsSig(JsonObject jsonKey) throws IOException {
+  private static void validateUseIsSig(JsonObject jsonKey) throws GeneralSecurityException {
     if (!jsonKey.has("use")) {
       return;
     }
     expectStringItem(jsonKey, "use", "sig");
   }
 
-  private static void validateKeyOpsIsVerify(JsonObject jsonKey) throws IOException {
+  private static void validateKeyOpsIsVerify(JsonObject jsonKey) throws GeneralSecurityException {
     if (!jsonKey.has("key_ops")) {
       return;
     }
     if (!jsonKey.get("key_ops").isJsonArray()) {
-      throw new IOException("key_ops is not an array");
+      throw new GeneralSecurityException("key_ops is not an array");
     }
     JsonArray keyOps = jsonKey.get("key_ops").getAsJsonArray();
     if (keyOps.size() != 1) {
-      throw new IOException("key_ops must contain exactly one element");
+      throw new GeneralSecurityException("key_ops must contain exactly one element");
     }
     if (!keyOps.get(0).isJsonPrimitive() || !keyOps.get(0).getAsJsonPrimitive().isString()) {
-      throw new IOException("key_ops is not a string");
+      throw new GeneralSecurityException("key_ops is not a string");
     }
     if (!keyOps.get(0).getAsString().equals("verify")) {
-      throw new IOException("unexpected keyOps value: " + keyOps.get(0).getAsString());
+      throw new GeneralSecurityException("unexpected keyOps value: " + keyOps.get(0).getAsString());
     }
   }
 
-  private static KeyData convertToRsaSsaPkcs1Key(JsonObject jsonKey) throws IOException {
+  private static KeyData convertToRsaSsaPkcs1Key(JsonObject jsonKey)
+      throws GeneralSecurityException {
     JwtRsaSsaPkcs1Algorithm algorithm;
     switch (getStringItem(jsonKey, "alg")) {
       case "RS256":
@@ -363,7 +371,8 @@ public final class JwkSetConverter {
         algorithm = JwtRsaSsaPkcs1Algorithm.RS512;
         break;
       default:
-        throw new IOException("Unknown Rsa Algorithm: " + getStringItem(jsonKey, "alg"));
+        throw new GeneralSecurityException(
+            "Unknown Rsa Algorithm: " + getStringItem(jsonKey, "alg"));
     }
     if (jsonKey.has("p")
         || jsonKey.has("q")
@@ -395,7 +404,7 @@ public final class JwkSetConverter {
         .build();
   }
 
-  private static KeyData convertToRsaSsaPssKey(JsonObject jsonKey) throws IOException {
+  private static KeyData convertToRsaSsaPssKey(JsonObject jsonKey) throws GeneralSecurityException {
     JwtRsaSsaPssAlgorithm algorithm;
     switch (getStringItem(jsonKey, "alg")) {
       case "PS256":
@@ -408,7 +417,8 @@ public final class JwkSetConverter {
         algorithm = JwtRsaSsaPssAlgorithm.PS512;
         break;
       default:
-        throw new IOException("Unknown Rsa Algorithm: " + getStringItem(jsonKey, "alg"));
+        throw new GeneralSecurityException(
+            "Unknown Rsa Algorithm: " + getStringItem(jsonKey, "alg"));
     }
     if (jsonKey.has("p")
         || jsonKey.has("q")
@@ -440,7 +450,7 @@ public final class JwkSetConverter {
         .build();
   }
 
-  private static KeyData convertToEcdsaKey(JsonObject jsonKey) throws IOException {
+  private static KeyData convertToEcdsaKey(JsonObject jsonKey) throws GeneralSecurityException {
     JwtEcdsaAlgorithm algorithm;
     switch (getStringItem(jsonKey, "alg")) {
       case "ES256":
@@ -456,7 +466,8 @@ public final class JwkSetConverter {
         algorithm = JwtEcdsaAlgorithm.ES512;
         break;
       default:
-        throw new IOException("Unknown Ecdsa Algorithm: " + getStringItem(jsonKey, "alg"));
+        throw new GeneralSecurityException(
+            "Unknown Ecdsa Algorithm: " + getStringItem(jsonKey, "alg"));
     }
     if (jsonKey.has("d")) {
       throw new UnsupportedOperationException("importing ECDSA private keys is not implemented");

@@ -30,7 +30,6 @@ import com.google.crypto.tink.tinkkey.KeyAccess;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.util.HashSet;
 import org.junit.Before;
@@ -547,13 +546,13 @@ public final class JwkSetConverterTest {
   @Test
   public void legacyEcdsaKeysets_fromPublicKeysetHandleFails() throws Exception {
     String keyset = ES256_KEYSET.replace("RAW", "LEGACY");
-    assertThrows(IOException.class, () -> convertToJwkSet(keyset));
+    assertThrows(GeneralSecurityException.class, () -> convertToJwkSet(keyset));
   }
 
   @Test
   public void crunchyEcdsaKeysets_fromPublicKeysetHandleFails() throws Exception {
     String keyset = ES256_KEYSET.replace("RAW", "CRUNCHY");
-    assertThrows(IOException.class, () -> convertToJwkSet(keyset));
+    assertThrows(GeneralSecurityException.class, () -> convertToJwkSet(keyset));
   }
 
   @Test
@@ -570,25 +569,25 @@ public final class JwkSetConverterTest {
   @Test
   public void legacyRsaSsaPkcs1Keysets_fromPublicKeysetHandleFails() throws Exception {
     String keyset = RS256_KEYSET.replace("RAW", "LEGACY");
-    assertThrows(IOException.class, () -> convertToJwkSet(keyset));
+    assertThrows(GeneralSecurityException.class, () -> convertToJwkSet(keyset));
   }
 
   @Test
   public void crunchyRsaSsaPkcs1Keysets_fromPublicKeysetHandleFails() throws Exception {
     String keyset = RS256_KEYSET.replace("RAW", "CRUNCHY");
-    assertThrows(IOException.class, () -> convertToJwkSet(keyset));
+    assertThrows(GeneralSecurityException.class, () -> convertToJwkSet(keyset));
   }
 
   @Test
   public void legacyRsaSsaPssKeysets_fromPublicKeysetHandleFails() throws Exception {
     String keyset = PS256_KEYSET.replace("RAW", "LEGACY");
-    assertThrows(IOException.class, () -> convertToJwkSet(keyset));
+    assertThrows(GeneralSecurityException.class, () -> convertToJwkSet(keyset));
   }
 
   @Test
   public void crunchyRsaSsaPssKeysets_fromPublicKeysetHandleFails() throws Exception {
     String keyset = PS256_KEYSET.replace("RAW", "CRUNCHY");
-    assertThrows(IOException.class, () -> convertToJwkSet(keyset));
+    assertThrows(GeneralSecurityException.class, () -> convertToJwkSet(keyset));
   }
 
   @Test
@@ -654,7 +653,8 @@ public final class JwkSetConverterTest {
             + "\"use\":\"sig\","
             + "\"key_ops\":[\"verify\"]"
             + "}]}";
-    assertThrows(IOException.class, () -> JwkSetConverter.toPublicKeysetHandle(jwksString));
+    assertThrows(
+        GeneralSecurityException.class, () -> JwkSetConverter.toPublicKeysetHandle(jwksString));
   }
 
   @Test
@@ -669,7 +669,8 @@ public final class JwkSetConverterTest {
             + "\"alg\":\"ES256\","
             + "\"key_ops\":[\"verify\"]"
             + "}]}";
-    assertThrows(IOException.class, () -> JwkSetConverter.toPublicKeysetHandle(jwksString));
+    assertThrows(
+        GeneralSecurityException.class, () -> JwkSetConverter.toPublicKeysetHandle(jwksString));
   }
 
   @Test
@@ -684,7 +685,8 @@ public final class JwkSetConverterTest {
             + "\"alg\":\"ES256\","
             + "\"key_ops\":[\"verify\"]"
             + "}]}";
-    assertThrows(IOException.class, () -> JwkSetConverter.toPublicKeysetHandle(jwksString));
+    assertThrows(
+        GeneralSecurityException.class, () -> JwkSetConverter.toPublicKeysetHandle(jwksString));
   }
 
   @Test
@@ -736,7 +738,8 @@ public final class JwkSetConverterTest {
             + "\"alg\":\"ES256\","
             + "\"key_ops\":[\"verify\"]"
             + "}]}";
-    assertThrows(IOException.class, () -> JwkSetConverter.toPublicKeysetHandle(jwksString));
+    assertThrows(
+        GeneralSecurityException.class, () -> JwkSetConverter.toPublicKeysetHandle(jwksString));
   }
 
   @Test
@@ -752,7 +755,8 @@ public final class JwkSetConverterTest {
             + "\"alg\":\"ES256\","
             + "\"key_ops\":[\"verify\"]"
             + "}]}";
-    assertThrows(IOException.class, () -> JwkSetConverter.toPublicKeysetHandle(jwksString));
+    assertThrows(
+        GeneralSecurityException.class, () -> JwkSetConverter.toPublicKeysetHandle(jwksString));
   }
 
   @Test
@@ -768,7 +772,8 @@ public final class JwkSetConverterTest {
             + "\"alg\":\"ES256\","
             + "\"key_ops\":[\"verify\"]"
             + "}]}";
-    assertThrows(IOException.class, () -> JwkSetConverter.toPublicKeysetHandle(jwksString));
+    assertThrows(
+        GeneralSecurityException.class, () -> JwkSetConverter.toPublicKeysetHandle(jwksString));
   }
 
   @Test
@@ -784,7 +789,8 @@ public final class JwkSetConverterTest {
             + "\"alg\":\"ES256\","
             + "\"key_ops\":[\"invalid\"]"
             + "}]}";
-    assertThrows(IOException.class, () -> JwkSetConverter.toPublicKeysetHandle(jwksString));
+    assertThrows(
+        GeneralSecurityException.class, () -> JwkSetConverter.toPublicKeysetHandle(jwksString));
   }
 
   @Test
@@ -800,7 +806,8 @@ public final class JwkSetConverterTest {
             + "\"alg\":\"ES256\","
             + "\"key_ops\":\"verify\""
             + "}]}";
-    assertThrows(IOException.class, () -> JwkSetConverter.toPublicKeysetHandle(jwksString));
+    assertThrows(
+        GeneralSecurityException.class, () -> JwkSetConverter.toPublicKeysetHandle(jwksString));
   }
 
   @Test
@@ -896,7 +903,8 @@ public final class JwkSetConverterTest {
             + "azfkIogKMV7Xk0aw6nCW6h49BYuIu3TVjiToLEu5kX0z501whcCI8SA1tlicl7CzOCvVF70vg03RAB5vZQWY"
             + "2oFr3AwKBYDHvsc\","
             + "\"e\":\"AQAB\",\"use\":\"sig\",\"key_ops\":[\"verify\"]}]}";
-    assertThrows(IOException.class, () -> JwkSetConverter.toPublicKeysetHandle(jwksString));
+    assertThrows(
+        GeneralSecurityException.class, () -> JwkSetConverter.toPublicKeysetHandle(jwksString));
   }
 
   @Test
@@ -909,10 +917,12 @@ public final class JwkSetConverterTest {
             + "azfkIogKMV7Xk0aw6nCW6h49BYuIu3TVjiToLEu5kX0z501whcCI8SA1tlicl7CzOCvVF70vg03RAB5vZQWY"
             + "2oFr3AwKBYDHvsc\","
             + "\"e\":\"AQAB\",\"use\":\"sig\",\"alg\":\"RS256\",\"key_ops\":[\"verify\"]}]}";
-    assertThrows(IOException.class, () -> JwkSetConverter.toPublicKeysetHandle(jwksString));
+    assertThrows(
+        GeneralSecurityException.class, () -> JwkSetConverter.toPublicKeysetHandle(jwksString));
 
     String psJwksString = jwksString.replace("RS256", "PS256");
-    assertThrows(IOException.class, () -> JwkSetConverter.toPublicKeysetHandle(psJwksString));
+    assertThrows(
+        GeneralSecurityException.class, () -> JwkSetConverter.toPublicKeysetHandle(psJwksString));
   }
 
   @Test
@@ -941,10 +951,12 @@ public final class JwkSetConverterTest {
             + "azfkIogKMV7Xk0aw6nCW6h49BYuIu3TVjiToLEu5kX0z501whcCI8SA1tlicl7CzOCvVF70vg03RAB5vZQWY"
             + "2oFr3AwKBYDHvsc\","
             + "\"e\":\"AQAB\",\"use\":\"sig\",\"alg\":\"RS256\",\"key_ops\":[\"verify\"]}]}";
-    assertThrows(IOException.class, () -> JwkSetConverter.toPublicKeysetHandle(jwksString));
+    assertThrows(
+        GeneralSecurityException.class, () -> JwkSetConverter.toPublicKeysetHandle(jwksString));
 
     String psJwksString = jwksString.replace("RS256", "PS256");
-    assertThrows(IOException.class, () -> JwkSetConverter.toPublicKeysetHandle(psJwksString));
+    assertThrows(
+        GeneralSecurityException.class, () -> JwkSetConverter.toPublicKeysetHandle(psJwksString));
   }
 
   @Test
@@ -957,10 +969,12 @@ public final class JwkSetConverterTest {
             + "azfkIogKMV7Xk0aw6nCW6h49BYuIu3TVjiToLEu5kX0z501whcCI8SA1tlicl7CzOCvVF70vg03RAB5vZQWY"
             + "2oFr3AwKBYDHvsc\","
             + "\"e\":\"AQAB\",\"use\":\"invalid\",\"alg\":\"RS256\",\"key_ops\":[\"verify\"]}]}";
-    assertThrows(IOException.class, () -> JwkSetConverter.toPublicKeysetHandle(jwksString));
+    assertThrows(
+        GeneralSecurityException.class, () -> JwkSetConverter.toPublicKeysetHandle(jwksString));
 
     String psJwksString = jwksString.replace("RS256", "PS256");
-    assertThrows(IOException.class, () -> JwkSetConverter.toPublicKeysetHandle(psJwksString));
+    assertThrows(
+        GeneralSecurityException.class, () -> JwkSetConverter.toPublicKeysetHandle(psJwksString));
   }
 
   @Test
@@ -973,10 +987,12 @@ public final class JwkSetConverterTest {
             + "azfkIogKMV7Xk0aw6nCW6h49BYuIu3TVjiToLEu5kX0z501whcCI8SA1tlicl7CzOCvVF70vg03RAB5vZQWY"
             + "2oFr3AwKBYDHvsc\","
             + "\"e\":\"AQAB\",\"use\":\"sig\",\"alg\":\"RS256\",\"key_ops\":[\"invalid\"]}]}";
-    assertThrows(IOException.class, () -> JwkSetConverter.toPublicKeysetHandle(jwksString));
+    assertThrows(
+        GeneralSecurityException.class, () -> JwkSetConverter.toPublicKeysetHandle(jwksString));
 
     String psJwksString = jwksString.replace("RS256", "PS256");
-    assertThrows(IOException.class, () -> JwkSetConverter.toPublicKeysetHandle(psJwksString));
+    assertThrows(
+        GeneralSecurityException.class, () -> JwkSetConverter.toPublicKeysetHandle(psJwksString));
   }
 
   @Test
@@ -989,10 +1005,12 @@ public final class JwkSetConverterTest {
             + "azfkIogKMV7Xk0aw6nCW6h49BYuIu3TVjiToLEu5kX0z501whcCI8SA1tlicl7CzOCvVF70vg03RAB5vZQWY"
             + "2oFr3AwKBYDHvsc\","
             + "\"e\":\"AQAB\",\"use\":\"sig\",\"alg\":\"RS256\",\"key_ops\":\"verify\"}]}";
-    assertThrows(IOException.class, () -> JwkSetConverter.toPublicKeysetHandle(jwksString));
+    assertThrows(
+        GeneralSecurityException.class, () -> JwkSetConverter.toPublicKeysetHandle(jwksString));
 
     String psJwksString = jwksString.replace("RS256", "PS256");
-    assertThrows(IOException.class, () -> JwkSetConverter.toPublicKeysetHandle(psJwksString));
+    assertThrows(
+        GeneralSecurityException.class, () -> JwkSetConverter.toPublicKeysetHandle(psJwksString));
   }
 
 
