@@ -31,17 +31,28 @@ type AEADService struct {
 	pb.AeadServer
 }
 
+func (s *AEADService) CreateAead(ctx context.Context, req *pb.AeadCreationRequest) (*pb.AeadCreationResponse, error) {
+	reader := keyset.NewBinaryReader(bytes.NewReader(req.Keyset))
+	handle, err := testkeyset.Read(reader)
+	if err != nil {
+		return &pb.AeadCreationResponse{Err: err.Error()}, nil
+	}
+	_, err = aead.New(handle)
+	if err != nil {
+		return &pb.AeadCreationResponse{Err: err.Error()}, nil
+	}
+	return &pb.AeadCreationResponse{}, nil
+}
+
 func (s *AEADService) Encrypt(ctx context.Context, req *pb.AeadEncryptRequest) (*pb.AeadEncryptResponse, error) {
 	reader := keyset.NewBinaryReader(bytes.NewReader(req.Keyset))
 	handle, err := testkeyset.Read(reader)
 	if err != nil {
-		return &pb.AeadEncryptResponse{
-			Result: &pb.AeadEncryptResponse_Err{err.Error()}}, nil
+		return nil, err
 	}
 	cipher, err := aead.New(handle)
 	if err != nil {
-		return &pb.AeadEncryptResponse{
-			Result: &pb.AeadEncryptResponse_Err{err.Error()}}, nil
+		return nil, err
 	}
 	ciphertext, err := cipher.Encrypt(req.Plaintext, req.AssociatedData)
 	if err != nil {
@@ -56,13 +67,11 @@ func (s *AEADService) Decrypt(ctx context.Context, req *pb.AeadDecryptRequest) (
 	reader := keyset.NewBinaryReader(bytes.NewReader(req.Keyset))
 	handle, err := testkeyset.Read(reader)
 	if err != nil {
-		return &pb.AeadDecryptResponse{
-			Result: &pb.AeadDecryptResponse_Err{err.Error()}}, nil
+		return nil, err
 	}
 	cipher, err := aead.New(handle)
 	if err != nil {
-		return &pb.AeadDecryptResponse{
-			Result: &pb.AeadDecryptResponse_Err{err.Error()}}, nil
+		return nil, err
 	}
 	plaintext, err := cipher.Decrypt(req.Ciphertext, req.AssociatedData)
 	if err != nil {

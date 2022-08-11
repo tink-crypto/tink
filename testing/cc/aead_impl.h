@@ -28,6 +28,10 @@ namespace tink_testing_api {
 // An Aead Service.
 class AeadImpl final : public Aead::Service {
  public:
+  grpc::Status CreateAead(grpc::ServerContext* context,
+                          const AeadCreationRequest* request,
+                          AeadCreationResponse* response) override;
+
   grpc::Status Encrypt(grpc::ServerContext* context,
                        const AeadEncryptRequest* request,
                        AeadEncryptResponse* response) override;

@@ -378,6 +378,18 @@ class KeysetServicer(testing_api_pb2_grpc.KeysetServicer):
 class AeadServicer(testing_api_pb2_grpc.AeadServicer):
   """A service for testing AEAD encryption."""
 
+  def CreateAead(
+      self, request: testing_api_pb2.AeadCreationRequest,
+      context: grpc.ServicerContext) -> testing_api_pb2.AeadCreationResponse:
+    """Creates an AEAD."""
+    try:
+      keyset_handle = cleartext_keyset_handle.read(
+          tink.BinaryKeysetReader(request.keyset))
+      keyset_handle.primitive(aead.Aead)
+      return testing_api_pb2.AeadCreationResponse()
+    except tink.TinkError as e:
+      return testing_api_pb2.AeadCreationResponse(err=str(e))
+
   def Encrypt(
       self, request: testing_api_pb2.AeadEncryptRequest,
       context: grpc.ServicerContext) -> testing_api_pb2.AeadEncryptResponse:

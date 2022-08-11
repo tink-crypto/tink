@@ -271,6 +271,27 @@ class ServicesTest(absltest.TestCase):
         read_encrypted_request, self._ctx)
     self.assertEqual(read_encrypted_response.WhichOneof('result'), 'err')
 
+  def test_create_aead(self):
+    keyset_servicer = services.KeysetServicer()
+    aead_servicer = services.AeadServicer()
+
+    template = aead.aead_key_templates.AES128_GCM.SerializeToString()
+    gen_request = testing_api_pb2.KeysetGenerateRequest(template=template)
+    gen_response = keyset_servicer.Generate(gen_request, self._ctx)
+    self.assertEqual(gen_response.WhichOneof('result'), 'keyset')
+
+    creation_request = testing_api_pb2.AeadCreationRequest(
+        keyset=gen_response.keyset)
+    creation_response = aead_servicer.CreateAead(creation_request, self._ctx)
+    self.assertEmpty(creation_response.err)
+
+  def test_create_aead_broken_keyset(self):
+    aead_servicer = services.AeadServicer()
+
+    creation_request = testing_api_pb2.AeadCreationRequest(keyset=b'\x80')
+    creation_response = aead_servicer.CreateAead(creation_request, self._ctx)
+    self.assertNotEmpty(creation_response.err)
+
   def test_generate_encrypt_decrypt(self):
     keyset_servicer = services.KeysetServicer()
     aead_servicer = services.AeadServicer()

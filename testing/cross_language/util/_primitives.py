@@ -145,6 +145,11 @@ class Aead(aead.Aead):
     self._keyset = keyset
 
   def encrypt(self, plaintext: bytes, associated_data: bytes) -> bytes:
+    # TODO(b/241219877): Do tje call to CreateAead in init instead.
+    creation_response = self._stub.CreateAead(
+        testing_api_pb2.AeadCreationRequest(keyset=self._keyset))
+    if creation_response.err:
+      raise tink.TinkError(creation_response.err)
     enc_request = testing_api_pb2.AeadEncryptRequest(
         keyset=self._keyset,
         plaintext=plaintext,
@@ -155,6 +160,11 @@ class Aead(aead.Aead):
     return enc_response.ciphertext
 
   def decrypt(self, ciphertext: bytes, associated_data: bytes) -> bytes:
+    # TODO(b/241219877): Do tje call to CreateAead in init instead.
+    creation_response = self._stub.CreateAead(
+        testing_api_pb2.AeadCreationRequest(keyset=self._keyset))
+    if creation_response.err:
+      raise tink.TinkError(creation_response.err)
     dec_request = testing_api_pb2.AeadDecryptRequest(
         keyset=self._keyset,
         ciphertext=ciphertext,

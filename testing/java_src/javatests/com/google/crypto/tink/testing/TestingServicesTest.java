@@ -30,6 +30,8 @@ import com.google.crypto.tink.mac.HmacKeyManager;
 import com.google.crypto.tink.prf.HmacPrfKeyManager;
 import com.google.crypto.tink.proto.Keyset;
 import com.google.crypto.tink.streamingaead.AesGcmHkdfStreamingKeyManager;
+import com.google.crypto.tink.testing.proto.AeadCreationRequest;
+import com.google.crypto.tink.testing.proto.AeadCreationResponse;
 import com.google.crypto.tink.testing.proto.AeadDecryptRequest;
 import com.google.crypto.tink.testing.proto.AeadDecryptResponse;
 import com.google.crypto.tink.testing.proto.AeadEncryptRequest;
@@ -340,6 +342,27 @@ public final class TestingServicesTest {
     assertThat(readResponse2.getErr()).isNotEmpty();
   }
 
+  @Test
+  public void aeadCreateKeyset_success() throws Exception {
+    byte[] template = KeyTemplateProtoConverter.toByteArray(KeyTemplates.get("AES128_GCM"));
+    KeysetGenerateResponse keysetResponse = generateKeyset(keysetStub, template);
+    assertThat(keysetResponse.getErr()).isEmpty();
+    AeadCreationResponse response =
+        aeadStub.createAead(
+            AeadCreationRequest.newBuilder().setKeyset(keysetResponse.getKeyset()).build());
+    assertThat(response.getErr()).isEmpty();
+  }
+
+  @Test
+  public void aeadCreateKeyset_fails() throws Exception {
+    AeadCreationResponse response =
+        aeadStub.createAead(
+            AeadCreationRequest.newBuilder()
+                .setKeyset(ByteString.copyFrom(new byte[] {(byte) 0x80}))
+                .build());
+    assertThat(response.getErr()).isNotEmpty();
+  }
+
   private static AeadEncryptResponse aeadEncrypt(
       AeadGrpc.AeadBlockingStub aeadStub, byte[] keyset, byte[] plaintext, byte[] associatedData) {
     AeadEncryptRequest encRequest =
@@ -391,15 +414,6 @@ public final class TestingServicesTest {
   }
 
   @Test
-  public void aeadEncrypt_failsOnBadKeyset() throws Exception {
-    byte[] badKeyset = "bad keyset".getBytes(UTF_8);
-    byte[] plaintext = "The quick brown fox jumps over the lazy dog".getBytes(UTF_8);
-    byte[] associatedData = "aead_encrypt_fails_on_bad_keyset".getBytes(UTF_8);
-    AeadEncryptResponse encResponse = aeadEncrypt(aeadStub, badKeyset, plaintext, associatedData);
-    assertThat(encResponse.getErr()).isNotEmpty();
-  }
-
-  @Test
   public void aeadDecrypt_failsOnBadCiphertext() throws Exception {
     byte[] template = KeyTemplateProtoConverter.toByteArray(KeyTemplates.get("AES128_GCM"));
     byte[] badCiphertext = "bad ciphertext".getBytes(UTF_8);
@@ -410,26 +424,6 @@ public final class TestingServicesTest {
     byte[] keyset = keysetResponse.getKeyset().toByteArray();
 
     AeadDecryptResponse decResponse = aeadDecrypt(aeadStub, keyset, badCiphertext, associatedData);
-    assertThat(decResponse.getErr()).isNotEmpty();
-  }
-
-  @Test
-  public void aeadDecrypt_failsOnBadKeyset() throws Exception {
-    byte[] template = KeyTemplateProtoConverter.toByteArray(KeyTemplates.get("AES128_GCM"));
-    byte[] plaintext = "The quick brown fox jumps over the lazy dog".getBytes(UTF_8);
-    byte[] associatedData = "generate_encrypt_decrypt".getBytes(UTF_8);
-
-    KeysetGenerateResponse keysetResponse = generateKeyset(keysetStub, template);
-    assertThat(keysetResponse.getErr()).isEmpty();
-    byte[] keyset = keysetResponse.getKeyset().toByteArray();
-
-    AeadEncryptResponse encResponse = aeadEncrypt(aeadStub, keyset, plaintext, associatedData);
-    assertThat(encResponse.getErr()).isEmpty();
-    byte[] ciphertext = encResponse.getCiphertext().toByteArray();
-
-    byte[] badKeyset = "bad keyset".getBytes(UTF_8);
-
-    AeadDecryptResponse decResponse = aeadDecrypt(aeadStub, badKeyset, ciphertext, associatedData);
     assertThat(decResponse.getErr()).isNotEmpty();
   }
 

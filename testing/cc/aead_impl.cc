@@ -23,19 +23,16 @@
 #include "tink/aead.h"
 #include "tink/binary_keyset_reader.h"
 #include "tink/cleartext_keyset_handle.h"
-#include "proto/testing_api.grpc.pb.h"
 
 namespace tink_testing_api {
 
 using ::crypto::tink::BinaryKeysetReader;
 using ::crypto::tink::CleartextKeysetHandle;
-using ::grpc::ServerContext;
-using ::grpc::Status;
 
 // Encrypts a message
-::grpc::Status AeadImpl::Encrypt(grpc::ServerContext* context,
-                                 const AeadEncryptRequest* request,
-                                 AeadEncryptResponse* response) {
+::grpc::Status AeadImpl::CreateAead(grpc::ServerContext* context,
+                                    const AeadCreationRequest* request,
+                                    AeadCreationResponse* response) {
   auto reader_result = BinaryKeysetReader::New(request->keyset());
   if (!reader_result.ok()) {
     response->set_err(std::string(reader_result.status().message()));
@@ -51,6 +48,28 @@ using ::grpc::Status;
   if (!aead_result.ok()) {
     response->set_err(std::string(aead_result.status().message()));
     return ::grpc::Status::OK;
+  }
+  return ::grpc::Status::OK;
+}
+
+::grpc::Status AeadImpl::Encrypt(grpc::ServerContext* context,
+                                 const AeadEncryptRequest* request,
+                                 AeadEncryptResponse* response) {
+  auto reader_result = BinaryKeysetReader::New(request->keyset());
+  if (!reader_result.ok()) {
+    return ::grpc::Status(::grpc::StatusCode::FAILED_PRECONDITION,
+                          "Reading Keyset failed");
+  }
+  auto handle_result =
+      CleartextKeysetHandle::Read(std::move(reader_result.value()));
+  if (!handle_result.ok()) {
+    return ::grpc::Status(::grpc::StatusCode::FAILED_PRECONDITION,
+                          "Creating KeysetHandle failed");
+  }
+  auto aead_result = handle_result.value()->GetPrimitive<crypto::tink::Aead>();
+  if (!aead_result.ok()) {
+    return ::grpc::Status(::grpc::StatusCode::FAILED_PRECONDITION,
+                          "Creating Aead failed");
   }
   auto encrypt_result = aead_result.value()->Encrypt(
       request->plaintext(), request->associated_data());
@@ -68,19 +87,19 @@ using ::grpc::Status;
                                  AeadDecryptResponse* response) {
   auto reader_result = BinaryKeysetReader::New(request->keyset());
   if (!reader_result.ok()) {
-    response->set_err(std::string(reader_result.status().message()));
-    return ::grpc::Status::OK;
+    return ::grpc::Status(::grpc::StatusCode::FAILED_PRECONDITION,
+                          "Reading Keyset failed");
   }
   auto handle_result =
       CleartextKeysetHandle::Read(std::move(reader_result.value()));
   if (!handle_result.ok()) {
-    response->set_err(std::string(handle_result.status().message()));
-    return ::grpc::Status::OK;
+    return ::grpc::Status(::grpc::StatusCode::FAILED_PRECONDITION,
+                          "Creating KeysetHandle failed");
   }
   auto aead_result = handle_result.value()->GetPrimitive<crypto::tink::Aead>();
   if (!aead_result.ok()) {
-    response->set_err(std::string(aead_result.status().message()));
-    return ::grpc::Status::OK;
+    return ::grpc::Status(::grpc::StatusCode::FAILED_PRECONDITION,
+                          "Creating Aead failed");
   }
   auto decrypt_result = aead_result.value()->Decrypt(
       request->ciphertext(), request->associated_data());

@@ -330,6 +330,43 @@ func TestKeysetWriteReadEncryptedWithAssociatedData(t *testing.T) {
 	}
 }
 
+func TestSuccessfulAeadCreation(t *testing.T) {
+	keysetService := &services.KeysetService{}
+	aeadService := &services.AEADService{}
+	ctx := context.Background()
+
+	template, err := proto.Marshal(aead.AES128GCMKeyTemplate())
+	if err != nil {
+		t.Fatalf("proto.Marshal(aead.AES128GCMKeyTemplate()) failed: %v", err)
+	}
+
+	keyset, err := genKeyset(ctx, keysetService, template)
+	if err != nil {
+		t.Fatalf("genKeyset failed: %v", err)
+	}
+
+	result, err := aeadService.CreateAead(ctx, &pb.AeadCreationRequest{Keyset: keyset})
+	if err != nil {
+		t.Fatalf("CreateAead with good keyset failed with gRPC error: %v", err)
+	}
+	if result.GetErr() != "" {
+		t.Fatalf("CreateAead with good keyset failed with creation error: %v", result.GetErr())
+	}
+}
+
+func TestFailingAeadCreation(t *testing.T) {
+	aeadService := &services.AEADService{}
+	ctx := context.Background()
+
+	result, err := aeadService.CreateAead(ctx, &pb.AeadCreationRequest{Keyset: []byte{0x80}})
+	if err != nil {
+		t.Fatalf("CreateAead with bad keyset failed with gRPC error: %v", err)
+	}
+	if result.GetErr() == "" {
+		t.Fatalf("CreateAead with bad keyset succeeded instead of failing")
+	}
+}
+
 func aeadEncrypt(ctx context.Context, aeadService *services.AEADService, keyset []byte, plaintext []byte, associatedData []byte) ([]byte, error) {
 	encRequest := &pb.AeadEncryptRequest{
 		Keyset:         keyset,
