@@ -32,6 +32,19 @@ java_library(
     ],
 )
 
+java_library(
+    name = "fake_aws_kms",
+    testonly = 1,
+    srcs = ["FakeAwsKms.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink:aead",
+        "//src/main/java/com/google/crypto/tink:key_templates",
+        "//src/main/java/com/google/crypto/tink:registry_cluster",
+        "@maven//:com_amazonaws_aws_java_sdk_core",
+        "@maven//:com_amazonaws_aws_java_sdk_kms",
+    ],
+)
+
 java_plugin(
     name = "auto_service_plugin",
     processor_class = "com.google.auto.service.processor.AutoServiceProcessor",

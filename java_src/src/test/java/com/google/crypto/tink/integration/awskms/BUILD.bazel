@@ -28,3 +28,17 @@ java_test(
         "@maven//:junit_junit",
     ],
 )
+
+java_test(
+    name = "FakeAwsKmsTest",
+    size = "small",
+    srcs = ["FakeAwsKmsTest.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink/aead:aead_config",
+        "//src/main/java/com/google/crypto/tink/integration/awskms:fake_aws_kms",
+        "@maven//:com_amazonaws_aws_java_sdk_core",
+        "@maven//:com_amazonaws_aws_java_sdk_kms",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
