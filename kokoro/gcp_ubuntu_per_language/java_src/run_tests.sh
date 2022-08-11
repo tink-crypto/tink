@@ -59,14 +59,14 @@ test_build_bazel_file() {
 
 
   # Targets in //src/main/java/com/google/crypto/tink/integration/awskms of
-  # type "java_library"
+  # type "java_library" excluding testonly targets
   local all_aws_kms_libs="$(mktemp)"
-  bazel query "kind(java_library,${integration_dir}/awskms/...)" > "${all_aws_kms_libs}"
+  bazel query "kind(java_library,${integration_dir}/awskms/...) except attr(testonly,1,${integration_dir}/...)" > "${all_aws_kms_libs}"
 
   # Targets in //src/main/java/com/google/crypto/tink/integration/gcpkms of
-  # type "java_library"
+  # type "java_library" excluding testonly targets
   all_gcp_kms_libs="$(mktemp)"
-  bazel query "kind(java_library,${integration_dir}/gcpkms/...)" > "${all_gcp_kms_libs}"
+  bazel query "kind(java_library,${integration_dir}/gcpkms/...) except attr(testonly,1,${integration_dir}/...)" > "${all_gcp_kms_libs}"
   popd
 
   python3 kokoro/testutils/create_main_build_file.py \
