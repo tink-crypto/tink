@@ -6,12 +6,13 @@ java_test(
     srcs = ["AwsKmsAeadTest.java"],
     deps = [
         "//src/main/java/com/google/crypto/tink:aead",
+        "//src/main/java/com/google/crypto/tink/aead:aead_config",
         "//src/main/java/com/google/crypto/tink/integration/awskms:aws_kms_aead",
+        "//src/main/java/com/google/crypto/tink/integration/awskms:fake_aws_kms",
         "//src/main/java/com/google/crypto/tink/subtle:random",
-        "@maven//:com_amazonaws_aws_java_sdk_core",
         "@maven//:com_amazonaws_aws_java_sdk_kms",
+        "@maven//:com_google_truth_truth",
         "@maven//:junit_junit",
-        "@maven//:org_mockito_mockito_core",
     ],
 )
 

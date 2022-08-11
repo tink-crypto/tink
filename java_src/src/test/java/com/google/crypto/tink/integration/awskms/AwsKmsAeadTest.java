@@ -16,121 +16,111 @@
 
 package com.google.crypto.tink.integration.awskms;
 
-import static org.junit.Assert.assertArrayEquals;
+import static com.google.common.truth.Truth.assertThat;
+import static java.util.Arrays.asList;
 import static org.junit.Assert.assertThrows;
-import static org.mockito.ArgumentMatchers.isA;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
-import com.amazonaws.AmazonServiceException;
 import com.amazonaws.services.kms.AWSKMS;
-import com.amazonaws.services.kms.model.DecryptRequest;
-import com.amazonaws.services.kms.model.DecryptResult;
-import com.amazonaws.services.kms.model.EncryptRequest;
-import com.amazonaws.services.kms.model.EncryptResult;
 import com.google.crypto.tink.Aead;
+import com.google.crypto.tink.aead.AeadConfig;
 import com.google.crypto.tink.subtle.Random;
-import java.nio.ByteBuffer;
 import java.security.GeneralSecurityException;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.junit.runners.JUnit4;
 
-/**
- * Tests for AwsKmsAead.
- */
-@RunWith(MockitoJUnitRunner.class)
+/** Tests for AwsKmsAead. */
+@RunWith(JUnit4.class)
 public class AwsKmsAeadTest {
   private static final String KEY_ARN =
       "arn:aws:kms:us-west-2:111122223333:key/1234abcd-12ab-34cd-56ef-1234567890ab";
-  @Mock private AWSKMS mockKms;
+  private static final String KEY_ARN_DIFFERENT = "arn:aws:kms:us-west-2:123:key/different";
 
-  @Test
-  public void testEncryptDecrypt() throws Exception {
-    DecryptResult mockDecryptResult = mock(DecryptResult.class);
-    EncryptResult mockEncryptResult = mock(EncryptResult.class);
-    when(mockKms.decrypt(isA(DecryptRequest.class)))
-        .thenReturn(mockDecryptResult);
-    when(mockKms.encrypt(isA(EncryptRequest.class)))
-        .thenReturn(mockEncryptResult);
-
-    Aead aead = new AwsKmsAead(mockKms, KEY_ARN);
-    byte[] aad = Random.randBytes(20);
-    for (int messageSize = 0; messageSize < 75; messageSize++) {
-      byte[] message = Random.randBytes(messageSize);
-      when(mockDecryptResult.getKeyId()).thenReturn(KEY_ARN);
-      when(mockDecryptResult.getPlaintext()).thenReturn(ByteBuffer.wrap(message));
-      when(mockEncryptResult.getCiphertextBlob()).thenReturn(ByteBuffer.wrap(message));
-      byte[] ciphertext = aead.encrypt(message, aad);
-      byte[] decrypted = aead.decrypt(ciphertext, aad);
-      assertArrayEquals(message, decrypted);
-    }
+  @BeforeClass
+  public static void setUpClass() throws Exception {
+    AeadConfig.register();
   }
 
   @Test
-  public void testEncryptShouldThrowExceptionIfRequestFailed() throws Exception {
-    AmazonServiceException exception = mock(AmazonServiceException.class);
-    when(mockKms.encrypt(isA(EncryptRequest.class)))
-        .thenThrow(exception);
+  public void testEncryptDecryptWithKnownKeyArn_success() throws Exception {
+    AWSKMS kms = new FakeAwsKms(asList(KEY_ARN, KEY_ARN_DIFFERENT));
 
-    Aead aead = new AwsKmsAead(mockKms, KEY_ARN);
+    Aead aead = new AwsKmsAead(kms, KEY_ARN);
+    byte[] aad = Random.randBytes(20);
+    byte[] message = Random.randBytes(42);
+    byte[] ciphertext = aead.encrypt(message, aad);
+    byte[] decrypted = aead.decrypt(ciphertext, aad);
+    assertThat(decrypted).isEqualTo(message);
+  }
+
+  @Test
+  public void testEncryptWithUnknownKeyArn_fails() throws Exception {
+    AWSKMS kmsThatDoentKnowKeyArn = new FakeAwsKms(asList(KEY_ARN_DIFFERENT));
+
+    Aead aead = new AwsKmsAead(kmsThatDoentKnowKeyArn, KEY_ARN);
     byte[] aad = Random.randBytes(20);
     byte[] message = Random.randBytes(20);
     assertThrows(GeneralSecurityException.class, () -> aead.encrypt(message, aad));
   }
 
   @Test
-  public void testDecryptShouldThrowExceptionIfRequestFailed() throws Exception {
-    EncryptResult mockEncryptResult = mock(EncryptResult.class);
-    when(mockKms.encrypt(isA(EncryptRequest.class)))
-        .thenReturn(mockEncryptResult);
-    AmazonServiceException exception = mock(AmazonServiceException.class);
-    when(mockKms.decrypt(isA(DecryptRequest.class)))
-        .thenThrow(exception);
-
-    Aead aead = new AwsKmsAead(mockKms, KEY_ARN);
+  public void testDecryptWithInvalidKeyArn_fails() throws Exception {
+    AWSKMS kms = new FakeAwsKms(asList(KEY_ARN));
+    Aead aead = new AwsKmsAead(kms, KEY_ARN);
     byte[] aad = Random.randBytes(20);
-    byte[] message = Random.randBytes(20);
-    when(mockEncryptResult.getCiphertextBlob()).thenReturn(ByteBuffer.wrap(message));
-    byte[] ciphertext = aead.encrypt(message, aad);
-    assertThrows(GeneralSecurityException.class, () -> aead.decrypt(ciphertext, aad));
+    byte[] invalidCiphertext = Random.randBytes(2);
+    assertThrows(GeneralSecurityException.class, () -> aead.decrypt(invalidCiphertext, aad));
   }
 
   @Test
-  public void testDecryptShouldThrowExceptionIfKeyArnIsDifferent() throws Exception {
-    DecryptResult mockDecryptResult = mock(DecryptResult.class);
-    EncryptResult mockEncryptResult = mock(EncryptResult.class);
-    when(mockKms.decrypt(isA(DecryptRequest.class)))
-        .thenReturn(mockDecryptResult);
-    when(mockKms.encrypt(isA(EncryptRequest.class)))
-        .thenReturn(mockEncryptResult);
+  public void testDecryptWithDifferentKeyArn_fails() throws Exception {
+    AWSKMS kms = new FakeAwsKms(asList(KEY_ARN, KEY_ARN_DIFFERENT));
 
-    Aead aead = new AwsKmsAead(mockKms, KEY_ARN);
+    Aead aead = new AwsKmsAead(kms, KEY_ARN);
     byte[] aad = Random.randBytes(20);
     byte[] message = Random.randBytes(20);
-    when(mockEncryptResult.getCiphertextBlob()).thenReturn(ByteBuffer.wrap(message));
-    when(mockDecryptResult.getKeyId()).thenReturn(KEY_ARN + "1");
-    byte[] ciphertext = aead.encrypt(message, aad);
-    assertThrows(GeneralSecurityException.class, () -> aead.decrypt(ciphertext, aad));
+
+    // Create a valid ciphertext with a different ARN
+    Aead aeadWithDifferentArn = new AwsKmsAead(kms, KEY_ARN_DIFFERENT);
+    byte[] ciphertextFromDifferentArn = aeadWithDifferentArn.encrypt(message, aad);
+
+    assertThrows(
+        GeneralSecurityException.class, () -> aead.decrypt(ciphertextFromDifferentArn, aad));
   }
 
   @Test
-  public void testDecryptShouldNotThrowExceptionIfKeyArnIsAlias() throws Exception {
-    DecryptResult mockDecryptResult = mock(DecryptResult.class);
-    EncryptResult mockEncryptResult = mock(EncryptResult.class);
-    when(mockKms.decrypt(isA(DecryptRequest.class))).thenReturn(mockDecryptResult);
-    when(mockKms.encrypt(isA(EncryptRequest.class))).thenReturn(mockEncryptResult);
+  public void testDecryptWithAliasKeyArn_success() throws Exception {
+    AWSKMS kms = new FakeAwsKms(asList(KEY_ARN));
 
+    byte[] aad = Random.randBytes(20);
+    byte[] message = Random.randBytes(20);
+
+    // Create ciphertext for KEY_ARN
+    Aead aead = new AwsKmsAead(kms, KEY_ARN);
+    byte[] ciphertext = aead.encrypt(message, aad);
+
+    // Use an alias ARN
     String aliasArn = "arn:aws:kms:us-west-2:111122223333:alias/ExampleAlias";
-    Aead aead = new AwsKmsAead(mockKms, aliasArn);
+    Aead aeadWithAliasArn = new AwsKmsAead(kms, aliasArn);
+    assertThat(aeadWithAliasArn.decrypt(ciphertext, aad)).isEqualTo(message);
+  }
+
+  @Test
+  public void testDecryptWithInvalidKeyArn_success() throws Exception {
+    AWSKMS kms = new FakeAwsKms(asList(KEY_ARN));
+
     byte[] aad = Random.randBytes(20);
     byte[] message = Random.randBytes(20);
-    when(mockEncryptResult.getCiphertextBlob()).thenReturn(ByteBuffer.wrap(message));
-    when(mockDecryptResult.getPlaintext()).thenReturn(ByteBuffer.wrap(message));
 
+    // Create ciphertext for KEY_ARN
+    Aead aead = new AwsKmsAead(kms, KEY_ARN);
     byte[] ciphertext = aead.encrypt(message, aad);
-    byte[] decrypted = aead.decrypt(ciphertext, aad);
-    assertArrayEquals(message, decrypted);
+
+    // Use an invalid Key ARN
+    // TODO(b/242149560): Make this test case fail
+    String invalidArn = "@#$@#$@#";
+    Aead aeadWithInvalidArn = new AwsKmsAead(kms, invalidArn);
+    assertThat(aeadWithInvalidArn.decrypt(ciphertext, aad)).isEqualTo(message);
   }
 }
