@@ -19,7 +19,6 @@ package com.google.crypto.tink.jwt;
 import com.google.crypto.tink.Key;
 import com.google.crypto.tink.KeyStatus;
 import com.google.crypto.tink.KeysetHandle;
-import com.google.crypto.tink.KeysetManager;
 import com.google.crypto.tink.internal.LegacyProtoKey;
 import com.google.crypto.tink.internal.ProtoKeySerialization;
 import com.google.crypto.tink.proto.JwtEcdsaAlgorithm;
@@ -28,14 +27,10 @@ import com.google.crypto.tink.proto.JwtRsaSsaPkcs1Algorithm;
 import com.google.crypto.tink.proto.JwtRsaSsaPkcs1PublicKey;
 import com.google.crypto.tink.proto.JwtRsaSsaPssAlgorithm;
 import com.google.crypto.tink.proto.JwtRsaSsaPssPublicKey;
-import com.google.crypto.tink.proto.KeyData;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
-import com.google.crypto.tink.proto.KeysetInfo;
 import com.google.crypto.tink.proto.OutputPrefixType;
 import com.google.crypto.tink.subtle.Base64;
 import com.google.crypto.tink.tinkkey.KeyAccess;
-import com.google.crypto.tink.tinkkey.KeyHandle;
-import com.google.crypto.tink.tinkkey.internal.ProtoKey;
 import com.google.errorprone.annotations.InlineMe;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -128,37 +123,34 @@ public final class JwkSetConverter {
     } catch (IllegalStateException | JsonParseException | StackOverflowError ex) {
       throw new GeneralSecurityException("JWK set is invalid JSON", ex);
     }
-    KeysetManager manager = KeysetManager.withEmptyKeyset();
+    KeysetHandle.Builder builder = KeysetHandle.newBuilder();
     JsonArray jsonKeys = jsonKeyset.get("keys").getAsJsonArray();
     for (JsonElement element : jsonKeys) {
       JsonObject jsonKey = element.getAsJsonObject();
       String algPrefix = getStringItem(jsonKey, "alg").substring(0, 2);
-      KeyData keyData;
+      ProtoKeySerialization keySerialization;
       switch (algPrefix) {
         case "RS":
-          keyData = convertToRsaSsaPkcs1Key(jsonKey);
+          keySerialization = convertToRsaSsaPkcs1Key(jsonKey);
           break;
         case "PS":
-          keyData = convertToRsaSsaPssKey(jsonKey);
+          keySerialization = convertToRsaSsaPssKey(jsonKey);
           break;
         case "ES":
-          keyData = convertToEcdsaKey(jsonKey);
+          keySerialization = convertToEcdsaKey(jsonKey);
           break;
         default:
           throw new GeneralSecurityException(
               "unexpected alg value: " + getStringItem(jsonKey, "alg"));
       }
-      manager.add(
-          KeyHandle.createFromKey(
-              new ProtoKey(keyData, com.google.crypto.tink.KeyTemplate.OutputPrefixType.RAW),
-              KeyAccess.publicAccess()));
+      builder.addEntry(
+          KeysetHandle.importKey(new LegacyProtoKey(keySerialization, null)).withRandomId());
     }
-    KeysetInfo info = manager.getKeysetHandle().getKeysetInfo();
-    if (info.getKeyInfoCount() <= 0) {
+    if (builder.size() <= 0) {
       throw new GeneralSecurityException("empty keyset");
     }
-    manager.setPrimary(info.getKeyInfo(0).getKeyId());
-    return manager.getKeysetHandle();
+    builder.getAt(0).makePrimary();
+    return builder.build();
   }
 
   private static final String JWT_ECDSA_PUBLIC_KEY_URL =
@@ -352,7 +344,7 @@ public final class JwkSetConverter {
     }
   }
 
-  private static KeyData convertToRsaSsaPkcs1Key(JsonObject jsonKey)
+  private static ProtoKeySerialization convertToRsaSsaPkcs1Key(JsonObject jsonKey)
       throws GeneralSecurityException {
     JwtRsaSsaPkcs1Algorithm algorithm;
     switch (getStringItem(jsonKey, "alg")) {
@@ -392,14 +384,16 @@ public final class JwkSetConverter {
               .setValue(getStringItem(jsonKey, "kid"))
               .build());
     }
-    return KeyData.newBuilder()
-        .setTypeUrl(JWT_RSA_SSA_PKCS1_PUBLIC_KEY_URL)
-        .setValue(pkcs1PubKeyBuilder.build().toByteString())
-        .setKeyMaterialType(KeyMaterialType.ASYMMETRIC_PUBLIC)
-        .build();
+    return ProtoKeySerialization.create(
+        JWT_RSA_SSA_PKCS1_PUBLIC_KEY_URL,
+        pkcs1PubKeyBuilder.build().toByteString(),
+        KeyMaterialType.ASYMMETRIC_PUBLIC,
+        OutputPrefixType.RAW,
+        null);
   }
 
-  private static KeyData convertToRsaSsaPssKey(JsonObject jsonKey) throws GeneralSecurityException {
+  private static ProtoKeySerialization convertToRsaSsaPssKey(JsonObject jsonKey)
+      throws GeneralSecurityException {
     JwtRsaSsaPssAlgorithm algorithm;
     switch (getStringItem(jsonKey, "alg")) {
       case "PS256":
@@ -438,14 +432,16 @@ public final class JwkSetConverter {
               .setValue(getStringItem(jsonKey, "kid"))
               .build());
     }
-    return KeyData.newBuilder()
-        .setTypeUrl(JWT_RSA_SSA_PSS_PUBLIC_KEY_URL)
-        .setValue(pssPubKeyBuilder.build().toByteString())
-        .setKeyMaterialType(KeyMaterialType.ASYMMETRIC_PUBLIC)
-        .build();
+    return ProtoKeySerialization.create(
+        JWT_RSA_SSA_PSS_PUBLIC_KEY_URL,
+        pssPubKeyBuilder.build().toByteString(),
+        KeyMaterialType.ASYMMETRIC_PUBLIC,
+        OutputPrefixType.RAW,
+        null);
   }
 
-  private static KeyData convertToEcdsaKey(JsonObject jsonKey) throws GeneralSecurityException {
+  private static ProtoKeySerialization convertToEcdsaKey(JsonObject jsonKey)
+      throws GeneralSecurityException {
     JwtEcdsaAlgorithm algorithm;
     switch (getStringItem(jsonKey, "alg")) {
       case "ES256":
@@ -480,11 +476,12 @@ public final class JwkSetConverter {
       ecdsaPubKeyBuilder.setCustomKid(
           JwtEcdsaPublicKey.CustomKid.newBuilder().setValue(getStringItem(jsonKey, "kid")).build());
     }
-    return KeyData.newBuilder()
-        .setTypeUrl(JWT_ECDSA_PUBLIC_KEY_URL)
-        .setValue(ecdsaPubKeyBuilder.build().toByteString())
-        .setKeyMaterialType(KeyMaterialType.ASYMMETRIC_PUBLIC)
-        .build();
+    return ProtoKeySerialization.create(
+        JWT_ECDSA_PUBLIC_KEY_URL,
+        ecdsaPubKeyBuilder.build().toByteString(),
+        KeyMaterialType.ASYMMETRIC_PUBLIC,
+        OutputPrefixType.RAW,
+        null);
   }
 
   /** @deprecated Use JwkSetConverter.fromPublicKeysetHandle(handle) instead. */
