@@ -1,0 +1,41 @@
+workspace(name = "some_example_workspace")
+
+local_repository(
+    name = "tink_cc",
+    path = "/tmp/git/tink_cc",
+)
+
+local_repository(
+    name = "tink_cc_awskms",
+    path = "/tmp/git/tink_cc_awskms",
+)
+
+local_repository(
+    name = "tink_cc_gcpkms",
+    path = "/tmp/git/tink_cc_gcpkms",
+)
+
+local_repository(
+    name = "tink_java",
+    path = "/tmp/git/tink_java",
+)
+
+local_repository(
+    name = "tink_java_awskms",
+    path = "/tmp/git/tink_java_awskms",
+)
+
+local_repository(
+    name = "tink_java_gcpkms",
+    path = "/tmp/git/tink_java_gcpkms",
+)
+
+local_repository(
+    name = "tink_py",
+    path = "/tmp/git/tink_py",
+)
+
+local_repository(
+    name = "tink_go",
+    path = "/tmp/git/tink_go",
+)

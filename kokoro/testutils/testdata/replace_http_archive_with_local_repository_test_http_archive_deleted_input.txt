@@ -1,0 +1,15 @@
+workspace(name = "some_example_workspace")
+
+local_repository(
+    name = "tink_cc",
+    path = "/tmp/git/tink_cc",
+)
+
+local_repository(
+    name = "tink_cc_awskms",
+    path = "/tmp/git/tink_cc_awskms",
+)
+
+# This is a comment with http_archive( in it.
+
+load("@bazel_gazelle//:deps.bzl", "gazelle_dependencies")
