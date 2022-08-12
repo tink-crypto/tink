@@ -6,6 +6,8 @@ go_library(
         "rsa.go",
         "rsassapkcs1_signer.go",
         "rsassapkcs1_verifier.go",
+        "rsassapss_signer.go",
+        "rsassapss_verifier.go",
         "signature.go",
     ],
     importpath = "github.com/google/tink/go/internal/signature",
@@ -21,6 +23,7 @@ go_test(
     srcs = [
         "rsa_test.go",
         "rsassapkcs1_signer_verifier_test.go",
+        "rsassapss_signer_verifier_test.go",
     ],
     data = [
         "@wycheproof//testvectors:all",
