@@ -19,12 +19,12 @@ so either encryption/decryption works as expected, or the keyset is rejected.
 """
 
 import itertools
+from typing import List
+from typing import Tuple
 
 from absl.testing import absltest
 from absl.testing import parameterized
-
 import tink
-from tink import aead
 
 from tink.proto import aes_ctr_hmac_aead_pb2
 from tink.proto import aes_eax_pb2
@@ -39,15 +39,9 @@ HASH_TYPES = [
     common_pb2.SHA256, common_pb2.SHA384, common_pb2.SHA512
 ]
 
-# Test cases that succeed in a language but should fail
-SUCCEEDS_BUT_SHOULD_FAIL = []
-
-# Test cases that fail in a language but should succeed
-FAILS_BUT_SHOULD_SUCCEED = []
-
 
 def setUpModule():
-  aead.register()
+  tink.aead.register()
   testing_servers.start('aead_consistency')
 
 
@@ -128,20 +122,19 @@ def aes_ctr_hmac_aead_key_test_cases():
     key.hmac_key.key_value = _gen_key_value(hmac_key_size)
     keyset = _gen_keyset(
         'type.googleapis.com/google.crypto.tink.AesCtrHmacAeadKey',
-        key.SerializeToString(),
-        tink_pb2.KeyData.SYMMETRIC)
+        key.SerializeToString(), tink_pb2.KeyData.SYMMETRIC)
     return ('AesCtrHmacAeadKey(%d,%d,%d,%d,%s,%d,%d,%d)' %
             (aes_key_size, iv_size, hmac_key_size, hmac_tag_size,
-             common_pb2.HashType.Name(hash_type),
-             key_version, aes_ctr_version, hmac_version), keyset)
+             common_pb2.HashType.Name(hash_type), key_version, aes_ctr_version,
+             hmac_version), keyset)
+
   yield _test_case()
   for aes_key_size in [15, 16, 24, 32, 64, 96]:
     for iv_size in [11, 12, 16, 17, 24, 32]:
       yield _test_case(aes_key_size=aes_key_size, iv_size=iv_size)
   for hmac_key_size in [15, 16, 24, 32, 64, 96]:
     for hmac_tag_size in [9, 10, 16, 20, 21, 24, 32, 33, 64, 65]:
-      yield _test_case(hmac_key_size=hmac_key_size,
-                       hmac_tag_size=hmac_tag_size)
+      yield _test_case(hmac_key_size=hmac_key_size, hmac_tag_size=hmac_tag_size)
   for hash_type in HASH_TYPES:
     yield _test_case(hash_type=hash_type)
   yield _test_case(key_version=1)
@@ -157,51 +150,79 @@ class AeadKeyConsistencyTest(parameterized.TestCase):
   that is done for each key independently.
   """
 
+  def _create_aeads_ignore_errors(
+      self, keyset: tink_pb2.Keyset) -> List[Tuple[tink.aead.Aead, str]]:
+    """Creates AEADs for the given keyset in each language.
+
+    Args:
+      keyset: A keyset as 'keyset' proto.
+
+    Returns:
+      A list of pairs (aead, language)
+    """
+
+    result = []
+    for lang in supported_key_types.ALL_LANGUAGES:
+      try:
+        aead = testing_servers.aead(lang, keyset.SerializeToString())
+        # TODO(b/241219877): Remove the next line once __init__ does this check
+        aead.encrypt(b'', b'')
+        result.append((aead, lang))
+      except tink.TinkError:
+        pass
+    return result
+
   @parameterized.parameters(
-      itertools.chain(aes_eax_key_test_cases(),
-                      aes_gcm_key_test_cases(),
+      itertools.chain(aes_eax_key_test_cases(), aes_gcm_key_test_cases(),
                       aes_ctr_hmac_aead_key_test_cases()))
-  def test_keyset_validation_consistency(self, name, keyset):
+  def test_aead_creation_supported_languages_consistent(self, name, keyset):
+    """Tests that AEAD creation is consistent in all supporeted languages."""
     supported_langs = supported_key_types.SUPPORTED_LANGUAGES[
         supported_key_types.KEY_TYPE_FROM_URL[keyset.key[0].key_data.type_url]]
-    supported_aeads = [
-        testing_servers.aead(lang, keyset.SerializeToString())
-        for lang in supported_langs
-    ]
+
+    langs = [lang for _, lang in self._create_aeads_ignore_errors(keyset)]
+
+    if langs:
+      with self.subTest('When creating AEAD objects for %s' % name):
+        self.assertEqual(langs, supported_langs)
+
+  @parameterized.parameters(
+      itertools.chain(aes_eax_key_test_cases(), aes_gcm_key_test_cases(),
+                      aes_ctr_hmac_aead_key_test_cases()))
+  def test_aead_creation_non_supported_languages_fail(self, name, keyset):
+    """Tests that AEAD creation fails in all unsupported languages."""
+    supported_langs = supported_key_types.SUPPORTED_LANGUAGES[
+        supported_key_types.KEY_TYPE_FROM_URL[keyset.key[0].key_data.type_url]]
+
+    langs = [lang for _, lang in self._create_aeads_ignore_errors(keyset)]
+
+    for lang in supported_key_types.ALL_LANGUAGES:
+      if lang not in supported_langs:
+        self.assertNotIn(
+            lang, langs,
+            'AEAD-Creation should fail in language %s for %s' % (lang, name))
+
+  @parameterized.parameters(
+      itertools.chain(aes_eax_key_test_cases(), aes_gcm_key_test_cases(),
+                      aes_ctr_hmac_aead_key_test_cases()))
+  def test_aead_pairwise_consistency(self, name, keyset):
+    """Tests that created AEADS behave consistently."""
+
+    aead_and_lang = self._create_aeads_ignore_errors(keyset)
     plaintext = b'plaintext'
     associated_data = b'associated_data'
-    failures = 0
-    ciphertexts = {}
-    results = {}
-    for p in supported_aeads:
-      try:
-        ciphertexts[p.lang] = p.encrypt(plaintext, associated_data)
-        if (name, p.lang) in SUCCEEDS_BUT_SHOULD_FAIL:
-          failures += 1
-          del ciphertexts[p.lang]
-        if (name, p.lang) in FAILS_BUT_SHOULD_SUCCEED:
-          self.fail('(%s, %s) succeeded, but is in FAILS_BUT_SHOULD_SUCCEED' %
-                    (name, p.lang))
-        results[p.lang] = 'success'
-      except tink.TinkError as e:
-        if (name, p.lang) not in FAILS_BUT_SHOULD_SUCCEED:
-          failures += 1
-        if (name, p.lang) in SUCCEEDS_BUT_SHOULD_FAIL:
-          self.fail(
-              '(%s, %s) is in SUCCEEDS_BUT_SHOULD_FAIL, but failed with %s' %
-              (name, p.lang, e))
-        results[p.lang] = e
-    # Test that either all supported langs accept the key, or all reject.
-    if failures not in [0, len(supported_langs)]:
-      self.fail('encryption for key %s is inconsistent: %s' %
-                (name, results))
-    # Test all generated ciphertexts can be decypted.
-    for enc_lang, ciphertext in ciphertexts.items():
-      dec_aead = supported_aeads[0]
-      output = dec_aead.decrypt(ciphertext, associated_data)
-      if output != plaintext:
-        self.fail('ciphertext encrypted with key %s in lang %s could not be'
-                  'decrypted in lang %s.' % (name, enc_lang, dec_aead.lang))
+
+    for aead, lang in aead_and_lang:
+      aead0 = aead_and_lang[0][0]
+      lang0 = aead_and_lang[0][1]
+
+      with self.subTest('Comparing %s-aead to %s-aead for %s ' %
+                        (lang0, lang, name)):
+        ciphertext = aead.encrypt(plaintext, associated_data)
+        self.assertEqual(aead0.decrypt(ciphertext, associated_data), plaintext)
+
+        ciphertext = aead0.encrypt(plaintext, associated_data)
+        self.assertEqual(aead.decrypt(ciphertext, associated_data), plaintext)
 
 
 if __name__ == '__main__':
