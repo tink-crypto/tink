@@ -138,7 +138,7 @@ run_all_linux_tests() {
 run_macos_tests() {
   local -a BAZEL_FLAGS=(
     --compilation_mode=dbg --dynamic_mode=off --cpu=ios_x86_64
-    --ios_cpu=x86_64 --experimental_enable_objc_cc_deps
+    --experimental_enable_objc_cc_deps
     --ios_sdk_version="${IOS_SDK_VERSION}"
     --xcode_version="${XCODE_VERSION}" --verbose_failures
     --test_output=all
