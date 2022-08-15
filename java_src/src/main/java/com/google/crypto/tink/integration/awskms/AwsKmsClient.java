@@ -29,10 +29,12 @@ import com.google.crypto.tink.Aead;
 import com.google.crypto.tink.KmsClient;
 import com.google.crypto.tink.KmsClients;
 import com.google.crypto.tink.subtle.Validators;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import java.security.GeneralSecurityException;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
+import javax.annotation.Nullable;
 
 /**
  * An implementation of {@link KmsClient} for <a href="https://aws.amazon.com/kms/">AWS KMS</a>.
@@ -44,8 +46,8 @@ public final class AwsKmsClient implements KmsClient {
   /** The prefix of all keys stored in AWS KMS. */
   public static final String PREFIX = "aws-kms://";
 
-  private String keyUri;
-  private AWSCredentialsProvider provider;
+  @Nullable private String keyUri;
+  @Nullable private AWSCredentialsProvider provider;
 
   /**
    * Constructs a generic AwsKmsClient that is not bound to any specific key.
@@ -69,7 +71,7 @@ public final class AwsKmsClient implements KmsClient {
   }
 
   /**
-   * @return @return true either if this client is a generic one and uri starts with {@link
+   * @return true either if this client is a generic one and uri starts with {@link
    *     AwsKmsClient#PREFIX}, or the client is a specific one that is bound to the key identified
    *     by {@code uri}.
    */
@@ -90,6 +92,7 @@ public final class AwsKmsClient implements KmsClient {
    * @throws GeneralSecurityException if the client initialization fails
    */
   @Override
+  @CanIgnoreReturnValue
   public KmsClient withCredentials(String credentialPath) throws GeneralSecurityException {
     try {
       if (credentialPath == null) {
@@ -116,6 +119,7 @@ public final class AwsKmsClient implements KmsClient {
    * @throws GeneralSecurityException if the client initialization fails
    */
   @Override
+  @CanIgnoreReturnValue
   public KmsClient withDefaultCredentials() throws GeneralSecurityException {
     try {
       return withCredentialsProvider(new DefaultAWSCredentialsProviderChain());
@@ -125,6 +129,7 @@ public final class AwsKmsClient implements KmsClient {
   }
 
   /** Loads AWS credentials from a provider. */
+  @CanIgnoreReturnValue
   public KmsClient withCredentialsProvider(AWSCredentialsProvider provider)
       throws GeneralSecurityException {
     this.provider = provider;
