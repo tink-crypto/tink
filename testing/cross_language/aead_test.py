@@ -17,11 +17,10 @@ These tests check some basic AEAD properties, and that all implementations can
 interoperate with each other.
 """
 
-from typing import Iterable, Tuple
+from typing import Iterable, List, Tuple
 
 from absl.testing import absltest
 from absl.testing import parameterized
-
 import tink
 from tink import aead
 
@@ -49,12 +48,13 @@ _FAKE_KMS_KEY_URI = (
     'LnRpbmsuQWVzR2NtS2V5EhIaEIK75t5L-adlUwVhWvRuWUwYARABGM2b3_MDIAE')
 
 
-# maps from key_template_name to (key_template, key_type)
+# maps from key_template_name to (key_template, key_type).  Contains all
+# templates we want to test which do not have a name in Tinkey.
 _ADDITIONAL_KEY_TEMPLATES = {
-    'FAKE_KMS_AEAD': (
+    '_FAKE_KMS_AEAD': (
         aead.aead_key_templates.create_kms_aead_key_template(_FAKE_KMS_KEY_URI),
         'KmsAeadKey'),
-    'FAKE_KMS_ENVELOPE_AEAD_WITH_AES128_GCM':
+    '_FAKE_KMS_ENVELOPE_AEAD_WITH_AES128_GCM':
         (aead.aead_key_templates.create_kms_envelope_aead_key_template(
             _FAKE_KMS_KEY_URI,
             aead.aead_key_templates.AES128_GCM), 'KmsEnvelopeAeadKey')
@@ -72,52 +72,67 @@ def all_aead_key_template_names() -> Iterable[str]:
 
 class AeadPythonTest(parameterized.TestCase):
 
+  def _create_aeads_ignore_errors(self,
+                                  keyset: bytes) -> List[Tuple[aead.Aead, str]]:
+    """Creates AEADs for the given keyset in each language.
+
+    Args:
+      keyset: A keyset as a serialized 'keyset' proto.
+
+    Returns:
+      A list of pairs (aead, language)
+    """
+
+    result = []
+    for lang in supported_key_types.ALL_LANGUAGES:
+      try:
+        aead_p = testing_servers.aead(lang, keyset)
+        # TODO(b/241219877): Remove the next line once __init__ does this check
+        aead_p.encrypt(b'', b'')
+        result.append((aead_p, lang))
+      except tink.TinkError:
+        pass
+    return result
+
+  def _langs_from_key_template_name(self, key_template_name: str) -> List[str]:
+    if key_template_name in _ADDITIONAL_KEY_TEMPLATES:
+      _, key_type = _ADDITIONAL_KEY_TEMPLATES[key_template_name]
+      return supported_key_types.SUPPORTED_LANGUAGES[key_type]
+    else:
+      return (supported_key_types
+              .SUPPORTED_LANGUAGES_BY_TEMPLATE_NAME[key_template_name])
+
+  def _as_proto_template(self, key_template_name: str) -> tink_pb2.KeyTemplate:
+    if key_template_name in _ADDITIONAL_KEY_TEMPLATES:
+      key_template, _ = _ADDITIONAL_KEY_TEMPLATES[key_template_name]
+      return key_template
+    else:
+      return supported_key_types.KEY_TEMPLATE[key_template_name]
+
   @parameterized.parameters(all_aead_key_template_names())
   def test_encrypt_decrypt(self, key_template_name):
-    if key_template_name in _ADDITIONAL_KEY_TEMPLATES:
-      key_template, key_type = _ADDITIONAL_KEY_TEMPLATES[
-          key_template_name]
-      supported_langs = supported_key_types.SUPPORTED_LANGUAGES[key_type]
-    else:
-      key_template = supported_key_types.KEY_TEMPLATE[key_template_name]
-      supported_langs = (
-          supported_key_types
-          .SUPPORTED_LANGUAGES_BY_TEMPLATE_NAME[key_template_name])
-    self.assertNotEmpty(supported_langs)
+    langs = self._langs_from_key_template_name(key_template_name)
+    self.assertNotEmpty(langs)
+    proto_template = self._as_proto_template(key_template_name)
     # Take the first supported language to generate the keyset.
-    keyset = testing_servers.new_keyset(supported_langs[0], key_template)
-    supported_aeads = [
-        testing_servers.aead(lang, keyset) for lang in supported_langs
-    ]
-    unsupported_aeads = [
-        testing_servers.aead(lang, keyset)
-        for lang in SUPPORTED_LANGUAGES
-        if lang not in supported_langs
-    ]
-    for p in supported_aeads:
+    keyset = testing_servers.new_keyset(langs[0], proto_template)
+
+    supported_aeads = self._create_aeads_ignore_errors(keyset)
+    self.assertEqual(set([lang for (_, lang) in supported_aeads]), set(langs))
+    for (p, lang) in supported_aeads:
       plaintext = (
           b'This is some plaintext message to be encrypted using key_template '
-          b'%s using %s for encryption.'
-          % (key_template_name.encode('utf8'), p.lang.encode('utf8')))
+          b'%s using %s for encryption.' %
+          (key_template_name.encode('utf8'), lang.encode('utf8')))
       associated_data = (
           b'Some associated data for %s using %s for encryption.' %
-          (key_template_name.encode('utf8'), p.lang.encode('utf8')))
+          (key_template_name.encode('utf8'), lang.encode('utf8')))
       ciphertext = p.encrypt(plaintext, associated_data)
-      for p2 in supported_aeads:
+      for (p2, lang2) in supported_aeads:
         output = p2.decrypt(ciphertext, associated_data)
-        self.assertEqual(output, plaintext)
-      for p2 in unsupported_aeads:
-        with self.assertRaises(
-            tink.TinkError,
-            msg='Language %s supports AEAD decrypt with %s unexpectedly' %
-            (p2.lang, key_template_name)):
-          p2.decrypt(ciphertext, associated_data)
-    for p in unsupported_aeads:
-      with self.assertRaises(
-          tink.TinkError,
-          msg='Language %s supports AEAD encrypt with %s unexpectedly' % (
-              p.lang, key_template_name)):
-        p.encrypt(b'plaintext', b'associated_data')
+        self.assertEqual(
+            output, plaintext,
+            'While encrypting in %s an decrypting in %s' % (lang, lang2))
 
 
 # If the implementations work fine for keysets with single keys, then key
@@ -163,6 +178,16 @@ class AeadKeyRotationTest(parameterized.TestCase):
     builder.disable_key(older_key_id)
     enc_aead4 = testing_servers.aead(enc_lang, builder.keyset())
     dec_aead4 = testing_servers.aead(dec_lang, builder.keyset())
+
+    # TODO(b/241219877): Remove the next lines once __init__ does this check
+    enc_aead1.encrypt(b'', b'')
+    dec_aead1.encrypt(b'', b'')
+    enc_aead2.encrypt(b'', b'')
+    dec_aead2.encrypt(b'', b'')
+    enc_aead3.encrypt(b'', b'')
+    dec_aead3.encrypt(b'', b'')
+    enc_aead4.encrypt(b'', b'')
+    dec_aead4.encrypt(b'', b'')
 
     self.assertNotEqual(older_key_id, newer_key_id)
     # 1 encrypts with the older key. So 1, 2 and 3 can decrypt it, but not 4.
