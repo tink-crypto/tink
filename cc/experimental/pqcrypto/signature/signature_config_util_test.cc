@@ -14,8 +14,7 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "tink/experimental/pqcrypto/signature/signature_config.h"
-
+#include <memory>
 #include <string>
 #include <utility>
 
@@ -24,6 +23,7 @@
 #include "tink/config/tink_fips.h"
 #include "tink/experimental/pqcrypto/signature/dilithium_sign_key_manager.h"
 #include "tink/experimental/pqcrypto/signature/dilithium_verify_key_manager.h"
+#include "tink/experimental/pqcrypto/signature/signature_config.h"
 #include "tink/public_key_sign.h"
 #include "tink/public_key_verify.h"
 #include "tink/registry.h"

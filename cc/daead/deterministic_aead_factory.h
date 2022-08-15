@@ -17,6 +17,8 @@
 #ifndef TINK_DAEAD_DETERMINISTIC_AEAD_FACTORY_H_
 #define TINK_DAEAD_DETERMINISTIC_AEAD_FACTORY_H_
 
+#include <memory>
+
 #include "absl/base/macros.h"
 #include "tink/deterministic_aead.h"
 #include "tink/key_manager.h"

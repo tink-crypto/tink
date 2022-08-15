@@ -17,6 +17,7 @@
 #define TINK_CORE_KEY_MANAGER_IMPL_H_
 
 #include <functional>
+#include <memory>
 #include <string>
 #include <utility>
 

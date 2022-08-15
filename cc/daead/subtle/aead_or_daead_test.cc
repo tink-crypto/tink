@@ -16,6 +16,7 @@
 
 #include "tink/daead/subtle/aead_or_daead.h"
 
+#include <memory>
 #include <string>
 #include <utility>
 

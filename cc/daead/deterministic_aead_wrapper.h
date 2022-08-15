@@ -17,6 +17,8 @@
 #ifndef TINK_DAEAD_DETERMINISTIC_AEAD_WRAPPER_H_
 #define TINK_DAEAD_DETERMINISTIC_AEAD_WRAPPER_H_
 
+#include <memory>
+
 #include "absl/strings/string_view.h"
 #include "tink/deterministic_aead.h"
 #include "tink/primitive_set.h"

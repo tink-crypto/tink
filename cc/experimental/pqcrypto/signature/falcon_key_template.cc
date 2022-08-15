@@ -16,6 +16,8 @@
 
 #include "tink/experimental/pqcrypto/signature/falcon_key_template.h"
 
+#include <memory>
+
 #include "tink/experimental/pqcrypto/signature/subtle/falcon_subtle_utils.h"
 #include "tink/util/constants.h"
 #include "proto/experimental/pqcrypto/falcon.pb.h"

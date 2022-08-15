@@ -16,6 +16,8 @@
 
 #include "tink/daead/aes_siv_key_manager.h"
 
+#include <sstream>
+
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "absl/status/status.h"

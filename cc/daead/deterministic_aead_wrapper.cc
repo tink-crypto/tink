@@ -16,6 +16,7 @@
 
 #include "tink/daead/deterministic_aead_wrapper.h"
 
+#include <memory>
 #include <string>
 #include <utility>
 

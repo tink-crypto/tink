@@ -16,6 +16,7 @@
 
 #include "tink/experimental/pqcrypto/signature/dilithium_key_template.h"
 
+#include <memory>
 #include <string>
 
 #include "gmock/gmock.h"

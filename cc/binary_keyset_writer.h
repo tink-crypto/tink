@@ -17,6 +17,7 @@
 #ifndef TINK_BINARY_KEYSET_WRITER_H_
 #define TINK_BINARY_KEYSET_WRITER_H_
 
+#include <memory>
 #include <ostream>
 #include <utility>
 

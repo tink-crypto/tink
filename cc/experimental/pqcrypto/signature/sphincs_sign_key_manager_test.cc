@@ -16,6 +16,7 @@
 
 #include "tink/experimental/pqcrypto/signature/sphincs_sign_key_manager.h"
 
+#include <memory>
 #include <string>
 
 #include "gmock/gmock.h"

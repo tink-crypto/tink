@@ -16,6 +16,7 @@
 #ifndef TINK_AEAD_FAILING_AEAD_H_
 #define TINK_AEAD_FAILING_AEAD_H_
 
+#include <memory>
 #include <string>
 
 #include "absl/strings/string_view.h"

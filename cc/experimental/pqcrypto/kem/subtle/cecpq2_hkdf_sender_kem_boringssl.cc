@@ -16,6 +16,7 @@
 
 #include "tink/experimental/pqcrypto/kem/subtle/cecpq2_hkdf_sender_kem_boringssl.h"
 
+#include <memory>
 #include <string>
 #include <utility>
 

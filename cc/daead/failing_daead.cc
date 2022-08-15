@@ -15,6 +15,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include "tink/daead/failing_daead.h"
 
+#include <memory>
 #include <string>
 #include <utility>
 

@@ -16,6 +16,7 @@
 
 #include "tink/aead/internal/zero_copy_aead_wrapper.h"
 
+#include <cstring>
 #include <memory>
 #include <string>
 #include <utility>

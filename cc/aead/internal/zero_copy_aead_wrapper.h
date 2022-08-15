@@ -17,6 +17,8 @@
 #ifndef TINK_AEAD_INTERNAL_ZERO_COPY_AEAD_WRAPPER_H_
 #define TINK_AEAD_INTERNAL_ZERO_COPY_AEAD_WRAPPER_H_
 
+#include <memory>
+
 #include "tink/aead.h"
 #include "tink/aead/internal/zero_copy_aead.h"
 #include "tink/primitive_set.h"

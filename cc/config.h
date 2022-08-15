@@ -17,6 +17,7 @@
 #ifndef TINK_CONFIG_H_
 #define TINK_CONFIG_H_
 
+#include <memory>
 #include <string>
 
 #include "absl/status/status.h"

@@ -16,6 +16,8 @@
 
 #include "tink/experimental/pqcrypto/signature/falcon_verify_key_manager.h"
 
+#include <memory>
+
 #include "absl/memory/memory.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/string_view.h"

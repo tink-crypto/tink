@@ -16,6 +16,7 @@
 #ifndef TINK_DAEAD_FAILING_DAEAD_H_
 #define TINK_DAEAD_FAILING_DAEAD_H_
 
+#include <memory>
 #include <string>
 
 #include "absl/strings/string_view.h"

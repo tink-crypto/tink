@@ -16,6 +16,8 @@
 
 #include "tink/experimental/pqcrypto/signature/sphincs_sign_key_manager.h"
 
+#include <memory>
+
 #include "absl/memory/memory.h"
 #include "absl/status/status.h"
 #include "absl/strings/str_cat.h"

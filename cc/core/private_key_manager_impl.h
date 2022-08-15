@@ -16,6 +16,7 @@
 #ifndef TINK_CORE_PRIVATE_KEY_MANAGER_IMPL_H_
 #define TINK_CORE_PRIVATE_KEY_MANAGER_IMPL_H_
 
+#include <memory>
 #include <string>
 #include <utility>
 

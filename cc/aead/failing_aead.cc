@@ -15,8 +15,10 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include "tink/aead/failing_aead.h"
 
+#include <memory>
 #include <string>
 #include <utility>
+
 #include "absl/strings/string_view.h"
 
 namespace crypto {

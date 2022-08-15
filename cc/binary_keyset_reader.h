@@ -18,6 +18,7 @@
 #define TINK_BINARY_KEYSET_READER_H_
 
 #include <istream>
+#include <memory>
 #include <string>
 
 #include "absl/strings/string_view.h"

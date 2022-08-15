@@ -16,6 +16,8 @@
 
 #include "tink/experimental/pqcrypto/kem/util/test_util.h"
 
+#include <vector>
+
 #include "gtest/gtest.h"
 #include "tink/aead/aes_gcm_key_manager.h"
 #include "tink/hybrid_encrypt.h"

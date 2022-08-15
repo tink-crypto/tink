@@ -16,8 +16,10 @@
 
 #include "tink/experimental/pqcrypto/kem/subtle/cecpq2_aead_hkdf_hybrid_decrypt.h"
 
+#include <memory>
 #include <string>
 #include <utility>
+#include <vector>
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"

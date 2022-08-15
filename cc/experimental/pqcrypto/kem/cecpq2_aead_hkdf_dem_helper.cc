@@ -16,6 +16,8 @@
 
 #include "tink/experimental/pqcrypto/kem/cecpq2_aead_hkdf_dem_helper.h"
 
+#include <memory>
+#include <sstream>
 #include <string>
 #include <utility>
 

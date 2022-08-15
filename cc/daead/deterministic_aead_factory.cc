@@ -16,6 +16,8 @@
 
 #include "tink/daead/deterministic_aead_factory.h"
 
+#include <memory>
+
 #include "tink/daead/deterministic_aead_wrapper.h"
 #include "tink/deterministic_aead.h"
 #include "tink/key_manager.h"

@@ -16,6 +16,7 @@
 #ifndef TINK_DAEAD_AES_SIV_KEY_MANAGER_H_
 #define TINK_DAEAD_AES_SIV_KEY_MANAGER_H_
 
+#include <memory>
 #include <string>
 
 #include "absl/memory/memory.h"

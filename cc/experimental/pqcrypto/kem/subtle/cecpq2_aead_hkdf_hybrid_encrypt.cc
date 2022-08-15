@@ -16,6 +16,7 @@
 
 #include "tink/experimental/pqcrypto/kem/subtle/cecpq2_aead_hkdf_hybrid_encrypt.h"
 
+#include <memory>
 #include <string>
 #include <utility>
 
