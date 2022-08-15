@@ -17,6 +17,7 @@
 #ifndef TINK_INTEGRATION_GCPKMS_GCP_KMS_AEAD_H_
 #define TINK_INTEGRATION_GCPKMS_GCP_KMS_AEAD_H_
 
+#include <memory>
 #include <string>
 
 #include "google/cloud/kms/v1/service.grpc.pb.h"

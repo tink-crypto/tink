@@ -15,6 +15,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include "tink/jwt/internal/jwt_ecdsa_verify_key_manager.h"
 
+#include <memory>
 #include <string>
 #include <utility>
 

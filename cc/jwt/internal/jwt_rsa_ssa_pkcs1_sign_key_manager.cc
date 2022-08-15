@@ -15,8 +15,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include "tink/jwt/internal/jwt_rsa_ssa_pkcs1_sign_key_manager.h"
 
-#include <utility>
+#include <memory>
 #include <string>
+#include <utility>
 
 #include "tink/jwt/internal/jwt_public_key_sign_impl.h"
 #include "tink/jwt/internal/jwt_rsa_ssa_pkcs1_verify_key_manager.h"

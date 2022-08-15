@@ -16,6 +16,7 @@
 #ifndef TINK_INTERNAL_EC_UTIL_H_
 #define TINK_INTERNAL_EC_UTIL_H_
 
+#include <memory>
 #include <string>
 
 #include "openssl/ec.h"

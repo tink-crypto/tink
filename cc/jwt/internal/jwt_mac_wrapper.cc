@@ -16,6 +16,7 @@
 
 #include "tink/jwt/internal/jwt_mac_wrapper.h"
 
+#include <memory>
 #include <string>
 #include <utility>
 

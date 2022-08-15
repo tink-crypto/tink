@@ -15,6 +15,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include "tink/internal/registry_impl.h"
 
+#include <memory>
+#include <typeindex>
 #include <utility>
 
 #include "absl/status/status.h"

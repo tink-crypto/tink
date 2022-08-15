@@ -18,6 +18,7 @@
 #define TINK_HYBRID_INTERNAL_HPKE_TEST_UTIL_H_
 
 #include <string>
+#include <vector>
 
 #include "absl/strings/escaping.h"
 #include "tink/hybrid/internal/hpke_util.h"

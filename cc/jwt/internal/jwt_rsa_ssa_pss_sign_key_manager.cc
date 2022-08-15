@@ -15,6 +15,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include "tink/jwt/internal/jwt_rsa_ssa_pss_sign_key_manager.h"
 
+#include <memory>
 #include <string>
 #include <utility>
 

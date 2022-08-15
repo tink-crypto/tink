@@ -16,6 +16,7 @@
 
 #include "tink/integration/gcpkms/gcp_kms_aead.h"
 
+#include <memory>
 #include <string>
 #include <utility>
 

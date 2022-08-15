@@ -15,6 +15,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 #include <memory>
+#include <sstream>
 #include <string>
 #include <thread>  // NOLINT(build/c++11)
 #include <utility>

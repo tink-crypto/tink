@@ -16,6 +16,7 @@
 #include "tink/internal/rsa_util.h"
 
 #include <algorithm>
+#include <iterator>
 #include <string>
 #include <utility>
 #include <vector>

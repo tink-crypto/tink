@@ -17,6 +17,7 @@
 #ifndef TINK_JSON_KEYSET_WRITER_H_
 #define TINK_JSON_KEYSET_WRITER_H_
 
+#include <memory>
 #include <ostream>
 #include <utility>
 

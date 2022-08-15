@@ -17,6 +17,7 @@
 #ifndef TINK_HYBRID_INTERNAL_HPKE_PUBLIC_KEY_MANAGER_H_
 #define TINK_HYBRID_INTERNAL_HPKE_PUBLIC_KEY_MANAGER_H_
 
+#include <memory>
 #include <string>
 
 #include "absl/memory/memory.h"

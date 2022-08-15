@@ -17,6 +17,8 @@
 #ifndef TINK_JWT_INTERNAL_JWT_MAC_WRAPPER_H_
 #define TINK_JWT_INTERNAL_JWT_MAC_WRAPPER_H_
 
+#include <memory>
+
 #include "tink/jwt/internal/jwt_mac_internal.h"
 #include "tink/jwt/jwt_mac.h"
 #include "tink/primitive_set.h"

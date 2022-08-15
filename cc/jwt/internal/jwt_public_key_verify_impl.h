@@ -17,6 +17,7 @@
 #ifndef TINK_JWT_INTERNAL_JWT_PUBLIC_KEY_VERIFY_IMPL_H_
 #define TINK_JWT_INTERNAL_JWT_PUBLIC_KEY_VERIFY_IMPL_H_
 
+#include <memory>
 #include <string>
 #include <utility>
 

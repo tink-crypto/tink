@@ -16,6 +16,8 @@
 #ifndef TINK_JWT_INTERNAL_JWT_PUBLIC_KEY_SIGN_WRAPPER_H_
 #define TINK_JWT_INTERNAL_JWT_PUBLIC_KEY_SIGN_WRAPPER_H_
 
+#include <memory>
+
 #include "tink/jwt/internal/jwt_public_key_sign_internal.h"
 #include "tink/jwt/jwt_public_key_sign.h"
 #include "tink/primitive_set.h"

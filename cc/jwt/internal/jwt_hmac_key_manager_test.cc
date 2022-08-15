@@ -16,7 +16,10 @@
 
 #include "tink/jwt/internal/jwt_hmac_key_manager.h"
 
+#include <memory>
+#include <sstream>
 #include <string>
+#include <vector>
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"

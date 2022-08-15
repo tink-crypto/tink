@@ -16,6 +16,7 @@
 #ifndef TINK_JWT_INTERNAL_JWT_HMAC_KEY_MANAGER_H_
 #define TINK_JWT_INTERNAL_JWT_HMAC_KEY_MANAGER_H_
 
+#include <memory>
 #include <string>
 #include <utility>
 
