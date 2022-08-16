@@ -394,10 +394,10 @@ class AeadServicer(testing_api_pb2_grpc.AeadServicer):
       self, request: testing_api_pb2.AeadEncryptRequest,
       context: grpc.ServicerContext) -> testing_api_pb2.AeadEncryptResponse:
     """Encrypts a message."""
+    keyset_handle = cleartext_keyset_handle.read(
+        tink.BinaryKeysetReader(request.keyset))
+    p = keyset_handle.primitive(aead.Aead)
     try:
-      keyset_handle = cleartext_keyset_handle.read(
-          tink.BinaryKeysetReader(request.keyset))
-      p = keyset_handle.primitive(aead.Aead)
       ciphertext = p.encrypt(request.plaintext, request.associated_data)
       return testing_api_pb2.AeadEncryptResponse(ciphertext=ciphertext)
     except tink.TinkError as e:
@@ -407,10 +407,10 @@ class AeadServicer(testing_api_pb2_grpc.AeadServicer):
       self, request: testing_api_pb2.AeadDecryptRequest,
       context: grpc.ServicerContext) -> testing_api_pb2.AeadDecryptResponse:
     """Decrypts a message."""
+    keyset_handle = cleartext_keyset_handle.read(
+        tink.BinaryKeysetReader(request.keyset))
+    p = keyset_handle.primitive(aead.Aead)
     try:
-      keyset_handle = cleartext_keyset_handle.read(
-          tink.BinaryKeysetReader(request.keyset))
-      p = keyset_handle.primitive(aead.Aead)
       plaintext = p.decrypt(request.ciphertext, request.associated_data)
       return testing_api_pb2.AeadDecryptResponse(plaintext=plaintext)
     except tink.TinkError as e:

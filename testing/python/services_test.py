@@ -292,6 +292,24 @@ class ServicesTest(absltest.TestCase):
     creation_response = aead_servicer.CreateAead(creation_request, self._ctx)
     self.assertNotEmpty(creation_response.err)
 
+  def test_encrypt_decrypt_wrong_keyset(self):
+    aead_servicer = services.AeadServicer()
+    keyset_servicer = services.KeysetServicer()
+    # HMAC keysets will not allow creation of an AEAD.
+    template = mac.mac_key_templates.HMAC_SHA256_128BITTAG.SerializeToString()
+    gen_request = testing_api_pb2.KeysetGenerateRequest(template=template)
+    gen_response = keyset_servicer.Generate(gen_request, self._ctx)
+    self.assertEqual(gen_response.WhichOneof('result'), 'keyset')
+    keyset = gen_response.keyset
+
+    with self.assertRaises(tink.TinkError):
+      aead_servicer.Encrypt(
+          testing_api_pb2.AeadEncryptRequest(keyset=keyset), self._ctx)
+
+    with self.assertRaises(tink.TinkError):
+      aead_servicer.Decrypt(
+          testing_api_pb2.AeadDecryptRequest(keyset=keyset), self._ctx)
+
   def test_generate_encrypt_decrypt(self):
     keyset_servicer = services.KeysetServicer()
     aead_servicer = services.AeadServicer()
