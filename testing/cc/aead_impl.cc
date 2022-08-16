@@ -29,7 +29,6 @@ namespace tink_testing_api {
 using ::crypto::tink::BinaryKeysetReader;
 using ::crypto::tink::CleartextKeysetHandle;
 
-// Encrypts a message
 ::grpc::Status AeadImpl::CreateAead(grpc::ServerContext* context,
                                     const AeadCreationRequest* request,
                                     AeadCreationResponse* response) {
@@ -81,7 +80,6 @@ using ::crypto::tink::CleartextKeysetHandle;
   return ::grpc::Status::OK;
 }
 
-// Decrypts a ciphertext
 ::grpc::Status AeadImpl::Decrypt(grpc::ServerContext* context,
                                  const AeadDecryptRequest* request,
                                  AeadDecryptResponse* response) {
