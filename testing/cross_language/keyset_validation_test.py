@@ -62,13 +62,9 @@ class KeysetValidationTest(parameterized.TestCase):
     """Unsets the primary key and tries to use an AEAD primitive."""
     template = supported_key_types.KEY_TEMPLATE[key_template_name]
     keyset = testing_servers.new_keyset(lang, template)
-    ciphertext = testing_servers.aead(lang, keyset).encrypt(b'foo', b'bar')
 
-    aead_without_primary = testing_servers.aead(lang, unset_primary(keyset))
     with self.assertRaises(tink.TinkError):
-      _ = aead_without_primary.encrypt(b'foo', b'bar')
-    with self.assertRaises(tink.TinkError):
-      _ = aead_without_primary.decrypt(ciphertext, b'bar')
+      _ = testing_servers.aead(lang, unset_primary(keyset))
 
   @parameterized.parameters(test_cases(supported_key_types.DAEAD_KEY_TYPES))
   def test_daead_without_primary(self, key_template_name, lang):

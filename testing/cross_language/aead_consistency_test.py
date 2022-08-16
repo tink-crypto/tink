@@ -165,8 +165,6 @@ class AeadKeyConsistencyTest(parameterized.TestCase):
     for lang in supported_key_types.ALL_LANGUAGES:
       try:
         aead = testing_servers.aead(lang, keyset.SerializeToString())
-        # TODO(b/241219877): Remove the next line once __init__ does this check
-        aead.encrypt(b'', b'')
         result.append((aead, lang))
       except tink.TinkError:
         pass

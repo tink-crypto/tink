@@ -87,8 +87,6 @@ class AeadPythonTest(parameterized.TestCase):
     for lang in supported_key_types.ALL_LANGUAGES:
       try:
         aead_p = testing_servers.aead(lang, keyset)
-        # TODO(b/241219877): Remove the next line once __init__ does this check
-        aead_p.encrypt(b'', b'')
         result.append((aead_p, lang))
       except tink.TinkError:
         pass
@@ -178,16 +176,6 @@ class AeadKeyRotationTest(parameterized.TestCase):
     builder.disable_key(older_key_id)
     enc_aead4 = testing_servers.aead(enc_lang, builder.keyset())
     dec_aead4 = testing_servers.aead(dec_lang, builder.keyset())
-
-    # TODO(b/241219877): Remove the next lines once __init__ does this check
-    enc_aead1.encrypt(b'', b'')
-    dec_aead1.encrypt(b'', b'')
-    enc_aead2.encrypt(b'', b'')
-    dec_aead2.encrypt(b'', b'')
-    enc_aead3.encrypt(b'', b'')
-    dec_aead3.encrypt(b'', b'')
-    enc_aead4.encrypt(b'', b'')
-    dec_aead4.encrypt(b'', b'')
 
     self.assertNotEqual(older_key_id, newer_key_id)
     # 1 encrypts with the older key. So 1, 2 and 3 can decrypt it, but not 4.

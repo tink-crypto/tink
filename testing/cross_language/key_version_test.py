@@ -126,9 +126,8 @@ class KeyVersionTest(parameterized.TestCase):
     keyset = testing_servers.new_keyset(lang, template)
     _ = testing_servers.aead(lang, keyset).encrypt(b'foo', b'bar')
     for keyset1 in gen_inc_versions(keyset):
-      aead_primitive = testing_servers.aead(lang, keyset1)
       with self.assertRaises(tink.TinkError):
-        _ = aead_primitive.encrypt(b'foo', b'bar')
+        _ = testing_servers.aead(lang, keyset1)
 
   @parameterized.parameters(test_cases(supported_key_types.DAEAD_KEY_TYPES))
   def test_inc_version_daead(self, key_template_name, lang):
