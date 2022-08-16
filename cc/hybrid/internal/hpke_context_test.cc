@@ -16,7 +16,9 @@
 
 #include "tink/hybrid/internal/hpke_context.h"
 
+#include <memory>
 #include <string>
+#include <vector>
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"

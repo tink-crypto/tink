@@ -16,6 +16,7 @@
 
 #include "tink/hybrid/hybrid_decrypt_wrapper.h"
 
+#include <memory>
 #include <string>
 #include <utility>
 

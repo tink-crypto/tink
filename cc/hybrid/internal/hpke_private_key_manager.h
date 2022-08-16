@@ -17,6 +17,7 @@
 #ifndef TINK_HYBRID_INTERNAL_HPKE_PRIVATE_KEY_MANAGER_H_
 #define TINK_HYBRID_INTERNAL_HPKE_PRIVATE_KEY_MANAGER_H_
 
+#include <memory>
 #include <string>
 
 #include "tink/core/key_type_manager.h"

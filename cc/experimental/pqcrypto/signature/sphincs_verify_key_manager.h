@@ -17,6 +17,7 @@
 #ifndef TINK_EXPERIMENTAL_PQCRYPTO_SIGNATURE_SPHINCS_VERIFY_KEY_MANAGER_H_
 #define TINK_EXPERIMENTAL_PQCRYPTO_SIGNATURE_SPHINCS_VERIFY_KEY_MANAGER_H_
 
+#include <memory>
 #include <string>
 
 #include "absl/memory/memory.h"

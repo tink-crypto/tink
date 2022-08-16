@@ -16,6 +16,7 @@
 
 #include "tink/hybrid/internal/hpke_key_boringssl.h"
 
+#include <memory>
 #include <string>
 
 #include "gtest/gtest.h"

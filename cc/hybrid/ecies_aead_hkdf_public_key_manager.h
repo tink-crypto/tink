@@ -16,6 +16,7 @@
 #ifndef TINK_HYBRID_ECIES_AEAD_HKDF_PUBLIC_KEY_MANAGER_H_
 #define TINK_HYBRID_ECIES_AEAD_HKDF_PUBLIC_KEY_MANAGER_H_
 
+#include <memory>
 #include <string>
 
 #include "absl/memory/memory.h"

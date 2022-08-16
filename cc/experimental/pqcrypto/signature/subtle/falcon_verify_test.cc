@@ -16,6 +16,7 @@
 
 #include "tink/experimental/pqcrypto/signature/subtle/falcon_verify.h"
 
+#include <memory>
 #include <string>
 #include <utility>
 

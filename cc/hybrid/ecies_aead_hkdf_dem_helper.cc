@@ -16,6 +16,7 @@
 
 #include "tink/hybrid/ecies_aead_hkdf_dem_helper.h"
 
+#include <memory>
 #include <string>
 #include <utility>
 

@@ -16,6 +16,7 @@
 
 #include "tink/hybrid/hybrid_encrypt_wrapper.h"
 
+#include <memory>
 #include <string>
 #include <utility>
 
@@ -25,8 +26,8 @@
 #include "tink/internal/monitoring_util.h"
 #include "tink/internal/registry_impl.h"
 #include "tink/internal/util.h"
-#include "tink/primitive_set.h"
 #include "tink/monitoring/monitoring.h"
+#include "tink/primitive_set.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 

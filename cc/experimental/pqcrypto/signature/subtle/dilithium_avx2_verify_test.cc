@@ -16,6 +16,7 @@
 
 #include "tink/experimental/pqcrypto/signature/subtle/dilithium_avx2_verify.h"
 
+#include <memory>
 #include <string>
 #include <utility>
 

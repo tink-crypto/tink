@@ -17,6 +17,8 @@
 #ifndef TINK_HYBRID_HYBRID_DECRYPT_FACTORY_H_
 #define TINK_HYBRID_HYBRID_DECRYPT_FACTORY_H_
 
+#include <memory>
+
 #include "absl/base/macros.h"
 #include "tink/hybrid_decrypt.h"
 #include "tink/key_manager.h"

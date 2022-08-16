@@ -15,11 +15,12 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include "tink/hybrid/failing_hybrid.h"
 
+#include <memory>
 #include <string>
 #include <utility>
 
-#include "tink/hybrid_encrypt.h"
 #include "absl/strings/string_view.h"
+#include "tink/hybrid_encrypt.h"
 
 namespace crypto {
 namespace tink {

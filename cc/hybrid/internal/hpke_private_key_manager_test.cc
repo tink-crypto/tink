@@ -16,6 +16,8 @@
 
 #include "tink/hybrid/internal/hpke_private_key_manager.h"
 
+#include <memory>
+
 #include "gtest/gtest.h"
 #include "absl/status/status.h"
 #include "tink/hybrid/internal/hpke_encrypt.h"

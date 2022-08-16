@@ -17,6 +17,8 @@
 #ifndef TINK_HYBRID_HYBRID_ENCRYPT_WRAPPER_H_
 #define TINK_HYBRID_HYBRID_ENCRYPT_WRAPPER_H_
 
+#include <memory>
+
 #include "absl/strings/string_view.h"
 #include "tink/hybrid_encrypt.h"
 #include "tink/primitive_set.h"

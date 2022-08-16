@@ -16,6 +16,7 @@
 
 #include "tink/hybrid/internal/hpke_context_boringssl.h"
 
+#include <memory>
 #include <string>
 #include <utility>
 

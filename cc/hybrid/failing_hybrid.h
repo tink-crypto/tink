@@ -16,6 +16,7 @@
 #ifndef TINK_HYBRID_FAILING_HYBRID_H_
 #define TINK_HYBRID_FAILING_HYBRID_H_
 
+#include <memory>
 #include <string>
 
 #include "absl/strings/string_view.h"
