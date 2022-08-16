@@ -447,6 +447,43 @@ func TestGenerateEncryptDecrypt(t *testing.T) {
 	}
 }
 
+func TestSuccessfulDaeadCreation(t *testing.T) {
+	keysetService := &services.KeysetService{}
+	daeadService := &services.DeterministicAEADService{}
+	ctx := context.Background()
+
+	template, err := proto.Marshal(daead.AESSIVKeyTemplate())
+	if err != nil {
+		t.Fatalf("proto.Marshal(daead.AESSIVKeyTemplate()) failed: %v", err)
+	}
+
+	keyset, err := genKeyset(ctx, keysetService, template)
+	if err != nil {
+		t.Fatalf("genKeyset failed: %v", err)
+	}
+
+	result, err := daeadService.CreateDeterministicAead(ctx, &pb.DeterministicAeadCreationRequest{Keyset: keyset})
+	if err != nil {
+		t.Fatalf("CreateDeterministicAead with good keyset failed with gRPC error: %v", err)
+	}
+	if result.GetErr() != "" {
+		t.Fatalf("CreateDeterministicAead with good keyset failed with creation error: %v", result.GetErr())
+	}
+}
+
+func TestFailingDaeadCreation(t *testing.T) {
+	daeadService := &services.DeterministicAEADService{}
+	ctx := context.Background()
+
+	result, err := daeadService.CreateDeterministicAead(ctx, &pb.DeterministicAeadCreationRequest{Keyset: []byte{0x80}})
+	if err != nil {
+		t.Fatalf("CreateAead with bad keyset failed with gRPC error: %v", err)
+	}
+	if result.GetErr() == "" {
+		t.Fatalf("CreateAead with bad keyset succeeded instead of failing")
+	}
+}
+
 func daeadEncrypt(ctx context.Context, daeadService *services.DeterministicAEADService, keyset []byte, plaintext []byte, associatedData []byte) ([]byte, error) {
 	encRequest := &pb.DeterministicAeadEncryptRequest{
 		Keyset:         keyset,

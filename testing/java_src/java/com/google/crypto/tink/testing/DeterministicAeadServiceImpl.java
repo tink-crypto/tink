@@ -20,13 +20,14 @@ import com.google.crypto.tink.BinaryKeysetReader;
 import com.google.crypto.tink.CleartextKeysetHandle;
 import com.google.crypto.tink.DeterministicAead;
 import com.google.crypto.tink.KeysetHandle;
+import com.google.crypto.tink.testing.proto.DeterministicAeadCreationRequest;
+import com.google.crypto.tink.testing.proto.DeterministicAeadCreationResponse;
 import com.google.crypto.tink.testing.proto.DeterministicAeadDecryptRequest;
 import com.google.crypto.tink.testing.proto.DeterministicAeadDecryptResponse;
 import com.google.crypto.tink.testing.proto.DeterministicAeadEncryptRequest;
 import com.google.crypto.tink.testing.proto.DeterministicAeadEncryptResponse;
 import com.google.crypto.tink.testing.proto.DeterministicAeadGrpc.DeterministicAeadImplBase;
 import com.google.protobuf.ByteString;
-import com.google.protobuf.InvalidProtocolBufferException;
 import io.grpc.Status;
 import io.grpc.stub.StreamObserver;
 import java.io.IOException;
@@ -38,32 +39,68 @@ public final class DeterministicAeadServiceImpl extends DeterministicAeadImplBas
   public DeterministicAeadServiceImpl() throws GeneralSecurityException {
   }
 
+  @Override
+  public void createDeterministicAead(
+      DeterministicAeadCreationRequest request,
+      StreamObserver<DeterministicAeadCreationResponse> responseObserver) {
+    try {
+      KeysetHandle keysetHandle =
+          CleartextKeysetHandle.read(
+              BinaryKeysetReader.withBytes(request.getKeyset().toByteArray()));
+      keysetHandle.getPrimitive(DeterministicAead.class);
+    } catch (GeneralSecurityException | IOException e) {
+      responseObserver.onNext(
+          DeterministicAeadCreationResponse.newBuilder().setErr(e.toString()).build());
+      responseObserver.onCompleted();
+      return;
+    }
+    responseObserver.onNext(DeterministicAeadCreationResponse.getDefaultInstance());
+    responseObserver.onCompleted();
+  }
+
+  DeterministicAeadEncryptResponse encryptWithDeterministicAead(
+      DeterministicAead deterministicAead, byte[] plaintext, byte[] associatedData) {
+    try {
+      byte[] ciphertext = deterministicAead.encryptDeterministically(plaintext, associatedData);
+      return DeterministicAeadEncryptResponse.newBuilder()
+          .setCiphertext(ByteString.copyFrom(ciphertext))
+          .build();
+    } catch (GeneralSecurityException e) {
+      return DeterministicAeadEncryptResponse.newBuilder().setErr(e.toString()).build();
+    }
+  }
+
   /** Encrypts a message. */
   @Override
   public void encryptDeterministically(
       DeterministicAeadEncryptRequest request,
       StreamObserver<DeterministicAeadEncryptResponse> responseObserver) {
-    DeterministicAeadEncryptResponse response;
     try {
       KeysetHandle keysetHandle =
           CleartextKeysetHandle.read(
               BinaryKeysetReader.withBytes(request.getKeyset().toByteArray()));
-      DeterministicAead daead = keysetHandle.getPrimitive(DeterministicAead.class);
-      byte[] ciphertext =
-          daead.encryptDeterministically(
-              request.getPlaintext().toByteArray(), request.getAssociatedData().toByteArray());
-      response =
-          DeterministicAeadEncryptResponse.newBuilder()
-              .setCiphertext(ByteString.copyFrom(ciphertext))
-              .build();
-    } catch (GeneralSecurityException | InvalidProtocolBufferException e)  {
-      response = DeterministicAeadEncryptResponse.newBuilder().setErr(e.toString()).build();
-    } catch (IOException e) {
+      DeterministicAeadEncryptResponse response =
+          encryptWithDeterministicAead(
+              keysetHandle.getPrimitive(DeterministicAead.class),
+              request.getPlaintext().toByteArray(),
+              request.getAssociatedData().toByteArray());
+      responseObserver.onNext(response);
+      responseObserver.onCompleted();
+    } catch (GeneralSecurityException | IOException e) {
       responseObserver.onError(Status.UNKNOWN.withDescription(e.getMessage()).asException());
-      return;
     }
-    responseObserver.onNext(response);
-    responseObserver.onCompleted();
+  }
+
+  DeterministicAeadDecryptResponse decryptWithDeterministicAead(
+      DeterministicAead deterministicAead, byte[] ciphertext, byte[] associatedData) {
+    try {
+      byte[] plaintext = deterministicAead.decryptDeterministically(ciphertext, associatedData);
+      return DeterministicAeadDecryptResponse.newBuilder()
+          .setPlaintext(ByteString.copyFrom(plaintext))
+          .build();
+    } catch (GeneralSecurityException e) {
+      return DeterministicAeadDecryptResponse.newBuilder().setErr(e.toString()).build();
+    }
   }
 
   /** Decrypts a message. */
@@ -71,26 +108,19 @@ public final class DeterministicAeadServiceImpl extends DeterministicAeadImplBas
   public void decryptDeterministically(
       DeterministicAeadDecryptRequest request,
       StreamObserver<DeterministicAeadDecryptResponse> responseObserver) {
-    DeterministicAeadDecryptResponse response;
     try {
       KeysetHandle keysetHandle =
           CleartextKeysetHandle.read(
               BinaryKeysetReader.withBytes(request.getKeyset().toByteArray()));
-      DeterministicAead daead = keysetHandle.getPrimitive(DeterministicAead.class);
-      byte[] plaintext =
-          daead.decryptDeterministically(
-              request.getCiphertext().toByteArray(), request.getAssociatedData().toByteArray());
-      response =
-          DeterministicAeadDecryptResponse.newBuilder()
-              .setPlaintext(ByteString.copyFrom(plaintext))
-              .build();
-    } catch (GeneralSecurityException | InvalidProtocolBufferException e) {
-      response = DeterministicAeadDecryptResponse.newBuilder().setErr(e.toString()).build();
-    } catch (IOException e) {
+      DeterministicAeadDecryptResponse response =
+          decryptWithDeterministicAead(
+              keysetHandle.getPrimitive(DeterministicAead.class),
+              request.getCiphertext().toByteArray(),
+              request.getAssociatedData().toByteArray());
+      responseObserver.onNext(response);
+      responseObserver.onCompleted();
+    } catch (GeneralSecurityException | IOException e) {
       responseObserver.onError(Status.UNKNOWN.withDescription(e.getMessage()).asException());
-      return;
     }
-    responseObserver.onNext(response);
-    responseObserver.onCompleted();
   }
 }

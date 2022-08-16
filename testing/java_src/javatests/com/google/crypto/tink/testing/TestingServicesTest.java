@@ -19,6 +19,7 @@ package com.google.crypto.tink.testing;
 import static com.google.common.truth.Truth.assertThat;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.concurrent.TimeUnit.SECONDS;
+import static org.junit.Assert.assertThrows;
 
 import com.google.crypto.tink.BinaryKeysetReader;
 import com.google.crypto.tink.KeyTemplate;
@@ -40,6 +41,8 @@ import com.google.crypto.tink.testing.proto.AeadGrpc;
 import com.google.crypto.tink.testing.proto.BytesValue;
 import com.google.crypto.tink.testing.proto.ComputeMacRequest;
 import com.google.crypto.tink.testing.proto.ComputeMacResponse;
+import com.google.crypto.tink.testing.proto.DeterministicAeadCreationRequest;
+import com.google.crypto.tink.testing.proto.DeterministicAeadCreationResponse;
 import com.google.crypto.tink.testing.proto.DeterministicAeadDecryptRequest;
 import com.google.crypto.tink.testing.proto.DeterministicAeadDecryptResponse;
 import com.google.crypto.tink.testing.proto.DeterministicAeadEncryptRequest;
@@ -79,6 +82,7 @@ import com.google.crypto.tink.testing.proto.VerifyMacResponse;
 import com.google.protobuf.ByteString;
 import io.grpc.ManagedChannel;
 import io.grpc.Server;
+import io.grpc.StatusRuntimeException;
 import io.grpc.inprocess.InProcessChannelBuilder;
 import io.grpc.inprocess.InProcessServerBuilder;
 import java.util.Optional;
@@ -427,6 +431,29 @@ public final class TestingServicesTest {
     assertThat(decResponse.getErr()).isNotEmpty();
   }
 
+  @Test
+  public void deterministicAeadCreateKeyset_success() throws Exception {
+    byte[] template = KeyTemplateProtoConverter.toByteArray(AesSivKeyManager.aes256SivTemplate());
+    KeysetGenerateResponse keysetResponse = generateKeyset(keysetStub, template);
+    assertThat(keysetResponse.getErr()).isEmpty();
+    DeterministicAeadCreationResponse response =
+        daeadStub.createDeterministicAead(
+            DeterministicAeadCreationRequest.newBuilder()
+                .setKeyset(keysetResponse.getKeyset())
+                .build());
+    assertThat(response.getErr()).isEmpty();
+  }
+
+  @Test
+  public void deterministicAeadCreateKeyset_fails() throws Exception {
+    DeterministicAeadCreationResponse response =
+        daeadStub.createDeterministicAead(
+            DeterministicAeadCreationRequest.newBuilder()
+                .setKeyset(ByteString.copyFrom(new byte[] {(byte) 0x80}))
+                .build());
+    assertThat(response.getErr()).isNotEmpty();
+  }
+
   private static DeterministicAeadEncryptResponse daeadEncrypt(
       DeterministicAeadGrpc.DeterministicAeadBlockingStub daeadStub,
       byte[] keyset,
@@ -483,9 +510,9 @@ public final class TestingServicesTest {
     byte[] badKeyset = "bad keyset".getBytes(UTF_8);
     byte[] plaintext = "The quick brown fox jumps over the lazy dog".getBytes(UTF_8);
     byte[] associatedData = "aead_encrypt_fails_on_bad_keyset".getBytes(UTF_8);
-    DeterministicAeadEncryptResponse encResponse =
-        daeadEncrypt(daeadStub, badKeyset, plaintext, associatedData);
-    assertThat(encResponse.getErr()).isNotEmpty();
+    assertThrows(
+        StatusRuntimeException.class,
+        () -> daeadEncrypt(daeadStub, badKeyset, plaintext, associatedData));
   }
 
   @Test
@@ -519,10 +546,9 @@ public final class TestingServicesTest {
     byte[] ciphertext = encResponse.getCiphertext().toByteArray();
 
     byte[] badKeyset = "bad keyset".getBytes(UTF_8);
-
-    DeterministicAeadDecryptResponse decResponse =
-        daeadDecrypt(daeadStub, badKeyset, ciphertext, associatedData);
-    assertThat(decResponse.getErr()).isNotEmpty();
+    assertThrows(
+        StatusRuntimeException.class,
+        () -> daeadDecrypt(daeadStub, badKeyset, ciphertext, associatedData));
   }
 
   private static StreamingAeadEncryptResponse streamingAeadEncrypt(

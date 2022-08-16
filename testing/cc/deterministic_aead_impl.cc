@@ -32,11 +32,10 @@ using ::crypto::tink::CleartextKeysetHandle;
 using ::grpc::ServerContext;
 using ::grpc::Status;
 
-// Encrypts a message
-::grpc::Status DeterministicAeadImpl::EncryptDeterministically(
+::grpc::Status DeterministicAeadImpl::CreateDeterministicAead(
     grpc::ServerContext* context,
-    const DeterministicAeadEncryptRequest* request,
-    DeterministicAeadEncryptResponse* response) {
+    const DeterministicAeadCreationRequest* request,
+    DeterministicAeadCreationResponse* response) {
   auto reader_result = BinaryKeysetReader::New(request->keyset());
   if (!reader_result.ok()) {
     response->set_err(std::string(reader_result.status().message()));
@@ -53,6 +52,30 @@ using ::grpc::Status;
   if (!daead_result.ok()) {
     response->set_err(std::string(daead_result.status().message()));
     return ::grpc::Status::OK;
+  }
+  return ::grpc::Status::OK;
+}
+
+::grpc::Status DeterministicAeadImpl::EncryptDeterministically(
+    grpc::ServerContext* context,
+    const DeterministicAeadEncryptRequest* request,
+    DeterministicAeadEncryptResponse* response) {
+  auto reader_result = BinaryKeysetReader::New(request->keyset());
+  if (!reader_result.ok()) {
+    return ::grpc::Status(::grpc::StatusCode::FAILED_PRECONDITION,
+                          "Reading Keyset failed");
+  }
+  auto handle_result =
+      CleartextKeysetHandle::Read(std::move(reader_result.value()));
+  if (!handle_result.ok()) {
+    return ::grpc::Status(::grpc::StatusCode::FAILED_PRECONDITION,
+                          "Creating KeysetHandle failed");
+  }
+  auto daead_result =
+      handle_result.value()->GetPrimitive<crypto::tink::DeterministicAead>();
+  if (!daead_result.ok()) {
+    return ::grpc::Status(::grpc::StatusCode::FAILED_PRECONDITION,
+                          "Creating DeterministicAead failed");
   }
   auto encrypt_result = daead_result.value()->EncryptDeterministically(
       request->plaintext(), request->associated_data());
@@ -64,27 +87,26 @@ using ::grpc::Status;
   return ::grpc::Status::OK;
 }
 
-// Decrypts a ciphertext
 ::grpc::Status DeterministicAeadImpl::DecryptDeterministically(
     grpc::ServerContext* context,
     const DeterministicAeadDecryptRequest* request,
     DeterministicAeadDecryptResponse* response) {
   auto reader_result = BinaryKeysetReader::New(request->keyset());
   if (!reader_result.ok()) {
-    response->set_err(std::string(reader_result.status().message()));
-    return ::grpc::Status::OK;
+    return ::grpc::Status(::grpc::StatusCode::FAILED_PRECONDITION,
+                          "Reading Keyset failed");
   }
   auto handle_result =
       CleartextKeysetHandle::Read(std::move(reader_result.value()));
   if (!handle_result.ok()) {
-    response->set_err(std::string(handle_result.status().message()));
-    return ::grpc::Status::OK;
+    return ::grpc::Status(::grpc::StatusCode::FAILED_PRECONDITION,
+                          "Creating KeysetHandle failed");
   }
   auto daead_result =
       handle_result.value()->GetPrimitive<crypto::tink::DeterministicAead>();
   if (!daead_result.ok()) {
-    response->set_err(std::string(daead_result.status().message()));
-    return ::grpc::Status::OK;
+    return ::grpc::Status(::grpc::StatusCode::FAILED_PRECONDITION,
+                          "Creating DeterministicAead failed");
   }
   auto decrypt_result = daead_result.value()->DecryptDeterministically(
       request->ciphertext(), request->associated_data());

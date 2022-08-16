@@ -210,12 +210,28 @@ message AeadDecryptResponse {
 
 // Service for Deterministic AEAD encryption and decryption
 service DeterministicAead {
-  // Encrypts a plaintext with the provided keyset
+  // Creates a Deterministic AEAD object without using it.
+  rpc CreateDeterministicAead(DeterministicAeadCreationRequest)
+      returns (DeterministicAeadCreationResponse) {}
+  // Encrypts a plaintext with the provided keyset. The client must call
+  // "CreateDeterministicAead" first to see if creation succeeds before calling
+  // this.
   rpc EncryptDeterministically(DeterministicAeadEncryptRequest)
       returns (DeterministicAeadEncryptResponse) {}
-  // Decrypts a ciphertext with the provided keyset
+  // Decrypts a ciphertext with the provided keyset. The client must call
+  // "CreateDeterministicAead" first to see if creation succeeds before calling
+  // this.
   rpc DecryptDeterministically(DeterministicAeadDecryptRequest)
       returns (DeterministicAeadDecryptResponse) {}
+}
+
+message DeterministicAeadCreationRequest {
+  bytes keyset = 1;  // serialized google.crypto.tink.Keyset.
+}
+
+message DeterministicAeadCreationResponse {
+  // Empty means no error
+  string err = 1;
 }
 
 message DeterministicAeadEncryptRequest {

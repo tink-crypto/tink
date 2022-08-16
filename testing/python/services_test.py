@@ -338,6 +338,49 @@ class ServicesTest(absltest.TestCase):
     response = metadata_servicer.GetServerInfo(request, self._ctx)
     self.assertEqual(response.language, 'python')
 
+  def test_create_deterministic_aead(self):
+    keyset_servicer = services.KeysetServicer()
+    daead_servicer = services.DeterministicAeadServicer()
+
+    template_proto = daead.deterministic_aead_key_templates.AES256_SIV
+    template = template_proto.SerializeToString()
+    gen_request = testing_api_pb2.KeysetGenerateRequest(template=template)
+    gen_response = keyset_servicer.Generate(gen_request, self._ctx)
+    self.assertEqual(gen_response.WhichOneof('result'), 'keyset')
+
+    creation_request = testing_api_pb2.DeterministicAeadCreationRequest(
+        keyset=gen_response.keyset)
+    creation_response = daead_servicer.CreateDeterministicAead(
+        creation_request, self._ctx)
+    self.assertEmpty(creation_response.err)
+
+  def test_create_deterministic_aead_broken_keyset(self):
+    daead_servicer = services.DeterministicAeadServicer()
+
+    creation_request = testing_api_pb2.DeterministicAeadCreationRequest(
+        keyset=b'\x80')
+    creation_response = daead_servicer.CreateDeterministicAead(
+        creation_request, self._ctx)
+    self.assertNotEmpty(creation_response.err)
+
+  def test_encrypt_decrypt_deterministic_aead_broken_keyset(self):
+    keyset_servicer = services.KeysetServicer()
+    daead_servicer = services.DeterministicAeadServicer()
+
+    # AES128_GCM keysets will not allow creation of an Deterministic AEAD.
+    template = aead.aead_key_templates.AES128_GCM.SerializeToString()
+    gen_request = testing_api_pb2.KeysetGenerateRequest(template=template)
+    gen_response = keyset_servicer.Generate(gen_request, self._ctx)
+    self.assertEqual(gen_response.WhichOneof('result'), 'keyset')
+    keyset = gen_response.keyset
+
+    enc_request = testing_api_pb2.DeterministicAeadEncryptRequest(keyset=keyset)
+    with self.assertRaises(tink.TinkError):
+      daead_servicer.EncryptDeterministically(enc_request, self._ctx)
+    dec_request = testing_api_pb2.DeterministicAeadDecryptRequest(keyset=keyset)
+    with self.assertRaises(tink.TinkError):
+      daead_servicer.DecryptDeterministically(dec_request, self._ctx)
+
   def test_generate_encrypt_decrypt_deterministically(self):
     keyset_servicer = services.KeysetServicer()
     daead_servicer = services.DeterministicAeadServicer()

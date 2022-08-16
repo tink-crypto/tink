@@ -31,17 +31,28 @@ type DeterministicAEADService struct {
 	pb.DeterministicAeadServer
 }
 
+func (s *DeterministicAEADService) CreateDeterministicAead(ctx context.Context, req *pb.DeterministicAeadCreationRequest) (*pb.DeterministicAeadCreationResponse, error) {
+	reader := keyset.NewBinaryReader(bytes.NewReader(req.Keyset))
+	handle, err := testkeyset.Read(reader)
+	if err != nil {
+		return &pb.DeterministicAeadCreationResponse{Err: err.Error()}, nil
+	}
+	_, err = daead.New(handle)
+	if err != nil {
+		return &pb.DeterministicAeadCreationResponse{Err: err.Error()}, nil
+	}
+	return &pb.DeterministicAeadCreationResponse{}, nil
+}
+
 func (s *DeterministicAEADService) EncryptDeterministically(ctx context.Context, req *pb.DeterministicAeadEncryptRequest) (*pb.DeterministicAeadEncryptResponse, error) {
 	reader := keyset.NewBinaryReader(bytes.NewReader(req.Keyset))
 	handle, err := testkeyset.Read(reader)
 	if err != nil {
-		return &pb.DeterministicAeadEncryptResponse{
-			Result: &pb.DeterministicAeadEncryptResponse_Err{err.Error()}}, nil
+		return nil, err
 	}
 	cipher, err := daead.New(handle)
 	if err != nil {
-		return &pb.DeterministicAeadEncryptResponse{
-			Result: &pb.DeterministicAeadEncryptResponse_Err{err.Error()}}, nil
+		return nil, err
 	}
 	ciphertext, err := cipher.EncryptDeterministically(req.Plaintext, req.AssociatedData)
 	if err != nil {
@@ -56,13 +67,11 @@ func (s *DeterministicAEADService) DecryptDeterministically(ctx context.Context,
 	reader := keyset.NewBinaryReader(bytes.NewReader(req.Keyset))
 	handle, err := testkeyset.Read(reader)
 	if err != nil {
-		return &pb.DeterministicAeadDecryptResponse{
-			Result: &pb.DeterministicAeadDecryptResponse_Err{err.Error()}}, nil
+		return nil, err
 	}
 	cipher, err := daead.New(handle)
 	if err != nil {
-		return &pb.DeterministicAeadDecryptResponse{
-			Result: &pb.DeterministicAeadDecryptResponse_Err{err.Error()}}, nil
+		return nil, err
 	}
 	plaintext, err := cipher.DecryptDeterministically(req.Ciphertext, req.AssociatedData)
 	if err != nil {

@@ -43,6 +43,8 @@ using ::tink_testing_api::DeterministicAeadEncryptResponse;
 
 using crypto::tink::KeysetHandle;
 using google::crypto::tink::KeyTemplate;
+using tink_testing_api::DeterministicAeadCreationRequest;
+using tink_testing_api::DeterministicAeadCreationResponse;
 
 std::string ValidKeyset() {
   const KeyTemplate& key_template = DeterministicAeadKeyTemplates::Aes256Siv();
@@ -65,6 +67,27 @@ class DeterministicAeadImplTest : public ::testing::Test {
     ASSERT_TRUE(DeterministicAeadConfig::Register().ok());
   }
 };
+
+TEST_F(DeterministicAeadImplTest, CreateDeterministicAeadSuccess) {
+  tink_testing_api::DeterministicAeadImpl aead;
+  std::string keyset = ValidKeyset();
+  DeterministicAeadCreationRequest request;
+  request.set_keyset(keyset);
+  DeterministicAeadCreationResponse response;
+
+  EXPECT_TRUE(aead.CreateDeterministicAead(nullptr, &request, &response).ok());
+  EXPECT_THAT(response.err(), IsEmpty());
+}
+
+TEST_F(DeterministicAeadImplTest, CreateAeadFails) {
+  tink_testing_api::DeterministicAeadImpl aead;
+  DeterministicAeadCreationRequest request;
+  request.set_keyset("bad keyset");
+  DeterministicAeadCreationResponse response;
+
+  EXPECT_TRUE(aead.CreateDeterministicAead(nullptr, &request, &response).ok());
+  EXPECT_THAT(response.err(), Not(IsEmpty()));
+}
 
 TEST_F(DeterministicAeadImplTest, EncryptDecryptSuccess) {
   tink_testing_api::DeterministicAeadImpl daead;
@@ -101,10 +124,9 @@ TEST_F(DeterministicAeadImplTest, EncryptBadKeysetFail) {
   enc_request.set_associated_data("ad");
   DeterministicAeadEncryptResponse enc_response;
 
-  EXPECT_TRUE(
+  EXPECT_FALSE(
       daead.EncryptDeterministically(nullptr, &enc_request, &enc_response)
           .ok());
-  EXPECT_THAT(enc_response.err(), Not(IsEmpty()));
 }
 
 TEST_F(DeterministicAeadImplTest, DecryptBadCiphertextFail) {

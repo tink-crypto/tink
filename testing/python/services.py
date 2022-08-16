@@ -458,15 +458,28 @@ class StreamingAeadServicer(testing_api_pb2_grpc.StreamingAeadServicer):
 class DeterministicAeadServicer(testing_api_pb2_grpc.DeterministicAeadServicer):
   """A service for testing Deterministic AEAD encryption."""
 
+  def CreateDeterministicAead(
+      self, request: testing_api_pb2.DeterministicAeadCreationRequest,
+      context: grpc.ServicerContext
+  ) -> testing_api_pb2.DeterministicAeadCreationResponse:
+    """Creates a Deterministic AEAD."""
+    try:
+      keyset_handle = cleartext_keyset_handle.read(
+          tink.BinaryKeysetReader(request.keyset))
+      keyset_handle.primitive(daead.DeterministicAead)
+      return testing_api_pb2.DeterministicAeadCreationResponse()
+    except tink.TinkError as e:
+      return testing_api_pb2.DeterministicAeadCreationResponse(err=str(e))
+
   def EncryptDeterministically(
       self, request: testing_api_pb2.DeterministicAeadEncryptRequest,
       context: grpc.ServicerContext
   ) -> testing_api_pb2.DeterministicAeadEncryptResponse:
     """Encrypts a message."""
+    keyset_handle = cleartext_keyset_handle.read(
+        tink.BinaryKeysetReader(request.keyset))
+    p = keyset_handle.primitive(daead.DeterministicAead)
     try:
-      keyset_handle = cleartext_keyset_handle.read(
-          tink.BinaryKeysetReader(request.keyset))
-      p = keyset_handle.primitive(daead.DeterministicAead)
       ciphertext = p.encrypt_deterministically(request.plaintext,
                                                request.associated_data)
       return testing_api_pb2.DeterministicAeadEncryptResponse(
@@ -479,10 +492,10 @@ class DeterministicAeadServicer(testing_api_pb2_grpc.DeterministicAeadServicer):
       context: grpc.ServicerContext
   ) -> testing_api_pb2.DeterministicAeadDecryptResponse:
     """Decrypts a message."""
+    keyset_handle = cleartext_keyset_handle.read(
+        tink.BinaryKeysetReader(request.keyset))
+    p = keyset_handle.primitive(daead.DeterministicAead)
     try:
-      keyset_handle = cleartext_keyset_handle.read(
-          tink.BinaryKeysetReader(request.keyset))
-      p = keyset_handle.primitive(daead.DeterministicAead)
       plaintext = p.decrypt_deterministically(request.ciphertext,
                                               request.associated_data)
       return testing_api_pb2.DeterministicAeadDecryptResponse(
