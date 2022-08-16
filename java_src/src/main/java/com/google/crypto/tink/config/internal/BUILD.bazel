@@ -17,21 +17,17 @@ android_library(
     srcs = select({
         "//src/main/java/com/google/crypto/tink/config:fips_enabled": ["TinkFipsEnabled.java"],
         "//conditions:default": ["TinkFipsDisabled.java"],
-        }),
-);
+    }),
+)
 
 java_library(
     name = "tink_fips_util",
     srcs = ["TinkFipsUtil.java"],
-    deps = [
-        ":tink_fips_status",
-    ],
+    deps = [":tink_fips_status"],
 )
 
 android_library(
     name = "tink_fips_util-android",
     srcs = ["TinkFipsUtil.java"],
-    deps = [
-        ":tink_fips_status-android",
-    ],
+    deps = [":tink_fips_status-android"],
 )
