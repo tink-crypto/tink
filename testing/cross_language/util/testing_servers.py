@@ -268,35 +268,29 @@ def start(output_files_prefix: str) -> None:
 
 def stop() -> None:
   """Stops all servers."""
-  global _ts
   _ts.stop()
 
 
 def key_template(lang: str, template_name: str) -> tink_pb2.KeyTemplate:
   """Returns the key template of template_name, implemented in lang."""
-  global _ts
   return _primitives.key_template(_ts.keyset_stub(lang), template_name)
 
 
 def new_keyset(lang: str, template: tink_pb2.KeyTemplate) -> bytes:
   """Returns a new KeysetHandle, implemented in lang."""
-  global _ts
   return _primitives.new_keyset(_ts.keyset_stub(lang), template)
 
 
 def public_keyset(lang: str, private_keyset: bytes) -> bytes:
   """Returns a public keyset handle, implemented in lang."""
-  global _ts
   return _primitives.public_keyset(_ts.keyset_stub(lang), private_keyset)
 
 
 def keyset_to_json(lang: str, keyset: bytes) -> str:
-  global _ts
   return _primitives.keyset_to_json(_ts.keyset_stub(lang), keyset)
 
 
 def keyset_from_json(lang: str, json_keyset: str) -> bytes:
-  global _ts
   return _primitives.keyset_from_json(_ts.keyset_stub(lang), json_keyset)
 
 
@@ -304,7 +298,6 @@ def keyset_read_encrypted(lang: str, encrypted_keyset: bytes,
                           master_keyset: bytes,
                           associated_data: Optional[bytes],
                           keyset_reader_type: str) -> bytes:
-  global _ts
   return _primitives.keyset_read_encrypted(
       _ts.keyset_stub(lang), encrypted_keyset, master_keyset, associated_data,
       keyset_reader_type)
@@ -313,95 +306,80 @@ def keyset_read_encrypted(lang: str, encrypted_keyset: bytes,
 def keyset_write_encrypted(lang: str, keyset: bytes, master_keyset: bytes,
                            associated_data: Optional[bytes],
                            keyset_writer_type: str) -> bytes:
-  global _ts
   return _primitives.keyset_write_encrypted(
       _ts.keyset_stub(lang), keyset, master_keyset, associated_data,
       keyset_writer_type)
 
 
 def jwk_set_to_keyset(lang: str, jwk_set: str) -> bytes:
-  global _ts
   return _primitives.jwk_set_to_keyset(_ts.jwt_stub(lang), jwk_set)
 
 
 def jwk_set_from_keyset(lang: str, keyset: bytes) -> str:
-  global _ts
   return _primitives.jwk_set_from_keyset(_ts.jwt_stub(lang), keyset)
 
 
 def aead(lang: str, keyset: bytes) -> _primitives.Aead:
   """Returns an AEAD primitive, implemented in lang."""
-  global _ts
   return _primitives.Aead(lang, _ts.aead_stub(lang), keyset)
 
 
 def deterministic_aead(lang: str,
                        keyset: bytes) -> _primitives.DeterministicAead:
   """Returns a DeterministicAEAD primitive, implemented in lang."""
-  global _ts
   return _primitives.DeterministicAead(lang, _ts.daead_stub(lang), keyset)
 
 
 def streaming_aead(lang: str, key_handle: bytes) -> _primitives.StreamingAead:
   """Returns a StreamingAEAD primitive, implemented in lang."""
-  global _ts
   return _primitives.StreamingAead(
       lang, _ts.streaming_aead_stub(lang), key_handle)
 
 
 def hybrid_encrypt(lang: str, pub_keyset: bytes) -> _primitives.HybridEncrypt:
   """Returns a HybridEncrypt  primitive, implemented in lang."""
-  global _ts
   return _primitives.HybridEncrypt(lang, _ts.hybrid_stub(lang), pub_keyset)
 
 
 def hybrid_decrypt(lang: str, priv_keyset: bytes) -> _primitives.HybridDecrypt:
   """Returns a HybridDecrypt primitive, implemented in lang."""
-  global _ts
   return _primitives.HybridDecrypt(lang, _ts.hybrid_stub(lang), priv_keyset)
 
 
 def mac(lang: str, keyset: bytes) -> _primitives.Mac:
   """Returns a MAC primitive, implemented in lang."""
-  global _ts
   return _primitives.Mac(lang, _ts.mac_stub(lang), keyset)
 
 
 def public_key_sign(lang: str,
                     priv_keyset: bytes) -> _primitives.PublicKeySign:
   """Returns an PublicKeySign primitive, implemented in lang."""
-  global _ts
   return _primitives.PublicKeySign(lang, _ts.signature_stub(lang), priv_keyset)
 
 
 def public_key_verify(lang: str,
                       pub_keyset: bytes) -> _primitives.PublicKeyVerify:
   """Returns an PublicKeyVerify primitive, implemented in lang."""
-  global _ts
   return _primitives.PublicKeyVerify(lang, _ts.signature_stub(lang), pub_keyset)
 
 
 def prf_set(lang: str, keyset: bytes) -> _primitives.PrfSet:
   """Returns an PrfSet primitive, implemented in lang."""
-  global _ts
   return _primitives.PrfSet(lang, _ts.prf_stub(lang), keyset)
 
 
 def jwt_mac(lang: str, keyset: bytes) -> _primitives.JwtMac:
   """Returns a JwtMac primitive, implemented in lang."""
-  global _ts
   return _primitives.JwtMac(lang, _ts.jwt_stub(lang), keyset)
 
 
 def jwt_public_key_sign(lang: str,
                         keyset: bytes) -> _primitives.JwtPublicKeySign:
   """Returns a JwtPublicKeySign primitive, implemented in lang."""
-  global _ts
   return _primitives.JwtPublicKeySign(lang, _ts.jwt_stub(lang), keyset)
 
 
 def jwt_public_key_verify(lang: str,
                           keyset: bytes) -> _primitives.JwtPublicKeyVerify:
   """Returns a JwtPublicKeyVerify primitive, implemented in lang."""
-  global _ts
   return _primitives.JwtPublicKeyVerify(lang, _ts.jwt_stub(lang), keyset)
