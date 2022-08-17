@@ -20,13 +20,13 @@ import com.google.crypto.tink.Aead;
 import com.google.crypto.tink.BinaryKeysetReader;
 import com.google.crypto.tink.CleartextKeysetHandle;
 import com.google.crypto.tink.KeysetHandle;
-import com.google.crypto.tink.testing.proto.AeadCreationRequest;
-import com.google.crypto.tink.testing.proto.AeadCreationResponse;
 import com.google.crypto.tink.testing.proto.AeadDecryptRequest;
 import com.google.crypto.tink.testing.proto.AeadDecryptResponse;
 import com.google.crypto.tink.testing.proto.AeadEncryptRequest;
 import com.google.crypto.tink.testing.proto.AeadEncryptResponse;
 import com.google.crypto.tink.testing.proto.AeadGrpc.AeadImplBase;
+import com.google.crypto.tink.testing.proto.CreationRequest;
+import com.google.crypto.tink.testing.proto.CreationResponse;
 import com.google.protobuf.ByteString;
 import io.grpc.stub.StreamObserver;
 import java.io.IOException;
@@ -38,19 +38,18 @@ public final class AeadServiceImpl extends AeadImplBase {
   public AeadServiceImpl() throws GeneralSecurityException {}
 
   @Override
-  public void createAead(
-      AeadCreationRequest request, StreamObserver<AeadCreationResponse> responseObserver) {
+  public void create(CreationRequest request, StreamObserver<CreationResponse> responseObserver) {
     try {
       KeysetHandle keysetHandle =
           CleartextKeysetHandle.read(
               BinaryKeysetReader.withBytes(request.getKeyset().toByteArray()));
       keysetHandle.getPrimitive(Aead.class);
     } catch (GeneralSecurityException | IOException e) {
-      responseObserver.onNext(AeadCreationResponse.newBuilder().setErr(e.toString()).build());
+      responseObserver.onNext(CreationResponse.newBuilder().setErr(e.toString()).build());
       responseObserver.onCompleted();
       return;
     }
-    responseObserver.onNext(AeadCreationResponse.getDefaultInstance());
+    responseObserver.onNext(CreationResponse.getDefaultInstance());
     responseObserver.onCompleted();
   }
 

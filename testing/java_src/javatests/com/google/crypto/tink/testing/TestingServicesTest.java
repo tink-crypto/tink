@@ -31,8 +31,6 @@ import com.google.crypto.tink.mac.HmacKeyManager;
 import com.google.crypto.tink.prf.HmacPrfKeyManager;
 import com.google.crypto.tink.proto.Keyset;
 import com.google.crypto.tink.streamingaead.AesGcmHkdfStreamingKeyManager;
-import com.google.crypto.tink.testing.proto.AeadCreationRequest;
-import com.google.crypto.tink.testing.proto.AeadCreationResponse;
 import com.google.crypto.tink.testing.proto.AeadDecryptRequest;
 import com.google.crypto.tink.testing.proto.AeadDecryptResponse;
 import com.google.crypto.tink.testing.proto.AeadEncryptRequest;
@@ -41,8 +39,8 @@ import com.google.crypto.tink.testing.proto.AeadGrpc;
 import com.google.crypto.tink.testing.proto.BytesValue;
 import com.google.crypto.tink.testing.proto.ComputeMacRequest;
 import com.google.crypto.tink.testing.proto.ComputeMacResponse;
-import com.google.crypto.tink.testing.proto.DeterministicAeadCreationRequest;
-import com.google.crypto.tink.testing.proto.DeterministicAeadCreationResponse;
+import com.google.crypto.tink.testing.proto.CreationRequest;
+import com.google.crypto.tink.testing.proto.CreationResponse;
 import com.google.crypto.tink.testing.proto.DeterministicAeadDecryptRequest;
 import com.google.crypto.tink.testing.proto.DeterministicAeadDecryptResponse;
 import com.google.crypto.tink.testing.proto.DeterministicAeadEncryptRequest;
@@ -351,17 +349,17 @@ public final class TestingServicesTest {
     byte[] template = KeyTemplateProtoConverter.toByteArray(KeyTemplates.get("AES128_GCM"));
     KeysetGenerateResponse keysetResponse = generateKeyset(keysetStub, template);
     assertThat(keysetResponse.getErr()).isEmpty();
-    AeadCreationResponse response =
-        aeadStub.createAead(
-            AeadCreationRequest.newBuilder().setKeyset(keysetResponse.getKeyset()).build());
+    CreationResponse response =
+        aeadStub.create(
+            CreationRequest.newBuilder().setKeyset(keysetResponse.getKeyset()).build());
     assertThat(response.getErr()).isEmpty();
   }
 
   @Test
   public void aeadCreateKeyset_fails() throws Exception {
-    AeadCreationResponse response =
-        aeadStub.createAead(
-            AeadCreationRequest.newBuilder()
+    CreationResponse response =
+        aeadStub.create(
+            CreationRequest.newBuilder()
                 .setKeyset(ByteString.copyFrom(new byte[] {(byte) 0x80}))
                 .build());
     assertThat(response.getErr()).isNotEmpty();
@@ -436,19 +434,17 @@ public final class TestingServicesTest {
     byte[] template = KeyTemplateProtoConverter.toByteArray(AesSivKeyManager.aes256SivTemplate());
     KeysetGenerateResponse keysetResponse = generateKeyset(keysetStub, template);
     assertThat(keysetResponse.getErr()).isEmpty();
-    DeterministicAeadCreationResponse response =
-        daeadStub.createDeterministicAead(
-            DeterministicAeadCreationRequest.newBuilder()
-                .setKeyset(keysetResponse.getKeyset())
-                .build());
+    CreationResponse response =
+        daeadStub.create(
+            CreationRequest.newBuilder().setKeyset(keysetResponse.getKeyset()).build());
     assertThat(response.getErr()).isEmpty();
   }
 
   @Test
   public void deterministicAeadCreateKeyset_fails() throws Exception {
-    DeterministicAeadCreationResponse response =
-        daeadStub.createDeterministicAead(
-            DeterministicAeadCreationRequest.newBuilder()
+    CreationResponse response =
+        daeadStub.create(
+            CreationRequest.newBuilder()
                 .setKeyset(ByteString.copyFrom(new byte[] {(byte) 0x80}))
                 .build());
     assertThat(response.getErr()).isNotEmpty();

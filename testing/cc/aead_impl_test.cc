@@ -43,8 +43,8 @@ using ::tink_testing_api::AeadDecryptResponse;
 
 using crypto::tink::KeysetHandle;
 using google::crypto::tink::KeyTemplate;
-using tink_testing_api::AeadCreationRequest;
-using tink_testing_api::AeadCreationResponse;
+using tink_testing_api::CreationRequest;
+using tink_testing_api::CreationResponse;
 
 std::string ValidKeyset() {
   const KeyTemplate& key_template = AeadKeyTemplates::Aes128Eax();
@@ -69,21 +69,21 @@ class AeadImplTest : public ::testing::Test {
 TEST_F(AeadImplTest, CreateAeadSuccess) {
   tink_testing_api::AeadImpl aead;
   std::string keyset = ValidKeyset();
-  AeadCreationRequest request;
+  CreationRequest request;
   request.set_keyset(keyset);
-  AeadCreationResponse response;
+  CreationResponse response;
 
-  EXPECT_TRUE(aead.CreateAead(nullptr, &request, &response).ok());
+  EXPECT_TRUE(aead.Create(nullptr, &request, &response).ok());
   EXPECT_THAT(response.err(), IsEmpty());
 }
 
 TEST_F(AeadImplTest, CreateAeadFails) {
   tink_testing_api::AeadImpl aead;
-  AeadCreationRequest request;
+  CreationRequest request;
   request.set_keyset("bad keyset");
-  AeadCreationResponse response;
+  CreationResponse response;
 
-  EXPECT_TRUE(aead.CreateAead(nullptr, &request, &response).ok());
+  EXPECT_TRUE(aead.Create(nullptr, &request, &response).ok());
   EXPECT_THAT(response.err(), Not(IsEmpty()));
 }
 

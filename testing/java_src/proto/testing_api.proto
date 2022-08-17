@@ -161,25 +161,25 @@ message KeysetWriteEncryptedResponse {
   }
 }
 
+message CreationRequest {
+  bytes keyset = 1;  // serialized google.crypto.tink.Keyset.
+}
+
+message CreationResponse {
+  // Empty means no error
+  string err = 1;
+}
+
 // Service for AEAD encryption and decryption
 service Aead {
   // Creates an Aead object without using it.
-  rpc CreateAead(AeadCreationRequest) returns (AeadCreationResponse) {}
+  rpc Create(CreationRequest) returns (CreationResponse) {}
   // Encrypts a plaintext with the provided keyset. The client must call
   // "CreateAead" first to see if creation succeeds before calling this.
   rpc Encrypt(AeadEncryptRequest) returns (AeadEncryptResponse) {}
   // Decrypts a ciphertext with the provided keyset. The client must call
   // "CreateAead" first to see if creation succeeds before calling this.
   rpc Decrypt(AeadDecryptRequest) returns (AeadDecryptResponse) {}
-}
-
-message AeadCreationRequest {
-  bytes keyset = 1;  // serialized google.crypto.tink.Keyset.
-}
-
-message AeadCreationResponse {
-  // Empty means no error
-  string err = 1;
 }
 
 message AeadEncryptRequest {
@@ -211,8 +211,7 @@ message AeadDecryptResponse {
 // Service for Deterministic AEAD encryption and decryption
 service DeterministicAead {
   // Creates a Deterministic AEAD object without using it.
-  rpc CreateDeterministicAead(DeterministicAeadCreationRequest)
-      returns (DeterministicAeadCreationResponse) {}
+  rpc Create(CreationRequest) returns (CreationResponse) {}
   // Encrypts a plaintext with the provided keyset. The client must call
   // "CreateDeterministicAead" first to see if creation succeeds before calling
   // this.
@@ -223,15 +222,6 @@ service DeterministicAead {
   // this.
   rpc DecryptDeterministically(DeterministicAeadDecryptRequest)
       returns (DeterministicAeadDecryptResponse) {}
-}
-
-message DeterministicAeadCreationRequest {
-  bytes keyset = 1;  // serialized google.crypto.tink.Keyset.
-}
-
-message DeterministicAeadCreationResponse {
-  // Empty means no error
-  string err = 1;
 }
 
 message DeterministicAeadEncryptRequest {

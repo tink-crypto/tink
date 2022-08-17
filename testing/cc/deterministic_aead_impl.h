@@ -28,10 +28,9 @@ namespace tink_testing_api {
 // An DeterministicAead Service.
 class DeterministicAeadImpl final : public DeterministicAead::Service {
  public:
-  grpc::Status CreateDeterministicAead(
-      grpc::ServerContext* context,
-      const DeterministicAeadCreationRequest* request,
-      DeterministicAeadCreationResponse* response) override;
+  grpc::Status Create(grpc::ServerContext* context,
+                      const CreationRequest* request,
+                      CreationResponse* response) override;
 
   grpc::Status EncryptDeterministically(
       grpc::ServerContext* context,

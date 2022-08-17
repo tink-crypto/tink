@@ -31,17 +31,17 @@ type AEADService struct {
 	pb.AeadServer
 }
 
-func (s *AEADService) CreateAead(ctx context.Context, req *pb.AeadCreationRequest) (*pb.AeadCreationResponse, error) {
+func (s *AEADService) Create(ctx context.Context, req *pb.CreationRequest) (*pb.CreationResponse, error) {
 	reader := keyset.NewBinaryReader(bytes.NewReader(req.Keyset))
 	handle, err := testkeyset.Read(reader)
 	if err != nil {
-		return &pb.AeadCreationResponse{Err: err.Error()}, nil
+		return &pb.CreationResponse{Err: err.Error()}, nil
 	}
 	_, err = aead.New(handle)
 	if err != nil {
-		return &pb.AeadCreationResponse{Err: err.Error()}, nil
+		return &pb.CreationResponse{Err: err.Error()}, nil
 	}
-	return &pb.AeadCreationResponse{}, nil
+	return &pb.CreationResponse{}, nil
 }
 
 func (s *AEADService) Encrypt(ctx context.Context, req *pb.AeadEncryptRequest) (*pb.AeadEncryptResponse, error) {

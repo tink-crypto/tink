@@ -32,10 +32,9 @@ using ::crypto::tink::CleartextKeysetHandle;
 using ::grpc::ServerContext;
 using ::grpc::Status;
 
-::grpc::Status DeterministicAeadImpl::CreateDeterministicAead(
-    grpc::ServerContext* context,
-    const DeterministicAeadCreationRequest* request,
-    DeterministicAeadCreationResponse* response) {
+::grpc::Status DeterministicAeadImpl::Create(grpc::ServerContext* context,
+                                             const CreationRequest* request,
+                                             CreationResponse* response) {
   auto reader_result = BinaryKeysetReader::New(request->keyset());
   if (!reader_result.ok()) {
     response->set_err(std::string(reader_result.status().message()));

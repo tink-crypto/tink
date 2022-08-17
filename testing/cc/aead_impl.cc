@@ -29,9 +29,9 @@ namespace tink_testing_api {
 using ::crypto::tink::BinaryKeysetReader;
 using ::crypto::tink::CleartextKeysetHandle;
 
-::grpc::Status AeadImpl::CreateAead(grpc::ServerContext* context,
-                                    const AeadCreationRequest* request,
-                                    AeadCreationResponse* response) {
+::grpc::Status AeadImpl::Create(grpc::ServerContext* context,
+                                const CreationRequest* request,
+                                CreationResponse* response) {
   auto reader_result = BinaryKeysetReader::New(request->keyset());
   if (!reader_result.ok()) {
     response->set_err(std::string(reader_result.status().message()));

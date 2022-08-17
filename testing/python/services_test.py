@@ -280,16 +280,16 @@ class ServicesTest(absltest.TestCase):
     gen_response = keyset_servicer.Generate(gen_request, self._ctx)
     self.assertEqual(gen_response.WhichOneof('result'), 'keyset')
 
-    creation_request = testing_api_pb2.AeadCreationRequest(
+    creation_request = testing_api_pb2.CreationRequest(
         keyset=gen_response.keyset)
-    creation_response = aead_servicer.CreateAead(creation_request, self._ctx)
+    creation_response = aead_servicer.Create(creation_request, self._ctx)
     self.assertEmpty(creation_response.err)
 
   def test_create_aead_broken_keyset(self):
     aead_servicer = services.AeadServicer()
 
-    creation_request = testing_api_pb2.AeadCreationRequest(keyset=b'\x80')
-    creation_response = aead_servicer.CreateAead(creation_request, self._ctx)
+    creation_request = testing_api_pb2.CreationRequest(keyset=b'\x80')
+    creation_response = aead_servicer.Create(creation_request, self._ctx)
     self.assertNotEmpty(creation_response.err)
 
   def test_encrypt_decrypt_wrong_keyset(self):
@@ -366,19 +366,17 @@ class ServicesTest(absltest.TestCase):
     gen_response = keyset_servicer.Generate(gen_request, self._ctx)
     self.assertEqual(gen_response.WhichOneof('result'), 'keyset')
 
-    creation_request = testing_api_pb2.DeterministicAeadCreationRequest(
+    creation_request = testing_api_pb2.CreationRequest(
         keyset=gen_response.keyset)
-    creation_response = daead_servicer.CreateDeterministicAead(
+    creation_response = daead_servicer.Create(
         creation_request, self._ctx)
     self.assertEmpty(creation_response.err)
 
   def test_create_deterministic_aead_broken_keyset(self):
     daead_servicer = services.DeterministicAeadServicer()
 
-    creation_request = testing_api_pb2.DeterministicAeadCreationRequest(
-        keyset=b'\x80')
-    creation_response = daead_servicer.CreateDeterministicAead(
-        creation_request, self._ctx)
+    creation_request = testing_api_pb2.CreationRequest(keyset=b'\x80')
+    creation_response = daead_servicer.Create(creation_request, self._ctx)
     self.assertNotEmpty(creation_response.err)
 
   def test_encrypt_decrypt_deterministic_aead_broken_keyset(self):

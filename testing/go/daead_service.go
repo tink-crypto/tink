@@ -31,17 +31,17 @@ type DeterministicAEADService struct {
 	pb.DeterministicAeadServer
 }
 
-func (s *DeterministicAEADService) CreateDeterministicAead(ctx context.Context, req *pb.DeterministicAeadCreationRequest) (*pb.DeterministicAeadCreationResponse, error) {
+func (s *DeterministicAEADService) Create(ctx context.Context, req *pb.CreationRequest) (*pb.CreationResponse, error) {
 	reader := keyset.NewBinaryReader(bytes.NewReader(req.Keyset))
 	handle, err := testkeyset.Read(reader)
 	if err != nil {
-		return &pb.DeterministicAeadCreationResponse{Err: err.Error()}, nil
+		return &pb.CreationResponse{Err: err.Error()}, nil
 	}
 	_, err = daead.New(handle)
 	if err != nil {
-		return &pb.DeterministicAeadCreationResponse{Err: err.Error()}, nil
+		return &pb.CreationResponse{Err: err.Error()}, nil
 	}
-	return &pb.DeterministicAeadCreationResponse{}, nil
+	return &pb.CreationResponse{}, nil
 }
 
 func (s *DeterministicAEADService) EncryptDeterministically(ctx context.Context, req *pb.DeterministicAeadEncryptRequest) (*pb.DeterministicAeadEncryptResponse, error) {

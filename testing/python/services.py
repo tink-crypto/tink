@@ -378,17 +378,16 @@ class KeysetServicer(testing_api_pb2_grpc.KeysetServicer):
 class AeadServicer(testing_api_pb2_grpc.AeadServicer):
   """A service for testing AEAD encryption."""
 
-  def CreateAead(
-      self, request: testing_api_pb2.AeadCreationRequest,
-      context: grpc.ServicerContext) -> testing_api_pb2.AeadCreationResponse:
+  def Create(self, request: testing_api_pb2.CreationRequest,
+             context: grpc.ServicerContext) -> testing_api_pb2.CreationResponse:
     """Creates an AEAD."""
     try:
       keyset_handle = cleartext_keyset_handle.read(
           tink.BinaryKeysetReader(request.keyset))
       keyset_handle.primitive(aead.Aead)
-      return testing_api_pb2.AeadCreationResponse()
+      return testing_api_pb2.CreationResponse()
     except tink.TinkError as e:
-      return testing_api_pb2.AeadCreationResponse(err=str(e))
+      return testing_api_pb2.CreationResponse(err=str(e))
 
   def Encrypt(
       self, request: testing_api_pb2.AeadEncryptRequest,
@@ -458,18 +457,16 @@ class StreamingAeadServicer(testing_api_pb2_grpc.StreamingAeadServicer):
 class DeterministicAeadServicer(testing_api_pb2_grpc.DeterministicAeadServicer):
   """A service for testing Deterministic AEAD encryption."""
 
-  def CreateDeterministicAead(
-      self, request: testing_api_pb2.DeterministicAeadCreationRequest,
-      context: grpc.ServicerContext
-  ) -> testing_api_pb2.DeterministicAeadCreationResponse:
+  def Create(self, request: testing_api_pb2.CreationRequest,
+             context: grpc.ServicerContext) -> testing_api_pb2.CreationResponse:
     """Creates a Deterministic AEAD."""
     try:
       keyset_handle = cleartext_keyset_handle.read(
           tink.BinaryKeysetReader(request.keyset))
       keyset_handle.primitive(daead.DeterministicAead)
-      return testing_api_pb2.DeterministicAeadCreationResponse()
+      return testing_api_pb2.CreationResponse()
     except tink.TinkError as e:
-      return testing_api_pb2.DeterministicAeadCreationResponse(err=str(e))
+      return testing_api_pb2.CreationResponse(err=str(e))
 
   def EncryptDeterministically(
       self, request: testing_api_pb2.DeterministicAeadEncryptRequest,

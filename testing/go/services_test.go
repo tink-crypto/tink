@@ -345,7 +345,7 @@ func TestSuccessfulAeadCreation(t *testing.T) {
 		t.Fatalf("genKeyset failed: %v", err)
 	}
 
-	result, err := aeadService.CreateAead(ctx, &pb.AeadCreationRequest{Keyset: keyset})
+	result, err := aeadService.Create(ctx, &pb.CreationRequest{Keyset: keyset})
 	if err != nil {
 		t.Fatalf("CreateAead with good keyset failed with gRPC error: %v", err)
 	}
@@ -358,7 +358,7 @@ func TestFailingAeadCreation(t *testing.T) {
 	aeadService := &services.AEADService{}
 	ctx := context.Background()
 
-	result, err := aeadService.CreateAead(ctx, &pb.AeadCreationRequest{Keyset: []byte{0x80}})
+	result, err := aeadService.Create(ctx, &pb.CreationRequest{Keyset: []byte{0x80}})
 	if err != nil {
 		t.Fatalf("CreateAead with bad keyset failed with gRPC error: %v", err)
 	}
@@ -462,7 +462,7 @@ func TestSuccessfulDaeadCreation(t *testing.T) {
 		t.Fatalf("genKeyset failed: %v", err)
 	}
 
-	result, err := daeadService.CreateDeterministicAead(ctx, &pb.DeterministicAeadCreationRequest{Keyset: keyset})
+	result, err := daeadService.Create(ctx, &pb.CreationRequest{Keyset: keyset})
 	if err != nil {
 		t.Fatalf("CreateDeterministicAead with good keyset failed with gRPC error: %v", err)
 	}
@@ -475,7 +475,7 @@ func TestFailingDaeadCreation(t *testing.T) {
 	daeadService := &services.DeterministicAEADService{}
 	ctx := context.Background()
 
-	result, err := daeadService.CreateDeterministicAead(ctx, &pb.DeterministicAeadCreationRequest{Keyset: []byte{0x80}})
+	result, err := daeadService.Create(ctx, &pb.CreationRequest{Keyset: []byte{0x80}})
 	if err != nil {
 		t.Fatalf("CreateAead with bad keyset failed with gRPC error: %v", err)
 	}

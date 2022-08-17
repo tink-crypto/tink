@@ -20,8 +20,8 @@ import com.google.crypto.tink.BinaryKeysetReader;
 import com.google.crypto.tink.CleartextKeysetHandle;
 import com.google.crypto.tink.DeterministicAead;
 import com.google.crypto.tink.KeysetHandle;
-import com.google.crypto.tink.testing.proto.DeterministicAeadCreationRequest;
-import com.google.crypto.tink.testing.proto.DeterministicAeadCreationResponse;
+import com.google.crypto.tink.testing.proto.CreationRequest;
+import com.google.crypto.tink.testing.proto.CreationResponse;
 import com.google.crypto.tink.testing.proto.DeterministicAeadDecryptRequest;
 import com.google.crypto.tink.testing.proto.DeterministicAeadDecryptResponse;
 import com.google.crypto.tink.testing.proto.DeterministicAeadEncryptRequest;
@@ -40,21 +40,18 @@ public final class DeterministicAeadServiceImpl extends DeterministicAeadImplBas
   }
 
   @Override
-  public void createDeterministicAead(
-      DeterministicAeadCreationRequest request,
-      StreamObserver<DeterministicAeadCreationResponse> responseObserver) {
+  public void create(CreationRequest request, StreamObserver<CreationResponse> responseObserver) {
     try {
       KeysetHandle keysetHandle =
           CleartextKeysetHandle.read(
               BinaryKeysetReader.withBytes(request.getKeyset().toByteArray()));
       keysetHandle.getPrimitive(DeterministicAead.class);
     } catch (GeneralSecurityException | IOException e) {
-      responseObserver.onNext(
-          DeterministicAeadCreationResponse.newBuilder().setErr(e.toString()).build());
+      responseObserver.onNext(CreationResponse.newBuilder().setErr(e.toString()).build());
       responseObserver.onCompleted();
       return;
     }
-    responseObserver.onNext(DeterministicAeadCreationResponse.getDefaultInstance());
+    responseObserver.onNext(CreationResponse.getDefaultInstance());
     responseObserver.onCompleted();
   }
 
