@@ -16,12 +16,16 @@
 
 #include <grpcpp/grpcpp.h>
 
+#include <iostream>
+#include <memory>
+#include <ostream>
 #include <string>
 
 #include "absl/flags/flag.h"
 #include "absl/flags/parse.h"
 #include "tink/config/tink_config.h"
 #include "tink/hybrid/hpke_config.h"
+#include "tink/integration/gcpkms/gcp_kms_client.h"
 #include "tink/jwt/jwt_mac_config.h"
 #include "tink/jwt/jwt_signature_config.h"
 #include "tink/util/fake_kms_client.h"
@@ -38,6 +42,9 @@
 #include "proto/testing_api.grpc.pb.h"
 
 ABSL_FLAG(int, port, 23456, "the port");
+
+constexpr absl::string_view kGcpCredentialsPath =
+    "testdata/gcp/credential.json";
 
 void RunServer() {
   auto status = crypto::tink::TinkConfig::Register();
@@ -69,6 +76,16 @@ void RunServer() {
   if (!register_fake_kms_client_status.ok()) {
     std::cerr << "FakeKmsClient::RegisterNewClient(\"\", \"\") failed: "
               << register_fake_kms_client_status.message() << std::endl;
+    return;
+  }
+  crypto::tink::util::Status register_gcp_kms_client_status =
+      crypto::tink::integration::gcpkms::GcpKmsClient::RegisterNewClient(
+          /*key_uri=*/"", kGcpCredentialsPath);
+  if (!register_gcp_kms_client_status.ok()) {
+    std::cerr << "GcpKmsClient::RegisterNewClient(\"\", \""
+              << kGcpCredentialsPath
+              << "\") failed: " << register_gcp_kms_client_status.message()
+              << std::endl;
     return;
   }
 

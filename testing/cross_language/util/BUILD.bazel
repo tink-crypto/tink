@@ -80,6 +80,7 @@ py_library(
     name = "testing_servers",
     srcs = ["testing_servers.py"],
     srcs_version = "PY3",
+    data = ["//testdata/gcp:credentials"],
     deps = [
         ":_primitives",
         ":testing_api_python_library",

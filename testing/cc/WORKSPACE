@@ -7,11 +7,22 @@ local_repository(
     path = "../../cc",
 )
 
+local_repository(
+    name = "tink_cc_gcpkms",
+    path = "../../cc/integration/gcpkms",
+)
+
 load("@tink_cc//:tink_cc_deps.bzl", "tink_cc_deps")
 tink_cc_deps()
 
 load("@tink_cc//:tink_cc_deps_init.bzl", "tink_cc_deps_init")
 tink_cc_deps_init()
+
+load("@tink_cc_gcpkms//:tink_cc_gcpkms_deps.bzl", "tink_cc_gcpkms_deps")
+tink_cc_gcpkms_deps()
+
+load("@tink_cc_gcpkms//:tink_cc_gcpkms_deps_init.bzl", "tink_cc_gcpkms_deps_init")
+tink_cc_gcpkms_deps_init()
 
 # Release from 2021-12-12
 http_archive(
