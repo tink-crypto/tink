@@ -17,104 +17,70 @@
 // Implementation of an Deterministic AEAD Service.
 #include "deterministic_aead_impl.h"
 
+#include <memory>
 #include <string>
 #include <utility>
 
 #include "tink/binary_keyset_reader.h"
 #include "tink/cleartext_keyset_handle.h"
 #include "tink/deterministic_aead.h"
+#include "create.h"
 #include "proto/testing_api.grpc.pb.h"
 
 namespace tink_testing_api {
 
-using ::crypto::tink::BinaryKeysetReader;
-using ::crypto::tink::CleartextKeysetHandle;
-using ::grpc::ServerContext;
-using ::grpc::Status;
+using ::crypto::tink::util::StatusOr;
 
-::grpc::Status DeterministicAeadImpl::Create(grpc::ServerContext* context,
-                                             const CreationRequest* request,
-                                             CreationResponse* response) {
-  auto reader_result = BinaryKeysetReader::New(request->keyset());
-  if (!reader_result.ok()) {
-    response->set_err(std::string(reader_result.status().message()));
-    return ::grpc::Status::OK;
-  }
-  auto handle_result =
-      CleartextKeysetHandle::Read(std::move(reader_result.value()));
-  if (!handle_result.ok()) {
-    response->set_err(std::string(handle_result.status().message()));
-    return ::grpc::Status::OK;
-  }
-  auto daead_result =
-      handle_result.value()->GetPrimitive<crypto::tink::DeterministicAead>();
-  if (!daead_result.ok()) {
-    response->set_err(std::string(daead_result.status().message()));
-    return ::grpc::Status::OK;
-  }
-  return ::grpc::Status::OK;
+grpc::Status DeterministicAeadImpl::Create(grpc::ServerContext* context,
+                                           const CreationRequest* request,
+                                           CreationResponse* response) {
+  return CreatePrimitiveForRpc<crypto::tink::DeterministicAead>(request,
+                                                                response);
 }
 
-::grpc::Status DeterministicAeadImpl::EncryptDeterministically(
+grpc::Status DeterministicAeadImpl::EncryptDeterministically(
     grpc::ServerContext* context,
     const DeterministicAeadEncryptRequest* request,
     DeterministicAeadEncryptResponse* response) {
-  auto reader_result = BinaryKeysetReader::New(request->keyset());
-  if (!reader_result.ok()) {
-    return ::grpc::Status(::grpc::StatusCode::FAILED_PRECONDITION,
-                          "Reading Keyset failed");
+  StatusOr<std::unique_ptr<crypto::tink::DeterministicAead>> daead =
+      PrimitiveFromSerializedBinaryProtoKeyset<crypto::tink::DeterministicAead>(
+          request->keyset());
+  if (!daead.ok()) {
+    return grpc::Status(
+        grpc::StatusCode::FAILED_PRECONDITION,
+        absl::StrCat("Creating primitive failed: ", daead.status().message()));
   }
-  auto handle_result =
-      CleartextKeysetHandle::Read(std::move(reader_result.value()));
-  if (!handle_result.ok()) {
-    return ::grpc::Status(::grpc::StatusCode::FAILED_PRECONDITION,
-                          "Creating KeysetHandle failed");
-  }
-  auto daead_result =
-      handle_result.value()->GetPrimitive<crypto::tink::DeterministicAead>();
-  if (!daead_result.ok()) {
-    return ::grpc::Status(::grpc::StatusCode::FAILED_PRECONDITION,
-                          "Creating DeterministicAead failed");
-  }
-  auto encrypt_result = daead_result.value()->EncryptDeterministically(
+
+  StatusOr<std::string> ciphertext = (*daead)->EncryptDeterministically(
       request->plaintext(), request->associated_data());
-  if (!encrypt_result.ok()) {
-    response->set_err(std::string(encrypt_result.status().message()));
-    return ::grpc::Status::OK;
+  if (!ciphertext.ok()) {
+    response->set_err(std::string(ciphertext.status().message()));
+    return grpc::Status::OK;
   }
-  response->set_ciphertext(encrypt_result.value());
-  return ::grpc::Status::OK;
+  response->set_ciphertext(*ciphertext);
+  return grpc::Status::OK;
 }
 
-::grpc::Status DeterministicAeadImpl::DecryptDeterministically(
+grpc::Status DeterministicAeadImpl::DecryptDeterministically(
     grpc::ServerContext* context,
     const DeterministicAeadDecryptRequest* request,
     DeterministicAeadDecryptResponse* response) {
-  auto reader_result = BinaryKeysetReader::New(request->keyset());
-  if (!reader_result.ok()) {
-    return ::grpc::Status(::grpc::StatusCode::FAILED_PRECONDITION,
-                          "Reading Keyset failed");
+  StatusOr<std::unique_ptr<crypto::tink::DeterministicAead>> daead =
+      PrimitiveFromSerializedBinaryProtoKeyset<crypto::tink::DeterministicAead>(
+          request->keyset());
+  if (!daead.ok()) {
+    return grpc::Status(
+        grpc::StatusCode::FAILED_PRECONDITION,
+        absl::StrCat("Creating primitive failed: ", daead.status().message()));
   }
-  auto handle_result =
-      CleartextKeysetHandle::Read(std::move(reader_result.value()));
-  if (!handle_result.ok()) {
-    return ::grpc::Status(::grpc::StatusCode::FAILED_PRECONDITION,
-                          "Creating KeysetHandle failed");
-  }
-  auto daead_result =
-      handle_result.value()->GetPrimitive<crypto::tink::DeterministicAead>();
-  if (!daead_result.ok()) {
-    return ::grpc::Status(::grpc::StatusCode::FAILED_PRECONDITION,
-                          "Creating DeterministicAead failed");
-  }
-  auto decrypt_result = daead_result.value()->DecryptDeterministically(
+  StatusOr<std::string> plaintext = (*daead)->DecryptDeterministically(
       request->ciphertext(), request->associated_data());
-  if (!decrypt_result.ok()) {
-    response->set_err(std::string(decrypt_result.status().message()));
-    return ::grpc::Status::OK;
+  if (!plaintext.ok()) {
+    response->set_err(std::string(plaintext.status().message()));
+    return grpc::Status::OK;
   }
-  response->set_plaintext(decrypt_result.value());
-  return ::grpc::Status::OK;
+  response->set_plaintext(*plaintext);
+  return grpc::Status::OK;
 }
 
 }  // namespace tink_testing_api

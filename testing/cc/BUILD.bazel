@@ -82,6 +82,7 @@ cc_library(
     srcs = ["aead_impl.cc"],
     hdrs = ["aead_impl.h"],
     deps = [
+        ":create",
         ":testing_api_cpp_library",
         "@com_google_absl//absl/base:core_headers",
         "@tink_cc//:binary_keyset_reader",
@@ -107,6 +108,7 @@ cc_library(
     srcs = ["deterministic_aead_impl.cc"],
     hdrs = ["deterministic_aead_impl.h"],
     deps = [
+        ":create",
         ":testing_api_cpp_library",
         "@com_google_absl//absl/base:core_headers",
         "@tink_cc",
@@ -296,6 +298,31 @@ cc_test(
         "@tink_cc//jwt:jwt_mac_config",
         "@tink_cc//jwt:jwt_signature_config",
         "@tink_cc//util:test_matchers",
+    ],
+)
+
+cc_library(
+    name = "create",
+    hdrs = ["create.h"],
+    deps = [
+        ":testing_api_cpp_library",
+        "@tink_cc//:binary_keyset_reader",
+        "@tink_cc//:cleartext_keyset_handle",
+    ],
+)
+
+cc_test(
+    name = "create_test",
+    srcs = ["create_test.cc"],
+    deps = [
+        ":aead_impl",
+        ":create",
+        "@com_google_googletest//:gtest_main",
+        "@tink_cc//:binary_keyset_writer",
+        "@tink_cc//:keyset_handle",
+        "@tink_cc//:mac",
+        "@tink_cc//aead:aead_config",
+        "@tink_cc//aead:aead_key_templates",
     ],
 )
 
