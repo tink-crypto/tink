@@ -29,7 +29,6 @@ import com.google.crypto.tink.testing.proto.CreationRequest;
 import com.google.crypto.tink.testing.proto.CreationResponse;
 import com.google.protobuf.ByteString;
 import io.grpc.stub.StreamObserver;
-import java.io.IOException;
 import java.security.GeneralSecurityException;
 
 /** Implements a gRPC Aead Testing service. */
@@ -39,18 +38,7 @@ public final class AeadServiceImpl extends AeadImplBase {
 
   @Override
   public void create(CreationRequest request, StreamObserver<CreationResponse> responseObserver) {
-    try {
-      KeysetHandle keysetHandle =
-          CleartextKeysetHandle.read(
-              BinaryKeysetReader.withBytes(request.getKeyset().toByteArray()));
-      keysetHandle.getPrimitive(Aead.class);
-    } catch (GeneralSecurityException | IOException e) {
-      responseObserver.onNext(CreationResponse.newBuilder().setErr(e.toString()).build());
-      responseObserver.onCompleted();
-      return;
-    }
-    responseObserver.onNext(CreationResponse.getDefaultInstance());
-    responseObserver.onCompleted();
+    Util.createPrimitiveForRpc(request, responseObserver, Aead.class);
   }
 
   AeadEncryptResponse encryptWithAead(Aead aead, byte[] plaintext, byte[] associatedData) {

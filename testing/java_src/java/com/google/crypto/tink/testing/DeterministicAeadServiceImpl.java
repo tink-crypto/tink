@@ -41,18 +41,7 @@ public final class DeterministicAeadServiceImpl extends DeterministicAeadImplBas
 
   @Override
   public void create(CreationRequest request, StreamObserver<CreationResponse> responseObserver) {
-    try {
-      KeysetHandle keysetHandle =
-          CleartextKeysetHandle.read(
-              BinaryKeysetReader.withBytes(request.getKeyset().toByteArray()));
-      keysetHandle.getPrimitive(DeterministicAead.class);
-    } catch (GeneralSecurityException | IOException e) {
-      responseObserver.onNext(CreationResponse.newBuilder().setErr(e.toString()).build());
-      responseObserver.onCompleted();
-      return;
-    }
-    responseObserver.onNext(CreationResponse.getDefaultInstance());
-    responseObserver.onCompleted();
+    Util.createPrimitiveForRpc(request, responseObserver, DeterministicAead.class);
   }
 
   DeterministicAeadEncryptResponse encryptWithDeterministicAead(
