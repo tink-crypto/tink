@@ -715,6 +715,19 @@ cc_library(
     deps = [":secret_key_access_token"],
 )
 
+cc_library(
+    name = "restricted_data",
+    srcs = ["core/restricted_data.cc"],
+    hdrs = ["restricted_data.h"],
+    include_prefix = "tink",
+    deps = [
+        ":secret_key_access_token",
+        "//subtle:random",
+        "//util:secret_data",
+        "@boringssl//:crypto",
+    ],
+)
+
 # tests
 
 cc_test(
@@ -996,6 +1009,18 @@ cc_test(
     deps = [
         ":key_access",
         ":secret_key_access_testonly",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "core/restricted_data_test",
+    srcs = ["core/restricted_data_test.cc"],
+    deps = [
+        ":insecure_secret_key_access",
+        ":restricted_data",
+        "//subtle:random",
+        "//util:secret_data",
         "@com_google_googletest//:gtest_main",
     ],
 )

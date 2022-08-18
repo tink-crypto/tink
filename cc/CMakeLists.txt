@@ -658,6 +658,12 @@ tink_cc_library(
 )
 
 tink_cc_library(
+  NAME secret_key_access_token
+  SRCS
+    secret_key_access_token.h
+)
+
+tink_cc_library(
   NAME insecure_secret_key_access
   SRCS
     insecure_secret_key_access.h
@@ -666,9 +672,15 @@ tink_cc_library(
 )
 
 tink_cc_library(
-  NAME secret_key_access_token
+  NAME restricted_data
   SRCS
-    secret_key_access_token.h
+    core/restricted_data.cc
+    restricted_data.h
+  DEPS
+    tink::core::secret_key_access_token
+    crypto
+    tink::subtle::random
+    tink::util::secret_data
 )
 
 # tests
@@ -941,4 +953,16 @@ tink_cc_test(
     tink::core::key_access
     tink::core::secret_key_access_testonly
     gmock
+)
+
+tink_cc_test(
+  NAME restricted_data_test
+  SRCS
+    core/restricted_data_test.cc
+  DEPS
+    tink::core::insecure_secret_key_access
+    tink::core::restricted_data
+    gmock
+    tink::subtle::random
+    tink::util::secret_data
 )
