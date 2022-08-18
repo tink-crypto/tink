@@ -58,7 +58,8 @@ final class FakeAwsKms extends AbstractAWSKMS {
   @Override
   public EncryptResult encrypt(EncryptRequest request) {
     if (!aeads.containsKey(request.getKeyId())) {
-      throw new AmazonServiceException("Unknown key ID");
+      throw new AmazonServiceException(
+          "Unknown key ID : " + request.getKeyId() + " is not in " + aeads.keySet());
     }
     try {
       Aead aead = aeads.get(request.getKeyId());

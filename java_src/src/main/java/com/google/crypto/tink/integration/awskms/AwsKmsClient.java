@@ -46,6 +46,7 @@ public final class AwsKmsClient implements KmsClient {
   /** The prefix of all keys stored in AWS KMS. */
   public static final String PREFIX = "aws-kms://";
 
+  @Nullable private AWSKMS awsKms;
   @Nullable private String keyUri;
   @Nullable private AWSCredentialsProvider provider;
 
@@ -136,6 +137,16 @@ public final class AwsKmsClient implements KmsClient {
     return this;
   }
 
+  /**
+   * Specifies the {@link com.amazonaws.services.kms.AWSKMS} object to be used. Only used for
+   * testing.
+   */
+  @CanIgnoreReturnValue
+  KmsClient withAwsKms(@Nullable AWSKMS awsKms) {
+    this.awsKms = awsKms;
+    return this;
+  }
+
   @Override
   public Aead getAead(String uri) throws GeneralSecurityException {
     if (this.keyUri != null && !this.keyUri.equals(uri)) {
@@ -146,12 +157,15 @@ public final class AwsKmsClient implements KmsClient {
 
     try {
       String keyUri = Validators.validateKmsKeyUriAndRemovePrefix(PREFIX, uri);
-      List<String> tokens = Splitter.on(':').splitToList(keyUri);
-      AWSKMS client =
-          AWSKMSClientBuilder.standard()
-              .withCredentials(provider)
-              .withRegion(Regions.fromName(tokens.get(3)))
-              .build();
+      AWSKMS client = awsKms;
+      if (client == null) {
+        List<String> tokens = Splitter.on(':').splitToList(keyUri);
+        client =
+            AWSKMSClientBuilder.standard()
+                .withCredentials(provider)
+                .withRegion(Regions.fromName(tokens.get(3)))
+                .build();
+      }
       return new AwsKmsAead(client, keyUri);
     } catch (AmazonServiceException e) {
       throw new GeneralSecurityException("cannot load credentials from provider", e);
@@ -169,6 +183,16 @@ public final class AwsKmsClient implements KmsClient {
    */
   public static void register(Optional<String> keyUri, Optional<String> credentialPath)
       throws GeneralSecurityException {
+    registerWithAwsKms(keyUri, credentialPath, null);
+  }
+
+  /**
+   * Does the same as {@link #register}, but with an additional {@code awsKms} argument. Only used
+   * for testing.
+   */
+  static void registerWithAwsKms(
+      Optional<String> keyUri, Optional<String> credentialPath, @Nullable AWSKMS awsKms)
+      throws GeneralSecurityException {
     AwsKmsClient client;
     if (keyUri.isPresent()) {
       client = new AwsKmsClient(keyUri.get());
@@ -180,6 +204,7 @@ public final class AwsKmsClient implements KmsClient {
     } else {
       client.withDefaultCredentials();
     }
+    client.withAwsKms(awsKms);
     KmsClients.add(client);
   }
 }
