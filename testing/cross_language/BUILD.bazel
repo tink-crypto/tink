@@ -87,6 +87,20 @@ py_test(
 )
 
 py_test(
+    name = "kms_envelope_aead_test",
+    srcs = ["kms_envelope_aead_test.py"],
+    tags = ["manual"],
+    deps = [
+        "//util:supported_key_types",
+        "//util:testing_servers",
+        requirement("absl-py"),
+        requirement("protobuf"),
+        "@tink_py//tink:tink_python",
+        "@tink_py//tink/aead",
+    ],
+)
+
+py_test(
     name = "aead_consistency_test",
     srcs = ["aead_consistency_test.py"],
     deps = [
