@@ -16,9 +16,7 @@ java_library(
 java_library(
     name = "aws_kms_client",
     srcs = ["AwsKmsClient.java"],
-    plugins = [
-        ":auto_service_plugin",
-    ],
+    plugins = [":auto_service_plugin"],
     deps = [
         ":aws_kms_aead",
         "//src/main/java/com/google/crypto/tink:aead",
