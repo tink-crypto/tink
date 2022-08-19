@@ -88,18 +88,27 @@ print_debug_output() {
 main() {
   process_args "$@"
 
+  local -a build_flags=()
   local -a test_flags=(
     --strategy=TestRunner=standalone
     --test_output=all
   )
+
+  local -r workspace_dir="$(cd ${WORKSPACE_DIR} && pwd)"
+
   if [[ "${PLATFORM}" == 'darwin' ]]; then
     test_flags+=( --jvmopt="-Djava.net.preferIPv6Addresses=true" )
+    if [[ "${workspace_dir}" =~ javascript ]]; then
+      build_flags+=( --experimental_inprocess_symlink_creation )
+      test_flags+=( --experimental_inprocess_symlink_creation )
+    fi
   fi
+  readonly build_flags
   readonly test_flags
   (
-    cd "${WORKSPACE_DIR}"
+    cd "${workspace_dir}"
     if [[ "${MANUAL_ONLY}" == "false" ]]; then
-      time bazel build -- ...
+      time bazel build "${build_flags[@]}" -- ...
       # Exit code 4 means targets build correctly but no tests were found. See
       # https://bazel.build/docs/scripts#exit-codes.
       bazel_test_return=0
@@ -110,7 +119,7 @@ main() {
     fi
     # Run specific manual targets.
     if (( ${#MANUAL_TARGETS[@]} > 0 )); then
-      time bazel build -- "${MANUAL_TARGETS[@]}"
+      time bazel build "${build_flags[@]}" -- "${MANUAL_TARGETS[@]}"
       time bazel test "${test_flags[@]}"  -- "${MANUAL_TARGETS[@]}"
     fi
   )
