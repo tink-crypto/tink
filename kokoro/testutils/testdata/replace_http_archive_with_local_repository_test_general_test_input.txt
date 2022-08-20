@@ -1,41 +1,51 @@
 workspace(name = "some_example_workspace")
 
-local_repository(
+load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
+
+http_archive(
     name = "tink_cc",
-    path = "/tmp/git/tink_cc",
+    urls = ["https://github.com/tink-crypto/tink-cc/archive/master.zip"],
+    strip_prefix = "tink-cc-master",
 )
 
-local_repository(
+http_archive(
     name = "tink_cc_awskms",
-    path = "/tmp/git/tink_cc_awskms",
+    urls = ["https://github.com/tink-crypto/tink-cc-awskms/archive/main.zip"],
+    strip_prefix = "tink-cc-awskms-main",
 )
 
-local_repository(
+http_archive(
     name = "tink_cc_gcpkms",
-    path = "/tmp/git/tink_cc_gcpkms",
+    urls = ["https://github.com/tink-crypto/tink-cc-gcpkms/archive/main.zip"],
+    strip_prefix = "tink-cc-gcpkms-main",
 )
 
-local_repository(
+http_archive(
     name = "tink_java",
-    path = "/tmp/git/tink_java",
+    urls = ["https://github.com/tink-crypto/tink-java/archive/main.zip"],
+    strip_prefix = "tink-java-main",
 )
 
-local_repository(
+http_archive(
     name = "tink_java_awskms",
-    path = "/tmp/git/tink_java_awskms",
+    urls = ["https://github.com/tink-crypto/tink-java-awskms/archive/main.zip"],
+    strip_prefix = "tink-java-awskms-main",
 )
 
-local_repository(
+http_archive(
     name = "tink_java_gcpkms",
-    path = "/tmp/git/tink_java_gcpkms",
+    urls = ["https://github.com/tink-crypto/tink-java-gcpkms/archive/main.zip"],
+    strip_prefix = "tink-java-gcpkms-main",
 )
 
-local_repository(
+http_archive(
     name = "tink_py",
-    path = "/tmp/git/tink_py",
+    urls = ["https://github.com/tink-crypto/tink-py/archive/main.zip"],
+    strip_prefix = "tink-py-main",
 )
 
-local_repository(
+http_archive(
     name = "tink_go",
-    path = "/tmp/git/tink_go",
+    urls = ["https://github.com/tink-crypto/tink-go/archive/main.zip"],
+    strip_prefix = "tink-go-main",
 )

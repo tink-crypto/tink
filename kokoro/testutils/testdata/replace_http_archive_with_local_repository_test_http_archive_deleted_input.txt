@@ -1,13 +1,17 @@
 workspace(name = "some_example_workspace")
 
-local_repository(
+load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
+
+http_archive(
     name = "tink_cc",
-    path = "/tmp/git/tink_cc",
+    urls = ["https://github.com/tink-crypto/tink-cc/archive/master.zip"],
+    strip_prefix = "tink-cc-master",
 )
 
-local_repository(
+http_archive(
     name = "tink_cc_awskms",
-    path = "/tmp/git/tink_cc_awskms",
+    urls = ["https://github.com/tink-crypto/tink-cc-awskms/archive/main.zip"],
+    strip_prefix = "tink-cc-awskms-main",
 )
 
 # This is a comment with http_archive( in it.
