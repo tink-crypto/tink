@@ -28,7 +28,6 @@ import com.google.common.base.Splitter;
 import com.google.crypto.tink.Aead;
 import com.google.crypto.tink.KmsClient;
 import com.google.crypto.tink.KmsClients;
-import com.google.crypto.tink.subtle.Validators;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import java.security.GeneralSecurityException;
 import java.util.List;
@@ -147,6 +146,14 @@ public final class AwsKmsClient implements KmsClient {
     return this;
   }
 
+  private static String removePrefix(String expectedPrefix, String kmsKeyUri) {
+    if (!kmsKeyUri.toLowerCase(Locale.US).startsWith(expectedPrefix)) {
+      throw new IllegalArgumentException(
+          String.format("key URI must start with %s", expectedPrefix));
+    }
+    return kmsKeyUri.substring(expectedPrefix.length());
+  }
+
   @Override
   public Aead getAead(String uri) throws GeneralSecurityException {
     if (this.keyUri != null && !this.keyUri.equals(uri)) {
@@ -156,7 +163,7 @@ public final class AwsKmsClient implements KmsClient {
     }
 
     try {
-      String keyUri = Validators.validateKmsKeyUriAndRemovePrefix(PREFIX, uri);
+      String keyUri = removePrefix(PREFIX, uri);
       AWSKMS client = awsKms;
       if (client == null) {
         List<String> tokens = Splitter.on(':').splitToList(keyUri);
