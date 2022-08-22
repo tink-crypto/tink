@@ -178,15 +178,14 @@ class DeterministicAead(daead.DeterministicAead):
     self.lang = lang
     self._stub = stub
     self._keyset = keyset
-
-  def encrypt_deterministically(self, plaintext: bytes,
-                                associated_data: bytes) -> bytes:
-    """Encrypts."""
-    # TODO(b/241219877): Do the call to Create in init instead.
     creation_response = self._stub.Create(
         testing_api_pb2.CreationRequest(keyset=self._keyset))
     if creation_response.err:
       raise tink.TinkError(creation_response.err)
+
+  def encrypt_deterministically(self, plaintext: bytes,
+                                associated_data: bytes) -> bytes:
+    """Encrypts."""
     enc_request = testing_api_pb2.DeterministicAeadEncryptRequest(
         keyset=self._keyset,
         plaintext=plaintext,
@@ -199,11 +198,6 @@ class DeterministicAead(daead.DeterministicAead):
   def decrypt_deterministically(self, ciphertext: bytes,
                                 associated_data: bytes) -> bytes:
     """Decrypts."""
-    # TODO(b/241219877): Do the call to Create in init instead.
-    creation_response = self._stub.Create(
-        testing_api_pb2.CreationRequest(keyset=self._keyset))
-    if creation_response.err:
-      raise tink.TinkError(creation_response.err)
     dec_request = testing_api_pb2.DeterministicAeadDecryptRequest(
         keyset=self._keyset,
         ciphertext=ciphertext,

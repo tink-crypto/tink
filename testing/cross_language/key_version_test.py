@@ -137,9 +137,8 @@ class KeyVersionTest(parameterized.TestCase):
     p = testing_servers.deterministic_aead(lang, keyset)
     _ = p.encrypt_deterministically(b'foo', b'bar')
     for keyset1 in gen_inc_versions(keyset):
-      daead_primitive = testing_servers.deterministic_aead(lang, keyset1)
       with self.assertRaises(tink.TinkError):
-        _ = daead_primitive.encrypt_deterministically(b'foo', b'bar')
+        _ = testing_servers.deterministic_aead(lang, keyset1)
 
   @parameterized.parameters(test_cases(supported_key_types.MAC_KEY_TYPES))
   def test_inc_version_mac(self, key_template_name, lang):

@@ -71,14 +71,8 @@ class KeysetValidationTest(parameterized.TestCase):
     """Unsets the primary key and tries to use a DAEAD primitive."""
     template = supported_key_types.KEY_TEMPLATE[key_template_name]
     keyset = testing_servers.new_keyset(lang, template)
-    p = testing_servers.deterministic_aead(lang, keyset)
-    ciphertext = p.encrypt_deterministically(b'foo', b'bar')
-    daead_without_primary = testing_servers.deterministic_aead(
-        lang, unset_primary(keyset))
     with self.assertRaises(tink.TinkError):
-      _ = daead_without_primary.encrypt_deterministically(b'foo', b'bar')
-    with self.assertRaises(tink.TinkError):
-      _ = daead_without_primary.decrypt_deterministically(ciphertext, b'bar')
+      _ = testing_servers.deterministic_aead(lang, unset_primary(keyset))
 
   @parameterized.parameters(test_cases(supported_key_types.MAC_KEY_TYPES))
   def test_mac_without_primary(self, key_template_name, lang):
