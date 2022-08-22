@@ -26,10 +26,10 @@ import com.google.crypto.tink.KmsClient;
 import com.google.crypto.tink.aead.AesCtrHmacAeadKeyManager;
 import com.google.crypto.tink.proto.Keyset;
 import com.google.crypto.tink.subtle.Base64;
-import com.google.crypto.tink.subtle.Validators;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
+import java.util.Locale;
 
 /** An implementation of a fake {@link KmsClient}. */
 public final class FakeKmsClient implements KmsClient {
@@ -72,6 +72,14 @@ public final class FakeKmsClient implements KmsClient {
     return this;
   }
 
+  private static String removePrefix(String expectedPrefix, String kmsKeyUri) {
+    if (!kmsKeyUri.toLowerCase(Locale.US).startsWith(expectedPrefix)) {
+      throw new IllegalArgumentException(
+          String.format("key URI must start with %s", expectedPrefix));
+    }
+    return kmsKeyUri.substring(expectedPrefix.length());
+  }
+
   @Override
   public Aead getAead(String uri) throws GeneralSecurityException {
     if (this.keyUri != null && !this.keyUri.equals(uri)) {
@@ -79,7 +87,7 @@ public final class FakeKmsClient implements KmsClient {
           String.format(
               "this client is bound to %s, cannot load keys bound to %s", this.keyUri, uri));
     }
-    String encodedKey = Validators.validateKmsKeyUriAndRemovePrefix(PREFIX, uri);
+    String encodedKey = removePrefix(PREFIX, uri);
     byte[] bytes = Base64.urlSafeDecode(encodedKey);
     try {
       KeysetHandle keysetHandle = CleartextKeysetHandle.read(BinaryKeysetReader.withBytes(bytes));

@@ -172,7 +172,6 @@ java_library(
         "//src/main/java/com/google/crypto/tink:registry_cluster",
         "//src/main/java/com/google/crypto/tink/aead:aes_ctr_hmac_aead_key_manager",
         "//src/main/java/com/google/crypto/tink/subtle:base64",
-        "//src/main/java/com/google/crypto/tink/subtle:validators",
     ],
 )
 
@@ -208,7 +207,6 @@ android_library(
         "//src/main/java/com/google/crypto/tink:registry_cluster-android",
         "//src/main/java/com/google/crypto/tink/aead:aes_ctr_hmac_aead_key_manager-android",
         "//src/main/java/com/google/crypto/tink/subtle:base64-android",
-        "//src/main/java/com/google/crypto/tink/subtle:validators-android",
     ],
 )
 
