@@ -45,7 +45,7 @@ def _templates() -> Dict[str, Tuple[tink_pb2.KeyTemplate, str]]:
 
 
 _KMS_KEY_TEMPLATES = _templates()
-_SUPPORTED_LANGUAGES_FOR_KMS_ENVELOPE_AEAD = ('cc',)
+_SUPPORTED_LANGUAGES_FOR_KMS_ENVELOPE_AEAD = ('cc', 'java')
 
 
 def setUpModule():

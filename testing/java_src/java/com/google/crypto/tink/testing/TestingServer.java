@@ -16,12 +16,11 @@
 
 package com.google.crypto.tink.testing;
 
-
-
 import com.google.crypto.tink.KmsClients;
 import com.google.crypto.tink.aead.AeadConfig;
 import com.google.crypto.tink.daead.DeterministicAeadConfig;
 import com.google.crypto.tink.hybrid.HybridConfig;
+import com.google.crypto.tink.integration.gcpkms.GcpKmsClient;
 import com.google.crypto.tink.jwt.JwtMacConfig;
 import com.google.crypto.tink.jwt.JwtSignatureConfig;
 import com.google.crypto.tink.mac.MacConfig;
@@ -32,12 +31,14 @@ import io.grpc.ServerBuilder;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.security.Security;
+import java.util.Optional;
 import org.conscrypt.Conscrypt;
 
-/**
- * Starts a server with Tink testing services.
- */
+/** Starts a server with Tink testing services. */
 public final class TestingServer {
+
+  private static final String CREDENTIAL_FILE_PATH =
+      "testdata/gcp/credential.json";
 
   private TestingServer() {
     // no instances
@@ -62,6 +63,7 @@ public final class TestingServer {
     PrfConfig.register();
     SignatureConfig.register();
     StreamingAeadConfig.register();
+    GcpKmsClient.register(Optional.empty(), Optional.of(CREDENTIAL_FILE_PATH));
 
     System.out.println("Start server on port " + port);
     KmsClients.add(new FakeKmsClient());

@@ -89,6 +89,7 @@ java_binary(
     runtime_deps = [
         "@io_grpc_grpc_java//netty",
     ],
+    data = ["//testdata/gcp:credentials"],
     deps = [
         ":testing_services",
         "@io_grpc_grpc_java//api",
@@ -99,6 +100,7 @@ java_binary(
         "@tink_java//src/main/java/com/google/crypto/tink/hybrid:hybrid_config",
         "@tink_java//src/main/java/com/google/crypto/tink/jwt:jwt_mac_config",
         "@tink_java//src/main/java/com/google/crypto/tink/jwt:jwt_signature_config",
+        "@tink_java//src/main/java/com/google/crypto/tink/integration/gcpkms:gcp_kms_client",
         "@tink_java//src/main/java/com/google/crypto/tink/mac:mac_config",
         "@tink_java//src/main/java/com/google/crypto/tink/prf:prf_config",
         "@tink_java//src/main/java/com/google/crypto/tink/signature:signature_config",
