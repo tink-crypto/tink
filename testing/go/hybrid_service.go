@@ -31,6 +31,32 @@ type HybridService struct {
 	pb.HybridServer
 }
 
+func (s *HybridService) CreateHybridEncrypt(ctx context.Context, req *pb.CreationRequest) (*pb.CreationResponse, error) {
+	reader := keyset.NewBinaryReader(bytes.NewReader(req.Keyset))
+	handle, err := testkeyset.Read(reader)
+	if err != nil {
+		return &pb.CreationResponse{Err: err.Error()}, nil
+	}
+	_, err = hybrid.NewHybridEncrypt(handle)
+	if err != nil {
+		return &pb.CreationResponse{Err: err.Error()}, nil
+	}
+	return &pb.CreationResponse{}, nil
+}
+
+func (s *HybridService) CreateHybridDecrypt(ctx context.Context, req *pb.CreationRequest) (*pb.CreationResponse, error) {
+	reader := keyset.NewBinaryReader(bytes.NewReader(req.Keyset))
+	handle, err := testkeyset.Read(reader)
+	if err != nil {
+		return &pb.CreationResponse{Err: err.Error()}, nil
+	}
+	_, err = hybrid.NewHybridDecrypt(handle)
+	if err != nil {
+		return &pb.CreationResponse{Err: err.Error()}, nil
+	}
+	return &pb.CreationResponse{}, nil
+}
+
 func (s *HybridService) Encrypt(ctx context.Context, req *pb.HybridEncryptRequest) (*pb.HybridEncryptResponse, error) {
 	reader := keyset.NewBinaryReader(bytes.NewReader(req.PublicKeyset))
 	handle, err := testkeyset.Read(reader)

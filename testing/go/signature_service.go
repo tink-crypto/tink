@@ -31,6 +31,32 @@ type SignatureService struct {
 	pb.SignatureServer
 }
 
+func (s *SignatureService) CreatePublicKeySign(ctx context.Context, req *pb.CreationRequest) (*pb.CreationResponse, error) {
+	reader := keyset.NewBinaryReader(bytes.NewReader(req.Keyset))
+	handle, err := testkeyset.Read(reader)
+	if err != nil {
+		return &pb.CreationResponse{Err: err.Error()}, nil
+	}
+	_, err = signature.NewSigner(handle)
+	if err != nil {
+		return &pb.CreationResponse{Err: err.Error()}, nil
+	}
+	return &pb.CreationResponse{}, nil
+}
+
+func (s *SignatureService) CreatePublicKeyVerify(ctx context.Context, req *pb.CreationRequest) (*pb.CreationResponse, error) {
+	reader := keyset.NewBinaryReader(bytes.NewReader(req.Keyset))
+	handle, err := testkeyset.Read(reader)
+	if err != nil {
+		return &pb.CreationResponse{Err: err.Error()}, nil
+	}
+	_, err = signature.NewVerifier(handle)
+	if err != nil {
+		return &pb.CreationResponse{Err: err.Error()}, nil
+	}
+	return &pb.CreationResponse{}, nil
+}
+
 func (s *SignatureService) Sign(ctx context.Context, req *pb.SignatureSignRequest) (*pb.SignatureSignResponse, error) {
 	reader := keyset.NewBinaryReader(bytes.NewReader(req.PrivateKeyset))
 	handle, err := testkeyset.Read(reader)

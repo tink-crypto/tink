@@ -31,6 +31,19 @@ type MacService struct {
 	pb.MacServer
 }
 
+func (s *MacService) Create(ctx context.Context, req *pb.CreationRequest) (*pb.CreationResponse, error) {
+	reader := keyset.NewBinaryReader(bytes.NewReader(req.Keyset))
+	handle, err := testkeyset.Read(reader)
+	if err != nil {
+		return &pb.CreationResponse{Err: err.Error()}, nil
+	}
+	_, err = mac.New(handle)
+	if err != nil {
+		return &pb.CreationResponse{Err: err.Error()}, nil
+	}
+	return &pb.CreationResponse{}, nil
+}
+
 func (s *MacService) ComputeMac(ctx context.Context, req *pb.ComputeMacRequest) (*pb.ComputeMacResponse, error) {
 	reader := keyset.NewBinaryReader(bytes.NewReader(req.Keyset))
 	handle, err := testkeyset.Read(reader)

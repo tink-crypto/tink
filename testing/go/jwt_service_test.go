@@ -31,6 +31,7 @@ import (
 	"google.golang.org/protobuf/testing/protocmp"
 	"github.com/google/tink/go/aead"
 	"github.com/google/tink/go/jwt"
+	"github.com/google/tink/go/signature"
 	"github.com/google/tink/testing/go/services"
 	pb "github.com/google/tink/testing/go/proto/testing_api_go_grpc"
 )
@@ -128,6 +129,55 @@ func TestJWTComputeInvalidJWT(t *testing.T) {
 				t.Fatalf("JwtSignResponse: error = nil, want error")
 			}
 		})
+	}
+}
+
+func TestSuccessfulJwtMacCreation(t *testing.T) {
+	keysetService := &services.KeysetService{}
+	jwtService := &services.JWTService{}
+	ctx := context.Background()
+
+	template, err := proto.Marshal(jwt.HS256Template())
+	if err != nil {
+		t.Fatalf("proto.Marshal(jwt.HS256Template()) failed: %v, want nil", err)
+	}
+
+	keyset, err := genKeyset(ctx, keysetService, template)
+	if err != nil {
+		t.Fatalf("genKeyset failed: %v", err)
+	}
+
+	result, err := jwtService.CreateJwtMac(ctx, &pb.CreationRequest{Keyset: keyset})
+	if err != nil {
+		t.Fatalf("CreateJwtMac with good keyset failed with gRPC error: %v, want nil", err)
+	}
+	if result.GetErr() != "" {
+		t.Fatalf("CreateJwtMac with good keyset failed with result.GetErr() = %q, want empty string", result.GetErr())
+	}
+}
+
+func TestFailingJwtMacCreation(t *testing.T) {
+	keysetService := &services.KeysetService{}
+	jwtService := &services.JWTService{}
+	ctx := context.Background()
+
+	// We use signature keys -- then we cannot create a JwtMac
+	template, err := proto.Marshal(aead.AES128GCMKeyTemplate())
+	if err != nil {
+		t.Fatalf("proto.Marshal(signature.ECDSAP256KeyTemplate()) failed: %v", err)
+	}
+
+	badKeyset, err := genKeyset(ctx, keysetService, template)
+	if err != nil {
+		t.Fatalf("genKeyset failed: %v", err)
+	}
+
+	result, err := jwtService.CreateJwtMac(ctx, &pb.CreationRequest{Keyset: badKeyset})
+	if err != nil {
+		t.Fatalf("CreateJwtMac with bad keyset failed with gRPC error: %v", err)
+	}
+	if result.GetErr() == "" {
+		t.Fatalf("result.GetErr() of bad keyset after CreateJwtMac is empty, want not empty")
 	}
 }
 
@@ -327,6 +377,112 @@ func TestJWTVerifyMACFailures(t *testing.T) {
 				t.Fatalf("JwtVerifyResponse_Err: nil, want error")
 			}
 		})
+	}
+}
+
+func TestSuccessfulJwtSignVerifyCreation(t *testing.T) {
+	keysetService := &services.KeysetService{}
+	jwtService := &services.JWTService{}
+	ctx := context.Background()
+
+	template, err := proto.Marshal(jwt.ES256Template())
+	if err != nil {
+		t.Fatalf("proto.Marshal(hybrid.ES256Template()) failed: %v", err)
+	}
+
+	privateKeyset, err := genKeyset(ctx, keysetService, template)
+	if err != nil {
+		t.Fatalf("genKeyset failed: %v", err)
+	}
+
+	result, err := jwtService.CreateJwtPublicKeySign(ctx, &pb.CreationRequest{Keyset: privateKeyset})
+	if err != nil {
+		t.Fatalf("CreateJwtPublicKeySign with good keyset failed with gRPC error: %v, want nil", err)
+	}
+	if result.GetErr() != "" {
+		t.Fatalf("CreateJwtPublicKeySign with good keyset failed with result.GetErr() = %q, want empty string", result.GetErr())
+	}
+}
+
+func TestSuccessfulJwtVerifyCreation(t *testing.T) {
+	keysetService := &services.KeysetService{}
+	jwtService := &services.JWTService{}
+	ctx := context.Background()
+
+	template, err := proto.Marshal(jwt.ES256Template())
+	if err != nil {
+		t.Fatalf("proto.Marshal(hybrid.ES256Template()) failed: %v", err)
+	}
+
+	privateKeyset, err := genKeyset(ctx, keysetService, template)
+	if err != nil {
+		t.Fatalf("genKeyset failed: %v", err)
+	}
+	publicKeyset, err := pubKeyset(ctx, keysetService, privateKeyset)
+	if err != nil {
+		t.Fatalf("pubKeyset failed: %v", err)
+	}
+
+	result, err := jwtService.CreateJwtPublicKeyVerify(ctx, &pb.CreationRequest{Keyset: publicKeyset})
+	if err != nil {
+		t.Fatalf("CreateJwtPublicKeyVerify with good keyset failed with gRPC error: %v", err)
+	}
+	if result.GetErr() != "" {
+		t.Fatalf("CreateJwtPublicKeyVerify with good keyset failed with result.GetErr() = %q, want empty string", result.GetErr())
+	}
+}
+
+func TestFailingJwtSignCreation(t *testing.T) {
+	keysetService := &services.KeysetService{}
+	jwtService := &services.JWTService{}
+	ctx := context.Background()
+
+	// We use signature keys -- then we cannot create a hybrid encrypt
+	template, err := proto.Marshal(signature.ECDSAP256KeyTemplate())
+	if err != nil {
+		t.Fatalf("proto.Marshal(signature.ECDSAP256KeyTemplate()) failed: %v", err)
+	}
+
+	privateKeyset, err := genKeyset(ctx, keysetService, template)
+	if err != nil {
+		t.Fatalf("genKeyset failed: %v", err)
+	}
+
+	result, err := jwtService.CreateJwtPublicKeySign(ctx, &pb.CreationRequest{Keyset: privateKeyset})
+	if err != nil {
+		t.Fatalf("CreateJwtPublicKeySign with bad keyset failed with gRPC error: %v", err)
+	}
+	if result.GetErr() == "" {
+		t.Fatalf("CreateJwtPublicKeySign with bad keyset succeeded")
+	}
+}
+
+func TestFailingJwtVerifyCreation(t *testing.T) {
+	keysetService := &services.KeysetService{}
+	jwtService := &services.JWTService{}
+	ctx := context.Background()
+
+	// We use signature keys -- then we cannot create a hybrid encrypt
+	template, err := proto.Marshal(signature.ECDSAP256KeyTemplate())
+	if err != nil {
+		t.Fatalf("proto.Marshal(signature.ECDSAP256KeyTemplate()) failed: %v", err)
+	}
+
+	privateKeyset, err := genKeyset(ctx, keysetService, template)
+	if err != nil {
+		t.Fatalf("genKeyset failed: %v", err)
+	}
+	publicKeyset, err := pubKeyset(ctx, keysetService, privateKeyset)
+	if err != nil {
+		t.Fatalf("pubKeyset failed: %v", err)
+	}
+
+	result, err := jwtService.CreateJwtPublicKeyVerify(ctx, &pb.CreationRequest{Keyset: publicKeyset})
+	if err != nil {
+		t.Fatalf("CreateJwtPublicKeyVerify with good keyset failed with gRPC error: %v", err)
+	}
+	if result.GetErr() == "" {
+		t.Fatalf("CreateJwtPublicKeyVerify with bad keyset succeeded")
 	}
 }
 

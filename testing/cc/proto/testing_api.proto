@@ -252,6 +252,9 @@ message DeterministicAeadDecryptResponse {
 
 // Service for Streaming AEAD encryption and decryption
 service StreamingAead {
+  // Creates a StreamingAead object without using it.
+  rpc Create(CreationRequest) returns (CreationResponse) {}
+
   // Encrypts a plaintext with the provided keyset
   rpc Encrypt(StreamingAeadEncryptRequest)
       returns (StreamingAeadEncryptResponse) {}
@@ -288,6 +291,8 @@ message StreamingAeadDecryptResponse {
 
 // Service to compute and verify MACs
 service Mac {
+  // Creates a Mac object without using it.
+  rpc Create(CreationRequest) returns (CreationResponse) {}
   // Computes a MAC for given data
   rpc ComputeMac(ComputeMacRequest) returns (ComputeMacResponse) {}
   // Verifies the validity of the MAC value, no error means success
@@ -318,6 +323,11 @@ message VerifyMacResponse {
 
 // Service to hybrid encrypt and decrypt
 service Hybrid {
+  // Creates a HybridEncrypt object without using it.
+  rpc CreateHybridEncrypt(CreationRequest) returns (CreationResponse) {}
+  // Creates a HybridDecrypt object without using it.
+  rpc CreateHybridDecrypt(CreationRequest) returns (CreationResponse) {}
+
   // Encrypts plaintext binding context_info to the resulting ciphertext
   rpc Encrypt(HybridEncryptRequest) returns (HybridEncryptResponse) {}
   // Decrypts ciphertext verifying the integrity of context_info
@@ -352,6 +362,11 @@ message HybridDecryptResponse {
 
 // Service to sign and verify signatures.
 service Signature {
+  // Creates a PublicKeySign object without using it.
+  rpc CreatePublicKeySign(CreationRequest) returns (CreationResponse) {}
+  // Creates a PublicKeyVerify object without using it.
+  rpc CreatePublicKeyVerify(CreationRequest) returns (CreationResponse) {}
+
   // Computes the signature for data
   rpc Sign(SignatureSignRequest) returns (SignatureSignResponse) {}
   // Verifies that signature is a digital signature for data
@@ -382,6 +397,9 @@ message SignatureVerifyResponse {
 
 // Service for PrfSet computation
 service PrfSet {
+  // Creates a PrfSet object without using it.
+  rpc Create(CreationRequest) returns (CreationResponse) {}
+
   // Returns the key ids and the primary key id in the keyset.
   rpc KeyIds(PrfSetKeyIdsRequest) returns (PrfSetKeyIdsResponse) {}
   // Computes the output of the PRF with the given key_id in the PrfSet.
@@ -419,6 +437,13 @@ message PrfSetComputeResponse {
 
 // Service for JSON Web Tokens (JWT)
 service Jwt {
+  // Creates a JwtMac object without using it.
+  rpc CreateJwtMac(CreationRequest) returns (CreationResponse) {}
+  // Creates a JwtPublicKeySign object without using it.
+  rpc CreateJwtPublicKeySign(CreationRequest) returns (CreationResponse) {}
+  // Creates a JwtPublicKeyVerify object without using it.
+  rpc CreateJwtPublicKeyVerify(CreationRequest) returns (CreationResponse) {}
+
   // Computes a signed compact JWT token.
   rpc ComputeMacAndEncode(JwtSignRequest) returns (JwtSignResponse) {}
   // Verifies the validity of the signed compact JWT token

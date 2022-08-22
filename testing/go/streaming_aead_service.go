@@ -37,6 +37,19 @@ type StreamingAEADService struct {
 	pb.StreamingAeadServer
 }
 
+func (s *StreamingAEADService) Create(ctx context.Context, req *pb.CreationRequest) (*pb.CreationResponse, error) {
+	reader := keyset.NewBinaryReader(bytes.NewReader(req.Keyset))
+	handle, err := testkeyset.Read(reader)
+	if err != nil {
+		return &pb.CreationResponse{Err: err.Error()}, nil
+	}
+	_, err = streamingaead.New(handle)
+	if err != nil {
+		return &pb.CreationResponse{Err: err.Error()}, nil
+	}
+	return &pb.CreationResponse{}, nil
+}
+
 func (s *StreamingAEADService) Encrypt(ctx context.Context, req *pb.StreamingAeadEncryptRequest) (*pb.StreamingAeadEncryptResponse, error) {
 	reader := keyset.NewBinaryReader(bytes.NewReader(req.Keyset))
 	handle, err := testkeyset.Read(reader)

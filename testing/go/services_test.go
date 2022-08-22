@@ -564,6 +564,54 @@ func TestGenerateEncryptDecryptDeterministically(t *testing.T) {
 	}
 }
 
+func TestSuccessfulStreamingAEADCreation(t *testing.T) {
+	keysetService := &services.KeysetService{}
+	streamingAEADService := &services.StreamingAEADService{}
+	ctx := context.Background()
+
+	template, err := proto.Marshal(streamingaead.AES128GCMHKDF4KBKeyTemplate())
+	if err != nil {
+		t.Fatalf("proto.Marshal(streamingaead.AES128GCMHKDF4KBKeyTemplate()) failed: %v", err)
+	}
+
+	privateKeyset, err := genKeyset(ctx, keysetService, template)
+	if err != nil {
+		t.Fatalf("genKeyset failed: %v", err)
+	}
+
+	result, err := streamingAEADService.Create(ctx, &pb.CreationRequest{Keyset: privateKeyset})
+	if err != nil {
+		t.Fatalf("streamingAEADService.Create with good keyset failed with gRPC error: %v, want nil", err)
+	}
+	if result.GetErr() != "" {
+		t.Fatalf("streamingAEADService.Create with good keyset failed with result.GetErr() = %q, want empty string", result.GetErr())
+	}
+}
+
+func TestFailingStreamingAEADCreation(t *testing.T) {
+	keysetService := &services.KeysetService{}
+	streamingAEADService := &services.StreamingAEADService{}
+	ctx := context.Background()
+
+	template, err := proto.Marshal(aead.AES128GCMKeyTemplate())
+	if err != nil {
+		t.Fatalf("proto.Marshal(aead.AES128GCMKeyTemplate()) failed: %v", err)
+	}
+
+	privateKeyset, err := genKeyset(ctx, keysetService, template)
+	if err != nil {
+		t.Fatalf("genKeyset failed: %v", err)
+	}
+
+	result, err := streamingAEADService.Create(ctx, &pb.CreationRequest{Keyset: privateKeyset})
+	if err != nil {
+		t.Fatalf("streamingAEADService.Create with bad keyset failed with gRPC error: %v", err)
+	}
+	if result.GetErr() == "" {
+		t.Fatalf("streamingAEADService.Create with bad keyset succeeded")
+	}
+}
+
 func streamingAEADEncrypt(ctx context.Context, streamingAEADService *services.StreamingAEADService, keyset []byte, plaintext []byte, associatedData []byte) ([]byte, error) {
 	encRequest := &pb.StreamingAeadEncryptRequest{
 		Keyset:         keyset,
@@ -641,6 +689,55 @@ func TestGenerateEncryptDecryptStreaming(t *testing.T) {
 	}
 	if _, err := streamingAEADDecrypt(ctx, streamingAEADService, keyset, []byte("badCiphertext"), associatedData); err == nil {
 		t.Fatalf("streamingAEADDecrypt of bad ciphertext succeeded unexpectedly.")
+	}
+}
+
+func TestSuccessfulMacCreation(t *testing.T) {
+	keysetService := &services.KeysetService{}
+	macService := &services.MacService{}
+	ctx := context.Background()
+
+	template, err := proto.Marshal(mac.HMACSHA256Tag128KeyTemplate())
+	if err != nil {
+		t.Fatalf("proto.Marshal(mac.HMACSHA256Tag128KeyTemplate()) failed: %v", err)
+	}
+
+	privateKeyset, err := genKeyset(ctx, keysetService, template)
+	if err != nil {
+		t.Fatalf("genKeyset failed: %v", err)
+	}
+
+	result, err := macService.Create(ctx, &pb.CreationRequest{Keyset: privateKeyset})
+	if err != nil {
+		t.Fatalf("macService.Create with good keyset failed with gRPC error: %v, want nil", err)
+	}
+	if result.GetErr() != "" {
+		t.Fatalf("macService.Create with good keyset failed with result.GetErr() = %q, want empty string", result.GetErr())
+	}
+}
+
+func TestFailingMacCreation(t *testing.T) {
+	keysetService := &services.KeysetService{}
+	macService := &services.MacService{}
+	ctx := context.Background()
+
+	// We use signature keys -- then we cannot create a hybrid encrypt
+	template, err := proto.Marshal(aead.AES128GCMKeyTemplate())
+	if err != nil {
+		t.Fatalf("proto.Marshal(aead.AES128GCMKeyTemplate()) failed: %v", err)
+	}
+
+	privateKeyset, err := genKeyset(ctx, keysetService, template)
+	if err != nil {
+		t.Fatalf("genKeyset failed: %v", err)
+	}
+
+	result, err := macService.Create(ctx, &pb.CreationRequest{Keyset: privateKeyset})
+	if err != nil {
+		t.Fatalf("macService.Create with bad keyset failed with gRPC error: %v", err)
+	}
+	if result.GetErr() == "" {
+		t.Fatalf("macService.Create with bad keyset succeeded")
 	}
 }
 
@@ -751,6 +848,112 @@ func hybridDecrypt(ctx context.Context, hybridService *services.HybridService, p
 	}
 }
 
+func TestSuccessfulHybridDecryptCreation(t *testing.T) {
+	keysetService := &services.KeysetService{}
+	hybridService := &services.HybridService{}
+	ctx := context.Background()
+
+	template, err := proto.Marshal(hybrid.ECIESHKDFAES128GCMKeyTemplate())
+	if err != nil {
+		t.Fatalf("proto.Marshal(hybrid.ECIESHKDFAES128GCMKeyTemplate()) failed: %v", err)
+	}
+
+	privateKeyset, err := genKeyset(ctx, keysetService, template)
+	if err != nil {
+		t.Fatalf("genKeyset failed: %v", err)
+	}
+
+	result, err := hybridService.CreateHybridDecrypt(ctx, &pb.CreationRequest{Keyset: privateKeyset})
+	if err != nil {
+		t.Fatalf("CreateHybridDecrypt with good keyset failed with gRPC error: %v, want nil", err)
+	}
+	if result.GetErr() != "" {
+		t.Fatalf("CreateHybridDecrypt with good keyset failed with result.GetErr() = %q, want empty string", result.GetErr())
+	}
+}
+
+func TestSuccessfulHybridEncryptCreation(t *testing.T) {
+	keysetService := &services.KeysetService{}
+	hybridService := &services.HybridService{}
+	ctx := context.Background()
+
+	template, err := proto.Marshal(hybrid.ECIESHKDFAES128GCMKeyTemplate())
+	if err != nil {
+		t.Fatalf("proto.Marshal(hybrid.ECIESHKDFAES128GCMKeyTemplate()) failed: %v", err)
+	}
+
+	privateKeyset, err := genKeyset(ctx, keysetService, template)
+	if err != nil {
+		t.Fatalf("genKeyset failed: %v", err)
+	}
+	publicKeyset, err := pubKeyset(ctx, keysetService, privateKeyset)
+	if err != nil {
+		t.Fatalf("pubKeyset failed: %v", err)
+	}
+
+	result, err := hybridService.CreateHybridEncrypt(ctx, &pb.CreationRequest{Keyset: publicKeyset})
+	if err != nil {
+		t.Fatalf("CreateHybridEncrypt with good keyset failed with gRPC error: %v, want nil", err)
+	}
+	if result.GetErr() != "" {
+		t.Fatalf("CreateHybridEncrypt with good keyset failed with result.GetErr() = %q, want empty string", result.GetErr())
+	}
+}
+
+func TestFailingHybridDecryptCreation(t *testing.T) {
+	keysetService := &services.KeysetService{}
+	hybridService := &services.HybridService{}
+	ctx := context.Background()
+
+	// We use signature keys -- then we cannot create a hybrid encrypt
+	template, err := proto.Marshal(signature.ECDSAP256KeyTemplate())
+	if err != nil {
+		t.Fatalf("proto.Marshal(signature.ECDSAP256KeyTemplate()) failed: %v", err)
+	}
+
+	privateKeyset, err := genKeyset(ctx, keysetService, template)
+	if err != nil {
+		t.Fatalf("genKeyset failed: %v", err)
+	}
+
+	result, err := hybridService.CreateHybridDecrypt(ctx, &pb.CreationRequest{Keyset: privateKeyset})
+	if err != nil {
+		t.Fatalf("CreateHybridDecrypt with bad keyset failed with gRPC error: %v", err)
+	}
+	if result.GetErr() == "" {
+		t.Fatalf("CreateHybridDecrypt with bad keyset succeeded")
+	}
+}
+
+func TestFailingHybridEncryptCreation(t *testing.T) {
+	keysetService := &services.KeysetService{}
+	hybridService := &services.HybridService{}
+	ctx := context.Background()
+
+	// We use signature keys -- then we cannot create a hybrid encrypt
+	template, err := proto.Marshal(signature.ECDSAP256KeyTemplate())
+	if err != nil {
+		t.Fatalf("proto.Marshal(signature.ECDSAP256KeyTemplate()) failed: %v", err)
+	}
+
+	privateKeyset, err := genKeyset(ctx, keysetService, template)
+	if err != nil {
+		t.Fatalf("genKeyset failed: %v", err)
+	}
+	publicKeyset, err := pubKeyset(ctx, keysetService, privateKeyset)
+	if err != nil {
+		t.Fatalf("pubKeyset failed: %v", err)
+	}
+
+	result, err := hybridService.CreateHybridEncrypt(ctx, &pb.CreationRequest{Keyset: publicKeyset})
+	if err != nil {
+		t.Fatalf("CreateHybridEncrypt with good keyset failed with gRPC error: %v", err)
+	}
+	if result.GetErr() == "" {
+		t.Fatalf("CreateHybridEncrypt with bad keyset succeeded")
+	}
+}
+
 func TestHybridGenerateEncryptDecrypt(t *testing.T) {
 	keysetService := &services.KeysetService{}
 	hybridService := &services.HybridService{}
@@ -795,6 +998,110 @@ func TestHybridGenerateEncryptDecrypt(t *testing.T) {
 	}
 	if _, err := hybridDecrypt(ctx, hybridService, privateKeyset, []byte("badCiphertext"), associatedData); err == nil {
 		t.Fatalf("hybridDecrypt of bad ciphertext succeeded unexpectedly.")
+	}
+}
+
+func TestSuccessfulPublicKeySignCreation(t *testing.T) {
+	keysetService := &services.KeysetService{}
+	signatureService := &services.SignatureService{}
+	ctx := context.Background()
+
+	template, err := proto.Marshal(signature.ECDSAP256KeyTemplate())
+	if err != nil {
+		t.Fatalf("proto.Marshal(signature.ECDSAP256KeyTemplate()) failed: %v", err)
+	}
+
+	privateKeyset, err := genKeyset(ctx, keysetService, template)
+	if err != nil {
+		t.Fatalf("genKeyset failed: %v", err)
+	}
+
+	result, err := signatureService.CreatePublicKeySign(ctx, &pb.CreationRequest{Keyset: privateKeyset})
+	if err != nil {
+		t.Fatalf("CreateHybridDecrypt with good keyset failed with gRPC error: %v", err)
+	}
+	if result.GetErr() != "" {
+		t.Fatalf("CreateHybridDecrypt good keyset failed with result.GetErr() = %q, want empty string", result.GetErr())
+	}
+}
+
+func TestSuccessfulPublicKeyVerifyCreation(t *testing.T) {
+	keysetService := &services.KeysetService{}
+	signatureService := &services.SignatureService{}
+	ctx := context.Background()
+
+	template, err := proto.Marshal(signature.ECDSAP256KeyTemplate())
+	if err != nil {
+		t.Fatalf("proto.Marshal(signature.ECDSAP256KeyTemplate()) failed: %v", err)
+	}
+
+	privateKeyset, err := genKeyset(ctx, keysetService, template)
+	if err != nil {
+		t.Fatalf("genKeyset failed: %v", err)
+	}
+	publicKeyset, err := pubKeyset(ctx, keysetService, privateKeyset)
+	if err != nil {
+		t.Fatalf("pubKeyset failed: %v", err)
+	}
+
+	result, err := signatureService.CreatePublicKeyVerify(ctx, &pb.CreationRequest{Keyset: publicKeyset})
+	if err != nil {
+		t.Fatalf("CreateHybridEncrypt with good keyset failed with gRPC error: %v", err)
+	}
+	if result.GetErr() != "" {
+		t.Fatalf("CreateHybridEncrypt good keyset failed with result.GetErr() = %q, want empty string", result.GetErr())
+	}
+}
+
+func TestFailingPublicKeySignCreation(t *testing.T) {
+	keysetService := &services.KeysetService{}
+	signatureService := &services.SignatureService{}
+	ctx := context.Background()
+
+	template, err := proto.Marshal(hybrid.ECIESHKDFAES128GCMKeyTemplate())
+	if err != nil {
+		t.Fatalf("proto.Marshal(hybrid.ECIESHKDFAES128GCMKeyTemplate()) failed: %v", err)
+	}
+
+	privateKeyset, err := genKeyset(ctx, keysetService, template)
+	if err != nil {
+		t.Fatalf("genKeyset failed: %v", err)
+	}
+
+	result, err := signatureService.CreatePublicKeySign(ctx, &pb.CreationRequest{Keyset: privateKeyset})
+	if err != nil {
+		t.Fatalf("CreatePublicKeySign with bad keyset failed with gRPC error: %v", err)
+	}
+	if result.GetErr() == "" {
+		t.Fatalf("CreatePublicKeySign with bad keyset succeeded")
+	}
+}
+
+func TestFailingPublicKeyVerifyCreation(t *testing.T) {
+	keysetService := &services.KeysetService{}
+	signatureService := &services.SignatureService{}
+	ctx := context.Background()
+
+	template, err := proto.Marshal(hybrid.ECIESHKDFAES128GCMKeyTemplate())
+	if err != nil {
+		t.Fatalf("proto.Marshal(hybrid.ECIESHKDFAES128GCMKeyTemplate()) failed: %v", err)
+	}
+
+	privateKeyset, err := genKeyset(ctx, keysetService, template)
+	if err != nil {
+		t.Fatalf("genKeyset failed: %v", err)
+	}
+	publicKeyset, err := pubKeyset(ctx, keysetService, privateKeyset)
+	if err != nil {
+		t.Fatalf("pubKeyset failed: %v", err)
+	}
+
+	result, err := signatureService.CreatePublicKeyVerify(ctx, &pb.CreationRequest{Keyset: publicKeyset})
+	if err != nil {
+		t.Fatalf("CreatePublicKeyVerify with good keyset failed with gRPC error: %v", err)
+	}
+	if result.GetErr() == "" {
+		t.Fatalf("CreatePublicKeyVerify with bad keyset succeeded")
 	}
 }
 
@@ -869,6 +1176,55 @@ func TestSignatureSignVerify(t *testing.T) {
 	}
 	if err := signatureVerify(ctx, signatureService, []byte("badPublicKeyset"), signatureValue, data); err == nil {
 		t.Fatalf("signatureVerify of bad public keyset succeeded unexpectedly.")
+	}
+}
+
+func TestSuccessfulPrfSetCreation(t *testing.T) {
+	keysetService := &services.KeysetService{}
+	prfSetService := &services.PrfSetService{}
+	ctx := context.Background()
+
+	template, err := proto.Marshal(prf.HMACSHA256PRFKeyTemplate())
+	if err != nil {
+		t.Fatalf("proto.Marshal(prf.HMACSHA256PRFKeyTemplate()) failed: %v", err)
+	}
+
+	privateKeyset, err := genKeyset(ctx, keysetService, template)
+	if err != nil {
+		t.Fatalf("genKeyset failed: %v", err)
+	}
+
+	result, err := prfSetService.Create(ctx, &pb.CreationRequest{Keyset: privateKeyset})
+	if err != nil {
+		t.Fatalf("macService.Create with good keyset failed with gRPC error: %v", err)
+	}
+	if result.GetErr() != "" {
+		t.Fatalf("macService.Create with good keyset failed with result.GetErr() = %q, want empty string", result.GetErr())
+	}
+}
+
+func TestFailingPrfSetCreation(t *testing.T) {
+	keysetService := &services.KeysetService{}
+	prfSetService := &services.MacService{}
+	ctx := context.Background()
+
+	// We use signature keys -- then we cannot create a hybrid encrypt
+	template, err := proto.Marshal(aead.AES128GCMKeyTemplate())
+	if err != nil {
+		t.Fatalf("proto.Marshal(aead.AES128GCMKeyTemplate()) failed: %v", err)
+	}
+
+	privateKeyset, err := genKeyset(ctx, keysetService, template)
+	if err != nil {
+		t.Fatalf("genKeyset failed: %v", err)
+	}
+
+	result, err := prfSetService.Create(ctx, &pb.CreationRequest{Keyset: privateKeyset})
+	if err != nil {
+		t.Fatalf("prfSetService.Create with bad keyset failed with gRPC error: %v", err)
+	}
+	if result.GetErr() == "" {
+		t.Fatalf("prfSetService.Create with bad keyset succeeded")
 	}
 }
 

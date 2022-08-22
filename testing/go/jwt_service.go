@@ -36,6 +36,45 @@ type JWTService struct {
 	pb.JwtServer
 }
 
+func (s *JWTService) CreateJwtMac(ctx context.Context, req *pb.CreationRequest) (*pb.CreationResponse, error) {
+	reader := keyset.NewBinaryReader(bytes.NewReader(req.Keyset))
+	handle, err := testkeyset.Read(reader)
+	if err != nil {
+		return &pb.CreationResponse{Err: err.Error()}, nil
+	}
+	_, err = jwt.NewMAC(handle)
+	if err != nil {
+		return &pb.CreationResponse{Err: err.Error()}, nil
+	}
+	return &pb.CreationResponse{}, nil
+}
+
+func (s *JWTService) CreateJwtPublicKeySign(ctx context.Context, req *pb.CreationRequest) (*pb.CreationResponse, error) {
+	reader := keyset.NewBinaryReader(bytes.NewReader(req.Keyset))
+	handle, err := testkeyset.Read(reader)
+	if err != nil {
+		return &pb.CreationResponse{Err: err.Error()}, nil
+	}
+	_, err = jwt.NewSigner(handle)
+	if err != nil {
+		return &pb.CreationResponse{Err: err.Error()}, nil
+	}
+	return &pb.CreationResponse{}, nil
+}
+
+func (s *JWTService) CreateJwtPublicKeyVerify(ctx context.Context, req *pb.CreationRequest) (*pb.CreationResponse, error) {
+	reader := keyset.NewBinaryReader(bytes.NewReader(req.Keyset))
+	handle, err := testkeyset.Read(reader)
+	if err != nil {
+		return &pb.CreationResponse{Err: err.Error()}, nil
+	}
+	_, err = jwt.NewVerifier(handle)
+	if err != nil {
+		return &pb.CreationResponse{Err: err.Error()}, nil
+	}
+	return &pb.CreationResponse{}, nil
+}
+
 func refString(s *wpb.StringValue) *string {
 	if s == nil {
 		return nil
