@@ -13,11 +13,12 @@
 # limitations under the License.
 """Cross-language tests for the KMS Envelope AEAD primitive with AWS and GCP."""
 
-from typing import Dict, Iterable, Tuple
+from typing import Dict, Iterable
 
 from absl.testing import absltest
 from absl.testing import parameterized
 
+import tink
 from tink import aead
 
 from tink.proto import tink_pb2
@@ -28,7 +29,7 @@ _GCP_KEY_URI = ('gcp-kms://projects/tink-test-infrastructure/locations/global/'
                 'keyRings/unit-and-integration-testing/cryptoKeys/aead-key')
 
 
-def _templates() -> Dict[str, Tuple[tink_pb2.KeyTemplate, str]]:
+def _templates() -> Dict[str, tuple[tink_pb2.KeyTemplate, str]]:
   """For each KMS envelope AEAD template name maps the key template and DEK AEAD key type."""
   kms_key_templates = {}
   for aead_key_type in supported_key_types.AEAD_KEY_TYPES:
@@ -70,6 +71,18 @@ def _test_cases() -> Iterable[str]:
         yield (key_template_name, encrypt_lang, decrypt_lang)
 
 
+def _get_plaintext_and_aad(key_template_name: str,
+                           lang: str) -> tuple[bytes, bytes]:
+  """Creates test plaintext and associated data from a key template and lang."""
+  plaintext = (
+      b'This is some plaintext message to be encrypted using key_template '
+      b'%s using %s for encryption.' %
+      (key_template_name.encode('utf8'), lang.encode('utf8')))
+  associated_data = (b'Some associated data for %s using %s for encryption.' %
+                     (key_template_name.encode('utf8'), lang.encode('utf8')))
+  return (plaintext, associated_data)
+
+
 class KmsEnvelopeAeadTest(parameterized.TestCase):
 
   @parameterized.parameters(_test_cases())
@@ -78,14 +91,8 @@ class KmsEnvelopeAeadTest(parameterized.TestCase):
     # Use the encryption language to generate the keyset proto.
     keyset = testing_servers.new_keyset(encrypt_lang, key_template)
     encrypt_primitive = testing_servers.aead(encrypt_lang, keyset)
-    plaintext = (
-        b'This is some plaintext message to be encrypted using key_template '
-        b'%s using %s for encryption.' %
-        (key_template_name.encode('utf8'),
-         encrypt_primitive.lang.encode('utf8')))
-    associated_data = (b'Some associated data for %s using %s for encryption.' %
-                       (key_template_name.encode('utf8'),
-                        encrypt_primitive.lang.encode('utf8')))
+    plaintext, associated_data = _get_plaintext_and_aad(key_template_name,
+                                                        encrypt_primitive.lang)
     ciphertext = encrypt_primitive.encrypt(plaintext, associated_data)
 
     # Decrypt.
@@ -93,8 +100,22 @@ class KmsEnvelopeAeadTest(parameterized.TestCase):
     output = decrypt_primitive.decrypt(ciphertext, associated_data)
     self.assertEqual(output, plaintext)
 
-# TODO(b/242686943): Add tests. For example, check that decryption fails with
-# wrong aad, or that two different key ids can't decrypt each other.
+  @parameterized.parameters(_test_cases())
+  def test_decryption_fails_with_wrong_aad(self, key_template_name,
+                                           encrypt_lang, decrypt_lang):
+    key_template, _ = _KMS_KEY_TEMPLATES[key_template_name]
+    # Use the encryption language to generate the keyset proto.
+    keyset = testing_servers.new_keyset(encrypt_lang, key_template)
+    encrypt_primitive = testing_servers.aead(encrypt_lang, keyset)
+    plaintext, associated_data = _get_plaintext_and_aad(key_template_name,
+                                                        encrypt_primitive.lang)
+    ciphertext = encrypt_primitive.encrypt(plaintext, associated_data)
+    decrypt_primitive = testing_servers.aead(decrypt_lang, keyset)
+    with self.assertRaises(tink.TinkError, msg='decryption failed'):
+      decrypt_primitive.decrypt(ciphertext, b'wrong aad')
+
+
+# TODO(b/242686943): That that two different key ids can't decrypt each other.
 
 if __name__ == '__main__':
   absltest.main()
