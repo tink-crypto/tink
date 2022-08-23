@@ -131,6 +131,11 @@ def _server_cmd(lang: str, port: int) -> List[str]:
     return [server_path, '--port', '%d' % port]
 
 
+def _get_file_content(filename: str) -> str:
+  with open(filename, 'r') as f:
+    return f.read()
+
+
 class _TestingServers():
   """TestingServers starts up testing gRPC servers and returns service stubs."""
 
@@ -178,9 +183,10 @@ class _TestingServers():
       except Exception as e:
         logging.info('Timeout while connecting to server %s', lang)
         self._server[lang].kill()
-        out, err = self._server[lang].communicate()
-        raise RuntimeError('Could not start %s server, output=%s, err=%s' %
-                           (lang, out, err)) from e
+        _, _ = self._server[lang].communicate()
+        raise RuntimeError(
+            'Could not start %s server, output=%s' %
+            (lang, _get_file_content(self._output_file[lang].name))) from e
       self._metadata_stub[lang] = testing_api_pb2_grpc.MetadataStub(
           self._channel[lang])
       self._keyset_stub[lang] = testing_api_pb2_grpc.KeysetStub(
