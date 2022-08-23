@@ -16,9 +16,6 @@
 
 package com.google.crypto.tink.testing;
 
-import com.google.crypto.tink.BinaryKeysetReader;
-import com.google.crypto.tink.CleartextKeysetHandle;
-import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.prf.Prf;
 import com.google.crypto.tink.prf.PrfSet;
 import com.google.crypto.tink.testing.proto.PrfSetComputeRequest;
@@ -27,10 +24,7 @@ import com.google.crypto.tink.testing.proto.PrfSetGrpc.PrfSetImplBase;
 import com.google.crypto.tink.testing.proto.PrfSetKeyIdsRequest;
 import com.google.crypto.tink.testing.proto.PrfSetKeyIdsResponse;
 import com.google.protobuf.ByteString;
-import com.google.protobuf.InvalidProtocolBufferException;
-import io.grpc.Status;
 import io.grpc.stub.StreamObserver;
-import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.util.Map;
 
@@ -40,61 +34,61 @@ public final class PrfSetServiceImpl extends PrfSetImplBase {
   public PrfSetServiceImpl() throws GeneralSecurityException {
   }
 
-  /** Returns the key IDs of the keyset. */
-  @Override
-  public void keyIds(
-      PrfSetKeyIdsRequest request, StreamObserver<PrfSetKeyIdsResponse> responseObserver) {
-    PrfSetKeyIdsResponse response;
+  private PrfSetKeyIdsResponse keyIds(
+      PrfSetKeyIdsRequest request) throws GeneralSecurityException {
     try {
-      KeysetHandle keysetHandle =
-          CleartextKeysetHandle.read(
-              BinaryKeysetReader.withBytes(request.getKeyset().toByteArray()));
-      PrfSet prfSet = keysetHandle.getPrimitive(PrfSet.class);
+      PrfSet prfSet = Util.parseBinaryProtoKeyset(request.getKeyset()).getPrimitive(PrfSet.class);
       PrfSetKeyIdsResponse.Output output = PrfSetKeyIdsResponse.Output.newBuilder()
           .setPrimaryKeyId(prfSet.getPrimaryId())
           .addAllKeyId(prfSet.getPrfs().keySet())
           .build();
-      response =
-          PrfSetKeyIdsResponse.newBuilder()
-          .setOutput(output)
-          .build();
-    } catch (GeneralSecurityException | InvalidProtocolBufferException e)  {
-      response = PrfSetKeyIdsResponse.newBuilder().setErr(e.toString()).build();
-    } catch (IOException e) {
-      responseObserver.onError(Status.UNKNOWN.withDescription(e.getMessage()).asException());
-      return;
+      return PrfSetKeyIdsResponse.newBuilder().setOutput(output).build();
+    } catch (GeneralSecurityException e)  {
+      return PrfSetKeyIdsResponse.newBuilder().setErr(e.toString()).build();
     }
-    responseObserver.onNext(response);
-    responseObserver.onCompleted();
+  }
+
+  @Override
+  public void keyIds(
+      PrfSetKeyIdsRequest request,
+      StreamObserver<PrfSetKeyIdsResponse> responseObserver) {
+    try {
+      responseObserver.onNext(keyIds(request));
+      responseObserver.onCompleted();
+    } catch (GeneralSecurityException e) {
+      responseObserver.onError(e);
+    }
   }
 
   /** Computes the output of one PRF. */
-  @Override
-  public void compute(
-      PrfSetComputeRequest request, StreamObserver<PrfSetComputeResponse> responseObserver) {
-    PrfSetComputeResponse response;
+  private PrfSetComputeResponse compute(PrfSetComputeRequest request)
+      throws GeneralSecurityException {
     try {
-      KeysetHandle keysetHandle =
-          CleartextKeysetHandle.read(
-              BinaryKeysetReader.withBytes(request.getKeyset().toByteArray()));
-      PrfSet prfSet = keysetHandle.getPrimitive(PrfSet.class);
+      PrfSet prfSet = Util.parseBinaryProtoKeyset(request.getKeyset()).getPrimitive(PrfSet.class);
       Map<Integer, Prf> prfs = prfSet.getPrfs();
       if (!prfs.containsKey(request.getKeyId())) {
-        response = PrfSetComputeResponse.newBuilder().setErr("Unknown Key ID.").build();
+        return PrfSetComputeResponse.newBuilder().setErr("Unknown Key ID.").build();
       } else {
         byte[] output =
             prfs.get(request.getKeyId())
                 .compute(request.getInputData().toByteArray(), request.getOutputLength());
-        response =
+        return
             PrfSetComputeResponse.newBuilder().setOutput(ByteString.copyFrom(output)).build();
       }
-    } catch (GeneralSecurityException | InvalidProtocolBufferException e) {
-      response = PrfSetComputeResponse.newBuilder().setErr(e.toString()).build();
-    } catch (IOException e) {
-      responseObserver.onError(Status.UNKNOWN.withDescription(e.getMessage()).asException());
-      return;
+    } catch (GeneralSecurityException e) {
+      return PrfSetComputeResponse.newBuilder().setErr(e.toString()).build();
     }
-    responseObserver.onNext(response);
-    responseObserver.onCompleted();
+  }
+
+  @Override
+  public void compute(
+      PrfSetComputeRequest request,
+      StreamObserver<PrfSetComputeResponse> responseObserver) {
+    try {
+      responseObserver.onNext(compute(request));
+      responseObserver.onCompleted();
+    } catch (GeneralSecurityException e) {
+      responseObserver.onError(e);
+    }
   }
 }

@@ -16,9 +16,6 @@
 
 package com.google.crypto.tink.testing;
 
-import com.google.crypto.tink.BinaryKeysetReader;
-import com.google.crypto.tink.CleartextKeysetHandle;
-import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.StreamingAead;
 import com.google.crypto.tink.testing.proto.StreamingAeadDecryptRequest;
 import com.google.crypto.tink.testing.proto.StreamingAeadDecryptResponse;
@@ -26,8 +23,6 @@ import com.google.crypto.tink.testing.proto.StreamingAeadEncryptRequest;
 import com.google.crypto.tink.testing.proto.StreamingAeadEncryptResponse;
 import com.google.crypto.tink.testing.proto.StreamingAeadGrpc.StreamingAeadImplBase;
 import com.google.protobuf.ByteString;
-import com.google.protobuf.InvalidProtocolBufferException;
-import io.grpc.Status;
 import io.grpc.stub.StreamObserver;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -41,16 +36,11 @@ public final class StreamingAeadServiceImpl extends StreamingAeadImplBase {
   public StreamingAeadServiceImpl() throws GeneralSecurityException {
   }
 
-  /** Encrypts a message. */
-  @Override
-  public void encrypt(
-      StreamingAeadEncryptRequest request,
-      StreamObserver<StreamingAeadEncryptResponse> responseObserver) {
-    StreamingAeadEncryptResponse response;
+  private StreamingAeadEncryptResponse encrypt(StreamingAeadEncryptRequest request)
+      throws GeneralSecurityException {
     try {
-      KeysetHandle keysetHandle = CleartextKeysetHandle.read(
-          BinaryKeysetReader.withBytes(request.getKeyset().toByteArray()));
-      StreamingAead streamingAead = keysetHandle.getPrimitive(StreamingAead.class);
+      StreamingAead streamingAead =
+          Util.parseBinaryProtoKeyset(request.getKeyset()).getPrimitive(StreamingAead.class);
 
       ByteArrayOutputStream ciphertextStream = new ByteArrayOutputStream();
       try (OutputStream encryptingStream =
@@ -58,31 +48,34 @@ public final class StreamingAeadServiceImpl extends StreamingAeadImplBase {
               ciphertextStream, request.getAssociatedData().toByteArray())) {
         request.getPlaintext().writeTo(encryptingStream);
       }
-      response =
-          StreamingAeadEncryptResponse.newBuilder()
-              .setCiphertext(ByteString.copyFrom(ciphertextStream.toByteArray()))
-              .build();
+      return StreamingAeadEncryptResponse.newBuilder()
+          .setCiphertext(ByteString.copyFrom(ciphertextStream.toByteArray()))
+          .build();
 
-    } catch (GeneralSecurityException | InvalidProtocolBufferException e)  {
-      response = StreamingAeadEncryptResponse.newBuilder().setErr(e.toString()).build();
+    } catch (GeneralSecurityException e)  {
+      return StreamingAeadEncryptResponse.newBuilder().setErr(e.toString()).build();
     } catch (IOException e) {
-      responseObserver.onError(Status.UNKNOWN.withDescription(e.getMessage()).asException());
-      return;
+      throw new GeneralSecurityException(e);
     }
-    responseObserver.onNext(response);
-    responseObserver.onCompleted();
   }
 
-  /** Decrypts a message. */
   @Override
-  public void decrypt(
-      StreamingAeadDecryptRequest request,
-      StreamObserver<StreamingAeadDecryptResponse> responseObserver) {
-    StreamingAeadDecryptResponse response;
+  public void encrypt(
+      StreamingAeadEncryptRequest request,
+      StreamObserver<StreamingAeadEncryptResponse> responseObserver) {
     try {
-      KeysetHandle keysetHandle = CleartextKeysetHandle.read(
-          BinaryKeysetReader.withBytes(request.getKeyset().toByteArray()));
-      StreamingAead streamingAead = keysetHandle.getPrimitive(StreamingAead.class);
+      responseObserver.onNext(encrypt(request));
+      responseObserver.onCompleted();
+    } catch (GeneralSecurityException e) {
+      responseObserver.onError(e);
+    }
+  }
+
+  private StreamingAeadDecryptResponse decrypt(StreamingAeadDecryptRequest request)
+      throws GeneralSecurityException {
+    try {
+      StreamingAead streamingAead =
+          Util.parseBinaryProtoKeyset(request.getKeyset()).getPrimitive(StreamingAead.class);
 
       InputStream ciphertextStream = request.getCiphertext().newInput();
       InputStream decryptingStream = streamingAead.newDecryptingStream(
@@ -96,14 +89,22 @@ public final class StreamingAeadServiceImpl extends StreamingAeadImplBase {
         plaintextStream.write(bytesRead);
       }
 
-      response = StreamingAeadDecryptResponse.newBuilder().setPlaintext(
+      return StreamingAeadDecryptResponse.newBuilder().setPlaintext(
           ByteString.copyFrom(plaintextStream.toByteArray())).build();
-    } catch (GeneralSecurityException | InvalidProtocolBufferException e) {
-      response = StreamingAeadDecryptResponse.newBuilder().setErr(e.toString()).build();
-    } catch (IOException e) {
-      response = StreamingAeadDecryptResponse.newBuilder().setErr(e.toString()).build();
+    } catch (GeneralSecurityException | IOException e)  {
+      return StreamingAeadDecryptResponse.newBuilder().setErr(e.toString()).build();
     }
-    responseObserver.onNext(response);
-    responseObserver.onCompleted();
+  }
+
+  @Override
+  public void decrypt(
+      StreamingAeadDecryptRequest request,
+      StreamObserver<StreamingAeadDecryptResponse> responseObserver) {
+    try {
+      responseObserver.onNext(decrypt(request));
+      responseObserver.onCompleted();
+    } catch (GeneralSecurityException e) {
+      responseObserver.onError(e);
+    }
   }
 }
