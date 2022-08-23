@@ -47,6 +47,9 @@ _CURRENT_TEST_SCOPE=
 # Current test case.
 _CURRENT_TEST_CASE=
 
+# True if at least one of the test cases terminated with an error.
+_HAS_ERROR="false"
+
 _print_testcase_failed_and_exit() {
   echo "[   FAILED ] ${_CURRENT_TEST_SCOPE}.${_CURRENT_TEST_CASE}"
   exit 1
@@ -73,7 +76,7 @@ _start_test_case() {
 #   _CURRENT_TEST_SCOPE
 #   _CURRENT_TEST_CASE
 #######################################
-_end_test_case() {
+_end_test_case_with_success() {
   test_case="$1"
   echo "[       OK ] ${_CURRENT_TEST_SCOPE}.${_CURRENT_TEST_CASE}"
 }
@@ -119,10 +122,16 @@ _do_run_test() {
   IFS=_ read _CURRENT_TEST_SCOPE _CURRENT_TEST_CASE <<< "${test_function#test_}"
   _start_test_case
   (
+    # Make sure we exit only when assertions fail.
     set +e
     "${test_function}"
   )
-  _end_test_case
+  local -r result=$?
+  if (( $result == 0 )); then
+    _end_test_case_with_success
+  else
+    _HAS_ERROR="true"
+  fi
 }
 
 #######################################
@@ -137,6 +146,10 @@ run_all_tests() {
   for test in $(_get_all_tests); do
     _do_run_test "${test}"
   done
+  # Make sure we return an error code for the failing test
+  if [[ "${_HAS_ERROR}" == "true" ]]; then
+    exit 1
+  fi
 }
 
 ASSERT_CMD_SUCCEEDED() {

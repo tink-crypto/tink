@@ -45,11 +45,17 @@ http_archive_not_deleted_input.txt"}"
 # Load the test library.
 source "${TEST_UTILS}"
 
+_copy_test_file() {
+  local -r file_to_copy="$1"
+  local -r destination="$2"
+  cp "${file_to_copy}" "${destination}"
+  chmod 0666 "${destination}"
+}
+
 # Test that http_archive entries are correctly replaced.
-#
 test_ReplaceHttpArchiveWithLocalRepositoryTest_GeneralTest() {
   ls "${TEST_CASE_TMPDIR}"
-  cp "${GENERAL_TEST_INPUT}" "${TEST_CASE_TMPDIR}/input.txt"
+  _copy_test_file "${GENERAL_TEST_INPUT}" "${TEST_CASE_TMPDIR}/input.txt"
   "${CLI}" -f "${TEST_CASE_TMPDIR}/input.txt" -t "/tmp/git"
   ASSERT_CMD_SUCCEEDED
   ASSERT_FILE_EQUALS "${TEST_CASE_TMPDIR}/input.txt" \
@@ -60,7 +66,8 @@ test_ReplaceHttpArchiveWithLocalRepositoryTest_GeneralTest() {
 # http_archive entry in the WORKSPACE file.
 test_ReplaceHttpArchiveWithLocalRepositoryTest_\
 HttpArchiveIsNotDeletedBecauseOtherHttpArchiveIsPresent() {
-  cp "${HTTP_ARCHIVE_NOT_DELETED_INPUT}" "${TEST_CASE_TMPDIR}/input.txt"
+  _copy_test_file "${HTTP_ARCHIVE_NOT_DELETED_INPUT}" \
+    "${TEST_CASE_TMPDIR}/input.txt"
   "${CLI}" -f "${TEST_CASE_TMPDIR}/input.txt" -t "/tmp/git"
   ASSERT_CMD_SUCCEEDED
   ASSERT_FILE_EQUALS "${TEST_CASE_TMPDIR}/input.txt" \
@@ -71,8 +78,9 @@ HttpArchiveIsNotDeletedBecauseOtherHttpArchiveIsPresent() {
 # http_archive.
 test_ReplaceHttpArchiveWithLocalRepositoryTest_\
 HttpArchiveIsDeletedBecauseOtherHttpArchiveIsComment() {
-  cp "${HTTP_ARCHIVE_DELETED_INPUT}" "${TEST_CASE_TMPDIR}/input.txt"
-  # "${CLI}" -f "${TEST_CASE_TMPDIR}/input.txt" -t "/tmp/git"
+  _copy_test_file "${HTTP_ARCHIVE_DELETED_INPUT}" \
+    "${TEST_CASE_TMPDIR}/input.txt"
+  "${CLI}" -f "${TEST_CASE_TMPDIR}/input.txt" -t "/tmp/git"
   ASSERT_CMD_SUCCEEDED
   ASSERT_FILE_EQUALS "${TEST_CASE_TMPDIR}/input.txt" \
     "${HTTP_ARCHIVE_DELETED_EXPECTED}"
