@@ -18,30 +18,42 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"net"
+	"os"
+	"path/filepath"
 
 	"flag"
 	// context is used to cancel outstanding requests
+	"google.golang.org/api/option"
 	"google.golang.org/grpc"
 	"github.com/google/tink/go/core/registry"
+	"github.com/google/tink/go/integration/gcpkms"
 	"github.com/google/tink/go/testing/fakekms"
 	"github.com/google/tink/testing/go/services"
 	pbgrpc "github.com/google/tink/testing/go/proto/testing_api_go_grpc"
 )
 
 var (
-	port = flag.Int("port", 10000, "The server port")
+	port            = flag.Int("port", 10000, "The server port")
+	gcpCredFilePath = filepath.Join(os.Getenv("TEST_SRCDIR"), "testing_python/testdata/gcp/credential.json")
 )
 
 func main() {
 	flag.Parse()
 	client, err := fakekms.NewClient("fake-kms://")
 	if err != nil {
-		log.Fatalf("Failed to generate new FakeKMSClient: %v", err)
+		log.Fatalf("fakekms.NewClient failed: %v", err)
 	}
 	registry.RegisterKMSClient(client)
+
+	gcpClient, err := gcpkms.NewClientWithOptions(context.Background(), "gcp-kms://", option.WithCredentialsFile(gcpCredFilePath))
+	if err != nil {
+		log.Fatalf("gcpkms.NewClientWithOptions failed: %v", err)
+	}
+	registry.RegisterKMSClient(gcpClient)
 
 	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", *port))
 	if err != nil {

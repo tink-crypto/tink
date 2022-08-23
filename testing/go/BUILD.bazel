@@ -83,11 +83,14 @@ go_binary(
     srcs = [
         "testing_server.go",
     ],
+    data = ["//testdata/gcp:credentials"],
     deps = [
         ":services",
         ":testing_api_go_grpc",
+        "@org_golang_google_api//option",
         "@org_golang_google_grpc//:go_default_library",
         "@tink_go//core/registry:go_default_library",
+        "@tink_go//integration/gcpkms:go_default_library",
         "@tink_go//testing/fakekms:go_default_library",
     ],
 )
