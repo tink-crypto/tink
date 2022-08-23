@@ -496,3 +496,25 @@ java_test(
         "@maven//:junit_junit",
     ],
 )
+
+java_test(
+    name = "BinaryKeysetReaderTest",
+    size = "small",
+    srcs = ["BinaryKeysetReaderTest.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink:aead",
+        "//src/main/java/com/google/crypto/tink:binary_keyset_reader",
+        "//src/main/java/com/google/crypto/tink:binary_keyset_writer",
+        "//src/main/java/com/google/crypto/tink:cleartext_keyset_handle",
+        "//src/main/java/com/google/crypto/tink:key_status",
+        "//src/main/java/com/google/crypto/tink:key_template",
+        "//src/main/java/com/google/crypto/tink:key_templates",
+        "//src/main/java/com/google/crypto/tink:keyset_reader",
+        "//src/main/java/com/google/crypto/tink:mac",
+        "//src/main/java/com/google/crypto/tink:registry_cluster",
+        "//src/main/java/com/google/crypto/tink/aead:aead_config",
+        "//src/main/java/com/google/crypto/tink/mac:mac_config",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
