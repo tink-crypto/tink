@@ -24,6 +24,7 @@
 #include "tink/cleartext_keyset_handle.h"
 #include "tink/hybrid_decrypt.h"
 #include "tink/hybrid_encrypt.h"
+#include "create.h"
 #include "proto/testing_api.grpc.pb.h"
 
 namespace tink_testing_api {
@@ -33,7 +34,18 @@ using ::crypto::tink::CleartextKeysetHandle;
 using ::grpc::ServerContext;
 using ::grpc::Status;
 
-// Encrypts a message
+::grpc::Status HybridImpl::CreateHybridEncrypt(grpc::ServerContext* context,
+                                               const CreationRequest* request,
+                                               CreationResponse* response) {
+  return CreatePrimitiveForRpc<crypto::tink::HybridEncrypt>(request, response);
+}
+
+::grpc::Status HybridImpl::CreateHybridDecrypt(grpc::ServerContext* context,
+                                               const CreationRequest* request,
+                                               CreationResponse* response) {
+  return CreatePrimitiveForRpc<crypto::tink::HybridDecrypt>(request, response);
+}
+
 ::grpc::Status HybridImpl::Encrypt(grpc::ServerContext* context,
                                    const HybridEncryptRequest* request,
                                    HybridEncryptResponse* response) {

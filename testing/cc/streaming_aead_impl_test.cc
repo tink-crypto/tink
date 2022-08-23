@@ -16,6 +16,8 @@
 
 #include "streaming_aead_impl.h"
 
+#include <ostream>
+#include <sstream>
 #include <string>
 
 #include "gmock/gmock.h"
@@ -36,10 +38,12 @@ using ::crypto::tink::CleartextKeysetHandle;
 
 using ::testing::Eq;
 using ::testing::IsEmpty;
+using ::tink_testing_api::CreationRequest;
+using ::tink_testing_api::CreationResponse;
 using ::tink_testing_api::StreamingAeadDecryptRequest;
+using ::tink_testing_api::StreamingAeadDecryptResponse;
 using ::tink_testing_api::StreamingAeadEncryptRequest;
 using ::tink_testing_api::StreamingAeadEncryptResponse;
-using ::tink_testing_api::StreamingAeadDecryptResponse;
 
 using crypto::tink::KeysetHandle;
 using google::crypto::tink::KeyTemplate;
@@ -66,6 +70,28 @@ class StreamingAeadImplTest : public ::testing::Test {
     ASSERT_TRUE(StreamingAeadConfig::Register().ok());
   }
 };
+
+TEST_F(StreamingAeadImplTest, CreateSuccess) {
+  tink_testing_api::StreamingAeadImpl streaming_aead;
+  std::string keyset = ValidKeyset();
+  CreationRequest request;
+  request.set_keyset(keyset);
+  CreationResponse response;
+
+  EXPECT_TRUE(streaming_aead.Create(nullptr, &request, &response).ok());
+  EXPECT_THAT(response.err(), IsEmpty());
+}
+
+TEST_F(StreamingAeadImplTest, CreateFails) {
+  tink_testing_api::StreamingAeadImpl streaming_aead;
+  CreationRequest request;
+  request.set_keyset("bad keyset");
+  CreationResponse response;
+
+  EXPECT_TRUE(streaming_aead.Create(nullptr, &request, &response).ok());
+  EXPECT_THAT(response.err(), Not(IsEmpty()));
+}
+
 
 TEST_F(StreamingAeadImplTest, EncryptDecryptSuccess) {
   tink_testing_api::StreamingAeadImpl streaming_aead;

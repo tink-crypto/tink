@@ -28,6 +28,10 @@ namespace tink_testing_api {
 // A PrfSet Service.
 class PrfSetImpl final : public PrfSet::Service {
  public:
+  grpc::Status Create(grpc::ServerContext* context,
+                      const CreationRequest* request,
+                      CreationResponse* response) override;
+
   grpc::Status KeyIds(grpc::ServerContext* context,
                       const PrfSetKeyIdsRequest* request,
                       PrfSetKeyIdsResponse* response) override;

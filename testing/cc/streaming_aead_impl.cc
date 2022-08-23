@@ -28,6 +28,7 @@
 #include "tink/util/istream_input_stream.h"
 #include "tink/util/ostream_output_stream.h"
 #include "tink/util/status.h"
+#include "create.h"
 #include "proto/testing_api.grpc.pb.h"
 
 namespace tink_testing_api {
@@ -41,6 +42,12 @@ using ::crypto::tink::util::IstreamInputStream;
 using ::crypto::tink::util::OstreamOutputStream;
 using ::grpc::ServerContext;
 using ::grpc::Status;
+
+::grpc::Status StreamingAeadImpl::Create(grpc::ServerContext* context,
+                                         const CreationRequest* request,
+                                         CreationResponse* response) {
+  return CreatePrimitiveForRpc<crypto::tink::StreamingAead>(request, response);
+}
 
 // Encrypts a message
 ::grpc::Status StreamingAeadImpl::Encrypt(

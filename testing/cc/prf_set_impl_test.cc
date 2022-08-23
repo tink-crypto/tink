@@ -37,6 +37,8 @@ using ::crypto::tink::PrfKeyTemplates;
 using ::testing::ElementsAre;
 using ::testing::Eq;
 using ::testing::IsEmpty;
+using ::tink_testing_api::CreationRequest;
+using ::tink_testing_api::CreationResponse;
 using ::tink_testing_api::PrfSetComputeRequest;
 using ::tink_testing_api::PrfSetComputeResponse;
 using ::tink_testing_api::PrfSetKeyIdsRequest;
@@ -64,6 +66,27 @@ class PrfSetImplTest : public ::testing::Test {
  protected:
   static void SetUpTestSuite() { ASSERT_TRUE(PrfConfig::Register().ok()); }
 };
+
+TEST_F(PrfSetImplTest, CreateAeadSuccess) {
+  tink_testing_api::PrfSetImpl prfset;
+  std::string keyset = ValidKeyset();
+  CreationRequest request;
+  request.set_keyset(keyset);
+  CreationResponse response;
+
+  EXPECT_TRUE(prfset.Create(nullptr, &request, &response).ok());
+  EXPECT_THAT(response.err(), IsEmpty());
+}
+
+TEST_F(PrfSetImplTest, CreateAeadFails) {
+  tink_testing_api::PrfSetImpl prfset;
+  CreationRequest request;
+  request.set_keyset("bad keyset");
+  CreationResponse response;
+
+  EXPECT_TRUE(prfset.Create(nullptr, &request, &response).ok());
+  EXPECT_THAT(response.err(), Not(IsEmpty()));
+}
 
 TEST_F(PrfSetImplTest, KeyIdsComputeSuccess) {
   tink_testing_api::PrfSetImpl prfset;

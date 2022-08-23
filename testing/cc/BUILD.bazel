@@ -135,6 +135,7 @@ cc_library(
     srcs = ["streaming_aead_impl.cc"],
     hdrs = ["streaming_aead_impl.h"],
     deps = [
+        ":create",
         ":testing_api_cpp_library",
         "@com_google_absl//absl/base:core_headers",
         "@com_google_absl//absl/status",
@@ -165,6 +166,7 @@ cc_library(
     srcs = ["mac_impl.cc"],
     hdrs = ["mac_impl.h"],
     deps = [
+        ":create",
         ":testing_api_cpp_library",
         "@com_google_absl//absl/base:core_headers",
         "@tink_cc",
@@ -191,6 +193,7 @@ cc_library(
     srcs = ["hybrid_impl.cc"],
     hdrs = ["hybrid_impl.h"],
     deps = [
+        ":create",
         ":testing_api_cpp_library",
         "@com_google_absl//absl/base:core_headers",
         "@tink_cc",
@@ -217,6 +220,7 @@ cc_library(
     srcs = ["signature_impl.cc"],
     hdrs = ["signature_impl.h"],
     deps = [
+        ":create",
         ":testing_api_cpp_library",
         "@com_google_absl//absl/base:core_headers",
         "@tink_cc",
@@ -243,6 +247,7 @@ cc_library(
     srcs = ["prf_set_impl.cc"],
     hdrs = ["prf_set_impl.h"],
     deps = [
+        ":create",
         ":testing_api_cpp_library",
         "@com_google_absl//absl/base:core_headers",
         "@tink_cc",
@@ -269,6 +274,7 @@ cc_library(
     srcs = ["jwt_impl.cc"],
     hdrs = ["jwt_impl.h"],
     deps = [
+        ":create",
         ":testing_api_cpp_library",
         "@com_google_absl//absl/base:core_headers",
         "@com_google_absl//absl/time",

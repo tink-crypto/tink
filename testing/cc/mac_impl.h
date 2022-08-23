@@ -28,6 +28,10 @@ namespace tink_testing_api {
 // A MAC Service.
 class MacImpl final : public Mac::Service {
  public:
+  grpc::Status Create(grpc::ServerContext* context,
+                      const CreationRequest* request,
+                      CreationResponse* response) override;
+
   grpc::Status ComputeMac(grpc::ServerContext* context,
                           const ComputeMacRequest* request,
                           ComputeMacResponse* response) override;

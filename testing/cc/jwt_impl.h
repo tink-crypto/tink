@@ -28,6 +28,18 @@ namespace tink_testing_api {
 // A Jwt Service.
 class JwtImpl final : public Jwt::Service {
  public:
+  grpc::Status CreateJwtMac(grpc::ServerContext* context,
+                            const CreationRequest* request,
+                            CreationResponse* response) override;
+
+  grpc::Status CreateJwtPublicKeySign(grpc::ServerContext* context,
+                                      const CreationRequest* request,
+                                      CreationResponse* response) override;
+
+  grpc::Status CreateJwtPublicKeyVerify(grpc::ServerContext* context,
+                                        const CreationRequest* request,
+                                        CreationResponse* response) override;
+
   grpc::Status ComputeMacAndEncode(grpc::ServerContext* context,
                                    const JwtSignRequest* request,
                                    JwtSignResponse* response) override;

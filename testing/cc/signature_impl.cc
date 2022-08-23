@@ -24,6 +24,7 @@
 #include "tink/cleartext_keyset_handle.h"
 #include "tink/public_key_sign.h"
 #include "tink/public_key_verify.h"
+#include "create.h"
 #include "proto/testing_api.grpc.pb.h"
 
 namespace tink_testing_api {
@@ -32,6 +33,19 @@ using ::crypto::tink::BinaryKeysetReader;
 using ::crypto::tink::CleartextKeysetHandle;
 using ::grpc::ServerContext;
 using ::grpc::Status;
+
+::grpc::Status SignatureImpl::CreatePublicKeySign(
+    grpc::ServerContext* context, const CreationRequest* request,
+    CreationResponse* response) {
+  return CreatePrimitiveForRpc<crypto::tink::PublicKeySign>(request, response);
+}
+
+::grpc::Status SignatureImpl::CreatePublicKeyVerify(
+    grpc::ServerContext* context, const CreationRequest* request,
+    CreationResponse* response) {
+  return CreatePrimitiveForRpc<crypto::tink::PublicKeyVerify>(request,
+                                                              response);
+}
 
 // Signs a message
 ::grpc::Status SignatureImpl::Sign(grpc::ServerContext* context,

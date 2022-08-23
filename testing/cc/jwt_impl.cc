@@ -17,9 +17,9 @@
 // Implementation of a JWT Service.
 #include "jwt_impl.h"
 
+#include <memory>
 #include <ostream>
 #include <sstream>
-#include <memory>
 #include <string>
 #include <utility>
 #include <vector>
@@ -34,6 +34,7 @@
 #include "tink/jwt/jwt_public_key_verify.h"
 #include "tink/jwt/raw_jwt.h"
 #include "tink/util/status.h"
+#include "create.h"
 
 namespace tink_testing_api {
 
@@ -208,6 +209,24 @@ crypto::tink::util::StatusOr<crypto::tink::JwtValidator> JwtValidatorFromProto(
         absl::Seconds(validator_proto.clock_skew().seconds()));
   }
   return builder.Build();
+}
+
+::grpc::Status JwtImpl::CreateJwtMac(grpc::ServerContext* context,
+                                     const CreationRequest* request,
+                                     CreationResponse* response) {
+  return CreatePrimitiveForRpc<JwtMac>(request, response);
+}
+
+::grpc::Status JwtImpl::CreateJwtPublicKeySign(grpc::ServerContext* context,
+                                               const CreationRequest* request,
+                                               CreationResponse* response) {
+  return CreatePrimitiveForRpc<JwtPublicKeySign>(request, response);
+}
+
+::grpc::Status JwtImpl::CreateJwtPublicKeyVerify(grpc::ServerContext* context,
+                                                 const CreationRequest* request,
+                                                 CreationResponse* response) {
+  return CreatePrimitiveForRpc<JwtPublicKeyVerify>(request, response);
 }
 
 // Computes a MAC and generates a signed compact JWT

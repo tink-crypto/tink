@@ -16,6 +16,9 @@
 
 #include "jwt_impl.h"
 
+#include <memory>
+#include <ostream>
+#include <sstream>
 #include <string>
 
 #include "gmock/gmock.h"
@@ -41,6 +44,8 @@ using ::testing::ElementsAre;
 using ::testing::Eq;
 using ::testing::IsEmpty;
 using ::testing::Not;
+using ::tink_testing_api::CreationRequest;
+using ::tink_testing_api::CreationResponse;
 using ::tink_testing_api::JwtFromJwkSetRequest;
 using ::tink_testing_api::JwtFromJwkSetResponse;
 using ::tink_testing_api::JwtSignRequest;
@@ -72,6 +77,27 @@ class JwtImplMacTest : public ::testing::Test {
  protected:
   static void SetUpTestSuite() { ASSERT_THAT(JwtMacRegister(), IsOk()); }
 };
+
+TEST_F(JwtImplMacTest, CreateJwtMacSuccess) {
+  tink_testing_api::JwtImpl jwt;
+  std::string keyset = ValidKeyset();
+  CreationRequest request;
+  request.set_keyset(keyset);
+  CreationResponse response;
+
+  EXPECT_TRUE(jwt.CreateJwtMac(nullptr, &request, &response).ok());
+  EXPECT_THAT(response.err(), IsEmpty());
+}
+
+TEST_F(JwtImplMacTest, CreateJwtMacFails) {
+  tink_testing_api::JwtImpl jwt;
+  CreationRequest request;
+  request.set_keyset("bad keyset");
+  CreationResponse response;
+
+  EXPECT_TRUE(jwt.CreateJwtMac(nullptr, &request, &response).ok());
+  EXPECT_THAT(response.err(), Not(IsEmpty()));
+}
 
 TEST_F(JwtImplMacTest, MacComputeVerifySuccess) {
   tink_testing_api::JwtImpl jwt;
@@ -208,6 +234,49 @@ class JwtImplSignatureTest : public ::testing::Test {
   std::string private_keyset_;
   std::string public_keyset_;
 };
+
+TEST_F(JwtImplSignatureTest, CreatePublicKeySignSuccess) {
+  tink_testing_api::JwtImpl jwt;
+  CreationRequest request;
+  request.set_keyset(private_keyset_);
+  CreationResponse response;
+
+  EXPECT_TRUE(jwt.CreateJwtPublicKeySign(nullptr, &request, &response).ok());
+  EXPECT_THAT(response.err(), IsEmpty());
+}
+
+TEST_F(JwtImplSignatureTest, CreatePublicKeySignFailure) {
+  tink_testing_api::JwtImpl jwt;
+
+  CreationRequest request;
+  request.set_keyset("\x80");
+  CreationResponse response;
+
+  EXPECT_TRUE(jwt.CreateJwtPublicKeySign(nullptr, &request, &response).ok());
+  EXPECT_THAT(response.err(), Not(IsEmpty()));
+}
+
+TEST_F(JwtImplSignatureTest, CreatePublicKeyVerifySuccess) {
+  tink_testing_api::JwtImpl jwt;
+
+  CreationRequest request;
+  request.set_keyset(public_keyset_);
+  CreationResponse response;
+
+  EXPECT_TRUE(jwt.CreateJwtPublicKeyVerify(nullptr, &request, &response).ok());
+  EXPECT_THAT(response.err(), IsEmpty());
+}
+
+TEST_F(JwtImplSignatureTest, CreatePublicKeyVerifyFailure) {
+  tink_testing_api::JwtImpl jwt;
+
+  CreationRequest request;
+  request.set_keyset("\x80");
+  CreationResponse response;
+
+  EXPECT_TRUE(jwt.CreateJwtPublicKeyVerify(nullptr, &request, &response).ok());
+  EXPECT_THAT(response.err(), Not(IsEmpty()));
+}
 
 TEST_F(JwtImplSignatureTest, SignVerifySuccess) {
   tink_testing_api::JwtImpl jwt;

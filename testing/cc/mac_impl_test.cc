@@ -37,6 +37,8 @@ using ::crypto::tink::MacKeyTemplates;
 using ::testing::IsEmpty;
 using ::tink_testing_api::ComputeMacRequest;
 using ::tink_testing_api::ComputeMacResponse;
+using ::tink_testing_api::CreationRequest;
+using ::tink_testing_api::CreationResponse;
 using ::tink_testing_api::VerifyMacRequest;
 using ::tink_testing_api::VerifyMacResponse;
 
@@ -62,6 +64,27 @@ class MacImplTest : public ::testing::Test {
  protected:
   static void SetUpTestSuite() { ASSERT_TRUE(MacConfig::Register().ok()); }
 };
+
+TEST_F(MacImplTest, CreateMacSuccess) {
+  tink_testing_api::MacImpl mac;
+  std::string keyset = ValidKeyset();
+  CreationRequest request;
+  request.set_keyset(keyset);
+  CreationResponse response;
+
+  EXPECT_TRUE(mac.Create(nullptr, &request, &response).ok());
+  EXPECT_THAT(response.err(), IsEmpty());
+}
+
+TEST_F(MacImplTest, CreateMacFails) {
+  tink_testing_api::MacImpl mac;
+  CreationRequest request;
+  request.set_keyset("bad keyset");
+  CreationResponse response;
+
+  EXPECT_TRUE(mac.Create(nullptr, &request, &response).ok());
+  EXPECT_THAT(response.err(), Not(IsEmpty()));
+}
 
 TEST_F(MacImplTest, ComputeVerifySuccess) {
   tink_testing_api::MacImpl mac;

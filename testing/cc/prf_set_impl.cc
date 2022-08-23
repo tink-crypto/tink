@@ -23,6 +23,7 @@
 #include "tink/binary_keyset_reader.h"
 #include "tink/cleartext_keyset_handle.h"
 #include "tink/prf/prf_set.h"
+#include "create.h"
 #include "proto/testing_api.grpc.pb.h"
 
 namespace tink_testing_api {
@@ -31,6 +32,12 @@ using ::crypto::tink::BinaryKeysetReader;
 using ::crypto::tink::CleartextKeysetHandle;
 using ::grpc::ServerContext;
 using ::grpc::Status;
+
+::grpc::Status PrfSetImpl::Create(grpc::ServerContext* context,
+                                  const CreationRequest* request,
+                                  CreationResponse* response) {
+  return CreatePrimitiveForRpc<crypto::tink::PrfSet>(request, response);
+}
 
 // Returns the Key Ids of the Keyset.
 ::grpc::Status PrfSetImpl::KeyIds(ServerContext* context,

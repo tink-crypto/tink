@@ -16,6 +16,9 @@
 
 #include "hybrid_impl.h"
 
+#include <memory>
+#include <ostream>
+#include <sstream>
 #include <string>
 
 #include "gmock/gmock.h"
@@ -36,6 +39,8 @@ using ::crypto::tink::HybridKeyTemplates;
 
 using ::testing::Eq;
 using ::testing::IsEmpty;
+using ::tink_testing_api::CreationRequest;
+using ::tink_testing_api::CreationResponse;
 using ::tink_testing_api::HybridDecryptRequest;
 using ::tink_testing_api::HybridDecryptResponse;
 using ::tink_testing_api::HybridEncryptRequest;
@@ -59,6 +64,66 @@ class HybridImplTest : public ::testing::Test {
  protected:
   static void SetUpTestSuite() { ASSERT_TRUE(HybridConfig::Register().ok()); }
 };
+
+TEST_F(HybridImplTest, CreateHybridDecryptSuccess) {
+  tink_testing_api::HybridImpl hybrid;
+  const KeyTemplate& key_template =
+      HybridKeyTemplates::EciesP256HkdfHmacSha256Aes128Gcm();
+  ::crypto::tink::util::StatusOr<std::unique_ptr<KeysetHandle>>
+      private_keyset_handle = KeysetHandle::GenerateNew(key_template);
+  ASSERT_TRUE(private_keyset_handle.status().ok())
+      << private_keyset_handle.status();
+
+  CreationRequest request;
+  request.set_keyset(KeysetBytes(**private_keyset_handle));
+  CreationResponse response;
+
+  EXPECT_TRUE(hybrid.CreateHybridDecrypt(nullptr, &request, &response).ok());
+  EXPECT_THAT(response.err(), IsEmpty());
+}
+
+TEST_F(HybridImplTest, CreateHybridDecryptFailure) {
+  tink_testing_api::HybridImpl hybrid;
+
+  CreationRequest request;
+  request.set_keyset("\x80");
+  CreationResponse response;
+
+  EXPECT_TRUE(hybrid.CreateHybridDecrypt(nullptr, &request, &response).ok());
+  EXPECT_THAT(response.err(), Not(IsEmpty()));
+}
+
+TEST_F(HybridImplTest, CreateHybridEncryptSuccess) {
+  tink_testing_api::HybridImpl hybrid;
+  const KeyTemplate& key_template =
+      HybridKeyTemplates::EciesP256HkdfHmacSha256Aes128Gcm();
+  ::crypto::tink::util::StatusOr<std::unique_ptr<KeysetHandle>>
+      private_keyset_handle = KeysetHandle::GenerateNew(key_template);
+  ASSERT_TRUE(private_keyset_handle.status().ok())
+      << private_keyset_handle.status();
+  ::crypto::tink::util::StatusOr<std::unique_ptr<KeysetHandle>>
+      public_keyset_handle = (*private_keyset_handle)->GetPublicKeysetHandle();
+  ASSERT_TRUE(public_keyset_handle.status().ok())
+      << public_keyset_handle.status();
+
+  CreationRequest request;
+  request.set_keyset(KeysetBytes(**public_keyset_handle));
+  CreationResponse response;
+
+  EXPECT_TRUE(hybrid.CreateHybridEncrypt(nullptr, &request, &response).ok());
+  EXPECT_THAT(response.err(), IsEmpty());
+}
+
+TEST_F(HybridImplTest, CreateHybridEncryptFailure) {
+  tink_testing_api::HybridImpl hybrid;
+
+  CreationRequest request;
+  request.set_keyset("\x80");
+  CreationResponse response;
+
+  EXPECT_TRUE(hybrid.CreateHybridEncrypt(nullptr, &request, &response).ok());
+  EXPECT_THAT(response.err(), Not(IsEmpty()));
+}
 
 TEST_F(HybridImplTest, EncryptDecryptSuccess) {
   tink_testing_api::HybridImpl hybrid;

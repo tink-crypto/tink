@@ -28,6 +28,10 @@ namespace tink_testing_api {
 // A StreamingAead Service.
 class StreamingAeadImpl final : public StreamingAead::Service {
  public:
+  grpc::Status Create(grpc::ServerContext* context,
+                      const CreationRequest* request,
+                      CreationResponse* response) override;
+
   grpc::Status Encrypt(grpc::ServerContext* context,
                        const StreamingAeadEncryptRequest* request,
                        StreamingAeadEncryptResponse* response) override;

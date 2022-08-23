@@ -16,6 +16,9 @@
 
 #include "signature_impl.h"
 
+#include <memory>
+#include <ostream>
+#include <sstream>
 #include <string>
 
 #include "gmock/gmock.h"
@@ -35,6 +38,8 @@ using ::crypto::tink::CleartextKeysetHandle;
 using ::crypto::tink::SignatureKeyTemplates;
 
 using ::testing::IsEmpty;
+using ::tink_testing_api::CreationRequest;
+using ::tink_testing_api::CreationResponse;
 using ::tink_testing_api::SignatureSignRequest;
 using ::tink_testing_api::SignatureSignResponse;
 using ::tink_testing_api::SignatureVerifyRequest;
@@ -60,6 +65,66 @@ class SignatureImplTest : public ::testing::Test {
     ASSERT_TRUE(SignatureConfig::Register().ok());
   }
 };
+
+TEST_F(SignatureImplTest, CreatePublicKeySignSuccess) {
+  tink_testing_api::SignatureImpl signature;
+  const KeyTemplate& key_template = SignatureKeyTemplates::EcdsaP256();
+  ::crypto::tink::util::StatusOr<std::unique_ptr<KeysetHandle>>
+      private_keyset_handle = KeysetHandle::GenerateNew(key_template);
+  ASSERT_TRUE(private_keyset_handle.status().ok())
+      << private_keyset_handle.status();
+
+  CreationRequest request;
+  request.set_keyset(KeysetBytes(**private_keyset_handle));
+  CreationResponse response;
+
+  EXPECT_TRUE(signature.CreatePublicKeySign(nullptr, &request, &response).ok());
+  EXPECT_THAT(response.err(), IsEmpty());
+}
+
+TEST_F(SignatureImplTest, CreatePublicKeySignFailure) {
+  tink_testing_api::SignatureImpl signature;
+
+  CreationRequest request;
+  request.set_keyset("\x80");
+  CreationResponse response;
+
+  EXPECT_TRUE(signature.CreatePublicKeySign(nullptr, &request, &response).ok());
+  EXPECT_THAT(response.err(), Not(IsEmpty()));
+}
+
+TEST_F(SignatureImplTest, CreatePublicKeyVerifySuccess) {
+  tink_testing_api::SignatureImpl signature;
+  const KeyTemplate& key_template = SignatureKeyTemplates::EcdsaP256();
+  ::crypto::tink::util::StatusOr<std::unique_ptr<KeysetHandle>>
+      private_keyset_handle = KeysetHandle::GenerateNew(key_template);
+  ASSERT_TRUE(private_keyset_handle.status().ok())
+      << private_keyset_handle.status();
+  ::crypto::tink::util::StatusOr<std::unique_ptr<KeysetHandle>>
+      public_keyset_handle = (*private_keyset_handle)->GetPublicKeysetHandle();
+  ASSERT_TRUE(public_keyset_handle.status().ok())
+      << public_keyset_handle.status();
+
+  CreationRequest request;
+  request.set_keyset(KeysetBytes(**public_keyset_handle));
+  CreationResponse response;
+
+  EXPECT_TRUE(
+      signature.CreatePublicKeyVerify(nullptr, &request, &response).ok());
+  EXPECT_THAT(response.err(), IsEmpty());
+}
+
+TEST_F(SignatureImplTest, CreatePublicKeyVerifyFailure) {
+  tink_testing_api::SignatureImpl signature;
+
+  CreationRequest request;
+  request.set_keyset("\x80");
+  CreationResponse response;
+
+  EXPECT_TRUE(
+      signature.CreatePublicKeyVerify(nullptr, &request, &response).ok());
+  EXPECT_THAT(response.err(), Not(IsEmpty()));
+}
 
 TEST_F(SignatureImplTest, SignVerifySuccess) {
   tink_testing_api::SignatureImpl signature;
