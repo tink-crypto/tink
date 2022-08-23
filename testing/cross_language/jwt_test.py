@@ -26,7 +26,6 @@ from tink import jwt
 from util import supported_key_types
 from util import testing_servers
 
-
 SUPPORTED_LANGUAGES = testing_servers.SUPPORTED_LANGUAGES_BY_PRIMITIVE['jwt']
 
 
@@ -36,6 +35,30 @@ def setUpModule():
 
 def tearDownModule():
   testing_servers.stop()
+
+
+# maps from key_template_name to supported_langs. Templates for a key type
+# that aren't widely deployed across a language.
+_ADDITIONAL_KEY_TEMPLATES = {
+    # JWT_RS in development in go b/230489047
+    'JWT_RS256_2048_F4': ['cc', 'java', 'python'],
+    'JWT_RS256_2048_F4_RAW': ['cc', 'java', 'python'],
+    'JWT_RS256_3072_F4': ['cc', 'java', 'python'],
+    'JWT_RS256_3072_F4_RAW': ['cc', 'java', 'python'],
+    'JWT_RS384_3072_F4': ['cc', 'java', 'python'],
+    'JWT_RS384_3072_F4_RAW': ['cc', 'java', 'python'],
+    'JWT_RS512_4096_F4': ['cc', 'java', 'python'],
+    'JWT_RS512_4096_F4_RAW': ['cc', 'java', 'python'],
+    # JWT PS in development in go b/230489047
+    'JWT_PS256_2048_F4': ['cc', 'java', 'python'],
+    'JWT_PS256_2048_F4_RAW': ['cc', 'java', 'python'],
+    'JWT_PS256_3072_F4': ['cc', 'java', 'python'],
+    'JWT_PS256_3072_F4_RAW': ['cc', 'java', 'python'],
+    'JWT_PS384_3072_F4': ['cc', 'java', 'python'],
+    'JWT_PS384_3072_F4_RAW': ['cc', 'java', 'python'],
+    'JWT_PS512_4096_F4': ['cc', 'java', 'python'],
+    'JWT_PS512_4096_F4_RAW': ['cc', 'java', 'python'],
+}
 
 
 def all_jwt_mac_key_template_names() -> Iterable[str]:
@@ -95,10 +118,14 @@ class JwtTest(parameterized.TestCase):
 
   @parameterized.parameters(all_jwt_signature_key_template_names())
   def test_jwt_public_key_sign_verify(self, key_template_name):
-    supported_langs = supported_key_types.SUPPORTED_LANGUAGES_BY_TEMPLATE_NAME[
-        key_template_name]
+    if key_template_name in _ADDITIONAL_KEY_TEMPLATES:
+      supported_langs = _ADDITIONAL_KEY_TEMPLATES[key_template_name]
+      key_template = supported_key_types.KEY_TEMPLATE[key_template_name]
+    else:
+      supported_langs = supported_key_types.SUPPORTED_LANGUAGES_BY_TEMPLATE_NAME[
+          key_template_name]
+      key_template = supported_key_types.KEY_TEMPLATE[key_template_name]
     self.assertNotEmpty(supported_langs)
-    key_template = supported_key_types.KEY_TEMPLATE[key_template_name]
     # Take the first supported language to generate the private keyset.
     private_keyset = testing_servers.new_keyset(supported_langs[0],
                                                 key_template)
@@ -123,8 +150,7 @@ class JwtTest(parameterized.TestCase):
     ]
     now = datetime.datetime.now(tz=datetime.timezone.utc)
     raw_jwt = jwt.new_raw_jwt(
-        issuer='issuer',
-        expiration=now + datetime.timedelta(seconds=100))
+        issuer='issuer', expiration=now + datetime.timedelta(seconds=100))
     for signer in supported_signers:
       compact = signer.sign_and_encode(raw_jwt)
       validator = jwt.new_validator(expected_issuer='issuer', fixed_now=now)
@@ -163,12 +189,10 @@ class JwtTest(parameterized.TestCase):
       signer = testing_servers.jwt_public_key_sign(lang1, private_keyset)
       compact = signer.sign_and_encode(raw_jwt)
       public_keyset = testing_servers.public_keyset(lang1, private_keyset)
-      public_jwk_set = testing_servers.jwk_set_from_keyset(
-          lang1, public_keyset)
+      public_jwk_set = testing_servers.jwk_set_from_keyset(lang1, public_keyset)
       for lang2 in supported_langs:
         # in lang2: import the public JWK set and verify the token
-        public_keyset = testing_servers.jwk_set_to_keyset(
-            lang2, public_jwk_set)
+        public_keyset = testing_servers.jwk_set_to_keyset(lang2, public_jwk_set)
         verifier = testing_servers.jwt_public_key_verify(lang2, public_keyset)
         verified_jwt = verifier.verify_and_decode(compact, validator)
         self.assertEqual(verified_jwt.issuer(), 'issuer')
@@ -205,6 +229,7 @@ class JwtTest(parameterized.TestCase):
           verifier = testing_servers.jwt_public_key_verify(lang2, public_keyset)
           verified_jwt = verifier.verify_and_decode(compact, validator)
           self.assertEqual(verified_jwt.issuer(), 'issuer')
+
 
 if __name__ == '__main__':
   absltest.main()
