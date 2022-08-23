@@ -25,11 +25,13 @@ import (
 	"google.golang.org/protobuf/proto"
 	"github.com/google/tink/go/keyset"
 	jepb "github.com/google/tink/go/proto/jwt_ecdsa_go_proto"
+	jrsppb "github.com/google/tink/go/proto/jwt_rsa_ssa_pkcs1_go_proto"
 	tinkpb "github.com/google/tink/go/proto/tink_go_proto"
 )
 
 const (
 	jwtECDSAPublicKeyType = "type.googleapis.com/google.crypto.tink.JwtEcdsaPublicKey"
+	jwtRSPublicKeyType    = "type.googleapis.com/google.crypto.tink.JwtRsaSsaPkcs1PublicKey"
 )
 
 func keysetHasID(ks *tinkpb.Keyset, keyID uint32) bool {
@@ -104,12 +106,12 @@ func expectStringItem(s *spb.Struct, name, value string) error {
 	return nil
 }
 
-func decodePoint(s *spb.Struct, name string) ([]byte, error) {
-	point, err := stringItem(s, name)
+func decodeItem(s *spb.Struct, name string) ([]byte, error) {
+	e, err := stringItem(s, name)
 	if err != nil {
 		return nil, err
 	}
-	return base64Decode(point)
+	return base64Decode(e)
 }
 
 func validateKeyOPSIsVerify(s *spb.Struct) error {
@@ -140,18 +142,103 @@ func validateUseIsSig(s *spb.Struct) error {
 	return expectStringItem(s, "use", "sig")
 }
 
-func algorithmPrefixMatch(s *spb.Struct, prefix string) error {
+func algorithmPrefix(s *spb.Struct) (string, error) {
 	alg, err := stringItem(s, "alg")
 	if err != nil {
-		return err
+		return "", err
 	}
-	if len(alg) < len(prefix) {
-		return fmt.Errorf("invalid algorithm")
+	if len(alg) < 2 {
+		return "", fmt.Errorf("invalid algorithm")
 	}
-	if alg[0:len(prefix)] != prefix {
-		return fmt.Errorf("invalid algorithm")
+	return alg[0:2], nil
+}
+
+var rsNameToAlg = map[string]jrsppb.JwtRsaSsaPkcs1Algorithm{
+	"RS256": jrsppb.JwtRsaSsaPkcs1Algorithm_RS256,
+	"RS384": jrsppb.JwtRsaSsaPkcs1Algorithm_RS384,
+	"RS512": jrsppb.JwtRsaSsaPkcs1Algorithm_RS512,
+}
+
+func rsPublicKeyDataFromStruct(keyStruct *spb.Struct) (*tinkpb.KeyData, error) {
+	alg, err := stringItem(keyStruct, "alg")
+	if err != nil {
+		return nil, err
 	}
-	return nil
+	algorithm, ok := rsNameToAlg[alg]
+	if !ok {
+		return nil, fmt.Errorf("invalid alg header: %q", alg)
+	}
+	rsaPubKey, err := rsaPubKeyFromStruct(keyStruct)
+	if err != nil {
+		return nil, err
+	}
+	jwtPubKey := &jrsppb.JwtRsaSsaPkcs1PublicKey{
+		Version:   0,
+		Algorithm: algorithm,
+		E:         rsaPubKey.exponent,
+		N:         rsaPubKey.modulus,
+	}
+	if rsaPubKey.customKID != nil {
+		jwtPubKey.CustomKid = &jrsppb.JwtRsaSsaPkcs1PublicKey_CustomKid{
+			Value: *rsaPubKey.customKID,
+		}
+	}
+	serializedPubKey, err := proto.Marshal(jwtPubKey)
+	if err != nil {
+		return nil, err
+	}
+	return &tinkpb.KeyData{
+		TypeUrl:         jwtRSPublicKeyType,
+		Value:           serializedPubKey,
+		KeyMaterialType: tinkpb.KeyData_ASYMMETRIC_PUBLIC,
+	}, nil
+}
+
+type rsaPubKey struct {
+	exponent  []byte
+	modulus   []byte
+	customKID *string
+}
+
+func rsaPubKeyFromStruct(keyStruct *spb.Struct) (*rsaPubKey, error) {
+	if hasItem(keyStruct, "p") ||
+		hasItem(keyStruct, "q") ||
+		hasItem(keyStruct, "dq") ||
+		hasItem(keyStruct, "dp") ||
+		hasItem(keyStruct, "d") ||
+		hasItem(keyStruct, "qi") {
+		return nil, fmt.Errorf("private key can't be converted")
+	}
+	if err := expectStringItem(keyStruct, "kty", "RSA"); err != nil {
+		return nil, err
+	}
+	if err := validateUseIsSig(keyStruct); err != nil {
+		return nil, err
+	}
+	if err := validateKeyOPSIsVerify(keyStruct); err != nil {
+		return nil, err
+	}
+	e, err := decodeItem(keyStruct, "e")
+	if err != nil {
+		return nil, err
+	}
+	n, err := decodeItem(keyStruct, "n")
+	if err != nil {
+		return nil, err
+	}
+	var customKID *string = nil
+	if hasItem(keyStruct, "kid") {
+		kid, err := stringItem(keyStruct, "kid")
+		if err != nil {
+			return nil, err
+		}
+		customKID = &kid
+	}
+	return &rsaPubKey{
+		exponent:  e,
+		modulus:   n,
+		customKID: customKID,
+	}, nil
 }
 
 func esPublicKeyDataFromStruct(keyStruct *spb.Struct) (*tinkpb.KeyData, error) {
@@ -188,11 +275,11 @@ func esPublicKeyDataFromStruct(keyStruct *spb.Struct) (*tinkpb.KeyData, error) {
 	if err := validateKeyOPSIsVerify(keyStruct); err != nil {
 		return nil, err
 	}
-	x, err := decodePoint(keyStruct, "x")
+	x, err := decodeItem(keyStruct, "x")
 	if err != nil {
 		return nil, fmt.Errorf("failed to decode x: %v", err)
 	}
-	y, err := decodePoint(keyStruct, "y")
+	y, err := decodeItem(keyStruct, "y")
 	if err != nil {
 		return nil, fmt.Errorf("failed to decode y: %v", err)
 	}
@@ -228,10 +315,19 @@ func keysetKeyFromStruct(val *spb.Value, keyID uint32) (*tinkpb.Keyset_Key, erro
 	if keyStruct == nil {
 		return nil, fmt.Errorf("key is not a JSON object")
 	}
-	if err := algorithmPrefixMatch(keyStruct, "ES"); err != nil {
+	algPrefix, err := algorithmPrefix(keyStruct)
+	if err != nil {
 		return nil, err
 	}
-	keyData, err := esPublicKeyDataFromStruct(keyStruct)
+	var keyData *tinkpb.KeyData
+	switch algPrefix {
+	case "ES":
+		keyData, err = esPublicKeyDataFromStruct(keyStruct)
+	case "RS":
+		keyData, err = rsPublicKeyDataFromStruct(keyStruct)
+	default:
+		return nil, fmt.Errorf("unsupported algorithm prefix: %v", algPrefix)
+	}
 	if err != nil {
 		return nil, err
 	}
@@ -245,7 +341,7 @@ func keysetKeyFromStruct(val *spb.Value, keyID uint32) (*tinkpb.Keyset_Key, erro
 
 // JWKSetToPublicKeysetHandle converts a Json Web Key (JWK) set into a Tink KeysetHandle.
 // It requires that all keys in the set have the "alg" field set. Currently, only
-// public keys for algorithms ES256, ES384 and ES512 are supported.
+// public keys for algorithms ES256, ES384, ES512, RS256, RS384, and RS512 are supported.
 // JWK is defined in https://www.rfc-editor.org/rfc/rfc7517.txt.
 func JWKSetToPublicKeysetHandle(jwkSet []byte) (*keyset.Handle, error) {
 	jwk := &spb.Struct{}
@@ -277,6 +373,42 @@ func addStringEntry(s *spb.Struct, key, val string) {
 	s.GetFields()[key] = spb.NewStringValue(val)
 }
 
+var rsAlgToStr map[jrsppb.JwtRsaSsaPkcs1Algorithm]string = map[jrsppb.JwtRsaSsaPkcs1Algorithm]string{
+	jrsppb.JwtRsaSsaPkcs1Algorithm_RS256: "RS256",
+	jrsppb.JwtRsaSsaPkcs1Algorithm_RS384: "RS384",
+	jrsppb.JwtRsaSsaPkcs1Algorithm_RS512: "RS512",
+}
+
+func rsPublicKeyToStruct(key *tinkpb.Keyset_Key) (*spb.Struct, error) {
+	pubKey := &jrsppb.JwtRsaSsaPkcs1PublicKey{}
+	if err := proto.Unmarshal(key.GetKeyData().GetValue(), pubKey); err != nil {
+		return nil, err
+	}
+	alg, ok := rsAlgToStr[pubKey.GetAlgorithm()]
+	if !ok {
+		return nil, fmt.Errorf("invalid algorithm")
+	}
+	outKey := &spb.Struct{
+		Fields: map[string]*spb.Value{},
+	}
+	addStringEntry(outKey, "alg", alg)
+	addStringEntry(outKey, "kty", "RSA")
+	addStringEntry(outKey, "e", base64Encode(pubKey.GetE()))
+	addStringEntry(outKey, "n", base64Encode(pubKey.GetN()))
+	addStringEntry(outKey, "use", "sig")
+	addKeyOPSVerify(outKey)
+
+	var customKID *string = nil
+	if pubKey.GetCustomKid() != nil {
+		ck := pubKey.GetCustomKid().GetValue()
+		customKID = &ck
+	}
+	if err := setKeyID(outKey, key, customKID); err != nil {
+		return nil, err
+	}
+	return outKey, nil
+}
+
 func esPublicKeyToStruct(key *tinkpb.Keyset_Key) (*spb.Struct, error) {
 	pubKey := &jepb.JwtEcdsaPublicKey{}
 	if err := proto.Unmarshal(key.GetKeyData().GetValue(), pubKey); err != nil {
@@ -304,20 +436,35 @@ func esPublicKeyToStruct(key *tinkpb.Keyset_Key) (*spb.Struct, error) {
 	addStringEntry(outKey, "use", "sig")
 	addKeyOPSVerify(outKey)
 
-	if key.GetOutputPrefixType() == tinkpb.OutputPrefixType_TINK {
-		kid := keyID(key.KeyId, key.GetOutputPrefixType())
-		if kid == nil {
-			return nil, fmt.Errorf("tink KID shouldn't be nil")
-		}
-		addStringEntry(outKey, "kid", *kid)
-	} else if pubKey.GetCustomKid() != nil {
-		addStringEntry(outKey, "kid", pubKey.GetCustomKid().GetValue())
+	var customKID *string = nil
+	if pubKey.GetCustomKid() != nil {
+		ck := pubKey.GetCustomKid().GetValue()
+		customKID = &ck
+	}
+	if err := setKeyID(outKey, key, customKID); err != nil {
+		return nil, err
 	}
 	return outKey, nil
 }
 
+func setKeyID(outKey *spb.Struct, key *tinkpb.Keyset_Key, customKID *string) error {
+	if key.GetOutputPrefixType() == tinkpb.OutputPrefixType_TINK {
+		if customKID != nil {
+			return fmt.Errorf("TINK keys shouldn't have custom KID")
+		}
+		kid := keyID(key.KeyId, key.GetOutputPrefixType())
+		if kid == nil {
+			return fmt.Errorf("tink KID shouldn't be nil")
+		}
+		addStringEntry(outKey, "kid", *kid)
+	} else if customKID != nil {
+		addStringEntry(outKey, "kid", *customKID)
+	}
+	return nil
+}
+
 // JWKSetFromPublicKeysetHandle converts a Tink KeysetHandle with JWT keys into a Json Web Key (JWK) set.
-// Currently only public keys for algorithms ES256, ES384 and ES512 are supported.
+// Currently only public keys for algorithms ES256, ES384, ES512, RS256, RS384, and RS512 are supported.
 // JWK is defined in https://www.rfc-editor.org/rfc/rfc7517.html.
 func JWKSetFromPublicKeysetHandle(kh *keyset.Handle) ([]byte, error) {
 	b := &bytes.Buffer{}
@@ -344,10 +491,16 @@ func JWKSetFromPublicKeysetHandle(kh *keyset.Handle) ([]byte, error) {
 		if keyData.GetKeyMaterialType() != tinkpb.KeyData_ASYMMETRIC_PUBLIC {
 			return nil, fmt.Errorf("only asymmetric public keys are supported")
 		}
-		if keyData.GetTypeUrl() != jwtECDSAPublicKeyType {
+		keyStruct := &spb.Struct{}
+		var err error
+		switch keyData.GetTypeUrl() {
+		case jwtECDSAPublicKeyType:
+			keyStruct, err = esPublicKeyToStruct(k)
+		case jwtRSPublicKeyType:
+			keyStruct, err = rsPublicKeyToStruct(k)
+		default:
 			return nil, fmt.Errorf("unsupported key type url")
 		}
-		keyStruct, err := esPublicKeyToStruct(k)
 		if err != nil {
 			return nil, err
 		}
