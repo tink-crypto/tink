@@ -22,6 +22,7 @@ import (
 	"time"
 
 	"google.golang.org/protobuf/proto"
+	"github.com/google/tink/go/core/registry"
 	"github.com/google/tink/go/subtle/random"
 	jrsppb "github.com/google/tink/go/proto/jwt_rsa_ssa_pkcs1_go_proto"
 )
@@ -54,8 +55,10 @@ func makeValidRSPublicKey() (*jrsppb.JwtRsaSsaPkcs1PublicKey, error) {
 }
 
 func TestJWTRSVerifierNotImplemented(t *testing.T) {
-	// TODO(b/173082704): call registry to get key manager once added to cross language tests.
-	km := &jwtRSVerifierKeyManager{}
+	km, err := registry.GetKeyManager(testJWTRSVerifierKeyType)
+	if err != nil {
+		t.Fatalf("registry.GetKeyManager(%q) err = %v, want nil", testJWTRSVerifierKeyType, err)
+	}
 	keyFormat := &jrsppb.JwtRsaSsaPkcs1KeyFormat{
 		Version:           0,
 		Algorithm:         jrsppb.JwtRsaSsaPkcs1Algorithm_RS256,
@@ -75,8 +78,10 @@ func TestJWTRSVerifierNotImplemented(t *testing.T) {
 }
 
 func TestJWTRSVerifierDoesSupport(t *testing.T) {
-	// TODO(b/173082704): call registry to get key manager once added to cross language tests.
-	km := &jwtRSVerifierKeyManager{}
+	km, err := registry.GetKeyManager(testJWTRSVerifierKeyType)
+	if err != nil {
+		t.Fatalf("registry.GetKeyManager(%q) err = %v, want nil", testJWTRSVerifierKeyType, err)
+	}
 	if !km.DoesSupport(testJWTRSVerifierKeyType) {
 		t.Errorf("DoesSupport(%q) = false, want true", testJWTRSVerifierKeyType)
 	}
@@ -86,8 +91,10 @@ func TestJWTRSVerifierDoesSupport(t *testing.T) {
 }
 
 func TestJWTRSVerifierTypeURL(t *testing.T) {
-	// TODO(b/173082704): call registry to get key manager once added to cross language tests.
-	km := &jwtRSVerifierKeyManager{}
+	km, err := registry.GetKeyManager(testJWTRSVerifierKeyType)
+	if err != nil {
+		t.Fatalf("registry.GetKeyManager(%q) err = %v, want nil", testJWTRSVerifierKeyType, err)
+	}
 	if km.TypeURL() != testJWTRSVerifierKeyType {
 		t.Errorf("km.TypeURL() = %q, want %q", km.TypeURL(), testJWTRSVerifierKeyType)
 	}
@@ -98,8 +105,10 @@ func TestJWTRSVerifierPrimitiveWithInvalidKey(t *testing.T) {
 		name   string
 		pubKey *jrsppb.JwtRsaSsaPkcs1PublicKey
 	}
-	// TODO(b/173082704): call registry to get key manager once added to cross language tests.
-	km := &jwtRSVerifierKeyManager{}
+	km, err := registry.GetKeyManager(testJWTRSVerifierKeyType)
+	if err != nil {
+		t.Fatalf("registry.GetKeyManager(%q) err = %v, want nil", testJWTRSVerifierKeyType, err)
+	}
 	validPubKey, err := makeValidRSPublicKey()
 	if err != nil {
 		t.Fatalf("makeValidRSAPSSPKCS1PrivKey() err = %v, want nil", err)
@@ -177,16 +186,20 @@ func TestJWTRSVerifierPrimitiveWithInvalidKey(t *testing.T) {
 }
 
 func TestJWTRSVerifierPrimitiveWithInvalidSerializedKey(t *testing.T) {
-	// TODO(b/173082704): call registry to get key manager once added to cross language tests.
-	km := &jwtRSVerifierKeyManager{}
+	km, err := registry.GetKeyManager(testJWTRSVerifierKeyType)
+	if err != nil {
+		t.Fatalf("registry.GetKeyManager(%q) err = %v, want nil", testJWTRSVerifierKeyType, err)
+	}
 	if _, err := km.Primitive([]byte("invalid_serialization")); err == nil {
 		t.Errorf("Primitive() err = nil, want error")
 	}
 }
 
 func TestJWTRSVerifierPrimitiveVerifyFixedToken(t *testing.T) {
-	// TODO(b/173082704): call registry to get key manager once added to cross language tests.
-	km := &jwtRSVerifierKeyManager{}
+	km, err := registry.GetKeyManager(testJWTRSVerifierKeyType)
+	if err != nil {
+		t.Fatalf("registry.GetKeyManager(%q) err = %v, want nil", testJWTRSVerifierKeyType, err)
+	}
 	pubKey, err := makeValidRSPublicKey()
 	if err != nil {
 		t.Fatalf("makeValidRSPublicKey() err = %v, want nil", err)
@@ -234,7 +247,10 @@ func TestJWTRSVerifierPrimitiveVerifyFixedToken(t *testing.T) {
 }
 
 func TestJWTRSVerifierPrimitiveWithCustomKID(t *testing.T) {
-	km := &jwtRSVerifierKeyManager{}
+	km, err := registry.GetKeyManager(testJWTRSVerifierKeyType)
+	if err != nil {
+		t.Fatalf("registry.GetKeyManager(%q) err = %v, want nil", testJWTRSVerifierKeyType, err)
+	}
 	pubKey, err := makeValidRSPublicKey()
 	if err != nil {
 		t.Fatalf("makeValidRSPublicKey() err = %v, want nil", err)
@@ -282,7 +298,6 @@ func TestJWTRSVerifierPrimitiveWithCustomKID(t *testing.T) {
 	if _, err := verifier.VerifyAndDecodeWithKID(compact, validator, refString("8542")); err == nil {
 		t.Errorf("verifier.VerifyAndDecodeWithKID(kid = '8542') err = nil, want error")
 	}
-
 	pubKey.CustomKid = &jrsppb.JwtRsaSsaPkcs1PublicKey_CustomKid{
 		Value: "1234",
 	}
@@ -305,8 +320,10 @@ func TestJWTRSVerifierPrimitiveWithCustomKID(t *testing.T) {
 }
 
 func TestJWTRSVerifierPrimitiveWithTinkKID(t *testing.T) {
-	// TODO(b/173082704): call registry to get key manager once added to cross language tests.
-	km := &jwtRSVerifierKeyManager{}
+	km, err := registry.GetKeyManager(testJWTRSVerifierKeyType)
+	if err != nil {
+		t.Fatalf("registry.GetKeyManager(%q) err = %v, want nil", testJWTRSVerifierKeyType, err)
+	}
 	pubKey, err := makeValidRSPublicKey()
 	if err != nil {
 		t.Fatalf("makeValidRSPublicKey() err = %v, want nil", err)

@@ -94,8 +94,10 @@ func makeValidJWTRSPrivateKey() (*jrsppb.JwtRsaSsaPkcs1PrivateKey, error) {
 }
 
 func TestJWTRSSignerKeyManagerDoesSupport(t *testing.T) {
-	// TODO(b/173082704): call registry to get key manager once added to cross language tests.
-	km := newjwtRSSignerKeyManager()
+	km, err := registry.GetKeyManager(testJWTRSSignerKeyType)
+	if err != nil {
+		t.Fatalf("registry.GetKeyManager(%q) err = %v, want nil", testJWTRSSignerKeyType, err)
+	}
 	if !km.DoesSupport(testJWTRSSignerKeyType) {
 		t.Errorf("DoesSupport(%q) = false, want true", testJWTRSSignerKeyType)
 	}
@@ -105,16 +107,20 @@ func TestJWTRSSignerKeyManagerDoesSupport(t *testing.T) {
 }
 
 func TestJWTRSSignerKeyManagerTypeURL(t *testing.T) {
-	// TODO(b/173082704): call registry to get key manager once added to cross language tests.
-	km := newjwtRSSignerKeyManager()
+	km, err := registry.GetKeyManager(testJWTRSSignerKeyType)
+	if err != nil {
+		t.Fatalf("registry.GetKeyManager(%q) err = %v, want nil", testJWTRSSignerKeyType, err)
+	}
 	if km.TypeURL() != testJWTRSSignerKeyType {
 		t.Errorf("TypeURL() = %v, want = %v", km.TypeURL(), testJWTRSSignerKeyType)
 	}
 }
 
 func TestJWTRSSignerKeyManagerPrimitiveSignAndVerify(t *testing.T) {
-	// TODO(b/173082704): call registry to get key manager once added to cross language tests.
-	skm := newjwtRSSignerKeyManager()
+	skm, err := registry.GetKeyManager(testJWTRSSignerKeyType)
+	if err != nil {
+		t.Fatalf("registry.GetKeyManager(%q) err = %v, want nil", testJWTRSSignerKeyType, err)
+	}
 	privKey, err := makeValidJWTRSPrivateKey()
 	if err != nil {
 		t.Fatalf("makeValidJWTRSPrivateKey() err = %v, want nil", err)
@@ -140,8 +146,10 @@ func TestJWTRSSignerKeyManagerPrimitiveSignAndVerify(t *testing.T) {
 	if err != nil {
 		t.Fatalf("SignAndEncodeWithKID(kid = nil) err = %v, want nil", err)
 	}
-	// TODO(b/173082704): call registry to get key manager once added to cross language tests.
-	vkm := &jwtRSVerifierKeyManager{}
+	vkm, err := registry.GetKeyManager(testJWTRSVerifierKeyType)
+	if err != nil {
+		t.Fatalf("registry.GetKeyManager(%q) err = %v, want nil", testJWTRSVerifierKeyType, err)
+	}
 	serializedPubKey, err := proto.Marshal(privKey.PublicKey)
 	if err != nil {
 		t.Fatalf("proto.Marshal() err = %v, want nil", err)
@@ -168,16 +176,20 @@ func TestJWTRSSignerKeyManagerPrimitiveSignAndVerify(t *testing.T) {
 }
 
 func TestJWTRSSignerKeyManagerPrimitiveWithInvalidSerializedKeyFails(t *testing.T) {
-	// TODO(b/173082704): call registry to get key manager once added to cross language tests.
-	km := newjwtRSSignerKeyManager()
+	km, err := registry.GetKeyManager(testJWTRSSignerKeyType)
+	if err != nil {
+		t.Fatalf("registry.GetKeyManager(%q) err = %v, want nil", testJWTRSSignerKeyType, err)
+	}
 	if _, err := km.Primitive([]byte("invalid_serialization")); err == nil {
 		t.Fatalf("Primitive() err = nil, want error")
 	}
 }
 
 func TestJWTRSSignerKeyManagerPrimitiveSignAndVerifyWithTinkKID(t *testing.T) {
-	// TODO(b/173082704): call registry to get key manager once added to cross language tests.
-	skm := newjwtRSSignerKeyManager()
+	skm, err := registry.GetKeyManager(testJWTRSSignerKeyType)
+	if err != nil {
+		t.Fatalf("registry.GetKeyManager(%q) err = %v, want nil", testJWTRSSignerKeyType, err)
+	}
 	privKey, err := makeValidJWTRSPrivateKey()
 	if err != nil {
 		t.Fatalf("makeValidJWTRSPrivateKey() err = %v, want nil", err)
@@ -203,8 +215,10 @@ func TestJWTRSSignerKeyManagerPrimitiveSignAndVerifyWithTinkKID(t *testing.T) {
 	if err != nil {
 		t.Fatalf("SignAndEncodeWithKID(kid = '555') err = %v, want nil", err)
 	}
-	// TODO(b/173082704): call registry to get key manager once added to cross language tests.
-	vkm := &jwtRSVerifierKeyManager{}
+	vkm, err := registry.GetKeyManager(testJWTRSVerifierKeyType)
+	if err != nil {
+		t.Fatalf("registry.GetKeyManager(%q) err = %v, want nil", testJWTRSVerifierKeyType, err)
+	}
 	serializedPubKey, err := proto.Marshal(privKey.PublicKey)
 	if err != nil {
 		t.Fatalf("proto.Marshal() err = %v, want nil", err)
@@ -230,8 +244,10 @@ func TestJWTRSSignerKeyManagerPrimitiveSignAndVerifyWithTinkKID(t *testing.T) {
 }
 
 func TestJWTRSSignerKeyManagerPrimitiveSignAndVerifyWithCustomKID(t *testing.T) {
-	// TODO(b/173082704): call registry to get key manager once added to cross language tests.
-	skm := newjwtRSSignerKeyManager()
+	skm, err := registry.GetKeyManager(testJWTRSSignerKeyType)
+	if err != nil {
+		t.Fatalf("registry.GetKeyManager(%q) err = %v, want nil", testJWTRSSignerKeyType, err)
+	}
 	privKey, err := makeValidJWTRSPrivateKey()
 	if err != nil {
 		t.Fatalf("makeValidJWTRSPrivateKey() err = %v, want nil", err)
@@ -262,8 +278,10 @@ func TestJWTRSSignerKeyManagerPrimitiveSignAndVerifyWithCustomKID(t *testing.T) 
 	if _, err := signer.SignAndEncodeWithKID(unsigned, refString("555")); err == nil {
 		t.Fatalf("SignAndEncodeWithKID(kid = '555') err = nil, want error")
 	}
-	// TODO(b/173082704): call registry to get key manager once added to cross language tests.
-	vkm := &jwtRSVerifierKeyManager{}
+	vkm, err := registry.GetKeyManager(testJWTRSVerifierKeyType)
+	if err != nil {
+		t.Fatalf("registry.GetKeyManager(%q) err = %v, want nil", testJWTRSVerifierKeyType, err)
+	}
 	serializedPubKey, err := proto.Marshal(privKey.PublicKey)
 	if err != nil {
 		t.Fatalf("proto.Marshal() err = %v, want nil", err)
@@ -293,8 +311,10 @@ func TestJWTRSSignerKeyManagerPrimitiveFailsWithInvalidKey(t *testing.T) {
 		name    string
 		privKey *jrsppb.JwtRsaSsaPkcs1PrivateKey
 	}
-	// TODO(b/173082704): call registry to get key manager once added to cross language tests.
-	km := newjwtRSSignerKeyManager()
+	km, err := registry.GetKeyManager(testJWTRSSignerKeyType)
+	if err != nil {
+		t.Fatalf("registry.GetKeyManager(%q) err = %v, want nil", testJWTRSSignerKeyType, err)
+	}
 	validPrivKey, err := makeValidJWTRSPrivateKey()
 	if err != nil {
 		t.Fatalf("makeValidJWTRSPrivateKey() err = %v, want nil", err)
@@ -531,8 +551,10 @@ func TestJWTRSSignerKeyManagerPrimitiveFailsWithInvalidKey(t *testing.T) {
 }
 
 func TestJWTRSSignerKeyManagerPublicKeyData(t *testing.T) {
-	// TODO(b/173082704): call registry to get key manager once added to cross language tests.
-	km := newjwtRSSignerKeyManager()
+	km, err := registry.GetKeyManager(testJWTRSSignerKeyType)
+	if err != nil {
+		t.Fatalf("registry.GetKeyManager(%q) err = %v, want nil", testJWTRSSignerKeyType, err)
+	}
 	privKey, err := makeValidJWTRSPrivateKey()
 	if err != nil {
 		t.Fatalf("makeValidJWTRSPrivateKey() err = %v, want nil", err)
@@ -561,16 +583,20 @@ func TestJWTRSSignerKeyManagerPublicKeyData(t *testing.T) {
 }
 
 func TestJWTRSSignerKeyManagerPublicKeyDataWithNilKeyFails(t *testing.T) {
-	// TODO(b/173082704): call registry to get key manager once added to cross language tests.
-	km := newjwtRSSignerKeyManager()
+	km, err := registry.GetKeyManager(testJWTRSSignerKeyType)
+	if err != nil {
+		t.Fatalf("registry.GetKeyManager(%q) err = %v, want nil", testJWTRSSignerKeyType, err)
+	}
 	if _, err := km.(registry.PrivateKeyManager).PublicKeyData(nil); err == nil {
 		t.Fatalf("PublicKeyData(nil) err = nil, want error")
 	}
 }
 
 func TestJWTRSSignerKeyManagerNewKeyData(t *testing.T) {
-	// TODO(b/173082704): call registry to get key manager once added to cross language tests.
-	km := newjwtRSSignerKeyManager()
+	km, err := registry.GetKeyManager(testJWTRSSignerKeyType)
+	if err != nil {
+		t.Fatalf("registry.GetKeyManager(%q) err = %v, want nil", testJWTRSSignerKeyType, err)
+	}
 	type testCase struct {
 		name      string
 		keyFormat *jrsppb.JwtRsaSsaPkcs1KeyFormat
@@ -646,8 +672,10 @@ func TestJWTRSSignerKeyManagerNewKeyDataFailsWithInvalidFormat(t *testing.T) {
 		name      string
 		keyFormat *jrsppb.JwtRsaSsaPkcs1KeyFormat
 	}
-	// TODO(b/173082704): call registry to get key manager once added to cross language tests.
-	km := newjwtRSSignerKeyManager()
+	km, err := registry.GetKeyManager(testJWTRSSignerKeyType)
+	if err != nil {
+		t.Fatalf("registry.GetKeyManager(%q) err = %v, want nil", testJWTRSSignerKeyType, err)
+	}
 	for _, tc := range []testCase{
 		{
 			name:      "nil key format",
@@ -710,8 +738,10 @@ func TestJWTRSSignerKeyManagerNewKeyDataFailsWithInvalidFormat(t *testing.T) {
 }
 
 func TestJWTRSSignerKeyManagerNewKeyDataFailsWithNilKeyFormat(t *testing.T) {
-	// TODO(b/173082704): call registry to get key manager once added to cross language tests.
-	km := newjwtRSSignerKeyManager()
+	km, err := registry.GetKeyManager(testJWTRSSignerKeyType)
+	if err != nil {
+		t.Fatalf("registry.GetKeyManager(%q) err = %v, want nil", testJWTRSSignerKeyType, err)
+	}
 	if _, err := km.NewKeyData(nil); err == nil {
 		t.Fatalf("NewKeyData() err = nil, want error")
 	}
@@ -721,8 +751,10 @@ func TestJWTRSSignerKeyManagerNewKeyDataFailsWithNilKeyFormat(t *testing.T) {
 }
 
 func TestJWTRSSignerKeyManagerNewKeyDataFailsWithInvalidSerializedKeyFormat(t *testing.T) {
-	// TODO(b/173082704): call registry to get key manager once added to cross language tests.
-	km := newjwtRSSignerKeyManager()
+	km, err := registry.GetKeyManager(testJWTRSSignerKeyType)
+	if err != nil {
+		t.Fatalf("registry.GetKeyManager(%q) err = %v, want nil", testJWTRSSignerKeyType, err)
+	}
 	if _, err := km.NewKeyData([]byte("invalid_data")); err == nil {
 		t.Fatalf("NewKeyData() err = nil, want error")
 	}

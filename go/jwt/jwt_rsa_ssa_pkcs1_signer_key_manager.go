@@ -45,11 +45,6 @@ var (
 // for JWT Signing using the 'RS256', 'RS384', and 'RS512' JWA algorithm.
 type jwtRSSignerKeyManager struct{}
 
-// TODO(b/230489047): delete in diffbase once cross language tests are fixed
-func newjwtRSSignerKeyManager() registry.KeyManager {
-	return &jwtRSSignerKeyManager{}
-}
-
 var _ registry.PrivateKeyManager = (*jwtRSSignerKeyManager)(nil)
 
 func bytesToBigInt(v []byte) *big.Int {

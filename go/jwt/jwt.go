@@ -33,4 +33,10 @@ func init() {
 	if err := registry.RegisterKeyManager(new(jwtECDSASignerKeyManager)); err != nil {
 		panic(fmt.Sprintf("jwt.init() failed registering JWT ECDSA signer key manger: %v", err))
 	}
+	if err := registry.RegisterKeyManager(new(jwtRSSignerKeyManager)); err != nil {
+		panic(fmt.Sprintf("jwt.init() failed registering JWT RSA SSA PKCS1 signer key manager: %v", err))
+	}
+	if err := registry.RegisterKeyManager(new(jwtRSVerifierKeyManager)); err != nil {
+		panic(fmt.Sprintf("jwt.init() failed registering JWT RSA SSA PKCS1 verifier key manager: %v", err))
+	}
 }
