@@ -49,3 +49,21 @@ http_archive(
     urls = ["https://github.com/tink-crypto/tink-go/archive/main.zip"],
     strip_prefix = "tink-go-main",
 )
+
+http_archive(
+    name = "tink_go_gcpkms",
+    urls = ["https://github.com/tink-crypto/tink-go-gcpkms/archive/main.zip"],
+    strip_prefix = "tink-go-gcpkms-main",
+)
+
+http_archive(
+    name = "com_github_tink_crypto_tink_go",
+    urls = ["https://github.com/tink-crypto/tink-go/archive/main.zip"],
+    strip_prefix = "tink-go-main",
+)
+
+http_archive(
+    name = "com_github_tink_crypto_tink_go_gcpkms",
+    urls = ["https://github.com/tink-crypto/tink-go-gcpkms/archive/main.zip"],
+    strip_prefix = "tink-go-gcpkms-main",
+)

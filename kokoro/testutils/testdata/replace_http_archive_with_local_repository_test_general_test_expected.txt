@@ -39,3 +39,18 @@ local_repository(
     name = "tink_go",
     path = "/tmp/git/tink_go",
 )
+
+local_repository(
+    name = "tink_go_gcpkms",
+    path = "/tmp/git/tink_go_gcpkms",
+)
+
+local_repository(
+    name = "com_github_tink_crypto_tink_go",
+    path = "/tmp/git/tink_go",
+)
+
+local_repository(
+    name = "com_github_tink_crypto_tink_go_gcpkms",
+    path = "/tmp/git/tink_go_gcpkms",
+)
