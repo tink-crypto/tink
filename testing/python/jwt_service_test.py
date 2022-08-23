@@ -87,6 +87,28 @@ class JwtServiceTest(absltest.TestCase):
     jwt.register_jwt_mac()
     jwt.register_jwt_signature()
 
+  def test_create_jwt_mac(self):
+    keyset_servicer = services.KeysetServicer()
+    jwt_servicer = jwt_service.JwtServicer()
+
+    template = jwt.jwt_hs256_template().SerializeToString()
+    gen_request = testing_api_pb2.KeysetGenerateRequest(template=template)
+    gen_response = keyset_servicer.Generate(gen_request, self._ctx)
+    self.assertEqual(gen_response.WhichOneof('result'), 'keyset')
+
+    creation_request = testing_api_pb2.CreationRequest(
+        keyset=gen_response.keyset)
+    creation_response = jwt_servicer.CreateJwtMac(
+        creation_request, self._ctx)
+    self.assertEmpty(creation_response.err)
+
+  def test_create_jwt_mac_broken_keyset(self):
+    jwt_servicer = jwt_service.JwtServicer()
+
+    creation_request = testing_api_pb2.CreationRequest(keyset=b'\x80')
+    creation_response = jwt_servicer.CreateJwtMac(creation_request, self._ctx)
+    self.assertNotEmpty(creation_response.err)
+
   def test_generate_compute_verify_mac(self):
     keyset_servicer = services.KeysetServicer()
     jwt_servicer = jwt_service.JwtServicer()
@@ -142,6 +164,56 @@ class JwtServiceTest(absltest.TestCase):
     print(verify_response.err)
     self.assertEqual(verify_response.WhichOneof('result'), 'verified_jwt')
     self.assertEqual(verify_response.verified_jwt.issuer.value, 'issuer')
+
+  def test_create_public_key_sign(self):
+    keyset_servicer = services.KeysetServicer()
+    jwt_servicer = jwt_service.JwtServicer()
+
+    template = jwt.jwt_es256_template().SerializeToString()
+    gen_request = testing_api_pb2.KeysetGenerateRequest(template=template)
+    gen_response = keyset_servicer.Generate(gen_request, self._ctx)
+    self.assertEqual(gen_response.WhichOneof('result'), 'keyset')
+
+    creation_request = testing_api_pb2.CreationRequest(
+        keyset=gen_response.keyset)
+    creation_response = jwt_servicer.CreateJwtPublicKeySign(
+        creation_request, self._ctx)
+    self.assertEmpty(creation_response.err)
+
+  def test_create_public_key_sign_bad_keyset(self):
+    jwt_servicer = jwt_service.JwtServicer()
+
+    creation_request = testing_api_pb2.CreationRequest(keyset=b'\x80')
+    creation_response = jwt_servicer.CreateJwtPublicKeySign(
+        creation_request, self._ctx)
+    self.assertNotEmpty(creation_response.err)
+
+  def test_create_public_key_verify(self):
+    keyset_servicer = services.KeysetServicer()
+    jwt_servicer = jwt_service.JwtServicer()
+
+    template = jwt.jwt_es256_template().SerializeToString()
+    gen_request = testing_api_pb2.KeysetGenerateRequest(template=template)
+    gen_response = keyset_servicer.Generate(gen_request, self._ctx)
+    self.assertEqual(gen_response.WhichOneof('result'), 'keyset')
+    pub_request = testing_api_pb2.KeysetPublicRequest(
+        private_keyset=gen_response.keyset)
+    pub_response = keyset_servicer.Public(pub_request, self._ctx)
+    self.assertEqual(pub_response.WhichOneof('result'), 'public_keyset')
+
+    creation_request = testing_api_pb2.CreationRequest(
+        keyset=pub_response.public_keyset)
+    creation_response = jwt_servicer.CreateJwtPublicKeyVerify(
+        creation_request, self._ctx)
+    self.assertEmpty(creation_response.err)
+
+  def test_create_public_key_verify_bad_keyset(self):
+    jwt_servicer = jwt_service.JwtServicer()
+
+    creation_request = testing_api_pb2.CreationRequest(keyset=b'\x80')
+    creation_response = jwt_servicer.CreateJwtPublicKeyVerify(
+        creation_request, self._ctx)
+    self.assertNotEmpty(creation_response.err)
 
   def test_generate_sign_export_import_verify_signature(self):
     keyset_servicer = services.KeysetServicer()

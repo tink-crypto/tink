@@ -380,7 +380,7 @@ class AeadServicer(testing_api_pb2_grpc.AeadServicer):
 
   def Create(self, request: testing_api_pb2.CreationRequest,
              context: grpc.ServicerContext) -> testing_api_pb2.CreationResponse:
-    """Creates an AEAD."""
+    """Creates an AEAD without using it."""
     try:
       keyset_handle = cleartext_keyset_handle.read(
           tink.BinaryKeysetReader(request.keyset))
@@ -418,6 +418,17 @@ class AeadServicer(testing_api_pb2_grpc.AeadServicer):
 
 class StreamingAeadServicer(testing_api_pb2_grpc.StreamingAeadServicer):
   """A service for testing StreamingAEAD encryption."""
+
+  def Create(self, request: testing_api_pb2.CreationRequest,
+             context: grpc.ServicerContext) -> testing_api_pb2.CreationResponse:
+    """Creates a Streaming Aead without using it."""
+    try:
+      keyset_handle = cleartext_keyset_handle.read(
+          tink.BinaryKeysetReader(request.keyset))
+      keyset_handle.primitive(streaming_aead.StreamingAead)
+      return testing_api_pb2.CreationResponse()
+    except tink.TinkError as e:
+      return testing_api_pb2.CreationResponse(err=str(e))
 
   def Encrypt(
       self, request: testing_api_pb2.StreamingAeadEncryptRequest,
@@ -459,7 +470,7 @@ class DeterministicAeadServicer(testing_api_pb2_grpc.DeterministicAeadServicer):
 
   def Create(self, request: testing_api_pb2.CreationRequest,
              context: grpc.ServicerContext) -> testing_api_pb2.CreationResponse:
-    """Creates a Deterministic AEAD."""
+    """Creates a Deterministic AEAD without using it."""
     try:
       keyset_handle = cleartext_keyset_handle.read(
           tink.BinaryKeysetReader(request.keyset))
@@ -504,6 +515,17 @@ class DeterministicAeadServicer(testing_api_pb2_grpc.DeterministicAeadServicer):
 class MacServicer(testing_api_pb2_grpc.MacServicer):
   """A service for testing MACs."""
 
+  def Create(self, request: testing_api_pb2.CreationRequest,
+             context: grpc.ServicerContext) -> testing_api_pb2.CreationResponse:
+    """Creates a MAC without using it."""
+    try:
+      keyset_handle = cleartext_keyset_handle.read(
+          tink.BinaryKeysetReader(request.keyset))
+      keyset_handle.primitive(mac.Mac)
+      return testing_api_pb2.CreationResponse()
+    except tink.TinkError as e:
+      return testing_api_pb2.CreationResponse(err=str(e))
+
   def ComputeMac(
       self, request: testing_api_pb2.ComputeMacRequest,
       context: grpc.ServicerContext) -> testing_api_pb2.ComputeMacResponse:
@@ -533,6 +555,30 @@ class MacServicer(testing_api_pb2_grpc.MacServicer):
 
 class HybridServicer(testing_api_pb2_grpc.HybridServicer):
   """A service for testing hybrid encryption and decryption."""
+
+  def CreateHybridEncrypt(
+      self, request: testing_api_pb2.CreationRequest,
+      context: grpc.ServicerContext) -> testing_api_pb2.CreationResponse:
+    """Creates a HybridEncrypt without using it."""
+    try:
+      keyset_handle = cleartext_keyset_handle.read(
+          tink.BinaryKeysetReader(request.keyset))
+      keyset_handle.primitive(hybrid.HybridEncrypt)
+      return testing_api_pb2.CreationResponse()
+    except tink.TinkError as e:
+      return testing_api_pb2.CreationResponse(err=str(e))
+
+  def CreateHybridDecrypt(
+      self, request: testing_api_pb2.CreationRequest,
+      context: grpc.ServicerContext) -> testing_api_pb2.CreationResponse:
+    """Creates a HybridDecrypt without using it."""
+    try:
+      keyset_handle = cleartext_keyset_handle.read(
+          tink.BinaryKeysetReader(request.keyset))
+      keyset_handle.primitive(hybrid.HybridDecrypt)
+      return testing_api_pb2.CreationResponse()
+    except tink.TinkError as e:
+      return testing_api_pb2.CreationResponse(err=str(e))
 
   def Encrypt(
       self, request: testing_api_pb2.HybridEncryptRequest,
@@ -564,6 +610,30 @@ class HybridServicer(testing_api_pb2_grpc.HybridServicer):
 class SignatureServicer(testing_api_pb2_grpc.SignatureServicer):
   """A service for testing signatures."""
 
+  def CreatePublicKeySign(
+      self, request: testing_api_pb2.CreationRequest,
+      context: grpc.ServicerContext) -> testing_api_pb2.CreationResponse:
+    """Creates a PublicKeySign without using it."""
+    try:
+      keyset_handle = cleartext_keyset_handle.read(
+          tink.BinaryKeysetReader(request.keyset))
+      keyset_handle.primitive(signature.PublicKeySign)
+      return testing_api_pb2.CreationResponse()
+    except tink.TinkError as e:
+      return testing_api_pb2.CreationResponse(err=str(e))
+
+  def CreatePublicKeyVerify(
+      self, request: testing_api_pb2.CreationRequest,
+      context: grpc.ServicerContext) -> testing_api_pb2.CreationResponse:
+    """Creates a PublicKeyVerify without using it."""
+    try:
+      keyset_handle = cleartext_keyset_handle.read(
+          tink.BinaryKeysetReader(request.keyset))
+      keyset_handle.primitive(signature.PublicKeyVerify)
+      return testing_api_pb2.CreationResponse()
+    except tink.TinkError as e:
+      return testing_api_pb2.CreationResponse(err=str(e))
+
   def Sign(
       self, request: testing_api_pb2.SignatureSignRequest,
       context: grpc.ServicerContext) -> testing_api_pb2.SignatureSignResponse:
@@ -593,6 +663,17 @@ class SignatureServicer(testing_api_pb2_grpc.SignatureServicer):
 
 class PrfSetServicer(testing_api_pb2_grpc.PrfSetServicer):
   """A service for testing PrfSet."""
+
+  def Create(self, request: testing_api_pb2.CreationRequest,
+             context: grpc.ServicerContext) -> testing_api_pb2.CreationResponse:
+    """Creates a PrfSet without using it."""
+    try:
+      keyset_handle = cleartext_keyset_handle.read(
+          tink.BinaryKeysetReader(request.keyset))
+      keyset_handle.primitive(prf.PrfSet)
+      return testing_api_pb2.CreationResponse()
+    except tink.TinkError as e:
+      return testing_api_pb2.CreationResponse(err=str(e))
 
   def KeyIds(
       self, request: testing_api_pb2.PrfSetKeyIdsRequest,

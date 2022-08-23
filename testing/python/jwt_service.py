@@ -186,6 +186,42 @@ def validator_from_proto(
 class JwtServicer(testing_api_pb2_grpc.JwtServicer):
   """A service for signing and verifying JWTs."""
 
+  def CreateJwtMac(
+      self, request: testing_api_pb2.CreationRequest,
+      context: grpc.ServicerContext) -> testing_api_pb2.CreationResponse:
+    """Creates a JwtMac without using it."""
+    try:
+      keyset_handle = cleartext_keyset_handle.read(
+          tink.BinaryKeysetReader(request.keyset))
+      keyset_handle.primitive(jwt.JwtMac)
+      return testing_api_pb2.CreationResponse()
+    except tink.TinkError as e:
+      return testing_api_pb2.CreationResponse(err=str(e))
+
+  def CreateJwtPublicKeySign(
+      self, request: testing_api_pb2.CreationRequest,
+      context: grpc.ServicerContext) -> testing_api_pb2.CreationResponse:
+    """Creates a JwtPublicKeySign without using it."""
+    try:
+      keyset_handle = cleartext_keyset_handle.read(
+          tink.BinaryKeysetReader(request.keyset))
+      keyset_handle.primitive(jwt.JwtPublicKeySign)
+      return testing_api_pb2.CreationResponse()
+    except tink.TinkError as e:
+      return testing_api_pb2.CreationResponse(err=str(e))
+
+  def CreateJwtPublicKeyVerify(
+      self, request: testing_api_pb2.CreationRequest,
+      context: grpc.ServicerContext) -> testing_api_pb2.CreationResponse:
+    """Creates a JwtPublicKeyVerify without using it."""
+    try:
+      keyset_handle = cleartext_keyset_handle.read(
+          tink.BinaryKeysetReader(request.keyset))
+      keyset_handle.primitive(jwt.JwtPublicKeyVerify)
+      return testing_api_pb2.CreationResponse()
+    except tink.TinkError as e:
+      return testing_api_pb2.CreationResponse(err=str(e))
+
   def ComputeMacAndEncode(
       self, request: testing_api_pb2.JwtSignRequest,
       context: grpc.ServicerContext) -> testing_api_pb2.JwtSignResponse:

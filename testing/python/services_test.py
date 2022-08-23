@@ -446,6 +446,28 @@ class ServicesTest(absltest.TestCase):
     self.assertEqual(dec_response.WhichOneof('result'), 'err')
     self.assertNotEmpty(dec_response.err)
 
+  def test_create_mac(self):
+    keyset_servicer = services.KeysetServicer()
+    mac_servicer = services.MacServicer()
+
+    template = mac.mac_key_templates.HMAC_SHA256_128BITTAG.SerializeToString()
+    gen_request = testing_api_pb2.KeysetGenerateRequest(template=template)
+    gen_response = keyset_servicer.Generate(gen_request, self._ctx)
+    self.assertEqual(gen_response.WhichOneof('result'), 'keyset')
+
+    creation_request = testing_api_pb2.CreationRequest(
+        keyset=gen_response.keyset)
+    creation_response = mac_servicer.Create(
+        creation_request, self._ctx)
+    self.assertEmpty(creation_response.err)
+
+  def test_create_mac_broken_keyset(self):
+    mac_servicer = services.MacServicer()
+
+    creation_request = testing_api_pb2.CreationRequest(keyset=b'\x80')
+    creation_response = mac_servicer.Create(creation_request, self._ctx)
+    self.assertNotEmpty(creation_response.err)
+
   def test_generate_compute_verify_mac(self):
     keyset_servicer = services.KeysetServicer()
     mac_servicer = services.MacServicer()
@@ -479,6 +501,58 @@ class ServicesTest(absltest.TestCase):
         keyset=keyset, mac_value=b'invalid mac_value', data=b'data')
     verify_response = mac_servicer.VerifyMac(verify_request, self._ctx)
     self.assertNotEmpty(verify_response.err)
+
+  def test_create_hybrid_decrypt(self):
+    keyset_servicer = services.KeysetServicer()
+    hybrid_servicer = services.HybridServicer()
+
+    tp = hybrid.hybrid_key_templates.ECIES_P256_HKDF_HMAC_SHA256_AES128_GCM
+    template = tp.SerializeToString()
+    gen_request = testing_api_pb2.KeysetGenerateRequest(template=template)
+    gen_response = keyset_servicer.Generate(gen_request, self._ctx)
+    self.assertEqual(gen_response.WhichOneof('result'), 'keyset')
+
+    creation_request = testing_api_pb2.CreationRequest(
+        keyset=gen_response.keyset)
+    creation_response = hybrid_servicer.CreateHybridDecrypt(
+        creation_request, self._ctx)
+    self.assertEmpty(creation_response.err)
+
+  def test_create_hybrid_decrypt_bad_keyset(self):
+    hybrid_servicer = services.HybridServicer()
+
+    creation_request = testing_api_pb2.CreationRequest(keyset=b'\x80')
+    creation_response = hybrid_servicer.CreateHybridDecrypt(
+        creation_request, self._ctx)
+    self.assertNotEmpty(creation_response.err)
+
+  def test_create_hybrid_encrypt(self):
+    keyset_servicer = services.KeysetServicer()
+    hybrid_servicer = services.HybridServicer()
+
+    tp = hybrid.hybrid_key_templates.ECIES_P256_HKDF_HMAC_SHA256_AES128_GCM
+    template = tp.SerializeToString()
+    gen_request = testing_api_pb2.KeysetGenerateRequest(template=template)
+    gen_response = keyset_servicer.Generate(gen_request, self._ctx)
+    self.assertEqual(gen_response.WhichOneof('result'), 'keyset')
+    pub_request = testing_api_pb2.KeysetPublicRequest(
+        private_keyset=gen_response.keyset)
+    pub_response = keyset_servicer.Public(pub_request, self._ctx)
+    self.assertEqual(pub_response.WhichOneof('result'), 'public_keyset')
+
+    creation_request = testing_api_pb2.CreationRequest(
+        keyset=pub_response.public_keyset)
+    creation_response = hybrid_servicer.CreateHybridEncrypt(
+        creation_request, self._ctx)
+    self.assertEmpty(creation_response.err)
+
+  def test_create_hybrid_encrypt_bad_keyset(self):
+    hybrid_servicer = services.HybridServicer()
+
+    creation_request = testing_api_pb2.CreationRequest(keyset=b'\x80')
+    creation_response = hybrid_servicer.CreateHybridEncrypt(
+        creation_request, self._ctx)
+    self.assertNotEmpty(creation_response.err)
 
   def test_generate_hybrid_encrypt_decrypt(self):
     keyset_servicer = services.KeysetServicer()
@@ -533,6 +607,56 @@ class ServicesTest(absltest.TestCase):
     dec_response = hybrid_servicer.Decrypt(dec_request, self._ctx)
     self.assertEqual(dec_response.WhichOneof('result'), 'err')
     self.assertNotEmpty(dec_response.err)
+
+  def test_create_public_key_sign(self):
+    keyset_servicer = services.KeysetServicer()
+    signature_servicer = services.SignatureServicer()
+
+    template = signature.signature_key_templates.ECDSA_P256.SerializeToString()
+    gen_request = testing_api_pb2.KeysetGenerateRequest(template=template)
+    gen_response = keyset_servicer.Generate(gen_request, self._ctx)
+    self.assertEqual(gen_response.WhichOneof('result'), 'keyset')
+
+    creation_request = testing_api_pb2.CreationRequest(
+        keyset=gen_response.keyset)
+    creation_response = signature_servicer.CreatePublicKeySign(
+        creation_request, self._ctx)
+    self.assertEmpty(creation_response.err)
+
+  def test_create_public_key_sign_bad_keyset(self):
+    signature_servicer = services.SignatureServicer()
+
+    creation_request = testing_api_pb2.CreationRequest(keyset=b'\x80')
+    creation_response = signature_servicer.CreatePublicKeySign(
+        creation_request, self._ctx)
+    self.assertNotEmpty(creation_response.err)
+
+  def test_create_public_key_verify(self):
+    keyset_servicer = services.KeysetServicer()
+    signature_servicer = services.SignatureServicer()
+
+    template = signature.signature_key_templates.ECDSA_P256.SerializeToString()
+    gen_request = testing_api_pb2.KeysetGenerateRequest(template=template)
+    gen_response = keyset_servicer.Generate(gen_request, self._ctx)
+    self.assertEqual(gen_response.WhichOneof('result'), 'keyset')
+    pub_request = testing_api_pb2.KeysetPublicRequest(
+        private_keyset=gen_response.keyset)
+    pub_response = keyset_servicer.Public(pub_request, self._ctx)
+    self.assertEqual(pub_response.WhichOneof('result'), 'public_keyset')
+
+    creation_request = testing_api_pb2.CreationRequest(
+        keyset=pub_response.public_keyset)
+    creation_response = signature_servicer.CreatePublicKeyVerify(
+        creation_request, self._ctx)
+    self.assertEmpty(creation_response.err)
+
+  def test_create_public_key_verify_bad_keyset(self):
+    signature_servicer = services.SignatureServicer()
+
+    creation_request = testing_api_pb2.CreationRequest(keyset=b'\x80')
+    creation_response = signature_servicer.CreatePublicKeyVerify(
+        creation_request, self._ctx)
+    self.assertNotEmpty(creation_response.err)
 
   def test_sign_verify(self):
     keyset_servicer = services.KeysetServicer()
@@ -591,6 +715,27 @@ class ServicesTest(absltest.TestCase):
     invalid_response = signature_servicer.Verify(invalid_request, self._ctx)
     self.assertNotEmpty(invalid_response.err)
 
+  def test_create_prf_set(self):
+    keyset_servicer = services.KeysetServicer()
+    prf_set_servicer = services.PrfSetServicer()
+
+    template = prf.prf_key_templates.HMAC_SHA256.SerializeToString()
+    gen_request = testing_api_pb2.KeysetGenerateRequest(template=template)
+    gen_response = keyset_servicer.Generate(gen_request, self._ctx)
+    self.assertEqual(gen_response.WhichOneof('result'), 'keyset')
+
+    creation_request = testing_api_pb2.CreationRequest(
+        keyset=gen_response.keyset)
+    creation_response = prf_set_servicer.Create(creation_request, self._ctx)
+    self.assertEmpty(creation_response.err)
+
+  def test_create_prf_set_wrong_keyset(self):
+    prf_set_servicer = services.PrfSetServicer()
+
+    creation_request = testing_api_pb2.CreationRequest(keyset=b'\x80')
+    creation_response = prf_set_servicer.Create(creation_request, self._ctx)
+    self.assertNotEmpty(creation_response.err)
+
   def test_compute_prf(self):
     keyset_servicer = services.KeysetServicer()
     prf_set_servicer = services.PrfSetServicer()
@@ -646,6 +791,30 @@ class ServicesTest(absltest.TestCase):
                                                         self._ctx)
     self.assertEqual(invalid_compute_response.WhichOneof('result'), 'err')
     self.assertNotEmpty(invalid_compute_response.err)
+
+  def test_create_streaming_aead(self):
+    keyset_servicer = services.KeysetServicer()
+    streaming_aead_servicer = services.StreamingAeadServicer()
+
+    templates = streaming_aead.streaming_aead_key_templates
+    template = templates.AES128_CTR_HMAC_SHA256_4KB.SerializeToString()
+    gen_request = testing_api_pb2.KeysetGenerateRequest(template=template)
+    gen_response = keyset_servicer.Generate(gen_request, self._ctx)
+    self.assertEqual(gen_response.WhichOneof('result'), 'keyset')
+
+    creation_request = testing_api_pb2.CreationRequest(
+        keyset=gen_response.keyset)
+    creation_response = streaming_aead_servicer.Create(
+        creation_request, self._ctx)
+    self.assertEmpty(creation_response.err)
+
+  def test_create_streaming_aead_broken_keyset(self):
+    streaming_aead_servicer = services.StreamingAeadServicer()
+
+    creation_request = testing_api_pb2.CreationRequest(keyset=b'\x80')
+    creation_response = streaming_aead_servicer.Create(creation_request,
+                                                       self._ctx)
+    self.assertNotEmpty(creation_response.err)
 
   def test_generate_streaming_encrypt_decrypt(self):
     keyset_servicer = services.KeysetServicer()
