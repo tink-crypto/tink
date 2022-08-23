@@ -167,3 +167,4 @@ Alumni:
 -   Enzo Puig
 -   Veronika Slívová
 -   Paula Vidas
+-   Cathie Yun
