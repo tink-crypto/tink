@@ -17,9 +17,6 @@
 package com.google.crypto.tink.testing;
 
 import com.google.crypto.tink.Aead;
-import com.google.crypto.tink.BinaryKeysetReader;
-import com.google.crypto.tink.CleartextKeysetHandle;
-import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.testing.proto.AeadDecryptRequest;
 import com.google.crypto.tink.testing.proto.AeadDecryptResponse;
 import com.google.crypto.tink.testing.proto.AeadEncryptRequest;
@@ -41,9 +38,12 @@ public final class AeadServiceImpl extends AeadImplBase {
     Util.createPrimitiveForRpc(request, responseObserver, Aead.class);
   }
 
-  AeadEncryptResponse encryptWithAead(Aead aead, byte[] plaintext, byte[] associatedData) {
+  AeadEncryptResponse encrypt(AeadEncryptRequest request) throws GeneralSecurityException {
+    Aead aead = Util.parseBinaryProtoKeyset(request.getKeyset()).getPrimitive(Aead.class);
     try {
-      byte[] ciphertext = aead.encrypt(plaintext, associatedData);
+      byte[] ciphertext =
+          aead.encrypt(
+              request.getPlaintext().toByteArray(), request.getAssociatedData().toByteArray());
       return AeadEncryptResponse.newBuilder()
           .setCiphertext(ByteString.copyFrom(ciphertext))
           .build();
@@ -52,33 +52,28 @@ public final class AeadServiceImpl extends AeadImplBase {
     }
   }
 
-  AeadDecryptResponse decryptWithAead(Aead aead, byte[] ciphertext, byte[] associatedData) {
-    try {
-      byte[] plaintext = aead.decrypt(ciphertext, associatedData);
-      return AeadDecryptResponse.newBuilder().setPlaintext(ByteString.copyFrom(plaintext)).build();
-    } catch (GeneralSecurityException e) {
-      return AeadDecryptResponse.newBuilder().setErr(e.toString()).build();
-    }
-  }
-
   /** Encrypts a message. */
   @Override
   public void encrypt(
       AeadEncryptRequest request, StreamObserver<AeadEncryptResponse> responseObserver) {
     try {
-      KeysetHandle keysetHandle =
-          CleartextKeysetHandle.read(
-              BinaryKeysetReader.withBytes(request.getKeyset().toByteArray()));
-      Aead aead = keysetHandle.getPrimitive(Aead.class);
-      AeadEncryptResponse response =
-          encryptWithAead(
-              aead,
-              request.getPlaintext().toByteArray(),
-              request.getAssociatedData().toByteArray());
+      AeadEncryptResponse response = encrypt(request);
       responseObserver.onNext(response);
       responseObserver.onCompleted();
     } catch (Exception e) {
       responseObserver.onError(e);
+    }
+  }
+
+  AeadDecryptResponse decrypt(AeadDecryptRequest request) throws GeneralSecurityException {
+    Aead aead = Util.parseBinaryProtoKeyset(request.getKeyset()).getPrimitive(Aead.class);
+    try {
+      byte[] plaintext =
+          aead.decrypt(
+              request.getCiphertext().toByteArray(), request.getAssociatedData().toByteArray());
+      return AeadDecryptResponse.newBuilder().setPlaintext(ByteString.copyFrom(plaintext)).build();
+    } catch (GeneralSecurityException e) {
+      return AeadDecryptResponse.newBuilder().setErr(e.toString()).build();
     }
   }
 
@@ -87,15 +82,7 @@ public final class AeadServiceImpl extends AeadImplBase {
   public void decrypt(
       AeadDecryptRequest request, StreamObserver<AeadDecryptResponse> responseObserver) {
     try {
-      KeysetHandle keysetHandle =
-          CleartextKeysetHandle.read(
-              BinaryKeysetReader.withBytes(request.getKeyset().toByteArray()));
-      Aead aead = keysetHandle.getPrimitive(Aead.class);
-      AeadDecryptResponse response =
-          decryptWithAead(
-              aead,
-              request.getCiphertext().toByteArray(),
-              request.getAssociatedData().toByteArray());
+      AeadDecryptResponse response = decrypt(request);
       responseObserver.onNext(response);
       responseObserver.onCompleted();
     } catch (Exception e) {

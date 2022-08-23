@@ -21,6 +21,7 @@ import com.google.crypto.tink.CleartextKeysetHandle;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.testing.proto.CreationRequest;
 import com.google.crypto.tink.testing.proto.CreationResponse;
+import com.google.protobuf.ByteString;
 import io.grpc.stub.StreamObserver;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
@@ -29,6 +30,15 @@ import java.security.GeneralSecurityException;
  * Utility functions for implementing Services.
  */
 final class Util {
+  static KeysetHandle parseBinaryProtoKeyset(ByteString serializedKeyset)
+      throws GeneralSecurityException {
+    try {
+      return CleartextKeysetHandle.read(
+          BinaryKeysetReader.withBytes(serializedKeyset.toByteArray()));
+    } catch (IOException e) {
+      throw new GeneralSecurityException(e);
+    }
+  }
 
   /** Responds to a "create" request for a specific class */
   static void createPrimitiveForRpc(
@@ -36,11 +46,9 @@ final class Util {
       StreamObserver<CreationResponse> responseObserver,
       Class<?> primitiveClass) {
     try {
-      KeysetHandle keysetHandle =
-          CleartextKeysetHandle.read(
-              BinaryKeysetReader.withBytes(request.getKeyset().toByteArray()));
+      KeysetHandle keysetHandle = parseBinaryProtoKeyset (request.getKeyset());
       keysetHandle.getPrimitive(primitiveClass);
-    } catch (GeneralSecurityException | IOException e) {
+    } catch (GeneralSecurityException e) {
       responseObserver.onNext(CreationResponse.newBuilder().setErr(e.toString()).build());
       responseObserver.onCompleted();
       return;
