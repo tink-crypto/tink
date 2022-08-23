@@ -16,76 +16,77 @@
 
 package com.google.crypto.tink.testing;
 
-import com.google.crypto.tink.BinaryKeysetReader;
-import com.google.crypto.tink.CleartextKeysetHandle;
 import com.google.crypto.tink.HybridDecrypt;
 import com.google.crypto.tink.HybridEncrypt;
-import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.testing.proto.HybridDecryptRequest;
 import com.google.crypto.tink.testing.proto.HybridDecryptResponse;
 import com.google.crypto.tink.testing.proto.HybridEncryptRequest;
 import com.google.crypto.tink.testing.proto.HybridEncryptResponse;
 import com.google.crypto.tink.testing.proto.HybridGrpc.HybridImplBase;
 import com.google.protobuf.ByteString;
-import com.google.protobuf.InvalidProtocolBufferException;
-import io.grpc.Status;
 import io.grpc.stub.StreamObserver;
-import java.io.IOException;
 import java.security.GeneralSecurityException;
 
 /** Implements a gRPC Hybrid Encryption Testing service. */
 public final class HybridServiceImpl extends HybridImplBase {
 
-  public HybridServiceImpl() throws GeneralSecurityException {
-  }
+  public HybridServiceImpl() throws GeneralSecurityException {}
 
-  /** Encrypts a message. */
-  @Override
-  public void encrypt(
-      HybridEncryptRequest request, StreamObserver<HybridEncryptResponse> responseObserver) {
-    HybridEncryptResponse response;
+  private HybridEncryptResponse encrypt(HybridEncryptRequest request)
+      throws GeneralSecurityException {
     try {
-      KeysetHandle publicKeysetHandle =
-          CleartextKeysetHandle.read(
-              BinaryKeysetReader.withBytes(request.getPublicKeyset().toByteArray()));
-      HybridEncrypt hybridEncrypt = publicKeysetHandle.getPrimitive(HybridEncrypt.class);
+      // TODO(b/241219877) Move the next line out from the try-catch block.
+      HybridEncrypt hybridEncrypt =
+          Util.parseBinaryProtoKeyset(request.getPublicKeyset()).getPrimitive(HybridEncrypt.class);
       byte[] ciphertext =
           hybridEncrypt.encrypt(
               request.getPlaintext().toByteArray(), request.getContextInfo().toByteArray());
-      response =
-          HybridEncryptResponse.newBuilder().setCiphertext(ByteString.copyFrom(ciphertext)).build();
-    } catch (GeneralSecurityException | InvalidProtocolBufferException e)  {
-      response = HybridEncryptResponse.newBuilder().setErr(e.toString()).build();
-    } catch (IOException e) {
-      responseObserver.onError(Status.UNKNOWN.withDescription(e.getMessage()).asException());
-      return;
+      return HybridEncryptResponse.newBuilder()
+          .setCiphertext(ByteString.copyFrom(ciphertext))
+          .build();
+    } catch (GeneralSecurityException e) {
+      return HybridEncryptResponse.newBuilder().setErr(e.toString()).build();
     }
-    responseObserver.onNext(response);
-    responseObserver.onCompleted();
   }
 
-  /** Decrypts a message. */
   @Override
-  public void decrypt(
-      HybridDecryptRequest request, StreamObserver<HybridDecryptResponse> responseObserver) {
-    HybridDecryptResponse response;
+  public void encrypt(
+      HybridEncryptRequest request, StreamObserver<HybridEncryptResponse> responseObserver) {
     try {
-      KeysetHandle privateKeysetHandle =
-          CleartextKeysetHandle.read(
-              BinaryKeysetReader.withBytes(request.getPrivateKeyset().toByteArray()));
-      HybridDecrypt hybridDecrypt = privateKeysetHandle.getPrimitive(HybridDecrypt.class);
+      HybridEncryptResponse response = encrypt(request);
+      responseObserver.onNext(response);
+      responseObserver.onCompleted();
+    } catch (GeneralSecurityException e) {
+      responseObserver.onError(e);
+    }
+  }
+
+  private HybridDecryptResponse decrypt(HybridDecryptRequest request)
+      throws GeneralSecurityException {
+    try {
+      // TODO(b/241219877) Move the next line out from the try-catch block.
+      HybridDecrypt hybridDecrypt =
+          Util.parseBinaryProtoKeyset(request.getPrivateKeyset()).getPrimitive(HybridDecrypt.class);
       byte[] plaintext =
           hybridDecrypt.decrypt(
               request.getCiphertext().toByteArray(), request.getContextInfo().toByteArray());
-      response =
-          HybridDecryptResponse.newBuilder().setPlaintext(ByteString.copyFrom(plaintext)).build();
-    } catch (GeneralSecurityException | InvalidProtocolBufferException e) {
-      response = HybridDecryptResponse.newBuilder().setErr(e.toString()).build();
-    } catch (IOException e) {
-      responseObserver.onError(Status.UNKNOWN.withDescription(e.getMessage()).asException());
-      return;
+      return HybridDecryptResponse.newBuilder()
+          .setPlaintext(ByteString.copyFrom(plaintext))
+          .build();
+    } catch (GeneralSecurityException e) {
+      return HybridDecryptResponse.newBuilder().setErr(e.toString()).build();
     }
-    responseObserver.onNext(response);
-    responseObserver.onCompleted();
+  }
+
+  @Override
+  public void decrypt(
+      HybridDecryptRequest request, StreamObserver<HybridDecryptResponse> responseObserver) {
+    try {
+      HybridDecryptResponse response = decrypt(request);
+      responseObserver.onNext(response);
+      responseObserver.onCompleted();
+    } catch (GeneralSecurityException e) {
+      responseObserver.onError(e);
+    }
   }
 }

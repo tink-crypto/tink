@@ -134,50 +134,55 @@ public final class JwtServiceImpl extends JwtImplBase {
     return rawJwtBuilder.build();
   }
 
-  /** Creates a signed compact JWT. */
+  private JwtSignResponse computeMacAndEncode(JwtSignRequest request)
+      throws GeneralSecurityException {
+    try {
+      // TODO(b/241219877) Move the next line out from the try-catch block.
+      JwtMac jwtMac = Util.parseBinaryProtoKeyset(request.getKeyset()).getPrimitive(JwtMac.class);
+      RawJwt rawJwt = convertJwtTokenToRawJwt(request.getRawJwt());
+      String signedCompactJwt = jwtMac.computeMacAndEncode(rawJwt);
+      return JwtSignResponse.newBuilder().setSignedCompactJwt(signedCompactJwt).build();
+    } catch (GeneralSecurityException e)  {
+      return JwtSignResponse.newBuilder().setErr(e.toString()).build();
+    }
+  }
+
   @Override
   public void computeMacAndEncode(
       JwtSignRequest request, StreamObserver<JwtSignResponse> responseObserver) {
-    JwtSignResponse response;
     try {
-      KeysetHandle keysetHandle =
-          CleartextKeysetHandle.read(
-              BinaryKeysetReader.withBytes(request.getKeyset().toByteArray()));
-      RawJwt rawJwt = convertJwtTokenToRawJwt(request.getRawJwt());
-      JwtMac jwtMac = keysetHandle.getPrimitive(JwtMac.class);
-      String signedCompactJwt = jwtMac.computeMacAndEncode(rawJwt);
-      response = JwtSignResponse.newBuilder().setSignedCompactJwt(signedCompactJwt).build();
-    } catch (GeneralSecurityException | InvalidProtocolBufferException e)  {
-      response = JwtSignResponse.newBuilder().setErr(e.toString()).build();
-    } catch (IOException e) {
-      responseObserver.onError(Status.UNKNOWN.withDescription(e.getMessage()).asException());
-      return;
+      JwtSignResponse response = computeMacAndEncode(request);
+      responseObserver.onNext(response);
+      responseObserver.onCompleted();
+    } catch (Exception e) {
+      responseObserver.onError(e);
     }
-    responseObserver.onNext(response);
-    responseObserver.onCompleted();
   }
 
-  /** Creates a signed compact JWT. */
+  private JwtSignResponse publicKeySignAndEncode(
+      JwtSignRequest request) throws GeneralSecurityException {
+    try {
+      // TODO(b/241219877) Move the next line out from the try-catch block.
+      JwtPublicKeySign signer =
+          Util.parseBinaryProtoKeyset(request.getKeyset()).getPrimitive(JwtPublicKeySign.class);
+      RawJwt rawJwt = convertJwtTokenToRawJwt(request.getRawJwt());
+      String signedCompactJwt = signer.signAndEncode(rawJwt);
+      return JwtSignResponse.newBuilder().setSignedCompactJwt(signedCompactJwt).build();
+    } catch (GeneralSecurityException e)  {
+      return JwtSignResponse.newBuilder().setErr(e.toString()).build();
+    }
+  }
+
   @Override
   public void publicKeySignAndEncode(
       JwtSignRequest request, StreamObserver<JwtSignResponse> responseObserver) {
-    JwtSignResponse response;
     try {
-      KeysetHandle keysetHandle =
-          CleartextKeysetHandle.read(
-              BinaryKeysetReader.withBytes(request.getKeyset().toByteArray()));
-      RawJwt rawJwt = convertJwtTokenToRawJwt(request.getRawJwt());
-      JwtPublicKeySign signer = keysetHandle.getPrimitive(JwtPublicKeySign.class);
-      String signedCompactJwt = signer.signAndEncode(rawJwt);
-      response = JwtSignResponse.newBuilder().setSignedCompactJwt(signedCompactJwt).build();
-    } catch (GeneralSecurityException | InvalidProtocolBufferException e)  {
-      response = JwtSignResponse.newBuilder().setErr(e.toString()).build();
-    } catch (IOException e) {
-      responseObserver.onError(Status.UNKNOWN.withDescription(e.getMessage()).asException());
-      return;
+      JwtSignResponse response = publicKeySignAndEncode(request);
+      responseObserver.onNext(response);
+      responseObserver.onCompleted();
+    } catch (Exception e) {
+      responseObserver.onError(e);
     }
-    responseObserver.onNext(response);
-    responseObserver.onCompleted();
   }
 
   private void addCustomClaimToBuilder(VerifiedJwt token, String name, JwtToken.Builder builder)
@@ -288,54 +293,60 @@ public final class JwtServiceImpl extends JwtImplBase {
     return validatorBuilder.build();
   }
 
-  /** Decodes and verifies a signed, compact JWT. */
+  private JwtVerifyResponse verifyMacAndDecode(JwtVerifyRequest request)
+      throws GeneralSecurityException {
+    try {
+      // TODO(b/241219877) Move the next line out from the try-catch block.
+      JwtMac jwtMac =
+          Util.parseBinaryProtoKeyset(request.getKeyset()).getPrimitive(JwtMac.class);
+      JwtValidator validator = convertProtoValidatorToValidator(request.getValidator());
+      VerifiedJwt verifiedJwt = jwtMac.verifyMacAndDecode(request.getSignedCompactJwt(), validator);
+      JwtToken token = convertVerifiedJwtToJwtToken(verifiedJwt);
+      return JwtVerifyResponse.newBuilder().setVerifiedJwt(token).build();
+    } catch (GeneralSecurityException e) {
+      return JwtVerifyResponse.newBuilder().setErr(e.toString()).build();
+    }
+  }
+
   @Override
   public void verifyMacAndDecode(
       JwtVerifyRequest request,
       StreamObserver<JwtVerifyResponse> responseObserver) {
-    JwtVerifyResponse response;
     try {
-      KeysetHandle keysetHandle =
-          CleartextKeysetHandle.read(
-              BinaryKeysetReader.withBytes(request.getKeyset().toByteArray()));
-      JwtValidator validator = convertProtoValidatorToValidator(request.getValidator());
-      JwtMac jwtMac = keysetHandle.getPrimitive(JwtMac.class);
-      VerifiedJwt verifiedJwt = jwtMac.verifyMacAndDecode(request.getSignedCompactJwt(), validator);
-      JwtToken token = convertVerifiedJwtToJwtToken(verifiedJwt);
-      response = JwtVerifyResponse.newBuilder().setVerifiedJwt(token).build();
-    } catch (GeneralSecurityException | InvalidProtocolBufferException e) {
-      response = JwtVerifyResponse.newBuilder().setErr(e.toString()).build();
-    } catch (IOException e) {
-      responseObserver.onError(Status.UNKNOWN.withDescription(e.getMessage()).asException());
-      return;
+      JwtVerifyResponse response = verifyMacAndDecode(request);
+      responseObserver.onNext(response);
+      responseObserver.onCompleted();
+    } catch (Exception e) {
+      responseObserver.onError(e);
     }
-    responseObserver.onNext(response);
-    responseObserver.onCompleted();
   }
 
-  /** Decodes and verifies a signed, compact JWT. */
+  private JwtVerifyResponse publicKeyVerifyAndDecode(JwtVerifyRequest request)
+      throws GeneralSecurityException {
+    try {
+      // TODO(b/241219877) Move the next line out from the try-catch block.
+      JwtPublicKeyVerify verifier =
+          Util.parseBinaryProtoKeyset(request.getKeyset()).getPrimitive(JwtPublicKeyVerify.class);
+      JwtValidator validator = convertProtoValidatorToValidator(request.getValidator());
+      VerifiedJwt verifiedJwt = verifier.verifyAndDecode(request.getSignedCompactJwt(), validator);
+      JwtToken token = convertVerifiedJwtToJwtToken(verifiedJwt);
+      return JwtVerifyResponse.newBuilder().setVerifiedJwt(token).build();
+    } catch (GeneralSecurityException e) {
+      return JwtVerifyResponse.newBuilder().setErr(e.toString()).build();
+    }
+  }
+
   @Override
   public void publicKeyVerifyAndDecode(
       JwtVerifyRequest request,
       StreamObserver<JwtVerifyResponse> responseObserver) {
-    JwtVerifyResponse response;
     try {
-      KeysetHandle keysetHandle =
-          CleartextKeysetHandle.read(
-              BinaryKeysetReader.withBytes(request.getKeyset().toByteArray()));
-      JwtValidator validator = convertProtoValidatorToValidator(request.getValidator());
-      JwtPublicKeyVerify verifier = keysetHandle.getPrimitive(JwtPublicKeyVerify.class);
-      VerifiedJwt verifiedJwt = verifier.verifyAndDecode(request.getSignedCompactJwt(), validator);
-      JwtToken token = convertVerifiedJwtToJwtToken(verifiedJwt);
-      response = JwtVerifyResponse.newBuilder().setVerifiedJwt(token).build();
-    } catch (GeneralSecurityException | InvalidProtocolBufferException e) {
-      response = JwtVerifyResponse.newBuilder().setErr(e.toString()).build();
-    } catch (IOException e) {
-      responseObserver.onError(Status.UNKNOWN.withDescription(e.getMessage()).asException());
-      return;
+      JwtVerifyResponse response = publicKeyVerifyAndDecode(request);
+      responseObserver.onNext(response);
+      responseObserver.onCompleted();
+    } catch (GeneralSecurityException e) {
+      responseObserver.onError(e);
     }
-    responseObserver.onNext(response);
-    responseObserver.onCompleted();
   }
 
   /** Converts a Tink JWT Keyset to a JWK set. */
