@@ -4,10 +4,7 @@ java_test(
     name = "GcpKmsClientTest",
     size = "small",
     srcs = ["GcpKmsClientTest.java"],
-    data = ["//testdata/gcp:credential.json"],
-    runtime_deps = [
-        "@maven//:com_fasterxml_jackson_core_jackson_core",
-    ],
+    data = ["//testdata/gcp:credentials"],
     deps = [
         "//src/main/java/com/google/crypto/tink:kms_client",
         "//src/main/java/com/google/crypto/tink:kms_clients",
