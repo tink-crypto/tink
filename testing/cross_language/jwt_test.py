@@ -40,15 +40,6 @@ def tearDownModule():
 # maps from key_template_name to supported_langs. Templates for a key type
 # that aren't widely deployed across a language.
 _ADDITIONAL_KEY_TEMPLATES = {
-    # JWT_RS in development in go b/230489047
-    'JWT_RS256_2048_F4': ['cc', 'java', 'go', 'python'],
-    'JWT_RS256_2048_F4_RAW': ['cc', 'java', 'go', 'python'],
-    'JWT_RS256_3072_F4': ['cc', 'java', 'go', 'python'],
-    'JWT_RS256_3072_F4_RAW': ['cc', 'java', 'go', 'python'],
-    'JWT_RS384_3072_F4': ['cc', 'java', 'go', 'python'],
-    'JWT_RS384_3072_F4_RAW': ['cc', 'java', 'go', 'python'],
-    'JWT_RS512_4096_F4': ['cc', 'java', 'go', 'python'],
-    'JWT_RS512_4096_F4_RAW': ['cc', 'java', 'go', 'python'],
     # JWT PS in development in go b/230489047
     'JWT_PS256_2048_F4': ['cc', 'java', 'python'],
     'JWT_PS256_2048_F4_RAW': ['cc', 'java', 'python'],

@@ -193,7 +193,7 @@ func RawRS384_3072_F4_Key_Template() *tinkpb.KeyTemplate {
 // RS512_4096_F4_Key_Template creates a JWT key template for JWA algorithm "RS512", which is digital
 // signature with RSA-SSA-PKCS1 and SHA512. It will set a key ID header "kid" in the token.
 func RS512_4096_F4_Key_Template() *tinkpb.KeyTemplate {
-	return createJWTRSKeyTemplate(jrsppb.JwtRsaSsaPkcs1Algorithm_RS384, 4096, tinkpb.OutputPrefixType_TINK)
+	return createJWTRSKeyTemplate(jrsppb.JwtRsaSsaPkcs1Algorithm_RS512, 4096, tinkpb.OutputPrefixType_TINK)
 }
 
 // RawRS512_4096_F4_Key_Template creates a JWT key template for JWA algorithm "RS512", which is digital
