@@ -27,6 +27,7 @@ from tink import prf
 from tink import signature
 from tink import streaming_aead
 
+from tink.integration import gcpkms
 from tink.testing import fake_kms
 
 from proto import testing_api_pb2_grpc
@@ -38,8 +39,11 @@ FLAGS = flags.FLAGS
 
 flags.DEFINE_integer('port', 10000, 'The port of the server.')
 
+_GCP_CREDENTIAL_PATH = 'testdata/gcp/credential.json'
 
-def main(unused_argv):
+
+def init_tink() -> None:
+  """Initializes Tink registering the required primitives."""
   aead.register()
   daead.register()
   hybrid.register()
@@ -50,6 +54,13 @@ def main(unused_argv):
   jwt.register_jwt_mac()
   jwt.register_jwt_signature()
   fake_kms.register_client()
+  gcpkms.GcpKmsClient.register_client(
+      key_uri='', credentials_path=_GCP_CREDENTIAL_PATH)
+
+
+def main(unused_argv):
+  init_tink()
+
   server = grpc.server(futures.ThreadPoolExecutor(max_workers=2))
   testing_api_pb2_grpc.add_MetadataServicer_to_server(
       services.MetadataServicer(), server)

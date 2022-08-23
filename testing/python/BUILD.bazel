@@ -86,6 +86,7 @@ py_test(
 py_binary(
     name = "testing_server",
     srcs = ["testing_server.py"],
+    data = ["//testdata/gcp:credentials"],
     python_version = "PY3",
     srcs_version = "PY3",
     deps = [
@@ -98,6 +99,7 @@ py_binary(
         "@tink_py//tink/aead",
         "@tink_py//tink/daead",
         "@tink_py//tink/hybrid",
+        "@tink_py//tink/integration/gcpkms",
         "@tink_py//tink/jwt",
         "@tink_py//tink/mac",
         "@tink_py//tink/signature",
