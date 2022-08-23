@@ -20,6 +20,8 @@ import (
 	"google.golang.org/protobuf/proto"
 	jepb "github.com/google/tink/go/proto/jwt_ecdsa_go_proto"
 	jwtmacpb "github.com/google/tink/go/proto/jwt_hmac_go_proto"
+	jrsppb "github.com/google/tink/go/proto/jwt_rsa_ssa_pkcs1_go_proto"
+	jrpsspb "github.com/google/tink/go/proto/jwt_rsa_ssa_pss_go_proto"
 	tinkpb "github.com/google/tink/go/proto/tink_go_proto"
 )
 
@@ -45,6 +47,36 @@ func createJWTECDSAKeyTemplate(algorithm jepb.JwtEcdsaAlgorithm, outputPrefixTyp
 	serializedFormat, _ := proto.Marshal(format)
 	return &tinkpb.KeyTemplate{
 		TypeUrl:          jwtECDSASignerTypeURL,
+		Value:            serializedFormat,
+		OutputPrefixType: outputPrefixType,
+	}
+}
+
+func createJWTRSKeyTemplate(algorithm jrsppb.JwtRsaSsaPkcs1Algorithm, modulusSizeInBits uint32, outputPrefixType tinkpb.OutputPrefixType) *tinkpb.KeyTemplate {
+	format := &jrsppb.JwtRsaSsaPkcs1KeyFormat{
+		Version:           jwtRSSignerKeyVersion,
+		Algorithm:         algorithm,
+		ModulusSizeInBits: modulusSizeInBits,
+		PublicExponent:    []byte{0x01, 0x00, 0x01},
+	}
+	serializedFormat, _ := proto.Marshal(format)
+	return &tinkpb.KeyTemplate{
+		TypeUrl:          jwtRSSignerTypeURL,
+		Value:            serializedFormat,
+		OutputPrefixType: outputPrefixType,
+	}
+}
+
+func createJWTPSKeyTemplate(algorithm jrpsspb.JwtRsaSsaPssAlgorithm, modulusSizeInBits uint32, outputPrefixType tinkpb.OutputPrefixType) *tinkpb.KeyTemplate {
+	format := &jrpsspb.JwtRsaSsaPssKeyFormat{
+		Version:           jwtPSSignerKeyVersion,
+		Algorithm:         algorithm,
+		PublicExponent:    []byte{0x01, 0x00, 0x01},
+		ModulusSizeInBits: modulusSizeInBits,
+	}
+	serializedFormat, _ := proto.Marshal(format)
+	return &tinkpb.KeyTemplate{
+		TypeUrl:          jwtPSSignerTypeURL,
 		Value:            serializedFormat,
 		OutputPrefixType: outputPrefixType,
 	}
@@ -120,4 +152,52 @@ func ES512Template() *tinkpb.KeyTemplate {
 // signature with the NIST P-521 curve. It will not set a key ID header "kid" in the token.
 func RawES512Template() *tinkpb.KeyTemplate {
 	return createJWTECDSAKeyTemplate(jepb.JwtEcdsaAlgorithm_ES512, tinkpb.OutputPrefixType_RAW)
+}
+
+// RS256_2048_F4_Key_Template creates a JWT key template for JWA algorithm "RS256", which is digital
+// signature with RSA-SSA-PKCS1 and SHA256. It will set a key ID header "kid" in the token.
+func RS256_2048_F4_Key_Template() *tinkpb.KeyTemplate {
+	return createJWTRSKeyTemplate(jrsppb.JwtRsaSsaPkcs1Algorithm_RS256, 2048, tinkpb.OutputPrefixType_TINK)
+}
+
+// RawRS256_2048_F4_Key_Template creates a JWT key template for JWA algorithm "RS256", which is digital
+// signature with RSA-SSA-PKCS1 and SHA256. It will not set a key ID header "kid" in the token.
+func RawRS256_2048_F4_Key_Template() *tinkpb.KeyTemplate {
+	return createJWTRSKeyTemplate(jrsppb.JwtRsaSsaPkcs1Algorithm_RS256, 2048, tinkpb.OutputPrefixType_RAW)
+}
+
+// RS256_3072_F4_Key_Template creates a JWT key template for JWA algorithm "RS256", which is digital
+// signature with RSA-SSA-PKCS1 and SHA256. It will set a key ID header "kid" in the token.
+func RS256_3072_F4_Key_Template() *tinkpb.KeyTemplate {
+	return createJWTRSKeyTemplate(jrsppb.JwtRsaSsaPkcs1Algorithm_RS256, 3072, tinkpb.OutputPrefixType_TINK)
+}
+
+// RawRS256_3072_F4_Key_Template creates a JWT key template for JWA algorithm "RS256", which is digital
+// signature with RSA-SSA-PKCS1 and SHA256. It will not set a key ID header "kid" in the token.
+func RawRS256_3072_F4_Key_Template() *tinkpb.KeyTemplate {
+	return createJWTRSKeyTemplate(jrsppb.JwtRsaSsaPkcs1Algorithm_RS256, 3072, tinkpb.OutputPrefixType_RAW)
+}
+
+// RS384_3072_F4_Key_Template creates a JWT key template for JWA algorithm "RS384", which is digital
+// signature with RSA-SSA-PKCS1 and SHA384. It will set a key ID header "kid" in the token.
+func RS384_3072_F4_Key_Template() *tinkpb.KeyTemplate {
+	return createJWTRSKeyTemplate(jrsppb.JwtRsaSsaPkcs1Algorithm_RS384, 3072, tinkpb.OutputPrefixType_TINK)
+}
+
+// RawRS384_3072_F4_Key_Template creates a JWT key template for JWA algorithm "RS384", which is digital
+// signature with RSA-SSA-PKCS1 and SHA384. It will not set a key ID header "kid" in the token.
+func RawRS384_3072_F4_Key_Template() *tinkpb.KeyTemplate {
+	return createJWTRSKeyTemplate(jrsppb.JwtRsaSsaPkcs1Algorithm_RS384, 3072, tinkpb.OutputPrefixType_RAW)
+}
+
+// RS512_4096_F4_Key_Template creates a JWT key template for JWA algorithm "RS512", which is digital
+// signature with RSA-SSA-PKCS1 and SHA512. It will set a key ID header "kid" in the token.
+func RS512_4096_F4_Key_Template() *tinkpb.KeyTemplate {
+	return createJWTRSKeyTemplate(jrsppb.JwtRsaSsaPkcs1Algorithm_RS384, 4096, tinkpb.OutputPrefixType_TINK)
+}
+
+// RawRS512_4096_F4_Key_Template creates a JWT key template for JWA algorithm "RS512", which is digital
+// signature with RSA-SSA-PKCS1 and SHA512. It will not set a key ID header "kid" in the token.
+func RawRS512_4096_F4_Key_Template() *tinkpb.KeyTemplate {
+	return createJWTRSKeyTemplate(jrsppb.JwtRsaSsaPkcs1Algorithm_RS512, 4096, tinkpb.OutputPrefixType_RAW)
 }

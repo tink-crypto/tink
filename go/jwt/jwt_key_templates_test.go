@@ -67,7 +67,7 @@ func TestJWTComputeVerifyMAC(t *testing.T) {
 	}
 }
 
-func TestJWTSignVerifyECDSA(t *testing.T) {
+func TestJWTSignVerify(t *testing.T) {
 	rawJWT, err := jwt.NewRawJWT(&jwt.RawJWTOptions{WithoutExpiration: true})
 	if err != nil {
 		t.Errorf("jwt.NewRawJWT() err = %v, want nil", err)
@@ -79,6 +79,14 @@ func TestJWTSignVerifyECDSA(t *testing.T) {
 		{tag: "JWT_ES256_RAW", template: jwt.RawES256Template()},
 		{tag: "JWT_ES384_RAW", template: jwt.RawES384Template()},
 		{tag: "JWT_ES512_RAW", template: jwt.RawES512Template()},
+		{tag: "JWT_RS256_2048_R4", template: jwt.RS256_2048_F4_Key_Template()},
+		{tag: "JWT_RS256_2048_R4_RAW", template: jwt.RawRS256_2048_F4_Key_Template()},
+		{tag: "JWT_RS256_3072_R4", template: jwt.RS256_3072_F4_Key_Template()},
+		{tag: "JWT_RS256_3072_R4_RAW", template: jwt.RawRS256_3072_F4_Key_Template()},
+		{tag: "JWT_RS384_3072_R4", template: jwt.RS384_3072_F4_Key_Template()},
+		{tag: "JWT_RS384_3072_R4_RAW", template: jwt.RawRS384_3072_F4_Key_Template()},
+		{tag: "JWT_RS512_4096_R4", template: jwt.RS512_4096_F4_Key_Template()},
+		{tag: "JWT_RS512_4096_R4_RAW", template: jwt.RawRS384_3072_F4_Key_Template()},
 	} {
 		t.Run(tc.tag, func(t *testing.T) {
 			kh, err := keyset.NewHandle(tc.template)
