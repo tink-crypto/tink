@@ -287,27 +287,15 @@ public final class AwsKmsClientTest {
   }
 
   @Test
-  public void kmsAeadCanDecryptCiphertextOfDifferentUriIfItIsHasAnInvalidUri() throws Exception {
-    String kekId = "arn:aws:kms:us-west-2:111122223333:key/1234abcd-12ab-34cd-56ef-1234567890ab";
-    String kekUri =
-        "aws-kms://arn:aws:kms:us-west-2:111122223333:key/1234abcd-12ab-34cd-56ef-1234567890ab";
+  public void invalidUri_fails() throws Exception {
     String invalidUri = "aws-kms://@#$%&";
 
     AwsKmsClient.registerWithAwsKms(
-        Optional.empty(), Optional.empty(), new FakeAwsKms(asList(kekId)));
+        Optional.empty(), Optional.empty(), new FakeAwsKms(asList(invalidUri)));
 
-    KeyTemplate kmsTemplate = KmsAeadKeyManager.createKeyTemplate(kekUri);
-    KeysetHandle handle = KeysetHandle.generateNew(kmsTemplate);
-    Aead kmsAead = handle.getPrimitive(Aead.class);
-    byte[] plaintext = "plaintext".getBytes(UTF_8);
-    byte[] associatedData = "associatedData".getBytes(UTF_8);
-    byte[] ciphertext = kmsAead.encrypt(plaintext, associatedData);
-
-    // TODO(b/242678738) This behavior is probably not intended, we should change that.
-    KeyTemplate templateWithInvalidUri = KmsAeadKeyManager.createKeyTemplate(invalidUri);
-    KeysetHandle handleWithInvalidUri = KeysetHandle.generateNew(templateWithInvalidUri);
-    Aead kmsAeadWithInvalidUri = handleWithInvalidUri.getPrimitive(Aead.class);
-    byte[] decrypted = kmsAeadWithInvalidUri.decrypt(ciphertext, associatedData);
-    assertThat(decrypted).isEqualTo(plaintext);
+    KeyTemplate template = KmsAeadKeyManager.createKeyTemplate(invalidUri);
+    KeysetHandle handle = KeysetHandle.generateNew(template);
+    // TODO(b/242678738) This should throw an IllegalArgumentException exception instead.
+    assertThrows(IndexOutOfBoundsException.class, () -> handle.getPrimitive(Aead.class));
   }
 }

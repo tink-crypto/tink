@@ -163,17 +163,18 @@ public final class AwsKmsClient implements KmsClient {
     }
 
     try {
-      String keyUri = removePrefix(PREFIX, uri);
+      String keyId = removePrefix(PREFIX, uri);
       AWSKMS client = awsKms;
+      List<String> tokens = Splitter.on(':').splitToList(keyId);
+      String regionName = tokens.get(3);
       if (client == null) {
-        List<String> tokens = Splitter.on(':').splitToList(keyUri);
         client =
             AWSKMSClientBuilder.standard()
                 .withCredentials(provider)
-                .withRegion(Regions.fromName(tokens.get(3)))
+                .withRegion(Regions.fromName(regionName))
                 .build();
       }
-      return new AwsKmsAead(client, keyUri);
+      return new AwsKmsAead(client, keyId);
     } catch (AmazonServiceException e) {
       throw new GeneralSecurityException("cannot load credentials from provider", e);
     }
