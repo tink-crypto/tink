@@ -18,6 +18,8 @@ package com.google.crypto.tink.testing;
 
 import com.google.crypto.tink.prf.Prf;
 import com.google.crypto.tink.prf.PrfSet;
+import com.google.crypto.tink.testing.proto.CreationRequest;
+import com.google.crypto.tink.testing.proto.CreationResponse;
 import com.google.crypto.tink.testing.proto.PrfSetComputeRequest;
 import com.google.crypto.tink.testing.proto.PrfSetComputeResponse;
 import com.google.crypto.tink.testing.proto.PrfSetGrpc.PrfSetImplBase;
@@ -32,6 +34,11 @@ import java.util.Map;
 public final class PrfSetServiceImpl extends PrfSetImplBase {
 
   public PrfSetServiceImpl() throws GeneralSecurityException {
+  }
+
+  @Override
+  public void create(CreationRequest request, StreamObserver<CreationResponse> responseObserver) {
+    Util.createPrimitiveForRpc(request, responseObserver, PrfSet.class);
   }
 
   private PrfSetKeyIdsResponse keyIds(

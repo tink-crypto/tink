@@ -18,6 +18,8 @@ package com.google.crypto.tink.testing;
 
 import com.google.crypto.tink.PublicKeySign;
 import com.google.crypto.tink.PublicKeyVerify;
+import com.google.crypto.tink.testing.proto.CreationRequest;
+import com.google.crypto.tink.testing.proto.CreationResponse;
 import com.google.crypto.tink.testing.proto.SignatureGrpc.SignatureImplBase;
 import com.google.crypto.tink.testing.proto.SignatureSignRequest;
 import com.google.crypto.tink.testing.proto.SignatureSignResponse;
@@ -31,6 +33,18 @@ import java.security.GeneralSecurityException;
 public final class SignatureServiceImpl extends SignatureImplBase {
 
   public SignatureServiceImpl() throws GeneralSecurityException {
+  }
+
+  @Override
+  public void createPublicKeySign(
+      CreationRequest request, StreamObserver<CreationResponse> responseObserver) {
+    Util.createPrimitiveForRpc(request, responseObserver, PublicKeySign.class);
+  }
+
+  @Override
+  public void createPublicKeyVerify(
+      CreationRequest request, StreamObserver<CreationResponse> responseObserver) {
+    Util.createPrimitiveForRpc(request, responseObserver, PublicKeyVerify.class);
   }
 
   private SignatureSignResponse sign(SignatureSignRequest request) throws GeneralSecurityException {

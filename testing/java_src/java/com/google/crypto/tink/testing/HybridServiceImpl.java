@@ -18,6 +18,8 @@ package com.google.crypto.tink.testing;
 
 import com.google.crypto.tink.HybridDecrypt;
 import com.google.crypto.tink.HybridEncrypt;
+import com.google.crypto.tink.testing.proto.CreationRequest;
+import com.google.crypto.tink.testing.proto.CreationResponse;
 import com.google.crypto.tink.testing.proto.HybridDecryptRequest;
 import com.google.crypto.tink.testing.proto.HybridDecryptResponse;
 import com.google.crypto.tink.testing.proto.HybridEncryptRequest;
@@ -31,6 +33,19 @@ import java.security.GeneralSecurityException;
 public final class HybridServiceImpl extends HybridImplBase {
 
   public HybridServiceImpl() throws GeneralSecurityException {}
+
+  @Override
+  public void createHybridEncrypt(
+      CreationRequest request, StreamObserver<CreationResponse> responseObserver) {
+    Util.createPrimitiveForRpc(request, responseObserver, HybridEncrypt.class);
+  }
+
+  @Override
+  public void createHybridDecrypt(
+      CreationRequest request, StreamObserver<CreationResponse> responseObserver) {
+    Util.createPrimitiveForRpc(request, responseObserver, HybridDecrypt.class);
+  }
+
 
   private HybridEncryptResponse encrypt(HybridEncryptRequest request)
       throws GeneralSecurityException {

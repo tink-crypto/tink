@@ -31,6 +31,8 @@ import com.google.crypto.tink.jwt.JwtValidator;
 import com.google.crypto.tink.jwt.RawJwt;
 import com.google.crypto.tink.jwt.VerifiedJwt;
 import com.google.crypto.tink.proto.Keyset;
+import com.google.crypto.tink.testing.proto.CreationRequest;
+import com.google.crypto.tink.testing.proto.CreationResponse;
 import com.google.crypto.tink.testing.proto.JwtClaimValue;
 import com.google.crypto.tink.testing.proto.JwtFromJwkSetRequest;
 import com.google.crypto.tink.testing.proto.JwtFromJwkSetResponse;
@@ -64,6 +66,24 @@ public final class JwtServiceImpl extends JwtImplBase {
   public JwtServiceImpl() throws GeneralSecurityException {
     JwtMacConfig.register();
     JwtSignatureConfig.register();
+  }
+
+  @Override
+  public void createJwtMac(
+      CreationRequest request, StreamObserver<CreationResponse> responseObserver) {
+    Util.createPrimitiveForRpc(request, responseObserver, JwtMac.class);
+  }
+
+  @Override
+  public void createJwtPublicKeySign(
+      CreationRequest request, StreamObserver<CreationResponse> responseObserver) {
+    Util.createPrimitiveForRpc(request, responseObserver, JwtPublicKeySign.class);
+  }
+
+  @Override
+  public void createJwtPublicKeyVerify(
+      CreationRequest request, StreamObserver<CreationResponse> responseObserver) {
+    Util.createPrimitiveForRpc(request, responseObserver, JwtPublicKeyVerify.class);
   }
 
   private Instant timestampToInstant(Timestamp t) {

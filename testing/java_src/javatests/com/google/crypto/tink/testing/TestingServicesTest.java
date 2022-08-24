@@ -547,6 +547,28 @@ public final class TestingServicesTest {
         () -> daeadDecrypt(daeadStub, badKeyset, ciphertext, associatedData));
   }
 
+  @Test
+  public void streamingAeadCreateKeyset_success() throws Exception {
+    byte[] template = KeyTemplateProtoConverter.toByteArray(
+        AesGcmHkdfStreamingKeyManager.aes128GcmHkdf4KBTemplate());
+    KeysetGenerateResponse keysetResponse = generateKeyset(keysetStub, template);
+    assertThat(keysetResponse.getErr()).isEmpty();
+    CreationResponse response =
+        streamingAeadStub.create(
+            CreationRequest.newBuilder().setKeyset(keysetResponse.getKeyset()).build());
+    assertThat(response.getErr()).isEmpty();
+  }
+
+  @Test
+  public void streamingAeadCreateKeyset_fails() throws Exception {
+    CreationResponse response =
+        streamingAeadStub.create(
+            CreationRequest.newBuilder()
+                .setKeyset(ByteString.copyFrom(new byte[] {(byte) 0x80}))
+                .build());
+    assertThat(response.getErr()).isNotEmpty();
+  }
+
   private static StreamingAeadEncryptResponse streamingAeadEncrypt(
       StreamingAeadGrpc.StreamingAeadBlockingStub streamingAeadStub,
       byte[] keyset,
@@ -648,6 +670,28 @@ public final class TestingServicesTest {
     assertThat(decResponse.getErr()).isNotEmpty();
   }
 
+  @Test
+  public void macCreateKeyset_success() throws Exception {
+    byte[] template = KeyTemplateProtoConverter.toByteArray(
+        HmacKeyManager.hmacSha256HalfDigestTemplate());
+    KeysetGenerateResponse keysetResponse = generateKeyset(keysetStub, template);
+    assertThat(keysetResponse.getErr()).isEmpty();
+    CreationResponse response =
+        macStub.create(
+            CreationRequest.newBuilder().setKeyset(keysetResponse.getKeyset()).build());
+    assertThat(response.getErr()).isEmpty();
+  }
+
+  @Test
+  public void macCreateKeyset_fails() throws Exception {
+    CreationResponse response =
+        macStub.create(
+            CreationRequest.newBuilder()
+                .setKeyset(ByteString.copyFrom(new byte[] {(byte) 0x80}))
+                .build());
+    assertThat(response.getErr()).isNotEmpty();
+  }
+
   private static ComputeMacResponse computeMac(
       MacGrpc.MacBlockingStub macStub, byte[] keyset, byte[] data) {
     ComputeMacRequest request =
@@ -728,6 +772,28 @@ public final class TestingServicesTest {
     byte[] badKeyset = "bad keyset".getBytes(UTF_8);
     VerifyMacResponse verifyResponse = verifyMac(macStub, badKeyset, macValue, data);
     assertThat(verifyResponse.getErr()).isNotEmpty();
+  }
+
+  @Test
+  public void prfSetCreateKeyset_success() throws Exception {
+    byte[] template = KeyTemplateProtoConverter.toByteArray(
+        HmacPrfKeyManager.hmacSha256Template());
+    KeysetGenerateResponse keysetResponse = generateKeyset(keysetStub, template);
+    assertThat(keysetResponse.getErr()).isEmpty();
+    CreationResponse response =
+        prfSetStub.create(
+            CreationRequest.newBuilder().setKeyset(keysetResponse.getKeyset()).build());
+    assertThat(response.getErr()).isEmpty();
+  }
+
+  @Test
+  public void prfSetCreateKeyset_fails() throws Exception {
+    CreationResponse response =
+        prfSetStub.create(
+            CreationRequest.newBuilder()
+                .setKeyset(ByteString.copyFrom(new byte[] {(byte) 0x80}))
+                .build());
+    assertThat(response.getErr()).isNotEmpty();
   }
 
   private static PrfSetKeyIdsResponse keyIds(

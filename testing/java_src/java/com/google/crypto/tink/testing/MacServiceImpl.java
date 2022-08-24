@@ -19,6 +19,8 @@ package com.google.crypto.tink.testing;
 import com.google.crypto.tink.Mac;
 import com.google.crypto.tink.testing.proto.ComputeMacRequest;
 import com.google.crypto.tink.testing.proto.ComputeMacResponse;
+import com.google.crypto.tink.testing.proto.CreationRequest;
+import com.google.crypto.tink.testing.proto.CreationResponse;
 import com.google.crypto.tink.testing.proto.MacGrpc.MacImplBase;
 import com.google.crypto.tink.testing.proto.VerifyMacRequest;
 import com.google.crypto.tink.testing.proto.VerifyMacResponse;
@@ -30,6 +32,11 @@ import java.security.GeneralSecurityException;
 public final class MacServiceImpl extends MacImplBase {
 
   public MacServiceImpl() throws GeneralSecurityException {
+  }
+
+  @Override
+  public void create(CreationRequest request, StreamObserver<CreationResponse> responseObserver) {
+    Util.createPrimitiveForRpc(request, responseObserver, Mac.class);
   }
 
   private ComputeMacResponse computeMac(

@@ -17,6 +17,8 @@
 package com.google.crypto.tink.testing;
 
 import com.google.crypto.tink.StreamingAead;
+import com.google.crypto.tink.testing.proto.CreationRequest;
+import com.google.crypto.tink.testing.proto.CreationResponse;
 import com.google.crypto.tink.testing.proto.StreamingAeadDecryptRequest;
 import com.google.crypto.tink.testing.proto.StreamingAeadDecryptResponse;
 import com.google.crypto.tink.testing.proto.StreamingAeadEncryptRequest;
@@ -34,6 +36,11 @@ import java.security.GeneralSecurityException;
 public final class StreamingAeadServiceImpl extends StreamingAeadImplBase {
 
   public StreamingAeadServiceImpl() throws GeneralSecurityException {
+  }
+
+  @Override
+  public void create(CreationRequest request, StreamObserver<CreationResponse> responseObserver) {
+    Util.createPrimitiveForRpc(request, responseObserver, StreamingAead.class);
   }
 
   private StreamingAeadEncryptResponse encrypt(StreamingAeadEncryptRequest request)

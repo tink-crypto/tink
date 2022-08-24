@@ -24,6 +24,8 @@ import com.google.crypto.tink.config.TinkConfig;
 import com.google.crypto.tink.hybrid.EciesAeadHkdfPrivateKeyManager;
 import com.google.crypto.tink.internal.KeyTemplateProtoConverter;
 import com.google.crypto.tink.signature.EcdsaSignKeyManager;
+import com.google.crypto.tink.testing.proto.CreationRequest;
+import com.google.crypto.tink.testing.proto.CreationResponse;
 import com.google.crypto.tink.testing.proto.HybridDecryptRequest;
 import com.google.crypto.tink.testing.proto.HybridDecryptResponse;
 import com.google.crypto.tink.testing.proto.HybridEncryptRequest;
@@ -100,6 +102,55 @@ public final class AsymmetricTestingServicesTest {
             .setPrivateKeyset(ByteString.copyFrom(privateKeyset))
             .build();
     return keysetStub.public_(request);
+  }
+
+  @Test
+  public void hybridDecryptCreateKeyset_success() throws Exception {
+    byte[] template = KeyTemplateProtoConverter.toByteArray(
+        EciesAeadHkdfPrivateKeyManager.eciesP256HkdfHmacSha256Aes128GcmTemplate());
+    KeysetGenerateResponse keysetResponse = generateKeyset(keysetStub, template);
+    assertThat(keysetResponse.getErr()).isEmpty();
+    CreationResponse response =
+        hybridStub.createHybridDecrypt(
+            CreationRequest.newBuilder().setKeyset(keysetResponse.getKeyset()).build());
+    assertThat(response.getErr()).isEmpty();
+  }
+
+  @Test
+  public void hybridDecryptCreateKeyset_fails() throws Exception {
+    CreationResponse response =
+        hybridStub.createHybridDecrypt(
+            CreationRequest.newBuilder()
+                .setKeyset(ByteString.copyFrom(new byte[] {(byte) 0x80}))
+                .build());
+    assertThat(response.getErr()).isNotEmpty();
+  }
+
+
+  @Test
+  public void hybridEncryptCreateKeyset_success() throws Exception {
+    byte[] template = KeyTemplateProtoConverter.toByteArray(
+        EciesAeadHkdfPrivateKeyManager.eciesP256HkdfHmacSha256Aes128GcmTemplate());
+    KeysetGenerateResponse keysetResponse = generateKeyset(keysetStub, template);
+    assertThat(keysetResponse.getErr()).isEmpty();
+    byte[] privateKeyset = keysetResponse.getKeyset().toByteArray();
+
+    KeysetPublicResponse pubResponse = publicKeyset(keysetStub, privateKeyset);
+    assertThat(pubResponse.getErr()).isEmpty();
+    CreationResponse response =
+        hybridStub.createHybridEncrypt(
+            CreationRequest.newBuilder().setKeyset(pubResponse.getPublicKeyset()).build());
+    assertThat(response.getErr()).isEmpty();
+  }
+
+  @Test
+  public void hybridEncryptCreateKeyset_fails() throws Exception {
+    CreationResponse response =
+        hybridStub.createHybridEncrypt(
+            CreationRequest.newBuilder()
+                .setKeyset(ByteString.copyFrom(new byte[] {(byte) 0x80}))
+                .build());
+    assertThat(response.getErr()).isNotEmpty();
   }
 
   private static HybridEncryptResponse hybridEncrypt(
@@ -219,6 +270,55 @@ public final class AsymmetricTestingServicesTest {
     HybridDecryptResponse decResponse =
         hybridDecrypt(hybridStub, badKeyset, ciphertext, contextInfo);
     assertThat(decResponse.getErr()).isNotEmpty();
+  }
+
+  @Test
+  public void publicKeySignCreateKeyset_success() throws Exception {
+    byte[] template = KeyTemplateProtoConverter.toByteArray(
+        EcdsaSignKeyManager.ecdsaP256Template());
+    KeysetGenerateResponse keysetResponse = generateKeyset(keysetStub, template);
+    assertThat(keysetResponse.getErr()).isEmpty();
+    CreationResponse response =
+        signatureStub.createPublicKeySign(
+            CreationRequest.newBuilder().setKeyset(keysetResponse.getKeyset()).build());
+    assertThat(response.getErr()).isEmpty();
+  }
+
+  @Test
+  public void publicKeySignCreateKeyset_fails() throws Exception {
+    CreationResponse response =
+        signatureStub.createPublicKeySign(
+            CreationRequest.newBuilder()
+                .setKeyset(ByteString.copyFrom(new byte[] {(byte) 0x80}))
+                .build());
+    assertThat(response.getErr()).isNotEmpty();
+  }
+
+
+  @Test
+  public void publicKeyVerifyCreateKeyset_success() throws Exception {
+    byte[] template = KeyTemplateProtoConverter.toByteArray(
+        EcdsaSignKeyManager.ecdsaP256Template());
+    KeysetGenerateResponse keysetResponse = generateKeyset(keysetStub, template);
+    assertThat(keysetResponse.getErr()).isEmpty();
+    byte[] privateKeyset = keysetResponse.getKeyset().toByteArray();
+
+    KeysetPublicResponse pubResponse = publicKeyset(keysetStub, privateKeyset);
+    assertThat(pubResponse.getErr()).isEmpty();
+    CreationResponse response =
+        signatureStub.createPublicKeyVerify(
+            CreationRequest.newBuilder().setKeyset(pubResponse.getPublicKeyset()).build());
+    assertThat(response.getErr()).isEmpty();
+  }
+
+  @Test
+  public void publicKeyVerifyCreateKeyset_fails() throws Exception {
+    CreationResponse response =
+        signatureStub.createPublicKeyVerify(
+            CreationRequest.newBuilder()
+                .setKeyset(ByteString.copyFrom(new byte[] {(byte) 0x80}))
+                .build());
+    assertThat(response.getErr()).isNotEmpty();
   }
 
   private static SignatureSignResponse signatureSign(

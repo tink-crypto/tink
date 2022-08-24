@@ -25,6 +25,8 @@ import com.google.crypto.tink.internal.KeyTemplateProtoConverter;
 import com.google.crypto.tink.jwt.JwtHmacKeyManager;
 import com.google.crypto.tink.jwt.JwtMacConfig;
 import com.google.crypto.tink.jwt.JwtSignatureConfig;
+import com.google.crypto.tink.testing.proto.CreationRequest;
+import com.google.crypto.tink.testing.proto.CreationResponse;
 import com.google.crypto.tink.testing.proto.JwtClaimValue;
 import com.google.crypto.tink.testing.proto.JwtFromJwkSetRequest;
 import com.google.crypto.tink.testing.proto.JwtFromJwkSetResponse;
@@ -131,6 +133,27 @@ public final class JwtServiceImplTest {
   }
 
   @Test
+  public void jwtMacCreateKeyset_success() throws Exception {
+    byte[] template = KeyTemplateProtoConverter.toByteArray(KeyTemplates.get("JWT_HS256"));
+    KeysetGenerateResponse keysetResponse = generateKeyset(keysetStub, template);
+    assertThat(keysetResponse.getErr()).isEmpty();
+    CreationResponse response =
+        jwtStub.createJwtMac(
+            CreationRequest.newBuilder().setKeyset(keysetResponse.getKeyset()).build());
+    assertThat(response.getErr()).isEmpty();
+  }
+
+  @Test
+  public void jwtMacCreateKeyset_fails() throws Exception {
+    CreationResponse response =
+        jwtStub.createJwtMac(
+            CreationRequest.newBuilder()
+                .setKeyset(ByteString.copyFrom(new byte[] {(byte) 0x80}))
+                .build());
+    assertThat(response.getErr()).isNotEmpty();
+  }
+
+  @Test
   public void jwtComputeVerifyMac_success() throws Exception {
     byte[] template = KeyTemplateProtoConverter.toByteArray(KeyTemplates.get("JWT_HS256"));
     KeysetGenerateResponse keysetResponse = generateKeyset(keysetStub, template);
@@ -191,6 +214,53 @@ public final class JwtServiceImplTest {
     JwtVerifyResponse verifyResponse = jwtStub.verifyMacAndDecode(verifyRequest);
     assertThat(verifyResponse.getErr()).isEmpty();
     assertThat(verifyResponse.getVerifiedJwt()).isEqualTo(token);
+  }
+
+  @Test
+  public void jwtPublicKeySignCreateKeyset_success() throws Exception {
+    byte[] template = KeyTemplateProtoConverter.toByteArray(KeyTemplates.get("JWT_ES256"));
+    KeysetGenerateResponse keysetResponse = generateKeyset(keysetStub, template);
+    assertThat(keysetResponse.getErr()).isEmpty();
+    CreationResponse response =
+        jwtStub.createJwtPublicKeySign(
+            CreationRequest.newBuilder().setKeyset(keysetResponse.getKeyset()).build());
+    assertThat(response.getErr()).isEmpty();
+  }
+
+  @Test
+  public void jwtPublicKeySignCreateKeyset_fails() throws Exception {
+    CreationResponse response =
+        jwtStub.createJwtPublicKeySign(
+            CreationRequest.newBuilder()
+                .setKeyset(ByteString.copyFrom(new byte[] {(byte) 0x80}))
+                .build());
+    assertThat(response.getErr()).isNotEmpty();
+  }
+
+
+  @Test
+  public void jwtPublicKeyVerifyCreateKeyset_success() throws Exception {
+    byte[] template = KeyTemplateProtoConverter.toByteArray(KeyTemplates.get("JWT_ES256"));
+    KeysetGenerateResponse keysetResponse = generateKeyset(keysetStub, template);
+    assertThat(keysetResponse.getErr()).isEmpty();
+    byte[] privateKeyset = keysetResponse.getKeyset().toByteArray();
+
+    KeysetPublicResponse pubResponse = publicKeyset(keysetStub, privateKeyset);
+    assertThat(pubResponse.getErr()).isEmpty();
+    CreationResponse response =
+        jwtStub.createJwtPublicKeyVerify(
+            CreationRequest.newBuilder().setKeyset(pubResponse.getPublicKeyset()).build());
+    assertThat(response.getErr()).isEmpty();
+  }
+
+  @Test
+  public void jwtPublicKeyVerifyCreateKeyset_fails() throws Exception {
+    CreationResponse response =
+        jwtStub.createJwtPublicKeyVerify(
+            CreationRequest.newBuilder()
+                .setKeyset(ByteString.copyFrom(new byte[] {(byte) 0x80}))
+                .build());
+    assertThat(response.getErr()).isNotEmpty();
   }
 
   @Test
