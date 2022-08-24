@@ -177,6 +177,26 @@ cc_library(
     ],
 )
 
+cc_library(
+    name = "aes_cmac_key",
+    srcs = ["aes_cmac_key.cc"],
+    hdrs = ["aes_cmac_key.h"],
+    include_prefix = "tink/mac",
+    deps = [
+        ":aes_cmac_parameters",
+        ":mac_key",
+        "//:restricted_data",
+        "//subtle:subtle_util",
+        "//util:status",
+        "//util:statusor",
+        "@boringssl//:crypto",
+        "@com_google_absl//absl/base:core_headers",
+        "@com_google_absl//absl/strings",
+        "@com_google_absl//absl/strings:str_format",
+        "@com_google_absl//absl/types:optional",
+    ],
+)
+
 # tests
 
 cc_test(
@@ -321,6 +341,21 @@ cc_test(
         ":aes_cmac_parameters",
         "//util:statusor",
         "//util:test_matchers",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "aes_cmac_key_test",
+    size = "small",
+    srcs = ["aes_cmac_key_test.cc"],
+    deps = [
+        ":aes_cmac_key",
+        ":aes_cmac_parameters",
+        "//:restricted_data",
+        "//util:statusor",
+        "//util:test_matchers",
+        "@com_google_absl//absl/types:optional",
         "@com_google_googletest//:gtest_main",
     ],
 )

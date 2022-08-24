@@ -165,6 +165,25 @@ tink_cc_library(
     tink::util::statusor
 )
 
+tink_cc_library(
+  NAME aes_cmac_key
+  SRCS
+    aes_cmac_key.cc
+    aes_cmac_key.h
+  DEPS
+    tink::mac::aes_cmac_parameters
+    tink::mac::mac_key
+    absl::core_headers
+    absl::strings
+    absl::str_format
+    absl::optional
+    crypto
+    tink::core::restricted_data
+    tink::subtle::subtle_util
+    tink::util::status
+    tink::util::statusor
+)
+
 # tests
 
 tink_cc_test(
@@ -301,6 +320,20 @@ tink_cc_test(
   DEPS
     tink::mac::aes_cmac_parameters
     gmock
+    tink::util::statusor
+    tink::util::test_matchers
+)
+
+tink_cc_test(
+  NAME aes_cmac_key_test
+  SRCS
+    aes_cmac_key_test.cc
+  DEPS
+    tink::mac::aes_cmac_key
+    tink::mac::aes_cmac_parameters
+    gmock
+    absl::optional
+    tink::core::restricted_data
     tink::util::statusor
     tink::util::test_matchers
 )
