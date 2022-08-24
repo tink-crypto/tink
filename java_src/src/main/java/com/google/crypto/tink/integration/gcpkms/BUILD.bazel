@@ -5,9 +5,7 @@ package(default_visibility = ["//visibility:public"])
 java_library(
     name = "gcp_kms_client",
     srcs = ["GcpKmsClient.java"],
-    plugins = [
-        ":auto_service_plugin"
-    ],
+    plugins = [":auto_service_plugin"],
     deps = [
         ":gcp_kms_aead",
         "//src/main/java/com/google/crypto/tink:aead",
