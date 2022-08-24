@@ -25,6 +25,9 @@ import com.google.crypto.tink.HybridEncrypt;
 import com.google.crypto.tink.PrimitiveSet;
 import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.aead.AeadKeyTemplates;
+import com.google.crypto.tink.internal.MutableMonitoringRegistry;
+import com.google.crypto.tink.internal.testing.FakeMonitoringClient;
+import com.google.crypto.tink.monitoring.MonitoringAnnotations;
 import com.google.crypto.tink.proto.EcPointFormat;
 import com.google.crypto.tink.proto.EciesAeadHkdfPrivateKey;
 import com.google.crypto.tink.proto.EciesAeadHkdfPublicKey;
@@ -37,6 +40,7 @@ import com.google.crypto.tink.proto.OutputPrefixType;
 import com.google.crypto.tink.subtle.Bytes;
 import com.google.crypto.tink.testing.TestUtil;
 import java.security.GeneralSecurityException;
+import java.util.List;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.experimental.theories.DataPoints;
@@ -366,5 +370,116 @@ public class HybridDecryptWrapperTest {
     byte[] ciphertext = encrypter.encrypt(plaintext, contextInfo);
 
     assertThat(decrypter.decrypt(ciphertext, contextInfo)).isEqualTo(plaintext);
+  }
+
+  @Theory
+  public void doesNotMonitorWithoutAnnotations() throws Exception {
+    FakeMonitoringClient fakeMonitoringClient = new FakeMonitoringClient();
+    MutableMonitoringRegistry.globalInstance().clear();
+    MutableMonitoringRegistry.globalInstance().registerMonitoringClient(fakeMonitoringClient);
+
+    PrimitiveSet<HybridEncrypt> encPrimitives =
+        TestUtil.createPrimitiveSet(
+            TestUtil.createKeyset(
+                getPublicKey(
+                    eciesAeadHkdfPrivateKey1.getPublicKey(),
+                    /*keyId=*/ 123,
+                    OutputPrefixType.TINK)),
+            HybridEncrypt.class);
+    HybridEncrypt encrypter = new HybridEncryptWrapper().wrap(encPrimitives);
+
+    PrimitiveSet<HybridDecrypt> decPrimitives =
+        TestUtil.createPrimitiveSet(
+            TestUtil.createKeyset(
+                getPrivateKey(eciesAeadHkdfPrivateKey1, /*keyId=*/ 123, OutputPrefixType.TINK)),
+            HybridDecrypt.class);
+    HybridDecrypt decrypter = new HybridDecryptWrapper().wrap(decPrimitives);
+
+    byte[] plaintext = "plaintext".getBytes(UTF_8);
+    byte[] contextInfo = "contextInfo".getBytes(UTF_8);
+    byte[] ciphertext = encrypter.encrypt(plaintext, contextInfo);
+
+    assertThat(decrypter.decrypt(ciphertext, contextInfo)).isEqualTo(plaintext);
+
+    assertThat(fakeMonitoringClient.getLogEntries()).isEmpty();
+    assertThat(fakeMonitoringClient.getLogFailureEntries()).isEmpty();
+  }
+
+  @Theory
+  public void monitorsWithAnnotations() throws Exception {
+    FakeMonitoringClient fakeMonitoringClient = new FakeMonitoringClient();
+    MutableMonitoringRegistry.globalInstance().clear();
+    MutableMonitoringRegistry.globalInstance().registerMonitoringClient(fakeMonitoringClient);
+
+    MonitoringAnnotations annotations =
+        MonitoringAnnotations.newBuilder().add("annotation_name", "annotation_value").build();
+
+    // We use two keys, to make sure that decryption logs the correct key id.
+    Key privateKey1 =
+        getPrivateKey(eciesAeadHkdfPrivateKey1, /*keyId=*/ 123, OutputPrefixType.TINK);
+    Key publicKey1 =
+        getPublicKey(
+            eciesAeadHkdfPrivateKey1.getPublicKey(), /*keyId=*/ 123, OutputPrefixType.TINK);
+
+    Key privateKey2 = getPrivateKey(eciesAeadHkdfPrivateKey2, /*keyId=*/ 234, OutputPrefixType.RAW);
+    Key publicKey2 =
+        getPublicKey(eciesAeadHkdfPrivateKey2.getPublicKey(), /*keyId=*/ 234, OutputPrefixType.RAW);
+
+    byte[] plaintext = "plaintext".getBytes(UTF_8);
+    byte[] contextInfo = "contextInfo".getBytes(UTF_8);
+
+    // Create for each key a ciphertext. Note that encrypter1 and encrypter2 are not monitored.
+    HybridEncrypt encrypter1 =
+        new HybridEncryptWrapper()
+            .wrap(
+                TestUtil.createPrimitiveSet(
+                    TestUtil.createKeyset(publicKey1), HybridEncrypt.class));
+    byte[] ciphertext1 = encrypter1.encrypt(plaintext, contextInfo);
+    HybridEncrypt encrypter2 =
+        new HybridEncryptWrapper()
+            .wrap(
+                TestUtil.createPrimitiveSet(
+                    TestUtil.createKeyset(publicKey2), HybridEncrypt.class));
+    byte[] ciphertext2 = encrypter2.encrypt(plaintext, contextInfo);
+
+    HybridDecrypt decrypter =
+        new HybridDecryptWrapper()
+            .wrap(
+                TestUtil.createPrimitiveSetWithAnnotations(
+                    TestUtil.createKeyset(privateKey1, privateKey2),
+                    annotations,
+                    HybridDecrypt.class));
+
+    assertThat(decrypter.decrypt(ciphertext1, contextInfo)).isEqualTo(plaintext);
+    assertThat(decrypter.decrypt(ciphertext2, contextInfo)).isEqualTo(plaintext);
+    assertThrows(
+        GeneralSecurityException.class,
+        () -> decrypter.decrypt(ciphertext1, "invalid".getBytes(UTF_8)));
+
+    List<FakeMonitoringClient.LogEntry> logEntries = fakeMonitoringClient.getLogEntries();
+    assertThat(logEntries).hasSize(2);
+    FakeMonitoringClient.LogEntry decEntry1 = logEntries.get(0);
+    assertThat(decEntry1.getKeyId()).isEqualTo(123);
+    assertThat(decEntry1.getPrimitive()).isEqualTo("hybrid_decrypt");
+    assertThat(decEntry1.getApi()).isEqualTo("decrypt");
+    // ciphertext1 was encrypted with key1, which has a TINK ouput prefix. This adds a 5 bytes
+    // prefix to the ciphertext. This prefix is not included in getNumBytesAsInput.
+    assertThat(decEntry1.getNumBytesAsInput()).isEqualTo(ciphertext1.length - 5);
+    assertThat(decEntry1.getKeysetInfo().getAnnotations()).isEqualTo(annotations);
+
+    FakeMonitoringClient.LogEntry decEntry2 = logEntries.get(1);
+    assertThat(decEntry2.getKeyId()).isEqualTo(234);
+    assertThat(decEntry2.getPrimitive()).isEqualTo("hybrid_decrypt");
+    assertThat(decEntry2.getApi()).isEqualTo("decrypt");
+    assertThat(decEntry2.getNumBytesAsInput()).isEqualTo(ciphertext2.length);
+    assertThat(decEntry2.getKeysetInfo().getAnnotations()).isEqualTo(annotations);
+
+    List<FakeMonitoringClient.LogFailureEntry> failures =
+        fakeMonitoringClient.getLogFailureEntries();
+    assertThat(failures).hasSize(1);
+    FakeMonitoringClient.LogFailureEntry decryptFailure = failures.get(0);
+    assertThat(decryptFailure.getPrimitive()).isEqualTo("hybrid_decrypt");
+    assertThat(decryptFailure.getApi()).isEqualTo("decrypt");
+    assertThat(decryptFailure.getKeysetInfo().getAnnotations()).isEqualTo(annotations);
   }
 }

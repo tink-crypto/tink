@@ -20,6 +20,10 @@ import com.google.crypto.tink.HybridDecrypt;
 import com.google.crypto.tink.PrimitiveSet;
 import com.google.crypto.tink.PrimitiveWrapper;
 import com.google.crypto.tink.Registry;
+import com.google.crypto.tink.internal.MonitoringUtil;
+import com.google.crypto.tink.internal.MutableMonitoringRegistry;
+import com.google.crypto.tink.monitoring.MonitoringClient;
+import com.google.crypto.tink.monitoring.MonitoringKeysetInfo;
 import java.security.GeneralSecurityException;
 import java.util.Arrays;
 import java.util.List;
@@ -39,8 +43,17 @@ public class HybridDecryptWrapper implements PrimitiveWrapper<HybridDecrypt, Hyb
   private static class WrappedHybridDecrypt implements HybridDecrypt {
     private final PrimitiveSet<HybridDecrypt> primitives;
 
+    private final MonitoringClient.Logger decLogger;
+
     public WrappedHybridDecrypt(final PrimitiveSet<HybridDecrypt> primitives) {
       this.primitives = primitives;
+      if (primitives.hasAnnotations()) {
+        MonitoringClient client = MutableMonitoringRegistry.globalInstance().getMonitoringClient();
+        MonitoringKeysetInfo keysetInfo = MonitoringUtil.getMonitoringKeysetInfo(primitives);
+        this.decLogger = client.createLogger(keysetInfo, "hybrid_decrypt", "decrypt");
+      } else {
+        this.decLogger = MonitoringUtil.DO_NOTHING_LOGGER;
+      }
     }
 
     @Override
@@ -53,7 +66,9 @@ public class HybridDecryptWrapper implements PrimitiveWrapper<HybridDecrypt, Hyb
         List<PrimitiveSet.Entry<HybridDecrypt>> entries = primitives.getPrimitive(prefix);
         for (PrimitiveSet.Entry<HybridDecrypt> entry : entries) {
           try {
-            return entry.getPrimitive().decrypt(ciphertextNoPrefix, contextInfo);
+            byte[] output = entry.getPrimitive().decrypt(ciphertextNoPrefix, contextInfo);
+            decLogger.log(entry.getKeyId(), ciphertextNoPrefix.length);
+            return output;
           } catch (GeneralSecurityException e) {
             logger.info("ciphertext prefix matches a key, but cannot decrypt: " + e.toString());
             continue;
@@ -64,12 +79,15 @@ public class HybridDecryptWrapper implements PrimitiveWrapper<HybridDecrypt, Hyb
       List<PrimitiveSet.Entry<HybridDecrypt>> entries = primitives.getRawPrimitives();
       for (PrimitiveSet.Entry<HybridDecrypt> entry : entries) {
         try {
-          return entry.getPrimitive().decrypt(ciphertext, contextInfo);
+          byte[] output = entry.getPrimitive().decrypt(ciphertext, contextInfo);
+          decLogger.log(entry.getKeyId(), ciphertext.length);
+          return output;
         } catch (GeneralSecurityException e) {
           continue;
         }
       }
       // nothing works.
+      decLogger.logFailure();
       throw new GeneralSecurityException("decryption failed");
     }
   }

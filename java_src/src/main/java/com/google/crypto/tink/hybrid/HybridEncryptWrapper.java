@@ -19,6 +19,10 @@ import com.google.crypto.tink.HybridEncrypt;
 import com.google.crypto.tink.PrimitiveSet;
 import com.google.crypto.tink.PrimitiveWrapper;
 import com.google.crypto.tink.Registry;
+import com.google.crypto.tink.internal.MonitoringUtil;
+import com.google.crypto.tink.internal.MutableMonitoringRegistry;
+import com.google.crypto.tink.monitoring.MonitoringClient;
+import com.google.crypto.tink.monitoring.MonitoringKeysetInfo;
 import com.google.crypto.tink.subtle.Bytes;
 import java.security.GeneralSecurityException;
 
@@ -33,19 +37,37 @@ public class HybridEncryptWrapper implements PrimitiveWrapper<HybridEncrypt, Hyb
   private static class WrappedHybridEncrypt implements HybridEncrypt {
     final PrimitiveSet<HybridEncrypt> primitives;
 
+    private final MonitoringClient.Logger encLogger;
+
     public WrappedHybridEncrypt(final PrimitiveSet<HybridEncrypt> primitives) {
       this.primitives = primitives;
+      if (primitives.hasAnnotations()) {
+        MonitoringClient client = MutableMonitoringRegistry.globalInstance().getMonitoringClient();
+        MonitoringKeysetInfo keysetInfo = MonitoringUtil.getMonitoringKeysetInfo(primitives);
+        this.encLogger = client.createLogger(keysetInfo, "hybrid_encrypt", "encrypt");
+      } else {
+        this.encLogger = MonitoringUtil.DO_NOTHING_LOGGER;
+      }
     }
 
     @Override
     public byte[] encrypt(final byte[] plaintext, final byte[] contextInfo)
         throws GeneralSecurityException {
       if (primitives.getPrimary() == null) {
+        encLogger.logFailure();
         throw new GeneralSecurityException("keyset without primary key");
       }
-      return Bytes.concat(
-          primitives.getPrimary().getIdentifier(),
-          primitives.getPrimary().getPrimitive().encrypt(plaintext, contextInfo));
+      try {
+        byte[] output =
+            Bytes.concat(
+                primitives.getPrimary().getIdentifier(),
+                primitives.getPrimary().getPrimitive().encrypt(plaintext, contextInfo));
+        encLogger.log(primitives.getPrimary().getKeyId(), plaintext.length);
+        return output;
+      } catch (GeneralSecurityException e) {
+        encLogger.logFailure();
+        throw e;
+      }
     }
   }
 
