@@ -11,12 +11,12 @@ go_binary(
     out = "aead_cli_go",
     data = ["//testdata/gcp:credentials"],
     deps = [
-        "@tink_go//aead:go_default_library",
-        "@tink_go//core/registry:go_default_library",
-        "@tink_go//integration/awskms:go_default_library",
-        "@tink_go//integration/gcpkms:go_default_library",
-        "@tink_go//keyset:go_default_library",
-        "@tink_go//testkeyset:go_default_library",
+        "@tink_go//aead",
+        "@tink_go//core/registry",
+        "@tink_go//integration/awskms",
+        "@tink_go//integration/gcpkms",
+        "@tink_go//keyset",
+        "@tink_go//testkeyset",
     ],
 )
 
@@ -26,9 +26,9 @@ go_binary(
     srcs = ["public_key_sign_cli.go"],
     out = "public_key_sign_cli_go",
     deps = [
-        "@tink_go//keyset:go_default_library",
-        "@tink_go//signature:go_default_library",
-        "@tink_go//testkeyset:go_default_library",
+        "@tink_go//keyset",
+        "@tink_go//signature",
+        "@tink_go//testkeyset",
     ],
 )
 
@@ -38,9 +38,9 @@ go_binary(
     srcs = ["public_key_verify_cli.go"],
     out = "public_key_verify_cli_go",
     deps = [
-        "@tink_go//keyset:go_default_library",
-        "@tink_go//signature:go_default_library",
-        "@tink_go//testkeyset:go_default_library",
+        "@tink_go//keyset",
+        "@tink_go//signature",
+        "@tink_go//testkeyset",
     ],
 )
 
@@ -55,12 +55,12 @@ go_binary(
     ],
     tags = ["no_rbe"],
     deps = [
-        "@tink_go//aead:go_default_library",
-        "@tink_go//core/registry:go_default_library",
-        "@tink_go//insecurecleartextkeyset:go_default_library",
-        "@tink_go//integration/awskms:go_default_library",
-        "@tink_go//integration/gcpkms:go_default_library",
-        "@tink_go//keyset:go_default_library",
-        "@tink_go//proto/tink_go_proto:go_default_library",
+        "@tink_go//aead",
+        "@tink_go//core/registry",
+        "@tink_go//insecurecleartextkeyset",
+        "@tink_go//integration/awskms",
+        "@tink_go//integration/gcpkms",
+        "@tink_go//keyset",
+        "@tink_go//proto/tink_go_proto",
     ],
 )
