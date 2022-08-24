@@ -114,6 +114,7 @@ java_test(
         "//src/main/java/com/google/crypto/tink/daead:deterministic_aead_key_templates",
         "//src/main/java/com/google/crypto/tink/subtle:random",
         "//src/main/java/com/google/crypto/tink/testing:test_util",
+        "@maven//:com_google_truth_truth",
         "@maven//:junit_junit",
     ],
 )

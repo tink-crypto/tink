@@ -16,9 +16,9 @@
 
 package com.google.crypto.tink.daead;
 
+import static com.google.common.truth.Truth.assertThat;
 import static com.google.crypto.tink.testing.TestUtil.assertExceptionContains;
 import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.fail;
 
@@ -115,10 +115,10 @@ public class DeterministicAeadIntegrationTest {
     byte[] plaintext = Random.randBytes(20);
     byte[] associatedData = Random.randBytes(20);
     byte[] ciphertext = daead.encryptDeterministically(plaintext, associatedData);
-    byte[] prefix = Arrays.copyOfRange(ciphertext, 0, CryptoFormat.NON_RAW_PREFIX_SIZE);
+    byte[] prefix = Arrays.copyOf(ciphertext, CryptoFormat.NON_RAW_PREFIX_SIZE);
     assertArrayEquals(prefix, CryptoFormat.getOutputPrefix(primary));
     assertArrayEquals(plaintext, daead.decryptDeterministically(ciphertext, associatedData));
-    assertEquals(CryptoFormat.NON_RAW_PREFIX_SIZE + plaintext.length + 16, ciphertext.length);
+    assertThat(ciphertext).hasLength(CryptoFormat.NON_RAW_PREFIX_SIZE + plaintext.length + 16);
 
     // encrypt with a non-primary RAW key and decrypt with the keyset
     KeysetHandle keysetHandle2 =
@@ -174,7 +174,7 @@ public class DeterministicAeadIntegrationTest {
     byte[] ciphertext = daead.encryptDeterministically(plaintext, associatedData);
 
     assertArrayEquals(plaintext, daead.decryptDeterministically(ciphertext, associatedData));
-    assertEquals(CryptoFormat.RAW_PREFIX_SIZE + plaintext.length + 16, ciphertext.length);
+    assertThat(ciphertext).hasLength(CryptoFormat.RAW_PREFIX_SIZE + plaintext.length + 16);
   }
 
   @Test
@@ -196,7 +196,7 @@ public class DeterministicAeadIntegrationTest {
     byte[] ciphertext = daead.encryptDeterministically(plaintext, associatedData);
 
     assertArrayEquals(plaintext, daead.decryptDeterministically(ciphertext, associatedData));
-    assertEquals(CryptoFormat.RAW_PREFIX_SIZE + plaintext.length + 16, ciphertext.length);
+    assertThat(ciphertext).hasLength(CryptoFormat.RAW_PREFIX_SIZE + plaintext.length + 16);
   }
 
   @Test
