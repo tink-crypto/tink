@@ -23,8 +23,11 @@
 //   associated-data:  a string to be used as assciated data
 //   output-file:  name of the file for the resulting output
 
+#include <stdlib.h>
+
 #include <fstream>
 #include <iostream>
+#include <memory>
 #include <sstream>
 #include <string>
 #include <utility>
