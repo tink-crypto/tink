@@ -87,6 +87,14 @@ func TestJWTSignVerify(t *testing.T) {
 		{tag: "JWT_RS384_3072_R4_RAW", template: jwt.RawRS384_3072_F4_Key_Template()},
 		{tag: "JWT_RS512_4096_R4", template: jwt.RS512_4096_F4_Key_Template()},
 		{tag: "JWT_RS512_4096_R4_RAW", template: jwt.RawRS384_3072_F4_Key_Template()},
+		{tag: "JWT_PS256_2048_R4", template: jwt.PS256_2048_F4_Key_Template()},
+		{tag: "JWT_PS256_2048_R4_RAW", template: jwt.RawPS256_2048_F4_Key_Template()},
+		{tag: "JWT_PS256_3072_R4", template: jwt.PS256_3072_F4_Key_Template()},
+		{tag: "JWT_PS256_3072_R4_RAW", template: jwt.RawPS256_3072_F4_Key_Template()},
+		{tag: "JWT_PS384_3072_R4", template: jwt.PS384_3072_F4_Key_Template()},
+		{tag: "JWT_PS384_3072_R4_RAW", template: jwt.RawPS384_3072_F4_Key_Template()},
+		{tag: "JWT_PS512_4096_R4", template: jwt.PS512_4096_F4_Key_Template()},
+		{tag: "JWT_PS512_4096_R4_RAW", template: jwt.RawPS384_3072_F4_Key_Template()},
 	} {
 		t.Run(tc.tag, func(t *testing.T) {
 			kh, err := keyset.NewHandle(tc.template)

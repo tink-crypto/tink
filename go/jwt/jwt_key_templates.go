@@ -201,3 +201,51 @@ func RS512_4096_F4_Key_Template() *tinkpb.KeyTemplate {
 func RawRS512_4096_F4_Key_Template() *tinkpb.KeyTemplate {
 	return createJWTRSKeyTemplate(jrsppb.JwtRsaSsaPkcs1Algorithm_RS512, 4096, tinkpb.OutputPrefixType_RAW)
 }
+
+// PS256_2048_F4_Key_Template creates a JWT key template for JWA algorithm "PS256", which is digital
+// signature with RSA-SSA-PSS, a 2048 bit modulus, and SHA256. It will set a key ID header "kid" in the token.
+func PS256_2048_F4_Key_Template() *tinkpb.KeyTemplate {
+	return createJWTPSKeyTemplate(jrpsspb.JwtRsaSsaPssAlgorithm_PS256, 2048, tinkpb.OutputPrefixType_TINK)
+}
+
+// RawPS256_2048_F4_Key_Template creates a JWT key template for JWA algorithm "PS256", which is digital
+// signature with RSA-SSA-PSS, a 2048 bit modulus, and SHA256. It will not set a key ID header "kid" in the token.
+func RawPS256_2048_F4_Key_Template() *tinkpb.KeyTemplate {
+	return createJWTPSKeyTemplate(jrpsspb.JwtRsaSsaPssAlgorithm_PS256, 2048, tinkpb.OutputPrefixType_RAW)
+}
+
+// PS256_3072_F4_Key_Template creates a JWT key template for JWA algorithm "PS256", which is digital
+// signature with RSA-SSA-PSS, a 3072 bit modulus, and SHA256. It will set a key ID header "kid" in the token.
+func PS256_3072_F4_Key_Template() *tinkpb.KeyTemplate {
+	return createJWTPSKeyTemplate(jrpsspb.JwtRsaSsaPssAlgorithm_PS256, 3072, tinkpb.OutputPrefixType_TINK)
+}
+
+// RawPS256_3072_F4_Key_Template creates a JWT key template for JWA algorithm "PS256", which is digital
+// signature with RSA-SSA-PSS, a 3072 bit modulus, and SHA256. It will not set a key ID header "kid" in the token.
+func RawPS256_3072_F4_Key_Template() *tinkpb.KeyTemplate {
+	return createJWTPSKeyTemplate(jrpsspb.JwtRsaSsaPssAlgorithm_PS256, 3072, tinkpb.OutputPrefixType_RAW)
+}
+
+// PS384_3072_F4_Key_Template creates a JWT key template for JWA algorithm "PS384", which is digital
+// signature with RSA-SSA-PSS, a 3072 bit modulus, and SHA384. It will set a key ID header "kid" in the token.
+func PS384_3072_F4_Key_Template() *tinkpb.KeyTemplate {
+	return createJWTPSKeyTemplate(jrpsspb.JwtRsaSsaPssAlgorithm_PS384, 3072, tinkpb.OutputPrefixType_TINK)
+}
+
+// RawPS384_3072_F4_Key_Template creates a JWT key template for JWA algorithm "PS384", which is digital
+// signature with RSA-SSA-PSS, a 3072 bit modulus, and SHA384. It will not set a key ID header "kid" in the token.
+func RawPS384_3072_F4_Key_Template() *tinkpb.KeyTemplate {
+	return createJWTPSKeyTemplate(jrpsspb.JwtRsaSsaPssAlgorithm_PS384, 3072, tinkpb.OutputPrefixType_RAW)
+}
+
+// PS512_4096_F4_Key_Template creates a JWT key template for JWA algorithm "PS512", which is digital
+// signature with RSA-SSA-PSS, a 4096 bit modulus, and SHA512. It will set a key ID header "kid" in the token.
+func PS512_4096_F4_Key_Template() *tinkpb.KeyTemplate {
+	return createJWTPSKeyTemplate(jrpsspb.JwtRsaSsaPssAlgorithm_PS512, 4096, tinkpb.OutputPrefixType_TINK)
+}
+
+// RawPS512_4096_F4_Key_Template creates a JWT key template for JWA algorithm "PS512", which is digital
+// signature with RSA-SSA-PSS, a 4096 bit modulus, and SHA512. It will not set a key ID header "kid" in the token.
+func RawPS512_4096_F4_Key_Template() *tinkpb.KeyTemplate {
+	return createJWTPSKeyTemplate(jrpsspb.JwtRsaSsaPssAlgorithm_PS512, 4096, tinkpb.OutputPrefixType_RAW)
+}
