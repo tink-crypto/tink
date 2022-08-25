@@ -22,6 +22,7 @@ import (
 	"time"
 
 	"google.golang.org/protobuf/proto"
+	"github.com/google/tink/go/core/registry"
 	"github.com/google/tink/go/subtle/random"
 	jrsppb "github.com/google/tink/go/proto/jwt_rsa_ssa_pss_go_proto"
 )
@@ -54,8 +55,10 @@ func makeValidPSPublicKey() (*jrsppb.JwtRsaSsaPssPublicKey, error) {
 }
 
 func TestJWTPSVerifierNotImplemented(t *testing.T) {
-	// TODO(b/173082704): call registry to get key manager once added to cross language tests.
-	km := &jwtPSVerifierKeyManager{}
+	km, err := registry.GetKeyManager(testJWTPSVerifierKeyType)
+	if err != nil {
+		t.Fatalf("registry.GetKeyManager(%q) err = %v, want nil", testJWTPSVerifierKeyType, err)
+	}
 	keyFormat := &jrsppb.JwtRsaSsaPssKeyFormat{
 		Version:           0,
 		Algorithm:         jrsppb.JwtRsaSsaPssAlgorithm_PS256,
@@ -75,8 +78,10 @@ func TestJWTPSVerifierNotImplemented(t *testing.T) {
 }
 
 func TestJWTPSVerifierDoesSupport(t *testing.T) {
-	// TODO(b/173082704): call registry to get key manager once added to cross language tests.
-	km := &jwtPSVerifierKeyManager{}
+	km, err := registry.GetKeyManager(testJWTPSVerifierKeyType)
+	if err != nil {
+		t.Fatalf("registry.GetKeyManager(%q) err = %v, want nil", testJWTPSVerifierKeyType, err)
+	}
 	if !km.DoesSupport(testJWTPSVerifierKeyType) {
 		t.Errorf("DoesSupport(%q) = false, want true", testJWTPSVerifierKeyType)
 	}
@@ -86,8 +91,10 @@ func TestJWTPSVerifierDoesSupport(t *testing.T) {
 }
 
 func TestJWTPSVerifierTypeURL(t *testing.T) {
-	// TODO(b/173082704): call registry to get key manager once added to cross language tests.
-	km := &jwtPSVerifierKeyManager{}
+	km, err := registry.GetKeyManager(testJWTPSVerifierKeyType)
+	if err != nil {
+		t.Fatalf("registry.GetKeyManager(%q) err = %v, want nil", testJWTPSVerifierKeyType, err)
+	}
 	if km.TypeURL() != testJWTPSVerifierKeyType {
 		t.Errorf("km.TypeURL() = %q, want %q", km.TypeURL(), testJWTPSVerifierKeyType)
 	}
@@ -98,8 +105,10 @@ func TestJWTPSVerifierPrimitiveWithInvalidKey(t *testing.T) {
 		name   string
 		pubKey *jrsppb.JwtRsaSsaPssPublicKey
 	}
-	// TODO(b/173082704): call registry to get key manager once added to cross language tests.
-	km := &jwtPSVerifierKeyManager{}
+	km, err := registry.GetKeyManager(testJWTPSVerifierKeyType)
+	if err != nil {
+		t.Fatalf("registry.GetKeyManager(%q) err = %v, want nil", testJWTPSVerifierKeyType, err)
+	}
 	validPubKey, err := makeValidPSPublicKey()
 	if err != nil {
 		t.Fatalf("makeValidPSPublicKey() err = %v, want nil", err)
@@ -177,8 +186,10 @@ func TestJWTPSVerifierPrimitiveWithInvalidKey(t *testing.T) {
 }
 
 func TestJWTPSVerifierPrimitiveVerifyFixedToken(t *testing.T) {
-	// TODO(b/173082704): call registry to get key manager once added to cross language tests.
-	km := &jwtPSVerifierKeyManager{}
+	km, err := registry.GetKeyManager(testJWTPSVerifierKeyType)
+	if err != nil {
+		t.Fatalf("registry.GetKeyManager(%q) err = %v, want nil", testJWTPSVerifierKeyType, err)
+	}
 	pubKey, err := makeValidPSPublicKey()
 	if err != nil {
 		t.Fatalf("makeValidPSPublicKey() err = %v, want nil", err)
@@ -223,8 +234,10 @@ func TestJWTPSVerifierPrimitiveVerifyFixedToken(t *testing.T) {
 }
 
 func TestJWTPSVerifierPrimitiveVerifyFixedTokenWithCustomKID(t *testing.T) {
-	// TODO(b/173082704): call registry to get key manager once added to cross language tests.
-	km := &jwtPSVerifierKeyManager{}
+	km, err := registry.GetKeyManager(testJWTPSVerifierKeyType)
+	if err != nil {
+		t.Fatalf("registry.GetKeyManager(%q) err = %v, want nil", testJWTPSVerifierKeyType, err)
+	}
 	pubKey, err := makeValidPSPublicKey()
 	if err != nil {
 		t.Fatalf("makeValidPSPublicKey() err = %v, want nil", err)
@@ -272,8 +285,10 @@ func TestJWTPSVerifierPrimitiveVerifyFixedTokenWithCustomKID(t *testing.T) {
 }
 
 func TestJWTPSVerifierPrimitiveVerifyFixedTokenWithTinkKID(t *testing.T) {
-	// TODO(b/173082704): call registry to get key manager once added to cross language tests.
-	km := &jwtPSVerifierKeyManager{}
+	km, err := registry.GetKeyManager(testJWTPSVerifierKeyType)
+	if err != nil {
+		t.Fatalf("registry.GetKeyManager(%q) err = %v, want nil", testJWTPSVerifierKeyType, err)
+	}
 	pubKey, err := makeValidPSPublicKey()
 	if err != nil {
 		t.Fatalf("makeValidPSPublicKey() err = %v, want nil", err)

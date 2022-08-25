@@ -45,11 +45,6 @@ var (
 // for JWT Signing using the 'PS256', 'PS384', and 'PS512' JWA algorithm.
 type jwtPSSignerKeyManager struct{}
 
-// TODO(b/230489047): delete in diffbase once cross language tests are fixed
-func newJWTPSSignerKeyManager() registry.KeyManager {
-	return &jwtPSSignerKeyManager{}
-}
-
 var _ registry.PrivateKeyManager = (*jwtPSSignerKeyManager)(nil)
 
 func (km *jwtPSSignerKeyManager) Primitive(serializedKey []byte) (interface{}, error) {
