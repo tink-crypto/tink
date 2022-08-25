@@ -52,13 +52,16 @@ public final class AesCmacKey extends MacKey {
       allowlistAnnotations = {AccessesPartialKey.class})
   public static AesCmacKey create(AesCmacParameters parameters, SecretBytes aesKey)
       throws GeneralSecurityException {
-    if (aesKey.size() != 32) {
-      throw new GeneralSecurityException("Invalid key size");
+    // The only check on the key size since it's verified during AesCmacParameter creation.
+    if (parameters.getKeySizeBytes() != aesKey.size()) {
+      throw new GeneralSecurityException("Key size mismatch");
     }
+
     if (parameters.hasIdRequirement()) {
       throw new GeneralSecurityException(
           "Must use createForKeyset for parameters with ID requirement");
     }
+
     return new AesCmacKey(parameters, aesKey, null);
   }
 
@@ -76,13 +79,16 @@ public final class AesCmacKey extends MacKey {
   public static AesCmacKey createForKeyset(
       AesCmacParameters parameters, SecretBytes aesKeyBytes, @Nullable Integer idRequirement)
       throws GeneralSecurityException {
-    if (aesKeyBytes.size() != 32) {
-      throw new GeneralSecurityException("Invalid key size");
+    // The only check on the key size since it's verified during AesCmacParameter creation.
+    if (parameters.getKeySizeBytes() != aesKeyBytes.size()) {
+      throw new GeneralSecurityException("Key size mismatch");
     }
+
     if (parameters.hasIdRequirement() && idRequirement == null) {
       throw new GeneralSecurityException(
           "Cannot create key without ID requirement with format with ID requirement");
     }
+
     if (!parameters.hasIdRequirement() && idRequirement != null) {
       throw new GeneralSecurityException(
           "Cannot create key with ID requirement with format without ID requirement");

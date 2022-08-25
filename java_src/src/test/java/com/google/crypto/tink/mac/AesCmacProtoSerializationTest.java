@@ -49,9 +49,12 @@ import org.junit.runner.RunWith;
 public final class AesCmacProtoSerializationTest {
   private static final String TYPE_URL = "type.googleapis.com/google.crypto.tink.AesCmacKey";
 
-  private static final SecretBytes AES_KEY = SecretBytes.randomBytes(32);
-  private static final ByteString AES_KEY_AS_BYTE_STRING =
-      ByteString.copyFrom(AES_KEY.toByteArray(InsecureSecretKeyAccess.get()));
+  private static final SecretBytes AES_KEY_32 = SecretBytes.randomBytes(32);
+  private static final SecretBytes AES_KEY_16 = SecretBytes.randomBytes(16);
+  private static final ByteString AES_KEY_AS_BYTE_STRING_32 =
+      ByteString.copyFrom(AES_KEY_32.toByteArray(InsecureSecretKeyAccess.get()));
+  private static final ByteString AES_KEY_AS_BYTE_STRING_16 =
+      ByteString.copyFrom(AES_KEY_16.toByteArray(InsecureSecretKeyAccess.get()));
 
   private static final MutableSerializationRegistry registry = new MutableSerializationRegistry();
 
@@ -60,27 +63,29 @@ public final class AesCmacProtoSerializationTest {
     AesCmacProtoSerialization.register(registry);
   }
 
-  static AesCmacParameters createAesCmacParameters(int tagSize, AesCmacParameters.Variant variant) {
+  static AesCmacParameters createAesCmacParameters(
+      int keySize, int tagSize, AesCmacParameters.Variant variant) {
     try {
-      return AesCmacParameters.createForKeysetWithCryptographicTagSize(tagSize, variant);
+      return AesCmacParameters.createForKeyset(keySize, tagSize, variant);
     } catch (GeneralSecurityException e) {
       throw new RuntimeException(e);
     }
   }
 
   static AesCmacKey createKey(
+      int keySize,
       int tagSize,
       AesCmacParameters.Variant variant,
       SecretBytes aesKey,
       @Nullable Integer idRequirement)
       throws GeneralSecurityException {
     return AesCmacKey.createForKeyset(
-        createAesCmacParameters(tagSize, variant), aesKey, idRequirement);
+        createAesCmacParameters(keySize, tagSize, variant), aesKey, idRequirement);
   }
 
-  static com.google.crypto.tink.proto.AesCmacKeyFormat createProtoFormat(int tagSize) {
+  static com.google.crypto.tink.proto.AesCmacKeyFormat createProtoFormat(int keySize, int tagSize) {
     return com.google.crypto.tink.proto.AesCmacKeyFormat.newBuilder()
-        .setKeySize(32)
+        .setKeySize(keySize)
         .setParams(AesCmacParams.newBuilder().setTagSize(tagSize))
         .build();
   }
@@ -97,61 +102,137 @@ public final class AesCmacProtoSerializationTest {
   public static final ParametersWithSerialization[] VALID_PARAMETERS =
       new ParametersWithSerialization[] {
         new ParametersWithSerialization(
-            createAesCmacParameters(/*tagSize=*/ 16, AesCmacParameters.Variant.TINK),
+            createAesCmacParameters(
+                /*keySize=*/ 16, /*tagSize=*/ 16, AesCmacParameters.Variant.TINK),
             ProtoParametersSerialization.create(
-                TYPE_URL, OutputPrefixType.TINK, createProtoFormat(16))),
+                TYPE_URL,
+                OutputPrefixType.TINK,
+                createProtoFormat(/*keySize=*/ 16, /*tagSize=*/ 16))),
         new ParametersWithSerialization(
-            createAesCmacParameters(/*tagSize=*/ 16, AesCmacParameters.Variant.CRUNCHY),
+            createAesCmacParameters(
+                /*keySize=*/ 16, /*tagSize=*/ 16, AesCmacParameters.Variant.CRUNCHY),
             ProtoParametersSerialization.create(
-                TYPE_URL, OutputPrefixType.CRUNCHY, createProtoFormat(16))),
+                TYPE_URL,
+                OutputPrefixType.CRUNCHY,
+                createProtoFormat(/*keySize=*/ 16, /*tagSize=*/ 16))),
         new ParametersWithSerialization(
-            createAesCmacParameters(/*tagSize=*/ 16, AesCmacParameters.Variant.LEGACY),
+            createAesCmacParameters(
+                /*keySize=*/ 16, /*tagSize=*/ 16, AesCmacParameters.Variant.LEGACY),
             ProtoParametersSerialization.create(
-                TYPE_URL, OutputPrefixType.LEGACY, createProtoFormat(16))),
+                TYPE_URL,
+                OutputPrefixType.LEGACY,
+                createProtoFormat(/*keySize=*/ 16, /*tagSize=*/ 16))),
         new ParametersWithSerialization(
-            createAesCmacParameters(/*tagSize=*/ 16, AesCmacParameters.Variant.NO_PREFIX),
+            createAesCmacParameters(
+                /*keySize=*/ 16, /*tagSize=*/ 16, AesCmacParameters.Variant.NO_PREFIX),
             ProtoParametersSerialization.create(
-                TYPE_URL, OutputPrefixType.RAW, createProtoFormat(16))),
+                TYPE_URL,
+                OutputPrefixType.RAW,
+                createProtoFormat(/*keySize=*/ 16, /*tagSize=*/ 16))),
         new ParametersWithSerialization(
-            createAesCmacParameters(/*tagSize=*/ 10, AesCmacParameters.Variant.TINK),
+            createAesCmacParameters(
+                /*keySize=*/ 32, /*tagSize=*/ 16, AesCmacParameters.Variant.TINK),
             ProtoParametersSerialization.create(
-                TYPE_URL, OutputPrefixType.TINK, createProtoFormat(10))),
+                TYPE_URL,
+                OutputPrefixType.TINK,
+                createProtoFormat(/*keySize=*/ 32, /*tagSize=*/ 16))),
         new ParametersWithSerialization(
-            createAesCmacParameters(/*tagSize=*/ 11, AesCmacParameters.Variant.TINK),
+            createAesCmacParameters(
+                /*keySize=*/ 32, /*tagSize=*/ 16, AesCmacParameters.Variant.CRUNCHY),
             ProtoParametersSerialization.create(
-                TYPE_URL, OutputPrefixType.TINK, createProtoFormat(11))),
+                TYPE_URL,
+                OutputPrefixType.CRUNCHY,
+                createProtoFormat(/*keySize=*/ 32, /*tagSize=*/ 16))),
         new ParametersWithSerialization(
-            createAesCmacParameters(/*tagSize=*/ 12, AesCmacParameters.Variant.TINK),
+            createAesCmacParameters(
+                /*keySize=*/ 32, /*tagSize=*/ 16, AesCmacParameters.Variant.LEGACY),
             ProtoParametersSerialization.create(
-                TYPE_URL, OutputPrefixType.TINK, createProtoFormat(12))),
+                TYPE_URL,
+                OutputPrefixType.LEGACY,
+                createProtoFormat(/*keySize=*/ 32, /*tagSize=*/ 16))),
         new ParametersWithSerialization(
-            createAesCmacParameters(/*tagSize=*/ 13, AesCmacParameters.Variant.TINK),
+            createAesCmacParameters(
+                /*keySize=*/ 32, /*tagSize=*/ 16, AesCmacParameters.Variant.NO_PREFIX),
             ProtoParametersSerialization.create(
-                TYPE_URL, OutputPrefixType.TINK, createProtoFormat(13))),
+                TYPE_URL,
+                OutputPrefixType.RAW,
+                createProtoFormat(/*keySize=*/ 32, /*tagSize=*/ 16))),
         new ParametersWithSerialization(
-            createAesCmacParameters(/*tagSize=*/ 14, AesCmacParameters.Variant.TINK),
+            createAesCmacParameters(
+                /*keySize=*/ 32, /*tagSize=*/ 10, AesCmacParameters.Variant.TINK),
             ProtoParametersSerialization.create(
-                TYPE_URL, OutputPrefixType.TINK, createProtoFormat(14))),
+                TYPE_URL,
+                OutputPrefixType.TINK,
+                createProtoFormat(/*keySize=*/ 32, /*tagSize=*/ 10))),
         new ParametersWithSerialization(
-            createAesCmacParameters(/*tagSize=*/ 15, AesCmacParameters.Variant.TINK),
+            createAesCmacParameters(
+                /*keySize=*/ 32, /*tagSize=*/ 11, AesCmacParameters.Variant.TINK),
             ProtoParametersSerialization.create(
-                TYPE_URL, OutputPrefixType.TINK, createProtoFormat(15))),
+                TYPE_URL,
+                OutputPrefixType.TINK,
+                createProtoFormat(/*keySize=*/ 32, /*tagSize=*/ 11))),
         new ParametersWithSerialization(
-            createAesCmacParameters(/*tagSize=*/ 11, AesCmacParameters.Variant.NO_PREFIX),
+            createAesCmacParameters(
+                /*keySize=*/ 32, /*tagSize=*/ 12, AesCmacParameters.Variant.TINK),
             ProtoParametersSerialization.create(
-                TYPE_URL, OutputPrefixType.RAW, createProtoFormat(11))),
+                TYPE_URL,
+                OutputPrefixType.TINK,
+                createProtoFormat(/*keySize=*/ 32, /*tagSize=*/ 12))),
+        new ParametersWithSerialization(
+            createAesCmacParameters(
+                /*keySize=*/ 32, /*tagSize=*/ 13, AesCmacParameters.Variant.TINK),
+            ProtoParametersSerialization.create(
+                TYPE_URL,
+                OutputPrefixType.TINK,
+                createProtoFormat(/*keySize=*/ 32, /*tagSize=*/ 13))),
+        new ParametersWithSerialization(
+            createAesCmacParameters(
+                /*keySize=*/ 32, /*tagSize=*/ 14, AesCmacParameters.Variant.TINK),
+            ProtoParametersSerialization.create(
+                TYPE_URL,
+                OutputPrefixType.TINK,
+                createProtoFormat(/*keySize=*/ 32, /*tagSize=*/ 14))),
+        new ParametersWithSerialization(
+            createAesCmacParameters(
+                /*keySize=*/ 32, /*tagSize=*/ 15, AesCmacParameters.Variant.TINK),
+            ProtoParametersSerialization.create(
+                TYPE_URL,
+                OutputPrefixType.TINK,
+                createProtoFormat(/*keySize=*/ 32, /*tagSize=*/ 15))),
+        new ParametersWithSerialization(
+            createAesCmacParameters(
+                /*keySize=*/ 32, /*tagSize=*/ 11, AesCmacParameters.Variant.NO_PREFIX),
+            ProtoParametersSerialization.create(
+                TYPE_URL,
+                OutputPrefixType.RAW,
+                createProtoFormat(/*keySize=*/ 32, /*tagSize=*/ 11))),
       };
 
   @DataPoints("invalidParameters")
   public static final ProtoParametersSerialization[] INVALID_PARAMETERS =
       new ProtoParametersSerialization[] {
-        ProtoParametersSerialization.create(TYPE_URL, OutputPrefixType.RAW, createProtoFormat(9)),
-        ProtoParametersSerialization.create(TYPE_URL, OutputPrefixType.RAW, createProtoFormat(7)),
-        ProtoParametersSerialization.create(TYPE_URL, OutputPrefixType.RAW, createProtoFormat(17)),
-        ProtoParametersSerialization.create(TYPE_URL, OutputPrefixType.RAW, createProtoFormat(19)),
-        ProtoParametersSerialization.create(TYPE_URL, OutputPrefixType.RAW, createProtoFormat(32)),
         ProtoParametersSerialization.create(
-            TYPE_URL, OutputPrefixType.UNKNOWN_PREFIX, createProtoFormat(16)),
+            TYPE_URL, OutputPrefixType.RAW, createProtoFormat(/*keySize=*/ 32, /*tagSize=*/ 9)),
+        ProtoParametersSerialization.create(
+            TYPE_URL, OutputPrefixType.RAW, createProtoFormat(/*keySize=*/ 32, /*tagSize=*/ 7)),
+        ProtoParametersSerialization.create(
+            TYPE_URL, OutputPrefixType.RAW, createProtoFormat(/*keySize=*/ 16, /*tagSize=*/ 17)),
+        ProtoParametersSerialization.create(
+            TYPE_URL, OutputPrefixType.RAW, createProtoFormat(/*keySize=*/ 16, /*tagSize=*/ 19)),
+        ProtoParametersSerialization.create(
+            TYPE_URL, OutputPrefixType.RAW, createProtoFormat(/*keySize=*/ 32, /*tagSize=*/ 32)),
+        ProtoParametersSerialization.create(
+            TYPE_URL, OutputPrefixType.RAW, createProtoFormat(/*keySize=*/ 1, /*tagSize=*/ 10)),
+        ProtoParametersSerialization.create(
+            TYPE_URL, OutputPrefixType.RAW, createProtoFormat(/*keySize=*/ -1, /*tagSize=*/ 10)),
+        ProtoParametersSerialization.create(
+            TYPE_URL, OutputPrefixType.RAW, createProtoFormat(/*keySize=*/ 20, /*tagSize=*/ 10)),
+        ProtoParametersSerialization.create(
+            TYPE_URL, OutputPrefixType.RAW, createProtoFormat(/*keySize=*/ 390, /*tagSize=*/ 10)),
+        ProtoParametersSerialization.create(
+            TYPE_URL,
+            OutputPrefixType.UNKNOWN_PREFIX,
+            createProtoFormat(/*keySize=*/ 32, /*tagSize=*/ 16)),
         // Proto messages start with a VarInt, which always ends with a byte with most
         // significant bit unset. 0x80 is hence invalid.
         ProtoParametersSerialization.create(
@@ -165,6 +246,7 @@ public final class AesCmacProtoSerializationTest {
   @Theory
   public void testSerializeParameters(
       @FromDataPoints("validParameters") ParametersWithSerialization pair) throws Exception {
+
     ProtoParametersSerialization serializedParameters =
         registry.serializeParameters(pair.getParameters(), ProtoParametersSerialization.class);
 
@@ -194,34 +276,105 @@ public final class AesCmacProtoSerializationTest {
       return new KeyWithSerialization[] {
         new KeyWithSerialization(
             createKey(
-                /*tagSize=*/ 16, AesCmacParameters.Variant.TINK, AES_KEY, /*idRequirement=*/ 1479),
+                /*keySize=*/ 32,
+                /*tagSize=*/ 16,
+                AesCmacParameters.Variant.TINK,
+                AES_KEY_32,
+                /*idRequirement=*/ 1479),
             ProtoKeySerialization.create(
                 TYPE_URL,
-                createProtoKey(/*tagSize=*/ 16, AES_KEY_AS_BYTE_STRING).toByteString(),
+                createProtoKey(/*tagSize=*/ 16, AES_KEY_AS_BYTE_STRING_32).toByteString(),
                 KeyMaterialType.SYMMETRIC,
                 OutputPrefixType.TINK,
                 /*idRequirement=*/ 1479)),
         new KeyWithSerialization(
-            createKey(16, AesCmacParameters.Variant.CRUNCHY, AES_KEY, 1479),
+            createKey(
+                /*keySize=*/ 32,
+                /*tagSize=*/ 16,
+                AesCmacParameters.Variant.CRUNCHY,
+                AES_KEY_32,
+                /*idRequirement=*/ 1479),
             ProtoKeySerialization.create(
                 TYPE_URL,
-                createProtoKey(/*tagSize=*/ 16, AES_KEY_AS_BYTE_STRING).toByteString(),
+                createProtoKey(/*tagSize=*/ 16, AES_KEY_AS_BYTE_STRING_32).toByteString(),
                 KeyMaterialType.SYMMETRIC,
                 OutputPrefixType.CRUNCHY,
                 /*idRequirement=*/ 1479)),
         new KeyWithSerialization(
-            createKey(16, AesCmacParameters.Variant.LEGACY, AES_KEY, 1479),
+            createKey(
+                /*keySize=*/ 32,
+                /*tagSize=*/ 16,
+                AesCmacParameters.Variant.LEGACY,
+                AES_KEY_32,
+                /*idRequirement=*/ 1479),
             ProtoKeySerialization.create(
                 TYPE_URL,
-                createProtoKey(/*tagSize=*/ 16, AES_KEY_AS_BYTE_STRING).toByteString(),
+                createProtoKey(/*tagSize=*/ 16, AES_KEY_AS_BYTE_STRING_32).toByteString(),
                 KeyMaterialType.SYMMETRIC,
                 OutputPrefixType.LEGACY,
-                1479)),
+                /*idRequirement=*/ 1479)),
         new KeyWithSerialization(
-            createKey(16, AesCmacParameters.Variant.NO_PREFIX, AES_KEY, null),
+            createKey(
+                /*keySize=*/ 32,
+                /*tagSize=*/ 16,
+                AesCmacParameters.Variant.NO_PREFIX,
+                AES_KEY_32,
+                /*idRequirement=*/ null),
             ProtoKeySerialization.create(
                 TYPE_URL,
-                createProtoKey(/*tagSize=*/ 16, AES_KEY_AS_BYTE_STRING).toByteString(),
+                createProtoKey(/*tagSize=*/ 16, AES_KEY_AS_BYTE_STRING_32).toByteString(),
+                KeyMaterialType.SYMMETRIC,
+                OutputPrefixType.RAW,
+                /*idRequirement=*/ null)),
+        new KeyWithSerialization(
+            createKey(
+                /*keySize=*/ 16,
+                /*tagSize=*/ 16,
+                AesCmacParameters.Variant.TINK,
+                AES_KEY_16,
+                /*idRequirement=*/ 1479),
+            ProtoKeySerialization.create(
+                TYPE_URL,
+                createProtoKey(/*tagSize=*/ 16, AES_KEY_AS_BYTE_STRING_16).toByteString(),
+                KeyMaterialType.SYMMETRIC,
+                OutputPrefixType.TINK,
+                /*idRequirement=*/ 1479)),
+        new KeyWithSerialization(
+            createKey(
+                /*keySize=*/ 16,
+                /*tagSize=*/ 16,
+                AesCmacParameters.Variant.CRUNCHY,
+                AES_KEY_16,
+                /*idRequirement=*/ 1479),
+            ProtoKeySerialization.create(
+                TYPE_URL,
+                createProtoKey(/*tagSize=*/ 16, AES_KEY_AS_BYTE_STRING_16).toByteString(),
+                KeyMaterialType.SYMMETRIC,
+                OutputPrefixType.CRUNCHY,
+                /*idRequirement=*/ 1479)),
+        new KeyWithSerialization(
+            createKey(
+                /*keySize=*/ 16,
+                /*tagSize=*/ 16,
+                AesCmacParameters.Variant.LEGACY,
+                AES_KEY_16,
+                /*idRequirement=*/ 1479),
+            ProtoKeySerialization.create(
+                TYPE_URL,
+                createProtoKey(/*tagSize=*/ 16, AES_KEY_AS_BYTE_STRING_16).toByteString(),
+                KeyMaterialType.SYMMETRIC,
+                OutputPrefixType.LEGACY,
+                /*idRequirement=*/ 1479)),
+        new KeyWithSerialization(
+            createKey(
+                /*keySize=*/ 16,
+                /*tagSize=*/ 16,
+                AesCmacParameters.Variant.NO_PREFIX,
+                AES_KEY_16,
+                /*idRequirement=*/ null),
+            ProtoKeySerialization.create(
+                TYPE_URL,
+                createProtoKey(/*tagSize=*/ 16, AES_KEY_AS_BYTE_STRING_16).toByteString(),
                 KeyMaterialType.SYMMETRIC,
                 OutputPrefixType.RAW,
                 /*idRequirement=*/ null)),
@@ -237,7 +390,7 @@ public final class AesCmacProtoSerializationTest {
         // Bad Version Number (1)
         ProtoKeySerialization.create(
             TYPE_URL,
-            createProtoKey(16, AES_KEY_AS_BYTE_STRING).toBuilder()
+            createProtoKey(16, AES_KEY_AS_BYTE_STRING_32).toBuilder()
                 .setVersion(1)
                 .build()
                 .toByteString(),
@@ -247,28 +400,21 @@ public final class AesCmacProtoSerializationTest {
         // Unknown prefix
         ProtoKeySerialization.create(
             TYPE_URL,
-            createProtoKey(16, AES_KEY_AS_BYTE_STRING).toByteString(),
+            createProtoKey(16, AES_KEY_AS_BYTE_STRING_16).toByteString(),
             KeyMaterialType.SYMMETRIC,
             OutputPrefixType.UNKNOWN_PREFIX,
             1479),
         // Bad Tag Length (9)
         ProtoKeySerialization.create(
             TYPE_URL,
-            createProtoKey(9, AES_KEY_AS_BYTE_STRING).toByteString(),
+            createProtoKey(9, AES_KEY_AS_BYTE_STRING_32).toByteString(),
             KeyMaterialType.SYMMETRIC,
             OutputPrefixType.TINK,
             1479),
         // Bad Tag Length (17)
         ProtoKeySerialization.create(
             TYPE_URL,
-            createProtoKey(17, AES_KEY_AS_BYTE_STRING).toByteString(),
-            KeyMaterialType.SYMMETRIC,
-            OutputPrefixType.TINK,
-            1479),
-        // Bad Key Length (16)
-        ProtoKeySerialization.create(
-            TYPE_URL,
-            createProtoKey(16, ByteString.copyFrom(new byte[16])).toByteString(),
+            createProtoKey(17, AES_KEY_AS_BYTE_STRING_16).toByteString(),
             KeyMaterialType.SYMMETRIC,
             OutputPrefixType.TINK,
             1479),
@@ -299,7 +445,7 @@ public final class AesCmacProtoSerializationTest {
         // under test.
         ProtoKeySerialization.create(
             "WrongTypeUrl",
-            createProtoKey(16, AES_KEY_AS_BYTE_STRING).toByteString(),
+            createProtoKey(16, AES_KEY_AS_BYTE_STRING_32).toByteString(),
             KeyMaterialType.SYMMETRIC,
             OutputPrefixType.TINK,
             1479),

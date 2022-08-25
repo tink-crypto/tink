@@ -117,7 +117,7 @@ final class AesCmacProtoSerialization {
             .setValue(
                 com.google.crypto.tink.proto.AesCmacKeyFormat.newBuilder()
                     .setParams(getProtoParams(parameters))
-                    .setKeySize(32)
+                    .setKeySize(parameters.getKeySizeBytes())
                     .build()
                     .toByteString())
             .setOutputPrefixType(toOutputPrefixType(parameters.getVariant()))
@@ -140,13 +140,6 @@ final class AesCmacProtoSerialization {
         key.getIdRequirementOrNull());
   }
 
-  private static AesCmacParameters parseParams(
-      com.google.crypto.tink.proto.AesCmacParams params, OutputPrefixType outputPrefixType)
-      throws GeneralSecurityException {
-    return AesCmacParameters.createForKeysetWithCryptographicTagSize(
-        params.getTagSize(), toVariant(outputPrefixType));
-  }
-
   private static AesCmacParameters parseParameters(ProtoParametersSerialization serialization)
       throws GeneralSecurityException {
     if (!serialization.getKeyTemplate().getTypeUrl().equals(TYPE_URL)) {
@@ -163,7 +156,10 @@ final class AesCmacProtoSerialization {
       throw new GeneralSecurityException("Parsing AesCmacParameters failed: ", e);
     }
 
-    return parseParams(format.getParams(), serialization.getKeyTemplate().getOutputPrefixType());
+    return AesCmacParameters.createForKeyset(
+        format.getKeySize(),
+        format.getParams().getTagSize(),
+        toVariant(serialization.getKeyTemplate().getOutputPrefixType()));
   }
 
   @SuppressWarnings("UnusedException")
@@ -182,7 +178,10 @@ final class AesCmacProtoSerialization {
         throw new GeneralSecurityException("Only version 0 keys are accepted");
       }
       AesCmacParameters parameters =
-          parseParams(protoKey.getParams(), serialization.getOutputPrefixType());
+          AesCmacParameters.createForKeyset(
+              protoKey.getKeyValue().size(),
+              protoKey.getParams().getTagSize(),
+              toVariant(serialization.getOutputPrefixType()));
       return AesCmacKey.createForKeyset(
           parameters,
           SecretBytes.copyFrom(
