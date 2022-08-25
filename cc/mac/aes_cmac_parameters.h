@@ -53,13 +53,17 @@ class AesCmacParameters : public MacParameters {
   AesCmacParameters(AesCmacParameters&& other) = default;
   AesCmacParameters& operator=(AesCmacParameters&& other) = default;
 
-  // Creates a new AES-CMAC parameters object. Returns an error status if
-  // `cryptographic_tag_size_in_bytes` falls outside [10,...,16].  Otherwise,
-  // returns the parameters object.
+  // Creates a new AES-CMAC parameters object unless an error occurs. An error
+  // occurs under one of the following conditions:
+  // 1. `key_size_in_bytes` is a value other than 16 or 32
+  // 2. `cryptographic_tag_size_in_bytes` falls outside [10,...,16]
   static util::StatusOr<AesCmacParameters> Create(
-      int cryptographic_tag_size_in_bytes, Variant variant);
+      int key_size_in_bytes, int cryptographic_tag_size_in_bytes,
+      Variant variant);
 
   Variant GetVariant() const { return variant_; }
+
+  int KeySizeInBytes() const { return key_size_in_bytes_; }
 
   // Returns the size of the tag, which is computed cryptographically from the
   // message. Note that this may differ from the total size of the tag, as for
@@ -79,10 +83,13 @@ class AesCmacParameters : public MacParameters {
   bool operator==(const Parameters& other) const override;
 
  private:
-  AesCmacParameters(int cryptographic_tag_size_in_bytes, Variant variant)
-      : cryptographic_tag_size_in_bytes_(cryptographic_tag_size_in_bytes),
+  AesCmacParameters(int key_size_in_bytes, int cryptographic_tag_size_in_bytes,
+                    Variant variant)
+      : key_size_in_bytes_(key_size_in_bytes),
+        cryptographic_tag_size_in_bytes_(cryptographic_tag_size_in_bytes),
         variant_(variant) {}
 
+  int key_size_in_bytes_;
   int cryptographic_tag_size_in_bytes_;
   Variant variant_;
 };

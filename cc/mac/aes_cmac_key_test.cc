@@ -18,6 +18,7 @@
 
 #include <memory>
 #include <string>
+#include <tuple>
 #include <utility>
 
 #include "gmock/gmock.h"
@@ -35,7 +36,9 @@ namespace {
 using ::crypto::tink::test::IsOk;
 using ::crypto::tink::test::IsOkAndHolds;
 using ::crypto::tink::test::StatusIs;
+using ::testing::Combine;
 using ::testing::Eq;
+using ::testing::Range;
 using ::testing::TestWithParam;
 using ::testing::Values;
 
@@ -45,26 +48,31 @@ struct TestCase {
   std::string output_prefix;
 };
 
-using AesCmacKeyTest = TestWithParam<TestCase>;
+using AesCmacKeyTest = TestWithParam<std::tuple<int, int, TestCase>>;
 
 INSTANTIATE_TEST_SUITE_P(
     AesCmacKeyTestSuite, AesCmacKeyTest,
-    Values(TestCase{AesCmacParameters::Variant::kTink, 0x02030400,
-                    std::string("\x01\x02\x03\x04\x00", 5)},
-           TestCase{AesCmacParameters::Variant::kCrunchy, 0x01030005,
-                    std::string("\x00\x01\x03\x00\x05", 5)},
-           TestCase{AesCmacParameters::Variant::kLegacy, 0x01020304,
-                    std::string("\x00\x01\x02\x03\x04", 5)},
-           TestCase{AesCmacParameters::Variant::kNoPrefix, absl::nullopt, ""}));
+    Combine(Values(16, 32), Range(10, 16),
+            Values(TestCase{AesCmacParameters::Variant::kTink, 0x02030400,
+                            std::string("\x01\x02\x03\x04\x00", 5)},
+                   TestCase{AesCmacParameters::Variant::kCrunchy, 0x01030005,
+                            std::string("\x00\x01\x03\x00\x05", 5)},
+                   TestCase{AesCmacParameters::Variant::kLegacy, 0x01020304,
+                            std::string("\x00\x01\x02\x03\x04", 5)},
+                   TestCase{AesCmacParameters::Variant::kNoPrefix,
+                            absl::nullopt, ""})));
 
 TEST_P(AesCmacKeyTest, CreateSucceeds) {
-  TestCase test_case = GetParam();
+  int key_size;
+  int cryptographic_tag_size;
+  TestCase test_case;
+  std::tie(key_size, cryptographic_tag_size, test_case) = GetParam();
 
   util::StatusOr<AesCmacParameters> params = AesCmacParameters::Create(
-      /*cryptographic_tag_size_in_bytes=*/16, test_case.variant);
+      key_size, cryptographic_tag_size, test_case.variant);
   ASSERT_THAT(params, IsOk());
 
-  RestrictedData secret = RestrictedData(/*num_random_bytes=*/32);
+  RestrictedData secret = RestrictedData(key_size);
   util::StatusOr<AesCmacKey> key =
       AesCmacKey::Create(*params, secret, test_case.id_requirement);
   ASSERT_THAT(key.status(), IsOk());
@@ -74,31 +82,34 @@ TEST_P(AesCmacKeyTest, CreateSucceeds) {
   EXPECT_THAT(key->GetOutputPrefix(), IsOkAndHolds(test_case.output_prefix));
 }
 
-TEST_P(AesCmacKeyTest, CreateKeyWithInvalidSizeFails) {
-  TestCase test_case = GetParam();
-
+TEST(AesCmacKeyTest, CreateKeyWithMismatchedKeySizeFails) {
+  // Key size parameter is 32 bytes.
   util::StatusOr<AesCmacParameters> params = AesCmacParameters::Create(
-      /*cryptographic_tag_size_in_bytes=*/16, test_case.variant);
+      /*key_size_in_bytes=*/32,
+      /*cryptographic_tag_size_in_bytes=*/16,
+      AesCmacParameters::Variant::kTink);
   ASSERT_THAT(params, IsOk());
 
-  RestrictedData invalid_secret = RestrictedData(/*num_random_bytes=*/31);
+  // Key material is 16 bytes (another valid key length).
+  RestrictedData mismatched_secret = RestrictedData(/*num_random_bytes=*/16);
 
   EXPECT_THAT(
-      AesCmacKey::Create(*params, invalid_secret, /*id_requirement=*/123)
+      AesCmacKey::Create(*params, mismatched_secret, /*id_requirement=*/123)
           .status(),
       StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
 TEST(AesCmacKeyTest, CreateKeyWithWrongIdRequirementFails) {
   util::StatusOr<AesCmacParameters> no_prefix_params =
-      AesCmacParameters::Create(
-          /*cryptographic_tag_size_in_bytes=*/16,
-          AesCmacParameters::Variant::kNoPrefix);
+      AesCmacParameters::Create(/*key_size_in_bytes=*/32,
+                                /*cryptographic_tag_size_in_bytes=*/16,
+                                AesCmacParameters::Variant::kNoPrefix);
   ASSERT_THAT(no_prefix_params, IsOk());
 
-  util::StatusOr<AesCmacParameters> tink_params = AesCmacParameters::Create(
-      /*cryptographic_tag_size_in_bytes=*/16,
-      AesCmacParameters::Variant::kTink);
+  util::StatusOr<AesCmacParameters> tink_params =
+      AesCmacParameters::Create(/*key_size_in_bytes=*/32,
+                                /*cryptographic_tag_size_in_bytes=*/16,
+                                AesCmacParameters::Variant::kTink);
   ASSERT_THAT(tink_params, IsOk());
 
   RestrictedData secret = RestrictedData(/*num_random_bytes=*/32);
@@ -114,13 +125,16 @@ TEST(AesCmacKeyTest, CreateKeyWithWrongIdRequirementFails) {
 }
 
 TEST_P(AesCmacKeyTest, GetAesCmacKey) {
-  TestCase test_case = GetParam();
+  int key_size;
+  int cryptographic_tag_size;
+  TestCase test_case;
+  std::tie(key_size, cryptographic_tag_size, test_case) = GetParam();
 
   util::StatusOr<AesCmacParameters> params = AesCmacParameters::Create(
-      /*cryptographic_tag_size_in_bytes=*/16, test_case.variant);
+      key_size, cryptographic_tag_size, test_case.variant);
   ASSERT_THAT(params, IsOk());
 
-  RestrictedData secret = RestrictedData(/*num_random_bytes=*/32);
+  RestrictedData secret = RestrictedData(key_size);
 
   util::StatusOr<AesCmacKey> key =
       AesCmacKey::Create(*params, secret, test_case.id_requirement);
@@ -130,13 +144,16 @@ TEST_P(AesCmacKeyTest, GetAesCmacKey) {
 }
 
 TEST_P(AesCmacKeyTest, KeyEquals) {
-  TestCase test_case = GetParam();
+  int key_size;
+  int cryptographic_tag_size;
+  TestCase test_case;
+  std::tie(key_size, cryptographic_tag_size, test_case) = GetParam();
 
   util::StatusOr<AesCmacParameters> params = AesCmacParameters::Create(
-      /*cryptographic_tag_size_in_bytes=*/16, test_case.variant);
+      key_size, cryptographic_tag_size, test_case.variant);
   ASSERT_THAT(params, IsOk());
 
-  RestrictedData secret = RestrictedData(/*num_random_bytes=*/32);
+  RestrictedData secret = RestrictedData(key_size);
   util::StatusOr<AesCmacKey> key =
       AesCmacKey::Create(*params, secret, test_case.id_requirement);
   ASSERT_THAT(key, IsOk());
@@ -152,14 +169,16 @@ TEST_P(AesCmacKeyTest, KeyEquals) {
 }
 
 TEST(AesCmacKeyTest, DifferentFormatNotEqual) {
-  util::StatusOr<AesCmacParameters> legacy_params = AesCmacParameters::Create(
-      /*cryptographic_tag_size_in_bytes=*/16,
-      AesCmacParameters::Variant::kLegacy);
+  util::StatusOr<AesCmacParameters> legacy_params =
+      AesCmacParameters::Create(/*key_size_in_bytes=*/32,
+                                /*cryptographic_tag_size_in_bytes=*/16,
+                                AesCmacParameters::Variant::kLegacy);
   ASSERT_THAT(legacy_params, IsOk());
 
-  util::StatusOr<AesCmacParameters> tink_params = AesCmacParameters::Create(
-      /*cryptographic_tag_size_in_bytes=*/16,
-      AesCmacParameters::Variant::kTink);
+  util::StatusOr<AesCmacParameters> tink_params =
+      AesCmacParameters::Create(/*key_size_in_bytes=*/32,
+                                /*cryptographic_tag_size_in_bytes=*/16,
+                                AesCmacParameters::Variant::kTink);
   ASSERT_THAT(tink_params, IsOk());
 
   RestrictedData secret = RestrictedData(/*num_random_bytes=*/32);
@@ -179,9 +198,10 @@ TEST(AesCmacKeyTest, DifferentFormatNotEqual) {
 }
 
 TEST(AesCmacKeyTest, DifferentSecretDataNotEqual) {
-  util::StatusOr<AesCmacParameters> params = AesCmacParameters::Create(
-      /*cryptographic_tag_size_in_bytes=*/16,
-      AesCmacParameters::Variant::kTink);
+  util::StatusOr<AesCmacParameters> params =
+      AesCmacParameters::Create(/*key_size_in_bytes=*/32,
+                                /*cryptographic_tag_size_in_bytes=*/16,
+                                AesCmacParameters::Variant::kTink);
   ASSERT_THAT(params, IsOk());
 
   RestrictedData secret1 = RestrictedData(/*num_random_bytes=*/32);
@@ -202,9 +222,10 @@ TEST(AesCmacKeyTest, DifferentSecretDataNotEqual) {
 }
 
 TEST(AesCmacKeyTest, DifferentIdRequirementNotEqual) {
-  util::StatusOr<AesCmacParameters> params = AesCmacParameters::Create(
-      /*cryptographic_tag_size_in_bytes=*/16,
-      AesCmacParameters::Variant::kTink);
+  util::StatusOr<AesCmacParameters> params =
+      AesCmacParameters::Create(/*key_size_in_bytes=*/32,
+                                /*cryptographic_tag_size_in_bytes=*/16,
+                                AesCmacParameters::Variant::kTink);
   ASSERT_THAT(params, IsOk());
 
   RestrictedData secret = RestrictedData(/*num_random_bytes=*/32);

@@ -38,38 +38,48 @@ using ::testing::Values;
 
 struct CreateTestCase {
   AesCmacParameters::Variant variant;
-  int cryptographic_tag_size_in_bytes;
-  int total_tag_size_in_bytes;
+  int key_size;
+  int cryptographic_tag_size;
+  int total_tag_size;
   bool has_id_requirement;
 };
 
-class AesCmacParametersCreateTest : public TestWithParam<CreateTestCase> {};
+using AesCmacParametersCreateTest = TestWithParam<CreateTestCase>;
 
 INSTANTIATE_TEST_SUITE_P(
     AesCmacParametersCreateTestSuite, AesCmacParametersCreateTest,
-    Values(CreateTestCase{AesCmacParameters::Variant::kTink, 10, 15, true},
-           CreateTestCase{AesCmacParameters::Variant::kCrunchy, 12, 17, true},
-           CreateTestCase{AesCmacParameters::Variant::kLegacy, 14, 19, true},
-           CreateTestCase{AesCmacParameters::Variant::kNoPrefix, 16, 16,
-                          false}));
+    Values(CreateTestCase{AesCmacParameters::Variant::kTink, /*key_size=*/16,
+                          /*cryptographic_tag_size=*/10, /*total_tag_size=*/15,
+                          /*has_id_requirement=*/true},
+           CreateTestCase{AesCmacParameters::Variant::kCrunchy, /*key_size=*/16,
+                          /*cryptographic_tag_size=*/12, /*total_tag_size=*/17,
+                          /*has_id_requirement=*/true},
+           CreateTestCase{AesCmacParameters::Variant::kLegacy, /*key_size=*/32,
+                          /*cryptographic_tag_size=*/14, /*total_tag_size=*/19,
+                          /*has_id_requirement=*/true},
+           CreateTestCase{AesCmacParameters::Variant::kNoPrefix,
+                          /*key_size=*/32, /*cryptographic_tag_size=*/16,
+                          /*total_tag_size=*/16,
+                          /*has_id_requirement=*/false}));
 
 TEST_P(AesCmacParametersCreateTest, Create) {
   CreateTestCase test_case = GetParam();
 
   util::StatusOr<AesCmacParameters> parameters = AesCmacParameters::Create(
-      test_case.cryptographic_tag_size_in_bytes, test_case.variant);
+      test_case.key_size, test_case.cryptographic_tag_size, test_case.variant);
   ASSERT_THAT(parameters, IsOk());
 
   EXPECT_THAT(parameters->GetVariant(), Eq(test_case.variant));
+  EXPECT_THAT(parameters->KeySizeInBytes(), Eq(test_case.key_size));
   EXPECT_THAT(parameters->CryptographicTagSizeInBytes(),
-              Eq(test_case.cryptographic_tag_size_in_bytes));
-  EXPECT_THAT(parameters->TotalTagSizeInBytes(),
-              Eq(test_case.total_tag_size_in_bytes));
+              Eq(test_case.cryptographic_tag_size));
+  EXPECT_THAT(parameters->TotalTagSizeInBytes(), Eq(test_case.total_tag_size));
   EXPECT_THAT(parameters->HasIdRequirement(), Eq(test_case.has_id_requirement));
 }
 
 TEST(AesCmacParametersTest, CreateWithInvalidVariantFails) {
   EXPECT_THAT(AesCmacParameters::Create(
+                  /*key_size_in_bytes=*/32,
                   /*cryptographic_tag_size_in_bytes=*/12,
                   AesCmacParameters::Variant::
                       kDoNotUseInsteadUseDefaultWhenWritingSwitchStatements)
@@ -77,39 +87,69 @@ TEST(AesCmacParametersTest, CreateWithInvalidVariantFails) {
               StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
+TEST(AesCmacParametersTest, CreateWithInvalidKeySizeFails) {
+  EXPECT_THAT(AesCmacParameters::Create(/*key_size_in_bytes=*/15,
+                                        /*cryptographic_tag_size_in_bytes=*/16,
+                                        AesCmacParameters::Variant::kNoPrefix)
+                  .status(),
+              StatusIs(absl::StatusCode::kInvalidArgument));
+  EXPECT_THAT(AesCmacParameters::Create(/*key_size_in_bytes=*/17,
+                                        /*cryptographic_tag_size_in_bytes=*/16,
+                                        AesCmacParameters::Variant::kNoPrefix)
+                  .status(),
+              StatusIs(absl::StatusCode::kInvalidArgument));
+  EXPECT_THAT(AesCmacParameters::Create(/*key_size_in_bytes=*/31,
+                                        /*cryptographic_tag_size_in_bytes=*/16,
+                                        AesCmacParameters::Variant::kNoPrefix)
+                  .status(),
+              StatusIs(absl::StatusCode::kInvalidArgument));
+  EXPECT_THAT(AesCmacParameters::Create(/*key_size_in_bytes=*/33,
+                                        /*cryptographic_tag_size_in_bytes=*/16,
+                                        AesCmacParameters::Variant::kNoPrefix)
+                  .status(),
+              StatusIs(absl::StatusCode::kInvalidArgument));
+}
+
 TEST(AesCmacParametersTest, CreateWithInvalidTagSizeFails) {
   // Too small.
-  EXPECT_THAT(AesCmacParameters::Create(/*cryptographic_tag_size_in_bytes=*/7,
+  EXPECT_THAT(AesCmacParameters::Create(/*key_size_in_bytes=*/32,
+                                        /*cryptographic_tag_size_in_bytes=*/7,
                                         AesCmacParameters::Variant::kNoPrefix)
                   .status(),
               StatusIs(absl::StatusCode::kInvalidArgument));
-  EXPECT_THAT(AesCmacParameters::Create(/*cryptographic_tag_size_in_bytes=*/8,
+  EXPECT_THAT(AesCmacParameters::Create(/*key_size_in_bytes=*/32,
+                                        /*cryptographic_tag_size_in_bytes=*/8,
                                         AesCmacParameters::Variant::kNoPrefix)
                   .status(),
               StatusIs(absl::StatusCode::kInvalidArgument));
-  EXPECT_THAT(AesCmacParameters::Create(/*cryptographic_tag_size_in_bytes=*/9,
+  EXPECT_THAT(AesCmacParameters::Create(/*key_size_in_bytes=*/32,
+                                        /*cryptographic_tag_size_in_bytes=*/9,
                                         AesCmacParameters::Variant::kNoPrefix)
                   .status(),
               StatusIs(absl::StatusCode::kInvalidArgument));
   // Too big;
-  EXPECT_THAT(AesCmacParameters::Create(/*cryptographic_tag_size_in_bytes=*/17,
+  EXPECT_THAT(AesCmacParameters::Create(/*key_size_in_bytes=*/32,
+                                        /*cryptographic_tag_size_in_bytes=*/17,
                                         AesCmacParameters::Variant::kNoPrefix)
                   .status(),
               StatusIs(absl::StatusCode::kInvalidArgument));
-  EXPECT_THAT(AesCmacParameters::Create(/*cryptographic_tag_size_in_bytes=*/18,
+  EXPECT_THAT(AesCmacParameters::Create(/*key_size_in_bytes=*/32,
+                                        /*cryptographic_tag_size_in_bytes=*/18,
                                         AesCmacParameters::Variant::kNoPrefix)
                   .status(),
               StatusIs(absl::StatusCode::kInvalidArgument));
-  EXPECT_THAT(AesCmacParameters::Create(/*cryptographic_tag_size_in_bytes=*/19,
+  EXPECT_THAT(AesCmacParameters::Create(/*key_size_in_bytes=*/32,
+                                        /*cryptographic_tag_size_in_bytes=*/19,
                                         AesCmacParameters::Variant::kNoPrefix)
                   .status(),
               StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
 TEST(AesCmacParametersTest, CopyConstructor) {
-  util::StatusOr<AesCmacParameters> parameters = AesCmacParameters::Create(
-      /*cryptographic_tag_size_in_bytes=*/12,
-      AesCmacParameters::Variant::kTink);
+  util::StatusOr<AesCmacParameters> parameters =
+      AesCmacParameters::Create(/*key_size_in_bytes=*/32,
+                                /*cryptographic_tag_size_in_bytes=*/12,
+                                AesCmacParameters::Variant::kTink);
   ASSERT_THAT(parameters, IsOk());
 
   AesCmacParameters copy(*parameters);
@@ -122,9 +162,10 @@ TEST(AesCmacParametersTest, CopyConstructor) {
 }
 
 TEST(AesCmacParametersTest, CopyAssignment) {
-  util::StatusOr<AesCmacParameters> parameters = AesCmacParameters::Create(
-      /*cryptographic_tag_size_in_bytes=*/12,
-      AesCmacParameters::Variant::kTink);
+  util::StatusOr<AesCmacParameters> parameters =
+      AesCmacParameters::Create(/*key_size_in_bytes=*/32,
+                                /*cryptographic_tag_size_in_bytes=*/12,
+                                AesCmacParameters::Variant::kTink);
   ASSERT_THAT(parameters, IsOk());
 
   AesCmacParameters copy = *parameters;
@@ -136,28 +177,29 @@ TEST(AesCmacParametersTest, CopyAssignment) {
   EXPECT_THAT(copy.HasIdRequirement(), Eq(parameters->HasIdRequirement()));
 }
 
-class AesCmacParametersVariantTest
-    : public TestWithParam<std::tuple<AesCmacParameters::Variant, int>> {};
+using AesCmacParametersVariantTest =
+    TestWithParam<std::tuple<int, int, AesCmacParameters::Variant>>;
 
-INSTANTIATE_TEST_SUITE_P(AesCmacParametersVariantTestSuite,
-                         AesCmacParametersVariantTest,
-                         Combine(Values(AesCmacParameters::Variant::kTink,
-                                        AesCmacParameters::Variant::kCrunchy,
-                                        AesCmacParameters::Variant::kLegacy,
-                                        AesCmacParameters::Variant::kNoPrefix),
-                                 Range(10, 16)));
+INSTANTIATE_TEST_SUITE_P(
+    AesCmacParametersVariantTestSuite, AesCmacParametersVariantTest,
+    Combine(Values(16, 32), Range(10, 16),
+            Values(AesCmacParameters::Variant::kTink,
+                   AesCmacParameters::Variant::kCrunchy,
+                   AesCmacParameters::Variant::kLegacy,
+                   AesCmacParameters::Variant::kNoPrefix)));
 
 TEST_P(AesCmacParametersVariantTest, ParametersEquals) {
-  AesCmacParameters::Variant variant;
+  int key_size;
   int cryptographic_tag_size;
-  std::tie(variant, cryptographic_tag_size) = GetParam();
+  AesCmacParameters::Variant variant;
+  std::tie(key_size, cryptographic_tag_size, variant) = GetParam();
 
   util::StatusOr<AesCmacParameters> parameters =
-      AesCmacParameters::Create(cryptographic_tag_size, variant);
+      AesCmacParameters::Create(key_size, cryptographic_tag_size, variant);
   ASSERT_THAT(parameters, IsOk());
 
   util::StatusOr<AesCmacParameters> other_parameters =
-      AesCmacParameters::Create(cryptographic_tag_size, variant);
+      AesCmacParameters::Create(key_size, cryptographic_tag_size, variant);
   ASSERT_THAT(other_parameters, IsOk());
 
   EXPECT_TRUE(*parameters == *other_parameters);
@@ -166,16 +208,34 @@ TEST_P(AesCmacParametersVariantTest, ParametersEquals) {
   EXPECT_FALSE(*other_parameters != *parameters);
 }
 
-TEST(AesCmacParametersTest, TagSizeNotEqual) {
-  util::StatusOr<AesCmacParameters> parameters = AesCmacParameters::Create(
-      /*cryptographic_tag_size_in_bytes=*/10,
-      AesCmacParameters::Variant::kNoPrefix);
+TEST(AesCmacParametersTest, KeySizeNotEqual) {
+  util::StatusOr<AesCmacParameters> parameters =
+      AesCmacParameters::Create(/*key_size_in_bytes=*/16,
+                                /*cryptographic_tag_size_in_bytes=*/10,
+                                AesCmacParameters::Variant::kNoPrefix);
   ASSERT_THAT(parameters, IsOk());
 
   util::StatusOr<AesCmacParameters> other_parameters =
-      AesCmacParameters::Create(
-          /*cryptographic_tag_size_in_bytes=*/11,
-          AesCmacParameters::Variant::kNoPrefix);
+      AesCmacParameters::Create(/*key_size_in_bytes=*/32,
+                                /*cryptographic_tag_size_in_bytes=*/10,
+                                AesCmacParameters::Variant::kNoPrefix);
+  ASSERT_THAT(other_parameters, IsOk());
+
+  EXPECT_TRUE(*parameters != *other_parameters);
+  EXPECT_FALSE(*parameters == *other_parameters);
+}
+
+TEST(AesCmacParametersTest, TagSizeNotEqual) {
+  util::StatusOr<AesCmacParameters> parameters =
+      AesCmacParameters::Create(/*key_size_in_bytes=*/32,
+                                /*cryptographic_tag_size_in_bytes=*/10,
+                                AesCmacParameters::Variant::kNoPrefix);
+  ASSERT_THAT(parameters, IsOk());
+
+  util::StatusOr<AesCmacParameters> other_parameters =
+      AesCmacParameters::Create(/*key_size_in_bytes=*/32,
+                                /*cryptographic_tag_size_in_bytes=*/11,
+                                AesCmacParameters::Variant::kNoPrefix);
   ASSERT_THAT(other_parameters, IsOk());
 
   EXPECT_TRUE(*parameters != *other_parameters);
@@ -183,15 +243,16 @@ TEST(AesCmacParametersTest, TagSizeNotEqual) {
 }
 
 TEST(AesCmacParametersTest, VariantNotEqual) {
-  util::StatusOr<AesCmacParameters> parameters = AesCmacParameters::Create(
-      /*cryptographic_tag_size_in_bytes=*/10,
-      AesCmacParameters::Variant::kNoPrefix);
+  util::StatusOr<AesCmacParameters> parameters =
+      AesCmacParameters::Create(/*key_size_in_bytes=*/32,
+                                /*cryptographic_tag_size_in_bytes=*/10,
+                                AesCmacParameters::Variant::kNoPrefix);
   ASSERT_THAT(parameters, IsOk());
 
   util::StatusOr<AesCmacParameters> other_parameters =
-      AesCmacParameters::Create(
-          /*cryptographic_tag_size_in_bytes=*/10,
-          AesCmacParameters::Variant::kTink);
+      AesCmacParameters::Create(/*key_size_in_bytes=*/32,
+                                /*cryptographic_tag_size_in_bytes=*/10,
+                                AesCmacParameters::Variant::kTink);
   ASSERT_THAT(other_parameters, IsOk());
 
   EXPECT_TRUE(*parameters != *other_parameters);

@@ -30,7 +30,14 @@ namespace crypto {
 namespace tink {
 
 util::StatusOr<AesCmacParameters> AesCmacParameters::Create(
-    int cryptographic_tag_size_in_bytes, Variant variant) {
+    int key_size_in_bytes, int cryptographic_tag_size_in_bytes,
+    Variant variant) {
+  if (key_size_in_bytes != 16 && key_size_in_bytes != 32) {
+    return util::Status(
+        absl::StatusCode::kInvalidArgument,
+        absl::StrCat("Key size should be either 16 or 32 bytes, got ",
+                     key_size_in_bytes, " bytes."));
+  }
   if (cryptographic_tag_size_in_bytes < 10) {
     return util::Status(
         absl::StatusCode::kInvalidArgument,
@@ -51,7 +58,8 @@ util::StatusOr<AesCmacParameters> AesCmacParameters::Create(
         absl::StatusCode::kInvalidArgument,
         "Cannot create AES-CMAC parameters with unknown variant.");
   }
-  return AesCmacParameters(cryptographic_tag_size_in_bytes, variant);
+  return AesCmacParameters(key_size_in_bytes, cryptographic_tag_size_in_bytes,
+                           variant);
 }
 
 int AesCmacParameters::TotalTagSizeInBytes() const {
@@ -75,9 +83,17 @@ bool AesCmacParameters::operator==(const Parameters& other) const {
   if (that == nullptr) {
     return false;
   }
-  return cryptographic_tag_size_in_bytes_ ==
-             that->cryptographic_tag_size_in_bytes_ &&
-         variant_ == that->variant_;
+  if (key_size_in_bytes_ != that->key_size_in_bytes_) {
+    return false;
+  }
+  if (cryptographic_tag_size_in_bytes_ !=
+      that->cryptographic_tag_size_in_bytes_) {
+    return false;
+  }
+  if (variant_ != that->variant_) {
+    return false;
+  }
+  return true;
 }
 
 }  // namespace tink

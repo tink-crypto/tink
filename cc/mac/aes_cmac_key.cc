@@ -21,8 +21,8 @@
 
 #include "absl/base/attributes.h"
 #include "absl/strings/escaping.h"
-#include "absl/types/optional.h"
 #include "absl/strings/str_format.h"
+#include "absl/types/optional.h"
 #include "tink/mac/aes_cmac_parameters.h"
 #include "tink/restricted_data.h"
 #include "tink/subtle/subtle_util.h"
@@ -35,10 +35,9 @@ namespace tink {
 util::StatusOr<AesCmacKey> AesCmacKey::Create(
     AesCmacParameters parameters, RestrictedData aes_key_bytes,
     absl::optional<int> id_requirement) {
-  if (aes_key_bytes.size() != 32) {
-    return util::Status(
-        absl::StatusCode::kInvalidArgument,
-        absl::StrCat("Invalid key size for AES-CMAC: ", aes_key_bytes.size()));
+  if (parameters.KeySizeInBytes() != aes_key_bytes.size()) {
+    return util::Status(absl::StatusCode::kInvalidArgument,
+                        "Key size does not match AES-CMAC parameters");
   }
   if (parameters.HasIdRequirement() && !id_requirement.has_value()) {
     return util::Status(
