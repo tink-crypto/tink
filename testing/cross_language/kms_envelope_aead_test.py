@@ -13,7 +13,7 @@
 # limitations under the License.
 """Cross-language tests for the KMS Envelope AEAD primitive with AWS and GCP."""
 
-from typing import Dict, Iterable
+from typing import Dict, Iterable, Tuple
 
 from absl.testing import absltest
 from absl.testing import parameterized
@@ -29,7 +29,7 @@ _GCP_KEY_URI = ('gcp-kms://projects/tink-test-infrastructure/locations/global/'
                 'keyRings/unit-and-integration-testing/cryptoKeys/aead-key')
 
 
-def _templates() -> Dict[str, tuple[tink_pb2.KeyTemplate, str]]:
+def _templates() -> Dict[str, Tuple[tink_pb2.KeyTemplate, str]]:
   """For each KMS envelope AEAD template name maps the key template and DEK AEAD key type."""
   kms_key_templates = {}
   for aead_key_type in supported_key_types.AEAD_KEY_TYPES:
@@ -72,7 +72,7 @@ def _test_cases() -> Iterable[str]:
 
 
 def _get_plaintext_and_aad(key_template_name: str,
-                           lang: str) -> tuple[bytes, bytes]:
+                           lang: str) -> Tuple[bytes, bytes]:
   """Creates test plaintext and associated data from a key template and lang."""
   plaintext = (
       b'This is some plaintext message to be encrypted using key_template '
