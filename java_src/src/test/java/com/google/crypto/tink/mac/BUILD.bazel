@@ -158,6 +158,7 @@ java_test(
     srcs = ["AesCmacParametersTest.java"],
     deps = [
         "//src/main/java/com/google/crypto/tink/mac:aes_cmac_parameters",
+        "@maven//:com_google_errorprone_error_prone_annotations",
         "@maven//:com_google_truth_truth",
         "@maven//:junit_junit",
     ],
