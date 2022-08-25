@@ -295,7 +295,6 @@ public final class AwsKmsClientTest {
 
     KeyTemplate template = KmsAeadKeyManager.createKeyTemplate(invalidUri);
     KeysetHandle handle = KeysetHandle.generateNew(template);
-    // TODO(b/242678738) This should throw an IllegalArgumentException exception instead.
-    assertThrows(IndexOutOfBoundsException.class, () -> handle.getPrimitive(Aead.class));
+    assertThrows(IllegalArgumentException.class, () -> handle.getPrimitive(Aead.class));
   }
 }

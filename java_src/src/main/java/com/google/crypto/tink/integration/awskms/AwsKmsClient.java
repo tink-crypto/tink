@@ -166,6 +166,9 @@ public final class AwsKmsClient implements KmsClient {
       String keyId = removePrefix(PREFIX, uri);
       AWSKMS client = awsKms;
       List<String> tokens = Splitter.on(':').splitToList(keyId);
+      if (tokens.size() < 4) {
+        throw new IllegalArgumentException("invalid key URI");
+      }
       String regionName = tokens.get(3);
       if (client == null) {
         client =
