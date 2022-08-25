@@ -26,12 +26,14 @@ import (
 	"github.com/google/tink/go/keyset"
 	jepb "github.com/google/tink/go/proto/jwt_ecdsa_go_proto"
 	jrsppb "github.com/google/tink/go/proto/jwt_rsa_ssa_pkcs1_go_proto"
+	jrpsspb "github.com/google/tink/go/proto/jwt_rsa_ssa_pss_go_proto"
 	tinkpb "github.com/google/tink/go/proto/tink_go_proto"
 )
 
 const (
 	jwtECDSAPublicKeyType = "type.googleapis.com/google.crypto.tink.JwtEcdsaPublicKey"
 	jwtRSPublicKeyType    = "type.googleapis.com/google.crypto.tink.JwtRsaSsaPkcs1PublicKey"
+	jwtPSPublicKeyType    = "type.googleapis.com/google.crypto.tink.JwtRsaSsaPssPublicKey"
 )
 
 func keysetHasID(ks *tinkpb.Keyset, keyID uint32) bool {
@@ -151,6 +153,47 @@ func algorithmPrefix(s *spb.Struct) (string, error) {
 		return "", fmt.Errorf("invalid algorithm")
 	}
 	return alg[0:2], nil
+}
+
+var psNameToAlg = map[string]jrpsspb.JwtRsaSsaPssAlgorithm{
+	"PS256": jrpsspb.JwtRsaSsaPssAlgorithm_PS256,
+	"PS384": jrpsspb.JwtRsaSsaPssAlgorithm_PS384,
+	"PS512": jrpsspb.JwtRsaSsaPssAlgorithm_PS512,
+}
+
+func psPublicKeyDataFromStruct(keyStruct *spb.Struct) (*tinkpb.KeyData, error) {
+	alg, err := stringItem(keyStruct, "alg")
+	if err != nil {
+		return nil, err
+	}
+	algorithm, ok := psNameToAlg[alg]
+	if !ok {
+		return nil, fmt.Errorf("invalid alg header: %q", alg)
+	}
+	rsaPubKey, err := rsaPubKeyFromStruct(keyStruct)
+	if err != nil {
+		return nil, err
+	}
+	jwtPubKey := &jrpsspb.JwtRsaSsaPssPublicKey{
+		Version:   jwtECDSASignerKeyVersion,
+		Algorithm: algorithm,
+		E:         rsaPubKey.exponent,
+		N:         rsaPubKey.modulus,
+	}
+	if rsaPubKey.customKID != nil {
+		jwtPubKey.CustomKid = &jrpsspb.JwtRsaSsaPssPublicKey_CustomKid{
+			Value: *rsaPubKey.customKID,
+		}
+	}
+	serializedPubKey, err := proto.Marshal(jwtPubKey)
+	if err != nil {
+		return nil, err
+	}
+	return &tinkpb.KeyData{
+		TypeUrl:         jwtPSPublicKeyType,
+		Value:           serializedPubKey,
+		KeyMaterialType: tinkpb.KeyData_ASYMMETRIC_PUBLIC,
+	}, nil
 }
 
 var rsNameToAlg = map[string]jrsppb.JwtRsaSsaPkcs1Algorithm{
@@ -325,6 +368,8 @@ func keysetKeyFromStruct(val *spb.Value, keyID uint32) (*tinkpb.Keyset_Key, erro
 		keyData, err = esPublicKeyDataFromStruct(keyStruct)
 	case "RS":
 		keyData, err = rsPublicKeyDataFromStruct(keyStruct)
+	case "PS":
+		keyData, err = psPublicKeyDataFromStruct(keyStruct)
 	default:
 		return nil, fmt.Errorf("unsupported algorithm prefix: %v", algPrefix)
 	}
@@ -371,6 +416,41 @@ func addKeyOPSVerify(s *spb.Struct) {
 
 func addStringEntry(s *spb.Struct, key, val string) {
 	s.GetFields()[key] = spb.NewStringValue(val)
+}
+
+var psAlgToStr map[jrpsspb.JwtRsaSsaPssAlgorithm]string = map[jrpsspb.JwtRsaSsaPssAlgorithm]string{
+	jrpsspb.JwtRsaSsaPssAlgorithm_PS256: "PS256",
+	jrpsspb.JwtRsaSsaPssAlgorithm_PS384: "PS384",
+	jrpsspb.JwtRsaSsaPssAlgorithm_PS512: "PS512",
+}
+
+func psPublicKeyToStruct(key *tinkpb.Keyset_Key) (*spb.Struct, error) {
+	pubKey := &jrpsspb.JwtRsaSsaPssPublicKey{}
+	if err := proto.Unmarshal(key.GetKeyData().GetValue(), pubKey); err != nil {
+		return nil, err
+	}
+	alg, ok := psAlgToStr[pubKey.GetAlgorithm()]
+	if !ok {
+		return nil, fmt.Errorf("invalid algorithm")
+	}
+	outKey := &spb.Struct{
+		Fields: map[string]*spb.Value{},
+	}
+	addStringEntry(outKey, "alg", alg)
+	addStringEntry(outKey, "kty", "RSA")
+	addStringEntry(outKey, "e", base64Encode(pubKey.GetE()))
+	addStringEntry(outKey, "n", base64Encode(pubKey.GetN()))
+	addStringEntry(outKey, "use", "sig")
+	addKeyOPSVerify(outKey)
+	var customKID *string = nil
+	if pubKey.GetCustomKid() != nil {
+		ck := pubKey.GetCustomKid().GetValue()
+		customKID = &ck
+	}
+	if err := setKeyID(outKey, key, customKID); err != nil {
+		return nil, err
+	}
+	return outKey, nil
 }
 
 var rsAlgToStr map[jrsppb.JwtRsaSsaPkcs1Algorithm]string = map[jrsppb.JwtRsaSsaPkcs1Algorithm]string{
@@ -498,6 +578,8 @@ func JWKSetFromPublicKeysetHandle(kh *keyset.Handle) ([]byte, error) {
 			keyStruct, err = esPublicKeyToStruct(k)
 		case jwtRSPublicKeyType:
 			keyStruct, err = rsPublicKeyToStruct(k)
+		case jwtPSPublicKeyType:
+			keyStruct, err = psPublicKeyToStruct(k)
 		default:
 			return nil, fmt.Errorf("unsupported key type url")
 		}

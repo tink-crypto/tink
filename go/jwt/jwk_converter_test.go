@@ -30,6 +30,7 @@ import (
 	"github.com/google/tink/go/testkeyset"
 	jepb "github.com/google/tink/go/proto/jwt_ecdsa_go_proto"
 	jrsppb "github.com/google/tink/go/proto/jwt_rsa_ssa_pkcs1_go_proto"
+	jrpsspb "github.com/google/tink/go/proto/jwt_rsa_ssa_pss_go_proto"
 	tinkpb "github.com/google/tink/go/proto/tink_go_proto"
 )
 
@@ -302,6 +303,121 @@ var jwkSetTestCases = []jwkSetTestCase{
 			}]
 		}`,
 	},
+	{
+		tag: "PS256",
+		jwkSet: `{
+		"keys":[{
+			"kty":"RSA",
+			"n":"0JqDlgy_KaDpCWhaB95cKdLsyBGCbh865tHHK3LM1Iv5qlt4eqO9n2Bn5R5_ZHrMEGvVoBmwpkfnWmaMxqZg-69k8id0dN4PKeBuIYeO5C2IE3D0uO1UWzsPi4XHtXf3CYmwYOUHJ5DT8q_jgMXYCefys4OvYkRcfSpWVvFtF1PzBSijQaxDQUx0rdJvi0JZTQOXHl4MwgzrFoERTdZswAXh21MK1Uav68Aa_Z8TZU3R_qY-TX78qhBCv8T_1wrooprF_xaJqpywXktUnQxVgu-aG6-yooqrICvobc_LHdF_8R-Qp2pYfsHSmPDSKu-5JqyyIIoxfXpLdUsrDl4HDw",
+			"e":"AQAB",
+			"use":"sig",
+			"alg":"PS256",
+			"key_ops":["verify"],
+			"kid":"a4D_hA"
+			}]
+		}`,
+		privateKeyset: `{
+			"primaryKeyId": 1803616132,
+			"key": [
+				{
+					"keyData": {
+						"typeUrl": "type.googleapis.com/google.crypto.tink.JwtRsaSsaPssPrivateKey",
+						"value": "QoABPzsxHq7K5f91YucwaXUDk7ERgE8pqLSc8w34gEnc/wo5vk0BamvQaWRVQQdzEfK+eqVbrHmWi5mhY9QXpOv0dhuhyvo8ZS0ya60cT6DYSu2LBLDHFa68Wp6SWbIwFN4X5uGC8DYvWpJU9PCYg6XUu67T37FhGFekGHTSXDLf9Ko6gAFm7TJOM/v8MbHkCpY5NTtda7fb09XBXFDSC2XFGKvOkfQrGEKdEAvOCffpTBHsyvZAEJag/p2OZ+4W2D3upPNFkrmtS9MSGU39o0kn2fd6Cw90w5S1gjfxgWDbZpzs4AvbpU436Zy2wZYjJSIG6xbjDuYwizrflPX/sq5GUpuCuTKAAW+ovScT/DR/doxZm+xykUTTfEr2W4pd5PpLQiI1gUA2UTnY6p0svW+IbbSaj6vTE8s6+STsTGYAteUgdFBo7Ao501XbAJpJQX4ONI6o66BUvvzy0S6VLs+YQ6MWpArvNnnzRo5NbznO6IESyumWNm+8HQMaJ12sAqpWOoH4bz1xKoAB02eSVf5ZSDiYa4uF85NvvAVvEVPOPAd2gOqXzOWH+AXtTHJ8n/gcvUMnFR3W7cdZdyY2HslV0qphvkL7mCwsoOUBH5dA+F10Ebmk4hU9XEkeQvgFVgffzyqKjG521WOnAXQXudhOkJgXqGoTB/fESyRvSqA7ZKwPL1dvZnpJRv8igAH8m64q3qJFFcHWsnUb3hS58BXm8aTuk8Reju8XDXjBa9DPy5UySS0P/Chyh8HF5PAIwWSXTYDtFvdve3UN28oxTzhZ1xsz86BOeF2lFHpZ1y8/uNzwLRTIYWCXhbAS+bGpQOUR4JJDjSyivJCBqrkMCDUWAXQSqIZzHnyD+wbP8RqAAkukY+fCuoTpXOd06ASnbIsb+ZF4y++LsoulcQ//wmemVEOihJcQDgAfcL0j6HTylFG2EJJMDoLVWv6sZgrYpR1O1g97IB8KsLvyLm1JHxb9rbTDBnKSWL72NSZWPfs/Q5y5SXRxSD1gJoL/pcL5uuOosJjIvQ2olVMryYAgbnsA5UHZP7N8YpX0njZxBl9/PFNrTkWBMr15+A0VqOGh0TGnE/D4iAAduMJn1f4a3ZYVC4FgxKVxLxkB3oOLZz+QXKvs61slwRjotY3BXoKeImedOFmZoOJCA9qD+9rT01mQ113Fi9ylkBD1VGqtvIoB1CZa4tZZkRyoAeIMU7vMUpESigIiAwEAARqAAtCag5YMvymg6QloWgfeXCnS7MgRgm4fOubRxytyzNSL+apbeHqjvZ9gZ+Uef2R6zBBr1aAZsKZH51pmjMamYPuvZPIndHTeDyngbiGHjuQtiBNw9LjtVFs7D4uFx7V39wmJsGDlByeQ0/Kv44DF2Ann8rODr2JEXH0qVlbxbRdT8wUoo0GsQ0FMdK3Sb4tCWU0Dlx5eDMIM6xaBEU3WbMAF4dtTCtVGr+vAGv2fE2VN0f6mPk1+/KoQQr/E/9cK6KKaxf8WiaqcsF5LVJ0MVYLvmhuvsqKKqyAr6G3Pyx3Rf/EfkKdqWH7B0pjw0irvuSassiCKMX16S3VLKw5eBw8QAQ==",
+						"keyMaterialType": "ASYMMETRIC_PRIVATE"
+					},
+					"status": "ENABLED",
+					"keyId": 1803616132,
+					"outputPrefixType": "TINK"
+				}
+			]
+		}`,
+	},
+	{
+		tag: "PS384",
+		jwkSet: `{
+			 "keys":[{
+				 "kty":"RSA",
+				 "n":"rMnTRrTk3zWf0ZqukmshN9GH9UsCcD0a2WlmO-0q7x_k31JIe2wtqhlQRwszfuOJmL5M4cpsvkDBT8th5yDqzzHMJRAs61Jq6ACNepj3_0hK8GszxiyxFQL3msxmu8e3F14M-V35n9aLr0meRHk9tzm968-wvp7I_IXlv1hbzHejh_gD14gy-GjdiJYGwg1oWINL6YzSv5DISxIAv9HLu5fmBLtoVyvU9iZLHfUJdq3Rlj5iCBUEFMJVb68PfWiB_xoA7nj3vpgAfGjDzQ62bVrVaOHOg2I4X2OxJBWJ8uFw6RRocpAfD_lEZBet-w6FaMHXh_iVwxPWNuNTbVHlerfdUHTMHO2jCR1JKKkI5px7aVM7fQUVtYSBk754LINhShkMCO9o--k7sZOFL_VohaCHtE9fRxIM5MYOKPyvPTf38EyCrAqreFd4ol0FCPea8n89BwV371GrXgP5C_9BdoG2uY6rxRwTzMNiLxzxWpkvlprNRxAsdRSZPEzKOI_t",
+				 "e":"AQAB",
+				 "use":"sig",
+				 "alg":"PS384",
+				 "key_ops":["verify"],
+				 "kid":"LFa3bw"
+			 }]
+		}`,
+		privateKeyset: `{
+			"primaryKeyId": 743880559,
+			"key": [
+				{
+					"keyData": {
+						"typeUrl": "type.googleapis.com/google.crypto.tink.JwtRsaSsaPssPrivateKey",
+						"value": "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",
+						"keyMaterialType": "ASYMMETRIC_PRIVATE"
+					},
+					"status": "ENABLED",
+					"keyId": 743880559,
+					"outputPrefixType": "TINK"
+				}
+			]
+		}`,
+	},
+	{
+		tag: "PS512",
+		jwkSet: `{
+			"keys":[{
+				"kty":"RSA",
+				"n":"ubM3lgyGn8IyKO-56q18hvuJkkxPrDXgalRWNmnA3QEseglU_9tp598dlq04eF1G4Xkrmk9OVyVSCuRdvMoko6wP4Jum-3cn42_Gsk8PdTwm3WD-yEBg_Usa_omLGiTfktyqqoZhh1TeOOBtNpD1U_p1wQxP3-bLl4__uR75CqlK9FYdBrIuqLP3nqa3_OAFuPBX77BuD1kcr5pUxPZkXBNAWpnvsW56swyIMZF2GRhfv2n2bZJgT4iybQcmEnvt1wfY3ecO5ZMSX2QNKpnRRejlIEqR9uAQa4wIJMViL8jDbAV-ZvUjMM1G0aAyMHPQzb2Hfkr9OtEi-_xyUCwqF2IUZfUb0-mCjOutpbBlSfkYULOrwd9RQTaLeNe3GhRjYWTJ-gLDS8DUWz8AcpCI7xoQSfuZLmBwxslqsObMYolxQJXej1IDmGX-Rjr4ro80EpMkv67gxYQwjP8p7FMHfK7FSDZMtT-h4mO7AD68vwHd99c9ALDJfPO7tAMG53opzD7YEZU-ySKRcMBIFRe5Kxj-m1fbN9q2ictzoQOvKh8TBlCsPLRbF5WVheUtE9anKiIik5zQInihoZidH5YJksdipMVWLeRs1Qk5J8ddv7n2dlbW7zoC60sh3ubLQ_MDm-eHlXoeKGioCMjDABRdokqal4wugvQUZyQcBBtfWT0",
+				"e":"AQAB",
+				"use":"sig",
+				"alg":"PS512",
+				"key_ops":["verify"],
+				"kid":"L-LcIw"
+			 }]
+		}`,
+		privateKeyset: `{
+			"primaryKeyId": 803396643,
+			"key": [
+				{
+					"keyData": {
+						"typeUrl": "type.googleapis.com/google.crypto.tink.JwtRsaSsaPssPrivateKey",
+						"value": "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",
+						"keyMaterialType": "ASYMMETRIC_PRIVATE"
+					},
+					"status": "ENABLED",
+					"keyId": 803396643,
+					"outputPrefixType": "TINK"
+				}
+			]
+		}`,
+	},
+	{
+		tag: "PS256_NO_KID",
+		jwkSet: `{
+		"keys":[{
+			"kty":"RSA",
+			"n":"rzu_DRFtzFpMUy-tXC98YxtyASy-3hVtM1X9KiwAoahSfd7VfzIlIXcbn3VewkZBtKGC98sGQJSQWA-EagOjMDua4rAGVCZ9Cj011Mxy1e2j6w7qRCudtWaMormfMpP6n2ht61HkZkQDZIlbdRvr20Glf2KWgd8KgSoEZKS7AjIHvoGbJCU7A7ajbONyKuicrYq1XYs4b1dYSqQ4VIZaei5NQM7_tddYJl-lSKN3mLEPhdWKHWf1rVfDbJNobAbqN7C70rUKJS3DZkwo-q3-QOoZleJXKTXurdRAhT66nfa-1f7idmIO37LwReX8zrgDWmMZPZ2mpfA86dIlkkk89Q",
+			"e":"AQAB",
+			"use":"sig",
+			"alg":"PS256",
+			"key_ops":["verify"]
+			}]
+		}`,
+		privateKeyset: `{
+			"primaryKeyId": 1629784556,
+			"key": [
+				{
+					"keyData": {
+						"typeUrl": "type.googleapis.com/google.crypto.tink.JwtRsaSsaPssPrivateKey",
+						"value": "QoABP9TTJpZ3lfj28Zh9hqHMNydjyJGup+Q8xjYubqsE+E3AlnSIvRDp9r0VVHZzsHBEdKtQQgCW4FT0I7Cy4z4W3ecKskuJWFYYn0PYOXLZoFo2MF3yZ0wI04aWhRS2+Zwl3BSr1eu84jiCm9rTsODyZ0MQORvpeBVaX9Y2IOPclvQ6gAGBpXDhI/1yKJq6vlymUBwKS2FG9Tf3as3YkH2B0b7wtv1Ir+WEa78ub52BwxnOKsf3V57WLnuQppLiw/bvHFxKVDNuWGiGTzEVhJW2qK3RgryXtqzkACm6cjL1FT22B9VmVx/GqWOOOLX4He1pq+UYkboWgXVkAdP0OaPv2hWIMTKAASnEMbcFq+ZbOJIJBwZXsSmrdSnfg8A2kwuatK2U2Of7/YCE5i11CUjWUvi99plk8g/mAinYu0Gfw6YSRgbWsAvK4GsIJ4322WT1yy4g6XuncL8MKC2rCYIkhFWpI1qcsS/PxU3zWMYodV6GjK31HXvqczlJfBYNEBo9HxeYDtchKoAB0vRt2QsYTMSVYw1gIDeKdHnhMDaakaIazjc4o+DCQSk+dU0EStSn8GHON0nIrEA8A5UHqF8/yh1mW+M0mkSaSiBp+7CLAowEu72wgdrymK/e6eIELH+joEDDgWpcF/WMEWSvls2a0q1atiYvC2ERLuSxSFjoJ8IRKVfVmjPi53EigAHUpqb3E/I863RAT2ocS5CnT7A8PBgttZqIyR1H8iC2bocre8H+8z8fVf4SeYsLhqvuBcTPXxZSUT+ZVf+LeELfmcd54savTU/yTQJ27s8WIkuLeTj+80FWCVtengLwP+Bte7nyzqbuXSWHUTUSVTCMK5PiBdWrOElVYlp3JxvTxRqAAgNrTEVGQYjy+xnFbKHHmGr7olwVAi1lqCGQDDZKMQH2fZOQqURH13MhdpPEL8LlKYuLejl5B+hzLaTWOqxx4TmD9Df3nMwAC0ELpDUAfz4e2quvuRD28+cR9u0G560ON53sJPbqPGVlbtaDmpn8nzvCOmczpoGmtzcBeZ/4GeEHThzq1sRE+tBJ6B4oS8R4LUtldg+FBUnZgqJvSC1gYYHO7oySCPC5V0R3EhpWDcVbYf7PyMC7oaxIPmCAu5Wc4DFirh13BAZI2FKW+Np/heZAjYUKa4Gtb0dMxvLwz3OcPPa/AQKSjko6aMRAQvjgd/UgQ+Sr496td45I4JGandESigIiAwEAARqAAq87vw0RbcxaTFMvrVwvfGMbcgEsvt4VbTNV/SosAKGoUn3e1X8yJSF3G591XsJGQbShgvfLBkCUkFgPhGoDozA7muKwBlQmfQo9NdTMctXto+sO6kQrnbVmjKK5nzKT+p9obetR5GZEA2SJW3Ub69tBpX9iloHfCoEqBGSkuwIyB76BmyQlOwO2o2zjcironK2KtV2LOG9XWEqkOFSGWnouTUDO/7XXWCZfpUijd5ixD4XVih1n9a1Xw2yTaGwG6jewu9K1CiUtw2ZMKPqt/kDqGZXiVyk17q3UQIU+up32vtX+4nZiDt+y8EXl/M64A1pjGT2dpqXwPOnSJZJJPPUQAQ==",
+						"keyMaterialType": "ASYMMETRIC_PRIVATE"
+					},
+					"status": "ENABLED",
+					"keyId": 1629784556,
+					"outputPrefixType": "RAW"
+				}
+			]
+		}`,
+	},
 }
 
 func TestToPublicKeysetHandle(t *testing.T) {
@@ -309,19 +425,19 @@ func TestToPublicKeysetHandle(t *testing.T) {
 		t.Run(tc.tag, func(t *testing.T) {
 			ks, err := jwt.JWKSetToPublicKeysetHandle([]byte(tc.jwkSet))
 			if err != nil {
-				t.Errorf("jwt.JWKSetToPublicKeysetHandle() err = %v, want nil", err)
+				t.Fatalf("jwt.JWKSetToPublicKeysetHandle() err = %v, want nil", err)
 			}
 			jwkSet, err := jwt.JWKSetFromPublicKeysetHandle(ks)
 			if err != nil {
-				t.Errorf("jwt.JWKSetFromPublicKeysetHandle() err = %v, want nil", err)
+				t.Fatalf("jwt.JWKSetFromPublicKeysetHandle() err = %v, want nil", err)
 			}
 			want := &spb.Struct{}
 			if err := want.UnmarshalJSON([]byte(tc.jwkSet)); err != nil {
-				t.Errorf("want.UnmarshalJSON() err = %v, want nil", err)
+				t.Fatalf("want.UnmarshalJSON() err = %v, want nil", err)
 			}
 			got := &spb.Struct{}
 			if err := got.UnmarshalJSON(jwkSet); err != nil {
-				t.Errorf("got.UnmarshalJSON() err = %v, want nil", err)
+				t.Fatalf("got.UnmarshalJSON() err = %v, want nil", err)
 			}
 			if !cmp.Equal(want, got, protocmp.Transform()) {
 				t.Errorf("mismatch in jwk sets: diff (-want,+got): %v", cmp.Diff(want, got, protocmp.Transform()))
@@ -379,6 +495,195 @@ func TestJWKSetToPublicKeysetHandleVerifyValidJWT(t *testing.T) {
 func TestJWKSetToPublicKeysetHandleInvalidJSONFails(t *testing.T) {
 	if _, err := jwt.JWKSetToPublicKeysetHandle([]byte(`({[}])`)); err == nil {
 		t.Errorf("jwt.JWKSetToPublicKeysetHandle() err = nil, want error")
+	}
+}
+
+func TestJWKSetToPublicKeysetPrimitivePS256SmallModulusFails(t *testing.T) {
+	jwk := `{"keys":[
+		{"kty":"RSA",
+		 "n":"AQAB",
+		 "e":"AQAB",
+		 "use":"sig",
+		 "alg":"PS256",
+		 "key_ops":["verify"],
+		 "kid":"DfpE4Q"
+		}]
+	}`
+	// Keys in the keyset are validated when the primitive is generated.
+	// JWKSetToPublicKeysetHandle doesn't fail, but NewVerifier will fail.
+	pubHandle, err := jwt.JWKSetToPublicKeysetHandle([]byte(jwk))
+	if err != nil {
+		t.Fatalf("jwt.JWKSetToPublicKeysetHandle() err = %v, want nil", err)
+	}
+	if _, err := jwt.NewVerifier(pubHandle); err == nil {
+		t.Errorf("jwt.NewVerifier() err = nil, want error")
+	}
+}
+
+func TestJWKSetToPublicKeysetPS256CorrectlySetsKID(t *testing.T) {
+	jwkSet := `{"keys":[
+      {"kty":"RSA",
+       "n":"AQAB",
+       "e":"AQAB",
+       "use":"sig",
+       "alg":"PS256",
+       "key_ops":["verify"],
+       "kid":"DfpE4Q"
+      }]}`
+	kh, err := jwt.JWKSetToPublicKeysetHandle([]byte(jwkSet))
+	if err != nil {
+		t.Fatalf("JWKSetToPublicKeysetHandle() err = %v, want nil", err)
+	}
+	ks := testkeyset.KeysetMaterial(kh)
+	key := ks.GetKey()[0]
+	if key.GetOutputPrefixType() != tinkpb.OutputPrefixType_RAW {
+		t.Errorf("key.GetOutputPrefixType() got %q, want %q", key.GetOutputPrefixType(), tinkpb.OutputPrefixType_RAW)
+	}
+	if key.GetKeyData() == nil {
+		t.Fatalf("GetKeyData() got nil, want *tinkpb.KeyData")
+	}
+	pubKey := &jrpsspb.JwtRsaSsaPssPublicKey{}
+	if err := proto.Unmarshal(key.GetKeyData().GetValue(), pubKey); err != nil {
+		t.Fatalf("proto.Unmarshal() err = %v, want nil", err)
+	}
+	if pubKey.GetCustomKid().GetValue() != "DfpE4Q" {
+		t.Errorf("pubKey.GetCustomKid().GetValue() = %q, want %q", pubKey.GetCustomKid().GetValue(), "DfpE4Q")
+	}
+}
+
+func TestJWKSetToPublicKeysetPS256WithoutOptionalFieldsSucceeds(t *testing.T) {
+	jwkSet := `{"keys":[
+      {"kty":"RSA",
+       "n":"AQAB",
+       "e":"AQAB",
+       "alg":"PS256"
+      }]}`
+	if _, err := jwt.JWKSetToPublicKeysetHandle([]byte(jwkSet)); err != nil {
+		t.Fatalf("jwt.JWKSetToPublicKeysetHandle() err = %v, want nil", err)
+	}
+}
+
+func TestJWKSetToPublicKeysetInvalidPS256JWKSet(t *testing.T) {
+	for _, tc := range []jwkSetTestCase{
+		{
+			tag: "PS256 without kty",
+			jwkSet: `{"keys":[
+				{"n":"AQAB",
+				 "e":"AQAB",
+				 "use":"sig",
+				 "alg":"PS256",
+				 "key_ops":["verify"],
+				 "kid":"DfpE4Q"
+				}]
+			}`,
+		},
+		{
+			tag: "PS256 without alg",
+			jwkSet: `{"keys":[
+				{"kty":"RSA",
+				 "n":"AQAB",
+				 "e":"AQAB",
+				 "use":"sig",
+				 "key_ops":["verify"],
+				 "kid":"DfpE4Q"
+				}]
+			}`,
+		},
+		{
+			tag: "PS256 invalid kty",
+			jwkSet: `{"keys":[
+				{"kty":"EC",
+				 "n":"AQAB",
+				 "e":"AQAB",
+				 "use":"sig",
+				 "alg":"PS256",
+				 "key_ops":["verify"],
+				 "kid":"DfpE4Q"
+				}]
+			}`,
+		},
+		{
+			tag: "PS256 invalid key ops",
+			jwkSet: `{"keys":[
+				{"kty":"RSA",
+				 "n":"AQAB",
+				 "e":"AQAB",
+				 "use":"sig",
+				 "alg":"PS256",
+				 "key_ops":["verify "],
+				 "kid":"DfpE4Q"
+				}]
+			}`,
+		},
+		{
+			tag: "PS invalid alg",
+			jwkSet: `{"keys":[
+				{"kty":"RSA",
+				 "n":"AQAB",
+				 "e":"AQAB",
+				 "use":"sig",
+				 "alg":"PS257",
+				 "key_ops":["verify"],
+				 "kid":"DfpE4Q"
+				}]
+			}`,
+		},
+		{
+			tag: "PS256 invalid key ops type",
+			jwkSet: `{"keys":[
+				{"kty":"RSA",
+				 "n":"AQAB",
+				 "e":"AQAB",
+				 "use":"sig",
+				 "alg":"PS256",
+				 "key_ops":"verify",
+				 "kid":"DfpE4Q"
+				}]
+			}`,
+		},
+		{
+			tag: "PS256 invalid use",
+			jwkSet: `{"keys":[
+				{"kty":"RSA",
+				 "n":"AQAB",
+				 "e":"AQAB",
+				 "use":"zag",
+				 "alg":"PS256",
+				 "key_ops":["verify"],
+				 "kid":"DfpE4Q"
+				}]
+			}	`,
+		},
+		{
+			tag: "PS256 without modulus",
+			jwkSet: `{"keys":[
+				{"kty":"RSA",
+				 "e":"AQAB",
+				 "use":"sig",
+				 "alg":"PS256",
+				 "key_ops":["verify"],
+				 "kid":"DfpE4Q"
+				}]
+			}`,
+		},
+		{
+			tag: "PSS256 without exponent",
+			jwkSet: `{"keys":[
+				{"kty":"RSA",
+				 "n":"AQAB",
+				 "use":"sig",
+				 "alg":"PS256",
+				 "key_ops":["verify"],
+				 "kid":"DfpE4Q"
+				}]
+			}`,
+		},
+	} {
+		t.Run(tc.tag, func(t *testing.T) {
+			if _, err := jwt.JWKSetToPublicKeysetHandle([]byte(tc.jwkSet)); err == nil {
+				t.Fatalf("jwt.JWKSetToPublicKeysetHandle() err = nil, want error")
+			}
+		})
 	}
 }
 
