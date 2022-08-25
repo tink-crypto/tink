@@ -37,21 +37,6 @@ def tearDownModule():
   testing_servers.stop()
 
 
-# maps from key_template_name to supported_langs. Templates for a key type
-# that aren't widely deployed across a language.
-_ADDITIONAL_KEY_TEMPLATES = {
-    # JWT PS in development in go b/230489047
-    'JWT_PS256_2048_F4': ['cc', 'java', 'go', 'python'],
-    'JWT_PS256_2048_F4_RAW': ['cc', 'java', 'go', 'python'],
-    'JWT_PS256_3072_F4': ['cc', 'java', 'go', 'python'],
-    'JWT_PS256_3072_F4_RAW': ['cc', 'java', 'go', 'python'],
-    'JWT_PS384_3072_F4': ['cc', 'java', 'go', 'python'],
-    'JWT_PS384_3072_F4_RAW': ['cc', 'java', 'go', 'python'],
-    'JWT_PS512_4096_F4': ['cc', 'java', 'go', 'python'],
-    'JWT_PS512_4096_F4_RAW': ['cc', 'java', 'go', 'python'],
-}
-
-
 def all_jwt_mac_key_template_names() -> Iterable[str]:
   """Yields all JWT MAC key template names."""
   for key_type in supported_key_types.JWT_MAC_KEY_TYPES:
@@ -109,13 +94,9 @@ class JwtTest(parameterized.TestCase):
 
   @parameterized.parameters(all_jwt_signature_key_template_names())
   def test_jwt_public_key_sign_verify(self, key_template_name):
-    if key_template_name in _ADDITIONAL_KEY_TEMPLATES:
-      supported_langs = _ADDITIONAL_KEY_TEMPLATES[key_template_name]
-      key_template = supported_key_types.KEY_TEMPLATE[key_template_name]
-    else:
-      supported_langs = supported_key_types.SUPPORTED_LANGUAGES_BY_TEMPLATE_NAME[
-          key_template_name]
-      key_template = supported_key_types.KEY_TEMPLATE[key_template_name]
+    supported_langs = supported_key_types.SUPPORTED_LANGUAGES_BY_TEMPLATE_NAME[
+        key_template_name]
+    key_template = supported_key_types.KEY_TEMPLATE[key_template_name]
     self.assertNotEmpty(supported_langs)
     # Take the first supported language to generate the private keyset.
     private_keyset = testing_servers.new_keyset(supported_langs[0],

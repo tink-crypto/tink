@@ -109,6 +109,14 @@ func (s *KeysetService) GetTemplate(ctx context.Context, req *pb.KeysetTemplateR
 			"JWT_RS384_3072_F4_RAW":        jwt.RawRS384_3072_F4_Key_Template(),
 			"JWT_RS512_4096_F4":            jwt.RS512_4096_F4_Key_Template(),
 			"JWT_RS512_4096_F4_RAW":        jwt.RawRS512_4096_F4_Key_Template(),
+			"JWT_PS256_2048_F4":            jwt.PS256_2048_F4_Key_Template(),
+			"JWT_PS256_2048_F4_RAW":        jwt.RawPS256_2048_F4_Key_Template(),
+			"JWT_PS256_3072_F4":            jwt.PS256_3072_F4_Key_Template(),
+			"JWT_PS256_3072_F4_RAW":        jwt.RawPS256_3072_F4_Key_Template(),
+			"JWT_PS384_3072_F4":            jwt.PS384_3072_F4_Key_Template(),
+			"JWT_PS384_3072_F4_RAW":        jwt.RawPS384_3072_F4_Key_Template(),
+			"JWT_PS512_4096_F4":            jwt.PS512_4096_F4_Key_Template(),
+			"JWT_PS512_4096_F4_RAW":        jwt.RawPS512_4096_F4_Key_Template(),
 		}
 	}
 	template, success := s.Templates[req.GetTemplateName()]
