@@ -41,7 +41,7 @@ def tearDownModule():
 
 def all_signature_private_key_template_names() -> Iterable[str]:
   """Yields all Signature private key template names."""
-  for key_type in supported_key_types.SIGNATURE_KEY_TYPES:
+  for key_type in supported_key_types.PRIVATE_SIGNATURE_KEY_TYPES:
     for key_template_name in supported_key_types.KEY_TEMPLATE_NAMES[key_type]:
       yield key_template_name
 

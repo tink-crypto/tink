@@ -61,7 +61,7 @@ def all_jwt_mac_key_template_names() -> Iterable[str]:
 
 def all_jwt_signature_key_template_names() -> Iterable[str]:
   """Yields all JWT signature key template names."""
-  for key_type in supported_key_types.JWT_SIGNATURE_KEY_TYPES:
+  for key_type in supported_key_types.JWT_PRIVATE_SIGNATURE_KEY_TYPES:
     for key_template_name in supported_key_types.KEY_TEMPLATE_NAMES[key_type]:
       yield key_template_name
 
