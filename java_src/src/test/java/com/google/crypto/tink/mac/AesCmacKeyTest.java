@@ -19,6 +19,7 @@ package com.google.crypto.tink.mac;
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertThrows;
 
+import com.google.crypto.tink.InsecureSecretKeyAccess;
 import com.google.crypto.tink.internal.KeyTester;
 import com.google.crypto.tink.util.SecretBytes;
 import java.security.GeneralSecurityException;
@@ -45,45 +46,149 @@ public final class AesCmacKeyTest {
 
   @BeforeClass
   public static void setUpParameters() throws Exception {
-    tinkParameters16 = AesCmacParameters.createForKeyset(16, 10, TINK);
-    legacyParameters16 = AesCmacParameters.createForKeyset(16, 10, LEGACY);
-    crunchyParameters16 = AesCmacParameters.createForKeyset(16, 10, CRUNCHY);
-    noPrefixParameters16 = AesCmacParameters.createForKeyset(16, 10, NO_PREFIX);
+    tinkParameters16 =
+        AesCmacParameters.builder()
+            .setKeySizeBytes(16)
+            .setTagSizeBytes(10)
+            .setVariant(TINK)
+            .build();
+    legacyParameters16 =
+        AesCmacParameters.builder()
+            .setKeySizeBytes(16)
+            .setTagSizeBytes(10)
+            .setVariant(LEGACY)
+            .build();
+    crunchyParameters16 =
+        AesCmacParameters.builder()
+            .setKeySizeBytes(16)
+            .setTagSizeBytes(10)
+            .setVariant(CRUNCHY)
+            .build();
+    noPrefixParameters16 =
+        AesCmacParameters.builder()
+            .setKeySizeBytes(16)
+            .setTagSizeBytes(10)
+            .setVariant(NO_PREFIX)
+            .build();
 
-    tinkParameters32 = AesCmacParameters.createForKeyset(32, 10, TINK);
-    legacyParameters32 = AesCmacParameters.createForKeyset(32, 10, LEGACY);
-    crunchyParameters32 = AesCmacParameters.createForKeyset(32, 10, CRUNCHY);
-    noPrefixParameters32 = AesCmacParameters.createForKeyset(32, 10, NO_PREFIX);
+    tinkParameters32 =
+        AesCmacParameters.builder()
+            .setKeySizeBytes(32)
+            .setTagSizeBytes(10)
+            .setVariant(TINK)
+            .build();
+    legacyParameters32 =
+        AesCmacParameters.builder()
+            .setKeySizeBytes(32)
+            .setTagSizeBytes(10)
+            .setVariant(LEGACY)
+            .build();
+    crunchyParameters32 =
+        AesCmacParameters.builder()
+            .setKeySizeBytes(32)
+            .setTagSizeBytes(10)
+            .setVariant(CRUNCHY)
+            .build();
+    noPrefixParameters32 =
+        AesCmacParameters.builder()
+            .setKeySizeBytes(32)
+            .setTagSizeBytes(10)
+            .setVariant(NO_PREFIX)
+            .build();
   }
 
   @Test
-  public void create_works() throws Exception {
-    AesCmacKey.create(noPrefixParameters16, SecretBytes.randomBytes(16));
-    AesCmacKey.createForKeyset(tinkParameters32, SecretBytes.randomBytes(32), 1907);
+  public void build_incompleteBuildsFail() throws Exception {
+    assertThrows(GeneralSecurityException.class, () -> AesCmacKey.builder().build());
+    assertThrows(
+        GeneralSecurityException.class,
+        () -> AesCmacKey.builder().setAesKeyBytes(SecretBytes.randomBytes(32)).build());
+    assertThrows(
+        GeneralSecurityException.class,
+        () -> AesCmacKey.builder().setParameters(tinkParameters16).build());
+    assertThrows(
+        GeneralSecurityException.class,
+        () ->
+            AesCmacKey.builder()
+                .setAesKeyBytes(SecretBytes.randomBytes(32))
+                .setParameters(tinkParameters32)
+                .build());
   }
 
   @Test
-  public void create_failsOnKeySizeMismatch() throws Exception {
+  public void build_works() throws Exception {
+    AesCmacKey.builder()
+        .setParameters(noPrefixParameters16)
+        .setAesKeyBytes(SecretBytes.randomBytes(16))
+        .build();
+    AesCmacKey.builder()
+        .setParameters(tinkParameters32)
+        .setAesKeyBytes(SecretBytes.randomBytes(32))
+        .setIdRequirement(1907)
+        .build();
+  }
+
+  @Test
+  public void build_failsOnKeySizeMismatch() throws Exception {
     assertThrows(
         GeneralSecurityException.class,
-        () -> AesCmacKey.create(noPrefixParameters16, SecretBytes.randomBytes(32)));
+        () ->
+            AesCmacKey.builder()
+                .setParameters(noPrefixParameters32)
+                .setAesKeyBytes(SecretBytes.randomBytes(16))
+                .build());
     assertThrows(
         GeneralSecurityException.class,
-        () -> AesCmacKey.createForKeyset(tinkParameters32, SecretBytes.randomBytes(16), 1907));
+        () ->
+            AesCmacKey.builder()
+                .setParameters(tinkParameters32)
+                .setAesKeyBytes(SecretBytes.randomBytes(16))
+                .setIdRequirement(199045)
+                .build());
+    assertThrows(
+        GeneralSecurityException.class,
+        () ->
+            AesCmacKey.builder()
+                .setParameters(noPrefixParameters16)
+                .setAesKeyBytes(SecretBytes.randomBytes(32))
+                .build());
+    assertThrows(
+        GeneralSecurityException.class,
+        () ->
+            AesCmacKey.builder()
+                .setParameters(tinkParameters16)
+                .setAesKeyBytes(SecretBytes.randomBytes(32))
+                .setIdRequirement(199045)
+                .build());
   }
 
   @Test
   public void getAesKey() throws Exception {
     SecretBytes aesKey = SecretBytes.randomBytes(32);
-    assertThat(AesCmacKey.create(noPrefixParameters32, aesKey).getAesKey()).isEqualTo(aesKey);
+    assertThat(
+            AesCmacKey.builder()
+                .setParameters(noPrefixParameters32)
+                .setAesKeyBytes(aesKey)
+                .build()
+                .getAesKey())
+        .isEqualTo(aesKey);
   }
 
   @Test
   public void getParameters() throws Exception {
-    assertThat(AesCmacKey.create(noPrefixParameters32, SecretBytes.randomBytes(32)).getParameters())
+    assertThat(
+            AesCmacKey.builder()
+                .setParameters(noPrefixParameters32)
+                .setAesKeyBytes(SecretBytes.randomBytes(32))
+                .build()
+                .getParameters())
         .isEqualTo(noPrefixParameters32);
     assertThat(
-            AesCmacKey.createForKeyset(tinkParameters16, SecretBytes.randomBytes(16), 1907)
+            AesCmacKey.builder()
+                .setParameters(tinkParameters16)
+                .setAesKeyBytes(SecretBytes.randomBytes(16))
+                .setIdRequirement(1907)
+                .build()
                 .getParameters())
         .isEqualTo(tinkParameters16);
   }
@@ -91,99 +196,182 @@ public final class AesCmacKeyTest {
   @Test
   public void getIdRequirement() throws Exception {
     assertThat(
-            AesCmacKey.create(noPrefixParameters16, SecretBytes.randomBytes(16))
+            AesCmacKey.builder()
+                .setParameters(noPrefixParameters16)
+                .setAesKeyBytes(SecretBytes.randomBytes(16))
+                .build()
                 .getIdRequirementOrNull())
         .isNull();
     assertThat(
-            AesCmacKey.createForKeyset(tinkParameters32, SecretBytes.randomBytes(32), 1907)
+            AesCmacKey.builder()
+                .setParameters(tinkParameters32)
+                .setAesKeyBytes(SecretBytes.randomBytes(32))
+                .setIdRequirement(1907)
+                .build()
                 .getIdRequirementOrNull())
         .isEqualTo(1907);
   }
 
   @Test
   public void invalidCreations() throws Exception {
-    // Wrong keylength
-    assertThrows(
-        GeneralSecurityException.class,
-        () -> AesCmacKey.create(noPrefixParameters32, SecretBytes.randomBytes(16)));
-    assertThrows(
-        GeneralSecurityException.class,
-        () -> AesCmacKey.createForKeyset(tinkParameters32, SecretBytes.randomBytes(16), 199045));
-    assertThrows(
-        GeneralSecurityException.class,
-        () -> AesCmacKey.create(noPrefixParameters16, SecretBytes.randomBytes(32)));
-    assertThrows(
-        GeneralSecurityException.class,
-        () -> AesCmacKey.createForKeyset(tinkParameters16, SecretBytes.randomBytes(32), 199045));
-    // Must use createForKeyset if we have id requirement
-    assertThrows(
-        GeneralSecurityException.class,
-        () -> AesCmacKey.create(tinkParameters32, SecretBytes.randomBytes(32)));
     // Must give ID with IDRequirement
     assertThrows(
         GeneralSecurityException.class,
-        () -> AesCmacKey.createForKeyset(tinkParameters16, SecretBytes.randomBytes(16), null));
+        () ->
+            AesCmacKey.builder()
+                .setParameters(tinkParameters16)
+                .setAesKeyBytes(SecretBytes.randomBytes(16))
+                .setIdRequirement(null)
+                .build());
     // Must not give ID without IDRequirement
     assertThrows(
         GeneralSecurityException.class,
-        () -> AesCmacKey.createForKeyset(noPrefixParameters16, SecretBytes.randomBytes(16), 123));
+        () ->
+            AesCmacKey.builder()
+                .setParameters(noPrefixParameters16)
+                .setAesKeyBytes(SecretBytes.randomBytes(16))
+                .setIdRequirement(123)
+                .build());
   }
 
   @Test
   public void testEqualities() throws Exception {
     SecretBytes key1 = SecretBytes.randomBytes(32);
+    SecretBytes key1Copy =
+        SecretBytes.copyFrom(
+            key1.toByteArray(InsecureSecretKeyAccess.get()), InsecureSecretKeyAccess.get());
     SecretBytes key2 = SecretBytes.randomBytes(32);
     SecretBytes key3 = SecretBytes.randomBytes(16);
     SecretBytes key4 = SecretBytes.randomBytes(16);
     new KeyTester()
         .addEqualityGroup(
             "No prefix, key1",
-            AesCmacKey.create(noPrefixParameters32, key1),
-            AesCmacKey.createForKeyset(noPrefixParameters32, key1, /* idRequirement=*/ null))
+            AesCmacKey.builder().setParameters(noPrefixParameters32).setAesKeyBytes(key1).build(),
+            AesCmacKey.builder()
+                .setParameters(noPrefixParameters32)
+                .setAesKeyBytes(key1)
+                .setIdRequirement(null)
+                .build())
         .addEqualityGroup(
             "No prefix, key2",
-            AesCmacKey.create(noPrefixParameters32, key2),
-            AesCmacKey.createForKeyset(noPrefixParameters32, key2, /* idRequirement=*/ null))
+            AesCmacKey.builder().setParameters(noPrefixParameters32).setAesKeyBytes(key2).build(),
+            AesCmacKey.builder()
+                .setParameters(noPrefixParameters32)
+                .setAesKeyBytes(key2)
+                .setIdRequirement(null)
+                .build())
         .addEqualityGroup(
             "No prefix, key3",
-            AesCmacKey.create(noPrefixParameters16, key3),
-            AesCmacKey.createForKeyset(noPrefixParameters16, key3, /* idRequirement=*/ null))
+            AesCmacKey.builder().setParameters(noPrefixParameters16).setAesKeyBytes(key3).build(),
+            AesCmacKey.builder()
+                .setParameters(noPrefixParameters16)
+                .setAesKeyBytes(key3)
+                .setIdRequirement(null)
+                .build())
         .addEqualityGroup(
             "No prefix, key4",
-            AesCmacKey.create(noPrefixParameters16, key4),
-            AesCmacKey.createForKeyset(noPrefixParameters16, key4, /* idRequirement=*/ null))
+            AesCmacKey.builder().setParameters(noPrefixParameters16).setAesKeyBytes(key4).build(),
+            AesCmacKey.builder()
+                .setParameters(noPrefixParameters16)
+                .setAesKeyBytes(key4)
+                .setIdRequirement(null)
+                .build())
         .addEqualityGroup(
             "Tink 1907 key1",
-            AesCmacKey.createForKeyset(tinkParameters32, key1, 1907),
-            AesCmacKey.createForKeyset(tinkParameters32, key1, 1907))
+            AesCmacKey.builder()
+                .setParameters(tinkParameters32)
+                .setAesKeyBytes(key1)
+                .setIdRequirement(1907)
+                .build(),
+            AesCmacKey.builder()
+                .setParameters(tinkParameters32)
+                .setAesKeyBytes(key1)
+                .setIdRequirement(1907)
+                .build())
         .addEqualityGroup(
             "Tink 1908 key1",
-            AesCmacKey.createForKeyset(tinkParameters32, key1, 1908),
-            AesCmacKey.createForKeyset(tinkParameters32, key1, 1908))
+            AesCmacKey.builder()
+                .setParameters(tinkParameters32)
+                .setAesKeyBytes(key1Copy)
+                .setIdRequirement(1908)
+                .build(),
+            AesCmacKey.builder()
+                .setParameters(tinkParameters32)
+                .setAesKeyBytes(key1)
+                .setIdRequirement(1908)
+                .build())
         .addEqualityGroup(
             "Tink 1907 key3",
-            AesCmacKey.createForKeyset(tinkParameters16, key3, 1907),
-            AesCmacKey.createForKeyset(tinkParameters16, key3, 1907))
+            AesCmacKey.builder()
+                .setParameters(tinkParameters16)
+                .setAesKeyBytes(key3)
+                .setIdRequirement(1907)
+                .build(),
+            AesCmacKey.builder()
+                .setParameters(tinkParameters16)
+                .setAesKeyBytes(key3)
+                .setIdRequirement(1907)
+                .build())
         .addEqualityGroup(
             "Tink 1908 key3",
-            AesCmacKey.createForKeyset(tinkParameters16, key3, 1908),
-            AesCmacKey.createForKeyset(tinkParameters16, key3, 1908))
+            AesCmacKey.builder()
+                .setParameters(tinkParameters16)
+                .setAesKeyBytes(key3)
+                .setIdRequirement(1908)
+                .build(),
+            AesCmacKey.builder()
+                .setParameters(tinkParameters16)
+                .setAesKeyBytes(key3)
+                .setIdRequirement(1908)
+                .build())
         .addEqualityGroup(
             "Legacy 1907 key1",
-            AesCmacKey.createForKeyset(legacyParameters32, key1, 1907),
-            AesCmacKey.createForKeyset(legacyParameters32, key1, 1907))
+            AesCmacKey.builder()
+                .setParameters(legacyParameters32)
+                .setAesKeyBytes(key1)
+                .setIdRequirement(1907)
+                .build(),
+            AesCmacKey.builder()
+                .setParameters(legacyParameters32)
+                .setAesKeyBytes(key1)
+                .setIdRequirement(1907)
+                .build())
         .addEqualityGroup(
             "Crunchy 1907 key1",
-            AesCmacKey.createForKeyset(crunchyParameters32, key1, 1907),
-            AesCmacKey.createForKeyset(crunchyParameters32, key1, 1907))
+            AesCmacKey.builder()
+                .setParameters(crunchyParameters32)
+                .setAesKeyBytes(key1)
+                .setIdRequirement(1907)
+                .build(),
+            AesCmacKey.builder()
+                .setParameters(crunchyParameters32)
+                .setAesKeyBytes(key1)
+                .setIdRequirement(1907)
+                .build())
         .addEqualityGroup(
             "Legacy 1907 key3",
-            AesCmacKey.createForKeyset(legacyParameters16, key3, 1907),
-            AesCmacKey.createForKeyset(legacyParameters16, key3, 1907))
+            AesCmacKey.builder()
+                .setParameters(legacyParameters16)
+                .setAesKeyBytes(key3)
+                .setIdRequirement(1907)
+                .build(),
+            AesCmacKey.builder()
+                .setParameters(legacyParameters16)
+                .setAesKeyBytes(key3)
+                .setIdRequirement(1907)
+                .build())
         .addEqualityGroup(
             "Crunchy 1907 key3",
-            AesCmacKey.createForKeyset(crunchyParameters16, key3, 1907),
-            AesCmacKey.createForKeyset(crunchyParameters16, key3, 1907))
+            AesCmacKey.builder()
+                .setParameters(crunchyParameters16)
+                .setAesKeyBytes(key3)
+                .setIdRequirement(1907)
+                .build(),
+            AesCmacKey.builder()
+                .setParameters(crunchyParameters16)
+                .setAesKeyBytes(key3)
+                .setIdRequirement(1907)
+                .build())
         .doTests();
   }
 }

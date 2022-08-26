@@ -16,10 +16,12 @@
 
 package com.google.crypto.tink.mac;
 
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.errorprone.annotations.Immutable;
 import java.security.GeneralSecurityException;
 import java.security.InvalidAlgorithmParameterException;
 import java.util.Objects;
+import javax.annotation.Nullable;
 
 /** Describes the parameters of an {@link AesCmacKey}. */
 public final class AesCmacParameters extends MacParameters {
@@ -48,6 +50,52 @@ public final class AesCmacParameters extends MacParameters {
     }
   }
 
+  /**
+   * Builds a new AesCmacParameters instance.
+   */
+  public static final class Builder {
+    @Nullable private Integer keySizeBytes = null;
+    @Nullable private Integer tagSizeBytes = null;
+    private Variant variant = Variant.NO_PREFIX;
+
+    private Builder() {}
+
+    @CanIgnoreReturnValue
+    public Builder setKeySizeBytes(int keySizeBytes) throws GeneralSecurityException {
+      if (keySizeBytes != 16 && keySizeBytes != 32) {
+        throw new InvalidAlgorithmParameterException(
+            String.format(
+                "Invalid key size %d; only 128-bit and 256-bit AES keys are supported",
+                keySizeBytes * 8));
+      }
+      this.keySizeBytes = keySizeBytes;
+      return this;
+    }
+
+    @CanIgnoreReturnValue
+    public Builder setTagSizeBytes(int tagSizeBytes) throws GeneralSecurityException {
+      if (tagSizeBytes < 10 || 16 < tagSizeBytes) {
+        throw new GeneralSecurityException(
+            "Invalid tag size for AesCmacParameters: " + tagSizeBytes);
+      }
+      this.tagSizeBytes = tagSizeBytes;
+      return this;
+    }
+
+    @CanIgnoreReturnValue
+    public Builder setVariant(Variant variant) {
+      this.variant = variant;
+      return this;
+    }
+
+    public AesCmacParameters build() throws GeneralSecurityException {
+      if (keySizeBytes == null || tagSizeBytes == null) {
+        throw new GeneralSecurityException("Key size and/or tag size not set");
+      }
+      return new AesCmacParameters(keySizeBytes, tagSizeBytes, variant);
+    }
+  }
+
   private final int keySizeBytes;
   private final int tagSizeBytes;
   private final Variant variant;
@@ -58,34 +106,10 @@ public final class AesCmacParameters extends MacParameters {
     this.variant = variant;
   }
 
-  /** Equivalent to {@code createForKeysetWithCryptographicTagSize(tagSize, Variant.NO_PREFIX);} */
-  public static AesCmacParameters create(int keySizeBytes, int tagSizeBytes)
-      throws GeneralSecurityException {
-    return createForKeyset(keySizeBytes, tagSizeBytes, Variant.NO_PREFIX);
+  public static Builder builder() {
+    return new Builder();
   }
 
-  /**
-   * Creates a new parameters object.
-   *
-   * @throws GeneralSecurityException if tagSizeBytes not in {10, …, 16}.
-   */
-  public static AesCmacParameters createForKeyset(
-      int keySizeBytes, int tagSizeBytes, Variant variant) throws GeneralSecurityException {
-    if (keySizeBytes != 16 && keySizeBytes != 32) {
-      throw new InvalidAlgorithmParameterException(
-          String.format(
-              "Invalid key size %d; only 128-bit and 256-bit AES keys are supported",
-              keySizeBytes * 8));
-    }
-
-    if (tagSizeBytes < 10 || 16 < tagSizeBytes) {
-      throw new GeneralSecurityException("Invalid tag size for AesCmacParameters: " + tagSizeBytes);
-    }
-
-    return new AesCmacParameters(keySizeBytes, tagSizeBytes, variant);
-  }
-
-  /** Returns the size of the key. */
   public int getKeySizeBytes() {
     return keySizeBytes;
   }

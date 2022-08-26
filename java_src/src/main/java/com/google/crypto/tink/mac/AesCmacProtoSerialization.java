@@ -156,10 +156,9 @@ final class AesCmacProtoSerialization {
       throw new GeneralSecurityException("Parsing AesCmacParameters failed: ", e);
     }
 
-    return AesCmacParameters.createForKeyset(
-        format.getKeySize(),
-        format.getParams().getTagSize(),
-        toVariant(serialization.getKeyTemplate().getOutputPrefixType()));
+    return AesCmacParameters.builder().setKeySizeBytes(format.getKeySize()).setTagSizeBytes(
+        format.getParams().getTagSize()).setVariant(
+        toVariant(serialization.getKeyTemplate().getOutputPrefixType())).build();
   }
 
   @SuppressWarnings("UnusedException")
@@ -178,15 +177,15 @@ final class AesCmacProtoSerialization {
         throw new GeneralSecurityException("Only version 0 keys are accepted");
       }
       AesCmacParameters parameters =
-          AesCmacParameters.createForKeyset(
-              protoKey.getKeyValue().size(),
-              protoKey.getParams().getTagSize(),
-              toVariant(serialization.getOutputPrefixType()));
-      return AesCmacKey.createForKeyset(
-          parameters,
-          SecretBytes.copyFrom(
-              protoKey.getKeyValue().toByteArray(), SecretKeyAccess.requireAccess(access)),
-          serialization.getIdRequirementOrNull());
+          AesCmacParameters.builder().setKeySizeBytes(protoKey.getKeyValue().size())
+              .setTagSizeBytes(protoKey.getParams().getTagSize())
+              .setVariant(toVariant(serialization.getOutputPrefixType())).build();
+      return AesCmacKey.builder()
+          .setParameters(parameters)
+          .setAesKeyBytes(SecretBytes.copyFrom(
+                protoKey.getKeyValue().toByteArray(), SecretKeyAccess.requireAccess(access)))
+          .setIdRequirement(serialization.getIdRequirementOrNull())
+          .build();
     } catch (InvalidProtocolBufferException | IllegalArgumentException e) {
       throw new GeneralSecurityException("Parsing AesCmacKey failed");
     }

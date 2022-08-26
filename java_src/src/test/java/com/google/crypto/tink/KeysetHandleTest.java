@@ -34,6 +34,7 @@ import com.google.crypto.tink.internal.ProtoKeySerialization;
 import com.google.crypto.tink.internal.testing.FakeMonitoringClient;
 import com.google.crypto.tink.mac.AesCmacKey;
 import com.google.crypto.tink.mac.AesCmacParameters;
+import com.google.crypto.tink.mac.AesCmacParameters.Variant;
 import com.google.crypto.tink.monitoring.MonitoringAnnotations;
 import com.google.crypto.tink.monitoring.MonitoringClient;
 import com.google.crypto.tink.proto.AesEaxKey;
@@ -791,7 +792,7 @@ public class KeysetHandleTest {
 
     assertThat(keysetHandle.size()).isEqualTo(1);
     assertThat(keysetHandle.getAt(0).getKey().getParameters())
-        .isEqualTo(AesCmacParameters.create(/*keySizeBytes=*/ 32, /*tagSizeBytes=*/ 16));
+        .isEqualTo(AesCmacParameters.builder().setKeySizeBytes(32).setTagSizeBytes(16).build());
   }
 
   @Test
@@ -804,24 +805,20 @@ public class KeysetHandleTest {
                     .setStatus(KeyStatus.DISABLED))
             .addEntry(
                 KeysetHandle.generateEntryFromParameters(
-                        AesCmacParameters.createForKeyset(
-                            /*keySizeBytes=*/ 32,
-                            /*tagSizeBytes=*/ 10,
-                            AesCmacParameters.Variant.CRUNCHY))
+                        AesCmacParameters.builder().setKeySizeBytes(32).setTagSizeBytes(10)
+                            .setVariant(Variant.CRUNCHY).build())
                     .withRandomId()
                     .makePrimary())
             .addEntry(
                 KeysetHandle.generateEntryFromParameters(
-                        AesCmacParameters.createForKeyset(
-                            /*keySizeBytes=*/ 32,
-                            /*tagSizeBytes=*/ 13,
-                            AesCmacParameters.Variant.LEGACY))
+                        AesCmacParameters.builder().setKeySizeBytes(32).setTagSizeBytes(13)
+                            .setVariant(Variant.LEGACY).build())
                     .withRandomId())
             .build();
     assertThat(keysetHandle.size()).isEqualTo(3);
     KeysetHandle.Entry entry0 = keysetHandle.getAt(0);
     assertThat(entry0.getKey().getParameters())
-        .isEqualTo(AesCmacParameters.create(/*keySizeBytes=*/ 32, /*tagSizeBytes=*/ 16));
+        .isEqualTo(AesCmacParameters.builder().setKeySizeBytes(32).setTagSizeBytes(16).build());
     assertThat(entry0.isPrimary()).isFalse();
     assertThat(entry0.getStatus()).isEqualTo(KeyStatus.DISABLED);
 
@@ -830,16 +827,16 @@ public class KeysetHandleTest {
     assertThat(entry1.getStatus()).isEqualTo(KeyStatus.ENABLED);
     assertThat(entry1.getKey().getParameters())
         .isEqualTo(
-            AesCmacParameters.createForKeyset(
-                /*keySizeBytes=*/ 32, /*tagSizeBytes=*/ 10, AesCmacParameters.Variant.CRUNCHY));
+            AesCmacParameters.builder().setKeySizeBytes(32).setTagSizeBytes(10)
+                .setVariant(Variant.CRUNCHY).build());
 
     KeysetHandle.Entry entry2 = keysetHandle.getAt(2);
     assertThat(entry2.isPrimary()).isFalse();
     assertThat(entry2.getStatus()).isEqualTo(KeyStatus.ENABLED);
     assertThat(keysetHandle.getAt(2).getKey().getParameters())
         .isEqualTo(
-            AesCmacParameters.createForKeyset(
-                /*keySizeBytes=*/ 32, /*tagSizeBytes=*/ 13, AesCmacParameters.Variant.LEGACY));
+            AesCmacParameters.builder().setKeySizeBytes(32).setTagSizeBytes(13)
+                .setVariant(Variant.LEGACY).build());
   }
 
   @Test
@@ -912,14 +909,14 @@ public class KeysetHandleTest {
     builder.addEntry(KeysetHandle.generateEntryFromParametersName("AES256_CMAC").withRandomId());
     builder.addEntry(
         KeysetHandle.generateEntryFromParameters(
-                AesCmacParameters.create(/*keySizeBytes=*/ 32, /*tagSizeBytes=*/ 13))
+                AesCmacParameters.builder().setKeySizeBytes(32).setTagSizeBytes(13).build())
             .withRandomId()
             .makePrimary());
     builder.removeAt(0);
     KeysetHandle handle = builder.build();
     assertThat(handle.size()).isEqualTo(1);
     assertThat(handle.getAt(0).getKey().getParameters())
-        .isEqualTo(AesCmacParameters.create(/*keySizeBytes=*/ 32, /*tagSizeBytes=*/ 13));
+        .isEqualTo(AesCmacParameters.builder().setKeySizeBytes(32).setTagSizeBytes(13).build());
   }
 
   @Test
@@ -1008,8 +1005,10 @@ public class KeysetHandleTest {
 
   @Test
   public void testImportKey_withoutIdRequirement_withFixedId_works() throws Exception {
-    AesCmacParameters params = AesCmacParameters.create(/*keySizeBytes=*/ 32, /*tagSizeBytes=*/ 10);
-    AesCmacKey key = AesCmacKey.create(params, SecretBytes.randomBytes(32));
+    AesCmacParameters params = AesCmacParameters.builder().setKeySizeBytes(32).setTagSizeBytes(10)
+        .build();
+    AesCmacKey key = AesCmacKey.builder().setParameters(params)
+        .setAesKeyBytes(SecretBytes.randomBytes(32)).build();
     KeysetHandle handle =
         KeysetHandle.newBuilder()
             .addEntry(KeysetHandle.importKey(key).withFixedId(102).makePrimary())
@@ -1021,8 +1020,10 @@ public class KeysetHandleTest {
 
   @Test
   public void testImportKey_withoutIdRequirement_noIdAssigned_throws() throws Exception {
-    AesCmacParameters params = AesCmacParameters.create(/*keySizeBytes=*/ 32, /*tagSizeBytes=*/ 10);
-    AesCmacKey key = AesCmacKey.create(params, SecretBytes.randomBytes(32));
+    AesCmacParameters params = AesCmacParameters.builder().setKeySizeBytes(32).setTagSizeBytes(10)
+        .build();
+    AesCmacKey key = AesCmacKey.builder().setParameters(params)
+        .setAesKeyBytes(SecretBytes.randomBytes(32)).build();
     KeysetHandle.Builder builder =
         KeysetHandle.newBuilder().addEntry(KeysetHandle.importKey(key).makePrimary());
     assertThrows(GeneralSecurityException.class, builder::build);
@@ -1030,8 +1031,10 @@ public class KeysetHandleTest {
 
   @Test
   public void testImportKey_withoutIdRequirement_withRandomId_works() throws Exception {
-    AesCmacParameters params = AesCmacParameters.create(/*keySizeBytes=*/ 32, /*tagSizeBytes=*/ 10);
-    AesCmacKey key = AesCmacKey.create(params, SecretBytes.randomBytes(32));
+    AesCmacParameters params = AesCmacParameters.builder().setKeySizeBytes(32).setTagSizeBytes(10)
+        .build();
+    AesCmacKey key = AesCmacKey.builder().setParameters(params)
+        .setAesKeyBytes(SecretBytes.randomBytes(32)).build();
     KeysetHandle handle =
         KeysetHandle.newBuilder()
             .addEntry(KeysetHandle.importKey(key).withRandomId().makePrimary())
@@ -1043,10 +1046,14 @@ public class KeysetHandleTest {
   @Test
   public void testImportKey_withIdRequirement_noId_works() throws Exception {
     AesCmacParameters params =
-        AesCmacParameters.createForKeyset(
-            /*keySizeBytes=*/ 32, /*tagSizeBytes=*/ 10, AesCmacParameters.Variant.TINK);
+        AesCmacParameters.builder().setKeySizeBytes(32).setTagSizeBytes(10).setVariant(Variant.TINK)
+            .build();
     AesCmacKey key =
-        AesCmacKey.createForKeyset(params, SecretBytes.randomBytes(32), /*idRequirement=*/ 105);
+        AesCmacKey.builder()
+            .setParameters(params)
+            .setAesKeyBytes(SecretBytes.randomBytes(32))
+            .setIdRequirement(105)
+            .build();
     KeysetHandle handle =
         KeysetHandle.newBuilder().addEntry(KeysetHandle.importKey(key).makePrimary()).build();
     assertThat(handle.size()).isEqualTo(1);
@@ -1057,10 +1064,14 @@ public class KeysetHandleTest {
   @Test
   public void testImportKey_withIdRequirement_randomId_throws() throws Exception {
     AesCmacParameters params =
-        AesCmacParameters.createForKeyset(
-            /*keySizeBytes=*/ 32, /*tagSizeBytes=*/ 10, AesCmacParameters.Variant.TINK);
+        AesCmacParameters.builder().setKeySizeBytes(32).setTagSizeBytes(10).setVariant(Variant.TINK)
+            .build();
     AesCmacKey key =
-        AesCmacKey.createForKeyset(params, SecretBytes.randomBytes(32), /*idRequirement=*/ 105);
+        AesCmacKey.builder()
+            .setParameters(params)
+            .setAesKeyBytes(SecretBytes.randomBytes(32))
+            .setIdRequirement(105)
+            .build();
     KeysetHandle.Builder builder =
         KeysetHandle.newBuilder()
             .addEntry(KeysetHandle.importKey(key).withRandomId().makePrimary());
@@ -1070,10 +1081,14 @@ public class KeysetHandleTest {
   @Test
   public void testImportKey_withIdRequirement_explicitlySetToCorrectId_works() throws Exception {
     AesCmacParameters params =
-        AesCmacParameters.createForKeyset(
-            /*keySizeBytes=*/ 32, /*tagSizeBytes=*/ 10, AesCmacParameters.Variant.TINK);
+        AesCmacParameters.builder().setKeySizeBytes(32).setTagSizeBytes(10).setVariant(Variant.TINK)
+            .build();
     AesCmacKey key =
-        AesCmacKey.createForKeyset(params, SecretBytes.randomBytes(32), /*idRequirement=*/ 105);
+        AesCmacKey.builder()
+            .setParameters(params)
+            .setAesKeyBytes(SecretBytes.randomBytes(32))
+            .setIdRequirement(105)
+            .build();
     KeysetHandle handle =
         KeysetHandle.newBuilder()
             .addEntry(KeysetHandle.importKey(key).withFixedId(105).makePrimary())
@@ -1086,10 +1101,14 @@ public class KeysetHandleTest {
   @Test
   public void testImportKey_withIdRequirement_explicitlySetToWrongId_throws() throws Exception {
     AesCmacParameters params =
-        AesCmacParameters.createForKeyset(
-            /*keySizeBytes=*/ 32, /*tagSizeBytes=*/ 10, AesCmacParameters.Variant.TINK);
+        AesCmacParameters.builder().setKeySizeBytes(32).setTagSizeBytes(10).setVariant(Variant.TINK)
+            .build();
     AesCmacKey key =
-        AesCmacKey.createForKeyset(params, SecretBytes.randomBytes(32), /*idRequirement=*/ 105);
+        AesCmacKey.builder()
+            .setParameters(params)
+            .setAesKeyBytes(SecretBytes.randomBytes(32))
+            .setIdRequirement(105)
+            .build();
     KeysetHandle.Builder builder =
         KeysetHandle.newBuilder()
             .addEntry(KeysetHandle.importKey(key).withFixedId(106).makePrimary());

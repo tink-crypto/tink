@@ -66,7 +66,8 @@ public final class AesCmacProtoSerializationTest {
   static AesCmacParameters createAesCmacParameters(
       int keySize, int tagSize, AesCmacParameters.Variant variant) {
     try {
-      return AesCmacParameters.createForKeyset(keySize, tagSize, variant);
+      return AesCmacParameters.builder().setKeySizeBytes(keySize).setTagSizeBytes(tagSize).setVariant(
+          variant).build();
     } catch (GeneralSecurityException e) {
       throw new RuntimeException(e);
     }
@@ -79,8 +80,11 @@ public final class AesCmacProtoSerializationTest {
       SecretBytes aesKey,
       @Nullable Integer idRequirement)
       throws GeneralSecurityException {
-    return AesCmacKey.createForKeyset(
-        createAesCmacParameters(keySize, tagSize, variant), aesKey, idRequirement);
+    return AesCmacKey.builder()
+        .setParameters(createAesCmacParameters(keySize, tagSize, variant))
+        .setAesKeyBytes(aesKey)
+        .setIdRequirement(idRequirement)
+        .build();
   }
 
   static com.google.crypto.tink.proto.AesCmacKeyFormat createProtoFormat(int keySize, int tagSize) {

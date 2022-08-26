@@ -34,14 +34,33 @@ public final class AesCmacParametersTest {
 
   @CanIgnoreReturnValue
   private static AesCmacParameters create(
-      int keySize, int tagSize, AesCmacParameters.Variant variant) throws GeneralSecurityException {
-    return AesCmacParameters.createForKeyset(keySize, tagSize, variant);
+      int keySizeBytes, int tagSizeBytes, AesCmacParameters.Variant variant)
+      throws GeneralSecurityException {
+    return AesCmacParameters.builder()
+        .setKeySizeBytes(keySizeBytes)
+        .setTagSizeBytes(tagSizeBytes)
+        .setVariant(variant)
+        .build();
   }
 
   @CanIgnoreReturnValue
   private static AesCmacParameters create(int keySizeBytes, int tagSizeBytes)
       throws GeneralSecurityException {
-    return AesCmacParameters.create(keySizeBytes, tagSizeBytes);
+    return AesCmacParameters.builder()
+        .setKeySizeBytes(keySizeBytes)
+        .setTagSizeBytes(tagSizeBytes)
+        .build();
+  }
+
+  @Test
+  public void testAesCmacParameters_incompleteBuildsFail() throws Exception {
+    assertThrows(GeneralSecurityException.class, () -> AesCmacParameters.builder().build());
+    assertThrows(
+        GeneralSecurityException.class,
+        () -> AesCmacParameters.builder().setTagSizeBytes(10).build());
+    assertThrows(
+        GeneralSecurityException.class,
+        () -> AesCmacParameters.builder().setKeySizeBytes(16).build());
   }
 
   @Test

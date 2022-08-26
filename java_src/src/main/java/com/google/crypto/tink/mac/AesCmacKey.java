@@ -20,6 +20,7 @@ import com.google.crypto.tink.AccessesPartialKey;
 import com.google.crypto.tink.Key;
 import com.google.crypto.tink.util.Bytes;
 import com.google.crypto.tink.util.SecretBytes;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.errorprone.annotations.RestrictedApi;
 import java.nio.ByteBuffer;
 import java.security.GeneralSecurityException;
@@ -37,6 +38,57 @@ public final class AesCmacKey extends MacKey {
   private final SecretBytes aesKeyBytes;
   @Nullable private final Integer idRequirement;
 
+  /**
+   * Builder for AesCmacKey.
+   */
+  public static class Builder {
+    private AesCmacParameters parameters = null;
+    private SecretBytes aesKeyBytes = null;
+    @Nullable private Integer idRequirement = null;
+
+    private Builder() {}
+
+    @CanIgnoreReturnValue
+    public Builder setParameters(AesCmacParameters parameters) {
+      this.parameters = parameters;
+      return this;
+    }
+
+    @CanIgnoreReturnValue
+    public Builder setAesKeyBytes(SecretBytes aesKeyBytes) throws GeneralSecurityException {
+      this.aesKeyBytes = aesKeyBytes;
+      return this;
+    }
+
+    @CanIgnoreReturnValue
+    public Builder setIdRequirement(@Nullable Integer idRequirement) {
+      this.idRequirement = idRequirement;
+      return this;
+    }
+
+    public AesCmacKey build() throws GeneralSecurityException {
+      if (parameters == null || aesKeyBytes == null) {
+        throw new GeneralSecurityException("Cannot build without parameters and/or key material");
+      }
+
+      if (parameters.getKeySizeBytes() != aesKeyBytes.size()) {
+        throw new GeneralSecurityException("Key size mismatch");
+      }
+
+      if (parameters.hasIdRequirement() && idRequirement == null) {
+        throw new GeneralSecurityException(
+            "Cannot create key without ID requirement with format with ID requirement");
+      }
+
+      if (!parameters.hasIdRequirement() && idRequirement != null) {
+        throw new GeneralSecurityException(
+            "Cannot create key with ID requirement with format without ID requirement");
+      }
+
+      return new AesCmacKey(parameters, aesKeyBytes, idRequirement);
+    }
+  }
+
   private AesCmacKey(
       AesCmacParameters parameters, SecretBytes aesKeyBytes, @Nullable Integer idRequirement) {
     this.parameters = parameters;
@@ -44,57 +96,13 @@ public final class AesCmacKey extends MacKey {
     this.idRequirement = idRequirement;
   }
 
-  /** Creates a new AES-CMAC key with an empty prefix. */
   @RestrictedApi(
       explanation = "Accessing parts of keys can produce unexpected incompatibilities",
       link = "https://developers.google.com/tink/design/access_control#accessing_partial_keys",
       allowedOnPath = ".*Test\\.java",
       allowlistAnnotations = {AccessesPartialKey.class})
-  public static AesCmacKey create(AesCmacParameters parameters, SecretBytes aesKey)
-      throws GeneralSecurityException {
-    // The only check on the key size since it's verified during AesCmacParameter creation.
-    if (parameters.getKeySizeBytes() != aesKey.size()) {
-      throw new GeneralSecurityException("Key size mismatch");
-    }
-
-    if (parameters.hasIdRequirement()) {
-      throw new GeneralSecurityException(
-          "Must use createForKeyset for parameters with ID requirement");
-    }
-
-    return new AesCmacKey(parameters, aesKey, null);
-  }
-
-  /**
-   * Creates a new AES-CMAC key for use in a keyset.
-   *
-   * <p>If the format specifies a variant which uses a prefix, the id is used to compute this
-   * prefix.
-   */
-  @RestrictedApi(
-      explanation = "Accessing parts of keys can produce unexpected incompatibilities",
-      link = "https://developers.google.com/tink/design/access_control#accessing_partial_keys",
-      allowedOnPath = ".*Test\\.java",
-      allowlistAnnotations = {AccessesPartialKey.class})
-  public static AesCmacKey createForKeyset(
-      AesCmacParameters parameters, SecretBytes aesKeyBytes, @Nullable Integer idRequirement)
-      throws GeneralSecurityException {
-    // The only check on the key size since it's verified during AesCmacParameter creation.
-    if (parameters.getKeySizeBytes() != aesKeyBytes.size()) {
-      throw new GeneralSecurityException("Key size mismatch");
-    }
-
-    if (parameters.hasIdRequirement() && idRequirement == null) {
-      throw new GeneralSecurityException(
-          "Cannot create key without ID requirement with format with ID requirement");
-    }
-
-    if (!parameters.hasIdRequirement() && idRequirement != null) {
-      throw new GeneralSecurityException(
-          "Cannot create key with ID requirement with format without ID requirement");
-    }
-
-    return new AesCmacKey(parameters, aesKeyBytes, idRequirement);
+  public static Builder builder() {
+    return new Builder();
   }
 
   /** Returns the underlying AES key. */
