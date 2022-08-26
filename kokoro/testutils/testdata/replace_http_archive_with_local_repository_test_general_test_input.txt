@@ -67,3 +67,9 @@ http_archive(
     urls = ["https://github.com/tink-crypto/tink-go-gcpkms/archive/main.zip"],
     strip_prefix = "tink-go-gcpkms-main",
 )
+
+http_archive(
+    name = "com_github_tink_crypto_tink_go_awskms",
+    urls = ["https://github.com/tink-crypto/tink-go-awskms/archive/main.zip"],
+    strip_prefix = "tink-go-awskms-main",
+)
