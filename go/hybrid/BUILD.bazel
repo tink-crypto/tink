@@ -44,6 +44,7 @@ go_test(
         "ecies_aead_hkdf_hybrid_encrypt_test.go",
         "hpke_private_key_manager_test.go",
         "hpke_public_key_manager_test.go",
+        "hybrid_b243759652_test.go",
         "hybrid_factory_test.go",
         "hybrid_key_templates_test.go",
         "hybrid_test.go",
