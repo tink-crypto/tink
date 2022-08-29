@@ -23,6 +23,7 @@ import (
 	"hash"
 
 	"github.com/google/tink/go/subtle"
+	"github.com/google/tink/go/tink"
 )
 
 const (
@@ -56,6 +57,39 @@ func HashSafeForSignature(hashAlg string) error {
 	default:
 		return fmt.Errorf("hash function not safe for digital signatures: %q", hashAlg)
 	}
+}
+
+const (
+	testMsg          = "Tink and Wycheproof."
+	signVerifyErrMsg = "signing with private key followed by verifying with public key failed, the key may be corrupted"
+)
+
+// Validate_RSA_SSA_PKCS1 validates that the corresponding private key is valid by signing and verifying a message.
+func Validate_RSA_SSA_PKCS1(hashAlg string, privKey *rsa.PrivateKey) error {
+	signer, err := New_RSA_SSA_PKCS1_Signer(hashAlg, privKey)
+	if err != nil {
+		return err
+	}
+	verifier, err := New_RSA_SSA_PKCS1_Verifier(hashAlg, &privKey.PublicKey)
+	if err != nil {
+		return err
+	}
+	if err := validateSignerVerifier(signer, verifier); err != nil {
+		return fmt.Errorf("RSA-SSA-PKCS1: %q", signVerifyErrMsg)
+	}
+	return nil
+}
+
+func validateSignerVerifier(signer tink.Signer, verifier tink.Verifier) error {
+	signature, err := signer.Sign([]byte(testMsg))
+	if err != nil {
+		return err
+	}
+	if err := verifier.Verify([]byte(signature), []byte(testMsg)); err != nil {
+		return err
+	}
+	fmt.Println("SINGATURE VERIFICATION SUCCED!")
+	return nil
 }
 
 func validRSAPublicKey(publicKey *rsa.PublicKey) error {

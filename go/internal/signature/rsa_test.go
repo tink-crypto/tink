@@ -17,6 +17,9 @@
 package signature_test
 
 import (
+	"crypto/rand"
+	"crypto/rsa"
+	"math/big"
 	"testing"
 
 	internal "github.com/google/tink/go/internal/signature"
@@ -69,6 +72,86 @@ func TestHashNotSafeForSignatureFails(t *testing.T) {
 		t.Run(h, func(t *testing.T) {
 			if err := internal.HashSafeForSignature(h); err == nil {
 				t.Errorf("HashSafeForSignature(%q)  err = nil, want error", h)
+			}
+		})
+	}
+}
+
+func TestRSAPKCS1KeySelfTestWithCorruptedKeysFails(t *testing.T) {
+	validPrivKey, err := rsa.GenerateKey(rand.Reader, 3072)
+	if err != nil {
+		t.Fatalf("rsa.GenerateKey(rand.Reader, 3072) err = %v, want nil", err)
+	}
+	if err := internal.Validate_RSA_SSA_PKCS1("SHA256", validPrivKey); err != nil {
+		t.Errorf("internal.Validate_RSA_SSA_PKCS1('SHA256', validPrivKey) err = %v, want nil", err)
+	}
+	type testCase struct {
+		tag  string
+		key  *rsa.PrivateKey
+		hash string
+	}
+	for _, tc := range []testCase{
+		{
+			tag: "modify public modulus",
+			key: &rsa.PrivateKey{
+				D:           validPrivKey.D,
+				Primes:      validPrivKey.Primes,
+				Precomputed: validPrivKey.Precomputed,
+				PublicKey: rsa.PublicKey{
+					N: validPrivKey.N.Add(validPrivKey.N, big.NewInt(500)),
+					E: validPrivKey.E,
+				},
+			},
+		},
+		{
+			tag: "modify public exponent",
+			key: &rsa.PrivateKey{
+				D:           validPrivKey.D,
+				Primes:      validPrivKey.Primes,
+				Precomputed: validPrivKey.Precomputed,
+				PublicKey: rsa.PublicKey{
+					N: validPrivKey.N,
+					E: validPrivKey.E + 5,
+				},
+			},
+		},
+		{
+			tag: "one byte shift in Q",
+			key: &rsa.PrivateKey{
+				PublicKey:   validPrivKey.PublicKey,
+				D:           validPrivKey.D,
+				Precomputed: validPrivKey.Precomputed,
+				Primes: []*big.Int{
+					func() *big.Int {
+						p := validPrivKey.Primes[0].Bytes()
+						p[4] <<= 1
+						return new(big.Int).SetBytes(p)
+					}(),
+					validPrivKey.Primes[1],
+				},
+			},
+			hash: "SHA256",
+		},
+		{
+			tag: "removing one byte from P",
+			key: &rsa.PrivateKey{
+				PublicKey:   validPrivKey.PublicKey,
+				D:           validPrivKey.D,
+				Precomputed: validPrivKey.Precomputed,
+				Primes: []*big.Int{
+					validPrivKey.Primes[0],
+					func() *big.Int {
+						p := validPrivKey.Primes[1].Bytes()
+						return new(big.Int).SetBytes(p[:len(p)-2])
+					}(),
+				},
+			},
+			hash: "SHA256",
+		},
+	} {
+		t.Run(tc.tag, func(t *testing.T) {
+			if err := internal.Validate_RSA_SSA_PKCS1(tc.hash, tc.key); err == nil {
+				t.Errorf("internal.Validate_RSA_SSA_PKCS1(key, hash = %q) err = nil, want error", tc.hash)
 			}
 		})
 	}
