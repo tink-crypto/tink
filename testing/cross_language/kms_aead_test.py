@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Cross-language tests for the KMS Envelope AEAD primitive with AWS and GCP."""
+import itertools
 
 from typing import Dict, Iterable, Tuple
 
@@ -29,7 +30,8 @@ _GCP_KEY_URI = ('gcp-kms://projects/tink-test-infrastructure/locations/global/'
                 'keyRings/unit-and-integration-testing/cryptoKeys/aead-key')
 
 
-def _templates() -> Dict[str, Tuple[tink_pb2.KeyTemplate, str]]:
+def _kms_envelope_aead_templates(
+) -> Dict[str, Tuple[tink_pb2.KeyTemplate, str]]:
   """For each KMS envelope AEAD template name maps the key template and DEK AEAD key type."""
   kms_key_templates = {}
   for aead_key_type in supported_key_types.AEAD_KEY_TYPES:
@@ -45,8 +47,10 @@ def _templates() -> Dict[str, Tuple[tink_pb2.KeyTemplate, str]]:
   return kms_key_templates
 
 
-_KMS_KEY_TEMPLATES = _templates()
+_KMS_ENVELOPE_AEAD_KEY_TEMPLATES = _kms_envelope_aead_templates()
 _SUPPORTED_LANGUAGES_FOR_KMS_ENVELOPE_AEAD = ('python', 'cc', 'go', 'java')
+# Currently Go doesn't support KmsAeadKey.
+_SUPPORTED_LANGUAGES_FOR_KMS_AEAD = ('python', 'cc', 'java')
 
 
 def setUpModule():
@@ -60,7 +64,8 @@ def tearDownModule():
 
 def _test_cases() -> Iterable[str]:
   """Yields (KMS Envelope AEAD template names, encrypt lang, decrypt lang)."""
-  for key_template_name, (_, aead_key_type) in _KMS_KEY_TEMPLATES.items():
+  for key_template_name, (
+      _, aead_key_type) in _KMS_ENVELOPE_AEAD_KEY_TEMPLATES.items():
     # Make sure to test languages that support the pritive used for DEK.
     supported_langs = supported_key_types.SUPPORTED_LANGUAGES[aead_key_type]
     # Make sure the language supports KMS envelope encryption.
@@ -83,11 +88,29 @@ def _get_plaintext_and_aad(key_template_name: str,
   return (plaintext, associated_data)
 
 
+class KmsAeadTest(parameterized.TestCase):
+
+  @parameterized.parameters(
+      itertools.product(_SUPPORTED_LANGUAGES_FOR_KMS_AEAD,
+                        _SUPPORTED_LANGUAGES_FOR_KMS_AEAD))
+  def test_encrypt_decrypt(self, encrypt_lang, decrypt_lang):
+    key_template = aead.aead_key_templates.create_kms_aead_key_template(
+        _GCP_KEY_URI)
+    keyset = testing_servers.new_keyset(encrypt_lang, key_template)
+    encrypt_primitive = testing_servers.aead(encrypt_lang, keyset)
+    plaintext, associated_data = _get_plaintext_and_aad('GCP_KMS_AEAD',
+                                                        encrypt_primitive.lang)
+    ciphertext = encrypt_primitive.encrypt(plaintext, associated_data)
+    decrypt_primitive = testing_servers.aead(decrypt_lang, keyset)
+    output = decrypt_primitive.decrypt(ciphertext, associated_data)
+    self.assertEqual(output, plaintext)
+
+
 class KmsEnvelopeAeadTest(parameterized.TestCase):
 
   @parameterized.parameters(_test_cases())
   def test_encrypt_decrypt(self, key_template_name, encrypt_lang, decrypt_lang):
-    key_template, _ = _KMS_KEY_TEMPLATES[key_template_name]
+    key_template, _ = _KMS_ENVELOPE_AEAD_KEY_TEMPLATES[key_template_name]
     # Use the encryption language to generate the keyset proto.
     keyset = testing_servers.new_keyset(encrypt_lang, key_template)
     encrypt_primitive = testing_servers.aead(encrypt_lang, keyset)
@@ -103,7 +126,7 @@ class KmsEnvelopeAeadTest(parameterized.TestCase):
   @parameterized.parameters(_test_cases())
   def test_decryption_fails_with_wrong_aad(self, key_template_name,
                                            encrypt_lang, decrypt_lang):
-    key_template, _ = _KMS_KEY_TEMPLATES[key_template_name]
+    key_template, _ = _KMS_ENVELOPE_AEAD_KEY_TEMPLATES[key_template_name]
     # Use the encryption language to generate the keyset proto.
     keyset = testing_servers.new_keyset(encrypt_lang, key_template)
     encrypt_primitive = testing_servers.aead(encrypt_lang, keyset)
