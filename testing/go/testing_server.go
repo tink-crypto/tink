@@ -22,8 +22,6 @@ import (
 	"fmt"
 	"log"
 	"net"
-	"os"
-	"path/filepath"
 
 	"flag"
 	// context is used to cancel outstanding requests
@@ -38,7 +36,8 @@ import (
 
 var (
 	port            = flag.Int("port", 10000, "The server port")
-	gcpCredFilePath = filepath.Join(os.Getenv("TEST_SRCDIR"), "testing_python/testdata/gcp/credential.json")
+	gcpCredFilePath = flag.String("gcp_credentials_path", "", "Google Cloud KMS credentials path")
+	gcpKeyURI       = flag.String("gcp_key_uri", "", "Google Cloud KMS key URL of the form: gcp-kms://projects/*/locations/*/keyRings/*/cryptoKeys/*.")
 )
 
 func main() {
@@ -49,7 +48,7 @@ func main() {
 	}
 	registry.RegisterKMSClient(client)
 
-	gcpClient, err := gcpkms.NewClientWithOptions(context.Background(), "gcp-kms://", option.WithCredentialsFile(gcpCredFilePath))
+	gcpClient, err := gcpkms.NewClientWithOptions(context.Background(), *gcpKeyURI, option.WithCredentialsFile(*gcpCredFilePath))
 	if err != nil {
 		log.Fatalf("gcpkms.NewClientWithOptions failed: %v", err)
 	}

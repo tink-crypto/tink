@@ -76,6 +76,12 @@ SUPPORTED_LANGUAGES_BY_PRIMITIVE = {
     'jwt': ['cc', 'java', 'go', 'python'],
 }
 
+GCP_KEY_URI = ('gcp-kms://projects/tink-test-infrastructure/locations/global/'
+               'keyRings/unit-and-integration-testing/cryptoKeys/aead-key')
+GCP_CREDENTIALS_PATH = os.path.join(
+    os.environ['TEST_SRCDIR'] if 'TEST_SRCDIR' in os.environ else '',
+    'cross_language_test/testdata/gcp/credential.json')
+
 _RELATIVE_ROOT_PATH = 'tink_base/testing'
 
 
@@ -123,12 +129,18 @@ def _server_path(lang: str) -> str:
 
 
 def _server_cmd(lang: str, port: int) -> List[str]:
+  """Returns the server command."""
   server_path = _server_path(lang)
+  server_args = [
+      '--port',
+      '%d' % port, '--gcp_credentials_path', GCP_CREDENTIALS_PATH,
+      '--gcp_key_uri', GCP_KEY_URI
+  ]
   if lang == 'java' and server_path.endswith('.jar'):
     java_path = os.path.join(_root_path(), _JAVA_PATH)
-    return [java_path, '-jar', server_path, '--port', '%d' % port]
+    return [java_path, '-jar', server_path] + server_args
   else:
-    return [server_path, '--port', '%d' % port]
+    return [server_path] + server_args
 
 
 def _get_file_content(filename: str) -> str:

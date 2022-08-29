@@ -23,6 +23,7 @@
 
 #include "absl/flags/flag.h"
 #include "absl/flags/parse.h"
+#include "absl/strings/str_cat.h"
 #include "tink/config/tink_config.h"
 #include "tink/hybrid/hpke_config.h"
 #include "tink/integration/gcpkms/gcp_kms_client.h"
@@ -42,9 +43,12 @@
 #include "proto/testing_api.grpc.pb.h"
 
 ABSL_FLAG(int, port, 23456, "the port");
-
-constexpr absl::string_view kGcpCredentialsPath =
-    "testdata/gcp/credential.json";
+ABSL_FLAG(std::string, gcp_credentials_path, "",
+          "Google Cloud KMS credentials path");
+ABSL_FLAG(
+    std::string, gcp_key_uri, "",
+    absl::StrCat("Google Cloud KMS key URL of the form: ",
+                 "gcp-kms://projects/*/locations/*/keyRings/*/cryptoKeys/*."));
 
 void RunServer() {
   auto status = crypto::tink::TinkConfig::Register();
@@ -78,13 +82,15 @@ void RunServer() {
               << register_fake_kms_client_status.message() << std::endl;
     return;
   }
-  crypto::tink::util::Status register_gcp_kms_client_status =
+  std::string gcp_credentials_path = absl::GetFlag(FLAGS_gcp_credentials_path);
+  std::string gcp_key_uri = absl::GetFlag(FLAGS_gcp_key_uri);
+  crypto::tink::util::Status register_gcpkms_client_status =
       crypto::tink::integration::gcpkms::GcpKmsClient::RegisterNewClient(
-          /*key_uri=*/"", kGcpCredentialsPath);
-  if (!register_gcp_kms_client_status.ok()) {
+          gcp_key_uri, gcp_credentials_path);
+  if (!register_gcpkms_client_status.ok()) {
     std::cerr << "GcpKmsClient::RegisterNewClient(\"\", \""
-              << kGcpCredentialsPath
-              << "\") failed: " << register_gcp_kms_client_status.message()
+              << gcp_credentials_path
+              << "\") failed: " << register_gcpkms_client_status.message()
               << std::endl;
     return;
   }

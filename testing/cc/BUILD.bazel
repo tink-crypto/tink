@@ -335,7 +335,6 @@ cc_test(
 cc_binary(
     name = "testing_server",
     srcs = ["testing_server.cc"],
-    data = ["//testdata/gcp:credentials"],
     deps = [
         ":aead_impl",
         ":deterministic_aead_impl",
@@ -351,6 +350,7 @@ cc_binary(
         "@com_google_absl//absl/base:core_headers",
         "@com_google_absl//absl/flags:flag",
         "@com_google_absl//absl/flags:parse",
+        "@com_google_absl//absl/strings",
         "@tink_cc//config:tink_config",
         "@tink_cc//hybrid:hpke_config",
         "@tink_cc//jwt:jwt_mac_config",

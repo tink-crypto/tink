@@ -38,8 +38,11 @@ import services
 FLAGS = flags.FLAGS
 
 flags.DEFINE_integer('port', 10000, 'The port of the server.')
-
-_GCP_CREDENTIAL_PATH = 'testdata/gcp/credential.json'
+GCP_CREDENTIALS_PATH = flags.DEFINE_string(
+    'gcp_credentials_path', '', 'Google Cloud KMS credentials path.')
+GCP_KEY_URI = flags.DEFINE_string(
+    'gcp_key_uri', '', 'Google Cloud KMS key URL of the form: '
+    'gcp-kms://projects/*/locations/*/keyRings/*/cryptoKeys/*.')
 
 
 def init_tink() -> None:
@@ -55,7 +58,7 @@ def init_tink() -> None:
   jwt.register_jwt_signature()
   fake_kms.register_client()
   gcpkms.GcpKmsClient.register_client(
-      key_uri='', credentials_path=_GCP_CREDENTIAL_PATH)
+      key_uri=GCP_KEY_URI.value, credentials_path=GCP_CREDENTIALS_PATH.value)
 
 
 def main(unused_argv):

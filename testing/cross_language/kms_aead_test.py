@@ -26,9 +26,6 @@ from tink.proto import tink_pb2
 from util import supported_key_types
 from util import testing_servers
 
-_GCP_KEY_URI = ('gcp-kms://projects/tink-test-infrastructure/locations/global/'
-                'keyRings/unit-and-integration-testing/cryptoKeys/aead-key')
-
 
 def _kms_envelope_aead_templates(
 ) -> Dict[str, Tuple[tink_pb2.KeyTemplate, str]]:
@@ -39,7 +36,7 @@ def _kms_envelope_aead_templates(
         aead_key_type]:
       envelope_aead_key_template = (
           aead.aead_key_templates.create_kms_envelope_aead_key_template(
-              _GCP_KEY_URI,
+              testing_servers.GCP_KEY_URI,
               supported_key_types.KEY_TEMPLATE[key_template_name]))
       kms_key_templates['GCP_KMS_ENVELOPE_AEAD_WITH_%s' %
                         key_template_name] = (envelope_aead_key_template,
@@ -95,7 +92,7 @@ class KmsAeadTest(parameterized.TestCase):
                         _SUPPORTED_LANGUAGES_FOR_KMS_AEAD))
   def test_encrypt_decrypt(self, encrypt_lang, decrypt_lang):
     key_template = aead.aead_key_templates.create_kms_aead_key_template(
-        _GCP_KEY_URI)
+        testing_servers.GCP_KEY_URI)
     keyset = testing_servers.new_keyset(encrypt_lang, key_template)
     encrypt_primitive = testing_servers.aead(encrypt_lang, keyset)
     plaintext, associated_data = _get_plaintext_and_aad('GCP_KMS_AEAD',

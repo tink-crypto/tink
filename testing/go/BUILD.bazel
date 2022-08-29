@@ -83,7 +83,6 @@ go_binary(
     srcs = [
         "testing_server.go",
     ],
-    data = ["//testdata/gcp:credentials"],
     deps = [
         ":services",
         ":testing_api_go_grpc",

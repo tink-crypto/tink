@@ -29,7 +29,11 @@ load("@com_google_protobuf//:protobuf_deps.bzl", "PROTOBUF_MAVEN_ARTIFACTS", "pr
 protobuf_deps()
 
 maven_install(
-    artifacts = TINK_MAVEN_ARTIFACTS + IO_GRPC_GRPC_JAVA_ARTIFACTS + PROTOBUF_MAVEN_ARTIFACTS,
+    artifacts = TINK_MAVEN_ARTIFACTS +
+      IO_GRPC_GRPC_JAVA_ARTIFACTS +
+      PROTOBUF_MAVEN_ARTIFACTS + [
+        "args4j:args4j:2.33",
+      ],
     generate_compat_repositories = True,
     override_targets = IO_GRPC_GRPC_JAVA_OVERRIDE_TARGETS,
     repositories = [

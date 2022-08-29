@@ -33,26 +33,27 @@ import java.security.GeneralSecurityException;
 import java.security.Security;
 import java.util.Optional;
 import org.conscrypt.Conscrypt;
+import org.kohsuke.args4j.CmdLineException;
+import org.kohsuke.args4j.CmdLineParser;
+import org.kohsuke.args4j.Option;
 
 /** Starts a server with Tink testing services. */
 public final class TestingServer {
 
-  private static final String CREDENTIAL_FILE_PATH =
-      "testdata/gcp/credential.json";
+  @Option(name = "--port", usage = "The service port")
+  private int port;
 
-  private TestingServer() {
-    // no instances
-  }
+  @Option(name = "--gcp_credentials_path", usage = "Google Cloud KMS credentials path")
+  private String gcpCredentialsPath;
 
-  public static void main(String[] args)
-      throws InterruptedException, GeneralSecurityException, IOException {
+  @Option(
+      name = "--gcp_key_uri",
+      usage =
+          "Google Cloud KMS key URL of the form:"
+              + " gcp-kms://projects/*/locations/*/keyRings/*/cryptoKeys/*.")
+  private String gcpKeyUri;
 
-    if ((args.length != 2) || !args[0].equals("--port")) {
-      System.out.println("Usage: TestingServer --port <port>");
-      System.exit(1);
-    }
-    int port = Integer.parseInt(args[1]);
-
+  public void run() throws InterruptedException, GeneralSecurityException, IOException {
     installConscrypt();
     AeadConfig.register();
     DeterministicAeadConfig.register();
@@ -63,7 +64,7 @@ public final class TestingServer {
     PrfConfig.register();
     SignatureConfig.register();
     StreamingAeadConfig.register();
-    GcpKmsClient.register(Optional.empty(), Optional.of(CREDENTIAL_FILE_PATH));
+    GcpKmsClient.register(Optional.of(gcpKeyUri), Optional.of(gcpCredentialsPath));
 
     System.out.println("Start server on port " + port);
     KmsClients.add(new FakeKmsClient());
@@ -81,6 +82,20 @@ public final class TestingServer {
         .build()
         .start()
         .awaitTermination();
+  }
+
+  public static void main(String[] args)
+      throws InterruptedException, GeneralSecurityException, IOException {
+
+    TestingServer server = new TestingServer();
+    CmdLineParser parser = new CmdLineParser(server);
+    try {
+      parser.parseArgument(args);
+    } catch (CmdLineException e) {
+      System.err.println("TestingServer [options...] arguments...");
+      parser.printUsage(System.err);
+    }
+    server.run();
   }
 
   private static void installConscrypt() {
