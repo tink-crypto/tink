@@ -26,10 +26,14 @@
 #include "absl/strings/str_cat.h"
 #include "tink/config/tink_config.h"
 #include "tink/hybrid/hpke_config.h"
+#ifdef TINK_CROSS_LANG_TESTS_AWSKMS
+#include "tink/integration/awskms/aws_kms_client.h"
+#endif  // TINK_CROSS_LANG_TESTS_AWSKMS
 #include "tink/integration/gcpkms/gcp_kms_client.h"
 #include "tink/jwt/jwt_mac_config.h"
 #include "tink/jwt/jwt_signature_config.h"
 #include "tink/util/fake_kms_client.h"
+#include "tink/util/status.h"
 #include "aead_impl.h"
 #include "deterministic_aead_impl.h"
 #include "hybrid_impl.h"
@@ -49,6 +53,13 @@ ABSL_FLAG(
     std::string, gcp_key_uri, "",
     absl::StrCat("Google Cloud KMS key URL of the form: ",
                  "gcp-kms://projects/*/locations/*/keyRings/*/cryptoKeys/*."));
+ABSL_FLAG(std::string, aws_credentials_path, "", "AWS KMS credentials path");
+ABSL_FLAG(
+    std::string, aws_key_uri, "",
+    absl::StrCat("AWS KMS key URL of the form: ",
+                 "aws-kms://arn:aws:kms:<region>:<account-id>:key/<key-id>."));
+
+namespace tink_testing_api {
 
 void RunServer() {
   auto status = crypto::tink::TinkConfig::Register();
@@ -94,20 +105,34 @@ void RunServer() {
               << std::endl;
     return;
   }
+#ifdef TINK_CROSS_LANG_TESTS_AWSKMS
+  std::string aws_credentials_path = absl::GetFlag(FLAGS_aws_credentials_path);
+  std::string aws_key_uri = absl::GetFlag(FLAGS_aws_key_uri);
+  crypto::tink::util::Status register_awskms_client_status =
+      crypto::tink::integration::awskms::AwsKmsClient::RegisterNewClient(
+          aws_key_uri, aws_credentials_path);
+  if (!register_awskms_client_status.ok()) {
+    std::cerr << "AwsKmsClient::RegisterNewClient(\"\", \""
+              << aws_credentials_path
+              << "\") failed: " << register_awskms_client_status.message()
+              << std::endl;
+    return;
+  }
+#endif  // TINK_CROSS_LANG_TESTS_AWSKMS
 
   const int port = absl::GetFlag(FLAGS_port);
   std::string server_address = absl::StrCat("[::]:", port);
 
-  tink_testing_api::MetadataImpl metadata;
-  tink_testing_api::KeysetImpl keyset;
-  tink_testing_api::AeadImpl aead;
-  tink_testing_api::DeterministicAeadImpl deterministic_aead;
-  tink_testing_api::HybridImpl hybrid;
-  tink_testing_api::MacImpl mac;
-  tink_testing_api::SignatureImpl signature;
-  tink_testing_api::StreamingAeadImpl streaming_aead;
-  tink_testing_api::PrfSetImpl prf_set;
-  tink_testing_api::JwtImpl jwt;
+  MetadataImpl metadata;
+  KeysetImpl keyset;
+  AeadImpl aead;
+  DeterministicAeadImpl deterministic_aead;
+  HybridImpl hybrid;
+  MacImpl mac;
+  SignatureImpl signature;
+  StreamingAeadImpl streaming_aead;
+  PrfSetImpl prf_set;
+  JwtImpl jwt;
 
   grpc::ServerBuilder builder;
   builder.AddListeningPort(
@@ -129,8 +154,10 @@ void RunServer() {
   server->Wait();
 }
 
+}  // namespace tink_testing_api
+
 int main(int argc, char** argv) {
   absl::ParseCommandLine(argc, argv);
-  RunServer();
+  tink_testing_api::RunServer();
   return 0;
 }

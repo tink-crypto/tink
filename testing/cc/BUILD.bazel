@@ -335,6 +335,7 @@ cc_test(
 cc_binary(
     name = "testing_server",
     srcs = ["testing_server.cc"],
+    local_defines = ["TINK_CROSS_LANG_TESTS_AWSKMS"],
     deps = [
         ":aead_impl",
         ":deterministic_aead_impl",
@@ -356,6 +357,8 @@ cc_binary(
         "@tink_cc//jwt:jwt_mac_config",
         "@tink_cc//jwt:jwt_signature_config",
         "@tink_cc//util:fake_kms_client",
+        "@tink_cc//util:status",
+        "@tink_cc_awskms//:aws_kms_client",
         "@tink_cc_gcpkms//:gcp_kms_client",
     ],
 )

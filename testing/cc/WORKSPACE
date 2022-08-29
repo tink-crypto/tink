@@ -12,6 +12,11 @@ local_repository(
     path = "../../cc/integration/gcpkms",
 )
 
+local_repository(
+    name = "tink_cc_awskms",
+    path = "../../cc/integration/awskms",
+)
+
 load("@tink_cc//:tink_cc_deps.bzl", "tink_cc_deps")
 tink_cc_deps()
 
@@ -23,6 +28,9 @@ tink_cc_gcpkms_deps()
 
 load("@tink_cc_gcpkms//:tink_cc_gcpkms_deps_init.bzl", "tink_cc_gcpkms_deps_init")
 tink_cc_gcpkms_deps_init()
+
+load("@tink_cc_awskms//:tink_cc_awskms_deps.bzl", "tink_cc_awskms_deps")
+tink_cc_awskms_deps()
 
 # Release from 2021-12-12
 http_archive(

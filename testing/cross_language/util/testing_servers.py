@@ -81,6 +81,11 @@ GCP_KEY_URI = ('gcp-kms://projects/tink-test-infrastructure/locations/global/'
 GCP_CREDENTIALS_PATH = os.path.join(
     os.environ['TEST_SRCDIR'] if 'TEST_SRCDIR' in os.environ else '',
     'cross_language_test/testdata/gcp/credential.json')
+AWS_KEY_URI = ('aws-kms://arn:aws:kms:us-east-2:235739564943:key/'
+               '3ee50705-5a82-4f5b-9753-05c4f473922f')
+AWS_CREDENTIALS_PATH = os.path.join(
+    os.environ['TEST_SRCDIR'] if 'TEST_SRCDIR' in os.environ else '',
+    'cross_language_test/testdata/aws/credentials.ini')
 
 _RELATIVE_ROOT_PATH = 'tink_base/testing'
 
@@ -136,6 +141,15 @@ def _server_cmd(lang: str, port: int) -> List[str]:
       '%d' % port, '--gcp_credentials_path', GCP_CREDENTIALS_PATH,
       '--gcp_key_uri', GCP_KEY_URI
   ]
+
+  # This is temporary and will be removed as soon as all the servers have
+  # support for AWS KMS.
+  if lang in ('cc',):
+    server_args += [
+        '--aws_credentials_path', AWS_CREDENTIALS_PATH, '--aws_key_uri',
+        AWS_KEY_URI
+    ]
+
   if lang == 'java' and server_path.endswith('.jar'):
     java_path = os.path.join(_root_path(), _JAVA_PATH)
     return [java_path, '-jar', server_path] + server_args
