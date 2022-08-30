@@ -170,7 +170,6 @@ successfully verified the token.
 
 Here are some small examples on how to use Tink's JWT library:
 
-* [examples/cc/jwt](https://github.com/google/tink/tree/master/examples/cc/jwt)
-* [examples/java_src/jwt](https://github.com/google/tink/tree/master/examples/java_src/jwt)
-* [examples/python/jwt](https://github.com/google/tink/tree/master/examples/python/jwt)
-
+* [examples/cc/jwt](https://github.com/google/tink/tree/master/cc/examples/jwt)
+* [examples/java_src/jwt](https://github.com/google/tink/tree/master/java_src/examples/jwt)
+* [examples/python/jwt](https://github.com/google/tink/tree/master/python/examples/jwt)
