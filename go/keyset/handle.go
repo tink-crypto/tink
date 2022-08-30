@@ -34,7 +34,16 @@ var errInvalidKeyset = fmt.Errorf("keyset.Handle: invalid keyset")
 // Handle provides access to a Keyset protobuf, to limit the exposure of actual protocol
 // buffers that hold sensitive key material.
 type Handle struct {
-	ks *tinkpb.Keyset
+	ks          *tinkpb.Keyset
+	annotations map[string]string
+}
+
+func newWithOptions(ks *tinkpb.Keyset, opts ...Option) (*Handle, error) {
+	h := &Handle{ks: ks}
+	if err := applyOptions(h, opts...); err != nil {
+		return nil, err
+	}
+	return h, nil
 }
 
 // NewHandle creates a keyset handle that contains a single fresh key generated according
@@ -58,7 +67,7 @@ func NewHandleWithNoSecrets(ks *tinkpb.Keyset) (*Handle, error) {
 	if ks == nil {
 		return nil, errors.New("keyset.Handle: nil keyset")
 	}
-	h := &Handle{ks}
+	h := &Handle{ks: ks}
 	if h.hasSecrets() {
 		// If you need to do this, you have to use func insecurecleartextkeyset.Read() instead.
 		return nil, errors.New("importing unencrypted secret key material is forbidden")
@@ -81,7 +90,7 @@ func ReadWithAssociatedData(reader Reader, masterKey tink.AEAD, associatedData [
 	if err != nil {
 		return nil, err
 	}
-	return &Handle{ks}, nil
+	return &Handle{ks: ks}, nil
 }
 
 // ReadWithNoSecrets tries to create a keyset.Handle from a keyset obtained via reader.
@@ -118,7 +127,7 @@ func (h *Handle) Public() (*Handle, error) {
 		PrimaryKeyId: h.ks.PrimaryKeyId,
 		Key:          pubKeys,
 	}
-	return &Handle{ks}, nil
+	return &Handle{ks: ks}, nil
 }
 
 // String returns a string representation of the managed keyset.
@@ -188,6 +197,7 @@ func (h *Handle) PrimitivesWithKeyManager(km registry.KeyManager) (*primitiveset
 		return nil, fmt.Errorf("registry.PrimitivesWithKeyManager: invalid keyset: %s", err)
 	}
 	primitiveSet := primitiveset.New()
+	primitiveSet.Annotations = h.annotations
 	for _, key := range h.ks.Key {
 		if key.Status != tinkpb.KeyStatusType_ENABLED {
 			continue

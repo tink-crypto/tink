@@ -179,7 +179,7 @@ func (km *Manager) Delete(keyID uint32) error {
 
 // Handle creates a new Handle for the managed keyset.
 func (km *Manager) Handle() (*Handle, error) {
-	return &Handle{km.ks}, nil
+	return &Handle{ks: km.ks}, nil
 }
 
 // newKeyID generates a key id that has not been used by any key in the keyset.

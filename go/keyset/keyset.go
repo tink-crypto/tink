@@ -26,8 +26,8 @@ import (
 // keysetHandle is used by package insecurecleartextkeyset and package
 // testkeyset (via package internal) to create a keyset.Handle from cleartext
 // key material.
-func keysetHandle(ks *tinkpb.Keyset) *Handle {
-	return &Handle{ks}
+func keysetHandle(ks *tinkpb.Keyset, opts ...Option) (*Handle, error) {
+	return newWithOptions(ks, opts...)
 }
 
 // keysetMaterial is used by package insecurecleartextkeyset and package

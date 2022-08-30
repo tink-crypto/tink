@@ -69,7 +69,7 @@ func KeysetInfoFromPrimitiveSet(ps *primitiveset.PrimitiveSet) (*monitoring.Keys
 		}
 	}
 	return &monitoring.KeysetInfo{
-		Annotations:  make(map[string]string), // TODO(b/225071831): propagate annotations to monitoring set.
+		Annotations:  ps.Annotations,
 		PrimaryKeyID: ps.Primary.KeyID,
 		Entries:      entries,
 	}, nil

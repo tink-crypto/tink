@@ -1,4 +1,4 @@
-load("@io_bazel_rules_go//go:def.bzl", "go_library")
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
 
 package(default_visibility = ["//:__subpackages__"])  # keep
 
@@ -21,4 +21,17 @@ alias(
     name = "go_default_library",
     actual = ":testkeyset",
     visibility = ["//visibility:public"],
+)
+
+go_test(
+    name = "testkeyset_test",
+    srcs = ["testkeyset_test.go"],
+    deps = [
+        ":testkeyset",
+        "//insecurecleartextkeyset",
+        "//keyset",
+        "//mac",
+        "//proto/tink_go_proto",
+        "@com_github_google_go_cmp//cmp",
+    ],
 )

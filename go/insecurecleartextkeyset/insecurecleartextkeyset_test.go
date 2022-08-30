@@ -17,11 +17,19 @@
 package insecurecleartextkeyset_test
 
 import (
+	"bytes"
 	"testing"
 
+	"github.com/google/go-cmp/cmp"
 	"google.golang.org/protobuf/proto"
+	"google.golang.org/protobuf/testing/protocmp"
+	"github.com/google/tink/go/aead"
+	"github.com/google/tink/go/hybrid"
 	"github.com/google/tink/go/insecurecleartextkeyset"
+	"github.com/google/tink/go/internal/internalregistry"
 	"github.com/google/tink/go/keyset"
+	"github.com/google/tink/go/mac"
+	"github.com/google/tink/go/testing/fakemonitoring"
 	"github.com/google/tink/go/testutil"
 
 	tinkpb "github.com/google/tink/go/proto/tink_go_proto"
@@ -54,6 +62,101 @@ func TestHandleFromReader(t *testing.T) {
 	parsedKs := insecurecleartextkeyset.KeysetMaterial(parsedHandle)
 	if !proto.Equal(ks, parsedKs) {
 		t.Errorf("parsed keyset (%s) doesn't match original keyset (%s)", parsedKs, ks)
+	}
+}
+
+func TestLegacyKeysetHandle(t *testing.T) {
+	handle, err := keyset.NewHandle(hybrid.DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_AES_128_GCM_Key_Template())
+	if err != nil {
+		t.Fatalf(" keyset.NewHandle(hybrid.DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_AES_128_GCM_Key_Template()) err = %v, want nil", err)
+	}
+	ks := insecurecleartextkeyset.KeysetMaterial(handle)
+	gotHandle := insecurecleartextkeyset.KeysetHandle(ks)
+	if !cmp.Equal(gotHandle.KeysetInfo(), handle.KeysetInfo(), protocmp.Transform()) {
+		t.Errorf("gotHandle.KeysetInfo() = %v, want %v", gotHandle.KeysetInfo(), handle.KeysetInfo())
+	}
+}
+
+func TestHandleFromReaderWithAnnotationsGetsMonitored(t *testing.T) {
+	defer internalregistry.ClearMonitoringClient()
+	client := &fakemonitoring.Client{}
+	if err := internalregistry.RegisterMonitoringClient(client); err != nil {
+		t.Fatalf("internalregistry.RegisterMonitoringClient() err = %v, want nil", err)
+	}
+	handle, err := keyset.NewHandle(aead.AES256GCMKeyTemplate())
+	if err != nil {
+		t.Fatalf(" keyset.NewHandle(aead.AES256GCMKeyTemplate()) err = %v, want nil", err)
+	}
+	buff := &bytes.Buffer{}
+	if err := insecurecleartextkeyset.Write(handle, keyset.NewBinaryWriter(buff)); err != nil {
+		t.Fatalf("insecurecleartextkeyset.Write() err = %v, want nil", err)
+	}
+	wantAnnotations := map[string]string{"foo": "bar"}
+	annotatedHandle, err := insecurecleartextkeyset.Read(keyset.NewBinaryReader(buff), keyset.WithAnnotations(wantAnnotations))
+	if err != nil {
+		t.Fatalf("insecurecleartextkeyset.Read() err = %v, want nil", err)
+	}
+	p, err := aead.New(annotatedHandle)
+	if err != nil {
+		t.Fatalf("aead.New() err = %v, want nil", err)
+	}
+	if _, err := p.Encrypt([]byte("some_data"), nil); err != nil {
+		t.Fatalf("Encrypt() err = %v, want nil", err)
+	}
+	events := client.Events()
+	gotAnnotations := events[0].Context.KeysetInfo.Annotations
+	if !cmp.Equal(gotAnnotations, wantAnnotations) {
+		t.Errorf("Annotations = %v, want %v", gotAnnotations, wantAnnotations)
+	}
+}
+
+func TestHandleFromReaderWithAnnotationsTwiceFails(t *testing.T) {
+	handle, err := keyset.NewHandle(mac.HMACSHA256Tag128KeyTemplate())
+	if err != nil {
+		t.Fatalf(" keyset.NewHandle(mac.HMACSHA256Tag128KeyTemplate()) err = %v, want nil", err)
+	}
+	buff := &bytes.Buffer{}
+	if err := insecurecleartextkeyset.Write(handle, keyset.NewBinaryWriter(buff)); err != nil {
+		t.Fatalf("insecurecleartextkeyset.Write() err = %v, want nil", err)
+	}
+	annotations := map[string]string{"foo": "bar"}
+	if _, err := insecurecleartextkeyset.Read(
+		keyset.NewBinaryReader(buff),
+		keyset.WithAnnotations(annotations),
+		keyset.WithAnnotations(annotations)); err == nil {
+		t.Fatalf("insecurecleartextkeyset.Read() err = nil, want error")
+	}
+}
+
+func TestHandleFromReaderWithoutAnnotationsMonitorsNoAnnotations(t *testing.T) {
+	defer internalregistry.ClearMonitoringClient()
+	client := &fakemonitoring.Client{}
+	if err := internalregistry.RegisterMonitoringClient(client); err != nil {
+		t.Fatalf("internalregistry.RegisterMonitoringClient() err = %v, want nil", err)
+	}
+	handle, err := keyset.NewHandle(aead.AES256GCMKeyTemplate())
+	if err != nil {
+		t.Fatalf(" keyset.NewHandle(aead.AES256GCMKeyTemplate()) err = %v, want nil", err)
+	}
+	buff := &bytes.Buffer{}
+	if err := insecurecleartextkeyset.Write(handle, keyset.NewBinaryWriter(buff)); err != nil {
+		t.Fatalf("insecurecleartextkeyset.Write() err = %v, want nil", err)
+	}
+	unannotatedHandle, err := insecurecleartextkeyset.Read(keyset.NewBinaryReader(buff))
+	if err != nil {
+		t.Fatalf("insecurecleartextkeyset.Read() err = %v, want nil", err)
+	}
+	p, err := aead.New(unannotatedHandle)
+	if err != nil {
+		t.Fatalf("aead.New() err = %v, want nil", err)
+	}
+	if _, err := p.Encrypt([]byte("some_data"), nil); err != nil {
+		t.Fatalf("Encrypt() err = %v, want nil", err)
+	}
+	events := client.Events()
+	gotAnnotations := events[0].Context.KeysetInfo.Annotations
+	if gotAnnotations != nil {
+		t.Errorf("Annotations = %v, want nil", gotAnnotations)
 	}
 }
 

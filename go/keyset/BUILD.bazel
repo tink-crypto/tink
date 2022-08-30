@@ -13,6 +13,7 @@ go_library(
         "keyset.go",
         "manager.go",
         "mem_io.go",
+        "option.go",
         "reader.go",
         "validation.go",
         "writer.go",

@@ -86,6 +86,10 @@ func TestKeysetInfoFromPrimitiveSet(t *testing.T) {
 		Primary: &primitiveset.Entry{
 			KeyID: 1,
 		},
+		Annotations: map[string]string{
+			"foo": "bar",
+			"zoo": "far",
+		},
 		Entries: map[string][]*primitiveset.Entry{
 			// Adding all entries under the same prefix to get deterministic output.
 			"one": []*primitiveset.Entry{
@@ -109,7 +113,10 @@ func TestKeysetInfoFromPrimitiveSet(t *testing.T) {
 	}
 	want := &monitoring.KeysetInfo{
 		PrimaryKeyID: 1,
-		Annotations:  make(map[string]string),
+		Annotations: map[string]string{
+			"foo": "bar",
+			"zoo": "far",
+		},
 		Entries: []*monitoring.Entry{
 			{
 				KeyID:          1,

@@ -70,13 +70,16 @@ type PrimitiveSet struct {
 	// primitives sharing the prefix). This allows quickly retrieving the
 	// primitives sharing some particular prefix.
 	Entries map[string][]*Entry
+
+	Annotations map[string]string
 }
 
 // New returns an empty instance of PrimitiveSet.
 func New() *PrimitiveSet {
 	return &PrimitiveSet{
-		Primary: nil,
-		Entries: make(map[string][]*Entry),
+		Primary:     nil,
+		Entries:     make(map[string][]*Entry),
+		Annotations: nil,
 	}
 }
 

@@ -198,7 +198,7 @@ func TestFactoryWithMonitoringPrimitiveLogsEncryptionDecryptionWithPrefix(t *tes
 	}
 	got := client.Events()
 	wantKeysetInfo := monitoring.NewKeysetInfo(
-		make(map[string]string),
+		/*annotations=*/ nil,
 		kh.KeysetInfo().GetPrimaryKeyId(),
 		[]*monitoring.Entry{
 			{
@@ -255,7 +255,7 @@ func TestFactoryWithMonitoringPrimitiveLogsEncryptionDecryptionWithoutPrefix(t *
 	}
 	got := client.Events()
 	wantKeysetInfo := monitoring.NewKeysetInfo(
-		make(map[string]string),
+		/*annotations=*/ nil,
 		kh.KeysetInfo().GetPrimaryKeyId(),
 		[]*monitoring.Entry{
 			{
@@ -330,7 +330,7 @@ func TestFactoryWithMonitoringPrimitiveWithMultipleKeysLogsEncryptionDecryption(
 		t.Fatalf("p.Decrypt() err = %v, want nil", err)
 	}
 	got := client.Events()
-	wantKeysetInfo := monitoring.NewKeysetInfo(make(map[string]string), keyIDs[1], []*monitoring.Entry{
+	wantKeysetInfo := monitoring.NewKeysetInfo( /*annotations=*/ nil, keyIDs[1], []*monitoring.Entry{
 		{
 			KeyID:          keyIDs[1],
 			Status:         monitoring.Enabled,
@@ -406,7 +406,7 @@ func TestFactoryWithMonitoringPrimitiveEncryptionFailureIsLogged(t *testing.T) {
 				"aead",
 				"encrypt",
 				monitoring.NewKeysetInfo(
-					make(map[string]string),
+					/*annotations=*/ nil,
 					kh.KeysetInfo().GetPrimaryKeyId(),
 					[]*monitoring.Entry{
 						{
@@ -448,7 +448,7 @@ func TestFactoryWithMonitoringPrimitiveDecryptionFailureIsLogged(t *testing.T) {
 				"aead",
 				"decrypt",
 				monitoring.NewKeysetInfo(
-					make(map[string]string),
+					/*annotations=*/ nil,
 					kh.KeysetInfo().GetPrimaryKeyId(),
 					[]*monitoring.Entry{
 						{
@@ -505,7 +505,7 @@ func TestFactoryWithMonitoringMultiplePrimitivesLogOperations(t *testing.T) {
 				"aead",
 				"encrypt",
 				monitoring.NewKeysetInfo(
-					make(map[string]string),
+					/*annotations=*/ nil,
 					kh1.KeysetInfo().GetPrimaryKeyId(),
 					[]*monitoring.Entry{
 						{
@@ -524,7 +524,7 @@ func TestFactoryWithMonitoringMultiplePrimitivesLogOperations(t *testing.T) {
 				"aead",
 				"encrypt",
 				monitoring.NewKeysetInfo(
-					make(map[string]string),
+					/*annotations=*/ nil,
 					kh2.KeysetInfo().GetPrimaryKeyId(),
 					[]*monitoring.Entry{
 						{
