@@ -53,40 +53,47 @@ func (km *rsaSSAPKCS1SignerKeyManager) Primitive(serializedKey []byte) (interfac
 	if err := proto.Unmarshal(serializedKey, key); err != nil {
 		return nil, err
 	}
-	if err := keyset.ValidateKeyVersion(key.Version, rsaSSAPKCS1SignerKeyVersion); err != nil {
+	if err := validateRSAPKCS1PrivateKey(key); err != nil {
 		return nil, err
 	}
-	if len(key.GetD()) == 0 ||
-		len(key.GetPublicKey().GetN()) == 0 ||
-		len(key.GetPublicKey().GetE()) == 0 ||
-		len(key.GetP()) == 0 ||
-		len(key.GetQ()) == 0 ||
-		len(key.GetDp()) == 0 ||
-		len(key.GetDq()) == 0 ||
-		len(key.GetCrt()) == 0 {
-		return nil, errInvalidRSASSAPKCS1SignKey
-	}
-	e := bytesToBigInt(key.PublicKey.E)
-	if !e.IsInt64() {
-		return nil, fmt.Errorf("rsassapkcs1_signer_key_manager: public exponent can't fit in 64 bit number")
-	}
 	privKey := &rsa.PrivateKey{
-		D: bytesToBigInt(key.D),
+		D: bytesToBigInt(key.GetD()),
 		PublicKey: rsa.PublicKey{
-			N: bytesToBigInt(key.PublicKey.N),
-			E: int(e.Uint64()),
+			N: bytesToBigInt(key.GetPublicKey().GetN()),
+			E: int(bytesToBigInt(key.GetPublicKey().GetE()).Int64()),
 		},
 		Primes: []*big.Int{
-			bytesToBigInt(key.P),
-			bytesToBigInt(key.Q),
+			bytesToBigInt(key.GetP()),
+			bytesToBigInt(key.GetQ()),
 		},
 		Precomputed: rsa.PrecomputedValues{
-			Dp:   bytesToBigInt(key.Dp),
-			Dq:   bytesToBigInt(key.Dq),
-			Qinv: bytesToBigInt(key.Crt),
+			Dp:   bytesToBigInt(key.GetDp()),
+			Dq:   bytesToBigInt(key.GetDq()),
+			Qinv: bytesToBigInt(key.GetCrt()),
 		},
 	}
-	return internal.New_RSA_SSA_PKCS1_Signer(hashName(key.PublicKey.Params.HashType), privKey)
+	h := hashName(key.GetPublicKey().GetParams().GetHashType())
+	if err := internal.Validate_RSA_SSA_PKCS1(h, privKey); err != nil {
+		return nil, err
+	}
+	return internal.New_RSA_SSA_PKCS1_Signer(h, privKey)
+}
+
+func validateRSAPKCS1PrivateKey(privKey *rsassapkcs1pb.RsaSsaPkcs1PrivateKey) error {
+	if err := keyset.ValidateKeyVersion(privKey.Version, rsaSSAPKCS1SignerKeyVersion); err != nil {
+		return err
+	}
+	if len(privKey.GetD()) == 0 ||
+		len(privKey.GetPublicKey().GetN()) == 0 ||
+		len(privKey.GetPublicKey().GetE()) == 0 ||
+		len(privKey.GetP()) == 0 ||
+		len(privKey.GetQ()) == 0 ||
+		len(privKey.GetDp()) == 0 ||
+		len(privKey.GetDq()) == 0 ||
+		len(privKey.GetCrt()) == 0 {
+		return errInvalidRSASSAPKCS1SignKey
+	}
+	return validateRSAPKCS1PublicKey(privKey.GetPublicKey())
 }
 
 func (km *rsaSSAPKCS1SignerKeyManager) NewKey(serializedKeyFormat []byte) (proto.Message, error) {
@@ -98,8 +105,8 @@ func (km *rsaSSAPKCS1SignerKeyManager) NewKey(serializedKeyFormat []byte) (proto
 		return nil, err
 	}
 	if err := validateRSAPubKeyParams(
-		keyFormat.Params.HashType,
-		int(keyFormat.ModulusSizeInBits),
+		keyFormat.GetParams().GetHashType(),
+		int(keyFormat.GetModulusSizeInBits()),
 		keyFormat.GetPublicExponent()); err != nil {
 		return nil, err
 	}
@@ -149,22 +156,10 @@ func (km *rsaSSAPKCS1SignerKeyManager) PublicKeyData(serializedPrivKey []byte) (
 	if err := proto.Unmarshal(serializedPrivKey, privKey); err != nil {
 		return nil, err
 	}
-	if privKey.GetPublicKey() == nil {
-		return nil, errInvalidRSASSAPKCS1SignKey
-	}
-	if err := keyset.ValidateKeyVersion(privKey.GetVersion(), rsaSSAPKCS1SignerKeyVersion); err != nil {
+	if err := validateRSAPKCS1PrivateKey(privKey); err != nil {
 		return nil, err
 	}
-	if err := keyset.ValidateKeyVersion(privKey.GetPublicKey().GetVersion(), rsaSSAPKCS1VerifierKeyVersion); err != nil {
-		return nil, err
-	}
-	if err := validateRSAPubKeyParams(
-		privKey.GetPublicKey().Params.HashType,
-		bytesToBigInt(privKey.GetPublicKey().GetN()).BitLen(),
-		privKey.GetPublicKey().GetE()); err != nil {
-		return nil, err
-	}
-	serializedPubKey, err := proto.Marshal(privKey.PublicKey)
+	serializedPubKey, err := proto.Marshal(privKey.GetPublicKey())
 	if err != nil {
 		return nil, err
 	}

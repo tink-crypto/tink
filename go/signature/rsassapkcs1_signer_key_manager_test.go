@@ -22,7 +22,6 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 	"google.golang.org/protobuf/proto"
-	"google.golang.org/protobuf/testing/protocmp"
 	"github.com/google/tink/go/core/registry"
 	internal "github.com/google/tink/go/internal/signature"
 	"github.com/google/tink/go/subtle/random"
@@ -58,10 +57,14 @@ func TestRSASSAPKCS1SignerTypeURL(t *testing.T) {
 	}
 }
 
-func TestRSASSAPKCS1SignerKeyManagerPublicData(t *testing.T) {
+func TestRSASSAPKCS1SignerKeyManagerPublicKeyData(t *testing.T) {
 	skm, err := registry.GetKeyManager(rsaPKCS1PrivateKeyTypeURL)
 	if err != nil {
 		t.Fatalf("registry.GetKeyManager(%q) err = %v, want nil", rsaPKCS1PrivateKeyTypeURL, err)
+	}
+	vkm, err := registry.GetKeyManager(rsaPKCS1PublicTypeURL)
+	if err != nil {
+		t.Fatalf("registry.GetKeyManager(%q) err = %v, want nil", rsaPKCS1PublicTypeURL, err)
 	}
 	privKey, err := makeValidRSAPKCS1Key()
 	if err != nil {
@@ -71,92 +74,18 @@ func TestRSASSAPKCS1SignerKeyManagerPublicData(t *testing.T) {
 	if err != nil {
 		t.Fatalf("proto.Marshal() err = %v, want nil", err)
 	}
-	serializedPublic, err := proto.Marshal(privKey.PublicKey)
-	if err != nil {
-		t.Fatalf("proto.Marshal() err = %v, want nil", err)
-	}
 	got, err := skm.(registry.PrivateKeyManager).PublicKeyData(serializedPrivate)
 	if err != nil {
 		t.Fatalf("PublicKeyData() err = %v, want nil", err)
 	}
-	want := &tinkpb.KeyData{
-		TypeUrl:         rsaPKCS1PublicTypeURL,
-		KeyMaterialType: tinkpb.KeyData_ASYMMETRIC_PUBLIC,
-		Value:           serializedPublic,
+	if got.GetKeyMaterialType() != tinkpb.KeyData_ASYMMETRIC_PUBLIC {
+		t.Errorf("GetKeyMaterialType() = %q, want %q", got.GetKeyMaterialType(), tinkpb.KeyData_ASYMMETRIC_PUBLIC)
 	}
-	if !cmp.Equal(got, want, protocmp.Transform()) {
-		t.Errorf("got = %v, want = %v, with diff: %v", got, want, cmp.Diff(got, want, protocmp.Transform()))
+	if got.GetTypeUrl() != rsaPKCS1PublicTypeURL {
+		t.Errorf("GetTypeUrl() = %q, want %q", got.GetTypeUrl(), rsaPKCS1PublicTypeURL)
 	}
-}
-
-func TestRSASSAPKCS1SignerKeyManagerPublicDataFailsWithInvalidInput(t *testing.T) {
-	type testCase struct {
-		name   string
-		pubKey *rsassapkcs1pb.RsaSsaPkcs1PublicKey
-	}
-	validPrivKey, err := makeValidRSAPKCS1Key()
-	if err != nil {
-		t.Fatalf("makeValidRSAPKCS1Key() err = %v, want nil", err)
-	}
-	skm, err := registry.GetKeyManager(rsaPKCS1PrivateKeyTypeURL)
-	if err != nil {
-		t.Fatalf("registry.GetKeyManager(%q) err = %v, want nil", rsaPKCS1PrivateKeyTypeURL, err)
-	}
-	for _, tc := range []testCase{
-		{
-			name:   "nil public key",
-			pubKey: nil,
-		},
-		{
-			name: "invalid hash function",
-			pubKey: &rsassapkcs1pb.RsaSsaPkcs1PublicKey{
-				Version: validPrivKey.GetVersion(),
-				Params: &rsassapkcs1pb.RsaSsaPkcs1Params{
-					HashType: cpb.HashType_SHA1,
-				},
-				N: validPrivKey.GetPublicKey().GetN(),
-				E: validPrivKey.GetPublicKey().GetE(),
-			},
-		},
-		{
-			name: "invalid exponent",
-			pubKey: &rsassapkcs1pb.RsaSsaPkcs1PublicKey{
-				Version: validPrivKey.GetVersion(),
-				Params:  validPrivKey.GetPublicKey().GetParams(),
-				N:       validPrivKey.GetPublicKey().GetN(),
-				E:       []byte{0x08},
-			},
-		},
-		{
-			name: "invalid modulus",
-			pubKey: &rsassapkcs1pb.RsaSsaPkcs1PublicKey{
-				Version: validPrivKey.GetVersion(),
-				Params:  validPrivKey.GetPublicKey().GetParams(),
-				N:       []byte{0x00, 0x00, 0x00},
-				E:       validPrivKey.GetPublicKey().GetE(),
-			},
-		},
-		{
-			name: "invalid version",
-			pubKey: &rsassapkcs1pb.RsaSsaPkcs1PublicKey{
-				Version: validPrivKey.GetVersion() + 1,
-				Params:  validPrivKey.GetPublicKey().GetParams(),
-				N:       validPrivKey.GetPublicKey().GetN(),
-				E:       validPrivKey.GetPublicKey().GetE(),
-			},
-		},
-	} {
-		t.Run(tc.name, func(t *testing.T) {
-			InvalidPub := validPrivKey
-			InvalidPub.PublicKey = tc.pubKey
-			serializedPrivateKey, err := proto.Marshal(InvalidPub)
-			if err != nil {
-				t.Fatalf("proto.Marshal() err= %v, want nil", err)
-			}
-			if _, err := skm.(registry.PrivateKeyManager).PublicKeyData(serializedPrivateKey); err == nil {
-				t.Fatalf("PublicKeyData() err = nil, want error")
-			}
-		})
+	if _, err := vkm.Primitive(got.GetValue()); err != nil {
+		t.Errorf("Primitive() err = %v, want nil", err)
 	}
 }
 
@@ -210,11 +139,18 @@ func TestRSASSAPKCS1SignerKeyManagerPrimitiveSignVerify(t *testing.T) {
 func TestRSASSAPKCS1SignerKeyManagerPrimitiveWithInvalidInputFails(t *testing.T) {
 	km, err := registry.GetKeyManager(rsaPKCS1PrivateKeyTypeURL)
 	if err != nil {
-		t.Errorf("cannot obtain RSASSAPKCS1Signer key manager: %s", err)
+		t.Fatalf("registry.GetKeyManager(%q) err = %v, want nil", rsaPKCS1PrivateKeyTypeURL, err)
 	}
 	validPrivKey, err := makeValidRSAPKCS1Key()
 	if err != nil {
 		t.Fatalf("makeValidRSAPKCS1Key() err = %v, want nil", err)
+	}
+	serializedValidPrivate, err := proto.Marshal(validPrivKey)
+	if err != nil {
+		t.Fatalf("proto.Marshal() err = %v, want nil", err)
+	}
+	if _, err := km.Primitive(serializedValidPrivate); err != nil {
+		t.Fatalf("Primitive(serializedValidPrivate) err = %v, want nil", err)
 	}
 	type testCase struct {
 		name string
@@ -245,7 +181,7 @@ func TestRSASSAPKCS1SignerKeyManagerPrimitiveWithInvalidInputFails(t *testing.T)
 		{
 			name: "invalid hash algorithm ",
 			key: &rsassapkcs1pb.RsaSsaPkcs1PrivateKey{
-				Version: validPrivKey.Version,
+				Version: validPrivKey.GetVersion(),
 				PublicKey: &rsassapkcs1pb.RsaSsaPkcs1PublicKey{
 					Version: validPrivKey.GetPublicKey().GetVersion(),
 					E:       validPrivKey.GetPublicKey().GetE(),
@@ -265,7 +201,7 @@ func TestRSASSAPKCS1SignerKeyManagerPrimitiveWithInvalidInputFails(t *testing.T)
 		{
 			name: "invalid modulus",
 			key: &rsassapkcs1pb.RsaSsaPkcs1PrivateKey{
-				Version: validPrivKey.Version,
+				Version: validPrivKey.GetVersion(),
 				PublicKey: &rsassapkcs1pb.RsaSsaPkcs1PublicKey{
 					Version: validPrivKey.GetPublicKey().GetVersion(),
 					E:       validPrivKey.GetPublicKey().GetE(),
@@ -283,7 +219,7 @@ func TestRSASSAPKCS1SignerKeyManagerPrimitiveWithInvalidInputFails(t *testing.T)
 		{
 			name: "invalid public key exponent",
 			key: &rsassapkcs1pb.RsaSsaPkcs1PrivateKey{
-				Version: validPrivKey.Version,
+				Version: validPrivKey.GetVersion(),
 				PublicKey: &rsassapkcs1pb.RsaSsaPkcs1PublicKey{
 					Version: validPrivKey.GetPublicKey().GetVersion(),
 					E:       []byte{0x06},
@@ -299,39 +235,82 @@ func TestRSASSAPKCS1SignerKeyManagerPrimitiveWithInvalidInputFails(t *testing.T)
 			},
 		},
 		{
-			name: "invalid private key",
+			name: "invalid private key D value",
 			key: &rsassapkcs1pb.RsaSsaPkcs1PrivateKey{
-				Version: validPrivKey.Version,
-				PublicKey: &rsassapkcs1pb.RsaSsaPkcs1PublicKey{
-					Version: validPrivKey.GetPublicKey().GetVersion(),
-					E:       validPrivKey.GetPublicKey().GetE(),
-					N:       validPrivKey.GetPublicKey().GetN(),
-					Params:  validPrivKey.GetPublicKey().GetParams(),
-				},
-				D:   nil,
-				P:   nil,
-				Q:   nil,
-				Dp:  validPrivKey.GetDp(),
-				Dq:  validPrivKey.GetDq(),
-				Crt: validPrivKey.GetCrt(),
+				Version:   validPrivKey.GetVersion(),
+				PublicKey: validPrivKey.GetPublicKey(),
+				D:         nil,
+				P:         validPrivKey.GetP(),
+				Q:         validPrivKey.GetQ(),
+				Dp:        validPrivKey.GetDp(),
+				Dq:        validPrivKey.GetDq(),
+				Crt:       validPrivKey.GetCrt(),
+			},
+		},
+
+		{
+			name: "invalid private key P value",
+			key: &rsassapkcs1pb.RsaSsaPkcs1PrivateKey{
+				Version:   validPrivKey.GetVersion(),
+				PublicKey: validPrivKey.GetPublicKey(),
+				D:         validPrivKey.GetD(),
+				P:         nil,
+				Q:         validPrivKey.GetQ(),
+				Dp:        validPrivKey.GetDp(),
+				Dq:        validPrivKey.GetDq(),
+				Crt:       validPrivKey.GetCrt(),
 			},
 		},
 		{
-			name: "invalid precomputed values in private key",
+			name: "invalid private key Q value",
 			key: &rsassapkcs1pb.RsaSsaPkcs1PrivateKey{
-				Version: validPrivKey.Version,
-				PublicKey: &rsassapkcs1pb.RsaSsaPkcs1PublicKey{
-					Version: validPrivKey.GetPublicKey().GetVersion(),
-					E:       validPrivKey.GetPublicKey().GetE(),
-					N:       validPrivKey.GetPublicKey().GetN(),
-					Params:  validPrivKey.GetPublicKey().GetParams(),
-				},
-				D:   validPrivKey.GetD(),
-				P:   validPrivKey.GetP(),
-				Q:   validPrivKey.GetQ(),
-				Dp:  nil,
-				Dq:  nil,
-				Crt: nil,
+				Version:   validPrivKey.GetVersion(),
+				PublicKey: validPrivKey.GetPublicKey(),
+				D:         validPrivKey.GetD(),
+				P:         validPrivKey.GetP(),
+				Q:         nil,
+				Dp:        validPrivKey.GetDp(),
+				Dq:        validPrivKey.GetDq(),
+				Crt:       validPrivKey.GetCrt(),
+			},
+		},
+		{
+			name: "invalid precomputed Dp values in private key",
+			key: &rsassapkcs1pb.RsaSsaPkcs1PrivateKey{
+				Version:   validPrivKey.GetVersion(),
+				PublicKey: validPrivKey.GetPublicKey(),
+				D:         validPrivKey.GetD(),
+				P:         validPrivKey.GetP(),
+				Q:         validPrivKey.GetQ(),
+				Dp:        nil,
+				Dq:        validPrivKey.GetDq(),
+				Crt:       validPrivKey.GetCrt(),
+			},
+		},
+		{
+			name: "invalid precomputed Dq values in private key",
+			key: &rsassapkcs1pb.RsaSsaPkcs1PrivateKey{
+				Version:   validPrivKey.GetVersion(),
+				PublicKey: validPrivKey.GetPublicKey(),
+				D:         validPrivKey.GetD(),
+				P:         validPrivKey.GetP(),
+				Q:         validPrivKey.GetQ(),
+				Dp:        validPrivKey.GetDp(),
+				Dq:        nil,
+				Crt:       validPrivKey.GetCrt(),
+			},
+		},
+		{
+			name: "invalid precomputed Crt values in private key",
+			key: &rsassapkcs1pb.RsaSsaPkcs1PrivateKey{
+				Version:   validPrivKey.GetVersion(),
+				PublicKey: validPrivKey.GetPublicKey(),
+				D:         validPrivKey.GetD(),
+				P:         validPrivKey.GetP(),
+				Q:         validPrivKey.GetQ(),
+				Dp:        validPrivKey.GetDp(),
+				Dq:        validPrivKey.GetDq(),
+				Crt:       nil,
 			},
 		},
 	} {
@@ -343,14 +322,37 @@ func TestRSASSAPKCS1SignerKeyManagerPrimitiveWithInvalidInputFails(t *testing.T)
 			if _, err := km.Primitive(serializedKey); err == nil {
 				t.Errorf("Primitive() err = nil, want error")
 			}
+			if _, err := km.(registry.PrivateKeyManager).PublicKeyData(serializedKey); err == nil {
+				t.Errorf("PublicKeyData() err = nil, want error")
+			}
 		})
+	}
+}
+
+func TestRSASSAPKCS1SignerKeyManagerPrimitiveWithCorruptedKeyFails(t *testing.T) {
+	km, err := registry.GetKeyManager(rsaPKCS1PrivateKeyTypeURL)
+	if err != nil {
+		t.Fatalf("registry.GetKeyManager(%q) err = %v, want nil", rsaPKCS1PrivateKeyTypeURL, err)
+	}
+	corruptedPrivKey, err := makeValidRSAPKCS1Key()
+	if err != nil {
+		t.Fatalf("makeValidRSAPKCS1Key() err = %v, want nil", err)
+	}
+	corruptedPrivKey.P[5] <<= 1
+	corruptedPrivKey.P[10] <<= 1
+	serializedCorruptedPrivate, err := proto.Marshal(corruptedPrivKey)
+	if err != nil {
+		t.Fatalf("proto.Marshal() err = %v, want nil", err)
+	}
+	if _, err := km.Primitive(serializedCorruptedPrivate); err == nil {
+		t.Errorf("Primitive() err = nil, want error")
 	}
 }
 
 func TestRSASSAPKCS1SignerKeyManagerPrimitiveNewKey(t *testing.T) {
 	km, err := registry.GetKeyManager(rsaPKCS1PrivateKeyTypeURL)
 	if err != nil {
-		t.Errorf("cannot obtain RSASSAPKCS1Signer key manager: %s", err)
+		t.Fatalf("registry.GetKeyManager(%q) err = %v, want nil", rsaPKCS1PrivateKeyTypeURL, err)
 	}
 	validPrivKey, err := makeValidRSAPKCS1Key()
 	if err != nil {
@@ -399,7 +401,7 @@ func TestRSASSAPKCS1SignerKeyManagerPrimitiveNewKeyWithInvalidInputFails(t *test
 	}
 	km, err := registry.GetKeyManager(rsaPKCS1PrivateKeyTypeURL)
 	if err != nil {
-		t.Errorf("cannot obtain RSASSAPKCS1Signer key manager: %s", err)
+		t.Fatalf("registry.GetKeyManager(%q) err = %v, want nil", rsaPKCS1PrivateKeyTypeURL, err)
 	}
 	for _, tc := range []testCase{
 		{
@@ -452,7 +454,7 @@ func TestRSASSAPKCS1SignerKeyManagerPrimitiveNewKeyWithInvalidInputFails(t *test
 func TestRSASSAPKCS1SignerKeyManagerPrimitiveNewKeyData(t *testing.T) {
 	km, err := registry.GetKeyManager(rsaPKCS1PrivateKeyTypeURL)
 	if err != nil {
-		t.Errorf("cannot obtain RSASSAPKCS1Signer key manager: %s", err)
+		t.Fatalf("registry.GetKeyManager(%q) err = %v, want nil", rsaPKCS1PrivateKeyTypeURL, err)
 	}
 	keyFormat := &rsassapkcs1pb.RsaSsaPkcs1KeyFormat{
 		ModulusSizeInBits: 2048,
@@ -470,9 +472,12 @@ func TestRSASSAPKCS1SignerKeyManagerPrimitiveNewKeyData(t *testing.T) {
 		t.Fatalf("NewKeyData() err = %v, want nil", err)
 	}
 	if keyData.GetTypeUrl() != rsaPKCS1PrivateKeyTypeURL {
-		t.Fatalf("GetTypeUrl() = %v, want %v", keyData.GetTypeUrl(), rsaPKCS1PrivateKeyTypeURL)
+		t.Errorf("GetTypeUrl() = %v, want %v", keyData.GetTypeUrl(), rsaPKCS1PrivateKeyTypeURL)
 	}
 	if keyData.GetKeyMaterialType() != tinkpb.KeyData_ASYMMETRIC_PRIVATE {
-		t.Fatalf("GetKeyMaterialType() = %v, want %v", keyData.GetKeyMaterialType(), tinkpb.KeyData_ASYMMETRIC_PRIVATE)
+		t.Errorf("GetKeyMaterialType() = %v, want %v", keyData.GetKeyMaterialType(), tinkpb.KeyData_ASYMMETRIC_PRIVATE)
+	}
+	if _, err := km.Primitive(keyData.GetValue()); err != nil {
+		t.Errorf("Primitive() err = %v, want nil", err)
 	}
 }

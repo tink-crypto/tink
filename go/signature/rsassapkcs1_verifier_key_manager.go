@@ -20,7 +20,6 @@ import (
 	"crypto/rsa"
 	"errors"
 	"fmt"
-	"math/big"
 
 	"google.golang.org/protobuf/proto"
 	"github.com/google/tink/go/core/registry"
@@ -51,18 +50,24 @@ func (km *rsaSSAPKCS1VerifierKeyManager) Primitive(serializedKey []byte) (interf
 	if err := proto.Unmarshal(serializedKey, key); err != nil {
 		return nil, err
 	}
-	if err := keyset.ValidateKeyVersion(key.Version, rsaSSAPKCS1VerifierKeyVersion); err != nil {
+	if err := validateRSAPKCS1PublicKey(key); err != nil {
 		return nil, err
 	}
-	e := new(big.Int).SetBytes(key.E)
-	if !e.IsInt64() {
-		return nil, fmt.Errorf("rsassapkcs1_verifier_key_manager: public exponent can't fit in 64 bit number")
-	}
 	keyData := &rsa.PublicKey{
-		E: int(e.Int64()),
-		N: new(big.Int).SetBytes(key.N),
+		E: int(bytesToBigInt(key.GetE()).Int64()),
+		N: bytesToBigInt(key.GetN()),
 	}
 	return internal.New_RSA_SSA_PKCS1_Verifier(hashName(key.Params.HashType), keyData)
+}
+
+func validateRSAPKCS1PublicKey(pubKey *rsassapkcs1pb.RsaSsaPkcs1PublicKey) error {
+	if err := keyset.ValidateKeyVersion(pubKey.GetVersion(), rsaSSAPKCS1VerifierKeyVersion); err != nil {
+		return err
+	}
+	return validateRSAPubKeyParams(
+		pubKey.GetParams().GetHashType(),
+		bytesToBigInt(pubKey.GetN()).BitLen(),
+		pubKey.GetE())
 }
 
 func (km *rsaSSAPKCS1VerifierKeyManager) NewKey(serializedKeyFormat []byte) (proto.Message, error) {

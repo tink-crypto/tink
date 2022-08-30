@@ -17,6 +17,7 @@
 package signature
 
 import (
+	"fmt"
 	"math/big"
 
 	internal "github.com/google/tink/go/internal/signature"
@@ -34,7 +35,11 @@ func validateRSAPubKeyParams(h commonpb.HashType, modSizeBits int, pubExponent [
 	if err := internal.RSAValidModulusSizeInBits(modSizeBits); err != nil {
 		return err
 	}
-	return internal.RSAValidPublicExponent(int(bytesToBigInt(pubExponent).Uint64()))
+	e := bytesToBigInt(pubExponent)
+	if !e.IsInt64() {
+		return fmt.Errorf("public exponent can't fit in a 64 bit number")
+	}
+	return internal.RSAValidPublicExponent(int(e.Int64()))
 }
 
 func hashName(h commonpb.HashType) string {
