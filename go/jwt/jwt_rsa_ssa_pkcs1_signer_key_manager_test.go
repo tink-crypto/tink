@@ -550,6 +550,27 @@ func TestJWTRSSignerKeyManagerPrimitiveFailsWithInvalidKey(t *testing.T) {
 	}
 }
 
+func TestJWTRSSignerKeyManagerPrimitiveFailsWithCorruptedKey(t *testing.T) {
+	km, err := registry.GetKeyManager(testJWTRSSignerKeyType)
+	if err != nil {
+		t.Fatalf("registry.GetKeyManager(%q) err = %v, want nil", testJWTRSSignerKeyType, err)
+	}
+	validPrivKey, err := makeValidJWTRSPrivateKey()
+	if err != nil {
+		t.Fatalf("makeValidJWTRSPrivateKey() err = %v, want nil", err)
+	}
+	corruptedPrivKey := validPrivKey
+	corruptedPrivKey.P[100] <<= 1
+	corruptedPrivKey.P[5] <<= 1
+	serializedPrivKey, err := proto.Marshal(corruptedPrivKey)
+	if err != nil {
+		t.Fatalf("proto.Marshal() err = %v, want nil", err)
+	}
+	if _, err := km.Primitive(serializedPrivKey); err == nil {
+		t.Fatalf("Primitive() err = nil, want error")
+	}
+}
+
 func TestJWTRSSignerKeyManagerPublicKeyData(t *testing.T) {
 	km, err := registry.GetKeyManager(testJWTRSSignerKeyType)
 	if err != nil {
