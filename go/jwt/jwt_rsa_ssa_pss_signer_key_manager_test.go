@@ -218,6 +218,36 @@ func TestJWTPSSignerKeyManagerPritimiveSignVerify(t *testing.T) {
 	}
 }
 
+func TestJWTPSSignerKeyManagerPrimitiveFailsWithCorruptedKey(t *testing.T) {
+	km, err := registry.GetKeyManager(testJWTPSSignerKeyType)
+	if err != nil {
+		t.Fatalf("registry.GetKeyManager(%q) err = %v, want nil", testJWTPSSignerKeyType, err)
+	}
+	validPrivKey, err := makeValidJWTPSPrivateKey()
+	if err != nil {
+		t.Fatalf("makeValidJWTPSPrivateKey() err = %v, want nil", err)
+	}
+	invalidQ := validPrivKey.GetQ()
+	invalidQ[50] <<= 1
+	corruptedPrivKey := &jrsppb.JwtRsaSsaPssPrivateKey{
+		Version:   validPrivKey.GetVersion(),
+		PublicKey: validPrivKey.GetPublicKey(),
+		D:         validPrivKey.GetD(),
+		P:         validPrivKey.GetP(),
+		Q:         invalidQ,
+		Dp:        validPrivKey.GetDp(),
+		Dq:        validPrivKey.GetDq(),
+		Crt:       validPrivKey.GetCrt(),
+	}
+	serializedPrivKey, err := proto.Marshal(corruptedPrivKey)
+	if err != nil {
+		t.Fatalf("proto.Marshal() err = %v, want nil", err)
+	}
+	if _, err := km.Primitive(serializedPrivKey); err == nil {
+		t.Fatalf("Primitive() err = nil, want error")
+	}
+}
+
 func TestJWTPSSignerKeyManagerPrimitiveFailsWithInvalidKey(t *testing.T) {
 	type testCase struct {
 		name    string

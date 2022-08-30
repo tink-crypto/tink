@@ -78,6 +78,9 @@ func (km *jwtPSSignerKeyManager) Primitive(serializedKey []byte) (interface{}, e
 		},
 	}
 	algorithm := privKey.GetPublicKey().GetAlgorithm()
+	if err := signature.Validate_RSA_SSA_PSS(validPSAlgToHash[algorithm], psAlgToSaltLen[algorithm], rsaPrivKey); err != nil {
+		return nil, err
+	}
 	signer, err := signature.New_RSA_SSA_PSS_Signer(validPSAlgToHash[algorithm], psAlgToSaltLen[algorithm], rsaPrivKey)
 	if err != nil {
 		return nil, err
@@ -102,7 +105,6 @@ func validatePSPrivateKey(privKey *jrsppb.JwtRsaSsaPssPrivateKey) error {
 	if err := validatePSPublicKey(privKey.GetPublicKey()); err != nil {
 		return err
 	}
-	// TODO(b/230489047): add a validation the key can actually sign.
 	return nil
 }
 
