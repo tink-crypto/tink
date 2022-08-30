@@ -20,6 +20,7 @@ import com.google.crypto.tink.KmsClients;
 import com.google.crypto.tink.aead.AeadConfig;
 import com.google.crypto.tink.daead.DeterministicAeadConfig;
 import com.google.crypto.tink.hybrid.HybridConfig;
+import com.google.crypto.tink.integration.awskms.AwsKmsClient;
 import com.google.crypto.tink.integration.gcpkms.GcpKmsClient;
 import com.google.crypto.tink.jwt.JwtMacConfig;
 import com.google.crypto.tink.jwt.JwtSignatureConfig;
@@ -53,6 +54,15 @@ public final class TestingServer {
               + " gcp-kms://projects/*/locations/*/keyRings/*/cryptoKeys/*.")
   private String gcpKeyUri;
 
+  @Option(name = "--aws_credentials_path", usage = "AWS KMS credentials path")
+  private String awsCredentialsPath;
+
+  @Option(
+      name = "--aws_key_uri",
+      usage =
+          "AWS KMS key URL of the form: aws-kms://arn:aws:kms:<region>:<account-id>:key/<key-id>.")
+  private String awsKeyUri;
+
   public void run() throws InterruptedException, GeneralSecurityException, IOException {
     installConscrypt();
     AeadConfig.register();
@@ -65,6 +75,7 @@ public final class TestingServer {
     SignatureConfig.register();
     StreamingAeadConfig.register();
     GcpKmsClient.register(Optional.of(gcpKeyUri), Optional.of(gcpCredentialsPath));
+    AwsKmsClient.register(Optional.of(awsKeyUri), Optional.of(awsCredentialsPath));
 
     System.out.println("Start server on port " + port);
     KmsClients.add(new FakeKmsClient());

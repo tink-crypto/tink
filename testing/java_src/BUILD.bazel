@@ -98,6 +98,7 @@ java_binary(
         "@tink_java//src/main/java/com/google/crypto/tink/aead:aead_config",
         "@tink_java//src/main/java/com/google/crypto/tink/daead:deterministic_aead_config",
         "@tink_java//src/main/java/com/google/crypto/tink/hybrid:hybrid_config",
+        "@tink_java//src/main/java/com/google/crypto/tink/integration/awskms:aws_kms_client",
         "@tink_java//src/main/java/com/google/crypto/tink/integration/gcpkms:gcp_kms_client",
         "@tink_java//src/main/java/com/google/crypto/tink/jwt:jwt_mac_config",
         "@tink_java//src/main/java/com/google/crypto/tink/jwt:jwt_signature_config",

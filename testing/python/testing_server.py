@@ -27,6 +27,7 @@ from tink import prf
 from tink import signature
 from tink import streaming_aead
 
+from tink.integration import awskms
 from tink.integration import gcpkms
 from tink.testing import fake_kms
 
@@ -43,6 +44,11 @@ GCP_CREDENTIALS_PATH = flags.DEFINE_string(
 GCP_KEY_URI = flags.DEFINE_string(
     'gcp_key_uri', '', 'Google Cloud KMS key URL of the form: '
     'gcp-kms://projects/*/locations/*/keyRings/*/cryptoKeys/*.')
+AWS_CREDENTIALS_PATH = flags.DEFINE_string('aws_credentials_path', '',
+                                           'AWS KMS credentials path.')
+AWS_KEY_URI = flags.DEFINE_string(
+    'aws_key_uri', '', 'AWS KMS key URL of the form: '
+    'aws-kms://arn:aws:kms:<region>:<account-id>:key/<key-id>.')
 
 
 def init_tink() -> None:
@@ -57,6 +63,8 @@ def init_tink() -> None:
   jwt.register_jwt_mac()
   jwt.register_jwt_signature()
   fake_kms.register_client()
+  awskms.AwsKmsClient.register_client(
+      key_uri=AWS_KEY_URI.value, credentials_path=AWS_CREDENTIALS_PATH.value)
   gcpkms.GcpKmsClient.register_client(
       key_uri=GCP_KEY_URI.value, credentials_path=GCP_CREDENTIALS_PATH.value)
 

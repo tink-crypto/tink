@@ -139,16 +139,9 @@ def _server_cmd(lang: str, port: int) -> List[str]:
   server_args = [
       '--port',
       '%d' % port, '--gcp_credentials_path', GCP_CREDENTIALS_PATH,
-      '--gcp_key_uri', GCP_KEY_URI
+      '--gcp_key_uri', GCP_KEY_URI, '--aws_credentials_path',
+      AWS_CREDENTIALS_PATH, '--aws_key_uri', AWS_KEY_URI
   ]
-
-  # This is temporary and will be removed as soon as all the servers have
-  # support for AWS KMS.
-  if lang in ('cc', 'go'):
-    server_args += [
-        '--aws_credentials_path', AWS_CREDENTIALS_PATH, '--aws_key_uri',
-        AWS_KEY_URI
-    ]
 
   if lang == 'java' and server_path.endswith('.jar'):
     java_path = os.path.join(_root_path(), _JAVA_PATH)
