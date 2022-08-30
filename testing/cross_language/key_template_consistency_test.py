@@ -21,12 +21,12 @@ from absl.testing import parameterized
 import tink
 
 from util import key_util
-from util import supported_key_types
 from util import testing_servers
+from util import utilities
 
 
 def all_template_names() -> Iterable[str]:
-  for names in supported_key_types.KEY_TEMPLATE_NAMES.values():
+  for names in utilities.KEY_TEMPLATE_NAMES.values():
     for name in names:
       yield name
 
@@ -75,7 +75,7 @@ class KeyGenerationConsistencyTest(parameterized.TestCase):
 
   @parameterized.parameters(all_template_names())
   def test_key_template_is_consistent(self, template_name):
-    langs = supported_key_types.SUPPORTED_LANGUAGES_BY_TEMPLATE_NAME[
+    langs = utilities.SUPPORTED_LANGUAGES_BY_TEMPLATE_NAME[
         template_name]
     templates = {}
     for lang in langs:

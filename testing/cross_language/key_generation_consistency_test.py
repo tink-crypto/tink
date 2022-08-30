@@ -34,6 +34,7 @@ from tink.proto import jwt_hmac_pb2
 from tink.proto import tink_pb2
 from util import supported_key_types
 from util import testing_servers
+from util import utilities
 
 # Test cases that succeed in a language but should fail
 SUCCEEDS_BUT_SHOULD_FAIL = [
@@ -395,7 +396,7 @@ class KeyGenerationConsistencyTest(parameterized.TestCase):
                       rsa_ssa_pss_test_cases()))
   def test_key_generation_consistency(self, name, template):
     supported_langs = supported_key_types.SUPPORTED_LANGUAGES[
-        supported_key_types.KEY_TYPE_FROM_URL[template.type_url]]
+        utilities.KEY_TYPE_FROM_URL[template.type_url]]
     failures = 0
     results = {}
     for lang in supported_langs:

@@ -25,6 +25,7 @@ from tink import aead
 from tink.proto import tink_pb2
 from util import supported_key_types
 from util import testing_servers
+from util import utilities
 
 
 def _kms_envelope_aead_templates(
@@ -32,12 +33,12 @@ def _kms_envelope_aead_templates(
   """For each KMS envelope AEAD template name maps the key template and DEK AEAD key type."""
   kms_key_templates = {}
   for aead_key_type in supported_key_types.AEAD_KEY_TYPES:
-    for key_template_name in supported_key_types.KEY_TEMPLATE_NAMES[
+    for key_template_name in utilities.KEY_TEMPLATE_NAMES[
         aead_key_type]:
       envelope_aead_key_template = (
           aead.aead_key_templates.create_kms_envelope_aead_key_template(
               testing_servers.GCP_KEY_URI,
-              supported_key_types.KEY_TEMPLATE[key_template_name]))
+              utilities.KEY_TEMPLATE[key_template_name]))
       kms_key_templates['GCP_KMS_ENVELOPE_AEAD_WITH_%s' %
                         key_template_name] = (envelope_aead_key_template,
                                               aead_key_type)

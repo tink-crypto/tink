@@ -19,27 +19,6 @@ py_library(
     testonly = 1,
     srcs = ["supported_key_types.py"],
     deps = [
-        "@tink_py//tink/aead",
-        "@tink_py//tink/daead",
-        "@tink_py//tink/hybrid",
-        "@tink_py//tink/jwt",
-        "@tink_py//tink/mac",
-        "@tink_py//tink/prf",
-        "@tink_py//tink/proto:common_py_pb2",
-        "@tink_py//tink/proto:tink_py_pb2",
-        "@tink_py//tink/signature",
-        "@tink_py//tink/streaming_aead",
-    ],
-)
-
-py_test(
-    name = "supported_key_types_test",
-    srcs = ["supported_key_types_test.py"],
-    python_version = "PY3",
-    srcs_version = "PY3",
-    deps = [
-        ":supported_key_types",
-        requirement("absl-py"),
     ],
 )
 
@@ -165,5 +144,33 @@ py_test(
         "@com_google_protobuf//:protobuf_python",
         requirement("absl-py"),
         "@tink_py//tink/proto:tink_py_pb2",
+    ],
+)
+
+py_library(
+    name = "utilities",
+    srcs = ["utilities.py"],
+    deps = [
+        ":supported_key_types",
+        "@tink_py//tink/aead",
+        "@tink_py//tink/daead",
+        "@tink_py//tink/hybrid",
+        "@tink_py//tink/jwt",
+        "@tink_py//tink/mac",
+        "@tink_py//tink/prf",
+        "@tink_py//tink/proto:common_py_pb2",
+        "@tink_py//tink/proto:tink_py_pb2",
+        "@tink_py//tink/signature",
+        "@tink_py//tink/streaming_aead",
+    ],
+)
+
+py_test(
+    name = "utilities_test",
+    srcs = ["utilities_test.py"],
+    deps = [
+        ":supported_key_types",
+        ":utilities",
+        requirement("absl-py"),
     ],
 )

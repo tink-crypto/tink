@@ -28,6 +28,7 @@ from tink.proto import tink_pb2
 from tink.testing import keyset_builder
 from util import supported_key_types
 from util import testing_servers
+from util import utilities
 
 SUPPORTED_LANGUAGES = testing_servers.SUPPORTED_LANGUAGES_BY_PRIMITIVE['hybrid']
 
@@ -101,7 +102,7 @@ _ADDITIONAL_KEY_TEMPLATES = {
 def all_hybrid_private_key_template_names() -> Iterable[str]:
   """Yields all Hybrid Encryption private key template names."""
   for key_type in supported_key_types.HYBRID_PRIVATE_KEY_TYPES:
-    for key_template_name in supported_key_types.KEY_TEMPLATE_NAMES[key_type]:
+    for key_template_name in utilities.KEY_TEMPLATE_NAMES[key_type]:
       yield key_template_name
   for key_template_name in _ADDITIONAL_KEY_TEMPLATES:
     yield key_template_name
@@ -115,10 +116,9 @@ class HybridEncryptionTest(parameterized.TestCase):
       key_template, supported_langs = _ADDITIONAL_KEY_TEMPLATES[
           key_template_name]
     else:
-      key_template = supported_key_types.KEY_TEMPLATE[key_template_name]
+      key_template = utilities.KEY_TEMPLATE[key_template_name]
       supported_langs = (
-          supported_key_types
-          .SUPPORTED_LANGUAGES_BY_TEMPLATE_NAME[key_template_name])
+          utilities.SUPPORTED_LANGUAGES_BY_TEMPLATE_NAME[key_template_name])
     self.assertNotEmpty(supported_langs)
     # Take the first supported language to generate the private keyset.
     private_keyset = testing_servers.new_keyset(supported_langs[0],

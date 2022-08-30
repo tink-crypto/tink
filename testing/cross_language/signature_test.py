@@ -25,6 +25,7 @@ from tink.proto import tink_pb2
 from tink.testing import keyset_builder
 from util import supported_key_types
 from util import testing_servers
+from util import utilities
 
 SUPPORTED_LANGUAGES = (testing_servers
                        .SUPPORTED_LANGUAGES_BY_PRIMITIVE['signature'])
@@ -42,7 +43,7 @@ def tearDownModule():
 def all_signature_private_key_template_names() -> Iterable[str]:
   """Yields all Signature private key template names."""
   for key_type in supported_key_types.PRIVATE_SIGNATURE_KEY_TYPES:
-    for key_template_name in supported_key_types.KEY_TEMPLATE_NAMES[key_type]:
+    for key_template_name in utilities.KEY_TEMPLATE_NAMES[key_type]:
       yield key_template_name
 
 
@@ -50,10 +51,10 @@ class SignatureTest(parameterized.TestCase):
 
   @parameterized.parameters(all_signature_private_key_template_names())
   def test_sign_verify(self, key_template_name):
-    supported_langs = supported_key_types.SUPPORTED_LANGUAGES_BY_TEMPLATE_NAME[
+    supported_langs = utilities.SUPPORTED_LANGUAGES_BY_TEMPLATE_NAME[
         key_template_name]
     self.assertNotEmpty(supported_langs)
-    key_template = supported_key_types.KEY_TEMPLATE[key_template_name]
+    key_template = utilities.KEY_TEMPLATE[key_template_name]
     # Take the first supported language to generate the private keyset.
     private_keyset = testing_servers.new_keyset(supported_langs[0],
                                                 key_template)

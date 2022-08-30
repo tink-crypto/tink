@@ -42,6 +42,7 @@ from tink.proto import xchacha20_poly1305_pb2
 
 from util import supported_key_types
 from util import testing_servers
+from util import utilities
 
 
 KEY_TYPE_TO_PROTO_CLASS = {
@@ -66,7 +67,7 @@ def gen_inc_versions(keyset):
   """Parses keyset and generates modified keyset with incremented version."""
   keyset_proto = tink_pb2.Keyset.FromString(keyset)
   for key in keyset_proto.key:
-    key_type = supported_key_types.KEY_TYPE_FROM_URL[key.key_data.type_url]
+    key_type = utilities.KEY_TYPE_FROM_URL[key.key_data.type_url]
     key_class = KEY_TYPE_TO_PROTO_CLASS[key_type]
 
     default_val = key.key_data.value
@@ -94,7 +95,7 @@ def gen_inc_versions(keyset):
 
 def test_cases(key_types: List[str]):
   for key_type in key_types:
-    for key_template_name in supported_key_types.KEY_TEMPLATE_NAMES[key_type]:
+    for key_template_name in utilities.KEY_TEMPLATE_NAMES[key_type]:
       for lang in supported_key_types.SUPPORTED_LANGUAGES[key_type]:
         yield (key_template_name, lang)
 
@@ -122,7 +123,7 @@ class KeyVersionTest(parameterized.TestCase):
   @parameterized.parameters(test_cases(supported_key_types.AEAD_KEY_TYPES))
   def test_inc_version_aead(self, key_template_name, lang):
     """Increments the key version by one and checks they can't be used."""
-    template = supported_key_types.KEY_TEMPLATE[key_template_name]
+    template = utilities.KEY_TEMPLATE[key_template_name]
     keyset = testing_servers.new_keyset(lang, template)
     _ = testing_servers.aead(lang, keyset).encrypt(b'foo', b'bar')
     for keyset1 in gen_inc_versions(keyset):
@@ -132,7 +133,7 @@ class KeyVersionTest(parameterized.TestCase):
   @parameterized.parameters(test_cases(supported_key_types.DAEAD_KEY_TYPES))
   def test_inc_version_daead(self, key_template_name, lang):
     """Increments the key version by one and checks they can't be used."""
-    template = supported_key_types.KEY_TEMPLATE[key_template_name]
+    template = utilities.KEY_TEMPLATE[key_template_name]
     keyset = testing_servers.new_keyset(lang, template)
     p = testing_servers.deterministic_aead(lang, keyset)
     _ = p.encrypt_deterministically(b'foo', b'bar')
@@ -143,7 +144,7 @@ class KeyVersionTest(parameterized.TestCase):
   @parameterized.parameters(test_cases(supported_key_types.MAC_KEY_TYPES))
   def test_inc_version_mac(self, key_template_name, lang):
     """Increments the key version by one and checks they can't be used."""
-    template = supported_key_types.KEY_TEMPLATE[key_template_name]
+    template = utilities.KEY_TEMPLATE[key_template_name]
     keyset = testing_servers.new_keyset(lang, template)
     _ = testing_servers.mac(lang, keyset).compute_mac(b'foo')
     for keyset1 in gen_inc_versions(keyset):
@@ -154,7 +155,7 @@ class KeyVersionTest(parameterized.TestCase):
   @parameterized.parameters(test_cases(supported_key_types.PRF_KEY_TYPES))
   def test_inc_version_prf(self, key_template_name, lang):
     """Increments the key version by one and checks they can't be used."""
-    template = supported_key_types.KEY_TEMPLATE[key_template_name]
+    template = utilities.KEY_TEMPLATE[key_template_name]
     keyset = testing_servers.new_keyset(lang, template)
     _ = testing_servers.prf_set(lang, keyset).primary().compute(b'foo', 16)
     for keyset1 in gen_inc_versions(keyset):

@@ -25,6 +25,7 @@ from tink import jwt
 
 from util import supported_key_types
 from util import testing_servers
+from util import utilities
 
 SUPPORTED_LANGUAGES = testing_servers.SUPPORTED_LANGUAGES_BY_PRIMITIVE['jwt']
 
@@ -40,14 +41,14 @@ def tearDownModule():
 def all_jwt_mac_key_template_names() -> Iterable[str]:
   """Yields all JWT MAC key template names."""
   for key_type in supported_key_types.JWT_MAC_KEY_TYPES:
-    for key_template_name in supported_key_types.KEY_TEMPLATE_NAMES[key_type]:
+    for key_template_name in utilities.KEY_TEMPLATE_NAMES[key_type]:
       yield key_template_name
 
 
 def all_jwt_signature_key_template_names() -> Iterable[str]:
   """Yields all JWT signature key template names."""
   for key_type in supported_key_types.JWT_PRIVATE_SIGNATURE_KEY_TYPES:
-    for key_template_name in supported_key_types.KEY_TEMPLATE_NAMES[key_type]:
+    for key_template_name in utilities.KEY_TEMPLATE_NAMES[key_type]:
       yield key_template_name
 
 
@@ -55,10 +56,10 @@ class JwtTest(parameterized.TestCase):
 
   @parameterized.parameters(all_jwt_mac_key_template_names())
   def test_compute_verify_jwt_mac(self, key_template_name):
-    supported_langs = supported_key_types.SUPPORTED_LANGUAGES_BY_TEMPLATE_NAME[
+    supported_langs = utilities.SUPPORTED_LANGUAGES_BY_TEMPLATE_NAME[
         key_template_name]
     self.assertNotEmpty(supported_langs)
-    key_template = supported_key_types.KEY_TEMPLATE[key_template_name]
+    key_template = utilities.KEY_TEMPLATE[key_template_name]
     # Take the first supported language to generate the keyset.
     keyset = testing_servers.new_keyset(supported_langs[0], key_template)
     supported_jwt_macs = [
@@ -94,9 +95,9 @@ class JwtTest(parameterized.TestCase):
 
   @parameterized.parameters(all_jwt_signature_key_template_names())
   def test_jwt_public_key_sign_verify(self, key_template_name):
-    supported_langs = supported_key_types.SUPPORTED_LANGUAGES_BY_TEMPLATE_NAME[
+    supported_langs = utilities.SUPPORTED_LANGUAGES_BY_TEMPLATE_NAME[
         key_template_name]
-    key_template = supported_key_types.KEY_TEMPLATE[key_template_name]
+    key_template = utilities.KEY_TEMPLATE[key_template_name]
     self.assertNotEmpty(supported_langs)
     # Take the first supported language to generate the private keyset.
     private_keyset = testing_servers.new_keyset(supported_langs[0],
@@ -144,10 +145,10 @@ class JwtTest(parameterized.TestCase):
 
   @parameterized.parameters(all_jwt_signature_key_template_names())
   def test_jwt_public_key_sign_export_import_verify(self, key_template_name):
-    supported_langs = supported_key_types.SUPPORTED_LANGUAGES_BY_TEMPLATE_NAME[
+    supported_langs = utilities.SUPPORTED_LANGUAGES_BY_TEMPLATE_NAME[
         key_template_name]
     self.assertNotEmpty(supported_langs)
-    key_template = supported_key_types.KEY_TEMPLATE[key_template_name]
+    key_template = utilities.KEY_TEMPLATE[key_template_name]
     # Take the first supported language to generate the private keyset.
     private_keyset = testing_servers.new_keyset(supported_langs[0],
                                                 key_template)

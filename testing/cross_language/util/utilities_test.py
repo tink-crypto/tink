@@ -15,10 +15,11 @@
 
 from absl.testing import absltest
 from util import supported_key_types
+from util import utilities
 
 
 def all_key_template_names():
-  for _, names in supported_key_types.KEY_TEMPLATE_NAMES.items():
+  for _, names in utilities.KEY_TEMPLATE_NAMES.items():
     for name in names:
       yield name
 
@@ -28,24 +29,23 @@ class SupportedKeyTypesTest(absltest.TestCase):
   def test_all_key_types_present(self):
     self.assertEqual(
         list(supported_key_types.SUPPORTED_LANGUAGES.keys()),
-        supported_key_types.ALL_KEY_TYPES)
+        utilities.ALL_KEY_TYPES)
     self.assertEqual(
-        list(supported_key_types.KEY_TEMPLATE_NAMES.keys()),
-        supported_key_types.ALL_KEY_TYPES)
+        list(utilities.KEY_TEMPLATE_NAMES.keys()), utilities.ALL_KEY_TYPES)
 
   def test_all_key_templates_present(self):
     self.assertEqual(
         list(all_key_template_names()),
-        list(supported_key_types.KEY_TEMPLATE.keys()))
+        list(utilities.KEY_TEMPLATE.keys()))
 
   def test_supported_lang_by_template_name_all_present(self):
     self.assertEqual(
         list(all_key_template_names()),
-        list(supported_key_types.SUPPORTED_LANGUAGES_BY_TEMPLATE_NAME.keys()))
+        list(utilities.SUPPORTED_LANGUAGES_BY_TEMPLATE_NAME.keys()))
 
   def test_supported_langauges_by_template_name(self):
     self.assertEqual(
-        supported_key_types.SUPPORTED_LANGUAGES_BY_TEMPLATE_NAME[
+        utilities.SUPPORTED_LANGUAGES_BY_TEMPLATE_NAME[
             'ECIES_P256_HKDF_HMAC_SHA256_AES128_GCM'],
         ['cc', 'java', 'go', 'python'])
 

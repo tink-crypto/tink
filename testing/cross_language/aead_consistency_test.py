@@ -33,6 +33,7 @@ from tink.proto import common_pb2
 from tink.proto import tink_pb2
 from util import supported_key_types
 from util import testing_servers
+from util import utilities
 
 HASH_TYPES = [
     common_pb2.UNKNOWN_HASH, common_pb2.SHA1, common_pb2.SHA224,
@@ -162,7 +163,7 @@ class AeadKeyConsistencyTest(parameterized.TestCase):
     """
 
     result = []
-    for lang in supported_key_types.ALL_LANGUAGES:
+    for lang in utilities.ALL_LANGUAGES:
       try:
         aead = testing_servers.aead(lang, keyset.SerializeToString())
         result.append((aead, lang))
@@ -176,7 +177,7 @@ class AeadKeyConsistencyTest(parameterized.TestCase):
   def test_aead_creation_supported_languages_consistent(self, name, keyset):
     """Tests that AEAD creation is consistent in all supporeted languages."""
     supported_langs = supported_key_types.SUPPORTED_LANGUAGES[
-        supported_key_types.KEY_TYPE_FROM_URL[keyset.key[0].key_data.type_url]]
+        utilities.KEY_TYPE_FROM_URL[keyset.key[0].key_data.type_url]]
 
     langs = [lang for _, lang in self._create_aeads_ignore_errors(keyset)]
 
@@ -190,11 +191,11 @@ class AeadKeyConsistencyTest(parameterized.TestCase):
   def test_aead_creation_non_supported_languages_fail(self, name, keyset):
     """Tests that AEAD creation fails in all unsupported languages."""
     supported_langs = supported_key_types.SUPPORTED_LANGUAGES[
-        supported_key_types.KEY_TYPE_FROM_URL[keyset.key[0].key_data.type_url]]
+        utilities.KEY_TYPE_FROM_URL[keyset.key[0].key_data.type_url]]
 
     langs = [lang for _, lang in self._create_aeads_ignore_errors(keyset)]
 
-    for lang in supported_key_types.ALL_LANGUAGES:
+    for lang in utilities.ALL_LANGUAGES:
       if lang not in supported_langs:
         self.assertNotIn(
             lang, langs,

@@ -28,6 +28,7 @@ from tink.proto import tink_pb2
 from tink.testing import keyset_builder
 from util import supported_key_types
 from util import testing_servers
+from util import utilities
 
 SUPPORTED_LANGUAGES = testing_servers.SUPPORTED_LANGUAGES_BY_PRIMITIVE['aead']
 
@@ -64,7 +65,7 @@ _ADDITIONAL_KEY_TEMPLATES = {
 def all_aead_key_template_names() -> Iterable[str]:
   """Yields all AEAD key template names."""
   for key_type in supported_key_types.AEAD_KEY_TYPES:
-    for key_template_name in supported_key_types.KEY_TEMPLATE_NAMES[key_type]:
+    for key_template_name in utilities.KEY_TEMPLATE_NAMES[key_type]:
       yield key_template_name
   for key_template_name in _ADDITIONAL_KEY_TEMPLATES:
     yield key_template_name
@@ -84,7 +85,7 @@ class AeadPythonTest(parameterized.TestCase):
     """
 
     result = []
-    for lang in supported_key_types.ALL_LANGUAGES:
+    for lang in utilities.ALL_LANGUAGES:
       try:
         aead_p = testing_servers.aead(lang, keyset)
         result.append((aead_p, lang))
@@ -97,15 +98,14 @@ class AeadPythonTest(parameterized.TestCase):
       _, key_type = _ADDITIONAL_KEY_TEMPLATES[key_template_name]
       return supported_key_types.SUPPORTED_LANGUAGES[key_type]
     else:
-      return (supported_key_types
-              .SUPPORTED_LANGUAGES_BY_TEMPLATE_NAME[key_template_name])
+      return utilities.SUPPORTED_LANGUAGES_BY_TEMPLATE_NAME[key_template_name]
 
   def _as_proto_template(self, key_template_name: str) -> tink_pb2.KeyTemplate:
     if key_template_name in _ADDITIONAL_KEY_TEMPLATES:
       key_template, _ = _ADDITIONAL_KEY_TEMPLATES[key_template_name]
       return key_template
     else:
-      return supported_key_types.KEY_TEMPLATE[key_template_name]
+      return utilities.KEY_TEMPLATE[key_template_name]
 
   @parameterized.parameters(all_aead_key_template_names())
   def test_encrypt_decrypt(self, key_template_name):

@@ -25,6 +25,7 @@ from tink.proto import tink_pb2
 from tink.testing import keyset_builder
 from util import supported_key_types
 from util import testing_servers
+from util import utilities
 
 SUPPORTED_LANGUAGES = testing_servers.SUPPORTED_LANGUAGES_BY_PRIMITIVE['mac']
 
@@ -54,7 +55,7 @@ _ADDITIONAL_KEY_TEMPLATES = {
 
 def mac_key_template_names() -> Iterable[str]:
   for key_type in supported_key_types.MAC_KEY_TYPES:
-    for key_template_name in supported_key_types.KEY_TEMPLATE_NAMES[key_type]:
+    for key_template_name in utilities.KEY_TEMPLATE_NAMES[key_type]:
       yield key_template_name
   for key_template_name in _ADDITIONAL_KEY_TEMPLATES:
     yield key_template_name
@@ -69,10 +70,9 @@ class MacTest(parameterized.TestCase):
           key_template_name]
       supported_langs = supported_key_types.SUPPORTED_LANGUAGES[key_type]
     else:
-      key_template = supported_key_types.KEY_TEMPLATE[key_template_name]
+      key_template = utilities.KEY_TEMPLATE[key_template_name]
       supported_langs = (
-          supported_key_types
-          .SUPPORTED_LANGUAGES_BY_TEMPLATE_NAME[key_template_name])
+          utilities.SUPPORTED_LANGUAGES_BY_TEMPLATE_NAME[key_template_name])
     self.assertNotEmpty(supported_langs)
     # Take the first supported language to generate the keyset.
     keyset = testing_servers.new_keyset(supported_langs[0], key_template)

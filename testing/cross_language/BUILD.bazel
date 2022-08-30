@@ -13,6 +13,7 @@ py_test(
     deps = [
         "//util:supported_key_types",
         "//util:testing_servers",
+        "//util:utilities",
         requirement("absl-py"),
         "@tink_py//tink:tink_python",
         "@tink_py//tink/aead",
@@ -34,6 +35,7 @@ py_test(
     deps = [
         "//util:supported_key_types",
         "//util:testing_servers",
+        "//util:utilities",
         requirement("absl-py"),
         "@tink_py//tink:tink_python",
         "@tink_py//tink/aead",
@@ -64,6 +66,7 @@ py_test(
     deps = [
         "//util:supported_key_types",
         "//util:testing_servers",
+        "//util:utilities",
         requirement("absl-py"),
         "@tink_py//tink:tink_python",
         "@tink_py//tink/jwt",
@@ -77,6 +80,7 @@ py_test(
     deps = [
         "//util:supported_key_types",
         "//util:testing_servers",
+        "//util:utilities",
         requirement("absl-py"),
         requirement("protobuf"),
         "@tink_py//tink:tink_python",
@@ -93,6 +97,7 @@ py_test(
     deps = [
         "//util:supported_key_types",
         "//util:testing_servers",
+        "//util:utilities",
         requirement("absl-py"),
         requirement("protobuf"),
         "@tink_py//tink:tink_python",
@@ -106,6 +111,7 @@ py_test(
     deps = [
         "//util:supported_key_types",
         "//util:testing_servers",
+        "//util:utilities",
         requirement("absl-py"),
         "@tink_py//tink:tink_python",
         "@tink_py//tink/aead",
@@ -123,6 +129,7 @@ py_test(
     deps = [
         "//util:supported_key_types",
         "//util:testing_servers",
+        "//util:utilities",
         requirement("absl-py"),
         "@tink_py//tink:tink_python",
         "@tink_py//tink/daead",
@@ -137,6 +144,7 @@ py_test(
     deps = [
         "//util:supported_key_types",
         "//util:testing_servers",
+        "//util:utilities",
         "@tink_py//tink/testing:keyset_builder",
         requirement("absl-py"),
         "@tink_py//tink:tink_python",
@@ -150,6 +158,7 @@ py_test(
     deps = [
         "//util:supported_key_types",
         "//util:testing_servers",
+        "//util:utilities",
         requirement("absl-py"),
         "@tink_py//tink:tink_python",
         "@tink_py//tink/mac",
@@ -164,6 +173,7 @@ py_test(
     deps = [
         "//util:supported_key_types",
         "//util:testing_servers",
+        "//util:utilities",
         requirement("absl-py"),
         "@tink_py//tink:tink_python",
         "@tink_py//tink/proto:tink_py_pb2",
@@ -178,6 +188,7 @@ py_test(
     deps = [
         "//util:supported_key_types",
         "//util:testing_servers",
+        "//util:utilities",
         requirement("absl-py"),
         "@tink_py//tink:tink_python",
         "@tink_py//tink/aead",
@@ -195,6 +206,7 @@ py_test(
     deps = [
         "//util:supported_key_types",
         "//util:testing_servers",
+        "//util:utilities",
         requirement("absl-py"),
         "@tink_py//tink:tink_python",
         "@tink_py//tink/prf",
@@ -208,6 +220,7 @@ py_test(
     deps = [
         "//util:supported_key_types",
         "//util:testing_servers",
+        "//util:utilities",
         requirement("absl-py"),
         "@tink_py//tink:tink_python",
         "@tink_py//tink/jwt",
@@ -238,6 +251,7 @@ py_test(
     deps = [
         "//util:supported_key_types",
         "//util:testing_servers",
+        "//util:utilities",
         requirement("absl-py"),
         "@tink_py//tink:tink_python",
         "@tink_py//tink/jwt",
@@ -254,6 +268,7 @@ py_test(
     name = "key_template_consistency_test",
     srcs = ["key_template_consistency_test.py"],
     deps = [
+        "//util:utilities",
         requirement("absl-py"),
         "//util:key_util",
         "//util:supported_key_types",
@@ -266,6 +281,7 @@ py_test(
     name = "keyset_read_write_test",
     srcs = ["keyset_read_write_test.py"],
     deps = [
+        "//util:utilities",
         requirement("absl-py"),
         "//util:key_util",
         "//util:supported_key_types",

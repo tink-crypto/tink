@@ -30,6 +30,7 @@ from tink.proto import tink_pb2
 
 from util import supported_key_types
 from util import testing_servers
+from util import utilities
 
 
 def unset_primary(keyset: bytes) -> bytes:
@@ -41,7 +42,7 @@ def unset_primary(keyset: bytes) -> bytes:
 
 def test_cases(key_types: List[str]):
   for key_type in key_types:
-    for key_template_name in supported_key_types.KEY_TEMPLATE_NAMES[key_type]:
+    for key_template_name in utilities.KEY_TEMPLATE_NAMES[key_type]:
       for lang in supported_key_types.SUPPORTED_LANGUAGES[key_type]:
         yield (key_template_name, lang)
 
@@ -60,7 +61,7 @@ class KeysetValidationTest(parameterized.TestCase):
   @parameterized.parameters(test_cases(supported_key_types.AEAD_KEY_TYPES))
   def test_aead_without_primary(self, key_template_name, lang):
     """Unsets the primary key and tries to use an AEAD primitive."""
-    template = supported_key_types.KEY_TEMPLATE[key_template_name]
+    template = utilities.KEY_TEMPLATE[key_template_name]
     keyset = testing_servers.new_keyset(lang, template)
 
     with self.assertRaises(tink.TinkError):
@@ -69,7 +70,7 @@ class KeysetValidationTest(parameterized.TestCase):
   @parameterized.parameters(test_cases(supported_key_types.DAEAD_KEY_TYPES))
   def test_daead_without_primary(self, key_template_name, lang):
     """Unsets the primary key and tries to use a DAEAD primitive."""
-    template = supported_key_types.KEY_TEMPLATE[key_template_name]
+    template = utilities.KEY_TEMPLATE[key_template_name]
     keyset = testing_servers.new_keyset(lang, template)
     with self.assertRaises(tink.TinkError):
       _ = testing_servers.deterministic_aead(lang, unset_primary(keyset))
@@ -77,7 +78,7 @@ class KeysetValidationTest(parameterized.TestCase):
   @parameterized.parameters(test_cases(supported_key_types.MAC_KEY_TYPES))
   def test_mac_without_primary(self, key_template_name, lang):
     """Unsets the primary key and tries to use a MAC primitive."""
-    template = supported_key_types.KEY_TEMPLATE[key_template_name]
+    template = utilities.KEY_TEMPLATE[key_template_name]
     keyset = testing_servers.new_keyset(lang, template)
     mac_value = testing_servers.mac(lang, keyset).compute_mac(b'foo')
     mac_without_primary = testing_servers.mac(lang, unset_primary(keyset))
@@ -89,7 +90,7 @@ class KeysetValidationTest(parameterized.TestCase):
   @parameterized.parameters(test_cases(supported_key_types.PRF_KEY_TYPES))
   def test_prf_without_primary(self, key_template_name, lang):
     """Unsets the primary key and tries to use a PRF set primitive."""
-    template = supported_key_types.KEY_TEMPLATE[key_template_name]
+    template = utilities.KEY_TEMPLATE[key_template_name]
     keyset = testing_servers.new_keyset(lang, template)
     _ = testing_servers.prf_set(lang, keyset).primary().compute(b'foo', 16)
     prf_set_without_primary = testing_servers.prf_set(lang,
@@ -102,7 +103,7 @@ class KeysetValidationTest(parameterized.TestCase):
   @parameterized.parameters(test_cases(['EcdsaPrivateKey']))
   def test_signature_without_primary(self, key_template_name, lang):
     """Unsets the primary key and tries to sign and verify signatures."""
-    template = supported_key_types.KEY_TEMPLATE[key_template_name]
+    template = utilities.KEY_TEMPLATE[key_template_name]
     private_keyset = testing_servers.new_keyset(lang, template)
     public_keyset = testing_servers.public_keyset(lang, private_keyset)
     sig = testing_servers.public_key_sign(lang, private_keyset).sign(b'foo')
@@ -125,7 +126,7 @@ class KeysetValidationTest(parameterized.TestCase):
       test_cases(supported_key_types.HYBRID_PRIVATE_KEY_TYPES))
   def test_hybrid_without_primary(self, key_template_name, lang):
     """Unsets the primary key and tries to use hybrid encryption."""
-    template = supported_key_types.KEY_TEMPLATE[key_template_name]
+    template = utilities.KEY_TEMPLATE[key_template_name]
     private_keyset = testing_servers.new_keyset(lang, template)
     public_keyset = testing_servers.public_keyset(lang, private_keyset)
     ciphertext = testing_servers.hybrid_encrypt(lang, public_keyset).encrypt(
@@ -146,7 +147,7 @@ class KeysetValidationTest(parameterized.TestCase):
   @parameterized.parameters(test_cases(['JwtEcdsaPrivateKey']))
   def test_jwt_signature_without_primary(self, key_template_name, lang):
     """Unsets the primary key and tries to sign and verify JWT signatures."""
-    template = supported_key_types.KEY_TEMPLATE[key_template_name]
+    template = utilities.KEY_TEMPLATE[key_template_name]
     private_keyset = testing_servers.new_keyset(lang, template)
     public_keyset = testing_servers.public_keyset(lang, private_keyset)
     signer = testing_servers.jwt_public_key_sign(lang, private_keyset)
@@ -176,7 +177,7 @@ class KeysetValidationTest(parameterized.TestCase):
       test_cases(supported_key_types.JWT_MAC_KEY_TYPES))
   def test_jwt_mac_without_primary(self, key_template_name, lang):
     """Unsets the primary key and tries to create and verify JWT MACs."""
-    template = supported_key_types.KEY_TEMPLATE[key_template_name]
+    template = utilities.KEY_TEMPLATE[key_template_name]
     keyset = testing_servers.new_keyset(lang, template)
     jwt_mac = testing_servers.jwt_mac(lang, keyset)
 
