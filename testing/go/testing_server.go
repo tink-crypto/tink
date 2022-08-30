@@ -28,6 +28,7 @@ import (
 	"google.golang.org/api/option"
 	"google.golang.org/grpc"
 	"github.com/google/tink/go/core/registry"
+	"github.com/google/tink/go/integration/awskms"
 	"github.com/google/tink/go/integration/gcpkms"
 	"github.com/google/tink/go/testing/fakekms"
 	"github.com/google/tink/testing/go/services"
@@ -38,6 +39,8 @@ var (
 	port            = flag.Int("port", 10000, "The server port")
 	gcpCredFilePath = flag.String("gcp_credentials_path", "", "Google Cloud KMS credentials path")
 	gcpKeyURI       = flag.String("gcp_key_uri", "", "Google Cloud KMS key URL of the form: gcp-kms://projects/*/locations/*/keyRings/*/cryptoKeys/*.")
+	awsCredFilePath = flag.String("aws_credentials_path", "", "AWS KMS credentials path")
+	awsKeyURI       = flag.String("aws_key_uri", "", "AWS KMS key URL of the form: aws-kms://arn:aws:kms:<region>:<account-id>:key/<key-id>.")
 )
 
 func main() {
@@ -53,6 +56,12 @@ func main() {
 		log.Fatalf("gcpkms.NewClientWithOptions failed: %v", err)
 	}
 	registry.RegisterKMSClient(gcpClient)
+
+	awsClient, err := awskms.NewClientWithCredentials(*awsKeyURI, *awsCredFilePath)
+	if err != nil {
+		log.Fatalf("awskms.NewClientWithCredentials failed: %v", err)
+	}
+	registry.RegisterKMSClient(awsClient)
 
 	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", *port))
 	if err != nil {

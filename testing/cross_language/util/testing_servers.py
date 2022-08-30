@@ -144,7 +144,7 @@ def _server_cmd(lang: str, port: int) -> List[str]:
 
   # This is temporary and will be removed as soon as all the servers have
   # support for AWS KMS.
-  if lang in ('cc',):
+  if lang in ('cc', 'go'):
     server_args += [
         '--aws_credentials_path', AWS_CREDENTIALS_PATH, '--aws_key_uri',
         AWS_KEY_URI

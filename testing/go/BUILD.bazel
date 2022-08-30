@@ -89,6 +89,7 @@ go_binary(
         "@org_golang_google_api//option",
         "@org_golang_google_grpc//:grpc",
         "@tink_go//core/registry",
+        "@tink_go//integration/awskms",
         "@tink_go//integration/gcpkms",
         "@tink_go//testing/fakekms",
     ],
