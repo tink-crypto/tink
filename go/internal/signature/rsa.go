@@ -80,6 +80,22 @@ func Validate_RSA_SSA_PKCS1(hashAlg string, privKey *rsa.PrivateKey) error {
 	return nil
 }
 
+// Validate_RSA_SSA_PSS validates that the corresponding private key is valid by signing and verifying a message.
+func Validate_RSA_SSA_PSS(hashAlg string, saltLen int, privKey *rsa.PrivateKey) error {
+	signer, err := New_RSA_SSA_PSS_Signer(hashAlg, saltLen, privKey)
+	if err != nil {
+		return err
+	}
+	verifier, err := New_RSA_SSA_PSS_Verifier(hashAlg, saltLen, &privKey.PublicKey)
+	if err != nil {
+		return err
+	}
+	if err := validateSignerVerifier(signer, verifier); err != nil {
+		return fmt.Errorf("RSA-SSA-PSS: %q", signVerifyErrMsg)
+	}
+	return nil
+}
+
 func validateSignerVerifier(signer tink.Signer, verifier tink.Verifier) error {
 	signature, err := signer.Sign([]byte(testMsg))
 	if err != nil {
@@ -88,7 +104,6 @@ func validateSignerVerifier(signer tink.Signer, verifier tink.Verifier) error {
 	if err := verifier.Verify([]byte(signature), []byte(testMsg)); err != nil {
 		return err
 	}
-	fmt.Println("SINGATURE VERIFICATION SUCCED!")
 	return nil
 }
 

@@ -77,13 +77,17 @@ func TestHashNotSafeForSignatureFails(t *testing.T) {
 	}
 }
 
-func TestRSAPKCS1KeySelfTestWithCorruptedKeysFails(t *testing.T) {
+func TestRSAKeySelfTestWithCorruptedKeysFails(t *testing.T) {
 	validPrivKey, err := rsa.GenerateKey(rand.Reader, 3072)
 	if err != nil {
 		t.Fatalf("rsa.GenerateKey(rand.Reader, 3072) err = %v, want nil", err)
 	}
 	if err := internal.Validate_RSA_SSA_PKCS1("SHA256", validPrivKey); err != nil {
 		t.Errorf("internal.Validate_RSA_SSA_PKCS1('SHA256', validPrivKey) err = %v, want nil", err)
+	}
+	saltLen := 0
+	if err := internal.Validate_RSA_SSA_PSS("SHA256", saltLen, validPrivKey); err != nil {
+		t.Errorf("internal.Validate_RSA_SSA_PSS('SHA256', saltLen, validPrivKey) err = %v, want nil", err)
 	}
 	type testCase struct {
 		tag  string
@@ -151,7 +155,10 @@ func TestRSAPKCS1KeySelfTestWithCorruptedKeysFails(t *testing.T) {
 	} {
 		t.Run(tc.tag, func(t *testing.T) {
 			if err := internal.Validate_RSA_SSA_PKCS1(tc.hash, tc.key); err == nil {
-				t.Errorf("internal.Validate_RSA_SSA_PKCS1(key, hash = %q) err = nil, want error", tc.hash)
+				t.Errorf("internal.Validate_RSA_SSA_PKCS1(hash = %q, key) err = nil, want error", tc.hash)
+			}
+			if err := internal.Validate_RSA_SSA_PSS(tc.hash, saltLen, tc.key); err == nil {
+				t.Errorf("internal.Validate_RSA_SSA_PSS(hash = %d saltLen = %q, key) err = nil, want error", saltLen, tc.hash)
 			}
 		})
 	}
