@@ -338,7 +338,7 @@ describe('registry test', function() {
 
       // The new key method of DummyKeyFactory returns an AesCtrKey which
       // KeyValue is set to corresponding value in newKeyMethodResult.
-      expect(key.getKeyValue_asU8()).toBe(newKeyMethodResult[i]);
+      expect(key.getKeyValue_asU8()).toEqual(newKeyMethodResult[i]);
     }
   });
   it('new key, with aes ctr hmac aead key', async function() {
