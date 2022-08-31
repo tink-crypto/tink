@@ -250,23 +250,6 @@ public final class StrictJsonParserTest {
     new TestCase("double_array", "[][]", new JsonArray()),
     new TestCase("number_with_space", "42 000", new JsonPrimitive(42)),
     new TestCase("float_with_space", "42 000.0", new JsonPrimitive(42)),
-
-    // Currently allowed, but should be rejected because they are invalid and even produce invalid
-    // Java strings. That's also why they don't have an expected string.
-    new TestCase("invalid_utf16", "\"\\uD834\"", null),
-    new TestCase("invalid_utf16_in_key", "{\"\\ud800\\ud800key\":\"value\"}", null),
-    new TestCase(
-        "invalid_utf16_in_key_2", "{\"key\":\"value1\",\"\\ud800\\ud800key\":\"value2\"}", null),
-    new TestCase("invalid_utf16_in_value", "{\"key\":\"value\\ud800\\ud800\"}", null),
-    new TestCase("invalid_surrogate_1", "\"\\uDADA\"", null),
-    new TestCase("invalid_surrogate_2", "\"\\ud800\"", null),
-    new TestCase("invalid_surrogate_3", "\"\\uDd1ea\"", null),
-    new TestCase("invalid_surrogate_4", "\"\\uDFAA\"", null),
-    new TestCase("invalid_surrogate_5", "\"\\uD888\\u1234\"", null),
-    new TestCase("invalid_surrogate_6", "\"\\uD800\\uD800\\n\"", null),
-    new TestCase("invalid_surrogate_7", "\"\\uDd1e\\uD834\"", null),
-    new TestCase("invalid_surrogate_in_map_key", "{\"\\uDFAA\":0}", null),
-    new TestCase("invalid_surrogate_in_map_value", "{\"a\": \"\\uDFAA\"}", null),
   };
 
   @Theory
@@ -525,6 +508,22 @@ public final class StrictJsonParserTest {
     new TestCase("single_space", " "),
     new TestCase("nested_with_duplicated_key", "{\"x\":{\"a\":\"b\",\"a\":\"c\"}}"),
     new TestCase("split_array", "{ \"a\" : [1,2,3], \"b\" : 0, \"a\" : [4,5,6]}"),
+
+    // invalid characters in strings
+    new TestCase("invalid_utf16", "\"\\uD834\"", null),
+    new TestCase("invalid_utf16_in_key", "{\"\\ud800\\ud800key\":\"value\"}", null),
+    new TestCase(
+         "invalid_utf16_in_key_2", "{\"key\":\"value1\",\"\\ud800\\ud800key\":\"value2\"}", null),
+    new TestCase("invalid_utf16_in_value", "{\"key\":\"value\\ud800\\ud800\"}", null),
+    new TestCase("invalid_surrogate_1", "\"\\uDADA\"", null),
+    new TestCase("invalid_surrogate_2", "\"\\ud800\"", null),
+    new TestCase("invalid_surrogate_3", "\"\\uDd1ea\"", null),
+    new TestCase("invalid_surrogate_4", "\"\\uDFAA\"", null),
+    new TestCase("invalid_surrogate_5", "\"\\uD888\\u1234\"", null),
+    new TestCase("invalid_surrogate_6", "\"\\uD800\\uD800\\n\"", null),
+    new TestCase("invalid_surrogate_7", "\"\\uDd1e\\uD834\"", null),
+    new TestCase("invalid_surrogate_in_map_key", "{\"\\uDFAA\":0}", null),
+    new TestCase("invalid_surrogate_in_map_value", "{\"a\": \"\\uDFAA\"}", null),
   };
 
   @Theory

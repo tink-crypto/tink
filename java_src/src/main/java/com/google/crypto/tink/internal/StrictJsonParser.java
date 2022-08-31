@@ -36,9 +36,28 @@ import javax.annotation.Nullable;
  * Implementation of a Strict JSON Parser.
  *
  * <p>The parsing is almost identical to TypeAdapters.JSON_ELEMENT, but it rejects duplicated map
- * keys.
+ * keys and strings with invalid characters.
  */
-final class StrictJsonParser {
+public final class StrictJsonParser {
+
+  private static boolean isValidString(String s) {
+    int length = s.length();
+    int i = 0;
+    while (true) {
+      char ch;
+      do {
+        if (i == length) {
+          return true;
+        }
+        ch = s.charAt(i);
+        i++;
+      } while (!Character.isSurrogate(ch));
+      if (Character.isLowSurrogate(ch) || i == length || !Character.isLowSurrogate(s.charAt(i))) {
+        return false;
+      }
+      i++;
+    }
+  }
 
   private static final TypeAdapter<JsonElement> JSON_ELEMENT =
       new TypeAdapter<JsonElement>() {
@@ -64,8 +83,11 @@ final class StrictJsonParser {
         private JsonElement readTerminal(JsonReader in, JsonToken peeked) throws IOException {
           switch (peeked) {
             case STRING:
-              // TODO(juerg): Add additional validation, as in jwt/JsonUtil.java.
-              return new JsonPrimitive(in.nextString());
+              String value = in.nextString();
+              if (!isValidString(value)) {
+                throw new IOException("illegal characters in string");
+              }
+              return new JsonPrimitive(value);
             case NUMBER:
               String number = in.nextString();
               return new JsonPrimitive(new LazilyParsedNumber(number));
@@ -99,7 +121,9 @@ final class StrictJsonParser {
               // Name is only used for JSON object members
               if (current instanceof JsonObject) {
                 name = in.nextName();
-                // TODO(juerg): Add additional validation, as in jwt/JsonUtil.java.
+                if (!isValidString(name)) {
+                  throw new IOException("illegal characters in string");
+                }
               }
 
               peeked = in.peek();
