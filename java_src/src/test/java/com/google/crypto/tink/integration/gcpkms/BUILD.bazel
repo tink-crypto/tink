@@ -57,3 +57,16 @@ java_test(
         "@maven//:junit_junit",
     ],
 )
+
+java_test(
+    name = "FakeCloudKmsTest",
+    size = "small",
+    srcs = ["FakeCloudKmsTest.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink/aead:aead_config",
+        "//src/main/java/com/google/crypto/tink/integration/gcpkms:fake_cloud_kms",
+        "@maven//:com_google_apis_google_api_services_cloudkms",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
