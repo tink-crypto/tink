@@ -165,7 +165,9 @@ class AeadKeyConsistencyTest(parameterized.TestCase):
     result = []
     for lang in utilities.ALL_LANGUAGES:
       try:
-        aead = testing_servers.aead(lang, keyset.SerializeToString())
+        aead = testing_servers.remote_primitive(lang,
+                                                keyset.SerializeToString(),
+                                                tink.aead.Aead)
         result.append((aead, lang))
       except tink.TinkError:
         pass

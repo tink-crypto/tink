@@ -124,7 +124,7 @@ class TestingServersTest(parameterized.TestCase):
                                         aead.aead_key_templates.AES128_GCM)
     plaintext = b'The quick brown fox jumps over the lazy dog'
     associated_data = b'associated_data'
-    aead_primitive = testing_servers.aead(lang, keyset)
+    aead_primitive = testing_servers.remote_primitive(lang, keyset, aead.Aead)
     ciphertext = aead_primitive.encrypt(plaintext, associated_data)
     output = aead_primitive.decrypt(ciphertext, associated_data)
     self.assertEqual(output, plaintext)

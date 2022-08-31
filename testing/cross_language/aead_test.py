@@ -78,7 +78,7 @@ class AeadPythonTest(parameterized.TestCase):
     result = []
     for lang in utilities.ALL_LANGUAGES:
       try:
-        aead_p = testing_servers.aead(lang, keyset)
+        aead_p = testing_servers.remote_primitive(lang, keyset, aead.Aead)
         result.append((aead_p, lang))
       except tink.TinkError:
         pass
@@ -157,19 +157,27 @@ class AeadKeyRotationTest(parameterized.TestCase):
     builder = keyset_builder.new_keyset_builder()
     older_key_id = builder.add_new_key(old_key_tmpl)
     builder.set_primary_key(older_key_id)
-    enc_aead1 = testing_servers.aead(enc_lang, builder.keyset())
-    dec_aead1 = testing_servers.aead(dec_lang, builder.keyset())
+    enc_aead1 = testing_servers.remote_primitive(enc_lang, builder.keyset(),
+                                                 aead.Aead)
+    dec_aead1 = testing_servers.remote_primitive(dec_lang, builder.keyset(),
+                                                 aead.Aead)
     newer_key_id = builder.add_new_key(new_key_tmpl)
-    enc_aead2 = testing_servers.aead(enc_lang, builder.keyset())
-    dec_aead2 = testing_servers.aead(dec_lang, builder.keyset())
+    enc_aead2 = testing_servers.remote_primitive(enc_lang, builder.keyset(),
+                                                 aead.Aead)
+    dec_aead2 = testing_servers.remote_primitive(dec_lang, builder.keyset(),
+                                                 aead.Aead)
 
     builder.set_primary_key(newer_key_id)
-    enc_aead3 = testing_servers.aead(enc_lang, builder.keyset())
-    dec_aead3 = testing_servers.aead(dec_lang, builder.keyset())
+    enc_aead3 = testing_servers.remote_primitive(enc_lang, builder.keyset(),
+                                                 aead.Aead)
+    dec_aead3 = testing_servers.remote_primitive(dec_lang, builder.keyset(),
+                                                 aead.Aead)
 
     builder.disable_key(older_key_id)
-    enc_aead4 = testing_servers.aead(enc_lang, builder.keyset())
-    dec_aead4 = testing_servers.aead(dec_lang, builder.keyset())
+    enc_aead4 = testing_servers.remote_primitive(enc_lang, builder.keyset(),
+                                                 aead.Aead)
+    dec_aead4 = testing_servers.remote_primitive(dec_lang, builder.keyset(),
+                                                 aead.Aead)
 
     self.assertNotEqual(older_key_id, newer_key_id)
     # 1 encrypts with the older key. So 1, 2 and 3 can decrypt it, but not 4.

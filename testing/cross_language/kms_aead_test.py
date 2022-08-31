@@ -95,11 +95,13 @@ class KmsAeadTest(parameterized.TestCase):
     key_template = aead.aead_key_templates.create_kms_aead_key_template(
         testing_servers.GCP_KEY_URI)
     keyset = testing_servers.new_keyset(encrypt_lang, key_template)
-    encrypt_primitive = testing_servers.aead(encrypt_lang, keyset)
+    encrypt_primitive = testing_servers.remote_primitive(
+        encrypt_lang, keyset, aead.Aead)
     plaintext, associated_data = _get_plaintext_and_aad('GCP_KMS_AEAD',
                                                         encrypt_primitive.lang)
     ciphertext = encrypt_primitive.encrypt(plaintext, associated_data)
-    decrypt_primitive = testing_servers.aead(decrypt_lang, keyset)
+    decrypt_primitive = testing_servers.remote_primitive(
+        decrypt_lang, keyset, aead.Aead)
     output = decrypt_primitive.decrypt(ciphertext, associated_data)
     self.assertEqual(output, plaintext)
 
@@ -111,13 +113,15 @@ class KmsEnvelopeAeadTest(parameterized.TestCase):
     key_template, _ = _KMS_ENVELOPE_AEAD_KEY_TEMPLATES[key_template_name]
     # Use the encryption language to generate the keyset proto.
     keyset = testing_servers.new_keyset(encrypt_lang, key_template)
-    encrypt_primitive = testing_servers.aead(encrypt_lang, keyset)
+    encrypt_primitive = testing_servers.remote_primitive(
+        encrypt_lang, keyset, aead.Aead)
     plaintext, associated_data = _get_plaintext_and_aad(key_template_name,
                                                         encrypt_primitive.lang)
     ciphertext = encrypt_primitive.encrypt(plaintext, associated_data)
 
     # Decrypt.
-    decrypt_primitive = testing_servers.aead(decrypt_lang, keyset)
+    decrypt_primitive = testing_servers.remote_primitive(
+        decrypt_lang, keyset, aead.Aead)
     output = decrypt_primitive.decrypt(ciphertext, associated_data)
     self.assertEqual(output, plaintext)
 
@@ -127,11 +131,13 @@ class KmsEnvelopeAeadTest(parameterized.TestCase):
     key_template, _ = _KMS_ENVELOPE_AEAD_KEY_TEMPLATES[key_template_name]
     # Use the encryption language to generate the keyset proto.
     keyset = testing_servers.new_keyset(encrypt_lang, key_template)
-    encrypt_primitive = testing_servers.aead(encrypt_lang, keyset)
+    encrypt_primitive = testing_servers.remote_primitive(
+        encrypt_lang, keyset, aead.Aead)
     plaintext, associated_data = _get_plaintext_and_aad(key_template_name,
                                                         encrypt_primitive.lang)
     ciphertext = encrypt_primitive.encrypt(plaintext, associated_data)
-    decrypt_primitive = testing_servers.aead(decrypt_lang, keyset)
+    decrypt_primitive = testing_servers.remote_primitive(
+        decrypt_lang, keyset, aead.Aead)
     with self.assertRaises(tink.TinkError, msg='decryption failed'):
       decrypt_primitive.decrypt(ciphertext, b'wrong aad')
 

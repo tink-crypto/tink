@@ -126,10 +126,11 @@ class KeyVersionTest(parameterized.TestCase):
     """Increments the key version by one and checks they can't be used."""
     template = utilities.KEY_TEMPLATE[key_template_name]
     keyset = testing_servers.new_keyset(lang, template)
-    _ = testing_servers.aead(lang, keyset).encrypt(b'foo', b'bar')
+    _ = testing_servers.remote_primitive(lang, keyset,
+                                         aead.Aead).encrypt(b'foo', b'bar')
     for keyset1 in gen_inc_versions(keyset):
       with self.assertRaises(tink.TinkError):
-        _ = testing_servers.aead(lang, keyset1)
+        _ = testing_servers.remote_primitive(lang, keyset1, aead.Aead)
 
   @parameterized.parameters(
       test_cases(supported_key_types.KEY_TYPES[daead.DeterministicAead]))

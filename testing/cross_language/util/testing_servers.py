@@ -17,15 +17,18 @@ import os
 import subprocess
 import time
 
-from typing import List, Optional
+from typing import List, Optional, Type, TypeVar
 from absl import logging
 import grpc
 import portpicker
+import tink
 
 from tink.proto import tink_pb2
 from util import _primitives
 from proto import testing_api_pb2
 from proto import testing_api_pb2_grpc
+
+P = TypeVar('P')
 
 # Server paths are relative to a root folder where all the server are located.
 # It can be set manually as follows:
@@ -344,11 +347,6 @@ def jwk_set_from_keyset(lang: str, keyset: bytes) -> str:
   return _primitives.jwk_set_from_keyset(_ts.jwt_stub(lang), keyset)
 
 
-def aead(lang: str, keyset: bytes) -> _primitives.Aead:
-  """Returns an AEAD primitive, implemented in lang."""
-  return _primitives.Aead(lang, _ts.aead_stub(lang), keyset)
-
-
 def deterministic_aead(lang: str,
                        keyset: bytes) -> _primitives.DeterministicAead:
   """Returns a DeterministicAEAD primitive, implemented in lang."""
@@ -408,3 +406,14 @@ def jwt_public_key_verify(lang: str,
                           keyset: bytes) -> _primitives.JwtPublicKeyVerify:
   """Returns a JwtPublicKeyVerify primitive, implemented in lang."""
   return _primitives.JwtPublicKeyVerify(lang, _ts.jwt_stub(lang), keyset)
+
+
+def remote_primitive(lang: str, keyset: bytes, primitive_class: Type[P]) -> P:
+  """Creates a primitive from a keyset backed by the given language."""
+  # TODO(b/241219877) Remove all other creation functions and route everything
+  # through this
+
+  if primitive_class == tink.aead.Aead:
+    result = _primitives.Aead(lang, _ts.aead_stub(lang), keyset)
+    return result
+  raise ValueError('Unsupported P in remote_primitive: ' + str(primitive_class))

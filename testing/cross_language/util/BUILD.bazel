@@ -73,6 +73,7 @@ py_library(
     srcs_version = "PY3",
     deps = [
         ":_primitives",
+        "@tink_py//tink:tink_python",
         ":testing_api_python_library",
         "@com_google_protobuf//:protobuf_python",
         requirement("absl-py"),

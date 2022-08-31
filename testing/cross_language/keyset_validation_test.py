@@ -70,7 +70,8 @@ class KeysetValidationTest(parameterized.TestCase):
     keyset = testing_servers.new_keyset(lang, template)
 
     with self.assertRaises(tink.TinkError):
-      _ = testing_servers.aead(lang, unset_primary(keyset))
+      _ = testing_servers.remote_primitive(lang, unset_primary(keyset),
+                                           aead.Aead)
 
   @parameterized.parameters(test_cases(daead.DeterministicAead))
   def test_daead_without_primary(self, key_template_name, lang):
