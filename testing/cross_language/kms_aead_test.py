@@ -32,7 +32,7 @@ def _kms_envelope_aead_templates(
 ) -> Dict[str, Tuple[tink_pb2.KeyTemplate, str]]:
   """For each KMS envelope AEAD template name maps the key template and DEK AEAD key type."""
   kms_key_templates = {}
-  for aead_key_type in supported_key_types.AEAD_KEY_TYPES:
+  for aead_key_type in supported_key_types.KEY_TYPES[aead.Aead]:
     for key_template_name in utilities.KEY_TEMPLATE_NAMES[
         aead_key_type]:
       envelope_aead_key_template = (

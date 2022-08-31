@@ -14,7 +14,6 @@
 """Cross-language tests for the StreamingAead primitive."""
 
 import io
-from typing import Iterable
 
 from absl.testing import absltest
 from absl.testing import parameterized
@@ -23,7 +22,6 @@ import tink
 from tink import streaming_aead
 
 from tink.testing import keyset_builder
-from util import supported_key_types
 from util import testing_servers
 from util import utilities
 
@@ -49,16 +47,10 @@ def tearDownModule():
   testing_servers.stop()
 
 
-def all_streaming_aead_key_template_names() -> Iterable[str]:
-  """Yields all Streaming AEAD key template names."""
-  for key_type in supported_key_types.STREAMING_AEAD_KEY_TYPES:
-    for key_template_name in utilities.KEY_TEMPLATE_NAMES[key_type]:
-      yield key_template_name
-
-
 class StreamingAeadPythonTest(parameterized.TestCase):
 
-  @parameterized.parameters(all_streaming_aead_key_template_names())
+  @parameterized.parameters(
+      utilities.tinkey_template_names_for(streaming_aead.StreamingAead))
   def test_encrypt_decrypt(self, key_template_name):
     supported_langs = utilities.SUPPORTED_LANGUAGES_BY_TEMPLATE_NAME[
         key_template_name]

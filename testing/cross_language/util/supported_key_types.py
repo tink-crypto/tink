@@ -18,46 +18,56 @@ understands in which language, and for which primitive. The correctness of this
 file is checked by the cross language tests.
 """
 
-# All KeyTypes (without the prefix 'type.googleapis.com/google.crypto.tink.')
-AEAD_KEY_TYPES = [
-    'AesEaxKey',
-    'AesGcmKey',
-    'AesGcmSivKey',
-    'AesCtrHmacAeadKey',
-    'ChaCha20Poly1305Key',
-    'XChaCha20Poly1305Key',
-    'KmsAeadKey',
-    'KmsEnvelopeAeadKey',
-]
-DAEAD_KEY_TYPES = ['AesSivKey']
-STREAMING_AEAD_KEY_TYPES = [
-    'AesCtrHmacStreamingKey',
-    'AesGcmHkdfStreamingKey',
-]
-HYBRID_PRIVATE_KEY_TYPES = ['EciesAeadHkdfPrivateKey', 'HpkePrivateKey']
-MAC_KEY_TYPES = [
-    'AesCmacKey',
-    'HmacKey',
-]
-PRIVATE_SIGNATURE_KEY_TYPES = [
-    'EcdsaPrivateKey',
-    'Ed25519PrivateKey',
-    'RsaSsaPkcs1PrivateKey',
-    'RsaSsaPssPrivateKey',
-]
-PRF_KEY_TYPES = [
-    'AesCmacPrfKey',
-    'HmacPrfKey',
-    'HkdfPrfKey',
-]
-JWT_MAC_KEY_TYPES = [
-    'JwtHmacKey',
-]
-JWT_PRIVATE_SIGNATURE_KEY_TYPES = [
-    'JwtEcdsaPrivateKey',
-    'JwtRsaSsaPkcs1PrivateKey',
-    'JwtRsaSsaPssPrivateKey',
-]
+from tink import aead
+from tink import daead
+from tink import hybrid
+from tink import jwt
+from tink import mac
+from tink import prf
+from tink import signature
+from tink import streaming_aead
+
+# Map from the primitives to the KeyTypes (without the prefix
+# 'type.googleapis.com/google.crypto.tink.')
+KEY_TYPES = {
+    aead.Aead: (
+        'AesEaxKey',
+        'AesGcmKey',
+        'AesGcmSivKey',
+        'AesCtrHmacAeadKey',
+        'ChaCha20Poly1305Key',
+        'XChaCha20Poly1305Key',
+        'KmsAeadKey',
+        'KmsEnvelopeAeadKey',
+    ),
+    daead.DeterministicAead: ('AesSivKey',),
+    streaming_aead.StreamingAead: (
+        'AesCtrHmacStreamingKey',
+        'AesGcmHkdfStreamingKey',
+    ),
+    hybrid.HybridDecrypt: ('EciesAeadHkdfPrivateKey', 'HpkePrivateKey'),
+    mac.Mac: (
+        'AesCmacKey',
+        'HmacKey',
+    ),
+    signature.PublicKeySign: (
+        'EcdsaPrivateKey',
+        'Ed25519PrivateKey',
+        'RsaSsaPkcs1PrivateKey',
+        'RsaSsaPssPrivateKey',
+    ),
+    prf.PrfSet: (
+        'AesCmacPrfKey',
+        'HmacPrfKey',
+        'HkdfPrfKey',
+    ),
+    jwt.JwtMac: ('JwtHmacKey',),
+    jwt.JwtPublicKeySign: (
+        'JwtEcdsaPrivateKey',
+        'JwtRsaSsaPkcs1PrivateKey',
+        'JwtRsaSsaPssPrivateKey',
+    )
+}
 
 # All languages that are supported by a KeyType
 SUPPORTED_LANGUAGES = {

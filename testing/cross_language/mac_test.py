@@ -53,17 +53,12 @@ _ADDITIONAL_KEY_TEMPLATES = {
 }
 
 
-def mac_key_template_names() -> Iterable[str]:
-  for key_type in supported_key_types.MAC_KEY_TYPES:
-    for key_template_name in utilities.KEY_TEMPLATE_NAMES[key_type]:
-      yield key_template_name
-  for key_template_name in _ADDITIONAL_KEY_TEMPLATES:
-    yield key_template_name
-
-
 class MacTest(parameterized.TestCase):
 
-  @parameterized.parameters(mac_key_template_names())
+  @parameterized.parameters([
+      *utilities.tinkey_template_names_for(mac.Mac),
+      *_ADDITIONAL_KEY_TEMPLATES.keys()
+  ])
   def test_compute_verify_mac(self, key_template_name):
     if key_template_name in _ADDITIONAL_KEY_TEMPLATES:
       key_template, key_type = _ADDITIONAL_KEY_TEMPLATES[

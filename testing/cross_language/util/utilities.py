@@ -15,6 +15,8 @@
 """Various utility functions for the cross language tests.
 """
 
+from typing import Any
+from typing import Iterable
 from typing import List
 
 from tink import aead
@@ -32,15 +34,15 @@ from util import supported_key_types
 # All languages supported by cross-language tests.
 ALL_LANGUAGES = ['cc', 'java', 'go', 'python']
 
+
+def _get_all_key_types():
+  result = []
+  for key_types_for_single_primitive in supported_key_types.KEY_TYPES.values():
+    result += key_types_for_single_primitive
+  return result
+
 # TODO(tholenst): Change this to a function.
-ALL_KEY_TYPES = (
-    supported_key_types.AEAD_KEY_TYPES + supported_key_types.DAEAD_KEY_TYPES +
-    supported_key_types.STREAMING_AEAD_KEY_TYPES +
-    supported_key_types.HYBRID_PRIVATE_KEY_TYPES +
-    supported_key_types.MAC_KEY_TYPES +
-    supported_key_types.PRIVATE_SIGNATURE_KEY_TYPES +
-    supported_key_types.PRF_KEY_TYPES + supported_key_types.JWT_MAC_KEY_TYPES +
-    supported_key_types.JWT_PRIVATE_SIGNATURE_KEY_TYPES)
+ALL_KEY_TYPES = _get_all_key_types()
 
 # TODO(tholenst): Change this to a function.
 KEY_TYPE_FROM_URL = {
@@ -358,6 +360,13 @@ def _all_key_template_names_with_key_type():
   for key_type, template_names in KEY_TEMPLATE_NAMES.items():
     for template_name in template_names:
       yield (template_name, key_type)
+
+
+def tinkey_template_names_for(primitive_class: Any) -> Iterable[str]:
+  """Returns all the key template names for the given primitive type."""
+  for key_type in supported_key_types.KEY_TYPES[primitive_class]:
+    for template_name in KEY_TEMPLATE_NAMES[key_type]:
+      yield template_name
 
 
 SUPPORTED_LANGUAGES_BY_TEMPLATE_NAME = {

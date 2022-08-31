@@ -26,7 +26,6 @@ from tink import hybrid
 from tink.proto import common_pb2
 from tink.proto import tink_pb2
 from tink.testing import keyset_builder
-from util import supported_key_types
 from util import testing_servers
 from util import utilities
 
@@ -99,18 +98,12 @@ _ADDITIONAL_KEY_TEMPLATES = {
 }
 
 
-def all_hybrid_private_key_template_names() -> Iterable[str]:
-  """Yields all Hybrid Encryption private key template names."""
-  for key_type in supported_key_types.HYBRID_PRIVATE_KEY_TYPES:
-    for key_template_name in utilities.KEY_TEMPLATE_NAMES[key_type]:
-      yield key_template_name
-  for key_template_name in _ADDITIONAL_KEY_TEMPLATES:
-    yield key_template_name
-
-
 class HybridEncryptionTest(parameterized.TestCase):
 
-  @parameterized.parameters(all_hybrid_private_key_template_names())
+  @parameterized.parameters([
+      *utilities.tinkey_template_names_for(hybrid.HybridDecrypt),
+      *_ADDITIONAL_KEY_TEMPLATES.keys()
+  ])
   def test_encrypt_decrypt(self, key_template_name):
     if key_template_name in _ADDITIONAL_KEY_TEMPLATES:
       key_template, supported_langs = _ADDITIONAL_KEY_TEMPLATES[

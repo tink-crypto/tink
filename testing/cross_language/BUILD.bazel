@@ -69,8 +69,14 @@ py_test(
         "//util:utilities",
         requirement("absl-py"),
         "@tink_py//tink:tink_python",
+        "@tink_py//tink/aead",
+        "@tink_py//tink/daead",
+        "@tink_py//tink/hybrid",
         "@tink_py//tink/jwt",
+        "@tink_py//tink/mac",
+        "@tink_py//tink/prf",
         "@tink_py//tink/proto:tink_py_pb2",
+        "@tink_py//tink/signature",
     ],
 )
 

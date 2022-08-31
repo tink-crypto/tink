@@ -23,7 +23,6 @@ from tink import signature
 
 from tink.proto import tink_pb2
 from tink.testing import keyset_builder
-from util import supported_key_types
 from util import testing_servers
 from util import utilities
 
@@ -40,16 +39,10 @@ def tearDownModule():
   testing_servers.stop()
 
 
-def all_signature_private_key_template_names() -> Iterable[str]:
-  """Yields all Signature private key template names."""
-  for key_type in supported_key_types.PRIVATE_SIGNATURE_KEY_TYPES:
-    for key_template_name in utilities.KEY_TEMPLATE_NAMES[key_type]:
-      yield key_template_name
-
-
 class SignatureTest(parameterized.TestCase):
 
-  @parameterized.parameters(all_signature_private_key_template_names())
+  @parameterized.parameters(
+      utilities.tinkey_template_names_for(signature.PublicKeySign))
   def test_sign_verify(self, key_template_name):
     supported_langs = utilities.SUPPORTED_LANGUAGES_BY_TEMPLATE_NAME[
         key_template_name]

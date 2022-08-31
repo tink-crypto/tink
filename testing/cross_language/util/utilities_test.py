@@ -13,7 +13,10 @@
 # limitations under the License.
 """Tests for tink.testing.cross_language.supported_key_types."""
 
+
 from absl.testing import absltest
+from tink import mac
+
 from util import supported_key_types
 from util import utilities
 
@@ -48,6 +51,13 @@ class SupportedKeyTypesTest(absltest.TestCase):
         utilities.SUPPORTED_LANGUAGES_BY_TEMPLATE_NAME[
             'ECIES_P256_HKDF_HMAC_SHA256_AES128_GCM'],
         ['cc', 'java', 'go', 'python'])
+
+  def test_tinkey_template_names_for(self):
+    self.assertEqual(
+        list(utilities.tinkey_template_names_for(mac.Mac)), [
+            'AES_CMAC', 'HMAC_SHA256_128BITTAG', 'HMAC_SHA256_256BITTAG',
+            'HMAC_SHA512_256BITTAG', 'HMAC_SHA512_512BITTAG'
+        ])
 
 
 if __name__ == '__main__':

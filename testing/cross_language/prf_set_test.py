@@ -13,8 +13,6 @@
 # limitations under the License.
 """Cross-language tests for the PrfSet primitive."""
 
-from typing import Iterable
-
 from absl.testing import absltest
 from absl.testing import parameterized
 
@@ -22,7 +20,6 @@ import tink
 from tink import prf
 
 from tink.testing import keyset_builder
-from util import supported_key_types
 from util import testing_servers
 from util import utilities
 
@@ -33,19 +30,11 @@ OUTPUT_LENGTHS = [
 ]
 
 
-def all_prf_key_template_names() -> Iterable[str]:
-  """Yields all PRF key template names."""
-  for key_type in supported_key_types.PRF_KEY_TYPES:
-    for key_template_name in utilities.KEY_TEMPLATE_NAMES[key_type]:
-      yield key_template_name
-
-
 def all_prf_key_template_names_with_some_output_length():
   """Yields (prf_key_template_name, output_length) tuples."""
-  for key_type in supported_key_types.PRF_KEY_TYPES:
-    for key_template_name in utilities.KEY_TEMPLATE_NAMES[key_type]:
-      for output_length in OUTPUT_LENGTHS:
-        yield (key_template_name, output_length)
+  for key_template_name in utilities.tinkey_template_names_for(prf.PrfSet):
+    for output_length in OUTPUT_LENGTHS:
+      yield (key_template_name, output_length)
 
 
 def gen_keyset(key_template_name: str) -> bytes:
@@ -75,7 +64,7 @@ def tearDownModule():
 
 class PrfSetPythonTest(parameterized.TestCase):
 
-  @parameterized.parameters(all_prf_key_template_names())
+  @parameterized.parameters(utilities.tinkey_template_names_for(prf.PrfSet))
   def test_unsupported(self, key_template_name):
     supported_langs = utilities.SUPPORTED_LANGUAGES_BY_TEMPLATE_NAME[
         key_template_name]
@@ -92,7 +81,7 @@ class PrfSetPythonTest(parameterized.TestCase):
           (p.lang, key_template_name)):
         p.primary().compute(b'input_data', output_length=16)
 
-  @parameterized.parameters(all_prf_key_template_names())
+  @parameterized.parameters(utilities.tinkey_template_names_for(prf.PrfSet))
   def test_supported(self, key_template_name):
     supported_langs = utilities.SUPPORTED_LANGUAGES_BY_TEMPLATE_NAME[
         key_template_name]

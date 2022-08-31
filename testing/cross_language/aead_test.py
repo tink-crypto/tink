@@ -62,15 +62,6 @@ _ADDITIONAL_KEY_TEMPLATES = {
 }
 
 
-def all_aead_key_template_names() -> Iterable[str]:
-  """Yields all AEAD key template names."""
-  for key_type in supported_key_types.AEAD_KEY_TYPES:
-    for key_template_name in utilities.KEY_TEMPLATE_NAMES[key_type]:
-      yield key_template_name
-  for key_template_name in _ADDITIONAL_KEY_TEMPLATES:
-    yield key_template_name
-
-
 class AeadPythonTest(parameterized.TestCase):
 
   def _create_aeads_ignore_errors(self,
@@ -107,7 +98,10 @@ class AeadPythonTest(parameterized.TestCase):
     else:
       return utilities.KEY_TEMPLATE[key_template_name]
 
-  @parameterized.parameters(all_aead_key_template_names())
+  @parameterized.parameters([
+      *utilities.tinkey_template_names_for(aead.Aead),
+      *_ADDITIONAL_KEY_TEMPLATES.keys()
+  ])
   def test_encrypt_decrypt(self, key_template_name):
     langs = self._langs_from_key_template_name(key_template_name)
     self.assertNotEmpty(langs)

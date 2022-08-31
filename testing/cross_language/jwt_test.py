@@ -15,7 +15,6 @@
 
 import datetime
 import json
-from typing import Iterable
 
 from absl.testing import absltest
 from absl.testing import parameterized
@@ -23,7 +22,6 @@ from absl.testing import parameterized
 import tink
 from tink import jwt
 
-from util import supported_key_types
 from util import testing_servers
 from util import utilities
 
@@ -38,23 +36,9 @@ def tearDownModule():
   testing_servers.stop()
 
 
-def all_jwt_mac_key_template_names() -> Iterable[str]:
-  """Yields all JWT MAC key template names."""
-  for key_type in supported_key_types.JWT_MAC_KEY_TYPES:
-    for key_template_name in utilities.KEY_TEMPLATE_NAMES[key_type]:
-      yield key_template_name
-
-
-def all_jwt_signature_key_template_names() -> Iterable[str]:
-  """Yields all JWT signature key template names."""
-  for key_type in supported_key_types.JWT_PRIVATE_SIGNATURE_KEY_TYPES:
-    for key_template_name in utilities.KEY_TEMPLATE_NAMES[key_type]:
-      yield key_template_name
-
-
 class JwtTest(parameterized.TestCase):
 
-  @parameterized.parameters(all_jwt_mac_key_template_names())
+  @parameterized.parameters(utilities.tinkey_template_names_for(jwt.JwtMac))
   def test_compute_verify_jwt_mac(self, key_template_name):
     supported_langs = utilities.SUPPORTED_LANGUAGES_BY_TEMPLATE_NAME[
         key_template_name]
@@ -93,7 +77,8 @@ class JwtTest(parameterized.TestCase):
           (p.lang, key_template_name)):
         p.compute_mac_and_encode(raw_jwt)
 
-  @parameterized.parameters(all_jwt_signature_key_template_names())
+  @parameterized.parameters(
+      utilities.tinkey_template_names_for(jwt.JwtPublicKeySign))
   def test_jwt_public_key_sign_verify(self, key_template_name):
     supported_langs = utilities.SUPPORTED_LANGUAGES_BY_TEMPLATE_NAME[
         key_template_name]
@@ -143,7 +128,8 @@ class JwtTest(parameterized.TestCase):
           (signer.lang, key_template_name)):
         _ = signer.sign_and_encode(raw_jwt)
 
-  @parameterized.parameters(all_jwt_signature_key_template_names())
+  @parameterized.parameters(
+      utilities.tinkey_template_names_for(jwt.JwtPublicKeySign))
   def test_jwt_public_key_sign_export_import_verify(self, key_template_name):
     supported_langs = utilities.SUPPORTED_LANGUAGES_BY_TEMPLATE_NAME[
         key_template_name]

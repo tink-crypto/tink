@@ -17,17 +17,22 @@ Currently only tests if keysets without a primary key are properly handled.
 """
 
 import datetime
-
-from typing import List
+from typing import Any
+from typing import Iterable
+from typing import Tuple
 
 from absl.testing import absltest
 from absl.testing import parameterized
-
 import tink
+from tink import aead
+from tink import daead
+from tink import hybrid
 from tink import jwt
+from tink import mac
+from tink import prf
+from tink import signature
 
 from tink.proto import tink_pb2
-
 from util import supported_key_types
 from util import testing_servers
 from util import utilities
@@ -40,8 +45,8 @@ def unset_primary(keyset: bytes) -> bytes:
   return keyset_proto.SerializeToString()
 
 
-def test_cases(key_types: List[str]):
-  for key_type in key_types:
+def test_cases(primitive: Any) -> Iterable[Tuple[str, str]]:
+  for key_type in supported_key_types.KEY_TYPES[primitive]:
     for key_template_name in utilities.KEY_TEMPLATE_NAMES[key_type]:
       for lang in supported_key_types.SUPPORTED_LANGUAGES[key_type]:
         yield (key_template_name, lang)
@@ -58,7 +63,7 @@ def tearDownModule():
 class KeysetValidationTest(parameterized.TestCase):
   """These tests verify keysets are properly validated."""
 
-  @parameterized.parameters(test_cases(supported_key_types.AEAD_KEY_TYPES))
+  @parameterized.parameters(test_cases(aead.Aead))
   def test_aead_without_primary(self, key_template_name, lang):
     """Unsets the primary key and tries to use an AEAD primitive."""
     template = utilities.KEY_TEMPLATE[key_template_name]
@@ -67,7 +72,7 @@ class KeysetValidationTest(parameterized.TestCase):
     with self.assertRaises(tink.TinkError):
       _ = testing_servers.aead(lang, unset_primary(keyset))
 
-  @parameterized.parameters(test_cases(supported_key_types.DAEAD_KEY_TYPES))
+  @parameterized.parameters(test_cases(daead.DeterministicAead))
   def test_daead_without_primary(self, key_template_name, lang):
     """Unsets the primary key and tries to use a DAEAD primitive."""
     template = utilities.KEY_TEMPLATE[key_template_name]
@@ -75,7 +80,7 @@ class KeysetValidationTest(parameterized.TestCase):
     with self.assertRaises(tink.TinkError):
       _ = testing_servers.deterministic_aead(lang, unset_primary(keyset))
 
-  @parameterized.parameters(test_cases(supported_key_types.MAC_KEY_TYPES))
+  @parameterized.parameters(test_cases(mac.Mac))
   def test_mac_without_primary(self, key_template_name, lang):
     """Unsets the primary key and tries to use a MAC primitive."""
     template = utilities.KEY_TEMPLATE[key_template_name]
@@ -87,7 +92,7 @@ class KeysetValidationTest(parameterized.TestCase):
     with self.assertRaises(tink.TinkError):
       mac_without_primary.verify_mac(mac_value, b'foo')
 
-  @parameterized.parameters(test_cases(supported_key_types.PRF_KEY_TYPES))
+  @parameterized.parameters(test_cases(prf.PrfSet))
   def test_prf_without_primary(self, key_template_name, lang):
     """Unsets the primary key and tries to use a PRF set primitive."""
     template = utilities.KEY_TEMPLATE[key_template_name]
@@ -98,9 +103,7 @@ class KeysetValidationTest(parameterized.TestCase):
     with self.assertRaises(tink.TinkError):
       _ = prf_set_without_primary.primary().compute(b'foo', 16)
 
-  # We skip RSA keys to make the tests run faster. It shouldn't make a
-  # difference since the logic does not really depend on the key type.
-  @parameterized.parameters(test_cases(['EcdsaPrivateKey']))
+  @parameterized.parameters(test_cases(signature.PublicKeySign))
   def test_signature_without_primary(self, key_template_name, lang):
     """Unsets the primary key and tries to sign and verify signatures."""
     template = utilities.KEY_TEMPLATE[key_template_name]
@@ -122,8 +125,7 @@ class KeysetValidationTest(parameterized.TestCase):
       with self.assertRaises(tink.TinkError):
         verifier_without_primary.verify(sig, b'foo')
 
-  @parameterized.parameters(
-      test_cases(supported_key_types.HYBRID_PRIVATE_KEY_TYPES))
+  @parameterized.parameters(test_cases(hybrid.HybridDecrypt))
   def test_hybrid_without_primary(self, key_template_name, lang):
     """Unsets the primary key and tries to use hybrid encryption."""
     template = utilities.KEY_TEMPLATE[key_template_name]
@@ -142,9 +144,7 @@ class KeysetValidationTest(parameterized.TestCase):
     with self.assertRaises(tink.TinkError):
       enc_without_primary.encrypt(b'foo', b'context_info')
 
-  # We skip RSA keys to make the tests run faster. It shouldn't make a
-  # difference since the logic does not really depend on the key type.
-  @parameterized.parameters(test_cases(['JwtEcdsaPrivateKey']))
+  @parameterized.parameters(test_cases(jwt.JwtPublicKeySign))
   def test_jwt_signature_without_primary(self, key_template_name, lang):
     """Unsets the primary key and tries to sign and verify JWT signatures."""
     template = utilities.KEY_TEMPLATE[key_template_name]
@@ -173,8 +173,7 @@ class KeysetValidationTest(parameterized.TestCase):
       with self.assertRaises(tink.TinkError):
         verifier_without_primary.verify_and_decode(token, validator)
 
-  @parameterized.parameters(
-      test_cases(supported_key_types.JWT_MAC_KEY_TYPES))
+  @parameterized.parameters(test_cases(jwt.JwtMac))
   def test_jwt_mac_without_primary(self, key_template_name, lang):
     """Unsets the primary key and tries to create and verify JWT MACs."""
     template = utilities.KEY_TEMPLATE[key_template_name]
