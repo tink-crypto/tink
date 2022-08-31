@@ -27,8 +27,16 @@ import (
 
 var (
 	// KeysetHandle creates a keyset.Handle from cleartext key material.
+	// callers should verify that the returned *keyset.Handle isn't nil.
+	// Deprecated: use NewHandle.
 	KeysetHandle = func(ks *tinkpb.Keyset) *keyset.Handle {
-		kh, _ := keysetHandle(ks)
+		kh, err := keysetHandle(ks)
+		if err != nil {
+			// this *keyset.Handle can only return errors when *keyset.Option arguments
+			// are provided. To maintain backwards compatibility and avoid panic, it returns
+			// a nil value if an error happens.
+			return nil
+		}
 		return kh
 	}
 
