@@ -1,0 +1,161 @@
+/*
+ * Copyright 2011 Google LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package com.google.crypto.tink.internal;
+
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonNull;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
+import com.google.gson.TypeAdapter;
+import com.google.gson.internal.LazilyParsedNumber;
+import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.JsonToken;
+import com.google.gson.stream.JsonWriter;
+import java.io.IOException;
+import java.io.StringReader;
+import java.util.ArrayDeque;
+import java.util.Deque;
+import javax.annotation.Nullable;
+
+/**
+ * Implementation of a Strict JSON Parser.
+ *
+ * <p>The parsing is almost identical to TypeAdapters.JSON_ELEMENT, but it rejects duplicated map
+ * keys.
+ */
+final class StrictJsonParser {
+
+  private static final TypeAdapter<JsonElement> JSON_ELEMENT =
+      new TypeAdapter<JsonElement>() {
+        /**
+         * Tries to begin reading a JSON array or JSON object, returning {@code null} if the next
+         * element is neither of those.
+         */
+        @Nullable
+        private JsonElement tryBeginNesting(JsonReader in, JsonToken peeked) throws IOException {
+          switch (peeked) {
+            case BEGIN_ARRAY:
+              in.beginArray();
+              return new JsonArray();
+            case BEGIN_OBJECT:
+              in.beginObject();
+              return new JsonObject();
+            default:
+              return null;
+          }
+        }
+
+        /** Reads a {@link JsonElement} which cannot have any nested elements */
+        private JsonElement readTerminal(JsonReader in, JsonToken peeked) throws IOException {
+          switch (peeked) {
+            case STRING:
+              // TODO(juerg): Add additional validation, as in jwt/JsonUtil.java.
+              return new JsonPrimitive(in.nextString());
+            case NUMBER:
+              String number = in.nextString();
+              return new JsonPrimitive(new LazilyParsedNumber(number));
+            case BOOLEAN:
+              return new JsonPrimitive(in.nextBoolean());
+            case NULL:
+              in.nextNull();
+              return JsonNull.INSTANCE;
+            default:
+              // When read(JsonReader) is called with JsonReader in invalid state
+              throw new IllegalStateException("Unexpected token: " + peeked);
+          }
+        }
+
+        @Override
+        public JsonElement read(JsonReader in) throws IOException {
+          // Either JsonArray or JsonObject
+          JsonElement current;
+          JsonToken peeked = in.peek();
+
+          current = tryBeginNesting(in, peeked);
+          if (current == null) {
+            return readTerminal(in, peeked);
+          }
+
+          Deque<JsonElement> stack = new ArrayDeque<>();
+
+          while (true) {
+            while (in.hasNext()) {
+              String name = null;
+              // Name is only used for JSON object members
+              if (current instanceof JsonObject) {
+                name = in.nextName();
+                // TODO(juerg): Add additional validation, as in jwt/JsonUtil.java.
+              }
+
+              peeked = in.peek();
+              JsonElement value = tryBeginNesting(in, peeked);
+              boolean isNesting = value != null;
+
+              if (value == null) {
+                value = readTerminal(in, peeked);
+              }
+
+              if (current instanceof JsonArray) {
+                ((JsonArray) current).add(value);
+              } else {
+                if (((JsonObject) current).has(name)) {
+                  throw new IOException("duplicate key: " + name);
+                }
+                ((JsonObject) current).add(name, value);
+              }
+
+              if (isNesting) {
+                stack.addLast(current);
+                current = value;
+              }
+            }
+
+            // End current element
+            if (current instanceof JsonArray) {
+              in.endArray();
+            } else {
+              in.endObject();
+            }
+
+            if (stack.isEmpty()) {
+              return current;
+            } else {
+              // Continue with enclosing element
+              current = stack.removeLast();
+            }
+          }
+        }
+
+        @Override
+        public void write(JsonWriter out, JsonElement value) {
+          throw new UnsupportedOperationException("write is not supported");
+        }
+      };
+
+  public static JsonElement parse(String json) throws IOException {
+    try {
+      JsonReader jsonReader = new JsonReader(new StringReader(json));
+      jsonReader.setLenient(false);
+      return JSON_ELEMENT.read(jsonReader);
+    } catch (NumberFormatException e) {
+      throw new IOException(e);
+    }
+  }
+
+  private StrictJsonParser() {}
+}

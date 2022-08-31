@@ -284,3 +284,15 @@ java_test(
         "@maven//:junit_junit",
     ],
 )
+
+java_test(
+    name = "StrictJsonParserTest",
+    size = "small",
+    srcs = ["StrictJsonParserTest.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink/internal:strict_json_parser",
+        "@maven//:com_google_code_gson_gson",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)

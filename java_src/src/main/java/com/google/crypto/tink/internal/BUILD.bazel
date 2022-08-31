@@ -494,3 +494,21 @@ java_library(
     srcs = ["BuildDispatchedCode.java"],
     deps = ["@maven//:com_google_code_findbugs_jsr305"],
 )
+
+java_library(
+    name = "strict_json_parser",
+    srcs = ["StrictJsonParser.java"],
+    deps = [
+        "@maven//:com_google_code_findbugs_jsr305",
+        "@maven//:com_google_code_gson_gson",
+    ],
+)
+
+android_library(
+    name = "strict_json_parser-android",
+    srcs = ["StrictJsonParser.java"],
+    deps = [
+        "@maven//:com_google_code_findbugs_jsr305",
+        "@maven//:com_google_code_gson_gson",
+    ],
+)
