@@ -37,7 +37,7 @@ func validateRSAPubKeyParams(h commonpb.HashType, modSizeBits int, pubExponent [
 	}
 	e := bytesToBigInt(pubExponent)
 	if !e.IsInt64() {
-		return fmt.Errorf("public exponent can't fit in a 64 bit number")
+		return fmt.Errorf("public exponent can't fit in a 64 bit integer")
 	}
 	return internal.RSAValidPublicExponent(int(e.Int64()))
 }
