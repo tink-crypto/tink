@@ -54,8 +54,7 @@ process_args() {
   # Parse options.
   while getopts "mh" opt; do
     case "${opt}" in
-      d) MANUAL_ONLY="true" ;;
-      h) usage ;;
+      m) MANUAL_ONLY="true" ;;
       *) usage ;;
     esac
   done
