@@ -70,14 +70,19 @@ public class JsonKeysetWriterTest {
 
   @Test
   public void testWrite_multipleKeys_shouldWork() throws Exception {
-    KeyTemplate template = MacKeyTemplates.HMAC_SHA256_128BITTAG;
     KeysetHandle handle1 =
-        KeysetManager.withEmptyKeyset()
-            .rotate(template)
-            .add(template)
-            .add(template)
-            .getKeysetHandle();
-
+        KeysetHandle.newBuilder()
+            .addEntry(
+                KeysetHandle.generateEntryFromParametersName("HMAC_SHA256_128BITTAG")
+                    .withRandomId()
+                    .makePrimary())
+            .addEntry(
+                KeysetHandle.generateEntryFromParametersName("HMAC_SHA256_128BITTAG")
+                    .withRandomId())
+            .addEntry(
+                KeysetHandle.generateEntryFromParametersName("HMAC_SHA256_128BITTAG")
+                    .withRandomId())
+            .build();
     testWrite_shouldWork(handle1);
   }
 
@@ -106,14 +111,19 @@ public class JsonKeysetWriterTest {
   @Test
   public void testWriteEncrypted_multipleKeys_shouldWork() throws Exception {
     // Encrypt the keyset with an AeadKey.
-    KeyTemplate template = MacKeyTemplates.HMAC_SHA256_128BITTAG;
     KeysetHandle handle1 =
-        KeysetManager.withEmptyKeyset()
-            .rotate(template)
-            .add(template)
-            .add(template)
-            .getKeysetHandle();
-
+        KeysetHandle.newBuilder()
+            .addEntry(
+                KeysetHandle.generateEntryFromParametersName("HMAC_SHA256_128BITTAG")
+                    .withRandomId()
+                    .makePrimary())
+            .addEntry(
+                KeysetHandle.generateEntryFromParametersName("HMAC_SHA256_128BITTAG")
+                    .withRandomId())
+            .addEntry(
+                KeysetHandle.generateEntryFromParametersName("HMAC_SHA256_128BITTAG")
+                    .withRandomId())
+            .build();
     testWriteEncrypted_shouldWork(handle1);
   }
 

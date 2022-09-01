@@ -104,13 +104,19 @@ public class JsonKeysetReaderTest {
 
   @Test
   public void testRead_multipleKeys_shouldWork() throws Exception {
-    KeyTemplate template = MacKeyTemplates.HMAC_SHA256_128BITTAG;
     KeysetHandle handle1 =
-        KeysetManager.withEmptyKeyset()
-            .rotate(template)
-            .add(template)
-            .add(template)
-            .getKeysetHandle();
+        KeysetHandle.newBuilder()
+            .addEntry(
+                KeysetHandle.generateEntryFromParametersName("HMAC_SHA256_128BITTAG")
+                    .withRandomId()
+                    .makePrimary())
+            .addEntry(
+                KeysetHandle.generateEntryFromParametersName("HMAC_SHA256_128BITTAG")
+                    .withRandomId())
+            .addEntry(
+                KeysetHandle.generateEntryFromParametersName("HMAC_SHA256_128BITTAG")
+                    .withRandomId())
+            .build();
     ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
     CleartextKeysetHandle.write(handle1, JsonKeysetWriter.withOutputStream(outputStream));
     KeysetHandle handle2 =
@@ -283,25 +289,27 @@ public class JsonKeysetReaderTest {
     Aead keysetEncryptionAead =
         KeysetHandle.generateNew(KeyTemplates.get("AES128_EAX")).getPrimitive(Aead.class);
     ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-    KeysetManager manager =
-        KeysetManager.withEmptyKeyset()
-            .add(KeyTemplates.get("HMAC_SHA256_128BITTAG"))
-            .add(KeyTemplates.get("HMAC_SHA256_128BITTAG_RAW"))
-            .add(KeyTemplates.get("HMAC_SHA256_256BITTAG"))
-            .add(KeyTemplates.get("HMAC_SHA256_256BITTAG_RAW"))
-            .add(KeyTemplates.get("AES256_CMAC"));
-    // To get the key IDs
-    KeysetHandle h = manager.getKeysetHandle();
-    int keyId1 = h.getKeysetInfo().getKeyInfo(1).getKeyId();
-    int keyId2 = h.getKeysetInfo().getKeyInfo(2).getKeyId();
-    int keyId3 = h.getKeysetInfo().getKeyInfo(3).getKeyId();
-    int keyId4 = h.getKeysetInfo().getKeyInfo(4).getKeyId();
-    manager.setPrimary(keyId1);
-    manager.delete(keyId2);
-    manager.destroy(keyId3);
-    manager.disable(keyId4);
-    KeysetHandle handle1 = manager.getKeysetHandle();
-
+    KeysetHandle handle1 =
+        KeysetHandle.newBuilder()
+            .addEntry(
+                KeysetHandle.generateEntryFromParametersName("HMAC_SHA256_128BITTAG")
+                    .withRandomId())
+            .addEntry(
+                KeysetHandle.generateEntryFromParametersName("HMAC_SHA256_128BITTAG_RAW")
+                    .withRandomId()
+                    .makePrimary())
+            .addEntry(
+                KeysetHandle.generateEntryFromParametersName("HMAC_SHA256_256BITTAG")
+                    .withRandomId())
+            .addEntry(
+                KeysetHandle.generateEntryFromParametersName("HMAC_SHA256_256BITTAG_RAW")
+                    .withRandomId()
+                    .setStatus(KeyStatus.DESTROYED))
+            .addEntry(
+                KeysetHandle.generateEntryFromParametersName("AES256_CMAC")
+                    .withRandomId()
+                    .setStatus(KeyStatus.DISABLED))
+            .build();
     handle1.write(JsonKeysetWriter.withOutputStream(outputStream), keysetEncryptionAead);
     KeysetHandle handle2 =
         KeysetHandle.read(
