@@ -18,9 +18,12 @@
 package signature
 
 import (
+	"math/big"
 	"testing"
 
+	"github.com/google/go-cmp/cmp"
 	"google.golang.org/protobuf/proto"
+	"google.golang.org/protobuf/testing/protocmp"
 	"github.com/google/tink/go/subtle/random"
 	"github.com/google/tink/go/tink"
 	cpb "github.com/google/tink/go/proto/common_go_proto"
@@ -30,7 +33,25 @@ import (
 
 const (
 	rsaPSSTestPrivateKeyTypeURL = "type.googleapis.com/google.crypto.tink.RsaSsaPssPrivateKey"
+	rsaPSSTestPrivateKeyVersion = 0
 )
+
+func TestRSASSAPSSSignerKeyManagerDoesSupport(t *testing.T) {
+	skm := &rsaSSAPSSSignerKeyManager{}
+	if !skm.DoesSupport(rsaPSSTestPrivateKeyTypeURL) {
+		t.Errorf("DoesSupport(%q) err = false, want true", rsaPSSTestPrivateKeyTypeURL)
+	}
+	if skm.DoesSupport("fake.type.url") {
+		t.Errorf("DoesSupport(%q) err = true, want false", "fake.type.url")
+	}
+}
+
+func TestRSASSAPSSSignerKeyManagerTypeURL(t *testing.T) {
+	skm := &rsaSSAPSSSignerKeyManager{}
+	if skm.TypeURL() != rsaPSSTestPrivateKeyTypeURL {
+		t.Errorf("TypeURL() = %q, want %q", skm.TypeURL(), rsaPSSTestPrivateKeyTypeURL)
+	}
+}
 
 func TestRSASSAPSSSignerGetPrimitive(t *testing.T) {
 	skm := &rsaSSAPSSSignerKeyManager{}
@@ -325,6 +346,211 @@ func TestRSASSAPSSSignerGetPrimitiveWithCorruptedPrivateKey(t *testing.T) {
 	}
 	if _, err := skm.Primitive(serializedPrivKey); err == nil {
 		t.Errorf("Primitive() err = nil, want error")
+	}
+}
+
+func TestRSASSAPSSSignerNewKey(t *testing.T) {
+	keyFormat := &rsppb.RsaSsaPssKeyFormat{
+		Params: &rsppb.RsaSsaPssParams{
+			SigHash:    cpb.HashType_SHA256,
+			Mgf1Hash:   cpb.HashType_SHA256,
+			SaltLength: 32,
+		},
+		ModulusSizeInBits: 3072,
+		PublicExponent:    []byte{0x01, 0x00, 0x01},
+	}
+	serializedKeyFormat, err := proto.Marshal(keyFormat)
+	if err != nil {
+		t.Fatalf("proto.Marshal() err = %v, want nil", err)
+	}
+	skm := &rsaSSAPSSSignerKeyManager{}
+	key, err := skm.NewKey(serializedKeyFormat)
+	if err != nil {
+		t.Fatalf("NewKey() err = %v, want nil", err)
+	}
+	privKey, ok := key.(*rsppb.RsaSsaPssPrivateKey)
+	if !ok {
+		t.Fatalf("key isn't a *rsppb.RsaSsaPssPrivateKey")
+	}
+	if privKey.GetVersion() != rsaPSSTestPrivateKeyVersion {
+		t.Errorf("privKey.GetVersion() = %d, want %d", privKey.GetVersion(), rsaPSSTestPrivateKeyVersion)
+	}
+	if privKey.GetD() == nil {
+		t.Error("GetD() == nil, want []byte{}")
+	}
+	if privKey.GetP() == nil {
+		t.Error("GetP() == nil, want []byte{}")
+	}
+	if privKey.GetQ() == nil {
+		t.Error("GetQ() == nil, want []byte{}")
+	}
+	if privKey.GetDp() == nil {
+		t.Error("GetDp() == nil, want []byte{}")
+	}
+	if privKey.GetDq() == nil {
+		t.Error("GetDq() == nil, want []byte{}")
+	}
+	if privKey.GetCrt() == nil {
+		t.Error("GetCrt() == nil, want []byte{}")
+	}
+	pubKey := privKey.GetPublicKey()
+	if !cmp.Equal(pubKey.GetE(), keyFormat.GetPublicExponent()) {
+		t.Errorf("GetE() = %v, want %v", pubKey.GetE(), keyFormat.GetPublicExponent())
+	}
+	n := uint32(new(big.Int).SetBytes(pubKey.GetN()).BitLen())
+	if !cmp.Equal(n, keyFormat.GetModulusSizeInBits()) {
+		t.Errorf("Modulus size in bits = %q, want %q", n, keyFormat.GetModulusSizeInBits())
+	}
+	if !cmp.Equal(pubKey.GetParams(), keyFormat.GetParams(), protocmp.Transform()) {
+		t.Errorf("GetParams() = %v, want %v", pubKey.GetParams(), keyFormat.GetParams())
+	}
+}
+
+func TestRSASSAPSSSignerNewKeyData(t *testing.T) {
+	keyFormat := &rsppb.RsaSsaPssKeyFormat{
+		Params: &rsppb.RsaSsaPssParams{
+			SigHash:    cpb.HashType_SHA256,
+			Mgf1Hash:   cpb.HashType_SHA256,
+			SaltLength: 32,
+		},
+		ModulusSizeInBits: 3072,
+		PublicExponent:    []byte{0x01, 0x00, 0x01},
+	}
+	serializedKeyFormat, err := proto.Marshal(keyFormat)
+	if err != nil {
+		t.Fatalf("proto.Marshal() err = %v, want nil", err)
+	}
+	skm := &rsaSSAPSSSignerKeyManager{}
+	vkm := &rsaSSAPSSVerifierKeyManager{}
+	keyData, err := skm.NewKeyData(serializedKeyFormat)
+	if err != nil {
+		t.Fatalf("skm.NewKeyData() err = %v, want nil", err)
+	}
+	if keyData.GetKeyMaterialType() != tpb.KeyData_ASYMMETRIC_PRIVATE {
+		t.Errorf("keyData.GetKeyMaterialType() = %v, want %v", keyData.GetKeyMaterialType(), tpb.KeyData_ASYMMETRIC_PRIVATE)
+	}
+	if keyData.GetTypeUrl() != rsaPSSTestPrivateKeyTypeURL {
+		t.Errorf("keyData.GetTypeUrl() = %q, want %q", keyData.GetTypeUrl(), rsaPSSTestPrivateKeyTypeURL)
+	}
+	// Creating a primitive does a self key test which signs and verifies data.
+	s, err := skm.Primitive(keyData.GetValue())
+	if err != nil {
+		t.Fatalf("Primitive() err = %v, want nil", err)
+	}
+	signer, ok := s.(tink.Signer)
+	if !ok {
+		t.Fatal("Primitive() return type isn't a tink.Signer")
+	}
+	data := random.GetRandomBytes(50)
+	sig, err := signer.Sign(data)
+	if err != nil {
+		t.Fatalf("signer.Sign() err = %v, want nil", err)
+	}
+	pubKeyData, err := skm.PublicKeyData(keyData.GetValue())
+	if err != nil {
+		t.Fatalf("PublicKeyData() err = %v, want nil", err)
+	}
+	v, err := vkm.Primitive(pubKeyData.GetValue())
+	if err != nil {
+		t.Fatalf("Primitive() err = %v, want nil", err)
+	}
+	verifier, ok := v.(tink.Verifier)
+	if !ok {
+		t.Fatal("Primitive() return type isn't a tink.Verifier")
+	}
+	if err := verifier.Verify(sig, data); err != nil {
+		t.Fatalf("verifier.Verify() err = %v, want nil", err)
+	}
+}
+
+func TestRSASSAPSSSignerNewKeyFailsWithInvalidFormat(t *testing.T) {
+	type testCase struct {
+		tag       string
+		keyFormat *rsppb.RsaSsaPssKeyFormat
+	}
+	skm := &rsaSSAPSSSignerKeyManager{}
+	validKeyFormat := &rsppb.RsaSsaPssKeyFormat{
+		Params: &rsppb.RsaSsaPssParams{
+			SigHash:    cpb.HashType_SHA256,
+			Mgf1Hash:   cpb.HashType_SHA256,
+			SaltLength: 32,
+		},
+		ModulusSizeInBits: 3072,
+		PublicExponent:    []byte{0x01, 0x00, 0x01},
+	}
+	serializedKeyFormat, err := proto.Marshal(validKeyFormat)
+	if err != nil {
+		t.Fatalf("proto.Marshal() err = %v, want nil", err)
+	}
+	if _, err := skm.NewKeyData(serializedKeyFormat); err != nil {
+		t.Fatalf("NewKeyData() err = %v, want nil", err)
+	}
+	for _, tc := range []testCase{
+		{
+			tag: "unsafe hash function",
+			keyFormat: &rsppb.RsaSsaPssKeyFormat{
+				Params: &rsppb.RsaSsaPssParams{
+					SigHash:    cpb.HashType_SHA224,
+					Mgf1Hash:   cpb.HashType_SHA224,
+					SaltLength: validKeyFormat.GetParams().GetSaltLength(),
+				},
+				ModulusSizeInBits: validKeyFormat.GetModulusSizeInBits(),
+				PublicExponent:    validKeyFormat.GetPublicExponent(),
+			},
+		},
+		{
+			tag: "different signature and mgf1 hash function",
+			keyFormat: &rsppb.RsaSsaPssKeyFormat{
+				Params: &rsppb.RsaSsaPssParams{
+					SigHash:    cpb.HashType_SHA384,
+					Mgf1Hash:   cpb.HashType_SHA512,
+					SaltLength: validKeyFormat.GetParams().GetSaltLength(),
+				},
+				ModulusSizeInBits: validKeyFormat.GetModulusSizeInBits(),
+				PublicExponent:    validKeyFormat.GetPublicExponent(),
+			},
+		},
+		{
+			tag: "negative salt length",
+			keyFormat: &rsppb.RsaSsaPssKeyFormat{
+				Params: &rsppb.RsaSsaPssParams{
+					SigHash:    validKeyFormat.GetParams().GetSigHash(),
+					Mgf1Hash:   validKeyFormat.GetParams().GetMgf1Hash(),
+					SaltLength: -1,
+				},
+				ModulusSizeInBits: validKeyFormat.GetModulusSizeInBits(),
+				PublicExponent:    validKeyFormat.GetPublicExponent(),
+			},
+		},
+		{
+			tag: "insecure modulus size",
+			keyFormat: &rsppb.RsaSsaPssKeyFormat{
+				Params:            validKeyFormat.GetParams(),
+				ModulusSizeInBits: 2047,
+				PublicExponent:    validKeyFormat.GetPublicExponent(),
+			},
+		},
+		{
+			tag: "invalid public exponent",
+			keyFormat: &rsppb.RsaSsaPssKeyFormat{
+				Params:            validKeyFormat.GetParams(),
+				ModulusSizeInBits: validKeyFormat.GetModulusSizeInBits(),
+				PublicExponent:    []byte{0x00, 0x00, 0x03},
+			},
+		},
+	} {
+		t.Run(tc.tag, func(t *testing.T) {
+			serializedKeyFormat, err := proto.Marshal(tc.keyFormat)
+			if err != nil {
+				t.Fatalf("proto.Marshal() err = %v, want nil", err)
+			}
+			if _, err := skm.NewKey(serializedKeyFormat); err == nil {
+				t.Fatalf("NewKey() err = nil, want error")
+			}
+			if _, err := skm.NewKeyData(serializedKeyFormat); err == nil {
+				t.Fatalf("NewKeyData() err = nil, want error")
+			}
+		})
 	}
 }
 

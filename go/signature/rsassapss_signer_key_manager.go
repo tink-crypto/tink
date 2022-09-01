@@ -17,6 +17,7 @@
 package signature
 
 import (
+	"crypto/rand"
 	"crypto/rsa"
 	"fmt"
 
@@ -121,13 +122,61 @@ func (km *rsaSSAPSSSignerKeyManager) PublicKeyData(serializedPrivKey []byte) (*t
 }
 
 func (km *rsaSSAPSSSignerKeyManager) NewKey(serializedKeyFormat []byte) (proto.Message, error) {
-	// TODO(b/173082704) implement in children CL.
-	return nil, fmt.Errorf("not implemented")
+	if len(serializedKeyFormat) == 0 {
+		return nil, fmt.Errorf("invalid key format")
+	}
+	keyFormat := &rsassapsspb.RsaSsaPssKeyFormat{}
+	if err := proto.Unmarshal(serializedKeyFormat, keyFormat); err != nil {
+		return nil, err
+	}
+	params := keyFormat.GetParams()
+	if params.GetSigHash() != params.GetMgf1Hash() {
+		return nil, fmt.Errorf("signature hash and mgf1 hash must be the same")
+	}
+	if params.GetSaltLength() < 0 {
+		return nil, fmt.Errorf("salt length can't be negative")
+	}
+	if err := validateRSAPubKeyParams(
+		params.GetSigHash(),
+		int(keyFormat.GetModulusSizeInBits()),
+		keyFormat.GetPublicExponent()); err != nil {
+		return nil, err
+	}
+	privKey, err := rsa.GenerateKey(rand.Reader, int(keyFormat.GetModulusSizeInBits()))
+	if err != nil {
+		return nil, err
+	}
+	return &rsassapsspb.RsaSsaPssPrivateKey{
+		Version: rsaSSAPSSSignerKeyVersion,
+		PublicKey: &rsassapsspb.RsaSsaPssPublicKey{
+			Version: rsaSSAPSSSignerKeyVersion,
+			Params:  keyFormat.GetParams(),
+			N:       privKey.PublicKey.N.Bytes(),
+			E:       big.NewInt(int64(privKey.PublicKey.E)).Bytes(),
+		},
+		D:   privKey.D.Bytes(),
+		P:   privKey.Primes[0].Bytes(),
+		Q:   privKey.Primes[1].Bytes(),
+		Dp:  privKey.Precomputed.Dp.Bytes(),
+		Dq:  privKey.Precomputed.Dq.Bytes(),
+		Crt: privKey.Precomputed.Qinv.Bytes(),
+	}, nil
 }
 
 func (km *rsaSSAPSSSignerKeyManager) NewKeyData(serializedKeyFormat []byte) (*tinkpb.KeyData, error) {
-	// TODO(b/173082704) implement in children CL.
-	return nil, fmt.Errorf("not implemented")
+	key, err := km.NewKey(serializedKeyFormat)
+	if err != nil {
+		return nil, err
+	}
+	serializedKey, err := proto.Marshal(key)
+	if err != nil {
+		return nil, err
+	}
+	return &tinkpb.KeyData{
+		TypeUrl:         rsaSSAPSSSignerTypeURL,
+		Value:           serializedKey,
+		KeyMaterialType: tinkpb.KeyData_ASYMMETRIC_PRIVATE,
+	}, nil
 }
 
 func (km *rsaSSAPSSSignerKeyManager) DoesSupport(typeURL string) bool {
