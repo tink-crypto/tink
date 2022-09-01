@@ -65,6 +65,7 @@ go_test(
         "//aead/subtle",
         "//core/cryptofmt",
         "//core/registry",
+        "//insecurecleartextkeyset",
         "//internal/internalregistry",
         "//keyset",
         "//monitoring",

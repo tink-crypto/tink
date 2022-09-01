@@ -26,6 +26,7 @@ import (
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/tink/go/aead"
 	"github.com/google/tink/go/core/cryptofmt"
+	"github.com/google/tink/go/insecurecleartextkeyset"
 	"github.com/google/tink/go/internal/internalregistry"
 	"github.com/google/tink/go/keyset"
 	"github.com/google/tink/go/monitoring"
@@ -531,6 +532,87 @@ func TestFactoryWithMonitoringMultiplePrimitivesLogOperations(t *testing.T) {
 							KeyID:          kh2.KeysetInfo().GetPrimaryKeyId(),
 							Status:         monitoring.Enabled,
 							FormatAsString: "type.googleapis.com/google.crypto.tink.AesCtrHmacAeadKey",
+						},
+					},
+				),
+			),
+		},
+	}
+	if !cmp.Equal(got, want) {
+		t.Errorf("got = %v, want = %v, with diff: %v", got, want, cmp.Diff(got, want))
+	}
+}
+
+func TestFactoryWithMonitoringAnnotations(t *testing.T) {
+	defer internalregistry.ClearMonitoringClient()
+	client := &fakemonitoring.Client{Name: ""}
+	if err := internalregistry.RegisterMonitoringClient(client); err != nil {
+		t.Fatalf("internalregistry.RegisterMonitoringClient() err = %v, want nil", err)
+	}
+	kh, err := keyset.NewHandle(aead.AES128GCMKeyTemplate())
+	if err != nil {
+		t.Fatalf("keyset.NewHandle() err = %v, want nil", err)
+	}
+	// Annotations are only supported throught the `insecurecleartextkeyset` API.
+	buff := &bytes.Buffer{}
+	if err := insecurecleartextkeyset.Write(kh, keyset.NewBinaryWriter(buff)); err != nil {
+		t.Fatalf("insecurecleartextkeyset.Write() err = %v, want nil", err)
+	}
+	annotations := map[string]string{"foo": "bar"}
+	mh, err := insecurecleartextkeyset.Read(keyset.NewBinaryReader(buff), keyset.WithAnnotations(annotations))
+	if err != nil {
+		t.Fatalf("insecurecleartextkeyset.Read() err = %v, want nil", err)
+	}
+	p, err := aead.New(mh)
+	if err != nil {
+		t.Fatalf("aead.New() err = %v, want nil", err)
+	}
+	pt := []byte("HELLO_WORLD")
+	ad := []byte("_!")
+	ct, err := p.Encrypt(pt, ad)
+	if err != nil {
+		t.Fatalf("p.Encrypt() err = %v, want nil", err)
+	}
+	if _, err := p.Decrypt(ct, ad); err != nil {
+		t.Fatalf("p.Decrypt() err = %v, want nil", err)
+	}
+	got := client.Events()
+	want := []*fakemonitoring.LogEvent{
+		{
+			KeyID:    mh.KeysetInfo().GetPrimaryKeyId(),
+			NumBytes: len(pt),
+			Context: monitoring.NewContext(
+				"aead",
+				"encrypt",
+				monitoring.NewKeysetInfo(
+					map[string]string{"foo": "bar"},
+					mh.KeysetInfo().GetPrimaryKeyId(),
+					[]*monitoring.Entry{
+						{
+							KeyID:          mh.KeysetInfo().GetPrimaryKeyId(),
+							Status:         monitoring.Enabled,
+							FormatAsString: "type.googleapis.com/google.crypto.tink.AesGcmKey",
+						},
+					},
+				),
+			),
+		},
+		{
+			KeyID: mh.KeysetInfo().GetPrimaryKeyId(),
+			// ciphertext was encrypted with a key that has TINK ouput prefix. This adds a 5 bytes prefix
+			// to the ciphertext. This prefix is not included in `Log` call.
+			NumBytes: len(ct) - cryptofmt.NonRawPrefixSize,
+			Context: monitoring.NewContext(
+				"aead",
+				"decrypt",
+				monitoring.NewKeysetInfo(
+					map[string]string{"foo": "bar"},
+					mh.KeysetInfo().GetPrimaryKeyId(),
+					[]*monitoring.Entry{
+						{
+							KeyID:          mh.KeysetInfo().GetPrimaryKeyId(),
+							Status:         monitoring.Enabled,
+							FormatAsString: "type.googleapis.com/google.crypto.tink.AesGcmKey",
 						},
 					},
 				),
