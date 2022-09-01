@@ -178,6 +178,7 @@ tink_cc_library(
     absl::str_format
     absl::optional
     crypto
+    tink::core::partial_key_access_token
     tink::core::restricted_data
     tink::subtle::subtle_util
     tink::util::status
@@ -333,6 +334,7 @@ tink_cc_test(
     tink::mac::aes_cmac_parameters
     gmock
     absl::optional
+    tink::core::partial_key_access
     tink::core::restricted_data
     tink::util::statusor
     tink::util::test_matchers

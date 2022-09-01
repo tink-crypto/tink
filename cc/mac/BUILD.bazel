@@ -185,6 +185,7 @@ cc_library(
     deps = [
         ":aes_cmac_parameters",
         ":mac_key",
+        "//:partial_key_access_token",
         "//:restricted_data",
         "//subtle:subtle_util",
         "//util:status",
@@ -352,6 +353,7 @@ cc_test(
     deps = [
         ":aes_cmac_key",
         ":aes_cmac_parameters",
+        "//:partial_key_access",
         "//:restricted_data",
         "//util:statusor",
         "//util:test_matchers",

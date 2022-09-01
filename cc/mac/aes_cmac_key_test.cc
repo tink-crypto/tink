@@ -25,6 +25,7 @@
 #include "gtest/gtest.h"
 #include "absl/types/optional.h"
 #include "tink/mac/aes_cmac_parameters.h"
+#include "tink/partial_key_access.h"
 #include "tink/restricted_data.h"
 #include "tink/util/statusor.h"
 #include "tink/util/test_matchers.h"
@@ -73,8 +74,8 @@ TEST_P(AesCmacKeyTest, CreateSucceeds) {
   ASSERT_THAT(params, IsOk());
 
   RestrictedData secret = RestrictedData(key_size);
-  util::StatusOr<AesCmacKey> key =
-      AesCmacKey::Create(*params, secret, test_case.id_requirement);
+  util::StatusOr<AesCmacKey> key = AesCmacKey::Create(
+      *params, secret, test_case.id_requirement, GetPartialKeyAccess());
   ASSERT_THAT(key.status(), IsOk());
 
   EXPECT_THAT(key->GetParameters(), Eq(*params));
@@ -93,10 +94,10 @@ TEST(AesCmacKeyTest, CreateKeyWithMismatchedKeySizeFails) {
   // Key material is 16 bytes (another valid key length).
   RestrictedData mismatched_secret = RestrictedData(/*num_random_bytes=*/16);
 
-  EXPECT_THAT(
-      AesCmacKey::Create(*params, mismatched_secret, /*id_requirement=*/123)
-          .status(),
-      StatusIs(absl::StatusCode::kInvalidArgument));
+  EXPECT_THAT(AesCmacKey::Create(*params, mismatched_secret,
+                                 /*id_requirement=*/123, GetPartialKeyAccess())
+                  .status(),
+              StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
 TEST(AesCmacKeyTest, CreateKeyWithWrongIdRequirementFails) {
@@ -114,12 +115,13 @@ TEST(AesCmacKeyTest, CreateKeyWithWrongIdRequirementFails) {
 
   RestrictedData secret = RestrictedData(/*num_random_bytes=*/32);
 
-  EXPECT_THAT(
-      AesCmacKey::Create(*no_prefix_params, secret, /*id_requirement=*/123)
-          .status(),
-      StatusIs(absl::StatusCode::kInvalidArgument));
+  EXPECT_THAT(AesCmacKey::Create(*no_prefix_params, secret,
+                                 /*id_requirement=*/123, GetPartialKeyAccess())
+                  .status(),
+              StatusIs(absl::StatusCode::kInvalidArgument));
   EXPECT_THAT(AesCmacKey::Create(*tink_params, secret,
-                                 /*id_requirement=*/absl::nullopt)
+                                 /*id_requirement=*/absl::nullopt,
+                                 GetPartialKeyAccess())
                   .status(),
               StatusIs(absl::StatusCode::kInvalidArgument));
 }
@@ -136,11 +138,11 @@ TEST_P(AesCmacKeyTest, GetAesCmacKey) {
 
   RestrictedData secret = RestrictedData(key_size);
 
-  util::StatusOr<AesCmacKey> key =
-      AesCmacKey::Create(*params, secret, test_case.id_requirement);
+  util::StatusOr<AesCmacKey> key = AesCmacKey::Create(
+      *params, secret, test_case.id_requirement, GetPartialKeyAccess());
   ASSERT_THAT(key.status(), IsOk());
 
-  EXPECT_THAT(key->GetAesKey(), IsOkAndHolds(secret));
+  EXPECT_THAT(key->GetAesKey(GetPartialKeyAccess()), IsOkAndHolds(secret));
 }
 
 TEST_P(AesCmacKeyTest, KeyEquals) {
@@ -154,12 +156,12 @@ TEST_P(AesCmacKeyTest, KeyEquals) {
   ASSERT_THAT(params, IsOk());
 
   RestrictedData secret = RestrictedData(key_size);
-  util::StatusOr<AesCmacKey> key =
-      AesCmacKey::Create(*params, secret, test_case.id_requirement);
+  util::StatusOr<AesCmacKey> key = AesCmacKey::Create(
+      *params, secret, test_case.id_requirement, GetPartialKeyAccess());
   ASSERT_THAT(key, IsOk());
 
-  util::StatusOr<AesCmacKey> other_key =
-      AesCmacKey::Create(*params, secret, test_case.id_requirement);
+  util::StatusOr<AesCmacKey> other_key = AesCmacKey::Create(
+      *params, secret, test_case.id_requirement, GetPartialKeyAccess());
   ASSERT_THAT(other_key, IsOk());
 
   EXPECT_TRUE(*key == *other_key);
@@ -184,11 +186,13 @@ TEST(AesCmacKeyTest, DifferentFormatNotEqual) {
   RestrictedData secret = RestrictedData(/*num_random_bytes=*/32);
 
   util::StatusOr<AesCmacKey> key =
-      AesCmacKey::Create(*legacy_params, secret, /*id_requirement=*/0x01020304);
+      AesCmacKey::Create(*legacy_params, secret, /*id_requirement=*/0x01020304,
+                         GetPartialKeyAccess());
   ASSERT_THAT(key.status(), IsOk());
 
   util::StatusOr<AesCmacKey> other_key =
-      AesCmacKey::Create(*tink_params, secret, /*id_requirement=*/0x01020304);
+      AesCmacKey::Create(*tink_params, secret, /*id_requirement=*/0x01020304,
+                         GetPartialKeyAccess());
   ASSERT_THAT(other_key.status(), IsOk());
 
   EXPECT_TRUE(*key != *other_key);
@@ -207,12 +211,12 @@ TEST(AesCmacKeyTest, DifferentSecretDataNotEqual) {
   RestrictedData secret1 = RestrictedData(/*num_random_bytes=*/32);
   RestrictedData secret2 = RestrictedData(/*num_random_bytes=*/32);
 
-  util::StatusOr<AesCmacKey> key =
-      AesCmacKey::Create(*params, secret1, /*id_requirement=*/0x01020304);
+  util::StatusOr<AesCmacKey> key = AesCmacKey::Create(
+      *params, secret1, /*id_requirement=*/0x01020304, GetPartialKeyAccess());
   ASSERT_THAT(key.status(), IsOk());
 
-  util::StatusOr<AesCmacKey> other_key =
-      AesCmacKey::Create(*params, secret2, /*id_requirement=*/0x01020304);
+  util::StatusOr<AesCmacKey> other_key = AesCmacKey::Create(
+      *params, secret2, /*id_requirement=*/0x01020304, GetPartialKeyAccess());
   ASSERT_THAT(other_key.status(), IsOk());
 
   EXPECT_TRUE(*key != *other_key);
@@ -230,12 +234,12 @@ TEST(AesCmacKeyTest, DifferentIdRequirementNotEqual) {
 
   RestrictedData secret = RestrictedData(/*num_random_bytes=*/32);
 
-  util::StatusOr<AesCmacKey> key =
-      AesCmacKey::Create(*params, secret, /*id_requirement=*/0x01020304);
+  util::StatusOr<AesCmacKey> key = AesCmacKey::Create(
+      *params, secret, /*id_requirement=*/0x01020304, GetPartialKeyAccess());
   ASSERT_THAT(key.status(), IsOk());
 
-  util::StatusOr<AesCmacKey> other_key =
-      AesCmacKey::Create(*params, secret, /*id_requirement=*/0x02030405);
+  util::StatusOr<AesCmacKey> other_key = AesCmacKey::Create(
+      *params, secret, /*id_requirement=*/0x02030405, GetPartialKeyAccess());
   ASSERT_THAT(other_key.status(), IsOk());
 
   EXPECT_TRUE(*key != *other_key);

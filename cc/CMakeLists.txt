@@ -658,6 +658,20 @@ tink_cc_library(
 )
 
 tink_cc_library(
+  NAME partial_key_access_token
+  SRCS
+    partial_key_access_token.h
+)
+
+tink_cc_library(
+  NAME partial_key_access
+  SRCS
+    partial_key_access.h
+  DEPS
+    tink::core::partial_key_access_token
+)
+
+tink_cc_library(
   NAME secret_key_access_token
   SRCS
     secret_key_access_token.h
@@ -953,6 +967,17 @@ tink_cc_test(
     tink::core::key_access
     tink::core::secret_key_access_testonly
     gmock
+)
+
+tink_cc_test(
+  NAME partial_key_access_token_test
+  SRCS
+    core/partial_key_access_token_test.cc
+  DEPS
+    tink::core::partial_key_access
+    tink::core::partial_key_access_token
+    gmock
+    absl::core_headers
 )
 
 tink_cc_test(

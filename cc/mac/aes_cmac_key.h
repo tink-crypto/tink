@@ -23,6 +23,7 @@
 #include "absl/types/optional.h"
 #include "tink/mac/aes_cmac_parameters.h"
 #include "tink/mac/mac_key.h"
+#include "tink/partial_key_access_token.h"
 #include "tink/restricted_data.h"
 #include "tink/util/statusor.h"
 
@@ -41,10 +42,13 @@ class AesCmacKey : public MacKey {
   // a prefix, then the id is used to compute this prefix.
   static util::StatusOr<AesCmacKey> Create(AesCmacParameters parameters,
                                            RestrictedData aes_key_bytes,
-                                           absl::optional<int> id_requirement);
+                                           absl::optional<int> id_requirement,
+                                           PartialKeyAccessToken token);
 
   // Returns the underlying AES key.
-  util::StatusOr<RestrictedData> GetAesKey() const { return aes_key_bytes_; }
+  util::StatusOr<RestrictedData> GetAesKey(PartialKeyAccessToken token) const {
+    return aes_key_bytes_;
+  }
 
   util::StatusOr<std::string> GetOutputPrefix() const override;
 

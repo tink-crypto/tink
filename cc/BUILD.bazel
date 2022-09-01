@@ -703,6 +703,19 @@ cc_library(
 )
 
 cc_library(
+    name = "partial_key_access_token",
+    hdrs = ["partial_key_access_token.h"],
+    include_prefix = "tink",
+)
+
+cc_library(
+    name = "partial_key_access",
+    hdrs = ["partial_key_access.h"],
+    include_prefix = "tink",
+    deps = [":partial_key_access_token"],
+)
+
+cc_library(
     name = "secret_key_access_token",
     hdrs = ["secret_key_access_token.h"],
     include_prefix = "tink",
@@ -1009,6 +1022,17 @@ cc_test(
     deps = [
         ":key_access",
         ":secret_key_access_testonly",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "core/partial_key_access_token_test",
+    srcs = ["core/partial_key_access_token_test.cc"],
+    deps = [
+        ":partial_key_access",
+        ":partial_key_access_token",
+        "@com_google_absl//absl/base:core_headers",
         "@com_google_googletest//:gtest_main",
     ],
 )
