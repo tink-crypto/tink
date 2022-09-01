@@ -23,7 +23,6 @@ import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.KeyTemplates;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.KeysetManager;
-import com.google.crypto.tink.internal.KeyTemplateProtoConverter;
 import com.google.crypto.tink.testing.TestUtil;
 import java.security.GeneralSecurityException;
 import java.time.Clock;
@@ -67,6 +66,8 @@ public class JwtPublicKeySignVerifyWrappersTest {
 
   @Test
   public void test_noPrimary_getSignPrimitive_fails() throws Exception {
+    // The old KeysetManager API allows keysets without primary key.
+    // The KeysetHandle.Builder does not allow this and can't be used in this test.
     KeyTemplate template = KeyTemplates.get("JWT_ES256");
     KeysetManager manager = KeysetManager.withEmptyKeyset().add(template);
     KeysetHandle handle = manager.getKeysetHandle();
@@ -76,9 +77,14 @@ public class JwtPublicKeySignVerifyWrappersTest {
 
   @Test
   public void test_noPrimary_getVerifyPrimitive_success() throws Exception {
-    KeyTemplate template = KeyTemplates.get("JWT_ES256");
-    KeysetManager manager = KeysetManager.withEmptyKeyset().add(template);
-    KeysetHandle publicHandle = manager.getKeysetHandle().getPublicKeysetHandle();
+    KeysetHandle privateKeysetHandle =
+        KeysetHandle.newBuilder()
+            .addEntry(
+                KeysetHandle.generateEntryFromParametersName("JWT_ES256")
+                    .withRandomId()
+                    .makePrimary())
+            .build();
+    KeysetHandle publicHandle = privateKeysetHandle.getPublicKeysetHandle();
     publicHandle.getPrimitive(JwtPublicKeyVerify.class);
   }
 
@@ -131,15 +137,20 @@ public class JwtPublicKeySignVerifyWrappersTest {
 
   @Test
   public void test_wrapMultipleRawKeys() throws Exception {
-    KeyTemplate template = KeyTemplates.get("JWT_ES256_RAW");
-
-    KeysetManager manager = KeysetManager.withEmptyKeyset();
-    manager.addNewKey(KeyTemplateProtoConverter.toProto(template), /*asPrimary=*/ true);
-    KeysetHandle oldHandle = manager.getKeysetHandle();
-
-    manager.addNewKey(KeyTemplateProtoConverter.toProto(template), /*asPrimary=*/ true);
-
-    KeysetHandle newHandle = manager.getKeysetHandle();
+    KeysetHandle oldHandle =
+        KeysetHandle.newBuilder()
+            .addEntry(
+                KeysetHandle.generateEntryFromParametersName("JWT_ES256_RAW")
+                    .withRandomId()
+                    .makePrimary())
+            .build();
+    KeysetHandle newHandle =
+        KeysetHandle.newBuilder(oldHandle)
+            .addEntry(
+                KeysetHandle.generateEntryFromParametersName("JWT_ES256_RAW")
+                    .withRandomId()
+                    .makePrimary())
+            .build();
 
     JwtPublicKeySign oldSigner = oldHandle.getPrimitive(JwtPublicKeySign.class);
     JwtPublicKeySign newSigner = newHandle.getPrimitive(JwtPublicKeySign.class);
@@ -167,15 +178,20 @@ public class JwtPublicKeySignVerifyWrappersTest {
 
   @Test
   public void test_wrapMultipleTinkKeys() throws Exception {
-    KeyTemplate tinkTemplate = KeyTemplates.get("JWT_ES256");
-
-    KeysetManager manager = KeysetManager.withEmptyKeyset();
-    manager.addNewKey(KeyTemplateProtoConverter.toProto(tinkTemplate), /*asPrimary=*/ true);
-    KeysetHandle oldHandle = manager.getKeysetHandle();
-
-    manager.addNewKey(KeyTemplateProtoConverter.toProto(tinkTemplate), /*asPrimary=*/ true);
-
-    KeysetHandle newHandle = manager.getKeysetHandle();
+    KeysetHandle oldHandle =
+        KeysetHandle.newBuilder()
+            .addEntry(
+                KeysetHandle.generateEntryFromParametersName("JWT_ES256")
+                    .withRandomId()
+                    .makePrimary())
+            .build();
+    KeysetHandle newHandle =
+        KeysetHandle.newBuilder(oldHandle)
+            .addEntry(
+                KeysetHandle.generateEntryFromParametersName("JWT_ES256")
+                    .withRandomId()
+                    .makePrimary())
+            .build();
 
     JwtPublicKeySign oldSigner = oldHandle.getPrimitive(JwtPublicKeySign.class);
     JwtPublicKeySign newSigner = newHandle.getPrimitive(JwtPublicKeySign.class);
