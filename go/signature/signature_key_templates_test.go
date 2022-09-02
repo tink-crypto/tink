@@ -73,10 +73,6 @@ func TestKeyTemplates(t *testing.T) {
 }
 
 func testSignVerify(template *tinkpb.KeyTemplate) error {
-	// TODO(b/173082704): enable once key manager is registered.
-	if template.GetTypeUrl() == "type.googleapis.com/google.crypto.tink.RsaSsaPssPrivateKey" {
-		return nil
-	}
 	privateHandle, err := keyset.NewHandle(template)
 	if err != nil {
 		return fmt.Errorf("keyset.NewHandle(tc.template) failed: %s", err)

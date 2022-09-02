@@ -59,8 +59,8 @@ go_test(
         "signature_key_templates_test.go",
         "signature_test.go",
     ],
-    embed = [":signature"],
     deps = [
+        ":signature",
         "//core/registry",
         "//internal/signature",
         "//keyset",

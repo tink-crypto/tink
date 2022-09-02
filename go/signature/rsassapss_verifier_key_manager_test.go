@@ -14,8 +14,7 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-// TODO(b/173082704): make public once key manager registered.
-package signature
+package signature_test
 
 import (
 	"crypto/rand"
@@ -26,6 +25,7 @@ import (
 	"testing"
 
 	"google.golang.org/protobuf/proto"
+	"github.com/google/tink/go/core/registry"
 	"github.com/google/tink/go/subtle/random"
 	"github.com/google/tink/go/tink"
 	commonpb "github.com/google/tink/go/proto/common_go_proto"
@@ -63,7 +63,10 @@ func makeValidRSAPSSKey() (*rsppb.RsaSsaPssPrivateKey, error) {
 }
 
 func TestRSASSAPSSVerifierNewKeyNotSupported(t *testing.T) {
-	vkm := &rsaSSAPSSVerifierKeyManager{}
+	vkm, err := registry.GetKeyManager(rsaPSSTestPublicKeyTypeURL)
+	if err != nil {
+		t.Fatalf("registry.GetKeyManager(%q) err = %v, want nil", err, rsaPSSTestPublicKeyTypeURL)
+	}
 	keyFormat := &rsppb.RsaSsaPssKeyFormat{
 		Params: &rsppb.RsaSsaPssParams{
 			SigHash:    commonpb.HashType_SHA256,
@@ -86,7 +89,10 @@ func TestRSASSAPSSVerifierNewKeyNotSupported(t *testing.T) {
 }
 
 func TestRSASSAPSSVerifierDoesSupport(t *testing.T) {
-	vkm := &rsaSSAPSSVerifierKeyManager{}
+	vkm, err := registry.GetKeyManager(rsaPSSTestPublicKeyTypeURL)
+	if err != nil {
+		t.Fatalf("registry.GetKeyManager(%q) err = %v, want nil", err, rsaPSSTestPublicKeyTypeURL)
+	}
 	if !vkm.DoesSupport(rsaPSSTestPublicKeyTypeURL) {
 		t.Errorf("DoesSupport(%q) = %v, want true", rsaPSSTestPublicKeyTypeURL, vkm.DoesSupport(rsaPSSTestPublicKeyTypeURL))
 	}
@@ -96,7 +102,10 @@ func TestRSASSAPSSVerifierDoesSupport(t *testing.T) {
 }
 
 func TestRSASSAPSSVerifierTypeURL(t *testing.T) {
-	vkm := &rsaSSAPSSVerifierKeyManager{}
+	vkm, err := registry.GetKeyManager(rsaPSSTestPublicKeyTypeURL)
+	if err != nil {
+		t.Fatalf("registry.GetKeyManager(%q) err = %v, want nil", err, rsaPSSTestPublicKeyTypeURL)
+	}
 	if vkm.TypeURL() != rsaPSSTestPublicKeyTypeURL {
 		t.Errorf("TypeURL() = %q, want %q", vkm.TypeURL(), rsaPSSTestPublicKeyTypeURL)
 	}
@@ -238,8 +247,10 @@ func (t *nistRSAPSSTestVector) ProtoKey() (*rsppb.RsaSsaPssPublicKey, error) {
 }
 
 func TestRSASSAPSSVerifierPrimitive(t *testing.T) {
-
-	vkm := &rsaSSAPSSVerifierKeyManager{}
+	vkm, err := registry.GetKeyManager(rsaPSSTestPublicKeyTypeURL)
+	if err != nil {
+		t.Fatalf("registry.GetKeyManager(%q) err = %v, want nil", err, rsaPSSTestPublicKeyTypeURL)
+	}
 	for _, tc := range nistRSAPSSTestVectors {
 		t.Run("nist test vector", func(t *testing.T) {
 			k, err := tc.ProtoKey()
@@ -278,7 +289,10 @@ func TestRSASSAPSSVerifierPrimitiveFailsWithInvalidKey(t *testing.T) {
 		tag    string
 		pubKey *rsppb.RsaSsaPssPublicKey
 	}
-	vkm := &rsaSSAPSSVerifierKeyManager{}
+	vkm, err := registry.GetKeyManager(rsaPSSTestPublicKeyTypeURL)
+	if err != nil {
+		t.Fatalf("registry.GetKeyManager(%q) err = %v, want nil", err, rsaPSSTestPublicKeyTypeURL)
+	}
 	privKey, err := makeValidRSAPSSKey()
 	if err != nil {
 		t.Fatalf("makeValidRSAPSSKey() err = %v, want nil", err)

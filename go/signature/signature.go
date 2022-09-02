@@ -50,4 +50,12 @@ func init() {
 	if err := registry.RegisterKeyManager(new(rsaSSAPKCS1VerifierKeyManager)); err != nil {
 		panic(fmt.Sprintf("signature.init() failed: %v", err))
 	}
+
+	// RSA SSA PSS
+	if err := registry.RegisterKeyManager(new(rsaSSAPSSSignerKeyManager)); err != nil {
+		panic(fmt.Sprintf("signature.init() failed: %v", err))
+	}
+	if err := registry.RegisterKeyManager(new(rsaSSAPSSVerifierKeyManager)); err != nil {
+		panic(fmt.Sprintf("signature.init() failed: %v", err))
+	}
 }
