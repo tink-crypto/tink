@@ -153,6 +153,28 @@ func (a *AlwaysFailingAead) Decrypt(ciphertext []byte, associatedData []byte) ([
 	return nil, fmt.Errorf("AlwaysFailingAead will always fail on decryption: %v", a.Error)
 }
 
+// AlwaysFailingDeterministicAead fails encryption and decryption operations.
+type AlwaysFailingDeterministicAead struct {
+	Error error
+}
+
+var _ (tink.DeterministicAEAD) = (*AlwaysFailingDeterministicAead)(nil)
+
+// NewAlwaysFailingDeterministicAead creates a new always failing AEAD.
+func NewAlwaysFailingDeterministicAead(err error) tink.DeterministicAEAD {
+	return &AlwaysFailingDeterministicAead{Error: err}
+}
+
+// EncryptDeterministically returns an error on encryption.
+func (a *AlwaysFailingDeterministicAead) EncryptDeterministically(plaintext []byte, associatedData []byte) ([]byte, error) {
+	return nil, fmt.Errorf("AlwaysFailingDeterministicAead will always fail on encryption: %v", a.Error)
+}
+
+// DecryptDeterministically returns an error on decryption.
+func (a *AlwaysFailingDeterministicAead) DecryptDeterministically(ciphertext []byte, associatedData []byte) ([]byte, error) {
+	return nil, fmt.Errorf("AlwaysFailingDeterministicAead will always fail on decryption: %v", a.Error)
+}
+
 // TestKeyManager is key manager which can be setup to return an arbitrary primitive for a type URL
 // useful for testing.
 type TestKeyManager struct {
