@@ -54,6 +54,14 @@ func TestKeyTemplates(t *testing.T) {
 			template: signature.RSA_SSA_PKCS1_4096_SHA512_F4_Key_Template()},
 		{name: "RSA_SSA_PKCS1_4096_SHA512_F4_RAW",
 			template: signature.RSA_SSA_PKCS1_4096_SHA512_F4_RAW_Key_Template()},
+		{name: "RSA_SSA_PSS_3072_SHA256_32_F4",
+			template: signature.RSA_SSA_PSS_3072_SHA256_32_F4_Key_Template()},
+		{name: "RSA_SSA_PSS_3072_SHA256_32_F4_RAW",
+			template: signature.RSA_SSA_PSS_3072_SHA256_32_F4_Raw_Key_Template()},
+		{name: "RSA_SSA_PSS_4096_SHA512_64_F4",
+			template: signature.RSA_SSA_PSS_4096_SHA512_64_F4_Key_Template()},
+		{name: "RSA_SSA_PSS_4096_SHA512_64_F4_RAW",
+			template: signature.RSA_SSA_PSS_4096_SHA512_64_F4_Raw_Key_Template()},
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
@@ -65,11 +73,14 @@ func TestKeyTemplates(t *testing.T) {
 }
 
 func testSignVerify(template *tinkpb.KeyTemplate) error {
+	// TODO(b/173082704): enable once key manager is registered.
+	if template.GetTypeUrl() == "type.googleapis.com/google.crypto.tink.RsaSsaPssPrivateKey" {
+		return nil
+	}
 	privateHandle, err := keyset.NewHandle(template)
 	if err != nil {
 		return fmt.Errorf("keyset.NewHandle(tc.template) failed: %s", err)
 	}
-
 	signer, err := signature.NewSigner(privateHandle)
 	if err != nil {
 		return fmt.Errorf("signature.NewSigner(privateHandle) failed: %s", err)
