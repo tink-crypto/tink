@@ -16,6 +16,7 @@
 
 package com.google.crypto.tink.jwt;
 
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.errorprone.annotations.Immutable;
 import java.time.Clock;
 import java.time.Duration;
@@ -104,6 +105,7 @@ public final class JwtValidator {
      *
      * <p>https://tools.ietf.org/html/rfc7519#section-4.1.1
      */
+    @CanIgnoreReturnValue
     public Builder expectTypeHeader(String value) {
       if (value == null) {
         throw new NullPointerException("typ header cannot be null");
@@ -113,6 +115,7 @@ public final class JwtValidator {
     }
 
     /** Lets the validator ignore the {@code typ} header. */
+    @CanIgnoreReturnValue
     public Builder ignoreTypeHeader() {
       this.ignoreTypeHeader = true;
       return this;
@@ -128,6 +131,7 @@ public final class JwtValidator {
      *
      * <p>https://tools.ietf.org/html/rfc7519#section-4.1.1
      */
+    @CanIgnoreReturnValue
     public Builder expectIssuer(String value) {
       if (value == null) {
         throw new NullPointerException("issuer cannot be null");
@@ -137,6 +141,7 @@ public final class JwtValidator {
     }
 
     /** Lets the validator ignore the {@code iss} claim. */
+    @CanIgnoreReturnValue
     public Builder ignoreIssuer() {
       this.ignoreIssuer = true;
       return this;
@@ -152,6 +157,7 @@ public final class JwtValidator {
      *
      * <p>https://tools.ietf.org/html/rfc7519#section-4.1.3
      */
+    @CanIgnoreReturnValue
     public Builder expectAudience(String value) {
       if (value == null) {
         throw new NullPointerException("audience cannot be null");
@@ -161,18 +167,21 @@ public final class JwtValidator {
     }
 
     /** Lets the validator ignore the {@code aud} claim. */
+    @CanIgnoreReturnValue
     public Builder ignoreAudiences() {
       this.ignoreAudiences = true;
       return this;
     }
 
-    /** Checks that the {@code iat} claim is in the past.*/
+    /** Checks that the {@code iat} claim is in the past. */
+    @CanIgnoreReturnValue
     public Builder expectIssuedInThePast() {
       this.expectIssuedInThePast = true;
       return this;
     }
 
     /** Sets the clock used to verify timestamp claims. */
+    @CanIgnoreReturnValue
     public Builder setClock(Clock clock) {
       if (clock == null) {
         throw new NullPointerException("clock cannot be null");
@@ -188,6 +197,7 @@ public final class JwtValidator {
      * <p>As recommended by https://tools.ietf.org/html/rfc7519, the clock skew should usually be no
      * more than a few minutes. In this implementation, the maximum value is 10 minutes.
      */
+    @CanIgnoreReturnValue
     public Builder setClockSkew(Duration clockSkew) {
       if (clockSkew.compareTo(MAX_CLOCK_SKEW) > 0) {
         throw new IllegalArgumentException("Clock skew too large, max is 10 minutes");
@@ -202,6 +212,7 @@ public final class JwtValidator {
      * <p>In most cases, tokens should always have an expiration, so this option should rarely be
      * used.
      */
+    @CanIgnoreReturnValue
     public Builder allowMissingExpiration() {
       this.allowMissingExpiration = true;
       return this;

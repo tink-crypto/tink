@@ -16,6 +16,7 @@
 
 package com.google.crypto.tink.jwt;
 
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.errorprone.annotations.Immutable;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -149,6 +150,7 @@ public final class RawJwt {
      * https://tools.ietf.org/html/rfc7519#section-5.1 and
      * https://tools.ietf.org/html/rfc8725#section-3.11
      */
+    @CanIgnoreReturnValue
     public Builder setTypeHeader(String value) {
       typeHeader = Optional.of(value);
       return this;
@@ -159,6 +161,7 @@ public final class RawJwt {
      *
      * <p>https://tools.ietf.org/html/rfc7519#section-4.1.1
      */
+    @CanIgnoreReturnValue
     public Builder setIssuer(String value) {
       if (!JsonUtil.isValidString(value)) {
         throw new IllegalArgumentException();
@@ -172,6 +175,7 @@ public final class RawJwt {
      *
      * <p>https://tools.ietf.org/html/rfc7519#section-4.1.2
      */
+    @CanIgnoreReturnValue
     public Builder setSubject(String value) {
       if (!JsonUtil.isValidString(value)) {
         throw new IllegalArgumentException();
@@ -183,11 +187,12 @@ public final class RawJwt {
     /**
      * Sets the audience that the JWT is intended for.
      *
-     * Sets the {@code aud} claim as a string. This method can't be used
-     * together with {@code setAudiences} or {@code addAudience}.
+     * <p>Sets the {@code aud} claim as a string. This method can't be used together with {@code
+     * setAudiences} or {@code addAudience}.
      *
      * <p>https://tools.ietf.org/html/rfc7519#section-4.1.3
      */
+    @CanIgnoreReturnValue
     public Builder setAudience(String value) {
       if (payload.has(JwtNames.CLAIM_AUDIENCE)
           && payload.get(JwtNames.CLAIM_AUDIENCE).isJsonArray()) {
@@ -204,11 +209,12 @@ public final class RawJwt {
     /**
      * Sets the audiences that the JWT is intended for.
      *
-     * Sets the {@code aud} claim as an array of strings. This method can't be used
-     * together with {@code setAudience}.
+     * <p>Sets the {@code aud} claim as an array of strings. This method can't be used together with
+     * {@code setAudience}.
      *
      * <p>https://tools.ietf.org/html/rfc7519#section-4.1.3
      */
+    @CanIgnoreReturnValue
     public Builder setAudiences(List<String> values) {
       if (payload.has(JwtNames.CLAIM_AUDIENCE)
               && !payload.get(JwtNames.CLAIM_AUDIENCE).isJsonArray()) {
@@ -231,11 +237,12 @@ public final class RawJwt {
     /**
      * Adds an audience that the JWT is intended for.
      *
-     * The {@code aud} claim will always be encoded as an array of strings. This method
-     * can't be used together with {@code setAudience}.
+     * <p>The {@code aud} claim will always be encoded as an array of strings. This method can't be
+     * used together with {@code setAudience}.
      *
      * <p>https://tools.ietf.org/html/rfc7519#section-4.1.3
      */
+    @CanIgnoreReturnValue
     public Builder addAudience(String value) {
       if (!JsonUtil.isValidString(value)) {
         throw new IllegalArgumentException("invalid string");
@@ -261,6 +268,7 @@ public final class RawJwt {
      *
      * <p>https://tools.ietf.org/html/rfc7519#section-4.1.7
      */
+    @CanIgnoreReturnValue
     public Builder setJwtId(String value) {
       if (!JsonUtil.isValidString(value)) {
         throw new IllegalArgumentException();
@@ -289,6 +297,7 @@ public final class RawJwt {
      *
      * <p>https://tools.ietf.org/html/rfc7519#section-4.1.4
      */
+    @CanIgnoreReturnValue
     public Builder setExpiration(Instant value) {
       setTimestampClaim(JwtNames.CLAIM_EXPIRATION, value);
       return this;
@@ -301,6 +310,7 @@ public final class RawJwt {
      * that this is not forgotten, by requiring to user to explicitly state that no expiration
      * should be set.
      */
+    @CanIgnoreReturnValue
     public Builder withoutExpiration() {
       this.withoutExpiration = true;
       return this;
@@ -316,6 +326,7 @@ public final class RawJwt {
      *
      * <p>https://tools.ietf.org/html/rfc7519#section-4.1.5
      */
+    @CanIgnoreReturnValue
     public Builder setNotBefore(Instant value) {
       setTimestampClaim(JwtNames.CLAIM_NOT_BEFORE, value);
       return this;
@@ -330,12 +341,14 @@ public final class RawJwt {
      *
      * <p>https://tools.ietf.org/html/rfc7519#section-4.1.6
      */
+    @CanIgnoreReturnValue
     public Builder setIssuedAt(Instant value) {
       setTimestampClaim(JwtNames.CLAIM_ISSUED_AT, value);
       return this;
     }
 
     /** Adds a custom claim of type {@code boolean} to the JWT. */
+    @CanIgnoreReturnValue
     public Builder addBooleanClaim(String name, boolean value) {
       JwtNames.validate(name);
       payload.add(name, new JsonPrimitive(value));
@@ -343,6 +356,7 @@ public final class RawJwt {
     }
 
     /** Adds a custom claim of type {@code double} to the JWT. */
+    @CanIgnoreReturnValue
     public Builder addNumberClaim(String name, double value) {
       JwtNames.validate(name);
       payload.add(name, new JsonPrimitive(value));
@@ -350,6 +364,7 @@ public final class RawJwt {
     }
 
     /** Adds a custom claim of type {@code String} to the JWT. */
+    @CanIgnoreReturnValue
     public Builder addStringClaim(String name, String value) {
       if (!JsonUtil.isValidString(value)) {
         throw new IllegalArgumentException();
@@ -360,6 +375,7 @@ public final class RawJwt {
     }
 
     /** Adds a custom claim with value null. */
+    @CanIgnoreReturnValue
     public Builder addNullClaim(String name) {
       JwtNames.validate(name);
       payload.add(name, JsonNull.INSTANCE);
@@ -367,6 +383,7 @@ public final class RawJwt {
     }
 
     /** Adds a custom claim encoded in a JSON {@code String} to the JWT. */
+    @CanIgnoreReturnValue
     public Builder addJsonObjectClaim(String name, String encodedJsonObject)
         throws JwtInvalidException {
       JwtNames.validate(name);
@@ -375,6 +392,7 @@ public final class RawJwt {
     }
 
     /** Adds a custom claim encoded in a JSON {@code String} to the JWT. */
+    @CanIgnoreReturnValue
     public Builder addJsonArrayClaim(String name, String encodedJsonArray)
         throws JwtInvalidException {
       JwtNames.validate(name);
