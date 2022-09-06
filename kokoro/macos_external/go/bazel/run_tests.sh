@@ -33,7 +33,7 @@ MANUAL_TARGETS=()
 # Run manual tests that rely on test data only available via Bazel.
 if [[ -n "${KOKORO_ROOT:-}" ]]; then
   MANUAL_TARGETS+=(
-    "//integration/gcpkms:gcpkms_test"
+    #"//integration/gcpkms:gcpkms_test"
     "//integration/awskms:awskms_test"
   )
 fi
