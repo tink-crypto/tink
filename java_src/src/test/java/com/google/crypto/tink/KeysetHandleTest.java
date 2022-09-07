@@ -904,19 +904,69 @@ public class KeysetHandleTest {
   }
 
   @Test
-  public void testBuilder_removeAt_works() throws Exception {
+  public void testBuilder_deprecated_removeAt_works() throws Exception {
     KeysetHandle.Builder builder = KeysetHandle.newBuilder();
-    builder.addEntry(KeysetHandle.generateEntryFromParametersName("AES256_CMAC").withRandomId());
+    builder.addEntry(
+        KeysetHandle.generateEntryFromParametersName("AES256_CMAC")
+            .withRandomId()
+            .setStatus(KeyStatus.DISABLED));
     builder.addEntry(
         KeysetHandle.generateEntryFromParameters(
                 AesCmacParameters.builder().setKeySizeBytes(32).setTagSizeBytes(13).build())
             .withRandomId()
-            .makePrimary());
-    builder.removeAt(0);
+            .makePrimary()
+            .setStatus(KeyStatus.ENABLED));
+    KeysetHandle.Builder.Entry removedEntry = builder.removeAt(0);
+    assertThat(removedEntry.getStatus()).isEqualTo(KeyStatus.DISABLED);
     KeysetHandle handle = builder.build();
     assertThat(handle.size()).isEqualTo(1);
     assertThat(handle.getAt(0).getKey().getParameters())
         .isEqualTo(AesCmacParameters.builder().setKeySizeBytes(32).setTagSizeBytes(13).build());
+  }
+
+  @Test
+  public void testBuilder_deprecated_removeAtInvalidIndex_throws() throws Exception {
+    KeysetHandle.Builder builder = KeysetHandle.newBuilder();
+    builder.addEntry(KeysetHandle.generateEntryFromParametersName("AES256_CMAC").withRandomId());
+    builder.addEntry(
+        KeysetHandle.generateEntryFromParametersName("AES256_CMAC").withRandomId().makePrimary());
+    assertThrows(IndexOutOfBoundsException.class, () -> builder.removeAt(2));
+  }
+
+  @Test
+  public void testBuilder_deleteAt_works() throws Exception {
+    KeysetHandle handle =
+        KeysetHandle.newBuilder()
+            .addEntry(KeysetHandle.generateEntryFromParametersName("AES256_CMAC").withRandomId())
+            .addEntry(
+                KeysetHandle.generateEntryFromParameters(
+                        AesCmacParameters.builder().setKeySizeBytes(32).setTagSizeBytes(13).build())
+                    .withRandomId()
+                    .makePrimary())
+            .build();
+    assertThat(handle.size()).isEqualTo(2);
+
+    KeysetHandle handle2 = KeysetHandle.newBuilder(handle).deleteAt(0).build();
+
+    assertThat(handle2.size()).isEqualTo(1);
+    assertThat(handle2.getAt(0).getKey().getParameters())
+        .isEqualTo(AesCmacParameters.builder().setKeySizeBytes(32).setTagSizeBytes(13).build());
+  }
+
+  @Test
+  public void testBuilder_deleteAtInvalidIndex_works() throws Exception {
+    KeysetHandle handle =
+        KeysetHandle.newBuilder()
+            .addEntry(KeysetHandle.generateEntryFromParametersName("AES256_CMAC").withRandomId())
+            .addEntry(
+                KeysetHandle.generateEntryFromParametersName("AES256_CMAC")
+                    .withRandomId()
+                    .makePrimary())
+            .build();
+    assertThat(handle.size()).isEqualTo(2);
+
+    assertThrows(
+        IndexOutOfBoundsException.class, () -> KeysetHandle.newBuilder(handle).deleteAt(2));
   }
 
   @Test
@@ -945,6 +995,19 @@ public class KeysetHandleTest {
         KeysetHandle.generateEntryFromParametersName("AES256_CMAC").withRandomId().makePrimary());
     builder.addEntry(KeysetHandle.generateEntryFromParametersName("AES256_CMAC").withRandomId());
     builder.removeAt(0);
+    assertThrows(GeneralSecurityException.class, builder::build);
+  }
+
+  @Test
+  public void testBuilder_deletedPrimary_throws() throws Exception {
+    KeysetHandle.Builder builder =
+        KeysetHandle.newBuilder()
+            .addEntry(
+                KeysetHandle.generateEntryFromParametersName("AES256_CMAC")
+                    .withRandomId()
+                    .makePrimary())
+            .addEntry(KeysetHandle.generateEntryFromParametersName("AES256_CMAC").withRandomId())
+            .deleteAt(0);
     assertThrows(GeneralSecurityException.class, builder::build);
   }
 

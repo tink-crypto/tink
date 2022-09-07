@@ -35,6 +35,7 @@ import com.google.crypto.tink.tinkkey.KeyAccess;
 import com.google.crypto.tink.tinkkey.KeyHandle;
 import com.google.crypto.tink.tinkkey.internal.InternalKeyHandle;
 import com.google.crypto.tink.tinkkey.internal.ProtoKey;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.errorprone.annotations.Immutable;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.ExtensionRegistryLite;
@@ -157,6 +158,7 @@ public final class KeysetHandle {
        * been added to a builder, otherwise they will marked as non-primary once this entry is added
        * to a builder.
        */
+      @CanIgnoreReturnValue
       public Entry makePrimary() {
         if (builder != null) {
           builder.clearPrimary();
@@ -171,6 +173,7 @@ public final class KeysetHandle {
       }
 
       /** Sets the status of this entry. */
+      @CanIgnoreReturnValue
       public Entry setStatus(KeyStatus status) {
         keyStatus = status;
         return this;
@@ -182,6 +185,7 @@ public final class KeysetHandle {
       }
 
       /** Tells Tink to assign a fixed id when this keyset is built. */
+      @CanIgnoreReturnValue
       public Entry withFixedId(int id) {
         this.strategy = KeyIdStrategy.fixedId(id);
         return this;
@@ -196,6 +200,7 @@ public final class KeysetHandle {
        * <p>If an entry is marked as {@code withRandomId}, all subsequent entries also need to be
        * marked with {@code withRandomId}, or else calling {@code build()} will fail.
        */
+      @CanIgnoreReturnValue
       public Entry withRandomId() {
         this.strategy = KeyIdStrategy.randomId();
         return this;
@@ -211,6 +216,7 @@ public final class KeysetHandle {
     }
 
     /** Adds an entry to a keyset */
+    @CanIgnoreReturnValue
     public KeysetHandle.Builder addEntry(KeysetHandle.Builder.Entry entry) {
       if (entry.builder != null) {
         throw new IllegalStateException("Entry has already been added to a KeysetHandle.Builder");
@@ -237,9 +243,25 @@ public final class KeysetHandle {
       return entries.get(i);
     }
 
-    /** Removes the entry at index {@code i}. */
+    /**
+     * Removes the entry at index {@code i} and returns that entry. Shifts any subsequent entries to
+     * the left (subtracts one from their indices).
+     *
+     * @deprecated Use {@link #deleteAt} or {@link #getAt} instead.
+     */
+    @Deprecated
     public Builder.Entry removeAt(int i) {
       return entries.remove(i);
+    }
+
+    /**
+     * Deletes the entry at index {@code i}. Shifts any subsequent entries to the left (subtracts
+     * one from their indices).
+     */
+    @CanIgnoreReturnValue
+    public KeysetHandle.Builder deleteAt(int i) {
+      entries.remove(i);
+      return this;
     }
 
     private static void checkIdAssignments(List<KeysetHandle.Builder.Entry> entries)
