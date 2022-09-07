@@ -112,8 +112,15 @@ func TestRSASSAPSSVerifierTypeURL(t *testing.T) {
 }
 
 type nistRSATestKey struct {
-	n string
-	e string
+	// public keys only require `n` and `e` to be set.
+	n   string
+	e   string
+	d   string
+	p   string
+	q   string
+	dp  string
+	dq  string
+	crt string
 }
 
 // The following keys are from:

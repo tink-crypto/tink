@@ -17,6 +17,7 @@
 package signature_test
 
 import (
+	"encoding/hex"
 	"math/big"
 	"testing"
 
@@ -25,6 +26,7 @@ import (
 	"github.com/google/tink/go/core/registry"
 	internal "github.com/google/tink/go/internal/signature"
 	"github.com/google/tink/go/subtle/random"
+	"github.com/google/tink/go/tink"
 	cpb "github.com/google/tink/go/proto/common_go_proto"
 	rsassapkcs1pb "github.com/google/tink/go/proto/rsa_ssa_pkcs1_go_proto"
 	tinkpb "github.com/google/tink/go/proto/tink_go_proto"
@@ -479,5 +481,44 @@ func TestRSASSAPKCS1SignerKeyManagerPrimitiveNewKeyData(t *testing.T) {
 	}
 	if _, err := km.Primitive(keyData.GetValue()); err != nil {
 		t.Errorf("Primitive() err = %v, want nil", err)
+	}
+}
+
+func TestRSASSAPKCS1SignerKeyManagerPrimitiveNISTTestVectors(t *testing.T) {
+	km, err := registry.GetKeyManager(rsaPKCS1PrivateKeyTypeURL)
+	if err != nil {
+		t.Fatalf("registry.GetKeyManager(%q) err = %v, want nil", rsaPKCS1PrivateKeyTypeURL, err)
+	}
+	for _, tc := range nistPKCS1TestVectors {
+		t.Run(tc.name, func(t *testing.T) {
+			key, err := tc.ToProtoKey()
+			if err != nil {
+				t.Fatalf("tc.ToProtoKey() err = %v, want nil", err)
+			}
+			serializedKey, err := proto.Marshal(key)
+			if err != nil {
+				t.Fatalf("proto.Marshal() err = %v, want nil", err)
+			}
+			p, err := km.Primitive(serializedKey)
+			if err != nil {
+				t.Fatalf("km.Primitive() err = %v, want nil", err)
+			}
+			msg, err := hex.DecodeString(tc.msg)
+			if err != nil {
+				t.Fatalf("hex.DecodeString(tc.msg) err = %v, want nil", err)
+			}
+			signer, ok := p.(tink.Signer)
+			if !ok {
+				t.Fatalf("primitive isn't a Tink.Signer")
+			}
+			sig, err := signer.Sign(msg)
+			if err != nil {
+				t.Fatalf("p.(tink.Signer).Sign(msg) err = %v, want nil", err)
+			}
+			gotSig := hex.EncodeToString(sig)
+			if !cmp.Equal(gotSig, tc.sig) {
+				t.Errorf("Sign() = %q, want %q", gotSig, tc.sig)
+			}
+		})
 	}
 }
