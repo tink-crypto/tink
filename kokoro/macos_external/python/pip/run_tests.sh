@@ -36,7 +36,5 @@ export TINK_PYTHON_ROOT_PATH="${PWD}/python"
 # Run Python tests directly so the package is used.
 # We exclude tests in tink/cc/pybind: they are implementation details and may
 # depend on a testonly shared object.
-find python/tink/ -not -path "*cc/pybind*" \
-  -not -path "*integration/gcpkms*" \
-  -type f -name "*_test.py" -print0 \
+find python/tink/ -not -path "*cc/pybind*" -type f -name "*_test.py" -print0 \
   | xargs -0 -n1 python3

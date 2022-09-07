@@ -80,9 +80,7 @@ run_all_linux_tests() {
       )
     fi
     readonly MANUAL_JAVA_TARGETS
-    #run_linux_tests "java_src" "${MANUAL_JAVA_TARGETS[@]}"
-    run_linux_tests "java_src"
-
+    run_linux_tests "java_src" "${MANUAL_JAVA_TARGETS[@]}"
 
     run_linux_tests "go"
     run_linux_tests "python"
@@ -91,12 +89,12 @@ run_all_linux_tests() {
     if [[ -n "${KOKORO_ROOT}" ]]; then
       MANUAL_TOOLS_TARGETS+=(
         "//testing/cc:aws_kms_aead_test"
-        #"//testing/cc:gcp_kms_aead_test"
-        #"//testing/cross_language:aead_envelope_test"
-        #"//tinkey/src/test/java/com/google/crypto/tink/tinkey:AddKeyCommandTest"
-        #"//tinkey/src/test/java/com/google/crypto/tink/tinkey:CreateKeysetCommandTest"
-        #"//tinkey/src/test/java/com/google/crypto/tink/tinkey:CreatePublicKeysetCommandTest"
-        #"//tinkey/src/test/java/com/google/crypto/tink/tinkey:RotateKeysetCommandTest"
+        "//testing/cc:gcp_kms_aead_test"
+        "//testing/cross_language:aead_envelope_test"
+        "//tinkey/src/test/java/com/google/crypto/tink/tinkey:AddKeyCommandTest"
+        "//tinkey/src/test/java/com/google/crypto/tink/tinkey:CreateKeysetCommandTest"
+        "//tinkey/src/test/java/com/google/crypto/tink/tinkey:CreatePublicKeysetCommandTest"
+        "//tinkey/src/test/java/com/google/crypto/tink/tinkey:RotateKeysetCommandTest"
       )
     fi
     readonly MANUAL_TOOLS_TARGETS
@@ -117,9 +115,7 @@ run_all_linux_tests() {
     )
   fi
   readonly MANUAL_EXAMPLE_JAVA_TARGETS
-  #run_linux_tests "java_src/examples" "${MANUAL_EXAMPLE_JAVA_TARGETS[@]}"
-  run_linux_tests "java_src/examples"
-
+  run_linux_tests "java_src/examples" "${MANUAL_EXAMPLE_JAVA_TARGETS[@]}"
 
   ## Install Tink and its dependencies via pip for the examples/python tests.
   install_tink_via_pip
@@ -136,8 +132,7 @@ run_all_linux_tests() {
     )
   fi
   readonly MANUAL_EXAMPLE_PYTHON_TARGETS
-  #run_linux_tests "python/examples" "${MANUAL_EXAMPLE_PYTHON_TARGETS[@]}"
-  run_linux_tests "python/examples"
+  run_linux_tests "python/examples" "${MANUAL_EXAMPLE_PYTHON_TARGETS[@]}"
 }
 
 run_macos_tests() {

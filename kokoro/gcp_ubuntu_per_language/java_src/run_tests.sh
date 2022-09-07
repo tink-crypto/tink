@@ -113,7 +113,6 @@ if [[ -n "${KOKORO_ROOT:-}" ]]; then
 fi
 readonly MANUAL_TARGETS
 
-#./kokoro/testutils/run_bazel_tests.sh java_src "${MANUAL_TARGETS[@]}"
-./kokoro/testutils/run_bazel_tests.sh java_src
+./kokoro/testutils/run_bazel_tests.sh java_src "${MANUAL_TARGETS[@]}"
 
 test_build_bazel_file

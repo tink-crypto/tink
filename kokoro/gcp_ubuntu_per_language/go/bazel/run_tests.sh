@@ -34,7 +34,7 @@ MANUAL_TARGETS=()
 if [[ -n "${KOKORO_ROOT:-}" ]]; then
   MANUAL_TARGETS+=(
     "//integration/gcpkms:gcpkms_test"
-    #"//integration/awskms:awskms_test"
+    "//integration/awskms:awskms_test"
   )
 fi
 readonly MANUAL_TARGETS
