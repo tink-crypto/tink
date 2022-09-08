@@ -310,7 +310,7 @@ public&nbsp;AwsKmsClient(<a href="https://docs.oracle.com/javase/8/docs/api/java
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
 <dd><code><a href="../../../../../../com/google/crypto/tink/KmsClient.html#doesSupport-java.lang.String-">doesSupport</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../../../com/google/crypto/tink/KmsClient.html" title="interface in com.google.crypto.tink">KmsClient</a></code></dd>
 <dt><span class="returnLabel">Returns:</span></dt>
-<dd>@return true either if this client is a generic one and uri starts with <a href="../../../../../../com/google/crypto/tink/integration/awskms/AwsKmsClient.html#PREFIX"><code>PREFIX</code></a>, or the client is a specific one that is bound to the key identified
+<dd>true either if this client is a generic one and uri starts with <a href="../../../../../../com/google/crypto/tink/integration/awskms/AwsKmsClient.html#PREFIX"><code>PREFIX</code></a>, or the client is a specific one that is bound to the key identified
      by <code>uri</code>.</dd>
 </dl>
 </li>
@@ -321,8 +321,9 @@ public&nbsp;AwsKmsClient(<a href="https://docs.oracle.com/javase/8/docs/api/java
 <ul class="blockList">
 <li class="blockList">
 <h4>withCredentials</h4>
-<pre>public&nbsp;<a href="../../../../../../com/google/crypto/tink/KmsClient.html" title="interface in com.google.crypto.tink">KmsClient</a>&nbsp;withCredentials(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;credentialPath)
-                          throws <a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
+<pre>@CanIgnoreReturnValue
+public&nbsp;<a href="../../../../../../com/google/crypto/tink/KmsClient.html" title="interface in com.google.crypto.tink">KmsClient</a>&nbsp;withCredentials(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;credentialPath)
+                                                throws <a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
 <div class="block">Loads AWS credentials from a properties file.
 
  <p>The AWS access key ID is expected to be in the <code>accessKey</code> property and the AWS
@@ -341,8 +342,9 @@ public&nbsp;AwsKmsClient(<a href="https://docs.oracle.com/javase/8/docs/api/java
 <ul class="blockList">
 <li class="blockList">
 <h4>withDefaultCredentials</h4>
-<pre>public&nbsp;<a href="../../../../../../com/google/crypto/tink/KmsClient.html" title="interface in com.google.crypto.tink">KmsClient</a>&nbsp;withDefaultCredentials()
-                                 throws <a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
+<pre>@CanIgnoreReturnValue
+public&nbsp;<a href="../../../../../../com/google/crypto/tink/KmsClient.html" title="interface in com.google.crypto.tink">KmsClient</a>&nbsp;withDefaultCredentials()
+                                                       throws <a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
 <div class="block">Loads default AWS credentials.
 
  <p>AWS credentials provider chain that looks for credentials in this order:
@@ -367,8 +369,9 @@ public&nbsp;AwsKmsClient(<a href="https://docs.oracle.com/javase/8/docs/api/java
 <ul class="blockList">
 <li class="blockList">
 <h4>withCredentialsProvider</h4>
-<pre>public&nbsp;<a href="../../../../../../com/google/crypto/tink/KmsClient.html" title="interface in com.google.crypto.tink">KmsClient</a>&nbsp;withCredentialsProvider(com.amazonaws.auth.AWSCredentialsProvider&nbsp;provider)
-                                  throws <a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
+<pre>@CanIgnoreReturnValue
+public&nbsp;<a href="../../../../../../com/google/crypto/tink/KmsClient.html" title="interface in com.google.crypto.tink">KmsClient</a>&nbsp;withCredentialsProvider(com.amazonaws.auth.AWSCredentialsProvider&nbsp;provider)
+                                                        throws <a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
 <div class="block">Loads AWS credentials from a provider.</div>
 <dl>
 <dt><span class="throwsLabel">Throws:</span></dt>
