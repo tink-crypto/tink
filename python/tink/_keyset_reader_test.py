@@ -51,6 +51,49 @@ class JsonKeysetReaderTest(absltest.TestCase):
     with self.assertRaises(core.TinkError):
       reader.read()
 
+  def test_read_rejects_negative_key_id(self):
+    json_keyset = """
+        {
+          "primaryKeyId": -42,
+          "key": [
+            {
+              "keyData": {
+                "typeUrl": "type.googleapis.com/google.crypto.tink.AesGcmKey",
+                "keyMaterialType": "SYMMETRIC",
+                "value": "GhCS/1+ejWpx68NfGt6ziYHd"
+              },
+              "outputPrefixType": "TINK",
+              "keyId": -42,
+              "status": "ENABLED"
+            }
+          ]
+        }"""
+    reader = tink.JsonKeysetReader(json_keyset)
+    with self.assertRaises(core.TinkError):
+      reader.read()
+
+  def test_read_rejects_key_id_larger_than_uint32(self):
+    # 4294967296 = 2^32, which is too large for uint32.
+    json_keyset = """
+        {
+          "primaryKeyId": 4294967296,
+          "key": [
+            {
+              "keyData": {
+                "typeUrl": "type.googleapis.com/google.crypto.tink.AesGcmKey",
+                "keyMaterialType": "SYMMETRIC",
+                "value": "GhCS/1+ejWpx68NfGt6ziYHd"
+              },
+              "outputPrefixType": "TINK",
+              "keyId": 4294967296,
+              "status": "ENABLED"
+            }
+          ]
+        }"""
+    reader = tink.JsonKeysetReader(json_keyset)
+    with self.assertRaises(core.TinkError):
+      reader.read()
+
   def test_read_encrypted(self):
     # encryptedKeyset is a base64-encoding of 'some ciphertext with keyset'
     json_encrypted_keyset = """

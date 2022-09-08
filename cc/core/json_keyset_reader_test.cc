@@ -27,7 +27,6 @@
 #include "gtest/gtest.h"
 #include "absl/strings/escaping.h"
 #include "absl/strings/substitute.h"
-#include "tink/util/protobuf_helper.h"
 #include "tink/util/test_matchers.h"
 #include "tink/util/test_util.h"
 #include "proto/aes_eax.pb.h"
@@ -312,11 +311,11 @@ TEST_F(JsonKeysetReaderTest, ReadLargeKeyId) {
   EXPECT_THAT(keyset->primary_key_id(), Eq(4294967275));
 }
 
-TEST_F(JsonKeysetReaderTest, ReadNegativeKeyId) {
+TEST_F(JsonKeysetReaderTest, RejectsNegativeKeyIds) {
   std::string json_serialization =
       absl::Substitute(R"(
       {
-         "primaryKeyId": -21,
+         "primaryKeyId": 711,
          "key":[
             {
                "keyData":{
@@ -326,6 +325,44 @@ TEST_F(JsonKeysetReaderTest, ReadNegativeKeyId) {
                },
                "outputPrefixType":"TINK",
                "keyId": -21,
+               "status":"ENABLED"
+            },
+            {
+               "keyData":{
+                  "typeUrl":"type.googleapis.com/google.crypto.tink.AesEaxKey",
+                  "keyMaterialType":"SYMMETRIC",
+                  "value":"$1"
+               },
+               "outputPrefixType":"RAW",
+               "keyId":711,
+               "status":"ENABLED"
+            }
+         ]
+      })",
+                       absl::Base64Escape(gcm_key_.SerializeAsString()),
+                       absl::Base64Escape(eax_key_.SerializeAsString()));
+  auto reader_result = JsonKeysetReader::New(json_serialization);
+  ASSERT_THAT(reader_result, IsOk());
+  auto reader = std::move(reader_result.value());
+  auto read_result = reader->Read();
+  EXPECT_THAT(read_result, Not(IsOk()));
+}
+
+TEST_F(JsonKeysetReaderTest, RejectsKeyIdLargerThanUint32) {
+  // 4294967296 = 2^32, which is too large for uint32.
+  std::string json_serialization =
+      absl::Substitute(R"(
+      {
+         "primaryKeyId": 711,
+         "key":[
+            {
+               "keyData":{
+                  "typeUrl":"type.googleapis.com/google.crypto.tink.AesGcmKey",
+                  "keyMaterialType":"SYMMETRIC",
+                  "value": "$0"
+               },
+               "outputPrefixType":"TINK",
+               "keyId": 4294967296,
                "status":"ENABLED"
             },
             {

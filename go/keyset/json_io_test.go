@@ -169,7 +169,7 @@ func TestJSONReaderLargeIds(t *testing.T) {
 	}
 }
 
-func TestJSONReaderNegativeIds(t *testing.T) {
+func TestJSONReaderRejectsNegativeKeyIds(t *testing.T) {
 	gcmkey := []byte(testutil.NewAESGCMKey(0, 16).String())
 	jsonKeyset := fmt.Sprintf(`{
          "primaryKeyId": -10,
@@ -182,6 +182,32 @@ func TestJSONReaderNegativeIds(t *testing.T) {
                },
                "outputPrefixType":"TINK",
                "keyId": -10,
+               "status":"ENABLED"
+            }
+         ]
+      }`, base64.StdEncoding.EncodeToString(gcmkey))
+	r := keyset.NewJSONReader(bytes.NewBufferString(jsonKeyset))
+
+	_, err := r.Read()
+	if err == nil {
+		t.Fatalf("Expected failure due to negative key id")
+	}
+}
+
+func TestJSONReaderRejectsKeyIdLargerThanUint32(t *testing.T) {
+	// 4294967296 = 2^32, which is too large for uint32.
+	gcmkey := []byte(testutil.NewAESGCMKey(0, 16).String())
+	jsonKeyset := fmt.Sprintf(`{
+         "primaryKeyId": 4294967296,
+         "key":[
+            {
+               "keyData":{
+                  "typeUrl":"type.googleapis.com/google.crypto.tink.AesGcmKey",
+                  "keyMaterialType":"SYMMETRIC",
+                  "value": %q
+               },
+               "outputPrefixType":"TINK",
+               "keyId": 4294967296,
                "status":"ENABLED"
             }
          ]
