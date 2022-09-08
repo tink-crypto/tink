@@ -47,6 +47,7 @@ from typing import Any, Optional
 from google.protobuf import descriptor
 from google.protobuf import message
 from google.protobuf import text_encoding
+from google.protobuf import text_format as proto_text_format
 from tink.proto import aes_cmac_pb2
 from tink.proto import aes_cmac_prf_pb2
 from tink.proto import aes_ctr_hmac_aead_pb2
@@ -242,6 +243,14 @@ def _text_format_message(msg: message.Message, indent: str,
 
 def text_format(msg: message.Message) -> str:
   return _text_format_message(msg, '', False)
+
+
+def parse_text_format(serialized: str, msg: message.Message) -> None:
+  # Different from binary parsing, text_format.Parse does not Clear the message.
+  msg.Clear()
+  proto_text_format.Parse(serialized, msg)
+  serialized_copy = text_format(msg)
+  assert serialized_copy == serialized
 
 
 def assert_tink_proto_equal(self,

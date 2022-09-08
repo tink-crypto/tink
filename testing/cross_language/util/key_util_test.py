@@ -134,6 +134,49 @@ key {
     with self.assertRaises(AssertionError):
       key_util.assert_tink_proto_equal(self, keyset_a, keyset_b)
 
+  def test_parse_text_format_symmetric_key_template(self):
+    serialized = r"""type_url: "type.googleapis.com/google.crypto.tink.AesEaxKey"
+# value: [type.googleapis.com/google.crypto.tink.AesEaxKeyFormat] {
+#   params {
+#     iv_size: 16
+#   }
+#   key_size: 16
+# }
+value: "\n\002\010\020\020\020"
+output_prefix_type: TINK"""
+    expected = tink_pb2.KeyTemplate(
+        type_url='type.googleapis.com/google.crypto.tink.AesEaxKey',
+        value=b'\n\x02\x08\x10\x10\x10',
+        output_prefix_type=tink_pb2.TINK)
+
+    parsed_template = tink_pb2.KeyTemplate()
+    key_util.parse_text_format(serialized, parsed_template)
+    self.assertEqual(parsed_template, expected)
+
+  def test_parse_text_format_wrong_comment(self):
+    serialized = r"""type_url: "type.googleapis.com/google.crypto.tink.AesEaxKey"
+value: "\n\002\010\020\020\020"
+output_prefix_type: TINK"""
+
+    parsed_template = tink_pb2.KeyTemplate()
+    with self.assertRaises(AssertionError):
+      key_util.parse_text_format(serialized, parsed_template)
+
+  def test_parse_text_format_missing_comment(self):
+    serialized = r"""type_url: "type.googleapis.com/google.crypto.tink.AesEaxKey"
+# value: [type.googleapis.com/google.crypto.tink.AesEaxKeyFormat] {
+#   params {
+#     iv_size: 16
+#   }
+#   key_size: 18
+# }
+value: "\n\002\010\020\020\020"
+output_prefix_type: TINK"""
+
+    parsed_template = tink_pb2.KeyTemplate()
+    with self.assertRaises(AssertionError):
+      key_util.parse_text_format(serialized, parsed_template)
+
 
 if __name__ == '__main__':
   absltest.main()
