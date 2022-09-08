@@ -55,7 +55,7 @@ cc_library(
         ":status",
         ":statusor",
         "@com_google_absl//absl/memory",
-        "@com_google_protobuf//:protobuf_lite",
+        "@com_google_protobuf//:protobuf",
     ],
 )
 
@@ -312,7 +312,7 @@ cc_library(
     name = "protobuf_helper",
     hdrs = ["protobuf_helper.h"],
     include_prefix = "tink/util",
-    deps = ["@com_google_protobuf//:protobuf_lite"],
+    deps = ["@com_google_protobuf//:protobuf"],
 )
 
 cc_library(
