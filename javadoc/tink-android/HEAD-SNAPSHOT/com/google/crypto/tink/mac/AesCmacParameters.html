@@ -17,7 +17,7 @@
     catch(err) {
     }
 //-->
-var methods = {"i0":9,"i1":9,"i2":10,"i3":10,"i4":10,"i5":10,"i6":10,"i7":10,"i8":10};
+var methods = {"i0":9,"i1":10,"i2":10,"i3":10,"i4":10,"i5":10,"i6":10,"i7":10,"i8":10};
 var tabs = {65535:["t0","All Methods"],1:["t1","Static Methods"],2:["t2","Instance Methods"],8:["t4","Concrete Methods"]};
 var altColor = "altColor";
 var rowColor = "rowColor";
@@ -49,7 +49,7 @@ var activeTableTab = "activeTableTab";
 <div class="subNav">
 <ul class="navList">
 <li><a href="../../../../../com/google/crypto/tink/mac/AesCmacKeyManager.html" title="class in com.google.crypto.tink.mac"><span class="typeNameLink">Prev&nbsp;Class</span></a></li>
-<li><a href="../../../../../com/google/crypto/tink/mac/AesCmacParameters.Variant.html" title="class in com.google.crypto.tink.mac"><span class="typeNameLink">Next&nbsp;Class</span></a></li>
+<li><a href="../../../../../com/google/crypto/tink/mac/AesCmacParameters.Builder.html" title="class in com.google.crypto.tink.mac"><span class="typeNameLink">Next&nbsp;Class</span></a></li>
 </ul>
 <ul class="navList">
 <li><a href="../../../../../index.html?com/google/crypto/tink/mac/AesCmacParameters.html" target="_top">Frames</a></li>
@@ -141,6 +141,12 @@ extends <a href="../../../../../com/google/crypto/tink/mac/MacParameters.html" t
 </tr>
 <tr class="altColor">
 <td class="colFirst"><code>static class&nbsp;</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/mac/AesCmacParameters.Builder.html" title="class in com.google.crypto.tink.mac">AesCmacParameters.Builder</a></span></code>
+<div class="block">Builds a new AesCmacParameters instance.</div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>static class&nbsp;</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/mac/AesCmacParameters.Variant.html" title="class in com.google.crypto.tink.mac">AesCmacParameters.Variant</a></span></code>
 <div class="block">Describes details of the mac computation.</div>
 </td>
@@ -161,27 +167,22 @@ extends <a href="../../../../../com/google/crypto/tink/mac/MacParameters.html" t
 <th class="colLast" scope="col">Method and Description</th>
 </tr>
 <tr id="i0" class="altColor">
-<td class="colFirst"><code>static <a href="../../../../../com/google/crypto/tink/mac/AesCmacParameters.html" title="class in com.google.crypto.tink.mac">AesCmacParameters</a></code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/mac/AesCmacParameters.html#create-int-">create</a></span>(int&nbsp;tagSize)</code>
-<div class="block">Equivalent to <code>createForKeysetWithCryptographicTagSize(tagSize, Variant.NO_PREFIX);</code></div>
-</td>
+<td class="colFirst"><code>static <a href="../../../../../com/google/crypto/tink/mac/AesCmacParameters.Builder.html" title="class in com.google.crypto.tink.mac">AesCmacParameters.Builder</a></code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/mac/AesCmacParameters.html#builder--">builder</a></span>()</code>&nbsp;</td>
 </tr>
 <tr id="i1" class="rowColor">
-<td class="colFirst"><code>static <a href="../../../../../com/google/crypto/tink/mac/AesCmacParameters.html" title="class in com.google.crypto.tink.mac">AesCmacParameters</a></code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/mac/AesCmacParameters.html#createForKeysetWithCryptographicTagSize-int-com.google.crypto.tink.mac.AesCmacParameters.Variant-">createForKeysetWithCryptographicTagSize</a></span>(int&nbsp;tagSizeBytes,
-                                       <a href="../../../../../com/google/crypto/tink/mac/AesCmacParameters.Variant.html" title="class in com.google.crypto.tink.mac">AesCmacParameters.Variant</a>&nbsp;variant)</code>
-<div class="block">Creates a new parameters object.</div>
-</td>
-</tr>
-<tr id="i2" class="altColor">
 <td class="colFirst"><code>boolean</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/mac/AesCmacParameters.html#equals-java.lang.Object-">equals</a></span>(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a>&nbsp;o)</code>&nbsp;</td>
 </tr>
-<tr id="i3" class="rowColor">
+<tr id="i2" class="altColor">
 <td class="colFirst"><code>int</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/mac/AesCmacParameters.html#getCryptographicTagSizeBytes--">getCryptographicTagSizeBytes</a></span>()</code>
 <div class="block">Returns the size of the tag which is computed cryptographically from the message.</div>
 </td>
+</tr>
+<tr id="i3" class="rowColor">
+<td class="colFirst"><code>int</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/mac/AesCmacParameters.html#getKeySizeBytes--">getKeySizeBytes</a></span>()</code>&nbsp;</td>
 </tr>
 <tr id="i4" class="altColor">
 <td class="colFirst"><code>int</code></td>
@@ -233,35 +234,22 @@ extends <a href="../../../../../com/google/crypto/tink/mac/MacParameters.html" t
 <!--   -->
 </a>
 <h3>Method Detail</h3>
-<a name="create-int-">
+<a name="builder--">
 <!--   -->
 </a>
 <ul class="blockList">
 <li class="blockList">
-<h4>create</h4>
-<pre>public static&nbsp;<a href="../../../../../com/google/crypto/tink/mac/AesCmacParameters.html" title="class in com.google.crypto.tink.mac">AesCmacParameters</a>&nbsp;create(int&nbsp;tagSize)
-                                throws <a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
-<div class="block">Equivalent to <code>createForKeysetWithCryptographicTagSize(tagSize, Variant.NO_PREFIX);</code></div>
-<dl>
-<dt><span class="throwsLabel">Throws:</span></dt>
-<dd><code><a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></code></dd>
-</dl>
+<h4>builder</h4>
+<pre>public static&nbsp;<a href="../../../../../com/google/crypto/tink/mac/AesCmacParameters.Builder.html" title="class in com.google.crypto.tink.mac">AesCmacParameters.Builder</a>&nbsp;builder()</pre>
 </li>
 </ul>
-<a name="createForKeysetWithCryptographicTagSize-int-com.google.crypto.tink.mac.AesCmacParameters.Variant-">
+<a name="getKeySizeBytes--">
 <!--   -->
 </a>
 <ul class="blockList">
 <li class="blockList">
-<h4>createForKeysetWithCryptographicTagSize</h4>
-<pre>public static&nbsp;<a href="../../../../../com/google/crypto/tink/mac/AesCmacParameters.html" title="class in com.google.crypto.tink.mac">AesCmacParameters</a>&nbsp;createForKeysetWithCryptographicTagSize(int&nbsp;tagSizeBytes,
-                                                                        <a href="../../../../../com/google/crypto/tink/mac/AesCmacParameters.Variant.html" title="class in com.google.crypto.tink.mac">AesCmacParameters.Variant</a>&nbsp;variant)
-                                                                 throws <a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
-<div class="block">Creates a new parameters object.</div>
-<dl>
-<dt><span class="throwsLabel">Throws:</span></dt>
-<dd><code><a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></code> - if tagSizeBytes not in {10, …, 16}.</dd>
-</dl>
+<h4>getKeySizeBytes</h4>
+<pre>public&nbsp;int&nbsp;getKeySizeBytes()</pre>
 </li>
 </ul>
 <a name="getCryptographicTagSizeBytes--">
@@ -386,7 +374,7 @@ extends <a href="../../../../../com/google/crypto/tink/mac/MacParameters.html" t
 <div class="subNav">
 <ul class="navList">
 <li><a href="../../../../../com/google/crypto/tink/mac/AesCmacKeyManager.html" title="class in com.google.crypto.tink.mac"><span class="typeNameLink">Prev&nbsp;Class</span></a></li>
-<li><a href="../../../../../com/google/crypto/tink/mac/AesCmacParameters.Variant.html" title="class in com.google.crypto.tink.mac"><span class="typeNameLink">Next&nbsp;Class</span></a></li>
+<li><a href="../../../../../com/google/crypto/tink/mac/AesCmacParameters.Builder.html" title="class in com.google.crypto.tink.mac"><span class="typeNameLink">Next&nbsp;Class</span></a></li>
 </ul>
 <ul class="navList">
 <li><a href="../../../../../index.html?com/google/crypto/tink/mac/AesCmacParameters.html" target="_top">Frames</a></li>

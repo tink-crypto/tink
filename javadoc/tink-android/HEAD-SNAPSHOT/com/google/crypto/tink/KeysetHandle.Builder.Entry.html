@@ -202,7 +202,8 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 <ul class="blockList">
 <li class="blockList">
 <h4>makePrimary</h4>
-<pre>public&nbsp;<a href="../../../../com/google/crypto/tink/KeysetHandle.Builder.Entry.html" title="class in com.google.crypto.tink">KeysetHandle.Builder.Entry</a>&nbsp;makePrimary()</pre>
+<pre>@CanIgnoreReturnValue
+public&nbsp;<a href="../../../../com/google/crypto/tink/KeysetHandle.Builder.Entry.html" title="class in com.google.crypto.tink">KeysetHandle.Builder.Entry</a>&nbsp;makePrimary()</pre>
 <div class="block">Marks that this entry is the primary key.
 
  <p>Other entries in the same keyset will be marked as non-primary if this Entry has already
@@ -226,7 +227,8 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 <ul class="blockList">
 <li class="blockList">
 <h4>setStatus</h4>
-<pre>public&nbsp;<a href="../../../../com/google/crypto/tink/KeysetHandle.Builder.Entry.html" title="class in com.google.crypto.tink">KeysetHandle.Builder.Entry</a>&nbsp;setStatus(<a href="../../../../com/google/crypto/tink/KeyStatus.html" title="class in com.google.crypto.tink">KeyStatus</a>&nbsp;status)</pre>
+<pre>@CanIgnoreReturnValue
+public&nbsp;<a href="../../../../com/google/crypto/tink/KeysetHandle.Builder.Entry.html" title="class in com.google.crypto.tink">KeysetHandle.Builder.Entry</a>&nbsp;setStatus(<a href="../../../../com/google/crypto/tink/KeyStatus.html" title="class in com.google.crypto.tink">KeyStatus</a>&nbsp;status)</pre>
 <div class="block">Sets the status of this entry.</div>
 </li>
 </ul>
@@ -246,7 +248,8 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 <ul class="blockList">
 <li class="blockList">
 <h4>withFixedId</h4>
-<pre>public&nbsp;<a href="../../../../com/google/crypto/tink/KeysetHandle.Builder.Entry.html" title="class in com.google.crypto.tink">KeysetHandle.Builder.Entry</a>&nbsp;withFixedId(int&nbsp;id)</pre>
+<pre>@CanIgnoreReturnValue
+public&nbsp;<a href="../../../../com/google/crypto/tink/KeysetHandle.Builder.Entry.html" title="class in com.google.crypto.tink">KeysetHandle.Builder.Entry</a>&nbsp;withFixedId(int&nbsp;id)</pre>
 <div class="block">Tells Tink to assign a fixed id when this keyset is built.</div>
 </li>
 </ul>
@@ -256,7 +259,8 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 <ul class="blockListLast">
 <li class="blockList">
 <h4>withRandomId</h4>
-<pre>public&nbsp;<a href="../../../../com/google/crypto/tink/KeysetHandle.Builder.Entry.html" title="class in com.google.crypto.tink">KeysetHandle.Builder.Entry</a>&nbsp;withRandomId()</pre>
+<pre>@CanIgnoreReturnValue
+public&nbsp;<a href="../../../../com/google/crypto/tink/KeysetHandle.Builder.Entry.html" title="class in com.google.crypto.tink">KeysetHandle.Builder.Entry</a>&nbsp;withRandomId()</pre>
 <div class="block">Tells Tink to assign an unused uniform random id when this keyset is built.
 
  <p>Using <code>withRandomId</code> is invalid for an entry with an imported or preexisting key,
