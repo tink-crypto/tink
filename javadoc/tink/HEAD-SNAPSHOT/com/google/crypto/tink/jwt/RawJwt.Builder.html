@@ -274,7 +274,8 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 <ul class="blockList">
 <li class="blockList">
 <h4>setTypeHeader</h4>
-<pre>public&nbsp;<a href="../../../../../com/google/crypto/tink/jwt/RawJwt.Builder.html" title="class in com.google.crypto.tink.jwt">RawJwt.Builder</a>&nbsp;setTypeHeader(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;value)</pre>
+<pre>@CanIgnoreReturnValue
+public&nbsp;<a href="../../../../../com/google/crypto/tink/jwt/RawJwt.Builder.html" title="class in com.google.crypto.tink.jwt">RawJwt.Builder</a>&nbsp;setTypeHeader(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;value)</pre>
 <div class="block">Sets the Type Header Parameter.
 
  <p>When set, this value should be set to a shortended IANA MediaType, see
@@ -288,7 +289,8 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 <ul class="blockList">
 <li class="blockList">
 <h4>setIssuer</h4>
-<pre>public&nbsp;<a href="../../../../../com/google/crypto/tink/jwt/RawJwt.Builder.html" title="class in com.google.crypto.tink.jwt">RawJwt.Builder</a>&nbsp;setIssuer(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;value)</pre>
+<pre>@CanIgnoreReturnValue
+public&nbsp;<a href="../../../../../com/google/crypto/tink/jwt/RawJwt.Builder.html" title="class in com.google.crypto.tink.jwt">RawJwt.Builder</a>&nbsp;setIssuer(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;value)</pre>
 <div class="block">Sets the issuer claim that identifies the principal that issued the JWT.
 
  <p>https://tools.ietf.org/html/rfc7519#section-4.1.1</div>
@@ -300,7 +302,8 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 <ul class="blockList">
 <li class="blockList">
 <h4>setSubject</h4>
-<pre>public&nbsp;<a href="../../../../../com/google/crypto/tink/jwt/RawJwt.Builder.html" title="class in com.google.crypto.tink.jwt">RawJwt.Builder</a>&nbsp;setSubject(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;value)</pre>
+<pre>@CanIgnoreReturnValue
+public&nbsp;<a href="../../../../../com/google/crypto/tink/jwt/RawJwt.Builder.html" title="class in com.google.crypto.tink.jwt">RawJwt.Builder</a>&nbsp;setSubject(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;value)</pre>
 <div class="block">Sets the subject claim identifying the principal that is the subject of the JWT.
 
  <p>https://tools.ietf.org/html/rfc7519#section-4.1.2</div>
@@ -312,11 +315,11 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 <ul class="blockList">
 <li class="blockList">
 <h4>setAudience</h4>
-<pre>public&nbsp;<a href="../../../../../com/google/crypto/tink/jwt/RawJwt.Builder.html" title="class in com.google.crypto.tink.jwt">RawJwt.Builder</a>&nbsp;setAudience(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;value)</pre>
+<pre>@CanIgnoreReturnValue
+public&nbsp;<a href="../../../../../com/google/crypto/tink/jwt/RawJwt.Builder.html" title="class in com.google.crypto.tink.jwt">RawJwt.Builder</a>&nbsp;setAudience(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;value)</pre>
 <div class="block">Sets the audience that the JWT is intended for.
 
- Sets the <code>aud</code> claim as a string. This method can't be used
- together with <code>setAudiences</code> or <code>addAudience</code>.
+ <p>Sets the <code>aud</code> claim as a string. This method can't be used together with <code>setAudiences</code> or <code>addAudience</code>.
 
  <p>https://tools.ietf.org/html/rfc7519#section-4.1.3</div>
 </li>
@@ -327,11 +330,12 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 <ul class="blockList">
 <li class="blockList">
 <h4>setAudiences</h4>
-<pre>public&nbsp;<a href="../../../../../com/google/crypto/tink/jwt/RawJwt.Builder.html" title="class in com.google.crypto.tink.jwt">RawJwt.Builder</a>&nbsp;setAudiences(<a href="https://docs.oracle.com/javase/8/docs/api/java/util/List.html?is-external=true" title="class or interface in java.util">List</a>&lt;<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&gt;&nbsp;values)</pre>
+<pre>@CanIgnoreReturnValue
+public&nbsp;<a href="../../../../../com/google/crypto/tink/jwt/RawJwt.Builder.html" title="class in com.google.crypto.tink.jwt">RawJwt.Builder</a>&nbsp;setAudiences(<a href="https://docs.oracle.com/javase/8/docs/api/java/util/List.html?is-external=true" title="class or interface in java.util">List</a>&lt;<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&gt;&nbsp;values)</pre>
 <div class="block">Sets the audiences that the JWT is intended for.
 
- Sets the <code>aud</code> claim as an array of strings. This method can't be used
- together with <code>setAudience</code>.
+ <p>Sets the <code>aud</code> claim as an array of strings. This method can't be used together with
+ <code>setAudience</code>.
 
  <p>https://tools.ietf.org/html/rfc7519#section-4.1.3</div>
 </li>
@@ -342,11 +346,12 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 <ul class="blockList">
 <li class="blockList">
 <h4>addAudience</h4>
-<pre>public&nbsp;<a href="../../../../../com/google/crypto/tink/jwt/RawJwt.Builder.html" title="class in com.google.crypto.tink.jwt">RawJwt.Builder</a>&nbsp;addAudience(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;value)</pre>
+<pre>@CanIgnoreReturnValue
+public&nbsp;<a href="../../../../../com/google/crypto/tink/jwt/RawJwt.Builder.html" title="class in com.google.crypto.tink.jwt">RawJwt.Builder</a>&nbsp;addAudience(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;value)</pre>
 <div class="block">Adds an audience that the JWT is intended for.
 
- The <code>aud</code> claim will always be encoded as an array of strings. This method
- can't be used together with <code>setAudience</code>.
+ <p>The <code>aud</code> claim will always be encoded as an array of strings. This method can't be
+ used together with <code>setAudience</code>.
 
  <p>https://tools.ietf.org/html/rfc7519#section-4.1.3</div>
 </li>
@@ -357,7 +362,8 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 <ul class="blockList">
 <li class="blockList">
 <h4>setJwtId</h4>
-<pre>public&nbsp;<a href="../../../../../com/google/crypto/tink/jwt/RawJwt.Builder.html" title="class in com.google.crypto.tink.jwt">RawJwt.Builder</a>&nbsp;setJwtId(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;value)</pre>
+<pre>@CanIgnoreReturnValue
+public&nbsp;<a href="../../../../../com/google/crypto/tink/jwt/RawJwt.Builder.html" title="class in com.google.crypto.tink.jwt">RawJwt.Builder</a>&nbsp;setJwtId(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;value)</pre>
 <div class="block">Sets the JWT ID claim that provides a unique identifier for the JWT.
 
  <p>https://tools.ietf.org/html/rfc7519#section-4.1.7</div>
@@ -369,7 +375,8 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 <ul class="blockList">
 <li class="blockList">
 <h4>setExpiration</h4>
-<pre>public&nbsp;<a href="../../../../../com/google/crypto/tink/jwt/RawJwt.Builder.html" title="class in com.google.crypto.tink.jwt">RawJwt.Builder</a>&nbsp;setExpiration(<a href="https://docs.oracle.com/javase/8/docs/api/java/time/Instant.html?is-external=true" title="class or interface in java.time">Instant</a>&nbsp;value)</pre>
+<pre>@CanIgnoreReturnValue
+public&nbsp;<a href="../../../../../com/google/crypto/tink/jwt/RawJwt.Builder.html" title="class in com.google.crypto.tink.jwt">RawJwt.Builder</a>&nbsp;setExpiration(<a href="https://docs.oracle.com/javase/8/docs/api/java/time/Instant.html?is-external=true" title="class or interface in java.time">Instant</a>&nbsp;value)</pre>
 <div class="block">Sets the <code>exp</code> claim that identifies the instant on or after which the token MUST NOT
  be accepted for processing.
 
@@ -386,7 +393,8 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 <ul class="blockList">
 <li class="blockList">
 <h4>withoutExpiration</h4>
-<pre>public&nbsp;<a href="../../../../../com/google/crypto/tink/jwt/RawJwt.Builder.html" title="class in com.google.crypto.tink.jwt">RawJwt.Builder</a>&nbsp;withoutExpiration()</pre>
+<pre>@CanIgnoreReturnValue
+public&nbsp;<a href="../../../../../com/google/crypto/tink/jwt/RawJwt.Builder.html" title="class in com.google.crypto.tink.jwt">RawJwt.Builder</a>&nbsp;withoutExpiration()</pre>
 <div class="block">Allow generating tokens without an expiration.
 
  <p>For most applications of JWT, an expiration date should be set. This function makes sure
@@ -400,7 +408,8 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 <ul class="blockList">
 <li class="blockList">
 <h4>setNotBefore</h4>
-<pre>public&nbsp;<a href="../../../../../com/google/crypto/tink/jwt/RawJwt.Builder.html" title="class in com.google.crypto.tink.jwt">RawJwt.Builder</a>&nbsp;setNotBefore(<a href="https://docs.oracle.com/javase/8/docs/api/java/time/Instant.html?is-external=true" title="class or interface in java.time">Instant</a>&nbsp;value)</pre>
+<pre>@CanIgnoreReturnValue
+public&nbsp;<a href="../../../../../com/google/crypto/tink/jwt/RawJwt.Builder.html" title="class in com.google.crypto.tink.jwt">RawJwt.Builder</a>&nbsp;setNotBefore(<a href="https://docs.oracle.com/javase/8/docs/api/java/time/Instant.html?is-external=true" title="class or interface in java.time">Instant</a>&nbsp;value)</pre>
 <div class="block">Sets the <code>nbf</code> claim that identifies the instant before which the token MUST NOT be
  accepted for processing.
 
@@ -417,7 +426,8 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 <ul class="blockList">
 <li class="blockList">
 <h4>setIssuedAt</h4>
-<pre>public&nbsp;<a href="../../../../../com/google/crypto/tink/jwt/RawJwt.Builder.html" title="class in com.google.crypto.tink.jwt">RawJwt.Builder</a>&nbsp;setIssuedAt(<a href="https://docs.oracle.com/javase/8/docs/api/java/time/Instant.html?is-external=true" title="class or interface in java.time">Instant</a>&nbsp;value)</pre>
+<pre>@CanIgnoreReturnValue
+public&nbsp;<a href="../../../../../com/google/crypto/tink/jwt/RawJwt.Builder.html" title="class in com.google.crypto.tink.jwt">RawJwt.Builder</a>&nbsp;setIssuedAt(<a href="https://docs.oracle.com/javase/8/docs/api/java/time/Instant.html?is-external=true" title="class or interface in java.time">Instant</a>&nbsp;value)</pre>
 <div class="block">Sets the <code>iat</code> claim that identifies the instant at which the JWT was issued.
 
  <p>This API requires <a href="https://docs.oracle.com/javase/8/docs/api/java/time/Instant.html?is-external=true" title="class or interface in java.time"><code>Instant</code></a> which is unavailable on Android until API
@@ -433,8 +443,9 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 <ul class="blockList">
 <li class="blockList">
 <h4>addBooleanClaim</h4>
-<pre>public&nbsp;<a href="../../../../../com/google/crypto/tink/jwt/RawJwt.Builder.html" title="class in com.google.crypto.tink.jwt">RawJwt.Builder</a>&nbsp;addBooleanClaim(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;name,
-                                      boolean&nbsp;value)</pre>
+<pre>@CanIgnoreReturnValue
+public&nbsp;<a href="../../../../../com/google/crypto/tink/jwt/RawJwt.Builder.html" title="class in com.google.crypto.tink.jwt">RawJwt.Builder</a>&nbsp;addBooleanClaim(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;name,
+                                                            boolean&nbsp;value)</pre>
 <div class="block">Adds a custom claim of type <code>boolean</code> to the JWT.</div>
 </li>
 </ul>
@@ -444,8 +455,9 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 <ul class="blockList">
 <li class="blockList">
 <h4>addNumberClaim</h4>
-<pre>public&nbsp;<a href="../../../../../com/google/crypto/tink/jwt/RawJwt.Builder.html" title="class in com.google.crypto.tink.jwt">RawJwt.Builder</a>&nbsp;addNumberClaim(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;name,
-                                     double&nbsp;value)</pre>
+<pre>@CanIgnoreReturnValue
+public&nbsp;<a href="../../../../../com/google/crypto/tink/jwt/RawJwt.Builder.html" title="class in com.google.crypto.tink.jwt">RawJwt.Builder</a>&nbsp;addNumberClaim(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;name,
+                                                           double&nbsp;value)</pre>
 <div class="block">Adds a custom claim of type <code>double</code> to the JWT.</div>
 </li>
 </ul>
@@ -455,8 +467,9 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 <ul class="blockList">
 <li class="blockList">
 <h4>addStringClaim</h4>
-<pre>public&nbsp;<a href="../../../../../com/google/crypto/tink/jwt/RawJwt.Builder.html" title="class in com.google.crypto.tink.jwt">RawJwt.Builder</a>&nbsp;addStringClaim(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;name,
-                                     <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;value)</pre>
+<pre>@CanIgnoreReturnValue
+public&nbsp;<a href="../../../../../com/google/crypto/tink/jwt/RawJwt.Builder.html" title="class in com.google.crypto.tink.jwt">RawJwt.Builder</a>&nbsp;addStringClaim(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;name,
+                                                           <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;value)</pre>
 <div class="block">Adds a custom claim of type <code>String</code> to the JWT.</div>
 </li>
 </ul>
@@ -466,7 +479,8 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 <ul class="blockList">
 <li class="blockList">
 <h4>addNullClaim</h4>
-<pre>public&nbsp;<a href="../../../../../com/google/crypto/tink/jwt/RawJwt.Builder.html" title="class in com.google.crypto.tink.jwt">RawJwt.Builder</a>&nbsp;addNullClaim(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;name)</pre>
+<pre>@CanIgnoreReturnValue
+public&nbsp;<a href="../../../../../com/google/crypto/tink/jwt/RawJwt.Builder.html" title="class in com.google.crypto.tink.jwt">RawJwt.Builder</a>&nbsp;addNullClaim(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;name)</pre>
 <div class="block">Adds a custom claim with value null.</div>
 </li>
 </ul>
@@ -476,9 +490,10 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 <ul class="blockList">
 <li class="blockList">
 <h4>addJsonObjectClaim</h4>
-<pre>public&nbsp;<a href="../../../../../com/google/crypto/tink/jwt/RawJwt.Builder.html" title="class in com.google.crypto.tink.jwt">RawJwt.Builder</a>&nbsp;addJsonObjectClaim(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;name,
-                                         <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;encodedJsonObject)
-                                  throws <a href="../../../../../com/google/crypto/tink/jwt/JwtInvalidException.html" title="class in com.google.crypto.tink.jwt">JwtInvalidException</a></pre>
+<pre>@CanIgnoreReturnValue
+public&nbsp;<a href="../../../../../com/google/crypto/tink/jwt/RawJwt.Builder.html" title="class in com.google.crypto.tink.jwt">RawJwt.Builder</a>&nbsp;addJsonObjectClaim(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;name,
+                                                               <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;encodedJsonObject)
+                                                        throws <a href="../../../../../com/google/crypto/tink/jwt/JwtInvalidException.html" title="class in com.google.crypto.tink.jwt">JwtInvalidException</a></pre>
 <div class="block">Adds a custom claim encoded in a JSON <code>String</code> to the JWT.</div>
 <dl>
 <dt><span class="throwsLabel">Throws:</span></dt>
@@ -492,9 +507,10 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 <ul class="blockList">
 <li class="blockList">
 <h4>addJsonArrayClaim</h4>
-<pre>public&nbsp;<a href="../../../../../com/google/crypto/tink/jwt/RawJwt.Builder.html" title="class in com.google.crypto.tink.jwt">RawJwt.Builder</a>&nbsp;addJsonArrayClaim(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;name,
-                                        <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;encodedJsonArray)
-                                 throws <a href="../../../../../com/google/crypto/tink/jwt/JwtInvalidException.html" title="class in com.google.crypto.tink.jwt">JwtInvalidException</a></pre>
+<pre>@CanIgnoreReturnValue
+public&nbsp;<a href="../../../../../com/google/crypto/tink/jwt/RawJwt.Builder.html" title="class in com.google.crypto.tink.jwt">RawJwt.Builder</a>&nbsp;addJsonArrayClaim(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;name,
+                                                              <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;encodedJsonArray)
+                                                       throws <a href="../../../../../com/google/crypto/tink/jwt/JwtInvalidException.html" title="class in com.google.crypto.tink.jwt">JwtInvalidException</a></pre>
 <div class="block">Adds a custom claim encoded in a JSON <code>String</code> to the JWT.</div>
 <dl>
 <dt><span class="throwsLabel">Throws:</span></dt>

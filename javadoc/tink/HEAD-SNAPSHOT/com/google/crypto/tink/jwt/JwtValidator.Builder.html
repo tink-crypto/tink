@@ -226,7 +226,8 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 <ul class="blockList">
 <li class="blockList">
 <h4>expectTypeHeader</h4>
-<pre>public&nbsp;<a href="../../../../../com/google/crypto/tink/jwt/JwtValidator.Builder.html" title="class in com.google.crypto.tink.jwt">JwtValidator.Builder</a>&nbsp;expectTypeHeader(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;value)</pre>
+<pre>@CanIgnoreReturnValue
+public&nbsp;<a href="../../../../../com/google/crypto/tink/jwt/JwtValidator.Builder.html" title="class in com.google.crypto.tink.jwt">JwtValidator.Builder</a>&nbsp;expectTypeHeader(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;value)</pre>
 <div class="block">Sets the expected type header of the token. When this is set, all tokens with missing or
  different <code>typ</code> header are rejected. When this is not set, all token that have a <code>typ</code> header are rejected. So this must be set for token that have a <code>typ</code> header.
 
@@ -242,7 +243,8 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 <ul class="blockList">
 <li class="blockList">
 <h4>ignoreTypeHeader</h4>
-<pre>public&nbsp;<a href="../../../../../com/google/crypto/tink/jwt/JwtValidator.Builder.html" title="class in com.google.crypto.tink.jwt">JwtValidator.Builder</a>&nbsp;ignoreTypeHeader()</pre>
+<pre>@CanIgnoreReturnValue
+public&nbsp;<a href="../../../../../com/google/crypto/tink/jwt/JwtValidator.Builder.html" title="class in com.google.crypto.tink.jwt">JwtValidator.Builder</a>&nbsp;ignoreTypeHeader()</pre>
 <div class="block">Lets the validator ignore the <code>typ</code> header.</div>
 </li>
 </ul>
@@ -252,7 +254,8 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 <ul class="blockList">
 <li class="blockList">
 <h4>expectIssuer</h4>
-<pre>public&nbsp;<a href="../../../../../com/google/crypto/tink/jwt/JwtValidator.Builder.html" title="class in com.google.crypto.tink.jwt">JwtValidator.Builder</a>&nbsp;expectIssuer(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;value)</pre>
+<pre>@CanIgnoreReturnValue
+public&nbsp;<a href="../../../../../com/google/crypto/tink/jwt/JwtValidator.Builder.html" title="class in com.google.crypto.tink.jwt">JwtValidator.Builder</a>&nbsp;expectIssuer(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;value)</pre>
 <div class="block">Sets the expected issuer claim of the token. When this is set, all tokens with missing or
  different <code>iss</code> claims are rejected. When this is not set, all token that have a <code>iss</code> claim are rejected. So this must be set for token that have a <code>iss</code> claim.
 
@@ -268,7 +271,8 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 <ul class="blockList">
 <li class="blockList">
 <h4>ignoreIssuer</h4>
-<pre>public&nbsp;<a href="../../../../../com/google/crypto/tink/jwt/JwtValidator.Builder.html" title="class in com.google.crypto.tink.jwt">JwtValidator.Builder</a>&nbsp;ignoreIssuer()</pre>
+<pre>@CanIgnoreReturnValue
+public&nbsp;<a href="../../../../../com/google/crypto/tink/jwt/JwtValidator.Builder.html" title="class in com.google.crypto.tink.jwt">JwtValidator.Builder</a>&nbsp;ignoreIssuer()</pre>
 <div class="block">Lets the validator ignore the <code>iss</code> claim.</div>
 </li>
 </ul>
@@ -278,7 +282,8 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 <ul class="blockList">
 <li class="blockList">
 <h4>expectAudience</h4>
-<pre>public&nbsp;<a href="../../../../../com/google/crypto/tink/jwt/JwtValidator.Builder.html" title="class in com.google.crypto.tink.jwt">JwtValidator.Builder</a>&nbsp;expectAudience(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;value)</pre>
+<pre>@CanIgnoreReturnValue
+public&nbsp;<a href="../../../../../com/google/crypto/tink/jwt/JwtValidator.Builder.html" title="class in com.google.crypto.tink.jwt">JwtValidator.Builder</a>&nbsp;expectAudience(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;value)</pre>
 <div class="block">Sets the expected audience. When this is set, all tokens that do not contain this audience in
  their <code>aud</code> claims are rejected. When this is not set, all token that have <code>aud</code>
  claims are rejected. So this must be set for token that have <code>aud</code> claims.
@@ -295,7 +300,8 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 <ul class="blockList">
 <li class="blockList">
 <h4>ignoreAudiences</h4>
-<pre>public&nbsp;<a href="../../../../../com/google/crypto/tink/jwt/JwtValidator.Builder.html" title="class in com.google.crypto.tink.jwt">JwtValidator.Builder</a>&nbsp;ignoreAudiences()</pre>
+<pre>@CanIgnoreReturnValue
+public&nbsp;<a href="../../../../../com/google/crypto/tink/jwt/JwtValidator.Builder.html" title="class in com.google.crypto.tink.jwt">JwtValidator.Builder</a>&nbsp;ignoreAudiences()</pre>
 <div class="block">Lets the validator ignore the <code>aud</code> claim.</div>
 </li>
 </ul>
@@ -305,7 +311,8 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 <ul class="blockList">
 <li class="blockList">
 <h4>expectIssuedInThePast</h4>
-<pre>public&nbsp;<a href="../../../../../com/google/crypto/tink/jwt/JwtValidator.Builder.html" title="class in com.google.crypto.tink.jwt">JwtValidator.Builder</a>&nbsp;expectIssuedInThePast()</pre>
+<pre>@CanIgnoreReturnValue
+public&nbsp;<a href="../../../../../com/google/crypto/tink/jwt/JwtValidator.Builder.html" title="class in com.google.crypto.tink.jwt">JwtValidator.Builder</a>&nbsp;expectIssuedInThePast()</pre>
 <div class="block">Checks that the <code>iat</code> claim is in the past.</div>
 </li>
 </ul>
@@ -315,7 +322,8 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 <ul class="blockList">
 <li class="blockList">
 <h4>setClock</h4>
-<pre>public&nbsp;<a href="../../../../../com/google/crypto/tink/jwt/JwtValidator.Builder.html" title="class in com.google.crypto.tink.jwt">JwtValidator.Builder</a>&nbsp;setClock(<a href="https://docs.oracle.com/javase/8/docs/api/java/time/Clock.html?is-external=true" title="class or interface in java.time">Clock</a>&nbsp;clock)</pre>
+<pre>@CanIgnoreReturnValue
+public&nbsp;<a href="../../../../../com/google/crypto/tink/jwt/JwtValidator.Builder.html" title="class in com.google.crypto.tink.jwt">JwtValidator.Builder</a>&nbsp;setClock(<a href="https://docs.oracle.com/javase/8/docs/api/java/time/Clock.html?is-external=true" title="class or interface in java.time">Clock</a>&nbsp;clock)</pre>
 <div class="block">Sets the clock used to verify timestamp claims.</div>
 </li>
 </ul>
@@ -325,7 +333,8 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 <ul class="blockList">
 <li class="blockList">
 <h4>setClockSkew</h4>
-<pre>public&nbsp;<a href="../../../../../com/google/crypto/tink/jwt/JwtValidator.Builder.html" title="class in com.google.crypto.tink.jwt">JwtValidator.Builder</a>&nbsp;setClockSkew(<a href="https://docs.oracle.com/javase/8/docs/api/java/time/Duration.html?is-external=true" title="class or interface in java.time">Duration</a>&nbsp;clockSkew)</pre>
+<pre>@CanIgnoreReturnValue
+public&nbsp;<a href="../../../../../com/google/crypto/tink/jwt/JwtValidator.Builder.html" title="class in com.google.crypto.tink.jwt">JwtValidator.Builder</a>&nbsp;setClockSkew(<a href="https://docs.oracle.com/javase/8/docs/api/java/time/Duration.html?is-external=true" title="class or interface in java.time">Duration</a>&nbsp;clockSkew)</pre>
 <div class="block">Sets the clock skew to tolerate when verifying timestamp claims, to deal with small clock
  differences among different machines.
 
@@ -339,7 +348,8 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 <ul class="blockList">
 <li class="blockList">
 <h4>allowMissingExpiration</h4>
-<pre>public&nbsp;<a href="../../../../../com/google/crypto/tink/jwt/JwtValidator.Builder.html" title="class in com.google.crypto.tink.jwt">JwtValidator.Builder</a>&nbsp;allowMissingExpiration()</pre>
+<pre>@CanIgnoreReturnValue
+public&nbsp;<a href="../../../../../com/google/crypto/tink/jwt/JwtValidator.Builder.html" title="class in com.google.crypto.tink.jwt">JwtValidator.Builder</a>&nbsp;allowMissingExpiration()</pre>
 <div class="block">When set, the validator accepts tokens that do not have an expiration set.
 
  <p>In most cases, tokens should always have an expiration, so this option should rarely be
