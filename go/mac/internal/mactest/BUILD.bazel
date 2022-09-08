@@ -1,0 +1,23 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+# TODO(felobato): describe this package.
+
+go_library(
+    name = "mactest",
+    srcs = ["mactest.go"],
+    importpath = "github.com/google/tink/go/mac/internal/mactest",
+    visibility = ["//mac:__subpackages__"],
+    deps = ["//tink"],
+)
+
+alias(
+    name = "go_default_library",
+    actual = ":mactest",
+    visibility = ["//mac:__subpackages__"],
+)
+
+go_test(
+    name = "mactest_test",
+    srcs = ["mactest_test.go"],
+    deps = [":mactest"],
+)
