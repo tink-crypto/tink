@@ -20,33 +20,54 @@ from google.protobuf import text_format
 from tink.proto import tink_pb2
 from util import key_util
 
-KEYSET_A = r"""
-  primary_key_id: 4223424880
-  key {
-    key_data {
-      type_url: "type.googleapis.com/google.crypto.tink.EcdsaPublicKey"
-      value: "\" \321L\232\025n*\335.w\023\311\242\035\252^B\024w\305lwa\261K\341\037\2353Yy\3521\032 ^}`\277\341|\364\355\013\035>\275&\3726fu\003\364\373\267\213e\320\030(\234\246b\352\362\311\022\006\030\002\020\002\010\003"
-      key_material_type: ASYMMETRIC_PUBLIC
-    }
-    status: ENABLED
-    key_id: 4223424880
-    output_prefix_type: CRUNCHY
-  }"""
-
-# The same keyset as A, but here EcdsaPublicKey is encoded differently
-KEYSET_B = r"""
-  primary_key_id: 4223424880
-  key {
-    key_data {
-      type_url: "type.googleapis.com/google.crypto.tink.EcdsaPublicKey"
-      value: "\022\006\010\003\020\002\030\002\032 ^}`\277\341|\364\355\013\035>\275&\3726fu\003\364\373\267\213e\320\030(\234\246b\352\362\311\" \321L\232\025n*\335.w\023\311\242\035\252^B\024w\305lwa\261K\341\037\2353Yy\3521"
-      key_material_type: ASYMMETRIC_PUBLIC
-    }
-    status: ENABLED
-    key_id: 4223424880
-    output_prefix_type: CRUNCHY
-  }
+KEY_TEMPLATE_1A = r"""
+ type_url: "type.googleapis.com/google.crypto.tink.EciesAeadHkdfPrivateKey"
+ value: "\n@\022>\022<\n0type.googleapis.com/google.crypto.tink.AesEaxKey\022\006\n\002\010\020\020\020\030\001"
+ output_prefix_type: RAW
 """
+
+# The same template as 1, but here AesEaxKeyFormat is encoded differently
+KEY_TEMPLATE_1B = r"""
+ type_url: "type.googleapis.com/google.crypto.tink.EciesAeadHkdfPrivateKey"
+ value: "\n@\022>\022<\n0type.googleapis.com/google.crypto.tink.AesEaxKey\022\006\020\020\n\002\010\020\030\001"
+ output_prefix_type: RAW
+"""
+
+# The same template as 1, but the inner AesEaxKeyFormat has a different iv_size
+KEY_TEMPLATE_2 = r"""
+ type_url: "type.googleapis.com/google.crypto.tink.EciesAeadHkdfPrivateKey"
+ value: "\n@\022>\022<\n0type.googleapis.com/google.crypto.tink.AesEaxKey\022\006\n\002\010\020\020\022\030\001"
+ output_prefix_type: RAW
+"""
+
+KEY_TEMPLATE_1_COMMENTED_FORMAT = r"""
+type_url: "type.googleapis.com/google.crypto.tink.EciesAeadHkdfPrivateKey"
+# value: [type.googleapis.com/google.crypto.tink.EciesAeadHkdfKeyFormat] {
+#   params {
+#     kem_params {
+#       curve_type: UNKNOWN_CURVE
+#       hkdf_hash_type: UNKNOWN_HASH
+#       hkdf_salt: ""
+#     }
+#     dem_params {
+#       aead_dem {
+#         type_url: "type.googleapis.com/google.crypto.tink.AesEaxKey"
+#         # value: [type.googleapis.com/google.crypto.tink.AesEaxKeyFormat] {
+#         #   params {
+#         #     iv_size: 16
+#         #   }
+#         #   key_size: 16
+#         # }
+#         value: "\n\002\010\020\020\020"
+#         output_prefix_type: TINK
+#       }
+#     }
+#     ec_point_format: UNKNOWN_FORMAT
+#   }
+# }
+value: "\n@\022>\022<\n0type.googleapis.com/google.crypto.tink.AesEaxKey\022\006\n\002\010\020\020\020\030\001"
+output_prefix_type: RAW
+""".strip()
 
 
 class KeyUtilTest(parameterized.TestCase):
@@ -92,6 +113,12 @@ output_prefix_type: TINK"""
     self.assertEqual(
         text_format.Parse(output, tink_pb2.KeyTemplate()), template)
 
+  def test_text_format_recursive_template(self):
+    template = tink_pb2.KeyTemplate()
+    text_format.Parse(KEY_TEMPLATE_1A, template)
+    output = key_util.text_format(template)
+    self.assertEqual(output, KEY_TEMPLATE_1_COMMENTED_FORMAT)
+
   def test_text_format_keyset(self):
     key = tink_pb2.Keyset.Key(
         key_data=tink_pb2.KeyData(
@@ -126,13 +153,13 @@ key {
 
   def test_compare_tink_messages(self):
     """Tests that all testdata have the expected format, including comments."""
-    keyset_a = text_format.Parse(KEYSET_A, tink_pb2.Keyset())
-    keyset_b = text_format.Parse(KEYSET_B, tink_pb2.Keyset())
-    key_util.assert_tink_proto_equal(self, keyset_a, keyset_b)
+    key_template_1a = text_format.Parse(KEY_TEMPLATE_1A, tink_pb2.KeyTemplate())
+    key_template_1b = text_format.Parse(KEY_TEMPLATE_1B, tink_pb2.KeyTemplate())
+    key_util.assert_tink_proto_equal(self, key_template_1a, key_template_1b)
+    key_template_2 = text_format.Parse(KEY_TEMPLATE_2, tink_pb2.KeyTemplate())
 
-    keyset_b.primary_key_id = 4223424881
     with self.assertRaises(AssertionError):
-      key_util.assert_tink_proto_equal(self, keyset_a, keyset_b)
+      key_util.assert_tink_proto_equal(self, key_template_1a, key_template_2)
 
   def test_parse_text_format_symmetric_key_template(self):
     serialized = r"""type_url: "type.googleapis.com/google.crypto.tink.AesEaxKey"
