@@ -17,15 +17,26 @@
 package mac_test
 
 import (
+	"bytes"
 	"fmt"
 	"strings"
 	"testing"
 
+	"github.com/google/go-cmp/cmp"
+	"github.com/google/go-cmp/cmp/cmpopts"
 	"google.golang.org/protobuf/proto"
 	"github.com/google/tink/go/core/cryptofmt"
+	"github.com/google/tink/go/core/registry"
+	"github.com/google/tink/go/insecurecleartextkeyset"
+	"github.com/google/tink/go/internal/internalregistry"
+	"github.com/google/tink/go/internal/testing/stubkeymanager"
 	"github.com/google/tink/go/keyset"
+	"github.com/google/tink/go/mac/internal/mactest"
 	"github.com/google/tink/go/mac"
+	"github.com/google/tink/go/monitoring"
 	"github.com/google/tink/go/signature"
+	"github.com/google/tink/go/subtle/random"
+	"github.com/google/tink/go/testing/fakemonitoring"
 	"github.com/google/tink/go/testkeyset"
 	"github.com/google/tink/go/testutil"
 	"github.com/google/tink/go/tink"
@@ -240,5 +251,386 @@ func TestFactoryWithValidPrimitiveSetType(t *testing.T) {
 	_, err = mac.New(goodKH)
 	if err != nil {
 		t.Fatalf("calling New() with good *keyset.Handle failed: %s", err)
+	}
+}
+
+func TestFactoryWithMonitoringPrimitiveLogsComputeAndVerify(t *testing.T) {
+	defer internalregistry.ClearMonitoringClient()
+	client := fakemonitoring.NewClient("fake-client")
+	if err := internalregistry.RegisterMonitoringClient(client); err != nil {
+		t.Fatalf("registry.RegisterMonitoringClient() err = %v, want nil", err)
+	}
+	kh, err := keyset.NewHandle(mac.HMACSHA256Tag256KeyTemplate())
+	if err != nil {
+		t.Fatalf("keyset.NewHandle(mac.HMACSHA256Tag256KeyTemplate()) err = %v, want nil", err)
+	}
+	p, err := mac.New(kh)
+	if err != nil {
+		t.Fatalf("mac.New() err = %v, want nil", err)
+	}
+	data := []byte("data")
+	tag, err := p.ComputeMAC(data)
+	if err != nil {
+		t.Fatalf("p.ComputeMAC() err = %v, want nil", err)
+	}
+	if err := p.VerifyMAC(tag, data); err != nil {
+		t.Fatalf("p.Verify() err = %v, want nil", err)
+	}
+	got := client.Events()
+	wantKeysetInfo := monitoring.NewKeysetInfo(
+		/*annotations=*/ nil,
+		kh.KeysetInfo().GetPrimaryKeyId(),
+		[]*monitoring.Entry{
+			{
+				KeyID:          kh.KeysetInfo().GetPrimaryKeyId(),
+				Status:         monitoring.Enabled,
+				FormatAsString: "type.googleapis.com/google.crypto.tink.HmacKey",
+			},
+		},
+	)
+	want := []*fakemonitoring.LogEvent{
+		&fakemonitoring.LogEvent{
+			Context:  monitoring.NewContext("mac", "compute", wantKeysetInfo),
+			KeyID:    kh.KeysetInfo().GetPrimaryKeyId(),
+			NumBytes: len(data),
+		},
+		&fakemonitoring.LogEvent{
+			Context:  monitoring.NewContext("mac", "verify", wantKeysetInfo),
+			KeyID:    kh.KeysetInfo().GetPrimaryKeyId(),
+			NumBytes: len(data),
+		},
+	}
+	if !cmp.Equal(got, want) {
+		t.Errorf("got = %v, want = %v, with diff: %v", got, want, cmp.Diff(got, want))
+	}
+}
+
+func TestFactoryWithMonitoringPrimitiveWithMultipleKeysLogsComputeVerify(t *testing.T) {
+	defer internalregistry.ClearMonitoringClient()
+	client := fakemonitoring.NewClient("fake-client")
+	if err := internalregistry.RegisterMonitoringClient(client); err != nil {
+		t.Fatalf("registry.RegisterMonitoringClient() err = %v, want nil", err)
+	}
+	manager := keyset.NewManager()
+	keyIDs := make([]uint32, 4, 4)
+	var err error
+	for i, tm := range []*tinkpb.KeyTemplate{
+		mac.HMACSHA256Tag256KeyTemplate(),
+		mac.HMACSHA256Tag128KeyTemplate(),
+		mac.HMACSHA512Tag512KeyTemplate(),
+		mac.AESCMACTag128KeyTemplate(),
+	} {
+		keyIDs[i], err = manager.Add(tm)
+		if err != nil {
+			t.Fatalf("manager.Add() err = %v, want nil", err)
+		}
+	}
+	if err := manager.SetPrimary(keyIDs[1]); err != nil {
+		t.Fatalf("manager.SetPrimary(%d) err = %v, want nil", keyIDs[1], err)
+	}
+	if err := manager.Disable(keyIDs[0]); err != nil {
+		t.Fatalf("manager.Disable(%d) err = %v, want nil", keyIDs[0], err)
+	}
+	kh, err := manager.Handle()
+	if err != nil {
+		t.Fatalf("manager.Handle() err = %v, want nil", err)
+	}
+	p, err := mac.New(kh)
+	if err != nil {
+		t.Fatalf("mac.New() err = %v, want nil", err)
+	}
+	data := random.GetRandomBytes(50)
+	tag, err := p.ComputeMAC(data)
+	if err != nil {
+		t.Fatalf("p.ComputeMAC() err = %v, want nil", err)
+	}
+	if err := p.VerifyMAC(tag, data); err != nil {
+		t.Fatalf("p.VerifyMAC() err = %v, want nil", err)
+	}
+	failures := len(client.Failures())
+	if failures != 0 {
+		t.Errorf("len(client.Failures()) = %d, want 0", failures)
+	}
+	got := client.Events()
+	wantKeysetInfo := &monitoring.KeysetInfo{
+		PrimaryKeyID: kh.KeysetInfo().GetPrimaryKeyId(),
+		Entries: []*monitoring.Entry{
+			{
+				KeyID:          kh.KeysetInfo().GetPrimaryKeyId(),
+				Status:         monitoring.Enabled,
+				FormatAsString: "type.googleapis.com/google.crypto.tink.HmacKey",
+			},
+			{
+				KeyID:          keyIDs[2],
+				Status:         monitoring.Enabled,
+				FormatAsString: "type.googleapis.com/google.crypto.tink.HmacKey",
+			},
+			{
+				KeyID:          keyIDs[3],
+				Status:         monitoring.Enabled,
+				FormatAsString: "type.googleapis.com/google.crypto.tink.AesCmacKey",
+			},
+		},
+	}
+	want := []*fakemonitoring.LogEvent{
+		{
+			KeyID:    kh.KeysetInfo().GetPrimaryKeyId(),
+			NumBytes: len(data),
+			Context: monitoring.NewContext(
+				"mac",
+				"compute",
+				wantKeysetInfo,
+			),
+		},
+		{
+			KeyID:    kh.KeysetInfo().GetPrimaryKeyId(),
+			NumBytes: len(data),
+			Context: monitoring.NewContext(
+				"mac",
+				"verify",
+				wantKeysetInfo,
+			),
+		},
+	}
+	// sort by keyID to avoid non deterministic order.
+	entryLessFunc := func(a, b *monitoring.Entry) bool {
+		return a.KeyID < b.KeyID
+	}
+	if !cmp.Equal(got, want, cmpopts.SortSlices(entryLessFunc)) {
+		t.Errorf("got = %v, want = %v, with diff: %v", got, want, cmp.Diff(got, want))
+	}
+}
+
+func TestFactoryWithMonitoringPrimitiveComputeFailureIsLogged(t *testing.T) {
+	defer internalregistry.ClearMonitoringClient()
+	client := fakemonitoring.NewClient("fake-client")
+	if err := internalregistry.RegisterMonitoringClient(client); err != nil {
+		t.Fatalf("registry.RegisterMonitoringClient() err = %v, want nil", err)
+	}
+	// Since this key type will be registered in the registry,
+	// ww create a very unique typeURL to avoid colliding with other tests.
+	typeURL := "TestFactoryWithMonitoringPrimitiveComputeFailureIsLogged" + string(random.GetRandomBytes(8))
+	template := &tinkpb.KeyTemplate{
+		TypeUrl:          typeURL,
+		OutputPrefixType: tinkpb.OutputPrefixType_LEGACY,
+	}
+	km := &stubkeymanager.StubKeyManager{
+		URL:  typeURL,
+		Prim: &mactest.AlwaysFailingMAC{Error: fmt.Errorf("system failure")},
+		Key:  &hmacpb.HmacKey{},
+		KeyData: &tinkpb.KeyData{
+			TypeUrl: template.TypeUrl,
+			Value:   []byte("some_data"),
+		},
+	}
+	if err := registry.RegisterKeyManager(km); err != nil {
+		t.Fatalf("registry.RegisterKeyManager() err = %v, want nil", err)
+	}
+	kh, err := keyset.NewHandle(template)
+	if err != nil {
+		t.Fatalf("keyset.NewHandle() err = %v, want nil", err)
+	}
+	m, err := mac.New(kh)
+	if err != nil {
+		t.Fatalf("mac.New() err = %v, want nil", err)
+	}
+	if _, err := m.ComputeMAC([]byte("some_data")); err == nil {
+		t.Fatalf("m.ComputeMAC() err = nil, want non-nil error")
+	}
+	got := client.Failures()
+	want := []*fakemonitoring.LogFailure{
+		{
+			Context: monitoring.NewContext(
+				"mac",
+				"compute",
+				monitoring.NewKeysetInfo(
+					/*annotations=*/ nil,
+					kh.KeysetInfo().GetPrimaryKeyId(),
+					[]*monitoring.Entry{
+						{
+							KeyID:          kh.KeysetInfo().GetPrimaryKeyId(),
+							Status:         monitoring.Enabled,
+							FormatAsString: typeURL,
+						},
+					},
+				),
+			),
+		},
+	}
+	if !cmp.Equal(got, want) {
+		t.Errorf("got = %v, want = %v, with diff: %v", got, want, cmp.Diff(got, want))
+	}
+}
+
+func TestFactoryWithMonitoringPrimitiveVerifyFailureIsLogged(t *testing.T) {
+	defer internalregistry.ClearMonitoringClient()
+	client := fakemonitoring.NewClient("fake-client")
+	if err := internalregistry.RegisterMonitoringClient(client); err != nil {
+		t.Fatalf("registry.RegisterMonitoringClient() err = %v, want nil", err)
+	}
+	kh, err := keyset.NewHandle(mac.HMACSHA256Tag256KeyTemplate())
+	if err != nil {
+		t.Fatalf("keyset.NewHandle() err = %v, want nil", err)
+	}
+	m, err := mac.New(kh)
+	if err != nil {
+		t.Fatalf("mac.New() err = %v, want nil", err)
+	}
+	if err := m.VerifyMAC(nil, nil); err == nil {
+		t.Fatalf("m.VerifyMAC() err = nil, want non-nil error")
+	}
+	got := client.Failures()
+	want := []*fakemonitoring.LogFailure{
+		{
+			Context: monitoring.NewContext(
+				"mac",
+				"verify",
+				monitoring.NewKeysetInfo(
+					/*annotations=*/ nil,
+					kh.KeysetInfo().GetPrimaryKeyId(),
+					[]*monitoring.Entry{
+						{
+							KeyID:          kh.KeysetInfo().GetPrimaryKeyId(),
+							Status:         monitoring.Enabled,
+							FormatAsString: "type.googleapis.com/google.crypto.tink.HmacKey",
+						},
+					},
+				),
+			),
+		},
+	}
+	if !cmp.Equal(got, want) {
+		t.Errorf("got = %v, want = %v, with diff: %v", got, want, cmp.Diff(got, want))
+	}
+}
+
+func TestFactoryWithMonitoringMultiplePrimitivesLogOperations(t *testing.T) {
+	defer internalregistry.ClearMonitoringClient()
+	client := fakemonitoring.NewClient("fake-client")
+	if err := internalregistry.RegisterMonitoringClient(client); err != nil {
+		t.Fatalf("registry.RegisterMonitoringClient() err = %v, want nil", err)
+	}
+	templates := []*tinkpb.KeyTemplate{
+		mac.HMACSHA256Tag256KeyTemplate(),
+		mac.AESCMACTag128KeyTemplate()}
+	handles := make([]*keyset.Handle, len(templates))
+	var err error
+	for i, tm := range templates {
+		handles[i], err = keyset.NewHandle(tm)
+		if err != nil {
+			t.Fatalf("keyset.NewHandle() err = %v, want nil", err)
+		}
+		p, err := mac.New(handles[i])
+		if err != nil {
+			t.Fatalf("mac.New() err = %v, want nil", err)
+		}
+		if _, err := p.ComputeMAC([]byte(tm.GetTypeUrl())); err != nil {
+			t.Fatalf("p.ComputeMAC() err = %v, want nil", err)
+		}
+	}
+	got := client.Events()
+	want := []*fakemonitoring.LogEvent{
+		{
+			KeyID:    handles[0].KeysetInfo().GetPrimaryKeyId(),
+			NumBytes: len(templates[0].GetTypeUrl()),
+			Context: monitoring.NewContext(
+				"mac",
+				"compute",
+				monitoring.NewKeysetInfo(
+					/*annotations=*/ nil,
+					handles[0].KeysetInfo().GetPrimaryKeyId(),
+					[]*monitoring.Entry{
+						{
+							KeyID:          handles[0].KeysetInfo().GetPrimaryKeyId(),
+							Status:         monitoring.Enabled,
+							FormatAsString: templates[0].GetTypeUrl(),
+						},
+					},
+				),
+			),
+		},
+		{
+			KeyID:    handles[1].KeysetInfo().GetPrimaryKeyId(),
+			NumBytes: len(templates[1].GetTypeUrl()),
+			Context: monitoring.NewContext(
+				"mac",
+				"compute",
+				monitoring.NewKeysetInfo(
+					/*annotations=*/ nil,
+					handles[1].KeysetInfo().GetPrimaryKeyId(),
+					[]*monitoring.Entry{
+						{
+							KeyID:          handles[1].KeysetInfo().GetPrimaryKeyId(),
+							Status:         monitoring.Enabled,
+							FormatAsString: templates[1].GetTypeUrl(),
+						},
+					},
+				),
+			),
+		},
+	}
+	if !cmp.Equal(got, want) {
+		t.Errorf("got = %v, want = %v, with diff: %v", got, want, cmp.Diff(got, want))
+	}
+}
+
+func TestFactoryWithMonitoringPrimitiveWithAnnotations(t *testing.T) {
+	defer internalregistry.ClearMonitoringClient()
+	client := fakemonitoring.NewClient("fake-client")
+	if err := internalregistry.RegisterMonitoringClient(client); err != nil {
+		t.Fatalf("registry.RegisterMonitoringClient() err = %v, want nil", err)
+	}
+	kh, err := keyset.NewHandle(mac.HMACSHA256Tag256KeyTemplate())
+	if err != nil {
+		t.Fatalf("keyset.NewHandle() err = %v, want nil", err)
+	}
+	// Annotations are only supported throught the `insecurecleartextkeyset` API.
+	buff := &bytes.Buffer{}
+	if err := insecurecleartextkeyset.Write(kh, keyset.NewBinaryWriter(buff)); err != nil {
+		t.Fatalf("insecurecleartextkeyset.Write() err = %v, want nil", err)
+	}
+	annotations := map[string]string{"foo": "bar"}
+	mh, err := insecurecleartextkeyset.Read(keyset.NewBinaryReader(buff), keyset.WithAnnotations(annotations))
+	if err != nil {
+		t.Fatalf("insecurecleartextkeyset.Read() err = %v, want nil", err)
+	}
+	p, err := mac.New(mh)
+	if err != nil {
+		t.Fatalf("mac.New() err = %v, want nil", err)
+	}
+	data := []byte("data")
+	tag, err := p.ComputeMAC(data)
+	if err != nil {
+		t.Fatalf("p.ComputeMAC() err = %v, want nil", err)
+	}
+	if err := p.VerifyMAC(tag, data); err != nil {
+		t.Fatalf("p.Verify() err = %v, want nil", err)
+	}
+	got := client.Events()
+	wantKeysetInfo := monitoring.NewKeysetInfo(
+		annotations,
+		kh.KeysetInfo().GetPrimaryKeyId(),
+		[]*monitoring.Entry{
+			{
+				KeyID:          kh.KeysetInfo().GetPrimaryKeyId(),
+				Status:         monitoring.Enabled,
+				FormatAsString: "type.googleapis.com/google.crypto.tink.HmacKey",
+			},
+		},
+	)
+	want := []*fakemonitoring.LogEvent{
+		&fakemonitoring.LogEvent{
+			Context:  monitoring.NewContext("mac", "compute", wantKeysetInfo),
+			KeyID:    kh.KeysetInfo().GetPrimaryKeyId(),
+			NumBytes: len(data),
+		},
+		&fakemonitoring.LogEvent{
+			Context:  monitoring.NewContext("mac", "verify", wantKeysetInfo),
+			KeyID:    kh.KeysetInfo().GetPrimaryKeyId(),
+			NumBytes: len(data),
+		},
+	}
+	if !cmp.Equal(got, want) {
+		t.Errorf("got = %v, want = %v, with diff: %v", got, want, cmp.Diff(got, want))
 	}
 }

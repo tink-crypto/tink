@@ -4,7 +4,7 @@ go_library(
     name = "stubkeymanager",
     srcs = ["stubkeymanager.go"],
     importpath = "github.com/google/tink/go/internal/testing/stubkeymanager",
-    visibility = ["//testing:__subpackages__"],
+    visibility = ["//:__subpackages__"],
     deps = [
         "//core/registry",
         "//proto/tink_go_proto",
@@ -15,7 +15,7 @@ go_library(
 alias(
     name = "go_default_library",
     actual = ":stubkeymanager",
-    visibility = ["//testing:__subpackages__"],
+    visibility = ["//:__subpackages__"],
 )
 
 go_test(
