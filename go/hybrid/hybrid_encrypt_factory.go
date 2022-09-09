@@ -21,7 +21,10 @@ import (
 
 	"github.com/google/tink/go/core/primitiveset"
 	"github.com/google/tink/go/core/registry"
+	"github.com/google/tink/go/internal/internalregistry"
+	"github.com/google/tink/go/internal/monitoringutil"
 	"github.com/google/tink/go/keyset"
+	"github.com/google/tink/go/monitoring"
 	"github.com/google/tink/go/tink"
 )
 
@@ -44,8 +47,12 @@ func NewHybridEncryptWithKeyManager(h *keyset.Handle, km registry.KeyManager) (t
 
 // encryptPrimitiveSet is an HybridEncrypt implementation that uses the underlying primitive set for encryption.
 type wrappedHybridEncrypt struct {
-	ps *primitiveset.PrimitiveSet
+	ps     *primitiveset.PrimitiveSet
+	logger monitoring.Logger
 }
+
+// "Compime time assertion that wrappedHybridEncrypt implements the HybridEncrypt interface.
+var _ tink.HybridEncrypt = (*wrappedHybridEncrypt)(nil)
 
 func newEncryptPrimitiveSet(ps *primitiveset.PrimitiveSet) (*wrappedHybridEncrypt, error) {
 	if _, ok := (ps.Primary.Primitive).(tink.HybridEncrypt); !ok {
@@ -59,10 +66,20 @@ func newEncryptPrimitiveSet(ps *primitiveset.PrimitiveSet) (*wrappedHybridEncryp
 			}
 		}
 	}
-
-	ret := new(wrappedHybridEncrypt)
-	ret.ps = ps
-
+	ret := &wrappedHybridEncrypt{ps: ps}
+	client := internalregistry.GetMonitoringClient()
+	keysetInfo, err := monitoringutil.KeysetInfoFromPrimitiveSet(ps)
+	if err != nil {
+		return nil, err
+	}
+	ret.logger, err = client.NewLogger(&monitoring.Context{
+		KeysetInfo:  keysetInfo,
+		Primitive:   "hybrid_encrypt",
+		APIFunction: "encrypt",
+	})
+	if err != nil {
+		return nil, err
+	}
 	return ret, nil
 }
 
@@ -77,7 +94,9 @@ func (a *wrappedHybridEncrypt) Encrypt(plaintext, contextInfo []byte) ([]byte, e
 
 	ct, err := p.Encrypt(plaintext, contextInfo)
 	if err != nil {
+		a.logger.LogFailure()
 		return nil, err
 	}
+	a.logger.Log(primary.KeyID, len(plaintext))
 	return append([]byte(primary.Prefix), ct...), nil
 }

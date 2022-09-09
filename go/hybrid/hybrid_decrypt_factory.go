@@ -22,7 +22,10 @@ import (
 	"github.com/google/tink/go/core/cryptofmt"
 	"github.com/google/tink/go/core/primitiveset"
 	"github.com/google/tink/go/core/registry"
+	"github.com/google/tink/go/internal/internalregistry"
+	"github.com/google/tink/go/internal/monitoringutil"
 	"github.com/google/tink/go/keyset"
+	"github.com/google/tink/go/monitoring"
 	"github.com/google/tink/go/tink"
 )
 
@@ -47,8 +50,12 @@ func NewHybridDecryptWithKeyManager(h *keyset.Handle, km registry.KeyManager) (t
 // wrappedHybridDecrypt is an HybridDecrypt implementation that uses the underlying primitive set
 // for decryption.
 type wrappedHybridDecrypt struct {
-	ps *primitiveset.PrimitiveSet
+	ps     *primitiveset.PrimitiveSet
+	logger monitoring.Logger
 }
+
+// "Compime time assertion that wrappedHybridDecrypt implements the HybridDecrypt interface.
+var _ tink.HybridDecrypt = (*wrappedHybridDecrypt)(nil)
 
 func newWrappedHybridDecrypt(ps *primitiveset.PrimitiveSet) (*wrappedHybridDecrypt, error) {
 	if _, ok := (ps.Primary.Primitive).(tink.HybridDecrypt); !ok {
@@ -62,9 +69,20 @@ func newWrappedHybridDecrypt(ps *primitiveset.PrimitiveSet) (*wrappedHybridDecry
 			}
 		}
 	}
-
-	ret := new(wrappedHybridDecrypt)
-	ret.ps = ps
+	ret := &wrappedHybridDecrypt{ps: ps}
+	client := internalregistry.GetMonitoringClient()
+	keysetInfo, err := monitoringutil.KeysetInfoFromPrimitiveSet(ps)
+	if err != nil {
+		return nil, err
+	}
+	ret.logger, err = client.NewLogger(&monitoring.Context{
+		KeysetInfo:  keysetInfo,
+		Primitive:   "hybrid_decrypt",
+		APIFunction: "decrypt",
+	})
+	if err != nil {
+		return nil, err
+	}
 
 	return ret, nil
 }
@@ -87,6 +105,7 @@ func (a *wrappedHybridDecrypt) Decrypt(ciphertext, contextInfo []byte) ([]byte, 
 
 				pt, err := p.Decrypt(ctNoPrefix, contextInfo)
 				if err == nil {
+					a.logger.Log(entries[i].KeyID, len(ctNoPrefix))
 					return pt, nil
 				}
 			}
@@ -104,11 +123,13 @@ func (a *wrappedHybridDecrypt) Decrypt(ciphertext, contextInfo []byte) ([]byte, 
 
 			pt, err := p.Decrypt(ciphertext, contextInfo)
 			if err == nil {
+				a.logger.Log(entries[i].KeyID, len(ciphertext))
 				return pt, nil
 			}
 		}
 	}
 
 	// nothing worked
+	a.logger.LogFailure()
 	return nil, fmt.Errorf("hybrid_factory: decryption failed")
 }

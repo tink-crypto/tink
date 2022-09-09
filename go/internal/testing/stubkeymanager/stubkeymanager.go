@@ -33,6 +33,19 @@ type StubKeyManager struct {
 
 var _ (registry.KeyManager) = (*StubKeyManager)(nil)
 
+// StubPrivateKeyManager is a private key manager for testing.
+type StubPrivateKeyManager struct {
+	StubKeyManager
+	PubKeyData *tinkpb.KeyData
+}
+
+var _ (registry.PrivateKeyManager) = (*StubPrivateKeyManager)(nil)
+
+// PublicKeyData returns the stub public key data.
+func (skm *StubPrivateKeyManager) PublicKeyData(serializedKey []byte) (*tinkpb.KeyData, error) {
+	return skm.PubKeyData, nil
+}
+
 // Primitive returns the stub primitive.
 func (km *StubKeyManager) Primitive(serializedKey []byte) (interface{}, error) {
 	return km.Prim, nil
