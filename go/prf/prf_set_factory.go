@@ -31,7 +31,7 @@ func NewPRFSet(h *keyset.Handle) (*Set, error) {
 
 // NewPRFSetWithKeyManager creates a prf.Set primitive from the given keyset handle and a custom key manager.
 //
-// Deprecated: Use [New].
+// Deprecated: Use [NewPRFSet].
 func NewPRFSetWithKeyManager(h *keyset.Handle, km registry.KeyManager) (*Set, error) {
 	ps, err := h.PrimitivesWithKeyManager(km)
 	if err != nil {
