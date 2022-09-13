@@ -222,6 +222,22 @@ output_prefix_type: TINK"""
     with self.assertRaises(AssertionError):
       key_util.parse_text_format(serialized, parsed_template)
 
+  def test_assert_tink_proto_equal_does_not_modify_messages(self):
+    """Tests that assert_tink_proto_equal does not modify the message."""
+    key_template_1 = text_format.Parse(KEY_TEMPLATE_1, tink_pb2.KeyTemplate())
+    key_template_1_original = text_format.Parse(
+        KEY_TEMPLATE_1_NOT_NORMALIZED, tink_pb2.KeyTemplate())
+    key_template_1_not_normalized = text_format.Parse(
+        KEY_TEMPLATE_1_NOT_NORMALIZED, tink_pb2.KeyTemplate())
+    key_util.assert_tink_proto_equal(self, key_template_1,
+                                     key_template_1_not_normalized)
+    self.assertEqual(key_template_1_original.value,
+                     key_template_1_not_normalized.value)
+    key_util.assert_tink_proto_equal(self, key_template_1_not_normalized,
+                                     key_template_1)
+    self.assertEqual(key_template_1_original.value,
+                     key_template_1_not_normalized.value)
+
 
 if __name__ == '__main__':
   absltest.main()

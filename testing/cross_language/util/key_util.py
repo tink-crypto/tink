@@ -168,12 +168,12 @@ KeyProto.add_key_type(kms_envelope_pb2.KmsEnvelopeAeadKey,
 
 def _text_format_field(value: Any,
                        field: descriptor.FieldDescriptor,
-                       indent: str, remove_value: bool) -> str:
+                       indent: str) -> str:
   """Returns a text formated proto field."""
   if field.type == TYPE_MESSAGE:
     output = [
         indent + field.name + ' {',
-        _normalize_and_text_format_message(value, indent + '  ', remove_value),
+        _normalize_and_text_format_message(value, indent + '  '),
         indent + '}'
     ]
     return '\n'.join(output)
@@ -187,16 +187,13 @@ def _text_format_field(value: Any,
     return indent + field.name + ': ' + str(value)
 
 
-def _normalize_and_text_format_message(msg: message.Message, indent: str,
-                                       remove_value: bool) -> str:
+def _normalize_and_text_format_message(msg: message.Message,
+                                       indent: str) -> str:
   """Returns a text formated proto message and changes msg to be canonical.
 
   Args:
     msg: the proto to be formated.
     indent: the indentation prefix of each line in the output.
-    remove_value: if True, replaced the value fields of tink's custom any protos
-      with '<removed>'. This is useful to compare protos, but should not be used
-      otherwise.
 
   Returns:
     A proto text format output, where serialized fields are deserialized in
@@ -209,7 +206,7 @@ def _normalize_and_text_format_message(msg: message.Message, indent: str,
       msg.DESCRIPTOR.full_name == 'google.crypto.tink.KeyData'):
     type_url = getattr(msg, 'type_url')  # Pytype requires to use getattr
     output.append(
-        _text_format_field(type_url, fields[0], indent, remove_value))
+        _text_format_field(type_url, fields[0], indent))
     value = getattr(msg, 'value')
     if msg.DESCRIPTOR.full_name == 'google.crypto.tink.KeyTemplate':
       # In KeyTemplates, type_url does not match the proto type used.
@@ -221,8 +218,7 @@ def _normalize_and_text_format_message(msg: message.Message, indent: str,
     output.append(indent + '# value: [' + TYPE_PREFIX +
                   proto_type.DESCRIPTOR.full_name + '] {')
     output.append(
-        _normalize_and_text_format_message(field_proto, indent + '#   ',
-                                           remove_value))
+        _normalize_and_text_format_message(field_proto, indent + '#   '))
     output.append(indent + '# }')
     # Serialize message again so it is canonicalized
     # We require here that proto serialization is in increasing field order
@@ -234,27 +230,23 @@ def _normalize_and_text_format_message(msg: message.Message, indent: str,
     # slow API here.
     value = field_proto.SerializeToString()
     setattr(msg, 'value', value)
-    if remove_value:
-      output.append(
-          _text_format_field('<removed>', fields[1], indent, remove_value))
-    else:
-      output.append(
-          _text_format_field(value, fields[1], indent, remove_value))
+    output.append(
+        _text_format_field(value, fields[1], indent))
     fields = fields[2:]
   for field in fields:
     if field.label == LABEL_REPEATED:
       for value in getattr(msg, field.name):
-        output.append(_text_format_field(value, field, indent, remove_value))
+        output.append(_text_format_field(value, field, indent))
     else:
       output.append(
           _text_format_field(
-              getattr(msg, field.name), field, indent, remove_value))
+              getattr(msg, field.name), field, indent))
   return '\n'.join(output)
 
 
 def text_format(msg: message.Message) -> str:
   msgcopy = copy.deepcopy(msg)
-  return _normalize_and_text_format_message(msgcopy, '', False)
+  return _normalize_and_text_format_message(msgcopy, '')
 
 
 def parse_text_format(serialized: str, msg: message.Message) -> None:
@@ -270,7 +262,10 @@ def assert_tink_proto_equal(self,
                             b: message.Message,
                             msg: Optional[str] = None) -> None:
   """Fails with a useful error if a and b aren't equal."""
+  a_copy = copy.deepcopy(a)
+  b_copy = copy.deepcopy(b)
+
   self.assertMultiLineEqual(
-      _normalize_and_text_format_message(a, '', True),
-      _normalize_and_text_format_message(b, '', True),
+      _normalize_and_text_format_message(a_copy, ''),
+      _normalize_and_text_format_message(b_copy, ''),
       msg=msg)
