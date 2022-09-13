@@ -202,33 +202,31 @@ def _text_format_message(msg: message.Message, indent: str,
   """
   output = []
   fields = msg.DESCRIPTOR.fields
-  if (len(fields) >= 2 and fields[0].name == 'type_url' and
-      fields[1].name == 'value'):
-    # special case for custom 'any' proto.
-    if getattr(msg, 'type_url'):
-      type_url = getattr(msg, 'type_url')
+  # special case for Tinks custom 'any' proto.
+  if (msg.DESCRIPTOR.full_name == 'google.crypto.tink.KeyTemplate' or
+      msg.DESCRIPTOR.full_name == 'google.crypto.tink.KeyData'):
+    type_url = getattr(msg, 'type_url')  # Pytype requires to use getattr
+    output.append(
+        _text_format_field(type_url, fields[0], indent, remove_value))
+    value = getattr(msg, 'value')
+    if msg.DESCRIPTOR.full_name == 'google.crypto.tink.KeyTemplate':
+      # In KeyTemplates, type_url does not match the proto type used.
+      proto_type = KeyProto.format_from_url(type_url)
+    else:
+      proto_type = KeyProto.from_url(type_url)
+    # parse 'value' and text format the content in a comment.
+    field_proto = proto_type.FromString(value)
+    output.append(indent + '# value: [' + TYPE_PREFIX +
+                  proto_type.DESCRIPTOR.full_name + '] {')
+    output.append(
+        _text_format_message(field_proto, indent + '#   ', remove_value))
+    output.append(indent + '# }')
+    if remove_value:
       output.append(
-          _text_format_field(type_url, fields[0], indent, remove_value))
-      if getattr(msg, 'value'):
-        value = getattr(msg, 'value')
-        if msg.DESCRIPTOR.full_name == 'google.crypto.tink.KeyTemplate':
-          # In KeyTemplates, type_url does not match the proto type used.
-          proto_type = KeyProto.format_from_url(type_url)
-        else:
-          proto_type = KeyProto.from_url(type_url)
-        # parse 'value' and text format the content in a comment.
-        field_proto = proto_type.FromString(value)
-        output.append(indent + '# value: [' + TYPE_PREFIX +
-                      proto_type.DESCRIPTOR.full_name + '] {')
-        output.append(
-            _text_format_message(field_proto, indent + '#   ', remove_value))
-        output.append(indent + '# }')
-        if remove_value:
-          output.append(
-              _text_format_field('<removed>', fields[1], indent, remove_value))
-        else:
-          output.append(
-              _text_format_field(value, fields[1], indent, remove_value))
+          _text_format_field('<removed>', fields[1], indent, remove_value))
+    else:
+      output.append(
+          _text_format_field(value, fields[1], indent, remove_value))
     fields = fields[2:]
   for field in fields:
     if field.label == LABEL_REPEATED:
