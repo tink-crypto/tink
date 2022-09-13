@@ -238,6 +238,19 @@ output_prefix_type: TINK"""
     self.assertEqual(key_template_1_original.value,
                      key_template_1_not_normalized.value)
 
+  def test_text_format_with_empty_value(self):
+    expected = r"""type_url: "type.googleapis.com/google.crypto.tink.ChaCha20Poly1305Key"
+# value: [type.googleapis.com/google.crypto.tink.ChaCha20Poly1305KeyFormat] {
+# }
+value: ""
+output_prefix_type: RAW"""
+
+    template = tink_pb2.KeyTemplate(
+        type_url='type.googleapis.com/google.crypto.tink.ChaCha20Poly1305Key',
+        output_prefix_type=tink_pb2.RAW)
+    formatted = key_util.text_format(template)
+    self.assertEqual(formatted, expected)
+
 
 if __name__ == '__main__':
   absltest.main()

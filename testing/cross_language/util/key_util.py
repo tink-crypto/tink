@@ -217,8 +217,10 @@ def _normalize_and_text_format_message(msg: message.Message,
     field_proto = proto_type.FromString(value)
     output.append(indent + '# value: [' + TYPE_PREFIX +
                   proto_type.DESCRIPTOR.full_name + '] {')
-    output.append(
-        _normalize_and_text_format_message(field_proto, indent + '#   '))
+    formatted_message = _normalize_and_text_format_message(
+        field_proto, indent + '#   ')
+    if formatted_message:
+      output.append(formatted_message)
     output.append(indent + '# }')
     # Serialize message again so it is canonicalized
     # We require here that proto serialization is in increasing field order
