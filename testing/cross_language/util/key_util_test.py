@@ -20,14 +20,14 @@ from google.protobuf import text_format
 from tink.proto import tink_pb2
 from util import key_util
 
-KEY_TEMPLATE_1A = r"""
+KEY_TEMPLATE_1 = r"""
  type_url: "type.googleapis.com/google.crypto.tink.EciesAeadHkdfPrivateKey"
  value: "\n@\022>\022<\n0type.googleapis.com/google.crypto.tink.AesEaxKey\022\006\n\002\010\020\020\020\030\001"
  output_prefix_type: RAW
 """
 
 # The same template as 1, but here AesEaxKeyFormat is encoded differently
-KEY_TEMPLATE_1B = r"""
+KEY_TEMPLATE_1_NOT_NORMALIZED = r"""
  type_url: "type.googleapis.com/google.crypto.tink.EciesAeadHkdfPrivateKey"
  value: "\n@\022>\022<\n0type.googleapis.com/google.crypto.tink.AesEaxKey\022\006\020\020\n\002\010\020\030\001"
  output_prefix_type: RAW
@@ -115,9 +115,25 @@ output_prefix_type: TINK"""
 
   def test_text_format_recursive_template(self):
     template = tink_pb2.KeyTemplate()
-    text_format.Parse(KEY_TEMPLATE_1A, template)
+    text_format.Parse(KEY_TEMPLATE_1, template)
     output = key_util.text_format(template)
     self.assertEqual(output, KEY_TEMPLATE_1_COMMENTED_FORMAT)
+
+  def test_text_format_normalizes_recursive_template(self):
+    template1a = tink_pb2.KeyTemplate()
+    text_format.Parse(KEY_TEMPLATE_1, template1a)
+
+    template = tink_pb2.KeyTemplate()
+    text_format.Parse(KEY_TEMPLATE_1_NOT_NORMALIZED, template)
+    # Before the call, the value is different (different serializations)
+    self.assertNotEqual(template1a.value, template.value)
+
+    normalized_template = key_util.text_format(template)
+    self.assertEqual(normalized_template, KEY_TEMPLATE_1_COMMENTED_FORMAT)
+
+    # We explicitly test that the value has not been changed (since this
+    # requirement needs an explicit copy in the code)
+    self.assertNotEqual(template1a.value, template.value)
 
   def test_text_format_keyset(self):
     key = tink_pb2.Keyset.Key(
@@ -153,13 +169,15 @@ key {
 
   def test_compare_tink_messages(self):
     """Tests that all testdata have the expected format, including comments."""
-    key_template_1a = text_format.Parse(KEY_TEMPLATE_1A, tink_pb2.KeyTemplate())
-    key_template_1b = text_format.Parse(KEY_TEMPLATE_1B, tink_pb2.KeyTemplate())
-    key_util.assert_tink_proto_equal(self, key_template_1a, key_template_1b)
+    key_template_1 = text_format.Parse(KEY_TEMPLATE_1, tink_pb2.KeyTemplate())
+    key_template_1_not_normalized = text_format.Parse(
+        KEY_TEMPLATE_1_NOT_NORMALIZED, tink_pb2.KeyTemplate())
+    key_util.assert_tink_proto_equal(self, key_template_1,
+                                     key_template_1_not_normalized)
     key_template_2 = text_format.Parse(KEY_TEMPLATE_2, tink_pb2.KeyTemplate())
 
     with self.assertRaises(AssertionError):
-      key_util.assert_tink_proto_equal(self, key_template_1a, key_template_2)
+      key_util.assert_tink_proto_equal(self, key_template_1, key_template_2)
 
   def test_parse_text_format_symmetric_key_template(self):
     serialized = r"""type_url: "type.googleapis.com/google.crypto.tink.AesEaxKey"

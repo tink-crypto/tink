@@ -42,6 +42,7 @@ can be used in tests to assert that two protos must be equal. If they are
 not equal, the function tries to output a meaningfull error message.
 """
 
+import copy
 from typing import Any, Optional
 
 from google.protobuf import descriptor
@@ -172,7 +173,8 @@ def _text_format_field(value: Any,
   if field.type == TYPE_MESSAGE:
     output = [
         indent + field.name + ' {',
-        _text_format_message(value, indent + '  ', remove_value), indent + '}'
+        _normalize_and_text_format_message(value, indent + '  ', remove_value),
+        indent + '}'
     ]
     return '\n'.join(output)
   elif field.type == TYPE_ENUM:
@@ -185,9 +187,9 @@ def _text_format_field(value: Any,
     return indent + field.name + ': ' + str(value)
 
 
-def _text_format_message(msg: message.Message, indent: str,
-                         remove_value: bool) -> str:
-  """Returns a text formated proto message.
+def _normalize_and_text_format_message(msg: message.Message, indent: str,
+                                       remove_value: bool) -> str:
+  """Returns a text formated proto message and changes msg to be canonical.
 
   Args:
     msg: the proto to be formated.
@@ -219,8 +221,19 @@ def _text_format_message(msg: message.Message, indent: str,
     output.append(indent + '# value: [' + TYPE_PREFIX +
                   proto_type.DESCRIPTOR.full_name + '] {')
     output.append(
-        _text_format_message(field_proto, indent + '#   ', remove_value))
+        _normalize_and_text_format_message(field_proto, indent + '#   ',
+                                           remove_value))
     output.append(indent + '# }')
+    # Serialize message again so it is canonicalized
+    # We require here that proto serialization is in increasing field order
+    # (Tink protos are basically unchangeable, so we don't need to worry about
+    # unknown fields). This is not guaranteed by proto, but is currently the
+    # case. If this ever changes we either hopefully have already a better
+    # solution in Tink, or else the proto team provides us with a reflection
+    # based API to do this (as they do in C++.) In this case, we simply use the
+    # slow API here.
+    value = field_proto.SerializeToString()
+    setattr(msg, 'value', value)
     if remove_value:
       output.append(
           _text_format_field('<removed>', fields[1], indent, remove_value))
@@ -240,7 +253,8 @@ def _text_format_message(msg: message.Message, indent: str,
 
 
 def text_format(msg: message.Message) -> str:
-  return _text_format_message(msg, '', False)
+  msgcopy = copy.deepcopy(msg)
+  return _normalize_and_text_format_message(msgcopy, '', False)
 
 
 def parse_text_format(serialized: str, msg: message.Message) -> None:
@@ -257,6 +271,6 @@ def assert_tink_proto_equal(self,
                             msg: Optional[str] = None) -> None:
   """Fails with a useful error if a and b aren't equal."""
   self.assertMultiLineEqual(
-      _text_format_message(a, '', True),
-      _text_format_message(b, '', True),
+      _normalize_and_text_format_message(a, '', True),
+      _normalize_and_text_format_message(b, '', True),
       msg=msg)
