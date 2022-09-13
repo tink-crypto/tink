@@ -26,6 +26,7 @@ import com.google.crypto.tink.proto.KeysetInfo;
 import com.google.crypto.tink.proto.OutputPrefixType;
 import com.google.crypto.tink.subtle.Base64;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
+import com.google.errorprone.annotations.InlineMe;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -81,6 +82,9 @@ public final class JsonKeysetReader implements KeysetReader {
    * @deprecated Use {@code #withString}
    */
   @Deprecated
+  @InlineMe(
+      replacement = "JsonKeysetReader.withString(input.toString())",
+      imports = "com.google.crypto.tink.JsonKeysetReader")
   public static JsonKeysetReader withJsonObject(Object input) {
     return withString(input.toString());
   }
