@@ -183,3 +183,22 @@ py_test(
         requirement("absl-py"),
     ],
 )
+
+py_library(
+    name = "_test_keys_container",
+    srcs = ["_test_keys_container.py"],
+    deps = [
+        ":key_util",
+        "@tink_py//tink/proto:tink_py_pb2",
+    ],
+)
+
+py_test(
+    name = "_test_keys_container_test",
+    srcs = ["_test_keys_container_test.py"],
+    deps = [
+        ":_test_keys_container",
+        requirement("absl-py"),
+        "@tink_py//tink/proto:tink_py_pb2",
+    ],
+)
