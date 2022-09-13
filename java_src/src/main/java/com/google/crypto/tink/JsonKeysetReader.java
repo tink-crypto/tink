@@ -25,7 +25,9 @@ import com.google.crypto.tink.proto.Keyset;
 import com.google.crypto.tink.proto.KeysetInfo;
 import com.google.crypto.tink.proto.OutputPrefixType;
 import com.google.crypto.tink.subtle.Base64;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonParser;
@@ -50,6 +52,9 @@ import java.nio.file.Path;
  */
 public final class JsonKeysetReader implements KeysetReader {
   private static final Charset UTF_8 = Charset.forName("UTF-8");
+
+  private static final long MAX_KEY_ID = 4294967295L;  // = 2^32 - 1
+  private static final long MIN_KEY_ID = Integer.MIN_VALUE;  // = - 2^31
 
   private final InputStream inputStream;
   private final JsonObject json;
@@ -125,6 +130,7 @@ public final class JsonKeysetReader implements KeysetReader {
     return withFile(path.toFile());
   }
 
+  @CanIgnoreReturnValue
   public JsonKeysetReader withUrlSafeBase64() {
     this.urlSafeBase64 = true;
     return this;
@@ -168,11 +174,20 @@ public final class JsonKeysetReader implements KeysetReader {
     }
   }
 
-  private Keyset keysetFromJson(JsonObject json) {
+  private static int getKeyId(JsonElement e) throws IOException {
+    long id = e.getAsLong();
+    if (id > MAX_KEY_ID || id < MIN_KEY_ID) {
+      throw new IOException("invalid key id");
+    }
+    // casts large unsigned int32 numbers to negative int32 numbers
+    return (int) e.getAsLong();
+  }
+
+  private Keyset keysetFromJson(JsonObject json) throws IOException {
     validateKeyset(json);
     Keyset.Builder builder = Keyset.newBuilder();
     if (json.has("primaryKeyId")) {
-      builder.setPrimaryKeyId(json.get("primaryKeyId").getAsInt());
+      builder.setPrimaryKeyId(getKeyId(json.get("primaryKeyId")));
     }
     JsonArray keys = json.getAsJsonArray("key");
     for (int i = 0; i < keys.size(); i++) {
@@ -181,7 +196,7 @@ public final class JsonKeysetReader implements KeysetReader {
     return builder.build();
   }
 
-  private EncryptedKeyset encryptedKeysetFromJson(JsonObject json) {
+  private EncryptedKeyset encryptedKeysetFromJson(JsonObject json) throws IOException {
     validateEncryptedKeyset(json);
     byte[] encryptedKeyset;
     if (urlSafeBase64) {
@@ -201,20 +216,20 @@ public final class JsonKeysetReader implements KeysetReader {
     }
   }
 
-  private Keyset.Key keyFromJson(JsonObject json) {
+  private Keyset.Key keyFromJson(JsonObject json) throws IOException {
     validateKey(json);
     return Keyset.Key.newBuilder()
         .setStatus(getStatus(json.get("status").getAsString()))
-        .setKeyId(json.get("keyId").getAsInt())
+        .setKeyId(getKeyId(json.get("keyId")))
         .setOutputPrefixType(getOutputPrefixType(json.get("outputPrefixType").getAsString()))
         .setKeyData(keyDataFromJson(json.getAsJsonObject("keyData")))
         .build();
   }
 
-  private static KeysetInfo keysetInfoFromJson(JsonObject json) {
+  private static KeysetInfo keysetInfoFromJson(JsonObject json) throws IOException {
     KeysetInfo.Builder builder = KeysetInfo.newBuilder();
     if (json.has("primaryKeyId")) {
-      builder.setPrimaryKeyId(json.get("primaryKeyId").getAsInt());
+      builder.setPrimaryKeyId(getKeyId(json.get("primaryKeyId")));
     }
     if (json.has("keyInfo")) {
       JsonArray keyInfos = json.getAsJsonArray("keyInfo");
@@ -225,10 +240,10 @@ public final class JsonKeysetReader implements KeysetReader {
     return builder.build();
   }
 
-  private static KeysetInfo.KeyInfo keyInfoFromJson(JsonObject json) {
+  private static KeysetInfo.KeyInfo keyInfoFromJson(JsonObject json) throws IOException {
     return KeysetInfo.KeyInfo.newBuilder()
         .setStatus(getStatus(json.get("status").getAsString()))
-        .setKeyId(json.get("keyId").getAsInt())
+        .setKeyId(getKeyId(json.get("keyId")))
         .setOutputPrefixType(getOutputPrefixType(json.get("outputPrefixType").getAsString()))
         .setTypeUrl(json.get("typeUrl").getAsString())
         .build();

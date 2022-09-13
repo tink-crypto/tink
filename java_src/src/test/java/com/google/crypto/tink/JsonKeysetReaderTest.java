@@ -372,17 +372,43 @@ public class JsonKeysetReaderTest {
   }
 
   @Test
-  public void testReadKeyset_negativeKeyId_works() throws Exception {
+  public void readKeyset_negativeKeyId_works() throws Exception {
     String jsonKeysetString = createJsonKeysetWithId("-21");
     Keyset keyset = JsonKeysetReader.withString(jsonKeysetString).read();
     assertThat(keyset.getPrimaryKeyId()).isEqualTo(-21);
   }
 
   @Test
-  public void testReadKeyset_hugeKeyId_convertsIntoSignedInt32() throws Exception {
+  public void readKeyset_convertsUnsignedUint32IntoSignedInt32() throws Exception {
     String jsonKeysetString = createJsonKeysetWithId("4294967275"); // 2^32 - 21
     Keyset keyset = JsonKeysetReader.withString(jsonKeysetString).read();
     assertThat(keyset.getPrimaryKeyId()).isEqualTo(-21);
+  }
+
+  @Test
+  public void readKeyset_acceptsMaxUint32() throws Exception {
+    String jsonKeysetString = createJsonKeysetWithId("4294967295"); // 2^32 - 1 = 0xffffffff
+    Keyset keyset = JsonKeysetReader.withString(jsonKeysetString).read();
+    assertThat(keyset.getPrimaryKeyId()).isEqualTo(-1);
+  }
+
+  @Test
+  public void readKeyset_acceptsMinInt32() throws Exception {
+    String jsonKeysetString = createJsonKeysetWithId("-2147483648"); // - 2^31
+    Keyset keyset = JsonKeysetReader.withString(jsonKeysetString).read();
+    assertThat(keyset.getPrimaryKeyId()).isEqualTo(-2147483648);
+  }
+
+  @Test
+  public void readKeyset_rejectsKeyIdLargerThanUint32() throws Exception {
+    String jsonKeysetString = createJsonKeysetWithId("4294967296"); // 2^32
+    assertThrows(IOException.class, () -> JsonKeysetReader.withString(jsonKeysetString).read());
+  }
+
+  @Test
+  public void readKeyset_rejectsKeyIdSmallerThanInt32() throws Exception {
+    String jsonKeysetString = createJsonKeysetWithId("-2147483649"); // - 2^31 - 1
+    assertThrows(IOException.class, () -> JsonKeysetReader.withString(jsonKeysetString).read());
   }
 
   @Test
