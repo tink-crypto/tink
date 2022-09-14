@@ -18,6 +18,7 @@ package aead_test
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"strings"
 	"testing"
@@ -26,8 +27,10 @@ import (
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/tink/go/aead"
 	"github.com/google/tink/go/core/cryptofmt"
+	"github.com/google/tink/go/core/registry"
 	"github.com/google/tink/go/insecurecleartextkeyset"
 	"github.com/google/tink/go/internal/internalregistry"
+	"github.com/google/tink/go/internal/testing/stubkeymanager"
 	"github.com/google/tink/go/keyset"
 	"github.com/google/tink/go/monitoring"
 	"github.com/google/tink/go/signature"
@@ -38,6 +41,7 @@ import (
 	"github.com/google/tink/go/tink"
 
 	"github.com/google/tink/go/aead/subtle"
+	agpb "github.com/google/tink/go/proto/aes_gcm_go_proto"
 	tinkpb "github.com/google/tink/go/proto/tink_go_proto"
 )
 
@@ -171,26 +175,37 @@ func TestFactoryWithValidPrimitiveSetType(t *testing.T) {
 	}
 }
 
-func TestFactoryWithMonitoringPrimitiveLogsEncryptionDecryptionWithPrefix(t *testing.T) {
+func TestPrimitiveFactoryWithMonitoringAnnotationsLogsEncryptionDecryptionWithPrefix(t *testing.T) {
 	defer internalregistry.ClearMonitoringClient()
 	client := fakemonitoring.NewClient("fake-client")
 	if err := internalregistry.RegisterMonitoringClient(client); err != nil {
-		t.Fatalf("registry.RegisterMonitoringClient() err = %v, want nil", err)
+		t.Fatalf("internalregistry.RegisterMonitoringClient() err = %v, want nil", err)
 	}
 	kh, err := keyset.NewHandle(aead.AES128GCMKeyTemplate())
 	if err != nil {
 		t.Fatalf("keyset.NewHandle() err = %v, want nil", err)
 	}
-	p, err := aead.New(kh)
+	// Annotations are only supported throught the `insecurecleartextkeyset` API.
+	buff := &bytes.Buffer{}
+	if err := insecurecleartextkeyset.Write(kh, keyset.NewBinaryWriter(buff)); err != nil {
+		t.Fatalf("insecurecleartextkeyset.Write() err = %v, want nil", err)
+	}
+	annotations := map[string]string{"foo": "bar"}
+	mh, err := insecurecleartextkeyset.Read(keyset.NewBinaryReader(buff), keyset.WithAnnotations(annotations))
+	if err != nil {
+		t.Fatalf("insecurecleartextkeyset.Read() err = %v, want nil", err)
+	}
+	p, err := aead.New(mh)
 	if err != nil {
 		t.Fatalf("aead.New() err = %v, want nil", err)
 	}
 	data := []byte("HELLO_WORLD")
-	ct, err := p.Encrypt(data, nil)
+	ad := []byte("_!")
+	ct, err := p.Encrypt(data, ad)
 	if err != nil {
 		t.Fatalf("p.Encrypt() err = %v, want nil", err)
 	}
-	if _, err := p.Decrypt(ct, nil); err != nil {
+	if _, err := p.Decrypt(ct, ad); err != nil {
 		t.Fatalf("p.Decrypt() err = %v, want nil", err)
 	}
 	failures := client.Failures()
@@ -199,7 +214,7 @@ func TestFactoryWithMonitoringPrimitiveLogsEncryptionDecryptionWithPrefix(t *tes
 	}
 	got := client.Events()
 	wantKeysetInfo := monitoring.NewKeysetInfo(
-		/*annotations=*/ nil,
+		annotations,
 		kh.KeysetInfo().GetPrimaryKeyId(),
 		[]*monitoring.Entry{
 			{
@@ -211,34 +226,44 @@ func TestFactoryWithMonitoringPrimitiveLogsEncryptionDecryptionWithPrefix(t *tes
 	)
 	want := []*fakemonitoring.LogEvent{
 		{
-			KeyID:    kh.KeysetInfo().GetPrimaryKeyId(),
+			KeyID:    mh.KeysetInfo().GetPrimaryKeyId(),
 			NumBytes: len(data),
 			Context:  monitoring.NewContext("aead", "encrypt", wantKeysetInfo),
 		},
 		{
-			KeyID: kh.KeysetInfo().GetPrimaryKeyId(),
+			KeyID: mh.KeysetInfo().GetPrimaryKeyId(),
 			// ciphertext was encrypted with a key that has TINK ouput prefix. This adds a 5 bytes prefix
 			// to the ciphertext. This prefix is not included in `Log` call.
 			NumBytes: len(ct) - cryptofmt.NonRawPrefixSize,
 			Context:  monitoring.NewContext("aead", "decrypt", wantKeysetInfo),
 		},
 	}
-	if !cmp.Equal(got, want) {
-		t.Errorf("got = %v, want = %v", got, want)
+	if cmp.Diff(got, want) != "" {
+		t.Errorf("%v", cmp.Diff(got, want))
 	}
 }
 
-func TestFactoryWithMonitoringPrimitiveLogsEncryptionDecryptionWithoutPrefix(t *testing.T) {
+func TestPrimitiveFactoryWithMonitoringAnnotationsLogsEncryptionDecryptionWithoutPrefix(t *testing.T) {
 	defer internalregistry.ClearMonitoringClient()
 	client := fakemonitoring.NewClient("fake-client")
 	if err := internalregistry.RegisterMonitoringClient(client); err != nil {
-		t.Fatalf("registry.RegisterMonitoringClient() err = %v, want nil", err)
+		t.Fatalf("internalregistry.RegisterMonitoringClient() err = %v, want nil", err)
 	}
 	kh, err := keyset.NewHandle(aead.AES256GCMNoPrefixKeyTemplate())
 	if err != nil {
 		t.Fatalf("keyset.NewHandle() err = %v, want nil", err)
 	}
-	p, err := aead.New(kh)
+	// Annotations are only supported throught the `insecurecleartextkeyset` API.
+	buff := &bytes.Buffer{}
+	if err := insecurecleartextkeyset.Write(kh, keyset.NewBinaryWriter(buff)); err != nil {
+		t.Fatalf("insecurecleartextkeyset.Write() err = %v, want nil", err)
+	}
+	annotations := map[string]string{"foo": "bar"}
+	mh, err := insecurecleartextkeyset.Read(keyset.NewBinaryReader(buff), keyset.WithAnnotations(annotations))
+	if err != nil {
+		t.Fatalf("insecurecleartextkeyset.Read() err = %v, want nil", err)
+	}
+	p, err := aead.New(mh)
 	if err != nil {
 		t.Fatalf("aead.New() err = %v, want nil", err)
 	}
@@ -256,7 +281,7 @@ func TestFactoryWithMonitoringPrimitiveLogsEncryptionDecryptionWithoutPrefix(t *
 	}
 	got := client.Events()
 	wantKeysetInfo := monitoring.NewKeysetInfo(
-		/*annotations=*/ nil,
+		annotations,
 		kh.KeysetInfo().GetPrimaryKeyId(),
 		[]*monitoring.Entry{
 			{
@@ -268,22 +293,22 @@ func TestFactoryWithMonitoringPrimitiveLogsEncryptionDecryptionWithoutPrefix(t *
 	)
 	want := []*fakemonitoring.LogEvent{
 		{
-			KeyID:    kh.KeysetInfo().GetPrimaryKeyId(),
+			KeyID:    mh.KeysetInfo().GetPrimaryKeyId(),
 			NumBytes: len(data),
 			Context:  monitoring.NewContext("aead", "encrypt", wantKeysetInfo),
 		},
 		{
-			KeyID:    kh.KeysetInfo().GetPrimaryKeyId(),
+			KeyID:    mh.KeysetInfo().GetPrimaryKeyId(),
 			NumBytes: len(ct),
 			Context:  monitoring.NewContext("aead", "decrypt", wantKeysetInfo),
 		},
 	}
-	if !cmp.Equal(got, want) {
-		t.Errorf("got = %v, want = %v", got, want)
+	if cmp.Diff(got, want) != "" {
+		t.Errorf("%v", cmp.Diff(got, want))
 	}
 }
 
-func TestFactoryWithMonitoringPrimitiveWithMultipleKeysLogsEncryptionDecryption(t *testing.T) {
+func TestPrimitiveFactoryMonitoringWithAnnotatiosMultipleKeysLogsEncryptionDecryption(t *testing.T) {
 	defer internalregistry.ClearMonitoringClient()
 	client := fakemonitoring.NewClient("fake-client")
 	if err := internalregistry.RegisterMonitoringClient(client); err != nil {
@@ -314,7 +339,17 @@ func TestFactoryWithMonitoringPrimitiveWithMultipleKeysLogsEncryptionDecryption(
 	if err != nil {
 		t.Fatalf("manager.Handle() err = %v, want nil", err)
 	}
-	p, err := aead.New(kh)
+	// Annotations are only supported throught the `insecurecleartextkeyset` API.
+	buff := &bytes.Buffer{}
+	if err := insecurecleartextkeyset.Write(kh, keyset.NewBinaryWriter(buff)); err != nil {
+		t.Fatalf("insecurecleartextkeyset.Write() err = %v, want nil", err)
+	}
+	annotations := map[string]string{"foo": "bar"}
+	mh, err := insecurecleartextkeyset.Read(keyset.NewBinaryReader(buff), keyset.WithAnnotations(annotations))
+	if err != nil {
+		t.Fatalf("insecurecleartextkeyset.Read() err = %v, want nil", err)
+	}
+	p, err := aead.New(mh)
 	if err != nil {
 		t.Fatalf("aead.New() err = %v, want nil", err)
 	}
@@ -331,7 +366,7 @@ func TestFactoryWithMonitoringPrimitiveWithMultipleKeysLogsEncryptionDecryption(
 		t.Fatalf("p.Decrypt() err = %v, want nil", err)
 	}
 	got := client.Events()
-	wantKeysetInfo := monitoring.NewKeysetInfo( /*annotations=*/ nil, keyIDs[1], []*monitoring.Entry{
+	wantKeysetInfo := monitoring.NewKeysetInfo(annotations, keyIDs[1], []*monitoring.Entry{
 		{
 			KeyID:          keyIDs[1],
 			Status:         monitoring.Enabled,
@@ -377,25 +412,47 @@ func TestFactoryWithMonitoringPrimitiveWithMultipleKeysLogsEncryptionDecryption(
 	}
 }
 
-func TestFactoryWithMonitoringPrimitiveEncryptionFailureIsLogged(t *testing.T) {
+func TestPrimitiveFactoryWithMonitoringAnnotationsEncryptionFailureIsLogged(t *testing.T) {
 	defer internalregistry.ClearMonitoringClient()
 	client := &fakemonitoring.Client{Name: ""}
 	if err := internalregistry.RegisterMonitoringClient(client); err != nil {
 		t.Fatalf("internalregistry.RegisterMonitoringClient() err = %v, want nil", err)
 	}
-	kh, err := keyset.NewHandle(aead.AES128GCMKeyTemplate())
+	typeURL := "TestFactoryWithMonitoringPrimitiveEncryptionFailureIsLogged"
+	template := &tinkpb.KeyTemplate{
+		TypeUrl:          typeURL,
+		OutputPrefixType: tinkpb.OutputPrefixType_LEGACY,
+	}
+	km := &stubkeymanager.StubKeyManager{
+		URL:  typeURL,
+		Key:  &agpb.AesGcmKey{},
+		Prim: &testutil.AlwaysFailingAead{Error: errors.New("failed")},
+		KeyData: &tinkpb.KeyData{
+			TypeUrl:         typeURL,
+			KeyMaterialType: tinkpb.KeyData_SYMMETRIC,
+			Value:           []byte("serialized_key"),
+		},
+	}
+	if err := registry.RegisterKeyManager(km); err != nil {
+		t.Fatalf("registry.RegisterKeyManager() err = %v, want nil", err)
+	}
+	kh, err := keyset.NewHandle(template)
 	if err != nil {
 		t.Fatalf("keyset.NewHandle() err = %v, want nil", err)
 	}
-	km := testutil.NewTestKeyManager(
-		&testutil.AlwaysFailingAead{
-			Error: fmt.Errorf("failed"),
-		},
-		testutil.AESGCMTypeURL,
-	)
-	p, err := aead.NewWithKeyManager(kh, km)
+	// Annotations are only supported throught the `insecurecleartextkeyset` API.
+	buff := &bytes.Buffer{}
+	if err := insecurecleartextkeyset.Write(kh, keyset.NewBinaryWriter(buff)); err != nil {
+		t.Fatalf("insecurecleartextkeyset.Write() err = %v, want nil", err)
+	}
+	annotations := map[string]string{"foo": "bar"}
+	mh, err := insecurecleartextkeyset.Read(keyset.NewBinaryReader(buff), keyset.WithAnnotations(annotations))
 	if err != nil {
-		t.Fatalf("aead.NewWithKeyManager() err = %v, want nil", err)
+		t.Fatalf("insecurecleartextkeyset.Read() err = %v, want nil", err)
+	}
+	p, err := aead.New(mh)
+	if err != nil {
+		t.Fatalf("aead.New() err = %v, want nil", err)
 	}
 	if _, err := p.Encrypt(nil, nil); err == nil {
 		t.Fatalf("Encrypt() err = nil, want error")
@@ -407,145 +464,27 @@ func TestFactoryWithMonitoringPrimitiveEncryptionFailureIsLogged(t *testing.T) {
 				"aead",
 				"encrypt",
 				monitoring.NewKeysetInfo(
-					/*annotations=*/ nil,
+					annotations,
 					kh.KeysetInfo().GetPrimaryKeyId(),
 					[]*monitoring.Entry{
 						{
 							KeyID:          kh.KeysetInfo().GetPrimaryKeyId(),
 							Status:         monitoring.Enabled,
-							FormatAsString: "type.googleapis.com/google.crypto.tink.AesGcmKey",
+							FormatAsString: typeURL,
 						},
 					},
 				),
 			),
 		},
 	}
-	if !cmp.Equal(got, want) {
-		t.Errorf("got = %v, want = %v", got, want)
+	if cmp.Diff(got, want) != "" {
+		t.Errorf("%v", cmp.Diff(got, want))
 	}
 }
 
-func TestFactoryWithMonitoringPrimitiveDecryptionFailureIsLogged(t *testing.T) {
+func TestPrimitiveFactoryWithMonitoringAnnotationsDecryptionFailureIsLogged(t *testing.T) {
 	defer internalregistry.ClearMonitoringClient()
-	client := &fakemonitoring.Client{Name: ""}
-	if err := internalregistry.RegisterMonitoringClient(client); err != nil {
-		t.Fatalf("internalregistry.RegisterMonitoringClient() err = %v, want nil", err)
-	}
-	kh, err := keyset.NewHandle(aead.AES128GCMKeyTemplate())
-	if err != nil {
-		t.Fatalf("keyset.NewHandle() err = %v, want nil", err)
-	}
-	p, err := aead.New(kh)
-	if err != nil {
-		t.Fatalf("aead.New() err = %v, want nil", err)
-	}
-	if _, err := p.Decrypt([]byte("invalid_data"), nil); err == nil {
-		t.Fatalf("Decrypt() err = nil, want error")
-	}
-	got := client.Failures()
-	want := []*fakemonitoring.LogFailure{
-		{
-			Context: monitoring.NewContext(
-				"aead",
-				"decrypt",
-				monitoring.NewKeysetInfo(
-					/*annotations=*/ nil,
-					kh.KeysetInfo().GetPrimaryKeyId(),
-					[]*monitoring.Entry{
-						{
-							KeyID:          kh.KeysetInfo().GetPrimaryKeyId(),
-							Status:         monitoring.Enabled,
-							FormatAsString: "type.googleapis.com/google.crypto.tink.AesGcmKey",
-						},
-					},
-				),
-			),
-		},
-	}
-	if !cmp.Equal(got, want) {
-		t.Errorf("got = %v, want = %v", got, want)
-	}
-}
-
-func TestFactoryWithMonitoringMultiplePrimitivesLogOperations(t *testing.T) {
-	defer internalregistry.ClearMonitoringClient()
-	client := &fakemonitoring.Client{Name: ""}
-	if err := internalregistry.RegisterMonitoringClient(client); err != nil {
-		t.Fatalf("internalregistry.RegisterMonitoringClient() err = %v, want nil", err)
-	}
-	kh1, err := keyset.NewHandle(aead.AES128GCMKeyTemplate())
-	if err != nil {
-		t.Fatalf("keyset.NewHandle() err = %v, want nil", err)
-	}
-	p1, err := aead.New(kh1)
-	if err != nil {
-		t.Fatalf("aead.New() err = %v, want nil", err)
-	}
-	kh2, err := keyset.NewHandle(aead.AES128CTRHMACSHA256KeyTemplate())
-	if err != nil {
-		t.Fatalf("keyset.NewHandle() err = %v, want nil", err)
-	}
-	p2, err := aead.New(kh2)
-	if err != nil {
-		t.Fatalf("aead.New() err = %v, want nil", err)
-	}
-	d1 := []byte("YELLOW_ORANGE")
-	if _, err := p1.Encrypt(d1, nil); err != nil {
-		t.Fatalf("p1.Encrypt() err = %v, want nil", err)
-	}
-	d2 := []byte("ORANGE_BLUE")
-	if _, err := p2.Encrypt(d2, nil); err != nil {
-		t.Fatalf("p2.Encrypt() err = %v, want nil", err)
-	}
-	got := client.Events()
-	want := []*fakemonitoring.LogEvent{
-		{
-			KeyID:    kh1.KeysetInfo().GetPrimaryKeyId(),
-			NumBytes: len(d1),
-			Context: monitoring.NewContext(
-				"aead",
-				"encrypt",
-				monitoring.NewKeysetInfo(
-					/*annotations=*/ nil,
-					kh1.KeysetInfo().GetPrimaryKeyId(),
-					[]*monitoring.Entry{
-						{
-							KeyID:          kh1.KeysetInfo().GetPrimaryKeyId(),
-							Status:         monitoring.Enabled,
-							FormatAsString: "type.googleapis.com/google.crypto.tink.AesGcmKey",
-						},
-					},
-				),
-			),
-		},
-		{
-			KeyID:    kh2.KeysetInfo().GetPrimaryKeyId(),
-			NumBytes: len(d2),
-			Context: monitoring.NewContext(
-				"aead",
-				"encrypt",
-				monitoring.NewKeysetInfo(
-					/*annotations=*/ nil,
-					kh2.KeysetInfo().GetPrimaryKeyId(),
-					[]*monitoring.Entry{
-						{
-							KeyID:          kh2.KeysetInfo().GetPrimaryKeyId(),
-							Status:         monitoring.Enabled,
-							FormatAsString: "type.googleapis.com/google.crypto.tink.AesCtrHmacAeadKey",
-						},
-					},
-				),
-			),
-		},
-	}
-	if !cmp.Equal(got, want) {
-		t.Errorf("got = %v, want = %v, with diff: %v", got, want, cmp.Diff(got, want))
-	}
-}
-
-func TestFactoryWithMonitoringAnnotations(t *testing.T) {
-	defer internalregistry.ClearMonitoringClient()
-	client := &fakemonitoring.Client{Name: ""}
+	client := fakemonitoring.NewClient("fake-client")
 	if err := internalregistry.RegisterMonitoringClient(client); err != nil {
 		t.Fatalf("internalregistry.RegisterMonitoringClient() err = %v, want nil", err)
 	}
@@ -567,29 +506,96 @@ func TestFactoryWithMonitoringAnnotations(t *testing.T) {
 	if err != nil {
 		t.Fatalf("aead.New() err = %v, want nil", err)
 	}
-	pt := []byte("HELLO_WORLD")
-	ad := []byte("_!")
-	ct, err := p.Encrypt(pt, ad)
-	if err != nil {
-		t.Fatalf("p.Encrypt() err = %v, want nil", err)
+	if _, err := p.Decrypt([]byte("invalid_data"), nil); err == nil {
+		t.Fatalf("Decrypt() err = nil, want error")
 	}
-	if _, err := p.Decrypt(ct, ad); err != nil {
-		t.Fatalf("p.Decrypt() err = %v, want nil", err)
+	got := client.Failures()
+	want := []*fakemonitoring.LogFailure{
+		{
+			Context: monitoring.NewContext(
+				"aead",
+				"decrypt",
+				monitoring.NewKeysetInfo(
+					annotations,
+					kh.KeysetInfo().GetPrimaryKeyId(),
+					[]*monitoring.Entry{
+						{
+							KeyID:          kh.KeysetInfo().GetPrimaryKeyId(),
+							Status:         monitoring.Enabled,
+							FormatAsString: "type.googleapis.com/google.crypto.tink.AesGcmKey",
+						},
+					},
+				),
+			),
+		},
+	}
+	if cmp.Diff(got, want) != "" {
+		t.Errorf("%v", cmp.Diff(got, want))
+	}
+}
+
+func TestFactoryWithMonitoringMultiplePrimitivesLogOperations(t *testing.T) {
+	defer internalregistry.ClearMonitoringClient()
+	client := &fakemonitoring.Client{Name: ""}
+	if err := internalregistry.RegisterMonitoringClient(client); err != nil {
+		t.Fatalf("internalregistry.RegisterMonitoringClient() err = %v, want nil", err)
+	}
+	kh1, err := keyset.NewHandle(aead.AES128GCMKeyTemplate())
+	if err != nil {
+		t.Fatalf("keyset.NewHandle() err = %v, want nil", err)
+	}
+	// Annotations are only supported throught the `insecurecleartextkeyset` API.
+	buff := &bytes.Buffer{}
+	if err := insecurecleartextkeyset.Write(kh1, keyset.NewBinaryWriter(buff)); err != nil {
+		t.Fatalf("insecurecleartextkeyset.Write() err = %v, want nil", err)
+	}
+	annotations := map[string]string{"foo": "bar"}
+	mh1, err := insecurecleartextkeyset.Read(keyset.NewBinaryReader(buff), keyset.WithAnnotations(annotations))
+	if err != nil {
+		t.Fatalf("insecurecleartextkeyset.Read() err = %v, want nil", err)
+	}
+	p1, err := aead.New(mh1)
+	if err != nil {
+		t.Fatalf("aead.New() err = %v, want nil", err)
+	}
+	kh2, err := keyset.NewHandle(aead.AES128CTRHMACSHA256KeyTemplate())
+	if err != nil {
+		t.Fatalf("keyset.NewHandle() err = %v, want nil", err)
+	}
+	buff.Reset()
+	if err := insecurecleartextkeyset.Write(kh2, keyset.NewBinaryWriter(buff)); err != nil {
+		t.Fatalf("insecurecleartextkeyset.Write() err = %v, want nil", err)
+	}
+	mh2, err := insecurecleartextkeyset.Read(keyset.NewBinaryReader(buff), keyset.WithAnnotations(annotations))
+	if err != nil {
+		t.Fatalf("insecurecleartextkeyset.Read() err = %v, want nil", err)
+	}
+	p2, err := aead.New(mh2)
+	if err != nil {
+		t.Fatalf("aead.New() err = %v, want nil", err)
+	}
+	d1 := []byte("YELLOW_ORANGE")
+	if _, err := p1.Encrypt(d1, nil); err != nil {
+		t.Fatalf("p1.Encrypt() err = %v, want nil", err)
+	}
+	d2 := []byte("ORANGE_BLUE")
+	if _, err := p2.Encrypt(d2, nil); err != nil {
+		t.Fatalf("p2.Encrypt() err = %v, want nil", err)
 	}
 	got := client.Events()
 	want := []*fakemonitoring.LogEvent{
 		{
-			KeyID:    mh.KeysetInfo().GetPrimaryKeyId(),
-			NumBytes: len(pt),
+			KeyID:    kh1.KeysetInfo().GetPrimaryKeyId(),
+			NumBytes: len(d1),
 			Context: monitoring.NewContext(
 				"aead",
 				"encrypt",
 				monitoring.NewKeysetInfo(
-					map[string]string{"foo": "bar"},
-					mh.KeysetInfo().GetPrimaryKeyId(),
+					annotations,
+					kh1.KeysetInfo().GetPrimaryKeyId(),
 					[]*monitoring.Entry{
 						{
-							KeyID:          mh.KeysetInfo().GetPrimaryKeyId(),
+							KeyID:          kh1.KeysetInfo().GetPrimaryKeyId(),
 							Status:         monitoring.Enabled,
 							FormatAsString: "type.googleapis.com/google.crypto.tink.AesGcmKey",
 						},
@@ -598,21 +604,19 @@ func TestFactoryWithMonitoringAnnotations(t *testing.T) {
 			),
 		},
 		{
-			KeyID: mh.KeysetInfo().GetPrimaryKeyId(),
-			// ciphertext was encrypted with a key that has TINK ouput prefix. This adds a 5 bytes prefix
-			// to the ciphertext. This prefix is not included in `Log` call.
-			NumBytes: len(ct) - cryptofmt.NonRawPrefixSize,
+			KeyID:    kh2.KeysetInfo().GetPrimaryKeyId(),
+			NumBytes: len(d2),
 			Context: monitoring.NewContext(
 				"aead",
-				"decrypt",
+				"encrypt",
 				monitoring.NewKeysetInfo(
-					map[string]string{"foo": "bar"},
-					mh.KeysetInfo().GetPrimaryKeyId(),
+					annotations,
+					kh2.KeysetInfo().GetPrimaryKeyId(),
 					[]*monitoring.Entry{
 						{
-							KeyID:          mh.KeysetInfo().GetPrimaryKeyId(),
+							KeyID:          kh2.KeysetInfo().GetPrimaryKeyId(),
 							Status:         monitoring.Enabled,
-							FormatAsString: "type.googleapis.com/google.crypto.tink.AesGcmKey",
+							FormatAsString: "type.googleapis.com/google.crypto.tink.AesCtrHmacAeadKey",
 						},
 					},
 				),
@@ -621,5 +625,37 @@ func TestFactoryWithMonitoringAnnotations(t *testing.T) {
 	}
 	if !cmp.Equal(got, want) {
 		t.Errorf("got = %v, want = %v, with diff: %v", got, want, cmp.Diff(got, want))
+	}
+}
+
+func TestPrimitiveFactoryEncryptDecryptWithoutAnnotationsDoesNothing(t *testing.T) {
+	defer internalregistry.ClearMonitoringClient()
+	client := fakemonitoring.NewClient("fake-client")
+	if err := internalregistry.RegisterMonitoringClient(client); err != nil {
+		t.Fatalf("internalregistry.RegisterMonitoringClient() err = %v, want nil", err)
+	}
+	kh, err := keyset.NewHandle(aead.AES128GCMKeyTemplate())
+	if err != nil {
+		t.Fatalf("keyset.NewHandle() err = %v, want nil", err)
+	}
+	p, err := aead.New(kh)
+	if err != nil {
+		t.Fatalf("aead.New() err = %v, want nil", err)
+	}
+	data := []byte("YELLOW_ORANGE")
+	ct, err := p.Encrypt(data, nil)
+	if err != nil {
+		t.Fatalf("p.Encrypt() err = %v, want nil", err)
+	}
+	if _, err := p.Decrypt(ct, nil); err != nil {
+		t.Fatalf("p.Decrypt() err = %v, want nil", err)
+	}
+	got := client.Events()
+	if len(got) != 0 {
+		t.Errorf("len(client.Events()) = %d, want 0", len(got))
+	}
+	failures := len(client.Failures())
+	if failures != 0 {
+		t.Errorf("len(client.Failures()) = %d, want 0", failures)
 	}
 }

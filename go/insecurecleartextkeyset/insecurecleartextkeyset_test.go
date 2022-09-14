@@ -139,7 +139,7 @@ func TestHandleFromReaderWithAnnotationsTwiceFails(t *testing.T) {
 	}
 }
 
-func TestHandleFromReaderWithoutAnnotationsMonitorsNoAnnotations(t *testing.T) {
+func TestHandleFromReaderWithoutAnnotationsDoesNotGetMonitored(t *testing.T) {
 	defer internalregistry.ClearMonitoringClient()
 	client := &fakemonitoring.Client{}
 	if err := internalregistry.RegisterMonitoringClient(client); err != nil {
@@ -164,10 +164,8 @@ func TestHandleFromReaderWithoutAnnotationsMonitorsNoAnnotations(t *testing.T) {
 	if _, err := p.Encrypt([]byte("some_data"), nil); err != nil {
 		t.Fatalf("Encrypt() err = %v, want nil", err)
 	}
-	events := client.Events()
-	gotAnnotations := events[0].Context.KeysetInfo.Annotations
-	if gotAnnotations != nil {
-		t.Errorf("Annotations = %v, want nil", gotAnnotations)
+	if len(client.Events()) != 0 {
+		t.Errorf("len(client.Events()) = %d, want 0", len(client.Events()))
 	}
 }
 
