@@ -58,12 +58,10 @@ public final class JsonKeysetReader implements KeysetReader {
   private static final long MIN_KEY_ID = Integer.MIN_VALUE;  // = - 2^31
 
   private final InputStream inputStream;
-  private final JsonObject json;
   private boolean urlSafeBase64 = false;
 
   private JsonKeysetReader(InputStream inputStream) {
     this.inputStream = inputStream;
-    json = null;
   }
 
   /**
@@ -143,14 +141,10 @@ public final class JsonKeysetReader implements KeysetReader {
   @Override
   public Keyset read() throws IOException {
     try {
-      if (json != null) {
-        return keysetFromJson(json);
-      } else {
-        JsonReader jsonReader = new JsonReader(
-            new StringReader(new String(Util.readAll(inputStream), UTF_8)));
-        jsonReader.setLenient(false);
+      JsonReader jsonReader =
+          new JsonReader(new StringReader(new String(Util.readAll(inputStream), UTF_8)));
+      jsonReader.setLenient(false);
         return keysetFromJson(Streams.parse(jsonReader).getAsJsonObject());
-      }
     } catch (JsonParseException | IllegalStateException e) {
       throw new IOException(e);
     } finally {
@@ -163,12 +157,8 @@ public final class JsonKeysetReader implements KeysetReader {
   @Override
   public EncryptedKeyset readEncrypted() throws IOException {
     try {
-      if (json != null) {
-        return encryptedKeysetFromJson(json);
-      } else {
-        return encryptedKeysetFromJson(
-            JsonParser.parseString(new String(Util.readAll(inputStream), UTF_8)).getAsJsonObject());
-      }
+      return encryptedKeysetFromJson(
+          JsonParser.parseString(new String(Util.readAll(inputStream), UTF_8)).getAsJsonObject());
     } catch (JsonParseException | IllegalStateException e) {
       throw new IOException(e);
     } finally {
