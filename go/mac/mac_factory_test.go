@@ -254,7 +254,7 @@ func TestFactoryWithValidPrimitiveSetType(t *testing.T) {
 	}
 }
 
-func TestFactoryWithMonitoringPrimitiveLogsComputeAndVerify(t *testing.T) {
+func TestPrimitiveFactoryMonitoringWithoutAnnotationsDoesNotLog(t *testing.T) {
 	defer internalregistry.ClearMonitoringClient()
 	client := fakemonitoring.NewClient("fake-client")
 	if err := internalregistry.RegisterMonitoringClient(client); err != nil {
@@ -277,31 +277,8 @@ func TestFactoryWithMonitoringPrimitiveLogsComputeAndVerify(t *testing.T) {
 		t.Fatalf("p.Verify() err = %v, want nil", err)
 	}
 	got := client.Events()
-	wantKeysetInfo := monitoring.NewKeysetInfo(
-		/*annotations=*/ nil,
-		kh.KeysetInfo().GetPrimaryKeyId(),
-		[]*monitoring.Entry{
-			{
-				KeyID:          kh.KeysetInfo().GetPrimaryKeyId(),
-				Status:         monitoring.Enabled,
-				FormatAsString: "type.googleapis.com/google.crypto.tink.HmacKey",
-			},
-		},
-	)
-	want := []*fakemonitoring.LogEvent{
-		&fakemonitoring.LogEvent{
-			Context:  monitoring.NewContext("mac", "compute", wantKeysetInfo),
-			KeyID:    kh.KeysetInfo().GetPrimaryKeyId(),
-			NumBytes: len(data),
-		},
-		&fakemonitoring.LogEvent{
-			Context:  monitoring.NewContext("mac", "verify", wantKeysetInfo),
-			KeyID:    kh.KeysetInfo().GetPrimaryKeyId(),
-			NumBytes: len(data),
-		},
-	}
-	if !cmp.Equal(got, want) {
-		t.Errorf("got = %v, want = %v, with diff: %v", got, want, cmp.Diff(got, want))
+	if len(got) != 0 {
+		t.Errorf("len(client.Events()) = %d, want 0", len(got))
 	}
 }
 
@@ -335,7 +312,17 @@ func TestFactoryWithMonitoringPrimitiveWithMultipleKeysLogsComputeVerify(t *test
 	if err != nil {
 		t.Fatalf("manager.Handle() err = %v, want nil", err)
 	}
-	p, err := mac.New(kh)
+	// Annotations are only supported throught the `insecurecleartextkeyset` API.
+	buff := &bytes.Buffer{}
+	if err := insecurecleartextkeyset.Write(kh, keyset.NewBinaryWriter(buff)); err != nil {
+		t.Fatalf("insecurecleartextkeyset.Write() err = %v, want nil", err)
+	}
+	annotations := map[string]string{"foo": "bar"}
+	mh, err := insecurecleartextkeyset.Read(keyset.NewBinaryReader(buff), keyset.WithAnnotations(annotations))
+	if err != nil {
+		t.Fatalf("insecurecleartextkeyset.Read() err = %v, want nil", err)
+	}
+	p, err := mac.New(mh)
 	if err != nil {
 		t.Fatalf("mac.New() err = %v, want nil", err)
 	}
@@ -353,6 +340,7 @@ func TestFactoryWithMonitoringPrimitiveWithMultipleKeysLogsComputeVerify(t *test
 	}
 	got := client.Events()
 	wantKeysetInfo := &monitoring.KeysetInfo{
+		Annotations:  annotations,
 		PrimaryKeyID: kh.KeysetInfo().GetPrimaryKeyId(),
 		Entries: []*monitoring.Entry{
 			{
@@ -401,15 +389,15 @@ func TestFactoryWithMonitoringPrimitiveWithMultipleKeysLogsComputeVerify(t *test
 	}
 }
 
-func TestFactoryWithMonitoringPrimitiveComputeFailureIsLogged(t *testing.T) {
+func TestPrimitiveFactoryWithMonitoringAnnotationsComputeFailureIsLogged(t *testing.T) {
 	defer internalregistry.ClearMonitoringClient()
 	client := fakemonitoring.NewClient("fake-client")
 	if err := internalregistry.RegisterMonitoringClient(client); err != nil {
 		t.Fatalf("registry.RegisterMonitoringClient() err = %v, want nil", err)
 	}
 	// Since this key type will be registered in the registry,
-	// ww create a very unique typeURL to avoid colliding with other tests.
-	typeURL := "TestFactoryWithMonitoringPrimitiveComputeFailureIsLogged" + string(random.GetRandomBytes(8))
+	// we create a very unique typeURL to avoid colliding with other tests.
+	typeURL := "TestPrimitiveFactoryWithMonitoringComputeFailureIsLogged"
 	template := &tinkpb.KeyTemplate{
 		TypeUrl:          typeURL,
 		OutputPrefixType: tinkpb.OutputPrefixType_LEGACY,
@@ -430,7 +418,17 @@ func TestFactoryWithMonitoringPrimitiveComputeFailureIsLogged(t *testing.T) {
 	if err != nil {
 		t.Fatalf("keyset.NewHandle() err = %v, want nil", err)
 	}
-	m, err := mac.New(kh)
+	// Annotations are only supported throught the `insecurecleartextkeyset` API.
+	buff := &bytes.Buffer{}
+	if err := insecurecleartextkeyset.Write(kh, keyset.NewBinaryWriter(buff)); err != nil {
+		t.Fatalf("insecurecleartextkeyset.Write() err = %v, want nil", err)
+	}
+	annotations := map[string]string{"foo": "bar"}
+	mh, err := insecurecleartextkeyset.Read(keyset.NewBinaryReader(buff), keyset.WithAnnotations(annotations))
+	if err != nil {
+		t.Fatalf("insecurecleartextkeyset.Read() err = %v, want nil", err)
+	}
+	m, err := mac.New(mh)
 	if err != nil {
 		t.Fatalf("mac.New() err = %v, want nil", err)
 	}
@@ -444,7 +442,7 @@ func TestFactoryWithMonitoringPrimitiveComputeFailureIsLogged(t *testing.T) {
 				"mac",
 				"compute",
 				monitoring.NewKeysetInfo(
-					/*annotations=*/ nil,
+					annotations,
 					kh.KeysetInfo().GetPrimaryKeyId(),
 					[]*monitoring.Entry{
 						{
@@ -462,7 +460,7 @@ func TestFactoryWithMonitoringPrimitiveComputeFailureIsLogged(t *testing.T) {
 	}
 }
 
-func TestFactoryWithMonitoringPrimitiveVerifyFailureIsLogged(t *testing.T) {
+func TestPrimitiveFactoryWithMonitoringAnnotationsVerifyFailureIsLogged(t *testing.T) {
 	defer internalregistry.ClearMonitoringClient()
 	client := fakemonitoring.NewClient("fake-client")
 	if err := internalregistry.RegisterMonitoringClient(client); err != nil {
@@ -472,7 +470,17 @@ func TestFactoryWithMonitoringPrimitiveVerifyFailureIsLogged(t *testing.T) {
 	if err != nil {
 		t.Fatalf("keyset.NewHandle() err = %v, want nil", err)
 	}
-	m, err := mac.New(kh)
+	// Annotations are only supported throught the `insecurecleartextkeyset` API.
+	buff := &bytes.Buffer{}
+	if err := insecurecleartextkeyset.Write(kh, keyset.NewBinaryWriter(buff)); err != nil {
+		t.Fatalf("insecurecleartextkeyset.Write() err = %v, want nil", err)
+	}
+	annotations := map[string]string{"foo": "bar"}
+	mh, err := insecurecleartextkeyset.Read(keyset.NewBinaryReader(buff), keyset.WithAnnotations(annotations))
+	if err != nil {
+		t.Fatalf("insecurecleartextkeyset.Read() err = %v, want nil", err)
+	}
+	m, err := mac.New(mh)
 	if err != nil {
 		t.Fatalf("mac.New() err = %v, want nil", err)
 	}
@@ -486,7 +494,7 @@ func TestFactoryWithMonitoringPrimitiveVerifyFailureIsLogged(t *testing.T) {
 				"mac",
 				"verify",
 				monitoring.NewKeysetInfo(
-					/*annotations=*/ nil,
+					annotations,
 					kh.KeysetInfo().GetPrimaryKeyId(),
 					[]*monitoring.Entry{
 						{
@@ -504,7 +512,7 @@ func TestFactoryWithMonitoringPrimitiveVerifyFailureIsLogged(t *testing.T) {
 	}
 }
 
-func TestFactoryWithMonitoringMultiplePrimitivesLogOperations(t *testing.T) {
+func TestPrimitiveFactoryMonitoringWithAnnotationsMultiplePrimitivesLogOperations(t *testing.T) {
 	defer internalregistry.ClearMonitoringClient()
 	client := fakemonitoring.NewClient("fake-client")
 	if err := internalregistry.RegisterMonitoringClient(client); err != nil {
@@ -515,12 +523,22 @@ func TestFactoryWithMonitoringMultiplePrimitivesLogOperations(t *testing.T) {
 		mac.AESCMACTag128KeyTemplate()}
 	handles := make([]*keyset.Handle, len(templates))
 	var err error
+	annotations := map[string]string{"foo": "bar"}
 	for i, tm := range templates {
 		handles[i], err = keyset.NewHandle(tm)
 		if err != nil {
 			t.Fatalf("keyset.NewHandle() err = %v, want nil", err)
 		}
-		p, err := mac.New(handles[i])
+		// Annotations are only supported throught the `insecurecleartextkeyset` API.
+		buff := &bytes.Buffer{}
+		if err := insecurecleartextkeyset.Write(handles[i], keyset.NewBinaryWriter(buff)); err != nil {
+			t.Fatalf("insecurecleartextkeyset.Write() err = %v, want nil", err)
+		}
+		mh, err := insecurecleartextkeyset.Read(keyset.NewBinaryReader(buff), keyset.WithAnnotations(annotations))
+		if err != nil {
+			t.Fatalf("insecurecleartextkeyset.Read() err = %v, want nil", err)
+		}
+		p, err := mac.New(mh)
 		if err != nil {
 			t.Fatalf("mac.New() err = %v, want nil", err)
 		}
@@ -537,7 +555,7 @@ func TestFactoryWithMonitoringMultiplePrimitivesLogOperations(t *testing.T) {
 				"mac",
 				"compute",
 				monitoring.NewKeysetInfo(
-					/*annotations=*/ nil,
+					annotations,
 					handles[0].KeysetInfo().GetPrimaryKeyId(),
 					[]*monitoring.Entry{
 						{
@@ -556,7 +574,7 @@ func TestFactoryWithMonitoringMultiplePrimitivesLogOperations(t *testing.T) {
 				"mac",
 				"compute",
 				monitoring.NewKeysetInfo(
-					/*annotations=*/ nil,
+					annotations,
 					handles[1].KeysetInfo().GetPrimaryKeyId(),
 					[]*monitoring.Entry{
 						{
@@ -574,7 +592,7 @@ func TestFactoryWithMonitoringMultiplePrimitivesLogOperations(t *testing.T) {
 	}
 }
 
-func TestFactoryWithMonitoringPrimitiveWithAnnotations(t *testing.T) {
+func TestPrimitiveFactoryMonitoringWithAnnotationsComputeVerifyLogs(t *testing.T) {
 	defer internalregistry.ClearMonitoringClient()
 	client := fakemonitoring.NewClient("fake-client")
 	if err := internalregistry.RegisterMonitoringClient(client); err != nil {

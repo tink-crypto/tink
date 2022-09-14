@@ -72,29 +72,43 @@ func newWrappedMAC(ps *primitiveset.PrimitiveSet) (*wrappedMAC, error) {
 			}
 		}
 	}
-	ret := &wrappedMAC{ps: ps}
-	client := internalregistry.GetMonitoringClient()
-	keysetInfo, err := monitoringutil.KeysetInfoFromPrimitiveSet(ps)
+	computeLogger, verifyLogger, err := createLoggers(ps)
 	if err != nil {
 		return nil, err
 	}
-	ret.computeLogger, err = client.NewLogger(&monitoring.Context{
+	return &wrappedMAC{
+		ps:            ps,
+		computeLogger: computeLogger,
+		verifyLogger:  verifyLogger,
+	}, nil
+}
+
+func createLoggers(ps *primitiveset.PrimitiveSet) (monitoring.Logger, monitoring.Logger, error) {
+	if len(ps.Annotations) == 0 {
+		return &monitoringutil.DoNothingLogger{}, &monitoringutil.DoNothingLogger{}, nil
+	}
+	client := internalregistry.GetMonitoringClient()
+	keysetInfo, err := monitoringutil.KeysetInfoFromPrimitiveSet(ps)
+	if err != nil {
+		return nil, nil, err
+	}
+	computeLogger, err := client.NewLogger(&monitoring.Context{
 		Primitive:   "mac",
 		APIFunction: "compute",
 		KeysetInfo:  keysetInfo,
 	})
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
-	ret.verifyLogger, err = client.NewLogger(&monitoring.Context{
+	verifyLogger, err := client.NewLogger(&monitoring.Context{
 		Primitive:   "mac",
 		APIFunction: "verify",
 		KeysetInfo:  keysetInfo,
 	})
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
-	return ret, nil
+	return computeLogger, verifyLogger, nil
 }
 
 // ComputeMAC calculates a MAC over the given data using the primary primitive
