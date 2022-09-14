@@ -600,7 +600,7 @@ public final class RawJwtTest {
   }
 
   @Test
-  public void fromJsonPayloadWithValidJsonEscapedCharacter_shouldThrow() throws Exception {
+  public void fromJsonPayloadWithValidJsonEscapedCharacter_success() throws Exception {
     RawJwt token = RawJwt.fromJsonPayload(Optional.empty(), "{\"iss\":\"\\uD834\\uDD1E\"}");
     assertThat(token.hasIssuer()).isTrue();
     assertThat(token.getIssuer()).isEqualTo("\uD834\uDD1E");
@@ -645,6 +645,15 @@ public final class RawJwtTest {
     String input = "{\"sub\": \"subject\" /*, \"iss\": \"issuer\" */}";
     assertThrows(JwtInvalidException.class, () -> RawJwt.fromJsonPayload(Optional.empty(), input));
   }
+
+  @Test
+  public void fromJsonPayloadWithTwoIdenticalClaimNames_firstIsIgnored() throws Exception {
+    String input = "{\"claim\": \"claim1\", \"claim\": \"claim2\"}";
+    RawJwt token = RawJwt.fromJsonPayload(Optional.empty(), input);
+    assertThat(token.hasStringClaim("claim")).isTrue();
+    assertThat(token.getStringClaim("claim")).isEqualTo("claim2");
+  }
+
 
   @Test
   public void fromJsonPayloadWithEscapedChars_success() throws Exception {
