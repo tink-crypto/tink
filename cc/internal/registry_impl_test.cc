@@ -487,6 +487,7 @@ TEST_F(RegistryTest, GetKeyManagerRemainsValid) {
   EXPECT_THAT(key_manager.value()->get_key_type(), Eq(key_type));
 }
 
+// TINK-PENDING-REMOVAL-IN-2.0.0-START
 class TestAeadCatalogue : public Catalogue<Aead> {
  public:
   TestAeadCatalogue() {}
@@ -529,6 +530,7 @@ TEST_F(RegistryTest, testAddCatalogue) {
   // Check the catalogue is still present.
   EXPECT_THAT(Registry::get_catalogue<Aead>(catalogue_name), IsOk());
 }
+// TINK-PENDING-REMOVAL-IN-2.0.0-END
 
 TEST_F(RegistryTest, testGettingPrimitives) {
   std::string key_type_1 = "google.crypto.tink.AesCtrHmacAeadKey";

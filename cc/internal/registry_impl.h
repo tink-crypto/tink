@@ -68,14 +68,17 @@ class RegistryImpl {
   RegistryImpl(const RegistryImpl&) = delete;
   RegistryImpl& operator=(const RegistryImpl&) = delete;
 
+  // TINK-PENDING-REMOVAL-IN-2.0.0-START
   template <class P>
   crypto::tink::util::StatusOr<const Catalogue<P>*> get_catalogue(
-      absl::string_view catalogue_name) const ABSL_LOCKS_EXCLUDED(maps_mutex_);
+     absl::string_view catalogue_name) const
+      ABSL_LOCKS_EXCLUDED(maps_mutex_);
 
   template <class P>
   crypto::tink::util::Status AddCatalogue(absl::string_view catalogue_name,
                                           Catalogue<P>* catalogue)
-      ABSL_LOCKS_EXCLUDED(maps_mutex_);
+     ABSL_LOCKS_EXCLUDED(maps_mutex_);
+  // TINK-PENDING-REMOVAL-IN-2.0.0-END
 
   // Registers the given 'manager' for the key type 'manager->get_key_type()'.
   // Takes ownership of 'manager', which must be non-nullptr.
@@ -445,6 +448,7 @@ class RegistryImpl {
       ABSL_GUARDED_BY(monitoring_factory_mutex_);
 };
 
+// TINK-PENDING-REMOVAL-IN-2.0.0-START
 template <class P>
 crypto::tink::util::Status RegistryImpl::AddCatalogue(
     absl::string_view catalogue_name, Catalogue<P>* catalogue) {
@@ -475,13 +479,14 @@ crypto::tink::util::Status RegistryImpl::AddCatalogue(
 }
 
 template <class P>
-crypto::tink::util::StatusOr<const Catalogue<P>*> RegistryImpl::get_catalogue(
-    absl::string_view catalogue_name) const {
+crypto::tink::util::StatusOr<const Catalogue<P>*>
+RegistryImpl::get_catalogue(absl::string_view catalogue_name) const {
   absl::MutexLock lock(&maps_mutex_);
   auto catalogue_entry = name_to_catalogue_map_.find(catalogue_name);
   if (catalogue_entry == name_to_catalogue_map_.end()) {
     return ToStatusF(absl::StatusCode::kNotFound,
-                     "No catalogue named '%s' has been added.", catalogue_name);
+                     "No catalogue named '%s' has been added.",
+                     catalogue_name);
   }
   if (catalogue_entry->second.type_id_name != typeid(P).name()) {
     return ToStatusF(absl::StatusCode::kInvalidArgument,
@@ -492,6 +497,7 @@ crypto::tink::util::StatusOr<const Catalogue<P>*> RegistryImpl::get_catalogue(
   }
   return static_cast<Catalogue<P>*>(catalogue_entry->second.catalogue.get());
 }
+// TINK-PENDING-REMOVAL-IN-2.0.0-END
 
 template <class P>
 crypto::tink::util::Status RegistryImpl::RegisterKeyManager(

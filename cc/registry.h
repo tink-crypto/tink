@@ -50,12 +50,13 @@ namespace tink {
 // and KeyManagers.
 class Registry {
  public:
+  // TINK-PENDING-REMOVAL-IN-2.0.0-START
   // Returns a catalogue with the given name (if any found).
   // Keeps the ownership of the catalogue.
   template <class P>
   ABSL_DEPRECATED("Catalogues are not supported anymore.")
   static crypto::tink::util::StatusOr<const Catalogue<P>*> get_catalogue(
-      absl::string_view catalogue_name) {
+       absl::string_view catalogue_name) {
     return internal::RegistryImpl::GlobalInstance().get_catalogue<P>(
         catalogue_name);
   }
@@ -83,9 +84,11 @@ class Registry {
   template <class P>
   ABSL_DEPRECATED("Use AddCatalogue with a unique_ptr input instead.")
   static crypto::tink::util::Status
-      AddCatalogue(absl::string_view catalogue_name, Catalogue<P>* catalogue) {
+      AddCatalogue(absl::string_view catalogue_name,
+                   Catalogue<P>* catalogue) {
     return AddCatalogue(catalogue_name, absl::WrapUnique(catalogue));
   }
+  // TINK-PENDING-REMOVAL-IN-2.0.0-END
 
   // Registers the given 'manager' for the key type 'manager->get_key_type()'.
   template <class ConcreteKeyManager>
