@@ -269,8 +269,7 @@ public final class StrictJsonParserTest {
   }
 
   @Theory
-  public void parsedNumberGetAsLong_discardsAllBut64LowestOrderBits(
-      @FromDataPoints("numbers") String number) throws Exception {
+  public void parsedNumberGetAsLong_discardsAllBut64LowestOrderBits() throws Exception {
     // It would be preferable if JsonElement.getAsLong would throw a NumberFormatException exception
     // if the number it contains does not fit into a long, similar to what Long.parseLong does.
 
@@ -283,8 +282,7 @@ public final class StrictJsonParserTest {
   }
 
   @Theory
-  public void parsedNumberGetAsInt_discardsAllBut32LowestOrderBits(
-      @FromDataPoints("numbers") String number) throws Exception {
+  public void parsedNumberGetAsInt_discardsAllBut32LowestOrderBits() throws Exception {
     // It would be preferable if JsonElement.getAsInt would throw a NumberFormatException exception
     // if the number it contains does not fit into a long, similar to what Int.parseInt does.
 
@@ -296,8 +294,8 @@ public final class StrictJsonParserTest {
     assertThat(numElement.getAsInt()).isEqualTo(-2147483647);
   }
 
-  @DataPoints("numbers")
-  public static final String[] NUMBERS =
+  @DataPoints("longs")
+  public static final String[] LONGS =
       new String[] {
         "0",
         "42",
@@ -308,23 +306,75 @@ public final class StrictJsonParserTest {
         "44444444444444444",
         "9223372036854775807",  // 2^63 - 1
         "-9223372036854775808",  // - 2^63
+      };
+
+  @DataPoints("biggerThanLongs")
+  public static final String[] BIGGER_THAN_LONGS =
+      new String[] {
         "9223372036854775809",  // 2^63 + 1
         "18446744073709551658",  // 2^64 + 42
         "9999999999999999999999999999999999999999999999999999999999999999",
         "-9999999999999999999999999999999999999999999999999999999999999999",
       };
+
   @Theory
-  public void parsedNumberGetAsLong_sameAsBigIntegerLongValue(
-      @FromDataPoints("numbers") String number) throws Exception {
-    JsonElement parsed = StrictJsonParser.parse(number);
-    assertThat(parsed.getAsLong()).isEqualTo(new BigInteger(number).longValue());
+  public void parsedNumberGetAsLong_validLong_sameAsParseLong(
+      @FromDataPoints("longs") String numString) throws Exception {
+    JsonElement parsed = StrictJsonParser.parse(numString);
+    assertThat(parsed.getAsLong()).isEqualTo(Long.parseLong(numString));
   }
 
   @Theory
-  public void parsedNumberGetAsInt_sameAsBigIntegerIntValue(
-      @FromDataPoints("numbers") String number) throws Exception {
-    JsonElement parsed = StrictJsonParser.parse(number);
-    assertThat(parsed.getAsInt()).isEqualTo(new BigInteger(number).intValue());
+  public void parsedNumberGetAsLong_biggerThanLong_sameAsBigIntegerLongValue(
+      @FromDataPoints("biggerThanLongs") String numString) throws Exception {
+    JsonElement parsed = StrictJsonParser.parse(numString);
+    assertThat(parsed.getAsLong()).isEqualTo(new BigInteger(numString).longValue());
+  }
+
+  @Theory
+  public void parsedNumberGetAsInt_validLong_sameAsBigIntegerIntValue(
+      @FromDataPoints("longs") String numString) throws Exception {
+    JsonElement parsed = StrictJsonParser.parse(numString);
+    assertThat(parsed.getAsInt()).isEqualTo(new BigInteger(numString).intValue());
+  }
+
+  @Theory
+  public void parsedNumberGetAsInt_biggerThanLong_sameAsBigIntegerIntValue(
+      @FromDataPoints("biggerThanLongs") String numString) throws Exception {
+    JsonElement parsed = StrictJsonParser.parse(numString);
+    assertThat(parsed.getAsInt()).isEqualTo(new BigInteger(numString).intValue());
+  }
+
+  @Theory
+  public void getParsedNumberAsLongOrThrow_validLong_sameAsParseLong(
+      @FromDataPoints("longs") String numString) throws Exception {
+    JsonElement parsed = StrictJsonParser.parse(numString);
+    assertThat(StrictJsonParser.getParsedNumberAsLongOrThrow(parsed))
+        .isEqualTo(Long.parseLong(numString));
+  }
+
+  @Theory
+  public void getParsedNumberAsLongOrThrow_biggerThanLong_throws(
+      @FromDataPoints("biggerThanLongs") String numString) throws Exception {
+    JsonElement parsed = StrictJsonParser.parse(numString);
+    assertThrows(
+        NumberFormatException.class, () -> StrictJsonParser.getParsedNumberAsLongOrThrow(parsed));
+  }
+
+  @Theory
+  public void getParsedNumberAsLongOrThrow_nestedValue_success() throws Exception {
+    JsonElement parsed = StrictJsonParser.parse("{\"a\":{\"b\":9223372036854775807}}");
+    JsonElement parsedNumber = parsed.getAsJsonObject().get("a").getAsJsonObject().get("b");
+    long output = StrictJsonParser.getParsedNumberAsLongOrThrow(parsedNumber);
+    assertThat(output).isEqualTo(9223372036854775807L);
+  }
+
+  @Theory
+  public void getParsedNumberAsLongOrThrow_notParsed_throws() throws Exception {
+    JsonElement notParsedJsonElementWithNumber = new JsonPrimitive(42);
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> StrictJsonParser.getParsedNumberAsLongOrThrow(notParsedJsonElementWithNumber));
   }
 
   @Theory
