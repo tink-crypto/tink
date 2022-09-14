@@ -21,18 +21,20 @@ import (
 	"fmt"
 
 	"github.com/google/tink/go/core/registry"
+	"github.com/google/tink/go/monitoring"
 )
 
 // The PRF interface is an abstraction for an element of a pseudo random
 // function family, selected by a key. It has the following property:
-//   * It is deterministic. PRF.compute(input, length) will always return the
+//   - It is deterministic. PRF.compute(input, length) will always return the
 //     same output if the same key is used. PRF.compute(input, length1) will be
 //     a prefix of PRF.compute(input, length2) if length1 < length2 and the same
 //     key is used.
-//   * It is indistinguishable from a random function:
+//   - It is indistinguishable from a random function:
 //     Given the evaluation of n different inputs, an attacker cannot
 //     distinguish between the PRF and random bytes on an input different from
 //     the n that are known.
+//
 // Use cases for PRF are deterministic redaction of PII, keyed hash functions,
 // creating sub IDs that do not allow joining with the original dataset without
 // knowing the key.
@@ -63,7 +65,8 @@ type Set struct {
 	// PrimaryID is the key ID marked as primary in the corresponding Keyset.
 	PrimaryID uint32
 	// PRFs maps key IDs to their corresponding PRF.
-	PRFs map[uint32]PRF
+	PRFs   map[uint32]PRF
+	logger monitoring.Logger
 }
 
 // ComputePrimaryPRF is equivalent to set.PRFs[set.PrimaryID].ComputePRF(input, outputLength).
@@ -72,7 +75,17 @@ func (s Set) ComputePrimaryPRF(input []byte, outputLength uint32) ([]byte, error
 	if !ok {
 		return nil, fmt.Errorf("Could not find primary ID %d in prf.Set", s.PrimaryID)
 	}
-	return prf.ComputePRF(input, outputLength)
+	p, err := prf.ComputePRF(input, outputLength)
+	if err != nil {
+		if s.logger != nil {
+			s.logger.LogFailure()
+		}
+		return nil, err
+	}
+	if s.logger != nil {
+		s.logger.Log(s.PrimaryID, len(input))
+	}
+	return p, nil
 }
 
 func init() {

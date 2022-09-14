@@ -25,6 +25,17 @@ import (
 	tpb "github.com/google/tink/go/proto/tink_go_proto"
 )
 
+// DoNothingLogger is a Logger that does nothing when invoked.
+type DoNothingLogger struct{}
+
+var _ monitoring.Logger = (*DoNothingLogger)(nil)
+
+// Log drops a log call.
+func (l *DoNothingLogger) Log(uint32, int) {}
+
+// LogFailure drops a failure call.
+func (l *DoNothingLogger) LogFailure() {}
+
 func keyStatusFromProto(status tpb.KeyStatusType) (monitoring.KeyStatus, error) {
 	var keyStatus monitoring.KeyStatus = 55
 	switch status {

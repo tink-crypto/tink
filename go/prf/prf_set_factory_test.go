@@ -17,13 +17,19 @@
 package prf_test
 
 import (
+	"bytes"
 	"encoding/hex"
 	"fmt"
 	"testing"
 
+	"github.com/google/go-cmp/cmp"
+	"github.com/google/tink/go/insecurecleartextkeyset"
+	"github.com/google/tink/go/internal/internalregistry"
 	"github.com/google/tink/go/keyset"
 	"github.com/google/tink/go/mac"
+	"github.com/google/tink/go/monitoring"
 	"github.com/google/tink/go/prf"
+	"github.com/google/tink/go/testing/fakemonitoring"
 	"github.com/google/tink/go/testutil"
 	tinkpb "github.com/google/tink/go/proto/tink_go_proto"
 )
@@ -221,5 +227,135 @@ func runZTests(results [][]byte, t *testing.T) {
 				t.Errorf("Expected different PRF outputs to be uncorrelated: %v", err)
 			}
 		}
+	}
+}
+
+func TestPrimitiveFactoryComputePRFWithoutAnnotationsDoesNothing(t *testing.T) {
+	defer internalregistry.ClearMonitoringClient()
+	client := fakemonitoring.NewClient("fake-client")
+	if err := internalregistry.RegisterMonitoringClient(client); err != nil {
+		t.Fatalf("internalregistry.RegisterMonitoringClient() err = %v, want nil", err)
+	}
+	kh, err := keyset.NewHandle(prf.HMACSHA256PRFKeyTemplate())
+	if err != nil {
+		t.Fatalf("keyset.NewHandle() err = %v, want nil", err)
+	}
+	prfSet, err := prf.NewPRFSet(kh)
+	if err != nil {
+		t.Fatalf("prf.NewPRFSet() err = %v, want nil", err)
+	}
+	if _, err := prfSet.ComputePrimaryPRF([]byte("input_data"), 32); err != nil {
+		t.Fatalf("prfSet.ComputePrimaryPRF() err = %v, want nil", err)
+	}
+	failures := len(client.Failures())
+	if failures != 0 {
+		t.Errorf("len(client.Failures()) = %d, want 0", failures)
+	}
+	got := client.Events()
+	if got != nil {
+		t.Errorf("client.Events() = %v, want nil", got)
+	}
+}
+
+func TestPrimitiveFactoryMonitoringWithAnnotationsComputePRFFailureIsLogged(t *testing.T) {
+	defer internalregistry.ClearMonitoringClient()
+	client := fakemonitoring.NewClient("fake-client")
+	if err := internalregistry.RegisterMonitoringClient(client); err != nil {
+		t.Fatalf("internalregistry.RegisterMonitoringClient() err = %v, want nil", err)
+	}
+	kh, err := keyset.NewHandle(prf.HMACSHA256PRFKeyTemplate())
+	if err != nil {
+		t.Fatalf("keyset.NewHandle() err = %v, want nil", err)
+	}
+	buff := &bytes.Buffer{}
+	if err := insecurecleartextkeyset.Write(kh, keyset.NewBinaryWriter(buff)); err != nil {
+		t.Fatalf("insecurecleartextkeyset.Write() err = %v, want nil", err)
+	}
+	annotations := map[string]string{"foo": "bar"}
+	mh, err := insecurecleartextkeyset.Read(keyset.NewBinaryReader(buff), keyset.WithAnnotations(annotations))
+	if err != nil {
+		t.Fatalf("insecurecleartextkeyset.Read() err = %v, want nil", err)
+	}
+	prfSet, err := prf.NewPRFSet(mh)
+	if err != nil {
+		t.Fatalf("prf.NewPRFSet() err = %v, want nil", err)
+	}
+	data := []byte("input_data")
+	if _, err := prfSet.ComputePrimaryPRF(data, 64); err == nil {
+		t.Fatalf("prfSet.ComputePrimaryPRF() err = nil, want non-nil errors")
+	}
+	got := client.Failures()
+	want := []*fakemonitoring.LogFailure{
+		{
+			Context: monitoring.NewContext(
+				"prf",
+				"compute",
+				&monitoring.KeysetInfo{
+					Annotations: annotations,
+					Entries: []*monitoring.Entry{
+						{
+							KeyID:          kh.KeysetInfo().GetPrimaryKeyId(),
+							Status:         monitoring.Enabled,
+							FormatAsString: kh.KeysetInfo().GetKeyInfo()[0].GetTypeUrl(),
+						},
+					},
+					PrimaryKeyID: kh.KeysetInfo().GetPrimaryKeyId(),
+				},
+			),
+		},
+	}
+	if diff := cmp.Diff(want, got); diff != "" {
+		t.Errorf("%v", diff)
+	}
+}
+
+func TestPrimitiveFactoryWithMonitoringAnnotationsLogsComputePRF(t *testing.T) {
+	defer internalregistry.ClearMonitoringClient()
+	client := fakemonitoring.NewClient("fake-client")
+	if err := internalregistry.RegisterMonitoringClient(client); err != nil {
+		t.Fatalf("internalregistry.RegisterMonitoringClient() err = %v, want nil", err)
+	}
+	kh, err := keyset.NewHandle(prf.HMACSHA256PRFKeyTemplate())
+	if err != nil {
+		t.Fatalf("keyset.NewHandle() err = %v, want nil", err)
+	}
+	buff := &bytes.Buffer{}
+	if err := insecurecleartextkeyset.Write(kh, keyset.NewBinaryWriter(buff)); err != nil {
+		t.Fatalf("insecurecleartextkeyset.Write() err = %v, want nil", err)
+	}
+	annotations := map[string]string{"foo": "bar"}
+	mh, err := insecurecleartextkeyset.Read(keyset.NewBinaryReader(buff), keyset.WithAnnotations(annotations))
+	if err != nil {
+		t.Fatalf("insecurecleartextkeyset.Read() err = %v, want nil", err)
+	}
+	prfSet, err := prf.NewPRFSet(mh)
+	if err != nil {
+		t.Fatalf("prf.NewPRFSet() err = %v, want nil", err)
+	}
+	data := []byte("some_data")
+	if _, err := prfSet.ComputePrimaryPRF(data, 20); err != nil {
+		t.Fatalf("prfSet.ComputePrimaryPRF() err = %v, want nil", err)
+	}
+	got := client.Events()
+	wantKeysetInfo := &monitoring.KeysetInfo{
+		PrimaryKeyID: kh.KeysetInfo().GetPrimaryKeyId(),
+		Entries: []*monitoring.Entry{
+			{
+				KeyID:          kh.KeysetInfo().GetPrimaryKeyId(),
+				Status:         monitoring.Enabled,
+				FormatAsString: kh.KeysetInfo().GetKeyInfo()[0].GetTypeUrl(),
+			},
+		},
+		Annotations: annotations,
+	}
+	want := []*fakemonitoring.LogEvent{
+		{
+			Context:  monitoring.NewContext("prf", "compute", wantKeysetInfo),
+			KeyID:    kh.KeysetInfo().GetPrimaryKeyId(),
+			NumBytes: len(data),
+		},
+	}
+	if !cmp.Equal(got, want) {
+		t.Errorf("got = %v, want = %v, with diff: %v", got, want, cmp.Diff(got, want))
 	}
 }

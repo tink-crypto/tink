@@ -19,7 +19,10 @@ go_library(
     deps = [
         "//core/primitiveset",
         "//core/registry",
+        "//internal/internalregistry",
+        "//internal/monitoringutil",
         "//keyset",
+        "//monitoring",
         "//prf/subtle",
         "//proto/aes_cmac_prf_go_proto",
         "//proto/common_go_proto",
@@ -44,8 +47,11 @@ go_test(
     deps = [
         ":prf",
         "//core/registry",
+        "//insecurecleartextkeyset",
+        "//internal/internalregistry",
         "//keyset",
         "//mac",
+        "//monitoring",
         "//prf/subtle",
         "//proto/aes_cmac_prf_go_proto",
         "//proto/common_go_proto",
@@ -53,7 +59,9 @@ go_test(
         "//proto/hmac_prf_go_proto",
         "//proto/tink_go_proto",
         "//subtle/random",
+        "//testing/fakemonitoring",
         "//testutil",
+        "@com_github_google_go_cmp//cmp",
         "@org_golang_google_protobuf//proto",
     ],
 )
