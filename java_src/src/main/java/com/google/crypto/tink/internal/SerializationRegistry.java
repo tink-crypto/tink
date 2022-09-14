@@ -20,6 +20,7 @@ import com.google.crypto.tink.Key;
 import com.google.crypto.tink.Parameters;
 import com.google.crypto.tink.SecretKeyAccess;
 import com.google.crypto.tink.util.Bytes;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import java.security.GeneralSecurityException;
 import java.util.HashMap;
 import java.util.Map;
@@ -28,7 +29,7 @@ import javax.annotation.Nullable;
 
 /**
  * Allows registering {@code KeySerializer}, {@code KeyParser}, {@code ParametersSerializer}, and
- * {@ParametersParser} objects, and parsing/serializing keys and key formats with such objects.
+ * {@link ParametersParser} objects, and parsing/serializing keys and key formats with such objects.
  */
 public final class SerializationRegistry {
   private final Map<SerializerIndex, KeySerializer<?, ?>> keySerializerMap;
@@ -65,6 +66,7 @@ public final class SerializationRegistry {
      * already been registered, this checks if they are the same. If they are, the call is ignored,
      * otherwise an exception is thrown.
      */
+    @CanIgnoreReturnValue
     public <KeyT extends Key, SerializationT extends Serialization> Builder registerKeySerializer(
         KeySerializer<KeyT, SerializationT> serializer) throws GeneralSecurityException {
       SerializerIndex index =
@@ -90,6 +92,7 @@ public final class SerializationRegistry {
      * parser.getObjectIdentifier())} has already been registered, this checks if they are the same.
      * If they are, the call is ignored, otherwise an exception is thrown.
      */
+    @CanIgnoreReturnValue
     public <SerializationT extends Serialization> Builder registerKeyParser(
         KeyParser<SerializationT> parser) throws GeneralSecurityException {
       ParserIndex index =
@@ -114,6 +117,7 @@ public final class SerializationRegistry {
      * already been registered, this checks if they are the same. If they are, the call is ignored,
      * otherwise an exception is thrown.
      */
+    @CanIgnoreReturnValue
     public <ParametersT extends Parameters, SerializationT extends Serialization>
         Builder registerParametersSerializer(
             ParametersSerializer<ParametersT, SerializationT> serializer)
@@ -141,6 +145,7 @@ public final class SerializationRegistry {
      * parser.getObjectIdentifier())} has already been registered, this checks if they are the same.
      * If they are, the call is ignored, otherwise an exception is thrown.
      */
+    @CanIgnoreReturnValue
     public <SerializationT extends Serialization> Builder registerParametersParser(
         ParametersParser<SerializationT> parser) throws GeneralSecurityException {
       ParserIndex index =

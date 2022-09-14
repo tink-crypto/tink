@@ -279,6 +279,7 @@ java_library(
         "//src/main/java/com/google/crypto/tink:secret_key_access",
         "//src/main/java/com/google/crypto/tink/util:bytes",
         "@maven//:com_google_code_findbugs_jsr305",
+        "@maven//:com_google_errorprone_error_prone_annotations",
     ],
 )
 
@@ -296,6 +297,7 @@ android_library(
         "//src/main/java/com/google/crypto/tink:secret_key_access-android",
         "//src/main/java/com/google/crypto/tink/util:bytes-android",
         "@maven//:com_google_code_findbugs_jsr305",
+        "@maven//:com_google_errorprone_error_prone_annotations",
     ],
 )
 
