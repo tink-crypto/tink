@@ -659,6 +659,34 @@ public final class RawJwtTest {
     assertThrows(JwtInvalidException.class, () -> RawJwt.fromJsonPayload(Optional.empty(), input));
   }
 
+  @Test
+  public void fromJsonPayload_withLargeNumberClaim() throws Exception {
+    String input =
+        "{\"numClaim\":   "
+            + "9999999999999999999999999999999999999999999900000000000000000000000}";
+    RawJwt token = RawJwt.fromJsonPayload(Optional.empty(), input);
+    assertThat(token.getNumberClaim("numClaim"))
+        .isWithin(0.0002e66)
+        .of(9.9999e66);
+  }
+
+  @Test
+  public void fromJsonPayload_withLargerThanDoubleMaxValueNumberClaim_isLarge() throws Exception {
+    String input =
+        "{\"numClaim\":   "
+            + "99999999999999999999999999.99e+99999999999999999999999999}";
+    RawJwt token = RawJwt.fromJsonPayload(Optional.empty(), input);
+    assertThat(token.getNumberClaim("numClaim")).isAtLeast(Double.MAX_VALUE);
+  }
+
+  @Test
+  public void fromJsonPayload_withSmallerThanDoubleMinValueNumberClaim_isSmall() throws Exception {
+    String input =
+        "{\"numClaim\":   "
+            + "-99999999999999999999999999.99e+99999999999999999999999999}";
+    RawJwt token = RawJwt.fromJsonPayload(Optional.empty(), input);
+    assertThat(token.getNumberClaim("numClaim")).isAtMost(Double.MIN_VALUE);
+  }
 
   @Test
   public void getClaimsOfDifferentType_shouldThrow() throws Exception {
