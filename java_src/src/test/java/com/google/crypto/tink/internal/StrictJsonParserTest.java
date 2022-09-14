@@ -29,6 +29,7 @@ import com.google.gson.internal.Streams;
 import com.google.gson.stream.JsonReader;
 import java.io.IOException;
 import java.io.StringReader;
+import java.math.BigInteger;
 import org.junit.experimental.theories.DataPoints;
 import org.junit.experimental.theories.FromDataPoints;
 import org.junit.experimental.theories.Theories;
@@ -268,67 +269,96 @@ public final class StrictJsonParserTest {
   }
 
   @Theory
-  public void testNumbersToLong() throws Exception {
-    // After parsing, numbers are represented as LazilyParsedNumber, which contain the unparsed
-    // string value of the number. When getAsLong() is called, then LazilyParsedNumber will convert
-    // the string into a long. It first tries to parse it using Long.parseLong(value), and if that
-    // fails, it tries new BigDecimal(value).longValue(), which will create a BigInteger and
-    // call longValue() on that.
-    assertThat(StrictJsonParser.parse("44444444444444444").getAsLong())
-        .isEqualTo(44444444444444444L);
-    // 2^63 - 1
-    assertThat(StrictJsonParser.parse("9223372036854775807").getAsLong()
+  public void parsedNumberGetAsLong_discardsAllBut64LowestOrderBits(
+      @FromDataPoints("numbers") String number) throws Exception {
+    // It would be preferable if JsonElement.getAsLong would throw a NumberFormatException exception
+    // if the number it contains does not fit into a long, similar to what Long.parseLong does.
+
+    // Instead, the method never throws an exception, and follows the "narrowing primitive
+    // conversion" of the Java Language Specification section 5.1.3, which means that all but the 32
+    // lowest order bits are discarded.
+
+    JsonElement numElement = StrictJsonParser.parse("9223372036854775809");  // 2^63 + 1
+    assertThat(numElement.getAsLong()).isEqualTo(-9223372036854775807L);
+  }
+
+  @Theory
+  public void parsedNumberGetAsInt_discardsAllBut32LowestOrderBits(
+      @FromDataPoints("numbers") String number) throws Exception {
+    // It would be preferable if JsonElement.getAsInt would throw a NumberFormatException exception
+    // if the number it contains does not fit into a long, similar to what Int.parseInt does.
+
+    // Instead, the method never throws an exception, and follows the "narrowing primitive
+    // conversion" of the Java Language Specification section 5.1.3, which means that all but the 32
+    // lowest order bits are discarded.
+
+    JsonElement numElement = StrictJsonParser.parse("2147483649");  // 2^31 + 1
+    assertThat(numElement.getAsInt()).isEqualTo(-2147483647);
+  }
+
+  @DataPoints("numbers")
+  public static final String[] NUMBERS =
+      new String[] {
+        "0",
+        "42",
+        "-42",
+        "2147483647", // 2^31 - 1
+        "-2147483648", // - 2^31
+        "2147483649", // 2^31 + 1
+        "44444444444444444",
+        "9223372036854775807",  // 2^63 - 1
+        "-9223372036854775808",  // - 2^63
+        "9223372036854775809",  // 2^63 + 1
+        "18446744073709551658",  // 2^64 + 42
+        "9999999999999999999999999999999999999999999999999999999999999999",
+        "-9999999999999999999999999999999999999999999999999999999999999999",
+      };
+  @Theory
+  public void parsedNumberGetAsLong_sameAsBigIntegerLongValue(
+      @FromDataPoints("numbers") String number) throws Exception {
+    JsonElement parsed = StrictJsonParser.parse(number);
+    assertThat(parsed.getAsLong()).isEqualTo(new BigInteger(number).longValue());
+  }
+
+  @Theory
+  public void parsedNumberGetAsInt_sameAsBigIntegerIntValue(
+      @FromDataPoints("numbers") String number) throws Exception {
+    JsonElement parsed = StrictJsonParser.parse(number);
+    assertThat(parsed.getAsInt()).isEqualTo(new BigInteger(number).intValue());
+  }
+
+  @Theory
+  public void floatNumbersGetAsLong_getsTruncated() throws Exception {
+    assertThat(StrictJsonParser.parse("42.0").getAsLong()).isEqualTo(42);
+    assertThat(StrictJsonParser.parse("2.1e1").getAsLong()).isEqualTo(21);
+
+    assertThat(StrictJsonParser.parse("42.1").getAsLong()).isEqualTo(42);
+    assertThat(StrictJsonParser.parse("42.9999").getAsLong()).isEqualTo(42);
+
+    // 2^63 - 1 as float
+    assertThat(StrictJsonParser.parse("9.223372036854775807e18").getAsLong()
       ).isEqualTo(9223372036854775807L);
 
-    // 2^63 + 1. Parsing as long fails. Parsing as BigDecimal works, but convertion to long wraps
-    // around and becomes negative.
-    assertThat(StrictJsonParser.parse("9223372036854775809").getAsLong()
-      ).isEqualTo(-9223372036854775807L);
-    // 2^64 + 42. BigInteger gives the number mod 2^64.
-    assertThat(StrictJsonParser.parse("18446744073709551658").getAsLong()
-      ).isEqualTo(42);
-    // float, a bit smaller than 2^64. Parsing as long fails, parsing as BigDecimal
-    // works, converting to long wraps around and results in a relatively small negative number.
-    assertThat(StrictJsonParser.parse("1.8446744e+19").getAsLong()).isEqualTo(-73709551616L);
-    // float, a bit larger than 2^64. Same as above, but now results in a small positive number.
-    assertThat(StrictJsonParser.parse("1.8446745e+19").getAsLong()
-      ).isEqualTo(926290448384L);
-    assertThat(StrictJsonParser.parse("1e+63").getAsLong()
+    // - 2^63 as float
+    assertThat(StrictJsonParser.parse("-9.223372036854775808e18").getAsLong()
       ).isEqualTo(-9223372036854775808L);
-    assertThat(
-            StrictJsonParser.parse(
-                    "999999999999999999999999999999999999999999999999999999999999999")  // 63 chars
-                .getAsLong())
-        .isEqualTo(9223372036854775807L);
+  }
 
-    // Numbers with 64 or more decimal digits are not parsed. But the result seems to depends on
-    // how many zeros the number has at the end.
-    assertThat(StrictJsonParser.parse("1e+64").getAsLong()).isEqualTo(0);
-    assertThat(
-            StrictJsonParser.parse(
-                    "9999999999999999999999999999999999999999999999999999999999999999")  // 64 chars
-                .getAsLong())
-        .isEqualTo(-1);
-    assertThat(
-            StrictJsonParser.parse(
-                    "-9999999999999999999999999999999999999999999999999999999999999999")
-                .getAsLong())
-        .isEqualTo(1);
-    assertThat(
-            StrictJsonParser.parse(
-                    "9999999999999999999999999999999999999999999999999999999999999000")
-                .getAsLong())
-        .isEqualTo(-1000);
-    assertThat(
-            StrictJsonParser.parse(
-                    "9999999999999999999999999999999999999999999999999990000000000000")
-                .getAsLong())
-        .isEqualTo(-10000000000000L);
-    assertThat(
-            StrictJsonParser.parse(
-                    "9999999999999999999999999999999999999999900000000000000000000000")
-                .getAsLong())
-        .isEqualTo(-200376420520689664L);
+  @Theory
+  public void floatNumbersGetAsInt_getsTruncated() throws Exception {
+    assertThat(StrictJsonParser.parse("42.0").getAsInt()).isEqualTo(42);
+    assertThat(StrictJsonParser.parse("2.1e1").getAsInt()).isEqualTo(21);
+
+    assertThat(StrictJsonParser.parse("42.1").getAsInt()).isEqualTo(42);
+    assertThat(StrictJsonParser.parse("42.9999").getAsInt()).isEqualTo(42);
+
+    // 2^31 - 1 as float
+    assertThat(StrictJsonParser.parse("2.147483647e9").getAsInt())
+        .isEqualTo(2147483647);
+
+    // - 2^31 as float
+    assertThat(StrictJsonParser.parse("-2.147483648e9").getAsInt())
+        .isEqualTo(-2147483648);
   }
 
   @Theory
