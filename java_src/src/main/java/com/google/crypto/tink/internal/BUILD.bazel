@@ -498,8 +498,8 @@ java_library(
 )
 
 java_library(
-    name = "strict_json_parser",
-    srcs = ["StrictJsonParser.java"],
+    name = "json_parser",
+    srcs = ["JsonParser.java"],
     deps = [
         "@maven//:com_google_code_findbugs_jsr305",
         "@maven//:com_google_code_gson_gson",
@@ -507,8 +507,8 @@ java_library(
 )
 
 android_library(
-    name = "strict_json_parser-android",
-    srcs = ["StrictJsonParser.java"],
+    name = "json_parser-android",
+    srcs = ["JsonParser.java"],
     deps = [
         "@maven//:com_google_code_findbugs_jsr305",
         "@maven//:com_google_code_gson_gson",

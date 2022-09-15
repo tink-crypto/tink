@@ -33,12 +33,15 @@ import java.util.Deque;
 import javax.annotation.Nullable;
 
 /**
- * Implementation of a Strict JSON Parser.
+ * A JSON Parser based on the GSON JsonReader.
  *
- * <p>The parsing is almost identical to TypeAdapters.JSON_ELEMENT, but it rejects duplicated map
- * keys and strings with invalid characters.
+ * <p>The parsing is almost identical to the normal parser provided by GSON with these changes: it
+ * never uses "lenient" mode, it rejects duplicated map keys and it rejects strings with invalid
+ * UTF16 characters.
+ *
+ * <p>The implementation is adapted from almost identical to GSON's TypeAdapters.JSON_ELEMENT.
  */
-public final class StrictJsonParser {
+public final class JsonParser {
 
   private static boolean isValidString(String s) {
     int length = s.length();
@@ -200,5 +203,5 @@ public final class StrictJsonParser {
     return Long.parseLong(element.getAsNumber().toString());
   }
 
-  private StrictJsonParser() {}
+  private JsonParser() {}
 }

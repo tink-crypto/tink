@@ -37,15 +37,15 @@ import org.junit.experimental.theories.Theory;
 import org.junit.runner.RunWith;
 
 /**
- * Tests that {@link StrictJsonParser}.
+ * Tests that {@link JsonParser}.
  *
  * <p>We currently test it together with {@link com.google.gson.internal.Streams#parse(JsonReader)},
  * to show where they do the same and where they don't.
  */
 @RunWith(Theories.class)
-public final class StrictJsonParserTest {
+public final class JsonParserTest {
 
-  // TODO(b/241828611) Remove this once we fully migrated to StrictJsonParser.parse.
+  // TODO(b/241828611) Remove this once we fully migrated to JsonParser.parse.
   // Streams.parse sometimes throws an IOException and sometimes an JsonParseException.
   private JsonElement normalParse(String input) throws IOException {
     try {
@@ -58,7 +58,6 @@ public final class StrictJsonParserTest {
   }
 
   public static final class TestCase {
-    // TODO(juerg): Make expected not a string but a JsonElement.
     public final String name;
     public final String input;
     public final JsonElement expected;
@@ -215,17 +214,6 @@ public final class StrictJsonParserTest {
         "-huge_number",
         "-999999999999999999999999999999999999999999999999999999999999999999999999999999999999999",
         new JsonPrimitive(-1e87)),
-
-    // For these two numbers, we couldn't find non-parsed numbers that are equal to them.
-    new TestCase(
-        "huge_exp",
-        "99999999999999999999999999.99e+99999999999999999999999999",
-        null),
-    new TestCase(
-        "-huge_exp",
-        "-99999999999999999999999999.99e-99999999999999999999999999",
-        null),
-
     new TestCase("string_with_tailing_comma", "\"a\",", new JsonPrimitive("a")),
     new TestCase("number_with_tailing_comma", "42,", new JsonPrimitive(42)),
     new TestCase("true_with_tailing_comma", "true,", new JsonPrimitive(true)),
@@ -256,16 +244,12 @@ public final class StrictJsonParserTest {
   @Theory
   public void testBothParsers_success(
       @FromDataPoints("testCasesSuccess") TestCase testCase) throws Exception {
-    JsonElement strictOutput = StrictJsonParser.parse(testCase.input);
+    JsonElement output = JsonParser.parse(testCase.input);
 
-    // TODO(juerg): Remove this once invalid UTF16 strings are rejected.
-    if (testCase.expected != null) {
-      assertThat(strictOutput).isEqualTo(testCase.expected);
-    }
+    assertThat(output).isEqualTo(testCase.expected);
 
     // compare to normalParse
-    JsonElement normalOutput = normalParse(testCase.input);
-    assertThat(strictOutput).isEqualTo(normalOutput);
+    assertThat(output).isEqualTo(normalParse(testCase.input));
   }
 
   @Theory
@@ -277,7 +261,7 @@ public final class StrictJsonParserTest {
     // conversion" of the Java Language Specification section 5.1.3, which means that all but the 32
     // lowest order bits are discarded.
 
-    JsonElement numElement = StrictJsonParser.parse("9223372036854775809");  // 2^63 + 1
+    JsonElement numElement = JsonParser.parse("9223372036854775809"); // 2^63 + 1
     assertThat(numElement.getAsLong()).isEqualTo(-9223372036854775807L);
   }
 
@@ -290,7 +274,7 @@ public final class StrictJsonParserTest {
     // conversion" of the Java Language Specification section 5.1.3, which means that all but the 32
     // lowest order bits are discarded.
 
-    JsonElement numElement = StrictJsonParser.parse("2147483649");  // 2^31 + 1
+    JsonElement numElement = JsonParser.parse("2147483649"); // 2^31 + 1
     assertThat(numElement.getAsInt()).isEqualTo(-2147483647);
   }
 
@@ -320,52 +304,52 @@ public final class StrictJsonParserTest {
   @Theory
   public void parsedNumberGetAsLong_validLong_sameAsParseLong(
       @FromDataPoints("longs") String numString) throws Exception {
-    JsonElement parsed = StrictJsonParser.parse(numString);
+    JsonElement parsed = JsonParser.parse(numString);
     assertThat(parsed.getAsLong()).isEqualTo(Long.parseLong(numString));
   }
 
   @Theory
   public void parsedNumberGetAsLong_biggerThanLong_sameAsBigIntegerLongValue(
       @FromDataPoints("biggerThanLongs") String numString) throws Exception {
-    JsonElement parsed = StrictJsonParser.parse(numString);
+    JsonElement parsed = JsonParser.parse(numString);
     assertThat(parsed.getAsLong()).isEqualTo(new BigInteger(numString).longValue());
   }
 
   @Theory
   public void parsedNumberGetAsInt_validLong_sameAsBigIntegerIntValue(
       @FromDataPoints("longs") String numString) throws Exception {
-    JsonElement parsed = StrictJsonParser.parse(numString);
+    JsonElement parsed = JsonParser.parse(numString);
     assertThat(parsed.getAsInt()).isEqualTo(new BigInteger(numString).intValue());
   }
 
   @Theory
   public void parsedNumberGetAsInt_biggerThanLong_sameAsBigIntegerIntValue(
       @FromDataPoints("biggerThanLongs") String numString) throws Exception {
-    JsonElement parsed = StrictJsonParser.parse(numString);
+    JsonElement parsed = JsonParser.parse(numString);
     assertThat(parsed.getAsInt()).isEqualTo(new BigInteger(numString).intValue());
   }
 
   @Theory
   public void getParsedNumberAsLongOrThrow_validLong_sameAsParseLong(
       @FromDataPoints("longs") String numString) throws Exception {
-    JsonElement parsed = StrictJsonParser.parse(numString);
-    assertThat(StrictJsonParser.getParsedNumberAsLongOrThrow(parsed))
+    JsonElement parsed = JsonParser.parse(numString);
+    assertThat(JsonParser.getParsedNumberAsLongOrThrow(parsed))
         .isEqualTo(Long.parseLong(numString));
   }
 
   @Theory
   public void getParsedNumberAsLongOrThrow_biggerThanLong_throws(
       @FromDataPoints("biggerThanLongs") String numString) throws Exception {
-    JsonElement parsed = StrictJsonParser.parse(numString);
+    JsonElement parsed = JsonParser.parse(numString);
     assertThrows(
-        NumberFormatException.class, () -> StrictJsonParser.getParsedNumberAsLongOrThrow(parsed));
+        NumberFormatException.class, () -> JsonParser.getParsedNumberAsLongOrThrow(parsed));
   }
 
   @Theory
   public void getParsedNumberAsLongOrThrow_nestedValue_success() throws Exception {
-    JsonElement parsed = StrictJsonParser.parse("{\"a\":{\"b\":9223372036854775807}}");
+    JsonElement parsed = JsonParser.parse("{\"a\":{\"b\":9223372036854775807}}");
     JsonElement parsedNumber = parsed.getAsJsonObject().get("a").getAsJsonObject().get("b");
-    long output = StrictJsonParser.getParsedNumberAsLongOrThrow(parsedNumber);
+    long output = JsonParser.getParsedNumberAsLongOrThrow(parsedNumber);
     assertThat(output).isEqualTo(9223372036854775807L);
   }
 
@@ -374,89 +358,80 @@ public final class StrictJsonParserTest {
     JsonElement notParsedJsonElementWithNumber = new JsonPrimitive(42);
     assertThrows(
         IllegalArgumentException.class,
-        () -> StrictJsonParser.getParsedNumberAsLongOrThrow(notParsedJsonElementWithNumber));
+        () -> JsonParser.getParsedNumberAsLongOrThrow(notParsedJsonElementWithNumber));
   }
 
   @Theory
   public void floatNumbersGetAsLong_getsTruncated() throws Exception {
-    assertThat(StrictJsonParser.parse("42.0").getAsLong()).isEqualTo(42);
-    assertThat(StrictJsonParser.parse("2.1e1").getAsLong()).isEqualTo(21);
+    assertThat(JsonParser.parse("42.0").getAsLong()).isEqualTo(42);
+    assertThat(JsonParser.parse("2.1e1").getAsLong()).isEqualTo(21);
 
-    assertThat(StrictJsonParser.parse("42.1").getAsLong()).isEqualTo(42);
-    assertThat(StrictJsonParser.parse("42.9999").getAsLong()).isEqualTo(42);
+    assertThat(JsonParser.parse("42.1").getAsLong()).isEqualTo(42);
+    assertThat(JsonParser.parse("42.9999").getAsLong()).isEqualTo(42);
 
     // 2^63 - 1 as float
-    assertThat(StrictJsonParser.parse("9.223372036854775807e18").getAsLong()
-      ).isEqualTo(9223372036854775807L);
+    assertThat(JsonParser.parse("9.223372036854775807e18").getAsLong())
+        .isEqualTo(9223372036854775807L);
 
     // - 2^63 as float
-    assertThat(StrictJsonParser.parse("-9.223372036854775808e18").getAsLong()
-      ).isEqualTo(-9223372036854775808L);
+    assertThat(JsonParser.parse("-9.223372036854775808e18").getAsLong())
+        .isEqualTo(-9223372036854775808L);
   }
 
   @Theory
   public void floatNumbersGetAsInt_getsTruncated() throws Exception {
-    assertThat(StrictJsonParser.parse("42.0").getAsInt()).isEqualTo(42);
-    assertThat(StrictJsonParser.parse("2.1e1").getAsInt()).isEqualTo(21);
+    assertThat(JsonParser.parse("42.0").getAsInt()).isEqualTo(42);
+    assertThat(JsonParser.parse("2.1e1").getAsInt()).isEqualTo(21);
 
-    assertThat(StrictJsonParser.parse("42.1").getAsInt()).isEqualTo(42);
-    assertThat(StrictJsonParser.parse("42.9999").getAsInt()).isEqualTo(42);
+    assertThat(JsonParser.parse("42.1").getAsInt()).isEqualTo(42);
+    assertThat(JsonParser.parse("42.9999").getAsInt()).isEqualTo(42);
 
     // 2^31 - 1 as float
-    assertThat(StrictJsonParser.parse("2.147483647e9").getAsInt())
-        .isEqualTo(2147483647);
+    assertThat(JsonParser.parse("2.147483647e9").getAsInt()).isEqualTo(2147483647);
 
     // - 2^31 as float
-    assertThat(StrictJsonParser.parse("-2.147483648e9").getAsInt())
-        .isEqualTo(-2147483648);
+    assertThat(JsonParser.parse("-2.147483648e9").getAsInt()).isEqualTo(-2147483648);
   }
 
   @Theory
   public void testNumbersToDouble() throws Exception {
-    assertThat(StrictJsonParser.parse("60911552482230981.0").getAsDouble()
-      ).isEqualTo(6.0911552482230984e16);
-    assertThat(StrictJsonParser.parse("4e+42").getAsDouble()
-      ).isEqualTo(4e42);
-    assertThat(StrictJsonParser.parse("4e42").getAsDouble()
-      ).isEqualTo(4e42);
-    assertThat(StrictJsonParser.parse("4E42").getAsDouble()
-      ).isEqualTo(4e42);
-    assertThat(StrictJsonParser.parse("-4e-42").getAsDouble()
-      ).isEqualTo(-4e-42);
+    assertThat(JsonParser.parse("60911552482230981.0").getAsDouble())
+        .isEqualTo(6.0911552482230984e16);
+    assertThat(JsonParser.parse("4e+42").getAsDouble()).isEqualTo(4e42);
+    assertThat(JsonParser.parse("4e42").getAsDouble()).isEqualTo(4e42);
+    assertThat(JsonParser.parse("4E42").getAsDouble()).isEqualTo(4e42);
+    assertThat(JsonParser.parse("-4e-42").getAsDouble()).isEqualTo(-4e-42);
     assertThat(
-            StrictJsonParser.parse(
+            JsonParser.parse(
                     "9999999999999999999999999999999999999999999999999999999999999999999999999999"
                         + "99999999999")
                 .getAsDouble())
         .isEqualTo(1.0e87);
     assertThat(
-            StrictJsonParser.parse(
+            JsonParser.parse(
                     "-999999999999999999999999999999999999999999999999999999999999999999999999999"
                         + "999999999999")
                 .getAsDouble())
         .isEqualTo(-1.0e87);
     assertThat(
-            StrictJsonParser.parse("99999999999999999999999999.99e+99999999999999999999999999")
+            JsonParser.parse("99999999999999999999999999.99e+99999999999999999999999999")
                 .getAsDouble())
         .isPositiveInfinity();
     assertThat(
-            StrictJsonParser.parse("-99999999999999999999999999.99e+99999999999999999999999999")
+            JsonParser.parse("-99999999999999999999999999.99e+99999999999999999999999999")
                 .getAsDouble())
         .isNegativeInfinity();
     assertThat(
-            StrictJsonParser.parse("99999999999999999999999999.99e-99999999999999999999999999")
+            JsonParser.parse("99999999999999999999999999.99e-99999999999999999999999999")
                 .getAsDouble())
         .isEqualTo(0.0);
-    assertThat(StrictJsonParser.parse("0.000000000000000000000000000000001").getAsDouble()
-      ).isEqualTo(0.000000000000000000000000000000001);
-    assertThat(StrictJsonParser.parse("-0.000000000000000000000000000000001").getAsDouble()
-      ).isEqualTo(-0.000000000000000000000000000000001);
-    assertThat(StrictJsonParser.parse("42").getAsInt()
-      ).isEqualTo(42);
-    assertThat(StrictJsonParser.parse("42\n").getAsInt()
-      ).isEqualTo(42);
-    assertThat(StrictJsonParser.parse("42\f").getAsInt()
-      ).isEqualTo(42);
+    assertThat(JsonParser.parse("0.000000000000000000000000000000001").getAsDouble())
+        .isEqualTo(0.000000000000000000000000000000001);
+    assertThat(JsonParser.parse("-0.000000000000000000000000000000001").getAsDouble())
+        .isEqualTo(-0.000000000000000000000000000000001);
+    assertThat(JsonParser.parse("42").getAsInt()).isEqualTo(42);
+    assertThat(JsonParser.parse("42\n").getAsInt()).isEqualTo(42);
+    assertThat(JsonParser.parse("42\f").getAsInt()).isEqualTo(42);
   }
 
   @DataPoints("testCasesFail")
@@ -576,7 +551,7 @@ public final class StrictJsonParserTest {
   @Theory
   public void testBothParsersFail(
       @FromDataPoints("testCasesFail") TestCase testCase) throws Exception {
-    assertThrows(IOException.class, () -> StrictJsonParser.parse(testCase.input));
+    assertThrows(IOException.class, () -> JsonParser.parse(testCase.input));
     assertThrows(IOException.class, () -> normalParse(testCase.input));
   }
 
@@ -609,8 +584,8 @@ public final class StrictJsonParserTest {
   @Theory
   public void testStrictFailsButNormalDoesNotFail(
       @FromDataPoints("stricterTestCases") TestCase testCase) throws Exception {
-    // StrictJsonParser.parse fails.
-    assertThrows(IOException.class, () -> StrictJsonParser.parse(testCase.input));
+    // JsonParser.parse fails.
+    assertThrows(IOException.class, () -> JsonParser.parse(testCase.input));
 
     // normalParse parses successfully.
     JsonElement unused = normalParse(testCase.input);
