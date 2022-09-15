@@ -7,6 +7,7 @@ java_library(
     srcs = ["RewardedAdsVerifier.java"],
     deps = [
         "@maven//:com_google_code_gson_gson",
+        "@maven//:com_google_errorprone_error_prone_annotations",
         "@maven//:com_google_http_client_google_http_client",
         "@tink_java//src/main/java/com/google/crypto/tink/subtle:base64",
         "@tink_java//src/main/java/com/google/crypto/tink/subtle:ecdsa_verify_jce",

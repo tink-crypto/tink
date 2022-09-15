@@ -23,6 +23,7 @@ import com.google.crypto.tink.apps.paymentmethodtoken.PaymentMethodTokenConstant
 import com.google.crypto.tink.subtle.Base64;
 import com.google.crypto.tink.subtle.EcdsaVerifyJce;
 import com.google.crypto.tink.subtle.EllipticCurves.EcdsaEncoding;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
@@ -161,25 +162,28 @@ public final class PaymentMethodTokenRecipient {
     private String senderId = PaymentMethodTokenConstants.GOOGLE_SENDER_ID;
     private String recipientId = null;
     private final List<SenderVerifyingKeysProvider> senderVerifyingKeysProviders =
-        new ArrayList<SenderVerifyingKeysProvider>();
-    private final List<ECPrivateKey> recipientPrivateKeys = new ArrayList<ECPrivateKey>();
+        new ArrayList<>();
+    private final List<ECPrivateKey> recipientPrivateKeys = new ArrayList<>();
     private final List<PaymentMethodTokenRecipientKem> recipientKems = new ArrayList<>();
 
     public Builder() {}
 
     /** Sets the protocolVersion. */
+    @CanIgnoreReturnValue
     public Builder protocolVersion(String val) {
       protocolVersion = val;
       return this;
     }
 
     /** Sets the sender Id. */
+    @CanIgnoreReturnValue
     public Builder senderId(String val) {
       senderId = val;
       return this;
     }
 
     /** Sets the recipient Id. */
+    @CanIgnoreReturnValue
     public Builder recipientId(String val) {
       recipientId = val;
       return this;
@@ -190,6 +194,7 @@ public final class PaymentMethodTokenRecipient {
      *
      * <p>This is the preferred method of specifying the verifying public keys of the sender.
      */
+    @CanIgnoreReturnValue
     public Builder fetchSenderVerifyingKeysWith(
         final GooglePaymentsPublicKeysManager googlePaymentsPublicKeysManager)
         throws GeneralSecurityException {
@@ -237,6 +242,7 @@ public final class PaymentMethodTokenRecipient {
      * <p>Each public key will be a base64 (no wrapping, padded) version of the key encoded in ASN.1
      * type SubjectPublicKeyInfo defined in the X.509 standard.
      */
+    @CanIgnoreReturnValue
     public Builder senderVerifyingKeys(final String trustedSigningKeysJson)
         throws GeneralSecurityException {
       this.senderVerifyingKeysProviders.add(
@@ -265,6 +271,7 @@ public final class PaymentMethodTokenRecipient {
      * the private keys corresponding to the public keys added. Adding multiple keys is useful for
      * handling key rotation.
      */
+    @CanIgnoreReturnValue
     public Builder addSenderVerifyingKey(final String val) throws GeneralSecurityException {
       this.senderVerifyingKeysProviders.add(
           new SenderVerifyingKeysProvider() {
@@ -285,6 +292,7 @@ public final class PaymentMethodTokenRecipient {
      * memory. Only use this method if you can't use {@link #fetchSenderVerifyingKeysWith} and be
      * aware you will need to handle Google key rotations yourself.
      */
+    @CanIgnoreReturnValue
     public Builder addSenderVerifyingKey(final ECPublicKey val) throws GeneralSecurityException {
       this.senderVerifyingKeysProviders.add(
           new SenderVerifyingKeysProvider() {
@@ -301,11 +309,13 @@ public final class PaymentMethodTokenRecipient {
      *
      * <p>It must be base64 encoded PKCS8 private key.
      */
+    @CanIgnoreReturnValue
     public Builder addRecipientPrivateKey(String val) throws GeneralSecurityException {
       return addRecipientPrivateKey(PaymentMethodTokenUtil.pkcs8EcPrivateKey(val));
     }
 
     /** Adds the decryption private key of the recipient. */
+    @CanIgnoreReturnValue
     public Builder addRecipientPrivateKey(ECPrivateKey val) throws GeneralSecurityException {
       recipientPrivateKeys.add(val);
       return this;
@@ -320,6 +330,7 @@ public final class PaymentMethodTokenRecipient {
      *
      * @since 1.1.0
      */
+    @CanIgnoreReturnValue
     public Builder addRecipientKem(PaymentMethodTokenRecipientKem kem) {
       recipientKems.add(kem);
       return this;

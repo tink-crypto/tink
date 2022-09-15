@@ -24,6 +24,7 @@ import com.google.crypto.tink.apps.paymentmethodtoken.PaymentMethodTokenConstant
 import com.google.crypto.tink.subtle.Base64;
 import com.google.crypto.tink.subtle.EcdsaSignJce;
 import com.google.crypto.tink.subtle.EllipticCurves.EcdsaEncoding;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonParser;
@@ -124,18 +125,21 @@ public final class PaymentMethodTokenSender {
     public Builder() {}
 
     /** Sets the protocolVersion. */
+    @CanIgnoreReturnValue
     public Builder protocolVersion(String val) {
       protocolVersion = val;
       return this;
     }
 
     /** Sets the sender Id. */
+    @CanIgnoreReturnValue
     public Builder senderId(String val) {
       senderId = val;
       return this;
     }
 
     /** Sets the recipient Id. */
+    @CanIgnoreReturnValue
     public Builder recipientId(String val) {
       recipientId = val;
       return this;
@@ -146,11 +150,13 @@ public final class PaymentMethodTokenSender {
      *
      * <p>It must be base64 encoded PKCS8 private key.
      */
+    @CanIgnoreReturnValue
     public Builder senderSigningKey(String val) throws GeneralSecurityException {
       senderSigningKey = PaymentMethodTokenUtil.pkcs8EcPrivateKey(val);
       return this;
     }
 
+    @CanIgnoreReturnValue
     public Builder senderSigningKey(ECPrivateKey val) throws GeneralSecurityException {
       senderSigningKey = val;
       return this;
@@ -172,6 +178,7 @@ public final class PaymentMethodTokenSender {
      *
      * @since 1.1.0
      */
+    @CanIgnoreReturnValue
     public Builder senderIntermediateSigningKey(ECPrivateKey val) throws GeneralSecurityException {
       senderIntermediateSigningKey = val;
       return this;
@@ -185,6 +192,7 @@ public final class PaymentMethodTokenSender {
      *
      * @since 1.1.0
      */
+    @CanIgnoreReturnValue
     public Builder senderIntermediateCert(String val) throws GeneralSecurityException {
       this.senderIntermediateCert = val;
       return this;
@@ -196,11 +204,13 @@ public final class PaymentMethodTokenSender {
      * <p>The public key is a base64 (no wrapping, padded) version of the key encoded in ASN.1 type
      * SubjectPublicKeyInfo defined in the X.509 standard.
      */
+    @CanIgnoreReturnValue
     public Builder recipientPublicKey(String val) throws GeneralSecurityException {
       recipientPublicKey = PaymentMethodTokenUtil.x509EcPublicKey(val);
       return this;
     }
 
+    @CanIgnoreReturnValue
     public Builder recipientPublicKey(ECPublicKey val) throws GeneralSecurityException {
       recipientPublicKey = val;
       return this;
@@ -213,6 +223,7 @@ public final class PaymentMethodTokenSender {
      * is described in more detail in "Public Key Cryptography For The Financial Services Industry:
      * The Elliptic Curve Digital Signature Algorithm (ECDSA)", ANSI X9.62, 1998
      */
+    @CanIgnoreReturnValue
     public Builder rawUncompressedRecipientPublicKey(String val) throws GeneralSecurityException {
       recipientPublicKey = PaymentMethodTokenUtil.rawUncompressedEcPublicKey(val);
       return this;

@@ -8,6 +8,7 @@ java_library(
     deps = [
         ":web_push_constants",
         ":web_push_util",
+        "@maven//:com_google_errorprone_error_prone_annotations",
         "@tink_java//src/main/java/com/google/crypto/tink:hybrid_decrypt",
         "@tink_java//src/main/java/com/google/crypto/tink/subtle:elliptic_curves",
         "@tink_java//src/main/java/com/google/crypto/tink/subtle:subtle_util_cluster",
@@ -36,6 +37,7 @@ java_library(
     deps = [
         ":web_push_constants",
         ":web_push_util",
+        "@maven//:com_google_errorprone_error_prone_annotations",
         "@tink_java//src/main/java/com/google/crypto/tink:hybrid_encrypt",
         "@tink_java//src/main/java/com/google/crypto/tink/subtle:elliptic_curves",
         "@tink_java//src/main/java/com/google/crypto/tink/subtle:random",

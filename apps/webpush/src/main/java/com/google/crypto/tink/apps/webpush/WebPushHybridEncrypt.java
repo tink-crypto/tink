@@ -20,6 +20,7 @@ import com.google.crypto.tink.HybridEncrypt;
 import com.google.crypto.tink.subtle.EllipticCurves;
 import com.google.crypto.tink.subtle.EngineFactory;
 import com.google.crypto.tink.subtle.Random;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import java.nio.ByteBuffer;
 import java.security.GeneralSecurityException;
 import java.security.KeyPair;
@@ -131,6 +132,7 @@ public final class WebPushHybridEncrypt implements HybridEncrypt {
      *
      * <p>If not set, a record size of 4096 bytes is used. This value should work for most users.
      */
+    @CanIgnoreReturnValue
     public Builder withRecordSize(int val) {
       if (val < WebPushConstants.CIPHERTEXT_OVERHEAD
           || val > WebPushConstants.MAX_CIPHERTEXT_SIZE) {
@@ -149,6 +151,7 @@ public final class WebPushHybridEncrypt implements HybridEncrypt {
      *
      * <p>The padding size cannot be larger than
      */
+    @CanIgnoreReturnValue
     public Builder withPaddingSize(int val) {
       if (val < 0
           || val > WebPushConstants.MAX_CIPHERTEXT_SIZE - WebPushConstants.CIPHERTEXT_OVERHEAD) {
@@ -165,12 +168,14 @@ public final class WebPushHybridEncrypt implements HybridEncrypt {
     }
 
     /** Sets the authentication secret. */
+    @CanIgnoreReturnValue
     public Builder withAuthSecret(final byte[] val) {
       authSecret = val.clone();
       return this;
     }
 
     /** Sets the public key of the recipient. */
+    @CanIgnoreReturnValue
     public Builder withRecipientPublicKey(ECPublicKey val) throws GeneralSecurityException {
       recipientPublicPoint = val.getW();
       recipientPublicKey =
@@ -188,6 +193,7 @@ public final class WebPushHybridEncrypt implements HybridEncrypt {
      * <p>The public key must be formatted as an uncompressed point format, i.e., it has {@code 65}
      * bytes and the first byte must be {@code 0x04}.
      */
+    @CanIgnoreReturnValue
     public Builder withRecipientPublicKey(final byte[] val) throws GeneralSecurityException {
       recipientPublicKey = val.clone();
       recipientPublicPoint =

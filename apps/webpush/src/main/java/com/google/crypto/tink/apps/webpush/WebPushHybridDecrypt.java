@@ -19,6 +19,7 @@ package com.google.crypto.tink.apps.webpush;
 import com.google.crypto.tink.HybridDecrypt;
 import com.google.crypto.tink.subtle.EllipticCurves;
 import com.google.crypto.tink.subtle.EngineFactory;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import java.nio.ByteBuffer;
 import java.security.GeneralSecurityException;
 import java.security.interfaces.ECPrivateKey;
@@ -143,18 +144,21 @@ public final class WebPushHybridDecrypt implements HybridDecrypt {
      *
      * <p>If not set, a record size of 4096 bytes is used. This value should work for most users.
      */
+    @CanIgnoreReturnValue
     public Builder withRecordSize(int val) {
       recordSize = val;
       return this;
     }
 
     /** Sets the authentication secret. */
+    @CanIgnoreReturnValue
     public Builder withAuthSecret(final byte[] val) {
       authSecret = val.clone();
       return this;
     }
 
     /** Sets the public key of the recipient. */
+    @CanIgnoreReturnValue
     public Builder withRecipientPublicKey(ECPublicKey val) throws GeneralSecurityException {
       recipientPublicKey =
           EllipticCurves.pointEncode(
@@ -170,12 +174,14 @@ public final class WebPushHybridDecrypt implements HybridDecrypt {
      * <p>The public key must be formatted as an uncompressed point format, i.e., it has {@code 65}
      * bytes and the first byte must be {@code 0x04}.
      */
+    @CanIgnoreReturnValue
     public Builder withRecipientPublicKey(final byte[] val) {
       recipientPublicKey = val.clone();
       return this;
     }
 
     /** Sets the private key of the recipient. */
+    @CanIgnoreReturnValue
     public Builder withRecipientPrivateKey(ECPrivateKey val) throws GeneralSecurityException {
       recipientPrivateKey = val;
       return this;
@@ -184,9 +190,10 @@ public final class WebPushHybridDecrypt implements HybridDecrypt {
     /**
      * Sets the private key of the recipient.
      *
-     * <p>The private key is the serialized bytes of the BigInteger returned by
-     * {@link ECPrivateKey#getS()}.
+     * <p>The private key is the serialized bytes of the BigInteger returned by {@link
+     * ECPrivateKey#getS()}.
      */
+    @CanIgnoreReturnValue
     public Builder withRecipientPrivateKey(final byte[] val) throws GeneralSecurityException {
       recipientPrivateKey =
           EllipticCurves.getEcPrivateKey(WebPushConstants.NIST_P256_CURVE_TYPE, val);

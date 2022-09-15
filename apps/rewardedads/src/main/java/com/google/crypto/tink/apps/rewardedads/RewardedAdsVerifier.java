@@ -23,6 +23,7 @@ import com.google.crypto.tink.subtle.EllipticCurves;
 import com.google.crypto.tink.subtle.EllipticCurves.EcdsaEncoding;
 import com.google.crypto.tink.subtle.Enums.HashType;
 import com.google.crypto.tink.util.KeysDownloader;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
@@ -184,6 +185,7 @@ public final class RewardedAdsVerifier {
      *
      * <p>This is the preferred method of specifying the verifying public keys.
      */
+    @CanIgnoreReturnValue
     public Builder fetchVerifyingPublicKeysWith(final KeysDownloader downloader)
         throws GeneralSecurityException {
       this.verifyingPublicKeysProviders.add(
@@ -231,6 +233,7 @@ public final class RewardedAdsVerifier {
      * <p>Each public key will be a base64 (no wrapping, padded) version of the key encoded in ASN.1
      * type SubjectPublicKeyInfo defined in the X.509 standard.
      */
+    @CanIgnoreReturnValue
     public Builder setVerifyingPublicKeys(final String publicKeysJson)
         throws GeneralSecurityException {
       this.verifyingPublicKeysProviders.add(
@@ -259,6 +262,7 @@ public final class RewardedAdsVerifier {
      * the private keys corresponding to the public keys added. Adding multiple keys is useful for
      * handling key rotation.
      */
+    @CanIgnoreReturnValue
     public Builder addVerifyingPublicKey(final long keyId, final String val)
         throws GeneralSecurityException {
       this.verifyingPublicKeysProviders.add(
@@ -281,6 +285,7 @@ public final class RewardedAdsVerifier {
      * this method if you can't use {@link #fetchVerifyingPublicKeysWith} and be aware you will need
      * to handle Google key rotations yourself.
      */
+    @CanIgnoreReturnValue
     public Builder addVerifyingPublicKey(final long keyId, final ECPublicKey val)
         throws GeneralSecurityException {
       this.verifyingPublicKeysProviders.add(

@@ -21,6 +21,7 @@ import com.google.crypto.tink.apps.paymentmethodtoken.PaymentMethodTokenConstant
 import com.google.crypto.tink.subtle.Base64;
 import com.google.crypto.tink.subtle.EcdsaSignJce;
 import com.google.crypto.tink.subtle.EllipticCurves.EcdsaEncoding;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
@@ -94,18 +95,21 @@ public class SenderIntermediateCertFactory {
     public Builder() {}
 
     /** Sets the protocolVersion. */
+    @CanIgnoreReturnValue
     public Builder protocolVersion(String val) {
       protocolVersion = val;
       return this;
     }
 
     /** Sets the sender Id. */
+    @CanIgnoreReturnValue
     public Builder senderId(String val) {
       senderId = val;
       return this;
     }
 
     /** Sets the expiration in millis since epoch. */
+    @CanIgnoreReturnValue
     public Builder expiration(long millisSinceEpoch) {
       expiration = millisSinceEpoch;
       return this;
@@ -116,6 +120,7 @@ public class SenderIntermediateCertFactory {
      *
      * <p>It must be base64 encoded PKCS8 private key.
      */
+    @CanIgnoreReturnValue
     public Builder addSenderSigningKey(String val) throws GeneralSecurityException {
       return addSenderSigningKey(PaymentMethodTokenUtil.pkcs8EcPrivateKey(val));
     }
@@ -125,6 +130,7 @@ public class SenderIntermediateCertFactory {
      *
      * <p>It must be base64 encoded PKCS8 private key.
      */
+    @CanIgnoreReturnValue
     public Builder addSenderSigningKey(ECPrivateKey val) throws GeneralSecurityException {
       this.senderSigningKeys.add(val);
       return this;
@@ -136,6 +142,7 @@ public class SenderIntermediateCertFactory {
      * <p>The public key specified here is a base64 (no wrapping, padded) version of the key encoded
      * in ASN.1 type SubjectPublicKeyInfo defined in the X.509 standard.
      */
+    @CanIgnoreReturnValue
     public Builder senderIntermediateSigningKey(String val) throws GeneralSecurityException {
       // Parsing to validate the format
       PaymentMethodTokenUtil.x509EcPublicKey(val);

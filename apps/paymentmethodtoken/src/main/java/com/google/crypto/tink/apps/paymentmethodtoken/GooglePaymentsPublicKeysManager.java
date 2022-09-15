@@ -19,6 +19,7 @@ package com.google.crypto.tink.apps.paymentmethodtoken;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.crypto.tink.util.KeysDownloader;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.concurrent.Executor;
@@ -111,6 +112,7 @@ public class GooglePaymentsPublicKeysManager {
     private HttpTransport httpTransport = DEFAULT_HTTP_TRANSPORT;
     private String keysUrl = KEYS_URL_PRODUCTION;
 
+    @CanIgnoreReturnValue
     public Builder setKeysUrl(String keysUrl) {
       this.keysUrl = keysUrl;
       return this;
@@ -122,6 +124,7 @@ public class GooglePaymentsPublicKeysManager {
      * <p>You generally should not need to set a custom transport as the default transport {@link
      * GooglePaymentsPublicKeysManager#DEFAULT_HTTP_TRANSPORT} should be suited for most use cases.
      */
+    @CanIgnoreReturnValue
     public Builder setHttpTransport(HttpTransport httpTransport) {
       this.httpTransport = httpTransport;
       return this;
