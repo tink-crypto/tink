@@ -26,6 +26,7 @@ import com.google.api.client.http.LowLevelHttpRequest;
 import com.google.api.client.testing.http.MockHttpTransport;
 import com.google.api.client.testing.http.MockLowLevelHttpRequest;
 import com.google.api.client.testing.http.MockLowLevelHttpResponse;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -467,26 +468,31 @@ public class KeysDownloaderTest {
     private Long ageInSeconds;
     private int statusCode = HttpStatusCodes.STATUS_CODE_OK;
 
+    @CanIgnoreReturnValue
     public HttpResponseBuilder setStatusCode(int statusCode) {
       this.statusCode = statusCode;
       return this;
     }
 
+    @CanIgnoreReturnValue
     public HttpResponseBuilder setContent(String content) {
       this.content = content;
       return this;
     }
 
+    @CanIgnoreReturnValue
     public HttpResponseBuilder setCacheControlWithMaxAgeInSeconds(Long maxAgeInSeconds) {
       this.maxAgeInSeconds = maxAgeInSeconds;
       return this;
     }
 
+    @CanIgnoreReturnValue
     public HttpResponseBuilder clearCacheControl() {
       this.maxAgeInSeconds = null;
       return this;
     }
 
+    @CanIgnoreReturnValue
     public HttpResponseBuilder setAgeInSeconds(Long ageInSeconds) {
       this.ageInSeconds = ageInSeconds;
       return this;

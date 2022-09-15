@@ -16,6 +16,7 @@
 
 package com.google.crypto.tink.signature;
 
+import androidx.annotation.Nullable;
 import com.google.crypto.tink.KeysetReader;
 import com.google.crypto.tink.PemKeyType;
 import com.google.crypto.tink.proto.EcdsaParams;
@@ -34,6 +35,7 @@ import com.google.crypto.tink.proto.RsaSsaPssParams;
 import com.google.crypto.tink.proto.RsaSsaPssPublicKey;
 import com.google.crypto.tink.signature.internal.SigUtil;
 import com.google.crypto.tink.subtle.Random;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.StringReader;
@@ -87,6 +89,7 @@ public final class SignaturePemKeysetReader implements KeysetReader {
      *
      * <p>The first key in the first added PEM is the primary key.
      */
+    @CanIgnoreReturnValue
     public Builder addPem(String pem, PemKeyType keyType) {
       PemKey pemKey = new PemKey();
       pemKey.reader = new BufferedReader(new StringReader(pem));
@@ -126,6 +129,7 @@ public final class SignaturePemKeysetReader implements KeysetReader {
   }
 
   /** Reads a single PEM key from {@code reader}. Invalid or unparsable PEM would be ignored */
+  @Nullable
   private static Keyset.Key readKey(BufferedReader reader, PemKeyType pemKeyType)
       throws IOException {
     Key key = pemKeyType.readKey(reader);

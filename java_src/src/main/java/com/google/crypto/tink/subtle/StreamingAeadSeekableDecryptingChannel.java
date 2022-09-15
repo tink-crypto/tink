@@ -17,6 +17,7 @@
 package com.google.crypto.tink.subtle;
 
 import androidx.annotation.RequiresApi;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.ClosedChannelException;
@@ -150,10 +151,10 @@ class StreamingAeadSeekableDecryptingChannel implements SeekableByteChannel {
   }
 
   /**
-   * Sets the position in the plaintext.
-   * Setting the position to a value greater than the plaintext size is legal.
-   * A later attempt to read byte will throw an IOException.
+   * Sets the position in the plaintext. Setting the position to a value greater than the plaintext
+   * size is legal. A later attempt to read byte will throw an IOException.
    */
+  @CanIgnoreReturnValue
   @Override
   public synchronized SeekableByteChannel position(long newPosition) {
     plaintextPosition = newPosition;

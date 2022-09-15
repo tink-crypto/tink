@@ -23,6 +23,7 @@ import static org.junit.Assert.fail;
 
 import com.google.crypto.tink.StreamingAead;
 import com.google.crypto.tink.subtle.Random;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -77,6 +78,7 @@ public final class StreamingTestUtil {
       return buffer.position();
     }
 
+    @CanIgnoreReturnValue
     @Override
     public synchronized SeekableByteBufferChannel position(long newPosition)
         throws ClosedChannelException {
@@ -136,7 +138,7 @@ public final class StreamingTestUtil {
     private boolean isopen;
 
     public ByteBufferChannel(ByteBuffer buffer) {
-      this(buffer, java.lang.Integer.MAX_VALUE);
+      this(buffer, Integer.MAX_VALUE);
     }
 
     public ByteBufferChannel(ByteBuffer buffer, int maxChunkSize) {
@@ -215,10 +217,10 @@ public final class StreamingTestUtil {
    * read()-operation is repeated until the specified size of the channel.
    */
   public static class PseudorandomReadableByteChannel implements ReadableByteChannel {
-    private long size;
+    private final long size;
     private long position;
     private boolean open;
-    private byte[] repeatedBlock;
+    private final byte[] repeatedBlock;
     public static final int BLOCK_SIZE = 1024;
 
     /** Returns a plaintext of a given size. */
@@ -246,7 +248,7 @@ public final class StreamingTestUtil {
         return -1;
       }
       long start = position;
-      long end = java.lang.Math.min(size, start + dst.remaining());
+      long end = Math.min(size, start + dst.remaining());
       long firstBlock = start / BLOCK_SIZE;
       long lastBlock = end / BLOCK_SIZE;
       int startOffset = (int) (start % BLOCK_SIZE);
@@ -313,8 +315,8 @@ public final class StreamingTestUtil {
 
   public static byte[] concatBytes(byte[] first, byte[] last) {
     byte[] res = new byte[first.length + last.length];
-    java.lang.System.arraycopy(first, 0, res, 0, first.length);
-    java.lang.System.arraycopy(last, 0, res, first.length, last.length);
+    System.arraycopy(first, 0, res, 0, first.length);
+    System.arraycopy(last, 0, res, first.length, last.length);
     return res;
   }
 
@@ -512,8 +514,7 @@ public final class StreamingTestUtil {
     WritableByteChannel encChannel = ags.newEncryptingChannel(ctChannel, associatedData);
     encChannel.write(ByteBuffer.wrap(plaintext));
     encChannel.close();
-    byte[] ciphertext = bos.toByteArray();
-    return ciphertext;
+    return bos.toByteArray();
   }
 
   // Methods for testEncryptDecryptLong.

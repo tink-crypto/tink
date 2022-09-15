@@ -9,6 +9,7 @@ java_library(
     srcs = ["KeysDownloader.java"],
     deps = [
         "@maven//:com_google_code_findbugs_jsr305",
+        "@maven//:com_google_errorprone_error_prone_annotations",
         "@maven//:com_google_http_client_google_http_client",
         "@maven//:joda_time_joda_time",
     ],
@@ -19,6 +20,7 @@ android_library(
     srcs = ["KeysDownloader.java"],
     deps = [
         "@maven//:com_google_code_findbugs_jsr305",
+        "@maven//:com_google_errorprone_error_prone_annotations",
         "@maven//:com_google_http_client_google_http_client",
         "@maven//:joda_time_joda_time",
     ],

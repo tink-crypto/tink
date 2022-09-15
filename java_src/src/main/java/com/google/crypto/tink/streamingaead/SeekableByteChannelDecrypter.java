@@ -19,6 +19,7 @@ package com.google.crypto.tink.streamingaead;
 import androidx.annotation.RequiresApi;
 import com.google.crypto.tink.PrimitiveSet;
 import com.google.crypto.tink.StreamingAead;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.NonWritableChannelException;
@@ -132,6 +133,7 @@ final class SeekableByteChannelDecrypter implements SeekableByteChannel {
     }
   }
 
+  @CanIgnoreReturnValue
   @Override
   @GuardedBy("this")
   public synchronized SeekableByteChannel position(long newPosition) throws IOException {

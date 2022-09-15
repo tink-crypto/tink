@@ -99,6 +99,7 @@ java_library(
         ":test_util",
         "//src/main/java/com/google/crypto/tink:streaming_aead",
         "//src/main/java/com/google/crypto/tink/subtle:random",
+        "@maven//:com_google_errorprone_error_prone_annotations",
         "@maven//:junit_junit",
     ],
 )
@@ -110,6 +111,7 @@ android_library(
         ":test_util-android",
         "//src/main/java/com/google/crypto/tink:streaming_aead-android",
         "//src/main/java/com/google/crypto/tink/subtle:random-android",
+        "@maven//:com_google_errorprone_error_prone_annotations",
         "@maven//:junit_junit",
     ],
 )

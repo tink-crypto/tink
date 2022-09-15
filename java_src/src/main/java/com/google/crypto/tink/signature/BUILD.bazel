@@ -57,6 +57,8 @@ java_library(
         "//src/main/java/com/google/crypto/tink:pem_key_type",
         "//src/main/java/com/google/crypto/tink/signature/internal:sig_util",
         "//src/main/java/com/google/crypto/tink/subtle:random",
+        "@maven//:androidx_annotation_annotation",
+        "@maven//:com_google_errorprone_error_prone_annotations",
     ],
 )
 
@@ -347,6 +349,8 @@ android_library(
         "//src/main/java/com/google/crypto/tink:pem_key_type-android",
         "//src/main/java/com/google/crypto/tink/signature/internal:sig_util-android",
         "//src/main/java/com/google/crypto/tink/subtle:random-android",
+        "@maven//:androidx_annotation_annotation",
+        "@maven//:com_google_errorprone_error_prone_annotations",
     ],
 )
 
