@@ -30,6 +30,7 @@ import com.google.crypto.tink.KmsClient;
 import com.google.crypto.tink.KmsClients;
 import com.google.crypto.tink.Version;
 import com.google.crypto.tink.subtle.Validators;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -110,6 +111,7 @@ public final class GcpKmsClient implements KmsClient {
   }
 
   /** Loads the provided credential with {@code GoogleCredential}. */
+  @CanIgnoreReturnValue
   public KmsClient withCredentials(GoogleCredential credential) {
     if (credential.createScopedRequired()) {
       credential = credential.createScoped(CloudKMSScopes.all());
@@ -122,6 +124,7 @@ public final class GcpKmsClient implements KmsClient {
   }
 
   /** Loads the provided credentials with {@code GoogleCredentials}. */
+  @CanIgnoreReturnValue
   public KmsClient withCredentials(GoogleCredentials credentials) throws GeneralSecurityException {
     if (credentials.createScopedRequired()) {
       credentials = credentials.createScoped(CloudKMSScopes.all());

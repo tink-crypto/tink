@@ -19,6 +19,7 @@ package com.google.crypto.tink.monitoring;
 import com.google.crypto.tink.KeyStatus;
 import com.google.crypto.tink.Parameters;
 import com.google.crypto.tink.annotations.Alpha;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.errorprone.annotations.Immutable;
 import java.security.GeneralSecurityException;
 import java.util.ArrayList;
@@ -93,6 +94,7 @@ public final class MonitoringKeysetInfo {
     private MonitoringAnnotations builderAnnotations = MonitoringAnnotations.EMPTY;
     @Nullable private Integer builderPrimaryKeyId = null;
 
+    @CanIgnoreReturnValue
     public Builder setAnnotations(MonitoringAnnotations annotations) {
       if (builderEntries == null) {
         throw new IllegalStateException("setAnnotations cannot be called after build()");
@@ -101,6 +103,7 @@ public final class MonitoringKeysetInfo {
       return this;
     }
 
+    @CanIgnoreReturnValue
     public Builder addEntry(KeyStatus status, int keyId, Parameters parameters) {
       if (builderEntries == null) {
         throw new IllegalStateException("addEntry cannot be called after build()");
@@ -109,6 +112,7 @@ public final class MonitoringKeysetInfo {
       return this;
     }
 
+    @CanIgnoreReturnValue
     public Builder setPrimaryKeyId(int primaryKeyId) {
       if (builderEntries == null) {
         throw new IllegalStateException("setPrimaryKeyId cannot be called after build()");

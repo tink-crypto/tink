@@ -26,6 +26,7 @@ import com.google.crypto.tink.Aead;
 import com.google.crypto.tink.KmsClient;
 import com.google.crypto.tink.subtle.Random;
 import com.google.crypto.tink.subtle.Validators;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.security.KeyStore;
@@ -96,6 +97,7 @@ public final class AndroidKeystoreKmsClient implements KmsClient {
       }
     }
 
+    @CanIgnoreReturnValue
     @RequiresApi(23)
     public Builder setKeyUri(String val) {
       if (val == null || !val.toLowerCase(Locale.US).startsWith(PREFIX)) {
@@ -106,6 +108,7 @@ public final class AndroidKeystoreKmsClient implements KmsClient {
     }
 
     /** This is for testing only */
+    @CanIgnoreReturnValue
     @RequiresApi(23)
     public Builder setKeyStore(KeyStore val) {
       if (val == null) {

@@ -19,6 +19,7 @@ package com.google.crypto.tink.internal;
 import static com.google.common.truth.Truth.assertWithMessage;
 
 import com.google.crypto.tink.Key;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -48,6 +49,7 @@ import java.util.Map;
 public final class KeyTester {
   private final Map<String, List<Key>> equivalenceGroups = new HashMap<>();
 
+  @CanIgnoreReturnValue
   public KeyTester addEqualityGroup(String name, Key... keys) {
     if (equivalenceGroups.containsKey(name)) {
       throw new AssertionError("Group with name " + name + " already present");

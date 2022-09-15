@@ -17,6 +17,7 @@
 package com.google.crypto.tink.monitoring;
 
 import com.google.crypto.tink.annotations.Alpha;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.errorprone.annotations.Immutable;
 import java.util.Collections;
 import java.util.HashMap;
@@ -37,6 +38,7 @@ public final class MonitoringAnnotations {
   public static final class Builder {
     private HashMap<String, String> builderEntries = new HashMap<>();
 
+    @CanIgnoreReturnValue
     public Builder addAll(Map<String, String> newEntries) {
       if (builderEntries == null) {
         throw new IllegalStateException("addAll cannot be called after build()");
@@ -45,6 +47,7 @@ public final class MonitoringAnnotations {
       return this;
     }
 
+    @CanIgnoreReturnValue
     public Builder add(String name, String value) {
       if (builderEntries == null) {
         throw new IllegalStateException("add cannot be called after build()");

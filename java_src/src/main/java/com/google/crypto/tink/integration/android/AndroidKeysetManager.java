@@ -20,6 +20,7 @@ import android.content.Context;
 import android.os.Build;
 import android.util.Log;
 import androidx.annotation.ChecksSdkIntAtLeast;
+import androidx.annotation.Nullable;
 import com.google.crypto.tink.Aead;
 import com.google.crypto.tink.CleartextKeysetHandle;
 import com.google.crypto.tink.KeyTemplate;
@@ -28,6 +29,8 @@ import com.google.crypto.tink.KeysetManager;
 import com.google.crypto.tink.KeysetReader;
 import com.google.crypto.tink.KeysetWriter;
 import com.google.crypto.tink.proto.OutputPrefixType;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
+import com.google.errorprone.annotations.InlineMe;
 import com.google.protobuf.InvalidProtocolBufferException;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -152,6 +155,7 @@ public final class AndroidKeysetManager {
     public Builder() {}
 
     /** Reads and writes the keyset from shared preferences. */
+    @CanIgnoreReturnValue
     public Builder withSharedPref(Context context, String keysetName, String prefFileName)
         throws IOException {
       if (context == null) {
@@ -171,6 +175,7 @@ public final class AndroidKeysetManager {
      * <p>Only master keys stored in Android Keystore is supported. The URI must start with {@code
      * android-keystore://}.
      */
+    @CanIgnoreReturnValue
     public Builder withMasterKeyUri(String val) {
       if (!val.startsWith(AndroidKeystoreKmsClient.PREFIX)) {
         throw new IllegalArgumentException(
@@ -190,6 +195,7 @@ public final class AndroidKeysetManager {
      * @deprecated This method takes a KeyTemplate proto, which is an internal implementation
      *     detail. Please use the withKeyTemplate method that takes a {@link KeyTemplate} POJO.
      */
+    @CanIgnoreReturnValue
     @Deprecated
     public Builder withKeyTemplate(com.google.crypto.tink.proto.KeyTemplate val) {
       keyTemplate =
@@ -199,6 +205,7 @@ public final class AndroidKeysetManager {
     }
 
     /** If the keyset is not found or valid, generates a new one using {@code val}. */
+    @CanIgnoreReturnValue
     public Builder withKeyTemplate(KeyTemplate val) {
       keyTemplate = val;
       return this;
@@ -212,6 +219,7 @@ public final class AndroidKeysetManager {
      *
      * @deprecated Android Keystore can be disabled by not setting a master key URI.
      */
+    @CanIgnoreReturnValue
     @Deprecated
     public Builder doNotUseKeystore() {
       masterKeyUri = null;
@@ -220,6 +228,7 @@ public final class AndroidKeysetManager {
     }
 
     /** This is for testing only */
+    @CanIgnoreReturnValue
     Builder withKeyStore(KeyStore val) {
       this.keyStore = val;
       return this;
@@ -241,6 +250,7 @@ public final class AndroidKeysetManager {
       return new AndroidKeysetManager(this);
     }
 
+    @Nullable
     private Aead readOrGenerateNewMasterKey() throws GeneralSecurityException {
       if (!isAtLeastM()) {
         Log.w(TAG, "Android Keystore requires at least Android M");
@@ -350,6 +360,7 @@ public final class AndroidKeysetManager {
    *     primary. However, when you do keyset rotation, you almost never want to make the new key
    *     primary, because old binaries don't know the new key yet.
    */
+  @CanIgnoreReturnValue
   @Deprecated
   public synchronized AndroidKeysetManager rotate(
       com.google.crypto.tink.proto.KeyTemplate keyTemplate) throws GeneralSecurityException {
@@ -366,6 +377,7 @@ public final class AndroidKeysetManager {
    * @deprecated This method takes a KeyTemplate proto, which is an internal implementation detail.
    *     Please use the add method that takes a {@link KeyTemplate} POJO.
    */
+  @CanIgnoreReturnValue
   @GuardedBy("this")
   @Deprecated
   public synchronized AndroidKeysetManager add(com.google.crypto.tink.proto.KeyTemplate keyTemplate)
@@ -381,6 +393,7 @@ public final class AndroidKeysetManager {
    * @throws GeneralSecurityException if cannot find any {@link KeyManager} that can handle {@code
    *     keyTemplate}
    */
+  @CanIgnoreReturnValue
   @GuardedBy("this")
   public synchronized AndroidKeysetManager add(KeyTemplate keyTemplate)
       throws GeneralSecurityException {
@@ -394,6 +407,7 @@ public final class AndroidKeysetManager {
    *
    * @throws GeneralSecurityException if the key is not found or not enabled
    */
+  @CanIgnoreReturnValue
   public synchronized AndroidKeysetManager setPrimary(int keyId) throws GeneralSecurityException {
     keysetManager = keysetManager.setPrimary(keyId);
     write(keysetManager);
@@ -406,6 +420,8 @@ public final class AndroidKeysetManager {
    * @throws GeneralSecurityException if the key is not found or not enabled
    * @deprecated use {@link setPrimary}
    */
+  @InlineMe(replacement = "this.setPrimary(keyId)")
+  @CanIgnoreReturnValue
   @Deprecated
   public synchronized AndroidKeysetManager promote(int keyId) throws GeneralSecurityException {
     return setPrimary(keyId);
@@ -416,6 +432,7 @@ public final class AndroidKeysetManager {
    *
    * @throws GeneralSecurityException if the key is not found
    */
+  @CanIgnoreReturnValue
   public synchronized AndroidKeysetManager enable(int keyId) throws GeneralSecurityException {
     keysetManager = keysetManager.enable(keyId);
     write(keysetManager);
@@ -427,6 +444,7 @@ public final class AndroidKeysetManager {
    *
    * @throws GeneralSecurityException if the key is not found or it is the primary key
    */
+  @CanIgnoreReturnValue
   public synchronized AndroidKeysetManager disable(int keyId) throws GeneralSecurityException {
     keysetManager = keysetManager.disable(keyId);
     write(keysetManager);
@@ -438,6 +456,7 @@ public final class AndroidKeysetManager {
    *
    * @throws GeneralSecurityException if the key is not found or it is the primary key
    */
+  @CanIgnoreReturnValue
   public synchronized AndroidKeysetManager delete(int keyId) throws GeneralSecurityException {
     keysetManager = keysetManager.delete(keyId);
     write(keysetManager);
@@ -449,6 +468,7 @@ public final class AndroidKeysetManager {
    *
    * @throws GeneralSecurityException if the key is not found or it is the primary key
    */
+  @CanIgnoreReturnValue
   public synchronized AndroidKeysetManager destroy(int keyId) throws GeneralSecurityException {
     keysetManager = keysetManager.destroy(keyId);
     write(keysetManager);

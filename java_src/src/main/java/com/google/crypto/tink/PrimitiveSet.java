@@ -23,6 +23,7 @@ import com.google.crypto.tink.proto.KeyStatusType;
 import com.google.crypto.tink.proto.Keyset;
 import com.google.crypto.tink.proto.OutputPrefixType;
 import com.google.crypto.tink.subtle.Hex;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import java.security.GeneralSecurityException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -106,6 +107,7 @@ public final class PrimitiveSet<P> {
       return outputPrefixType;
     }
 
+    @Nullable
     public final byte[] getIdentifier() {
       if (identifier == null) {
         return null;
@@ -340,6 +342,7 @@ public final class PrimitiveSet<P> {
     private Entry<P> primary;
     private MonitoringAnnotations annotations;
 
+    @CanIgnoreReturnValue
     private Builder<P> addPrimitive(final P primitive, Keyset.Key key, boolean asPrimary)
         throws GeneralSecurityException {
       if (primitives == null) {
@@ -370,6 +373,7 @@ public final class PrimitiveSet<P> {
       return addPrimitive(primitive, key, true);
     }
 
+    @CanIgnoreReturnValue
     public Builder<P> setAnnotations(MonitoringAnnotations annotations) {
       if (primitives == null) {
         throw new IllegalStateException("setAnnotations cannot be called after build");

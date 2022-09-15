@@ -111,6 +111,7 @@ java_library(
     srcs = ["KeyTester.java"],
     deps = [
         "//src/main/java/com/google/crypto/tink:key",
+        "@maven//:com_google_errorprone_error_prone_annotations",
         "@maven//:com_google_truth_truth",
     ],
 )
@@ -121,6 +122,7 @@ android_library(
     srcs = ["KeyTester.java"],
     deps = [
         "//src/main/java/com/google/crypto/tink:key-android",
+        "@maven//:com_google_errorprone_error_prone_annotations",
         "@maven//:com_google_truth_truth",
     ],
 )
