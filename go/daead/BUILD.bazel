@@ -46,6 +46,7 @@ go_test(
         "//daead/subtle",
         "//insecurecleartextkeyset",
         "//internal/internalregistry",
+        "//internal/testing/stubkeymanager",
         "//keyset",
         "//monitoring",
         "//proto/aes_siv_go_proto",

@@ -68,29 +68,43 @@ func newWrappedDeterministicAEAD(ps *primitiveset.PrimitiveSet) (*wrappedDetermi
 			}
 		}
 	}
-	ret := &wrappedDeterministicAEAD{ps: ps}
-	client := internalregistry.GetMonitoringClient()
-	keysetInfo, err := monitoringutil.KeysetInfoFromPrimitiveSet(ps)
+	encLogger, decLogger, err := createLoggers(ps)
 	if err != nil {
 		return nil, err
 	}
-	ret.encLogger, err = client.NewLogger(&monitoring.Context{
+	return &wrappedDeterministicAEAD{
+		ps:        ps,
+		encLogger: encLogger,
+		decLogger: decLogger,
+	}, nil
+}
+
+func createLoggers(ps *primitiveset.PrimitiveSet) (monitoring.Logger, monitoring.Logger, error) {
+	if len(ps.Annotations) == 0 {
+		return &monitoringutil.DoNothingLogger{}, &monitoringutil.DoNothingLogger{}, nil
+	}
+	client := internalregistry.GetMonitoringClient()
+	keysetInfo, err := monitoringutil.KeysetInfoFromPrimitiveSet(ps)
+	if err != nil {
+		return nil, nil, err
+	}
+	encLogger, err := client.NewLogger(&monitoring.Context{
 		Primitive:   "daead",
 		APIFunction: "encrypt",
 		KeysetInfo:  keysetInfo,
 	})
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
-	ret.decLogger, err = client.NewLogger(&monitoring.Context{
+	decLogger, err := client.NewLogger(&monitoring.Context{
 		Primitive:   "daead",
 		APIFunction: "decrypt",
 		KeysetInfo:  keysetInfo,
 	})
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
-	return ret, nil
+	return encLogger, decLogger, nil
 }
 
 // EncryptDeterministically deterministically encrypts plaintext with additionalData as additional authenticated data.
