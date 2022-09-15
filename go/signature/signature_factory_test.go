@@ -17,13 +17,22 @@
 package signature_test
 
 import (
+	"bytes"
+	"fmt"
 	"testing"
 
+	"github.com/google/go-cmp/cmp"
 	"google.golang.org/protobuf/proto"
+	"github.com/google/tink/go/core/registry"
+	"github.com/google/tink/go/insecurecleartextkeyset"
+	"github.com/google/tink/go/internal/internalregistry"
+	"github.com/google/tink/go/internal/testing/stubkeymanager"
 	"github.com/google/tink/go/keyset"
 	"github.com/google/tink/go/mac"
+	"github.com/google/tink/go/monitoring"
 	"github.com/google/tink/go/signature"
 	"github.com/google/tink/go/subtle/random"
+	"github.com/google/tink/go/testing/fakemonitoring"
 	"github.com/google/tink/go/testkeyset"
 	"github.com/google/tink/go/testutil"
 	commonpb "github.com/google/tink/go/proto/common_go_proto"
@@ -175,5 +184,268 @@ func TestFactoryWithValidPrimitiveSetType(t *testing.T) {
 	_, err = signature.NewVerifier(goodPublicKH)
 	if err != nil {
 		t.Errorf("signature.NewVerifier(goodPublicKH) err = %v, want nil", err)
+	}
+}
+
+func TestPrimitiveFactorySignVerifyWithoutAnnotationsDoesNothing(t *testing.T) {
+	defer internalregistry.ClearMonitoringClient()
+	client := fakemonitoring.NewClient("fake-client")
+	if err := internalregistry.RegisterMonitoringClient(client); err != nil {
+		t.Fatalf("internalregistry.RegisterMonitoringClient() err = %v, want nil", err)
+	}
+	privHandle, err := keyset.NewHandle(signature.ED25519KeyTemplate())
+	if err != nil {
+		t.Fatalf("keyset.NewHandle() err = %v, want nil", err)
+	}
+	signer, err := signature.NewSigner(privHandle)
+	if err != nil {
+		t.Fatalf("signature.NewSigner() err = %v, want nil", err)
+	}
+	pubHandle, err := privHandle.Public()
+	if err != nil {
+		t.Fatalf("privHandle.Public() err = %v, want nil", err)
+	}
+	verifier, err := signature.NewVerifier(pubHandle)
+	if err != nil {
+		t.Fatalf("signature.NewVerifier() err = %v, want nil", err)
+	}
+	data := []byte("some_important_data")
+	sig, err := signer.Sign(data)
+	if err != nil {
+		t.Fatalf("signer.Sign() err = %v, want nil", err)
+	}
+	if err := verifier.Verify(sig, data); err != nil {
+		t.Fatalf("verifier.Verify() err = %v, want nil", err)
+	}
+	if len(client.Events()) != 0 {
+		t.Errorf("len(client.Events()) = %d, want 0", len(client.Events()))
+	}
+	if len(client.Failures()) != 0 {
+		t.Errorf("len(client.Failures()) = %d, want 0", len(client.Failures()))
+	}
+}
+
+func TestPrimitiveFactoryMonitoringWithAnnotationsLogSignVerify(t *testing.T) {
+	defer internalregistry.ClearMonitoringClient()
+	client := fakemonitoring.NewClient("fake-client")
+	if err := internalregistry.RegisterMonitoringClient(client); err != nil {
+		t.Fatalf("internalregistry.RegisterMonitoringClient() err = %v, want nil", err)
+	}
+	handle, err := keyset.NewHandle(signature.ED25519KeyTemplate())
+	if err != nil {
+		t.Fatalf("keyset.NewHandle() err = %v, want nil", err)
+	}
+	buff := &bytes.Buffer{}
+	if err := insecurecleartextkeyset.Write(handle, keyset.NewBinaryWriter(buff)); err != nil {
+		t.Fatalf("insecurecleartextkeyset.Write() err = %v, want nil", err)
+	}
+	annotations := map[string]string{"foo": "bar"}
+	privHandle, err := insecurecleartextkeyset.Read(keyset.NewBinaryReader(buff), keyset.WithAnnotations(annotations))
+	if err != nil {
+		t.Fatalf("insecurecleartextkeyset.Read() err = %v, want nil", err)
+	}
+	signer, err := signature.NewSigner(privHandle)
+	if err != nil {
+		t.Fatalf("signature.NewSigner() err = %v, want nil", err)
+	}
+	pubHandle, err := privHandle.Public()
+	if err != nil {
+		t.Fatalf("privHandle.Public() err = %v, want nil", err)
+	}
+	buff.Reset()
+	if err := insecurecleartextkeyset.Write(pubHandle, keyset.NewBinaryWriter(buff)); err != nil {
+		t.Fatalf("insecurecleartextkeyset.Write() err = %v, want nil", err)
+	}
+	pubHandle, err = insecurecleartextkeyset.Read(keyset.NewBinaryReader(buff), keyset.WithAnnotations(annotations))
+	if err != nil {
+		t.Fatalf("insecurecleartextkeyset.Read() err = %v, want nil", err)
+	}
+	verifier, err := signature.NewVerifier(pubHandle)
+	if err != nil {
+		t.Fatalf("signature.NewVerifier() err = %v, want nil", err)
+	}
+	data := []byte("some_important_data")
+	sig, err := signer.Sign(data)
+	if err != nil {
+		t.Fatalf("signer.Sign() err = %v, want nil", err)
+	}
+	if err := verifier.Verify(sig, data); err != nil {
+		t.Fatalf("verifier.Verify() err = %v, want nil", err)
+	}
+	if len(client.Failures()) != 0 {
+		t.Errorf("len(client.Failures()) = %d, want 0", len(client.Failures()))
+	}
+	got := client.Events()
+	wantVerifyKeysetInfo := &monitoring.KeysetInfo{
+		Annotations:  annotations,
+		PrimaryKeyID: pubHandle.KeysetInfo().GetPrimaryKeyId(),
+		Entries: []*monitoring.Entry{
+			{
+				KeyID:          pubHandle.KeysetInfo().GetPrimaryKeyId(),
+				Status:         monitoring.Enabled,
+				FormatAsString: pubHandle.KeysetInfo().GetKeyInfo()[0].GetTypeUrl(),
+			},
+		},
+	}
+	wantSignKeysetInfo := &monitoring.KeysetInfo{
+		Annotations:  annotations,
+		PrimaryKeyID: privHandle.KeysetInfo().GetPrimaryKeyId(),
+		Entries: []*monitoring.Entry{
+			{
+				KeyID:          privHandle.KeysetInfo().GetPrimaryKeyId(),
+				Status:         monitoring.Enabled,
+				FormatAsString: privHandle.KeysetInfo().GetKeyInfo()[0].GetTypeUrl(),
+			},
+		},
+	}
+	want := []*fakemonitoring.LogEvent{
+		{
+			Context:  monitoring.NewContext("public_key_sign", "sign", wantSignKeysetInfo),
+			KeyID:    privHandle.KeysetInfo().GetPrimaryKeyId(),
+			NumBytes: len(data),
+		},
+		{
+			Context:  monitoring.NewContext("public_key_sign", "verify", wantVerifyKeysetInfo),
+			KeyID:    privHandle.KeysetInfo().GetPrimaryKeyId(),
+			NumBytes: len(data),
+		},
+	}
+	if diff := cmp.Diff(want, got); diff != "" {
+		t.Errorf("%v", diff)
+	}
+}
+
+type alwaysFailingSigner struct{}
+
+func (a *alwaysFailingSigner) Sign(data []byte) ([]byte, error) { return nil, fmt.Errorf("failed") }
+
+func TestPrimitiveFactoryMonitoringWithAnnotationsSignFailureIsLogged(t *testing.T) {
+	defer internalregistry.ClearMonitoringClient()
+	client := fakemonitoring.NewClient("fake-client")
+	if err := internalregistry.RegisterMonitoringClient(client); err != nil {
+		t.Fatalf("internalregistry.RegisterMonitoringClient() err = %v, want nil", err)
+	}
+	typeURL := "TestPrimitiveFactoryMonitoringWithAnnotationsSignFailureIsLogged" + "PrivateKeyManager"
+	km := &stubkeymanager.StubPrivateKeyManager{
+		StubKeyManager: stubkeymanager.StubKeyManager{
+			URL:  typeURL,
+			Prim: &alwaysFailingSigner{},
+			KeyData: &tinkpb.KeyData{
+				TypeUrl:         typeURL,
+				Value:           []byte("serialized_key"),
+				KeyMaterialType: tinkpb.KeyData_ASYMMETRIC_PRIVATE,
+			},
+		},
+	}
+	if err := registry.RegisterKeyManager(km); err != nil {
+		t.Fatalf("registry.RegisterKeyManager() err = %v, want nil", err)
+	}
+	template := &tinkpb.KeyTemplate{
+		TypeUrl:          typeURL,
+		OutputPrefixType: tinkpb.OutputPrefixType_LEGACY,
+	}
+	kh, err := keyset.NewHandle(template)
+	if err != nil {
+		t.Fatalf("keyset.NewHandle() err = %v, want nil", err)
+	}
+	buff := &bytes.Buffer{}
+	if err := insecurecleartextkeyset.Write(kh, keyset.NewBinaryWriter(buff)); err != nil {
+		t.Fatalf("insecurecleartextkeyset.Write() err = %v, want nil", err)
+	}
+	annotations := map[string]string{"foo": "bar"}
+	privHandle, err := insecurecleartextkeyset.Read(keyset.NewBinaryReader(buff), keyset.WithAnnotations(annotations))
+	if err != nil {
+		t.Fatalf("insecurecleartextkeyset.Read() err = %v, want nil", err)
+	}
+	signer, err := signature.NewSigner(privHandle)
+	if err != nil {
+		t.Fatalf("signature.NewSigner() err = %v, want nil", err)
+	}
+	if _, err := signer.Sign([]byte("some_data")); err == nil {
+		t.Fatalf("signer.Sign() err = nil, want error")
+	}
+	if len(client.Events()) != 0 {
+		t.Errorf("len(client.Events()) = %d, want 0", len(client.Events()))
+	}
+	got := client.Failures()
+	want := []*fakemonitoring.LogFailure{
+		{
+			Context: monitoring.NewContext(
+				"public_key_sign",
+				"sign",
+				monitoring.NewKeysetInfo(
+					annotations,
+					kh.KeysetInfo().GetPrimaryKeyId(),
+					[]*monitoring.Entry{
+						{
+							KeyID:          kh.KeysetInfo().GetPrimaryKeyId(),
+							Status:         monitoring.Enabled,
+							FormatAsString: typeURL,
+						},
+					},
+				),
+			),
+		},
+	}
+	if diff := cmp.Diff(want, got); diff != "" {
+		t.Errorf("%v", diff)
+	}
+}
+
+func TestPrimitiveFactoryMonitoringWithAnnotationsVerifyFailureIsLogged(t *testing.T) {
+	defer internalregistry.ClearMonitoringClient()
+	client := fakemonitoring.NewClient("fake-client")
+	if err := internalregistry.RegisterMonitoringClient(client); err != nil {
+		t.Fatalf("internalregistry.RegisterMonitoringClient() err = %v, want nil", err)
+	}
+	privHandle, err := keyset.NewHandle(signature.ED25519KeyTemplate())
+	if err != nil {
+		t.Fatalf("keyset.NewHandle() err = %v, want nil", err)
+	}
+	pubHandle, err := privHandle.Public()
+	if err != nil {
+		t.Fatalf("privHandle.Public() err = %v, want nil", err)
+	}
+	buff := &bytes.Buffer{}
+	annotations := map[string]string{"foo": "bar"}
+	if err := insecurecleartextkeyset.Write(pubHandle, keyset.NewBinaryWriter(buff)); err != nil {
+		t.Fatalf("insecurecleartextkeyset.Write() err = %v, want nil", err)
+	}
+	pubHandle, err = insecurecleartextkeyset.Read(keyset.NewBinaryReader(buff), keyset.WithAnnotations(annotations))
+	if err != nil {
+		t.Fatalf("insecurecleartextkeyset.Read() err = %v, want nil", err)
+	}
+	verifier, err := signature.NewVerifier(pubHandle)
+	if err != nil {
+		t.Fatalf("signature.NewVerifier() err = %v, want nil", err)
+	}
+	if err := verifier.Verify([]byte("some_invalid_signature"), []byte("some_invalid_data")); err == nil {
+		t.Fatalf("verifier.Verify() err = nil, want error")
+	}
+	if len(client.Events()) != 0 {
+		t.Errorf("len(client.Events()) = %d, want 0", len(client.Events()))
+	}
+	got := client.Failures()
+	want := []*fakemonitoring.LogFailure{
+		{
+			Context: monitoring.NewContext(
+				"public_key_sign",
+				"verify",
+				monitoring.NewKeysetInfo(
+					annotations,
+					pubHandle.KeysetInfo().GetPrimaryKeyId(),
+					[]*monitoring.Entry{
+						{
+							KeyID:          pubHandle.KeysetInfo().GetPrimaryKeyId(),
+							Status:         monitoring.Enabled,
+							FormatAsString: pubHandle.KeysetInfo().GetKeyInfo()[0].GetTypeUrl(),
+						},
+					},
+				),
+			),
+		},
+	}
+	if diff := cmp.Diff(want, got); diff != "" {
+		t.Errorf("%v", diff)
 	}
 }

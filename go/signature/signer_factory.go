@@ -21,7 +21,10 @@ import (
 
 	"github.com/google/tink/go/core/primitiveset"
 	"github.com/google/tink/go/core/registry"
+	"github.com/google/tink/go/internal/internalregistry"
+	"github.com/google/tink/go/internal/monitoringutil"
 	"github.com/google/tink/go/keyset"
+	"github.com/google/tink/go/monitoring"
 	"github.com/google/tink/go/tink"
 	tinkpb "github.com/google/tink/go/proto/tink_go_proto"
 )
@@ -45,7 +48,8 @@ func NewSignerWithKeyManager(h *keyset.Handle, km registry.KeyManager) (tink.Sig
 
 // wrappedSigner is an Signer implementation that uses the underlying primitive set for signing.
 type wrappedSigner struct {
-	ps *primitiveset.PrimitiveSet
+	ps     *primitiveset.PrimitiveSet
+	logger monitoring.Logger
 }
 
 // Asserts that wrappedSigner implements the Signer interface.
@@ -63,11 +67,30 @@ func newWrappedSigner(ps *primitiveset.PrimitiveSet) (*wrappedSigner, error) {
 			}
 		}
 	}
+	logger, err := createSignerLogger(ps)
+	if err != nil {
+		return nil, err
+	}
+	return &wrappedSigner{
+		ps:     ps,
+		logger: logger,
+	}, nil
+}
 
-	ret := new(wrappedSigner)
-	ret.ps = ps
-
-	return ret, nil
+func createSignerLogger(ps *primitiveset.PrimitiveSet) (monitoring.Logger, error) {
+	// only keysets which contain annotations are monitored.
+	if len(ps.Annotations) == 0 {
+		return &monitoringutil.DoNothingLogger{}, nil
+	}
+	keysetInfo, err := monitoringutil.KeysetInfoFromPrimitiveSet(ps)
+	if err != nil {
+		return nil, err
+	}
+	return internalregistry.GetMonitoringClient().NewLogger(&monitoring.Context{
+		KeysetInfo:  keysetInfo,
+		Primitive:   "public_key_sign",
+		APIFunction: "sign",
+	})
 }
 
 // Sign signs the given data and returns the signature concatenated with the identifier of the
@@ -89,7 +112,9 @@ func (s *wrappedSigner) Sign(data []byte) ([]byte, error) {
 
 	signature, err := signer.Sign(signedData)
 	if err != nil {
+		s.logger.LogFailure()
 		return nil, err
 	}
+	s.logger.Log(primary.KeyID, len(data))
 	return append([]byte(primary.Prefix), signature...), nil
 }

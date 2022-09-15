@@ -23,7 +23,10 @@ import (
 	"github.com/google/tink/go/core/cryptofmt"
 	"github.com/google/tink/go/core/primitiveset"
 	"github.com/google/tink/go/core/registry"
+	"github.com/google/tink/go/internal/internalregistry"
+	"github.com/google/tink/go/internal/monitoringutil"
 	"github.com/google/tink/go/keyset"
+	"github.com/google/tink/go/monitoring"
 	"github.com/google/tink/go/tink"
 	tinkpb "github.com/google/tink/go/proto/tink_go_proto"
 )
@@ -47,7 +50,8 @@ func NewVerifierWithKeyManager(h *keyset.Handle, km registry.KeyManager) (tink.V
 // verifierSet is a Verifier implementation that uses the
 // underlying primitive set for verifying.
 type wrappedVerifier struct {
-	ps *primitiveset.PrimitiveSet
+	ps     *primitiveset.PrimitiveSet
+	logger monitoring.Logger
 }
 
 // Asserts that verifierSet implements the Verifier interface.
@@ -65,11 +69,30 @@ func newWrappedVerifier(ps *primitiveset.PrimitiveSet) (*wrappedVerifier, error)
 			}
 		}
 	}
+	logger, err := createVerifierLogger(ps)
+	if err != nil {
+		return nil, err
+	}
+	return &wrappedVerifier{
+		ps:     ps,
+		logger: logger,
+	}, nil
+}
 
-	ret := new(wrappedVerifier)
-	ret.ps = ps
-
-	return ret, nil
+func createVerifierLogger(ps *primitiveset.PrimitiveSet) (monitoring.Logger, error) {
+	// only keysets which contain annotations are monitored.
+	if len(ps.Annotations) == 0 {
+		return &monitoringutil.DoNothingLogger{}, nil
+	}
+	keysetInfo, err := monitoringutil.KeysetInfoFromPrimitiveSet(ps)
+	if err != nil {
+		return nil, err
+	}
+	return internalregistry.GetMonitoringClient().NewLogger(&monitoring.Context{
+		KeysetInfo:  keysetInfo,
+		Primitive:   "public_key_sign",
+		APIFunction: "verify",
+	})
 }
 
 var errInvalidSignature = errors.New("verifier_factory: invalid signature")
@@ -100,6 +123,7 @@ func (v *wrappedVerifier) Verify(signature, data []byte) error {
 			}
 
 			if err = verifier.Verify(signatureNoPrefix, signedData); err == nil {
+				v.logger.Log(entries[i].KeyID, len(signedData))
 				return nil
 			}
 		}
@@ -115,10 +139,11 @@ func (v *wrappedVerifier) Verify(signature, data []byte) error {
 			}
 
 			if err = verifier.Verify(signature, data); err == nil {
+				v.logger.Log(entries[i].KeyID, len(data))
 				return nil
 			}
 		}
 	}
-
+	v.logger.LogFailure()
 	return errInvalidSignature
 }
