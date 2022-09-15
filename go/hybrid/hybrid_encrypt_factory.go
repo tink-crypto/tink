@@ -51,7 +51,7 @@ type wrappedHybridEncrypt struct {
 	logger monitoring.Logger
 }
 
-// "Compime time assertion that wrappedHybridEncrypt implements the HybridEncrypt interface.
+// compile time assertion that wrappedHybridEncrypt implements the HybridEncrypt interface.
 var _ tink.HybridEncrypt = (*wrappedHybridEncrypt)(nil)
 
 func newEncryptPrimitiveSet(ps *primitiveset.PrimitiveSet) (*wrappedHybridEncrypt, error) {
@@ -66,21 +66,29 @@ func newEncryptPrimitiveSet(ps *primitiveset.PrimitiveSet) (*wrappedHybridEncryp
 			}
 		}
 	}
-	ret := &wrappedHybridEncrypt{ps: ps}
-	client := internalregistry.GetMonitoringClient()
+	logger, err := createEncryptLogger(ps)
+	if err != nil {
+		return nil, err
+	}
+	return &wrappedHybridEncrypt{
+		ps:     ps,
+		logger: logger,
+	}, nil
+}
+
+func createEncryptLogger(ps *primitiveset.PrimitiveSet) (monitoring.Logger, error) {
+	if len(ps.Annotations) == 0 {
+		return &monitoringutil.DoNothingLogger{}, nil
+	}
 	keysetInfo, err := monitoringutil.KeysetInfoFromPrimitiveSet(ps)
 	if err != nil {
 		return nil, err
 	}
-	ret.logger, err = client.NewLogger(&monitoring.Context{
+	return internalregistry.GetMonitoringClient().NewLogger(&monitoring.Context{
 		KeysetInfo:  keysetInfo,
 		Primitive:   "hybrid_encrypt",
 		APIFunction: "encrypt",
 	})
-	if err != nil {
-		return nil, err
-	}
-	return ret, nil
 }
 
 // Encrypt encrypts the given plaintext binding contextInfo to the resulting ciphertext.

@@ -193,20 +193,36 @@ func TestPrimitiveFactoryFailsWhenKeysetHasNoPrimary(t *testing.T) {
 	}
 }
 
-func TestPrimitiveFactoryMontioringLogsEncryptAndDecryptWithPrefix(t *testing.T) {
+func TestPrimitiveFactoryMonitoringWithAnnotationsLogsEncryptAndDecryptWithPrefix(t *testing.T) {
 	defer internalregistry.ClearMonitoringClient()
 	client := fakemonitoring.NewClient("fake-client")
 	if err := internalregistry.RegisterMonitoringClient(client); err != nil {
 		t.Fatalf("registry.RegisterMonitoringClient() err = %v, want nil", err)
 	}
-	template := hybrid.DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_AES_128_GCM_Key_Template()
-	privHandle, err := keyset.NewHandle(template)
+	handle, err := keyset.NewHandle(hybrid.DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_AES_128_GCM_Key_Template())
 	if err != nil {
 		t.Fatalf("keyset.NewHandle() err = %v, want nil", err)
+	}
+	buff := &bytes.Buffer{}
+	if err := insecurecleartextkeyset.Write(handle, keyset.NewBinaryWriter(buff)); err != nil {
+		t.Fatalf("insecurecleartextkeyset.Write() err = %v, want nil", err)
+	}
+	annotations := map[string]string{"foo": "bar"}
+	privHandle, err := insecurecleartextkeyset.Read(keyset.NewBinaryReader(buff), keyset.WithAnnotations(annotations))
+	if err != nil {
+		t.Fatalf("insecurecleartextkeyset.Read() err = %v, want nil", err)
 	}
 	pubHandle, err := privHandle.Public()
 	if err != nil {
 		t.Fatalf("privHandle.Public() err = %v, want nil", err)
+	}
+	buff.Reset()
+	if err := insecurecleartextkeyset.Write(pubHandle, keyset.NewBinaryWriter(buff)); err != nil {
+		t.Fatalf("insecurecleartextkeyset.Write() err = %v, want nil", err)
+	}
+	pubHandle, err = insecurecleartextkeyset.Read(keyset.NewBinaryReader(buff), keyset.WithAnnotations(annotations))
+	if err != nil {
+		t.Fatalf("insecurecleartextkeyset.Read() err = %v, want nil", err)
 	}
 	e, err := hybrid.NewHybridEncrypt(pubHandle)
 	if err != nil {
@@ -227,6 +243,7 @@ func TestPrimitiveFactoryMontioringLogsEncryptAndDecryptWithPrefix(t *testing.T)
 	}
 	got := client.Events()
 	wantEncryptKeysetInfo := &monitoring.KeysetInfo{
+		Annotations:  annotations,
 		PrimaryKeyID: privHandle.KeysetInfo().GetPrimaryKeyId(),
 		Entries: []*monitoring.Entry{
 			{
@@ -237,12 +254,13 @@ func TestPrimitiveFactoryMontioringLogsEncryptAndDecryptWithPrefix(t *testing.T)
 		},
 	}
 	wantDecryptKeysetInfo := &monitoring.KeysetInfo{
+		Annotations:  annotations,
 		PrimaryKeyID: privHandle.KeysetInfo().GetPrimaryKeyId(),
 		Entries: []*monitoring.Entry{
 			{
 				KeyID:          privHandle.KeysetInfo().GetPrimaryKeyId(),
 				Status:         monitoring.Enabled,
-				FormatAsString: template.GetTypeUrl(),
+				FormatAsString: privHandle.KeysetInfo().GetKeyInfo()[0].GetTypeUrl(),
 			},
 		},
 	}
@@ -265,20 +283,36 @@ func TestPrimitiveFactoryMontioringLogsEncryptAndDecryptWithPrefix(t *testing.T)
 	}
 }
 
-func TestPrimitiveFactoryMontioringLogsEncryptAndDecryptWithoutPrefix(t *testing.T) {
+func TestPrimitiveFactoryMonitoringWithAnnotationsLogsEncryptAndDecryptWithoutPrefix(t *testing.T) {
 	defer internalregistry.ClearMonitoringClient()
 	client := fakemonitoring.NewClient("fake-client")
 	if err := internalregistry.RegisterMonitoringClient(client); err != nil {
 		t.Fatalf("registry.RegisterMonitoringClient() err = %v, want nil", err)
 	}
-	template := hybrid.DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_AES_128_GCM_Raw_Key_Template()
-	privHandle, err := keyset.NewHandle(template)
+	handle, err := keyset.NewHandle(hybrid.DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_AES_128_GCM_Raw_Key_Template())
 	if err != nil {
 		t.Fatalf("keyset.NewHandle() err = %v, want nil", err)
+	}
+	buff := &bytes.Buffer{}
+	if err := insecurecleartextkeyset.Write(handle, keyset.NewBinaryWriter(buff)); err != nil {
+		t.Fatalf("insecurecleartextkeyset.Write() err = %v, want nil", err)
+	}
+	annotations := map[string]string{"foo": "bar"}
+	privHandle, err := insecurecleartextkeyset.Read(keyset.NewBinaryReader(buff), keyset.WithAnnotations(annotations))
+	if err != nil {
+		t.Fatalf("insecurecleartextkeyset.Read() err = %v, want nil", err)
 	}
 	pubHandle, err := privHandle.Public()
 	if err != nil {
 		t.Fatalf("privHandle.Public() err = %v, want nil", err)
+	}
+	buff.Reset()
+	if err := insecurecleartextkeyset.Write(pubHandle, keyset.NewBinaryWriter(buff)); err != nil {
+		t.Fatalf("insecurecleartextkeyset.Write() err = %v, want nil", err)
+	}
+	pubHandle, err = insecurecleartextkeyset.Read(keyset.NewBinaryReader(buff), keyset.WithAnnotations(annotations))
+	if err != nil {
+		t.Fatalf("insecurecleartextkeyset.Read() err = %v, want nil", err)
 	}
 	e, err := hybrid.NewHybridEncrypt(pubHandle)
 	if err != nil {
@@ -299,6 +333,7 @@ func TestPrimitiveFactoryMontioringLogsEncryptAndDecryptWithoutPrefix(t *testing
 	}
 	got := client.Events()
 	wantEncryptKeysetInfo := &monitoring.KeysetInfo{
+		Annotations:  annotations,
 		PrimaryKeyID: privHandle.KeysetInfo().GetPrimaryKeyId(),
 		Entries: []*monitoring.Entry{
 			{
@@ -309,12 +344,13 @@ func TestPrimitiveFactoryMontioringLogsEncryptAndDecryptWithoutPrefix(t *testing
 		},
 	}
 	wantDecryptKeysetInfo := &monitoring.KeysetInfo{
+		Annotations:  annotations,
 		PrimaryKeyID: privHandle.KeysetInfo().GetPrimaryKeyId(),
 		Entries: []*monitoring.Entry{
 			{
 				KeyID:          privHandle.KeysetInfo().GetPrimaryKeyId(),
 				Status:         monitoring.Enabled,
-				FormatAsString: template.GetTypeUrl(),
+				FormatAsString: privHandle.KeysetInfo().GetKeyInfo()[0].GetTypeUrl(),
 			},
 		},
 	}
@@ -362,13 +398,30 @@ func TestPrimitiveFactoryWithMonitoringWithMultipleKeysLogsEncryptionDecryption(
 	if err := manager.Disable(keyIDs[0]); err != nil {
 		t.Fatalf("manager.Disable(%d) err = %v, want nil", keyIDs[0], err)
 	}
-	privHandle, err := manager.Handle()
+	handle, err := manager.Handle()
 	if err != nil {
 		t.Fatalf("manager.Handle() err = %v, want nil", err)
+	}
+	buff := &bytes.Buffer{}
+	if err := insecurecleartextkeyset.Write(handle, keyset.NewBinaryWriter(buff)); err != nil {
+		t.Fatalf("insecurecleartextkeyset.Write() err = %v, want nil", err)
+	}
+	annotations := map[string]string{"foo": "bar"}
+	privHandle, err := insecurecleartextkeyset.Read(keyset.NewBinaryReader(buff), keyset.WithAnnotations(annotations))
+	if err != nil {
+		t.Fatalf("insecurecleartextkeyset.Read() err = %v, want nil", err)
 	}
 	pubHandle, err := privHandle.Public()
 	if err != nil {
 		t.Fatalf("privHandle.Public() err = %v, want nil", err)
+	}
+	buff.Reset()
+	if err := insecurecleartextkeyset.Write(pubHandle, keyset.NewBinaryWriter(buff)); err != nil {
+		t.Fatalf("insecurecleartextkeyset.Write() err = %v, want nil", err)
+	}
+	pubHandle, err = insecurecleartextkeyset.Read(keyset.NewBinaryReader(buff), keyset.WithAnnotations(annotations))
+	if err != nil {
+		t.Fatalf("insecurecleartextkeyset.Read() err = %v, want nil", err)
 	}
 	e, err := hybrid.NewHybridEncrypt(pubHandle)
 	if err != nil {
@@ -393,6 +446,7 @@ func TestPrimitiveFactoryWithMonitoringWithMultipleKeysLogsEncryptionDecryption(
 	}
 	got := client.Events()
 	wantEncryptKeysetInfo := &monitoring.KeysetInfo{
+		Annotations:  annotations,
 		PrimaryKeyID: privHandle.KeysetInfo().GetPrimaryKeyId(),
 		Entries: []*monitoring.Entry{
 			{
@@ -413,6 +467,7 @@ func TestPrimitiveFactoryWithMonitoringWithMultipleKeysLogsEncryptionDecryption(
 		},
 	}
 	wantDecryptKeysetInfo := &monitoring.KeysetInfo{
+		Annotations:  annotations,
 		PrimaryKeyID: privHandle.KeysetInfo().GetPrimaryKeyId(),
 		Entries: []*monitoring.Entry{
 			{
@@ -453,7 +508,7 @@ func TestPrimitiveFactoryWithMonitoringWithMultipleKeysLogsEncryptionDecryption(
 	}
 }
 
-func TestPrimitiveFactoryWithMonitoringEncryptionFailureIsLogged(t *testing.T) {
+func TestPrimitiveFactoryMonitoringWithAnnotationsEncryptFailureIsLogged(t *testing.T) {
 	defer internalregistry.ClearMonitoringClient()
 	client := fakemonitoring.NewClient("fake-client")
 	if err := internalregistry.RegisterMonitoringClient(client); err != nil {
@@ -461,8 +516,8 @@ func TestPrimitiveFactoryWithMonitoringEncryptionFailureIsLogged(t *testing.T) {
 	}
 	// Since this key type will be registered in the registry,
 	// we create a very unique typeURL to avoid colliding with other tests.
-	privKeyTypeURL := "TestPrimitiveFactoryWithMonitoringEncryptionFailureIsLogged" + "PrivateKeyManager" + string(random.GetRandomBytes(8))
-	pubKeyTypeURL := "TestPrimitiveFactoryWithMonitoringEncryptionFailureIsLogged" + "PrivateKeyManager" + string(random.GetRandomBytes(8))
+	privKeyTypeURL := "TestPrimitiveFactoryWithMonitoringEncryptionFailureIsLogged" + "PrivateKeyManager"
+	pubKeyTypeURL := "TestPrimitiveFactoryWithMonitoringEncryptionFailureIsLogged" + "PublicKeyManager"
 	template := &tinkpb.KeyTemplate{
 		TypeUrl:          privKeyTypeURL,
 		OutputPrefixType: tinkpb.OutputPrefixType_LEGACY,
@@ -493,13 +548,30 @@ func TestPrimitiveFactoryWithMonitoringEncryptionFailureIsLogged(t *testing.T) {
 	if err := registry.RegisterKeyManager(pubKeyManager); err != nil {
 		t.Fatalf("registry.RegisterKeyManager() err = %v, want nil", err)
 	}
-	privHandle, err := keyset.NewHandle(template)
+	handle, err := keyset.NewHandle(template)
 	if err != nil {
 		t.Fatalf("keyset.NewHandle() err = %v, want nil", err)
+	}
+	buff := &bytes.Buffer{}
+	if err := insecurecleartextkeyset.Write(handle, keyset.NewBinaryWriter(buff)); err != nil {
+		t.Fatalf("insecurecleartextkeyset.Write() err = %v, want nil", err)
+	}
+	annotations := map[string]string{"foo": "bar"}
+	privHandle, err := insecurecleartextkeyset.Read(keyset.NewBinaryReader(buff), keyset.WithAnnotations(annotations))
+	if err != nil {
+		t.Fatalf("insecurecleartextkeyset.Read() err = %v, want nil", err)
 	}
 	pubHandle, err := privHandle.Public()
 	if err != nil {
 		t.Fatalf("privHandle.Public() err = %v, want nil", err)
+	}
+	buff.Reset()
+	if err := insecurecleartextkeyset.Write(pubHandle, keyset.NewBinaryWriter(buff)); err != nil {
+		t.Fatalf("insecurecleartextkeyset.Write() err = %v, want nil", err)
+	}
+	pubHandle, err = insecurecleartextkeyset.Read(keyset.NewBinaryReader(buff), keyset.WithAnnotations(annotations))
+	if err != nil {
+		t.Fatalf("insecurecleartextkeyset.Read() err = %v, want nil", err)
 	}
 	e, err := hybrid.NewHybridEncrypt(pubHandle)
 	if err != nil {
@@ -515,7 +587,7 @@ func TestPrimitiveFactoryWithMonitoringEncryptionFailureIsLogged(t *testing.T) {
 				"hybrid_encrypt",
 				"encrypt",
 				monitoring.NewKeysetInfo(
-					/*annotations=*/ nil,
+					annotations,
 					pubHandle.KeysetInfo().GetPrimaryKeyId(),
 					[]*monitoring.Entry{
 						{
@@ -533,16 +605,24 @@ func TestPrimitiveFactoryWithMonitoringEncryptionFailureIsLogged(t *testing.T) {
 	}
 }
 
-func TestPrimitiveFactoryWithMonitoringVerifyFailureIsLogged(t *testing.T) {
+func TestPrimitiveFactoryMonitoringWithAnnotationsDecryptFailureIsLogged(t *testing.T) {
 	defer internalregistry.ClearMonitoringClient()
 	client := fakemonitoring.NewClient("fake-client")
 	if err := internalregistry.RegisterMonitoringClient(client); err != nil {
 		t.Fatalf("registry.RegisterMonitoringClient() err = %v, want nil", err)
 	}
-	template := hybrid.DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_AES_128_GCM_Raw_Key_Template()
-	privHandle, err := keyset.NewHandle(template)
+	handle, err := keyset.NewHandle(hybrid.DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_AES_128_GCM_Key_Template())
 	if err != nil {
 		t.Fatalf("keyset.NewHandle() err = %v, want nil", err)
+	}
+	buff := &bytes.Buffer{}
+	if err := insecurecleartextkeyset.Write(handle, keyset.NewBinaryWriter(buff)); err != nil {
+		t.Fatalf("insecurecleartextkeyset.Write() err = %v, want nil", err)
+	}
+	annotations := map[string]string{"foo": "bar"}
+	privHandle, err := insecurecleartextkeyset.Read(keyset.NewBinaryReader(buff), keyset.WithAnnotations(annotations))
+	if err != nil {
+		t.Fatalf("insecurecleartextkeyset.Read() err = %v, want nil", err)
 	}
 	e, err := hybrid.NewHybridDecrypt(privHandle)
 	if err != nil {
@@ -558,7 +638,7 @@ func TestPrimitiveFactoryWithMonitoringVerifyFailureIsLogged(t *testing.T) {
 				"hybrid_decrypt",
 				"decrypt",
 				monitoring.NewKeysetInfo(
-					/*annotations=*/ nil,
+					annotations,
 					privHandle.KeysetInfo().GetPrimaryKeyId(),
 					[]*monitoring.Entry{
 						{
@@ -576,25 +656,15 @@ func TestPrimitiveFactoryWithMonitoringVerifyFailureIsLogged(t *testing.T) {
 	}
 }
 
-func TestPrimitiveFactoryWithMonitoringWithAnnotations(t *testing.T) {
+func TestPrimitiveFactoryEncryptDecryptWithoutAnnotationsDoesNotMonitor(t *testing.T) {
 	defer internalregistry.ClearMonitoringClient()
 	client := fakemonitoring.NewClient("fake-client")
 	if err := internalregistry.RegisterMonitoringClient(client); err != nil {
 		t.Fatalf("registry.RegisterMonitoringClient() err = %v, want nil", err)
 	}
-	template := hybrid.DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_AES_128_GCM_Raw_Key_Template()
-	handle, err := keyset.NewHandle(template)
+	privHandle, err := keyset.NewHandle(hybrid.DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_AES_128_GCM_Key_Template())
 	if err != nil {
 		t.Fatalf("keyset.NewHandle() err = %v, want nil", err)
-	}
-	buff := &bytes.Buffer{}
-	if err := insecurecleartextkeyset.Write(handle, keyset.NewBinaryWriter(buff)); err != nil {
-		t.Fatalf("insecurecleartextkeyset.Write() err = %v, want nil", err)
-	}
-	annotations := map[string]string{"foo": "bar"}
-	privHandle, err := insecurecleartextkeyset.Read(keyset.NewBinaryReader(buff), keyset.WithAnnotations(annotations))
-	if err != nil {
-		t.Fatalf("insecurecleartextkeyset.Read() err = %v, want nil", err)
 	}
 	pubHandle, err := privHandle.Public()
 	if err != nil {
@@ -617,41 +687,10 @@ func TestPrimitiveFactoryWithMonitoringWithAnnotations(t *testing.T) {
 	if _, err := d.Decrypt(ct, aad); err != nil {
 		t.Fatalf("d.Decrypt() err = %v, want nil", err)
 	}
-	got := client.Events()
-	wantEncryptKeysetInfo := &monitoring.KeysetInfo{
-		PrimaryKeyID: privHandle.KeysetInfo().GetPrimaryKeyId(),
-		Entries: []*monitoring.Entry{
-			{
-				KeyID:          pubHandle.KeysetInfo().GetPrimaryKeyId(),
-				Status:         monitoring.Enabled,
-				FormatAsString: pubHandle.KeysetInfo().GetKeyInfo()[0].GetTypeUrl(),
-			},
-		},
+	if len(client.Events()) != 0 {
+		t.Errorf("len(client.Events()) = %d, want 0", len(client.Events()))
 	}
-	wantDecryptKeysetInfo := &monitoring.KeysetInfo{
-		PrimaryKeyID: privHandle.KeysetInfo().GetPrimaryKeyId(),
-		Entries: []*monitoring.Entry{
-			{
-				KeyID:          privHandle.KeysetInfo().GetPrimaryKeyId(),
-				Status:         monitoring.Enabled,
-				FormatAsString: template.GetTypeUrl(),
-			},
-		},
-		Annotations: annotations,
-	}
-	want := []*fakemonitoring.LogEvent{
-		{
-			Context:  monitoring.NewContext("hybrid_encrypt", "encrypt", wantEncryptKeysetInfo),
-			KeyID:    pubHandle.KeysetInfo().GetPrimaryKeyId(),
-			NumBytes: len(data),
-		},
-		{
-			Context:  monitoring.NewContext("hybrid_decrypt", "decrypt", wantDecryptKeysetInfo),
-			KeyID:    privHandle.KeysetInfo().GetPrimaryKeyId(),
-			NumBytes: len(ct),
-		},
-	}
-	if diff := cmp.Diff(want, got); diff != "" {
-		t.Errorf("%v", diff)
+	if len(client.Failures()) != 0 {
+		t.Errorf("len(client.Failures()) = %d, want 0", len(client.Failures()))
 	}
 }

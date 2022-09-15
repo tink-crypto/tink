@@ -54,7 +54,7 @@ type wrappedHybridDecrypt struct {
 	logger monitoring.Logger
 }
 
-// "Compime time assertion that wrappedHybridDecrypt implements the HybridDecrypt interface.
+// compile time assertion that wrappedHybridDecrypt implements the HybridDecrypt interface.
 var _ tink.HybridDecrypt = (*wrappedHybridDecrypt)(nil)
 
 func newWrappedHybridDecrypt(ps *primitiveset.PrimitiveSet) (*wrappedHybridDecrypt, error) {
@@ -69,22 +69,29 @@ func newWrappedHybridDecrypt(ps *primitiveset.PrimitiveSet) (*wrappedHybridDecry
 			}
 		}
 	}
-	ret := &wrappedHybridDecrypt{ps: ps}
-	client := internalregistry.GetMonitoringClient()
+	logger, err := createDecryptLogger(ps)
+	if err != nil {
+		return nil, err
+	}
+	return &wrappedHybridDecrypt{
+		ps:     ps,
+		logger: logger,
+	}, nil
+}
+
+func createDecryptLogger(ps *primitiveset.PrimitiveSet) (monitoring.Logger, error) {
+	if len(ps.Annotations) == 0 {
+		return &monitoringutil.DoNothingLogger{}, nil
+	}
 	keysetInfo, err := monitoringutil.KeysetInfoFromPrimitiveSet(ps)
 	if err != nil {
 		return nil, err
 	}
-	ret.logger, err = client.NewLogger(&monitoring.Context{
+	return internalregistry.GetMonitoringClient().NewLogger(&monitoring.Context{
 		KeysetInfo:  keysetInfo,
 		Primitive:   "hybrid_decrypt",
 		APIFunction: "decrypt",
 	})
-	if err != nil {
-		return nil, err
-	}
-
-	return ret, nil
 }
 
 // Decrypt decrypts the given ciphertext, verifying the integrity of contextInfo.
