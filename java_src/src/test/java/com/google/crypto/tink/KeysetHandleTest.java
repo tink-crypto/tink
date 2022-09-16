@@ -865,7 +865,7 @@ public class KeysetHandleTest {
   public void testBuilder_withRandomId_doesNotHaveCollisions() throws Exception {
     // Test takes longer on Android; and a simple Java test suffices.
     assumeFalse(TestUtil.isAndroid());
-    int numNonPrimaryKeys = 2 << 16;
+    int numNonPrimaryKeys = 1 << 16;
     KeysetHandle.Builder builder = KeysetHandle.newBuilder();
     builder.addEntry(
         KeysetHandle.generateEntryFromParametersName("AES256_CMAC").withRandomId().makePrimary());
