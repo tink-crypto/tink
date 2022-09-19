@@ -582,6 +582,20 @@ public final class JsonParserTest {
   };
 
   @Theory
+  public void tooManyRecursions_fail() throws Exception {
+    int recursionNum = 150;
+    StringBuilder sb = new StringBuilder();
+    for (int i = 0; i < recursionNum; i++) {
+      sb.append("{\"a\":");
+    }
+    sb.append("1");
+    for (int i = 0; i < recursionNum; i++) {
+      sb.append("}");
+    }
+    assertThrows(IOException.class, () -> JsonParser.parse(sb.toString()));
+  }
+
+  @Theory
   public void testStrictFailsButNormalDoesNotFail(
       @FromDataPoints("stricterTestCases") TestCase testCase) throws Exception {
     // JsonParser.parse fails.

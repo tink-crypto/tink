@@ -62,117 +62,124 @@ public final class JsonParser {
     }
   }
 
-  private static final TypeAdapter<JsonElement> JSON_ELEMENT =
-      new TypeAdapter<JsonElement>() {
-        /**
-         * Tries to begin reading a JSON array or JSON object, returning {@code null} if the next
-         * element is neither of those.
-         */
-        @Nullable
-        private JsonElement tryBeginNesting(JsonReader in, JsonToken peeked) throws IOException {
-          switch (peeked) {
-            case BEGIN_ARRAY:
-              in.beginArray();
-              return new JsonArray();
-            case BEGIN_OBJECT:
-              in.beginObject();
-              return new JsonObject();
-            default:
-              return null;
+  private static final class JsonElementTypeAdapter extends TypeAdapter<JsonElement> {
+
+    private static final int RECURSION_LIMIT = 100;
+
+    /**
+     * Tries to begin reading a JSON array or JSON object, returning {@code null} if the next
+     * element is neither of those.
+     */
+    @Nullable
+    private JsonElement tryBeginNesting(JsonReader in, JsonToken peeked) throws IOException {
+      switch (peeked) {
+        case BEGIN_ARRAY:
+          in.beginArray();
+          return new JsonArray();
+        case BEGIN_OBJECT:
+          in.beginObject();
+          return new JsonObject();
+        default:
+          return null;
+      }
+    }
+
+    /** Reads a {@link JsonElement} which cannot have any nested elements */
+    private JsonElement readTerminal(JsonReader in, JsonToken peeked) throws IOException {
+      switch (peeked) {
+        case STRING:
+          String value = in.nextString();
+          if (!isValidString(value)) {
+            throw new IOException("illegal characters in string");
           }
-        }
+          return new JsonPrimitive(value);
+        case NUMBER:
+          String number = in.nextString();
+          return new JsonPrimitive(new LazilyParsedNumber(number));
+        case BOOLEAN:
+          return new JsonPrimitive(in.nextBoolean());
+        case NULL:
+          in.nextNull();
+          return JsonNull.INSTANCE;
+        default:
+          // When read(JsonReader) is called with JsonReader in invalid state
+          throw new IllegalStateException("Unexpected token: " + peeked);
+      }
+    }
 
-        /** Reads a {@link JsonElement} which cannot have any nested elements */
-        private JsonElement readTerminal(JsonReader in, JsonToken peeked) throws IOException {
-          switch (peeked) {
-            case STRING:
-              String value = in.nextString();
-              if (!isValidString(value)) {
-                throw new IOException("illegal characters in string");
-              }
-              return new JsonPrimitive(value);
-            case NUMBER:
-              String number = in.nextString();
-              return new JsonPrimitive(new LazilyParsedNumber(number));
-            case BOOLEAN:
-              return new JsonPrimitive(in.nextBoolean());
-            case NULL:
-              in.nextNull();
-              return JsonNull.INSTANCE;
-            default:
-              // When read(JsonReader) is called with JsonReader in invalid state
-              throw new IllegalStateException("Unexpected token: " + peeked);
-          }
-        }
+    @Override
+    public JsonElement read(JsonReader in) throws IOException {
+      // Either JsonArray or JsonObject
+      JsonElement current;
+      JsonToken peeked = in.peek();
 
-        @Override
-        public JsonElement read(JsonReader in) throws IOException {
-          // Either JsonArray or JsonObject
-          JsonElement current;
-          JsonToken peeked = in.peek();
+      current = tryBeginNesting(in, peeked);
+      if (current == null) {
+        return readTerminal(in, peeked);
+      }
 
-          current = tryBeginNesting(in, peeked);
-          if (current == null) {
-            return readTerminal(in, peeked);
-          }
+      Deque<JsonElement> stack = new ArrayDeque<>();
 
-          Deque<JsonElement> stack = new ArrayDeque<>();
-
-          while (true) {
-            while (in.hasNext()) {
-              String name = null;
-              // Name is only used for JSON object members
-              if (current instanceof JsonObject) {
-                name = in.nextName();
-                if (!isValidString(name)) {
-                  throw new IOException("illegal characters in string");
-                }
-              }
-
-              peeked = in.peek();
-              JsonElement value = tryBeginNesting(in, peeked);
-              boolean isNesting = value != null;
-
-              if (value == null) {
-                value = readTerminal(in, peeked);
-              }
-
-              if (current instanceof JsonArray) {
-                ((JsonArray) current).add(value);
-              } else {
-                if (((JsonObject) current).has(name)) {
-                  throw new IOException("duplicate key: " + name);
-                }
-                ((JsonObject) current).add(name, value);
-              }
-
-              if (isNesting) {
-                stack.addLast(current);
-                current = value;
-              }
-            }
-
-            // End current element
-            if (current instanceof JsonArray) {
-              in.endArray();
-            } else {
-              in.endObject();
-            }
-
-            if (stack.isEmpty()) {
-              return current;
-            } else {
-              // Continue with enclosing element
-              current = stack.removeLast();
+      while (true) {
+        while (in.hasNext()) {
+          String name = null;
+          // Name is only used for JSON object members
+          if (current instanceof JsonObject) {
+            name = in.nextName();
+            if (!isValidString(name)) {
+              throw new IOException("illegal characters in string");
             }
           }
+
+          peeked = in.peek();
+          JsonElement value = tryBeginNesting(in, peeked);
+          boolean isNesting = value != null;
+
+          if (value == null) {
+            value = readTerminal(in, peeked);
+          }
+
+          if (current instanceof JsonArray) {
+            ((JsonArray) current).add(value);
+          } else {
+            if (((JsonObject) current).has(name)) {
+              throw new IOException("duplicate key: " + name);
+            }
+            ((JsonObject) current).add(name, value);
+          }
+
+          if (isNesting) {
+            stack.addLast(current);
+            if (stack.size() > RECURSION_LIMIT) {
+               throw new IOException("too many recursions");
+            }
+            current = value;
+          }
         }
 
-        @Override
-        public void write(JsonWriter out, JsonElement value) {
-          throw new UnsupportedOperationException("write is not supported");
+        // End current element
+        if (current instanceof JsonArray) {
+          in.endArray();
+        } else {
+          in.endObject();
         }
-      };
+
+        if (stack.isEmpty()) {
+          return current;
+        } else {
+          // Continue with enclosing element
+          current = stack.removeLast();
+        }
+      }
+    }
+
+    @Override
+    public void write(JsonWriter out, JsonElement value) {
+      throw new UnsupportedOperationException("write is not supported");
+    }
+  }
+
+  private static final JsonElementTypeAdapter JSON_ELEMENT = new JsonElementTypeAdapter();
 
   public static JsonElement parse(String json) throws IOException {
     try {
