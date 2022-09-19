@@ -63,7 +63,7 @@ main() {
     "${ADDITIONAL_CMAKE_PARAMETERS[@]}"
   )
   # We need an absolute path to the CMake project directory.
-  local -r tink_cmake_project_dir="$(pwd)/$(basename ${CMAKE_PROJECT_DIR})"
+  local -r tink_cmake_project_dir="$(cd "${CMAKE_PROJECT_DIR}" && pwd)"
   local -r cmake_build_dir="$(mktemp -dt cmake-build.XXXXXX)"
   cd "${cmake_build_dir}"
   cmake --version
