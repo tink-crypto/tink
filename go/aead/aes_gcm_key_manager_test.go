@@ -21,9 +21,11 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/google/go-cmp/cmp"
 	"google.golang.org/protobuf/proto"
 	"github.com/google/tink/go/aead/subtle"
 	"github.com/google/tink/go/core/registry"
+	"github.com/google/tink/go/internal/internalregistry"
 	"github.com/google/tink/go/subtle/random"
 	"github.com/google/tink/go/testutil"
 	gcmpb "github.com/google/tink/go/proto/aes_gcm_go_proto"
@@ -38,7 +40,7 @@ func TestAESGCMGetPrimitiveBasic(t *testing.T) {
 		t.Errorf("cannot obtain AES-GCM key manager: %s", err)
 	}
 	for _, keySize := range keySizes {
-		key := testutil.NewAESGCMKey(testutil.AESGCMKeyVersion, uint32(keySize))
+		key := testutil.NewAESGCMKey(testutil.AESGCMKeyVersion, keySize)
 		serializedKey, _ := proto.Marshal(key)
 		p, err := keyManager.Primitive(serializedKey)
 		if err != nil {
@@ -102,7 +104,7 @@ func TestAESGCMNewKeyBasic(t *testing.T) {
 		t.Errorf("cannot obtain AES-GCM key manager: %s", err)
 	}
 	for _, keySize := range keySizes {
-		format := testutil.NewAESGCMKeyFormat(uint32(keySize))
+		format := testutil.NewAESGCMKeyFormat(keySize)
 		serializedFormat, _ := proto.Marshal(format)
 		m, err := keyManager.NewKey(serializedFormat)
 		if err != nil {
@@ -144,7 +146,7 @@ func TestAESGCMNewKeyDataBasic(t *testing.T) {
 		t.Errorf("cannot obtain AES-GCM key manager: %s", err)
 	}
 	for _, keySize := range keySizes {
-		format := testutil.NewAESGCMKeyFormat(uint32(keySize))
+		format := testutil.NewAESGCMKeyFormat(keySize)
 		serializedFormat, _ := proto.Marshal(format)
 		keyData, err := keyManager.NewKeyData(serializedFormat)
 		if err != nil {
@@ -208,6 +210,146 @@ func TestAESGCMTypeURL(t *testing.T) {
 	}
 	if keyManager.TypeURL() != testutil.AESGCMTypeURL {
 		t.Errorf("incorrect key type")
+	}
+}
+
+func TestAESGCMKeyMaterialType(t *testing.T) {
+	km, err := registry.GetKeyManager(testutil.AESGCMTypeURL)
+	if err != nil {
+		t.Fatalf("registry.GetKeyManager(%q) err = %v, want nil", testutil.AESGCMTypeURL, err)
+	}
+	keyManager, ok := km.(internalregistry.DerivableKeyManager)
+	if !ok {
+		t.Fatalf("key manager is not DerivableKeyManager")
+	}
+	if got, want := keyManager.KeyMaterialType(), tinkpb.KeyData_SYMMETRIC; got != want {
+		t.Errorf("KeyMaterialType() = %v, want %v", got, want)
+	}
+}
+
+func TestAESGCMDeriveKey(t *testing.T) {
+	km, err := registry.GetKeyManager(testutil.AESGCMTypeURL)
+	if err != nil {
+		t.Fatalf("registry.GetKeyManager(%q) err = %v, want nil", testutil.AESGCMTypeURL, err)
+	}
+	keyManager, ok := km.(internalregistry.DerivableKeyManager)
+	if !ok {
+		t.Fatalf("key manager is not DerivableKeyManager")
+	}
+
+	for _, test := range []struct {
+		name    string
+		keySize uint32
+		randLen uint32
+	}{
+		{"AES-128-GCM, randLen=16", 16, 16},
+		{"AES-128-GCM, randLen=32", 16, 32},
+		{"AES-256-GCM, randLen=32", 32, 32},
+		{"AES-256-GCM, randLen=64", 32, 64},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			keyFormat := testutil.NewAESGCMKeyFormat(test.keySize)
+			serializedKeyFormat, err := proto.Marshal(keyFormat)
+			if err != nil {
+				t.Fatalf("proto.Marshal(%v) err = %v, want nil", keyFormat, err)
+			}
+
+			rand := random.GetRandomBytes(test.randLen)
+			buf := &bytes.Buffer{}
+			if _, err := buf.Write(rand); err != nil {
+				t.Fatalf("Write() err = %v, want nil", err)
+			}
+
+			k, err := keyManager.DeriveKey(serializedKeyFormat, buf)
+			if err != nil {
+				t.Fatalf("keyManager.DeriveKey() err = %v, want nil", err)
+			}
+			key := k.(*gcmpb.AesGcmKey)
+			if got, want := len(key.GetKeyValue()), int(test.keySize); got != want {
+				t.Errorf("key length = %d, want %d", got, want)
+			}
+			if diff := cmp.Diff(key.GetKeyValue(), rand[:test.keySize]); diff != "" {
+				t.Errorf("incorrect derived key: diff = %v", diff)
+			}
+		})
+	}
+}
+
+func TestAESGCMDeriveKeyFailsWithInvalidKeyFormats(t *testing.T) {
+	km, err := registry.GetKeyManager(testutil.AESGCMTypeURL)
+	if err != nil {
+		t.Fatalf("registry.GetKeyManager(%q) err = %v, want nil", testutil.AESGCMTypeURL, err)
+	}
+	keyManager, ok := km.(internalregistry.DerivableKeyManager)
+	if !ok {
+		t.Fatalf("key manager is not DerivableKeyManager")
+	}
+
+	for _, test := range []struct {
+		name      string
+		keyFormat *gcmpb.AesGcmKeyFormat
+		randLen   uint32
+	}{
+		{
+			"invalid key size",
+			&gcmpb.AesGcmKeyFormat{KeySize: 50, Version: 0},
+			50,
+		},
+		{"not enough randomness",
+			&gcmpb.AesGcmKeyFormat{KeySize: 32, Version: 0},
+			10,
+		},
+		{"invalid version",
+			&gcmpb.AesGcmKeyFormat{KeySize: 32, Version: 100000},
+			32,
+		},
+		{"empty key format",
+			&gcmpb.AesGcmKeyFormat{},
+			16,
+		},
+		{"nil key format",
+			nil,
+			16,
+		},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			serializedKeyFormat, err := proto.Marshal(test.keyFormat)
+			if err != nil {
+				t.Fatalf("proto.Marshal(%v) err = %v, want nil", test.keyFormat, err)
+			}
+
+			buf := &bytes.Buffer{}
+			if _, err := buf.Write(random.GetRandomBytes(test.randLen)); err != nil {
+				t.Fatalf("Write() err = %v, want nil", err)
+			}
+
+			if _, err := keyManager.DeriveKey(serializedKeyFormat, buf); err == nil {
+				t.Fatalf("keyManager.DeriveKey() err = nil, want non-nil")
+			}
+		})
+	}
+}
+
+func TestAESGCMDeriveKeyFailsWithMalformedSerializedKeyFormat(t *testing.T) {
+	km, err := registry.GetKeyManager(testutil.AESGCMTypeURL)
+	if err != nil {
+		t.Fatalf("registry.GetKeyManager(%q) err = %v, want nil", testutil.AESGCMTypeURL, err)
+	}
+	keyManager, ok := km.(internalregistry.DerivableKeyManager)
+	if !ok {
+		t.Fatalf("key manager is not DerivableKeyManager")
+	}
+
+	size := proto.Size(&gcmpb.AesGcmKeyFormat{KeySize: 16, Version: 0})
+	malformedSerializedKeyFormat := random.GetRandomBytes(uint32(size))
+
+	buf := &bytes.Buffer{}
+	if _, err := buf.Write(random.GetRandomBytes(32)); err != nil {
+		t.Fatalf("Write() err = %v, want nil", err)
+	}
+
+	if _, err := keyManager.DeriveKey(malformedSerializedKeyFormat, buf); err == nil {
+		t.Fatalf("keyManager.DeriveKey() err = nil, want non-nil")
 	}
 }
 

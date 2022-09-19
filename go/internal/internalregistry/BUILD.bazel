@@ -6,9 +6,17 @@ licenses(["notice"])  # keep
 
 go_library(
     name = "internalregistry",
-    srcs = ["internal_registry.go"],
+    srcs = [
+        "derivable_key_manager.go",
+        "internal_registry.go",
+    ],
     importpath = "github.com/google/tink/go/internal/internalregistry",
-    deps = ["//monitoring"],
+    deps = [
+        "//core/registry",
+        "//monitoring",
+        "//proto/tink_go_proto",
+        "@org_golang_google_protobuf//proto",
+    ],
 )
 
 go_test(
