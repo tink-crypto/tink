@@ -641,17 +641,15 @@ public final class RawJwtTest {
   }
 
   @Test
-  public void fromJsonPayloadWithComments_shouldThrow () throws Exception {
+  public void fromJsonPayloadWithComments_shouldThrow() throws Exception {
     String input = "{\"sub\": \"subject\" /*, \"iss\": \"issuer\" */}";
     assertThrows(JwtInvalidException.class, () -> RawJwt.fromJsonPayload(Optional.empty(), input));
   }
 
   @Test
-  public void fromJsonPayloadWithTwoIdenticalClaimNames_firstIsIgnored() throws Exception {
+  public void fromJsonPayloadWithTwoIdenticalClaimNames_shouldThrow() throws Exception {
     String input = "{\"claim\": \"claim1\", \"claim\": \"claim2\"}";
-    RawJwt token = RawJwt.fromJsonPayload(Optional.empty(), input);
-    assertThat(token.hasStringClaim("claim")).isTrue();
-    assertThat(token.getStringClaim("claim")).isEqualTo("claim2");
+    assertThrows(JwtInvalidException.class, () -> RawJwt.fromJsonPayload(Optional.empty(), input));
   }
 
 

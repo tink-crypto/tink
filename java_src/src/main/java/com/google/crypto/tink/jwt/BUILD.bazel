@@ -506,6 +506,7 @@ java_library(
     srcs = ["JsonUtil.java"],
     deps = [
         ":jwt_invalid_exception",
+        "//src/main/java/com/google/crypto/tink/internal:json_parser",
         "@maven//:com_google_code_gson_gson",
     ],
 )
@@ -515,6 +516,7 @@ android_library(
     srcs = ["JsonUtil.java"],
     deps = [
         ":jwt_invalid_exception-android",
+        "//src/main/java/com/google/crypto/tink/internal:json_parser-android",
         "@maven//:com_google_code_gson_gson",
     ],
 )

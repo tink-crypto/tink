@@ -16,20 +16,18 @@
 
 package com.google.crypto.tink.jwt;
 
+import com.google.crypto.tink.internal.JsonParser;
 import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
-import com.google.gson.internal.Streams;
-import com.google.gson.stream.JsonReader;
-import java.io.StringReader;
-import java.util.Map;
+import java.io.IOException;
 
 /**
  * Helper functions to parse JSON strings, and validate strings.
  * */
 final class JsonUtil {
 
+  // TODO(juerg): Remove this function, and make isValidateString in JsonParser public.
   static boolean isValidString(String s) {
     int length = s.length();
     int i = 0;
@@ -49,56 +47,18 @@ final class JsonUtil {
     }
   }
 
-  private static void validateAllStringsInJsonObject(JsonObject jsonObject)
-      throws JwtInvalidException {
-    for (Map.Entry<String, JsonElement> entry : jsonObject.entrySet()) {
-      if (!isValidString(entry.getKey())) {
-        throw new JwtInvalidException("JSON string contains character");
-      }
-      validateAllStringsInJsonElement(entry.getValue());
-    }
-  }
-
-  private static void validateAllStringsInJsonElement(JsonElement element)
-      throws JwtInvalidException {
-    if (element.isJsonPrimitive() && element.getAsJsonPrimitive().isString()) {
-      if (!isValidString(element.getAsJsonPrimitive().getAsString())) {
-        throw new JwtInvalidException("JSON string contains invalid character");
-      }
-    } else if (element.isJsonObject()) {
-      validateAllStringsInJsonObject(element.getAsJsonObject());
-    } else if (element.isJsonArray()) {
-      validateAllStringsInJsonArray(element.getAsJsonArray());
-    }
-  }
-
-  private static void validateAllStringsInJsonArray(JsonArray jsonArray)
-      throws JwtInvalidException {
-    for (JsonElement element : jsonArray) {
-      validateAllStringsInJsonElement(element);
-    }
-  }
-
   static JsonObject parseJson(String jsonString) throws JwtInvalidException {
     try {
-      JsonReader jsonReader = new JsonReader(new StringReader(jsonString));
-      jsonReader.setLenient(false);
-      JsonObject output = Streams.parse(jsonReader).getAsJsonObject();
-      validateAllStringsInJsonObject(output);
-      return output;
-    } catch (IllegalStateException | JsonParseException | StackOverflowError ex) {
+      return JsonParser.parse(jsonString).getAsJsonObject();
+    } catch (IllegalStateException | JsonParseException  | IOException ex) {
       throw new JwtInvalidException("invalid JSON: " + ex);
     }
   }
 
   static JsonArray parseJsonArray(String jsonString) throws JwtInvalidException {
     try {
-      JsonReader jsonReader = new JsonReader(new StringReader(jsonString));
-      jsonReader.setLenient(false);
-      JsonArray output = Streams.parse(jsonReader).getAsJsonArray();
-      validateAllStringsInJsonArray(output);
-      return output;
-    } catch (IllegalStateException | JsonParseException | StackOverflowError ex) {
+      return JsonParser.parse(jsonString).getAsJsonArray();
+    } catch (IllegalStateException | JsonParseException | IOException ex) {
       throw new JwtInvalidException("invalid JSON: " + ex);
     }
   }

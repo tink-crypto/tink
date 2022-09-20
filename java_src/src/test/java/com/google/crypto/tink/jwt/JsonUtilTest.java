@@ -75,16 +75,17 @@ public final class JsonUtilTest {
     for (int i = 0; i < 10000; i++) {
       sb.append("}");
     }
-    try {
-      JsonUtil.parseJson(sb.toString());
-    } catch (JwtInvalidException ex) {
-      // JwtInvalidException is fine, no exception as well.
-    }
+    assertThrows(JwtInvalidException.class, () -> JsonUtil.parseJson(sb.toString()));
   }
 
   @Test
   public void parseJsonWithoutQuotes_fail() throws Exception {
     assertThrows(JwtInvalidException.class, () -> JsonUtil.parseJson("{bool:false}"));
+  }
+
+  @Test
+  public void parseJsonObjectWithoutDuplicateKey_fail() throws Exception {
+    assertThrows(JwtInvalidException.class, () -> JsonUtil.parseJson("{\"a\":1,\"a\":2}"));
   }
 
   @Test
