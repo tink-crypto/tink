@@ -1,0 +1,36 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+package(default_visibility = ["//:__subpackages__"])  # keep
+
+licenses(["notice"])  # keep
+
+go_library(
+    name = "streamingprf",
+    srcs = [
+        "hkdf_streaming_prf.go",
+        "streaming_prf.go",
+    ],
+    importpath = "github.com/google/tink/go/keyderivation/internal/streamingprf",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//subtle",
+        "@org_golang_x_crypto//hkdf",
+    ],
+)
+
+go_test(
+    name = "streamingprf_test",
+    srcs = ["hkdf_streaming_prf_test.go"],
+    data = ["@wycheproof//testvectors:all"],
+    embed = [":streamingprf"],
+    deps = [
+        "//subtle/random",
+        "//testutil",
+    ],
+)
+
+alias(
+    name = "go_default_library",
+    actual = ":streamingprf",
+    visibility = ["//visibility:public"],
+)
