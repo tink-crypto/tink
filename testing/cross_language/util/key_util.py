@@ -256,7 +256,7 @@ def parse_text_format(serialized: str, msg: message.Message) -> None:
   msg.Clear()
   proto_text_format.Parse(serialized, msg)
   serialized_copy = text_format(msg)
-  assert serialized_copy == serialized
+  assert serialized_copy == serialized, serialized_copy
 
 
 def assert_tink_proto_equal(self,

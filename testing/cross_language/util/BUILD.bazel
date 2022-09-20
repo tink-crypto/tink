@@ -202,3 +202,36 @@ py_test(
         "@tink_py//tink/proto:tink_py_pb2",
     ],
 )
+
+py_library(
+    name = "_test_keys_db",
+    srcs = ["_test_keys_db.py"],
+    deps = [":_test_keys_container"],
+)
+
+py_library(
+    name = "create_test_key",
+    srcs = ["create_test_key.py"],
+    deps = [
+        ":_test_keys_container",
+        ":_test_keys_db",
+        ":key_util",
+        "@tink_py//tink/proto:tink_py_pb2",
+        "@tink_py//tink:cleartext_keyset_handle",
+        "@tink_py//tink:tink_python",
+    ],
+)
+
+py_test(
+    name = "create_test_key_test",
+    srcs = ["create_test_key_test.py"],
+    deps = [
+        ":_test_keys_container",
+        ":create_test_key",
+        ":key_util",
+        requirement("absl-py"),
+        "@tink_py//tink/aead",
+        "@tink_py//tink/proto:aes_gcm_py_pb2",
+        "@tink_py//tink/proto:tink_py_pb2",
+    ],
+)
