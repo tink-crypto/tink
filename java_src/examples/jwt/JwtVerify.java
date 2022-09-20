@@ -22,7 +22,6 @@ import com.google.crypto.tink.jwt.JwtPublicKeyVerify;
 import com.google.crypto.tink.jwt.JwtSignatureConfig;
 import com.google.crypto.tink.jwt.JwtValidator;
 import com.google.crypto.tink.jwt.VerifiedJwt;
-import com.google.crypto.tink.tinkkey.KeyAccess;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -61,7 +60,7 @@ public final class JwtVerify {
     KeysetHandle publicKeysetHandle = null;
     try {
       String publicJwkSet = new String(Files.readAllBytes(publicJwkSetFile.toPath()), UTF_8);
-      publicKeysetHandle = JwkSetConverter.toKeysetHandle(publicJwkSet, KeyAccess.publicAccess());
+      publicKeysetHandle = JwkSetConverter.toPublicKeysetHandle(publicJwkSet);
     } catch (GeneralSecurityException | IOException ex) {
       System.err.println("Cannot read keyset, got error: " + ex);
       System.exit(1);
