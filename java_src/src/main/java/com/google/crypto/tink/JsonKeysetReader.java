@@ -17,6 +17,7 @@
 package com.google.crypto.tink;
 
 import androidx.annotation.RequiresApi;
+import com.google.crypto.tink.internal.JsonParser;
 import com.google.crypto.tink.proto.EncryptedKeyset;
 import com.google.crypto.tink.proto.KeyData;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
@@ -31,16 +32,12 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
-import com.google.gson.JsonParser;
-import com.google.gson.internal.Streams;
-import com.google.gson.stream.JsonReader;
 import com.google.protobuf.ByteString;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.StringReader;
 import java.nio.charset.Charset;
 import java.nio.file.Path;
 
@@ -141,10 +138,8 @@ public final class JsonKeysetReader implements KeysetReader {
   @Override
   public Keyset read() throws IOException {
     try {
-      JsonReader jsonReader =
-          new JsonReader(new StringReader(new String(Util.readAll(inputStream), UTF_8)));
-      jsonReader.setLenient(false);
-        return keysetFromJson(Streams.parse(jsonReader).getAsJsonObject());
+      return keysetFromJson(
+          JsonParser.parse(new String(Util.readAll(inputStream), UTF_8)).getAsJsonObject());
     } catch (JsonParseException | IllegalStateException e) {
       throw new IOException(e);
     } finally {
@@ -158,7 +153,7 @@ public final class JsonKeysetReader implements KeysetReader {
   public EncryptedKeyset readEncrypted() throws IOException {
     try {
       return encryptedKeysetFromJson(
-          JsonParser.parseString(new String(Util.readAll(inputStream), UTF_8)).getAsJsonObject());
+          JsonParser.parse(new String(Util.readAll(inputStream), UTF_8)).getAsJsonObject());
     } catch (JsonParseException | IllegalStateException e) {
       throw new IOException(e);
     } finally {
@@ -168,13 +163,18 @@ public final class JsonKeysetReader implements KeysetReader {
     }
   }
 
-  private static int getKeyId(JsonElement e) throws IOException {
-    long id = e.getAsLong();
+  private static int getKeyId(JsonElement element) throws IOException {
+    long id;
+    try {
+      id = JsonParser.getParsedNumberAsLongOrThrow(element);
+    } catch (NumberFormatException e) {
+      throw new IOException(e);
+    }
     if (id > MAX_KEY_ID || id < MIN_KEY_ID) {
       throw new IOException("invalid key id");
     }
     // casts large unsigned int32 numbers to negative int32 numbers
-    return (int) e.getAsLong();
+    return (int) element.getAsLong();
   }
 
   private Keyset keysetFromJson(JsonObject json) throws IOException {

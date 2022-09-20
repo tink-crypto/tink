@@ -406,6 +406,12 @@ public class JsonKeysetReaderTest {
   }
 
   @Test
+  public void readKeyset_rejectsKeyIdLargerThanUint64() throws Exception {
+    String jsonKeysetString = createJsonKeysetWithId("18446744073709551658"); // 2^64 + 42
+    assertThrows(IOException.class, () -> JsonKeysetReader.withString(jsonKeysetString).read());
+  }
+
+  @Test
   public void readKeyset_rejectsKeyIdSmallerThanInt32() throws Exception {
     String jsonKeysetString = createJsonKeysetWithId("-2147483649"); // - 2^31 - 1
     assertThrows(IOException.class, () -> JsonKeysetReader.withString(jsonKeysetString).read());
@@ -414,6 +420,42 @@ public class JsonKeysetReaderTest {
   @Test
   public void testReadKeyset_keyIdWithComment_throws() throws Exception {
     String jsonKeysetString = createJsonKeysetWithId("123 /* comment on key ID */");
+    assertThrows(IOException.class, () -> JsonKeysetReader.withString(jsonKeysetString).read());
+  }
+
+  @Test
+  public void testReadKeyset_withDuplicatedMapKey_throws() throws Exception {
+    String jsonKeysetString = "{"
+        + "\"primaryKeyId\": 123,"
+        + "\"key\": [{"
+        + "\"keyData\": {"
+        + "\"typeUrl\": \"type.googleapis.com/google.crypto.tink.HmacKey\","
+        + "\"keyMaterialType\": \"SYMMETRIC\","
+        + "\"keyMaterialType\": \"SYMMETRIC\","
+        + "\"value\": \"EgQIAxAQGiBYhMkitTWFVefTIBg6kpvac+bwFOGSkENGmU+1EYgocg==\""
+        + "},"
+        + "\"outputPrefixType\": \"TINK\","
+        + "\"keyId\": 123,"
+        + "\"status\": \"ENABLED\""
+        + "}]}";
+    assertThrows(IOException.class, () -> JsonKeysetReader.withString(jsonKeysetString).read());
+  }
+
+  @Test
+  public void testReadKeyset_withInvalidCharacterInTypeUrl_throws() throws Exception {
+    String jsonKeysetString =
+        "{"
+            + "\"primaryKeyId\": 123,"
+            + "\"key\": [{"
+            + "\"keyData\": {"
+            + "\"typeUrl\": \"type.googleapis.com/google.crypto.tink.HmacKey\\uD834\","
+            + "\"keyMaterialType\": \"SYMMETRIC\","
+            + "\"value\": \"EgQIAxAQGiBYhMkitTWFVefTIBg6kpvac+bwFOGSkENGmU+1EYgocg==\""
+            + "},"
+            + "\"outputPrefixType\": \"TINK\","
+            + "\"keyId\": 123,"
+            + "\"status\": \"ENABLED\""
+            + "}]}";
     assertThrows(IOException.class, () -> JsonKeysetReader.withString(jsonKeysetString).read());
   }
 
