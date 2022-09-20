@@ -382,6 +382,14 @@ class RawJwtTest(absltest.TestCase):
     with self.assertRaises(jwt.JwtInvalidError):
       jwt.RawJwt._from_json(None, u'{"a":{"a":{"a":"\\uD834"}}}')
 
+  def test_from_payload_with_duplicate_map_keys_fails(self):
+    with self.assertRaises(jwt.JwtInvalidError):
+      jwt.RawJwt._from_json(None, '{"claim": "claim1", "claim": "claim2"}')
+    with self.assertRaises(jwt.JwtInvalidError):
+      jwt.RawJwt._from_json(None, '{"nested": {"a: "a1", "a": "a2"}}')
+    # this is fine, since the two 'a' keys are not in the same map
+    _ = jwt.RawJwt._from_json(None, '{"a": "a1", "b": {"a": "a2"}}')
+
   def test_modification(self):
     audiences = ['alice', 'bob']
     my_claim = {'one': 'two'}

@@ -23,26 +23,40 @@ def json_dumps(json_data: Any) -> str:
   return json.dumps(json_data, separators=(',', ':'))
 
 
-def validate_all_strings(json_data: Any):
-  """Recursivly visits all strings and raises UnicodeEncodeError if invalid."""
-  if isinstance(json_data, str):
-    # We use encode('utf8') to validate that the string is valid.
-    json_data.encode('utf8')
-  if isinstance(json_data, list):
-    for item in json_data:
-      validate_all_strings(item)
-  if isinstance(json_data, dict):
-    for key, value in json_data.items():
-      key.encode('utf8')
-      validate_all_strings(value)
+def _validate_str(value: str) -> None:
+  """Uses encode('utf8') to check if value is a valid string."""
+  _ = value.encode('utf8')
+
+
+def _validate_value(value: Any) -> None:
+  """Validates strings in a JSON object value."""
+  # We don't need to check strings inside dicts, because json.loads will call
+  # _dict_with_validation for these.
+  if isinstance(value, str):
+    _validate_str(value)
+  if isinstance(value, list):
+    for item in value:
+      if isinstance(item, str):
+        _validate_str(item)
+
+
+def _dict_with_validation(pairs):
+  """Validates pairs and returns a dict."""
+  keys = set()
+  for key, value in pairs:
+    _validate_str(key)
+    if key in keys:
+      raise _jwt_error.JwtInvalidError(
+          'Failed to parse JSON string, duplicated key')
+    keys.add(key)
+    _validate_value(value)
+  return dict(pairs)
 
 
 def json_loads(json_text: str) -> Any:
   """Does the same as json.loads, but with some additional validation."""
   try:
-    json_data = json.loads(json_text)
-    validate_all_strings(json_data)
-    return json_data
+    return json.loads(json_text, object_pairs_hook=_dict_with_validation)
   except json.decoder.JSONDecodeError:
     raise _jwt_error.JwtInvalidError('Failed to parse JSON string')
   except RecursionError:

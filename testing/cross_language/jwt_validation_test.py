@@ -385,17 +385,9 @@ class JwtTest(parameterized.TestCase):
     token = generate_token('{"alg":"HS256"}', '{"iss":"joe", "iss":"jane"}')
     jwt_mac = testing_servers.jwt_mac(lang, KEYSET)
 
-    if lang != 'python':
-      validator_with_second_issuer = jwt.new_validator(
-          ignore_issuer=True, allow_missing_expiration=True)
-      with self.assertRaises(tink.TinkError):
-        jwt_mac.verify_mac_and_decode(token, validator_with_second_issuer)
-    else:
-      # Currently, this is accepted in Python, and always the last
-      # entry is used.
-      # TODO(b/241828611): This should be rejected.
-      validator_with_second_issuer = jwt.new_validator(
-          expected_issuer='jane', allow_missing_expiration=True)
+    validator_with_second_issuer = jwt.new_validator(
+        ignore_issuer=True, allow_missing_expiration=True)
+    with self.assertRaises(tink.TinkError):
       jwt_mac.verify_mac_and_decode(token, validator_with_second_issuer)
 
   @parameterized.parameters(SUPPORTED_LANGUAGES)
