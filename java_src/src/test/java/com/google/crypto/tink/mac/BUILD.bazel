@@ -165,6 +165,17 @@ java_test(
 )
 
 java_test(
+    name = "HmacParametersTest",
+    size = "small",
+    srcs = ["HmacParametersTest.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink/mac:hmac_parameters",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
     name = "AesCmacKeyTest",
     size = "small",
     srcs = ["AesCmacKeyTest.java"],
