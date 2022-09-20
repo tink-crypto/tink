@@ -17,6 +17,8 @@
 package stubkeymanager_test
 
 import (
+	"bytes"
+	"errors"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
@@ -30,7 +32,7 @@ type fakePrimitive struct {
 	Name string
 }
 
-func TestStubKeyManagerReturnsAppropiateValues(t *testing.T) {
+func TestStubKeyManager(t *testing.T) {
 	keyType := "some.key.type"
 	km := stubkeymanager.StubKeyManager{
 		URL:  keyType,
@@ -39,37 +41,72 @@ func TestStubKeyManagerReturnsAppropiateValues(t *testing.T) {
 		KeyData: &tpb.KeyData{
 			TypeUrl:         keyType,
 			Value:           []byte("key_value"),
-			KeyMaterialType: tpb.KeyData_ASYMMETRIC_PRIVATE,
+			KeyMaterialType: tpb.KeyData_SYMMETRIC,
 		},
 	}
 	if !km.DoesSupport(keyType) {
-		t.Errorf("km.DoesSupport(%q) = false , want true", keyType)
+		t.Errorf("DoesSupport(%q) = false , want true", keyType)
 	}
 	if km.DoesSupport("some.other.key.type") {
-		t.Errorf("km.DoesSupport(%q) = true , want false", keyType)
+		t.Errorf("DoesSupport(%q) = true , want false", keyType)
 	}
-	if km.TypeURL() != keyType {
-		t.Errorf("km.TypeURL() = %q, want %q", km.TypeURL(), keyType)
+	if km.TypeURL() != km.URL {
+		t.Errorf("TypeURL() = %q, want %q", km.TypeURL(), keyType)
 	}
 	key, err := km.NewKey(nil)
 	if err != nil {
-		t.Errorf("km.NewKey() err = %v, want nil", err)
+		t.Errorf("NewKey() err = %v, want nil", err)
 	}
 	if !cmp.Equal(key, km.Key, protocmp.Transform()) {
 		t.Errorf("NewKey() = %v, want %v", key, km.Key)
 	}
 	keyData, err := km.NewKeyData(nil)
 	if err != nil {
-		t.Errorf("km.NewKeyData() err = %v, want nil", err)
+		t.Errorf("NewKeyData() err = %v, want nil", err)
 	}
 	if !cmp.Equal(keyData, km.KeyData, protocmp.Transform()) {
 		t.Errorf("NewKeyData() = %v, want %v", keyData, km.KeyData)
 	}
 	p, err := km.Primitive(nil)
 	if err != nil {
-		t.Errorf("km.Primitive() err = %v, want nil", err)
+		t.Errorf("Primitive() err = %v, want nil", err)
 	}
 	if !cmp.Equal(p, km.Prim) {
 		t.Errorf("Primitive() = %v, want %v", p, km.Prim)
+	}
+}
+
+func TestStubPrivateKeyManager(t *testing.T) {
+	km := stubkeymanager.StubPrivateKeyManager{
+		PubKeyData: &tpb.KeyData{
+			TypeUrl:         "some.key.type",
+			Value:           []byte("key_value"),
+			KeyMaterialType: tpb.KeyData_ASYMMETRIC_PUBLIC,
+		},
+	}
+	pubKeyData, err := km.PublicKeyData(nil)
+	if err != nil {
+		t.Errorf("PublicKeyData() err = %v, want nil", err)
+	}
+	if !cmp.Equal(pubKeyData, km.PubKeyData, protocmp.Transform()) {
+		t.Errorf("PublicKeyData() = %v, want %v", pubKeyData, km.PubKeyData)
+	}
+}
+
+func TestStubDerivableKeyManager(t *testing.T) {
+	km := stubkeymanager.StubDerivableKeyManager{
+		KeyMatType: tpb.KeyData_SYMMETRIC,
+		DerKey:     &agpb.AesGcmKey{Version: 0, KeyValue: []byte("derived_key_value")},
+		DerErr:     errors.New("hiya"),
+	}
+	if km.KeyMaterialType() != km.KeyMatType {
+		t.Errorf("KeyMaterialType() = %d, want %d", km.KeyMaterialType(), tpb.KeyData_SYMMETRIC)
+	}
+	derivedKey, err := km.DeriveKey([]byte{}, &bytes.Buffer{})
+	if !cmp.Equal(derivedKey, km.DerKey, protocmp.Transform()) {
+		t.Errorf("DeriveKey() = %v, want %v", derivedKey, km.DerKey)
+	}
+	if err != km.DerErr {
+		t.Errorf("DeriveKey() err = %v, want %v", err, km.DerErr)
 	}
 }

@@ -2,20 +2,16 @@ load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
 
 go_library(
     name = "stubkeymanager",
+    testonly = 1,
     srcs = ["stubkeymanager.go"],
     importpath = "github.com/google/tink/go/internal/testing/stubkeymanager",
     visibility = ["//:__subpackages__"],
     deps = [
         "//core/registry",
+        "//internal/internalregistry",
         "//proto/tink_go_proto",
         "@org_golang_google_protobuf//proto",
     ],
-)
-
-alias(
-    name = "go_default_library",
-    actual = ":stubkeymanager",
-    visibility = ["//:__subpackages__"],
 )
 
 go_test(
@@ -28,4 +24,10 @@ go_test(
         "@com_github_google_go_cmp//cmp",
         "@org_golang_google_protobuf//testing/protocmp",
     ],
+)
+
+alias(
+    name = "go_default_library",
+    actual = ":stubkeymanager",
+    visibility = ["//:__subpackages__"],
 )

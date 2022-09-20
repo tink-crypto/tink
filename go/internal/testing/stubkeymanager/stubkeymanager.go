@@ -14,12 +14,15 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-// Package stubkeymanager defines a key manager for testing primitives.
+// Package stubkeymanager defines key managers for testing primitives.
 package stubkeymanager
 
 import (
+	"io"
+
 	"google.golang.org/protobuf/proto"
 	"github.com/google/tink/go/core/registry"
+	"github.com/google/tink/go/internal/internalregistry"
 	tinkpb "github.com/google/tink/go/proto/tink_go_proto"
 )
 
@@ -32,19 +35,6 @@ type StubKeyManager struct {
 }
 
 var _ (registry.KeyManager) = (*StubKeyManager)(nil)
-
-// StubPrivateKeyManager is a private key manager for testing.
-type StubPrivateKeyManager struct {
-	StubKeyManager
-	PubKeyData *tinkpb.KeyData
-}
-
-var _ (registry.PrivateKeyManager) = (*StubPrivateKeyManager)(nil)
-
-// PublicKeyData returns the stub public key data.
-func (skm *StubPrivateKeyManager) PublicKeyData(serializedKey []byte) (*tinkpb.KeyData, error) {
-	return skm.PubKeyData, nil
-}
 
 // Primitive returns the stub primitive.
 func (km *StubKeyManager) Primitive(serializedKey []byte) (interface{}, error) {
@@ -69,4 +59,37 @@ func (km *StubKeyManager) DoesSupport(typeURL string) bool {
 // TypeURL returns the stub type url.
 func (km *StubKeyManager) TypeURL() string {
 	return km.URL
+}
+
+// StubPrivateKeyManager is a private key manager for testing.
+type StubPrivateKeyManager struct {
+	StubKeyManager
+	PubKeyData *tinkpb.KeyData
+}
+
+var _ (registry.PrivateKeyManager) = (*StubPrivateKeyManager)(nil)
+
+// PublicKeyData returns the stub public key data.
+func (skm *StubPrivateKeyManager) PublicKeyData(serializedKey []byte) (*tinkpb.KeyData, error) {
+	return skm.PubKeyData, nil
+}
+
+// StubDerivableKeyManager is a derivable key manager for testing.
+type StubDerivableKeyManager struct {
+	StubKeyManager
+	KeyMatType tinkpb.KeyData_KeyMaterialType
+	DerKey     proto.Message
+	DerErr     error
+}
+
+var _ (internalregistry.DerivableKeyManager) = (*StubDerivableKeyManager)(nil)
+
+// KeyMaterialType returns the stub key material type.
+func (dkm *StubDerivableKeyManager) KeyMaterialType() tinkpb.KeyData_KeyMaterialType {
+	return dkm.KeyMatType
+}
+
+// DeriveKey returns the stub derived key and error.
+func (dkm *StubDerivableKeyManager) DeriveKey(serializedKeyFormat []byte, pseudorandomness io.Reader) (proto.Message, error) {
+	return dkm.DerKey, dkm.DerErr
 }
