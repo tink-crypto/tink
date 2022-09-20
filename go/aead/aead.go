@@ -23,6 +23,7 @@ import (
 	"fmt"
 
 	"github.com/google/tink/go/core/registry"
+	"github.com/google/tink/go/internal/internalregistry"
 )
 
 func init() {
@@ -33,6 +34,7 @@ func init() {
 	if err := registry.RegisterKeyManager(new(aesGCMKeyManager)); err != nil {
 		panic(fmt.Sprintf("aead.init() failed: %v", err))
 	}
+	internalregistry.AllowKeyDerivation(aesGCMTypeURL)
 
 	if err := registry.RegisterKeyManager(new(chaCha20Poly1305KeyManager)); err != nil {
 		panic(fmt.Sprintf("aead.init() failed: %v", err))

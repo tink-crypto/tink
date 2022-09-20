@@ -9,6 +9,7 @@ go_library(
     srcs = [
         "derivable_key_manager.go",
         "internal_registry.go",
+        "key_derivation.go",
     ],
     importpath = "github.com/google/tink/go/internal/internalregistry",
     deps = [
@@ -21,10 +22,20 @@ go_library(
 
 go_test(
     name = "internalregistry_test",
-    srcs = ["internal_registry_test.go"],
+    srcs = [
+        "internal_registry_test.go",
+        "key_derivation_test.go",
+    ],
     deps = [
         ":internalregistry",
+        "//aead",
+        "//core/registry",
+        "//internal/testing/stubkeymanager",
+        "//proto/aes_gcm_go_proto",
+        "//proto/tink_go_proto",
+        "//subtle/random",
         "//testing/fakemonitoring",
+        "@org_golang_google_protobuf//proto",
     ],
 )
 
