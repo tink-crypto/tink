@@ -195,7 +195,7 @@ public final class HmacParameters extends MacParameters {
     this.hashType = hashType;
   }
 
-  public static Builder newBuilder() {
+  public static Builder builder() {
     return new Builder();
   }
 

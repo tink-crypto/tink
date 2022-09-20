@@ -33,7 +33,7 @@ public final class HmacParametersTest {
   @Test
   public void buildParametersAndGetProperties() throws Exception {
     HmacParameters parameters =
-        HmacParameters.newBuilder()
+        HmacParameters.builder()
             .setKeySizeBytes(16)
             .setTagSizeBytes(21)
             .setHashType(HmacParameters.HashType.SHA256)
@@ -50,7 +50,7 @@ public final class HmacParametersTest {
   @Test
   public void buildParametersWithoutPrefix() throws Exception {
     HmacParameters parameters =
-        HmacParameters.newBuilder()
+        HmacParameters.builder()
             .setKeySizeBytes(16)
             .setTagSizeBytes(21)
             .setHashType(HmacParameters.HashType.SHA256)
@@ -65,7 +65,7 @@ public final class HmacParametersTest {
   @Test
   public void buildParametersWithTinkPrefix() throws Exception {
     HmacParameters parameters =
-        HmacParameters.newBuilder()
+        HmacParameters.builder()
             .setKeySizeBytes(16)
             .setTagSizeBytes(21)
             .setHashType(HmacParameters.HashType.SHA256)
@@ -80,7 +80,7 @@ public final class HmacParametersTest {
   @Test
   public void buildParametersWithLegacyPrefix() throws Exception {
     HmacParameters parameters =
-        HmacParameters.newBuilder()
+        HmacParameters.builder()
             .setKeySizeBytes(16)
             .setTagSizeBytes(21)
             .setHashType(HmacParameters.HashType.SHA256)
@@ -95,7 +95,7 @@ public final class HmacParametersTest {
   @Test
   public void buildParametersWithCrunchyPrefix() throws Exception {
     HmacParameters parameters =
-        HmacParameters.newBuilder()
+        HmacParameters.builder()
             .setKeySizeBytes(16)
             .setTagSizeBytes(21)
             .setHashType(HmacParameters.HashType.SHA256)
@@ -110,7 +110,7 @@ public final class HmacParametersTest {
   @Test
   public void buildParametersWithSha256() throws Exception {
     HmacParameters parameters =
-        HmacParameters.newBuilder()
+        HmacParameters.builder()
             .setKeySizeBytes(16)
             .setTagSizeBytes(21)
             .setHashType(HmacParameters.HashType.SHA256)
@@ -122,7 +122,7 @@ public final class HmacParametersTest {
   @Test
   public void buildParametersWithSha384() throws Exception {
     HmacParameters parameters =
-        HmacParameters.newBuilder()
+        HmacParameters.builder()
             .setKeySizeBytes(16)
             .setTagSizeBytes(21)
             .setHashType(HmacParameters.HashType.SHA384)
@@ -134,7 +134,7 @@ public final class HmacParametersTest {
   @Test
   public void buildParametersWithSha512() throws Exception {
     HmacParameters parameters =
-        HmacParameters.newBuilder()
+        HmacParameters.builder()
             .setKeySizeBytes(16)
             .setTagSizeBytes(21)
             .setHashType(HmacParameters.HashType.SHA512)
@@ -148,7 +148,7 @@ public final class HmacParametersTest {
     assertThrows(
         GeneralSecurityException.class,
         () ->
-            HmacParameters.newBuilder()
+            HmacParameters.builder()
                 .setKeySizeBytes(16)
                 .setTagSizeBytes(0)
                 .setHashType(HmacParameters.HashType.SHA1)
@@ -157,21 +157,21 @@ public final class HmacParametersTest {
     assertThrows(
         GeneralSecurityException.class,
         () ->
-            HmacParameters.newBuilder()
+            HmacParameters.builder()
                 .setKeySizeBytes(16)
                 .setTagSizeBytes(9)
                 .setHashType(HmacParameters.HashType.SHA1)
                 .setVariant(HmacParameters.Variant.NO_PREFIX)
                 .build());
     HmacParameters unused =
-        HmacParameters.newBuilder()
+        HmacParameters.builder()
             .setKeySizeBytes(16)
             .setTagSizeBytes(10)
             .setHashType(HmacParameters.HashType.SHA1)
             .setVariant(HmacParameters.Variant.NO_PREFIX)
             .build();
     unused =
-        HmacParameters.newBuilder()
+        HmacParameters.builder()
             .setKeySizeBytes(16)
             .setTagSizeBytes(20)
             .setHashType(HmacParameters.HashType.SHA1)
@@ -180,7 +180,7 @@ public final class HmacParametersTest {
     assertThrows(
         GeneralSecurityException.class,
         () ->
-            HmacParameters.newBuilder()
+            HmacParameters.builder()
                 .setKeySizeBytes(16)
                 .setTagSizeBytes(21)
                 .setHashType(HmacParameters.HashType.SHA1)
@@ -189,7 +189,7 @@ public final class HmacParametersTest {
     assertThrows(
         GeneralSecurityException.class,
         () ->
-            HmacParameters.newBuilder()
+            HmacParameters.builder()
                 .setKeySizeBytes(16)
                 .setTagSizeBytes(32)
                 .setHashType(HmacParameters.HashType.SHA1)
@@ -202,7 +202,7 @@ public final class HmacParametersTest {
     assertThrows(
         GeneralSecurityException.class,
         () ->
-            HmacParameters.newBuilder()
+            HmacParameters.builder()
                 .setKeySizeBytes(16)
                 .setTagSizeBytes(0)
                 .setHashType(HmacParameters.HashType.SHA224)
@@ -211,21 +211,21 @@ public final class HmacParametersTest {
     assertThrows(
         GeneralSecurityException.class,
         () ->
-            HmacParameters.newBuilder()
+            HmacParameters.builder()
                 .setKeySizeBytes(16)
                 .setTagSizeBytes(9)
                 .setHashType(HmacParameters.HashType.SHA224)
                 .setVariant(HmacParameters.Variant.NO_PREFIX)
                 .build());
     HmacParameters unused =
-        HmacParameters.newBuilder()
+        HmacParameters.builder()
             .setKeySizeBytes(16)
             .setTagSizeBytes(10)
             .setHashType(HmacParameters.HashType.SHA224)
             .setVariant(HmacParameters.Variant.NO_PREFIX)
             .build();
     unused =
-        HmacParameters.newBuilder()
+        HmacParameters.builder()
             .setKeySizeBytes(16)
             .setTagSizeBytes(28)
             .setHashType(HmacParameters.HashType.SHA224)
@@ -234,7 +234,7 @@ public final class HmacParametersTest {
     assertThrows(
         GeneralSecurityException.class,
         () ->
-            HmacParameters.newBuilder()
+            HmacParameters.builder()
                 .setKeySizeBytes(16)
                 .setTagSizeBytes(29)
                 .setHashType(HmacParameters.HashType.SHA224)
@@ -243,7 +243,7 @@ public final class HmacParametersTest {
     assertThrows(
         GeneralSecurityException.class,
         () ->
-            HmacParameters.newBuilder()
+            HmacParameters.builder()
                 .setKeySizeBytes(16)
                 .setTagSizeBytes(32)
                 .setHashType(HmacParameters.HashType.SHA224)
@@ -256,7 +256,7 @@ public final class HmacParametersTest {
     assertThrows(
         GeneralSecurityException.class,
         () ->
-            HmacParameters.newBuilder()
+            HmacParameters.builder()
                 .setKeySizeBytes(16)
                 .setTagSizeBytes(0)
                 .setHashType(HmacParameters.HashType.SHA256)
@@ -265,21 +265,21 @@ public final class HmacParametersTest {
     assertThrows(
         GeneralSecurityException.class,
         () ->
-            HmacParameters.newBuilder()
+            HmacParameters.builder()
                 .setKeySizeBytes(16)
                 .setTagSizeBytes(9)
                 .setHashType(HmacParameters.HashType.SHA256)
                 .setVariant(HmacParameters.Variant.NO_PREFIX)
                 .build());
     HmacParameters unused =
-        HmacParameters.newBuilder()
+        HmacParameters.builder()
             .setKeySizeBytes(16)
             .setTagSizeBytes(10)
             .setHashType(HmacParameters.HashType.SHA256)
             .setVariant(HmacParameters.Variant.NO_PREFIX)
             .build();
     unused =
-        HmacParameters.newBuilder()
+        HmacParameters.builder()
             .setKeySizeBytes(16)
             .setTagSizeBytes(32)
             .setHashType(HmacParameters.HashType.SHA256)
@@ -288,7 +288,7 @@ public final class HmacParametersTest {
     assertThrows(
         GeneralSecurityException.class,
         () ->
-            HmacParameters.newBuilder()
+            HmacParameters.builder()
                 .setKeySizeBytes(16)
                 .setTagSizeBytes(33)
                 .setHashType(HmacParameters.HashType.SHA256)
@@ -297,7 +297,7 @@ public final class HmacParametersTest {
     assertThrows(
         GeneralSecurityException.class,
         () ->
-            HmacParameters.newBuilder()
+            HmacParameters.builder()
                 .setKeySizeBytes(16)
                 .setTagSizeBytes(64)
                 .setHashType(HmacParameters.HashType.SHA256)
@@ -310,7 +310,7 @@ public final class HmacParametersTest {
     assertThrows(
         GeneralSecurityException.class,
         () ->
-            HmacParameters.newBuilder()
+            HmacParameters.builder()
                 .setKeySizeBytes(16)
                 .setTagSizeBytes(0)
                 .setHashType(HmacParameters.HashType.SHA384)
@@ -319,21 +319,21 @@ public final class HmacParametersTest {
     assertThrows(
         GeneralSecurityException.class,
         () ->
-            HmacParameters.newBuilder()
+            HmacParameters.builder()
                 .setKeySizeBytes(16)
                 .setTagSizeBytes(9)
                 .setHashType(HmacParameters.HashType.SHA384)
                 .setVariant(HmacParameters.Variant.NO_PREFIX)
                 .build());
     HmacParameters unused =
-        HmacParameters.newBuilder()
+        HmacParameters.builder()
             .setKeySizeBytes(16)
             .setTagSizeBytes(10)
             .setHashType(HmacParameters.HashType.SHA384)
             .setVariant(HmacParameters.Variant.NO_PREFIX)
             .build();
     unused =
-        HmacParameters.newBuilder()
+        HmacParameters.builder()
             .setKeySizeBytes(16)
             .setTagSizeBytes(48)
             .setHashType(HmacParameters.HashType.SHA384)
@@ -342,7 +342,7 @@ public final class HmacParametersTest {
     assertThrows(
         GeneralSecurityException.class,
         () ->
-            HmacParameters.newBuilder()
+            HmacParameters.builder()
                 .setKeySizeBytes(16)
                 .setTagSizeBytes(49)
                 .setHashType(HmacParameters.HashType.SHA384)
@@ -351,7 +351,7 @@ public final class HmacParametersTest {
     assertThrows(
         GeneralSecurityException.class,
         () ->
-            HmacParameters.newBuilder()
+            HmacParameters.builder()
                 .setKeySizeBytes(16)
                 .setTagSizeBytes(64)
                 .setHashType(HmacParameters.HashType.SHA384)
@@ -364,7 +364,7 @@ public final class HmacParametersTest {
     assertThrows(
         GeneralSecurityException.class,
         () ->
-            HmacParameters.newBuilder()
+            HmacParameters.builder()
                 .setKeySizeBytes(16)
                 .setTagSizeBytes(0)
                 .setHashType(HmacParameters.HashType.SHA512)
@@ -373,21 +373,21 @@ public final class HmacParametersTest {
     assertThrows(
         GeneralSecurityException.class,
         () ->
-            HmacParameters.newBuilder()
+            HmacParameters.builder()
                 .setKeySizeBytes(16)
                 .setTagSizeBytes(9)
                 .setHashType(HmacParameters.HashType.SHA512)
                 .setVariant(HmacParameters.Variant.NO_PREFIX)
                 .build());
     HmacParameters unused =
-        HmacParameters.newBuilder()
+        HmacParameters.builder()
             .setKeySizeBytes(16)
             .setTagSizeBytes(10)
             .setHashType(HmacParameters.HashType.SHA512)
             .setVariant(HmacParameters.Variant.NO_PREFIX)
             .build();
     unused =
-        HmacParameters.newBuilder()
+        HmacParameters.builder()
             .setKeySizeBytes(16)
             .setTagSizeBytes(64)
             .setHashType(HmacParameters.HashType.SHA512)
@@ -396,7 +396,7 @@ public final class HmacParametersTest {
     assertThrows(
         GeneralSecurityException.class,
         () ->
-            HmacParameters.newBuilder()
+            HmacParameters.builder()
                 .setKeySizeBytes(16)
                 .setTagSizeBytes(65)
                 .setHashType(HmacParameters.HashType.SHA512)
@@ -405,7 +405,7 @@ public final class HmacParametersTest {
     assertThrows(
         GeneralSecurityException.class,
         () ->
-            HmacParameters.newBuilder()
+            HmacParameters.builder()
                 .setKeySizeBytes(16)
                 .setTagSizeBytes(128)
                 .setHashType(HmacParameters.HashType.SHA512)
@@ -416,14 +416,14 @@ public final class HmacParametersTest {
   @Test
   public void testEqualsAndEqualHashCode() throws Exception {
     HmacParameters parameters1 =
-        HmacParameters.newBuilder()
+        HmacParameters.builder()
             .setKeySizeBytes(16)
             .setTagSizeBytes(21)
             .setHashType(HmacParameters.HashType.SHA256)
             .setVariant(HmacParameters.Variant.NO_PREFIX)
             .build();
     HmacParameters parameters2 =
-        HmacParameters.newBuilder()
+        HmacParameters.builder()
             .setKeySizeBytes(16)
             .setTagSizeBytes(21)
             .setHashType(HmacParameters.HashType.SHA256)
@@ -437,7 +437,7 @@ public final class HmacParametersTest {
   @Test
   public void testNotEqual() throws Exception {
     HmacParameters parameters =
-        HmacParameters.newBuilder()
+        HmacParameters.builder()
             .setKeySizeBytes(16)
             .setTagSizeBytes(21)
             .setHashType(HmacParameters.HashType.SHA256)
@@ -445,7 +445,7 @@ public final class HmacParametersTest {
             .build();
     assertThat(parameters)
         .isNotEqualTo(
-            HmacParameters.newBuilder()
+            HmacParameters.builder()
                 .setKeySizeBytes(32)
                 .setTagSizeBytes(21)
                 .setHashType(HmacParameters.HashType.SHA256)
@@ -453,7 +453,7 @@ public final class HmacParametersTest {
                 .build());
     assertThat(parameters)
         .isNotEqualTo(
-            HmacParameters.newBuilder()
+            HmacParameters.builder()
                 .setKeySizeBytes(16)
                 .setTagSizeBytes(22)
                 .setHashType(HmacParameters.HashType.SHA256)
@@ -461,7 +461,7 @@ public final class HmacParametersTest {
                 .build());
     assertThat(parameters)
         .isNotEqualTo(
-            HmacParameters.newBuilder()
+            HmacParameters.builder()
                 .setKeySizeBytes(16)
                 .setTagSizeBytes(21)
                 .setHashType(HmacParameters.HashType.SHA384)
@@ -469,7 +469,7 @@ public final class HmacParametersTest {
                 .build());
     assertThat(parameters)
         .isNotEqualTo(
-            HmacParameters.newBuilder()
+            HmacParameters.builder()
                 .setKeySizeBytes(16)
                 .setTagSizeBytes(21)
                 .setHashType(HmacParameters.HashType.SHA256)
