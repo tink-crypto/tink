@@ -80,7 +80,7 @@ func TestRSASSAPSSSignVerifyInvalidFails(t *testing.T) {
 
 	modifiedSig := s[:]
 	// modify first byte in signature
-	modifiedSig[0] <<= 1
+	modifiedSig[0] = byte(uint8(modifiedSig[0]) + 1)
 	if err := verifier.Verify(modifiedSig, data); err == nil {
 		t.Errorf("Verify(modifiedSig, data) err = nil, want error")
 	}

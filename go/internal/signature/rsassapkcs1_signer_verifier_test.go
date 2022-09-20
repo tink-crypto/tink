@@ -80,7 +80,7 @@ func TestRSASSAPKCS1ModifySignatureFails(t *testing.T) {
 	if err := verifier.Verify(truncSig, data); err == nil {
 		t.Fatalf("Verify() err = nil, want error")
 	}
-	signature[0] <<= 1
+	signature[0] = byte(uint8(signature[0] + 1))
 	if err := verifier.Verify(truncSig, data); err == nil {
 		t.Fatalf("Verify() err = nil, want error")
 	}

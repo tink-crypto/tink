@@ -128,7 +128,7 @@ func TestRSAKeySelfTestWithCorruptedKeysFails(t *testing.T) {
 				Primes: []*big.Int{
 					func() *big.Int {
 						p := validPrivKey.Primes[0].Bytes()
-						p[4] <<= 1
+						p[4] = byte(uint8(p[4] + 1))
 						return new(big.Int).SetBytes(p)
 					}(),
 					validPrivKey.Primes[1],

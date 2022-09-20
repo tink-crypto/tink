@@ -340,8 +340,8 @@ func TestRSASSAPKCS1SignerKeyManagerPrimitiveWithCorruptedKeyFails(t *testing.T)
 	if err != nil {
 		t.Fatalf("makeValidRSAPKCS1Key() err = %v, want nil", err)
 	}
-	corruptedPrivKey.P[5] <<= 1
-	corruptedPrivKey.P[10] <<= 1
+	corruptedPrivKey.P[5] = byte(uint8(corruptedPrivKey.P[5] + 1))
+	corruptedPrivKey.P[10] = byte(uint8(corruptedPrivKey.P[10] + 1))
 	serializedCorruptedPrivate, err := proto.Marshal(corruptedPrivKey)
 	if err != nil {
 		t.Fatalf("proto.Marshal() err = %v, want nil", err)

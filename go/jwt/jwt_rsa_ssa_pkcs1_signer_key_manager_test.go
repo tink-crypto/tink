@@ -560,8 +560,8 @@ func TestJWTRSSignerKeyManagerPrimitiveFailsWithCorruptedKey(t *testing.T) {
 		t.Fatalf("makeValidJWTRSPrivateKey() err = %v, want nil", err)
 	}
 	corruptedPrivKey := validPrivKey
-	corruptedPrivKey.P[100] <<= 1
-	corruptedPrivKey.P[5] <<= 1
+	corruptedPrivKey.P[100] = byte(uint8(corruptedPrivKey.P[100] + 1))
+	corruptedPrivKey.P[5] = byte(uint8(corruptedPrivKey.P[5] + 1))
 	serializedPrivKey, err := proto.Marshal(corruptedPrivKey)
 	if err != nil {
 		t.Fatalf("proto.Marshal() err = %v, want nil", err)

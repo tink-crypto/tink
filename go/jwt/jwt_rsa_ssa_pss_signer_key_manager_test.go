@@ -228,7 +228,7 @@ func TestJWTPSSignerKeyManagerPrimitiveFailsWithCorruptedKey(t *testing.T) {
 		t.Fatalf("makeValidJWTPSPrivateKey() err = %v, want nil", err)
 	}
 	invalidQ := validPrivKey.GetQ()
-	invalidQ[50] <<= 1
+	invalidQ[50] = byte(uint8(invalidQ[50] + 1))
 	corruptedPrivKey := &jrsppb.JwtRsaSsaPssPrivateKey{
 		Version:   validPrivKey.GetVersion(),
 		PublicKey: validPrivKey.GetPublicKey(),
