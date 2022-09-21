@@ -23,8 +23,8 @@ from tink import cleartext_keyset_handle
 
 from tink.proto import tink_pb2
 from util import key_util
-from google3.third_party.tink.testing.cross_language.util.test_keys import _test_keys_container
-from google3.third_party.tink.testing.cross_language.util.test_keys import _test_keys_db
+from util.test_keys import _test_keys_container
+from util.test_keys import _test_keys_db
 
 
 def _use_stored_key(template: tink_pb2.KeyTemplate) -> bool:

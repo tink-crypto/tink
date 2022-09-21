@@ -14,7 +14,7 @@
 
 """Database of precomputed Tink Keys for the cross language tests.
 """
-from google3.third_party.tink.testing.cross_language.util.test_keys import _test_keys_container
+from util.test_keys import _test_keys_container
 
 db = _test_keys_container.TestKeysContainer()
 

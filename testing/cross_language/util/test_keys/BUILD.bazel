@@ -11,7 +11,10 @@ licenses(["notice"])
 py_library(
     name = "test_keys",
     srcs = ["__init__.py"],
-    deps = [":_create_test_key"],
+    deps = [
+        ":_create_test_key",
+        ":_test_keys_container",
+    ],
 )
 
 py_library(
@@ -27,7 +30,7 @@ py_test(
     name = "_test_keys_container_test",
     srcs = ["_test_keys_container_test.py"],
     deps = [
-        ":_test_keys_container",
+        ":test_keys",
         requirement("absl-py"),
         "@tink_py//tink/proto:tink_py_pb2",
     ],
@@ -46,9 +49,9 @@ py_library(
         ":_test_keys_container",
         ":_test_keys_db",
         "//util:key_util",
-        "@tink_py//tink/proto:tink_py_pb2",
         "@tink_py//tink:cleartext_keyset_handle",
         "@tink_py//tink:tink_python",
+        "@tink_py//tink/proto:tink_py_pb2",
     ],
 )
 
@@ -56,8 +59,7 @@ py_test(
     name = "_create_test_key_test",
     srcs = ["_create_test_key_test.py"],
     deps = [
-        ":_test_keys_container",
-        ":_create_test_key",
+        ":test_keys",
         "//util:key_util",
         requirement("absl-py"),
         "@tink_py//tink/aead",

@@ -13,8 +13,8 @@
 # limitations under the License.
 """test_keys package."""
 
-from google3.third_party.tink.testing.cross_language.util.test_keys import _create_test_key
-from google3.third_party.tink.testing.cross_language.util.test_keys import _test_keys_container
+from util.test_keys import _create_test_key
+from util.test_keys import _test_keys_container
 
 new_or_stored_key = _create_test_key.new_or_stored_key
 new_or_stored_keyset = _create_test_key.new_or_stored_keyset
