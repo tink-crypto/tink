@@ -27,10 +27,9 @@ import com.google.gson.JsonParseException;
 import com.google.gson.JsonPrimitive;
 import com.google.gson.internal.Streams;
 import com.google.gson.stream.JsonReader;
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.ObjectInputStream;
+import java.io.NotSerializableException;
 import java.io.ObjectOutputStream;
 import java.io.StringReader;
 import java.math.BigInteger;
@@ -269,13 +268,24 @@ public final class JsonParserTest {
     Number num = numElement.getAsNumber();
     ByteArrayOutputStream bytes = new ByteArrayOutputStream();
     ObjectOutputStream out = new ObjectOutputStream(bytes);
-    out.writeObject(num);
-    ObjectInputStream in = new ObjectInputStream(new ByteArrayInputStream(bytes.toByteArray()));
-    Number deserialized = (Number) in.readObject();
-    assertThat(deserialized.intValue()).isEqualTo(42);
+    assertThrows(NotSerializableException.class, () -> out.writeObject(num));
   }
 
-  @Theory
+  @Test
+  public void parsedNumberGetValue() throws Exception {
+    JsonElement numElement = JsonParser.parse("42.42");
+    assertThat(numElement.getAsInt()).isEqualTo(42);
+    assertThat(numElement.getAsLong()).isEqualTo(42);
+    assertThat(numElement.getAsFloat()).isEqualTo(42.42f);
+    assertThat(numElement.getAsDouble()).isEqualTo(42.42);
+    Number number = numElement.getAsNumber();
+    assertThat(number.intValue()).isEqualTo(42);
+    assertThat(number.longValue()).isEqualTo(42);
+    assertThat(number.floatValue()).isEqualTo(42.42f);
+    assertThat(number.doubleValue()).isEqualTo(42.42);
+  }
+
+  @Test
   public void parsedNumberGetAsLong_discardsAllBut64LowestOrderBits() throws Exception {
     // It would be preferable if JsonElement.getAsLong would throw a NumberFormatException exception
     // if the number it contains does not fit into a long, similar to what Long.parseLong does.
@@ -288,7 +298,7 @@ public final class JsonParserTest {
     assertThat(numElement.getAsLong()).isEqualTo(-9223372036854775807L);
   }
 
-  @Theory
+  @Test
   public void parsedNumberGetAsInt_discardsAllBut32LowestOrderBits() throws Exception {
     // It would be preferable if JsonElement.getAsInt would throw a NumberFormatException exception
     // if the number it contains does not fit into a long, similar to what Int.parseInt does.

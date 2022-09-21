@@ -22,12 +22,14 @@ import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import com.google.gson.TypeAdapter;
-import com.google.gson.internal.LazilyParsedNumber;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonToken;
 import com.google.gson.stream.JsonWriter;
 import java.io.IOException;
+import java.io.NotSerializableException;
+import java.io.ObjectInputStream;
 import java.io.StringReader;
+import java.math.BigDecimal;
 import java.util.ArrayDeque;
 import java.util.Deque;
 import javax.annotation.Nullable;
@@ -59,6 +61,78 @@ public final class JsonParser {
         return false;
       }
       i++;
+    }
+  }
+
+  /** This is a modified copy of Gson's internal LazilyParsedNumber. */
+  @SuppressWarnings("serial") // Serialization is not supported. Throws NotSerializableException
+  private static final class LazilyParsedNumber extends Number {
+    private final String value;
+
+    public LazilyParsedNumber(String value) {
+      this.value = value;
+    }
+
+    @Override
+    public int intValue() {
+      try {
+        return Integer.parseInt(value);
+      } catch (NumberFormatException e) {
+        try {
+          return (int) Long.parseLong(value);
+        } catch (NumberFormatException nfe) {
+          return new BigDecimal(value).intValue();
+        }
+      }
+    }
+
+    @Override
+    public long longValue() {
+      try {
+        return Long.parseLong(value);
+      } catch (NumberFormatException e) {
+        return new BigDecimal(value).longValue();
+      }
+    }
+
+    @Override
+    public float floatValue() {
+      return Float.parseFloat(value);
+    }
+
+    @Override
+    public double doubleValue() {
+      return Double.parseDouble(value);
+    }
+
+    @Override
+    public String toString() {
+      return value;
+    }
+
+    private Object writeReplace() throws NotSerializableException {
+      throw new NotSerializableException("serialization is not supported");
+    }
+
+    private void readObject(ObjectInputStream in) throws NotSerializableException {
+      throw new NotSerializableException("serialization is not supported");
+    }
+
+    @Override
+    public int hashCode() {
+      return value.hashCode();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+      if (this == obj) {
+        return true;
+      }
+      if (obj instanceof LazilyParsedNumber) {
+        LazilyParsedNumber other = (LazilyParsedNumber) obj;
+        return value.equals(other.value);
+      }
+      return false;
     }
   }
 
