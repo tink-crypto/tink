@@ -17,27 +17,10 @@
 
 set -eu
 
-if [ $# -lt 1 ]; then
-  echo "usage $0 <version-name>"
+if (( $# < 1 )); then
+  echo "Usage: $0 <version-name>"
   exit 1;
 fi
 
 version_name="$1"
-shift 1
-
-if [[ ! "${version_name}" =~ ^1\. ]]; then
-  echo 'Version name must begin with "1."'
-  exit 2
-fi
-
-if [[ "${version_name}" =~ " " ]]; then
-  echo "Version name must not have any spaces"
-  exit 3
-fi
-
-bash "$(dirname $0)/execute_deploy.sh" \
-  "gpg:sign-and-deploy-file" \
-  "${version_name}" \
-  "-DrepositoryId=ossrh" \
-  "-Durl=https://oss.sonatype.org/service/local/staging/deploy/maven2/" \
-  "-X"
+bash "$(dirname $0)/execute_deploy.sh" "release" "${version_name}"

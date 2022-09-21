@@ -29,8 +29,6 @@ usage() {
   exit 1
 }
 
-# Process flags.
-
 DRY_RUN="false"
 LOCAL="false"
 
@@ -38,7 +36,6 @@ while getopts "dlh" opt; do
   case "${opt}" in
     d) DRY_RUN="true" ;;
     l) LOCAL="true" ;;
-    h) usage ;;
     *) usage ;;
   esac
 done
@@ -47,25 +44,18 @@ shift $((OPTIND - 1))
 readonly DRY_RUN
 readonly LOCAL
 
-declare -a COMMON_FLAGS
+declare -a FLAGS
 if [[ "${DRY_RUN}" == "true" ]]; then
-  COMMON_FLAGS+=( -d )
+  FLAGS+=( -d )
 fi
-readonly COMMON_FLAGS
+readonly FLAGS
 
 if [[ "${LOCAL}" == "true" ]]; then
-  echo -e "Publishing local Maven snapshot...\n"
-  bash "$(dirname $0)/execute_deploy.sh" "${COMMON_FLAGS[@]}" -l \
-    "install:install-file" \
-    "HEAD-SNAPSHOT"
+  echo "Publishing local Maven snapshot..."
+  bash "$(dirname $0)/execute_deploy.sh" "${FLAGS[@]}" "install" "HEAD"
 else
-  echo -e "Publishing Maven snapshot...\n"
-  bash "$(dirname $0)/execute_deploy.sh" "${COMMON_FLAGS[@]}" \
-    "deploy:deploy-file" \
-    "HEAD-SNAPSHOT" \
-    "-DrepositoryId=ossrh" \
-    "-Durl=https://oss.sonatype.org/content/repositories/snapshots" \
-    "--settings=../$(dirname $0)/settings.xml"
+  echo "Publishing Maven snapshot...\n"
+  bash "$(dirname $0)/execute_deploy.sh" "${FLAGS[@]}" "snapshot" "HEAD"
 fi
 
-echo -e "Finished publishing Maven snapshot."
+echo "Finished publishing Maven snapshot."
