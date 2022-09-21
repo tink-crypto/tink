@@ -27,25 +27,10 @@ import java.io.IOException;
  * */
 final class JsonUtil {
 
-  // TODO(juerg): Remove this function, and make isValidateString in JsonParser public.
   static boolean isValidString(String s) {
-    int length = s.length();
-    int i = 0;
-    while (true) {
-      char ch;
-      do {
-        if (i == length) {
-          return true;
-        }
-        ch = s.charAt(i);
-        i++;
-      } while (!Character.isSurrogate(ch));
-      if (Character.isLowSurrogate(ch) || i == length || !Character.isLowSurrogate(s.charAt(i))) {
-        return false;
-      }
-      i++;
-    }
+    return JsonParser.isValidString(s);
   }
+
 
   static JsonObject parseJson(String jsonString) throws JwtInvalidException {
     try {

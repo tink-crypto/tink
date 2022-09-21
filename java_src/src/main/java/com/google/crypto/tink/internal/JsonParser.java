@@ -43,7 +43,7 @@ import javax.annotation.Nullable;
  */
 public final class JsonParser {
 
-  private static boolean isValidString(String s) {
+  public static boolean isValidString(String s) {
     int length = s.length();
     int i = 0;
     while (true) {
