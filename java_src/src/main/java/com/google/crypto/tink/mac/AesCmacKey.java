@@ -36,6 +36,7 @@ import javax.annotation.Nullable;
 public final class AesCmacKey extends MacKey {
   private final AesCmacParameters parameters;
   private final SecretBytes aesKeyBytes;
+  private final Bytes outputPrefix;
   @Nullable private final Integer idRequirement;
 
   /**
@@ -66,6 +67,21 @@ public final class AesCmacKey extends MacKey {
       return this;
     }
 
+    private Bytes getOutputPrefix() {
+      if (parameters.getVariant() == AesCmacParameters.Variant.NO_PREFIX) {
+        return Bytes.copyFrom(new byte[] {});
+      }
+      if (parameters.getVariant() == AesCmacParameters.Variant.LEGACY
+          || parameters.getVariant() == AesCmacParameters.Variant.CRUNCHY) {
+        return Bytes.copyFrom(ByteBuffer.allocate(5).put((byte) 0).putInt(idRequirement).array());
+      }
+      if (parameters.getVariant() == AesCmacParameters.Variant.TINK) {
+        return Bytes.copyFrom(ByteBuffer.allocate(5).put((byte) 1).putInt(idRequirement).array());
+      }
+      throw new IllegalStateException(
+          "Unknown AesCmacParametersParameters.Variant: " + parameters.getVariant());
+    }
+
     public AesCmacKey build() throws GeneralSecurityException {
       if (parameters == null || aesKeyBytes == null) {
         throw new GeneralSecurityException("Cannot build without parameters and/or key material");
@@ -84,15 +100,19 @@ public final class AesCmacKey extends MacKey {
         throw new GeneralSecurityException(
             "Cannot create key with ID requirement with format without ID requirement");
       }
-
-      return new AesCmacKey(parameters, aesKeyBytes, idRequirement);
+      Bytes outputPrefix = getOutputPrefix();
+      return new AesCmacKey(parameters, aesKeyBytes, outputPrefix, idRequirement);
     }
   }
 
   private AesCmacKey(
-      AesCmacParameters parameters, SecretBytes aesKeyBytes, @Nullable Integer idRequirement) {
+      AesCmacParameters parameters,
+      SecretBytes aesKeyBytes,
+      Bytes outputPrefix,
+      @Nullable Integer idRequirement) {
     this.parameters = parameters;
     this.aesKeyBytes = aesKeyBytes;
+    this.outputPrefix = outputPrefix;
     this.idRequirement = idRequirement;
   }
 
@@ -117,18 +137,7 @@ public final class AesCmacKey extends MacKey {
 
   @Override
   public Bytes getOutputPrefix() {
-    if (parameters.getVariant() == AesCmacParameters.Variant.NO_PREFIX) {
-      return Bytes.copyFrom(new byte[] {});
-    }
-    if (parameters.getVariant() == AesCmacParameters.Variant.LEGACY
-        || parameters.getVariant() == AesCmacParameters.Variant.CRUNCHY) {
-      return Bytes.copyFrom(ByteBuffer.allocate(5).put((byte) 0).putInt(idRequirement).array());
-    }
-    if (parameters.getVariant() == AesCmacParameters.Variant.TINK) {
-      return Bytes.copyFrom(ByteBuffer.allocate(5).put((byte) 1).putInt(idRequirement).array());
-    }
-    throw new IllegalStateException(
-        "Unknown AesCmacParameters.Variant: " + parameters.getVariant());
+    return outputPrefix;
   }
 
   @Override
