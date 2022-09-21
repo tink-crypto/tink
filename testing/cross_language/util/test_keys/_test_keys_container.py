@@ -20,7 +20,6 @@ from tink.proto import tink_pb2
 from util import key_util
 
 
-## TODO(tholenst): Move this class in a subdirectory test_key_creation (or so)
 class TestKeysContainer():
   """Container for test keys."""
 

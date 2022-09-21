@@ -16,13 +16,13 @@
 from absl.testing import absltest
 
 from tink.proto import tink_pb2
-from util import _test_keys_container
+from util import test_keys
 
 
 class TestKeysContainerTest(absltest.TestCase):
 
   def test_insert_and_retrieve(self):
-    container = _test_keys_container.TestKeysContainer()
+    container = test_keys.TestKeysContainer()
     container.add_key(
         template=r"""
           type_url: "type.googleapis.com/google.crypto.tink.ChaCha20Poly1305Key"
@@ -58,7 +58,7 @@ class TestKeysContainerTest(absltest.TestCase):
     )
 
   def test_element_not_present_throws(self):
-    container = _test_keys_container.TestKeysContainer()
+    container = test_keys.TestKeysContainer()
     template = tink_pb2.KeyTemplate(
         type_url='type.googleapis.com/google.crypto.tink.ChaCha20Poly1305Key',
         output_prefix_type=tink_pb2.RAW)
@@ -85,7 +85,7 @@ class TestKeysContainerTest(absltest.TestCase):
       status: ENABLED
       key_id: 1349954765
       output_prefix_type: RAW"""
-    container = _test_keys_container.TestKeysContainer()
+    container = test_keys.TestKeysContainer()
     with self.assertRaises(AssertionError):
       container.add_key('# Comment\n' + valid_template, valid_key)
     with self.assertRaises(AssertionError):
@@ -95,7 +95,7 @@ class TestKeysContainerTest(absltest.TestCase):
     container.add_key(valid_template, valid_key)
 
   def test_multiple_keys_works(self):
-    container = _test_keys_container.TestKeysContainer()
+    container = test_keys.TestKeysContainer()
     container.add_key(
         template=r"""
           type_url: "type.googleapis.com/google.crypto.tink.ChaCha20Poly1305Key"
@@ -146,7 +146,7 @@ class TestKeysContainerTest(absltest.TestCase):
         container.get_key(template).output_prefix_type, tink_pb2.TINK)
 
   def test_insert_same_template_twice_fails(self):
-    container = _test_keys_container.TestKeysContainer()
+    container = test_keys.TestKeysContainer()
     container.add_key(
         template=r"""
           type_url: "type.googleapis.com/google.crypto.tink.ChaCha20Poly1305Key"

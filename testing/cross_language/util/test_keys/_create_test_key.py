@@ -22,9 +22,9 @@ import tink
 from tink import cleartext_keyset_handle
 
 from tink.proto import tink_pb2
-from util import _test_keys_container
-from util import _test_keys_db
 from util import key_util
+from google3.third_party.tink.testing.cross_language.util.test_keys import _test_keys_container
+from google3.third_party.tink.testing.cross_language.util.test_keys import _test_keys_db
 
 
 def _use_stored_key(template: tink_pb2.KeyTemplate) -> bool:
@@ -36,7 +36,7 @@ def _use_stored_key(template: tink_pb2.KeyTemplate) -> bool:
 
 def new_or_stored_key(
     template: tink_pb2.KeyTemplate,
-    container: _test_keys_container.TestKeysContainer = _test_keys_db.test_keys,
+    container: _test_keys_container.TestKeysContainer = _test_keys_db.db,
     use_stored_key: Callable[[tink_pb2.KeyTemplate], bool] = _use_stored_key
 ) -> tink_pb2.Keyset.Key:
   """Returns either a new key or one which is stored in the passed in db.
@@ -69,7 +69,7 @@ def new_or_stored_key(
 
 def new_or_stored_keyset(
     template: tink_pb2.KeyTemplate,
-    container: _test_keys_container.TestKeysContainer = _test_keys_db.test_keys,
+    container: _test_keys_container.TestKeysContainer = _test_keys_db.db,
     use_stored_key: Callable[[tink_pb2.KeyTemplate], bool] = _use_stored_key
 ) -> tink_pb2.Keyset:
   """Returns a new keyset with a single new or stored key.
