@@ -60,8 +60,8 @@ JavaScript is currently under development.
 |                    | AES-CMAC                          | yes      | yes                 | yes               | **no**          | yes        | yes        |
 | Digital Signatures | ECDSA over NIST curves            | yes      | yes                 | yes \*            | yes             | yes        | yes        |
 |                    | Ed25519                           | yes      | yes                 | yes               | yes             | yes        | yes        |
-|                    | RSA-SSA-PKCS1                     | yes      | yes                 | yes               | yes             | **no**     | yes        |
-|                    | RSA-SSA-PSS                       | yes      | yes                 | yes               | yes             | **no**     | yes        |
+|                    | RSA-SSA-PKCS1                     | yes      | yes                 | yes               | yes             | yes        | yes        |
+|                    | RSA-SSA-PSS                       | yes      | yes                 | yes               | yes             | yes        | yes        |
 | Hybrid Encryption  | HPKE                              | yes      | yes                 | **no**            | **no**          | yes        | yes        |
 |                    | ECIES with AEAD                   | yes      | yes                 | yes               | yes             | yes        | yes        |
 |                    | ECIES with DeterministicAEAD      | yes      | yes                 | yes               | **no**          | yes        | yes        |
