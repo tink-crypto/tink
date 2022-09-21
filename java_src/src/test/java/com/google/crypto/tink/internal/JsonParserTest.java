@@ -23,15 +23,11 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParseException;
 import com.google.gson.JsonPrimitive;
-import com.google.gson.internal.Streams;
-import com.google.gson.stream.JsonReader;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.NotSerializableException;
 import java.io.ObjectOutputStream;
-import java.io.StringReader;
 import java.math.BigInteger;
 import org.junit.Test;
 import org.junit.experimental.theories.DataPoints;
@@ -41,25 +37,10 @@ import org.junit.experimental.theories.Theory;
 import org.junit.runner.RunWith;
 
 /**
- * Tests that {@link JsonParser}.
- *
- * <p>We currently test it together with {@link com.google.gson.internal.Streams#parse(JsonReader)},
- * to show where they do the same and where they don't.
+ * Tests for Tink's internal {@link JsonParser}.
  */
 @RunWith(Theories.class)
 public final class JsonParserTest {
-
-  // TODO(b/241828611) Remove this once we fully migrated to JsonParser.parse.
-  // Streams.parse sometimes throws an IOException and sometimes an JsonParseException.
-  private JsonElement normalParse(String input) throws IOException {
-    try {
-      JsonReader jsonReader = new JsonReader(new StringReader(input));
-      jsonReader.setLenient(false);
-      return Streams.parse(jsonReader);
-    } catch (JsonParseException e) {
-      throw new IOException(e);
-    }
-  }
 
   public static final class TestCase {
     public final String name;
@@ -246,14 +227,11 @@ public final class JsonParserTest {
   };
 
   @Theory
-  public void testBothParsers_success(
+  public void parse_asExpected(
       @FromDataPoints("testCasesSuccess") TestCase testCase) throws Exception {
     JsonElement output = JsonParser.parse(testCase.input);
 
     assertThat(output).isEqualTo(testCase.expected);
-
-    // compare to normalParse
-    assertThat(output).isEqualTo(normalParse(testCase.input));
   }
 
   @Test
@@ -579,17 +557,7 @@ public final class JsonParserTest {
     new TestCase("array_with_leading_uescaped_thinspace", "[\\u0020\"a\"]"),
     new TestCase("array_with_escaped_new_line", "[\\n]"),
     new TestCase("array_with_escaped_tab", "[\\t]"),
-  };
 
-  @Theory
-  public void testBothParsersFail(
-      @FromDataPoints("testCasesFail") TestCase testCase) throws Exception {
-    assertThrows(IOException.class, () -> JsonParser.parse(testCase.input));
-    assertThrows(IOException.class, () -> normalParse(testCase.input));
-  }
-
-  @DataPoints("stricterTestCases")
-  public static final TestCase[] STRICTER_TEST_CASES = {
     new TestCase("duplicated_key", "{\"a\":\"b\",\"a\":\"c\"}"),
     new TestCase("duplicated_key_and_value", "{\"a\":\"b\",\"a\":\"b\"}"),
     new TestCase("empty", ""),
@@ -614,7 +582,7 @@ public final class JsonParserTest {
     new TestCase("invalid_surrogate_in_map_value", "{\"a\": \"\\uDFAA\"}", null),
   };
 
-  @Theory
+  @Test
   public void tooManyRecursions_fail() throws Exception {
     int recursionNum = 150;
     StringBuilder sb = new StringBuilder();
@@ -629,12 +597,9 @@ public final class JsonParserTest {
   }
 
   @Theory
-  public void testStrictFailsButNormalDoesNotFail(
-      @FromDataPoints("stricterTestCases") TestCase testCase) throws Exception {
-    // JsonParser.parse fails.
+  public void parse_fail(
+      @FromDataPoints("testCasesFail") TestCase testCase) throws Exception {
     assertThrows(IOException.class, () -> JsonParser.parse(testCase.input));
-
-    // normalParse parses successfully.
-    JsonElement unused = normalParse(testCase.input);
   }
+
 }
