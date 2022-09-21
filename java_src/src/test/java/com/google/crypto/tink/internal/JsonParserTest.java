@@ -27,9 +27,14 @@ import com.google.gson.JsonParseException;
 import com.google.gson.JsonPrimitive;
 import com.google.gson.internal.Streams;
 import com.google.gson.stream.JsonReader;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.StringReader;
 import java.math.BigInteger;
+import org.junit.Test;
 import org.junit.experimental.theories.DataPoints;
 import org.junit.experimental.theories.FromDataPoints;
 import org.junit.experimental.theories.Theories;
@@ -250,6 +255,24 @@ public final class JsonParserTest {
 
     // compare to normalParse
     assertThat(output).isEqualTo(normalParse(testCase.input));
+  }
+
+  @Test
+  public void parsedElementWithNumberToString_doesNotLoosePrecision() throws Exception {
+    JsonElement element = JsonParser.parse("{ \"a\": 9223372036854775807 }");
+    assertThat(element.toString()).isEqualTo("{\"a\":9223372036854775807}");
+  }
+
+  @Test
+  public void parsedNumberSerializeDeserialize_returnsBigDecimal() throws Exception {
+    JsonElement numElement = JsonParser.parse("42");
+    Number num = numElement.getAsNumber();
+    ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+    ObjectOutputStream out = new ObjectOutputStream(bytes);
+    out.writeObject(num);
+    ObjectInputStream in = new ObjectInputStream(new ByteArrayInputStream(bytes.toByteArray()));
+    Number deserialized = (Number) in.readObject();
+    assertThat(deserialized.intValue()).isEqualTo(42);
   }
 
   @Theory
