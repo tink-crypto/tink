@@ -19,7 +19,6 @@ package streamingaead_test
 import (
 	"fmt"
 	"io"
-	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
@@ -29,7 +28,7 @@ import (
 )
 
 func Example() {
-	dir, err := ioutil.TempDir("", "streamingaead")
+	dir, err := os.MkdirTemp("", "streamingaead")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -41,7 +40,7 @@ func Example() {
 		dstFilename = filepath.Join(dir, "plaintext.dst")
 	)
 
-	if err := ioutil.WriteFile(srcFilename, []byte("this data needs to be encrypted"), 0666); err != nil {
+	if err := os.WriteFile(srcFilename, []byte("this data needs to be encrypted"), 0666); err != nil {
 		log.Fatal(err)
 	}
 
@@ -120,7 +119,7 @@ func Example() {
 		log.Fatal(err)
 	}
 
-	b, err := ioutil.ReadFile(dstFilename)
+	b, err := os.ReadFile(dstFilename)
 
 	if err != nil {
 		log.Fatal(err)

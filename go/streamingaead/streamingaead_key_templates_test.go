@@ -18,7 +18,7 @@ package streamingaead_test
 
 import (
 	"bytes"
-	"io/ioutil"
+	"io"
 	"testing"
 
 	"github.com/google/tink/go/keyset"
@@ -91,9 +91,9 @@ func TestKeyTemplates(t *testing.T) {
 			if err != nil {
 				t.Fatalf("primitive.NewDecryptingReader(buf, aad) failed: %v", err)
 			}
-			decrypted, err := ioutil.ReadAll(r)
+			decrypted, err := io.ReadAll(r)
 			if err != nil {
-				t.Fatalf("ioutil.ReadAll(r) failed: %v", err)
+				t.Fatalf("io.ReadAll(r) failed: %v", err)
 			}
 			if !bytes.Equal(decrypted, plaintext) {
 				t.Errorf("decrypted data doesn't match plaintext, got: %q, want: ''", decrypted)

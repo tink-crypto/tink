@@ -18,7 +18,6 @@ package keyset
 
 import (
 	"io"
-	"io/ioutil"
 
 	"google.golang.org/protobuf/proto"
 
@@ -56,7 +55,7 @@ func (bkr *BinaryReader) ReadEncrypted() (*tinkpb.EncryptedKeyset, error) {
 }
 
 func read(r io.Reader, msg proto.Message) error {
-	data, err := ioutil.ReadAll(r)
+	data, err := io.ReadAll(r)
 	if err != nil {
 		return err
 	}

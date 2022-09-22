@@ -22,8 +22,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"net/http"
+	"os"
 	"runtime"
 	"strings"
 
@@ -142,7 +142,7 @@ func NewClientWithCredentials(uriPrefix string, credentialPath string) (registry
 	if len(credentialPath) <= 0 {
 		return nil, errCred
 	}
-	data, err := ioutil.ReadFile(credentialPath)
+	data, err := os.ReadFile(credentialPath)
 	if err != nil {
 		return nil, errCred
 	}
