@@ -15,22 +15,6 @@ python_grpc_library(
 )
 
 py_library(
-    name = "supported_key_types",
-    testonly = 1,
-    srcs = ["supported_key_types.py"],
-    deps = [
-        "@tink_py//tink/aead",
-        "@tink_py//tink/daead",
-        "@tink_py//tink/hybrid",
-        "@tink_py//tink/jwt",
-        "@tink_py//tink/mac",
-        "@tink_py//tink/prf",
-        "@tink_py//tink/signature",
-        "@tink_py//tink/streaming_aead",
-    ],
-)
-
-py_library(
     name = "_primitives",
     srcs = ["_primitives.py"],
     srcs_version = "PY3",
@@ -160,7 +144,7 @@ py_library(
     name = "utilities",
     srcs = ["utilities.py"],
     deps = [
-        ":supported_key_types",
+        "//tink_config",
         "@tink_py//tink/aead",
         "@tink_py//tink/daead",
         "@tink_py//tink/hybrid",
@@ -178,7 +162,7 @@ py_test(
     name = "utilities_test",
     srcs = ["utilities_test.py"],
     deps = [
-        ":supported_key_types",
+        "//tink_config",
         ":utilities",
         requirement("absl-py"),
     ],

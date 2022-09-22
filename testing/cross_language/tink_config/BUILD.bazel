@@ -1,0 +1,27 @@
+load("@rules_python//python:defs.bzl", "py_library")
+
+package(
+    default_testonly = 1,
+    default_visibility = ["//visibility:public"],
+)
+
+py_library(
+    name = "tink_config",
+    srcs = ["__init__.py"],
+    deps = [":_key_types"],
+)
+
+py_library(
+    name = "_key_types",
+    srcs = ["_key_types.py"],
+    deps = [
+        "@tink_py//tink/aead",
+        "@tink_py//tink/daead",
+        "@tink_py//tink/hybrid",
+        "@tink_py//tink/jwt",
+        "@tink_py//tink/mac",
+        "@tink_py//tink/prf",
+        "@tink_py//tink/signature",
+        "@tink_py//tink/streaming_aead",
+    ],
+)

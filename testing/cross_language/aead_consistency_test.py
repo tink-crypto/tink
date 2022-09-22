@@ -31,7 +31,7 @@ from tink.proto import aes_eax_pb2
 from tink.proto import aes_gcm_pb2
 from tink.proto import common_pb2
 from tink.proto import tink_pb2
-from util import supported_key_types
+import tink_config
 from util import testing_servers
 from util import utilities
 
@@ -178,7 +178,7 @@ class AeadKeyConsistencyTest(parameterized.TestCase):
                       aes_ctr_hmac_aead_key_test_cases()))
   def test_aead_creation_supported_languages_consistent(self, name, keyset):
     """Tests that AEAD creation is consistent in all supporeted languages."""
-    supported_langs = supported_key_types.SUPPORTED_LANGUAGES[
+    supported_langs = tink_config.SUPPORTED_LANGUAGES[
         utilities.KEY_TYPE_FROM_URL[keyset.key[0].key_data.type_url]]
 
     langs = [lang for _, lang in self._create_aeads_ignore_errors(keyset)]
@@ -192,7 +192,7 @@ class AeadKeyConsistencyTest(parameterized.TestCase):
                       aes_ctr_hmac_aead_key_test_cases()))
   def test_aead_creation_non_supported_languages_fail(self, name, keyset):
     """Tests that AEAD creation fails in all unsupported languages."""
-    supported_langs = supported_key_types.SUPPORTED_LANGUAGES[
+    supported_langs = tink_config.SUPPORTED_LANGUAGES[
         utilities.KEY_TYPE_FROM_URL[keyset.key[0].key_data.type_url]]
 
     langs = [lang for _, lang in self._create_aeads_ignore_errors(keyset)]

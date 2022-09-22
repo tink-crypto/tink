@@ -33,7 +33,7 @@ from tink import prf
 from tink import signature
 
 from tink.proto import tink_pb2
-from util import supported_key_types
+import tink_config
 from util import testing_servers
 from util import utilities
 
@@ -46,9 +46,9 @@ def unset_primary(keyset: bytes) -> bytes:
 
 
 def test_cases(primitive: Any) -> Iterable[Tuple[str, str]]:
-  for key_type in supported_key_types.KEY_TYPES[primitive]:
+  for key_type in tink_config.KEY_TYPES[primitive]:
     for key_template_name in utilities.KEY_TEMPLATE_NAMES[key_type]:
-      for lang in supported_key_types.SUPPORTED_LANGUAGES[key_type]:
+      for lang in tink_config.SUPPORTED_LANGUAGES[key_type]:
         yield (key_template_name, lang)
 
 

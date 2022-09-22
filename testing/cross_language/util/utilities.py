@@ -29,7 +29,7 @@ from tink import signature
 from tink import streaming_aead
 
 from tink.proto import tink_pb2
-from util import supported_key_types
+import tink_config
 
 # All languages supported by cross-language tests.
 ALL_LANGUAGES = ['cc', 'java', 'go', 'python']
@@ -37,7 +37,7 @@ ALL_LANGUAGES = ['cc', 'java', 'go', 'python']
 
 def _get_all_key_types():
   result = []
-  for key_types_for_single_primitive in supported_key_types.KEY_TYPES.values():
+  for key_types_for_single_primitive in tink_config.KEY_TYPES.values():
     result += key_types_for_single_primitive
   return result
 
@@ -353,7 +353,7 @@ def _supported_languages_by_template(
     template_name: str, key_type: str) -> List[str]:
   if template_name in _CUSTOM_SUPPORTED_LANGUAGES_BY_TEMPLATE_NAME:
     return _CUSTOM_SUPPORTED_LANGUAGES_BY_TEMPLATE_NAME[template_name]
-  return supported_key_types.SUPPORTED_LANGUAGES[key_type]
+  return tink_config.SUPPORTED_LANGUAGES[key_type]
 
 
 def _all_key_template_names_with_key_type():
@@ -364,7 +364,7 @@ def _all_key_template_names_with_key_type():
 
 def tinkey_template_names_for(primitive_class: Any) -> Iterable[str]:
   """Returns all the key template names for the given primitive type."""
-  for key_type in supported_key_types.KEY_TYPES[primitive_class]:
+  for key_type in tink_config.KEY_TYPES[primitive_class]:
     for template_name in KEY_TEMPLATE_NAMES[key_type]:
       yield template_name
 

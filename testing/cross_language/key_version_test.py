@@ -40,7 +40,7 @@ from tink.proto import kms_envelope_pb2
 from tink.proto import tink_pb2
 from tink.proto import xchacha20_poly1305_pb2
 
-from util import supported_key_types
+import tink_config
 from util import testing_servers
 from util import utilities
 
@@ -96,7 +96,7 @@ def gen_inc_versions(keyset):
 def test_cases(key_types: Iterable[str]):
   for key_type in key_types:
     for key_template_name in utilities.KEY_TEMPLATE_NAMES[key_type]:
-      for lang in supported_key_types.SUPPORTED_LANGUAGES[key_type]:
+      for lang in tink_config.SUPPORTED_LANGUAGES[key_type]:
         yield (key_template_name, lang)
 
 
@@ -121,7 +121,7 @@ class KeyVersionTest(parameterized.TestCase):
   """
 
   @parameterized.parameters(
-      test_cases(supported_key_types.KEY_TYPES[aead.Aead]))
+      test_cases(tink_config.KEY_TYPES[aead.Aead]))
   def test_inc_version_aead(self, key_template_name, lang):
     """Increments the key version by one and checks they can't be used."""
     template = utilities.KEY_TEMPLATE[key_template_name]
@@ -133,7 +133,7 @@ class KeyVersionTest(parameterized.TestCase):
         _ = testing_servers.remote_primitive(lang, keyset1, aead.Aead)
 
   @parameterized.parameters(
-      test_cases(supported_key_types.KEY_TYPES[daead.DeterministicAead]))
+      test_cases(tink_config.KEY_TYPES[daead.DeterministicAead]))
   def test_inc_version_daead(self, key_template_name, lang):
     """Increments the key version by one and checks they can't be used."""
     template = utilities.KEY_TEMPLATE[key_template_name]
@@ -144,7 +144,7 @@ class KeyVersionTest(parameterized.TestCase):
       with self.assertRaises(tink.TinkError):
         _ = testing_servers.deterministic_aead(lang, keyset1)
 
-  @parameterized.parameters(test_cases(supported_key_types.KEY_TYPES[mac.Mac]))
+  @parameterized.parameters(test_cases(tink_config.KEY_TYPES[mac.Mac]))
   def test_inc_version_mac(self, key_template_name, lang):
     """Increments the key version by one and checks they can't be used."""
     template = utilities.KEY_TEMPLATE[key_template_name]
@@ -156,7 +156,7 @@ class KeyVersionTest(parameterized.TestCase):
         _ = mac_primitive1.compute_mac(b'foo')
 
   @parameterized.parameters(
-      test_cases(supported_key_types.KEY_TYPES[prf.PrfSet]))
+      test_cases(tink_config.KEY_TYPES[prf.PrfSet]))
   def test_inc_version_prf(self, key_template_name, lang):
     """Increments the key version by one and checks they can't be used."""
     template = utilities.KEY_TEMPLATE[key_template_name]

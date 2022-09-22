@@ -23,7 +23,7 @@ from tink import mac
 
 from tink.proto import tink_pb2
 from tink.testing import keyset_builder
-from util import supported_key_types
+import tink_config
 from util import testing_servers
 from util import utilities
 
@@ -63,7 +63,7 @@ class MacTest(parameterized.TestCase):
     if key_template_name in _ADDITIONAL_KEY_TEMPLATES:
       key_template, key_type = _ADDITIONAL_KEY_TEMPLATES[
           key_template_name]
-      supported_langs = supported_key_types.SUPPORTED_LANGUAGES[key_type]
+      supported_langs = tink_config.SUPPORTED_LANGUAGES[key_type]
     else:
       key_template = utilities.KEY_TEMPLATE[key_template_name]
       supported_langs = (

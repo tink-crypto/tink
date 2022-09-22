@@ -17,7 +17,7 @@
 from absl.testing import absltest
 from tink import mac
 
-from util import supported_key_types
+import tink_config
 from util import utilities
 
 
@@ -31,7 +31,7 @@ class SupportedKeyTypesTest(absltest.TestCase):
 
   def test_all_key_types_present(self):
     self.assertEqual(
-        list(supported_key_types.SUPPORTED_LANGUAGES.keys()),
+        list(tink_config.SUPPORTED_LANGUAGES.keys()),
         utilities.ALL_KEY_TYPES)
     self.assertEqual(
         list(utilities.KEY_TEMPLATE_NAMES.keys()), utilities.ALL_KEY_TYPES)

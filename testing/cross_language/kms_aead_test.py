@@ -23,7 +23,7 @@ import tink
 from tink import aead
 
 from tink.proto import tink_pb2
-from util import supported_key_types
+import tink_config
 from util import testing_servers
 from util import utilities
 
@@ -32,7 +32,7 @@ def _kms_envelope_aead_templates(
 ) -> Dict[str, Tuple[tink_pb2.KeyTemplate, str]]:
   """For each KMS envelope AEAD template name maps the key template and DEK AEAD key type."""
   kms_key_templates = {}
-  for aead_key_type in supported_key_types.KEY_TYPES[aead.Aead]:
+  for aead_key_type in tink_config.KEY_TYPES[aead.Aead]:
     for key_template_name in utilities.KEY_TEMPLATE_NAMES[
         aead_key_type]:
       envelope_aead_key_template = (
@@ -65,7 +65,7 @@ def _test_cases() -> Iterable[str]:
   for key_template_name, (
       _, aead_key_type) in _KMS_ENVELOPE_AEAD_KEY_TEMPLATES.items():
     # Make sure to test languages that support the pritive used for DEK.
-    supported_langs = supported_key_types.SUPPORTED_LANGUAGES[aead_key_type]
+    supported_langs = tink_config.SUPPORTED_LANGUAGES[aead_key_type]
     # Make sure the language supports KMS envelope encryption.
     supported_langs = set(supported_langs).intersection(
         _SUPPORTED_LANGUAGES_FOR_KMS_ENVELOPE_AEAD)

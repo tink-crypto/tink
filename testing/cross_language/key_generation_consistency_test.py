@@ -32,7 +32,7 @@ from tink.proto import common_pb2
 from tink.proto import ecdsa_pb2
 from tink.proto import jwt_hmac_pb2
 from tink.proto import tink_pb2
-from util import supported_key_types
+import tink_config
 from util import testing_servers
 from util import utilities
 
@@ -395,7 +395,7 @@ class KeyGenerationConsistencyTest(parameterized.TestCase):
                       rsa_ssa_pkcs1_test_cases(),
                       rsa_ssa_pss_test_cases()))
   def test_key_generation_consistency(self, name, template):
-    supported_langs = supported_key_types.SUPPORTED_LANGUAGES[
+    supported_langs = tink_config.SUPPORTED_LANGUAGES[
         utilities.KEY_TYPE_FROM_URL[template.type_url]]
     failures = 0
     results = {}
