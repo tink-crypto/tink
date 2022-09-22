@@ -38,12 +38,15 @@ install_cmake() {
   local cmake_archive="${cmake_name}.tar.gz"
   local cmake_url="https://github.com/Kitware/CMake/releases/download/v${cmake_version}/${cmake_archive}"
   local cmake_tmpdir="$(mktemp -dt tink-cmake.XXXXXX)"
+  local -r cmake_folder="${cmake_tmpdir}/${cmake_name}"
   (
     cd "${cmake_tmpdir}"
     curl -OLsS "${cmake_url}"
     echo "${cmake_sha256} ${cmake_archive}" | sha256sum -c
-
-    tar xzf "${cmake_archive}"
+    mkdir -p "${cmake_folder}"
+    # This is needed because versions <= 3.19.X are named
+    # cmake-<VERSION>-Linux-x86_64.
+    tar xzf "${cmake_archive}" -C "${cmake_folder}" --strip-component=1
   )
   export PATH="${cmake_tmpdir}/${cmake_name}/bin:${PATH}"
 }
