@@ -18,7 +18,12 @@
 // function families.
 package streamingprf
 
-import "io"
+import (
+	"fmt"
+	"io"
+
+	"github.com/google/tink/go/core/registry"
+)
 
 // StreamingPRF is the interface used to represent a streaming pseudorandom
 // function family for a specified key.
@@ -28,4 +33,10 @@ type StreamingPRF interface {
 	// Compute computes the PRF selected by the specified key on input and returns
 	// the result via a reader.
 	Compute(input []byte) io.Reader
+}
+
+func init() {
+	if err := registry.RegisterKeyManager(new(hkdfStreamingPRFKeyManager)); err != nil {
+		panic(fmt.Sprintf("streamingprf.init() failed: %v", err))
+	}
 }

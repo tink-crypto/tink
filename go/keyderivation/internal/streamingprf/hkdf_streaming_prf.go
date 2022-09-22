@@ -41,11 +41,8 @@ var _ StreamingPRF = (*hkdfStreamingPRF)(nil)
 // newHKDFStreamingPRF constructs a new hkdfStreamingPRF using hashName, key,
 // and salt. Salt can be nil.
 func newHKDFStreamingPRF(hashName string, key, salt []byte) (*hkdfStreamingPRF, error) {
-	if hashName != "SHA256" && hashName != "SHA512" {
-		return nil, fmt.Errorf("only SHA-256, SHA-512 allowed for HKDF")
-	}
-	if len(key) < minHKDFStreamingPRFKeySize {
-		return nil, fmt.Errorf("key too short, require 32-bytes: %d", len(key))
+	if err := validateHKDFStreamingPRFParams(hashName, len(key)); err != nil {
+		return nil, err
 	}
 	return &hkdfStreamingPRF{
 		h:    subtle.GetHashFunc(hashName),
@@ -57,4 +54,14 @@ func newHKDFStreamingPRF(hashName string, key, salt []byte) (*hkdfStreamingPRF, 
 // Compute computes and returns the HKDF as a Reader.
 func (h *hkdfStreamingPRF) Compute(data []byte) io.Reader {
 	return hkdf.New(h.h, h.key, h.salt, data)
+}
+
+func validateHKDFStreamingPRFParams(hash string, keySize int) error {
+	if hash != "SHA256" && hash != "SHA512" {
+		return fmt.Errorf("only SHA-256, SHA-512 allowed for HKDF")
+	}
+	if keySize < minHKDFStreamingPRFKeySize {
+		return fmt.Errorf("key too short, require %d-bytes: %d", minHKDFStreamingPRFKeySize, keySize)
+	}
+	return nil
 }
