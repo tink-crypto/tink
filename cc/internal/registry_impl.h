@@ -275,8 +275,8 @@ class RegistryImpl {
       return public_key_manager_type_index_;
     }
 
-    bool new_key_allowed() const { return new_key_allowed_; }
-    void set_new_key_allowed(bool b) { new_key_allowed_ = b; }
+    bool new_key_allowed() const { return new_key_allowed_.load(); }
+    void set_new_key_allowed(bool b) { new_key_allowed_.store(b); }
 
     const KeyFactory& key_factory() const { return *key_factory_; }
 
@@ -299,7 +299,7 @@ class RegistryImpl {
     absl::flat_hash_map<std::type_index, std::unique_ptr<KeyManagerBase>>
         primitive_to_manager_;
     // Whether the key manager allows creating new keys.
-    bool new_key_allowed_;
+    std::atomic<bool> new_key_allowed_;
     // A factory constructed from an internal key manager. Owned version of
     // key_factory if constructed with a KeyTypeManager. This is nullptr if
     // constructed with a KeyManager.
