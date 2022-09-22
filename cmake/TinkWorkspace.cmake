@@ -95,10 +95,12 @@ if (NOT TINK_USE_SYSTEM_OPENSSL)
     NAME boringssl
     URL https://github.com/google/boringssl/archive/d345d68d5c4b5471290ebe13f090f1fd5b7e8f58.zip
     SHA256 482796f369c8655dbda3be801ae98c47916ecd3bff223d007a723fd5f5ecba22
+    CMAKE_SUBDIR src
   )
 
   # BoringSSL targets do not carry include directory info, this fixes it.
-  target_include_directories(crypto PUBLIC "${boringssl_SOURCE_DIR}/src/include")
+  target_include_directories(crypto PUBLIC
+    "$<BUILD_INTERFACE:${boringssl_SOURCE_DIR}/src/include>")
 else()
   # Support for ED25519 was added from 1.1.1.
   find_package(OpenSSL 1.1.1 REQUIRED)
