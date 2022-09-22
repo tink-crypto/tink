@@ -434,20 +434,21 @@ class RegistryImpl {
   // key_type_manager remains valid.
   // NOTE: We require pointer stability of the value, as get_key_type_info
   // returns a pointer which needs to stay alive.
-  absl::flat_hash_map<std::string, KeyTypeInfo> type_url_to_info_
-      ABSL_GUARDED_BY(maps_mutex_);
+  absl::flat_hash_map<std::string, std::unique_ptr<KeyTypeInfo>>
+      type_url_to_info_ ABSL_GUARDED_BY(maps_mutex_);
   // A map from the type_id to the corresponding wrapper.
-  absl::flat_hash_map<std::type_index, WrapperInfo> primitive_to_wrapper_
-      ABSL_GUARDED_BY(maps_mutex_);
+  absl::flat_hash_map<std::type_index, std::unique_ptr<WrapperInfo>>
+      primitive_to_wrapper_ ABSL_GUARDED_BY(maps_mutex_);
 
-  absl::flat_hash_map<std::string, LabelInfo> name_to_catalogue_map_
-      ABSL_GUARDED_BY(maps_mutex_);
+  absl::flat_hash_map<std::string, std::unique_ptr<LabelInfo>>
+      name_to_catalogue_map_ ABSL_GUARDED_BY(maps_mutex_);
 
   mutable absl::Mutex monitoring_factory_mutex_;
   std::unique_ptr<crypto::tink::MonitoringClientFactory> monitoring_factory_
       ABSL_GUARDED_BY(monitoring_factory_mutex_);
 };
 
+// NOLINTBEGIN(whitespace/line_length) (Formatted when commented in)
 // TINK-PENDING-REMOVAL-IN-2.0.0-START
 template <class P>
 crypto::tink::util::Status RegistryImpl::AddCatalogue(
@@ -462,7 +463,7 @@ crypto::tink::util::Status RegistryImpl::AddCatalogue(
   auto curr_catalogue = name_to_catalogue_map_.find(catalogue_name);
   if (curr_catalogue != name_to_catalogue_map_.end()) {
     auto existing =
-        static_cast<Catalogue<P>*>(curr_catalogue->second.catalogue.get());
+        static_cast<Catalogue<P>*>(curr_catalogue->second->catalogue.get());
     if (std::type_index(typeid(*existing)) !=
         std::type_index(typeid(*catalogue))) {
       return ToStatusF(absl::StatusCode::kAlreadyExists,
@@ -470,34 +471,34 @@ crypto::tink::util::Status RegistryImpl::AddCatalogue(
                        catalogue_name);
     }
   } else {
-    name_to_catalogue_map_.emplace(
-        std::piecewise_construct, std::forward_as_tuple(catalogue_name),
-        std::forward_as_tuple(std::move(entry), std::type_index(typeid(P)),
-                              typeid(P).name()));
+    auto label_info = absl::make_unique<LabelInfo>(
+        std::move(entry), std::type_index(typeid(P)), typeid(P).name());
+    name_to_catalogue_map_.insert(
+        {std::string(catalogue_name), std::move(label_info)});
   }
   return crypto::tink::util::OkStatus();
 }
 
 template <class P>
-crypto::tink::util::StatusOr<const Catalogue<P>*>
-RegistryImpl::get_catalogue(absl::string_view catalogue_name) const {
+crypto::tink::util::StatusOr<const Catalogue<P>*> RegistryImpl::get_catalogue(
+    absl::string_view catalogue_name) const {
   absl::MutexLock lock(&maps_mutex_);
   auto catalogue_entry = name_to_catalogue_map_.find(catalogue_name);
   if (catalogue_entry == name_to_catalogue_map_.end()) {
     return ToStatusF(absl::StatusCode::kNotFound,
-                     "No catalogue named '%s' has been added.",
-                     catalogue_name);
+                     "No catalogue named '%s' has been added.", catalogue_name);
   }
-  if (catalogue_entry->second.type_id_name != typeid(P).name()) {
+  if (catalogue_entry->second->type_id_name != typeid(P).name()) {
     return ToStatusF(absl::StatusCode::kInvalidArgument,
                      "Wrong Primitive type for catalogue named '%s': "
                      "got '%s', expected '%s'",
                      catalogue_name, typeid(P).name(),
-                     catalogue_entry->second.type_id_name);
+                     catalogue_entry->second->type_id_name);
   }
-  return static_cast<Catalogue<P>*>(catalogue_entry->second.catalogue.get());
+  return static_cast<Catalogue<P>*>(catalogue_entry->second->catalogue.get());
 }
 // TINK-PENDING-REMOVAL-IN-2.0.0-END
+// NOLINTEND(whitespace/line_length)
 
 template <class P>
 crypto::tink::util::Status RegistryImpl::RegisterKeyManager(
@@ -519,11 +520,11 @@ crypto::tink::util::Status RegistryImpl::RegisterKeyManager(
 
   auto it = type_url_to_info_.find(type_url);
   if (it != type_url_to_info_.end()) {
-    it->second.set_new_key_allowed(new_key_allowed);
+    it->second->set_new_key_allowed(new_key_allowed);
   } else {
-    type_url_to_info_.emplace(
-        std::piecewise_construct, std::forward_as_tuple(type_url),
-        std::forward_as_tuple(owned_manager.release(), new_key_allowed));
+    auto key_type_info = absl::make_unique<KeyTypeInfo>(owned_manager.release(),
+                                                        new_key_allowed);
+    type_url_to_info_.insert({type_url, std::move(key_type_info)});
   }
   return crypto::tink::util::OkStatus();
 }
@@ -557,11 +558,11 @@ crypto::tink::util::Status RegistryImpl::RegisterKeyTypeManager(
 
   auto it = type_url_to_info_.find(type_url);
   if (it != type_url_to_info_.end()) {
-    it->second.set_new_key_allowed(new_key_allowed);
+    it->second->set_new_key_allowed(new_key_allowed);
   } else {
-    type_url_to_info_.emplace(
-        std::piecewise_construct, std::forward_as_tuple(type_url),
-        std::forward_as_tuple(owned_manager.release(), new_key_allowed));
+    auto key_type_info = absl::make_unique<KeyTypeInfo>(owned_manager.release(),
+                                                        new_key_allowed);
+    type_url_to_info_.insert({type_url, std::move(key_type_info)});
   }
   return crypto::tink::util::OkStatus();
 }
@@ -657,7 +658,7 @@ crypto::tink::util::Status RegistryImpl::RegisterAsymmetricKeyManagers(
 
   if (private_found) {
     // implies public_found.
-    if (!private_it->second.public_key_manager_type_index().has_value()) {
+    if (!private_it->second->public_key_manager_type_index().has_value()) {
       return crypto::tink::util::Status(
           absl::StatusCode::kInvalidArgument,
           absl::StrCat("private key manager corresponding to ",
@@ -665,7 +666,7 @@ crypto::tink::util::Status RegistryImpl::RegisterAsymmetricKeyManagers(
                        " is already registered without public key manager, "
                        "cannot be re-registered with public key manager. "));
     }
-    if (*private_it->second.public_key_manager_type_index() !=
+    if (*private_it->second->public_key_manager_type_index() !=
         std::type_index(typeid(*public_key_manager))) {
       return crypto::tink::util::Status(
           absl::StatusCode::kInvalidArgument,
@@ -673,7 +674,7 @@ crypto::tink::util::Status RegistryImpl::RegisterAsymmetricKeyManagers(
               "private key manager corresponding to ",
               typeid(*private_key_manager).name(),
               " is already registered with ",
-              private_it->second.public_key_manager_type_index()->name(),
+              private_it->second->public_key_manager_type_index()->name(),
               ", cannot be re-registered with ",
               typeid(*public_key_manager).name()));
     }
@@ -681,16 +682,17 @@ crypto::tink::util::Status RegistryImpl::RegisterAsymmetricKeyManagers(
 
   if (!private_found) {
     // !public_found must hold.
-    type_url_to_info_.emplace(
-        std::piecewise_construct, std::forward_as_tuple(private_type_url),
-        std::forward_as_tuple(owned_private_key_manager.release(),
-                              owned_public_key_manager.get(), new_key_allowed));
-    type_url_to_info_.emplace(
-        std::piecewise_construct, std::forward_as_tuple(public_type_url),
-        std::forward_as_tuple(owned_public_key_manager.release(),
-                              new_key_allowed));
+    auto private_key_type_manager_info = absl::make_unique<KeyTypeInfo>(
+        owned_private_key_manager.release(), owned_public_key_manager.get(),
+        new_key_allowed);
+    type_url_to_info_.insert(
+        {private_type_url, std::move(private_key_type_manager_info)});
+    auto public_key_type_info = absl::make_unique<KeyTypeInfo>(
+        owned_public_key_manager.release(), new_key_allowed);
+    type_url_to_info_.insert(
+        {public_type_url, std::move(public_key_type_info)});
   } else {
-    private_it->second.set_new_key_allowed(new_key_allowed);
+    private_it->second->set_new_key_allowed(new_key_allowed);
   }
 
   return util::OkStatus();
@@ -703,22 +705,21 @@ crypto::tink::util::Status RegistryImpl::RegisterPrimitiveWrapper(
     return crypto::tink::util::Status(absl::StatusCode::kInvalidArgument,
                                       "Parameter 'wrapper' must be non-null.");
   }
-  std::unique_ptr<PrimitiveWrapper<P, Q>> entry(wrapper);
+  std::unique_ptr<PrimitiveWrapper<P, Q>> owned_wrapper(wrapper);
 
   absl::MutexLock lock(&maps_mutex_);
   auto it = primitive_to_wrapper_.find(std::type_index(typeid(Q)));
   if (it != primitive_to_wrapper_.end()) {
-    if (!it->second.HasSameType(*wrapper)) {
+    if (!it->second->HasSameType(*wrapper)) {
       return util::Status(
           absl::StatusCode::kAlreadyExists,
           "A wrapper named for this primitive has already been added.");
     }
     return crypto::tink::util::OkStatus();
   }
-  primitive_to_wrapper_.emplace(
-      std::piecewise_construct,
-      std::forward_as_tuple(std::type_index(typeid(Q))),
-      std::forward_as_tuple(std::move(entry)));
+  auto wrapper_info = absl::make_unique<WrapperInfo>(std::move(owned_wrapper));
+  primitive_to_wrapper_.insert(
+      {std::type_index(typeid(Q)), std::move(wrapper_info)});
   return crypto::tink::util::OkStatus();
 }
 
@@ -731,7 +732,7 @@ RegistryImpl::get_key_manager(absl::string_view type_url) const {
     return ToStatusF(absl::StatusCode::kNotFound,
                      "No manager for type '%s' has been registered.", type_url);
   }
-  return it->second.get_key_manager<P>(type_url);
+  return it->second->get_key_manager<P>(type_url);
 }
 
 template <class P>
@@ -764,7 +765,7 @@ RegistryImpl::GetLegacyWrapper() const {
         absl::StatusCode::kNotFound,
         absl::StrCat("No wrapper registered for type ", typeid(P).name()));
   }
-  return it->second.GetLegacyWrapper<P>();
+  return it->second->GetLegacyWrapper<P>();
 }
 
 template <class P>
@@ -777,7 +778,7 @@ RegistryImpl::GetKeysetWrapper() const {
         absl::StatusCode::kNotFound,
         absl::StrCat("No wrapper registered for type ", typeid(P).name()));
   }
-  return it->second.GetKeysetWrapper<P>();
+  return it->second->GetKeysetWrapper<P>();
 }
 
 template <class P>

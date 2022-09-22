@@ -43,7 +43,7 @@ StatusOr<const RegistryImpl::KeyTypeInfo*> RegistryImpl::get_key_type_info(
     return ToStatusF(absl::StatusCode::kNotFound,
                      "No manager for type '%s' has been registered.", type_url);
   }
-  return &it->second;
+  return it->second.get();
 }
 
 StatusOr<std::unique_ptr<KeyData>> RegistryImpl::NewKeyData(
@@ -85,12 +85,12 @@ crypto::tink::util::Status RegistryImpl::CheckInsertable(
   if (it == type_url_to_info_.end()) {
     return crypto::tink::util::OkStatus();
   }
-  if (it->second.key_manager_type_index() != key_manager_type_index) {
+  if (it->second->key_manager_type_index() != key_manager_type_index) {
     return ToStatusF(absl::StatusCode::kAlreadyExists,
                      "A manager for type '%s' has been already registered.",
                      type_url);
   }
-  if (!it->second.new_key_allowed() && new_key_allowed) {
+  if (!it->second->new_key_allowed() && new_key_allowed) {
     return ToStatusF(absl::StatusCode::kAlreadyExists,
                      "A manager for type '%s' has been already registered "
                      "with forbidden new key operation.",
