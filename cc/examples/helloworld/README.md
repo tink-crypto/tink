@@ -53,7 +53,7 @@ cd tink/cc/examples/helloworld
   # Note: Specify -DTINK_USE_SYSTEM_OPENSSL=ON if you want to build Tink against
   # OpenSSL rather than BoringSSL. CMake will search for a suitable OpenSSL
   # library in the system's library path.
-  cmake .. -DCMAKE_CXX_STANDARD=11
+  cmake ..
   make -j"$(nproc)"
 )
 

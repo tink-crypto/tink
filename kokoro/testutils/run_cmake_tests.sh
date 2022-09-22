@@ -59,7 +59,8 @@ main() {
   process_args "$@"
   local -r cmake_parameters=(
     -DTINK_BUILD_TESTS=ON
-    -DCMAKE_CXX_STANDARD=11
+    -DCMAKE_CXX_STANDARD=14
+    -DCMAKE_CXX_STANDARD_REQUIRED=ON
     "${ADDITIONAL_CMAKE_PARAMETERS[@]}"
   )
   # We need an absolute path to the CMake project directory.

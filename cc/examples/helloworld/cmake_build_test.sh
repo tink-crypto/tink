@@ -17,7 +17,7 @@
 
 set -e
 
-readonly TINK_USE_CXX_STANDARD=11
+readonly TINK_USE_CXX_STANDARD=14
 
 # Test for using Tink in a CMake project.
 

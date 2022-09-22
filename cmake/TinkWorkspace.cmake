@@ -90,11 +90,11 @@ http_archive(
 add_directory_alias("${wycheproof_SOURCE_DIR}" "${CMAKE_BINARY_DIR}/external/wycheproof")
 
 if (NOT TINK_USE_SYSTEM_OPENSSL)
+  # Commit from Sep 14, 2022.
   http_archive(
     NAME boringssl
-    URL https://github.com/google/boringssl/archive/88cdf7dd2dbce1ecb9057c183095103d83373abe.zip
-    SHA256 24092815136f956069fcfa5172166ad4e025166ce6fe500420c9e3e3c4f3da38
-    CMAKE_SUBDIR src
+    URL https://github.com/google/boringssl/archive/d345d68d5c4b5471290ebe13f090f1fd5b7e8f58.zip
+    SHA256 482796f369c8655dbda3be801ae98c47916ecd3bff223d007a723fd5f5ecba22
   )
 
   # BoringSSL targets do not carry include directory info, this fixes it.
