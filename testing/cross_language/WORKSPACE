@@ -67,10 +67,10 @@ http_archive(
 http_archive(
     name = "org_python_pypi_portpicker",
     urls = [
-        "https://pypi.python.org/packages/d9/f4/0188bc07d38b5f9dd192b8329c5e098e3b23552c01a96fd08973dba9e315/portpicker-1.3.1.tar.gz",
+        "https://files.pythonhosted.org/packages/3b/34/bfbd5236c7726452080a92a9f6ea9770cd65f51b05cef319ccb767ed32bf/portpicker-1.5.2.tar.gz",
     ],
-    sha256 = "d2cdc776873635ed421315c4d22e63280042456bbfa07397817e687b142b9667",
-    strip_prefix = "portpicker-1.3.1/src",
+    sha256 = "c55683ad725f5c00a41bc7db0225223e8be024b1fa564d039ed3390e4fd48fb3",
+    strip_prefix = "portpicker-1.5.2/src",
     build_file = "portpicker.BUILD.bazel",
 )
 
