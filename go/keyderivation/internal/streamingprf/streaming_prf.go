@@ -32,7 +32,7 @@ import (
 type StreamingPRF interface {
 	// Compute computes the PRF selected by the specified key on input and returns
 	// the result via a reader.
-	Compute(input []byte) io.Reader
+	Compute(input []byte) (io.Reader, error)
 }
 
 func init() {

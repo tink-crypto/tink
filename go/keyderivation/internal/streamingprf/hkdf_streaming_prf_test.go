@@ -108,7 +108,10 @@ func TestHKDFStreamingPRFWithRFCVector(t *testing.T) {
 	if err != nil {
 		t.Fatalf("newHKDFStreamingPRF() err = %v, want nil", err)
 	}
-	r := h.Compute(info)
+	r, err := h.Compute(info)
+	if err != nil {
+		t.Fatalf("Compute() err = %v, want nil", err)
+	}
 	out := make([]byte, vec.outLen)
 	if _, err := io.ReadAtLeast(r, out, len(out)); err != nil {
 		t.Fatalf("io.ReadAtLeast err = %v, want nil", err)
@@ -168,7 +171,10 @@ func TestHKDFStreamingPRFWithWycheproof(t *testing.T) {
 						if err != nil {
 							t.Fatalf("newHKDFStreamingPRF err = %v, want nil", err)
 						}
-						r := h.Compute(test.Info)
+						r, err := h.Compute(test.Info)
+						if err != nil {
+							t.Fatalf("Compute() err = %v, want nil", err)
+						}
 						out := make([]byte, test.Size)
 						if _, err := io.ReadAtLeast(r, out, len(out)); err != nil {
 							t.Fatalf("io.ReadAtLeast err = %v, want nil", err)
@@ -181,7 +187,10 @@ func TestHKDFStreamingPRFWithWycheproof(t *testing.T) {
 						if err != nil {
 							return
 						}
-						r := h.Compute(test.Info)
+						r, err := h.Compute(test.Info)
+						if err != nil {
+							t.Fatalf("Compute() err = %v, want nil", err)
+						}
 						out := make([]byte, test.Size)
 						if _, err := io.ReadAtLeast(r, out, len(out)); err == nil {
 							t.Error("io.ReadAtLeast err = nil, want non-nil")

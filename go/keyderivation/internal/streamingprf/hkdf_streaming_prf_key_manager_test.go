@@ -71,7 +71,10 @@ func TestHKDFStreamingPRFKeyManagerPrimitive(t *testing.T) {
 			if !ok {
 				t.Fatal("primitive is not StreamingPRF")
 			}
-			r := hkdf.Compute(data)
+			r, err := hkdf.Compute(data)
+			if err != nil {
+				t.Fatalf("Compute() err = %v, want nil", err)
+			}
 			var outLimit int
 			switch test.hash {
 			case commonpb.HashType_SHA256:

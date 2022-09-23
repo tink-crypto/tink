@@ -52,8 +52,8 @@ func newHKDFStreamingPRF(hashName string, key, salt []byte) (*hkdfStreamingPRF, 
 }
 
 // Compute computes and returns the HKDF as a Reader.
-func (h *hkdfStreamingPRF) Compute(data []byte) io.Reader {
-	return hkdf.New(h.h, h.key, h.salt, data)
+func (h *hkdfStreamingPRF) Compute(data []byte) (io.Reader, error) {
+	return hkdf.New(h.h, h.key, h.salt, data), nil
 }
 
 func validateHKDFStreamingPRFParams(hash string, keySize int) error {
