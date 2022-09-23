@@ -31,6 +31,7 @@ go_test(
     srcs = [
         "hkdf_streaming_prf_key_manager_test.go",
         "hkdf_streaming_prf_test.go",
+        "streaming_prf_test.go",
     ],
     data = ["@wycheproof//testvectors:all"],
     embed = [":streamingprf"],

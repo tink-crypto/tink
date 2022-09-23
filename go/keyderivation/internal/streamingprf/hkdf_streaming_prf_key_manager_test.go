@@ -18,8 +18,6 @@ package streamingprf_test
 
 import (
 	"bytes"
-	"crypto/sha256"
-	"crypto/sha512"
 	"testing"
 
 	"google.golang.org/protobuf/proto"
@@ -58,7 +56,6 @@ func TestHKDFStreamingPRFKeyManagerPrimitive(t *testing.T) {
 				},
 				KeyValue: random.GetRandomBytes(32),
 			}
-			data := random.GetRandomBytes(32)
 			serializedKey, err := proto.Marshal(key)
 			if err != nil {
 				t.Fatalf("proto.Marshal(%v) err = %v, want nil", key, err)
@@ -67,26 +64,18 @@ func TestHKDFStreamingPRFKeyManagerPrimitive(t *testing.T) {
 			if err != nil {
 				t.Fatalf("Primitive() err = %v, want nil", err)
 			}
-			hkdf, ok := p.(streamingprf.StreamingPRF)
+			prf, ok := p.(streamingprf.StreamingPRF)
 			if !ok {
 				t.Fatal("primitive is not StreamingPRF")
 			}
-			r, err := hkdf.Compute(data)
+			r, err := prf.Compute(random.GetRandomBytes(32))
 			if err != nil {
 				t.Fatalf("Compute() err = %v, want nil", err)
 			}
-			var outLimit int
-			switch test.hash {
-			case commonpb.HashType_SHA256:
-				outLimit = sha256.Size * 255
-			case commonpb.HashType_SHA512:
-				outLimit = sha512.Size * 255
-			default:
-				outLimit = 0
-			}
-			out := make([]byte, outLimit)
+			limit := limitFromHash(t, test.hash)
+			out := make([]byte, limit)
 			n, err := r.Read(out)
-			if n != outLimit || err != nil {
+			if n != limit || err != nil {
 				t.Errorf("Read() not enough bytes: %d, %v", n, err)
 			}
 		})
