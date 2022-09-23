@@ -34,35 +34,15 @@ import (
 
 func TestNew(t *testing.T) {
 	for _, test := range []struct {
-		name string
-		hash commonpb.HashType
-		salt []byte
+		name     string
+		hash     commonpb.HashType
+		template *tinkpb.KeyTemplate
 	}{
-		// TODO(b/227682336): Replace with pre-defined key templates.
-		{"SHA256", commonpb.HashType_SHA256, nil},
-		{"SHA256/salt", commonpb.HashType_SHA256, random.GetRandomBytes(16)},
-		{"SHA512", commonpb.HashType_SHA512, nil},
-		{"SHA512/salt", commonpb.HashType_SHA512, random.GetRandomBytes(16)},
+		{"SHA256", commonpb.HashType_SHA256, streamingprf.HKDFSHA256RawKeyTemplate()},
+		{"SHA512", commonpb.HashType_SHA512, streamingprf.HKDFSHA512RawKeyTemplate()},
 	} {
 		t.Run(test.name, func(t *testing.T) {
-			keyFormat := &hkdfpb.HkdfPrfKeyFormat{
-				Params: &hkdfpb.HkdfPrfParams{
-					Hash: test.hash,
-					Salt: test.salt,
-				},
-				KeySize: 32,
-				Version: 0,
-			}
-			serializedKeyFormat, err := proto.Marshal(keyFormat)
-			if err != nil {
-				t.Fatalf("proto.Marshal(%v) err = %v, want nil", keyFormat, err)
-			}
-			template := &tinkpb.KeyTemplate{
-				TypeUrl:          hkdfStreamingPRFTypeURL,
-				OutputPrefixType: tinkpb.OutputPrefixType_RAW,
-				Value:            serializedKeyFormat,
-			}
-			kh, err := keyset.NewHandle(template)
+			kh, err := keyset.NewHandle(test.template)
 			if err != nil {
 				t.Fatalf("keyset.NewHandle() err = %v, want nil", err)
 			}
@@ -70,7 +50,6 @@ func TestNew(t *testing.T) {
 			if err != nil {
 				t.Errorf("streamingprf.New() err = %v, want nil", err)
 			}
-
 			r, err := prf.Compute(random.GetRandomBytes(32))
 			if err != nil {
 				t.Fatalf("prf.Compute() err = %v, want nil", err)
