@@ -210,7 +210,7 @@ func TestJWTPSSignerKeyManagerPritimiveSignVerify(t *testing.T) {
 			if tc.tinkKID != nil {
 				// The tc.tinkKID value was written into the JWT header in SignAndEncodeWithKID.
 				// It is now ignored if the Tink KID is not set.
-				if _, err := verifier.VerifyAndDecodeWithKID(signed, validator /*tinkKID=*/, nil); err != nil {
+				if _, err := verifier.VerifyAndDecodeWithKID(signed, validator /*=tinkKID*/, nil); err != nil {
 					t.Errorf("VerifyAndDecodeWithKID(kid = nil) err = %v, want nil", err)
 				}
 			}

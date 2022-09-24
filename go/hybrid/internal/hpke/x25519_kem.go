@@ -101,7 +101,7 @@ func (x *x25519KEM) deriveKEMSharedSecret(dh, senderPubKey, recipientPubKey []by
 		return nil, err
 	}
 	return hkdfKDF.extractAndExpand(
-		/*salt=*/ nil,
+		nil, /*=salt*/
 		dh,
 		"eae_prk",
 		ctx,
