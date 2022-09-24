@@ -24,6 +24,7 @@ import (
 	commonpb "github.com/google/tink/go/proto/common_go_proto"
 )
 
+// limitFromHash returns the maximum output bytes from a HKDF using hash.
 func limitFromHash(t *testing.T, hash commonpb.HashType) (limit int) {
 	t.Helper()
 	switch hash {
