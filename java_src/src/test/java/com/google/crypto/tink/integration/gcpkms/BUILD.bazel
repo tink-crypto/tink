@@ -24,9 +24,9 @@ java_test(
 )
 
 java_test(
-    name = "KmsAeadKeyManagerWithGcpTest",
+    name = "GcpKmsIntegrationTest",
     size = "small",
-    srcs = ["KmsAeadKeyManagerWithGcpTest.java"],
+    srcs = ["GcpKmsIntegrationTest.java"],
     data = ["//testdata/gcp:credentials"],
     tags = [
         "manual",
@@ -35,33 +35,15 @@ java_test(
     ],
     deps = [
         "//src/main/java/com/google/crypto/tink:aead",
+        "//src/main/java/com/google/crypto/tink:key_template",
+        "//src/main/java/com/google/crypto/tink:key_templates",
         "//src/main/java/com/google/crypto/tink:registry_cluster",
         "//src/main/java/com/google/crypto/tink/aead:aead_config",
-        "//src/main/java/com/google/crypto/tink/aead:aead_key_templates",
+        "//src/main/java/com/google/crypto/tink/aead:kms_aead_key_manager",
+        "//src/main/java/com/google/crypto/tink/aead:kms_envelope_aead_key_manager",
         "//src/main/java/com/google/crypto/tink/integration/gcpkms:gcp_kms_client",
         "//src/main/java/com/google/crypto/tink/testing:test_util",
-        "@maven//:junit_junit",
-    ],
-)
-
-java_test(
-    name = "KmsEnvelopeAeadKeyManagerWithGcpTest",
-    size = "small",
-    srcs = ["KmsEnvelopeAeadKeyManagerWithGcpTest.java"],
-    data = ["//testdata/gcp:credentials"],
-    tags = [
-        "manual",
-        "no_rbe",
-        "requires-network",
-    ],
-    deps = [
-        "//proto:tink_java_proto",
-        "//src/main/java/com/google/crypto/tink:aead",
-        "//src/main/java/com/google/crypto/tink:registry_cluster",
-        "//src/main/java/com/google/crypto/tink/aead:aead_config",
-        "//src/main/java/com/google/crypto/tink/aead:aead_key_templates",
-        "//src/main/java/com/google/crypto/tink/integration/gcpkms:gcp_kms_client",
-        "//src/main/java/com/google/crypto/tink/testing:test_util",
+        "@maven//:com_google_truth_truth",
         "@maven//:junit_junit",
     ],
 )

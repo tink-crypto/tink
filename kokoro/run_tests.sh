@@ -75,8 +75,7 @@ run_all_linux_tests() {
     local -a MANUAL_JAVA_TARGETS
     if [[ -n "${KOKORO_ROOT}" ]]; then
       MANUAL_JAVA_TARGETS+=(
-        "//src/test/java/com/google/crypto/tink/integration/gcpkms:KmsAeadKeyManagerWithGcpTest"
-        "//src/test/java/com/google/crypto/tink/integration/gcpkms:KmsEnvelopeAeadKeyManagerWithGcpTest"
+        "//src/test/java/com/google/crypto/tink/integration/gcpkms:GcpKmsIntegrationTest"
       )
     fi
     readonly MANUAL_JAVA_TARGETS
