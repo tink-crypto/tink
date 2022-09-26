@@ -57,9 +57,11 @@ py_library(
     srcs_version = "PY3",
     deps = [
         ":_primitives",
+        ":key_util",
         ":testing_api_python_library",
         "@com_google_protobuf//:protobuf_python",
         "@tink_py//tink:tink_python",
+        "@tink_py//tink/proto:tink_py_pb2",
         requirement("absl-py"),
         "@org_python_pypi_portpicker//:portpicker",
     ],
@@ -162,8 +164,8 @@ py_test(
     name = "utilities_test",
     srcs = ["utilities_test.py"],
     deps = [
-        "//tink_config",
         ":utilities",
+        "//tink_config",
         requirement("absl-py"),
     ],
 )

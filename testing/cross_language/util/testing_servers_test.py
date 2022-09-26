@@ -15,12 +15,12 @@
 
 import datetime
 import io
-
+import textwrap
 from typing import Iterable, Tuple
 
+from absl import flags
 from absl.testing import absltest
 from absl.testing import parameterized
-
 import tink
 from tink import aead
 from tink import daead
@@ -31,9 +31,32 @@ from tink import prf
 from tink import signature
 from tink import streaming_aead
 
+from tink.proto import tink_pb2
+from util import key_util
 from util import testing_servers
 
 _SUPPORTED_LANGUAGES = testing_servers.SUPPORTED_LANGUAGES_BY_PRIMITIVE
+
+_HEX_TEMPLATE = flags.DEFINE_string(
+    'hex_template',
+    aead.aead_key_templates.AES256_GCM.SerializeToString().hex(),
+    'The template in hex format to use in the create_keyset test.'
+)
+
+_FORCE_FAILURE_FOR_ADDING_KEY_TO_DB = flags.DEFINE_boolean(
+    'force_failure_for_adding_key_to_db', False,
+    'Set to force a message which helps to add a new key to the DB.')
+
+_MESSAGE_TEMPLATE = '''
+Please add the following to _test_keys_db.py:
+COPY PASTE START ===============================================================
+db.add_key(
+    template=r"""
+{template_text_format}""",
+    key=r"""
+{key_text_format}""")
+COPY PASTE END =================================================================
+'''
 
 
 class TestingServersConfigTest(absltest.TestCase):
@@ -83,6 +106,29 @@ class TestingServersTest(parameterized.TestCase):
     template = testing_servers.key_template(lang, 'AES128_GCM')
     self.assertEqual(template.type_url,
                      'type.googleapis.com/google.crypto.tink.AesGcmKey')
+
+  @parameterized.parameters(testing_servers.LANGUAGES)
+  def test_new_keyset(self, lang):
+    """Tests that we can create a new keyset in each language.
+
+    This test also serves to add new keys to the _test_keys_db -- see the
+    comments there.
+
+    Args:
+      lang: language to use for the test
+    """
+    template = tink_pb2.KeyTemplate().FromString(
+        bytes.fromhex(_HEX_TEMPLATE.value))
+    keyset = testing_servers.new_keyset(lang, template)
+    parsed_keyset = tink_pb2.Keyset.FromString(keyset)
+    self.assertLen(parsed_keyset.key, 1)
+    if _FORCE_FAILURE_FOR_ADDING_KEY_TO_DB.value:
+      self.fail(
+          _MESSAGE_TEMPLATE.format(
+              template_text_format=textwrap.indent(
+                  key_util.text_format(template), ' ' * 6),
+              key_text_format=textwrap.indent(
+                  key_util.text_format(parsed_keyset.key[0]), ' ' * 6)))
 
   @parameterized.parameters(encrypted_keyset_test_cases())
   def test_read_write_encrypted_keyset(self, lang, keyset_reader_type,
