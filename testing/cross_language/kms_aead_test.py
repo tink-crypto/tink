@@ -39,7 +39,7 @@ def _kms_envelope_aead_templates(
   kms_key_templates = {}
   for kms_service in kms_services:
     key_uri = _KMS_KEY_URI[kms_service]
-    for aead_key_type in tink_config.KEY_TYPES[aead.Aead]:
+    for aead_key_type in tink_config.key_types_for_primitive(aead.Aead):
       for key_template_name in utilities.KEY_TEMPLATE_NAMES[aead_key_type]:
         kms_envelope_aead_key_template = (
             aead.aead_key_templates.create_kms_envelope_aead_key_template(
