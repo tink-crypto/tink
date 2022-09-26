@@ -30,11 +30,10 @@ def all_key_template_names():
 class SupportedKeyTypesTest(absltest.TestCase):
 
   def test_all_key_types_present(self):
+    self.assertCountEqual(tink_config.SUPPORTED_LANGUAGES.keys(),
+                          tink_config.all_key_types())
     self.assertEqual(
-        list(tink_config.SUPPORTED_LANGUAGES.keys()),
-        utilities.ALL_KEY_TYPES)
-    self.assertEqual(
-        list(utilities.KEY_TEMPLATE_NAMES.keys()), utilities.ALL_KEY_TYPES)
+        list(utilities.KEY_TEMPLATE_NAMES.keys()), tink_config.all_key_types())
 
   def test_all_key_templates_present(self):
     self.assertEqual(

@@ -67,7 +67,7 @@ def gen_inc_versions(keyset):
   """Parses keyset and generates modified keyset with incremented version."""
   keyset_proto = tink_pb2.Keyset.FromString(keyset)
   for key in keyset_proto.key:
-    key_type = utilities.KEY_TYPE_FROM_URL[key.key_data.type_url]
+    key_type = tink_config.key_type_from_type_url(key.key_data.type_url)
     key_class = KEY_TYPE_TO_PROTO_CLASS[key_type]
 
     default_val = key.key_data.value
@@ -121,7 +121,7 @@ class KeyVersionTest(parameterized.TestCase):
   """
 
   @parameterized.parameters(
-      test_cases(tink_config.KEY_TYPES[aead.Aead]))
+      test_cases(tink_config.key_types_for_primitive(aead.Aead)))
   def test_inc_version_aead(self, key_template_name, lang):
     """Increments the key version by one and checks they can't be used."""
     template = utilities.KEY_TEMPLATE[key_template_name]
@@ -133,7 +133,7 @@ class KeyVersionTest(parameterized.TestCase):
         _ = testing_servers.remote_primitive(lang, keyset1, aead.Aead)
 
   @parameterized.parameters(
-      test_cases(tink_config.KEY_TYPES[daead.DeterministicAead]))
+      test_cases(tink_config.key_types_for_primitive(daead.DeterministicAead)))
   def test_inc_version_daead(self, key_template_name, lang):
     """Increments the key version by one and checks they can't be used."""
     template = utilities.KEY_TEMPLATE[key_template_name]
@@ -144,7 +144,8 @@ class KeyVersionTest(parameterized.TestCase):
       with self.assertRaises(tink.TinkError):
         _ = testing_servers.deterministic_aead(lang, keyset1)
 
-  @parameterized.parameters(test_cases(tink_config.KEY_TYPES[mac.Mac]))
+  @parameterized.parameters(
+      test_cases(tink_config.key_types_for_primitive(mac.Mac)))
   def test_inc_version_mac(self, key_template_name, lang):
     """Increments the key version by one and checks they can't be used."""
     template = utilities.KEY_TEMPLATE[key_template_name]
@@ -156,7 +157,7 @@ class KeyVersionTest(parameterized.TestCase):
         _ = mac_primitive1.compute_mac(b'foo')
 
   @parameterized.parameters(
-      test_cases(tink_config.KEY_TYPES[prf.PrfSet]))
+      test_cases(tink_config.key_types_for_primitive(prf.PrfSet)))
   def test_inc_version_prf(self, key_template_name, lang):
     """Increments the key version by one and checks they can't be used."""
     template = utilities.KEY_TEMPLATE[key_template_name]

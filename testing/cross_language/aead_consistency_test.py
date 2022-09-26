@@ -179,7 +179,7 @@ class AeadKeyConsistencyTest(parameterized.TestCase):
   def test_aead_creation_supported_languages_consistent(self, name, keyset):
     """Tests that AEAD creation is consistent in all supporeted languages."""
     supported_langs = tink_config.SUPPORTED_LANGUAGES[
-        utilities.KEY_TYPE_FROM_URL[keyset.key[0].key_data.type_url]]
+        tink_config.key_type_from_type_url(keyset.key[0].key_data.type_url)]
 
     langs = [lang for _, lang in self._create_aeads_ignore_errors(keyset)]
 
@@ -193,7 +193,7 @@ class AeadKeyConsistencyTest(parameterized.TestCase):
   def test_aead_creation_non_supported_languages_fail(self, name, keyset):
     """Tests that AEAD creation fails in all unsupported languages."""
     supported_langs = tink_config.SUPPORTED_LANGUAGES[
-        utilities.KEY_TYPE_FROM_URL[keyset.key[0].key_data.type_url]]
+        tink_config.key_type_from_type_url(keyset.key[0].key_data.type_url)]
 
     langs = [lang for _, lang in self._create_aeads_ignore_errors(keyset)]
 

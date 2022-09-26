@@ -21,9 +21,13 @@ TODO(tholenst): Move all files describing the configuration into this directory,
 and add functions to access the information from the outside.
 """
 
+from tink_config import _helpers
 from tink_config import _key_types
 
-# TODO(tholenst): Do not export this, instead export an appropriate function
-KEY_TYPES = _key_types.KEY_TYPES
+all_key_types = _helpers.all_key_types
+key_types_for_primitive = _helpers.key_types_for_primitive
+key_type_from_type_url = _helpers.key_type_from_type_url
+
+
 # TODO(tholenst): Do not export this, instead export an appropriate function
 SUPPORTED_LANGUAGES = _key_types.SUPPORTED_LANGUAGES

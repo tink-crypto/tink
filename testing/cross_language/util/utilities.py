@@ -35,20 +35,6 @@ import tink_config
 ALL_LANGUAGES = ['cc', 'java', 'go', 'python']
 
 
-def _get_all_key_types():
-  result = []
-  for key_types_for_single_primitive in tink_config.KEY_TYPES.values():
-    result += key_types_for_single_primitive
-  return result
-
-# TODO(tholenst): Change this to a function.
-ALL_KEY_TYPES = _get_all_key_types()
-
-# TODO(tholenst): Change this to a function.
-KEY_TYPE_FROM_URL = {
-    'type.googleapis.com/google.crypto.tink.' + key_type: key_type
-    for key_type in ALL_KEY_TYPES}
-
 # For each KeyType, a list of Tinkey KeyTemplate names.
 # TODO(juerg): Add missing key template names, and remove deprecated names.
 # TODO(tholenst): Change this to a function
@@ -364,7 +350,7 @@ def _all_key_template_names_with_key_type():
 
 def tinkey_template_names_for(primitive_class: Any) -> Iterable[str]:
   """Returns all the key template names for the given primitive type."""
-  for key_type in tink_config.KEY_TYPES[primitive_class]:
+  for key_type in tink_config.key_types_for_primitive(primitive_class):
     for template_name in KEY_TEMPLATE_NAMES[key_type]:
       yield template_name
 

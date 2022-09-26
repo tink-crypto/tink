@@ -46,7 +46,7 @@ def unset_primary(keyset: bytes) -> bytes:
 
 
 def test_cases(primitive: Any) -> Iterable[Tuple[str, str]]:
-  for key_type in tink_config.KEY_TYPES[primitive]:
+  for key_type in tink_config.key_types_for_primitive(primitive):
     for key_template_name in utilities.KEY_TEMPLATE_NAMES[key_type]:
       for lang in tink_config.SUPPORTED_LANGUAGES[key_type]:
         yield (key_template_name, lang)
