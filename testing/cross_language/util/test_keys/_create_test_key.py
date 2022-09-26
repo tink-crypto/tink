@@ -27,6 +27,18 @@ from util.test_keys import _test_keys_container
 from util.test_keys import _test_keys_db
 
 
+_CREATE_NEW_KEY_MESSAGE_TEMPLATE = """
+Unable to retrieve stored key for template:
+{text_format}
+To create a new key with this template, run:
+blaze test \\
+  //third_party/tink/testing/cross_language/util:testing_servers_test \\
+  --test_arg=--force_failure_for_adding_key_to_db \\
+  --test_arg=--hex_template={hex_template} \\
+  --test_output=errors
+""".strip()
+
+
 def _use_stored_key(template: tink_pb2.KeyTemplate) -> bool:
   if (template.type_url ==
       'type.googleapis.com/google.crypto.tink.ChaCha20Poly1305Key'):
@@ -63,8 +75,10 @@ def new_or_stored_key(
   try:
     return container.get_key(template)
   except KeyError:
-    raise ValueError('Unable to retrieve stored key for template:\n' +
-                     key_util.text_format(template)) from None
+    raise ValueError(
+        _CREATE_NEW_KEY_MESSAGE_TEMPLATE.format(
+            text_format=key_util.text_format(template),
+            hex_template=template.SerializeToString().hex())) from None
 
 
 def new_or_stored_keyset(

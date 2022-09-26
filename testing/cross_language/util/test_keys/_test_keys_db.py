@@ -13,6 +13,16 @@
 # limitations under the License.
 
 """Database of precomputed Tink Keys for the cross language tests.
+
+To add a new key to this, we recommend the following process:
+1) Add a test which calls one of test_keys.new_or_stored_key or
+   test_keys.new_or_stored_keyset
+2) Change _use_stored_key in _create_test_keys.py to return true for the key
+   format you would like to add to this list.
+3) Run your test. It should fail, and give you a test command to run to produce
+   a key.
+4) Run the test command given. It should fail, and give you a new block to add
+   to this file here.
 """
 from util.test_keys import _test_keys_container
 
