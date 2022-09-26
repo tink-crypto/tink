@@ -86,7 +86,6 @@ py_test(
 py_binary(
     name = "testing_server",
     srcs = ["testing_server.py"],
-    data = ["//testdata/gcp:credentials"],
     python_version = "PY3",
     srcs_version = "PY3",
     deps = [

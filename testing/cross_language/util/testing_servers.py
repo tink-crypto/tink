@@ -86,9 +86,12 @@ GCP_CREDENTIALS_PATH = os.path.join(
     'cross_language_test/testdata/gcp/credential.json')
 AWS_KEY_URI = ('aws-kms://arn:aws:kms:us-east-2:235739564943:key/'
                '3ee50705-5a82-4f5b-9753-05c4f473922f')
-AWS_CREDENTIALS_PATH = os.path.join(
+AWS_CREDENTIALS_INI_PATH = os.path.join(
     os.environ['TEST_SRCDIR'] if 'TEST_SRCDIR' in os.environ else '',
     'cross_language_test/testdata/aws/credentials.ini')
+AWS_CREDENTIALS_CRED_PATH = os.path.join(
+    os.environ['TEST_SRCDIR'] if 'TEST_SRCDIR' in os.environ else '',
+    'cross_language_test/testdata/aws/credentials.cred')
 
 _RELATIVE_ROOT_PATH = 'tink_base/testing'
 
@@ -139,11 +142,14 @@ def _server_path(lang: str) -> str:
 def _server_cmd(lang: str, port: int) -> List[str]:
   """Returns the server command."""
   server_path = _server_path(lang)
+  # TODO(b/249015767): Refactor KMS integration to pass credentials via gRPC.
   server_args = [
       '--port',
       '%d' % port, '--gcp_credentials_path', GCP_CREDENTIALS_PATH,
       '--gcp_key_uri', GCP_KEY_URI, '--aws_credentials_path',
-      AWS_CREDENTIALS_PATH, '--aws_key_uri', AWS_KEY_URI
+      # Java expects a .cred file. Others a .ini file.
+      AWS_CREDENTIALS_CRED_PATH if lang == 'java' else AWS_CREDENTIALS_INI_PATH,
+      '--aws_key_uri', AWS_KEY_URI
   ]
 
   if lang == 'java' and server_path.endswith('.jar'):
@@ -195,8 +201,9 @@ class _TestingServers():
         raise RuntimeError('Could not start %s server' % lang) from e
       self._server[lang] = subprocess.Popen(
           cmd, stdout=self._output_file[lang], stderr=subprocess.STDOUT)
-      logging.info('%s server started on port %d with pid: %d.',
-                   lang, port, self._server[lang].pid)
+      logging.info('%s server started on port %d with pid: %d. Log output: %s',
+                   lang, port, self._server[lang].pid,
+                   self._output_file[lang].name)
       self._channel[lang] = grpc.secure_channel(
           '[::]:%d' % port, grpc.local_channel_credentials())
     for lang in LANGUAGES:
