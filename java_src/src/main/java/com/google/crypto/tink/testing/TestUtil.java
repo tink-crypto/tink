@@ -106,7 +106,7 @@ public final class TestUtil {
   }
 
   // This GCP KMS CryptoKey is restricted to the service account in {@code SERVICE_ACCOUNT_FILE}.
-  public static final String RESTRICTED_CRYPTO_KEY_URI =
+  public static final String GCP_KMS_TEST_KEY_URI =
       String.format(
           "gcp-kms://projects/%s/locations/%s/keyRings/%s/cryptoKeys/%s",
           "tink-test-infrastructure", "global", "unit-and-integration-testing", "aead-key");
@@ -116,11 +116,11 @@ public final class TestUtil {
   public static final String SERVICE_ACCOUNT_FILE = "testdata/gcp/credential.json";
 
   // This AWS KMS CryptoKey is restricted to Google use only and {@code AWS_CREDS}.
-  public static final String AWS_CRYPTO_URI =
+  public static final String AWS_KMS_TEST_KEY_URI =
       "aws-kms://arn:aws:kms:us-east-2:235739564943:key/3ee50705-5a82-4f5b-9753-05c4f473922f";
 
   // This is a credential for the AWS service account with granted access to
-  // {@code AWS_CRYPTO_URI}.
+  // {@code AWS_KMS_TEST_KEY_URI}.
   public static final String AWS_CREDS = "testdata/aws/credentials.cred";
 
   /** A dummy Aead-implementation that just throws exception. */

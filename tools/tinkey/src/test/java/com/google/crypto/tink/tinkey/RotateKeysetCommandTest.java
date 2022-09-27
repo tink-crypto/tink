@@ -113,7 +113,7 @@ public class RotateKeysetCommandTest {
     // This test requires KMS/internet access and thus cannot run on RBE.
     assumeFalse(TestUtil.isRemoteBuildExecution());
     // Create an input stream containing an encrypted keyset.
-    String masterKeyUri = TestUtil.RESTRICTED_CRYPTO_KEY_URI;
+    String masterKeyUri = TestUtil.GCP_KMS_TEST_KEY_URI;
     String credentialPath = TestUtil.SERVICE_ACCOUNT_FILE;
     InputStream inputStream =
         TinkeyUtil.createKeyset(existingTemplate, INPUT_FORMAT, masterKeyUri, credentialPath);

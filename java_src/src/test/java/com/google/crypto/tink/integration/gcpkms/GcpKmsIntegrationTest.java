@@ -46,7 +46,7 @@ public class GcpKmsIntegrationTest {
   public void kmsAeadUsingGcpKms_success() throws Exception {
     KeysetHandle keysetHandle =
         KeysetHandle.generateNew(
-            KmsAeadKeyManager.createKeyTemplate(TestUtil.RESTRICTED_CRYPTO_KEY_URI));
+            KmsAeadKeyManager.createKeyTemplate(TestUtil.GCP_KMS_TEST_KEY_URI));
 
     Aead aead = keysetHandle.getPrimitive(Aead.class);
 
@@ -61,7 +61,7 @@ public class GcpKmsIntegrationTest {
   public void kmsEnvelopeAeadUsingGcpKms_success() throws Exception {
     KeyTemplate envelopeTemplate =
         KmsEnvelopeAeadKeyManager.createKeyTemplate(
-            TestUtil.RESTRICTED_CRYPTO_KEY_URI, KeyTemplates.get("AES128_CTR_HMAC_SHA256"));
+            TestUtil.GCP_KMS_TEST_KEY_URI, KeyTemplates.get("AES128_CTR_HMAC_SHA256"));
     KeysetHandle keysetHandle = KeysetHandle.generateNew(envelopeTemplate);
 
     Aead aead = keysetHandle.getPrimitive(Aead.class);
