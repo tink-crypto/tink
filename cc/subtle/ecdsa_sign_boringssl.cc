@@ -58,12 +58,12 @@ crypto::tink::util::StatusOr<std::string> DerToIeee(absl::string_view der,
   size_t field_size_in_bytes =
       (EC_GROUP_get_degree(EC_KEY_get0_group(key)) + 7) / 8;
 
-  ECDSA_SIG* ecdsa_ptr = nullptr;
   const uint8_t* der_ptr = reinterpret_cast<const uint8_t*>(der.data());
   // Note: d2i_ECDSA_SIG is deprecated in BoringSSL, but it isn't in OpenSSL.
   internal::SslUniquePtr<ECDSA_SIG> ecdsa(
-      d2i_ECDSA_SIG(&ecdsa_ptr, &der_ptr, der.size()));
-  if (ecdsa == nullptr) {
+      d2i_ECDSA_SIG(nullptr, &der_ptr, der.size()));
+  if (ecdsa == nullptr ||
+      der_ptr != reinterpret_cast<const uint8_t*>(der.data() + der.size())) {
     return util::Status(absl::StatusCode::kInternal, "d2i_ECDSA_SIG failed");
   }
 
