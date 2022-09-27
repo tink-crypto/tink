@@ -159,7 +159,7 @@ public class KeysetHandleTest {
   }
 
   @Test
-  public void generateNew_shouldWork() throws Exception {
+  public void generateNew_tink_shouldWork() throws Exception {
     KeyTemplate template = KeyTemplates.get("AES128_EAX");
 
     KeysetHandle handle = KeysetHandle.generateNew(template);
@@ -170,6 +170,27 @@ public class KeysetHandleTest {
     expect.that(keyset.getPrimaryKeyId()).isEqualTo(key.getKeyId());
     expect.that(key.getStatus()).isEqualTo(KeyStatusType.ENABLED);
     expect.that(key.getOutputPrefixType()).isEqualTo(OutputPrefixType.TINK);
+    expect.that(key.hasKeyData()).isTrue();
+    expect.that(key.getKeyData().getTypeUrl()).isEqualTo(template.getTypeUrl());
+    AesEaxKeyFormat aesEaxKeyFormat =
+        AesEaxKeyFormat.parseFrom(template.getValue(), ExtensionRegistryLite.getEmptyRegistry());
+    AesEaxKey aesEaxKey =
+        AesEaxKey.parseFrom(key.getKeyData().getValue(), ExtensionRegistryLite.getEmptyRegistry());
+    expect.that(aesEaxKey.getKeyValue().size()).isEqualTo(aesEaxKeyFormat.getKeySize());
+  }
+
+  @Test
+  public void generateNew_raw_shouldWork() throws Exception {
+    KeyTemplate template = KeyTemplates.get("AES128_EAX_RAW");
+
+    KeysetHandle handle = KeysetHandle.generateNew(template);
+
+    Keyset keyset = handle.getKeyset();
+    expect.that(keyset.getKeyCount()).isEqualTo(1);
+    Keyset.Key key = keyset.getKey(0);
+    expect.that(keyset.getPrimaryKeyId()).isEqualTo(key.getKeyId());
+    expect.that(key.getStatus()).isEqualTo(KeyStatusType.ENABLED);
+    expect.that(key.getOutputPrefixType()).isEqualTo(OutputPrefixType.RAW);
     expect.that(key.hasKeyData()).isTrue();
     expect.that(key.getKeyData().getTypeUrl()).isEqualTo(template.getTypeUrl());
     AesEaxKeyFormat aesEaxKeyFormat =

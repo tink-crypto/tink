@@ -692,7 +692,11 @@ public final class KeysetHandle {
   @Deprecated
   public static final KeysetHandle generateNew(com.google.crypto.tink.proto.KeyTemplate keyTemplate)
       throws GeneralSecurityException {
-    return KeysetManager.withEmptyKeyset().rotate(keyTemplate).getKeysetHandle();
+    LegacyProtoParameters parameters =
+        new LegacyProtoParameters(ProtoParametersSerialization.create(keyTemplate));
+    return KeysetHandle.newBuilder()
+        .addEntry(KeysetHandle.generateEntryFromParameters(parameters).makePrimary().withRandomId())
+        .build();
   }
 
   /**
@@ -703,7 +707,11 @@ public final class KeysetHandle {
    */
   public static final KeysetHandle generateNew(KeyTemplate keyTemplate)
       throws GeneralSecurityException {
-    return KeysetManager.withEmptyKeyset().rotate(keyTemplate.getProto()).getKeysetHandle();
+    LegacyProtoParameters parameters =
+        new LegacyProtoParameters(ProtoParametersSerialization.create(keyTemplate.getProto()));
+    return KeysetHandle.newBuilder()
+        .addEntry(KeysetHandle.generateEntryFromParameters(parameters).makePrimary().withRandomId())
+        .build();
   }
 
   /**
