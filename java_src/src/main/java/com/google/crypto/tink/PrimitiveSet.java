@@ -362,12 +362,14 @@ public final class PrimitiveSet<P> {
     }
 
     /* Adds a non-primary primitive.*/
+    @CanIgnoreReturnValue
     public Builder<P> addPrimitive(final P primitive, Keyset.Key key)
         throws GeneralSecurityException {
       return addPrimitive(primitive, key, false);
     }
 
     /* Adds the primary primitive. Should be called exactly once per PrimitiveSet.*/
+    @CanIgnoreReturnValue
     public Builder<P> addPrimaryPrimitive(final P primitive, Keyset.Key key)
         throws GeneralSecurityException {
       return addPrimitive(primitive, key, true);
