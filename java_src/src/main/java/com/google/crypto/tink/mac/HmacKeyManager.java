@@ -232,6 +232,7 @@ public final class HmacKeyManager extends KeyTypeManager<HmacKey> {
 
   public static void register(boolean newKeyAllowed) throws GeneralSecurityException {
     Registry.registerKeyManager(new HmacKeyManager(), newKeyAllowed);
+    HmacProtoSerialization.register();
   }
 
   /**

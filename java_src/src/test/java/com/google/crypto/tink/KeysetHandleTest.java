@@ -35,6 +35,7 @@ import com.google.crypto.tink.internal.testing.FakeMonitoringClient;
 import com.google.crypto.tink.mac.AesCmacKey;
 import com.google.crypto.tink.mac.AesCmacParameters;
 import com.google.crypto.tink.mac.AesCmacParameters.Variant;
+import com.google.crypto.tink.mac.HmacKey;
 import com.google.crypto.tink.monitoring.MonitoringAnnotations;
 import com.google.crypto.tink.monitoring.MonitoringClient;
 import com.google.crypto.tink.proto.AesEaxKey;
@@ -576,11 +577,31 @@ public class KeysetHandleTest {
   }
 
   @Test
-  public void testGetAt_singleKey_works() throws Exception {
+  public void testGetAt_singleKeyWithRegisteredProtoSerialization_works() throws Exception {
+    // HmacKey's proto serialization HmacProtoSerialization is registed in HmacKeyManager.
     Keyset keyset =
         TestUtil.createKeyset(
             TestUtil.createKey(
                 TestUtil.createHmacKeyData("01234567890123456".getBytes(UTF_8), 16),
+                42,
+                KeyStatusType.ENABLED,
+                OutputPrefixType.TINK));
+    KeysetHandle handle = KeysetHandle.fromKeyset(keyset);
+    assertThat(handle.size()).isEqualTo(1);
+    KeysetHandle.Entry entry = handle.getAt(0);
+    assertThat(entry.getId()).isEqualTo(42);
+    assertThat(entry.getStatus()).isEqualTo(KeyStatus.ENABLED);
+    assertThat(entry.isPrimary()).isTrue();
+    assertThat(entry.getKey().getClass()).isEqualTo(HmacKey.class);
+  }
+
+  @Test
+  public void testGetAt_singleKeyWithoutRegisteredProtoSerialization_works() throws Exception {
+    // HkdfPrfKey does currently not have a serialization registed.
+    Keyset keyset =
+        TestUtil.createKeyset(
+            TestUtil.createKey(
+                TestUtil.createPrfKeyData("01234567890123456".getBytes(UTF_8)),
                 42,
                 KeyStatusType.ENABLED,
                 OutputPrefixType.TINK));

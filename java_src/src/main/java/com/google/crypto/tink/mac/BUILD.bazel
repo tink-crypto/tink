@@ -8,6 +8,7 @@ java_library(
     name = "hmac_key_manager",
     srcs = ["HmacKeyManager.java"],
     deps = [
+        ":hmac_proto_serialization",
         "//proto:common_java_proto",
         "//proto:hmac_java_proto",
         "//proto:tink_java_proto",
@@ -29,6 +30,7 @@ android_library(
     name = "hmac_key_manager-android",
     srcs = ["HmacKeyManager.java"],
     deps = [
+        ":hmac_proto_serialization-android",
         "//proto:common_java_proto_lite",
         "//proto:hmac_java_proto_lite",
         "//proto:tink_java_proto_lite",
