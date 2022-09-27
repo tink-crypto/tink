@@ -48,12 +48,12 @@ func AllowKeyDerivation(typeURL string) {
 	derivableKeyManagers[typeURL] = true
 }
 
-// DeriveKey derives a new key from template and pseudorandomness. Derivation is
-// allowed if the template's associated key manager
+// DerivableKeyManagerFromKeyTemplate returns the key manager specified by the
+// given key template. It succeeds only if the key manager
 //   - has a type URL in derivableKeyManagers,
 //   - is registered in the registry, and
 //   - implements DerivableKeyManager.
-func DeriveKey(keyTemplate *tinkpb.KeyTemplate, pseudorandomness io.Reader) (*tinkpb.KeyData, error) {
+func DerivableKeyManagerFromKeyTemplate(keyTemplate *tinkpb.KeyTemplate) (DerivableKeyManager, error) {
 	if keyTemplate == nil {
 		return nil, fmt.Errorf("no key template provided")
 	}
@@ -68,7 +68,15 @@ func DeriveKey(keyTemplate *tinkpb.KeyTemplate, pseudorandomness io.Reader) (*ti
 	if !ok {
 		return nil, fmt.Errorf("key manager for type %s does not implement key derivation", keyTemplate.GetTypeUrl())
 	}
+	return keyManager, nil
+}
 
+// DeriveKey derives a new key from template and pseudorandomness.
+func DeriveKey(keyTemplate *tinkpb.KeyTemplate, pseudorandomness io.Reader) (*tinkpb.KeyData, error) {
+	keyManager, err := DerivableKeyManagerFromKeyTemplate(keyTemplate)
+	if err != nil {
+		return nil, err
+	}
 	key, err := keyManager.DeriveKey(keyTemplate.GetValue(), pseudorandomness)
 	if err != nil {
 		return nil, err
@@ -77,7 +85,6 @@ func DeriveKey(keyTemplate *tinkpb.KeyTemplate, pseudorandomness io.Reader) (*ti
 	if err != nil {
 		return nil, fmt.Errorf("failed to serialize derived key: %v", err)
 	}
-
 	return &tinkpb.KeyData{
 		TypeUrl:         keyTemplate.GetTypeUrl(),
 		Value:           serializedKey,
