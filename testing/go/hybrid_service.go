@@ -22,7 +22,7 @@ import (
 
 	"github.com/google/tink/go/hybrid"
 	"github.com/google/tink/go/keyset"
-	"github.com/google/tink/go/testkeyset"
+	"github.com/google/tink/go/insecurecleartextkeyset"
 	pb "github.com/google/tink/testing/go/proto/testing_api_go_grpc"
 )
 
@@ -33,7 +33,7 @@ type HybridService struct {
 
 func (s *HybridService) CreateHybridEncrypt(ctx context.Context, req *pb.CreationRequest) (*pb.CreationResponse, error) {
 	reader := keyset.NewBinaryReader(bytes.NewReader(req.Keyset))
-	handle, err := testkeyset.Read(reader)
+	handle, err := insecurecleartextkeyset.Read(reader)
 	if err != nil {
 		return &pb.CreationResponse{Err: err.Error()}, nil
 	}
@@ -46,7 +46,7 @@ func (s *HybridService) CreateHybridEncrypt(ctx context.Context, req *pb.Creatio
 
 func (s *HybridService) CreateHybridDecrypt(ctx context.Context, req *pb.CreationRequest) (*pb.CreationResponse, error) {
 	reader := keyset.NewBinaryReader(bytes.NewReader(req.Keyset))
-	handle, err := testkeyset.Read(reader)
+	handle, err := insecurecleartextkeyset.Read(reader)
 	if err != nil {
 		return &pb.CreationResponse{Err: err.Error()}, nil
 	}
@@ -59,7 +59,7 @@ func (s *HybridService) CreateHybridDecrypt(ctx context.Context, req *pb.Creatio
 
 func (s *HybridService) Encrypt(ctx context.Context, req *pb.HybridEncryptRequest) (*pb.HybridEncryptResponse, error) {
 	reader := keyset.NewBinaryReader(bytes.NewReader(req.PublicKeyset))
-	handle, err := testkeyset.Read(reader)
+	handle, err := insecurecleartextkeyset.Read(reader)
 	if err != nil {
 		return &pb.HybridEncryptResponse{
 			Result: &pb.HybridEncryptResponse_Err{err.Error()}}, nil
@@ -80,7 +80,7 @@ func (s *HybridService) Encrypt(ctx context.Context, req *pb.HybridEncryptReques
 
 func (s *HybridService) Decrypt(ctx context.Context, req *pb.HybridDecryptRequest) (*pb.HybridDecryptResponse, error) {
 	reader := keyset.NewBinaryReader(bytes.NewReader(req.PrivateKeyset))
-	handle, err := testkeyset.Read(reader)
+	handle, err := insecurecleartextkeyset.Read(reader)
 	if err != nil {
 		return &pb.HybridDecryptResponse{
 			Result: &pb.HybridDecryptResponse_Err{err.Error()}}, nil

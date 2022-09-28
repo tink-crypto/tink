@@ -25,9 +25,9 @@ import (
 	spb "google.golang.org/protobuf/types/known/structpb"
 	tpb "google.golang.org/protobuf/types/known/timestamppb"
 	wpb "google.golang.org/protobuf/types/known/wrapperspb"
+	"github.com/google/tink/go/insecurecleartextkeyset"
 	"github.com/google/tink/go/jwt"
 	"github.com/google/tink/go/keyset"
-	"github.com/google/tink/go/testkeyset"
 	pb "github.com/google/tink/testing/go/proto/testing_api_go_grpc"
 )
 
@@ -38,7 +38,7 @@ type JWTService struct {
 
 func (s *JWTService) CreateJwtMac(ctx context.Context, req *pb.CreationRequest) (*pb.CreationResponse, error) {
 	reader := keyset.NewBinaryReader(bytes.NewReader(req.Keyset))
-	handle, err := testkeyset.Read(reader)
+	handle, err := insecurecleartextkeyset.Read(reader)
 	if err != nil {
 		return &pb.CreationResponse{Err: err.Error()}, nil
 	}
@@ -51,7 +51,7 @@ func (s *JWTService) CreateJwtMac(ctx context.Context, req *pb.CreationRequest) 
 
 func (s *JWTService) CreateJwtPublicKeySign(ctx context.Context, req *pb.CreationRequest) (*pb.CreationResponse, error) {
 	reader := keyset.NewBinaryReader(bytes.NewReader(req.Keyset))
-	handle, err := testkeyset.Read(reader)
+	handle, err := insecurecleartextkeyset.Read(reader)
 	if err != nil {
 		return &pb.CreationResponse{Err: err.Error()}, nil
 	}
@@ -64,7 +64,7 @@ func (s *JWTService) CreateJwtPublicKeySign(ctx context.Context, req *pb.Creatio
 
 func (s *JWTService) CreateJwtPublicKeyVerify(ctx context.Context, req *pb.CreationRequest) (*pb.CreationResponse, error) {
 	reader := keyset.NewBinaryReader(bytes.NewReader(req.Keyset))
-	handle, err := testkeyset.Read(reader)
+	handle, err := insecurecleartextkeyset.Read(reader)
 	if err != nil {
 		return &pb.CreationResponse{Err: err.Error()}, nil
 	}
@@ -348,7 +348,7 @@ func jwtFromJwkSetResponseError(err error) *pb.JwtFromJwkSetResponse {
 
 func (s *JWTService) ComputeMacAndEncode(ctx context.Context, req *pb.JwtSignRequest) (*pb.JwtSignResponse, error) {
 	reader := keyset.NewBinaryReader(bytes.NewReader(req.Keyset))
-	handle, err := testkeyset.Read(reader)
+	handle, err := insecurecleartextkeyset.Read(reader)
 	if err != nil {
 		return jwtSignResponseError(err), nil
 	}
@@ -371,7 +371,7 @@ func (s *JWTService) ComputeMacAndEncode(ctx context.Context, req *pb.JwtSignReq
 
 func (s *JWTService) VerifyMacAndDecode(ctx context.Context, req *pb.JwtVerifyRequest) (*pb.JwtVerifyResponse, error) {
 	reader := keyset.NewBinaryReader(bytes.NewReader(req.Keyset))
-	handle, err := testkeyset.Read(reader)
+	handle, err := insecurecleartextkeyset.Read(reader)
 	if err != nil {
 		return jwtVerifyResponseError(err), nil
 	}
@@ -398,7 +398,7 @@ func (s *JWTService) VerifyMacAndDecode(ctx context.Context, req *pb.JwtVerifyRe
 
 func (s *JWTService) PublicKeySignAndEncode(ctx context.Context, req *pb.JwtSignRequest) (*pb.JwtSignResponse, error) {
 	reader := keyset.NewBinaryReader(bytes.NewReader(req.Keyset))
-	handle, err := testkeyset.Read(reader)
+	handle, err := insecurecleartextkeyset.Read(reader)
 	if err != nil {
 		return jwtSignResponseError(err), nil
 	}
@@ -421,7 +421,7 @@ func (s *JWTService) PublicKeySignAndEncode(ctx context.Context, req *pb.JwtSign
 
 func (s *JWTService) PublicKeyVerifyAndDecode(ctx context.Context, req *pb.JwtVerifyRequest) (*pb.JwtVerifyResponse, error) {
 	reader := keyset.NewBinaryReader(bytes.NewReader(req.Keyset))
-	handle, err := testkeyset.Read(reader)
+	handle, err := insecurecleartextkeyset.Read(reader)
 	if err != nil {
 		return jwtVerifyResponseError(err), nil
 	}
@@ -470,7 +470,7 @@ func (s *JWTService) FromJwkSet(ctx context.Context, req *pb.JwtFromJwkSetReques
 		return jwtFromJwkSetResponseError(err), nil
 	}
 	b := &bytes.Buffer{}
-	if err := testkeyset.Write(handle, keyset.NewBinaryWriter(b)); err != nil {
+	if err := insecurecleartextkeyset.Write(handle, keyset.NewBinaryWriter(b)); err != nil {
 		return jwtFromJwkSetResponseError(err), nil
 	}
 	return &pb.JwtFromJwkSetResponse{

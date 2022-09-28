@@ -22,7 +22,7 @@ import (
 
 	"github.com/google/tink/go/keyset"
 	"github.com/google/tink/go/signature"
-	"github.com/google/tink/go/testkeyset"
+	"github.com/google/tink/go/insecurecleartextkeyset"
 	pb "github.com/google/tink/testing/go/proto/testing_api_go_grpc"
 )
 
@@ -33,7 +33,7 @@ type SignatureService struct {
 
 func (s *SignatureService) CreatePublicKeySign(ctx context.Context, req *pb.CreationRequest) (*pb.CreationResponse, error) {
 	reader := keyset.NewBinaryReader(bytes.NewReader(req.Keyset))
-	handle, err := testkeyset.Read(reader)
+	handle, err := insecurecleartextkeyset.Read(reader)
 	if err != nil {
 		return &pb.CreationResponse{Err: err.Error()}, nil
 	}
@@ -46,7 +46,7 @@ func (s *SignatureService) CreatePublicKeySign(ctx context.Context, req *pb.Crea
 
 func (s *SignatureService) CreatePublicKeyVerify(ctx context.Context, req *pb.CreationRequest) (*pb.CreationResponse, error) {
 	reader := keyset.NewBinaryReader(bytes.NewReader(req.Keyset))
-	handle, err := testkeyset.Read(reader)
+	handle, err := insecurecleartextkeyset.Read(reader)
 	if err != nil {
 		return &pb.CreationResponse{Err: err.Error()}, nil
 	}
@@ -59,7 +59,7 @@ func (s *SignatureService) CreatePublicKeyVerify(ctx context.Context, req *pb.Cr
 
 func (s *SignatureService) Sign(ctx context.Context, req *pb.SignatureSignRequest) (*pb.SignatureSignResponse, error) {
 	reader := keyset.NewBinaryReader(bytes.NewReader(req.PrivateKeyset))
-	handle, err := testkeyset.Read(reader)
+	handle, err := insecurecleartextkeyset.Read(reader)
 	if err != nil {
 		return &pb.SignatureSignResponse{
 			Result: &pb.SignatureSignResponse_Err{err.Error()}}, nil
@@ -80,7 +80,7 @@ func (s *SignatureService) Sign(ctx context.Context, req *pb.SignatureSignReques
 
 func (s *SignatureService) Verify(ctx context.Context, req *pb.SignatureVerifyRequest) (*pb.SignatureVerifyResponse, error) {
 	reader := keyset.NewBinaryReader(bytes.NewReader(req.PublicKeyset))
-	handle, err := testkeyset.Read(reader)
+	handle, err := insecurecleartextkeyset.Read(reader)
 	if err != nil {
 		return &pb.SignatureVerifyResponse{Err: err.Error()}, nil
 	}

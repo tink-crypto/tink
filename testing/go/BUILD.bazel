@@ -38,6 +38,7 @@ go_library(
         "@tink_go//aead",
         "@tink_go//daead",
         "@tink_go//hybrid",
+        "@tink_go//insecurecleartextkeyset",
         "@tink_go//jwt",
         "@tink_go//keyset",
         "@tink_go//mac",
@@ -45,7 +46,6 @@ go_library(
         "@tink_go//proto/tink_go_proto",
         "@tink_go//signature",
         "@tink_go//streamingaead",
-        "@tink_go//testkeyset",
     ],
 )
 

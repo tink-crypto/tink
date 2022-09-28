@@ -25,13 +25,13 @@ import (
 	"github.com/google/tink/go/aead"
 	"github.com/google/tink/go/daead"
 	"github.com/google/tink/go/hybrid"
+	"github.com/google/tink/go/insecurecleartextkeyset"
 	"github.com/google/tink/go/jwt"
 	"github.com/google/tink/go/keyset"
 	"github.com/google/tink/go/mac"
 	"github.com/google/tink/go/prf"
 	"github.com/google/tink/go/signature"
 	"github.com/google/tink/go/streamingaead"
-	"github.com/google/tink/go/testkeyset"
 	tinkpb "github.com/google/tink/go/proto/tink_go_proto"
 	pb "github.com/google/tink/testing/go/proto/testing_api_go_grpc"
 
@@ -149,7 +149,7 @@ func (s *KeysetService) Generate(ctx context.Context, req *pb.KeysetGenerateRequ
 	}
 	buf := new(bytes.Buffer)
 	writer := keyset.NewBinaryWriter(buf)
-	err = testkeyset.Write(handle, writer)
+	err = insecurecleartextkeyset.Write(handle, writer)
 	if err != nil {
 		return &pb.KeysetGenerateResponse{
 			Result: &pb.KeysetGenerateResponse_Err{err.Error()}}, nil
@@ -160,7 +160,7 @@ func (s *KeysetService) Generate(ctx context.Context, req *pb.KeysetGenerateRequ
 
 func (s *KeysetService) Public(ctx context.Context, req *pb.KeysetPublicRequest) (*pb.KeysetPublicResponse, error) {
 	reader := keyset.NewBinaryReader(bytes.NewReader(req.PrivateKeyset))
-	privateHandle, err := testkeyset.Read(reader)
+	privateHandle, err := insecurecleartextkeyset.Read(reader)
 	if err != nil {
 		return &pb.KeysetPublicResponse{
 			Result: &pb.KeysetPublicResponse_Err{err.Error()}}, nil
@@ -172,7 +172,7 @@ func (s *KeysetService) Public(ctx context.Context, req *pb.KeysetPublicRequest)
 	}
 	buf := new(bytes.Buffer)
 	writer := keyset.NewBinaryWriter(buf)
-	err = testkeyset.Write(publicHandle, writer)
+	err = insecurecleartextkeyset.Write(publicHandle, writer)
 	if err != nil {
 		return &pb.KeysetPublicResponse{
 			Result: &pb.KeysetPublicResponse_Err{err.Error()}}, nil
@@ -183,14 +183,14 @@ func (s *KeysetService) Public(ctx context.Context, req *pb.KeysetPublicRequest)
 
 func (s *KeysetService) ToJson(ctx context.Context, req *pb.KeysetToJsonRequest) (*pb.KeysetToJsonResponse, error) {
 	reader := keyset.NewBinaryReader(bytes.NewReader(req.Keyset))
-	handle, err := testkeyset.Read(reader)
+	handle, err := insecurecleartextkeyset.Read(reader)
 	if err != nil {
 		return &pb.KeysetToJsonResponse{
 			Result: &pb.KeysetToJsonResponse_Err{err.Error()}}, nil
 	}
 	buf := new(bytes.Buffer)
 	writer := keyset.NewJSONWriter(buf)
-	if err := testkeyset.Write(handle, writer); err != nil {
+	if err := insecurecleartextkeyset.Write(handle, writer); err != nil {
 		return &pb.KeysetToJsonResponse{
 			Result: &pb.KeysetToJsonResponse_Err{err.Error()}}, nil
 	}
@@ -200,14 +200,14 @@ func (s *KeysetService) ToJson(ctx context.Context, req *pb.KeysetToJsonRequest)
 
 func (s *KeysetService) FromJson(ctx context.Context, req *pb.KeysetFromJsonRequest) (*pb.KeysetFromJsonResponse, error) {
 	reader := keyset.NewJSONReader(bytes.NewBufferString(req.JsonKeyset))
-	handle, err := testkeyset.Read(reader)
+	handle, err := insecurecleartextkeyset.Read(reader)
 	if err != nil {
 		return &pb.KeysetFromJsonResponse{
 			Result: &pb.KeysetFromJsonResponse_Err{err.Error()}}, nil
 	}
 	buf := new(bytes.Buffer)
 	writer := keyset.NewBinaryWriter(buf)
-	if err := testkeyset.Write(handle, writer); err != nil {
+	if err := insecurecleartextkeyset.Write(handle, writer); err != nil {
 		return &pb.KeysetFromJsonResponse{
 			Result: &pb.KeysetFromJsonResponse_Err{err.Error()}}, nil
 	}
@@ -217,7 +217,7 @@ func (s *KeysetService) FromJson(ctx context.Context, req *pb.KeysetFromJsonRequ
 
 func (s *KeysetService) WriteEncrypted(ctx context.Context, req *pb.KeysetWriteEncryptedRequest) (*pb.KeysetWriteEncryptedResponse, error) {
 	masterReader := keyset.NewBinaryReader(bytes.NewReader(req.GetMasterKeyset()))
-	masterHandle, err := testkeyset.Read(masterReader)
+	masterHandle, err := insecurecleartextkeyset.Read(masterReader)
 	if err != nil {
 		return &pb.KeysetWriteEncryptedResponse{
 			Result: &pb.KeysetWriteEncryptedResponse_Err{err.Error()}}, nil
@@ -229,7 +229,7 @@ func (s *KeysetService) WriteEncrypted(ctx context.Context, req *pb.KeysetWriteE
 	}
 
 	reader := keyset.NewBinaryReader(bytes.NewReader(req.GetKeyset()))
-	handle, err := testkeyset.Read(reader)
+	handle, err := insecurecleartextkeyset.Read(reader)
 	if err != nil {
 		return &pb.KeysetWriteEncryptedResponse{
 			Result: &pb.KeysetWriteEncryptedResponse_Err{err.Error()}}, nil
@@ -259,7 +259,7 @@ func (s *KeysetService) WriteEncrypted(ctx context.Context, req *pb.KeysetWriteE
 
 func (s *KeysetService) ReadEncrypted(ctx context.Context, req *pb.KeysetReadEncryptedRequest) (*pb.KeysetReadEncryptedResponse, error) {
 	masterReader := keyset.NewBinaryReader(bytes.NewReader(req.GetMasterKeyset()))
-	masterHandle, err := testkeyset.Read(masterReader)
+	masterHandle, err := insecurecleartextkeyset.Read(masterReader)
 	if err != nil {
 		return &pb.KeysetReadEncryptedResponse{
 			Result: &pb.KeysetReadEncryptedResponse_Err{err.Error()}}, nil
@@ -291,7 +291,7 @@ func (s *KeysetService) ReadEncrypted(ctx context.Context, req *pb.KeysetReadEnc
 
 	buf := new(bytes.Buffer)
 	writer := keyset.NewBinaryWriter(buf)
-	if err := testkeyset.Write(handle, writer); err != nil {
+	if err := insecurecleartextkeyset.Write(handle, writer); err != nil {
 		return &pb.KeysetReadEncryptedResponse{
 			Result: &pb.KeysetReadEncryptedResponse_Err{err.Error()}}, nil
 	}
