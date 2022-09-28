@@ -18,7 +18,6 @@ package streamingprf
 
 import (
 	"errors"
-	"fmt"
 
 	"google.golang.org/protobuf/proto"
 	"github.com/google/tink/go/core/registry"
@@ -64,9 +63,6 @@ func (km *hkdfStreamingPRFKeyManager) NewKey(serializedKeyFormat []byte) (proto.
 	keyFormat := &hkdfpb.HkdfPrfKeyFormat{}
 	if err := proto.Unmarshal(serializedKeyFormat, keyFormat); err != nil {
 		return nil, errInvalidHKDFStreamingPRFKeyFormat
-	}
-	if keyFormat.GetParams() == nil {
-		return nil, fmt.Errorf("nil HKDF PRF params")
 	}
 	if err := validateHKDFStreamingPRFParams(hashNameFromHKDFPRFParams(keyFormat.GetParams()), int(keyFormat.GetKeySize())); err != nil {
 		return nil, err
