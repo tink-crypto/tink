@@ -63,7 +63,7 @@ class MacTest(parameterized.TestCase):
     if key_template_name in _ADDITIONAL_KEY_TEMPLATES:
       key_template, key_type = _ADDITIONAL_KEY_TEMPLATES[
           key_template_name]
-      supported_langs = tink_config.SUPPORTED_LANGUAGES[key_type]
+      supported_langs = tink_config.supported_languages_for_key_type(key_type)
     else:
       key_template = utilities.KEY_TEMPLATE[key_template_name]
       supported_langs = (

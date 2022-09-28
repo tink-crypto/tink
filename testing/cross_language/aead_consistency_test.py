@@ -178,8 +178,8 @@ class AeadKeyConsistencyTest(parameterized.TestCase):
                       aes_ctr_hmac_aead_key_test_cases()))
   def test_aead_creation_supported_languages_consistent(self, name, keyset):
     """Tests that AEAD creation is consistent in all supporeted languages."""
-    supported_langs = tink_config.SUPPORTED_LANGUAGES[
-        tink_config.key_type_from_type_url(keyset.key[0].key_data.type_url)]
+    supported_langs = tink_config.supported_languages_for_key_type(
+        tink_config.key_type_from_type_url(keyset.key[0].key_data.type_url))
 
     langs = [lang for _, lang in self._create_aeads_ignore_errors(keyset)]
 
@@ -192,8 +192,8 @@ class AeadKeyConsistencyTest(parameterized.TestCase):
                       aes_ctr_hmac_aead_key_test_cases()))
   def test_aead_creation_non_supported_languages_fail(self, name, keyset):
     """Tests that AEAD creation fails in all unsupported languages."""
-    supported_langs = tink_config.SUPPORTED_LANGUAGES[
-        tink_config.key_type_from_type_url(keyset.key[0].key_data.type_url)]
+    supported_langs = tink_config.supported_languages_for_key_type(
+        tink_config.key_type_from_type_url(keyset.key[0].key_data.type_url))
 
     langs = [lang for _, lang in self._create_aeads_ignore_errors(keyset)]
 

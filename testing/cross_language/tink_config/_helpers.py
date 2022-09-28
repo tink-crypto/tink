@@ -47,20 +47,53 @@ def key_types_for_primitive(p: Any) -> List[str]:
 
 
 def key_type_from_type_url(type_url: str) -> str:
-  """Returns the key type from a given TypeUrl, assuming that the value.
+  """Returns the key type from a given TypeUrl.
 
   If the TypeUrl is invalid throws an exception.
   Args:
-    type_url: Fpr example type.googleapis.com/google.crypto.tink.AesGcmKey
+    type_url: For example 'type.googleapis.com/google.crypto.tink.AesGcmKey'
   Returns:
     The stripped version (e.g. AesGcmKey)
   Raises:
-    ValueError if the type url is unknown.
+    ValueError if the type url is unknown or in a bad format.
   """
   if not type_url.startswith(_TYPE_URL_PREFIX):
     raise ValueError('Invalid type_url: ' + type_url)
   # removeprefix does not yet exist in all our supported python versions.
-  stripped_type_url = type_url[len(_TYPE_URL_PREFIX):]
-  if stripped_type_url not in all_key_types():
-    raise ValueError('type_url for unknown key type: ' + stripped_type_url)
-  return stripped_type_url
+  key_type = type_url[len(_TYPE_URL_PREFIX):]
+  if key_type not in all_key_types():
+    raise ValueError('key type unknown: ' + key_type)
+  return key_type
+
+
+def supported_languages_for_key_type(key_type: str) -> List[str]:
+  """Returns the list of supported languages for a given KeyType.
+
+    Throws an except if the key type is unkonwn.
+  Args:
+    key_type: The shortened type URL (e.g. 'AesGcmKey')
+  Returns:
+    The list of languages which this key type supportes.
+  Raises:
+    ValueError if the key type is unknown.
+  """
+  if key_type not in all_key_types():
+    raise ValueError('key_type unknown: ' + key_type)
+  return _key_types.SUPPORTED_LANGUAGES[key_type]
+
+
+def supported_languages_for_primitive(p: Any) -> List[str]:
+  """Returns the list of languages which support a primitive.
+
+    Throws an except if the key type is unkonwn.
+  Args:
+    p: The Primitive
+  Returns:
+    The list of languages which this primitive supportes.
+  Raises:
+    ValueError if the key type is unknown.
+  """
+  result = set()
+  for key_type in key_types_for_primitive(p):
+    result.update(set(supported_languages_for_key_type(key_type)))
+  return list(result)

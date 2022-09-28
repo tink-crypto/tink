@@ -87,7 +87,7 @@ class AeadPythonTest(parameterized.TestCase):
   def _langs_from_key_template_name(self, key_template_name: str) -> List[str]:
     if key_template_name in _ADDITIONAL_KEY_TEMPLATES:
       _, key_type = _ADDITIONAL_KEY_TEMPLATES[key_template_name]
-      return tink_config.SUPPORTED_LANGUAGES[key_type]
+      return tink_config.supported_languages_for_key_type(key_type)
     else:
       return utilities.SUPPORTED_LANGUAGES_BY_TEMPLATE_NAME[key_template_name]
 

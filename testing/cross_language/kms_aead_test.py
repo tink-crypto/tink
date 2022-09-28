@@ -115,7 +115,8 @@ def _kms_envelope_aead_test_cases() -> Iterable[Tuple[str, str, str]]:
   for key_template_name, (
       _, aead_key_type) in _KMS_ENVELOPE_AEAD_KEY_TEMPLATES.items():
     # Make sure to test languages that support the pritive used for DEK.
-    supported_langs = tink_config.SUPPORTED_LANGUAGES[aead_key_type]
+    supported_langs = tink_config.supported_languages_for_key_type(
+        aead_key_type)
     # Make sure the language supports KMS envelope encryption.
     supported_langs = set(supported_langs).intersection(
         _SUPPORTED_LANGUAGES_FOR_KMS_ENVELOPE_AEAD)

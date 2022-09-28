@@ -339,7 +339,7 @@ def _supported_languages_by_template(
     template_name: str, key_type: str) -> List[str]:
   if template_name in _CUSTOM_SUPPORTED_LANGUAGES_BY_TEMPLATE_NAME:
     return _CUSTOM_SUPPORTED_LANGUAGES_BY_TEMPLATE_NAME[template_name]
-  return tink_config.SUPPORTED_LANGUAGES[key_type]
+  return tink_config.supported_languages_for_key_type(key_type)
 
 
 def _all_key_template_names_with_key_type():

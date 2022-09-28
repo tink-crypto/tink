@@ -42,5 +42,24 @@ class HelpersTest(absltest.TestCase):
       _helpers.key_type_from_type_url(
           'type.googleapis.com/google.crypto.tink.InvalidKeyType29981')
 
+  def test_supported_languages_for_key_type(self):
+    self.assertCountEqual(
+        _helpers.supported_languages_for_key_type('AesGcmKey'),
+        ['cc', 'java', 'go', 'python'])
+
+  def test_supported_languages_for_key_type_invalid(self):
+    with self.assertRaises(ValueError):
+      _helpers.supported_languages_for_key_type('InvalidKeyType21b9a1')
+
+  def test_supported_languages_for_primitive(self):
+    self.assertCountEqual(
+        _helpers.supported_languages_for_primitive(aead.Aead),
+        ['cc', 'java', 'go', 'python'])
+
+  def test_supported_languages_for_primitive_invalid(self):
+    with self.assertRaises(KeyError):
+      _helpers.supported_languages_for_primitive('not a primitive, a string')
+
+
 if __name__ == '__main__':
   absltest.main()

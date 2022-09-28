@@ -27,7 +27,5 @@ from tink_config import _key_types
 all_key_types = _helpers.all_key_types
 key_types_for_primitive = _helpers.key_types_for_primitive
 key_type_from_type_url = _helpers.key_type_from_type_url
-
-
-# TODO(tholenst): Do not export this, instead export an appropriate function
-SUPPORTED_LANGUAGES = _key_types.SUPPORTED_LANGUAGES
+supported_languages_for_key_type = _helpers.supported_languages_for_key_type
+supported_languages_for_primitive = _helpers.supported_languages_for_primitive

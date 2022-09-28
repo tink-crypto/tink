@@ -394,8 +394,8 @@ class KeyGenerationConsistencyTest(parameterized.TestCase):
                       rsa_ssa_pkcs1_test_cases(),
                       rsa_ssa_pss_test_cases()))
   def test_key_generation_consistency(self, name, template):
-    supported_langs = tink_config.SUPPORTED_LANGUAGES[
-        tink_config.key_type_from_type_url(template.type_url)]
+    supported_langs = tink_config.supported_languages_for_key_type(
+        tink_config.key_type_from_type_url(template.type_url))
     failures = 0
     results = {}
     for lang in supported_langs:

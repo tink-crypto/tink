@@ -96,7 +96,7 @@ def gen_inc_versions(keyset):
 def test_cases(key_types: Iterable[str]):
   for key_type in key_types:
     for key_template_name in utilities.KEY_TEMPLATE_NAMES[key_type]:
-      for lang in tink_config.SUPPORTED_LANGUAGES[key_type]:
+      for lang in tink_config.supported_languages_for_key_type(key_type):
         yield (key_template_name, lang)
 
 
