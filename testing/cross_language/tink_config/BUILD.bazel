@@ -43,5 +43,6 @@ py_test(
         ":_helpers",
         requirement("absl-py"),
         "@tink_py//tink/aead",
+        "@tink_py//tink/hybrid",
     ],
 )

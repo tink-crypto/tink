@@ -29,3 +29,5 @@ key_types_for_primitive = _helpers.key_types_for_primitive
 key_type_from_type_url = _helpers.key_type_from_type_url
 supported_languages_for_key_type = _helpers.supported_languages_for_key_type
 supported_languages_for_primitive = _helpers.supported_languages_for_primitive
+all_primitives = _helpers.all_primitives
+primitive_for_keytype = _helpers.primitive_for_keytype

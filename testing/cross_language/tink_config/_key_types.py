@@ -46,6 +46,7 @@ KEY_TYPES = {
         'AesGcmHkdfStreamingKey',
     ),
     hybrid.HybridDecrypt: ('EciesAeadHkdfPrivateKey', 'HpkePrivateKey'),
+    hybrid.HybridEncrypt: ('EciesAeadHkdfPublicKey', 'HpkePublicKey'),
     mac.Mac: (
         'AesCmacKey',
         'HmacKey',
@@ -55,6 +56,12 @@ KEY_TYPES = {
         'Ed25519PrivateKey',
         'RsaSsaPkcs1PrivateKey',
         'RsaSsaPssPrivateKey',
+    ),
+    signature.PublicKeyVerify: (
+        'EcdsaPublicKey',
+        'Ed25519PublicKey',
+        'RsaSsaPkcs1PublicKey',
+        'RsaSsaPssPublicKey',
     ),
     prf.PrfSet: (
         'AesCmacPrfKey',

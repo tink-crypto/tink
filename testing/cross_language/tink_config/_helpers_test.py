@@ -15,6 +15,7 @@
 
 from absl.testing import absltest
 from tink import aead
+from tink import hybrid
 
 from tink_config import _helpers
 
@@ -60,6 +61,17 @@ class HelpersTest(absltest.TestCase):
     with self.assertRaises(KeyError):
       _helpers.supported_languages_for_primitive('not a primitive, a string')
 
+  def test_all_primitives(self):
+    self.assertContainsSubset(
+        [aead.Aead, hybrid.HybridEncrypt, hybrid.HybridEncrypt],
+        _helpers.all_primitives())
+
+  def test_primitive_for_keytype(self):
+    self.assertEqual(_helpers.primitive_for_keytype('AesGcmKey'), aead.Aead)
+
+  def test_primitive_for_keytype_throws_invalid(self):
+    with self.assertRaises(ValueError):
+      _helpers.primitive_for_keytype('InvalidKeyType776611')
 
 if __name__ == '__main__':
   absltest.main()

@@ -14,7 +14,7 @@
 """Helper functions to access the information in this module.
 """
 
-from typing import Any, List
+from typing import Any, Iterable, List
 
 from tink_config import _key_types
 
@@ -97,3 +97,17 @@ def supported_languages_for_primitive(p: Any) -> List[str]:
   for key_type in key_types_for_primitive(p):
     result.update(set(supported_languages_for_key_type(key_type)))
   return list(result)
+
+
+def all_primitives() -> Iterable[Any]:
+  """Returns all the primitive types (such as tink.aead.Aead)."""
+  return [p for p, _ in _key_types.KEY_TYPES.items()]
+
+
+def primitive_for_keytype(key_type: str) -> Any:
+  """Returns the primitive for the given key type."""
+
+  for p, key_types in _key_types.KEY_TYPES.items():
+    if key_type in key_types:
+      return p
+  raise ValueError('Unknown key type: ' + key_type)

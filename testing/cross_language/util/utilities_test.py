@@ -29,9 +29,11 @@ def all_key_template_names():
 
 class SupportedKeyTypesTest(absltest.TestCase):
 
-  def test_all_key_types_present(self):
-    self.assertEqual(
-        list(utilities.KEY_TEMPLATE_NAMES.keys()), tink_config.all_key_types())
+  def test_template_types_subset(self):
+    """Tests that all key types which have a template are in all_key_types()."""
+    self.assertContainsSubset(
+        set(utilities.KEY_TEMPLATE_NAMES.keys()),
+        set(tink_config.all_key_types()))
 
   def test_all_key_templates_present(self):
     self.assertEqual(
@@ -55,7 +57,6 @@ class SupportedKeyTypesTest(absltest.TestCase):
             'AES_CMAC', 'HMAC_SHA256_128BITTAG', 'HMAC_SHA256_256BITTAG',
             'HMAC_SHA512_256BITTAG', 'HMAC_SHA512_512BITTAG'
         ])
-
 
 if __name__ == '__main__':
   absltest.main()
