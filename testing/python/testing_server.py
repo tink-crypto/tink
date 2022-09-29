@@ -14,6 +14,7 @@
 """Tink Primitive Testing Service in Python."""
 
 from concurrent import futures
+import sys
 
 from absl import app
 from absl import flags
@@ -27,14 +28,13 @@ from tink import prf
 from tink import signature
 from tink import streaming_aead
 
-from tink.integration import awskms
-from tink.integration import gcpkms
 from tink.testing import fake_kms
-
 from proto import testing_api_pb2_grpc
-
 import jwt_service
 import services
+
+from tink.integration import awskms
+from tink.integration import gcpkms
 
 FLAGS = flags.FLAGS
 
@@ -93,9 +93,11 @@ def main(unused_argv):
       services.StreamingAeadServicer(), server)
   testing_api_pb2_grpc.add_JwtServicer_to_server(jwt_service.JwtServicer(),
                                                  server)
-  server.add_secure_port('[::]:%d' % FLAGS.port,
-                         grpc.local_server_credentials())
+  used_port = server.add_secure_port('[::]:%d' % FLAGS.port,
+                                     grpc.local_server_credentials())
   server.start()
+  print('Server started on port ' + str(used_port))
+  print(' (stderr) Server started on port ' + str(used_port), file=sys.stderr)
   server.wait_for_termination()
 
 

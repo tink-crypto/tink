@@ -181,18 +181,13 @@ class _TestingServers():
     self._signature_stub = {}
     self._prf_stub = {}
     self._jwt_stub = {}
+    self._test_name = test_name
+
     for lang in LANGUAGES:
       port = portpicker.pick_unused_port()
       cmd = _server_cmd(lang, port)
       logging.info('cmd = %s', cmd)
-      try:
-        output_dir = os.environ['TEST_UNDECLARED_OUTPUTS_DIR']
-      except KeyError as e:
-        raise RuntimeError(
-            'Could not start %s server, TEST_UNDECLARED_OUTPUTS_DIR environment'
-            'variable must be set') from e
-      output_file = '%s-%s-%s' % (test_name, lang, 'server.log')
-      output_path = os.path.join(output_dir, output_file)
+      output_path = self._get_output_path(lang)
       logging.info('writing server output to %s', output_path)
       try:
         self._output_file[lang] = open(output_path, 'w+')
@@ -225,6 +220,16 @@ class _TestingServers():
         stub_name = '_%s_stub' % primitive
         getattr(self, stub_name)[lang] = _PRIMITIVE_STUBS[primitive](
             self._channel[lang])
+
+  def _get_output_path(self, lang) -> str:
+    try:
+      output_dir = os.environ['TEST_UNDECLARED_OUTPUTS_DIR']
+    except KeyError as e:
+      raise RuntimeError(
+          'Could not start %s server, TEST_UNDECLARED_OUTPUTS_DIR environment'
+          'variable must be set') from e
+    output_file = '%s-%s-%s' % (self._test_name, lang, 'server.log')
+    return os.path.join(output_dir, output_file)
 
   def keyset_stub(self, lang) -> testing_api_pb2_grpc.KeysetStub:
     return self._keyset_stub[lang]
@@ -272,6 +277,20 @@ class _TestingServers():
       self._output_file[lang].close()
     logging.info('All servers stopped.')
 
+    print()
+    print()
+    for lang in LANGUAGES:
+      total_reps = 1 + 100 // len(lang + ' ')
+      length = total_reps * len(lang + ' ') - 1
+      print('=' * length)
+      print((lang + ' ') * total_reps)
+      print('v' * length)
+      with open(self._get_output_path(lang)) as f:
+        print(f.read())
+      print('^' * length)
+      print((lang + ' ') * total_reps)
+      print('=' * length)
+      print()
 
 _ts = None
 
