@@ -31,7 +31,7 @@ _CREATE_NEW_KEY_MESSAGE_TEMPLATE = """
 Unable to retrieve stored key for template:
 {text_format}
 To create a new key with this template, run:
-blaze test \\
+blaze test --trim_test_configuration \\
   //third_party/tink/testing/cross_language/util:testing_servers_test \\
   --test_arg=--force_failure_for_adding_key_to_db \\
   --test_arg=--hex_template={hex_template} \\
