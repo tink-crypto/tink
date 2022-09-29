@@ -230,7 +230,7 @@ def _normalize_and_text_format_message(msg: message.Message,
     # solution in Tink, or else the proto team provides us with a reflection
     # based API to do this (as they do in C++.) In this case, we simply use the
     # slow API here.
-    value = field_proto.SerializeToString()
+    value = field_proto.SerializeToString(deterministic=True)
     setattr(msg, 'value', value)
     output.append(
         _text_format_field(value, fields[1], indent))
