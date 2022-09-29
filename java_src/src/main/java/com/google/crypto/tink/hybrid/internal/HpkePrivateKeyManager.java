@@ -30,12 +30,16 @@ import com.google.crypto.tink.proto.HpkeParams;
 import com.google.crypto.tink.proto.HpkePrivateKey;
 import com.google.crypto.tink.proto.HpkePublicKey;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
+import com.google.crypto.tink.subtle.EllipticCurves;
 import com.google.crypto.tink.subtle.Validators;
 import com.google.crypto.tink.subtle.X25519;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.ExtensionRegistryLite;
 import com.google.protobuf.InvalidProtocolBufferException;
 import java.security.GeneralSecurityException;
+import java.security.KeyPair;
+import java.security.interfaces.ECPrivateKey;
+import java.security.interfaces.ECPublicKey;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -121,8 +125,30 @@ public final class HpkePrivateKeyManager
 
       @Override
       public HpkePrivateKey createKey(HpkeKeyFormat keyFormat) throws GeneralSecurityException {
-        byte[] privateKeyBytes = X25519.generatePrivateKey();
-        byte[] publicKeyBytes = X25519.publicFromPrivate(privateKeyBytes);
+        byte[] privateKeyBytes;
+        byte[] publicKeyBytes;
+
+        switch (keyFormat.getParams().getKem()) {
+          case DHKEM_X25519_HKDF_SHA256:
+            privateKeyBytes = X25519.generatePrivateKey();
+            publicKeyBytes = X25519.publicFromPrivate(privateKeyBytes);
+            break;
+          case DHKEM_P256_HKDF_SHA256:
+          case DHKEM_P384_HKDF_SHA384:
+          case DHKEM_P521_HKDF_SHA512:
+            EllipticCurves.CurveType curveType =
+                HpkeUtil.nistHpkeKemToCurve(keyFormat.getParams().getKem());
+            KeyPair keyPair = EllipticCurves.generateKeyPair(curveType);
+            publicKeyBytes =
+                EllipticCurves.pointEncode(
+                    curveType,
+                    EllipticCurves.PointFormatType.UNCOMPRESSED,
+                    ((ECPublicKey) keyPair.getPublic()).getW());
+            privateKeyBytes = ((ECPrivateKey) keyPair.getPrivate()).getS().toByteArray();
+            break;
+          default:
+            throw new GeneralSecurityException("Invalid KEM");
+        }
 
         HpkePublicKey publicKey =
             HpkePublicKey.newBuilder()

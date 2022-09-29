@@ -23,6 +23,7 @@ import com.google.crypto.tink.proto.HpkeKdf;
 import com.google.crypto.tink.proto.HpkeKem;
 import com.google.crypto.tink.proto.HpkeParams;
 import com.google.crypto.tink.subtle.Bytes;
+import com.google.crypto.tink.subtle.EllipticCurves;
 import java.security.GeneralSecurityException;
 
 /** Collection of helper functions for HPKE. */
@@ -126,6 +127,19 @@ public final class HpkeUtil {
     if ((params.getAead() == HpkeAead.AEAD_UNKNOWN)
         || (params.getAead() == HpkeAead.UNRECOGNIZED)) {
       throw new GeneralSecurityException("Invalid AEAD param: " + params.getAead().name());
+    }
+  }
+
+  static EllipticCurves.CurveType nistHpkeKemToCurve(HpkeKem kem) throws GeneralSecurityException {
+    switch (kem) {
+      case DHKEM_P256_HKDF_SHA256:
+        return EllipticCurves.CurveType.NIST_P256;
+      case DHKEM_P384_HKDF_SHA384:
+        return EllipticCurves.CurveType.NIST_P384;
+      case DHKEM_P521_HKDF_SHA512:
+        return EllipticCurves.CurveType.NIST_P521;
+      default:
+        throw new GeneralSecurityException("Unrecognized NIST HPKE KEM identifier");
     }
   }
 
