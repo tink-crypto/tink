@@ -51,7 +51,7 @@ install_cmake() {
   export PATH="${cmake_tmpdir}/${cmake_name}/bin:${PATH}"
 }
 
-if [[ -n "${KOKORO_ROOT:-}" ]]; then
+if [[ -n "${KOKORO_ARTIFACTS_DIR:-}" ]]; then
   # If specifying the version, users must also specify the digest.
   if (( "$#" == 1 )); then
     echo \
