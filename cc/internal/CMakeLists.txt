@@ -449,6 +449,7 @@ tink_cc_library(
     proto_parameters_serialization.h
   DEPS
     tink::internal::serialization
+    tink::internal::util
     absl::strings
     tink::util::statusor
     tink::proto::tink_cc_proto

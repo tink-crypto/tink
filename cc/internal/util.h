@@ -31,6 +31,10 @@ bool BuffersOverlap(absl::string_view first, absl::string_view second);
 // Returns true if `first` fully overlaps with `second`.
 bool BuffersAreIdentical(absl::string_view first, absl::string_view second);
 
+// Returns true if `input` only contains printable ASCII characters (whitespace
+// is not allowed).
+bool IsPrintableAscii(absl::string_view input);
+
 }  // namespace internal
 }  // namespace tink
 }  // namespace crypto

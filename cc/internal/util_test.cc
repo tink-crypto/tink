@@ -26,6 +26,9 @@ namespace tink {
 namespace internal {
 namespace {
 
+using ::testing::IsFalse;
+using ::testing::IsTrue;
+
 constexpr absl::string_view kLongString =
     "a long buffer with \n several \n newlines";
 
@@ -95,6 +98,22 @@ TEST(BuffersAreIdenticalTest, PartialOverlapFails) {
   EXPECT_FALSE(BuffersAreIdentical(buffer.substr(0, 10), buffer.substr(10, 5)));
   EXPECT_FALSE(BuffersAreIdentical(buffer.substr(9, 5), buffer.substr(0, 10)));
   EXPECT_FALSE(BuffersAreIdentical(buffer.substr(10, 5), buffer.substr(0, 10)));
+}
+
+TEST(UtilTest, IsPrintableAscii) {
+  const std::string input =
+      "!\"#$%&'()*+,-./"
+      "0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`"
+      "abcdefghijklmnopqrstuvwxyz{|}~";
+  EXPECT_THAT(IsPrintableAscii(input), IsTrue());
+}
+
+TEST(UtilTest, IsNotPrintableAscii) {
+  EXPECT_THAT(IsPrintableAscii("\n"), IsFalse());
+  EXPECT_THAT(IsPrintableAscii("\t"), IsFalse());
+  EXPECT_THAT(IsPrintableAscii(" "), IsFalse());
+  EXPECT_THAT(IsPrintableAscii(std::string("\x7f", 1)), IsFalse());
+  EXPECT_THAT(IsPrintableAscii("ö"), IsFalse());
 }
 
 }  // namespace

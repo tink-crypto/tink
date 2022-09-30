@@ -18,29 +18,17 @@
 
 #include <string>
 
-#include "absl/strings/ascii.h"
 #include "absl/strings/string_view.h"
+#include "tink/internal/util.h"
 #include "tink/util/statusor.h"
 #include "proto/tink.pb.h"
 
 namespace crypto {
 namespace tink {
 namespace internal {
-namespace {
 
 using ::google::crypto::tink::KeyTemplate;
 using ::google::crypto::tink::OutputPrefixType;
-
-bool IsPrintableAscii(absl::string_view input) {
-  for (char c : input) {
-    if (!absl::ascii_isprint(c) || absl::ascii_isspace(c)) {
-      return false;
-    }
-  }
-  return true;
-}
-
-}  // namespace
 
 util::StatusOr<ProtoParametersSerialization>
 ProtoParametersSerialization::Create(absl::string_view type_url,

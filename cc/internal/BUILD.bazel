@@ -481,6 +481,7 @@ cc_library(
     include_prefix = "tink/internal",
     deps = [
         ":serialization",
+        ":util",
         "//proto:tink_cc_proto",
         "//util:statusor",
         "@com_google_absl//absl/strings",

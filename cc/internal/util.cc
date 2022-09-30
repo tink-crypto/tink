@@ -18,6 +18,7 @@
 #include <iterator>
 #include <functional>
 
+#include "absl/strings/ascii.h"
 #include "absl/strings/string_view.h"
 
 namespace crypto {
@@ -55,6 +56,15 @@ bool BuffersAreIdentical(absl::string_view first, absl::string_view second) {
                                                             second.begin()) &&
          std::equal_to<absl::string_view::const_iterator>{}(
              std::prev(first.end()), std::prev(second.end()));
+}
+
+bool IsPrintableAscii(absl::string_view input) {
+  for (char c : input) {
+    if (!absl::ascii_isprint(c) || absl::ascii_isspace(c)) {
+      return false;
+    }
+  }
+  return true;
 }
 
 }  // namespace internal
