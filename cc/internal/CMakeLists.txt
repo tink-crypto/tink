@@ -433,3 +433,36 @@ tink_cc_test(
     tink::util::test_matchers
     tink::proto::tink_cc_proto
 )
+
+tink_cc_library(
+  NAME serialization
+  SRCS
+    serialization.h
+  DEPS
+    absl::strings
+)
+
+tink_cc_library(
+  NAME proto_parameters_serialization
+  SRCS
+    proto_parameters_serialization.cc
+    proto_parameters_serialization.h
+  DEPS
+    tink::internal::serialization
+    absl::strings
+    tink::util::statusor
+    tink::proto::tink_cc_proto
+)
+
+tink_cc_test(
+  NAME proto_parameters_serialization_test
+  SRCS
+    proto_parameters_serialization_test.cc
+  DEPS
+    tink::internal::proto_parameters_serialization
+    gmock
+    tink::util::statusor
+    tink::util::test_matchers
+    tink::proto::test_proto_cc_proto
+    tink::proto::tink_cc_proto
+)

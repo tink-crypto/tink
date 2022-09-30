@@ -466,3 +466,36 @@ cc_test(
         "@com_google_googletest//:gtest_main",
     ],
 )
+
+cc_library(
+    name = "serialization",
+    hdrs = ["serialization.h"],
+    include_prefix = "tink/internal",
+    deps = ["@com_google_absl//absl/strings"],
+)
+
+cc_library(
+    name = "proto_parameters_serialization",
+    srcs = ["proto_parameters_serialization.cc"],
+    hdrs = ["proto_parameters_serialization.h"],
+    include_prefix = "tink/internal",
+    deps = [
+        ":serialization",
+        "//proto:tink_cc_proto",
+        "//util:statusor",
+        "@com_google_absl//absl/strings",
+    ],
+)
+
+cc_test(
+    name = "proto_parameters_serialization_test",
+    srcs = ["proto_parameters_serialization_test.cc"],
+    deps = [
+        ":proto_parameters_serialization",
+        "//proto:test_proto_cc_proto",
+        "//proto:tink_cc_proto",
+        "//util:statusor",
+        "//util:test_matchers",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
