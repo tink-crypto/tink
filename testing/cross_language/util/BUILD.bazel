@@ -166,6 +166,10 @@ py_test(
     deps = [
         ":utilities",
         "//tink_config",
+        "//util/test_keys",
+        "@tink_py//tink/aead",
+        "@tink_py//tink/mac",
+        "@tink_py//tink/proto:tink_py_pb2",
         requirement("absl-py"),
     ],
 )

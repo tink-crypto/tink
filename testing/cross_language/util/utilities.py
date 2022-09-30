@@ -15,9 +15,7 @@
 """Various utility functions for the cross language tests.
 """
 
-from typing import Any
-from typing import Iterable
-from typing import List
+from typing import Any, Iterable, List, Set
 
 from tink import aead
 from tink import daead
@@ -359,3 +357,11 @@ SUPPORTED_LANGUAGES_BY_TEMPLATE_NAME = {
     name: _supported_languages_by_template(name, template)
     for name, template in _all_key_template_names_with_key_type()
 }
+
+
+def key_types_in_keyset(keyset: bytes) -> Set[str]:
+  """Returns a set containing all key types in a keyset."""
+  parsed_keyset = tink_pb2.Keyset.FromString(keyset)
+  type_urls = [k.key_data.type_url for k in parsed_keyset.key]
+  key_types = [tink_config.key_type_from_type_url(t) for t in type_urls]
+  return set(key_types)

@@ -15,9 +15,12 @@
 
 
 from absl.testing import absltest
+from tink import aead
 from tink import mac
 
+from tink.proto import tink_pb2
 import tink_config
+from util import test_keys
 from util import utilities
 
 
@@ -25,6 +28,10 @@ def all_key_template_names():
   for _, names in utilities.KEY_TEMPLATE_NAMES.items():
     for name in names:
       yield name
+
+
+def setUpModule():
+  aead.register()
 
 
 class SupportedKeyTypesTest(absltest.TestCase):
@@ -57,6 +64,21 @@ class SupportedKeyTypesTest(absltest.TestCase):
             'AES_CMAC', 'HMAC_SHA256_128BITTAG', 'HMAC_SHA256_256BITTAG',
             'HMAC_SHA512_256BITTAG', 'HMAC_SHA512_512BITTAG'
         ])
+
+  def test_key_types_in_keyset_single_key(self):
+    aes_gcm_keyset = test_keys.new_or_stored_keyset(
+        aead.aead_key_templates.AES128_GCM).SerializeToString()
+    self.assertEqual(
+        utilities.key_types_in_keyset(aes_gcm_keyset), set(['AesGcmKey']))
+
+  def test_key_types_in_keyset_multiple_keys(self):
+    key1 = test_keys.new_or_stored_key(aead.aead_key_templates.AES128_GCM)
+    key2 = test_keys.new_or_stored_key(aead.aead_key_templates.AES256_GCM)
+    key3 = test_keys.new_or_stored_key(aead.aead_key_templates.AES128_EAX)
+    keyset = tink_pb2.Keyset(key=[key1, key2, key3], primary_key_id=key1.key_id)
+    self.assertEqual(
+        utilities.key_types_in_keyset(keyset.SerializeToString()),
+        set(['AesGcmKey', 'AesEaxKey']))
 
 if __name__ == '__main__':
   absltest.main()
