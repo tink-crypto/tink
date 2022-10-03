@@ -64,11 +64,11 @@ func newPRFBasedDeriver(prfKeyData *tinkpb.KeyData, derivedKeyTemplate *tinkpb.K
 func (p *prfBasedDeriver) DeriveKeyset(salt []byte) (*keyset.Handle, error) {
 	randomness, err := p.prf.Compute(salt)
 	if err != nil {
-		return nil, fmt.Errorf("compute randomness from PRF: %v", err)
+		return nil, fmt.Errorf("compute randomness from PRF failed: %v", err)
 	}
 	keyData, err := internalregistry.DeriveKey(p.derivedKeyTemplate, randomness)
 	if err != nil {
-		return nil, fmt.Errorf("derive key: %v", err)
+		return nil, fmt.Errorf("derive key failed: %v", err)
 	}
 	// Fill in placeholder values for key ID, status, and output prefix type.
 	// These will be populated with the correct values in the keyset deriver
