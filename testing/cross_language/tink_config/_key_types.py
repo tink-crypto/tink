@@ -73,7 +73,32 @@ KEY_TYPES = {
         'JwtEcdsaPrivateKey',
         'JwtRsaSsaPkcs1PrivateKey',
         'JwtRsaSsaPssPrivateKey',
+    ),
+    jwt.JwtPublicKeyVerify: (
+        'JwtEcdsaPublicKey',
+        'JwtRsaSsaPkcs1PublicKey',
+        'JwtRsaSsaPssPublicKey',
     )
+}
+
+# Map from Asymmetric Private Primitive to Asymmetric Public Primitive
+PRIVATE_TO_PUBLIC_PRIMITIVE = {
+    hybrid.HybridDecrypt: hybrid.HybridEncrypt,
+    signature.PublicKeySign: signature.PublicKeyVerify,
+    jwt.JwtPublicKeySign: jwt.JwtPublicKeyVerify,
+}
+
+# Map from Private Key Types to Public Key Types
+PRIVATE_TO_PUBLIC_KEY = {
+    'EciesAeadHkdfPrivateKey': 'EciesAeadHkdfPublicKey',
+    'HpkePrivateKey': 'HpkePublicKey',
+    'EcdsaPrivateKey': 'EcdsaPublicKey',
+    'Ed25519PrivateKey': 'Ed25519PublicKey',
+    'RsaSsaPkcs1PrivateKey': 'RsaSsaPkcs1PublicKey',
+    'RsaSsaPssPrivateKey': 'RsaSsaPssPublicKey',
+    'JwtEcdsaPrivateKey': 'JwtEcdsaPublicKey',
+    'JwtRsaSsaPkcs1PrivateKey': 'JwtRsaSsaPkcs1PublicKey',
+    'JwtRsaSsaPssPrivateKey': 'JwtRsaSsaPssPublicKey',
 }
 
 # All languages that are supported by a KeyType

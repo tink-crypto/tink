@@ -30,6 +30,16 @@ py_library(
     ],
 )
 
+py_test(
+    name = "_key_types_test",
+    srcs = ["_key_types_test.py"],
+    deps = [
+        ":_helpers",
+        ":_key_types",
+        requirement("absl-py"),
+    ],
+)
+
 py_library(
     name = "_helpers",
     srcs = ["_helpers.py"],
