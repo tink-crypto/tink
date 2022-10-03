@@ -9,6 +9,7 @@ go_library(
     srcs = [
         "keyset_deriver.go",
         "prf_based_deriver.go",
+        "prf_based_deriver_key_manager.go",
     ],
     importpath = "github.com/google/tink/go/keyderivation",
     visibility = ["//visibility:public"],
@@ -18,13 +19,18 @@ go_library(
         "//internal/internalregistry",
         "//keyderivation/internal/streamingprf",
         "//keyset",
+        "//proto/prf_based_deriver_go_proto",
         "//proto/tink_go_proto",
+        "@org_golang_google_protobuf//proto",
     ],
 )
 
 go_test(
     name = "keyderivation_test",
-    srcs = ["prf_based_deriver_test.go"],
+    srcs = [
+        "prf_based_deriver_key_manager_test.go",
+        "prf_based_deriver_test.go",
+    ],
     embed = [":keyderivation"],
     deps = [
         "//aead",
@@ -34,8 +40,12 @@ go_test(
         "//proto/aes_gcm_go_proto",
         "//proto/common_go_proto",
         "//proto/hkdf_prf_go_proto",
+        "//proto/prf_based_deriver_go_proto",
         "//proto/tink_go_proto",
+        "//subtle/random",
+        "@com_github_google_go_cmp//cmp",
         "@org_golang_google_protobuf//proto",
+        "@org_golang_google_protobuf//testing/protocmp",
     ],
 )
 
