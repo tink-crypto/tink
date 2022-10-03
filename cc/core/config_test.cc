@@ -48,9 +48,6 @@ TEST_F(ConfigTest, testValidation) {
   EXPECT_EQ(absl::StatusCode::kInvalidArgument, status.code());
 }
 
-
-// TODO(przydatek): add more tests.
-
 }  // namespace
 }  // namespace tink
 }  // namespace crypto

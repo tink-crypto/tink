@@ -391,6 +391,7 @@ tink_cc_library(
     tink::core::catalogue
     tink::core::key_manager
     tink::core::registry
+    absl::core_headers
     absl::status
     absl::strings
     tink::aead::aead_config

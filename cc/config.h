@@ -20,6 +20,7 @@
 #include <memory>
 #include <string>
 
+#include "absl/base/attributes.h"
 #include "absl/status/status.h"
 #include "absl/strings/ascii.h"
 #include "tink/aead/aead_config.h"
@@ -51,7 +52,8 @@ namespace tink {
 // RegistryConfig registry_config = ...;
 // auto status = Config::Register(registry_config);
 //
-class Config {
+// TODO(b/250586153): Remove this class when Tink ObjC no longer depends on it.
+class ABSL_DEPRECATED("RegistryConfig and KeyTypeEntry are deprecated") Config {
  public:
   // Returns a KeyTypeEntry for Tink key types with the specified parameters.
   static std::unique_ptr<google::crypto::tink::KeyTypeEntry>
