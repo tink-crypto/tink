@@ -1,4 +1,4 @@
-load("@io_bazel_rules_go//go:def.bzl", "go_library")
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
 
 package(default_visibility = ["//:__subpackages__"])  # keep
 
@@ -6,10 +6,37 @@ licenses(["notice"])  # keep
 
 go_library(
     name = "keyderivation",
-    srcs = ["keyset_deriver.go"],
+    srcs = [
+        "keyset_deriver.go",
+        "prf_based_deriver.go",
+    ],
     importpath = "github.com/google/tink/go/keyderivation",
     visibility = ["//visibility:public"],
-    deps = ["//keyset"],
+    deps = [
+        "//core/registry",
+        "//insecurecleartextkeyset",
+        "//internal/internalregistry",
+        "//keyderivation/internal/streamingprf",
+        "//keyset",
+        "//proto/tink_go_proto",
+    ],
+)
+
+go_test(
+    name = "keyderivation_test",
+    srcs = ["prf_based_deriver_test.go"],
+    embed = [":keyderivation"],
+    deps = [
+        "//aead",
+        "//core/registry",
+        "//insecurecleartextkeyset",
+        "//keyderivation/internal/streamingprf",
+        "//proto/aes_gcm_go_proto",
+        "//proto/common_go_proto",
+        "//proto/hkdf_prf_go_proto",
+        "//proto/tink_go_proto",
+        "@org_golang_google_protobuf//proto",
+    ],
 )
 
 alias(
