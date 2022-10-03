@@ -467,3 +467,32 @@ tink_cc_test(
     tink::proto::test_proto_cc_proto
     tink::proto::tink_cc_proto
 )
+
+tink_cc_library(
+  NAME proto_key_serialization
+  SRCS
+    proto_key_serialization.cc
+    proto_key_serialization.h
+  DEPS
+    tink::internal::serialization
+    tink::internal::util
+    absl::status
+    tink::core::restricted_data
+    tink::util::statusor
+    tink::proto::tink_cc_proto
+)
+
+tink_cc_test(
+  NAME proto_key_serialization_test
+  SRCS
+    proto_key_serialization_test.cc
+  DEPS
+    tink::internal::proto_key_serialization
+    gmock
+    tink::core::insecure_secret_key_access
+    tink::core::restricted_data
+    tink::util::statusor
+    tink::util::test_matchers
+    tink::proto::tink_cc_proto
+)
+

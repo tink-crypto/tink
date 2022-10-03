@@ -500,3 +500,32 @@ cc_test(
         "@com_google_googletest//:gtest_main",
     ],
 )
+
+cc_library(
+    name = "proto_key_serialization",
+    srcs = ["proto_key_serialization.cc"],
+    hdrs = ["proto_key_serialization.h"],
+    include_prefix = "tink/internal",
+    deps = [
+        ":serialization",
+        ":util",
+        "//:restricted_data",
+        "//proto:tink_cc_proto",
+        "//util:statusor",
+        "@com_google_absl//absl/status",
+    ],
+)
+
+cc_test(
+    name = "proto_key_serialization_test",
+    srcs = ["proto_key_serialization_test.cc"],
+    deps = [
+        ":proto_key_serialization",
+        "//:insecure_secret_key_access",
+        "//:restricted_data",
+        "//proto:tink_cc_proto",
+        "//util:statusor",
+        "//util:test_matchers",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
