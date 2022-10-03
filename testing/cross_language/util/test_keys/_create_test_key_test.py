@@ -15,12 +15,22 @@
 """Tests for create_test_key."""
 
 from absl.testing import absltest
+from absl.testing import parameterized
 from tink import aead
+from tink import daead
+from tink import hybrid
+from tink import jwt
+from tink import mac
+from tink import prf
+from tink import signature
+from tink import streaming_aead
 
 from tink.proto import aes_gcm_pb2
 from tink.proto import tink_pb2
+import tink_config
 from util import key_util
 from util import test_keys
+from util import utilities
 
 
 def _do_not_use_stored_key(_: tink_pb2.KeyTemplate) -> bool:
@@ -33,9 +43,17 @@ def _use_stored_key(_: tink_pb2.KeyTemplate) -> bool:
 
 def setUpModule():
   aead.register()
+  daead.register()
+  hybrid.register()
+  jwt.register_jwt_mac()
+  jwt.register_jwt_signature()
+  mac.register()
+  prf.register()
+  signature.register()
+  streaming_aead.register()
 
 
-class CreateTestKeyTest(absltest.TestCase):
+class CreateTestKeyTest(parameterized.TestCase):
 
   def test_get_new_aes_gcm_key(self):
     """Tests that AES GCM Keys can be generated on the fly."""
@@ -154,6 +172,16 @@ output_prefix_type: RAW""",
         b'\022 \372\022\371\335\313\301\314\253\r\364\376\341o\242\375\000p\317,t\326\373U\332\267\342\212\210\2160\3611'
     )
 
+  @parameterized.parameters([
+      aead.Aead, daead.DeterministicAead, streaming_aead.StreamingAead,
+      hybrid.HybridDecrypt, mac.Mac, signature.PublicKeySign, prf.PrfSet,
+      jwt.JwtMac, jwt.JwtPublicKeySign
+  ])
+  def test_create_test_keys_for_primitive(self, primitive):
+    keyset = test_keys.some_keyset_for_primitive(primitive)
+    key_types = utilities.key_types_in_keyset(keyset.SerializeToString())
+    for key_type in key_types:
+      self.assertIn(key_type, tink_config.key_types_for_primitive(primitive))
 
 if __name__ == '__main__':
   absltest.main()

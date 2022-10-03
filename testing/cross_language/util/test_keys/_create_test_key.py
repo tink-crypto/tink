@@ -16,10 +16,19 @@
 """
 
 import io
+from typing import Any
 from typing import Callable
 
 import tink
+from tink import aead
 from tink import cleartext_keyset_handle
+from tink import daead
+from tink import hybrid
+from tink import jwt
+from tink import mac
+from tink import prf
+from tink import signature
+from tink import streaming_aead
 
 from tink.proto import tink_pb2
 from util import key_util
@@ -101,3 +110,31 @@ def new_or_stored_keyset(
   key = new_or_stored_key(template, container, use_stored_key)
   keyset = tink_pb2.Keyset(key=[key], primary_key_id=key.key_id)
   return keyset
+
+
+def _some_template_for_primitive(primitive: Any) -> tink_pb2.KeyTemplate:
+  """Returns an arbitrary template for the given primitive."""
+  if primitive == aead.Aead:
+    return aead.aead_key_templates.AES128_GCM
+  if primitive == daead.DeterministicAead:
+    return daead.deterministic_aead_key_templates.AES256_SIV
+  if primitive == streaming_aead.StreamingAead:
+    return streaming_aead.streaming_aead_key_templates.AES256_CTR_HMAC_SHA256_1MB
+  if primitive == hybrid.HybridDecrypt:
+    return hybrid.hybrid_key_templates.DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_AES_256_GCM_RAW
+  if primitive == mac.Mac:
+    return mac.mac_key_templates.HMAC_SHA256_256BITTAG
+  if primitive == signature.PublicKeySign:
+    return signature.signature_key_templates.RSA_SSA_PKCS1_4096_SHA512_F4
+  if primitive == prf.PrfSet:
+    return prf.prf_key_templates.HKDF_SHA256
+  if primitive == jwt.JwtMac:
+    return jwt.jwt_hs256_template()
+  if primitive == jwt.JwtPublicKeySign:
+    return jwt.jwt_ps512_4096_f4_template()
+  raise ValueError('Unknown primitive in _some_template_for_primitive')
+
+
+def some_keyset_for_primitive(primitive: Any) -> tink_pb2.Keyset:
+  """Returns an arbitrary keyset for the given primitive."""
+  return new_or_stored_keyset(_some_template_for_primitive(primitive))

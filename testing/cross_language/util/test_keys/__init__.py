@@ -18,4 +18,6 @@ from util.test_keys import _test_keys_container
 
 new_or_stored_key = _create_test_key.new_or_stored_key
 new_or_stored_keyset = _create_test_key.new_or_stored_keyset
+some_keyset_for_primitive = _create_test_key.some_keyset_for_primitive
+
 TestKeysContainer = _test_keys_container.TestKeysContainer
