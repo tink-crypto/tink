@@ -23,6 +23,7 @@ import (
 
 	"github.com/google/tink/go/core/primitiveset"
 	"github.com/google/tink/go/keyset"
+	tinkpb "github.com/google/tink/go/proto/tink_go_proto"
 )
 
 // New generates a new instance of the Streaming PRF primitive.
@@ -46,15 +47,21 @@ type wrappedStreamingPRF struct {
 var _ StreamingPRF = (*wrappedStreamingPRF)(nil)
 
 func newWrappedStreamingPRF(ps *primitiveset.PrimitiveSet) (*wrappedStreamingPRF, error) {
+	if rawEntries, err := ps.RawEntries(); err != nil || len(rawEntries) != 1 {
+		return nil, errors.New("streaming_prf_factory: only accepts keysets with 1 RAW key")
+	}
+	// ps.Entries is a map of prefix type -> []*Entry.
+	if len(ps.Entries) != 1 {
+		return nil, errors.New("streaming_prf_factory: only accepts keys with prefix type RAW")
+	}
 	if _, ok := (ps.Primary.Primitive).(StreamingPRF); !ok {
 		return nil, errors.New("streaming_prf_factory: not a Streaming PRF primitive")
 	}
-	for _, primitives := range ps.Entries {
-		for _, p := range primitives {
-			if _, ok := (p.Primitive).(StreamingPRF); !ok {
-				return nil, errors.New("streaming_prf_factory: not a Streaming PRF primitive")
-			}
-		}
+	if ps.Primary.PrefixType != tinkpb.OutputPrefixType_RAW {
+		return nil, errors.New("streaming_prf_factory: primary key prefix type is not RAW")
+	}
+	if ps.Primary.Status != tinkpb.KeyStatusType_ENABLED {
+		return nil, errors.New("streaming_prf_factory: primary key is not ENABLED")
 	}
 	return &wrappedStreamingPRF{ps: ps}, nil
 }

@@ -43,6 +43,7 @@ go_test(
     deps = [
         "//aead",
         "//core/registry",
+        "//insecurecleartextkeyset",
         "//keyset",
         "//proto/aes_gcm_go_proto",
         "//proto/common_go_proto",

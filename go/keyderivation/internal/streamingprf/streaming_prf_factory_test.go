@@ -23,6 +23,7 @@ import (
 	"google.golang.org/protobuf/proto"
 	"github.com/google/tink/go/aead"
 	"github.com/google/tink/go/core/registry"
+	"github.com/google/tink/go/insecurecleartextkeyset"
 	"github.com/google/tink/go/keyderivation/internal/streamingprf"
 	"github.com/google/tink/go/keyset"
 	"github.com/google/tink/go/subtle/random"
@@ -161,18 +162,119 @@ func TestNewEqualToStreamingPRFPrimitive(t *testing.T) {
 	}
 }
 
-func TestNewRejectsNilKeysetHandle(t *testing.T) {
+func TestNewRejectsIncorrectKeysetHandle(t *testing.T) {
 	if _, err := streamingprf.New(nil); err == nil {
+		t.Error("streamingprf.New() err = nil, want non-nil")
+	}
+
+	aeadKH, err := keyset.NewHandle(aead.AES128GCMKeyTemplate())
+	if err != nil {
+		t.Fatalf("keyset.NewHandle() err = %v, want nil", err)
+	}
+	if _, err := streamingprf.New(aeadKH); err == nil {
 		t.Error("streamingprf.New() err = nil, want non-nil")
 	}
 }
 
-func TestNewRejectsIncorrectKey(t *testing.T) {
-	kh, err := keyset.NewHandle(aead.AES128GCMKeyTemplate())
+func TestNewRejectsInvalidKeysetHandle(t *testing.T) {
+	keyData, err := registry.NewKeyData(streamingprf.HKDFSHA256RawKeyTemplate())
 	if err != nil {
-		t.Fatalf("keyset.NewHandle() err = %v, want nil", err)
+		t.Fatalf("registry.NewKeyData() err = %v", err)
 	}
-	if _, err := streamingprf.New(kh); err == nil {
-		t.Error("streamingprf.New() err = nil, want non-nil")
+	for _, test := range []struct {
+		name string
+		ks   *tinkpb.Keyset
+	}{
+		{
+			"multiple raw keys",
+			&tinkpb.Keyset{
+				PrimaryKeyId: 119,
+				Key: []*tinkpb.Keyset_Key{
+					&tinkpb.Keyset_Key{
+						KeyData:          keyData,
+						Status:           tinkpb.KeyStatusType_ENABLED,
+						KeyId:            119,
+						OutputPrefixType: tinkpb.OutputPrefixType_RAW,
+					},
+					&tinkpb.Keyset_Key{
+						KeyData:          keyData,
+						Status:           tinkpb.KeyStatusType_ENABLED,
+						KeyId:            200,
+						OutputPrefixType: tinkpb.OutputPrefixType_RAW,
+					},
+				},
+			},
+		},
+		{
+			"various output prefix keys",
+			&tinkpb.Keyset{
+				PrimaryKeyId: 119,
+				Key: []*tinkpb.Keyset_Key{
+					&tinkpb.Keyset_Key{
+						KeyData:          keyData,
+						Status:           tinkpb.KeyStatusType_ENABLED,
+						KeyId:            119,
+						OutputPrefixType: tinkpb.OutputPrefixType_RAW,
+					},
+					&tinkpb.Keyset_Key{
+						KeyData:          keyData,
+						Status:           tinkpb.KeyStatusType_ENABLED,
+						KeyId:            200,
+						OutputPrefixType: tinkpb.OutputPrefixType_TINK,
+					},
+				},
+			},
+		},
+		{
+			"invalid prefix type",
+			&tinkpb.Keyset{
+				PrimaryKeyId: 119,
+				Key: []*tinkpb.Keyset_Key{
+					&tinkpb.Keyset_Key{
+						KeyData:          keyData,
+						Status:           tinkpb.KeyStatusType_ENABLED,
+						KeyId:            119,
+						OutputPrefixType: tinkpb.OutputPrefixType_TINK,
+					},
+				},
+			}},
+		{
+			"invalid status",
+			&tinkpb.Keyset{
+				PrimaryKeyId: 119,
+				Key: []*tinkpb.Keyset_Key{
+					&tinkpb.Keyset_Key{
+						KeyData:          keyData,
+						Status:           tinkpb.KeyStatusType_UNKNOWN_STATUS,
+						KeyId:            119,
+						OutputPrefixType: tinkpb.OutputPrefixType_RAW,
+					},
+				},
+			},
+		},
+		{
+			"no primary key",
+			&tinkpb.Keyset{
+				PrimaryKeyId: 200,
+				Key: []*tinkpb.Keyset_Key{
+					&tinkpb.Keyset_Key{
+						KeyData:          keyData,
+						Status:           tinkpb.KeyStatusType_UNKNOWN_STATUS,
+						KeyId:            119,
+						OutputPrefixType: tinkpb.OutputPrefixType_RAW,
+					},
+				},
+			},
+		},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			kh, err := insecurecleartextkeyset.Read(&keyset.MemReaderWriter{Keyset: test.ks})
+			if err != nil {
+				t.Fatalf("insecurecleartextkeyset.Read() err = %v, want nil", err)
+			}
+			if _, err := streamingprf.New(kh); err == nil {
+				t.Error("streamingprf.New() err = nil, want non-nil")
+			}
+		})
 	}
 }
