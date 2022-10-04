@@ -94,10 +94,11 @@ class CreateTestKeyTest(parameterized.TestCase):
   def test_get_keyset_new_aes_gcm_key(self):
     """Tests that AES GCM Keys can be generated on the fly."""
     template = aead.aead_key_templates.AES128_GCM
-    keyset = test_keys.new_or_stored_keyset(
+    serialized_keyset = test_keys.new_or_stored_keyset(
         template,
         test_keys.TestKeysContainer(),
         _do_not_use_stored_key)
+    keyset = tink_pb2.Keyset.FromString(serialized_keyset)
     self.assertLen(keyset.key, 1)
     self.assertEqual(keyset.primary_key_id, keyset.key[0].key_id)
     self.assertEqual(keyset.key[0].key_data.type_url,
@@ -117,9 +118,9 @@ class CreateTestKeyTest(parameterized.TestCase):
     container_with_aes_gcm_key = test_keys.TestKeysContainer()
     container_with_aes_gcm_key.add_key(
         key_util.text_format(template), key_util.text_format(key))
-    keyset = test_keys.new_or_stored_keyset(template,
-                                            container_with_aes_gcm_key,
-                                            _use_stored_key)
+    serialized_keyset = test_keys.new_or_stored_keyset(
+        template, container_with_aes_gcm_key, _use_stored_key)
+    keyset = tink_pb2.Keyset.FromString(serialized_keyset)
     # It suffices to compare the key material to check if the keys are the same
     self.assertLen(keyset.key, 1)
     self.assertEqual(keyset.primary_key_id, keyset.key[0].key_id)
@@ -164,7 +165,8 @@ output_prefix_type: RAW""",
 value: ""
 output_prefix_type: RAW""",
         msg=parsed_template)
-    keyset = test_keys.new_or_stored_keyset(parsed_template)
+    serialized_keyset = test_keys.new_or_stored_keyset(parsed_template)
+    keyset = tink_pb2.Keyset.FromString(serialized_keyset)
     self.assertLen(keyset.key, 1)
     # The same value as in _test_keys_db for the raw key.
     self.assertEqual(
@@ -179,7 +181,7 @@ output_prefix_type: RAW""",
   ])
   def test_create_test_keys_for_primitive(self, primitive):
     keyset = test_keys.some_keyset_for_primitive(primitive)
-    key_types = utilities.key_types_in_keyset(keyset.SerializeToString())
+    key_types = utilities.key_types_in_keyset(keyset)
     for key_type in key_types:
       self.assertIn(key_type, tink_config.key_types_for_primitive(primitive))
 

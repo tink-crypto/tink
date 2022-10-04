@@ -67,7 +67,7 @@ class SupportedKeyTypesTest(absltest.TestCase):
 
   def test_key_types_in_keyset_single_key(self):
     aes_gcm_keyset = test_keys.new_or_stored_keyset(
-        aead.aead_key_templates.AES128_GCM).SerializeToString()
+        aead.aead_key_templates.AES128_GCM)
     self.assertEqual(
         utilities.key_types_in_keyset(aes_gcm_keyset), set(['AesGcmKey']))
 

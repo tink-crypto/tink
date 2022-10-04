@@ -94,7 +94,7 @@ def new_or_stored_keyset(
     template: tink_pb2.KeyTemplate,
     container: _test_keys_container.TestKeysContainer = _test_keys_db.db,
     use_stored_key: Callable[[tink_pb2.KeyTemplate], bool] = _use_stored_key
-) -> tink_pb2.Keyset:
+) -> bytes:
   """Returns a new keyset with a single new or stored key.
 
   The arguments 'container' and 'use_stored_key' are for testing and typically
@@ -109,7 +109,7 @@ def new_or_stored_keyset(
   """
   key = new_or_stored_key(template, container, use_stored_key)
   keyset = tink_pb2.Keyset(key=[key], primary_key_id=key.key_id)
-  return keyset
+  return keyset.SerializeToString()
 
 
 def _some_template_for_primitive(primitive: Any) -> tink_pb2.KeyTemplate:
@@ -135,6 +135,6 @@ def _some_template_for_primitive(primitive: Any) -> tink_pb2.KeyTemplate:
   raise ValueError('Unknown primitive in _some_template_for_primitive')
 
 
-def some_keyset_for_primitive(primitive: Any) -> tink_pb2.Keyset:
+def some_keyset_for_primitive(primitive: Any) -> bytes:
   """Returns an arbitrary keyset for the given primitive."""
   return new_or_stored_keyset(_some_template_for_primitive(primitive))
