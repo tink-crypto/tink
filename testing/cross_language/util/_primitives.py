@@ -217,6 +217,13 @@ class StreamingAead(streaming_aead.StreamingAead):
     self._stub = stub
     self._keyset = keyset
 
+  def perform_create_check(self):
+    # TODO(b/241219877) Remove this and do the check in __init__ instead.
+    creation_response = self._stub.Create(
+        testing_api_pb2.CreationRequest(keyset=self._keyset))
+    if creation_response.err:
+      raise tink.TinkError(creation_response.err)
+
   def new_encrypting_stream(self, plaintext: BinaryIO,
                             associated_data: bytes) -> BinaryIO:
     enc_request = testing_api_pb2.StreamingAeadEncryptRequest(
@@ -249,6 +256,13 @@ class Mac(mac.Mac):
     self._stub = stub
     self._keyset = keyset
 
+  def perform_create_check(self):
+    # TODO(b/241219877) Remove this and do the check in __init__ instead.
+    creation_response = self._stub.Create(
+        testing_api_pb2.CreationRequest(keyset=self._keyset))
+    if creation_response.err:
+      raise tink.TinkError(creation_response.err)
+
   def compute_mac(self, data: bytes) -> bytes:
     request = testing_api_pb2.ComputeMacRequest(keyset=self._keyset, data=data)
     response = self._stub.ComputeMac(request)
@@ -273,6 +287,13 @@ class HybridEncrypt(hybrid.HybridEncrypt):
     self._stub = stub
     self._public_handle = public_handle
 
+  def perform_create_check(self):
+    # TODO(b/241219877) Remove this and do the check in __init__ instead.
+    creation_response = self._stub.CreateHybridEncrypt(
+        testing_api_pb2.CreationRequest(keyset=self._public_handle))
+    if creation_response.err:
+      raise tink.TinkError(creation_response.err)
+
   def encrypt(self, plaintext: bytes, context_info: bytes) -> bytes:
     enc_request = testing_api_pb2.HybridEncryptRequest(
         public_keyset=self._public_handle,
@@ -292,6 +313,13 @@ class HybridDecrypt(hybrid.HybridDecrypt):
     self.lang = lang
     self._stub = stub
     self._private_handle = private_handle
+
+  def perform_create_check(self):
+    # TODO(b/241219877) Remove this and do the check in __init__ instead.
+    creation_response = self._stub.CreateHybridDecrypt(
+        testing_api_pb2.CreationRequest(keyset=self._private_handle))
+    if creation_response.err:
+      raise tink.TinkError(creation_response.err)
 
   def decrypt(self, ciphertext: bytes, context_info: bytes) -> bytes:
     dec_request = testing_api_pb2.HybridDecryptRequest(
@@ -313,6 +341,13 @@ class PublicKeySign(tink_signature.PublicKeySign):
     self._stub = stub
     self._private_handle = private_handle
 
+  def perform_create_check(self):
+    # TODO(b/241219877) Remove this and do the check in __init__ instead.
+    creation_response = self._stub.CreatePublicKeySign(
+        testing_api_pb2.CreationRequest(keyset=self._private_handle))
+    if creation_response.err:
+      raise tink.TinkError(creation_response.err)
+
   def sign(self, data: bytes) -> bytes:
     request = testing_api_pb2.SignatureSignRequest(
         private_keyset=self._private_handle, data=data)
@@ -330,6 +365,13 @@ class PublicKeyVerify(tink_signature.PublicKeyVerify):
     self.lang = lang
     self._stub = stub
     self._public_handle = public_handle
+
+  def perform_create_check(self):
+    # TODO(b/241219877) Remove this and do the check in __init__ instead.
+    creation_response = self._stub.CreatePublicKeyVerify(
+        testing_api_pb2.CreationRequest(keyset=self._public_handle))
+    if creation_response.err:
+      raise tink.TinkError(creation_response.err)
 
   def verify(self, signature: bytes, data: bytes) -> None:
     request = testing_api_pb2.SignatureVerifyRequest(
@@ -372,6 +414,13 @@ class PrfSet(prf.PrfSet):
     self._key_ids_initialized = False
     self._primary_key_id = None
     self._prfs = None
+
+  def perform_create_check(self):
+    # TODO(b/241219877) Remove this and do the check in __init__ instead.
+    creation_response = self._stub.Create(
+        testing_api_pb2.CreationRequest(keyset=self._keyset))
+    if creation_response.err:
+      raise tink.TinkError(creation_response.err)
 
   def _initialize_key_ids(self) -> None:
     if not self._key_ids_initialized:
@@ -546,6 +595,13 @@ class JwtMac():
     self._stub = stub
     self._keyset = keyset
 
+  def perform_create_check(self):
+    # TODO(b/241219877) Remove this and do the check in __init__ instead.
+    creation_response = self._stub.CreateJwtMac(
+        testing_api_pb2.CreationRequest(keyset=self._keyset))
+    if creation_response.err:
+      raise tink.TinkError(creation_response.err)
+
   def compute_mac_and_encode(self, raw_jwt: jwt.RawJwt) -> str:
     request = testing_api_pb2.JwtSignRequest(
         keyset=self._keyset, raw_jwt=raw_jwt_to_proto(raw_jwt))
@@ -575,6 +631,13 @@ class JwtPublicKeySign():
     self._stub = stub
     self._keyset = keyset
 
+  def perform_create_check(self):
+    # TODO(b/241219877) Remove this and do the check in __init__ instead.
+    creation_response = self._stub.CreateJwtPublicKeySign(
+        testing_api_pb2.CreationRequest(keyset=self._keyset))
+    if creation_response.err:
+      raise tink.TinkError(creation_response.err)
+
   def sign_and_encode(self, raw_jwt: jwt.RawJwt) -> str:
     request = testing_api_pb2.JwtSignRequest(
         keyset=self._keyset, raw_jwt=raw_jwt_to_proto(raw_jwt))
@@ -592,6 +655,13 @@ class JwtPublicKeyVerify():
     self.lang = lang
     self._stub = stub
     self._keyset = keyset
+
+  def perform_create_check(self):
+    # TODO(b/241219877) Remove this and do the check in __init__ instead.
+    creation_response = self._stub.CreateJwtPublicKeyVerify(
+        testing_api_pb2.CreationRequest(keyset=self._keyset))
+    if creation_response.err:
+      raise tink.TinkError(creation_response.err)
 
   def verify_and_decode(self, signed_compact_jwt: str,
                         validator: jwt.JwtValidator) -> jwt.VerifiedJwt:

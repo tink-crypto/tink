@@ -78,6 +78,7 @@ py_test(
     deps = [
         ":testing_api_python_library",
         requirement("absl-py"),
+        "//util/test_keys",
         "@org_python_pypi_portpicker//:portpicker",
         "@tink_py//tink/aead",
         "@tink_py//tink/daead",

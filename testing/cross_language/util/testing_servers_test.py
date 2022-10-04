@@ -33,6 +33,7 @@ from tink import streaming_aead
 
 from tink.proto import tink_pb2
 from util import key_util
+from util import test_keys
 from util import testing_servers
 
 _SUPPORTED_LANGUAGES = testing_servers.SUPPORTED_LANGUAGES_BY_PRIMITIVE
@@ -57,6 +58,18 @@ db.add_key(
 {key_text_format}""")
 COPY PASTE END =================================================================
 '''
+
+
+def setUpModule():
+  aead.register()
+  daead.register()
+  hybrid.register()
+  jwt.register_jwt_mac()
+  jwt.register_jwt_signature()
+  mac.register()
+  prf.register()
+  signature.register()
+  streaming_aead.register()
 
 
 class TestingServersConfigTest(absltest.TestCase):
@@ -129,6 +142,28 @@ class TestingServersTest(parameterized.TestCase):
                   key_util.text_format(template), ' ' * 6),
               key_text_format=textwrap.indent(
                   key_util.text_format(parsed_keyset.key[0]), ' ' * 6)))
+
+  @parameterized.parameters([
+      aead.Aead, daead.DeterministicAead, streaming_aead.StreamingAead,
+      hybrid.HybridDecrypt, hybrid.HybridEncrypt, mac.Mac,
+      signature.PublicKeySign, signature.PublicKeyVerify, prf.PrfSet,
+      jwt.JwtMac, jwt.JwtPublicKeySign, jwt.JwtPublicKeyVerify
+  ])
+  def test_create_with_correct_keyset(self, primitive):
+    keyset = test_keys.some_keyset_for_primitive(primitive)
+    _ = testing_servers.remote_primitive('python', keyset, primitive)
+
+  @parameterized.parameters([
+      aead.Aead, daead.DeterministicAead, streaming_aead.StreamingAead,
+      hybrid.HybridDecrypt, hybrid.HybridEncrypt, mac.Mac,
+      signature.PublicKeySign, signature.PublicKeyVerify, prf.PrfSet,
+      jwt.JwtMac, jwt.JwtPublicKeySign, jwt.JwtPublicKeyVerify
+  ])
+  def test_create_with_incorrect_keyset(self, primitive):
+    wrong_primitive = aead.Aead if primitive == mac.Mac else mac.Mac
+    keyset = test_keys.some_keyset_for_primitive(wrong_primitive)
+    with self.assertRaises(tink.TinkError):
+      testing_servers.remote_primitive('python', keyset, primitive)
 
   @parameterized.parameters(encrypted_keyset_test_cases())
   def test_read_write_encrypted_keyset(self, lang, keyset_reader_type,
