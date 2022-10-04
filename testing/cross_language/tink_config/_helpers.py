@@ -111,3 +111,14 @@ def primitive_for_keytype(key_type: str) -> Any:
     if key_type in key_types:
       return p
   raise ValueError('Unknown key type: ' + key_type)
+
+
+def is_asymmetric_public_key_primitive(p: Any) -> bool:
+  """Returns true iff this p is the public part of an asymmetric scheme."""
+  return p in _key_types.PRIVATE_TO_PUBLIC_PRIMITIVE.values()
+
+
+def get_private_key_primitive(p: Any) -> Any:
+  """Returns the private primitive corresponding to this public part."""
+  inverted = {v: k for (k, v) in _key_types.PRIVATE_TO_PUBLIC_PRIMITIVE.items()}
+  return inverted[p]

@@ -31,3 +31,5 @@ supported_languages_for_key_type = _helpers.supported_languages_for_key_type
 supported_languages_for_primitive = _helpers.supported_languages_for_primitive
 all_primitives = _helpers.all_primitives
 primitive_for_keytype = _helpers.primitive_for_keytype
+is_asymmetric_public_key_primitive = _helpers.is_asymmetric_public_key_primitive
+get_private_key_primitive = _helpers.get_private_key_primitive

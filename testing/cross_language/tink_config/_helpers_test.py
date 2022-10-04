@@ -73,5 +73,17 @@ class HelpersTest(absltest.TestCase):
     with self.assertRaises(ValueError):
       _helpers.primitive_for_keytype('InvalidKeyType776611')
 
+  def test_is_asymmetric_public_key_primitive(self):
+    self.assertFalse(_helpers.is_asymmetric_public_key_primitive(aead.Aead))
+    self.assertFalse(
+        _helpers.is_asymmetric_public_key_primitive(hybrid.HybridDecrypt))
+    self.assertTrue(
+        _helpers.is_asymmetric_public_key_primitive(hybrid.HybridEncrypt))
+
+  def test_get_private_key_primitive(self):
+    self.assertEqual(
+        _helpers.get_private_key_primitive(hybrid.HybridEncrypt),
+        hybrid.HybridDecrypt)
+
 if __name__ == '__main__':
   absltest.main()
