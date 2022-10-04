@@ -1,0 +1,28 @@
+"""Walkthrough examples for using Tink."""
+package(default_visibility = ["//visibility:public"])
+
+licenses(["notice"])
+
+cc_library(
+    name = "create_keyset",
+    srcs = ["create_keyset.cc"],
+    hdrs = ["create_keyset.h"],
+    deps = [
+        "@tink_cc//:keyset_handle",
+        "@tink_cc",
+        "@tink_cc//util:statusor",
+    ],
+)
+
+cc_test(
+    name = "create_keyset_test",
+    srcs = ["create_keyset_test.cc"],
+    deps = [
+        ":create_keyset",
+        "@com_google_absl//absl/strings",
+        "@com_google_googletest//:gtest_main",
+        "@tink_cc",
+        "@tink_cc//util:test_matchers",
+    ],
+)
+
