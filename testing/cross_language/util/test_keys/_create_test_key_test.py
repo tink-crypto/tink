@@ -176,8 +176,9 @@ output_prefix_type: RAW""",
 
   @parameterized.parameters([
       aead.Aead, daead.DeterministicAead, streaming_aead.StreamingAead,
-      hybrid.HybridDecrypt, mac.Mac, signature.PublicKeySign, prf.PrfSet,
-      jwt.JwtMac, jwt.JwtPublicKeySign
+      hybrid.HybridDecrypt, hybrid.HybridEncrypt, mac.Mac,
+      signature.PublicKeySign, signature.PublicKeyVerify, prf.PrfSet,
+      jwt.JwtMac, jwt.JwtPublicKeySign, jwt.JwtPublicKeyVerify
   ])
   def test_create_test_keys_for_primitive(self, primitive):
     keyset = test_keys.some_keyset_for_primitive(primitive)

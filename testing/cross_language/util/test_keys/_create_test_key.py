@@ -31,6 +31,7 @@ from tink import signature
 from tink import streaming_aead
 
 from tink.proto import tink_pb2
+import tink_config
 from util import key_util
 from util.test_keys import _test_keys_container
 from util.test_keys import _test_keys_db
@@ -135,6 +136,23 @@ def _some_template_for_primitive(primitive: Any) -> tink_pb2.KeyTemplate:
   raise ValueError('Unknown primitive in _some_template_for_primitive')
 
 
+def _get_public_keyset(private_keyset: bytes) -> bytes:
+  reader = tink.BinaryKeysetReader(private_keyset)
+  keyset_handle = cleartext_keyset_handle.read(reader)
+  public_keyset_handle = keyset_handle.public_keyset_handle()
+  public_keyset = io.BytesIO()
+  cleartext_keyset_handle.write(
+      tink.BinaryKeysetWriter(public_keyset), public_keyset_handle)
+  return public_keyset.getvalue()
+
+
 def some_keyset_for_primitive(primitive: Any) -> bytes:
   """Returns an arbitrary keyset for the given primitive."""
-  return new_or_stored_keyset(_some_template_for_primitive(primitive))
+  if not tink_config.is_asymmetric_public_key_primitive(primitive):
+    return new_or_stored_keyset(_some_template_for_primitive(primitive))
+
+  private_key_primitive = tink_config.get_private_key_primitive(primitive)
+  private_keyset = new_or_stored_keyset(
+      _some_template_for_primitive(private_key_primitive))
+
+  return _get_public_keyset(private_keyset)

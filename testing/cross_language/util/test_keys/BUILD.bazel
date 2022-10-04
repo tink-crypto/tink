@@ -48,6 +48,7 @@ py_library(
     deps = [
         ":_test_keys_container",
         ":_test_keys_db",
+        "//tink_config",
         "//util:key_util",
         "@tink_py//tink:cleartext_keyset_handle",
         "@tink_py//tink:tink_python",
