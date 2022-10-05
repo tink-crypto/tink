@@ -76,16 +76,18 @@ func (p *prfBasedDeriver) DeriveKeyset(salt []byte) (*keyset.Handle, error) {
 	// and the user only interacts via the keyset deriver factory.
 	// TODO(b/249835030): Change to 0 once tagged bug is resolved.
 	var primaryKeyID uint32 = 1
-	ks := &tinkpb.Keyset{
-		PrimaryKeyId: primaryKeyID,
-		Key: []*tinkpb.Keyset_Key{
-			&tinkpb.Keyset_Key{
-				KeyData:          keyData,
-				Status:           tinkpb.KeyStatusType_UNKNOWN_STATUS,
-				KeyId:            primaryKeyID,
-				OutputPrefixType: tinkpb.OutputPrefixType_UNKNOWN_PREFIX,
+	return insecurecleartextkeyset.Read(
+		&keyset.MemReaderWriter{
+			Keyset: &tinkpb.Keyset{
+				PrimaryKeyId: primaryKeyID,
+				Key: []*tinkpb.Keyset_Key{
+					&tinkpb.Keyset_Key{
+						KeyData:          keyData,
+						Status:           tinkpb.KeyStatusType_UNKNOWN_STATUS,
+						KeyId:            primaryKeyID,
+						OutputPrefixType: tinkpb.OutputPrefixType_UNKNOWN_PREFIX,
+					},
+				},
 			},
-		},
-	}
-	return insecurecleartextkeyset.Read(&keyset.MemReaderWriter{Keyset: ks})
+		})
 }

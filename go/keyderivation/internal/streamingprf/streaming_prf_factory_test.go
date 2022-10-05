@@ -43,11 +43,11 @@ func TestNew(t *testing.T) {
 		{"SHA512", commonpb.HashType_SHA512, streamingprf.HKDFSHA512RawKeyTemplate()},
 	} {
 		t.Run(test.name, func(t *testing.T) {
-			kh, err := keyset.NewHandle(test.template)
+			handle, err := keyset.NewHandle(test.template)
 			if err != nil {
 				t.Fatalf("keyset.NewHandle() err = %v, want nil", err)
 			}
-			prf, err := streamingprf.New(kh)
+			prf, err := streamingprf.New(handle)
 			if err != nil {
 				t.Errorf("streamingprf.New() err = %v, want nil", err)
 			}
@@ -101,7 +101,7 @@ func TestNewEqualToStreamingPRFPrimitive(t *testing.T) {
 
 			// Use shared key data to create StreamingPRF using New().
 			var primaryKeyID uint32 = 12
-			kh, err := testkeyset.NewHandle(
+			handle, err := testkeyset.NewHandle(
 				&tinkpb.Keyset{
 					PrimaryKeyId: primaryKeyID,
 					Key: []*tinkpb.Keyset_Key{
@@ -116,7 +116,7 @@ func TestNewEqualToStreamingPRFPrimitive(t *testing.T) {
 			if err != nil {
 				t.Fatalf("testkeyset.NewHandle() err = %v, want nil", err)
 			}
-			gotPRF, err := streamingprf.New(kh)
+			gotPRF, err := streamingprf.New(handle)
 			if err != nil {
 				t.Fatalf("streamingprf.New() err = %v, want nil", err)
 			}
@@ -167,11 +167,11 @@ func TestNewRejectsIncorrectKeysetHandle(t *testing.T) {
 		t.Error("streamingprf.New() err = nil, want non-nil")
 	}
 
-	aeadKH, err := keyset.NewHandle(aead.AES128GCMKeyTemplate())
+	aeadHandle, err := keyset.NewHandle(aead.AES128GCMKeyTemplate())
 	if err != nil {
 		t.Fatalf("keyset.NewHandle() err = %v, want nil", err)
 	}
-	if _, err := streamingprf.New(aeadKH); err == nil {
+	if _, err := streamingprf.New(aeadHandle); err == nil {
 		t.Error("streamingprf.New() err = nil, want non-nil")
 	}
 }
@@ -182,8 +182,8 @@ func TestNewRejectsInvalidKeysetHandle(t *testing.T) {
 		t.Fatalf("registry.NewKeyData() err = %v", err)
 	}
 	for _, test := range []struct {
-		name string
-		ks   *tinkpb.Keyset
+		name   string
+		keyset *tinkpb.Keyset
 	}{
 		{
 			"multiple raw keys",
@@ -268,11 +268,11 @@ func TestNewRejectsInvalidKeysetHandle(t *testing.T) {
 		},
 	} {
 		t.Run(test.name, func(t *testing.T) {
-			kh, err := insecurecleartextkeyset.Read(&keyset.MemReaderWriter{Keyset: test.ks})
+			handle, err := insecurecleartextkeyset.Read(&keyset.MemReaderWriter{Keyset: test.keyset})
 			if err != nil {
 				t.Fatalf("insecurecleartextkeyset.Read() err = %v, want nil", err)
 			}
-			if _, err := streamingprf.New(kh); err == nil {
+			if _, err := streamingprf.New(handle); err == nil {
 				t.Error("streamingprf.New() err = nil, want non-nil")
 			}
 		})

@@ -144,18 +144,18 @@ func TestPRFBasedDeriverWithHKDFRFCVector(t *testing.T) {
 			if err != nil {
 				t.Fatalf("newPRFBasedDeriver() err = %v, want nil", err)
 			}
-			derivedKH, err := d.DeriveKeyset(derivationSalt)
+			derivedHandle, err := d.DeriveKeyset(derivationSalt)
 			if err != nil {
 				t.Fatalf("DeriveKeyset() err = %v, want nil", err)
 			}
-			derivedKS := insecurecleartextkeyset.KeysetMaterial(derivedKH)
+			derivedKeyset := insecurecleartextkeyset.KeysetMaterial(derivedHandle)
 
 			// Verify keyset.
-			if len(derivedKS.GetKey()) != 1 {
-				t.Fatalf("len(keyset) = %d, want 1", len(derivedKS.GetKey()))
+			if len(derivedKeyset.GetKey()) != 1 {
+				t.Fatalf("len(keyset) = %d, want 1", len(derivedKeyset.GetKey()))
 			}
-			key := derivedKS.GetKey()[0]
-			if derivedKS.GetPrimaryKeyId() != key.GetKeyId() {
+			key := derivedKeyset.GetKey()[0]
+			if derivedKeyset.GetPrimaryKeyId() != key.GetKeyId() {
 				t.Fatal("keyset has no primary key")
 			}
 			// Verify key attributes set by prfBasedDeriver.

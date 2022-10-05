@@ -36,11 +36,11 @@ func TestKeyTemplates(t *testing.T) {
 		{"SHA512", commonpb.HashType_SHA512, streamingprf.HKDFSHA512RawKeyTemplate()},
 	} {
 		t.Run(test.name, func(t *testing.T) {
-			kh, err := keyset.NewHandle(test.template)
+			handle, err := keyset.NewHandle(test.template)
 			if err != nil {
 				t.Fatalf("keyset.NewHandle() err = %v, want nil", err)
 			}
-			prf, err := streamingprf.New(kh)
+			prf, err := streamingprf.New(handle)
 			if err != nil {
 				t.Errorf("streamingprf.New() err = %v, want nil", err)
 			}
