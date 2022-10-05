@@ -27,7 +27,7 @@ public final class TinkProtoKeysetFormat {
   public static KeysetHandle parseKeyset(byte[] serializedKeyset, SecretKeyAccess access)
       throws GeneralSecurityException {
     if (access == null) {
-      throw new NullPointerException("...");
+      throw new NullPointerException("SecretKeyAccess cannot be null");
     }
     SecretKeyAccess.requireAccess(access);
     try {
@@ -41,7 +41,7 @@ public final class TinkProtoKeysetFormat {
   public static byte[] serializeKeyset(KeysetHandle keysetHandle, SecretKeyAccess access)
       throws GeneralSecurityException {
     if (access == null) {
-      throw new NullPointerException("...");
+      throw new NullPointerException("SecretKeyAccess cannot be null");
     }
     SecretKeyAccess.requireAccess(access);
     try {
