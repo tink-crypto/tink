@@ -107,7 +107,7 @@ class StreamingAeadSeekableDecryptingChannel implements SeekableByteChannel {
   /**
    * A description of the state of this StreamingAeadSeekableDecryptingChannel.
    * While this description does not contain plaintext or key material
-   * it contains length information that might be confidential.
+   * it contains length information that might leak some information.
    */
   @Override
   public synchronized String toString() {
