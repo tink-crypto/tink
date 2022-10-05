@@ -868,3 +868,29 @@ android_library(
         "@maven//:com_google_errorprone_error_prone_annotations",
     ],
 )
+
+java_library(
+    name = "tink_proto_keyset_format",
+    srcs = ["TinkProtoKeysetFormat.java"],
+    deps = [
+        ":aead",
+        ":binary_keyset_reader",
+        ":binary_keyset_writer",
+        ":cleartext_keyset_handle",
+        ":registry_cluster",
+        ":secret_key_access",
+    ],
+)
+
+android_library(
+    name = "tink_proto_keyset_format-android",
+    srcs = ["TinkProtoKeysetFormat.java"],
+    deps = [
+        ":aead-android",
+        ":binary_keyset_reader-android",
+        ":binary_keyset_writer-android",
+        ":cleartext_keyset_handle-android",
+        ":registry_cluster-android",
+        ":secret_key_access-android",
+    ],
+)
