@@ -32,6 +32,15 @@ namespace internal {
 // serialization.
 class ProtoParametersSerialization : public Serialization {
  public:
+  // Copyable and movable.
+  ProtoParametersSerialization(const ProtoParametersSerialization& other) =
+      default;
+  ProtoParametersSerialization& operator=(
+      const ProtoParametersSerialization& other) = default;
+  ProtoParametersSerialization(ProtoParametersSerialization&& other) = default;
+  ProtoParametersSerialization& operator=(
+      ProtoParametersSerialization&& other) = default;
+
   // Creates a `ProtoParametersSerialization` object from individual components.
   static util::StatusOr<ProtoParametersSerialization> Create(
       absl::string_view type_url,

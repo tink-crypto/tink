@@ -33,6 +33,13 @@ namespace internal {
 // serialization.
 class ProtoKeySerialization : public Serialization {
  public:
+  // Copyable and movable.
+  ProtoKeySerialization(const ProtoKeySerialization& other) = default;
+  ProtoKeySerialization& operator=(const ProtoKeySerialization& other) =
+      default;
+  ProtoKeySerialization(ProtoKeySerialization&& other) = default;
+  ProtoKeySerialization& operator=(ProtoKeySerialization&& other) = default;
+
   // Creates a `ProtoKeySerialization` object from individual components.
   static util::StatusOr<ProtoKeySerialization> Create(
       absl::string_view type_url, RestrictedData serialized_key,
