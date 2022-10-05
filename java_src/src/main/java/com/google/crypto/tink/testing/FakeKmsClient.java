@@ -17,17 +17,13 @@
 package com.google.crypto.tink.testing;
 
 import com.google.crypto.tink.Aead;
-import com.google.crypto.tink.BinaryKeysetReader;
-import com.google.crypto.tink.BinaryKeysetWriter;
-import com.google.crypto.tink.CleartextKeysetHandle;
+import com.google.crypto.tink.InsecureSecretKeyAccess;
 import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.KmsClient;
+import com.google.crypto.tink.TinkProtoKeysetFormat;
 import com.google.crypto.tink.aead.AesCtrHmacAeadKeyManager;
-import com.google.crypto.tink.proto.Keyset;
 import com.google.crypto.tink.subtle.Base64;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.util.Locale;
 
@@ -89,12 +85,9 @@ public final class FakeKmsClient implements KmsClient {
     }
     String encodedKey = removePrefix(PREFIX, uri);
     byte[] bytes = Base64.urlSafeDecode(encodedKey);
-    try {
-      KeysetHandle keysetHandle = CleartextKeysetHandle.read(BinaryKeysetReader.withBytes(bytes));
-      return keysetHandle.getPrimitive(Aead.class);
-    } catch (IOException e) {
-      throw new GeneralSecurityException("Failed to create AEAD ", e);
-    }
+    KeysetHandle keysetHandle =
+        TinkProtoKeysetFormat.parseKeyset(bytes, InsecureSecretKeyAccess.get());
+    return keysetHandle.getPrimitive(Aead.class);
   }
 
   /** @return a new, random fake key_uri. */
@@ -102,16 +95,9 @@ public final class FakeKmsClient implements KmsClient {
     // The key_uri contains an encoded keyset with a new aes128CtrHmacSha256 key.
     KeyTemplate template = AesCtrHmacAeadKeyManager.aes128CtrHmacSha256Template();
     KeysetHandle keysetHandle = KeysetHandle.generateNew(template);
-    Keyset keyset = CleartextKeysetHandle.getKeyset(keysetHandle);
-    ByteArrayOutputStream keysetStream = new ByteArrayOutputStream();
-    try {
-      BinaryKeysetWriter.withOutputStream(keysetStream).write(keyset);
-      keysetStream.close();
-    } catch (IOException e) {
-      throw new GeneralSecurityException("Failed to create key URI ", e);
-    }
-    String encodedKey = Base64.urlSafeEncode(keysetStream.toByteArray());
-    return PREFIX + encodedKey;
+    byte[] serializedKeyset =
+        TinkProtoKeysetFormat.serializeKeyset(keysetHandle, InsecureSecretKeyAccess.get());
+    return PREFIX + Base64.urlSafeEncode(serializedKeyset);
   }
 
 
