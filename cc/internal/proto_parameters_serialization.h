@@ -51,7 +51,11 @@ class ProtoParametersSerialization : public Serialization {
   }
 
  private:
+  // The following friend classes require access to
+  // `EqualsWithPotentialFalseNegatives()`.
   friend class ProtoParametersSerializationTest;
+  friend class LegacyProtoParameters;
+  friend class LegacyProtoParametersTest;
 
   explicit ProtoParametersSerialization(
       google::crypto::tink::KeyTemplate key_template)
@@ -61,7 +65,7 @@ class ProtoParametersSerialization : public Serialization {
   // Returns `true` if this `ProtoParametersSerialization` object is equal to
   // `other` (with the possibility of false negatives due to lack of
   // determinism during serialization).  Should only be used temporarily by the
-  // to-be-implemented `LegacyProtoParameters` class.
+  // `LegacyProtoParameters` class.
   bool EqualsWithPotentialFalseNegatives(
       const ProtoParametersSerialization& other) const;
 

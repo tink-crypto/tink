@@ -496,3 +496,27 @@ tink_cc_test(
     tink::proto::tink_cc_proto
 )
 
+tink_cc_library(
+  NAME legacy_proto_parameters
+  SRCS
+    legacy_proto_parameters.cc
+    legacy_proto_parameters.h
+  DEPS
+    tink::internal::proto_parameters_serialization
+    tink::core::parameters
+    tink::proto::tink_cc_proto
+)
+
+tink_cc_test(
+  NAME legacy_proto_parameters_test
+  SRCS
+    legacy_proto_parameters_test.cc
+  DEPS
+    tink::internal::legacy_proto_parameters
+    tink::internal::proto_parameters_serialization
+    gmock
+    tink::util::statusor
+    tink::util::test_matchers
+    tink::proto::test_proto_cc_proto
+    tink::proto::tink_cc_proto
+)

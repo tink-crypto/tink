@@ -529,3 +529,29 @@ cc_test(
         "@com_google_googletest//:gtest_main",
     ],
 )
+
+cc_library(
+    name = "legacy_proto_parameters",
+    srcs = ["legacy_proto_parameters.cc"],
+    hdrs = ["legacy_proto_parameters.h"],
+    include_prefix = "tink/internal",
+    deps = [
+        ":proto_parameters_serialization",
+        "//:parameters",
+        "//proto:tink_cc_proto",
+    ],
+)
+
+cc_test(
+    name = "legacy_proto_parameters_test",
+    srcs = ["legacy_proto_parameters_test.cc"],
+    deps = [
+        ":legacy_proto_parameters",
+        ":proto_parameters_serialization",
+        "//proto:test_proto_cc_proto",
+        "//proto:tink_cc_proto",
+        "//util:statusor",
+        "//util:test_matchers",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
