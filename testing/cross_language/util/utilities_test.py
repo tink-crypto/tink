@@ -69,7 +69,7 @@ class SupportedKeyTypesTest(absltest.TestCase):
     aes_gcm_keyset = test_keys.new_or_stored_keyset(
         aead.aead_key_templates.AES128_GCM)
     self.assertEqual(
-        utilities.key_types_in_keyset(aes_gcm_keyset), set(['AesGcmKey']))
+        utilities.key_types_in_keyset(aes_gcm_keyset), ['AesGcmKey'])
 
   def test_key_types_in_keyset_multiple_keys(self):
     key1 = test_keys.new_or_stored_key(aead.aead_key_templates.AES128_GCM)
@@ -78,7 +78,7 @@ class SupportedKeyTypesTest(absltest.TestCase):
     keyset = tink_pb2.Keyset(key=[key1, key2, key3], primary_key_id=key1.key_id)
     self.assertEqual(
         utilities.key_types_in_keyset(keyset.SerializeToString()),
-        set(['AesGcmKey', 'AesEaxKey']))
+        ['AesGcmKey', 'AesGcmKey', 'AesEaxKey'])
 
 if __name__ == '__main__':
   absltest.main()
