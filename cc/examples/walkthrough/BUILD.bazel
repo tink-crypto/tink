@@ -5,6 +5,18 @@ package(default_visibility = ["//visibility:public"])
 licenses(["notice"])
 
 cc_library(
+    name = "test_util",
+    testonly = 1,
+    srcs = ["test_util.cc"],
+    hdrs = ["test_util.h"],
+    deps = [
+        ":load_cleartext_keyset",
+        "@com_google_absl//absl/strings",
+        "@tink_cc",
+    ],
+)
+
+cc_library(
     name = "create_keyset",
     srcs = ["create_keyset.cc"],
     hdrs = ["create_keyset.h"],
@@ -67,8 +79,36 @@ cc_test(
     deps = [
         ":load_cleartext_keyset",
         ":load_encrypted_keyset",
+        ":test_util",
         "@com_google_absl//absl/memory",
         "@com_google_absl//absl/status",
+        "@com_google_absl//absl/strings",
+        "@com_google_googletest//:gtest_main",
+        "@tink_cc",
+        "@tink_cc//util:test_matchers",
+    ],
+)
+
+cc_library(
+    name = "write_keyset",
+    srcs = ["write_keyset.cc"],
+    hdrs = ["write_keyset.h"],
+    deps = [
+        "@com_google_absl//absl/status",
+        "@com_google_absl//absl/strings",
+        "@tink_cc",
+    ],
+)
+
+cc_test(
+    name = "write_keyset_test",
+    srcs = ["write_keyset_test.cc"],
+    deps = [
+        ":load_cleartext_keyset",
+        ":load_encrypted_keyset",
+        ":test_util",
+        ":write_keyset",
+        "@com_google_absl//absl/memory",
         "@com_google_absl//absl/strings",
         "@com_google_googletest//:gtest_main",
         "@tink_cc",

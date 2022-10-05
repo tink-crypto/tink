@@ -25,12 +25,11 @@
 #include "gmock/gmock.h"
 #include "absl/memory/memory.h"
 #include "absl/status/status.h"
-#include "absl/strings/match.h"
 #include "absl/strings/string_view.h"
 #include "tink/aead.h"
 #include "tink/aead/aead_config.h"
 #include "walkthrough/load_cleartext_keyset.h"
-#include "tink/kms_client.h"
+#include "walkthrough/test_util.h"
 #include "tink/kms_clients.h"
 #include "tink/registry.h"
 #include "tink/util/statusor.h"
@@ -39,7 +38,7 @@
 namespace tink_walkthrough {
 namespace {
 
-constexpr absl::string_view kSerializedMasterKeyKeyset = R"string({
+constexpr absl::string_view kSerializedMasterKeyKeyset = R"json({
   "key": [
     {
       "keyData": {
@@ -53,9 +52,9 @@ constexpr absl::string_view kSerializedMasterKeyKeyset = R"string({
     }
   ],
   "primaryKeyId": 294406504
-})string";
+})json";
 
-constexpr absl::string_view kSerializedKeysetToEncrypt = R"string({
+constexpr absl::string_view kSerializedKeysetToEncrypt = R"json({
   "key": [
     {
       "keyData": {
@@ -69,18 +68,17 @@ constexpr absl::string_view kSerializedKeysetToEncrypt = R"string({
     }
   ],
   "primaryKeyId": 1931667682
-})string";
+})json";
 
 // Encryption of kSerializedKeysetToEncrypt using kSerializedMasterKeyKeyset.
-constexpr absl::string_view kEncryptedKeyset = R"string({
+constexpr absl::string_view kEncryptedKeyset = R"json({
   "encryptedKeyset": "ARGMSWi6YHyZ/Oqxl00XSq631a0q2UPmf+rCvCIAggSZrwCmxFF797MpY0dqgaXu1fz2eQ8zFNhlyTXv9kwg1kY6COpyhY/68zNBUkyKX4CharLYfpg1LgRl+6rMzIQa0XDHh7ZDmp1CevzecZIKnG83uDRHxxSv3h8c/Kc="
-})string";
+})json";
 
 constexpr absl::string_view kFakeKmsKeyUri = "fake://some_key";
 
 using ::crypto::tink::Aead;
 using ::crypto::tink::KeysetHandle;
-using ::crypto::tink::KmsClient;
 using ::crypto::tink::Registry;
 using ::crypto::tink::test::IsOk;
 using ::crypto::tink::test::IsOkAndHolds;
@@ -89,38 +87,6 @@ using ::crypto::tink::util::Status;
 using ::crypto::tink::util::StatusOr;
 using ::testing::Environment;
 
-// A fake KmsClient that for every key URI always returns an aead from
-// kSerializedMasterKeyKeyset.
-class FakeKmsClient : public KmsClient {
- public:
-  bool DoesSupport(absl::string_view key_uri) const override {
-    return absl::StartsWith(key_uri, "fake://");
-  }
-
-  StatusOr<std::unique_ptr<Aead>> GetAead(
-      absl::string_view key_uri) const override {
-    StatusOr<std::unique_ptr<KeysetHandle>> master_key_keyset =
-        LoadKeyset(kSerializedMasterKeyKeyset);
-    if (!master_key_keyset.ok()) {
-      return master_key_keyset.status();
-    }
-    return (*master_key_keyset)->GetPrimitive<Aead>();
-  }
-};
-
-// A fake KmsClient that always fails to return an AEAD.
-class AlwaysFailingFakeKmsClient : public KmsClient {
- public:
-  bool DoesSupport(absl::string_view key_uri) const override {
-    return absl::StartsWith(key_uri, "failing://");
-  }
-
-  StatusOr<std::unique_ptr<Aead>> GetAead(
-      absl::string_view key_uri) const override {
-    return Status(absl::StatusCode::kUnimplemented, "Unimplemented");
-  }
-};
-
 // Test environment used to register KMS clients only once for the whole test.
 class LoadKeysetTestEnvironment : public Environment {
  public:
@@ -128,7 +94,8 @@ class LoadKeysetTestEnvironment : public Environment {
 
   // Register FakeKmsClient and AlwaysFailingFakeKmsClient.
   void SetUp() override {
-    auto fake_kms = absl::make_unique<FakeKmsClient>();
+    auto fake_kms =
+        absl::make_unique<FakeKmsClient>(kSerializedMasterKeyKeyset);
     ASSERT_THAT(crypto::tink::KmsClients::Add(std::move(fake_kms)), IsOk());
     auto failing_kms = absl::make_unique<AlwaysFailingFakeKmsClient>();
     ASSERT_THAT(crypto::tink::KmsClients::Add(std::move(failing_kms)), IsOk());

@@ -29,7 +29,7 @@
 namespace tink_walkthrough {
 namespace {
 
-constexpr absl::string_view kSerializedKeyset = R"string({
+constexpr absl::string_view kSerializedKeyset = R"json({
   "key": [
     {
       "keyData": {
@@ -43,7 +43,7 @@ constexpr absl::string_view kSerializedKeyset = R"string({
     }
   ],
   "primaryKeyId": 294406504
-})string";
+})json";
 
 using ::crypto::tink::test::IsOk;
 using ::crypto::tink::test::IsOkAndHolds;
