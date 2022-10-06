@@ -90,11 +90,12 @@ parse_args() {
       if [[ -z "${GIT_URL}" ]]; then
         usage
       fi
+      local -r maven_scripts_dir="$(cd "$(dirname "$0")" && pwd)"
       MAVEN_ARGS+=(
         "deploy:deploy-file"
         "-DrepositoryId=ossrh"
         "-Durl=https://oss.sonatype.org/content/repositories/snapshots"
-        "--settings=maven/settings.xml"
+        "--settings=${maven_scripts_dir}/settings.xml"
       )
       ARTIFACT_VERSION="${ARTIFACT_VERSION}-SNAPSHOT"
       ;;
