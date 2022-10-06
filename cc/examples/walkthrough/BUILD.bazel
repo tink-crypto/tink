@@ -115,3 +115,26 @@ cc_test(
         "@tink_cc//util:test_matchers",
     ],
 )
+
+cc_library(
+    name = "obtain_and_use_a_primitive",
+    srcs = ["obtain_and_use_a_primitive.cc"],
+    hdrs = ["obtain_and_use_a_primitive.h"],
+    deps = [
+        "@com_google_absl//absl/strings",
+        "@tink_cc",
+    ],
+)
+
+cc_test(
+    name = "obtain_and_use_a_primitive_test",
+    srcs = ["obtain_and_use_a_primitive_test.cc"],
+    deps = [
+        ":load_cleartext_keyset",
+        ":obtain_and_use_a_primitive",
+        "@com_google_googletest//:gtest_main",
+        "@com_google_absl//absl/strings",
+        "@tink_cc",
+        "@tink_cc//util:test_matchers",
+    ],
+)
