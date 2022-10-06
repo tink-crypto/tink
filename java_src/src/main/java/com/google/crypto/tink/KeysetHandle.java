@@ -80,9 +80,9 @@ public final class KeysetHandle {
    * . 7
    *
    * <p>All these functions return a {@code KeysetBuilder.Entry}. It is necessary to assign an ID to
-   * a new entry by calling one of {@link Entry#withNextId}, {@link Entry#withFixedId}, or {@link
-   * Entry#withRandomId}. The exception is when an existing key which has an id requirement is
-   * imported (in which case the required ID is used).
+   * a new entry by calling one of {@link Entry#withFixedId} or {@link Entry#withRandomId}. The
+   * exception is when an existing key which has an id requirement is imported (in which case the
+   * required ID is used).
    *
    * <p>It is possible to set the status of an entry by calling {@link Entry#setStatus}. The Status
    * defaults to {@code ENABLED}.
@@ -360,8 +360,6 @@ public final class KeysetHandle {
      *       withRandomId}-entry
      *   <li>There are two entries with the same {@code withFixedId} (including pre-existing keys
      *       and imported keys which have an id requirement).
-     *   <li>There is a {@code withNextId} entry, but there previously was an entry which has an ID
-     *       of {@code MAX_INTEGER}.
      * </ul>
      */
     public KeysetHandle build() throws GeneralSecurityException {
@@ -528,8 +526,8 @@ public final class KeysetHandle {
    * Creates a new entry with a fixed key.
    *
    * <p>If the Key has an IdRequirement, the default will be fixed to this ID. Otherwise, the user
-   * has to specify the ID to be used and call one of {@code withFixedId(i)}, {@code
-   * withRandomId()}, or {@code withNextId()} should on the returned entry.
+   * has to specify the ID to be used and call one of {@code withFixedId(i)} or {@code
+   * withRandomId()} on the returned entry.
    */
   public static KeysetHandle.Builder.Entry importKey(Key key) {
     KeysetHandle.Builder.Entry importedEntry = new KeysetHandle.Builder.Entry(key);
