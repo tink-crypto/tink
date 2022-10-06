@@ -276,8 +276,8 @@ py_test(
     deps = [
         "//util:utilities",
         requirement("absl-py"),
-        "//util:key_util",
         "//tink_config",
+        "//util:key_util",
         "//util:testing_servers",
         "@tink_py//tink:tink_python",
     ],
@@ -289,12 +289,26 @@ py_test(
     deps = [
         "//util:utilities",
         requirement("absl-py"),
-        "//util:key_util",
         "//tink_config",
+        "//util:key_util",
         "//util:testing_servers",
         "@com_google_protobuf//:protobuf_python",
         "@tink_py//tink:tink_python",
         "@tink_py//tink/aead",
+        "@tink_py//tink/proto:tink_py_pb2",
+    ],
+)
+
+py_test(
+    name = "primitive_creation_test",
+    srcs = ["primitive_creation_test.py"],
+    deps = [
+        requirement("absl-py"),
+        "//tink_config",
+        "//util:testing_servers",
+        "//util:utilities",
+        "//util/test_keys",
+        "@tink_py//tink:tink_python",
         "@tink_py//tink/proto:tink_py_pb2",
     ],
 )
