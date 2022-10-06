@@ -11,3 +11,83 @@ android_library(
     name = "aes_util-android",
     srcs = ["AesUtil.java"],
 )
+
+java_library(
+    name = "chunked_aes_cmac_computation",
+    srcs = ["ChunkedAesCmacComputation.java"],
+    deps = [
+        ":aes_util",
+        "//src/main/java/com/google/crypto/tink:accesses_partial_key",
+        "//src/main/java/com/google/crypto/tink:insecure_secret_key_access",
+        "//src/main/java/com/google/crypto/tink/mac:aes_cmac_key",
+        "//src/main/java/com/google/crypto/tink/mac:chunked_mac_computation",
+        "//src/main/java/com/google/crypto/tink/subtle:bytes",
+        "//src/main/java/com/google/crypto/tink/subtle:subtle_util_cluster",
+    ],
+)
+
+android_library(
+    name = "chunked_aes_cmac_computation-android",
+    srcs = ["ChunkedAesCmacComputation.java"],
+    deps = [
+        ":aes_util-android",
+        "//src/main/java/com/google/crypto/tink:accesses_partial_key-android",
+        "//src/main/java/com/google/crypto/tink:insecure_secret_key_access-android",
+        "//src/main/java/com/google/crypto/tink/mac:aes_cmac_key-android",
+        "//src/main/java/com/google/crypto/tink/mac:chunked_mac_computation-android",
+        "//src/main/java/com/google/crypto/tink/subtle:bytes-android",
+        "//src/main/java/com/google/crypto/tink/subtle:subtle_util_cluster-android",
+    ],
+)
+
+java_library(
+    name = "chunked_aes_cmac_impl",
+    srcs = ["ChunkedAesCmacImpl.java"],
+    deps = [
+        ":chunked_aes_cmac_computation",
+        ":chunked_aes_cmac_verification",
+        "//src/main/java/com/google/crypto/tink/config/internal:tink_fips_util",
+        "//src/main/java/com/google/crypto/tink/mac:aes_cmac_key",
+        "//src/main/java/com/google/crypto/tink/mac:chunked_mac",
+        "//src/main/java/com/google/crypto/tink/mac:chunked_mac_computation",
+        "//src/main/java/com/google/crypto/tink/mac:chunked_mac_verification",
+        "@maven//:com_google_errorprone_error_prone_annotations",
+    ],
+)
+
+android_library(
+    name = "chunked_aes_cmac_impl-android",
+    srcs = ["ChunkedAesCmacImpl.java"],
+    deps = [
+        ":chunked_aes_cmac_computation-android",
+        ":chunked_aes_cmac_verification-android",
+        "//src/main/java/com/google/crypto/tink/config/internal:tink_fips_util-android",
+        "//src/main/java/com/google/crypto/tink/mac:aes_cmac_key-android",
+        "//src/main/java/com/google/crypto/tink/mac:chunked_mac-android",
+        "//src/main/java/com/google/crypto/tink/mac:chunked_mac_computation-android",
+        "//src/main/java/com/google/crypto/tink/mac:chunked_mac_verification-android",
+        "@maven//:com_google_errorprone_error_prone_annotations",
+    ],
+)
+
+java_library(
+    name = "chunked_aes_cmac_verification",
+    srcs = ["ChunkedAesCmacVerification.java"],
+    deps = [
+        ":chunked_aes_cmac_computation",
+        "//src/main/java/com/google/crypto/tink/mac:aes_cmac_key",
+        "//src/main/java/com/google/crypto/tink/mac:chunked_mac_verification",
+        "//src/main/java/com/google/crypto/tink/subtle:bytes",
+    ],
+)
+
+android_library(
+    name = "chunked_aes_cmac_verification-android",
+    srcs = ["ChunkedAesCmacVerification.java"],
+    deps = [
+        ":chunked_aes_cmac_computation-android",
+        "//src/main/java/com/google/crypto/tink/mac:aes_cmac_key-android",
+        "//src/main/java/com/google/crypto/tink/mac:chunked_mac_verification-android",
+        "//src/main/java/com/google/crypto/tink/subtle:bytes-android",
+    ],
+)
