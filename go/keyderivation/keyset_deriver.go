@@ -15,7 +15,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 // Package keyderivation provides implementations of the keyset deriver
-// primitive.
+// primitive. It is currently not completely implemented.
 package keyderivation
 
 import (
