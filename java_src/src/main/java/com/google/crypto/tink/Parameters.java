@@ -34,8 +34,8 @@ public abstract class Parameters {
    *
    * <p>In Tink, certain keys change their behavior depending on the key id (for example, an {@link
    * Aead} object can prefix the ciphertext with the big endian encoding of the key id). If this is
-   * the case, such a key should require a unique id in {@link Key#getIdRequirement} and return true
-   * here.
+   * the case, such a key should require a unique id in {@link Key#getIdRequirementOrNull} and
+   * return true here.
    */
   public abstract boolean hasIdRequirement();
 }
