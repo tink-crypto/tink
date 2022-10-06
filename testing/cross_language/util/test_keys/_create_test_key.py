@@ -50,8 +50,26 @@ blaze test --trim_test_configuration \\
 
 
 def _use_stored_key(template: tink_pb2.KeyTemplate) -> bool:
+  """Returns true for templates for which we should use _test_keys_db.py."""
+  # We cannot yet create ChaCha20Poly1305Keys in Python.
   if (template.type_url ==
       'type.googleapis.com/google.crypto.tink.ChaCha20Poly1305Key'):
+    return True
+  # Creating RSA Keys is very slow.
+  if (template.type_url ==
+      'type.googleapis.com/google.crypto.tink.RsaSsaPkcs1PrivateKey'):
+    return True
+  # Creating RSA Keys is very slow.
+  if (template.type_url ==
+      'type.googleapis.com/google.crypto.tink.RsaSsaPssPrivateKey'):
+    return True
+  # Creating RSA Keys is very slow.
+  if (template.type_url ==
+      'type.googleapis.com/google.crypto.tink.JwtRsaSsaPkcs1PrivateKey'):
+    return True
+  # Creating RSA Keys is very slow.
+  if (template.type_url ==
+      'type.googleapis.com/google.crypto.tink.JwtRsaSsaPssPrivateKey'):
     return True
   return False
 

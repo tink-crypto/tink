@@ -309,6 +309,5 @@ py_test(
         "//util:utilities",
         "//util/test_keys",
         "@tink_py//tink:tink_python",
-        "@tink_py//tink/proto:tink_py_pb2",
     ],
 )

@@ -55,10 +55,7 @@ def tearDownModule():
 
 
 def single_key_keysets():
-  # TODO(tholenst): Add all templates.
-  for name in ('AES128_EAX', 'AES256_GCM',
-               'ECIES_P256_HKDF_HMAC_SHA256_AES128_GCM'):
-    template = utilities.KEY_TEMPLATE[name]
+  for _, template in utilities.KEY_TEMPLATE.items():
     yield test_keys.new_or_stored_keyset(template)
 
 
