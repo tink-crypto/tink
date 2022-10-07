@@ -33,3 +33,4 @@ all_primitives = _helpers.all_primitives
 primitive_for_keytype = _helpers.primitive_for_keytype
 is_asymmetric_public_key_primitive = _helpers.is_asymmetric_public_key_primitive
 get_private_key_primitive = _helpers.get_private_key_primitive
+keyset_supported = _helpers.keyset_supported

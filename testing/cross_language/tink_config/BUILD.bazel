@@ -43,7 +43,10 @@ py_test(
 py_library(
     name = "_helpers",
     srcs = ["_helpers.py"],
-    deps = [":_key_types"],
+    deps = [
+        ":_key_types",
+        "@tink_py//tink/proto:tink_py_pb2",
+    ],
 )
 
 py_test(
@@ -52,7 +55,10 @@ py_test(
     deps = [
         ":_helpers",
         requirement("absl-py"),
+        "//util/test_keys",
         "@tink_py//tink/aead",
         "@tink_py//tink/hybrid",
+        "@tink_py//tink/mac",
+        "@tink_py//tink/proto:tink_py_pb2",
     ],
 )

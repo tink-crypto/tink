@@ -16,8 +16,16 @@
 from absl.testing import absltest
 from tink import aead
 from tink import hybrid
+from tink import mac
 
+from tink.proto import tink_pb2
 from tink_config import _helpers
+from util import test_keys
+
+
+def setUpModule():
+  aead.register()
+  mac.register()
 
 
 class HelpersTest(absltest.TestCase):
@@ -84,6 +92,39 @@ class HelpersTest(absltest.TestCase):
     self.assertEqual(
         _helpers.get_private_key_primitive(hybrid.HybridEncrypt),
         hybrid.HybridDecrypt)
+
+  def test_keyset_supported_true(self):
+    keyset = test_keys.some_keyset_for_primitive(aead.Aead)
+    self.assertTrue(_helpers.keyset_supported(keyset, aead.Aead, 'python'))
+
+  def test_keyset_supported_keyset_wrong_primitive_false(self):
+    keyset = test_keys.some_keyset_for_primitive(aead.Aead)
+    self.assertFalse(_helpers.keyset_supported(keyset, mac.Mac, 'python'))
+
+  def test_keyset_supported_keyset_wrong_language_false(self):
+    keyset = test_keys.some_keyset_for_primitive(aead.Aead)
+    self.assertFalse(
+        _helpers.keyset_supported(keyset, aead.Aead, 'non-existing-language'))
+
+  def test_keyset_two_keys_supported_true(self):
+    keyset = test_keys.some_keyset_for_primitive(aead.Aead)
+    parsed_keyset = tink_pb2.Keyset.FromString(keyset)
+    key0 = parsed_keyset.key[0]
+    parsed_keyset.key.append(key0)
+    parsed_keyset.key[1].key_id += 1
+    self.assertTrue(
+        _helpers.keyset_supported(parsed_keyset.SerializeToString(), aead.Aead,
+                                  'python'))
+
+  def test_keyset_two_keys_unsupported_false(self):
+    keyset0 = test_keys.some_keyset_for_primitive(aead.Aead)
+    keyset1 = test_keys.some_keyset_for_primitive(mac.Mac)
+    parsed_keyset0 = tink_pb2.Keyset.FromString(keyset0)
+    parsed_keyset1 = tink_pb2.Keyset.FromString(keyset1)
+    parsed_keyset0.key.append(parsed_keyset1.key[0])
+    self.assertFalse(
+        _helpers.keyset_supported(parsed_keyset0.SerializeToString(), aead.Aead,
+                                  'python'))
 
 if __name__ == '__main__':
   absltest.main()

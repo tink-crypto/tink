@@ -16,6 +16,7 @@
 
 from typing import Any, Iterable, List
 
+from tink.proto import tink_pb2
 from tink_config import _key_types
 
 _TYPE_URL_PREFIX = 'type.googleapis.com/google.crypto.tink.'
@@ -122,3 +123,36 @@ def get_private_key_primitive(p: Any) -> Any:
   """Returns the private primitive corresponding to this public part."""
   inverted = {v: k for (k, v) in _key_types.PRIVATE_TO_PUBLIC_PRIMITIVE.items()}
   return inverted[p]
+
+
+def _key_types_in_keyset(keyset: bytes) -> List[str]:
+  parsed_keyset = tink_pb2.Keyset.FromString(keyset)
+  type_urls = [k.key_data.type_url for k in parsed_keyset.key]
+  return [key_type_from_type_url(t) for t in type_urls]
+
+
+def keyset_supported(keyset: bytes, p: Any, lang: str) -> bool:
+  """Checks if the given keyset can be instantiated as 'p' in the 'lang'.
+
+  Returns true if it is expected that the keyset can be instantiated in language
+  'lang', according to the current configuration stored in tink_config. This
+  only looks at the key types in the keyset, and does not check if the keys
+  themselves are valid. It also does not check that the keyset is valid.
+
+  Args:
+    keyset: The serialized keyset
+    p: The primitive class, e.g. aead.Aead
+    lang: The language, e.g. 'python' or 'java'.
+
+  Returns:
+    True iff all key types are for this primitive and supported in the given
+    language.
+  """
+
+  key_types = _key_types_in_keyset(keyset)
+  for key_type in key_types:
+    if primitive_for_keytype(key_type) != p:
+      return False
+    if lang not in supported_languages_for_key_type(key_type):
+      return False
+  return True
