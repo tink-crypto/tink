@@ -214,7 +214,7 @@ publish_javadoc_to_github_pages() {
           "javadoc/${LIBRARY_NAME}/${ARTIFACT_VERSION}"
     fi
     print_and_do mkdir -p "javadoc/${LIBRARY_NAME}/${ARTIFACT_VERSION}"
-    print_and_do unzip "../${javadoc_file}" \
+    print_and_do unzip "${javadoc_file}" \
       -d "javadoc/${LIBRARY_NAME}/${ARTIFACT_VERSION}"
     print_and_do rm -rf "javadoc/${LIBRARY_NAME}/${ARTIFACT_VERSION}/META-INF/"
     print_and_do git "${GIT_ARGS[@]}" add \
