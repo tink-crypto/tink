@@ -238,7 +238,8 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 <ul class="blockList">
 <li class="blockList">
 <h4>protocolVersion</h4>
-<pre>public&nbsp;<a href="../../../../../../com/google/crypto/tink/apps/paymentmethodtoken/SenderIntermediateCertFactory.Builder.html" title="class in com.google.crypto.tink.apps.paymentmethodtoken">SenderIntermediateCertFactory.Builder</a>&nbsp;protocolVersion(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;val)</pre>
+<pre>@CanIgnoreReturnValue
+public&nbsp;<a href="../../../../../../com/google/crypto/tink/apps/paymentmethodtoken/SenderIntermediateCertFactory.Builder.html" title="class in com.google.crypto.tink.apps.paymentmethodtoken">SenderIntermediateCertFactory.Builder</a>&nbsp;protocolVersion(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;val)</pre>
 <div class="block">Sets the protocolVersion.</div>
 </li>
 </ul>
@@ -248,7 +249,8 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 <ul class="blockList">
 <li class="blockList">
 <h4>senderId</h4>
-<pre>public&nbsp;<a href="../../../../../../com/google/crypto/tink/apps/paymentmethodtoken/SenderIntermediateCertFactory.Builder.html" title="class in com.google.crypto.tink.apps.paymentmethodtoken">SenderIntermediateCertFactory.Builder</a>&nbsp;senderId(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;val)</pre>
+<pre>@CanIgnoreReturnValue
+public&nbsp;<a href="../../../../../../com/google/crypto/tink/apps/paymentmethodtoken/SenderIntermediateCertFactory.Builder.html" title="class in com.google.crypto.tink.apps.paymentmethodtoken">SenderIntermediateCertFactory.Builder</a>&nbsp;senderId(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;val)</pre>
 <div class="block">Sets the sender Id.</div>
 </li>
 </ul>
@@ -258,7 +260,8 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 <ul class="blockList">
 <li class="blockList">
 <h4>expiration</h4>
-<pre>public&nbsp;<a href="../../../../../../com/google/crypto/tink/apps/paymentmethodtoken/SenderIntermediateCertFactory.Builder.html" title="class in com.google.crypto.tink.apps.paymentmethodtoken">SenderIntermediateCertFactory.Builder</a>&nbsp;expiration(long&nbsp;millisSinceEpoch)</pre>
+<pre>@CanIgnoreReturnValue
+public&nbsp;<a href="../../../../../../com/google/crypto/tink/apps/paymentmethodtoken/SenderIntermediateCertFactory.Builder.html" title="class in com.google.crypto.tink.apps.paymentmethodtoken">SenderIntermediateCertFactory.Builder</a>&nbsp;expiration(long&nbsp;millisSinceEpoch)</pre>
 <div class="block">Sets the expiration in millis since epoch.</div>
 </li>
 </ul>
@@ -268,8 +271,9 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 <ul class="blockList">
 <li class="blockList">
 <h4>addSenderSigningKey</h4>
-<pre>public&nbsp;<a href="../../../../../../com/google/crypto/tink/apps/paymentmethodtoken/SenderIntermediateCertFactory.Builder.html" title="class in com.google.crypto.tink.apps.paymentmethodtoken">SenderIntermediateCertFactory.Builder</a>&nbsp;addSenderSigningKey(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;val)
-                                                          throws <a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
+<pre>@CanIgnoreReturnValue
+public&nbsp;<a href="../../../../../../com/google/crypto/tink/apps/paymentmethodtoken/SenderIntermediateCertFactory.Builder.html" title="class in com.google.crypto.tink.apps.paymentmethodtoken">SenderIntermediateCertFactory.Builder</a>&nbsp;addSenderSigningKey(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;val)
+                                                                                throws <a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
 <div class="block">Adds a signing key of the sender.
 
  <p>It must be base64 encoded PKCS8 private key.</div>
@@ -285,8 +289,9 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 <ul class="blockList">
 <li class="blockList">
 <h4>addSenderSigningKey</h4>
-<pre>public&nbsp;<a href="../../../../../../com/google/crypto/tink/apps/paymentmethodtoken/SenderIntermediateCertFactory.Builder.html" title="class in com.google.crypto.tink.apps.paymentmethodtoken">SenderIntermediateCertFactory.Builder</a>&nbsp;addSenderSigningKey(<a href="https://docs.oracle.com/javase/8/docs/api/java/security/interfaces/ECPrivateKey.html?is-external=true" title="class or interface in java.security.interfaces">ECPrivateKey</a>&nbsp;val)
-                                                          throws <a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
+<pre>@CanIgnoreReturnValue
+public&nbsp;<a href="../../../../../../com/google/crypto/tink/apps/paymentmethodtoken/SenderIntermediateCertFactory.Builder.html" title="class in com.google.crypto.tink.apps.paymentmethodtoken">SenderIntermediateCertFactory.Builder</a>&nbsp;addSenderSigningKey(<a href="https://docs.oracle.com/javase/8/docs/api/java/security/interfaces/ECPrivateKey.html?is-external=true" title="class or interface in java.security.interfaces">ECPrivateKey</a>&nbsp;val)
+                                                                                throws <a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
 <div class="block">Adds a signing key of the sender.
 
  <p>It must be base64 encoded PKCS8 private key.</div>
@@ -302,8 +307,9 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 <ul class="blockList">
 <li class="blockList">
 <h4>senderIntermediateSigningKey</h4>
-<pre>public&nbsp;<a href="../../../../../../com/google/crypto/tink/apps/paymentmethodtoken/SenderIntermediateCertFactory.Builder.html" title="class in com.google.crypto.tink.apps.paymentmethodtoken">SenderIntermediateCertFactory.Builder</a>&nbsp;senderIntermediateSigningKey(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;val)
-                                                                   throws <a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
+<pre>@CanIgnoreReturnValue
+public&nbsp;<a href="../../../../../../com/google/crypto/tink/apps/paymentmethodtoken/SenderIntermediateCertFactory.Builder.html" title="class in com.google.crypto.tink.apps.paymentmethodtoken">SenderIntermediateCertFactory.Builder</a>&nbsp;senderIntermediateSigningKey(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;val)
+                                                                                         throws <a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
 <div class="block">Sets the intermediate signing key being signed.
 
  <p>The public key specified here is a base64 (no wrapping, padded) version of the key encoded

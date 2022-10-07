@@ -262,7 +262,8 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 <ul class="blockList">
 <li class="blockList">
 <h4>protocolVersion</h4>
-<pre>public&nbsp;<a href="../../../../../../com/google/crypto/tink/apps/paymentmethodtoken/PaymentMethodTokenRecipient.Builder.html" title="class in com.google.crypto.tink.apps.paymentmethodtoken">PaymentMethodTokenRecipient.Builder</a>&nbsp;protocolVersion(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;val)</pre>
+<pre>@CanIgnoreReturnValue
+public&nbsp;<a href="../../../../../../com/google/crypto/tink/apps/paymentmethodtoken/PaymentMethodTokenRecipient.Builder.html" title="class in com.google.crypto.tink.apps.paymentmethodtoken">PaymentMethodTokenRecipient.Builder</a>&nbsp;protocolVersion(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;val)</pre>
 <div class="block">Sets the protocolVersion.</div>
 </li>
 </ul>
@@ -272,7 +273,8 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 <ul class="blockList">
 <li class="blockList">
 <h4>senderId</h4>
-<pre>public&nbsp;<a href="../../../../../../com/google/crypto/tink/apps/paymentmethodtoken/PaymentMethodTokenRecipient.Builder.html" title="class in com.google.crypto.tink.apps.paymentmethodtoken">PaymentMethodTokenRecipient.Builder</a>&nbsp;senderId(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;val)</pre>
+<pre>@CanIgnoreReturnValue
+public&nbsp;<a href="../../../../../../com/google/crypto/tink/apps/paymentmethodtoken/PaymentMethodTokenRecipient.Builder.html" title="class in com.google.crypto.tink.apps.paymentmethodtoken">PaymentMethodTokenRecipient.Builder</a>&nbsp;senderId(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;val)</pre>
 <div class="block">Sets the sender Id.</div>
 </li>
 </ul>
@@ -282,7 +284,8 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 <ul class="blockList">
 <li class="blockList">
 <h4>recipientId</h4>
-<pre>public&nbsp;<a href="../../../../../../com/google/crypto/tink/apps/paymentmethodtoken/PaymentMethodTokenRecipient.Builder.html" title="class in com.google.crypto.tink.apps.paymentmethodtoken">PaymentMethodTokenRecipient.Builder</a>&nbsp;recipientId(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;val)</pre>
+<pre>@CanIgnoreReturnValue
+public&nbsp;<a href="../../../../../../com/google/crypto/tink/apps/paymentmethodtoken/PaymentMethodTokenRecipient.Builder.html" title="class in com.google.crypto.tink.apps.paymentmethodtoken">PaymentMethodTokenRecipient.Builder</a>&nbsp;recipientId(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;val)</pre>
 <div class="block">Sets the recipient Id.</div>
 </li>
 </ul>
@@ -292,8 +295,9 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 <ul class="blockList">
 <li class="blockList">
 <h4>fetchSenderVerifyingKeysWith</h4>
-<pre>public&nbsp;<a href="../../../../../../com/google/crypto/tink/apps/paymentmethodtoken/PaymentMethodTokenRecipient.Builder.html" title="class in com.google.crypto.tink.apps.paymentmethodtoken">PaymentMethodTokenRecipient.Builder</a>&nbsp;fetchSenderVerifyingKeysWith(<a href="../../../../../../com/google/crypto/tink/apps/paymentmethodtoken/GooglePaymentsPublicKeysManager.html" title="class in com.google.crypto.tink.apps.paymentmethodtoken">GooglePaymentsPublicKeysManager</a>&nbsp;googlePaymentsPublicKeysManager)
-                                                                 throws <a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
+<pre>@CanIgnoreReturnValue
+public&nbsp;<a href="../../../../../../com/google/crypto/tink/apps/paymentmethodtoken/PaymentMethodTokenRecipient.Builder.html" title="class in com.google.crypto.tink.apps.paymentmethodtoken">PaymentMethodTokenRecipient.Builder</a>&nbsp;fetchSenderVerifyingKeysWith(<a href="../../../../../../com/google/crypto/tink/apps/paymentmethodtoken/GooglePaymentsPublicKeysManager.html" title="class in com.google.crypto.tink.apps.paymentmethodtoken">GooglePaymentsPublicKeysManager</a>&nbsp;googlePaymentsPublicKeysManager)
+                                                                                       throws <a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
 <div class="block">Fetches verifying public keys of the sender using <a href="../../../../../../com/google/crypto/tink/apps/paymentmethodtoken/GooglePaymentsPublicKeysManager.html" title="class in com.google.crypto.tink.apps.paymentmethodtoken"><code>GooglePaymentsPublicKeysManager</code></a>.
 
  <p>This is the preferred method of specifying the verifying public keys of the sender.</div>
@@ -309,8 +313,9 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 <ul class="blockList">
 <li class="blockList">
 <h4>senderVerifyingKeys</h4>
-<pre>public&nbsp;<a href="../../../../../../com/google/crypto/tink/apps/paymentmethodtoken/PaymentMethodTokenRecipient.Builder.html" title="class in com.google.crypto.tink.apps.paymentmethodtoken">PaymentMethodTokenRecipient.Builder</a>&nbsp;senderVerifyingKeys(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;trustedSigningKeysJson)
-                                                        throws <a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
+<pre>@CanIgnoreReturnValue
+public&nbsp;<a href="../../../../../../com/google/crypto/tink/apps/paymentmethodtoken/PaymentMethodTokenRecipient.Builder.html" title="class in com.google.crypto.tink.apps.paymentmethodtoken">PaymentMethodTokenRecipient.Builder</a>&nbsp;senderVerifyingKeys(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;trustedSigningKeysJson)
+                                                                              throws <a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
 <div class="block">Sets the trusted verifying public keys of the sender.
 
  <p><b>IMPORTANT</b>: Instead of using this method to set the verifying public keys of the
@@ -349,8 +354,9 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 <ul class="blockList">
 <li class="blockList">
 <h4>addSenderVerifyingKey</h4>
-<pre>public&nbsp;<a href="../../../../../../com/google/crypto/tink/apps/paymentmethodtoken/PaymentMethodTokenRecipient.Builder.html" title="class in com.google.crypto.tink.apps.paymentmethodtoken">PaymentMethodTokenRecipient.Builder</a>&nbsp;addSenderVerifyingKey(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;val)
-                                                          throws <a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
+<pre>@CanIgnoreReturnValue
+public&nbsp;<a href="../../../../../../com/google/crypto/tink/apps/paymentmethodtoken/PaymentMethodTokenRecipient.Builder.html" title="class in com.google.crypto.tink.apps.paymentmethodtoken">PaymentMethodTokenRecipient.Builder</a>&nbsp;addSenderVerifyingKey(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;val)
+                                                                                throws <a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
 <div class="block">Adds a verifying public key of the sender.
 
  <p><b>IMPORTANT</b>: Instead of using this method to set the verifying public keys of the
@@ -376,8 +382,9 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 <ul class="blockList">
 <li class="blockList">
 <h4>addSenderVerifyingKey</h4>
-<pre>public&nbsp;<a href="../../../../../../com/google/crypto/tink/apps/paymentmethodtoken/PaymentMethodTokenRecipient.Builder.html" title="class in com.google.crypto.tink.apps.paymentmethodtoken">PaymentMethodTokenRecipient.Builder</a>&nbsp;addSenderVerifyingKey(<a href="https://docs.oracle.com/javase/8/docs/api/java/security/interfaces/ECPublicKey.html?is-external=true" title="class or interface in java.security.interfaces">ECPublicKey</a>&nbsp;val)
-                                                          throws <a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
+<pre>@CanIgnoreReturnValue
+public&nbsp;<a href="../../../../../../com/google/crypto/tink/apps/paymentmethodtoken/PaymentMethodTokenRecipient.Builder.html" title="class in com.google.crypto.tink.apps.paymentmethodtoken">PaymentMethodTokenRecipient.Builder</a>&nbsp;addSenderVerifyingKey(<a href="https://docs.oracle.com/javase/8/docs/api/java/security/interfaces/ECPublicKey.html?is-external=true" title="class or interface in java.security.interfaces">ECPublicKey</a>&nbsp;val)
+                                                                                throws <a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
 <div class="block">Adds a verifying public key of the sender.
 
  <p><b>IMPORTANT</b>: Instead of using this method to set the verifying public keys of the
@@ -396,8 +403,9 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 <ul class="blockList">
 <li class="blockList">
 <h4>addRecipientPrivateKey</h4>
-<pre>public&nbsp;<a href="../../../../../../com/google/crypto/tink/apps/paymentmethodtoken/PaymentMethodTokenRecipient.Builder.html" title="class in com.google.crypto.tink.apps.paymentmethodtoken">PaymentMethodTokenRecipient.Builder</a>&nbsp;addRecipientPrivateKey(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;val)
-                                                           throws <a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
+<pre>@CanIgnoreReturnValue
+public&nbsp;<a href="../../../../../../com/google/crypto/tink/apps/paymentmethodtoken/PaymentMethodTokenRecipient.Builder.html" title="class in com.google.crypto.tink.apps.paymentmethodtoken">PaymentMethodTokenRecipient.Builder</a>&nbsp;addRecipientPrivateKey(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;val)
+                                                                                 throws <a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
 <div class="block">Adds the decryption private key of the recipient.
 
  <p>It must be base64 encoded PKCS8 private key.</div>
@@ -413,8 +421,9 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 <ul class="blockList">
 <li class="blockList">
 <h4>addRecipientPrivateKey</h4>
-<pre>public&nbsp;<a href="../../../../../../com/google/crypto/tink/apps/paymentmethodtoken/PaymentMethodTokenRecipient.Builder.html" title="class in com.google.crypto.tink.apps.paymentmethodtoken">PaymentMethodTokenRecipient.Builder</a>&nbsp;addRecipientPrivateKey(<a href="https://docs.oracle.com/javase/8/docs/api/java/security/interfaces/ECPrivateKey.html?is-external=true" title="class or interface in java.security.interfaces">ECPrivateKey</a>&nbsp;val)
-                                                           throws <a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
+<pre>@CanIgnoreReturnValue
+public&nbsp;<a href="../../../../../../com/google/crypto/tink/apps/paymentmethodtoken/PaymentMethodTokenRecipient.Builder.html" title="class in com.google.crypto.tink.apps.paymentmethodtoken">PaymentMethodTokenRecipient.Builder</a>&nbsp;addRecipientPrivateKey(<a href="https://docs.oracle.com/javase/8/docs/api/java/security/interfaces/ECPrivateKey.html?is-external=true" title="class or interface in java.security.interfaces">ECPrivateKey</a>&nbsp;val)
+                                                                                 throws <a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
 <div class="block">Adds the decryption private key of the recipient.</div>
 <dl>
 <dt><span class="throwsLabel">Throws:</span></dt>
@@ -428,7 +437,8 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 <ul class="blockList">
 <li class="blockList">
 <h4>addRecipientKem</h4>
-<pre>public&nbsp;<a href="../../../../../../com/google/crypto/tink/apps/paymentmethodtoken/PaymentMethodTokenRecipient.Builder.html" title="class in com.google.crypto.tink.apps.paymentmethodtoken">PaymentMethodTokenRecipient.Builder</a>&nbsp;addRecipientKem(<a href="../../../../../../com/google/crypto/tink/apps/paymentmethodtoken/PaymentMethodTokenRecipientKem.html" title="interface in com.google.crypto.tink.apps.paymentmethodtoken">PaymentMethodTokenRecipientKem</a>&nbsp;kem)</pre>
+<pre>@CanIgnoreReturnValue
+public&nbsp;<a href="../../../../../../com/google/crypto/tink/apps/paymentmethodtoken/PaymentMethodTokenRecipient.Builder.html" title="class in com.google.crypto.tink.apps.paymentmethodtoken">PaymentMethodTokenRecipient.Builder</a>&nbsp;addRecipientKem(<a href="../../../../../../com/google/crypto/tink/apps/paymentmethodtoken/PaymentMethodTokenRecipientKem.html" title="interface in com.google.crypto.tink.apps.paymentmethodtoken">PaymentMethodTokenRecipientKem</a>&nbsp;kem)</pre>
 <div class="block">Adds a custom <a href="../../../../../../com/google/crypto/tink/apps/paymentmethodtoken/PaymentMethodTokenRecipientKem.html" title="interface in com.google.crypto.tink.apps.paymentmethodtoken"><code>PaymentMethodTokenRecipientKem</code></a>.
 
  <p>This is useful for clients that store keys in an HSM and need a more control on how the
