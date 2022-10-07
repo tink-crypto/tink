@@ -4,7 +4,7 @@ go_library(
     name = "prf_based_deriver_go_proto",
     srcs = ["prf_based_deriver.pb.go"],
     importpath = "github.com/google/tink/go/proto/prf_based_deriver_go_proto",
-    visibility = ["//:__subpackages__"],
+    visibility = ["//visibility:public"],
     deps = [
         "//proto/tink_go_proto",
         "@org_golang_google_protobuf//reflect/protoreflect",
@@ -15,5 +15,5 @@ go_library(
 alias(
     name = "go_default_library",
     actual = ":prf_based_deriver_go_proto",
-    visibility = ["//:__subpackages__"],
+    visibility = ["//visibility:public"],
 )

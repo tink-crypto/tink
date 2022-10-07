@@ -4,7 +4,7 @@ go_library(
     name = "aes_ctr_go_proto",
     srcs = ["aes_ctr.pb.go"],
     importpath = "github.com/google/tink/go/proto/aes_ctr_go_proto",
-    visibility = ["//:__subpackages__"],
+    visibility = ["//visibility:public"],
     deps = [
         "@org_golang_google_protobuf//reflect/protoreflect",
         "@org_golang_google_protobuf//runtime/protoimpl",
@@ -14,5 +14,5 @@ go_library(
 alias(
     name = "go_default_library",
     actual = ":aes_ctr_go_proto",
-    visibility = ["//:__subpackages__"],
+    visibility = ["//visibility:public"],
 )
