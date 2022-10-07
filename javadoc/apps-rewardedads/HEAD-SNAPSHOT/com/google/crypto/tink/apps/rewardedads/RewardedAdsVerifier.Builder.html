@@ -224,8 +224,9 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 <ul class="blockList">
 <li class="blockList">
 <h4>fetchVerifyingPublicKeysWith</h4>
-<pre>public&nbsp;<a href="../../../../../../com/google/crypto/tink/apps/rewardedads/RewardedAdsVerifier.Builder.html" title="class in com.google.crypto.tink.apps.rewardedads">RewardedAdsVerifier.Builder</a>&nbsp;fetchVerifyingPublicKeysWith(com.google.crypto.tink.util.KeysDownloader&nbsp;downloader)
-                                                         throws <a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
+<pre>@CanIgnoreReturnValue
+public&nbsp;<a href="../../../../../../com/google/crypto/tink/apps/rewardedads/RewardedAdsVerifier.Builder.html" title="class in com.google.crypto.tink.apps.rewardedads">RewardedAdsVerifier.Builder</a>&nbsp;fetchVerifyingPublicKeysWith(com.google.crypto.tink.util.KeysDownloader&nbsp;downloader)
+                                                                               throws <a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
 <div class="block">Fetches verifying public keys of the sender using <code>KeysDownloader</code>.
 
  <p>This is the preferred method of specifying the verifying public keys.</div>
@@ -241,8 +242,9 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 <ul class="blockList">
 <li class="blockList">
 <h4>setVerifyingPublicKeys</h4>
-<pre>public&nbsp;<a href="../../../../../../com/google/crypto/tink/apps/rewardedads/RewardedAdsVerifier.Builder.html" title="class in com.google.crypto.tink.apps.rewardedads">RewardedAdsVerifier.Builder</a>&nbsp;setVerifyingPublicKeys(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;publicKeysJson)
-                                                   throws <a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
+<pre>@CanIgnoreReturnValue
+public&nbsp;<a href="../../../../../../com/google/crypto/tink/apps/rewardedads/RewardedAdsVerifier.Builder.html" title="class in com.google.crypto.tink.apps.rewardedads">RewardedAdsVerifier.Builder</a>&nbsp;setVerifyingPublicKeys(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;publicKeysJson)
+                                                                         throws <a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
 <div class="block">Sets the trusted verifying public keys of the sender.
 
  <p><b>IMPORTANT</b>: Instead of using this method to set the verifying public keys of the
@@ -283,9 +285,10 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 <ul class="blockList">
 <li class="blockList">
 <h4>addVerifyingPublicKey</h4>
-<pre>public&nbsp;<a href="../../../../../../com/google/crypto/tink/apps/rewardedads/RewardedAdsVerifier.Builder.html" title="class in com.google.crypto.tink.apps.rewardedads">RewardedAdsVerifier.Builder</a>&nbsp;addVerifyingPublicKey(long&nbsp;keyId,
-                                                         <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;val)
-                                                  throws <a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
+<pre>@CanIgnoreReturnValue
+public&nbsp;<a href="../../../../../../com/google/crypto/tink/apps/rewardedads/RewardedAdsVerifier.Builder.html" title="class in com.google.crypto.tink.apps.rewardedads">RewardedAdsVerifier.Builder</a>&nbsp;addVerifyingPublicKey(long&nbsp;keyId,
+                                                                               <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;val)
+                                                                        throws <a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
 <div class="block">Adds a verifying public key of the sender.
 
  <p><b>IMPORTANT</b>: Instead of using this method to set the verifying public keys of the
@@ -311,9 +314,10 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 <ul class="blockList">
 <li class="blockList">
 <h4>addVerifyingPublicKey</h4>
-<pre>public&nbsp;<a href="../../../../../../com/google/crypto/tink/apps/rewardedads/RewardedAdsVerifier.Builder.html" title="class in com.google.crypto.tink.apps.rewardedads">RewardedAdsVerifier.Builder</a>&nbsp;addVerifyingPublicKey(long&nbsp;keyId,
-                                                         <a href="https://docs.oracle.com/javase/8/docs/api/java/security/interfaces/ECPublicKey.html?is-external=true" title="class or interface in java.security.interfaces">ECPublicKey</a>&nbsp;val)
-                                                  throws <a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
+<pre>@CanIgnoreReturnValue
+public&nbsp;<a href="../../../../../../com/google/crypto/tink/apps/rewardedads/RewardedAdsVerifier.Builder.html" title="class in com.google.crypto.tink.apps.rewardedads">RewardedAdsVerifier.Builder</a>&nbsp;addVerifyingPublicKey(long&nbsp;keyId,
+                                                                               <a href="https://docs.oracle.com/javase/8/docs/api/java/security/interfaces/ECPublicKey.html?is-external=true" title="class or interface in java.security.interfaces">ECPublicKey</a>&nbsp;val)
+                                                                        throws <a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
 <div class="block">Adds a verifying public key of the sender.
 
  <p><b>IMPORTANT</b>: Instead of using this method to set the verifying public keys of the
