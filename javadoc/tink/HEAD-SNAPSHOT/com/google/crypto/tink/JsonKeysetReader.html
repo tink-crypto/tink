@@ -246,6 +246,8 @@ implements <a href="../../../../com/google/crypto/tink/KeysetReader.html" title=
 <li class="blockList">
 <h4>withJsonObject</h4>
 <pre><a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Deprecated.html?is-external=true" title="class or interface in java.lang">@Deprecated</a>
+ @InlineMe(replacement="JsonKeysetReader.withString(input.toString())",
+          imports="com.google.crypto.tink.JsonKeysetReader")
 public static&nbsp;<a href="../../../../com/google/crypto/tink/JsonKeysetReader.html" title="class in com.google.crypto.tink">JsonKeysetReader</a>&nbsp;withJsonObject(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a>&nbsp;input)</pre>
 <div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;<span class="deprecationComment">Use <code>#withString</code></span></div>
 <div class="block">Static method to create a JsonKeysetReader from an <code>JsonObject</code>.</div>
@@ -333,7 +335,8 @@ public static&nbsp;<a href="../../../../com/google/crypto/tink/JsonKeysetReader.
 <ul class="blockList">
 <li class="blockList">
 <h4>withUrlSafeBase64</h4>
-<pre>public&nbsp;<a href="../../../../com/google/crypto/tink/JsonKeysetReader.html" title="class in com.google.crypto.tink">JsonKeysetReader</a>&nbsp;withUrlSafeBase64()</pre>
+<pre>@CanIgnoreReturnValue
+public&nbsp;<a href="../../../../com/google/crypto/tink/JsonKeysetReader.html" title="class in com.google.crypto.tink">JsonKeysetReader</a>&nbsp;withUrlSafeBase64()</pre>
 </li>
 </ul>
 <a name="read--">

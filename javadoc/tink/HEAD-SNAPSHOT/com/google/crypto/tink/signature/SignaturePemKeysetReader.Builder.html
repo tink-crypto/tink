@@ -181,8 +181,9 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 <ul class="blockListLast">
 <li class="blockList">
 <h4>addPem</h4>
-<pre>public&nbsp;<a href="../../../../../com/google/crypto/tink/signature/SignaturePemKeysetReader.Builder.html" title="class in com.google.crypto.tink.signature">SignaturePemKeysetReader.Builder</a>&nbsp;addPem(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;pem,
-                                               <a href="../../../../../com/google/crypto/tink/PemKeyType.html" title="enum in com.google.crypto.tink">PemKeyType</a>&nbsp;keyType)</pre>
+<pre>@CanIgnoreReturnValue
+public&nbsp;<a href="../../../../../com/google/crypto/tink/signature/SignaturePemKeysetReader.Builder.html" title="class in com.google.crypto.tink.signature">SignaturePemKeysetReader.Builder</a>&nbsp;addPem(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;pem,
+                                                                     <a href="../../../../../com/google/crypto/tink/PemKeyType.html" title="enum in com.google.crypto.tink">PemKeyType</a>&nbsp;keyType)</pre>
 <div class="block">Adds a PEM.
 
  <p>A single PEM can contain multiple keys, but all must have the same <code>keyType</code>.

@@ -305,9 +305,10 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 <ul class="blockList">
 <li class="blockList">
 <h4>rotate</h4>
-<pre><a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Deprecated.html?is-external=true" title="class or interface in java.lang">@Deprecated</a>
+<pre>@CanIgnoreReturnValue
+ <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Deprecated.html?is-external=true" title="class or interface in java.lang">@Deprecated</a>
 public&nbsp;<a href="../../../../com/google/crypto/tink/KeysetManager.html" title="class in com.google.crypto.tink">KeysetManager</a>&nbsp;rotate(<a href="../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto">KeyTemplate</a>&nbsp;keyTemplate)
-                                 throws <a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
+                                                        throws <a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
 <div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;<span class="deprecationComment">Please use <a href="../../../../com/google/crypto/tink/KeysetManager.html#add-com.google.crypto.tink.proto.KeyTemplate-"><code>add(com.google.crypto.tink.proto.KeyTemplate)</code></a>. This method adds a new key and immediately promotes it to
      primary. However, when you do keyset rotation, you almost never want to make the new key
      primary, because old binaries don't know the new key yet.</span></div>
@@ -325,9 +326,10 @@ public&nbsp;<a href="../../../../com/google/crypto/tink/KeysetManager.html" titl
 <ul class="blockList">
 <li class="blockList">
 <h4>add</h4>
-<pre><a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Deprecated.html?is-external=true" title="class or interface in java.lang">@Deprecated</a>
+<pre>@CanIgnoreReturnValue
+ <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Deprecated.html?is-external=true" title="class or interface in java.lang">@Deprecated</a>
 public&nbsp;<a href="../../../../com/google/crypto/tink/KeysetManager.html" title="class in com.google.crypto.tink">KeysetManager</a>&nbsp;add(<a href="../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto">KeyTemplate</a>&nbsp;keyTemplate)
-                              throws <a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
+                                                     throws <a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
 <div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;<span class="deprecationComment">This method takes a KeyTemplate proto, which is an internal implementation detail.
      Please use the add method that takes a <a href="../../../../com/google/crypto/tink/KeyTemplate.html" title="class in com.google.crypto.tink"><code>KeyTemplate</code></a> POJO.</span></div>
 <div class="block">Generates and adds a fresh key generated using <code>keyTemplate</code>.</div>
@@ -343,8 +345,9 @@ public&nbsp;<a href="../../../../com/google/crypto/tink/KeysetManager.html" titl
 <ul class="blockList">
 <li class="blockList">
 <h4>add</h4>
-<pre>public&nbsp;<a href="../../../../com/google/crypto/tink/KeysetManager.html" title="class in com.google.crypto.tink">KeysetManager</a>&nbsp;add(<a href="../../../../com/google/crypto/tink/KeyTemplate.html" title="class in com.google.crypto.tink">KeyTemplate</a>&nbsp;keyTemplate)
-                  throws <a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
+<pre>@CanIgnoreReturnValue
+public&nbsp;<a href="../../../../com/google/crypto/tink/KeysetManager.html" title="class in com.google.crypto.tink">KeysetManager</a>&nbsp;add(<a href="../../../../com/google/crypto/tink/KeyTemplate.html" title="class in com.google.crypto.tink">KeyTemplate</a>&nbsp;keyTemplate)
+                                        throws <a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
 <div class="block">Generates and adds a fresh key generated using <code>keyTemplate</code>.</div>
 <dl>
 <dt><span class="throwsLabel">Throws:</span></dt>
@@ -358,8 +361,9 @@ public&nbsp;<a href="../../../../com/google/crypto/tink/KeysetManager.html" titl
 <ul class="blockList">
 <li class="blockList">
 <h4>add</h4>
-<pre>public&nbsp;<a href="../../../../com/google/crypto/tink/KeysetManager.html" title="class in com.google.crypto.tink">KeysetManager</a>&nbsp;add(<a href="../../../../com/google/crypto/tink/tinkkey/KeyHandle.html" title="class in com.google.crypto.tink.tinkkey">KeyHandle</a>&nbsp;keyHandle)
-                  throws <a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
+<pre>@CanIgnoreReturnValue
+public&nbsp;<a href="../../../../com/google/crypto/tink/KeysetManager.html" title="class in com.google.crypto.tink">KeysetManager</a>&nbsp;add(<a href="../../../../com/google/crypto/tink/tinkkey/KeyHandle.html" title="class in com.google.crypto.tink.tinkkey">KeyHandle</a>&nbsp;keyHandle)
+                                        throws <a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
 <div class="block">Adds the input <a href="../../../../com/google/crypto/tink/tinkkey/KeyHandle.html" title="class in com.google.crypto.tink.tinkkey"><code>KeyHandle</code></a> to the existing keyset. The KeyStatusType and key ID of the
  <a href="../../../../com/google/crypto/tink/tinkkey/KeyHandle.html" title="class in com.google.crypto.tink.tinkkey"><code>KeyHandle</code></a> are used as-is in the keyset.</div>
 <dl>
@@ -377,10 +381,11 @@ public&nbsp;<a href="../../../../com/google/crypto/tink/KeysetManager.html" titl
 <ul class="blockList">
 <li class="blockList">
 <h4>add</h4>
-<pre><a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Deprecated.html?is-external=true" title="class or interface in java.lang">@Deprecated</a>
+<pre>@CanIgnoreReturnValue
+ <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Deprecated.html?is-external=true" title="class or interface in java.lang">@Deprecated</a>
 public&nbsp;<a href="../../../../com/google/crypto/tink/KeysetManager.html" title="class in com.google.crypto.tink">KeysetManager</a>&nbsp;add(<a href="../../../../com/google/crypto/tink/tinkkey/KeyHandle.html" title="class in com.google.crypto.tink.tinkkey">KeyHandle</a>&nbsp;keyHandle,
-                                     <a href="../../../../com/google/crypto/tink/tinkkey/KeyAccess.html" title="class in com.google.crypto.tink.tinkkey">KeyAccess</a>&nbsp;access)
-                              throws <a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
+                                                            <a href="../../../../com/google/crypto/tink/tinkkey/KeyAccess.html" title="class in com.google.crypto.tink.tinkkey">KeyAccess</a>&nbsp;access)
+                                                     throws <a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
 <div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;<span class="deprecationComment">Use KeysetManager.add(KeyHandle) instead.</span></div>
 <div class="block">Adds the input <code>KeyHandle</code> to the existing keyset with <code>OutputPrefixType.TINK</code>.</div>
 <dl>
@@ -419,8 +424,9 @@ public&nbsp;int&nbsp;addNewKey(<a href="../../../../com/google/crypto/tink/proto
 <ul class="blockList">
 <li class="blockList">
 <h4>setPrimary</h4>
-<pre>public&nbsp;<a href="../../../../com/google/crypto/tink/KeysetManager.html" title="class in com.google.crypto.tink">KeysetManager</a>&nbsp;setPrimary(int&nbsp;keyId)
-                         throws <a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
+<pre>@CanIgnoreReturnValue
+public&nbsp;<a href="../../../../com/google/crypto/tink/KeysetManager.html" title="class in com.google.crypto.tink">KeysetManager</a>&nbsp;setPrimary(int&nbsp;keyId)
+                                               throws <a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
 <div class="block">Sets the key with <code>keyId</code> as primary.</div>
 <dl>
 <dt><span class="throwsLabel">Throws:</span></dt>
@@ -434,9 +440,11 @@ public&nbsp;int&nbsp;addNewKey(<a href="../../../../com/google/crypto/tink/proto
 <ul class="blockList">
 <li class="blockList">
 <h4>promote</h4>
-<pre><a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Deprecated.html?is-external=true" title="class or interface in java.lang">@Deprecated</a>
+<pre>@InlineMe(replacement="this.setPrimary(keyId)")
+ @CanIgnoreReturnValue
+ <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Deprecated.html?is-external=true" title="class or interface in java.lang">@Deprecated</a>
 public&nbsp;<a href="../../../../com/google/crypto/tink/KeysetManager.html" title="class in com.google.crypto.tink">KeysetManager</a>&nbsp;promote(int&nbsp;keyId)
-                                  throws <a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
+                                                                                                          throws <a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
 <div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;<span class="deprecationComment">use <code>setPrimary</code></span></div>
 <div class="block">Sets the key with <code>keyId</code> as primary.</div>
 <dl>
@@ -451,8 +459,9 @@ public&nbsp;<a href="../../../../com/google/crypto/tink/KeysetManager.html" titl
 <ul class="blockList">
 <li class="blockList">
 <h4>enable</h4>
-<pre>public&nbsp;<a href="../../../../com/google/crypto/tink/KeysetManager.html" title="class in com.google.crypto.tink">KeysetManager</a>&nbsp;enable(int&nbsp;keyId)
-                     throws <a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
+<pre>@CanIgnoreReturnValue
+public&nbsp;<a href="../../../../com/google/crypto/tink/KeysetManager.html" title="class in com.google.crypto.tink">KeysetManager</a>&nbsp;enable(int&nbsp;keyId)
+                                           throws <a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
 <div class="block">Enables the key with <code>keyId</code>.</div>
 <dl>
 <dt><span class="throwsLabel">Throws:</span></dt>
@@ -466,8 +475,9 @@ public&nbsp;<a href="../../../../com/google/crypto/tink/KeysetManager.html" titl
 <ul class="blockList">
 <li class="blockList">
 <h4>disable</h4>
-<pre>public&nbsp;<a href="../../../../com/google/crypto/tink/KeysetManager.html" title="class in com.google.crypto.tink">KeysetManager</a>&nbsp;disable(int&nbsp;keyId)
-                      throws <a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
+<pre>@CanIgnoreReturnValue
+public&nbsp;<a href="../../../../com/google/crypto/tink/KeysetManager.html" title="class in com.google.crypto.tink">KeysetManager</a>&nbsp;disable(int&nbsp;keyId)
+                                            throws <a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
 <div class="block">Disables the key with <code>keyId</code>.</div>
 <dl>
 <dt><span class="throwsLabel">Throws:</span></dt>
@@ -481,8 +491,9 @@ public&nbsp;<a href="../../../../com/google/crypto/tink/KeysetManager.html" titl
 <ul class="blockList">
 <li class="blockList">
 <h4>delete</h4>
-<pre>public&nbsp;<a href="../../../../com/google/crypto/tink/KeysetManager.html" title="class in com.google.crypto.tink">KeysetManager</a>&nbsp;delete(int&nbsp;keyId)
-                     throws <a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
+<pre>@CanIgnoreReturnValue
+public&nbsp;<a href="../../../../com/google/crypto/tink/KeysetManager.html" title="class in com.google.crypto.tink">KeysetManager</a>&nbsp;delete(int&nbsp;keyId)
+                                           throws <a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
 <div class="block">Deletes the key with <code>keyId</code>.</div>
 <dl>
 <dt><span class="throwsLabel">Throws:</span></dt>
@@ -496,8 +507,9 @@ public&nbsp;<a href="../../../../com/google/crypto/tink/KeysetManager.html" titl
 <ul class="blockListLast">
 <li class="blockList">
 <h4>destroy</h4>
-<pre>public&nbsp;<a href="../../../../com/google/crypto/tink/KeysetManager.html" title="class in com.google.crypto.tink">KeysetManager</a>&nbsp;destroy(int&nbsp;keyId)
-                      throws <a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
+<pre>@CanIgnoreReturnValue
+public&nbsp;<a href="../../../../com/google/crypto/tink/KeysetManager.html" title="class in com.google.crypto.tink">KeysetManager</a>&nbsp;destroy(int&nbsp;keyId)
+                                            throws <a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
 <div class="block">Destroys the key material associated with the <code>keyId</code>.</div>
 <dl>
 <dt><span class="throwsLabel">Throws:</span></dt>
