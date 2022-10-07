@@ -51,13 +51,13 @@ main() {
   process_args "$@"
 
   # URL of the git repository used for javadoc publishing.
-  local git_user="git"
+  local git_url="git@github.com:google/tink.git"
   if [ -n "${KOKORO_ROOT}" ]; then
     # GITHUB_ACCESS_TOKEN is populated by Kokoro.
-    git_user="ise-crypto:${GITHUB_ACCESS_TOKEN}"
+    local -r git_credentials="ise-crypto:${GITHUB_ACCESS_TOKEN}"
+    git_url="https://${git_credentials}@github.com/google/tink.git"
   fi
-  readonly git_user
-  local -r git_url="${git_user}@github.com:google/tink.git"
+  readonly git_url
 
   local -r maven_scripts_dir="$(cd "$(dirname "$0")" && pwd)"
   local -r tink_root="$(cd ${maven_scripts_dir}/.. && pwd)"
