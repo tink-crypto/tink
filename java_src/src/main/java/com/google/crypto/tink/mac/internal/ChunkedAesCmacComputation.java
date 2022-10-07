@@ -21,6 +21,7 @@ import static java.lang.Math.min;
 import com.google.crypto.tink.AccessesPartialKey;
 import com.google.crypto.tink.InsecureSecretKeyAccess;
 import com.google.crypto.tink.mac.AesCmacKey;
+import com.google.crypto.tink.mac.AesCmacParameters.Variant;
 import com.google.crypto.tink.mac.ChunkedMacComputation;
 import com.google.crypto.tink.subtle.Bytes;
 import com.google.crypto.tink.subtle.EngineFactory;
@@ -37,6 +38,9 @@ import javax.crypto.spec.SecretKeySpec;
  */
 @AccessesPartialKey
 final class ChunkedAesCmacComputation implements ChunkedMacComputation {
+  // A single byte to be added to the plaintext for the legacy key type.
+  private static final byte[] FORMAT_VERSION = new byte[] {0};
+
   private final Cipher aes;
   private final AesCmacKey key;
   // subKey1 and subKey2 are derived as in RFC 4493.
@@ -127,6 +131,9 @@ final class ChunkedAesCmacComputation implements ChunkedMacComputation {
     if (finalized) {
       throw new IllegalStateException(
           "Can not compute after computing the MAC tag. Please create a new object.");
+    }
+    if (key.getParameters().getVariant() == Variant.LEGACY) {
+      update(ByteBuffer.wrap(FORMAT_VERSION));
     }
     finalized = true;
 

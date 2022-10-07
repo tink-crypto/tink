@@ -22,6 +22,8 @@ import static org.junit.Assume.assumeFalse;
 import static org.junit.Assume.assumeTrue;
 
 import com.google.crypto.tink.InsecureSecretKeyAccess;
+import com.google.crypto.tink.KeysetHandle;
+import com.google.crypto.tink.Mac;
 import com.google.crypto.tink.config.TinkFips;
 import com.google.crypto.tink.mac.AesCmacKey;
 import com.google.crypto.tink.mac.AesCmacParameters;
@@ -29,6 +31,7 @@ import com.google.crypto.tink.mac.AesCmacParameters.Variant;
 import com.google.crypto.tink.mac.ChunkedMac;
 import com.google.crypto.tink.mac.ChunkedMacComputation;
 import com.google.crypto.tink.mac.ChunkedMacVerification;
+import com.google.crypto.tink.mac.MacConfig;
 import com.google.crypto.tink.subtle.Hex;
 import com.google.crypto.tink.subtle.Random;
 import com.google.crypto.tink.testing.WycheproofTestUtil;
@@ -39,13 +42,22 @@ import java.nio.ByteBuffer;
 import java.security.GeneralSecurityException;
 import java.util.Arrays;
 import javax.annotation.Nullable;
+import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.experimental.theories.DataPoints;
+import org.junit.experimental.theories.FromDataPoints;
+import org.junit.experimental.theories.Theories;
+import org.junit.experimental.theories.Theory;
 import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
 
 /* Unit tests for Streaming AesCmac computation. */
-@RunWith(JUnit4.class)
+@RunWith(Theories.class)
 public class ChunkedAesCmacTest {
+  @BeforeClass
+  public static void setUp() throws Exception {
+    MacConfig.register();
+  }
+
   private static class AesCmacTestVector {
     public final AesCmacKey key;
     public final byte[] message;
@@ -148,7 +160,7 @@ public class ChunkedAesCmacTest {
       "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
           + "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
           + "bbbbbb",
-      "0000000755611a1ededd3dfff548ed80b7fd10c0ba");
+      "00000007554816512e20d15db74f1de942d86a2f7b");
   private static final AesCmacTestVector TAG_WITH_KEY_PREFIX_TYPE_TINK = new AesCmacTestVector(
       createAesCmacKey(
           "00112233445566778899aabbccddeeff",
@@ -235,6 +247,61 @@ public class ChunkedAesCmacTest {
     } catch (GeneralSecurityException ex) {
       throw new IllegalStateException(ex);
     }
+  }
+
+  @DataPoints("parameters")
+  public static final AesCmacParameters[] PARAMETERS = {
+      createAesCmacParameters(32, 10, Variant.LEGACY),
+      createAesCmacParameters(32, 11, Variant.LEGACY),
+      createAesCmacParameters(32, 12, Variant.LEGACY),
+      createAesCmacParameters(32, 13, Variant.LEGACY),
+      createAesCmacParameters(32, 14, Variant.LEGACY),
+      createAesCmacParameters(32, 15, Variant.LEGACY),
+      createAesCmacParameters(32, 16, Variant.LEGACY),
+
+      createAesCmacParameters(32, 10, Variant.TINK),
+      createAesCmacParameters(32, 11, Variant.TINK),
+      createAesCmacParameters(32, 12, Variant.TINK),
+      createAesCmacParameters(32, 13, Variant.TINK),
+      createAesCmacParameters(32, 14, Variant.TINK),
+      createAesCmacParameters(32, 15, Variant.TINK),
+      createAesCmacParameters(32, 16, Variant.TINK),
+
+      createAesCmacParameters(32, 10, Variant.CRUNCHY),
+      createAesCmacParameters(32, 11, Variant.CRUNCHY),
+      createAesCmacParameters(32, 12, Variant.CRUNCHY),
+      createAesCmacParameters(32, 13, Variant.CRUNCHY),
+      createAesCmacParameters(32, 14, Variant.CRUNCHY),
+      createAesCmacParameters(32, 15, Variant.CRUNCHY),
+      createAesCmacParameters(32, 16, Variant.CRUNCHY),
+
+      createAesCmacParameters(32, 10, Variant.NO_PREFIX),
+      createAesCmacParameters(32, 11, Variant.NO_PREFIX),
+      createAesCmacParameters(32, 12, Variant.NO_PREFIX),
+      createAesCmacParameters(32, 13, Variant.NO_PREFIX),
+      createAesCmacParameters(32, 14, Variant.NO_PREFIX),
+      createAesCmacParameters(32, 15, Variant.NO_PREFIX),
+      createAesCmacParameters(32, 16, Variant.NO_PREFIX),
+  };
+
+  @Theory
+  public void testCompatibility(@FromDataPoints("parameters") AesCmacParameters parameters)
+      throws Exception {
+    KeysetHandle keysetHandle =
+        KeysetHandle
+            .newBuilder()
+            .addEntry(
+                KeysetHandle
+                    .generateEntryFromParameters(parameters).withFixedId(1234).makePrimary())
+            .build();
+    Mac mac = keysetHandle.getPrimitive(Mac.class);
+    AesCmacKey key = (AesCmacKey) keysetHandle.getAt(0).getKey();
+    ChunkedMac chunkedMac = new ChunkedAesCmacImpl(key);
+    ChunkedMacComputation chunkedMacComputation = chunkedMac.createComputation();
+
+    byte[] testData = new byte[] {1, 2, 3, 4, 5, 6, 7, 8};
+    chunkedMacComputation.update(ByteBuffer.wrap(testData));
+    assertThat(mac.computeMac(testData)).isEqualTo(chunkedMacComputation.computeMac());
   }
 
   @Test
