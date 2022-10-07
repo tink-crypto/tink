@@ -238,7 +238,8 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 <ul class="blockList">
 <li class="blockList">
 <h4>withRecordSize</h4>
-<pre>public&nbsp;<a href="../../../../../../com/google/crypto/tink/apps/webpush/WebPushHybridDecrypt.Builder.html" title="class in com.google.crypto.tink.apps.webpush">WebPushHybridDecrypt.Builder</a>&nbsp;withRecordSize(int&nbsp;val)</pre>
+<pre>@CanIgnoreReturnValue
+public&nbsp;<a href="../../../../../../com/google/crypto/tink/apps/webpush/WebPushHybridDecrypt.Builder.html" title="class in com.google.crypto.tink.apps.webpush">WebPushHybridDecrypt.Builder</a>&nbsp;withRecordSize(int&nbsp;val)</pre>
 <div class="block">Sets the record size.
 
  <p>If set, this value must match the record size set with <a href="../../../../../../com/google/crypto/tink/apps/webpush/WebPushHybridEncrypt.Builder.html#withRecordSize-int-"><code>WebPushHybridEncrypt.Builder.withRecordSize(int)</code></a>.
@@ -252,7 +253,8 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 <ul class="blockList">
 <li class="blockList">
 <h4>withAuthSecret</h4>
-<pre>public&nbsp;<a href="../../../../../../com/google/crypto/tink/apps/webpush/WebPushHybridDecrypt.Builder.html" title="class in com.google.crypto.tink.apps.webpush">WebPushHybridDecrypt.Builder</a>&nbsp;withAuthSecret(byte[]&nbsp;val)</pre>
+<pre>@CanIgnoreReturnValue
+public&nbsp;<a href="../../../../../../com/google/crypto/tink/apps/webpush/WebPushHybridDecrypt.Builder.html" title="class in com.google.crypto.tink.apps.webpush">WebPushHybridDecrypt.Builder</a>&nbsp;withAuthSecret(byte[]&nbsp;val)</pre>
 <div class="block">Sets the authentication secret.</div>
 </li>
 </ul>
@@ -262,8 +264,9 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 <ul class="blockList">
 <li class="blockList">
 <h4>withRecipientPublicKey</h4>
-<pre>public&nbsp;<a href="../../../../../../com/google/crypto/tink/apps/webpush/WebPushHybridDecrypt.Builder.html" title="class in com.google.crypto.tink.apps.webpush">WebPushHybridDecrypt.Builder</a>&nbsp;withRecipientPublicKey(<a href="https://docs.oracle.com/javase/8/docs/api/java/security/interfaces/ECPublicKey.html?is-external=true" title="class or interface in java.security.interfaces">ECPublicKey</a>&nbsp;val)
-                                                    throws <a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
+<pre>@CanIgnoreReturnValue
+public&nbsp;<a href="../../../../../../com/google/crypto/tink/apps/webpush/WebPushHybridDecrypt.Builder.html" title="class in com.google.crypto.tink.apps.webpush">WebPushHybridDecrypt.Builder</a>&nbsp;withRecipientPublicKey(<a href="https://docs.oracle.com/javase/8/docs/api/java/security/interfaces/ECPublicKey.html?is-external=true" title="class or interface in java.security.interfaces">ECPublicKey</a>&nbsp;val)
+                                                                          throws <a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
 <div class="block">Sets the public key of the recipient.</div>
 <dl>
 <dt><span class="throwsLabel">Throws:</span></dt>
@@ -277,7 +280,8 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 <ul class="blockList">
 <li class="blockList">
 <h4>withRecipientPublicKey</h4>
-<pre>public&nbsp;<a href="../../../../../../com/google/crypto/tink/apps/webpush/WebPushHybridDecrypt.Builder.html" title="class in com.google.crypto.tink.apps.webpush">WebPushHybridDecrypt.Builder</a>&nbsp;withRecipientPublicKey(byte[]&nbsp;val)</pre>
+<pre>@CanIgnoreReturnValue
+public&nbsp;<a href="../../../../../../com/google/crypto/tink/apps/webpush/WebPushHybridDecrypt.Builder.html" title="class in com.google.crypto.tink.apps.webpush">WebPushHybridDecrypt.Builder</a>&nbsp;withRecipientPublicKey(byte[]&nbsp;val)</pre>
 <div class="block">Sets the public key of the recipient.
 
  <p>The public key must be formatted as an uncompressed point format, i.e., it has <code>65</code>
@@ -290,8 +294,9 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 <ul class="blockList">
 <li class="blockList">
 <h4>withRecipientPrivateKey</h4>
-<pre>public&nbsp;<a href="../../../../../../com/google/crypto/tink/apps/webpush/WebPushHybridDecrypt.Builder.html" title="class in com.google.crypto.tink.apps.webpush">WebPushHybridDecrypt.Builder</a>&nbsp;withRecipientPrivateKey(<a href="https://docs.oracle.com/javase/8/docs/api/java/security/interfaces/ECPrivateKey.html?is-external=true" title="class or interface in java.security.interfaces">ECPrivateKey</a>&nbsp;val)
-                                                     throws <a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
+<pre>@CanIgnoreReturnValue
+public&nbsp;<a href="../../../../../../com/google/crypto/tink/apps/webpush/WebPushHybridDecrypt.Builder.html" title="class in com.google.crypto.tink.apps.webpush">WebPushHybridDecrypt.Builder</a>&nbsp;withRecipientPrivateKey(<a href="https://docs.oracle.com/javase/8/docs/api/java/security/interfaces/ECPrivateKey.html?is-external=true" title="class or interface in java.security.interfaces">ECPrivateKey</a>&nbsp;val)
+                                                                           throws <a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
 <div class="block">Sets the private key of the recipient.</div>
 <dl>
 <dt><span class="throwsLabel">Throws:</span></dt>
@@ -305,12 +310,12 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 <ul class="blockList">
 <li class="blockList">
 <h4>withRecipientPrivateKey</h4>
-<pre>public&nbsp;<a href="../../../../../../com/google/crypto/tink/apps/webpush/WebPushHybridDecrypt.Builder.html" title="class in com.google.crypto.tink.apps.webpush">WebPushHybridDecrypt.Builder</a>&nbsp;withRecipientPrivateKey(byte[]&nbsp;val)
-                                                     throws <a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
+<pre>@CanIgnoreReturnValue
+public&nbsp;<a href="../../../../../../com/google/crypto/tink/apps/webpush/WebPushHybridDecrypt.Builder.html" title="class in com.google.crypto.tink.apps.webpush">WebPushHybridDecrypt.Builder</a>&nbsp;withRecipientPrivateKey(byte[]&nbsp;val)
+                                                                           throws <a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
 <div class="block">Sets the private key of the recipient.
 
- <p>The private key is the serialized bytes of the BigInteger returned by
- <a href="https://docs.oracle.com/javase/8/docs/api/java/security/interfaces/ECPrivateKey.html?is-external=true#getS--" title="class or interface in java.security.interfaces"><code>ECPrivateKey.getS()</code></a>.</div>
+ <p>The private key is the serialized bytes of the BigInteger returned by <a href="https://docs.oracle.com/javase/8/docs/api/java/security/interfaces/ECPrivateKey.html?is-external=true#getS--" title="class or interface in java.security.interfaces"><code>ECPrivateKey.getS()</code></a>.</div>
 <dl>
 <dt><span class="throwsLabel">Throws:</span></dt>
 <dd><code><a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></code></dd>
