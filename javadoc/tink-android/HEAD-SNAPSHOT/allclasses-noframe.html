@@ -149,6 +149,7 @@
 <li><a href="com/google/crypto/tink/proto/ChaCha20Poly1305KeyFormatOrBuilder.html" title="interface in com.google.crypto.tink.proto"><span class="interfaceName">ChaCha20Poly1305KeyFormatOrBuilder</span></a></li>
 <li><a href="com/google/crypto/tink/aead/ChaCha20Poly1305KeyManager.html" title="class in com.google.crypto.tink.aead">ChaCha20Poly1305KeyManager</a></li>
 <li><a href="com/google/crypto/tink/proto/ChaCha20Poly1305KeyOrBuilder.html" title="interface in com.google.crypto.tink.proto"><span class="interfaceName">ChaCha20Poly1305KeyOrBuilder</span></a></li>
+<li><a href="com/google/crypto/tink/mac/internal/ChunkedAesCmacImpl.html" title="class in com.google.crypto.tink.mac.internal">ChunkedAesCmacImpl</a></li>
 <li><a href="com/google/crypto/tink/mac/ChunkedMac.html" title="interface in com.google.crypto.tink.mac"><span class="interfaceName">ChunkedMac</span></a></li>
 <li><a href="com/google/crypto/tink/mac/ChunkedMacComputation.html" title="interface in com.google.crypto.tink.mac"><span class="interfaceName">ChunkedMacComputation</span></a></li>
 <li><a href="com/google/crypto/tink/mac/ChunkedMacVerification.html" title="interface in com.google.crypto.tink.mac"><span class="interfaceName">ChunkedMacVerification</span></a></li>
@@ -256,13 +257,19 @@
 <li><a href="com/google/crypto/tink/proto/HkdfPrfParamsOrBuilder.html" title="interface in com.google.crypto.tink.proto"><span class="interfaceName">HkdfPrfParamsOrBuilder</span></a></li>
 <li><a href="com/google/crypto/tink/subtle/prf/HkdfStreamingPrf.html" title="class in com.google.crypto.tink.subtle.prf">HkdfStreamingPrf</a></li>
 <li><a href="com/google/crypto/tink/proto/Hmac.html" title="class in com.google.crypto.tink.proto">Hmac</a></li>
+<li><a href="com/google/crypto/tink/mac/HmacKey.html" title="class in com.google.crypto.tink.mac">HmacKey</a></li>
 <li><a href="com/google/crypto/tink/proto/HmacKey.html" title="class in com.google.crypto.tink.proto">HmacKey</a></li>
+<li><a href="com/google/crypto/tink/mac/HmacKey.Builder.html" title="class in com.google.crypto.tink.mac">HmacKey.Builder</a></li>
 <li><a href="com/google/crypto/tink/proto/HmacKey.Builder.html" title="class in com.google.crypto.tink.proto">HmacKey.Builder</a></li>
 <li><a href="com/google/crypto/tink/proto/HmacKeyFormat.html" title="class in com.google.crypto.tink.proto">HmacKeyFormat</a></li>
 <li><a href="com/google/crypto/tink/proto/HmacKeyFormat.Builder.html" title="class in com.google.crypto.tink.proto">HmacKeyFormat.Builder</a></li>
 <li><a href="com/google/crypto/tink/proto/HmacKeyFormatOrBuilder.html" title="interface in com.google.crypto.tink.proto"><span class="interfaceName">HmacKeyFormatOrBuilder</span></a></li>
 <li><a href="com/google/crypto/tink/mac/HmacKeyManager.html" title="class in com.google.crypto.tink.mac">HmacKeyManager</a></li>
 <li><a href="com/google/crypto/tink/proto/HmacKeyOrBuilder.html" title="interface in com.google.crypto.tink.proto"><span class="interfaceName">HmacKeyOrBuilder</span></a></li>
+<li><a href="com/google/crypto/tink/mac/HmacParameters.html" title="class in com.google.crypto.tink.mac">HmacParameters</a></li>
+<li><a href="com/google/crypto/tink/mac/HmacParameters.Builder.html" title="class in com.google.crypto.tink.mac">HmacParameters.Builder</a></li>
+<li><a href="com/google/crypto/tink/mac/HmacParameters.HashType.html" title="class in com.google.crypto.tink.mac">HmacParameters.HashType</a></li>
+<li><a href="com/google/crypto/tink/mac/HmacParameters.Variant.html" title="class in com.google.crypto.tink.mac">HmacParameters.Variant</a></li>
 <li><a href="com/google/crypto/tink/proto/HmacParams.html" title="class in com.google.crypto.tink.proto">HmacParams</a></li>
 <li><a href="com/google/crypto/tink/proto/HmacParams.Builder.html" title="class in com.google.crypto.tink.proto">HmacParams.Builder</a></li>
 <li><a href="com/google/crypto/tink/proto/HmacParamsOrBuilder.html" title="interface in com.google.crypto.tink.proto"><span class="interfaceName">HmacParamsOrBuilder</span></a></li>
@@ -316,6 +323,7 @@
 <li><a href="com/google/crypto/tink/tinkkey/internal/InternalKeyHandle.html" title="class in com.google.crypto.tink.tinkkey.internal">InternalKeyHandle</a></li>
 <li><a href="com/google/crypto/tink/JsonKeysetReader.html" title="class in com.google.crypto.tink">JsonKeysetReader</a></li>
 <li><a href="com/google/crypto/tink/JsonKeysetWriter.html" title="class in com.google.crypto.tink">JsonKeysetWriter</a></li>
+<li><a href="com/google/crypto/tink/internal/JsonParser.html" title="class in com.google.crypto.tink.internal">JsonParser</a></li>
 <li><a href="com/google/crypto/tink/jwt/JwkSetConverter.html" title="class in com.google.crypto.tink.jwt">JwkSetConverter</a></li>
 <li><a href="com/google/crypto/tink/proto/JwtEcdsa.html" title="class in com.google.crypto.tink.proto">JwtEcdsa</a></li>
 <li><a href="com/google/crypto/tink/proto/JwtEcdsaAlgorithm.html" title="enum in com.google.crypto.tink.proto">JwtEcdsaAlgorithm</a></li>
@@ -574,7 +582,6 @@
 <li><a href="com/google/crypto/tink/subtle/prf/StreamingPrf.html" title="interface in com.google.crypto.tink.subtle.prf"><span class="interfaceName">StreamingPrf</span></a></li>
 <li><a href="com/google/crypto/tink/subtle/StreamSegmentDecrypter.html" title="interface in com.google.crypto.tink.subtle"><span class="interfaceName">StreamSegmentDecrypter</span></a></li>
 <li><a href="com/google/crypto/tink/subtle/StreamSegmentEncrypter.html" title="interface in com.google.crypto.tink.subtle"><span class="interfaceName">StreamSegmentEncrypter</span></a></li>
-<li><a href="com/google/crypto/tink/internal/StrictJsonParser.html" title="class in com.google.crypto.tink.internal">StrictJsonParser</a></li>
 <li><a href="com/google/crypto/tink/subtle/SubtleUtil.html" title="class in com.google.crypto.tink.subtle">SubtleUtil</a></li>
 <li><a href="com/google/crypto/tink/proto/Tink.html" title="class in com.google.crypto.tink.proto">Tink</a></li>
 <li><a href="com/google/crypto/tink/internal/TinkBugException.html" title="class in com.google.crypto.tink.internal">TinkBugException</a></li>
@@ -583,6 +590,7 @@
 <li><a href="com/google/crypto/tink/config/internal/TinkFipsUtil.html" title="class in com.google.crypto.tink.config.internal">TinkFipsUtil</a></li>
 <li><a href="com/google/crypto/tink/config/internal/TinkFipsUtil.AlgorithmFipsCompatibility.html" title="enum in com.google.crypto.tink.config.internal">TinkFipsUtil.AlgorithmFipsCompatibility</a></li>
 <li><a href="com/google/crypto/tink/tinkkey/TinkKey.html" title="interface in com.google.crypto.tink.tinkkey"><span class="interfaceName">TinkKey</span></a></li>
+<li><a href="com/google/crypto/tink/TinkProtoKeysetFormat.html" title="class in com.google.crypto.tink">TinkProtoKeysetFormat</a></li>
 <li><a href="com/google/crypto/tink/internal/Util.html" title="class in com.google.crypto.tink.internal">Util</a></li>
 <li><a href="com/google/crypto/tink/subtle/Validators.html" title="class in com.google.crypto.tink.subtle">Validators</a></li>
 <li><a href="com/google/crypto/tink/jwt/VerifiedJwt.html" title="class in com.google.crypto.tink.jwt">VerifiedJwt</a></li>

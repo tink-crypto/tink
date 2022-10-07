@@ -138,12 +138,18 @@
 <tbody>
 <tr class="altColor">
 <td class="colFirst"><code>static <a href="../../../../../com/google/crypto/tink/KeysetHandle.html" title="class in com.google.crypto.tink">KeysetHandle</a></code></td>
+<td class="colLast"><span class="typeNameLabel">TinkProtoKeysetFormat.</span><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/TinkProtoKeysetFormat.html#parseEncryptedKeyset-byte:A-com.google.crypto.tink.Aead-byte:A-">parseEncryptedKeyset</a></span>(byte[]&nbsp;serializedEncryptedKeyset,
+                    <a href="../../../../../com/google/crypto/tink/Aead.html" title="interface in com.google.crypto.tink">Aead</a>&nbsp;keysetEncryptionAead,
+                    byte[]&nbsp;associatedData)</code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>static <a href="../../../../../com/google/crypto/tink/KeysetHandle.html" title="class in com.google.crypto.tink">KeysetHandle</a></code></td>
 <td class="colLast"><span class="typeNameLabel">KeysetHandle.</span><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/KeysetHandle.html#read-com.google.crypto.tink.KeysetReader-com.google.crypto.tink.Aead-">read</a></span>(<a href="../../../../../com/google/crypto/tink/KeysetReader.html" title="interface in com.google.crypto.tink">KeysetReader</a>&nbsp;reader,
     <a href="../../../../../com/google/crypto/tink/Aead.html" title="interface in com.google.crypto.tink">Aead</a>&nbsp;masterKey)</code>
 <div class="block">Tries to create a <a href="../../../../../com/google/crypto/tink/KeysetHandle.html" title="class in com.google.crypto.tink"><code>KeysetHandle</code></a> from an encrypted keyset obtained via <code>reader</code>.</div>
 </td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><code>static <a href="../../../../../com/google/crypto/tink/KeysetHandle.html" title="class in com.google.crypto.tink">KeysetHandle</a></code></td>
 <td class="colLast"><span class="typeNameLabel">KeysetHandle.</span><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/KeysetHandle.html#readWithAssociatedData-com.google.crypto.tink.KeysetReader-com.google.crypto.tink.Aead-byte:A-">readWithAssociatedData</a></span>(<a href="../../../../../com/google/crypto/tink/KeysetReader.html" title="interface in com.google.crypto.tink">KeysetReader</a>&nbsp;reader,
                       <a href="../../../../../com/google/crypto/tink/Aead.html" title="interface in com.google.crypto.tink">Aead</a>&nbsp;masterKey,
@@ -151,6 +157,12 @@
 <div class="block">Tries to create a <a href="../../../../../com/google/crypto/tink/KeysetHandle.html" title="class in com.google.crypto.tink"><code>KeysetHandle</code></a> from an encrypted keyset obtained via <code>reader</code>,
  using the provided associated data.</div>
 </td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>static byte[]</code></td>
+<td class="colLast"><span class="typeNameLabel">TinkProtoKeysetFormat.</span><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/TinkProtoKeysetFormat.html#serializeEncryptedKeyset-com.google.crypto.tink.KeysetHandle-com.google.crypto.tink.Aead-byte:A-">serializeEncryptedKeyset</a></span>(<a href="../../../../../com/google/crypto/tink/KeysetHandle.html" title="class in com.google.crypto.tink">KeysetHandle</a>&nbsp;keysetHandle,
+                        <a href="../../../../../com/google/crypto/tink/Aead.html" title="interface in com.google.crypto.tink">Aead</a>&nbsp;keysetEncryptionAead,
+                        byte[]&nbsp;associatedData)</code>&nbsp;</td>
 </tr>
 <tr class="altColor">
 <td class="colFirst"><code>void</code></td>

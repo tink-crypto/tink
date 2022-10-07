@@ -217,7 +217,8 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 <ul class="blockList">
 <li class="blockList">
 <h4>setUrl</h4>
-<pre>public&nbsp;<a href="../../../../../com/google/crypto/tink/util/KeysDownloader.Builder.html" title="class in com.google.crypto.tink.util">KeysDownloader.Builder</a>&nbsp;setUrl(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;val)</pre>
+<pre>@CanIgnoreReturnValue
+public&nbsp;<a href="../../../../../com/google/crypto/tink/util/KeysDownloader.Builder.html" title="class in com.google.crypto.tink.util">KeysDownloader.Builder</a>&nbsp;setUrl(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;val)</pre>
 <div class="block">Sets the url which must point to a HTTPS server.</div>
 </li>
 </ul>
@@ -227,7 +228,8 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 <ul class="blockList">
 <li class="blockList">
 <h4>setExecutor</h4>
-<pre>public&nbsp;<a href="../../../../../com/google/crypto/tink/util/KeysDownloader.Builder.html" title="class in com.google.crypto.tink.util">KeysDownloader.Builder</a>&nbsp;setExecutor(<a href="https://docs.oracle.com/javase/8/docs/api/java/util/concurrent/Executor.html?is-external=true" title="class or interface in java.util.concurrent">Executor</a>&nbsp;val)</pre>
+<pre>@CanIgnoreReturnValue
+public&nbsp;<a href="../../../../../com/google/crypto/tink/util/KeysDownloader.Builder.html" title="class in com.google.crypto.tink.util">KeysDownloader.Builder</a>&nbsp;setExecutor(<a href="https://docs.oracle.com/javase/8/docs/api/java/util/concurrent/Executor.html?is-external=true" title="class or interface in java.util.concurrent">Executor</a>&nbsp;val)</pre>
 <div class="block">Sets the background executor.</div>
 </li>
 </ul>
@@ -237,7 +239,8 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 <ul class="blockList">
 <li class="blockList">
 <h4>setHttpTransport</h4>
-<pre>public&nbsp;<a href="../../../../../com/google/crypto/tink/util/KeysDownloader.Builder.html" title="class in com.google.crypto.tink.util">KeysDownloader.Builder</a>&nbsp;setHttpTransport(com.google.api.client.http.HttpTransport&nbsp;httpTransport)</pre>
+<pre>@CanIgnoreReturnValue
+public&nbsp;<a href="../../../../../com/google/crypto/tink/util/KeysDownloader.Builder.html" title="class in com.google.crypto.tink.util">KeysDownloader.Builder</a>&nbsp;setHttpTransport(com.google.api.client.http.HttpTransport&nbsp;httpTransport)</pre>
 <div class="block">Sets the HTTP transport.
 
  <p>You generally should not need to set a custom transport as the default transport <a href="../../../../../com/google/crypto/tink/util/KeysDownloader.html#DEFAULT_HTTP_TRANSPORT"><code>KeysDownloader.DEFAULT_HTTP_TRANSPORT</code></a> should be suited for most use cases.</div>
