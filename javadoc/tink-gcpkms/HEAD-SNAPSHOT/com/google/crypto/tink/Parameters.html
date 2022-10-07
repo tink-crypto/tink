@@ -212,8 +212,8 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
  it is in a keyset.
 
  <p>In Tink, certain keys change their behavior depending on the key id (for example, an <a href="../../../../com/google/crypto/tink/Aead.html" title="interface in com.google.crypto.tink"><code>Aead</code></a> object can prefix the ciphertext with the big endian encoding of the key id). If this is
- the case, such a key should require a unique id in <code>Key#getIdRequirement</code> and return true
- here.</div>
+ the case, such a key should require a unique id in <a href="../../../../com/google/crypto/tink/Key.html#getIdRequirementOrNull--"><code>Key.getIdRequirementOrNull()</code></a> and
+ return true here.</div>
 </li>
 </ul>
 </li>

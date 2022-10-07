@@ -132,8 +132,9 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
  . 7
 
  <p>All these functions return a <code>KeysetBuilder.Entry</code>. It is necessary to assign an ID to
- a new entry by calling one of <code>Entry#withNextId</code>, <a href="../../../../com/google/crypto/tink/KeysetHandle.Builder.Entry.html#withFixedId-int-"><code>KeysetHandle.Builder.Entry.withFixedId(int)</code></a>, or <a href="../../../../com/google/crypto/tink/KeysetHandle.Builder.Entry.html#withRandomId--"><code>KeysetHandle.Builder.Entry.withRandomId()</code></a>. The exception is when an existing key which has an id requirement is
- imported (in which case the required ID is used).
+ a new entry by calling one of <a href="../../../../com/google/crypto/tink/KeysetHandle.Builder.Entry.html#withFixedId-int-"><code>KeysetHandle.Builder.Entry.withFixedId(int)</code></a> or <a href="../../../../com/google/crypto/tink/KeysetHandle.Builder.Entry.html#withRandomId--"><code>KeysetHandle.Builder.Entry.withRandomId()</code></a>. The
+ exception is when an existing key which has an id requirement is imported (in which case the
+ required ID is used).
 
  <p>It is possible to set the status of an entry by calling <a href="../../../../com/google/crypto/tink/KeysetHandle.Builder.Entry.html#setStatus-com.google.crypto.tink.KeyStatus-"><code>KeysetHandle.Builder.Entry.setStatus(com.google.crypto.tink.KeyStatus)</code></a>. The Status
  defaults to <code>ENABLED</code>.
@@ -352,8 +353,6 @@ public&nbsp;<a href="../../../../com/google/crypto/tink/KeysetHandle.Builder.htm
    <li>There is a <code>withRandomId</code>-entry which is followed by a non <code>withRandomId</code>-entry
    <li>There are two entries with the same <code>withFixedId</code> (including pre-existing keys
        and imported keys which have an id requirement).
-   <li>There is a <code>withNextId</code> entry, but there previously was an entry which has an ID
-       of <code>MAX_INTEGER</code>.
  </ul></div>
 <dl>
 <dt><span class="throwsLabel">Throws:</span></dt>
