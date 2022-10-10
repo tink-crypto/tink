@@ -46,15 +46,10 @@ class DeterministicAeadTest(parameterized.TestCase):
     # Take the first supported language to generate the keyset.
     keyset = testing_servers.new_keyset(supported_langs[0], key_template)
     supported_daeads = [
-        testing_servers.deterministic_aead(lang, keyset)
+        testing_servers.remote_primitive(lang, keyset, daead.DeterministicAead)
         for lang in supported_langs
     ]
     self.assertNotEmpty(supported_daeads)
-    unsupported_daeads = [
-        testing_servers.deterministic_aead(lang, keyset)
-        for lang in SUPPORTED_LANGUAGES
-        if lang not in supported_langs
-    ]
     plaintext = (
         b'This is some plaintext message to be encrypted using '
         b'key_template %s.' % key_template_name.encode('utf8'))
@@ -71,18 +66,6 @@ class DeterministicAeadTest(parameterized.TestCase):
     for p2 in supported_daeads:
       output = p2.decrypt_deterministically(ciphertext, associated_data)
       self.assertEqual(output, plaintext)
-    for p2 in unsupported_daeads:
-      with self.assertRaises(
-          tink.TinkError,
-          msg='Language %s supports decrypt_deterministically with %s '
-          'unexpectedly' % (p2.lang, key_template_name)):
-        p2.decrypt_deterministically(ciphertext, associated_data)
-    for p in unsupported_daeads:
-      with self.assertRaises(
-          tink.TinkError,
-          msg='Language %s supports encrypt_deterministically with %s '
-          'unexpectedly' % (p.lang, key_template_name)):
-        p.encrypt_deterministically(b'plaintext', b'associated_data')
 
 
 # If the implementations work fine for keysets with single keys, then key
@@ -115,19 +98,27 @@ class DaeadKeyRotationTest(parameterized.TestCase):
     builder = keyset_builder.new_keyset_builder()
     older_key_id = builder.add_new_key(old_key_tmpl)
     builder.set_primary_key(older_key_id)
-    enc_daead1 = testing_servers.deterministic_aead(enc_lang, builder.keyset())
-    dec_daead1 = testing_servers.deterministic_aead(dec_lang, builder.keyset())
+    enc_daead1 = testing_servers.remote_primitive(enc_lang, builder.keyset(),
+                                                  daead.DeterministicAead)
+    dec_daead1 = testing_servers.remote_primitive(dec_lang, builder.keyset(),
+                                                  daead.DeterministicAead)
     newer_key_id = builder.add_new_key(new_key_tmpl)
-    enc_daead2 = testing_servers.deterministic_aead(enc_lang, builder.keyset())
-    dec_daead2 = testing_servers.deterministic_aead(dec_lang, builder.keyset())
+    enc_daead2 = testing_servers.remote_primitive(enc_lang, builder.keyset(),
+                                                  daead.DeterministicAead)
+    dec_daead2 = testing_servers.remote_primitive(dec_lang, builder.keyset(),
+                                                  daead.DeterministicAead)
 
     builder.set_primary_key(newer_key_id)
-    enc_daead3 = testing_servers.deterministic_aead(enc_lang, builder.keyset())
-    dec_daead3 = testing_servers.deterministic_aead(dec_lang, builder.keyset())
+    enc_daead3 = testing_servers.remote_primitive(enc_lang, builder.keyset(),
+                                                  daead.DeterministicAead)
+    dec_daead3 = testing_servers.remote_primitive(dec_lang, builder.keyset(),
+                                                  daead.DeterministicAead)
 
     builder.disable_key(older_key_id)
-    enc_daead4 = testing_servers.deterministic_aead(enc_lang, builder.keyset())
-    dec_daead4 = testing_servers.deterministic_aead(dec_lang, builder.keyset())
+    enc_daead4 = testing_servers.remote_primitive(enc_lang, builder.keyset(),
+                                                  daead.DeterministicAead)
+    dec_daead4 = testing_servers.remote_primitive(dec_lang, builder.keyset(),
+                                                  daead.DeterministicAead)
 
     self.assertNotEqual(older_key_id, newer_key_id)
     # 1 encrypts with the older key. So 1, 2 and 3 can decrypt it, but not 4.

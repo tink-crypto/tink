@@ -373,12 +373,6 @@ def jwk_set_from_keyset(lang: str, keyset: bytes) -> str:
   return _primitives.jwk_set_from_keyset(_ts.jwt_stub(lang), keyset)
 
 
-def deterministic_aead(lang: str,
-                       keyset: bytes) -> _primitives.DeterministicAead:
-  """Returns a DeterministicAEAD primitive, implemented in lang."""
-  return _primitives.DeterministicAead(lang, _ts.daead_stub(lang), keyset)
-
-
 def streaming_aead(lang: str, key_handle: bytes) -> _primitives.StreamingAead:
   """Returns a StreamingAEAD primitive, implemented in lang."""
   return _primitives.StreamingAead(
@@ -440,11 +434,9 @@ def remote_primitive(lang: str, keyset: bytes, primitive_class: Type[P]) -> P:
   # through this
 
   if primitive_class == tink.aead.Aead:
-    result = _primitives.Aead(lang, _ts.aead_stub(lang), keyset)
-    return result
+    return _primitives.Aead(lang, _ts.aead_stub(lang), keyset)
   if primitive_class == tink.daead.DeterministicAead:
-    result = _primitives.DeterministicAead(lang, _ts.daead_stub(lang), keyset)
-    return result
+    return _primitives.DeterministicAead(lang, _ts.daead_stub(lang), keyset)
   if primitive_class == tink.streaming_aead.StreamingAead:
     result = _primitives.StreamingAead(lang, _ts.streaming_aead_stub(lang),
                                        keyset)

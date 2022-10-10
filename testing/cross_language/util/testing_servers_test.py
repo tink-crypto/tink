@@ -219,7 +219,8 @@ class TestingServersTest(parameterized.TestCase):
         lang, daead.deterministic_aead_key_templates.AES256_SIV)
     plaintext = b'The quick brown fox jumps over the lazy dog'
     associated_data = b'associated_data'
-    daead_primitive = testing_servers.deterministic_aead(lang, keyset)
+    daead_primitive = testing_servers.remote_primitive(lang, keyset,
+                                                       daead.DeterministicAead)
     ciphertext = daead_primitive.encrypt_deterministically(
         plaintext, associated_data)
     output = daead_primitive.decrypt_deterministically(

@@ -79,7 +79,8 @@ class KeysetValidationTest(parameterized.TestCase):
     template = utilities.KEY_TEMPLATE[key_template_name]
     keyset = testing_servers.new_keyset(lang, template)
     with self.assertRaises(tink.TinkError):
-      _ = testing_servers.deterministic_aead(lang, unset_primary(keyset))
+      _ = testing_servers.remote_primitive(lang, unset_primary(keyset),
+                                           daead.DeterministicAead)
 
   @parameterized.parameters(test_cases(mac.Mac))
   def test_mac_without_primary(self, key_template_name, lang):
