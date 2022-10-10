@@ -379,16 +379,6 @@ def streaming_aead(lang: str, key_handle: bytes) -> _primitives.StreamingAead:
       lang, _ts.streaming_aead_stub(lang), key_handle)
 
 
-def hybrid_encrypt(lang: str, pub_keyset: bytes) -> _primitives.HybridEncrypt:
-  """Returns a HybridEncrypt  primitive, implemented in lang."""
-  return _primitives.HybridEncrypt(lang, _ts.hybrid_stub(lang), pub_keyset)
-
-
-def hybrid_decrypt(lang: str, priv_keyset: bytes) -> _primitives.HybridDecrypt:
-  """Returns a HybridDecrypt primitive, implemented in lang."""
-  return _primitives.HybridDecrypt(lang, _ts.hybrid_stub(lang), priv_keyset)
-
-
 def mac(lang: str, keyset: bytes) -> _primitives.Mac:
   """Returns a MAC primitive, implemented in lang."""
   return _primitives.Mac(lang, _ts.mac_stub(lang), keyset)

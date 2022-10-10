@@ -117,49 +117,28 @@ class HybridEncryptionTest(parameterized.TestCase):
     private_keyset = testing_servers.new_keyset(supported_langs[0],
                                                 key_template)
     supported_decs = [
-        testing_servers.hybrid_decrypt(lang, private_keyset)
+        testing_servers.remote_primitive(lang, private_keyset,
+                                         hybrid.HybridDecrypt)
         for lang in supported_langs
-    ]
-    unsupported_decs = [
-        testing_servers.hybrid_decrypt(lang, private_keyset)
-        for lang in SUPPORTED_LANGUAGES
-        if lang not in supported_langs
     ]
     public_keyset = testing_servers.public_keyset(supported_langs[0],
                                                   private_keyset)
-    supported_encs = [
-        testing_servers.hybrid_encrypt(lang, public_keyset)
+    supported_encs = {
+        lang: testing_servers.remote_primitive(lang, public_keyset,
+                                               hybrid.HybridEncrypt)
         for lang in supported_langs
-    ]
-    unsupported_encs = [
-        testing_servers.hybrid_encrypt(lang, public_keyset)
-        for lang in testing_servers.LANGUAGES
-        if lang not in supported_langs
-    ]
-    for enc in supported_encs:
+    }
+    for lang, hybrid_encrypt in supported_encs.items():
       plaintext = (
           b'This is some plaintext message to be encrypted using key_template '
-          b'%s in %s.' % (key_template_name.encode('utf8'),
-                          enc.lang.encode('utf8')))
-      context_info = (
-          b'Some context info for %s using %s for encryption.' %
-          (key_template_name.encode('utf8'), enc.lang.encode('utf8')))
-      ciphertext = enc.encrypt(plaintext, context_info)
+          b'%s in %s.' %
+          (key_template_name.encode('utf8'), lang.encode('utf8')))
+      context_info = (b'Some context info for %s using %s for encryption.' %
+                      (key_template_name.encode('utf8'), lang.encode('utf8')))
+      ciphertext = hybrid_encrypt.encrypt(plaintext, context_info)
       for dec in supported_decs:
         output = dec.decrypt(ciphertext, context_info)
         self.assertEqual(output, plaintext)
-      for dec in unsupported_decs:
-        with self.assertRaises(
-            tink.TinkError,
-            msg='Language %s supports hybrid decrypt with %s unexpectedly' %
-            (dec.lang, key_template_name)):
-          dec.decrypt(ciphertext, context_info)
-    for enc in unsupported_encs:
-      with self.assertRaises(
-          tink.TinkError,
-          msg='Language %s supports hybrid encrypt with %s unexpectedly' % (
-              enc.lang, key_template_name)):
-        enc.encrypt(b'plaintext', b'context_info')
 
 
 # If the implementations work fine for keysets with single keys, then key
@@ -193,19 +172,27 @@ class HybridEncryptionKeyRotationTest(parameterized.TestCase):
     builder = keyset_builder.new_keyset_builder()
     older_key_id = builder.add_new_key(old_key_tmpl)
     builder.set_primary_key(older_key_id)
-    dec1 = testing_servers.hybrid_decrypt(enc_lang, builder.keyset())
-    enc1 = testing_servers.hybrid_encrypt(dec_lang, builder.public_keyset())
+    dec1 = testing_servers.remote_primitive(enc_lang, builder.keyset(),
+                                            hybrid.HybridDecrypt)
+    enc1 = testing_servers.remote_primitive(dec_lang, builder.public_keyset(),
+                                            hybrid.HybridEncrypt)
     newer_key_id = builder.add_new_key(new_key_tmpl)
-    dec2 = testing_servers.hybrid_decrypt(enc_lang, builder.keyset())
-    enc2 = testing_servers.hybrid_encrypt(dec_lang, builder.public_keyset())
+    dec2 = testing_servers.remote_primitive(enc_lang, builder.keyset(),
+                                            hybrid.HybridDecrypt)
+    enc2 = testing_servers.remote_primitive(dec_lang, builder.public_keyset(),
+                                            hybrid.HybridEncrypt)
 
     builder.set_primary_key(newer_key_id)
-    dec3 = testing_servers.hybrid_decrypt(enc_lang, builder.keyset())
-    enc3 = testing_servers.hybrid_encrypt(dec_lang, builder.public_keyset())
+    dec3 = testing_servers.remote_primitive(enc_lang, builder.keyset(),
+                                            hybrid.HybridDecrypt)
+    enc3 = testing_servers.remote_primitive(dec_lang, builder.public_keyset(),
+                                            hybrid.HybridEncrypt)
 
     builder.disable_key(older_key_id)
-    dec4 = testing_servers.hybrid_decrypt(enc_lang, builder.keyset())
-    enc4 = testing_servers.hybrid_encrypt(dec_lang, builder.public_keyset())
+    dec4 = testing_servers.remote_primitive(enc_lang, builder.keyset(),
+                                            hybrid.HybridDecrypt)
+    enc4 = testing_servers.remote_primitive(dec_lang, builder.public_keyset(),
+                                            hybrid.HybridEncrypt)
     self.assertNotEqual(older_key_id, newer_key_id)
 
     # p1 encrypts with the older key. So p1, p2 and p3 can decrypt it,

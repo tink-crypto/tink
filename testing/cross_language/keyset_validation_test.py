@@ -133,17 +133,18 @@ class KeysetValidationTest(parameterized.TestCase):
     template = utilities.KEY_TEMPLATE[key_template_name]
     private_keyset = testing_servers.new_keyset(lang, template)
     public_keyset = testing_servers.public_keyset(lang, private_keyset)
-    ciphertext = testing_servers.hybrid_encrypt(lang, public_keyset).encrypt(
-        b'foo', b'context_info')
 
-    dec_without_primary = testing_servers.hybrid_decrypt(
-        lang, unset_primary(private_keyset))
+    private_keyset_without_primary = unset_primary(private_keyset)
     with self.assertRaises(tink.TinkError):
-      dec_without_primary.decrypt(ciphertext, b'context_info')
+      testing_servers.remote_primitive(
+          lang, unset_primary(private_keyset_without_primary),
+          hybrid.HybridDecrypt)
 
-    enc_without_primary = testing_servers.hybrid_encrypt(
-        lang, unset_primary(public_keyset))
+    public_keyset_without_primary = unset_primary(public_keyset)
     with self.assertRaises(tink.TinkError):
+      enc_without_primary = testing_servers.remote_primitive(
+          lang, public_keyset_without_primary, hybrid.HybridEncrypt)
+      # TODO(b/228140127) This should fail above already.
       enc_without_primary.encrypt(b'foo', b'context_info')
 
   @parameterized.parameters(test_cases(jwt.JwtPublicKeySign))

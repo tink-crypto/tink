@@ -266,11 +266,13 @@ class TestingServersTest(parameterized.TestCase):
         lang,
         hybrid.hybrid_key_templates.ECIES_P256_HKDF_HMAC_SHA256_AES128_GCM)
     public_handle = testing_servers.public_keyset(lang, private_handle)
-    enc_primitive = testing_servers.hybrid_encrypt(lang, public_handle)
+    enc_primitive = testing_servers.remote_primitive(lang, public_handle,
+                                                     hybrid.HybridEncrypt)
     data = b'The quick brown fox jumps over the lazy dog'
     context_info = b'context'
     ciphertext = enc_primitive.encrypt(data, context_info)
-    dec_primitive = testing_servers.hybrid_decrypt(lang, private_handle)
+    dec_primitive = testing_servers.remote_primitive(lang, private_handle,
+                                                     hybrid.HybridDecrypt)
     output = dec_primitive.decrypt(ciphertext, context_info)
     self.assertEqual(output, data)
 
