@@ -87,23 +87,17 @@ class KeysetValidationTest(parameterized.TestCase):
     """Unsets the primary key and tries to use a MAC primitive."""
     template = utilities.KEY_TEMPLATE[key_template_name]
     keyset = testing_servers.new_keyset(lang, template)
-    mac_value = testing_servers.mac(lang, keyset).compute_mac(b'foo')
-    mac_without_primary = testing_servers.mac(lang, unset_primary(keyset))
     with self.assertRaises(tink.TinkError):
-      _ = mac_without_primary.compute_mac(b'foo')
-    with self.assertRaises(tink.TinkError):
-      mac_without_primary.verify_mac(mac_value, b'foo')
+      testing_servers.remote_primitive(lang, unset_primary(keyset), mac.Mac)
 
   @parameterized.parameters(test_cases(prf.PrfSet))
   def test_prf_without_primary(self, key_template_name, lang):
     """Unsets the primary key and tries to use a PRF set primitive."""
     template = utilities.KEY_TEMPLATE[key_template_name]
     keyset = testing_servers.new_keyset(lang, template)
-    _ = testing_servers.prf_set(lang, keyset).primary().compute(b'foo', 16)
-    prf_set_without_primary = testing_servers.prf_set(lang,
-                                                      unset_primary(keyset))
     with self.assertRaises(tink.TinkError):
-      _ = prf_set_without_primary.primary().compute(b'foo', 16)
+      _ = testing_servers.remote_primitive(lang, unset_primary(keyset),
+                                           prf.PrfSet)
 
   @parameterized.parameters(test_cases(signature.PublicKeySign))
   def test_signature_without_primary(self, key_template_name, lang):
@@ -181,22 +175,10 @@ class KeysetValidationTest(parameterized.TestCase):
     """Unsets the primary key and tries to create and verify JWT MACs."""
     template = utilities.KEY_TEMPLATE[key_template_name]
     keyset = testing_servers.new_keyset(lang, template)
-    jwt_mac = testing_servers.jwt_mac(lang, keyset)
 
-    now = datetime.datetime.now(tz=datetime.timezone.utc)
-    raw_jwt = jwt.new_raw_jwt(
-        issuer='issuer',
-        expiration=now + datetime.timedelta(seconds=100))
-    token = jwt_mac.compute_mac_and_encode(raw_jwt)
-
-    jwt_mac_without_primary = testing_servers.jwt_mac(
-        lang, unset_primary(keyset))
     with self.assertRaises(tink.TinkError):
-      jwt_mac_without_primary.compute_mac_and_encode(raw_jwt)
-
-    validator = jwt.new_validator(expected_issuer='issuer', fixed_now=now)
-    with self.assertRaises(tink.TinkError):
-      jwt_mac_without_primary.verify_mac_and_decode(token, validator)
+      _ = testing_servers.remote_primitive(lang, unset_primary(keyset),
+                                           jwt.JwtMac)
 
 
 if __name__ == '__main__':
