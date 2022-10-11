@@ -1,11 +1,11 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 26
+    compileSdkVersion 29
     defaultConfig {
         applicationId "com.helloworld"
-        minSdkVersion 19
-        targetSdkVersion 26
+        minSdkVersion 23
+        targetSdkVersion 29
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
@@ -19,6 +19,9 @@ android {
    compileOptions {
         sourceCompatibility 1.8
         targetCompatibility 1.8
+   }
+   lintOptions {
+        abortOnError false
    }
 }
 

@@ -109,9 +109,9 @@ test_android_snapshot() {
     yes | "${ANDROID_HOME}/tools/bin/sdkmanager" --licenses
   fi
 
-  ./examples/android/helloworld/gradlew \
+  ./java_src/examples/android/helloworld/gradlew \
     "${gradle_flags[@]}" \
-    -p ./examples/android/helloworld build
+    -p ./java_src/examples/android/helloworld build
 }
 
 main() {
