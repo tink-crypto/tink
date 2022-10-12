@@ -520,3 +520,32 @@ tink_cc_test(
     tink::proto::test_proto_cc_proto
     tink::proto::tink_cc_proto
 )
+
+tink_cc_library(
+  NAME legacy_proto_key
+  SRCS
+    legacy_proto_key.cc
+    legacy_proto_key.h
+  DEPS
+    tink::internal::proto_key_serialization
+    tink::core::key
+    tink::core::secret_key_access_token
+    tink::util::status
+    tink::util::statusor
+    tink::proto::tink_cc_proto
+)
+
+tink_cc_test(
+  NAME legacy_proto_key_test
+  SRCS
+    legacy_proto_key_test.cc
+  DEPS
+    tink::internal::legacy_proto_key
+    tink::internal::proto_key_serialization
+    gmock
+    tink::core::insecure_secret_key_access
+    tink::core::restricted_data
+    tink::util::statusor
+    tink::util::test_matchers
+    tink::proto::tink_cc_proto
+)

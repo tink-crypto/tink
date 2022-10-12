@@ -555,3 +555,33 @@ cc_test(
         "@com_google_googletest//:gtest_main",
     ],
 )
+
+cc_library(
+    name = "legacy_proto_key",
+    srcs = ["legacy_proto_key.cc"],
+    hdrs = ["legacy_proto_key.h"],
+    include_prefix = "tink/internal",
+    deps = [
+        ":proto_key_serialization",
+        "//:key",
+        "//:secret_key_access_token",
+        "//proto:tink_cc_proto",
+        "//util:status",
+        "//util:statusor",
+    ],
+)
+
+cc_test(
+    name = "legacy_proto_key_test",
+    srcs = ["legacy_proto_key_test.cc"],
+    deps = [
+        ":legacy_proto_key",
+        ":proto_key_serialization",
+        "//:insecure_secret_key_access",
+        "//:restricted_data",
+        "//proto:tink_cc_proto",
+        "//util:statusor",
+        "//util:test_matchers",
+        "@com_google_googletest//:gtest_main",
+    ],
+)

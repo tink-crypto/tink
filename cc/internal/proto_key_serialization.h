@@ -70,6 +70,8 @@ class ProtoKeySerialization : public Serialization {
 
  private:
   friend class ProtoKeySerializationTest;
+  friend class LegacyProtoKey;
+  friend class LegacyProtoKeyTest;
 
   ProtoKeySerialization(
       absl::string_view type_url, absl::string_view object_identifier,
@@ -87,7 +89,7 @@ class ProtoKeySerialization : public Serialization {
   // Returns `true` if this `ProtoKeySerialization` object is equal to
   // `other` (with the possibility of false negatives due to lack of
   // determinism during serialization).  Should only be used temporarily by the
-  // to-be-implemented `LegacyKeyParameters` class.
+  // `LegacyKeyParameters` class.
   bool EqualsWithPotentialFalseNegatives(
       const ProtoKeySerialization& other) const;
 
