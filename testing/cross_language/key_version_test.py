@@ -151,11 +151,10 @@ class KeyVersionTest(parameterized.TestCase):
     """Increments the key version by one and checks they can't be used."""
     template = utilities.KEY_TEMPLATE[key_template_name]
     keyset = testing_servers.new_keyset(lang, template)
-    _ = testing_servers.mac(lang, keyset).compute_mac(b'foo')
+    _ = testing_servers.remote_primitive(lang, keyset, mac.Mac)
     for keyset1 in gen_inc_versions(keyset):
-      mac_primitive1 = testing_servers.mac(lang, keyset1)
       with self.assertRaises(tink.TinkError):
-        _ = mac_primitive1.compute_mac(b'foo')
+        _ = testing_servers.remote_primitive(lang, keyset1, mac.Mac)
 
   @parameterized.parameters(
       test_cases(tink_config.key_types_for_primitive(prf.PrfSet)))

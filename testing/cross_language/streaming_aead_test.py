@@ -58,48 +58,28 @@ class StreamingAeadPythonTest(parameterized.TestCase):
     key_template = utilities.KEY_TEMPLATE[key_template_name]
     # Take the first supported language to generate the keyset.
     keyset = testing_servers.new_keyset(supported_langs[0], key_template)
-    supported_streaming_aeads = [
-        testing_servers.streaming_aead(lang, keyset) for lang in supported_langs
-    ]
-    unsupported_streaming_aeads = [
-        testing_servers.streaming_aead(lang, keyset)
-        for lang in SUPPORTED_LANGUAGES
-        if lang not in supported_langs
-    ]
-    for p in supported_streaming_aeads:
+    supported_streaming_aeads = {}
+    for lang in supported_langs:
+      supported_streaming_aeads[lang] = testing_servers.remote_primitive(
+          lang, keyset, streaming_aead.StreamingAead)
+    for lang, p in supported_streaming_aeads.items():
       desc = (
           b'This is some plaintext message to be encrypted using key_template '
           b'%s using %s for encryption.'
-          % (key_template_name.encode('utf8'), p.lang.encode('utf8')))
+          % (key_template_name.encode('utf8'), lang.encode('utf8')))
       plaintext = desc + LONG_PLAINTEXT
       associated_data = (
           b'Some associated data for %s using %s for encryption.' %
-          (key_template_name.encode('utf8'), p.lang.encode('utf8')))
+          (key_template_name.encode('utf8'), lang.encode('utf8')))
       plaintext_stream = io.BytesIO(plaintext)
       ciphertext_result_stream = p.new_encrypting_stream(
           plaintext_stream, associated_data)
       ciphertext = ciphertext_result_stream.read()
-      for p2 in supported_streaming_aeads:
+      for _, p2 in supported_streaming_aeads.items():
         ciphertext_stream = io.BytesIO(ciphertext)
         decrypted_stream = p2.new_decrypting_stream(
             ciphertext_stream, associated_data)
         self.assertEqual(decrypted_stream.read(), plaintext)
-      for p2 in unsupported_streaming_aeads:
-        with self.assertRaises(
-            tink.TinkError,
-            msg='Language %s supports streaming AEAD decryption with %s '
-            'unexpectedly' % (p2.lang, key_template_name)):
-          ciphertext_stream = io.BytesIO(ciphertext)
-          decrypted_stream = p2.new_decrypting_stream(
-              ciphertext_stream, associated_data)
-    for p in unsupported_streaming_aeads:
-      with self.assertRaises(
-          tink.TinkError,
-          msg='Language %s supports streaming AEAD encryption with %s '
-          'unexpectedly' % (p.lang, key_template_name)):
-        plaintext_stream = io.BytesIO(b'plaintext')
-        ciphertext_result_stream = p.new_encrypting_stream(
-            plaintext_stream, b'associated_data')
 
   @parameterized.parameters(key_rotation_test_cases())
   def test_key_rotation(self, enc_lang, dec_lang):
@@ -109,20 +89,28 @@ class StreamingAeadPythonTest(parameterized.TestCase):
     older_key_id = builder.add_new_key(
         streaming_aead.streaming_aead_key_templates.AES128_GCM_HKDF_4KB)
     builder.set_primary_key(older_key_id)
-    enc1 = testing_servers.streaming_aead(enc_lang, builder.keyset())
-    dec1 = testing_servers.streaming_aead(dec_lang, builder.keyset())
+    enc1 = testing_servers.remote_primitive(enc_lang, builder.keyset(),
+                                            streaming_aead.StreamingAead)
+    dec1 = testing_servers.remote_primitive(dec_lang, builder.keyset(),
+                                            streaming_aead.StreamingAead)
     newer_key_id = builder.add_new_key(
         streaming_aead.streaming_aead_key_templates.AES256_GCM_HKDF_4KB)
-    enc2 = testing_servers.streaming_aead(enc_lang, builder.keyset())
-    dec2 = testing_servers.streaming_aead(dec_lang, builder.keyset())
+    enc2 = testing_servers.remote_primitive(enc_lang, builder.keyset(),
+                                            streaming_aead.StreamingAead)
+    dec2 = testing_servers.remote_primitive(dec_lang, builder.keyset(),
+                                            streaming_aead.StreamingAead)
 
     builder.set_primary_key(newer_key_id)
-    enc3 = testing_servers.streaming_aead(enc_lang, builder.keyset())
-    dec3 = testing_servers.streaming_aead(dec_lang, builder.keyset())
+    enc3 = testing_servers.remote_primitive(enc_lang, builder.keyset(),
+                                            streaming_aead.StreamingAead)
+    dec3 = testing_servers.remote_primitive(dec_lang, builder.keyset(),
+                                            streaming_aead.StreamingAead)
 
     builder.disable_key(older_key_id)
-    enc4 = testing_servers.streaming_aead(enc_lang, builder.keyset())
-    dec4 = testing_servers.streaming_aead(dec_lang, builder.keyset())
+    enc4 = testing_servers.remote_primitive(enc_lang, builder.keyset(),
+                                            streaming_aead.StreamingAead)
+    dec4 = testing_servers.remote_primitive(dec_lang, builder.keyset(),
+                                            streaming_aead.StreamingAead)
 
     self.assertNotEqual(older_key_id, newer_key_id)
     # 1 encrypts with the older key. So 1, 2 and 3 can decrypt it, but not 4.

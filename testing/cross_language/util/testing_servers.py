@@ -373,17 +373,6 @@ def jwk_set_from_keyset(lang: str, keyset: bytes) -> str:
   return _primitives.jwk_set_from_keyset(_ts.jwt_stub(lang), keyset)
 
 
-def streaming_aead(lang: str, key_handle: bytes) -> _primitives.StreamingAead:
-  """Returns a StreamingAEAD primitive, implemented in lang."""
-  return _primitives.StreamingAead(
-      lang, _ts.streaming_aead_stub(lang), key_handle)
-
-
-def mac(lang: str, keyset: bytes) -> _primitives.Mac:
-  """Returns a MAC primitive, implemented in lang."""
-  return _primitives.Mac(lang, _ts.mac_stub(lang), keyset)
-
-
 def public_key_sign(lang: str,
                     priv_keyset: bytes) -> _primitives.PublicKeySign:
   """Returns an PublicKeySign primitive, implemented in lang."""

@@ -71,34 +71,18 @@ class MacTest(parameterized.TestCase):
     self.assertNotEmpty(supported_langs)
     # Take the first supported language to generate the keyset.
     keyset = testing_servers.new_keyset(supported_langs[0], key_template)
-    supported_macs = [
-        testing_servers.mac(lang, keyset) for lang in supported_langs
-    ]
-    unsupported_macs = [
-        testing_servers.mac(lang, keyset)
-        for lang in SUPPORTED_LANGUAGES
-        if lang not in supported_langs
-    ]
-    for p in supported_macs:
+    supported_macs = {}
+    for lang in supported_langs:
+      supported_macs[lang] = testing_servers.remote_primitive(
+          lang, keyset, mac.Mac)
+    for lang, p in supported_macs.items():
       data = (
           b'This is some data to be authenticated using key_template '
           b'%s in %s.' % (key_template_name.encode('utf8'),
-                          p.lang.encode('utf8')))
+                          lang.encode('utf8')))
       mac_value = p.compute_mac(data)
-      for p2 in supported_macs:
+      for _, p2 in supported_macs.items():
         self.assertIsNone(p2.verify_mac(mac_value, data))
-      for p2 in unsupported_macs:
-        with self.assertRaises(
-            tink.TinkError,
-            msg='Language %s supports verify_mac with %s unexpectedly' %
-            (p2.lang, key_template_name)):
-          p2.verify_mac(mac_value, data)
-    for p in unsupported_macs:
-      with self.assertRaises(
-          tink.TinkError,
-          msg='Language %s supports compute_mac with %s unexpectedly' %
-          (p.lang, key_template_name)):
-        p.compute_mac(data)
 
 
 # If the implementations work fine for keysets with single keys, then key
@@ -134,19 +118,27 @@ class MacKeyRotationTest(parameterized.TestCase):
     builder = keyset_builder.new_keyset_builder()
     older_key_id = builder.add_new_key(old_key_tmpl)
     builder.set_primary_key(older_key_id)
-    compute_mac1 = testing_servers.mac(compute_lang, builder.keyset())
-    verify_mac1 = testing_servers.mac(verify_lang, builder.keyset())
+    compute_mac1 = testing_servers.remote_primitive(compute_lang,
+                                                    builder.keyset(), mac.Mac)
+    verify_mac1 = testing_servers.remote_primitive(verify_lang,
+                                                   builder.keyset(), mac.Mac)
     newer_key_id = builder.add_new_key(new_key_tmpl)
-    compute_mac2 = testing_servers.mac(compute_lang, builder.keyset())
-    verify_mac2 = testing_servers.mac(verify_lang, builder.keyset())
+    compute_mac2 = testing_servers.remote_primitive(compute_lang,
+                                                    builder.keyset(), mac.Mac)
+    verify_mac2 = testing_servers.remote_primitive(verify_lang,
+                                                   builder.keyset(), mac.Mac)
 
     builder.set_primary_key(newer_key_id)
-    compute_mac3 = testing_servers.mac(compute_lang, builder.keyset())
-    verify_mac3 = testing_servers.mac(verify_lang, builder.keyset())
+    compute_mac3 = testing_servers.remote_primitive(compute_lang,
+                                                    builder.keyset(), mac.Mac)
+    verify_mac3 = testing_servers.remote_primitive(verify_lang,
+                                                   builder.keyset(), mac.Mac)
 
     builder.disable_key(older_key_id)
-    compute_mac4 = testing_servers.mac(compute_lang, builder.keyset())
-    verify_mac4 = testing_servers.mac(verify_lang, builder.keyset())
+    compute_mac4 = testing_servers.remote_primitive(compute_lang,
+                                                    builder.keyset(), mac.Mac)
+    verify_mac4 = testing_servers.remote_primitive(verify_lang,
+                                                   builder.keyset(), mac.Mac)
 
     self.assertNotEqual(older_key_id, newer_key_id)
     # 1 uses the older key. So 1, 2 and 3 can verify the mac, but not 4.

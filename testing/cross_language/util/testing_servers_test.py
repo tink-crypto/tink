@@ -237,7 +237,8 @@ class TestingServersTest(parameterized.TestCase):
     plaintext = b'The quick brown fox jumps over the lazy dog'
     plaintext_stream = io.BytesIO(plaintext)
     associated_data = b'associated_data'
-    streaming_aead_primitive = testing_servers.streaming_aead(lang, keyset)
+    streaming_aead_primitive = testing_servers.remote_primitive(
+        lang, keyset, streaming_aead.StreamingAead)
     ciphertext_stream = streaming_aead_primitive.new_encrypting_stream(
         plaintext_stream, associated_data)
     output_stream = streaming_aead_primitive.new_decrypting_stream(
@@ -253,7 +254,7 @@ class TestingServersTest(parameterized.TestCase):
     keyset = testing_servers.new_keyset(
         lang, mac.mac_key_templates.HMAC_SHA256_128BITTAG)
     data = b'The quick brown fox jumps over the lazy dog'
-    mac_primitive = testing_servers.mac(lang, keyset)
+    mac_primitive = testing_servers.remote_primitive(lang, keyset, mac.Mac)
     mac_value = mac_primitive.compute_mac(data)
     mac_primitive.verify_mac(mac_value, data)
 
