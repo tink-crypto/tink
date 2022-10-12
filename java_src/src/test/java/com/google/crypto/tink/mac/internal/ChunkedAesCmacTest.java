@@ -179,7 +179,9 @@ public class ChunkedAesCmacTest {
           + "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
           + "bbbbbb",
       "139fce15a6f4a281ad22458d3d3cac26");
-  private static final AesCmacTestVector[] CMAC_IMPLEMENTATION_DETAIL_TEST_VECTORS =
+
+  @DataPoints("implementationTestVectors")
+  public static final AesCmacTestVector[] CMAC_IMPLEMENTATION_DETAIL_TEST_VECTORS =
       new AesCmacTestVector[] {
         NOT_OVERFLOWING_INTERNAL_STATE,
         FILL_UP_EXACTLY_INTERNAL_STATE,
@@ -789,5 +791,19 @@ public class ChunkedAesCmacTest {
     } catch (AssertionError e) {
       throw new AssertionError(debugReadSequence.toString(), e);
     }
+  }
+
+  @Theory
+  public void testTagModificationAfterCreateVerification(
+      @FromDataPoints("implementationTestVectors") AesCmacTestVector t) throws Exception {
+    assumeFalse(TinkFips.useOnlyFips());
+
+    ChunkedMac mac = new ChunkedAesCmacImpl(t.key);
+
+    byte[] mutableTag = Arrays.copyOf(t.tag, t.tag.length);
+    ChunkedMacVerification macVerification = mac.createVerification(mutableTag);
+    mutableTag[0] ^= (byte) 0x01;
+    macVerification.update(ByteBuffer.wrap(t.message));
+    macVerification.verifyMac();
   }
 }

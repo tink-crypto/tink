@@ -18,7 +18,7 @@ package com.google.crypto.tink.mac.internal;
 
 import com.google.crypto.tink.mac.AesCmacKey;
 import com.google.crypto.tink.mac.ChunkedMacVerification;
-import com.google.crypto.tink.subtle.Bytes;
+import com.google.crypto.tink.util.Bytes;
 import java.nio.ByteBuffer;
 import java.security.GeneralSecurityException;
 
@@ -27,7 +27,7 @@ import java.security.GeneralSecurityException;
  * under the hood.
  */
 final class ChunkedAesCmacVerification implements ChunkedMacVerification {
-  private final byte[] tag;
+  private final Bytes tag;
   private final ChunkedAesCmacComputation aesCmacComputation;
 
   ChunkedAesCmacVerification(AesCmacKey key, byte[] tag)
@@ -35,7 +35,7 @@ final class ChunkedAesCmacVerification implements ChunkedMacVerification {
     // Checks regarding tag and key sizes, as well as FIPS-compatibility, are performed by
     // ChunkedAesCmacImpl.
     aesCmacComputation = new ChunkedAesCmacComputation(key);
-    this.tag = tag;
+    this.tag = Bytes.copyFrom(tag);
   }
 
   @Override
@@ -47,7 +47,7 @@ final class ChunkedAesCmacVerification implements ChunkedMacVerification {
   @Override
   public void verifyMac() throws GeneralSecurityException {
     byte[] other = aesCmacComputation.computeMac();
-    if (!Bytes.equal(tag, other)) {
+    if (!tag.equals(Bytes.copyFrom(other))) {
       throw new GeneralSecurityException("invalid MAC");
     }
   }
