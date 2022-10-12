@@ -37,7 +37,7 @@ type JWTService struct {
 }
 
 func (s *JWTService) CreateJwtMac(ctx context.Context, req *pb.CreationRequest) (*pb.CreationResponse, error) {
-	reader := keyset.NewBinaryReader(bytes.NewReader(req.Keyset))
+	reader := keyset.NewBinaryReader(bytes.NewReader(req.GetAnnotatedKeyset().GetSerializedKeyset()))
 	handle, err := insecurecleartextkeyset.Read(reader)
 	if err != nil {
 		return &pb.CreationResponse{Err: err.Error()}, nil
@@ -50,7 +50,7 @@ func (s *JWTService) CreateJwtMac(ctx context.Context, req *pb.CreationRequest) 
 }
 
 func (s *JWTService) CreateJwtPublicKeySign(ctx context.Context, req *pb.CreationRequest) (*pb.CreationResponse, error) {
-	reader := keyset.NewBinaryReader(bytes.NewReader(req.Keyset))
+	reader := keyset.NewBinaryReader(bytes.NewReader(req.GetAnnotatedKeyset().GetSerializedKeyset()))
 	handle, err := insecurecleartextkeyset.Read(reader)
 	if err != nil {
 		return &pb.CreationResponse{Err: err.Error()}, nil
@@ -63,7 +63,7 @@ func (s *JWTService) CreateJwtPublicKeySign(ctx context.Context, req *pb.Creatio
 }
 
 func (s *JWTService) CreateJwtPublicKeyVerify(ctx context.Context, req *pb.CreationRequest) (*pb.CreationResponse, error) {
-	reader := keyset.NewBinaryReader(bytes.NewReader(req.Keyset))
+	reader := keyset.NewBinaryReader(bytes.NewReader(req.GetAnnotatedKeyset().GetSerializedKeyset()))
 	handle, err := insecurecleartextkeyset.Read(reader)
 	if err != nil {
 		return &pb.CreationResponse{Err: err.Error()}, nil
@@ -347,7 +347,7 @@ func jwtFromJwkSetResponseError(err error) *pb.JwtFromJwkSetResponse {
 }
 
 func (s *JWTService) ComputeMacAndEncode(ctx context.Context, req *pb.JwtSignRequest) (*pb.JwtSignResponse, error) {
-	reader := keyset.NewBinaryReader(bytes.NewReader(req.Keyset))
+	reader := keyset.NewBinaryReader(bytes.NewReader(req.GetAnnotatedKeyset().GetSerializedKeyset()))
 	handle, err := insecurecleartextkeyset.Read(reader)
 	if err != nil {
 		return jwtSignResponseError(err), nil
@@ -370,7 +370,7 @@ func (s *JWTService) ComputeMacAndEncode(ctx context.Context, req *pb.JwtSignReq
 }
 
 func (s *JWTService) VerifyMacAndDecode(ctx context.Context, req *pb.JwtVerifyRequest) (*pb.JwtVerifyResponse, error) {
-	reader := keyset.NewBinaryReader(bytes.NewReader(req.Keyset))
+	reader := keyset.NewBinaryReader(bytes.NewReader(req.GetAnnotatedKeyset().GetSerializedKeyset()))
 	handle, err := insecurecleartextkeyset.Read(reader)
 	if err != nil {
 		return jwtVerifyResponseError(err), nil
@@ -397,7 +397,7 @@ func (s *JWTService) VerifyMacAndDecode(ctx context.Context, req *pb.JwtVerifyRe
 }
 
 func (s *JWTService) PublicKeySignAndEncode(ctx context.Context, req *pb.JwtSignRequest) (*pb.JwtSignResponse, error) {
-	reader := keyset.NewBinaryReader(bytes.NewReader(req.Keyset))
+	reader := keyset.NewBinaryReader(bytes.NewReader(req.GetAnnotatedKeyset().GetSerializedKeyset()))
 	handle, err := insecurecleartextkeyset.Read(reader)
 	if err != nil {
 		return jwtSignResponseError(err), nil
@@ -420,7 +420,7 @@ func (s *JWTService) PublicKeySignAndEncode(ctx context.Context, req *pb.JwtSign
 }
 
 func (s *JWTService) PublicKeyVerifyAndDecode(ctx context.Context, req *pb.JwtVerifyRequest) (*pb.JwtVerifyResponse, error) {
-	reader := keyset.NewBinaryReader(bytes.NewReader(req.Keyset))
+	reader := keyset.NewBinaryReader(bytes.NewReader(req.GetAnnotatedKeyset().GetSerializedKeyset()))
 	handle, err := insecurecleartextkeyset.Read(reader)
 	if err != nil {
 		return jwtVerifyResponseError(err), nil

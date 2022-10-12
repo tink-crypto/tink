@@ -17,11 +17,10 @@
 // Implementation of a Signature Service
 #include "signature_impl.h"
 
+#include <memory>
 #include <string>
 #include <utility>
 
-#include "tink/binary_keyset_reader.h"
-#include "tink/cleartext_keyset_handle.h"
 #include "tink/public_key_sign.h"
 #include "tink/public_key_verify.h"
 #include "create.h"
@@ -29,8 +28,7 @@
 
 namespace tink_testing_api {
 
-using ::crypto::tink::BinaryKeysetReader;
-using ::crypto::tink::CleartextKeysetHandle;
+using ::crypto::tink::util::StatusOr;
 using ::grpc::ServerContext;
 using ::grpc::Status;
 
@@ -51,19 +49,9 @@ using ::grpc::Status;
 ::grpc::Status SignatureImpl::Sign(grpc::ServerContext* context,
                                    const SignatureSignRequest* request,
                                    SignatureSignResponse* response) {
-  auto reader_result = BinaryKeysetReader::New(request->private_keyset());
-  if (!reader_result.ok()) {
-    response->set_err(std::string(reader_result.status().message()));
-    return ::grpc::Status::OK;
-  }
-  auto private_handle_result =
-      CleartextKeysetHandle::Read(std::move(reader_result.value()));
-  if (!private_handle_result.ok()) {
-    response->set_err(std::string(private_handle_result.status().message()));
-    return ::grpc::Status::OK;
-  }
-  auto signer_result = private_handle_result.value()
-                           ->GetPrimitive<crypto::tink::PublicKeySign>();
+  StatusOr<std::unique_ptr<crypto::tink::PublicKeySign>> signer_result =
+      PrimitiveFromSerializedBinaryProtoKeyset<crypto::tink::PublicKeySign>(
+          request->private_annotated_keyset());
   if (!signer_result.ok()) {
     response->set_err(std::string(signer_result.status().message()));
     return ::grpc::Status::OK;
@@ -81,19 +69,9 @@ using ::grpc::Status;
 ::grpc::Status SignatureImpl::Verify(grpc::ServerContext* context,
                                      const SignatureVerifyRequest* request,
                                      SignatureVerifyResponse* response) {
-  auto reader_result = BinaryKeysetReader::New(request->public_keyset());
-  if (!reader_result.ok()) {
-    response->set_err(std::string(reader_result.status().message()));
-    return ::grpc::Status::OK;
-  }
-  auto public_handle_result =
-      CleartextKeysetHandle::Read(std::move(reader_result.value()));
-  if (!public_handle_result.ok()) {
-    response->set_err(std::string(public_handle_result.status().message()));
-    return ::grpc::Status::OK;
-  }
-  auto verifier_result = public_handle_result.value()
-                             ->GetPrimitive<crypto::tink::PublicKeyVerify>();
+  StatusOr<std::unique_ptr<crypto::tink::PublicKeyVerify>> verifier_result =
+      PrimitiveFromSerializedBinaryProtoKeyset<crypto::tink::PublicKeyVerify>(
+          request->public_annotated_keyset());
   if (!verifier_result.ok()) {
     response->set_err(std::string(verifier_result.status().message()));
     return ::grpc::Status::OK;

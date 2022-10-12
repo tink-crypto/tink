@@ -20,9 +20,9 @@ import (
 	"bytes"
 	"context"
 
+	"github.com/google/tink/go/insecurecleartextkeyset"
 	"github.com/google/tink/go/keyset"
 	"github.com/google/tink/go/signature"
-	"github.com/google/tink/go/insecurecleartextkeyset"
 	pb "github.com/google/tink/testing/go/proto/testing_api_go_grpc"
 )
 
@@ -32,7 +32,7 @@ type SignatureService struct {
 }
 
 func (s *SignatureService) CreatePublicKeySign(ctx context.Context, req *pb.CreationRequest) (*pb.CreationResponse, error) {
-	reader := keyset.NewBinaryReader(bytes.NewReader(req.Keyset))
+	reader := keyset.NewBinaryReader(bytes.NewReader(req.GetAnnotatedKeyset().GetSerializedKeyset()))
 	handle, err := insecurecleartextkeyset.Read(reader)
 	if err != nil {
 		return &pb.CreationResponse{Err: err.Error()}, nil
@@ -45,7 +45,7 @@ func (s *SignatureService) CreatePublicKeySign(ctx context.Context, req *pb.Crea
 }
 
 func (s *SignatureService) CreatePublicKeyVerify(ctx context.Context, req *pb.CreationRequest) (*pb.CreationResponse, error) {
-	reader := keyset.NewBinaryReader(bytes.NewReader(req.Keyset))
+	reader := keyset.NewBinaryReader(bytes.NewReader(req.GetAnnotatedKeyset().GetSerializedKeyset()))
 	handle, err := insecurecleartextkeyset.Read(reader)
 	if err != nil {
 		return &pb.CreationResponse{Err: err.Error()}, nil
@@ -58,7 +58,7 @@ func (s *SignatureService) CreatePublicKeyVerify(ctx context.Context, req *pb.Cr
 }
 
 func (s *SignatureService) Sign(ctx context.Context, req *pb.SignatureSignRequest) (*pb.SignatureSignResponse, error) {
-	reader := keyset.NewBinaryReader(bytes.NewReader(req.PrivateKeyset))
+	reader := keyset.NewBinaryReader(bytes.NewReader(req.GetPrivateAnnotatedKeyset().GetSerializedKeyset()))
 	handle, err := insecurecleartextkeyset.Read(reader)
 	if err != nil {
 		return &pb.SignatureSignResponse{
@@ -79,7 +79,7 @@ func (s *SignatureService) Sign(ctx context.Context, req *pb.SignatureSignReques
 }
 
 func (s *SignatureService) Verify(ctx context.Context, req *pb.SignatureVerifyRequest) (*pb.SignatureVerifyResponse, error) {
-	reader := keyset.NewBinaryReader(bytes.NewReader(req.PublicKeyset))
+	reader := keyset.NewBinaryReader(bytes.NewReader(req.GetPublicAnnotatedKeyset().GetSerializedKeyset()))
 	handle, err := insecurecleartextkeyset.Read(reader)
 	if err != nil {
 		return &pb.SignatureVerifyResponse{Err: err.Error()}, nil

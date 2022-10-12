@@ -383,7 +383,7 @@ class AeadServicer(testing_api_pb2_grpc.AeadServicer):
     """Creates an AEAD without using it."""
     try:
       keyset_handle = cleartext_keyset_handle.read(
-          tink.BinaryKeysetReader(request.keyset))
+          tink.BinaryKeysetReader(request.annotated_keyset.serialized_keyset))
       keyset_handle.primitive(aead.Aead)
       return testing_api_pb2.CreationResponse()
     except tink.TinkError as e:
@@ -394,7 +394,7 @@ class AeadServicer(testing_api_pb2_grpc.AeadServicer):
       context: grpc.ServicerContext) -> testing_api_pb2.AeadEncryptResponse:
     """Encrypts a message."""
     keyset_handle = cleartext_keyset_handle.read(
-        tink.BinaryKeysetReader(request.keyset))
+        tink.BinaryKeysetReader(request.annotated_keyset.serialized_keyset))
     p = keyset_handle.primitive(aead.Aead)
     try:
       ciphertext = p.encrypt(request.plaintext, request.associated_data)
@@ -407,7 +407,7 @@ class AeadServicer(testing_api_pb2_grpc.AeadServicer):
       context: grpc.ServicerContext) -> testing_api_pb2.AeadDecryptResponse:
     """Decrypts a message."""
     keyset_handle = cleartext_keyset_handle.read(
-        tink.BinaryKeysetReader(request.keyset))
+        tink.BinaryKeysetReader(request.annotated_keyset.serialized_keyset))
     p = keyset_handle.primitive(aead.Aead)
     try:
       plaintext = p.decrypt(request.ciphertext, request.associated_data)
@@ -424,7 +424,7 @@ class StreamingAeadServicer(testing_api_pb2_grpc.StreamingAeadServicer):
     """Creates a Streaming Aead without using it."""
     try:
       keyset_handle = cleartext_keyset_handle.read(
-          tink.BinaryKeysetReader(request.keyset))
+          tink.BinaryKeysetReader(request.annotated_keyset.serialized_keyset))
       keyset_handle.primitive(streaming_aead.StreamingAead)
       return testing_api_pb2.CreationResponse()
     except tink.TinkError as e:
@@ -437,7 +437,7 @@ class StreamingAeadServicer(testing_api_pb2_grpc.StreamingAeadServicer):
     """Encrypts a message."""
     try:
       keyset_handle = cleartext_keyset_handle.read(
-          tink.BinaryKeysetReader(request.keyset))
+          tink.BinaryKeysetReader(request.annotated_keyset.serialized_keyset))
       p = keyset_handle.primitive(streaming_aead.StreamingAead)
       ciphertext_destination = bytes_io.BytesIOWithValueAfterClose()
       with p.new_encrypting_stream(ciphertext_destination,
@@ -455,7 +455,7 @@ class StreamingAeadServicer(testing_api_pb2_grpc.StreamingAeadServicer):
     """Decrypts a message."""
     try:
       keyset_handle = cleartext_keyset_handle.read(
-          tink.BinaryKeysetReader(request.keyset))
+          tink.BinaryKeysetReader(request.annotated_keyset.serialized_keyset))
       p = keyset_handle.primitive(streaming_aead.StreamingAead)
       stream = io.BytesIO(request.ciphertext)
       with p.new_decrypting_stream(stream, request.associated_data) as s:
@@ -473,7 +473,7 @@ class DeterministicAeadServicer(testing_api_pb2_grpc.DeterministicAeadServicer):
     """Creates a Deterministic AEAD without using it."""
     try:
       keyset_handle = cleartext_keyset_handle.read(
-          tink.BinaryKeysetReader(request.keyset))
+          tink.BinaryKeysetReader(request.annotated_keyset.serialized_keyset))
       keyset_handle.primitive(daead.DeterministicAead)
       return testing_api_pb2.CreationResponse()
     except tink.TinkError as e:
@@ -485,7 +485,7 @@ class DeterministicAeadServicer(testing_api_pb2_grpc.DeterministicAeadServicer):
   ) -> testing_api_pb2.DeterministicAeadEncryptResponse:
     """Encrypts a message."""
     keyset_handle = cleartext_keyset_handle.read(
-        tink.BinaryKeysetReader(request.keyset))
+        tink.BinaryKeysetReader(request.annotated_keyset.serialized_keyset))
     p = keyset_handle.primitive(daead.DeterministicAead)
     try:
       ciphertext = p.encrypt_deterministically(request.plaintext,
@@ -501,7 +501,7 @@ class DeterministicAeadServicer(testing_api_pb2_grpc.DeterministicAeadServicer):
   ) -> testing_api_pb2.DeterministicAeadDecryptResponse:
     """Decrypts a message."""
     keyset_handle = cleartext_keyset_handle.read(
-        tink.BinaryKeysetReader(request.keyset))
+        tink.BinaryKeysetReader(request.annotated_keyset.serialized_keyset))
     p = keyset_handle.primitive(daead.DeterministicAead)
     try:
       plaintext = p.decrypt_deterministically(request.ciphertext,
@@ -520,7 +520,7 @@ class MacServicer(testing_api_pb2_grpc.MacServicer):
     """Creates a MAC without using it."""
     try:
       keyset_handle = cleartext_keyset_handle.read(
-          tink.BinaryKeysetReader(request.keyset))
+          tink.BinaryKeysetReader(request.annotated_keyset.serialized_keyset))
       keyset_handle.primitive(mac.Mac)
       return testing_api_pb2.CreationResponse()
     except tink.TinkError as e:
@@ -532,7 +532,7 @@ class MacServicer(testing_api_pb2_grpc.MacServicer):
     """Computes a MAC."""
     try:
       keyset_handle = cleartext_keyset_handle.read(
-          tink.BinaryKeysetReader(request.keyset))
+          tink.BinaryKeysetReader(request.annotated_keyset.serialized_keyset))
       p = keyset_handle.primitive(mac.Mac)
       mac_value = p.compute_mac(request.data)
       return testing_api_pb2.ComputeMacResponse(mac_value=mac_value)
@@ -545,7 +545,7 @@ class MacServicer(testing_api_pb2_grpc.MacServicer):
     """Verifies a MAC value."""
     try:
       keyset_handle = cleartext_keyset_handle.read(
-          tink.BinaryKeysetReader(request.keyset))
+          tink.BinaryKeysetReader(request.annotated_keyset.serialized_keyset))
       p = keyset_handle.primitive(mac.Mac)
       p.verify_mac(request.mac_value, request.data)
       return testing_api_pb2.VerifyMacResponse()
@@ -562,7 +562,7 @@ class HybridServicer(testing_api_pb2_grpc.HybridServicer):
     """Creates a HybridEncrypt without using it."""
     try:
       keyset_handle = cleartext_keyset_handle.read(
-          tink.BinaryKeysetReader(request.keyset))
+          tink.BinaryKeysetReader(request.annotated_keyset.serialized_keyset))
       keyset_handle.primitive(hybrid.HybridEncrypt)
       return testing_api_pb2.CreationResponse()
     except tink.TinkError as e:
@@ -574,7 +574,7 @@ class HybridServicer(testing_api_pb2_grpc.HybridServicer):
     """Creates a HybridDecrypt without using it."""
     try:
       keyset_handle = cleartext_keyset_handle.read(
-          tink.BinaryKeysetReader(request.keyset))
+          tink.BinaryKeysetReader(request.annotated_keyset.serialized_keyset))
       keyset_handle.primitive(hybrid.HybridDecrypt)
       return testing_api_pb2.CreationResponse()
     except tink.TinkError as e:
@@ -586,7 +586,8 @@ class HybridServicer(testing_api_pb2_grpc.HybridServicer):
     """Encrypts a message."""
     try:
       public_keyset_handle = cleartext_keyset_handle.read(
-          tink.BinaryKeysetReader(request.public_keyset))
+          tink.BinaryKeysetReader(
+              request.public_annotated_keyset.serialized_keyset))
       p = public_keyset_handle.primitive(hybrid.HybridEncrypt)
       ciphertext = p.encrypt(request.plaintext, request.context_info)
       return testing_api_pb2.HybridEncryptResponse(ciphertext=ciphertext)
@@ -599,7 +600,8 @@ class HybridServicer(testing_api_pb2_grpc.HybridServicer):
     """Decrypts a message."""
     try:
       private_keyset_handle = cleartext_keyset_handle.read(
-          tink.BinaryKeysetReader(request.private_keyset))
+          tink.BinaryKeysetReader(
+              request.private_annotated_keyset.serialized_keyset))
       p = private_keyset_handle.primitive(hybrid.HybridDecrypt)
       plaintext = p.decrypt(request.ciphertext, request.context_info)
       return testing_api_pb2.HybridDecryptResponse(plaintext=plaintext)
@@ -616,7 +618,7 @@ class SignatureServicer(testing_api_pb2_grpc.SignatureServicer):
     """Creates a PublicKeySign without using it."""
     try:
       keyset_handle = cleartext_keyset_handle.read(
-          tink.BinaryKeysetReader(request.keyset))
+          tink.BinaryKeysetReader(request.annotated_keyset.serialized_keyset))
       keyset_handle.primitive(signature.PublicKeySign)
       return testing_api_pb2.CreationResponse()
     except tink.TinkError as e:
@@ -628,7 +630,7 @@ class SignatureServicer(testing_api_pb2_grpc.SignatureServicer):
     """Creates a PublicKeyVerify without using it."""
     try:
       keyset_handle = cleartext_keyset_handle.read(
-          tink.BinaryKeysetReader(request.keyset))
+          tink.BinaryKeysetReader(request.annotated_keyset.serialized_keyset))
       keyset_handle.primitive(signature.PublicKeyVerify)
       return testing_api_pb2.CreationResponse()
     except tink.TinkError as e:
@@ -640,7 +642,8 @@ class SignatureServicer(testing_api_pb2_grpc.SignatureServicer):
     """Signs a message."""
     try:
       private_keyset_handle = cleartext_keyset_handle.read(
-          tink.BinaryKeysetReader(request.private_keyset))
+          tink.BinaryKeysetReader(
+              request.private_annotated_keyset.serialized_keyset))
       p = private_keyset_handle.primitive(signature.PublicKeySign)
       signature_value = p.sign(request.data)
       return testing_api_pb2.SignatureSignResponse(signature=signature_value)
@@ -653,7 +656,8 @@ class SignatureServicer(testing_api_pb2_grpc.SignatureServicer):
     """Verifies a signature."""
     try:
       public_keyset_handle = cleartext_keyset_handle.read(
-          tink.BinaryKeysetReader(request.public_keyset))
+          tink.BinaryKeysetReader(
+              request.public_annotated_keyset.serialized_keyset))
       p = public_keyset_handle.primitive(signature.PublicKeyVerify)
       p.verify(request.signature, request.data)
       return testing_api_pb2.SignatureVerifyResponse()
@@ -669,7 +673,7 @@ class PrfSetServicer(testing_api_pb2_grpc.PrfSetServicer):
     """Creates a PrfSet without using it."""
     try:
       keyset_handle = cleartext_keyset_handle.read(
-          tink.BinaryKeysetReader(request.keyset))
+          tink.BinaryKeysetReader(request.annotated_keyset.serialized_keyset))
       keyset_handle.primitive(prf.PrfSet)
       return testing_api_pb2.CreationResponse()
     except tink.TinkError as e:
@@ -681,7 +685,7 @@ class PrfSetServicer(testing_api_pb2_grpc.PrfSetServicer):
     """Returns all key IDs and the primary key ID."""
     try:
       keyset_handle = cleartext_keyset_handle.read(
-          tink.BinaryKeysetReader(request.keyset))
+          tink.BinaryKeysetReader(request.annotated_keyset.serialized_keyset))
       p = keyset_handle.primitive(prf.PrfSet)
       prfs = p.all()
       response = testing_api_pb2.PrfSetKeyIdsResponse()
@@ -697,7 +701,7 @@ class PrfSetServicer(testing_api_pb2_grpc.PrfSetServicer):
     """Computes the output of one PRF."""
     try:
       keyset_handle = cleartext_keyset_handle.read(
-          tink.BinaryKeysetReader(request.keyset))
+          tink.BinaryKeysetReader(request.annotated_keyset.serialized_keyset))
       f = keyset_handle.primitive(prf.PrfSet).all()[request.key_id]
       return testing_api_pb2.PrfSetComputeResponse(
           output=f.compute(request.input_data, request.output_length))

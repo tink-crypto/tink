@@ -97,7 +97,8 @@ class JwtServiceTest(absltest.TestCase):
     self.assertEqual(gen_response.WhichOneof('result'), 'keyset')
 
     creation_request = testing_api_pb2.CreationRequest(
-        keyset=gen_response.keyset)
+        annotated_keyset=testing_api_pb2.AnnotatedKeyset(
+            serialized_keyset=gen_response.keyset))
     creation_response = jwt_servicer.CreateJwtMac(
         creation_request, self._ctx)
     self.assertEmpty(creation_response.err)
@@ -105,7 +106,9 @@ class JwtServiceTest(absltest.TestCase):
   def test_create_jwt_mac_broken_keyset(self):
     jwt_servicer = jwt_service.JwtServicer()
 
-    creation_request = testing_api_pb2.CreationRequest(keyset=b'\x80')
+    creation_request = testing_api_pb2.CreationRequest(
+        annotated_keyset=testing_api_pb2.AnnotatedKeyset(
+            serialized_keyset=b'\x80'))
     creation_response = jwt_servicer.CreateJwtMac(creation_request, self._ctx)
     self.assertNotEmpty(creation_response.err)
 
@@ -119,7 +122,9 @@ class JwtServiceTest(absltest.TestCase):
     self.assertEqual(gen_response.WhichOneof('result'), 'keyset')
     keyset = gen_response.keyset
 
-    comp_request = testing_api_pb2.JwtSignRequest(keyset=keyset)
+    comp_request = testing_api_pb2.JwtSignRequest(
+        annotated_keyset=testing_api_pb2.AnnotatedKeyset(
+            serialized_keyset=keyset))
     comp_request.raw_jwt.issuer.value = 'issuer'
     comp_request.raw_jwt.subject.value = 'subject'
     comp_request.raw_jwt.custom_claims['myclaim'].bool_value = True
@@ -130,7 +135,9 @@ class JwtServiceTest(absltest.TestCase):
     self.assertEqual(comp_response.WhichOneof('result'), 'signed_compact_jwt')
     signed_compact_jwt = comp_response.signed_compact_jwt
     verify_request = testing_api_pb2.JwtVerifyRequest(
-        keyset=keyset, signed_compact_jwt=signed_compact_jwt)
+        annotated_keyset=testing_api_pb2.AnnotatedKeyset(
+            serialized_keyset=keyset),
+        signed_compact_jwt=signed_compact_jwt)
     verify_request.validator.expected_issuer.value = 'issuer'
     verify_request.validator.now.seconds = 1234
     verify_response = jwt_servicer.VerifyMacAndDecode(verify_request, self._ctx)
@@ -150,14 +157,18 @@ class JwtServiceTest(absltest.TestCase):
     self.assertEqual(gen_response.WhichOneof('result'), 'keyset')
     keyset = gen_response.keyset
 
-    comp_request = testing_api_pb2.JwtSignRequest(keyset=keyset)
+    comp_request = testing_api_pb2.JwtSignRequest(
+        annotated_keyset=testing_api_pb2.AnnotatedKeyset(
+            serialized_keyset=keyset))
     comp_request.raw_jwt.issuer.value = 'issuer'
 
     comp_response = jwt_servicer.ComputeMacAndEncode(comp_request, self._ctx)
     self.assertEqual(comp_response.WhichOneof('result'), 'signed_compact_jwt')
     signed_compact_jwt = comp_response.signed_compact_jwt
     verify_request = testing_api_pb2.JwtVerifyRequest(
-        keyset=keyset, signed_compact_jwt=signed_compact_jwt)
+        annotated_keyset=testing_api_pb2.AnnotatedKeyset(
+            serialized_keyset=keyset),
+        signed_compact_jwt=signed_compact_jwt)
     verify_request.validator.expected_issuer.value = 'issuer'
     verify_request.validator.allow_missing_expiration = True
     verify_response = jwt_servicer.VerifyMacAndDecode(verify_request, self._ctx)
@@ -175,7 +186,8 @@ class JwtServiceTest(absltest.TestCase):
     self.assertEqual(gen_response.WhichOneof('result'), 'keyset')
 
     creation_request = testing_api_pb2.CreationRequest(
-        keyset=gen_response.keyset)
+        annotated_keyset=testing_api_pb2.AnnotatedKeyset(
+            serialized_keyset=gen_response.keyset))
     creation_response = jwt_servicer.CreateJwtPublicKeySign(
         creation_request, self._ctx)
     self.assertEmpty(creation_response.err)
@@ -183,7 +195,9 @@ class JwtServiceTest(absltest.TestCase):
   def test_create_public_key_sign_bad_keyset(self):
     jwt_servicer = jwt_service.JwtServicer()
 
-    creation_request = testing_api_pb2.CreationRequest(keyset=b'\x80')
+    creation_request = testing_api_pb2.CreationRequest(
+        annotated_keyset=testing_api_pb2.AnnotatedKeyset(
+            serialized_keyset=b'\x80'))
     creation_response = jwt_servicer.CreateJwtPublicKeySign(
         creation_request, self._ctx)
     self.assertNotEmpty(creation_response.err)
@@ -202,7 +216,8 @@ class JwtServiceTest(absltest.TestCase):
     self.assertEqual(pub_response.WhichOneof('result'), 'public_keyset')
 
     creation_request = testing_api_pb2.CreationRequest(
-        keyset=pub_response.public_keyset)
+        annotated_keyset=testing_api_pb2.AnnotatedKeyset(
+            serialized_keyset=pub_response.public_keyset))
     creation_response = jwt_servicer.CreateJwtPublicKeyVerify(
         creation_request, self._ctx)
     self.assertEmpty(creation_response.err)
@@ -210,7 +225,9 @@ class JwtServiceTest(absltest.TestCase):
   def test_create_public_key_verify_bad_keyset(self):
     jwt_servicer = jwt_service.JwtServicer()
 
-    creation_request = testing_api_pb2.CreationRequest(keyset=b'\x80')
+    creation_request = testing_api_pb2.CreationRequest(
+        annotated_keyset=testing_api_pb2.AnnotatedKeyset(
+            serialized_keyset=b'\x80'))
     creation_response = jwt_servicer.CreateJwtPublicKeyVerify(
         creation_request, self._ctx)
     self.assertNotEmpty(creation_response.err)
@@ -225,7 +242,9 @@ class JwtServiceTest(absltest.TestCase):
     self.assertEqual(gen_response.WhichOneof('result'), 'keyset')
     private_keyset = gen_response.keyset
 
-    comp_request = testing_api_pb2.JwtSignRequest(keyset=private_keyset)
+    comp_request = testing_api_pb2.JwtSignRequest(
+        annotated_keyset=testing_api_pb2.AnnotatedKeyset(
+            serialized_keyset=private_keyset))
     comp_request.raw_jwt.issuer.value = 'issuer'
     comp_request.raw_jwt.subject.value = 'subject'
     comp_request.raw_jwt.custom_claims['myclaim'].bool_value = True
@@ -252,7 +271,8 @@ class JwtServiceTest(absltest.TestCase):
     self.assertEqual(from_jwkset_response.WhichOneof('result'), 'keyset')
 
     verify_request = testing_api_pb2.JwtVerifyRequest(
-        keyset=from_jwkset_response.keyset,
+        annotated_keyset=testing_api_pb2.AnnotatedKeyset(
+            serialized_keyset=from_jwkset_response.keyset),
         signed_compact_jwt=signed_compact_jwt)
     verify_request.validator.expected_issuer.value = 'issuer'
     verify_request.validator.allow_missing_expiration = True

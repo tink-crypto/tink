@@ -18,12 +18,11 @@
 #include "streaming_aead_impl.h"
 
 #include <algorithm>
+#include <memory>
 #include <string>
 #include <utility>
 
 #include "absl/status/status.h"
-#include "tink/binary_keyset_reader.h"
-#include "tink/cleartext_keyset_handle.h"
 #include "tink/streaming_aead.h"
 #include "tink/util/istream_input_stream.h"
 #include "tink/util/ostream_output_stream.h"
@@ -35,11 +34,10 @@ namespace tink_testing_api {
 
 namespace tinkutil = ::crypto::tink::util;
 
-using ::crypto::tink::BinaryKeysetReader;
-using ::crypto::tink::CleartextKeysetHandle;
 using ::crypto::tink::InputStream;
 using ::crypto::tink::util::IstreamInputStream;
 using ::crypto::tink::util::OstreamOutputStream;
+using ::crypto::tink::util::StatusOr;
 using ::grpc::ServerContext;
 using ::grpc::Status;
 
@@ -54,19 +52,9 @@ using ::grpc::Status;
     grpc::ServerContext* context,
     const StreamingAeadEncryptRequest* request,
     StreamingAeadEncryptResponse* response) {
-  auto reader_result = BinaryKeysetReader::New(request->keyset());
-  if (!reader_result.ok()) {
-    response->set_err(std::string(reader_result.status().message()));
-    return ::grpc::Status::OK;
-  }
-  auto handle_result =
-      CleartextKeysetHandle::Read(std::move(reader_result.value()));
-  if (!handle_result.ok()) {
-    response->set_err(std::string(handle_result.status().message()));
-    return ::grpc::Status::OK;
-  }
-  auto streaming_aead_result =
-      handle_result.value()->GetPrimitive<crypto::tink::StreamingAead>();
+  StatusOr<std::unique_ptr<crypto::tink::StreamingAead>> streaming_aead_result =
+      PrimitiveFromSerializedBinaryProtoKeyset<crypto::tink::StreamingAead>(
+          request->annotated_keyset());
   if (!streaming_aead_result.ok()) {
     response->set_err(std::string(streaming_aead_result.status().message()));
     return ::grpc::Status::OK;
@@ -122,19 +110,9 @@ using ::grpc::Status;
     grpc::ServerContext* context,
     const StreamingAeadDecryptRequest* request,
     StreamingAeadDecryptResponse* response) {
-  auto reader_result = BinaryKeysetReader::New(request->keyset());
-  if (!reader_result.ok()) {
-    response->set_err(std::string(reader_result.status().message()));
-    return ::grpc::Status::OK;
-  }
-  auto handle_result =
-      CleartextKeysetHandle::Read(std::move(reader_result.value()));
-  if (!handle_result.ok()) {
-    response->set_err(std::string(handle_result.status().message()));
-    return ::grpc::Status::OK;
-  }
-  auto streaming_aead_result =
-      handle_result.value()->GetPrimitive<crypto::tink::StreamingAead>();
+  StatusOr<std::unique_ptr<crypto::tink::StreamingAead>> streaming_aead_result =
+      PrimitiveFromSerializedBinaryProtoKeyset<crypto::tink::StreamingAead>(
+          request->annotated_keyset());
   if (!streaming_aead_result.ok()) {
     response->set_err(std::string(streaming_aead_result.status().message()));
     return ::grpc::Status::OK;

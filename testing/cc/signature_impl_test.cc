@@ -27,7 +27,6 @@
 #include "tink/cleartext_keyset_handle.h"
 #include "tink/signature/signature_config.h"
 #include "tink/signature/signature_key_templates.h"
-#include "proto/testing_api.grpc.pb.h"
 
 namespace crypto {
 namespace tink {
@@ -75,7 +74,8 @@ TEST_F(SignatureImplTest, CreatePublicKeySignSuccess) {
       << private_keyset_handle.status();
 
   CreationRequest request;
-  request.set_keyset(KeysetBytes(**private_keyset_handle));
+  request.mutable_annotated_keyset()->set_serialized_keyset(
+      KeysetBytes(**private_keyset_handle));
   CreationResponse response;
 
   EXPECT_TRUE(signature.CreatePublicKeySign(nullptr, &request, &response).ok());
@@ -86,7 +86,7 @@ TEST_F(SignatureImplTest, CreatePublicKeySignFailure) {
   tink_testing_api::SignatureImpl signature;
 
   CreationRequest request;
-  request.set_keyset("\x80");
+  request.mutable_annotated_keyset()->set_serialized_keyset("\x80");
   CreationResponse response;
 
   EXPECT_TRUE(signature.CreatePublicKeySign(nullptr, &request, &response).ok());
@@ -106,7 +106,8 @@ TEST_F(SignatureImplTest, CreatePublicKeyVerifySuccess) {
       << public_keyset_handle.status();
 
   CreationRequest request;
-  request.set_keyset(KeysetBytes(**public_keyset_handle));
+  request.mutable_annotated_keyset()->set_serialized_keyset(
+      KeysetBytes(**public_keyset_handle));
   CreationResponse response;
 
   EXPECT_TRUE(
@@ -118,7 +119,7 @@ TEST_F(SignatureImplTest, CreatePublicKeyVerifyFailure) {
   tink_testing_api::SignatureImpl signature;
 
   CreationRequest request;
-  request.set_keyset("\x80");
+  request.mutable_annotated_keyset()->set_serialized_keyset("\x80");
   CreationResponse response;
 
   EXPECT_TRUE(
@@ -136,7 +137,8 @@ TEST_F(SignatureImplTest, SignVerifySuccess) {
   EXPECT_TRUE(public_handle_result.ok());
 
   SignatureSignRequest sign_request;
-  sign_request.set_private_keyset(KeysetBytes(*private_handle_result.value()));
+  sign_request.mutable_private_annotated_keyset()->set_serialized_keyset(
+      KeysetBytes(*private_handle_result.value()));
   sign_request.set_data("some data");
   SignatureSignResponse sign_response;
 
@@ -144,7 +146,8 @@ TEST_F(SignatureImplTest, SignVerifySuccess) {
   EXPECT_THAT(sign_response.err(), IsEmpty());
 
   SignatureVerifyRequest verify_request;
-  verify_request.set_public_keyset(KeysetBytes(*public_handle_result.value()));
+  verify_request.mutable_public_annotated_keyset()->set_serialized_keyset(
+      KeysetBytes(*public_handle_result.value()));
   verify_request.set_signature(sign_response.signature());
   verify_request.set_data("some data");
   SignatureVerifyResponse verify_response;
@@ -157,7 +160,8 @@ TEST_F(SignatureImplTest, SignVerifySuccess) {
 TEST_F(SignatureImplTest, SignBadKeysetFail) {
   tink_testing_api::SignatureImpl signature;
   SignatureSignRequest sign_request;
-  sign_request.set_private_keyset("bad private keyset");
+  sign_request.mutable_private_annotated_keyset()->set_serialized_keyset(
+      "bad private keyset");
   sign_request.set_data("some data");
   SignatureSignResponse sign_response;
 
@@ -175,7 +179,8 @@ TEST_F(SignatureImplTest, VerifyBadCiphertextFail) {
   EXPECT_TRUE(public_handle_result.ok());
 
   SignatureVerifyRequest verify_request;
-  verify_request.set_public_keyset(KeysetBytes(*public_handle_result.value()));
+  verify_request.mutable_public_annotated_keyset()->set_serialized_keyset(
+      KeysetBytes(*public_handle_result.value()));
   verify_request.set_signature("bad signature");
   verify_request.set_data("some data");
   SignatureVerifyResponse verify_response;

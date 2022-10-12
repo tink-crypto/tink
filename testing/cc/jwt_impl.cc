@@ -44,7 +44,6 @@ using ::crypto::tink::CleartextKeysetHandle;
 using ::crypto::tink::JwtMac;
 using ::crypto::tink::JwtPublicKeySign;
 using ::crypto::tink::JwtPublicKeyVerify;
-using ::crypto::tink::KeysetHandle;
 using ::crypto::tink::KeysetReader;
 using ::crypto::tink::RawJwt;
 using ::crypto::tink::VerifiedJwt;
@@ -233,20 +232,9 @@ crypto::tink::util::StatusOr<crypto::tink::JwtValidator> JwtValidatorFromProto(
 grpc::Status JwtImpl::ComputeMacAndEncode(grpc::ServerContext* context,
                                             const JwtSignRequest* request,
                                             JwtSignResponse* response) {
-  StatusOr<std::unique_ptr<KeysetReader>> reader =
-      BinaryKeysetReader::New(request->keyset());
-  if (!reader.ok()) {
-    response->set_err(std::string(reader.status().message()));
-    return grpc::Status::OK;
-  }
-  StatusOr<std::unique_ptr<KeysetHandle>> handle =
-      CleartextKeysetHandle::Read(*std::move(reader));
-  if (!handle.ok()) {
-    response->set_err(std::string(handle.status().message()));
-    return grpc::Status::OK;
-  }
   StatusOr<std::unique_ptr<JwtMac>> jwt_mac =
-      (*handle)->GetPrimitive<JwtMac>();
+      PrimitiveFromSerializedBinaryProtoKeyset<JwtMac>(
+          request->annotated_keyset());
   if (!jwt_mac.ok()) {
     response->set_err(std::string(jwt_mac.status().message()));
     return grpc::Status::OK;
@@ -270,19 +258,9 @@ grpc::Status JwtImpl::ComputeMacAndEncode(grpc::ServerContext* context,
 grpc::Status JwtImpl::VerifyMacAndDecode(grpc::ServerContext* context,
                                            const JwtVerifyRequest* request,
                                            JwtVerifyResponse* response) {
-  StatusOr<std::unique_ptr<KeysetReader>> reader =
-      BinaryKeysetReader::New(request->keyset());
-  if (!reader.ok()) {
-    response->set_err(std::string(reader.status().message()));
-    return grpc::Status::OK;
-  }
-  StatusOr<std::unique_ptr<KeysetHandle>> handle =
-      CleartextKeysetHandle::Read(*std::move(reader));
-  if (!handle.ok()) {
-    response->set_err(std::string(handle.status().message()));
-    return grpc::Status::OK;
-  }
-  StatusOr<std::unique_ptr<JwtMac>> jwt_mac = (*handle)->GetPrimitive<JwtMac>();
+  StatusOr<std::unique_ptr<JwtMac>> jwt_mac =
+      PrimitiveFromSerializedBinaryProtoKeyset<JwtMac>(
+          request->annotated_keyset());
   if (!jwt_mac.ok()) {
     response->set_err(std::string(jwt_mac.status().message()));
     return grpc::Status::OK;
@@ -302,20 +280,9 @@ grpc::Status JwtImpl::VerifyMacAndDecode(grpc::ServerContext* context,
 grpc::Status JwtImpl::PublicKeySignAndEncode(grpc::ServerContext* context,
                                    const JwtSignRequest* request,
                                    JwtSignResponse* response) {
-  StatusOr<std::unique_ptr<KeysetReader>> reader =
-      BinaryKeysetReader::New(request->keyset());
-  if (!reader.ok()) {
-    response->set_err(std::string(reader.status().message()));
-    return grpc::Status::OK;
-  }
-  StatusOr<std::unique_ptr<KeysetHandle>> handle =
-      CleartextKeysetHandle::Read(*std::move(reader));
-  if (!handle.ok()) {
-    response->set_err(std::string(handle.status().message()));
-    return grpc::Status::OK;
-  }
   StatusOr<std::unique_ptr<JwtPublicKeySign>> jwt_sign =
-      (*handle)->GetPrimitive<JwtPublicKeySign>();
+      PrimitiveFromSerializedBinaryProtoKeyset<JwtPublicKeySign>(
+          request->annotated_keyset());
   if (!jwt_sign.ok()) {
     response->set_err(std::string(jwt_sign.status().message()));
     return grpc::Status::OK;
@@ -337,20 +304,9 @@ grpc::Status JwtImpl::PublicKeySignAndEncode(grpc::ServerContext* context,
 grpc::Status JwtImpl::PublicKeyVerifyAndDecode(grpc::ServerContext* context,
                                         const JwtVerifyRequest* request,
                                         JwtVerifyResponse* response) {
-  StatusOr<std::unique_ptr<KeysetReader>> reader =
-      BinaryKeysetReader::New(request->keyset());
-  if (!reader.ok()) {
-    response->set_err(std::string(reader.status().message()));
-    return grpc::Status::OK;
-  }
-  StatusOr<std::unique_ptr<KeysetHandle>> handle =
-      CleartextKeysetHandle::Read(*std::move(reader));
-  if (!handle.ok()) {
-    response->set_err(std::string(handle.status().message()));
-    return grpc::Status::OK;
-  }
   StatusOr<std::unique_ptr<JwtPublicKeyVerify>> jwt_verify =
-      (*handle)->GetPrimitive<JwtPublicKeyVerify>();
+      PrimitiveFromSerializedBinaryProtoKeyset<JwtPublicKeyVerify>(
+          request->annotated_keyset());
   if (!jwt_verify.ok()) {
     response->set_err(std::string(jwt_verify.status().message()));
     return grpc::Status::OK;
@@ -376,7 +332,7 @@ grpc::Status JwtImpl::PublicKeyVerifyAndDecode(grpc::ServerContext* context,
     response->set_err(std::string(reader.status().message()));
     return ::grpc::Status::OK;
   }
-  StatusOr<std::unique_ptr<KeysetHandle>> handle =
+  StatusOr<std::unique_ptr<::crypto::tink::KeysetHandle>> handle =
       CleartextKeysetHandle::Read(*std::move(reader));
   if (!handle.ok()) {
     response->set_err(std::string(handle.status().message()));
@@ -394,7 +350,7 @@ grpc::Status JwtImpl::PublicKeyVerifyAndDecode(grpc::ServerContext* context,
 ::grpc::Status JwtImpl::FromJwkSet(grpc::ServerContext* context,
                                    const JwtFromJwkSetRequest* request,
                                    JwtFromJwkSetResponse* response) {
-  StatusOr<std::unique_ptr<KeysetHandle>> keyset_handle =
+  StatusOr<std::unique_ptr<::crypto::tink::KeysetHandle>> keyset_handle =
       JwkSetToPublicKeysetHandle(request->jwk_set());
   if (!keyset_handle.ok()) {
     response->set_err(std::string(keyset_handle.status().message()));

@@ -71,7 +71,7 @@ TEST_F(PrfSetImplTest, CreateAeadSuccess) {
   tink_testing_api::PrfSetImpl prfset;
   std::string keyset = ValidKeyset();
   CreationRequest request;
-  request.set_keyset(keyset);
+  request.mutable_annotated_keyset()->set_serialized_keyset(keyset);
   CreationResponse response;
 
   EXPECT_TRUE(prfset.Create(nullptr, &request, &response).ok());
@@ -81,7 +81,7 @@ TEST_F(PrfSetImplTest, CreateAeadSuccess) {
 TEST_F(PrfSetImplTest, CreateAeadFails) {
   tink_testing_api::PrfSetImpl prfset;
   CreationRequest request;
-  request.set_keyset("bad keyset");
+  request.mutable_annotated_keyset()->set_serialized_keyset("bad keyset");
   CreationResponse response;
 
   EXPECT_TRUE(prfset.Create(nullptr, &request, &response).ok());
@@ -93,7 +93,7 @@ TEST_F(PrfSetImplTest, KeyIdsComputeSuccess) {
   std::string keyset = ValidKeyset();
 
   PrfSetKeyIdsRequest key_id_request;
-  key_id_request.set_keyset(keyset);
+  key_id_request.mutable_annotated_keyset()->set_serialized_keyset(keyset);
   PrfSetKeyIdsResponse key_id_response;
 
   EXPECT_TRUE(prfset.KeyIds(nullptr, &key_id_request, &key_id_response).ok());
@@ -102,7 +102,7 @@ TEST_F(PrfSetImplTest, KeyIdsComputeSuccess) {
               ElementsAre(key_id_response.output().primary_key_id()));
 
   PrfSetComputeRequest comp_request;
-  comp_request.set_keyset(keyset);
+  comp_request.mutable_annotated_keyset()->set_serialized_keyset(keyset);
   comp_request.set_key_id(key_id_response.output().primary_key_id());
   comp_request.set_input_data("some data");
   comp_request.set_output_length(16);
@@ -116,7 +116,8 @@ TEST_F(PrfSetImplTest, KeyIdsComputeSuccess) {
 TEST_F(PrfSetImplTest, KeyIdsBadKeysetFail) {
   tink_testing_api::PrfSetImpl prfset;
   PrfSetKeyIdsRequest key_id_request;
-  key_id_request.set_keyset("bad keyset");
+  key_id_request.mutable_annotated_keyset()->set_serialized_keyset(
+      "bad keyset");
   PrfSetKeyIdsResponse key_id_response;
 
   EXPECT_TRUE(prfset.KeyIds(nullptr, &key_id_request, &key_id_response).ok());
@@ -126,7 +127,7 @@ TEST_F(PrfSetImplTest, KeyIdsBadKeysetFail) {
 TEST_F(PrfSetImplTest, ComputeBadKeysetFail) {
   tink_testing_api::PrfSetImpl prfset;
   PrfSetComputeRequest comp_request;
-  comp_request.set_keyset("bad keyset");
+  comp_request.mutable_annotated_keyset()->set_serialized_keyset("bad keyset");
   comp_request.set_key_id(1234);
   comp_request.set_input_data("some data");
   comp_request.set_output_length(16);
@@ -140,13 +141,13 @@ TEST_F(PrfSetImplTest, ComputeBadOutputLengthFail) {
   tink_testing_api::PrfSetImpl prfset;
   std::string keyset = ValidKeyset();
   PrfSetKeyIdsRequest key_id_request;
-  key_id_request.set_keyset(keyset);
+  key_id_request.mutable_annotated_keyset()->set_serialized_keyset(keyset);
   PrfSetKeyIdsResponse key_id_response;
   EXPECT_TRUE(prfset.KeyIds(nullptr, &key_id_request, &key_id_response).ok());
   EXPECT_THAT(key_id_response.err(), IsEmpty());
 
   PrfSetComputeRequest comp_request;
-  comp_request.set_keyset(keyset);
+  comp_request.mutable_annotated_keyset()->set_serialized_keyset(keyset);
   comp_request.set_key_id(key_id_response.output().primary_key_id());
   comp_request.set_input_data("some data");
   comp_request.set_output_length(123456);  // bad output length
@@ -160,7 +161,7 @@ TEST_F(PrfSetImplTest, ComputeBadKeyIdFail) {
   std::string keyset = ValidKeyset();
 
   PrfSetComputeRequest comp_request;
-  comp_request.set_keyset(keyset);
+  comp_request.mutable_annotated_keyset()->set_serialized_keyset(keyset);
   comp_request.set_key_id(12345);  // bad key id
   comp_request.set_input_data("some data");
   comp_request.set_output_length(16);

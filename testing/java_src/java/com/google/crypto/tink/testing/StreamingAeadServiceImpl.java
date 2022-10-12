@@ -47,7 +47,8 @@ public final class StreamingAeadServiceImpl extends StreamingAeadImplBase {
       throws GeneralSecurityException {
     try {
       StreamingAead streamingAead =
-          Util.parseBinaryProtoKeyset(request.getKeyset()).getPrimitive(StreamingAead.class);
+          Util.parseBinaryProtoKeyset(request.getAnnotatedKeyset().getSerializedKeyset())
+              .getPrimitive(StreamingAead.class);
 
       ByteArrayOutputStream ciphertextStream = new ByteArrayOutputStream();
       try (OutputStream encryptingStream =
@@ -82,7 +83,8 @@ public final class StreamingAeadServiceImpl extends StreamingAeadImplBase {
       throws GeneralSecurityException {
     try {
       StreamingAead streamingAead =
-          Util.parseBinaryProtoKeyset(request.getKeyset()).getPrimitive(StreamingAead.class);
+          Util.parseBinaryProtoKeyset(request.getAnnotatedKeyset().getSerializedKeyset())
+              .getPrimitive(StreamingAead.class);
 
       InputStream ciphertextStream = request.getCiphertext().newInput();
       InputStream decryptingStream = streamingAead.newDecryptingStream(

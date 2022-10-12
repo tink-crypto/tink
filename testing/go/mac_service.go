@@ -20,9 +20,9 @@ import (
 	"bytes"
 	"context"
 
+	"github.com/google/tink/go/insecurecleartextkeyset"
 	"github.com/google/tink/go/keyset"
 	"github.com/google/tink/go/mac"
-	"github.com/google/tink/go/insecurecleartextkeyset"
 	pb "github.com/google/tink/testing/go/proto/testing_api_go_grpc"
 )
 
@@ -32,7 +32,7 @@ type MacService struct {
 }
 
 func (s *MacService) Create(ctx context.Context, req *pb.CreationRequest) (*pb.CreationResponse, error) {
-	reader := keyset.NewBinaryReader(bytes.NewReader(req.Keyset))
+	reader := keyset.NewBinaryReader(bytes.NewReader(req.GetAnnotatedKeyset().GetSerializedKeyset()))
 	handle, err := insecurecleartextkeyset.Read(reader)
 	if err != nil {
 		return &pb.CreationResponse{Err: err.Error()}, nil
@@ -45,7 +45,7 @@ func (s *MacService) Create(ctx context.Context, req *pb.CreationRequest) (*pb.C
 }
 
 func (s *MacService) ComputeMac(ctx context.Context, req *pb.ComputeMacRequest) (*pb.ComputeMacResponse, error) {
-	reader := keyset.NewBinaryReader(bytes.NewReader(req.Keyset))
+	reader := keyset.NewBinaryReader(bytes.NewReader(req.GetAnnotatedKeyset().GetSerializedKeyset()))
 	handle, err := insecurecleartextkeyset.Read(reader)
 	if err != nil {
 		return &pb.ComputeMacResponse{
@@ -66,7 +66,7 @@ func (s *MacService) ComputeMac(ctx context.Context, req *pb.ComputeMacRequest) 
 }
 
 func (s *MacService) VerifyMac(ctx context.Context, req *pb.VerifyMacRequest) (*pb.VerifyMacResponse, error) {
-	reader := keyset.NewBinaryReader(bytes.NewReader(req.Keyset))
+	reader := keyset.NewBinaryReader(bytes.NewReader(req.GetAnnotatedKeyset().GetSerializedKeyset()))
 	handle, err := insecurecleartextkeyset.Read(reader)
 	if err != nil {
 		return &pb.VerifyMacResponse{Err: err.Error()}, nil

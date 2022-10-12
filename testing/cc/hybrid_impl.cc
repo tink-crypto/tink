@@ -17,20 +17,19 @@
 // Implementation of a Hybrid encryption service
 #include "hybrid_impl.h"
 
+#include <memory>
 #include <string>
 #include <utility>
 
-#include "tink/binary_keyset_reader.h"
-#include "tink/cleartext_keyset_handle.h"
 #include "tink/hybrid_decrypt.h"
 #include "tink/hybrid_encrypt.h"
+#include "tink/util/statusor.h"
 #include "create.h"
 #include "proto/testing_api.grpc.pb.h"
 
 namespace tink_testing_api {
 
-using ::crypto::tink::BinaryKeysetReader;
-using ::crypto::tink::CleartextKeysetHandle;
+using ::crypto::tink::util::StatusOr;
 using ::grpc::ServerContext;
 using ::grpc::Status;
 
@@ -49,19 +48,9 @@ using ::grpc::Status;
 ::grpc::Status HybridImpl::Encrypt(grpc::ServerContext* context,
                                    const HybridEncryptRequest* request,
                                    HybridEncryptResponse* response) {
-  auto reader_result = BinaryKeysetReader::New(request->public_keyset());
-  if (!reader_result.ok()) {
-    response->set_err(std::string(reader_result.status().message()));
-    return ::grpc::Status::OK;
-  }
-  auto public_handle_result =
-      CleartextKeysetHandle::Read(std::move(reader_result.value()));
-  if (!public_handle_result.ok()) {
-    response->set_err(std::string(public_handle_result.status().message()));
-    return ::grpc::Status::OK;
-  }
-  auto hybrid_encrypt_result =
-      public_handle_result.value()->GetPrimitive<crypto::tink::HybridEncrypt>();
+  StatusOr<std::unique_ptr<crypto::tink::HybridEncrypt>> hybrid_encrypt_result =
+      PrimitiveFromSerializedBinaryProtoKeyset<crypto::tink::HybridEncrypt>(
+          request->public_annotated_keyset());
   if (!hybrid_encrypt_result.ok()) {
     response->set_err(std::string(hybrid_encrypt_result.status().message()));
     return ::grpc::Status::OK;
@@ -80,20 +69,9 @@ using ::grpc::Status;
 ::grpc::Status HybridImpl::Decrypt(grpc::ServerContext* context,
                                    const HybridDecryptRequest* request,
                                    HybridDecryptResponse* response) {
-  auto reader_result = BinaryKeysetReader::New(request->private_keyset());
-  if (!reader_result.ok()) {
-    response->set_err(std::string(reader_result.status().message()));
-    return ::grpc::Status::OK;
-  }
-  auto private_handle_result =
-      CleartextKeysetHandle::Read(std::move(reader_result.value()));
-  if (!private_handle_result.ok()) {
-    response->set_err(std::string(private_handle_result.status().message()));
-    return ::grpc::Status::OK;
-  }
-  auto hybrid_decrypt_result =
-      private_handle_result.value()
-          ->GetPrimitive<crypto::tink::HybridDecrypt>();
+  StatusOr<std::unique_ptr<crypto::tink::HybridDecrypt>> hybrid_decrypt_result =
+      PrimitiveFromSerializedBinaryProtoKeyset<crypto::tink::HybridDecrypt>(
+          request->private_annotated_keyset());
   if (!hybrid_decrypt_result.ok()) {
     response->set_err(std::string(hybrid_decrypt_result.status().message()));
     return ::grpc::Status::OK;

@@ -17,19 +17,17 @@
 // Implementation of a MAC Service.
 #include "mac_impl.h"
 
+#include <memory>
 #include <string>
 #include <utility>
 
-#include "tink/binary_keyset_reader.h"
-#include "tink/cleartext_keyset_handle.h"
 #include "tink/mac.h"
 #include "create.h"
 #include "proto/testing_api.grpc.pb.h"
 
 namespace tink_testing_api {
 
-using ::crypto::tink::BinaryKeysetReader;
-using ::crypto::tink::CleartextKeysetHandle;
+using ::crypto::tink::util::StatusOr;
 using ::grpc::ServerContext;
 using ::grpc::Status;
 
@@ -43,18 +41,9 @@ using ::grpc::Status;
 ::grpc::Status MacImpl::ComputeMac(grpc::ServerContext* context,
                                    const ComputeMacRequest* request,
                                    ComputeMacResponse* response) {
-  auto reader_result = BinaryKeysetReader::New(request->keyset());
-  if (!reader_result.ok()) {
-    response->set_err(std::string(reader_result.status().message()));
-    return ::grpc::Status::OK;
-  }
-  auto handle_result =
-      CleartextKeysetHandle::Read(std::move(reader_result.value()));
-  if (!handle_result.ok()) {
-    response->set_err(std::string(handle_result.status().message()));
-    return ::grpc::Status::OK;
-  }
-  auto mac_result = handle_result.value()->GetPrimitive<crypto::tink::Mac>();
+  StatusOr<std::unique_ptr<crypto::tink::Mac>> mac_result =
+      PrimitiveFromSerializedBinaryProtoKeyset<crypto::tink::Mac>(
+          request->annotated_keyset());
   if (!mac_result.ok()) {
     response->set_err(std::string(mac_result.status().message()));
     return ::grpc::Status::OK;
@@ -72,18 +61,9 @@ using ::grpc::Status;
 ::grpc::Status MacImpl::VerifyMac(grpc::ServerContext* context,
                                   const VerifyMacRequest* request,
                                   VerifyMacResponse* response) {
-  auto reader_result = BinaryKeysetReader::New(request->keyset());
-  if (!reader_result.ok()) {
-    response->set_err(std::string(reader_result.status().message()));
-    return ::grpc::Status::OK;
-  }
-  auto handle_result =
-      CleartextKeysetHandle::Read(std::move(reader_result.value()));
-  if (!handle_result.ok()) {
-    response->set_err(std::string(handle_result.status().message()));
-    return ::grpc::Status::OK;
-  }
-  auto mac_result = handle_result.value()->GetPrimitive<crypto::tink::Mac>();
+  StatusOr<std::unique_ptr<crypto::tink::Mac>> mac_result =
+      PrimitiveFromSerializedBinaryProtoKeyset<crypto::tink::Mac>(
+          request->annotated_keyset());
   if (!mac_result.ok()) {
     response->set_err(std::string(mac_result.status().message()));
     return ::grpc::Status::OK;

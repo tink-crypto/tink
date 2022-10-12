@@ -70,7 +70,7 @@ TEST_F(AeadImplTest, CreateAeadSuccess) {
   tink_testing_api::AeadImpl aead;
   std::string keyset = ValidKeyset();
   CreationRequest request;
-  request.set_keyset(keyset);
+  request.mutable_annotated_keyset()->set_serialized_keyset(keyset);
   CreationResponse response;
 
   EXPECT_TRUE(aead.Create(nullptr, &request, &response).ok());
@@ -80,7 +80,7 @@ TEST_F(AeadImplTest, CreateAeadSuccess) {
 TEST_F(AeadImplTest, CreateAeadFails) {
   tink_testing_api::AeadImpl aead;
   CreationRequest request;
-  request.set_keyset("bad keyset");
+  request.mutable_annotated_keyset()->set_serialized_keyset("bad keyset");
   CreationResponse response;
 
   EXPECT_TRUE(aead.Create(nullptr, &request, &response).ok());
@@ -91,7 +91,7 @@ TEST_F(AeadImplTest, EncryptDecryptSuccess) {
   tink_testing_api::AeadImpl aead;
   std::string keyset = ValidKeyset();
   AeadEncryptRequest enc_request;
-  enc_request.set_keyset(keyset);
+  enc_request.mutable_annotated_keyset()->set_serialized_keyset(keyset);
   enc_request.set_plaintext("Plain text");
   enc_request.set_associated_data("ad");
   AeadEncryptResponse enc_response;
@@ -100,7 +100,7 @@ TEST_F(AeadImplTest, EncryptDecryptSuccess) {
   EXPECT_THAT(enc_response.err(), IsEmpty());
 
   AeadDecryptRequest dec_request;
-  dec_request.set_keyset(keyset);
+  dec_request.mutable_annotated_keyset()->set_serialized_keyset(keyset);
   dec_request.set_ciphertext(enc_response.ciphertext());
   dec_request.set_associated_data("ad");
   AeadDecryptResponse dec_response;
@@ -113,7 +113,7 @@ TEST_F(AeadImplTest, EncryptDecryptSuccess) {
 TEST_F(AeadImplTest, EncryptBadKeysetFail) {
   tink_testing_api::AeadImpl aead;
   AeadEncryptRequest enc_request;
-  enc_request.set_keyset("bad keyset");
+  enc_request.mutable_annotated_keyset()->set_serialized_keyset("bad keyset");
   enc_request.set_plaintext("Plain text");
   enc_request.set_associated_data("ad");
   AeadEncryptResponse enc_response;
@@ -125,7 +125,7 @@ TEST_F(AeadImplTest, DecryptBadCiphertextFail) {
   tink_testing_api::AeadImpl aead;
   std::string keyset = ValidKeyset();
   AeadDecryptRequest dec_request;
-  dec_request.set_keyset(keyset);
+  dec_request.mutable_annotated_keyset()->set_serialized_keyset(keyset);
   dec_request.set_ciphertext("bad ciphertext");
   dec_request.set_associated_data("ad");
   AeadDecryptResponse dec_response;

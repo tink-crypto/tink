@@ -17,19 +17,17 @@
 // Implementation of a PrfSet Service.
 #include "prf_set_impl.h"
 
+#include <memory>
 #include <string>
 #include <utility>
 
-#include "tink/binary_keyset_reader.h"
-#include "tink/cleartext_keyset_handle.h"
 #include "tink/prf/prf_set.h"
 #include "create.h"
 #include "proto/testing_api.grpc.pb.h"
 
 namespace tink_testing_api {
 
-using ::crypto::tink::BinaryKeysetReader;
-using ::crypto::tink::CleartextKeysetHandle;
+using ::crypto::tink::util::StatusOr;
 using ::grpc::ServerContext;
 using ::grpc::Status;
 
@@ -43,19 +41,9 @@ using ::grpc::Status;
 ::grpc::Status PrfSetImpl::KeyIds(ServerContext* context,
                                   const PrfSetKeyIdsRequest* request,
                                   PrfSetKeyIdsResponse* response) {
-  auto reader_result = BinaryKeysetReader::New(request->keyset());
-  if (!reader_result.ok()) {
-    response->set_err(std::string(reader_result.status().message()));
-    return ::grpc::Status::OK;
-  }
-  auto handle_result =
-      CleartextKeysetHandle::Read(std::move(reader_result.value()));
-  if (!handle_result.ok()) {
-    response->set_err(std::string(handle_result.status().message()));
-    return ::grpc::Status::OK;
-  }
-  auto prf_set_result =
-      handle_result.value()->GetPrimitive<crypto::tink::PrfSet>();
+  StatusOr<std::unique_ptr<crypto::tink::PrfSet>> prf_set_result =
+      PrimitiveFromSerializedBinaryProtoKeyset<crypto::tink::PrfSet>(
+          request->annotated_keyset());
   if (!prf_set_result.ok()) {
     response->set_err(std::string(prf_set_result.status().message()));
     return ::grpc::Status::OK;
@@ -72,19 +60,9 @@ using ::grpc::Status;
 ::grpc::Status PrfSetImpl::Compute(ServerContext* context,
                                    const PrfSetComputeRequest* request,
                                    PrfSetComputeResponse* response) {
-  auto reader_result = BinaryKeysetReader::New(request->keyset());
-  if (!reader_result.ok()) {
-    response->set_err(std::string(reader_result.status().message()));
-    return ::grpc::Status::OK;
-  }
-  auto handle_result =
-      CleartextKeysetHandle::Read(std::move(reader_result.value()));
-  if (!handle_result.ok()) {
-    response->set_err(std::string(handle_result.status().message()));
-    return ::grpc::Status::OK;
-  }
-  auto prf_set_result =
-      handle_result.value()->GetPrimitive<crypto::tink::PrfSet>();
+  StatusOr<std::unique_ptr<crypto::tink::PrfSet>> prf_set_result =
+      PrimitiveFromSerializedBinaryProtoKeyset<crypto::tink::PrfSet>(
+          request->annotated_keyset());
   if (!prf_set_result.ok()) {
     response->set_err(std::string(prf_set_result.status().message()));
     return ::grpc::Status::OK;

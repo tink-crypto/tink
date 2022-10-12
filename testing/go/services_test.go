@@ -345,7 +345,7 @@ func TestSuccessfulAeadCreation(t *testing.T) {
 		t.Fatalf("genKeyset failed: %v", err)
 	}
 
-	result, err := aeadService.Create(ctx, &pb.CreationRequest{Keyset: keyset})
+	result, err := aeadService.Create(ctx, &pb.CreationRequest{AnnotatedKeyset: &pb.AnnotatedKeyset{SerializedKeyset: keyset}})
 	if err != nil {
 		t.Fatalf("CreateAead with good keyset failed with gRPC error: %v", err)
 	}
@@ -358,7 +358,8 @@ func TestFailingAeadCreation(t *testing.T) {
 	aeadService := &services.AEADService{}
 	ctx := context.Background()
 
-	result, err := aeadService.Create(ctx, &pb.CreationRequest{Keyset: []byte{0x80}})
+	result, err := aeadService.Create(ctx, &pb.CreationRequest{
+		AnnotatedKeyset: &pb.AnnotatedKeyset{SerializedKeyset: []byte{0x80}}})
 	if err != nil {
 		t.Fatalf("CreateAead with bad keyset failed with gRPC error: %v", err)
 	}
@@ -369,9 +370,9 @@ func TestFailingAeadCreation(t *testing.T) {
 
 func aeadEncrypt(ctx context.Context, aeadService *services.AEADService, keyset []byte, plaintext []byte, associatedData []byte) ([]byte, error) {
 	encRequest := &pb.AeadEncryptRequest{
-		Keyset:         keyset,
-		Plaintext:      plaintext,
-		AssociatedData: associatedData,
+		AnnotatedKeyset: &pb.AnnotatedKeyset{SerializedKeyset: keyset},
+		Plaintext:       plaintext,
+		AssociatedData:  associatedData,
 	}
 	encResponse, err := aeadService.Encrypt(ctx, encRequest)
 	if err != nil {
@@ -389,9 +390,9 @@ func aeadEncrypt(ctx context.Context, aeadService *services.AEADService, keyset 
 
 func aeadDecrypt(ctx context.Context, aeadService *services.AEADService, keyset []byte, ciphertext []byte, associatedData []byte) ([]byte, error) {
 	decRequest := &pb.AeadDecryptRequest{
-		Keyset:         keyset,
-		Ciphertext:     ciphertext,
-		AssociatedData: associatedData,
+		AnnotatedKeyset: &pb.AnnotatedKeyset{SerializedKeyset: keyset},
+		Ciphertext:      ciphertext,
+		AssociatedData:  associatedData,
 	}
 	decResponse, err := aeadService.Decrypt(ctx, decRequest)
 	if err != nil {
@@ -462,7 +463,7 @@ func TestSuccessfulDaeadCreation(t *testing.T) {
 		t.Fatalf("genKeyset failed: %v", err)
 	}
 
-	result, err := daeadService.Create(ctx, &pb.CreationRequest{Keyset: keyset})
+	result, err := daeadService.Create(ctx, &pb.CreationRequest{AnnotatedKeyset: &pb.AnnotatedKeyset{SerializedKeyset: keyset}})
 	if err != nil {
 		t.Fatalf("CreateDeterministicAead with good keyset failed with gRPC error: %v", err)
 	}
@@ -475,7 +476,7 @@ func TestFailingDaeadCreation(t *testing.T) {
 	daeadService := &services.DeterministicAEADService{}
 	ctx := context.Background()
 
-	result, err := daeadService.Create(ctx, &pb.CreationRequest{Keyset: []byte{0x80}})
+	result, err := daeadService.Create(ctx, &pb.CreationRequest{AnnotatedKeyset: &pb.AnnotatedKeyset{SerializedKeyset: []byte{0x80}}})
 	if err != nil {
 		t.Fatalf("CreateAead with bad keyset failed with gRPC error: %v", err)
 	}
@@ -486,9 +487,9 @@ func TestFailingDaeadCreation(t *testing.T) {
 
 func daeadEncrypt(ctx context.Context, daeadService *services.DeterministicAEADService, keyset []byte, plaintext []byte, associatedData []byte) ([]byte, error) {
 	encRequest := &pb.DeterministicAeadEncryptRequest{
-		Keyset:         keyset,
-		Plaintext:      plaintext,
-		AssociatedData: associatedData,
+		AnnotatedKeyset: &pb.AnnotatedKeyset{SerializedKeyset: keyset},
+		Plaintext:       plaintext,
+		AssociatedData:  associatedData,
 	}
 	encResponse, err := daeadService.EncryptDeterministically(ctx, encRequest)
 	if err != nil {
@@ -506,9 +507,9 @@ func daeadEncrypt(ctx context.Context, daeadService *services.DeterministicAEADS
 
 func daeadDecrypt(ctx context.Context, daeadService *services.DeterministicAEADService, keyset []byte, ciphertext []byte, associatedData []byte) ([]byte, error) {
 	decRequest := &pb.DeterministicAeadDecryptRequest{
-		Keyset:         keyset,
-		Ciphertext:     ciphertext,
-		AssociatedData: associatedData,
+		AnnotatedKeyset: &pb.AnnotatedKeyset{SerializedKeyset: keyset},
+		Ciphertext:      ciphertext,
+		AssociatedData:  associatedData,
 	}
 	decResponse, err := daeadService.DecryptDeterministically(ctx, decRequest)
 	if err != nil {
@@ -579,7 +580,7 @@ func TestSuccessfulStreamingAEADCreation(t *testing.T) {
 		t.Fatalf("genKeyset failed: %v", err)
 	}
 
-	result, err := streamingAEADService.Create(ctx, &pb.CreationRequest{Keyset: privateKeyset})
+	result, err := streamingAEADService.Create(ctx, &pb.CreationRequest{AnnotatedKeyset: &pb.AnnotatedKeyset{SerializedKeyset: privateKeyset}})
 	if err != nil {
 		t.Fatalf("streamingAEADService.Create with good keyset failed with gRPC error: %v, want nil", err)
 	}
@@ -603,7 +604,7 @@ func TestFailingStreamingAEADCreation(t *testing.T) {
 		t.Fatalf("genKeyset failed: %v", err)
 	}
 
-	result, err := streamingAEADService.Create(ctx, &pb.CreationRequest{Keyset: privateKeyset})
+	result, err := streamingAEADService.Create(ctx, &pb.CreationRequest{AnnotatedKeyset: &pb.AnnotatedKeyset{SerializedKeyset: privateKeyset}})
 	if err != nil {
 		t.Fatalf("streamingAEADService.Create with bad keyset failed with gRPC error: %v", err)
 	}
@@ -614,9 +615,9 @@ func TestFailingStreamingAEADCreation(t *testing.T) {
 
 func streamingAEADEncrypt(ctx context.Context, streamingAEADService *services.StreamingAEADService, keyset []byte, plaintext []byte, associatedData []byte) ([]byte, error) {
 	encRequest := &pb.StreamingAeadEncryptRequest{
-		Keyset:         keyset,
-		Plaintext:      plaintext,
-		AssociatedData: associatedData,
+		AnnotatedKeyset: &pb.AnnotatedKeyset{SerializedKeyset: keyset},
+		Plaintext:       plaintext,
+		AssociatedData:  associatedData,
 	}
 	encResponse, err := streamingAEADService.Encrypt(ctx, encRequest)
 	if err != nil {
@@ -634,9 +635,9 @@ func streamingAEADEncrypt(ctx context.Context, streamingAEADService *services.St
 
 func streamingAEADDecrypt(ctx context.Context, streamingAEADService *services.StreamingAEADService, keyset []byte, ciphertext []byte, associatedData []byte) ([]byte, error) {
 	decRequest := &pb.StreamingAeadDecryptRequest{
-		Keyset:         keyset,
-		Ciphertext:     ciphertext,
-		AssociatedData: associatedData,
+		AnnotatedKeyset: &pb.AnnotatedKeyset{SerializedKeyset: keyset},
+		Ciphertext:      ciphertext,
+		AssociatedData:  associatedData,
 	}
 	decResponse, err := streamingAEADService.Decrypt(ctx, decRequest)
 	if err != nil {
@@ -707,7 +708,7 @@ func TestSuccessfulMacCreation(t *testing.T) {
 		t.Fatalf("genKeyset failed: %v", err)
 	}
 
-	result, err := macService.Create(ctx, &pb.CreationRequest{Keyset: privateKeyset})
+	result, err := macService.Create(ctx, &pb.CreationRequest{AnnotatedKeyset: &pb.AnnotatedKeyset{SerializedKeyset: privateKeyset}})
 	if err != nil {
 		t.Fatalf("macService.Create with good keyset failed with gRPC error: %v, want nil", err)
 	}
@@ -732,7 +733,7 @@ func TestFailingMacCreation(t *testing.T) {
 		t.Fatalf("genKeyset failed: %v", err)
 	}
 
-	result, err := macService.Create(ctx, &pb.CreationRequest{Keyset: privateKeyset})
+	result, err := macService.Create(ctx, &pb.CreationRequest{AnnotatedKeyset: &pb.AnnotatedKeyset{SerializedKeyset: privateKeyset}})
 	if err != nil {
 		t.Fatalf("macService.Create with bad keyset failed with gRPC error: %v", err)
 	}
@@ -743,8 +744,8 @@ func TestFailingMacCreation(t *testing.T) {
 
 func computeMAC(ctx context.Context, macService *services.MacService, keyset []byte, data []byte) ([]byte, error) {
 	encRequest := &pb.ComputeMacRequest{
-		Keyset: keyset,
-		Data:   data,
+		AnnotatedKeyset: &pb.AnnotatedKeyset{SerializedKeyset: keyset},
+		Data:            data,
 	}
 	response, err := macService.ComputeMac(ctx, encRequest)
 	if err != nil {
@@ -762,9 +763,9 @@ func computeMAC(ctx context.Context, macService *services.MacService, keyset []b
 
 func verifyMAC(ctx context.Context, macService *services.MacService, keyset []byte, macValue []byte, data []byte) error {
 	request := &pb.VerifyMacRequest{
-		Keyset:   keyset,
-		MacValue: macValue,
-		Data:     data,
+		AnnotatedKeyset: &pb.AnnotatedKeyset{SerializedKeyset: keyset},
+		MacValue:        macValue,
+		Data:            data,
 	}
 	response, err := macService.VerifyMac(ctx, request)
 	if err != nil {
@@ -810,9 +811,9 @@ func TestComputeVerifyMac(t *testing.T) {
 
 func hybridEncrypt(ctx context.Context, hybridService *services.HybridService, publicKeyset []byte, plaintext []byte, contextInfo []byte) ([]byte, error) {
 	encRequest := &pb.HybridEncryptRequest{
-		PublicKeyset: publicKeyset,
-		Plaintext:    plaintext,
-		ContextInfo:  contextInfo,
+		PublicAnnotatedKeyset: &pb.AnnotatedKeyset{SerializedKeyset: publicKeyset},
+		Plaintext:             plaintext,
+		ContextInfo:           contextInfo,
 	}
 	encResponse, err := hybridService.Encrypt(ctx, encRequest)
 	if err != nil {
@@ -830,9 +831,9 @@ func hybridEncrypt(ctx context.Context, hybridService *services.HybridService, p
 
 func hybridDecrypt(ctx context.Context, hybridService *services.HybridService, privateKeyset []byte, ciphertext []byte, contextInfo []byte) ([]byte, error) {
 	decRequest := &pb.HybridDecryptRequest{
-		PrivateKeyset: privateKeyset,
-		Ciphertext:    ciphertext,
-		ContextInfo:   contextInfo,
+		PrivateAnnotatedKeyset: &pb.AnnotatedKeyset{SerializedKeyset: privateKeyset},
+		Ciphertext:             ciphertext,
+		ContextInfo:            contextInfo,
 	}
 	decResponse, err := hybridService.Decrypt(ctx, decRequest)
 	if err != nil {
@@ -863,7 +864,7 @@ func TestSuccessfulHybridDecryptCreation(t *testing.T) {
 		t.Fatalf("genKeyset failed: %v", err)
 	}
 
-	result, err := hybridService.CreateHybridDecrypt(ctx, &pb.CreationRequest{Keyset: privateKeyset})
+	result, err := hybridService.CreateHybridDecrypt(ctx, &pb.CreationRequest{AnnotatedKeyset: &pb.AnnotatedKeyset{SerializedKeyset: privateKeyset}})
 	if err != nil {
 		t.Fatalf("CreateHybridDecrypt with good keyset failed with gRPC error: %v, want nil", err)
 	}
@@ -891,7 +892,7 @@ func TestSuccessfulHybridEncryptCreation(t *testing.T) {
 		t.Fatalf("pubKeyset failed: %v", err)
 	}
 
-	result, err := hybridService.CreateHybridEncrypt(ctx, &pb.CreationRequest{Keyset: publicKeyset})
+	result, err := hybridService.CreateHybridEncrypt(ctx, &pb.CreationRequest{AnnotatedKeyset: &pb.AnnotatedKeyset{SerializedKeyset: publicKeyset}})
 	if err != nil {
 		t.Fatalf("CreateHybridEncrypt with good keyset failed with gRPC error: %v, want nil", err)
 	}
@@ -916,7 +917,7 @@ func TestFailingHybridDecryptCreation(t *testing.T) {
 		t.Fatalf("genKeyset failed: %v", err)
 	}
 
-	result, err := hybridService.CreateHybridDecrypt(ctx, &pb.CreationRequest{Keyset: privateKeyset})
+	result, err := hybridService.CreateHybridDecrypt(ctx, &pb.CreationRequest{AnnotatedKeyset: &pb.AnnotatedKeyset{SerializedKeyset: privateKeyset}})
 	if err != nil {
 		t.Fatalf("CreateHybridDecrypt with bad keyset failed with gRPC error: %v", err)
 	}
@@ -945,7 +946,7 @@ func TestFailingHybridEncryptCreation(t *testing.T) {
 		t.Fatalf("pubKeyset failed: %v", err)
 	}
 
-	result, err := hybridService.CreateHybridEncrypt(ctx, &pb.CreationRequest{Keyset: publicKeyset})
+	result, err := hybridService.CreateHybridEncrypt(ctx, &pb.CreationRequest{AnnotatedKeyset: &pb.AnnotatedKeyset{SerializedKeyset: publicKeyset}})
 	if err != nil {
 		t.Fatalf("CreateHybridEncrypt with good keyset failed with gRPC error: %v", err)
 	}
@@ -1016,7 +1017,7 @@ func TestSuccessfulPublicKeySignCreation(t *testing.T) {
 		t.Fatalf("genKeyset failed: %v", err)
 	}
 
-	result, err := signatureService.CreatePublicKeySign(ctx, &pb.CreationRequest{Keyset: privateKeyset})
+	result, err := signatureService.CreatePublicKeySign(ctx, &pb.CreationRequest{AnnotatedKeyset: &pb.AnnotatedKeyset{SerializedKeyset: privateKeyset}})
 	if err != nil {
 		t.Fatalf("CreateHybridDecrypt with good keyset failed with gRPC error: %v", err)
 	}
@@ -1044,7 +1045,7 @@ func TestSuccessfulPublicKeyVerifyCreation(t *testing.T) {
 		t.Fatalf("pubKeyset failed: %v", err)
 	}
 
-	result, err := signatureService.CreatePublicKeyVerify(ctx, &pb.CreationRequest{Keyset: publicKeyset})
+	result, err := signatureService.CreatePublicKeyVerify(ctx, &pb.CreationRequest{AnnotatedKeyset: &pb.AnnotatedKeyset{SerializedKeyset: publicKeyset}})
 	if err != nil {
 		t.Fatalf("CreateHybridEncrypt with good keyset failed with gRPC error: %v", err)
 	}
@@ -1068,7 +1069,7 @@ func TestFailingPublicKeySignCreation(t *testing.T) {
 		t.Fatalf("genKeyset failed: %v", err)
 	}
 
-	result, err := signatureService.CreatePublicKeySign(ctx, &pb.CreationRequest{Keyset: privateKeyset})
+	result, err := signatureService.CreatePublicKeySign(ctx, &pb.CreationRequest{AnnotatedKeyset: &pb.AnnotatedKeyset{SerializedKeyset: privateKeyset}})
 	if err != nil {
 		t.Fatalf("CreatePublicKeySign with bad keyset failed with gRPC error: %v", err)
 	}
@@ -1096,7 +1097,7 @@ func TestFailingPublicKeyVerifyCreation(t *testing.T) {
 		t.Fatalf("pubKeyset failed: %v", err)
 	}
 
-	result, err := signatureService.CreatePublicKeyVerify(ctx, &pb.CreationRequest{Keyset: publicKeyset})
+	result, err := signatureService.CreatePublicKeyVerify(ctx, &pb.CreationRequest{AnnotatedKeyset: &pb.AnnotatedKeyset{SerializedKeyset: publicKeyset}})
 	if err != nil {
 		t.Fatalf("CreatePublicKeyVerify with good keyset failed with gRPC error: %v", err)
 	}
@@ -1107,8 +1108,8 @@ func TestFailingPublicKeyVerifyCreation(t *testing.T) {
 
 func signatureSign(ctx context.Context, signatureService *services.SignatureService, privateKeyset []byte, data []byte) ([]byte, error) {
 	encRequest := &pb.SignatureSignRequest{
-		PrivateKeyset: privateKeyset,
-		Data:          data,
+		PrivateAnnotatedKeyset: &pb.AnnotatedKeyset{SerializedKeyset: privateKeyset},
+		Data:                   data,
 	}
 	response, err := signatureService.Sign(ctx, encRequest)
 	if err != nil {
@@ -1126,9 +1127,9 @@ func signatureSign(ctx context.Context, signatureService *services.SignatureServ
 
 func signatureVerify(ctx context.Context, signatureService *services.SignatureService, publicKeyset []byte, signatureValue []byte, data []byte) error {
 	request := &pb.SignatureVerifyRequest{
-		PublicKeyset: publicKeyset,
-		Signature:    signatureValue,
-		Data:         data,
+		PublicAnnotatedKeyset: &pb.AnnotatedKeyset{SerializedKeyset: publicKeyset},
+		Signature:             signatureValue,
+		Data:                  data,
 	}
 	response, err := signatureService.Verify(ctx, request)
 	if err != nil {
@@ -1194,7 +1195,7 @@ func TestSuccessfulPrfSetCreation(t *testing.T) {
 		t.Fatalf("genKeyset failed: %v", err)
 	}
 
-	result, err := prfSetService.Create(ctx, &pb.CreationRequest{Keyset: privateKeyset})
+	result, err := prfSetService.Create(ctx, &pb.CreationRequest{AnnotatedKeyset: &pb.AnnotatedKeyset{SerializedKeyset: privateKeyset}})
 	if err != nil {
 		t.Fatalf("macService.Create with good keyset failed with gRPC error: %v", err)
 	}
@@ -1219,7 +1220,7 @@ func TestFailingPrfSetCreation(t *testing.T) {
 		t.Fatalf("genKeyset failed: %v", err)
 	}
 
-	result, err := prfSetService.Create(ctx, &pb.CreationRequest{Keyset: privateKeyset})
+	result, err := prfSetService.Create(ctx, &pb.CreationRequest{AnnotatedKeyset: &pb.AnnotatedKeyset{SerializedKeyset: privateKeyset}})
 	if err != nil {
 		t.Fatalf("prfSetService.Create with bad keyset failed with gRPC error: %v", err)
 	}
@@ -1230,7 +1231,7 @@ func TestFailingPrfSetCreation(t *testing.T) {
 
 func prfSetKeyIds(ctx context.Context, prfSetService *services.PrfSetService, keyset []byte) (uint32, []uint32, error) {
 	request := &pb.PrfSetKeyIdsRequest{
-		Keyset: keyset,
+		AnnotatedKeyset: &pb.AnnotatedKeyset{SerializedKeyset: keyset},
 	}
 	response, err := prfSetService.KeyIds(ctx, request)
 	if err != nil {
@@ -1248,10 +1249,10 @@ func prfSetKeyIds(ctx context.Context, prfSetService *services.PrfSetService, ke
 
 func prfSetCompute(ctx context.Context, prfSetService *services.PrfSetService, keyset []byte, keyID uint32, inputData []byte, outputLength int) ([]byte, error) {
 	request := &pb.PrfSetComputeRequest{
-		Keyset:       keyset,
-		KeyId:        keyID,
-		InputData:    inputData,
-		OutputLength: int32(outputLength),
+		AnnotatedKeyset: &pb.AnnotatedKeyset{SerializedKeyset: keyset},
+		KeyId:           keyID,
+		InputData:       inputData,
+		OutputLength:    int32(outputLength),
 	}
 	response, err := prfSetService.Compute(ctx, request)
 	if err != nil {

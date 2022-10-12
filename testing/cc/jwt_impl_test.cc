@@ -82,7 +82,7 @@ TEST_F(JwtImplMacTest, CreateJwtMacSuccess) {
   tink_testing_api::JwtImpl jwt;
   std::string keyset = ValidKeyset();
   CreationRequest request;
-  request.set_keyset(keyset);
+  request.mutable_annotated_keyset()->set_serialized_keyset(keyset);
   CreationResponse response;
 
   EXPECT_TRUE(jwt.CreateJwtMac(nullptr, &request, &response).ok());
@@ -92,7 +92,7 @@ TEST_F(JwtImplMacTest, CreateJwtMacSuccess) {
 TEST_F(JwtImplMacTest, CreateJwtMacFails) {
   tink_testing_api::JwtImpl jwt;
   CreationRequest request;
-  request.set_keyset("bad keyset");
+  request.mutable_annotated_keyset()->set_serialized_keyset("bad keyset");
   CreationResponse response;
 
   EXPECT_TRUE(jwt.CreateJwtMac(nullptr, &request, &response).ok());
@@ -103,7 +103,7 @@ TEST_F(JwtImplMacTest, MacComputeVerifySuccess) {
   tink_testing_api::JwtImpl jwt;
   std::string keyset = ValidKeyset();
   JwtSignRequest comp_request;
-  comp_request.set_keyset(keyset);
+  comp_request.mutable_annotated_keyset()->set_serialized_keyset(keyset);
   JwtToken* raw_jwt = comp_request.mutable_raw_jwt();
   raw_jwt->mutable_type_header()->set_value("type_header");
   raw_jwt->mutable_issuer()->set_value("issuer");
@@ -127,7 +127,7 @@ TEST_F(JwtImplMacTest, MacComputeVerifySuccess) {
   EXPECT_THAT(comp_response.err(), IsEmpty());
 
   JwtVerifyRequest verify_request;
-  verify_request.set_keyset(keyset);
+  verify_request.mutable_annotated_keyset()->set_serialized_keyset(keyset);
   verify_request.set_signed_compact_jwt(comp_response.signed_compact_jwt());
   JwtValidator* validator = verify_request.mutable_validator();
   validator->mutable_expected_type_header()->set_value("type_header");
@@ -166,7 +166,7 @@ TEST_F(JwtImplMacTest, MacComputeVerifySuccess) {
 TEST_F(JwtImplMacTest, ComputeBadKeysetFail) {
   tink_testing_api::JwtImpl jwt;
   JwtSignRequest comp_request;
-  comp_request.set_keyset("bad keyset");
+  comp_request.mutable_annotated_keyset()->set_serialized_keyset("bad keyset");
   comp_request.mutable_raw_jwt()->mutable_issuer()->set_value("issuer");
   JwtSignResponse comp_response;
 
@@ -179,7 +179,7 @@ TEST_F(JwtImplMacTest, VerifyWithWrongIssuerFails) {
   tink_testing_api::JwtImpl jwt;
   std::string keyset = ValidKeyset();
   JwtSignRequest comp_request;
-  comp_request.set_keyset(keyset);
+  comp_request.mutable_annotated_keyset()->set_serialized_keyset(keyset);
   comp_request.mutable_raw_jwt()->mutable_issuer()->set_value("unknown");
   JwtSignResponse comp_response;
   EXPECT_TRUE(
@@ -187,7 +187,7 @@ TEST_F(JwtImplMacTest, VerifyWithWrongIssuerFails) {
   EXPECT_THAT(comp_response.err(), IsEmpty());
 
   JwtVerifyRequest verify_request;
-  verify_request.set_keyset(keyset);
+  verify_request.mutable_annotated_keyset()->set_serialized_keyset(keyset);
   verify_request.set_signed_compact_jwt(comp_response.signed_compact_jwt());
   verify_request.mutable_validator()->mutable_expected_issuer()->set_value(
       "issuer");
@@ -238,7 +238,7 @@ class JwtImplSignatureTest : public ::testing::Test {
 TEST_F(JwtImplSignatureTest, CreatePublicKeySignSuccess) {
   tink_testing_api::JwtImpl jwt;
   CreationRequest request;
-  request.set_keyset(private_keyset_);
+  request.mutable_annotated_keyset()->set_serialized_keyset(private_keyset_);
   CreationResponse response;
 
   EXPECT_TRUE(jwt.CreateJwtPublicKeySign(nullptr, &request, &response).ok());
@@ -249,7 +249,7 @@ TEST_F(JwtImplSignatureTest, CreatePublicKeySignFailure) {
   tink_testing_api::JwtImpl jwt;
 
   CreationRequest request;
-  request.set_keyset("\x80");
+  request.mutable_annotated_keyset()->set_serialized_keyset("\x80");
   CreationResponse response;
 
   EXPECT_TRUE(jwt.CreateJwtPublicKeySign(nullptr, &request, &response).ok());
@@ -260,7 +260,7 @@ TEST_F(JwtImplSignatureTest, CreatePublicKeyVerifySuccess) {
   tink_testing_api::JwtImpl jwt;
 
   CreationRequest request;
-  request.set_keyset(public_keyset_);
+  request.mutable_annotated_keyset()->set_serialized_keyset(public_keyset_);
   CreationResponse response;
 
   EXPECT_TRUE(jwt.CreateJwtPublicKeyVerify(nullptr, &request, &response).ok());
@@ -271,7 +271,7 @@ TEST_F(JwtImplSignatureTest, CreatePublicKeyVerifyFailure) {
   tink_testing_api::JwtImpl jwt;
 
   CreationRequest request;
-  request.set_keyset("\x80");
+  request.mutable_annotated_keyset()->set_serialized_keyset("\x80");
   CreationResponse response;
 
   EXPECT_TRUE(jwt.CreateJwtPublicKeyVerify(nullptr, &request, &response).ok());
@@ -281,7 +281,8 @@ TEST_F(JwtImplSignatureTest, CreatePublicKeyVerifyFailure) {
 TEST_F(JwtImplSignatureTest, SignVerifySuccess) {
   tink_testing_api::JwtImpl jwt;
   JwtSignRequest comp_request;
-  comp_request.set_keyset(private_keyset_);
+  comp_request.mutable_annotated_keyset()->set_serialized_keyset(
+      private_keyset_);
   JwtToken* raw_jwt = comp_request.mutable_raw_jwt();
   raw_jwt->mutable_type_header()->set_value("type_header");
   raw_jwt->mutable_issuer()->set_value("issuer");
@@ -304,7 +305,8 @@ TEST_F(JwtImplSignatureTest, SignVerifySuccess) {
   EXPECT_THAT(comp_response.err(), IsEmpty());
 
   JwtVerifyRequest verify_request;
-  verify_request.set_keyset(public_keyset_);
+  verify_request.mutable_annotated_keyset()->set_serialized_keyset(
+      public_keyset_);
   verify_request.set_signed_compact_jwt(comp_response.signed_compact_jwt());
   JwtValidator* validator = verify_request.mutable_validator();
   validator->mutable_expected_type_header()->set_value("type_header");
@@ -340,7 +342,7 @@ TEST_F(JwtImplSignatureTest, SignVerifySuccess) {
 TEST_F(JwtImplSignatureTest, SignWithBadKeysetFails) {
   tink_testing_api::JwtImpl jwt;
   JwtSignRequest comp_request;
-  comp_request.set_keyset("bad keyset");
+  comp_request.mutable_annotated_keyset()->set_serialized_keyset("bad keyset");
   comp_request.mutable_raw_jwt()->mutable_issuer()->set_value("issuer");
   JwtSignResponse comp_response;
 
@@ -352,7 +354,8 @@ TEST_F(JwtImplSignatureTest, SignWithBadKeysetFails) {
 TEST_F(JwtImplSignatureTest, VerifyWithWrongIssuerFails) {
   tink_testing_api::JwtImpl jwt;
   JwtSignRequest comp_request;
-  comp_request.set_keyset(private_keyset_);
+  comp_request.mutable_annotated_keyset()->set_serialized_keyset(
+      private_keyset_);
   comp_request.mutable_raw_jwt()->mutable_issuer()->set_value("unknown");
   JwtSignResponse comp_response;
   EXPECT_TRUE(
@@ -360,7 +363,8 @@ TEST_F(JwtImplSignatureTest, VerifyWithWrongIssuerFails) {
   EXPECT_THAT(comp_response.err(), IsEmpty());
 
   JwtVerifyRequest verify_request;
-  verify_request.set_keyset(public_keyset_);
+  verify_request.mutable_annotated_keyset()->set_serialized_keyset(
+      public_keyset_);
   verify_request.set_signed_compact_jwt(comp_response.signed_compact_jwt());
   verify_request.mutable_validator()->mutable_expected_issuer()->set_value(
       "issuer");
@@ -377,7 +381,8 @@ TEST_F(JwtImplSignatureTest, SignConvertToAndFromJwkVerifySuccess) {
 
   // Create a signed token
   JwtSignRequest comp_request;
-  comp_request.set_keyset(private_keyset_);
+  comp_request.mutable_annotated_keyset()->set_serialized_keyset(
+      private_keyset_);
   JwtToken* raw_jwt = comp_request.mutable_raw_jwt();
   raw_jwt->mutable_issuer()->set_value("issuer");
   raw_jwt->mutable_expiration()->set_seconds(34567);
@@ -405,7 +410,8 @@ TEST_F(JwtImplSignatureTest, SignConvertToAndFromJwkVerifySuccess) {
 
   // Verify the token using the public keyset
   JwtVerifyRequest verify_request;
-  verify_request.set_keyset(from_jwk_response.keyset());
+  verify_request.mutable_annotated_keyset()->set_serialized_keyset(
+      from_jwk_response.keyset());
   verify_request.set_signed_compact_jwt(comp_response.signed_compact_jwt());
   JwtValidator* validator = verify_request.mutable_validator();
   validator->mutable_expected_issuer()->set_value("issuer");

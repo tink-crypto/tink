@@ -75,7 +75,8 @@ TEST_F(HybridImplTest, CreateHybridDecryptSuccess) {
       << private_keyset_handle.status();
 
   CreationRequest request;
-  request.set_keyset(KeysetBytes(**private_keyset_handle));
+  request.mutable_annotated_keyset()->set_serialized_keyset(
+      KeysetBytes(**private_keyset_handle));
   CreationResponse response;
 
   EXPECT_TRUE(hybrid.CreateHybridDecrypt(nullptr, &request, &response).ok());
@@ -86,7 +87,7 @@ TEST_F(HybridImplTest, CreateHybridDecryptFailure) {
   tink_testing_api::HybridImpl hybrid;
 
   CreationRequest request;
-  request.set_keyset("\x80");
+  request.mutable_annotated_keyset()->set_serialized_keyset("\x80");
   CreationResponse response;
 
   EXPECT_TRUE(hybrid.CreateHybridDecrypt(nullptr, &request, &response).ok());
@@ -107,7 +108,8 @@ TEST_F(HybridImplTest, CreateHybridEncryptSuccess) {
       << public_keyset_handle.status();
 
   CreationRequest request;
-  request.set_keyset(KeysetBytes(**public_keyset_handle));
+  request.mutable_annotated_keyset()->set_serialized_keyset(
+      KeysetBytes(**public_keyset_handle));
   CreationResponse response;
 
   EXPECT_TRUE(hybrid.CreateHybridEncrypt(nullptr, &request, &response).ok());
@@ -118,7 +120,7 @@ TEST_F(HybridImplTest, CreateHybridEncryptFailure) {
   tink_testing_api::HybridImpl hybrid;
 
   CreationRequest request;
-  request.set_keyset("\x80");
+  request.mutable_annotated_keyset()->set_serialized_keyset("\x80");
   CreationResponse response;
 
   EXPECT_TRUE(hybrid.CreateHybridEncrypt(nullptr, &request, &response).ok());
@@ -136,7 +138,8 @@ TEST_F(HybridImplTest, EncryptDecryptSuccess) {
   EXPECT_TRUE(public_handle_result.ok());
 
   HybridEncryptRequest enc_request;
-  enc_request.set_public_keyset(KeysetBytes(*public_handle_result.value()));
+  enc_request.mutable_public_annotated_keyset()->set_serialized_keyset(
+      KeysetBytes(*public_handle_result.value()));
   enc_request.set_plaintext("Plain text");
   enc_request.set_context_info("context");
   HybridEncryptResponse enc_response;
@@ -145,7 +148,8 @@ TEST_F(HybridImplTest, EncryptDecryptSuccess) {
   EXPECT_THAT(enc_response.err(), IsEmpty());
 
   HybridDecryptRequest dec_request;
-  dec_request.set_private_keyset(KeysetBytes(*private_handle_result.value()));
+  dec_request.mutable_private_annotated_keyset()->set_serialized_keyset(
+      KeysetBytes(*private_handle_result.value()));
   dec_request.set_ciphertext(enc_response.ciphertext());
   dec_request.set_context_info("context");
   HybridDecryptResponse dec_response;
@@ -158,7 +162,8 @@ TEST_F(HybridImplTest, EncryptDecryptSuccess) {
 TEST_F(HybridImplTest, EncryptBadKeysetFail) {
   tink_testing_api::HybridImpl hybrid;
   HybridEncryptRequest enc_request;
-  enc_request.set_public_keyset("bad keyset");
+  enc_request.mutable_public_annotated_keyset()->set_serialized_keyset(
+      "bad keyset");
   enc_request.set_plaintext("Plain text");
   enc_request.set_context_info("context");
   HybridEncryptResponse enc_response;
@@ -175,7 +180,8 @@ TEST_F(HybridImplTest, DecryptBadCiphertextFail) {
   EXPECT_TRUE(private_handle_result.ok());
 
   HybridDecryptRequest dec_request;
-  dec_request.set_private_keyset(KeysetBytes(*private_handle_result.value()));
+  dec_request.mutable_private_annotated_keyset()->set_serialized_keyset(
+      KeysetBytes(*private_handle_result.value()));
   dec_request.set_ciphertext("bad ciphertext");
   dec_request.set_context_info("context");
   HybridDecryptResponse dec_response;

@@ -69,7 +69,7 @@ TEST_F(MacImplTest, CreateMacSuccess) {
   tink_testing_api::MacImpl mac;
   std::string keyset = ValidKeyset();
   CreationRequest request;
-  request.set_keyset(keyset);
+  request.mutable_annotated_keyset()->set_serialized_keyset(keyset);
   CreationResponse response;
 
   EXPECT_TRUE(mac.Create(nullptr, &request, &response).ok());
@@ -79,7 +79,7 @@ TEST_F(MacImplTest, CreateMacSuccess) {
 TEST_F(MacImplTest, CreateMacFails) {
   tink_testing_api::MacImpl mac;
   CreationRequest request;
-  request.set_keyset("bad keyset");
+  request.mutable_annotated_keyset()->set_serialized_keyset("bad keyset");
   CreationResponse response;
 
   EXPECT_TRUE(mac.Create(nullptr, &request, &response).ok());
@@ -90,7 +90,7 @@ TEST_F(MacImplTest, ComputeVerifySuccess) {
   tink_testing_api::MacImpl mac;
   std::string keyset = ValidKeyset();
   ComputeMacRequest comp_request;
-  comp_request.set_keyset(keyset);
+  comp_request.mutable_annotated_keyset()->set_serialized_keyset(keyset);
   comp_request.set_data("some data");
   ComputeMacResponse comp_response;
 
@@ -98,7 +98,7 @@ TEST_F(MacImplTest, ComputeVerifySuccess) {
   EXPECT_THAT(comp_response.err(), IsEmpty());
 
   VerifyMacRequest verify_request;
-  verify_request.set_keyset(keyset);
+  verify_request.mutable_annotated_keyset()->set_serialized_keyset(keyset);
   verify_request.set_mac_value(comp_response.mac_value());
   verify_request.set_data("some data");
   VerifyMacResponse verify_response;
@@ -110,7 +110,7 @@ TEST_F(MacImplTest, ComputeVerifySuccess) {
 TEST_F(MacImplTest, ComputeBadKeysetFail) {
   tink_testing_api::MacImpl mac;
   ComputeMacRequest comp_request;
-  comp_request.set_keyset("bad keyset");
+  comp_request.mutable_annotated_keyset()->set_serialized_keyset("bad keyset");
   comp_request.set_data("some data");
   ComputeMacResponse comp_response;
 
@@ -122,7 +122,7 @@ TEST_F(MacImplTest, VerifyBadCiphertextFail) {
   tink_testing_api::MacImpl mac;
   std::string keyset = ValidKeyset();
   VerifyMacRequest verify_request;
-  verify_request.set_keyset(keyset);
+  verify_request.mutable_annotated_keyset()->set_serialized_keyset(keyset);
   verify_request.set_mac_value("bad mac value");
   verify_request.set_data("some data");
   VerifyMacResponse verify_response;

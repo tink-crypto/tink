@@ -38,9 +38,11 @@ namespace tink_testing_api {
 // optional SecretKeyAccessToken).
 template <typename T>
 crypto::tink::util::StatusOr<std::unique_ptr<T>>
-PrimitiveFromSerializedBinaryProtoKeyset(absl::string_view keyset) {
+PrimitiveFromSerializedBinaryProtoKeyset(
+    const AnnotatedKeyset& annotated_keyset) {
   crypto::tink::util::StatusOr<std::unique_ptr<crypto::tink::KeysetReader>>
-      reader = crypto::tink::BinaryKeysetReader::New(keyset);
+      reader = crypto::tink::BinaryKeysetReader::New(
+          annotated_keyset.serialized_keyset());
   if (!reader.ok()) {
     return reader.status();
   }
@@ -59,7 +61,7 @@ template <typename T>
 grpc::Status CreatePrimitiveForRpc(const CreationRequest* request,
                                    CreationResponse* response) {
   crypto::tink::util::StatusOr<std::unique_ptr<T>> primitive =
-      PrimitiveFromSerializedBinaryProtoKeyset<T>(request->keyset());
+      PrimitiveFromSerializedBinaryProtoKeyset<T>(request->annotated_keyset());
   if (!primitive.ok()) {
     response->set_err(std::string(primitive.status().message()));
   }

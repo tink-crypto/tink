@@ -25,6 +25,7 @@ import com.google.crypto.tink.internal.KeyTemplateProtoConverter;
 import com.google.crypto.tink.jwt.JwtHmacKeyManager;
 import com.google.crypto.tink.jwt.JwtMacConfig;
 import com.google.crypto.tink.jwt.JwtSignatureConfig;
+import com.google.crypto.tink.testing.proto.AnnotatedKeyset;
 import com.google.crypto.tink.testing.proto.CreationRequest;
 import com.google.crypto.tink.testing.proto.CreationResponse;
 import com.google.crypto.tink.testing.proto.JwtClaimValue;
@@ -71,17 +72,14 @@ public final class JwtServiceImplTest {
     JwtSignatureConfig.register();
 
     String serverName = InProcessServerBuilder.generateName();
-    server = InProcessServerBuilder
-        .forName(serverName)
-        .directExecutor()
-        .addService(new KeysetServiceImpl())
-        .addService(new JwtServiceImpl())
-        .build()
-        .start();
-    channel = InProcessChannelBuilder
-        .forName(serverName)
-        .directExecutor()
-        .build();
+    server =
+        InProcessServerBuilder.forName(serverName)
+            .directExecutor()
+            .addService(new KeysetServiceImpl())
+            .addService(new JwtServiceImpl())
+            .build()
+            .start();
+    channel = InProcessChannelBuilder.forName(serverName).directExecutor().build();
     keysetStub = KeysetGrpc.newBlockingStub(channel);
     jwtStub = JwtGrpc.newBlockingStub(channel);
   }
@@ -139,7 +137,12 @@ public final class JwtServiceImplTest {
     assertThat(keysetResponse.getErr()).isEmpty();
     CreationResponse response =
         jwtStub.createJwtMac(
-            CreationRequest.newBuilder().setKeyset(keysetResponse.getKeyset()).build());
+            CreationRequest.newBuilder()
+                .setAnnotatedKeyset(
+                    AnnotatedKeyset.newBuilder()
+                        .setSerializedKeyset(keysetResponse.getKeyset())
+                        .build())
+                .build());
     assertThat(response.getErr()).isEmpty();
   }
 
@@ -148,7 +151,10 @@ public final class JwtServiceImplTest {
     CreationResponse response =
         jwtStub.createJwtMac(
             CreationRequest.newBuilder()
-                .setKeyset(ByteString.copyFrom(new byte[] {(byte) 0x80}))
+                .setAnnotatedKeyset(
+                    AnnotatedKeyset.newBuilder()
+                        .setSerializedKeyset(ByteString.copyFrom(new byte[] {(byte) 0x80}))
+                        .build())
                 .build());
     assertThat(response.getErr()).isNotEmpty();
   }
@@ -165,7 +171,13 @@ public final class JwtServiceImplTest {
     JwtToken token = generateToken("audience", expSecs, expNanos);
 
     JwtSignRequest signRequest =
-        JwtSignRequest.newBuilder().setKeyset(ByteString.copyFrom(keyset)).setRawJwt(token).build();
+        JwtSignRequest.newBuilder()
+            .setAnnotatedKeyset(
+                AnnotatedKeyset.newBuilder()
+                    .setSerializedKeyset(ByteString.copyFrom(keyset))
+                    .build())
+            .setRawJwt(token)
+            .build();
     JwtSignResponse signResponse = jwtStub.computeMacAndEncode(signRequest);
     assertThat(signResponse.getErr()).isEmpty();
 
@@ -178,7 +190,10 @@ public final class JwtServiceImplTest {
             .build();
     JwtVerifyRequest verifyRequest =
         JwtVerifyRequest.newBuilder()
-            .setKeyset(ByteString.copyFrom(keyset))
+            .setAnnotatedKeyset(
+                AnnotatedKeyset.newBuilder()
+                    .setSerializedKeyset(ByteString.copyFrom(keyset))
+                    .build())
             .setSignedCompactJwt(signResponse.getSignedCompactJwt())
             .setValidator(validator)
             .build();
@@ -199,14 +214,23 @@ public final class JwtServiceImplTest {
     JwtToken token = JwtToken.getDefaultInstance();
 
     JwtSignRequest signRequest =
-        JwtSignRequest.newBuilder().setKeyset(ByteString.copyFrom(keyset)).setRawJwt(token).build();
+        JwtSignRequest.newBuilder()
+            .setAnnotatedKeyset(
+                AnnotatedKeyset.newBuilder()
+                    .setSerializedKeyset(ByteString.copyFrom(keyset))
+                    .build())
+            .setRawJwt(token)
+            .build();
     JwtSignResponse signResponse = jwtStub.computeMacAndEncode(signRequest);
     assertThat(signResponse.getErr()).isEmpty();
 
     JwtValidator validator = JwtValidator.newBuilder().setAllowMissingExpiration(true).build();
     JwtVerifyRequest verifyRequest =
         JwtVerifyRequest.newBuilder()
-            .setKeyset(ByteString.copyFrom(keyset))
+            .setAnnotatedKeyset(
+                AnnotatedKeyset.newBuilder()
+                    .setSerializedKeyset(ByteString.copyFrom(keyset))
+                    .build())
             .setSignedCompactJwt(signResponse.getSignedCompactJwt())
             .setValidator(validator)
             .build();
@@ -223,7 +247,12 @@ public final class JwtServiceImplTest {
     assertThat(keysetResponse.getErr()).isEmpty();
     CreationResponse response =
         jwtStub.createJwtPublicKeySign(
-            CreationRequest.newBuilder().setKeyset(keysetResponse.getKeyset()).build());
+            CreationRequest.newBuilder()
+                .setAnnotatedKeyset(
+                    AnnotatedKeyset.newBuilder()
+                        .setSerializedKeyset(keysetResponse.getKeyset())
+                        .build())
+                .build());
     assertThat(response.getErr()).isEmpty();
   }
 
@@ -232,11 +261,12 @@ public final class JwtServiceImplTest {
     CreationResponse response =
         jwtStub.createJwtPublicKeySign(
             CreationRequest.newBuilder()
-                .setKeyset(ByteString.copyFrom(new byte[] {(byte) 0x80}))
+                .setAnnotatedKeyset(
+                    AnnotatedKeyset.newBuilder()
+                        .setSerializedKeyset(ByteString.copyFrom(new byte[] {(byte) 0x80})))
                 .build());
     assertThat(response.getErr()).isNotEmpty();
   }
-
 
   @Test
   public void jwtPublicKeyVerifyCreateKeyset_success() throws Exception {
@@ -249,7 +279,12 @@ public final class JwtServiceImplTest {
     assertThat(pubResponse.getErr()).isEmpty();
     CreationResponse response =
         jwtStub.createJwtPublicKeyVerify(
-            CreationRequest.newBuilder().setKeyset(pubResponse.getPublicKeyset()).build());
+            CreationRequest.newBuilder()
+                .setAnnotatedKeyset(
+                    AnnotatedKeyset.newBuilder()
+                        .setSerializedKeyset(pubResponse.getPublicKeyset())
+                        .build())
+                .build());
     assertThat(response.getErr()).isEmpty();
   }
 
@@ -258,7 +293,10 @@ public final class JwtServiceImplTest {
     CreationResponse response =
         jwtStub.createJwtPublicKeyVerify(
             CreationRequest.newBuilder()
-                .setKeyset(ByteString.copyFrom(new byte[] {(byte) 0x80}))
+                .setAnnotatedKeyset(
+                    AnnotatedKeyset.newBuilder()
+                        .setSerializedKeyset(ByteString.copyFrom(new byte[] {(byte) 0x80}))
+                        .build())
                 .build());
     assertThat(response.getErr()).isNotEmpty();
   }
@@ -280,7 +318,10 @@ public final class JwtServiceImplTest {
 
     JwtSignRequest signRequest =
         JwtSignRequest.newBuilder()
-            .setKeyset(ByteString.copyFrom(privateKeyset))
+            .setAnnotatedKeyset(
+                AnnotatedKeyset.newBuilder()
+                    .setSerializedKeyset(ByteString.copyFrom(privateKeyset))
+                    .build())
             .setRawJwt(token)
             .build();
     JwtSignResponse signResponse = jwtStub.publicKeySignAndEncode(signRequest);
@@ -295,7 +336,10 @@ public final class JwtServiceImplTest {
             .build();
     JwtVerifyRequest verifyRequest =
         JwtVerifyRequest.newBuilder()
-            .setKeyset(ByteString.copyFrom(publicKeyset))
+            .setAnnotatedKeyset(
+                AnnotatedKeyset.newBuilder()
+                    .setSerializedKeyset(ByteString.copyFrom(publicKeyset))
+                    .build())
             .setSignedCompactJwt(signResponse.getSignedCompactJwt())
             .setValidator(validator)
             .build();
@@ -313,7 +357,10 @@ public final class JwtServiceImplTest {
     JwtToken token = generateToken("audience", 1234, 0);
     JwtSignRequest signRequest =
         JwtSignRequest.newBuilder()
-            .setKeyset(ByteString.copyFrom(badKeyset))
+            .setAnnotatedKeyset(
+                AnnotatedKeyset.newBuilder()
+                    .setSerializedKeyset(ByteString.copyFrom(badKeyset))
+                    .build())
             .setRawJwt(token)
             .build();
     JwtSignResponse signResponse = jwtStub.computeMacAndEncode(signRequest);
@@ -330,7 +377,13 @@ public final class JwtServiceImplTest {
     JwtToken token = generateToken("audience", 1234 - 10, 0);
 
     JwtSignRequest signRequest =
-        JwtSignRequest.newBuilder().setKeyset(ByteString.copyFrom(keyset)).setRawJwt(token).build();
+        JwtSignRequest.newBuilder()
+            .setAnnotatedKeyset(
+                AnnotatedKeyset.newBuilder()
+                    .setSerializedKeyset(ByteString.copyFrom(keyset))
+                    .build())
+            .setRawJwt(token)
+            .build();
     JwtSignResponse signResponse = jwtStub.computeMacAndEncode(signRequest);
     assertThat(signResponse.getErr()).isEmpty();
 
@@ -343,7 +396,10 @@ public final class JwtServiceImplTest {
             .build();
     JwtVerifyRequest verifyRequest =
         JwtVerifyRequest.newBuilder()
-            .setKeyset(ByteString.copyFrom(keyset))
+            .setAnnotatedKeyset(
+                AnnotatedKeyset.newBuilder()
+                    .setSerializedKeyset(ByteString.copyFrom(keyset))
+                    .build())
             .setSignedCompactJwt(signResponse.getSignedCompactJwt())
             .setValidator(validator)
             .build();
@@ -363,7 +419,10 @@ public final class JwtServiceImplTest {
 
     JwtSignRequest signRequest =
         JwtSignRequest.newBuilder()
-            .setKeyset(ByteString.copyFrom(keyset))
+            .setAnnotatedKeyset(
+                AnnotatedKeyset.newBuilder()
+                    .setSerializedKeyset(ByteString.copyFrom(keyset))
+                    .build())
             .setRawJwt(token)
             .build();
     JwtSignResponse signResponse = jwtStub.computeMacAndEncode(signRequest);
@@ -378,7 +437,10 @@ public final class JwtServiceImplTest {
             .build();
     JwtVerifyRequest verifyRequest =
         JwtVerifyRequest.newBuilder()
-            .setKeyset(ByteString.copyFrom(keyset))
+            .setAnnotatedKeyset(
+                AnnotatedKeyset.newBuilder()
+                    .setSerializedKeyset(ByteString.copyFrom(keyset))
+                    .build())
             .setSignedCompactJwt(signResponse.getSignedCompactJwt())
             .setValidator(validator)
             .build();
@@ -399,7 +461,10 @@ public final class JwtServiceImplTest {
 
     JwtSignRequest signRequest =
         JwtSignRequest.newBuilder()
-            .setKeyset(ByteString.copyFrom(keyset))
+            .setAnnotatedKeyset(
+                AnnotatedKeyset.newBuilder()
+                    .setSerializedKeyset(ByteString.copyFrom(keyset))
+                    .build())
             .setRawJwt(token)
             .build();
     JwtSignResponse signResponse = jwtStub.computeMacAndEncode(signRequest);
@@ -418,7 +483,10 @@ public final class JwtServiceImplTest {
             .build();
     JwtVerifyRequest verifyRequest =
         JwtVerifyRequest.newBuilder()
-            .setKeyset(ByteString.copyFrom(wrongKeyset))
+            .setAnnotatedKeyset(
+                AnnotatedKeyset.newBuilder()
+                    .setSerializedKeyset(ByteString.copyFrom(wrongKeyset))
+                    .build())
             .setSignedCompactJwt(signResponse.getSignedCompactJwt())
             .setValidator(validator)
             .build();
@@ -442,7 +510,10 @@ public final class JwtServiceImplTest {
 
     JwtSignRequest signRequest =
         JwtSignRequest.newBuilder()
-            .setKeyset(ByteString.copyFrom(privateKeyset))
+            .setAnnotatedKeyset(
+                AnnotatedKeyset.newBuilder()
+                    .setSerializedKeyset(ByteString.copyFrom(privateKeyset))
+                    .build())
             .setRawJwt(token)
             .build();
     JwtSignResponse signResponse = jwtStub.publicKeySignAndEncode(signRequest);
@@ -470,7 +541,8 @@ public final class JwtServiceImplTest {
             .build();
     JwtVerifyRequest verifyRequest =
         JwtVerifyRequest.newBuilder()
-            .setKeyset(fromResponse.getKeyset())
+            .setAnnotatedKeyset(
+                AnnotatedKeyset.newBuilder().setSerializedKeyset(fromResponse.getKeyset()).build())
             .setSignedCompactJwt(signResponse.getSignedCompactJwt())
             .setValidator(validator)
             .build();

@@ -46,7 +46,8 @@ final class Util {
       StreamObserver<CreationResponse> responseObserver,
       Class<?> primitiveClass) {
     try {
-      KeysetHandle keysetHandle = parseBinaryProtoKeyset (request.getKeyset());
+      KeysetHandle keysetHandle =
+          parseBinaryProtoKeyset(request.getAnnotatedKeyset().getSerializedKeyset());
       keysetHandle.getPrimitive(primitiveClass);
     } catch (GeneralSecurityException e) {
       responseObserver.onNext(CreationResponse.newBuilder().setErr(e.toString()).build());

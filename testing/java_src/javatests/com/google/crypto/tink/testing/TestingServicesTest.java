@@ -36,6 +36,7 @@ import com.google.crypto.tink.testing.proto.AeadDecryptResponse;
 import com.google.crypto.tink.testing.proto.AeadEncryptRequest;
 import com.google.crypto.tink.testing.proto.AeadEncryptResponse;
 import com.google.crypto.tink.testing.proto.AeadGrpc;
+import com.google.crypto.tink.testing.proto.AnnotatedKeyset;
 import com.google.crypto.tink.testing.proto.BytesValue;
 import com.google.crypto.tink.testing.proto.ComputeMacRequest;
 import com.google.crypto.tink.testing.proto.ComputeMacResponse;
@@ -106,22 +107,19 @@ public final class TestingServicesTest {
   public void setUp() throws Exception {
     TinkConfig.register();
     String serverName = InProcessServerBuilder.generateName();
-    server = InProcessServerBuilder
-        .forName(serverName)
-        .directExecutor()
-        .addService(new MetadataServiceImpl())
-        .addService(new KeysetServiceImpl())
-        .addService(new AeadServiceImpl())
-        .addService(new DeterministicAeadServiceImpl())
-        .addService(new StreamingAeadServiceImpl())
-        .addService(new MacServiceImpl())
-        .addService(new PrfSetServiceImpl())
-        .build()
-        .start();
-    channel = InProcessChannelBuilder
-        .forName(serverName)
-        .directExecutor()
-        .build();
+    server =
+        InProcessServerBuilder.forName(serverName)
+            .directExecutor()
+            .addService(new MetadataServiceImpl())
+            .addService(new KeysetServiceImpl())
+            .addService(new AeadServiceImpl())
+            .addService(new DeterministicAeadServiceImpl())
+            .addService(new StreamingAeadServiceImpl())
+            .addService(new MacServiceImpl())
+            .addService(new PrfSetServiceImpl())
+            .build()
+            .start();
+    channel = InProcessChannelBuilder.forName(serverName).directExecutor().build();
     metadataStub = MetadataGrpc.newBlockingStub(channel);
     keysetStub = KeysetGrpc.newBlockingStub(channel);
     aeadStub = AeadGrpc.newBlockingStub(channel);
@@ -241,7 +239,9 @@ public final class TestingServicesTest {
   }
 
   private static KeysetWriteEncryptedResponse keysetWriteEncrypted(
-      KeysetGrpc.KeysetBlockingStub keysetStub, byte[] keyset, byte[] masterKeyset,
+      KeysetGrpc.KeysetBlockingStub keysetStub,
+      byte[] keyset,
+      byte[] masterKeyset,
       Optional<byte[]> associatedData) {
     KeysetWriteEncryptedRequest.Builder requestBuilder =
         KeysetWriteEncryptedRequest.newBuilder()
@@ -268,7 +268,8 @@ public final class TestingServicesTest {
     byte[] masterKeyset = masterKeysetResponse.getKeyset().toByteArray();
 
     KeysetWriteEncryptedResponse writeResponse =
-        keysetWriteEncrypted(keysetStub, keyset, masterKeyset, /*associatedData=*/Optional.empty());
+        keysetWriteEncrypted(
+            keysetStub, keyset, masterKeyset, /*associatedData=*/ Optional.empty());
     assertThat(writeResponse.getErr()).isEmpty();
     byte[] encryptedKeyset = writeResponse.getEncryptedKeyset().toByteArray();
 
@@ -304,8 +305,7 @@ public final class TestingServicesTest {
     assertThat(encryptedKeyset).isNotEqualTo(keyset);
 
     KeysetReadEncryptedResponse readResponse =
-        keysetReadEncrypted(
-            keysetStub, encryptedKeyset, masterKeyset, Optional.of(associatedData));
+        keysetReadEncrypted(keysetStub, encryptedKeyset, masterKeyset, Optional.of(associatedData));
     assertThat(readResponse.getErr()).isEmpty();
     byte[] output = readResponse.getKeyset().toByteArray();
 
@@ -351,7 +351,12 @@ public final class TestingServicesTest {
     assertThat(keysetResponse.getErr()).isEmpty();
     CreationResponse response =
         aeadStub.create(
-            CreationRequest.newBuilder().setKeyset(keysetResponse.getKeyset()).build());
+            CreationRequest.newBuilder()
+                .setAnnotatedKeyset(
+                    AnnotatedKeyset.newBuilder()
+                        .setSerializedKeyset(keysetResponse.getKeyset())
+                        .build())
+                .build());
     assertThat(response.getErr()).isEmpty();
   }
 
@@ -360,7 +365,10 @@ public final class TestingServicesTest {
     CreationResponse response =
         aeadStub.create(
             CreationRequest.newBuilder()
-                .setKeyset(ByteString.copyFrom(new byte[] {(byte) 0x80}))
+                .setAnnotatedKeyset(
+                    AnnotatedKeyset.newBuilder()
+                        .setSerializedKeyset(ByteString.copyFrom(new byte[] {(byte) 0x80}))
+                        .build())
                 .build());
     assertThat(response.getErr()).isNotEmpty();
   }
@@ -369,7 +377,10 @@ public final class TestingServicesTest {
       AeadGrpc.AeadBlockingStub aeadStub, byte[] keyset, byte[] plaintext, byte[] associatedData) {
     AeadEncryptRequest encRequest =
         AeadEncryptRequest.newBuilder()
-            .setKeyset(ByteString.copyFrom(keyset))
+            .setAnnotatedKeyset(
+                AnnotatedKeyset.newBuilder()
+                    .setSerializedKeyset(ByteString.copyFrom(keyset))
+                    .build())
             .setPlaintext(ByteString.copyFrom(plaintext))
             .setAssociatedData(ByteString.copyFrom(associatedData))
             .build();
@@ -380,7 +391,10 @@ public final class TestingServicesTest {
       AeadGrpc.AeadBlockingStub aeadStub, byte[] keyset, byte[] ciphertext, byte[] associatedData) {
     AeadDecryptRequest decRequest =
         AeadDecryptRequest.newBuilder()
-            .setKeyset(ByteString.copyFrom(keyset))
+            .setAnnotatedKeyset(
+                AnnotatedKeyset.newBuilder()
+                    .setSerializedKeyset(ByteString.copyFrom(keyset))
+                    .build())
             .setCiphertext(ByteString.copyFrom(ciphertext))
             .setAssociatedData(ByteString.copyFrom(associatedData))
             .build();
@@ -436,7 +450,10 @@ public final class TestingServicesTest {
     assertThat(keysetResponse.getErr()).isEmpty();
     CreationResponse response =
         daeadStub.create(
-            CreationRequest.newBuilder().setKeyset(keysetResponse.getKeyset()).build());
+            CreationRequest.newBuilder()
+                .setAnnotatedKeyset(
+                    AnnotatedKeyset.newBuilder().setSerializedKeyset(keysetResponse.getKeyset()))
+                .build());
     assertThat(response.getErr()).isEmpty();
   }
 
@@ -445,7 +462,9 @@ public final class TestingServicesTest {
     CreationResponse response =
         daeadStub.create(
             CreationRequest.newBuilder()
-                .setKeyset(ByteString.copyFrom(new byte[] {(byte) 0x80}))
+                .setAnnotatedKeyset(
+                    AnnotatedKeyset.newBuilder()
+                        .setSerializedKeyset(ByteString.copyFrom(new byte[] {(byte) 0x80})))
                 .build());
     assertThat(response.getErr()).isNotEmpty();
   }
@@ -457,7 +476,8 @@ public final class TestingServicesTest {
       byte[] associatedData) {
     DeterministicAeadEncryptRequest encRequest =
         DeterministicAeadEncryptRequest.newBuilder()
-            .setKeyset(ByteString.copyFrom(keyset))
+            .setAnnotatedKeyset(
+                AnnotatedKeyset.newBuilder().setSerializedKeyset(ByteString.copyFrom(keyset)))
             .setPlaintext(ByteString.copyFrom(plaintext))
             .setAssociatedData(ByteString.copyFrom(associatedData))
             .build();
@@ -471,7 +491,10 @@ public final class TestingServicesTest {
       byte[] associatedData) {
     DeterministicAeadDecryptRequest decRequest =
         DeterministicAeadDecryptRequest.newBuilder()
-            .setKeyset(ByteString.copyFrom(keyset))
+            .setAnnotatedKeyset(
+                AnnotatedKeyset.newBuilder()
+                    .setSerializedKeyset(ByteString.copyFrom(keyset))
+                    .build())
             .setCiphertext(ByteString.copyFrom(ciphertext))
             .setAssociatedData(ByteString.copyFrom(associatedData))
             .build();
@@ -549,13 +572,19 @@ public final class TestingServicesTest {
 
   @Test
   public void streamingAeadCreateKeyset_success() throws Exception {
-    byte[] template = KeyTemplateProtoConverter.toByteArray(
-        AesGcmHkdfStreamingKeyManager.aes128GcmHkdf4KBTemplate());
+    byte[] template =
+        KeyTemplateProtoConverter.toByteArray(
+            AesGcmHkdfStreamingKeyManager.aes128GcmHkdf4KBTemplate());
     KeysetGenerateResponse keysetResponse = generateKeyset(keysetStub, template);
     assertThat(keysetResponse.getErr()).isEmpty();
     CreationResponse response =
         streamingAeadStub.create(
-            CreationRequest.newBuilder().setKeyset(keysetResponse.getKeyset()).build());
+            CreationRequest.newBuilder()
+                .setAnnotatedKeyset(
+                    AnnotatedKeyset.newBuilder()
+                        .setSerializedKeyset(keysetResponse.getKeyset())
+                        .build())
+                .build());
     assertThat(response.getErr()).isEmpty();
   }
 
@@ -564,7 +593,10 @@ public final class TestingServicesTest {
     CreationResponse response =
         streamingAeadStub.create(
             CreationRequest.newBuilder()
-                .setKeyset(ByteString.copyFrom(new byte[] {(byte) 0x80}))
+                .setAnnotatedKeyset(
+                    AnnotatedKeyset.newBuilder()
+                        .setSerializedKeyset(ByteString.copyFrom(new byte[] {(byte) 0x80}))
+                        .build())
                 .build());
     assertThat(response.getErr()).isNotEmpty();
   }
@@ -576,7 +608,10 @@ public final class TestingServicesTest {
       byte[] associatedData) {
     StreamingAeadEncryptRequest encRequest =
         StreamingAeadEncryptRequest.newBuilder()
-            .setKeyset(ByteString.copyFrom(keyset))
+            .setAnnotatedKeyset(
+                AnnotatedKeyset.newBuilder()
+                    .setSerializedKeyset(ByteString.copyFrom(keyset))
+                    .build())
             .setPlaintext(ByteString.copyFrom(plaintext))
             .setAssociatedData(ByteString.copyFrom(associatedData))
             .build();
@@ -590,7 +625,10 @@ public final class TestingServicesTest {
       byte[] associatedData) {
     StreamingAeadDecryptRequest decRequest =
         StreamingAeadDecryptRequest.newBuilder()
-            .setKeyset(ByteString.copyFrom(keyset))
+            .setAnnotatedKeyset(
+                AnnotatedKeyset.newBuilder()
+                    .setSerializedKeyset(ByteString.copyFrom(keyset))
+                    .build())
             .setCiphertext(ByteString.copyFrom(ciphertext))
             .setAssociatedData(ByteString.copyFrom(associatedData))
             .build();
@@ -599,8 +637,9 @@ public final class TestingServicesTest {
 
   @Test
   public void streamingAeadGenerateEncryptDecrypt_success() throws Exception {
-    byte[] template = KeyTemplateProtoConverter.toByteArray(
-        AesGcmHkdfStreamingKeyManager.aes128GcmHkdf4KBTemplate());
+    byte[] template =
+        KeyTemplateProtoConverter.toByteArray(
+            AesGcmHkdfStreamingKeyManager.aes128GcmHkdf4KBTemplate());
     byte[] plaintext = "The quick brown fox jumps over the lazy dog".getBytes(UTF_8);
     byte[] associatedData = "generate_encrypt_decrypt".getBytes(UTF_8);
 
@@ -608,13 +647,13 @@ public final class TestingServicesTest {
     assertThat(keysetResponse.getErr()).isEmpty();
     byte[] keyset = keysetResponse.getKeyset().toByteArray();
 
-    StreamingAeadEncryptResponse encResponse = streamingAeadEncrypt(
-        streamingAeadStub, keyset, plaintext, associatedData);
+    StreamingAeadEncryptResponse encResponse =
+        streamingAeadEncrypt(streamingAeadStub, keyset, plaintext, associatedData);
     assertThat(encResponse.getErr()).isEmpty();
     byte[] ciphertext = encResponse.getCiphertext().toByteArray();
 
-    StreamingAeadDecryptResponse decResponse = streamingAeadDecrypt(
-        streamingAeadStub, keyset, ciphertext, associatedData);
+    StreamingAeadDecryptResponse decResponse =
+        streamingAeadDecrypt(streamingAeadStub, keyset, ciphertext, associatedData);
     assertThat(decResponse.getErr()).isEmpty();
     byte[] output = decResponse.getPlaintext().toByteArray();
 
@@ -626,15 +665,16 @@ public final class TestingServicesTest {
     byte[] badKeyset = "bad keyset".getBytes(UTF_8);
     byte[] plaintext = "The quick brown fox jumps over the lazy dog".getBytes(UTF_8);
     byte[] associatedData = "streamingAead_encrypt_fails_on_bad_keyset".getBytes(UTF_8);
-    StreamingAeadEncryptResponse encResponse = streamingAeadEncrypt(
-        streamingAeadStub, badKeyset, plaintext, associatedData);
+    StreamingAeadEncryptResponse encResponse =
+        streamingAeadEncrypt(streamingAeadStub, badKeyset, plaintext, associatedData);
     assertThat(encResponse.getErr()).isNotEmpty();
   }
 
   @Test
   public void streamingAeadDecrypt_failsOnBadCiphertext() throws Exception {
-    byte[] template = KeyTemplateProtoConverter.toByteArray(
-        AesGcmHkdfStreamingKeyManager.aes128GcmHkdf4KBTemplate());
+    byte[] template =
+        KeyTemplateProtoConverter.toByteArray(
+            AesGcmHkdfStreamingKeyManager.aes128GcmHkdf4KBTemplate());
     byte[] badCiphertext = "bad ciphertext".getBytes(UTF_8);
     byte[] associatedData = "streamingAead_decrypt_fails_on_bad_ciphertext".getBytes(UTF_8);
 
@@ -642,15 +682,16 @@ public final class TestingServicesTest {
     assertThat(keysetResponse.getErr()).isEmpty();
     byte[] keyset = keysetResponse.getKeyset().toByteArray();
 
-    StreamingAeadDecryptResponse decResponse = streamingAeadDecrypt(
-        streamingAeadStub, keyset, badCiphertext, associatedData);
+    StreamingAeadDecryptResponse decResponse =
+        streamingAeadDecrypt(streamingAeadStub, keyset, badCiphertext, associatedData);
     assertThat(decResponse.getErr()).isNotEmpty();
   }
 
   @Test
   public void streamingAeadDecrypt_failsOnBadKeyset() throws Exception {
-    byte[] template = KeyTemplateProtoConverter.toByteArray(
-        AesGcmHkdfStreamingKeyManager.aes128GcmHkdf4KBTemplate());
+    byte[] template =
+        KeyTemplateProtoConverter.toByteArray(
+            AesGcmHkdfStreamingKeyManager.aes128GcmHkdf4KBTemplate());
     byte[] plaintext = "The quick brown fox jumps over the lazy dog".getBytes(UTF_8);
     byte[] associatedData = "generate_encrypt_decrypt".getBytes(UTF_8);
 
@@ -658,27 +699,32 @@ public final class TestingServicesTest {
     assertThat(keysetResponse.getErr()).isEmpty();
     byte[] keyset = keysetResponse.getKeyset().toByteArray();
 
-    StreamingAeadEncryptResponse encResponse = streamingAeadEncrypt(
-        streamingAeadStub, keyset, plaintext, associatedData);
+    StreamingAeadEncryptResponse encResponse =
+        streamingAeadEncrypt(streamingAeadStub, keyset, plaintext, associatedData);
     assertThat(encResponse.getErr()).isEmpty();
     byte[] ciphertext = encResponse.getCiphertext().toByteArray();
 
     byte[] badKeyset = "bad keyset".getBytes(UTF_8);
 
-    StreamingAeadDecryptResponse decResponse = streamingAeadDecrypt(
-        streamingAeadStub, badKeyset, ciphertext, associatedData);
+    StreamingAeadDecryptResponse decResponse =
+        streamingAeadDecrypt(streamingAeadStub, badKeyset, ciphertext, associatedData);
     assertThat(decResponse.getErr()).isNotEmpty();
   }
 
   @Test
   public void macCreateKeyset_success() throws Exception {
-    byte[] template = KeyTemplateProtoConverter.toByteArray(
-        HmacKeyManager.hmacSha256HalfDigestTemplate());
+    byte[] template =
+        KeyTemplateProtoConverter.toByteArray(HmacKeyManager.hmacSha256HalfDigestTemplate());
     KeysetGenerateResponse keysetResponse = generateKeyset(keysetStub, template);
     assertThat(keysetResponse.getErr()).isEmpty();
     CreationResponse response =
         macStub.create(
-            CreationRequest.newBuilder().setKeyset(keysetResponse.getKeyset()).build());
+            CreationRequest.newBuilder()
+                .setAnnotatedKeyset(
+                    AnnotatedKeyset.newBuilder()
+                        .setSerializedKeyset(keysetResponse.getKeyset())
+                        .build())
+                .build());
     assertThat(response.getErr()).isEmpty();
   }
 
@@ -687,7 +733,10 @@ public final class TestingServicesTest {
     CreationResponse response =
         macStub.create(
             CreationRequest.newBuilder()
-                .setKeyset(ByteString.copyFrom(new byte[] {(byte) 0x80}))
+                .setAnnotatedKeyset(
+                    AnnotatedKeyset.newBuilder()
+                        .setSerializedKeyset(ByteString.copyFrom(new byte[] {(byte) 0x80}))
+                        .build())
                 .build());
     assertThat(response.getErr()).isNotEmpty();
   }
@@ -696,7 +745,10 @@ public final class TestingServicesTest {
       MacGrpc.MacBlockingStub macStub, byte[] keyset, byte[] data) {
     ComputeMacRequest request =
         ComputeMacRequest.newBuilder()
-            .setKeyset(ByteString.copyFrom(keyset))
+            .setAnnotatedKeyset(
+                AnnotatedKeyset.newBuilder()
+                    .setSerializedKeyset(ByteString.copyFrom(keyset))
+                    .build())
             .setData(ByteString.copyFrom(data))
             .build();
     return macStub.computeMac(request);
@@ -706,7 +758,10 @@ public final class TestingServicesTest {
       MacGrpc.MacBlockingStub macStub, byte[] keyset, byte[] macValue, byte[] data) {
     VerifyMacRequest request =
         VerifyMacRequest.newBuilder()
-            .setKeyset(ByteString.copyFrom(keyset))
+            .setAnnotatedKeyset(
+                AnnotatedKeyset.newBuilder()
+                    .setSerializedKeyset(ByteString.copyFrom(keyset))
+                    .build())
             .setMacValue(ByteString.copyFrom(macValue))
             .setData(ByteString.copyFrom(data))
             .build();
@@ -715,8 +770,8 @@ public final class TestingServicesTest {
 
   @Test
   public void computeVerifyMac_success() throws Exception {
-    byte[] template = KeyTemplateProtoConverter.toByteArray(
-        HmacKeyManager.hmacSha256HalfDigestTemplate());
+    byte[] template =
+        KeyTemplateProtoConverter.toByteArray(HmacKeyManager.hmacSha256HalfDigestTemplate());
     byte[] data = "The quick brown fox jumps over the lazy dog".getBytes(UTF_8);
 
     KeysetGenerateResponse keysetResponse = generateKeyset(keysetStub, template);
@@ -742,8 +797,8 @@ public final class TestingServicesTest {
 
   @Test
   public void verifyMac_failsOnBadMacValue() throws Exception {
-    byte[] template = KeyTemplateProtoConverter.toByteArray(
-        HmacKeyManager.hmacSha256HalfDigestTemplate());
+    byte[] template =
+        KeyTemplateProtoConverter.toByteArray(HmacKeyManager.hmacSha256HalfDigestTemplate());
     byte[] data = "The quick brown fox jumps over the lazy dog".getBytes(UTF_8);
 
     KeysetGenerateResponse keysetResponse = generateKeyset(keysetStub, template);
@@ -757,8 +812,8 @@ public final class TestingServicesTest {
 
   @Test
   public void verifyMac_failsOnBadKeyset() throws Exception {
-    byte[] template = KeyTemplateProtoConverter.toByteArray(
-        HmacKeyManager.hmacSha256HalfDigestTemplate());
+    byte[] template =
+        KeyTemplateProtoConverter.toByteArray(HmacKeyManager.hmacSha256HalfDigestTemplate());
     byte[] data = "The quick brown fox jumps over the lazy dog".getBytes(UTF_8);
 
     KeysetGenerateResponse keysetResponse = generateKeyset(keysetStub, template);
@@ -776,13 +831,17 @@ public final class TestingServicesTest {
 
   @Test
   public void prfSetCreateKeyset_success() throws Exception {
-    byte[] template = KeyTemplateProtoConverter.toByteArray(
-        HmacPrfKeyManager.hmacSha256Template());
+    byte[] template = KeyTemplateProtoConverter.toByteArray(HmacPrfKeyManager.hmacSha256Template());
     KeysetGenerateResponse keysetResponse = generateKeyset(keysetStub, template);
     assertThat(keysetResponse.getErr()).isEmpty();
     CreationResponse response =
         prfSetStub.create(
-            CreationRequest.newBuilder().setKeyset(keysetResponse.getKeyset()).build());
+            CreationRequest.newBuilder()
+                .setAnnotatedKeyset(
+                    AnnotatedKeyset.newBuilder()
+                        .setSerializedKeyset(keysetResponse.getKeyset())
+                        .build())
+                .build());
     assertThat(response.getErr()).isEmpty();
   }
 
@@ -791,7 +850,10 @@ public final class TestingServicesTest {
     CreationResponse response =
         prfSetStub.create(
             CreationRequest.newBuilder()
-                .setKeyset(ByteString.copyFrom(new byte[] {(byte) 0x80}))
+                .setAnnotatedKeyset(
+                    AnnotatedKeyset.newBuilder()
+                        .setSerializedKeyset(ByteString.copyFrom(new byte[] {(byte) 0x80}))
+                        .build())
                 .build());
     assertThat(response.getErr()).isNotEmpty();
   }
@@ -800,7 +862,10 @@ public final class TestingServicesTest {
       PrfSetGrpc.PrfSetBlockingStub prfSetStub, byte[] keyset) {
     PrfSetKeyIdsRequest request =
         PrfSetKeyIdsRequest.newBuilder()
-            .setKeyset(ByteString.copyFrom(keyset))
+            .setAnnotatedKeyset(
+                AnnotatedKeyset.newBuilder()
+                    .setSerializedKeyset(ByteString.copyFrom(keyset))
+                    .build())
             .build();
     return prfSetStub.keyIds(request);
   }
@@ -813,7 +878,10 @@ public final class TestingServicesTest {
       int outputLength) {
     PrfSetComputeRequest request =
         PrfSetComputeRequest.newBuilder()
-            .setKeyset(ByteString.copyFrom(keyset))
+            .setAnnotatedKeyset(
+                AnnotatedKeyset.newBuilder()
+                    .setSerializedKeyset(ByteString.copyFrom(keyset))
+                    .build())
             .setKeyId(keyId)
             .setInputData(ByteString.copyFrom(inputData))
             .setOutputLength(outputLength)

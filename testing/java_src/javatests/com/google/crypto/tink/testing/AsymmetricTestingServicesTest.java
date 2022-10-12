@@ -24,6 +24,7 @@ import com.google.crypto.tink.config.TinkConfig;
 import com.google.crypto.tink.hybrid.EciesAeadHkdfPrivateKeyManager;
 import com.google.crypto.tink.internal.KeyTemplateProtoConverter;
 import com.google.crypto.tink.signature.EcdsaSignKeyManager;
+import com.google.crypto.tink.testing.proto.AnnotatedKeyset;
 import com.google.crypto.tink.testing.proto.CreationRequest;
 import com.google.crypto.tink.testing.proto.CreationResponse;
 import com.google.crypto.tink.testing.proto.HybridDecryptRequest;
@@ -60,23 +61,19 @@ public final class AsymmetricTestingServicesTest {
   HybridGrpc.HybridBlockingStub hybridStub;
   SignatureGrpc.SignatureBlockingStub signatureStub;
 
-
   @Before
   public void setUp() throws Exception {
     TinkConfig.register();
     String serverName = InProcessServerBuilder.generateName();
-    server = InProcessServerBuilder
-        .forName(serverName)
-        .directExecutor()
-        .addService(new KeysetServiceImpl())
-        .addService(new HybridServiceImpl())
-        .addService(new SignatureServiceImpl())
-        .build()
-        .start();
-    channel = InProcessChannelBuilder
-        .forName(serverName)
-        .directExecutor()
-        .build();
+    server =
+        InProcessServerBuilder.forName(serverName)
+            .directExecutor()
+            .addService(new KeysetServiceImpl())
+            .addService(new HybridServiceImpl())
+            .addService(new SignatureServiceImpl())
+            .build()
+            .start();
+    channel = InProcessChannelBuilder.forName(serverName).directExecutor().build();
     keysetStub = KeysetGrpc.newBlockingStub(channel);
     hybridStub = HybridGrpc.newBlockingStub(channel);
     signatureStub = SignatureGrpc.newBlockingStub(channel);
@@ -106,13 +103,19 @@ public final class AsymmetricTestingServicesTest {
 
   @Test
   public void hybridDecryptCreateKeyset_success() throws Exception {
-    byte[] template = KeyTemplateProtoConverter.toByteArray(
-        EciesAeadHkdfPrivateKeyManager.eciesP256HkdfHmacSha256Aes128GcmTemplate());
+    byte[] template =
+        KeyTemplateProtoConverter.toByteArray(
+            EciesAeadHkdfPrivateKeyManager.eciesP256HkdfHmacSha256Aes128GcmTemplate());
     KeysetGenerateResponse keysetResponse = generateKeyset(keysetStub, template);
     assertThat(keysetResponse.getErr()).isEmpty();
     CreationResponse response =
         hybridStub.createHybridDecrypt(
-            CreationRequest.newBuilder().setKeyset(keysetResponse.getKeyset()).build());
+            CreationRequest.newBuilder()
+                .setAnnotatedKeyset(
+                    AnnotatedKeyset.newBuilder()
+                        .setSerializedKeyset(keysetResponse.getKeyset())
+                        .build())
+                .build());
     assertThat(response.getErr()).isEmpty();
   }
 
@@ -121,7 +124,10 @@ public final class AsymmetricTestingServicesTest {
     CreationResponse response =
         hybridStub.createHybridDecrypt(
             CreationRequest.newBuilder()
-                .setKeyset(ByteString.copyFrom(new byte[] {(byte) 0x80}))
+                .setAnnotatedKeyset(
+                    AnnotatedKeyset.newBuilder()
+                        .setSerializedKeyset(ByteString.copyFrom(new byte[] {(byte) 0x80}))
+                        .build())
                 .build());
     assertThat(response.getErr()).isNotEmpty();
   }
@@ -139,7 +145,12 @@ public final class AsymmetricTestingServicesTest {
     assertThat(pubResponse.getErr()).isEmpty();
     CreationResponse response =
         hybridStub.createHybridEncrypt(
-            CreationRequest.newBuilder().setKeyset(pubResponse.getPublicKeyset()).build());
+            CreationRequest.newBuilder()
+                .setAnnotatedKeyset(
+                    AnnotatedKeyset.newBuilder()
+                        .setSerializedKeyset(pubResponse.getPublicKeyset())
+                        .build())
+                .build());
     assertThat(response.getErr()).isEmpty();
   }
 
@@ -148,7 +159,10 @@ public final class AsymmetricTestingServicesTest {
     CreationResponse response =
         hybridStub.createHybridEncrypt(
             CreationRequest.newBuilder()
-                .setKeyset(ByteString.copyFrom(new byte[] {(byte) 0x80}))
+                .setAnnotatedKeyset(
+                    AnnotatedKeyset.newBuilder()
+                        .setSerializedKeyset(ByteString.copyFrom(new byte[] {(byte) 0x80}))
+                        .build())
                 .build());
     assertThat(response.getErr()).isNotEmpty();
   }
@@ -160,7 +174,10 @@ public final class AsymmetricTestingServicesTest {
       byte[] contextInfo) {
     HybridEncryptRequest encRequest =
         HybridEncryptRequest.newBuilder()
-            .setPublicKeyset(ByteString.copyFrom(publicKeyset))
+            .setPublicAnnotatedKeyset(
+                AnnotatedKeyset.newBuilder()
+                    .setSerializedKeyset(ByteString.copyFrom(publicKeyset))
+                    .build())
             .setPlaintext(ByteString.copyFrom(plaintext))
             .setContextInfo(ByteString.copyFrom(contextInfo))
             .build();
@@ -174,7 +191,10 @@ public final class AsymmetricTestingServicesTest {
       byte[] contextInfo) {
     HybridDecryptRequest decRequest =
         HybridDecryptRequest.newBuilder()
-            .setPrivateKeyset(ByteString.copyFrom(privateKeyset))
+            .setPrivateAnnotatedKeyset(
+                AnnotatedKeyset.newBuilder()
+                    .setSerializedKeyset(ByteString.copyFrom(privateKeyset))
+                    .build())
             .setCiphertext(ByteString.copyFrom(ciphertext))
             .setContextInfo(ByteString.copyFrom(contextInfo))
             .build();
@@ -280,7 +300,12 @@ public final class AsymmetricTestingServicesTest {
     assertThat(keysetResponse.getErr()).isEmpty();
     CreationResponse response =
         signatureStub.createPublicKeySign(
-            CreationRequest.newBuilder().setKeyset(keysetResponse.getKeyset()).build());
+            CreationRequest.newBuilder()
+                .setAnnotatedKeyset(
+                    AnnotatedKeyset.newBuilder()
+                        .setSerializedKeyset(keysetResponse.getKeyset())
+                        .build())
+                .build());
     assertThat(response.getErr()).isEmpty();
   }
 
@@ -289,7 +314,10 @@ public final class AsymmetricTestingServicesTest {
     CreationResponse response =
         signatureStub.createPublicKeySign(
             CreationRequest.newBuilder()
-                .setKeyset(ByteString.copyFrom(new byte[] {(byte) 0x80}))
+                .setAnnotatedKeyset(
+                    AnnotatedKeyset.newBuilder()
+                        .setSerializedKeyset(ByteString.copyFrom(new byte[] {(byte) 0x80}))
+                        .build())
                 .build());
     assertThat(response.getErr()).isNotEmpty();
   }
@@ -307,7 +335,12 @@ public final class AsymmetricTestingServicesTest {
     assertThat(pubResponse.getErr()).isEmpty();
     CreationResponse response =
         signatureStub.createPublicKeyVerify(
-            CreationRequest.newBuilder().setKeyset(pubResponse.getPublicKeyset()).build());
+            CreationRequest.newBuilder()
+                .setAnnotatedKeyset(
+                    AnnotatedKeyset.newBuilder()
+                        .setSerializedKeyset(pubResponse.getPublicKeyset())
+                        .build())
+                .build());
     assertThat(response.getErr()).isEmpty();
   }
 
@@ -316,7 +349,10 @@ public final class AsymmetricTestingServicesTest {
     CreationResponse response =
         signatureStub.createPublicKeyVerify(
             CreationRequest.newBuilder()
-                .setKeyset(ByteString.copyFrom(new byte[] {(byte) 0x80}))
+                .setAnnotatedKeyset(
+                    AnnotatedKeyset.newBuilder()
+                        .setSerializedKeyset(ByteString.copyFrom(new byte[] {(byte) 0x80}))
+                        .build())
                 .build());
     assertThat(response.getErr()).isNotEmpty();
   }
@@ -325,7 +361,10 @@ public final class AsymmetricTestingServicesTest {
       SignatureGrpc.SignatureBlockingStub signatureStub, byte[] privateKeyset, byte[] data) {
     SignatureSignRequest request =
         SignatureSignRequest.newBuilder()
-            .setPrivateKeyset(ByteString.copyFrom(privateKeyset))
+            .setPrivateAnnotatedKeyset(
+                AnnotatedKeyset.newBuilder()
+                    .setSerializedKeyset(ByteString.copyFrom(privateKeyset))
+                    .build())
             .setData(ByteString.copyFrom(data))
             .build();
     return signatureStub.sign(request);
@@ -338,7 +377,10 @@ public final class AsymmetricTestingServicesTest {
       byte[] data) {
     SignatureVerifyRequest request =
         SignatureVerifyRequest.newBuilder()
-            .setPublicKeyset(ByteString.copyFrom(publicKeyset))
+            .setPublicAnnotatedKeyset(
+                AnnotatedKeyset.newBuilder()
+                    .setSerializedKeyset(ByteString.copyFrom(publicKeyset))
+                    .build())
             .setSignature(ByteString.copyFrom(signature))
             .setData(ByteString.copyFrom(data))
             .build();

@@ -281,14 +281,17 @@ class ServicesTest(absltest.TestCase):
     self.assertEqual(gen_response.WhichOneof('result'), 'keyset')
 
     creation_request = testing_api_pb2.CreationRequest(
-        keyset=gen_response.keyset)
+        annotated_keyset=testing_api_pb2.AnnotatedKeyset(
+            serialized_keyset=gen_response.keyset))
     creation_response = aead_servicer.Create(creation_request, self._ctx)
     self.assertEmpty(creation_response.err)
 
   def test_create_aead_broken_keyset(self):
     aead_servicer = services.AeadServicer()
 
-    creation_request = testing_api_pb2.CreationRequest(keyset=b'\x80')
+    creation_request = testing_api_pb2.CreationRequest(
+        annotated_keyset=testing_api_pb2.AnnotatedKeyset(
+            serialized_keyset=b'\x80'))
     creation_response = aead_servicer.Create(creation_request, self._ctx)
     self.assertNotEmpty(creation_response.err)
 
@@ -304,11 +307,15 @@ class ServicesTest(absltest.TestCase):
 
     with self.assertRaises(tink.TinkError):
       aead_servicer.Encrypt(
-          testing_api_pb2.AeadEncryptRequest(keyset=keyset), self._ctx)
+          testing_api_pb2.AeadEncryptRequest(
+              annotated_keyset=testing_api_pb2.AnnotatedKeyset(
+                  serialized_keyset=keyset)), self._ctx)
 
     with self.assertRaises(tink.TinkError):
       aead_servicer.Decrypt(
-          testing_api_pb2.AeadDecryptRequest(keyset=keyset), self._ctx)
+          testing_api_pb2.AeadDecryptRequest(
+              annotated_keyset=testing_api_pb2.AnnotatedKeyset(
+                  serialized_keyset=keyset)), self._ctx)
 
   def test_generate_encrypt_decrypt(self):
     keyset_servicer = services.KeysetServicer()
@@ -322,12 +329,18 @@ class ServicesTest(absltest.TestCase):
     plaintext = b'The quick brown fox jumps over the lazy dog'
     associated_data = b'associated_data'
     enc_request = testing_api_pb2.AeadEncryptRequest(
-        keyset=keyset, plaintext=plaintext, associated_data=associated_data)
+        annotated_keyset=testing_api_pb2.AnnotatedKeyset(
+            serialized_keyset=keyset),
+        plaintext=plaintext,
+        associated_data=associated_data)
     enc_response = aead_servicer.Encrypt(enc_request, self._ctx)
     self.assertEqual(enc_response.WhichOneof('result'), 'ciphertext')
     ciphertext = enc_response.ciphertext
     dec_request = testing_api_pb2.AeadDecryptRequest(
-        keyset=keyset, ciphertext=ciphertext, associated_data=associated_data)
+        annotated_keyset=testing_api_pb2.AnnotatedKeyset(
+            serialized_keyset=keyset),
+        ciphertext=ciphertext,
+        associated_data=associated_data)
     dec_response = aead_servicer.Decrypt(dec_request, self._ctx)
     self.assertEqual(dec_response.WhichOneof('result'), 'plaintext')
     self.assertEqual(dec_response.plaintext, plaintext)
@@ -345,7 +358,10 @@ class ServicesTest(absltest.TestCase):
     ciphertext = b'some invalid ciphertext'
     associated_data = b'associated_data'
     dec_request = testing_api_pb2.AeadDecryptRequest(
-        keyset=keyset, ciphertext=ciphertext, associated_data=associated_data)
+        annotated_keyset=testing_api_pb2.AnnotatedKeyset(
+            serialized_keyset=keyset),
+        ciphertext=ciphertext,
+        associated_data=associated_data)
     dec_response = aead_servicer.Decrypt(dec_request, self._ctx)
     self.assertEqual(dec_response.WhichOneof('result'), 'err')
     self.assertNotEmpty(dec_response.err)
@@ -367,7 +383,8 @@ class ServicesTest(absltest.TestCase):
     self.assertEqual(gen_response.WhichOneof('result'), 'keyset')
 
     creation_request = testing_api_pb2.CreationRequest(
-        keyset=gen_response.keyset)
+        annotated_keyset=testing_api_pb2.AnnotatedKeyset(
+            serialized_keyset=gen_response.keyset))
     creation_response = daead_servicer.Create(
         creation_request, self._ctx)
     self.assertEmpty(creation_response.err)
@@ -375,7 +392,9 @@ class ServicesTest(absltest.TestCase):
   def test_create_deterministic_aead_broken_keyset(self):
     daead_servicer = services.DeterministicAeadServicer()
 
-    creation_request = testing_api_pb2.CreationRequest(keyset=b'\x80')
+    creation_request = testing_api_pb2.CreationRequest(
+        annotated_keyset=testing_api_pb2.AnnotatedKeyset(
+            serialized_keyset=b'\x80'))
     creation_response = daead_servicer.Create(creation_request, self._ctx)
     self.assertNotEmpty(creation_response.err)
 
@@ -390,10 +409,14 @@ class ServicesTest(absltest.TestCase):
     self.assertEqual(gen_response.WhichOneof('result'), 'keyset')
     keyset = gen_response.keyset
 
-    enc_request = testing_api_pb2.DeterministicAeadEncryptRequest(keyset=keyset)
+    enc_request = testing_api_pb2.DeterministicAeadEncryptRequest(
+        annotated_keyset=testing_api_pb2.AnnotatedKeyset(
+            serialized_keyset=keyset))
     with self.assertRaises(tink.TinkError):
       daead_servicer.EncryptDeterministically(enc_request, self._ctx)
-    dec_request = testing_api_pb2.DeterministicAeadDecryptRequest(keyset=keyset)
+    dec_request = testing_api_pb2.DeterministicAeadDecryptRequest(
+        annotated_keyset=testing_api_pb2.AnnotatedKeyset(
+            serialized_keyset=keyset))
     with self.assertRaises(tink.TinkError):
       daead_servicer.DecryptDeterministically(dec_request, self._ctx)
 
@@ -410,7 +433,10 @@ class ServicesTest(absltest.TestCase):
     plaintext = b'The quick brown fox jumps over the lazy dog'
     associated_data = b'associated_data'
     enc_request = testing_api_pb2.DeterministicAeadEncryptRequest(
-        keyset=keyset, plaintext=plaintext, associated_data=associated_data)
+        annotated_keyset=testing_api_pb2.AnnotatedKeyset(
+            serialized_keyset=keyset),
+        plaintext=plaintext,
+        associated_data=associated_data)
     enc_response = daead_servicer.EncryptDeterministically(enc_request,
                                                            self._ctx)
     self.assertEqual(enc_response.WhichOneof('result'), 'ciphertext')
@@ -420,7 +446,10 @@ class ServicesTest(absltest.TestCase):
     self.assertEqual(enc_response2.ciphertext, enc_response.ciphertext)
     ciphertext = enc_response.ciphertext
     dec_request = testing_api_pb2.DeterministicAeadDecryptRequest(
-        keyset=keyset, ciphertext=ciphertext, associated_data=associated_data)
+        annotated_keyset=testing_api_pb2.AnnotatedKeyset(
+            serialized_keyset=keyset),
+        ciphertext=ciphertext,
+        associated_data=associated_data)
     dec_response = daead_servicer.DecryptDeterministically(dec_request,
                                                            self._ctx)
     self.assertEqual(dec_response.WhichOneof('result'), 'plaintext')
@@ -440,7 +469,10 @@ class ServicesTest(absltest.TestCase):
     ciphertext = b'some invalid ciphertext'
     associated_data = b'associated_data'
     dec_request = testing_api_pb2.DeterministicAeadDecryptRequest(
-        keyset=keyset, ciphertext=ciphertext, associated_data=associated_data)
+        annotated_keyset=testing_api_pb2.AnnotatedKeyset(
+            serialized_keyset=keyset),
+        ciphertext=ciphertext,
+        associated_data=associated_data)
     dec_response = daead_servicer.DecryptDeterministically(dec_request,
                                                            self._ctx)
     self.assertEqual(dec_response.WhichOneof('result'), 'err')
@@ -456,7 +488,8 @@ class ServicesTest(absltest.TestCase):
     self.assertEqual(gen_response.WhichOneof('result'), 'keyset')
 
     creation_request = testing_api_pb2.CreationRequest(
-        keyset=gen_response.keyset)
+        annotated_keyset=testing_api_pb2.AnnotatedKeyset(
+            serialized_keyset=gen_response.keyset))
     creation_response = mac_servicer.Create(
         creation_request, self._ctx)
     self.assertEmpty(creation_response.err)
@@ -464,7 +497,9 @@ class ServicesTest(absltest.TestCase):
   def test_create_mac_broken_keyset(self):
     mac_servicer = services.MacServicer()
 
-    creation_request = testing_api_pb2.CreationRequest(keyset=b'\x80')
+    creation_request = testing_api_pb2.CreationRequest(
+        annotated_keyset=testing_api_pb2.AnnotatedKeyset(
+            serialized_keyset=b'\x80'))
     creation_response = mac_servicer.Create(creation_request, self._ctx)
     self.assertNotEmpty(creation_response.err)
 
@@ -478,12 +513,18 @@ class ServicesTest(absltest.TestCase):
     self.assertEqual(gen_response.WhichOneof('result'), 'keyset')
     keyset = gen_response.keyset
     data = b'The quick brown fox jumps over the lazy dog'
-    comp_request = testing_api_pb2.ComputeMacRequest(keyset=keyset, data=data)
+    comp_request = testing_api_pb2.ComputeMacRequest(
+        annotated_keyset=testing_api_pb2.AnnotatedKeyset(
+            serialized_keyset=keyset),
+        data=data)
     comp_response = mac_servicer.ComputeMac(comp_request, self._ctx)
     self.assertEqual(comp_response.WhichOneof('result'), 'mac_value')
     mac_value = comp_response.mac_value
     verify_request = testing_api_pb2.VerifyMacRequest(
-        keyset=keyset, mac_value=mac_value, data=data)
+        annotated_keyset=testing_api_pb2.AnnotatedKeyset(
+            serialized_keyset=keyset),
+        mac_value=mac_value,
+        data=data)
     verify_response = mac_servicer.VerifyMac(verify_request, self._ctx)
     self.assertEmpty(verify_response.err)
 
@@ -498,7 +539,10 @@ class ServicesTest(absltest.TestCase):
     keyset = gen_response.keyset
 
     verify_request = testing_api_pb2.VerifyMacRequest(
-        keyset=keyset, mac_value=b'invalid mac_value', data=b'data')
+        annotated_keyset=testing_api_pb2.AnnotatedKeyset(
+            serialized_keyset=keyset),
+        mac_value=b'invalid mac_value',
+        data=b'data')
     verify_response = mac_servicer.VerifyMac(verify_request, self._ctx)
     self.assertNotEmpty(verify_response.err)
 
@@ -513,7 +557,8 @@ class ServicesTest(absltest.TestCase):
     self.assertEqual(gen_response.WhichOneof('result'), 'keyset')
 
     creation_request = testing_api_pb2.CreationRequest(
-        keyset=gen_response.keyset)
+        annotated_keyset=testing_api_pb2.AnnotatedKeyset(
+            serialized_keyset=gen_response.keyset))
     creation_response = hybrid_servicer.CreateHybridDecrypt(
         creation_request, self._ctx)
     self.assertEmpty(creation_response.err)
@@ -521,7 +566,9 @@ class ServicesTest(absltest.TestCase):
   def test_create_hybrid_decrypt_bad_keyset(self):
     hybrid_servicer = services.HybridServicer()
 
-    creation_request = testing_api_pb2.CreationRequest(keyset=b'\x80')
+    creation_request = testing_api_pb2.CreationRequest(
+        annotated_keyset=testing_api_pb2.AnnotatedKeyset(
+            serialized_keyset=b'\x80'))
     creation_response = hybrid_servicer.CreateHybridDecrypt(
         creation_request, self._ctx)
     self.assertNotEmpty(creation_response.err)
@@ -541,7 +588,8 @@ class ServicesTest(absltest.TestCase):
     self.assertEqual(pub_response.WhichOneof('result'), 'public_keyset')
 
     creation_request = testing_api_pb2.CreationRequest(
-        keyset=pub_response.public_keyset)
+        annotated_keyset=testing_api_pb2.AnnotatedKeyset(
+            serialized_keyset=pub_response.public_keyset))
     creation_response = hybrid_servicer.CreateHybridEncrypt(
         creation_request, self._ctx)
     self.assertEmpty(creation_response.err)
@@ -549,7 +597,9 @@ class ServicesTest(absltest.TestCase):
   def test_create_hybrid_encrypt_bad_keyset(self):
     hybrid_servicer = services.HybridServicer()
 
-    creation_request = testing_api_pb2.CreationRequest(keyset=b'\x80')
+    creation_request = testing_api_pb2.CreationRequest(
+        annotated_keyset=testing_api_pb2.AnnotatedKeyset(
+            serialized_keyset=b'\x80'))
     creation_response = hybrid_servicer.CreateHybridEncrypt(
         creation_request, self._ctx)
     self.assertNotEmpty(creation_response.err)
@@ -574,7 +624,8 @@ class ServicesTest(absltest.TestCase):
     plaintext = b'The quick brown fox jumps over the lazy dog'
     context_info = b'context_info'
     enc_request = testing_api_pb2.HybridEncryptRequest(
-        public_keyset=public_keyset,
+        public_annotated_keyset=testing_api_pb2.AnnotatedKeyset(
+            serialized_keyset=public_keyset),
         plaintext=plaintext,
         context_info=context_info)
     enc_response = hybrid_servicer.Encrypt(enc_request, self._ctx)
@@ -582,7 +633,8 @@ class ServicesTest(absltest.TestCase):
     ciphertext = enc_response.ciphertext
 
     dec_request = testing_api_pb2.HybridDecryptRequest(
-        private_keyset=private_keyset,
+        private_annotated_keyset=testing_api_pb2.AnnotatedKeyset(
+            serialized_keyset=private_keyset),
         ciphertext=ciphertext,
         context_info=context_info)
     dec_response = hybrid_servicer.Decrypt(dec_request, self._ctx)
@@ -601,7 +653,8 @@ class ServicesTest(absltest.TestCase):
     private_keyset = gen_response.keyset
 
     dec_request = testing_api_pb2.HybridDecryptRequest(
-        private_keyset=private_keyset,
+        private_annotated_keyset=testing_api_pb2.AnnotatedKeyset(
+            serialized_keyset=private_keyset),
         ciphertext=b'invalid ciphertext',
         context_info=b'context_info')
     dec_response = hybrid_servicer.Decrypt(dec_request, self._ctx)
@@ -618,7 +671,8 @@ class ServicesTest(absltest.TestCase):
     self.assertEqual(gen_response.WhichOneof('result'), 'keyset')
 
     creation_request = testing_api_pb2.CreationRequest(
-        keyset=gen_response.keyset)
+        annotated_keyset=testing_api_pb2.AnnotatedKeyset(
+            serialized_keyset=gen_response.keyset))
     creation_response = signature_servicer.CreatePublicKeySign(
         creation_request, self._ctx)
     self.assertEmpty(creation_response.err)
@@ -626,7 +680,9 @@ class ServicesTest(absltest.TestCase):
   def test_create_public_key_sign_bad_keyset(self):
     signature_servicer = services.SignatureServicer()
 
-    creation_request = testing_api_pb2.CreationRequest(keyset=b'\x80')
+    creation_request = testing_api_pb2.CreationRequest(
+        annotated_keyset=testing_api_pb2.AnnotatedKeyset(
+            serialized_keyset=b'\x80'))
     creation_response = signature_servicer.CreatePublicKeySign(
         creation_request, self._ctx)
     self.assertNotEmpty(creation_response.err)
@@ -645,7 +701,8 @@ class ServicesTest(absltest.TestCase):
     self.assertEqual(pub_response.WhichOneof('result'), 'public_keyset')
 
     creation_request = testing_api_pb2.CreationRequest(
-        keyset=pub_response.public_keyset)
+        annotated_keyset=testing_api_pb2.AnnotatedKeyset(
+            serialized_keyset=pub_response.public_keyset))
     creation_response = signature_servicer.CreatePublicKeyVerify(
         creation_request, self._ctx)
     self.assertEmpty(creation_response.err)
@@ -653,7 +710,9 @@ class ServicesTest(absltest.TestCase):
   def test_create_public_key_verify_bad_keyset(self):
     signature_servicer = services.SignatureServicer()
 
-    creation_request = testing_api_pb2.CreationRequest(keyset=b'\x80')
+    creation_request = testing_api_pb2.CreationRequest(
+        annotated_keyset=testing_api_pb2.AnnotatedKeyset(
+            serialized_keyset=b'\x80'))
     creation_response = signature_servicer.CreatePublicKeyVerify(
         creation_request, self._ctx)
     self.assertNotEmpty(creation_response.err)
@@ -678,14 +737,16 @@ class ServicesTest(absltest.TestCase):
     data = b'The quick brown fox jumps over the lazy dog'
 
     sign_request = testing_api_pb2.SignatureSignRequest(
-        private_keyset=private_keyset,
+        private_annotated_keyset=testing_api_pb2.AnnotatedKeyset(
+            serialized_keyset=private_keyset),
         data=data)
     sign_response = signature_servicer.Sign(sign_request, self._ctx)
     self.assertEqual(sign_response.WhichOneof('result'), 'signature')
     a_signature = sign_response.signature
 
     verify_request = testing_api_pb2.SignatureVerifyRequest(
-        public_keyset=public_keyset,
+        public_annotated_keyset=testing_api_pb2.AnnotatedKeyset(
+            serialized_keyset=public_keyset),
         signature=a_signature,
         data=data)
     verify_response = signature_servicer.Verify(verify_request, self._ctx)
@@ -709,7 +770,8 @@ class ServicesTest(absltest.TestCase):
     public_keyset = pub_response.public_keyset
 
     invalid_request = testing_api_pb2.SignatureVerifyRequest(
-        public_keyset=public_keyset,
+        public_annotated_keyset=testing_api_pb2.AnnotatedKeyset(
+            serialized_keyset=public_keyset),
         signature=b'invalid signature',
         data=b'The quick brown fox jumps over the lazy dog')
     invalid_response = signature_servicer.Verify(invalid_request, self._ctx)
@@ -725,14 +787,17 @@ class ServicesTest(absltest.TestCase):
     self.assertEqual(gen_response.WhichOneof('result'), 'keyset')
 
     creation_request = testing_api_pb2.CreationRequest(
-        keyset=gen_response.keyset)
+        annotated_keyset=testing_api_pb2.AnnotatedKeyset(
+            serialized_keyset=gen_response.keyset))
     creation_response = prf_set_servicer.Create(creation_request, self._ctx)
     self.assertEmpty(creation_response.err)
 
   def test_create_prf_set_wrong_keyset(self):
     prf_set_servicer = services.PrfSetServicer()
 
-    creation_request = testing_api_pb2.CreationRequest(keyset=b'\x80')
+    creation_request = testing_api_pb2.CreationRequest(
+        annotated_keyset=testing_api_pb2.AnnotatedKeyset(
+            serialized_keyset=b'\x80'))
     creation_response = prf_set_servicer.Create(creation_request, self._ctx)
     self.assertNotEmpty(creation_response.err)
 
@@ -745,7 +810,9 @@ class ServicesTest(absltest.TestCase):
     self.assertEqual(gen_response.WhichOneof('result'), 'keyset')
     keyset = gen_response.keyset
 
-    key_ids_request = testing_api_pb2.PrfSetKeyIdsRequest(keyset=keyset)
+    key_ids_request = testing_api_pb2.PrfSetKeyIdsRequest(
+        annotated_keyset=testing_api_pb2.AnnotatedKeyset(
+            serialized_keyset=keyset))
     key_ids_response = prf_set_servicer.KeyIds(key_ids_request, self._ctx)
     self.assertEqual(key_ids_response.WhichOneof('result'), 'output')
     self.assertLen(key_ids_response.output.key_id, 1)
@@ -754,7 +821,8 @@ class ServicesTest(absltest.TestCase):
 
     output_length = 31
     compute_request = testing_api_pb2.PrfSetComputeRequest(
-        keyset=keyset,
+        annotated_keyset=testing_api_pb2.AnnotatedKeyset(
+            serialized_keyset=keyset),
         key_id=key_ids_response.output.primary_key_id,
         input_data=b'input_data',
         output_length=output_length)
@@ -765,7 +833,9 @@ class ServicesTest(absltest.TestCase):
   def test_key_ids_prf_fail(self):
     prf_set_servicer = services.PrfSetServicer()
     invalid_key_ids_response = prf_set_servicer.KeyIds(
-        testing_api_pb2.PrfSetKeyIdsRequest(keyset=b'badkeyset'), self._ctx)
+        testing_api_pb2.PrfSetKeyIdsRequest(
+            annotated_keyset=testing_api_pb2.AnnotatedKeyset(
+                serialized_keyset=b'badkeyset')), self._ctx)
     self.assertNotEmpty(invalid_key_ids_response.err)
 
   def test_compute_prf_fail(self):
@@ -776,14 +846,17 @@ class ServicesTest(absltest.TestCase):
     gen_response = keyset_servicer.Generate(gen_request, self._ctx)
     self.assertEqual(gen_response.WhichOneof('result'), 'keyset')
     keyset = gen_response.keyset
-    key_ids_request = testing_api_pb2.PrfSetKeyIdsRequest(keyset=keyset)
+    key_ids_request = testing_api_pb2.PrfSetKeyIdsRequest(
+        annotated_keyset=testing_api_pb2.AnnotatedKeyset(
+            serialized_keyset=keyset))
     key_ids_response = prf_set_servicer.KeyIds(key_ids_request, self._ctx)
     self.assertEqual(key_ids_response.WhichOneof('result'), 'output')
     primary_key_id = key_ids_response.output.primary_key_id
 
     invalid_output_length = 123456
     invalid_compute_request = testing_api_pb2.PrfSetComputeRequest(
-        keyset=keyset,
+        annotated_keyset=testing_api_pb2.AnnotatedKeyset(
+            serialized_keyset=keyset),
         key_id=primary_key_id,
         input_data=b'input_data',
         output_length=invalid_output_length)
@@ -803,7 +876,8 @@ class ServicesTest(absltest.TestCase):
     self.assertEqual(gen_response.WhichOneof('result'), 'keyset')
 
     creation_request = testing_api_pb2.CreationRequest(
-        keyset=gen_response.keyset)
+        annotated_keyset=testing_api_pb2.AnnotatedKeyset(
+            serialized_keyset=gen_response.keyset))
     creation_response = streaming_aead_servicer.Create(
         creation_request, self._ctx)
     self.assertEmpty(creation_response.err)
@@ -811,7 +885,9 @@ class ServicesTest(absltest.TestCase):
   def test_create_streaming_aead_broken_keyset(self):
     streaming_aead_servicer = services.StreamingAeadServicer()
 
-    creation_request = testing_api_pb2.CreationRequest(keyset=b'\x80')
+    creation_request = testing_api_pb2.CreationRequest(
+        annotated_keyset=testing_api_pb2.AnnotatedKeyset(
+            serialized_keyset=b'\x80'))
     creation_response = streaming_aead_servicer.Create(creation_request,
                                                        self._ctx)
     self.assertNotEmpty(creation_response.err)
@@ -830,13 +906,19 @@ class ServicesTest(absltest.TestCase):
     associated_data = b'associated_data'
 
     enc_request = testing_api_pb2.StreamingAeadEncryptRequest(
-        keyset=keyset, plaintext=plaintext, associated_data=associated_data)
+        annotated_keyset=testing_api_pb2.AnnotatedKeyset(
+            serialized_keyset=keyset),
+        plaintext=plaintext,
+        associated_data=associated_data)
     enc_response = streaming_aead_servicer.Encrypt(enc_request, self._ctx)
     self.assertEqual(enc_response.WhichOneof('result'), 'ciphertext')
     ciphertext = enc_response.ciphertext
 
     dec_request = testing_api_pb2.StreamingAeadDecryptRequest(
-        keyset=keyset, ciphertext=ciphertext, associated_data=associated_data)
+        annotated_keyset=testing_api_pb2.AnnotatedKeyset(
+            serialized_keyset=keyset),
+        ciphertext=ciphertext,
+        associated_data=associated_data)
     dec_response = streaming_aead_servicer.Decrypt(dec_request, self._ctx)
     self.assertEqual(dec_response.WhichOneof('result'), 'plaintext')
 
@@ -856,7 +938,10 @@ class ServicesTest(absltest.TestCase):
     ciphertext = b'some invalid ciphertext'
     associated_data = b'associated_data'
     dec_request = testing_api_pb2.StreamingAeadDecryptRequest(
-        keyset=keyset, ciphertext=ciphertext, associated_data=associated_data)
+        annotated_keyset=testing_api_pb2.AnnotatedKeyset(
+            serialized_keyset=keyset),
+        ciphertext=ciphertext,
+        associated_data=associated_data)
     dec_response = streaming_aead_servicer.Decrypt(dec_request, self._ctx)
     self.assertEqual(dec_response.WhichOneof('result'), 'err')
     self.assertNotEmpty(dec_response.err)

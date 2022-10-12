@@ -72,7 +72,7 @@ TEST_F(DeterministicAeadImplTest, CreateSuccess) {
   tink_testing_api::DeterministicAeadImpl aead;
   std::string keyset = ValidKeyset();
   CreationRequest request;
-  request.set_keyset(keyset);
+  request.mutable_annotated_keyset()->set_serialized_keyset(keyset);
   CreationResponse response;
 
   EXPECT_TRUE(aead.Create(nullptr, &request, &response).ok());
@@ -82,7 +82,7 @@ TEST_F(DeterministicAeadImplTest, CreateSuccess) {
 TEST_F(DeterministicAeadImplTest, CreateAeadFails) {
   tink_testing_api::DeterministicAeadImpl aead;
   CreationRequest request;
-  request.set_keyset("bad keyset");
+  request.mutable_annotated_keyset()->set_serialized_keyset("bad keyset");
   CreationResponse response;
 
   EXPECT_TRUE(aead.Create(nullptr, &request, &response).ok());
@@ -93,7 +93,7 @@ TEST_F(DeterministicAeadImplTest, EncryptDecryptSuccess) {
   tink_testing_api::DeterministicAeadImpl daead;
   std::string keyset = ValidKeyset();
   DeterministicAeadEncryptRequest enc_request;
-  enc_request.set_keyset(keyset);
+  enc_request.mutable_annotated_keyset()->set_serialized_keyset(keyset);
   enc_request.set_plaintext("Plain text");
   enc_request.set_associated_data("ad");
   DeterministicAeadEncryptResponse enc_response;
@@ -104,7 +104,7 @@ TEST_F(DeterministicAeadImplTest, EncryptDecryptSuccess) {
   EXPECT_THAT(enc_response.err(), IsEmpty());
 
   DeterministicAeadDecryptRequest dec_request;
-  dec_request.set_keyset(keyset);
+  dec_request.mutable_annotated_keyset()->set_serialized_keyset(keyset);
   dec_request.set_ciphertext(enc_response.ciphertext());
   dec_request.set_associated_data("ad");
   DeterministicAeadDecryptResponse dec_response;
@@ -119,7 +119,7 @@ TEST_F(DeterministicAeadImplTest, EncryptDecryptSuccess) {
 TEST_F(DeterministicAeadImplTest, EncryptBadKeysetFail) {
   tink_testing_api::DeterministicAeadImpl daead;
   DeterministicAeadEncryptRequest enc_request;
-  enc_request.set_keyset("bad keyset");
+  enc_request.mutable_annotated_keyset()->set_serialized_keyset("bad keyset");
   enc_request.set_plaintext("Plain text");
   enc_request.set_associated_data("ad");
   DeterministicAeadEncryptResponse enc_response;
@@ -133,7 +133,7 @@ TEST_F(DeterministicAeadImplTest, DecryptBadCiphertextFail) {
   tink_testing_api::DeterministicAeadImpl daead;
   std::string keyset = ValidKeyset();
   DeterministicAeadDecryptRequest dec_request;
-  dec_request.set_keyset(keyset);
+  dec_request.mutable_annotated_keyset()->set_serialized_keyset(keyset);
   dec_request.set_ciphertext("bad ciphertext");
   dec_request.set_associated_data("ad");
   DeterministicAeadDecryptResponse dec_response;

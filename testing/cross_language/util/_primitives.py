@@ -144,13 +144,16 @@ class Aead(aead.Aead):
     self._stub = stub
     self._keyset = keyset
     creation_response = self._stub.Create(
-        testing_api_pb2.CreationRequest(keyset=self._keyset))
+        testing_api_pb2.CreationRequest(
+            annotated_keyset=testing_api_pb2.AnnotatedKeyset(
+                serialized_keyset=self._keyset)))
     if creation_response.err:
       raise tink.TinkError(creation_response.err)
 
   def encrypt(self, plaintext: bytes, associated_data: bytes) -> bytes:
     enc_request = testing_api_pb2.AeadEncryptRequest(
-        keyset=self._keyset,
+        annotated_keyset=testing_api_pb2.AnnotatedKeyset(
+            serialized_keyset=self._keyset),
         plaintext=plaintext,
         associated_data=associated_data)
     enc_response = self._stub.Encrypt(enc_request)
@@ -160,7 +163,8 @@ class Aead(aead.Aead):
 
   def decrypt(self, ciphertext: bytes, associated_data: bytes) -> bytes:
     dec_request = testing_api_pb2.AeadDecryptRequest(
-        keyset=self._keyset,
+        annotated_keyset=testing_api_pb2.AnnotatedKeyset(
+            serialized_keyset=self._keyset),
         ciphertext=ciphertext,
         associated_data=associated_data)
     dec_response = self._stub.Decrypt(dec_request)
@@ -179,7 +183,9 @@ class DeterministicAead(daead.DeterministicAead):
     self._stub = stub
     self._keyset = keyset
     creation_response = self._stub.Create(
-        testing_api_pb2.CreationRequest(keyset=self._keyset))
+        testing_api_pb2.CreationRequest(
+            annotated_keyset=testing_api_pb2.AnnotatedKeyset(
+                serialized_keyset=self._keyset)))
     if creation_response.err:
       raise tink.TinkError(creation_response.err)
 
@@ -187,7 +193,8 @@ class DeterministicAead(daead.DeterministicAead):
                                 associated_data: bytes) -> bytes:
     """Encrypts."""
     enc_request = testing_api_pb2.DeterministicAeadEncryptRequest(
-        keyset=self._keyset,
+        annotated_keyset=testing_api_pb2.AnnotatedKeyset(
+            serialized_keyset=self._keyset),
         plaintext=plaintext,
         associated_data=associated_data)
     enc_response = self._stub.EncryptDeterministically(enc_request)
@@ -199,7 +206,8 @@ class DeterministicAead(daead.DeterministicAead):
                                 associated_data: bytes) -> bytes:
     """Decrypts."""
     dec_request = testing_api_pb2.DeterministicAeadDecryptRequest(
-        keyset=self._keyset,
+        annotated_keyset=testing_api_pb2.AnnotatedKeyset(
+            serialized_keyset=self._keyset),
         ciphertext=ciphertext,
         associated_data=associated_data)
     dec_response = self._stub.DecryptDeterministically(dec_request)
@@ -220,14 +228,17 @@ class StreamingAead(streaming_aead.StreamingAead):
   def perform_create_check(self):
     # TODO(b/241219877) Remove this and do the check in __init__ instead.
     creation_response = self._stub.Create(
-        testing_api_pb2.CreationRequest(keyset=self._keyset))
+        testing_api_pb2.CreationRequest(
+            annotated_keyset=testing_api_pb2.AnnotatedKeyset(
+                serialized_keyset=self._keyset)))
     if creation_response.err:
       raise tink.TinkError(creation_response.err)
 
   def new_encrypting_stream(self, plaintext: BinaryIO,
                             associated_data: bytes) -> BinaryIO:
     enc_request = testing_api_pb2.StreamingAeadEncryptRequest(
-        keyset=self._keyset,
+        annotated_keyset=testing_api_pb2.AnnotatedKeyset(
+            serialized_keyset=self._keyset),
         plaintext=plaintext.read(),
         associated_data=associated_data)
     enc_response = self._stub.Encrypt(enc_request)
@@ -238,7 +249,8 @@ class StreamingAead(streaming_aead.StreamingAead):
   def new_decrypting_stream(self, ciphertext: BinaryIO,
                             associated_data: bytes) -> BinaryIO:
     dec_request = testing_api_pb2.StreamingAeadDecryptRequest(
-        keyset=self._keyset,
+        annotated_keyset=testing_api_pb2.AnnotatedKeyset(
+            serialized_keyset=self._keyset),
         ciphertext=ciphertext.read(),
         associated_data=associated_data)
     dec_response = self._stub.Decrypt(dec_request)
@@ -259,12 +271,17 @@ class Mac(mac.Mac):
   def perform_create_check(self):
     # TODO(b/241219877) Remove this and do the check in __init__ instead.
     creation_response = self._stub.Create(
-        testing_api_pb2.CreationRequest(keyset=self._keyset))
+        testing_api_pb2.CreationRequest(
+            annotated_keyset=testing_api_pb2.AnnotatedKeyset(
+                serialized_keyset=self._keyset)))
     if creation_response.err:
       raise tink.TinkError(creation_response.err)
 
   def compute_mac(self, data: bytes) -> bytes:
-    request = testing_api_pb2.ComputeMacRequest(keyset=self._keyset, data=data)
+    request = testing_api_pb2.ComputeMacRequest(
+        annotated_keyset=testing_api_pb2.AnnotatedKeyset(
+            serialized_keyset=self._keyset),
+        data=data)
     response = self._stub.ComputeMac(request)
     if response.err:
       raise tink.TinkError(response.err)
@@ -272,7 +289,10 @@ class Mac(mac.Mac):
 
   def verify_mac(self, mac_value: bytes, data: bytes) -> None:
     request = testing_api_pb2.VerifyMacRequest(
-        keyset=self._keyset, mac_value=mac_value, data=data)
+        annotated_keyset=testing_api_pb2.AnnotatedKeyset(
+            serialized_keyset=self._keyset),
+        mac_value=mac_value,
+        data=data)
     response = self._stub.VerifyMac(request)
     if response.err:
       raise tink.TinkError(response.err)
@@ -290,13 +310,16 @@ class HybridEncrypt(hybrid.HybridEncrypt):
   def perform_create_check(self):
     # TODO(b/241219877) Remove this and do the check in __init__ instead.
     creation_response = self._stub.CreateHybridEncrypt(
-        testing_api_pb2.CreationRequest(keyset=self._public_handle))
+        testing_api_pb2.CreationRequest(
+            annotated_keyset=testing_api_pb2.AnnotatedKeyset(
+                serialized_keyset=self._public_handle)))
     if creation_response.err:
       raise tink.TinkError(creation_response.err)
 
   def encrypt(self, plaintext: bytes, context_info: bytes) -> bytes:
     enc_request = testing_api_pb2.HybridEncryptRequest(
-        public_keyset=self._public_handle,
+        public_annotated_keyset=testing_api_pb2.AnnotatedKeyset(
+            serialized_keyset=self._public_handle),
         plaintext=plaintext,
         context_info=context_info)
     enc_response = self._stub.Encrypt(enc_request)
@@ -317,13 +340,16 @@ class HybridDecrypt(hybrid.HybridDecrypt):
   def perform_create_check(self):
     # TODO(b/241219877) Remove this and do the check in __init__ instead.
     creation_response = self._stub.CreateHybridDecrypt(
-        testing_api_pb2.CreationRequest(keyset=self._private_handle))
+        testing_api_pb2.CreationRequest(
+            annotated_keyset=testing_api_pb2.AnnotatedKeyset(
+                serialized_keyset=self._private_handle)))
     if creation_response.err:
       raise tink.TinkError(creation_response.err)
 
   def decrypt(self, ciphertext: bytes, context_info: bytes) -> bytes:
     dec_request = testing_api_pb2.HybridDecryptRequest(
-        private_keyset=self._private_handle,
+        private_annotated_keyset=testing_api_pb2.AnnotatedKeyset(
+            serialized_keyset=self._private_handle),
         ciphertext=ciphertext,
         context_info=context_info)
     dec_response = self._stub.Decrypt(dec_request)
@@ -344,13 +370,17 @@ class PublicKeySign(tink_signature.PublicKeySign):
   def perform_create_check(self):
     # TODO(b/241219877) Remove this and do the check in __init__ instead.
     creation_response = self._stub.CreatePublicKeySign(
-        testing_api_pb2.CreationRequest(keyset=self._private_handle))
+        testing_api_pb2.CreationRequest(
+            annotated_keyset=testing_api_pb2.AnnotatedKeyset(
+                serialized_keyset=self._private_handle)))
     if creation_response.err:
       raise tink.TinkError(creation_response.err)
 
   def sign(self, data: bytes) -> bytes:
     request = testing_api_pb2.SignatureSignRequest(
-        private_keyset=self._private_handle, data=data)
+        private_annotated_keyset=testing_api_pb2.AnnotatedKeyset(
+            serialized_keyset=self._private_handle),
+        data=data)
     response = self._stub.Sign(request)
     if response.err:
       raise tink.TinkError(response.err)
@@ -369,13 +399,18 @@ class PublicKeyVerify(tink_signature.PublicKeyVerify):
   def perform_create_check(self):
     # TODO(b/241219877) Remove this and do the check in __init__ instead.
     creation_response = self._stub.CreatePublicKeyVerify(
-        testing_api_pb2.CreationRequest(keyset=self._public_handle))
+        testing_api_pb2.CreationRequest(
+            annotated_keyset=testing_api_pb2.AnnotatedKeyset(
+                serialized_keyset=self._public_handle)))
     if creation_response.err:
       raise tink.TinkError(creation_response.err)
 
   def verify(self, signature: bytes, data: bytes) -> None:
     request = testing_api_pb2.SignatureVerifyRequest(
-        public_keyset=self._public_handle, signature=signature, data=data)
+        public_annotated_keyset=testing_api_pb2.AnnotatedKeyset(
+            serialized_keyset=self._public_handle),
+        signature=signature,
+        data=data)
     response = self._stub.Verify(request)
     if response.err:
       raise tink.TinkError(response.err)
@@ -393,7 +428,8 @@ class _Prf(prf.Prf):
 
   def compute(self, input_data: bytes, output_length: int) -> bytes:
     request = testing_api_pb2.PrfSetComputeRequest(
-        keyset=self._keyset,
+        annotated_keyset=testing_api_pb2.AnnotatedKeyset(
+            serialized_keyset=self._keyset),
         key_id=self._key_id,
         input_data=input_data,
         output_length=output_length)
@@ -418,13 +454,17 @@ class PrfSet(prf.PrfSet):
   def perform_create_check(self):
     # TODO(b/241219877) Remove this and do the check in __init__ instead.
     creation_response = self._stub.Create(
-        testing_api_pb2.CreationRequest(keyset=self._keyset))
+        testing_api_pb2.CreationRequest(
+            annotated_keyset=testing_api_pb2.AnnotatedKeyset(
+                serialized_keyset=self._keyset)))
     if creation_response.err:
       raise tink.TinkError(creation_response.err)
 
   def _initialize_key_ids(self) -> None:
     if not self._key_ids_initialized:
-      request = testing_api_pb2.PrfSetKeyIdsRequest(keyset=self._keyset)
+      request = testing_api_pb2.PrfSetKeyIdsRequest(
+          annotated_keyset=testing_api_pb2.AnnotatedKeyset(
+              serialized_keyset=self._keyset))
       response = self._stub.KeyIds(request)
       if response.err:
         raise tink.TinkError(response.err)
@@ -598,13 +638,17 @@ class JwtMac():
   def perform_create_check(self):
     # TODO(b/241219877) Remove this and do the check in __init__ instead.
     creation_response = self._stub.CreateJwtMac(
-        testing_api_pb2.CreationRequest(keyset=self._keyset))
+        testing_api_pb2.CreationRequest(
+            annotated_keyset=testing_api_pb2.AnnotatedKeyset(
+                serialized_keyset=self._keyset)))
     if creation_response.err:
       raise tink.TinkError(creation_response.err)
 
   def compute_mac_and_encode(self, raw_jwt: jwt.RawJwt) -> str:
     request = testing_api_pb2.JwtSignRequest(
-        keyset=self._keyset, raw_jwt=raw_jwt_to_proto(raw_jwt))
+        annotated_keyset=testing_api_pb2.AnnotatedKeyset(
+            serialized_keyset=self._keyset),
+        raw_jwt=raw_jwt_to_proto(raw_jwt))
     response = self._stub.ComputeMacAndEncode(request)
     if response.err:
       raise tink.TinkError(response.err)
@@ -612,8 +656,20 @@ class JwtMac():
 
   def verify_mac_and_decode(self, signed_compact_jwt: str,
                             validator: jwt.JwtValidator) -> jwt.VerifiedJwt:
+    """verifies and decodes a jwt in compact serialization using a mac.
+
+    Args:
+      signed_compact_jwt: the sign jwt in compact serialization form.
+      validator: validator to validate the jwt.
+
+    Returns:
+
+    Raises:
+      tink.TinkError: if verification or validation fails.
+    """
     request = testing_api_pb2.JwtVerifyRequest(
-        keyset=self._keyset,
+        annotated_keyset=testing_api_pb2.AnnotatedKeyset(
+            serialized_keyset=self._keyset),
         validator=jwt_validator_to_proto(validator),
         signed_compact_jwt=signed_compact_jwt)
     response = self._stub.VerifyMacAndDecode(request)
@@ -634,13 +690,17 @@ class JwtPublicKeySign():
   def perform_create_check(self):
     # TODO(b/241219877) Remove this and do the check in __init__ instead.
     creation_response = self._stub.CreateJwtPublicKeySign(
-        testing_api_pb2.CreationRequest(keyset=self._keyset))
+        testing_api_pb2.CreationRequest(
+            annotated_keyset=testing_api_pb2.AnnotatedKeyset(
+                serialized_keyset=self._keyset)))
     if creation_response.err:
       raise tink.TinkError(creation_response.err)
 
   def sign_and_encode(self, raw_jwt: jwt.RawJwt) -> str:
     request = testing_api_pb2.JwtSignRequest(
-        keyset=self._keyset, raw_jwt=raw_jwt_to_proto(raw_jwt))
+        annotated_keyset=testing_api_pb2.AnnotatedKeyset(
+            serialized_keyset=self._keyset),
+        raw_jwt=raw_jwt_to_proto(raw_jwt))
     response = self._stub.PublicKeySignAndEncode(request)
     if response.err:
       raise tink.TinkError(response.err)
@@ -659,14 +719,28 @@ class JwtPublicKeyVerify():
   def perform_create_check(self):
     # TODO(b/241219877) Remove this and do the check in __init__ instead.
     creation_response = self._stub.CreateJwtPublicKeyVerify(
-        testing_api_pb2.CreationRequest(keyset=self._keyset))
+        testing_api_pb2.CreationRequest(
+            annotated_keyset=testing_api_pb2.AnnotatedKeyset(
+                serialized_keyset=self._keyset)))
     if creation_response.err:
       raise tink.TinkError(creation_response.err)
 
   def verify_and_decode(self, signed_compact_jwt: str,
                         validator: jwt.JwtValidator) -> jwt.VerifiedJwt:
+    """verifies and decodes a jwt in compact serialization using a digital signature.
+
+    Args:
+      signed_compact_jwt: the sign jwt in compact serialization form.
+      validator: validator to validate the jwt.
+
+    Returns:
+
+    Raises:
+      tink.TinkError: if verification or validation fails.
+    """
     request = testing_api_pb2.JwtVerifyRequest(
-        keyset=self._keyset,
+        annotated_keyset=testing_api_pb2.AnnotatedKeyset(
+            serialized_keyset=self._keyset),
         validator=jwt_validator_to_proto(validator),
         signed_compact_jwt=signed_compact_jwt)
     response = self._stub.PublicKeyVerifyAndDecode(request)

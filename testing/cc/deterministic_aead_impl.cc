@@ -21,11 +21,8 @@
 #include <string>
 #include <utility>
 
-#include "tink/binary_keyset_reader.h"
-#include "tink/cleartext_keyset_handle.h"
 #include "tink/deterministic_aead.h"
 #include "create.h"
-#include "proto/testing_api.grpc.pb.h"
 
 namespace tink_testing_api {
 
@@ -44,7 +41,7 @@ grpc::Status DeterministicAeadImpl::EncryptDeterministically(
     DeterministicAeadEncryptResponse* response) {
   StatusOr<std::unique_ptr<crypto::tink::DeterministicAead>> daead =
       PrimitiveFromSerializedBinaryProtoKeyset<crypto::tink::DeterministicAead>(
-          request->keyset());
+          request->annotated_keyset());
   if (!daead.ok()) {
     return grpc::Status(
         grpc::StatusCode::FAILED_PRECONDITION,
@@ -67,7 +64,7 @@ grpc::Status DeterministicAeadImpl::DecryptDeterministically(
     DeterministicAeadDecryptResponse* response) {
   StatusOr<std::unique_ptr<crypto::tink::DeterministicAead>> daead =
       PrimitiveFromSerializedBinaryProtoKeyset<crypto::tink::DeterministicAead>(
-          request->keyset());
+          request->annotated_keyset());
   if (!daead.ok()) {
     return grpc::Status(
         grpc::StatusCode::FAILED_PRECONDITION,

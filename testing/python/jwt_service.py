@@ -192,7 +192,7 @@ class JwtServicer(testing_api_pb2_grpc.JwtServicer):
     """Creates a JwtMac without using it."""
     try:
       keyset_handle = cleartext_keyset_handle.read(
-          tink.BinaryKeysetReader(request.keyset))
+          tink.BinaryKeysetReader(request.annotated_keyset.serialized_keyset))
       keyset_handle.primitive(jwt.JwtMac)
       return testing_api_pb2.CreationResponse()
     except tink.TinkError as e:
@@ -204,7 +204,7 @@ class JwtServicer(testing_api_pb2_grpc.JwtServicer):
     """Creates a JwtPublicKeySign without using it."""
     try:
       keyset_handle = cleartext_keyset_handle.read(
-          tink.BinaryKeysetReader(request.keyset))
+          tink.BinaryKeysetReader(request.annotated_keyset.serialized_keyset))
       keyset_handle.primitive(jwt.JwtPublicKeySign)
       return testing_api_pb2.CreationResponse()
     except tink.TinkError as e:
@@ -216,7 +216,7 @@ class JwtServicer(testing_api_pb2_grpc.JwtServicer):
     """Creates a JwtPublicKeyVerify without using it."""
     try:
       keyset_handle = cleartext_keyset_handle.read(
-          tink.BinaryKeysetReader(request.keyset))
+          tink.BinaryKeysetReader(request.annotated_keyset.serialized_keyset))
       keyset_handle.primitive(jwt.JwtPublicKeyVerify)
       return testing_api_pb2.CreationResponse()
     except tink.TinkError as e:
@@ -228,7 +228,7 @@ class JwtServicer(testing_api_pb2_grpc.JwtServicer):
     """Computes a MACed compact JWT."""
     try:
       keyset_handle = cleartext_keyset_handle.read(
-          tink.BinaryKeysetReader(request.keyset))
+          tink.BinaryKeysetReader(request.annotated_keyset.serialized_keyset))
       p = keyset_handle.primitive(jwt.JwtMac)
       raw_jwt = raw_jwt_from_proto(request.raw_jwt)
       signed_compact_jwt = p.compute_mac_and_encode(raw_jwt)
@@ -243,7 +243,7 @@ class JwtServicer(testing_api_pb2_grpc.JwtServicer):
     """Verifies a MAC value."""
     try:
       keyset_handle = cleartext_keyset_handle.read(
-          tink.BinaryKeysetReader(request.keyset))
+          tink.BinaryKeysetReader(request.annotated_keyset.serialized_keyset))
       validator = validator_from_proto(request.validator)
       p = keyset_handle.primitive(jwt.JwtMac)
       verified_jwt = p.verify_mac_and_decode(request.signed_compact_jwt,
@@ -259,7 +259,7 @@ class JwtServicer(testing_api_pb2_grpc.JwtServicer):
     """Computes a signed compact JWT token."""
     try:
       keyset_handle = cleartext_keyset_handle.read(
-          tink.BinaryKeysetReader(request.keyset))
+          tink.BinaryKeysetReader(request.annotated_keyset.serialized_keyset))
       p = keyset_handle.primitive(jwt.JwtPublicKeySign)
       raw_jwt = raw_jwt_from_proto(request.raw_jwt)
       signed_compact_jwt = p.sign_and_encode(raw_jwt)
@@ -274,7 +274,7 @@ class JwtServicer(testing_api_pb2_grpc.JwtServicer):
     """Verifies the validity of the signed compact JWT token."""
     try:
       keyset_handle = cleartext_keyset_handle.read(
-          tink.BinaryKeysetReader(request.keyset))
+          tink.BinaryKeysetReader(request.annotated_keyset.serialized_keyset))
       validator = validator_from_proto(request.validator)
       p = keyset_handle.primitive(jwt.JwtPublicKeyVerify)
       verified_jwt = p.verify_and_decode(request.signed_compact_jwt, validator)

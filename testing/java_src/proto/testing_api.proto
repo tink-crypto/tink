@@ -161,8 +161,13 @@ message KeysetWriteEncryptedResponse {
   }
 }
 
+message AnnotatedKeyset {
+  bytes serialized_keyset = 1;  // serialized google.crypto.tink.Keyset.
+  map<string, string> annotations = 2;
+}
+
 message CreationRequest {
-  bytes keyset = 1;  // serialized google.crypto.tink.Keyset.
+  AnnotatedKeyset annotated_keyset = 1;
 }
 
 message CreationResponse {
@@ -183,7 +188,7 @@ service Aead {
 }
 
 message AeadEncryptRequest {
-  bytes keyset = 1;  // serialized google.crypto.tink.Keyset.
+  AnnotatedKeyset annotated_keyset = 1;
   bytes plaintext = 2;
   bytes associated_data = 3;
 }
@@ -196,7 +201,7 @@ message AeadEncryptResponse {
 }
 
 message AeadDecryptRequest {
-  bytes keyset = 1;  // serialized google.crypto.tink.Keyset.
+  AnnotatedKeyset annotated_keyset = 1;
   bytes ciphertext = 2;
   bytes associated_data = 3;
 }
@@ -225,7 +230,7 @@ service DeterministicAead {
 }
 
 message DeterministicAeadEncryptRequest {
-  bytes keyset = 1;  // serialized google.crypto.tink.Keyset.
+  AnnotatedKeyset annotated_keyset = 1;
   bytes plaintext = 2;
   bytes associated_data = 3;
 }
@@ -238,7 +243,7 @@ message DeterministicAeadEncryptResponse {
 }
 
 message DeterministicAeadDecryptRequest {
-  bytes keyset = 1;  // serialized google.crypto.tink.Keyset.
+  AnnotatedKeyset annotated_keyset = 1;
   bytes ciphertext = 2;
   bytes associated_data = 3;
 }
@@ -264,7 +269,7 @@ service StreamingAead {
 }
 
 message StreamingAeadEncryptRequest {
-  bytes keyset = 1;  // serialized google.crypto.tink.Keyset.
+  AnnotatedKeyset annotated_keyset = 1;
   bytes plaintext = 2;
   bytes associated_data = 3;
 }
@@ -277,7 +282,7 @@ message StreamingAeadEncryptResponse {
 }
 
 message StreamingAeadDecryptRequest {
-  bytes keyset = 1;  // serialized google.crypto.tink.Keyset.
+  AnnotatedKeyset annotated_keyset = 1;
   bytes ciphertext = 2;
   bytes associated_data = 3;
 }
@@ -300,7 +305,7 @@ service Mac {
 }
 
 message ComputeMacRequest {
-  bytes keyset = 1;  // serialized google.crypto.tink.Keyset.
+  AnnotatedKeyset annotated_keyset = 1;
   bytes data = 2;
 }
 
@@ -312,7 +317,7 @@ message ComputeMacResponse {
 }
 
 message VerifyMacRequest {
-  bytes keyset = 1;  // serialized google.crypto.tink.Keyset.
+  AnnotatedKeyset annotated_keyset = 1;
   bytes mac_value = 2;
   bytes data = 3;
 }
@@ -335,7 +340,7 @@ service Hybrid {
 }
 
 message HybridEncryptRequest {
-  bytes public_keyset = 1;  // serialized google.crypto.tink.Keyset.
+  AnnotatedKeyset public_annotated_keyset = 1;
   bytes plaintext = 2;
   bytes context_info = 3;
 }
@@ -348,7 +353,7 @@ message HybridEncryptResponse {
 }
 
 message HybridDecryptRequest {
-  bytes private_keyset = 1;  // serialized google.crypto.tink.Keyset.
+  AnnotatedKeyset private_annotated_keyset = 1;
   bytes ciphertext = 2;
   bytes context_info = 3;
 }
@@ -374,7 +379,7 @@ service Signature {
 }
 
 message SignatureSignRequest {
-  bytes private_keyset = 1;  // serialized google.crypto.tink.Keyset.
+  AnnotatedKeyset private_annotated_keyset = 1;
   bytes data = 2;
 }
 
@@ -386,7 +391,7 @@ message SignatureSignResponse {
 }
 
 message SignatureVerifyRequest {
-  bytes public_keyset = 1;  // serialized google.crypto.tink.Keyset.
+  AnnotatedKeyset public_annotated_keyset = 1;
   bytes signature = 2;
   bytes data = 3;
 }
@@ -407,7 +412,7 @@ service PrfSet {
 }
 
 message PrfSetKeyIdsRequest {
-  bytes keyset = 1;  // serialized google.crypto.tink.Keyset.
+  AnnotatedKeyset annotated_keyset = 1;
 }
 
 message PrfSetKeyIdsResponse {
@@ -422,7 +427,7 @@ message PrfSetKeyIdsResponse {
 }
 
 message PrfSetComputeRequest {
-  bytes keyset = 1;  // serialized google.crypto.tink.Keyset.
+  AnnotatedKeyset annotated_keyset = 1;
   uint32 key_id = 2;
   bytes input_data = 3;
   int32 output_length = 4;
@@ -500,7 +505,7 @@ message JwtValidator {
 }
 
 message JwtSignRequest {
-  bytes keyset = 1;  // serialized google.crypto.tink.Keyset
+  AnnotatedKeyset annotated_keyset = 1;
   JwtToken raw_jwt = 2;
 }
 
@@ -512,7 +517,7 @@ message JwtSignResponse {
 }
 
 message JwtVerifyRequest {
-  bytes keyset = 1;  // serialized google.crypto.tink.Keyset
+  AnnotatedKeyset annotated_keyset = 1;
   string signed_compact_jwt = 2;
   JwtValidator validator = 3;
 }

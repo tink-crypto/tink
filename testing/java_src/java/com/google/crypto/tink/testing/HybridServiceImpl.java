@@ -52,7 +52,8 @@ public final class HybridServiceImpl extends HybridImplBase {
     try {
       // TODO(b/241219877) Move the next line out from the try-catch block.
       HybridEncrypt hybridEncrypt =
-          Util.parseBinaryProtoKeyset(request.getPublicKeyset()).getPrimitive(HybridEncrypt.class);
+          Util.parseBinaryProtoKeyset(request.getPublicAnnotatedKeyset().getSerializedKeyset())
+              .getPrimitive(HybridEncrypt.class);
       byte[] ciphertext =
           hybridEncrypt.encrypt(
               request.getPlaintext().toByteArray(), request.getContextInfo().toByteArray());
@@ -81,7 +82,8 @@ public final class HybridServiceImpl extends HybridImplBase {
     try {
       // TODO(b/241219877) Move the next line out from the try-catch block.
       HybridDecrypt hybridDecrypt =
-          Util.parseBinaryProtoKeyset(request.getPrivateKeyset()).getPrimitive(HybridDecrypt.class);
+          Util.parseBinaryProtoKeyset(request.getPrivateAnnotatedKeyset().getSerializedKeyset())
+              .getPrimitive(HybridDecrypt.class);
       byte[] plaintext =
           hybridDecrypt.decrypt(
               request.getCiphertext().toByteArray(), request.getContextInfo().toByteArray());

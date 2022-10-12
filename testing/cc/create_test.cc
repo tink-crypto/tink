@@ -18,9 +18,7 @@
 
 #include <memory>
 #include <ostream>
-
 #include <sstream>
-
 #include <string>
 
 #include "gmock/gmock.h"
@@ -30,7 +28,6 @@
 #include "tink/binary_keyset_writer.h"
 #include "tink/keyset_handle.h"
 #include "tink/mac.h"
-#include "aead_impl.h"
 
 namespace tink_testing_api {
 
@@ -66,7 +63,7 @@ class CreateTest : public ::testing::Test {
 TEST_F(CreateTest, RpcHelperSuccess) {
   std::string keyset = ValidAeadKeyset();
   CreationRequest request;
-  request.set_keyset(keyset);
+  request.mutable_annotated_keyset()->set_serialized_keyset(keyset);
   CreationResponse response;
 
   EXPECT_TRUE(
@@ -78,7 +75,7 @@ TEST_F(CreateTest, RpcHelperSuccess) {
 TEST_F(CreateTest, RpcHelperWrongPrimitiveFails) {
   std::string keyset = ValidAeadKeyset();
   CreationRequest request;
-  request.set_keyset(keyset);
+  request.mutable_annotated_keyset()->set_serialized_keyset(keyset);
   CreationResponse response;
   EXPECT_TRUE(
       CreatePrimitiveForRpc<crypto::tink::Mac>(&request, &response).ok());
@@ -86,17 +83,21 @@ TEST_F(CreateTest, RpcHelperWrongPrimitiveFails) {
 }
 
 TEST_F(CreateTest, PrimitiveCreationWorks) {
-  std::string keyset = ValidAeadKeyset();
+  AnnotatedKeyset annotated_keyset;
+  annotated_keyset.set_serialized_keyset(ValidAeadKeyset());
   crypto::tink::util::StatusOr<std::unique_ptr<crypto::tink::Aead>> aead =
-      PrimitiveFromSerializedBinaryProtoKeyset<crypto::tink::Aead>(keyset);
+      PrimitiveFromSerializedBinaryProtoKeyset<crypto::tink::Aead>(
+          annotated_keyset);
   ASSERT_TRUE(aead.status().ok()) << aead.status();
   EXPECT_THAT(*aead, NotNull());
 }
 
 TEST_F(CreateTest, PrimitiveCreationWrongPrimitiveFails) {
-  std::string keyset = ValidAeadKeyset();
+  AnnotatedKeyset annotated_keyset;
+  annotated_keyset.set_serialized_keyset(ValidAeadKeyset());
   crypto::tink::util::StatusOr<std::unique_ptr<crypto::tink::Mac>> aead =
-      PrimitiveFromSerializedBinaryProtoKeyset<crypto::tink::Mac>(keyset);
+      PrimitiveFromSerializedBinaryProtoKeyset<crypto::tink::Mac>(
+          annotated_keyset);
   ASSERT_FALSE(aead.status().ok());
 }
 

@@ -75,7 +75,7 @@ TEST_F(StreamingAeadImplTest, CreateSuccess) {
   tink_testing_api::StreamingAeadImpl streaming_aead;
   std::string keyset = ValidKeyset();
   CreationRequest request;
-  request.set_keyset(keyset);
+  request.mutable_annotated_keyset()->set_serialized_keyset(keyset);
   CreationResponse response;
 
   EXPECT_TRUE(streaming_aead.Create(nullptr, &request, &response).ok());
@@ -85,7 +85,7 @@ TEST_F(StreamingAeadImplTest, CreateSuccess) {
 TEST_F(StreamingAeadImplTest, CreateFails) {
   tink_testing_api::StreamingAeadImpl streaming_aead;
   CreationRequest request;
-  request.set_keyset("bad keyset");
+  request.mutable_annotated_keyset()->set_serialized_keyset("bad keyset");
   CreationResponse response;
 
   EXPECT_TRUE(streaming_aead.Create(nullptr, &request, &response).ok());
@@ -97,7 +97,7 @@ TEST_F(StreamingAeadImplTest, EncryptDecryptSuccess) {
   tink_testing_api::StreamingAeadImpl streaming_aead;
   std::string keyset = ValidKeyset();
   StreamingAeadEncryptRequest enc_request;
-  enc_request.set_keyset(keyset);
+  enc_request.mutable_annotated_keyset()->set_serialized_keyset(keyset);
   enc_request.set_plaintext("Plain text");
   enc_request.set_associated_data("ad");
   StreamingAeadEncryptResponse enc_response;
@@ -107,7 +107,7 @@ TEST_F(StreamingAeadImplTest, EncryptDecryptSuccess) {
   EXPECT_THAT(enc_response.err(), IsEmpty());
 
   StreamingAeadDecryptRequest dec_request;
-  dec_request.set_keyset(keyset);
+  dec_request.mutable_annotated_keyset()->set_serialized_keyset(keyset);
   dec_request.set_ciphertext(enc_response.ciphertext());
   dec_request.set_associated_data("ad");
   StreamingAeadDecryptResponse dec_response;
@@ -121,7 +121,7 @@ TEST_F(StreamingAeadImplTest, EncryptDecryptSuccess) {
 TEST_F(StreamingAeadImplTest, EncryptBadKeysetFail) {
   tink_testing_api::StreamingAeadImpl streaming_aead;
   StreamingAeadEncryptRequest enc_request;
-  enc_request.set_keyset("bad keyset");
+  enc_request.mutable_annotated_keyset()->set_serialized_keyset("bad keyset");
   enc_request.set_plaintext("Plain text");
   enc_request.set_associated_data("ad");
   StreamingAeadEncryptResponse enc_response;
@@ -135,7 +135,7 @@ TEST_F(StreamingAeadImplTest, DecryptBadCiphertextFail) {
   tink_testing_api::StreamingAeadImpl streaming_aead;
   std::string keyset = ValidKeyset();
   StreamingAeadDecryptRequest dec_request;
-  dec_request.set_keyset(keyset);
+  dec_request.mutable_annotated_keyset()->set_serialized_keyset(keyset);
   dec_request.set_ciphertext("bad ciphertext");
   dec_request.set_associated_data("ad");
   StreamingAeadDecryptResponse dec_response;

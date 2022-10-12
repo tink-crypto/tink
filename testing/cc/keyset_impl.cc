@@ -225,7 +225,7 @@ grpc::Status KeysetImpl::Generate(grpc::ServerContext* context,
     response->set_err("Could not parse the key template");
     return grpc::Status::OK;
   }
-  auto handle_result = KeysetHandle::GenerateNew(key_template);
+  auto handle_result = ::crypto::tink::KeysetHandle::GenerateNew(key_template);
   if (!handle_result.ok()) {
     response->set_err(std::string(handle_result.status().message()));
     return grpc::Status::OK;
@@ -478,7 +478,7 @@ grpc::Status KeysetImpl::ReadEncrypted(
   std::unique_ptr<KeysetHandle> keyset_handle;
   if (request->has_associated_data()) {
     StatusOr<std::unique_ptr<KeysetHandle>> read_result =
-        KeysetHandle::ReadWithAssociatedData(
+        ::crypto::tink::KeysetHandle::ReadWithAssociatedData(
             std::move(keyset_reader), **master_aead,
             request->associated_data().value());
     if (!read_result.ok()) {
@@ -488,7 +488,8 @@ grpc::Status KeysetImpl::ReadEncrypted(
     keyset_handle = *std::move(read_result);
   } else {
     StatusOr<std::unique_ptr<KeysetHandle>> read_result =
-        KeysetHandle::Read(std::move(keyset_reader), **master_aead);
+        ::crypto::tink::KeysetHandle::Read(std::move(keyset_reader),
+                                           **master_aead);
     if (!read_result.ok()) {
       response->set_err(std::string(read_result.status().message()));
       return grpc::Status::OK;

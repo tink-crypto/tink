@@ -121,7 +121,7 @@ func TestJWTComputeInvalidJWT(t *testing.T) {
 			if err != nil {
 				t.Fatalf("genKeyset failed: %v", err)
 			}
-			signResponse, err := jwtService.ComputeMacAndEncode(ctx, &pb.JwtSignRequest{Keyset: keyset, RawJwt: tc.rawJWT})
+			signResponse, err := jwtService.ComputeMacAndEncode(ctx, &pb.JwtSignRequest{AnnotatedKeyset: &pb.AnnotatedKeyset{SerializedKeyset: keyset}, RawJwt: tc.rawJWT})
 			if err != nil {
 				t.Fatalf("jwtService.ComputeMacAndEncode() err = %v, want nil", err)
 			}
@@ -147,7 +147,7 @@ func TestSuccessfulJwtMacCreation(t *testing.T) {
 		t.Fatalf("genKeyset failed: %v", err)
 	}
 
-	result, err := jwtService.CreateJwtMac(ctx, &pb.CreationRequest{Keyset: keyset})
+	result, err := jwtService.CreateJwtMac(ctx, &pb.CreationRequest{AnnotatedKeyset: &pb.AnnotatedKeyset{SerializedKeyset: keyset}})
 	if err != nil {
 		t.Fatalf("CreateJwtMac with good keyset failed with gRPC error: %v, want nil", err)
 	}
@@ -172,7 +172,7 @@ func TestFailingJwtMacCreation(t *testing.T) {
 		t.Fatalf("genKeyset failed: %v", err)
 	}
 
-	result, err := jwtService.CreateJwtMac(ctx, &pb.CreationRequest{Keyset: badKeyset})
+	result, err := jwtService.CreateJwtMac(ctx, &pb.CreationRequest{AnnotatedKeyset: &pb.AnnotatedKeyset{SerializedKeyset: badKeyset}})
 	if err != nil {
 		t.Fatalf("CreateJwtMac with bad keyset failed with gRPC error: %v", err)
 	}
@@ -197,7 +197,7 @@ func TestJWTComputeMACWithInvalidKeysetFails(t *testing.T) {
 		TypeHeader: &wpb.StringValue{Value: "JWT"},
 		Issuer:     &wpb.StringValue{Value: "issuer"},
 	}
-	signResponse, err := jwtService.ComputeMacAndEncode(ctx, &pb.JwtSignRequest{Keyset: keyset, RawJwt: rawJWT})
+	signResponse, err := jwtService.ComputeMacAndEncode(ctx, &pb.JwtSignRequest{AnnotatedKeyset: &pb.AnnotatedKeyset{SerializedKeyset: keyset}, RawJwt: rawJWT})
 	if err != nil {
 		t.Fatalf("jwtService.ComputeMacAndEncode() err = %v, want nil", err)
 	}
@@ -284,7 +284,7 @@ func TestJWTComputeAndVerifyMac(t *testing.T) {
 				t.Fatalf("genKeyset failed: %v", err)
 			}
 
-			signResponse, err := jwtService.ComputeMacAndEncode(ctx, &pb.JwtSignRequest{Keyset: keyset, RawJwt: tc.rawJWT})
+			signResponse, err := jwtService.ComputeMacAndEncode(ctx, &pb.JwtSignRequest{AnnotatedKeyset: &pb.AnnotatedKeyset{SerializedKeyset: keyset}, RawJwt: tc.rawJWT})
 			if err != nil {
 				t.Fatalf("jwtService.ComputeMacAndEncode() err = %v, want nil", err)
 			}
@@ -292,7 +292,7 @@ func TestJWTComputeAndVerifyMac(t *testing.T) {
 			if err != nil {
 				t.Fatalf("JwtSignResponse_Err: %v", err)
 			}
-			verifyResponse, err := jwtService.VerifyMacAndDecode(ctx, &pb.JwtVerifyRequest{Keyset: keyset, SignedCompactJwt: compact, Validator: tc.validator})
+			verifyResponse, err := jwtService.VerifyMacAndDecode(ctx, &pb.JwtVerifyRequest{AnnotatedKeyset: &pb.AnnotatedKeyset{SerializedKeyset: keyset}, SignedCompactJwt: compact, Validator: tc.validator})
 			if err != nil {
 				t.Fatalf("jwtService.VerifyMacAndDecode() err = %v, want nil", err)
 			}
@@ -325,7 +325,7 @@ func TestJWTVerifyMACFailures(t *testing.T) {
 		NotBefore:  &tpb.Timestamp{Seconds: 12345},
 		IssuedAt:   &tpb.Timestamp{Seconds: 1234},
 	}
-	signResponse, err := jwtService.ComputeMacAndEncode(ctx, &pb.JwtSignRequest{Keyset: keyset, RawJwt: rawJWT})
+	signResponse, err := jwtService.ComputeMacAndEncode(ctx, &pb.JwtSignRequest{AnnotatedKeyset: &pb.AnnotatedKeyset{SerializedKeyset: keyset}, RawJwt: rawJWT})
 	if err != nil {
 		t.Fatalf("jwtService.ComputeMacAndEncode() err = %v, want nil", err)
 	}
@@ -337,7 +337,7 @@ func TestJWTVerifyMACFailures(t *testing.T) {
 		ExpectedTypeHeader: &wpb.StringValue{Value: "JWT"},
 		Now:                &tpb.Timestamp{Seconds: 12345},
 	}
-	verifyResponse, err := jwtService.VerifyMacAndDecode(ctx, &pb.JwtVerifyRequest{Keyset: keyset, SignedCompactJwt: compact, Validator: validator})
+	verifyResponse, err := jwtService.VerifyMacAndDecode(ctx, &pb.JwtVerifyRequest{AnnotatedKeyset: &pb.AnnotatedKeyset{SerializedKeyset: keyset}, SignedCompactJwt: compact, Validator: validator})
 	if err != nil {
 		t.Fatalf("jwtService.VerifyMacAndDecode() err = %v, want nil", err)
 	}
@@ -369,7 +369,7 @@ func TestJWTVerifyMACFailures(t *testing.T) {
 		},
 	} {
 		t.Run(tc.tag, func(t *testing.T) {
-			verifyResponse, err := jwtService.VerifyMacAndDecode(ctx, &pb.JwtVerifyRequest{Keyset: keyset, SignedCompactJwt: compact, Validator: tc.validator})
+			verifyResponse, err := jwtService.VerifyMacAndDecode(ctx, &pb.JwtVerifyRequest{AnnotatedKeyset: &pb.AnnotatedKeyset{SerializedKeyset: keyset}, SignedCompactJwt: compact, Validator: tc.validator})
 			if err != nil {
 				t.Fatalf("jwtService.VerifyMacAndDecode() err = %v, want nil", err)
 			}
@@ -395,7 +395,7 @@ func TestSuccessfulJwtSignVerifyCreation(t *testing.T) {
 		t.Fatalf("genKeyset failed: %v", err)
 	}
 
-	result, err := jwtService.CreateJwtPublicKeySign(ctx, &pb.CreationRequest{Keyset: privateKeyset})
+	result, err := jwtService.CreateJwtPublicKeySign(ctx, &pb.CreationRequest{AnnotatedKeyset: &pb.AnnotatedKeyset{SerializedKeyset: privateKeyset}})
 	if err != nil {
 		t.Fatalf("CreateJwtPublicKeySign with good keyset failed with gRPC error: %v, want nil", err)
 	}
@@ -423,7 +423,7 @@ func TestSuccessfulJwtVerifyCreation(t *testing.T) {
 		t.Fatalf("pubKeyset failed: %v", err)
 	}
 
-	result, err := jwtService.CreateJwtPublicKeyVerify(ctx, &pb.CreationRequest{Keyset: publicKeyset})
+	result, err := jwtService.CreateJwtPublicKeyVerify(ctx, &pb.CreationRequest{AnnotatedKeyset: &pb.AnnotatedKeyset{SerializedKeyset: publicKeyset}})
 	if err != nil {
 		t.Fatalf("CreateJwtPublicKeyVerify with good keyset failed with gRPC error: %v", err)
 	}
@@ -448,7 +448,7 @@ func TestFailingJwtSignCreation(t *testing.T) {
 		t.Fatalf("genKeyset failed: %v", err)
 	}
 
-	result, err := jwtService.CreateJwtPublicKeySign(ctx, &pb.CreationRequest{Keyset: privateKeyset})
+	result, err := jwtService.CreateJwtPublicKeySign(ctx, &pb.CreationRequest{AnnotatedKeyset: &pb.AnnotatedKeyset{SerializedKeyset: privateKeyset}})
 	if err != nil {
 		t.Fatalf("CreateJwtPublicKeySign with bad keyset failed with gRPC error: %v", err)
 	}
@@ -477,7 +477,7 @@ func TestFailingJwtVerifyCreation(t *testing.T) {
 		t.Fatalf("pubKeyset failed: %v", err)
 	}
 
-	result, err := jwtService.CreateJwtPublicKeyVerify(ctx, &pb.CreationRequest{Keyset: publicKeyset})
+	result, err := jwtService.CreateJwtPublicKeyVerify(ctx, &pb.CreationRequest{AnnotatedKeyset: &pb.AnnotatedKeyset{SerializedKeyset: publicKeyset}})
 	if err != nil {
 		t.Fatalf("CreateJwtPublicKeyVerify with good keyset failed with gRPC error: %v", err)
 	}
@@ -502,7 +502,7 @@ func TestJWTPublicKeySignWithInvalidKeysetFails(t *testing.T) {
 	rawJWT := &pb.JwtToken{
 		Subject: &wpb.StringValue{Value: "tink-subject"},
 	}
-	signResponse, err := jwtService.PublicKeySignAndEncode(ctx, &pb.JwtSignRequest{Keyset: privateKeyset, RawJwt: rawJWT})
+	signResponse, err := jwtService.PublicKeySignAndEncode(ctx, &pb.JwtSignRequest{AnnotatedKeyset: &pb.AnnotatedKeyset{SerializedKeyset: privateKeyset}, RawJwt: rawJWT})
 	if err != nil {
 		t.Fatalf("jwtService.PublicKeySignAndEncode() err = %v", err)
 	}
@@ -547,7 +547,7 @@ func TestJWTPublicKeySignInvalidTokenFails(t *testing.T) {
 		},
 	} {
 		t.Run(tc.tag, func(t *testing.T) {
-			signResponse, err := jwtService.PublicKeySignAndEncode(ctx, &pb.JwtSignRequest{Keyset: privateKeyset, RawJwt: tc.rawJWT})
+			signResponse, err := jwtService.PublicKeySignAndEncode(ctx, &pb.JwtSignRequest{AnnotatedKeyset: &pb.AnnotatedKeyset{SerializedKeyset: privateKeyset}, RawJwt: tc.rawJWT})
 			if err != nil {
 				t.Fatalf("jwtService.PublicKeySignAndEncode() err = %v", err)
 			}
@@ -578,7 +578,7 @@ func TestJWTPublicKeyVerifyFails(t *testing.T) {
 	rawJWT := &pb.JwtToken{
 		Subject: &wpb.StringValue{Value: "tink-subject"},
 	}
-	signResponse, err := jwtService.PublicKeySignAndEncode(ctx, &pb.JwtSignRequest{Keyset: privateKeyset, RawJwt: rawJWT})
+	signResponse, err := jwtService.PublicKeySignAndEncode(ctx, &pb.JwtSignRequest{AnnotatedKeyset: &pb.AnnotatedKeyset{SerializedKeyset: privateKeyset}, RawJwt: rawJWT})
 	if err != nil {
 		t.Fatalf("jwtService.PublicKeySignAndEncode() err = %v", err)
 	}
@@ -589,7 +589,7 @@ func TestJWTPublicKeyVerifyFails(t *testing.T) {
 	validator := &pb.JwtValidator{
 		ExpectedTypeHeader: &wpb.StringValue{Value: "JWT"},
 	}
-	verifyResponse, err := jwtService.PublicKeyVerifyAndDecode(ctx, &pb.JwtVerifyRequest{Keyset: publicKeyset, SignedCompactJwt: compact, Validator: validator})
+	verifyResponse, err := jwtService.PublicKeyVerifyAndDecode(ctx, &pb.JwtVerifyRequest{AnnotatedKeyset: &pb.AnnotatedKeyset{SerializedKeyset: publicKeyset}, SignedCompactJwt: compact, Validator: validator})
 	if err != nil {
 		t.Fatalf("jwtVerifySignature failed: %v", err)
 	}
@@ -618,7 +618,7 @@ func TestJWTPublicKeySignAndEncodeVerifyAndDecode(t *testing.T) {
 	rawJWT := &pb.JwtToken{
 		Subject: &wpb.StringValue{Value: "tink-subject"},
 	}
-	signResponse, err := jwtService.PublicKeySignAndEncode(ctx, &pb.JwtSignRequest{Keyset: privateKeyset, RawJwt: rawJWT})
+	signResponse, err := jwtService.PublicKeySignAndEncode(ctx, &pb.JwtSignRequest{AnnotatedKeyset: &pb.AnnotatedKeyset{SerializedKeyset: privateKeyset}, RawJwt: rawJWT})
 	if err != nil {
 		t.Fatalf("jwtService.PublicKeySignAndEncode() err = %v", err)
 	}
@@ -629,7 +629,7 @@ func TestJWTPublicKeySignAndEncodeVerifyAndDecode(t *testing.T) {
 	validator := &pb.JwtValidator{
 		AllowMissingExpiration: true,
 	}
-	verifyResponse, err := jwtService.PublicKeyVerifyAndDecode(ctx, &pb.JwtVerifyRequest{Keyset: publicKeyset, SignedCompactJwt: compact, Validator: validator})
+	verifyResponse, err := jwtService.PublicKeyVerifyAndDecode(ctx, &pb.JwtVerifyRequest{AnnotatedKeyset: &pb.AnnotatedKeyset{SerializedKeyset: publicKeyset}, SignedCompactJwt: compact, Validator: validator})
 	if err != nil {
 		t.Fatalf("jwtVerifySignature failed: %v", err)
 	}

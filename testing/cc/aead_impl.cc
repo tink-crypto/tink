@@ -39,7 +39,7 @@ using ::crypto::tink::util::StatusOr;
                                  AeadEncryptResponse* response) {
   StatusOr<std::unique_ptr<crypto::tink::Aead>> aead =
       PrimitiveFromSerializedBinaryProtoKeyset<crypto::tink::Aead>(
-          request->keyset());
+          request->annotated_keyset());
   if (!aead.ok()) {
     return grpc::Status(
         grpc::StatusCode::FAILED_PRECONDITION,
@@ -61,7 +61,7 @@ grpc::Status AeadImpl::Decrypt(grpc::ServerContext* context,
                                  AeadDecryptResponse* response) {
   StatusOr<std::unique_ptr<crypto::tink::Aead>> aead =
       PrimitiveFromSerializedBinaryProtoKeyset<crypto::tink::Aead>(
-          request->keyset());
+          request->annotated_keyset());
   if (!aead.ok()) {
     return grpc::Status(
         grpc::StatusCode::FAILED_PRECONDITION,
