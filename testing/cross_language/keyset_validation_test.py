@@ -105,21 +105,26 @@ class KeysetValidationTest(parameterized.TestCase):
     template = utilities.KEY_TEMPLATE[key_template_name]
     private_keyset = testing_servers.new_keyset(lang, template)
     public_keyset = testing_servers.public_keyset(lang, private_keyset)
-    sig = testing_servers.public_key_sign(lang, private_keyset).sign(b'foo')
-    testing_servers.public_key_verify(lang, public_keyset).verify(sig, b'foo')
-
-    signer_without_primary = testing_servers.public_key_sign(
-        lang, unset_primary(private_keyset))
-    verifier_without_primary = testing_servers.public_key_verify(
-        lang, unset_primary(public_keyset))
+    signer = testing_servers.remote_primitive(lang, private_keyset,
+                                              signature.PublicKeySign)
+    sig = signer.sign(b'foo')
+    verifier = testing_servers.remote_primitive(lang, public_keyset,
+                                                signature.PublicKeyVerify)
+    verifier.verify(sig, b'foo')
+    private_keyset_without_primary = unset_primary(private_keyset)
+    public_keyset_without_primary = unset_primary(public_keyset)
     with self.assertRaises(tink.TinkError):
-      signer_without_primary.sign(b'foo')
-    if lang in ['java', 'python']:
-      # Java and Python currently allow this.
-      verifier_without_primary.verify(sig, b'foo')
-    else:
+      _ = testing_servers.remote_primitive(
+          lang, private_keyset_without_primary, signature.PublicKeySign)
+    if lang not in ['java', 'python']:
       with self.assertRaises(tink.TinkError):
-        verifier_without_primary.verify(sig, b'foo')
+        _ = testing_servers.remote_primitive(
+            lang, public_keyset_without_primary, signature.PublicKeyVerify)
+    if lang in ['java', 'python']:
+      # TODO(b/252792776) This should fail.
+      verifier_without_primary = testing_servers.remote_primitive(
+          lang, public_keyset_without_primary, signature.PublicKeyVerify)
+      verifier_without_primary.verify(sig, b'foo')
 
   @parameterized.parameters(test_cases(hybrid.HybridDecrypt))
   def test_hybrid_without_primary(self, key_template_name, lang):
@@ -147,7 +152,8 @@ class KeysetValidationTest(parameterized.TestCase):
     template = utilities.KEY_TEMPLATE[key_template_name]
     private_keyset = testing_servers.new_keyset(lang, template)
     public_keyset = testing_servers.public_keyset(lang, private_keyset)
-    signer = testing_servers.jwt_public_key_sign(lang, private_keyset)
+    signer = testing_servers.remote_primitive(lang, private_keyset,
+                                              jwt.JwtPublicKeySign)
 
     now = datetime.datetime.now(tz=datetime.timezone.utc)
     raw_jwt = jwt.new_raw_jwt(
@@ -155,20 +161,24 @@ class KeysetValidationTest(parameterized.TestCase):
         expiration=now + datetime.timedelta(seconds=100))
     token = signer.sign_and_encode(raw_jwt)
 
-    signer_without_primary = testing_servers.jwt_public_key_sign(
-        lang, unset_primary(private_keyset))
-    with self.assertRaises(tink.TinkError):
-      signer_without_primary.sign_and_encode(raw_jwt)
+    private_keyset_without_primary = unset_primary(private_keyset)
+    public_keyset_without_primary = unset_primary(public_keyset)
 
-    verifier_without_primary = testing_servers.jwt_public_key_verify(
-        lang, unset_primary(public_keyset))
-    validator = jwt.new_validator(expected_issuer='issuer', fixed_now=now)
-    if lang in ['cc', 'java', 'python']:
-      # C++, Java and Python currently allow this.
-      verifier_without_primary.verify_and_decode(token, validator)
-    else:
+    with self.assertRaises(tink.TinkError):
+      _ = testing_servers.remote_primitive(
+          lang, private_keyset_without_primary, jwt.JwtPublicKeySign)
+
+    if lang not in ['cc', 'java', 'python']:
       with self.assertRaises(tink.TinkError):
-        verifier_without_primary.verify_and_decode(token, validator)
+        _ = testing_servers.remote_primitive(lang,
+                                             public_keyset_without_primary,
+                                             jwt.JwtPublicKeyVerify)
+    if lang in ['cc', 'java', 'python']:
+      # TODO(b/252792776) This should fail.
+      verifier_without_primary = testing_servers.remote_primitive(
+          lang, public_keyset_without_primary, jwt.JwtPublicKeyVerify)
+      validator = jwt.new_validator(expected_issuer='issuer', fixed_now=now)
+      verifier_without_primary.verify_and_decode(token, validator)
 
   @parameterized.parameters(test_cases(jwt.JwtMac))
   def test_jwt_mac_without_primary(self, key_template_name, lang):
