@@ -115,7 +115,7 @@ TEST(AesSivBoringSslTest, testEncryptDecryptKeySizes) {
           "812731321de508761437195ff231765aa4913219873ac6918639816312130011"
           "abc900bba11400187984719827431246bbab1231eb4145215ff7141436616beb"
           "9817298148712fed3aab61000ff123313e"));
-  for (int keysize = 0; keysize <= keymaterial.size(); ++keysize){
+  for (int keysize = 0; keysize < keymaterial.size(); ++keysize){
     util::SecretData key(&keymaterial[0], &keymaterial[keysize]);
     auto cipher = AesSivBoringSsl::New(key);
     if (keysize == 64) {
