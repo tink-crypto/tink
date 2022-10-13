@@ -443,6 +443,8 @@ cc_library(
     hdrs = ["monitoring_util.h"],
     include_prefix = "tink/internal",
     deps = [
+        ":key_status_util",
+        "//:key_status",
         "//:primitive_set",
         "//monitoring",
         "//proto:tink_cc_proto",
@@ -457,6 +459,7 @@ cc_test(
     srcs = ["monitoring_util_test.cc"],
     deps = [
         ":monitoring_util",
+        "//:key_status",
         "//:primitive_set",
         "//monitoring",
         "//proto:tink_cc_proto",
@@ -579,6 +582,31 @@ cc_test(
         ":proto_key_serialization",
         "//:insecure_secret_key_access",
         "//:restricted_data",
+        "//proto:tink_cc_proto",
+        "//util:statusor",
+        "//util:test_matchers",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_library(
+    name = "key_status_util",
+    srcs = ["key_status_util.cc"],
+    hdrs = ["key_status_util.h"],
+    include_prefix = "tink/internal",
+    deps = [
+        "//:key_status",
+        "//proto:tink_cc_proto",
+        "//util:statusor",
+    ],
+)
+
+cc_test(
+    name = "key_status_util_test",
+    srcs = ["key_status_util_test.cc"],
+    deps = [
+        ":key_status_util",
+        "//:key_status",
         "//proto:tink_cc_proto",
         "//util:statusor",
         "//util:test_matchers",

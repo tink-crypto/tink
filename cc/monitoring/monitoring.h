@@ -21,6 +21,7 @@
 #include <vector>
 
 #include "absl/container/flat_hash_map.h"
+#include "tink/key_status.h"
 #include "tink/util/statusor.h"
 
 namespace crypto {
@@ -33,16 +34,6 @@ class MonitoringKeySetInfo {
   // Description about each entry of the KeySet.
   class Entry {
    public:
-    // Enum representation of KeyStatusType in tink/proto/tink.proto. Using an
-    // enum class prevents unintentional implicit conversions.
-    enum class KeyStatus : int {
-      kEnabled = 1,    // Can be used for cryptographic operations.
-      kDisabled = 2,   // Cannot be used (but can become kEnabled again).
-      kDestroyed = 3,  // Key data does not exist in this Keyset any more.
-      // Added to guard from failures that may be caused by future expansions.
-      kDoNotUseInsteadUseDefaultWhenWritingSwitchStatements = 20,
-    };
-
     // Constructs a new KeySet entry with a given `status`, `key_id` and key
     // format `parameters_as_string`.
     Entry(KeyStatus status, uint32_t key_id,

@@ -411,8 +411,10 @@ tink_cc_library(
   SRCS
     monitoring_util.h
   DEPS
+    tink::internal::key_status_util
     absl::flat_hash_map
     absl::status
+    tink::core::key_status
     tink::core::primitive_set
     tink::monitoring::monitoring
     tink::util::statusor
@@ -428,6 +430,7 @@ tink_cc_test(
     gmock
     absl::status
     absl::strings
+    tink::core::key_status
     tink::core::primitive_set
     tink::monitoring::monitoring
     tink::util::test_matchers
@@ -545,6 +548,30 @@ tink_cc_test(
     gmock
     tink::core::insecure_secret_key_access
     tink::core::restricted_data
+    tink::util::statusor
+    tink::util::test_matchers
+    tink::proto::tink_cc_proto
+)
+
+tink_cc_library(
+  NAME key_status_util
+  SRCS
+    key_status_util.cc
+    key_status_util.h
+  DEPS
+    tink::core::key_status
+    tink::util::statusor
+    tink::proto::tink_cc_proto
+)
+
+tink_cc_test(
+  NAME key_status_util_test
+  SRCS
+    key_status_util_test.cc
+  DEPS
+    tink::internal::key_status_util
+    gmock
+    tink::core::key_status
     tink::util::statusor
     tink::util::test_matchers
     tink::proto::tink_cc_proto

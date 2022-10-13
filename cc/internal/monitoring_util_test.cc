@@ -25,6 +25,7 @@
 #include "gtest/gtest.h"
 #include "absl/status/status.h"
 #include "absl/strings/string_view.h"
+#include "tink/key_status.h"
 #include "tink/monitoring/monitoring.h"
 #include "tink/primitive_set.h"
 #include "tink/util/test_matchers.h"
@@ -138,10 +139,10 @@ TEST(MonitoringUtilTest, MonitoringKeySetInfoFromPrimitiveSetValid) {
   EXPECT_THAT(monitoring_entries,
               UnorderedElementsAre(
                   MonitoringKeySetInfoEntryEq(MonitoringKeySetInfo::Entry(
-                      MonitoringKeySetInfo::Entry::KeyStatus::kEnabled,
+                      KeyStatus::kEnabled,
                       /*key_id=*/1, kPrimitive1KeyTyepUrl)),
                   MonitoringKeySetInfoEntryEq(MonitoringKeySetInfo::Entry(
-                      MonitoringKeySetInfo::Entry::KeyStatus::kEnabled,
+                      KeyStatus::kEnabled,
                       /*key_id=*/2, kPrimitive2KeyTypeUrl))));
 }
 

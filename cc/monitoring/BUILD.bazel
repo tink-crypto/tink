@@ -7,6 +7,7 @@ cc_library(
     hdrs = ["monitoring.h"],
     include_prefix = "tink/monitoring",
     deps = [
+        "//:key_status",
         "//util:statusor",
         "@com_google_absl//absl/container:flat_hash_map",
     ],

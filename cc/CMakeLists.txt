@@ -698,6 +698,12 @@ tink_cc_library(
     tink::util::secret_data
 )
 
+tink_cc_library(
+  NAME key_status
+  SRCS
+    key_status.h
+)
+
 # tests
 
 tink_cc_test(

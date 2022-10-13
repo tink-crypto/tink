@@ -742,6 +742,13 @@ cc_library(
     ],
 )
 
+cc_library(
+    name = "key_status",
+    hdrs = ["key_status.h"],
+    include_prefix = "tink",
+    visibility = ["//visibility:public"],
+)
+
 # tests
 
 cc_test(

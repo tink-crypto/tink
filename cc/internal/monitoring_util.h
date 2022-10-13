@@ -21,6 +21,8 @@
 
 #include "absl/container/flat_hash_map.h"
 #include "absl/status/status.h"
+#include "tink/internal/key_status_util.h"
+#include "tink/key_status.h"
 #include "tink/monitoring/monitoring.h"
 #include "tink/primitive_set.h"
 #include "tink/util/statusor.h"
@@ -47,30 +49,14 @@ MonitoringKeySetInfoFromPrimitiveSet(const PrimitiveSet<P>& primitive_set) {
   }
   std::vector<MonitoringKeySetInfo::Entry> keyset_info_entries = {};
   for (const auto& entry : primitive_set_entries) {
-    MonitoringKeySetInfo::Entry::KeyStatus key_status;
-    switch (entry->get_status()) {
-      case google::crypto::tink::KeyStatusType::ENABLED: {
-        key_status = MonitoringKeySetInfo::Entry::KeyStatus::kEnabled;
-        break;
-      }
-      case google::crypto::tink::KeyStatusType::DISABLED: {
-        key_status = MonitoringKeySetInfo::Entry::KeyStatus::kDisabled;
-        break;
-      }
-      case google::crypto::tink::KeyStatusType::DESTROYED: {
-        key_status = MonitoringKeySetInfo::Entry::KeyStatus::kDestroyed;
-        break;
-      }
-      default:
-        return util::Status(
-            absl::StatusCode::kInvalidArgument,
-            absl::StrCat("Unknown key status ", entry->get_status()));
-    }
+    util::StatusOr<KeyStatus> key_status =
+        FromKeyStatusType(entry->get_status());
+    if (!key_status.ok()) return key_status.status();
 
     // TODO(b/222245356): Populate key_format_as_string with the actual key
     // format when available. For now, we use the key type URL.
     auto keyset_info_entry = MonitoringKeySetInfo::Entry(
-        key_status, entry->get_key_id(), entry->get_key_type_url());
+        *key_status, entry->get_key_id(), entry->get_key_type_url());
     keyset_info_entries.push_back(keyset_info_entry);
   }
   MonitoringKeySetInfo keyset_info(primitive_set.get_annotations(),
