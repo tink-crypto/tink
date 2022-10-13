@@ -16,7 +16,6 @@
 
 package com.google.crypto.tink;
 
-
 import com.google.crypto.tink.annotations.Alpha;
 import com.google.crypto.tink.internal.LegacyProtoKey;
 import com.google.crypto.tink.internal.LegacyProtoParameters;
@@ -538,6 +537,13 @@ public final class KeysetHandle {
     return importedEntry;
   }
 
+  /**
+   * Creates a new entry with Status "ENABLED" and a new key created from the named parameters. No
+   * ID is set.
+   *
+   * <p>{@code namedParameters} is the key template name that fully specifies the parameters, e.g.
+   * "DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_AES_128_GCM".
+   */
   public static KeysetHandle.Builder.Entry generateEntryFromParametersName(String namedParameters)
       throws GeneralSecurityException {
     if (!Registry.keyTemplateMap().containsKey(namedParameters)) {
@@ -552,6 +558,10 @@ public final class KeysetHandle {
     return new KeysetHandle.Builder.Entry(parameters);
   }
 
+  /**
+   * Creates a new entry with Status "ENABLED" and a new key created from the parameters. No ID is
+   * set.
+   */
   public static KeysetHandle.Builder.Entry generateEntryFromParameters(Parameters parameters) {
     return new KeysetHandle.Builder.Entry(parameters);
   }
@@ -875,8 +885,7 @@ public final class KeysetHandle {
       // check emptiness here too, in case the encrypted keys unwrapped to nothing?
       assertEnoughKeyMaterial(keyset);
       return keyset;
-    } catch (
-        InvalidProtocolBufferException e) {
+    } catch (InvalidProtocolBufferException e) {
       // Do not propagate InvalidProtocolBufferException to guarantee no key material is leaked
       throw new GeneralSecurityException("invalid keyset, corrupted key material");
     }
