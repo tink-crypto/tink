@@ -1,3 +1,2 @@
 absl-py
-google-cloud-core
-google-cloud-storage
+google-cloud-storage==2.5.0

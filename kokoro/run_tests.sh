@@ -172,7 +172,9 @@ install_tink_via_pip() {
   pip3 install "${PIP_FLAGS[@]}" ./python
 
   # Install dependencies for the examples/python tests
-  pip3 install "${PIP_FLAGS[@]}" google-cloud-storage
+  pip3 install "${PIP_FLAGS[@]}" \
+    -r python/examples/requirements.txt \
+    -c python/examples/constraints.in
 }
 
 install_temp_protoc() {
