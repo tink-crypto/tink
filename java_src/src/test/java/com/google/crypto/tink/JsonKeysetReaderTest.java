@@ -25,6 +25,7 @@ import com.google.crypto.tink.config.TinkConfig;
 import com.google.crypto.tink.mac.MacKeyTemplates;
 import com.google.crypto.tink.proto.KeyTemplate;
 import com.google.crypto.tink.proto.Keyset;
+import com.google.crypto.tink.subtle.Hex;
 import com.google.crypto.tink.subtle.Random;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
@@ -125,6 +126,47 @@ public class JsonKeysetReaderTest {
 
     assertKeysetHandle(handle1, handle2);
   }
+
+  @Test
+  public void readTestKeysetVerifyTestTag() throws Exception {
+    KeysetHandle handle = CleartextKeysetHandle.read(JsonKeysetReader.withString(JSON_KEYSET));
+    byte[] data = "data".getBytes(UTF_8);
+    Mac mac = handle.getPrimitive(Mac.class);
+    byte[] tag = Hex.decode("0120a4107f3549e4fb3137415a63f5c8a0524f8ca7");
+    mac.verifyMac(tag, data);
+  }
+
+  @Test
+  public void readEncryptedTestKeysetVerifyTestTag() throws Exception {
+    // This is the same test vector as in KeysetHandleTest.
+    // An AEAD key, with which we encrypted the mac keyset below.
+    byte[] serializedKeysetEncryptionKeyset =
+        Hex.decode(
+            "08b891f5a20412580a4c0a30747970652e676f6f676c65617069732e636f6d2f676f6f676c652e6372797"
+                + "0746f2e74696e6b2e4165734561784b65791216120208101a10e5d7d0cdd649e81e7952260689b2"
+                + "e1971801100118b891f5a2042001");
+    KeysetHandle keysetEncryptionHandle = TinkProtoKeysetFormat.parseKeyset(
+        serializedKeysetEncryptionKeyset, InsecureSecretKeyAccess.get());
+    Aead keysetEncryptionAead = keysetEncryptionHandle.getPrimitive(Aead.class);
+    byte[] associatedData = Hex.decode("abcdef330012");
+
+    String encryptedKeyset =
+        "{\"encryptedKeyset\":"
+            + "\"AURdSLhZcFEgMBptDyi4/D8hL3h+Iz7ICgLrdeVRH26Fi3uSeewFoFA5cV5wfNueme3/BBR60yJ4hGpQ"
+            + "p+/248ZIgfuWyfmAGZ4dmYnYC1qd/IWkZZfVr3aOsx4j4kFZHkkvA+XIZUh/INbdPsMUNJy9cmu6s8osdH"
+            + "zu0XzP2ltWUowbr0fLQJwy92eAvU6gv91k6Tc=\","
+            + "\"keysetInfo\":{\"primaryKeyId\":547623039,\"keyInfo\":[{\"typeUrl\":"
+            + "\"type.googleapis.com/google.crypto.tink.HmacKey\",\"status\":\"ENABLED\","
+            + "\"keyId\":547623039,\"outputPrefixType\":\"TINK\"}]}}";
+
+    KeysetHandle handle = KeysetHandle.readWithAssociatedData(
+        JsonKeysetReader.withString(encryptedKeyset), keysetEncryptionAead, associatedData);
+    byte[] data = "data".getBytes(UTF_8);
+    Mac mac = handle.getPrimitive(Mac.class);
+    byte[] tag = Hex.decode("0120a4107f3549e4fb3137415a63f5c8a0524f8ca7");
+    mac.verifyMac(tag, data);
+  }
+
 
   @Test
   public void testRead_urlSafeKeyset_shouldWork() throws Exception {

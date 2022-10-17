@@ -894,3 +894,29 @@ android_library(
         ":secret_key_access-android",
     ],
 )
+
+java_library(
+    name = "tink_json_proto_keyset_format",
+    srcs = ["TinkJsonProtoKeysetFormat.java"],
+    deps = [
+        ":aead",
+        ":cleartext_keyset_handle",
+        ":json_keyset_reader",
+        ":json_keyset_writer",
+        ":registry_cluster",
+        ":secret_key_access",
+    ],
+)
+
+android_library(
+    name = "tink_json_proto_keyset_format-android",
+    srcs = ["TinkProtoKeysetFormat.java"],
+    deps = [
+        ":aead-android",
+        ":binary_keyset_reader-android",
+        ":binary_keyset_writer-android",
+        ":cleartext_keyset_handle-android",
+        ":registry_cluster-android",
+        ":secret_key_access-android",
+    ],
+)
