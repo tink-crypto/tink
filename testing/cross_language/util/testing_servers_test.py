@@ -285,10 +285,12 @@ class TestingServersTest(parameterized.TestCase):
     private_handle = testing_servers.new_keyset(
         lang, signature.signature_key_templates.ED25519)
     public_handle = testing_servers.public_keyset(lang, private_handle)
-    sign_primitive = testing_servers.public_key_sign(lang, private_handle)
+    sign_primitive = testing_servers.remote_primitive(lang, private_handle,
+                                                      signature.PublicKeySign)
     data = b'The quick brown fox jumps over the lazy dog'
     signature_value = sign_primitive.sign(data)
-    verify_primitive = testing_servers.public_key_verify(lang, public_handle)
+    verify_primitive = testing_servers.remote_primitive(
+        lang, public_handle, signature.PublicKeyVerify)
     verify_primitive.verify(signature_value, data)
 
     with self.assertRaises(tink.TinkError):

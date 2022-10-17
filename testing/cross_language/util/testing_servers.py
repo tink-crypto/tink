@@ -373,18 +373,6 @@ def jwk_set_from_keyset(lang: str, keyset: bytes) -> str:
   return _primitives.jwk_set_from_keyset(_ts.jwt_stub(lang), keyset)
 
 
-def public_key_sign(lang: str,
-                    priv_keyset: bytes) -> _primitives.PublicKeySign:
-  """Returns an PublicKeySign primitive, implemented in lang."""
-  return _primitives.PublicKeySign(lang, _ts.signature_stub(lang), priv_keyset)
-
-
-def public_key_verify(lang: str,
-                      pub_keyset: bytes) -> _primitives.PublicKeyVerify:
-  """Returns an PublicKeyVerify primitive, implemented in lang."""
-  return _primitives.PublicKeyVerify(lang, _ts.signature_stub(lang), pub_keyset)
-
-
 def prf_set(lang: str, keyset: bytes) -> _primitives.PrfSet:
   """Returns an PrfSet primitive, implemented in lang."""
   return _primitives.PrfSet(lang, _ts.prf_stub(lang), keyset)

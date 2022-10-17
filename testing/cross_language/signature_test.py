@@ -51,45 +51,22 @@ class SignatureTest(parameterized.TestCase):
     # Take the first supported language to generate the private keyset.
     private_keyset = testing_servers.new_keyset(supported_langs[0],
                                                 key_template)
-    supported_signers = [
-        testing_servers.public_key_sign(lang, private_keyset)
-        for lang in supported_langs
-    ]
-    unsupported_signers = [
-        testing_servers.public_key_sign(lang, private_keyset)
-        for lang in SUPPORTED_LANGUAGES
-        if lang not in supported_langs
-    ]
+    supported_signers = {}
+    for lang in supported_langs:
+      supported_signers[lang] = testing_servers.remote_primitive(
+          lang, private_keyset, signature.PublicKeySign)
     public_keyset = testing_servers.public_keyset('java', private_keyset)
-    supported_verifiers = [
-        testing_servers.public_key_verify(lang, public_keyset)
-        for lang in supported_langs
-    ]
-    unsupported_verifiers = [
-        testing_servers.public_key_verify(lang, public_keyset)
-        for lang in testing_servers.LANGUAGES
-        if lang not in supported_langs
-    ]
-    for signer in supported_signers:
+    supported_verifiers = {}
+    for lang in supported_verifiers:
+      supported_verifiers[lang] = testing_servers.remote_primitive(
+          lang, public_keyset, signature.PublicKeyVerify)
+    for lang, signer in supported_signers.items():
       message = (
           b'A message to be signed using key_template %s in %s.'
-          % (key_template_name.encode('utf8'), signer.lang.encode('utf8')))
+          % (key_template_name.encode('utf8'), lang.encode('utf8')))
       sign = signer.sign(message)
-      for verifier in supported_verifiers:
+      for _, verifier in supported_verifiers.items():
         self.assertIsNone(verifier.verify(sign, message))
-      for verifier in unsupported_verifiers:
-        with self.assertRaises(
-            tink.TinkError,
-            msg='Language %s supports signature verify with %s unexpectedly' %
-            (verifier.lang, key_template_name)):
-          verifier.verify(sign, message)
-    for signer in unsupported_signers:
-      with self.assertRaises(
-          tink.TinkError,
-          msg='Language %s supports signature sign with %s unexpectedly' %
-          (signer.lang, key_template_name)):
-        _ = signer.sign(message)
-
 
 # If the implementations work fine for keysets with single keys, then key
 # rotation should work if the primitive wrapper is implemented correctly.
@@ -123,23 +100,31 @@ class SignatureKeyRotationTest(parameterized.TestCase):
     builder = keyset_builder.new_keyset_builder()
     older_key_id = builder.add_new_key(old_key_tmpl)
     builder.set_primary_key(older_key_id)
-    sign1 = testing_servers.public_key_sign(enc_lang, builder.keyset())
-    verify1 = testing_servers.public_key_verify(dec_lang,
-                                                builder.public_keyset())
+    sign1 = testing_servers.remote_primitive(enc_lang, builder.keyset(),
+                                             signature.PublicKeySign)
+    verify1 = testing_servers.remote_primitive(dec_lang,
+                                               builder.public_keyset(),
+                                               signature.PublicKeyVerify)
     newer_key_id = builder.add_new_key(new_key_tmpl)
-    sign2 = testing_servers.public_key_sign(enc_lang, builder.keyset())
-    verify2 = testing_servers.public_key_verify(dec_lang,
-                                                builder.public_keyset())
+    sign2 = testing_servers.remote_primitive(enc_lang, builder.keyset(),
+                                             signature.PublicKeySign)
+    verify2 = testing_servers.remote_primitive(dec_lang,
+                                               builder.public_keyset(),
+                                               signature.PublicKeyVerify)
 
     builder.set_primary_key(newer_key_id)
-    sign3 = testing_servers.public_key_sign(enc_lang, builder.keyset())
-    verify3 = testing_servers.public_key_verify(dec_lang,
-                                                builder.public_keyset())
+    sign3 = testing_servers.remote_primitive(enc_lang, builder.keyset(),
+                                             signature.PublicKeySign)
+    verify3 = testing_servers.remote_primitive(dec_lang,
+                                               builder.public_keyset(),
+                                               signature.PublicKeyVerify)
 
     builder.disable_key(older_key_id)
-    sign4 = testing_servers.public_key_sign(enc_lang, builder.keyset())
-    verify4 = testing_servers.public_key_verify(dec_lang,
-                                                builder.public_keyset())
+    sign4 = testing_servers.remote_primitive(enc_lang, builder.keyset(),
+                                             signature.PublicKeySign)
+    verify4 = testing_servers.remote_primitive(dec_lang,
+                                               builder.public_keyset(),
+                                               signature.PublicKeyVerify)
     self.assertNotEqual(older_key_id, newer_key_id)
 
     # 1 signs with the older key. So 1, 2 and 3 can verify it, but not 4.
