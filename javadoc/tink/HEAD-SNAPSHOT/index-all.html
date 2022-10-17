@@ -1848,6 +1848,12 @@
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/mac/internal/ChunkedAesCmacImpl.html#ChunkedAesCmacImpl-com.google.crypto.tink.mac.AesCmacKey-">ChunkedAesCmacImpl(AesCmacKey)</a></span> - Constructor for class com.google.crypto.tink.mac.internal.<a href="com/google/crypto/tink/mac/internal/ChunkedAesCmacImpl.html" title="class in com.google.crypto.tink.mac.internal">ChunkedAesCmacImpl</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="com/google/crypto/tink/mac/internal/ChunkedHmacImpl.html" title="class in com.google.crypto.tink.mac.internal"><span class="typeNameLink">ChunkedHmacImpl</span></a> - Class in <a href="com/google/crypto/tink/mac/internal/package-summary.html">com.google.crypto.tink.mac.internal</a></dt>
+<dd>
+<div class="block">Class that provides the functionality expressed by the ChunkedMac interface with HMAC.</div>
+</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/mac/internal/ChunkedHmacImpl.html#ChunkedHmacImpl-com.google.crypto.tink.mac.HmacKey-">ChunkedHmacImpl(HmacKey)</a></span> - Constructor for class com.google.crypto.tink.mac.internal.<a href="com/google/crypto/tink/mac/internal/ChunkedHmacImpl.html" title="class in com.google.crypto.tink.mac.internal">ChunkedHmacImpl</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="com/google/crypto/tink/mac/ChunkedMac.html" title="interface in com.google.crypto.tink.mac"><span class="typeNameLink">ChunkedMac</span></a> - Interface in <a href="com/google/crypto/tink/mac/package-summary.html">com.google.crypto.tink.mac</a></dt>
 <dd>
 <div class="block">An interface representing Streaming MAC.</div>
@@ -3974,6 +3980,8 @@
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/mac/internal/ChunkedAesCmacImpl.html#createComputation--">createComputation()</a></span> - Method in class com.google.crypto.tink.mac.internal.<a href="com/google/crypto/tink/mac/internal/ChunkedAesCmacImpl.html" title="class in com.google.crypto.tink.mac.internal">ChunkedAesCmacImpl</a></dt>
 <dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/mac/internal/ChunkedHmacImpl.html#createComputation--">createComputation()</a></span> - Method in class com.google.crypto.tink.mac.internal.<a href="com/google/crypto/tink/mac/internal/ChunkedHmacImpl.html" title="class in com.google.crypto.tink.mac.internal">ChunkedHmacImpl</a></dt>
+<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/signature/SignatureKeyTemplates.html#createEcdsaKeyTemplate-com.google.crypto.tink.proto.HashType-com.google.crypto.tink.proto.EllipticCurveType-com.google.crypto.tink.proto.EcdsaSignatureEncoding-com.google.crypto.tink.proto.OutputPrefixType-">createEcdsaKeyTemplate(HashType, EllipticCurveType, EcdsaSignatureEncoding, OutputPrefixType)</a></span> - Static method in class com.google.crypto.tink.signature.<a href="com/google/crypto/tink/signature/SignatureKeyTemplates.html" title="class in com.google.crypto.tink.signature">SignatureKeyTemplates</a></dt>
 <dd>
 <div class="block"><span class="deprecatedLabel">Deprecated.</span></div>
@@ -4050,6 +4058,8 @@
 <div class="block">Creates an instance of a single Chunked MAC verification.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/mac/internal/ChunkedAesCmacImpl.html#createVerification-byte:A-">createVerification(byte[])</a></span> - Method in class com.google.crypto.tink.mac.internal.<a href="com/google/crypto/tink/mac/internal/ChunkedAesCmacImpl.html" title="class in com.google.crypto.tink.mac.internal">ChunkedAesCmacImpl</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/mac/internal/ChunkedHmacImpl.html#createVerification-byte:A-">createVerification(byte[])</a></span> - Method in class com.google.crypto.tink.mac.internal.<a href="com/google/crypto/tink/mac/internal/ChunkedHmacImpl.html" title="class in com.google.crypto.tink.mac.internal">ChunkedHmacImpl</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/subtle/Base64.html#CRLF">CRLF</a></span> - Static variable in class com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/Base64.html" title="class in com.google.crypto.tink.subtle">Base64</a></dt>
 <dd>
@@ -5352,9 +5362,13 @@
 <h2 class="title">G</h2>
 <dl>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/KeysetHandle.html#generateEntryFromParameters-com.google.crypto.tink.Parameters-">generateEntryFromParameters(Parameters)</a></span> - Static method in class com.google.crypto.tink.<a href="com/google/crypto/tink/KeysetHandle.html" title="class in com.google.crypto.tink">KeysetHandle</a></dt>
-<dd>&nbsp;</dd>
+<dd>
+<div class="block">Creates a new entry with Status "ENABLED" and a new key created from the parameters.</div>
+</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/KeysetHandle.html#generateEntryFromParametersName-java.lang.String-">generateEntryFromParametersName(String)</a></span> - Static method in class com.google.crypto.tink.<a href="com/google/crypto/tink/KeysetHandle.html" title="class in com.google.crypto.tink">KeysetHandle</a></dt>
-<dd>&nbsp;</dd>
+<dd>
+<div class="block">Creates a new entry with Status "ENABLED" and a new key created from the named parameters.</div>
+</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/subtle/EciesHkdfRecipientKem.html#generateKey-byte:A-java.lang.String-byte:A-byte:A-int-com.google.crypto.tink.subtle.EllipticCurves.PointFormatType-">generateKey(byte[], String, byte[], byte[], int, EllipticCurves.PointFormatType)</a></span> - Method in class com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/EciesHkdfRecipientKem.html" title="class in com.google.crypto.tink.subtle">EciesHkdfRecipientKem</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/subtle/EciesHkdfSenderKem.html#generateKey-java.lang.String-byte:A-byte:A-int-com.google.crypto.tink.subtle.EllipticCurves.PointFormatType-">generateKey(String, byte[], byte[], int, EllipticCurves.PointFormatType)</a></span> - Method in class com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/EciesHkdfSenderKem.html" title="class in com.google.crypto.tink.subtle">EciesHkdfSenderKem</a></dt>
