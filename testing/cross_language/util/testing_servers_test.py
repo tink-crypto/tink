@@ -312,7 +312,8 @@ class TestingServersTest(parameterized.TestCase):
   def test_jwt_mac(self, lang):
     keyset = testing_servers.new_keyset(lang, jwt.jwt_hs256_template())
 
-    jwt_mac_primitive = testing_servers.jwt_mac(lang, keyset)
+    jwt_mac_primitive = testing_servers.remote_primitive(
+        lang, keyset, jwt.JwtMac)
 
     now = datetime.datetime.now(tz=datetime.timezone.utc)
     token = jwt.new_raw_jwt(

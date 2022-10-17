@@ -46,14 +46,10 @@ class JwtTest(parameterized.TestCase):
     key_template = utilities.KEY_TEMPLATE[key_template_name]
     # Take the first supported language to generate the keyset.
     keyset = testing_servers.new_keyset(supported_langs[0], key_template)
-    supported_jwt_macs = [
-        testing_servers.jwt_mac(lang, keyset) for lang in supported_langs
-    ]
-    unsupported_jwt_macs = [
-        testing_servers.jwt_mac(lang, keyset)
-        for lang in SUPPORTED_LANGUAGES
-        if lang not in supported_langs
-    ]
+    supported_jwt_macs = []
+    for lang in supported_langs:
+      supported_jwt_macs.append(
+          testing_servers.remote_primitive(lang, keyset, jwt.JwtMac))
     now = datetime.datetime.now(tz=datetime.timezone.utc)
     raw_jwt = jwt.new_raw_jwt(
         issuer='issuer',
@@ -64,18 +60,6 @@ class JwtTest(parameterized.TestCase):
       for p2 in supported_jwt_macs:
         verified_jwt = p2.verify_mac_and_decode(compact, validator)
         self.assertEqual(verified_jwt.issuer(), 'issuer')
-      for p2 in unsupported_jwt_macs:
-        with self.assertRaises(
-            tink.TinkError,
-            msg='%s supports verify_mac_and_decode with %s unexpectedly'
-            % (p2.lang, key_template_name)):
-          p2.verify_mac_and_decode(compact, validator)
-    for p in unsupported_jwt_macs:
-      with self.assertRaises(
-          tink.TinkError,
-          msg='%s supports compute_mac_and_encode with %s unexpectedly' %
-          (p.lang, key_template_name)):
-        p.compute_mac_and_encode(raw_jwt)
 
   @parameterized.parameters(
       utilities.tinkey_template_names_for(jwt.JwtPublicKeySign))

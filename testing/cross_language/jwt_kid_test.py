@@ -107,7 +107,7 @@ class JwtKidTest(parameterized.TestCase):
     keyset = testing_servers.new_keyset('cc', key_template)
     raw_jwt = jwt.new_raw_jwt(without_expiration=True)
     for lang in SUPPORTED_LANGUAGES:
-      jwt_mac = testing_servers.jwt_mac(lang, keyset)
+      jwt_mac = testing_servers.remote_primitive(lang, keyset, jwt.JwtMac)
       compact = jwt_mac.compute_mac_and_encode(raw_jwt)
       self.assertIsNotNone(decode_kid(compact))
 
@@ -117,7 +117,7 @@ class JwtKidTest(parameterized.TestCase):
     keyset = testing_servers.new_keyset('cc', key_template)
     raw_jwt = jwt.new_raw_jwt(without_expiration=True)
     for lang in SUPPORTED_LANGUAGES:
-      jwt_mac = testing_servers.jwt_mac(lang, keyset)
+      jwt_mac = testing_servers.remote_primitive(lang, keyset, jwt.JwtMac)
       compact = jwt_mac.compute_mac_and_encode(raw_jwt)
       self.assertIsNone(decode_kid(compact))
 
@@ -156,7 +156,9 @@ class JwtKidTest(parameterized.TestCase):
         template_name=template_name, custom_kid='my kid')
     raw_jwt = jwt.new_raw_jwt(without_expiration=True)
     for lang in SUPPORTED_LANGUAGES:
-      jwt_mac = testing_servers.jwt_mac(lang, keyset.SerializeToString())
+      jwt_mac = testing_servers.remote_primitive(lang,
+                                                 keyset.SerializeToString(),
+                                                 jwt.JwtMac)
       compact = jwt_mac.compute_mac_and_encode(raw_jwt)
       self.assertEqual(decode_kid(compact), 'my kid')
 
@@ -170,7 +172,9 @@ class JwtKidTest(parameterized.TestCase):
           tink.TinkError,
           msg=('%s supports JWT mac keys with TINK output prefix type '
                'and custom_kid set unexpectedly') % lang):
-        jwt_mac = testing_servers.jwt_mac(lang, keyset.SerializeToString())
+        jwt_mac = testing_servers.remote_primitive(lang,
+                                                   keyset.SerializeToString(),
+                                                   jwt.JwtMac)
         jwt_mac.compute_mac_and_encode(raw_jwt)
 
   @parameterized.parameters(
