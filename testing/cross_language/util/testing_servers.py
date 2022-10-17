@@ -383,18 +383,6 @@ def jwt_mac(lang: str, keyset: bytes) -> _primitives.JwtMac:
   return _primitives.JwtMac(lang, _ts.jwt_stub(lang), keyset)
 
 
-def jwt_public_key_sign(lang: str,
-                        keyset: bytes) -> _primitives.JwtPublicKeySign:
-  """Returns a JwtPublicKeySign primitive, implemented in lang."""
-  return _primitives.JwtPublicKeySign(lang, _ts.jwt_stub(lang), keyset)
-
-
-def jwt_public_key_verify(lang: str,
-                          keyset: bytes) -> _primitives.JwtPublicKeyVerify:
-  """Returns a JwtPublicKeyVerify primitive, implemented in lang."""
-  return _primitives.JwtPublicKeyVerify(lang, _ts.jwt_stub(lang), keyset)
-
-
 def remote_primitive(lang: str, keyset: bytes, primitive_class: Type[P]) -> P:
   """Creates a primitive from a keyset backed by the given language."""
   # TODO(b/241219877) Remove all other creation functions and route everything

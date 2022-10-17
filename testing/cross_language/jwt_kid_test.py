@@ -130,7 +130,8 @@ class JwtKidTest(parameterized.TestCase):
     supported_langs = utilities.SUPPORTED_LANGUAGES_BY_TEMPLATE_NAME[
         template_name]
     for lang in supported_langs:
-      jwt_sign = testing_servers.jwt_public_key_sign(lang, keyset)
+      jwt_sign = testing_servers.remote_primitive(lang, keyset,
+                                                  jwt.JwtPublicKeySign)
       compact = jwt_sign.sign_and_encode(raw_jwt)
       self.assertIsNotNone(decode_kid(compact))
 
@@ -144,7 +145,8 @@ class JwtKidTest(parameterized.TestCase):
     supported_langs = utilities.SUPPORTED_LANGUAGES_BY_TEMPLATE_NAME[
         template_name]
     for lang in supported_langs:
-      jwt_sign = testing_servers.jwt_public_key_sign(lang, keyset)
+      jwt_sign = testing_servers.remote_primitive(lang, keyset,
+                                                  jwt.JwtPublicKeySign)
       compact = jwt_sign.sign_and_encode(raw_jwt)
       self.assertIsNone(decode_kid(compact))
 
@@ -181,8 +183,9 @@ class JwtKidTest(parameterized.TestCase):
     supported_langs = utilities.SUPPORTED_LANGUAGES_BY_TEMPLATE_NAME[
         template_name]
     for lang in supported_langs:
-      jwt_sign = testing_servers.jwt_public_key_sign(lang,
-                                                     keyset.SerializeToString())
+      jwt_sign = testing_servers.remote_primitive(lang,
+                                                  keyset.SerializeToString(),
+                                                  jwt.JwtPublicKeySign)
       compact = jwt_sign.sign_and_encode(raw_jwt)
       self.assertEqual(decode_kid(compact), 'my kid')
 
@@ -198,8 +201,9 @@ class JwtKidTest(parameterized.TestCase):
           tink.TinkError,
           msg=('%s supports JWT signature keys with TINK output prefix type '
                'and custom_kid set unexpectedly') % lang):
-        jwt_sign = testing_servers.jwt_public_key_sign(
-            lang, keyset.SerializeToString())
+        jwt_sign = testing_servers.remote_primitive(lang,
+                                                    keyset.SerializeToString(),
+                                                    jwt.JwtPublicKeySign)
         jwt_sign.sign_and_encode(raw_jwt)
 
 

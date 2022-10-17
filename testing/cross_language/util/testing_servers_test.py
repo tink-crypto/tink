@@ -344,8 +344,10 @@ class TestingServersTest(parameterized.TestCase):
     private_keyset = testing_servers.new_keyset(lang, jwt.jwt_es256_template())
     public_keyset = testing_servers.public_keyset(lang, private_keyset)
 
-    signer = testing_servers.jwt_public_key_sign(lang, private_keyset)
-    verifier = testing_servers.jwt_public_key_verify(lang, public_keyset)
+    signer = testing_servers.remote_primitive(lang, private_keyset,
+                                              jwt.JwtPublicKeySign)
+    verifier = testing_servers.remote_primitive(lang, public_keyset,
+                                                jwt.JwtPublicKeyVerify)
 
     now = datetime.datetime.now(tz=datetime.timezone.utc)
     token = jwt.new_raw_jwt(
@@ -378,7 +380,8 @@ class TestingServersTest(parameterized.TestCase):
     public_keyset = testing_servers.public_keyset(lang, private_keyset)
 
     # sign and export public key
-    signer = testing_servers.jwt_public_key_sign(lang, private_keyset)
+    signer = testing_servers.remote_primitive(lang, private_keyset,
+                                              jwt.JwtPublicKeySign)
     now = datetime.datetime.now(tz=datetime.timezone.utc)
     token = jwt.new_raw_jwt(
         jwt_id='jwt_id', expiration=now + datetime.timedelta(seconds=100))
@@ -389,8 +392,8 @@ class TestingServersTest(parameterized.TestCase):
     imported_public_keyset = testing_servers.jwk_set_to_keyset(
         lang, public_jwk_set)
 
-    verifier = testing_servers.jwt_public_key_verify(lang,
-                                                     imported_public_keyset)
+    verifier = testing_servers.remote_primitive(lang, imported_public_keyset,
+                                                jwt.JwtPublicKeyVerify)
     validator = jwt.new_validator(fixed_now=now)
     verified_jwt = verifier.verify_and_decode(compact, validator)
     self.assertEqual(verified_jwt.jwt_id(), 'jwt_id')
