@@ -910,12 +910,12 @@ java_library(
 
 android_library(
     name = "tink_json_proto_keyset_format-android",
-    srcs = ["TinkProtoKeysetFormat.java"],
+    srcs = ["TinkJsonProtoKeysetFormat.java"],
     deps = [
         ":aead-android",
-        ":binary_keyset_reader-android",
-        ":binary_keyset_writer-android",
         ":cleartext_keyset_handle-android",
+        ":json_keyset_reader-android",
+        ":json_keyset_writer-android",
         ":registry_cluster-android",
         ":secret_key_access-android",
     ],
