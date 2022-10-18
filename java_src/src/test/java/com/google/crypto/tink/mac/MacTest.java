@@ -20,12 +20,12 @@ import static com.google.common.truth.Truth.assertThat;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.Assert.assertThrows;
 
-import com.google.crypto.tink.CleartextKeysetHandle;
 import com.google.crypto.tink.DeterministicAead;
-import com.google.crypto.tink.JsonKeysetReader;
+import com.google.crypto.tink.InsecureSecretKeyAccess;
 import com.google.crypto.tink.KeyTemplates;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.Mac;
+import com.google.crypto.tink.TinkJsonProtoKeysetFormat;
 import com.google.crypto.tink.daead.DeterministicAeadConfig;
 import com.google.crypto.tink.util.SecretBytes;
 import java.security.GeneralSecurityException;
@@ -161,7 +161,8 @@ public final class MacTest {
   @Theory
   public void readKeysetEncryptDecrypt()
       throws Exception {
-    KeysetHandle handle = CleartextKeysetHandle.read(JsonKeysetReader.withString(JSON_MAC_KEYSET));
+    KeysetHandle handle =
+        TinkJsonProtoKeysetFormat.parseKeyset(JSON_MAC_KEYSET, InsecureSecretKeyAccess.get());
 
     Mac mac = handle.getPrimitive(Mac.class);
 
@@ -222,7 +223,8 @@ public final class MacTest {
   public void multipleKeysReadKeysetWithEncryptDecrypt()
       throws Exception {
     KeysetHandle handle =
-        CleartextKeysetHandle.read(JsonKeysetReader.withString(JSON_MAC_KEYSET_WITH_MULTIPLE_KEYS));
+        TinkJsonProtoKeysetFormat.parseKeyset(
+            JSON_MAC_KEYSET_WITH_MULTIPLE_KEYS, InsecureSecretKeyAccess.get());
 
     Mac mac = handle.getPrimitive(Mac.class);
 
@@ -232,7 +234,8 @@ public final class MacTest {
 
     // Also test that mac can verify tags computed with a non-primary key. We use
     // JSON_MAC_KEYSET to compute a tag with the first key.
-    KeysetHandle handle1 = CleartextKeysetHandle.read(JsonKeysetReader.withString(JSON_MAC_KEYSET));
+    KeysetHandle handle1 =
+        TinkJsonProtoKeysetFormat.parseKeyset(JSON_MAC_KEYSET, InsecureSecretKeyAccess.get());
     Mac mac1 = handle1.getPrimitive(Mac.class);
     byte[] tag1 = mac1.computeMac(data);
     mac.verifyMac(tag1, data);
@@ -261,8 +264,7 @@ public final class MacTest {
   @Theory
   public void getPrimitiveFromNonMacKeyset_throws() throws Exception {
     KeysetHandle handle =
-        CleartextKeysetHandle.read(
-            JsonKeysetReader.withString(JSON_DAEAD_KEYSET));
+        TinkJsonProtoKeysetFormat.parseKeyset(JSON_DAEAD_KEYSET, InsecureSecretKeyAccess.get());
     // Test that the keyset can create a DeterministicAead primitive, but not a Mac.
     handle.getPrimitive(DeterministicAead.class);
     assertThrows(GeneralSecurityException.class, () -> handle.getPrimitive(Mac.class));

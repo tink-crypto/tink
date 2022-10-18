@@ -19,11 +19,11 @@ package com.google.crypto.tink.jwt;
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertThrows;
 
-import com.google.crypto.tink.CleartextKeysetHandle;
 import com.google.crypto.tink.DeterministicAead;
-import com.google.crypto.tink.JsonKeysetReader;
+import com.google.crypto.tink.InsecureSecretKeyAccess;
 import com.google.crypto.tink.KeyTemplates;
 import com.google.crypto.tink.KeysetHandle;
+import com.google.crypto.tink.TinkJsonProtoKeysetFormat;
 import com.google.crypto.tink.daead.DeterministicAeadConfig;
 import java.security.GeneralSecurityException;
 import java.time.Clock;
@@ -147,7 +147,7 @@ public final class JwtTest {
   @Theory
   public void readKeysetComputeVerifyJwtMac_success() throws Exception {
     KeysetHandle handle =
-        CleartextKeysetHandle.read(JsonKeysetReader.withString(JSON_JWT_MAC_KEYSET));
+        TinkJsonProtoKeysetFormat.parseKeyset(JSON_JWT_MAC_KEYSET, InsecureSecretKeyAccess.get());
     Instant now = Clock.systemUTC().instant();
     JwtMac jwtMac = handle.getPrimitive(JwtMac.class);
     RawJwt rawJwt =
@@ -210,8 +210,8 @@ public final class JwtTest {
   public void multipleKeysReadKeysetComputeVerifyJwtMac_success()
       throws Exception {
     KeysetHandle handle =
-        CleartextKeysetHandle.read(
-            JsonKeysetReader.withString(JSON_JWT_MAC_KEYSET_WITH_MULTIPLE_KEYS));
+        TinkJsonProtoKeysetFormat.parseKeyset(
+            JSON_JWT_MAC_KEYSET_WITH_MULTIPLE_KEYS, InsecureSecretKeyAccess.get());
     Instant now = Clock.systemUTC().instant();
     JwtMac jwtMac = handle.getPrimitive(JwtMac.class);
     RawJwt rawJwt =
@@ -230,7 +230,8 @@ public final class JwtTest {
     // Also test that jwtMac can verify tokens computed with a non-primary key. We use
     // JSON_JWT_MAC_KEYSET to compute a tag with the first key.
     KeysetHandle handle1 =
-        CleartextKeysetHandle.read(JsonKeysetReader.withString(JSON_JWT_MAC_KEYSET));
+        TinkJsonProtoKeysetFormat.parseKeyset(
+            JSON_JWT_MAC_KEYSET, InsecureSecretKeyAccess.get());
     JwtMac jwtMac1 = handle1.getPrimitive(JwtMac.class);
     String token1 = jwtMac1.computeMacAndEncode(rawJwt);
     assertThat(jwtMac.verifyMacAndDecode(token1, validator).getSubject()).isEqualTo("subject");
@@ -259,8 +260,8 @@ public final class JwtTest {
   @Theory
   public void getPrimitiveFromNonMacKeyset_throws() throws Exception {
     KeysetHandle handle =
-        CleartextKeysetHandle.read(
-            JsonKeysetReader.withString(JSON_DAEAD_KEYSET));
+        TinkJsonProtoKeysetFormat.parseKeyset(
+            JSON_DAEAD_KEYSET, InsecureSecretKeyAccess.get());
     // Test that the keyset can create a DeterministicAead primitive, but not a JwtMac.
     handle.getPrimitive(DeterministicAead.class);
     assertThrows(GeneralSecurityException.class, () -> handle.getPrimitive(JwtMac.class));

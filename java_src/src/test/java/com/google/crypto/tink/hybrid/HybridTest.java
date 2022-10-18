@@ -20,13 +20,13 @@ import static com.google.common.truth.Truth.assertThat;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.Assert.assertThrows;
 
-import com.google.crypto.tink.CleartextKeysetHandle;
 import com.google.crypto.tink.DeterministicAead;
 import com.google.crypto.tink.HybridDecrypt;
 import com.google.crypto.tink.HybridEncrypt;
-import com.google.crypto.tink.JsonKeysetReader;
+import com.google.crypto.tink.InsecureSecretKeyAccess;
 import com.google.crypto.tink.KeyTemplates;
 import com.google.crypto.tink.KeysetHandle;
+import com.google.crypto.tink.TinkJsonProtoKeysetFormat;
 import com.google.crypto.tink.daead.DeterministicAeadConfig;
 import com.google.crypto.tink.testing.TestUtil;
 import java.security.GeneralSecurityException;
@@ -152,9 +152,9 @@ public final class HybridTest {
   public void readKeysetEncryptDecrypt_success()
       throws Exception {
     KeysetHandle privateHandle =
-        CleartextKeysetHandle.read(JsonKeysetReader.withString(JSON_PRIVATE_KEYSET));
+        TinkJsonProtoKeysetFormat.parseKeyset(JSON_PRIVATE_KEYSET, InsecureSecretKeyAccess.get());
     KeysetHandle publicHandle =
-        CleartextKeysetHandle.read(JsonKeysetReader.withString(JSON_PUBLIC_KEYSET));
+        TinkJsonProtoKeysetFormat.parseKeyset(JSON_PUBLIC_KEYSET, InsecureSecretKeyAccess.get());
 
     HybridEncrypt encrypter = publicHandle.getPrimitive(HybridEncrypt.class);
     HybridDecrypt decrypter = privateHandle.getPrimitive(HybridDecrypt.class);
@@ -257,11 +257,11 @@ public final class HybridTest {
   public void multipleKeysReadKeysetWithEncryptDecrypt()
       throws Exception {
     KeysetHandle privateHandle =
-        CleartextKeysetHandle.read(
-            JsonKeysetReader.withString(JSON_PRIVATE_KEYSET_WITH_MULTIPLE_KEYS));
+        TinkJsonProtoKeysetFormat.parseKeyset(
+            JSON_PRIVATE_KEYSET_WITH_MULTIPLE_KEYS, InsecureSecretKeyAccess.get());
     KeysetHandle publicHandle =
-        CleartextKeysetHandle.read(
-            JsonKeysetReader.withString(JSON_PUBLIC_KEYSET_WITH_MULTIPLE_KEYS));
+        TinkJsonProtoKeysetFormat.parseKeyset(
+            JSON_PUBLIC_KEYSET_WITH_MULTIPLE_KEYS, InsecureSecretKeyAccess.get());
 
     HybridEncrypt encrypter = publicHandle.getPrimitive(HybridEncrypt.class);
     HybridDecrypt decrypter = privateHandle.getPrimitive(HybridDecrypt.class);
@@ -274,7 +274,8 @@ public final class HybridTest {
     // Also test that decrypter can decrypt ciphertext of a non-primary key. We use
     // JSON_PUBLIC_KEYSET to create a ciphertext with the first key.
     KeysetHandle publicHandle1 =
-        CleartextKeysetHandle.read(JsonKeysetReader.withString(JSON_PUBLIC_KEYSET));
+        TinkJsonProtoKeysetFormat.parseKeyset(
+            JSON_PUBLIC_KEYSET, InsecureSecretKeyAccess.get());
     HybridEncrypt encrypter1 = publicHandle1.getPrimitive(HybridEncrypt.class);
     byte[] ciphertext1 = encrypter1.encrypt(plaintext, contextInfo);
     assertThat(decrypter.decrypt(ciphertext1, contextInfo)).isEqualTo(plaintext);
@@ -305,8 +306,7 @@ public final class HybridTest {
   public void getPrimitiveFromNonSignatureKeyset_throws()
       throws Exception {
     KeysetHandle handle =
-        CleartextKeysetHandle.read(
-            JsonKeysetReader.withString(JSON_DAEAD_KEYSET));
+        TinkJsonProtoKeysetFormat.parseKeyset(JSON_DAEAD_KEYSET, InsecureSecretKeyAccess.get());
     // Test that the keyset can create a DeterministicAead primitive, but neither HybridEncrypt
     // nor HybridDecrypt primitives.
     handle.getPrimitive(DeterministicAead.class);
