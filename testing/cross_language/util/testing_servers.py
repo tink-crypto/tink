@@ -373,11 +373,6 @@ def jwk_set_from_keyset(lang: str, keyset: bytes) -> str:
   return _primitives.jwk_set_from_keyset(_ts.jwt_stub(lang), keyset)
 
 
-def prf_set(lang: str, keyset: bytes) -> _primitives.PrfSet:
-  """Returns an PrfSet primitive, implemented in lang."""
-  return _primitives.PrfSet(lang, _ts.prf_stub(lang), keyset)
-
-
 def remote_primitive(lang: str, keyset: bytes, primitive_class: Type[P]) -> P:
   """Creates a primitive from a keyset backed by the given language."""
   # TODO(b/241219877) Remove all other creation functions and route everything

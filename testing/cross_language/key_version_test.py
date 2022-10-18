@@ -162,11 +162,11 @@ class KeyVersionTest(parameterized.TestCase):
     """Increments the key version by one and checks they can't be used."""
     template = utilities.KEY_TEMPLATE[key_template_name]
     keyset = testing_servers.new_keyset(lang, template)
-    _ = testing_servers.prf_set(lang, keyset).primary().compute(b'foo', 16)
+    prf_set = testing_servers.remote_primitive(lang, keyset, prf.PrfSet)
+    _ = prf_set.primary().compute(b'foo', 16)
     for keyset1 in gen_inc_versions(keyset):
-      prf_set_primitive = testing_servers.prf_set(lang, keyset1)
       with self.assertRaises(tink.TinkError):
-        _ = prf_set_primitive.primary().compute(b'foo', 16)
+        _ = testing_servers.remote_primitive(lang, keyset1, prf.PrfSet)
 
 
 if __name__ == '__main__':

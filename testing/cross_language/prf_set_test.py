@@ -65,23 +65,6 @@ def tearDownModule():
 class PrfSetPythonTest(parameterized.TestCase):
 
   @parameterized.parameters(utilities.tinkey_template_names_for(prf.PrfSet))
-  def test_unsupported(self, key_template_name):
-    supported_langs = utilities.SUPPORTED_LANGUAGES_BY_TEMPLATE_NAME[
-        key_template_name]
-    self.assertNotEmpty(supported_langs)
-    keyset = gen_keyset(key_template_name)
-    unsupported_languages = [
-        lang for lang in SUPPORTED_LANGUAGES if lang not in supported_langs
-    ]
-    for lang in unsupported_languages:
-      p = testing_servers.prf_set(lang, keyset)
-      with self.assertRaises(
-          tink.TinkError,
-          msg='Language %s supports PRF compute with %s unexpectedly' %
-          (p.lang, key_template_name)):
-        p.primary().compute(b'input_data', output_length=16)
-
-  @parameterized.parameters(utilities.tinkey_template_names_for(prf.PrfSet))
   def test_supported(self, key_template_name):
     supported_langs = utilities.SUPPORTED_LANGUAGES_BY_TEMPLATE_NAME[
         key_template_name]
@@ -90,7 +73,7 @@ class PrfSetPythonTest(parameterized.TestCase):
     input_data = b'This is some input data.'
     outputs = []
     for lang in supported_langs:
-      p = testing_servers.prf_set(lang, keyset)
+      p = testing_servers.remote_primitive(lang, keyset, prf.PrfSet)
       outputs.append(p.primary().compute(input_data, 16))
     self.assertLen(outputs, len(supported_langs))
     self.assertLen(outputs[0], 16)
@@ -111,7 +94,7 @@ class PrfSetPythonTest(parameterized.TestCase):
     outputs = {}
     for lang in supported_langs:
       try:
-        p = testing_servers.prf_set(lang, keyset)
+        p = testing_servers.remote_primitive(lang, keyset, prf.PrfSet)
         outputs[lang] = p.primary().compute(input_data, output_length)
       except tink.TinkError as e:
         errors[lang] = e
@@ -127,7 +110,7 @@ class PrfSetPythonTest(parameterized.TestCase):
     keyset = gen_keyset_with_2_prfs()
     input_data = b'This is some input data.'
     output_length = 15
-    p = testing_servers.prf_set(lang, keyset)
+    p = testing_servers.remote_primitive(lang, keyset, prf.PrfSet)
     primary_output = p.primary().compute(input_data, output_length)
     primary_id = p.primary_id()
     all_outputs = {

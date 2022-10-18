@@ -301,7 +301,8 @@ class TestingServersTest(parameterized.TestCase):
     keyset = testing_servers.new_keyset(lang,
                                         prf.prf_key_templates.HMAC_SHA256)
     input_data = b'The quick brown fox jumps over the lazy dog'
-    prf_set_primitive = testing_servers.prf_set(lang, keyset)
+    prf_set_primitive = testing_servers.remote_primitive(
+        lang, keyset, prf.PrfSet)
     output = prf_set_primitive.primary().compute(input_data, output_length=15)
     self.assertLen(output, 15)
 
