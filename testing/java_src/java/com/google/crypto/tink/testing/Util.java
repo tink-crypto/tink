@@ -16,14 +16,13 @@
 
 package com.google.crypto.tink.testing;
 
-import com.google.crypto.tink.BinaryKeysetReader;
-import com.google.crypto.tink.CleartextKeysetHandle;
+import com.google.crypto.tink.InsecureSecretKeyAccess;
 import com.google.crypto.tink.KeysetHandle;
+import com.google.crypto.tink.TinkProtoKeysetFormat;
 import com.google.crypto.tink.testing.proto.CreationRequest;
 import com.google.crypto.tink.testing.proto.CreationResponse;
 import com.google.protobuf.ByteString;
 import io.grpc.stub.StreamObserver;
-import java.io.IOException;
 import java.security.GeneralSecurityException;
 
 /**
@@ -32,12 +31,8 @@ import java.security.GeneralSecurityException;
 final class Util {
   static KeysetHandle parseBinaryProtoKeyset(ByteString serializedKeyset)
       throws GeneralSecurityException {
-    try {
-      return CleartextKeysetHandle.read(
-          BinaryKeysetReader.withBytes(serializedKeyset.toByteArray()));
-    } catch (IOException e) {
-      throw new GeneralSecurityException(e);
-    }
+    return TinkProtoKeysetFormat.parseKeyset(
+        serializedKeyset.toByteArray(), InsecureSecretKeyAccess.get());
   }
 
   /** Responds to a "create" request for a specific class */

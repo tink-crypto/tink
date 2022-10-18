@@ -21,15 +21,16 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.junit.Assert.assertThrows;
 
-import com.google.crypto.tink.BinaryKeysetReader;
+import com.google.crypto.tink.InsecureSecretKeyAccess;
 import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.KeyTemplates;
+import com.google.crypto.tink.KeysetHandle;
+import com.google.crypto.tink.TinkProtoKeysetFormat;
 import com.google.crypto.tink.config.TinkConfig;
 import com.google.crypto.tink.daead.AesSivKeyManager;
 import com.google.crypto.tink.internal.KeyTemplateProtoConverter;
 import com.google.crypto.tink.mac.HmacKeyManager;
 import com.google.crypto.tink.prf.HmacPrfKeyManager;
-import com.google.crypto.tink.proto.Keyset;
 import com.google.crypto.tink.streamingaead.AesGcmHkdfStreamingKeyManager;
 import com.google.crypto.tink.testing.proto.AeadDecryptRequest;
 import com.google.crypto.tink.testing.proto.AeadDecryptResponse;
@@ -176,7 +177,7 @@ public final class TestingServicesTest {
   }
 
   @Test
-  public void toJson_success() throws Exception {
+  public void fromJson_success() throws Exception {
     String jsonKeyset =
         ""
             + "{"
@@ -196,10 +197,11 @@ public final class TestingServicesTest {
             + "}";
     KeysetFromJsonResponse fromResponse = keysetFromJson(keysetStub, jsonKeyset);
     assertThat(fromResponse.getErr()).isEmpty();
-    byte[] output = fromResponse.getKeyset().toByteArray();
+    byte[] serializedKeyset = fromResponse.getKeyset().toByteArray();
 
-    Keyset keyset = BinaryKeysetReader.withBytes(output).read();
-    assertThat(keyset.getPrimaryKeyId()).isEqualTo(42);
+    KeysetHandle parseKeysetHandle =
+        TinkProtoKeysetFormat.parseKeyset(serializedKeyset, InsecureSecretKeyAccess.get());
+    assertThat(parseKeysetHandle.getPrimary().getId()).isEqualTo(42);
   }
 
   @Test
@@ -282,6 +284,24 @@ public final class TestingServicesTest {
     byte[] output = readResponse.getKeyset().toByteArray();
 
     assertThat(output).isEqualTo(keyset);
+
+    // Empty associated data should be the same as no associated data.
+    KeysetReadEncryptedResponse readResponseWithEmptyAssociatedData =
+        keysetReadEncrypted(
+            keysetStub,
+            encryptedKeyset,
+            masterKeyset,
+            /*associatedData=*/ Optional.of(new byte[0]));
+    assertThat(readResponseWithEmptyAssociatedData.getErr()).isEmpty();
+    assertThat(readResponseWithEmptyAssociatedData.getKeyset().toByteArray()).isEqualTo(keyset);
+
+    KeysetReadEncryptedResponse readResponseWithInvalidAssociatedData =
+        keysetReadEncrypted(
+            keysetStub,
+            encryptedKeyset,
+            masterKeyset,
+            Optional.of("invalidAssociatedData".getBytes(UTF_8)));
+    assertThat(readResponseWithInvalidAssociatedData.getErr()).isNotEmpty();
   }
 
   @Test
@@ -310,6 +330,52 @@ public final class TestingServicesTest {
     byte[] output = readResponse.getKeyset().toByteArray();
 
     assertThat(output).isEqualTo(keyset);
+
+    KeysetReadEncryptedResponse readResponseWithInvalidAssociatedData =
+        keysetReadEncrypted(
+            keysetStub,
+            encryptedKeyset,
+            masterKeyset,
+            Optional.of("invalidAssociatedData".getBytes(UTF_8)));
+    assertThat(readResponseWithInvalidAssociatedData.getErr()).isNotEmpty();
+
+    KeysetReadEncryptedResponse readResponseWithoutAssociatedData =
+        keysetReadEncrypted(
+            keysetStub, encryptedKeyset, masterKeyset, /*associatedData=*/ Optional.empty());
+    assertThat(readResponseWithoutAssociatedData.getErr()).isNotEmpty();
+  }
+
+  @Test
+  public void generateEncryptDecryptKeysetWithEmptyAssociatedData() throws Exception {
+    byte[] template = KeyTemplateProtoConverter.toByteArray(KeyTemplates.get("AES128_GCM"));
+    byte[] emptyAssociatedData = new byte[0];
+
+    KeysetGenerateResponse keysetResponse = generateKeyset(keysetStub, template);
+    assertThat(keysetResponse.getErr()).isEmpty();
+    byte[] keyset = keysetResponse.getKeyset().toByteArray();
+
+    KeysetGenerateResponse masterKeysetResponse = generateKeyset(keysetStub, template);
+    assertThat(masterKeysetResponse.getErr()).isEmpty();
+    byte[] masterKeyset = masterKeysetResponse.getKeyset().toByteArray();
+
+    KeysetWriteEncryptedResponse writeResponse =
+        keysetWriteEncrypted(keysetStub, keyset, masterKeyset, Optional.of(emptyAssociatedData));
+    assertThat(writeResponse.getErr()).isEmpty();
+    byte[] encryptedKeyset = writeResponse.getEncryptedKeyset().toByteArray();
+
+    assertThat(encryptedKeyset).isNotEqualTo(keyset);
+
+    KeysetReadEncryptedResponse readResponse =
+        keysetReadEncrypted(
+            keysetStub, encryptedKeyset, masterKeyset, Optional.of(emptyAssociatedData));
+    assertThat(readResponse.getErr()).isEmpty();
+    byte[] output = readResponse.getKeyset().toByteArray();
+    assertThat(output).isEqualTo(keyset);
+
+    KeysetReadEncryptedResponse readResponseWithoutAssociatedData =
+        keysetReadEncrypted(keysetStub, encryptedKeyset, masterKeyset, Optional.empty());
+    assertThat(readResponseWithoutAssociatedData.getErr()).isEmpty();
+    assertThat(readResponseWithoutAssociatedData.getKeyset().toByteArray()).isEqualTo(keyset);
   }
 
   @Test
@@ -343,6 +409,8 @@ public final class TestingServicesTest {
             keysetStub, invalidData, masterKeyset, /*associatedData=*/ Optional.empty());
     assertThat(readResponse2.getErr()).isNotEmpty();
   }
+
+  // TODO(juerg): Add tests for KEYSET_WRITER_JSON.
 
   @Test
   public void aeadCreateKeyset_success() throws Exception {
