@@ -811,6 +811,10 @@ crypto::tink::util::StatusOr<std::unique_ptr<P>> RegistryImpl::WrapKeyset(
 
 inline crypto::tink::util::Status RegistryImpl::RestrictToFipsIfEmpty() const {
   absl::MutexLock lock(&maps_mutex_);
+  // If we are already in FIPS mode, then do nothing..
+  if (IsFipsModeEnabled()) {
+    return util::OkStatus();
+  }
   if (type_url_to_info_.empty()) {
     SetFipsRestricted();
     return util::OkStatus();

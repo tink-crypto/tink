@@ -1998,14 +1998,30 @@ TEST_F(RegistryImplTest, CanDelegateGetPublicKey) {
                        HasSubstr("GetPublicKey worked")));
 }
 
-TEST_F(RegistryImplTest, FipsSucceedsOnEmptyRegistry) {
+TEST_F(RegistryImplTest, FipsRestrictionSucceedsOnEmptyRegistry) {
   RegistryImpl registry_impl;
   EXPECT_THAT(registry_impl.RestrictToFipsIfEmpty(), IsOk());
 }
 
+TEST_F(RegistryImplTest, FipsRestrictionSucceedsWhenSettingMultipleTimes) {
+  RegistryImpl registry_impl;
+  EXPECT_THAT(registry_impl.RestrictToFipsIfEmpty(), IsOk());
+  EXPECT_THAT(registry_impl.RestrictToFipsIfEmpty(), IsOk());
+  EXPECT_THAT(registry_impl.RestrictToFipsIfEmpty(), IsOk());
+}
+
+TEST_F(RegistryImplTest, FipsRestrictionSucceedsIfBuildInFipsMode) {
+  if (!kUseOnlyFips) {
+    GTEST_SKIP() << "Not supported when Tink is not built in FIPS mode.";
+  }
+  RegistryImpl registry_impl;
+  EXPECT_THAT(registry_impl.RestrictToFipsIfEmpty(), IsOk());
+}
+
+
 TEST_F(RegistryImplTest, FipsFailsIfNotEmpty) {
-  if (!FIPS_mode()) {
-    GTEST_SKIP() << "Not supported when BoringSSL is not built in FIPS-mode.";
+  if (kUseOnlyFips) {
+    GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
 
   auto fips_key_manager = absl::make_unique<ExampleKeyTypeManager>();
