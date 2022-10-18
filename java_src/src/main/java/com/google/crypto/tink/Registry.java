@@ -842,6 +842,10 @@ public final class Registry {
    * @throws GeneralSecurityException if any key manager has already been registered.
    */
   public static synchronized void restrictToFipsIfEmpty() throws GeneralSecurityException {
+    // If we are already using FIPS mode, do nothing.
+    if (TinkFipsUtil.useOnlyFips()) {
+      return;
+    }
     if (keyManagerRegistry.get().isEmpty()) {
       TinkFipsUtil.setFipsRestricted();
       return;

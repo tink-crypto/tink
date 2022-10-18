@@ -1777,7 +1777,24 @@ public class RegistryTest {
   }
 
   @Test
+  public void testFips_succeedsOnSuccessiveRestrictToFips() throws Exception {
+    Registry.reset();
+    Registry.restrictToFipsIfEmpty();
+    Registry.restrictToFipsIfEmpty();
+    Registry.restrictToFipsIfEmpty();
+    assertTrue(TinkFipsUtil.useOnlyFips());
+  }
+
+  @Test
+  public void testFips_succeedsOnRestrictToFipsWhenBuiltInFipsMode() throws Exception {
+    Assume.assumeTrue(TinkFipsUtil.useOnlyFips());
+    Registry.restrictToFipsIfEmpty();
+    assertTrue(TinkFipsUtil.useOnlyFips());
+  }
+
+  @Test
   public void testFips_failsOnNonEmptyRegistry() throws Exception {
+    Assume.assumeFalse(TinkFipsUtil.useOnlyFips());
     assertThrows(GeneralSecurityException.class, Registry::restrictToFipsIfEmpty);
   }
 
