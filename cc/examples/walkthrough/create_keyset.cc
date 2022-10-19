@@ -21,6 +21,7 @@
 
 #include "tink/aead/aead_key_templates.h"
 #include "tink/keyset_handle.h"
+#include "tink/util/statusor.h"
 
 namespace tink_walkthrough {
 
