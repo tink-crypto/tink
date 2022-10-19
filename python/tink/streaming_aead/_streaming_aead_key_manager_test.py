@@ -21,6 +21,7 @@ from tink.proto import aes_ctr_hmac_streaming_pb2
 from tink.proto import aes_gcm_hkdf_streaming_pb2
 from tink.proto import common_pb2
 from tink.proto import tink_pb2
+import tink
 from tink import core
 from tink import streaming_aead
 from tink.streaming_aead import _raw_streaming_aead
@@ -219,6 +220,40 @@ class StreamingAeadKeyManagerTest(parameterized.TestCase):
         ct_source, b'bad' + aad, close_ciphertext_source=True) as ds:
       with self.assertRaises(core.TinkError):
         ds.read()
+
+  @parameterized.parameters([
+      streaming_aead.streaming_aead_key_templates.AES128_GCM_HKDF_4KB,
+      streaming_aead.streaming_aead_key_templates.AES128_GCM_HKDF_1MB,
+      streaming_aead.streaming_aead_key_templates.AES256_GCM_HKDF_4KB,
+      streaming_aead.streaming_aead_key_templates.AES256_GCM_HKDF_1MB,
+      streaming_aead.streaming_aead_key_templates.AES128_CTR_HMAC_SHA256_4KB,
+      streaming_aead.streaming_aead_key_templates.AES128_CTR_HMAC_SHA256_1MB,
+      streaming_aead.streaming_aead_key_templates.AES256_CTR_HMAC_SHA256_4KB,
+      streaming_aead.streaming_aead_key_templates.AES256_CTR_HMAC_SHA256_1MB
+  ])
+  def test_encrypt_decrypt_success(self, template):
+    keyset_handle = tink.new_keyset_handle(template)
+    primitive = keyset_handle.primitive(streaming_aead.StreamingAead)
+
+    plaintext = b'plaintext'
+    associated_data = b'associated_data'
+
+    # Encrypt
+    ciphertext_destination = bytes_io.BytesIOWithValueAfterClose()
+    with primitive.new_encrypting_stream(ciphertext_destination,
+                                         associated_data) as encryption_stream:
+      encryption_stream.write(plaintext)
+
+    ciphertext = ciphertext_destination.value_after_close()
+
+    # Decrypt
+    ciphertext_source = io.BytesIO(ciphertext)
+    decrypted = None
+    with primitive.new_decrypting_stream(ciphertext_source,
+                                         associated_data) as decryption_stream:
+      decrypted = decryption_stream.read()
+
+    self.assertEqual(decrypted, plaintext)
 
 if __name__ == '__main__':
   absltest.main()
