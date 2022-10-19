@@ -19,6 +19,7 @@ package com.google.crypto.tink.testing;
 import static com.google.common.truth.Truth.assertThat;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.concurrent.TimeUnit.SECONDS;
+import static org.junit.Assert.assertThrows;
 
 import com.google.crypto.tink.config.TinkConfig;
 import com.google.crypto.tink.hybrid.EciesAeadHkdfPrivateKeyManager;
@@ -237,17 +238,17 @@ public final class AsymmetricTestingServicesTest {
   }
 
   @Test
-  public void hybridEncrypt_failsOnBadKeyset() throws Exception {
+  public void hybridEncrypt_errorOnBadKeyset() throws Exception {
     byte[] badKeyset = "bad keyset".getBytes(UTF_8);
     byte[] plaintext = "The quick brown fox jumps over the lazy dog".getBytes(UTF_8);
     byte[] contextInfo = "hybrid_encrypt_bad_keyset".getBytes(UTF_8);
-    HybridEncryptResponse encResponse =
-        hybridEncrypt(hybridStub, badKeyset, plaintext, contextInfo);
-    assertThat(encResponse.getErr()).isNotEmpty();
+    assertThrows(
+        io.grpc.StatusRuntimeException.class,
+        () -> hybridEncrypt(hybridStub, badKeyset, plaintext, contextInfo));
   }
 
   @Test
-  public void hybridDecrypt_failsOnBadCiphertext() throws Exception {
+  public void hybridDecrypt_errorOnBadCiphertext() throws Exception {
     byte[] template = KeyTemplateProtoConverter.toByteArray(
         EciesAeadHkdfPrivateKeyManager.eciesP256HkdfHmacSha256Aes128GcmTemplate());
     byte[] badCiphertext = "bad ciphertext".getBytes(UTF_8);
@@ -261,9 +262,9 @@ public final class AsymmetricTestingServicesTest {
     assertThat(pubResponse.getErr()).isEmpty();
     byte[] publicKeyset = pubResponse.getPublicKeyset().toByteArray();
 
-    HybridDecryptResponse decResponse =
-        hybridDecrypt(hybridStub, publicKeyset, badCiphertext, contextInfo);
-    assertThat(decResponse.getErr()).isNotEmpty();
+    assertThrows(
+        io.grpc.StatusRuntimeException.class,
+        () -> hybridDecrypt(hybridStub, publicKeyset, badCiphertext, contextInfo));
   }
 
   @Test
@@ -287,9 +288,9 @@ public final class AsymmetricTestingServicesTest {
     byte[] ciphertext = encResponse.getCiphertext().toByteArray();
 
     byte[] badKeyset = "bad keyset".getBytes(UTF_8);
-    HybridDecryptResponse decResponse =
-        hybridDecrypt(hybridStub, badKeyset, ciphertext, contextInfo);
-    assertThat(decResponse.getErr()).isNotEmpty();
+    assertThrows(
+        io.grpc.StatusRuntimeException.class,
+        () -> hybridDecrypt(hybridStub, badKeyset, ciphertext, contextInfo));
   }
 
   @Test

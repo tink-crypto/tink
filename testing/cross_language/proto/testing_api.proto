@@ -180,10 +180,10 @@ service Aead {
   // Creates an Aead object without using it.
   rpc Create(CreationRequest) returns (CreationResponse) {}
   // Encrypts a plaintext with the provided keyset. The client must call
-  // "CreateAead" first to see if creation succeeds before calling this.
+  // "Create" first to see if creation succeeds before calling this.
   rpc Encrypt(AeadEncryptRequest) returns (AeadEncryptResponse) {}
   // Decrypts a ciphertext with the provided keyset. The client must call
-  // "CreateAead" first to see if creation succeeds before calling this.
+  // "Create" first to see if creation succeeds before calling this.
   rpc Decrypt(AeadDecryptRequest) returns (AeadDecryptResponse) {}
 }
 
@@ -218,12 +218,12 @@ service DeterministicAead {
   // Creates a Deterministic AEAD object without using it.
   rpc Create(CreationRequest) returns (CreationResponse) {}
   // Encrypts a plaintext with the provided keyset. The client must call
-  // "CreateDeterministicAead" first to see if creation succeeds before calling
+  // "Create" first to see if creation succeeds before calling
   // this.
   rpc EncryptDeterministically(DeterministicAeadEncryptRequest)
       returns (DeterministicAeadEncryptResponse) {}
   // Decrypts a ciphertext with the provided keyset. The client must call
-  // "CreateDeterministicAead" first to see if creation succeeds before calling
+  // "Create" first to see if creation succeeds before calling
   // this.
   rpc DecryptDeterministically(DeterministicAeadDecryptRequest)
       returns (DeterministicAeadDecryptResponse) {}
@@ -260,10 +260,12 @@ service StreamingAead {
   // Creates a StreamingAead object without using it.
   rpc Create(CreationRequest) returns (CreationResponse) {}
 
-  // Encrypts a plaintext with the provided keyset
+  // Encrypts a plaintext with the provided keyset. The client must call
+  // "Create" first to see if creation succeeds before calling this.
   rpc Encrypt(StreamingAeadEncryptRequest)
       returns (StreamingAeadEncryptResponse) {}
-  // Decrypts a ciphertext with the provided keyset
+  // Decrypts a ciphertext with the provided keyset. The client must call
+  // "Create" first to see if creation succeeds before calling this.
   rpc Decrypt(StreamingAeadDecryptRequest)
       returns (StreamingAeadDecryptResponse) {}
 }
@@ -298,9 +300,11 @@ message StreamingAeadDecryptResponse {
 service Mac {
   // Creates a Mac object without using it.
   rpc Create(CreationRequest) returns (CreationResponse) {}
-  // Computes a MAC for given data
+  // Computes a MAC for given data. The client must call "Create" first to see
+  // if creation succeeds before calling this.
   rpc ComputeMac(ComputeMacRequest) returns (ComputeMacResponse) {}
-  // Verifies the validity of the MAC value, no error means success
+  // Verifies the validity of the MAC value, no error means success. The client
+  // must call "Create" first to see if creation succeeds before calling this.
   rpc VerifyMac(VerifyMacRequest) returns (VerifyMacResponse) {}
 }
 
@@ -333,9 +337,13 @@ service Hybrid {
   // Creates a HybridDecrypt object without using it.
   rpc CreateHybridDecrypt(CreationRequest) returns (CreationResponse) {}
 
-  // Encrypts plaintext binding context_info to the resulting ciphertext
+  // Encrypts plaintext binding context_info to the resulting ciphertext. The
+  // client must call "CreateHybridEncrypt" first to see if creation succeeds
+  // before calling this.
   rpc Encrypt(HybridEncryptRequest) returns (HybridEncryptResponse) {}
-  // Decrypts ciphertext verifying the integrity of context_info
+  // Decrypts ciphertext verifying the integrity of context_info. The client
+  // must call "CreateHybridDecrypt" first to see if creation succeeds before
+  // calling this.
   rpc Decrypt(HybridDecryptRequest) returns (HybridDecryptResponse) {}
 }
 
@@ -372,9 +380,12 @@ service Signature {
   // Creates a PublicKeyVerify object without using it.
   rpc CreatePublicKeyVerify(CreationRequest) returns (CreationResponse) {}
 
-  // Computes the signature for data
+  // Computes the signature for data. The client must call "CreatePublicKeySign"
+  // first to see if creation succeeds before calling this.
   rpc Sign(SignatureSignRequest) returns (SignatureSignResponse) {}
-  // Verifies that signature is a digital signature for data
+  // Verifies that signature is a digital signature for data. The client must
+  // call "CreatePublicKeyVerify" first to see if creation succeeds before
+  // calling this.
   rpc Verify(SignatureVerifyRequest) returns (SignatureVerifyResponse) {}
 }
 
@@ -405,9 +416,12 @@ service PrfSet {
   // Creates a PrfSet object without using it.
   rpc Create(CreationRequest) returns (CreationResponse) {}
 
-  // Returns the key ids and the primary key id in the keyset.
+  // Returns the key ids and the primary key id in the keyset.The client must
+  // call "Create" first to see if creation succeeds before calling this.
   rpc KeyIds(PrfSetKeyIdsRequest) returns (PrfSetKeyIdsResponse) {}
-  // Computes the output of the PRF with the given key_id in the PrfSet.
+  // Computes the output of the PRF with the given key_id in the PrfSet.The
+  // client must call "Create" first to see if creation succeeds before calling
+  // this.
   rpc Compute(PrfSetComputeRequest) returns (PrfSetComputeResponse) {}
 }
 

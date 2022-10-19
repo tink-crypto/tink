@@ -19,6 +19,7 @@ package com.google.crypto.tink.testing;
 import static com.google.common.truth.Truth.assertThat;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.concurrent.TimeUnit.SECONDS;
+import static org.junit.Assert.assertThrows;
 
 import com.google.crypto.tink.KeyTemplates;
 import com.google.crypto.tink.internal.KeyTemplateProtoConverter;
@@ -363,8 +364,8 @@ public final class JwtServiceImplTest {
                     .build())
             .setRawJwt(token)
             .build();
-    JwtSignResponse signResponse = jwtStub.computeMacAndEncode(signRequest);
-    assertThat(signResponse.getErr()).isNotEmpty();
+    assertThrows(
+        io.grpc.StatusRuntimeException.class, () -> jwtStub.computeMacAndEncode(signRequest));
   }
 
   @Test

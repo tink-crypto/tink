@@ -151,11 +151,10 @@ public final class JwtServiceImpl extends JwtImplBase {
 
   private JwtSignResponse computeMacAndEncode(JwtSignRequest request)
       throws GeneralSecurityException {
+    JwtMac jwtMac =
+        Util.parseBinaryProtoKeyset(request.getAnnotatedKeyset().getSerializedKeyset())
+            .getPrimitive(JwtMac.class);
     try {
-      // TODO(b/241219877) Move the next line out from the try-catch block.
-      JwtMac jwtMac =
-          Util.parseBinaryProtoKeyset(request.getAnnotatedKeyset().getSerializedKeyset())
-              .getPrimitive(JwtMac.class);
       RawJwt rawJwt = convertJwtTokenToRawJwt(request.getRawJwt());
       String signedCompactJwt = jwtMac.computeMacAndEncode(rawJwt);
       return JwtSignResponse.newBuilder().setSignedCompactJwt(signedCompactJwt).build();
@@ -176,13 +175,12 @@ public final class JwtServiceImpl extends JwtImplBase {
     }
   }
 
-  private JwtSignResponse publicKeySignAndEncode(
-      JwtSignRequest request) throws GeneralSecurityException {
+  private JwtSignResponse publicKeySignAndEncode(JwtSignRequest request)
+      throws GeneralSecurityException {
+    JwtPublicKeySign signer =
+        Util.parseBinaryProtoKeyset(request.getAnnotatedKeyset().getSerializedKeyset())
+            .getPrimitive(JwtPublicKeySign.class);
     try {
-      // TODO(b/241219877) Move the next line out from the try-catch block.
-      JwtPublicKeySign signer =
-          Util.parseBinaryProtoKeyset(request.getAnnotatedKeyset().getSerializedKeyset())
-              .getPrimitive(JwtPublicKeySign.class);
       RawJwt rawJwt = convertJwtTokenToRawJwt(request.getRawJwt());
       String signedCompactJwt = signer.signAndEncode(rawJwt);
       return JwtSignResponse.newBuilder().setSignedCompactJwt(signedCompactJwt).build();
@@ -313,11 +311,10 @@ public final class JwtServiceImpl extends JwtImplBase {
 
   private JwtVerifyResponse verifyMacAndDecode(JwtVerifyRequest request)
       throws GeneralSecurityException {
+    JwtMac jwtMac =
+        Util.parseBinaryProtoKeyset(request.getAnnotatedKeyset().getSerializedKeyset())
+            .getPrimitive(JwtMac.class);
     try {
-      // TODO(b/241219877) Move the next line out from the try-catch block.
-      JwtMac jwtMac =
-          Util.parseBinaryProtoKeyset(request.getAnnotatedKeyset().getSerializedKeyset())
-              .getPrimitive(JwtMac.class);
       JwtValidator validator = convertProtoValidatorToValidator(request.getValidator());
       VerifiedJwt verifiedJwt = jwtMac.verifyMacAndDecode(request.getSignedCompactJwt(), validator);
       JwtToken token = convertVerifiedJwtToJwtToken(verifiedJwt);
@@ -342,11 +339,10 @@ public final class JwtServiceImpl extends JwtImplBase {
 
   private JwtVerifyResponse publicKeyVerifyAndDecode(JwtVerifyRequest request)
       throws GeneralSecurityException {
+    JwtPublicKeyVerify verifier =
+        Util.parseBinaryProtoKeyset(request.getAnnotatedKeyset().getSerializedKeyset())
+            .getPrimitive(JwtPublicKeyVerify.class);
     try {
-      // TODO(b/241219877) Move the next line out from the try-catch block.
-      JwtPublicKeyVerify verifier =
-          Util.parseBinaryProtoKeyset(request.getAnnotatedKeyset().getSerializedKeyset())
-              .getPrimitive(JwtPublicKeyVerify.class);
       JwtValidator validator = convertProtoValidatorToValidator(request.getValidator());
       VerifiedJwt verifiedJwt = verifier.verifyAndDecode(request.getSignedCompactJwt(), validator);
       JwtToken token = convertVerifiedJwtToJwtToken(verifiedJwt);
