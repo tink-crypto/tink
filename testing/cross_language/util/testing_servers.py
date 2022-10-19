@@ -374,9 +374,24 @@ def jwk_set_from_keyset(lang: str, keyset: bytes) -> str:
 
 
 def remote_primitive(lang: str, keyset: bytes, primitive_class: Type[P]) -> P:
-  """Creates a primitive from a keyset backed by the given language."""
-  # TODO(b/241219877) Remove all other creation functions and route everything
-  # through this
+  """Creates a primitive from a keyset backed by the given language.
+
+  Internally, this does an RPC to the server specified by 'lang' in order to
+  try to 'Create' the primitive. If the RPC returns with an error, a TinkError
+  is returned. Otherwise, an instance of the primitive is returned which
+  forwards calls to the service implemented in the language.
+
+  Args:
+    lang: specification of the language to use
+    keyset: the serialized keyset
+    primitive_class: the type of the primitive
+
+  Returns:
+    A primitive to be used.
+
+  Raises:
+    TinkError if creation fails.
+  """
 
   if primitive_class == tink.aead.Aead:
     return _primitives.Aead(lang, _ts.aead_stub(lang), keyset)

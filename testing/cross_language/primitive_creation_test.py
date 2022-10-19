@@ -55,6 +55,12 @@ def tearDownModule():
 
 
 def single_key_keysets():
+  """Produces single key keysets which can be produced from a template.
+
+  This does not produce keysets which have public keys.
+  Yields:
+    valid keysets generated from templates
+  """
   for _, template in utilities.KEY_TEMPLATE.items():
     yield test_keys.new_or_stored_keyset(template)
 
@@ -118,7 +124,14 @@ def _is_b243759652_test_case(lang: str, keyset: bytes, primitive: Any) -> bool:
 
 
 class SupportedKeyTypesTest(parameterized.TestCase):
-  """Test class."""
+  """Tests if creation of primitives succeeds as described in tink_config.
+
+  This test tries to see if creation of primitives is consistent with what is
+  configured in tink_config._key_types. For this, we enumerate as many triples
+  (lang, keyset, primitive) as possible, and compute, for each of them, the
+  expected result from the config, and the actual result by creating the
+  primitive.
+  """
 
   @parameterized.named_parameters(named_testcases())
   def test_create(self, lang: str, keyset: bytes, primitive: Any):
@@ -126,13 +139,13 @@ class SupportedKeyTypesTest(parameterized.TestCase):
 
     This tests should pass for every keyset, as long as the keyset can be
     correctly parsed.
+
     Args:
       lang: The language to test
       keyset: A byte string representing a keyset. The keyset needs to be valid.
       primitive: The primitive to try and instantiate
     """
     keytypes = utilities.key_types_in_keyset(keyset)
-    self.assertLen(keytypes, 1)
     keytype = keytypes[0]
 
     if _is_b243759652_test_case(lang, keyset, primitive):
@@ -150,7 +163,16 @@ class SupportedKeyTypesTest(parameterized.TestCase):
   @parameterized.named_parameters(named_testcases())
   def test_create_with_public_keyset(self, lang: str, keyset: bytes,
                                      primitive: Any):
-    """Tests primitive creation, after getting a public keyset."""
+    """Tests primitive creation, after getting a public keyset.
+
+    It would be somewhat better if the test cases above produce all keysets --
+    however, this currently doesn't happen.
+
+    Args:
+      lang: the language to use
+      keyset: the serialized keyset, must be valid
+      primitive: the primitive to test
+    """
     try:
       public_keyset = testing_servers.public_keyset(lang, keyset)
     except tink.TinkError:
