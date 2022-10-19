@@ -224,9 +224,6 @@ class StreamingAead(streaming_aead.StreamingAead):
     self.lang = lang
     self._stub = stub
     self._keyset = keyset
-
-  def perform_create_check(self):
-    # TODO(b/241219877) Remove this and do the check in __init__ instead.
     creation_response = self._stub.Create(
         testing_api_pb2.CreationRequest(
             annotated_keyset=testing_api_pb2.AnnotatedKeyset(
@@ -267,9 +264,6 @@ class Mac(mac.Mac):
     self.lang = lang
     self._stub = stub
     self._keyset = keyset
-
-  def perform_create_check(self):
-    # TODO(b/241219877) Remove this and do the check in __init__ instead.
     creation_response = self._stub.Create(
         testing_api_pb2.CreationRequest(
             annotated_keyset=testing_api_pb2.AnnotatedKeyset(
@@ -306,9 +300,6 @@ class HybridEncrypt(hybrid.HybridEncrypt):
     self.lang = lang
     self._stub = stub
     self._public_handle = public_handle
-
-  def perform_create_check(self):
-    # TODO(b/241219877) Remove this and do the check in __init__ instead.
     creation_response = self._stub.CreateHybridEncrypt(
         testing_api_pb2.CreationRequest(
             annotated_keyset=testing_api_pb2.AnnotatedKeyset(
@@ -336,9 +327,6 @@ class HybridDecrypt(hybrid.HybridDecrypt):
     self.lang = lang
     self._stub = stub
     self._private_handle = private_handle
-
-  def perform_create_check(self):
-    # TODO(b/241219877) Remove this and do the check in __init__ instead.
     creation_response = self._stub.CreateHybridDecrypt(
         testing_api_pb2.CreationRequest(
             annotated_keyset=testing_api_pb2.AnnotatedKeyset(
@@ -366,9 +354,6 @@ class PublicKeySign(tink_signature.PublicKeySign):
     self.lang = lang
     self._stub = stub
     self._private_handle = private_handle
-
-  def perform_create_check(self):
-    # TODO(b/241219877) Remove this and do the check in __init__ instead.
     creation_response = self._stub.CreatePublicKeySign(
         testing_api_pb2.CreationRequest(
             annotated_keyset=testing_api_pb2.AnnotatedKeyset(
@@ -395,9 +380,6 @@ class PublicKeyVerify(tink_signature.PublicKeyVerify):
     self.lang = lang
     self._stub = stub
     self._public_handle = public_handle
-
-  def perform_create_check(self):
-    # TODO(b/241219877) Remove this and do the check in __init__ instead.
     creation_response = self._stub.CreatePublicKeyVerify(
         testing_api_pb2.CreationRequest(
             annotated_keyset=testing_api_pb2.AnnotatedKeyset(
@@ -450,9 +432,6 @@ class PrfSet(prf.PrfSet):
     self._key_ids_initialized = False
     self._primary_key_id = None
     self._prfs = None
-
-  def perform_create_check(self):
-    # TODO(b/241219877) Remove this and do the check in __init__ instead.
     creation_response = self._stub.Create(
         testing_api_pb2.CreationRequest(
             annotated_keyset=testing_api_pb2.AnnotatedKeyset(
@@ -634,9 +613,6 @@ class JwtMac():
     self.lang = lang
     self._stub = stub
     self._keyset = keyset
-
-  def perform_create_check(self):
-    # TODO(b/241219877) Remove this and do the check in __init__ instead.
     creation_response = self._stub.CreateJwtMac(
         testing_api_pb2.CreationRequest(
             annotated_keyset=testing_api_pb2.AnnotatedKeyset(
@@ -686,9 +662,6 @@ class JwtPublicKeySign():
     self.lang = lang
     self._stub = stub
     self._keyset = keyset
-
-  def perform_create_check(self):
-    # TODO(b/241219877) Remove this and do the check in __init__ instead.
     creation_response = self._stub.CreateJwtPublicKeySign(
         testing_api_pb2.CreationRequest(
             annotated_keyset=testing_api_pb2.AnnotatedKeyset(
@@ -715,9 +688,6 @@ class JwtPublicKeyVerify():
     self.lang = lang
     self._stub = stub
     self._keyset = keyset
-
-  def perform_create_check(self):
-    # TODO(b/241219877) Remove this and do the check in __init__ instead.
     creation_response = self._stub.CreateJwtPublicKeyVerify(
         testing_api_pb2.CreationRequest(
             annotated_keyset=testing_api_pb2.AnnotatedKeyset(

@@ -383,44 +383,24 @@ def remote_primitive(lang: str, keyset: bytes, primitive_class: Type[P]) -> P:
   if primitive_class == tink.daead.DeterministicAead:
     return _primitives.DeterministicAead(lang, _ts.daead_stub(lang), keyset)
   if primitive_class == tink.streaming_aead.StreamingAead:
-    result = _primitives.StreamingAead(lang, _ts.streaming_aead_stub(lang),
-                                       keyset)
-    result.perform_create_check()
-    return result
+    return _primitives.StreamingAead(lang, _ts.streaming_aead_stub(lang),
+                                     keyset)
   if primitive_class == tink.hybrid.HybridDecrypt:
-    result = _primitives.HybridDecrypt(lang, _ts.hybrid_stub(lang), keyset)
-    result.perform_create_check()
-    return result
+    return _primitives.HybridDecrypt(lang, _ts.hybrid_stub(lang), keyset)
   if primitive_class == tink.hybrid.HybridEncrypt:
-    result = _primitives.HybridEncrypt(lang, _ts.hybrid_stub(lang), keyset)
-    result.perform_create_check()
-    return result
+    return _primitives.HybridEncrypt(lang, _ts.hybrid_stub(lang), keyset)
   if primitive_class == tink.mac.Mac:
-    result = _primitives.Mac(lang, _ts.mac_stub(lang), keyset)
-    result.perform_create_check()
-    return result
+    return _primitives.Mac(lang, _ts.mac_stub(lang), keyset)
   if primitive_class == tink.signature.PublicKeySign:
-    result = _primitives.PublicKeySign(lang, _ts.signature_stub(lang), keyset)
-    result.perform_create_check()
-    return result
+    return _primitives.PublicKeySign(lang, _ts.signature_stub(lang), keyset)
   if primitive_class == tink.signature.PublicKeyVerify:
-    result = _primitives.PublicKeyVerify(lang, _ts.signature_stub(lang), keyset)
-    result.perform_create_check()
-    return result
+    return _primitives.PublicKeyVerify(lang, _ts.signature_stub(lang), keyset)
   if primitive_class == tink.prf.PrfSet:
-    result = _primitives.PrfSet(lang, _ts.prf_stub(lang), keyset)
-    result.perform_create_check()
-    return result
+    return _primitives.PrfSet(lang, _ts.prf_stub(lang), keyset)
   if primitive_class == tink.jwt.JwtMac:
-    result = _primitives.JwtMac(lang, _ts.jwt_stub(lang), keyset)
-    result.perform_create_check()
-    return result
+    return _primitives.JwtMac(lang, _ts.jwt_stub(lang), keyset)
   if primitive_class == tink.jwt.JwtPublicKeySign:
-    result = _primitives.JwtPublicKeySign(lang, _ts.jwt_stub(lang), keyset)
-    result.perform_create_check()
-    return result
+    return _primitives.JwtPublicKeySign(lang, _ts.jwt_stub(lang), keyset)
   if primitive_class == tink.jwt.JwtPublicKeyVerify:
-    result = _primitives.JwtPublicKeyVerify(lang, _ts.jwt_stub(lang), keyset)
-    result.perform_create_check()
-    return result
+    return _primitives.JwtPublicKeyVerify(lang, _ts.jwt_stub(lang), keyset)
   raise ValueError('Unsupported P in remote_primitive: ' + str(primitive_class))
