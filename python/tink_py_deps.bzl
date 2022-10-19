@@ -9,12 +9,12 @@ def tink_py_deps():
     """
 
     if not native.existing_rule("rules_python"):
-        # Release from 2022-01-05
+        # Release from 2022-07-15
         http_archive(
             name = "rules_python",
-            sha256 = "a30abdfc7126d497a7698c29c46ea9901c6392d6ed315171a6df5ce433aa4502",
-            strip_prefix = "rules_python-0.6.0",
-            url = "https://github.com/bazelbuild/rules_python/archive/0.6.0.tar.gz",
+            sha256 = "a3a6e99f497be089f81ec082882e40246bfd435f52f4e82f37e89449b04573f6",
+            strip_prefix = "rules_python-0.10.2",
+            url = "https://github.com/bazelbuild/rules_python/archive/refs/tags/0.10.2.tar.gz",
         )
 
     if not native.existing_rule("pybind11"):
