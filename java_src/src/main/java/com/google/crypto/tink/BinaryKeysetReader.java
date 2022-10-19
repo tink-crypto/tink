@@ -18,6 +18,7 @@ package com.google.crypto.tink;
 
 import com.google.crypto.tink.proto.EncryptedKeyset;
 import com.google.crypto.tink.proto.Keyset;
+import com.google.errorprone.annotations.InlineMe;
 import com.google.protobuf.ExtensionRegistryLite;
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -56,8 +57,12 @@ public final class BinaryKeysetReader implements KeysetReader {
    * <p>Note: the input file won't be read until {@link BinaryKeysetReader#read} or {@link
    * BinaryKeysetReader#readEncrypted} is called.
    */
+  @InlineMe(
+      replacement = "BinaryKeysetReader.withInputStream(new FileInputStream(file))",
+      imports = {"com.google.crypto.tink.BinaryKeysetReader", "java.io.FileInputStream"})
+  @Deprecated
   public static KeysetReader withFile(File file) throws IOException {
-    return new BinaryKeysetReader(new FileInputStream(file));
+    return withInputStream(new FileInputStream(file));
   }
 
   private BinaryKeysetReader(InputStream stream) {

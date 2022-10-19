@@ -22,6 +22,7 @@ import com.google.crypto.tink.proto.KeyData;
 import com.google.crypto.tink.proto.Keyset;
 import com.google.crypto.tink.proto.KeysetInfo;
 import com.google.crypto.tink.subtle.Base64;
+import com.google.errorprone.annotations.InlineMe;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
@@ -58,13 +59,25 @@ public final class JsonKeysetWriter implements KeysetWriter {
   }
 
   /** Static method to create a JsonKeysetWriter that writes to a file. */
+  @InlineMe(
+      replacement = "JsonKeysetWriter.withOutputStream(new FileOutputStream(file))",
+      imports = {"com.google.crypto.tink.JsonKeysetWriter", "java.io.FileOutputStream"})
+  @Deprecated
   public static KeysetWriter withFile(File file) throws IOException {
-    return new JsonKeysetWriter(new FileOutputStream(file));
+    return withOutputStream(new FileOutputStream(file));
   }
 
   /** Static method to create a JsonKeysetWriter that writes to a file path. */
+  @InlineMe(
+      replacement = "JsonKeysetWriter.withOutputStream(new FileOutputStream(new File(path)))",
+      imports = {
+        "com.google.crypto.tink.JsonKeysetWriter",
+        "java.io.File",
+        "java.io.FileOutputStream"
+      })
+  @Deprecated
   public static KeysetWriter withPath(String path) throws IOException {
-    return withFile(new File(path));
+    return withOutputStream(new FileOutputStream(new File(path)));
   }
 
   /**
