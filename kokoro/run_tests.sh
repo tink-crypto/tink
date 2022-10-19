@@ -217,8 +217,18 @@ test_maven_packages() {
     return
   fi
 
-  ./maven/publish_snapshot.sh -l
-  ./maven/test_snapshot.sh -l
+  local -a maven_script_flags
+  if [[ "${KOKORO_JOB_NAME:-}" != "tink/github/gcp_ubuntu/continuous" ]]; then
+    # Unless running the GitHub continuous job, deploy and test Maven packages
+    # locally.
+    #
+    # Otherwise, snapshots will be published to the Maven Central repository.
+    maven_script_flags+=( -l )
+  fi
+  readonly maven_script_flags
+
+  ./maven/publish_snapshot.sh "${maven_script_flags[@]}"
+  ./maven/test_snapshot.sh "${maven_script_flags[@]}"
 }
 
 main() {
