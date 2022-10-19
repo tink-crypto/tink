@@ -369,11 +369,11 @@ public final class StreamingTestUtil {
 
     // Encrypt plaintext.
     ByteArrayOutputStream ciphertext = new ByteArrayOutputStream();
-    WritableByteChannel encChannel =
+    try (WritableByteChannel encChannel =
         encryptionStreamingAead.newEncryptingChannel(
-            Channels.newChannel(ciphertext), associatedData);
-    encChannel.write(ByteBuffer.wrap(plaintext));
-    encChannel.close();
+            Channels.newChannel(ciphertext), associatedData)) {
+      encChannel.write(ByteBuffer.wrap(plaintext));
+    }
 
     // Decrypt ciphertext via ReadableByteChannel.
     {
@@ -475,9 +475,10 @@ public final class StreamingTestUtil {
 
     // Encrypt with an OutputStream.
     ByteArrayOutputStream bos = new ByteArrayOutputStream();
-    OutputStream encStream = encryptionStreamingAead.newEncryptingStream(bos, associatedData);
-    encStream.write(plaintext);
-    encStream.close();
+    try (OutputStream encStream =
+        encryptionStreamingAead.newEncryptingStream(bos, associatedData)) {
+      encStream.write(plaintext);
+    }
     byte[] ciphertext2 = bos.toByteArray();
 
     // Check that the stream encrypted ciphertext is correct.
@@ -511,9 +512,9 @@ public final class StreamingTestUtil {
     ByteArrayOutputStream bos = new ByteArrayOutputStream();
     WritableByteChannel ctChannel = Channels.newChannel(bos);
     ctChannel.write(ByteBuffer.allocate(firstSegmentOffset));
-    WritableByteChannel encChannel = ags.newEncryptingChannel(ctChannel, associatedData);
-    encChannel.write(ByteBuffer.wrap(plaintext));
-    encChannel.close();
+    try (WritableByteChannel encChannel = ags.newEncryptingChannel(ctChannel, associatedData)) {
+      encChannel.write(ByteBuffer.wrap(plaintext));
+    }
     return bos.toByteArray();
   }
 
@@ -559,9 +560,9 @@ public final class StreamingTestUtil {
       throws Exception {
     ByteArrayOutputStream bos = new ByteArrayOutputStream();
     bos.write(new byte[firstSegmentOffset]);
-    OutputStream encChannel = ags.newEncryptingStream(bos, associatedData);
-    encChannel.write(plaintext);
-    encChannel.close();
+    try (OutputStream encChannel = ags.newEncryptingStream(bos, associatedData)) {
+      encChannel.write(plaintext);
+    }
     byte[] ciphertext = bos.toByteArray();
     return ciphertext;
   }
@@ -773,11 +774,11 @@ public final class StreamingTestUtil {
     ByteArrayOutputStream bos = new ByteArrayOutputStream();
     WritableByteChannel ctChannel = Channels.newChannel(bos);
     WritableByteChannel encChannel = ags.newEncryptingChannel(ctChannel, associatedData);
-    OutputStream encStream = Channels.newOutputStream(encChannel);
-    for (int i = 0; i < plaintext.length; i++) {
-      encStream.write(plaintext[i]);
+    try (OutputStream encStream = Channels.newOutputStream(encChannel)) {
+      for (int i = 0; i < plaintext.length; i++) {
+        encStream.write(plaintext[i]);
+      }
     }
-    encStream.close();
     isValidCiphertext(ags, plaintext, associatedData, bos.toByteArray());
   }
 
@@ -788,11 +789,11 @@ public final class StreamingTestUtil {
     ByteArrayOutputStream bos = new ByteArrayOutputStream();
     WritableByteChannel ctChannel = Channels.newChannel(bos);
     WritableByteChannel encChannel = ags.newEncryptingChannel(ctChannel, associatedData);
-    OutputStream encStream = Channels.newOutputStream(encChannel);
-    for (int i = 0; i < plaintext.length; i++) {
-      encStream.write(plaintext[i]);
+    try (OutputStream encStream = Channels.newOutputStream(encChannel)) {
+      for (int i = 0; i < plaintext.length; i++) {
+        encStream.write(plaintext[i]);
+      }
     }
-    encStream.close();
     isValidCiphertext(ags, plaintext, associatedData, bos.toByteArray());
   }
 
@@ -814,12 +815,12 @@ public final class StreamingTestUtil {
     // Encrypts a sequence of strings.
     ByteArrayOutputStream bos = new ByteArrayOutputStream();
     WritableByteChannel ctChannel = Channels.newChannel(bos);
-    Writer writer =
-        Channels.newWriter(ags.newEncryptingChannel(ctChannel, associatedData), "UTF-8");
-    for (int i = 0; i < repetitions; i++) {
-      writer.write(stringWithNonAsciiChars);
+    try (Writer writer =
+        Channels.newWriter(ags.newEncryptingChannel(ctChannel, associatedData), "UTF-8")) {
+      for (int i = 0; i < repetitions; i++) {
+        writer.write(stringWithNonAsciiChars);
+      }
     }
-    writer.close();
     byte[] ciphertext = bos.toByteArray();
 
     // Decrypts a sequence of strings.
