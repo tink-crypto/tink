@@ -22,6 +22,7 @@ import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.jwt.JwkSetConverter;
 import com.google.crypto.tink.jwt.JwtSignatureConfig;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
@@ -54,9 +55,9 @@ public final class JwtGeneratePublicJwkSet {
 
     // Read the keyset into a KeysetHandle.
     KeysetHandle privateKeysetHandle = null;
-    try {
+    try (FileInputStream inputStream = new FileInputStream(privateKeysetFile)) {
       privateKeysetHandle =
-          CleartextKeysetHandle.read(JsonKeysetReader.withFile(privateKeysetFile));
+          CleartextKeysetHandle.read(JsonKeysetReader.withInputStream(inputStream));
     } catch (GeneralSecurityException | IOException ex) {
       System.err.println("Cannot read keyset, got error: " + ex);
       System.exit(1);

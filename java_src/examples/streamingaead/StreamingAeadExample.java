@@ -69,8 +69,8 @@ public final class StreamingAeadExample {
 
     // Read the keyset into a KeysetHandle
     KeysetHandle handle = null;
-    try {
-      handle = CleartextKeysetHandle.read(JsonKeysetReader.withFile(keyFile));
+    try (FileInputStream inputStream = new FileInputStream(keyFile)) {
+      handle = CleartextKeysetHandle.read(JsonKeysetReader.withInputStream(inputStream));
     } catch (GeneralSecurityException | IOException ex) {
       System.err.println("Cannot read keyset, got error: " + ex);
       System.exit(1);

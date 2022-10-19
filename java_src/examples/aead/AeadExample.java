@@ -22,6 +22,7 @@ import com.google.crypto.tink.JsonKeysetReader;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.aead.AeadConfig;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -66,8 +67,8 @@ public final class AeadExample {
 
     // Read the keyset into a KeysetHandle.
     KeysetHandle handle = null;
-    try {
-      handle = CleartextKeysetHandle.read(JsonKeysetReader.withFile(keyFile));
+    try (FileInputStream inputStream = new FileInputStream(keyFile)) {
+      handle = CleartextKeysetHandle.read(JsonKeysetReader.withInputStream(inputStream));
     } catch (GeneralSecurityException | IOException ex) {
       System.err.println("Cannot read keyset, got error: " + ex);
       System.exit(1);
