@@ -9,6 +9,7 @@ go_library(
     srcs = [
         "keyset_deriver.go",
         "keyset_deriver_factory.go",
+        "keyset_deriver_key_templates.go",
         "prf_based_deriver.go",
         "prf_based_deriver_key_manager.go",
     ],
@@ -32,6 +33,7 @@ go_test(
     srcs = [
         "keyset_deriver_factory_test.go",
         "keyset_deriver_factory_x_test.go",
+        "keyset_deriver_key_templates_test.go",
         "prf_based_deriver_key_manager_test.go",
         "prf_based_deriver_test.go",
     ],

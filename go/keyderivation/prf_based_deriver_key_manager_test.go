@@ -43,23 +43,19 @@ type namedTemplate struct {
 	template *tinkpb.KeyTemplate
 }
 
-var (
-	prfs = []namedTemplate{
-		{"HKDF-SHA256", streamingprf.HKDFSHA256RawKeyTemplate()},
-		{"HKDF-SHA512", streamingprf.HKDFSHA512RawKeyTemplate()},
-	}
-
-	derivations = []namedTemplate{
-		{"AES128GCM", aead.AES128GCMKeyTemplate()},
-		{"AES256GCM", aead.AES256GCMKeyTemplate()},
-		{"AES256GCMNoPrefix", aead.AES256GCMNoPrefixKeyTemplate()},
-	}
-)
-
 func TestPRFBasedDeriverKeyManagerPrimitive(t *testing.T) {
 	km, err := registry.GetKeyManager(prfBasedDeriverTypeURL)
 	if err != nil {
 		t.Fatalf("GetKeyManager(%q) err = %v, want nil", prfBasedDeriverTypeURL, err)
+	}
+	prfs := []namedTemplate{
+		{"HKDF-SHA256", streamingprf.HKDFSHA256RawKeyTemplate()},
+		{"HKDF-SHA512", streamingprf.HKDFSHA512RawKeyTemplate()},
+	}
+	derivations := []namedTemplate{
+		{"AES128GCM", aead.AES128GCMKeyTemplate()},
+		{"AES256GCM", aead.AES256GCMKeyTemplate()},
+		{"AES256GCMNoPrefix", aead.AES256GCMNoPrefixKeyTemplate()},
 	}
 	for _, prf := range prfs {
 		for _, der := range derivations {
@@ -222,6 +218,15 @@ func TestPRFBasedDeriverKeyManagerNewKey(t *testing.T) {
 	if err != nil {
 		t.Fatalf("GetKeyManager(%q) err = %v, want nil", prfBasedDeriverTypeURL, err)
 	}
+	prfs := []namedTemplate{
+		{"HKDF-SHA256", streamingprf.HKDFSHA256RawKeyTemplate()},
+		{"HKDF-SHA512", streamingprf.HKDFSHA512RawKeyTemplate()},
+	}
+	derivations := []namedTemplate{
+		{"AES128GCM", aead.AES128GCMKeyTemplate()},
+		{"AES256GCM", aead.AES256GCMKeyTemplate()},
+		{"AES256GCMNoPrefix", aead.AES256GCMNoPrefixKeyTemplate()},
+	}
 	for _, prf := range prfs {
 		for _, der := range derivations {
 			for _, salt := range [][]byte{nil, []byte("salt")} {
@@ -271,6 +276,15 @@ func TestPRFBasedDeriverKeyManagerNewKeyData(t *testing.T) {
 	km, err := registry.GetKeyManager(prfBasedDeriverTypeURL)
 	if err != nil {
 		t.Fatalf("GetKeyManager(%q) err = %v, want nil", prfBasedDeriverTypeURL, err)
+	}
+	prfs := []namedTemplate{
+		{"HKDF-SHA256", streamingprf.HKDFSHA256RawKeyTemplate()},
+		{"HKDF-SHA512", streamingprf.HKDFSHA512RawKeyTemplate()},
+	}
+	derivations := []namedTemplate{
+		{"AES128GCM", aead.AES128GCMKeyTemplate()},
+		{"AES256GCM", aead.AES256GCMKeyTemplate()},
+		{"AES256GCMNoPrefix", aead.AES256GCMNoPrefixKeyTemplate()},
 	}
 	for _, prf := range prfs {
 		for _, der := range derivations {
