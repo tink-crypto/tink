@@ -301,7 +301,7 @@ def main():
       long_description_content_type='text/markdown',
       # Contained modules and scripts.
       packages=setuptools.find_packages(),
-      install_requires=_parse_requirements('requirements.txt'),
+      install_requires=_parse_requirements('requirements.in'),
       cmdclass=dict(build_ext=BuildBazelExtension),
       ext_modules=[
           BazelExtension('//tink/cc/pybind:tink_bindings'),
