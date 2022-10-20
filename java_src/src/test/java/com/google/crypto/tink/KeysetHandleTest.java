@@ -48,7 +48,6 @@ import com.google.crypto.tink.proto.OutputPrefixType;
 import com.google.crypto.tink.signature.PublicKeySignFactory;
 import com.google.crypto.tink.signature.PublicKeyVerifyFactory;
 import com.google.crypto.tink.signature.SignatureConfig;
-import com.google.crypto.tink.signature.SignatureKeyTemplates;
 import com.google.crypto.tink.subtle.Hex;
 import com.google.crypto.tink.subtle.Random;
 import com.google.crypto.tink.testing.TestUtil;
@@ -368,7 +367,7 @@ public class KeysetHandleTest {
 
   @Test
   public void getPublicKeysetHandle_shouldWork() throws Exception {
-    KeysetHandle privateHandle = KeysetHandle.generateNew(SignatureKeyTemplates.ECDSA_P256);
+    KeysetHandle privateHandle = KeysetHandle.generateNew(KeyTemplates.get("ECDSA_P256"));
     KeyData privateKeyData = privateHandle.getKeyset().getKey(0).getKeyData();
     EcdsaPrivateKey privateKey =
         EcdsaPrivateKey.parseFrom(
@@ -484,62 +483,116 @@ public class KeysetHandleTest {
     assertThat(entries.get(0).getKeysetInfo().getAnnotations()).isEqualTo(annotations);
   }
 
+  @SuppressWarnings("deprecation")  // This is a test for the deprecated function
   @Test
-  public void readNoSecret_shouldWork() throws Exception {
-    KeysetHandle privateHandle = KeysetHandle.generateNew(SignatureKeyTemplates.ECDSA_P256);
-    Keyset keyset = privateHandle.getPublicKeysetHandle().getKeyset();
+  public void deprecated_readNoSecretWithBytesInput_sameAs_parseKeysetWithoutSecret()
+      throws Exception {
+    // Public keyset should have the same output
+    KeysetHandle privateHandle = KeysetHandle.generateNew(KeyTemplates.get("ECDSA_P256"));
+    byte[] serializedPublicKeyset = privateHandle.getPublicKeysetHandle().getKeyset().toByteArray();
 
-    Keyset keyset2 = KeysetHandle.readNoSecret(keyset.toByteArray()).getKeyset();
-    Keyset keyset3 =
-        KeysetHandle.readNoSecret(BinaryKeysetReader.withBytes(keyset.toByteArray())).getKeyset();
+    KeysetHandle readNoSecretOutput = KeysetHandle.readNoSecret(serializedPublicKeyset);
+    KeysetHandle parseKeysetWithoutSecretOutput =
+        TinkProtoKeysetFormat.parseKeysetWithoutSecret(serializedPublicKeyset);
+    expect
+        .that(readNoSecretOutput.getKeyset())
+        .isEqualTo(parseKeysetWithoutSecretOutput.getKeyset());
 
-    expect.that(keyset).isEqualTo(keyset2);
-    expect.that(keyset).isEqualTo(keyset3);
+    // Symmetric Keyset should fail
+    byte[] serializedSymmetricKeyset =
+        TestUtil.createKeyset(
+                TestUtil.createKey(
+                    TestUtil.createHmacKeyData("01234567890123456".getBytes(UTF_8), 16),
+                    42,
+                    KeyStatusType.ENABLED,
+                    OutputPrefixType.TINK))
+            .toByteArray();
+    assertThrows(
+        GeneralSecurityException.class, () -> KeysetHandle.readNoSecret(serializedSymmetricKeyset));
+    assertThrows(
+        GeneralSecurityException.class,
+        () -> TinkProtoKeysetFormat.parseKeysetWithoutSecret(serializedSymmetricKeyset));
+
+    // Private Keyset should fail
+    byte[] serializedPrivateKeyset = privateHandle.getKeyset().toByteArray();
+    assertThrows(
+        GeneralSecurityException.class, () -> KeysetHandle.readNoSecret(serializedPrivateKeyset));
+    assertThrows(
+        GeneralSecurityException.class,
+        () -> TinkProtoKeysetFormat.parseKeysetWithoutSecret(serializedPrivateKeyset));
+
+    // Empty Keyset should fail
+    assertThrows(GeneralSecurityException.class, () -> KeysetHandle.readNoSecret(new byte[0]));
+    assertThrows(
+        GeneralSecurityException.class,
+        () -> TinkProtoKeysetFormat.parseKeysetWithoutSecret(new byte[0]));
+
+    // Invalid Keyset should fail
+    byte[] proto = new byte[] {0x00, 0x01, 0x02};
+    assertThrows(GeneralSecurityException.class, () -> KeysetHandle.readNoSecret(proto));
+    assertThrows(
+        GeneralSecurityException.class,
+        () -> TinkProtoKeysetFormat.parseKeysetWithoutSecret(proto));
   }
 
   @Test
-  public void readNoSecret_withTypeSymmetric_shouldThrow() throws Exception {
+  public void readNoSecretWithBinaryKeysetReader_shouldWork() throws Exception {
+    KeysetHandle privateHandle = KeysetHandle.generateNew(KeyTemplates.get("ECDSA_P256"));
+    Keyset keyset = privateHandle.getPublicKeysetHandle().getKeyset();
+    byte[] serializedKeyset = keyset.toByteArray();
+
+    Keyset readKeyset =
+        KeysetHandle.readNoSecret(BinaryKeysetReader.withBytes(serializedKeyset)).getKeyset();
+
+    expect.that(readKeyset).isEqualTo(keyset);
+  }
+
+  @Test
+  public void readNoSecretWithBinaryKeysetReader_withTypeSymmetric_shouldThrow() throws Exception {
     String keyValue = "01234567890123456";
-    Keyset keyset =
+    byte[] serializedKeyset =
         TestUtil.createKeyset(
             TestUtil.createKey(
                 TestUtil.createHmacKeyData(keyValue.getBytes(UTF_8), 16),
                 42,
                 KeyStatusType.ENABLED,
-                OutputPrefixType.TINK));
+                OutputPrefixType.TINK)).toByteArray();
 
-    assertThrows(
-        GeneralSecurityException.class, () -> KeysetHandle.readNoSecret(keyset.toByteArray()));
     assertThrows(
         GeneralSecurityException.class,
-        () -> KeysetHandle.readNoSecret(BinaryKeysetReader.withBytes(keyset.toByteArray())));
+        () -> KeysetHandle.readNoSecret(BinaryKeysetReader.withBytes(serializedKeyset)));
   }
 
   @Test
-  public void readNoSecret_withTypeAsymmetricPrivate_shouldThrow() throws Exception {
-    Keyset keyset = KeysetHandle.generateNew(SignatureKeyTemplates.ECDSA_P256).getKeyset();
+  public void readNoSecretWithBinaryKeysetReader_withTypeAsymmetricPrivate_shouldThrow()
+      throws Exception {
+    byte[] serializedKeyset =
+        KeysetHandle.generateNew(KeyTemplates.get("ECDSA_P256")).getKeyset().toByteArray();
 
-    assertThrows(
-        GeneralSecurityException.class, () -> KeysetHandle.readNoSecret(keyset.toByteArray()));
     assertThrows(
         GeneralSecurityException.class,
-        () -> KeysetHandle.readNoSecret(BinaryKeysetReader.withBytes(keyset.toByteArray())));
+        () -> KeysetHandle.readNoSecret(BinaryKeysetReader.withBytes(serializedKeyset)));
   }
 
   @Test
-  public void readNoSecret_withEmptyKeyset_shouldThrow() throws Exception {
-    assertThrows(GeneralSecurityException.class, () -> KeysetHandle.readNoSecret(new byte[0]));
+  public void readNoSecretWithBinaryKeysetReader_withEmptyKeyset_shouldThrow() throws Exception {
+    byte[] emptySerializedKeyset = new byte[0];
+    assertThrows(
+        GeneralSecurityException.class,
+        () -> KeysetHandle.readNoSecret(BinaryKeysetReader.withBytes(emptySerializedKeyset)));
   }
 
   @Test
-  public void readNoSecret_withInvalidKeyset_shouldThrow() throws Exception {
-    byte[] proto = new byte[] {0x00, 0x01, 0x02};
-    assertThrows(GeneralSecurityException.class, () -> KeysetHandle.readNoSecret(proto));
+  public void readNoSecretWithBinaryKeysetReader_withInvalidKeyset_shouldThrow() throws Exception {
+    byte[] invalidSerializedKeyset = new byte[] {0x00, 0x01, 0x02};
+    assertThrows(
+        GeneralSecurityException.class,
+        () -> KeysetHandle.readNoSecret(BinaryKeysetReader.withBytes(invalidSerializedKeyset)));
   }
 
   @Test
   public void writeNoSecretThenReadNoSecret_returnsSameKeyset() throws Exception {
-    KeysetHandle privateHandle = KeysetHandle.generateNew(SignatureKeyTemplates.ECDSA_P256);
+    KeysetHandle privateHandle = KeysetHandle.generateNew(KeyTemplates.get("ECDSA_P256"));
     KeysetHandle publicHandle = privateHandle.getPublicKeysetHandle();
     ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
     KeysetWriter writer = BinaryKeysetWriter.withOutputStream(outputStream);
@@ -570,7 +623,7 @@ public class KeysetHandleTest {
 
   @Test
   public void writeNoSecret_withTypeAsymmetricPrivate_shouldThrow() throws Exception {
-    KeysetHandle handle = KeysetHandle.generateNew(SignatureKeyTemplates.ECDSA_P256);
+    KeysetHandle handle = KeysetHandle.generateNew(KeyTemplates.get("ECDSA_P256"));
 
     assertThrows(GeneralSecurityException.class, () -> handle.writeNoSecret(null /* writer */));
   }
