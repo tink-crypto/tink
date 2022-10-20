@@ -20,9 +20,11 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertThrows;
 
 import com.google.crypto.tink.CleartextKeysetHandle;
+import com.google.crypto.tink.InsecureSecretKeyAccess;
 import com.google.crypto.tink.JsonKeysetReader;
 import com.google.crypto.tink.KeyTemplates;
 import com.google.crypto.tink.KeysetHandle;
+import com.google.crypto.tink.TinkJsonProtoKeysetFormat;
 import com.google.crypto.tink.proto.KeysetInfo;
 import com.google.crypto.tink.proto.OutputPrefixType;
 import com.google.crypto.tink.testing.TestUtil;
@@ -367,7 +369,8 @@ public final class JwkSetConverterTest {
   }
 
   private static String convertToJwkSet(String jsonKeyset) throws Exception {
-    KeysetHandle handle = CleartextKeysetHandle.read(JsonKeysetReader.withString(jsonKeyset));
+    KeysetHandle handle =
+        TinkJsonProtoKeysetFormat.parseKeyset(jsonKeyset, InsecureSecretKeyAccess.get());
     return JwkSetConverter.fromPublicKeysetHandle(handle);
   }
 
