@@ -129,20 +129,23 @@ public class KeysetHandleTest {
     Registry.registerPrimitiveWrapper(new AeadToEncryptOnlyWrapper());
   }
 
+  @SuppressWarnings("deprecation")  // This is a test for the deprecated function
   @Test
-  public void getKeys() throws Exception {
-    KeyTemplate keyTemplate = KeyTemplates.get("AES128_EAX");
-    KeysetManager keysetManager = KeysetManager.withEmptyKeyset();
-    final int numKeys = 3;
-    for (int i = 0; i < numKeys; i++) {
-      keysetManager.add(keyTemplate);
-    }
-    KeysetHandle handle = keysetManager.getKeysetHandle();
+  public void deprecated_getKeys() throws Exception {
+    KeysetHandle handle =
+        KeysetHandle.newBuilder()
+            .addEntry(KeysetHandle.generateEntryFromParametersName("AES128_EAX").withRandomId())
+            .addEntry(
+                KeysetHandle.generateEntryFromParametersName("AES128_EAX")
+                    .withRandomId()
+                    .makePrimary())
+            .addEntry(KeysetHandle.generateEntryFromParametersName("AES128_EAX").withRandomId())
+            .build();
     Keyset keyset = handle.getKeyset();
 
     List<KeyHandle> keysetKeys = handle.getKeys();
 
-    expect.that(keysetKeys).hasSize(numKeys);
+    expect.that(keysetKeys).hasSize(3);
     Map<Integer, KeyHandle> keysetKeysMap =
         keysetKeys.stream().collect(Collectors.toMap(KeyHandle::getId, key -> key));
     for (Keyset.Key key : keyset.getKeyList()) {
@@ -239,8 +242,9 @@ public class KeysetHandleTest {
     assertThat(keys).hasSize(numKeys);
   }
 
+  @SuppressWarnings("deprecation")  // This is a test for the deprecated function
   @Test
-  public void createFromKey_shouldWork() throws Exception {
+  public void deprecated_createFromKey_shouldWork() throws Exception {
     KeyTemplate template = KeyTemplates.get("AES128_EAX");
     KeyHandle keyHandle = KeyHandle.generateNew(template);
     KeyAccess token = SecretKeyAccess.insecureSecretAccess();
@@ -628,26 +632,36 @@ public class KeysetHandleTest {
     assertThrows(GeneralSecurityException.class, () -> handle.writeNoSecret(null /* writer */));
   }
 
+  @SuppressWarnings("deprecation")  // This is a test for the deprecated function
   @Test
-  public void primaryKey_shouldWork() throws Exception {
-    KeyTemplate kt1 = KeyTemplates.get("AES128_EAX");
-    KeyTemplate kt2 = KeyTemplates.get("HMAC_SHA256_256BITTAG");
-    KeysetHandle ksh =
-        KeysetManager.withKeysetHandle(KeysetHandle.generateNew(kt1)).add(kt2).getKeysetHandle();
+  public void deprecated_primaryKey_shouldWork() throws Exception {
+    KeysetHandle handle =
+        KeysetHandle.newBuilder()
+        .addEntry(
+            KeysetHandle.generateEntryFromParametersName("AES128_EAX").withFixedId(123))
+        .addEntry(
+            KeysetHandle.generateEntryFromParametersName("HMAC_SHA256_256BITTAG")
+                .withFixedId(234).makePrimary())
+        .build();
 
-    KeyHandle kh = ksh.primaryKey();
-
-    ProtoKey pk = (ProtoKey) kh.getKey(SecretKeyAccess.insecureSecretAccess());
-    assertThat(pk.getProtoKey().getTypeUrl()).isEqualTo(kt1.getTypeUrl());
+    KeyHandle keyHandle = handle.primaryKey();
+    assertThat(keyHandle.getId()).isEqualTo(234);
   }
 
+  @SuppressWarnings("deprecation")  // This is a test for the deprecated function
   @Test
-  public void primaryKey_noPrimaryPresent_shouldThrow() throws Exception {
-    KeyTemplate kt1 = KeyTemplates.get("AES128_EAX");
-    KeyTemplate kt2 = KeyTemplates.get("HMAC_SHA256_256BITTAG");
-    KeysetHandle ksh = KeysetManager.withEmptyKeyset().add(kt1).add(kt2).getKeysetHandle();
+  public void deprecated_primaryKey_primaryNotPresent_shouldThrow() throws Exception {
+    Keyset keyset =
+        TestUtil.createKeyset(
+            TestUtil.createKey(
+                TestUtil.createHmacKeyData("01234567890123456".getBytes(UTF_8), 16),
+                42,
+                KeyStatusType.ENABLED,
+                OutputPrefixType.TINK));
+    KeysetHandle handle =
+        KeysetHandle.fromKeyset(Keyset.newBuilder(keyset).setPrimaryKeyId(77).build());
 
-    assertThrows(GeneralSecurityException.class, ksh::primaryKey);
+    assertThrows(GeneralSecurityException.class, handle::primaryKey);
   }
 
   @Test

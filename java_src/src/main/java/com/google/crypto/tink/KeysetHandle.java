@@ -667,7 +667,11 @@ public final class KeysetHandle {
     return entryByIndex(i);
   }
 
-  /** Returns the keyset data as a list of {@link KeyHandle}s. */
+  /** Returns the keyset data as a list of {@link KeyHandle}s.
+   *
+   * @deprecated Use {@link #size} and {@link #getAt} instead.
+   */
+  @Deprecated
   public List<KeyHandle> getKeys() {
     ArrayList<KeyHandle> result = new ArrayList<>();
     for (Keyset.Key key : keyset.getKeyList()) {
@@ -725,8 +729,7 @@ public final class KeysetHandle {
   /**
    * Returns a {@code KeysetHandle} that contains the single {@code KeyHandle} passed as input.
    *
-   * @deprecated Use {@code KeysetManager.withEmptyKeyset().add(keyHandle)
-   *     .setPrimary(keyHandle.getId()).getKeysetHandle()} instead.
+   * @deprecated Use {@link KeysetHandle.Builder.addEntry} instead.
    */
   @Deprecated
   public static final KeysetHandle createFromKey(KeyHandle keyHandle, KeyAccess access)
@@ -1014,7 +1017,10 @@ public final class KeysetHandle {
   /**
    * Searches the keyset to find the primary key of this {@code KeysetHandle}, and returns the key
    * wrapped in a {@code KeyHandle}.
+   *
+   * @deprecated Use {@link #getPrimary} instead.
    */
+  @Deprecated
   public KeyHandle primaryKey() throws GeneralSecurityException {
     int primaryKeyId = keyset.getPrimaryKeyId();
     for (Keyset.Key key : keyset.getKeyList()) {
