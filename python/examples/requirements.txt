@@ -1,2 +1,5 @@
+-c constraints.in
 absl-py
+# This is required by Tink.
+protobuf==3.20.1
 google-cloud-storage==2.5.0

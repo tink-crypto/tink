@@ -11,7 +11,6 @@ py_binary(
     python_version = "PY3",
     deps = [
         requirement("absl-py"),
-        requirement("google-cloud-core"),
         requirement("google-cloud-storage"),
         "@tink_py//tink:tink_python",
         "@tink_py//tink/integration/gcpkms",
