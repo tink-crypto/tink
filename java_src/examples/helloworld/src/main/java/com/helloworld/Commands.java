@@ -21,6 +21,7 @@ import com.google.crypto.tink.JsonKeysetWriter;
 import com.google.crypto.tink.KeyTemplates;
 import com.google.crypto.tink.KeysetHandle;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -61,10 +62,14 @@ public final class Commands {
       // WARNING: reading cleartext keysets is a bad practice. Tink supports reading/writing
       // encrypted keysets, see
       // https://github.com/google/tink/blob/master/docs/JAVA-HOWTO.md#loading-existing-keysets.
-      return CleartextKeysetHandle.read(JsonKeysetReader.withFile(keyset));
+      try (FileInputStream inputStream = new FileInputStream(keyset)) {
+        return CleartextKeysetHandle.read(JsonKeysetReader.withInputStream(inputStream));
+      }
     }
     KeysetHandle handle = KeysetHandle.generateNew(KeyTemplates.get("AES128_GCM"));
-    CleartextKeysetHandle.write(handle, JsonKeysetWriter.withFile(keyset));
+    try (FileOutputStream outputStream = new FileOutputStream(keyset)) {
+      CleartextKeysetHandle.write(handle, JsonKeysetWriter.withOutputStream(outputStream));
+    }
     return handle;
   }
 

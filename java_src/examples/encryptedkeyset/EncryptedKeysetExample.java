@@ -23,6 +23,7 @@ import com.google.crypto.tink.aead.AeadConfig;
 import com.google.crypto.tink.aead.KmsAeadKeyManager;
 import com.google.crypto.tink.integration.gcpkms.GcpKmsClient;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -96,7 +97,9 @@ public final class EncryptedKeysetExample {
       // [END generate-a-new-keyset]
 
       // [START encrypt-a-keyset]
-      handle.write(JsonKeysetWriter.withFile(keyFile), kekAead);
+      try (FileOutputStream outputStream = new FileOutputStream(keyFile)) {
+        handle.write(JsonKeysetWriter.withOutputStream(outputStream), kekAead);
+      }
       // [END encrypt-a-keyset]
       System.exit(0);
     }
@@ -105,8 +108,8 @@ public final class EncryptedKeysetExample {
 
     // Read the encrypted keyset
     KeysetHandle handle = null;
-    try {
-      handle = KeysetHandle.read(JsonKeysetReader.withFile(keyFile), kekAead);
+    try (FileInputStream inputStream = new FileInputStream(keyFile)) {
+      handle = KeysetHandle.read(JsonKeysetReader.withInputStream(inputStream), kekAead);
     } catch (GeneralSecurityException | IOException ex) {
       System.err.println("Error reading key: " + ex);
       System.exit(1);

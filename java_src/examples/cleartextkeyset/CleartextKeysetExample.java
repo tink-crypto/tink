@@ -22,6 +22,7 @@ import com.google.crypto.tink.KeyTemplates;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.aead.AeadConfig;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -73,7 +74,9 @@ public final class CleartextKeysetExample {
       // [END generate-a-new-keyset]
 
       // [START store-a-cleartext-keyset]
-      CleartextKeysetHandle.write(handle, JsonKeysetWriter.withFile(keyFile));
+      try (FileOutputStream outputStream = new FileOutputStream(keyFile)) {
+        CleartextKeysetHandle.write(handle, JsonKeysetWriter.withOutputStream(outputStream));
+      }
       // [END store-a-cleartext-keyset]
       System.exit(0);
     }
@@ -82,8 +85,8 @@ public final class CleartextKeysetExample {
 
     // Read the cleartext keyset
     KeysetHandle handle = null;
-    try {
-      handle = CleartextKeysetHandle.read(JsonKeysetReader.withFile(keyFile));
+    try (FileInputStream inputStream = new FileInputStream(keyFile)) {
+      handle = CleartextKeysetHandle.read(JsonKeysetReader.withInputStream(inputStream));
     } catch (GeneralSecurityException | IOException ex) {
       System.err.println("Error reading key: " + ex);
       System.exit(1);
