@@ -1,5 +1,5 @@
 load("@build_bazel_rules_apple//apple:ios.bzl", "ios_static_framework", "ios_unit_test")
-load("//objc:minimum_os.bzl", "IOS_MINIMUM_OS")
+load("//:minimum_os.bzl", "IOS_MINIMUM_OS")
 load("//:tink_version.bzl", "TINK_VERSION_LABEL")
 load("//:template_rule.bzl", "template_rule")
 
