@@ -7,8 +7,8 @@ objc_library(
     srcs = ["TINKErrors.mm"],
     hdrs = ["TINKErrors.h"],
     deps = [
-        "//cc/util:status",
         "@com_google_absl//absl/status",
+        "@tink_cc//util:status",
     ],
 )
 
@@ -18,8 +18,8 @@ objc_library(
     hdrs = ["TINKStrings.h"],
     deps = [
         ":errors",
-        "//cc/util:status",
         "@com_google_absl//absl/strings",
+        "@tink_cc//util:status",
     ],
 )
 
@@ -31,10 +31,10 @@ objc_library(
     deps = [
         ":errors",
         ":strings",
-        "//cc/subtle:subtle_util_boringssl",
         "//proto:all_objc_proto",
         "@com_google_absl//absl/strings",
         "@com_google_protobuf//:objectivec",
+        "@tink_cc//subtle:subtle_util_boringssl",
     ],
 )
 
@@ -47,7 +47,7 @@ objc_library(
         ":errors",
         ":strings",
         ":tink_cc_pb",
-        "//cc/util:status",
+        "@tink_cc//util:status",
         "//proto:all_objc_proto",
         "@com_google_absl//absl/strings",
     ],
