@@ -146,8 +146,7 @@ func ECDSAP521KeyWithoutPrefixTemplate() *tinkpb.KeyTemplate {
 
 // createECDSAKeyTemplate creates a KeyTemplate containing a EcdasKeyFormat
 // with the given parameters.
-func createECDSAKeyTemplate(hashType commonpb.HashType, curve commonpb.EllipticCurveType,
-	encoding ecdsapb.EcdsaSignatureEncoding, prefixType tinkpb.OutputPrefixType) *tinkpb.KeyTemplate {
+func createECDSAKeyTemplate(hashType commonpb.HashType, curve commonpb.EllipticCurveType, encoding ecdsapb.EcdsaSignatureEncoding, prefixType tinkpb.OutputPrefixType) *tinkpb.KeyTemplate {
 	params := &ecdsapb.EcdsaParams{
 		HashType: hashType,
 		Curve:    curve,

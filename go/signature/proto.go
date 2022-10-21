@@ -31,9 +31,7 @@ func getECDSAParamNames(params *ecdsapb.EcdsaParams) (string, string, string) {
 }
 
 // newECDSAPrivateKey creates a ECDSAPrivateKey with the specified paramaters.
-func newECDSAPrivateKey(version uint32,
-	publicKey *ecdsapb.EcdsaPublicKey,
-	keyValue []byte) *ecdsapb.EcdsaPrivateKey {
+func newECDSAPrivateKey(version uint32, publicKey *ecdsapb.EcdsaPublicKey, keyValue []byte) *ecdsapb.EcdsaPrivateKey {
 	return &ecdsapb.EcdsaPrivateKey{
 		Version:   version,
 		PublicKey: publicKey,
@@ -42,9 +40,7 @@ func newECDSAPrivateKey(version uint32,
 }
 
 // newECDSAPublicKey creates a ECDSAPublicKey with the specified paramaters.
-func newECDSAPublicKey(version uint32,
-	params *ecdsapb.EcdsaParams,
-	x []byte, y []byte) *ecdsapb.EcdsaPublicKey {
+func newECDSAPublicKey(version uint32, params *ecdsapb.EcdsaParams, x, y []byte) *ecdsapb.EcdsaPublicKey {
 	return &ecdsapb.EcdsaPublicKey{
 		Version: version,
 		Params:  params,

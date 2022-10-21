@@ -68,60 +68,55 @@ func AES256GCMHKDF1MBKeyTemplate() *tinkpb.KeyTemplate {
 
 // AES128CTRHMACSHA256Segment4KBKeyTemplate is a KeyTemplate that generates an
 // AES-CTR-HMAC key with the following parameters:
-//		- Main key size: 16 bytes
-//		- HKDF algorthim: HMAC-SHA256
-//		- AES-CTR derived key size: 16 bytes
-//		- Tag algorithm: HMAC-SHA256
-//		- Tag size: 32 bytes
-//		- Ciphertext segment size: 4096 bytes (4 KB)
+//   - Main key size: 16 bytes
+//   - HKDF algorthim: HMAC-SHA256
+//   - AES-CTR derived key size: 16 bytes
+//   - Tag algorithm: HMAC-SHA256
+//   - Tag size: 32 bytes
+//   - Ciphertext segment size: 4096 bytes (4 KB)
 func AES128CTRHMACSHA256Segment4KBKeyTemplate() *tinkpb.KeyTemplate {
 	return newAESCTRHMACKeyTemplate(16, commonpb.HashType_SHA256, 16, commonpb.HashType_SHA256, 32, 4096)
 }
 
 // AES128CTRHMACSHA256Segment1MBKeyTemplate is a KeyTemplate that generates an
 // AES-CTR-HMAC key with the following parameters:
-//		- Main key size: 16 bytes
-//		- HKDF algorthim: HMAC-SHA256
-//		- AES-CTR derived key size: 16 bytes
-//		- Tag algorithm: HMAC-SHA256
-//		- Tag size: 32 bytes
-//		- Ciphertext segment size: 1048576 bytes (1 MB)
+//   - Main key size: 16 bytes
+//   - HKDF algorthim: HMAC-SHA256
+//   - AES-CTR derived key size: 16 bytes
+//   - Tag algorithm: HMAC-SHA256
+//   - Tag size: 32 bytes
+//   - Ciphertext segment size: 1048576 bytes (1 MB)
 func AES128CTRHMACSHA256Segment1MBKeyTemplate() *tinkpb.KeyTemplate {
 	return newAESCTRHMACKeyTemplate(16, commonpb.HashType_SHA256, 16, commonpb.HashType_SHA256, 32, 1048576)
 }
 
 // AES256CTRHMACSHA256Segment4KBKeyTemplate is a KeyTemplate that generates an
 // AES-CTR-HMAC key with the following parameters:
-//		- Main key size: 32 bytes
-//		- HKDF algorthim: HMAC-SHA256
-//		- AES-CTR derived key size: 32 bytes
-//		- Tag algorithm: HMAC-SHA256
-//		- Tag size: 32 bytes
-//		- Ciphertext segment size: 4096 bytes (4 KB)
+//   - Main key size: 32 bytes
+//   - HKDF algorthim: HMAC-SHA256
+//   - AES-CTR derived key size: 32 bytes
+//   - Tag algorithm: HMAC-SHA256
+//   - Tag size: 32 bytes
+//   - Ciphertext segment size: 4096 bytes (4 KB)
 func AES256CTRHMACSHA256Segment4KBKeyTemplate() *tinkpb.KeyTemplate {
 	return newAESCTRHMACKeyTemplate(32, commonpb.HashType_SHA256, 32, commonpb.HashType_SHA256, 32, 4096)
 }
 
 // AES256CTRHMACSHA256Segment1MBKeyTemplate is a KeyTemplate that generates an
 // AES-CTR-HMAC key with the following parameters:
-//		- Main key size: 32 bytes
-//		- HKDF algorthim: HMAC-SHA256
-//		- AES-CTR derived key size: 32 bytes
-//		- Tag algorithm: HMAC-SHA256
-//		- Tag size: 32 bytes
-//		- Ciphertext segment size: 1048576 bytes (1 MB)
+//   - Main key size: 32 bytes
+//   - HKDF algorthim: HMAC-SHA256
+//   - AES-CTR derived key size: 32 bytes
+//   - Tag algorithm: HMAC-SHA256
+//   - Tag size: 32 bytes
+//   - Ciphertext segment size: 1048576 bytes (1 MB)
 func AES256CTRHMACSHA256Segment1MBKeyTemplate() *tinkpb.KeyTemplate {
 	return newAESCTRHMACKeyTemplate(32, commonpb.HashType_SHA256, 32, commonpb.HashType_SHA256, 32, 1048576)
 }
 
 // newAESGCMHKDFKeyTemplate creates a KeyTemplate containing a AesGcmHkdfStreamingKeyFormat with
 // specified parameters.
-func newAESGCMHKDFKeyTemplate(
-	mainKeySize uint32,
-	hkdfHashType commonpb.HashType,
-	derivedKeySize uint32,
-	ciphertextSegmentSize uint32,
-) *tinkpb.KeyTemplate {
+func newAESGCMHKDFKeyTemplate(mainKeySize uint32, hkdfHashType commonpb.HashType, derivedKeySize, ciphertextSegmentSize uint32) *tinkpb.KeyTemplate {
 	serializedFormat, err := proto.Marshal(&gcmhkdfpb.AesGcmHkdfStreamingKeyFormat{
 		KeySize: mainKeySize,
 		Params: &gcmhkdfpb.AesGcmHkdfStreamingParams{
@@ -142,14 +137,7 @@ func newAESGCMHKDFKeyTemplate(
 
 // newAESCTRHMACKeyTemplate creates a KeyTemplate containing a
 // AesCtrHmacStreamingKeyFormat with the specified parameters.
-func newAESCTRHMACKeyTemplate(
-	mainKeySize uint32,
-	hkdfHashType commonpb.HashType,
-	derivedKeySize uint32,
-	tagAlg commonpb.HashType,
-	tagSize uint32,
-	ciphertextSegmentSize uint32,
-) *tinkpb.KeyTemplate {
+func newAESCTRHMACKeyTemplate(mainKeySize uint32, hkdfHashType commonpb.HashType, derivedKeySize uint32, tagAlg commonpb.HashType, tagSize, ciphertextSegmentSize uint32) *tinkpb.KeyTemplate {
 	serializedFormat, err := proto.Marshal(&ctrhmacpb.AesCtrHmacStreamingKeyFormat{
 		KeySize: mainKeySize,
 		Params: &ctrhmacpb.AesCtrHmacStreamingParams{

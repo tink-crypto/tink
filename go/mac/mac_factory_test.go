@@ -192,8 +192,7 @@ func TestFactoryLegacyFixedKeyFixedTag(t *testing.T) {
 	}
 }
 
-func verifyMacPrimitive(computePrimitive tink.MAC, verifyPrimitive tink.MAC,
-	expectedPrefix string, tagSize uint32) error {
+func verifyMacPrimitive(computePrimitive, verifyPrimitive tink.MAC, expectedPrefix string, tagSize uint32) error {
 	data := []byte("hello")
 	tag, err := computePrimitive.ComputeMAC(data)
 	if err != nil {

@@ -108,9 +108,7 @@ func TestFactoryRawKeyAsPrimary(t *testing.T) {
 	}
 }
 
-func validateAEADFactoryCipher(encryptCipher tink.AEAD,
-	decryptCipher tink.AEAD,
-	expectedPrefix string) error {
+func validateAEADFactoryCipher(encryptCipher, decryptCipher tink.AEAD, expectedPrefix string) error {
 	prefixSize := len(expectedPrefix)
 	// regular plaintext
 	pt := random.GetRandomBytes(20)

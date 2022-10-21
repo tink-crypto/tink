@@ -129,10 +129,7 @@ func TestPrimitiveFactoryFailsWhenKeysetHasNoPrimary(t *testing.T) {
 	}
 }
 
-func newECDSAKeysetKeypair(hashType commonpb.HashType,
-	curve commonpb.EllipticCurveType,
-	outputPrefixType tinkpb.OutputPrefixType,
-	keyID uint32) (*tinkpb.Keyset_Key, *tinkpb.Keyset_Key) {
+func newECDSAKeysetKeypair(hashType commonpb.HashType, curve commonpb.EllipticCurveType, outputPrefixType tinkpb.OutputPrefixType, keyID uint32) (*tinkpb.Keyset_Key, *tinkpb.Keyset_Key) {
 	key := testutil.NewRandomECDSAPrivateKey(hashType, curve)
 	serializedKey, _ := proto.Marshal(key)
 	keyData := testutil.NewKeyData(testutil.ECDSASignerTypeURL,

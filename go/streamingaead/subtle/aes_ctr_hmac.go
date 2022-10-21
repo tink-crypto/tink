@@ -76,15 +76,7 @@ type AESCTRHMAC struct {
 // ciphertextSegmentSize is the size of ciphertext segments.
 //
 // firstSegmentOffset is the offset of the first ciphertext segment.
-func NewAESCTRHMAC(
-	mainKey []byte,
-	hkdfAlg string,
-	keySizeInBytes int,
-	tagAlg string,
-	tagSizeInBytes int,
-	ciphertextSegmentSize int,
-	firstSegmentOffset int,
-) (*AESCTRHMAC, error) {
+func NewAESCTRHMAC(mainKey []byte, hkdfAlg string, keySizeInBytes int, tagAlg string, tagSizeInBytes, ciphertextSegmentSize, firstSegmentOffset int) (*AESCTRHMAC, error) {
 	if len(mainKey) < 16 || len(mainKey) < keySizeInBytes {
 		return nil, errors.New("mainKey too short")
 	}

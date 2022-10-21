@@ -312,8 +312,7 @@ func NewTestAESSIVKeyset(primaryOutputPrefixType tinkpb.OutputPrefixType) *tinkp
 }
 
 // NewTestHMACKeyset creates a new Keyset containing a HMACKey.
-func NewTestHMACKeyset(tagSize uint32,
-	primaryOutputPrefixType tinkpb.OutputPrefixType) *tinkpb.Keyset {
+func NewTestHMACKeyset(tagSize uint32, primaryOutputPrefixType tinkpb.OutputPrefixType) *tinkpb.Keyset {
 	keyData := NewHMACKeyData(commonpb.HashType_SHA256, tagSize)
 	return NewTestKeyset(keyData, primaryOutputPrefixType)
 }
@@ -330,8 +329,7 @@ func NewTestAESGCMHKDFKeyset() *tinkpb.Keyset {
 }
 
 // NewTestKeyset creates a new test Keyset.
-func NewTestKeyset(keyData *tinkpb.KeyData,
-	primaryOutputPrefixType tinkpb.OutputPrefixType) *tinkpb.Keyset {
+func NewTestKeyset(keyData *tinkpb.KeyData, primaryOutputPrefixType tinkpb.OutputPrefixType) *tinkpb.Keyset {
 	primaryKey := NewKey(keyData, tinkpb.KeyStatusType_ENABLED, 42, primaryOutputPrefixType)
 	rawKey := NewKey(keyData, tinkpb.KeyStatusType_ENABLED, 43, tinkpb.OutputPrefixType_RAW)
 	legacyKey := NewKey(keyData, tinkpb.KeyStatusType_ENABLED, 44, tinkpb.OutputPrefixType_LEGACY)
@@ -352,9 +350,7 @@ func NewDummyKey(keyID int, status tinkpb.KeyStatusType, outputPrefixType tinkpb
 }
 
 // NewECDSAParams creates a ECDSAParams with the specified parameters.
-func NewECDSAParams(hashType commonpb.HashType,
-	curve commonpb.EllipticCurveType,
-	encoding ecdsapb.EcdsaSignatureEncoding) *ecdsapb.EcdsaParams {
+func NewECDSAParams(hashType commonpb.HashType, curve commonpb.EllipticCurveType, encoding ecdsapb.EcdsaSignatureEncoding) *ecdsapb.EcdsaParams {
 	return &ecdsapb.EcdsaParams{
 		HashType: hashType,
 		Curve:    curve,
@@ -368,9 +364,7 @@ func NewECDSAKeyFormat(params *ecdsapb.EcdsaParams) *ecdsapb.EcdsaKeyFormat {
 }
 
 // NewECDSAPrivateKey creates a ECDSAPrivateKey with the specified paramaters.
-func NewECDSAPrivateKey(version uint32,
-	publicKey *ecdsapb.EcdsaPublicKey,
-	keyValue []byte) *ecdsapb.EcdsaPrivateKey {
+func NewECDSAPrivateKey(version uint32, publicKey *ecdsapb.EcdsaPublicKey, keyValue []byte) *ecdsapb.EcdsaPrivateKey {
 	return &ecdsapb.EcdsaPrivateKey{
 		Version:   version,
 		PublicKey: publicKey,
@@ -379,9 +373,7 @@ func NewECDSAPrivateKey(version uint32,
 }
 
 // NewECDSAPublicKey creates a ECDSAPublicKey with the specified paramaters.
-func NewECDSAPublicKey(version uint32,
-	params *ecdsapb.EcdsaParams,
-	x []byte, y []byte) *ecdsapb.EcdsaPublicKey {
+func NewECDSAPublicKey(version uint32, params *ecdsapb.EcdsaParams, x, y []byte) *ecdsapb.EcdsaPublicKey {
 	return &ecdsapb.EcdsaPublicKey{
 		Version: version,
 		Params:  params,
@@ -458,7 +450,7 @@ func NewAESGCMKeyFormat(keySize uint32) *gcmpb.AesGcmKeyFormat {
 }
 
 // NewAESGCMSIVKey creates a randomly generated AESGCMSIVKey.
-func NewAESGCMSIVKey(keyVersion uint32, keySize uint32) *gcmsivpb.AesGcmSivKey {
+func NewAESGCMSIVKey(keyVersion, keySize uint32) *gcmsivpb.AesGcmSivKey {
 	keyValue := random.GetRandomBytes(keySize)
 	return &gcmsivpb.AesGcmSivKey{
 		Version:  keyVersion,
@@ -483,13 +475,7 @@ func NewAESGCMSIVKeyFormat(keySize uint32) *gcmsivpb.AesGcmSivKeyFormat {
 }
 
 // NewAESGCMHKDFKey creates a randomly generated AESGCMHKDFKey.
-func NewAESGCMHKDFKey(
-	keyVersion uint32,
-	keySize uint32,
-	derivedKeySize uint32,
-	hkdfHashType commonpb.HashType,
-	ciphertextSegmentSize uint32,
-) *gcmhkdfpb.AesGcmHkdfStreamingKey {
+func NewAESGCMHKDFKey(keyVersion, keySize, derivedKeySize uint32, hkdfHashType commonpb.HashType, ciphertextSegmentSize uint32) *gcmhkdfpb.AesGcmHkdfStreamingKey {
 	keyValue := random.GetRandomBytes(keySize)
 	return &gcmhkdfpb.AesGcmHkdfStreamingKey{
 		Version:  keyVersion,
@@ -503,12 +489,7 @@ func NewAESGCMHKDFKey(
 }
 
 // NewAESGCMHKDFKeyData creates a KeyData containing a randomly generated AESGCMHKDFKey.
-func NewAESGCMHKDFKeyData(
-	keySize uint32,
-	derivedKeySize uint32,
-	hkdfHashType commonpb.HashType,
-	ciphertextSegmentSize uint32,
-) *tinkpb.KeyData {
+func NewAESGCMHKDFKeyData(keySize, derivedKeySize uint32, hkdfHashType commonpb.HashType, ciphertextSegmentSize uint32) *tinkpb.KeyData {
 	serializedKey, err := proto.Marshal(NewAESGCMHKDFKey(AESGCMHKDFKeyVersion, keySize, derivedKeySize, hkdfHashType, ciphertextSegmentSize))
 	if err != nil {
 		log.Fatalf("failed serializing proto: %v", err)
@@ -517,12 +498,7 @@ func NewAESGCMHKDFKeyData(
 }
 
 // NewAESGCMHKDFKeyFormat returns a new AESGCMHKDFKeyFormat.
-func NewAESGCMHKDFKeyFormat(
-	keySize uint32,
-	derivedKeySize uint32,
-	hkdfHashType commonpb.HashType,
-	ciphertextSegmentSize uint32,
-) *gcmhkdfpb.AesGcmHkdfStreamingKeyFormat {
+func NewAESGCMHKDFKeyFormat(keySize, derivedKeySize uint32, hkdfHashType commonpb.HashType, ciphertextSegmentSize uint32) *gcmhkdfpb.AesGcmHkdfStreamingKeyFormat {
 	return &gcmhkdfpb.AesGcmHkdfStreamingKeyFormat{
 		KeySize: keySize,
 		Params: &gcmhkdfpb.AesGcmHkdfStreamingParams{
@@ -534,15 +510,7 @@ func NewAESGCMHKDFKeyFormat(
 }
 
 // NewAESCTRHMACKey creates a randomly generated AESCTRHMACKey.
-func NewAESCTRHMACKey(
-	keyVersion uint32,
-	keySize uint32,
-	hkdfHashType commonpb.HashType,
-	derivedKeySize uint32,
-	hashType commonpb.HashType,
-	tagSize uint32,
-	ciphertextSegmentSize uint32,
-) *ctrhmacpb.AesCtrHmacStreamingKey {
+func NewAESCTRHMACKey(keyVersion, keySize uint32, hkdfHashType commonpb.HashType, derivedKeySize uint32, hashType commonpb.HashType, tagSize, ciphertextSegmentSize uint32) *ctrhmacpb.AesCtrHmacStreamingKey {
 	keyValue := random.GetRandomBytes(keySize)
 	return &ctrhmacpb.AesCtrHmacStreamingKey{
 		Version:  keyVersion,
@@ -560,14 +528,7 @@ func NewAESCTRHMACKey(
 }
 
 // NewAESCTRHMACKeyFormat returns a new AESCTRHMACKeyFormat.
-func NewAESCTRHMACKeyFormat(
-	keySize uint32,
-	hkdfHashType commonpb.HashType,
-	derivedKeySize uint32,
-	hashType commonpb.HashType,
-	tagSize uint32,
-	ciphertextSegmentSize uint32,
-) *ctrhmacpb.AesCtrHmacStreamingKeyFormat {
+func NewAESCTRHMACKeyFormat(keySize uint32, hkdfHashType commonpb.HashType, derivedKeySize uint32, hashType commonpb.HashType, tagSize, ciphertextSegmentSize uint32) *ctrhmacpb.AesCtrHmacStreamingKeyFormat {
 	return &ctrhmacpb.AesCtrHmacStreamingKeyFormat{
 		KeySize: keySize,
 		Params: &ctrhmacpb.AesCtrHmacStreamingParams{
@@ -739,9 +700,7 @@ func NewAESCMACPRFKeyFormat() *aescmacprfpb.AesCmacPrfKeyFormat {
 }
 
 // NewKeyData creates a new KeyData with the specified parameters.
-func NewKeyData(typeURL string,
-	value []byte,
-	materialType tinkpb.KeyData_KeyMaterialType) *tinkpb.KeyData {
+func NewKeyData(typeURL string, value []byte, materialType tinkpb.KeyData_KeyMaterialType) *tinkpb.KeyData {
 	return &tinkpb.KeyData{
 		TypeUrl:         typeURL,
 		Value:           value,
@@ -750,10 +709,7 @@ func NewKeyData(typeURL string,
 }
 
 // NewKey creates a new Key with the specified parameters.
-func NewKey(keyData *tinkpb.KeyData,
-	status tinkpb.KeyStatusType,
-	keyID uint32,
-	prefixType tinkpb.OutputPrefixType) *tinkpb.Keyset_Key {
+func NewKey(keyData *tinkpb.KeyData, status tinkpb.KeyStatusType, keyID uint32, prefixType tinkpb.OutputPrefixType) *tinkpb.Keyset_Key {
 	return &tinkpb.Keyset_Key{
 		KeyData:          keyData,
 		Status:           status,
@@ -763,8 +719,7 @@ func NewKey(keyData *tinkpb.KeyData,
 }
 
 // NewKeyset creates a new Keyset with the specified parameters.
-func NewKeyset(primaryKeyID uint32,
-	keys []*tinkpb.Keyset_Key) *tinkpb.Keyset {
+func NewKeyset(primaryKeyID uint32, keys []*tinkpb.Keyset_Key) *tinkpb.Keyset {
 	return &tinkpb.Keyset{
 		PrimaryKeyId: primaryKeyID,
 		Key:          keys,
@@ -853,8 +808,7 @@ func rotate(bytes []byte) []byte {
 //
 // Note: Having a correlation of zero is only a necessary but not sufficient
 // condition for independence.
-func ZTestCrosscorrelationUniformStrings(bytes1,
-	bytes2 []byte) error {
+func ZTestCrosscorrelationUniformStrings(bytes1, bytes2 []byte) error {
 	if len(bytes1) != len(bytes2) {
 		return fmt.Errorf(
 			"Strings are not of equal length")

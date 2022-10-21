@@ -66,9 +66,7 @@ func AESCMACTag128KeyTemplate() *tinkpb.KeyTemplate {
 }
 
 // createHMACKeyTemplate creates a new KeyTemplate for HMAC using the given parameters.
-func createHMACKeyTemplate(keySize uint32,
-	tagSize uint32,
-	hashType commonpb.HashType) *tinkpb.KeyTemplate {
+func createHMACKeyTemplate(keySize, tagSize uint32, hashType commonpb.HashType) *tinkpb.KeyTemplate {
 	params := hmacpb.HmacParams{
 		Hash:    hashType,
 		TagSize: tagSize,

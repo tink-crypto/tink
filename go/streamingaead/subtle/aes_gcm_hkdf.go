@@ -70,13 +70,7 @@ type AESGCMHKDF struct {
 // ciphertextSegmentSize argument is the size of ciphertext segments.
 //
 // firstSegmentOffset argument is the offset of the first ciphertext segment.
-func NewAESGCMHKDF(
-	mainKey []byte,
-	hkdfAlg string,
-	keySizeInBytes int,
-	ciphertextSegmentSize int,
-	firstSegmentOffset int,
-) (*AESGCMHKDF, error) {
+func NewAESGCMHKDF(mainKey []byte, hkdfAlg string, keySizeInBytes, ciphertextSegmentSize, firstSegmentOffset int) (*AESGCMHKDF, error) {
 	if len(mainKey) < 16 || len(mainKey) < keySizeInBytes {
 		return nil, errors.New("mainKey too short")
 	}
