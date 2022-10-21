@@ -41,7 +41,7 @@ import javax.crypto.Mac;
  *
  * @since 1.0.0
  */
-public final class EngineFactory<T_WRAPPER extends EngineWrapper<T_ENGINE>, T_ENGINE> {
+public final class EngineFactory<T_WRAPPER extends EngineWrapper<JcePrimitiveT>, JcePrimitiveT> {
   private static final Logger logger = Logger.getLogger(EngineFactory.class.getName());
   private static final List<Provider> policy;
   private static final boolean LET_FALLBACK;
@@ -106,7 +106,7 @@ public final class EngineFactory<T_WRAPPER extends EngineWrapper<T_ENGINE>, T_EN
     this.instanceBuilder = instanceBuilder;
   }
 
-  public T_ENGINE getInstance(String algorithm) throws GeneralSecurityException {
+  public JcePrimitiveT getInstance(String algorithm) throws GeneralSecurityException {
     Exception cause = null;
     for (Provider provider : policy) {
       try {
