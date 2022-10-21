@@ -71,8 +71,14 @@ func TestDerivableKeyManagerFromKeyTemplate(t *testing.T) {
 		name        string
 		keyTemplate *tinkpb.KeyTemplate
 	}{
-		{"AES-128-GCM", aead.AES128GCMKeyTemplate()},
-		{"AES-256-GCM", aead.AES256GCMKeyTemplate()},
+		{
+			name:        "AES-128-GCM",
+			keyTemplate: aead.AES128GCMKeyTemplate(),
+		},
+		{
+			name:        "AES-256-GCM",
+			keyTemplate: aead.AES256GCMKeyTemplate(),
+		},
 	} {
 		t.Run(test.name, func(t *testing.T) {
 			if _, err := internalregistry.DerivableKeyManagerFromKeyTemplate(test.keyTemplate); err != nil {
@@ -89,22 +95,22 @@ func TestDerivableKeyManagerFromKeyTemplateRejectsInvalidInputs(t *testing.T) {
 		name        string
 		keyTemplate *tinkpb.KeyTemplate
 	}{
-		{"nil key template", nil},
+		{name: "nil key template"},
 		{
-			"derivation-disallowed but registered key manager",
-			aead.AES128CTRHMACSHA256KeyTemplate(),
+			name:        "derivation-disallowed but registered key manager",
+			keyTemplate: aead.AES128CTRHMACSHA256KeyTemplate(),
 		},
 		{
-			"derivation-allowed but unregistered key manager",
-			&tinkpb.KeyTemplate{
+			name: "derivation-allowed but unregistered key manager",
+			keyTemplate: &tinkpb.KeyTemplate{
 				TypeUrl:          unregisteredKMTypeURL,
 				Value:            rand,
 				OutputPrefixType: tinkpb.OutputPrefixType_TINK,
 			},
 		},
 		{
-			"does not implement DerivableKeyManager",
-			&tinkpb.KeyTemplate{
+			name: "does not implement DerivableKeyManager",
+			keyTemplate: &tinkpb.KeyTemplate{
 				TypeUrl:          notDerivableKMTypeURL,
 				Value:            rand,
 				OutputPrefixType: tinkpb.OutputPrefixType_TINK,
@@ -126,14 +132,21 @@ func TestDeriveKey(t *testing.T) {
 		keySize         uint32
 		keyMaterialType tinkpb.KeyData_KeyMaterialType
 	}{
-		{"AES-128-GCM", aead.AES128GCMKeyTemplate(), 16, tinkpb.KeyData_SYMMETRIC},
-		{"AES-256-GCM", aead.AES256GCMKeyTemplate(), 32, tinkpb.KeyData_SYMMETRIC},
+		{
+			name:            "AES-128-GCM",
+			keyTemplate:     aead.AES128GCMKeyTemplate(),
+			keySize:         16,
+			keyMaterialType: tinkpb.KeyData_SYMMETRIC,
+		},
+		{
+			name:            "AES-256-GCM",
+			keyTemplate:     aead.AES256GCMKeyTemplate(),
+			keySize:         32,
+			keyMaterialType: tinkpb.KeyData_SYMMETRIC,
+		},
 	} {
 		t.Run(test.name, func(t *testing.T) {
-			buf := &bytes.Buffer{}
-			if _, err := buf.Write(random.GetRandomBytes(test.keySize)); err != nil {
-				t.Fatalf("Write() err = %v, want nil", err)
-			}
+			buf := bytes.NewBuffer(random.GetRandomBytes(test.keySize))
 			keyData, err := internalregistry.DeriveKey(test.keyTemplate, buf)
 			if err != nil {
 				t.Fatalf("internalregistry.DeriveKey() err = %v, want nil", err)
@@ -163,21 +176,26 @@ func TestDeriveKeyFails(t *testing.T) {
 		keyTemplate *tinkpb.KeyTemplate
 		randLen     uint32
 	}{
-		{"not enough randomness", aead.AES128GCMKeyTemplate(), 15},
-		{"nil key template", nil, 32},
 		{
-			"derivation-disallowed but registered key manager",
-			aead.AES128CTRHMACSHA256KeyTemplate(),
-			32,
+			name:        "not enough randomness",
+			keyTemplate: aead.AES128GCMKeyTemplate(),
+			randLen:     15},
+		{
+			name:    "nil key template",
+			randLen: 32},
+		{
+			name:        "derivation-disallowed but registered key manager",
+			keyTemplate: aead.AES128CTRHMACSHA256KeyTemplate(),
+			randLen:     32,
 		},
 		{
-			"derivation-allowed but unregistered key manager",
-			&tinkpb.KeyTemplate{
+			name: "derivation-allowed but unregistered key manager",
+			keyTemplate: &tinkpb.KeyTemplate{
 				TypeUrl:          unregisteredKMTypeURL,
 				Value:            rand,
 				OutputPrefixType: tinkpb.OutputPrefixType_TINK,
 			},
-			32,
+			randLen: 32,
 		},
 		{
 			"does not implement DerivableKeyManager",
@@ -199,10 +217,7 @@ func TestDeriveKeyFails(t *testing.T) {
 		},
 	} {
 		t.Run(test.name, func(t *testing.T) {
-			buf := &bytes.Buffer{}
-			if _, err := buf.Write(random.GetRandomBytes(test.randLen)); err != nil {
-				t.Fatalf("Write() err = %v, want nil", err)
-			}
+			buf := bytes.NewBuffer(random.GetRandomBytes(test.randLen))
 			if _, err := internalregistry.DeriveKey(test.keyTemplate, buf); err == nil {
 				t.Error("internalregistry.DeriveKey() err = nil, want non-nil")
 			}
