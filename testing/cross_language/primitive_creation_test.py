@@ -27,11 +27,11 @@ from tink import prf
 from tink import signature
 from tink import streaming_aead
 
+from tink.proto import tink_pb2
 import tink_config
 from util import test_keys
 from util import testing_servers
 from util import utilities
-
 
 # We register the primitives here because creation of the keysets happens
 # before "setUpModule" is called.
@@ -96,6 +96,7 @@ def _is_b243759652_test_case(lang: str, keyset: bytes, primitive: Any) -> bool:
     lang: A string describing the language.
     keyset: A serialized keyset
     primitive: One of the primitives
+
   Returns:
     True iff this test case falls under b/243759652.
   """
@@ -137,7 +138,7 @@ class SupportedKeyTypesTest(parameterized.TestCase):
   def test_create(self, lang: str, keyset: bytes, primitive: Any):
     """Tests primitive creation (see top level comment).
 
-    This tests should pass for every keyset, as long as the keyset can be
+    This test should pass for every keyset, as long as the keyset can be
     correctly parsed.
 
     Args:
@@ -193,6 +194,45 @@ class SupportedKeyTypesTest(parameterized.TestCase):
     else:
       with self.assertRaises(tink.TinkError):
         _ = testing_servers.remote_primitive(lang, public_keyset, primitive)
+
+  @parameterized.named_parameters(named_testcases())
+  def test_create_with_key_id_0(self, lang: str, keyset: bytes, primitive: Any):
+    """Tests primitive creation when key ID is 0.
+
+    Args:
+      lang: The language to test
+      keyset: A byte string representing a keyset. The keyset needs to be valid.
+      primitive: The primitive to try and instantiate
+    """
+    keyset_proto = tink_pb2.Keyset.FromString(keyset)
+    for key in keyset_proto.key:
+      if key.key_id == keyset_proto.primary_key_id:
+        key.key_id = 0
+    keyset_proto.primary_key_id = 0
+    modified_keyset = keyset_proto.SerializeToString()
+
+    keytypes = utilities.key_types_in_keyset(keyset)
+    keytype = keytypes[0]
+
+    # This test should pass in all languages. However, Golang currently
+    # disallows key ID = 0 while all others allow it.
+    # TODO(b/249835030): Remove constraint in Golang.
+    if lang == 'go':
+      with self.assertRaises(tink.TinkError):
+        _ = testing_servers.remote_primitive(lang, modified_keyset, primitive)
+      return
+
+    if _is_b243759652_test_case(lang, modified_keyset, primitive):
+      # TODO(b/243759652): This should raise a TinkError, but doesn't
+      _ = testing_servers.remote_primitive(lang, modified_keyset, primitive)
+      return
+
+    if (lang in tink_config.supported_languages_for_key_type(keytype) and
+        primitive == tink_config.primitive_for_keytype(keytype)):
+      _ = testing_servers.remote_primitive(lang, modified_keyset, primitive)
+    else:
+      with self.assertRaises(tink.TinkError):
+        _ = testing_servers.remote_primitive(lang, modified_keyset, primitive)
 
 
 if __name__ == '__main__':
