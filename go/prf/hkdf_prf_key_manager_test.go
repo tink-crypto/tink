@@ -17,12 +17,15 @@
 package prf_test
 
 import (
+	"bytes"
 	"encoding/hex"
 	"fmt"
 	"testing"
 
+	"github.com/google/go-cmp/cmp"
 	"google.golang.org/protobuf/proto"
 	"github.com/google/tink/go/core/registry"
+	"github.com/google/tink/go/internal/internalregistry"
 	"github.com/google/tink/go/prf"
 	"github.com/google/tink/go/prf/subtle"
 	"github.com/google/tink/go/subtle/random"
@@ -204,6 +207,186 @@ func TestHKDFTypeURL(t *testing.T) {
 	}
 	if km.TypeURL() != testutil.HKDFPRFTypeURL {
 		t.Errorf("incorrect GetKeyType()")
+	}
+}
+
+func TestHKDFKeyMaterialType(t *testing.T) {
+	km, err := registry.GetKeyManager(testutil.HKDFPRFTypeURL)
+	if err != nil {
+		t.Fatalf("registry.GetKeyManager(%q) err = %v, want nil", testutil.HKDFPRFTypeURL, err)
+	}
+	keyManager, ok := km.(internalregistry.DerivableKeyManager)
+	if !ok {
+		t.Fatalf("key manager is not DerivableKeyManager")
+	}
+	if got, want := keyManager.KeyMaterialType(), tinkpb.KeyData_SYMMETRIC; got != want {
+		t.Errorf("KeyMaterialType() = %v, want %v", got, want)
+	}
+}
+
+func TestHKDFDeriveKey(t *testing.T) {
+	km, err := registry.GetKeyManager(testutil.HKDFPRFTypeURL)
+	if err != nil {
+		t.Fatalf("registry.GetKeyManager(%q) err = %v, want nil", testutil.HKDFPRFTypeURL, err)
+	}
+	keyManager, ok := km.(internalregistry.DerivableKeyManager)
+	if !ok {
+		t.Fatalf("key manager is not DerivableKeyManager")
+	}
+
+	var keySize uint32 = 32
+	for _, test := range []struct {
+		name     string
+		hashType commonpb.HashType
+		salt     []byte
+	}{
+		{
+			name:     "SHA256",
+			hashType: commonpb.HashType_SHA256,
+			salt:     make([]byte, 0),
+		},
+		{
+			name:     "SHA256/salt",
+			hashType: commonpb.HashType_SHA256,
+			salt:     []byte{0x01, 0x03, 0x42},
+		},
+		{
+			name:     "SHA512",
+			hashType: commonpb.HashType_SHA512,
+			salt:     make([]byte, 0),
+		},
+		{
+			name:     "SHA512/salt",
+			hashType: commonpb.HashType_SHA512,
+			salt:     []byte{0x01, 0x03, 0x42},
+		},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			keyFormat := testutil.NewHKDFPRFKeyFormat(test.hashType, test.salt)
+			serializedKeyFormat, err := proto.Marshal(keyFormat)
+			if err != nil {
+				t.Fatalf("proto.Marshal(%v) err = %v, want nil", keyFormat, err)
+			}
+
+			rand := random.GetRandomBytes(keySize)
+			buf := &bytes.Buffer{}
+			if p, _ := buf.Write(rand); p != len(rand) {
+				t.Fatalf("incomplete Write() = %d bytes, want %d bytes", p, len(rand))
+			}
+
+			k, err := keyManager.DeriveKey(serializedKeyFormat, buf)
+			if err != nil {
+				t.Fatalf("keyManager.DeriveKey() err = %v, want nil", err)
+			}
+			key := k.(*hkdfpb.HkdfPrfKey)
+			if got, want := len(key.GetKeyValue()), int(keySize); got != want {
+				t.Errorf("key length = %d, want %d", got, want)
+			}
+			if diff := cmp.Diff(key.GetKeyValue(), rand); diff != "" {
+				t.Errorf("incorrect derived key: diff = %v", diff)
+			}
+		})
+	}
+}
+
+func TestHKDFDeriveKeyFailsWithInvalidKeyFormats(t *testing.T) {
+	km, err := registry.GetKeyManager(testutil.HKDFPRFTypeURL)
+	if err != nil {
+		t.Fatalf("registry.GetKeyManager(%q) err = %v, want nil", testutil.HKDFPRFTypeURL, err)
+	}
+	keyManager, ok := km.(internalregistry.DerivableKeyManager)
+	if !ok {
+		t.Fatalf("key manager is not DerivableKeyManager")
+	}
+
+	var keySize uint32 = 32
+	validKeyFormat := &hkdfpb.HkdfPrfKeyFormat{
+		Params:  testutil.NewHKDFPRFParams(commonpb.HashType_SHA256, make([]byte, 0)),
+		KeySize: keySize,
+		Version: 0,
+	}
+	serializedValidKeyFormat, err := proto.Marshal(validKeyFormat)
+	if err != nil {
+		t.Fatalf("proto.Marshal(%v) err = %v, want nil", validKeyFormat, err)
+	}
+	buf := bytes.NewBuffer(random.GetRandomBytes(keySize))
+	if _, err := keyManager.DeriveKey(serializedValidKeyFormat, buf); err != nil {
+		t.Fatalf("keyManager.DeriveKey() err = %v, want nil", err)
+	}
+
+	for _, test := range []struct {
+		name      string
+		keyFormat *hkdfpb.HkdfPrfKeyFormat
+		randLen   uint32
+	}{
+		{
+			name: "invalid key size",
+			keyFormat: &hkdfpb.HkdfPrfKeyFormat{
+				Params:  validKeyFormat.GetParams(),
+				KeySize: 16,
+				Version: validKeyFormat.GetVersion(),
+			},
+			randLen: keySize,
+		},
+		{
+			name:      "not enough randomness",
+			keyFormat: validKeyFormat,
+			randLen:   16,
+		},
+		{
+			name: "invalid version",
+			keyFormat: &hkdfpb.HkdfPrfKeyFormat{
+				Params:  validKeyFormat.GetParams(),
+				KeySize: validKeyFormat.GetKeySize(),
+				Version: 100000,
+			},
+			randLen: keySize,
+		},
+		{
+			name:      "empty key format",
+			keyFormat: &hkdfpb.HkdfPrfKeyFormat{},
+			randLen:   keySize,
+		},
+		{
+			name:    "nil key format",
+			randLen: keySize,
+		},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			serializedKeyFormat, err := proto.Marshal(test.keyFormat)
+			if err != nil {
+				t.Fatalf("proto.Marshal(%v) err = %v, want nil", test.keyFormat, err)
+			}
+			buf := bytes.NewBuffer(random.GetRandomBytes(test.randLen))
+			if _, err := keyManager.DeriveKey(serializedKeyFormat, buf); err == nil {
+				t.Errorf("keyManager.DeriveKey() err = nil, want non-nil")
+			}
+		})
+	}
+}
+
+func TestHKDFDeriveKeyFailsWithMalformedSerializedKeyFormat(t *testing.T) {
+	km, err := registry.GetKeyManager(testutil.HKDFPRFTypeURL)
+	if err != nil {
+		t.Fatalf("registry.GetKeyManager(%q) err = %v, want nil", testutil.HKDFPRFTypeURL, err)
+	}
+	keyManager, ok := km.(internalregistry.DerivableKeyManager)
+	if !ok {
+		t.Fatalf("key manager is not DerivableKeyManager")
+	}
+
+	var keySize uint32 = 32
+	malformedSerializedKeyFormat := random.GetRandomBytes(
+		uint32(
+			proto.Size(&hkdfpb.HkdfPrfKeyFormat{
+				Params:  testutil.NewHKDFPRFParams(commonpb.HashType_SHA256, make([]byte, 0)),
+				KeySize: keySize,
+				Version: 0,
+			})))
+
+	buf := bytes.NewBuffer(random.GetRandomBytes(keySize))
+	if _, err := keyManager.DeriveKey(malformedSerializedKeyFormat, buf); err == nil {
+		t.Errorf("keyManager.DeriveKey() err = nil, want non-nil")
 	}
 }
 

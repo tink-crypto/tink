@@ -19,8 +19,10 @@ package prf
 import (
 	"errors"
 	"fmt"
+	"io"
 
 	"google.golang.org/protobuf/proto"
+	"github.com/google/tink/go/core/registry"
 	"github.com/google/tink/go/keyset"
 	"github.com/google/tink/go/prf/subtle"
 	"github.com/google/tink/go/subtle/random"
@@ -39,6 +41,9 @@ var errInvalidHKDFPRFKeyFormat = errors.New("hkdf_prf_key_manager: invalid key f
 
 // hkdfprfKeyManager generates new HKDF PRF keys and produces new instances of HKDF.
 type hkdfprfKeyManager struct{}
+
+// Assert that hkdfprfKeyManager implements the KeyManager interface.
+var _ registry.KeyManager = (*hkdfprfKeyManager)(nil)
 
 // Primitive constructs a HKDF instance for the given serialized HKDFKey.
 func (km *hkdfprfKeyManager) Primitive(serializedKey []byte) (interface{}, error) {
@@ -95,7 +100,7 @@ func (km *hkdfprfKeyManager) NewKeyData(serializedKeyFormat []byte) (*tinkpb.Key
 	return &tinkpb.KeyData{
 		TypeUrl:         hkdfprfTypeURL,
 		Value:           serializedKey,
-		KeyMaterialType: tinkpb.KeyData_SYMMETRIC,
+		KeyMaterialType: km.KeyMaterialType(),
 	}, nil
 }
 
@@ -107,6 +112,40 @@ func (km *hkdfprfKeyManager) DoesSupport(typeURL string) bool {
 // TypeURL returns the type URL of keys managed by this KeyManager.
 func (km *hkdfprfKeyManager) TypeURL() string {
 	return hkdfprfTypeURL
+}
+
+// KeyMaterialType returns the key material type of this KeyManager.
+func (km *hkdfprfKeyManager) KeyMaterialType() tinkpb.KeyData_KeyMaterialType {
+	return tinkpb.KeyData_SYMMETRIC
+}
+
+// DeriveKey derives a new key from serializedKeyFormat and pseudorandomness.
+func (km *hkdfprfKeyManager) DeriveKey(serializedKeyFormat []byte, pseudorandomness io.Reader) (proto.Message, error) {
+	if len(serializedKeyFormat) == 0 {
+		return nil, errInvalidHKDFPRFKeyFormat
+	}
+	keyFormat := new(hkdfpb.HkdfPrfKeyFormat)
+	if err := proto.Unmarshal(serializedKeyFormat, keyFormat); err != nil {
+		return nil, errInvalidHKDFPRFKeyFormat
+	}
+	if err := km.validateKeyFormat(keyFormat); err != nil {
+		return nil, fmt.Errorf("hkdf_prf_key_manager: invalid key format: %s", err)
+	}
+	if err := keyset.ValidateKeyVersion(keyFormat.GetVersion(), hkdfprfKeyVersion); err != nil {
+		return nil, fmt.Errorf("hkdf_prf_key_manager: invalid key version: %s", err)
+	}
+
+	keyValue := make([]byte, keyFormat.GetKeySize())
+	n, err := pseudorandomness.Read(keyValue)
+	if n != len(keyValue) || err != nil {
+		return nil, fmt.Errorf("hkdf_prf_key_manager: not enough pseudorandomness given")
+	}
+
+	return &hkdfpb.HkdfPrfKey{
+		Version:  hkdfprfKeyVersion,
+		Params:   keyFormat.Params,
+		KeyValue: keyValue,
+	}, nil
 }
 
 // validateKey validates the given HKDFPRFKey. It only validates the version of the
