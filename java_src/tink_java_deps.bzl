@@ -65,9 +65,9 @@ def tink_java_deps():
         # Release from 2021-06-08.
         http_archive(
             name = "com_google_protobuf",
-            strip_prefix = "protobuf-3.19.3",
-            urls = ["https://github.com/protocolbuffers/protobuf/archive/v3.19.3.zip"],
-            sha256 = "6b6bf5cd8d0cca442745c4c3c9f527c83ad6ef35a405f64db5215889ac779b42",
+            strip_prefix = "protobuf-3.19.6",
+            urls = ["https://github.com/protocolbuffers/protobuf/archive/v3.19.6.zip"],
+            sha256 = "387e2c559bb2c7c1bc3798c4e6cff015381a79b2758696afcbf8e88730b47389",
         )
 
     # -------------------------------------------------------------------------
