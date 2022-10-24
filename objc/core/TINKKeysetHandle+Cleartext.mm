@@ -16,15 +16,15 @@
  **************************************************************************
  */
 
-#import "objc/TINKKeysetHandle+Cleartext.h"
+#import "TINKKeysetHandle+Cleartext.h"
 
 #include "tink/cleartext_keyset_handle.h"
 
-#import "objc/TINKKeysetHandle.h"
-#import "objc/core/TINKKeysetHandle_Internal.h"
-#import "objc/core/TINKKeysetReader_Internal.h"
-#import "objc/util/TINKErrors.h"
-#import "objc/util/TINKStrings.h"
+#import "TINKKeysetHandle.h"
+#import "core/TINKKeysetHandle_Internal.h"
+#import "core/TINKKeysetReader_Internal.h"
+#import "util/TINKErrors.h"
+#import "util/TINKStrings.h"
 
 @implementation TINKKeysetHandle (Cleartext)
 

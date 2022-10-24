@@ -26,15 +26,15 @@
 #include "proto/ecies_aead_hkdf.pb.h"
 #include "proto/tink.pb.h"
 
-#import "objc/TINKConfig.h"
-#import "objc/TINKHybridConfig.h"
-#import "objc/TINKHybridDecrypt.h"
-#import "objc/TINKHybridDecryptFactory.h"
-#import "objc/TINKHybridEncrypt.h"
-#import "objc/TINKHybridEncryptFactory.h"
-#import "objc/TINKKeysetHandle.h"
-#import "objc/core/TINKKeysetHandle_Internal.h"
-#import "objc/util/TINKStrings.h"
+#import "TINKConfig.h"
+#import "TINKHybridConfig.h"
+#import "TINKHybridDecrypt.h"
+#import "TINKHybridDecryptFactory.h"
+#import "TINKHybridEncrypt.h"
+#import "TINKHybridEncryptFactory.h"
+#import "TINKKeysetHandle.h"
+#import "core/TINKKeysetHandle_Internal.h"
+#import "util/TINKStrings.h"
 
 using ::crypto::tink::TestKeysetHandle;
 using ::crypto::tink::test::AddTinkKey;

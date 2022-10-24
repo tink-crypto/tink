@@ -18,7 +18,7 @@
 
 #import <UIKit/UIKit.h>
 
-#import "objc/Tests/Host/AppDelegate.h"
+#import "third_party/tink/objc/Tests/Host/AppDelegate.h"
 
 int main(int argc, char* argv[]) {
   @autoreleasepool {

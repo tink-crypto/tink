@@ -16,15 +16,15 @@
  **************************************************************************
  */
 
-#import "objc/TINKDeterministicAeadFactory.h"
+#import "TINKDeterministicAeadFactory.h"
 
 #import <Foundation/Foundation.h>
 
-#import "objc/TINKDeterministicAead.h"
-#import "objc/TINKKeysetHandle.h"
-#import "objc/core/TINKKeysetHandle_Internal.h"
-#import "objc/daead/TINKDeterministicAeadInternal.h"
-#import "objc/util/TINKErrors.h"
+#import "TINKDeterministicAead.h"
+#import "TINKKeysetHandle.h"
+#import "core/TINKKeysetHandle_Internal.h"
+#import "daead/TINKDeterministicAeadInternal.h"
+#import "util/TINKErrors.h"
 
 #include "tink/keyset_handle.h"
 #include "tink/util/status.h"

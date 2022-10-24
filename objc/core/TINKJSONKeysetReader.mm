@@ -16,12 +16,12 @@
  **************************************************************************
  */
 
-#import "objc/TINKJSONKeysetReader.h"
+#import "TINKJSONKeysetReader.h"
 
-#import "objc/TINKKeysetReader.h"
-#import "objc/core/TINKKeysetReader_Internal.h"
-#import "objc/util/TINKErrors.h"
-#import "objc/util/TINKStrings.h"
+#import "TINKKeysetReader.h"
+#import "core/TINKKeysetReader_Internal.h"
+#import "util/TINKErrors.h"
+#import "util/TINKStrings.h"
 
 #include "absl/status/status.h"
 #include "absl/strings/string_view.h"

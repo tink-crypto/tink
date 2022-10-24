@@ -16,16 +16,16 @@
  **************************************************************************
  */
 
-#import "objc/TINKAllConfig.h"
+#import "TINKAllConfig.h"
 
 #include "tink/config/tink_config.h"
 #include "proto/config.pb.h"
 
 #import <Foundation/Foundation.h>
 
-#import "objc/TINKRegistryConfig.h"
-#import "objc/core/TINKRegistryConfig_Internal.h"
-#import "objc/util/TINKErrors.h"
+#import "TINKRegistryConfig.h"
+#import "core/TINKRegistryConfig_Internal.h"
+#import "util/TINKErrors.h"
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wobjc-designated-initializers"

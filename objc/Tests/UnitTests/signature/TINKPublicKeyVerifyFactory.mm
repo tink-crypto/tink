@@ -16,20 +16,20 @@
  **************************************************************************
  */
 
-#import "objc/TINKPublicKeyVerifyFactory.h"
+#import "TINKPublicKeyVerifyFactory.h"
 
 #import <Foundation/Foundation.h>
 #import <XCTest/XCTest.h>
 
-#import "objc/TINKKeysetHandle.h"
-#import "objc/TINKPublicKeySign.h"
-#import "objc/TINKPublicKeySignFactory.h"
-#import "objc/TINKPublicKeyVerify.h"
-#import "objc/TINKPublicKeyVerifyFactory.h"
-#import "objc/TINKSignatureConfig.h"
-#import "objc/core/TINKKeysetHandle_Internal.h"
-#import "objc/signature/TINKPublicKeyVerifyInternal.h"
-#import "objc/util/TINKStrings.h"
+#import "TINKKeysetHandle.h"
+#import "TINKPublicKeySign.h"
+#import "TINKPublicKeySignFactory.h"
+#import "TINKPublicKeyVerify.h"
+#import "TINKPublicKeyVerifyFactory.h"
+#import "TINKSignatureConfig.h"
+#import "core/TINKKeysetHandle_Internal.h"
+#import "signature/TINKPublicKeyVerifyInternal.h"
+#import "util/TINKStrings.h"
 
 #include "absl/status/status.h"
 #include "tink/crypto_format.h"

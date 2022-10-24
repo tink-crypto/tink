@@ -16,11 +16,11 @@
  **************************************************************************
  */
 
-#import "objc/TINKAeadKeyTemplate.h"
+#import "TINKAeadKeyTemplate.h"
 
-#import "objc/TINKKeyTemplate.h"
-#import "objc/core/TINKKeyTemplate_Internal.h"
-#import "objc/util/TINKErrors.h"
+#import "TINKKeyTemplate.h"
+#import "core/TINKKeyTemplate_Internal.h"
+#import "util/TINKErrors.h"
 
 #include "absl/status/status.h"
 #include "tink/aead/aead_key_templates.h"

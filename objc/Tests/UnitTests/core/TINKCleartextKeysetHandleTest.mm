@@ -19,11 +19,11 @@
 #import <Foundation/Foundation.h>
 #import <XCTest/XCTest.h>
 
-#import "objc/TINKBinaryKeysetReader.h"
-#import "objc/TINKKeysetHandle+Cleartext.h"
-#import "objc/TINKKeysetHandle.h"
-#import "objc/core/TINKKeysetHandle_Internal.h"
-#import "objc/util/TINKStrings.h"
+#import "TINKBinaryKeysetReader.h"
+#import "TINKKeysetHandle+Cleartext.h"
+#import "TINKKeysetHandle.h"
+#import "core/TINKKeysetHandle_Internal.h"
+#import "util/TINKStrings.h"
 
 #include "absl/status/status.h"
 #include "tink/util/test_keyset_handle.h"

@@ -16,15 +16,15 @@
  **************************************************************************
  */
 
-#import "objc/TINKMacFactory.h"
+#import "TINKMacFactory.h"
 
 #import <Foundation/Foundation.h>
 
-#import "objc/TINKKeysetHandle.h"
-#import "objc/TINKMac.h"
-#import "objc/core/TINKKeysetHandle_Internal.h"
-#import "objc/mac/TINKMacInternal.h"
-#import "objc/util/TINKErrors.h"
+#import "TINKKeysetHandle.h"
+#import "TINKMac.h"
+#import "core/TINKKeysetHandle_Internal.h"
+#import "mac/TINKMacInternal.h"
+#import "util/TINKErrors.h"
 
 #include "tink/keyset_handle.h"
 #include "tink/util/status.h"

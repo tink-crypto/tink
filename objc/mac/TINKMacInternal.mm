@@ -16,10 +16,10 @@
  **************************************************************************
  */
 
-#import "objc/mac/TINKMacInternal.h"
+#import "mac/TINKMacInternal.h"
 
-#import "objc/util/TINKErrors.h"
-#import "objc/util/TINKStrings.h"
+#import "util/TINKErrors.h"
+#import "util/TINKStrings.h"
 
 #include "absl/strings/string_view.h"
 #include "tink/mac.h"

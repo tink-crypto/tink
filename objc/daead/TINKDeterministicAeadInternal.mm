@@ -16,18 +16,18 @@
  **************************************************************************
  */
 
-#import "objc/daead/TINKDeterministicAeadInternal.h"
-#import "objc/TINKDeterministicAead.h"
+#import "daead/TINKDeterministicAeadInternal.h"
+#import "TINKDeterministicAead.h"
 
 #include "absl/strings/string_view.h"
 #include "tink/deterministic_aead.h"
 #include "tink/keyset_handle.h"
 #include "tink/util/status.h"
 
-#import "objc/TINKKeysetHandle.h"
-#import "objc/core/TINKKeysetHandle_Internal.h"
-#import "objc/util/TINKErrors.h"
-#import "objc/util/TINKStrings.h"
+#import "TINKKeysetHandle.h"
+#import "core/TINKKeysetHandle_Internal.h"
+#import "util/TINKErrors.h"
+#import "util/TINKStrings.h"
 
 @implementation TINKDeterministicAeadInternal {
   std::unique_ptr<crypto::tink::DeterministicAead> _ccDeterministicAead;

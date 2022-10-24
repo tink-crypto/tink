@@ -16,11 +16,11 @@
  **************************************************************************
  */
 
-#import "objc/hybrid/TINKHybridDecryptInternal.h"
+#import "hybrid/TINKHybridDecryptInternal.h"
 
-#import "objc/TINKHybridDecrypt.h"
-#import "objc/util/TINKErrors.h"
-#import "objc/util/TINKStrings.h"
+#import "TINKHybridDecrypt.h"
+#import "util/TINKErrors.h"
+#import "util/TINKStrings.h"
 
 #include "absl/strings/string_view.h"
 #include "tink/hybrid_decrypt.h"

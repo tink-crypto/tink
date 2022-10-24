@@ -16,16 +16,16 @@
  **************************************************************************
  */
 
-#import "objc/TINKKeysetHandle.h"
+#import "TINKKeysetHandle.h"
 
-#import "objc/TINKAead.h"
-#import "objc/TINKKeyTemplate.h"
-#import "objc/TINKKeysetReader.h"
-#import "objc/aead/TINKAeadInternal.h"
-#import "objc/core/TINKKeyTemplate_Internal.h"
-#import "objc/core/TINKKeysetReader_Internal.h"
-#import "objc/util/TINKErrors.h"
-#import "objc/util/TINKStrings.h"
+#import "TINKAead.h"
+#import "TINKKeyTemplate.h"
+#import "TINKKeysetReader.h"
+#import "aead/TINKAeadInternal.h"
+#import "core/TINKKeyTemplate_Internal.h"
+#import "core/TINKKeysetReader_Internal.h"
+#import "util/TINKErrors.h"
+#import "util/TINKStrings.h"
 
 #include <iosfwd>
 #include <iostream>

@@ -18,7 +18,7 @@
 
 #ifdef __cplusplus
 
-#import "objc/TINKAead.h"
+#import "TINKAead.h"
 
 #import <Foundation/Foundation.h>
 

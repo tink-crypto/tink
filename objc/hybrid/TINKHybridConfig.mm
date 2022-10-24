@@ -16,11 +16,11 @@
  **************************************************************************
  */
 
-#import "objc/TINKHybridConfig.h"
+#import "TINKHybridConfig.h"
 
-#import "objc/TINKRegistryConfig.h"
-#import "objc/core/TINKRegistryConfig_Internal.h"
-#import "objc/util/TINKErrors.h"
+#import "TINKRegistryConfig.h"
+#import "core/TINKRegistryConfig_Internal.h"
+#import "util/TINKErrors.h"
 
 #include "tink/hybrid/hybrid_config.h"
 #include "tink/util/status.h"

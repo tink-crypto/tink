@@ -16,16 +16,16 @@
  **************************************************************************
  */
 
-#import "objc/TINKAeadFactory.h"
+#import "TINKAeadFactory.h"
 
 #import <XCTest/XCTest.h>
 
-#import "objc/TINKAead.h"
-#import "objc/TINKAeadConfig.h"
-#import "objc/TINKAeadFactory.h"
-#import "objc/TINKKeysetHandle.h"
-#import "objc/core/TINKKeysetHandle_Internal.h"
-#import "objc/util/TINKStrings.h"
+#import "TINKAead.h"
+#import "TINKAeadConfig.h"
+#import "TINKAeadFactory.h"
+#import "TINKKeysetHandle.h"
+#import "core/TINKKeysetHandle_Internal.h"
+#import "util/TINKStrings.h"
 
 #include "absl/status/status.h"
 #include "tink/aead.h"

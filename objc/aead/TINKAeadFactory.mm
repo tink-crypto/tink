@@ -16,15 +16,15 @@
  **************************************************************************
  */
 
-#import "objc/TINKAeadFactory.h"
+#import "TINKAeadFactory.h"
 
 #import <Foundation/Foundation.h>
 
-#import "objc/TINKAead.h"
-#import "objc/TINKKeysetHandle.h"
-#import "objc/aead/TINKAeadInternal.h"
-#import "objc/core/TINKKeysetHandle_Internal.h"
-#import "objc/util/TINKErrors.h"
+#import "TINKAead.h"
+#import "TINKKeysetHandle.h"
+#import "aead/TINKAeadInternal.h"
+#import "core/TINKKeysetHandle_Internal.h"
+#import "util/TINKErrors.h"
 
 #include "tink/keyset_handle.h"
 #include "tink/util/status.h"

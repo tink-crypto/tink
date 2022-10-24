@@ -18,7 +18,7 @@
 
 #ifdef __cplusplus
 
-#import "objc/TINKKeysetHandle.h"
+#import "TINKKeysetHandle.h"
 
 #include "tink/keyset_handle.h"
 

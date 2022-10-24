@@ -16,7 +16,7 @@
  **************************************************************************
  */
 
-#import "objc/TINKDeterministicAead.h"
+#import "TINKDeterministicAead.h"
 
 #import <Foundation/Foundation.h>
 

@@ -16,21 +16,21 @@
  **************************************************************************
  */
 
-#import "objc/TINKKeysetHandle.h"
-#import "objc/core/TINKKeysetHandle_Internal.h"
+#import "TINKKeysetHandle.h"
+#import "core/TINKKeysetHandle_Internal.h"
 
 #import <Security/Security.h>
 #import <XCTest/XCTest.h>
 
-#import "objc/TINKAead.h"
-#import "objc/TINKAeadKeyTemplate.h"
-#import "objc/TINKAllConfig.h"
-#import "objc/TINKBinaryKeysetReader.h"
-#import "objc/TINKConfig.h"
-#import "objc/TINKHybridKeyTemplate.h"
-#import "objc/TINKSignatureKeyTemplate.h"
-#import "objc/aead/TINKAeadInternal.h"
-#import "objc/util/TINKStrings.h"
+#import "TINKAead.h"
+#import "TINKAeadKeyTemplate.h"
+#import "TINKAllConfig.h"
+#import "TINKBinaryKeysetReader.h"
+#import "TINKConfig.h"
+#import "TINKHybridKeyTemplate.h"
+#import "TINKSignatureKeyTemplate.h"
+#import "aead/TINKAeadInternal.h"
+#import "util/TINKStrings.h"
 
 #include "absl/status/status.h"
 #include "tink/binary_keyset_reader.h"

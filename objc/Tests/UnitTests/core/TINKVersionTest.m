@@ -16,7 +16,7 @@
  **************************************************************************
  */
 
-#import "objc/TINKVersion.h"
+#import "TINKVersion.h"
 
 #import <XCTest/XCTest.h>
 

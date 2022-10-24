@@ -16,11 +16,11 @@
  **************************************************************************
  */
 
-#import "objc/TINKBinaryKeysetReader.h"
+#import "TINKBinaryKeysetReader.h"
 
 #import <XCTest/XCTest.h>
 
-#import "objc/util/TINKStrings.h"
+#import "util/TINKStrings.h"
 
 #include "tink/util/test_util.h"
 #include "proto/tink.pb.h"

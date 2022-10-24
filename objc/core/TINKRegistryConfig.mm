@@ -16,8 +16,8 @@
  **************************************************************************
  */
 
-#import "objc/TINKRegistryConfig.h"
-#import "objc/core/TINKRegistryConfig_Internal.h"
+#import "TINKRegistryConfig.h"
+#import "core/TINKRegistryConfig_Internal.h"
 
 #include "proto/config.pb.h"
 

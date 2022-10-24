@@ -16,15 +16,15 @@
  **************************************************************************
  */
 
-#import "objc/TINKDeterministicAeadConfig.h"
+#import "TINKDeterministicAeadConfig.h"
 
 #include "tink/daead/deterministic_aead_config.h"
 #include "tink/util/status.h"
 #include "proto/config.pb.h"
 
-#import "objc/TINKRegistryConfig.h"
-#import "objc/core/TINKRegistryConfig_Internal.h"
-#import "objc/util/TINKErrors.h"
+#import "TINKRegistryConfig.h"
+#import "core/TINKRegistryConfig_Internal.h"
+#import "util/TINKErrors.h"
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wobjc-designated-initializers"

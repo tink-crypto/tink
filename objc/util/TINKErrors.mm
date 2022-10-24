@@ -15,7 +15,7 @@
  *
  **************************************************************************
  */
-#import "objc/util/TINKErrors.h"
+#import "util/TINKErrors.h"
 
 #include "absl/status/status.h"
 #include "tink/util/status.h"

@@ -18,7 +18,7 @@
 
 #ifdef __cplusplus
 
-#import "objc/TINKRegistryConfig.h"
+#import "TINKRegistryConfig.h"
 
 #include "proto/config.pb.h"
 

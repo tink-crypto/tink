@@ -16,11 +16,11 @@
  **************************************************************************
  */
 
-#import "objc/TINKMacKeyTemplate.h"
+#import "TINKMacKeyTemplate.h"
 
-#import "objc/TINKKeyTemplate.h"
-#import "objc/core/TINKKeyTemplate_Internal.h"
-#import "objc/util/TINKErrors.h"
+#import "TINKKeyTemplate.h"
+#import "core/TINKKeyTemplate_Internal.h"
+#import "util/TINKErrors.h"
 
 #include "absl/status/status.h"
 #include "tink/mac/mac_key_templates.h"

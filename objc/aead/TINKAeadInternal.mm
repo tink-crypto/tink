@@ -16,11 +16,11 @@
  **************************************************************************
  */
 
-#import "objc/aead/TINKAeadInternal.h"
+#import "aead/TINKAeadInternal.h"
 
-#import "objc/TINKAead.h"
-#import "objc/util/TINKErrors.h"
-#import "objc/util/TINKStrings.h"
+#import "TINKAead.h"
+#import "util/TINKErrors.h"
+#import "util/TINKStrings.h"
 
 #include "absl/strings/string_view.h"
 #include "tink/aead.h"

@@ -16,16 +16,16 @@
  **************************************************************************
  */
 
-#import "objc/TINKDeterministicAeadKeyTemplate.h"
+#import "TINKDeterministicAeadKeyTemplate.h"
 
 #include "absl/status/status.h"
 #include "tink/daead/deterministic_aead_key_templates.h"
 #include "tink/util/status.h"
 #include "proto/tink.pb.h"
 
-#import "objc/TINKKeyTemplate.h"
-#import "objc/core/TINKKeyTemplate_Internal.h"
-#import "objc/util/TINKErrors.h"
+#import "TINKKeyTemplate.h"
+#import "core/TINKKeyTemplate_Internal.h"
+#import "util/TINKErrors.h"
 
 @implementation TINKDeterministicAeadKeyTemplate
 

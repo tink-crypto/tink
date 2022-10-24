@@ -18,7 +18,7 @@
 
 #ifdef __cplusplus
 
-#import "objc/TINKKeyTemplate.h"
+#import "TINKKeyTemplate.h"
 
 #include "proto/tink.pb.h"
 

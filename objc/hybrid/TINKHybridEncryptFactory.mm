@@ -16,15 +16,15 @@
  **************************************************************************
  */
 
-#import "objc/TINKHybridEncryptFactory.h"
+#import "TINKHybridEncryptFactory.h"
 
 #import <Foundation/Foundation.h>
 
-#import "objc/TINKHybridEncrypt.h"
-#import "objc/TINKKeysetHandle.h"
-#import "objc/core/TINKKeysetHandle_Internal.h"
-#import "objc/hybrid/TINKHybridEncryptInternal.h"
-#import "objc/util/TINKErrors.h"
+#import "TINKHybridEncrypt.h"
+#import "TINKKeysetHandle.h"
+#import "core/TINKKeysetHandle_Internal.h"
+#import "hybrid/TINKHybridEncryptInternal.h"
+#import "util/TINKErrors.h"
 
 #include "tink/keyset_handle.h"
 #include "tink/util/status.h"

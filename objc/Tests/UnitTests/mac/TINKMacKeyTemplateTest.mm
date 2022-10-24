@@ -16,12 +16,12 @@
  **************************************************************************
  */
 
-#import "objc/TINKMacKeyTemplate.h"
+#import "TINKMacKeyTemplate.h"
 
 #import <XCTest/XCTest.h>
 
-#import "objc/TINKKeyTemplate.h"
-#import "objc/core/TINKKeyTemplate_Internal.h"
+#import "TINKKeyTemplate.h"
+#import "core/TINKKeyTemplate_Internal.h"
 #include "proto/common.pb.h"
 #include "proto/tink.pb.h"
 

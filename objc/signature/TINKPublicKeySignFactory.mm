@@ -16,15 +16,15 @@
  **************************************************************************
  */
 
-#import "objc/TINKPublicKeySignFactory.h"
+#import "TINKPublicKeySignFactory.h"
 
 #import <Foundation/Foundation.h>
 
-#import "objc/TINKKeysetHandle.h"
-#import "objc/TINKPublicKeySign.h"
-#import "objc/core/TINKKeysetHandle_Internal.h"
-#import "objc/signature/TINKPublicKeySignInternal.h"
-#import "objc/util/TINKErrors.h"
+#import "TINKKeysetHandle.h"
+#import "TINKPublicKeySign.h"
+#import "core/TINKKeysetHandle_Internal.h"
+#import "signature/TINKPublicKeySignInternal.h"
+#import "util/TINKErrors.h"
 
 #include "tink/keyset_handle.h"
 #include "tink/util/status.h"

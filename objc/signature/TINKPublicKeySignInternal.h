@@ -18,7 +18,7 @@
 
 #ifdef __cplusplus
 
-#import "objc/TINKPublicKeySign.h"
+#import "TINKPublicKeySign.h"
 
 #import <Foundation/Foundation.h>
 

@@ -16,7 +16,7 @@
  **************************************************************************
  */
 
-#import "objc/Tests/Host/AppDelegate.h"
+#import "third_party/tink/objc/Tests/Host/AppDelegate.h"
 
 @interface AppDelegate ()
 

@@ -16,11 +16,11 @@
  **************************************************************************
  */
 
-#import "objc/signature/TINKPublicKeySignInternal.h"
+#import "signature/TINKPublicKeySignInternal.h"
 
-#import "objc/TINKPublicKeySign.h"
-#import "objc/util/TINKErrors.h"
-#import "objc/util/TINKStrings.h"
+#import "TINKPublicKeySign.h"
+#import "util/TINKErrors.h"
+#import "util/TINKStrings.h"
 
 #include "absl/strings/string_view.h"
 #include "tink/public_key_sign.h"

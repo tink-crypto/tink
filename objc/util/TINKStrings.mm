@@ -16,11 +16,11 @@
  **************************************************************************
  */
 
-#import "objc/util/TINKStrings.h"
+#import "util/TINKStrings.h"
 
 #import <Foundation/Foundation.h>
 
-#import "objc/util/TINKErrors.h"
+#import "util/TINKErrors.h"
 
 #include "absl/strings/string_view.h"
 

@@ -18,7 +18,7 @@
 
 #ifdef __cplusplus
 
-#import "objc/TINKHybridEncrypt.h"
+#import "TINKHybridEncrypt.h"
 
 #import <Foundation/Foundation.h>
 

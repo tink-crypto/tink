@@ -16,14 +16,14 @@
  **************************************************************************
  */
 
-#import "objc/TINKAeadKeyTemplate.h"
+#import "TINKAeadKeyTemplate.h"
 
 #import <XCTest/XCTest.h>
 
 #include "tink/aead/xchacha20_poly1305_key_manager.h"
 
-#import "objc/TINKKeyTemplate.h"
-#import "objc/core/TINKKeyTemplate_Internal.h"
+#import "TINKKeyTemplate.h"
+#import "core/TINKKeyTemplate_Internal.h"
 
 using google::crypto::tink::XChaCha20Poly1305KeyFormat;
 

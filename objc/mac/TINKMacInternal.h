@@ -18,7 +18,7 @@
 
 #ifdef __cplusplus
 
-#import "objc/TINKMac.h"
+#import "TINKMac.h"
 
 #import <Foundation/Foundation.h>
 

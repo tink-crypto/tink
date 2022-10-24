@@ -18,8 +18,8 @@
 
 #import <Foundation/Foundation.h>
 
-#import "objc/TINKKeysetReader.h"
-#import "objc/core/TINKKeysetReader_Internal.h"
+#import "TINKKeysetReader.h"
+#import "core/TINKKeysetReader_Internal.h"
 
 #include "tink/keyset_reader.h"
 

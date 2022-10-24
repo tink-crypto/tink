@@ -16,11 +16,11 @@
  **************************************************************************
  */
 
-#import "objc/TINKMacConfig.h"
+#import "TINKMacConfig.h"
 
-#import "objc/TINKRegistryConfig.h"
-#import "objc/core/TINKRegistryConfig_Internal.h"
-#import "objc/util/TINKErrors.h"
+#import "TINKRegistryConfig.h"
+#import "core/TINKRegistryConfig_Internal.h"
+#import "util/TINKErrors.h"
 
 #include "tink/mac/mac_config.h"
 #include "tink/util/status.h"
