@@ -20,6 +20,7 @@ import com.google.crypto.tink.SecretKeyAccess;
 import com.google.crypto.tink.annotations.Alpha;
 import com.google.crypto.tink.subtle.Random;
 import com.google.errorprone.annotations.Immutable;
+import java.security.MessageDigest;
 
 /** A class storing an immutable byte array, protecting the data via {@link SecretKeyAccess}. */
 @Alpha
@@ -72,13 +73,6 @@ public final class SecretBytes {
   public boolean equalsSecretBytes(SecretBytes other) {
     byte[] myArray = bytes.toByteArray();
     byte[] otherArray = other.bytes.toByteArray();
-    if (myArray.length != otherArray.length) {
-      return false;
-    }
-    int res = 0;
-    for (int i = 0; i < myArray.length; i++) {
-      res |= myArray[i] ^ otherArray[i];
-    }
-    return res == 0;
+    return MessageDigest.isEqual(myArray, otherArray);
   }
 }

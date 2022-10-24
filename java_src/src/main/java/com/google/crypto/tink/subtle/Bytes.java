@@ -18,6 +18,7 @@ package com.google.crypto.tink.subtle;
 
 import java.nio.ByteBuffer;
 import java.security.GeneralSecurityException;
+import java.security.MessageDigest;
 import java.util.Arrays;
 
 /**
@@ -32,17 +33,7 @@ public final class Bytes {
    * @return true if two arrays are equal.
    */
   public static final boolean equal(final byte[] x, final byte[] y) {
-    if (x == null || y == null) {
-      return false;
-    }
-    if (x.length != y.length) {
-      return false;
-    }
-    int res = 0;
-    for (int i = 0; i < x.length; i++) {
-      res |= x[i] ^ y[i];
-    }
-    return res == 0;
+    return MessageDigest.isEqual(x, y);
   }
 
   /**
