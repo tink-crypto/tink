@@ -19,7 +19,10 @@ set -euo pipefail
 cd ${KOKORO_ARTIFACTS_DIR}/git/tink
 
 cd objc
+
+use_bazel.sh $(cat .bazelversion)
+bazel build -- //:aead //util:errors
+
 ## TODO(b/155060426) Reenable once the tests work.
-# use_bazel.sh $(cat .bazelversion)
 # time bazel build -- ...
 # time bazel test --test_output="errors" -- ...
