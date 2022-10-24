@@ -613,3 +613,45 @@ cc_test(
         "@com_google_googletest//:gtest_main",
     ],
 )
+
+cc_library(
+    name = "keyset_handle_builder_entry",
+    srcs = ["keyset_handle_builder_entry.cc"],
+    hdrs = ["keyset_handle_builder_entry.h"],
+    include_prefix = "tink/internal",
+    deps = [
+        ":key_status_util",
+        ":legacy_proto_key",
+        ":legacy_proto_parameters",
+        ":proto_key_serialization",
+        ":proto_parameters_serialization",
+        "//:insecure_secret_key_access",
+        "//:key",
+        "//:key_status",
+        "//:parameters",
+        "//:registry",
+        "//proto:tink_cc_proto",
+        "//util:statusor",
+        "@com_google_absl//absl/strings",
+        "@com_google_absl//absl/types:optional",
+    ],
+)
+
+cc_test(
+    name = "keyset_handle_builder_entry_test",
+    srcs = ["keyset_handle_builder_entry_test.cc"],
+    deps = [
+        ":keyset_handle_builder_entry",
+        ":legacy_proto_key",
+        ":legacy_proto_parameters",
+        ":proto_key_serialization",
+        ":proto_parameters_serialization",
+        "//:insecure_secret_key_access",
+        "//config:tink_config",
+        "//mac:mac_key_templates",
+        "//proto:tink_cc_proto",
+        "//util:statusor",
+        "//util:test_matchers",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
