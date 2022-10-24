@@ -200,7 +200,7 @@ java_library(
         ":rsa_ssa_pkcs1_verify_jce",
         ":rsa_ssa_pss_sign_jce",
         ":rsa_ssa_pss_verify_jce",
-        "@com_google_protobuf//:protobuf_javalite",
+        "@maven//:com_google_protobuf_protobuf_javalite",
     ],
 )
 
@@ -1016,7 +1016,7 @@ android_library(
         ":rsa_ssa_pkcs1_verify_jce-android",
         ":rsa_ssa_pss_sign_jce-android",
         ":rsa_ssa_pss_verify_jce-android",
-        "@com_google_protobuf//:protobuf_javalite",
+        "@maven//:com_google_protobuf_protobuf_javalite",
     ],
 )
 

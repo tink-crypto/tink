@@ -13,7 +13,7 @@ java_library(
     deps = [
         "//proto:tink_java_proto",
         "//src/main/java/com/google/crypto/tink:key_template",
-        "@com_google_protobuf//:protobuf_javalite",
+        "@maven//:com_google_protobuf_protobuf_javalite",
     ],
 )
 
@@ -66,7 +66,7 @@ java_library(
         "//src/main/java/com/google/crypto/tink:key_template",
         "//src/main/java/com/google/crypto/tink/annotations:alpha",
         "//src/main/java/com/google/crypto/tink/config/internal:tink_fips_util",
-        "@com_google_protobuf//:protobuf_javalite",
+        "@maven//:com_google_protobuf_protobuf_javalite",
     ],
 )
 
@@ -79,7 +79,7 @@ android_library(
         "//src/main/java/com/google/crypto/tink:key_template-android",
         "//src/main/java/com/google/crypto/tink/annotations:alpha-android",
         "//src/main/java/com/google/crypto/tink/config/internal:tink_fips_util-android",
-        "@com_google_protobuf//:protobuf_javalite",
+        "@maven//:com_google_protobuf_protobuf_javalite",
     ],
 )
 
@@ -90,7 +90,7 @@ java_library(
         ":key_type_manager",
         ":primitive_factory",
         "//src/main/java/com/google/crypto/tink/annotations:alpha",
-        "@com_google_protobuf//:protobuf_javalite",
+        "@maven//:com_google_protobuf_protobuf_javalite",
     ],
 )
 
@@ -101,7 +101,7 @@ android_library(
         ":key_type_manager-android",
         ":primitive_factory-android",
         "//src/main/java/com/google/crypto/tink/annotations:alpha-android",
-        "@com_google_protobuf//:protobuf_javalite",
+        "@maven//:com_google_protobuf_protobuf_javalite",
     ],
 )
 
@@ -130,13 +130,13 @@ android_library(
 java_library(
     name = "primitive_factory",
     srcs = ["PrimitiveFactory.java"],
-    deps = ["@com_google_protobuf//:protobuf_javalite"],
+    deps = ["@maven//:com_google_protobuf_protobuf_javalite"],
 )
 
 android_library(
     name = "primitive_factory-android",
     srcs = ["PrimitiveFactory.java"],
-    deps = ["@com_google_protobuf//:protobuf_javalite"],
+    deps = ["@maven//:com_google_protobuf_protobuf_javalite"],
 )
 
 android_library(
@@ -145,7 +145,7 @@ android_library(
     deps = [
         "//proto:tink_java_proto_lite",
         "//src/main/java/com/google/crypto/tink:key_template-android",
-        "@com_google_protobuf//:protobuf_javalite",
+        "@maven//:com_google_protobuf_protobuf_javalite",
     ],
 )
 
@@ -221,8 +221,8 @@ java_library(
         ":util",
         "//proto:tink_java_proto",
         "//src/main/java/com/google/crypto/tink/util:bytes",
-        "@com_google_protobuf//:protobuf_javalite",
         "@maven//:com_google_errorprone_error_prone_annotations",
+        "@maven//:com_google_protobuf_protobuf_javalite",
     ],
 )
 
@@ -234,9 +234,9 @@ java_library(
         ":util",
         "//proto:tink_java_proto",
         "//src/main/java/com/google/crypto/tink/util:bytes",
-        "@com_google_protobuf//:protobuf_javalite",
         "@maven//:com_google_code_findbugs_jsr305",
         "@maven//:com_google_errorprone_error_prone_annotations",
+        "@maven//:com_google_protobuf_protobuf_javalite",
     ],
 )
 
@@ -248,8 +248,8 @@ android_library(
         ":util-android",
         "//proto:tink_java_proto_lite",
         "//src/main/java/com/google/crypto/tink/util:bytes-android",
-        "@com_google_protobuf//:protobuf_javalite",
         "@maven//:com_google_errorprone_error_prone_annotations",
+        "@maven//:com_google_protobuf_protobuf_javalite",
     ],
 )
 
@@ -261,9 +261,9 @@ android_library(
         ":util-android",
         "//proto:tink_java_proto_lite",
         "//src/main/java/com/google/crypto/tink/util:bytes-android",
-        "@com_google_protobuf//:protobuf_javalite",
         "@maven//:com_google_code_findbugs_jsr305",
         "@maven//:com_google_errorprone_error_prone_annotations",
+        "@maven//:com_google_protobuf_protobuf_javalite",
     ],
 )
 

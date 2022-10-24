@@ -118,7 +118,7 @@ java_library(
         "//src/main/java/com/google/crypto/tink/subtle:aes_siv",
         "//src/main/java/com/google/crypto/tink/subtle:random",
         "//src/main/java/com/google/crypto/tink/subtle:validators",
-        "@com_google_protobuf//:protobuf_javalite",
+        "@maven//:com_google_protobuf_protobuf_javalite",
     ],
 )
 
@@ -136,6 +136,6 @@ android_library(
         "//src/main/java/com/google/crypto/tink/subtle:aes_siv-android",
         "//src/main/java/com/google/crypto/tink/subtle:random-android",
         "//src/main/java/com/google/crypto/tink/subtle:validators-android",
-        "@com_google_protobuf//:protobuf_javalite",
+        "@maven//:com_google_protobuf_protobuf_javalite",
     ],
 )

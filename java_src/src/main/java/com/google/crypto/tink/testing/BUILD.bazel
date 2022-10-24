@@ -42,8 +42,8 @@ java_library(
         "//src/main/java/com/google/crypto/tink/subtle:elliptic_curves",
         "//src/main/java/com/google/crypto/tink/subtle:hex",
         "//src/main/java/com/google/crypto/tink/subtle:random",
-        "@com_google_protobuf//:protobuf_javalite",
         "@maven//:com_google_code_findbugs_jsr305",
+        "@maven//:com_google_protobuf_protobuf_javalite",
         "@maven//:com_google_truth_truth",
         "@maven//:junit_junit",
     ],
@@ -85,8 +85,8 @@ android_library(
         "//src/main/java/com/google/crypto/tink/subtle:elliptic_curves-android",
         "//src/main/java/com/google/crypto/tink/subtle:hex-android",
         "//src/main/java/com/google/crypto/tink/subtle:random-android",
-        "@com_google_protobuf//:protobuf_javalite",
         "@maven//:com_google_code_findbugs_jsr305",
+        "@maven//:com_google_protobuf_protobuf_javalite",
         "@maven//:com_google_truth_truth",
         "@maven//:junit_junit",
     ],
@@ -122,7 +122,7 @@ java_library(
     deps = [
         "//src/main/java/com/google/crypto/tink:key_template",
         "//src/main/java/com/google/crypto/tink/internal:key_type_manager",
-        "@com_google_protobuf//:protobuf_javalite",
+        "@maven//:com_google_protobuf_protobuf_javalite",
         "@maven//:com_google_truth_truth",
     ],
 )
@@ -133,7 +133,7 @@ android_library(
     deps = [
         "//src/main/java/com/google/crypto/tink:key_template-android",
         "//src/main/java/com/google/crypto/tink/internal:key_type_manager-android",
-        "@com_google_protobuf//:protobuf_javalite",
+        "@maven//:com_google_protobuf_protobuf_javalite",
         "@maven//:com_google_truth_truth",
     ],
 )

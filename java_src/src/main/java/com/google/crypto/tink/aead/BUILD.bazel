@@ -19,7 +19,7 @@ java_library(
         "//src/main/java/com/google/crypto/tink/subtle:aes_gcm_jce",
         "//src/main/java/com/google/crypto/tink/subtle:random",
         "//src/main/java/com/google/crypto/tink/subtle:validators",
-        "@com_google_protobuf//:protobuf_javalite",
+        "@maven//:com_google_protobuf_protobuf_javalite",
     ],
 )
 
@@ -37,7 +37,7 @@ java_library(
         "//src/main/java/com/google/crypto/tink/internal:primitive_factory",
         "//src/main/java/com/google/crypto/tink/subtle:random",
         "//src/main/java/com/google/crypto/tink/subtle:validators",
-        "@com_google_protobuf//:protobuf_javalite",
+        "@maven//:com_google_protobuf_protobuf_javalite",
     ],
 )
 
@@ -85,7 +85,7 @@ java_library(
         "//src/main/java/com/google/crypto/tink/subtle:encrypt_then_authenticate",
         "//src/main/java/com/google/crypto/tink/subtle:ind_cpa_cipher",
         "//src/main/java/com/google/crypto/tink/subtle:validators",
-        "@com_google_protobuf//:protobuf_javalite",
+        "@maven//:com_google_protobuf_protobuf_javalite",
     ],
 )
 
@@ -114,7 +114,7 @@ java_library(
         "//src/main/java/com/google/crypto/tink/internal:key_type_manager",
         "//src/main/java/com/google/crypto/tink/internal:primitive_factory",
         "//src/main/java/com/google/crypto/tink/subtle:validators",
-        "@com_google_protobuf//:protobuf_javalite",
+        "@maven//:com_google_protobuf_protobuf_javalite",
     ],
 )
 
@@ -142,7 +142,7 @@ java_library(
         "//src/main/java/com/google/crypto/tink/subtle:random",
         "//src/main/java/com/google/crypto/tink/subtle:validators",
         "//src/main/java/com/google/crypto/tink/subtle:x_cha_cha20_poly1305",
-        "@com_google_protobuf//:protobuf_javalite",
+        "@maven//:com_google_protobuf_protobuf_javalite",
     ],
 )
 
@@ -178,7 +178,7 @@ java_library(
         "//src/main/java/com/google/crypto/tink/internal:key_type_manager",
         "//src/main/java/com/google/crypto/tink/internal:primitive_factory",
         "//src/main/java/com/google/crypto/tink/subtle:validators",
-        "@com_google_protobuf//:protobuf_javalite",
+        "@maven//:com_google_protobuf_protobuf_javalite",
     ],
 )
 
@@ -195,7 +195,7 @@ java_library(
         "//src/main/java/com/google/crypto/tink/subtle:ind_cpa_cipher",
         "//src/main/java/com/google/crypto/tink/subtle:random",
         "//src/main/java/com/google/crypto/tink/subtle:validators",
-        "@com_google_protobuf//:protobuf_javalite",
+        "@maven//:com_google_protobuf_protobuf_javalite",
     ],
 )
 
@@ -213,7 +213,7 @@ java_library(
         "//src/main/java/com/google/crypto/tink/subtle:cha_cha20_poly1305",
         "//src/main/java/com/google/crypto/tink/subtle:random",
         "//src/main/java/com/google/crypto/tink/subtle:validators",
-        "@com_google_protobuf//:protobuf_javalite",
+        "@maven//:com_google_protobuf_protobuf_javalite",
     ],
 )
 
@@ -231,7 +231,7 @@ java_library(
         "//src/main/java/com/google/crypto/tink/subtle:aes_eax_jce",
         "//src/main/java/com/google/crypto/tink/subtle:random",
         "//src/main/java/com/google/crypto/tink/subtle:validators",
-        "@com_google_protobuf//:protobuf_javalite",
+        "@maven//:com_google_protobuf_protobuf_javalite",
     ],
 )
 
@@ -271,7 +271,7 @@ android_library(
         "//src/main/java/com/google/crypto/tink/subtle:aes_gcm_jce-android",
         "//src/main/java/com/google/crypto/tink/subtle:random-android",
         "//src/main/java/com/google/crypto/tink/subtle:validators-android",
-        "@com_google_protobuf//:protobuf_javalite",
+        "@maven//:com_google_protobuf_protobuf_javalite",
     ],
 )
 
@@ -289,7 +289,7 @@ android_library(
         "//src/main/java/com/google/crypto/tink/internal:primitive_factory-android",
         "//src/main/java/com/google/crypto/tink/subtle:random-android",
         "//src/main/java/com/google/crypto/tink/subtle:validators-android",
-        "@com_google_protobuf//:protobuf_javalite",
+        "@maven//:com_google_protobuf_protobuf_javalite",
     ],
 )
 
@@ -337,7 +337,7 @@ android_library(
         "//src/main/java/com/google/crypto/tink/subtle:encrypt_then_authenticate-android",
         "//src/main/java/com/google/crypto/tink/subtle:ind_cpa_cipher-android",
         "//src/main/java/com/google/crypto/tink/subtle:validators-android",
-        "@com_google_protobuf//:protobuf_javalite",
+        "@maven//:com_google_protobuf_protobuf_javalite",
     ],
 )
 
@@ -366,7 +366,7 @@ android_library(
         "//src/main/java/com/google/crypto/tink/internal:key_type_manager-android",
         "//src/main/java/com/google/crypto/tink/internal:primitive_factory-android",
         "//src/main/java/com/google/crypto/tink/subtle:validators-android",
-        "@com_google_protobuf//:protobuf_javalite",
+        "@maven//:com_google_protobuf_protobuf_javalite",
     ],
 )
 
@@ -394,7 +394,7 @@ android_library(
         "//src/main/java/com/google/crypto/tink/subtle:random-android",
         "//src/main/java/com/google/crypto/tink/subtle:validators-android",
         "//src/main/java/com/google/crypto/tink/subtle:x_cha_cha20_poly1305-android",
-        "@com_google_protobuf//:protobuf_javalite",
+        "@maven//:com_google_protobuf_protobuf_javalite",
     ],
 )
 
@@ -430,7 +430,7 @@ android_library(
         "//src/main/java/com/google/crypto/tink/internal:key_type_manager-android",
         "//src/main/java/com/google/crypto/tink/internal:primitive_factory-android",
         "//src/main/java/com/google/crypto/tink/subtle:validators-android",
-        "@com_google_protobuf//:protobuf_javalite",
+        "@maven//:com_google_protobuf_protobuf_javalite",
     ],
 )
 
@@ -447,7 +447,7 @@ android_library(
         "//src/main/java/com/google/crypto/tink/subtle:ind_cpa_cipher-android",
         "//src/main/java/com/google/crypto/tink/subtle:random-android",
         "//src/main/java/com/google/crypto/tink/subtle:validators-android",
-        "@com_google_protobuf//:protobuf_javalite",
+        "@maven//:com_google_protobuf_protobuf_javalite",
     ],
 )
 
@@ -465,7 +465,7 @@ android_library(
         "//src/main/java/com/google/crypto/tink/subtle:cha_cha20_poly1305-android",
         "//src/main/java/com/google/crypto/tink/subtle:random-android",
         "//src/main/java/com/google/crypto/tink/subtle:validators-android",
-        "@com_google_protobuf//:protobuf_javalite",
+        "@maven//:com_google_protobuf_protobuf_javalite",
     ],
 )
 
@@ -483,7 +483,7 @@ android_library(
         "//src/main/java/com/google/crypto/tink/subtle:aes_eax_jce-android",
         "//src/main/java/com/google/crypto/tink/subtle:random-android",
         "//src/main/java/com/google/crypto/tink/subtle:validators-android",
-        "@com_google_protobuf//:protobuf_javalite",
+        "@maven//:com_google_protobuf_protobuf_javalite",
     ],
 )
 

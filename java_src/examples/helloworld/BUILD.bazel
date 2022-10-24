@@ -11,8 +11,8 @@ java_binary(
     ]),
     main_class = "com.helloworld.HelloWorld",
     runtime_deps = [
-        "@com_google_protobuf//:protobuf_javalite",
         "@maven//:com_google_code_gson_gson",
+        "@maven//:com_google_protobuf_protobuf_javalite",
     ],
     deps = [
         "@maven//:args4j_args4j",
