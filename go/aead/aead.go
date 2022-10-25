@@ -34,7 +34,9 @@ func init() {
 	if err := registry.RegisterKeyManager(new(aesGCMKeyManager)); err != nil {
 		panic(fmt.Sprintf("aead.init() failed: %v", err))
 	}
-	internalregistry.AllowKeyDerivation(aesGCMTypeURL)
+	if err := internalregistry.AllowKeyDerivation(aesGCMTypeURL); err != nil {
+		panic(fmt.Sprintf("aead.init() failed: %v", err))
+	}
 
 	if err := registry.RegisterKeyManager(new(chaCha20Poly1305KeyManager)); err != nil {
 		panic(fmt.Sprintf("aead.init() failed: %v", err))

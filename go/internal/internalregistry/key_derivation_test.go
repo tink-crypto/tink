@@ -45,15 +45,11 @@ func mustRegisterBadKeyManagers(t *testing.T) {
 	t.Helper()
 	// The registry does not allow a key manager to be registered more than once.
 	once.Do(func() {
-		internalregistry.AllowKeyDerivation(unregisteredKMTypeURL)
-
-		internalregistry.AllowKeyDerivation(notDerivableKMTypeURL)
 		notDerivableKM := &stubkeymanager.StubKeyManager{URL: notDerivableKMTypeURL}
 		if err := registry.RegisterKeyManager(notDerivableKM); err != nil {
 			t.Fatalf("registry.RegisterKeyManager() err = %v, want nil", err)
 		}
 
-		internalregistry.AllowKeyDerivation(failingKMTypeURL)
 		failingKM := &stubkeymanager.StubDerivableKeyManager{
 			StubKeyManager: stubkeymanager.StubKeyManager{
 				URL: failingKMTypeURL,
@@ -66,60 +62,37 @@ func mustRegisterBadKeyManagers(t *testing.T) {
 	})
 }
 
-func TestDerivableKeyManagerFromKeyTemplate(t *testing.T) {
-	for _, test := range []struct {
-		name        string
-		keyTemplate *tinkpb.KeyTemplate
-	}{
-		{
-			name:        "AES-128-GCM",
-			keyTemplate: aead.AES128GCMKeyTemplate(),
-		},
-		{
-			name:        "AES-256-GCM",
-			keyTemplate: aead.AES256GCMKeyTemplate(),
-		},
+func TestDerivableKeyManagers(t *testing.T) {
+	mustRegisterBadKeyManagers(t)
+	for _, typeURL := range []string{
+		aead.AES128GCMKeyTemplate().GetTypeUrl(),
+		aead.AES256GCMKeyTemplate().GetTypeUrl(),
+		failingKMTypeURL,
 	} {
-		t.Run(test.name, func(t *testing.T) {
-			if _, err := internalregistry.DerivableKeyManagerFromKeyTemplate(test.keyTemplate); err != nil {
-				t.Errorf("DerivableKeyManagerFromKeyTemplate() err = %v, want nil", err)
+		t.Run(typeURL, func(t *testing.T) {
+			if err := internalregistry.AllowKeyDerivation(typeURL); err != nil {
+				t.Fatalf("internalregistry.AllowKeyDerivation() err = %v, want nil", err)
+			}
+			if !internalregistry.CanDeriveKeys(typeURL) {
+				t.Errorf("internalregistry.CanDeriveKeys() = false, want true")
 			}
 		})
 	}
 }
 
-func TestDerivableKeyManagerFromKeyTemplateRejectsInvalidInputs(t *testing.T) {
+func TestDerivableKeyManagersRejectsInvalidInputs(t *testing.T) {
 	mustRegisterBadKeyManagers(t)
-	rand := random.GetRandomBytes(32)
-	for _, test := range []struct {
-		name        string
-		keyTemplate *tinkpb.KeyTemplate
-	}{
-		{name: "nil key template"},
-		{
-			name:        "derivation-disallowed but registered key manager",
-			keyTemplate: aead.AES128CTRHMACSHA256KeyTemplate(),
-		},
-		{
-			name: "derivation-allowed but unregistered key manager",
-			keyTemplate: &tinkpb.KeyTemplate{
-				TypeUrl:          unregisteredKMTypeURL,
-				Value:            rand,
-				OutputPrefixType: tinkpb.OutputPrefixType_TINK,
-			},
-		},
-		{
-			name: "does not implement DerivableKeyManager",
-			keyTemplate: &tinkpb.KeyTemplate{
-				TypeUrl:          notDerivableKMTypeURL,
-				Value:            rand,
-				OutputPrefixType: tinkpb.OutputPrefixType_TINK,
-			},
-		},
+	for _, typeURL := range []string{
+		"",
+		unregisteredKMTypeURL,
+		notDerivableKMTypeURL,
 	} {
-		t.Run(test.name, func(t *testing.T) {
-			if _, err := internalregistry.DerivableKeyManagerFromKeyTemplate(test.keyTemplate); err == nil {
-				t.Error("DerivableKeyManagerFromKeyTemplate() err = nil, want non-nil")
+		t.Run(typeURL, func(t *testing.T) {
+			if err := internalregistry.AllowKeyDerivation(typeURL); err == nil {
+				t.Error("internalregistry.AllowKeyDerivation() err = nil, want non-nil")
+			}
+			if internalregistry.CanDeriveKeys(typeURL) {
+				t.Errorf("internalregistry.CanDeriveKeys() = true, want false")
 			}
 		})
 	}

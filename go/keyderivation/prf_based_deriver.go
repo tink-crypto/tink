@@ -49,11 +49,11 @@ func newPRFBasedDeriver(prfKeyData *tinkpb.KeyData, derivedKeyTemplate *tinkpb.K
 	}
 	prf, ok := p.(streamingprf.StreamingPRF)
 	if !ok {
-		return nil, fmt.Errorf("primitive is not StreamingPRF")
+		return nil, errors.New("primitive is not StreamingPRF")
 	}
 	// Validate derived key template.
-	if _, err := internalregistry.DerivableKeyManagerFromKeyTemplate(derivedKeyTemplate); err != nil {
-		return nil, err
+	if !internalregistry.CanDeriveKeys(derivedKeyTemplate.GetTypeUrl()) {
+		return nil, errors.New("derived key template is not a derivable key type")
 	}
 	return &prfBasedDeriver{
 		prf:                prf,

@@ -30,7 +30,10 @@ var (
 	derivableKeyManagersMu sync.RWMutex
 
 	// derivableKeyManagers is the set of all key managers allowed to derive keys.
-	// It is keyed by the key manager's type URL, i.e. typeURL -> true.
+	// It is keyed by the key manager's type URL, i.e. typeURL -> true. All type
+	// URLs in this map correspond to key managers that are
+	//   - in the registry and
+	//   - implement key derivation.
 	//
 	// This exists because of Golang's weak type system and the desire to keep key
 	// derivation non-public. If we do not explicitly restrict derivable key
@@ -40,24 +43,32 @@ var (
 	derivableKeyManagers = make(map[string]bool)
 )
 
-// AllowKeyDerivation adds the type URL to the derivable key managers allow
-// list.
-func AllowKeyDerivation(typeURL string) {
+// AllowKeyDerivation adds the type URL to derivableKeyManagers if the
+// corresponding key manager is in the registry and implements key derivation.
+func AllowKeyDerivation(typeURL string) error {
+	km, err := registry.GetKeyManager(typeURL)
+	if err != nil {
+		return err
+	}
+	if _, ok := km.(DerivableKeyManager); !ok {
+		return fmt.Errorf("key manager for type %s does not implement key derivation", typeURL)
+	}
 	derivableKeyManagersMu.Lock()
-	defer derivableKeyManagersMu.Unlock()
 	derivableKeyManagers[typeURL] = true
+	derivableKeyManagersMu.Unlock()
+	return nil
 }
 
-// DerivableKeyManagerFromKeyTemplate returns the key manager specified by the
-// given key template. It succeeds only if the key manager
-//   - has a type URL in derivableKeyManagers,
-//   - is registered in the registry, and
-//   - implements DerivableKeyManager.
-func DerivableKeyManagerFromKeyTemplate(keyTemplate *tinkpb.KeyTemplate) (DerivableKeyManager, error) {
-	if keyTemplate == nil {
-		return nil, fmt.Errorf("no key template provided")
-	}
-	if !isDerivableKeyManager(keyTemplate.GetTypeUrl()) {
+// CanDeriveKeys returns true if typeURL is in derivableKeyManagers.
+func CanDeriveKeys(typeURL string) bool {
+	derivableKeyManagersMu.Lock()
+	defer derivableKeyManagersMu.Unlock()
+	return derivableKeyManagers[typeURL]
+}
+
+// DeriveKey derives a new key from template and pseudorandomness.
+func DeriveKey(keyTemplate *tinkpb.KeyTemplate, pseudorandomness io.Reader) (*tinkpb.KeyData, error) {
+	if !CanDeriveKeys(keyTemplate.GetTypeUrl()) {
 		return nil, fmt.Errorf("key manager for type %s is not allowed to derive keys", keyTemplate.GetTypeUrl())
 	}
 	km, err := registry.GetKeyManager(keyTemplate.GetTypeUrl())
@@ -67,15 +78,6 @@ func DerivableKeyManagerFromKeyTemplate(keyTemplate *tinkpb.KeyTemplate) (Deriva
 	keyManager, ok := km.(DerivableKeyManager)
 	if !ok {
 		return nil, fmt.Errorf("key manager for type %s does not implement key derivation", keyTemplate.GetTypeUrl())
-	}
-	return keyManager, nil
-}
-
-// DeriveKey derives a new key from template and pseudorandomness.
-func DeriveKey(keyTemplate *tinkpb.KeyTemplate, pseudorandomness io.Reader) (*tinkpb.KeyData, error) {
-	keyManager, err := DerivableKeyManagerFromKeyTemplate(keyTemplate)
-	if err != nil {
-		return nil, err
 	}
 	key, err := keyManager.DeriveKey(keyTemplate.GetValue(), pseudorandomness)
 	if err != nil {
@@ -90,12 +92,4 @@ func DeriveKey(keyTemplate *tinkpb.KeyTemplate, pseudorandomness io.Reader) (*ti
 		Value:           serializedKey,
 		KeyMaterialType: keyManager.KeyMaterialType(),
 	}, nil
-}
-
-// isDerivableKeyManager returns true if the type URL is in the derivable key
-// managers allow list, else returns false.
-func isDerivableKeyManager(typeURL string) bool {
-	derivableKeyManagersMu.Lock()
-	defer derivableKeyManagersMu.Unlock()
-	return derivableKeyManagers[typeURL]
 }
