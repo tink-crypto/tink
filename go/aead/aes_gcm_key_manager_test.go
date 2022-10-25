@@ -325,7 +325,7 @@ func TestAESGCMDeriveKeyFailsWithInvalidKeyFormats(t *testing.T) {
 			}
 			buf := bytes.NewBuffer(random.GetRandomBytes(test.randLen))
 			if _, err := keyManager.DeriveKey(serializedKeyFormat, buf); err == nil {
-				t.Fatalf("keyManager.DeriveKey() err = nil, want non-nil")
+				t.Error("keyManager.DeriveKey() err = nil, want non-nil")
 			}
 		})
 	}
@@ -344,7 +344,7 @@ func TestAESGCMDeriveKeyFailsWithMalformedSerializedKeyFormat(t *testing.T) {
 	malformedSerializedKeyFormat := random.GetRandomBytes(uint32(size))
 	buf := bytes.NewBuffer(random.GetRandomBytes(32))
 	if _, err := keyManager.DeriveKey(malformedSerializedKeyFormat, buf); err == nil {
-		t.Fatalf("keyManager.DeriveKey() err = nil, want non-nil")
+		t.Error("keyManager.DeriveKey() err = nil, want non-nil")
 	}
 }
 
