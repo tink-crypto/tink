@@ -43,28 +43,119 @@ import javax.crypto.Mac;
  */
 public final class EngineFactory<T_WRAPPER extends EngineWrapper<JcePrimitiveT>, JcePrimitiveT> {
   private static final Logger logger = Logger.getLogger(EngineFactory.class.getName());
-  private static final List<Provider> policy;
-  private static final boolean LET_FALLBACK;
+  private final Policy<JcePrimitiveT> policy;
 
-  // Warning: keep this above the initialization of static providers below. or you'll get null
-  // pointer errors (due to this policy not being initialized).
-  static {
-    if (TinkFipsUtil.useOnlyFips()) {
-      // The only accepted provider is Conscrypt in FIPS-mode and no fallback is allowed.
-      policy = toProviderList("GmsCore_OpenSSL", "AndroidOpenSSL", "Conscrypt");
-      LET_FALLBACK = false;
-    } else if (SubtleUtil.isAndroid()) {
-      // TODO(thaidn): test this when Android building and testing are supported.
-      // On Android prefer Conscrypt, but allow fallback to other providers.
-      policy =
-          toProviderList(
-              "GmsCore_OpenSSL" /* Conscrypt in GmsCore, updatable thus preferrable */,
-              "AndroidOpenSSL" /* Conscrypt in AOSP, not updatable but still better than BC */);
-      LET_FALLBACK = true;
-    } else {
-      policy = new ArrayList<>();
-      LET_FALLBACK = true;
+  /**
+   * A Policy provides a wrapper around the JCE engines, and defines how a cipher instance will be
+   * retrieved. A preferred list of providers can be passed, which the policy might use to
+   * prioritize certain providers. For details see the specific policies.
+   */
+  private static interface Policy<JcePrimitiveT> {
+    public JcePrimitiveT getInstance(String algorithm) throws GeneralSecurityException;
+
+    public JcePrimitiveT getInstance(String algorithm, List<Provider> preferredProviders)
+        throws GeneralSecurityException;
+  }
+
+  /**
+   * The default policy, which uses the JDK priority for providers. If a list of preferred providers
+   * is provided, then these will be used first in the order they are given.
+   */
+  private static class DefaultPolicy<JcePrimitiveT> implements Policy<JcePrimitiveT> {
+    private DefaultPolicy(EngineWrapper<JcePrimitiveT> jceFactory) {
+      this.jceFactory = jceFactory;
     }
+
+    @Override
+    public JcePrimitiveT getInstance(String algorithm) throws GeneralSecurityException {
+      return this.jceFactory.getInstance(algorithm, null);
+    }
+
+    @Override
+    public JcePrimitiveT getInstance(String algorithm, List<Provider> preferredProviders)
+        throws GeneralSecurityException {
+      for (Provider provider : preferredProviders) {
+        try {
+          return this.jceFactory.getInstance(algorithm, provider);
+        } catch (Exception e) {
+          // Provider failed to provide instance, but we can continue with other providers.
+        }
+      }
+      return getInstance(algorithm);
+    }
+
+    private final EngineWrapper<JcePrimitiveT> jceFactory;
+  }
+
+  /**
+   * The FIPS policy, only allows Conscrypt as a provider. No other provider will be used, and any
+   * preferred provider will be ignored.
+   */
+  private static class FipsPolicy<JcePrimitiveT> implements Policy<JcePrimitiveT> {
+    private FipsPolicy(EngineWrapper<JcePrimitiveT> jceFactory) {
+      this.jceFactory = jceFactory;
+    }
+
+    @Override
+    public JcePrimitiveT getInstance(String algorithm) throws GeneralSecurityException {
+      List<Provider> conscryptProviders =
+          toProviderList("GmsCore_OpenSSL", "AndroidOpenSSL", "Conscrypt");
+      Exception cause = null;
+      for (Provider provider : conscryptProviders) {
+        try {
+          return this.jceFactory.getInstance(algorithm, provider);
+        } catch (Exception e) {
+          if (cause == null) {
+            cause = e;
+          }
+        }
+      }
+      throw new GeneralSecurityException("No good Provider found.", cause);
+    }
+
+    @Override
+    public JcePrimitiveT getInstance(String algorithm, List<Provider> preferredProviders)
+        throws GeneralSecurityException {
+      // Ignores preferred provider, as we don't allow overruling the policy.
+      return getInstance(algorithm);
+    }
+
+    private final EngineWrapper<JcePrimitiveT> jceFactory;
+  }
+
+  /**
+   * The Android policy always prefer Conscrypt as a provider, but allows to fallback on the JDK
+   * behavior if these are not available. Preferred providers will be ignored.
+   */
+  private static class AndroidPolicy<JcePrimitiveT> implements Policy<JcePrimitiveT> {
+    private AndroidPolicy(EngineWrapper<JcePrimitiveT> jceFactory) {
+      this.jceFactory = jceFactory;
+    }
+
+    @Override
+    public JcePrimitiveT getInstance(String algorithm) throws GeneralSecurityException {
+      List<Provider> conscryptProviders = toProviderList("GmsCore_OpenSSL", "AndroidOpenSSL");
+      Exception cause = null;
+      for (Provider provider : conscryptProviders) {
+        try {
+          return this.jceFactory.getInstance(algorithm, provider);
+        } catch (Exception e) {
+          if (cause == null) {
+            cause = e;
+          }
+        }
+      }
+      return this.jceFactory.getInstance(algorithm, null);
+    }
+
+    @Override
+    public JcePrimitiveT getInstance(String algorithm, List<Provider> preferredProviders)
+        throws GeneralSecurityException {
+      // Ignores preferred provider, as we don't allow overruling the policy.
+      return getInstance(algorithm);
+    }
+
+    private final EngineWrapper<JcePrimitiveT> jceFactory;
   }
 
   public static final EngineFactory<EngineWrapper.TCipher, Cipher> CIPHER =
@@ -103,25 +194,21 @@ public final class EngineFactory<T_WRAPPER extends EngineWrapper<JcePrimitiveT>,
   }
 
   public EngineFactory(T_WRAPPER instanceBuilder) {
-    this.instanceBuilder = instanceBuilder;
+    if (TinkFipsUtil.useOnlyFips()) {
+      policy = new FipsPolicy<>(instanceBuilder);
+    } else if (SubtleUtil.isAndroid()) {
+      policy = new AndroidPolicy<>(instanceBuilder);
+    } else {
+      policy = new DefaultPolicy<>(instanceBuilder);
+    }
   }
 
   public JcePrimitiveT getInstance(String algorithm) throws GeneralSecurityException {
-    Exception cause = null;
-    for (Provider provider : policy) {
-      try {
-        return this.instanceBuilder.getInstance(algorithm, provider);
-      } catch (Exception e) {
-        if (cause == null) {
-          cause = e;
-        }
-      }
-    }
-    if (LET_FALLBACK) {
-      return this.instanceBuilder.getInstance(algorithm, null);
-    }
-    throw new GeneralSecurityException("No good Provider found.", cause);
+    return policy.getInstance(algorithm);
   }
 
-  private final T_WRAPPER instanceBuilder;
+  JcePrimitiveT getInstance(String algorithm, List<Provider> preferredProviders)
+      throws GeneralSecurityException {
+    return policy.getInstance(algorithm, preferredProviders);
+  }
 }

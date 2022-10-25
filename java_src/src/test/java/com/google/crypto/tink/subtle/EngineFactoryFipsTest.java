@@ -22,6 +22,7 @@ import com.google.crypto.tink.config.TinkFips;
 import java.security.GeneralSecurityException;
 import java.security.Provider;
 import java.security.Security;
+import java.util.List;
 import org.conscrypt.Conscrypt;
 import org.junit.Assume;
 import org.junit.Before;
@@ -105,5 +106,19 @@ public final class EngineFactoryFipsTest {
 
     // Conscrypt does not provide "AES", so this must fail and not use another provider.
     assertThrows(GeneralSecurityException.class, () -> EngineFactory.CIPHER.getInstance("AES"));
+  }
+
+  @Test
+  public void testNoFallbackEvenIfPreferred() throws Exception {
+    Provider p = Conscrypt.newProvider();
+    Security.addProvider(p);
+
+    for (Provider provider : Security.getProviders()) {
+      List<Provider> preferredProviders = EngineFactory.toProviderList(provider.getName());
+      // Conscrypt does not provide "AES", so this must fail and not use the preferred provider.
+      assertThrows(
+          GeneralSecurityException.class,
+          () -> EngineFactory.CIPHER.getInstance("AES", preferredProviders));
+    }
   }
 }
