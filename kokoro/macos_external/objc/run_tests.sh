@@ -20,8 +20,8 @@ cd ${KOKORO_ARTIFACTS_DIR}/git/tink
 
 cd objc
 
-use_bazel.sh $(cat .bazelversion)
-bazel build -- //:aead //util:errors
+use_bazel.sh "$(cat .bazelversion)"
+bazel build -- //:aead //util/...
 
 ## TODO(b/155060426) Reenable once the tests work.
 # time bazel build -- ...
