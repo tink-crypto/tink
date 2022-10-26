@@ -26,7 +26,6 @@ import java.security.Security;
 import java.security.Signature;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Logger;
 import javax.crypto.Cipher;
 import javax.crypto.KeyAgreement;
 import javax.crypto.Mac;
@@ -42,7 +41,6 @@ import javax.crypto.Mac;
  * @since 1.0.0
  */
 public final class EngineFactory<T_WRAPPER extends EngineWrapper<JcePrimitiveT>, JcePrimitiveT> {
-  private static final Logger logger = Logger.getLogger(EngineFactory.class.getName());
   private final Policy<JcePrimitiveT> policy;
 
   /**
@@ -186,8 +184,6 @@ public final class EngineFactory<T_WRAPPER extends EngineWrapper<JcePrimitiveT>,
       Provider p = Security.getProvider(s);
       if (p != null) {
         providers.add(p);
-      } else {
-        logger.info(String.format("Provider %s not available", s));
       }
     }
     return providers;
