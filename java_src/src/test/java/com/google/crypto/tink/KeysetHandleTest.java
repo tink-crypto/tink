@@ -41,6 +41,8 @@ import com.google.crypto.tink.monitoring.MonitoringClient;
 import com.google.crypto.tink.proto.AesEaxKey;
 import com.google.crypto.tink.proto.AesEaxKeyFormat;
 import com.google.crypto.tink.proto.EcdsaPrivateKey;
+import com.google.crypto.tink.proto.HashType;
+import com.google.crypto.tink.proto.HmacParams;
 import com.google.crypto.tink.proto.KeyData;
 import com.google.crypto.tink.proto.KeyStatusType;
 import com.google.crypto.tink.proto.Keyset;
@@ -681,6 +683,37 @@ public class KeysetHandleTest {
     assertThat(entry.getStatus()).isEqualTo(KeyStatus.ENABLED);
     assertThat(entry.isPrimary()).isTrue();
     assertThat(entry.getKey().getClass()).isEqualTo(HmacKey.class);
+  }
+
+  @Test
+  public void getAt_invalidKeyWithRegisteredProtoSerialization_givesALegacyProtoKey()
+      throws Exception {
+    // HmacKey's proto serialization HmacProtoSerialization is registed in HmacKeyManager.
+    com.google.crypto.tink.proto.HmacKey invalidProtoHmacKey =
+        com.google.crypto.tink.proto.HmacKey.newBuilder()
+            .setVersion(999)
+            .setKeyValue(ByteString.copyFromUtf8("01234567890123456"))
+            .setParams(HmacParams.newBuilder().setHash(HashType.UNKNOWN_HASH).setTagSize(0))
+            .build();
+    Keyset keyset =
+        TestUtil.createKeyset(
+            TestUtil.createKey(
+                TestUtil.createKeyData(
+                    invalidProtoHmacKey,
+                    "type.googleapis.com/google.crypto.tink.HmacKey",
+                    KeyData.KeyMaterialType.SYMMETRIC),
+                42,
+                KeyStatusType.ENABLED,
+                OutputPrefixType.TINK));
+    KeysetHandle handle = KeysetHandle.fromKeyset(keyset);
+    assertThat(handle.size()).isEqualTo(1);
+    KeysetHandle.Entry entry = handle.getAt(0);
+    assertThat(entry.getId()).isEqualTo(42);
+    assertThat(entry.getStatus()).isEqualTo(KeyStatus.ENABLED);
+    assertThat(entry.isPrimary()).isTrue();
+    // Parsing the proto key into an HmacKey failed. So instead of a HmacKey, we get a
+    // LegacyProtoKey key.
+    assertThat(entry.getKey().getClass()).isEqualTo(LegacyProtoKey.class);
   }
 
   @Test

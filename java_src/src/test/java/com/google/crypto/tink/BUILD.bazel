@@ -290,7 +290,9 @@ java_test(
     srcs = ["KeysetHandleTest.java"],
     deps = [
         "//proto:aes_eax_java_proto",
+        "//proto:common_java_proto",
         "//proto:ecdsa_java_proto",
+        "//proto:hmac_java_proto",
         "//proto:tink_java_proto",
         "//src/main/java/com/google/crypto/tink:aead",
         "//src/main/java/com/google/crypto/tink:binary_keyset_reader",
