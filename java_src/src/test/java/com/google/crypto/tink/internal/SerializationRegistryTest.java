@@ -216,12 +216,14 @@ public final class SerializationRegistryTest {
                     TestKey1.class,
                     TestSerializationA.class))
             .build();
+    assertThat(registry.hasSerializerForKey(new TestKey1(), TestSerializationA.class)).isTrue();
     assertThat(registry.serializeKey(new TestKey1(), TestSerializationA.class, ACCESS)).isNotNull();
   }
 
   @Test
   public void test_emptyRegistry_throws() throws Exception {
     SerializationRegistry registry = new SerializationRegistry.Builder().build();
+    assertThat(registry.hasSerializerForKey(new TestKey1(), TestSerializationA.class)).isFalse();
     assertThrows(
         GeneralSecurityException.class,
         () -> registry.serializeKey(new TestKey1(), TestSerializationA.class, ACCESS));
@@ -384,6 +386,7 @@ public final class SerializationRegistryTest {
                 KeyParser.create(
                     SerializationRegistryTest::parseAToKey1, A_1, TestSerializationA.class))
             .build();
+    assertThat(registry.hasParserForKey(new TestSerializationA(A_1))).isTrue();
     assertThat(registry.parseKey(new TestSerializationA(A_1), ACCESS)).isNotNull();
   }
 
@@ -403,6 +406,7 @@ public final class SerializationRegistryTest {
   @Test
   public void test_parse_emptyRegistry_throws() throws Exception {
     SerializationRegistry registry = new SerializationRegistry.Builder().build();
+    assertThat(registry.hasParserForKey(new TestSerializationA(A_1))).isFalse();
     assertThrows(
         GeneralSecurityException.class,
         () -> registry.parseKey(new TestSerializationA(A_1), ACCESS));
@@ -574,6 +578,8 @@ public final class SerializationRegistryTest {
                     TestParameters1.class,
                     TestSerializationA.class))
             .build();
+    assertThat(registry.hasSerializerForParameters(new TestParameters1(), TestSerializationA.class))
+        .isTrue();
     assertThat(registry.serializeParameters(new TestParameters1(), TestSerializationA.class))
         .isNotNull();
   }
@@ -581,6 +587,8 @@ public final class SerializationRegistryTest {
   @Test
   public void test_emptyRegistrySerializeParameters_throws() throws Exception {
     SerializationRegistry registry = new SerializationRegistry.Builder().build();
+    assertThat(registry.hasSerializerForParameters(new TestParameters1(), TestSerializationA.class))
+        .isFalse();
     assertThrows(
         GeneralSecurityException.class,
         () -> registry.serializeParameters(new TestParameters1(), TestSerializationA.class));
@@ -744,12 +752,14 @@ public final class SerializationRegistryTest {
                 ParametersParser.create(
                     SerializationRegistryTest::parseAToParameters1, A_1, TestSerializationA.class))
             .build();
+    assertThat(registry.hasParserForParameters(new TestSerializationA(A_1))).isTrue();
     assertThat(registry.parseParameters(new TestSerializationA(A_1))).isNotNull();
   }
 
   @Test
   public void test_formatParse_emptyRegistry_throws() throws Exception {
     SerializationRegistry registry = new SerializationRegistry.Builder().build();
+    assertThat(registry.hasParserForParameters(new TestSerializationA(A_1))).isFalse();
     assertThrows(
         GeneralSecurityException.class,
         () -> registry.parseParameters(new TestSerializationA(A_1)));

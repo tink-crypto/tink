@@ -240,6 +240,14 @@ public final class SerializationRegistry {
     }
   }
 
+  /** Returns true if a parser for this {@code serializedKey} has been registered. */
+  public <SerializationT extends Serialization> boolean hasParserForKey(
+      SerializationT serializedKey) {
+    ParserIndex index =
+        new ParserIndex(serializedKey.getClass(), serializedKey.getObjectIdentifier());
+    return keyParserMap.containsKey(index);
+  }
+
   /**
    * Parses the given serialization into a Key.
    *
@@ -262,6 +270,13 @@ public final class SerializationRegistry {
     return parser.parseKey(serializedKey, access);
   }
 
+  /** Returns true if a parser for this {@code serializedKey} has been registered. */
+  public <KeyT extends Key, SerializationT extends Serialization> boolean hasSerializerForKey(
+      KeyT key, Class<SerializationT> serializationClass) {
+    SerializerIndex index = new SerializerIndex(key.getClass(), serializationClass);
+    return keySerializerMap.containsKey(index);
+  }
+
   /**
    * Serializes a given Key into a "SerializationT" object.
    *
@@ -279,6 +294,15 @@ public final class SerializationRegistry {
     KeySerializer<KeyT, SerializationT> serializer =
         (KeySerializer<KeyT, SerializationT>) keySerializerMap.get(index);
     return serializer.serializeKey(key, access);
+  }
+
+  /** Returns true if a parser for this {@code serializedKey} has been registered. */
+  public <SerializationT extends Serialization> boolean hasParserForParameters(
+      SerializationT serializedParameters) {
+    ParserIndex index =
+        new ParserIndex(
+            serializedParameters.getClass(), serializedParameters.getObjectIdentifier());
+    return parametersParserMap.containsKey(index);
   }
 
   /**
@@ -302,6 +326,14 @@ public final class SerializationRegistry {
     ParametersParser<SerializationT> parser =
         (ParametersParser<SerializationT>) parametersParserMap.get(index);
     return parser.parseParameters(serializedParameters);
+  }
+
+  /** Returns true if a parser for this {@code serializedKey} has been registered. */
+  public <ParametersT extends Parameters, SerializationT extends Serialization>
+      boolean hasSerializerForParameters(
+          ParametersT parameters, Class<SerializationT> serializationClass) {
+    SerializerIndex index = new SerializerIndex(parameters.getClass(), serializationClass);
+    return parametersSerializerMap.containsKey(index);
   }
 
   /**
