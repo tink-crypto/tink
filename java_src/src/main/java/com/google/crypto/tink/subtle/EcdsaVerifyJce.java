@@ -22,9 +22,11 @@ import com.google.crypto.tink.subtle.EllipticCurves.EcdsaEncoding;
 import com.google.crypto.tink.subtle.Enums.HashType;
 import com.google.errorprone.annotations.Immutable;
 import java.security.GeneralSecurityException;
+import java.security.Provider;
 import java.security.Signature;
 import java.security.interfaces.ECPublicKey;
 import java.security.spec.EllipticCurve;
+import java.util.List;
 
 /**
  * ECDSA verifying with JCE.
@@ -68,7 +70,10 @@ public final class EcdsaVerifyJce implements PublicKeyVerify {
     if (!EllipticCurves.isValidDerEncoding(derSignature)) {
       throw new GeneralSecurityException("Invalid signature");
     }
-    Signature verifier = EngineFactory.SIGNATURE.getInstance(signatureAlgorithm);
+    List<Provider> preferredProviders =
+        EngineFactory.toProviderList("GmsCore_OpenSSL", "AndroidOpenSSL", "Conscrypt");
+    Signature verifier =
+        EngineFactory.SIGNATURE.getInstance(signatureAlgorithm, preferredProviders);
     verifier.initVerify(publicKey);
     verifier.update(data);
     boolean verified = false;

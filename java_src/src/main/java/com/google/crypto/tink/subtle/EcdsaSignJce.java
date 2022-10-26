@@ -22,9 +22,11 @@ import com.google.crypto.tink.subtle.EllipticCurves.EcdsaEncoding;
 import com.google.crypto.tink.subtle.Enums.HashType;
 import com.google.errorprone.annotations.Immutable;
 import java.security.GeneralSecurityException;
+import java.security.Provider;
 import java.security.Signature;
 import java.security.interfaces.ECPrivateKey;
 import java.security.spec.EllipticCurve;
+import java.util.List;
 
 /**
  * ECDSA signing with JCE.
@@ -56,7 +58,10 @@ public final class EcdsaSignJce implements PublicKeySign {
 
   @Override
   public byte[] sign(final byte[] data) throws GeneralSecurityException {
-    Signature signer = EngineFactory.SIGNATURE.getInstance(signatureAlgorithm);
+    // Prefer Conscrypt over other providers if available.
+    List<Provider> preferredProviders =
+        EngineFactory.toProviderList("GmsCore_OpenSSL", "AndroidOpenSSL", "Conscrypt");
+    Signature signer = EngineFactory.SIGNATURE.getInstance(signatureAlgorithm, preferredProviders);
     signer.initSign(privateKey);
     signer.update(data);
     byte[] signature = signer.sign();
