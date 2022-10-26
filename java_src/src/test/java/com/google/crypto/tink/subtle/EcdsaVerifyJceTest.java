@@ -309,9 +309,15 @@ public class EcdsaVerifyJceTest {
   public void testFailIfFipsModuleNotAvailable() throws Exception {
     Assume.assumeTrue(TinkFips.useOnlyFips() && !TinkFipsUtil.fipsModuleAvailable());
 
+    ECParameterSpec ecParams = EllipticCurves.getNistP256Params();
+    KeyPairGenerator keyGen = KeyPairGenerator.getInstance("EC");
+    keyGen.initialize(ecParams);
+    KeyPair keyPair = keyGen.generateKeyPair();
+
     assertThrows(
         GeneralSecurityException.class,
-        () -> testWycheproofVectors(
-        "../wycheproof/testvectors/ecdsa_secp256r1_sha256_test.json", EcdsaEncoding.DER));
+        () ->
+            new EcdsaVerifyJce(
+                (ECPublicKey) keyPair.getPublic(), HashType.SHA256, EcdsaEncoding.DER));
   }
 }
