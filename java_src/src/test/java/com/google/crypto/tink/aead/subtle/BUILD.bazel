@@ -7,10 +7,7 @@ java_test(
     name = "AesGcmSivTest",
     srcs = ["AesGcmSivTest.java"],
     data = ["@wycheproof//testvectors:aes_gcm_siv"],
-    tags = [
-        "manual",
-        "notsan",
-    ],
+    tags = ["notsan"],
     deps = [
         "//src/main/java/com/google/crypto/tink/aead/subtle:aes_gcm_siv",
         "//src/main/java/com/google/crypto/tink/subtle:bytes",
