@@ -24,6 +24,7 @@ import com.google.crypto.tink.proto.Keyset;
 import com.google.crypto.tink.proto.OutputPrefixType;
 import com.google.crypto.tink.subtle.Hex;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
+import com.google.errorprone.annotations.InlineMe;
 import java.security.GeneralSecurityException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -194,6 +195,10 @@ public final class PrimitiveSet<P> {
   }
 
   /** Returns the entries with primitives identified by the ciphertext prefix of {@code key}. */
+  @InlineMe(
+      replacement = "this.getPrimitive(CryptoFormat.getOutputPrefix(key))",
+      imports = {"com.google.crypto.tink.CryptoFormat"})
+  @Deprecated
   List<Entry<P>> getPrimitive(Keyset.Key key) throws GeneralSecurityException {
     return getPrimitive(CryptoFormat.getOutputPrefix(key));
   }
