@@ -111,6 +111,12 @@ public final class MutableSerializationRegistry {
     registry.set(newRegistry);
   }
 
+  /** Returns true if a parser for this {@code serializedKey} has been registered. */
+  public <SerializationT extends Serialization> boolean hasParserForKey(
+      SerializationT serializedKey) {
+    return registry.get().hasParserForKey(serializedKey);
+  }
+
   /**
    * Parses the given serialization into a Key.
    *
@@ -151,6 +157,12 @@ public final class MutableSerializationRegistry {
     }
   }
 
+  /** Returns true if a parser for this {@code serializedKey} has been registered. */
+  public <KeyT extends Key, SerializationT extends Serialization> boolean hasSerializerForKey(
+      KeyT key, Class<SerializationT> serializationClass) {
+    return registry.get().hasSerializerForKey(key, serializationClass);
+  }
+
   /**
    * Serializes a given Key into a "SerializationT" object.
    *
@@ -161,6 +173,12 @@ public final class MutableSerializationRegistry {
       KeyT key, Class<SerializationT> serializationClass, @Nullable SecretKeyAccess access)
       throws GeneralSecurityException {
     return registry.get().serializeKey(key, serializationClass, access);
+  }
+
+  /** Returns true if a parser for this {@code serializedKey} has been registered. */
+  public <SerializationT extends Serialization> boolean hasParserForParameters(
+      SerializationT serializedParameters) {
+    return registry.get().hasParserForParameters(serializedParameters);
   }
 
   /**
@@ -189,6 +207,13 @@ public final class MutableSerializationRegistry {
     } catch (GeneralSecurityException e) {
       return new LegacyProtoParameters(protoParametersSerialization);
     }
+  }
+
+  /** Returns true if a parser for this {@code serializedKey} has been registered. */
+  public <ParametersT extends Parameters, SerializationT extends Serialization>
+      boolean hasSerializerForParameters(
+          ParametersT parameters, Class<SerializationT> serializationClass) {
+    return registry.get().hasSerializerForParameters(parameters, serializationClass);
   }
 
   /**
