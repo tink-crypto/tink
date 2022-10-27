@@ -24,6 +24,7 @@ if [[ -n "${KOKORO_ROOT:-}" ]]; then
 fi
 
 ./kokoro/testutils/copy_credentials.sh "python/testdata" "all"
+./kokoro/testutils/upgrade_gcc.sh
 # Sourcing required to update callers environment.
 source ./kokoro/testutils/install_python3.sh
 source ./kokoro/testutils/install_protoc.sh

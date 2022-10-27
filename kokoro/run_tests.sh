@@ -236,15 +236,15 @@ main() {
   if [[ -n "${KOKORO_ROOT}" ]]; then
     cd "${KOKORO_ARTIFACTS_DIR}"/git*/tink*
 
-    use_bazel.sh $(cat .bazelversion)
+    use_bazel.sh "$(cat .bazelversion)"
 
     # Install protoc into a temporary directory.
     install_temp_protoc
 
     if [[ "${PLATFORM}" == 'linux' ]]; then
-      # Install a more recent Python. Sourcing required to update callers
-      # environment.
+      # Sourcing required to update callers environment.
       source ./kokoro/testutils/install_python3.sh
+      ./kokoro/testutils/upgrade_gcc.sh
     fi
 
     if [[ "${PLATFORM}" == 'darwin' ]]; then

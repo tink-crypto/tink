@@ -20,6 +20,7 @@ cd ${KOKORO_ARTIFACTS_DIR}/git/tink
 
 ./kokoro/testutils/copy_credentials.sh "tools/testdata" "all"
 ./kokoro/testutils/update_android_sdk.sh
+./kokoro/testutils/upgrade_gcc.sh
 # Sourcing required to update callers environment.
 source ./kokoro/testutils/install_python3.sh
 source ./kokoro/testutils/install_go.sh

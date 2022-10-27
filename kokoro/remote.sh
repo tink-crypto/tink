@@ -31,6 +31,7 @@ if [[ -n "${KOKORO_ROOT}" ]]; then
 
   use_bazel.sh $(cat .bazelversion)
   ./kokoro/testutils/update_android_sdk.sh
+  ./kokoro/testutils/upgrade_gcc.sh
 fi
 
 echo "Using bazel binary: $(which bazel)"

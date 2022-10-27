@@ -18,15 +18,13 @@ set -euo pipefail
 
 if [[ -n "${KOKORO_ROOT:-}" ]]; then
   cd "${KOKORO_ARTIFACTS_DIR}/git/tink"
+  use_bazel.sh "$(cat python/.bazelversion)"
 fi
 
 ./kokoro/testutils/copy_credentials.sh "python/testdata" "all"
+./kokoro/testutils/upgrade_gcc.sh
 # Sourcing required to update callers environment.
 source ./kokoro/testutils/install_python3.sh
-
-if [[ -n "${KOKORO_ROOT:-}" ]]; then
-  use_bazel.sh $(cat python/.bazelversion)
-fi
 
 # Run manual tests which rely on key material injected into the Kokoro
 # environement.
