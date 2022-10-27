@@ -6,6 +6,7 @@
 
 import {AeadKeyTemplates} from '../aead/aead_key_templates';
 import {PbEciesAeadHkdfKeyFormat, PbEllipticCurveType, PbHashType, PbOutputPrefixType, PbPointFormat} from '../internal/proto';
+import {bytesAsU8} from '../internal/proto_shims';
 import {assertMessageEquals} from '../testing/internal/test_utils';
 
 import {EciesAeadHkdfPrivateKeyManager} from './ecies_aead_hkdf_private_key_manager';
@@ -31,7 +32,7 @@ describe('hybrid key templates test', function() {
 
     // Test values in key format.
     const keyFormat =
-        PbEciesAeadHkdfKeyFormat.deserializeBinary(keyTemplate.getValue_asU8());
+        PbEciesAeadHkdfKeyFormat.deserializeBinary(keyTemplate.getValue());
     const params = keyFormat.getParams();
     expect(params!.getEcPointFormat()).toBe(expectedPointFormat);
 
@@ -45,7 +46,7 @@ describe('hybrid key templates test', function() {
     assertMessageEquals(demParams!.getAeadDem()!, expectedAeadTemplate);
 
     // Test that the template works with EciesAeadHkdfPrivateKeyManager.
-    manager.getKeyFactory().newKey(keyTemplate.getValue_asU8());
+    manager.getKeyFactory().newKey(bytesAsU8(keyTemplate.getValue()));
   });
 
   it('ecies p256 hkdf hmac sha256 aes128 ctr hmac sha256', function() {
@@ -68,7 +69,7 @@ describe('hybrid key templates test', function() {
 
     // Test values in key format.
     const keyFormat =
-        PbEciesAeadHkdfKeyFormat.deserializeBinary(keyTemplate.getValue_asU8());
+        PbEciesAeadHkdfKeyFormat.deserializeBinary(keyTemplate.getValue());
     const params = keyFormat.getParams();
     expect(params!.getEcPointFormat()).toBe(expectedPointFormat);
 
@@ -82,6 +83,6 @@ describe('hybrid key templates test', function() {
     assertMessageEquals(demParams!.getAeadDem()!, expectedAeadTemplate);
 
     // Test that the template works with EciesAeadHkdfPrivateKeyManager.
-    manager.getKeyFactory().newKey(keyTemplate.getValue_asU8());
+    manager.getKeyFactory().newKey(bytesAsU8(keyTemplate.getValue()));
   });
 });

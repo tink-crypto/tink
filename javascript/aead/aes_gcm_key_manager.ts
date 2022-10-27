@@ -7,6 +7,7 @@
 import {SecurityException} from '../exception/security_exception';
 import * as KeyManager from '../internal/key_manager';
 import {PbAesGcmKey, PbAesGcmKeyFormat, PbKeyData, PbMessage} from '../internal/proto';
+import {bytesAsU8, bytesLength} from '../internal/proto_shims';
 import * as Registry from '../internal/registry';
 import {Constructor} from '../internal/util';
 import * as aesGcm from '../subtle/aes_gcm';
@@ -101,7 +102,7 @@ export class AesGcmKeyManager implements KeyManager.KeyManager<Aead> {
     }
     const keyProto = AesGcmKeyManager.getKeyProto(key);
     AesGcmKeyManager.validateKey(keyProto);
-    return await aesGcm.fromRawKey(keyProto.getKeyValue_asU8());
+    return await aesGcm.fromRawKey(bytesAsU8(keyProto.getKeyValue()));
   }
 
   doesSupport(keyType: string) {
@@ -125,7 +126,7 @@ export class AesGcmKeyManager implements KeyManager.KeyManager<Aead> {
   }
 
   private static validateKey(key: PbAesGcmKey) {
-    Validators.validateAesKeySize(key.getKeyValue_asU8().length);
+    Validators.validateAesKeySize(bytesLength(key.getKeyValue()));
     Validators.validateVersion(key.getVersion(), VERSION);
   }
 
@@ -159,7 +160,7 @@ export class AesGcmKeyManager implements KeyManager.KeyManager<Aead> {
     }
     let deserializedKey: PbAesGcmKey;
     try {
-      deserializedKey = PbAesGcmKey.deserializeBinary(keyData.getValue_asU8());
+      deserializedKey = PbAesGcmKey.deserializeBinary(keyData.getValue());
     } catch (e) {
       throw new SecurityException(
           'Could not parse the input as a ' +

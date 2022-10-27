@@ -6,6 +6,7 @@
 
 import {AeadKeyTemplates} from '../aead/aead_key_templates';
 import {PbEciesAeadDemParams, PbEciesAeadHkdfParams, PbEciesAeadHkdfPrivateKey, PbEciesAeadHkdfPublicKey, PbEciesHkdfKemParams, PbEllipticCurveType, PbHashType, PbKeyTemplate, PbPointFormat} from '../internal/proto';
+import {bytesAsU8} from '../internal/proto_shims';
 import * as Util from '../internal/util';
 import * as Bytes from '../subtle/bytes';
 import * as EllipticCurves from '../subtle/elliptic_curves';
@@ -40,9 +41,9 @@ describe('ecies aead hkdf util test', function() {
       expect(jwk?.['kty']).toBe('EC');
       expect(jwk?.['crv']).toBe(curveTypeString);
       expect(Bytes.fromBase64(assertExists(jwk['x']), /* opt_webSafe = */ true))
-          .toEqual(assertExists(key.getPublicKey()).getX_asU8());
+          .toEqual(bytesAsU8(assertExists(key.getPublicKey()).getX()));
       expect(Bytes.fromBase64(assertExists(jwk['y']), /* opt_webSafe = */ true))
-          .toEqual(assertExists(key.getPublicKey()).getY_asU8());
+          .toEqual(bytesAsU8(assertExists(key.getPublicKey()).getY()));
       expect(jwk?.['d']).toEqual(undefined);
       expect(jwk?.['ext']).toBe(true);
     }
@@ -58,8 +59,8 @@ describe('ecies aead hkdf util test', function() {
          const key = await createKey(curve);
 
          // Add leading zeros to x and y value of key.
-         const x = assertExists(key.getPublicKey()).getX_asU8();
-         const y = assertExists(key.getPublicKey()).getY_asU8();
+         const x = bytesAsU8(assertExists(key.getPublicKey()).getX());
+         const y = bytesAsU8(assertExists(key.getPublicKey()).getY());
          key.getPublicKey()?.setX(
              Bytes.concat(new Uint8Array([0, 0, 0, 0, 0]), x));
          key.getPublicKey()?.setY(Bytes.concat(new Uint8Array([0, 0, 0]), y));
@@ -87,7 +88,7 @@ describe('ecies aead hkdf util test', function() {
        const curve = PbEllipticCurveType.NIST_P256;
        const key = await createKey(curve);
        const publicKey = assertExists(key.getPublicKey());
-       const x = publicKey.getX_asU8();
+       const x = bytesAsU8(publicKey.getX());
        publicKey.setX(Bytes.concat(new Uint8Array([1, 0]), x));
        try {
          EciesAeadHkdfUtil.getJsonWebKeyFromProto(publicKey);
@@ -115,11 +116,11 @@ describe('ecies aead hkdf util test', function() {
       expect(jwk?.['kty']).toBe('EC');
       expect(jwk?.['crv']).toBe(curveTypeString);
       expect(Bytes.fromBase64(assertExists(jwk['x']), /* opt_webSafe = */ true))
-          .toEqual(publicKey.getX_asU8());
+          .toEqual(bytesAsU8(publicKey.getX()));
       expect(Bytes.fromBase64(assertExists(jwk['y']), /* opt_webSafe = */ true))
-          .toEqual(publicKey.getY_asU8());
+          .toEqual(bytesAsU8(publicKey.getY()));
       expect(Bytes.fromBase64(assertExists(jwk['d']), /* opt_webSafe = */ true))
-          .toEqual(key.getKeyValue_asU8());
+          .toEqual(bytesAsU8(key.getKeyValue()));
       expect(jwk?.['ext']).toBe(true);
     }
   });
@@ -132,7 +133,7 @@ describe('ecies aead hkdf util test', function() {
                     PbEllipticCurveType.NIST_P521,
        ]) {
          const key = await createKey(curve);
-         const d = key.getKeyValue_asU8();
+         const d = bytesAsU8(key.getKeyValue());
          key.setKeyValue(Bytes.concat(new Uint8Array([0, 0, 0]), d));
          const jwk = EciesAeadHkdfUtil.getJsonWebKeyFromProto(key);
 
@@ -145,10 +146,10 @@ describe('ecies aead hkdf util test', function() {
          expect(jwk?.['crv']).toBe(curveTypeString);
          expect(
              Bytes.fromBase64(assertExists(jwk['x']), /* opt_webSafe = */ true))
-             .toEqual(publicKey.getX_asU8());
+             .toEqual(bytesAsU8(publicKey.getX()));
          expect(
              Bytes.fromBase64(assertExists(jwk['y']), /* opt_webSafe = */ true))
-             .toEqual(publicKey.getY_asU8());
+             .toEqual(bytesAsU8(publicKey.getY()));
          expect(
              Bytes.fromBase64(assertExists(jwk['d']), /* opt_webSafe = */ true))
              .toEqual(d);

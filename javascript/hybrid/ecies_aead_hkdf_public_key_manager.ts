@@ -7,6 +7,7 @@
 import {SecurityException} from '../exception/security_exception';
 import * as KeyManager from '../internal/key_manager';
 import {PbEciesAeadHkdfParams, PbEciesAeadHkdfPublicKey, PbKeyData, PbKeyTemplate, PbMessage} from '../internal/proto';
+import {bytesAsU8} from '../internal/proto_shims';
 import * as Util from '../internal/util';
 import * as eciesAeadHkdfHybridEncrypt from '../subtle/ecies_aead_hkdf_hybrid_encrypt';
 
@@ -69,7 +70,7 @@ export class EciesAeadHkdfPublicKeyManager implements
       throw new SecurityException('KEM params not set');
     }
     const hkdfHash = Util.hashTypeProtoToString(kemParams.getHkdfHashType());
-    const hkdfSalt = kemParams.getHkdfSalt_asU8();
+    const hkdfSalt = bytesAsU8(kemParams.getHkdfSalt());
     return eciesAeadHkdfHybridEncrypt.fromJsonWebKey(
         recepientPublicKey, hkdfHash, pointFormat, demHelper, hkdfSalt);
   }
@@ -116,13 +117,13 @@ export class EciesAeadHkdfPublicKeyManager implements
     }
     let key: PbEciesAeadHkdfPublicKey;
     try {
-      key = PbEciesAeadHkdfPublicKey.deserializeBinary(keyData.getValue_asU8());
+      key = PbEciesAeadHkdfPublicKey.deserializeBinary(keyData.getValue());
     } catch (e) {
       throw new SecurityException(
           'Input cannot be parsed as ' +
           EciesAeadHkdfPublicKeyManager.KEY_TYPE + ' key-proto.');
     }
-    if (!key.getParams() || !key.getX_asU8() || !key.getY_asU8()) {
+    if (!key.getParams() || !key.getX() || !key.getY()) {
       throw new SecurityException(
           'Input cannot be parsed as ' +
           EciesAeadHkdfPublicKeyManager.KEY_TYPE + ' key-proto.');

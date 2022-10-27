@@ -25,6 +25,7 @@ import * as KeyManager from './key_manager';
 import * as PrimitiveSet from './primitive_set';
 import {PrimitiveWrapper} from './primitive_wrapper';
 import {PbKeyData, PbKeyTemplate, PbMessage} from './proto';
+import {bytesAsU8} from './proto_shims';
 import {Constructor, isInstanceOf} from './util';
 
 // key managers maps
@@ -130,7 +131,7 @@ export async function getPrimitive<P>(
 export async function newKeyData(keyTemplate: PbKeyTemplate):
     Promise<PbKeyData> {
   const manager = getKeyManagerWithNewKeyAllowedCheck_(keyTemplate);
-  return manager.getKeyFactory().newKeyData(keyTemplate.getValue_asU8());
+  return manager.getKeyFactory().newKeyData(bytesAsU8(keyTemplate.getValue()));
 }
 
 /**
@@ -143,7 +144,7 @@ export async function newKeyData(keyTemplate: PbKeyTemplate):
  */
 export async function newKey(keyTemplate: PbKeyTemplate): Promise<PbMessage> {
   const manager = getKeyManagerWithNewKeyAllowedCheck_(keyTemplate);
-  return manager.getKeyFactory().newKey(keyTemplate.getValue_asU8());
+  return manager.getKeyFactory().newKey(bytesAsU8(keyTemplate.getValue()));
 }
 
 /**

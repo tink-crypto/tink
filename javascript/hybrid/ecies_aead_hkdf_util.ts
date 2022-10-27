@@ -6,6 +6,7 @@
 
 import {SecurityException} from '../exception/security_exception';
 import {PbEciesAeadHkdfPrivateKey, PbEciesAeadHkdfPublicKey} from '../internal/proto';
+import {bytesAsU8} from '../internal/proto_shims';
 import * as Util from '../internal/util';
 import * as EllipticCurves from '../subtle/elliptic_curves';
 
@@ -36,12 +37,12 @@ export function getJsonWebKeyFromProto(key: PbEciesAeadHkdfPrivateKey|
   const curveType = Util.curveTypeProtoToSubtle(kemParams.getCurveType());
   const expectedLength = EllipticCurves.fieldSizeInBytes(curveType);
   const x = Util.bigEndianNumberToCorrectLength(
-      publicKey.getX_asU8(), expectedLength);
+      bytesAsU8(publicKey.getX()), expectedLength);
   const y = Util.bigEndianNumberToCorrectLength(
-      publicKey.getY_asU8(), expectedLength);
+      bytesAsU8(publicKey.getY()), expectedLength);
   if (key instanceof PbEciesAeadHkdfPrivateKey) {
     d = Util.bigEndianNumberToCorrectLength(
-        key.getKeyValue_asU8(), expectedLength);
+        bytesAsU8(key.getKeyValue()), expectedLength);
   }
   return EllipticCurves.getJsonWebKey(curveType, x, y, d);
 }

@@ -7,6 +7,7 @@
 import {SecurityException} from '../exception/security_exception';
 import * as KeyManager from '../internal/key_manager';
 import {PbAesCtrHmacAeadKey, PbAesCtrHmacAeadKeyFormat, PbAesCtrKey, PbAesCtrKeyFormat, PbAesCtrParams, PbHashType, PbHmacKey, PbHmacKeyFormat, PbHmacParams, PbKeyData, PbMessage} from '../internal/proto';
+import {bytesAsU8, bytesLength} from '../internal/proto_shims';
 import * as Registry from '../internal/registry';
 import {Constructor} from '../internal/util';
 import {aesCtrHmacFromRawKeys} from '../subtle/encrypt_then_authenticate';
@@ -193,8 +194,7 @@ export class AesCtrHmacAeadKeyManager implements KeyManager.KeyManager<Aead> {
             this.getKeyType() + '.');
       }
       try {
-        deserializedKey =
-            PbAesCtrHmacAeadKey.deserializeBinary(key.getValue_asU8());
+        deserializedKey = PbAesCtrHmacAeadKey.deserializeBinary(key.getValue());
       } catch (e) {
         throw new SecurityException(
             'Could not parse the key in key data as a serialized proto of ' +
@@ -265,9 +265,9 @@ export class AesCtrHmacAeadKeyManager implements KeyManager.KeyManager<Aead> {
     Validators.validateVersion(key.getVersion(), this.getVersion());
     const keyFormat = (new PbAesCtrKeyFormat())
                           .setParams(key.getParams())
-                          .setKeySize(key.getKeyValue_asU8().length);
+                          .setKeySize(bytesLength(key.getKeyValue()));
     const {ivSize} = this.keyFactory.validateAesCtrKeyFormat(keyFormat);
-    return {aesCtrKeyValue: key.getKeyValue_asU8(), ivSize};
+    return {aesCtrKeyValue: bytesAsU8(key.getKeyValue()), ivSize};
   }
 
   /**
@@ -283,10 +283,10 @@ export class AesCtrHmacAeadKeyManager implements KeyManager.KeyManager<Aead> {
     Validators.validateVersion(key.getVersion(), this.getVersion());
     const keyFormat = (new PbHmacKeyFormat())
                           .setParams(key.getParams())
-                          .setKeySize(key.getKeyValue_asU8().length);
+                          .setKeySize(bytesLength(key.getKeyValue()));
     const {hashType, tagSize} =
         this.keyFactory.validateHmacKeyFormat(keyFormat);
-    return {hmacKeyValue: key.getKeyValue_asU8(), hashType, tagSize};
+    return {hmacKeyValue: bytesAsU8(key.getKeyValue()), hashType, tagSize};
   }
 
   static register() {

@@ -85,8 +85,7 @@ export class RegistryEciesAeadHkdfDemHelper implements EciesAeadHkdfDemHelper {
       PbAesGcmKeyFormat {
     let keyFormat: PbAesGcmKeyFormat;
     try {
-      keyFormat =
-          PbAesGcmKeyFormat.deserializeBinary(keyTemplate.getValue_asU8());
+      keyFormat = PbAesGcmKeyFormat.deserializeBinary(keyTemplate.getValue());
     } catch (e) {
       throw new SecurityException(
           'Could not parse the given Uint8Array as a serialized proto of ' +
@@ -104,8 +103,8 @@ export class RegistryEciesAeadHkdfDemHelper implements EciesAeadHkdfDemHelper {
       PbAesCtrHmacAeadKeyFormat {
     let keyFormat: PbAesCtrHmacAeadKeyFormat;
     try {
-      keyFormat = PbAesCtrHmacAeadKeyFormat.deserializeBinary(
-          keyTemplate.getValue_asU8());
+      keyFormat =
+          PbAesCtrHmacAeadKeyFormat.deserializeBinary(keyTemplate.getValue());
     } catch (e) {
       throw new SecurityException(
           'Could not parse the given Uint8Array ' +

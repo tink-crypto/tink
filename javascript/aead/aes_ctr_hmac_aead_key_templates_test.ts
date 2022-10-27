@@ -5,6 +5,7 @@
  */
 
 import {PbAesCtrHmacAeadKeyFormat, PbHashType, PbOutputPrefixType} from '../internal/proto';
+import {bytesAsU8} from '../internal/proto_shims';
 
 import {AesCtrHmacAeadKeyManager} from './aes_ctr_hmac_aead_key_manager';
 import {AesCtrHmacAeadKeyTemplates} from './aes_ctr_hmac_aead_key_templates';
@@ -29,8 +30,8 @@ describe('aes ctr hmac aead key templates test', function() {
     expect(keyTemplate.getOutputPrefixType()).toBe(expectedOutputPrefix);
 
     // Test values in key format.
-    const keyFormat = PbAesCtrHmacAeadKeyFormat.deserializeBinary(
-        keyTemplate.getValue_asU8());
+    const keyFormat =
+        PbAesCtrHmacAeadKeyFormat.deserializeBinary(keyTemplate.getValue());
 
     // Test AesCtrKeyFormat.
     const aesCtrKeyFormat = keyFormat.getAesCtrKeyFormat();
@@ -44,7 +45,7 @@ describe('aes ctr hmac aead key templates test', function() {
     expect(hmacKeyFormat!.getParams()!.getHash()).toBe(expectedHashFunction);
 
     // Test that the template works with AesCtrHmacAeadKeyManager.
-    manager.getKeyFactory().newKey(keyTemplate.getValue_asU8());
+    manager.getKeyFactory().newKey(bytesAsU8(keyTemplate.getValue()));
   });
 
   it('aes256 ctr hmac sha256', function() {
@@ -66,8 +67,8 @@ describe('aes ctr hmac aead key templates test', function() {
     expect(keyTemplate.getOutputPrefixType()).toBe(expectedOutputPrefix);
 
     // Test values in key format.
-    const keyFormat = PbAesCtrHmacAeadKeyFormat.deserializeBinary(
-        keyTemplate.getValue_asU8());
+    const keyFormat =
+        PbAesCtrHmacAeadKeyFormat.deserializeBinary(keyTemplate.getValue());
 
     // Test AesCtrKeyFormat.
     const aesCtrKeyFormat = keyFormat.getAesCtrKeyFormat();
@@ -81,6 +82,6 @@ describe('aes ctr hmac aead key templates test', function() {
     expect(hmacKeyFormat!.getParams()!.getHash()).toBe(expectedHashFunction);
 
     // Test that the template works with AesCtrHmacAeadKeyManager.
-    manager.getKeyFactory().newKey(keyTemplate.getValue_asU8());
+    manager.getKeyFactory().newKey(bytesAsU8(keyTemplate.getValue()));
   });
 });

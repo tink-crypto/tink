@@ -7,6 +7,7 @@
 import {SecurityException} from '../exception/security_exception';
 import * as KeyManager from '../internal/key_manager';
 import {PbEcdsaKeyFormat, PbEcdsaParams, PbEcdsaPrivateKey, PbEcdsaPublicKey, PbKeyData, PbMessage} from '../internal/proto';
+import {ProtoBytes} from '../internal/proto_shims';
 import * as Util from '../internal/util';
 import {Constructor} from '../internal/util';
 import * as Bytes from '../subtle/bytes';
@@ -213,11 +214,11 @@ export class EcdsaPrivateKeyManager implements
           ' is not supported. This key manager supports ' +
           EcdsaPrivateKeyManager.KEY_TYPE + '.');
     }
-    return deserializePrivateKey(keyData.getValue_asU8());
+    return deserializePrivateKey(keyData.getValue());
   }
 }
 
-function deserializePrivateKey(serializedPrivateKey: Uint8Array):
+function deserializePrivateKey(serializedPrivateKey: ProtoBytes):
     PbEcdsaPrivateKey {
   let key: PbEcdsaPrivateKey;
   try {
@@ -227,7 +228,7 @@ function deserializePrivateKey(serializedPrivateKey: Uint8Array):
         'Input cannot be parsed as ' + EcdsaPrivateKeyManager.KEY_TYPE +
         ' key-proto.');
   }
-  if (!key.getPublicKey() || !key.getKeyValue_asU8()) {
+  if (!key.getPublicKey() || !key.getKeyValue()) {
     throw new SecurityException(
         'Input cannot be parsed as ' + EcdsaPrivateKeyManager.KEY_TYPE +
         ' key-proto.');

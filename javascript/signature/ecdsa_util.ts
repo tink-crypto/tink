@@ -6,6 +6,7 @@
 
 import {SecurityException} from '../exception/security_exception';
 import {PbEcdsaKeyFormat, PbEcdsaParams, PbEcdsaPrivateKey, PbEcdsaPublicKey, PbEcdsaSignatureEncoding as PbEcdsaSignatureEncodingType} from '../internal/proto';
+import {bytesAsU8, bytesLength} from '../internal/proto_shims';
 import * as Util from '../internal/util';
 import * as EllipticCurves from '../subtle/elliptic_curves';
 import * as Validators from '../subtle/validators';
@@ -22,7 +23,7 @@ export function validatePrivateKey(
     key: PbEcdsaPrivateKey, privateKeyManagerVersion: number,
     publicKeyManagerVersion: number) {
   Validators.validateVersion(key.getVersion(), privateKeyManagerVersion);
-  if (!key.getKeyValue_asU8()) {
+  if (!key.getKeyValue()) {
     throw new SecurityException(
         'Invalid private key - missing private key value.');
   }
@@ -42,7 +43,7 @@ export function validatePublicKey(
     throw new SecurityException('Invalid public key - missing params.');
   }
   validateParams(params);
-  if (!key.getX_asU8().length || !key.getY_asU8().length) {
+  if (!bytesLength(key.getX()) || !bytesLength(key.getY())) {
     throw new SecurityException(
         'Invalid public key - missing value of X or Y.');
   }
@@ -92,12 +93,12 @@ export function getJsonWebKeyFromProto(key: PbEcdsaPrivateKey|
   const curveType = Util.curveTypeProtoToSubtle(params.getCurve());
   const expectedLength = EllipticCurves.fieldSizeInBytes(curveType);
   const x = Util.bigEndianNumberToCorrectLength(
-      publicKey.getX_asU8(), expectedLength);
+      bytesAsU8(publicKey.getX()), expectedLength);
   const y = Util.bigEndianNumberToCorrectLength(
-      publicKey.getY_asU8(), expectedLength);
+      bytesAsU8(publicKey.getY()), expectedLength);
   if (key instanceof PbEcdsaPrivateKey) {
     d = Util.bigEndianNumberToCorrectLength(
-        key.getKeyValue_asU8(), expectedLength);
+        bytesAsU8(key.getKeyValue()), expectedLength);
   }
   return EllipticCurves.getJsonWebKey(curveType, x, y, d);
 }

@@ -5,6 +5,7 @@
  */
 
 import {PbAesGcmKeyFormat, PbOutputPrefixType} from '../internal/proto';
+import {bytesAsU8} from '../internal/proto_shims';
 
 import {AesGcmKeyManager} from './aes_gcm_key_manager';
 import {AesGcmKeyTemplates} from './aes_gcm_key_templates';
@@ -25,11 +26,11 @@ describe('aes gcm key templates test', function() {
 
     // Test key size value in key format.
     const keyFormat =
-        PbAesGcmKeyFormat.deserializeBinary(keyTemplate.getValue_asU8());
+        PbAesGcmKeyFormat.deserializeBinary(keyTemplate.getValue());
     expect(keyFormat.getKeySize()).toBe(expectedKeySize);
 
     // Test that the template works with AesCtrHmacAeadKeyManager.
-    manager.getKeyFactory().newKey(keyTemplate.getValue_asU8());
+    manager.getKeyFactory().newKey(bytesAsU8(keyTemplate.getValue()));
   });
 
   it('aes256 gcm', function() {
@@ -47,11 +48,11 @@ describe('aes gcm key templates test', function() {
 
     // Test key size value in key format.
     const keyFormat =
-        PbAesGcmKeyFormat.deserializeBinary(keyTemplate.getValue_asU8());
+        PbAesGcmKeyFormat.deserializeBinary(keyTemplate.getValue());
     expect(keyFormat.getKeySize()).toBe(expectedKeySize);
 
     // Test that the template works with AesCtrHmacAeadKeyManager.
-    manager.getKeyFactory().newKey(keyTemplate.getValue_asU8());
+    manager.getKeyFactory().newKey(bytesAsU8(keyTemplate.getValue()));
   });
 
   it('aes256 gcm no prefix', function() {
@@ -69,10 +70,10 @@ describe('aes gcm key templates test', function() {
 
     // Test key size value in key format.
     const keyFormat =
-        PbAesGcmKeyFormat.deserializeBinary(keyTemplate.getValue_asU8());
+        PbAesGcmKeyFormat.deserializeBinary(keyTemplate.getValue());
     expect(keyFormat.getKeySize()).toBe(expectedKeySize);
 
     // Test that the template works with AesCtrHmacAeadKeyManager.
-    manager.getKeyFactory().newKey(keyTemplate.getValue_asU8());
+    manager.getKeyFactory().newKey(bytesAsU8(keyTemplate.getValue()));
   });
 });

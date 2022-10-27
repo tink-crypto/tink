@@ -6,6 +6,7 @@
 
 import {KeysetHandle} from '../internal/keyset_handle';
 import {PbKeyData, PbKeyset, PbKeysetKey, PbKeyStatusType, PbOutputPrefixType} from '../internal/proto';
+import {bytesAsU8} from '../internal/proto_shims';
 import * as Registry from '../internal/registry';
 import * as Random from '../subtle/random';
 
@@ -69,7 +70,7 @@ describe('hybrid config test', function() {
           await privateKeysetHandle.getPrimitive<HybridDecrypt>(HybridDecrypt);
 
       const publicKeyData = Registry.getPublicKeyData(
-          privateKeyData.getTypeUrl(), privateKeyData.getValue_asU8());
+          privateKeyData.getTypeUrl(), bytesAsU8(privateKeyData.getValue()));
       const publicKeysetHandle = createKeysetHandleFromKeyData(publicKeyData);
       const hybridEncrypt =
           await publicKeysetHandle.getPrimitive<HybridEncrypt>(HybridEncrypt);

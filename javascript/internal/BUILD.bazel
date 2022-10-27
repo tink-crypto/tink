@@ -78,6 +78,7 @@ ts_library(
         "keyset_writer.ts",
         "primitive_set.ts",
         "primitive_wrapper.ts",
+        "proto_shims.ts",
         "registry.ts",
         "util.ts",
     ],

@@ -7,6 +7,7 @@
 import {AeadConfig} from '../aead/aead_config';
 import {SecurityException} from '../exception/security_exception';
 import {PbEciesAeadDemParams, PbEciesAeadHkdfKeyFormat, PbEciesAeadHkdfParams, PbEciesAeadHkdfPrivateKey, PbEciesAeadHkdfPublicKey, PbEciesHkdfKemParams, PbEllipticCurveType, PbHashType, PbPointFormat} from '../internal/proto';
+import {bytesLength} from '../internal/proto_shims';
 import * as Validators from '../subtle/validators';
 
 function validateKemParams(kemParams: PbEciesHkdfKemParams) {
@@ -77,7 +78,7 @@ export function validatePublicKey(
     throw new SecurityException('Invalid public key - missing key params.');
   }
   validateParams(params);
-  if (!key.getX_asU8().length || !key.getY_asU8().length) {
+  if (!bytesLength(key.getX()) || !bytesLength(key.getY())) {
     throw new SecurityException(
         'Invalid public key - missing value of X or Y.');
   }
@@ -88,7 +89,7 @@ export function validatePrivateKey(
     key: PbEciesAeadHkdfPrivateKey, privateKeyManagerVersion: number,
     publicKeyManagerVersion: number) {
   Validators.validateVersion(key.getVersion(), privateKeyManagerVersion);
-  if (!key.getKeyValue_asU8()) {
+  if (!key.getKeyValue()) {
     throw new SecurityException(
         'Invalid private key - missing private key value.');
   }

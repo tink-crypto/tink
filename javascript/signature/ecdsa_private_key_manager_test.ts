@@ -5,6 +5,7 @@
  */
 
 import {PbEcdsaKeyFormat, PbEcdsaParams, PbEcdsaPrivateKey, PbEcdsaPublicKey, PbEcdsaSignatureEncoding, PbEllipticCurveType, PbHashType, PbKeyData} from '../internal/proto';
+import {bytesAsU8} from '../internal/proto_shims';
 import * as Registry from '../internal/registry';
 import * as Random from '../subtle/random';
 import {assertExists, assertInstanceof} from '../testing/internal/test_utils';
@@ -167,7 +168,7 @@ describe('ecdsa private key manager test', function() {
       expect(keyData.getTypeUrl()).toBe(PRIVATE_KEY_TYPE);
       expect(keyData.getKeyMaterialType()).toBe(PRIVATE_KEY_MATERIAL_TYPE);
 
-      const key = PbEcdsaPrivateKey.deserializeBinary(keyData.getValue_asU8());
+      const key = PbEcdsaPrivateKey.deserializeBinary(keyData.getValue());
       expect(key.getPublicKey()?.getParams()).toEqual(keyFormat.getParams());
       // The keys are tested more in tests for getPrimitive method below, where
       // the primitive based on the created key is tested.
@@ -197,15 +198,13 @@ describe('ecdsa private key manager test', function() {
     expect(publicKeyData.getTypeUrl()).toBe(PUBLIC_KEY_TYPE);
     expect(publicKeyData.getKeyMaterialType()).toBe(PUBLIC_KEY_MATERIAL_TYPE);
     const publicKey =
-        PbEcdsaPublicKey.deserializeBinary(publicKeyData.getValue_asU8());
+        PbEcdsaPublicKey.deserializeBinary(publicKeyData.getValue());
     expect(publicKey.getVersion())
         .toEqual(privateKey.getPublicKey()!.getVersion());
     expect(publicKey.getParams())
         .toEqual(privateKey.getPublicKey()!.getParams());
-    expect(publicKey.getX_asU8())
-        .toEqual(privateKey.getPublicKey()!.getX_asU8());
-    expect(publicKey.getY_asU8())
-        .toEqual(privateKey.getPublicKey()!.getY_asU8());
+    expect(publicKey.getX()).toEqual(privateKey.getPublicKey()!.getX());
+    expect(publicKey.getY()).toEqual(privateKey.getPublicKey()!.getY());
   });
 
   it('get primitive, unsupported key data type', async function() {
@@ -363,7 +362,8 @@ describe('ecdsa private key manager test', function() {
       const keyData = await privateKeyManager.getKeyFactory().newKeyData(
           serializedKeyFormat);
       const factory = privateKeyManager.getKeyFactory();
-      const publicKeyData = factory.getPublicKeyData(keyData.getValue_asU8());
+      const publicKeyData =
+          factory.getPublicKeyData(bytesAsU8(keyData.getValue()));
 
       const publicKeyVerify: PublicKeyVerify =
           assertExists(await publicKeyManager.getPrimitive(

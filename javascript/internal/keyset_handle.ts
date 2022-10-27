@@ -14,6 +14,7 @@ import {KeysetReader} from './keyset_reader';
 import {KeysetWriter} from './keyset_writer';
 import * as PrimitiveSet from './primitive_set';
 import {PbKeyData, PbKeyMaterialType, PbKeyset, PbKeysetKey, PbKeyStatusType, PbKeyTemplate} from './proto';
+import {bytesAsU8} from './proto_shims';
 import * as Registry from './registry';
 import * as Util from './util';
 
@@ -147,7 +148,7 @@ function createPublicKeyData(privateKeyData: PbKeyData): PbKeyData {
     throw new SecurityException('The keyset contains a non-private key');
   }
   return Registry.getPublicKeyData(
-      privateKeyData.getTypeUrl(), privateKeyData.getValue_asU8());
+      privateKeyData.getTypeUrl(), bytesAsU8(privateKeyData.getValue()));
 }
 
 /**

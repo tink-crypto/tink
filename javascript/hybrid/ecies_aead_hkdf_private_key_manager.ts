@@ -7,6 +7,7 @@
 import {SecurityException} from '../exception/security_exception';
 import * as KeyManager from '../internal/key_manager';
 import {PbEciesAeadHkdfKeyFormat, PbEciesAeadHkdfParams, PbEciesAeadHkdfPrivateKey, PbEciesAeadHkdfPublicKey, PbKeyData, PbMessage} from '../internal/proto';
+import {bytesAsU8, ProtoBytes} from '../internal/proto_shims';
 import * as Util from '../internal/util';
 import * as Bytes from '../subtle/bytes';
 import * as eciesAeadHkdfHybridDecrypt from '../subtle/ecies_aead_hkdf_hybrid_decrypt';
@@ -197,7 +198,7 @@ export class EciesAeadHkdfPrivateKeyManager implements
       throw new SecurityException('KEM params not set');
     }
     const hkdfHash = Util.hashTypeProtoToString(kemParams.getHkdfHashType());
-    const hkdfSalt = kemParams.getHkdfSalt_asU8();
+    const hkdfSalt = bytesAsU8(kemParams.getHkdfSalt());
     return eciesAeadHkdfHybridDecrypt.fromJsonWebKey(
         recepientPrivateKey, hkdfHash, pointFormat, demHelper, hkdfSalt);
   }
@@ -243,11 +244,11 @@ export class EciesAeadHkdfPrivateKeyManager implements
           ' is not supported. This key manager supports ' +
           EciesAeadHkdfPrivateKeyManager.KEY_TYPE + '.');
     }
-    return deserializePrivateKey(keyData.getValue_asU8());
+    return deserializePrivateKey(keyData.getValue());
   }
 }
 
-function deserializePrivateKey(serializedPrivateKey: Uint8Array):
+function deserializePrivateKey(serializedPrivateKey: ProtoBytes):
     PbEciesAeadHkdfPrivateKey {
   let key: PbEciesAeadHkdfPrivateKey;
   try {
@@ -257,7 +258,7 @@ function deserializePrivateKey(serializedPrivateKey: Uint8Array):
         'Input cannot be parsed as ' + EciesAeadHkdfPrivateKeyManager.KEY_TYPE +
         ' key-proto.');
   }
-  if (!key.getPublicKey() || !key.getKeyValue_asU8()) {
+  if (!key.getPublicKey() || !key.getKeyValue()) {
     throw new SecurityException(
         'Input cannot be parsed as ' + EciesAeadHkdfPrivateKeyManager.KEY_TYPE +
         ' key-proto.');

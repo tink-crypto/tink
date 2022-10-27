@@ -5,6 +5,7 @@
  */
 
 import {PbEcdsaKeyFormat, PbEcdsaSignatureEncoding, PbEllipticCurveType, PbHashType, PbOutputPrefixType} from '../internal/proto';
+import {bytesAsU8} from '../internal/proto_shims';
 
 import {EcdsaPrivateKeyManager} from './ecdsa_private_key_manager';
 import {SignatureKeyTemplates} from './signature_key_templates';
@@ -28,7 +29,7 @@ describe('signature key templates test', function() {
 
     // Test values in key format.
     const keyFormat =
-        PbEcdsaKeyFormat.deserializeBinary(keyTemplate.getValue_asU8());
+        PbEcdsaKeyFormat.deserializeBinary(keyTemplate.getValue());
     const params = keyFormat.getParams();
     expect(params!.getEncoding()).toBe(expectedEncoding);
 
@@ -37,6 +38,6 @@ describe('signature key templates test', function() {
     expect(params!.getHashType()).toBe(expectedHashFunction);
 
     // Test that the template works with EcdsaPrivateKeyManager.
-    manager.getKeyFactory().newKey(keyTemplate.getValue_asU8());
+    manager.getKeyFactory().newKey(bytesAsU8(keyTemplate.getValue()));
   });
 });

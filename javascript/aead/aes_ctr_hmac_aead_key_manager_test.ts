@@ -5,6 +5,7 @@
  */
 
 import {PbAesCtrHmacAeadKey, PbAesCtrHmacAeadKeyFormat, PbAesCtrKey, PbAesCtrKeyFormat, PbAesCtrParams, PbHashType, PbHmacKey, PbHmacKeyFormat, PbHmacParams, PbKeyData} from '../internal/proto';
+import {bytesLength} from '../internal/proto_shims';
 import * as Random from '../subtle/random';
 import {assertExists} from '../testing/internal/test_utils';
 
@@ -252,14 +253,14 @@ describe('aes ctr hmac aead key manager test', function() {
     const key = manager.getKeyFactory().newKey(keyFormat);
 
     // testing AES CTR key
-    expect(key.getAesCtrKey()?.getKeyValue_asU8().length)
+    expect(bytesLength(key.getAesCtrKey()?.getKeyValue()))
         .toBe(keyFormat.getAesCtrKeyFormat()?.getKeySize());
     expect(key.getAesCtrKey()?.getVersion()).toBe(0);
     expect(key.getAesCtrKey()?.getParams()?.getIvSize())
         .toBe(keyFormat.getAesCtrKeyFormat()?.getParams()?.getIvSize());
 
     // testing HMAC key
-    expect(key.getHmacKey()?.getKeyValue_asU8()?.length)
+    expect(bytesLength(key.getHmacKey()?.getKeyValue()))
         .toBe(keyFormat.getHmacKeyFormat()?.getKeySize());
     expect(key.getHmacKey()?.getVersion()).toBe(0);
     expect(key.getHmacKey()?.getParams()?.getHash())
@@ -277,7 +278,7 @@ describe('aes ctr hmac aead key manager test', function() {
     const key = manager.getKeyFactory().newKey(serializedKeyFormat);
 
     // testing AES CTR key
-    expect(key.getAesCtrKey()?.getKeyValue_asU8().length)
+    expect(bytesLength(key.getAesCtrKey()?.getKeyValue()))
         .toBe(keyFormat.getAesCtrKeyFormat()?.getKeySize());
     expect(key.getAesCtrKey()?.getVersion()).toBe(0);
     expect(key.getAesCtrKey()?.getParams()?.getIvSize())
@@ -285,7 +286,7 @@ describe('aes ctr hmac aead key manager test', function() {
 
 
     // testing HMAC key
-    expect(key.getHmacKey()?.getKeyValue_asU8()?.length)
+    expect(bytesLength(key.getHmacKey()?.getKeyValue()))
         .toBe(keyFormat.getHmacKeyFormat()?.getKeySize());
     expect(key.getHmacKey()?.getVersion()).toBe(0);
     expect(key.getHmacKey()?.getParams()?.getHash())
@@ -329,11 +330,11 @@ describe('aes ctr hmac aead key manager test', function() {
     expect(keyData.getKeyMaterialType())
         .toBe(PbKeyData.KeyMaterialType.SYMMETRIC);
 
-    const key = PbAesCtrHmacAeadKey.deserializeBinary(keyData.getValue_asU8());
+    const key = PbAesCtrHmacAeadKey.deserializeBinary(keyData.getValue());
 
-    expect(key.getAesCtrKey()?.getKeyValue_asU8().length)
+    expect(bytesLength(key.getAesCtrKey()?.getKeyValue()))
         .toBe(keyFormat.getAesCtrKeyFormat()?.getKeySize());
-    expect(key.getHmacKey()?.getKeyValue_asU8()?.length)
+    expect(bytesLength(key.getHmacKey()?.getKeyValue()))
         .toBe(keyFormat.getHmacKeyFormat()?.getKeySize());
   });
 
