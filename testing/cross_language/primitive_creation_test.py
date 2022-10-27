@@ -214,14 +214,6 @@ class SupportedKeyTypesTest(parameterized.TestCase):
     keytypes = utilities.key_types_in_keyset(keyset)
     keytype = keytypes[0]
 
-    # This test should pass in all languages. However, Golang currently
-    # disallows key ID = 0 while all others allow it.
-    # TODO(b/249835030): Remove constraint in Golang.
-    if lang == 'go':
-      with self.assertRaises(tink.TinkError):
-        _ = testing_servers.remote_primitive(lang, modified_keyset, primitive)
-      return
-
     if _is_b243759652_test_case(lang, modified_keyset, primitive):
       # TODO(b/243759652): This should raise a TinkError, but doesn't
       _ = testing_servers.remote_primitive(lang, modified_keyset, primitive)
