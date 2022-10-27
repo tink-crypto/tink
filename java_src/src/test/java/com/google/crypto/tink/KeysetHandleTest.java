@@ -686,7 +686,7 @@ public class KeysetHandleTest {
   }
 
   @Test
-  public void getAt_invalidKeyWithRegisteredProtoSerialization_givesALegacyProtoKey()
+  public void getAt_invalidKeyWithRegisteredProtoSerialization_throwsIllegalStateException()
       throws Exception {
     // HmacKey's proto serialization HmacProtoSerialization is registed in HmacKeyManager.
     com.google.crypto.tink.proto.HmacKey invalidProtoHmacKey =
@@ -707,13 +707,7 @@ public class KeysetHandleTest {
                 OutputPrefixType.TINK));
     KeysetHandle handle = KeysetHandle.fromKeyset(keyset);
     assertThat(handle.size()).isEqualTo(1);
-    KeysetHandle.Entry entry = handle.getAt(0);
-    assertThat(entry.getId()).isEqualTo(42);
-    assertThat(entry.getStatus()).isEqualTo(KeyStatus.ENABLED);
-    assertThat(entry.isPrimary()).isTrue();
-    // Parsing the proto key into an HmacKey failed. So instead of a HmacKey, we get a
-    // LegacyProtoKey key.
-    assertThat(entry.getKey().getClass()).isEqualTo(LegacyProtoKey.class);
+    assertThrows(IllegalStateException.class, () -> handle.getAt(0));
   }
 
   @Test

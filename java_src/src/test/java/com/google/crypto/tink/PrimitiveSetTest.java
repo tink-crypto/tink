@@ -24,16 +24,23 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
 
 import com.google.crypto.tink.internal.LegacyProtoKey;
+import com.google.crypto.tink.mac.HmacKey;
+import com.google.crypto.tink.mac.HmacKeyManager;
 import com.google.crypto.tink.monitoring.MonitoringAnnotations;
+import com.google.crypto.tink.proto.HashType;
+import com.google.crypto.tink.proto.HmacParams;
 import com.google.crypto.tink.proto.KeyData;
 import com.google.crypto.tink.proto.KeyStatusType;
 import com.google.crypto.tink.proto.Keyset.Key;
 import com.google.crypto.tink.proto.OutputPrefixType;
 import com.google.crypto.tink.subtle.Hex;
+import com.google.crypto.tink.testing.TestUtil;
+import com.google.protobuf.ByteString;
 import java.security.GeneralSecurityException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -68,6 +75,11 @@ public class PrimitiveSetTest {
     public void verifyMac(byte[] mac, byte[] data) throws GeneralSecurityException {
       return;
     }
+  }
+
+  @BeforeClass
+  public static void setUp() throws GeneralSecurityException {
+    HmacKeyManager.register(true);
   }
 
   @Test
@@ -276,7 +288,7 @@ public class PrimitiveSetTest {
   }
 
   @Test
-  public void testEntryGetKey() throws Exception {
+  public void getKeyWithoutParser_givesLegacyProtoKey() throws Exception {
     PrimitiveSet.Builder<Mac> builder = PrimitiveSet.newBuilder(Mac.class);
     Key key1 =
         Key.newBuilder()
@@ -294,6 +306,52 @@ public class PrimitiveSetTest {
     assertThat(legacyProtoKey.getSerialization(InsecureSecretKeyAccess.get()).getTypeUrl())
         .isEqualTo("typeUrl1");
   }
+
+  @Test
+  public void getKeyWithParser_works() throws Exception {
+    // HmacKey's proto serialization HmacProtoSerialization is registed in HmacKeyManager.
+    Key protoKey =
+            TestUtil.createKey(
+                TestUtil.createHmacKeyData("01234567890123456".getBytes(UTF_8), 16),
+                42,
+                KeyStatusType.ENABLED,
+                OutputPrefixType.TINK);
+    byte[] prefix = CryptoFormat.getOutputPrefix(protoKey);
+    PrimitiveSet.Builder<Mac> builder = PrimitiveSet.newBuilder(Mac.class);
+    builder.addPrimitive(new DummyMac1(), protoKey);
+    PrimitiveSet<Mac> pset = builder.build();
+
+    com.google.crypto.tink.Key key = pset.getPrimitive(prefix).get(0).getKey();
+    assertThat(key).isInstanceOf(HmacKey.class);
+    HmacKey hmacKey = (HmacKey) key;
+    assertThat(hmacKey.getIdRequirementOrNull()).isEqualTo(42);
+  }
+
+  @Test
+  public void addPrimitiveWithInvalidKeyThatHasAParser_throws()
+      throws Exception {
+    // HmacKey's proto serialization HmacProtoSerialization is registed in HmacKeyManager.
+    com.google.crypto.tink.proto.HmacKey invalidProtoHmacKey =
+        com.google.crypto.tink.proto.HmacKey.newBuilder()
+            .setVersion(999)
+            .setKeyValue(ByteString.copyFromUtf8("01234567890123456"))
+            .setParams(HmacParams.newBuilder().setHash(HashType.UNKNOWN_HASH).setTagSize(0))
+            .build();
+    Key protoKey =
+            TestUtil.createKey(
+                TestUtil.createKeyData(
+                    invalidProtoHmacKey,
+                    "type.googleapis.com/google.crypto.tink.HmacKey",
+                    KeyData.KeyMaterialType.SYMMETRIC),
+                42,
+                KeyStatusType.ENABLED,
+                OutputPrefixType.TINK);
+
+    PrimitiveSet.Builder<Mac> builder = PrimitiveSet.newBuilder(Mac.class);
+    assertThrows(GeneralSecurityException.class,
+        () -> builder.addPrimitive(new DummyMac1(), protoKey));
+  }
+
 
   @Test
   public void testWithAnnotations() throws Exception {

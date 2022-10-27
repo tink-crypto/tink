@@ -508,15 +508,15 @@ public final class KeysetHandle {
     int id = protoKey.getKeyId();
 
     ProtoKeySerialization protoKeySerialization = toProtoKeySerialization(protoKey);
-    Key key =
+    try {
+      Key key =
         MutableSerializationRegistry.globalInstance()
             .parseKeyWithLegacyFallback(protoKeySerialization, InsecureSecretKeyAccess.get());
-    try {
       return new KeysetHandle.Entry(
           key, parseStatus(protoKey.getStatus()), id, id == keyset.getPrimaryKeyId());
     } catch (GeneralSecurityException e) {
-      // This may happen if a keyset without status makes it here; we should reject
-      // such keysets earlier instead.
+      // This may happen if a keyset without status makes it here; or if a key has a parser
+      // registered but parsing fails. We should reject such keysets earlier instead.
       throw new IllegalStateException("Creating an entry failed", e);
     }
   }
