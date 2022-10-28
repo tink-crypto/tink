@@ -92,6 +92,7 @@ tink_cc_library(
     tink::core::input_stream
     tink::core::json_keyset_reader
     tink::core::json_keyset_writer
+    tink::core::key
     tink::core::key_manager
     tink::core::keyset_handle
     tink::core::keyset_manager
@@ -473,7 +474,10 @@ tink_cc_library(
     keyset_handle.h
   DEPS
     tink::core::aead
+    tink::core::insecure_secret_key_access
+    tink::core::key
     tink::core::key_manager
+    tink::core::key_status
     tink::core::keyset_reader
     tink::core::keyset_writer
     tink::core::primitive_set
@@ -483,7 +487,12 @@ tink_cc_library(
     absl::memory
     absl::status
     absl::strings
+    absl::optional
     tink::internal::key_info
+    tink::internal::key_status_util
+    tink::internal::legacy_proto_key
+    tink::internal::proto_key_serialization
+    tink::internal::util
     tink::util::errors
     tink::util::keyset_util
     tink::proto::tink_cc_proto
@@ -803,6 +812,7 @@ tink_cc_test(
     tink::core::key_manager_impl
     tink::core::json_keyset_reader
     tink::core::json_keyset_writer
+    tink::core::key_status
     tink::core::keyset_handle
     tink::core::primitive_set
     tink::core::primitive_wrapper
@@ -813,6 +823,9 @@ tink_cc_test(
     tink::aead::aead_wrapper
     tink::aead::aes_gcm_key_manager
     tink::config::tink_config
+    tink::internal::legacy_proto_parameters
+    tink::internal::proto_parameters_serialization
+    tink::mac::mac_key_templates
     tink::signature::ecdsa_sign_key_manager
     tink::signature::signature_key_templates
     tink::util::protobuf_helper

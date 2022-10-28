@@ -17,6 +17,7 @@
 #ifndef TINK_KEYSET_HANDLE_H_
 #define TINK_KEYSET_HANDLE_H_
 
+#include <memory>
 #include <string>
 #include <utility>
 
@@ -25,7 +26,9 @@
 #include "absl/status/status.h"
 #include "tink/aead.h"
 #include "tink/internal/key_info.h"
+#include "tink/key.h"
 #include "tink/key_manager.h"
+#include "tink/key_status.h"
 #include "tink/keyset_reader.h"
 #include "tink/keyset_writer.h"
 #include "tink/primitive_set.h"
@@ -40,6 +43,58 @@ namespace tink {
 // key material.
 class KeysetHandle {
  public:
+  // Represents a single entry in a `KeysetHandle`. Some current behavior will
+  // be changed in the future.
+  class Entry {
+   public:
+    // May return an internal class in case there is no implementation of the
+    // corresponding key class yet.  Returned value only valid for lifetime
+    // of entry object.
+    const Key& GetKey() const { return *key_; }
+
+    // Status indicates whether or not a key should still be used.
+    KeyStatus GetStatus() const { return status_; }
+
+    // ID should be unique (though currently Tink still accepts keysets with
+    // repeated IDs).
+    int GetId() const { return id_; }
+
+    // Should return true for exactly one entry (though currently Tink still
+    // accepts keysets which have no entry marked as primary).
+    bool IsPrimary() const { return is_primary_; }
+
+   private:
+    friend class KeysetHandle;
+
+    Entry(std::unique_ptr<Key> key, KeyStatus status, int id, bool is_primary)
+        : key_(std::move(key)),
+          status_(status),
+          id_(id),
+          is_primary_(is_primary) {}
+
+    std::unique_ptr<Key> key_;
+    KeyStatus status_;
+    int id_;
+    bool is_primary_;
+  };
+
+  // Returns the number of entries in this keyset.
+  int size() const { return keyset_.key_size(); }
+  // Validates single `KeysetHandle::Entry` at `index` by making sure that the
+  // key entry's type URL is printable and that it has a valid key status.
+  crypto::tink::util::Status ValidateAt(int index) const;
+  // Validates each individual `KeysetHandle::Entry` in keyset handle by calling
+  // `ValidateAt()`.  Also, checks that there is a single enabled primary key.
+  crypto::tink::util::Status Validate() const;
+  // Returns entry for primary key in this keyset. Crashes if `Validate()`
+  // does not return an OK status.  Call `Validate()` prior to calling this
+  // method to avoid potentially crashing your program.
+  Entry GetPrimary() const;
+  // Returns the `KeysetHandle::Entry` at `index`.  Crashes if
+  // `ValidateAt(index)` does not return an OK status.  Call `ValidateAt(index)`
+  // prior to calling this method to avoid potentially crashing your program.
+  Entry operator[](int index) const;
+
   // Creates a KeysetHandle from an encrypted keyset obtained via `reader`
   // using `master_key_aead` to decrypt the keyset, with monitoring annotations
   // `monitoring_annotations`; by default, `monitoring_annotations` is empty.

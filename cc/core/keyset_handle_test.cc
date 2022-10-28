@@ -35,8 +35,12 @@
 #include "tink/cleartext_keyset_handle.h"
 #include "tink/config/tink_config.h"
 #include "tink/core/key_manager_impl.h"
+#include "tink/internal/legacy_proto_parameters.h"
+#include "tink/internal/proto_parameters_serialization.h"
 #include "tink/json_keyset_reader.h"
 #include "tink/json_keyset_writer.h"
+#include "tink/key_status.h"
+#include "tink/mac/mac_key_templates.h"
 #include "tink/primitive_set.h"
 #include "tink/primitive_wrapper.h"
 #include "tink/signature/ecdsa_sign_key_manager.h"
@@ -67,7 +71,11 @@ using google::crypto::tink::KeyStatusType;
 using google::crypto::tink::KeyTemplate;
 using google::crypto::tink::OutputPrefixType;
 using ::testing::_;
+using ::testing::Eq;
+using ::testing::IsFalse;
+using ::testing::IsTrue;
 using ::testing::Not;
+using ::testing::SizeIs;
 
 namespace {
 
@@ -78,6 +86,8 @@ class KeysetHandleTest : public ::testing::Test {
     ASSERT_TRUE(status.ok()) << status;
   }
 };
+
+using KeysetHandleDeathTest = KeysetHandleTest;
 
 // Dummy key factory that is required to create a key manager.
 class DummyAeadKeyFactory : public KeyFactory {
@@ -1040,6 +1050,193 @@ TEST_F(KeysetHandleTest, GetKeysetInfo) {
     EXPECT_EQ(key.key_id(), key_info.key_id());
     EXPECT_EQ(key.output_prefix_type(), key_info.output_prefix_type());
   }
+}
+
+TEST_F(KeysetHandleTest, GetEntryFromSingleKeyKeyset) {
+  Keyset keyset;
+  Keyset::Key key;
+  AddTinkKey("first_key_type", 11, key, KeyStatusType::ENABLED,
+             KeyData::SYMMETRIC, &keyset);
+  keyset.set_primary_key_id(11);
+  std::unique_ptr<KeysetHandle> handle =
+      TestKeysetHandle::GetKeysetHandle(keyset);
+  ASSERT_THAT(handle->Validate(), IsOk());
+  ASSERT_THAT(*handle, SizeIs(1));
+
+  ASSERT_THAT(handle->ValidateAt(0), IsOk());
+  KeysetHandle::Entry entry = (*handle)[0];
+
+  EXPECT_THAT(entry.GetId(), Eq(11));
+  EXPECT_THAT(entry.GetStatus(), Eq(KeyStatus::kEnabled));
+  EXPECT_THAT(entry.IsPrimary(), IsTrue());
+  EXPECT_THAT(entry.GetKey().GetIdRequirement(), Eq(11));
+  EXPECT_THAT(entry.GetKey().GetParameters().HasIdRequirement(), IsTrue());
+}
+
+TEST_F(KeysetHandleTest, GetEntryFromMultipleKeyKeyset) {
+  Keyset keyset;
+  Keyset::Key key;
+  AddRawKey("first_key_type", 11, key, KeyStatusType::DISABLED,
+            KeyData::SYMMETRIC, &keyset);
+  AddTinkKey("second_key_type", 22, key, KeyStatusType::ENABLED,
+             KeyData::SYMMETRIC, &keyset);
+  AddRawKey("third_key_type", 33, key, KeyStatusType::DESTROYED,
+            KeyData::SYMMETRIC, &keyset);
+  keyset.set_primary_key_id(22);
+
+  std::unique_ptr<KeysetHandle> handle =
+      TestKeysetHandle::GetKeysetHandle(keyset);
+  ASSERT_THAT(handle->Validate(), IsOk());
+  ASSERT_THAT(*handle, SizeIs(3));
+
+  ASSERT_THAT(handle->ValidateAt(0), IsOk());
+  KeysetHandle::Entry entry0 = (*handle)[0];
+  EXPECT_THAT(entry0.GetId(), Eq(11));
+  EXPECT_THAT(entry0.GetStatus(), Eq(KeyStatus::kDisabled));
+  EXPECT_THAT(entry0.IsPrimary(), IsFalse());
+  EXPECT_THAT(entry0.GetKey().GetIdRequirement(), Eq(absl::nullopt));
+  EXPECT_THAT(entry0.GetKey().GetParameters().HasIdRequirement(), IsFalse());
+
+  ASSERT_THAT(handle->ValidateAt(1), IsOk());
+  KeysetHandle::Entry entry1 = (*handle)[1];
+  EXPECT_THAT(entry1.GetId(), Eq(22));
+  EXPECT_THAT(entry1.GetStatus(), Eq(KeyStatus::kEnabled));
+  EXPECT_THAT(entry1.IsPrimary(), IsTrue());
+  EXPECT_THAT(entry1.GetKey().GetIdRequirement(), Eq(22));
+  EXPECT_THAT(entry1.GetKey().GetParameters().HasIdRequirement(), IsTrue());
+
+  ASSERT_THAT(handle->ValidateAt(2), IsOk());
+  KeysetHandle::Entry entry2 = (*handle)[2];
+  EXPECT_THAT(entry2.GetId(), Eq(33));
+  EXPECT_THAT(entry2.GetStatus(), Eq(KeyStatus::kDestroyed));
+  EXPECT_THAT(entry2.IsPrimary(), IsFalse());
+  EXPECT_THAT(entry2.GetKey().GetIdRequirement(), Eq(absl::nullopt));
+  EXPECT_THAT(entry2.GetKey().GetParameters().HasIdRequirement(), IsFalse());
+}
+
+TEST_F(KeysetHandleDeathTest, EntryWithIndexOutOfBoundsCrashes) {
+  Keyset keyset;
+  Keyset::Key key;
+  AddTinkKey("first_key_type", 11, key, KeyStatusType::ENABLED,
+             KeyData::SYMMETRIC, &keyset);
+  keyset.set_primary_key_id(11);
+  std::unique_ptr<KeysetHandle> handle =
+      TestKeysetHandle::GetKeysetHandle(keyset);
+  ASSERT_THAT(handle->Validate(), IsOk());
+  ASSERT_THAT(*handle, SizeIs(1));
+
+  EXPECT_DEATH_IF_SUPPORTED((*handle)[-1],
+                            "Invalid index -1 for keyset of size 1");
+  EXPECT_DEATH_IF_SUPPORTED((*handle)[1],
+                            "Invalid index 1 for keyset of size 1");
+}
+
+TEST_F(KeysetHandleDeathTest, EntryWithUnknownStatusFails) {
+  Keyset keyset;
+  Keyset::Key key;
+  AddTinkKey("first_key_type", 11, key, KeyStatusType::UNKNOWN_STATUS,
+             KeyData::SYMMETRIC, &keyset);
+  keyset.set_primary_key_id(11);
+  std::unique_ptr<KeysetHandle> handle =
+      TestKeysetHandle::GetKeysetHandle(keyset);
+  ASSERT_THAT(*handle, SizeIs(1));
+
+  EXPECT_THAT(handle->Validate(),
+              StatusIs(absl::StatusCode::kInvalidArgument));
+  EXPECT_THAT(handle->ValidateAt(0),
+              StatusIs(absl::StatusCode::kInvalidArgument));
+  EXPECT_DEATH_IF_SUPPORTED((*handle)[0], "Invalid key status type.");
+}
+
+TEST_F(KeysetHandleDeathTest, EntryWithUnprintableTypeUrlFails) {
+  Keyset keyset;
+  Keyset::Key key;
+  AddRawKey("invalid key type url with spaces", 11, key, KeyStatusType::ENABLED,
+            KeyData::SYMMETRIC, &keyset);
+  keyset.set_primary_key_id(11);
+
+  std::unique_ptr<KeysetHandle> handle =
+      TestKeysetHandle::GetKeysetHandle(keyset);
+  ASSERT_THAT(*handle, SizeIs(1));
+
+  EXPECT_THAT(handle->Validate(),
+              StatusIs(absl::StatusCode::kFailedPrecondition));
+  EXPECT_THAT(handle->ValidateAt(0),
+              StatusIs(absl::StatusCode::kFailedPrecondition));
+  EXPECT_DEATH_IF_SUPPORTED((*handle)[0],
+                            "Non-printable ASCII character in type URL.");
+}
+
+TEST_F(KeysetHandleTest, GetPrimary) {
+  Keyset keyset;
+  Keyset::Key key;
+  AddTinkKey("first_key_type", 11, key, KeyStatusType::ENABLED,
+             KeyData::SYMMETRIC, &keyset);
+  AddTinkKey("first_key_type", 22, key, KeyStatusType::ENABLED,
+             KeyData::SYMMETRIC, &keyset);
+  AddTinkKey("first_key_type", 33, key, KeyStatusType::ENABLED,
+             KeyData::SYMMETRIC, &keyset);
+  keyset.set_primary_key_id(33);
+  std::unique_ptr<KeysetHandle> handle =
+      TestKeysetHandle::GetKeysetHandle(keyset);
+  ASSERT_THAT(handle->Validate(), IsOk());
+  ASSERT_THAT(*handle, SizeIs(3));
+
+  util::StatusOr<KeysetHandle::Entry> primary = handle->GetPrimary();
+  ASSERT_THAT(primary, IsOk());
+
+  EXPECT_THAT(primary->GetId(), Eq(33));
+  EXPECT_THAT(primary->GetStatus(), Eq(KeyStatus::kEnabled));
+  EXPECT_THAT(primary->IsPrimary(), IsTrue());
+}
+
+TEST_F(KeysetHandleDeathTest, NonexistentPrimaryFails) {
+  Keyset keyset;
+  Keyset::Key key;
+  AddTinkKey("first_key_type", 11, key, KeyStatusType::ENABLED,
+             KeyData::SYMMETRIC, &keyset);
+  std::unique_ptr<KeysetHandle> handle =
+      TestKeysetHandle::GetKeysetHandle(keyset);
+  ASSERT_THAT(*handle, SizeIs(1));
+
+  EXPECT_THAT(handle->Validate(),
+              StatusIs(absl::StatusCode::kFailedPrecondition));
+  EXPECT_DEATH_IF_SUPPORTED(handle->GetPrimary(), "Keyset has no primary");
+}
+
+TEST_F(KeysetHandleDeathTest, MultiplePrimariesFail) {
+  Keyset keyset;
+  Keyset::Key key;
+  AddTinkKey("first_key_type", 11, key, KeyStatusType::ENABLED,
+             KeyData::SYMMETRIC, &keyset);
+  AddTinkKey("second_key_type", 11, key, KeyStatusType::ENABLED,
+             KeyData::SYMMETRIC, &keyset);
+  // Multiple primaries since two distinct keys share the same key id.
+  keyset.set_primary_key_id(11);
+  std::unique_ptr<KeysetHandle> handle =
+      TestKeysetHandle::GetKeysetHandle(keyset);
+  ASSERT_THAT(*handle, SizeIs(2));
+
+  EXPECT_THAT(handle->Validate(),
+              StatusIs(absl::StatusCode::kFailedPrecondition));
+  EXPECT_DEATH_IF_SUPPORTED(handle->GetPrimary(),
+                            "Keyset has more than one primary");
+}
+
+TEST_F(KeysetHandleDeathTest, GetDisabledPrimaryFails) {
+  Keyset keyset;
+  Keyset::Key key;
+  AddTinkKey("first_key_type", 11, key, KeyStatusType::DISABLED,
+             KeyData::SYMMETRIC, &keyset);
+  keyset.set_primary_key_id(11);
+  std::unique_ptr<KeysetHandle> handle =
+      TestKeysetHandle::GetKeysetHandle(keyset);
+  ASSERT_THAT(*handle, SizeIs(1));
+
+  EXPECT_THAT(handle->Validate(),
+              StatusIs(absl::StatusCode::kFailedPrecondition));
+  EXPECT_DEATH_IF_SUPPORTED(handle->GetPrimary(),
+                            "Keyset has primary that is not enabled");
 }
 
 }  // namespace

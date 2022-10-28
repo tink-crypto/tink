@@ -15,6 +15,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include "tink/keyset_handle.h"
 
+#include <iostream>
 #include <memory>
 #include <string>
 #include <utility>
@@ -23,8 +24,15 @@
 #include "absl/memory/memory.h"
 #include "absl/status/status.h"
 #include "absl/strings/string_view.h"
+#include "absl/types/optional.h"
 #include "tink/aead.h"
+#include "tink/insecure_secret_key_access.h"
 #include "tink/internal/key_info.h"
+#include "tink/internal/key_status_util.h"
+#include "tink/internal/legacy_proto_key.h"
+#include "tink/internal/proto_key_serialization.h"
+#include "tink/internal/util.h"
+#include "tink/key_status.h"
 #include "tink/keyset_reader.h"
 #include "tink/keyset_writer.h"
 #include "tink/registry.h"
@@ -36,7 +44,9 @@ using google::crypto::tink::EncryptedKeyset;
 using google::crypto::tink::KeyData;
 using google::crypto::tink::Keyset;
 using google::crypto::tink::KeysetInfo;
+using google::crypto::tink::KeyStatusType;
 using google::crypto::tink::KeyTemplate;
+using google::crypto::tink::OutputPrefixType;
 
 namespace crypto {
 namespace tink {
@@ -83,7 +93,129 @@ util::Status ValidateNoSecret(const Keyset& keyset) {
   return util::OkStatus();
 }
 
+util::StatusOr<internal::ProtoKeySerialization> ToProtoKeySerialization(
+    Keyset::Key key) {
+  absl::optional<int> id_requirement = absl::nullopt;
+  if (key.output_prefix_type() != OutputPrefixType::RAW) {
+    id_requirement = key.key_id();
+  }
+  return internal::ProtoKeySerialization::Create(
+      key.key_data().type_url(),
+      RestrictedData(key.key_data().value(), InsecureSecretKeyAccess::Get()),
+      key.key_data().key_material_type(), key.output_prefix_type(),
+      id_requirement);
+}
+
 }  // anonymous namespace
+
+util::Status KeysetHandle::ValidateAt(int index) const {
+  const Keyset::Key& proto_key = get_keyset().key(index);
+  OutputPrefixType output_prefix_type = proto_key.output_prefix_type();
+  absl::optional<int> id_requirement = absl::nullopt;
+  if (output_prefix_type != OutputPrefixType::RAW) {
+    id_requirement = proto_key.key_id();
+  }
+
+  if (!internal::IsPrintableAscii(proto_key.key_data().type_url())) {
+    return util::Status(absl::StatusCode::kFailedPrecondition,
+                        "Non-printable ASCII character in type URL.");
+  }
+
+  util::StatusOr<KeyStatus> key_status =
+      internal::FromKeyStatusType(proto_key.status());
+  if (!key_status.ok()) return key_status.status();
+
+  return util::OkStatus();
+}
+
+util::Status KeysetHandle::Validate() const {
+  int num_primary = 0;
+  const Keyset& keyset = get_keyset();
+
+  for (int i = 0; i < size(); ++i) {
+    util::Status status = ValidateAt(i);
+    if (!status.ok()) return status;
+
+    Keyset::Key proto_key = keyset.key(i);
+    if (proto_key.key_id() == keyset.primary_key_id()) {
+      ++num_primary;
+      if (proto_key.status() != KeyStatusType::ENABLED) {
+        return util::Status(absl::StatusCode::kFailedPrecondition,
+                            "Keyset has primary that is not enabled");
+      }
+    }
+  }
+
+  if (num_primary < 1) {
+    return util::Status(absl::StatusCode::kFailedPrecondition,
+                        "Keyset has no primary");
+  }
+  if (num_primary > 1) {
+    return util::Status(absl::StatusCode::kFailedPrecondition,
+                        "Keyset has more than one primary");
+  }
+
+  return util::OkStatus();
+}
+
+KeysetHandle::Entry KeysetHandle::GetPrimary() const {
+  util::Status validation = Validate();
+  if (!validation.ok()) {
+    std::cerr << validation.message();
+    std::abort();
+  }
+
+  const Keyset& keyset = get_keyset();
+  for (int i = 0; i < keyset.key_size(); ++i) {
+    if (keyset.key(i).key_id() == keyset.primary_key_id()) {
+      return (*this)[i];
+    }
+  }
+
+  // Since keyset handle was validated, it should have a valid primary key.
+  std::cerr << "Keyset handle should have a valid primary key.";
+  std::abort();
+}
+
+KeysetHandle::Entry KeysetHandle::operator[](int index) const {
+  if (index < 0 || index >= size()) {
+    std::cerr << "Invalid index " << index << " for keyset of size " << size();
+    std::abort();
+  }
+
+  util::Status validation = ValidateAt(index);
+  if (!validation.ok()) {
+    std::cerr << validation.message();
+    std::abort();
+  }
+
+  const Keyset::Key& proto_key = get_keyset().key(index);
+  int id = proto_key.key_id();
+
+  util::StatusOr<internal::ProtoKeySerialization> serialization =
+      ToProtoKeySerialization(proto_key);
+  // Status should be OK since this keyset handle has been validated.
+  if (!serialization.ok()) {
+    std::cerr << serialization.status().message();
+    std::abort();
+  }
+
+  // TODO(b/242162436): Add support for more than legacy proto keys.
+  util::StatusOr<internal::LegacyProtoKey> key =
+      internal::LegacyProtoKey::Create(*serialization,
+                                       InsecureSecretKeyAccess::Get());
+
+  util::StatusOr<KeyStatus> key_status =
+      internal::FromKeyStatusType(proto_key.status());
+  // Status should be OK since this keyset handle has been validated.
+  if (!key_status.ok()) {
+    std::cerr << key_status.status().message();
+    std::abort();
+  }
+
+  return Entry(absl::make_unique<internal::LegacyProtoKey>(std::move(*key)),
+               *key_status, id, id == get_keyset().primary_key_id());
+}
 
 util::StatusOr<std::unique_ptr<KeysetHandle>> KeysetHandle::Read(
     std::unique_ptr<KeysetReader> reader, const Aead& master_key_aead,
