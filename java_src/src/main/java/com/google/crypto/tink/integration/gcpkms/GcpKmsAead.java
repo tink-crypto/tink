@@ -61,7 +61,7 @@ public final class GcpKmsAead implements Aead {
               .cryptoKeys()
               .encrypt(this.kmsKeyUri, request)
               .execute();
-      return response.decodeCiphertext();
+      return toNonNullableByteArray(response.decodeCiphertext());
     } catch (IOException e) {
       throw new GeneralSecurityException("encryption failed", e);
     }
@@ -80,9 +80,19 @@ public final class GcpKmsAead implements Aead {
               .cryptoKeys()
               .decrypt(this.kmsKeyUri, request)
               .execute();
-      return response.decodePlaintext();
+      return toNonNullableByteArray(response.decodePlaintext());
     } catch (IOException e) {
       throw new GeneralSecurityException("decryption failed", e);
+    }
+  }
+
+  private static final byte[] EMPTY_BYTE_ARRAY = new byte[0];
+
+  private static byte[] toNonNullableByteArray(byte[] data) {
+    if (data == null) {
+      return EMPTY_BYTE_ARRAY;
+    } else {
+      return data;
     }
   }
 }

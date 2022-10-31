@@ -241,6 +241,25 @@ public final class GcpKmsClientTest {
   }
 
   @Test
+  public void kmsAead_encryptDecryptEmptyString_success() throws Exception {
+    String keyId = "projects/tink-test/locations/global/keyRings/unit-test/cryptoKeys/aead-key";
+    String keyUri =
+        "gcp-kms://projects/tink-test/locations/global/keyRings/unit-test/cryptoKeys/aead-key";
+
+    registerGcpKmsClient(new FakeCloudKms(asList(keyId)));
+
+    KeyTemplate kmsTemplate = KmsAeadKeyManager.createKeyTemplate(keyUri);
+    KeysetHandle handle = KeysetHandle.generateNew(kmsTemplate);
+    Aead aead = handle.getPrimitive(Aead.class);
+
+    byte[] plaintext = "".getBytes(UTF_8);
+    byte[] associatedData = "associatedData".getBytes(UTF_8);
+    byte[] ciphertext = aead.encrypt(plaintext, associatedData);
+    byte[] decrypted = aead.decrypt(ciphertext, associatedData);
+    assertThat(decrypted).isEqualTo(plaintext);
+  }
+
+  @Test
   public void kmsAeadCannotDecryptCiphertextOfDifferentUri() throws Exception {
     String keyId = "projects/tink-test/locations/global/keyRings/unit-test/cryptoKeys/aead-key";
     String keyId2 = "projects/tink-test/locations/global/keyRings/unit-test/cryptoKeys/aead-key2";

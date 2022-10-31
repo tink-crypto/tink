@@ -151,7 +151,12 @@ final class FakeCloudKms extends CloudKMS {
                 byte[] plaintext =
                     aead.decrypt(
                         request.decodeCiphertext(), request.decodeAdditionalAuthenticatedData());
-                return new DecryptResponse().encodePlaintext(plaintext);
+                if (plaintext.length == 0) {
+                  // The real CloudKMS also returns null in this case.
+                  return new DecryptResponse().encodePlaintext(null);
+                } else {
+                  return new DecryptResponse().encodePlaintext(plaintext);
+                }
               } catch (GeneralSecurityException e) {
                 throw new IOException(e.getMessage());
               }

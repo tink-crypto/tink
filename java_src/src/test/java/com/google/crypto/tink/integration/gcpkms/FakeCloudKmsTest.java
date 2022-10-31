@@ -72,6 +72,32 @@ public final class FakeCloudKmsTest {
   }
 
   @Test
+  public void encryptEmptyData_decryptReturnsNull() throws Exception {
+    CloudKMS kms = new FakeCloudKms(asList(KEY_ID));
+
+    byte[] plaintext = "".getBytes(UTF_8);
+    byte[] associatedData = "associatedData".getBytes(UTF_8);
+
+    EncryptRequest encRequest =
+        new EncryptRequest()
+            .encodePlaintext(plaintext)
+            .encodeAdditionalAuthenticatedData(associatedData);
+
+    EncryptResponse encResponse =
+        kms.projects().locations().keyRings().cryptoKeys().encrypt(KEY_ID, encRequest).execute();
+
+    DecryptRequest decRequest =
+        new DecryptRequest()
+            .encodeCiphertext(encResponse.decodeCiphertext())
+            .encodeAdditionalAuthenticatedData(associatedData);
+
+    DecryptResponse decResponse =
+        kms.projects().locations().keyRings().cryptoKeys().decrypt(KEY_ID, decRequest).execute();
+
+    assertThat(decResponse.decodePlaintext()).isNull();
+  }
+
+  @Test
   public void testEncryptWithUnknownKeyId_executeFails() throws Exception {
     CloudKMS kms = new FakeCloudKms(asList(KEY_ID));
 

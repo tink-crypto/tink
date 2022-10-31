@@ -18,6 +18,7 @@ package com.google.crypto.tink.integration.gcpkms;
 
 import static com.google.common.truth.Truth.assertThat;
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static org.junit.Assert.assertThrows;
 
 import com.google.crypto.tink.Aead;
 import com.google.crypto.tink.KeyTemplate;
@@ -27,6 +28,7 @@ import com.google.crypto.tink.aead.AeadConfig;
 import com.google.crypto.tink.aead.KmsAeadKeyManager;
 import com.google.crypto.tink.aead.KmsEnvelopeAeadKeyManager;
 import com.google.crypto.tink.testing.TestUtil;
+import java.security.GeneralSecurityException;
 import java.util.Optional;
 import org.junit.Before;
 import org.junit.Test;
@@ -43,7 +45,7 @@ public class GcpKmsIntegrationTest {
   }
 
   @Test
-  public void kmsAeadUsingGcpKms_success() throws Exception {
+  public void kmsAead_encryptDecrypt() throws Exception {
     KeysetHandle keysetHandle =
         KeysetHandle.generateNew(
             KmsAeadKeyManager.createKeyTemplate(TestUtil.GCP_KMS_TEST_KEY_URI));
@@ -55,10 +57,18 @@ public class GcpKmsIntegrationTest {
     byte[] ciphertext = aead.encrypt(plaintext, associatedData);
     byte[] decrypted = aead.decrypt(ciphertext, associatedData);
     assertThat(decrypted).isEqualTo(plaintext);
+
+    byte[] invalid = "invalid".getBytes(UTF_8);
+    byte[] empty = "".getBytes(UTF_8);
+    assertThrows(GeneralSecurityException.class, () -> aead.decrypt(ciphertext, invalid));
+    assertThrows(GeneralSecurityException.class, () -> aead.decrypt(invalid, associatedData));
+    assertThrows(GeneralSecurityException.class, () -> aead.decrypt(empty, associatedData));
+    assertThat(aead.decrypt(aead.encrypt(empty, associatedData), associatedData)).isEqualTo(empty);
+    assertThat(aead.decrypt(aead.encrypt(plaintext, empty), empty)).isEqualTo(plaintext);
   }
 
   @Test
-  public void kmsEnvelopeAeadUsingGcpKms_success() throws Exception {
+  public void kmsEnvelopeAead_encryptDecrypt() throws Exception {
     KeyTemplate envelopeTemplate =
         KmsEnvelopeAeadKeyManager.createKeyTemplate(
             TestUtil.GCP_KMS_TEST_KEY_URI, KeyTemplates.get("AES128_CTR_HMAC_SHA256"));
@@ -71,5 +81,13 @@ public class GcpKmsIntegrationTest {
     byte[] ciphertext = aead.encrypt(plaintext, associatedData);
     byte[] decrypted = aead.decrypt(ciphertext, associatedData);
     assertThat(decrypted).isEqualTo(plaintext);
+
+    byte[] invalid = "invalid".getBytes(UTF_8);
+    byte[] empty = "".getBytes(UTF_8);
+    assertThrows(GeneralSecurityException.class, () -> aead.decrypt(ciphertext, invalid));
+    assertThrows(GeneralSecurityException.class, () -> aead.decrypt(invalid, associatedData));
+    assertThrows(GeneralSecurityException.class, () -> aead.decrypt(empty, associatedData));
+    assertThat(aead.decrypt(aead.encrypt(empty, associatedData), associatedData)).isEqualTo(empty);
+    assertThat(aead.decrypt(aead.encrypt(plaintext, empty), empty)).isEqualTo(plaintext);
   }
 }
