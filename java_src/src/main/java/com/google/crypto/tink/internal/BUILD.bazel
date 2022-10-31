@@ -516,3 +516,35 @@ android_library(
         "@maven//:com_google_code_gson_gson",
     ],
 )
+
+java_library(
+    name = "primitive_registry",
+    srcs = ["PrimitiveRegistry.java"],
+    deps = [
+        ":primitive_constructor",
+        "//src/main/java/com/google/crypto/tink:key",
+        "@maven//:com_google_errorprone_error_prone_annotations",
+    ],
+)
+
+android_library(
+    name = "primitive_registry-android",
+    srcs = ["PrimitiveRegistry.java"],
+    deps = [
+        ":primitive_constructor-android",
+        "//src/main/java/com/google/crypto/tink:key-android",
+        "@maven//:com_google_errorprone_error_prone_annotations",
+    ],
+)
+
+java_library(
+    name = "primitive_constructor",
+    srcs = ["PrimitiveConstructor.java"],
+    deps = ["//src/main/java/com/google/crypto/tink:key"],
+)
+
+android_library(
+    name = "primitive_constructor-android",
+    srcs = ["PrimitiveConstructor.java"],
+    deps = ["//src/main/java/com/google/crypto/tink:key-android"],
+)
