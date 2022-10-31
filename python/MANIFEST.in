@@ -3,6 +3,7 @@
 # "python setup.py sdist" or "python setup.py bdist_wheel".
 include requirements.in
 include requirements.txt
+include .bazelrc
 include VERSION
 include WORKSPACE
 include BUILD.bazel
