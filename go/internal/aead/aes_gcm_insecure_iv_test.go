@@ -232,34 +232,10 @@ func TestAESGCMInsecureIVModifyCiphertext(t *testing.T) {
 	}
 }
 
-type aeadSuite struct {
-	testutil.WycheproofSuite
-	TestGroups []*aeadGroup `json:"testGroups"`
-}
-
-type aeadGroup struct {
-	testutil.WycheproofGroup
-	IVSize  uint32      `json:"ivSize"`
-	KeySize uint32      `json:"keySize"`
-	TagSize uint32      `json:"tagSize"`
-	Type    string      `json:"type"`
-	Tests   []*aeadCase `json:"tests"`
-}
-
-type aeadCase struct {
-	testutil.WycheproofCase
-	AD      testutil.HexBytes `json:"aad"`
-	CT      testutil.HexBytes `json:"ct"`
-	IV      testutil.HexBytes `json:"iv"`
-	Key     testutil.HexBytes `json:"key"`
-	Message testutil.HexBytes `json:"msg"`
-	Tag     testutil.HexBytes `json:"tag"`
-}
-
 func TestAESGCMInsecureIVWycheproofVectors(t *testing.T) {
 	testutil.SkipTestIfTestSrcDirIsNotSet(t)
 
-	suite := new(aeadSuite)
+	suite := new(AEADSuite)
 	if err := testutil.PopulateSuite(suite, "aes_gcm_test.json"); err != nil {
 		t.Fatalf("failed to populate suite: %s", err)
 	}

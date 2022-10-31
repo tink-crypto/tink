@@ -197,7 +197,7 @@ func TestChaCha20Poly1305WycheproofCases(t *testing.T) {
 		if group.KeySize/8 != chacha20poly1305.KeySize {
 			continue
 		}
-		if group.IvSize/8 != chacha20poly1305.NonceSize {
+		if group.IVSize/8 != chacha20poly1305.NonceSize {
 			continue
 		}
 
@@ -215,13 +215,13 @@ func runChaCha20Poly1305WycheproofCase(t *testing.T, tc *AEADCase) {
 	}
 
 	nonce := random.GetRandomBytes(chacha20poly1305.NonceSize)
-	_, err = ca.Encrypt(nonce, tc.Msg, tc.Aad)
+	_, err = ca.Encrypt(nonce, tc.Message, tc.AD)
 	if err != nil {
 		t.Fatalf("unexpected encryption error: %s", err)
 	}
 
-	ct := append(tc.Ct, tc.Tag...)
-	decrypted, err := ca.Decrypt(tc.Iv, ct, tc.Aad)
+	ct := append(tc.CT, tc.Tag...)
+	decrypted, err := ca.Decrypt(tc.IV, ct, tc.AD)
 	if err != nil {
 		if tc.Result == "valid" {
 			t.Errorf("unexpected error: %s", err)
@@ -230,7 +230,7 @@ func runChaCha20Poly1305WycheproofCase(t *testing.T, tc *AEADCase) {
 		if tc.Result == "invalid" {
 			t.Error("decrypted invalid")
 		}
-		if !bytes.Equal(decrypted, tc.Msg) {
+		if !bytes.Equal(decrypted, tc.Message) {
 			t.Error("incorrect decryption")
 		}
 	}

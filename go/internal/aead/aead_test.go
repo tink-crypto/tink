@@ -30,7 +30,7 @@ type AEADSuite struct {
 
 type AEADGroup struct {
 	testutil.WycheproofGroup
-	IvSize  uint32      `json:"ivSize"`
+	IVSize  uint32      `json:"ivSize"`
 	KeySize uint32      `json:"keySize"`
 	TagSize uint32      `json:"tagSize"`
 	Type    string      `json:"type"`
@@ -39,12 +39,12 @@ type AEADGroup struct {
 
 type AEADCase struct {
 	testutil.WycheproofCase
-	Aad testutil.HexBytes `json:"aad"`
-	Ct  testutil.HexBytes `json:"ct"`
-	Iv  testutil.HexBytes `json:"iv"`
-	Key testutil.HexBytes `json:"key"`
-	Msg testutil.HexBytes `json:"msg"`
-	Tag testutil.HexBytes `json:"tag"`
+	AD      testutil.HexBytes `json:"aad"`
+	CT      testutil.HexBytes `json:"ct"`
+	IV      testutil.HexBytes `json:"iv"`
+	Key     testutil.HexBytes `json:"key"`
+	Message testutil.HexBytes `json:"msg"`
+	Tag     testutil.HexBytes `json:"tag"`
 }
 
 func TestValidateAESKeySize(t *testing.T) {
