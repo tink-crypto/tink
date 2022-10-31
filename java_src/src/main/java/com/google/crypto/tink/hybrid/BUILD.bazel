@@ -60,7 +60,7 @@ java_library(
         "//src/main/java/com/google/crypto/tink/subtle:ecies_aead_hkdf_hybrid_encrypt",
         "//src/main/java/com/google/crypto/tink/subtle:elliptic_curves",
         "//src/main/java/com/google/crypto/tink/subtle:validators",
-        "@maven//:com_google_protobuf_protobuf_javalite",
+        "@maven//:com_google_protobuf_protobuf_java",
     ],
 )
 
@@ -81,7 +81,7 @@ java_library(
         "//src/main/java/com/google/crypto/tink/daead:deterministic_aead_config",
         "//src/main/java/com/google/crypto/tink/hybrid/subtle:aead_or_daead",
         "//src/main/java/com/google/crypto/tink/subtle:ecies_aead_hkdf_dem_helper",
-        "@maven//:com_google_protobuf_protobuf_javalite",
+        "@maven//:com_google_protobuf_protobuf_java",
     ],
 )
 
@@ -109,7 +109,7 @@ java_library(
         "//proto:ecies_aead_hkdf_java_proto",
         "//proto:tink_java_proto",
         "//src/main/java/com/google/crypto/tink/aead:aead_key_templates",
-        "@maven//:com_google_protobuf_protobuf_javalite",
+        "@maven//:com_google_protobuf_protobuf_java",
     ],
 )
 
@@ -136,7 +136,7 @@ java_library(
         "//src/main/java/com/google/crypto/tink/subtle:ecies_aead_hkdf_hybrid_decrypt",
         "//src/main/java/com/google/crypto/tink/subtle:elliptic_curves",
         "//src/main/java/com/google/crypto/tink/subtle:validators",
-        "@maven//:com_google_protobuf_protobuf_javalite",
+        "@maven//:com_google_protobuf_protobuf_java",
     ],
 )
 

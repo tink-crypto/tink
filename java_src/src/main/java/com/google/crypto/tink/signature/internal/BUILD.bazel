@@ -14,7 +14,7 @@ java_library(
         "//proto:rsa_ssa_pss_java_proto",
         "//src/main/java/com/google/crypto/tink/subtle:elliptic_curves",
         "//src/main/java/com/google/crypto/tink/subtle:enums",
-        "@maven//:com_google_protobuf_protobuf_javalite",
+        "@maven//:com_google_protobuf_protobuf_java",
     ],
 )
 

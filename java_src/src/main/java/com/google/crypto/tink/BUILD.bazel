@@ -176,7 +176,7 @@ java_library(
         ":keyset_reader",
         "//proto:tink_java_proto",
         "@maven//:com_google_errorprone_error_prone_annotations",
-        "@maven//:com_google_protobuf_protobuf_javalite",
+        "@maven//:com_google_protobuf_protobuf_java",
     ],
 )
 
@@ -203,7 +203,7 @@ java_library(
         "@maven//:androidx_annotation_annotation",
         "@maven//:com_google_code_gson_gson",
         "@maven//:com_google_errorprone_error_prone_annotations",
-        "@maven//:com_google_protobuf_protobuf_javalite",
+        "@maven//:com_google_protobuf_protobuf_java",
     ],
 )
 
@@ -229,7 +229,7 @@ java_library(
     deps = [
         ":key_manager",
         "//proto:tink_java_proto",
-        "@maven//:com_google_protobuf_protobuf_javalite",
+        "@maven//:com_google_protobuf_protobuf_java",
     ],
 )
 
@@ -249,7 +249,7 @@ java_library(
     deps = [
         ":registry",
         "//proto:tink_java_proto",
-        "@maven//:com_google_protobuf_protobuf_javalite",
+        "@maven//:com_google_protobuf_protobuf_java",
     ],
 )
 
@@ -269,7 +269,7 @@ java_library(
     deps = [
         "//proto:tink_java_proto",
         "@maven//:com_google_errorprone_error_prone_annotations",
-        "@maven//:com_google_protobuf_protobuf_javalite",
+        "@maven//:com_google_protobuf_protobuf_java",
     ],
 )
 
@@ -333,7 +333,7 @@ java_library(
         "//src/main/java/com/google/crypto/tink/annotations:alpha",
         "//src/main/java/com/google/crypto/tink/internal:key_type_manager",
         "//src/main/java/com/google/crypto/tink/internal:private_key_type_manager",
-        "@maven//:com_google_protobuf_protobuf_javalite",
+        "@maven//:com_google_protobuf_protobuf_java",
     ],
 )
 
@@ -358,7 +358,7 @@ java_library(
         ":keyset_reader",
         ":registry_cluster",
         "//proto:tink_java_proto",
-        "@maven//:com_google_protobuf_protobuf_javalite",
+        "@maven//:com_google_protobuf_protobuf_java",
     ],
 )
 
@@ -383,7 +383,7 @@ java_library(
         "//proto:tink_java_proto",
         "//src/main/java/com/google/crypto/tink/annotations:alpha",
         "//src/main/java/com/google/crypto/tink/monitoring:monitoring_annotations",
-        "@maven//:com_google_protobuf_protobuf_javalite",
+        "@maven//:com_google_protobuf_protobuf_java",
     ],
 )
 
@@ -436,7 +436,7 @@ java_library(
     srcs = ["KeyManager.java"],
     deps = [
         "//proto:tink_java_proto",
-        "@maven//:com_google_protobuf_protobuf_javalite",
+        "@maven//:com_google_protobuf_protobuf_java",
     ],
 )
 
@@ -457,7 +457,7 @@ java_library(
         "//proto:tink_java_proto",
         "//src/main/java/com/google/crypto/tink/annotations:alpha",
         "//src/main/java/com/google/crypto/tink/internal:key_type_manager",
-        "@maven//:com_google_protobuf_protobuf_javalite",
+        "@maven//:com_google_protobuf_protobuf_java",
     ],
 )
 
@@ -525,7 +525,7 @@ java_library(
         "//src/main/java/com/google/crypto/tink/internal:key_type_manager",
         "//src/main/java/com/google/crypto/tink/internal:private_key_type_manager",
         "@maven//:com_google_code_findbugs_jsr305",
-        "@maven//:com_google_protobuf_protobuf_javalite",
+        "@maven//:com_google_protobuf_protobuf_java",
     ],
 )
 
@@ -585,7 +585,7 @@ java_library(
         "//src/main/java/com/google/crypto/tink/tinkkey/internal:proto_key",
         "@maven//:com_google_code_findbugs_jsr305",
         "@maven//:com_google_errorprone_error_prone_annotations",
-        "@maven//:com_google_protobuf_protobuf_javalite",
+        "@maven//:com_google_protobuf_protobuf_java",
     ],
 )
 
@@ -768,7 +768,7 @@ java_library(
         "//src/main/java/com/google/crypto/tink/config/internal:tink_fips_util",
         "//src/main/java/com/google/crypto/tink/internal:key_type_manager",
         "//src/main/java/com/google/crypto/tink/internal:private_key_type_manager",
-        "@maven//:com_google_protobuf_protobuf_javalite",
+        "@maven//:com_google_protobuf_protobuf_java",
     ],
 )
 

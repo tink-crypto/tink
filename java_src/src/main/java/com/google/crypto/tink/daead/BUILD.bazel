@@ -118,7 +118,7 @@ java_library(
         "//src/main/java/com/google/crypto/tink/subtle:aes_siv",
         "//src/main/java/com/google/crypto/tink/subtle:random",
         "//src/main/java/com/google/crypto/tink/subtle:validators",
-        "@maven//:com_google_protobuf_protobuf_javalite",
+        "@maven//:com_google_protobuf_protobuf_java",
     ],
 )
 

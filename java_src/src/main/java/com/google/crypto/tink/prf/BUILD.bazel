@@ -20,7 +20,7 @@ java_library(
         "//src/main/java/com/google/crypto/tink/subtle/prf:hkdf_streaming_prf",
         "//src/main/java/com/google/crypto/tink/subtle/prf:prf_impl",
         "//src/main/java/com/google/crypto/tink/subtle/prf:streaming_prf",
-        "@maven//:com_google_protobuf_protobuf_javalite",
+        "@maven//:com_google_protobuf_protobuf_java",
     ],
 )
 
@@ -116,7 +116,7 @@ java_library(
         "//src/main/java/com/google/crypto/tink/subtle:prf_aes_cmac",
         "//src/main/java/com/google/crypto/tink/subtle:random",
         "//src/main/java/com/google/crypto/tink/subtle:validators",
-        "@maven//:com_google_protobuf_protobuf_javalite",
+        "@maven//:com_google_protobuf_protobuf_java",
     ],
 )
 
@@ -154,7 +154,7 @@ java_library(
         "//src/main/java/com/google/crypto/tink/subtle:prf_hmac_jce",
         "//src/main/java/com/google/crypto/tink/subtle:random",
         "//src/main/java/com/google/crypto/tink/subtle:validators",
-        "@maven//:com_google_protobuf_protobuf_javalite",
+        "@maven//:com_google_protobuf_protobuf_java",
     ],
 )
 

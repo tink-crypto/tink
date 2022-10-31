@@ -25,4 +25,3 @@ java_test(
         "@maven//:junit_junit",
     ],
 )
-
