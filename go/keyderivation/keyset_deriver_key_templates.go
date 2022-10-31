@@ -17,6 +17,8 @@
 package keyderivation
 
 import (
+	"fmt"
+
 	"google.golang.org/protobuf/proto"
 	"github.com/google/tink/go/keyset"
 	prfderpb "github.com/google/tink/go/proto/prf_based_deriver_go_proto"
@@ -33,7 +35,10 @@ func CreatePRFBasedKeyTemplate(prfKeyTemplate, derivedKeyTemplate *tinkpb.KeyTem
 			DerivedKeyTemplate: derivedKeyTemplate,
 		},
 	}
-	serializedFormat, _ := proto.Marshal(keyFormat)
+	serializedFormat, err := proto.Marshal(keyFormat)
+	if err != nil {
+		return nil, fmt.Errorf("failed to marshal key format: %s", err)
+	}
 	template := &tinkpb.KeyTemplate{
 		TypeUrl:          prfBasedDeriverTypeURL,
 		OutputPrefixType: derivedKeyTemplate.GetOutputPrefixType(),

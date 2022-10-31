@@ -124,6 +124,11 @@ func TestInvalidPRFBasedDeriverKeyTemplates(t *testing.T) {
 			name:           "nil derived key template",
 			prfKeyTemplate: streamingprf.HKDFSHA256RawKeyTemplate(),
 		},
+		{
+			name:               "malformed PRF key template",
+			prfKeyTemplate:     &tinkpb.KeyTemplate{TypeUrl: "\xff"},
+			derivedKeyTemplate: aead.AES128GCMKeyTemplate(),
+		},
 		// AES128CTRHMACSHA256KeyTemplate() is an unsupported derived key template
 		// because DeriveKey() is not implemented in the AES-CTR-HMAC key manager.
 		// TODO(b/227682336): Add mock key manager that doesn't derive keys.
