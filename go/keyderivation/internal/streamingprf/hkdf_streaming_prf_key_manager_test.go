@@ -42,10 +42,24 @@ func TestHKDFStreamingPRFKeyManagerPrimitive(t *testing.T) {
 		hash commonpb.HashType
 		salt []byte
 	}{
-		{"SHA256", commonpb.HashType_SHA256, nil},
-		{"SHA256/salt", commonpb.HashType_SHA256, random.GetRandomBytes(16)},
-		{"SHA512", commonpb.HashType_SHA512, nil},
-		{"SHA512/salt", commonpb.HashType_SHA512, random.GetRandomBytes(16)},
+		{
+			name: "SHA256_nil_salt",
+			hash: commonpb.HashType_SHA256,
+		},
+		{
+			name: "SHA256_random_salt",
+			hash: commonpb.HashType_SHA256,
+			salt: random.GetRandomBytes(16),
+		},
+		{
+			name: "SHA512_nil_salt",
+			hash: commonpb.HashType_SHA512,
+		},
+		{
+			name: "SHA512_random_salt",
+			hash: commonpb.HashType_SHA512,
+			salt: random.GetRandomBytes(16),
+		},
 	} {
 		t.Run(test.name, func(t *testing.T) {
 			key := &hkdfpb.HkdfPrfKey{
@@ -104,10 +118,21 @@ func TestHKDFStreamingPRFKeyManagerPrimitiveRejectsIncorrectKeys(t *testing.T) {
 		name          string
 		serializedKey []byte
 	}{
-		{"nil key", nil},
-		{"zero-length key", []byte{}},
-		{"missing params", serializedMissingParamsKey},
-		{"wrong key type", serializedAESGCMKey},
+		{
+			name: "nil key",
+		},
+		{
+			name:          "zero-length key",
+			serializedKey: []byte{},
+		},
+		{
+			name:          "missing params",
+			serializedKey: serializedMissingParamsKey,
+		},
+		{
+			name:          "wrong key type",
+			serializedKey: serializedAESGCMKey,
+		},
 	} {
 		t.Run(test.name, func(t *testing.T) {
 			if _, err := km.Primitive(test.serializedKey); err == nil {
@@ -196,10 +221,24 @@ func TestHKDFStreamingPRFKeyManagerNewKey(t *testing.T) {
 		hash commonpb.HashType
 		salt []byte
 	}{
-		{"SHA256", commonpb.HashType_SHA256, nil},
-		{"SHA256/salt", commonpb.HashType_SHA256, random.GetRandomBytes(16)},
-		{"SHA512", commonpb.HashType_SHA512, nil},
-		{"SHA512/salt", commonpb.HashType_SHA512, random.GetRandomBytes(16)},
+		{
+			name: "SHA256_nil_salt",
+			hash: commonpb.HashType_SHA256,
+		},
+		{
+			name: "SHA256_random_salt",
+			hash: commonpb.HashType_SHA256,
+			salt: random.GetRandomBytes(16),
+		},
+		{
+			name: "SHA512_nil_salt",
+			hash: commonpb.HashType_SHA512,
+		},
+		{
+			name: "SHA512_random_salt",
+			hash: commonpb.HashType_SHA512,
+			salt: random.GetRandomBytes(16),
+		},
 	} {
 		t.Run(test.name, func(t *testing.T) {
 			keyFormat := &hkdfpb.HkdfPrfKeyFormat{
@@ -260,10 +299,21 @@ func TestHKDFStreamingPRFKeyManagerNewKeyRejectsIncorrectKeyFormats(t *testing.T
 		name                string
 		serializedKeyFormat []byte
 	}{
-		{"nil key", nil},
-		{"zero-length key", []byte{}},
-		{"missing params", serializedMissingParamsKeyFormat},
-		{"wrong key type", serializedAESGCMKeyFormat},
+		{
+			name: "nil key",
+		},
+		{
+			name:                "zero-length key",
+			serializedKeyFormat: []byte{},
+		},
+		{
+			name:                "missing params",
+			serializedKeyFormat: serializedMissingParamsKeyFormat,
+		},
+		{
+			name:                "wrong key type",
+			serializedKeyFormat: serializedAESGCMKeyFormat,
+		},
 	} {
 		t.Run(test.name, func(t *testing.T) {
 			if _, err := km.NewKey(test.serializedKeyFormat); err == nil {
@@ -341,10 +391,24 @@ func TestHKDFStreamingPRFKeyManagerNewKeyData(t *testing.T) {
 		hash commonpb.HashType
 		salt []byte
 	}{
-		{"SHA256", commonpb.HashType_SHA256, nil},
-		{"SHA256/salt", commonpb.HashType_SHA256, random.GetRandomBytes(16)},
-		{"SHA512", commonpb.HashType_SHA512, nil},
-		{"SHA512/salt", commonpb.HashType_SHA512, random.GetRandomBytes(16)},
+		{
+			name: "SHA256_nil_salt",
+			hash: commonpb.HashType_SHA256,
+		},
+		{
+			name: "SHA256_random_salt",
+			hash: commonpb.HashType_SHA256,
+			salt: random.GetRandomBytes(16),
+		},
+		{
+			name: "SHA512_nil_salt",
+			hash: commonpb.HashType_SHA512,
+		},
+		{
+			name: "SHA512_random_salt",
+			hash: commonpb.HashType_SHA512,
+			salt: random.GetRandomBytes(16),
+		},
 	} {
 		t.Run(test.name, func(t *testing.T) {
 			keyFormat := &hkdfpb.HkdfPrfKeyFormat{
@@ -412,10 +476,21 @@ func TestHKDFStreamingPRFKeyManagerNewKeyDataRejectsIncorrectKeyFormats(t *testi
 		name                string
 		serializedKeyFormat []byte
 	}{
-		{"nil key", nil},
-		{"zero-length key", []byte{}},
-		{"missing params", serializedMissingParamsKeyFormat},
-		{"wrong key type", serializedAESGCMKeyFormat},
+		{
+			name: "nil key",
+		},
+		{
+			name:                "zero-length key",
+			serializedKeyFormat: []byte{},
+		},
+		{
+			name:                "missing params",
+			serializedKeyFormat: serializedMissingParamsKeyFormat,
+		},
+		{
+			name:                "wrong key type",
+			serializedKeyFormat: serializedAESGCMKeyFormat,
+		},
 	} {
 		t.Run(test.name, func(t *testing.T) {
 			if _, err := km.NewKeyData(test.serializedKeyFormat); err == nil {

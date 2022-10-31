@@ -14,20 +14,22 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
+// Package keyderivation provides implementations of the keyset deriver
+// primitive.
+//
+// # Status
+//
+// This pckage is not currently completely implemented.
 package keyderivation
 
 import (
-	"github.com/google/tink/go/keyset"
+	"fmt"
+
+	"github.com/google/tink/go/core/registry"
 )
 
-// KeysetDeriver is the interface used to derive new keysets based on an
-// additional input, the salt.
-//
-// The salt is used to create the keyset using a pseudorandom function. More
-// explicitly, implementations need to generate keysets which are secure even if
-// the attacker is given the salt, plus access to an oracle which creates
-// keysets for any salt the attacker requests, as long as it is not equal to the
-// salt which the attacker attacks.
-type KeysetDeriver interface {
-	DeriveKeyset(salt []byte) (*keyset.Handle, error)
+func init() {
+	if err := registry.RegisterKeyManager(new(prfBasedDeriverKeyManager)); err != nil {
+		panic(fmt.Sprintf("keyderivation.init() failed: %v", err))
+	}
 }

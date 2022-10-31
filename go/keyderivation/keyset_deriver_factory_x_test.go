@@ -47,7 +47,7 @@ func TestWrappedKeysetDeriver(t *testing.T) {
 		OutputPrefixType: tinkpb.OutputPrefixType_RAW,
 		Value:            serializedKeyFormat,
 	}
-	singleKeyKH, err := keyset.NewHandle(template)
+	singleKeyHandle, err := keyset.NewHandle(template)
 	if err != nil {
 		t.Fatalf("keyset.NewHandle() err = %v, want nil", err)
 	}
@@ -68,36 +68,42 @@ func TestWrappedKeysetDeriver(t *testing.T) {
 		OutputPrefixType: tinkpb.OutputPrefixType_RAW,
 		Value:            serializedKeyFormat,
 	}
-	manager := keyset.NewManagerFromHandle(singleKeyKH)
+	manager := keyset.NewManagerFromHandle(singleKeyHandle)
 	if _, err := manager.Add(template); err != nil {
 		t.Fatalf("manager.Add() err = %v, want nil", err)
 	}
-	multipleKeysKH, err := manager.Handle()
+	multipleKeysHandle, err := manager.Handle()
 	if err != nil {
 		t.Fatalf("manager.Handle() err %v, want nil", err)
 	}
 
 	for _, test := range []struct {
-		name string
-		kh   *keyset.Handle
+		name   string
+		handle *keyset.Handle
 	}{
-		{"single key", singleKeyKH},
-		{"multiple keys", multipleKeysKH},
+		{
+			name:   "single key",
+			handle: singleKeyHandle,
+		},
+		{
+			name:   "multiple keys",
+			handle: multipleKeysHandle,
+		},
 	} {
 		t.Run(test.name, func(t *testing.T) {
 			// Derive keyset handle.
-			kd, err := keyderivation.New(test.kh)
+			kd, err := keyderivation.New(test.handle)
 			if err != nil {
 				t.Fatalf("keyderivation.New() err = %v, want nil", err)
 			}
-			derivedKH, err := kd.DeriveKeyset([]byte("salt"))
+			derivedHandle, err := kd.DeriveKeyset([]byte("salt"))
 			if err != nil {
 				t.Fatalf("DeriveKeyset() err = %v, want nil", err)
 			}
 
 			// Verify number of derived keys = number of deriving keys.
-			derivedKeyInfo := derivedKH.KeysetInfo().GetKeyInfo()
-			keyInfo := test.kh.KeysetInfo().GetKeyInfo()
+			derivedKeyInfo := derivedHandle.KeysetInfo().GetKeyInfo()
+			keyInfo := test.handle.KeysetInfo().GetKeyInfo()
 			if len(derivedKeyInfo) != len(keyInfo) {
 				t.Errorf("number of derived keys = %d, want %d", len(derivedKeyInfo), len(keyInfo))
 			}
@@ -126,7 +132,7 @@ func TestWrappedKeysetDeriver(t *testing.T) {
 				if !hasMatchingDerivingKey {
 					t.Errorf("derived key has no matching deriving key")
 				}
-				if derivedKey.GetKeyId() == derivedKH.KeysetInfo().GetPrimaryKeyId() {
+				if derivedKey.GetKeyId() == derivedHandle.KeysetInfo().GetPrimaryKeyId() {
 					hasPrimaryKey = true
 				}
 			}
@@ -137,7 +143,7 @@ func TestWrappedKeysetDeriver(t *testing.T) {
 			// Verify derived keyset handle works for AEAD.
 			pt := random.GetRandomBytes(16)
 			ad := random.GetRandomBytes(4)
-			a, err := aead.New(derivedKH)
+			a, err := aead.New(derivedHandle)
 			if err != nil {
 				t.Fatalf("aead.New() err = %v, want nil", err)
 			}

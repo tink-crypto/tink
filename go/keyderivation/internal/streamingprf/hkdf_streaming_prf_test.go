@@ -34,10 +34,24 @@ func TestNewHKDFStreamingPRF(t *testing.T) {
 		hash string
 		salt []byte
 	}{
-		{"SHA256, nil salt", "SHA256", nil},
-		{"SHA256, random salt", "SHA256", random.GetRandomBytes(16)},
-		{"SHA512, nil salt", "SHA512", nil},
-		{"SHA512, random salt", "SHA512", random.GetRandomBytes(16)},
+		{
+			name: "SHA256_nil_salt",
+			hash: "SHA256",
+		},
+		{
+			name: "SHA256_random_salt",
+			hash: "SHA256",
+			salt: random.GetRandomBytes(16),
+		},
+		{
+			name: "SHA512_nil_salt",
+			hash: "SHA512",
+		},
+		{
+			name: "SHA512_random_salt",
+			hash: "SHA512",
+			salt: random.GetRandomBytes(16),
+		},
 	} {
 		t.Run(test.name, func(t *testing.T) {
 			key := random.GetRandomBytes(32)
@@ -60,9 +74,17 @@ func TestNewHKDFStreamingPRFFails(t *testing.T) {
 		hash    string
 		keySize uint32
 	}{
-		{"SHA256", 16},
-		{"SHA512", 16},
-		{"SHA1", 20},
+		{
+			hash:    "SHA256",
+			keySize: 16,
+		},
+		{
+			hash:    "SHA512",
+			keySize: 16},
+		{
+			hash:    "SHA1",
+			keySize: 20,
+		},
 	} {
 		t.Run(test.hash, func(t *testing.T) {
 			if _, err := newHKDFStreamingPRF(test.hash, random.GetRandomBytes(test.keySize), nil); err == nil {

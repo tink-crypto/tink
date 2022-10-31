@@ -32,21 +32,42 @@ import (
 func TestPRFBasedKeyTemplateDerivesAESGCMKeyset(t *testing.T) {
 	plaintext := random.GetRandomBytes(16)
 	associatedData := random.GetRandomBytes(8)
-	prfs := []namedTemplate{
-		{"HKDF-SHA256", streamingprf.HKDFSHA256RawKeyTemplate()},
-		{"HKDF-SHA512", streamingprf.HKDFSHA512RawKeyTemplate()},
+	prfs := []struct {
+		name     string
+		template *tinkpb.KeyTemplate
+	}{
+		{
+			name:     "HKDF-SHA256",
+			template: streamingprf.HKDFSHA256RawKeyTemplate(),
+		},
+		{
+			name:     "HKDF-SHA512",
+			template: streamingprf.HKDFSHA512RawKeyTemplate(),
+		},
 	}
-	derivations := []namedTemplate{
-		{"AES128GCM", aead.AES128GCMKeyTemplate()},
-		{"AES256GCM", aead.AES256GCMKeyTemplate()},
-		{"AES256GCMNoPrefix", aead.AES256GCMNoPrefixKeyTemplate()},
+	derivations := []struct {
+		name     string
+		template *tinkpb.KeyTemplate
+	}{
+		{
+			name:     "AES128GCM",
+			template: aead.AES128GCMKeyTemplate(),
+		},
+		{
+			name:     "AES256GCM",
+			template: aead.AES256GCMKeyTemplate(),
+		},
+		{
+			name:     "AES256GCMNoPrefix",
+			template: aead.AES256GCMNoPrefixKeyTemplate(),
+		},
 	}
 	for _, prf := range prfs {
 		for _, der := range derivations {
 			for _, salt := range [][]byte{nil, []byte("salt")} {
-				name := fmt.Sprintf("%s/%s", prf.name, der.name)
+				name := fmt.Sprintf("%s_%s", prf.name, der.name)
 				if salt != nil {
-					name += "/salt"
+					name += "_with_salt"
 				}
 				t.Run(name, func(t *testing.T) {
 					template, err := keyderivation.CreatePRFBasedKeyTemplate(prf.template, der.template)
@@ -92,15 +113,34 @@ func TestInvalidPRFBasedDeriverKeyTemplates(t *testing.T) {
 		prfKeyTemplate     *tinkpb.KeyTemplate
 		derivedKeyTemplate *tinkpb.KeyTemplate
 	}{
-		{"nil everything", nil, nil},
-		{"nil PRF key template", nil, aead.AES128GCMKeyTemplate()},
-		{"nil derived key template", streamingprf.HKDFSHA256RawKeyTemplate(), nil},
+		{
+			name: "nil templates",
+		},
+		{
+			name:               "nil PRF key template",
+			derivedKeyTemplate: aead.AES128GCMKeyTemplate(),
+		},
+		{
+			name:           "nil derived key template",
+			prfKeyTemplate: streamingprf.HKDFSHA256RawKeyTemplate(),
+		},
 		// AES128CTRHMACSHA256KeyTemplate() is an unsupported derived key template
 		// because DeriveKey() is not implemented in the AES-CTR-HMAC key manager.
 		// TODO(b/227682336): Add mock key manager that doesn't derive keys.
-		{"unsupported everything", aead.AES128GCMKeyTemplate(), aead.AES128CTRHMACSHA256KeyTemplate()},
-		{"unsupported PRF key template", aead.AES128GCMKeyTemplate(), aead.AES128GCMKeyTemplate()},
-		{"unsupported derived key template", streamingprf.HKDFSHA256RawKeyTemplate(), aead.AES128CTRHMACSHA256KeyTemplate()},
+		{
+			name:               "unsupported templates",
+			prfKeyTemplate:     aead.AES128GCMKeyTemplate(),
+			derivedKeyTemplate: aead.AES128CTRHMACSHA256KeyTemplate()},
+		{
+			name:               "unsupported PRF key template",
+			prfKeyTemplate:     aead.AES128GCMKeyTemplate(),
+			derivedKeyTemplate: aead.AES128GCMKeyTemplate(),
+		},
+		{
+			name:               "unsupported derived key template",
+			prfKeyTemplate:     streamingprf.HKDFSHA256RawKeyTemplate(),
+			derivedKeyTemplate: aead.AES128CTRHMACSHA256KeyTemplate(),
+		},
 	} {
 		t.Run(test.name, func(t *testing.T) {
 			if _, err := keyderivation.CreatePRFBasedKeyTemplate(test.prfKeyTemplate, test.derivedKeyTemplate); err == nil {

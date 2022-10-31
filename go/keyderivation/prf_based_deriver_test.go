@@ -34,26 +34,43 @@ import (
 )
 
 func TestPRFBasedDeriverWithAEAD(t *testing.T) {
-	type namedTemplate struct {
+	prfs := []struct {
 		name     string
 		template *tinkpb.KeyTemplate
+	}{
+		{
+			name:     "SHA256",
+			template: streamingprf.HKDFSHA256RawKeyTemplate(),
+		},
+		{
+			name:     "SHA512",
+			template: streamingprf.HKDFSHA512RawKeyTemplate(),
+		},
 	}
-	prfs := []namedTemplate{
-		{"SHA256", streamingprf.HKDFSHA256RawKeyTemplate()},
-		{"SHA512", streamingprf.HKDFSHA512RawKeyTemplate()},
-	}
-	derivations := []namedTemplate{
-		{"AES128GCM", aead.AES128GCMKeyTemplate()},
-		{"AES256GCM", aead.AES256GCMKeyTemplate()},
-		{"AES256GCMNoPrefix", aead.AES256GCMNoPrefixKeyTemplate()},
+	derivations := []struct {
+		name     string
+		template *tinkpb.KeyTemplate
+	}{
+		{
+			name:     "AES128GCM",
+			template: aead.AES128GCMKeyTemplate(),
+		},
+		{
+			name:     "AES256GCM",
+			template: aead.AES256GCMKeyTemplate(),
+		},
+		{
+			name:     "AES256GCMNoPrefix",
+			template: aead.AES256GCMNoPrefixKeyTemplate(),
+		},
 	}
 	salts := [][]byte{nil, []byte("salt")}
 	for _, prf := range prfs {
 		for _, der := range derivations {
 			for _, salt := range salts {
-				name := fmt.Sprintf("%s/%s", prf.name, der.name)
+				name := fmt.Sprintf("%s_%s", prf.name, der.name)
 				if salt != nil {
-					name += "/salt"
+					name += "_with_salt"
 				}
 				t.Run(name, func(t *testing.T) {
 					prfKeyData, err := registry.NewKeyData(prf.template)
@@ -134,9 +151,18 @@ func TestPRFBasedDeriverWithHKDFRFCVector(t *testing.T) {
 		name               string
 		derivedKeyTemplate *tinkpb.KeyTemplate
 	}{
-		{"AES128GCM", aead.AES128GCMKeyTemplate()},
-		{"AES256GCM", aead.AES256GCMKeyTemplate()},
-		{"AES256GCMNoPrefix", aead.AES256GCMNoPrefixKeyTemplate()},
+		{
+			name:               "AES128GCM",
+			derivedKeyTemplate: aead.AES128GCMKeyTemplate(),
+		},
+		{
+			name:               "AES256GCM",
+			derivedKeyTemplate: aead.AES256GCMKeyTemplate(),
+		},
+		{
+			name:               "AES256GCMNoPrefix",
+			derivedKeyTemplate: aead.AES256GCMNoPrefixKeyTemplate(),
+		},
 	} {
 		t.Run(test.name, func(t *testing.T) {
 			// Derive keyset.
@@ -204,11 +230,27 @@ func TestNewPRFBasedDeriverRejectsInvalidInputs(t *testing.T) {
 		prfKeyData         *tinkpb.KeyData
 		derivedKeyTemplate *tinkpb.KeyTemplate
 	}{
-		{"nil everything", nil, nil},
-		{"nil PRF key data", nil, validDerivedKeyTemplate},
-		{"nil derived template", validPRFKeyData, nil},
-		{"invalid PRF key data", invalidPRFKeyData, validDerivedKeyTemplate},
-		{"invalid derived template", validPRFKeyData, streamingprf.HKDFSHA256RawKeyTemplate()},
+		{
+			name: "nil inputs",
+		},
+		{
+			name:               "nil PRF key data",
+			derivedKeyTemplate: validDerivedKeyTemplate,
+		},
+		{
+			name:       "nil derived template",
+			prfKeyData: validPRFKeyData,
+		},
+		{
+			name:               "invalid PRF key data",
+			prfKeyData:         invalidPRFKeyData,
+			derivedKeyTemplate: validDerivedKeyTemplate,
+		},
+		{
+			name:               "invalid derived template",
+			prfKeyData:         validPRFKeyData,
+			derivedKeyTemplate: streamingprf.HKDFSHA256RawKeyTemplate(),
+		},
 	} {
 		t.Run(test.name, func(t *testing.T) {
 			if _, err := newPRFBasedDeriver(test.prfKeyData, test.derivedKeyTemplate); err == nil {

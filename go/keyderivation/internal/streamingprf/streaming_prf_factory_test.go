@@ -39,8 +39,16 @@ func TestNew(t *testing.T) {
 		hash     commonpb.HashType
 		template *tinkpb.KeyTemplate
 	}{
-		{"SHA256", commonpb.HashType_SHA256, streamingprf.HKDFSHA256RawKeyTemplate()},
-		{"SHA512", commonpb.HashType_SHA512, streamingprf.HKDFSHA512RawKeyTemplate()},
+		{
+			name:     "SHA256",
+			hash:     commonpb.HashType_SHA256,
+			template: streamingprf.HKDFSHA256RawKeyTemplate(),
+		},
+		{
+			name:     "SHA512",
+			hash:     commonpb.HashType_SHA512,
+			template: streamingprf.HKDFSHA512RawKeyTemplate(),
+		},
 	} {
 		t.Run(test.name, func(t *testing.T) {
 			handle, err := keyset.NewHandle(test.template)
@@ -75,10 +83,24 @@ func TestNewEqualToStreamingPRFPrimitive(t *testing.T) {
 		hash commonpb.HashType
 		salt []byte
 	}{
-		{"SHA256", commonpb.HashType_SHA256, nil},
-		{"SHA256/salt", commonpb.HashType_SHA256, random.GetRandomBytes(16)},
-		{"SHA512", commonpb.HashType_SHA512, nil},
-		{"SHA512/salt", commonpb.HashType_SHA512, random.GetRandomBytes(16)},
+		{
+			name: "SHA256_nil_salt",
+			hash: commonpb.HashType_SHA256,
+		},
+		{
+			name: "SHA256_random_salt",
+			hash: commonpb.HashType_SHA256,
+			salt: random.GetRandomBytes(16),
+		},
+		{
+			name: "SHA512_nil_salt",
+			hash: commonpb.HashType_SHA512,
+		},
+		{
+			name: "SHA512_random_salt",
+			hash: commonpb.HashType_SHA512,
+			salt: random.GetRandomBytes(16),
+		},
 	} {
 		t.Run(test.name, func(t *testing.T) {
 			// Construct shared key data.

@@ -38,31 +38,47 @@ const (
 	prfBasedDeriverTypeURL    = "type.googleapis.com/google.crypto.tink.PrfBasedDeriverKey"
 )
 
-type namedTemplate struct {
-	name     string
-	template *tinkpb.KeyTemplate
-}
-
 func TestPRFBasedDeriverKeyManagerPrimitive(t *testing.T) {
 	km, err := registry.GetKeyManager(prfBasedDeriverTypeURL)
 	if err != nil {
 		t.Fatalf("GetKeyManager(%q) err = %v, want nil", prfBasedDeriverTypeURL, err)
 	}
-	prfs := []namedTemplate{
-		{"HKDF-SHA256", streamingprf.HKDFSHA256RawKeyTemplate()},
-		{"HKDF-SHA512", streamingprf.HKDFSHA512RawKeyTemplate()},
+	prfs := []struct {
+		name     string
+		template *tinkpb.KeyTemplate
+	}{
+		{
+			name:     "HKDF-SHA256",
+			template: streamingprf.HKDFSHA256RawKeyTemplate(),
+		},
+		{
+			name:     "HKDF-SHA512",
+			template: streamingprf.HKDFSHA512RawKeyTemplate(),
+		},
 	}
-	derivations := []namedTemplate{
-		{"AES128GCM", aead.AES128GCMKeyTemplate()},
-		{"AES256GCM", aead.AES256GCMKeyTemplate()},
-		{"AES256GCMNoPrefix", aead.AES256GCMNoPrefixKeyTemplate()},
+	derivations := []struct {
+		name     string
+		template *tinkpb.KeyTemplate
+	}{
+		{
+			name:     "AES128GCM",
+			template: aead.AES128GCMKeyTemplate(),
+		},
+		{
+			name:     "AES256GCM",
+			template: aead.AES256GCMKeyTemplate(),
+		},
+		{
+			name:     "AES256GCMNoPrefix",
+			template: aead.AES256GCMNoPrefixKeyTemplate(),
+		},
 	}
 	for _, prf := range prfs {
 		for _, der := range derivations {
 			for _, salt := range [][]byte{nil, []byte("salt")} {
-				name := fmt.Sprintf("%s/%s", prf.name, der.name)
+				name := fmt.Sprintf("%s_%s", prf.name, der.name)
 				if salt != nil {
-					name += "/salt"
+					name += "_with_salt"
 				}
 				t.Run(name, func(t *testing.T) {
 					prfKey, err := registry.NewKeyData(prf.template)
@@ -126,10 +142,21 @@ func TestPRFBasedDeriverKeyManagerPrimitiveRejectsIncorrectKeys(t *testing.T) {
 		name          string
 		serializedKey []byte
 	}{
-		{"nil key", nil},
-		{"zero-length key", []byte{}},
-		{"missing params", serializedMissingParamsKey},
-		{"wrong key type", serializedAESGCMKey},
+		{
+			name: "nil key",
+		},
+		{
+			name:          "zero-length key",
+			serializedKey: []byte{},
+		},
+		{
+			name:          "missing params",
+			serializedKey: serializedMissingParamsKey,
+		},
+		{
+			name:          "wrong key type",
+			serializedKey: serializedAESGCMKey,
+		},
 	} {
 		t.Run(test.name, func(t *testing.T) {
 			if _, err := km.Primitive(test.serializedKey); err == nil {
@@ -176,22 +203,22 @@ func TestPRFBasedDeriverKeyManagerPrimitiveRejectsInvalidKeys(t *testing.T) {
 		derKeyTemplate *tinkpb.KeyTemplate
 	}{
 		{
-			"invalid version",
-			100,
-			validKey.GetPrfKey(),
-			validKey.GetParams().GetDerivedKeyTemplate(),
+			name:           "invalid version",
+			version:        100,
+			prfKey:         validKey.GetPrfKey(),
+			derKeyTemplate: validKey.GetParams().GetDerivedKeyTemplate(),
 		},
 		{
-			"invalid PRF key",
-			validKey.GetVersion(),
-			invalidPRFKey,
-			validKey.GetParams().GetDerivedKeyTemplate(),
+			name:           "invalid PRF key",
+			version:        validKey.GetVersion(),
+			prfKey:         invalidPRFKey,
+			derKeyTemplate: validKey.GetParams().GetDerivedKeyTemplate(),
 		},
 		{
-			"invalid derived key template",
-			validKey.GetVersion(),
-			validKey.GetPrfKey(),
-			aead.AES128CTRHMACSHA256KeyTemplate(),
+			name:           "invalid derived key template",
+			version:        validKey.GetVersion(),
+			prfKey:         validKey.GetPrfKey(),
+			derKeyTemplate: aead.AES128CTRHMACSHA256KeyTemplate(),
 		},
 	} {
 		t.Run(test.name, func(t *testing.T) {
@@ -218,21 +245,42 @@ func TestPRFBasedDeriverKeyManagerNewKey(t *testing.T) {
 	if err != nil {
 		t.Fatalf("GetKeyManager(%q) err = %v, want nil", prfBasedDeriverTypeURL, err)
 	}
-	prfs := []namedTemplate{
-		{"HKDF-SHA256", streamingprf.HKDFSHA256RawKeyTemplate()},
-		{"HKDF-SHA512", streamingprf.HKDFSHA512RawKeyTemplate()},
+	prfs := []struct {
+		name     string
+		template *tinkpb.KeyTemplate
+	}{
+		{
+			name:     "HKDF-SHA256",
+			template: streamingprf.HKDFSHA256RawKeyTemplate(),
+		},
+		{
+			name:     "HKDF-SHA512",
+			template: streamingprf.HKDFSHA512RawKeyTemplate(),
+		},
 	}
-	derivations := []namedTemplate{
-		{"AES128GCM", aead.AES128GCMKeyTemplate()},
-		{"AES256GCM", aead.AES256GCMKeyTemplate()},
-		{"AES256GCMNoPrefix", aead.AES256GCMNoPrefixKeyTemplate()},
+	derivations := []struct {
+		name     string
+		template *tinkpb.KeyTemplate
+	}{
+		{
+			name:     "AES128GCM",
+			template: aead.AES128GCMKeyTemplate(),
+		},
+		{
+			name:     "AES256GCM",
+			template: aead.AES256GCMKeyTemplate(),
+		},
+		{
+			name:     "AES256GCMNoPrefix",
+			template: aead.AES256GCMNoPrefixKeyTemplate(),
+		},
 	}
 	for _, prf := range prfs {
 		for _, der := range derivations {
 			for _, salt := range [][]byte{nil, []byte("salt")} {
-				name := fmt.Sprintf("%s/%s", prf.name, der.name)
+				name := fmt.Sprintf("%s_%s", prf.name, der.name)
 				if salt != nil {
-					name += "/salt"
+					name += "_with_salt"
 				}
 				t.Run(name, func(t *testing.T) {
 					keyFormat := &prfderpb.PrfBasedDeriverKeyFormat{
@@ -277,21 +325,42 @@ func TestPRFBasedDeriverKeyManagerNewKeyData(t *testing.T) {
 	if err != nil {
 		t.Fatalf("GetKeyManager(%q) err = %v, want nil", prfBasedDeriverTypeURL, err)
 	}
-	prfs := []namedTemplate{
-		{"HKDF-SHA256", streamingprf.HKDFSHA256RawKeyTemplate()},
-		{"HKDF-SHA512", streamingprf.HKDFSHA512RawKeyTemplate()},
+	prfs := []struct {
+		name     string
+		template *tinkpb.KeyTemplate
+	}{
+		{
+			name:     "HKDF-SHA256",
+			template: streamingprf.HKDFSHA256RawKeyTemplate(),
+		},
+		{
+			name:     "HKDF-SHA512",
+			template: streamingprf.HKDFSHA512RawKeyTemplate(),
+		},
 	}
-	derivations := []namedTemplate{
-		{"AES128GCM", aead.AES128GCMKeyTemplate()},
-		{"AES256GCM", aead.AES256GCMKeyTemplate()},
-		{"AES256GCMNoPrefix", aead.AES256GCMNoPrefixKeyTemplate()},
+	derivations := []struct {
+		name     string
+		template *tinkpb.KeyTemplate
+	}{
+		{
+			name:     "AES128GCM",
+			template: aead.AES128GCMKeyTemplate(),
+		},
+		{
+			name:     "AES256GCM",
+			template: aead.AES256GCMKeyTemplate(),
+		},
+		{
+			name:     "AES256GCMNoPrefix",
+			template: aead.AES256GCMNoPrefixKeyTemplate(),
+		},
 	}
 	for _, prf := range prfs {
 		for _, der := range derivations {
 			for _, salt := range [][]byte{nil, []byte("salt")} {
-				name := fmt.Sprintf("%s/%s", prf.name, der.name)
+				name := fmt.Sprintf("%s_%s", prf.name, der.name)
 				if salt != nil {
-					name += "/salt"
+					name += "_with_salt"
 				}
 				t.Run(name, func(t *testing.T) {
 					keyFormat := &prfderpb.PrfBasedDeriverKeyFormat{
@@ -358,10 +427,21 @@ func TestPRFBasedDeriverKeyManagerNewKeyAndNewKeyDataRejectsIncorrectKeyFormats(
 		name                string
 		serializedKeyFormat []byte
 	}{
-		{"nil key", nil},
-		{"zero-length key", []byte{}},
-		{"missing params", serializedMissingParamsKeyFormat},
-		{"wrong key type", serializedAESGCMKeyFormat},
+		{
+			name: "nil key",
+		},
+		{
+			name:                "zero-length key",
+			serializedKeyFormat: []byte{},
+		},
+		{
+			name:                "missing params",
+			serializedKeyFormat: serializedMissingParamsKeyFormat,
+		},
+		{
+			name:                "wrong key type",
+			serializedKeyFormat: serializedAESGCMKeyFormat,
+		},
 	} {
 		t.Run(test.name, func(t *testing.T) {
 			if _, err := km.NewKey(test.serializedKeyFormat); err == nil {

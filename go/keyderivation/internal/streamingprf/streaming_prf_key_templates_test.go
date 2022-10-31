@@ -32,8 +32,16 @@ func TestKeyTemplates(t *testing.T) {
 		hash     commonpb.HashType
 		template *tinkpb.KeyTemplate
 	}{
-		{"SHA256", commonpb.HashType_SHA256, streamingprf.HKDFSHA256RawKeyTemplate()},
-		{"SHA512", commonpb.HashType_SHA512, streamingprf.HKDFSHA512RawKeyTemplate()},
+		{
+			name:     "SHA256",
+			hash:     commonpb.HashType_SHA256,
+			template: streamingprf.HKDFSHA256RawKeyTemplate(),
+		},
+		{
+			name:     "SHA512",
+			hash:     commonpb.HashType_SHA512,
+			template: streamingprf.HKDFSHA512RawKeyTemplate(),
+		},
 	} {
 		t.Run(test.name, func(t *testing.T) {
 			handle, err := keyset.NewHandle(test.template)
