@@ -271,7 +271,7 @@ func TestAESGCMInsecureIVWycheproofVectors(t *testing.T) {
 			continue
 		}
 		for _, tc := range group.Tests {
-			name := fmt.Sprintf("%s-%s(%d,%d)/Case-%d", suite.Algorithm, group.Type, group.KeySize, group.TagSize, tc.CaseID)
+			name := fmt.Sprintf("%s-%s(%d,%d):Case-%d", suite.Algorithm, group.Type, group.KeySize, group.TagSize, tc.CaseID)
 			t.Run(name, func(t *testing.T) {
 				a, err := aead.NewAESGCMInsecureIV(tc.Key, false /*=prependIV*/)
 				if err != nil {
