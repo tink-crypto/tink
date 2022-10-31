@@ -52,21 +52,21 @@ func AES256GCMNoPrefixKeyTemplate() *tinkpb.KeyTemplate {
 }
 
 // AES128CTRHMACSHA256KeyTemplate is a KeyTemplate that generates an AES-CTR-HMAC-AEAD key with the following parameters:
-//  - AES key size: 16 bytes
-//  - AES CTR IV size: 16 bytes
-//  - HMAC key size: 32 bytes
-//  - HMAC tag size: 16 bytes
-//  - HMAC hash function: SHA256
+//   - AES key size: 16 bytes
+//   - AES CTR IV size: 16 bytes
+//   - HMAC key size: 32 bytes
+//   - HMAC tag size: 16 bytes
+//   - HMAC hash function: SHA256
 func AES128CTRHMACSHA256KeyTemplate() *tinkpb.KeyTemplate {
 	return createAESCTRHMACAEADKeyTemplate(16, 16, 32, 16, commonpb.HashType_SHA256)
 }
 
 // AES256CTRHMACSHA256KeyTemplate is a KeyTemplate that generates an AES-CTR-HMAC-AEAD key with the following parameters:
-//  - AES key size: 32 bytes
-//  - AES CTR IV size: 16 bytes
-//  - HMAC key size: 32 bytes
-//  - HMAC tag size: 32 bytes
-//  - HMAC hash function: SHA256
+//   - AES key size: 32 bytes
+//   - AES CTR IV size: 16 bytes
+//   - HMAC key size: 32 bytes
+//   - HMAC tag size: 32 bytes
+//   - HMAC hash function: SHA256
 func AES256CTRHMACSHA256KeyTemplate() *tinkpb.KeyTemplate {
 	return createAESCTRHMACAEADKeyTemplate(32, 16, 32, 32, commonpb.HashType_SHA256)
 }
