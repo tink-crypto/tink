@@ -24,7 +24,6 @@
 #import <Foundation/Foundation.h>
 
 #import "TINKRegistryConfig.h"
-#import "core/TINKRegistryConfig_Internal.h"
 #import "util/TINKErrors.h"
 
 #pragma clang diagnostic push
@@ -40,9 +39,7 @@
     return nil;
   }
 
-  google::crypto::tink::RegistryConfig ccConfig = crypto::tink::TinkConfig::Latest();
-
-  return (self = [super initWithCcConfig:ccConfig]);
+  return (self = [super initWithError:error]);
 }
 
 @end

@@ -19,12 +19,10 @@
 #import "TINKMacConfig.h"
 
 #import "TINKRegistryConfig.h"
-#import "core/TINKRegistryConfig_Internal.h"
 #import "util/TINKErrors.h"
 
 #include "tink/mac/mac_config.h"
 #include "tink/util/status.h"
-#include "proto/config.pb.h"
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wobjc-designated-initializers"
@@ -39,9 +37,7 @@
     return nil;
   }
 
-  google::crypto::tink::RegistryConfig ccConfig = crypto::tink::MacConfig::Latest();
-
-  return (self = [super initWithCcConfig:ccConfig]);
+  return (self = [super initWithError:error]);
 }
 
 @end

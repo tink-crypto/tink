@@ -128,9 +128,9 @@ objc_library(
     visibility = ["//visibility:public"],
     deps = [
         ":registry_config",
+        "//objc/util:errors",
         "@tink_cc//config:tink_config",
         "@tink_cc//util:errors",
-        "//objc/util:errors",
     ],
 )
 
@@ -261,12 +261,9 @@ objc_library(
     srcs = ["core/TINKRegistryConfig.mm"],
     hdrs = [
         "TINKRegistryConfig.h",
-        "core/TINKRegistryConfig_Internal.h",
     ],
     visibility = ["//visibility:public"],
-    deps = [
-        ":config_cc_pb",
-    ],
+    deps = [],
 )
 
 template_rule(

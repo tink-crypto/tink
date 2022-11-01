@@ -17,33 +17,13 @@
  */
 
 #import "TINKRegistryConfig.h"
-#import "core/TINKRegistryConfig_Internal.h"
 
-#include "proto/config.pb.h"
-
-@implementation TINKRegistryConfig {
-  google::crypto::tink::RegistryConfig _ccConfig;
-}
-
-- (instancetype)initWithCcConfig:(google::crypto::tink::RegistryConfig)ccConfig {
-  if ((self = [super init])) {
-    _ccConfig = ccConfig;
-  }
-  return self;
-}
-
-- (void)setCcConfig:(google::crypto::tink::RegistryConfig)ccConfig {
-  _ccConfig = ccConfig;
-}
-
-- (google::crypto::tink::RegistryConfig)ccConfig {
-  return _ccConfig;
-}
+@implementation TINKRegistryConfig
 
 - (nullable instancetype)initWithError:(NSError **)error {
   NSAssert(![self isMemberOfClass:[TINKRegistryConfig class]],
            @"Only instantiate from derived classes!");
-  return nil;
+  return self;
 }
 
 @end

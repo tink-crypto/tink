@@ -19,7 +19,6 @@
 #import "TINKAeadConfig.h"
 
 #import "TINKRegistryConfig.h"
-#import "core/TINKRegistryConfig_Internal.h"
 #import "util/TINKErrors.h"
 
 #include "tink/aead/aead_config.h"
@@ -39,8 +38,7 @@
     return nil;
   }
 
-  google::crypto::tink::RegistryConfig ccConfig = crypto::tink::AeadConfig::Latest();
-  return (self = [super initWithCcConfig:ccConfig]);
+  return (self = [super initWithError:error]);
 }
 
 @end
