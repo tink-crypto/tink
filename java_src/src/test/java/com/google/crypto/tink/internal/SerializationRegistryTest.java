@@ -249,7 +249,7 @@ public final class SerializationRegistryTest {
     KeySerializer<TestKey1, TestSerializationA> testSerializer =
         KeySerializer.create(
             SerializationRegistryTest::serializeKey1ToA, TestKey1.class, TestSerializationA.class);
-    new SerializationRegistry.Builder()
+    SerializationRegistry unused = new SerializationRegistry.Builder()
         .registerKeySerializer(testSerializer)
         .registerKeySerializer(testSerializer)
         .build();
@@ -267,7 +267,7 @@ public final class SerializationRegistryTest {
     builder.registerKeySerializer(testSerializer1);
     assertThrows(
         GeneralSecurityException.class,
-        () -> builder.registerKeySerializer(testSerializer2).build());
+        () -> builder.registerKeySerializer(testSerializer2));
   }
 
   @Test
@@ -278,7 +278,7 @@ public final class SerializationRegistryTest {
     KeySerializer<TestKey2, TestSerializationA> testSerializer2 =
         KeySerializer.create(
             SerializationRegistryTest::serializeKey2ToA, TestKey2.class, TestSerializationA.class);
-    new SerializationRegistry.Builder()
+    SerializationRegistry unused = new SerializationRegistry.Builder()
         .registerKeySerializer(testSerializer1)
         .registerKeySerializer(testSerializer2)
         .build();
@@ -293,7 +293,7 @@ public final class SerializationRegistryTest {
     KeySerializer<TestKey2, TestSerializationA> testSerializer2 =
         KeySerializer.create(
             SerializationRegistryTest::serializeKey2ToA, TestKey2.class, TestSerializationA.class);
-    new SerializationRegistry.Builder()
+    SerializationRegistry unused = new SerializationRegistry.Builder()
         .registerKeySerializer(testSerializer1)
         .registerKeySerializer(testSerializer2)
         .build();
@@ -416,7 +416,7 @@ public final class SerializationRegistryTest {
   public void test_registerSameParserTwice_works() throws Exception {
     KeyParser<TestSerializationA> testParser =
         KeyParser.create(SerializationRegistryTest::parseAToKey1, A_1, TestSerializationA.class);
-    new SerializationRegistry.Builder()
+    SerializationRegistry unused = new SerializationRegistry.Builder()
         .registerKeyParser(testParser)
         .registerKeyParser(testParser)
         .build();
@@ -431,7 +431,7 @@ public final class SerializationRegistryTest {
     SerializationRegistry.Builder builder = new SerializationRegistry.Builder();
     builder.registerKeyParser(testParser1);
     assertThrows(
-        GeneralSecurityException.class, () -> builder.registerKeyParser(testParser2).build());
+        GeneralSecurityException.class, () -> builder.registerKeyParser(testParser2));
   }
 
   @Test
@@ -440,7 +440,7 @@ public final class SerializationRegistryTest {
         KeyParser.create(SerializationRegistryTest::parseAToKey1, A_1, TestSerializationA.class);
     KeyParser<TestSerializationB> testParser2 =
         KeyParser.create(SerializationRegistryTest::parseBToKey1, B_1, TestSerializationB.class);
-    new SerializationRegistry.Builder()
+    SerializationRegistry unused = new SerializationRegistry.Builder()
         .registerKeyParser(testParser1)
         .registerKeyParser(testParser2)
         .build();
@@ -452,7 +452,7 @@ public final class SerializationRegistryTest {
         KeyParser.create(SerializationRegistryTest::parseAToKey1, A_1, TestSerializationA.class);
     KeyParser<TestSerializationA> testParser2 =
         KeyParser.create(SerializationRegistryTest::parseAToKey2, A_2, TestSerializationA.class);
-    new SerializationRegistry.Builder()
+    SerializationRegistry unused = new SerializationRegistry.Builder()
         .registerKeyParser(testParser1)
         .registerKeyParser(testParser2)
         .build();
@@ -499,7 +499,7 @@ public final class SerializationRegistryTest {
     SerializationRegistry.Builder builder = new SerializationRegistry.Builder(registry1);
     SerializationRegistry registry2 = builder.build();
 
-    builder
+    SerializationRegistry unused = builder
         .registerKeyParser(
             KeyParser.create(
                 SerializationRegistryTest::parseAToKey1, A_1, TestSerializationA.class))
@@ -601,7 +601,7 @@ public final class SerializationRegistryTest {
             SerializationRegistryTest::serializeParameters1ToA,
             TestParameters1.class,
             TestSerializationA.class);
-    new SerializationRegistry.Builder()
+    SerializationRegistry unused = new SerializationRegistry.Builder()
         .registerParametersSerializer(testSerializer)
         .registerParametersSerializer(testSerializer)
         .build();
@@ -623,7 +623,7 @@ public final class SerializationRegistryTest {
     builder.registerParametersSerializer(testSerializer1);
     assertThrows(
         GeneralSecurityException.class,
-        () -> builder.registerParametersSerializer(testSerializer2).build());
+        () -> builder.registerParametersSerializer(testSerializer2));
   }
 
   @Test
@@ -638,7 +638,7 @@ public final class SerializationRegistryTest {
             SerializationRegistryTest::serializeParameters2ToA,
             TestParameters2.class,
             TestSerializationA.class);
-    new SerializationRegistry.Builder()
+    SerializationRegistry unused = new SerializationRegistry.Builder()
         .registerParametersSerializer(testSerializer1)
         .registerParametersSerializer(testSerializer2)
         .build();
@@ -657,7 +657,7 @@ public final class SerializationRegistryTest {
             SerializationRegistryTest::serializeParameters2ToA,
             TestParameters2.class,
             TestSerializationA.class);
-    new SerializationRegistry.Builder()
+    SerializationRegistry unused = new SerializationRegistry.Builder()
         .registerParametersSerializer(testSerializer1)
         .registerParametersSerializer(testSerializer2)
         .build();
@@ -770,7 +770,7 @@ public final class SerializationRegistryTest {
     ParametersParser<TestSerializationA> testParser =
         ParametersParser.create(
             SerializationRegistryTest::parseAToParameters1, A_1, TestSerializationA.class);
-    new SerializationRegistry.Builder()
+    SerializationRegistry unused = new SerializationRegistry.Builder()
         .registerParametersParser(testParser)
         .registerParametersParser(testParser)
         .build();
@@ -788,7 +788,7 @@ public final class SerializationRegistryTest {
     builder.registerParametersParser(testParser1);
     assertThrows(
         GeneralSecurityException.class,
-        () -> builder.registerParametersParser(testParser2).build());
+        () -> builder.registerParametersParser(testParser2));
   }
 
   @Test
@@ -800,7 +800,7 @@ public final class SerializationRegistryTest {
     ParametersParser<TestSerializationB> testParser2 =
         ParametersParser.create(
             SerializationRegistryTest::parseBToParameters1, B_1, TestSerializationB.class);
-    new SerializationRegistry.Builder()
+    SerializationRegistry unused = new SerializationRegistry.Builder()
         .registerParametersParser(testParser1)
         .registerParametersParser(testParser2)
         .build();
@@ -814,7 +814,7 @@ public final class SerializationRegistryTest {
     ParametersParser<TestSerializationA> testParser2 =
         ParametersParser.create(
             SerializationRegistryTest::parseAToParameters2, A_2, TestSerializationA.class);
-    new SerializationRegistry.Builder()
+    SerializationRegistry unused = new SerializationRegistry.Builder()
         .registerParametersParser(testParser1)
         .registerParametersParser(testParser2)
         .build();
@@ -865,7 +865,7 @@ public final class SerializationRegistryTest {
     SerializationRegistry.Builder builder = new SerializationRegistry.Builder(registry1);
     SerializationRegistry registry2 = builder.build();
 
-    builder
+    SerializationRegistry unused = builder
         .registerParametersParser(
             ParametersParser.create(
                 SerializationRegistryTest::parseAToParameters1, A_1, TestSerializationA.class))
