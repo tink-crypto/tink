@@ -1,0 +1,29 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+package(default_visibility = ["//:__subpackages__"])
+
+licenses(["notice"])
+
+go_library(
+    name = "tinkerror",
+    srcs = [
+        "doc.go",
+        "tinkerror.go",
+    ],
+    importpath = "github.com/google/tink/go/internal/tinkerror",
+)
+
+go_test(
+    name = "tinkerror_test",
+    srcs = ["tinkerror_test.go"],
+    deps = [
+        ":tinkerror",
+        "//internal/tinkerror/tinkerrortest",
+    ],
+)
+
+alias(
+    name = "go_default_library",
+    actual = ":tinkerror",
+    visibility = ["//:__subpackages__"],
+)
