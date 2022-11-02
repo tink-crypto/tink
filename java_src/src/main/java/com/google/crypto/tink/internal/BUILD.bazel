@@ -548,3 +548,23 @@ android_library(
     srcs = ["PrimitiveConstructor.java"],
     deps = ["//src/main/java/com/google/crypto/tink:key-android"],
 )
+
+android_library(
+    name = "mutable_primitive_registry-android",
+    srcs = ["MutablePrimitiveRegistry.java"],
+    deps = [
+        ":primitive_constructor-android",
+        ":primitive_registry-android",
+        "//src/main/java/com/google/crypto/tink:key-android",
+    ],
+)
+
+java_library(
+    name = "mutable_primitive_registry",
+    srcs = ["MutablePrimitiveRegistry.java"],
+    deps = [
+        ":primitive_constructor",
+        ":primitive_registry",
+        "//src/main/java/com/google/crypto/tink:key",
+    ],
+)
