@@ -38,6 +38,21 @@ import org.junit.runners.JUnit4;
 /** Integration tests for Tink's GcpKmsClient with the real GCP Cloud KMS. */
 @RunWith(JUnit4.class)
 public class GcpKmsIntegrationTest {
+
+  // A valid GCP KMS AEAD key URI.
+  // It is restricted to the service account in {@link
+  // com.google.crypto.tink.testing.TestUtil#SERVICE_ACCOUNT_FILE}.
+  private static final String GCP_KMS_TEST_KEY_URI =
+      "gcp-kms://projects/tink-test-infrastructure/locations/global/keyRings/"
+          + "unit-and-integration-testing/cryptoKeys/aead-key";
+
+  // Another valid GCP KMS AEAD key URI in the same key ring as {@link #GCP_KMS_TEST_KEY_URI}.
+  // It is restricted to the service account in {@link
+  // com.google.crypto.tink.testing.TestUtil#SERVICE_ACCOUNT_FILE}.
+  private static final String GCP_KMS_TEST_KEY_URI_2 =
+      "gcp-kms://projects/tink-test-infrastructure/locations/global/keyRings/"
+          + "unit-and-integration-testing/cryptoKeys/aead2-key";
+
   @Before
   public void setUp() throws Exception {
     GcpKmsClient.register(Optional.empty(), Optional.of(TestUtil.SERVICE_ACCOUNT_FILE));
@@ -48,7 +63,7 @@ public class GcpKmsIntegrationTest {
   public void kmsAead_encryptDecrypt() throws Exception {
     KeysetHandle keysetHandle =
         KeysetHandle.generateNew(
-            KmsAeadKeyManager.createKeyTemplate(TestUtil.GCP_KMS_TEST_KEY_URI));
+            KmsAeadKeyManager.createKeyTemplate(GCP_KMS_TEST_KEY_URI));
 
     Aead aead = keysetHandle.getPrimitive(Aead.class);
 
@@ -68,10 +83,37 @@ public class GcpKmsIntegrationTest {
   }
 
   @Test
+  public void kmsAeadDecryptWithDifferentKeyUri_fails() throws Exception {
+    KeysetHandle keysetHandle =
+        KeysetHandle.generateNew(
+            KmsAeadKeyManager.createKeyTemplate(GCP_KMS_TEST_KEY_URI));
+    Aead aead = keysetHandle.getPrimitive(Aead.class);
+
+    KeysetHandle keysetHandle2 =
+        KeysetHandle.generateNew(
+            KmsAeadKeyManager.createKeyTemplate(GCP_KMS_TEST_KEY_URI_2));
+    Aead aead2 = keysetHandle2.getPrimitive(Aead.class);
+
+    byte[] plaintext = "plaintext".getBytes(UTF_8);
+    byte[] associatedData = "associatedData".getBytes(UTF_8);
+
+    byte[] ciphertext = aead.encrypt(plaintext, associatedData);
+    byte[] ciphertext2 = aead2.encrypt(plaintext, associatedData);
+
+    // Ciphertexts are valid.
+    assertThat(aead.decrypt(ciphertext, associatedData)).isEqualTo(plaintext);
+    assertThat(aead2.decrypt(ciphertext2, associatedData)).isEqualTo(plaintext);
+
+    // Ciphertexts cannot be decrypted using a different key URI.
+    assertThrows(GeneralSecurityException.class, () -> aead.decrypt(ciphertext2, associatedData));
+    assertThrows(GeneralSecurityException.class, () -> aead2.decrypt(ciphertext, associatedData));
+  }
+
+  @Test
   public void kmsEnvelopeAead_encryptDecrypt() throws Exception {
     KeyTemplate envelopeTemplate =
         KmsEnvelopeAeadKeyManager.createKeyTemplate(
-            TestUtil.GCP_KMS_TEST_KEY_URI, KeyTemplates.get("AES128_CTR_HMAC_SHA256"));
+            GCP_KMS_TEST_KEY_URI, KeyTemplates.get("AES128_CTR_HMAC_SHA256"));
     KeysetHandle keysetHandle = KeysetHandle.generateNew(envelopeTemplate);
 
     Aead aead = keysetHandle.getPrimitive(Aead.class);
@@ -90,4 +132,34 @@ public class GcpKmsIntegrationTest {
     assertThat(aead.decrypt(aead.encrypt(empty, associatedData), associatedData)).isEqualTo(empty);
     assertThat(aead.decrypt(aead.encrypt(plaintext, empty), empty)).isEqualTo(plaintext);
   }
+
+  @Test
+  public void kmsEnvelopeAeadDecryptWithDifferentKeyUri_fails() throws Exception {
+    KeysetHandle keysetHandle =
+        KeysetHandle.generateNew(
+            KmsEnvelopeAeadKeyManager.createKeyTemplate(
+            GCP_KMS_TEST_KEY_URI, KeyTemplates.get("AES128_CTR_HMAC_SHA256")));
+    Aead aead = keysetHandle.getPrimitive(Aead.class);
+
+    KeysetHandle keysetHandle2 =
+        KeysetHandle.generateNew(
+            KmsEnvelopeAeadKeyManager.createKeyTemplate(
+            GCP_KMS_TEST_KEY_URI_2, KeyTemplates.get("AES128_CTR_HMAC_SHA256")));
+    Aead aead2 = keysetHandle2.getPrimitive(Aead.class);
+
+    byte[] plaintext = "plaintext".getBytes(UTF_8);
+    byte[] associatedData = "associatedData".getBytes(UTF_8);
+
+    byte[] ciphertext = aead.encrypt(plaintext, associatedData);
+    byte[] ciphertext2 = aead2.encrypt(plaintext, associatedData);
+
+    // Ciphertexts are valid.
+    assertThat(aead.decrypt(ciphertext, associatedData)).isEqualTo(plaintext);
+    assertThat(aead2.decrypt(ciphertext2, associatedData)).isEqualTo(plaintext);
+
+    // Ciphertexts cannot be decrypted using a different key URI.
+    assertThrows(GeneralSecurityException.class, () -> aead.decrypt(ciphertext2, associatedData));
+    assertThrows(GeneralSecurityException.class, () -> aead2.decrypt(ciphertext, associatedData));
+  }
+
 }
