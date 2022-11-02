@@ -223,7 +223,7 @@ public final class PrimitiveRegistryTest {
   }
 
   @Test
-  public void test_serializer_copyWorks() throws Exception {
+  public void test_copyWorks() throws Exception {
     PrimitiveRegistry registry =
         new PrimitiveRegistry.Builder()
             .registerPrimitiveConstructor(

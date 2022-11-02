@@ -37,7 +37,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
 /**
- * Thread safety tests for {@link MutableSerializationRegistry}.
+ * Tests for {@link MutableSerializationRegistry}.
  *
  * <p>We repeat the main tests in SerializationRegistryTest. There really shouldn't be both classes,
  * but currently this is what we need, and the other is what we should have.
