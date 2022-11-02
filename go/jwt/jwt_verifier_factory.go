@@ -57,16 +57,25 @@ func newWrappedVerifier(ps *primitiveset.PrimitiveSet) (*wrappedVerifier, error)
 }
 
 func (w *wrappedVerifier) VerifyAndDecode(compact string, validator *Validator) (*VerifiedJWT, error) {
+	var interestingErr error
 	for _, s := range w.ps.Entries {
 		for _, e := range s {
 			p, ok := e.Primitive.(*verifierWithKID)
 			if !ok {
 				return nil, fmt.Errorf("jwt_verifier_factory: not a JWT Verifier primitive")
 			}
-			if verifiedJWT, err := p.VerifyAndDecodeWithKID(compact, validator, keyID(e.KeyID, e.PrefixType)); err == nil {
+			verifiedJWT, err := p.VerifyAndDecodeWithKID(compact, validator, keyID(e.KeyID, e.PrefixType))
+			if err == nil {
 				return verifiedJWT, nil
+			}
+			if err != errJwtVerification {
+				// any error that is not the generic errJwtVerification is considered interesting
+				interestingErr = err
 			}
 		}
 	}
-	return nil, fmt.Errorf("verification failed")
+	if interestingErr != nil {
+		return nil, interestingErr
+	}
+	return nil, errJwtVerification
 }

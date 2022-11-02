@@ -66,16 +66,25 @@ func (w *wrappedJWTMAC) ComputeMACAndEncode(token *RawJWT) (string, error) {
 }
 
 func (w *wrappedJWTMAC) VerifyMACAndDecode(compact string, validator *Validator) (*VerifiedJWT, error) {
+	var interestingErr error
 	for _, s := range w.ps.Entries {
 		for _, e := range s {
 			p, ok := e.Primitive.(*macWithKID)
 			if !ok {
 				return nil, fmt.Errorf("jwt_mac_factory: not a JWT MAC primitive")
 			}
-			if verifiedJWT, err := p.VerifyMACAndDecodeWithKID(compact, validator, keyID(e.KeyID, e.PrefixType)); err == nil {
+			verifiedJWT, err := p.VerifyMACAndDecodeWithKID(compact, validator, keyID(e.KeyID, e.PrefixType))
+			if err == nil {
 				return verifiedJWT, nil
+			}
+			if err != errJwtVerification {
+				// any error that is not the generic errJwtVerification is considered interesting
+				interestingErr = err
 			}
 		}
 	}
-	return nil, fmt.Errorf("verification failed")
+	if interestingErr != nil {
+		return nil, interestingErr
+	}
+	return nil, errJwtVerification
 }

@@ -239,3 +239,40 @@ func TestFactoryWithInvalidPrimitiveSetType(t *testing.T) {
 		t.Fatal("calling NewMAC() err = nil, want error")
 	}
 }
+
+func TestVerifyMACAndDecodeReturnsValidationError(t *testing.T) {
+	keyData, err := newKeyData(newJWTHMACKey(jwtmacpb.JwtHmacAlgorithm_HS256, nil))
+	if err != nil {
+		t.Fatalf("creating NewKeyData: %v", err)
+	}
+	p, err := createJWTMAC(keyData, tinkpb.OutputPrefixType_TINK)
+	if err != nil {
+		t.Fatalf("creating New JWT MAC: %v", err)
+	}
+
+	audience := "audience"
+	rawJWT, err := jwt.NewRawJWT(&jwt.RawJWTOptions{Audience: &audience, WithoutExpiration: true})
+	if err != nil {
+		t.Fatalf("jwt.NewRawJWT() err = %v, want nil", err)
+	}
+	token, err := p.ComputeMACAndEncode(rawJWT)
+	if err != nil {
+		t.Errorf("p.ComputeMACAndEncode() err = %v, want nil", err)
+	}
+
+	otherAudience := "otherAudience"
+	validator, err := jwt.NewValidator(
+		&jwt.ValidatorOpts{ExpectedAudience: &otherAudience, AllowMissingExpiration: true})
+	if err != nil {
+		t.Fatalf("jwt.NewValidator() err = %v, want nil", err)
+	}
+
+	_, err = p.VerifyMACAndDecode(token, validator)
+	wantErr := "validating audience claim: otherAudience not found"
+	if err == nil {
+		t.Errorf("p.VerifyMACAndDecode() err = nil, want %q", wantErr)
+	}
+	if err.Error() != wantErr {
+		t.Errorf("p.VerifyMACAndDecode() err = %q, want %q", err.Error(), wantErr)
+	}
+}

@@ -18,10 +18,14 @@
 package jwt
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/google/tink/go/core/registry"
 )
+
+// A generic error returned when something went wrong before validation
+var errJwtVerification = errors.New("verification failed")
 
 func init() {
 	if err := registry.RegisterKeyManager(new(jwtHMACKeyManager)); err != nil {

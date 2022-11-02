@@ -258,6 +258,44 @@ func TestFactorySignVerifyWithKIDFailure(t *testing.T) {
 	}
 }
 
+func TestVerifyAndDecodeReturnsValidationError(t *testing.T) {
+	_, privateHandle, publicHandle := createKeyAndKeyHandles(t, nil /*=kid*/, tinkpb.OutputPrefixType_TINK)
+	signer, err := jwt.NewSigner(privateHandle)
+	if err != nil {
+		t.Fatalf("jwt.NewSigner() err = %v, want nil", err)
+	}
+	verifier, err := jwt.NewVerifier(publicHandle)
+	if err != nil {
+		t.Fatalf("jwt.NewVerifier() err = %v, want nil", err)
+	}
+
+	audience := "audience"
+	rawJWT, err := jwt.NewRawJWT(&jwt.RawJWTOptions{Audience: &audience, WithoutExpiration: true})
+	if err != nil {
+		t.Fatalf("jwt.NewRawJWT() err = %v, want nil", err)
+	}
+
+	compact, err := signer.SignAndEncode(rawJWT)
+	if err != nil {
+		t.Errorf("signer.SignAndEncode() err = %v, want nil", err)
+	}
+
+	otherAudience := "otherAudience"
+	validator, err := jwt.NewValidator(
+		&jwt.ValidatorOpts{ExpectedAudience: &otherAudience, AllowMissingExpiration: true})
+	if err != nil {
+		t.Fatalf("jwt.NewValidator() err = %v, want nil", err)
+	}
+	_, err = verifier.VerifyAndDecode(compact, validator)
+	wantErr := "validating audience claim: otherAudience not found"
+	if err == nil {
+		t.Errorf("verifier.VerifyAndDecode() err = nil, want %q", wantErr)
+	}
+	if err.Error() != wantErr {
+		t.Errorf("verifier.VerifyAndDecode() err = %q, want %q", err.Error(), wantErr)
+	}
+}
+
 func TestFactorySignVerifyWithKIDSuccess(t *testing.T) {
 	rawJWT, err := jwt.NewRawJWT(&jwt.RawJWTOptions{WithoutExpiration: true})
 	if err != nil {
