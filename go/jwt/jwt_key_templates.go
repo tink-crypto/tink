@@ -17,7 +17,10 @@
 package jwt
 
 import (
+	"fmt"
+
 	"google.golang.org/protobuf/proto"
+	"github.com/google/tink/go/internal/tinkerror"
 	jepb "github.com/google/tink/go/proto/jwt_ecdsa_go_proto"
 	jwtmacpb "github.com/google/tink/go/proto/jwt_hmac_go_proto"
 	jrsppb "github.com/google/tink/go/proto/jwt_rsa_ssa_pkcs1_go_proto"
@@ -31,7 +34,10 @@ func createJWTHMACKeyTemplate(keySize uint32, algorithm jwtmacpb.JwtHmacAlgorith
 		Version:   jwtHMACKeyVersion,
 		Algorithm: algorithm,
 	}
-	serializedFormat, _ := proto.Marshal(format)
+	serializedFormat, err := proto.Marshal(format)
+	if err != nil {
+		tinkerror.Fail(fmt.Sprintf("failed to marshal key format: %s", err))
+	}
 	return &tinkpb.KeyTemplate{
 		TypeUrl:          jwtHMACTypeURL,
 		Value:            serializedFormat,
@@ -44,7 +50,10 @@ func createJWTECDSAKeyTemplate(algorithm jepb.JwtEcdsaAlgorithm, outputPrefixTyp
 		Version:   jwtECDSASignerKeyVersion,
 		Algorithm: algorithm,
 	}
-	serializedFormat, _ := proto.Marshal(format)
+	serializedFormat, err := proto.Marshal(format)
+	if err != nil {
+		tinkerror.Fail(fmt.Sprintf("failed to marshal key format: %s", err))
+	}
 	return &tinkpb.KeyTemplate{
 		TypeUrl:          jwtECDSASignerTypeURL,
 		Value:            serializedFormat,
@@ -59,7 +68,10 @@ func createJWTRSKeyTemplate(algorithm jrsppb.JwtRsaSsaPkcs1Algorithm, modulusSiz
 		ModulusSizeInBits: modulusSizeInBits,
 		PublicExponent:    []byte{0x01, 0x00, 0x01},
 	}
-	serializedFormat, _ := proto.Marshal(format)
+	serializedFormat, err := proto.Marshal(format)
+	if err != nil {
+		tinkerror.Fail(fmt.Sprintf("failed to marshal key format: %s", err))
+	}
 	return &tinkpb.KeyTemplate{
 		TypeUrl:          jwtRSSignerTypeURL,
 		Value:            serializedFormat,
@@ -74,7 +86,10 @@ func createJWTPSKeyTemplate(algorithm jrpsspb.JwtRsaSsaPssAlgorithm, modulusSize
 		PublicExponent:    []byte{0x01, 0x00, 0x01},
 		ModulusSizeInBits: modulusSizeInBits,
 	}
-	serializedFormat, _ := proto.Marshal(format)
+	serializedFormat, err := proto.Marshal(format)
+	if err != nil {
+		tinkerror.Fail(fmt.Sprintf("failed to marshal key format: %s", err))
+	}
 	return &tinkpb.KeyTemplate{
 		TypeUrl:          jwtPSSignerTypeURL,
 		Value:            serializedFormat,

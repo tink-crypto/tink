@@ -17,7 +17,10 @@
 package signature
 
 import (
+	"fmt"
+
 	"google.golang.org/protobuf/proto"
+	"github.com/google/tink/go/internal/tinkerror"
 	commonpb "github.com/google/tink/go/proto/common_go_proto"
 	ecdsapb "github.com/google/tink/go/proto/ecdsa_go_proto"
 	rsppb "github.com/google/tink/go/proto/rsa_ssa_pkcs1_go_proto"
@@ -153,7 +156,10 @@ func createECDSAKeyTemplate(hashType commonpb.HashType, curve commonpb.EllipticC
 		Encoding: encoding,
 	}
 	format := &ecdsapb.EcdsaKeyFormat{Params: params}
-	serializedFormat, _ := proto.Marshal(format)
+	serializedFormat, err := proto.Marshal(format)
+	if err != nil {
+		tinkerror.Fail(fmt.Sprintf("failed to marshal key format: %s", err))
+	}
 	return &tinkpb.KeyTemplate{
 		TypeUrl:          ecdsaSignerTypeURL,
 		Value:            serializedFormat,
@@ -185,7 +191,10 @@ func create_RSA_SSA_PKCS1_Template(prefixType tinkpb.OutputPrefixType, hashType 
 		ModulusSizeInBits: modulusSizeInBits,
 		PublicExponent:    []byte{0x01, 0x00, 0x01},
 	}
-	serializedFormat, _ := proto.Marshal(keyFormat)
+	serializedFormat, err := proto.Marshal(keyFormat)
+	if err != nil {
+		tinkerror.Fail(fmt.Sprintf("failed to marshal key format: %s", err))
+	}
 	return &tinkpb.KeyTemplate{
 		TypeUrl:          rsaSSAPKCS1SignerTypeURL,
 		OutputPrefixType: prefixType,
@@ -203,7 +212,10 @@ func create_RSA_SSA_PSS_Template(prefixType tinkpb.OutputPrefixType, hashType co
 		ModulusSizeInBits: modulusSizeInBits,
 		PublicExponent:    []byte{0x01, 0x00, 0x01},
 	}
-	serializedFormat, _ := proto.Marshal(keyFormat)
+	serializedFormat, err := proto.Marshal(keyFormat)
+	if err != nil {
+		tinkerror.Fail(fmt.Sprintf("failed to marshal key format: %s", err))
+	}
 	return &tinkpb.KeyTemplate{
 		TypeUrl:          rsaSSAPSSSignerTypeURL,
 		OutputPrefixType: prefixType,

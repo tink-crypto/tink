@@ -24,6 +24,7 @@ go_library(
         "//hybrid/subtle",
         "//internal/internalregistry",
         "//internal/monitoringutil",
+        "//internal/tinkerror",
         "//keyset",
         "//monitoring",
         "//proto/aes_ctr_hmac_aead_go_proto",

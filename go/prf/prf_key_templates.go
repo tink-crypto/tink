@@ -17,7 +17,10 @@
 package prf
 
 import (
+	"fmt"
+
 	"google.golang.org/protobuf/proto"
+	"github.com/google/tink/go/internal/tinkerror"
 	cmacpb "github.com/google/tink/go/proto/aes_cmac_prf_go_proto"
 	commonpb "github.com/google/tink/go/proto/common_go_proto"
 	hkdfpb "github.com/google/tink/go/proto/hkdf_prf_go_proto"
@@ -64,7 +67,10 @@ func createHMACPRFKeyTemplate(keySize uint32, hashType commonpb.HashType) *tinkp
 		Params:  &params,
 		KeySize: keySize,
 	}
-	serializedFormat, _ := proto.Marshal(&format)
+	serializedFormat, err := proto.Marshal(&format)
+	if err != nil {
+		tinkerror.Fail(fmt.Sprintf("failed to marshal key format: %s", err))
+	}
 	return &tinkpb.KeyTemplate{
 		TypeUrl:          hmacprfTypeURL,
 		OutputPrefixType: tinkpb.OutputPrefixType_RAW,
@@ -82,7 +88,10 @@ func createHKDFPRFKeyTemplate(keySize uint32, hashType commonpb.HashType, salt [
 		Params:  &params,
 		KeySize: keySize,
 	}
-	serializedFormat, _ := proto.Marshal(&format)
+	serializedFormat, err := proto.Marshal(&format)
+	if err != nil {
+		tinkerror.Fail(fmt.Sprintf("failed to marshal key format: %s", err))
+	}
 	return &tinkpb.KeyTemplate{
 		TypeUrl:          hkdfprfTypeURL,
 		OutputPrefixType: tinkpb.OutputPrefixType_RAW,
@@ -95,7 +104,10 @@ func createAESCMACPRFKeyTemplate(keySize uint32) *tinkpb.KeyTemplate {
 	format := cmacpb.AesCmacPrfKeyFormat{
 		KeySize: keySize,
 	}
-	serializedFormat, _ := proto.Marshal(&format)
+	serializedFormat, err := proto.Marshal(&format)
+	if err != nil {
+		tinkerror.Fail(fmt.Sprintf("failed to marshal key format: %s", err))
+	}
 	return &tinkpb.KeyTemplate{
 		TypeUrl:          aescmacprfTypeURL,
 		OutputPrefixType: tinkpb.OutputPrefixType_RAW,

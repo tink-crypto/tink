@@ -17,8 +17,11 @@
 package hybrid
 
 import (
+	"fmt"
+
 	"google.golang.org/protobuf/proto"
 	"github.com/google/tink/go/aead"
+	"github.com/google/tink/go/internal/tinkerror"
 	commonpb "github.com/google/tink/go/proto/common_go_proto"
 	eciespb "github.com/google/tink/go/proto/ecies_aead_hkdf_go_proto"
 	hpkepb "github.com/google/tink/go/proto/hpke_go_proto"
@@ -134,7 +137,10 @@ func createHPKEKeyTemplate(kem hpkepb.HpkeKem, kdf hpkepb.HpkeKdf, aead hpkepb.H
 			Aead: aead,
 		},
 	}
-	serializedFormat, _ := proto.Marshal(format)
+	serializedFormat, err := proto.Marshal(format)
+	if err != nil {
+		tinkerror.Fail(fmt.Sprintf("failed to marshal key format: %s", err))
+	}
 	return &tinkpb.KeyTemplate{
 		TypeUrl:          hpkePrivateKeyTypeURL,
 		Value:            serializedFormat,
@@ -183,7 +189,10 @@ func createECIESAEADHKDFKeyTemplate(c commonpb.EllipticCurveType, ht commonpb.Ha
 			EcPointFormat: ptfmt,
 		},
 	}
-	serializedFormat, _ := proto.Marshal(format)
+	serializedFormat, err := proto.Marshal(format)
+	if err != nil {
+		tinkerror.Fail(fmt.Sprintf("failed to marshal key format: %s", err))
+	}
 	return &tinkpb.KeyTemplate{
 		TypeUrl:          eciesAEADHKDFPrivateKeyTypeURL,
 		Value:            serializedFormat,

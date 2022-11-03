@@ -21,6 +21,7 @@ go_library(
         "//core/registry",
         "//internal/internalregistry",
         "//internal/monitoringutil",
+        "//internal/tinkerror",
         "//keyset",
         "//monitoring",
         "//prf/subtle",

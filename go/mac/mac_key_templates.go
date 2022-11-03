@@ -17,7 +17,10 @@
 package mac
 
 import (
+	"fmt"
+
 	"google.golang.org/protobuf/proto"
+	"github.com/google/tink/go/internal/tinkerror"
 	cmacpb "github.com/google/tink/go/proto/aes_cmac_go_proto"
 	commonpb "github.com/google/tink/go/proto/common_go_proto"
 	hmacpb "github.com/google/tink/go/proto/hmac_go_proto"
@@ -75,7 +78,10 @@ func createHMACKeyTemplate(keySize, tagSize uint32, hashType commonpb.HashType) 
 		Params:  &params,
 		KeySize: keySize,
 	}
-	serializedFormat, _ := proto.Marshal(&format)
+	serializedFormat, err := proto.Marshal(&format)
+	if err != nil {
+		tinkerror.Fail(fmt.Sprintf("failed to marshal key format: %s", err))
+	}
 	return &tinkpb.KeyTemplate{
 		TypeUrl:          hmacTypeURL,
 		Value:            serializedFormat,
@@ -92,7 +98,10 @@ func createCMACKeyTemplate(keySize uint32, tagSize uint32) *tinkpb.KeyTemplate {
 		Params:  &params,
 		KeySize: keySize,
 	}
-	serializedFormat, _ := proto.Marshal(&format)
+	serializedFormat, err := proto.Marshal(&format)
+	if err != nil {
+		tinkerror.Fail(fmt.Sprintf("failed to marshal key format: %s", err))
+	}
 	return &tinkpb.KeyTemplate{
 		TypeUrl:          cmacTypeURL,
 		Value:            serializedFormat,

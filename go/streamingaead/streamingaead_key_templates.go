@@ -20,6 +20,7 @@ import (
 	"fmt"
 
 	"google.golang.org/protobuf/proto"
+	"github.com/google/tink/go/internal/tinkerror"
 	ctrhmacpb "github.com/google/tink/go/proto/aes_ctr_hmac_streaming_go_proto"
 	gcmhkdfpb "github.com/google/tink/go/proto/aes_gcm_hkdf_streaming_go_proto"
 	commonpb "github.com/google/tink/go/proto/common_go_proto"
@@ -126,7 +127,7 @@ func newAESGCMHKDFKeyTemplate(mainKeySize uint32, hkdfHashType commonpb.HashType
 		},
 	})
 	if err != nil {
-		panic(fmt.Sprintf("failed to marshal key: %s", err))
+		tinkerror.Fail(fmt.Sprintf("failed to marshal key: %s", err))
 	}
 	return &tinkpb.KeyTemplate{
 		TypeUrl:          aesGCMHKDFTypeURL,
@@ -151,7 +152,7 @@ func newAESCTRHMACKeyTemplate(mainKeySize uint32, hkdfHashType commonpb.HashType
 		},
 	})
 	if err != nil {
-		panic(fmt.Sprintf("failed to marshal key: %s", err))
+		tinkerror.Fail(fmt.Sprintf("failed to marshal key: %s", err))
 	}
 	return &tinkpb.KeyTemplate{
 		TypeUrl:          aesCTRHMACTypeURL,

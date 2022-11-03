@@ -20,6 +20,7 @@ go_library(
         "//aead/subtle",
         "//core/primitiveset",
         "//core/registry",
+        "//internal/tinkerror",
         "//keyset",
         "//mac/subtle",
         "//proto/aes_ctr_hmac_streaming_go_proto",

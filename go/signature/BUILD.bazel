@@ -31,6 +31,7 @@ go_library(
         "//internal/internalregistry",
         "//internal/monitoringutil",
         "//internal/signature",
+        "//internal/tinkerror",
         "//keyset",
         "//monitoring",
         "//proto/common_go_proto",

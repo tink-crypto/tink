@@ -17,7 +17,10 @@
 package aead
 
 import (
+	"fmt"
+
 	"google.golang.org/protobuf/proto"
+	"github.com/google/tink/go/internal/tinkerror"
 	ctrpb "github.com/google/tink/go/proto/aes_ctr_go_proto"
 	ctrhmacpb "github.com/google/tink/go/proto/aes_ctr_hmac_aead_go_proto"
 	gcmpb "github.com/google/tink/go/proto/aes_gcm_go_proto"
@@ -113,7 +116,10 @@ func createAESGCMKeyTemplate(keySize uint32, outputPrefixType tinkpb.OutputPrefi
 	format := &gcmpb.AesGcmKeyFormat{
 		KeySize: keySize,
 	}
-	serializedFormat, _ := proto.Marshal(format)
+	serializedFormat, err := proto.Marshal(format)
+	if err != nil {
+		tinkerror.Fail(fmt.Sprintf("failed to marshal key format: %s", err))
+	}
 	return &tinkpb.KeyTemplate{
 		TypeUrl:          aesGCMTypeURL,
 		Value:            serializedFormat,
@@ -132,7 +138,10 @@ func createAESCTRHMACAEADKeyTemplate(aesKeySize, ivSize, hmacKeySize, tagSize ui
 			KeySize: hmacKeySize,
 		},
 	}
-	serializedFormat, _ := proto.Marshal(format)
+	serializedFormat, err := proto.Marshal(format)
+	if err != nil {
+		tinkerror.Fail(fmt.Sprintf("failed to marshal key format: %s", err))
+	}
 	return &tinkpb.KeyTemplate{
 		Value:            serializedFormat,
 		TypeUrl:          aesCTRHMACAEADTypeURL,

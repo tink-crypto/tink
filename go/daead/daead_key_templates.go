@@ -17,7 +17,10 @@
 package daead
 
 import (
+	"fmt"
+
 	"google.golang.org/protobuf/proto"
+	"github.com/google/tink/go/internal/tinkerror"
 	aspb "github.com/google/tink/go/proto/aes_siv_go_proto"
 	tinkpb "github.com/google/tink/go/proto/tink_go_proto"
 )
@@ -27,7 +30,10 @@ func AESSIVKeyTemplate() *tinkpb.KeyTemplate {
 	format := &aspb.AesSivKeyFormat{
 		KeySize: 64,
 	}
-	serializedFormat, _ := proto.Marshal(format)
+	serializedFormat, err := proto.Marshal(format)
+	if err != nil {
+		tinkerror.Fail(fmt.Sprintf("failed to marshal key format: %s", err))
+	}
 	return &tinkpb.KeyTemplate{
 		TypeUrl:          aesSIVTypeURL,
 		OutputPrefixType: tinkpb.OutputPrefixType_TINK,

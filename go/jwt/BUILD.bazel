@@ -37,6 +37,7 @@ go_library(
         "//core/primitiveset",
         "//core/registry",
         "//internal/signature",
+        "//internal/tinkerror",
         "//keyset",
         "//mac/subtle",
         "//proto/jwt_ecdsa_go_proto",
