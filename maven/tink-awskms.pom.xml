@@ -82,17 +82,15 @@
     <tag>HEAD</tag>
   </scm>
 
-  <properties>
+    <properties>
     <java.version>1.8</java.version>
-
+    <tink.version>VERSION_PLACEHOLDER</tink.version>
     <aws-java-sdk-core.version>1.12.182</aws-java-sdk-core.version>
     <aws-java-sdk-kms.version>1.12.182</aws-java-sdk-kms.version>
-    <commons-logging.version>1.2</commons-logging.version>
-    <google-auto-service.version>1.0.1</google-auto-service.version>
-    <google-guava.version>31.0.1-jre</google-guava.version>
-    <httpclient.version>4.5.13</httpclient.version>
-    <jackson.version>2.13.1</jackson.version>
-    <tink.version>VERSION_PLACEHOLDER</tink.version>
+    <auto-service-annotations.version>1.0.1</auto-service-annotations.version>
+    <jsr305.version>3.0.2</jsr305.version>
+    <error_prone_annotations.version>2.10.0</error_prone_annotations.version>
+    <guava.version>31.0.1-jre</guava.version>
   </properties>
 
   <dependencies>
@@ -102,20 +100,8 @@
       <version>${aws-java-sdk-core.version}</version>
       <exclusions>
         <exclusion>
-          <groupId>com.fasterxml.jackson.core</groupId>
-          <artifactId>jackson-databind</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>com.fasterxml.jackson.dataformat</groupId>
-          <artifactId>jackson-dataformat-cbor</artifactId>
-        </exclusion>
-        <exclusion>
           <groupId>com.google.guava</groupId>
           <artifactId>guava</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>org.apache.httpcomponents</groupId>
-          <artifactId>httpclient</artifactId>
         </exclusion>
         <exclusion>
           <groupId>commons-codec</groupId>
@@ -127,63 +113,26 @@
         </exclusion>
       </exclusions>
     </dependency>
-
     <dependency>
       <groupId>com.amazonaws</groupId>
       <artifactId>aws-java-sdk-kms</artifactId>
       <version>${aws-java-sdk-kms.version}</version>
       <exclusions>
         <exclusion>
-          <groupId>com.fasterxml.jackson.core</groupId>
-          <artifactId>jackson-databind</artifactId>
-        </exclusion>
-        <exclusion>
           <groupId>com.google.guava</groupId>
           <artifactId>guava</artifactId>
         </exclusion>
       </exclusions>
     </dependency>
-
-    <dependency>
-      <groupId>com.fasterxml.jackson.core</groupId>
-      <artifactId>jackson-core</artifactId>
-      <version>${jackson.version}</version>
-    </dependency>
-
-    <dependency>
-      <groupId>com.fasterxml.jackson.core</groupId>
-      <artifactId>jackson-databind</artifactId>
-      <version>${jackson.version}</version>
-      <exclusions>
-        <exclusion>
-          <groupId>com.fasterxml.jackson.core</groupId>
-          <artifactId>jackson-core</artifactId>
-        </exclusion>
-      </exclusions>
-    </dependency>
-
-    <dependency>
-      <groupId>com.fasterxml.jackson.dataformat</groupId>
-      <artifactId>jackson-dataformat-cbor</artifactId>
-      <version>${jackson.version}</version>
-      <exclusions>
-        <exclusion>
-          <groupId>com.fasterxml.jackson.core</groupId>
-          <artifactId>jackson-core</artifactId>
-        </exclusion>
-      </exclusions>
-    </dependency>
-
     <dependency>
       <groupId>com.google.guava</groupId>
       <artifactId>guava</artifactId>
-      <version>${google-guava.version}</version>
+      <version>${guava.version}</version>
     </dependency>
-
     <dependency>
       <groupId>com.google.auto.service</groupId>
-      <artifactId>auto-service</artifactId>
-      <version>${google-auto-service.version}</version>
+      <artifactId>auto-service-annotations</artifactId>
+      <version>${auto-service-annotations.version}</version>
       <exclusions>
         <exclusion>
           <groupId>com.google.guava</groupId>
@@ -191,34 +140,20 @@
         </exclusion>
       </exclusions>
     </dependency>
-
     <dependency>
       <groupId>com.google.crypto.tink</groupId>
       <artifactId>tink</artifactId>
       <version>${tink.version}</version>
     </dependency>
-
     <dependency>
-      <groupId>commons-logging</groupId>
-      <artifactId>commons-logging</artifactId>
-      <version>${commons-logging.version}</version>
+      <groupId>com.google.code.findbugs</groupId>
+      <artifactId>jsr305</artifactId>
+      <version>${jsr305.version}</version>
     </dependency>
-
     <dependency>
-      <groupId>org.apache.httpcomponents</groupId>
-      <artifactId>httpclient</artifactId>
-      <version>${httpclient.version}</version>
-      <exclusions>
-        <exclusion>
-          <groupId>commons-logging</groupId>
-          <artifactId>commons-logging</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>org.apache.httpcomponents</groupId>
-          <artifactId>httpcore</artifactId>
-        </exclusion>
-      </exclusions>
+      <groupId>com.google.errorprone</groupId>
+      <artifactId>error_prone_annotations</artifactId>
+      <version>${error_prone_annotations.version}</version>
     </dependency>
-
   </dependencies>
 </project>
