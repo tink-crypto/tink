@@ -69,6 +69,7 @@ go_test(
         "//insecurecleartextkeyset",
         "//internal/internalregistry",
         "//internal/testing/stubkeymanager",
+        "//internal/tinkerror/tinkerrortest",
         "//keyset",
         "//monitoring",
         "//proto/aes_ctr_hmac_aead_go_proto",
