@@ -74,8 +74,7 @@ func (p *prfBasedDeriver) DeriveKeyset(salt []byte) (*keyset.Handle, error) {
 	// These will be populated with the correct values in the keyset deriver
 	// factory. This is acceptable because the keyset as-is will never leave Tink,
 	// and the user only interacts via the keyset deriver factory.
-	// TODO(b/249835030): Change to 0 once tagged bug is resolved.
-	var primaryKeyID uint32 = 1
+	var primaryKeyID uint32 = 0
 	return insecurecleartextkeyset.Read(
 		&keyset.MemReaderWriter{
 			Keyset: &tinkpb.Keyset{

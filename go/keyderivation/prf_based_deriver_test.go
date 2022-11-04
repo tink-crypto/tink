@@ -85,8 +85,8 @@ func TestPRFBasedDeriverWithAEAD(t *testing.T) {
 						t.Errorf("DeriveKeyset() err = %v, want nil", err)
 					}
 					// We cannot test the derived keyset handle because, at this point, it
-					// is filled with dummy values for the key ID, status, and output
-					// prefix type fields.
+					// is filled with placeholder values for the key ID, status, and
+					// output prefix type fields.
 				})
 			}
 		}
