@@ -19,6 +19,7 @@ package com.google.crypto.tink.subtle;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertThrows;
 
 import com.google.crypto.tink.testing.TestUtil;
 import com.google.crypto.tink.testing.WycheproofTestUtil;
@@ -360,6 +361,57 @@ public class EllipticCurvesTest {
     }
   }
 
+  @Test
+  public void pointEncode_failsIfPointIsNotOnCurve() throws Exception {
+    // Same an entry of testVectors2, but the value of y has been incremented by 1.
+    BigInteger x = new BigInteger(
+        "79974177209371530366349631093481213364328002500948308276357601809416549347930");
+    BigInteger y = new BigInteger(
+           "11093679777528052772423074391650378811758820120351664471899251711300542565880");
+    // Adding one to y make the point not be on the curve.
+    assertThrows(
+        GeneralSecurityException.class,
+        () ->
+            EllipticCurves.pointEncode(
+                EllipticCurves.CurveType.NIST_P256,
+                EllipticCurves.PointFormatType.UNCOMPRESSED,
+                new ECPoint(x, y)));
+  }
+
+  @Test
+  public void pointDecode_uncompressed_failsIfPointIsNotOnCurve() throws Exception {
+    // Same an entry of testVectors2, but the last byte is changed from f7 to f6
+    byte[] encoded = TestUtil.hexDecode("04"
+            + "b0cfc7bc02fc980d858077552947ffb449b10df8949dee4e56fe21e016dcb25a"
+            + "1886ccdca5487a6772f9401888203f90587cc00a730e2b83d5c6f89b3b568df6");
+    // Adding one to y make the point not be on the curve.
+    assertThrows(GeneralSecurityException.class,
+        () -> EllipticCurves.pointDecode(EllipticCurves.CurveType.NIST_P256,
+            EllipticCurves.PointFormatType.UNCOMPRESSED, encoded));
+  }
+
+  @Test
+  public void pointDecode_crunchy_failsIfPointIsNotOnCurve() throws Exception {
+    // Same as an entry of testVectors2, but the last byte is changed from f4 to f5
+    byte[] encoded = TestUtil.hexDecode(
+        "0000000000000000000000000000000000000000000000000000000000000000"
+            + "66485c780e2f83d72433bd5d84a06bb6541c2af31dae871728bf856a174f93f5");
+    // Adding one to y make the point not be on the curve.
+    assertThrows(GeneralSecurityException.class,
+        () -> EllipticCurves.pointDecode(EllipticCurves.CurveType.NIST_P256,
+            EllipticCurves.PointFormatType.DO_NOT_USE_CRUNCHY_UNCOMPRESSED, encoded));
+  }
+
+  @Test
+  public void pointDecode_compressed_failsIfEncodingIsInvalid() throws Exception {
+    // Same as an entry of testVectors2, but the last byte is changed from 00 to 01
+    byte[] encoded = TestUtil.hexDecode(
+        "020000000000000000000000000000000000000000000000000000000000000001");
+    assertThrows(GeneralSecurityException.class,
+        () -> EllipticCurves.pointDecode(EllipticCurves.CurveType.NIST_P256,
+            EllipticCurves.PointFormatType.COMPRESSED, encoded));
+  }
+
   /** A class to store a pair of valid Ecdsa signature in IEEE_P1363 and DER format. */
   protected static class EcdsaIeeeDer {
     public String hexIeee;
@@ -534,6 +586,5 @@ public class EllipticCurvesTest {
     assertEquals(0, errors);
   }
 
-  // TODO(b/238096965): Add tests that computeSharedSecret, pointDecode and pointEncode check that
-  // the point is on the curve.
+  // TODO(b/238096965): Add test that computeSharedSecret checks that the point is on the curve.
 }
