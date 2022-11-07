@@ -65,6 +65,7 @@ class KeysetHandle {
 
    private:
     friend class KeysetHandle;
+    friend class KeysetHandleBuilder;
 
     Entry(std::unique_ptr<Key> key, KeyStatus status, int id, bool is_primary)
         : key_(std::move(key)),
@@ -187,6 +188,9 @@ class KeysetHandle {
 
   // TestKeysetHandle::GetKeyset() provides access to get_keyset().
   friend class TestKeysetHandle;
+
+  // KeysetHandleBuilder::Build() needs access to KeysetHandle(Keyset).
+  friend class KeysetHandleBuilder;
 
   // Creates a handle that contains the given keyset.
   explicit KeysetHandle(google::crypto::tink::Keyset keyset);

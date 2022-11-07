@@ -499,6 +499,24 @@ tink_cc_library(
 )
 
 tink_cc_library(
+  NAME keyset_handle_builder
+  SRCS
+    core/keyset_handle_builder.cc
+    keyset_handle_builder.h
+  DEPS
+    tink::core::key
+    tink::core::key_status
+    tink::core::keyset_handle
+    tink::core::parameters
+    absl::status
+    absl::strings
+    absl::optional
+    tink::internal::keyset_handle_builder_entry
+    tink::subtle::random
+    tink::proto::tink_cc_proto
+)
+
+tink_cc_library(
   NAME cleartext_keyset_handle
   SRCS
     core/cleartext_keyset_handle.cc
@@ -831,6 +849,29 @@ tink_cc_test(
     tink::util::protobuf_helper
     tink::util::status
     tink::util::test_keyset_handle
+    tink::util::test_matchers
+    tink::util::test_util
+    tink::proto::tink_cc_proto
+)
+
+tink_cc_test(
+  NAME keyset_handle_builder_test
+  SRCS
+    core/keyset_handle_builder_test.cc
+  DEPS
+    tink::core::insecure_secret_key_access
+    tink::core::key_status
+    tink::core::keyset_handle_builder
+    gmock
+    absl::status
+    absl::strings
+    tink::config::tink_config
+    tink::internal::legacy_proto_key
+    tink::internal::legacy_proto_parameters
+    tink::internal::proto_key_serialization
+    tink::internal::proto_parameters_serialization
+    tink::mac::mac_key_templates
+    tink::util::status
     tink::util::test_matchers
     tink::util::test_util
     tink::proto::tink_cc_proto

@@ -535,6 +535,26 @@ cc_library(
 )
 
 cc_library(
+    name = "keyset_handle_builder",
+    srcs = ["core/keyset_handle_builder.cc"],
+    hdrs = ["keyset_handle_builder.h"],
+    include_prefix = "tink",
+    visibility = ["//visibility:public"],
+    deps = [
+        ":key",
+        ":key_status",
+        ":keyset_handle",
+        ":parameters",
+        "//internal:keyset_handle_builder_entry",
+        "//proto:tink_cc_proto",
+        "//subtle:random",
+        "@com_google_absl//absl/status",
+        "@com_google_absl//absl/strings",
+        "@com_google_absl//absl/types:optional",
+    ],
+)
+
+cc_library(
     name = "cleartext_keyset_handle",
     srcs = ["core/cleartext_keyset_handle.cc"],
     hdrs = ["cleartext_keyset_handle.h"],
@@ -881,6 +901,30 @@ cc_test(
         "//util:protobuf_helper",
         "//util:status",
         "//util:test_keyset_handle",
+        "//util:test_matchers",
+        "//util:test_util",
+        "@com_google_absl//absl/status",
+        "@com_google_absl//absl/strings",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "keyset_handle_builder_test",
+    size = "small",
+    srcs = ["core/keyset_handle_builder_test.cc"],
+    deps = [
+        ":insecure_secret_key_access",
+        ":key_status",
+        ":keyset_handle_builder",
+        "//config:tink_config",
+        "//internal:legacy_proto_key",
+        "//internal:legacy_proto_parameters",
+        "//internal:proto_key_serialization",
+        "//internal:proto_parameters_serialization",
+        "//mac:mac_key_templates",
+        "//proto:tink_cc_proto",
+        "//util:status",
         "//util:test_matchers",
         "//util:test_util",
         "@com_google_absl//absl/status",
