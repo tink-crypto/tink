@@ -20,6 +20,8 @@ set -euo pipefail
 # Tests for Tink CC MAC.
 #############################################################################
 
+: "${TEST_TMPDIR:=$(mktemp -d)}"
+
 readonly CLI="$1"
 readonly KEYSET_FILE="$2"
 readonly DATA_FILE="${TEST_TMPDIR}/example_data.txt"
