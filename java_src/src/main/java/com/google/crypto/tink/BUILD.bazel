@@ -740,6 +740,24 @@ android_library(
 )
 
 java_library(
+    name = "private_key",
+    srcs = ["PrivateKey.java"],
+    deps = [
+        ":key",
+        "//src/main/java/com/google/crypto/tink/annotations:alpha",
+    ],
+)
+
+android_library(
+    name = "private_key-android",
+    srcs = ["PrivateKey.java"],
+    deps = [
+        ":key-android",
+        "//src/main/java/com/google/crypto/tink/annotations:alpha-android",
+    ],
+)
+
+java_library(
     name = "parameters",
     srcs = ["Parameters.java"],
     deps = [

@@ -585,3 +585,77 @@ android_library(
         "@maven//:com_google_protobuf_protobuf_javalite",
     ],
 )
+
+java_library(
+    name = "signature_parameters",
+    srcs = ["SignatureParameters.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink:parameters",
+        "//src/main/java/com/google/crypto/tink/annotations:alpha",
+        "@maven//:com_google_errorprone_error_prone_annotations",
+    ],
+)
+
+java_library(
+    name = "signature_private_key",
+    srcs = ["SignaturePrivateKey.java"],
+    deps = [
+        ":signature_parameters",
+        ":signature_public_key",
+        "//src/main/java/com/google/crypto/tink:key",
+        "//src/main/java/com/google/crypto/tink:private_key",
+        "//src/main/java/com/google/crypto/tink/annotations:alpha",
+        "//src/main/java/com/google/crypto/tink/util:bytes",
+        "@maven//:com_google_code_findbugs_jsr305",
+        "@maven//:com_google_errorprone_error_prone_annotations",
+    ],
+)
+
+java_library(
+    name = "signature_public_key",
+    srcs = ["SignaturePublicKey.java"],
+    deps = [
+        ":signature_parameters",
+        "//src/main/java/com/google/crypto/tink:key",
+        "//src/main/java/com/google/crypto/tink/annotations:alpha",
+        "//src/main/java/com/google/crypto/tink/util:bytes",
+        "@maven//:com_google_errorprone_error_prone_annotations",
+    ],
+)
+
+android_library(
+    name = "signature_parameters-android",
+    srcs = ["SignatureParameters.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink:parameters-android",
+        "//src/main/java/com/google/crypto/tink/annotations:alpha-android",
+        "@maven//:com_google_errorprone_error_prone_annotations",
+    ],
+)
+
+android_library(
+    name = "signature_private_key-android",
+    srcs = ["SignaturePrivateKey.java"],
+    deps = [
+        ":signature_parameters-android",
+        ":signature_public_key-android",
+        "//src/main/java/com/google/crypto/tink:key-android",
+        "//src/main/java/com/google/crypto/tink:private_key-android",
+        "//src/main/java/com/google/crypto/tink/annotations:alpha-android",
+        "//src/main/java/com/google/crypto/tink/util:bytes-android",
+        "@maven//:com_google_code_findbugs_jsr305",
+        "@maven//:com_google_errorprone_error_prone_annotations",
+    ],
+)
+
+android_library(
+    name = "signature_public_key-android",
+    srcs = ["SignaturePublicKey.java"],
+    deps = [
+        ":signature_parameters-android",
+        "//src/main/java/com/google/crypto/tink:key-android",
+        "//src/main/java/com/google/crypto/tink/annotations:alpha-android",
+        "//src/main/java/com/google/crypto/tink/util:bytes-android",
+        "@maven//:com_google_errorprone_error_prone_annotations",
+    ],
+)
