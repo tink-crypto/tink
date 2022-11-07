@@ -568,3 +568,13 @@ java_library(
         "//src/main/java/com/google/crypto/tink:key",
     ],
 )
+
+java_library(
+    name = "elliptic_curves_util",
+    srcs = ["EllipticCurvesUtil.java"],
+)
+
+android_library(
+    name = "elliptic_curves_util-android",
+    srcs = ["EllipticCurvesUtil.java"],
+)

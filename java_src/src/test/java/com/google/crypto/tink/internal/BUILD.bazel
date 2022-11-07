@@ -359,3 +359,14 @@ java_test(
         "@maven//:junit_junit",
     ],
 )
+
+java_test(
+    name = "EllipticCurvesUtilTest",
+    size = "small",
+    srcs = ["EllipticCurvesUtilTest.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink/internal:elliptic_curves_util",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
