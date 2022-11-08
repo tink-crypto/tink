@@ -18,14 +18,9 @@
 
 #include <stdlib.h>
 
-#include <fstream>
 #include <iostream>
 #include <memory>
-#include <ostream>
-#include <sstream>
 #include <string>
-#include <utility>
-#include <vector>
 
 #include "absl/flags/flag.h"
 #include "absl/flags/parse.h"
