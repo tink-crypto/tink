@@ -48,7 +48,57 @@ public final class HmacParametersTest {
   }
 
   @Test
-  public void buildParametersWithoutPrefix() throws Exception {
+  public void buildParametersWithoutSettingVariant_hasNoPrefix() throws Exception {
+    HmacParameters parameters =
+        HmacParameters.builder()
+            .setKeySizeBytes(16)
+            .setTagSizeBytes(21)
+            .setHashType(HmacParameters.HashType.SHA256)
+            .build();
+    assertThat(parameters.getCryptographicTagSizeBytes()).isEqualTo(21);
+    assertThat(parameters.getTotalTagSizeBytes()).isEqualTo(21);
+    assertThat(parameters.getVariant()).isEqualTo(HmacParameters.Variant.NO_PREFIX);
+    assertThat(parameters.hasIdRequirement()).isFalse();
+  }
+
+  @Test
+  public void buildParametersWithoutSettingKeySize_fails() throws Exception {
+    assertThrows(
+        GeneralSecurityException.class,
+        () ->
+            HmacParameters.builder()
+                .setTagSizeBytes(21)
+                .setHashType(HmacParameters.HashType.SHA256)
+                .setVariant(HmacParameters.Variant.NO_PREFIX)
+                .build());
+  }
+
+  @Test
+  public void buildParametersWithoutSettingTagSize_fails() throws Exception {
+   assertThrows(
+        GeneralSecurityException.class,
+        () ->
+            HmacParameters.builder()
+                .setKeySizeBytes(16)
+                .setHashType(HmacParameters.HashType.SHA256)
+                .setVariant(HmacParameters.Variant.NO_PREFIX)
+                .build());
+  }
+
+  @Test
+  public void buildParametersWithoutSettingHashType_fails() throws Exception {
+   assertThrows(
+        GeneralSecurityException.class,
+        () ->
+            HmacParameters.builder()
+                .setKeySizeBytes(16)
+                .setTagSizeBytes(21)
+                .setVariant(HmacParameters.Variant.NO_PREFIX)
+                .build());
+  }
+
+  @Test
+  public void buildParametersWithNoPrefix() throws Exception {
     HmacParameters parameters =
         HmacParameters.builder()
             .setKeySizeBytes(16)
