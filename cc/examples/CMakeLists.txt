@@ -11,7 +11,7 @@ set(CMAKE_BUILD_TYPE Release)
 add_subdirectory(../.. tink)
 
 # Make sure we have bash.
-find_program(BASH_PROGRAM bash)
+find_program(BASH_PROGRAM bash REQUIRED)
 
 # Include path at the base of the examples folder.
 set(TINK_EXAMPLES_INCLUDE_PATH "${CMAKE_SOURCE_DIR}")
