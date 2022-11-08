@@ -79,13 +79,15 @@ SUPPORTED_LANGUAGES_BY_PRIMITIVE = {
     'jwt': ['cc', 'java', 'go', 'python'],
 }
 
-GCP_KEY_URI = ('gcp-kms://projects/tink-test-infrastructure/locations/global/'
-               'keyRings/unit-and-integration-testing/cryptoKeys/aead-key')
+# Needed in golang, because there key URIs are not optional.
+GCP_KEY_URI_PREFIX = (
+    'gcp-kms://projects/tink-test-infrastructure/locations/global/'
+    'keyRings/unit-and-integration-testing/cryptoKeys/')
+AWS_KEY_URI_PREFIX = 'aws-kms://arn:aws:kms:us-east-2:235739564943:key/'
+
 GCP_CREDENTIALS_PATH = os.path.join(
     os.environ['TEST_SRCDIR'] if 'TEST_SRCDIR' in os.environ else '',
     'cross_language_test/testdata/gcp/credential.json')
-AWS_KEY_URI = ('aws-kms://arn:aws:kms:us-east-2:235739564943:key/'
-               '3ee50705-5a82-4f5b-9753-05c4f473922f')
 AWS_CREDENTIALS_INI_PATH = os.path.join(
     os.environ['TEST_SRCDIR'] if 'TEST_SRCDIR' in os.environ else '',
     'cross_language_test/testdata/aws/credentials.ini')
@@ -141,16 +143,25 @@ def _server_path(lang: str) -> str:
 
 def _server_cmd(lang: str, port: int) -> List[str]:
   """Returns the server command."""
+  if lang == 'java':
+    # Java expects a .cred file. Others a .ini file.
+    aws_credentials_path = AWS_CREDENTIALS_CRED_PATH
+  else:
+    aws_credentials_path = AWS_CREDENTIALS_INI_PATH
+
   server_path = _server_path(lang)
   # TODO(b/249015767): Refactor KMS integration to pass credentials via gRPC.
   server_args = [
       '--port',
       '%d' % port, '--gcp_credentials_path', GCP_CREDENTIALS_PATH,
-      '--gcp_key_uri', GCP_KEY_URI, '--aws_credentials_path',
-      # Java expects a .cred file. Others a .ini file.
-      AWS_CREDENTIALS_CRED_PATH if lang == 'java' else AWS_CREDENTIALS_INI_PATH,
-      '--aws_key_uri', AWS_KEY_URI
+      '--aws_credentials_path', aws_credentials_path
   ]
+  if lang == 'go':
+    # in all languages except go, the key URI parameters are optional.
+    # in go, they are required, but can be a prefix.
+    server_args.extend([
+        '--gcp_key_uri', GCP_KEY_URI_PREFIX,
+        '--aws_key_uri', AWS_KEY_URI_PREFIX])
 
   if lang == 'java' and server_path.endswith('.jar'):
     java_path = os.path.join(_root_path(), _JAVA_PATH)

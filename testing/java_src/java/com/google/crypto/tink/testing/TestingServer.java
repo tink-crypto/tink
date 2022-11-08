@@ -74,8 +74,8 @@ public final class TestingServer {
     PrfConfig.register();
     SignatureConfig.register();
     StreamingAeadConfig.register();
-    GcpKmsClient.register(Optional.of(gcpKeyUri), Optional.of(gcpCredentialsPath));
-    AwsKmsClient.register(Optional.of(awsKeyUri), Optional.of(awsCredentialsPath));
+    GcpKmsClient.register(Optional.ofNullable(gcpKeyUri), Optional.of(gcpCredentialsPath));
+    AwsKmsClient.register(Optional.ofNullable(awsKeyUri), Optional.of(awsCredentialsPath));
 
     System.out.println("Start server on port " + port);
     KmsClients.add(new FakeKmsClient());

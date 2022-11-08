@@ -27,9 +27,14 @@ import tink_config
 from util import testing_servers
 from util import utilities
 
+_AWS_KEY_URI = ('aws-kms://arn:aws:kms:us-east-2:235739564943:key/'
+                '3ee50705-5a82-4f5b-9753-05c4f473922f')
+_GCP_KEY_URI = ('gcp-kms://projects/tink-test-infrastructure/locations/global/'
+                'keyRings/unit-and-integration-testing/cryptoKeys/aead-key')
+
 _KMS_KEY_URI = {
-    'GCP': testing_servers.GCP_KEY_URI,
-    'AWS': testing_servers.AWS_KEY_URI,
+    'GCP': _GCP_KEY_URI,
+    'AWS': _AWS_KEY_URI,
 }
 
 
