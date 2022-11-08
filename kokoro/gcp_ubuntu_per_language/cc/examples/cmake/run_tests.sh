@@ -25,7 +25,5 @@ fi
 source ./kokoro/testutils/install_cmake.sh "3.8.0" \
   "330357990d84599f9c1a87f568a724f0fe5de1687c32961dda689d52588a5b24"
 
-export TEST_TMPDIR="$(mktemp -dt examples-cc-cmake.XXXXXX)"
-export TEST_SRCDIR="$(cd ..; pwd)"
-cd cc/examples/helloworld
-./cmake_build_test.sh
+./kokoro/testutils/run_cmake_tests.sh "cc/examples" -DTINK_BUILD_TESTS=OFF
+

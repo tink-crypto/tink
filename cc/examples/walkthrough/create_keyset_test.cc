@@ -36,20 +36,20 @@ using ::crypto::tink::util::StatusOr;
 using ::testing::Not;
 using ::testing::Test;
 
-class CreateAead256GcmSivKeysetTest : public Test {
+class CreateAead128GcmKeysetTest : public Test {
  public:
   void TearDown() override { crypto::tink::Registry::Reset(); }
 };
 
-TEST_F(CreateAead256GcmSivKeysetTest,
-       CreateAead256GcmSivKeysetFailsIfAeadNotRegistered) {
-  EXPECT_THAT(CreateAead256GcmSivKeyset(), Not(IsOk()));
+TEST_F(CreateAead128GcmKeysetTest,
+       CreateAead128GcmKeysetFailsIfAeadNotRegistered) {
+  EXPECT_THAT(CreateAead128GcmKeyset(), Not(IsOk()));
 }
 
-TEST_F(CreateAead256GcmSivKeysetTest, CreateAead256GcmSivKeysetSucceeds) {
+TEST_F(CreateAead128GcmKeysetTest, CreateAead128GcmKeysetSucceeds) {
   ASSERT_THAT(crypto::tink::AeadConfig::Register(), IsOk());
   StatusOr<std::unique_ptr<crypto::tink::KeysetHandle>> keyset_handle =
-      CreateAead256GcmSivKeyset();
+      CreateAead128GcmKeyset();
   ASSERT_THAT(keyset_handle, IsOk());
   constexpr absl::string_view plaintext = "Some plaintext";
   constexpr absl::string_view associated_data = "Some associated_data";

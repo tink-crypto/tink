@@ -29,15 +29,14 @@ using ::crypto::tink::KeysetHandle;
 using ::crypto::tink::util::StatusOr;
 using ::google::crypto::tink::KeyTemplate;
 
-// Creates a keyset with a single AES256-GCM-SIV key and return a handle to
-// it.
+// Creates a keyset with a single AES128-GCM key and return a handle to it.
 //
 // Prerequisites for this example:
 //  - Register AEAD implementations of Tink.
-StatusOr<std::unique_ptr<KeysetHandle>> CreateAead256GcmSivKeyset() {
+StatusOr<std::unique_ptr<KeysetHandle>> CreateAead128GcmKeyset() {
   // Tink provides pre-baked templetes. For example, we generate a key template
-  // for AES256-GCM-SIV.
-  KeyTemplate key_template = crypto::tink::AeadKeyTemplates::Aes256GcmSiv();
+  // for AES128-GCM.
+  KeyTemplate key_template = crypto::tink::AeadKeyTemplates::Aes128Gcm();
   // This will generate a new keyset with only *one* key and return a keyset
   // handle to it.
   return KeysetHandle::GenerateNew(key_template);

@@ -8,7 +8,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_BUILD_TYPE Release)
 
 # Import Tink as an in-tree dependency.
-add_subdirectory(.. tink)
+add_subdirectory(../.. tink)
 
 # Make sure we have bash.
 find_program(BASH_PROGRAM bash)
