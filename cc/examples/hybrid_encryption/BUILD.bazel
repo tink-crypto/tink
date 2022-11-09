@@ -2,18 +2,9 @@ package(default_visibility = ["//visibility:public"])
 
 licenses(["notice"])
 
-filegroup(
-    name = "hybrid_test_keyset",
-    srcs = [
-        "hybrid_test_private_keyset.json",
-        "hybrid_test_public_keyset.json",
-    ],
-)
-
 cc_binary(
     name = "hybrid_cli",
     srcs = ["hybrid_cli.cc"],
-    data = [":hybrid_test_keyset"],
     deps = [
         "//util:util",
         "@com_google_absl//absl/flags:flag",
@@ -35,10 +26,10 @@ sh_test(
     srcs = ["hybrid_cli_test.sh"],
     args = [
         "$(rootpath :hybrid_cli)",
-        "$(rootpaths :hybrid_test_keyset)",
+        "$(rootpaths //hybrid_encryption/testdata:hpke_test_keyset)",
     ],
     data = [
         ":hybrid_cli",
-        ":hybrid_test_keyset",
+        "//hybrid_encryption/testdata:hpke_test_keyset",
     ],
 )

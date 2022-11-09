@@ -19,7 +19,7 @@ set(TINK_EXAMPLES_INCLUDE_PATH "${CMAKE_SOURCE_DIR}")
 enable_testing()
 
 add_subdirectory(aead)
+add_subdirectory(hybrid_encryption)
 add_subdirectory(mac)
 add_subdirectory(util)
 add_subdirectory(walkthrough)
-

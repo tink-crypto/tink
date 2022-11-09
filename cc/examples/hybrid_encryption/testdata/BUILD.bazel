@@ -1,0 +1,19 @@
+package(default_visibility = ["//visibility:public"])
+
+licenses(["notice"])
+
+filegroup(
+    name = "hpke_test_keyset",
+    srcs = [
+        "hpke_test_private_keyset.json",
+        "hpke_test_public_keyset.json",
+    ],
+)
+
+filegroup(
+    name = "hybrid_test_keyset",
+    srcs = [
+        "hybrid_test_private_keyset.json",
+        "hybrid_test_public_keyset.json",
+    ],
+)

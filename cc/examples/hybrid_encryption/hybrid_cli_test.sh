@@ -20,6 +20,8 @@ set -euo pipefail
 # Tests for Tink C++ hybrid encryption example.
 #############################################################################
 
+: "${TEST_TMPDIR:=$(mktemp -d)}"
+
 readonly CLI="$1"
 readonly PRIVATE_KEYSET_FILE="$2"
 readonly PUBLIC_KEYSET_FILE="$3"
