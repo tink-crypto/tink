@@ -27,7 +27,7 @@
 #include "absl/flags/parse.h"
 #include "absl/strings/string_view.h"
 #include "util/util.h"
-#ifndef TINK_USE_OPENSSL
+#ifndef TINK_EXAMPLES_EXCLUDE_HPKE
 #include "tink/hybrid/hpke_config.h"
 #endif
 #include "tink/hybrid/hybrid_config.h"
@@ -90,7 +90,7 @@ Status HybridCli(absl::string_view mode, const std::string& keyset_filename,
                absl::string_view context_info) {
   Status result = crypto::tink::HybridConfig::Register();
   if (!result.ok()) return result;
-#ifndef TINK_USE_OPENSSL
+#ifndef TINK_EXAMPLES_EXCLUDE_HPKE
   // HPKE isn't supported when using OpenSSL as a backend.
   result = crypto::tink::RegisterHpke();
   if (!result.ok()) return result;

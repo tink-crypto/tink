@@ -6,12 +6,9 @@ target_link_libraries(hybrid_cli
   tink::static
   absl::flags_parse
   util)
-
-if (TINK_USE_SYSTEM_OPENSSL)
-  # Tink with OpenSSL doesn't support HPKE. We use this define to allow ecluding
-  # HPKE initialization.
-  target_compile_definitions(hybrid_cli PRIVATE TINK_USE_OPENSSL)
-endif()
+# Tink CMake's configuration doesn't expose tink::core::hpke_config. Remove
+# HPKE from this example when building with CMake.
+target_compile_definitions(hybrid_cli PRIVATE TINK_EXAMPLES_EXCLUDE_HPKE)
 
 add_test(
   NAME hybrid_cli_test
