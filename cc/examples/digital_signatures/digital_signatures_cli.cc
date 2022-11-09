@@ -13,246 +13,138 @@
 // limitations under the License.
 //
 ///////////////////////////////////////////////////////////////////////////////
-
-// A command-line utility for generating Digital Signatures keys, and creating
-// and verifying digital signatures.
-//
-// The first argument is the operation and it should be one of the following:
-// gen-private-key get-public-key sign verify.
-// Additional arguments depend on the operation.
-//
-// gen-private-key
-//   Generates a new private keyset using the RsaSsaPkcs13072Sha256F4 template.
-//   It requires 1 additional argument:
-//     output-file: name of the file for the resulting output
-//
-// get-public-key
-//   Extracts a public keyset associated with the given private keyset.
-//   It requires 2 additional arguments:
-//     private-keyset-file: name of the file with the private keyset
-//     output-file: name of the file for the resulting output
-//
-// sign
-//   Signs the message using the given private keyset.
-//   It requires 3 additional arguments:
-//     private-keyset-file: name of the file with the private keyset
-//     message-file: name of the file with the message
-//     output-file: name of the file for the resulting output
-//
-// verify
-//   Verifies the signature of the message using the given public keyset.
-//   It requires 4 additional arguments:
-//     public-keyset-file: name of the file with the public keyset
-//     message-file: name of the file with the message
-//     signature-file: name of the file with the signature
-//     output-file: name of the file for the resulting output (valid/invalid)
-
+// [START digital-signature-example]
+// A utility for signing and verifying files using digital signatures.
 #include <iostream>
+#include <memory>
+#include <ostream>
 #include <string>
 #include <utility>
 
+#include "absl/flags/flag.h"
+#include "absl/flags/parse.h"
+#include "util/util.h"
+#include "tink/keyset_handle.h"
 #include "tink/public_key_sign.h"
 #include "tink/public_key_verify.h"
-#include "tink/signature/signature_key_templates.h"
-#include "digital_signatures/util.h"
+#include "tink/signature/signature_config.h"
+#include "tink/util/status.h"
 
-// Prints usage info.
-void PrintUsageInfo() {
-  std::clog << "Usage: operation arguments\n"
-            << "where operation is one of the following:\n"
-            << "  gen-private-key get-public-key sign verify\n"
-            << "and, depending on the operation, arguments are:\n"
-            << "  gen-private-key: output-file\n"
-            << "  get-public-key: private-keyset-file output-file\n"
-            << "  sign: private-keyset-file message-file output-file\n"
-            << "  verify: public-keyset-file message-file signature-file "
-            << "output-file" << std::endl;
-}
+ABSL_FLAG(std::string, keyset_filename, "", "Keyset file in JSON format");
+ABSL_FLAG(std::string, mode, "", "Mode of operation (sign|verify)");
+ABSL_FLAG(std::string, input_filename, "", "Filename to operate on");
+ABSL_FLAG(std::string, signature_filename, "", "Path to the signature file");
 
-// Generates a new private keyset using the RsaSsaPkcs13072Sha256F4 template
-// and writes it to the output file.
-void GeneratePrivateKey(const std::string& output_filename) {
-  std::clog << "Generating a new private keyset.." << std::endl;
+namespace {
 
-  auto key_template =
-      crypto::tink::SignatureKeyTemplates::RsaSsaPkcs13072Sha256F4();
-  auto new_keyset_handle_result =
-      crypto::tink::KeysetHandle::GenerateNew(key_template);
-  if (!new_keyset_handle_result.ok()) {
-    std::clog << "Generating new keyset failed: "
-              << new_keyset_handle_result.status().message() << std::endl;
+using ::crypto::tink::KeysetHandle;
+using ::crypto::tink::PublicKeySign;
+using ::crypto::tink::PublicKeyVerify;
+using ::crypto::tink::util::Status;
+using ::crypto::tink::util::StatusOr;
+
+constexpr absl::string_view kSign = "sign";
+constexpr absl::string_view kVerify = "verify";
+
+// [START_EXCLUDE]
+void ValidateParams() {
+  if (absl::GetFlag(FLAGS_mode).empty() ||
+      (absl::GetFlag(FLAGS_mode) != kSign &&
+       absl::GetFlag(FLAGS_mode) != kVerify)) {
+    std::cerr << "ERROR: Invalid mode; must be `" << kSign << "` or `"
+              << kVerify << "`" << std::endl;
     exit(1);
   }
-  auto keyset_handle = std::move(new_keyset_handle_result.value());
 
-  std::clog << "Writing the keyset to file " << output_filename
-            << "..." << std::endl;
-
-  Util::WriteKeyset(keyset_handle, output_filename);
-}
-
-// Extracts a public keyset associated with the given private keyset
-// and writes it to the output file.
-void ExtractPublicKey(const std::string& private_keyset_filename,
-                      const std::string& output_filename) {
-  std::clog << "Extracting a public keyset associated with the private "
-            << "keyset from file " << private_keyset_filename << "..."
-            << std::endl;
-
-  auto private_keyset_handle = Util::ReadKeyset(private_keyset_filename);
-
-  auto new_keyset_handle_result =
-      private_keyset_handle->GetPublicKeysetHandle();
-  if (!new_keyset_handle_result.ok()) {
-    std::clog << "Getting the keyset failed: "
-              << new_keyset_handle_result.status().message() << std::endl;
+  if (absl::GetFlag(FLAGS_keyset_filename).empty()) {
+    std::cerr << "ERROR: Keyset file must be specified" << std::endl;
     exit(1);
   }
-  auto public_keyset_handle = std::move(new_keyset_handle_result.value());
 
-  std::clog << "Writing the keyset to file " << output_filename
-            << "..." << std::endl;
-
-  Util::WriteKeyset(public_keyset_handle, output_filename);
-}
-
-// Signs the message using the given private keyset
-// and writes the signature to the output file.
-void Sign(const std::string& keyset_filename,
-          const std::string& message_filename,
-          const std::string& output_filename) {
-  auto keyset_handle = Util::ReadKeyset(keyset_filename);
-
-  auto primitive_result =
-      keyset_handle->GetPrimitive<crypto::tink::PublicKeySign>();
-  if (!primitive_result.ok()) {
-    std::clog << "Getting PublicKeySign-primitive from the factory failed: "
-              << primitive_result.status().message() << std::endl;
+  if (absl::GetFlag(FLAGS_input_filename).empty()) {
+    std::cerr << "ERROR: Input file must be specified" << std::endl;
     exit(1);
   }
-  auto public_key_sign = std::move(primitive_result.value());
 
-  std::clog << "Signing message from file " << message_filename
-            << " using private keyset from file " << keyset_filename
-            << "..." << std::endl;
-
-  std::string message = Util::Read(message_filename);
-
-  auto sign_result = public_key_sign->Sign(message);
-  if (!sign_result.ok()) {
-    std::clog << "Error while signing the message: "
-              << sign_result.status().message() << std::endl;
+  if (absl::GetFlag(FLAGS_signature_filename).empty()) {
+    std::cerr << "ERROR: Signature file must be specified" << std::endl;
     exit(1);
   }
-  std::string signature = sign_result.value();
-
-  std::clog << "Writing the resulting signature to file " << output_filename
-            << "..." << std::endl;
-
-  Util::Write(signature, output_filename);
 }
+// [END_EXCLUDE]
+}  // namespace
 
-// Verifies the signature of the message using the given public keyset
-// and writes the result to the output file.
-void Verify(const std::string& keyset_filename,
-            const std::string& message_filename,
-            const std::string& signature_filename,
-            const std::string& output_filename) {
-  auto keyset_handle = Util::ReadKeyset(keyset_filename);
+namespace tink_cc_examples {
 
-  auto primitive_result =
-      keyset_handle->GetPrimitive<crypto::tink::PublicKeyVerify>();
-  if (!primitive_result.ok()) {
-    std::clog << "Getting PublicKeyVerify-primitive from the factory "
-              << "failed: " << primitive_result.status().message() << std::endl;
-    exit(1);
+// Digital signature example CLI implementation.
+Status DigitalSignatureCli(absl::string_view mode,
+                           const std::string& keyset_filename,
+                           const std::string& input_filename,
+                           const std::string& signature_filename) {
+  Status result = crypto::tink::SignatureConfig::Register();
+  if (!result.ok()) return result;
+
+  // Read the keyset from file.
+  StatusOr<std::unique_ptr<KeysetHandle>> keyset_handle =
+      ReadJsonCleartextKeyset(keyset_filename);
+  if (!keyset_handle.ok()) return keyset_handle.status();
+
+  // Read the input.
+  StatusOr<std::string> input_file_content = ReadFile(input_filename);
+  if (!input_file_content.ok()) return input_file_content.status();
+
+  if (mode == kSign) {
+    StatusOr<std::unique_ptr<PublicKeySign>> public_key_sign =
+        (*keyset_handle)->GetPrimitive<PublicKeySign>();
+    if (!public_key_sign.ok()) return public_key_sign.status();
+
+    StatusOr<std::string> signature =
+        (*public_key_sign)->Sign(*input_file_content);
+    if (!signature.ok()) return signature.status();
+
+    return WriteToFile(*signature, signature_filename);
+  } else {  // mode == kVerify
+    StatusOr<std::unique_ptr<PublicKeyVerify>> public_key_verify =
+        (*keyset_handle)->GetPrimitive<PublicKeyVerify>();
+    if (!public_key_verify.ok()) return public_key_verify.status();
+
+    // Read the signature.
+    StatusOr<std::string> signature_file_content = ReadFile(signature_filename);
+    if (!signature_file_content.ok()) return signature_file_content.status();
+
+    return (*public_key_verify)
+        ->Verify(*signature_file_content, *input_file_content);
   }
-  auto public_key_verify = std::move(primitive_result.value());
-
-  std::clog << "Verifying signature from file " << signature_filename
-            << " of the message from file " << message_filename
-            << " using public keyset from file " << keyset_filename
-            << "..." << std::endl;
-
-  std::string signature = Util::Read(signature_filename);
-  std::string message = Util::Read(message_filename);
-
-  std::string result;
-  auto verify_status = public_key_verify->Verify(signature, message);
-  if (!verify_status.ok()) {
-    std::clog << "Error while verifying the signature: "
-              << verify_status.message() << std::endl;
-    result = "invalid";
-  } else {
-    result = "valid";
-  }
-
-  std::clog << "Writing the result to file " << output_filename
-            << "..." << std::endl;
-
-  Util::Write(result, output_filename);
 }
+}  // namespace tink_cc_examples
 
 int main(int argc, char** argv) {
-  if (argc == 1) {
-    PrintUsageInfo();
-    exit(1);
+  absl::ParseCommandLine(argc, argv);
+
+  ValidateParams();
+
+  std::string mode = absl::GetFlag(FLAGS_mode);
+  std::string keyset_filename = absl::GetFlag(FLAGS_keyset_filename);
+  std::string input_filename = absl::GetFlag(FLAGS_input_filename);
+  std::string signature_filename = absl::GetFlag(FLAGS_signature_filename);
+
+  std::clog << "Using keyset in " << keyset_filename << " to " << mode;
+  if (mode == kSign) {
+    std::clog << " file " << input_filename
+              << "; the resulting signature is written to "
+              << signature_filename << std::endl;
+  } else {  // mode == kVerify
+    std::clog << " the signature in " << signature_filename
+              << " over the content of " << input_filename << std::endl;
   }
 
-  Util::InitTink();
-
-  std::string operation = argv[1];
-
-  if (operation == "gen-private-key") {
-    if (argc != 3) {
-      PrintUsageInfo();
-      exit(1);
-    }
-
-    std::string output_filename = argv[2];
-
-    GeneratePrivateKey(output_filename);
-  } else if (operation == "get-public-key") {
-    if (argc != 4) {
-      PrintUsageInfo();
-      exit(1);
-    }
-
-    std::string private_keyset_filename = argv[2];
-    std::string output_filename = argv[3];
-
-    ExtractPublicKey(private_keyset_filename, output_filename);
-  } else if (operation == "sign") {
-    if (argc != 5) {
-      PrintUsageInfo();
-      exit(1);
-    }
-
-    std::string keyset_filename = argv[2];
-    std::string message_filename = argv[3];
-    std::string output_filename = argv[4];
-
-    Sign(keyset_filename, message_filename, output_filename);
-  } else if (operation == "verify") {
-    if (argc != 6) {
-      PrintUsageInfo();
-      exit(1);
-    }
-
-    std::string keyset_filename = argv[2];
-    std::string message_filename = argv[3];
-    std::string signature_filename = argv[4];
-    std::string output_filename = argv[5];
-
-    Verify(keyset_filename, message_filename, signature_filename,
-           output_filename);
-  } else {
-    std::clog << "Unknown operation. Supported operations are: "
-              << "gen-private-key get-public-key sign verify" << std::endl;
+  Status result = tink_cc_examples::DigitalSignatureCli(
+      mode, keyset_filename, input_filename, signature_filename);
+  if (!result.ok()) {
+    std::cerr << result.message() << std::endl;
     exit(1);
   }
-
-  std::clog << "Done!" << std::endl;
 
   return 0;
 }
+// [END digital-signature-example]

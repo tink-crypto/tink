@@ -14,114 +14,160 @@
 # limitations under the License.
 ################################################################################
 
+set -euo pipefail
 
 #############################################################################
-#### Tests for digital_signatures_cli binary.
-
-SIGNATURE_CLI="$1"
-
-PRIVATE_KEYSET_FILE="$TEST_TMPDIR/private_keyset.bin"
-PUBLIC_KEYSET_FILE="$TEST_TMPDIR/public_keyset.bin"
-MESSAGE_FILE="$TEST_TMPDIR/message.txt"
-SIGNATURE_FILE="$TEST_TMPDIR/signature.bin"
-RESULT_FILE="$TEST_TMPDIR/result.txt"
-
-OTHER_PRIVATE_KEYSET_FILE="$TEST_TMPDIR/other_private_keyset.bin"
-OTHER_PUBLIC_KEYSET_FILE="$TEST_TMPDIR/other_public_keyset.bin"
-OTHER_MESSAGE_FILE="$TEST_TMPDIR/other_message.txt"
-
-echo "This is a message." > $MESSAGE_FILE
-echo "This is a different message." > $OTHER_MESSAGE_FILE
-
+# Tests for Tink C++ digital signature example.
 #############################################################################
-#### Helper function that checks if values are equal.
 
-assert_equal() {
-  if [ "$1" == "$2" ]; then
-    echo "+++ Success: values are equal."
-  else
-    echo "--- Failure: values are different. Expected: [$1], actual: [$2]."
-    exit 1
+: "${TEST_TMPDIR:=$(mktemp -d)}"
+
+readonly CLI="$1"
+readonly PRIVATE_KEYSET_FILE="$2"
+readonly PUBLIC_KEYSET_FILE="$3"
+readonly MESSAGE_FILE="${TEST_TMPDIR}/message.txt"
+readonly SIGNATURE_FILE="${TEST_TMPDIR}/signature.txt"
+readonly TEST_NAME="TinkCcExamplesDigitalSignaturesTest"
+
+echo "This is some message to be signed." > "${MESSAGE_FILE}"
+
+#######################################
+# A helper function for getting the return code of a command that may fail.
+# Temporarily disables error safety and stores return value in TEST_STATUS.
+#
+# Globals:
+#   TEST_STATUS
+# Arguments:
+#   Command to execute.
+#######################################
+test_command() {
+  set +e
+  "$@"
+  TEST_STATUS=$?
+  set -e
+}
+
+#######################################
+# Asserts that the outcome of the latest test command was the expected one.
+#
+# If not, it terminates the test execution.
+#
+# Globals:
+#   TEST_STATUS
+#   TEST_NAME
+#   TEST_CASE
+# Arguments:
+#   expected_outcome: The expected outcome.
+#######################################
+_assert_test_command_outcome() {
+  expected_outcome="$1"
+  if (( TEST_STATUS != expected_outcome )); then
+      echo "[   FAILED ] ${TEST_NAME}.${TEST_CASE}"
+      exit 1
   fi
 }
 
-#############################################################################
-#### All good, everything should work.
-test_name="all_good"
-echo "+++ Starting test $test_name..."
+assert_command_succeeded() {
+  _assert_test_command_outcome 0
+}
 
-#### Generate a private key and get a public key.
-$SIGNATURE_CLI gen-private-key $PRIVATE_KEYSET_FILE || exit 1
-$SIGNATURE_CLI get-public-key $PRIVATE_KEYSET_FILE $PUBLIC_KEYSET_FILE || exit 1
+assert_command_failed() {
+  _assert_test_command_outcome 1
+}
 
-#### Sign the message.
-$SIGNATURE_CLI sign $PRIVATE_KEYSET_FILE $MESSAGE_FILE $SIGNATURE_FILE || exit 1
+#######################################
+# Starts a new test case; records the test case name to TEST_CASE.
+#
+# Globals:
+#   TEST_NAME
+#   TEST_CASE
+# Arguments:
+#   test_case: The name of the test case.
+#######################################
+start_test_case() {
+  TEST_CASE="$1"
+  echo "[ RUN      ] ${TEST_NAME}.${TEST_CASE}"
+}
 
-#### Verify the signature.
-$SIGNATURE_CLI verify $PUBLIC_KEYSET_FILE $MESSAGE_FILE $SIGNATURE_FILE $RESULT_FILE || exit 1
-
-#### Check that the signature is valid.
-RESULT=$(<$RESULT_FILE)
-assert_equal "valid" "$RESULT"
-
-#############################################################################
-#### Bad private key when getting the public key.
-test_name="get_public_key_with_bad_private_key"
-echo "+++ Starting test $test_name..."
-
-echo "abcd" >> $PRIVATE_KEYSET_FILE
-$SIGNATURE_CLI get-public-key $PRIVATE_KEYSET_FILE $PUBLIC_KEYSET_FILE
-
-EXIT_VALUE="$?"
-assert_equal 1 "$EXIT_VALUE"
-
-#############################################################################
-#### Different public key when verifying a signature.
-test_name="verify_with_different_public_key"
-echo "+++ Starting test $test_name..."
-
-$SIGNATURE_CLI gen-private-key $PRIVATE_KEYSET_FILE || exit 1
-$SIGNATURE_CLI gen-private-key $OTHER_PRIVATE_KEYSET_FILE || exit 1
-$SIGNATURE_CLI get-public-key $OTHER_PRIVATE_KEYSET_FILE $OTHER_PUBLIC_KEYSET_FILE || exit 1
-$SIGNATURE_CLI sign $PRIVATE_KEYSET_FILE $MESSAGE_FILE $SIGNATURE_FILE || exit 1
-$SIGNATURE_CLI verify $OTHER_PUBLIC_KEYSET_FILE $MESSAGE_FILE $SIGNATURE_FILE $RESULT_FILE || exit 1
-
-RESULT=$(<$RESULT_FILE)
-assert_equal "invalid" "$RESULT"
+#######################################
+# Ends a test case printing a success message.
+#
+# Globals:
+#   TEST_NAME
+#   TEST_CASE
+#######################################
+end_test_case() {
+  echo "[       OK ] ${TEST_NAME}.${TEST_CASE}"
+}
 
 #############################################################################
-#### Different message when verifying a signature.
-test_name="verify_with_different_message"
-echo "+++ Starting test $test_name..."
 
-$SIGNATURE_CLI gen-private-key $PRIVATE_KEYSET_FILE || exit 1
-$SIGNATURE_CLI get-public-key $PRIVATE_KEYSET_FILE $PUBLIC_KEYSET_FILE || exit 1
-$SIGNATURE_CLI sign $PRIVATE_KEYSET_FILE $MESSAGE_FILE $SIGNATURE_FILE || exit 1
-$SIGNATURE_CLI verify $PUBLIC_KEYSET_FILE $OTHER_MESSAGE_FILE $SIGNATURE_FILE $RESULT_FILE || exit 1
+start_test_case "sign_verify_all_good"
 
-RESULT=$(<$RESULT_FILE)
-assert_equal "invalid" "$RESULT"
+# Sign.
+test_command "${CLI}" \
+  --mode sign \
+  --keyset_filename "${PRIVATE_KEYSET_FILE}" \
+  --input_filename "${MESSAGE_FILE}" \
+  --signature_filename "${SIGNATURE_FILE}"
+assert_command_succeeded
 
-#############################################################################
-#### Sign with wrong key.
-test_name="sign_with_wrong_key"
-echo "+++ Starting test $test_name..."
+# Verify.
+test_command "${CLI}" \
+  --mode verify \
+  --keyset_filename "${PUBLIC_KEYSET_FILE}" \
+  --input_filename "${MESSAGE_FILE}" \
+  --signature_filename "${SIGNATURE_FILE}"
+assert_command_succeeded
 
-$SIGNATURE_CLI gen-private-key $PRIVATE_KEYSET_FILE || exit 1
-$SIGNATURE_CLI get-public-key $PRIVATE_KEYSET_FILE $PUBLIC_KEYSET_FILE || exit 1
-$SIGNATURE_CLI sign $PUBLIC_KEYSET_FILE $MESSAGE_FILE $SIGNATURE_FILE
-
-EXIT_VALUE="$?"
-assert_equal 1 "$EXIT_VALUE"
+end_test_case
 
 #############################################################################
-#### Verify with wrong key.
-test_name="verify_with_wrong_key"
-echo "+++ Starting test $test_name..."
 
-$SIGNATURE_CLI gen-private-key $PRIVATE_KEYSET_FILE || exit 1
-$SIGNATURE_CLI sign $PRIVATE_KEYSET_FILE $MESSAGE_FILE $SIGNATURE_FILE || exit 1
-$SIGNATURE_CLI verify $PRIVATE_KEYSET_FILE $MESSAGE_FILE $SIGNATURE_FILE $RESULT_FILE
+start_test_case "verify_fails_with_modified_signature"
 
-EXIT_VALUE="$?"
-assert_equal 1 "$EXIT_VALUE"
+# Sign.
+test_command "${CLI}" \
+  --mode sign \
+  --keyset_filename "${PRIVATE_KEYSET_FILE}" \
+  --input_filename "${MESSAGE_FILE}" \
+  --signature_filename "${SIGNATURE_FILE}"
+assert_command_succeeded
+
+# Modify signature.
+echo "modified" >> "${SIGNATURE_FILE}"
+
+# Verify.
+test_command "${CLI}" \
+  --mode verify \
+  --keyset_filename "${PUBLIC_KEYSET_FILE}" \
+  --input_filename "${MESSAGE_FILE}" \
+  --signature_filename "${SIGNATURE_FILE}"
+assert_command_failed
+
+end_test_case
+
+#############################################################################
+
+start_test_case "verify_fails_with_modified_message"
+
+# Sign.
+test_command "${CLI}" \
+  --mode sign \
+  --keyset_filename "${PRIVATE_KEYSET_FILE}" \
+  --input_filename "${MESSAGE_FILE}" \
+  --signature_filename "${SIGNATURE_FILE}"
+assert_command_succeeded
+
+# Modify message.
+echo "modified" >> "${MESSAGE_FILE}"
+
+# Verify.
+test_command "${CLI}" \
+  --mode verify \
+  --keyset_filename "${PUBLIC_KEYSET_FILE}" \
+  --input_filename "${MESSAGE_FILE}" \
+  --signature_filename "${SIGNATURE_FILE}"
+assert_command_failed
+
+end_test_case

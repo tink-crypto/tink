@@ -2,19 +2,11 @@ package(default_visibility = ["//visibility:public"])
 
 licenses(["notice"])
 
-cc_library(
-    name = "util",
-    srcs = ["util.cc"],
-    hdrs = ["util.h"],
-    deps = [
-        "@tink_cc//:binary_keyset_reader",
-        "@tink_cc//:binary_keyset_writer",
-        "@tink_cc//:cleartext_keyset_handle",
-        "@tink_cc//:keyset_handle",
-        "@tink_cc//:keyset_reader",
-        "@tink_cc//:keyset_writer",
-        "@tink_cc//config:tink_config",
-        "@tink_cc//util:status",
+filegroup(
+    name = "digital_signature_keyset",
+    srcs = [
+        "digital_signature_private_keyset.json",
+        "digital_signature_public_keyset.json",
     ],
 )
 
@@ -22,10 +14,14 @@ cc_binary(
     name = "digital_signatures_cli",
     srcs = ["digital_signatures_cli.cc"],
     deps = [
-        ":util",
+        "//util:util",
+        "@com_google_absl//absl/flags:flag",
+        "@com_google_absl//absl/flags:parse",
+        "@tink_cc//:keyset_handle",
         "@tink_cc//:public_key_sign",
         "@tink_cc//:public_key_verify",
-        "@tink_cc//signature:signature_key_templates",
+        "@tink_cc//signature:signature_config",
+        "@tink_cc//util:status",
     ],
 )
 
@@ -35,6 +31,10 @@ sh_test(
     srcs = ["digital_signatures_cli_test.sh"],
     args = [
         "$(rootpath :digital_signatures_cli)",
+        "$(rootpaths :digital_signature_keyset)",
     ],
-    data = [":digital_signatures_cli"],
+    data = [
+        ":digital_signature_keyset",
+        ":digital_signatures_cli",
+    ],
 )
