@@ -92,14 +92,14 @@ var activeTableTab = "activeTableTab";
 <!-- ======== START OF CLASS DATA ======== -->
 <div class="header">
 <div class="subTitle">com.google.crypto.tink.subtle</div>
-<h2 title="Class EngineFactory" class="title">Class EngineFactory&lt;T_WRAPPER extends <a href="../../../../../com/google/crypto/tink/subtle/EngineWrapper.html" title="interface in com.google.crypto.tink.subtle">EngineWrapper</a>&lt;T_ENGINE&gt;,T_ENGINE&gt;</h2>
+<h2 title="Class EngineFactory" class="title">Class EngineFactory&lt;T_WRAPPER extends <a href="../../../../../com/google/crypto/tink/subtle/EngineWrapper.html" title="interface in com.google.crypto.tink.subtle">EngineWrapper</a>&lt;JcePrimitiveT&gt;,JcePrimitiveT&gt;</h2>
 </div>
 <div class="contentContainer">
 <ul class="inheritance">
 <li><a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">java.lang.Object</a></li>
 <li>
 <ul class="inheritance">
-<li>com.google.crypto.tink.subtle.EngineFactory&lt;T_WRAPPER,T_ENGINE&gt;</li>
+<li>com.google.crypto.tink.subtle.EngineFactory&lt;T_WRAPPER,JcePrimitiveT&gt;</li>
 </ul>
 </li>
 </ul>
@@ -108,7 +108,7 @@ var activeTableTab = "activeTableTab";
 <li class="blockList">
 <hr>
 <br>
-<pre>public final class <span class="typeNameLabel">EngineFactory&lt;T_WRAPPER extends <a href="../../../../../com/google/crypto/tink/subtle/EngineWrapper.html" title="interface in com.google.crypto.tink.subtle">EngineWrapper</a>&lt;T_ENGINE&gt;,T_ENGINE&gt;</span>
+<pre>public final class <span class="typeNameLabel">EngineFactory&lt;T_WRAPPER extends <a href="../../../../../com/google/crypto/tink/subtle/EngineWrapper.html" title="interface in com.google.crypto.tink.subtle">EngineWrapper</a>&lt;JcePrimitiveT&gt;,JcePrimitiveT&gt;</span>
 extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a></pre>
 <div class="block">A factory that returns JCE engines, using pre-specified j.security.Providers.
 
@@ -199,7 +199,7 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 <th class="colLast" scope="col">Method and Description</th>
 </tr>
 <tr id="i0" class="altColor">
-<td class="colFirst"><code><a href="../../../../../com/google/crypto/tink/subtle/EngineFactory.html" title="type parameter in EngineFactory">T_ENGINE</a></code></td>
+<td class="colFirst"><code><a href="../../../../../com/google/crypto/tink/subtle/EngineFactory.html" title="type parameter in EngineFactory">JcePrimitiveT</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/subtle/EngineFactory.html#getInstance-java.lang.String-">getInstance</a></span>(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;algorithm)</code>&nbsp;</td>
 </tr>
 <tr id="i1" class="rowColor">
@@ -336,8 +336,8 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 <ul class="blockListLast">
 <li class="blockList">
 <h4>getInstance</h4>
-<pre>public&nbsp;<a href="../../../../../com/google/crypto/tink/subtle/EngineFactory.html" title="type parameter in EngineFactory">T_ENGINE</a>&nbsp;getInstance(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;algorithm)
-                     throws <a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
+<pre>public&nbsp;<a href="../../../../../com/google/crypto/tink/subtle/EngineFactory.html" title="type parameter in EngineFactory">JcePrimitiveT</a>&nbsp;getInstance(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;algorithm)
+                          throws <a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
 <dl>
 <dt><span class="throwsLabel">Throws:</span></dt>
 <dd><code><a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></code></dd>

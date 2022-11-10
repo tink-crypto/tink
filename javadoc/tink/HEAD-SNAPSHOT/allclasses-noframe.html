@@ -221,6 +221,7 @@
 <li><a href="com/google/crypto/tink/subtle/EllipticCurves.CurveType.html" title="enum in com.google.crypto.tink.subtle">EllipticCurves.CurveType</a></li>
 <li><a href="com/google/crypto/tink/subtle/EllipticCurves.EcdsaEncoding.html" title="enum in com.google.crypto.tink.subtle">EllipticCurves.EcdsaEncoding</a></li>
 <li><a href="com/google/crypto/tink/subtle/EllipticCurves.PointFormatType.html" title="enum in com.google.crypto.tink.subtle">EllipticCurves.PointFormatType</a></li>
+<li><a href="com/google/crypto/tink/internal/EllipticCurvesUtil.html" title="class in com.google.crypto.tink.internal">EllipticCurvesUtil</a></li>
 <li><a href="com/google/crypto/tink/proto/EllipticCurveType.html" title="enum in com.google.crypto.tink.proto">EllipticCurveType</a></li>
 <li><a href="com/google/crypto/tink/proto/EncryptedKeyset.html" title="class in com.google.crypto.tink.proto">EncryptedKeyset</a></li>
 <li><a href="com/google/crypto/tink/proto/EncryptedKeyset.Builder.html" title="class in com.google.crypto.tink.proto">EncryptedKeyset.Builder</a></li>
@@ -476,6 +477,7 @@
 <li><a href="com/google/crypto/tink/monitoring/MonitoringKeysetInfo.Entry.html" title="class in com.google.crypto.tink.monitoring">MonitoringKeysetInfo.Entry</a></li>
 <li><a href="com/google/crypto/tink/internal/MonitoringUtil.html" title="class in com.google.crypto.tink.internal">MonitoringUtil</a></li>
 <li><a href="com/google/crypto/tink/internal/MutableMonitoringRegistry.html" title="class in com.google.crypto.tink.internal">MutableMonitoringRegistry</a></li>
+<li><a href="com/google/crypto/tink/internal/MutablePrimitiveRegistry.html" title="class in com.google.crypto.tink.internal">MutablePrimitiveRegistry</a></li>
 <li><a href="com/google/crypto/tink/internal/MutableSerializationRegistry.html" title="class in com.google.crypto.tink.internal">MutableSerializationRegistry</a></li>
 <li><a href="com/google/crypto/tink/NoSecretKeysetHandle.html" title="class in com.google.crypto.tink">NoSecretKeysetHandle</a></li>
 <li><a href="com/google/crypto/tink/proto/OutputPrefixType.html" title="enum in com.google.crypto.tink.proto">OutputPrefixType</a></li>
@@ -496,11 +498,16 @@
 <li><a href="com/google/crypto/tink/subtle/PrfMac.html" title="class in com.google.crypto.tink.subtle">PrfMac</a></li>
 <li><a href="com/google/crypto/tink/prf/PrfSet.html" title="class in com.google.crypto.tink.prf">PrfSet</a></li>
 <li><a href="com/google/crypto/tink/prf/PrfSetWrapper.html" title="class in com.google.crypto.tink.prf">PrfSetWrapper</a></li>
+<li><a href="com/google/crypto/tink/internal/PrimitiveConstructor.html" title="class in com.google.crypto.tink.internal">PrimitiveConstructor</a></li>
+<li><a href="com/google/crypto/tink/internal/PrimitiveConstructor.PrimitiveConstructionFunction.html" title="interface in com.google.crypto.tink.internal"><span class="interfaceName">PrimitiveConstructor.PrimitiveConstructionFunction</span></a></li>
 <li><a href="com/google/crypto/tink/internal/PrimitiveFactory.html" title="class in com.google.crypto.tink.internal">PrimitiveFactory</a></li>
+<li><a href="com/google/crypto/tink/internal/PrimitiveRegistry.html" title="class in com.google.crypto.tink.internal">PrimitiveRegistry</a></li>
+<li><a href="com/google/crypto/tink/internal/PrimitiveRegistry.Builder.html" title="class in com.google.crypto.tink.internal">PrimitiveRegistry.Builder</a></li>
 <li><a href="com/google/crypto/tink/PrimitiveSet.html" title="class in com.google.crypto.tink">PrimitiveSet</a></li>
 <li><a href="com/google/crypto/tink/PrimitiveSet.Builder.html" title="class in com.google.crypto.tink">PrimitiveSet.Builder</a></li>
 <li><a href="com/google/crypto/tink/PrimitiveSet.Entry.html" title="class in com.google.crypto.tink">PrimitiveSet.Entry</a></li>
 <li><a href="com/google/crypto/tink/PrimitiveWrapper.html" title="interface in com.google.crypto.tink"><span class="interfaceName">PrimitiveWrapper</span></a></li>
+<li><a href="com/google/crypto/tink/PrivateKey.html" title="interface in com.google.crypto.tink"><span class="interfaceName">PrivateKey</span></a></li>
 <li><a href="com/google/crypto/tink/PrivateKeyManager.html" title="interface in com.google.crypto.tink"><span class="interfaceName">PrivateKeyManager</span></a></li>
 <li><a href="com/google/crypto/tink/internal/PrivateKeyTypeManager.html" title="class in com.google.crypto.tink.internal">PrivateKeyTypeManager</a></li>
 <li><a href="com/google/crypto/tink/PrivilegedRegistry.html" title="class in com.google.crypto.tink">PrivilegedRegistry</a></li>
@@ -565,8 +572,11 @@
 <li><a href="com/google/crypto/tink/internal/SerializationRegistry.Builder.html" title="class in com.google.crypto.tink.internal">SerializationRegistry.Builder</a></li>
 <li><a href="com/google/crypto/tink/signature/SignatureConfig.html" title="class in com.google.crypto.tink.signature">SignatureConfig</a></li>
 <li><a href="com/google/crypto/tink/signature/SignatureKeyTemplates.html" title="class in com.google.crypto.tink.signature">SignatureKeyTemplates</a></li>
+<li><a href="com/google/crypto/tink/signature/SignatureParameters.html" title="class in com.google.crypto.tink.signature">SignatureParameters</a></li>
 <li><a href="com/google/crypto/tink/signature/SignaturePemKeysetReader.html" title="class in com.google.crypto.tink.signature">SignaturePemKeysetReader</a></li>
 <li><a href="com/google/crypto/tink/signature/SignaturePemKeysetReader.Builder.html" title="class in com.google.crypto.tink.signature">SignaturePemKeysetReader.Builder</a></li>
+<li><a href="com/google/crypto/tink/signature/SignaturePrivateKey.html" title="class in com.google.crypto.tink.signature">SignaturePrivateKey</a></li>
+<li><a href="com/google/crypto/tink/signature/SignaturePublicKey.html" title="class in com.google.crypto.tink.signature">SignaturePublicKey</a></li>
 <li><a href="com/google/crypto/tink/signature/internal/SigUtil.html" title="class in com.google.crypto.tink.signature.internal">SigUtil</a></li>
 <li><a href="com/google/crypto/tink/StreamingAead.html" title="interface in com.google.crypto.tink"><span class="interfaceName">StreamingAead</span></a></li>
 <li><a href="com/google/crypto/tink/streamingaead/StreamingAeadConfig.html" title="class in com.google.crypto.tink.streamingaead">StreamingAeadConfig</a></li>
@@ -583,6 +593,7 @@
 <li><a href="com/google/crypto/tink/config/TinkFips.html" title="class in com.google.crypto.tink.config">TinkFips</a></li>
 <li><a href="com/google/crypto/tink/config/internal/TinkFipsUtil.html" title="class in com.google.crypto.tink.config.internal">TinkFipsUtil</a></li>
 <li><a href="com/google/crypto/tink/config/internal/TinkFipsUtil.AlgorithmFipsCompatibility.html" title="enum in com.google.crypto.tink.config.internal">TinkFipsUtil.AlgorithmFipsCompatibility</a></li>
+<li><a href="com/google/crypto/tink/TinkJsonProtoKeysetFormat.html" title="class in com.google.crypto.tink">TinkJsonProtoKeysetFormat</a></li>
 <li><a href="com/google/crypto/tink/tinkkey/TinkKey.html" title="interface in com.google.crypto.tink.tinkkey"><span class="interfaceName">TinkKey</span></a></li>
 <li><a href="com/google/crypto/tink/TinkProtoKeysetFormat.html" title="class in com.google.crypto.tink">TinkProtoKeysetFormat</a></li>
 <li><a href="com/google/crypto/tink/internal/Util.html" title="class in com.google.crypto.tink.internal">Util</a></li>
