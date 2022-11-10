@@ -1,11 +1,1 @@
-com.google.crypto.tink
-com.google.crypto.tink.annotations
-com.google.crypto.tink.config.internal
 com.google.crypto.tink.integration.gcpkms
-com.google.crypto.tink.internal
-com.google.crypto.tink.monitoring
-com.google.crypto.tink.proto
-com.google.crypto.tink.subtle
-com.google.crypto.tink.tinkkey
-com.google.crypto.tink.tinkkey.internal
-com.google.crypto.tink.util
