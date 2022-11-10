@@ -5,6 +5,7 @@ package(default_visibility = ["//:__subpackages__"])
 ts_library(
     name = "hpke",
     srcs = [
+        "hpke_aead.ts",
         "hpke_kdf.ts",
         "hpke_kem.ts",
         "hpke_kem_encap_output.ts",
