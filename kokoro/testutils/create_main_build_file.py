@@ -79,7 +79,7 @@ gen_maven_jar_rules(
         "Automatic-Module-Name: com.google.crypto.tink.integration.awskms",
     ],
     root_packages = [
-        "com.google.crypto.tink",
+        "com.google.crypto.tink.integration.awskms",
     ],
     deps = [
 $awsk_deps_formatted
@@ -93,7 +93,7 @@ gen_maven_jar_rules(
         "Automatic-Module-Name: com.google.crypto.tink.integration.gcpkms",
     ],
     root_packages = [
-        "com.google.crypto.tink",
+        "com.google.crypto.tink.integration.gcpkms",
     ],
     deps = [
 $gcpk_deps_formatted
