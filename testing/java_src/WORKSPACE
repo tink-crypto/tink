@@ -15,14 +15,6 @@ load("@tink_java//:tink_java_deps_init.bzl", "tink_java_deps_init")
 
 tink_java_deps_init()
 
-# Required by gRPC, which would fetch v3.21.7 otherwise.
-http_archive(
-    name = "com_google_protobuf_javalite",
-    sha256 = "04e1ed9664d1325b43723b6a62a4a41bf6b2b90ac72b5daee288365aad0ea47d",
-    strip_prefix = "protobuf-3.20.3",
-    urls = ["https://github.com/protocolbuffers/protobuf/archive/v3.19.3.zip"],
-)
-
 # Release from 2022-04-28.
 http_archive(
     name = "io_grpc_grpc_java",
