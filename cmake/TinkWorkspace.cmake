@@ -133,7 +133,7 @@ set(protobuf_BUILD_EXAMPLES OFF CACHE BOOL "Tink dependency override" FORCE)
 
 http_archive(
   NAME com_google_protobuf
-  URL https://github.com/protocolbuffers/protobuf/archive/v3.19.3.zip
-  SHA256 6b6bf5cd8d0cca442745c4c3c9f527c83ad6ef35a405f64db5215889ac779b42
+  URL https://github.com/protocolbuffers/protobuf/archive/v3.20.3.zip
+  SHA256 04e1ed9664d1325b43723b6a62a4a41bf6b2b90ac72b5daee288365aad0ea47d
   CMAKE_SUBDIR cmake
 )
