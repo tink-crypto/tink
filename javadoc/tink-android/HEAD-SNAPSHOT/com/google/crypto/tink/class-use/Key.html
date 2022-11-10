@@ -93,6 +93,10 @@
 <td class="colFirst"><a href="#com.google.crypto.tink.mac">com.google.crypto.tink.mac</a></td>
 <td class="colLast">&nbsp;</td>
 </tr>
+<tr class="rowColor">
+<td class="colFirst"><a href="#com.google.crypto.tink.signature">com.google.crypto.tink.signature</a></td>
+<td class="colLast">&nbsp;</td>
+</tr>
 </tbody>
 </table>
 </li>
@@ -119,6 +123,10 @@
 <tr class="rowColor">
 <td class="colFirst"><code><a href="../../../../../com/google/crypto/tink/Key.html" title="class in com.google.crypto.tink">Key</a></code></td>
 <td class="colLast"><span class="typeNameLabel">PrimitiveSet.Entry.</span><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/PrimitiveSet.Entry.html#getKey--">getKey</a></span>()</code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code><a href="../../../../../com/google/crypto/tink/Key.html" title="class in com.google.crypto.tink">Key</a></code></td>
+<td class="colLast"><span class="typeNameLabel">PrivateKey.</span><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/PrivateKey.html#getPublicKey--">getPublicKey</a></span>()</code>&nbsp;</td>
 </tr>
 </tbody>
 </table>
@@ -167,6 +175,18 @@
 <div class="block">A function which serializes a key.</div>
 </td>
 </tr>
+<tr class="altColor">
+<td class="colFirst"><code>class&nbsp;</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/internal/PrimitiveConstructor.html" title="class in com.google.crypto.tink.internal">PrimitiveConstructor</a>&lt;KeyT extends <a href="../../../../../com/google/crypto/tink/Key.html" title="class in com.google.crypto.tink">Key</a>,PrimitiveT&gt;</span></code>
+<div class="block">Create Primitive objects from <code>Key</code> objects of a certain kind.</div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>static interface&nbsp;</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/internal/PrimitiveConstructor.PrimitiveConstructionFunction.html" title="interface in com.google.crypto.tink.internal">PrimitiveConstructor.PrimitiveConstructionFunction</a>&lt;KeyT extends <a href="../../../../../com/google/crypto/tink/Key.html" title="class in com.google.crypto.tink">Key</a>,PrimitiveT&gt;</span></code>
+<div class="block">A function which creates a Primitive object.</div>
+</td>
+</tr>
 </tbody>
 </table>
 <table class="useSummary" border="0" cellpadding="3" cellspacing="0" summary="Use table, listing subclasses, and an explanation">
@@ -200,18 +220,66 @@
 </td>
 </tr>
 <tr class="rowColor">
+<td class="colFirst"><code>static &lt;KeyT extends <a href="../../../../../com/google/crypto/tink/Key.html" title="class in com.google.crypto.tink">Key</a>,PrimitiveT&gt;<br><a href="../../../../../com/google/crypto/tink/internal/PrimitiveConstructor.html" title="class in com.google.crypto.tink.internal">PrimitiveConstructor</a>&lt;KeyT,PrimitiveT&gt;</code></td>
+<td class="colLast"><span class="typeNameLabel">PrimitiveConstructor.</span><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/internal/PrimitiveConstructor.html#create-com.google.crypto.tink.internal.PrimitiveConstructor.PrimitiveConstructionFunction-java.lang.Class-java.lang.Class-">create</a></span>(<a href="../../../../../com/google/crypto/tink/internal/PrimitiveConstructor.PrimitiveConstructionFunction.html" title="interface in com.google.crypto.tink.internal">PrimitiveConstructor.PrimitiveConstructionFunction</a>&lt;KeyT,PrimitiveT&gt;&nbsp;function,
+      <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Class.html?is-external=true" title="class or interface in java.lang">Class</a>&lt;KeyT&gt;&nbsp;keyClass,
+      <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Class.html?is-external=true" title="class or interface in java.lang">Class</a>&lt;PrimitiveT&gt;&nbsp;primitiveClass)</code>
+<div class="block">Creates a PrimitiveConstructor object.</div>
+</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>&lt;KeyT extends <a href="../../../../../com/google/crypto/tink/Key.html" title="class in com.google.crypto.tink">Key</a>,PrimitiveT&gt;<br>PrimitiveT</code></td>
+<td class="colLast"><span class="typeNameLabel">PrimitiveRegistry.</span><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/internal/PrimitiveRegistry.html#getPrimitive-KeyT-java.lang.Class-">getPrimitive</a></span>(KeyT&nbsp;key,
+            <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Class.html?is-external=true" title="class or interface in java.lang">Class</a>&lt;PrimitiveT&gt;&nbsp;primitiveClass)</code>
+<div class="block">Creates a primitive from a given key.</div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>&lt;KeyT extends <a href="../../../../../com/google/crypto/tink/Key.html" title="class in com.google.crypto.tink">Key</a>,PrimitiveT&gt;<br>PrimitiveT</code></td>
+<td class="colLast"><span class="typeNameLabel">MutablePrimitiveRegistry.</span><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/internal/MutablePrimitiveRegistry.html#getPrimitive-KeyT-java.lang.Class-">getPrimitive</a></span>(KeyT&nbsp;key,
+            <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Class.html?is-external=true" title="class or interface in java.lang">Class</a>&lt;PrimitiveT&gt;&nbsp;primitiveClass)</code>
+<div class="block">Creates a primitive from a given key.</div>
+</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>&lt;KeyT extends <a href="../../../../../com/google/crypto/tink/Key.html" title="class in com.google.crypto.tink">Key</a>,SerializationT extends <a href="../../../../../com/google/crypto/tink/internal/Serialization.html" title="interface in com.google.crypto.tink.internal">Serialization</a>&gt;<br>boolean</code></td>
+<td class="colLast"><span class="typeNameLabel">SerializationRegistry.</span><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/internal/SerializationRegistry.html#hasSerializerForKey-KeyT-java.lang.Class-">hasSerializerForKey</a></span>(KeyT&nbsp;key,
+                   <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Class.html?is-external=true" title="class or interface in java.lang">Class</a>&lt;SerializationT&gt;&nbsp;serializationClass)</code>
+<div class="block">Returns true if a parser for this <code>serializedKey</code> has been registered.</div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>&lt;KeyT extends <a href="../../../../../com/google/crypto/tink/Key.html" title="class in com.google.crypto.tink">Key</a>,SerializationT extends <a href="../../../../../com/google/crypto/tink/internal/Serialization.html" title="interface in com.google.crypto.tink.internal">Serialization</a>&gt;<br>boolean</code></td>
+<td class="colLast"><span class="typeNameLabel">MutableSerializationRegistry.</span><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/internal/MutableSerializationRegistry.html#hasSerializerForKey-KeyT-java.lang.Class-">hasSerializerForKey</a></span>(KeyT&nbsp;key,
+                   <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Class.html?is-external=true" title="class or interface in java.lang">Class</a>&lt;SerializationT&gt;&nbsp;serializationClass)</code>
+<div class="block">Returns true if a parser for this <code>serializedKey</code> has been registered.</div>
+</td>
+</tr>
+<tr class="altColor">
 <td class="colFirst"><code>&lt;KeyT extends <a href="../../../../../com/google/crypto/tink/Key.html" title="class in com.google.crypto.tink">Key</a>,SerializationT extends <a href="../../../../../com/google/crypto/tink/internal/Serialization.html" title="interface in com.google.crypto.tink.internal">Serialization</a>&gt;<br><a href="../../../../../com/google/crypto/tink/internal/SerializationRegistry.Builder.html" title="class in com.google.crypto.tink.internal">SerializationRegistry.Builder</a></code></td>
 <td class="colLast"><span class="typeNameLabel">SerializationRegistry.Builder.</span><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/internal/SerializationRegistry.Builder.html#registerKeySerializer-com.google.crypto.tink.internal.KeySerializer-">registerKeySerializer</a></span>(<a href="../../../../../com/google/crypto/tink/internal/KeySerializer.html" title="class in com.google.crypto.tink.internal">KeySerializer</a>&lt;KeyT,SerializationT&gt;&nbsp;serializer)</code>
 <div class="block">Registers a key serializer for later use in <a href="../../../../../com/google/crypto/tink/internal/SerializationRegistry.html#serializeKey-KeyT-java.lang.Class-com.google.crypto.tink.SecretKeyAccess-"><code>SerializationRegistry.serializeKey(KeyT, java.lang.Class&lt;SerializationT&gt;, com.google.crypto.tink.SecretKeyAccess)</code></a>.</div>
 </td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><code>&lt;KeyT extends <a href="../../../../../com/google/crypto/tink/Key.html" title="class in com.google.crypto.tink">Key</a>,SerializationT extends <a href="../../../../../com/google/crypto/tink/internal/Serialization.html" title="interface in com.google.crypto.tink.internal">Serialization</a>&gt;<br>void</code></td>
 <td class="colLast"><span class="typeNameLabel">MutableSerializationRegistry.</span><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/internal/MutableSerializationRegistry.html#registerKeySerializer-com.google.crypto.tink.internal.KeySerializer-">registerKeySerializer</a></span>(<a href="../../../../../com/google/crypto/tink/internal/KeySerializer.html" title="class in com.google.crypto.tink.internal">KeySerializer</a>&lt;KeyT,SerializationT&gt;&nbsp;serializer)</code>
 <div class="block">Registers a key serializer for later use in <a href="../../../../../com/google/crypto/tink/internal/MutableSerializationRegistry.html#serializeKey-KeyT-java.lang.Class-com.google.crypto.tink.SecretKeyAccess-"><code>MutableSerializationRegistry.serializeKey(KeyT, java.lang.Class&lt;SerializationT&gt;, com.google.crypto.tink.SecretKeyAccess)</code></a>.</div>
 </td>
 </tr>
+<tr class="altColor">
+<td class="colFirst"><code>&lt;KeyT extends <a href="../../../../../com/google/crypto/tink/Key.html" title="class in com.google.crypto.tink">Key</a>,PrimitiveT&gt;<br><a href="../../../../../com/google/crypto/tink/internal/PrimitiveRegistry.Builder.html" title="class in com.google.crypto.tink.internal">PrimitiveRegistry.Builder</a></code></td>
+<td class="colLast"><span class="typeNameLabel">PrimitiveRegistry.Builder.</span><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/internal/PrimitiveRegistry.Builder.html#registerPrimitiveConstructor-com.google.crypto.tink.internal.PrimitiveConstructor-">registerPrimitiveConstructor</a></span>(<a href="../../../../../com/google/crypto/tink/internal/PrimitiveConstructor.html" title="class in com.google.crypto.tink.internal">PrimitiveConstructor</a>&lt;KeyT,PrimitiveT&gt;&nbsp;primitiveConstructor)</code>
+<div class="block">Registers a primitive constructor for later use in <a href="../../../../../com/google/crypto/tink/internal/PrimitiveRegistry.html#getPrimitive-KeyT-java.lang.Class-"><code>PrimitiveRegistry.getPrimitive(KeyT, java.lang.Class&lt;PrimitiveT&gt;)</code></a>.</div>
+</td>
+</tr>
 <tr class="rowColor">
+<td class="colFirst"><code>&lt;KeyT extends <a href="../../../../../com/google/crypto/tink/Key.html" title="class in com.google.crypto.tink">Key</a>,PrimitiveT&gt;<br>void</code></td>
+<td class="colLast"><span class="typeNameLabel">MutablePrimitiveRegistry.</span><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/internal/MutablePrimitiveRegistry.html#registerPrimitiveConstructor-com.google.crypto.tink.internal.PrimitiveConstructor-">registerPrimitiveConstructor</a></span>(<a href="../../../../../com/google/crypto/tink/internal/PrimitiveConstructor.html" title="class in com.google.crypto.tink.internal">PrimitiveConstructor</a>&lt;KeyT,PrimitiveT&gt;&nbsp;constructor)</code>
+<div class="block">Registers a key primitive constructor for later use in <a href="../../../../../com/google/crypto/tink/internal/MutablePrimitiveRegistry.html#getPrimitive-KeyT-java.lang.Class-"><code>MutablePrimitiveRegistry.getPrimitive(KeyT, java.lang.Class&lt;PrimitiveT&gt;)</code></a>.</div>
+</td>
+</tr>
+<tr class="altColor">
 <td class="colFirst"><code>&lt;KeyT extends <a href="../../../../../com/google/crypto/tink/Key.html" title="class in com.google.crypto.tink">Key</a>,SerializationT extends <a href="../../../../../com/google/crypto/tink/internal/Serialization.html" title="interface in com.google.crypto.tink.internal">Serialization</a>&gt;<br>SerializationT</code></td>
 <td class="colLast"><span class="typeNameLabel">SerializationRegistry.</span><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/internal/SerializationRegistry.html#serializeKey-KeyT-java.lang.Class-com.google.crypto.tink.SecretKeyAccess-">serializeKey</a></span>(KeyT&nbsp;key,
             <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Class.html?is-external=true" title="class or interface in java.lang">Class</a>&lt;SerializationT&gt;&nbsp;serializationClass,
@@ -219,7 +287,7 @@
 <div class="block">Serializes a given Key into a "SerializationT" object.</div>
 </td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><code>&lt;KeyT extends <a href="../../../../../com/google/crypto/tink/Key.html" title="class in com.google.crypto.tink">Key</a>,SerializationT extends <a href="../../../../../com/google/crypto/tink/internal/Serialization.html" title="interface in com.google.crypto.tink.internal">Serialization</a>&gt;<br>SerializationT</code></td>
 <td class="colLast"><span class="typeNameLabel">MutableSerializationRegistry.</span><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/internal/MutableSerializationRegistry.html#serializeKey-KeyT-java.lang.Class-com.google.crypto.tink.SecretKeyAccess-">serializeKey</a></span>(KeyT&nbsp;key,
             <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Class.html?is-external=true" title="class or interface in java.lang">Class</a>&lt;SerializationT&gt;&nbsp;serializationClass,
@@ -332,6 +400,33 @@
 <tr class="rowColor">
 <td class="colFirst"><code>boolean</code></td>
 <td class="colLast"><span class="typeNameLabel">HmacKey.</span><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/mac/HmacKey.html#equalsKey-com.google.crypto.tink.Key-">equalsKey</a></span>(<a href="../../../../../com/google/crypto/tink/Key.html" title="class in com.google.crypto.tink">Key</a>&nbsp;o)</code>&nbsp;</td>
+</tr>
+</tbody>
+</table>
+</li>
+<li class="blockList"><a name="com.google.crypto.tink.signature">
+<!--   -->
+</a>
+<h3>Uses of <a href="../../../../../com/google/crypto/tink/Key.html" title="class in com.google.crypto.tink">Key</a> in <a href="../../../../../com/google/crypto/tink/signature/package-summary.html">com.google.crypto.tink.signature</a></h3>
+<table class="useSummary" border="0" cellpadding="3" cellspacing="0" summary="Use table, listing subclasses, and an explanation">
+<caption><span>Subclasses of <a href="../../../../../com/google/crypto/tink/Key.html" title="class in com.google.crypto.tink">Key</a> in <a href="../../../../../com/google/crypto/tink/signature/package-summary.html">com.google.crypto.tink.signature</a></span><span class="tabEnd">&nbsp;</span></caption>
+<tr>
+<th class="colFirst" scope="col">Modifier and Type</th>
+<th class="colLast" scope="col">Class and Description</th>
+</tr>
+<tbody>
+<tr class="altColor">
+<td class="colFirst"><code>class&nbsp;</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/signature/SignaturePrivateKey.html" title="class in com.google.crypto.tink.signature">SignaturePrivateKey</a></span></code>
+<div class="block">A <a href="../../../../../com/google/crypto/tink/signature/SignaturePrivateKey.html" title="class in com.google.crypto.tink.signature"><code>SignaturePrivateKey</code></a> represents a digital signature primitive, which consists of a sign
+ and a verify function.</div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>class&nbsp;</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/signature/SignaturePublicKey.html" title="class in com.google.crypto.tink.signature">SignaturePublicKey</a></span></code>
+<div class="block">A SignaturePublicKey represents the verification portion of a digital signature primitive.</div>
+</td>
 </tr>
 </tbody>
 </table>

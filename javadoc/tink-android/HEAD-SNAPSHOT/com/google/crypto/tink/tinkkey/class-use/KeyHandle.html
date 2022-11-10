@@ -112,8 +112,9 @@
 <tr class="altColor">
 <td class="colFirst"><code><a href="../../../../../../com/google/crypto/tink/tinkkey/KeyHandle.html" title="class in com.google.crypto.tink.tinkkey">KeyHandle</a></code></td>
 <td class="colLast"><span class="typeNameLabel">KeysetHandle.</span><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/KeysetHandle.html#primaryKey--">primaryKey</a></span>()</code>
-<div class="block">Searches the keyset to find the primary key of this <code>KeysetHandle</code>, and returns the key
- wrapped in a <code>KeyHandle</code>.</div>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;
+<div class="block"><span class="deprecationComment">Use <a href="../../../../../../com/google/crypto/tink/KeysetHandle.html#getPrimary--"><code>KeysetHandle.getPrimary()</code></a> instead.</span></div>
+</div>
 </td>
 </tr>
 </tbody>
@@ -128,7 +129,9 @@
 <tr class="altColor">
 <td class="colFirst"><code><a href="https://docs.oracle.com/javase/8/docs/api/java/util/List.html?is-external=true" title="class or interface in java.util">List</a>&lt;<a href="../../../../../../com/google/crypto/tink/tinkkey/KeyHandle.html" title="class in com.google.crypto.tink.tinkkey">KeyHandle</a>&gt;</code></td>
 <td class="colLast"><span class="typeNameLabel">KeysetHandle.</span><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/KeysetHandle.html#getKeys--">getKeys</a></span>()</code>
-<div class="block">Returns the keyset data as a list of <a href="../../../../../../com/google/crypto/tink/tinkkey/KeyHandle.html" title="class in com.google.crypto.tink.tinkkey"><code>KeyHandle</code></a>s.</div>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;
+<div class="block"><span class="deprecationComment">Use <a href="../../../../../../com/google/crypto/tink/KeysetHandle.html#size--"><code>KeysetHandle.size()</code></a> and <a href="../../../../../../com/google/crypto/tink/KeysetHandle.html#getAt-int-"><code>KeysetHandle.getAt(int)</code></a> instead.</span></div>
+</div>
 </td>
 </tr>
 </tbody>
@@ -160,8 +163,7 @@
 <td class="colLast"><span class="typeNameLabel">KeysetHandle.</span><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/KeysetHandle.html#createFromKey-com.google.crypto.tink.tinkkey.KeyHandle-com.google.crypto.tink.tinkkey.KeyAccess-">createFromKey</a></span>(<a href="../../../../../../com/google/crypto/tink/tinkkey/KeyHandle.html" title="class in com.google.crypto.tink.tinkkey">KeyHandle</a>&nbsp;keyHandle,
              <a href="../../../../../../com/google/crypto/tink/tinkkey/KeyAccess.html" title="class in com.google.crypto.tink.tinkkey">KeyAccess</a>&nbsp;access)</code>
 <div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;
-<div class="block"><span class="deprecationComment">Use <code>KeysetManager.withEmptyKeyset().add(keyHandle)
-     .setPrimary(keyHandle.getId()).getKeysetHandle()</code> instead.</span></div>
+<div class="block"><span class="deprecationComment">Use <code>KeysetHandle.Builder.addEntry</code> instead.</span></div>
 </div>
 </td>
 </tr>

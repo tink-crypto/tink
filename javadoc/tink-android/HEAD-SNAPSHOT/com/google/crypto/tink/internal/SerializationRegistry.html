@@ -17,7 +17,7 @@
     catch(err) {
     }
 //-->
-var methods = {"i0":10,"i1":10,"i2":10,"i3":10};
+var methods = {"i0":10,"i1":10,"i2":10,"i3":10,"i4":10,"i5":10,"i6":10,"i7":10};
 var tabs = {65535:["t0","All Methods"],2:["t2","Instance Methods"],8:["t4","Concrete Methods"]};
 var altColor = "altColor";
 var rowColor = "rowColor";
@@ -152,19 +152,45 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 <th class="colLast" scope="col">Method and Description</th>
 </tr>
 <tr id="i0" class="altColor">
+<td class="colFirst"><code>&lt;SerializationT extends <a href="../../../../../com/google/crypto/tink/internal/Serialization.html" title="interface in com.google.crypto.tink.internal">Serialization</a>&gt;<br>boolean</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/internal/SerializationRegistry.html#hasParserForKey-SerializationT-">hasParserForKey</a></span>(SerializationT&nbsp;serializedKey)</code>
+<div class="block">Returns true if a parser for this <code>serializedKey</code> has been registered.</div>
+</td>
+</tr>
+<tr id="i1" class="rowColor">
+<td class="colFirst"><code>&lt;SerializationT extends <a href="../../../../../com/google/crypto/tink/internal/Serialization.html" title="interface in com.google.crypto.tink.internal">Serialization</a>&gt;<br>boolean</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/internal/SerializationRegistry.html#hasParserForParameters-SerializationT-">hasParserForParameters</a></span>(SerializationT&nbsp;serializedParameters)</code>
+<div class="block">Returns true if a parser for this <code>serializedKey</code> has been registered.</div>
+</td>
+</tr>
+<tr id="i2" class="altColor">
+<td class="colFirst"><code>&lt;KeyT extends <a href="../../../../../com/google/crypto/tink/Key.html" title="class in com.google.crypto.tink">Key</a>,SerializationT extends <a href="../../../../../com/google/crypto/tink/internal/Serialization.html" title="interface in com.google.crypto.tink.internal">Serialization</a>&gt;<br>boolean</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/internal/SerializationRegistry.html#hasSerializerForKey-KeyT-java.lang.Class-">hasSerializerForKey</a></span>(KeyT&nbsp;key,
+                   <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Class.html?is-external=true" title="class or interface in java.lang">Class</a>&lt;SerializationT&gt;&nbsp;serializationClass)</code>
+<div class="block">Returns true if a parser for this <code>serializedKey</code> has been registered.</div>
+</td>
+</tr>
+<tr id="i3" class="rowColor">
+<td class="colFirst"><code>&lt;ParametersT extends <a href="../../../../../com/google/crypto/tink/Parameters.html" title="class in com.google.crypto.tink">Parameters</a>,SerializationT extends <a href="../../../../../com/google/crypto/tink/internal/Serialization.html" title="interface in com.google.crypto.tink.internal">Serialization</a>&gt;<br>boolean</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/internal/SerializationRegistry.html#hasSerializerForParameters-ParametersT-java.lang.Class-">hasSerializerForParameters</a></span>(ParametersT&nbsp;parameters,
+                          <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Class.html?is-external=true" title="class or interface in java.lang">Class</a>&lt;SerializationT&gt;&nbsp;serializationClass)</code>
+<div class="block">Returns true if a parser for this <code>serializedKey</code> has been registered.</div>
+</td>
+</tr>
+<tr id="i4" class="altColor">
 <td class="colFirst"><code>&lt;SerializationT extends <a href="../../../../../com/google/crypto/tink/internal/Serialization.html" title="interface in com.google.crypto.tink.internal">Serialization</a>&gt;<br><a href="../../../../../com/google/crypto/tink/Key.html" title="class in com.google.crypto.tink">Key</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/internal/SerializationRegistry.html#parseKey-SerializationT-com.google.crypto.tink.SecretKeyAccess-">parseKey</a></span>(SerializationT&nbsp;serializedKey,
         <a href="../../../../../com/google/crypto/tink/SecretKeyAccess.html" title="class in com.google.crypto.tink">SecretKeyAccess</a>&nbsp;access)</code>
 <div class="block">Parses the given serialization into a Key.</div>
 </td>
 </tr>
-<tr id="i1" class="rowColor">
+<tr id="i5" class="rowColor">
 <td class="colFirst"><code>&lt;SerializationT extends <a href="../../../../../com/google/crypto/tink/internal/Serialization.html" title="interface in com.google.crypto.tink.internal">Serialization</a>&gt;<br><a href="../../../../../com/google/crypto/tink/Parameters.html" title="class in com.google.crypto.tink">Parameters</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/internal/SerializationRegistry.html#parseParameters-SerializationT-">parseParameters</a></span>(SerializationT&nbsp;serializedParameters)</code>
 <div class="block">Parses the given serialization into a Parameters.</div>
 </td>
 </tr>
-<tr id="i2" class="altColor">
+<tr id="i6" class="altColor">
 <td class="colFirst"><code>&lt;KeyT extends <a href="../../../../../com/google/crypto/tink/Key.html" title="class in com.google.crypto.tink">Key</a>,SerializationT extends <a href="../../../../../com/google/crypto/tink/internal/Serialization.html" title="interface in com.google.crypto.tink.internal">Serialization</a>&gt;<br>SerializationT</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/internal/SerializationRegistry.html#serializeKey-KeyT-java.lang.Class-com.google.crypto.tink.SecretKeyAccess-">serializeKey</a></span>(KeyT&nbsp;key,
             <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Class.html?is-external=true" title="class or interface in java.lang">Class</a>&lt;SerializationT&gt;&nbsp;serializationClass,
@@ -172,7 +198,7 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 <div class="block">Serializes a given Key into a "SerializationT" object.</div>
 </td>
 </tr>
-<tr id="i3" class="rowColor">
+<tr id="i7" class="rowColor">
 <td class="colFirst"><code>&lt;ParametersT extends <a href="../../../../../com/google/crypto/tink/Parameters.html" title="class in com.google.crypto.tink">Parameters</a>,SerializationT extends <a href="../../../../../com/google/crypto/tink/internal/Serialization.html" title="interface in com.google.crypto.tink.internal">Serialization</a>&gt;<br>SerializationT</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/internal/SerializationRegistry.html#serializeParameters-ParametersT-java.lang.Class-">serializeParameters</a></span>(ParametersT&nbsp;parameters,
                    <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Class.html?is-external=true" title="class or interface in java.lang">Class</a>&lt;SerializationT&gt;&nbsp;serializationClass)</code>
@@ -201,6 +227,18 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 <!--   -->
 </a>
 <h3>Method Detail</h3>
+<a name="hasParserForKey-com.google.crypto.tink.internal.Serialization-">
+<!--   -->
+</a><a name="hasParserForKey-SerializationT-">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>hasParserForKey</h4>
+<pre>public&nbsp;&lt;SerializationT extends <a href="../../../../../com/google/crypto/tink/internal/Serialization.html" title="interface in com.google.crypto.tink.internal">Serialization</a>&gt;&nbsp;boolean&nbsp;hasParserForKey(SerializationT&nbsp;serializedKey)</pre>
+<div class="block">Returns true if a parser for this <code>serializedKey</code> has been registered.</div>
+</li>
+</ul>
 <a name="parseKey-com.google.crypto.tink.internal.Serialization-com.google.crypto.tink.SecretKeyAccess-">
 <!--   -->
 </a><a name="parseKey-SerializationT-com.google.crypto.tink.SecretKeyAccess-">
@@ -221,6 +259,19 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 <dt><span class="throwsLabel">Throws:</span></dt>
 <dd><code><a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></code></dd>
 </dl>
+</li>
+</ul>
+<a name="hasSerializerForKey-com.google.crypto.tink.Key-java.lang.Class-">
+<!--   -->
+</a><a name="hasSerializerForKey-KeyT-java.lang.Class-">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>hasSerializerForKey</h4>
+<pre>public&nbsp;&lt;KeyT extends <a href="../../../../../com/google/crypto/tink/Key.html" title="class in com.google.crypto.tink">Key</a>,SerializationT extends <a href="../../../../../com/google/crypto/tink/internal/Serialization.html" title="interface in com.google.crypto.tink.internal">Serialization</a>&gt;&nbsp;boolean&nbsp;hasSerializerForKey(KeyT&nbsp;key,
+                                                                                           <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Class.html?is-external=true" title="class or interface in java.lang">Class</a>&lt;SerializationT&gt;&nbsp;serializationClass)</pre>
+<div class="block">Returns true if a parser for this <code>serializedKey</code> has been registered.</div>
 </li>
 </ul>
 <a name="serializeKey-com.google.crypto.tink.Key-java.lang.Class-com.google.crypto.tink.SecretKeyAccess-">
@@ -245,6 +296,18 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 </dl>
 </li>
 </ul>
+<a name="hasParserForParameters-com.google.crypto.tink.internal.Serialization-">
+<!--   -->
+</a><a name="hasParserForParameters-SerializationT-">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>hasParserForParameters</h4>
+<pre>public&nbsp;&lt;SerializationT extends <a href="../../../../../com/google/crypto/tink/internal/Serialization.html" title="interface in com.google.crypto.tink.internal">Serialization</a>&gt;&nbsp;boolean&nbsp;hasParserForParameters(SerializationT&nbsp;serializedParameters)</pre>
+<div class="block">Returns true if a parser for this <code>serializedKey</code> has been registered.</div>
+</li>
+</ul>
 <a name="parseParameters-com.google.crypto.tink.internal.Serialization-">
 <!--   -->
 </a><a name="parseParameters-SerializationT-">
@@ -263,6 +326,19 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 <dt><span class="throwsLabel">Throws:</span></dt>
 <dd><code><a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></code></dd>
 </dl>
+</li>
+</ul>
+<a name="hasSerializerForParameters-com.google.crypto.tink.Parameters-java.lang.Class-">
+<!--   -->
+</a><a name="hasSerializerForParameters-ParametersT-java.lang.Class-">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>hasSerializerForParameters</h4>
+<pre>public&nbsp;&lt;ParametersT extends <a href="../../../../../com/google/crypto/tink/Parameters.html" title="class in com.google.crypto.tink">Parameters</a>,SerializationT extends <a href="../../../../../com/google/crypto/tink/internal/Serialization.html" title="interface in com.google.crypto.tink.internal">Serialization</a>&gt;&nbsp;boolean&nbsp;hasSerializerForParameters(ParametersT&nbsp;parameters,
+                                                                                                                <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Class.html?is-external=true" title="class or interface in java.lang">Class</a>&lt;SerializationT&gt;&nbsp;serializationClass)</pre>
+<div class="block">Returns true if a parser for this <code>serializedKey</code> has been registered.</div>
 </li>
 </ul>
 <a name="serializeParameters-com.google.crypto.tink.Parameters-java.lang.Class-">

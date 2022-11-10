@@ -212,6 +212,58 @@
 </td>
 </tr>
 <tr class="altColor">
+<td class="colFirst"><code>&lt;SerializationT extends <a href="../../../../../../com/google/crypto/tink/internal/Serialization.html" title="interface in com.google.crypto.tink.internal">Serialization</a>&gt;<br>boolean</code></td>
+<td class="colLast"><span class="typeNameLabel">SerializationRegistry.</span><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/internal/SerializationRegistry.html#hasParserForKey-SerializationT-">hasParserForKey</a></span>(SerializationT&nbsp;serializedKey)</code>
+<div class="block">Returns true if a parser for this <code>serializedKey</code> has been registered.</div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>&lt;SerializationT extends <a href="../../../../../../com/google/crypto/tink/internal/Serialization.html" title="interface in com.google.crypto.tink.internal">Serialization</a>&gt;<br>boolean</code></td>
+<td class="colLast"><span class="typeNameLabel">MutableSerializationRegistry.</span><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/internal/MutableSerializationRegistry.html#hasParserForKey-SerializationT-">hasParserForKey</a></span>(SerializationT&nbsp;serializedKey)</code>
+<div class="block">Returns true if a parser for this <code>serializedKey</code> has been registered.</div>
+</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>&lt;SerializationT extends <a href="../../../../../../com/google/crypto/tink/internal/Serialization.html" title="interface in com.google.crypto.tink.internal">Serialization</a>&gt;<br>boolean</code></td>
+<td class="colLast"><span class="typeNameLabel">SerializationRegistry.</span><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/internal/SerializationRegistry.html#hasParserForParameters-SerializationT-">hasParserForParameters</a></span>(SerializationT&nbsp;serializedParameters)</code>
+<div class="block">Returns true if a parser for this <code>serializedKey</code> has been registered.</div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>&lt;SerializationT extends <a href="../../../../../../com/google/crypto/tink/internal/Serialization.html" title="interface in com.google.crypto.tink.internal">Serialization</a>&gt;<br>boolean</code></td>
+<td class="colLast"><span class="typeNameLabel">MutableSerializationRegistry.</span><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/internal/MutableSerializationRegistry.html#hasParserForParameters-SerializationT-">hasParserForParameters</a></span>(SerializationT&nbsp;serializedParameters)</code>
+<div class="block">Returns true if a parser for this <code>serializedKey</code> has been registered.</div>
+</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>&lt;KeyT extends <a href="../../../../../../com/google/crypto/tink/Key.html" title="class in com.google.crypto.tink">Key</a>,SerializationT extends <a href="../../../../../../com/google/crypto/tink/internal/Serialization.html" title="interface in com.google.crypto.tink.internal">Serialization</a>&gt;<br>boolean</code></td>
+<td class="colLast"><span class="typeNameLabel">SerializationRegistry.</span><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/internal/SerializationRegistry.html#hasSerializerForKey-KeyT-java.lang.Class-">hasSerializerForKey</a></span>(KeyT&nbsp;key,
+                   <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Class.html?is-external=true" title="class or interface in java.lang">Class</a>&lt;SerializationT&gt;&nbsp;serializationClass)</code>
+<div class="block">Returns true if a parser for this <code>serializedKey</code> has been registered.</div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>&lt;KeyT extends <a href="../../../../../../com/google/crypto/tink/Key.html" title="class in com.google.crypto.tink">Key</a>,SerializationT extends <a href="../../../../../../com/google/crypto/tink/internal/Serialization.html" title="interface in com.google.crypto.tink.internal">Serialization</a>&gt;<br>boolean</code></td>
+<td class="colLast"><span class="typeNameLabel">MutableSerializationRegistry.</span><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/internal/MutableSerializationRegistry.html#hasSerializerForKey-KeyT-java.lang.Class-">hasSerializerForKey</a></span>(KeyT&nbsp;key,
+                   <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Class.html?is-external=true" title="class or interface in java.lang">Class</a>&lt;SerializationT&gt;&nbsp;serializationClass)</code>
+<div class="block">Returns true if a parser for this <code>serializedKey</code> has been registered.</div>
+</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>&lt;ParametersT extends <a href="../../../../../../com/google/crypto/tink/Parameters.html" title="class in com.google.crypto.tink">Parameters</a>,SerializationT extends <a href="../../../../../../com/google/crypto/tink/internal/Serialization.html" title="interface in com.google.crypto.tink.internal">Serialization</a>&gt;<br>boolean</code></td>
+<td class="colLast"><span class="typeNameLabel">SerializationRegistry.</span><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/internal/SerializationRegistry.html#hasSerializerForParameters-ParametersT-java.lang.Class-">hasSerializerForParameters</a></span>(ParametersT&nbsp;parameters,
+                          <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Class.html?is-external=true" title="class or interface in java.lang">Class</a>&lt;SerializationT&gt;&nbsp;serializationClass)</code>
+<div class="block">Returns true if a parser for this <code>serializedKey</code> has been registered.</div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>&lt;ParametersT extends <a href="../../../../../../com/google/crypto/tink/Parameters.html" title="class in com.google.crypto.tink">Parameters</a>,SerializationT extends <a href="../../../../../../com/google/crypto/tink/internal/Serialization.html" title="interface in com.google.crypto.tink.internal">Serialization</a>&gt;<br>boolean</code></td>
+<td class="colLast"><span class="typeNameLabel">MutableSerializationRegistry.</span><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/internal/MutableSerializationRegistry.html#hasSerializerForParameters-ParametersT-java.lang.Class-">hasSerializerForParameters</a></span>(ParametersT&nbsp;parameters,
+                          <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Class.html?is-external=true" title="class or interface in java.lang">Class</a>&lt;SerializationT&gt;&nbsp;serializationClass)</code>
+<div class="block">Returns true if a parser for this <code>serializedKey</code> has been registered.</div>
+</td>
+</tr>
+<tr class="altColor">
 <td class="colFirst"><code>&lt;SerializationT extends <a href="../../../../../../com/google/crypto/tink/internal/Serialization.html" title="interface in com.google.crypto.tink.internal">Serialization</a>&gt;<br><a href="../../../../../../com/google/crypto/tink/Key.html" title="class in com.google.crypto.tink">Key</a></code></td>
 <td class="colLast"><span class="typeNameLabel">SerializationRegistry.</span><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/internal/SerializationRegistry.html#parseKey-SerializationT-com.google.crypto.tink.SecretKeyAccess-">parseKey</a></span>(SerializationT&nbsp;serializedKey,
         <a href="../../../../../../com/google/crypto/tink/SecretKeyAccess.html" title="class in com.google.crypto.tink">SecretKeyAccess</a>&nbsp;access)</code>
