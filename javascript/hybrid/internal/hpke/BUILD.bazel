@@ -1,0 +1,11 @@
+load("@npm//@bazel/typescript:index.bzl", "ts_library")
+
+package(default_visibility = ["//:__subpackages__"])
+
+ts_library(
+    name = "hpke",
+    srcs = [
+        "hpke_kdf.ts",
+    ],
+    module_name = "tink-crypto/hybrid/internal/hpke",
+)
