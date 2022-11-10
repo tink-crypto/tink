@@ -106,11 +106,15 @@ func TestBasicAead(t *testing.T) {
 	for _, file := range []string{credFile, credINIFile} {
 		setupKMS(t, filepath.Join(srcDir, file))
 		dek := aead.AES128CTRHMACSHA256KeyTemplate()
-		kh, err := keyset.NewHandle(aead.KMSEnvelopeAEADKeyTemplate(keyURI, dek))
+		template, err := aead.CreateKMSEnvelopeAEADKeyTemplate(keyURI, dek)
+		if err != nil {
+			t.Fatalf("error creating key template: %v", err)
+		}
+		handle, err := keyset.NewHandle(template)
 		if err != nil {
 			t.Fatalf("error getting a new keyset handle: %v", err)
 		}
-		a, err := aead.New(kh)
+		a, err := aead.New(handle)
 		if err != nil {
 			t.Fatalf("error getting the primitive: %v", err)
 		}
@@ -130,11 +134,15 @@ func TestBasicAeadWithoutAdditionalData(t *testing.T) {
 		for _, file := range []string{credFile, credINIFile} {
 			setupKMSWithURI(t, filepath.Join(srcDir, file), uri)
 			dek := aead.AES128CTRHMACSHA256KeyTemplate()
-			kh, err := keyset.NewHandle(aead.KMSEnvelopeAEADKeyTemplate(uri, dek))
+			template, err := aead.CreateKMSEnvelopeAEADKeyTemplate(uri, dek)
+			if err != nil {
+				t.Fatalf("error creating key template: %v", err)
+			}
+			handle, err := keyset.NewHandle(template)
 			if err != nil {
 				t.Fatalf("error getting a new keyset handle: %v", err)
 			}
-			a, err := aead.New(kh)
+			a, err := aead.New(handle)
 			if err != nil {
 				t.Fatalf("error getting the primitive: %v", err)
 			}

@@ -58,7 +58,7 @@ func main() {
 	kms := os.Args[2]
 	dek := os.Args[3]
 	var dekT *tinkpb.KeyTemplate
-	var kh *keyset.Handle
+	var handle *keyset.Handle
 	var b bytes.Buffer
 	switch strings.ToUpper(dek) {
 	case "AES128_GCM":
@@ -75,7 +75,11 @@ func main() {
 			log.Fatal(err)
 		}
 		registry.RegisterKMSClient(gcpclient)
-		kh, err = keyset.NewHandle(aead.KMSEnvelopeAEADKeyTemplate(gcpURI, dekT))
+		template, err := aead.CreateKMSEnvelopeAEADKeyTemplate(gcpURI, dekT)
+		if err != nil {
+			log.Fatal(err)
+		}
+		handle, err = keyset.NewHandle(template)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -85,14 +89,18 @@ func main() {
 			log.Fatal(err)
 		}
 		registry.RegisterKMSClient(awsclient)
-		kh, err = keyset.NewHandle(aead.KMSEnvelopeAEADKeyTemplate(awsURI, dekT))
+		template, err := aead.CreateKMSEnvelopeAEADKeyTemplate(awsURI, dekT)
+		if err != nil {
+			log.Fatal(err)
+		}
+		handle, err = keyset.NewHandle(template)
 		if err != nil {
 			log.Fatal(err)
 		}
 	default:
 		log.Fatalf("KMS %s, is not supported. Expecting AWS or GCP", kms)
 	}
-	ks := insecurecleartextkeyset.KeysetMaterial(kh)
+	ks := insecurecleartextkeyset.KeysetMaterial(handle)
 	h, err := insecurecleartextkeyset.Read(&keyset.MemReaderWriter{Keyset: ks})
 	if err != nil {
 		log.Fatal(err)

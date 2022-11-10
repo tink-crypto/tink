@@ -85,13 +85,17 @@ func basicAEADTest(t *testing.T, a tink.AEAD) error {
 func TestBasicAead(t *testing.T) {
 	setupKMS(t)
 	dek := aead.AES128CTRHMACSHA256KeyTemplate()
-	kh, err := keyset.NewHandle(aead.KMSEnvelopeAEADKeyTemplate(keyURI, dek))
+	template, err := aead.CreateKMSEnvelopeAEADKeyTemplate(keyURI, dek)
 	if err != nil {
-		t.Errorf("error getting a new keyset handle: %v", err)
+		t.Fatalf("error creating key template: %v", err)
 	}
-	a, err := aead.New(kh)
+	handle, err := keyset.NewHandle(template)
 	if err != nil {
-		t.Errorf("error getting the primitive: %v", err)
+		t.Fatalf("error getting a new keyset handle: %v", err)
+	}
+	a, err := aead.New(handle)
+	if err != nil {
+		t.Fatalf("error getting the primitive: %v", err)
 	}
 	if err := basicAEADTest(t, a); err != nil {
 		t.Errorf("error in basic aead tests: %v", err)

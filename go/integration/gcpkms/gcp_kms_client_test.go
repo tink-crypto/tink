@@ -35,11 +35,15 @@ func Example() {
 	registry.RegisterKMSClient(gcpclient)
 
 	dek := aead.AES128CTRHMACSHA256KeyTemplate()
-	kh, err := keyset.NewHandle(aead.KMSEnvelopeAEADKeyTemplate(keyURI, dek))
+	template, err := aead.CreateKMSEnvelopeAEADKeyTemplate(keyURI, dek)
 	if err != nil {
 		log.Fatal(err)
 	}
-	a, err := aead.New(kh)
+	handle, err := keyset.NewHandle(template)
+	if err != nil {
+		log.Fatal(err)
+	}
+	a, err := aead.New(handle)
 	if err != nil {
 		log.Fatal(err)
 	}
