@@ -137,6 +137,11 @@ If you'd like to talk to the developers or get notified about major product
 updates, you may want to subscribe to our
 [mailing list](https://groups.google.com/forum/#!forum/tink-users).
 
+<!-- TODO(b/258598945): Remove after 2022-11-17 -->
+Also, to help make Tink better for everyone, please consider [registering to
+participate](https://rsvp.withgoogle.com/events/tink-user-feedback-2022) in a
+Tink user session on 17 November 2022.
+
 ## Maintainers
 
 Tink is maintained by (A-Z):
