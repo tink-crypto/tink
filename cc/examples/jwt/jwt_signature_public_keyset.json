@@ -1,0 +1,15 @@
+{
+  "primaryKeyId": 185188009,
+  "key": [
+    {
+      "keyData": {
+        "typeUrl": "type.googleapis.com/google.crypto.tink.JwtRsaSsaPkcs1PublicKey",
+        "value": "EAEagQIAs9iifvWObNLbP+x7zupVIYTdHKba4VFgJEnnGtIII21R+KGddTdvNGAokd4GPrFk1GDPitHrAAoW1+NWrafsEUi2J9Sy3uwEyarsKDggewoBCNg2fcWAiZXplPjUyTlhrLvTuyrcL/mGPy+ib7bdmov+D2EP+rKUH6/ydtQGiyHRR3uurTUWfrMD1/6WaBVfngpy5Pxs2nuHXRmBHQKWmPfvErgr4abdjhKDaWIuxzSise1CSAbiWTNcxpIuFYZgPjgQzpqeh93LUXIX9YJds/bhHtXqRdxk6yTisloHOZETItK/rHCCE25dLkkaJ2Li7AtnJdBc6tEUNiuFj2JCjSIDAQAB",
+        "keyMaterialType": "ASYMMETRIC_PUBLIC"
+      },
+      "status": "ENABLED",
+      "keyId": 185188009,
+      "outputPrefixType": "TINK"
+    }
+  ]
+}

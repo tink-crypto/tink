@@ -2,19 +2,11 @@ package(default_visibility = ["//visibility:public"])
 
 licenses(["notice"])
 
-cc_library(
-    name = "util",
-    srcs = ["util.cc"],
-    hdrs = ["util.h"],
-    deps = [
-        "@com_google_absl//absl/strings",
-        "@tink_cc//:binary_keyset_reader",
-        "@tink_cc//:binary_keyset_writer",
-        "@tink_cc//:cleartext_keyset_handle",
-        "@tink_cc//:keyset_handle",
-        "@tink_cc//:keyset_reader",
-        "@tink_cc//:keyset_writer",
-        "@tink_cc//util:status",
+filegroup(
+    name = "jwt_signature_keysets",
+    srcs = [
+        "jwt_signature_private_keyset.json",
+        "jwt_signature_public_keyset.json",
     ],
 )
 
@@ -22,14 +14,16 @@ cc_binary(
     name = "jwt_signature_cli",
     srcs = ["jwt_signature_cli.cc"],
     deps = [
-        ":util",
-        "@tink_cc//jwt:jwt_key_templates",
+        "//util:util",
+        "@com_google_absl//absl/flags:flag",
+        "@com_google_absl//absl/flags:parse",
+        "@tink_cc//:keyset_handle",
         "@tink_cc//jwt:jwt_public_key_sign",
         "@tink_cc//jwt:jwt_public_key_verify",
         "@tink_cc//jwt:jwt_signature_config",
         "@tink_cc//jwt:jwt_validator",
         "@tink_cc//jwt:raw_jwt",
-        "@tink_cc//jwt:verified_jwt",
+        "@tink_cc//util:status",
     ],
 )
 
@@ -39,6 +33,10 @@ sh_test(
     srcs = ["jwt_signature_cli_test.sh"],
     args = [
         "$(rootpath :jwt_signature_cli)",
+        "$(rootpaths :jwt_signature_keysets)",
     ],
-    data = [":jwt_signature_cli"],
+    data = [
+        ":jwt_signature_cli",
+        ":jwt_signature_keysets",
+    ],
 )
