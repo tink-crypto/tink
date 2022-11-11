@@ -37,7 +37,7 @@ readonly -A PYTHON_VERSIONS
 export TINK_PYTHON_ROOT_PATH="${PWD}"
 
 readonly BAZEL_VERSION="$(cat ${TINK_PYTHON_ROOT_PATH}/.bazelversion)"
-readonly PROTOC_VERSION="3.19.3"
+readonly PROTOC_VERSION="3.20.3"
 
 # Get dependencies which are needed for building Tink.
 
