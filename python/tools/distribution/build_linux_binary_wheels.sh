@@ -37,7 +37,8 @@ readonly -A PYTHON_VERSIONS
 export TINK_PYTHON_ROOT_PATH="${PWD}"
 
 readonly BAZEL_VERSION="$(cat ${TINK_PYTHON_ROOT_PATH}/.bazelversion)"
-readonly PROTOC_VERSION="3.20.3"
+# Contains python version 4.21.9 of protobuf
+readonly PROTOC_RELEASE_TAG="21.9"
 
 # Get dependencies which are needed for building Tink.
 
@@ -47,8 +48,8 @@ chmod +x "bazel-${BAZEL_VERSION}-installer-linux-x86_64.sh"
 ./"bazel-${BAZEL_VERSION}-installer-linux-x86_64.sh"
 
 # Install protoc. Needed for protocol buffer compilation.
-PROTOC_ZIP="protoc-${PROTOC_VERSION}-linux-x86_64.zip"
-curl -OL "https://github.com/protocolbuffers/protobuf/releases/download/v${PROTOC_VERSION}/${PROTOC_ZIP}"
+PROTOC_ZIP="protoc-${PROTOC_RELEASE_TAG}-linux-x86_64.zip"
+curl -OL "https://github.com/protocolbuffers/protobuf/releases/download/v${PROTOC_RELEASE_TAG}/${PROTOC_ZIP}"
 unzip -o "${PROTOC_ZIP}" -d /usr/local bin/protoc
 
 # Setup required for Tink.
