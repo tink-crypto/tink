@@ -8,10 +8,6 @@ load("@tink_javascript//:tink_javascript_deps.bzl", "tink_javascript_deps")
 # Loads the Tink javascript dependencies.
 tink_javascript_deps()
 
-load("@com_google_protobuf//:protobuf_deps.bzl", "protobuf_deps")
-
-protobuf_deps()
-
 load("@build_bazel_rules_nodejs//:index.bzl", "yarn_install")
 
 yarn_install(
