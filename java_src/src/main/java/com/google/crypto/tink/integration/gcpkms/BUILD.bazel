@@ -45,6 +45,7 @@ java_plugin(
 
 java_library(
     name = "fake_cloud_kms",
+    testonly = 1,
     srcs = ["FakeCloudKms.java"],
     deps = [
         "//src/main/java/com/google/crypto/tink:aead",
