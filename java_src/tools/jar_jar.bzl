@@ -36,7 +36,7 @@ jar_jar = rule(
     attrs = {
         "input_jar": attr.label(allow_single_file = True),
         "rules": attr.label(allow_single_file = True),
-        "_jarjar": attr.label(executable = True, cfg = "host", default = Label("//tools:jarjar")),
+        "_jarjar": attr.label(executable = True, cfg = "exec", default = Label("//tools:jarjar")),
     },
     outputs = {
         "jar": "%{name}.jar",

@@ -89,7 +89,7 @@ java_single_jar = rule(
         ),
         "_singlejar": attr.label(
             default = Label("@bazel_tools//tools/jdk:singlejar"),
-            cfg = "host",
+            cfg = "exec",
             allow_single_file = True,
             executable = True,
         ),
