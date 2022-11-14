@@ -124,6 +124,9 @@ public final class SubtleUtil {
    */
   public static byte[] integer2Bytes(BigInteger num, int intendedLength)
       throws GeneralSecurityException {
+    if (num.signum() == -1) {
+      throw new IllegalArgumentException("integer must be nonnegative");
+    }
     byte[] b = num.toByteArray();
     if (b.length == intendedLength) {
       return b;
