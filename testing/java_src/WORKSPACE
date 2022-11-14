@@ -15,15 +15,15 @@ load("@tink_java//:tink_java_deps_init.bzl", "tink_java_deps_init")
 
 tink_java_deps_init()
 
-# Release from 2022-04-28.
+# Release from 2022-10-19.
 http_archive(
     name = "io_grpc_grpc_java",
-    sha256 = "c1b80883511ceb1e433fb2d4b2f6d85dca0c62a265a6a3e6695144610d6f65b8",
-    strip_prefix = "grpc-java-1.46.0",
-    url = "https://github.com/grpc/grpc-java/archive/v1.46.0.tar.gz",
-    # Replaces `protobuf_java_lite` with `protobuf_javalite`. Protobuf v3.19.3
-    # doesn't expose a `protobuf_java_lite` target.
-    patches = ["@testing_java//third_party:io_grpc_grpc_java_1_46_0.diff"],
+    sha256 = "992f757b022bb40d2db07a4924f169c0abacbbddcae8f32edb99921683fdffe9",
+    strip_prefix = "grpc-java-1.50.2",
+    url = "https://github.com/grpc/grpc-java/archive/v1.50.2.tar.gz",
+    # Replaces `protobuf_java_lite` with `protobuf_javalite`. Protobuf
+    # does not expose a `protobuf_java_lite` target.
+    patches = ["@testing_java//third_party:io_grpc_grpc_java.diff"],
     patch_args = ["-p1"],
 )
 
