@@ -27,10 +27,34 @@ import tink_config
 from util import testing_servers
 from util import utilities
 
+# AWS Key with alias "unit-and-integration-testing"
 _AWS_KEY_URI = ('aws-kms://arn:aws:kms:us-east-2:235739564943:key/'
                 '3ee50705-5a82-4f5b-9753-05c4f473922f')
+_AWS_KEY_ALIAS_URI = ('aws-kms://arn:aws:kms:us-east-2:235739564943:alias/'
+                      'unit-and-integration-testing')
+
+
+# 2nd AWS Key with alias "unit-and-integration-testing-2"
+_AWS_KEY_2_URI = ('aws-kms://arn:aws:kms:us-east-2:235739564943:key/'
+                  'b3ca2efd-a8fb-47f2-b541-7e20f8c5cd11')
+_AWS_KEY_2_ALIAS_URI = ('aws-kms://arn:aws:kms:us-east-2:235739564943:alias/'
+                        'unit-and-integration-testing-2')
+
+_AWS_UNKNOWN_KEY_URI = ('aws-kms://arn:aws:kms:us-east-2:235739564943:key/'
+                        '4ee50705-5a82-4f5b-9753-05c4f473922f')
+_AWS_UNKNOWN_KEY_ALIAS_URI = (
+    'aws-kms://arn:aws:kms:us-east-2:235739564943:alias/'
+    'unknown-unit-and-integration-testing')
+
 _GCP_KEY_URI = ('gcp-kms://projects/tink-test-infrastructure/locations/global/'
                 'keyRings/unit-and-integration-testing/cryptoKeys/aead-key')
+_GCP_KEY_2_URI = (
+    'gcp-kms://projects/tink-test-infrastructure/locations/global/'
+    'keyRings/unit-and-integration-testing/cryptoKeys/aead2-key')
+_GCP_UNKNOWN_KEY_URI = (
+    'gcp-kms://projects/tink-test-infrastructure/locations/global/'
+    'keyRings/unit-and-integration-testing/cryptoKeys/unknown')
+
 
 _KMS_KEY_URI = {
     'GCP': _GCP_KEY_URI,
@@ -95,6 +119,22 @@ def _kms_aead_test_cases() -> Iterable[Tuple[str, str, str]]:
       yield (kms_service, encrypt_lang, decrypt_lang)
 
 
+def _two_key_uris_test_cases():
+  for lang in _SUPPORTED_LANGUAGES_FOR_KMS_AEAD.get('AWS', []):
+    yield (lang, _AWS_KEY_URI, _AWS_KEY_2_URI)
+    yield (lang, _AWS_KEY_ALIAS_URI, _AWS_KEY_2_ALIAS_URI)
+  for lang in _SUPPORTED_LANGUAGES_FOR_KMS_AEAD.get('GCP', []):
+    yield (lang, _GCP_KEY_URI, _GCP_KEY_2_URI)
+
+
+def _unknown_key_uris_test_cases():
+  for lang in _SUPPORTED_LANGUAGES_FOR_KMS_AEAD.get('AWS', []):
+    yield (lang, _AWS_UNKNOWN_KEY_URI)
+    yield (lang, _AWS_UNKNOWN_KEY_ALIAS_URI)
+  for lang in _SUPPORTED_LANGUAGES_FOR_KMS_AEAD.get('GCP', []):
+    yield (lang, _GCP_UNKNOWN_KEY_URI)
+
+
 class KmsAeadTest(parameterized.TestCase):
 
   @parameterized.parameters(_kms_aead_test_cases())
@@ -113,6 +153,50 @@ class KmsAeadTest(parameterized.TestCase):
         decrypt_lang, keyset, aead.Aead)
     output = decrypt_primitive.decrypt(ciphertext, associated_data)
     self.assertEqual(output, plaintext)
+
+  @parameterized.parameters(_two_key_uris_test_cases())
+  def test_cannot_decrypt_ciphertext_of_other_key_uri(self, lang, key_uri,
+                                                      key_uri_2):
+    keyset = testing_servers.new_keyset(
+        lang, aead.aead_key_templates.create_kms_aead_key_template(key_uri))
+    keyset_2 = testing_servers.new_keyset(
+        lang, aead.aead_key_templates.create_kms_aead_key_template(key_uri_2))
+
+    primitive = testing_servers.remote_primitive(
+        lang=lang, keyset=keyset, primitive_class=aead.Aead)
+    primitive_2 = testing_servers.remote_primitive(
+        lang=lang, keyset=keyset_2, primitive_class=aead.Aead)
+
+    plaintext = b'plaintext'
+    associated_data = b'associated_data'
+
+    ciphertext = primitive.encrypt(plaintext, associated_data)
+    ciphertext_2 = primitive_2.encrypt(plaintext, associated_data)
+
+    # Can be decrypted by the primtive that created the ciphertext.
+    self.assertEqual(primitive.decrypt(ciphertext, associated_data), plaintext)
+    self.assertEqual(
+        primitive_2.decrypt(ciphertext_2, associated_data), plaintext)
+
+    # Cannot be decrypted by the other primitive.
+    with self.assertRaises(tink.TinkError):
+      primitive.decrypt(ciphertext_2, associated_data)
+    with self.assertRaises(tink.TinkError):
+      primitive_2.decrypt(ciphertext, associated_data)
+
+  @parameterized.parameters(_unknown_key_uris_test_cases())
+  def test_encrypt_fails_with_unknown_key_uri(self, lang, unknown_key_uri):
+    key_template = aead.aead_key_templates.create_kms_aead_key_template(
+        unknown_key_uri)
+    keyset = testing_servers.new_keyset(lang, key_template)
+    primitive = testing_servers.remote_primitive(
+        lang=lang, keyset=keyset, primitive_class=aead.Aead)
+
+    plaintext = b'plaintext'
+    associated_data = b'associated_data'
+
+    with self.assertRaises(tink.TinkError):
+      primitive.encrypt(plaintext, associated_data)
 
 
 def _kms_envelope_aead_test_cases() -> Iterable[Tuple[str, str, str]]:
@@ -164,9 +248,6 @@ class KmsEnvelopeAeadTest(parameterized.TestCase):
         decrypt_lang, keyset, aead.Aead)
     with self.assertRaises(tink.TinkError, msg='decryption failed'):
       decrypt_primitive.decrypt(ciphertext, b'wrong aad')
-
-
-# TODO(b/242686943): That that two different key ids can't decrypt each other.
 
 if __name__ == '__main__':
   absltest.main()
