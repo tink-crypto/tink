@@ -29,12 +29,12 @@ http_archive(
 #   * @com_google_protobuf//:cc_toolchain
 #   * @com_google_protobuf//:java_toolchain
 # This statement defines the @com_google_protobuf repo.
-# Release from 2022-09-29.
+# Release X.21.9 from 2022-10-26.
 http_archive(
     name = "com_google_protobuf",
-    sha256 = "04e1ed9664d1325b43723b6a62a4a41bf6b2b90ac72b5daee288365aad0ea47d",
-    strip_prefix = "protobuf-3.20.3",
-    urls = ["https://github.com/protocolbuffers/protobuf/archive/v3.20.3.zip"],
+    strip_prefix = "protobuf-21.9",
+    urls = ["https://github.com/protocolbuffers/protobuf/archive/refs/tags/v21.9.zip"],
+    sha256 = "5babb8571f1cceafe0c18e13ddb3be556e87e12ceea3463d6b0d0064e6cc1ac3",
 )
 
 load("@com_google_protobuf//:protobuf_deps.bzl", "protobuf_deps")
