@@ -178,7 +178,8 @@ install_tink_via_pip() {
 }
 
 install_temp_protoc() {
-  local protoc_version='3.19.3'
+  ## Use protoc version X.21.9.
+  local protoc_version='21.9'
   local protoc_platform
   case "${PLATFORM}" in
     'linux')

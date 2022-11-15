@@ -24,7 +24,8 @@
 # Usage:
 #   source ./kokoro/testutils/install_protoc.sh [version]
 
-readonly DEFAULT_PROTOC_VERSION="3.20.3"
+## Per default, use X.21.9.
+readonly DEFAULT_PROTOC_VERSION="21.9"
 
 install_temp_protoc() {
   local protoc_version="${1:-${DEFAULT_PROTOC_VERSION}}"
