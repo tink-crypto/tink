@@ -254,6 +254,25 @@ java_library(
     ],
 )
 
+java_library(
+    name = "aead_key",
+    srcs = ["AeadKey.java"],
+    deps = [
+        ":aead_parameters",
+        "//src/main/java/com/google/crypto/tink:key",
+        "//src/main/java/com/google/crypto/tink/util:bytes",
+    ],
+)
+
+java_library(
+    name = "aead_parameters",
+    srcs = ["AeadParameters.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink:parameters",
+        "@maven//:com_google_errorprone_error_prone_annotations",
+    ],
+)
+
 # Android libraries
 
 android_library(
@@ -503,5 +522,24 @@ android_library(
         "//proto:config_java_proto_lite",
         "//src/main/java/com/google/crypto/tink/config:tink_fips-android",
         "//src/main/java/com/google/crypto/tink/mac:mac_config-android",
+    ],
+)
+
+android_library(
+    name = "aead_key-android",
+    srcs = ["AeadKey.java"],
+    deps = [
+        ":aead_parameters-android",
+        "//src/main/java/com/google/crypto/tink:key-android",
+        "//src/main/java/com/google/crypto/tink/util:bytes-android",
+    ],
+)
+
+android_library(
+    name = "aead_parameters-android",
+    srcs = ["AeadParameters.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink:parameters-android",
+        "@maven//:com_google_errorprone_error_prone_annotations",
     ],
 )
