@@ -349,3 +349,16 @@ java_test(
         "@maven//:junit_junit",
     ],
 )
+
+java_test(
+    name = "EcdsaParametersTest",
+    size = "small",
+    srcs = ["EcdsaParametersTest.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink/internal:elliptic_curves_util",
+        "//src/main/java/com/google/crypto/tink/mac:hmac_parameters",
+        "//src/main/java/com/google/crypto/tink/signature:ecdsa_parameters",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
