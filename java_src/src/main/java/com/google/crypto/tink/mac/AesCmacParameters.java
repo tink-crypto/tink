@@ -89,8 +89,14 @@ public final class AesCmacParameters extends MacParameters {
     }
 
     public AesCmacParameters build() throws GeneralSecurityException {
-      if (keySizeBytes == null || tagSizeBytes == null) {
-        throw new GeneralSecurityException("Key size and/or tag size not set");
+      if (keySizeBytes == null) {
+        throw new GeneralSecurityException("key size not set");
+      }
+      if (tagSizeBytes == null) {
+        throw new GeneralSecurityException("tag size not set");
+      }
+      if (variant == null) {
+        throw new GeneralSecurityException("variant not set");
       }
       return new AesCmacParameters(keySizeBytes, tagSizeBytes, variant);
     }

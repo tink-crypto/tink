@@ -174,6 +174,9 @@ public final class HmacParameters extends MacParameters {
       if (hashType == null) {
         throw new GeneralSecurityException("hash type is not set");
       }
+      if (variant == null) {
+        throw new GeneralSecurityException("variant is not set");
+      }
       if (keySizeBytes < 16) {
         throw new InvalidAlgorithmParameterException(
             String.format("Invalid key size in bytes %d; must be at least 16 bytes", keySizeBytes));

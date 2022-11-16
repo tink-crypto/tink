@@ -98,6 +98,19 @@ public final class HmacParametersTest {
   }
 
   @Test
+  public void buildWithVariantSetToNull_fails() throws Exception {
+    assertThrows(
+        GeneralSecurityException.class,
+        () ->
+            HmacParameters.builder()
+                .setKeySizeBytes(16)
+                .setTagSizeBytes(21)
+                .setHashType(HmacParameters.HashType.SHA256)
+                .setVariant(null)
+                .build());
+  }
+
+  @Test
   public void buildParametersWithNoPrefix() throws Exception {
     HmacParameters parameters =
         HmacParameters.builder()
