@@ -44,6 +44,8 @@ func TestKeyTemplates(t *testing.T) {
 			template: signature.ECDSAP256KeyWithoutPrefixTemplate()},
 		{name: "ECDSA_P384_NO_PREFIX",
 			template: signature.ECDSAP384KeyWithoutPrefixTemplate()},
+		{name: "ECDSA_P384_SHA384_NO_PREFIX",
+			template: signature.ECDSAP384SHA384KeyWithoutPrefixTemplate()},
 		{name: "ECDSA_P521_NO_PREFIX",
 			template: signature.ECDSAP521KeyWithoutPrefixTemplate()},
 		{name: "RSA_SSA_PKCS1_3072_SHA256_F4",

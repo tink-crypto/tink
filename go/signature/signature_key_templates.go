@@ -97,6 +97,18 @@ func ECDSAP384SHA384KeyTemplate() *tinkpb.KeyTemplate {
 		tinkpb.OutputPrefixType_TINK)
 }
 
+// ECDSAP384SHA384KeyWithoutPrefixTemplate is a KeyTemplate that generates a new ECDSA private key with the following parameters:
+//   - Hash function: SHA384
+//   - Curve: NIST P-384
+//   - Signature encoding: DER
+//   - Output prefix type: RAW
+func ECDSAP384SHA384KeyWithoutPrefixTemplate() *tinkpb.KeyTemplate {
+	return createECDSAKeyTemplate(commonpb.HashType_SHA384,
+		commonpb.EllipticCurveType_NIST_P384,
+		ecdsapb.EcdsaSignatureEncoding_DER,
+		tinkpb.OutputPrefixType_RAW)
+}
+
 // ECDSAP384SHA512KeyTemplate is a KeyTemplate that generates a new ECDSA private key with the following parameters:
 //   - Hash function: SHA512
 //   - Curve: NIST P-384
@@ -139,7 +151,7 @@ func ECDSAP521KeyTemplate() *tinkpb.KeyTemplate {
 //   - Hash function: SHA512
 //   - Curve: NIST P-521
 //   - Signature encoding: DER
-//   - Output prefix type: TINK
+//   - Output prefix type: RAW
 func ECDSAP521KeyWithoutPrefixTemplate() *tinkpb.KeyTemplate {
 	return createECDSAKeyTemplate(commonpb.HashType_SHA512,
 		commonpb.EllipticCurveType_NIST_P521,
