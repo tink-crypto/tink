@@ -28,8 +28,8 @@ public final class AesCmacParameters extends MacParameters {
   /**
    * Describes details of the mac computation.
    *
-   * <p>The usual AES CMAC key is used for variant "NO_PREFIX". Other variants slightly change how
-   * the mac is computed, or add a prefix to every computation depending on the key id.
+   * <p>The standard AES CMAC key is used for variant "NO_PREFIX". Other variants slightly change
+   * how the mac is computed, or add a prefix to every computation depending on the key id.
    */
   @Immutable
   public static final class Variant {
