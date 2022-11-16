@@ -86,8 +86,12 @@ public final class JsonKeysetWriter implements KeysetWriter {
    * <p>This method only works on Android API level 26 or newer.
    */
   @RequiresApi(26) // https://developer.android.com/reference/java/nio/file/Path
+  @InlineMe(
+      replacement = "JsonKeysetWriter.withOutputStream(new FileOutputStream(path.toFile()))",
+      imports = {"com.google.crypto.tink.JsonKeysetWriter", "java.io.FileOutputStream"})
+  @Deprecated
   public static KeysetWriter withPath(Path path) throws IOException {
-    return withFile(path.toFile());
+    return withOutputStream(new FileOutputStream(path.toFile()));
   }
 
   @Override
