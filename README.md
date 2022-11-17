@@ -162,6 +162,7 @@ Tink is maintained by (A-Z):
 -   Laurent Simon
 -   Elizaveta Tretiakova
 -   Jürg Wullschleger
+-   Federico Zalcberg
 
 Alumni:
 
