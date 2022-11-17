@@ -22,6 +22,7 @@ import com.google.crypto.tink.annotations.Alpha;
 import com.google.crypto.tink.util.Bytes;
 import com.google.crypto.tink.util.SecretBytes;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
+import com.google.errorprone.annotations.Immutable;
 import com.google.errorprone.annotations.RestrictedApi;
 import java.nio.ByteBuffer;
 import java.security.GeneralSecurityException;
@@ -35,6 +36,7 @@ import javax.annotation.Nullable;
  * future.
  */
 @Alpha
+@Immutable
 public final class HmacKey extends MacKey {
   private final HmacParameters parameters;
   private final SecretBytes keyBytes;
@@ -43,8 +45,8 @@ public final class HmacKey extends MacKey {
 
   /** Builder for HmacKey. */
   public static class Builder {
-    private HmacParameters parameters = null;
-    private SecretBytes keyBytes = null;
+    @Nullable private HmacParameters parameters = null;
+    @Nullable private SecretBytes keyBytes = null;
     @Nullable private Integer idRequirement = null;
 
     private Builder() {}
@@ -92,12 +94,12 @@ public final class HmacKey extends MacKey {
 
       if (parameters.hasIdRequirement() && idRequirement == null) {
         throw new GeneralSecurityException(
-            "Cannot create key without ID requirement with format with ID requirement");
+            "Cannot create key without ID requirement with parameters with ID requirement");
       }
 
       if (!parameters.hasIdRequirement() && idRequirement != null) {
         throw new GeneralSecurityException(
-            "Cannot create key with ID requirement with format without ID requirement");
+            "Cannot create key with ID requirement with parameters without ID requirement");
       }
       Bytes outputPrefix = getOutputPrefix();
       return new HmacKey(parameters, keyBytes, outputPrefix, idRequirement);

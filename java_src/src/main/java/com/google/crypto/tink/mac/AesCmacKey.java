@@ -21,6 +21,7 @@ import com.google.crypto.tink.Key;
 import com.google.crypto.tink.util.Bytes;
 import com.google.crypto.tink.util.SecretBytes;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
+import com.google.errorprone.annotations.Immutable;
 import com.google.errorprone.annotations.RestrictedApi;
 import java.nio.ByteBuffer;
 import java.security.GeneralSecurityException;
@@ -33,6 +34,7 @@ import javax.annotation.Nullable;
  * <p>AES-CMAC is specified in RFC 4493. Tink supports AES-CMAC with keys of length 32 bytes (256
  * bits) only.
  */
+@Immutable
 public final class AesCmacKey extends MacKey {
   private final AesCmacParameters parameters;
   private final SecretBytes aesKeyBytes;
@@ -43,8 +45,8 @@ public final class AesCmacKey extends MacKey {
    * Builder for AesCmacKey.
    */
   public static class Builder {
-    private AesCmacParameters parameters = null;
-    private SecretBytes aesKeyBytes = null;
+    @Nullable private AesCmacParameters parameters = null;
+    @Nullable private SecretBytes aesKeyBytes = null;
     @Nullable private Integer idRequirement = null;
 
     private Builder() {}
@@ -93,12 +95,12 @@ public final class AesCmacKey extends MacKey {
 
       if (parameters.hasIdRequirement() && idRequirement == null) {
         throw new GeneralSecurityException(
-            "Cannot create key without ID requirement with format with ID requirement");
+            "Cannot create key without ID requirement with parameters with ID requirement");
       }
 
       if (!parameters.hasIdRequirement() && idRequirement != null) {
         throw new GeneralSecurityException(
-            "Cannot create key with ID requirement with format without ID requirement");
+            "Cannot create key with ID requirement with parameters without ID requirement");
       }
       Bytes outputPrefix = getOutputPrefix();
       return new AesCmacKey(parameters, aesKeyBytes, outputPrefix, idRequirement);
