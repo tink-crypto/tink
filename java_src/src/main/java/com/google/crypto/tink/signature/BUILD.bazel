@@ -342,6 +342,22 @@ java_library(
     ],
 )
 
+java_library(
+    name = "ecdsa_public_key",
+    srcs = ["EcdsaPublicKey.java"],
+    deps = [
+        ":ecdsa_parameters",
+        ":signature_public_key",
+        "//src/main/java/com/google/crypto/tink:accesses_partial_key",
+        "//src/main/java/com/google/crypto/tink:key",
+        "//src/main/java/com/google/crypto/tink/annotations:alpha",
+        "//src/main/java/com/google/crypto/tink/internal:elliptic_curves_util",
+        "//src/main/java/com/google/crypto/tink/util:bytes",
+        "@maven//:com_google_code_findbugs_jsr305",
+        "@maven//:com_google_errorprone_error_prone_annotations",
+    ],
+)
+
 # Android packages
 
 android_library(
@@ -678,6 +694,22 @@ android_library(
         ":signature_parameters-android",
         "//src/main/java/com/google/crypto/tink/annotations:alpha-android",
         "//src/main/java/com/google/crypto/tink/internal:elliptic_curves_util-android",
+        "@maven//:com_google_errorprone_error_prone_annotations",
+    ],
+)
+
+android_library(
+    name = "ecdsa_public_key-android",
+    srcs = ["EcdsaPublicKey.java"],
+    deps = [
+        ":ecdsa_parameters-android",
+        ":signature_public_key-android",
+        "//src/main/java/com/google/crypto/tink:accesses_partial_key-android",
+        "//src/main/java/com/google/crypto/tink:key-android",
+        "//src/main/java/com/google/crypto/tink/annotations:alpha-android",
+        "//src/main/java/com/google/crypto/tink/internal:elliptic_curves_util-android",
+        "//src/main/java/com/google/crypto/tink/util:bytes-android",
+        "@maven//:com_google_code_findbugs_jsr305",
         "@maven//:com_google_errorprone_error_prone_annotations",
     ],
 )
