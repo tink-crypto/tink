@@ -17,12 +17,9 @@
 package services
 
 import (
-	"bytes"
 	"context"
 
 	"github.com/google/tink/go/daead"
-	"github.com/google/tink/go/insecurecleartextkeyset"
-	"github.com/google/tink/go/keyset"
 	pb "github.com/google/tink/testing/go/proto/testing_api_go_grpc"
 )
 
@@ -32,8 +29,7 @@ type DeterministicAEADService struct {
 }
 
 func (s *DeterministicAEADService) Create(ctx context.Context, req *pb.CreationRequest) (*pb.CreationResponse, error) {
-	reader := keyset.NewBinaryReader(bytes.NewReader(req.GetAnnotatedKeyset().GetSerializedKeyset()))
-	handle, err := insecurecleartextkeyset.Read(reader)
+	handle, err := toKeysetHandle(req.GetAnnotatedKeyset())
 	if err != nil {
 		return &pb.CreationResponse{Err: err.Error()}, nil
 	}
@@ -45,8 +41,7 @@ func (s *DeterministicAEADService) Create(ctx context.Context, req *pb.CreationR
 }
 
 func (s *DeterministicAEADService) EncryptDeterministically(ctx context.Context, req *pb.DeterministicAeadEncryptRequest) (*pb.DeterministicAeadEncryptResponse, error) {
-	reader := keyset.NewBinaryReader(bytes.NewReader(req.GetAnnotatedKeyset().GetSerializedKeyset()))
-	handle, err := insecurecleartextkeyset.Read(reader)
+	handle, err := toKeysetHandle(req.GetAnnotatedKeyset())
 	if err != nil {
 		return nil, err
 	}
@@ -64,8 +59,7 @@ func (s *DeterministicAEADService) EncryptDeterministically(ctx context.Context,
 }
 
 func (s *DeterministicAEADService) DecryptDeterministically(ctx context.Context, req *pb.DeterministicAeadDecryptRequest) (*pb.DeterministicAeadDecryptResponse, error) {
-	reader := keyset.NewBinaryReader(bytes.NewReader(req.GetAnnotatedKeyset().GetSerializedKeyset()))
-	handle, err := insecurecleartextkeyset.Read(reader)
+	handle, err := toKeysetHandle(req.GetAnnotatedKeyset())
 	if err != nil {
 		return nil, err
 	}

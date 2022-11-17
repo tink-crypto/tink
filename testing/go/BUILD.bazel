@@ -18,6 +18,7 @@ go_library(
     name = "services",
     srcs = [
         "aead_service.go",
+        "annotated_keyset.go",
         "daead_service.go",
         "hybrid_service.go",
         "jwt_service.go",

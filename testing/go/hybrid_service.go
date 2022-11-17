@@ -17,12 +17,9 @@
 package services
 
 import (
-	"bytes"
 	"context"
 
 	"github.com/google/tink/go/hybrid"
-	"github.com/google/tink/go/insecurecleartextkeyset"
-	"github.com/google/tink/go/keyset"
 	pb "github.com/google/tink/testing/go/proto/testing_api_go_grpc"
 )
 
@@ -32,8 +29,7 @@ type HybridService struct {
 }
 
 func (s *HybridService) CreateHybridEncrypt(ctx context.Context, req *pb.CreationRequest) (*pb.CreationResponse, error) {
-	reader := keyset.NewBinaryReader(bytes.NewReader(req.GetAnnotatedKeyset().GetSerializedKeyset()))
-	handle, err := insecurecleartextkeyset.Read(reader)
+	handle, err := toKeysetHandle(req.GetAnnotatedKeyset())
 	if err != nil {
 		return &pb.CreationResponse{Err: err.Error()}, nil
 	}
@@ -45,8 +41,7 @@ func (s *HybridService) CreateHybridEncrypt(ctx context.Context, req *pb.Creatio
 }
 
 func (s *HybridService) CreateHybridDecrypt(ctx context.Context, req *pb.CreationRequest) (*pb.CreationResponse, error) {
-	reader := keyset.NewBinaryReader(bytes.NewReader(req.GetAnnotatedKeyset().GetSerializedKeyset()))
-	handle, err := insecurecleartextkeyset.Read(reader)
+	handle, err := toKeysetHandle(req.GetAnnotatedKeyset())
 	if err != nil {
 		return &pb.CreationResponse{Err: err.Error()}, nil
 	}
@@ -58,8 +53,7 @@ func (s *HybridService) CreateHybridDecrypt(ctx context.Context, req *pb.Creatio
 }
 
 func (s *HybridService) Encrypt(ctx context.Context, req *pb.HybridEncryptRequest) (*pb.HybridEncryptResponse, error) {
-	reader := keyset.NewBinaryReader(bytes.NewReader(req.GetPublicAnnotatedKeyset().GetSerializedKeyset()))
-	handle, err := insecurecleartextkeyset.Read(reader)
+	handle, err := toKeysetHandle(req.GetPublicAnnotatedKeyset())
 	if err != nil {
 		return &pb.HybridEncryptResponse{
 			Result: &pb.HybridEncryptResponse_Err{err.Error()}}, nil
@@ -79,8 +73,7 @@ func (s *HybridService) Encrypt(ctx context.Context, req *pb.HybridEncryptReques
 }
 
 func (s *HybridService) Decrypt(ctx context.Context, req *pb.HybridDecryptRequest) (*pb.HybridDecryptResponse, error) {
-	reader := keyset.NewBinaryReader(bytes.NewReader(req.GetPrivateAnnotatedKeyset().GetSerializedKeyset()))
-	handle, err := insecurecleartextkeyset.Read(reader)
+	handle, err := toKeysetHandle(req.GetPrivateAnnotatedKeyset())
 	if err != nil {
 		return &pb.HybridDecryptResponse{
 			Result: &pb.HybridDecryptResponse_Err{err.Error()}}, nil

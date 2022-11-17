@@ -17,12 +17,9 @@
 package services
 
 import (
-	"bytes"
 	"context"
 
 	"github.com/google/tink/go/aead"
-	"github.com/google/tink/go/insecurecleartextkeyset"
-	"github.com/google/tink/go/keyset"
 	pb "github.com/google/tink/testing/go/proto/testing_api_go_grpc"
 )
 
@@ -32,8 +29,7 @@ type AEADService struct {
 }
 
 func (s *AEADService) Create(ctx context.Context, req *pb.CreationRequest) (*pb.CreationResponse, error) {
-	reader := keyset.NewBinaryReader(bytes.NewReader(req.GetAnnotatedKeyset().GetSerializedKeyset()))
-	handle, err := insecurecleartextkeyset.Read(reader)
+	handle, err := toKeysetHandle(req.GetAnnotatedKeyset())
 	if err != nil {
 		return &pb.CreationResponse{Err: err.Error()}, nil
 	}
@@ -45,8 +41,7 @@ func (s *AEADService) Create(ctx context.Context, req *pb.CreationRequest) (*pb.
 }
 
 func (s *AEADService) Encrypt(ctx context.Context, req *pb.AeadEncryptRequest) (*pb.AeadEncryptResponse, error) {
-	reader := keyset.NewBinaryReader(bytes.NewReader(req.GetAnnotatedKeyset().GetSerializedKeyset()))
-	handle, err := insecurecleartextkeyset.Read(reader)
+	handle, err := toKeysetHandle(req.GetAnnotatedKeyset())
 	if err != nil {
 		return nil, err
 	}
@@ -64,8 +59,7 @@ func (s *AEADService) Encrypt(ctx context.Context, req *pb.AeadEncryptRequest) (
 }
 
 func (s *AEADService) Decrypt(ctx context.Context, req *pb.AeadDecryptRequest) (*pb.AeadDecryptResponse, error) {
-	reader := keyset.NewBinaryReader(bytes.NewReader(req.GetAnnotatedKeyset().GetSerializedKeyset()))
-	handle, err := insecurecleartextkeyset.Read(reader)
+	handle, err := toKeysetHandle(req.GetAnnotatedKeyset())
 	if err != nil {
 		return nil, err
 	}

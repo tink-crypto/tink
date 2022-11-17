@@ -17,11 +17,8 @@
 package services
 
 import (
-	"bytes"
 	"context"
 
-	"github.com/google/tink/go/insecurecleartextkeyset"
-	"github.com/google/tink/go/keyset"
 	"github.com/google/tink/go/prf"
 	pb "github.com/google/tink/testing/go/proto/testing_api_go_grpc"
 )
@@ -32,8 +29,7 @@ type PrfSetService struct {
 }
 
 func (s *PrfSetService) Create(ctx context.Context, req *pb.CreationRequest) (*pb.CreationResponse, error) {
-	reader := keyset.NewBinaryReader(bytes.NewReader(req.GetAnnotatedKeyset().GetSerializedKeyset()))
-	handle, err := insecurecleartextkeyset.Read(reader)
+	handle, err := toKeysetHandle(req.GetAnnotatedKeyset())
 	if err != nil {
 		return &pb.CreationResponse{Err: err.Error()}, nil
 	}
@@ -45,8 +41,7 @@ func (s *PrfSetService) Create(ctx context.Context, req *pb.CreationRequest) (*p
 }
 
 func (s *PrfSetService) KeyIds(ctx context.Context, req *pb.PrfSetKeyIdsRequest) (*pb.PrfSetKeyIdsResponse, error) {
-	reader := keyset.NewBinaryReader(bytes.NewReader(req.GetAnnotatedKeyset().GetSerializedKeyset()))
-	handle, err := insecurecleartextkeyset.Read(reader)
+	handle, err := toKeysetHandle(req.GetAnnotatedKeyset())
 	if err != nil {
 		return &pb.PrfSetKeyIdsResponse{
 			Result: &pb.PrfSetKeyIdsResponse_Err{err.Error()}}, nil
@@ -66,8 +61,7 @@ func (s *PrfSetService) KeyIds(ctx context.Context, req *pb.PrfSetKeyIdsRequest)
 }
 
 func (s *PrfSetService) Compute(ctx context.Context, req *pb.PrfSetComputeRequest) (*pb.PrfSetComputeResponse, error) {
-	reader := keyset.NewBinaryReader(bytes.NewReader(req.GetAnnotatedKeyset().GetSerializedKeyset()))
-	handle, err := insecurecleartextkeyset.Read(reader)
+	handle, err := toKeysetHandle(req.GetAnnotatedKeyset())
 	if err != nil {
 		return &pb.PrfSetComputeResponse{
 			Result: &pb.PrfSetComputeResponse_Err{err.Error()}}, nil
