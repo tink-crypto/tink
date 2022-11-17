@@ -25,6 +25,7 @@
 #include <string>
 #include <utility>
 
+#include "absl/container/flat_hash_map.h"
 #include "tink/binary_keyset_reader.h"
 #include "tink/cleartext_keyset_handle.h"
 #include "tink/keyset_handle.h"
@@ -46,8 +47,13 @@ PrimitiveFromSerializedBinaryProtoKeyset(
   if (!reader.ok()) {
     return reader.status();
   }
+  absl::flat_hash_map<std::string, std::string> annotations;
+  for (const auto& annotation : annotated_keyset.annotations()) {
+    annotations[annotation.first] = annotation.second;
+  }
   crypto::tink::util::StatusOr<std::unique_ptr<crypto::tink::KeysetHandle>>
-      handle = crypto::tink::CleartextKeysetHandle::Read(*std::move(reader));
+      handle = crypto::tink::CleartextKeysetHandle::Read(*std::move(reader),
+                                                         annotations);
   if (!handle.ok()) {
     return handle.status();
   }

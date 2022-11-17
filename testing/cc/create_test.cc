@@ -101,6 +101,16 @@ TEST_F(CreateTest, PrimitiveCreationWrongPrimitiveFails) {
   ASSERT_FALSE(aead.status().ok());
 }
 
+TEST_F(CreateTest, PrimitiveWithAnnotationsWorks) {
+  AnnotatedKeyset annotated_keyset;
+  annotated_keyset.set_serialized_keyset(ValidAeadKeyset());
+  annotated_keyset.mutable_annotations()->insert({"key1", "value1"});
+  crypto::tink::util::StatusOr<std::unique_ptr<crypto::tink::Aead>> aead =
+      PrimitiveFromSerializedBinaryProtoKeyset<crypto::tink::Aead>(
+          annotated_keyset);
+  ASSERT_TRUE(aead.status().ok());
+  EXPECT_THAT(*aead, NotNull());
+}
 
 }  // namespace
 

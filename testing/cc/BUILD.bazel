@@ -316,6 +316,7 @@ cc_library(
     hdrs = ["create.h"],
     deps = [
         ":testing_api_cpp_library",
+        "@com_google_absl//absl/container:flat_hash_map",
         "@tink_cc//:binary_keyset_reader",
         "@tink_cc//:cleartext_keyset_handle",
         "@tink_cc//:keyset_handle",
