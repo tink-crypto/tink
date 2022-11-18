@@ -39,6 +39,7 @@ karma_web_test_suite(
     deps = [
         "//aead:aead_tests",
         "//hybrid:hybrid_tests",
+        "//hybrid/internal/hpke:hpke_tests",
         "//internal:internal_tests",
         "//signature:signature_tests",
         "//subtle:subtle_tests",
@@ -54,8 +55,8 @@ ng_package(
     name = "tink-crypto",
     package_name = "tink-crypto",
     srcs = [
-        "package.json",
         "README.md",
+        "package.json",
     ],
     entry_point = ":index.ts",
     deps = [":javascript"],

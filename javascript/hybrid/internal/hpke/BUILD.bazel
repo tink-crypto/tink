@@ -5,11 +5,28 @@ package(default_visibility = ["//:__subpackages__"])
 ts_library(
     name = "hpke",
     srcs = [
+        "hkdf_hpke_kdf.ts",
         "hpke_aead.ts",
         "hpke_kdf.ts",
         "hpke_kem.ts",
         "hpke_kem_encap_output.ts",
         "hpke_kem_private_key.ts",
+        "hpke_util.ts",
     ],
     module_name = "tink-crypto/hybrid/internal/hpke",
+    deps = [
+        "//exception",
+        "//subtle",
+    ],
+)
+
+ts_library(
+    name = "hpke_tests",
+    testonly = True,
+    srcs = ["hkdf_hpke_kdf_test.ts"],
+    deps = [
+        ":hpke",
+        "//subtle",
+        "@npm//@types/jasmine",
+    ],
 )

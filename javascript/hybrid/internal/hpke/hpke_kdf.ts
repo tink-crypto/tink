@@ -21,9 +21,12 @@ export interface HpkeKdf {
    * https://www.rfc-editor.org/rfc/rfc9180.html#section-4-9.
    *
    */
-  labeledExtract(
-      ikm: Uint8Array, ikmLabel: string, suiteId: Uint8Array,
-      salt?: Uint8Array): Promise<Uint8Array>;
+  labeledExtract({ikm, ikmLabel, suiteId, salt}: {
+    ikm: Uint8Array,
+    ikmLabel: string,
+    suiteId: Uint8Array,
+    salt?: Uint8Array
+  }): Promise<Uint8Array>;
 
   /**
    * Expands pseudorandom key `prk` into `length` pseudorandom bytes
@@ -34,9 +37,13 @@ export interface HpkeKdf {
    * https://www.rfc-editor.org/rfc/rfc9180.html#section-4-10.
    *
    */
-  labeledExpand(
-      prk: Uint8Array, info: Uint8Array, infoLabel: string, suiteId: Uint8Array,
-      length: number): Promise<Uint8Array>;
+  labeledExpand({prk, info, infoLabel, suiteId, length}: {
+    prk: Uint8Array,
+    info: Uint8Array,
+    infoLabel: string,
+    suiteId: Uint8Array,
+    length: number
+  }): Promise<Uint8Array>;
 
   /**
    * Combines `labeledExtract` and `labeledExpand` into a single method.
@@ -45,10 +52,15 @@ export interface HpkeKdf {
    * https://www.rfc-editor.org/rfc/rfc9180.html#section-4.1-3.
    *
    */
-  extractAndExpand(
-      ikm: Uint8Array, ikmLabel: string, info: Uint8Array, infoLabel: string,
-      suiteId: Uint8Array, length: number,
-      salt?: Uint8Array): Promise<Uint8Array>;
+  extractAndExpand({ikm, ikmLabel, info, infoLabel, suiteId, length, salt}: {
+    ikm: Uint8Array,
+    ikmLabel: string,
+    info: Uint8Array,
+    infoLabel: string,
+    suiteId: Uint8Array,
+    length: number,
+    salt?: Uint8Array
+  }): Promise<Uint8Array>;
 
   /**
    * Returns the HPKE KDF algorithm identifier for the underlying
