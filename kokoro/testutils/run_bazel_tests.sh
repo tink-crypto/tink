@@ -42,6 +42,7 @@ readonly PLATFORM="$(uname | tr '[:upper:]' '[:lower:]')"
 MANUAL_ONLY="false"
 WORKSPACE_DIR=
 MANUAL_TARGETS=
+BAZEL_CMD="bazel"
 
 #######################################
 # Process command line arguments.
@@ -74,6 +75,14 @@ process_args() {
   if [[ "${MANUAL_ONLY}" == "true" ]] && (( ${#MANUAL_TARGETS[@]} == 0 )); then
     usage
   fi
+
+  # Use Bazelisk (https://github.com/bazelbuild/bazelisk) if available.
+  if command -v "bazelisk" &> /dev/null; then
+    BAZEL_CMD="bazelisk"
+    "${BAZEL_CMD}" version
+  fi
+  "${BAZEL_CMD}" --version
+  readonly BAZEL_CMD
 }
 
 #######################################
@@ -107,19 +116,19 @@ main() {
   (
     cd "${workspace_dir}"
     if [[ "${MANUAL_ONLY}" == "false" ]]; then
-      time bazel build "${build_flags[@]}" -- ...
+      time "${BAZEL_CMD}" build "${build_flags[@]}" -- ...
       # Exit code 4 means targets build correctly but no tests were found. See
       # https://bazel.build/docs/scripts#exit-codes.
       bazel_test_return=0
-      time bazel test "${test_flags[@]}" -- ... || bazel_test_return="$?"
+      time "${BAZEL_CMD}" test "${test_flags[@]}" -- ... || bazel_test_return="$?"
       if (( $bazel_test_return != 0 && $bazel_test_return != 4 )); then
         return "${bazel_test_return}"
       fi
     fi
     # Run specific manual targets.
     if (( ${#MANUAL_TARGETS[@]} > 0 )); then
-      time bazel build "${build_flags[@]}" -- "${MANUAL_TARGETS[@]}"
-      time bazel test "${test_flags[@]}"  -- "${MANUAL_TARGETS[@]}"
+      time "${BAZEL_CMD}" build "${build_flags[@]}" -- "${MANUAL_TARGETS[@]}"
+      time "${BAZEL_CMD}" test "${test_flags[@]}"  -- "${MANUAL_TARGETS[@]}"
     fi
   )
 }
