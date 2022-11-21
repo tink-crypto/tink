@@ -67,3 +67,23 @@ android_library(
         "@maven//:com_google_errorprone_error_prone_annotations",
     ],
 )
+
+java_library(
+    name = "secret_big_integer",
+    srcs = ["SecretBigInteger.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink:secret_key_access",
+        "//src/main/java/com/google/crypto/tink/annotations:alpha",
+        "@maven//:com_google_errorprone_error_prone_annotations",
+    ],
+)
+
+android_library(
+    name = "secret_big_integer-android",
+    srcs = ["SecretBigInteger.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink:secret_key_access-android",
+        "//src/main/java/com/google/crypto/tink/annotations:alpha-android",
+        "@maven//:com_google_errorprone_error_prone_annotations",
+    ],
+)
