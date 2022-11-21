@@ -33,6 +33,7 @@ fi
 (yes || true) | "${ANDROID_HOME}/tools/bin/sdkmanager" \
   "build-tools;30.0.3" \
   "platform-tools" \
+  "platforms;android-26" \
   "platforms;android-29" \
   "platforms;android-30" \
   "platforms;android-31" \
