@@ -22,8 +22,11 @@ import com.google.errorprone.annotations.Immutable;
  *
  * <p>This class can be used to keep track of places where secret keys are accessed directly in
  * code, as opposed to indirectly via a primitive.
- **/
+ *
+ * @deprecated Use {@link com.google.crypto.tink.InsecureSecretKeyAccess} instead.
+ */
 @Immutable
+@Deprecated
 public final class SecretKeyAccess {
 
   private SecretKeyAccess() {}

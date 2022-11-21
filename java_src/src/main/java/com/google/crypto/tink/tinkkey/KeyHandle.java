@@ -28,8 +28,11 @@ import java.security.GeneralSecurityException;
  * Wraps a {@link TinkKey} and enforces access to the underlying {@link TinkKey} with {@link
  * KeyAccess}. Specifically, if the underlying {@link TinkKey} has a secret, then one can only get
  * it with a {@link SecretKeyAccess} instance.
+ *
+ * @deprecated Use {@link com.google.crypto.tink.Key} instead.
  */
 @Immutable
+@Deprecated
 public class KeyHandle {
 
   /**
