@@ -49,6 +49,8 @@ LIBRARY_NAME=
 POM_FILE=
 ARTIFACT_VERSION=
 
+# Other.
+BAZEL_CMD="bazel"
 MAVEN_ARGS=()
 
 parse_args() {
@@ -115,6 +117,11 @@ parse_args() {
       usage
       ;;
   esac
+
+  if command -v "bazelisk" &> /dev/null; then
+    BAZEL_CMD="bazelisk"
+  fi
+  readonly BAZEL_CMD
 
   readonly ACTION
   readonly LIBRARY_NAME
@@ -245,7 +252,7 @@ main() {
 
   local -r workspace_dir="$(pwd)"
 
-  print_and_do bazel build "${library}" "${src_jar}" "${javadoc}"
+  print_and_do "${BAZEL_CMD}" build "${library}" "${src_jar}" "${javadoc}"
 
   local -r library_file="$(echo_output_file "." "${library}")"
   local -r src_jar_file="$(echo_output_file "." "${src_jar}")"
