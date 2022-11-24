@@ -1,0 +1,9 @@
+licenses(["notice"])
+
+package(default_visibility = ["//:__subpackages__"])
+
+cc_library(
+    name = "tink_cc_pb_redirect",
+    hdrs = ["tink_cc_pb_redirect.h"],
+    deps = ["@tink_cc//proto:tink_cc_proto"],
+)
