@@ -13,16 +13,3 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 ################################################################################
-
-
-set -euo pipefail
-cd ${KOKORO_ARTIFACTS_DIR}/git/tink
-
-cd objc
-
-use_bazel.sh "$(cat .bazelversion)"
-bazel build -- //:aead //util/...
-
-## TODO(b/155060426) Reenable once the tests work.
-# time bazel build -- ...
-# time bazel test --test_output="errors" -- ...
