@@ -21,7 +21,6 @@ java_test(
 
 java_test(
     name = "EcdsaVerifyJceTest",
-    size = "small",
     srcs = ["EcdsaVerifyJceTest.java"],
     data = ["@wycheproof//testvectors:all"],
     tags = ["fips"],
