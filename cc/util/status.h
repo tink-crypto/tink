@@ -143,6 +143,7 @@ class Status {
   Status();
 
   // Make a Status from the specified error and message.
+  ABSL_DEPRECATED("Use the constructor with an absl::StatusCode.")
   Status(::crypto::tink::util::error::Code error,
          const std::string& error_message);
   // Abseil-compatible constructor from an error and a message
