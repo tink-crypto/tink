@@ -208,8 +208,10 @@ inline bool Status::operator!=(const Status& other) const {
   return !(*this == other);
 }
 
+ABSL_DEPRECATED("Use absl::StatusCodeToString with a StatusCode instead.")
 extern std::string ErrorCodeString(crypto::tink::util::error::Code error);
 
+ABSL_DEPRECATED("Use absl::StatusCode instead.")
 extern ::std::ostream& operator<<(::std::ostream& os,
                                   ::crypto::tink::util::error::Code code);
 extern ::std::ostream& operator<<(::std::ostream& os, const Status& other);
