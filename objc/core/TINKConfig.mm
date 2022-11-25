@@ -23,9 +23,6 @@
 #import "TINKRegistryConfig.h"
 #import "util/TINKErrors.h"
 
-#include "tink/config.h"
-#include "tink/util/errors.h"
-
 @implementation TINKConfig
 
 + (BOOL)registerConfig:(TINKRegistryConfig *)config error:(NSError **)error {

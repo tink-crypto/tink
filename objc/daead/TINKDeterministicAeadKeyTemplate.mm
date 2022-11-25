@@ -21,7 +21,7 @@
 #include "absl/status/status.h"
 #include "tink/daead/deterministic_aead_key_templates.h"
 #include "tink/util/status.h"
-#include "proto/tink.pb.h"
+#include "third_party/tink/objc/proto_redirect/tink_cc_pb_redirect.h"
 
 #import "TINKKeyTemplate.h"
 #import "core/TINKKeyTemplate_Internal.h"

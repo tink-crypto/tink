@@ -25,7 +25,7 @@
 #include "absl/status/status.h"
 #include "tink/mac/mac_key_templates.h"
 #include "tink/util/status.h"
-#include "proto/tink.pb.h"
+#include "third_party/tink/objc/proto_redirect/tink_cc_pb_redirect.h"
 
 @implementation TINKMacKeyTemplate
 

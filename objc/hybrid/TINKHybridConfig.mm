@@ -23,7 +23,6 @@
 
 #include "tink/hybrid/hybrid_config.h"
 #include "tink/util/status.h"
-#include "proto/config.pb.h"
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wobjc-designated-initializers"

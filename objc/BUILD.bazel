@@ -109,6 +109,7 @@ ios_static_framework(
     ],
     bundle_name = "Tink",
     minimum_os_version = IOS_MINIMUM_OS,
+    tags = ["do_not_build_b155060426"],
     deps = [
         ":cleartext_keyset_handle",
         ":objc",
@@ -127,10 +128,9 @@ objc_library(
     ],
     visibility = ["//visibility:public"],
     deps = [
-        ":registry_config",
+        "//Tink:registry_config",
         "//Tink/util:errors",
         "@tink_cc//tink/config:tink_config",
-        "@tink_cc//tink/util:errors",
     ],
 )
 
@@ -142,8 +142,8 @@ objc_library(
     ],
     visibility = ["//visibility:public"],
     deps = [
-        ":keyset_reader",
-        ":tink_cc_pb",
+        "//Tink:keyset_reader",
+        "//Tink/proto_redirect:tink_cc_pb_redirect",
         "//Tink/util:errors",
         "//Tink/util:strings",
         "@com_google_absl//absl/status",
@@ -159,8 +159,9 @@ objc_library(
         "TINKKeysetHandle+Cleartext.h",
     ],
     deps = [
-        ":keyset_handle",
-        ":keyset_reader",
+        "//Tink:keyset_handle",
+        "//Tink:keyset_reader",
+        "//Tink/proto_redirect:tink_cc_pb_redirect",
         "//Tink/util:errors",
         "@tink_cc//tink:cleartext_keyset_handle",
     ],
@@ -174,9 +175,8 @@ objc_library(
     ],
     visibility = ["//visibility:public"],
     deps = [
-        ":registry_config",
+        "//Tink:registry_config",
         "//Tink/util:errors",
-        "@tink_cc//tink:config",
     ],
 )
 
@@ -189,7 +189,7 @@ objc_library(
     visibility = ["//visibility:public"],
     deps = [
         ":keyset_reader",
-        ":tink_cc_pb",
+        "//Tink/proto_redirect:tink_cc_pb_redirect",
         "//Tink/util:errors",
         "//Tink/util:strings",
         "@com_google_absl//absl/status",
@@ -315,7 +315,6 @@ objc_library(
         "//Tink/util:errors",
         "//Tink/util:strings",
         "@tink_cc//tink/aead:aead_config",
-        "@tink_cc//tink/util:errors",
     ],
 )
 
@@ -330,7 +329,6 @@ objc_library(
         ":keyset_handle",
         "//Tink/util:errors",
         "@tink_cc//tink:keyset_handle",
-        "@tink_cc//tink/aead:aead_factory",
         "@tink_cc//tink/util:status",
     ],
 )
@@ -342,7 +340,6 @@ objc_library(
     visibility = ["//visibility:public"],
     deps = [
         ":key_template",
-        ":tink_cc_pb",
         "//Tink/util:errors",
         "@com_google_absl//absl/status",
         "@tink_cc//tink/aead:aead_key_templates",
@@ -384,7 +381,6 @@ objc_library(
         "//Tink/util:errors",
         "//Tink/util:strings",
         "@tink_cc//tink/daead:deterministic_aead_config",
-        "@tink_cc//tink/util:errors",
     ],
 )
 
@@ -399,7 +395,6 @@ objc_library(
         ":keyset_handle",
         "//Tink/util:errors",
         "@tink_cc//tink:keyset_handle",
-        "@tink_cc//tink/daead:deterministic_aead_factory",
         "@tink_cc//tink/util:status",
     ],
 )
@@ -411,7 +406,6 @@ objc_library(
     visibility = ["//visibility:public"],
     deps = [
         ":key_template",
-        ":tink_cc_pb",
         "//Tink/util:errors",
         "@com_google_absl//absl/status",
         "@tink_cc//tink/daead:deterministic_aead_key_templates",
@@ -450,7 +444,6 @@ objc_library(
         ":keyset_handle",
         "//Tink/util:errors",
         "@tink_cc//tink:keyset_handle",
-        "@tink_cc//tink/hybrid:hybrid_decrypt_factory",
         "@tink_cc//tink/util:status",
     ],
 )
@@ -479,7 +472,6 @@ objc_library(
         ":keyset_handle",
         "//Tink/util:errors",
         "@tink_cc//tink:keyset_handle",
-        "@tink_cc//tink/hybrid:hybrid_encrypt_factory",
         "@tink_cc//tink/util:status",
     ],
 )
@@ -507,7 +499,6 @@ objc_library(
         "//Tink/util:errors",
         "//Tink/util:strings",
         "@tink_cc//tink/hybrid:hybrid_config",
-        "@tink_cc//tink/util:errors",
     ],
 )
 
@@ -518,7 +509,7 @@ objc_library(
     visibility = ["//visibility:public"],
     deps = [
         ":key_template",
-        ":tink_cc_pb",
+        "//Tink/proto_redirect:tink_cc_pb_redirect",
         "//Tink/util:errors",
         "@com_google_absl//absl/status",
         "@tink_cc//tink/hybrid:hybrid_key_templates",
@@ -548,7 +539,6 @@ objc_library(
         "//Tink/util:errors",
         "//Tink/util:strings",
         "@tink_cc//tink/mac:mac_config",
-        "@tink_cc//tink/util:errors",
     ],
 )
 
@@ -558,12 +548,11 @@ objc_library(
     hdrs = ["TINKMacFactory.h"],
     visibility = ["//visibility:public"],
     deps = [
-        ":keyset_handle",
-        ":mac",
-        ":mac_internal",
+        "//Tink:keyset_handle",
+        "//Tink:mac",
+        "//Tink:mac_internal",
         "//Tink/util:errors",
         "@tink_cc//tink:keyset_handle",
-        "@tink_cc//tink/mac:mac_factory",
         "@tink_cc//tink/util:status",
     ],
 )
@@ -573,7 +562,7 @@ objc_library(
     srcs = ["mac/TINKMacInternal.mm"],
     hdrs = ["mac/TINKMacInternal.h"],
     deps = [
-        ":mac",
+        "//Tink:mac",
         "//Tink/util:errors",
         "//Tink/util:strings",
         "@com_google_absl//absl/strings",
@@ -587,29 +576,11 @@ objc_library(
     hdrs = ["TINKMacKeyTemplate.h"],
     visibility = ["//visibility:public"],
     deps = [
-        ":key_template",
-        ":tink_cc_pb",
+        "//Tink:key_template",
         "//Tink/util:errors",
         "@com_google_absl//absl/status",
         "@tink_cc//tink/mac:mac_key_templates",
         "@tink_cc//tink/util:status",
-    ],
-)
-
-# C++ protocol buffers.
-# We need to convert them to cc_library so we can add them as a dependency of objc_library targets.
-
-cc_library(
-    name = "config_cc_pb",
-    deps = [
-        "//proto:config_cc_proto",
-    ],
-)
-
-cc_library(
-    name = "tink_cc_pb",
-    deps = [
-        "//proto:tink_cc_proto",
     ],
 )
 
@@ -642,7 +613,6 @@ objc_library(
         ":registry_config",
         "//Tink/util:errors",
         "@tink_cc//tink/signature:signature_config",
-        "@tink_cc//tink/util:errors",
     ],
 )
 
@@ -698,7 +668,6 @@ objc_library(
         ":public_key_sign_internal",
         "//Tink/util:errors",
         "@tink_cc//tink:keyset_handle",
-        "@tink_cc//tink/signature:public_key_sign_factory",
         "@tink_cc//tink/util:status",
     ],
 )
@@ -714,7 +683,6 @@ objc_library(
         ":public_key_verify_internal",
         "//Tink/util:errors",
         "@tink_cc//tink:keyset_handle",
-        "@tink_cc//tink/signature:public_key_verify_factory",
         "@tink_cc//tink/util:status",
     ],
 )
@@ -726,6 +694,7 @@ objc_library(
 ios_unit_test(
     name = "TinkTests",
     minimum_os_version = IOS_MINIMUM_OS,
+    tags = ["do_not_build_b155060426"],
     deps = [
         ":UnitTestLib",
     ],
@@ -744,12 +713,10 @@ objc_library(
             "Tests/UnitTests/core/TINKKeysetHandleTest.mm",
         ],
     ),
+    tags = ["do_not_build_b155060426"],
     deps = [
-        ":aead_internal",
-        ":testonly",
-        "//Tink/util:proto_helpers",
-        "//Tink/util:test_helpers",
-        "//proto:all_objc_proto",
+        "//Tink:aead_internal",
+        "//Tink:testonly",
         "@com_google_absl//absl/memory",
         "@com_google_absl//absl/status",
         "@com_google_protobuf//:protobuf_lite",
@@ -757,7 +724,6 @@ objc_library(
         "@tink_cc//tink:crypto_format",
         "@tink_cc//tink:keyset_handle",
         "@tink_cc//tink/aead:aead_config",
-        "@tink_cc//tink/aead:aead_factory",
         "@tink_cc//tink/util:status",
         "@tink_cc//tink/util:test_keyset_handle",
         "@tink_cc//tink/util:test_util",

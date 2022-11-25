@@ -40,7 +40,7 @@
 #include "tink/cleartext_keyset_handle.h"
 #include "tink/keyset_handle.h"
 #include "tink/util/status.h"
-#include "proto/tink.pb.h"
+#include "third_party/tink/objc/proto_redirect/tink_cc_pb_redirect.h"
 
 static NSString *const kTinkService = @"com.google.crypto.tink";
 
