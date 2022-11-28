@@ -132,6 +132,7 @@ java_library(
     srcs = ["EllipticCurves.java"],
     deps = [
         ":subtle_util_cluster",
+        "//src/main/java/com/google/crypto/tink/internal:big_integer_encoding",
         "//src/main/java/com/google/crypto/tink/internal:elliptic_curves_util",
     ],
 )
@@ -529,8 +530,10 @@ java_library(
         ":enums",
         ":validators",
         "//src/main/java/com/google/crypto/tink/config/internal:tink_fips_util",
+        "//src/main/java/com/google/crypto/tink/internal:big_integer_encoding",
         "//src/main/java/com/google/crypto/tink/internal:util",
         "@maven//:com_google_code_findbugs_jsr305",
+        "@maven//:com_google_errorprone_error_prone_annotations",
     ],
 )
 
@@ -813,6 +816,7 @@ android_library(
     srcs = ["EllipticCurves.java"],
     deps = [
         ":subtle_util_cluster-android",
+        "//src/main/java/com/google/crypto/tink/internal:big_integer_encoding-android",
         "//src/main/java/com/google/crypto/tink/internal:elliptic_curves_util-android",
     ],
 )
@@ -1047,8 +1051,10 @@ android_library(
         ":enums-android",
         ":validators-android",
         "//src/main/java/com/google/crypto/tink/config/internal:tink_fips_util-android",
+        "//src/main/java/com/google/crypto/tink/internal:big_integer_encoding-android",
         "//src/main/java/com/google/crypto/tink/internal:util-android",
         "@maven//:com_google_code_findbugs_jsr305",
+        "@maven//:com_google_errorprone_error_prone_annotations",
     ],
 )
 

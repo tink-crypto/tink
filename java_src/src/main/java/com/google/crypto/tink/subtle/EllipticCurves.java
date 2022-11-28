@@ -16,6 +16,7 @@
 
 package com.google.crypto.tink.subtle;
 
+import com.google.crypto.tink.internal.BigIntegerEncoding;
 import com.google.crypto.tink.internal.EllipticCurvesUtil;
 import java.math.BigInteger;
 import java.security.GeneralSecurityException;
@@ -680,8 +681,8 @@ public final class EllipticCurves {
       case UNCOMPRESSED:
         {
           byte[] encoded = new byte[2 * coordinateSize + 1];
-          byte[] x = point.getAffineX().toByteArray();
-          byte[] y = point.getAffineY().toByteArray();
+          byte[] x = BigIntegerEncoding.toBigEndianBytes(point.getAffineX());
+          byte[] y = BigIntegerEncoding.toBigEndianBytes(point.getAffineY());
           // Order of System.arraycopy is important because x,y can have leading 0's.
           System.arraycopy(y, 0, encoded, 1 + 2 * coordinateSize - y.length, y.length);
           System.arraycopy(x, 0, encoded, 1 + coordinateSize - x.length, x.length);
@@ -691,12 +692,12 @@ public final class EllipticCurves {
       case DO_NOT_USE_CRUNCHY_UNCOMPRESSED:
         {
           byte[] encoded = new byte[2 * coordinateSize];
-          byte[] x = point.getAffineX().toByteArray();
+          byte[] x = BigIntegerEncoding.toBigEndianBytes(point.getAffineX());
           if (x.length > coordinateSize) {
             // x has leading 0's, strip them.
             x = Arrays.copyOfRange(x, x.length - coordinateSize, x.length);
           }
-          byte[] y = point.getAffineY().toByteArray();
+          byte[] y = BigIntegerEncoding.toBigEndianBytes(point.getAffineY());
           if (y.length > coordinateSize) {
             // y has leading 0's, strip them.
             y = Arrays.copyOfRange(y, y.length - coordinateSize, y.length);
@@ -708,7 +709,7 @@ public final class EllipticCurves {
       case COMPRESSED:
         {
           byte[] encoded = new byte[coordinateSize + 1];
-          byte[] x = point.getAffineX().toByteArray();
+          byte[] x = BigIntegerEncoding.toBigEndianBytes(point.getAffineX());
           System.arraycopy(x, 0, encoded, 1 + coordinateSize - x.length, x.length);
           encoded[0] = (byte) (point.getAffineY().testBit(0) ? 3 : 2);
           return encoded;
@@ -803,7 +804,7 @@ public final class EllipticCurves {
   public static ECPrivateKey getEcPrivateKey(CurveType curve, final byte[] keyValue)
       throws GeneralSecurityException {
     ECParameterSpec ecParams = getCurveSpec(curve);
-    BigInteger privValue = new BigInteger(1, keyValue);
+    BigInteger privValue = BigIntegerEncoding.fromUnsignedBigEndianBytes(keyValue);
     ECPrivateKeySpec spec = new ECPrivateKeySpec(privValue, ecParams);
     KeyFactory kf = EngineFactory.KEY_FACTORY.getInstance("EC");
     return (ECPrivateKey) kf.generatePrivate(spec);

@@ -578,3 +578,13 @@ android_library(
     name = "elliptic_curves_util-android",
     srcs = ["EllipticCurvesUtil.java"],
 )
+
+java_library(
+    name = "big_integer_encoding",
+    srcs = ["BigIntegerEncoding.java"],
+)
+
+android_library(
+    name = "big_integer_encoding-android",
+    srcs = ["BigIntegerEncoding.java"],
+)

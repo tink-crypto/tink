@@ -370,3 +370,14 @@ java_test(
         "@maven//:junit_junit",
     ],
 )
+
+java_test(
+    name = "BigIntegerEncodingTest",
+    size = "small",
+    srcs = ["BigIntegerEncodingTest.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink/internal:big_integer_encoding",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)

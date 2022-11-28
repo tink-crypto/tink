@@ -16,8 +16,10 @@
 
 package com.google.crypto.tink.subtle;
 
+import com.google.crypto.tink.internal.BigIntegerEncoding;
 import com.google.crypto.tink.internal.Util;
 import com.google.crypto.tink.subtle.Enums.HashType;
+import com.google.errorprone.annotations.InlineMe;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.security.GeneralSecurityException;
@@ -104,14 +106,18 @@ public final class SubtleUtil {
   }
 
   /**
-   * Converts an byte array to a nonnegative integer
+   * Converts an unsigned, big-endian encoded byte array to a non-negative integer
    * (https://tools.ietf.org/html/rfc8017#section-4.1).
    *
    * @param bs the byte array to be converted to integer.
    * @return the corresponding integer.
    */
+  @InlineMe(
+      replacement = "BigIntegerEncoding.fromUnsignedBigEndianBytes(bs)",
+      imports = "com.google.crypto.tink.internal.BigIntegerEncoding")
+  @Deprecated
   public static BigInteger bytes2Integer(byte[] bs) {
-    return new BigInteger(1, bs);
+    return BigIntegerEncoding.fromUnsignedBigEndianBytes(bs);
   }
 
   /**
@@ -124,6 +130,7 @@ public final class SubtleUtil {
    */
   public static byte[] integer2Bytes(BigInteger num, int intendedLength)
       throws GeneralSecurityException {
+    // TODO(juerg): Move this function into BigIntegerEncoding.
     if (num.signum() == -1) {
       throw new IllegalArgumentException("integer must be nonnegative");
     }
