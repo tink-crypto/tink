@@ -28,7 +28,13 @@
 #include "tink/internal/legacy_proto_parameters.h"
 #include "tink/internal/proto_key_serialization.h"
 #include "tink/internal/proto_parameters_serialization.h"
+#include "tink/keyset_handle.h"
+#include "tink/keyset_handle_builder.h"
+#include "tink/mac/aes_cmac_key.h"
+#include "tink/mac/aes_cmac_parameters.h"
 #include "tink/mac/mac_key_templates.h"
+#include "tink/partial_key_access.h"
+#include "tink/restricted_data.h"
 #include "tink/util/statusor.h"
 #include "tink/util/test_matchers.h"
 #include "proto/tink.pb.h"
@@ -47,6 +53,7 @@ using ::google::crypto::tink::OutputPrefixType;
 using ::testing::Eq;
 using ::testing::IsFalse;
 using ::testing::IsTrue;
+using ::testing::Not;
 using ::testing::Test;
 
 util::StatusOr<LegacyProtoParameters> CreateLegacyProtoParameters() {
@@ -219,6 +226,42 @@ TEST_F(CreateKeysetKeyTest,
   util::StatusOr<Keyset::Key> keyset_key = entry.CreateKeysetKey(/*id=*/456);
   EXPECT_THAT(keyset_key.status(),
               StatusIs(absl::StatusCode::kInvalidArgument));
+}
+
+TEST_F(CreateKeysetKeyTest, CreateKeysetFromNonLegacyParameters) {
+  util::StatusOr<AesCmacParameters> aes_cmac_parameters =
+      AesCmacParameters::Create(/*key_size_in_bytes=*/16,
+                                /*cryptographic_tag_size_in_bytes=*/10,
+                                AesCmacParameters::Variant::kTink);
+  ASSERT_THAT(aes_cmac_parameters, IsOk());
+
+  util::StatusOr<KeysetHandle> handle =
+      KeysetHandleBuilder()
+          .AddEntry(KeysetHandleBuilder::Entry::CreateFromCopyableParams(
+              *aes_cmac_parameters, KeyStatus::kEnabled, /*is_primary=*/true,
+              /*id=*/123))
+          .Build();
+  // TODO(b/242162436): This should succeed.
+  ASSERT_THAT(handle, Not(IsOk()));
+}
+
+TEST_F(CreateKeysetKeyTest, CreateKeysetFromNonLegacyKey) {
+  util::StatusOr<AesCmacParameters> aes_cmac_parameters =
+      AesCmacParameters::Create(/*key_size_in_bytes=*/16,
+                                /*cryptographic_tag_size_in_bytes=*/10,
+                                AesCmacParameters::Variant::kTink);
+  ASSERT_THAT(aes_cmac_parameters, IsOk());
+  util::StatusOr<AesCmacKey> aes_cmac_key = AesCmacKey::Create(
+      *aes_cmac_parameters, RestrictedData(16), 123, GetPartialKeyAccess());
+  ASSERT_THAT(aes_cmac_key.status(), IsOk());
+
+  util::StatusOr<KeysetHandle> handle =
+      KeysetHandleBuilder()
+          .AddEntry(KeysetHandleBuilder::Entry::CreateFromCopyableKey(
+              *aes_cmac_key, KeyStatus::kEnabled, /*is_primary=*/true))
+          .Build();
+  // TODO(b/242162436): This should succeed.
+  ASSERT_THAT(handle, Not(IsOk()));
 }
 
 }  // namespace

@@ -611,7 +611,13 @@ tink_cc_test(
     tink::internal::proto_parameters_serialization
     gmock
     tink::core::insecure_secret_key_access
+    tink::core::keyset_handle
+    tink::core::keyset_handle_builder
+    tink::core::partial_key_access
+    tink::core::restricted_data
     tink::config::tink_config
+    tink::mac::aes_cmac_key
+    tink::mac::aes_cmac_parameters
     tink::mac::mac_key_templates
     tink::util::statusor
     tink::util::test_matchers

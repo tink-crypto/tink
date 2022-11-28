@@ -108,8 +108,12 @@ util::StatusOr<Keyset::Key> KeyEntry::CreateKeysetKey(int id) {
   }
 
   // TODO(b/242162436): Add support for more than LegacyProtoKey.
-  const LegacyProtoKey& key = dynamic_cast<const LegacyProtoKey&>(*key_);
-  return CreateKeysetKeyFromLegacyProtoKey(key, id, *key_status);
+  const LegacyProtoKey* key = dynamic_cast<const LegacyProtoKey*>(key_.get());
+  if (key == nullptr) {
+    return util::Status(absl::StatusCode::kInvalidArgument,
+                        "Cannot create keyset from non-legacy key.");
+  }
+  return CreateKeysetKeyFromLegacyProtoKey(*key, id, *key_status);
 }
 
 util::StatusOr<Keyset::Key> ParametersEntry::CreateKeysetKey(int id) {
@@ -122,9 +126,13 @@ util::StatusOr<Keyset::Key> ParametersEntry::CreateKeysetKey(int id) {
   }
 
   // TODO(b/242162436): Add support for more than LegacyProtoParameters.
-  const LegacyProtoParameters& params =
-      dynamic_cast<const LegacyProtoParameters&>(*parameters_);
-  return CreateKeysetKeyFromLegacyProtoParameters(params, id, *key_status);
+  const LegacyProtoParameters* params =
+      dynamic_cast<const LegacyProtoParameters*>(parameters_.get());
+  if (params == nullptr) {
+    return util::Status(absl::StatusCode::kInvalidArgument,
+                        "Cannot create keyset from non-legacy parameters.");
+  }
+  return CreateKeysetKeyFromLegacyProtoParameters(*params, id, *key_status);
 }
 
 }  // namespace internal
