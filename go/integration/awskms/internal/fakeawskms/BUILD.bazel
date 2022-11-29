@@ -1,0 +1,33 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+package(default_visibility = ["//:__subpackages__"])
+
+licenses(["notice"])  # keep
+
+go_library(
+    name = "fakeawskms",
+    srcs = ["fakeawskms.go"],
+    importpath = "github.com/google/tink/go/integration/awskms/internal/fakeawskms",
+    deps = [
+        "@com_github_aws_aws_sdk_go//service/kms",
+        "@com_github_aws_aws_sdk_go//service/kms/kmsiface",
+        "//aead",
+        "//keyset",
+        "//tink",
+    ],
+)
+
+go_test(
+    name = "fakeawskms_test",
+    srcs = ["fakeawskms_test.go"],
+    embed = [":fakeawskms"],
+    deps = [
+        "@com_github_aws_aws_sdk_go//aws",
+        "@com_github_aws_aws_sdk_go//service/kms",
+    ],
+)
+
+alias(
+    name = "go_default_library",
+    actual = ":fakeawskms",
+)
