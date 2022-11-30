@@ -6,9 +6,6 @@
 
 /** Interface for private keys for Key Encapsulation Mechanism (KEM)  */
 export interface HpkeKemPrivateKey {
-  /** Gets the serialized KEM private key. */
-  getSerializedPrivateKey(): Promise<Uint8Array>;
-
   /** Gets the serialized KEM public key. */
   getSerializedPublicKey(): Promise<Uint8Array>;
 

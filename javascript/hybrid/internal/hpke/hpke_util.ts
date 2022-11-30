@@ -4,13 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-/**
- * TODO(b/201071402): Unit tests for this file will be added in a subsequent CL
- * as soon as functionality for a byteArrayToCryptoKey util function is
- * added. The functions in this file are already being indirectly
- * tested by the HDKF tests (such as testExtractAndExpand).
- */
-
+import {SecurityException} from '../../../exception/security_exception';
 import * as bytes from '../../../subtle/bytes';
 import * as ellipticCurves from '../../../subtle/elliptic_curves';
 
@@ -142,4 +136,22 @@ export async function getPrivateKeyFromByteArray(
   jsonWebKey.d = bytes.toBase64(privateKey, true);
 
   return await ellipticCurves.importPrivateKey('ECDH', jsonWebKey);
+}
+
+/**
+ * Converts a public `key` into a `Uint8Array` containing an
+ * uncompressed point encoded according to Section 2.3.3 of
+ * @see https://secg.org/sec1-v2.pdf.
+ */
+export async function getByteArrayFromPublicKey(key: CryptoKey):
+    Promise<Uint8Array> {
+  const alg: EcKeyGenParams = key.algorithm as EcKeyGenParams;
+  const jsonWebKey = await ellipticCurves.exportCryptoKey(key);
+
+  if (!jsonWebKey.crv) {
+    throw new SecurityException('Curve has to be defined.');
+  }
+
+  return ellipticCurves.pointEncode(
+      alg.namedCurve, ellipticCurves.PointFormatType.UNCOMPRESSED, jsonWebKey);
 }
