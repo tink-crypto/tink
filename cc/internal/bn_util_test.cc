@@ -59,6 +59,21 @@ TEST(BnUtil, StringToBignum) {
   }
 }
 
+TEST(StringToBignum, IgnoresLeadingZeros) {
+  std::string encoded = absl::HexStringToBytes("0102");
+  std::string encoded_with_leading_zeros = absl::HexStringToBytes("0000000102");
+
+  util::StatusOr<internal::SslUniquePtr<BIGNUM>> num =
+      StringToBignum(encoded);
+  ASSERT_THAT(num, IsOk());
+
+  util::StatusOr<internal::SslUniquePtr<BIGNUM>> num2 =
+      StringToBignum(encoded_with_leading_zeros);
+  ASSERT_THAT(num2, IsOk());
+
+  EXPECT_EQ(BN_cmp(num2->get(), num->get()), 0);
+}
+
 TEST(BnUtil, BignumToString) {
   std::vector<std::string> bn_strs = {"0000000000000000", "0000000000000001",
                                       "1000000000000000", "ffffffffffffffff",
@@ -73,6 +88,94 @@ TEST(BnUtil, BignumToString) {
     ASSERT_THAT(result, IsOk());
     EXPECT_EQ(bn_bytes, *result);
   }
+}
+
+TEST(BignumToStringWithBNNumBytes, NoLeadingZeros) {
+  {
+    util::StatusOr<internal::SslUniquePtr<BIGNUM>> bn0 =
+      StringToBignum(absl::HexStringToBytes("000000"));
+    ASSERT_THAT(bn0, IsOk());
+
+    util::StatusOr<std::string> encoded0 =
+        internal::BignumToString(bn0->get(), BN_num_bytes(bn0->get()));
+    ASSERT_THAT(encoded0, IsOk());
+    EXPECT_EQ(*encoded0, absl::HexStringToBytes(""));
+  }
+
+  {
+    util::StatusOr<internal::SslUniquePtr<BIGNUM>> bn127 =
+      StringToBignum(absl::HexStringToBytes("00007F"));
+    ASSERT_THAT(bn127, IsOk());
+
+    util::StatusOr<std::string> encoded127 =
+        internal::BignumToString(bn127->get(), BN_num_bytes(bn127->get()));
+    ASSERT_THAT(encoded127, IsOk());
+    EXPECT_EQ(*encoded127, absl::HexStringToBytes("7F"));
+  }
+
+  {
+    util::StatusOr<internal::SslUniquePtr<BIGNUM>> bn128 =
+        StringToBignum(absl::HexStringToBytes("000080"));
+    ASSERT_THAT(bn128, IsOk());
+
+    util::StatusOr<std::string> encoded128 =
+        internal::BignumToString(bn128->get(), BN_num_bytes(bn128->get()));
+    ASSERT_THAT(encoded128, IsOk());
+    EXPECT_EQ(*encoded128, absl::HexStringToBytes("80"));
+  }
+
+  {
+    util::StatusOr<internal::SslUniquePtr<BIGNUM>> bn255 =
+      StringToBignum(absl::HexStringToBytes("0000FF"));
+    ASSERT_THAT(bn255, IsOk());
+
+      util::StatusOr<std::string> encoded255 =
+        internal::BignumToString(bn255->get(), BN_num_bytes(bn255->get()));
+    ASSERT_THAT(encoded255, IsOk());
+    EXPECT_EQ(*encoded255, absl::HexStringToBytes("FF"));
+  }
+
+  {
+    util::StatusOr<internal::SslUniquePtr<BIGNUM>> bn256 =
+      StringToBignum(absl::HexStringToBytes("000100"));
+    ASSERT_THAT(bn256, IsOk());
+
+    util::StatusOr<std::string> encoded256 =
+        internal::BignumToString(bn256->get(), BN_num_bytes(bn256->get()));
+    ASSERT_THAT(encoded256, IsOk());
+    EXPECT_EQ(*encoded256, absl::HexStringToBytes("0100"));
+  }
+}
+
+
+TEST(BignumToString, PadsWithLeadingZeros) {
+  util::StatusOr<internal::SslUniquePtr<BIGNUM>> num =
+      StringToBignum(absl::HexStringToBytes("0102"));
+  ASSERT_THAT(num, IsOk());
+
+  util::StatusOr<std::string> encoded =
+      BignumToString(num->get(), /*len=*/ 2);
+  ASSERT_THAT(encoded, IsOk());
+  EXPECT_EQ(*encoded, absl::HexStringToBytes("0102"));
+
+  util::StatusOr<std::string> encodedWithPadding =
+      BignumToString(num->get(), /*len=*/ 5);
+  ASSERT_THAT(encodedWithPadding, IsOk());
+  EXPECT_EQ(*encodedWithPadding, absl::HexStringToBytes("0000000102"));
+
+  // try to encode with a value for len that is too short.
+  ASSERT_THAT(BignumToString(num->get(), /*len=*/1), Not(IsOk()));
+}
+
+TEST(BignumToString, RejectsNegativeNumbers) {
+  // create a negative BIGNUM
+  util::StatusOr<internal::SslUniquePtr<BIGNUM>> number = HexToBignum("01");
+  ASSERT_THAT(number, IsOk());
+  BN_set_negative(number->get(), 1);
+  // Check that number is negative
+  ASSERT_EQ(CompareBignumWithWord(number->get(), /*word=*/0), -1);
+
+  ASSERT_THAT(BignumToString(number->get(), /*len=*/2), Not(IsOk()));
 }
 
 TEST(BnUtil, BignumToSecretData) {

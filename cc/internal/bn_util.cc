@@ -34,6 +34,10 @@ util::Status BignumToBinaryPadded(absl::Span<char> buffer,
   if (bignum == nullptr) {
     return util::Status(absl::StatusCode::kInvalidArgument, "BIGNUM is NULL");
   }
+  if (BN_is_negative(bignum)) {
+    return util::Status(absl::StatusCode::kInternal,
+                        "Value must not be negative");
+  }
 
   // BN_bn2binpad returns the length of the buffer on success and -1 on failure.
   int len = BN_bn2binpad(
