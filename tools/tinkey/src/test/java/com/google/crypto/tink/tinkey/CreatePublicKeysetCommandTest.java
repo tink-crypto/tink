@@ -17,7 +17,6 @@
 package com.google.crypto.tink.tinkey;
 
 import static com.google.common.truth.Truth.assertThat;
-import static org.junit.Assume.assumeFalse;
 
 import com.google.crypto.tink.CleartextKeysetHandle;
 import com.google.crypto.tink.HybridDecrypt;
@@ -118,8 +117,6 @@ public class CreatePublicKeysetCommandTest {
 
   private void testCreate_encryptedPrivate_shouldCreateCleartextPublic(
       KeyTemplate template, KeyType type) throws Exception {
-    // This test requires KMS/internet access and thus cannot run on RBE.
-    assumeFalse(TestUtil.isRemoteBuildExecution());
     // Create an input stream containing a cleartext private keyset.
     String masterKeyUri = TestUtil.GCP_KMS_TEST_KEY_URI;
     String credentialPath = TestUtil.SERVICE_ACCOUNT_FILE;
