@@ -260,7 +260,7 @@ public final class HmacParameters extends MacParameters {
 
   @Override
   public int hashCode() {
-    return Objects.hash(tagSizeBytes, variant, hashType);
+    return Objects.hash(keySizeBytes, tagSizeBytes, variant, hashType);
   }
 
   @Override

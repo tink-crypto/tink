@@ -255,4 +255,15 @@ public final class AesCmacParametersTest {
     assertThat(create(32, 16, LEGACY).hashCode()).isEqualTo(create(32, 16, LEGACY).hashCode());
     assertThat(create(16, 16, CRUNCHY).hashCode()).isEqualTo(create(16, 16, CRUNCHY).hashCode());
   }
+
+  @Test
+  public void testAesCmacParameters_notEqualHashes() throws Exception {
+    assertThat(create(32, 10, NO_PREFIX).hashCode())
+        .isNotEqualTo(create(16, 10, NO_PREFIX).hashCode());
+    assertThat(create(16, 10, NO_PREFIX).hashCode())
+        .isNotEqualTo(create(16, 11, NO_PREFIX).hashCode());
+    assertThat(create(32, 10, NO_PREFIX).hashCode()).isNotEqualTo(create(32, 10, TINK).hashCode());
+    assertThat(create(16, 10, TINK).hashCode()).isNotEqualTo(create(16, 10, LEGACY).hashCode());
+    assertThat(create(32, 10, LEGACY).hashCode()).isNotEqualTo(create(32, 10, CRUNCHY).hashCode());
+  }
 }

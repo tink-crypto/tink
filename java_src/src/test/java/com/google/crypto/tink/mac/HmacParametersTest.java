@@ -498,45 +498,55 @@ public final class HmacParametersTest {
   }
 
   @Test
-  public void testNotEqual() throws Exception {
-    HmacParameters parameters =
+  public void testNotEqualandNotEqualHashCode() throws Exception {
+    HmacParameters parameters1 =
         HmacParameters.builder()
             .setKeySizeBytes(16)
             .setTagSizeBytes(21)
             .setHashType(HmacParameters.HashType.SHA256)
             .setVariant(HmacParameters.Variant.NO_PREFIX)
             .build();
-    assertThat(parameters)
-        .isNotEqualTo(
-            HmacParameters.builder()
-                .setKeySizeBytes(32)
-                .setTagSizeBytes(21)
-                .setHashType(HmacParameters.HashType.SHA256)
-                .setVariant(HmacParameters.Variant.NO_PREFIX)
-                .build());
-    assertThat(parameters)
-        .isNotEqualTo(
-            HmacParameters.builder()
-                .setKeySizeBytes(16)
-                .setTagSizeBytes(22)
-                .setHashType(HmacParameters.HashType.SHA256)
-                .setVariant(HmacParameters.Variant.NO_PREFIX)
-                .build());
-    assertThat(parameters)
-        .isNotEqualTo(
-            HmacParameters.builder()
-                .setKeySizeBytes(16)
-                .setTagSizeBytes(21)
-                .setHashType(HmacParameters.HashType.SHA384)
-                .setVariant(HmacParameters.Variant.NO_PREFIX)
-                .build());
-    assertThat(parameters)
-        .isNotEqualTo(
-            HmacParameters.builder()
-                .setKeySizeBytes(16)
-                .setTagSizeBytes(21)
-                .setHashType(HmacParameters.HashType.SHA256)
-                .setVariant(HmacParameters.Variant.TINK)
-                .build());
+
+    HmacParameters parameters2;
+
+    parameters2 =
+        HmacParameters.builder()
+            .setKeySizeBytes(32)
+            .setTagSizeBytes(21)
+            .setHashType(HmacParameters.HashType.SHA256)
+            .setVariant(HmacParameters.Variant.NO_PREFIX)
+            .build();
+    assertThat(parameters1).isNotEqualTo(parameters2);
+    assertThat(parameters1.hashCode()).isNotEqualTo(parameters2.hashCode());
+
+    parameters2 =
+        HmacParameters.builder()
+            .setKeySizeBytes(16)
+            .setTagSizeBytes(22)
+            .setHashType(HmacParameters.HashType.SHA256)
+            .setVariant(HmacParameters.Variant.NO_PREFIX)
+            .build();
+    assertThat(parameters1).isNotEqualTo(parameters2);
+    assertThat(parameters1.hashCode()).isNotEqualTo(parameters2.hashCode());
+
+    parameters2 =
+        HmacParameters.builder()
+            .setKeySizeBytes(16)
+            .setTagSizeBytes(21)
+            .setHashType(HmacParameters.HashType.SHA384)
+            .setVariant(HmacParameters.Variant.NO_PREFIX)
+            .build();
+    assertThat(parameters1).isNotEqualTo(parameters2);
+    assertThat(parameters1.hashCode()).isNotEqualTo(parameters2.hashCode());
+
+    parameters2 =
+        HmacParameters.builder()
+            .setKeySizeBytes(16)
+            .setTagSizeBytes(21)
+            .setHashType(HmacParameters.HashType.SHA256)
+            .setVariant(HmacParameters.Variant.TINK)
+            .build();
+    assertThat(parameters1).isNotEqualTo(parameters2);
+    assertThat(parameters1.hashCode()).isNotEqualTo(parameters2.hashCode());
   }
 }
