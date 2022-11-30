@@ -16,7 +16,7 @@ import * as hpkeUtil from './hpke_util';
  * @see https://www.rfc-editor.org/rfc/rfc9180.html#section-4.1-3
  */
 export class HkdfHpkeKdf implements HpkeKdf {
-  constructor(private readonly macAlgorithm: 'SHA-256'|'SHA-512') {}
+  constructor(private readonly hashFunction: 'SHA-256'|'SHA-512') {}
 
   async labeledExtract({ikm, ikmLabel, suiteId, salt}: {
     ikm: Uint8Array,
@@ -74,7 +74,7 @@ export class HkdfHpkeKdf implements HpkeKdf {
     }
     validators.requireUint8Array(info);
 
-    const hmac = await hmacFromRawKey(this.macAlgorithm, prk, digestSize);
+    const hmac = await hmacFromRawKey(this.hashFunction, prk, digestSize);
     let ctr = 1;
     let pos = 0;
     let digest = new Uint8Array(0);
@@ -109,14 +109,14 @@ export class HkdfHpkeKdf implements HpkeKdf {
     }
     validators.requireUint8Array(salt);
 
-    const hmac = await hmacFromRawKey(this.macAlgorithm, salt, digestSize);
+    const hmac = await hmacFromRawKey(this.hashFunction, salt, digestSize);
     const prk = await hmac.computeMac(ikm);
 
     return prk;
   }
 
   getKdfId(): Uint8Array {
-    switch (this.macAlgorithm) {
+    switch (this.hashFunction) {
       case 'SHA-256':
         return hpkeUtil.HKDF_SHA256_KDF_ID;
       case 'SHA-512':
@@ -125,7 +125,7 @@ export class HkdfHpkeKdf implements HpkeKdf {
   }
 
   getMacLength(): number {
-    switch (this.macAlgorithm) {
+    switch (this.hashFunction) {
       case 'SHA-256':
         return 32;
       case 'SHA-512':
