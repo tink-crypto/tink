@@ -11,14 +11,21 @@ import {randBytes} from '../../../subtle/random';
 
 import {fromBytes, fromCryptoKeyPair} from './nist_curves_hpke_kem_private_key';
 
+interface TestVector {
+  name: string;
+  curveType: ellipticCurves.CurveType.P256|ellipticCurves.CurveType.P521;
+  senderPublicKey: Uint8Array;
+  senderPrivateKey: Uint8Array;
+}
+
 /**
  * Test vectors as described in @see https://www.rfc-editor.org/rfc/rfc9180.html#appendix-A
  */
-const TEST_VECTORS = [
+const TEST_VECTORS: TestVector[] = [
   /** Test vector for DHKEM(P-256, HKDF-SHA256), HKDF-SHA256, AES-128-GCM */
   {
     name: 'DHKEM(P-521, HKDF-SHA512)',
-    curveType: ellipticCurves.CurveType.P256 as const,
+    curveType: ellipticCurves.CurveType.P256,
     senderPublicKey: bytes.fromHex(
         '04a92719c6195d5085104f469a8b9814d5838ff72b60501e2c4466e5e67b325ac98536d7b61a1af4b78e5b7f951c0900be863c403ce65c9bfcb9382657222d18c4'),
     senderPrivateKey: bytes.fromHex(
@@ -27,7 +34,7 @@ const TEST_VECTORS = [
   /** Test vector for DHKEM(P-521, HKDF-SHA512), HKDF-SHA512, AES-256-GCM */
   {
     name: 'DHKEM(P-521, HKDF-SHA512)',
-    curveType: ellipticCurves.CurveType.P521 as const,
+    curveType: ellipticCurves.CurveType.P521,
     senderPublicKey: bytes.fromHex(
         '040138b385ca16bb0d5fa0c0665fbbd7e69e3ee29f63991d3e9b5fa740aab8900aaeed46ed73a49055758425a0ce36507c54b29cc5b85a5cee6bae0cf1c21f2731ece2013dc3fb7c8d21654bb161b463962ca19e8c654ff24c94dd2898de12051f1ed0692237fb02b2f8d1dc1c73e9b366b529eb436e98a996ee522aef863dd5739d2f29b0'),
     senderPrivateKey: bytes.fromHex(
@@ -68,8 +75,8 @@ describe('NistCurvesHpkeKemPrivateKey', () => {
       it('ECDH curve type', async () => {
         const mismatchedCurveType =
             testInfo.curveType === ellipticCurves.CurveType.P256 ?
-            ellipticCurves.CurveType.P521 as const:
-            ellipticCurves.CurveType.P256 as const;
+            ellipticCurves.CurveType.P521 :
+            ellipticCurves.CurveType.P256;
 
         await expectAsync(fromBytes({
           privateKey: testInfo.senderPrivateKey,

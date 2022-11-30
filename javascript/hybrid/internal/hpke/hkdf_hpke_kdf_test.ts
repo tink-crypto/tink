@@ -12,10 +12,32 @@ import * as hpkeUtil from './hpke_util';
 
 const AES_GCM_NONCE_LENGTH: number = 12;  // Nn
 
-const TEST_VECTORS = [
-  /** Test vector for DHKEM(P-256, HKDF-SHA256),HKDF-SHA256, AES-128-GCM */
+interface TestVector {
+  hashFunction: 'SHA-256'|'SHA-512';
+  curveType: string;
+  mode: Uint8Array;
+  kemId: Uint8Array;
+  kdfId: Uint8Array;
+  aeadId: Uint8Array;
+  aesKeyLength: number;
+  kemSharedSecretLength: number;
+  info: Uint8Array;
+  senderPublicKey: Uint8Array;
+  senderPrivateKey: Uint8Array;
+  recipientPublicKey: Uint8Array;
+  recipientPrivateKey: Uint8Array;
+  encapsulatedKey: Uint8Array;
+  sharedSecret: Uint8Array;
+  keyScheduleContext: Uint8Array;
+  secret: Uint8Array;
+  key: Uint8Array;
+  baseNonce: Uint8Array;
+}
+
+const TEST_VECTORS: TestVector[] = [
+  /** Test vector for DHKEM(P-256, HKDF-SHA256), HKDF-SHA256, AES-128-GCM */
   {
-    macAlgorithm: 'SHA-256' as const,
+    hashFunction: 'SHA-256',
     curveType: 'P-256',
     mode: hpkeUtil.BASE_MODE,
     kemId: hpkeUtil.P256_HKDF_SHA256_KEM_ID,
@@ -43,9 +65,9 @@ const TEST_VECTORS = [
     key: bytes.fromHex('868c066ef58aae6dc589b6cfdd18f97e'),
     baseNonce: bytes.fromHex('4e0bc5018beba4bf004cca59'),
   },
-  /** Test vector for DHKEM(P-521, HKDF-SHA512),HKDF-SHA512, AES-256-GCM */
+  /** Test vector for DHKEM(P-521, HKDF-SHA512), HKDF-SHA512, AES-256-GCM */
   {
-    macAlgorithm: 'SHA-512' as const,
+    hashFunction: 'SHA-512',
     curveType: 'P-521',
     mode: hpkeUtil.BASE_MODE,
     kemId: hpkeUtil.P521_HKDF_SHA512_KEM_ID,
@@ -79,8 +101,8 @@ const TEST_VECTORS = [
 describe('HkdfHpkeKdf', () => {
   describe('extract', () => {
     for (const testInfo of TEST_VECTORS) {
-      it('should work for ${testInfo.macAlgorithm}', async () => {
-        const kdf = new HkdfHpkeKdf(testInfo.macAlgorithm);
+      it('should work for ${testInfo.hashFunction}', async () => {
+        const kdf = new HkdfHpkeKdf(testInfo.hashFunction);
 
         const suiteId: Uint8Array = hpkeUtil.hpkeSuiteId({
           kemId: testInfo.kemId,
@@ -116,8 +138,8 @@ describe('HkdfHpkeKdf', () => {
 
   describe('expand', () => {
     for (const testInfo of TEST_VECTORS) {
-      it('should work for ${testInfo.macAlgorithm}', async () => {
-        const kdf = new HkdfHpkeKdf(testInfo.macAlgorithm);
+      it('should work for ${testInfo.hashFunction}', async () => {
+        const kdf = new HkdfHpkeKdf(testInfo.hashFunction);
 
         const suiteId: Uint8Array = hpkeUtil.hpkeSuiteId({
           kemId: testInfo.kemId,
@@ -149,8 +171,8 @@ describe('HkdfHpkeKdf', () => {
 
   describe('extractAndExpand', () => {
     for (const testInfo of TEST_VECTORS) {
-      it('should work for ${testInfo.macAlgorithm}', async () => {
-        const kdf = new HkdfHpkeKdf(testInfo.macAlgorithm);
+      it('should work for ${testInfo.hashFunction}', async () => {
+        const kdf = new HkdfHpkeKdf(testInfo.hashFunction);
 
         const senderPrivateKey = await hpkeUtil.getPrivateKeyFromByteArray({
           curveType: testInfo.curveType,
