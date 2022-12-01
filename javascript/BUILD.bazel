@@ -38,6 +38,7 @@ karma_web_test_suite(
     ],
     deps = [
         "//aead:aead_tests",
+        "//aead/internal:internal_tests",
         "//hybrid:hybrid_tests",
         "//hybrid/internal/hpke:hpke_tests",
         "//internal:internal_tests",

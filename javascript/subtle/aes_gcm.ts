@@ -5,93 +5,41 @@
  */
 
 import {Aead} from '../aead/internal/aead';
-import {SecurityException} from '../exception/security_exception';
+import {InsecureIvAesGcm, IV_SIZE_IN_BYTES} from '../aead/internal/insecure_iv_aes_gcm';
 
-import * as Bytes from './bytes';
-import * as Random from './random';
-import * as Validators from './validators';
-
-/**
- * The only supported IV size.
- *
- */
-const IV_SIZE_IN_BYTES: number = 12;
+import {randBytes} from './random';
+import * as validators from './validators';
 
 /**
- * The only supported tag size.
- *
- */
-const TAG_SIZE_IN_BITS: number = 128;
-
-/**
- * Implementation of AES-GCM.
+ * Implementation of AES-GCM, wrapped around InsecureIvAesGcm.
  *
  * @final
  */
 export class AesGcm extends Aead {
-  constructor(private readonly key: CryptoKey) {
+  private readonly insecureIvAesGcm: InsecureIvAesGcm;
+
+  constructor(readonly key: CryptoKey) {
     super();
+    this.insecureIvAesGcm = new InsecureIvAesGcm({key, prependIv: true});
   }
 
-  /**
-   */
   async encrypt(plaintext: Uint8Array, associatedData?: Uint8Array):
       Promise<Uint8Array> {
-    Validators.requireUint8Array(plaintext);
-    if (associatedData != null) {
-      Validators.requireUint8Array(associatedData);
-    }
-    const iv = Random.randBytes(IV_SIZE_IN_BYTES);
-    const alg: AesGcmParams = {
-      'name': 'AES-GCM',
-      'iv': iv,
-      'tagLength': TAG_SIZE_IN_BITS
-    };
-    if (associatedData) {
-      alg['additionalData'] = associatedData;
-    }
-    const ciphertext =
-        await self.crypto.subtle.encrypt(alg, this.key, plaintext);
-    return Bytes.concat(iv, new Uint8Array(ciphertext));
+    const iv: Uint8Array = randBytes(IV_SIZE_IN_BYTES);
+    return this.insecureIvAesGcm.encrypt(iv, plaintext, associatedData);
   }
 
-  /**
-   */
   async decrypt(ciphertext: Uint8Array, associatedData?: Uint8Array):
       Promise<Uint8Array> {
-    Validators.requireUint8Array(ciphertext);
-    if (ciphertext.length < IV_SIZE_IN_BYTES + TAG_SIZE_IN_BITS / 8) {
-      throw new SecurityException('ciphertext too short');
-    }
-    if (associatedData != null) {
-      Validators.requireUint8Array(associatedData);
-    }
     const iv = new Uint8Array(IV_SIZE_IN_BYTES);
     iv.set(ciphertext.subarray(0, IV_SIZE_IN_BYTES));
-    const alg: AesGcmParams = {
-      'name': 'AES-GCM',
-      'iv': iv,
-      'tagLength': TAG_SIZE_IN_BITS
-    };
-    if (associatedData) {
-      alg['additionalData'] = associatedData;
-    }
-    try {
-      return new Uint8Array(await self.crypto.subtle.decrypt(
-          alg, this.key,
-          new Uint8Array(ciphertext.subarray(IV_SIZE_IN_BYTES))));
-      // Preserving old behavior when moving to
-      // https://www.typescriptlang.org/tsconfig#useUnknownInCatchVariables
-      // tslint:disable-next-line:no-any
-    } catch (e: any) {
-      throw new SecurityException(e.toString());
-    }
+    return this.insecureIvAesGcm.decrypt(iv, ciphertext, associatedData);
   }
 }
 
+/** Returns an AEAD instantiation genererated from a given raw `key`  */
 export async function fromRawKey(key: Uint8Array): Promise<Aead> {
-  Validators.requireUint8Array(key);
-  Validators.validateAesKeySize(key.length);
+  validators.validateAesKeySize(key.length);
   const webCryptoKey = await self.crypto.subtle.importKey(
       /* format */
       'raw', key,
