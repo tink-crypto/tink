@@ -28,6 +28,11 @@ import (
 	tinkpb "github.com/google/tink/go/proto/tink_go_proto"
 )
 
+const (
+	hkdfPRFTypeURL          = "type.googleapis.com/google.crypto.tink.HkdfPrfKey"
+	hkdfStreamingPRFTypeURL = "type.googleapis.com/google.crypto.tink.HkdfStreamingPrfKey"
+)
+
 // prfBasedDeriver uses prf and the Tink registry to derive a keyset handle as
 // described by derivedKeyTemplate.
 type prfBasedDeriver struct {
@@ -39,22 +44,43 @@ type prfBasedDeriver struct {
 var _ KeysetDeriver = (*prfBasedDeriver)(nil)
 
 func newPRFBasedDeriver(prfKeyData *tinkpb.KeyData, derivedKeyTemplate *tinkpb.KeyTemplate) (*prfBasedDeriver, error) {
-	// Validate PRF key data.
+	// Obtain Streaming PRF from PRF key data.
 	if prfKeyData == nil {
 		return nil, errors.New("PRF key data is nil")
 	}
-	p, err := registry.Primitive(prfKeyData.GetTypeUrl(), prfKeyData.GetValue())
-	if err != nil {
-		return nil, fmt.Errorf("failed to retrieve StreamingPRF primitive from registry: %v", err)
+	var p interface{}
+	if prfKeyData.GetTypeUrl() != hkdfPRFTypeURL {
+		var err error
+		p, err = registry.Primitive(prfKeyData.GetTypeUrl(), prfKeyData.GetValue())
+		if err != nil {
+			return nil, fmt.Errorf("failed to retrieve StreamingPRF primitive from registry: %v", err)
+		}
+	} else {
+		// For HKDF PRF keys, create a local instance of the HKDF Streaming PRF key
+		// manager and obtain the Streaming PRF interface through it, instead of
+		// obtaining it through the registry. This allows us to keep the HKDF
+		// Streaming PRF key manager out of the registry for smoother deprecation.
+		//
+		// TODO(b/260619626): Remove this once PRF and Streaming PRF share the same
+		// type URL and registry.Primitive() can return multiple interfaces per
+		// primitive.
+		hkdfStreamingPRFKeyManager := streamingprf.HKDFStreamingPRFKeyManager{}
+		var err error
+		p, err = hkdfStreamingPRFKeyManager.Primitive(prfKeyData.GetValue())
+		if err != nil {
+			return nil, fmt.Errorf("failed to retrieve StreamingPRF primitive from key manager: %v", err)
+		}
 	}
 	prf, ok := p.(streamingprf.StreamingPRF)
 	if !ok {
 		return nil, errors.New("primitive is not StreamingPRF")
 	}
+
 	// Validate derived key template.
 	if !internalregistry.CanDeriveKeys(derivedKeyTemplate.GetTypeUrl()) {
 		return nil, errors.New("derived key template is not a derivable key type")
 	}
+
 	return &prfBasedDeriver{
 		prf:                prf,
 		derivedKeyTemplate: derivedKeyTemplate,

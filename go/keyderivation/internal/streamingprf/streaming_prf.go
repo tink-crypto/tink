@@ -35,8 +35,9 @@ type StreamingPRF interface {
 	Compute(input []byte) (io.Reader, error)
 }
 
+// TODO(b/227682336): Remove HKDFStreamingPRFKeyManager registration.
 func init() {
-	if err := registry.RegisterKeyManager(new(hkdfStreamingPRFKeyManager)); err != nil {
+	if err := registry.RegisterKeyManager(new(HKDFStreamingPRFKeyManager)); err != nil {
 		panic(fmt.Sprintf("streamingprf.init() failed: %v", err))
 	}
 }

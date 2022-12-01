@@ -38,11 +38,15 @@ var (
 	errInvalidHKDFStreamingPRFKeyFormat = errors.New("hkdf_streaming_prf_key_manager: invalid key format")
 )
 
-type hkdfStreamingPRFKeyManager struct{}
+// HKDFStreamingPRFKeyManager is a KeyManager for HKDF Streaming PRF keys. It is
+// exported for use in keyderivation.prfBasedDeriver. This is not part of the
+// public API as this is in internal/.
+type HKDFStreamingPRFKeyManager struct{}
 
-var _ registry.KeyManager = (*hkdfStreamingPRFKeyManager)(nil)
+var _ registry.KeyManager = (*HKDFStreamingPRFKeyManager)(nil)
 
-func (km *hkdfStreamingPRFKeyManager) Primitive(serializedKey []byte) (interface{}, error) {
+// Primitive constructs a primitive instance for the key given in serializedKey.
+func (km *HKDFStreamingPRFKeyManager) Primitive(serializedKey []byte) (interface{}, error) {
 	if len(serializedKey) == 0 {
 		return nil, errInvalidHKDFStreamingPRFKey
 	}
@@ -56,7 +60,8 @@ func (km *hkdfStreamingPRFKeyManager) Primitive(serializedKey []byte) (interface
 	return newHKDFStreamingPRF(hashNameFromHKDFPRFParams(key.GetParams()), key.GetKeyValue(), key.GetParams().GetSalt())
 }
 
-func (km *hkdfStreamingPRFKeyManager) NewKey(serializedKeyFormat []byte) (proto.Message, error) {
+// NewKey generates a new key according to specification in serializedKeyFormat.
+func (km *HKDFStreamingPRFKeyManager) NewKey(serializedKeyFormat []byte) (proto.Message, error) {
 	if len(serializedKeyFormat) == 0 {
 		return nil, errInvalidHKDFStreamingPRFKeyFormat
 	}
@@ -74,7 +79,9 @@ func (km *hkdfStreamingPRFKeyManager) NewKey(serializedKeyFormat []byte) (proto.
 	}, nil
 }
 
-func (km *hkdfStreamingPRFKeyManager) NewKeyData(serializedKeyFormat []byte) (*tinkpb.KeyData, error) {
+// NewKeyData generates a new KeyData according to specification in
+// serializedkeyFormat. This should be used solely by the key management API.
+func (km *HKDFStreamingPRFKeyManager) NewKeyData(serializedKeyFormat []byte) (*tinkpb.KeyData, error) {
 	key, err := km.NewKey(serializedKeyFormat)
 	if err != nil {
 		return nil, err
@@ -90,11 +97,15 @@ func (km *hkdfStreamingPRFKeyManager) NewKeyData(serializedKeyFormat []byte) (*t
 	}, nil
 }
 
-func (km *hkdfStreamingPRFKeyManager) DoesSupport(typeURL string) bool {
+// DoesSupport returns true iff this KeyManager supports key type identified by
+// typeURL.
+func (km *HKDFStreamingPRFKeyManager) DoesSupport(typeURL string) bool {
 	return typeURL == hkdfStreamingPRFTypeURL
 }
 
-func (km *hkdfStreamingPRFKeyManager) TypeURL() string {
+// TypeURL returns the type URL that identifes the key type of keys managed by
+// this KeyManager.
+func (km *HKDFStreamingPRFKeyManager) TypeURL() string {
 	return hkdfStreamingPRFTypeURL
 }
 

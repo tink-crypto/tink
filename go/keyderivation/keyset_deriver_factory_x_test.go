@@ -22,9 +22,9 @@ import (
 
 	"google.golang.org/protobuf/proto"
 	"github.com/google/tink/go/aead"
-	"github.com/google/tink/go/keyderivation/internal/streamingprf"
 	"github.com/google/tink/go/keyderivation"
 	"github.com/google/tink/go/keyset"
+	"github.com/google/tink/go/prf"
 	"github.com/google/tink/go/subtle/random"
 	prfderpb "github.com/google/tink/go/proto/prf_based_deriver_go_proto"
 	tinkpb "github.com/google/tink/go/proto/tink_go_proto"
@@ -33,7 +33,7 @@ import (
 func TestWrappedKeysetDeriver(t *testing.T) {
 	// Construct a deriving keyset handle containing one key.
 	sha256AES128GCMkeyFormat := &prfderpb.PrfBasedDeriverKeyFormat{
-		PrfKeyTemplate: streamingprf.HKDFSHA256RawKeyTemplate(),
+		PrfKeyTemplate: prf.HKDFSHA256PRFKeyTemplate(),
 		Params: &prfderpb.PrfBasedDeriverParams{
 			DerivedKeyTemplate: aead.AES128GCMKeyTemplate(),
 		},
@@ -53,15 +53,15 @@ func TestWrappedKeysetDeriver(t *testing.T) {
 	}
 
 	// Construct a deriving keyset handle containing two different types of keys.
-	sha512AES256GCMNoPrefixkeyFormat := &prfderpb.PrfBasedDeriverKeyFormat{
-		PrfKeyTemplate: streamingprf.HKDFSHA512RawKeyTemplate(),
+	sha256AES256GCMNoPrefixKeyFormat := &prfderpb.PrfBasedDeriverKeyFormat{
+		PrfKeyTemplate: prf.HKDFSHA256PRFKeyTemplate(),
 		Params: &prfderpb.PrfBasedDeriverParams{
 			DerivedKeyTemplate: aead.AES256GCMNoPrefixKeyTemplate(),
 		},
 	}
-	serializedKeyFormat, err = proto.Marshal(sha512AES256GCMNoPrefixkeyFormat)
+	serializedKeyFormat, err = proto.Marshal(sha256AES256GCMNoPrefixKeyFormat)
 	if err != nil {
-		t.Fatalf("proto.Marshal(%v) err = %v, want nil", sha512AES256GCMNoPrefixkeyFormat, err)
+		t.Fatalf("proto.Marshal(%v) err = %v, want nil", sha256AES256GCMNoPrefixKeyFormat, err)
 	}
 	template = &tinkpb.KeyTemplate{
 		TypeUrl:          prfBasedDeriverTypeURL,

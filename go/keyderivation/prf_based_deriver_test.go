@@ -26,7 +26,7 @@ import (
 	"github.com/google/tink/go/aead"
 	"github.com/google/tink/go/core/registry"
 	"github.com/google/tink/go/insecurecleartextkeyset"
-	"github.com/google/tink/go/keyderivation/internal/streamingprf"
+	"github.com/google/tink/go/prf"
 	aesgcmpb "github.com/google/tink/go/proto/aes_gcm_go_proto"
 	commonpb "github.com/google/tink/go/proto/common_go_proto"
 	hkdfpb "github.com/google/tink/go/proto/hkdf_prf_go_proto"
@@ -40,11 +40,7 @@ func TestPRFBasedDeriverWithAEAD(t *testing.T) {
 	}{
 		{
 			name:     "SHA256",
-			template: streamingprf.HKDFSHA256RawKeyTemplate(),
-		},
-		{
-			name:     "SHA512",
-			template: streamingprf.HKDFSHA512RawKeyTemplate(),
+			template: prf.HKDFSHA256PRFKeyTemplate(),
 		},
 	}
 	derivations := []struct {
@@ -142,7 +138,7 @@ func TestPRFBasedDeriverWithHKDFRFCVector(t *testing.T) {
 		t.Fatalf("proto.Marshal() err = %v, want nil", err)
 	}
 	prfKeyData := &tinkpb.KeyData{
-		TypeUrl:         streamingprf.HKDFSHA256RawKeyTemplate().GetTypeUrl(),
+		TypeUrl:         prf.HKDFSHA256PRFKeyTemplate().GetTypeUrl(),
 		Value:           serializedPRFKey,
 		KeyMaterialType: tinkpb.KeyData_SYMMETRIC,
 	}
@@ -213,7 +209,7 @@ func TestPRFBasedDeriverWithHKDFRFCVector(t *testing.T) {
 }
 
 func TestNewPRFBasedDeriverRejectsInvalidInputs(t *testing.T) {
-	validPRFKeyData, err := registry.NewKeyData(streamingprf.HKDFSHA256RawKeyTemplate())
+	validPRFKeyData, err := registry.NewKeyData(prf.HKDFSHA256PRFKeyTemplate())
 	if err != nil {
 		t.Fatalf("registry.NewKeyData() err = %v, want nil", err)
 	}
@@ -249,7 +245,7 @@ func TestNewPRFBasedDeriverRejectsInvalidInputs(t *testing.T) {
 		{
 			name:               "invalid derived template",
 			prfKeyData:         validPRFKeyData,
-			derivedKeyTemplate: streamingprf.HKDFSHA256RawKeyTemplate(),
+			derivedKeyTemplate: prf.HKDFSHA256PRFKeyTemplate(),
 		},
 	} {
 		t.Run(test.name, func(t *testing.T) {

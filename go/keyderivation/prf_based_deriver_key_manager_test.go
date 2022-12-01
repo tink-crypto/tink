@@ -25,8 +25,8 @@ import (
 	"google.golang.org/protobuf/testing/protocmp"
 	"github.com/google/tink/go/aead"
 	"github.com/google/tink/go/core/registry"
-	"github.com/google/tink/go/keyderivation/internal/streamingprf"
 	"github.com/google/tink/go/keyderivation"
+	"github.com/google/tink/go/prf"
 	"github.com/google/tink/go/subtle/random"
 	aesgcmpb "github.com/google/tink/go/proto/aes_gcm_go_proto"
 	prfderpb "github.com/google/tink/go/proto/prf_based_deriver_go_proto"
@@ -49,11 +49,7 @@ func TestPRFBasedDeriverKeyManagerPrimitive(t *testing.T) {
 	}{
 		{
 			name:     "HKDF-SHA256",
-			template: streamingprf.HKDFSHA256RawKeyTemplate(),
-		},
-		{
-			name:     "HKDF-SHA512",
-			template: streamingprf.HKDFSHA512RawKeyTemplate(),
+			template: prf.HKDFSHA256PRFKeyTemplate(),
 		},
 	}
 	derivations := []struct {
@@ -121,7 +117,7 @@ func TestPRFBasedDeriverKeyManagerPrimitiveRejectsIncorrectKeys(t *testing.T) {
 	if err != nil {
 		t.Fatalf("GetKeyManager(%q) err = %v, want nil", prfBasedDeriverTypeURL, err)
 	}
-	prfKey, err := registry.NewKeyData(streamingprf.HKDFSHA256RawKeyTemplate())
+	prfKey, err := registry.NewKeyData(prf.HKDFSHA256PRFKeyTemplate())
 	if err != nil {
 		t.Fatalf("registry.NewKeyData() err = %v, want nil", err)
 	}
@@ -172,7 +168,7 @@ func TestPRFBasedDeriverKeyManagerPrimitiveRejectsInvalidKeys(t *testing.T) {
 		t.Fatalf("GetKeyManager(%q) err = %v, want nil", prfBasedDeriverTypeURL, err)
 	}
 
-	validPRFKey, err := registry.NewKeyData(streamingprf.HKDFSHA256RawKeyTemplate())
+	validPRFKey, err := registry.NewKeyData(prf.HKDFSHA256PRFKeyTemplate())
 	if err != nil {
 		t.Fatalf("registry.NewKeyData() err = %v, want nil", err)
 	}
@@ -251,11 +247,7 @@ func TestPRFBasedDeriverKeyManagerNewKey(t *testing.T) {
 	}{
 		{
 			name:     "HKDF-SHA256",
-			template: streamingprf.HKDFSHA256RawKeyTemplate(),
-		},
-		{
-			name:     "HKDF-SHA512",
-			template: streamingprf.HKDFSHA512RawKeyTemplate(),
+			template: prf.HKDFSHA256PRFKeyTemplate(),
 		},
 	}
 	derivations := []struct {
@@ -331,11 +323,7 @@ func TestPRFBasedDeriverKeyManagerNewKeyData(t *testing.T) {
 	}{
 		{
 			name:     "HKDF-SHA256",
-			template: streamingprf.HKDFSHA256RawKeyTemplate(),
-		},
-		{
-			name:     "HKDF-SHA512",
-			template: streamingprf.HKDFSHA512RawKeyTemplate(),
+			template: prf.HKDFSHA256PRFKeyTemplate(),
 		},
 	}
 	derivations := []struct {
@@ -412,7 +400,7 @@ func TestPRFBasedDeriverKeyManagerNewKeyAndNewKeyDataRejectsIncorrectKeyFormats(
 		t.Fatalf("GetKeyManager(%q) err = %v, want nil", prfBasedDeriverTypeURL, err)
 	}
 	missingParamsKeyFormat := &prfderpb.PrfBasedDeriverKeyFormat{
-		PrfKeyTemplate: streamingprf.HKDFSHA256RawKeyTemplate(),
+		PrfKeyTemplate: prf.HKDFSHA256PRFKeyTemplate(),
 	}
 	serializedMissingParamsKeyFormat, err := proto.Marshal(missingParamsKeyFormat)
 	if err != nil {
@@ -461,7 +449,7 @@ func TestPRFBasedDeriverKeyManagerNewKeyAndNewKeyDataRejectsInvalidKeyFormats(t 
 	}
 
 	validKeyFormat := &prfderpb.PrfBasedDeriverKeyFormat{
-		PrfKeyTemplate: streamingprf.HKDFSHA256RawKeyTemplate(),
+		PrfKeyTemplate: prf.HKDFSHA256PRFKeyTemplate(),
 		Params: &prfderpb.PrfBasedDeriverParams{
 			DerivedKeyTemplate: aead.AES128GCMKeyTemplate(),
 		},

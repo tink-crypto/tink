@@ -19,7 +19,8 @@
 //
 // # Status
 //
-// This pckage is not currently completely implemented.
+// This package is not completely implemented.
+// TODO(b/227682336): Add cross-language tests before modifying status.
 package keyderivation
 
 import (
