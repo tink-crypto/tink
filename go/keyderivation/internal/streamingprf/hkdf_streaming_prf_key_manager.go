@@ -22,11 +22,13 @@ import (
 	"google.golang.org/protobuf/proto"
 	"github.com/google/tink/go/core/registry"
 	"github.com/google/tink/go/keyset"
-	"github.com/google/tink/go/subtle/random"
 	commonpb "github.com/google/tink/go/proto/common_go_proto"
 	hkdfpb "github.com/google/tink/go/proto/hkdf_prf_go_proto"
 	tinkpb "github.com/google/tink/go/proto/tink_go_proto"
 )
+
+// TODO(b/260619626): HKDF PRF and HKDF Streaming PRF will eventually share the
+// same key manager, rendering this one obsolete.
 
 const (
 	hkdfStreamingPRFKeyVersion = 0
@@ -36,6 +38,7 @@ const (
 var (
 	errInvalidHKDFStreamingPRFKey       = errors.New("hkdf_streaming_prf_key_manager: invalid key")
 	errInvalidHKDFStreamingPRFKeyFormat = errors.New("hkdf_streaming_prf_key_manager: invalid key format")
+	errHKDFStreamingPRFNotImplemented   = errors.New("hkdf_streaming_prf_key_manager: not implemented")
 )
 
 // HKDFStreamingPRFKeyManager is a KeyManager for HKDF Streaming PRF keys. It is
@@ -57,44 +60,23 @@ func (km *HKDFStreamingPRFKeyManager) Primitive(serializedKey []byte) (interface
 	if keyset.ValidateKeyVersion(key.GetVersion(), hkdfStreamingPRFKeyVersion) != nil {
 		return nil, errInvalidHKDFStreamingPRFKey
 	}
-	return newHKDFStreamingPRF(hashNameFromHKDFPRFParams(key.GetParams()), key.GetKeyValue(), key.GetParams().GetSalt())
+	hashName := commonpb.HashType_name[int32(key.GetParams().GetHash())]
+	return newHKDFStreamingPRF(hashName, key.GetKeyValue(), key.GetParams().GetSalt())
 }
 
 // NewKey generates a new key according to specification in serializedKeyFormat.
+// It is not implemented for this KeyManager to prevent the generation of keys
+// of this key type.
 func (km *HKDFStreamingPRFKeyManager) NewKey(serializedKeyFormat []byte) (proto.Message, error) {
-	if len(serializedKeyFormat) == 0 {
-		return nil, errInvalidHKDFStreamingPRFKeyFormat
-	}
-	keyFormat := &hkdfpb.HkdfPrfKeyFormat{}
-	if err := proto.Unmarshal(serializedKeyFormat, keyFormat); err != nil {
-		return nil, errInvalidHKDFStreamingPRFKeyFormat
-	}
-	if err := validateHKDFStreamingPRFParams(hashNameFromHKDFPRFParams(keyFormat.GetParams()), int(keyFormat.GetKeySize())); err != nil {
-		return nil, err
-	}
-	return &hkdfpb.HkdfPrfKey{
-		Version:  hkdfStreamingPRFKeyVersion,
-		Params:   keyFormat.GetParams(),
-		KeyValue: random.GetRandomBytes(keyFormat.GetKeySize()),
-	}, nil
+	return nil, errHKDFStreamingPRFNotImplemented
 }
 
 // NewKeyData generates a new KeyData according to specification in
 // serializedkeyFormat. This should be used solely by the key management API.
+// It is not implemented for this KeyManager to prevent the generation of keys
+// of this key type.
 func (km *HKDFStreamingPRFKeyManager) NewKeyData(serializedKeyFormat []byte) (*tinkpb.KeyData, error) {
-	key, err := km.NewKey(serializedKeyFormat)
-	if err != nil {
-		return nil, err
-	}
-	serializedKey, err := proto.Marshal(key)
-	if err != nil {
-		return nil, errInvalidHKDFStreamingPRFKeyFormat
-	}
-	return &tinkpb.KeyData{
-		TypeUrl:         hkdfStreamingPRFTypeURL,
-		Value:           serializedKey,
-		KeyMaterialType: tinkpb.KeyData_SYMMETRIC,
-	}, nil
+	return nil, errHKDFStreamingPRFNotImplemented
 }
 
 // DoesSupport returns true iff this KeyManager supports key type identified by
@@ -107,8 +89,4 @@ func (km *HKDFStreamingPRFKeyManager) DoesSupport(typeURL string) bool {
 // this KeyManager.
 func (km *HKDFStreamingPRFKeyManager) TypeURL() string {
 	return hkdfStreamingPRFTypeURL
-}
-
-func hashNameFromHKDFPRFParams(params *hkdfpb.HkdfPrfParams) string {
-	return commonpb.HashType_name[int32(params.GetHash())]
 }

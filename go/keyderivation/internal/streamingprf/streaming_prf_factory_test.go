@@ -26,6 +26,7 @@ import (
 	"github.com/google/tink/go/insecurecleartextkeyset"
 	"github.com/google/tink/go/keyderivation/internal/streamingprf"
 	"github.com/google/tink/go/keyset"
+	"github.com/google/tink/go/prf"
 	"github.com/google/tink/go/subtle/random"
 	"github.com/google/tink/go/testkeyset"
 	commonpb "github.com/google/tink/go/proto/common_go_proto"
@@ -34,49 +35,51 @@ import (
 )
 
 func TestNew(t *testing.T) {
-	for _, test := range []struct {
-		name     string
-		hash     commonpb.HashType
-		template *tinkpb.KeyTemplate
-	}{
-		{
-			name:     "SHA256",
-			hash:     commonpb.HashType_SHA256,
-			template: streamingprf.HKDFSHA256RawKeyTemplate(),
+	keyData, err := registry.NewKeyData(prf.HKDFSHA256PRFKeyTemplate())
+	if err != nil {
+		t.Fatalf("registry.NewKeyData() err = %v", err)
+	}
+	keyData.TypeUrl = hkdfStreamingPRFTypeURL
+	ks := &tinkpb.Keyset{
+		PrimaryKeyId: 119,
+		Key: []*tinkpb.Keyset_Key{
+			&tinkpb.Keyset_Key{
+				KeyData:          keyData,
+				Status:           tinkpb.KeyStatusType_ENABLED,
+				KeyId:            119,
+				OutputPrefixType: tinkpb.OutputPrefixType_RAW,
+			},
 		},
-		{
-			name:     "SHA512",
-			hash:     commonpb.HashType_SHA512,
-			template: streamingprf.HKDFSHA512RawKeyTemplate(),
-		},
-	} {
-		t.Run(test.name, func(t *testing.T) {
-			handle, err := keyset.NewHandle(test.template)
-			if err != nil {
-				t.Fatalf("keyset.NewHandle() err = %v, want nil", err)
-			}
-			prf, err := streamingprf.New(handle)
-			if err != nil {
-				t.Errorf("streamingprf.New() err = %v, want nil", err)
-			}
-			r, err := prf.Compute(random.GetRandomBytes(32))
-			if err != nil {
-				t.Fatalf("prf.Compute() err = %v, want nil", err)
-			}
-			limit := limitFromHash(t, test.hash)
-			out := make([]byte, limit)
-			n, err := r.Read(out)
-			if n != limit || err != nil {
-				t.Errorf("Read() bytes = %d, want %d: %v", n, limit, err)
-			}
-		})
+	}
+	handle, err := insecurecleartextkeyset.Read(&keyset.MemReaderWriter{Keyset: ks})
+	if err != nil {
+		t.Fatalf("insecurecleartextkeyset.Read() err = %v, want nil", err)
+	}
+	prf, err := streamingprf.New(handle)
+	if err != nil {
+		t.Errorf("streamingprf.New() err = %v, want nil", err)
+	}
+	r, err := prf.Compute(random.GetRandomBytes(32))
+	if err != nil {
+		t.Fatalf("prf.Compute() err = %v, want nil", err)
+	}
+	limit := limitFromHash(t, commonpb.HashType_SHA256)
+	out := make([]byte, limit)
+	n, err := r.Read(out)
+	if n != limit || err != nil {
+		t.Errorf("Read() bytes = %d, want %d: %v", n, limit, err)
 	}
 }
 
 func TestNewEqualToStreamingPRFPrimitive(t *testing.T) {
-	km, err := registry.GetKeyManager(hkdfStreamingPRFTypeURL)
+	streamingPRFKM, err := registry.GetKeyManager(hkdfStreamingPRFTypeURL)
 	if err != nil {
 		t.Fatalf("GetKeyManager(%s) err = %v, want nil", hkdfStreamingPRFTypeURL, err)
+	}
+	hkdfPRFTypeURL := "type.googleapis.com/google.crypto.tink.HkdfPrfKey"
+	prfKM, err := registry.GetKeyManager(hkdfPRFTypeURL)
+	if err != nil {
+		t.Fatalf("GetKeyManager(%s) err = %v, want nil", hkdfPRFTypeURL, err)
 	}
 	for _, test := range []struct {
 		name string
@@ -116,10 +119,11 @@ func TestNewEqualToStreamingPRFPrimitive(t *testing.T) {
 			if err != nil {
 				t.Fatalf("proto.Marshal(%v) err = %v, want nil", keyFormat, err)
 			}
-			sharedKeyData, err := km.NewKeyData(serializedKeyFormat)
+			sharedKeyData, err := prfKM.NewKeyData(serializedKeyFormat)
 			if err != nil {
 				t.Fatalf("NewKeyData() err = %v, want nil", err)
 			}
+			sharedKeyData.TypeUrl = hkdfStreamingPRFTypeURL
 
 			// Use shared key data to create StreamingPRF using New().
 			var primaryKeyID uint32 = 12
@@ -144,7 +148,7 @@ func TestNewEqualToStreamingPRFPrimitive(t *testing.T) {
 			}
 
 			// Use shared key data to create StreamingPRF using Primitive().
-			p, err := km.Primitive(sharedKeyData.GetValue())
+			p, err := streamingPRFKM.Primitive(sharedKeyData.GetValue())
 			if err != nil {
 				t.Fatalf("Primitive() err = %v, want nil", err)
 			}
@@ -199,10 +203,11 @@ func TestNewRejectsIncorrectKeysetHandle(t *testing.T) {
 }
 
 func TestNewRejectsInvalidKeysetHandle(t *testing.T) {
-	keyData, err := registry.NewKeyData(streamingprf.HKDFSHA256RawKeyTemplate())
+	keyData, err := registry.NewKeyData(prf.HKDFSHA256PRFKeyTemplate())
 	if err != nil {
 		t.Fatalf("registry.NewKeyData() err = %v", err)
 	}
+	keyData.TypeUrl = hkdfStreamingPRFTypeURL
 	for _, test := range []struct {
 		name   string
 		keyset *tinkpb.Keyset
