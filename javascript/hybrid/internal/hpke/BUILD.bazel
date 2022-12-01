@@ -5,6 +5,7 @@ package(default_visibility = ["//:__subpackages__"])
 ts_library(
     name = "hpke",
     srcs = [
+        "aes_gcm_hpke_aead.ts",
         "hkdf_hpke_kdf.ts",
         "hpke_aead.ts",
         "hpke_kdf.ts",
@@ -17,6 +18,7 @@ ts_library(
     ],
     module_name = "tink-crypto/hybrid/internal/hpke",
     deps = [
+        "//aead/internal",
         "//exception",
         "//subtle",
     ],
@@ -26,6 +28,7 @@ ts_library(
     name = "hpke_tests",
     testonly = True,
     srcs = [
+        "aes_gcm_hpke_aead_tests.ts",
         "hkdf_hpke_kdf_test.ts",
         "hpke_util_test.ts",
         "nist_curves_hpke_kem_private_key_test.ts",
