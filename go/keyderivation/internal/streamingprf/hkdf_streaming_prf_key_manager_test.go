@@ -21,7 +21,6 @@ import (
 	"testing"
 
 	"google.golang.org/protobuf/proto"
-	"github.com/google/tink/go/core/registry"
 	"github.com/google/tink/go/keyderivation/internal/streamingprf"
 	"github.com/google/tink/go/subtle/random"
 	aesgcmpb "github.com/google/tink/go/proto/aes_gcm_go_proto"
@@ -30,10 +29,7 @@ import (
 )
 
 func TestHKDFStreamingPRFKeyManagerPrimitive(t *testing.T) {
-	km, err := registry.GetKeyManager(hkdfStreamingPRFTypeURL)
-	if err != nil {
-		t.Fatalf("GetKeyManager(%s) err = %v, want nil", hkdfStreamingPRFTypeURL, err)
-	}
+	km := streamingprf.HKDFStreamingPRFKeyManager{}
 	for _, test := range []struct {
 		name string
 		hash commonpb.HashType
@@ -94,10 +90,7 @@ func TestHKDFStreamingPRFKeyManagerPrimitive(t *testing.T) {
 }
 
 func TestHKDFStreamingPRFKeyManagerPrimitiveRejectsIncorrectKeys(t *testing.T) {
-	km, err := registry.GetKeyManager(hkdfStreamingPRFTypeURL)
-	if err != nil {
-		t.Fatalf("GetKeyManager(%s) err = %v, want nil", hkdfStreamingPRFTypeURL, err)
-	}
+	km := streamingprf.HKDFStreamingPRFKeyManager{}
 	missingParamsKey := &hkdfpb.HkdfPrfKey{
 		Version:  0,
 		KeyValue: random.GetRandomBytes(32),
@@ -140,10 +133,7 @@ func TestHKDFStreamingPRFKeyManagerPrimitiveRejectsIncorrectKeys(t *testing.T) {
 }
 
 func TestHKDFStreamingPRFKeyManagerPrimitiveRejectsInvalidKeys(t *testing.T) {
-	km, err := registry.GetKeyManager(hkdfStreamingPRFTypeURL)
-	if err != nil {
-		t.Fatalf("GetKeyManager(%s) err = %v, want nil", hkdfStreamingPRFTypeURL, err)
-	}
+	km := streamingprf.HKDFStreamingPRFKeyManager{}
 
 	validKey := &hkdfpb.HkdfPrfKey{
 		Version: 0,
@@ -209,10 +199,7 @@ func TestHKDFStreamingPRFKeyManagerPrimitiveRejectsInvalidKeys(t *testing.T) {
 }
 
 func TestHKDFStreamingPRFKeyManagerNewKeyAndNewKeyData(t *testing.T) {
-	km, err := registry.GetKeyManager(hkdfStreamingPRFTypeURL)
-	if err != nil {
-		t.Fatalf("GetKeyManager(%s) err = %v, want nil", hkdfStreamingPRFTypeURL, err)
-	}
+	km := streamingprf.HKDFStreamingPRFKeyManager{}
 	notImplemented := "not implemented"
 	if _, err := km.NewKey(random.GetRandomBytes(16)); !strings.Contains(err.Error(), notImplemented) {
 		t.Errorf("NewKey() err = %v, want containing %q", err, notImplemented)
@@ -223,12 +210,9 @@ func TestHKDFStreamingPRFKeyManagerNewKeyAndNewKeyData(t *testing.T) {
 }
 
 func TestHKDFStreamingPRFKeyManagerDoesSupport(t *testing.T) {
-	km, err := registry.GetKeyManager(hkdfStreamingPRFTypeURL)
-	if err != nil {
-		t.Fatalf("GetKeyManager(%s) err = %v, want nil", hkdfStreamingPRFTypeURL, err)
-	}
-	if !km.DoesSupport(hkdfStreamingPRFTypeURL) {
-		t.Errorf("DoesSupport(%q) = false, want true", hkdfStreamingPRFTypeURL)
+	km := streamingprf.HKDFStreamingPRFKeyManager{}
+	if !km.DoesSupport(hkdfPRFTypeURL) {
+		t.Errorf("DoesSupport(%q) = false, want true", hkdfPRFTypeURL)
 	}
 	if unsupported := "unsupported.key.type"; km.DoesSupport(unsupported) {
 		t.Errorf("DoesSupport(%q) = true, want false", unsupported)
@@ -236,11 +220,8 @@ func TestHKDFStreamingPRFKeyManagerDoesSupport(t *testing.T) {
 }
 
 func TestHKDFStreamingPRFKeyManagerTypeURL(t *testing.T) {
-	km, err := registry.GetKeyManager(hkdfStreamingPRFTypeURL)
-	if err != nil {
-		t.Fatalf("GetKeyManager(%s) err = %v, want nil", hkdfStreamingPRFTypeURL, err)
-	}
-	if km.TypeURL() != hkdfStreamingPRFTypeURL {
-		t.Errorf("TypeURL() = %q, want %q", km.TypeURL(), hkdfStreamingPRFTypeURL)
+	km := streamingprf.HKDFStreamingPRFKeyManager{}
+	if km.TypeURL() != hkdfPRFTypeURL {
+		t.Errorf("TypeURL() = %q, want %q", km.TypeURL(), hkdfPRFTypeURL)
 	}
 }

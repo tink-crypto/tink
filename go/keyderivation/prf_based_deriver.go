@@ -20,7 +20,6 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/google/tink/go/core/registry"
 	"github.com/google/tink/go/insecurecleartextkeyset"
 	"github.com/google/tink/go/internal/internalregistry"
 	"github.com/google/tink/go/keyderivation/internal/streamingprf"
@@ -28,10 +27,7 @@ import (
 	tinkpb "github.com/google/tink/go/proto/tink_go_proto"
 )
 
-const (
-	hkdfPRFTypeURL          = "type.googleapis.com/google.crypto.tink.HkdfPrfKey"
-	hkdfStreamingPRFTypeURL = "type.googleapis.com/google.crypto.tink.HkdfStreamingPrfKey"
-)
+const hkdfPRFTypeURL = "type.googleapis.com/google.crypto.tink.HkdfPrfKey"
 
 // prfBasedDeriver uses prf and the Tink registry to derive a keyset handle as
 // described by derivedKeyTemplate.
@@ -48,28 +44,21 @@ func newPRFBasedDeriver(prfKeyData *tinkpb.KeyData, derivedKeyTemplate *tinkpb.K
 	if prfKeyData == nil {
 		return nil, errors.New("PRF key data is nil")
 	}
-	var p interface{}
 	if prfKeyData.GetTypeUrl() != hkdfPRFTypeURL {
-		var err error
-		p, err = registry.Primitive(prfKeyData.GetTypeUrl(), prfKeyData.GetValue())
-		if err != nil {
-			return nil, fmt.Errorf("failed to retrieve StreamingPRF primitive from registry: %v", err)
-		}
-	} else {
-		// For HKDF PRF keys, create a local instance of the HKDF Streaming PRF key
-		// manager and obtain the Streaming PRF interface through it, instead of
-		// obtaining it through the registry. This allows us to keep the HKDF
-		// Streaming PRF key manager out of the registry for smoother deprecation.
-		//
-		// TODO(b/260619626): Remove this once PRF and Streaming PRF share the same
-		// type URL and registry.Primitive() can return multiple interfaces per
-		// primitive.
-		hkdfStreamingPRFKeyManager := streamingprf.HKDFStreamingPRFKeyManager{}
-		var err error
-		p, err = hkdfStreamingPRFKeyManager.Primitive(prfKeyData.GetValue())
-		if err != nil {
-			return nil, fmt.Errorf("failed to retrieve StreamingPRF primitive from key manager: %v", err)
-		}
+		return nil, fmt.Errorf("PRF key data with type URL %q is not supported", prfKeyData.GetTypeUrl())
+	}
+	// For HKDF PRF keys, create a local instance of the HKDF Streaming PRF key
+	// manager and obtain the Streaming PRF interface through it, instead of
+	// obtaining it through the registry. This allows us to keep the HKDF
+	// Streaming PRF key manager out of the registry for smoother deprecation.
+	//
+	// TODO(b/260619626): Remove this once PRF and Streaming PRF share the same
+	// type URL and registry.Primitive() can return multiple interfaces per
+	// primitive.
+	hkdfStreamingPRFKeyManager := streamingprf.HKDFStreamingPRFKeyManager{}
+	p, err := hkdfStreamingPRFKeyManager.Primitive(prfKeyData.GetValue())
+	if err != nil {
+		return nil, fmt.Errorf("failed to retrieve StreamingPRF primitive from key manager: %v", err)
 	}
 	prf, ok := p.(streamingprf.StreamingPRF)
 	if !ok {

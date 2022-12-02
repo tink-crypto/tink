@@ -39,7 +39,6 @@ func TestNew(t *testing.T) {
 	if err != nil {
 		t.Fatalf("registry.NewKeyData() err = %v", err)
 	}
-	keyData.TypeUrl = hkdfStreamingPRFTypeURL
 	ks := &tinkpb.Keyset{
 		PrimaryKeyId: 119,
 		Key: []*tinkpb.Keyset_Key{
@@ -72,11 +71,7 @@ func TestNew(t *testing.T) {
 }
 
 func TestNewEqualToStreamingPRFPrimitive(t *testing.T) {
-	streamingPRFKM, err := registry.GetKeyManager(hkdfStreamingPRFTypeURL)
-	if err != nil {
-		t.Fatalf("GetKeyManager(%s) err = %v, want nil", hkdfStreamingPRFTypeURL, err)
-	}
-	hkdfPRFTypeURL := "type.googleapis.com/google.crypto.tink.HkdfPrfKey"
+	streamingPRFKM := streamingprf.HKDFStreamingPRFKeyManager{}
 	prfKM, err := registry.GetKeyManager(hkdfPRFTypeURL)
 	if err != nil {
 		t.Fatalf("GetKeyManager(%s) err = %v, want nil", hkdfPRFTypeURL, err)
@@ -123,7 +118,6 @@ func TestNewEqualToStreamingPRFPrimitive(t *testing.T) {
 			if err != nil {
 				t.Fatalf("NewKeyData() err = %v, want nil", err)
 			}
-			sharedKeyData.TypeUrl = hkdfStreamingPRFTypeURL
 
 			// Use shared key data to create StreamingPRF using New().
 			var primaryKeyID uint32 = 12
@@ -207,7 +201,6 @@ func TestNewRejectsInvalidKeysetHandle(t *testing.T) {
 	if err != nil {
 		t.Fatalf("registry.NewKeyData() err = %v", err)
 	}
-	keyData.TypeUrl = hkdfStreamingPRFTypeURL
 	for _, test := range []struct {
 		name   string
 		keyset *tinkpb.Keyset

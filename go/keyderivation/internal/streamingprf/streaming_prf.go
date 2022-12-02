@@ -19,10 +19,7 @@
 package streamingprf
 
 import (
-	"fmt"
 	"io"
-
-	"github.com/google/tink/go/core/registry"
 )
 
 // StreamingPRF is the interface used to represent a streaming pseudorandom
@@ -33,11 +30,4 @@ type StreamingPRF interface {
 	// Compute computes the PRF selected by the specified key on input and returns
 	// the result via a reader.
 	Compute(input []byte) (io.Reader, error)
-}
-
-// TODO(b/227682336): Remove HKDFStreamingPRFKeyManager registration.
-func init() {
-	if err := registry.RegisterKeyManager(new(HKDFStreamingPRFKeyManager)); err != nil {
-		panic(fmt.Sprintf("streamingprf.init() failed: %v", err))
-	}
 }

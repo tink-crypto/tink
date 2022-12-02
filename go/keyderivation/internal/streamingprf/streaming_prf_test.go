@@ -24,7 +24,7 @@ import (
 	commonpb "github.com/google/tink/go/proto/common_go_proto"
 )
 
-const hkdfStreamingPRFTypeURL = "type.googleapis.com/google.crypto.tink.HkdfStreamingPrfKey"
+const hkdfPRFTypeURL = "type.googleapis.com/google.crypto.tink.HkdfPrfKey"
 
 // limitFromHash returns the maximum output bytes from a HKDF using hash.
 func limitFromHash(t *testing.T, hash commonpb.HashType) (limit int) {

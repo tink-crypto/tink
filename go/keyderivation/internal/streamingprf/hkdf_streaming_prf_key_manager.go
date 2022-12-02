@@ -27,12 +27,14 @@ import (
 	tinkpb "github.com/google/tink/go/proto/tink_go_proto"
 )
 
-// TODO(b/260619626): HKDF PRF and HKDF Streaming PRF will eventually share the
-// same key manager, rendering this one obsolete.
+// TODO(b/260619626): HKDF PRF and HKDF Streaming PRF currently share the same
+// type URL. This is fine as HKDFStreamingPRFKeyManager is not in the global
+// registry. HKDF PRF and HKDF Streaming PRF will eventually share the same key
+// manager, rendering this one obsolete.
 
 const (
 	hkdfStreamingPRFKeyVersion = 0
-	hkdfStreamingPRFTypeURL    = "type.googleapis.com/google.crypto.tink.HkdfStreamingPrfKey"
+	hkdfPRFTypeURL             = "type.googleapis.com/google.crypto.tink.HkdfPrfKey"
 )
 
 var (
@@ -82,11 +84,11 @@ func (km *HKDFStreamingPRFKeyManager) NewKeyData(serializedKeyFormat []byte) (*t
 // DoesSupport returns true iff this KeyManager supports key type identified by
 // typeURL.
 func (km *HKDFStreamingPRFKeyManager) DoesSupport(typeURL string) bool {
-	return typeURL == hkdfStreamingPRFTypeURL
+	return typeURL == hkdfPRFTypeURL
 }
 
 // TypeURL returns the type URL that identifes the key type of keys managed by
 // this KeyManager.
 func (km *HKDFStreamingPRFKeyManager) TypeURL() string {
-	return hkdfStreamingPRFTypeURL
+	return hkdfPRFTypeURL
 }

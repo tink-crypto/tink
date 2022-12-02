@@ -31,7 +31,7 @@ func New(h *keyset.Handle) (StreamingPRF, error) {
 	if h == nil {
 		return nil, errors.New("keyset handle can't be nil")
 	}
-	ps, err := h.PrimitivesWithKeyManager(nil)
+	ps, err := h.PrimitivesWithKeyManager(new(HKDFStreamingPRFKeyManager))
 	if err != nil {
 		return nil, fmt.Errorf("streaming_prf_factory: cannot obtain primitive set: %v", err)
 	}
