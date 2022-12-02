@@ -273,6 +273,16 @@ java_library(
     ],
 )
 
+java_library(
+    name = "aes_eax_parameters",
+    srcs = ["AesEaxParameters.java"],
+    deps = [
+        ":aead_parameters",
+        "@maven//:com_google_code_findbugs_jsr305",
+        "@maven//:com_google_errorprone_error_prone_annotations",
+    ],
+)
+
 # Android libraries
 
 android_library(
@@ -540,6 +550,16 @@ android_library(
     srcs = ["AeadParameters.java"],
     deps = [
         "//src/main/java/com/google/crypto/tink:parameters-android",
+        "@maven//:com_google_errorprone_error_prone_annotations",
+    ],
+)
+
+android_library(
+    name = "aes_eax_parameters-android",
+    srcs = ["AesEaxParameters.java"],
+    deps = [
+        ":aead_parameters-android",
+        "@maven//:com_google_code_findbugs_jsr305",
         "@maven//:com_google_errorprone_error_prone_annotations",
     ],
 )
