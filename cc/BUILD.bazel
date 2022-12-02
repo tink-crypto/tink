@@ -1113,3 +1113,39 @@ cc_test(
         "@com_google_googletest//:gtest_main",
     ],
 )
+
+cc_library(
+    name = "proto_keyset_format",
+    srcs = ["proto_keyset_format.cc"],
+    hdrs = ["proto_keyset_format.h"],
+    include_prefix = "tink",
+    deps = [
+        ":binary_keyset_reader",
+        ":binary_keyset_writer",
+        ":cleartext_keyset_handle",
+        ":keyset_handle",
+        ":secret_key_access_token",
+        "//util:secret_data",
+        "@com_google_absl//absl/strings",
+    ],
+)
+
+cc_test(
+    name = "proto_keyset_format_test",
+    srcs = ["proto_keyset_format_test.cc"],
+    deps = [
+        ":insecure_secret_key_access",
+        ":keyset_handle_builder",
+        ":mac",
+        ":proto_keyset_format",
+        "//config:tink_config",
+        "//internal:legacy_proto_parameters",
+        "//internal:proto_parameters_serialization",
+        "//mac:mac_key_templates",
+        "//signature:signature_key_templates",
+        "//util:secret_data",
+        "//util:test_matchers",
+        "@com_google_absl//absl/strings",
+        "@com_google_googletest//:gtest_main",
+    ],
+)

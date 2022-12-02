@@ -1052,3 +1052,38 @@ tink_cc_test(
     tink::subtle::random
     tink::util::secret_data
 )
+
+tink_cc_library(
+  NAME proto_keyset_format
+  SRCS
+    proto_keyset_format.cc
+    proto_keyset_format.h
+  DEPS
+    tink::core::binary_keyset_reader
+    tink::core::binary_keyset_writer
+    tink::core::cleartext_keyset_handle
+    tink::core::keyset_handle
+    tink::core::secret_key_access_token
+    absl::strings
+    tink::util::secret_data
+)
+
+tink_cc_test(
+  NAME proto_keyset_format_test
+  SRCS
+    proto_keyset_format_test.cc
+  DEPS
+    tink::core::insecure_secret_key_access
+    tink::core::keyset_handle_builder
+    tink::core::mac
+    tink::core::proto_keyset_format
+    gmock
+    absl::strings
+    tink::config::tink_config
+    tink::internal::legacy_proto_parameters
+    tink::internal::proto_parameters_serialization
+    tink::mac::mac_key_templates
+    tink::signature::signature_key_templates
+    tink::util::secret_data
+    tink::util::test_matchers
+)
