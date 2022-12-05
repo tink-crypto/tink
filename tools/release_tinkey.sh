@@ -17,9 +17,10 @@
 # This script creates a Tinkey distribution and uploads it to Google Cloud
 # Storage.
 # Prerequisites:
-#   - Google Cloud SDK: https://cloud.google.com/sdk/install
+#   - Google Cloud SDK (https://cloud.google.com/sdk/install)
 #   - Write access to the "tinkey" GCS bucket. Ping tink-dev@.
-#   - bazel: https://bazel.build/
+#   - Bazelisk (https://github.com/bazelbuild/bazelisk) or Bazel
+#     (https://bazel.build/)
 
 usage() {
   echo "Usage: $0 [-dh] <version>"
@@ -60,8 +61,12 @@ fi
 # Set up parameters.
 
 readonly GCS_LOCATION="gs://tinkey/"
-
 readonly TMP_DIR="$(mktemp -dt tinkey.XXXXXX)"
+BAZEL_CMD="bazel"
+if command -v "bazelisk" &> /dev/null; then
+  BAZEL_CMD="bazelisk"
+fi
+readonly BAZEL_CMD
 
 do_command() {
   if ! "$@"; then
@@ -97,7 +102,7 @@ do_if_not_dry_run() {
 build_tinkey() {
   print_and_do cd tools
 
-  print_and_do bazel build tinkey:tinkey_deploy.jar
+  print_and_do "${BAZEL_CMD}" build tinkey:tinkey_deploy.jar
 
   print_and_do cp bazel-bin/tinkey/tinkey_deploy.jar "${TMP_DIR}"
 
