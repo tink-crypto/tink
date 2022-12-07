@@ -20,11 +20,9 @@
 #
 # NOTES:
 #   * If not running on Kokoro, this script will do nothing.
-#   * This script MUST be sourced to update the environment of the calling
+#   * This script *must* be sourced to update the environment of the calling
 #     script.
-#   * The required Bazel version *must* be installed before running this script
-#     with:
-#       use_bazel.sh "$(cat <path to version file>/.bazelversion)"
+#   * The required Bazel version *must* be installed before running this script.
 #
 # Usage:
 #   source ./kokoro/testutils/install_tink_via_pip.sh <path to tink python root>
