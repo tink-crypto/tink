@@ -29,7 +29,6 @@ public final class TinkProtoKeysetFormat {
     if (access == null) {
       throw new NullPointerException("SecretKeyAccess cannot be null");
     }
-    SecretKeyAccess.requireAccess(access);
     try {
       return CleartextKeysetHandle.read(BinaryKeysetReader.withBytes(serializedKeyset));
     } catch (IOException e) {
@@ -43,7 +42,6 @@ public final class TinkProtoKeysetFormat {
     if (access == null) {
       throw new NullPointerException("SecretKeyAccess cannot be null");
     }
-    SecretKeyAccess.requireAccess(access);
     try {
       ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
       CleartextKeysetHandle.write(keysetHandle, BinaryKeysetWriter.withOutputStream(outputStream));
