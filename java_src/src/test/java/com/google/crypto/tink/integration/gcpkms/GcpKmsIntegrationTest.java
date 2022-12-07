@@ -21,12 +21,15 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.Assert.assertThrows;
 
 import com.google.crypto.tink.Aead;
+import com.google.crypto.tink.InsecureSecretKeyAccess;
 import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.KeyTemplates;
 import com.google.crypto.tink.KeysetHandle;
+import com.google.crypto.tink.TinkProtoKeysetFormat;
 import com.google.crypto.tink.aead.AeadConfig;
 import com.google.crypto.tink.aead.KmsAeadKeyManager;
 import com.google.crypto.tink.aead.KmsEnvelopeAeadKeyManager;
+import com.google.crypto.tink.subtle.Base64;
 import com.google.crypto.tink.testing.TestUtil;
 import java.security.GeneralSecurityException;
 import java.util.Optional;
@@ -80,6 +83,25 @@ public class GcpKmsIntegrationTest {
     assertThrows(GeneralSecurityException.class, () -> aead.decrypt(empty, associatedData));
     assertThat(aead.decrypt(aead.encrypt(empty, associatedData), associatedData)).isEqualTo(empty);
     assertThat(aead.decrypt(aead.encrypt(plaintext, empty), empty)).isEqualTo(plaintext);
+  }
+
+  @Test
+  public void kmsAeadEncryptAndDecryptWithoutAssociatedData_success() throws Exception {
+    KeysetHandle keysetHandle =
+        KeysetHandle.generateNew(
+            KmsAeadKeyManager.createKeyTemplate(GCP_KMS_TEST_KEY_URI));
+    Aead aead = keysetHandle.getPrimitive(Aead.class);
+
+    byte[] plaintext = "plaintext".getBytes(UTF_8);
+    byte[] empty = "".getBytes(UTF_8);
+    byte[] ciphertextWithNullAd = aead.encrypt(plaintext, null);
+    byte[] ciphertextWithEmptyAd = aead.encrypt(plaintext, empty);
+
+    // Null and empty associated data should be treated the same.
+    assertThat(aead.decrypt(ciphertextWithNullAd, null)).isEqualTo(plaintext);
+    assertThat(aead.decrypt(ciphertextWithNullAd, empty)).isEqualTo(plaintext);
+    assertThat(aead.decrypt(ciphertextWithEmptyAd, null)).isEqualTo(plaintext);
+    assertThat(aead.decrypt(ciphertextWithEmptyAd, empty)).isEqualTo(plaintext);
   }
 
   @Test
@@ -160,6 +182,53 @@ public class GcpKmsIntegrationTest {
     // Ciphertexts cannot be decrypted using a different key URI.
     assertThrows(GeneralSecurityException.class, () -> aead.decrypt(ciphertext2, associatedData));
     assertThrows(GeneralSecurityException.class, () -> aead2.decrypt(ciphertext, associatedData));
+  }
+
+  @Test
+  public void decryptCiphertextEncryptedInBigQueryUsingAWrappedKeyset() throws Exception {
+    String keyUri =
+        "gcp-kms://projects/tink-test-infrastructure/locations/us/keyRings/"
+            + "big-query-test-key/cryptoKeys/aead-key";
+
+    // This wrapped keyset was generated in BigQuery using this command:
+    // DECLARE kms_key_uri STRING;
+    // SET kms_key_uri =
+    // 'gcp-kms://projects/tink-test-infrastructure/locations/us/keyRings/big-query-test-key/cryptoKeys/aead-key';
+    // SELECT KEYS.NEW_WRAPPED_KEYSET(kms_key_uri, 'AEAD_AES_GCM_256')
+    byte[] wrappedKeyset =
+        Base64.decode(
+            "CiQAv82D2I7RT2gQRd/01m+Md8WAmOyehVog50vs5uPq2B+R36YSlQEAba+J9rC0gfmX9FSs8P"
+                + "sWIpCVbIvPiflsaHRxq5GQjknVgYuJLIMDXlGhQBa3NrfJSmj1T/KDHQ3EzCcPAXtOAbAExZr/"
+                + "7jsgiCzo/YQINyPb2rGkW4ofo/BVyvhZ/Pk40iuPHv8Q/PXVrNsq3Y2vkkpsyb3QUhJZseURGj"
+                + "jeQnZde6i3EmvDejXhOZJ3XdQUjwgorA==");
+
+    // This ciphertext was generated in BigQuery using this command:
+    // DECLARE kms_key_uri STRING;
+    // DECLARE wrapped_key BYTES;
+    // SET kms_key_uri =
+    // 'gcp-kms://projects/tink-test-infrastructure/locations/us/keyRings/big-query-test-key/cryptoKeys/aead-key';
+    // SET wrapped_key =
+    // FROM_BASE64('CiQAv82D2I7RT2gQRd/01m+Md8WAmOyehVog50vs5uPq2B+R36YSlQEAba+J9rC0gfmX9FSs8PsWIpCVbIvPiflsaHRxq5GQjknVgYuJLIMDXlGhQBa3NrfJSmj1T/KDHQ3EzCcPAXtOAbAExZr/7jsgiCzo/YQINyPb2rGkW4ofo/BVyvhZ/Pk40iuPHv8Q/PXVrNsq3Y2vkkpsyb3QUhJZseURGjjeQnZde6i3EmvDejXhOZJ3XdQUjwgorA==');
+    // SELECT AEAD.ENCRYPT(KEYS.KEYSET_CHAIN(kms_key_uri, wrapped_key), 'elephant', 'animal')
+    //     AS encrypted_animal;
+    byte[] ciphertext = Base64.decode("AcpCNBevmQnr9momhlKKEyKDOCj5bMfizqC22N/hLZd58LFpC+r99C0=");
+
+    KeysetHandle kmsKeysetHandle =
+        KeysetHandle.generateNew(KmsAeadKeyManager.createKeyTemplate(keyUri));
+    Aead kmsAead = kmsKeysetHandle.getPrimitive(Aead.class);
+
+    byte[] unwrappedKeyset =
+        kmsAead.decrypt(wrappedKeyset, /* associatedData= */ "".getBytes(UTF_8));
+    KeysetHandle handle =
+        TinkProtoKeysetFormat.parseKeyset(unwrappedKeyset, InsecureSecretKeyAccess.get());
+    Aead aead = handle.getPrimitive(Aead.class);
+    byte[] decrypted = aead.decrypt(ciphertext, /* associatedData= */ "animal".getBytes(UTF_8));
+    assertThat(decrypted).isEqualTo("elephant".getBytes(UTF_8));
+
+    // BigQuery's wrappedKeyset is not compatible with TinkProtoKeysetFormat.parseEncryptedKeyset
+    assertThrows(GeneralSecurityException.class,
+        () -> TinkProtoKeysetFormat.parseEncryptedKeyset(
+            wrappedKeyset, kmsAead, "".getBytes(UTF_8)));
   }
 
 }
