@@ -20,6 +20,12 @@
 
 #import <XCTest/XCTest.h>
 
+#include <string>
+
+#include <utility>
+
+#include <memory>
+
 #import "TINKAead.h"
 #import "TINKAeadConfig.h"
 #import "TINKAeadFactory.h"
@@ -33,17 +39,20 @@
 #include "tink/aead/aes_gcm_key_manager.h"
 #include "tink/crypto_format.h"
 #include "tink/keyset_handle.h"
+#include "tink/proto_keyset_format.h"
+#include "tink/insecure_secret_key_access.h"
 #include "tink/util/status.h"
-#include "tink/util/test_keyset_handle.h"
 #include "tink/util/test_util.h"
 #include "proto/aes_gcm.pb.h"
 #include "proto/tink.pb.h"
 
 using crypto::tink::AesGcmKeyManager;
-using crypto::tink::KeyFactory;
-using crypto::tink::TestKeysetHandle;
+using crypto::tink::InsecureSecretKeyAccess;
+using crypto::tink::KeysetHandle;
+using crypto::tink::ParseKeysetFromProtoKeysetFormat;
 using crypto::tink::test::AddRawKey;
 using crypto::tink::test::AddTinkKey;
+using crypto::tink::util::StatusOr;
 using google::crypto::tink::AesGcmKey;
 using google::crypto::tink::AesGcmKeyFormat;
 using google::crypto::tink::KeyData;
@@ -62,8 +71,11 @@ using google::crypto::tink::KeyStatusType;
   XCTAssertNil(error);
 
   Keyset keyset;
-  TINKKeysetHandle *handle =
-      [[TINKKeysetHandle alloc] initWithCCKeysetHandle:TestKeysetHandle::GetKeysetHandle(keyset)];
+  StatusOr<crypto::tink::KeysetHandle> cc_keyset_handle =
+      ParseKeysetFromProtoKeysetFormat("", InsecureSecretKeyAccess::Get());
+  XCTAssertTrue(cc_keyset_handle.ok());
+  TINKKeysetHandle *handle = [[TINKKeysetHandle alloc]
+      initWithCCKeysetHandle:std::make_unique<KeysetHandle>(*cc_keyset_handle)];
   XCTAssertNotNil(handle);
 
   error = nil;
@@ -102,8 +114,11 @@ using google::crypto::tink::KeyStatusType;
   XCTAssertNotNil(aeadConfig);
   XCTAssertNil(error);
 
-  TINKKeysetHandle *handle =
-      [[TINKKeysetHandle alloc] initWithCCKeysetHandle:TestKeysetHandle::GetKeysetHandle(keyset)];
+  StatusOr<crypto::tink::KeysetHandle> cc_keyset_handle =
+      ParseKeysetFromProtoKeysetFormat(keyset.SerializeAsString(), InsecureSecretKeyAccess::Get());
+  XCTAssertTrue(cc_keyset_handle.ok());
+  TINKKeysetHandle *handle = [[TINKKeysetHandle alloc]
+      initWithCCKeysetHandle:std::make_unique<KeysetHandle>(*cc_keyset_handle)];
   XCTAssertNotNil(handle);
 
   id<TINKAead> aead = [TINKAeadFactory primitiveWithKeysetHandle:handle error:&error];
