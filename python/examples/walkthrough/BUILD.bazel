@@ -1,0 +1,47 @@
+load("@rules_python//python:defs.bzl", "py_library", "py_test")
+load("@pip_deps//:requirements.bzl", "requirement")
+
+package(default_visibility = ["//visibility:public"])
+
+licenses(["notice"])
+
+py_library(
+    name = "create_keyset",
+    srcs = ["create_keyset.py"],
+    deps = [
+        "@tink_py//tink:tink_python",
+        "@tink_py//tink/aead",
+    ],
+)
+
+py_test(
+    name = "create_keyset_test",
+    srcs = ["create_keyset_test.py"],
+    python_version = "PY3",
+    deps = [
+        requirement("absl-py"),
+        ":create_keyset",
+        "@tink_py//tink/aead",
+    ],
+)
+
+py_library(
+    name = "load_cleartext_keyset",
+    srcs = ["load_cleartext_keyset.py"],
+    deps = [
+        "@tink_py//tink:cleartext_keyset_handle",
+        "@tink_py//tink:tink_python",
+    ],
+)
+
+py_test(
+    name = "load_cleartext_keyset_test",
+    srcs = ["load_cleartext_keyset_test.py"],
+    python_version = "PY3",
+    deps = [
+        requirement("absl-py"),
+        ":load_cleartext_keyset",
+        "@tink_py//tink:tink_python",
+        "@tink_py//tink/aead",
+    ],
+)
