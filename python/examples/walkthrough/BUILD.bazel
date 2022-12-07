@@ -45,3 +45,25 @@ py_test(
         "@tink_py//tink/aead",
     ],
 )
+
+py_library(
+    name = "load_encrypted_keyset",
+    srcs = ["load_encrypted_keyset.py"],
+    deps = [
+        "@tink_py//tink:tink_python",
+        "@tink_py//tink/aead",
+    ],
+)
+
+py_test(
+    name = "load_encrypted_keyset_test",
+    srcs = ["load_encrypted_keyset_test.py"],
+    deps = [
+        requirement("absl-py"),
+        ":load_encrypted_keyset",
+        "@tink_py//tink:cleartext_keyset_handle",
+        "@tink_py//tink:tink_python",
+        "@tink_py//tink/aead",
+        "@tink_py//tink/testing:fake_kms",
+    ],
+)
