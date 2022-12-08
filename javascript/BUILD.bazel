@@ -41,6 +41,7 @@ karma_web_test_suite(
         "//aead/internal:internal_tests",
         "//hybrid:hybrid_tests",
         "//hybrid/internal/hpke:hpke_tests",
+        "//hybrid/internal/hpke/testing:hpke_test_utils_tests",
         "//internal:internal_tests",
         "//signature:signature_tests",
         "//subtle:subtle_tests",

@@ -4,23 +4,22 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import {InvalidArgumentsException} from '../../../exception/invalid_arguments_exception';
 import * as bytes from '../../../subtle/bytes';
 import * as ellipticCurves from '../../../subtle/elliptic_curves';
 
 import {HkdfHpkeKdf} from './hkdf_hpke_kdf';
+import {HPKE_BORINGSSL_TEST_VECTORS} from './hpke_boringssl_test_vectors';
 import * as hpkeUtil from './hpke_util';
+import {parseTestVectors} from './testing/hpke_test_utils';
 
 const AES_GCM_NONCE_LENGTH: number = 12;  // Nn
 
 interface TestVector {
-  hashFunction: 'SHA-256'|'SHA-512';
-  curveType: string;
   mode: Uint8Array;
   kemId: Uint8Array;
   kdfId: Uint8Array;
   aeadId: Uint8Array;
-  aesKeyLength: number;
-  kemSharedSecretLength: number;
   info: Uint8Array;
   senderPublicKey: Uint8Array;
   senderPrivateKey: Uint8Array;
@@ -37,14 +36,10 @@ interface TestVector {
 const TEST_VECTORS: TestVector[] = [
   /** Test vector for DHKEM(P-256, HKDF-SHA256), HKDF-SHA256, AES-128-GCM */
   {
-    hashFunction: 'SHA-256',
-    curveType: 'P-256',
     mode: hpkeUtil.BASE_MODE,
     kemId: hpkeUtil.P256_HKDF_SHA256_KEM_ID,
     kdfId: hpkeUtil.HKDF_SHA256_KDF_ID,
     aeadId: hpkeUtil.AES_128_GCM_AEAD_ID,
-    aesKeyLength: 16,
-    kemSharedSecretLength: 32,
     info: bytes.fromHex('4f6465206f6e2061204772656369616e2055726e'),
     senderPublicKey: bytes.fromHex(
         '04a92719c6195d5085104f469a8b9814d5838ff72b60501e2c4466e5e67b325ac98536d7b61a1af4b78e5b7f951c0900be863c403ce65c9bfcb9382657222d18c4'),
@@ -67,14 +62,10 @@ const TEST_VECTORS: TestVector[] = [
   },
   /** Test vector for DHKEM(P-521, HKDF-SHA512), HKDF-SHA512, AES-256-GCM */
   {
-    hashFunction: 'SHA-512',
-    curveType: 'P-521',
     mode: hpkeUtil.BASE_MODE,
     kemId: hpkeUtil.P521_HKDF_SHA512_KEM_ID,
     kdfId: hpkeUtil.HKDF_SHA512_KDF_ID,
     aeadId: hpkeUtil.AES_256_GCM_AEAD_ID,
-    aesKeyLength: 32,
-    kemSharedSecretLength: 64,
     info: bytes.fromHex('4f6465206f6e2061204772656369616e2055726e'),
     senderPublicKey: bytes.fromHex(
         '040138b385ca16bb0d5fa0c0665fbbd7e69e3ee29f63991d3e9b5fa740aab8900aaeed46ed73a49055758425a0ce36507c54b29cc5b85a5cee6bae0cf1c21f2731ece2013dc3fb7c8d21654bb161b463962ca19e8c654ff24c94dd2898de12051f1ed0692237fb02b2f8d1dc1c73e9b366b529eb436e98a996ee522aef863dd5739d2f29b0'),
@@ -95,14 +86,40 @@ const TEST_VECTORS: TestVector[] = [
     key: bytes.fromHex(
         '751e346ce8f0ddb2305c8a2a85c70d5cf559c53093656be636b9406d4d7d1b70'),
     baseNonce: bytes.fromHex('55ff7a7d739c69f44b25447b'),
-  }
+  },
+  ...parseTestVectors(HPKE_BORINGSSL_TEST_VECTORS)
 ];
 
 describe('HkdfHpkeKdf', () => {
-  describe('extract', () => {
-    for (const testInfo of TEST_VECTORS) {
-      it('should work for ${testInfo.hashFunction}', async () => {
-        const kdf = new HkdfHpkeKdf(testInfo.hashFunction);
+  for (const testInfo of TEST_VECTORS) {
+    let kdfHashFunction: 'SHA-256'|'SHA-512';
+    let kemHashFunction: 'SHA-256'|'SHA-512';
+    let curveType: ellipticCurves.CurveType.P256|ellipticCurves.CurveType.P521;
+
+    if (bytes.isEqual(testInfo.kdfId, hpkeUtil.HKDF_SHA256_KDF_ID)) {
+      kdfHashFunction = 'SHA-256';
+    } else if (bytes.isEqual(testInfo.kdfId, hpkeUtil.HKDF_SHA512_KDF_ID)) {
+      kdfHashFunction = 'SHA-512';
+    } else {
+      throw new InvalidArgumentsException(
+          `unsupported KDF id: ${testInfo.kdfId}`);
+    }
+
+    if (bytes.isEqual(testInfo.kemId, hpkeUtil.P256_HKDF_SHA256_KEM_ID)) {
+      curveType = ellipticCurves.CurveType.P256;
+      kemHashFunction = 'SHA-256';
+    } else if (bytes.isEqual(
+                   testInfo.kemId, hpkeUtil.P521_HKDF_SHA512_KEM_ID)) {
+      curveType = ellipticCurves.CurveType.P521;
+      kemHashFunction = 'SHA-512';
+    } else {
+      throw new InvalidArgumentsException(
+          `unsupported KEM id: ${testInfo.kemId}`);
+    }
+
+    describe('extract', () => {
+      it(`should work for ${kdfHashFunction}`, async () => {
+        const kdf = new HkdfHpkeKdf(kdfHashFunction);
 
         const suiteId: Uint8Array = hpkeUtil.hpkeSuiteId({
           kemId: testInfo.kemId,
@@ -133,13 +150,11 @@ describe('HkdfHpkeKdf', () => {
         expect(keyScheduleContext).toEqual(testInfo.keyScheduleContext);
         expect(secret).toEqual(testInfo.secret);
       });
-    }
-  });
+    });
 
-  describe('expand', () => {
-    for (const testInfo of TEST_VECTORS) {
-      it('should work for ${testInfo.hashFunction}', async () => {
-        const kdf = new HkdfHpkeKdf(testInfo.hashFunction);
+    describe('expand', () => {
+      it(`should work for ${kdfHashFunction}`, async () => {
+        const kdf = new HkdfHpkeKdf(kdfHashFunction);
 
         const suiteId: Uint8Array = hpkeUtil.hpkeSuiteId({
           kemId: testInfo.kemId,
@@ -152,7 +167,7 @@ describe('HkdfHpkeKdf', () => {
           info: testInfo.keyScheduleContext,
           infoLabel: 'key',
           suiteId,
-          length: testInfo.aesKeyLength,
+          length: testInfo.key.length as 16 | 32,
         });
 
         const baseNonce: Uint8Array = await kdf.labeledExpand({
@@ -166,42 +181,42 @@ describe('HkdfHpkeKdf', () => {
         expect(key).toEqual(testInfo.key);
         expect(baseNonce).toEqual(testInfo.baseNonce);
       });
-    }
-  });
+    });
 
-  describe('extractAndExpand', () => {
-    for (const testInfo of TEST_VECTORS) {
-      it('should work for ${testInfo.hashFunction}', async () => {
-        const kdf = new HkdfHpkeKdf(testInfo.hashFunction);
+    describe('extractAndExpand', () => {
+      it(`should work for ${kemHashFunction} KEM Shared Secret derivation`,
+         async () => {
+           const kdf = new HkdfHpkeKdf(kemHashFunction);
 
-        const senderPrivateKey = await hpkeUtil.getPrivateKeyFromByteArray({
-          curveType: testInfo.curveType,
-          publicKey: testInfo.senderPublicKey,
-          privateKey: testInfo.senderPrivateKey
-        });
+           const senderPrivateKey = await hpkeUtil.getPrivateKeyFromByteArray({
+             curveType: ellipticCurves.curveToString(curveType),
+             publicKey: testInfo.senderPublicKey,
+             privateKey: testInfo.senderPrivateKey
+           });
 
-        const recipientPublicCryptoKey =
-            await hpkeUtil.getPublicKeyFromByteArray(
-                testInfo.curveType, testInfo.recipientPublicKey);
+           const recipientPublicCryptoKey =
+               await hpkeUtil.getPublicKeyFromByteArray(
+                   ellipticCurves.curveToString(curveType),
+                   testInfo.recipientPublicKey);
 
-        const dhSharedSecret: Uint8Array =
-            await ellipticCurves.computeEcdhSharedSecret(
-                senderPrivateKey, recipientPublicCryptoKey);
+           const dhSharedSecret: Uint8Array =
+               await ellipticCurves.computeEcdhSharedSecret(
+                   senderPrivateKey, recipientPublicCryptoKey);
 
-        const kemContext: Uint8Array =
-            bytes.concat(testInfo.senderPublicKey, testInfo.recipientPublicKey);
+           const kemContext: Uint8Array = bytes.concat(
+               testInfo.senderPublicKey, testInfo.recipientPublicKey);
 
-        const sharedSecret: Uint8Array = await kdf.extractAndExpand({
-          ikm: dhSharedSecret,
-          ikmLabel: 'eae_prk',
-          info: kemContext,
-          infoLabel: 'shared_secret',
-          suiteId: hpkeUtil.kemSuiteId(testInfo.kemId),
-          length: testInfo.kemSharedSecretLength,
-        });
+           const sharedSecret: Uint8Array = await kdf.extractAndExpand({
+             ikm: dhSharedSecret,
+             ikmLabel: 'eae_prk',
+             info: kemContext,
+             infoLabel: 'shared_secret',
+             suiteId: hpkeUtil.kemSuiteId(testInfo.kemId),
+             length: testInfo.sharedSecret.length,
+           });
 
-        expect(sharedSecret).toEqual(testInfo.sharedSecret);
-      });
-    }
-  });
+           expect(sharedSecret).toEqual(testInfo.sharedSecret);
+         });
+    });
+  }
 });

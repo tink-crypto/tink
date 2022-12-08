@@ -6,15 +6,18 @@
 
 import 'jasmine';
 
+import {InvalidArgumentsException} from '../../../exception/invalid_arguments_exception';
 import {SecurityException} from '../../../exception/security_exception';
 import * as bytes from '../../../subtle/bytes';
 import {randBytes} from '../../../subtle/random';
 
 import {AesGcmHpkeAead} from './aes_gcm_hpke_aead';
+import {HPKE_BORINGSSL_TEST_VECTORS} from './hpke_boringssl_test_vectors';
+import * as hpkeUtil from './hpke_util';
+import {parseTestVectors} from './testing/hpke_test_utils';
 
 interface TestVector {
-  name: string;
-  keyLength: 16|32;
+  aeadId: Uint8Array;
   key: Uint8Array;
   encryptions: Array<{
     nonce: Uint8Array,
@@ -29,8 +32,7 @@ interface TestVector {
  */
 const TEST_VECTORS: TestVector[] = [
   {
-    name: 'AES-128-GCM',
-    keyLength: 16,
+    aeadId: hpkeUtil.AES_128_GCM_AEAD_ID,
     key: bytes.fromHex('868c066ef58aae6dc589b6cfdd18f97e'),
     encryptions: [
       {
@@ -60,8 +62,7 @@ const TEST_VECTORS: TestVector[] = [
     ]
   },
   {
-    name: 'AES-256-GCM',
-    keyLength: 32,
+    aeadId: hpkeUtil.AES_256_GCM_AEAD_ID,
     key: bytes.fromHex(
         '751e346ce8f0ddb2305c8a2a85c70d5cf559c53093656be636b9406d4d7d1b70'),
     encryptions: [
@@ -90,15 +91,30 @@ const TEST_VECTORS: TestVector[] = [
         associatedData: bytes.fromHex('436f756e742d32'),
       },
     ]
-  }
+  },
+  ...parseTestVectors(HPKE_BORINGSSL_TEST_VECTORS)
 ];
 
 
 describe('AES-GCM HPKE AEAD', () => {
   for (const testInfo of TEST_VECTORS) {
+    let aeadAlgorithm: string;
+    let incorrectKeyLength: 16|32;
+
+    if (bytes.isEqual(testInfo.aeadId, hpkeUtil.AES_128_GCM_AEAD_ID)) {
+      aeadAlgorithm = 'AES-128-GCM';
+      incorrectKeyLength = 32;
+    } else if (bytes.isEqual(testInfo.aeadId, hpkeUtil.AES_256_GCM_AEAD_ID)) {
+      aeadAlgorithm = 'AES-256-GCM';
+      incorrectKeyLength = 16;
+    } else {
+      throw new InvalidArgumentsException(
+          `unsupported AEAD id : ${testInfo.aeadId}`);
+    }
+
     describe('seal and open', () => {
-      it(`should work for ${testInfo.name}`, async () => {
-        const aead = new AesGcmHpkeAead(testInfo.keyLength);
+      it(`should work for ${aeadAlgorithm}`, async () => {
+        const aead = new AesGcmHpkeAead(testInfo.key.length as 16 | 32);
         for (const encryption of testInfo.encryptions) {
           const ciphertext: Uint8Array = await aead.seal({
             key: testInfo.key,
@@ -121,9 +137,8 @@ describe('AES-GCM HPKE AEAD', () => {
     });
 
     describe('seal', () => {
-      it(`should fail with the wrong key length for ${testInfo.name}`,
+      it(`should fail with the wrong key length for ${aeadAlgorithm}`,
          async () => {
-           const incorrectKeyLength = testInfo.keyLength === 16 ? 32 : 16;
            const aead = new AesGcmHpkeAead(incorrectKeyLength);
 
            await expectAsync(aead.seal({
@@ -135,9 +150,9 @@ describe('AES-GCM HPKE AEAD', () => {
          });
 
       it(`should generate different ciphertexts for different nonces using ${
-             testInfo.name}`,
+             aeadAlgorithm}`,
          async () => {
-           const aead = new AesGcmHpkeAead(testInfo.keyLength);
+           const aead = new AesGcmHpkeAead(testInfo.key.length as 16 | 32);
            const encryption = testInfo.encryptions[0];
            const ciphertexts = new Set<string>();
 
@@ -156,9 +171,9 @@ describe('AES-GCM HPKE AEAD', () => {
          });
 
       it(`should generate different ciphertexts for different plaintexts using ${
-             testInfo.name}`,
+             aeadAlgorithm}`,
          async () => {
-           const aead = new AesGcmHpkeAead(testInfo.keyLength);
+           const aead = new AesGcmHpkeAead(testInfo.key.length as 16 | 32);
            const encryption = testInfo.encryptions[0];
            const ciphertexts = new Set<string>();
 
@@ -178,9 +193,9 @@ describe('AES-GCM HPKE AEAD', () => {
          });
 
       it(`should generate different ciphertexts for different associated data using ${
-             testInfo.name}`,
+             aeadAlgorithm}`,
          async () => {
-           const aead = new AesGcmHpkeAead(testInfo.keyLength);
+           const aead = new AesGcmHpkeAead(testInfo.key.length as 16 | 32);
            const encryption = testInfo.encryptions[0];
            const ciphertexts = new Set<string>();
 
@@ -201,9 +216,8 @@ describe('AES-GCM HPKE AEAD', () => {
     });
 
     describe('open', () => {
-      it(`should fail with the wrong key length for ${testInfo.name}`,
+      it(`should fail with the wrong key length for ${aeadAlgorithm}`,
          async () => {
-           const incorrectKeyLength = testInfo.keyLength === 16 ? 32 : 16;
            const aead = new AesGcmHpkeAead(incorrectKeyLength);
 
            await expectAsync(aead.open({
@@ -215,8 +229,8 @@ describe('AES-GCM HPKE AEAD', () => {
          });
 
       for (const encryption of testInfo.encryptions) {
-        it(`should fail with an invalid key for ${testInfo.name}`, async () => {
-          const aead = new AesGcmHpkeAead(testInfo.keyLength);
+        it(`should fail with an invalid key for ${aeadAlgorithm}`, async () => {
+          const aead = new AesGcmHpkeAead(testInfo.key.length as 16 | 32);
 
           await expectAsync(aead.open({
             key: randBytes(testInfo.key.length),
@@ -226,9 +240,9 @@ describe('AES-GCM HPKE AEAD', () => {
           })).toBeRejectedWithError(SecurityException);
         });
 
-        it(`should fail with an invalid nonce for ${testInfo.name}`,
+        it(`should fail with an invalid nonce for ${aeadAlgorithm}`,
            async () => {
-             const aead = new AesGcmHpkeAead(testInfo.keyLength);
+             const aead = new AesGcmHpkeAead(testInfo.key.length as 16 | 32);
 
              await expectAsync(aead.open({
                key: testInfo.key,
@@ -238,9 +252,9 @@ describe('AES-GCM HPKE AEAD', () => {
              })).toBeRejectedWithError(SecurityException);
            });
 
-        it(`should fail with an invalid ciphertext for ${testInfo.name}`,
+        it(`should fail with an invalid ciphertext for ${aeadAlgorithm}`,
            async () => {
-             const aead = new AesGcmHpkeAead(testInfo.keyLength);
+             const aead = new AesGcmHpkeAead(testInfo.key.length as 16 | 32);
 
              await expectAsync(aead.open({
                key: testInfo.key,
@@ -250,9 +264,9 @@ describe('AES-GCM HPKE AEAD', () => {
              })).toBeRejectedWithError(SecurityException);
            });
 
-        it(`should fail with invalid associated data for ${testInfo.name}`,
+        it(`should fail with invalid associated data for ${aeadAlgorithm}`,
            async () => {
-             const aead = new AesGcmHpkeAead(testInfo.keyLength);
+             const aead = new AesGcmHpkeAead(testInfo.key.length as 16 | 32);
 
              await expectAsync(aead.open({
                key: testInfo.key,

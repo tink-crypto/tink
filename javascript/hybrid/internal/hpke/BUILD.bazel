@@ -33,11 +33,22 @@ ts_library(
         "hpke_util_test.ts",
         "nist_curves_hpke_kem_private_key_test.ts",
         "nist_curves_hpke_kem_test.ts",
+        ":hpke_boringssl_test_vectors",
     ],
     deps = [
         ":hpke",
         "//exception",
+        "//hybrid/internal/hpke/testing:hpke_test_utils",
         "//subtle",
+        "//testing/internal",
         "@npm//@types/jasmine",
     ],
+)
+
+genrule(
+    name = "hpke_boringssl_test_vectors",
+    testonly = True,
+    srcs = ["//testdata/testvectors:hpke_boringssl"],
+    outs = [":hpke_boringssl_test_vectors.ts"],
+    cmd = 'cat - $< <<<"export const HPKE_BORINGSSL_TEST_VECTORS =" >$@',
 )

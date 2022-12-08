@@ -1,0 +1,27 @@
+load("@npm//@bazel/typescript:index.bzl", "ts_library")
+
+package(default_visibility = ["//:__subpackages__"])
+
+ts_library(
+    name = "hpke_test_utils",
+    testonly = True,
+    srcs = ["hpke_test_utils.ts"],
+    deps = [
+        "//exception",
+        "//hybrid/internal/hpke",
+        "//subtle",
+    ],
+)
+
+ts_library(
+    name = "hpke_test_utils_tests",
+    testonly = True,
+    srcs = ["hpke_test_utils_test.ts"],
+    deps = [
+        ":hpke_test_utils",
+        "//exception",
+        "//hybrid/internal/hpke",
+        "//subtle",
+        "@npm//@types/jasmine",
+    ],
+)
