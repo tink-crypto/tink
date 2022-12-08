@@ -121,4 +121,59 @@ describe('HPKE Util', () => {
       });
     });
   }
+
+  describe('numberToByteArray', () => {
+    it('should convert values correctly', async () => {
+      expect(hpkeUtil.numberToByteArray(/*intendedLength*/ 0, 0))
+          .toEqual(new Uint8Array(0));
+
+      expect(hpkeUtil.numberToByteArray(/*intendedLength*/ 1, 0))
+          .toEqual(Uint8Array.of(0x00));
+
+      expect(hpkeUtil.numberToByteArray(/*intendedLength*/ 2, 0))
+          .toEqual(Uint8Array.of(0x00, 0x00));
+
+      expect(hpkeUtil.numberToByteArray(/*intendedLength*/ 1, 1))
+          .toEqual(Uint8Array.of(0x01));
+
+      expect(hpkeUtil.numberToByteArray(/*intendedLength*/ 2, 1))
+          .toEqual(Uint8Array.of(0x00, 0x01));
+
+      expect(hpkeUtil.numberToByteArray(/*intendedLength*/ 1, 127))
+          .toEqual(Uint8Array.of(0x7F));
+
+      expect(hpkeUtil.numberToByteArray(/*intendedLength*/ 2, 127))
+          .toEqual(Uint8Array.of(0x00, 0x7F));
+
+      expect(hpkeUtil.numberToByteArray(/*intendedLength*/ 3, 127))
+          .toEqual(Uint8Array.of(0x00, 0x00, 0x7F));
+
+      expect(hpkeUtil.numberToByteArray(/*intendedLength*/ 1, 128))
+          .toEqual(Uint8Array.of(0x80));
+
+      expect(hpkeUtil.numberToByteArray(/*intendedLength*/ 2, 128))
+          .toEqual(Uint8Array.of(0x00, 0x80));
+
+      expect(hpkeUtil.numberToByteArray(/*intendedLength*/ 3, 128))
+          .toEqual(Uint8Array.of(0x00, 0x00, 0x80));
+
+      expect(hpkeUtil.numberToByteArray(/*intendedLength*/ 1, 255))
+          .toEqual(Uint8Array.of(0xFF));
+
+      expect(hpkeUtil.numberToByteArray(/*intendedLength*/ 2, 255))
+          .toEqual(Uint8Array.of(0x00, 0xFF));
+
+      expect(hpkeUtil.numberToByteArray(/*intendedLength*/ 3, 255))
+          .toEqual(Uint8Array.of(0x00, 0x00, 0xFF));
+
+      expect(hpkeUtil.numberToByteArray(/*intendedLength*/ 2, 256))
+          .toEqual(Uint8Array.of(0x01, 0x00));
+
+      expect(hpkeUtil.numberToByteArray(/*intendedLength*/ 2, 258))
+          .toEqual(Uint8Array.of(0x01, 0x02));
+
+      expect(hpkeUtil.numberToByteArray(/*intendedLength*/ 4, 258))
+          .toEqual(Uint8Array.of(0x00, 0x00, 0x01, 0x02));
+    });
+  });
 });
