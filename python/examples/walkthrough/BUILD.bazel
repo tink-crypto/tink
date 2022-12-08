@@ -58,6 +58,7 @@ py_library(
 py_test(
     name = "load_encrypted_keyset_test",
     srcs = ["load_encrypted_keyset_test.py"],
+    python_version = "PY3",
     deps = [
         requirement("absl-py"),
         ":load_encrypted_keyset",
@@ -65,5 +66,26 @@ py_test(
         "@tink_py//tink:tink_python",
         "@tink_py//tink/aead",
         "@tink_py//tink/testing:fake_kms",
+    ],
+)
+
+py_library(
+    name = "obtain_and_use_a_primitive",
+    srcs = ["obtain_and_use_a_primitive.py"],
+    deps = [
+        "@tink_py//tink:tink_python",
+        "@tink_py//tink/aead",
+    ],
+)
+
+py_test(
+    name = "obtain_and_use_a_primitive_test",
+    srcs = ["obtain_and_use_a_primitive_test.py"],
+    python_version = "PY3",
+    deps = [
+        requirement("absl-py"),
+        ":load_cleartext_keyset",
+        ":obtain_and_use_a_primitive",
+        "@tink_py//tink/aead",
     ],
 )
