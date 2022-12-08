@@ -216,14 +216,10 @@ tink_cc_library(
     absl::strings
     crypto
     tink::core::public_key_sign
-    tink::internal::bn_util
-    tink::internal::ec_util
-    tink::internal::err_util
     tink::internal::fips_utils
     tink::internal::md_util
-    tink::internal::ssl_unique_ptr
     tink::internal::util
-    tink::util::errors
+    tink::signature::internal::ecdsa_raw_sign_boringssl
     tink::util::statusor
 )
 

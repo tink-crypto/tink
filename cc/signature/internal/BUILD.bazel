@@ -1,1 +1,49 @@
+package(default_visibility = ["//:__subpackages__"])
+
 licenses(["notice"])
+
+cc_library(
+    name = "ecdsa_raw_sign_boringssl",
+    srcs = ["ecdsa_raw_sign_boringssl.cc"],
+    hdrs = ["ecdsa_raw_sign_boringssl.h"],
+    include_prefix = "tink/signature/internal",
+    deps = [
+        "//:public_key_sign",
+        "//internal:bn_util",
+        "//internal:ec_util",
+        "//internal:err_util",
+        "//internal:fips_utils",
+        "//internal:md_util",
+        "//internal:ssl_unique_ptr",
+        "//internal:util",
+        "//subtle:common_enums",
+        "//subtle:subtle_util_boringssl",
+        "//util:errors",
+        "//util:statusor",
+        "@boringssl//:crypto",
+        "@com_google_absl//absl/status",
+        "@com_google_absl//absl/strings",
+    ],
+)
+
+cc_test(
+    name = "ecdsa_raw_sign_boringssl_test",
+    size = "small",
+    srcs = ["ecdsa_raw_sign_boringssl_test.cc"],
+    tags = ["fips"],
+    deps = [
+        ":ecdsa_raw_sign_boringssl",
+        "//:public_key_sign",
+        "//:public_key_verify",
+        "//config:tink_fips",
+        "//internal:ec_util",
+        "//subtle:common_enums",
+        "//subtle:ecdsa_verify_boringssl",
+        "//subtle:subtle_util_boringssl",
+        "//util:status",
+        "//util:statusor",
+        "//util:test_matchers",
+        "@com_google_absl//absl/status",
+        "@com_google_googletest//:gtest_main",
+    ],
+)

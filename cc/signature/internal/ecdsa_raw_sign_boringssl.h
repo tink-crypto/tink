@@ -14,32 +14,33 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef TINK_SUBTLE_ECDSA_SIGN_BORINGSSL_H_
-#define TINK_SUBTLE_ECDSA_SIGN_BORINGSSL_H_
+#ifndef TINK_SIGNATURE_INTERNAL_ECDSA_RAW_SIGN_BORINGSSL_H_
+#define TINK_SIGNATURE_INTERNAL_ECDSA_RAW_SIGN_BORINGSSL_H_
 
 #include <memory>
 #include <string>
 #include <utility>
 
 #include "absl/strings/string_view.h"
+#include "openssl/ec.h"
 #include "openssl/evp.h"
 #include "tink/internal/fips_utils.h"
+#include "tink/internal/ssl_unique_ptr.h"
 #include "tink/public_key_sign.h"
-#include "tink/signature/internal/ecdsa_raw_sign_boringssl.h"
 #include "tink/subtle/common_enums.h"
 #include "tink/subtle/subtle_util_boringssl.h"
 #include "tink/util/statusor.h"
 
 namespace crypto {
 namespace tink {
-namespace subtle {
+namespace internal {
 
-// ECDSA signing using Boring SSL, generating signatures in DER-encoding.
-class EcdsaSignBoringSsl : public PublicKeySign {
+// ECDSA raw signing using Boring SSL, generating signatures in DER-encoding.
+class EcdsaRawSignBoringSsl : public PublicKeySign {
  public:
-  static crypto::tink::util::StatusOr<std::unique_ptr<EcdsaSignBoringSsl>> New(
-      const SubtleUtilBoringSSL::EcKey& ec_key, HashType hash_type,
-      EcdsaSignatureEncoding encoding);
+  static crypto::tink::util::StatusOr<std::unique_ptr<EcdsaRawSignBoringSsl>>
+  New(const subtle::SubtleUtilBoringSSL::EcKey& ec_key,
+      subtle::EcdsaSignatureEncoding encoding);
 
   // Computes the signature for 'data'.
   crypto::tink::util::StatusOr<std::string> Sign(
@@ -49,17 +50,16 @@ class EcdsaSignBoringSsl : public PublicKeySign {
       crypto::tink::internal::FipsCompatibility::kRequiresBoringCrypto;
 
  private:
-  explicit EcdsaSignBoringSsl(
-      const EVP_MD* hash,
-      std::unique_ptr<internal::EcdsaRawSignBoringSsl> raw_signer)
-      : hash_(hash), raw_signer_(std::move(raw_signer)) {}
+  EcdsaRawSignBoringSsl(internal::SslUniquePtr<EC_KEY> key,
+                        subtle::EcdsaSignatureEncoding encoding)
+      : key_(std::move(key)), encoding_(encoding) {}
 
-  const EVP_MD* hash_;  // Owned by BoringSSL.
-  std::unique_ptr<internal::EcdsaRawSignBoringSsl> raw_signer_;
+  internal::SslUniquePtr<EC_KEY> key_;
+  subtle::EcdsaSignatureEncoding encoding_;
 };
 
-}  // namespace subtle
+}  // namespace internal
 }  // namespace tink
 }  // namespace crypto
 
-#endif  // TINK_SUBTLE_ECDSA_SIGN_BORINGSSL_H_
+#endif  // TINK_SIGNATURE_INTERNAL_ECDSA_RAW_SIGN_BORINGSSL_H_

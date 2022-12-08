@@ -1,5 +1,7 @@
 tink_module(signature)
 
+add_subdirectory(internal)
+
 tink_cc_library(
   NAME public_key_verify_wrapper
   SRCS
