@@ -17,7 +17,7 @@
     catch(err) {
     }
 //-->
-var methods = {"i0":41,"i1":9,"i2":9,"i3":9,"i4":9,"i5":9,"i6":9,"i7":9,"i8":9};
+var methods = {"i0":41,"i1":41,"i2":9,"i3":9,"i4":9,"i5":9,"i6":9,"i7":9,"i8":9};
 var tabs = {65535:["t0","All Methods"],1:["t1","Static Methods"],8:["t4","Concrete Methods"],32:["t6","Deprecated Methods"]};
 var altColor = "altColor";
 var rowColor = "rowColor";
@@ -140,8 +140,7 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 <tr id="i1" class="rowColor">
 <td class="colFirst"><code>static <a href="https://docs.oracle.com/javase/8/docs/api/java/math/BigInteger.html?is-external=true" title="class or interface in java.math">BigInteger</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/subtle/SubtleUtil.html#bytes2Integer-byte:A-">bytes2Integer</a></span>(byte[]&nbsp;bs)</code>
-<div class="block">Converts an byte array to a nonnegative integer
- (https://tools.ietf.org/html/rfc8017#section-4.1).</div>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;</div>
 </td>
 </tr>
 <tr id="i2" class="altColor">
@@ -304,8 +303,12 @@ public static&nbsp;int&nbsp;androidApiLevel()</pre>
 <ul class="blockList">
 <li class="blockList">
 <h4>bytes2Integer</h4>
-<pre>public static&nbsp;<a href="https://docs.oracle.com/javase/8/docs/api/java/math/BigInteger.html?is-external=true" title="class or interface in java.math">BigInteger</a>&nbsp;bytes2Integer(byte[]&nbsp;bs)</pre>
-<div class="block">Converts an byte array to a nonnegative integer
+<pre>@InlineMe(replacement="BigIntegerEncoding.fromUnsignedBigEndianBytes(bs)",
+          imports="com.google.crypto.tink.internal.BigIntegerEncoding")
+ <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Deprecated.html?is-external=true" title="class or interface in java.lang">@Deprecated</a>
+public static&nbsp;<a href="https://docs.oracle.com/javase/8/docs/api/java/math/BigInteger.html?is-external=true" title="class or interface in java.math">BigInteger</a>&nbsp;bytes2Integer(byte[]&nbsp;bs)</pre>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;</div>
+<div class="block">Converts an unsigned, big-endian encoded byte array to a non-negative integer
  (https://tools.ietf.org/html/rfc8017#section-4.1).</div>
 <dl>
 <dt><span class="paramLabel">Parameters:</span></dt>
