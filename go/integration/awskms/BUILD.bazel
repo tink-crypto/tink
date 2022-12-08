@@ -44,7 +44,6 @@ go_test(
         "//core/registry",
         "//keyset",
         "//subtle/random",
-        "//tink",
     ],
 )
 

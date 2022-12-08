@@ -18,7 +18,6 @@ package awskms_test
 
 import (
 	"bytes"
-	"errors"
 	"os"
 	"path/filepath"
 	"testing"
@@ -29,7 +28,6 @@ import (
 	"github.com/google/tink/go/core/registry"
 	"github.com/google/tink/go/keyset"
 	"github.com/google/tink/go/subtle/random"
-	"github.com/google/tink/go/tink"
 
 	"github.com/google/tink/go/integration/awskms"
 )
@@ -51,12 +49,7 @@ func init() {
 	os.Setenv("SSL_CERT_FILE", certPath)
 }
 
-func setupKMS(t *testing.T, cf string) {
-	t.Helper()
-	setupKMSWithURI(t, cf, keyURI)
-}
-
-func setupKMSWithURI(t *testing.T, cf string, uri string) {
+func setupKMS(t *testing.T, cf string, uri string) {
 	t.Helper()
 	g, err := awskms.NewClientWithCredentials(uri, cf)
 	if err != nil {
@@ -69,86 +62,39 @@ func setupKMSWithURI(t *testing.T, cf string, uri string) {
 	registry.RegisterKMSClient(g)
 }
 
-func basicAEADTest(t *testing.T, a tink.AEAD) error {
-	t.Helper()
-	return basicAEADTestWithOptions(t, a, 100 /*loopCount*/, true /*withAdditionalData*/)
-}
-
-func basicAEADTestWithOptions(t *testing.T, a tink.AEAD, loopCount int, withAdditionalData bool) error {
-	t.Helper()
-	for i := 0; i < loopCount; i++ {
-		pt := random.GetRandomBytes(20)
-		var ad []byte = nil
-		if withAdditionalData {
-			ad = random.GetRandomBytes(20)
-		}
-		ct, err := a.Encrypt(pt, ad)
-		if err != nil {
-			return err
-		}
-		dt, err := a.Decrypt(ct, ad)
-		if err != nil {
-			return err
-		}
-		if !bytes.Equal(dt, pt) {
-			return errors.New("decrypt not inverse of encrypt")
-		}
-	}
-	return nil
-}
-
-func TestBasicAead(t *testing.T) {
+func TestKMSEnvelopeAEADEncryptAndDecrypt(t *testing.T) {
 	srcDir, ok := os.LookupEnv("TEST_SRCDIR")
 	if !ok {
 		t.Skip("TEST_SRCDIR not set")
 	}
 
 	for _, file := range []string{credFile, credINIFile} {
-		setupKMS(t, filepath.Join(srcDir, file))
+		setupKMS(t, filepath.Join(srcDir, file), keyURI)
 		dek := aead.AES128CTRHMACSHA256KeyTemplate()
 		template, err := aead.CreateKMSEnvelopeAEADKeyTemplate(keyURI, dek)
 		if err != nil {
-			t.Fatalf("error creating key template: %v", err)
+			t.Fatalf("aead.CreateKMSEnvelopeAEADKeyTemplate() err = %v, want nil", err)
 		}
 		handle, err := keyset.NewHandle(template)
 		if err != nil {
-			t.Fatalf("error getting a new keyset handle: %v", err)
+			t.Fatalf("keyset.NewHandle() err = %v, want nil", err)
 		}
 		a, err := aead.New(handle)
 		if err != nil {
-			t.Fatalf("error getting the primitive: %v", err)
+			t.Fatalf("aead.New() err = %v, want nil", err)
 		}
-		if err := basicAEADTest(t, a); err != nil {
-			t.Errorf("error in basic aead tests: %v", err)
-		}
-	}
-}
-
-func TestBasicAeadWithoutAdditionalData(t *testing.T) {
-	srcDir, ok := os.LookupEnv("TEST_SRCDIR")
-	if !ok {
-		t.Skip("TEST_SRCDIR not set")
-	}
-
-	for _, uri := range []string{keyURI, keyAliasURI} {
-		for _, file := range []string{credFile, credINIFile} {
-			setupKMSWithURI(t, filepath.Join(srcDir, file), uri)
-			dek := aead.AES128CTRHMACSHA256KeyTemplate()
-			template, err := aead.CreateKMSEnvelopeAEADKeyTemplate(uri, dek)
+		for _, ad := range [][]byte{nil, random.GetRandomBytes(20)} {
+			pt := random.GetRandomBytes(20)
+			ct, err := a.Encrypt(pt, ad)
 			if err != nil {
-				t.Fatalf("error creating key template: %v", err)
+				t.Fatalf("a.Encrypt(pt, ad) err = %v, want nil", err)
 			}
-			handle, err := keyset.NewHandle(template)
+			dt, err := a.Decrypt(ct, ad)
 			if err != nil {
-				t.Fatalf("error getting a new keyset handle: %v", err)
+				t.Fatalf("a.Decrypt(ct, ad) err = %v, want nil", err)
 			}
-			a, err := aead.New(handle)
-			if err != nil {
-				t.Fatalf("error getting the primitive: %v", err)
-			}
-			// Only test 10 times (instead of 100) because each test makes HTTP requests to AWS.
-			if err := basicAEADTestWithOptions(t, a, 10 /*loopCount*/, false /*withAdditionalData*/); err != nil {
-				t.Errorf("error in basic aead tests without additinal data: %v", err)
+			if !bytes.Equal(dt, pt) {
+				t.Errorf("a.Decrypt() = %q, want %q", dt, pt)
 			}
 		}
 	}
