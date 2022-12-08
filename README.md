@@ -157,7 +157,6 @@ Tink is maintained by (A-Z):
 -   Laurent Simon
 -   Elizaveta Tretiakova
 -   Jürg Wullschleger
--   Federico Zalcberg
 
 Alumni:
 
@@ -169,3 +168,4 @@ Alumni:
 -   Veronika Slívová
 -   Paula Vidas
 -   Cathie Yun
+-   Federico Zalcberg
