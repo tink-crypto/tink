@@ -20,11 +20,9 @@
 
 #import <XCTest/XCTest.h>
 
-#include <string>
-
-#include <utility>
-
 #include <memory>
+#include <string>
+#include <utility>
 
 #import "TINKAead.h"
 #import "TINKAeadConfig.h"
@@ -46,18 +44,18 @@
 #include "proto/aes_gcm.pb.h"
 #include "proto/tink.pb.h"
 
-using crypto::tink::AesGcmKeyManager;
-using crypto::tink::InsecureSecretKeyAccess;
-using crypto::tink::KeysetHandle;
-using crypto::tink::ParseKeysetFromProtoKeysetFormat;
-using crypto::tink::test::AddRawKey;
-using crypto::tink::test::AddTinkKey;
-using crypto::tink::util::StatusOr;
-using google::crypto::tink::AesGcmKey;
-using google::crypto::tink::AesGcmKeyFormat;
-using google::crypto::tink::KeyData;
-using google::crypto::tink::Keyset;
-using google::crypto::tink::KeyStatusType;
+using ::crypto::tink::AesGcmKeyManager;
+using ::crypto::tink::InsecureSecretKeyAccess;
+using ::crypto::tink::KeysetHandle;
+using ::crypto::tink::ParseKeysetFromProtoKeysetFormat;
+using ::crypto::tink::test::AddRawKey;
+using ::crypto::tink::test::AddTinkKey;
+using ::crypto::tink::util::StatusOr;
+using ::google::crypto::tink::AesGcmKey;
+using ::google::crypto::tink::AesGcmKeyFormat;
+using ::google::crypto::tink::KeyData;
+using ::google::crypto::tink::Keyset;
+using ::google::crypto::tink::KeyStatusType;
 
 @interface TINKAeadFactoryTest : XCTestCase
 @end

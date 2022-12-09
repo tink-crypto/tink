@@ -20,6 +20,10 @@
 
 #import <XCTest/XCTest.h>
 
+#include <memory>
+#include <string>
+#include <utility>
+
 #import "TINKDeterministicAead.h"
 #import "TINKDeterministicAeadConfig.h"
 #import "TINKDeterministicAeadFactory.h"
@@ -39,16 +43,15 @@
 #include "proto/aes_siv.pb.h"
 #include "proto/tink.pb.h"
 
-using crypto::tink::AesSivKeyManager;
-using crypto::tink::KeyFactory;
-using crypto::tink::TestKeysetHandle;
-using crypto::tink::test::AddRawKey;
-using crypto::tink::test::AddTinkKey;
-using google::crypto::tink::AesSivKey;
-using google::crypto::tink::AesSivKeyFormat;
-using google::crypto::tink::KeyData;
-using google::crypto::tink::Keyset;
-using google::crypto::tink::KeyStatusType;
+using ::crypto::tink::AesSivKeyManager;
+using ::crypto::tink::TestKeysetHandle;
+using ::crypto::tink::test::AddRawKey;
+using ::crypto::tink::test::AddTinkKey;
+using ::google::crypto::tink::AesSivKey;
+using ::google::crypto::tink::AesSivKeyFormat;
+using ::google::crypto::tink::KeyData;
+using ::google::crypto::tink::Keyset;
+using ::google::crypto::tink::KeyStatusType;
 
 @interface TINKDeterministicAeadFactoryTest : XCTestCase
 @end

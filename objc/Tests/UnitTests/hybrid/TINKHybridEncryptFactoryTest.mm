@@ -18,6 +18,10 @@
 
 #import <XCTest/XCTest.h>
 
+#include <memory>
+#include <string>
+#include <utility>
+
 #include "absl/status/status.h"
 #include "tink/util/status.h"
 #include "tink/util/test_keyset_handle.h"
@@ -48,7 +52,7 @@ using ::google::crypto::tink::KeyStatusType;
 @interface TINKHybridEncryptFactoryTest : XCTestCase
 @end
 
-static EciesAeadHkdfPublicKey getNewEciesPublicKey() {
+static EciesAeadHkdfPublicKey GetNewEciesPublicKey() {
   return crypto::tink::test::GetEciesAesGcmHkdfTestKey(
       EllipticCurveType::NIST_P256, EcPointFormat::UNCOMPRESSED, HashType::SHA256, 32).public_key();
 }
@@ -67,7 +71,7 @@ static EciesAeadHkdfPublicKey getNewEciesPublicKey() {
   XCTAssertNil(primitive);
   XCTAssertNotNil(error);
   XCTAssertEqual((absl::StatusCode)error.code, absl::StatusCode::kInvalidArgument);
-  NSDictionary *userInfo = [error userInfo];
+  NSDictionary<NSErrorUserInfoKey, id> *userInfo = [error userInfo];
   NSString *errorString = [userInfo objectForKey:NSLocalizedFailureReasonErrorKey];
   XCTAssertTrue([errorString containsString:@"at least one key"]);
 }
@@ -80,9 +84,9 @@ static EciesAeadHkdfPublicKey getNewEciesPublicKey() {
   uint32_t keyId1 = 1234543;
   uint32_t keyId2 = 726329;
   uint32_t keyId3 = 7213743;
-  EciesAeadHkdfPublicKey eciesKey1 = getNewEciesPublicKey();
-  EciesAeadHkdfPublicKey eciesKey2 = getNewEciesPublicKey();
-  EciesAeadHkdfPublicKey eciesKey3 = getNewEciesPublicKey();
+  EciesAeadHkdfPublicKey eciesKey1 = GetNewEciesPublicKey();
+  EciesAeadHkdfPublicKey eciesKey2 = GetNewEciesPublicKey();
+  EciesAeadHkdfPublicKey eciesKey3 = GetNewEciesPublicKey();
 
   AddTinkKey(publicKeyType, keyId1, eciesKey1, KeyStatusType::ENABLED, KeyData::ASYMMETRIC_PUBLIC,
              &publicKeyset);

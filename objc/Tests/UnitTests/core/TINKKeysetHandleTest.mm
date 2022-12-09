@@ -22,6 +22,10 @@
 #import <Security/Security.h>
 #import <XCTest/XCTest.h>
 
+#include <memory>
+#include <string>
+#include <utility>
+
 #import "TINKAead.h"
 #import "TINKAeadKeyTemplate.h"
 #import "TINKAllConfig.h"
@@ -112,13 +116,13 @@ static Keyset *gKeyset;
     // Store the keyset.
     [attributes setObject:kGoodKeysetName forKey:(__bridge id)kSecAttrAccount];
     [attributes setObject:gGoodSerializedKeyset forKey:(__bridge id)kSecValueData];
-    OSStatus status = SecItemAdd((__bridge CFDictionaryRef)attributes, NULL);
+    OSStatus status = SecItemAdd((__bridge CFDictionaryRef)attributes, nullptr);
     XCTAssertTrue(status == errSecSuccess || status == errSecDuplicateItem);
 
     // Store the bad keyset.
     [attributes setObject:kBadKeysetName forKey:(__bridge id)kSecAttrAccount];
     [attributes setObject:gBadSerializedKeyset forKey:(__bridge id)kSecValueData];
-    status = SecItemAdd((__bridge CFDictionaryRef)attributes, NULL);
+    status = SecItemAdd((__bridge CFDictionaryRef)attributes, nullptr);
     XCTAssertTrue(status == errSecSuccess || status == errSecDuplicateItem);
   });
 }

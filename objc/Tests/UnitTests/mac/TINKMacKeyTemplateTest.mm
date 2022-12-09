@@ -20,6 +20,10 @@
 
 #import <XCTest/XCTest.h>
 
+#include <memory>
+#include <string>
+#include <utility>
+
 #import "TINKKeyTemplate.h"
 #import "core/TINKKeyTemplate_Internal.h"
 #include "proto/common.pb.h"
@@ -44,7 +48,7 @@ static std::string const kAesCmacKeyTypeURL = "type.googleapis.com/google.crypto
   XCTAssertNotNil(error);
   XCTAssertNil(keyTemplate);
   XCTAssertEqual((absl::StatusCode)error.code, absl::StatusCode::kInvalidArgument);
-  NSDictionary *userInfo = [error userInfo];
+  NSDictionary<NSErrorUserInfoKey, id> *userInfo = [error userInfo];
   NSString *errorString = [userInfo objectForKey:NSLocalizedFailureReasonErrorKey];
   XCTAssertTrue([errorString containsString:@"Invalid TINKMacKeyTemplate"]);
 }

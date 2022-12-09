@@ -20,6 +20,10 @@
 
 #import <XCTest/XCTest.h>
 
+#include <memory>
+#include <string>
+#include <utility>
+
 #import "util/TINKStrings.h"
 
 #include "google/protobuf/util/json_util.h"

@@ -20,6 +20,10 @@
 
 #import <XCTest/XCTest.h>
 
+#include <memory>
+#include <string>
+#include <utility>
+
 #import "TINKKeyTemplate.h"
 #import "core/TINKKeyTemplate_Internal.h"
 #include "proto/common.pb.h"

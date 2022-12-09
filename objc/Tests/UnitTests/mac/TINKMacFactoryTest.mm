@@ -39,17 +39,16 @@
 #include "proto/hmac.pb.h"
 #include "proto/tink.pb.h"
 
-using crypto::tink::HmacKeyManager;
-using crypto::tink::KeyFactory;
-using crypto::tink::TestKeysetHandle;
-using crypto::tink::test::AddRawKey;
-using crypto::tink::test::AddTinkKey;
-using google::crypto::tink::HashType;
-using google::crypto::tink::HmacKey;
-using google::crypto::tink::HmacKeyFormat;
-using google::crypto::tink::KeyData;
-using google::crypto::tink::Keyset;
-using google::crypto::tink::KeyStatusType;
+using ::crypto::tink::HmacKeyManager;
+using ::crypto::tink::TestKeysetHandle;
+using ::crypto::tink::test::AddRawKey;
+using ::crypto::tink::test::AddTinkKey;
+using ::google::crypto::tink::HashType;
+using ::google::crypto::tink::HmacKey;
+using ::google::crypto::tink::HmacKeyFormat;
+using ::google::crypto::tink::KeyData;
+using ::google::crypto::tink::Keyset;
+using ::google::crypto::tink::KeyStatusType;
 
 @interface TINKMacFactoryTest : XCTestCase
 @end
@@ -159,7 +158,7 @@ using google::crypto::tink::KeyStatusType;
   }
 
   const char *macBytes = (const char *)computedMac.bytes;
-  XCTAssertTrue(macBytes != NULL);
+  XCTAssertTrue(macBytes != nullptr);
 
   // Flip all the bits in the MAC one by one.
   for (NSUInteger byteIndex = 0; byteIndex < computedMac.length; byteIndex++) {
