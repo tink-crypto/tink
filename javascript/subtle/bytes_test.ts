@@ -4,6 +4,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import {InvalidArgumentsException} from '../exception/invalid_arguments_exception';
+
 import * as Bytes from './bytes';
 import * as Random from './random';
 
@@ -136,5 +138,38 @@ describe('bytes test', function() {
       const arrayRepresentation = Bytes.fromByteString(str);
       expect(arrayRepresentation).toEqual(array);
     }
+  });
+});
+
+describe('xor', () => {
+  for (let i = 0; i < 100; i++) {
+    it(`should work on two byte arrays of size ${i} bytes`, () => {
+      const arr1 = Random.randBytes(i);
+      const arr2 = Random.randBytes(i);
+
+      const xor = Bytes.xor(arr1, arr2);
+      for (let j = 0; j < i; j++) {
+        expect(xor[j]).toEqual(arr1[j] ^ arr2[j]);
+      }
+    });
+
+    it(`should be commutative on byte arrays of size ${i} bytes`, () => {
+      const arr1 = Random.randBytes(i);
+      const arr2 = Random.randBytes(i);
+
+      expect(Bytes.xor(arr1, arr2)).toEqual(Bytes.xor(arr2, arr1));
+    });
+  }
+
+  it('should fail on byte arrays of different lengths', () => {
+    const arrLengthZero = Random.randBytes(0);
+    const arrLengthTen = Random.randBytes(10);
+    const arrLengthEleven = Random.randBytes(11);
+
+    expect(() => Bytes.xor(arrLengthZero, arrLengthTen))
+        .toThrowError(InvalidArgumentsException);
+
+    expect(() => Bytes.xor(arrLengthTen, arrLengthEleven))
+        .toThrowError(InvalidArgumentsException);
   });
 });

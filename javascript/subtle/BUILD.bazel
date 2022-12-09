@@ -55,6 +55,7 @@ ts_library(
     deps = [
         ":subtle",
         "//aead",
+        "//exception",
         "//hybrid",
         "//internal",
         "//signature/internal",

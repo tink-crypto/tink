@@ -181,3 +181,21 @@ export function toByteString(bytes: Uint8Array): string {
   }
   return str;
 }
+
+/**
+ * Returns the element-wise XOR of two byte arrays of the same length
+ */
+export function xor(x: Uint8Array, y: Uint8Array): Uint8Array {
+  if (x.length !== y.length) {
+    throw new InvalidArgumentsException(
+        'Both byte arrays should be of the same length');
+  }
+
+  const arr = new Uint8Array(x.length);
+
+  for (let i = 0; i < arr.length; i++) {
+    arr[i] = x[i] ^ y[i];
+  }
+
+  return arr;
+}

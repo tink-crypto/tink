@@ -52,6 +52,24 @@ export function numberToByteArray(capacity: number, value: number): Uint8Array {
   return result;
 }
 
+
+/**
+ * Transforms `value` to a MSB-first byte array of size `capacity`.
+ *
+ * The HPKE standard defines this function as I2OSP(n, w) where w =
+ * capacity and n = value.
+ *
+ * @see https://www.rfc-editor.org/rfc/rfc9180.html#name-notation
+ *
+ */
+export function bigIntToByteArray(capacity: number, value: bigint): Uint8Array {
+  const result = new Uint8Array(capacity);
+  for (let i = 0; i < capacity; i++) {
+    result[i] = Number((value >> BigInt((8 * (capacity - i - 1))))) & 0xFF;
+  }
+  return result;
+}
+
 /**
  * Generates KEM suite id from `kemId` according to the definition in
  * @see https://www.rfc-editor.org/rfc/rfc9180.html#section-4.1-5. Only used for
