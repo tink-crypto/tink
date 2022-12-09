@@ -27,12 +27,13 @@ export class AesCtrHmacAeadKeyTemplates {
    */
   static aes128CtrHmacSha256(): PbKeyTemplate {
     return AesCtrHmacAeadKeyTemplates.newAesCtrHmacSha256KeyTemplate(
-        16,
         /* aesKeySize = */
         16,
         /* ivSize = */
-        32,
+        16,
         /* hmacKeySize = */
+        32,
+        /* tagSize = */
         16);
   }
 
@@ -50,12 +51,13 @@ export class AesCtrHmacAeadKeyTemplates {
    */
   static aes256CtrHmacSha256(): PbKeyTemplate {
     return AesCtrHmacAeadKeyTemplates.newAesCtrHmacSha256KeyTemplate(
-        32,
         /* aesKeySize = */
-        16,
-        /* ivSize = */
         32,
+        /* ivSize = */
+        16,
         /* hmacKeySize = */
+        32,
+        /* tagSize = */
         32);
   }
 
