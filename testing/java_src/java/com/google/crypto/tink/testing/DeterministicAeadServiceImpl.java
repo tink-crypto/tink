@@ -41,7 +41,7 @@ public final class DeterministicAeadServiceImpl extends DeterministicAeadImplBas
   private DeterministicAeadEncryptResponse encryptDeterministically(
       DeterministicAeadEncryptRequest request) throws GeneralSecurityException {
     DeterministicAead daead =
-        Util.parseBinaryProtoKeyset(request.getAnnotatedKeyset().getSerializedKeyset())
+        Util.parseBinaryProtoKeyset(request.getAnnotatedKeyset())
             .getPrimitive(DeterministicAead.class);
     try {
       byte[] ciphertext =
@@ -71,7 +71,7 @@ public final class DeterministicAeadServiceImpl extends DeterministicAeadImplBas
   private DeterministicAeadDecryptResponse decryptDeterministically(
       DeterministicAeadDecryptRequest request) throws GeneralSecurityException {
     DeterministicAead daead =
-        Util.parseBinaryProtoKeyset(request.getAnnotatedKeyset().getSerializedKeyset())
+        Util.parseBinaryProtoKeyset(request.getAnnotatedKeyset())
             .getPrimitive(DeterministicAead.class);
     try {
       byte[] plaintext =

@@ -39,9 +39,7 @@ public final class AeadServiceImpl extends AeadImplBase {
   }
 
   AeadEncryptResponse encrypt(AeadEncryptRequest request) throws GeneralSecurityException {
-    Aead aead =
-        Util.parseBinaryProtoKeyset(request.getAnnotatedKeyset().getSerializedKeyset())
-            .getPrimitive(Aead.class);
+    Aead aead = Util.parseBinaryProtoKeyset(request.getAnnotatedKeyset()).getPrimitive(Aead.class);
     try {
       byte[] ciphertext =
           aead.encrypt(
@@ -69,7 +67,7 @@ public final class AeadServiceImpl extends AeadImplBase {
 
   AeadDecryptResponse decrypt(AeadDecryptRequest request) throws GeneralSecurityException {
     Aead aead =
-        Util.parseBinaryProtoKeyset(request.getAnnotatedKeyset().getSerializedKeyset())
+        Util.parseBinaryProtoKeyset(request.getAnnotatedKeyset())
             .getPrimitive(Aead.class);
     try {
       byte[] plaintext =

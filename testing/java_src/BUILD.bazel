@@ -44,6 +44,8 @@ java_library(
         "@io_grpc_grpc_java//protobuf",
         "@io_grpc_grpc_java//stub",
         "@tink_java//src/main/java/com/google/crypto/tink:aead",
+        "@tink_java//src/main/java/com/google/crypto/tink:binary_keyset_reader",
+        "@tink_java//src/main/java/com/google/crypto/tink:cleartext_keyset_handle",
         "@tink_java//src/main/java/com/google/crypto/tink:deterministic_aead",
         "@tink_java//src/main/java/com/google/crypto/tink:hybrid_decrypt",
         "@tink_java//src/main/java/com/google/crypto/tink:hybrid_encrypt",

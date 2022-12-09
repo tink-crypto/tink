@@ -50,7 +50,7 @@ public final class HybridServiceImpl extends HybridImplBase {
   private HybridEncryptResponse encrypt(HybridEncryptRequest request)
       throws GeneralSecurityException {
     HybridEncrypt hybridEncrypt =
-        Util.parseBinaryProtoKeyset(request.getPublicAnnotatedKeyset().getSerializedKeyset())
+        Util.parseBinaryProtoKeyset(request.getPublicAnnotatedKeyset())
             .getPrimitive(HybridEncrypt.class);
     try {
       byte[] ciphertext =
@@ -79,7 +79,7 @@ public final class HybridServiceImpl extends HybridImplBase {
   private HybridDecryptResponse decrypt(HybridDecryptRequest request)
       throws GeneralSecurityException {
     HybridDecrypt hybridDecrypt =
-        Util.parseBinaryProtoKeyset(request.getPrivateAnnotatedKeyset().getSerializedKeyset())
+        Util.parseBinaryProtoKeyset(request.getPrivateAnnotatedKeyset())
             .getPrimitive(HybridDecrypt.class);
     try {
       byte[] plaintext =

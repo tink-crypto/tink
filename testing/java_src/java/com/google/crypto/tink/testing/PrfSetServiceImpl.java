@@ -45,7 +45,7 @@ public final class PrfSetServiceImpl extends PrfSetImplBase {
       PrfSetKeyIdsRequest request) throws GeneralSecurityException {
     try {
       PrfSet prfSet =
-          Util.parseBinaryProtoKeyset(request.getAnnotatedKeyset().getSerializedKeyset())
+          Util.parseBinaryProtoKeyset(request.getAnnotatedKeyset())
               .getPrimitive(PrfSet.class);
       PrfSetKeyIdsResponse.Output output = PrfSetKeyIdsResponse.Output.newBuilder()
           .setPrimaryKeyId(prfSet.getPrimaryId())
@@ -74,7 +74,7 @@ public final class PrfSetServiceImpl extends PrfSetImplBase {
       throws GeneralSecurityException {
     try {
       PrfSet prfSet =
-          Util.parseBinaryProtoKeyset(request.getAnnotatedKeyset().getSerializedKeyset())
+          Util.parseBinaryProtoKeyset(request.getAnnotatedKeyset())
               .getPrimitive(PrfSet.class);
       Map<Integer, Prf> prfs = prfSet.getPrfs();
       if (!prfs.containsKey(request.getKeyId())) {

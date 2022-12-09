@@ -152,7 +152,7 @@ public final class JwtServiceImpl extends JwtImplBase {
   private JwtSignResponse computeMacAndEncode(JwtSignRequest request)
       throws GeneralSecurityException {
     JwtMac jwtMac =
-        Util.parseBinaryProtoKeyset(request.getAnnotatedKeyset().getSerializedKeyset())
+        Util.parseBinaryProtoKeyset(request.getAnnotatedKeyset())
             .getPrimitive(JwtMac.class);
     try {
       RawJwt rawJwt = convertJwtTokenToRawJwt(request.getRawJwt());
@@ -178,7 +178,7 @@ public final class JwtServiceImpl extends JwtImplBase {
   private JwtSignResponse publicKeySignAndEncode(JwtSignRequest request)
       throws GeneralSecurityException {
     JwtPublicKeySign signer =
-        Util.parseBinaryProtoKeyset(request.getAnnotatedKeyset().getSerializedKeyset())
+        Util.parseBinaryProtoKeyset(request.getAnnotatedKeyset())
             .getPrimitive(JwtPublicKeySign.class);
     try {
       RawJwt rawJwt = convertJwtTokenToRawJwt(request.getRawJwt());
@@ -312,7 +312,7 @@ public final class JwtServiceImpl extends JwtImplBase {
   private JwtVerifyResponse verifyMacAndDecode(JwtVerifyRequest request)
       throws GeneralSecurityException {
     JwtMac jwtMac =
-        Util.parseBinaryProtoKeyset(request.getAnnotatedKeyset().getSerializedKeyset())
+        Util.parseBinaryProtoKeyset(request.getAnnotatedKeyset())
             .getPrimitive(JwtMac.class);
     try {
       JwtValidator validator = convertProtoValidatorToValidator(request.getValidator());
@@ -340,7 +340,7 @@ public final class JwtServiceImpl extends JwtImplBase {
   private JwtVerifyResponse publicKeyVerifyAndDecode(JwtVerifyRequest request)
       throws GeneralSecurityException {
     JwtPublicKeyVerify verifier =
-        Util.parseBinaryProtoKeyset(request.getAnnotatedKeyset().getSerializedKeyset())
+        Util.parseBinaryProtoKeyset(request.getAnnotatedKeyset())
             .getPrimitive(JwtPublicKeyVerify.class);
     try {
       JwtValidator validator = convertProtoValidatorToValidator(request.getValidator());

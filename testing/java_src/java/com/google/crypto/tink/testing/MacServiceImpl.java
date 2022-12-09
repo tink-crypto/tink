@@ -43,7 +43,7 @@ public final class MacServiceImpl extends MacImplBase {
       ComputeMacRequest request) throws GeneralSecurityException {
     try {
       Mac mac =
-          Util.parseBinaryProtoKeyset(request.getAnnotatedKeyset().getSerializedKeyset())
+          Util.parseBinaryProtoKeyset(request.getAnnotatedKeyset())
               .getPrimitive(Mac.class);
       byte[] macValue = mac.computeMac(request.getData().toByteArray());
       return ComputeMacResponse.newBuilder().setMacValue(ByteString.copyFrom(macValue)).build();
@@ -67,7 +67,7 @@ public final class MacServiceImpl extends MacImplBase {
   private VerifyMacResponse verifyMac(VerifyMacRequest request) throws GeneralSecurityException {
     try {
       Mac mac =
-          Util.parseBinaryProtoKeyset(request.getAnnotatedKeyset().getSerializedKeyset())
+          Util.parseBinaryProtoKeyset(request.getAnnotatedKeyset())
               .getPrimitive(Mac.class);
       mac.verifyMac(request.getMacValue().toByteArray(), request.getData().toByteArray());
       return VerifyMacResponse.getDefaultInstance();
