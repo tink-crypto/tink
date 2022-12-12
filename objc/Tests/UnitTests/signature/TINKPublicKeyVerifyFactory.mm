@@ -21,6 +21,10 @@
 #import <Foundation/Foundation.h>
 #import <XCTest/XCTest.h>
 
+#include <memory>
+#include <string>
+#include <utility>
+
 #import "TINKKeysetHandle.h"
 #import "TINKPublicKeySign.h"
 #import "TINKPublicKeySignFactory.h"
@@ -33,28 +37,29 @@
 
 #include "absl/status/status.h"
 #include "tink/crypto_format.h"
+#include "tink/insecure_secret_key_access.h"
 #include "tink/keyset_handle.h"
+#include "tink/proto_keyset_format.h"
 #include "tink/signature/ecdsa_sign_key_manager.h"
 #include "tink/signature/signature_config.h"
 #include "tink/util/status.h"
-#include "tink/util/test_keyset_handle.h"
 #include "tink/util/test_util.h"
 #include "proto/ecdsa.pb.h"
 #include "proto/tink.pb.h"
 
-using crypto::tink::EcdsaSignKeyManager;
-using google::crypto::tink::EcdsaSignatureEncoding;
-using crypto::tink::KeyFactory;
-using crypto::tink::TestKeysetHandle;
-using crypto::tink::test::AddRawKey;
-using crypto::tink::test::AddTinkKey;
-using google::crypto::tink::EcdsaPublicKey;
-using google::crypto::tink::EcdsaPrivateKey;
-using google::crypto::tink::EllipticCurveType;
-using google::crypto::tink::HashType;
-using google::crypto::tink::KeyData;
-using google::crypto::tink::Keyset;
-using google::crypto::tink::KeyStatusType;
+using ::crypto::tink::InsecureSecretKeyAccess;
+using ::crypto::tink::KeysetHandle;
+using ::crypto::tink::ParseKeysetFromProtoKeysetFormat;
+using ::crypto::tink::test::AddTinkKey;
+using ::crypto::tink::util::StatusOr;
+using ::google::crypto::tink::EcdsaPrivateKey;
+using ::google::crypto::tink::EcdsaPublicKey;
+using ::google::crypto::tink::EcdsaSignatureEncoding;
+using ::google::crypto::tink::EllipticCurveType;
+using ::google::crypto::tink::HashType;
+using ::google::crypto::tink::KeyData;
+using ::google::crypto::tink::Keyset;
+using ::google::crypto::tink::KeyStatusType;
 
 static EcdsaPrivateKey GetNewEcdsaPrivateKey() {
   return crypto::tink::test::GetEcdsaTestPrivateKey(EllipticCurveType::NIST_P256, HashType::SHA256,
@@ -113,8 +118,11 @@ static Keyset publicKeyset;
 
 - (void)testEmptyKeyset {
   Keyset keyset;
-  TINKKeysetHandle *handle =
-      [[TINKKeysetHandle alloc] initWithCCKeysetHandle:TestKeysetHandle::GetKeysetHandle(keyset)];
+  StatusOr<KeysetHandle> ccKeysetHandle =
+      ParseKeysetFromProtoKeysetFormat(keyset.SerializeAsString(), InsecureSecretKeyAccess::Get());
+  XCTAssertTrue(ccKeysetHandle.ok());
+  TINKKeysetHandle *handle = [[TINKKeysetHandle alloc]
+      initWithCCKeysetHandle:std::make_unique<KeysetHandle>(*ccKeysetHandle)];
   XCTAssertNotNil(handle);
 
   NSError *error = nil;
@@ -132,12 +140,19 @@ static Keyset publicKeyset;
   XCTAssertNotNil(signatureConfig);
   XCTAssertNil(error);
 
+  StatusOr<KeysetHandle> ccPrivateKeysetHandle = ParseKeysetFromProtoKeysetFormat(
+      privateKeyset.SerializeAsString(), InsecureSecretKeyAccess::Get());
+  XCTAssertTrue(ccPrivateKeysetHandle.ok());
   TINKKeysetHandle *handlePrivate = [[TINKKeysetHandle alloc]
-      initWithCCKeysetHandle:TestKeysetHandle::GetKeysetHandle(privateKeyset)];
+      initWithCCKeysetHandle:std::make_unique<KeysetHandle>(*ccPrivateKeysetHandle)];
   XCTAssertNotNil(handlePrivate);
 
+  StatusOr<KeysetHandle> ccKeysetHandlePublic =
+      ParseKeysetFromProtoKeysetFormat(publicKeyset.SerializeAsString(),
+                                       InsecureSecretKeyAccess::Get());
+  XCTAssertTrue(ccKeysetHandlePublic.ok());
   TINKKeysetHandle *handlePublic = [[TINKKeysetHandle alloc]
-      initWithCCKeysetHandle:TestKeysetHandle::GetKeysetHandle(publicKeyset)];
+      initWithCCKeysetHandle:std::make_unique<KeysetHandle>(*ccKeysetHandlePublic)];
   XCTAssertNotNil(handlePublic);
 
   id<TINKPublicKeySign> publicKeySign =

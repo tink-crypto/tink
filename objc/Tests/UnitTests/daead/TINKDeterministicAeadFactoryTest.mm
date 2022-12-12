@@ -36,17 +36,21 @@
 #include "tink/daead/aes_siv_key_manager.h"
 #include "tink/daead/deterministic_aead_config.h"
 #include "tink/deterministic_aead.h"
+#include "tink/insecure_secret_key_access.h"
 #include "tink/keyset_handle.h"
-#include "tink/util/test_keyset_handle.h"
+#include "tink/proto_keyset_format.h"
 #include "tink/util/status.h"
 #include "tink/util/test_util.h"
 #include "proto/aes_siv.pb.h"
 #include "proto/tink.pb.h"
 
 using ::crypto::tink::AesSivKeyManager;
-using ::crypto::tink::TestKeysetHandle;
+using ::crypto::tink::InsecureSecretKeyAccess;
+using ::crypto::tink::KeysetHandle;
+using ::crypto::tink::ParseKeysetFromProtoKeysetFormat;
 using ::crypto::tink::test::AddRawKey;
 using ::crypto::tink::test::AddTinkKey;
+using ::crypto::tink::util::StatusOr;
 using ::google::crypto::tink::AesSivKey;
 using ::google::crypto::tink::AesSivKeyFormat;
 using ::google::crypto::tink::KeyData;
@@ -66,8 +70,11 @@ using ::google::crypto::tink::KeyStatusType;
   XCTAssertNil(error);
 
   Keyset keyset;
-  TINKKeysetHandle *handle =
-      [[TINKKeysetHandle alloc] initWithCCKeysetHandle:TestKeysetHandle::GetKeysetHandle(keyset)];
+  StatusOr<KeysetHandle> ccKeysetHandle =
+      ParseKeysetFromProtoKeysetFormat(keyset.SerializeAsString(), InsecureSecretKeyAccess::Get());
+  XCTAssertTrue(ccKeysetHandle.ok());
+  TINKKeysetHandle *handle = [[TINKKeysetHandle alloc]
+      initWithCCKeysetHandle:std::make_unique<KeysetHandle>(*ccKeysetHandle)];
   XCTAssertNotNil(handle);
 
   id<TINKDeterministicAead> aead = [TINKDeterministicAeadFactory primitiveWithKeysetHandle:handle
@@ -106,8 +113,11 @@ using ::google::crypto::tink::KeyStatusType;
   XCTAssertNotNil(aeadConfig);
   XCTAssertNil(error);
 
-  TINKKeysetHandle *handle =
-      [[TINKKeysetHandle alloc] initWithCCKeysetHandle:TestKeysetHandle::GetKeysetHandle(keyset)];
+  StatusOr<KeysetHandle> ccKeysetHandle =
+      ParseKeysetFromProtoKeysetFormat(keyset.SerializeAsString(), InsecureSecretKeyAccess::Get());
+  XCTAssertTrue(ccKeysetHandle.ok());
+  TINKKeysetHandle *handle = [[TINKKeysetHandle alloc]
+      initWithCCKeysetHandle:std::make_unique<KeysetHandle>(*ccKeysetHandle)];
   XCTAssertNotNil(handle);
 
   id<TINKDeterministicAead> aead = [TINKDeterministicAeadFactory primitiveWithKeysetHandle:handle

@@ -20,6 +20,10 @@
 
 #import <XCTest/XCTest.h>
 
+#include <memory>
+#include <string>
+#include <utility>
+
 #import "TINKKeysetHandle.h"
 #import "TINKMac.h"
 #import "TINKMacConfig.h"
@@ -29,20 +33,23 @@
 
 #include "absl/status/status.h"
 #include "tink/crypto_format.h"
+#include "tink/insecure_secret_key_access.h"
 #include "tink/keyset_handle.h"
 #include "tink/mac.h"
 #include "tink/mac/hmac_key_manager.h"
 #include "tink/mac/mac_config.h"
+#include "tink/proto_keyset_format.h"
 #include "tink/util/status.h"
-#include "tink/util/test_keyset_handle.h"
 #include "tink/util/test_util.h"
 #include "proto/hmac.pb.h"
 #include "proto/tink.pb.h"
 
 using ::crypto::tink::HmacKeyManager;
-using ::crypto::tink::TestKeysetHandle;
+using ::crypto::tink::InsecureSecretKeyAccess;
+using ::crypto::tink::KeysetHandle;
 using ::crypto::tink::test::AddRawKey;
 using ::crypto::tink::test::AddTinkKey;
+using ::crypto::tink::util::StatusOr;
 using ::google::crypto::tink::HashType;
 using ::google::crypto::tink::HmacKey;
 using ::google::crypto::tink::HmacKeyFormat;
@@ -57,8 +64,11 @@ using ::google::crypto::tink::KeyStatusType;
 
 - (void)testEmptyKeyset {
   Keyset keyset;
-  TINKKeysetHandle *handle =
-      [[TINKKeysetHandle alloc] initWithCCKeysetHandle:TestKeysetHandle::GetKeysetHandle(keyset)];
+  StatusOr<KeysetHandle> cc_keyset_handle =
+      ParseKeysetFromProtoKeysetFormat(keyset.SerializeAsString(), InsecureSecretKeyAccess::Get());
+  XCTAssertTrue(cc_keyset_handle.ok());
+  TINKKeysetHandle *handle = [[TINKKeysetHandle alloc]
+      initWithCCKeysetHandle:std::make_unique<KeysetHandle>(*cc_keyset_handle)];
   XCTAssertNotNil(handle);
 
   NSError *error = nil;
@@ -100,8 +110,11 @@ using ::google::crypto::tink::KeyStatusType;
   XCTAssertNotNil(macConfig);
   XCTAssertNil(error);
 
-  TINKKeysetHandle *handle =
-      [[TINKKeysetHandle alloc] initWithCCKeysetHandle:TestKeysetHandle::GetKeysetHandle(keyset)];
+  StatusOr<KeysetHandle> cc_keyset_handle =
+      ParseKeysetFromProtoKeysetFormat(keyset.SerializeAsString(), InsecureSecretKeyAccess::Get());
+  XCTAssertTrue(cc_keyset_handle.ok());
+  TINKKeysetHandle *handle = [[TINKKeysetHandle alloc]
+      initWithCCKeysetHandle:std::make_unique<KeysetHandle>(*cc_keyset_handle)];
   XCTAssertNotNil(handle);
 
   id<TINKMac> mac = [TINKMacFactory primitiveWithKeysetHandle:handle error:&error];
@@ -134,7 +147,7 @@ using ::google::crypto::tink::KeyStatusType;
   XCTAssertTrue([error.localizedFailureReason containsString:@"verification failed"]);
 
   const char *dataBytes = (const char *)data.bytes;
-  XCTAssertTrue(dataBytes != NULL);
+  XCTAssertTrue(dataBytes != nullptr);
 
   // Flip all the bits in data one by one.
   for (NSUInteger byteIndex = 0; byteIndex < data.length; byteIndex++) {

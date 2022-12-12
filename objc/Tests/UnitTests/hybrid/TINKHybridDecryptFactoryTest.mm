@@ -24,8 +24,9 @@
 
 #include "absl/status/status.h"
 #include "tink/crypto_format.h"
+#include "tink/insecure_secret_key_access.h"
+#include "tink/proto_keyset_format.h"
 #include "tink/util/status.h"
-#include "tink/util/test_keyset_handle.h"
 #include "tink/util/test_util.h"
 #include "proto/ecies_aead_hkdf.pb.h"
 #include "proto/tink.pb.h"
@@ -40,10 +41,13 @@
 #import "core/TINKKeysetHandle_Internal.h"
 #import "util/TINKStrings.h"
 
-using ::crypto::tink::TestKeysetHandle;
-using ::crypto::tink::test::AddTinkKey;
-using ::crypto::tink::test::AddRawKey;
+using ::crypto::tink::InsecureSecretKeyAccess;
+using ::crypto::tink::KeysetHandle;
+using ::crypto::tink::ParseKeysetFromProtoKeysetFormat;
 using ::crypto::tink::test::AddLegacyKey;
+using ::crypto::tink::test::AddRawKey;
+using ::crypto::tink::test::AddTinkKey;
+using ::crypto::tink::util::StatusOr;
 using ::google::crypto::tink::EciesAeadHkdfPrivateKey;
 using ::google::crypto::tink::EcPointFormat;
 using ::google::crypto::tink::EllipticCurveType;
@@ -63,11 +67,17 @@ static EciesAeadHkdfPrivateKey GetNewEciesPrivateKey() {
 @implementation TINKHybridDecryptFactoryTest
 
 - (void)testEncryptWith:(Keyset *)publicKeyset andDecryptWith:(Keyset *)privateKeyset {
+  StatusOr<KeysetHandle> ccPrivateKeysetHandle = ParseKeysetFromProtoKeysetFormat(
+      privateKeyset->SerializeAsString(), InsecureSecretKeyAccess::Get());
+  XCTAssertTrue(ccPrivateKeysetHandle.ok());
   TINKKeysetHandle *privateKeysetHandle = [[TINKKeysetHandle alloc]
-      initWithCCKeysetHandle:TestKeysetHandle::GetKeysetHandle(*privateKeyset)];
+      initWithCCKeysetHandle:std::make_unique<KeysetHandle>(*ccPrivateKeysetHandle)];
 
+  StatusOr<KeysetHandle> ccPublicKeysetHandle = ParseKeysetFromProtoKeysetFormat(
+      publicKeyset->SerializeAsString(), InsecureSecretKeyAccess::Get());
+  XCTAssertTrue(ccPublicKeysetHandle.ok());
   TINKKeysetHandle *publicKeysetHandle = [[TINKKeysetHandle alloc]
-      initWithCCKeysetHandle:TestKeysetHandle::GetKeysetHandle(*publicKeyset)];
+      initWithCCKeysetHandle:std::make_unique<KeysetHandle>(*ccPublicKeysetHandle)];
 
   // Get a HybridDecrypt primitive.
   NSError *error = nil;
@@ -107,8 +117,11 @@ static EciesAeadHkdfPrivateKey GetNewEciesPrivateKey() {
   XCTAssertNil(error);
 
   google::crypto::tink::Keyset keyset;
-  TINKKeysetHandle *keysetHandle =
-      [[TINKKeysetHandle alloc] initWithCCKeysetHandle:TestKeysetHandle::GetKeysetHandle(keyset)];
+  StatusOr<KeysetHandle> ccKeysetHandle =
+      ParseKeysetFromProtoKeysetFormat(keyset.SerializeAsString(), InsecureSecretKeyAccess::Get());
+  XCTAssertTrue(ccKeysetHandle.ok());
+  TINKKeysetHandle *keysetHandle = [[TINKKeysetHandle alloc]
+      initWithCCKeysetHandle:std::make_unique<KeysetHandle>(*ccKeysetHandle)];
   XCTAssertNotNil(keysetHandle);
 
   id<TINKHybridDecrypt> primitive =
