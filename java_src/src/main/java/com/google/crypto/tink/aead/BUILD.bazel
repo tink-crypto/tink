@@ -221,6 +221,7 @@ java_library(
     name = "aes_eax_key_manager",
     srcs = ["AesEaxKeyManager.java"],
     deps = [
+        ":aes_eax_proto_serialization",
         "//proto:aes_eax_java_proto",
         "//proto:tink_java_proto",
         "//src/main/java/com/google/crypto/tink:aead",
@@ -543,6 +544,7 @@ android_library(
     name = "aes_eax_key_manager-android",
     srcs = ["AesEaxKeyManager.java"],
     deps = [
+        ":aes_eax_proto_serialization-android",
         "//proto:aes_eax_java_proto_lite",
         "//proto:tink_java_proto_lite",
         "//src/main/java/com/google/crypto/tink:aead-android",

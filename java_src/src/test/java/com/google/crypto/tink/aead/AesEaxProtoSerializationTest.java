@@ -300,6 +300,26 @@ public final class AesEaxProtoSerializationTest {
   }
 
   @Test
+  public void parseKey_legacy() throws Exception {
+    ProtoKeySerialization serialization =
+        ProtoKeySerialization.create(
+            TYPE_URL,
+            com.google.crypto.tink.proto.AesEaxKey.newBuilder()
+                .setVersion(0)
+                .setKeyValue(KEY_BYTES_16_AS_BYTE_STRING)
+                .setParams(AesEaxParams.newBuilder().setIvSize(16))
+                .build()
+                .toByteString(),
+            KeyMaterialType.SYMMETRIC,
+            OutputPrefixType.LEGACY,
+            1479);
+    // Legacy keys are parsed to crunchy
+    Key parsed = registry.parseKey(serialization, InsecureSecretKeyAccess.get());
+    assertThat(((AesEaxParameters) parsed.getParameters()).getVariant())
+        .isEqualTo(AesEaxParameters.Variant.CRUNCHY);
+  }
+
+  @Test
   public void testSerializeKeys_noAccess_throws() throws Exception {
     AesEaxParameters parameters =
         AesEaxParameters.builder()
@@ -407,18 +427,6 @@ public final class AesEaxProtoSerializationTest {
                 .toByteString(),
             KeyMaterialType.SYMMETRIC,
             OutputPrefixType.TINK,
-            1479),
-        // Legacy prefix
-        ProtoKeySerialization.create(
-            TYPE_URL,
-            com.google.crypto.tink.proto.AesEaxKey.newBuilder()
-                .setVersion(0)
-                .setKeyValue(KEY_BYTES_16_AS_BYTE_STRING)
-                .setParams(AesEaxParams.newBuilder().setIvSize(16))
-                .build()
-                .toByteString(),
-            KeyMaterialType.SYMMETRIC,
-            OutputPrefixType.LEGACY,
             1479),
       };
     } catch (GeneralSecurityException e) {

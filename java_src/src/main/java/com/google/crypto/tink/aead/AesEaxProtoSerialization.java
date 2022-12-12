@@ -85,7 +85,9 @@ final class AesEaxProtoSerialization {
     switch (outputPrefixType) {
       case TINK:
         return AesEaxParameters.Variant.TINK;
+        /** Parse LEGACY prefix to CRUNCHY, since they act the same for this type of key */
       case CRUNCHY:
+      case LEGACY:
         return AesEaxParameters.Variant.CRUNCHY;
       case RAW:
         return AesEaxParameters.Variant.NO_PREFIX;

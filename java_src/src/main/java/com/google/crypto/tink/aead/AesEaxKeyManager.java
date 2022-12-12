@@ -126,6 +126,7 @@ public final class AesEaxKeyManager extends KeyTypeManager<AesEaxKey> {
 
   public static void register(boolean newKeyAllowed) throws GeneralSecurityException {
     Registry.registerKeyManager(new AesEaxKeyManager(), newKeyAllowed);
+    AesEaxProtoSerialization.register();
   }
 
   /**
