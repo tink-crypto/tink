@@ -1120,6 +1120,7 @@ cc_library(
     srcs = ["proto_keyset_format.cc"],
     hdrs = ["proto_keyset_format.h"],
     include_prefix = "tink",
+    visibility = ["//visibility:public"],
     deps = [
         ":binary_keyset_reader",
         ":binary_keyset_writer",
