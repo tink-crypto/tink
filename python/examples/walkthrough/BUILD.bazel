@@ -89,3 +89,26 @@ py_test(
         "@tink_py//tink/aead",
     ],
 )
+
+py_library(
+    name = "write_keyset",
+    srcs = ["write_keyset.py"],
+    deps = [
+        "@tink_py//tink:tink_python",
+        "@tink_py//tink/aead",
+    ],
+)
+
+py_test(
+    name = "write_keyset_test",
+    srcs = ["write_keyset_test.py"],
+    deps = [
+        ":create_keyset",
+        ":load_encrypted_keyset",
+        ":write_keyset",
+        requirement("absl-py"),
+        "@tink_py//tink:tink_python",
+        "@tink_py//tink/aead",
+        "@tink_py//tink/testing:fake_kms",
+    ],
+)

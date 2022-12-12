@@ -12,9 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Test for load_encrypted_keyset."""
-import base64
-import io
-
 from absl.testing import absltest
 
 import tink
@@ -63,22 +60,13 @@ _ENCRYPTED_KEYSET = r"""{
   "encryptedKeyset": "ARGMSWi6YHyZ/Oqxl00XSq631a0q2UPmf+rCvCIAggSZrwCmxFF797MpY0dqgaXu1fz2eQ8zFNhlyTXv9kwg1kY6COpyhY/68zNBUkyKX4CharLYfpg1LgRl+6rMzIQa0XDHh7ZDmp1CevzecZIKnG83uDRHxxSv3h8c/Kc="
 }"""
 
-
-def _get_base64_encoded_keyset_from_serialized_json(
-    serialized_json_keyset: str) -> str:
-  """Returns a Base64 encoded keyset from a JSON serialized keyset as str."""
-  keyset_handle = cleartext_keyset_handle.read(
-      tink.JsonKeysetReader(serialized_json_keyset))
-  stream = io.BytesIO()
-  writer = tink.BinaryKeysetWriter(stream)
-  cleartext_keyset_handle.write(writer, keyset_handle)
-  return base64.urlsafe_b64encode(stream.getvalue()).decode('utf-8')
-
-
-# Fake KMS keys are base64-encoded keysets.
+# Fake KMS keys are base64-encoded keysets. This was generated from
+# _FAKE_KMS_AEAD_KEYSET by first serializing it to bytes using a
+# tink.BinaryKeysetWriter, and then encoding it as base64.
 _FAKE_KMS_KEY_URI = (
-    'fake-kms://' +
-    _get_base64_encoded_keyset_from_serialized_json(_FAKE_KMS_AEAD_KEYSET))
+    'fake-kms://COiSsYwBEmQKWAowdHlwZS5nb29nbGVhcGlzLmNvbS9nb29nbGUuY3J5cHRvLnR'
+    'pbmsuQWVzR2NtS2V5EiIaIFbJR8aBiTdFNGGP8shTNK50haXKMJ-0I7KlOvSMI1IuGAEQARjok'
+    'rGMASAB')
 
 
 class LoadEncryptedKeysetTest(absltest.TestCase):
