@@ -61,8 +61,9 @@ public final class PrimitiveSet<P> {
    * information about the primitive.
    */
   public static final class Entry<P> {
-    // The actual primitive.
-    private final P primitive;
+    // If set, this is a primitive of a key.
+    @Nullable private final P fullPrimitive;
+    @Nullable private final P primitive;
     // Identifies the primitive within the set.
     // It is the ciphertext prefix of the corresponding key.
     private final byte[] identifier;
@@ -75,12 +76,14 @@ public final class PrimitiveSet<P> {
     private final Key key;
 
     Entry(
-        P primitive,
+        @Nullable P fullPrimitive,
+        @Nullable P primitive,
         final byte[] identifier,
         KeyStatusType status,
         OutputPrefixType outputPrefixType,
         int keyId,
         Key key) {
+      this.fullPrimitive = fullPrimitive;
       this.primitive = primitive;
       this.identifier = Arrays.copyOf(identifier, identifier.length);
       this.status = status;
@@ -90,12 +93,26 @@ public final class PrimitiveSet<P> {
     }
 
     /**
+     * Returns the full primitive for this entry.
+     *
+     * <p>This is used in cases when the new Tink Key interface is used and the primitive is
+     * self-sufficient by itself, meaning that all the necessary information to process the
+     * primitive is contained in the primitive (most likely through the new Key interface), as
+     * opposed to the {@code primitive} field (see {@link #getPrimitive} for details).
+     */
+    @Nullable
+    public P getFullPrimitive() {
+      return this.fullPrimitive;
+    }
+
+    /**
      * Returns the primitive for this entry.
      *
      * <p>For primitives of type {@code Mac}, {@code Aead}, {@code PublicKeySign}, {@code
      * PublicKeyVerify}, {@code DeterministicAead}, {@code HybridEncrypt}, and {@code HybridDecrypt}
      * this is a primitive which <b>ignores</b> the output prefix and assumes "RAW".
      */
+    @Nullable
     public P getPrimitive() {
       return this.primitive;
     }
@@ -125,13 +142,20 @@ public final class PrimitiveSet<P> {
       return key;
     }
 
+    @Nullable
     public Parameters getParameters() {
+      if (key == null) {
+        return null;
+      }
       return key.getParameters();
     }
   }
 
   private static <P> Entry<P> addEntryToMap(
-      P primitive, Keyset.Key key, ConcurrentMap<Prefix, List<Entry<P>>> primitives)
+      @Nullable P fullPrimitive,
+      @Nullable P primitive,
+      Keyset.Key key,
+      ConcurrentMap<Prefix, List<Entry<P>>> primitives)
       throws GeneralSecurityException {
     @Nullable Integer idRequirement = key.getKeyId();
     if (key.getOutputPrefixType() == OutputPrefixType.RAW) {
@@ -149,6 +173,7 @@ public final class PrimitiveSet<P> {
                 InsecureSecretKeyAccess.get());
     Entry<P> entry =
         new Entry<P>(
+            fullPrimitive,
             primitive,
             CryptoFormat.getOutputPrefix(key),
             key.getStatus(),
@@ -169,7 +194,7 @@ public final class PrimitiveSet<P> {
     return entry;
   }
 
-  /** @return the entry with the primary primitive. */
+  /** Returns the entry with the primary primitive. */
   @Nullable
   public Entry<P> getPrimary() {
     return primary;
@@ -248,7 +273,8 @@ public final class PrimitiveSet<P> {
     return new PrimitiveSet<P>(primitiveClass);
   }
 
-  /** Sets given Entry {@code primary} as the primary one.
+  /**
+   * Sets given Entry {@code primary} as the primary one.
    *
    * @throws IllegalStateException if object has been created by the {@link Builder}.
    * @deprecated use {@link Builder.addPrimaryPrimitive} instead.
@@ -276,13 +302,11 @@ public final class PrimitiveSet<P> {
    * Creates an entry in the primitive table.
    *
    * @return the added {@link Entry}
-   *
    * @throws IllegalStateException if object has been created by the {@link Builder}.
    * @deprecated use {@link Builder.addPrimitive} or {@link Builder.addPrimaryPrimitive} instead.
    */
   @Deprecated
-  public Entry<P> addPrimitive(final P primitive, Keyset.Key key)
-      throws GeneralSecurityException {
+  public Entry<P> addPrimitive(final P primitive, Keyset.Key key) throws GeneralSecurityException {
     if (!isMutable) {
       throw new IllegalStateException(
           "addPrimitive cannot be called on an immutable primitive set");
@@ -290,7 +314,7 @@ public final class PrimitiveSet<P> {
     if (key.getStatus() != KeyStatusType.ENABLED) {
       throw new GeneralSecurityException("only ENABLED key is allowed");
     }
-    return addEntryToMap(primitive, key, primitives);
+    return addEntryToMap(null, primitive, key, primitives);
   }
 
   public Class<P> getPrimitiveClass() {
@@ -348,7 +372,11 @@ public final class PrimitiveSet<P> {
     private MonitoringAnnotations annotations;
 
     @CanIgnoreReturnValue
-    private Builder<P> addPrimitive(final P primitive, Keyset.Key key, boolean asPrimary)
+    private Builder<P> addPrimitive(
+        @Nullable final P fullPrimitive,
+        @Nullable final P primitive,
+        Keyset.Key key,
+        boolean asPrimary)
         throws GeneralSecurityException {
       if (primitives == null) {
         throw new IllegalStateException("addPrimitive cannot be called after build");
@@ -356,7 +384,7 @@ public final class PrimitiveSet<P> {
       if (key.getStatus() != KeyStatusType.ENABLED) {
         throw new GeneralSecurityException("only ENABLED key is allowed");
       }
-      Entry<P> entry = addEntryToMap(primitive, key, primitives);
+      Entry<P> entry = addEntryToMap(fullPrimitive, primitive, key, primitives);
       if (asPrimary) {
         if (this.primary != null) {
           throw new IllegalStateException("you cannot set two primary primitives");
@@ -370,14 +398,35 @@ public final class PrimitiveSet<P> {
     @CanIgnoreReturnValue
     public Builder<P> addPrimitive(final P primitive, Keyset.Key key)
         throws GeneralSecurityException {
-      return addPrimitive(primitive, key, false);
+      return addPrimitive(null, primitive, key, false);
     }
 
-    /* Adds the primary primitive. Should be called exactly once per PrimitiveSet.*/
+    /**
+     * Adds the primary primitive. This or addPrimaryFullPrimitiveAndOptionalPrimitive should be
+     * called exactly once per PrimitiveSet.
+     */
     @CanIgnoreReturnValue
     public Builder<P> addPrimaryPrimitive(final P primitive, Keyset.Key key)
         throws GeneralSecurityException {
-      return addPrimitive(primitive, key, true);
+      return addPrimitive(null, primitive, key, true);
+    }
+
+    @CanIgnoreReturnValue
+    public Builder<P> addFullPrimitiveAndOptionalPrimitive(
+        @Nullable final P fullPrimitive, @Nullable final P primitive, Keyset.Key key)
+        throws GeneralSecurityException {
+      return addPrimitive(fullPrimitive, primitive, key, false);
+    }
+
+    /**
+     * Adds the primary primitive and full primitive. This or addPrimaryPrimitive should be called
+     * exactly once per PrimitiveSet.
+     */
+    @CanIgnoreReturnValue
+    public Builder<P> addPrimaryFullPrimitiveAndOptionalPrimitive(
+        @Nullable final P fullPrimitive, @Nullable final P primitive, Keyset.Key key)
+        throws GeneralSecurityException {
+      return addPrimitive(fullPrimitive, primitive, key, true);
     }
 
     @CanIgnoreReturnValue
