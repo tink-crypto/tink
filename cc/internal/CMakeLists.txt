@@ -554,6 +554,27 @@ tink_cc_test(
 )
 
 tink_cc_library(
+  NAME parameters_parser
+  SRCS
+    parameters_parser.h
+  DEPS
+    absl::strings
+    tink::util::statusor
+)
+
+tink_cc_test(
+  NAME parameters_parser_test
+  SRCS
+    parameters_parser_test.cc
+  DEPS
+    tink::internal::parameters_parser
+    tink::internal::serialization
+    gmock
+    tink::core::parameters
+    tink::util::test_matchers
+)
+
+tink_cc_library(
   NAME key_status_util
   SRCS
     key_status_util.cc
