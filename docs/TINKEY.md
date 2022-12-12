@@ -55,7 +55,8 @@ Available commands:
 *   `enable-key`: Enables a specified key in a keyset.
 *   `list-keyset`: Lists keys in a keyset.
 *   `promote-key`: Promotes a specified key to primary.
-*   `rotate-keyset`: Performs a key rotation in a keyset.
+*   `rotate-keyset`: Deprecated. Rotate keysets in two steps using the commands
+    `add-key` and later `promote-key`.
 
 To obtain info about arguments available/required for a command, run `tinkey
 <command>` without further arguments.
@@ -66,18 +67,11 @@ To obtain info about arguments available/required for a command, run `tinkey
 tinkey create-keyset --key-template ECDSA_P256 --out private-keyset.cfg
 ```
 
--   Add a new key to a keyset
+-   Add a new key to a keyset. This does not change the primary key.
 
 ```shell
 tinkey add-key --key-template ECDSA_P512 --in private-keyset.cfg \
---out private-keyset.cfg
-```
-
--   Rotate a keyset by adding a primary key
-
-```shell
-tinkey rotate-keyset --key-template ED25519 --in private-keyset.cfg \
---out private-keyset.cfg
+  --out new-private-keyset.cfg
 ```
 
 -   List metadata of keys in a keyset:
@@ -86,11 +80,24 @@ tinkey rotate-keyset --key-template ED25519 --in private-keyset.cfg \
 tinkey list-keyset --in private-keyset.cfg
 ```
 
+-   Make the key with key ID 1234567890 the primary key. (You can get the key ID
+    using the `list-keyset` command.)
+
+```shell
+tinkey promote-key --in private-keyset.cfg --key-id 1234567890 \
+  --out new-private-keyset.cfg
+```
+
 -   Create a public keyset from a private keyset
 
 ```shell
 tinkey create-public-keyset --in private-keyset.cfg --out public-keyset.cfg
 ```
+
+Note: tinkey does not allow you to overwrite the keyset to prevent accidental
+loss of existing keys. We recommend you always create a new keyset and
+only delete the old keyset when you are certain that the new keyset works.
+
 
 ## Work with Key Management System (KMS)
 
@@ -176,18 +183,20 @@ tinkey convert-keyset --in cleartext-keyset.cfg --out encrypted-keyset.cfg \
 --new-master-key-uri gcp-kms://projects/tink-examples/locations/global/keyRings/foo/cryptoKeys/bar
 ```
 
--   Add a new key to an encrypted keyset, using default credentials
+-   Add a new key to an encrypted keyset, using default credentials. This does
+    not change the primary key.
 
 ```shell
 tinkey add-key --key-template AES256_GCM --in encrypted-keyset.cfg \
---out encrypted-keyset.cfg \
+  --out new-encrypted-keyset.cfg \
 --master-key-uri gcp-kms://projects/tink-examples/locations/global/keyRings/foo/cryptoKeys/bar
 ```
 
--   Rotate an encrypted keyset by adding a primary key
+-   Make the key with key ID 1234567890 the primary key in an encrypted keyset.
+    (You can get the key ID using the `list-keyset` command.)
 
 ```shell
-tinkey rotate-keyset --key-template AES256_GCM --in encrypted-keyset.cfg \
---out encrypted-keyset.cfg \
+tinkey promote-key--in encrypted-keyset.cfg --key-id 1234567890 \
+  --out new-encrypted-keyset.cfg \
 --master-key-uri gcp-kms://projects/tink-examples/locations/global/keyRings/foo/cryptoKeys/bar
 ```
