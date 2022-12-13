@@ -129,7 +129,7 @@ public final class PrimitiveRegistryTest {
   }
 
   @Test
-  public void test_registerSameSerializerTwice_works() throws Exception {
+  public void test_registerSameConstructorTwice_works() throws Exception {
     PrimitiveConstructor<TestKey1, TestPrimitiveA> testPrimitiveConstructor =
         PrimitiveConstructor.create(
             PrimitiveRegistryTest::getPrimitiveAKey1, TestKey1.class, TestPrimitiveA.class);
@@ -140,7 +140,7 @@ public final class PrimitiveRegistryTest {
   }
 
   @Test
-  public void test_registerDifferentSerializerWithSameKeyType_throws() throws Exception {
+  public void test_registerDifferentConstructorWithSameKeyType_throws() throws Exception {
     PrimitiveConstructor<TestKey1, TestPrimitiveA> testPrimitiveConstructor1 =
         PrimitiveConstructor.create(
             PrimitiveRegistryTest::getPrimitiveAKey1, TestKey1.class, TestPrimitiveA.class);
@@ -155,7 +155,7 @@ public final class PrimitiveRegistryTest {
   }
 
   @Test
-  public void test_registerDifferentSerializerWithDifferentKeyType_works() throws Exception {
+  public void test_registerDifferentConstructorWithDifferentKeyType_works() throws Exception {
     PrimitiveConstructor<TestKey1, TestPrimitiveA> testPrimitiveConstructor1 =
         PrimitiveConstructor.create(
             PrimitiveRegistryTest::getPrimitiveAKey1, TestKey1.class, TestPrimitiveA.class);
@@ -169,7 +169,7 @@ public final class PrimitiveRegistryTest {
   }
 
   @Test
-  public void test_registerDifferentSerializerWithDifferentPrimitiveType_works()
+  public void test_registerDifferentConstructorWithDifferentPrimitiveType_works()
       throws Exception {
     PrimitiveConstructor<TestKey1, TestPrimitiveA> testPrimitiveConstructor1 =
         PrimitiveConstructor.create(
