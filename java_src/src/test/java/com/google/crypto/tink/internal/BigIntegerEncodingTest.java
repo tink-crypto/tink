@@ -20,6 +20,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertThrows;
 
 import java.math.BigInteger;
+import java.security.GeneralSecurityException;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -48,6 +49,99 @@ public final class BigIntegerEncodingTest {
   }
 
   @Test
+  public void toBigEndianBytesOfFixedLength_success() throws Exception {
+    assertThat(BigIntegerEncoding.toBigEndianBytesOfFixedLength(BigInteger.ZERO, /* length= */ 0))
+        .isEqualTo(new byte[] {});
+    assertThat(BigIntegerEncoding.toBigEndianBytesOfFixedLength(BigInteger.ZERO, /* length= */ 1))
+        .isEqualTo(new byte[] {(byte) 0x00});
+    assertThat(BigIntegerEncoding.toBigEndianBytesOfFixedLength(BigInteger.ZERO, /* length= */ 2))
+        .isEqualTo(new byte[] {(byte) 0x00, (byte) 0x00});
+    assertThat(BigIntegerEncoding.toBigEndianBytesOfFixedLength(BigInteger.ONE, /* length= */ 1))
+        .isEqualTo(new byte[] {(byte) 0x01});
+    assertThat(BigIntegerEncoding.toBigEndianBytesOfFixedLength(BigInteger.ONE, /* length= */ 2))
+        .isEqualTo(new byte[] {(byte) 0x00, (byte) 0x01});
+    assertThat(
+            BigIntegerEncoding.toBigEndianBytesOfFixedLength(
+                BigInteger.valueOf(127), /* length= */ 1))
+        .isEqualTo(new byte[] {(byte) 0x7F});
+    assertThat(
+            BigIntegerEncoding.toBigEndianBytesOfFixedLength(
+                BigInteger.valueOf(127), /* length= */ 2))
+        .isEqualTo(new byte[] {(byte) 0x00, (byte) 0x7F});
+    assertThat(
+            BigIntegerEncoding.toBigEndianBytesOfFixedLength(
+                BigInteger.valueOf(127), /* length= */ 3))
+        .isEqualTo(new byte[] {(byte) 0x00, (byte) 0x00, (byte) 0x7F});
+    assertThat(
+            BigIntegerEncoding.toBigEndianBytesOfFixedLength(
+                BigInteger.valueOf(128), /* length= */ 1))
+        .isEqualTo(new byte[] {(byte) 0x80});
+    assertThat(
+            BigIntegerEncoding.toBigEndianBytesOfFixedLength(
+                BigInteger.valueOf(128), /* length= */ 2))
+        .isEqualTo(new byte[] {(byte) 0x00, (byte) 0x80});
+    assertThat(
+            BigIntegerEncoding.toBigEndianBytesOfFixedLength(
+                BigInteger.valueOf(128), /* length= */ 3))
+        .isEqualTo(new byte[] {(byte) 0x00, (byte) 0x00, (byte) 0x80});
+    assertThat(
+            BigIntegerEncoding.toBigEndianBytesOfFixedLength(
+                BigInteger.valueOf(255), /* length= */ 1))
+        .isEqualTo(new byte[] {(byte) 0xFF});
+    assertThat(
+            BigIntegerEncoding.toBigEndianBytesOfFixedLength(
+                BigInteger.valueOf(255), /* length= */ 2))
+        .isEqualTo(new byte[] {(byte) 0x00, (byte) 0xFF});
+    assertThat(
+            BigIntegerEncoding.toBigEndianBytesOfFixedLength(
+                BigInteger.valueOf(255), /* length= */ 3))
+        .isEqualTo(new byte[] {(byte) 0x00, (byte) 0x00, (byte) 0xFF});
+    assertThat(
+            BigIntegerEncoding.toBigEndianBytesOfFixedLength(
+                BigInteger.valueOf(256), /* length= */ 2))
+        .isEqualTo(new byte[] {(byte) 0x01, (byte) 0x00});
+    assertThat(
+            BigIntegerEncoding.toBigEndianBytesOfFixedLength(
+                BigInteger.valueOf(258), /* length= */ 2))
+        .isEqualTo(new byte[] {(byte) 0x01, (byte) 0x02});
+    assertThat(
+            BigIntegerEncoding.toBigEndianBytesOfFixedLength(
+                BigInteger.valueOf(258), /* length= */ 4))
+        .isEqualTo(new byte[] {(byte) 0x00, (byte) 0x00, (byte) 0x01, (byte) 0x02});
+  }
+
+  @Test
+  public void toBigEndianBytesOfFixedLength_failWhenIntegerIsNegative() throws Exception {
+    assertThrows(
+        IllegalArgumentException.class,
+        () ->
+            BigIntegerEncoding.toBigEndianBytesOfFixedLength(
+                BigInteger.valueOf(-1), /* length= */ 2));
+    assertThrows(
+        IllegalArgumentException.class,
+        () ->
+            BigIntegerEncoding.toBigEndianBytesOfFixedLength(
+                BigInteger.valueOf(-42), /* length= */ 2));
+  }
+
+  @Test
+  public void toBigEndianBytesOfFixedLength_failWhenIntegerIsTooLargerForLength() throws Exception {
+    assertThrows(
+        GeneralSecurityException.class,
+        () -> BigIntegerEncoding.toBigEndianBytesOfFixedLength(BigInteger.ONE, /* length= */ 0));
+    assertThrows(
+        GeneralSecurityException.class,
+        () ->
+            BigIntegerEncoding.toBigEndianBytesOfFixedLength(
+                BigInteger.valueOf(256), /* length= */ 1));
+    assertThrows(
+        GeneralSecurityException.class,
+        () ->
+            BigIntegerEncoding.toBigEndianBytesOfFixedLength(
+                BigInteger.valueOf(256 * 256), /* length= */ 2));
+  }
+
+  @Test
   public void fromUnsignedBigEndianBytes() throws Exception {
     assertThat(BigIntegerEncoding.fromUnsignedBigEndianBytes(new byte[] {(byte) 0x00}))
         .isEqualTo(BigInteger.ZERO);
@@ -60,13 +154,9 @@ public final class BigIntegerEncodingTest {
         .isEqualTo(BigInteger.valueOf(128));
     assertThat(BigIntegerEncoding.fromUnsignedBigEndianBytes(new byte[] {(byte) 0xFF}))
         .isEqualTo(BigInteger.valueOf(255));
-    assertThat(
-            BigIntegerEncoding.fromUnsignedBigEndianBytes(
-                new byte[] {(byte) 0x01, (byte) 0x00}))
+    assertThat(BigIntegerEncoding.fromUnsignedBigEndianBytes(new byte[] {(byte) 0x01, (byte) 0x00}))
         .isEqualTo(BigInteger.valueOf(256));
-    assertThat(
-            BigIntegerEncoding.fromUnsignedBigEndianBytes(
-                new byte[] {(byte) 0x01, (byte) 0x02}))
+    assertThat(BigIntegerEncoding.fromUnsignedBigEndianBytes(new byte[] {(byte) 0x01, (byte) 0x02}))
         .isEqualTo(BigInteger.valueOf(258));
     // leading zeros are ignored
     assertThat(
@@ -94,39 +184,34 @@ public final class BigIntegerEncodingTest {
   public void toBigEndianBytes_canBeParsedAsSignedOrUnsigned() throws Exception {
     byte[] encoded0 = BigIntegerEncoding.toBigEndianBytes(BigInteger.ZERO);
     assertThat(encoded0).hasLength(1);
-    assertThat(BigIntegerEncoding.fromUnsignedBigEndianBytes(encoded0))
-        .isEqualTo(BigInteger.ZERO);
+    assertThat(BigIntegerEncoding.fromUnsignedBigEndianBytes(encoded0)).isEqualTo(BigInteger.ZERO);
     assertThat(fromSignedBigEndianBytes(encoded0)).isEqualTo(BigInteger.ZERO);
 
     // 10 is a 1-byte unsigned integer with the most significant bit 0.
     byte[] encoded10 = BigIntegerEncoding.toBigEndianBytes(BigInteger.TEN);
     assertThat(encoded10).hasLength(1);
-    assertThat(BigIntegerEncoding.fromUnsignedBigEndianBytes(encoded10))
-        .isEqualTo(BigInteger.TEN);
+    assertThat(BigIntegerEncoding.fromUnsignedBigEndianBytes(encoded10)).isEqualTo(BigInteger.TEN);
     assertThat(fromSignedBigEndianBytes(encoded10)).isEqualTo(BigInteger.TEN);
 
     // 130 is a 1-byte unsigned integer with the most significant bit 1.
     BigInteger bigInt130 = BigInteger.valueOf(130);
     byte[] encoded130 = BigIntegerEncoding.toBigEndianBytes(bigInt130);
     assertThat(encoded130).hasLength(2);
-    assertThat(BigIntegerEncoding.fromUnsignedBigEndianBytes(encoded130))
-        .isEqualTo(bigInt130);
+    assertThat(BigIntegerEncoding.fromUnsignedBigEndianBytes(encoded130)).isEqualTo(bigInt130);
     assertThat(fromSignedBigEndianBytes(encoded130)).isEqualTo(bigInt130);
 
     // 30000 is a 2-byte unsigned integer with the most significant bit 0.
     BigInteger bigInt30k = BigInteger.valueOf(30000);
     byte[] encoded30k = BigIntegerEncoding.toBigEndianBytes(bigInt30k);
     assertThat(encoded30k).hasLength(2);
-    assertThat(BigIntegerEncoding.fromUnsignedBigEndianBytes(encoded30k))
-        .isEqualTo(bigInt30k);
+    assertThat(BigIntegerEncoding.fromUnsignedBigEndianBytes(encoded30k)).isEqualTo(bigInt30k);
     assertThat(fromSignedBigEndianBytes(encoded30k)).isEqualTo(bigInt30k);
 
     // 60000 is a 2-byte unsigned integer with the most significant bit 1.
     BigInteger bigInt60k = BigInteger.valueOf(60000);
     byte[] encoded60k = BigIntegerEncoding.toBigEndianBytes(bigInt60k);
     assertThat(encoded60k).hasLength(3);
-    assertThat(BigIntegerEncoding.fromUnsignedBigEndianBytes(encoded60k))
-        .isEqualTo(bigInt60k);
+    assertThat(BigIntegerEncoding.fromUnsignedBigEndianBytes(encoded60k)).isEqualTo(bigInt60k);
     assertThat(fromSignedBigEndianBytes(encoded60k)).isEqualTo(bigInt60k);
   }
 }

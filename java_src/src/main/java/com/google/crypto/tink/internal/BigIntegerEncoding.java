@@ -17,6 +17,8 @@
 package com.google.crypto.tink.internal;
 
 import java.math.BigInteger;
+import java.security.GeneralSecurityException;
+import java.util.Arrays;
 
 /**
  * Helper class with functions that encode and decode non-negative {@link java.math.BigInteger} to
@@ -38,6 +40,39 @@ public final class BigIntegerEncoding {
       throw new IllegalArgumentException("n must not be negative");
     }
     return n.toByteArray();
+  }
+
+  /**
+   * Encodes a non-negative {@link java.math.BigInteger} into a byte array of a specified length,
+   * using big-endian byte-order.
+   *
+   * <p>See also <a href="https://www.rfc-editor.org/rfc/rfc8017#section-4.2">RFC 8017, Sec. 4.2</a>
+   *
+   * <p>throws a GeneralSecurityException if the number is negative or length is too short.
+   */
+  public static byte[] toBigEndianBytesOfFixedLength(BigInteger n, int length)
+      throws GeneralSecurityException {
+    if (n.signum() == -1) {
+      throw new IllegalArgumentException("integer must be nonnegative");
+    }
+    byte[] b = n.toByteArray();
+    if (b.length == length) {
+      return b;
+    }
+    if (b.length > length + 1 /* potential leading zero */) {
+      throw new GeneralSecurityException("integer too large");
+    }
+    if (b.length == length + 1) {
+      if (b[0] == 0 /* leading zero */) {
+        return Arrays.copyOfRange(b, 1, b.length);
+      } else {
+        throw new GeneralSecurityException("integer too large");
+      }
+    }
+    // Left zero pad b.
+    byte[] res = new byte[length];
+    System.arraycopy(b, 0, res, length - b.length, b.length);
+    return res;
   }
 
   /**

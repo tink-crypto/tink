@@ -54,8 +54,8 @@ java_library(
         ":hpke_kem_private_key",
         ":hpke_util",
         "//proto:hpke_java_proto",
+        "//src/main/java/com/google/crypto/tink/internal:big_integer_encoding",
         "//src/main/java/com/google/crypto/tink/subtle:bytes",
-        "//src/main/java/com/google/crypto/tink/subtle:subtle_util_cluster",
         "@maven//:com_google_code_findbugs_jsr305",
     ],
 )
@@ -305,8 +305,8 @@ android_library(
         ":hpke_kem_private_key-android",
         ":hpke_util-android",
         "//proto:hpke_java_proto_lite",
+        "//src/main/java/com/google/crypto/tink/internal:big_integer_encoding-android",
         "//src/main/java/com/google/crypto/tink/subtle:bytes-android",
-        "//src/main/java/com/google/crypto/tink/subtle:subtle_util_cluster-android",
         "@maven//:com_google_code_findbugs_jsr305",
     ],
 )

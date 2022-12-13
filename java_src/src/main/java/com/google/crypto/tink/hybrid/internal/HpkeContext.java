@@ -16,9 +16,9 @@
 
 package com.google.crypto.tink.hybrid.internal;
 
+import com.google.crypto.tink.internal.BigIntegerEncoding;
 import com.google.crypto.tink.proto.HpkePublicKey;
 import com.google.crypto.tink.subtle.Bytes;
-import com.google.crypto.tink.subtle.SubtleUtil;
 import java.math.BigInteger;
 import java.security.GeneralSecurityException;
 import javax.annotation.concurrent.GuardedBy;
@@ -137,7 +137,9 @@ final class HpkeContext {
   /** ComputeNonce() from https://www.rfc-editor.org/rfc/rfc9180.html#section-5.2-11. */
   @GuardedBy("this")
   private byte[] computeNonce() throws GeneralSecurityException {
-    return Bytes.xor(baseNonce, SubtleUtil.integer2Bytes(sequenceNumber, aead.getNonceLength()));
+    return Bytes.xor(
+        baseNonce,
+        BigIntegerEncoding.toBigEndianBytesOfFixedLength(sequenceNumber, aead.getNonceLength()));
   }
 
   /** Returns the next nonce to use for seal/open. Also, increments the sequence number. */
