@@ -53,10 +53,9 @@ MonitoringKeySetInfoFromPrimitiveSet(const PrimitiveSet<P>& primitive_set) {
         FromKeyStatusType(entry->get_status());
     if (!key_status.ok()) return key_status.status();
 
-    // TODO(b/222245356): Populate key_format_as_string with the actual key
-    // format when available. For now, we use the key type URL.
     auto keyset_info_entry = MonitoringKeySetInfo::Entry(
-        *key_status, entry->get_key_id(), entry->get_key_type_url());
+        *key_status, entry->get_key_id(), entry->get_key_type_url(),
+        OutputPrefixType_Name(entry->get_output_prefix_type()));
     keyset_info_entries.push_back(keyset_info_entry);
   }
   MonitoringKeySetInfo keyset_info(primitive_set.get_annotations(),

@@ -17,6 +17,7 @@
 #define TINK_MONITORING_MONITORING_H_
 
 #include <cstdint>
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -34,31 +35,32 @@ class MonitoringKeySetInfo {
   // Description about each entry of the KeySet.
   class Entry {
    public:
-    // Constructs a new KeySet entry with a given `status`, `key_id` and key
-    // format `parameters_as_string`.
-    Entry(KeyStatus status, uint32_t key_id,
-          absl::string_view parameters_as_string)
+    // Constructs a new KeySet entry with a given `status`, `key_id`,
+    // `key_type`, and `key_prefix`.
+    Entry(KeyStatus status, uint32_t key_id, absl::string_view key_type,
+          absl::string_view key_prefix)
         : status_(status),
           key_id_(key_id),
-          parameters_as_string_(parameters_as_string) {}
+          key_type_(key_type),
+          key_prefix_(key_prefix) {}
 
     // Returns the status of this entry.
     KeyStatus GetStatus() const { return status_; }
     // Returns the ID of the entry within the keyset.
     uint32_t GetKeyId() const { return key_id_; }
-    // Returns the parameters in a serialized form.
-    //
-    // *WARNING* the actual content of `parameters_as_string_` is considered
-    // unstable and might change in future versions of Tink. A user should not
-    // rely on a specific representation of the key_format.
-    std::string GetParametersAsString() const { return parameters_as_string_; }
+    // Returns the key type.
+    std::string GetKeyType() const { return key_type_; }
+    // Returns the key prefix.
+    std::string GetKeyPrefix() const { return key_prefix_; }
 
    private:
     const KeyStatus status_;
     // Identifies a key within a keyset.
     const uint32_t key_id_;
-    // This field stores information about the parameters.
-    const std::string parameters_as_string_;
+    // This field stores the key type.
+    const std::string key_type_;
+    // Stores the key output prefix.
+    const std::string key_prefix_;
   };
 
   // Constructs a MonitoringKeySetInfo object with the given

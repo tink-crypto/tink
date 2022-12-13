@@ -91,7 +91,8 @@ PrimitiveSetInputPrimitive<std::string> NewPrimitiveSetInputPrimitive(
 MATCHER_P(MonitoringKeySetInfoEntryEq, other, "") {
   return arg.GetStatus() == other.GetStatus() &&
          arg.GetKeyId() == other.GetKeyId() &&
-         arg.GetParametersAsString() == other.GetParametersAsString();
+         arg.GetKeyPrefix() == other.GetKeyPrefix() &&
+         arg.GetKeyType() == other.GetKeyType();
 }
 
 TEST(MonitoringUtilTest, MonitoringKeySetInfoFromPrimitiveSetValid) {
@@ -140,10 +141,10 @@ TEST(MonitoringUtilTest, MonitoringKeySetInfoFromPrimitiveSetValid) {
               UnorderedElementsAre(
                   MonitoringKeySetInfoEntryEq(MonitoringKeySetInfo::Entry(
                       KeyStatus::kEnabled,
-                      /*key_id=*/1, kPrimitive1KeyTyepUrl)),
+                      /*key_id=*/1, kPrimitive1KeyTyepUrl, "TINK")),
                   MonitoringKeySetInfoEntryEq(MonitoringKeySetInfo::Entry(
                       KeyStatus::kEnabled,
-                      /*key_id=*/2, kPrimitive2KeyTypeUrl))));
+                      /*key_id=*/2, kPrimitive2KeyTypeUrl, "TINK"))));
 }
 
 }  // namespace
