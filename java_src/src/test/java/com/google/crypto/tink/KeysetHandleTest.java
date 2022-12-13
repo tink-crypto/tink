@@ -22,8 +22,8 @@ import static org.junit.Assert.assertThrows;
 import static org.junit.Assume.assumeFalse;
 
 import com.google.common.truth.Expect;
+import com.google.crypto.tink.aead.AeadConfig;
 import com.google.crypto.tink.aead.AesEaxKeyManager;
-import com.google.crypto.tink.config.TinkConfig;
 import com.google.crypto.tink.internal.KeyParser;
 import com.google.crypto.tink.internal.KeyStatusTypeProtoConverter;
 import com.google.crypto.tink.internal.LegacyProtoKey;
@@ -36,6 +36,7 @@ import com.google.crypto.tink.mac.AesCmacKey;
 import com.google.crypto.tink.mac.AesCmacParameters;
 import com.google.crypto.tink.mac.AesCmacParameters.Variant;
 import com.google.crypto.tink.mac.HmacKey;
+import com.google.crypto.tink.mac.MacConfig;
 import com.google.crypto.tink.monitoring.MonitoringAnnotations;
 import com.google.crypto.tink.monitoring.MonitoringClient;
 import com.google.crypto.tink.proto.AesEaxKey;
@@ -47,8 +48,6 @@ import com.google.crypto.tink.proto.KeyData;
 import com.google.crypto.tink.proto.KeyStatusType;
 import com.google.crypto.tink.proto.Keyset;
 import com.google.crypto.tink.proto.OutputPrefixType;
-import com.google.crypto.tink.signature.PublicKeySignFactory;
-import com.google.crypto.tink.signature.PublicKeyVerifyFactory;
 import com.google.crypto.tink.signature.SignatureConfig;
 import com.google.crypto.tink.subtle.Hex;
 import com.google.crypto.tink.subtle.Random;
@@ -127,7 +126,9 @@ public class KeysetHandleTest {
 
   @BeforeClass
   public static void setUp() throws GeneralSecurityException {
-    Config.register(TinkConfig.TINK_1_0_0);
+    MacConfig.register();
+    AeadConfig.register();
+    SignatureConfig.register();
     Registry.registerPrimitiveWrapper(new AeadToEncryptOnlyWrapper());
   }
 
@@ -393,8 +394,8 @@ public class KeysetHandleTest {
     expect
         .that(publicKeyData.getValue().toByteArray())
         .isEqualTo(privateKey.getPublicKey().toByteArray());
-    PublicKeySign signer = PublicKeySignFactory.getPrimitive(privateHandle);
-    PublicKeyVerify verifier = PublicKeyVerifyFactory.getPrimitive(publicHandle);
+    PublicKeySign signer = privateHandle.getPrimitive(PublicKeySign.class);
+    PublicKeyVerify verifier = publicHandle.getPrimitive(PublicKeyVerify.class);
     byte[] message = Random.randBytes(20);
     verifier.verify(signer.sign(message), message);
   }
@@ -415,7 +416,7 @@ public class KeysetHandleTest {
     KeysetReader reader = BinaryKeysetReader.withBytes(new byte[0]);
 
     assertThrows(
-        GeneralSecurityException.class, () -> KeysetHandle.read(reader, null /* masterKey */));
+        GeneralSecurityException.class, () -> KeysetHandle.read(reader, /* masterKey= */ null));
   }
 
   @Test
@@ -631,7 +632,7 @@ public class KeysetHandleTest {
   public void writeNoSecret_withTypeAsymmetricPrivate_shouldThrow() throws Exception {
     KeysetHandle handle = KeysetHandle.generateNew(KeyTemplates.get("ECDSA_P256"));
 
-    assertThrows(GeneralSecurityException.class, () -> handle.writeNoSecret(null /* writer */));
+    assertThrows(GeneralSecurityException.class, () -> handle.writeNoSecret(/* writer= */ null));
   }
 
   @SuppressWarnings("deprecation")  // This is a test for the deprecated function
@@ -929,6 +930,39 @@ public class KeysetHandleTest {
     assertThat(keysetHandle.size()).isEqualTo(1);
     assertThat(keysetHandle.getAt(0).getKey().getParameters())
         .isEqualTo(AesCmacParameters.builder().setKeySizeBytes(32).setTagSizeBytes(16).build());
+  }
+
+  @Test
+  public void keysetRotationWithBuilder_works() throws Exception {
+    KeysetHandle oldKeyset =
+        KeysetHandle.newBuilder()
+            .addEntry(
+                KeysetHandle.generateEntryFromParametersName("AES256_CMAC_RAW")
+                    .withRandomId()
+                    .makePrimary())
+            .build();
+
+    // Add new key.
+    KeysetHandle keysetWithNewKey =
+        KeysetHandle.newBuilder(oldKeyset)
+            .addEntry(
+                KeysetHandle.generateEntryFromParametersName("AES256_CMAC_RAW").withRandomId())
+            .build();
+
+    // Make latest key primary.
+    KeysetHandle.Builder builder = KeysetHandle.newBuilder(keysetWithNewKey);
+    builder.getAt(builder.size() - 1).makePrimary();
+    KeysetHandle keysetWithNewPrimary = builder.build();
+
+    assertThat(oldKeyset.size()).isEqualTo(1);
+
+    assertThat(keysetWithNewKey.size()).isEqualTo(2);
+    assertThat(keysetWithNewKey.getAt(0).isPrimary()).isTrue();
+    assertThat(keysetWithNewKey.getAt(1).isPrimary()).isFalse();
+
+    assertThat(keysetWithNewPrimary.size()).isEqualTo(2);
+    assertThat(keysetWithNewPrimary.getAt(0).isPrimary()).isFalse();
+    assertThat(keysetWithNewPrimary.getAt(1).isPrimary()).isTrue();
   }
 
   @Test
