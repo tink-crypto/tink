@@ -725,7 +725,6 @@ objc_library(
         "@tink_cc//tink:keyset_handle",
         "@tink_cc//tink/aead:aead_config",
         "@tink_cc//tink/util:status",
-        "@tink_cc//tink/util:test_keyset_handle",
         "@tink_cc//tink/util:test_util",
     ],
 )
