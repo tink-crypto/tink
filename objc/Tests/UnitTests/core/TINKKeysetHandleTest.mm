@@ -42,9 +42,8 @@
 #include "tink/proto_keyset_format.h"
 #include "tink/util/secret_data.h"
 #include "tink/util/status.h"
-#include "tink/util/statusor.h"
 #include "tink/util/test_util.h"
-#include "proto/tink.pb.h"
+#include "third_party/tink/objc/proto_redirect/tink_cc_pb_redirect.h"
 
 using ::crypto::tink::InsecureSecretKeyAccess;
 using ::crypto::tink::SerializeKeysetToProtoKeysetFormat;
@@ -422,9 +421,10 @@ static Keyset *gKeyset;
 
   Keyset keyset;
   XCTAssertTrue(
-      keyset.ParseFromString(SecretDataAsStringView(*serializedKeyset)));
+      keyset.ParseFromString(std::string(SecretDataAsStringView(*serializedKeyset))));
   Keyset publicKeyset;
-  XCTAssertTrue(publicKeyset.ParseFromString(SecretDataAsStringView(*serializedPublicKeyset)));
+  XCTAssertTrue(
+      publicKeyset.ParseFromString(std::string(SecretDataAsStringView(*serializedPublicKeyset))));
 
   XCTAssertEqual(keyset.primary_key_id(), publicKeyset.primary_key_id());
   XCTAssertEqual(keyset.key_size(), publicKeyset.key_size());
