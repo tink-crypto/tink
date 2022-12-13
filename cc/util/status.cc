@@ -34,13 +34,13 @@ namespace {
 
 const Status& GetCancelled() {
   static const Status* status =
-      new Status(::crypto::tink::util::error::CANCELLED, "");
+      new Status(absl::StatusCode::kCancelled, "");
   return *status;
 }
 
 const Status& GetUnknown() {
   static const Status* status =
-      new Status(::crypto::tink::util::error::UNKNOWN, "");
+      new Status(absl::StatusCode::kUnknown, "");
   return *status;
 }
 
