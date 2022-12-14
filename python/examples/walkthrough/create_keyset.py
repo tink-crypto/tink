@@ -29,7 +29,7 @@ def CreateAead128GcmKeyset() -> tink.KeysetHandle:
   Raises:
     tink.TinkError in case of errors.
   """
-  # Tink provides pre-baked templetes. For example, we generate a key template
+  # Tink provides pre-baked templates. For example, we generate a key template
   # for AES128-GCM.
   key_template = aead.aead_key_templates.AES128_GCM
   # This will generate a new keyset with only *one* key and return a keyset
