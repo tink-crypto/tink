@@ -17,6 +17,7 @@
 package com.google.crypto.tink.hybrid.internal;
 
 import static com.google.common.truth.Truth.assertThat;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThrows;
 
 import com.google.crypto.tink.HybridDecrypt;
@@ -248,7 +249,7 @@ public final class HpkePrivateKeyManagerTest {
 
     HpkePrivateKeyManager.registerPair(/*newKeyAllowed=*/ true);
 
-    Registry.getKeyManager(publicKeyUrl, HybridEncrypt.class);
-    Registry.getKeyManager(privateKeyUrl, HybridDecrypt.class);
+    assertNotNull(Registry.getKeyManager(publicKeyUrl, HybridEncrypt.class));
+    assertNotNull(Registry.getKeyManager(privateKeyUrl, HybridDecrypt.class));
   }
 }

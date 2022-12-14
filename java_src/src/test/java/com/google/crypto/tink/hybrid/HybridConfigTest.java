@@ -17,6 +17,7 @@
 package com.google.crypto.tink.hybrid;
 
 import static com.google.common.truth.Truth.assertThat;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThrows;
 
 import com.google.crypto.tink.HybridDecrypt;
@@ -75,8 +76,8 @@ public class HybridConfigTest {
     // Initialize the config.
     HybridConfig.register();
 
-    Registry.getKeyManager(eciesPrivateKeyUrl, HybridDecrypt.class);
-    Registry.getKeyManager(hpkePrivateKeyUrl, HybridDecrypt.class);
+    assertNotNull(Registry.getKeyManager(eciesPrivateKeyUrl, HybridDecrypt.class));
+    assertNotNull(Registry.getKeyManager(hpkePrivateKeyUrl, HybridDecrypt.class));
 
     // Running init() manually again should succeed.
     HybridConfig.register();
@@ -96,7 +97,7 @@ public class HybridConfigTest {
     };
 
     for (String typeUrl : keyTypeUrls) {
-      Registry.getKeyManager(typeUrl, HybridDecrypt.class);
+      assertNotNull(Registry.getKeyManager(typeUrl, HybridDecrypt.class));
     }
   }
 

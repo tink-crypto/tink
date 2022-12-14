@@ -17,6 +17,7 @@
 package com.google.crypto.tink.streamingaead;
 
 import static com.google.common.truth.Truth.assertThat;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThrows;
 
 import com.google.crypto.tink.Registry;
@@ -61,7 +62,7 @@ public class StreamingAeadConfigTest {
     StreamingAeadConfig.register();
 
     // After registration the key manager should be present.
-    Registry.getKeyManager(typeUrl, StreamingAead.class);
+    assertNotNull(Registry.getKeyManager(typeUrl, StreamingAead.class));
 
     // Running init() manually again should succeed.
     StreamingAeadConfig.register();
@@ -81,7 +82,7 @@ public class StreamingAeadConfigTest {
     };
 
     for (String typeUrl : keyTypeUrls) {
-      Registry.getKeyManager(typeUrl, StreamingAead.class);
+      assertNotNull(Registry.getKeyManager(typeUrl, StreamingAead.class));
     }
   }
 

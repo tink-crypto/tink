@@ -17,6 +17,7 @@
 package com.google.crypto.tink.signature;
 
 import static com.google.common.truth.Truth.assertThat;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThrows;
 
 import com.google.crypto.tink.PublicKeySign;
@@ -62,7 +63,7 @@ public class SignatureConfigTest {
     SignatureConfig.register();
 
     // After registration the key manager should be present.
-    Registry.getKeyManager(typeUrl, PublicKeySign.class);
+    assertNotNull(Registry.getKeyManager(typeUrl, PublicKeySign.class));
 
     // Running init() manually again should succeed.
     SignatureConfig.register();
@@ -84,7 +85,7 @@ public class SignatureConfigTest {
     };
 
     for (String typeUrl : keyTypeUrlsSign) {
-      Registry.getKeyManager(typeUrl, PublicKeySign.class);
+      assertNotNull(Registry.getKeyManager(typeUrl, PublicKeySign.class));
     }
 
     String[] keyTypeUrlsVerify = {
@@ -95,7 +96,7 @@ public class SignatureConfigTest {
     };
 
     for (String typeUrl : keyTypeUrlsVerify) {
-      Registry.getKeyManager(typeUrl, PublicKeyVerify.class);
+      assertNotNull(Registry.getKeyManager(typeUrl, PublicKeyVerify.class));
     }
   }
 
@@ -114,7 +115,7 @@ public class SignatureConfigTest {
     };
 
     for (String typeUrl : keyTypeUrlsSign) {
-      Registry.getKeyManager(typeUrl, PublicKeySign.class);
+      assertNotNull(Registry.getKeyManager(typeUrl, PublicKeySign.class));
     }
 
     String[] keyTypeUrlsVerify = {
@@ -123,7 +124,7 @@ public class SignatureConfigTest {
     };
 
     for (String typeUrl : keyTypeUrlsVerify) {
-      Registry.getKeyManager(typeUrl, PublicKeyVerify.class);
+      assertNotNull(Registry.getKeyManager(typeUrl, PublicKeyVerify.class));
     }
   }
 

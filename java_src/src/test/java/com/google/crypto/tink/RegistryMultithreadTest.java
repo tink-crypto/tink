@@ -18,6 +18,7 @@ package com.google.crypto.tink;
 
 import static com.google.common.truth.Truth.assertThat;
 import static java.util.concurrent.TimeUnit.SECONDS;
+import static org.junit.Assert.assertNotNull;
 
 import com.google.crypto.tink.internal.KeyTypeManager;
 import com.google.crypto.tink.internal.PrivateKeyTypeManager;
@@ -252,11 +253,10 @@ public final class RegistryMultithreadTest {
             () -> {
               try {
                 for (int i = 0; i < REPETITIONS; ++i) {
-
-                  Registry.getKeyManager("KeyManagerStart");
-                  Registry.getKeyManager("KeyTypeManagerStart");
-                  Registry.getKeyManager("PrivateKeyTypeManagerStart");
-                  Registry.getKeyManager("PublicKeyTypeManagerStart");
+                  assertNotNull(Registry.getKeyManager("KeyManagerStart"));
+                  assertNotNull(Registry.getKeyManager("KeyTypeManagerStart"));
+                  assertNotNull(Registry.getKeyManager("PrivateKeyTypeManagerStart"));
+                  assertNotNull(Registry.getKeyManager("PublicKeyTypeManagerStart"));
                 }
               } catch (GeneralSecurityException e) {
                 throw new RuntimeException(e);

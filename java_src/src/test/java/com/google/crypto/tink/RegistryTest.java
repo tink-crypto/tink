@@ -19,6 +19,7 @@ package com.google.crypto.tink;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.crypto.tink.testing.TestUtil.assertExceptionContains;
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -1718,7 +1719,7 @@ public class RegistryTest {
     // Skip test if in FIPS mode, as EAX is not allowed in FipsMode.
     Assume.assumeFalse(TinkFips.useOnlyFips());
 
-    Registry.wrap(createAeadPrimitiveSet());
+    assertNotNull(Registry.wrap(createAeadPrimitiveSet()));
   }
 
   @Test

@@ -17,6 +17,7 @@
 package com.google.crypto.tink.aead;
 
 import static com.google.common.truth.Truth.assertThat;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThrows;
 
 import com.google.crypto.tink.Aead;
@@ -60,7 +61,7 @@ public class AeadConfigTest {
     AeadConfig.register();
 
     // After registration the key manager should be present.
-    Registry.getKeyManager(typeUrl, Aead.class);
+    assertNotNull(Registry.getKeyManager(typeUrl, Aead.class));
 
     // Running init() manually again should succeed.
     AeadConfig.register();
@@ -85,7 +86,7 @@ public class AeadConfigTest {
     };
 
     for (String typeUrl : keyTypeUrls) {
-      Registry.getKeyManager(typeUrl, Aead.class);
+      assertNotNull(Registry.getKeyManager(typeUrl, Aead.class));
     }
   }
 
@@ -103,7 +104,7 @@ public class AeadConfigTest {
     };
 
     for (String typeUrl : keyTypeUrls) {
-      Registry.getKeyManager(typeUrl, Aead.class);
+      assertNotNull(Registry.getKeyManager(typeUrl, Aead.class));
     }
   }
 

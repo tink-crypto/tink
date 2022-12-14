@@ -17,6 +17,7 @@
 package com.google.crypto.tink.prf;
 
 import static com.google.common.truth.Truth.assertThat;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThrows;
 
 import com.google.crypto.tink.Registry;
@@ -50,7 +51,7 @@ public class PrfConfigTest {
     PrfConfig.register();
 
     // After registration, the key manager should be present.
-    Registry.getKeyManager(typeUrl, Prf.class);
+    assertNotNull(Registry.getKeyManager(typeUrl, Prf.class));
 
     // Running init() manually again should succeed.
     PrfConfig.register();
@@ -71,7 +72,7 @@ public class PrfConfigTest {
     };
 
     for (String typeUrl : keyTypeUrls) {
-      Registry.getKeyManager(typeUrl, Prf.class);
+      assertNotNull(Registry.getKeyManager(typeUrl, Prf.class));
     }
   }
 
@@ -88,7 +89,7 @@ public class PrfConfigTest {
     };
 
     for (String typeUrl : keyTypeUrls) {
-      Registry.getKeyManager(typeUrl, Prf.class);
+      assertNotNull(Registry.getKeyManager(typeUrl, Prf.class));
     }
   }
 

@@ -17,6 +17,7 @@
 package com.google.crypto.tink.config;
 
 import static com.google.common.truth.Truth.assertThat;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThrows;
 
 import com.google.crypto.tink.Config;
@@ -101,11 +102,11 @@ public class TinkConfigTest {
 
     // After registration the key managers should be present.
     Config.register(TinkConfig.TINK_1_1_0);
-    Registry.getUntypedKeyManager(macTypeUrl);
-    Registry.getUntypedKeyManager(aeadTypeUrl);
-    Registry.getUntypedKeyManager(daeadTypeUrl);
-    Registry.getUntypedKeyManager(hybridTypeUrl);
-    Registry.getUntypedKeyManager(signTypeUrl);
-    Registry.getUntypedKeyManager(streamingAeadTypeUrl);
+    assertNotNull(Registry.getUntypedKeyManager(macTypeUrl));
+    assertNotNull(Registry.getUntypedKeyManager(aeadTypeUrl));
+    assertNotNull(Registry.getUntypedKeyManager(daeadTypeUrl));
+    assertNotNull(Registry.getUntypedKeyManager(hybridTypeUrl));
+    assertNotNull(Registry.getUntypedKeyManager(signTypeUrl));
+    assertNotNull(Registry.getUntypedKeyManager(streamingAeadTypeUrl));
   }
 }

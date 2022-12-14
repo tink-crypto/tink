@@ -16,6 +16,7 @@
 
 package com.google.crypto.tink.daead;
 
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThrows;
 
 import com.google.crypto.tink.DeterministicAead;
@@ -52,7 +53,7 @@ public class DeterministicAeadConfigTest {
     DeterministicAeadConfig.register();
 
     // After registration, the key manager should be present.
-    Registry.getKeyManager(typeUrl, DeterministicAead.class);
+    assertNotNull(Registry.getKeyManager(typeUrl, DeterministicAead.class));
 
     // Running init() manually again should succeed.
     DeterministicAeadConfig.register();
@@ -71,7 +72,7 @@ public class DeterministicAeadConfigTest {
     };
 
     for (String typeUrl : keyTypeUrls) {
-      Registry.getKeyManager(typeUrl, DeterministicAead.class);
+      assertNotNull(Registry.getKeyManager(typeUrl, DeterministicAead.class));
     }
   }
 

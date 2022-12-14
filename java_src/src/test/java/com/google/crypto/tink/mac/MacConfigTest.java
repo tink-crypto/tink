@@ -17,6 +17,7 @@
 package com.google.crypto.tink.mac;
 
 import static com.google.common.truth.Truth.assertThat;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThrows;
 
 import com.google.crypto.tink.Mac;
@@ -56,7 +57,7 @@ public class MacConfigTest {
     MacConfig.register();
 
     // After registration the key manager should be present.
-    Registry.getKeyManager(typeUrl);
+    assertNotNull(Registry.getKeyManager(typeUrl));
 
     // Running init() manually again should succeed.
     MacConfig.register();
@@ -76,7 +77,7 @@ public class MacConfigTest {
     };
 
     for (String typeUrl : keyTypeUrls) {
-      Registry.getKeyManager(typeUrl, Mac.class);
+      assertNotNull(Registry.getKeyManager(typeUrl, Mac.class));
     }
   }
 
@@ -93,7 +94,7 @@ public class MacConfigTest {
     };
 
     for (String typeUrl : keyTypeUrls) {
-      Registry.getKeyManager(typeUrl, Mac.class);
+      assertNotNull(Registry.getKeyManager(typeUrl, Mac.class));
     }
   }
 
