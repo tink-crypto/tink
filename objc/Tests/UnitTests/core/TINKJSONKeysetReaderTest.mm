@@ -104,6 +104,56 @@ constexpr absl::string_view kSingleKeyAesGcmKeyset = R"json(
   XCTAssertEqual([computedPlaintext length], 0);
 }
 
-// TODO(tholenst): Add more tests, in particularly one with bad input.
+// If the keyset is not even json, we currently fail when initializing the TINKKeysetHandle.
+- (void)testCreateKeysetHandle_brokenKeysetNotJson_fails {
+  constexpr absl::string_view kKeysetNotJson = "This for sure isn't JSON }}}";
+
+  NSData *serializedKeysetData = [NSData dataWithBytes:kKeysetNotJson.data()
+                                                length:kKeysetNotJson.size()];
+  NSError *error = nil;
+  TINKJSONKeysetReader *reader =
+      [[TINKJSONKeysetReader alloc] initWithSerializedKeyset:serializedKeysetData error:&error];
+  XCTAssertNotNil(reader);
+  XCTAssertNil(error, @"Initialization of TINKJSONKeysetReader failed with %@", error);
+
+  (void)[[TINKKeysetHandle alloc] initCleartextKeysetHandleWithKeysetReader:reader error:&error];
+  XCTAssertNotNil(error);
+}
+
+// If the keyset is broken e.g. because the primary doesn't exist, currently we only fail once we
+// create the primitive.
+- (void)testCreateKeysetHandle_brokenKeysetNoPrimary_fails {
+  constexpr absl::string_view kKeysetWithNoPrimaryKey = R"json(
+    {
+      "primaryKeyId":1,
+      "key":[{
+        "keyData":{
+          "typeUrl":"type.googleapis.com/google.crypto.tink.AesGcmKey",
+          "value":"GhD+9l0RANZjzZEZ8PDp7LRW",
+          "keyMaterialType":"SYMMETRIC"},
+        "status":"ENABLED",
+        "keyId":2,
+        "outputPrefixType":"TINK"
+      }]
+    })json";
+
+  NSData *serializedKeysetData = [NSData dataWithBytes:kKeysetWithNoPrimaryKey.data()
+                                                length:kKeysetWithNoPrimaryKey.size()];
+  NSError *error = nil;
+  TINKJSONKeysetReader *reader =
+      [[TINKJSONKeysetReader alloc] initWithSerializedKeyset:serializedKeysetData error:&error];
+  XCTAssertNotNil(reader);
+  XCTAssertNil(error, @"Initialization of TINKJSONKeysetReader failed with %@", error);
+
+  TINKKeysetHandle *handle =
+      [[TINKKeysetHandle alloc] initCleartextKeysetHandleWithKeysetReader:reader error:&error];
+  XCTAssertNotNil(handle);
+  XCTAssertNil(error, @"Initialization of TINKKeysetHandle failed with %@", error);
+
+  (void)[TINKAeadFactory primitiveWithKeysetHandle:handle error:&error];
+  XCTAssertNotNil(error);
+}
+
+// TODO(tholenst): Add more tests, in particularly one with a keyset with invalid keys
 
 @end
