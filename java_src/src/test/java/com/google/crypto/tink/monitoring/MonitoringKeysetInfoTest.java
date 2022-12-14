@@ -49,25 +49,25 @@ public final class MonitoringKeysetInfoTest {
 
   @Test
   public void addAndGetEntry() throws Exception {
-    Parameters parameters = makeLegacyProtoParameters("typeUrl123");
     MonitoringKeysetInfo info =
         MonitoringKeysetInfo.newBuilder()
-            .addEntry(KeyStatus.ENABLED, 123, makeLegacyProtoParameters("typeUrl123"))
+            .addEntry(KeyStatus.ENABLED, 123, "typeUrl123", "TINK")
             .setPrimaryKeyId(123)
             .build();
     assertThat(info.getEntries()).hasSize(1);
     MonitoringKeysetInfo.Entry entry = info.getEntries().get(0);
     assertThat(entry.getStatus()).isEqualTo(KeyStatus.ENABLED);
     assertThat(entry.getKeyId()).isEqualTo(123);
-    assertThat(entry.getParameters()).isEqualTo(parameters);
+    assertThat(entry.getKeyType()).isEqualTo("typeUrl123");
+    assertThat(entry.getKeyPrefix()).isEqualTo("TINK");
   }
 
   @Test
   public void addEntries() throws Exception  {
     MonitoringKeysetInfo info =
         MonitoringKeysetInfo.newBuilder()
-            .addEntry(KeyStatus.ENABLED, 123, makeLegacyProtoParameters("typeUrl123"))
-            .addEntry(KeyStatus.ENABLED, 234, makeLegacyProtoParameters("typeUrl234"))
+            .addEntry(KeyStatus.ENABLED, 123, "typeUrl123", "TINK")
+            .addEntry(KeyStatus.ENABLED, 234, "typeUrl234", "TINK")
             .setPrimaryKeyId(123)
             .build();
     assertThat(info.getEntries()).hasSize(2);
@@ -77,8 +77,8 @@ public final class MonitoringKeysetInfoTest {
   public void addSameEntryTwice() throws Exception  {
     MonitoringKeysetInfo info =
         MonitoringKeysetInfo.newBuilder()
-            .addEntry(KeyStatus.ENABLED, 123, makeLegacyProtoParameters("typeUrl123"))
-            .addEntry(KeyStatus.ENABLED, 123, makeLegacyProtoParameters("typeUrl123"))
+            .addEntry(KeyStatus.ENABLED, 123, "typeUrl123", "TINK")
+            .addEntry(KeyStatus.ENABLED, 123, "typeUrl123", "TINK")
             .setPrimaryKeyId(123)
             .build();
     // entries are a list, so we can add the same entry twice.
@@ -99,7 +99,7 @@ public final class MonitoringKeysetInfoTest {
     MonitoringKeysetInfo info =
         MonitoringKeysetInfo.newBuilder()
             .setAnnotations(monitoringAnnotations)
-            .addEntry(KeyStatus.ENABLED, 123, makeLegacyProtoParameters("typeUrl123"))
+            .addEntry(KeyStatus.ENABLED, 123, "typeUrl123", "TINK")
             .setPrimaryKeyId(123)
             .build();
     HashMap<String, String> expected = new HashMap<>();
@@ -114,7 +114,7 @@ public final class MonitoringKeysetInfoTest {
   public void primaryIsNullIfItIsNotSet() throws Exception  {
     MonitoringKeysetInfo info =
         MonitoringKeysetInfo.newBuilder()
-            .addEntry(KeyStatus.ENABLED, 123, makeLegacyProtoParameters("typeUrl123"))
+            .addEntry(KeyStatus.ENABLED, 123, "typeUrl123", "TINK")
             .build();
     assertThat(info.getPrimaryKeyId()).isNull();
   }
@@ -125,7 +125,7 @@ public final class MonitoringKeysetInfoTest {
         GeneralSecurityException.class,
         () ->
             MonitoringKeysetInfo.newBuilder()
-                .addEntry(KeyStatus.ENABLED, 123, makeLegacyProtoParameters("typeUrl123"))
+                .addEntry(KeyStatus.ENABLED, 123, "typeUrl123", "TINK")
                 .setPrimaryKeyId(124)
                 .build());
     assertThrows(
@@ -140,7 +140,7 @@ public final class MonitoringKeysetInfoTest {
   public void entriesAreNotModifiable() throws Exception {
     MonitoringKeysetInfo info =
         MonitoringKeysetInfo.newBuilder()
-            .addEntry(KeyStatus.ENABLED, 123, makeLegacyProtoParameters("typeUrl123"))
+            .addEntry(KeyStatus.ENABLED, 123, "typeUrl123", "TINK")
             .setPrimaryKeyId(123)
             .setAnnotations(
                 MonitoringAnnotations.newBuilder()
@@ -149,7 +149,7 @@ public final class MonitoringKeysetInfoTest {
             .build();
     MonitoringKeysetInfo info2 =
         MonitoringKeysetInfo.newBuilder()
-            .addEntry(KeyStatus.ENABLED, 234, makeLegacyProtoParameters("typeUrl234"))
+            .addEntry(KeyStatus.ENABLED, 234, "typeUrl234", "TINK")
             .setPrimaryKeyId(234)
             .build();
     assertThrows(
@@ -166,14 +166,14 @@ public final class MonitoringKeysetInfoTest {
         MonitoringAnnotations.newBuilder().add("annotation_name2", "annotation_value2").build();
     MonitoringKeysetInfo.Builder builder =
         MonitoringKeysetInfo.newBuilder()
-            .addEntry(KeyStatus.ENABLED, 123, makeLegacyProtoParameters("typeUrl123"))
+            .addEntry(KeyStatus.ENABLED, 123, "typeUrl123", "TINK")
             .setPrimaryKeyId(123)
             .setAnnotations(annotations);
     builder.build();
     assertThrows(IllegalStateException.class, () -> builder.setAnnotations(annotations));
     assertThrows(
         IllegalStateException.class,
-        () -> builder.addEntry(KeyStatus.ENABLED, 234, makeLegacyProtoParameters("typeUrl234")));
+        () -> builder.addEntry(KeyStatus.ENABLED, 234, "typeUrl234", "TINK"));
     assertThrows(IllegalStateException.class, () -> builder.setPrimaryKeyId(123));
   }
 
@@ -185,16 +185,15 @@ public final class MonitoringKeysetInfoTest {
                 MonitoringAnnotations.newBuilder()
                     .add("annotation_name1", "annotation_value1")
                     .build())
-            .addEntry(KeyStatus.ENABLED, 123, makeLegacyProtoParameters("typeUrl123"))
-            .addEntry(KeyStatus.DISABLED, 234, makeLegacyProtoParameters("typeUrl234"))
+            .addEntry(KeyStatus.ENABLED, 123, "typeUrl123", "TINK")
+            .addEntry(KeyStatus.DISABLED, 234, "typeUrl234", "TINK")
             .setPrimaryKeyId(123)
             .build();
     assertThat(info.toString())
         .isEqualTo(
             "(annotations={annotation_name1=annotation_value1}, entries=[(status=ENABLED,"
-                + " keyId=123, parameters='(typeUrl=typeUrl123, outputPrefixType=TINK)'),"
-                + " (status=DISABLED, keyId=234, parameters='(typeUrl=typeUrl234,"
-                + " outputPrefixType=TINK)')], primaryKeyId=123)");
+                + " keyId=123, keyType='typeUrl123', keyPrefix='TINK'), (status=DISABLED,"
+                + " keyId=234, keyType='typeUrl234', keyPrefix='TINK')], primaryKeyId=123)");
   }
 
   @Test
@@ -206,8 +205,8 @@ public final class MonitoringKeysetInfoTest {
                     .add("annotation_name1", "annotation_value1")
                     .add("annotation_name2", "annotation_value2")
                     .build())
-            .addEntry(KeyStatus.ENABLED, 123, makeLegacyProtoParameters("typeUrl123"))
-            .addEntry(KeyStatus.ENABLED, 234, makeLegacyProtoParameters("typeUrl234"))
+            .addEntry(KeyStatus.ENABLED, 123, "typeUrl123", "TINK")
+            .addEntry(KeyStatus.ENABLED, 234, "typeUrl234", "TINK")
             .setPrimaryKeyId(123)
             .build();
     MonitoringKeysetInfo infoWithAnnotationsInOtherOrder =
@@ -217,8 +216,8 @@ public final class MonitoringKeysetInfoTest {
                     .add("annotation_name2", "annotation_value2")
                     .add("annotation_name1", "annotation_value1")
                     .build())
-            .addEntry(KeyStatus.ENABLED, 123, makeLegacyProtoParameters("typeUrl123"))
-            .addEntry(KeyStatus.ENABLED, 234, makeLegacyProtoParameters("typeUrl234"))
+            .addEntry(KeyStatus.ENABLED, 123, "typeUrl123", "TINK")
+            .addEntry(KeyStatus.ENABLED, 234, "typeUrl234", "TINK")
             .setPrimaryKeyId(123)
             .build();
     MonitoringKeysetInfo infoWithEntriesInOtherOrder =
@@ -228,8 +227,8 @@ public final class MonitoringKeysetInfoTest {
                     .add("annotation_name1", "annotation_value1")
                     .add("annotation_name2", "annotation_value2")
                     .build())
-            .addEntry(KeyStatus.ENABLED, 234, makeLegacyProtoParameters("typeUrl234"))
-            .addEntry(KeyStatus.ENABLED, 123, makeLegacyProtoParameters("typeUrl123"))
+            .addEntry(KeyStatus.ENABLED, 234, "typeUrl234", "TINK")
+            .addEntry(KeyStatus.ENABLED, 123, "typeUrl123", "TINK")
             .setPrimaryKeyId(123)
             .build();
     MonitoringKeysetInfo infoWithOtherAnnotations =
@@ -239,8 +238,8 @@ public final class MonitoringKeysetInfoTest {
                     .add("annotation_name1", "annotation_value1")
                     .add("annotation_name3", "annotation_value3")
                     .build())
-            .addEntry(KeyStatus.ENABLED, 123, makeLegacyProtoParameters("typeUrl123"))
-            .addEntry(KeyStatus.ENABLED, 234, makeLegacyProtoParameters("typeUrl234"))
+            .addEntry(KeyStatus.ENABLED, 123, "typeUrl123", "TINK")
+            .addEntry(KeyStatus.ENABLED, 234, "typeUrl234", "TINK")
             .setPrimaryKeyId(123)
             .build();
     MonitoringKeysetInfo infoWithOtherPrimaryKeyId =
@@ -250,8 +249,8 @@ public final class MonitoringKeysetInfoTest {
                     .add("annotation_name1", "annotation_value1")
                     .add("annotation_name2", "annotation_value2")
                     .build())
-            .addEntry(KeyStatus.ENABLED, 123, makeLegacyProtoParameters("typeUrl123"))
-            .addEntry(KeyStatus.ENABLED, 234, makeLegacyProtoParameters("typeUrl234"))
+            .addEntry(KeyStatus.ENABLED, 123, "typeUrl123", "TINK")
+            .addEntry(KeyStatus.ENABLED, 234, "typeUrl234", "TINK")
             .setPrimaryKeyId(234)
             .build();
     // annotations are a map. They can be added in any order.

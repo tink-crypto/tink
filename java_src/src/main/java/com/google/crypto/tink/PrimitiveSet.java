@@ -73,6 +73,7 @@ public final class PrimitiveSet<P> {
     private final OutputPrefixType outputPrefixType;
     // The id of the key.
     private final int keyId;
+    private final String keyType;
     private final Key key;
 
     Entry(
@@ -82,6 +83,7 @@ public final class PrimitiveSet<P> {
         KeyStatusType status,
         OutputPrefixType outputPrefixType,
         int keyId,
+        String keyType,
         Key key) {
       this.fullPrimitive = fullPrimitive;
       this.primitive = primitive;
@@ -89,6 +91,7 @@ public final class PrimitiveSet<P> {
       this.status = status;
       this.outputPrefixType = outputPrefixType;
       this.keyId = keyId;
+      this.keyType = keyType;
       this.key = key;
     }
 
@@ -138,6 +141,10 @@ public final class PrimitiveSet<P> {
       return keyId;
     }
 
+    public String getKeyType() {
+      return keyType;
+    }
+
     public Key getKey() {
       return key;
     }
@@ -179,6 +186,7 @@ public final class PrimitiveSet<P> {
             key.getStatus(),
             key.getOutputPrefixType(),
             key.getKeyId(),
+            key.getKeyData().getTypeUrl(),
             keyObject);
     List<Entry<P>> list = new ArrayList<>();
     list.add(entry);

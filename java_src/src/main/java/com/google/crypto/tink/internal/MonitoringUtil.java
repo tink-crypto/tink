@@ -51,12 +51,25 @@ public final class MonitoringUtil {
     }
   }
 
+  private static final String TYPE_URL_PREFIX = "type.googleapis.com/google.crypto.";
+
+  private static String parseKeyTypeUrl(String keyTypeUrl) {
+    if (!keyTypeUrl.startsWith(TYPE_URL_PREFIX)) {
+      return keyTypeUrl;
+    }
+    return keyTypeUrl.substring(TYPE_URL_PREFIX.length());
+  }
+
   public static <P> MonitoringKeysetInfo getMonitoringKeysetInfo(PrimitiveSet<P> primitiveSet) {
     MonitoringKeysetInfo.Builder builder = MonitoringKeysetInfo.newBuilder();
     builder.setAnnotations(primitiveSet.getAnnotations());
     for (List<PrimitiveSet.Entry<P>> entries : primitiveSet.getAll()) {
       for (PrimitiveSet.Entry<P> entry : entries) {
-        builder.addEntry(parseStatus(entry.getStatus()), entry.getKeyId(), entry.getParameters());
+        builder.addEntry(
+            parseStatus(entry.getStatus()),
+            entry.getKeyId(),
+            parseKeyTypeUrl(entry.getKeyType()),
+            entry.getOutputPrefixType().name());
       }
     }
     @Nullable PrimitiveSet.Entry<P> primary = primitiveSet.getPrimary();
