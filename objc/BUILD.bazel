@@ -706,6 +706,9 @@ objc_library(
     srcs = glob(
         [
             "Tests/UnitTests/core/*.mm",
+            "Tests/UnitTests/aead/*.mm",
+            "Tests/UnitTests/mac/*.mm",
+            "Tests/UnitTests/daead/*.mm",
         ],
     ),
     deps = [
@@ -715,6 +718,9 @@ objc_library(
         ":public_key_sign_internal",
         ":public_key_verify_internal",
         ":testonly",
+        "//Tink/proto_redirect:aes_gcm_cc_pb_redirect",
+        "//Tink/proto_redirect:aes_siv_cc_pb_redirect",
+        "//Tink/proto_redirect:hmac_cc_pb_redirect",
         "//Tink/proto_redirect:tink_cc_pb_redirect",
         "//Tink/util:strings",
         "@com_google_absl//absl/status",

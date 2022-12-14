@@ -41,8 +41,8 @@
 #include "tink/proto_keyset_format.h"
 #include "tink/util/status.h"
 #include "tink/util/test_util.h"
-#include "proto/aes_gcm.pb.h"
-#include "proto/tink.pb.h"
+#include "third_party/tink/objc/proto_redirect/tink_cc_pb_redirect.h"
+#include "third_party/tink/objc/proto_redirect/aes_gcm_cc_pb_redirect.h"
 
 using ::crypto::tink::AesGcmKeyManager;
 using ::crypto::tink::InsecureSecretKeyAccess;
@@ -70,10 +70,10 @@ using ::google::crypto::tink::KeyStatusType;
 
   Keyset keyset;
   StatusOr<crypto::tink::KeysetHandle> cc_keyset_handle =
-      ParseKeysetFromProtoKeysetFormat("", InsecureSecretKeyAccess::Get());
+      ParseKeysetFromProtoKeysetFormat(/*serialized_keyset=*/"", InsecureSecretKeyAccess::Get());
   XCTAssertTrue(cc_keyset_handle.ok());
   TINKKeysetHandle *handle = [[TINKKeysetHandle alloc]
-      initWithCCKeysetHandle:std::make_unique<KeysetHandle>(*cc_keyset_handle)];
+      initWithCCKeysetHandle:absl::make_unique<KeysetHandle>(*cc_keyset_handle)];
   XCTAssertNotNil(handle);
 
   error = nil;
@@ -116,7 +116,7 @@ using ::google::crypto::tink::KeyStatusType;
       ParseKeysetFromProtoKeysetFormat(keyset.SerializeAsString(), InsecureSecretKeyAccess::Get());
   XCTAssertTrue(cc_keyset_handle.ok());
   TINKKeysetHandle *handle = [[TINKKeysetHandle alloc]
-      initWithCCKeysetHandle:std::make_unique<KeysetHandle>(*cc_keyset_handle)];
+      initWithCCKeysetHandle:absl::make_unique<KeysetHandle>(*cc_keyset_handle)];
   XCTAssertNotNil(handle);
 
   id<TINKAead> aead = [TINKAeadFactory primitiveWithKeysetHandle:handle error:&error];

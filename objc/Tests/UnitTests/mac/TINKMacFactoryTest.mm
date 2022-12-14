@@ -41,8 +41,8 @@
 #include "tink/proto_keyset_format.h"
 #include "tink/util/status.h"
 #include "tink/util/test_util.h"
-#include "proto/hmac.pb.h"
-#include "proto/tink.pb.h"
+#include "third_party/tink/objc/proto_redirect/tink_cc_pb_redirect.h"
+#include "third_party/tink/objc/proto_redirect/hmac_cc_pb_redirect.h"
 
 using ::crypto::tink::HmacKeyManager;
 using ::crypto::tink::InsecureSecretKeyAccess;
@@ -68,7 +68,7 @@ using ::google::crypto::tink::KeyStatusType;
       ParseKeysetFromProtoKeysetFormat(keyset.SerializeAsString(), InsecureSecretKeyAccess::Get());
   XCTAssertTrue(cc_keyset_handle.ok());
   TINKKeysetHandle *handle = [[TINKKeysetHandle alloc]
-      initWithCCKeysetHandle:std::make_unique<KeysetHandle>(*cc_keyset_handle)];
+      initWithCCKeysetHandle:absl::make_unique<KeysetHandle>(*cc_keyset_handle)];
   XCTAssertNotNil(handle);
 
   NSError *error = nil;
@@ -114,7 +114,7 @@ using ::google::crypto::tink::KeyStatusType;
       ParseKeysetFromProtoKeysetFormat(keyset.SerializeAsString(), InsecureSecretKeyAccess::Get());
   XCTAssertTrue(cc_keyset_handle.ok());
   TINKKeysetHandle *handle = [[TINKKeysetHandle alloc]
-      initWithCCKeysetHandle:std::make_unique<KeysetHandle>(*cc_keyset_handle)];
+      initWithCCKeysetHandle:absl::make_unique<KeysetHandle>(*cc_keyset_handle)];
   XCTAssertNotNil(handle);
 
   id<TINKMac> mac = [TINKMacFactory primitiveWithKeysetHandle:handle error:&error];
