@@ -612,6 +612,28 @@ cc_test(
 )
 
 cc_library(
+    name = "parameters_serializer",
+    hdrs = ["parameters_serializer.h"],
+    include_prefix = "tink/internal",
+    deps = [
+        "//util:statusor",
+        "@com_google_absl//absl/strings",
+    ],
+)
+
+cc_test(
+    name = "parameters_serializer_test",
+    srcs = ["parameters_serializer_test.cc"],
+    deps = [
+        ":parameters_serializer",
+        ":serialization",
+        "//:parameters",
+        "//util:test_matchers",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_library(
     name = "key_status_util",
     srcs = ["key_status_util.cc"],
     hdrs = ["key_status_util.h"],

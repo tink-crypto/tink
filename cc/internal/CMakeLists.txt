@@ -575,6 +575,27 @@ tink_cc_test(
 )
 
 tink_cc_library(
+  NAME parameters_serializer
+  SRCS
+    parameters_serializer.h
+  DEPS
+    absl::strings
+    tink::util::statusor
+)
+
+tink_cc_test(
+  NAME parameters_serializer_test
+  SRCS
+    parameters_serializer_test.cc
+  DEPS
+    tink::internal::parameters_serializer
+    tink::internal::serialization
+    gmock
+    tink::core::parameters
+    tink::util::test_matchers
+)
+
+tink_cc_library(
   NAME key_status_util
   SRCS
     key_status_util.cc
