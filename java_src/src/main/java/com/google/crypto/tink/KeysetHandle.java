@@ -249,6 +249,7 @@ public final class KeysetHandle {
      * @deprecated Use {@link #deleteAt} or {@link #getAt} instead.
      */
     @Deprecated
+    @CanIgnoreReturnValue
     public Builder.Entry removeAt(int i) {
       return entries.remove(i);
     }
@@ -929,7 +930,7 @@ public final class KeysetHandle {
   @SuppressWarnings("deprecation")
   private static void validate(KeyData keyData) throws GeneralSecurityException {
     // This will throw GeneralSecurityException if the keyData is invalid.
-    Registry.getPrimitive(keyData);
+    Object unused = Registry.getPrimitive(keyData);
   }
 
   /**
