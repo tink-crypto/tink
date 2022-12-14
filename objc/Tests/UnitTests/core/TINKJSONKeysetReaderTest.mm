@@ -24,17 +24,29 @@
 #include <string>
 #include <utility>
 
+#import "TINKAead.h"
+#import "TINKAeadFactory.h"
+#import "TINKAllConfig.h"
+#import "TINKKeysetHandle+Cleartext.h"
+#import "TINKKeysetHandle.h"
 #import "util/TINKStrings.h"
 
-#include "google/protobuf/util/json_util.h"
-#include "tink/util/test_util.h"
-#include "proto/tink.pb.h"
+#include "absl/strings/escaping.h"
 
-static NSData *gBadJSONSerializedKeyset;
-static NSData *gGoodJSONSerializedKeyset;
-static NSData *gGoodJSONSerializedEncryptedKeyset;
-static NSData *gGoodSerializedKeyset;
-static NSData *gGoodSerializedEncryptedKeyset;
+constexpr absl::string_view kSingleKeyAesGcmKeyset = R"json(
+  {
+    "primaryKeyId":1931667682,
+    "key":[{
+      "keyData":{
+        "typeUrl":"type.googleapis.com/google.crypto.tink.AesGcmKey",
+        "value":"GhD+9l0RANZjzZEZ8PDp7LRW",
+        "keyMaterialType":"SYMMETRIC"},
+      "status":"ENABLED",
+      "keyId":1931667682,
+      "outputPrefixType":"TINK"
+    }]
+  })json";
+
 
 @interface TINKJSONKeysetReaderTest : XCTestCase
 @end
@@ -42,73 +54,56 @@ static NSData *gGoodSerializedEncryptedKeyset;
 @implementation TINKJSONKeysetReaderTest
 
 + (void)setUp {
-  google::protobuf::util::JsonPrintOptions json_options;
-  json_options.add_whitespace = true;
-  json_options.always_print_primitive_fields = true;
-
-  google::crypto::tink::Keyset keyset;
-  google::crypto::tink::Keyset::Key key;
-  crypto::tink::test::AddTinkKey("some key type", 42, key,
-                                 google::crypto::tink::KeyStatusType::ENABLED,
-                                 google::crypto::tink::KeyData::SYMMETRIC, &keyset);
-  crypto::tink::test::AddRawKey("some other key type", 711, key,
-                                google::crypto::tink::KeyStatusType::ENABLED,
-                                google::crypto::tink::KeyData::SYMMETRIC, &keyset);
-  keyset.set_primary_key_id(42);
-  std::string ccGoodSerializedKeyset;
-  auto status =
-      google::protobuf::util::MessageToJsonString(keyset, &ccGoodSerializedKeyset, json_options);
-  XCTAssertTrue(status.ok());
-
-  gGoodJSONSerializedKeyset = TINKStringToNSData(ccGoodSerializedKeyset);
-  gBadJSONSerializedKeyset = TINKStringToNSData("some weird string");
-
-  google::crypto::tink::EncryptedKeyset encrypted_keyset;
-  encrypted_keyset.set_encrypted_keyset("some ciphertext with keyset");
-
-  auto keyset_info = encrypted_keyset.mutable_keyset_info();
-  keyset_info->set_primary_key_id(42);
-  auto key_info = keyset_info->add_key_info();
-  key_info->set_type_url("some type_url");
-  key_info->set_key_id(42);
-  std::string ccGoodSerializedEncryptedKeyset;
-  status = google::protobuf::util::MessageToJsonString(
-      encrypted_keyset, &ccGoodSerializedEncryptedKeyset, json_options);
-  XCTAssertTrue(status.ok());
-
-  std::string tmp;
-  encrypted_keyset.SerializeToString(&tmp);
-  gGoodSerializedEncryptedKeyset = TINKStringToNSData(tmp);
-
-  gGoodJSONSerializedEncryptedKeyset = TINKStringToNSData(ccGoodSerializedEncryptedKeyset);
-  keyset.SerializeToString(&tmp);
-  gGoodSerializedKeyset = TINKStringToNSData(tmp);
+  NSError *error = nil;
+  TINKAllConfig *allConfig = [[TINKAllConfig alloc] initWithError:&error];
+  XCTAssertNotNil(allConfig);
+  XCTAssertNil(error);
 }
 
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wnonnull"
-- (void)testReaderCreation {
-  // Serialized keyset is nil.
+
+- (void)testCreateKeysetHandle {
+  NSData *serializedKeysetData = [NSData dataWithBytes:kSingleKeyAesGcmKeyset.data()
+                                                length:kSingleKeyAesGcmKeyset.size()];
   NSError *error = nil;
   TINKJSONKeysetReader *reader =
-      [[TINKJSONKeysetReader alloc] initWithSerializedKeyset:nil error:&error];
-  XCTAssertNil(reader);
-  XCTAssertNotNil(error);
-
-  // Good serialized keyset.
-  error = nil;
-  reader = [[TINKJSONKeysetReader alloc] initWithSerializedKeyset:gGoodJSONSerializedKeyset
-                                                            error:&error];
+      [[TINKJSONKeysetReader alloc] initWithSerializedKeyset:serializedKeysetData error:&error];
   XCTAssertNotNil(reader);
-  XCTAssertNil(error);
+  XCTAssertNil(error, @"Initialization of TINKJSONKeysetReader failed with %@", error);
 
-  // Bad serialized keyset.
-  error = nil;
-  reader =
-      [[TINKJSONKeysetReader alloc] initWithSerializedKeyset:gBadJSONSerializedKeyset error:&error];
-  XCTAssertNotNil(reader);
-  XCTAssertNil(error);
+  TINKKeysetHandle *handle =
+      [[TINKKeysetHandle alloc] initCleartextKeysetHandleWithKeysetReader:reader error:&error];
+  XCTAssertNotNil(handle);
+  XCTAssertNil(error, @"Initialization of TINKKeysetHandle failed with %@", error);
 }
-#pragma clang diagnostic pop
+
+- (void)testCreateAead {
+  NSData *serializedKeysetData = [NSData dataWithBytes:kSingleKeyAesGcmKeyset.data()
+                                                length:kSingleKeyAesGcmKeyset.size()];
+  NSError *error = nil;
+  TINKJSONKeysetReader *reader =
+      [[TINKJSONKeysetReader alloc] initWithSerializedKeyset:serializedKeysetData error:&error];
+
+  TINKKeysetHandle *handle =
+      [[TINKKeysetHandle alloc] initCleartextKeysetHandleWithKeysetReader:reader error:&error];
+
+  id<TINKAead> aead = [TINKAeadFactory primitiveWithKeysetHandle:handle error:&error];
+  XCTAssertNotNil(aead);
+  XCTAssertNil(error, @"Aead creation failed with %@", error);
+
+  NSString *kEmpty = @"";
+  NSData *kEmptyData = [kEmpty dataUsingEncoding:NSUTF8StringEncoding];
+
+  // Test vector for this key: encryption of the empty string with empty aad. Generated with Java.
+  std::string kCiphertext = absl::HexStringToBytes(
+      "017322e8e2c38b8d06b46b40010a6e2a19e572eb3e626ea64238bf9018fa61cbea");
+  NSData *kCiphertextData = [NSData dataWithBytes:kCiphertext.data() length:kCiphertext.size()];
+  NSData *computedPlaintext = [aead decrypt:kCiphertextData
+                         withAdditionalData:kEmptyData
+                                      error:&error];
+  XCTAssertNil(error, @"Decryption failed with %@", error);
+  XCTAssertEqual([computedPlaintext length], 0);
+}
+
+// TODO(tholenst): Add more tests, in particularly one with bad input.
 
 @end
