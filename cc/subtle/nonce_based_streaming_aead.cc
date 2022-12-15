@@ -16,6 +16,7 @@
 
 #include "tink/subtle/nonce_based_streaming_aead.h"
 
+#include <memory>
 #include <utility>
 
 #include "absl/strings/string_view.h"

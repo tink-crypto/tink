@@ -17,6 +17,8 @@
 #ifndef TINK_SUBTLE_PRF_STREAMING_PRF_WRAPPER_H_
 #define TINK_SUBTLE_PRF_STREAMING_PRF_WRAPPER_H_
 
+#include <memory>
+
 #include "tink/primitive_set.h"
 #include "tink/primitive_wrapper.h"
 #include "tink/subtle/prf/streaming_prf.h"

@@ -16,6 +16,7 @@
 
 #include "tink/subtle/aes_gcm_hkdf_stream_segment_decrypter.h"
 
+#include <memory>
 #include <string>
 #include <utility>
 #include <vector>

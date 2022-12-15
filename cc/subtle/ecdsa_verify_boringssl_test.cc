@@ -17,6 +17,7 @@
 #include "tink/subtle/ecdsa_verify_boringssl.h"
 
 #include <iostream>
+#include <memory>
 #include <string>
 #include <utility>
 

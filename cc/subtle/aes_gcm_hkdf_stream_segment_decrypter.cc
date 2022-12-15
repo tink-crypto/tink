@@ -21,6 +21,7 @@
 #include <limits>
 #include <memory>
 #include <utility>
+#include <vector>
 
 #include "absl/algorithm/container.h"
 #include "absl/base/config.h"

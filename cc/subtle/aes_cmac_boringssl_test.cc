@@ -16,7 +16,9 @@
 
 #include "tink/subtle/aes_cmac_boringssl.h"
 
+#include <memory>
 #include <string>
+#include <utility>
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"

@@ -16,6 +16,7 @@
 
 #include "tink/subtle/rsa_ssa_pss_sign_boringssl.h"
 
+#include <memory>
 #include <string>
 #include <utility>
 #include <vector>

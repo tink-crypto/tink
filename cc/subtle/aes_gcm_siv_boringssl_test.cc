@@ -16,6 +16,7 @@
 
 #include "tink/subtle/aes_gcm_siv_boringssl.h"
 
+#include <memory>
 #include <string>
 #include <vector>
 

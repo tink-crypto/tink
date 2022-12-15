@@ -16,6 +16,7 @@
 
 #include "tink/subtle/ecies_hkdf_sender_kem_boringssl.h"
 
+#include <memory>
 #include <string>
 #include <utility>
 

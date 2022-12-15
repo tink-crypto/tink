@@ -16,6 +16,8 @@
 
 #include "tink/subtle/prf/streaming_prf_wrapper.h"
 
+#include <memory>
+#include <sstream>
 #include <string>
 #include <utility>
 

@@ -16,9 +16,11 @@
 
 #include "tink/subtle/ed25519_verify_boringssl.h"
 
+#include <iostream>
 #include <memory>
 #include <string>
 #include <utility>
+#include <vector>
 
 #include "gtest/gtest.h"
 #include "absl/status/status.h"

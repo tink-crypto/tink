@@ -16,6 +16,7 @@
 
 #include "tink/subtle/aes_ctr_boringssl.h"
 
+#include <memory>
 #include <string>
 #include <utility>
 

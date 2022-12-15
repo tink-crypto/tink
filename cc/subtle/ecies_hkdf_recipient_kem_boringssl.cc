@@ -16,6 +16,7 @@
 
 #include "tink/subtle/ecies_hkdf_recipient_kem_boringssl.h"
 
+#include <memory>
 #include <utility>
 
 #include "absl/memory/memory.h"

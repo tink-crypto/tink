@@ -16,6 +16,7 @@
 
 #include "tink/subtle/ed25519_sign_boringssl.h"
 
+#include <memory>
 #include <string>
 #include <utility>
 

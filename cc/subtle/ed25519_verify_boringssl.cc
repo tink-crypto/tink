@@ -17,6 +17,7 @@
 #include "tink/subtle/ed25519_verify_boringssl.h"
 
 #include <cstring>
+#include <memory>
 #include <utility>
 
 #include "absl/memory/memory.h"

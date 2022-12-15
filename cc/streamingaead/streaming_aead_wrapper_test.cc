@@ -16,9 +16,11 @@
 
 #include "tink/streamingaead/streaming_aead_wrapper.h"
 
+#include <memory>
 #include <sstream>
 #include <string>
 #include <utility>
+#include <vector>
 
 #include "gtest/gtest.h"
 #include "absl/memory/memory.h"

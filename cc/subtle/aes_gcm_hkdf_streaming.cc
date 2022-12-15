@@ -16,6 +16,7 @@
 
 #include "tink/subtle/aes_gcm_hkdf_streaming.h"
 
+#include <memory>
 #include <string>
 #include <utility>
 

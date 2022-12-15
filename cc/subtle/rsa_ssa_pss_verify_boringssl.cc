@@ -17,8 +17,10 @@
 #include "tink/subtle/rsa_ssa_pss_verify_boringssl.h"
 
 #include <cstdint>
+#include <memory>
 #include <string>
 #include <utility>
+#include <vector>
 
 #include "absl/memory/memory.h"
 #include "absl/status/status.h"

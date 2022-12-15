@@ -16,6 +16,7 @@
 
 #include "tink/subtle/prf/hkdf_streaming_prf.h"
 
+#include <memory>
 #include <string>
 #include <utility>
 

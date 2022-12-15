@@ -16,6 +16,7 @@
 
 #include "tink/subtle/rsa_ssa_pkcs1_verify_boringssl.h"
 
+#include <memory>
 #include <string>
 #include <utility>
 

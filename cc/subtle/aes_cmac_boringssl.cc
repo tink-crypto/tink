@@ -17,6 +17,7 @@
 #include "tink/subtle/aes_cmac_boringssl.h"
 
 #include <cstdint>
+#include <memory>
 #include <string>
 #include <utility>
 

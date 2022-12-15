@@ -16,6 +16,7 @@
 
 #include "tink/subtle/aes_eax_boringssl.h"
 
+#include <memory>
 #include <string>
 #include <utility>
 #include <vector>

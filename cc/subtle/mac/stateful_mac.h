@@ -27,6 +27,7 @@
 #ifndef TINK_SUBTLE_MAC_STATEFUL_MAC_H_
 #define TINK_SUBTLE_MAC_STATEFUL_MAC_H_
 
+#include <memory>
 #include <string>
 
 #include "absl/strings/string_view.h"

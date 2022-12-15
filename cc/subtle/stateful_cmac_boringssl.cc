@@ -16,6 +16,7 @@
 
 #include "tink/subtle/stateful_cmac_boringssl.h"
 
+#include <memory>
 #include <string>
 #include <utility>
 
