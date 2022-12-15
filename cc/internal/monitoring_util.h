@@ -21,6 +21,7 @@
 
 #include "absl/container/flat_hash_map.h"
 #include "absl/status/status.h"
+#include "absl/strings/strip.h"
 #include "tink/internal/key_status_util.h"
 #include "tink/key_status.h"
 #include "tink/monitoring/monitoring.h"
@@ -31,6 +32,8 @@
 namespace crypto {
 namespace tink {
 namespace internal {
+
+constexpr char kKeyTypePrefix[] = "type.googleapis.com/google.crypto.";
 
 // Constructs a MonitoringKeySetInfo object from a PrimitiveSet `primitive_set`
 // for a given primitive P.
@@ -54,7 +57,8 @@ MonitoringKeySetInfoFromPrimitiveSet(const PrimitiveSet<P>& primitive_set) {
     if (!key_status.ok()) return key_status.status();
 
     auto keyset_info_entry = MonitoringKeySetInfo::Entry(
-        *key_status, entry->get_key_id(), entry->get_key_type_url(),
+        *key_status, entry->get_key_id(),
+        absl::StripPrefix(entry->get_key_type_url(), kKeyTypePrefix),
         OutputPrefixType_Name(entry->get_output_prefix_type()));
     keyset_info_entries.push_back(keyset_info_entry);
   }

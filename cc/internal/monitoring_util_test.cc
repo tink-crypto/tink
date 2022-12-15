@@ -137,14 +137,15 @@ TEST(MonitoringUtilTest, MonitoringKeySetInfoFromPrimitiveSetValid) {
               UnorderedElementsAreArray(kAnnotations));
   const std::vector<MonitoringKeySetInfo::Entry> &monitoring_entries =
       monitoring_keyset_info->GetEntries();
-  EXPECT_THAT(monitoring_entries,
-              UnorderedElementsAre(
-                  MonitoringKeySetInfoEntryEq(MonitoringKeySetInfo::Entry(
-                      KeyStatus::kEnabled,
-                      /*key_id=*/1, kPrimitive1KeyTyepUrl, "TINK")),
-                  MonitoringKeySetInfoEntryEq(MonitoringKeySetInfo::Entry(
-                      KeyStatus::kEnabled,
-                      /*key_id=*/2, kPrimitive2KeyTypeUrl, "TINK"))));
+  EXPECT_THAT(
+      monitoring_entries,
+      UnorderedElementsAre(
+          MonitoringKeySetInfoEntryEq(MonitoringKeySetInfo::Entry(
+              KeyStatus::kEnabled,
+              /*key_id=*/1, "tink.SomePrimitiveInstance", "TINK")),
+          MonitoringKeySetInfoEntryEq(MonitoringKeySetInfo::Entry(
+              KeyStatus::kEnabled,
+              /*key_id=*/2, "tink.SomeOtherPrimitiveInstance", "TINK"))));
 }
 
 }  // namespace

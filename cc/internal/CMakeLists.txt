@@ -414,6 +414,7 @@ tink_cc_library(
     tink::internal::key_status_util
     absl::flat_hash_map
     absl::status
+    absl::strings
     tink::core::key_status
     tink::core::primitive_set
     tink::monitoring::monitoring
