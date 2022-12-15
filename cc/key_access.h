@@ -27,7 +27,7 @@ class KeyAccess {
     return token;
   }
 
-  const bool CanAccessSecret() { return can_access_secret_; }
+  bool CanAccessSecret() { return can_access_secret_; }
 
   // KeyAccess objects are copiable and movable.
   KeyAccess(const KeyAccess&) = default;

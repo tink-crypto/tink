@@ -178,7 +178,7 @@ class PrimitiveSet {
   const Entry<P>* get_primary() const { return primary_; }
 
   // Returns all entries currently in this primitive set.
-  const std::vector<Entry<P>*> get_all() const {
+  std::vector<Entry<P>*> get_all() const {
     absl::MutexLock lock(&primitives_mutex_);
     std::vector<Entry<P>*> result;
     for (const auto& prefix_and_vector : primitives_) {

@@ -425,7 +425,7 @@ struct EncodingTestVector {
   EllipticCurveType curve;
 };
 
-const std::vector<EncodingTestVector> GetEncodingTestVectors() {
+std::vector<EncodingTestVector> GetEncodingTestVectors() {
   return {
       {EcPointFormat::UNCOMPRESSED,
        "00093057fb862f2ad2e82e581baeb3324e7b32946f2ba845a9beeed87d6995f54918ec6"

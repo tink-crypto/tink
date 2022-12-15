@@ -36,7 +36,7 @@ namespace crypto {
 namespace tink {
 namespace subtle {
 
-static const std::string longToBigEndianStr(uint64_t value) {
+static std::string longToBigEndianStr(uint64_t value) {
   uint8_t bytes[8];
   for (int i = sizeof(bytes) - 1; i >= 0; i--) {
     bytes[i] = value & 0xff;
