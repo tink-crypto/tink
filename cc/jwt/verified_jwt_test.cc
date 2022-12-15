@@ -326,7 +326,7 @@ TEST(VerifiedJwt, MoveMakesCopy) {
   VerifiedJwt jwt2 = std::move(jwt1);
   // We want that a VerifiedJwt object remains a valid object, even after
   // std::moved has been called.
-  EXPECT_TRUE(jwt1.HasIssuer());
+  EXPECT_TRUE(jwt1.HasIssuer());  // NOLINT(bugprone-use-after-move)
   EXPECT_THAT(jwt1.GetIssuer(), IsOkAndHolds("issuer"));
   EXPECT_TRUE(jwt2.HasIssuer());
   EXPECT_THAT(jwt2.GetIssuer(), IsOkAndHolds("issuer"));
