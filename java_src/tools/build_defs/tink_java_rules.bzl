@@ -58,7 +58,7 @@ def tink_android_test(name, srcs, deps, shard_count = 1, data = [], min_version 
                 target_device = device,
                 test_app = legacy_multidex_binary if version_num < 21 else native_multidex_binary,
                 data = data,
-                tags = ["manual"],
+                tags = [] if version_num == min_version else ["manual"],
                 shard_count = shard_count,
             )
 
