@@ -78,26 +78,17 @@ class AesEaxAesni : public Aead {
   bool SetKey(const util::SecretData& key);
 
   // Encrypt a single block.
-  __m128i EncryptBlock(const __m128i block) const;
+  __m128i EncryptBlock(__m128i block) const;
 
   // Encrypt 2 blocks with plain AES.
-  void Encrypt2Blocks(
-      const __m128i in0,
-      const __m128i in1,
-      __m128i *out0,
-      __m128i *out1) const;
+  void Encrypt2Blocks(__m128i in0, __m128i in1, __m128i* out0,
+                      __m128i* out1) const;
 
   // Encrypt 3 blocks and decrypts 1 block.
   // This is used to decrypt a ciphertext and verify the MAC concurrently.
-  void Encrypt3Decrypt1(
-      const __m128i in0,
-      const __m128i in1,
-      const __m128i in2,
-      const __m128i in_dec,
-      __m128i* out0,
-      __m128i* out1,
-      __m128i* out2,
-      __m128i* out_dec) const;
+  void Encrypt3Decrypt1(__m128i in0, __m128i in1, __m128i in2, __m128i in_dec,
+                        __m128i* out0, __m128i* out1, __m128i* out2,
+                        __m128i* out_dec) const;
 
   // Pads a partial block of size 1 .. 16.
   __m128i Pad(const uint8_t* data, int len) const;

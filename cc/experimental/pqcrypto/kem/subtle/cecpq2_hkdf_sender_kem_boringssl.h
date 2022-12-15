@@ -89,9 +89,8 @@ class Cecpq2HkdfSenderKemBoringSsl {
   // curves is trivial.
   static crypto::tink::util::StatusOr<
       std::unique_ptr<const Cecpq2HkdfSenderKemBoringSsl>>
-  New(EllipticCurveType curve, const absl::string_view ec_pubx,
-      const absl::string_view ec_puby,
-      const absl::string_view marshalled_hrss_pub);
+  New(EllipticCurveType curve, absl::string_view ec_pubx,
+      absl::string_view ec_puby, absl::string_view marshalled_hrss_pub);
 
   // Generates ephemeral key pairs, computes ECC's shared secret based on
   // generated ephemeral key and recipient's public key, generate a random
@@ -114,9 +113,8 @@ class Cecpq2HkdfX25519SenderKemBoringSsl : public Cecpq2HkdfSenderKemBoringSsl {
   // must be a big-endian byte array, and recipient's HRSS public key.
   static crypto::tink::util::StatusOr<
       std::unique_ptr<const Cecpq2HkdfSenderKemBoringSsl>>
-  New(EllipticCurveType curve, const absl::string_view pubx,
-      const absl::string_view puby,
-      const absl::string_view marshalled_hrss_pub);
+  New(EllipticCurveType curve, absl::string_view pubx, absl::string_view puby,
+      absl::string_view marshalled_hrss_pub);
 
   // Generates an ephemeral X25519 key pair, computes the X25519's shared secret
   // based on the ephemeral key and recipient's public key, generates a random
@@ -136,8 +134,7 @@ class Cecpq2HkdfX25519SenderKemBoringSsl : public Cecpq2HkdfSenderKemBoringSsl {
   // curve is not provided as a parameter here because the curve validation has
   // already been made in the New() method defined above.
   explicit Cecpq2HkdfX25519SenderKemBoringSsl(
-      const absl::string_view peer_ec_pubx,
-      const absl::string_view marshalled_hrss_pub);
+      absl::string_view peer_ec_pubx, absl::string_view marshalled_hrss_pub);
 
   // X25519 and HRSS public key containers. We note that the BoringSSL
   // implementation of HRSS requires that the HRSS public key is stored in the
