@@ -35,9 +35,10 @@ const (
 
 // Entry represents each entry inside a Keyset.
 type Entry struct {
-	Status         KeyStatus
-	KeyID          uint32
-	FormatAsString string
+	Status    KeyStatus
+	KeyID     uint32
+	KeyType   string
+	KeyPrefix string
 }
 
 // KeysetInfo represents a keyset in a certain point in time for the

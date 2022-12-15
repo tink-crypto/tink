@@ -19,11 +19,14 @@ package monitoringutil
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/google/tink/go/core/primitiveset"
 	"github.com/google/tink/go/monitoring"
 	tpb "github.com/google/tink/go/proto/tink_go_proto"
 )
+
+const keytypeURLPrefix = "type.googleapis.com/google.crypto."
 
 // DoNothingLogger is a Logger that does nothing when invoked.
 type DoNothingLogger struct{}
@@ -52,6 +55,10 @@ func keyStatusFromProto(status tpb.KeyStatusType) (monitoring.KeyStatus, error) 
 
 }
 
+func parseKeyTypeURL(ktu string) string {
+	return strings.TrimPrefix(ktu, keytypeURLPrefix)
+}
+
 // KeysetInfoFromPrimitiveSet creates a `KeysetInfo` from a `PrimitiveSet`.
 // This function doesn't guarantee to preserve the ordering of the keys in the keyset.
 func KeysetInfoFromPrimitiveSet(ps *primitiveset.PrimitiveSet) (*monitoring.KeysetInfo, error) {
@@ -72,9 +79,10 @@ func KeysetInfoFromPrimitiveSet(ps *primitiveset.PrimitiveSet) (*monitoring.Keys
 				return nil, err
 			}
 			e := &monitoring.Entry{
-				KeyID:          pe.KeyID,
-				Status:         keyStatus,
-				FormatAsString: pe.TypeURL, // TODO(b/225071831): populate FormatAsString with key format when available.
+				KeyID:     pe.KeyID,
+				Status:    keyStatus,
+				KeyType:   parseKeyTypeURL(pe.TypeURL),
+				KeyPrefix: pe.PrefixType.String(),
 			}
 			entries = append(entries, e)
 		}

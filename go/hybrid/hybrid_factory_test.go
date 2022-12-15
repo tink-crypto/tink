@@ -247,9 +247,10 @@ func TestPrimitiveFactoryMonitoringWithAnnotationsLogsEncryptAndDecryptWithPrefi
 		PrimaryKeyID: privHandle.KeysetInfo().GetPrimaryKeyId(),
 		Entries: []*monitoring.Entry{
 			{
-				KeyID:          pubHandle.KeysetInfo().GetPrimaryKeyId(),
-				Status:         monitoring.Enabled,
-				FormatAsString: pubHandle.KeysetInfo().GetKeyInfo()[0].GetTypeUrl(),
+				KeyID:     pubHandle.KeysetInfo().GetPrimaryKeyId(),
+				Status:    monitoring.Enabled,
+				KeyType:   "tink.HpkePublicKey",
+				KeyPrefix: "TINK",
 			},
 		},
 	}
@@ -258,9 +259,10 @@ func TestPrimitiveFactoryMonitoringWithAnnotationsLogsEncryptAndDecryptWithPrefi
 		PrimaryKeyID: privHandle.KeysetInfo().GetPrimaryKeyId(),
 		Entries: []*monitoring.Entry{
 			{
-				KeyID:          privHandle.KeysetInfo().GetPrimaryKeyId(),
-				Status:         monitoring.Enabled,
-				FormatAsString: privHandle.KeysetInfo().GetKeyInfo()[0].GetTypeUrl(),
+				KeyID:     privHandle.KeysetInfo().GetPrimaryKeyId(),
+				Status:    monitoring.Enabled,
+				KeyType:   "tink.HpkePrivateKey",
+				KeyPrefix: "TINK",
 			},
 		},
 	}
@@ -337,9 +339,10 @@ func TestPrimitiveFactoryMonitoringWithAnnotationsLogsEncryptAndDecryptWithoutPr
 		PrimaryKeyID: privHandle.KeysetInfo().GetPrimaryKeyId(),
 		Entries: []*monitoring.Entry{
 			{
-				KeyID:          pubHandle.KeysetInfo().GetPrimaryKeyId(),
-				Status:         monitoring.Enabled,
-				FormatAsString: pubHandle.KeysetInfo().GetKeyInfo()[0].GetTypeUrl(),
+				KeyID:     pubHandle.KeysetInfo().GetPrimaryKeyId(),
+				Status:    monitoring.Enabled,
+				KeyType:   "tink.HpkePublicKey",
+				KeyPrefix: "RAW",
 			},
 		},
 	}
@@ -348,9 +351,10 @@ func TestPrimitiveFactoryMonitoringWithAnnotationsLogsEncryptAndDecryptWithoutPr
 		PrimaryKeyID: privHandle.KeysetInfo().GetPrimaryKeyId(),
 		Entries: []*monitoring.Entry{
 			{
-				KeyID:          privHandle.KeysetInfo().GetPrimaryKeyId(),
-				Status:         monitoring.Enabled,
-				FormatAsString: privHandle.KeysetInfo().GetKeyInfo()[0].GetTypeUrl(),
+				KeyID:     privHandle.KeysetInfo().GetPrimaryKeyId(),
+				Status:    monitoring.Enabled,
+				KeyType:   "tink.HpkePrivateKey",
+				KeyPrefix: "RAW",
 			},
 		},
 	}
@@ -450,19 +454,22 @@ func TestPrimitiveFactoryWithMonitoringWithMultipleKeysLogsEncryptionDecryption(
 		PrimaryKeyID: privHandle.KeysetInfo().GetPrimaryKeyId(),
 		Entries: []*monitoring.Entry{
 			{
-				KeyID:          pubHandle.KeysetInfo().GetPrimaryKeyId(),
-				Status:         monitoring.Enabled,
-				FormatAsString: pubHandle.KeysetInfo().GetKeyInfo()[0].GetTypeUrl(),
+				KeyID:     pubHandle.KeysetInfo().GetPrimaryKeyId(),
+				Status:    monitoring.Enabled,
+				KeyType:   "tink.HpkePublicKey",
+				KeyPrefix: "RAW",
 			},
 			{
-				KeyID:          keyIDs[2],
-				Status:         monitoring.Enabled,
-				FormatAsString: "type.googleapis.com/google.crypto.tink.HpkePublicKey",
+				KeyID:     keyIDs[2],
+				Status:    monitoring.Enabled,
+				KeyType:   "tink.HpkePublicKey",
+				KeyPrefix: "TINK",
 			},
 			{
-				KeyID:          keyIDs[3],
-				Status:         monitoring.Enabled,
-				FormatAsString: "type.googleapis.com/google.crypto.tink.EciesAeadHkdfPublicKey",
+				KeyID:     keyIDs[3],
+				Status:    monitoring.Enabled,
+				KeyType:   "tink.EciesAeadHkdfPublicKey",
+				KeyPrefix: "TINK",
 			},
 		},
 	}
@@ -471,19 +478,22 @@ func TestPrimitiveFactoryWithMonitoringWithMultipleKeysLogsEncryptionDecryption(
 		PrimaryKeyID: privHandle.KeysetInfo().GetPrimaryKeyId(),
 		Entries: []*monitoring.Entry{
 			{
-				KeyID:          privHandle.KeysetInfo().GetPrimaryKeyId(),
-				Status:         monitoring.Enabled,
-				FormatAsString: privHandle.KeysetInfo().GetKeyInfo()[0].GetTypeUrl(),
+				KeyID:     privHandle.KeysetInfo().GetPrimaryKeyId(),
+				Status:    monitoring.Enabled,
+				KeyType:   "tink.HpkePrivateKey",
+				KeyPrefix: "RAW",
 			},
 			{
-				KeyID:          keyIDs[2],
-				Status:         monitoring.Enabled,
-				FormatAsString: "type.googleapis.com/google.crypto.tink.HpkePrivateKey",
+				KeyID:     keyIDs[2],
+				Status:    monitoring.Enabled,
+				KeyType:   "tink.HpkePrivateKey",
+				KeyPrefix: "TINK",
 			},
 			{
-				KeyID:          keyIDs[3],
-				Status:         monitoring.Enabled,
-				FormatAsString: "type.googleapis.com/google.crypto.tink.EciesAeadHkdfPrivateKey",
+				KeyID:     keyIDs[3],
+				Status:    monitoring.Enabled,
+				KeyType:   "tink.EciesAeadHkdfPrivateKey",
+				KeyPrefix: "TINK",
 			},
 		},
 	}
@@ -591,9 +601,10 @@ func TestPrimitiveFactoryMonitoringWithAnnotationsEncryptFailureIsLogged(t *test
 					pubHandle.KeysetInfo().GetPrimaryKeyId(),
 					[]*monitoring.Entry{
 						{
-							KeyID:          pubHandle.KeysetInfo().GetPrimaryKeyId(),
-							Status:         monitoring.Enabled,
-							FormatAsString: pubKeyTypeURL,
+							KeyID:     pubHandle.KeysetInfo().GetPrimaryKeyId(),
+							Status:    monitoring.Enabled,
+							KeyType:   pubKeyTypeURL,
+							KeyPrefix: "LEGACY",
 						},
 					},
 				),
@@ -642,9 +653,10 @@ func TestPrimitiveFactoryMonitoringWithAnnotationsDecryptFailureIsLogged(t *test
 					privHandle.KeysetInfo().GetPrimaryKeyId(),
 					[]*monitoring.Entry{
 						{
-							KeyID:          privHandle.KeysetInfo().GetPrimaryKeyId(),
-							Status:         monitoring.Enabled,
-							FormatAsString: privHandle.KeysetInfo().GetKeyInfo()[0].GetTypeUrl(),
+							KeyID:     privHandle.KeysetInfo().GetPrimaryKeyId(),
+							Status:    monitoring.Enabled,
+							KeyType:   "tink.HpkePrivateKey",
+							KeyPrefix: "TINK",
 						},
 					},
 				),

@@ -216,9 +216,10 @@ func TestPrimitiveFactoryWithMonitoringAnnotationsLogsEncryptionDecryptionWithPr
 		kh.KeysetInfo().GetPrimaryKeyId(),
 		[]*monitoring.Entry{
 			{
-				KeyID:          kh.KeysetInfo().GetPrimaryKeyId(),
-				Status:         monitoring.Enabled,
-				FormatAsString: "type.googleapis.com/google.crypto.tink.AesGcmKey",
+				KeyID:     kh.KeysetInfo().GetPrimaryKeyId(),
+				Status:    monitoring.Enabled,
+				KeyType:   "tink.AesGcmKey",
+				KeyPrefix: "TINK",
 			},
 		},
 	)
@@ -283,9 +284,10 @@ func TestPrimitiveFactoryWithMonitoringAnnotationsLogsEncryptionDecryptionWithou
 		kh.KeysetInfo().GetPrimaryKeyId(),
 		[]*monitoring.Entry{
 			{
-				KeyID:          kh.KeysetInfo().GetPrimaryKeyId(),
-				Status:         monitoring.Enabled,
-				FormatAsString: "type.googleapis.com/google.crypto.tink.AesGcmKey",
+				KeyID:     kh.KeysetInfo().GetPrimaryKeyId(),
+				Status:    monitoring.Enabled,
+				KeyType:   "tink.AesGcmKey",
+				KeyPrefix: "RAW",
 			},
 		},
 	)
@@ -366,19 +368,22 @@ func TestPrimitiveFactoryMonitoringWithAnnotatiosMultipleKeysLogsEncryptionDecry
 	got := client.Events()
 	wantKeysetInfo := monitoring.NewKeysetInfo(annotations, keyIDs[1], []*monitoring.Entry{
 		{
-			KeyID:          keyIDs[1],
-			Status:         monitoring.Enabled,
-			FormatAsString: "type.googleapis.com/google.crypto.tink.AesGcmKey",
+			KeyID:     keyIDs[1],
+			Status:    monitoring.Enabled,
+			KeyType:   "tink.AesGcmKey",
+			KeyPrefix: "RAW",
 		},
 		{
-			KeyID:          keyIDs[2],
-			Status:         monitoring.Enabled,
-			FormatAsString: "type.googleapis.com/google.crypto.tink.AesCtrHmacAeadKey",
+			KeyID:     keyIDs[2],
+			Status:    monitoring.Enabled,
+			KeyType:   "tink.AesCtrHmacAeadKey",
+			KeyPrefix: "TINK",
 		},
 		{
-			KeyID:          keyIDs[3],
-			Status:         monitoring.Enabled,
-			FormatAsString: "type.googleapis.com/google.crypto.tink.XChaCha20Poly1305Key",
+			KeyID:     keyIDs[3],
+			Status:    monitoring.Enabled,
+			KeyType:   "tink.XChaCha20Poly1305Key",
+			KeyPrefix: "TINK",
 		},
 	})
 	want := []*fakemonitoring.LogEvent{
@@ -466,9 +471,10 @@ func TestPrimitiveFactoryWithMonitoringAnnotationsEncryptionFailureIsLogged(t *t
 					kh.KeysetInfo().GetPrimaryKeyId(),
 					[]*monitoring.Entry{
 						{
-							KeyID:          kh.KeysetInfo().GetPrimaryKeyId(),
-							Status:         monitoring.Enabled,
-							FormatAsString: typeURL,
+							KeyID:     kh.KeysetInfo().GetPrimaryKeyId(),
+							Status:    monitoring.Enabled,
+							KeyType:   typeURL,
+							KeyPrefix: "LEGACY",
 						},
 					},
 				),
@@ -518,9 +524,10 @@ func TestPrimitiveFactoryWithMonitoringAnnotationsDecryptionFailureIsLogged(t *t
 					kh.KeysetInfo().GetPrimaryKeyId(),
 					[]*monitoring.Entry{
 						{
-							KeyID:          kh.KeysetInfo().GetPrimaryKeyId(),
-							Status:         monitoring.Enabled,
-							FormatAsString: "type.googleapis.com/google.crypto.tink.AesGcmKey",
+							KeyID:     kh.KeysetInfo().GetPrimaryKeyId(),
+							Status:    monitoring.Enabled,
+							KeyType:   "tink.AesGcmKey",
+							KeyPrefix: "TINK",
 						},
 					},
 				),
@@ -593,9 +600,10 @@ func TestFactoryWithMonitoringMultiplePrimitivesLogOperations(t *testing.T) {
 					kh1.KeysetInfo().GetPrimaryKeyId(),
 					[]*monitoring.Entry{
 						{
-							KeyID:          kh1.KeysetInfo().GetPrimaryKeyId(),
-							Status:         monitoring.Enabled,
-							FormatAsString: "type.googleapis.com/google.crypto.tink.AesGcmKey",
+							KeyID:     kh1.KeysetInfo().GetPrimaryKeyId(),
+							Status:    monitoring.Enabled,
+							KeyType:   "tink.AesGcmKey",
+							KeyPrefix: "TINK",
 						},
 					},
 				),
@@ -612,9 +620,10 @@ func TestFactoryWithMonitoringMultiplePrimitivesLogOperations(t *testing.T) {
 					kh2.KeysetInfo().GetPrimaryKeyId(),
 					[]*monitoring.Entry{
 						{
-							KeyID:          kh2.KeysetInfo().GetPrimaryKeyId(),
-							Status:         monitoring.Enabled,
-							FormatAsString: "type.googleapis.com/google.crypto.tink.AesCtrHmacAeadKey",
+							KeyID:     kh2.KeysetInfo().GetPrimaryKeyId(),
+							Status:    monitoring.Enabled,
+							KeyType:   "tink.AesCtrHmacAeadKey",
+							KeyPrefix: "TINK",
 						},
 					},
 				),

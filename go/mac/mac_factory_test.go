@@ -343,19 +343,22 @@ func TestFactoryWithMonitoringPrimitiveWithMultipleKeysLogsComputeVerify(t *test
 		PrimaryKeyID: kh.KeysetInfo().GetPrimaryKeyId(),
 		Entries: []*monitoring.Entry{
 			{
-				KeyID:          kh.KeysetInfo().GetPrimaryKeyId(),
-				Status:         monitoring.Enabled,
-				FormatAsString: "type.googleapis.com/google.crypto.tink.HmacKey",
+				KeyID:     kh.KeysetInfo().GetPrimaryKeyId(),
+				Status:    monitoring.Enabled,
+				KeyType:   "tink.HmacKey",
+				KeyPrefix: "TINK",
 			},
 			{
-				KeyID:          keyIDs[2],
-				Status:         monitoring.Enabled,
-				FormatAsString: "type.googleapis.com/google.crypto.tink.HmacKey",
+				KeyID:     keyIDs[2],
+				Status:    monitoring.Enabled,
+				KeyType:   "tink.HmacKey",
+				KeyPrefix: "TINK",
 			},
 			{
-				KeyID:          keyIDs[3],
-				Status:         monitoring.Enabled,
-				FormatAsString: "type.googleapis.com/google.crypto.tink.AesCmacKey",
+				KeyID:     keyIDs[3],
+				Status:    monitoring.Enabled,
+				KeyType:   "tink.AesCmacKey",
+				KeyPrefix: "TINK",
 			},
 		},
 	}
@@ -445,9 +448,10 @@ func TestPrimitiveFactoryWithMonitoringAnnotationsComputeFailureIsLogged(t *test
 					kh.KeysetInfo().GetPrimaryKeyId(),
 					[]*monitoring.Entry{
 						{
-							KeyID:          kh.KeysetInfo().GetPrimaryKeyId(),
-							Status:         monitoring.Enabled,
-							FormatAsString: typeURL,
+							KeyID:     kh.KeysetInfo().GetPrimaryKeyId(),
+							Status:    monitoring.Enabled,
+							KeyType:   typeURL,
+							KeyPrefix: "LEGACY",
 						},
 					},
 				),
@@ -497,9 +501,10 @@ func TestPrimitiveFactoryWithMonitoringAnnotationsVerifyFailureIsLogged(t *testi
 					kh.KeysetInfo().GetPrimaryKeyId(),
 					[]*monitoring.Entry{
 						{
-							KeyID:          kh.KeysetInfo().GetPrimaryKeyId(),
-							Status:         monitoring.Enabled,
-							FormatAsString: "type.googleapis.com/google.crypto.tink.HmacKey",
+							KeyID:     kh.KeysetInfo().GetPrimaryKeyId(),
+							Status:    monitoring.Enabled,
+							KeyType:   "tink.HmacKey",
+							KeyPrefix: "TINK",
 						},
 					},
 				),
@@ -558,9 +563,10 @@ func TestPrimitiveFactoryMonitoringWithAnnotationsMultiplePrimitivesLogOperation
 					handles[0].KeysetInfo().GetPrimaryKeyId(),
 					[]*monitoring.Entry{
 						{
-							KeyID:          handles[0].KeysetInfo().GetPrimaryKeyId(),
-							Status:         monitoring.Enabled,
-							FormatAsString: templates[0].GetTypeUrl(),
+							KeyID:     handles[0].KeysetInfo().GetPrimaryKeyId(),
+							Status:    monitoring.Enabled,
+							KeyType:   "tink.HmacKey",
+							KeyPrefix: "TINK",
 						},
 					},
 				),
@@ -577,9 +583,10 @@ func TestPrimitiveFactoryMonitoringWithAnnotationsMultiplePrimitivesLogOperation
 					handles[1].KeysetInfo().GetPrimaryKeyId(),
 					[]*monitoring.Entry{
 						{
-							KeyID:          handles[1].KeysetInfo().GetPrimaryKeyId(),
-							Status:         monitoring.Enabled,
-							FormatAsString: templates[1].GetTypeUrl(),
+							KeyID:     handles[1].KeysetInfo().GetPrimaryKeyId(),
+							Status:    monitoring.Enabled,
+							KeyType:   "tink.AesCmacKey",
+							KeyPrefix: "TINK",
 						},
 					},
 				),
@@ -629,9 +636,10 @@ func TestPrimitiveFactoryMonitoringWithAnnotationsComputeVerifyLogs(t *testing.T
 		kh.KeysetInfo().GetPrimaryKeyId(),
 		[]*monitoring.Entry{
 			{
-				KeyID:          kh.KeysetInfo().GetPrimaryKeyId(),
-				Status:         monitoring.Enabled,
-				FormatAsString: "type.googleapis.com/google.crypto.tink.HmacKey",
+				KeyID:     kh.KeysetInfo().GetPrimaryKeyId(),
+				Status:    monitoring.Enabled,
+				KeyType:   "tink.HmacKey",
+				KeyPrefix: "TINK",
 			},
 		},
 	)

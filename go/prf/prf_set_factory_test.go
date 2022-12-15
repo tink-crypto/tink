@@ -294,9 +294,10 @@ func TestPrimitiveFactoryMonitoringWithAnnotationsComputePRFFailureIsLogged(t *t
 					Annotations: annotations,
 					Entries: []*monitoring.Entry{
 						{
-							KeyID:          kh.KeysetInfo().GetPrimaryKeyId(),
-							Status:         monitoring.Enabled,
-							FormatAsString: kh.KeysetInfo().GetKeyInfo()[0].GetTypeUrl(),
+							KeyID:     kh.KeysetInfo().GetPrimaryKeyId(),
+							Status:    monitoring.Enabled,
+							KeyType:   "tink.HmacPrfKey",
+							KeyPrefix: "RAW",
 						},
 					},
 					PrimaryKeyID: kh.KeysetInfo().GetPrimaryKeyId(),
@@ -341,9 +342,10 @@ func TestPrimitiveFactoryWithMonitoringAnnotationsLogsComputePRF(t *testing.T) {
 		PrimaryKeyID: kh.KeysetInfo().GetPrimaryKeyId(),
 		Entries: []*monitoring.Entry{
 			{
-				KeyID:          kh.KeysetInfo().GetPrimaryKeyId(),
-				Status:         monitoring.Enabled,
-				FormatAsString: kh.KeysetInfo().GetKeyInfo()[0].GetTypeUrl(),
+				KeyID:     kh.KeysetInfo().GetPrimaryKeyId(),
+				Status:    monitoring.Enabled,
+				KeyType:   "tink.HmacPrfKey",
+				KeyPrefix: "RAW",
 			},
 		},
 		Annotations: annotations,

@@ -94,19 +94,22 @@ func TestKeysetInfoFromPrimitiveSet(t *testing.T) {
 			// Adding all entries under the same prefix to get deterministic output.
 			"one": []*primitiveset.Entry{
 				&primitiveset.Entry{
-					KeyID:   1,
-					Status:  tpb.KeyStatusType_ENABLED,
-					TypeURL: "type.googleapis.com/google.crypto.tink.AesSivKey",
+					KeyID:      1,
+					Status:     tpb.KeyStatusType_ENABLED,
+					TypeURL:    "type.googleapis.com/google.crypto.tink.AesSivKey",
+					PrefixType: tpb.OutputPrefixType_TINK,
 				},
 				&primitiveset.Entry{
-					KeyID:   2,
-					Status:  tpb.KeyStatusType_DISABLED,
-					TypeURL: "type.googleapis.com/google.crypto.tink.AesGcmKey",
+					KeyID:      2,
+					Status:     tpb.KeyStatusType_DISABLED,
+					TypeURL:    "type.googleapis.com/google.crypto.tink.AesGcmKey",
+					PrefixType: tpb.OutputPrefixType_TINK,
 				},
 				&primitiveset.Entry{
-					KeyID:   3,
-					Status:  tpb.KeyStatusType_DESTROYED,
-					TypeURL: "type.googleapis.com/google.crypto.tink.AesCtrHmacKey",
+					KeyID:      3,
+					Status:     tpb.KeyStatusType_DESTROYED,
+					TypeURL:    "type.googleapis.com/google.crypto.tink.AesCtrHmacKey",
+					PrefixType: tpb.OutputPrefixType_TINK,
 				},
 			},
 		},
@@ -119,19 +122,22 @@ func TestKeysetInfoFromPrimitiveSet(t *testing.T) {
 		},
 		Entries: []*monitoring.Entry{
 			{
-				KeyID:          1,
-				Status:         monitoring.Enabled,
-				FormatAsString: "type.googleapis.com/google.crypto.tink.AesSivKey",
+				KeyID:     1,
+				Status:    monitoring.Enabled,
+				KeyType:   "tink.AesSivKey",
+				KeyPrefix: "TINK",
 			},
 			{
-				KeyID:          2,
-				Status:         monitoring.Disabled,
-				FormatAsString: "type.googleapis.com/google.crypto.tink.AesGcmKey",
+				KeyID:     2,
+				Status:    monitoring.Disabled,
+				KeyType:   "tink.AesGcmKey",
+				KeyPrefix: "TINK",
 			},
 			{
-				KeyID:          3,
-				Status:         monitoring.Destroyed,
-				FormatAsString: "type.googleapis.com/google.crypto.tink.AesCtrHmacKey",
+				KeyID:     3,
+				Status:    monitoring.Destroyed,
+				KeyType:   "tink.AesCtrHmacKey",
+				KeyPrefix: "TINK",
 			},
 		},
 	}

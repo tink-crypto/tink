@@ -278,9 +278,10 @@ func TestPrimitiveFactoryMonitoringWithAnnotationsLogSignVerify(t *testing.T) {
 		PrimaryKeyID: pubHandle.KeysetInfo().GetPrimaryKeyId(),
 		Entries: []*monitoring.Entry{
 			{
-				KeyID:          pubHandle.KeysetInfo().GetPrimaryKeyId(),
-				Status:         monitoring.Enabled,
-				FormatAsString: pubHandle.KeysetInfo().GetKeyInfo()[0].GetTypeUrl(),
+				KeyID:     pubHandle.KeysetInfo().GetPrimaryKeyId(),
+				Status:    monitoring.Enabled,
+				KeyType:   "tink.Ed25519PublicKey",
+				KeyPrefix: "TINK",
 			},
 		},
 	}
@@ -289,9 +290,10 @@ func TestPrimitiveFactoryMonitoringWithAnnotationsLogSignVerify(t *testing.T) {
 		PrimaryKeyID: privHandle.KeysetInfo().GetPrimaryKeyId(),
 		Entries: []*monitoring.Entry{
 			{
-				KeyID:          privHandle.KeysetInfo().GetPrimaryKeyId(),
-				Status:         monitoring.Enabled,
-				FormatAsString: privHandle.KeysetInfo().GetKeyInfo()[0].GetTypeUrl(),
+				KeyID:     privHandle.KeysetInfo().GetPrimaryKeyId(),
+				Status:    monitoring.Enabled,
+				KeyType:   "tink.Ed25519PrivateKey",
+				KeyPrefix: "TINK",
 			},
 		},
 	}
@@ -375,9 +377,10 @@ func TestPrimitiveFactoryMonitoringWithAnnotationsSignFailureIsLogged(t *testing
 					kh.KeysetInfo().GetPrimaryKeyId(),
 					[]*monitoring.Entry{
 						{
-							KeyID:          kh.KeysetInfo().GetPrimaryKeyId(),
-							Status:         monitoring.Enabled,
-							FormatAsString: typeURL,
+							KeyID:     kh.KeysetInfo().GetPrimaryKeyId(),
+							Status:    monitoring.Enabled,
+							KeyType:   typeURL,
+							KeyPrefix: "LEGACY",
 						},
 					},
 				),
@@ -433,9 +436,10 @@ func TestPrimitiveFactoryMonitoringWithAnnotationsVerifyFailureIsLogged(t *testi
 					pubHandle.KeysetInfo().GetPrimaryKeyId(),
 					[]*monitoring.Entry{
 						{
-							KeyID:          pubHandle.KeysetInfo().GetPrimaryKeyId(),
-							Status:         monitoring.Enabled,
-							FormatAsString: pubHandle.KeysetInfo().GetKeyInfo()[0].GetTypeUrl(),
+							KeyID:     pubHandle.KeysetInfo().GetPrimaryKeyId(),
+							Status:    monitoring.Enabled,
+							KeyType:   "tink.Ed25519PublicKey",
+							KeyPrefix: "TINK",
 						},
 					},
 				),
