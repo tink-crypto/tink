@@ -17,6 +17,8 @@
 package com.google.crypto.tink.internal;
 
 import com.google.crypto.tink.Key;
+import com.google.crypto.tink.PrimitiveSet;
+import com.google.crypto.tink.PrimitiveWrapper;
 import java.security.GeneralSecurityException;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -51,28 +53,44 @@ public final class MutablePrimitiveRegistry {
    * already been registered and is the same, then the call is ignored; otherwise, an exception is
    * thrown.
    */
-  public synchronized <KeyT extends Key, PrimitiveT>
-  void registerPrimitiveConstructor(PrimitiveConstructor<KeyT, PrimitiveT> constructor)
-      throws GeneralSecurityException {
+  public synchronized <KeyT extends Key, PrimitiveT> void registerPrimitiveConstructor(
+      PrimitiveConstructor<KeyT, PrimitiveT> constructor) throws GeneralSecurityException {
     PrimitiveRegistry newRegistry =
-        new PrimitiveRegistry
-            .Builder(registry.get())
+        new PrimitiveRegistry.Builder(registry.get())
             .registerPrimitiveConstructor(constructor)
             .build();
+    registry.set(newRegistry);
+  }
+
+  public synchronized <InputPrimitiveT, WrapperPrimitiveT> void registerPrimitiveWrapper(
+      PrimitiveWrapper<InputPrimitiveT, WrapperPrimitiveT> wrapper)
+      throws GeneralSecurityException {
+    PrimitiveRegistry newRegistry =
+        new PrimitiveRegistry.Builder(registry.get()).registerPrimitiveWrapper(wrapper).build();
     registry.set(newRegistry);
   }
 
   /**
    * Creates a primitive from a given key.
    *
-   * <p>This will look up a previously registered constructor for the given pair of
-   * {@code (KeyT, PrimitiveT)}, and, if successful, use the registered PrimitiveConstructor object
-   * to create the requested primitive. Throws if the required constructor has not been registered,
-   * or if the primitive construction threw.
+   * <p>This will look up a previously registered constructor for the given pair of {@code (KeyT,
+   * PrimitiveT)}, and, if successful, use the registered PrimitiveConstructor object to create the
+   * requested primitive. Throws if the required constructor has not been registered, or if the
+   * primitive construction threw.
    */
   public <KeyT extends Key, PrimitiveT> PrimitiveT getPrimitive(
-      KeyT key, Class<PrimitiveT> primitiveClass)
-      throws GeneralSecurityException {
+      KeyT key, Class<PrimitiveT> primitiveClass) throws GeneralSecurityException {
     return registry.get().getPrimitive(key, primitiveClass);
+  }
+
+  public <WrapperPrimitiveT> Class<?> getInputPrimitiveClass(
+      Class<WrapperPrimitiveT> wrapperClassObject) throws GeneralSecurityException {
+    return registry.get().getInputPrimitiveClass(wrapperClassObject);
+  }
+
+  public <InputPrimitiveT, WrapperPrimitiveT> WrapperPrimitiveT wrap(
+      PrimitiveSet<InputPrimitiveT> primitives, Class<WrapperPrimitiveT> wrapperClassObject)
+      throws GeneralSecurityException {
+    return registry.get().wrap(primitives, wrapperClassObject);
   }
 }

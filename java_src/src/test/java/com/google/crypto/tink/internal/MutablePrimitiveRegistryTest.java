@@ -21,6 +21,8 @@ import static org.junit.Assert.assertThrows;
 
 import com.google.crypto.tink.Key;
 import com.google.crypto.tink.Parameters;
+import com.google.crypto.tink.PrimitiveSet;
+import com.google.crypto.tink.PrimitiveWrapper;
 import com.google.errorprone.annotations.Immutable;
 import java.security.GeneralSecurityException;
 import javax.annotation.Nullable;
@@ -104,6 +106,48 @@ public final class MutablePrimitiveRegistryTest {
     return new MutablePrimitiveRegistryTest.TestPrimitiveB();
   }
 
+  @Immutable
+  private static final class TestWrapperA
+      implements PrimitiveWrapper<TestPrimitiveA, TestPrimitiveA> {
+
+    @Override
+    public TestPrimitiveA wrap(final PrimitiveSet<TestPrimitiveA> primitives)
+        throws GeneralSecurityException {
+      return new TestPrimitiveA();
+    }
+
+    @Override
+    public Class<TestPrimitiveA> getPrimitiveClass() {
+      return TestPrimitiveA.class;
+    }
+
+    @Override
+    public Class<TestPrimitiveA> getInputPrimitiveClass() {
+      return TestPrimitiveA.class;
+    }
+  }
+
+  @Immutable
+  private static final class TestWrapperB
+      implements PrimitiveWrapper<TestPrimitiveA, TestPrimitiveB> {
+
+    @Override
+    public TestPrimitiveB wrap(final PrimitiveSet<TestPrimitiveA> primitives)
+        throws GeneralSecurityException {
+      return new TestPrimitiveB();
+    }
+
+    @Override
+    public Class<TestPrimitiveB> getPrimitiveClass() {
+      return TestPrimitiveB.class;
+    }
+
+    @Override
+    public Class<TestPrimitiveA> getInputPrimitiveClass() {
+      return TestPrimitiveA.class;
+    }
+  }
+
   @Test
   public void test_registerAll_checkDispatch() throws Exception {
     MutablePrimitiveRegistry registry = new MutablePrimitiveRegistry();
@@ -152,5 +196,35 @@ public final class MutablePrimitiveRegistryTest {
             registry.getPrimitive(
                 new MutablePrimitiveRegistryTest.TestKey1(),
                 MutablePrimitiveRegistryTest.TestPrimitiveA.class));
+    assertThrows(
+        GeneralSecurityException.class,
+        () -> registry.getInputPrimitiveClass(MutablePrimitiveRegistryTest.TestPrimitiveA.class));
+    assertThrows(
+        GeneralSecurityException.class,
+        () ->
+            registry.wrap(
+                PrimitiveSet.newBuilder(MutablePrimitiveRegistryTest.TestPrimitiveA.class).build(),
+                MutablePrimitiveRegistryTest.TestPrimitiveA.class));
+  }
+
+  @Test
+  public void test_registerAllWrappers_checkDispatch() throws Exception {
+    MutablePrimitiveRegistry registry = new MutablePrimitiveRegistry();
+
+    registry.registerPrimitiveWrapper(new TestWrapperA());
+    registry.registerPrimitiveWrapper(new TestWrapperB());
+
+    assertThat(registry.getInputPrimitiveClass(TestPrimitiveA.class))
+        .isEqualTo(TestPrimitiveA.class);
+    assertThat(registry.getInputPrimitiveClass(TestPrimitiveB.class))
+        .isEqualTo(TestPrimitiveA.class);
+    assertThat(
+            registry.wrap(
+                PrimitiveSet.newBuilder(TestPrimitiveA.class).build(), TestPrimitiveA.class))
+        .isInstanceOf(TestPrimitiveA.class);
+    assertThat(
+            registry.wrap(
+                PrimitiveSet.newBuilder(TestPrimitiveA.class).build(), TestPrimitiveB.class))
+        .isInstanceOf(TestPrimitiveB.class);
   }
 }

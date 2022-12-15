@@ -21,6 +21,8 @@ import static org.junit.Assert.assertThrows;
 
 import com.google.crypto.tink.Key;
 import com.google.crypto.tink.Parameters;
+import com.google.crypto.tink.PrimitiveSet;
+import com.google.crypto.tink.PrimitiveWrapper;
 import com.google.errorprone.annotations.Immutable;
 import java.security.GeneralSecurityException;
 import javax.annotation.Nullable;
@@ -91,6 +93,48 @@ public final class PrimitiveRegistryTest {
     public TestPrimitiveB() {}
   }
 
+  @Immutable
+  private static final class TestWrapperA
+      implements PrimitiveWrapper<TestPrimitiveA, TestPrimitiveA> {
+
+    @Override
+    public TestPrimitiveA wrap(final PrimitiveSet<TestPrimitiveA> primitives)
+        throws GeneralSecurityException {
+      return new TestPrimitiveA();
+    }
+
+    @Override
+    public Class<TestPrimitiveA> getPrimitiveClass() {
+      return TestPrimitiveA.class;
+    }
+
+    @Override
+    public Class<TestPrimitiveA> getInputPrimitiveClass() {
+      return TestPrimitiveA.class;
+    }
+  }
+
+  @Immutable
+  private static final class TestWrapperB
+      implements PrimitiveWrapper<TestPrimitiveA, TestPrimitiveB> {
+
+    @Override
+    public TestPrimitiveB wrap(final PrimitiveSet<TestPrimitiveA> primitives)
+        throws GeneralSecurityException {
+      return new TestPrimitiveB();
+    }
+
+    @Override
+    public Class<TestPrimitiveB> getPrimitiveClass() {
+      return TestPrimitiveB.class;
+    }
+
+    @Override
+    public Class<TestPrimitiveA> getInputPrimitiveClass() {
+      return TestPrimitiveA.class;
+    }
+  }
+
   private static TestPrimitiveA getPrimitiveAKey1(TestKey1 key) {
     return new TestPrimitiveA();
   }
@@ -107,6 +151,7 @@ public final class PrimitiveRegistryTest {
     return new TestPrimitiveB();
   }
 
+  /** Test PrimitiveConstructor functionality. */
   @Test
   public void test_registerConstructorAndGet() throws Exception {
     PrimitiveRegistry registry =
@@ -126,6 +171,14 @@ public final class PrimitiveRegistryTest {
     assertThrows(
         GeneralSecurityException.class,
         () -> registry.getPrimitive(new TestKey1(), TestPrimitiveA.class));
+    assertThrows(
+        GeneralSecurityException.class,
+        () ->
+            registry.wrap(
+                PrimitiveSet.newBuilder(TestPrimitiveA.class).build(), TestPrimitiveA.class));
+    assertThrows(
+        GeneralSecurityException.class,
+        () -> registry.getInputPrimitiveClass(TestPrimitiveA.class));
   }
 
   @Test
@@ -184,72 +237,145 @@ public final class PrimitiveRegistryTest {
   }
 
   @Test
-  public void test_registerAll_checkDispatch() throws Exception {
+  public void test_registerAllConstructors_checkDispatch() throws Exception {
     PrimitiveRegistry registry =
         new PrimitiveRegistry.Builder()
             .registerPrimitiveConstructor(
                 PrimitiveConstructor.create(
-                    PrimitiveRegistryTest::getPrimitiveAKey1,
-                    TestKey1.class,
-                    TestPrimitiveA.class))
+                    PrimitiveRegistryTest::getPrimitiveAKey1, TestKey1.class, TestPrimitiveA.class))
             .registerPrimitiveConstructor(
                 PrimitiveConstructor.create(
-                    PrimitiveRegistryTest::getPrimitiveAKey2,
-                    TestKey2.class,
-                    TestPrimitiveA.class))
+                    PrimitiveRegistryTest::getPrimitiveAKey2, TestKey2.class, TestPrimitiveA.class))
             .registerPrimitiveConstructor(
                 PrimitiveConstructor.create(
-                    PrimitiveRegistryTest::getPrimitiveBKey1,
-                    TestKey1.class,
-                    TestPrimitiveB.class))
+                    PrimitiveRegistryTest::getPrimitiveBKey1, TestKey1.class, TestPrimitiveB.class))
             .registerPrimitiveConstructor(
                 PrimitiveConstructor.create(
-                    PrimitiveRegistryTest::getPrimitiveBKey2,
-                    TestKey2.class,
-                    TestPrimitiveB.class))
+                    PrimitiveRegistryTest::getPrimitiveBKey2, TestKey2.class, TestPrimitiveB.class))
             .build();
-    assertThat(
-        registry
-            .getPrimitive(new TestKey1(), TestPrimitiveA.class)).isInstanceOf(TestPrimitiveA.class);
-    assertThat(
-        registry
-            .getPrimitive(new TestKey2(), TestPrimitiveA.class)).isInstanceOf(TestPrimitiveA.class);
-    assertThat(
-        registry
-            .getPrimitive(new TestKey1(), TestPrimitiveB.class)).isInstanceOf(TestPrimitiveB.class);
-    assertThat(
-        registry
-            .getPrimitive(new TestKey2(), TestPrimitiveB.class)).isInstanceOf(TestPrimitiveB.class);
+    assertThat(registry.getPrimitive(new TestKey1(), TestPrimitiveA.class))
+        .isInstanceOf(TestPrimitiveA.class);
+    assertThat(registry.getPrimitive(new TestKey2(), TestPrimitiveA.class))
+        .isInstanceOf(TestPrimitiveA.class);
+    assertThat(registry.getPrimitive(new TestKey1(), TestPrimitiveB.class))
+        .isInstanceOf(TestPrimitiveB.class);
+    assertThat(registry.getPrimitive(new TestKey2(), TestPrimitiveB.class))
+        .isInstanceOf(TestPrimitiveB.class);
   }
 
+  /** Test PrimitiveWrapper functionality. */
+  @Test
+  public void test_registerWrapperAndGet() throws Exception {
+    PrimitiveRegistry registry =
+        new PrimitiveRegistry.Builder().registerPrimitiveWrapper(new TestWrapperA()).build();
+    assertThat(
+            registry.wrap(
+                PrimitiveSet.newBuilder(TestPrimitiveA.class).build(), TestPrimitiveA.class))
+        .isNotNull();
+  }
+
+  @Test
+  public void test_registerSameWrapperTwice_works() throws Exception {
+    TestWrapperA wrapper = new TestWrapperA();
+    PrimitiveRegistry unused =
+        new PrimitiveRegistry.Builder()
+            .registerPrimitiveWrapper(wrapper)
+            .registerPrimitiveWrapper(wrapper)
+            .build();
+  }
+
+  @Test
+  public void test_registerDifferentWrapperWithSamePrimitiveType_throws() throws Exception {
+    PrimitiveRegistry.Builder builder = new PrimitiveRegistry.Builder();
+    builder.registerPrimitiveWrapper(new TestWrapperA());
+    assertThrows(
+        GeneralSecurityException.class, () -> builder.registerPrimitiveWrapper(new TestWrapperA()));
+  }
+
+  @Test
+  public void test_registerDifferentWrapperWithDifferentPrimitiveType_works() throws Exception {
+    PrimitiveRegistry unused =
+        new PrimitiveRegistry.Builder()
+            .registerPrimitiveWrapper(new TestWrapperA())
+            .registerPrimitiveWrapper(new TestWrapperB())
+            .build();
+  }
+
+  @Test
+  public void test_registerAllWrappers_checkDispatch() throws Exception {
+    PrimitiveRegistry registry =
+        new PrimitiveRegistry.Builder()
+            .registerPrimitiveWrapper(new TestWrapperA())
+            .registerPrimitiveWrapper(new TestWrapperB())
+            .build();
+    assertThat(registry.getInputPrimitiveClass(TestPrimitiveA.class))
+        .isEqualTo(TestPrimitiveA.class);
+    assertThat(registry.getInputPrimitiveClass(TestPrimitiveB.class))
+        .isEqualTo(TestPrimitiveA.class);
+    assertThat(
+            registry.wrap(
+                PrimitiveSet.newBuilder(TestPrimitiveA.class).build(), TestPrimitiveA.class))
+        .isInstanceOf(TestPrimitiveA.class);
+    assertThat(
+            registry.wrap(
+                PrimitiveSet.newBuilder(TestPrimitiveA.class).build(), TestPrimitiveB.class))
+        .isInstanceOf(TestPrimitiveB.class);
+  }
+
+  /** Test general functionality. */
   @Test
   public void test_copyWorks() throws Exception {
     PrimitiveRegistry registry =
         new PrimitiveRegistry.Builder()
             .registerPrimitiveConstructor(
                 PrimitiveConstructor.create(
-                    PrimitiveRegistryTest::getPrimitiveAKey1,
-                    TestKey1.class,
-                    TestPrimitiveA.class))
+                    PrimitiveRegistryTest::getPrimitiveAKey1, TestKey1.class, TestPrimitiveA.class))
+            .registerPrimitiveWrapper(new TestWrapperA())
             .build();
     PrimitiveRegistry registry2 = new PrimitiveRegistry.Builder(registry).build();
     assertThat(registry2.getPrimitive(new TestKey1(), TestPrimitiveA.class))
         .isInstanceOf(TestPrimitiveA.class);
+    assertThat(
+            registry2.wrap(
+                PrimitiveSet.newBuilder(TestPrimitiveA.class).build(), TestPrimitiveA.class))
+        .isInstanceOf(TestPrimitiveA.class);
+    assertThat(registry2.getInputPrimitiveClass(TestPrimitiveA.class))
+        .isEqualTo(TestPrimitiveA.class);
   }
-  
+
   @Test
   public void test_copyDoesNotChangeOldVersion() throws Exception {
     PrimitiveRegistry registry1 = new PrimitiveRegistry.Builder().build();
     PrimitiveRegistry.Builder builder = new PrimitiveRegistry.Builder(registry1);
     PrimitiveRegistry registry2 = builder.build();
-    builder.registerPrimitiveConstructor(
-        PrimitiveConstructor.create(
-            PrimitiveRegistryTest::getPrimitiveAKey1, TestKey1.class, TestPrimitiveA.class));
+
+    builder
+        .registerPrimitiveConstructor(
+            PrimitiveConstructor.create(
+                PrimitiveRegistryTest::getPrimitiveAKey1, TestKey1.class, TestPrimitiveA.class))
+        .registerPrimitiveWrapper(new TestWrapperA());
+
     assertThrows(
         GeneralSecurityException.class,
         () -> registry1.getPrimitive(new TestKey1(), TestPrimitiveA.class));
     assertThrows(
         GeneralSecurityException.class,
         () -> registry2.getPrimitive(new TestKey1(), TestPrimitiveA.class));
+    assertThrows(
+        GeneralSecurityException.class,
+        () -> registry1.getInputPrimitiveClass(TestPrimitiveA.class));
+    assertThrows(
+        GeneralSecurityException.class,
+        () -> registry2.getInputPrimitiveClass(TestPrimitiveA.class));
+    assertThrows(
+        GeneralSecurityException.class,
+        () ->
+            registry1.wrap(
+                PrimitiveSet.newBuilder(TestPrimitiveA.class).build(), TestPrimitiveA.class));
+    assertThrows(
+        GeneralSecurityException.class,
+        () ->
+            registry2.wrap(
+                PrimitiveSet.newBuilder(TestPrimitiveA.class).build(), TestPrimitiveA.class));
   }
 }

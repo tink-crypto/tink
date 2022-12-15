@@ -17,6 +17,8 @@
 package com.google.crypto.tink.internal;
 
 import com.google.crypto.tink.Key;
+import com.google.crypto.tink.PrimitiveSet;
+import com.google.crypto.tink.PrimitiveWrapper;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import java.security.GeneralSecurityException;
 import java.util.HashMap;
@@ -29,18 +31,22 @@ import java.util.Objects;
  */
 public class PrimitiveRegistry {
   private final Map<PrimitiveConstructorIndex, PrimitiveConstructor<?, ?>> primitiveConstructorMap;
+  private final Map<Class<?>, PrimitiveWrapper<?, ?>> primitiveWrapperMap;
 
   /** Allows building PrimitiveRegistry objects. */
   public static final class Builder {
     private final Map<PrimitiveConstructorIndex, PrimitiveConstructor<?, ?>>
         primitiveConstructorMap;
+    private final Map<Class<?>, PrimitiveWrapper<?, ?>> primitiveWrapperMap;
 
     public Builder() {
       primitiveConstructorMap = new HashMap<>();
+      primitiveWrapperMap = new HashMap<>();
     }
 
     public Builder(PrimitiveRegistry registry) {
       primitiveConstructorMap = new HashMap<>(registry.primitiveConstructorMap);
+      primitiveWrapperMap = new HashMap<>(registry.primitiveWrapperMap);
     }
 
     /**
@@ -73,6 +79,27 @@ public class PrimitiveRegistry {
       return this;
     }
 
+    @CanIgnoreReturnValue
+    public <InputPrimitiveT, WrapperPrimitiveT> Builder registerPrimitiveWrapper(
+        PrimitiveWrapper<InputPrimitiveT, WrapperPrimitiveT> wrapper)
+        throws GeneralSecurityException {
+      Class<WrapperPrimitiveT> wrapperClassObject = wrapper.getPrimitiveClass();
+      if (primitiveWrapperMap.containsKey(wrapperClassObject)) {
+        PrimitiveWrapper<?, ?> existingPrimitiveWrapper =
+            primitiveWrapperMap.get(wrapperClassObject);
+        if (!existingPrimitiveWrapper.equals(wrapper)
+            || !wrapper.equals(existingPrimitiveWrapper)) {
+          throw new GeneralSecurityException(
+              "Attempt to register non-equal PrimitiveWrapper object or input class object for"
+                  + " already existing object of type"
+                  + wrapperClassObject);
+        }
+      } else {
+        primitiveWrapperMap.put(wrapperClassObject, wrapper);
+      }
+      return this;
+    }
+
     PrimitiveRegistry build() {
       return new PrimitiveRegistry(this);
     }
@@ -80,15 +107,15 @@ public class PrimitiveRegistry {
 
   private PrimitiveRegistry(Builder builder) {
     primitiveConstructorMap = new HashMap<>(builder.primitiveConstructorMap);
+    primitiveWrapperMap = new HashMap<>(builder.primitiveWrapperMap);
   }
 
   /**
    * Creates a primitive from a given key.
    *
-   * <p>This will look up a previously registered constructor for the given pair of
-   * {@code (KeyT, PrimitiveT)}, and, if successful, use the registered PrimitiveConstructor object
-   * to create the requested primitive. Throws on a failed lookup, or if the primitive construction
-   * threw.
+   * <p>This will look up a previously registered constructor for the given pair of {@code (KeyT,
+   * PrimitiveT)}, and, if successful, use the registered PrimitiveConstructor object to create the
+   * requested primitive. Throws on a failed lookup, or if the primitive construction threw.
    */
   public <KeyT extends Key, PrimitiveT> PrimitiveT getPrimitive(
       KeyT key, Class<PrimitiveT> primitiveClass) throws GeneralSecurityException {
@@ -100,6 +127,38 @@ public class PrimitiveRegistry {
     PrimitiveConstructor<KeyT, PrimitiveT> primitiveConstructor =
         (PrimitiveConstructor<KeyT, PrimitiveT>) primitiveConstructorMap.get(index);
     return primitiveConstructor.constructPrimitive(key);
+  }
+
+  public Class<?> getInputPrimitiveClass(Class<?> wrapperClassObject)
+      throws GeneralSecurityException {
+    if (!primitiveWrapperMap.containsKey(wrapperClassObject)) {
+      throw new GeneralSecurityException(
+          "No input primitive class for " + wrapperClassObject + " available");
+    }
+    return primitiveWrapperMap.get(wrapperClassObject).getInputPrimitiveClass();
+  }
+
+  public <InputPrimitiveT, WrapperPrimitiveT> WrapperPrimitiveT wrap(
+      PrimitiveSet<InputPrimitiveT> primitives, Class<WrapperPrimitiveT> wrapperClassObject)
+      throws GeneralSecurityException {
+    if (!primitiveWrapperMap.containsKey(wrapperClassObject)) {
+      throw new GeneralSecurityException(
+          "No PrimitiveWrapper for " + wrapperClassObject + " available");
+    }
+    @SuppressWarnings("unchecked") // We know this is how this map is organized.
+    PrimitiveWrapper<?, WrapperPrimitiveT> wrapper =
+        (PrimitiveWrapper<?, WrapperPrimitiveT>)
+            primitiveWrapperMap.get(wrapperClassObject);
+    if (!primitives.getPrimitiveClass().equals(wrapper.getInputPrimitiveClass())
+        || !wrapper.getInputPrimitiveClass().equals(primitives.getPrimitiveClass())) {
+      throw new GeneralSecurityException(
+          "Input primitive type of the wrapper doesn't match the type of primitives in the provided"
+              + " PrimitiveSet");
+    }
+    @SuppressWarnings("unchecked") // The check above ensured this.
+    PrimitiveWrapper<InputPrimitiveT, WrapperPrimitiveT> typedWrapper =
+        (PrimitiveWrapper<InputPrimitiveT, WrapperPrimitiveT>) wrapper;
+    return typedWrapper.wrap(primitives);
   }
 
   private static final class PrimitiveConstructorIndex {
