@@ -154,6 +154,109 @@ constexpr absl::string_view kSingleKeyAesGcmKeyset = R"json(
   XCTAssertNotNil(error);
 }
 
-// TODO(tholenst): Add more tests, in particularly one with a keyset with invalid keys
+// If the keyset is broken in that the key serialization is invalid, currently we fail when creating
+// the aead.
+- (void)testCreateKeysetHandle_brokenKeysetInvalidKey_fails {
+  // gA== in base64 decodes to 0x80, a simple invalid serialized proto.
+  constexpr absl::string_view kKeysetWithInvalidKey = R"json(
+  {
+    "primaryKeyId":1931667682,
+    "key":[{
+      "keyData":{
+        "typeUrl":"type.googleapis.com/google.crypto.tink.AesGcmKey",
+        "value":"gA==",
+        "keyMaterialType":"SYMMETRIC"},
+      "status":"ENABLED",
+      "keyId":1931667682,
+      "outputPrefixType":"TINK"
+    }]
+  })json";
+
+  NSData *serializedKeysetData = [NSData dataWithBytes:kKeysetWithInvalidKey.data()
+                                                length:kKeysetWithInvalidKey.size()];
+  NSError *error = nil;
+  TINKJSONKeysetReader *reader =
+      [[TINKJSONKeysetReader alloc] initWithSerializedKeyset:serializedKeysetData error:&error];
+  XCTAssertNotNil(reader);
+  XCTAssertNil(error, @"Initialization of TINKJSONKeysetReader failed with %@", error);
+
+  TINKKeysetHandle *handle =
+      [[TINKKeysetHandle alloc] initCleartextKeysetHandleWithKeysetReader:reader error:&error];
+  XCTAssertNotNil(handle);
+  XCTAssertNil(error, @"Initialization of TINKKeysetHandle failed with %@", error);
+
+  (void)[TINKAeadFactory primitiveWithKeysetHandle:handle error:&error];
+  XCTAssertNotNil(error);
+}
+
+// Test that keysets with two keys work (by decrypting a non-primary ciphertext).
+// Created from the above keyset with tinkey add-key --key_template=AES_128_GCM
+- (void)testMultiKeyKeyset {
+  constexpr absl::string_view kKeysetWithTwoKeys = R"json(
+  {
+    "primaryKeyId": 1617278036,
+    "key": [
+      {
+        "keyData": {
+          "typeUrl": "type.googleapis.com/google.crypto.tink.AesGcmKey",
+          "value": "GhD+9l0RANZjzZEZ8PDp7LRW",
+          "keyMaterialType": "SYMMETRIC"
+        },
+        "status": "ENABLED",
+        "keyId": 1931667682,
+        "outputPrefixType": "TINK"
+      },
+      {
+        "keyData": {
+          "typeUrl": "type.googleapis.com/google.crypto.tink.AesGcmKey",
+          "value": "GhDqOTk9s1gXwupF4k9R9Cps",
+          "keyMaterialType": "SYMMETRIC"
+        },
+        "status": "ENABLED",
+        "keyId": 1617278036,
+        "outputPrefixType": "RAW"
+      }
+    ]
+  })json";
+
+  // Get the AEAD from the kKeysetWithTwoKeys
+  NSData *twoKeysSerializedKeysetData = [NSData dataWithBytes:kKeysetWithTwoKeys.data()
+                                                length:kKeysetWithTwoKeys.size()];
+  NSError *error = nil;
+  TINKJSONKeysetReader *reader =
+      [[TINKJSONKeysetReader alloc] initWithSerializedKeyset:twoKeysSerializedKeysetData
+                                                       error:&error];
+  XCTAssertNotNil(reader);
+  XCTAssertNil(error, @"Initialization of TINKJSONKeysetReader failed with %@", error);
+
+  TINKKeysetHandle *handle =
+      [[TINKKeysetHandle alloc] initCleartextKeysetHandleWithKeysetReader:reader error:&error];
+  XCTAssertNotNil(handle);
+  XCTAssertNil(error, @"Initialization of TINKKeysetHandle failed with %@", error);
+
+  id<TINKAead> twoKeysAead =
+      [TINKAeadFactory primitiveWithKeysetHandle:handle error:&error];
+  XCTAssertNil(error);
+
+  // Get the AEAD from the kSingleKeyAesGcmKeyset
+  NSData *serializedKeysetData = [NSData dataWithBytes:kSingleKeyAesGcmKeyset.data()
+                                                length:kSingleKeyAesGcmKeyset.size()];
+  reader = [[TINKJSONKeysetReader alloc] initWithSerializedKeyset:serializedKeysetData
+                                                            error:&error];
+
+  handle = [[TINKKeysetHandle alloc] initCleartextKeysetHandleWithKeysetReader:reader error:&error];
+
+  id<TINKAead> singleKeyAead = [TINKAeadFactory primitiveWithKeysetHandle:handle error:&error];
+
+  // Encrypt with singleKeyAead, then decrypt with twoKeysAead
+  NSData *empty = [[NSData alloc] init];
+
+  NSData *ciphertext = [singleKeyAead encrypt:empty withAdditionalData:empty error:&error];
+  XCTAssertNil(error, @"Encrypt failed with %@", error);
+
+  NSData *decryption = [twoKeysAead decrypt:ciphertext withAdditionalData:empty error:&error];
+  XCTAssertNil(error, @"Encrypt failed with %@", error);
+  XCTAssertEqualObjects(decryption, empty);
+}
 
 @end
