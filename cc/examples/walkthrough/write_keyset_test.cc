@@ -24,6 +24,7 @@
 
 #include "gmock/gmock.h"
 #include "absl/memory/memory.h"
+#include "absl/status/status.h"
 #include "absl/strings/string_view.h"
 #include "tink/aead.h"
 #include "tink/aead/aead_config.h"
@@ -31,6 +32,7 @@
 #include "walkthrough/load_encrypted_keyset.h"
 #include "walkthrough/test_util.h"
 #include "tink/kms_clients.h"
+#include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "tink/util/test_matchers.h"
 
@@ -73,48 +75,69 @@ using ::crypto::tink::Aead;
 using ::crypto::tink::KeysetHandle;
 using ::crypto::tink::test::IsOk;
 using ::crypto::tink::test::IsOkAndHolds;
+using ::crypto::tink::test::StatusIs;
+using ::crypto::tink::util::Status;
 using ::crypto::tink::util::StatusOr;
 using ::testing::Not;
 
-TEST(WriteKeysetTest, WriteEncryptedKeysetFailsWithNullOutputStream) {
-  StatusOr<std::unique_ptr<KeysetHandle>> keyset_handle_to_encrypt =
-      LoadKeyset(kSerializedKeysetToEncrypt);
-  ASSERT_THAT(keyset_handle_to_encrypt, IsOk());
-  std::stringbuf buffer;
-  auto output_stream = absl::make_unique<std::ostream>(&buffer);
+Status InitFakeKms() {
+  static Status* status = new Status([]() {
+    Status status = crypto::tink::AeadConfig::Register();
+    if (!status.ok()) {
+      return status;
+    }
+    return crypto::tink::KmsClients::Add(
+        absl::make_unique<FakeKmsClient>(kSerializedMasterKeyKeyset));
+  }());
+  return *status;
+}
+
+class WriteKeysetTest : public testing::Test {
+ protected:
+  void SetUp() override {
+    ASSERT_THAT(InitFakeKms(), IsOk());
+    StatusOr<std::unique_ptr<KeysetHandle>> keyset_handle_to_encrypt =
+        LoadKeyset(kSerializedKeysetToEncrypt);
+    ASSERT_THAT(keyset_handle_to_encrypt, IsOk());
+    keyset_handle_to_encrypt_ = std::move(*keyset_handle_to_encrypt);
+  }
+
+  std::unique_ptr<KeysetHandle> keyset_handle_to_encrypt_;
+};
+
+TEST_F(WriteKeysetTest, WriteEncryptedKeysetFailsWithNullOutputStream) {
+  EXPECT_THAT(WriteEncryptedKeyset(*keyset_handle_to_encrypt_, nullptr,
+                                   /*master_kms_key_uri=*/"fake://some_key"),
+              StatusIs(absl::StatusCode::kInvalidArgument));
+}
+
+TEST_F(WriteKeysetTest, WriteEncryptedKeysetFailsWhenStreamFails) {
+  auto output_stream = absl::make_unique<std::ostream>(nullptr);
   EXPECT_THAT(
-      WriteEncryptedKeyset(**keyset_handle_to_encrypt, std::move(output_stream),
+      WriteEncryptedKeyset(*keyset_handle_to_encrypt_, std::move(output_stream),
                            /*master_kms_key_uri=*/"fake://some_key"),
       Not(IsOk()));
 }
 
-TEST(WriteKeysetTest, WriteEncryptedKeysetFailsNoKmsAvailable) {
-  StatusOr<std::unique_ptr<KeysetHandle>> keyset_handle_to_encrypt =
-      LoadKeyset(kSerializedKeysetToEncrypt);
-  ASSERT_THAT(keyset_handle_to_encrypt, IsOk());
-  EXPECT_THAT(WriteEncryptedKeyset(**keyset_handle_to_encrypt, nullptr,
-                                   /*master_kms_key_uri=*/"fake://some_key"),
-              Not(IsOk()));
+TEST_F(WriteKeysetTest, WriteEncryptedKeysetFailsNoKmsAvailable) {
+  std::stringbuf buffer;
+  auto output_stream = absl::make_unique<std::ostream>(&buffer);
+  EXPECT_THAT(WriteEncryptedKeyset(
+                  *keyset_handle_to_encrypt_, std::move(output_stream),
+                  /*master_kms_key_uri=*/"does_not_exist://does_not_exist"),
+              StatusIs(absl::StatusCode::kNotFound));
 }
 
-TEST(WriteKeysetTest, WriteEncryptedKeysetWithValidInputs) {
-  // Register the fake KMS for testing.
-  ASSERT_THAT(crypto::tink::AeadConfig::Register(), IsOk());
-  auto fake_kms = absl::make_unique<FakeKmsClient>(kSerializedMasterKeyKeyset);
-  ASSERT_THAT(crypto::tink::KmsClients::Add(std::move(fake_kms)), IsOk());
-
-  StatusOr<std::unique_ptr<KeysetHandle>> keyset_handle_to_encrypt =
-      LoadKeyset(kSerializedKeysetToEncrypt);
-  ASSERT_THAT(keyset_handle_to_encrypt, IsOk());
+TEST_F(WriteKeysetTest, WriteEncryptedKeysetWithValidInputs) {
   std::stringbuf buffer;
   auto output_stream = absl::make_unique<std::ostream>(&buffer);
   constexpr absl::string_view master_kms_key_uri = "fake://some_key";
   ASSERT_THAT(
-      WriteEncryptedKeyset(**keyset_handle_to_encrypt, std::move(output_stream),
+      WriteEncryptedKeyset(*keyset_handle_to_encrypt_, std::move(output_stream),
                            master_kms_key_uri),
       IsOk());
   StatusOr<std::unique_ptr<Aead>> expected_aead =
-      (*keyset_handle_to_encrypt)->GetPrimitive<Aead>();
+      keyset_handle_to_encrypt_->GetPrimitive<Aead>();
   ASSERT_THAT(expected_aead, IsOk());
   constexpr absl::string_view associated_data = "Some associated data";
   constexpr absl::string_view plaintext = "Some plaintext";
