@@ -21,6 +21,7 @@
 #include <algorithm>
 #include <cstring>
 #include <istream>
+#include <memory>
 #include <utility>
 
 #include "absl/memory/memory.h"

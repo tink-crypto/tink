@@ -17,6 +17,7 @@
 #include "tink/subtle/streaming_aead_decrypting_stream.h"
 
 #include <algorithm>
+#include <memory>
 #include <sstream>
 #include <string>
 #include <utility>

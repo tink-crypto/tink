@@ -16,6 +16,7 @@
 
 #include "tink/util/test_keyset_handle.h"
 
+#include <memory>
 #include <utility>
 
 #include "absl/memory/memory.h"

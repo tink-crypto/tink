@@ -16,6 +16,7 @@
 
 #include "tink/util/input_stream_util.h"
 
+#include <sstream>
 #include <string>
 #include <utility>
 

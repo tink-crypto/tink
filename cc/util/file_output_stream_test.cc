@@ -17,6 +17,7 @@
 #include "tink/util/file_output_stream.h"
 
 #include <algorithm>
+#include <cstring>
 #include <string>
 
 #include "gtest/gtest.h"

@@ -17,6 +17,8 @@
 #ifndef TINK_UTIL_TEST_KEYSET_HANDLE_H_
 #define TINK_UTIL_TEST_KEYSET_HANDLE_H_
 
+#include <memory>
+
 #include "tink/keyset_handle.h"
 #include "proto/tink.pb.h"
 

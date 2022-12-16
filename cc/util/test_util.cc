@@ -24,7 +24,11 @@
 #include <cmath>
 #include <cstdint>
 #include <cstdlib>
+#include <iostream>
+#include <memory>
+#include <ostream>
 #include <string>
+#include <vector>
 
 #include "absl/memory/memory.h"
 #include "absl/status/status.h"

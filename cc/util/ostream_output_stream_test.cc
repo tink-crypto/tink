@@ -17,9 +17,11 @@
 #include "tink/util/ostream_output_stream.h"
 
 #include <algorithm>
+#include <cstring>
 #include <fstream>
 #include <iostream>
 #include <memory>
+#include <ostream>
 #include <string>
 #include <utility>
 

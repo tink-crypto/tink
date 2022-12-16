@@ -16,6 +16,8 @@
 #include "tink/subtle/streaming_aead_test_util.h"
 
 #include <algorithm>
+#include <cstring>
+#include <memory>
 #include <sstream>
 #include <string>
 #include <utility>

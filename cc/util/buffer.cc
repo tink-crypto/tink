@@ -16,6 +16,8 @@
 
 #include "tink/util/buffer.h"
 
+#include <memory>
+
 #include "absl/memory/memory.h"
 #include "absl/status/status.h"
 #include "tink/util/status.h"

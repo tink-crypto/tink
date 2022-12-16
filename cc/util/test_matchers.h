@@ -17,6 +17,7 @@
 #ifndef TINK_UTIL_TEST_MATCHERS_H_
 #define TINK_UTIL_TEST_MATCHERS_H_
 
+#include <ostream>
 #include <string>
 
 #include "gmock/gmock.h"

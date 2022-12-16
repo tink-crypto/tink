@@ -17,6 +17,7 @@
 #include "tink/subtle/streaming_mac_impl.h"
 
 #include <algorithm>
+#include <memory>
 #include <string>
 #include <utility>
 

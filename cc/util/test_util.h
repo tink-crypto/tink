@@ -18,6 +18,8 @@
 #define TINK_UTIL_TEST_UTIL_H_
 
 #include <limits>
+#include <memory>
+#include <ostream>
 #include <string>
 #include <utility>
 

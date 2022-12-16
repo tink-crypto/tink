@@ -17,6 +17,8 @@
 #ifndef TINK_UTIL_BUFFER_H_
 #define TINK_UTIL_BUFFER_H_
 
+#include <memory>
+
 #include "absl/memory/memory.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
