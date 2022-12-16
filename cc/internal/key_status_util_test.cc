@@ -66,6 +66,12 @@ TEST(KeyStatusUtilTest, ToKeyStatusType) {
   EXPECT_THAT(unknown.status(), StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
+TEST(KeyStatusUtilTest, ToKeyStatusName) {
+  EXPECT_EQ(ToKeyStatusName(KeyStatus::kEnabled), "ENABLED");
+  EXPECT_EQ(ToKeyStatusName(KeyStatus::kDisabled), "DISABLED");
+  EXPECT_EQ(ToKeyStatusName(KeyStatus::kDestroyed), "DESTROYED");
+}
+
 }  // namespace
 }  // namespace internal
 }  // namespace tink

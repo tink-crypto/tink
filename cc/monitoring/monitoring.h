@@ -22,6 +22,7 @@
 #include <vector>
 
 #include "absl/container/flat_hash_map.h"
+#include "tink/internal/key_status_util.h"
 #include "tink/key_status.h"
 #include "tink/util/statusor.h"
 
@@ -45,7 +46,7 @@ class MonitoringKeySetInfo {
           key_prefix_(key_prefix) {}
 
     // Returns the status of this entry.
-    KeyStatus GetStatus() const { return status_; }
+    std::string GetStatus() const { return internal::ToKeyStatusName(status_); }
     // Returns the ID of the entry within the keyset.
     uint32_t GetKeyId() const { return key_id_; }
     // Returns the key type.

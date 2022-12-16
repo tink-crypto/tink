@@ -7,6 +7,7 @@ tink_cc_library(
   DEPS
     absl::flat_hash_map
     tink::core::key_status
+    tink::internal::key_status_util
     tink::util::statusor
 )
 

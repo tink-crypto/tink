@@ -17,6 +17,8 @@
 #ifndef TINK_INTERNAL_KEY_STATUS_UTIL_H_
 #define TINK_INTERNAL_KEY_STATUS_UTIL_H_
 
+#include <string>
+
 #include "tink/key_status.h"
 #include "tink/util/statusor.h"
 #include "proto/tink.pb.h"
@@ -34,6 +36,10 @@ util::StatusOr<KeyStatus> FromKeyStatusType(
 // `status` is unrecognized (i.e., not handled), then an error is returned.
 util::StatusOr<google::crypto::tink::KeyStatusType> ToKeyStatusType(
     KeyStatus status);
+
+// Returns a canonical name for a `KeyStatus` based on the corresponding
+// `KeyStatusType` proto enum.
+std::string ToKeyStatusName(KeyStatus status);
 
 }  // namespace internal
 }  // namespace tink

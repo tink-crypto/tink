@@ -16,6 +16,8 @@
 
 #include "tink/internal/key_status_util.h"
 
+#include <string>
+
 #include "tink/key_status.h"
 #include "tink/util/statusor.h"
 #include "proto/tink.pb.h"
@@ -51,6 +53,19 @@ util::StatusOr<KeyStatusType> ToKeyStatusType(KeyStatus status) {
     default:
       return util::Status(absl::StatusCode::kInvalidArgument,
                           "Invalid key status.");
+  }
+}
+
+std::string ToKeyStatusName(KeyStatus status) {
+  switch (status) {
+    case KeyStatus::kEnabled:
+    return KeyStatusType_Name(KeyStatusType::ENABLED);
+    case KeyStatus::kDisabled:
+    return KeyStatusType_Name(KeyStatusType::DISABLED);
+    case KeyStatus::kDestroyed:
+      return KeyStatusType_Name(KeyStatusType::DESTROYED);
+    default:
+      return KeyStatusType_Name(KeyStatusType::UNKNOWN_STATUS);
   }
 }
 
