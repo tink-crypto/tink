@@ -95,7 +95,6 @@ java_library(
     deps = [
         ":aead_wrapper",
         "//src/main/java/com/google/crypto/tink:aead",
-        "//src/main/java/com/google/crypto/tink:registry",
         "//src/main/java/com/google/crypto/tink:registry_cluster",
     ],
 )
@@ -418,7 +417,6 @@ android_library(
     deps = [
         ":aead_wrapper-android",
         "//src/main/java/com/google/crypto/tink:aead-android",
-        "//src/main/java/com/google/crypto/tink:registry-android",
         "//src/main/java/com/google/crypto/tink:registry_cluster-android",
     ],
 )

@@ -76,7 +76,6 @@ java_library(
     srcs = ["StreamingAeadFactory.java"],
     deps = [
         ":streaming_aead_wrapper",
-        "//src/main/java/com/google/crypto/tink:registry",
         "//src/main/java/com/google/crypto/tink:registry_cluster",
         "//src/main/java/com/google/crypto/tink:streaming_aead",
     ],
@@ -220,7 +219,6 @@ android_library(
     srcs = ["StreamingAeadFactory.java"],
     deps = [
         ":streaming_aead_wrapper-android",
-        "//src/main/java/com/google/crypto/tink:registry-android",
         "//src/main/java/com/google/crypto/tink:registry_cluster-android",
         "//src/main/java/com/google/crypto/tink:streaming_aead-android",
     ],

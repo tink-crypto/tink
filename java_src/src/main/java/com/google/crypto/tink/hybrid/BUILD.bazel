@@ -157,7 +157,6 @@ java_library(
     deps = [
         ":hybrid_decrypt_wrapper",
         "//src/main/java/com/google/crypto/tink:hybrid_decrypt",
-        "//src/main/java/com/google/crypto/tink:registry",
         "//src/main/java/com/google/crypto/tink:registry_cluster",
     ],
 )
@@ -168,7 +167,6 @@ java_library(
     deps = [
         ":hybrid_encrypt_wrapper",
         "//src/main/java/com/google/crypto/tink:hybrid_encrypt",
-        "//src/main/java/com/google/crypto/tink:registry",
         "//src/main/java/com/google/crypto/tink:registry_cluster",
     ],
 )
@@ -337,7 +335,6 @@ android_library(
     deps = [
         ":hybrid_decrypt_wrapper-android",
         "//src/main/java/com/google/crypto/tink:hybrid_decrypt-android",
-        "//src/main/java/com/google/crypto/tink:registry-android",
         "//src/main/java/com/google/crypto/tink:registry_cluster-android",
     ],
 )
@@ -348,7 +345,6 @@ android_library(
     deps = [
         ":hybrid_encrypt_wrapper-android",
         "//src/main/java/com/google/crypto/tink:hybrid_encrypt-android",
-        "//src/main/java/com/google/crypto/tink:registry-android",
         "//src/main/java/com/google/crypto/tink:registry_cluster-android",
     ],
 )

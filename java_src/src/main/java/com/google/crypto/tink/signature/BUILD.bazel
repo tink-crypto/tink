@@ -176,7 +176,6 @@ java_library(
     deps = [
         ":public_key_sign_wrapper",
         "//src/main/java/com/google/crypto/tink:public_key_sign",
-        "//src/main/java/com/google/crypto/tink:registry",
         "//src/main/java/com/google/crypto/tink:registry_cluster",
     ],
 )
@@ -274,7 +273,6 @@ java_library(
     deps = [
         ":public_key_verify_wrapper",
         "//src/main/java/com/google/crypto/tink:public_key_verify",
-        "//src/main/java/com/google/crypto/tink:registry",
         "//src/main/java/com/google/crypto/tink:registry_cluster",
     ],
 )
@@ -532,7 +530,6 @@ android_library(
     deps = [
         ":public_key_sign_wrapper-android",
         "//src/main/java/com/google/crypto/tink:public_key_sign-android",
-        "//src/main/java/com/google/crypto/tink:registry-android",
         "//src/main/java/com/google/crypto/tink:registry_cluster-android",
     ],
 )
@@ -630,7 +627,6 @@ android_library(
     deps = [
         ":public_key_verify_wrapper-android",
         "//src/main/java/com/google/crypto/tink:public_key_verify-android",
-        "//src/main/java/com/google/crypto/tink:registry-android",
         "//src/main/java/com/google/crypto/tink:registry_cluster-android",
     ],
 )
