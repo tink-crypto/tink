@@ -709,6 +709,7 @@ objc_library(
             "Tests/UnitTests/aead/*.mm",
             "Tests/UnitTests/mac/*.mm",
             "Tests/UnitTests/daead/*.mm",
+            "Tests/UnitTests/hybrid/*.mm",
         ],
     ),
     deps = [
