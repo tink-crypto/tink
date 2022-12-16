@@ -48,7 +48,7 @@ class JwtPublicKeyVerify {
   virtual crypto::tink::util::StatusOr<VerifiedJwt> VerifyAndDecode(
       absl::string_view compact, const JwtValidator& validator) const = 0;
 
-  virtual ~JwtPublicKeyVerify() {}
+  virtual ~JwtPublicKeyVerify() = default;
 };
 
 }  // namespace tink

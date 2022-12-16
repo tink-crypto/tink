@@ -36,7 +36,7 @@ class KeysetHandle;
 class KeysetManager {
  public:
   // Constructs a KeysetManager with an empty Keyset.
-  KeysetManager() {}
+  KeysetManager() = default;
 
   // Creates a new KeysetManager that contains a Keyset with a single key
   // generated freshly according the specification in 'key_template'.

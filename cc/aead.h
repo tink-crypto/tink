@@ -51,7 +51,7 @@ class Aead {
       absl::string_view ciphertext,
       absl::string_view associated_data) const = 0;
 
-  virtual ~Aead() {}
+  virtual ~Aead() = default;
 };
 
 }  // namespace tink

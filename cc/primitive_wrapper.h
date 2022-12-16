@@ -34,7 +34,7 @@ namespace tink {
 template <typename InputPrimitive, typename Primitive>
 class PrimitiveWrapper {
  public:
-  virtual ~PrimitiveWrapper() {}
+  virtual ~PrimitiveWrapper() = default;
   virtual crypto::tink::util::StatusOr<std::unique_ptr<Primitive>> Wrap(
       std::unique_ptr<PrimitiveSet<InputPrimitive>> primitive_set) const = 0;
 };

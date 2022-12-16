@@ -53,7 +53,7 @@ class DeterministicAead {
       absl::string_view ciphertext,
       absl::string_view associated_data) const = 0;
 
-  virtual ~DeterministicAead() {}
+  virtual ~DeterministicAead() = default;
 };
 
 }  // namespace tink

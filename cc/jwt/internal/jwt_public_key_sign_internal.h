@@ -41,7 +41,7 @@ class JwtPublicKeySignInternal {
   virtual crypto::tink::util::StatusOr<std::string> SignAndEncodeWithKid(
       const RawJwt& token, absl::optional<absl::string_view> kid) const = 0;
 
-  virtual ~JwtPublicKeySignInternal() {}
+  virtual ~JwtPublicKeySignInternal() = default;
 };
 
 }  // namespace tink

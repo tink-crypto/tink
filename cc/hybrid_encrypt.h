@@ -61,7 +61,7 @@ class HybridEncrypt {
   virtual crypto::tink::util::StatusOr<std::string> Encrypt(
       absl::string_view plaintext, absl::string_view context_info) const = 0;
 
-  virtual ~HybridEncrypt() {}
+  virtual ~HybridEncrypt() = default;
 };
 
 }  // namespace tink

@@ -46,7 +46,7 @@ namespace tink {
 // for non-deterministic MAC algorithms.
 class Prf {
  public:
-  virtual ~Prf() {}
+  virtual ~Prf() = default;
   // Computes the PRF selected by the underlying key on input and
   // returns the first outputLength bytes.
   // When choosing this parameter keep the birthday paradox in mind.
@@ -67,7 +67,7 @@ class Prf {
 // the Keyset.
 class PrfSet {
  public:
-  virtual ~PrfSet() {}
+  virtual ~PrfSet() = default;
   // The primary ID of the keyset.
   virtual uint32_t GetPrimaryId() const = 0;
   // A map of the PRFs represented by the keys in this keyset.

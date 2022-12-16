@@ -59,7 +59,7 @@ template <class T>
 class OutputStreamWithResult : public OutputStream {
  public:
   OutputStreamWithResult() : closed_(false) {}
-  ~OutputStreamWithResult() override {}
+  ~OutputStreamWithResult() override = default;
 
   // The return type is StatusOr<T> if T != Status, and Status otherwise.
   using ResultType =

@@ -46,7 +46,7 @@ class JwtPublicKeyVerifySetWrapper : public JwtPublicKeyVerify {
       absl::string_view compact,
       const crypto::tink::JwtValidator& validator) const override;
 
-  ~JwtPublicKeyVerifySetWrapper() override {}
+  ~JwtPublicKeyVerifySetWrapper() override = default;
 
  private:
   std::unique_ptr<PrimitiveSet<JwtPublicKeyVerifyInternal>> jwt_verify_set_;

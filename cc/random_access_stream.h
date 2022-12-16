@@ -28,8 +28,8 @@ namespace tink {
 // like regular files.
 class RandomAccessStream {
  public:
-  RandomAccessStream() {}
-  virtual ~RandomAccessStream() {}
+  RandomAccessStream() = default;
+  virtual ~RandomAccessStream() = default;
 
   // Reads up to 'count' bytes starting at 'position' and writes them
   // to 'dest_buffer'.  'position' must be within the size of the stream,

@@ -56,7 +56,7 @@ class CordAeadSetWrapper : public CordAead {
   crypto::tink::util::StatusOr<absl::Cord> Decrypt(
       absl::Cord ciphertext, absl::Cord associated_data) const override;
 
-  ~CordAeadSetWrapper() override {}
+  ~CordAeadSetWrapper() override = default;
 
  private:
   std::unique_ptr<PrimitiveSet<CordAead>> aead_set_;

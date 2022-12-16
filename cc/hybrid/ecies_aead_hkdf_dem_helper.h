@@ -38,7 +38,7 @@ class EciesAeadHkdfDemHelper {
   crypto::tink::util::StatusOr<std::unique_ptr<const EciesAeadHkdfDemHelper>>
       New(const google::crypto::tink::KeyTemplate& dem_key_template);
 
-  virtual ~EciesAeadHkdfDemHelper() {}
+  virtual ~EciesAeadHkdfDemHelper() = default;
 
   // Returns the size of the DEM-key in bytes.
   uint32_t dem_key_size_in_bytes() const {

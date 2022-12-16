@@ -155,7 +155,7 @@ class ChunkedMacSetWrapper : public ChunkedMac {
   util::StatusOr<std::unique_ptr<ChunkedMacVerification>> CreateVerification(
       absl::string_view tag) const override;
 
-  ~ChunkedMacSetWrapper() override {}
+  ~ChunkedMacSetWrapper() override = default;
 
  private:
   std::unique_ptr<PrimitiveSet<ChunkedMac>> mac_set_;

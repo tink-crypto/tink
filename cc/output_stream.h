@@ -27,8 +27,8 @@ namespace tink {
 // Protocol Buffers' google::protobuf::io::ZeroCopyOutputStream.
 class OutputStream {
  public:
-  OutputStream() {}
-  virtual ~OutputStream() {}
+  OutputStream() = default;
+  virtual ~OutputStream() = default;
 
   // Obtains a buffer into which data can be written.  Any data written
   // into this buffer will eventually (maybe instantly, maybe later on)

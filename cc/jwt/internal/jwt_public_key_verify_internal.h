@@ -54,7 +54,7 @@ class JwtPublicKeyVerifyInternal {
       absl::string_view compact, const JwtValidator& validator,
       absl::optional<absl::string_view> kid) const = 0;
 
-  virtual ~JwtPublicKeyVerifyInternal() {}
+  virtual ~JwtPublicKeyVerifyInternal() = default;
 };
 
 }  // namespace tink

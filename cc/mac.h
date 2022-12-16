@@ -42,7 +42,7 @@ class Mac {
       absl::string_view mac_value,
       absl::string_view data) const = 0;
 
-  virtual ~Mac() {}
+  virtual ~Mac() = default;
 };
 
 }  // namespace tink

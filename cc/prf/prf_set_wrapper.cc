@@ -45,7 +45,7 @@ class PrfSetPrimitiveWrapper : public PrfSet {
   }
   const std::map<uint32_t, Prf*>& GetPrfs() const override { return prfs_; }
 
-  ~PrfSetPrimitiveWrapper() override {}
+  ~PrfSetPrimitiveWrapper() override = default;
 
  private:
   std::unique_ptr<PrimitiveSet<Prf>> prf_set_;

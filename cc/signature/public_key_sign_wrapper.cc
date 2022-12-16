@@ -64,7 +64,7 @@ class PublicKeySignSetWrapper : public PublicKeySign {
   crypto::tink::util::StatusOr<std::string> Sign(
       absl::string_view data) const override;
 
-  ~PublicKeySignSetWrapper() override {}
+  ~PublicKeySignSetWrapper() override = default;
 
  private:
   std::unique_ptr<PrimitiveSet<PublicKeySign>> public_key_sign_set_;

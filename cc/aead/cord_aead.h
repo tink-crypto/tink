@@ -56,7 +56,7 @@ class CordAead {
       absl::Cord ciphertext,
       absl::Cord associated_data) const = 0;
 
-  virtual ~CordAead() {}
+  virtual ~CordAead() = default;
 };
 
 }  // namespace tink

@@ -60,7 +60,7 @@ class MacSetWrapper : public Mac {
   crypto::tink::util::Status VerifyMac(absl::string_view mac_value,
                                        absl::string_view data) const override;
 
-  ~MacSetWrapper() override {}
+  ~MacSetWrapper() override = default;
 
  private:
   std::unique_ptr<PrimitiveSet<Mac>> mac_set_;

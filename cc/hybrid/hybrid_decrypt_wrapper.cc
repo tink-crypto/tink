@@ -52,7 +52,7 @@ class HybridDecryptSetWrapper : public HybridDecrypt {
       absl::string_view ciphertext,
       absl::string_view context_info) const override;
 
-  ~HybridDecryptSetWrapper() override {}
+  ~HybridDecryptSetWrapper() override = default;
 
  private:
   std::unique_ptr<PrimitiveSet<HybridDecrypt>> hybrid_decrypt_set_;

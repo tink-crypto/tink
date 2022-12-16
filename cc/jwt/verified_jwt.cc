@@ -27,7 +27,7 @@
 namespace crypto {
 namespace tink {
 
-VerifiedJwt::VerifiedJwt() {}
+VerifiedJwt::VerifiedJwt() = default;
 
 VerifiedJwt::VerifiedJwt(const RawJwt& raw_jwt) {
   raw_jwt_ = raw_jwt;

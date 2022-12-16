@@ -255,7 +255,7 @@ class ExampleKeyTypeManager : public KeyTypeManager<AesGcmKey, AesGcmKeyFormat,
 template <typename P, typename Q = P>
 class TestWrapper : public PrimitiveWrapper<P, Q> {
  public:
-  TestWrapper() {}
+  TestWrapper() = default;
   crypto::tink::util::StatusOr<std::unique_ptr<Q>> Wrap(
       std::unique_ptr<PrimitiveSet<P>> primitive_set) const override {
     return util::Status(absl::StatusCode::kUnimplemented,

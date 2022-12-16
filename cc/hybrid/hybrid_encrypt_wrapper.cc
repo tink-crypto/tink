@@ -67,7 +67,7 @@ class HybridEncryptSetWrapper : public HybridEncrypt {
       absl::string_view plaintext,
       absl::string_view context_info) const override;
 
-  ~HybridEncryptSetWrapper() override {}
+  ~HybridEncryptSetWrapper() override = default;
 
  private:
   std::unique_ptr<PrimitiveSet<HybridEncrypt>> hybrid_encrypt_set_;

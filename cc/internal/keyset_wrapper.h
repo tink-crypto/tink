@@ -41,7 +41,7 @@ namespace internal {
 template <typename Primitive>
 class KeysetWrapper {
  public:
-  virtual ~KeysetWrapper() {}
+  virtual ~KeysetWrapper() = default;
 
   // Wraps a given `keyset` with annotations `annotations`.
   virtual crypto::tink::util::StatusOr<std::unique_ptr<Primitive>> Wrap(

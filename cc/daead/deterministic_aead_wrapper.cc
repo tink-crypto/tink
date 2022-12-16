@@ -71,7 +71,7 @@ class  DeterministicAeadSetWrapper : public DeterministicAead {
       absl::string_view ciphertext,
       absl::string_view associated_data) const override;
 
-  ~DeterministicAeadSetWrapper() override {}
+  ~DeterministicAeadSetWrapper() override = default;
 
  private:
   std::unique_ptr<PrimitiveSet<DeterministicAead>> daead_set_;

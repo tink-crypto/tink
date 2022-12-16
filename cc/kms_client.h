@@ -38,7 +38,7 @@ class KmsClient {
   virtual crypto::tink::util::StatusOr<std::unique_ptr<Aead>>
   GetAead(absl::string_view key_uri) const = 0;
 
-  virtual ~KmsClient() {}
+  virtual ~KmsClient() = default;
 };
 
 }  // namespace tink

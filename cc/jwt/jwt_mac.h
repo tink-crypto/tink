@@ -56,7 +56,7 @@ class JwtMac {
   virtual crypto::tink::util::StatusOr<VerifiedJwt> VerifyMacAndDecode(
       absl::string_view compact, const JwtValidator& validator) const = 0;
 
-  virtual ~JwtMac() {}
+  virtual ~JwtMac() = default;
 };
 
 }  // namespace tink

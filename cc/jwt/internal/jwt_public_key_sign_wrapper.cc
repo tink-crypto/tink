@@ -45,7 +45,7 @@ class JwtPublicKeySignSetWrapper : public JwtPublicKeySign {
   crypto::tink::util::StatusOr<std::string> SignAndEncode(
       const crypto::tink::RawJwt& token) const override;
 
-  ~JwtPublicKeySignSetWrapper() override {}
+  ~JwtPublicKeySignSetWrapper() override = default;
 
  private:
   std::unique_ptr<PrimitiveSet<JwtPublicKeySignInternal>> jwt_sign_set_;

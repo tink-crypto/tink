@@ -60,7 +60,7 @@ class ZeroCopyAeadSetWrapper : public Aead {
       absl::string_view ciphertext,
       absl::string_view associated_data) const override;
 
-  ~ZeroCopyAeadSetWrapper() override {}
+  ~ZeroCopyAeadSetWrapper() override = default;
 
  private:
   std::unique_ptr<PrimitiveSet<ZeroCopyAead>> aead_set_;

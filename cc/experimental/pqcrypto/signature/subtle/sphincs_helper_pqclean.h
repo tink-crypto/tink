@@ -34,7 +34,7 @@ class SphincsHelperPqclean {
 
   SphincsHelperPqclean(const SphincsHelperPqclean &other) = delete;
   SphincsHelperPqclean &operator=(const SphincsHelperPqclean &other) = delete;
-  virtual ~SphincsHelperPqclean() {}
+  virtual ~SphincsHelperPqclean() = default;
 
   // Arguments:
   //   sig - output signature (allocated buffer of size at least

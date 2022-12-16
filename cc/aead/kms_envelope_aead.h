@@ -58,7 +58,7 @@ class KmsEnvelopeAead : public Aead {
       absl::string_view ciphertext,
       absl::string_view associated_data) const override;
 
-  ~KmsEnvelopeAead() override {}
+  ~KmsEnvelopeAead() override = default;
 
  private:
   KmsEnvelopeAead(const google::crypto::tink::KeyTemplate& dek_template,

@@ -186,7 +186,7 @@ util::StatusOr<std::string> RawJwt::GetJsonPayload() const {
   return jwt_internal::ProtoStructToJsonString(json_proto_);
 }
 
-RawJwt::RawJwt() {}
+RawJwt::RawJwt() = default;
 
 RawJwt::RawJwt(absl::optional<std::string> type_header,
                google::protobuf::Struct json_proto) {

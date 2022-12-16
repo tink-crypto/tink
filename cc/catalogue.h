@@ -37,7 +37,7 @@ class ABSL_DEPRECATED("Catalogues are not supported anymore.") Catalogue {
   GetKeyManager(const std::string& type_url, const std::string& primitive_name,
                 uint32_t min_version) const = 0;
 
-  virtual ~Catalogue() {}
+  virtual ~Catalogue() = default;
 };
 
 }  // namespace tink

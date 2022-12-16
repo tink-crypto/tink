@@ -38,7 +38,7 @@ class PublicKeyVerify {
       absl::string_view signature,
       absl::string_view data) const = 0;
 
-  virtual ~PublicKeyVerify() {}
+  virtual ~PublicKeyVerify() = default;
 };
 
 }  // namespace tink

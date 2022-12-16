@@ -57,7 +57,7 @@ class KeyFactory {
       std::unique_ptr<google::crypto::tink::KeyData>>
   NewKeyData(absl::string_view serialized_key_format) const = 0;
 
-  virtual ~KeyFactory() {}
+  virtual ~KeyFactory() = default;
 };
 
 class PrivateKeyFactory : public virtual KeyFactory {
@@ -67,7 +67,7 @@ class PrivateKeyFactory : public virtual KeyFactory {
       std::unique_ptr<google::crypto::tink::KeyData>>
   GetPublicKeyData(absl::string_view serialized_private_key) const = 0;
 
-  virtual ~PrivateKeyFactory() {}
+  ~PrivateKeyFactory() override = default;
 };
 
 /**
@@ -95,7 +95,7 @@ class KeyManagerBase {
     return (key_type == get_key_type());
   }
 
-  virtual ~KeyManagerBase() {}
+  virtual ~KeyManagerBase() = default;
 };
 
 template <class P>

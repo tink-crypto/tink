@@ -35,7 +35,7 @@ class KeysetWriter {
   virtual crypto::tink::util::Status
       Write(const google::crypto::tink::EncryptedKeyset& encrypted_keyset) = 0;
 
-  virtual ~KeysetWriter() {}
+  virtual ~KeysetWriter() = default;
 };
 
 }  // namespace tink

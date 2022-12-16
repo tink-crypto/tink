@@ -53,7 +53,7 @@ class GcpKmsAead : public Aead {
       absl::string_view ciphertext,
       absl::string_view associated_data) const override;
 
-  virtual ~GcpKmsAead() {}
+  virtual ~GcpKmsAead() = default;
 
  private:
   GcpKmsAead(

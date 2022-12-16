@@ -38,7 +38,7 @@ class JwtPublicKeySign {
   virtual crypto::tink::util::StatusOr<std::string> SignAndEncode(
       const RawJwt& token) const = 0;
 
-  virtual ~JwtPublicKeySign() {}
+  virtual ~JwtPublicKeySign() = default;
 };
 
 }  // namespace tink

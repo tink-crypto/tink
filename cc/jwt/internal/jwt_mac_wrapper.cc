@@ -49,7 +49,7 @@ class JwtMacSetWrapper : public JwtMac {
       absl::string_view compact,
       const crypto::tink::JwtValidator& validator) const override;
 
-  ~JwtMacSetWrapper() override {}
+  ~JwtMacSetWrapper() override = default;
 
  private:
   std::unique_ptr<PrimitiveSet<JwtMacInternal>> jwt_mac_set_;

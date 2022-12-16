@@ -39,7 +39,7 @@ class PublicKeySign {
   virtual crypto::tink::util::StatusOr<std::string> Sign(
       absl::string_view data) const = 0;
 
-  virtual ~PublicKeySign() {}
+  virtual ~PublicKeySign() = default;
 };
 
 }  // namespace tink

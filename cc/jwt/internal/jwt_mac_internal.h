@@ -65,7 +65,7 @@ class JwtMacInternal {
       absl::string_view compact, const JwtValidator& validator,
       absl::optional<absl::string_view> kid) const = 0;
 
-  virtual ~JwtMacInternal() {}
+  virtual ~JwtMacInternal() = default;
 };
 
 }  // namespace jwt_internal
