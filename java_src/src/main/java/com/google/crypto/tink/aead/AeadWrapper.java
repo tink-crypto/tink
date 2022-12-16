@@ -42,6 +42,8 @@ import java.util.logging.Logger;
 public class AeadWrapper implements PrimitiveWrapper<Aead, Aead> {
   private static final Logger logger = Logger.getLogger(AeadWrapper.class.getName());
 
+  private static final AeadWrapper WRAPPER = new AeadWrapper();
+
   private static class WrappedAead implements Aead {
     private final PrimitiveSet<Aead> pSet;
     private final MonitoringClient.Logger encLogger;
@@ -131,6 +133,6 @@ public class AeadWrapper implements PrimitiveWrapper<Aead, Aead> {
   }
 
   public static void register() throws GeneralSecurityException {
-    Registry.registerPrimitiveWrapper(new AeadWrapper());
+    Registry.registerPrimitiveWrapper(WRAPPER);
   }
 }

@@ -45,6 +45,7 @@ class MacWrapper implements PrimitiveWrapper<Mac, Mac> {
   private static final Logger logger = Logger.getLogger(MacWrapper.class.getName());
 
   private static final byte[] FORMAT_VERSION = new byte[] {0};
+  private static final MacWrapper WRAPPER = new MacWrapper();
 
   private static class WrappedMac implements Mac {
     private final PrimitiveSet<Mac> primitives;
@@ -169,6 +170,6 @@ class MacWrapper implements PrimitiveWrapper<Mac, Mac> {
   }
 
  public static void register() throws GeneralSecurityException {
-    Registry.registerPrimitiveWrapper(new MacWrapper());
+    Registry.registerPrimitiveWrapper(WRAPPER);
   }
 }

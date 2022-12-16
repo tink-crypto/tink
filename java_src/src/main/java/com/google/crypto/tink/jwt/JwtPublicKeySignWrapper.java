@@ -35,6 +35,8 @@ import java.util.Optional;
 class JwtPublicKeySignWrapper
     implements PrimitiveWrapper<JwtPublicKeySignInternal, JwtPublicKeySign> {
 
+  private static final JwtPublicKeySignWrapper WRAPPER = new JwtPublicKeySignWrapper();
+
   private static void validate(PrimitiveSet<JwtPublicKeySignInternal> primitiveSet)
       throws GeneralSecurityException {
     if (primitiveSet.getPrimary() == null) {
@@ -94,6 +96,6 @@ class JwtPublicKeySignWrapper
    * argument.
    */
   public static void register() throws GeneralSecurityException {
-    Registry.registerPrimitiveWrapper(new JwtPublicKeySignWrapper());
+    Registry.registerPrimitiveWrapper(WRAPPER);
   }
 }

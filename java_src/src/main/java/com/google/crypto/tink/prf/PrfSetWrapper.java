@@ -38,6 +38,9 @@ import java.util.Map;
  */
 @Immutable
 public class PrfSetWrapper implements PrimitiveWrapper<Prf, PrfSet> {
+
+  private static final PrfSetWrapper WRAPPER = new PrfSetWrapper();
+
   private static class WrappedPrfSet extends PrfSet {
     // This map is constructed using Collections.unmodifiableMap
     @SuppressWarnings("Immutable")
@@ -131,6 +134,6 @@ public class PrfSetWrapper implements PrimitiveWrapper<Prf, PrfSet> {
   }
 
   public static void register() throws GeneralSecurityException {
-    Registry.registerPrimitiveWrapper(new PrfSetWrapper());
+    Registry.registerPrimitiveWrapper(WRAPPER);
   }
 }

@@ -29,6 +29,9 @@ import java.util.Optional;
  * JwtMacWrapper is the implementation of {@link PrimitiveWrapper} for the {@link JwtMac} primitive.
  */
 class JwtMacWrapper implements PrimitiveWrapper<JwtMacInternal, JwtMac> {
+
+  private static final JwtMacWrapper WRAPPER = new JwtMacWrapper();
+
   private static void validate(PrimitiveSet<JwtMacInternal> primitiveSet)
       throws GeneralSecurityException {
     if (primitiveSet.getPrimary() == null) {
@@ -105,6 +108,6 @@ class JwtMacWrapper implements PrimitiveWrapper<JwtMacInternal, JwtMac> {
   }
 
  public static void register() throws GeneralSecurityException {
-    Registry.registerPrimitiveWrapper(new JwtMacWrapper());
+    Registry.registerPrimitiveWrapper(WRAPPER);
   }
 }

@@ -31,6 +31,9 @@ import java.security.GeneralSecurityException;
  * {@link com.google.crypto.tink.proto.OutputPrefixType#RAW}.
  */
 public class StreamingAeadWrapper implements PrimitiveWrapper<StreamingAead, StreamingAead> {
+
+  private static final StreamingAeadWrapper WRAPPER = new StreamingAeadWrapper();
+
   StreamingAeadWrapper() {}
 
   /**
@@ -54,6 +57,6 @@ public class StreamingAeadWrapper implements PrimitiveWrapper<StreamingAead, Str
   }
 
   public static void register() throws GeneralSecurityException {
-    Registry.registerPrimitiveWrapper(new StreamingAeadWrapper());
+    Registry.registerPrimitiveWrapper(WRAPPER);
   }
 }

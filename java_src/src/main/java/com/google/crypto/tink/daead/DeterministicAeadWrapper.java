@@ -42,7 +42,9 @@ import java.util.logging.Logger;
  */
 public class DeterministicAeadWrapper
     implements PrimitiveWrapper<DeterministicAead, DeterministicAead> {
+
   private static final Logger logger = Logger.getLogger(DeterministicAeadWrapper.class.getName());
+  private static final DeterministicAeadWrapper WRAPPER = new DeterministicAeadWrapper();
 
   private static class WrappedDeterministicAead implements DeterministicAead {
     private final PrimitiveSet<DeterministicAead> primitives;
@@ -138,6 +140,6 @@ public class DeterministicAeadWrapper
   }
 
   public static void register() throws GeneralSecurityException {
-    Registry.registerPrimitiveWrapper(new DeterministicAeadWrapper());
+    Registry.registerPrimitiveWrapper(WRAPPER);
   }
 }

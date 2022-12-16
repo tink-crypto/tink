@@ -38,6 +38,7 @@ import java.security.GeneralSecurityException;
 public class PublicKeySignWrapper implements PrimitiveWrapper<PublicKeySign, PublicKeySign> {
 
   private static final byte[] FORMAT_VERSION = new byte[] {0};
+  private static final PublicKeySignWrapper WRAPPER = new PublicKeySignWrapper();
 
   private static class WrappedPublicKeySign implements PublicKeySign {
     private final PrimitiveSet<PublicKeySign> primitives;
@@ -99,6 +100,6 @@ public class PublicKeySignWrapper implements PrimitiveWrapper<PublicKeySign, Pub
    * argument.
    */
   public static void register() throws GeneralSecurityException {
-    Registry.registerPrimitiveWrapper(new PublicKeySignWrapper());
+    Registry.registerPrimitiveWrapper(WRAPPER);
   }
 }

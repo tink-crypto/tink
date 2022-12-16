@@ -43,9 +43,11 @@ import java.util.logging.Logger;
  * @since 1.0.0
  */
 class PublicKeyVerifyWrapper implements PrimitiveWrapper<PublicKeyVerify, PublicKeyVerify> {
+
   private static final Logger logger = Logger.getLogger(PublicKeyVerifyWrapper.class.getName());
 
   private static final byte[] FORMAT_VERSION = new byte[] {0};
+  private static final PublicKeyVerifyWrapper WRAPPER = new PublicKeyVerifyWrapper();
 
   private static class WrappedPublicKeyVerify implements PublicKeyVerify {
     private final PrimitiveSet<PublicKeyVerify> primitives;
@@ -131,6 +133,6 @@ class PublicKeyVerifyWrapper implements PrimitiveWrapper<PublicKeyVerify, Public
    * argument.
    */
   public static void register() throws GeneralSecurityException {
-    Registry.registerPrimitiveWrapper(new PublicKeyVerifyWrapper());
+    Registry.registerPrimitiveWrapper(WRAPPER);
   }
 }

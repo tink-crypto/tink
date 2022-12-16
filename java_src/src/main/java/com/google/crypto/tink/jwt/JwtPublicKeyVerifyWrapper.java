@@ -29,6 +29,8 @@ import java.util.Optional;
 class JwtPublicKeyVerifyWrapper
     implements PrimitiveWrapper<JwtPublicKeyVerifyInternal, JwtPublicKeyVerify> {
 
+  private static final JwtPublicKeyVerifyWrapper WRAPPER = new JwtPublicKeyVerifyWrapper();
+
   private static void validate(PrimitiveSet<JwtPublicKeyVerifyInternal> primitiveSet)
       throws GeneralSecurityException {
     for (List<PrimitiveSet.Entry<JwtPublicKeyVerifyInternal>> entries : primitiveSet.getAll()) {
@@ -100,6 +102,6 @@ class JwtPublicKeyVerifyWrapper
    * argument.
    */
   public static void register() throws GeneralSecurityException {
-    Registry.registerPrimitiveWrapper(new JwtPublicKeyVerifyWrapper());
+    Registry.registerPrimitiveWrapper(WRAPPER);
   }
 }

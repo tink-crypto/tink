@@ -34,6 +34,9 @@ import java.security.GeneralSecurityException;
  * with the primary key.
  */
 public class HybridEncryptWrapper implements PrimitiveWrapper<HybridEncrypt, HybridEncrypt> {
+
+  private static final HybridEncryptWrapper WRAPPER = new HybridEncryptWrapper();
+
   private static class WrappedHybridEncrypt implements HybridEncrypt {
     final PrimitiveSet<HybridEncrypt> primitives;
 
@@ -95,6 +98,6 @@ public class HybridEncryptWrapper implements PrimitiveWrapper<HybridEncrypt, Hyb
    * argument.
    */
   public static void register() throws GeneralSecurityException {
-    Registry.registerPrimitiveWrapper(new HybridEncryptWrapper());
+    Registry.registerPrimitiveWrapper(WRAPPER);
   }
 }

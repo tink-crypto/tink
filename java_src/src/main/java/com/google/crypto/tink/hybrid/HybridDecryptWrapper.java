@@ -38,7 +38,9 @@ import java.util.logging.Logger;
  * com.google.crypto.tink.proto.OutputPrefixType#RAW}.
  */
 public class HybridDecryptWrapper implements PrimitiveWrapper<HybridDecrypt, HybridDecrypt> {
+
   private static final Logger logger = Logger.getLogger(HybridDecryptWrapper.class.getName());
+  private static final HybridDecryptWrapper WRAPPER = new HybridDecryptWrapper();
 
   private static class WrappedHybridDecrypt implements HybridDecrypt {
     private final PrimitiveSet<HybridDecrypt> primitives;
@@ -116,6 +118,6 @@ public class HybridDecryptWrapper implements PrimitiveWrapper<HybridDecrypt, Hyb
    * argument.
    */
   public static void register() throws GeneralSecurityException {
-    Registry.registerPrimitiveWrapper(new HybridDecryptWrapper());
+    Registry.registerPrimitiveWrapper(WRAPPER);
   }
 }
