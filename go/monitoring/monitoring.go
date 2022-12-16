@@ -33,6 +33,18 @@ const (
 	DoNotUse KeyStatus = 20
 )
 
+func (status KeyStatus) String() string {
+	switch status {
+	case Enabled:
+		return "ENABLED"
+	case Disabled:
+		return "DISABLED"
+	case Destroyed:
+		return "DESTROYED"
+	}
+	return "UNKNOWN"
+}
+
 // Entry represents each entry inside a Keyset.
 type Entry struct {
 	Status    KeyStatus
