@@ -17,6 +17,7 @@
 #include "tink/streamingaead/shared_input_stream.h"
 
 #include <algorithm>
+#include <memory>
 #include <sstream>
 #include <string>
 #include <utility>

@@ -16,6 +16,7 @@
 
 #include "tink/signature/ed25519_sign_key_manager.h"
 
+#include <sstream>
 #include <string>
 
 #include "gmock/gmock.h"

@@ -16,6 +16,7 @@
 
 #include "tink/mac/mac_wrapper.h"
 
+#include <memory>
 #include <string>
 #include <utility>
 

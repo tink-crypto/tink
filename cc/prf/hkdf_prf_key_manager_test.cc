@@ -16,6 +16,8 @@
 
 #include "tink/prf/hkdf_prf_key_manager.h"
 
+#include <memory>
+#include <sstream>
 #include <string>
 #include <utility>
 

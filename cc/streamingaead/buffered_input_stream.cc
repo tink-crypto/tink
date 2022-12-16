@@ -18,6 +18,7 @@
 
 #include <algorithm>
 #include <cstring>
+#include <memory>
 #include <utility>
 #include <vector>
 

@@ -16,6 +16,7 @@
 
 #include "tink/streamingaead/streaming_aead_wrapper.h"
 
+#include <memory>
 #include <utility>
 
 #include "absl/status/status.h"

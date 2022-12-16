@@ -15,6 +15,8 @@
 ////////////////////////////////////////////////////////////////////////////////
 #include "tink/prf/prf_key_templates.h"
 
+#include <memory>
+
 #include "absl/memory/memory.h"
 #include "tink/prf/aes_cmac_prf_key_manager.h"
 #include "tink/prf/hkdf_prf_key_manager.h"

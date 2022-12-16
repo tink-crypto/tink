@@ -17,6 +17,7 @@
 #define TINK_PRF_HMAC_PRF_KEY_MANAGER_H_
 
 #include <algorithm>
+#include <map>
 #include <memory>
 #include <string>
 #include <vector>

@@ -16,18 +16,19 @@
 
 #include "tink/signature/public_key_verify_wrapper.h"
 
+#include <memory>
 #include <string>
 #include <utility>
 
 #include "absl/status/status.h"
 #include "absl/strings/str_cat.h"
 #include "tink/crypto_format.h"
-#include "tink/internal/util.h"
-#include "tink/primitive_set.h"
-#include "tink/public_key_verify.h"
 #include "tink/internal/monitoring_util.h"
 #include "tink/internal/registry_impl.h"
+#include "tink/internal/util.h"
 #include "tink/monitoring/monitoring.h"
+#include "tink/primitive_set.h"
+#include "tink/public_key_verify.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "proto/tink.pb.h"

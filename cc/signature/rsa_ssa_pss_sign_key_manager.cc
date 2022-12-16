@@ -16,6 +16,7 @@
 
 #include "tink/signature/rsa_ssa_pss_sign_key_manager.h"
 
+#include <memory>
 #include <string>
 #include <utility>
 

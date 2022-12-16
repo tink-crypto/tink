@@ -16,6 +16,7 @@
 #ifndef TINK_SIGNATURE_RSA_SSA_PKCS1_SIGN_KEY_MANAGER_H_
 #define TINK_SIGNATURE_RSA_SSA_PKCS1_SIGN_KEY_MANAGER_H_
 
+#include <memory>
 #include <string>
 
 #include "absl/memory/memory.h"

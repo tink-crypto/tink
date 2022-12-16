@@ -16,6 +16,8 @@
 
 #include "tink/signature/ed25519_verify_key_manager.h"
 
+#include <memory>
+
 #include "absl/status/status.h"
 #include "absl/strings/string_view.h"
 #include "tink/public_key_verify.h"

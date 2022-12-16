@@ -17,6 +17,7 @@
 #define TINK_PRF_AES_CMAC_PRF_KEY_MANAGER_H_
 
 #include <algorithm>
+#include <memory>
 #include <string>
 #include <vector>
 

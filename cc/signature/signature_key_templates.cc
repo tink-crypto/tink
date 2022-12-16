@@ -16,6 +16,8 @@
 
 #include "tink/signature/signature_key_templates.h"
 
+#include <memory>
+
 #include "absl/memory/memory.h"
 #include "absl/strings/str_cat.h"
 #include "openssl/bn.h"

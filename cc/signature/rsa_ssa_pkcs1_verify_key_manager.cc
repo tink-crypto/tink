@@ -16,6 +16,7 @@
 
 #include "tink/signature/rsa_ssa_pkcs1_verify_key_manager.h"
 
+#include <memory>
 #include <utility>
 
 #include "absl/strings/str_cat.h"

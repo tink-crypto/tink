@@ -16,6 +16,8 @@
 
 #include "tink/prf/hmac_prf_key_manager.h"
 
+#include <sstream>
+
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "absl/status/status.h"

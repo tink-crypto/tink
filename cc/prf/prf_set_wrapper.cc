@@ -15,6 +15,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include "tink/prf/prf_set_wrapper.h"
 
+#include <map>
+#include <memory>
 #include <utility>
 
 #include "absl/memory/memory.h"

@@ -17,6 +17,8 @@
 #ifndef TINK_SIGNATURE_PUBLIC_KEY_SIGN_WRAPPER_H_
 #define TINK_SIGNATURE_PUBLIC_KEY_SIGN_WRAPPER_H_
 
+#include <memory>
+
 #include "absl/strings/string_view.h"
 #include "tink/primitive_set.h"
 #include "tink/primitive_wrapper.h"

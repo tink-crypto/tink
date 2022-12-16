@@ -16,6 +16,7 @@
 
 #include "tink/streamingaead/decrypting_input_stream.h"
 
+#include <memory>
 #include <sstream>
 #include <string>
 #include <utility>

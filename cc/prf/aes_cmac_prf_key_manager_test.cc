@@ -15,6 +15,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 #include "tink/prf/aes_cmac_prf_key_manager.h"
 
+#include <memory>
 #include <sstream>
 #include <string>
 

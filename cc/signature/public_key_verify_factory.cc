@@ -16,6 +16,8 @@
 
 #include "tink/signature/public_key_verify_factory.h"
 
+#include <memory>
+
 #include "tink/key_manager.h"
 #include "tink/keyset_handle.h"
 #include "tink/public_key_verify.h"

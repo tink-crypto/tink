@@ -17,6 +17,8 @@
 #ifndef TINK_SIGNATURE_PUBLIC_KEY_VERIFY_FACTORY_H_
 #define TINK_SIGNATURE_PUBLIC_KEY_VERIFY_FACTORY_H_
 
+#include <memory>
+
 #include "absl/base/macros.h"
 #include "tink/key_manager.h"
 #include "tink/keyset_handle.h"

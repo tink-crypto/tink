@@ -16,6 +16,7 @@
 
 #include "tink/streamingaead/decrypting_random_access_stream.h"
 
+#include <memory>
 #include <utility>
 
 #include "absl/memory/memory.h"
