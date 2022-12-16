@@ -39,7 +39,7 @@ namespace internal {
 class EcdsaRawSignBoringSsl : public PublicKeySign {
  public:
   static crypto::tink::util::StatusOr<std::unique_ptr<EcdsaRawSignBoringSsl>>
-  New(const subtle::SubtleUtilBoringSSL::EcKey& ec_key,
+  New(const crypto::tink::internal::EcKey& ec_key,
       subtle::EcdsaSignatureEncoding encoding);
 
   // Computes the signature for 'data'.
