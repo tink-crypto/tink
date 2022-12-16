@@ -30,8 +30,8 @@ namespace tink {
 //
 // Example:
 //     RestrictedData restricted_data(/*num_random_bytes=*/32);
-//     const std::string raw_secret =
-//         restricted_data.GetSecret(InsecureSecretKeyAccess::Get()).data();
+//     absl::string_view raw_secret =
+//         restricted_data.GetSecret(InsecureSecretKeyAccess::Get());
 class RestrictedData {
  public:
   // Copyable and movable.
