@@ -16,6 +16,7 @@
 
 #include "tink/jwt/internal/raw_jwt_rsa_ssa_pss_verify_key_manager.h"
 
+#include <memory>
 #include <utility>
 
 #include "absl/status/status.h"

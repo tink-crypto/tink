@@ -20,6 +20,7 @@
 
 #include <iostream>
 #include <memory>
+#include <ostream>
 #include <string>
 
 #include "absl/flags/flag.h"

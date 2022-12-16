@@ -16,6 +16,8 @@
 #ifndef TINK_KEYSET_MANAGER_H_
 #define TINK_KEYSET_MANAGER_H_
 
+#include <memory>
+
 #include "absl/base/thread_annotations.h"
 #include "absl/synchronization/mutex.h"
 #include "tink/util/status.h"

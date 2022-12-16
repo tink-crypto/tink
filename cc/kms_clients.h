@@ -17,6 +17,7 @@
 #ifndef TINK_KMS_CLIENTS_H_
 #define TINK_KMS_CLIENTS_H_
 
+#include <memory>
 #include <utility>
 #include <vector>
 

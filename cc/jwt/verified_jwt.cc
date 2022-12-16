@@ -17,6 +17,7 @@
 #include "tink/jwt/verified_jwt.h"
 
 #include <string>
+#include <vector>
 
 #include "absl/strings/numbers.h"
 #include "absl/strings/str_format.h"

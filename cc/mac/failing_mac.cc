@@ -15,6 +15,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include "tink/mac/failing_mac.h"
 
+#include <memory>
 #include <string>
 #include <utility>
 

@@ -18,6 +18,7 @@
 #define TINK_JWT_VERIFIED_JWT_H_
 
 #include <string>
+#include <vector>
 
 #include "google/protobuf/struct.pb.h"
 #include "absl/strings/string_view.h"

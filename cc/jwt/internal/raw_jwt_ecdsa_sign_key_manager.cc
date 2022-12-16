@@ -16,6 +16,7 @@
 
 #include "tink/jwt/internal/raw_jwt_ecdsa_sign_key_manager.h"
 
+#include <memory>
 #include <string>
 #include <utility>
 

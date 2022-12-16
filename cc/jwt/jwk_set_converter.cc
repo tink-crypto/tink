@@ -16,6 +16,9 @@
 
 #include "tink/jwt/jwk_set_converter.h"
 
+#include <memory>
+#include <ostream>
+#include <sstream>
 #include <string>
 
 #include "absl/strings/escaping.h"

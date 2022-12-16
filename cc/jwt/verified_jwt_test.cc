@@ -16,8 +16,10 @@
 
 #include "tink/jwt/verified_jwt.h"
 
+#include <memory>
 #include <string>
 #include <utility>
+#include <vector>
 
 #include "gtest/gtest.h"
 #include "absl/status/status.h"

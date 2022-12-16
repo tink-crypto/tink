@@ -16,12 +16,13 @@
 
 #include "tink/mac/mac_factory.h"
 
+#include <memory>
+
 #include "tink/mac.h"
-#include "tink/registry.h"
 #include "tink/mac/mac_wrapper.h"
+#include "tink/registry.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
-
 
 namespace crypto {
 namespace tink {

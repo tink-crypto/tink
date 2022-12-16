@@ -16,6 +16,7 @@
 #ifndef TINK_MAC_FAILING_MAC_H_
 #define TINK_MAC_FAILING_MAC_H_
 
+#include <memory>
 #include <string>
 
 #include "absl/strings/string_view.h"

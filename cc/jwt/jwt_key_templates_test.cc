@@ -16,6 +16,7 @@
 
 #include "tink/jwt/jwt_key_templates.h"
 
+#include <memory>
 #include <string>
 #include <utility>
 

@@ -17,6 +17,7 @@
 #include "tink/jwt/raw_jwt.h"
 
 #include <string>
+#include <vector>
 
 #include "gtest/gtest.h"
 #include "absl/strings/escaping.h"

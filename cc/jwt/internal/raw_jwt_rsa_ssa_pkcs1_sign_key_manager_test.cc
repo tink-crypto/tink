@@ -16,6 +16,7 @@
 
 #include "tink/jwt/internal/raw_jwt_rsa_ssa_pkcs1_sign_key_manager.h"
 
+#include <memory>
 #include <string>
 #include <utility>
 

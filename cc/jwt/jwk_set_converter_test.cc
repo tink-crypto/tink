@@ -16,7 +16,9 @@
 
 #include "tink/jwt/jwk_set_converter.h"
 
+#include <memory>
 #include <string>
+#include <tuple>
 #include <utility>
 
 #include "google/protobuf/util/message_differencer.h"

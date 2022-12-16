@@ -17,6 +17,8 @@
 #ifndef TINK_MAC_MAC_WRAPPER_H_
 #define TINK_MAC_MAC_WRAPPER_H_
 
+#include <memory>
+
 #include "absl/strings/string_view.h"
 #include "tink/mac.h"
 #include "tink/primitive_set.h"

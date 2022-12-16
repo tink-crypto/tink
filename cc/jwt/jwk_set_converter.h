@@ -17,6 +17,7 @@
 #ifndef TINK_JWT_JWK_SET_CONVERTER_H_
 #define TINK_JWT_JWK_SET_CONVERTER_H_
 
+#include <memory>
 #include <string>
 
 #include "absl/strings/string_view.h"
