@@ -133,26 +133,20 @@ IsOkAndHolds(InnerMatcher&& inner_matcher) {
       std::forward<InnerMatcher>(inner_matcher));
 }
 
-// Matches a Status with the specified 'code' as error_code().
-// TODO(lizatretyakova): remove the static_cast and fix the comment above to
-// use code() after all StatusIs usages are migrated to use absl::StatusCode.
+// Matches a Status with the specified 'code' as code().
 MATCHER_P(StatusIs, code,
-          "is a Status with a " +
-              absl::StatusCodeToString(static_cast<absl::StatusCode>(code)) +
-              " code") {
-  if (arg.code() == static_cast<absl::StatusCode>(code)) {
+          "is a Status with a " + absl::StatusCodeToString(code) + " code") {
+  if (arg.code() == code) {
     return true;
   }
   *result_listener << ::testing::PrintToString(arg);
   return false;
 }
 
-// Matches a Status whose error_code() equals 'code', and whose
-// error_message() matches 'message_macher'.
-// TODO(lizatretyakova): remove the static_cast and fix the comment above to
-// use code() after all StatusIs usages are migrated to use absl::StatusCode.
+// Matches a Status whose code() equals 'code', and whose message() matches
+// 'message_macher'.
 MATCHER_P2(StatusIs, code, message_matcher, "") {
-  return (arg.code() == static_cast<absl::StatusCode>(code)) &&
+  return (arg.code() == code) &&
          testing::Matches(message_matcher)(std::string(arg.message()));
 }
 
