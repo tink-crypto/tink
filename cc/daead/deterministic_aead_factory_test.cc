@@ -31,7 +31,6 @@
 #include "tink/util/test_util.h"
 #include "proto/aes_siv.pb.h"
 
-using crypto::tink::TestKeysetHandle;
 using crypto::tink::test::AddRawKey;
 using crypto::tink::test::AddTinkKey;
 using google::crypto::tink::AesSivKeyFormat;

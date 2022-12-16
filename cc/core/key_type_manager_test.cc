@@ -38,7 +38,6 @@ namespace tink {
 
 namespace {
 
-using ::crypto::tink::test::StatusIs;
 using ::google::crypto::tink::AesGcmKey;
 using ::google::crypto::tink::AesGcmKeyFormat;
 using ::testing::Eq;

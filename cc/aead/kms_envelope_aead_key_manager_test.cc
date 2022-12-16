@@ -47,7 +47,6 @@ using ::crypto::tink::test::DummyAead;
 using ::crypto::tink::test::DummyKmsClient;
 using ::crypto::tink::test::IsOk;
 using ::crypto::tink::test::StatusIs;
-using ::google::crypto::tink::KeyData;
 using ::google::crypto::tink::KmsEnvelopeAeadKey;
 using ::google::crypto::tink::KmsEnvelopeAeadKeyFormat;
 using ::testing::Eq;

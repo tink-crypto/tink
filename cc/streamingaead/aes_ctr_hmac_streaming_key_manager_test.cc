@@ -48,7 +48,6 @@ using ::crypto::tink::test::StatusIs;
 using ::google::crypto::tink::AesCtrHmacStreamingKey;
 using ::google::crypto::tink::AesCtrHmacStreamingKeyFormat;
 using ::google::crypto::tink::HashType;
-using ::google::crypto::tink::KeyData;
 using ::testing::Eq;
 using ::testing::HasSubstr;
 using ::testing::Not;

@@ -33,7 +33,6 @@
 #include "proto/hmac.pb.h"
 #include "proto/tink.pb.h"
 
-using crypto::tink::TestKeysetHandle;
 using crypto::tink::test::AddRawKey;
 using crypto::tink::test::AddTinkKey;
 using google::crypto::tink::HashType;

@@ -35,7 +35,6 @@
 #include "proto/ecies_aead_hkdf.pb.h"
 #include "proto/tink.pb.h"
 
-using crypto::tink::TestKeysetHandle;
 using crypto::tink::test::AddRawKey;
 using crypto::tink::test::AddTinkKey;
 using google::crypto::tink::EciesAeadHkdfPrivateKey;

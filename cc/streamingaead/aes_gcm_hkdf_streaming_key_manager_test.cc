@@ -51,7 +51,6 @@ using ::crypto::tink::util::StatusOr;
 using ::google::crypto::tink::AesGcmHkdfStreamingKey;
 using ::google::crypto::tink::AesGcmHkdfStreamingKeyFormat;
 using ::google::crypto::tink::HashType;
-using ::google::crypto::tink::KeyData;
 using ::testing::Eq;
 using ::testing::HasSubstr;
 using ::testing::Not;

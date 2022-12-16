@@ -29,7 +29,6 @@
 #include "tink/util/test_util.h"
 #include "proto/tink.pb.h"
 
-using crypto::tink::TestKeysetHandle;
 using crypto::tink::test::AddRawKey;
 using crypto::tink::test::AddTinkKey;
 

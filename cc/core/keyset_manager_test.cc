@@ -26,8 +26,6 @@
 #include "proto/aes_gcm.pb.h"
 #include "proto/tink.pb.h"
 
-using crypto::tink::TestKeysetHandle;
-
 using google::crypto::tink::AesGcmKeyFormat;
 using google::crypto::tink::KeyData;
 using google::crypto::tink::KeyStatusType;

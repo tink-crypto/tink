@@ -43,7 +43,6 @@ using ::google::crypto::tink::EcdsaKeyFormat;
 using ::google::crypto::tink::EcdsaPrivateKey;
 using ::google::crypto::tink::EcdsaPublicKey;
 using ::google::crypto::tink::EcdsaSignatureEncoding;
-using ::google::crypto::tink::KeyData;
 using ::testing::Eq;
 using ::testing::HasSubstr;
 using ::testing::Return;

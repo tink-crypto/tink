@@ -41,7 +41,6 @@ using ::crypto::tink::util::StatusOr;
 using ::google::crypto::tink::HashType;
 using ::google::crypto::tink::HmacPrfKey;
 using ::google::crypto::tink::HmacPrfKeyFormat;
-using ::google::crypto::tink::KeyData;
 using ::testing::HasSubstr;
 using ::testing::Not;
 using ::testing::SizeIs;

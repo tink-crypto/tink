@@ -51,7 +51,6 @@ namespace tink {
 
 using ::google::crypto::tink::EcdsaParams;
 using ::google::crypto::tink::EcdsaPublicKey;
-using ::google::crypto::tink::EcdsaSignatureEncoding;
 using ::google::crypto::tink::EllipticCurveType;
 using ::google::crypto::tink::EncryptedKeyset;
 using ::google::crypto::tink::HashType;

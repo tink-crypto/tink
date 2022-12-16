@@ -31,7 +31,6 @@
 #include "proto/kms_aead.pb.h"
 #include "proto/kms_envelope.pb.h"
 
-using ::crypto::tink::test::IsOk;
 using google::crypto::tink::KeyTemplate;
 using google::crypto::tink::KmsAeadKeyFormat;
 using google::crypto::tink::KmsEnvelopeAeadKeyFormat;

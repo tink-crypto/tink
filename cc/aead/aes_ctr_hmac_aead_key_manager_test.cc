@@ -52,7 +52,6 @@ using ::crypto::tink::util::StatusOr;
 using ::google::crypto::tink::AesCtrHmacAeadKey;
 using ::google::crypto::tink::AesCtrHmacAeadKeyFormat;
 using ::google::crypto::tink::HashType;
-using ::google::crypto::tink::KeyData;
 using ::testing::Eq;
 using ::testing::Not;
 using ::testing::SizeIs;

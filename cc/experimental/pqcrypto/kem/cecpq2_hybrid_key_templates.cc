@@ -29,7 +29,6 @@ namespace crypto {
 namespace tink {
 namespace {
 
-using google::crypto::tink::Cecpq2AeadHkdfKeyFormat;
 using google::crypto::tink::EcPointFormat;
 using google::crypto::tink::EllipticCurveType;
 using google::crypto::tink::HashType;
