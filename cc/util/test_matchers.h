@@ -115,7 +115,8 @@ std::string StatusToString(const util::StatusOr<T>& s) {
 // Matches a util::StatusOk() value.
 // This is better than EXPECT_TRUE(status.ok())
 // because the error message is a part of the failure messsage.
-MATCHER(IsOk, "is a Status with an OK value") {
+MATCHER(IsOk,
+        absl::StrCat(negation ? "isn't" : "is", " a Status with an OK value")) {
   if (arg.ok()) {
     return true;
   }
