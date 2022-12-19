@@ -101,38 +101,16 @@
       <groupId>com.google.api-client</groupId>
       <artifactId>google-api-client</artifactId>
       <version>${google-api-client.version}</version>
-      <exclusions>
-        <exclusion>
-          <groupId>com.google.http-client</groupId>
-          <artifactId>google-http-client</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>com.google.http-client</groupId>
-          <artifactId>google-http-client-gson</artifactId>
-        </exclusion>
-      </exclusions>
     </dependency>
     <dependency>
       <groupId>com.google.apis</groupId>
       <artifactId>google-api-services-cloudkms</artifactId>
       <version>${google-api-services-cloudkms.version}</version>
-      <exclusions>
-        <exclusion>
-          <groupId>com.google.api-client</groupId>
-          <artifactId>google-api-client</artifactId>
-        </exclusion>
-      </exclusions>
     </dependency>
     <dependency>
       <groupId>com.google.auth</groupId>
       <artifactId>google-auth-library-oauth2-http</artifactId>
       <version>${google-auth-library-oauth2-http.version}</version>
-      <exclusions>
-        <exclusion>
-          <groupId>com.google.http-client</groupId>
-          <artifactId>google-http-client</artifactId>
-        </exclusion>
-      </exclusions>
     </dependency>
     <dependency>
       <groupId>com.google.auto.service</groupId>
@@ -163,12 +141,6 @@
       <groupId>com.google.oauth-client</groupId>
       <artifactId>google-oauth-client</artifactId>
       <version>${google-oauth-client.version}</version>
-      <exclusions>
-        <exclusion>
-          <groupId>com.google.http-client</groupId>
-          <artifactId>google-http-client</artifactId>
-        </exclusion>
-      </exclusions>
     </dependency>
     <dependency>
       <groupId>com.google.crypto.tink</groupId>

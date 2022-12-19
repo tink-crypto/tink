@@ -67,9 +67,3 @@ This process consists of 3 steps:
 3.  Then you want to test the new snapshot.
 
 You want to repeat these steps until there is no error.
-
-If you encounter `Dependency convergence` error, it means that the artifact has
-already, usually indirectly, depended on another version of the new dependency.
-You want to exclude that version.
-
-See the history of the POM files for examples.
