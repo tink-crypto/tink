@@ -16,7 +16,7 @@
 import datetime
 import io
 import json
-from typing import BinaryIO, Optional, Mapping, Tuple
+from typing import BinaryIO, Dict, Optional, Mapping, Tuple
 
 import tink
 from tink import aead
@@ -139,21 +139,23 @@ class Aead(aead.Aead):
   """Wraps AEAD service stub into an Aead primitive."""
 
   def __init__(self, lang: str, stub: testing_api_pb2_grpc.AeadStub,
-               keyset: bytes) -> None:
+               keyset: bytes, annotations: Optional[Dict[str, str]]) -> None:
     self.lang = lang
     self._stub = stub
     self._keyset = keyset
+    self._annotations = annotations
     creation_response = self._stub.Create(
         testing_api_pb2.CreationRequest(
             annotated_keyset=testing_api_pb2.AnnotatedKeyset(
-                serialized_keyset=self._keyset)))
+                serialized_keyset=self._keyset,
+                annotations=self._annotations)))
     if creation_response.err:
       raise tink.TinkError(creation_response.err)
 
   def encrypt(self, plaintext: bytes, associated_data: bytes) -> bytes:
     enc_request = testing_api_pb2.AeadEncryptRequest(
         annotated_keyset=testing_api_pb2.AnnotatedKeyset(
-            serialized_keyset=self._keyset),
+            serialized_keyset=self._keyset, annotations=self._annotations),
         plaintext=plaintext,
         associated_data=associated_data)
     enc_response = self._stub.Encrypt(enc_request)
@@ -164,7 +166,7 @@ class Aead(aead.Aead):
   def decrypt(self, ciphertext: bytes, associated_data: bytes) -> bytes:
     dec_request = testing_api_pb2.AeadDecryptRequest(
         annotated_keyset=testing_api_pb2.AnnotatedKeyset(
-            serialized_keyset=self._keyset),
+            serialized_keyset=self._keyset, annotations=self._annotations),
         ciphertext=ciphertext,
         associated_data=associated_data)
     dec_response = self._stub.Decrypt(dec_request)
@@ -177,15 +179,16 @@ class DeterministicAead(daead.DeterministicAead):
   """Wraps DAEAD services stub into an DeterministicAead primitive."""
 
   def __init__(self, lang: str,
-               stub: testing_api_pb2_grpc.DeterministicAeadStub,
-               keyset: bytes) -> None:
+               stub: testing_api_pb2_grpc.DeterministicAeadStub, keyset: bytes,
+               annotations: Optional[Dict[str, str]]) -> None:
     self.lang = lang
     self._stub = stub
     self._keyset = keyset
+    self._annotations = annotations
     creation_response = self._stub.Create(
         testing_api_pb2.CreationRequest(
             annotated_keyset=testing_api_pb2.AnnotatedKeyset(
-                serialized_keyset=self._keyset)))
+                annotations=self._annotations, serialized_keyset=self._keyset)))
     if creation_response.err:
       raise tink.TinkError(creation_response.err)
 
@@ -194,7 +197,7 @@ class DeterministicAead(daead.DeterministicAead):
     """Encrypts."""
     enc_request = testing_api_pb2.DeterministicAeadEncryptRequest(
         annotated_keyset=testing_api_pb2.AnnotatedKeyset(
-            serialized_keyset=self._keyset),
+            serialized_keyset=self._keyset, annotations=self._annotations),
         plaintext=plaintext,
         associated_data=associated_data)
     enc_response = self._stub.EncryptDeterministically(enc_request)
@@ -207,7 +210,7 @@ class DeterministicAead(daead.DeterministicAead):
     """Decrypts."""
     dec_request = testing_api_pb2.DeterministicAeadDecryptRequest(
         annotated_keyset=testing_api_pb2.AnnotatedKeyset(
-            serialized_keyset=self._keyset),
+            serialized_keyset=self._keyset, annotations=self._annotations),
         ciphertext=ciphertext,
         associated_data=associated_data)
     dec_response = self._stub.DecryptDeterministically(dec_request)
@@ -260,21 +263,22 @@ class Mac(mac.Mac):
   """Wraps MAC service stub into an Mac primitive."""
 
   def __init__(self, lang: str, stub: testing_api_pb2_grpc.MacStub,
-               keyset: bytes) -> None:
+               keyset: bytes, annotations: Optional[Dict[str, str]]) -> None:
     self.lang = lang
     self._stub = stub
     self._keyset = keyset
+    self._annotations = annotations
     creation_response = self._stub.Create(
         testing_api_pb2.CreationRequest(
             annotated_keyset=testing_api_pb2.AnnotatedKeyset(
-                serialized_keyset=self._keyset)))
+                serialized_keyset=self._keyset, annotations=self._annotations)))
     if creation_response.err:
       raise tink.TinkError(creation_response.err)
 
   def compute_mac(self, data: bytes) -> bytes:
     request = testing_api_pb2.ComputeMacRequest(
         annotated_keyset=testing_api_pb2.AnnotatedKeyset(
-            serialized_keyset=self._keyset),
+            serialized_keyset=self._keyset, annotations=self._annotations),
         data=data)
     response = self._stub.ComputeMac(request)
     if response.err:
@@ -284,7 +288,7 @@ class Mac(mac.Mac):
   def verify_mac(self, mac_value: bytes, data: bytes) -> None:
     request = testing_api_pb2.VerifyMacRequest(
         annotated_keyset=testing_api_pb2.AnnotatedKeyset(
-            serialized_keyset=self._keyset),
+            serialized_keyset=self._keyset, annotations=self._annotations),
         mac_value=mac_value,
         data=data)
     response = self._stub.VerifyMac(request)
@@ -296,21 +300,25 @@ class HybridEncrypt(hybrid.HybridEncrypt):
   """Implements the HybridEncrypt primitive using a hybrid service stub."""
 
   def __init__(self, lang: str, stub: testing_api_pb2_grpc.HybridStub,
-               public_handle: bytes) -> None:
+               public_handle: bytes, annotations: Optional[Dict[str,
+                                                                str]]) -> None:
     self.lang = lang
     self._stub = stub
     self._public_handle = public_handle
+    self._annotations = annotations
     creation_response = self._stub.CreateHybridEncrypt(
         testing_api_pb2.CreationRequest(
             annotated_keyset=testing_api_pb2.AnnotatedKeyset(
-                serialized_keyset=self._public_handle)))
+                serialized_keyset=self._public_handle,
+                annotations=self._annotations)))
     if creation_response.err:
       raise tink.TinkError(creation_response.err)
 
   def encrypt(self, plaintext: bytes, context_info: bytes) -> bytes:
     enc_request = testing_api_pb2.HybridEncryptRequest(
         public_annotated_keyset=testing_api_pb2.AnnotatedKeyset(
-            serialized_keyset=self._public_handle),
+            serialized_keyset=self._public_handle,
+            annotations=self._annotations),
         plaintext=plaintext,
         context_info=context_info)
     enc_response = self._stub.Encrypt(enc_request)
@@ -323,21 +331,25 @@ class HybridDecrypt(hybrid.HybridDecrypt):
   """Implements the HybridDecrypt primitive using a hybrid service stub."""
 
   def __init__(self, lang: str, stub: testing_api_pb2_grpc.HybridStub,
-               private_handle: bytes) -> None:
+               private_handle: bytes, annotations: Optional[Dict[str,
+                                                                 str]]) -> None:
     self.lang = lang
     self._stub = stub
     self._private_handle = private_handle
+    self._annotations = annotations
     creation_response = self._stub.CreateHybridDecrypt(
         testing_api_pb2.CreationRequest(
             annotated_keyset=testing_api_pb2.AnnotatedKeyset(
-                serialized_keyset=self._private_handle)))
+                serialized_keyset=self._private_handle,
+                annotations=self._annotations)))
     if creation_response.err:
       raise tink.TinkError(creation_response.err)
 
   def decrypt(self, ciphertext: bytes, context_info: bytes) -> bytes:
     dec_request = testing_api_pb2.HybridDecryptRequest(
         private_annotated_keyset=testing_api_pb2.AnnotatedKeyset(
-            serialized_keyset=self._private_handle),
+            serialized_keyset=self._private_handle,
+            annotations=self._annotations),
         ciphertext=ciphertext,
         context_info=context_info)
     dec_response = self._stub.Decrypt(dec_request)
@@ -350,21 +362,25 @@ class PublicKeySign(tink_signature.PublicKeySign):
   """Implements the PublicKeySign primitive using a signature service stub."""
 
   def __init__(self, lang: str, stub: testing_api_pb2_grpc.SignatureStub,
-               private_handle: bytes) -> None:
+               private_handle: bytes, annotations: Optional[Dict[str,
+                                                                 str]]) -> None:
     self.lang = lang
     self._stub = stub
     self._private_handle = private_handle
+    self._annotations = annotations
     creation_response = self._stub.CreatePublicKeySign(
         testing_api_pb2.CreationRequest(
             annotated_keyset=testing_api_pb2.AnnotatedKeyset(
-                serialized_keyset=self._private_handle)))
+                serialized_keyset=self._private_handle,
+                annotations=self._annotations)))
     if creation_response.err:
       raise tink.TinkError(creation_response.err)
 
   def sign(self, data: bytes) -> bytes:
     request = testing_api_pb2.SignatureSignRequest(
         private_annotated_keyset=testing_api_pb2.AnnotatedKeyset(
-            serialized_keyset=self._private_handle),
+            serialized_keyset=self._private_handle,
+            annotations=self._annotations),
         data=data)
     response = self._stub.Sign(request)
     if response.err:
@@ -376,21 +392,25 @@ class PublicKeyVerify(tink_signature.PublicKeyVerify):
   """Implements the PublicKeyVerify primitive using a signature service stub."""
 
   def __init__(self, lang: str, stub: testing_api_pb2_grpc.SignatureStub,
-               public_handle: bytes) -> None:
+               public_handle: bytes, annotations: Optional[Dict[str,
+                                                                str]]) -> None:
     self.lang = lang
     self._stub = stub
     self._public_handle = public_handle
+    self._annotations = annotations
     creation_response = self._stub.CreatePublicKeyVerify(
         testing_api_pb2.CreationRequest(
             annotated_keyset=testing_api_pb2.AnnotatedKeyset(
-                serialized_keyset=self._public_handle)))
+                serialized_keyset=self._public_handle,
+                annotations=self._annotations)))
     if creation_response.err:
       raise tink.TinkError(creation_response.err)
 
   def verify(self, signature: bytes, data: bytes) -> None:
     request = testing_api_pb2.SignatureVerifyRequest(
         public_annotated_keyset=testing_api_pb2.AnnotatedKeyset(
-            serialized_keyset=self._public_handle),
+            serialized_keyset=self._public_handle,
+            annotations=self._annotations),
         signature=signature,
         data=data)
     response = self._stub.Verify(request)
@@ -402,16 +422,18 @@ class _Prf(prf.Prf):
   """Implements a Prf from a PrfSet service stub."""
 
   def __init__(self, lang: str, stub: testing_api_pb2_grpc.PrfSetStub,
-               keyset: bytes, key_id: int) -> None:
+               keyset: bytes, key_id: int,
+               annotations: Optional[Dict[str, str]]) -> None:
     self.lang = lang
     self._stub = stub
     self._keyset = keyset
     self._key_id = key_id
+    self._annotations = annotations
 
   def compute(self, input_data: bytes, output_length: int) -> bytes:
     request = testing_api_pb2.PrfSetComputeRequest(
         annotated_keyset=testing_api_pb2.AnnotatedKeyset(
-            serialized_keyset=self._keyset),
+            serialized_keyset=self._keyset, annotations=self._annotations),
         key_id=self._key_id,
         input_data=input_data,
         output_length=output_length)
@@ -425,17 +447,18 @@ class PrfSet(prf.PrfSet):
   """Implements a PrfSet from a PrfSet service stub."""
 
   def __init__(self, lang: str, stub: testing_api_pb2_grpc.PrfSetStub,
-               keyset: bytes) -> None:
+               keyset: bytes, annotations: Optional[Dict[str, str]]) -> None:
     self.lang = lang
     self._stub = stub
     self._keyset = keyset
     self._key_ids_initialized = False
     self._primary_key_id = None
     self._prfs = None
+    self._annotations = annotations
     creation_response = self._stub.Create(
         testing_api_pb2.CreationRequest(
             annotated_keyset=testing_api_pb2.AnnotatedKeyset(
-                serialized_keyset=self._keyset)))
+                serialized_keyset=self._keyset, annotations=self._annotations)))
     if creation_response.err:
       raise tink.TinkError(creation_response.err)
 
@@ -443,14 +466,15 @@ class PrfSet(prf.PrfSet):
     if not self._key_ids_initialized:
       request = testing_api_pb2.PrfSetKeyIdsRequest(
           annotated_keyset=testing_api_pb2.AnnotatedKeyset(
-              serialized_keyset=self._keyset))
+              serialized_keyset=self._keyset, annotations=self._annotations))
       response = self._stub.KeyIds(request)
       if response.err:
         raise tink.TinkError(response.err)
       self._primary_key_id = response.output.primary_key_id
       self._prfs = {}
       for key_id in response.output.key_id:
-        self._prfs[key_id] = _Prf(self.lang, self._stub, self._keyset, key_id)
+        self._prfs[key_id] = _Prf(self.lang, self._stub, self._keyset, key_id,
+                                  self._annotations)
       self._key_ids_initialized = True
 
   def primary_id(self) -> int:

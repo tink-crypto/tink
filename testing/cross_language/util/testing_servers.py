@@ -405,24 +405,27 @@ def remote_primitive(lang: str, keyset: bytes, primitive_class: Type[P]) -> P:
   """
 
   if primitive_class == tink.aead.Aead:
-    return _primitives.Aead(lang, _ts.aead_stub(lang), keyset)
+    return _primitives.Aead(lang, _ts.aead_stub(lang), keyset, None)
   if primitive_class == tink.daead.DeterministicAead:
-    return _primitives.DeterministicAead(lang, _ts.daead_stub(lang), keyset)
+    return _primitives.DeterministicAead(lang, _ts.daead_stub(lang), keyset,
+                                         None)
   if primitive_class == tink.streaming_aead.StreamingAead:
     return _primitives.StreamingAead(lang, _ts.streaming_aead_stub(lang),
                                      keyset)
   if primitive_class == tink.hybrid.HybridDecrypt:
-    return _primitives.HybridDecrypt(lang, _ts.hybrid_stub(lang), keyset)
+    return _primitives.HybridDecrypt(lang, _ts.hybrid_stub(lang), keyset, None)
   if primitive_class == tink.hybrid.HybridEncrypt:
-    return _primitives.HybridEncrypt(lang, _ts.hybrid_stub(lang), keyset)
+    return _primitives.HybridEncrypt(lang, _ts.hybrid_stub(lang), keyset, None)
   if primitive_class == tink.mac.Mac:
-    return _primitives.Mac(lang, _ts.mac_stub(lang), keyset)
+    return _primitives.Mac(lang, _ts.mac_stub(lang), keyset, None)
   if primitive_class == tink.signature.PublicKeySign:
-    return _primitives.PublicKeySign(lang, _ts.signature_stub(lang), keyset)
+    return _primitives.PublicKeySign(lang, _ts.signature_stub(lang), keyset,
+                                     None)
   if primitive_class == tink.signature.PublicKeyVerify:
-    return _primitives.PublicKeyVerify(lang, _ts.signature_stub(lang), keyset)
+    return _primitives.PublicKeyVerify(lang, _ts.signature_stub(lang), keyset,
+                                       None)
   if primitive_class == tink.prf.PrfSet:
-    return _primitives.PrfSet(lang, _ts.prf_stub(lang), keyset)
+    return _primitives.PrfSet(lang, _ts.prf_stub(lang), keyset, None)
   if primitive_class == tink.jwt.JwtMac:
     return _primitives.JwtMac(lang, _ts.jwt_stub(lang), keyset)
   if primitive_class == tink.jwt.JwtPublicKeySign:
