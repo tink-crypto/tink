@@ -47,6 +47,20 @@ constexpr absl::string_view kSingleKeyAesGcmKeyset = R"json(
     }]
   })json";
 
+@interface TINKJSONKeysetReader (FromStringView)
+
+- (instancetype)initWithStringView:(absl::string_view)view error:(NSError **)error;
+
+@end
+
+@implementation TINKJSONKeysetReader (FromStringView)
+
+- (instancetype)initWithStringView:(absl::string_view)view error:(NSError **)error {
+  NSData *serializedKeysetData = [NSData dataWithBytes:view.data() length:view.size()];
+  return [self initWithSerializedKeyset:serializedKeysetData error:error];
+}
+
+@end
 
 @interface TINKJSONKeysetReaderTest : XCTestCase
 @end
@@ -60,13 +74,10 @@ constexpr absl::string_view kSingleKeyAesGcmKeyset = R"json(
   XCTAssertNil(error);
 }
 
-
 - (void)testCreateKeysetHandle {
-  NSData *serializedKeysetData = [NSData dataWithBytes:kSingleKeyAesGcmKeyset.data()
-                                                length:kSingleKeyAesGcmKeyset.size()];
   NSError *error = nil;
   TINKJSONKeysetReader *reader =
-      [[TINKJSONKeysetReader alloc] initWithSerializedKeyset:serializedKeysetData error:&error];
+      [[TINKJSONKeysetReader alloc] initWithStringView:kSingleKeyAesGcmKeyset error:&error];
   XCTAssertNotNil(reader);
   XCTAssertNil(error, @"Initialization of TINKJSONKeysetReader failed with %@", error);
 
@@ -77,11 +88,9 @@ constexpr absl::string_view kSingleKeyAesGcmKeyset = R"json(
 }
 
 - (void)testCreateAead {
-  NSData *serializedKeysetData = [NSData dataWithBytes:kSingleKeyAesGcmKeyset.data()
-                                                length:kSingleKeyAesGcmKeyset.size()];
   NSError *error = nil;
   TINKJSONKeysetReader *reader =
-      [[TINKJSONKeysetReader alloc] initWithSerializedKeyset:serializedKeysetData error:&error];
+      [[TINKJSONKeysetReader alloc] initWithStringView:kSingleKeyAesGcmKeyset error:&error];
 
   TINKKeysetHandle *handle =
       [[TINKKeysetHandle alloc] initCleartextKeysetHandleWithKeysetReader:reader error:&error];
@@ -108,11 +117,9 @@ constexpr absl::string_view kSingleKeyAesGcmKeyset = R"json(
 - (void)testCreateKeysetHandle_brokenKeysetNotJson_fails {
   constexpr absl::string_view kKeysetNotJson = "This for sure isn't JSON }}}";
 
-  NSData *serializedKeysetData = [NSData dataWithBytes:kKeysetNotJson.data()
-                                                length:kKeysetNotJson.size()];
   NSError *error = nil;
   TINKJSONKeysetReader *reader =
-      [[TINKJSONKeysetReader alloc] initWithSerializedKeyset:serializedKeysetData error:&error];
+      [[TINKJSONKeysetReader alloc] initWithStringView:kKeysetNotJson error:&error];
   XCTAssertNotNil(reader);
   XCTAssertNil(error, @"Initialization of TINKJSONKeysetReader failed with %@", error);
 
@@ -137,11 +144,9 @@ constexpr absl::string_view kSingleKeyAesGcmKeyset = R"json(
       }]
     })json";
 
-  NSData *serializedKeysetData = [NSData dataWithBytes:kKeysetWithNoPrimaryKey.data()
-                                                length:kKeysetWithNoPrimaryKey.size()];
   NSError *error = nil;
   TINKJSONKeysetReader *reader =
-      [[TINKJSONKeysetReader alloc] initWithSerializedKeyset:serializedKeysetData error:&error];
+      [[TINKJSONKeysetReader alloc] initWithStringView:kKeysetWithNoPrimaryKey error:&error];
   XCTAssertNotNil(reader);
   XCTAssertNil(error, @"Initialization of TINKJSONKeysetReader failed with %@", error);
 
@@ -172,11 +177,9 @@ constexpr absl::string_view kSingleKeyAesGcmKeyset = R"json(
     }]
   })json";
 
-  NSData *serializedKeysetData = [NSData dataWithBytes:kKeysetWithInvalidKey.data()
-                                                length:kKeysetWithInvalidKey.size()];
   NSError *error = nil;
   TINKJSONKeysetReader *reader =
-      [[TINKJSONKeysetReader alloc] initWithSerializedKeyset:serializedKeysetData error:&error];
+      [[TINKJSONKeysetReader alloc] initWithStringView:kKeysetWithInvalidKey error:&error];
   XCTAssertNotNil(reader);
   XCTAssertNil(error, @"Initialization of TINKJSONKeysetReader failed with %@", error);
 
@@ -220,12 +223,9 @@ constexpr absl::string_view kSingleKeyAesGcmKeyset = R"json(
   })json";
 
   // Get the AEAD from the kKeysetWithTwoKeys
-  NSData *twoKeysSerializedKeysetData = [NSData dataWithBytes:kKeysetWithTwoKeys.data()
-                                                length:kKeysetWithTwoKeys.size()];
   NSError *error = nil;
-  TINKJSONKeysetReader *reader =
-      [[TINKJSONKeysetReader alloc] initWithSerializedKeyset:twoKeysSerializedKeysetData
-                                                       error:&error];
+  TINKJSONKeysetReader *reader = [[TINKJSONKeysetReader alloc] initWithStringView:kKeysetWithTwoKeys
+                                                                            error:&error];
   XCTAssertNotNil(reader);
   XCTAssertNil(error, @"Initialization of TINKJSONKeysetReader failed with %@", error);
 
@@ -239,10 +239,7 @@ constexpr absl::string_view kSingleKeyAesGcmKeyset = R"json(
   XCTAssertNil(error);
 
   // Get the AEAD from the kSingleKeyAesGcmKeyset
-  NSData *serializedKeysetData = [NSData dataWithBytes:kSingleKeyAesGcmKeyset.data()
-                                                length:kSingleKeyAesGcmKeyset.size()];
-  reader = [[TINKJSONKeysetReader alloc] initWithSerializedKeyset:serializedKeysetData
-                                                            error:&error];
+  reader = [[TINKJSONKeysetReader alloc] initWithStringView:kSingleKeyAesGcmKeyset error:&error];
 
   handle = [[TINKKeysetHandle alloc] initCleartextKeysetHandleWithKeysetReader:reader error:&error];
 
