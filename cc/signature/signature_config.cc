@@ -20,7 +20,6 @@
 #include "tink/config/config_util.h"
 #include "tink/config/tink_fips.h"
 #include "tink/registry.h"
-#include "tink/signature/ecdsa_sign_key_manager.h"
 #include "tink/signature/ecdsa_verify_key_manager.h"
 #include "tink/signature/ed25519_sign_key_manager.h"
 #include "tink/signature/ed25519_verify_key_manager.h"
@@ -31,6 +30,7 @@
 #include "tink/signature/rsa_ssa_pss_sign_key_manager.h"
 #include "tink/signature/rsa_ssa_pss_verify_key_manager.h"
 #include "tink/util/status.h"
+#include "tink/signature/ecdsa_sign_key_manager.h"
 #include "proto/config.pb.h"
 
 using google::crypto::tink::RegistryConfig;
