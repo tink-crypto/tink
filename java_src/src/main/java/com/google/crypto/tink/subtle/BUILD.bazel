@@ -443,6 +443,7 @@ java_library(
 java_library(
     name = "base64",
     srcs = ["Base64.java"],
+    deps = ["@maven//:com_google_errorprone_error_prone_annotations"],
 )
 
 java_library(
@@ -548,6 +549,7 @@ java_library(
         ":curve25519",
         ":field25519",
         ":subtle_util_cluster",
+        "@maven//:com_google_errorprone_error_prone_annotations",
     ],
 )
 
@@ -625,6 +627,7 @@ android_library(
 android_library(
     name = "base64-android",
     srcs = ["Base64.java"],
+    deps = ["@maven//:com_google_errorprone_error_prone_annotations"],
 )
 
 android_library(
@@ -772,6 +775,7 @@ android_library(
         ":curve25519-android",
         ":field25519-android",
         ":subtle_util_cluster-android",
+        "@maven//:com_google_errorprone_error_prone_annotations",
     ],
 )
 

@@ -16,6 +16,7 @@
 
 package com.google.crypto.tink.subtle;
 
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 
@@ -580,6 +581,13 @@ public final class Base64 {
       return len * 8 / 5 + 10;
     }
 
+    /**
+     * Processes the input to encode it in base 64.
+     *
+     * <p>This function always returns true -- encoding can never fail. So if one knows that one has
+     * this class one can ignore the return value.
+     */
+    @CanIgnoreReturnValue
     @Override
     public boolean process(byte[] input, int offset, int len, boolean finish) {
       // Using local variables makes the encoder about 9% faster.
