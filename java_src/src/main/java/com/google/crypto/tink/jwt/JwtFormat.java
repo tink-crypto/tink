@@ -79,7 +79,7 @@ final class JwtFormat {
     }
   }
 
-  private static String validateAlgorithm(String algo) throws InvalidAlgorithmParameterException {
+  private static void validateAlgorithm(String algo) throws InvalidAlgorithmParameterException {
     switch (algo) {
       case "HS256":
       case "HS384":
@@ -93,7 +93,7 @@ final class JwtFormat {
       case "PS256":
       case "PS384":
       case "PS512":
-        return algo;
+        return;
       default:
         throw new InvalidAlgorithmParameterException("invalid algorithm: " + algo);
     }

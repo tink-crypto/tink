@@ -39,8 +39,7 @@ final class JwtNames {
   static final String HEADER_TYPE = "typ";
   static final String HEADER_CRITICAL = "crit";
 
-
-  static String validate(String name) {
+  static void validate(String name) {
     if (isRegisteredName(name)) {
       throw new IllegalArgumentException(
           String.format(
@@ -48,7 +47,6 @@ final class JwtNames {
                   + " setter method.",
               name));
     }
-    return name;
   }
 
   static boolean isRegisteredName(String name) {
