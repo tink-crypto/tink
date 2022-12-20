@@ -705,11 +705,8 @@ objc_library(
     testonly = 1,
     srcs = glob(
         [
-            "Tests/UnitTests/core/*.mm",
-            "Tests/UnitTests/aead/*.mm",
-            "Tests/UnitTests/mac/*.mm",
-            "Tests/UnitTests/daead/*.mm",
-            "Tests/UnitTests/hybrid/*.mm",
+            "Tests/UnitTests/**/*.m",
+            "Tests/UnitTests/**/*.mm",
         ],
     ),
     deps = [
