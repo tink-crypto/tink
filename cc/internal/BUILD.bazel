@@ -635,6 +635,32 @@ cc_test(
 )
 
 cc_library(
+    name = "key_parser",
+    hdrs = ["key_parser.h"],
+    include_prefix = "tink/internal",
+    deps = [
+        "//:secret_key_access_token",
+        "//util:statusor",
+        "@com_google_absl//absl/functional:function_ref",
+        "@com_google_absl//absl/strings",
+    ],
+)
+
+cc_test(
+    name = "key_parser_test",
+    srcs = ["key_parser_test.cc"],
+    deps = [
+        ":key_parser",
+        ":serialization",
+        "//:insecure_secret_key_access",
+        "//:key",
+        "//:parameters",
+        "//util:test_matchers",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_library(
     name = "key_status_util",
     srcs = ["key_status_util.cc"],
     hdrs = ["key_status_util.h"],

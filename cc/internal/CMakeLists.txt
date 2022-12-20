@@ -597,6 +597,31 @@ tink_cc_test(
 )
 
 tink_cc_library(
+  NAME key_parser
+  SRCS
+    key_parser.h
+  DEPS
+    absl::function_ref
+    absl::strings
+    tink::core::secret_key_access_token
+    tink::util::statusor
+)
+
+tink_cc_test(
+  NAME key_parser_test
+  SRCS
+    key_parser_test.cc
+  DEPS
+    tink::internal::key_parser
+    tink::internal::serialization
+    gmock
+    tink::core::insecure_secret_key_access
+    tink::core::key
+    tink::core::parameters
+    tink::util::test_matchers
+)
+
+tink_cc_library(
   NAME key_status_util
   SRCS
     key_status_util.cc
