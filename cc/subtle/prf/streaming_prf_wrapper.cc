@@ -37,7 +37,7 @@ class StreamingPrfSetWrapper : public StreamingPrf {
     return streaming_prf_set_->get_primary()->get_primitive().ComputePrf(input);
   }
 
-  ~StreamingPrfSetWrapper() override {}
+  ~StreamingPrfSetWrapper() override = default;
 
  private:
   std::unique_ptr<PrimitiveSet<StreamingPrf>> streaming_prf_set_;

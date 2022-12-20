@@ -44,7 +44,7 @@ class StreamingMac {
   virtual util::StatusOr<std::unique_ptr<OutputStreamWithResult<util::Status>>>
   NewVerifyMacOutputStream(const std::string& mac_value) const = 0;
 
-  virtual ~StreamingMac() {}
+  virtual ~StreamingMac() = default;
 };
 
 }  // namespace tink

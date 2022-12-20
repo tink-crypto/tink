@@ -66,7 +66,7 @@ class PublicKeyVerifySetWrapper : public PublicKeyVerify {
   crypto::tink::util::Status Verify(absl::string_view signature,
                                     absl::string_view data) const override;
 
-  ~PublicKeyVerifySetWrapper() override {}
+  ~PublicKeyVerifySetWrapper() override = default;
 
  private:
   std::unique_ptr<PrimitiveSet<PublicKeyVerify>> public_key_verify_set_;

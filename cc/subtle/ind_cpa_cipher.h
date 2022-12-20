@@ -42,7 +42,7 @@ class IndCpaCipher {
   virtual crypto::tink::util::StatusOr<std::string> Decrypt(
       absl::string_view ciphertext) const = 0;
 
-  virtual ~IndCpaCipher() {}
+  virtual ~IndCpaCipher() = default;
 };
 
 }  // namespace subtle

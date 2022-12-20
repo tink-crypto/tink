@@ -77,7 +77,7 @@ class StreamingAead {
       std::unique_ptr<crypto::tink::RandomAccessStream> ciphertext_source,
       absl::string_view associated_data) const = 0;
 
-  virtual ~StreamingAead() {}
+  virtual ~StreamingAead() = default;
 };
 
 }  // namespace tink

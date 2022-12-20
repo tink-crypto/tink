@@ -38,7 +38,7 @@ class StreamingPrf {
   virtual std::unique_ptr<InputStream> ComputePrf(
       absl::string_view input) const = 0;
 
-  virtual ~StreamingPrf() {}
+  virtual ~StreamingPrf() = default;
 };
 
 }  // namespace tink

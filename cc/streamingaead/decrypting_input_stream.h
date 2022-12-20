@@ -48,7 +48,7 @@ class DecryptingInputStream : public crypto::tink::InputStream {
       std::unique_ptr<crypto::tink::InputStream> ciphertext_source,
       absl::string_view associated_data);
 
-  ~DecryptingInputStream() override {}
+  ~DecryptingInputStream() override = default;
   util::StatusOr<int> Next(const void** data) override;
   void BackUp(int count) override;
   int64_t Position() const override;

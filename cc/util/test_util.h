@@ -735,7 +735,7 @@ class DummyKmsClient : public KmsClient {
     return {absl::make_unique<DummyAead>(key_uri)};
   }
 
-  ~DummyKmsClient() override {}
+  ~DummyKmsClient() override = default;
 
  private:
   std::string uri_prefix_;

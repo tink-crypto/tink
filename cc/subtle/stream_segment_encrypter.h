@@ -98,7 +98,7 @@ class StreamSegmentEncrypter {
   //   segment_overhead = ciphertext_segment_size - get_plaintext_segment_size()
   virtual int get_ciphertext_offset() const = 0;
 
-  virtual ~StreamSegmentEncrypter() {}
+  virtual ~StreamSegmentEncrypter() = default;
 
  protected:
   // Increments the segment number.

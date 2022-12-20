@@ -60,7 +60,7 @@ class Buffer {
   // Returns OK iff 0 <= new_size <= allocated_size();
   virtual util::Status set_size(int new_size) = 0;
 
-  virtual ~Buffer() {}
+  virtual ~Buffer() = default;
 };
 
 }  // namespace util

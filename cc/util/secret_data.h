@@ -74,7 +74,7 @@ class SecretUniquePtr {
   using element_type = typename Value::element_type;
   using deleter_type = typename Value::deleter_type;
 
-  SecretUniquePtr() {}
+  SecretUniquePtr() = default;
 
   pointer get() const { return value_.get(); }
   deleter_type& get_deleter() { return value_.get_deleter(); }

@@ -94,7 +94,7 @@ class AesGcmHkdfStreamingKeyManager
       const google::crypto::tink::AesGcmHkdfStreamingKeyFormat& key_format,
       InputStream* input_stream) const override;
 
-  ~AesGcmHkdfStreamingKeyManager() override {}
+  ~AesGcmHkdfStreamingKeyManager() override = default;
 
  private:
   const std::string key_type_ = absl::StrCat(

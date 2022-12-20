@@ -38,7 +38,7 @@ class SharedRandomAccessStream : public crypto::tink::RandomAccessStream {
       crypto::tink::RandomAccessStream* random_access_stream)
       : random_access_stream_(random_access_stream) {}
 
-  ~SharedRandomAccessStream() override {}
+  ~SharedRandomAccessStream() override = default;
 
   crypto::tink::util::Status PRead(
       int64_t position, int count,

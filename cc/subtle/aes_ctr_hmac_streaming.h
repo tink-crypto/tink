@@ -183,7 +183,7 @@ class AesCtrHmacStreamSegmentDecrypter : public StreamSegmentDecrypter {
     return ciphertext_segment_size_;
   }
   int get_ciphertext_offset() const override { return ciphertext_offset_; }
-  ~AesCtrHmacStreamSegmentDecrypter() override {}
+  ~AesCtrHmacStreamSegmentDecrypter() override = default;
 
  private:
   AesCtrHmacStreamSegmentDecrypter(util::SecretData ikm, HashType hkdf_algo,

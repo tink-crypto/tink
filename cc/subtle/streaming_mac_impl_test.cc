@@ -42,8 +42,8 @@ using ::testing::HasSubstr;
 
 class DummyStatefulMacFactory : public StatefulMacFactory {
  public:
-  DummyStatefulMacFactory() {}
-  ~DummyStatefulMacFactory() override {}
+  DummyStatefulMacFactory() = default;
+  ~DummyStatefulMacFactory() override = default;
 
   // Constructs a StatefulMac using the DummyStatefulMac, which creates
   // returns a MAC of the header concatenated with the plaintext.

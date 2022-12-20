@@ -86,8 +86,7 @@ void IstreamInputStream::BackUp(int count) {
   position_ = position_ - actual_count;
 }
 
-IstreamInputStream::~IstreamInputStream() {
-}
+IstreamInputStream::~IstreamInputStream() = default;
 
 int64_t IstreamInputStream::Position() const {
   return position_;

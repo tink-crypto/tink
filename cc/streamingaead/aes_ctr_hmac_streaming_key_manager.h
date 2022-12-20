@@ -98,7 +98,7 @@ class AesCtrHmacStreamingKeyManager
       const google::crypto::tink::AesCtrHmacStreamingKeyFormat& key_format,
       InputStream* input_stream) const override;
 
-  ~AesCtrHmacStreamingKeyManager() override {}
+  ~AesCtrHmacStreamingKeyManager() override = default;
 
  private:
   const std::string key_type_ = absl::StrCat(

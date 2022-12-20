@@ -79,7 +79,7 @@ class StreamingAeadSetWrapper: public StreamingAead {
       std::unique_ptr<crypto::tink::RandomAccessStream> ciphertext_source,
       absl::string_view associated_data) const override;
 
-  ~StreamingAeadSetWrapper() override {}
+  ~StreamingAeadSetWrapper() override = default;
 
  private:
   // We use a shared_ptr here to ensure that primitives_ stays alive

@@ -72,7 +72,7 @@ class StreamSegmentDecrypter {
   //   segment_overhead = ciphertext_segment_size - get_plaintext_segment_size()
   virtual int get_ciphertext_offset() const = 0;
 
-  virtual ~StreamSegmentDecrypter() {}
+  virtual ~StreamSegmentDecrypter() = default;
 };
 
 }  // namespace subtle

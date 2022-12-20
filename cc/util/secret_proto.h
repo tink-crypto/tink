@@ -61,7 +61,7 @@ class SecretProto {
     return proto;
   }
 
-  SecretProto() {}
+  SecretProto() = default;
 
   SecretProto(const SecretProto& other) { *value_ = *other.value_; }
 

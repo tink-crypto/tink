@@ -138,7 +138,7 @@ class DummyStreamSegmentEncrypter : public StreamSegmentEncrypter {
     return ct_offset_;
   }
 
-  ~DummyStreamSegmentEncrypter() override {}
+  ~DummyStreamSegmentEncrypter() override = default;
 
   int get_generated_output_size() {
     return generated_output_size_;
@@ -227,7 +227,7 @@ class DummyStreamSegmentDecrypter : public StreamSegmentDecrypter {
     return ct_offset_;
   }
 
-  ~DummyStreamSegmentDecrypter() override {}
+  ~DummyStreamSegmentDecrypter() override = default;
 
   int get_generated_output_size() {
     return generated_output_size_;

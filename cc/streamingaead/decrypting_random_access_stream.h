@@ -50,7 +50,7 @@ class DecryptingRandomAccessStream : public crypto::tink::RandomAccessStream {
       std::unique_ptr<crypto::tink::RandomAccessStream> ciphertext_source,
       absl::string_view associated_data);
 
-  ~DecryptingRandomAccessStream() override {}
+  ~DecryptingRandomAccessStream() override = default;
   crypto::tink::util::Status PRead(int64_t position, int count,
       crypto::tink::util::Buffer* dest_buffer) override;
   crypto::tink::util::StatusOr<int64_t> size() override;

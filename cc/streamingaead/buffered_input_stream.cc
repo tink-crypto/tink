@@ -136,9 +136,7 @@ crypto::tink::util::Status BufferedInputStream::Rewind() {
   return status_;
 }
 
-
-BufferedInputStream::~BufferedInputStream() {
-}
+BufferedInputStream::~BufferedInputStream() = default;
 
 int64_t BufferedInputStream::Position() const {
   if (direct_access_) return input_stream_->Position();
