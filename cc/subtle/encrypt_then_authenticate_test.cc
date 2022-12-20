@@ -290,7 +290,11 @@ TEST(EncryptThenAuthenticateTest, testAuthBypassShouldNotWork) {
   const std::string message = "Some data to encrypt.";
   // ...with a long associated_data whose size in bits converted to an unsigned
   // 32-bit integer is 0.
-  const std::string associated_data = std::string(1 << 29, 'a');
+  std::string associated_data;
+  constexpr size_t kAssociatedDataSize = 1 << 29;
+  constexpr size_t kCiphertextSpace = 1000;
+  associated_data.reserve(kAssociatedDataSize + kCiphertextSpace);
+  associated_data.resize(kAssociatedDataSize, 'a');
   auto encrypted = cipher->Encrypt(message, associated_data);
   EXPECT_TRUE(encrypted.ok()) << encrypted.status();
   auto ct = encrypted.value();
@@ -300,7 +304,7 @@ TEST(EncryptThenAuthenticateTest, testAuthBypassShouldNotWork) {
   // Test that the 2^29-byte associated_data is NOT considered equal to an empty
   // associated_data. That is, test that a valid tag for (ciphertext,
   // associated_data) is INVALID for (associated_data + ciphertext, "").
-  ct = associated_data + ct;
+  ct = std::move(associated_data) + ct;
   decrypted = cipher->Decrypt(ct, "");
   EXPECT_FALSE(decrypted.ok());
 #endif  // __ASYLO__

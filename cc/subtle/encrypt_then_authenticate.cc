@@ -73,23 +73,20 @@ util::StatusOr<std::string> EncryptThenAuthenticate::Encrypt(
                         "associated data too long");
   }
 
-  auto ct = ind_cpa_cipher_->Encrypt(plaintext);
-  if (!ct.ok()) {
-    return ct.status();
+  auto ciphertext = ind_cpa_cipher_->Encrypt(plaintext);
+  if (!ciphertext.ok()) {
+    return ciphertext.status();
   }
-  std::string ciphertext(ct.value());
-  std::string toAuthData =
-      absl::StrCat(associated_data, ciphertext,
-                   longToBigEndianStr(associated_data_size_in_bits));
-
-  auto tag = mac_->ComputeMac(toAuthData);
+  auto tag = mac_->ComputeMac(
+      absl::StrCat(associated_data, *ciphertext,
+                   longToBigEndianStr(associated_data_size_in_bits)));
   if (!tag.ok()) {
     return tag.status();
   }
-  if (tag.value().size() != tag_size_) {
+  if (tag->size() != tag_size_) {
     return util::Status(absl::StatusCode::kInternal, "invalid tag size");
   }
-  return ciphertext.append(tag.value());
+  return ciphertext->append(tag.value());
 }
 
 util::StatusOr<std::string> EncryptThenAuthenticate::Decrypt(
@@ -113,11 +110,10 @@ util::StatusOr<std::string> EncryptThenAuthenticate::Decrypt(
 
   auto payload = ciphertext.substr(0, ciphertext.size() - tag_size_);
   auto tag = ciphertext.substr(ciphertext.size() - tag_size_, tag_size_);
-  std::string toAuthData =
-      absl::StrCat(associated_data, payload,
-                   longToBigEndianStr(associated_data_size_in_bits));
 
-  auto verified = mac_->VerifyMac(tag, toAuthData);
+  auto verified = mac_->VerifyMac(
+      tag, absl::StrCat(associated_data, payload,
+                        longToBigEndianStr(associated_data_size_in_bits)));
   if (!verified.ok()) {
     return verified;
   }

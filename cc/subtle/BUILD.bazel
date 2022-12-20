@@ -1138,7 +1138,6 @@ cc_test(
 
 cc_test(
     name = "encrypt_then_authenticate_test",
-    size = "small",
     srcs = ["encrypt_then_authenticate_test.cc"],
     deps = [
         ":aes_ctr_boringssl",
