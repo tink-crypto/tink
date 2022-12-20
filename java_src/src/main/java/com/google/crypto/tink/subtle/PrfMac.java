@@ -45,7 +45,7 @@ public class PrfMac implements Mac {
 
     // Some Prf implementations have restrictions on maximum tag length. These throw on compute().
     // Check for those restrictions on tag length here by doing a compute() pass.
-    wrappedPrf.compute(new byte[0], tagSize);
+    Object unused = wrappedPrf.compute(new byte[0], tagSize);
   }
 
   @Override

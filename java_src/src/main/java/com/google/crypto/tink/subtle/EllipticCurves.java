@@ -834,7 +834,7 @@ public final class EllipticCurves {
       throw new GeneralSecurityException("shared secret is out of range");
     }
     // This will throw if x is not a valid coordinate.
-    getY(x, true /* lsb, doesn't matter here */, privateKeyCurve);
+    Object unused = getY(x, true /* lsb, doesn't matter here */, privateKeyCurve);
   }
 
   /* Generates the DH shared secret using {@code myPrivateKey} and {@code peerPublicKey} */

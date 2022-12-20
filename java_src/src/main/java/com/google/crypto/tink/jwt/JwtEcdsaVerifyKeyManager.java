@@ -72,7 +72,7 @@ class JwtEcdsaVerifyKeyManager extends KeyTypeManager<JwtEcdsaPublicKey> {
   static final void validateEcdsaAlgorithm(JwtEcdsaAlgorithm algorithm)
       throws GeneralSecurityException {
     // Purposely ignore the result. This function will throw if the algorithm is invalid.
-    hashForEcdsaAlgorithm(algorithm);
+    Object unused = hashForEcdsaAlgorithm(algorithm);
   }
 
   private static class JwtPublicKeyVerifyFactory

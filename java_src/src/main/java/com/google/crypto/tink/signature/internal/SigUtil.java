@@ -82,7 +82,7 @@ public final class SigUtil {
    */
   public static void validateRsaSsaPkcs1Params(RsaSsaPkcs1Params params)
       throws GeneralSecurityException {
-    toHashType(params.getHashType());
+    Enums.HashType unused = toHashType(params.getHashType());
   }
 
   /**
@@ -99,7 +99,7 @@ public final class SigUtil {
    */
   public static void validateRsaSsaPssParams(RsaSsaPssParams params)
       throws GeneralSecurityException {
-    toHashType(params.getSigHash());
+    Object unused = toHashType(params.getSigHash());
     if (params.getSigHash() != params.getMgf1Hash()) {
       throw new GeneralSecurityException("MGF1 hash is different from signature hash");
     }
