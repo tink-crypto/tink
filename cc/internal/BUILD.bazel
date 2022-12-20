@@ -661,6 +661,32 @@ cc_test(
 )
 
 cc_library(
+    name = "key_serializer",
+    hdrs = ["key_serializer.h"],
+    include_prefix = "tink/internal",
+    deps = [
+        "//:secret_key_access_token",
+        "//util:statusor",
+        "@com_google_absl//absl/functional:function_ref",
+    ],
+)
+
+cc_test(
+    name = "key_serializer_test",
+    srcs = ["key_serializer_test.cc"],
+    deps = [
+        ":key_serializer",
+        ":serialization",
+        "//:insecure_secret_key_access",
+        "//:key",
+        "//:parameters",
+        "//:secret_key_access_token",
+        "//util:test_matchers",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_library(
     name = "key_status_util",
     srcs = ["key_status_util.cc"],
     hdrs = ["key_status_util.h"],

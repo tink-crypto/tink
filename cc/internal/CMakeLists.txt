@@ -622,6 +622,31 @@ tink_cc_test(
 )
 
 tink_cc_library(
+  NAME key_serializer
+  SRCS
+    key_serializer.h
+  DEPS
+    absl::function_ref
+    tink::core::secret_key_access_token
+    tink::util::statusor
+)
+
+tink_cc_test(
+  NAME key_serializer_test
+  SRCS
+    key_serializer_test.cc
+  DEPS
+    tink::internal::key_serializer
+    tink::internal::serialization
+    gmock
+    tink::core::insecure_secret_key_access
+    tink::core::key
+    tink::core::parameters
+    tink::core::secret_key_access_token
+    tink::util::test_matchers
+)
+
+tink_cc_library(
   NAME key_status_util
   SRCS
     key_status_util.cc
