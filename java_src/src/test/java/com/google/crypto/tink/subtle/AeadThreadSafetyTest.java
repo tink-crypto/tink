@@ -159,7 +159,7 @@ public class AeadThreadSafetyTest {
     // if we do this multithreaded, there is a potential for a race in case we call encrypt
     // for the first time at the same time in multiple threads. To get around this, we first encrypt
     // an empty plaintext here.
-    cipher.encrypt(new byte[0]);
+    Object unused = cipher.encrypt(new byte[0]);
 
     Aead aesCtrHmac = new EncryptThenAuthenticate(cipher, mac, macSize);
     testEncryptionDecryption(aesCtrHmac, 5, 128, 20);

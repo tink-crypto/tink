@@ -34,15 +34,15 @@ public class EngineFactoryTest {
 
   @Test
   public void testAtLeastGetsACipherByDefault() throws Exception {
-    EngineFactory.CIPHER.getInstance("AES");
+    Object unused = EngineFactory.CIPHER.getInstance("AES");
     // didn't throw
   }
 
   @Test
   public void testIsReuseable() throws Exception {
-    EngineFactory.CIPHER.getInstance("AES");
-    EngineFactory.CIPHER.getInstance("AES");
-    EngineFactory.CIPHER.getInstance("AES");
+    Object unused = EngineFactory.CIPHER.getInstance("AES");
+    unused = EngineFactory.CIPHER.getInstance("AES");
+    unused = EngineFactory.CIPHER.getInstance("AES");
     // didn't throw
   }
 

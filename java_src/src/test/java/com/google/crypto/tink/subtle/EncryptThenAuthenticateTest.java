@@ -117,11 +117,7 @@ public class EncryptThenAuthenticateTest {
         continue;
       }
       Aead aead = getAead(t.macKey, t.encKey, t.ivSize, t.tagLength, t.macAlg);
-      try {
-        aead.decrypt(t.ciphertext, t.aad);
-      } catch (GeneralSecurityException e) {
-        fail("Ciphertext and aad are valid, shouldn't reach here: " + i + " " + e);
-      }
+      Object unused = aead.decrypt(t.ciphertext, t.aad);
     }
   }
 

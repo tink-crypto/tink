@@ -60,6 +60,6 @@ public class Ed25519Test {
   @Test
   public void testScalarMultWithBase() throws Exception {
     byte[] scalar = Hex.decode("521784c403e6fb32d48e0da85969a82f5952856bde4471a42b3fa56fd8b96c0d");
-    Ed25519.scalarMultWithBaseToBytes(scalar);
+    Object unused = Ed25519.scalarMultWithBaseToBytes(scalar);
   }
 }

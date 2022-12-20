@@ -181,7 +181,7 @@ public class SignatureThreadSafetyTest {
     // initalize some of the java.security.Providers the first time we sign. If we do this
     // multithreaded, there is a potential for a race. To get around this, we first sign once, to
     // initialize everything.
-    signer.sign(message);
+    Object unused = signer.sign(message);
 
     ExceptionHandler exceptionHandler = new ExceptionHandler();
     Thread[] thread = new Thread[numberOfThreads];

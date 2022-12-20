@@ -279,8 +279,9 @@ public class PrfHmacJceTest {
 
   private static void testPrfNoExceptionIfTagSizeIsTooSmall(String algoName) throws Exception {
     for (int i = 0; i < PrfMac.MIN_TAG_SIZE_IN_BYTES; i++) {
-      new PrfHmacJce(algoName, new SecretKeySpec(Random.randBytes(16), "HMAC"))
-          .compute(new byte[100], i);
+      Object unused =
+          new PrfHmacJce(algoName, new SecretKeySpec(Random.randBytes(16), "HMAC"))
+              .compute(new byte[100], i);
     }
   }
 
