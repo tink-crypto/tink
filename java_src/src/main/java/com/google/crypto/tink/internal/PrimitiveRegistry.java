@@ -143,7 +143,7 @@ public class PrimitiveRegistry {
       throws GeneralSecurityException {
     if (!primitiveWrapperMap.containsKey(wrapperClassObject)) {
       throw new GeneralSecurityException(
-          "No PrimitiveWrapper for " + wrapperClassObject + " available");
+          "No wrapper found for " + wrapperClassObject);
     }
     @SuppressWarnings("unchecked") // We know this is how this map is organized.
     PrimitiveWrapper<?, WrapperPrimitiveT> wrapper =
