@@ -694,7 +694,6 @@ objc_library(
 ios_unit_test(
     name = "TinkTests",
     minimum_os_version = IOS_MINIMUM_OS,
-    tags = ["do_not_build_b155060426"],
     deps = [
         ":UnitTestLib",
     ],
