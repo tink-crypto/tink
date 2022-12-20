@@ -122,6 +122,8 @@ import javax.annotation.concurrent.GuardedBy;
  * @since 1.0.0
  */
 public final class AndroidKeysetManager {
+  private static final Object lock = new Object();
+
   private static final String TAG = AndroidKeysetManager.class.getSimpleName();
   private final KeysetWriter writer;
   private final Aead masterKey;
@@ -242,12 +244,17 @@ public final class AndroidKeysetManager {
      * @throws GeneralSecurityException If cannot read an existing keyset or generate a new one.
      */
     public synchronized AndroidKeysetManager build() throws GeneralSecurityException, IOException {
-      if (masterKeyUri != null) {
-        masterKey = readOrGenerateNewMasterKey();
-      }
-      this.keysetManager = readOrGenerateNewKeyset();
+      // readOrGenerateNewMasterKey() and readOrGenerateNewKeyset() involve shared pref filesystem
+      // operations. To control access to this global state in multi-threaded contexts we need to
+      // ensure mutual exclusion of these functions.
+      synchronized (lock) {
+        if (masterKeyUri != null) {
+          masterKey = readOrGenerateNewMasterKey();
+        }
+        this.keysetManager = readOrGenerateNewKeyset();
 
-      return new AndroidKeysetManager(this);
+        return new AndroidKeysetManager(this);
+      }
     }
 
     @Nullable
@@ -343,9 +350,7 @@ public final class AndroidKeysetManager {
     }
   }
 
-  /**
-   * @return a {@link KeysetHandle} of the managed keyset
-   */
+  /** Returns a {@link KeysetHandle} of the managed keyset. */
   public synchronized KeysetHandle getKeysetHandle() throws GeneralSecurityException {
     return keysetManager.getKeysetHandle();
   }
