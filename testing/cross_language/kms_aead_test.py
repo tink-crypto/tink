@@ -122,9 +122,18 @@ def _kms_aead_test_cases() -> Iterable[Tuple[str, str, str]]:
 def _two_key_uris_test_cases():
   for lang in _SUPPORTED_LANGUAGES_FOR_KMS_AEAD.get('AWS', []):
     yield (lang, _AWS_KEY_URI, _AWS_KEY_2_URI)
-    yield (lang, _AWS_KEY_ALIAS_URI, _AWS_KEY_2_ALIAS_URI)
   for lang in _SUPPORTED_LANGUAGES_FOR_KMS_AEAD.get('GCP', []):
     yield (lang, _GCP_KEY_URI, _GCP_KEY_2_URI)
+
+
+def _key_uris_with_alias_test_cases():
+  for lang in _SUPPORTED_LANGUAGES_FOR_KMS_AEAD.get('AWS', []):
+    yield (lang, _AWS_KEY_ALIAS_URI)
+
+
+def _two_key_uris_with_alias_test_cases():
+  for lang in _SUPPORTED_LANGUAGES_FOR_KMS_AEAD.get('AWS', []):
+    yield (lang, _AWS_KEY_ALIAS_URI, _AWS_KEY_2_ALIAS_URI)
 
 
 def _unknown_key_uris_test_cases():
@@ -177,6 +186,68 @@ class KmsAeadTest(parameterized.TestCase):
     self.assertEqual(primitive.decrypt(ciphertext, associated_data), plaintext)
     self.assertEqual(
         primitive_2.decrypt(ciphertext_2, associated_data), plaintext)
+
+    # Cannot be decrypted by the other primitive.
+    with self.assertRaises(tink.TinkError):
+      primitive.decrypt(ciphertext_2, associated_data)
+    with self.assertRaises(tink.TinkError):
+      primitive_2.decrypt(ciphertext, associated_data)
+
+  @parameterized.parameters(_key_uris_with_alias_test_cases())
+  def test_encrypt_decrypt_with_key_aliases(self, lang, alias_key_uri):
+    keyset = testing_servers.new_keyset(
+        lang,
+        aead.aead_key_templates.create_kms_aead_key_template(alias_key_uri))
+    primitive = testing_servers.remote_primitive(
+        lang=lang, keyset=keyset, primitive_class=aead.Aead)
+    plaintext = b'plaintext'
+    associated_data = b'associated_data'
+    ciphertext = primitive.encrypt(plaintext, associated_data)
+    if lang == 'cc' or lang == 'python':
+      # TODO(b/263231865) C++ and Python do not yet properly support aliases.
+      with self.assertRaises(tink.TinkError):
+        primitive.decrypt(ciphertext, associated_data)
+    self.assertEqual(primitive.decrypt(ciphertext, associated_data), plaintext)
+
+  @parameterized.parameters(_two_key_uris_with_alias_test_cases())
+  def test_cannot_decrypt_ciphertext_of_other_alias_key_uri(
+      self, lang, alias_key_uri, alias_key_uri_2):
+    keyset = testing_servers.new_keyset(
+        lang,
+        aead.aead_key_templates.create_kms_aead_key_template(alias_key_uri))
+    keyset_2 = testing_servers.new_keyset(
+        lang,
+        aead.aead_key_templates.create_kms_aead_key_template(alias_key_uri_2))
+
+    primitive = testing_servers.remote_primitive(
+        lang=lang, keyset=keyset, primitive_class=aead.Aead)
+    primitive_2 = testing_servers.remote_primitive(
+        lang=lang, keyset=keyset_2, primitive_class=aead.Aead)
+
+    plaintext = b'plaintext'
+    associated_data = b'associated_data'
+
+    ciphertext = primitive.encrypt(plaintext, associated_data)
+    ciphertext_2 = primitive_2.encrypt(plaintext, associated_data)
+
+    if lang == 'cc' or lang == 'python':
+      # TODO(b/263231865) C++ and Python do not yet properly support aliases.
+      with self.assertRaises(tink.TinkError):
+        primitive.decrypt(ciphertext, associated_data)
+      with self.assertRaises(tink.TinkError):
+        primitive_2.decrypt(ciphertext_2, associated_data)
+      return
+
+    # Can be decrypted by the primtive that created the ciphertext.
+    self.assertEqual(primitive.decrypt(ciphertext, associated_data), plaintext)
+    self.assertEqual(
+        primitive_2.decrypt(ciphertext_2, associated_data), plaintext)
+
+    if lang == 'java':
+      # TODO(b/242678738) Java currently does not reject this.
+      self.assertEqual(
+          primitive.decrypt(ciphertext_2, associated_data), plaintext)
+      return
 
     # Cannot be decrypted by the other primitive.
     with self.assertRaises(tink.TinkError):
