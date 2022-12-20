@@ -213,7 +213,7 @@ public final class AeadTest {
     KeysetHandle handle =
         TinkJsonProtoKeysetFormat.parseKeyset(JSON_DAEAD_KEYSET, InsecureSecretKeyAccess.get());
     // Test that the keyset can create a DeterministicAead primitive, but not a Aead.
-    handle.getPrimitive(DeterministicAead.class);
+    Object unused = handle.getPrimitive(DeterministicAead.class);
     assertThrows(GeneralSecurityException.class, () -> handle.getPrimitive(Aead.class));
   }
 }

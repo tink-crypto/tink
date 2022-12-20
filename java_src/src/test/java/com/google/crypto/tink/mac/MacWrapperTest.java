@@ -409,7 +409,7 @@ public class MacWrapperTest {
     // Wrapping would throw before any mac is computed, so we can use any Mac for the test.
     PrimitiveSet<Mac> primitives =
         PrimitiveSet.newBuilder(Mac.class).addPrimaryPrimitive(new AlwaysFailingMac(), key).build();
-    new MacWrapper().wrap(primitives);
+    Object unused = new MacWrapper().wrap(primitives);
   }
 
   @Test

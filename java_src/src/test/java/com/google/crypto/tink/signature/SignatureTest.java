@@ -339,7 +339,7 @@ public final class SignatureTest {
 
     // Test that the keyset can create a DeterministicAead primitive, but neither PublicKeySign
     // nor PublicKeyVerify primitives.
-    handle.getPrimitive(DeterministicAead.class);
+    Object unused = handle.getPrimitive(DeterministicAead.class);
     assertThrows(GeneralSecurityException.class, () -> handle.getPrimitive(PublicKeySign.class));
     assertThrows(GeneralSecurityException.class, () -> handle.getPrimitive(PublicKeyVerify.class));
   }

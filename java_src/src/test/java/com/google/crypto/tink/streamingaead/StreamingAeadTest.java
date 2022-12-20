@@ -273,7 +273,7 @@ public final class StreamingAeadTest {
         TinkJsonProtoKeysetFormat.parseKeyset(
             JSON_DAEAD_KEYSET, InsecureSecretKeyAccess.get());
     // Test that the keyset can create a DeterministicAead primitive, but not a StreamingAead.
-    handle.getPrimitive(DeterministicAead.class);
+    Object unused = handle.getPrimitive(DeterministicAead.class);
     assertThrows(GeneralSecurityException.class, () -> handle.getPrimitive(StreamingAead.class));
   }
 }

@@ -309,7 +309,7 @@ public final class HybridTest {
         TinkJsonProtoKeysetFormat.parseKeyset(JSON_DAEAD_KEYSET, InsecureSecretKeyAccess.get());
     // Test that the keyset can create a DeterministicAead primitive, but neither HybridEncrypt
     // nor HybridDecrypt primitives.
-    handle.getPrimitive(DeterministicAead.class);
+    Object unused = handle.getPrimitive(DeterministicAead.class);
     assertThrows(GeneralSecurityException.class, () -> handle.getPrimitive(HybridEncrypt.class));
     assertThrows(GeneralSecurityException.class, () -> handle.getPrimitive(HybridDecrypt.class));
   }

@@ -189,7 +189,7 @@ public final class PrfTest {
     KeysetHandle handle =
         TinkJsonProtoKeysetFormat.parseKeyset(JSON_DAEAD_KEYSET, InsecureSecretKeyAccess.get());
     // Test that the keyset can create a DeterministicAead primitive, but not a Mac.
-    handle.getPrimitive(DeterministicAead.class);
+    Object unused = handle.getPrimitive(DeterministicAead.class);
     assertThrows(GeneralSecurityException.class, () -> handle.getPrimitive(Mac.class));
   }
 }
