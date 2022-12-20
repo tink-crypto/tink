@@ -605,7 +605,7 @@ public final class JwkSetConverterTest {
             + "\"alg\":\"ES256\""
             + "}]}";
     // ignore returned value, we only test that it worked.
-    JwkSetConverter.toPublicKeysetHandle(jwksString);
+    Object unused = JwkSetConverter.toPublicKeysetHandle(jwksString);
   }
 
   @Test
@@ -641,7 +641,7 @@ public final class JwkSetConverterTest {
             + "\"key_ops\":[\"verify\"]"
             + "}]}";
     // ignore returned value, we only test that it worked.
-    JwkSetConverter.toPublicKeysetHandle(jwksString);
+    Object unused = JwkSetConverter.toPublicKeysetHandle(jwksString);
   }
 
   @Test
@@ -824,11 +824,11 @@ public final class JwkSetConverterTest {
             + "2oFr3AwKBYDHvsc\","
             + "\"e\":\"AQAB\",\"alg\":\"RS256\"}]}";
     // ignore returned value, we only test that it worked.
-    JwkSetConverter.toPublicKeysetHandle(jwksString);
+    Object unused = JwkSetConverter.toPublicKeysetHandle(jwksString);
 
     String psJwksString = jwksString.replace("RS256", "PS256");
     // ignore returned value, we only test that it worked.
-    JwkSetConverter.toPublicKeysetHandle(psJwksString);
+    unused = JwkSetConverter.toPublicKeysetHandle(psJwksString);
   }
 
   @Test
@@ -843,11 +843,11 @@ public final class JwkSetConverterTest {
             + "\"unknown\":1234,"
             + "\"e\":\"AQAB\",\"use\":\"sig\",\"alg\":\"RS256\",\"key_ops\":[\"verify\"]}]}";
     // ignore returned value, we only test that it worked.
-    JwkSetConverter.toPublicKeysetHandle(jwksString);
+    Object unused = JwkSetConverter.toPublicKeysetHandle(jwksString);
 
     String psJwksString = jwksString.replace("RS256", "PS256");
     // ignore returned value, we only test that it worked.
-    JwkSetConverter.toPublicKeysetHandle(psJwksString);
+    unused = JwkSetConverter.toPublicKeysetHandle(psJwksString);
   }
 
   @Test

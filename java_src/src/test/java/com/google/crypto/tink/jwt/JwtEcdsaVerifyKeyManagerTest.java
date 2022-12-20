@@ -94,8 +94,9 @@ public final class JwtEcdsaVerifyKeyManagerTest {
         verifyManager.getPrimitive(publicKey, JwtPublicKeyVerifyInternal.class);
     RawJwt token = RawJwt.newBuilder().withoutExpiration().build();
     JwtValidator validator = JwtValidator.newBuilder().allowMissingExpiration().build();
-    verifier.verifyAndDecodeWithKid(
-        signer.signAndEncodeWithKid(token, Optional.empty()), validator, Optional.empty());
+    Object unused =
+        verifier.verifyAndDecodeWithKid(
+            signer.signAndEncodeWithKid(token, Optional.empty()), validator, Optional.empty());
   }
 
   // Note: we use Theory as a parametrized test -- different from what the Theory framework intends.

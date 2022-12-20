@@ -407,16 +407,20 @@ public class JwtEcdsaSignKeyManagerTest {
     JsonObject normalHeader = new JsonObject();
     normalHeader.addProperty("alg", "ES256");
     String normalSignedCompact = generateSignedCompact(rawSigner, normalHeader, payload);
-    verifier.verifyAndDecode(normalSignedCompact, validator);
+    Object unused = verifier.verifyAndDecode(normalSignedCompact, validator);
 
     // valid token, with "typ" set in the header
     JsonObject goodHeader = new JsonObject();
     goodHeader.addProperty("alg", "ES256");
     goodHeader.addProperty("typ", "typeHeader");
     String goodSignedCompact = generateSignedCompact(rawSigner, goodHeader, payload);
-    verifier.verifyAndDecode(
-        goodSignedCompact,
-        JwtValidator.newBuilder().expectTypeHeader("typeHeader").allowMissingExpiration().build());
+    unused =
+        verifier.verifyAndDecode(
+            goodSignedCompact,
+            JwtValidator.newBuilder()
+                .expectTypeHeader("typeHeader")
+                .allowMissingExpiration()
+                .build());
 
     // invalid token with an empty header
     JsonObject emptyHeader = new JsonObject();
@@ -438,7 +442,7 @@ public class JwtEcdsaSignKeyManagerTest {
     unknownKidHeader.addProperty("alg", "ES256");
     unknownKidHeader.addProperty("kid", "unknown");
     String unknownKidSignedCompact = generateSignedCompact(rawSigner, unknownKidHeader, payload);
-    verifier.verifyAndDecode(unknownKidSignedCompact, validator);
+    unused = verifier.verifyAndDecode(unknownKidSignedCompact, validator);
   }
 
   @Test
@@ -471,7 +475,7 @@ public class JwtEcdsaSignKeyManagerTest {
     normalHeader.addProperty("alg", "ES256");
     normalHeader.addProperty("kid", kid);
     String normalToken = generateSignedCompact(rawSigner, normalHeader, payload);
-    verifier.verifyAndDecode(normalToken, validator);
+    Object unused = verifier.verifyAndDecode(normalToken, validator);
 
     // token without kid are rejected, even if they are valid.
     JsonObject headerWithoutKid = new JsonObject();

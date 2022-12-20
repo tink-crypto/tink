@@ -615,16 +615,20 @@ public class JwtHmacKeyManagerTest {
     JsonObject normalHeader = new JsonObject();
     normalHeader.addProperty("alg", "HS256");
     String normalSignedCompact = generateSignedCompact(rawPrimitive, normalHeader, payload);
-    primitive.verifyMacAndDecode(normalSignedCompact, validator);
+    Object unused = primitive.verifyMacAndDecode(normalSignedCompact, validator);
 
     // valid token, with "typ" set in the header
     JsonObject goodHeader = new JsonObject();
     goodHeader.addProperty("alg", "HS256");
     goodHeader.addProperty("typ", "typeHeader");
     String goodSignedCompact = generateSignedCompact(rawPrimitive, goodHeader, payload);
-    primitive.verifyMacAndDecode(
-        goodSignedCompact,
-        JwtValidator.newBuilder().expectTypeHeader("typeHeader").allowMissingExpiration().build());
+    unused =
+        primitive.verifyMacAndDecode(
+            goodSignedCompact,
+            JwtValidator.newBuilder()
+                .expectTypeHeader("typeHeader")
+                .allowMissingExpiration()
+                .build());
 
     // invalid token with an empty header
     JsonObject emptyHeader = new JsonObject();
@@ -647,7 +651,7 @@ public class JwtHmacKeyManagerTest {
     headerWithUnknownKid.addProperty("kid", "unknown");
     String tokenWithUnknownKid = generateSignedCompact(
         rawPrimitive, headerWithUnknownKid, payload);
-    primitive.verifyMacAndDecode(tokenWithUnknownKid, validator);
+    unused = primitive.verifyMacAndDecode(tokenWithUnknownKid, validator);
   }
 
   @Test
@@ -675,7 +679,7 @@ public class JwtHmacKeyManagerTest {
     normalHeader.addProperty("alg", "HS256");
     normalHeader.addProperty("kid", kid);
     String normalToken = generateSignedCompact(rawPrimitive, normalHeader, payload);
-    primitive.verifyMacAndDecode(normalToken, validator);
+    Object unused = primitive.verifyMacAndDecode(normalToken, validator);
 
     // valid token, with "typ" set in the header
     JsonObject headerWithTyp = new JsonObject();
@@ -683,9 +687,13 @@ public class JwtHmacKeyManagerTest {
     headerWithTyp.addProperty("typ", "typeHeader");
     headerWithTyp.addProperty("kid", kid);
     String tokenWithTyp = generateSignedCompact(rawPrimitive, headerWithTyp, payload);
-    primitive.verifyMacAndDecode(
-        tokenWithTyp,
-        JwtValidator.newBuilder().expectTypeHeader("typeHeader").allowMissingExpiration().build());
+    unused =
+        primitive.verifyMacAndDecode(
+            tokenWithTyp,
+            JwtValidator.newBuilder()
+                .expectTypeHeader("typeHeader")
+                .allowMissingExpiration()
+                .build());
 
     // invalid token without algorithm
     JsonObject headerWithoutAlg = new JsonObject();

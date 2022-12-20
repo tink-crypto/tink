@@ -85,7 +85,7 @@ public class JwtPublicKeySignVerifyWrappersTest {
                     .makePrimary())
             .build();
     KeysetHandle publicHandle = privateKeysetHandle.getPublicKeysetHandle();
-    publicHandle.getPrimitive(JwtPublicKeyVerify.class);
+    Object unused = publicHandle.getPrimitive(JwtPublicKeyVerify.class);
   }
 
   @Test

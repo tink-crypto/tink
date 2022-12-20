@@ -532,9 +532,13 @@ public class JwtRsaSsaPkcs1SignKeyManagerTest {
     goodHeader.addProperty("alg", "RS256");
     goodHeader.addProperty("typ", "typeHeader");
     String goodSignedCompact = generateSignedCompact(rawSigner, goodHeader, payload);
-    verifier.verifyAndDecode(
-        goodSignedCompact,
-        JwtValidator.newBuilder().expectTypeHeader("typeHeader").allowMissingExpiration().build());
+    Object unused =
+        verifier.verifyAndDecode(
+            goodSignedCompact,
+            JwtValidator.newBuilder()
+                .expectTypeHeader("typeHeader")
+                .allowMissingExpiration()
+                .build());
 
     // invalid token with an empty header
     JsonObject emptyHeader = new JsonObject();
@@ -556,7 +560,7 @@ public class JwtRsaSsaPkcs1SignKeyManagerTest {
     unknownKidHeader.addProperty("alg", "RS256");
     unknownKidHeader.addProperty("kid", "unknown");
     String unknownKidSignedCompact = generateSignedCompact(rawSigner, unknownKidHeader, payload);
-    verifier.verifyAndDecode(unknownKidSignedCompact, validator);
+    unused = verifier.verifyAndDecode(unknownKidSignedCompact, validator);
   }
 
   @Test
@@ -590,7 +594,7 @@ public class JwtRsaSsaPkcs1SignKeyManagerTest {
     normalHeader.addProperty("alg", "RS256");
     normalHeader.addProperty("kid", kid);
     String validToken = generateSignedCompact(rawSigner, normalHeader, payload);
-    verifier.verifyAndDecode(validToken, validator);
+    Object unused = verifier.verifyAndDecode(validToken, validator);
 
     // token without kid are rejected, even if they are valid.
     JsonObject headerWithoutKid = new JsonObject();
