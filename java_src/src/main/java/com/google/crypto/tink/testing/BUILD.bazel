@@ -122,6 +122,7 @@ java_library(
     deps = [
         "//src/main/java/com/google/crypto/tink:key_template",
         "//src/main/java/com/google/crypto/tink/internal:key_type_manager",
+        "@maven//:com_google_errorprone_error_prone_annotations",
         "@maven//:com_google_protobuf_protobuf_java",
         "@maven//:com_google_truth_truth",
     ],
@@ -133,6 +134,7 @@ android_library(
     deps = [
         "//src/main/java/com/google/crypto/tink:key_template-android",
         "//src/main/java/com/google/crypto/tink/internal:key_type_manager-android",
+        "@maven//:com_google_errorprone_error_prone_annotations",
         "@maven//:com_google_protobuf_protobuf_javalite",
         "@maven//:com_google_truth_truth",
     ],

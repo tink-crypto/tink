@@ -314,6 +314,7 @@ public final class PrimitiveSet<P> {
    * @deprecated use {@link Builder.addPrimitive} or {@link Builder.addPrimaryPrimitive} instead.
    */
   @Deprecated
+  @CanIgnoreReturnValue
   public Entry<P> addPrimitive(final P primitive, Keyset.Key key) throws GeneralSecurityException {
     if (!isMutable) {
       throw new IllegalStateException(

@@ -161,6 +161,7 @@ public class KeysDownloader {
   }
 
   @GuardedBy("fetchDataLock")
+  @CanIgnoreReturnValue
   private String fetchAndCacheData() throws IOException {
     long currentTimeInMillis = getCurrentTimeInMillis();
     HttpRequest httpRequest =

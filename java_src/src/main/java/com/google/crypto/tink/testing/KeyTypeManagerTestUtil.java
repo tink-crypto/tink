@@ -20,6 +20,7 @@ import static com.google.common.truth.Truth.assertThat;
 
 import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.internal.KeyTypeManager;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.MessageLite;
 
@@ -39,6 +40,7 @@ public class KeyTypeManagerTestUtil {
    * Checks that the given keyTemplate will be handed to the given KeyTypeManager (if registered),
    * that it validates, and returns a key if needed.
    */
+  @CanIgnoreReturnValue
   public static <KeyProtoT extends MessageLite> KeyProtoT testKeyTemplateCompatible(
       KeyTypeManager<KeyProtoT> manager, KeyTemplate template) throws Exception {
     assertThat(template.getTypeUrl()).isEqualTo(manager.getKeyType());
