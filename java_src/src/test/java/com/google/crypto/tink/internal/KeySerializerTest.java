@@ -70,8 +70,9 @@ public final class KeySerializerTest {
 
   @Test
   public void createSerializer_works() throws Exception {
-    KeySerializer.create(
-        KeySerializerTest::serialize, ExampleKey.class, ExampleSerialization.class);
+    Object unused =
+        KeySerializer.create(
+            KeySerializerTest::serialize, ExampleKey.class, ExampleSerialization.class);
   }
 
   @Test

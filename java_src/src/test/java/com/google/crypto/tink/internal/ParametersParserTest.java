@@ -53,8 +53,9 @@ public final class ParametersParserTest {
 
   @Test
   public void createParser_works() throws Exception {
-    ParametersParser.create(
-        ParametersParserTest::parse, Bytes.copyFrom(new byte[0]), ExampleSerialization.class);
+    Object unused =
+        ParametersParser.create(
+            ParametersParserTest::parse, Bytes.copyFrom(new byte[0]), ExampleSerialization.class);
   }
 
   @Test

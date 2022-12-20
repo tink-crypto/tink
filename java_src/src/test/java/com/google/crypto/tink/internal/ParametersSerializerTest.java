@@ -53,8 +53,11 @@ public final class ParametersSerializerTest {
 
   @Test
   public void createSerializer_works() throws Exception {
-    ParametersSerializer.create(
-        ParametersSerializerTest::serialize, ExampleParameters.class, ExampleSerialization.class);
+    Object unused =
+        ParametersSerializer.create(
+            ParametersSerializerTest::serialize,
+            ExampleParameters.class,
+            ExampleSerialization.class);
   }
 
   @Test

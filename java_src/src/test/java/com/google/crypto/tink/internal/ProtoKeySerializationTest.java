@@ -69,11 +69,16 @@ public final class ProtoKeySerializationTest {
     final ByteString value = ByteString.copyFrom(new byte[] {10, 11, 12});
     final KeyMaterialType keyMaterialType = KeyMaterialType.SYMMETRIC;
 
-    ProtoKeySerialization.create(
-        typeUrl, value, keyMaterialType, OutputPrefixType.RAW, /* idRequirement = */ null);
-    ProtoKeySerialization.create(typeUrl, value, keyMaterialType, OutputPrefixType.TINK, 123);
-    ProtoKeySerialization.create(typeUrl, value, keyMaterialType, OutputPrefixType.CRUNCHY, 123);
-    ProtoKeySerialization.create(typeUrl, value, keyMaterialType, OutputPrefixType.LEGACY, 123);
+    Object unused =
+        ProtoKeySerialization.create(
+            typeUrl, value, keyMaterialType, OutputPrefixType.RAW, /* idRequirement= */ null);
+    unused =
+        ProtoKeySerialization.create(typeUrl, value, keyMaterialType, OutputPrefixType.TINK, 123);
+    unused =
+        ProtoKeySerialization.create(
+            typeUrl, value, keyMaterialType, OutputPrefixType.CRUNCHY, 123);
+    unused =
+        ProtoKeySerialization.create(typeUrl, value, keyMaterialType, OutputPrefixType.LEGACY, 123);
 
     assertThrows(
         GeneralSecurityException.class,

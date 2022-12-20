@@ -71,7 +71,9 @@ public final class KeyParserTest {
 
   @Test
   public void createParser_works() throws Exception {
-    KeyParser.create(KeyParserTest::parse, Bytes.copyFrom(new byte[0]), ExampleSerialization.class);
+    Object unused =
+        KeyParser.create(
+            KeyParserTest::parse, Bytes.copyFrom(new byte[0]), ExampleSerialization.class);
   }
 
   @Test
