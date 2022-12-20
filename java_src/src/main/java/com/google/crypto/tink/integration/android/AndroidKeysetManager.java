@@ -305,25 +305,25 @@ public final class AndroidKeysetManager {
         return read();
       } catch (FileNotFoundException ex) {
         // Not found, handle below.
-        if (Log.isLoggable(TAG, Log.INFO)) {
-          Log.i(
+        if (Log.isLoggable(TAG, Log.VERBOSE)) {
+          Log.v(
               TAG, String.format("keyset not found, will generate a new one. %s", ex.getMessage()));
         }
       }
 
-      // Not found.
-      if (keyTemplate != null) {
-        KeysetManager manager = KeysetManager.withEmptyKeyset().add(keyTemplate);
-        int keyId = manager.getKeysetHandle().getKeysetInfo().getKeyInfo(0).getKeyId();
-        manager = manager.setPrimary(keyId);
-        if (masterKey != null) {
-          manager.getKeysetHandle().write(writer, masterKey);
-        } else {
-          CleartextKeysetHandle.write(manager.getKeysetHandle(), writer);
-        }
-        return manager;
+      if (keyTemplate == null) {
+        throw new GeneralSecurityException("cannot read or generate keyset");
       }
-      throw new GeneralSecurityException("cannot read or generate keyset");
+
+      KeysetManager manager = KeysetManager.withEmptyKeyset().add(keyTemplate);
+      int keyId = manager.getKeysetHandle().getKeysetInfo().getKeyInfo(0).getKeyId();
+      manager = manager.setPrimary(keyId);
+      if (masterKey != null) {
+        manager.getKeysetHandle().write(writer, masterKey);
+      } else {
+        CleartextKeysetHandle.write(manager.getKeysetHandle(), writer);
+      }
+      return manager;
     }
 
     private KeysetManager read() throws GeneralSecurityException, IOException {
