@@ -1,6 +1,5 @@
 workspace(
     name = "tink_javascript",
-    managed_directories = {"@npm": ["node_modules"]},
 )
 
 load("@tink_javascript//:tink_javascript_deps.bzl", "tink_javascript_deps")
