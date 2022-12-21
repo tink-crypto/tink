@@ -304,7 +304,7 @@ func TestPrimitiveFactoryMonitoringWithAnnotationsLogSignVerify(t *testing.T) {
 			NumBytes: len(data),
 		},
 		{
-			Context:  monitoring.NewContext("public_key_sign", "verify", wantVerifyKeysetInfo),
+			Context:  monitoring.NewContext("public_key_verify", "verify", wantVerifyKeysetInfo),
 			KeyID:    privHandle.KeysetInfo().GetPrimaryKeyId(),
 			NumBytes: len(data),
 		},
@@ -429,7 +429,7 @@ func TestPrimitiveFactoryMonitoringWithAnnotationsVerifyFailureIsLogged(t *testi
 	want := []*fakemonitoring.LogFailure{
 		{
 			Context: monitoring.NewContext(
-				"public_key_sign",
+				"public_key_verify",
 				"verify",
 				monitoring.NewKeysetInfo(
 					annotations,

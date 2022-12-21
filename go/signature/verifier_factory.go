@@ -90,7 +90,7 @@ func createVerifierLogger(ps *primitiveset.PrimitiveSet) (monitoring.Logger, err
 	}
 	return internalregistry.GetMonitoringClient().NewLogger(&monitoring.Context{
 		KeysetInfo:  keysetInfo,
-		Primitive:   "public_key_sign",
+		Primitive:   "public_key_verify",
 		APIFunction: "verify",
 	})
 }
