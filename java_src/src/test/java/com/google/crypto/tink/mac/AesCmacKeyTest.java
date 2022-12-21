@@ -119,15 +119,17 @@ public final class AesCmacKeyTest {
 
   @Test
   public void build_works() throws Exception {
-    AesCmacKey.builder()
-        .setParameters(noPrefixParameters16)
-        .setAesKeyBytes(SecretBytes.randomBytes(16))
-        .build();
-    AesCmacKey.builder()
-        .setParameters(tinkParameters32)
-        .setAesKeyBytes(SecretBytes.randomBytes(32))
-        .setIdRequirement(1907)
-        .build();
+    Object unused =
+        AesCmacKey.builder()
+            .setParameters(noPrefixParameters16)
+            .setAesKeyBytes(SecretBytes.randomBytes(16))
+            .build();
+    unused =
+        AesCmacKey.builder()
+            .setParameters(tinkParameters32)
+            .setAesKeyBytes(SecretBytes.randomBytes(32))
+            .setIdRequirement(1907)
+            .build();
   }
 
   @Test

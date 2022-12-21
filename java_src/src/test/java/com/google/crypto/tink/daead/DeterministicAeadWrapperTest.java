@@ -255,8 +255,8 @@ public class DeterministicAeadWrapperTest {
 
     byte[] ciphertext = daead.encryptDeterministically(plaintext, associatedData);
 
-    daead.decryptDeterministically(ciphertext, associatedData);
-    daead.decryptDeterministically(ciphertext2, associatedData);
+    Object unused = daead.decryptDeterministically(ciphertext, associatedData);
+    unused = daead.decryptDeterministically(ciphertext2, associatedData);
     assertThrows(
         GeneralSecurityException.class,
         () -> daead.decryptDeterministically(ciphertext, new byte[0]));

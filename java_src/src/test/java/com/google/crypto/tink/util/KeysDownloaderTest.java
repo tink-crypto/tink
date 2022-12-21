@@ -304,7 +304,7 @@ public class KeysDownloaderTest {
   public void shouldPerformRefreshAfterExecutorTransientFailure() throws Exception {
     KeysDownloader instance = newInstanceForTests();
     httpResponseBuilder = new HttpResponseBuilder().setContent("keys1");
-    instance.download();
+    Object unused = instance.download();
     httpResponseBuilder = new HttpResponseBuilder().setContent("keys2");
     // Executor temporarily full, rejecting new Runnable instances
     executorIsAcceptingRunnables = false;

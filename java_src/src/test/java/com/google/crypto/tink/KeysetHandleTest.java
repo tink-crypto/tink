@@ -484,7 +484,7 @@ public class KeysetHandleTest {
         MonitoringAnnotations.newBuilder().add("annotation_name", "annotation_value").build();
     KeysetHandle handleWithAnnotations = KeysetHandle.fromKeysetAndAnnotations(keyset, annotations);
     EncryptOnly encryptOnlyWithAnnotations = handleWithAnnotations.getPrimitive(EncryptOnly.class);
-    encryptOnlyWithAnnotations.encrypt(message);
+    Object unused = encryptOnlyWithAnnotations.encrypt(message);
     List<FakeMonitoringClient.LogEntry> entries = fakeMonitoringClient.getLogEntries();
     assertThat(entries).hasSize(1);
     assertThat(entries.get(0).getKeysetInfo().getAnnotations()).isEqualTo(annotations);

@@ -308,7 +308,7 @@ public class PublicKeySignWrapperTest {
     PublicKeySign signer = new PublicKeySignWrapper().wrap(signPrimitives);
 
     byte[] data = "data".getBytes(UTF_8);
-    signer.sign(data);
+    Object unused = signer.sign(data);
 
     assertThat(fakeMonitoringClient.getLogEntries()).isEmpty();
     assertThat(fakeMonitoringClient.getLogFailureEntries()).isEmpty();
@@ -336,8 +336,8 @@ public class PublicKeySignWrapperTest {
                 TestUtil.createPrimitiveSetWithAnnotations(
                     TestUtil.createKeyset(privateKey2), annotations, PublicKeySign.class));
     byte[] data = "data".getBytes(UTF_8);
-    signer.sign(data);
-    signer2.sign(data);
+    Object unused = signer.sign(data);
+    unused = signer2.sign(data);
 
     List<FakeMonitoringClient.LogEntry> logEntries = fakeMonitoringClient.getLogEntries();
     assertThat(logEntries).hasSize(2);

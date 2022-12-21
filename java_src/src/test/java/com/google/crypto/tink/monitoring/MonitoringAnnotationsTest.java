@@ -77,7 +77,7 @@ public final class MonitoringAnnotationsTest {
   public void builderIsInvalidAfterBuild() throws Exception {
     MonitoringAnnotations.Builder builder =
         MonitoringAnnotations.newBuilder().add("annotation_name", "annotation_value");
-    builder.build();
+    Object unused = builder.build();
     assertThrows(
         IllegalStateException.class, () -> builder.add("annotation_name2", "annotation_value2"));
     HashMap<String, String> newAnnotations = new HashMap<>();

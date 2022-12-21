@@ -117,7 +117,7 @@ public final class KeyManagerImplTest {
   public void getPrimitive_byteString_works() throws Exception {
     KeyManager<Aead> keyManager = new KeyManagerImpl<>(new TestKeyTypeManager(), Aead.class);
     MessageLite key = keyManager.newKey(AesGcmKeyFormat.newBuilder().setKeySize(16).build());
-    keyManager.getPrimitive(key.toByteString());
+    Object unused = keyManager.getPrimitive(key.toByteString());
   }
 
   @Test
@@ -126,7 +126,7 @@ public final class KeyManagerImplTest {
         new KeyManagerImpl<>(new TestKeyTypeManager(), FakeAead.class);
     MessageLite key =
         fakeAeadKeyManager.newKey(AesGcmKeyFormat.newBuilder().setKeySize(16).build());
-    fakeAeadKeyManager.getPrimitive(key.toByteString());
+    Object unused = fakeAeadKeyManager.getPrimitive(key.toByteString());
   }
 
   @Test
@@ -150,7 +150,7 @@ public final class KeyManagerImplTest {
   public void getPrimitive_messageLite_works() throws Exception {
     KeyManager<Aead> keyManager = new KeyManagerImpl<>(new TestKeyTypeManager(), Aead.class);
     MessageLite key = keyManager.newKey(AesGcmKeyFormat.newBuilder().setKeySize(16).build());
-    keyManager.getPrimitive(key);
+    Object unused = keyManager.getPrimitive(key);
   }
 
   @Test
@@ -183,7 +183,8 @@ public final class KeyManagerImplTest {
   @Test
   public void newKey_byteString_works() throws Exception {
     KeyManager<Aead> keyManager = new KeyManagerImpl<>(new TestKeyTypeManager(), Aead.class);
-    keyManager.newKey(AesGcmKeyFormat.newBuilder().setKeySize(16).build().toByteString());
+    Object unused =
+        keyManager.newKey(AesGcmKeyFormat.newBuilder().setKeySize(16).build().toByteString());
   }
 
   @Test
@@ -201,7 +202,7 @@ public final class KeyManagerImplTest {
   @Test
   public void newKey_messageLite_works() throws Exception {
     KeyManager<Aead> keyManager = new KeyManagerImpl<>(new TestKeyTypeManager(), Aead.class);
-    keyManager.newKey(AesGcmKeyFormat.newBuilder().setKeySize(16).build());
+    Object unused = keyManager.newKey(AesGcmKeyFormat.newBuilder().setKeySize(16).build());
   }
 
   @Test
@@ -246,7 +247,8 @@ public final class KeyManagerImplTest {
   @Test
   public void newKeyData_works() throws Exception {
     KeyManager<Aead> keyManager = new KeyManagerImpl<>(new TestKeyTypeManager(), Aead.class);
-    keyManager.newKeyData(AesGcmKeyFormat.newBuilder().setKeySize(16).build().toByteString());
+    Object unused =
+        keyManager.newKeyData(AesGcmKeyFormat.newBuilder().setKeySize(16).build().toByteString());
   }
 
   @Test

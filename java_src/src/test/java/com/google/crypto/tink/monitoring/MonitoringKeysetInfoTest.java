@@ -169,7 +169,7 @@ public final class MonitoringKeysetInfoTest {
             .addEntry(KeyStatus.ENABLED, 123, "typeUrl123", "TINK")
             .setPrimaryKeyId(123)
             .setAnnotations(annotations);
-    builder.build();
+    Object unused = builder.build();
     assertThrows(IllegalStateException.class, () -> builder.setAnnotations(annotations));
     assertThrows(
         IllegalStateException.class,

@@ -59,7 +59,7 @@ public final class FakeKmsClientTest {
             + "QQKUb85xOdhmuqMmvderls5oymgmtSLYKabGAEQARiKqYafByAB";
     FakeKmsClient client = new FakeKmsClient(uri);
     assertThat(client.doesSupport(uri)).isTrue();
-    client.getAead(uri); // No exception
+    Object unused = client.getAead(uri); // No exception
 
     // No other key_uri is accepted, even a valid one.
     String anotherUri =
@@ -79,12 +79,12 @@ public final class FakeKmsClientTest {
             + "ZXNDdHJIbWFjQWVhZEtleRJCEhYSAggQGhBBqhLL7pdFk-FzEYi4lo5CGigSBAgDEBAaIFRMn3OEi"
             + "QQKUb85xOdhmuqMmvderls5oymgmtSLYKabGAEQARiKqYafByAB";
     assertThat(client.doesSupport(uri)).isTrue();
-    client.getAead(uri); // No exception
+    Object unused = client.getAead(uri); // No exception
     String anotherUri =
         "fake-kms://CPeFs9sGEo0BCoABCjh0eXBlLmdvb2dsZWFwaXMuY29tL2dvb2dsZS5jcnlwdG8udGluay5B"
             + "ZXNDdHJIbWFjQWVhZEtleRJCEhYSAggQGhCE7VadpBOqUEib9Db55aI2GigSBAgDEBAaII0DdIzGe"
             + "3r2nXHnGoSRa9GZXGsjZsl719GfJrhtjjVGGAEQARj3hbPbBiAB";
     assertThat(client.doesSupport(anotherUri)).isTrue();
-    client.getAead(anotherUri); // No exception
+    unused = client.getAead(anotherUri); // No exception
   }
 }

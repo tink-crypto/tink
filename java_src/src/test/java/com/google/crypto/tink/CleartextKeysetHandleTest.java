@@ -55,7 +55,7 @@ public class CleartextKeysetHandleTest {
     Keyset keyset = CleartextKeysetHandle.getKeyset(handle);
     handle = CleartextKeysetHandle.parseFrom(keyset.toByteArray());
     assertEquals(keyset, handle.getKeyset());
-    handle.getPrimitive(Mac.class);
+    Object unused = handle.getPrimitive(Mac.class);
   }
 
   @Test

@@ -256,7 +256,7 @@ public class HkdfPrfKeyManagerTest {
                     .setSalt(ByteString.copyFromUtf8("some salt"))
                     .setHash(HashType.SHA256))
             .build();
-    manager.getPrimitive(key, Prf.class);
+    Object unused = manager.getPrimitive(key, Prf.class);
   }
 
   @Test
