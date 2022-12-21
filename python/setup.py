@@ -267,10 +267,7 @@ class BuildBazelExtension(build_ext.build_ext):
 
     bazel_argv = [
         self.bazel_command, 'build', ext.bazel_target,
-        '--compilation_mode=' + ('dbg' if self.debug else 'opt'),
-        '--incompatible_linkopts_to_linklibs'
-        # TODO(https://github.com/bazelbuild/bazel/issues/9254): Remove linkopts
-        # flag when issue is fixed.
+        '--compilation_mode=' + ('dbg' if self.debug else 'opt')
     ]
     self.spawn(bazel_argv)
     ext_bazel_bin_path = os.path.join('bazel-bin', ext.relpath,
