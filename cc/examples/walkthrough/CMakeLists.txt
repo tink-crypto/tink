@@ -36,6 +36,12 @@ target_include_directories(obtain_and_use_a_primitive PUBLIC
     "${TINK_EXAMPLES_INCLUDE_PATH}")
 target_link_libraries(obtain_and_use_a_primitive tink::static)
 
+add_library(write_cleartext_keyset write_cleartext_keyset.cc write_cleartext_keyset.h)
+target_include_directories(write_cleartext_keyset PUBLIC
+    "${CMAKE_CURRENT_SOURCE_DIR}"
+    "${TINK_EXAMPLES_INCLUDE_PATH}")
+target_link_libraries(write_cleartext_keyset tink::static)
+
 # Test targets.
 # NOTE: gmock and gtest_main are already exported by Tink.
 
@@ -58,3 +64,7 @@ target_link_libraries(write_keyset_test test_util write_keyset load_cleartext_ke
 add_executable(obtain_and_use_a_primitive_test obtain_and_use_a_primitive_test.cc)
 add_test(NAME obtain_and_use_a_primitive_test COMMAND obtain_and_use_a_primitive_test WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
 target_link_libraries(obtain_and_use_a_primitive_test obtain_and_use_a_primitive load_cleartext_keyset gmock gtest_main)
+
+add_executable(write_cleartext_keyset_test write_cleartext_keyset_test.cc)
+add_test(NAME write_cleartext_keyset_test COMMAND write_cleartext_keyset_test WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
+target_link_libraries(write_cleartext_keyset_test write_cleartext_keyset load_cleartext_keyset gmock gtest_main)
