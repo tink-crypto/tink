@@ -46,9 +46,7 @@ StatusOr<std::unique_ptr<crypto::tink::KeysetHandle>> LoadKeyset(
   // To load a serialized keyset we need a JSON keyset reader.
   StatusOr<std::unique_ptr<crypto::tink::KeysetReader>> reader =
       crypto::tink::JsonKeysetReader::New(serialized_keyset);
-  if (!reader.ok()) {
-    return reader.status();
-  }
+  if (!reader.ok()) return reader.status();
   // Parse and obtain the keyset using the reader.
   return crypto::tink::CleartextKeysetHandle::Read(*std::move(reader));
 }

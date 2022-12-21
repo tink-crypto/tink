@@ -46,9 +46,7 @@ StatusOr<std::string> AeadEncrypt(const KeysetHandle& keyset_handle,
   // "wraps" multiple Aead primitives in the keyset. When encrypting it uses the
   // primary key.
   StatusOr<std::unique_ptr<Aead>> aead = keyset_handle.GetPrimitive<Aead>();
-  if (!aead.ok()) {
-    return aead.status();
-  }
+  if (!aead.ok()) return aead.status();
   return (*aead)->Encrypt(palintext, associated_data);
 }
 
@@ -65,9 +63,7 @@ StatusOr<std::string> AeadDecrypt(const KeysetHandle& keyset_handle,
   // "wraps" multiple Aead primitives in the keyset. When decrypting it uses the
   // key that was used to encrypt using the key ID contained in the ciphertext.
   StatusOr<std::unique_ptr<Aead>> aead = keyset_handle.GetPrimitive<Aead>();
-  if (!aead.ok()) {
-    return aead.status();
-  }
+  if (!aead.ok()) return aead.status();
   return (*aead)->Decrypt(ciphertext, associated_data);
 }
 

@@ -55,21 +55,15 @@ StatusOr<std::unique_ptr<KeysetHandle>> LoadKeyset(
   // Get a KMS client for the given key URI.
   StatusOr<const crypto::tink::KmsClient*> kms_client =
       crypto::tink::KmsClients::Get(master_key_uri);
-  if (!kms_client.ok()) {
-    return kms_client.status();
-  }
+  if (!kms_client.ok()) return kms_client.status();
   // A KmsClient can return an Aead primitive.
   StatusOr<std::unique_ptr<crypto::tink::Aead>> kms_aead =
       (*kms_client)->GetAead(master_key_uri);
-  if (!kms_aead.ok()) {
-    return kms_aead.status();
-  }
+  if (!kms_aead.ok()) return kms_aead.status();
   // Use a JSON reader to read the encrypted keyset.
   StatusOr<std::unique_ptr<crypto::tink::KeysetReader>> reader =
       crypto::tink::JsonKeysetReader::New(serialized_encrypted_keyset);
-  if (!reader.ok()) {
-    return reader.status();
-  }
+  if (!reader.ok()) return reader.status();
   // Decrypt using the KMS, parse the keyset and retuns a handle to it.
   return KeysetHandle::Read(*std::move(reader), **kms_aead);
 }

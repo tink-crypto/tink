@@ -49,21 +49,15 @@ crypto::tink::util::Status WriteEncryptedKeyset(
   // Create a writer that will write the keyset to output_stream as JSON.
   StatusOr<std::unique_ptr<JsonKeysetWriter>> writer =
       JsonKeysetWriter::New(std::move(output_stream));
-  if (!writer.ok()) {
-    return writer.status();
-  }
+  if (!writer.ok()) return writer.status();
   // Get a KMS client for the given key URI.
   StatusOr<const crypto::tink::KmsClient*> kms_client =
       crypto::tink::KmsClients::Get(master_kms_key_uri);
-  if (!kms_client.ok()) {
-    return kms_client.status();
-  }
+  if (!kms_client.ok()) return kms_client.status();
   // Get an Aead primitive that uses the KMS service to encrypt/decrypt.
   StatusOr<std::unique_ptr<crypto::tink::Aead>> kms_aead =
       (*kms_client)->GetAead(master_kms_key_uri);
-  if (!kms_aead.ok()) {
-    return kms_aead.status();
-  }
+  if (!kms_aead.ok()) return kms_aead.status();
   return keyset.Write(writer->get(), **kms_aead);
 }
 
