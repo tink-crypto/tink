@@ -112,3 +112,25 @@ py_test(
         "@tink_py//tink/testing:fake_kms",
     ],
 )
+
+py_library(
+    name = "write_cleartext_keyset",
+    srcs = ["write_cleartext_keyset.py"],
+    deps = [
+        "@tink_py//tink:tink_python",
+        "@tink_py//tink:cleartext_keyset_handle",
+    ],
+)
+
+py_test(
+    name = "write_cleartext_keyset_test",
+    srcs = ["write_cleartext_keyset_test.py"],
+    deps = [
+        ":create_keyset",
+        ":load_cleartext_keyset",
+        ":write_cleartext_keyset",
+        requirement("absl-py"),
+        "@tink_py//tink:tink_python",
+        "@tink_py//tink/aead",
+    ],
+)
