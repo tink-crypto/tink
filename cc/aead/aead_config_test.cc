@@ -35,21 +35,18 @@
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "tink/util/test_matchers.h"
-#include "tink/util/test_util.h"
 #include "proto/tink.pb.h"
 
 namespace crypto {
 namespace tink {
 namespace {
 
-using ::crypto::tink::test::DummyAead;
 using ::crypto::tink::test::IsOk;
 using ::crypto::tink::test::StatusIs;
-using ::google::crypto::tink::KeysetInfo;
-using ::google::crypto::tink::KeyStatusType;
+using ::crypto::tink::util::StatusOr;
 using ::google::crypto::tink::KeyTemplate;
-using ::google::crypto::tink::OutputPrefixType;
 using ::testing::Eq;
+using ::testing::IsNull;
 using ::testing::Not;
 using ::testing::Test;
 
@@ -80,30 +77,12 @@ TEST_F(AeadConfigTest, WrappersRegistered) {
 
   ASSERT_THAT(AeadConfig::Register(), IsOk());
 
-  KeysetInfo::KeyInfo key_info;
-  key_info.set_status(KeyStatusType::ENABLED);
-  key_info.set_key_id(1234);
-  key_info.set_output_prefix_type(OutputPrefixType::RAW);
-  auto primitive_set = absl::make_unique<PrimitiveSet<Aead>>();
-  ASSERT_THAT(primitive_set->set_primary(*primitive_set->AddPrimitive(
-                  absl::make_unique<DummyAead>("dummy"), key_info)),
-              IsOk());
-
-  util::StatusOr<std::unique_ptr<Aead>> primitive_result =
-      Registry::Wrap(std::move(primitive_set));
-
-  ASSERT_THAT(primitive_result, IsOk());
-  util::StatusOr<std::string> encryption_result =
-      (*primitive_result)->Encrypt("secret", "");
-  ASSERT_THAT(encryption_result, IsOk());
-
-  util::StatusOr<std::string> decryption_result =
-      DummyAead("dummy").Decrypt(*encryption_result, "");
-  ASSERT_THAT(decryption_result, IsOk());
-  EXPECT_THAT(*decryption_result, Eq("secret"));
-
-  decryption_result = DummyAead("dummy").Decrypt(*encryption_result, "wrong");
-  EXPECT_THAT(decryption_result, Not(IsOk()));
+  StatusOr<std::unique_ptr<KeysetHandle>> keyset_handle =
+      KeysetHandle::GenerateNew(AeadKeyTemplates::Aes128Gcm());
+  ASSERT_THAT(keyset_handle.status(), IsOk());
+  StatusOr<std::unique_ptr<Aead>> aead = (*keyset_handle)->GetPrimitive<Aead>();
+  ASSERT_THAT(aead.status(), IsOk());
+  ASSERT_THAT(*aead, Not(IsNull()));
 }
 
 // FIPS-only mode tests
