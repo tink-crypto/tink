@@ -707,6 +707,10 @@ objc_library(
             "Tests/UnitTests/**/*.m",
             "Tests/UnitTests/**/*.mm",
         ],
+        exclude = [
+            # TODO(b/155060426) Enable the KeysetHandle Tests.
+            "Tests/UnitTests/core/TINKKeysetHandleTest.mm",
+        ],
     ),
     deps = [
         ":aead_internal",
