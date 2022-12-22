@@ -207,7 +207,9 @@ class KmsAeadTest(parameterized.TestCase):
       # TODO(b/263231865) C++ and Python do not yet properly support aliases.
       with self.assertRaises(tink.TinkError):
         primitive.decrypt(ciphertext, associated_data)
-    self.assertEqual(primitive.decrypt(ciphertext, associated_data), plaintext)
+    else:
+      self.assertEqual(
+          primitive.decrypt(ciphertext, associated_data), plaintext)
 
   @parameterized.parameters(_two_key_uris_with_alias_test_cases())
   def test_cannot_decrypt_ciphertext_of_other_alias_key_uri(
