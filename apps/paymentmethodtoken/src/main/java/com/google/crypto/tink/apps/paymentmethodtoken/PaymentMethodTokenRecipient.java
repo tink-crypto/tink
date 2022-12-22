@@ -561,7 +561,7 @@ public final class PaymentMethodTokenRecipient {
     return Collections.singletonList(provider);
   }
 
-  private JsonObject validateIntermediateSigningKey(final JsonObject intermediateSigningKey)
+  private void validateIntermediateSigningKey(final JsonObject intermediateSigningKey)
       throws GeneralSecurityException {
     if (!intermediateSigningKey.has(PaymentMethodTokenConstants.JSON_SIGNATURES_KEY)
         || !intermediateSigningKey.has(PaymentMethodTokenConstants.JSON_SIGNED_KEY_KEY)
@@ -569,7 +569,6 @@ public final class PaymentMethodTokenRecipient {
       throw new GeneralSecurityException(
           "intermediateSigningKey must contain exactly signedKey and signatures");
     }
-    return intermediateSigningKey;
   }
 
   private void validateSignedKey(final JsonObject signedKey) throws GeneralSecurityException {
