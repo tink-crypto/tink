@@ -5,11 +5,12 @@ load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 def tink_objc_deps():
     """Dependencies for Tink Objective C."""
     if not native.existing_rule("build_bazel_rules_apple"):
-        # Release from 2022-09-16.
+        # Release from 2022-12-21.
         http_archive(
+            strip_prefix = "rules_apple-2.0.0",
             name = "build_bazel_rules_apple",
-            sha256 = "90e3b5e8ff942be134e64a83499974203ea64797fd620eddeb71b3a8e1bff681",
-            url = "https://github.com/bazelbuild/rules_apple/releases/download/1.1.2/rules_apple.1.1.2.tar.gz",
+            sha256 = "58fef2369c53b0d9a75441bc40489b586a7ccce24335c9b51ccfa7265623aeb4",
+            url = "https://github.com/bazelbuild/rules_apple/archive/refs/tags/2.0.0.zip",
         )
     if not native.existing_rule("build_bazel_rules_swift"):
         # Release from 2022-09-16.
