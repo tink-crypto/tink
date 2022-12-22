@@ -16,16 +16,16 @@
 
 package com.google.crypto.tink.internal;
 
+import com.google.crypto.tink.subtle.Random;
 import java.math.BigInteger;
 import java.security.GeneralSecurityException;
+import java.security.spec.ECField;
 import java.security.spec.ECFieldFp;
 import java.security.spec.ECParameterSpec;
 import java.security.spec.ECPoint;
 import java.security.spec.EllipticCurve;
 
-/**
- * Utility functions for elliptic curve crypto, used in ECDSA and ECDH.
- */
+/** Utility functions for elliptic curve crypto, used in ECDSA and ECDH. */
 public final class EllipticCurvesUtil {
 
   public static final ECParameterSpec NIST_P256_PARAMS = getNistP256Params();
@@ -110,7 +110,6 @@ public final class EllipticCurvesUtil {
     }
   }
 
-
   /** Returns whether {@code spec} is a {@link ECParameterSpec} of one of the NIST curves. */
   public static boolean isNistEcParameterSpec(ECParameterSpec spec) {
     return isSameEcParameterSpec(spec, NIST_P256_PARAMS)
@@ -133,9 +132,9 @@ public final class EllipticCurvesUtil {
    * @return the order of the finite field over which curve is defined.
    */
   public static BigInteger getModulus(EllipticCurve curve) throws GeneralSecurityException {
-    java.security.spec.ECField field = curve.getField();
-    if (field instanceof java.security.spec.ECFieldFp) {
-      return ((java.security.spec.ECFieldFp) field).getP();
+    ECField field = curve.getField();
+    if (field instanceof ECFieldFp) {
+      return ((ECFieldFp) field).getP();
     } else {
       throw new GeneralSecurityException("Only curves over prime order fields are supported");
     }
@@ -152,12 +151,169 @@ public final class EllipticCurvesUtil {
     final BigInteger gy = new BigInteger(hexGY, 16);
     final int h = 1;
     ECFieldFp fp = new ECFieldFp(p);
-    java.security.spec.EllipticCurve curveSpec = new java.security.spec.EllipticCurve(fp, a, b);
+    EllipticCurve curveSpec = new EllipticCurve(fp, a, b);
     ECPoint g = new ECPoint(gx, gy);
     ECParameterSpec ecSpec = new ECParameterSpec(curveSpec, g, n, h);
     return ecSpec;
   }
 
-  private EllipticCurvesUtil() {
+  /**
+   * Calculates x times the generator of the give elliptic curve spec using the Montgomery ladder.
+   *
+   * <p>This should only be used to validate keys, and not to sign or verify messages.
+   *
+   * <p>See: <a href="https://en.wikipedia.org/wiki/Elliptic_curve_point_multiplication">Elliptic
+   * curve point multiplication</a>.
+   *
+   * @param x must be larger than 0 and smaller than the order of the generator.
+   * @return the ECPoint that is x times the generator.
+   */
+  public static ECPoint multiplyByGenerator(BigInteger x, ECParameterSpec spec)
+      throws GeneralSecurityException {
+    if (!EllipticCurvesUtil.isNistEcParameterSpec(spec)) {
+      throw new GeneralSecurityException("spec must be NIST P256, P384 or P521");
+    }
+    if (x.signum() != 1) {
+      throw new GeneralSecurityException("k must be positive");
+    }
+    if (x.compareTo(spec.getOrder()) >= 0) {
+      throw new GeneralSecurityException("k must be smaller than the order of the generator");
+    }
+    EllipticCurve curve = spec.getCurve();
+    ECPoint generator = spec.getGenerator();
+    checkPointOnCurve(generator, curve);
+    BigInteger a = spec.getCurve().getA();
+    BigInteger modulus = getModulus(curve);
+
+    JacobianEcPoint r0 = toJacobianEcPoint(ECPoint.POINT_INFINITY, modulus);
+    JacobianEcPoint r1 = toJacobianEcPoint(generator, modulus);
+    for (int i = x.bitLength(); i >= 0; i--) {
+      if (x.testBit(i)) {
+        r0 = addJacobianPoints(r0, r1, a, modulus);
+        r1 = doubleJacobianPoint(r1, a, modulus);
+      } else {
+        r1 = addJacobianPoints(r0, r1, a, modulus);
+        r0 = doubleJacobianPoint(r0, a, modulus);
+      }
+    }
+    ECPoint output = r0.toECPoint(modulus);
+    checkPointOnCurve(output, curve);
+    return output;
   }
+
+  private static final BigInteger TWO = BigInteger.valueOf(2);
+  private static final BigInteger THREE = BigInteger.valueOf(3);
+  private static final BigInteger FOUR = BigInteger.valueOf(4);
+  private static final BigInteger EIGHT = BigInteger.valueOf(8);
+
+  /**
+   * Jacobian representation of elliptic curve points.
+   *
+   * <p>The point (X, Y) is represented by a triple (x, y, z), where X = x/z^2 and Y = y/z^3.
+   */
+  static class JacobianEcPoint {
+    BigInteger x;
+    BigInteger y;
+    BigInteger z;
+
+    JacobianEcPoint(BigInteger x, BigInteger y, BigInteger z) {
+      this.x = x;
+      this.y = y;
+      this.z = z;
+    }
+
+    boolean isInfinity() {
+      return this.z.equals(BigInteger.ZERO);
+    }
+
+    ECPoint toECPoint(BigInteger modulus) {
+      if (isInfinity()) {
+        return ECPoint.POINT_INFINITY;
+      }
+      BigInteger zInv = z.modInverse(modulus);
+      BigInteger zInv2 = zInv.multiply(zInv).mod(modulus);
+      return new ECPoint(
+          x.multiply(zInv2).mod(modulus),
+          y.multiply(zInv2).mod(modulus).multiply(zInv).mod(modulus));
+    }
+
+    static final JacobianEcPoint INFINITY =
+        new JacobianEcPoint(BigInteger.ONE, BigInteger.ONE, BigInteger.ZERO);
+  }
+
+  static JacobianEcPoint toJacobianEcPoint(ECPoint p, BigInteger modulus) {
+    if (p.equals(ECPoint.POINT_INFINITY)) {
+      return JacobianEcPoint.INFINITY;
+    }
+    // Randomize the coordinates to get some protection against timing side channels.
+    // Note that this randomization does not protect against all attacks, since it does not
+    // randomize the value 0. A paper exploiting this is "Zero-Value Point Attacks on Elliptic Curve
+    // Cryptosystem" by T. Akishita and T. Takagi
+    // https://download.hrz.tu-darmstadt.de/pub/FB20/Dekanat/Publikationen/CDC/TI-03-01.zvp.pdf
+    // A consequence of this paper is that this implementation should not be used for ECDH.
+    BigInteger z = new BigInteger(1, Random.randBytes((modulus.bitLength() + 8) / 8)).mod(modulus);
+    BigInteger zz = z.multiply(z).mod(modulus);
+    BigInteger zzz = zz.multiply(z).mod(modulus);
+    return new JacobianEcPoint(
+        p.getAffineX().multiply(zz).mod(modulus), p.getAffineY().multiply(zzz).mod(modulus), z);
+  }
+
+  static JacobianEcPoint doubleJacobianPoint(JacobianEcPoint p, BigInteger a, BigInteger modulus) {
+    // http://hyperelliptic.org/EFD/g1p/auto-shortw-jacobian.html#doubling-dbl-2007-bl
+    if (p.y.equals(BigInteger.ZERO)) {
+      return JacobianEcPoint.INFINITY;
+    }
+    BigInteger xx = p.x.multiply(p.x).mod(modulus);
+    BigInteger yy = p.y.multiply(p.y).mod(modulus);
+    BigInteger yyyy = yy.multiply(yy).mod(modulus);
+    BigInteger zz = p.z.multiply(p.z).mod(modulus);
+    BigInteger x1yy = p.x.add(yy);
+    BigInteger s = x1yy.multiply(x1yy).mod(modulus).subtract(xx).subtract(yyyy).multiply(TWO);
+    BigInteger m = xx.multiply(THREE).add(a.multiply(zz).multiply(zz).mod(modulus));
+    BigInteger t = m.multiply(m).mod(modulus).subtract(s.multiply(TWO)).mod(modulus);
+    BigInteger x3 = t;
+    BigInteger y3 =
+        m.multiply(s.subtract(t)).mod(modulus).subtract(yyyy.multiply(EIGHT)).mod(modulus);
+    BigInteger y1z1 = p.y.add(p.z);
+    BigInteger z3 = y1z1.multiply(y1z1).mod(modulus).subtract(yy).subtract(zz).mod(modulus);
+    return new JacobianEcPoint(x3, y3, z3);
+  }
+
+  static JacobianEcPoint addJacobianPoints(
+      JacobianEcPoint p1, JacobianEcPoint p2, BigInteger a, BigInteger modulus) {
+    // See http://hyperelliptic.org/EFD/g1p/auto-shortw-jacobian.html#addition-add-2007-bl
+    // and https://en.wikibooks.org/wiki/Cryptography/Prime_Curve/Jacobian_Coordinates
+    if (p1.isInfinity()) {
+      return p2;
+    }
+    if (p2.isInfinity()) {
+      return p1;
+    }
+    BigInteger z1z1 = p1.z.multiply(p1.z).mod(modulus);
+    BigInteger z2z2 = p2.z.multiply(p2.z).mod(modulus);
+    BigInteger u1 = p1.x.multiply(z2z2).mod(modulus);
+    BigInteger u2 = p2.x.multiply(z1z1).mod(modulus);
+    BigInteger s1 = p1.y.multiply(p2.z).mod(modulus).multiply(z2z2).mod(modulus);
+    BigInteger s2 = p2.y.multiply(p1.z).mod(modulus).multiply(z1z1).mod(modulus);
+    if (u1.equals(u2)) {
+      if (!s1.equals(s2)) {
+        return JacobianEcPoint.INFINITY;
+      } else {
+        return doubleJacobianPoint(p1, a, modulus);
+      }
+    }
+    BigInteger h = u2.subtract(u1).mod(modulus);
+    BigInteger i = h.multiply(FOUR).multiply(h).mod(modulus);
+    BigInteger j = h.multiply(i).mod(modulus);
+    BigInteger r = s2.subtract(s1).multiply(TWO).mod(modulus);
+    BigInteger v = u1.multiply(i).mod(modulus);
+    BigInteger x3 = r.multiply(r).mod(modulus).subtract(j).subtract(v.multiply(TWO)).mod(modulus);
+    BigInteger y3 = r.multiply(v.subtract(x3)).subtract(s1.multiply(TWO).multiply(j)).mod(modulus);
+    BigInteger z12 = p1.z.add(p2.z);
+    BigInteger z3 =
+        z12.multiply(z12).mod(modulus).subtract(z1z1).subtract(z2z2).multiply(h).mod(modulus);
+    return new JacobianEcPoint(x3, y3, z3);
+  }
+
+  private EllipticCurvesUtil() {}
 }

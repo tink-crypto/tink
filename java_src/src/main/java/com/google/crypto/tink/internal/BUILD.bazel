@@ -580,11 +580,13 @@ java_library(
 java_library(
     name = "elliptic_curves_util",
     srcs = ["EllipticCurvesUtil.java"],
+    deps = ["//src/main/java/com/google/crypto/tink/subtle:random"],
 )
 
 android_library(
     name = "elliptic_curves_util-android",
     srcs = ["EllipticCurvesUtil.java"],
+    deps = ["//src/main/java/com/google/crypto/tink/subtle:random-android"],
 )
 
 java_library(
