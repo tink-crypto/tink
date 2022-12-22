@@ -96,7 +96,7 @@ public class WebPushHybridDecryptTest {
                 .withRecipientPublicKey(uaPublicKey)
                 .withRecipientPrivateKey(uaPrivateKey)
                 .build();
-
+        fail("Expected IllegalArgumentException");
       } catch (IllegalArgumentException ex) {
         // expected.
       }
