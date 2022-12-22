@@ -16,6 +16,7 @@
 #ifndef TINK_INTERNAL_KEYSET_WRAPPER_IMPL_H_
 #define TINK_INTERNAL_KEYSET_WRAPPER_IMPL_H_
 
+#include <memory>
 #include <string>
 
 #include "absl/container/flat_hash_map.h"
@@ -50,22 +51,27 @@ class KeysetWrapperImpl : public KeysetWrapper<Q> {
       const override {
     crypto::tink::util::Status status = ValidateKeyset(keyset);
     if (!status.ok()) return status;
-    auto primitives = absl::make_unique<PrimitiveSet<P>>(annotations);
+    typename PrimitiveSet<P>::Builder primitives_builder;
+    primitives_builder.AddAnnotations(annotations);
     for (const google::crypto::tink::Keyset::Key& key : keyset.key()) {
       if (key.status() != google::crypto::tink::KeyStatusType::ENABLED) {
         continue;
       }
       auto primitive = primitive_getter_(key.key_data());
       if (!primitive.ok()) return primitive.status();
-      auto entry = primitives->AddPrimitive(std::move(primitive.value()),
-                                            KeyInfoFromKey(key));
-      if (!entry.ok()) return entry.status();
       if (key.key_id() == keyset.primary_key_id()) {
-        auto primary_result = primitives->set_primary(entry.value());
-        if (!primary_result.ok()) return primary_result;
+        primitives_builder.AddPrimaryPrimitive(std::move(primitive.value()),
+                                               KeyInfoFromKey(key));
+      } else {
+        primitives_builder.AddPrimitive(std::move(primitive.value()),
+                                        KeyInfoFromKey(key));
       }
     }
-    return transforming_wrapper_.Wrap(std::move(primitives));
+    crypto::tink::util::StatusOr<PrimitiveSet<P>> primitives =
+        std::move(primitives_builder).Build();
+    if (!primitives.ok()) return primitives.status();
+    return transforming_wrapper_.Wrap(
+        std::make_unique<PrimitiveSet<P>>(*std::move(primitives)));
   }
 
  private:
