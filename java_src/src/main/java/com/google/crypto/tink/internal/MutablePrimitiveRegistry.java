@@ -33,11 +33,15 @@ import java.util.concurrent.atomic.AtomicReference;
  * should register such an object into a global, mutable registry.
  */
 public final class MutablePrimitiveRegistry {
-  private static final MutablePrimitiveRegistry GLOBAL_INSTANCE =
+  private static MutablePrimitiveRegistry globalInstance =
       new MutablePrimitiveRegistry();
 
   public static MutablePrimitiveRegistry globalInstance() {
-    return GLOBAL_INSTANCE;
+    return globalInstance;
+  }
+
+  public static void resetGlobalInstanceTestOnly() {
+    globalInstance = new MutablePrimitiveRegistry();
   }
 
   private final AtomicReference<PrimitiveRegistry> registry =
