@@ -258,6 +258,7 @@ tink_cc_test(
     tink::hybrid::hybrid_key_templates
     gmock
     absl::status
+    crypto
     tink::core::config
     tink::core::hybrid_decrypt
     tink::core::hybrid_encrypt

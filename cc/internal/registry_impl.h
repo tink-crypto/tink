@@ -549,7 +549,7 @@ crypto::tink::util::Status RegistryImpl::RegisterKeyTypeManager(
         absl::StatusCode::kInternal,
         absl::StrCat("Failed registering the key manager for ",
                      typeid(*owned_manager).name(),
-                     " as it is not FIPS compatible."));
+                     " as it is not FIPS compatible: ", fips_status.message()));
   }
 
   crypto::tink::util::Status status = CheckInsertable(
@@ -599,9 +599,10 @@ crypto::tink::util::Status RegistryImpl::RegisterAsymmetricKeyManagers(
   if (!private_fips_status.ok()) {
     return crypto::tink::util::Status(
         absl::StatusCode::kInternal,
-        absl::StrCat("Failed registering the key manager for ",
-                     typeid(*private_key_manager).name(),
-                     " as it is not FIPS compatible."));
+        absl::StrCat(
+            "Failed registering the key manager for ",
+            typeid(*private_key_manager).name(),
+            " as it is not FIPS compatible: ", private_fips_status.message()));
   }
 
   auto public_fips_status =
@@ -610,9 +611,10 @@ crypto::tink::util::Status RegistryImpl::RegisterAsymmetricKeyManagers(
   if (!public_fips_status.ok()) {
     return crypto::tink::util::Status(
         absl::StatusCode::kInternal,
-        absl::StrCat("Failed registering the key manager for ",
-                     typeid(*public_key_manager).name(),
-                     " as it is not FIPS compatible."));
+        absl::StrCat(
+            "Failed registering the key manager for ",
+            typeid(*public_key_manager).name(),
+            " as it is not FIPS compatible: ", public_fips_status.message()));
   }
 
   crypto::tink::util::Status status = CheckInsertable(

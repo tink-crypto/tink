@@ -23,7 +23,7 @@
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "absl/status/status.h"
-#include "tink/config.h"
+#include "openssl/crypto.h"
 #include "tink/config/tink_fips.h"
 #include "tink/hybrid/ecies_aead_hkdf_private_key_manager.h"
 #include "tink/hybrid/ecies_aead_hkdf_public_key_manager.h"
@@ -146,8 +146,8 @@ TEST_F(HybridConfigTest, DecryptWrapperRegistered) {
 
 // FIPS-only mode tests
 TEST_F(HybridConfigTest, RegisterNonFipsTemplates) {
-  if (!IsFipsModeEnabled()) {
-    GTEST_SKIP() << "Only supported in FIPS-only mode";
+  if (!IsFipsModeEnabled() || !FIPS_mode()) {
+    GTEST_SKIP() << "Only supported in FIPS-only mode with BoringCrypto";
   }
 
   EXPECT_THAT(HybridConfig::Register(), IsOk());

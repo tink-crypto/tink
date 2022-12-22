@@ -42,6 +42,7 @@ const RegistryConfig& HybridConfig::Latest() {
 // static
 util::Status HybridConfig::Register() {
   auto status = AeadConfig::Register();
+  if (!status.ok()) return status;
 
   // Register primitive wrappers.
   status = Registry::RegisterPrimitiveWrapper(
