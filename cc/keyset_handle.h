@@ -23,6 +23,7 @@
 
 #include "absl/base/attributes.h"
 #include "absl/container/flat_hash_map.h"
+#include "absl/memory/memory.h"
 #include "absl/status/status.h"
 #include "tink/aead.h"
 #include "tink/internal/key_info.h"
@@ -242,8 +243,8 @@ crypto::tink::util::StatusOr<std::unique_ptr<PrimitiveSet<P>>>
 KeysetHandle::GetPrimitives(const KeyManager<P>* custom_manager) const {
   crypto::tink::util::Status status = ValidateKeyset(get_keyset());
   if (!status.ok()) return status;
-  std::unique_ptr<PrimitiveSet<P>> primitives(
-      new PrimitiveSet<P>(monitoring_annotations_));
+  typename PrimitiveSet<P>::Builder primitives_builder;
+  primitives_builder.AddAnnotations(monitoring_annotations_);
   for (const google::crypto::tink::Keyset::Key& key : get_keyset().key()) {
     if (key.status() == google::crypto::tink::KeyStatusType::ENABLED) {
       std::unique_ptr<P> primitive;
@@ -257,16 +258,18 @@ KeysetHandle::GetPrimitives(const KeyManager<P>* custom_manager) const {
         if (!primitive_result.ok()) return primitive_result.status();
         primitive = std::move(primitive_result.value());
       }
-      auto entry_result =
-          primitives->AddPrimitive(std::move(primitive), KeyInfoFromKey(key));
-      if (!entry_result.ok()) return entry_result.status();
       if (key.key_id() == get_keyset().primary_key_id()) {
-        auto primary_result = primitives->set_primary(entry_result.value());
-        if (!primary_result.ok()) return primary_result;
+        primitives_builder.AddPrimaryPrimitive(std::move(primitive),
+                                               KeyInfoFromKey(key));
+      } else {
+        primitives_builder.AddPrimitive(std::move(primitive),
+                                        KeyInfoFromKey(key));
       }
     }
   }
-  return std::move(primitives);
+  auto primitives = std::move(primitives_builder).Build();
+  if (!primitives.ok()) return primitives.status();
+  return absl::make_unique<PrimitiveSet<P>>(*std::move(primitives));
 }
 
 template <class P>
