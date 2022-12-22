@@ -23,7 +23,6 @@ import tink
 from tink import aead
 
 from tink.proto import tink_pb2
-import tink_config
 from util import testing_servers
 from util import utilities
 
@@ -61,22 +60,21 @@ _KMS_KEY_URI = {
     'AWS': _AWS_KEY_URI,
 }
 
+_DEK_TEMPLATE = utilities.KEY_TEMPLATE['AES128_GCM']
+
 
 def _kms_envelope_aead_templates(
-    kms_services: Sequence[str]) -> Dict[str, Tuple[tink_pb2.KeyTemplate, str]]:
-  """For each KMS envelope AEAD template name maps the key template and DEK AEAD key type."""
+    kms_services: Sequence[str]) -> Dict[str, tink_pb2.KeyTemplate]:
+  """Generates a map from KMS envelope AEAD template name to key template."""
   kms_key_templates = {}
   for kms_service in kms_services:
     key_uri = _KMS_KEY_URI[kms_service]
-    for aead_key_type in tink_config.key_types_for_primitive(aead.Aead):
-      for key_template_name in utilities.KEY_TEMPLATE_NAMES[aead_key_type]:
-        kms_envelope_aead_key_template = (
-            aead.aead_key_templates.create_kms_envelope_aead_key_template(
-                key_uri, utilities.KEY_TEMPLATE[key_template_name]))
-        kms_envelope_aead_template_name = '%s_KMS_ENVELOPE_AEAD_WITH_%s' % (
-            kms_service, key_template_name)
-        kms_key_templates[kms_envelope_aead_template_name] = (
-            kms_envelope_aead_key_template, aead_key_type)
+    kms_envelope_aead_key_template = (
+        aead.aead_key_templates.create_kms_envelope_aead_key_template(
+            key_uri, _DEK_TEMPLATE))
+    kms_envelope_aead_template_name = '%s_KMS_ENVELOPE_AEAD' % kms_service
+    kms_key_templates[kms_envelope_aead_template_name] = (
+        kms_envelope_aead_key_template)
   return kms_key_templates
 
 
@@ -274,14 +272,9 @@ class KmsAeadTest(parameterized.TestCase):
 
 def _kms_envelope_aead_test_cases() -> Iterable[Tuple[str, str, str]]:
   """Yields (KMS Envelope AEAD template names, encrypt lang, decrypt lang)."""
-  for key_template_name, (
-      _, aead_key_type) in _KMS_ENVELOPE_AEAD_KEY_TEMPLATES.items():
+  for key_template_name in _KMS_ENVELOPE_AEAD_KEY_TEMPLATES:
     # Make sure to test languages that support the pritive used for DEK.
-    supported_langs = tink_config.supported_languages_for_key_type(
-        aead_key_type)
-    # Make sure the language supports KMS envelope encryption.
-    supported_langs = set(supported_langs).intersection(
-        _SUPPORTED_LANGUAGES_FOR_KMS_ENVELOPE_AEAD)
+    supported_langs = _SUPPORTED_LANGUAGES_FOR_KMS_ENVELOPE_AEAD
     for encrypt_lang in supported_langs:
       for decrypt_lang in supported_langs:
         yield (key_template_name, encrypt_lang, decrypt_lang)
@@ -291,7 +284,7 @@ class KmsEnvelopeAeadTest(parameterized.TestCase):
 
   @parameterized.parameters(_kms_envelope_aead_test_cases())
   def test_encrypt_decrypt(self, key_template_name, encrypt_lang, decrypt_lang):
-    key_template, _ = _KMS_ENVELOPE_AEAD_KEY_TEMPLATES[key_template_name]
+    key_template = _KMS_ENVELOPE_AEAD_KEY_TEMPLATES[key_template_name]
     # Use the encryption language to generate the keyset proto.
     keyset = testing_servers.new_keyset(encrypt_lang, key_template)
     encrypt_primitive = testing_servers.remote_primitive(
@@ -309,7 +302,7 @@ class KmsEnvelopeAeadTest(parameterized.TestCase):
   @parameterized.parameters(_kms_envelope_aead_test_cases())
   def test_decryption_fails_with_wrong_aad(self, key_template_name,
                                            encrypt_lang, decrypt_lang):
-    key_template, _ = _KMS_ENVELOPE_AEAD_KEY_TEMPLATES[key_template_name]
+    key_template = _KMS_ENVELOPE_AEAD_KEY_TEMPLATES[key_template_name]
     # Use the encryption language to generate the keyset proto.
     keyset = testing_servers.new_keyset(encrypt_lang, key_template)
     encrypt_primitive = testing_servers.remote_primitive(
