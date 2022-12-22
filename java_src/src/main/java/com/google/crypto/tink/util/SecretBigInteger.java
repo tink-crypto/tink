@@ -25,7 +25,7 @@ import java.security.MessageDigest;
 /** A class storing a secret BigInteger, protecting the value via {@link SecretKeyAccess}. */
 @Alpha
 @Immutable
-final class SecretBigInteger {
+public final class SecretBigInteger {
   private final BigInteger value;
 
   private SecretBigInteger(BigInteger value) {

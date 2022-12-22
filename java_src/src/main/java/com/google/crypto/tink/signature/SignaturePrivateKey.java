@@ -60,7 +60,7 @@ public abstract class SignaturePrivateKey extends Key implements PrivateKey {
    * <p>Returns the same as {@code getPublicKey().getParameters()}.
    */
   @Override
-  public final SignatureParameters getParameters() {
+  public SignatureParameters getParameters() {
     return getPublicKey().getParameters();
   }
 }
