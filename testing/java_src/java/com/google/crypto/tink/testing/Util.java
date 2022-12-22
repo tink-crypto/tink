@@ -48,7 +48,8 @@ final class Util {
       Class<?> primitiveClass) {
     try {
       KeysetHandle keysetHandle = parseBinaryProtoKeyset(request.getAnnotatedKeyset());
-      keysetHandle.getPrimitive(primitiveClass);
+      // We create to check if there is an exception thrown.
+      Object unused = keysetHandle.getPrimitive(primitiveClass);
     } catch (GeneralSecurityException e) {
       responseObserver.onNext(CreationResponse.newBuilder().setErr(e.toString()).build());
       responseObserver.onCompleted();

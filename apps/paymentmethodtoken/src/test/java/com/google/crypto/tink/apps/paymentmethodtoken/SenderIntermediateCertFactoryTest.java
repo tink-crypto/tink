@@ -139,7 +139,7 @@ public class SenderIntermediateCertFactoryTest {
 
   @Test
   public void shouldSupportECV2SigningOnly() throws Exception {
-    new SenderIntermediateCertFactory.Builder()
+    Object unused = new SenderIntermediateCertFactory.Builder()
         .protocolVersion(PaymentMethodTokenConstants.PROTOCOL_VERSION_EC_V2_SIGNING_ONLY)
         .senderIntermediateSigningKey(GOOGLE_SIGNING_EC_V2_INTERMEDIATE_PUBLIC_KEY_X509_BASE64)
         .addSenderSigningKey(GOOGLE_SIGNING_EC_V2_PRIVATE_KEY_PKCS8_BASE64)
@@ -150,7 +150,7 @@ public class SenderIntermediateCertFactoryTest {
   @Test
   public void shouldThrowIfInvalidProtocolVersionSet() throws Exception {
     try {
-      new SenderIntermediateCertFactory.Builder()
+      Object unused = new SenderIntermediateCertFactory.Builder()
           .protocolVersion(PaymentMethodTokenConstants.PROTOCOL_VERSION_EC_V1)
           .build();
       fail("Should have thrown!");

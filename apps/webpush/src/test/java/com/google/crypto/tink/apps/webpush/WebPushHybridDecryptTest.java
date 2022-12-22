@@ -89,12 +89,13 @@ public class WebPushHybridDecryptTest {
       }
 
       try {
-        new WebPushHybridDecrypt.Builder()
-            .withRecordSize(WebPushConstants.CIPHERTEXT_OVERHEAD - 1)
-            .withAuthSecret(authSecret)
-            .withRecipientPublicKey(uaPublicKey)
-            .withRecipientPrivateKey(uaPrivateKey)
-            .build();
+        Object unused =
+            new WebPushHybridDecrypt.Builder()
+                .withRecordSize(WebPushConstants.CIPHERTEXT_OVERHEAD - 1)
+                .withAuthSecret(authSecret)
+                .withRecipientPublicKey(uaPublicKey)
+                .withRecipientPrivateKey(uaPrivateKey)
+                .build();
 
       } catch (IllegalArgumentException ex) {
         // expected.

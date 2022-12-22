@@ -145,7 +145,7 @@ public class SenderIntermediateCertFactory {
     @CanIgnoreReturnValue
     public Builder senderIntermediateSigningKey(String val) throws GeneralSecurityException {
       // Parsing to validate the format
-      PaymentMethodTokenUtil.x509EcPublicKey(val);
+      Object unused = PaymentMethodTokenUtil.x509EcPublicKey(val);
       intermediateSigningKey = val;
       return this;
     }
