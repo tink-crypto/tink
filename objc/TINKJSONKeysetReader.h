@@ -28,7 +28,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 /**
  * Initializes a TINKJSONKeysetReader using a serialized keyset in proto JSON wire format.
- * The serialized keyset can be cleartext or encrypted.
+ * The serialized keyset can either be cleartext or encrypted.
  */
 - (nullable instancetype)initWithSerializedKeyset:(NSData *)keyset
                                             error:(NSError **)error NS_DESIGNATED_INITIALIZER;

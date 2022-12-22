@@ -71,7 +71,7 @@ class KeysetWrapperImpl : public KeysetWrapper<Q> {
         std::move(primitives_builder).Build();
     if (!primitives.ok()) return primitives.status();
     return transforming_wrapper_.Wrap(
-        std::make_unique<PrimitiveSet<P>>(*std::move(primitives)));
+        absl::make_unique<PrimitiveSet<P>>(*std::move(primitives)));
   }
 
  private:
