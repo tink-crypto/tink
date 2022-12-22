@@ -51,7 +51,10 @@ func wrapPRFset(ps *primitiveset.PrimitiveSet) (*Set, error) {
 	}
 	set.PrimaryID = ps.Primary.KeyID
 	set.PRFs = make(map[uint32]PRF)
-
+	logger, err := createLogger(ps)
+	if err != nil {
+		return nil, err
+	}
 	entries, err := ps.RawEntries()
 	if err != nil {
 		return nil, fmt.Errorf("Could not get raw entries: %v", err)
@@ -67,11 +70,11 @@ func wrapPRFset(ps *primitiveset.PrimitiveSet) (*Set, error) {
 		if !ok {
 			return nil, fmt.Errorf("prf_set_factory: not a PRF primitive")
 		}
-		set.PRFs[entry.KeyID] = prf
-	}
-	set.logger, err = createLogger(ps)
-	if err != nil {
-		return nil, err
+		set.PRFs[entry.KeyID] = &monitoredPRF{
+			prf:    prf,
+			keyID:  entry.KeyID,
+			logger: logger,
+		}
 	}
 	return set, nil
 }

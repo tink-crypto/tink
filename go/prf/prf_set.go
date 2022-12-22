@@ -57,6 +57,24 @@ type PRF interface {
 	ComputePRF(input []byte, outputLength uint32) ([]byte, error)
 }
 
+type monitoredPRF struct {
+	prf    PRF
+	keyID  uint32
+	logger monitoring.Logger
+}
+
+var _ PRF = (*monitoredPRF)(nil)
+
+func (w *monitoredPRF) ComputePRF(input []byte, outputLength uint32) ([]byte, error) {
+	p, err := w.prf.ComputePRF(input, outputLength)
+	if err != nil {
+		w.logger.LogFailure()
+		return nil, err
+	}
+	w.logger.Log(w.keyID, len(input))
+	return p, nil
+}
+
 // Set is a set of PRFs. A Tink Keyset can be converted into a set of PRFs using this primitive. Every
 // key in the keyset corresponds to a PRF in the prf.Set.
 // Every PRF in the set is given an ID, which is the same ID as the key id in
@@ -65,8 +83,7 @@ type Set struct {
 	// PrimaryID is the key ID marked as primary in the corresponding Keyset.
 	PrimaryID uint32
 	// PRFs maps key IDs to their corresponding PRF.
-	PRFs   map[uint32]PRF
-	logger monitoring.Logger
+	PRFs map[uint32]PRF
 }
 
 // ComputePrimaryPRF is equivalent to set.PRFs[set.PrimaryID].ComputePRF(input, outputLength).
@@ -75,17 +92,7 @@ func (s Set) ComputePrimaryPRF(input []byte, outputLength uint32) ([]byte, error
 	if !ok {
 		return nil, fmt.Errorf("Could not find primary ID %d in prf.Set", s.PrimaryID)
 	}
-	p, err := prf.ComputePRF(input, outputLength)
-	if err != nil {
-		if s.logger != nil {
-			s.logger.LogFailure()
-		}
-		return nil, err
-	}
-	if s.logger != nil {
-		s.logger.Log(s.PrimaryID, len(input))
-	}
-	return p, nil
+	return prf.ComputePRF(input, outputLength)
 }
 
 func init() {

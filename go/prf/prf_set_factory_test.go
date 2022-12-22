@@ -23,6 +23,7 @@ import (
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
+	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/tink/go/insecurecleartextkeyset"
 	"github.com/google/tink/go/internal/internalregistry"
 	"github.com/google/tink/go/keyset"
@@ -308,6 +309,99 @@ func TestPrimitiveFactoryMonitoringWithAnnotationsComputePRFFailureIsLogged(t *t
 	if diff := cmp.Diff(want, got); diff != "" {
 		t.Errorf("%v", diff)
 	}
+}
+
+func TestPrimitiveFactoryIndividualPrfWithAnnotatonsLogsCompute(t *testing.T) {
+	defer internalregistry.ClearMonitoringClient()
+	client := fakemonitoring.NewClient("fake-client")
+	if err := internalregistry.RegisterMonitoringClient(client); err != nil {
+		t.Fatalf("internalregistry.RegisterMonitoringClient() err = %v, want nil", err)
+	}
+	kh, err := keyset.NewHandle(prf.HMACSHA256PRFKeyTemplate())
+	if err != nil {
+		t.Fatalf("keyset.NewHandle() err = %v, want nil", err)
+	}
+	manager := keyset.NewManagerFromHandle(kh)
+	hmac512KeyID, err := manager.Add(prf.HMACSHA512PRFKeyTemplate())
+	if err != nil {
+		t.Fatalf("manager.Add() err = %v, want nil", err)
+	}
+	aesKeyID, err := manager.Add(prf.AESCMACPRFKeyTemplate())
+	if err != nil {
+		t.Fatalf("manager.Add() err = %v, want nil", err)
+	}
+	kh, err = manager.Handle()
+	if err != nil {
+		t.Fatalf("manager.Handle() err = %v, want nil", err)
+	}
+	buff := &bytes.Buffer{}
+	if err := insecurecleartextkeyset.Write(kh, keyset.NewBinaryWriter(buff)); err != nil {
+		t.Fatalf("insecurecleartextkeyset.Write() err = %v, want nil", err)
+	}
+	annotations := map[string]string{"foo": "bar"}
+	mh, err := insecurecleartextkeyset.Read(keyset.NewBinaryReader(buff), keyset.WithAnnotations(annotations))
+	if err != nil {
+		t.Fatalf("insecurecleartextkeyset.Read() err = %v, want nil", err)
+	}
+	prfSet, err := prf.NewPRFSet(mh)
+	if err != nil {
+		t.Fatalf("prf.NewPRFSet() err = %v, want nil", err)
+	}
+	for _, p := range prfSet.PRFs {
+		if _, err := p.ComputePRF([]byte("input_data"), 16); err != nil {
+			t.Fatalf("p.ComputePRF() err = %v, want nil", err)
+		}
+
+	}
+	got := client.Events()
+	wantKeysetInfo := &monitoring.KeysetInfo{
+		PrimaryKeyID: kh.KeysetInfo().GetPrimaryKeyId(),
+		Entries: []*monitoring.Entry{
+			{
+				KeyID:     kh.KeysetInfo().GetPrimaryKeyId(),
+				Status:    monitoring.Enabled,
+				KeyType:   "tink.HmacPrfKey",
+				KeyPrefix: "RAW",
+			},
+			{
+				KeyID:     hmac512KeyID,
+				Status:    monitoring.Enabled,
+				KeyType:   "tink.HmacPrfKey",
+				KeyPrefix: "RAW",
+			},
+			{
+				KeyID:     aesKeyID,
+				Status:    monitoring.Enabled,
+				KeyType:   "tink.AesCmacPrfKey",
+				KeyPrefix: "RAW",
+			},
+		},
+		Annotations: annotations,
+	}
+	want := []*fakemonitoring.LogEvent{
+		{
+			Context:  monitoring.NewContext("prf", "compute", wantKeysetInfo),
+			KeyID:    kh.KeysetInfo().GetKeyInfo()[0].GetKeyId(),
+			NumBytes: len("input_data"),
+		},
+		{
+			Context:  monitoring.NewContext("prf", "compute", wantKeysetInfo),
+			KeyID:    kh.KeysetInfo().GetKeyInfo()[1].GetKeyId(),
+			NumBytes: len("input_data"),
+		},
+		{
+			Context:  monitoring.NewContext("prf", "compute", wantKeysetInfo),
+			KeyID:    kh.KeysetInfo().GetKeyInfo()[2].GetKeyId(),
+			NumBytes: len("input_data"),
+		},
+	}
+	eventCmp := func(a, b *fakemonitoring.LogEvent) bool {
+		return a.KeyID < b.KeyID
+	}
+	if !cmp.Equal(got, want, cmpopts.SortSlices(eventCmp)) {
+		t.Errorf("got = %v, want = %v, with diff: %v", got, want, cmp.Diff(got, want))
+	}
+
 }
 
 func TestPrimitiveFactoryWithMonitoringAnnotationsLogsComputePRF(t *testing.T) {
