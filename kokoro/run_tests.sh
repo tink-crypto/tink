@@ -156,6 +156,10 @@ run_macos_tests() {
 }
 
 install_tink_via_pip() {
+  if [[ -n "${KOKORO_ROOT}" ]]; then
+    use_bazel.sh "$(cat python/.bazelversion)"
+  fi
+
   local -a PIP_FLAGS
   if [[ "${PLATFORM}" == 'darwin' ]]; then
     PIP_FLAGS=( --user )
@@ -213,6 +217,9 @@ install_temp_protoc() {
 #   None
 #######################################
 test_maven_packages() {
+  if [[ -n "${KOKORO_ROOT}" ]]; then
+    use_bazel.sh "$(cat java_src/.bazelversion)"
+  fi
   # Only test in the Ubuntu environment.
   if [[ "${PLATFORM}" != "linux" ]]; then
     return
