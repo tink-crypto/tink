@@ -21,6 +21,7 @@ import (
 	"fmt"
 
 	"github.com/google/tink/go/core/registry"
+	"github.com/google/tink/go/internal/internalregistry"
 	"github.com/google/tink/go/monitoring"
 )
 
@@ -100,6 +101,9 @@ func init() {
 		panic(fmt.Sprintf("prf.init() failed: %v", err))
 	}
 	if err := registry.RegisterKeyManager(new(hkdfprfKeyManager)); err != nil {
+		panic(fmt.Sprintf("prf.init() failed: %v", err))
+	}
+	if err := internalregistry.AllowKeyDerivation(hkdfprfTypeURL); err != nil {
 		panic(fmt.Sprintf("prf.init() failed: %v", err))
 	}
 	if err := registry.RegisterKeyManager(new(aescmacprfKeyManager)); err != nil {

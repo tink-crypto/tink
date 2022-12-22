@@ -33,7 +33,7 @@ import (
 	tinkpb "github.com/google/tink/go/proto/tink_go_proto"
 )
 
-func TestPRFBasedDeriverWithAEAD(t *testing.T) {
+func TestPRFBasedDeriver(t *testing.T) {
 	prfs := []struct {
 		name     string
 		template *tinkpb.KeyTemplate
@@ -58,6 +58,10 @@ func TestPRFBasedDeriverWithAEAD(t *testing.T) {
 		{
 			name:     "AES256GCMNoPrefix",
 			template: aead.AES256GCMNoPrefixKeyTemplate(),
+		},
+		{
+			name:     "HKDFSHA256PRF",
+			template: prf.HKDFSHA256PRFKeyTemplate(),
 		},
 	}
 	salts := [][]byte{nil, []byte("salt")}
@@ -221,6 +225,13 @@ func TestNewPRFBasedDeriverRejectsInvalidInputs(t *testing.T) {
 	if err != nil {
 		t.Fatalf("registry.NewKeyData() err = %v, want nil", err)
 	}
+	// The derivation of KeysetDeriver keyset handles is not supported, i.e. a
+	// KeysetDeriver key template cannot be used as the derivedKeyTemplate
+	// argument in newPRFBasedDeriver().
+	invalidDerivedKeyTemplate, err := CreatePRFBasedKeyTemplate(prf.HKDFSHA256PRFKeyTemplate(), aead.AES128GCMKeyTemplate())
+	if err != nil {
+		t.Fatalf("CreatePRFBasedKeyTemplate() err = %v, want nil", err)
+	}
 	for _, test := range []struct {
 		name               string
 		prfKeyData         *tinkpb.KeyData
@@ -245,7 +256,7 @@ func TestNewPRFBasedDeriverRejectsInvalidInputs(t *testing.T) {
 		{
 			name:               "invalid derived template",
 			prfKeyData:         validPRFKeyData,
-			derivedKeyTemplate: prf.HKDFSHA256PRFKeyTemplate(),
+			derivedKeyTemplate: invalidDerivedKeyTemplate,
 		},
 	} {
 		t.Run(test.name, func(t *testing.T) {
