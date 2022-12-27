@@ -169,6 +169,7 @@ public final class PaymentMethodTokenSender {
      *
      * @since 1.1.0
      */
+    @CanIgnoreReturnValue
     public Builder senderIntermediateSigningKey(String val) throws GeneralSecurityException {
       return senderIntermediateSigningKey(PaymentMethodTokenUtil.pkcs8EcPrivateKey(val));
     }
