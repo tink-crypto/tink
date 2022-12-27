@@ -10,6 +10,7 @@ def tink_android_test(name, srcs, deps, shard_count = 1, data = [], min_version 
         name: The name of the test created.
         srcs: The test source of the test.
         deps: The dependencies.
+        shard_count: Number of shards.
         data: Data dependencies.
         min_version: The minimum version of android which should be tested.
     """
@@ -22,6 +23,9 @@ def tink_android_test(name, srcs, deps, shard_count = 1, data = [], min_version 
         25: "//tools/mobile/devices/android/generic_phone:android_25_x86",
         26: "//tools/mobile/devices/android/generic_phone:android_26_x86",
         27: "//tools/mobile/devices/android/generic_phone:android_27_x86",
+        28: "//tools/mobile/devices/android/generic_phone:android_28_x86",
+        29: "//tools/mobile/devices/android/generic_phone:android_29_x86",
+        30: "//tools/mobile/devices/android/generic_phone:android_30_x86",
     }
 
     deps.append("//java/com/google/android/apps/common/testing/testrunner")
