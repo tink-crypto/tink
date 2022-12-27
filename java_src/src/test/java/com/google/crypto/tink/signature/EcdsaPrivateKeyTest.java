@@ -334,7 +334,17 @@ public final class EcdsaPrivateKeyTest {
                 .build(),
             // the same key built twice must be equal
             EcdsaPrivateKey.builder()
-                .setPublicKey(noPrefixPublicKey)
+                .setPublicKey(
+                    EcdsaPublicKey.builder()
+                        .setParameters(
+                            EcdsaParameters.builder()
+                                .setSignatureEncoding(EcdsaParameters.SignatureEncoding.IEEE_P1363)
+                                .setCurveType(EcdsaParameters.CurveType.NIST_P256)
+                                .setHashType(EcdsaParameters.HashType.SHA256)
+                                .setVariant(EcdsaParameters.Variant.NO_PREFIX)
+                                .build())
+                        .setPublicPoint(P256_PUBLIC_POINT)
+                        .build())
                 .setPrivateValue(
                     SecretBigInteger.fromBigInteger(
                         P256_PRIVATE_VALUE, InsecureSecretKeyAccess.get()))

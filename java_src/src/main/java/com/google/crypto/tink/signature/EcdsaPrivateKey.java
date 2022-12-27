@@ -130,7 +130,7 @@ public final class EcdsaPrivateKey extends SignaturePrivateKey {
       return false;
     }
     EcdsaPrivateKey that = (EcdsaPrivateKey) o;
-    return that.publicKey.equals(publicKey)
+    return that.publicKey.equalsKey(publicKey)
         && privateValue.equalsSecretBigInteger(that.privateValue);
   }
 }
