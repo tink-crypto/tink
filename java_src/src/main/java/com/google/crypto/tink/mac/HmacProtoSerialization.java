@@ -183,7 +183,7 @@ final class HmacProtoSerialization {
       throws GeneralSecurityException {
     if (!serialization.getKeyTemplate().getTypeUrl().equals(TYPE_URL)) {
       throw new IllegalArgumentException(
-          "Wrong type URL in call to HmacParameters.parseParameters: "
+          "Wrong type URL in call to HmacProtoSerialization.parseParameters: "
               + serialization.getKeyTemplate().getTypeUrl());
     }
     com.google.crypto.tink.proto.HmacKeyFormat format;
@@ -212,7 +212,7 @@ final class HmacProtoSerialization {
       throws GeneralSecurityException {
     if (!serialization.getTypeUrl().equals(TYPE_URL)) {
       throw new IllegalArgumentException(
-          "Wrong type URL in call to HmacParameters.parseParameters");
+          "Wrong type URL in call to HmacProtoSerialization.parseKey");
     }
     try {
       com.google.crypto.tink.proto.HmacKey protoKey =
