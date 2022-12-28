@@ -118,7 +118,8 @@ public class JwtRsaSsaPssSignKeyManagerTest {
   // Note: we use Theory as a parametrized test -- different from what the Theory framework intends.
   @Theory
   public void validateKeyFormat_ok(
-      @FromDataPoints("algorithmParam") JwtRsaSsaPssAlgorithm algorithm, int keySize)
+      @FromDataPoints("algorithmParam") JwtRsaSsaPssAlgorithm algorithm,
+      @FromDataPoints("sizes") int keySize)
       throws GeneralSecurityException {
     JwtRsaSsaPssKeyFormat format = createKeyFormat(algorithm, keySize, RSAKeyGenParameterSpec.F4);
     factory.validateKeyFormat(format);
@@ -178,9 +179,9 @@ public class JwtRsaSsaPssSignKeyManagerTest {
 
   // Note: we use Theory as a parametrized test -- different from what the Theory framework intends.
   @Theory
-  public void createKeys_ok(
-      @FromDataPoints("algorithmParam") JwtRsaSsaPssAlgorithm algorithm, int keySize)
+  public void createKeys_ok(@FromDataPoints("algorithmParam") JwtRsaSsaPssAlgorithm algorithm)
       throws Exception {
+    int keySize = 2048;
     if (TestUtil.isTsan()) {
       // creating keys is too slow in Tsan.
       // We do not use assume because Theories expects to find something which is not skipped.
@@ -219,7 +220,8 @@ public class JwtRsaSsaPssSignKeyManagerTest {
   // Note: we use Theory as a parametrized test -- different from what the Theory framework intends.
   @Theory
   public void createCorruptedModulusPrimitive_throws(
-      @FromDataPoints("algorithmParam") JwtRsaSsaPssAlgorithm algorithm, int keySize)
+      @FromDataPoints("algorithmParam") JwtRsaSsaPssAlgorithm algorithm,
+      @FromDataPoints("sizes") int keySize)
       throws Exception {
     if (TestUtil.isTsan()) {
       // creating keys is too slow in Tsan.

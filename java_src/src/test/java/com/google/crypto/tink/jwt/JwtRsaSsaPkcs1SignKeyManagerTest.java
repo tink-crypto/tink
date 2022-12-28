@@ -181,10 +181,9 @@ public class JwtRsaSsaPkcs1SignKeyManagerTest {
 
   // Note: we use Theory as a parametrized test -- different from what the Theory framework intends.
   @Theory
-  public void createKeys_ok(
-      @FromDataPoints("algorithmParam") JwtRsaSsaPkcs1Algorithm algorithm,
-      @FromDataPoints("sizes") int keySize)
+  public void createKeys_ok(@FromDataPoints("algorithmParam") JwtRsaSsaPkcs1Algorithm algorithm)
       throws Exception {
+    int keySize = 2048;
     if (TestUtil.isTsan()) {
       // creating keys is too slow in Tsan.
       // We do not use assume because Theories expects to find something which is not skipped.
