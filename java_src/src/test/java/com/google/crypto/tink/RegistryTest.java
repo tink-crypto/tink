@@ -137,6 +137,8 @@ public class RegistryTest {
   }
 
   private static class AeadToEncryptOnlyWrapper implements PrimitiveWrapper<Aead, EncryptOnly> {
+    public static final AeadToEncryptOnlyWrapper WRAPPER = new AeadToEncryptOnlyWrapper();
+
     @Override
     public EncryptOnly wrap(PrimitiveSet<Aead> set) throws GeneralSecurityException {
       return new EncryptOnly() {
@@ -169,7 +171,7 @@ public class RegistryTest {
     TinkFipsUtil.unsetFipsRestricted();
     Registry.reset();
     TinkConfig.register();
-    Registry.registerPrimitiveWrapper(new AeadToEncryptOnlyWrapper());
+    Registry.registerPrimitiveWrapper(AeadToEncryptOnlyWrapper.WRAPPER);
   }
 
   private void testGetKeyManagerShouldWork(String typeUrl, String className) throws Exception {

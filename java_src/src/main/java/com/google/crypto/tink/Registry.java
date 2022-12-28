@@ -18,6 +18,7 @@ package com.google.crypto.tink;
 
 import com.google.crypto.tink.config.internal.TinkFipsUtil;
 import com.google.crypto.tink.internal.KeyTypeManager;
+import com.google.crypto.tink.internal.MutablePrimitiveRegistry;
 import com.google.crypto.tink.internal.PrivateKeyTypeManager;
 import com.google.crypto.tink.proto.KeyData;
 import com.google.protobuf.ByteString;
@@ -91,9 +92,6 @@ public final class Registry {
   private static final ConcurrentMap<String, Catalogue<?>> catalogueMap =
       new ConcurrentHashMap<>(); //  name -> catalogue mapping
 
-  private static final ConcurrentMap<Class<?>, PrimitiveWrapper<?, ?>> primitiveWrapperMap =
-      new ConcurrentHashMap<>();
-
   private static final ConcurrentMap<String, KeyTemplate> keyTemplateMap =
       new ConcurrentHashMap<>(); // name -> KeyTemplate mapping
 
@@ -144,10 +142,10 @@ public final class Registry {
    */
   static synchronized void reset() {
     keyManagerRegistry.set(new KeyManagerRegistry());
+    MutablePrimitiveRegistry.resetGlobalInstanceTestOnly();
     keyDeriverMap.clear();
     newKeyAllowedMap.clear();
     catalogueMap.clear();
-    primitiveWrapperMap.clear();
     keyTemplateMap.clear();
   }
 
@@ -488,24 +486,7 @@ public final class Registry {
     if (wrapper == null) {
       throw new IllegalArgumentException("wrapper must be non-null");
     }
-    Class<P> classObject = wrapper.getPrimitiveClass();
-    if (primitiveWrapperMap.containsKey(classObject)) {
-      @SuppressWarnings("unchecked") // We know that we only inserted objects of the correct type.
-      PrimitiveWrapper<?, P> existingWrapper =
-          (PrimitiveWrapper<?, P>) primitiveWrapperMap.get(classObject);
-      if (!wrapper.getClass().getName().equals(existingWrapper.getClass().getName())) {
-        logger.warning(
-            "Attempted overwrite of a registered PrimitiveWrapper for type " + classObject);
-        throw new GeneralSecurityException(
-            String.format(
-                "PrimitiveWrapper for primitive (%s) is already registered to be %s, "
-                    + "cannot be re-registered with %s",
-                classObject.getName(),
-                existingWrapper.getClass().getName(),
-                wrapper.getClass().getName()));
-      }
-    }
-    primitiveWrapperMap.put(classObject, wrapper);
+    MutablePrimitiveRegistry.globalInstance().registerPrimitiveWrapper(wrapper);
   }
 
   /**
@@ -764,28 +745,18 @@ public final class Registry {
     return getPrimitive(keyData.getTypeUrl(), keyData.getValue(), primitiveClass);
   }
 
+  static <KeyT extends Key, P> P getFullPrimitive(KeyT key, Class<P> primitiveClass)
+      throws GeneralSecurityException {
+    return MutablePrimitiveRegistry.globalInstance().getPrimitive(key, primitiveClass);
+  }
+
   /**
    * Looks up the globally registered PrimitiveWrapper for this primitive and wraps the given
    * PrimitiveSet with it.
    */
   public static <B, P> P wrap(PrimitiveSet<B> primitiveSet, Class<P> clazz)
       throws GeneralSecurityException {
-    @SuppressWarnings("unchecked") // We know that we inserted Class<P> -> PrimitiveWrapper<?, P>
-    PrimitiveWrapper<?, P> wrapper = (PrimitiveWrapper<?, P>) primitiveWrapperMap.get(clazz);
-    if (wrapper == null) {
-      throw new GeneralSecurityException(
-          "No wrapper found for " + primitiveSet.getPrimitiveClass().getName());
-    }
-    if (!wrapper.getInputPrimitiveClass().equals(primitiveSet.getPrimitiveClass())) {
-      throw new GeneralSecurityException(
-          "Wrong input primitive class, expected "
-              + wrapper.getInputPrimitiveClass()
-              + ", got "
-              + primitiveSet.getPrimitiveClass());
-    }
-    @SuppressWarnings("unchecked") // We just checked correctness
-    P result = ((PrimitiveWrapper<B, P>) wrapper).wrap(primitiveSet);
-    return result;
+    return MutablePrimitiveRegistry.globalInstance().wrap(primitiveSet, clazz);
   }
 
   public static <P> P wrap(PrimitiveSet<P> primitiveSet)
@@ -819,11 +790,11 @@ public final class Registry {
    */
   @Nullable
   public static Class<?> getInputPrimitive(Class<?> wrappedPrimitive) {
-    PrimitiveWrapper<?, ?> wrapper = primitiveWrapperMap.get(wrappedPrimitive);
-    if (wrapper == null) {
+    try {
+      return MutablePrimitiveRegistry.globalInstance().getInputPrimitiveClass(wrappedPrimitive);
+    } catch (GeneralSecurityException e) {
       return null;
     }
-    return wrapper.getInputPrimitiveClass();
   }
 
   /**
