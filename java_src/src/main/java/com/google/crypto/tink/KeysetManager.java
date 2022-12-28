@@ -173,6 +173,7 @@ public final class KeysetManager {
    *     true immediately promotes it to primary. However, when you do keyset rotation, you almost
    *     never want to make the new key primary, because old binaries don't know the new key yet.
    */
+  @CanIgnoreReturnValue
   @Deprecated
   public synchronized int addNewKey(
       com.google.crypto.tink.proto.KeyTemplate keyTemplate, boolean asPrimary)
