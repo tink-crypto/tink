@@ -23,6 +23,8 @@
 #include "tink/key_manager.h"
 #include "tink/util/statusor.h"
 
+// NOLINTBEGIN(whitespace/line_length) (Formatted when commented in)
+// TINK-PENDING-REMOVAL-IN-2.0.0-START
 namespace crypto {
 namespace tink {
 
@@ -42,5 +44,7 @@ class ABSL_DEPRECATED("Catalogues are not supported anymore.") Catalogue {
 
 }  // namespace tink
 }  // namespace crypto
+// TINK-PENDING-REMOVAL-IN-2.0.0-END
+// NOLINTEND(whitespace/line_length)
 
 #endif  // TINK_CATALOGUE_H_
