@@ -102,6 +102,7 @@ public final class AesEaxParametersTest {
             AesEaxParameters.builder()
                 .setKeySizeBytes(16)
                 .setIvSizeBytes(16)
+                .setTagSizeBytes(16)
                 .setVariant(null)
                 .build());
   }
