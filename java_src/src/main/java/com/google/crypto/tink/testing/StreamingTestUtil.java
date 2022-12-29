@@ -1151,7 +1151,7 @@ public final class StreamingTestUtil {
       read = ptStream.read(decrypted);
       if (read > 0) {
         ByteBuffer expected = ByteBuffer.allocate(read);
-        plaintext.read(expected);
+        assertEquals(plaintext.read(expected), read);
         decrypted.flip();
         TestUtil.assertByteBufferContains(expected.array(), decrypted);
         decryptedSize += read;
@@ -1183,7 +1183,7 @@ public final class StreamingTestUtil {
       }
       byte[] expected = new byte[read];
       plaintext.position(start);
-      plaintext.read(ByteBuffer.wrap(expected));
+      assertEquals(plaintext.read(ByteBuffer.wrap(expected)), read);
       decrypted.flip();
       TestUtil.assertByteBufferContains(expected, decrypted);
     }
