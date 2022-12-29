@@ -35,6 +35,8 @@
 namespace crypto {
 namespace tink {
 
+// NOLINTBEGIN(whitespace/line_length) (Formatted when commented in)
+// TINK-PENDING-REMOVAL-IN-2.0.0-START
 using ::google::crypto::tink::RegistryConfig;
 
 // static
@@ -42,6 +44,8 @@ const RegistryConfig& AeadConfig::Latest() {
   static const RegistryConfig* config = new RegistryConfig();
   return *config;
 }
+// TINK-PENDING-REMOVAL-IN-2.0.0-END
+// NOLINTEND(whitespace/line_length)
 
 // static
 util::Status AeadConfig::Register() {

@@ -34,6 +34,8 @@ namespace tink {
 //
 class MacConfig {
  public:
+  // NOLINTBEGIN(whitespace/line_length) (Formatted when commented in)
+  // TINK-PENDING-REMOVAL-IN-2.0.0-START
   static constexpr char kCatalogueName[] = "TinkMac";
   static constexpr char kPrimitiveName[] = "Mac";
 
@@ -41,6 +43,8 @@ class MacConfig {
   // in the current Tink release.
   ABSL_DEPRECATED("This is not supported anymore.")
   static const google::crypto::tink::RegistryConfig& Latest();
+  // TINK-PENDING-REMOVAL-IN-2.0.0-END
+  // NOLINTEND(whitespace/line_length)
 
   // Registers Mac primitive wrapper and key managers for all Mac key types
   // from the current Tink release.

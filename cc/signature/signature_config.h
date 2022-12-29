@@ -37,6 +37,8 @@ namespace tink {
 //
 class SignatureConfig {
  public:
+  // NOLINTBEGIN(whitespace/line_length) (Formatted when commented in)
+  // TINK-PENDING-REMOVAL-IN-2.0.0-START
   static constexpr char kPublicKeySignCatalogueName[] = "TinkPublicKeySign";
   static constexpr char kPublicKeyVerifyCatalogueName[] = "TinkPublicKeyVerify";
   static constexpr char kPublicKeySignPrimitiveName[] = "PublicKeySign";
@@ -46,6 +48,9 @@ class SignatureConfig {
   // supported in the current Tink release.
   ABSL_DEPRECATED("This is not supported anymore.")
   static const google::crypto::tink::RegistryConfig& Latest();
+
+  // TINK-PENDING-REMOVAL-IN-2.0.0-END
+  // NOLINTEND(whitespace/line_length)
 
   // Registers PublicKeySign and PublicKeyVerify primitive wrappers, and key
   // managers for all implementations of PublicKeySign and PublicKeyVerify from

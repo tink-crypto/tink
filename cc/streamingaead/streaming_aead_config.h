@@ -35,6 +35,8 @@ namespace tink {
 //
 class StreamingAeadConfig {
  public:
+  // NOLINTBEGIN(whitespace/line_length) (Formatted when commented in)
+  // TINK-PENDING-REMOVAL-IN-2.0.0-START
   static constexpr char kCatalogueName[] = "TinkStreamingAead";
   static constexpr char kPrimitiveName[] = "StreamingAead";
 
@@ -42,6 +44,8 @@ class StreamingAeadConfig {
   // in the current Tink release.
   ABSL_DEPRECATED("This is not supported anymore.")
   static const google::crypto::tink::RegistryConfig& Latest();
+  // TINK-PENDING-REMOVAL-IN-2.0.0-END
+  // NOLINTEND(whitespace/line_length)
 
   // Registers StreamingAead primitive wrapper and key managers for all
   // StreamingAead key types from the current Tink release.

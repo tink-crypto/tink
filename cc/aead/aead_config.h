@@ -34,6 +34,8 @@ namespace tink {
 //
 class AeadConfig {
  public:
+  // NOLINTBEGIN(whitespace/line_length) (Formatted when commented in)
+  // TINK-PENDING-REMOVAL-IN-2.0.0-START
   static constexpr char kCatalogueName[] = "TinkAead";
   static constexpr char kPrimitiveName[] = "Aead";
 
@@ -41,6 +43,8 @@ class AeadConfig {
   // in the current Tink release.
   ABSL_DEPRECATED("This is not supported anymore.")
   static const google::crypto::tink::RegistryConfig& Latest();
+  // TINK-PENDING-REMOVAL-IN-2.0.0-END
+  // NOLINTEND(whitespace/line_length)
 
   // Registers Aead primitive wrapper and key managers for all Aead key types
   // from the current Tink release.
