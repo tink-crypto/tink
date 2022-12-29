@@ -218,7 +218,7 @@ public final class AndroidKeystoreKmsClient implements KmsClient {
     AndroidKeystoreKmsClient client = new AndroidKeystoreKmsClient();
     if (!client.hasKey(keyUri)) {
       Log.i(TAG, String.format("key URI %s doesn't exist, generating a new one", keyUri));
-      generateNewAeadKey(keyUri);
+      generateNewAesGcmKeyWithoutExistenceCheck(keyUri);
     }
     return client.getAead(keyUri);
   }
@@ -238,7 +238,17 @@ public final class AndroidKeystoreKmsClient implements KmsClient {
                   + " deleteKey() and try again",
               keyUri));
     }
+    generateNewAesGcmKeyWithoutExistenceCheck(keyUri);
+  }
 
+  /**
+   * Generates a new AES256-GCM key in Android Keystore.
+   *
+   * <p>This function does not check if the key already exists, and will overwrite any existing key.
+   */
+  @RequiresApi(Build.VERSION_CODES.M)
+  static void generateNewAesGcmKeyWithoutExistenceCheck(String keyUri)
+      throws GeneralSecurityException {
     String keyId = Validators.validateKmsKeyUriAndRemovePrefix(PREFIX, keyUri);
     KeyGenerator keyGenerator =
         KeyGenerator.getInstance(KeyProperties.KEY_ALGORITHM_AES, "AndroidKeyStore");

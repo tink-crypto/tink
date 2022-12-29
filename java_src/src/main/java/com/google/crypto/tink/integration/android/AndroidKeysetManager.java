@@ -131,7 +131,7 @@ public final class AndroidKeysetManager {
   @GuardedBy("this")
   private KeysetManager keysetManager;
 
-  private AndroidKeysetManager(Builder builder) throws GeneralSecurityException, IOException {
+  private AndroidKeysetManager(Builder builder) {
     writer = builder.writer;
     masterKey = builder.masterKey;
     keysetManager = builder.keysetManager;
@@ -274,7 +274,8 @@ public final class AndroidKeysetManager {
       boolean existed = client.hasKey(masterKeyUri);
       if (!existed) {
         try {
-          AndroidKeystoreKmsClient.generateNewAeadKey(masterKeyUri);
+          // Note that this function does not use the keyStore instance set with withKeyStore.
+          AndroidKeystoreKmsClient.generateNewAesGcmKeyWithoutExistenceCheck(masterKeyUri);
         } catch (GeneralSecurityException | ProviderException ex) {
           Log.w(TAG, "cannot use Android Keystore, it'll be disabled", ex);
           return null;
