@@ -984,21 +984,19 @@ public final class KeysetHandle {
     }
   }
 
-  /** Allows us to have a name {@code B} for the base primitive. */
+  /** Helper function to allow us to have a a name {@code B} for the base primitive. */
   private <B, P> P getPrimitiveWithKnownInputPrimitive(
       Class<P> classObject, Class<B> inputPrimitiveClassObject) throws GeneralSecurityException {
     Util.validateKeyset(keyset);
     PrimitiveSet.Builder<B> builder = PrimitiveSet.newBuilder(inputPrimitiveClassObject);
     builder.setAnnotations(annotations);
     for (Keyset.Key key : keyset.getKeyList()) {
-      if (key.getStatus().equals(KeyStatusType.ENABLED)) {
-        @Nullable B primitive = getLegacyPrimitiveOrNull(key, inputPrimitiveClassObject);
-        @Nullable B fullPrimitive = getFullPrimitiveOrNull(key, inputPrimitiveClassObject);
-
+      if (key.getStatus() == KeyStatusType.ENABLED) {
+        B primitive = Registry.getPrimitive(key.getKeyData(), inputPrimitiveClassObject);
         if (key.getKeyId() == keyset.getPrimaryKeyId()) {
-          builder.addPrimaryFullPrimitiveAndOptionalPrimitive(fullPrimitive, primitive, key);
+          builder.addPrimaryPrimitive(primitive, key);
         } else {
-          builder.addFullPrimitiveAndOptionalPrimitive(fullPrimitive, primitive, key);
+          builder.addPrimitive(primitive, key);
         }
       }
     }
@@ -1035,48 +1033,5 @@ public final class KeysetHandle {
       }
     }
     throw new GeneralSecurityException("No primary key found in keyset.");
-  }
-
-  @Nullable
-  private static <B> B getLegacyPrimitiveOrNull(Keyset.Key key, Class<B> inputPrimitiveClassObject)
-      throws GeneralSecurityException {
-    try {
-      return Registry.getPrimitive(key.getKeyData(), inputPrimitiveClassObject);
-    } catch (UnsupportedOperationException e) {
-      if (e.getMessage()
-          .contains(
-              "should not be created via a key manager. Use the corresponding *Registry"
-                  + " instead.")) {
-        // Ignoring. This error means that this primitive should be handled through the
-        // PrimitiveRegistry.
-        return null;
-      }
-      // Otherwise the error is likely legit. Do not swallow.
-      throw e;
-    } catch (GeneralSecurityException e) {
-      if (e.getMessage().contains("No key manager found for key type ")
-          || e.getMessage().contains(" not supported by key manager of type ")) {
-        // Ignoring because the key may not have a corresponding legacy key manager.
-        return null;
-      }
-      // Otherwise the error is likely legit. Do not swallow.
-      throw e;
-    }
-  }
-
-  @Nullable
-  private static <B> B getFullPrimitiveOrNull(Keyset.Key key, Class<B> inputPrimitiveClassObject)
-      throws GeneralSecurityException {
-    ProtoKeySerialization protoKeySerialization = toProtoKeySerialization(key);
-    Key keyObject =
-        MutableSerializationRegistry.globalInstance()
-            .parseKeyWithLegacyFallback(protoKeySerialization, InsecureSecretKeyAccess.get());
-    try {
-      return Registry.getFullPrimitive(keyObject, inputPrimitiveClassObject);
-    } catch (GeneralSecurityException e) {
-      // Ignoring because the key may not yet have a corresponding class.
-      // TODO(lizatretyakova): stop ignoring when all key classes are migrated from protos.
-      return null;
-    }
   }
 }

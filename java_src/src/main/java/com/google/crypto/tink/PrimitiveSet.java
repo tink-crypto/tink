@@ -390,10 +390,6 @@ public final class PrimitiveSet<P> {
       if (primitives == null) {
         throw new IllegalStateException("addPrimitive cannot be called after build");
       }
-      if (fullPrimitive == null && primitive == null) {
-        throw new GeneralSecurityException(
-            "at least one of the `fullPrimitive` or `primitive` must be set");
-      }
       if (key.getStatus() != KeyStatusType.ENABLED) {
         throw new GeneralSecurityException("only ENABLED key is allowed");
       }

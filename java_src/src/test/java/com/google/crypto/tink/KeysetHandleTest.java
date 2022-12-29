@@ -77,14 +77,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
-/**
- * Tests for {@link KeysetHandle}.
- *
- * <p>Please note, that in relation to the {@link PrimitiveSet#fullPrimitive} this file only tests
- * the legacy scenario where the {@link PrimitiveSet#primitive} is set and {@link
- * PrimitiveSet#fullPrimitive} isn't; the other scenarios are tested in
- * {@link KeysetHandleFullPrimitiveTest}.
- */
+/** Tests for KeysetHandle. */
 @RunWith(JUnit4.class)
 public class KeysetHandleTest {
 
@@ -95,9 +88,6 @@ public class KeysetHandleTest {
   }
 
   private static class AeadToEncryptOnlyWrapper implements PrimitiveWrapper<Aead, EncryptOnly> {
-
-    private static final AeadToEncryptOnlyWrapper WRAPPER = new AeadToEncryptOnlyWrapper();
-
     private static class EncryptOnlyWithMonitoring implements EncryptOnly {
 
       private final MonitoringClient.Logger logger;
@@ -132,10 +122,6 @@ public class KeysetHandleTest {
     public Class<Aead> getInputPrimitiveClass() {
       return Aead.class;
     }
-
-    static void register() throws GeneralSecurityException {
-      Registry.registerPrimitiveWrapper(WRAPPER);
-    }
   }
 
   @BeforeClass
@@ -143,10 +129,10 @@ public class KeysetHandleTest {
     MacConfig.register();
     AeadConfig.register();
     SignatureConfig.register();
-    AeadToEncryptOnlyWrapper.register();
+    Registry.registerPrimitiveWrapper(new AeadToEncryptOnlyWrapper());
   }
 
-  @SuppressWarnings("deprecation") // This is a test for the deprecated function
+  @SuppressWarnings("deprecation")  // This is a test for the deprecated function
   @Test
   public void deprecated_getKeys() throws Exception {
     KeysetHandle handle =
