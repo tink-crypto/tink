@@ -18,6 +18,7 @@ package daead_test
 
 import (
 	"bytes"
+	"encoding/hex"
 	"fmt"
 	"testing"
 
@@ -28,7 +29,7 @@ import (
 
 	"github.com/google/tink/go/daead/subtle"
 	aspb "github.com/google/tink/go/proto/aes_siv_go_proto"
-	tinkpb "github.com/google/tink/go/proto/tink_go_proto"
+	tpb "github.com/google/tink/go/proto/tink_go_proto"
 )
 
 func TestAESSIVPrimitive(t *testing.T) {
@@ -56,7 +57,30 @@ func TestAESSIVPrimitiveWithInvalidKeys(t *testing.T) {
 	if err != nil {
 		t.Errorf("cannot obtain AESSIV key manager: %s", err)
 	}
-	invalidKeys := genInvalidAESSIVKeys()
+	invalidKeys := []*aspb.AesSivKey{
+		// Bad key size.
+		&aspb.AesSivKey{
+			Version:  testutil.AESSIVKeyVersion,
+			KeyValue: random.GetRandomBytes(16),
+		},
+		&aspb.AesSivKey{
+			Version:  testutil.AESSIVKeyVersion,
+			KeyValue: random.GetRandomBytes(32),
+		},
+		&aspb.AesSivKey{
+			Version:  testutil.AESSIVKeyVersion,
+			KeyValue: random.GetRandomBytes(63),
+		},
+		&aspb.AesSivKey{
+			Version:  testutil.AESSIVKeyVersion,
+			KeyValue: random.GetRandomBytes(65),
+		},
+		// Bad version.
+		&aspb.AesSivKey{
+			Version:  testutil.AESSIVKeyVersion + 1,
+			KeyValue: random.GetRandomBytes(subtle.AESSIVKeySize),
+		},
+	}
 	for _, key := range invalidKeys {
 		serializedKey, _ := proto.Marshal(key)
 		if _, err := km.Primitive(serializedKey); err == nil {
@@ -92,7 +116,7 @@ func TestAESSIVNewKeyData(t *testing.T) {
 	if kd.TypeUrl != testutil.AESSIVTypeURL {
 		t.Errorf("TypeUrl: %v != %v", kd.TypeUrl, testutil.AESSIVTypeURL)
 	}
-	if kd.KeyMaterialType != tinkpb.KeyData_SYMMETRIC {
+	if kd.KeyMaterialType != tpb.KeyData_SYMMETRIC {
 		t.Errorf("KeyMaterialType: %v != SYMMETRIC", kd.KeyMaterialType)
 	}
 	key := new(aspb.AesSivKey)
@@ -107,18 +131,39 @@ func TestAESSIVNewKeyData(t *testing.T) {
 func TestAESSIVNewKeyInvalid(t *testing.T) {
 	km, err := registry.GetKeyManager(testutil.AESSIVTypeURL)
 	if err != nil {
-		t.Errorf("cannot obtain AESSIV key manager: %s", err)
+		t.Errorf("registry.GetKeyManager(%q) err = %v, want nil", testutil.AESSIVTypeURL, err)
 	}
-	keyFormat := &aspb.AesSivKeyFormat{
+	invalidKeySize, err := proto.Marshal(&aspb.AesSivKeyFormat{
 		KeySize: subtle.AESSIVKeySize - 1,
-	}
-	serializedKeyFormat, err := proto.Marshal(keyFormat)
+		Version: testutil.AESSIVKeyVersion,
+	})
 	if err != nil {
-		t.Errorf("proto.Marshal(keyFormat) = %v; want nil", err)
+		t.Errorf("proto.Marshal() err = %v, want nil", err)
 	}
-	_, err = km.NewKey(serializedKeyFormat)
-	if err == nil {
-		t.Errorf("km.NewKey(serializedKeyFormat) = _, nil; want _, err")
+	// Proto messages start with a VarInt, which always ends with a byte with the
+	// MSB unset, so 0x80 is invalid.
+	invalidSerialization, err := hex.DecodeString("80")
+	if err != nil {
+		t.Errorf("hex.DecodeString() err = %v, want nil", err)
+	}
+	for _, test := range []struct {
+		name      string
+		keyFormat []byte
+	}{
+		{
+			name:      "invalid key size",
+			keyFormat: invalidKeySize,
+		},
+		{
+			name:      "invalid serialization",
+			keyFormat: invalidSerialization,
+		},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			if _, err = km.NewKey(test.keyFormat); err == nil {
+				t.Error("km.NewKey() err = nil, want non-nil")
+			}
+		})
 	}
 }
 
@@ -178,31 +223,4 @@ func validateAESSIVKey(key *aspb.AesSivKey) error {
 		return fmt.Errorf("invalid key: %v", key.KeyValue)
 	}
 	return validateAESSIVPrimitive(p, key)
-}
-
-func genInvalidAESSIVKeys() []*aspb.AesSivKey {
-	return []*aspb.AesSivKey{
-		// Bad key size.
-		&aspb.AesSivKey{
-			Version:  testutil.AESSIVKeyVersion,
-			KeyValue: random.GetRandomBytes(16),
-		},
-		&aspb.AesSivKey{
-			Version:  testutil.AESSIVKeyVersion,
-			KeyValue: random.GetRandomBytes(32),
-		},
-		&aspb.AesSivKey{
-			Version:  testutil.AESSIVKeyVersion,
-			KeyValue: random.GetRandomBytes(63),
-		},
-		&aspb.AesSivKey{
-			Version:  testutil.AESSIVKeyVersion,
-			KeyValue: random.GetRandomBytes(65),
-		},
-		// Bad version.
-		&aspb.AesSivKey{
-			Version:  testutil.AESSIVKeyVersion + 1,
-			KeyValue: random.GetRandomBytes(subtle.AESSIVKeySize),
-		},
-	}
 }
