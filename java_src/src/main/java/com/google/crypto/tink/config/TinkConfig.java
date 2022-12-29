@@ -35,9 +35,7 @@ import java.security.GeneralSecurityException;
  * }</pre>
  *
  * @since 1.0.0
- * @deprecated Use per-primitive configs, e.g., {@link AeadConfig}, {@link HybridConfig}, etc.
  */
-@Deprecated
 public final class TinkConfig {
   /** @deprecated */
   @Deprecated
