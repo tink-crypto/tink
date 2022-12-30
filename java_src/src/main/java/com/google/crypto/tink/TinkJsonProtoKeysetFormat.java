@@ -31,7 +31,6 @@ public final class TinkJsonProtoKeysetFormat {
     if (access == null) {
       throw new NullPointerException("SecretKeyAccess cannot be null");
     }
-    SecretKeyAccess.requireAccess(access);
     try {
       return CleartextKeysetHandle.read(JsonKeysetReader.withString(serializedKeyset));
     } catch (IOException e) {
@@ -45,7 +44,6 @@ public final class TinkJsonProtoKeysetFormat {
     if (access == null) {
       throw new NullPointerException("SecretKeyAccess cannot be null");
     }
-    SecretKeyAccess.requireAccess(access);
     try {
       ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
       CleartextKeysetHandle.write(keysetHandle, JsonKeysetWriter.withOutputStream(outputStream));
