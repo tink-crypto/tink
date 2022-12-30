@@ -17,6 +17,9 @@
 #ifndef TINK_CONFIG_H_
 #define TINK_CONFIG_H_
 
+// NOLINTBEGIN(whitespace/line_length) (Formatted when commented in)
+// TINK-PENDING-REMOVAL-IN-2.0.0-START
+
 #include <memory>
 #include <string>
 
@@ -52,7 +55,6 @@ namespace tink {
 // RegistryConfig registry_config = ...;
 // auto status = Config::Register(registry_config);
 //
-// TODO(b/250586153): Remove this class when Tink ObjC no longer depends on it.
 class ABSL_DEPRECATED("RegistryConfig and KeyTypeEntry are deprecated") Config {
  public:
   // Returns a KeyTypeEntry for Tink key types with the specified parameters.
@@ -115,5 +117,8 @@ crypto::tink::util::Status Config::Register(
 
 }  // namespace tink
 }  // namespace crypto
+
+// TINK-PENDING-REMOVAL-IN-2.0.0-END
+// NOLINTEND(whitespace/line_length)
 
 #endif  // TINK_CONFIG_H_

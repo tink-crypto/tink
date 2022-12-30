@@ -14,6 +14,9 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
+// NOLINTBEGIN(whitespace/line_length) (Formatted when commented in)
+// TINK-PENDING-REMOVAL-IN-2.0.0-START
+
 #include "tink/config.h"
 
 #include "gtest/gtest.h"
@@ -51,3 +54,6 @@ TEST_F(ConfigTest, testValidation) {
 }  // namespace
 }  // namespace tink
 }  // namespace crypto
+
+// TINK-PENDING-REMOVAL-IN-2.0.0-END
+// NOLINTEND(whitespace/line_length)
