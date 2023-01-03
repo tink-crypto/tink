@@ -487,7 +487,7 @@ public final class KeysetHandle {
         .build();
   }
 
-  static ProtoKeySerialization toProtoKeySerialization(Keyset.Key protoKey) {
+  private static ProtoKeySerialization toProtoKeySerialization(Keyset.Key protoKey) {
     int id = protoKey.getKeyId();
     @Nullable
     Integer idRequirement = protoKey.getOutputPrefixType() == OutputPrefixType.RAW ? null : id;
