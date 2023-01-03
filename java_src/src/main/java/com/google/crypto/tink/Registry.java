@@ -483,9 +483,6 @@ public final class Registry {
    */
   public static synchronized <B, P> void registerPrimitiveWrapper(
       final PrimitiveWrapper<B, P> wrapper) throws GeneralSecurityException {
-    if (wrapper == null) {
-      throw new IllegalArgumentException("wrapper must be non-null");
-    }
     MutablePrimitiveRegistry.globalInstance().registerPrimitiveWrapper(wrapper);
   }
 
