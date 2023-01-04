@@ -355,3 +355,14 @@ java_test(
         "@maven//:junit_junit",
     ],
 )
+
+java_test(
+    name = "AesGcmParametersTest",
+    size = "small",
+    srcs = ["AesGcmParametersTest.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink/aead:aes_gcm_parameters",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
