@@ -350,6 +350,16 @@ java_library(
     ],
 )
 
+java_library(
+    name = "aes_gcm_siv_parameters",
+    srcs = ["AesGcmSivParameters.java"],
+    deps = [
+        ":aead_parameters",
+        "@maven//:com_google_code_findbugs_jsr305",
+        "@maven//:com_google_errorprone_error_prone_annotations",
+    ],
+)
+
 # Android libraries
 
 android_library(
@@ -693,6 +703,16 @@ android_library(
         "//src/main/java/com/google/crypto/tink/annotations:alpha-android",
         "//src/main/java/com/google/crypto/tink/util:bytes-android",
         "//src/main/java/com/google/crypto/tink/util:secret_bytes-android",
+        "@maven//:com_google_code_findbugs_jsr305",
+        "@maven//:com_google_errorprone_error_prone_annotations",
+    ],
+)
+
+android_library(
+    name = "aes_gcm_siv_parameters-android",
+    srcs = ["AesGcmSivParameters.java"],
+    deps = [
+        ":aead_parameters-android",
         "@maven//:com_google_code_findbugs_jsr305",
         "@maven//:com_google_errorprone_error_prone_annotations",
     ],
