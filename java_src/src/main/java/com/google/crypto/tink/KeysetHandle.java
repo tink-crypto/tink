@@ -391,7 +391,7 @@ public final class KeysetHandle {
         throw new GeneralSecurityException("No primary was set");
       }
       keysetBuilder.setPrimaryKeyId(primaryId);
-      return new KeysetHandle(keysetBuilder.build());
+      return KeysetHandle.fromKeyset(keysetBuilder.build());
     }
   }
 
@@ -487,6 +487,31 @@ public final class KeysetHandle {
         .build();
   }
 
+  /**
+   * Returns an immutable list of key objects for this keyset.
+   *
+   * <p>If a status is unparseable or parsing of a key fails, there will be "null" in the
+   * corresponding entry.
+   */
+  private static List<Entry> getEntriesFromKeyset(Keyset keyset) {
+    List<Entry> result = new ArrayList<>(keyset.getKeyCount());
+    for (Keyset.Key protoKey : keyset.getKeyList()) {
+      int id = protoKey.getKeyId();
+      ProtoKeySerialization protoKeySerialization = toProtoKeySerialization(protoKey);
+      try {
+        Key key =
+            MutableSerializationRegistry.globalInstance()
+                .parseKeyWithLegacyFallback(protoKeySerialization, InsecureSecretKeyAccess.get());
+        result.add(
+            new KeysetHandle.Entry(
+                key, parseStatus(protoKey.getStatus()), id, id == keyset.getPrimaryKeyId()));
+      } catch (GeneralSecurityException e) {
+        result.add(null);
+      }
+    }
+    return Collections.unmodifiableList(result);
+  }
+
   private static ProtoKeySerialization toProtoKeySerialization(Keyset.Key protoKey) {
     int id = protoKey.getKeyId();
     @Nullable
@@ -505,21 +530,13 @@ public final class KeysetHandle {
   }
 
   private KeysetHandle.Entry entryByIndex(int i) {
-    Keyset.Key protoKey = keyset.getKey(i);
-    int id = protoKey.getKeyId();
-
-    ProtoKeySerialization protoKeySerialization = toProtoKeySerialization(protoKey);
-    try {
-      Key key =
-        MutableSerializationRegistry.globalInstance()
-            .parseKeyWithLegacyFallback(protoKeySerialization, InsecureSecretKeyAccess.get());
-      return new KeysetHandle.Entry(
-          key, parseStatus(protoKey.getStatus()), id, id == keyset.getPrimaryKeyId());
-    } catch (GeneralSecurityException e) {
+    if (entries.get(i) == null) {
       // This may happen if a keyset without status makes it here; or if a key has a parser
       // registered but parsing fails. We should reject such keysets earlier instead.
-      throw new IllegalStateException("Creating an entry failed", e);
+      throw new IllegalStateException(
+          "Keyset-Entry at position i has wrong status or key parsing failed");
     }
+    return entries.get(i);
   }
 
   /**
@@ -568,15 +585,24 @@ public final class KeysetHandle {
   }
 
   private final Keyset keyset;
+  /* Note: this should be List<@Nullable Entry>; but since we use the Nullable annotation from
+   * javax.annotation it is not possible to do this.
+   *
+   * Contains all entries; but if either parsing the status or the key failed, contains null.
+   */
+  private final List<Entry> entries;
   private final MonitoringAnnotations annotations;
 
-  private KeysetHandle(Keyset keyset) {
+  private KeysetHandle(Keyset keyset, List<Entry> entries) {
     this.keyset = keyset;
+    this.entries = entries;
     this.annotations = MonitoringAnnotations.EMPTY;
   }
 
-  private KeysetHandle(Keyset keyset, MonitoringAnnotations annotations) {
+  private KeysetHandle(
+      Keyset keyset, List<Entry> entries, MonitoringAnnotations annotations) {
     this.keyset = keyset;
+    this.entries = entries;
     this.annotations = annotations;
   }
 
@@ -586,7 +612,9 @@ public final class KeysetHandle {
    */
   static final KeysetHandle fromKeyset(Keyset keyset) throws GeneralSecurityException {
     assertEnoughKeyMaterial(keyset);
-    return new KeysetHandle(keyset);
+    List<Entry> entries = getEntriesFromKeyset(keyset);
+
+    return new KeysetHandle(keyset, entries);
   }
 
   /**
@@ -596,7 +624,8 @@ public final class KeysetHandle {
   static final KeysetHandle fromKeysetAndAnnotations(
       Keyset keyset, MonitoringAnnotations annotations) throws GeneralSecurityException {
     assertEnoughKeyMaterial(keyset);
-    return new KeysetHandle(keyset, annotations);
+    List<Entry> entries = getEntriesFromKeyset(keyset);
+    return new KeysetHandle(keyset, entries, annotations);
   }
 
   /**
@@ -771,7 +800,7 @@ public final class KeysetHandle {
       throws GeneralSecurityException, IOException {
     EncryptedKeyset encryptedKeyset = reader.readEncrypted();
     assertEnoughEncryptedKeyMaterial(encryptedKeyset);
-    return new KeysetHandle(decrypt(encryptedKeyset, masterKey, associatedData));
+    return KeysetHandle.fromKeyset(decrypt(encryptedKeyset, masterKey, associatedData));
   }
 
   /**
@@ -913,7 +942,7 @@ public final class KeysetHandle {
       keysetBuilder.addKey(key.toBuilder().setKeyData(keyData).build());
     }
     keysetBuilder.setPrimaryKeyId(keyset.getPrimaryKeyId());
-    return new KeysetHandle(keysetBuilder.build());
+    return KeysetHandle.fromKeyset(keysetBuilder.build());
   }
 
   private static KeyData createPublicKeyData(KeyData privateKeyData)
@@ -990,15 +1019,21 @@ public final class KeysetHandle {
     Util.validateKeyset(keyset);
     PrimitiveSet.Builder<B> builder = PrimitiveSet.newBuilder(inputPrimitiveClassObject);
     builder.setAnnotations(annotations);
-    for (Keyset.Key key : keyset.getKeyList()) {
-      if (key.getStatus().equals(KeyStatusType.ENABLED)) {
-        @Nullable B primitive = getLegacyPrimitiveOrNull(key, inputPrimitiveClassObject);
-        @Nullable B fullPrimitive = getFullPrimitiveOrNull(key, inputPrimitiveClassObject);
+    for (int i = 0; i < size(); ++i) {
+      Keyset.Key protoKey = keyset.getKey(i);
+      if (protoKey.getStatus().equals(KeyStatusType.ENABLED)) {
+        @Nullable B primitive = getLegacyPrimitiveOrNull(protoKey, inputPrimitiveClassObject);
+        @Nullable B fullPrimitive = null;
+        // Entries.get(i) may be null (if the status is invalid in the proto, or parsing failed.
+        if (entries.get(i) != null) {
+          fullPrimitive =
+              getFullPrimitiveOrNull(entries.get(i).getKey(), inputPrimitiveClassObject);
+        }
 
-        if (key.getKeyId() == keyset.getPrimaryKeyId()) {
-          builder.addPrimaryFullPrimitiveAndOptionalPrimitive(fullPrimitive, primitive, key);
+        if (protoKey.getKeyId() == keyset.getPrimaryKeyId()) {
+          builder.addPrimaryFullPrimitiveAndOptionalPrimitive(fullPrimitive, primitive, protoKey);
         } else {
-          builder.addFullPrimitiveAndOptionalPrimitive(fullPrimitive, primitive, key);
+          builder.addFullPrimitiveAndOptionalPrimitive(fullPrimitive, primitive, protoKey);
         }
       }
     }
@@ -1065,14 +1100,10 @@ public final class KeysetHandle {
   }
 
   @Nullable
-  private static <B> B getFullPrimitiveOrNull(Keyset.Key key, Class<B> inputPrimitiveClassObject)
+  private <B> B getFullPrimitiveOrNull(Key key, Class<B> inputPrimitiveClassObject)
       throws GeneralSecurityException {
-    ProtoKeySerialization protoKeySerialization = toProtoKeySerialization(key);
-    Key keyObject =
-        MutableSerializationRegistry.globalInstance()
-            .parseKeyWithLegacyFallback(protoKeySerialization, InsecureSecretKeyAccess.get());
     try {
-      return Registry.getFullPrimitive(keyObject, inputPrimitiveClassObject);
+      return Registry.getFullPrimitive(key, inputPrimitiveClassObject);
     } catch (GeneralSecurityException e) {
       // Ignoring because the key may not yet have a corresponding class.
       // TODO(lizatretyakova): stop ignoring when all key classes are migrated from protos.
