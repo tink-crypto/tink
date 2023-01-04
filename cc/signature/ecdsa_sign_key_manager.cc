@@ -77,6 +77,12 @@ StatusOr<EcdsaPrivateKey> EcdsaSignKeyManager::DeriveKey(
         "Deriving EC keys is not allowed in FIPS mode.");
   }
 
+  util::Status status =
+      ValidateVersion(ecdsa_key_format.version(), get_version());
+  if (!status.ok()) {
+    return status;
+  }
+
   // Extract enough random bytes from the input_stream to match the security
   // level of the EC. Note that the input_stream here must come from a PRF
   // and will not use more bytes than required by the security level of the EC.

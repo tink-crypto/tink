@@ -104,6 +104,7 @@ output_prefix_type: TINK"""
 #     curve: NIST_P384
 #     encoding: DER
 #   }
+#   version: 0
 # }
 value: "\022\006\010\004\020\003\030\002"
 output_prefix_type: TINK"""
