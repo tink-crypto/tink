@@ -209,8 +209,9 @@ public final class EcdsaProtoSerializationTest {
     com.google.crypto.tink.proto.EcdsaPublicKey protoPublicKey =
         com.google.crypto.tink.proto.EcdsaPublicKey.newBuilder()
             .setVersion(0)
-            .setX(ByteString.copyFrom(TestUtil.hexDecode(hexX)))
-            .setY(ByteString.copyFrom(TestUtil.hexDecode(hexY)))
+            // X and Y are currently serialized with an extra zero at the beginning.
+            .setX(ByteString.copyFrom(TestUtil.hexDecode("00" + hexX)))
+            .setY(ByteString.copyFrom(TestUtil.hexDecode("00" + hexY)))
             .setParams(
                 EcdsaParams.newBuilder()
                     .setHashType(HashType.SHA256)
@@ -258,8 +259,9 @@ public final class EcdsaProtoSerializationTest {
     com.google.crypto.tink.proto.EcdsaPublicKey protoPublicKey =
         com.google.crypto.tink.proto.EcdsaPublicKey.newBuilder()
             .setVersion(0)
-            .setX(ByteString.copyFrom(TestUtil.hexDecode(hexX)))
-            .setY(ByteString.copyFrom(TestUtil.hexDecode(hexY)))
+            // X and Y are currently serialized with an extra zero at the beginning.
+            .setX(ByteString.copyFrom(TestUtil.hexDecode("00" + hexX)))
+            .setY(ByteString.copyFrom(TestUtil.hexDecode("00" + hexY)))
             .setParams(
                 EcdsaParams.newBuilder()
                     .setHashType(HashType.SHA384)
@@ -285,7 +287,7 @@ public final class EcdsaProtoSerializationTest {
 
   @Test
   public void parseSerializePublicKey_reencodesNumbersInFixedLengthByteArrays() throws Exception {
-    // a valid P521 point, but not encoded with leading zeros or truncated zeros.
+    // a valid P521 point, but encoded with leading zeros or truncated zeros.
     String hexXTruncated =
         "685a48e86c79f0f0875f7bc18d25eb5fc8c0b07e5da4f4370f3a949034085433"
             + "4b1e1b87fa395464c60626124a4e70d0f785601d37c09870ebf176666877a2046d";
@@ -320,12 +322,15 @@ public final class EcdsaProtoSerializationTest {
         com.google.crypto.tink.proto.EcdsaPublicKey.parseFrom(
             serialized.getValue(), ExtensionRegistryLite.getEmptyRegistry());
 
-    // We expect X and Y to always be encoded in 66 bytes.
+    // X and Y are currently serialized with an extra zero at the beginning. So we expect X and Y to
+    // always be encoded in 67 bytes.
     String expectedHexX =
-        "00685a48e86c79f0f0875f7bc18d25eb5fc8c0b07e5da4f4370f3a949034085433"
+        "00"
+            + "00685a48e86c79f0f0875f7bc18d25eb5fc8c0b07e5da4f4370f3a949034085433"
             + "4b1e1b87fa395464c60626124a4e70d0f785601d37c09870ebf176666877a2046d";
     String expectedHexY =
-        "01ba52c56fc8776d9e8f5db4f0cc27636d0b741bbe05400697942e80b739884a83"
+        "00"
+            + "01ba52c56fc8776d9e8f5db4f0cc27636d0b741bbe05400697942e80b739884a83"
             + "bde99e0f6716939e632bc8986fa18dccd443a348b6c3e522497955a4f3c302f676";
     assertThat(protoPublicKeyFromSerialized.getX())
         .isEqualTo(ByteString.copyFrom(TestUtil.hexDecode(expectedHexX)));
@@ -334,9 +339,40 @@ public final class EcdsaProtoSerializationTest {
   }
 
   @Test
+  public void serializedProtoCanBeParsedUsingBigIntegerTwoComplementEncoding() throws Exception {
+    String hexX = "700c48f77f56584c5cc632ca65640db91b6bacce3a4df6b42ce7cc838833d287";
+    String hexY = "db71e509e3fd9b060ddb20ba5c51dcc5948d46fbf640dfe0441782cab85fa4ac";
+
+    EcdsaPublicKey key =
+        EcdsaPublicKey.builder()
+            .setParameters(
+                EcdsaParameters.builder()
+                    .setSignatureEncoding(EcdsaParameters.SignatureEncoding.IEEE_P1363)
+                    .setCurveType(EcdsaParameters.CurveType.NIST_P256)
+                    .setHashType(EcdsaParameters.HashType.SHA256)
+                    .setVariant(EcdsaParameters.Variant.TINK)
+                    .build())
+            .setPublicPoint(new ECPoint(new BigInteger(hexX, 16), new BigInteger(hexY, 16)))
+            .setIdRequirement(123)
+            .build();
+
+    ProtoKeySerialization serialized =
+        registry.serializeKey(key, ProtoKeySerialization.class, /* access= */ null);
+
+    com.google.crypto.tink.proto.EcdsaPublicKey parsedProtoEcdsaPublicKey =
+        com.google.crypto.tink.proto.EcdsaPublicKey.parseFrom(
+            serialized.getValue(), ExtensionRegistryLite.getEmptyRegistry());
+    // parse x and y using BigIntegers two complement encoding.
+    assertThat(new BigInteger(parsedProtoEcdsaPublicKey.getX().toByteArray()))
+        .isEqualTo(key.getPublicPoint().getAffineX());
+    assertThat(new BigInteger(parsedProtoEcdsaPublicKey.getY().toByteArray()))
+        .isEqualTo(key.getPublicPoint().getAffineY());
+  }
+
+  @Test
   public void serializeParsePrivateKey_p256_tink_equal() throws Exception {
     // a valid P256 private key
-    // All values are encoded as 32 bytes, leading zeros are not truncated.
+    // All values are encoded as 32 bytes.
     String hexX = "60FED4BA255A9D31C961EB74C6356D68C049B8923B61FA6CE669622E60F29FB6";
     String hexY = "7903FE1008B8BC99A41AE9E95628BC64F2F1B20C2D7E9F5177A3C294D4462299";
     String hexPrivateValue = "C9AFA9D845BA75166B5C215767B1D6934E50C3DB36E89B127B8A622B120F6721";
@@ -364,8 +400,9 @@ public final class EcdsaProtoSerializationTest {
     com.google.crypto.tink.proto.EcdsaPublicKey protoPublicKey =
         com.google.crypto.tink.proto.EcdsaPublicKey.newBuilder()
             .setVersion(0)
-            .setX(ByteString.copyFrom(TestUtil.hexDecode(hexX)))
-            .setY(ByteString.copyFrom(TestUtil.hexDecode(hexY)))
+            // X and Y are currently serialized with an extra zero at the beginning.
+            .setX(ByteString.copyFrom(TestUtil.hexDecode("00" + hexX)))
+            .setY(ByteString.copyFrom(TestUtil.hexDecode("00" + hexY)))
             .setParams(
                 EcdsaParams.newBuilder()
                     .setHashType(HashType.SHA256)
@@ -376,7 +413,8 @@ public final class EcdsaProtoSerializationTest {
         com.google.crypto.tink.proto.EcdsaPrivateKey.newBuilder()
             .setVersion(0)
             .setPublicKey(protoPublicKey)
-            .setKeyValue(ByteString.copyFrom(TestUtil.hexDecode(hexPrivateValue)))
+            // privateValue is currently serialized with an extra zero at the beginning.
+            .setKeyValue(ByteString.copyFrom(TestUtil.hexDecode("00" + hexPrivateValue)))
             .build();
     ProtoKeySerialization serialization =
         ProtoKeySerialization.create(
