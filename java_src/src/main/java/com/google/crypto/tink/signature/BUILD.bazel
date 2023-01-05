@@ -83,7 +83,6 @@ java_library(
     name = "ecdsa_sign_key_manager",
     srcs = ["EcdsaSignKeyManager.java"],
     deps = [
-        ":ecdsa_proto_serialization",
         ":ecdsa_verify_key_manager",
         "//proto:common_java_proto",
         "//proto:ecdsa_java_proto",
@@ -455,7 +454,6 @@ android_library(
     name = "ecdsa_sign_key_manager-android",
     srcs = ["EcdsaSignKeyManager.java"],
     deps = [
-        ":ecdsa_proto_serialization-android",
         ":ecdsa_verify_key_manager-android",
         "//proto:common_java_proto_lite",
         "//proto:ecdsa_java_proto_lite",

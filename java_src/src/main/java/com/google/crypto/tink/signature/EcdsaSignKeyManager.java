@@ -259,7 +259,6 @@ public final class EcdsaSignKeyManager
   public static void registerPair(boolean newKeyAllowed) throws GeneralSecurityException {
     Registry.registerAsymmetricKeyManagers(
         new EcdsaSignKeyManager(), new EcdsaVerifyKeyManager(), newKeyAllowed);
-    EcdsaProtoSerialization.register();
   }
 
   /**
