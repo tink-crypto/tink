@@ -17,11 +17,16 @@
 package signature_test
 
 import (
+	"bytes"
+	"encoding/hex"
 	"fmt"
 	"testing"
 
+	"github.com/google/go-cmp/cmp"
+	"golang.org/x/crypto/ed25519"
 	"google.golang.org/protobuf/proto"
 	"github.com/google/tink/go/core/registry"
+	"github.com/google/tink/go/internal/internalregistry"
 	"github.com/google/tink/go/signature/subtle"
 	"github.com/google/tink/go/subtle/random"
 	"github.com/google/tink/go/testutil"
@@ -153,6 +158,145 @@ func TestED25519PublicKeyDataWithInvalidInput(t *testing.T) {
 	// invalid with a single byte
 	if _, err := pkm.PublicKeyData([]byte{42}); err == nil {
 		t.Errorf("expect an error when input is an empty slice")
+	}
+}
+
+func TestED25519KeyMaterialType(t *testing.T) {
+	km, err := registry.GetKeyManager(testutil.ED25519SignerTypeURL)
+	if err != nil {
+		t.Fatalf("registry.GetKeyManager(%q) err = %v, want nil", testutil.ED25519SignerTypeURL, err)
+	}
+	keyManager, ok := km.(internalregistry.DerivableKeyManager)
+	if !ok {
+		t.Fatalf("key manager is not DerivableKeyManager")
+	}
+	if got, want := keyManager.KeyMaterialType(), tinkpb.KeyData_ASYMMETRIC_PRIVATE; got != want {
+		t.Errorf("KeyMaterialType() = %v, want %v", got, want)
+	}
+}
+
+func TestED25519DeriveKey(t *testing.T) {
+	km, err := registry.GetKeyManager(testutil.ED25519SignerTypeURL)
+	if err != nil {
+		t.Fatalf("registry.GetKeyManager(%q) err = %v, want nil", testutil.ED25519SignerTypeURL, err)
+	}
+	keyManager, ok := km.(internalregistry.DerivableKeyManager)
+	if !ok {
+		t.Fatalf("key manager is not DerivableKeyManager")
+	}
+	keyFormat, err := proto.Marshal(&ed25519pb.Ed25519KeyFormat{Version: testutil.ED25519SignerKeyVersion})
+	if err != nil {
+		t.Fatalf("proto.Marshal() err = %v, want nil", err)
+	}
+	for _, test := range []struct {
+		name      string
+		keyFormat []byte
+	}{
+		{
+			name:      "nil",
+			keyFormat: nil,
+		},
+		{
+			name:      "empty",
+			keyFormat: []byte{},
+		},
+		{
+			name:      "specified",
+			keyFormat: keyFormat,
+		},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			rand := random.GetRandomBytes(ed25519.SeedSize)
+			buf := &bytes.Buffer{}
+			if p, _ := buf.Write(rand); p != len(rand) {
+				t.Fatalf("incomplete Write() = %d bytes, want %d bytes", p, len(rand))
+			}
+			k, err := keyManager.DeriveKey(test.keyFormat, buf)
+			if err != nil {
+				t.Fatalf("keyManager.DeriveKey() err = %v, want nil", err)
+			}
+			key := k.(*ed25519pb.Ed25519PrivateKey)
+			if got, want := len(key.KeyValue), ed25519.SeedSize; got != want {
+				t.Errorf("private key length = %d, want %d", got, want)
+			}
+			if diff := cmp.Diff(key.KeyValue, rand[:ed25519.SeedSize]); diff != "" {
+				t.Errorf("incorrect derived private key: diff = %v", diff)
+			}
+			if got, want := len(key.PublicKey.KeyValue), ed25519.PublicKeySize; got != want {
+				t.Errorf("public key length = %d, want %d", got, want)
+			}
+			if diff := cmp.Diff(key.PublicKey.KeyValue, []byte(ed25519.NewKeyFromSeed(rand))[32:]); diff != "" {
+				t.Errorf("incorrect derived public key: diff = %v", diff)
+			}
+		})
+	}
+}
+
+func TestED25519DeriveKeyFailsWithInvalidKeyFormats(t *testing.T) {
+	km, err := registry.GetKeyManager(testutil.ED25519SignerTypeURL)
+	if err != nil {
+		t.Fatalf("registry.GetKeyManager(%q) err = %v, want nil", testutil.ED25519SignerTypeURL, err)
+	}
+	keyManager, ok := km.(internalregistry.DerivableKeyManager)
+	if !ok {
+		t.Fatalf("key manager is not DerivableKeyManager")
+	}
+	invalidVersion, err := proto.Marshal(&ed25519pb.Ed25519KeyFormat{Version: 10})
+	if err != nil {
+		t.Fatalf("proto.Marshal() err = %v, want nil", err)
+	}
+	// Proto messages start with a VarInt, which always ends with a byte with the
+	// MSB unset, so 0x80 is invalid.
+	invalidSerialization, err := hex.DecodeString("80")
+	if err != nil {
+		t.Errorf("hex.DecodeString() err = %v, want nil", err)
+	}
+	for _, test := range []struct {
+		name      string
+		keyFormat []byte
+	}{
+		{
+			name:      "invalid version",
+			keyFormat: invalidVersion,
+		},
+		{
+			name:      "invalid serialization",
+			keyFormat: invalidSerialization,
+		},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			buf := bytes.NewBuffer(random.GetRandomBytes(ed25519.SeedSize))
+			if _, err := keyManager.DeriveKey(test.keyFormat, buf); err == nil {
+				t.Errorf("keyManager.DeriveKey() err = nil, want non-nil")
+			}
+		})
+	}
+}
+
+func TestED25519DeriveKeyFailsWithInsufficientRandomness(t *testing.T) {
+	km, err := registry.GetKeyManager(testutil.ED25519SignerTypeURL)
+	if err != nil {
+		t.Fatalf("registry.GetKeyManager(%q) err = %v, want nil", testutil.ED25519SignerTypeURL, err)
+	}
+	keyManager, ok := km.(internalregistry.DerivableKeyManager)
+	if !ok {
+		t.Fatalf("key manager is not DerivableKeyManager")
+	}
+	keyFormat, err := proto.Marshal(&ed25519pb.Ed25519KeyFormat{Version: 0})
+	if err != nil {
+		t.Fatalf("proto.Marshal() err = %v, want nil", err)
+	}
+	{
+		buf := bytes.NewBuffer(random.GetRandomBytes(ed25519.SeedSize))
+		if _, err := keyManager.DeriveKey(keyFormat, buf); err != nil {
+			t.Errorf("keyManager.DeriveKey() err = %v, want nil", err)
+		}
+	}
+	{
+		insufficientBuf := bytes.NewBuffer(random.GetRandomBytes(ed25519.SeedSize - 1))
+		if _, err := keyManager.DeriveKey(keyFormat, insufficientBuf); err == nil {
+			t.Errorf("keyManager.DeriveKey() err = nil, want non-nil")
+		}
 	}
 }
 
