@@ -37,7 +37,7 @@ final class ChunkedHmacVerification implements ChunkedMacVerification {
   }
 
   @Override
-  public void update(final ByteBuffer data) {
+  public void update(ByteBuffer data) {
     // No need to check state since the ChunkedHmacComputation already does this.
     hmacComputation.update(data);
   }

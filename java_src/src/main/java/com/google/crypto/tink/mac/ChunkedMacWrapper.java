@@ -49,7 +49,7 @@ public class ChunkedMacWrapper implements PrimitiveWrapper<ChunkedMac, ChunkedMa
     }
 
     @Override
-    public void update(final ByteBuffer data) throws GeneralSecurityException {
+    public void update(ByteBuffer data) throws GeneralSecurityException {
       // We will need to be `reset()`ting this buffer due to potentially multiple reads from the
       // same data span in order to be consistent with the behaviour of ChunkedMacComputation
       // wrapper. That is, after the execution, user's buffer's `mark` is left unchanged, and its

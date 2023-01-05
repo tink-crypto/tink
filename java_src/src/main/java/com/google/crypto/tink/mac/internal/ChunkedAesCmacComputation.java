@@ -92,7 +92,7 @@ final class ChunkedAesCmacComputation implements ChunkedMacComputation {
   }
 
   @Override
-  public void update(final ByteBuffer data) throws GeneralSecurityException {
+  public void update(ByteBuffer data) throws GeneralSecurityException {
     if (finalized) {
       throw new IllegalStateException(
           "Can not update after computing the MAC tag. Please create a new object.");
