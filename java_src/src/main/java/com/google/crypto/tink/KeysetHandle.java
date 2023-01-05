@@ -1077,17 +1077,6 @@ public final class KeysetHandle {
       throws GeneralSecurityException {
     try {
       return Registry.getPrimitive(key.getKeyData(), inputPrimitiveClassObject);
-    } catch (UnsupportedOperationException e) {
-      if (e.getMessage()
-          .contains(
-              "should not be created via a key manager. Use the corresponding *Registry"
-                  + " instead.")) {
-        // Ignoring. This error means that this primitive should be handled through the
-        // PrimitiveRegistry.
-        return null;
-      }
-      // Otherwise the error is likely legit. Do not swallow.
-      throw e;
     } catch (GeneralSecurityException e) {
       if (e.getMessage().contains("No key manager found for key type ")
           || e.getMessage().contains(" not supported by key manager of type ")) {

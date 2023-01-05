@@ -21,7 +21,10 @@ import com.google.crypto.tink.Mac;
 import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.config.internal.TinkFipsUtil;
 import com.google.crypto.tink.internal.KeyTypeManager;
+import com.google.crypto.tink.internal.MutablePrimitiveRegistry;
+import com.google.crypto.tink.internal.PrimitiveConstructor;
 import com.google.crypto.tink.internal.PrimitiveFactory;
+import com.google.crypto.tink.mac.internal.ChunkedHmacImpl;
 import com.google.crypto.tink.proto.HashType;
 import com.google.crypto.tink.proto.HmacKey;
 import com.google.crypto.tink.proto.HmacKeyFormat;
@@ -80,6 +83,13 @@ public final class HmacKeyManager extends KeyTypeManager<HmacKey> {
 
   /** Minimum tag size in bytes. This provides minimum 80-bit security strength. */
   private static final int MIN_TAG_SIZE_IN_BYTES = 10;
+
+  private static final PrimitiveConstructor<com.google.crypto.tink.mac.HmacKey, ChunkedMac>
+      CHUNKED_MAC_PRIMITIVE_CONSTRUCTOR =
+          PrimitiveConstructor.create(
+              ChunkedHmacImpl::new,
+              com.google.crypto.tink.mac.HmacKey.class,
+              ChunkedMac.class);
 
   @Override
   public String getKeyType() {
@@ -233,6 +243,8 @@ public final class HmacKeyManager extends KeyTypeManager<HmacKey> {
   public static void register(boolean newKeyAllowed) throws GeneralSecurityException {
     Registry.registerKeyManager(new HmacKeyManager(), newKeyAllowed);
     HmacProtoSerialization.register();
+    MutablePrimitiveRegistry.globalInstance()
+        .registerPrimitiveConstructor(CHUNKED_MAC_PRIMITIVE_CONSTRUCTOR);
   }
 
   /**

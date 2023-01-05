@@ -20,7 +20,10 @@ import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.Mac;
 import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.internal.KeyTypeManager;
+import com.google.crypto.tink.internal.MutablePrimitiveRegistry;
+import com.google.crypto.tink.internal.PrimitiveConstructor;
 import com.google.crypto.tink.internal.PrimitiveFactory;
+import com.google.crypto.tink.mac.internal.ChunkedAesCmacImpl;
 import com.google.crypto.tink.proto.AesCmacKey;
 import com.google.crypto.tink.proto.AesCmacKeyFormat;
 import com.google.crypto.tink.proto.AesCmacParams;
@@ -58,6 +61,12 @@ public final class AesCmacKeyManager extends KeyTypeManager<AesCmacKey> {
   private static final int KEY_SIZE_IN_BYTES = 32;
   private static final int MIN_TAG_SIZE_IN_BYTES = 10;
   private static final int MAX_TAG_SIZE_IN_BYTES = 16;
+  private static final PrimitiveConstructor<com.google.crypto.tink.mac.AesCmacKey, ChunkedMac>
+      CHUNKED_MAC_PRIMITIVE_CONSTRUCTOR =
+          PrimitiveConstructor.create(
+              ChunkedAesCmacImpl::new,
+              com.google.crypto.tink.mac.AesCmacKey.class,
+              ChunkedMac.class);
 
   @Override
   public String getKeyType() {
@@ -161,6 +170,8 @@ public final class AesCmacKeyManager extends KeyTypeManager<AesCmacKey> {
   public static void register(boolean newKeyAllowed) throws GeneralSecurityException {
     Registry.registerKeyManager(new AesCmacKeyManager(), newKeyAllowed);
     AesCmacProtoSerialization.register();
+    MutablePrimitiveRegistry.globalInstance()
+        .registerPrimitiveConstructor(CHUNKED_MAC_PRIMITIVE_CONSTRUCTOR);
   }
 
   /**
