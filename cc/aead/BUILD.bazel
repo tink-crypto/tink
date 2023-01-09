@@ -589,6 +589,7 @@ cc_test(
         ":aead_key_templates",
         ":kms_envelope_aead",
         "//:aead",
+        "//:keyset_handle",
         "//:registry",
         "//mac:mac_key_templates",
         "//proto:aes_gcm_cc_proto",
@@ -599,6 +600,7 @@ cc_test(
         "@com_google_absl//absl/base:endian",
         "@com_google_absl//absl/memory",
         "@com_google_absl//absl/status",
+        "@com_google_absl//absl/strings",
         "@com_google_googletest//:gtest_main",
     ],
 )
