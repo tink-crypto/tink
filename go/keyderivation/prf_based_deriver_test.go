@@ -27,6 +27,7 @@ import (
 	"github.com/google/tink/go/core/registry"
 	"github.com/google/tink/go/daead"
 	"github.com/google/tink/go/insecurecleartextkeyset"
+	"github.com/google/tink/go/mac"
 	"github.com/google/tink/go/prf"
 	"github.com/google/tink/go/signature"
 	"github.com/google/tink/go/streamingaead"
@@ -42,7 +43,7 @@ func TestPRFBasedDeriver(t *testing.T) {
 		template *tinkpb.KeyTemplate
 	}{
 		{
-			name:     "SHA256",
+			name:     "HKDF_SHA256",
 			template: prf.HKDFSHA256PRFKeyTemplate(),
 		},
 	}
@@ -71,6 +72,22 @@ func TestPRFBasedDeriver(t *testing.T) {
 		{
 			name:     "AES256_SIV",
 			template: daead.AESSIVKeyTemplate(),
+		},
+		{
+			name:     "HMAC_SHA256_128BITTAG",
+			template: mac.HMACSHA256Tag128KeyTemplate(),
+		},
+		{
+			name:     "HMAC_SHA256_256BITTAG",
+			template: mac.HMACSHA256Tag256KeyTemplate(),
+		},
+		{
+			name:     "HMAC_SHA512_256BITTAG",
+			template: mac.HMACSHA512Tag256KeyTemplate(),
+		},
+		{
+			name:     "HMAC_SHA512_512BITTAG",
+			template: mac.HMACSHA512Tag512KeyTemplate(),
 		},
 		{
 			name:     "HKDF_SHA256",

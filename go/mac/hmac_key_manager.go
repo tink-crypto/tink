@@ -19,6 +19,7 @@ package mac
 import (
 	"errors"
 	"fmt"
+	"io"
 
 	"google.golang.org/protobuf/proto"
 	"github.com/google/tink/go/keyset"
@@ -95,7 +96,7 @@ func (km *hmacKeyManager) NewKeyData(serializedKeyFormat []byte) (*tinkpb.KeyDat
 	return &tinkpb.KeyData{
 		TypeUrl:         hmacTypeURL,
 		Value:           serializedKey,
-		KeyMaterialType: tinkpb.KeyData_SYMMETRIC,
+		KeyMaterialType: km.KeyMaterialType(),
 	}, nil
 }
 
@@ -107,6 +108,38 @@ func (km *hmacKeyManager) DoesSupport(typeURL string) bool {
 // TypeURL returns the type URL of keys managed by this KeyManager.
 func (km *hmacKeyManager) TypeURL() string {
 	return hmacTypeURL
+}
+
+// KeyMaterialType returns the key material type of this key manager.
+func (km *hmacKeyManager) KeyMaterialType() tinkpb.KeyData_KeyMaterialType {
+	return tinkpb.KeyData_SYMMETRIC
+}
+
+// DeriveKey derives a new key from serializedKeyFormat and pseudorandomness.
+func (km *hmacKeyManager) DeriveKey(serializedKeyFormat []byte, pseudorandomness io.Reader) (proto.Message, error) {
+	if len(serializedKeyFormat) == 0 {
+		return nil, errInvalidHMACKeyFormat
+	}
+	keyFormat := new(hmacpb.HmacKeyFormat)
+	if err := proto.Unmarshal(serializedKeyFormat, keyFormat); err != nil {
+		return nil, errInvalidHMACKeyFormat
+	}
+	if err := km.validateKeyFormat(keyFormat); err != nil {
+		return nil, fmt.Errorf("hmac_key_manager: invalid key format: %v", err)
+	}
+	if err := keyset.ValidateKeyVersion(keyFormat.GetVersion(), hmacKeyVersion); err != nil {
+		return nil, fmt.Errorf("hmac_key_manager: invalid key version: %s", err)
+	}
+
+	keyValue := make([]byte, keyFormat.GetKeySize())
+	if _, err := io.ReadFull(pseudorandomness, keyValue); err != nil {
+		return nil, fmt.Errorf("hmac_key_manager: not enough pseudorandomness given")
+	}
+	return &hmacpb.HmacKey{
+		Version:  hmacKeyVersion,
+		Params:   keyFormat.Params,
+		KeyValue: keyValue,
+	}, nil
 }
 
 // validateKey validates the given HMACKey. It only validates the version of the
