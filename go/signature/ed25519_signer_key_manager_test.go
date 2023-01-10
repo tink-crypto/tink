@@ -193,10 +193,12 @@ func TestED25519DeriveKey(t *testing.T) {
 		keyFormat []byte
 	}{
 		{
+			// nil unmarshals to an empty proto, which implies version = 0.
 			name:      "nil",
 			keyFormat: nil,
 		},
 		{
+			// An empty proto implies version = 0.
 			name:      "empty",
 			keyFormat: []byte{},
 		},

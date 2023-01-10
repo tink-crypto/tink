@@ -348,6 +348,34 @@ func TestAESGCMDeriveKeyFailsWithMalformedSerializedKeyFormat(t *testing.T) {
 	}
 }
 
+func TestAESGCMDeriveKeyFailsWithInsufficientRandomness(t *testing.T) {
+	km, err := registry.GetKeyManager(testutil.AESGCMTypeURL)
+	if err != nil {
+		t.Fatalf("registry.GetKeyManager(%q) err = %v, want nil", testutil.AESGCMTypeURL, err)
+	}
+	keyManager, ok := km.(internalregistry.DerivableKeyManager)
+	if !ok {
+		t.Fatalf("key manager is not DerivableKeyManager")
+	}
+	var keySize uint32 = 16
+	keyFormat, err := proto.Marshal(testutil.NewAESGCMKeyFormat(keySize))
+	if err != nil {
+		t.Fatalf("proto.Marshal() err = %v, want nil", err)
+	}
+	{
+		buf := bytes.NewBuffer(random.GetRandomBytes(keySize))
+		if _, err := keyManager.DeriveKey(keyFormat, buf); err != nil {
+			t.Errorf("keyManager.DeriveKey() err = %v, want nil", err)
+		}
+	}
+	{
+		insufficientBuf := bytes.NewBuffer(random.GetRandomBytes(keySize - 1))
+		if _, err := keyManager.DeriveKey(keyFormat, insufficientBuf); err == nil {
+			t.Errorf("keyManager.DeriveKey() err = nil, want non-nil")
+		}
+	}
+}
+
 func genInvalidAESGCMKeys() []proto.Message {
 	return []proto.Message{
 		// not a AESGCMKey
