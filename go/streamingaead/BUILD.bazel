@@ -20,6 +20,7 @@ go_library(
         "//aead/subtle",
         "//core/primitiveset",
         "//core/registry",
+        "//internal/internalregistry",
         "//internal/tinkerror",
         "//keyset",
         "//mac/subtle",
@@ -48,6 +49,7 @@ go_test(
     embed = [":streamingaead"],
     deps = [
         "//core/registry",
+        "//internal/internalregistry",
         "//keyset",
         "//mac",
         "//proto/aes_ctr_hmac_streaming_go_proto",
@@ -59,6 +61,7 @@ go_test(
         "//testkeyset",
         "//testutil",
         "//tink",
+        "@com_github_google_go_cmp//cmp",
         "@org_golang_google_protobuf//proto",
     ],
 )

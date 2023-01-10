@@ -19,6 +19,7 @@ package streamingaead
 import (
 	"errors"
 	"fmt"
+	"io"
 
 	"google.golang.org/protobuf/proto"
 	subtleaead "github.com/google/tink/go/aead/subtle"
@@ -103,7 +104,7 @@ func (km *aesGCMHKDFKeyManager) NewKeyData(serializedKeyFormat []byte) (*tinkpb.
 	return &tinkpb.KeyData{
 		TypeUrl:         km.TypeURL(),
 		Value:           serializedKey,
-		KeyMaterialType: tinkpb.KeyData_SYMMETRIC,
+		KeyMaterialType: km.KeyMaterialType(),
 	}, nil
 }
 
@@ -117,10 +118,41 @@ func (km *aesGCMHKDFKeyManager) TypeURL() string {
 	return aesGCMHKDFTypeURL
 }
 
+// KeyMaterialType returns the key material type of this key manager.
+func (km *aesGCMHKDFKeyManager) KeyMaterialType() tinkpb.KeyData_KeyMaterialType {
+	return tinkpb.KeyData_SYMMETRIC
+}
+
+// DeriveKey derives a new key from serializedKeyFormat and pseudorandomness.
+func (km *aesGCMHKDFKeyManager) DeriveKey(serializedKeyFormat []byte, pseudorandomness io.Reader) (proto.Message, error) {
+	if len(serializedKeyFormat) == 0 {
+		return nil, errInvalidAESGCMHKDFKeyFormat
+	}
+	keyFormat := &ghpb.AesGcmHkdfStreamingKeyFormat{}
+	if err := proto.Unmarshal(serializedKeyFormat, keyFormat); err != nil {
+		return nil, errInvalidAESGCMHKDFKeyFormat
+	}
+	if err := km.validateKeyFormat(keyFormat); err != nil {
+		return nil, fmt.Errorf("aes_gcm_hkdf_key_manager: invalid key format: %v", err)
+	}
+	if err := keyset.ValidateKeyVersion(keyFormat.GetVersion(), aesGCMHKDFKeyVersion); err != nil {
+		return nil, fmt.Errorf("aes_gcm_hkdf_key_manager: invalid key version: %s", err)
+	}
+
+	keyValue := make([]byte, keyFormat.GetKeySize())
+	if _, err := io.ReadFull(pseudorandomness, keyValue); err != nil {
+		return nil, fmt.Errorf("aes_gcm_hkdf_key_manager: not enough pseudorandomness given")
+	}
+	return &ghpb.AesGcmHkdfStreamingKey{
+		Version:  aesGCMHKDFKeyVersion,
+		KeyValue: keyValue,
+		Params:   keyFormat.Params,
+	}, nil
+}
+
 // validateKey validates the given AESGCMHKDFKey.
 func (km *aesGCMHKDFKeyManager) validateKey(key *ghpb.AesGcmHkdfStreamingKey) error {
-	err := keyset.ValidateKeyVersion(key.Version, aesGCMHKDFKeyVersion)
-	if err != nil {
+	if err := keyset.ValidateKeyVersion(key.Version, aesGCMHKDFKeyVersion); err != nil {
 		return fmt.Errorf("aes_gcm_hkdf_key_manager: %s", err)
 	}
 	keySize := uint32(len(key.KeyValue))
