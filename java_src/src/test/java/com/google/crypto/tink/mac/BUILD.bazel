@@ -290,3 +290,27 @@ java_test(
         "@maven//:junit_junit",
     ],
 )
+
+java_test(
+    name = "ChunkedMacTest",
+    size = "small",
+    srcs = ["ChunkedMacTest.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink:key",
+        "//src/main/java/com/google/crypto/tink:mac",
+        "//src/main/java/com/google/crypto/tink:registry_cluster",
+        "//src/main/java/com/google/crypto/tink/mac:aes_cmac_key",
+        "//src/main/java/com/google/crypto/tink/mac:aes_cmac_parameters",
+        "//src/main/java/com/google/crypto/tink/mac:aes_cmac_proto_serialization",
+        "//src/main/java/com/google/crypto/tink/mac:chunked_mac",
+        "//src/main/java/com/google/crypto/tink/mac:chunked_mac_computation",
+        "//src/main/java/com/google/crypto/tink/mac:chunked_mac_verification",
+        "//src/main/java/com/google/crypto/tink/mac:chunked_mac_wrapper",
+        "//src/main/java/com/google/crypto/tink/mac:hmac_key",
+        "//src/main/java/com/google/crypto/tink/mac:hmac_parameters",
+        "//src/main/java/com/google/crypto/tink/mac:hmac_proto_serialization",
+        "//src/main/java/com/google/crypto/tink/mac:mac_config",
+        "//src/main/java/com/google/crypto/tink/util:secret_bytes",
+        "@maven//:junit_junit",
+    ],
+)
