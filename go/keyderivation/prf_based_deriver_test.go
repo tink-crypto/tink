@@ -44,29 +44,35 @@ func TestPRFBasedDeriver(t *testing.T) {
 			template: prf.HKDFSHA256PRFKeyTemplate(),
 		},
 	}
+	// Derivation names match KEY_TEMPLATE_NAMES in
+	// https://github.com/google/tink/blob/cd96c47ced3f72199832573cdccf18719dc7c73b/testing/cross_language/util/utilities.py.
 	derivations := []struct {
 		name     string
 		template *tinkpb.KeyTemplate
 	}{
 		{
-			name:     "AES128GCM",
+			name:     "AES128_GCM",
 			template: aead.AES128GCMKeyTemplate(),
 		},
 		{
-			name:     "AES256GCM",
+			name:     "AES256_GCM",
 			template: aead.AES256GCMKeyTemplate(),
 		},
 		{
-			name:     "AES256GCMNoPrefix",
+			name:     "AES256_GCM_RAW",
 			template: aead.AES256GCMNoPrefixKeyTemplate(),
+		},
+		{
+			name:     "XCHACHA20_POLY1305",
+			template: aead.XChaCha20Poly1305KeyTemplate(),
+		},
+		{
+			name:     "HKDF_SHA256",
+			template: prf.HKDFSHA256PRFKeyTemplate(),
 		},
 		{
 			name:     "ED25519",
 			template: signature.ED25519KeyTemplate(),
-		},
-		{
-			name:     "HKDFSHA256PRF",
-			template: prf.HKDFSHA256PRFKeyTemplate(),
 		},
 	}
 	salts := [][]byte{nil, []byte("salt")}
@@ -98,7 +104,7 @@ func TestPRFBasedDeriver(t *testing.T) {
 	}
 }
 
-func TestPRFBasedDeriverWithHKDFRFCVector(t *testing.T) {
+func TestPRFBasedDeriverWithHKDFRFCVectorForAESGCM(t *testing.T) {
 	// This is the only HKDF vector that uses an accepted hash function and has
 	// key size >= 32-bytes.
 	// https://www.rfc-editor.org/rfc/rfc5869#appendix-A.2
@@ -157,15 +163,15 @@ func TestPRFBasedDeriverWithHKDFRFCVector(t *testing.T) {
 		derivedKeyTemplate *tinkpb.KeyTemplate
 	}{
 		{
-			name:               "AES128GCM",
+			name:               "AES128_GCM",
 			derivedKeyTemplate: aead.AES128GCMKeyTemplate(),
 		},
 		{
-			name:               "AES256GCM",
+			name:               "AES256_GCM",
 			derivedKeyTemplate: aead.AES256GCMKeyTemplate(),
 		},
 		{
-			name:               "AES256GCMNoPrefix",
+			name:               "AES256_GCM_RAW",
 			derivedKeyTemplate: aead.AES256GCMNoPrefixKeyTemplate(),
 		},
 	} {

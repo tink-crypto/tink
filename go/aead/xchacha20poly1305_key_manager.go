@@ -18,6 +18,7 @@ package aead
 
 import (
 	"fmt"
+	"io"
 
 	"golang.org/x/crypto/chacha20poly1305"
 	"google.golang.org/protobuf/proto"
@@ -27,7 +28,7 @@ import (
 	"github.com/google/tink/go/subtle/random"
 
 	tpb "github.com/google/tink/go/proto/tink_go_proto"
-	xcppb "github.com/google/tink/go/proto/xchacha20_poly1305_go_proto"
+	xpb "github.com/google/tink/go/proto/xchacha20_poly1305_go_proto"
 )
 
 const (
@@ -35,7 +36,10 @@ const (
 	xChaCha20Poly1305TypeURL    = "type.googleapis.com/google.crypto.tink.XChaCha20Poly1305Key"
 )
 
-var errInvalidXChaCha20Poly1305Key = fmt.Errorf("xchacha20poly1305_key_manager: invalid key")
+var (
+	errInvalidXChaCha20Poly1305Key       = fmt.Errorf("xchacha20poly1305_key_manager: invalid key")
+	errInvalidXChaCha20Poly1305KeyFormat = fmt.Errorf("xchacha20poly1305_key_manager: invalid key format")
+)
 
 // xChaCha20Poly1305KeyManager generates XChaCha20Poly1305Key keys and produces
 // instances of XChaCha20Poly1305.
@@ -50,7 +54,7 @@ func (km *xChaCha20Poly1305KeyManager) Primitive(serializedKey []byte) (interfac
 	if len(serializedKey) == 0 {
 		return nil, errInvalidXChaCha20Poly1305Key
 	}
-	key := new(xcppb.XChaCha20Poly1305Key)
+	key := new(xpb.XChaCha20Poly1305Key)
 	if err := proto.Unmarshal(serializedKey, key); err != nil {
 		return nil, errInvalidXChaCha20Poly1305Key
 	}
@@ -67,7 +71,7 @@ func (km *xChaCha20Poly1305KeyManager) Primitive(serializedKey []byte) (interfac
 // NewKey generates a new XChaCha20Poly1305Key. It ignores serializedKeyFormat
 // because the key size and other params are fixed.
 func (km *xChaCha20Poly1305KeyManager) NewKey(serializedKeyFormat []byte) (proto.Message, error) {
-	return &xcppb.XChaCha20Poly1305Key{
+	return &xpb.XChaCha20Poly1305Key{
 		Version:  xChaCha20Poly1305KeyVersion,
 		KeyValue: random.GetRandomBytes(chacha20poly1305.KeySize),
 	}, nil
@@ -77,7 +81,7 @@ func (km *xChaCha20Poly1305KeyManager) NewKey(serializedKeyFormat []byte) (proto
 // the key size and other params are fixed. This should be used solely by the
 // key management API.
 func (km *xChaCha20Poly1305KeyManager) NewKeyData(serializedKeyFormat []byte) (*tpb.KeyData, error) {
-	key := &xcppb.XChaCha20Poly1305Key{
+	key := &xpb.XChaCha20Poly1305Key{
 		Version:  xChaCha20Poly1305KeyVersion,
 		KeyValue: random.GetRandomBytes(chacha20poly1305.KeySize),
 	}
@@ -88,7 +92,7 @@ func (km *xChaCha20Poly1305KeyManager) NewKeyData(serializedKeyFormat []byte) (*
 	return &tpb.KeyData{
 		TypeUrl:         xChaCha20Poly1305TypeURL,
 		Value:           serializedKey,
-		KeyMaterialType: tpb.KeyData_SYMMETRIC,
+		KeyMaterialType: km.KeyMaterialType(),
 	}, nil
 }
 
@@ -102,8 +106,35 @@ func (km *xChaCha20Poly1305KeyManager) TypeURL() string {
 	return xChaCha20Poly1305TypeURL
 }
 
+// KeyMaterialType returns the key material type of this key manager.
+func (km *xChaCha20Poly1305KeyManager) KeyMaterialType() tpb.KeyData_KeyMaterialType {
+	return tpb.KeyData_SYMMETRIC
+}
+
+// DeriveKey derives a new key from serializedKeyFormat and pseudorandomness.
+// Unlike NewKey, DeriveKey validates serializedKeyFormat's version.
+func (km *xChaCha20Poly1305KeyManager) DeriveKey(serializedKeyFormat []byte, pseudorandomness io.Reader) (proto.Message, error) {
+	keyFormat := new(xpb.XChaCha20Poly1305KeyFormat)
+	if err := proto.Unmarshal(serializedKeyFormat, keyFormat); err != nil {
+		return nil, fmt.Errorf("xchacha20poly1305_key_manager: %v", err)
+	}
+	err := keyset.ValidateKeyVersion(keyFormat.Version, xChaCha20Poly1305KeyVersion)
+	if err != nil {
+		return nil, fmt.Errorf("xchacha20poly1305_key_manager: %v", err)
+	}
+
+	keyValue := make([]byte, chacha20poly1305.KeySize)
+	if _, err := io.ReadFull(pseudorandomness, keyValue); err != nil {
+		return nil, fmt.Errorf("xchacha20poly1305_key_manager: not enough pseudorandomness given")
+	}
+	return &xpb.XChaCha20Poly1305Key{
+		Version:  xChaCha20Poly1305KeyVersion,
+		KeyValue: keyValue,
+	}, nil
+}
+
 // validateKey validates the given XChaCha20Poly1305Key.
-func (km *xChaCha20Poly1305KeyManager) validateKey(key *xcppb.XChaCha20Poly1305Key) error {
+func (km *xChaCha20Poly1305KeyManager) validateKey(key *xpb.XChaCha20Poly1305Key) error {
 	err := keyset.ValidateKeyVersion(key.Version, xChaCha20Poly1305KeyVersion)
 	if err != nil {
 		return fmt.Errorf("xchacha20poly1305_key_manager: %v", err)
