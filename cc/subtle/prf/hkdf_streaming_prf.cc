@@ -91,8 +91,8 @@ class HkdfInputStream : public InputStream {
     }
     ti_.resize(digest_size);
 
-    // BoringSSL's `HDKF_extract` function is implemented as an HMAC [1]. We
-    // replace calls to `HDKF_extract` with a direct call to `HMAC` to make this
+    // BoringSSL's `HKDF_extract` function is implemented as an HMAC [1]. We
+    // replace calls to `HKDF_extract` with a direct call to `HMAC` to make this
     // compatible to OpenSSL, which doesn't expose `HKDF*` functions.
     //
     // [1] https://github.com/google/boringssl/blob/master/crypto/hkdf/hkdf.c#L42

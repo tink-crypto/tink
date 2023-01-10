@@ -24,12 +24,12 @@ type KEMKey struct {
 }
 
 // ECIESHKDFSenderKem represents HKDF-based ECIES-KEM (key encapsulation mechanism)
-//for ECIES sender.
+// for ECIES sender.
 type ECIESHKDFSenderKem struct {
 	recipientPublicKey *ECPublicKey
 }
 
-// GenerateKey a HDKF based KEM.
+// encapsulate generates an HKDF-based KEMKey.
 func (s *ECIESHKDFSenderKem) encapsulate(hashAlg string, salt []byte, info []byte, keySize uint32, pointFormat string) (*KEMKey, error) {
 
 	pvt, err := GenerateECDHKeyPair(s.recipientPublicKey.Curve)
