@@ -456,7 +456,7 @@ static Keyset *gKeyset;
 }
 
 - (void)testReadNoSecret {
-  auto keyset = absl::make_unique<Keyset>();
+  auto keyset = std::make_unique<Keyset>();
   Keyset::Key key;
   AddTinkKey("some key type", 42, key, KeyStatusType::ENABLED, KeyData::ASYMMETRIC_PUBLIC,
              keyset.get());
@@ -478,7 +478,7 @@ static Keyset *gKeyset;
 }
 
 - (void)testReadNoSecretFailForTypeUnknown {
-  auto keyset = absl::make_unique<Keyset>();
+  auto keyset = std::make_unique<Keyset>();
   Keyset::Key key;
   AddTinkKey("some key type", 42, key, KeyStatusType::ENABLED, KeyData::UNKNOWN_KEYMATERIAL,
              keyset.get());
@@ -495,7 +495,7 @@ static Keyset *gKeyset;
 }
 
 - (void)testReadNoSecretFailForTypeSymmetric {
-  auto keyset = absl::make_unique<Keyset>();
+  auto keyset = std::make_unique<Keyset>();
   Keyset::Key key;
   AddTinkKey("some key type", 42, key, KeyStatusType::ENABLED, KeyData::SYMMETRIC, keyset.get());
   keyset->set_primary_key_id(42);
@@ -511,7 +511,7 @@ static Keyset *gKeyset;
 }
 
 - (void)testReadNoSecretFailForTypeAssymmetricPrivate {
-  auto keyset = absl::make_unique<Keyset>();
+  auto keyset = std::make_unique<Keyset>();
   Keyset::Key key;
   AddTinkKey("some key type", 42, key, KeyStatusType::ENABLED, KeyData::ASYMMETRIC_PRIVATE,
              keyset.get());
@@ -528,7 +528,7 @@ static Keyset *gKeyset;
 }
 
 - (void)testReadNoSecretFailForHidden {
-  auto keyset = absl::make_unique<Keyset>();
+  auto keyset = std::make_unique<Keyset>();
   Keyset::Key key;
   AddTinkKey("some key type", 42, key, KeyStatusType::ENABLED, KeyData::ASYMMETRIC_PUBLIC,
              keyset.get());

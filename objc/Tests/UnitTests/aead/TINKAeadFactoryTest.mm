@@ -73,7 +73,7 @@ using ::google::crypto::tink::KeyStatusType;
       ParseKeysetFromProtoKeysetFormat(/*serialized_keyset=*/"", InsecureSecretKeyAccess::Get());
   XCTAssertTrue(cc_keyset_handle.ok());
   TINKKeysetHandle *handle = [[TINKKeysetHandle alloc]
-      initWithCCKeysetHandle:absl::make_unique<KeysetHandle>(*cc_keyset_handle)];
+      initWithCCKeysetHandle:std::make_unique<KeysetHandle>(*cc_keyset_handle)];
   XCTAssertNotNil(handle);
 
   error = nil;
@@ -116,7 +116,7 @@ using ::google::crypto::tink::KeyStatusType;
       ParseKeysetFromProtoKeysetFormat(keyset.SerializeAsString(), InsecureSecretKeyAccess::Get());
   XCTAssertTrue(cc_keyset_handle.ok());
   TINKKeysetHandle *handle = [[TINKKeysetHandle alloc]
-      initWithCCKeysetHandle:absl::make_unique<KeysetHandle>(*cc_keyset_handle)];
+      initWithCCKeysetHandle:std::make_unique<KeysetHandle>(*cc_keyset_handle)];
   XCTAssertNotNil(handle);
 
   id<TINKAead> aead = [TINKAeadFactory primitiveWithKeysetHandle:handle error:&error];
