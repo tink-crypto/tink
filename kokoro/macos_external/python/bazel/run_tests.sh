@@ -16,22 +16,24 @@
 
 set -euo pipefail
 
-if [[ -n "${KOKORO_ROOT:-}" ]]; then
-  cd "${KOKORO_ARTIFACTS_DIR}/git/tink"
+IS_KOKORO="false"
+if [[ -n "${KOKORO_ARTIFACTS_DIR:-}" ]]; then
+  IS_KOKORO="true"
+fi
+readonly IS_KOKORO
+
+if [[ "${IS_KOKORO}" == "true" ]]; then
+  cd "$(echo "${KOKORO_ARTIFACTS_DIR}"/git*/tink)"
 fi
 
 ./kokoro/testutils/copy_credentials.sh "python/testdata" "gcp"
 # Install protobuf pip packages.
-pip3 install protobuf --user
-
-if [[ -n "${KOKORO_ROOT:-}" ]]; then
-  use_bazel.sh $(cat python/.bazelversion)
-fi
+pip3 install protobuf==3.20.3 --user
 
 # Run manual tests which rely on key material injected into the Kokoro
 # environement.
 MANUAL_TARGETS=()
-if [[ -n "${KOKORO_ROOT:-}" ]]; then
+if [[ "${IS_KOKORO}" == "true" ]]; then
   MANUAL_TARGETS+=( "//tink/integration/gcpkms:_gcp_kms_aead_test" )
 fi
 readonly MANUAL_TARGETS

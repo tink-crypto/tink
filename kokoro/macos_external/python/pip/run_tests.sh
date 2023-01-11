@@ -16,10 +16,8 @@
 
 set -euo pipefail
 
-# If we are running on Kokoro cd into the repository.
-if [[ -n "${KOKORO_ROOT:-}" ]]; then
-  cd "${KOKORO_ARTIFACTS_DIR}/git/tink"
-  use_bazel.sh "$(cat python/.bazelversion)"
+if [[ -n "${KOKORO_ARTIFACTS_DIR:-}" ]]; then
+  cd "$(echo "${KOKORO_ARTIFACTS_DIR}"/git*/tink)"
 fi
 
 ./kokoro/testutils/copy_credentials.sh "python/testdata" "all"

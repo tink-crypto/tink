@@ -16,24 +16,15 @@
 
 set -euo pipefail
 
-export XCODE_VERSION=11.3
+export XCODE_VERSION=14
 export DEVELOPER_DIR="/Applications/Xcode_${XCODE_VERSION}.app/Contents/Developer"
-export ANDROID_HOME="/Users/kbuilder/Library/Android/sdk"
+export ANDROID_HOME="/usr/local/share/android-sdk"
 export COURSIER_OPTS="-Djava.net.preferIPv6Addresses=true"
 
-declare -a TEST_FLAGS
-TEST_FLAGS=(
-  --strategy=TestRunner=standalone
-  --test_output=errors
-  --jvmopt="-Djava.net.preferIPv6Addresses=true"
-)
-readonly TEST_FLAGS
+if [[ -n "${KOKORO_ROOT:-}" ]] ; then
+  cd "$(echo "${KOKORO_ARTIFACTS_DIR}"/git*/tink)"
+  export JAVA_HOME=$(/usr/libexec/java_home -v "1.8.0_292")
+fi
 
-cd ${KOKORO_ARTIFACTS_DIR}/git/tink
-./kokoro/testutils/copy_credentials.sh "java_src/testdata" "all"
 ./kokoro/testutils/update_android_sdk.sh
-
-cd java_src
-use_bazel.sh $(cat .bazelversion)
-bazel build ...
-bazel test "${TEST_FLAGS[@]}" -- ...
+./kokoro/testutils/run_bazel_tests.sh java_src

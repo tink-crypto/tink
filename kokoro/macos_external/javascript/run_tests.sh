@@ -14,30 +14,10 @@
 # limitations under the License.
 ################################################################################
 
-
 set -euo pipefail
 
-main() {
-  if [[ -n "${KOKORO_ROOT:-}" ]]; then
-    cd "${KOKORO_ARTIFACTS_DIR}/git/tink"
-  fi
+if [[ -n "${KOKORO_ARTIFACTS_DIR:-}" ]]; then
+  cd "$(echo "${KOKORO_ARTIFACTS_DIR}"/git*/tink)"
+fi
 
-  cd javascript
-  if [[ -n "${KOKORO_ROOT:-}" ]]; then
-    use_bazel.sh "$(cat .bazelversion)"
-  fi
-
-  local readonly TEST_FLAGS=(
-    --strategy=TestRunner=standalone
-    --test_output=errors
-  )
-
-  # This is needed to handle recent Chrome distributions on macOS which have
-  # paths with spaces. Context:
-  # https://github.com/bazelbuild/bazel/issues/4327#issuecomment-627422865
-  local readonly BAZEL_FLAGS=( --experimental_inprocess_symlink_creation )
-  bazel build "${BAZEL_FLAGS[@]}" -- ...
-  bazel test "${BAZEL_FLAGS[@]}" "${TEST_FLAGS[@]}" -- ...
-}
-
-main "$@"
+./kokoro/testutils/run_bazel_tests.sh javascript

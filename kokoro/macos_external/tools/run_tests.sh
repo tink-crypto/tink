@@ -14,45 +14,38 @@
 # limitations under the License.
 ################################################################################
 
-
 set -euo pipefail
 
-
-export XCODE_VERSION=11.3
+export XCODE_VERSION=14
 export DEVELOPER_DIR="/Applications/Xcode_${XCODE_VERSION}.app/Contents/Developer"
-export ANDROID_HOME="/Users/kbuilder/Library/Android/sdk"
+export ANDROID_HOME="/usr/local/share/android-sdk"
 export COURSIER_OPTS="-Djava.net.preferIPv6Addresses=true"
 
-cd "${KOKORO_ARTIFACTS_DIR}/git/tink"
+IS_KOKORO="false"
+if [[ -n "${KOKORO_ARTIFACTS_DIR:-}" ]]; then
+  IS_KOKORO="true"
+fi
+readonly IS_KOKORO
+
+if [[ "${IS_KOKORO}" == "true" ]] ; then
+  cd "$(echo "${KOKORO_ARTIFACTS_DIR}"/git*/tink)"
+  export JAVA_HOME=$(/usr/libexec/java_home -v "1.8.0_292")
+fi
+
 ./kokoro/testutils/copy_credentials.sh "tools/testdata" "all"
 ./kokoro/testutils/update_android_sdk.sh
 # Sourcing required to update callers environment.
 source ./kokoro/testutils/install_go.sh
-
 echo "Using go binary from $(which go): $(go version)"
 
 # TODO(b/155225382): Avoid modifying the sytem Python installation.
 pip3 install --user protobuf
 
-cd tools
-use_bazel.sh $(cat .bazelversion)
-
-declare -a TEST_FLAGS
-TEST_FLAGS=(
-  --strategy=TestRunner=standalone
-  --test_output=errors
-  --jvmopt="-Djava.net.preferIPv6Addresses=true"
-)
-readonly TEST_FLAGS
-
-time bazel build -- ...
-time bazel test "${TEST_FLAGS[@]}" -- ...
-
 # Run manual tests which rely on key material injected into the Kokoro
 # environement.
-if [[ -n "${KOKORO_ROOT}" ]]; then
-  declare -a MANUAL_TARGETS
-  MANUAL_TARGETS=(
+MANUAL_TARGETS=()
+if [[ "${IS_KOKORO}" == "true" ]] ; then
+  MANUAL_TARGETS+=(
     "//testing/cc:aws_kms_aead_test"
     "//testing/cc:gcp_kms_aead_test"
     "//testing/cross_language:aead_envelope_test"
@@ -61,6 +54,7 @@ if [[ -n "${KOKORO_ROOT}" ]]; then
     "//tinkey/src/test/java/com/google/crypto/tink/tinkey:CreatePublicKeysetCommandTest"
     "//tinkey/src/test/java/com/google/crypto/tink/tinkey:RotateKeysetCommandTest"
   )
-  readonly MANUAL_TARGETS
-  time bazel test "${TEST_FLAGS[@]}" -- "${MANUAL_TARGETS[@]}"
 fi
+readonly MANUAL_TARGETS
+
+./kokoro/testutils/run_bazel_tests.sh tools "${MANUAL_TARGETS}"
