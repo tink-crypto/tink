@@ -66,25 +66,154 @@ ts_library_from_closure(
 )
 
 ts_library(
-    name = "internal",
+    name = "binary_keyset_reader",
     srcs = [
         "binary_keyset_reader.ts",
+    ],
+    deps = [
+        ":keyset_reader",
+        ":proto",
+        "//exception",
+    ],
+)
+
+ts_library(
+    name = "binary_keyset_writer",
+    srcs = [
         "binary_keyset_writer.ts",
+    ],
+    deps = [
+        ":keyset_writer",
+        ":proto",
+        "//exception",
+    ],
+)
+
+ts_library(
+    name = "cleartext_keyset_handle",
+    srcs = [
         "cleartext_keyset_handle.ts",
+    ],
+    deps = [
+        ":binary_keyset_reader",
+        ":binary_keyset_writer",
+        ":keyset_handle",
+    ],
+)
+
+ts_library(
+    name = "crypto_format",
+    srcs = [
         "crypto_format.ts",
+    ],
+    deps = [
+        ":proto",
+        "//exception",
+    ],
+)
+
+ts_library(
+    name = "key_manager",
+    srcs = [
         "key_manager.ts",
+    ],
+    deps = [
+        ":proto",
+        ":util",
+    ],
+)
+
+ts_library(
+    name = "keyset_handle",
+    srcs = [
         "keyset_handle.ts",
+    ],
+    deps = [
+        ":key_manager",
+        ":keyset_reader",
+        ":keyset_writer",
+        ":primitive_set",
+        ":proto",
+        ":proto_shims",
+        ":registry",
+        ":util",
+        "//aead/internal",
+        "//exception",
+        "//subtle",
+    ],
+)
+
+ts_library(
+    name = "keyset_reader",
+    srcs = [
         "keyset_reader.ts",
+    ],
+    deps = [":proto"],
+)
+
+ts_library(
+    name = "keyset_writer",
+    srcs = [
         "keyset_writer.ts",
+    ],
+    deps = [":proto"],
+)
+
+ts_library(
+    name = "primitive_set",
+    srcs = [
         "primitive_set.ts",
+    ],
+    deps = [
+        ":crypto_format",
+        ":proto",
+        ":util",
+        "//exception",
+    ],
+)
+
+ts_library(
+    name = "primitive_wrapper",
+    srcs = [
         "primitive_wrapper.ts",
+    ],
+    deps = [
+        ":primitive_set",
+        ":util",
+    ],
+)
+
+ts_library(
+    name = "proto_shims",
+    srcs = [
         "proto_shims.ts",
+    ],
+    deps = ["//subtle"],
+)
+
+ts_library(
+    name = "registry",
+    srcs = [
         "registry.ts",
+    ],
+    deps = [
+        ":key_manager",
+        ":primitive_set",
+        ":primitive_wrapper",
+        ":proto",
+        ":proto_shims",
+        ":util",
+        "//exception",
+    ],
+)
+
+ts_library(
+    name = "util",
+    srcs = [
         "util.ts",
     ],
     deps = [
         ":proto",
-        "//aead/internal",
         "//exception",
         "//subtle",
     ],
@@ -106,8 +235,18 @@ ts_library(
         "util_test.ts",
     ],
     deps = [
-        ":internal",
+        ":binary_keyset_reader",
+        ":binary_keyset_writer",
+        ":cleartext_keyset_handle",
+        ":crypto_format",
+        ":key_manager",
+        ":keyset_handle",
+        ":primitive_set",
+        ":primitive_wrapper",
         ":proto",
+        ":proto_shims",
+        ":registry",
+        ":util",
         "//aead",
         "//exception",
         "//hybrid",

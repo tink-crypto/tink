@@ -6,5 +6,5 @@ ts_library(
     name = "insecure",
     srcs = ["index.ts"],
     module_name = "tink-crypto/binary/insecure",
-    deps = ["//internal"],
+    deps = ["//internal:cleartext_keyset_handle"],
 )

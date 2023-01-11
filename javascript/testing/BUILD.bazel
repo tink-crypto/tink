@@ -6,5 +6,5 @@ ts_library(
     name = "testing",
     srcs = ["index.ts"],
     module_name = "tink-crypto/testing",
-    deps = ["//internal"],
+    deps = ["//internal:registry"],
 )
