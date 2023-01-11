@@ -54,6 +54,7 @@ go_test(
         "//proto/hkdf_prf_go_proto",
         "//proto/prf_based_deriver_go_proto",
         "//proto/tink_go_proto",
+        "//signature",
         "//streamingaead",
         "//subtle/random",
         "@com_github_google_go_cmp//cmp",
