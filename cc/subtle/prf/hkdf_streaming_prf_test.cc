@@ -16,6 +16,8 @@
 
 #include "tink/subtle/prf/hkdf_streaming_prf.h"
 
+#include <algorithm>
+#include <iterator>
 #include <memory>
 #include <string>
 #include <utility>
@@ -24,6 +26,7 @@
 #include "gtest/gtest.h"
 #include "absl/status/status.h"
 #include "tink/config/tink_fips.h"
+#include "tink/subtle/common_enums.h"
 #include "tink/subtle/hkdf.h"
 #include "tink/subtle/random.h"
 #include "tink/util/input_stream_util.h"
@@ -64,6 +67,43 @@ TEST(HkdfStreamingPrf, Basic) {
   ASSERT_THAT(result_or, IsOk());
 
   EXPECT_THAT(result_or.value(), SizeIs(10));
+}
+
+TEST(HkdfStreamingPrf, EmptySalt) {
+  if (IsFipsModeEnabled()) {
+    GTEST_SKIP() << "Not supported in FIPS-only mode";
+  }
+
+  crypto::tink::subtle::HashType hash_type = SHA512;
+  const int hash_length = 64;
+  util::SecretData secret = util::SecretDataFromStringView("key0123456");
+  absl::string_view input = "input";
+  int num_bytes = 10;
+
+  std::string prf_empty_salt;
+  std::string prf_zeroed_salt;
+  {
+    auto streaming_prf = HkdfStreamingPrf::New(hash_type, secret, "");
+    ASSERT_THAT(streaming_prf, IsOk());
+    std::unique_ptr<InputStream> stream = (*streaming_prf)->ComputePrf(input);
+    auto result = ReadBytesFromStream(num_bytes, stream.get());
+    ASSERT_THAT(result, IsOk());
+    prf_empty_salt = *result;
+  }
+  {
+    uint8_t zeroedSalt[hash_length];
+    std::fill(std::begin(zeroedSalt), std::end(zeroedSalt), 0);
+    auto streaming_prf = HkdfStreamingPrf::New(hash_type, secret,
+                                               std::string((char*)zeroedSalt));
+    ASSERT_THAT(streaming_prf, IsOk());
+    std::unique_ptr<InputStream> stream = (*streaming_prf)->ComputePrf(input);
+    auto result = ReadBytesFromStream(num_bytes, stream.get());
+    ASSERT_THAT(result, IsOk());
+    prf_zeroed_salt = *result;
+  }
+  EXPECT_THAT(prf_empty_salt, SizeIs(num_bytes));
+  EXPECT_THAT(prf_zeroed_salt, SizeIs(num_bytes));
+  ASSERT_EQ(prf_empty_salt, prf_zeroed_salt);
 }
 
 TEST(HkdfStreamingPrf, DifferentInputsGiveDifferentvalues) {
@@ -529,12 +569,11 @@ TEST(HkdfStreamingPrf, TestAgainstHkdfUtil) {
   std::string salt = Random::GetRandomBytes(234);
   std::string info = Random::GetRandomBytes(345);
 
-  auto streaming_result_or = ComputeWithHkdfStreamingPrf(
-      hash, ikm, salt, info, 456);
+  auto streaming_result_or =
+      ComputeWithHkdfStreamingPrf(hash, ikm, salt, info, 456);
   ASSERT_THAT(streaming_result_or, IsOk());
 
-  auto compute_hkdf_result_or =  Hkdf::ComputeHkdf(
-      hash, ikm, salt, info, 456);
+  auto compute_hkdf_result_or = Hkdf::ComputeHkdf(hash, ikm, salt, info, 456);
   ASSERT_THAT(compute_hkdf_result_or, IsOk());
 
   util::SecretData compute_hkdf_result =
