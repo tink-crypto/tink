@@ -94,6 +94,14 @@ func TestPRFBasedDeriver(t *testing.T) {
 			template: prf.HKDFSHA256PRFKeyTemplate(),
 		},
 		{
+			name:     "HMAC_SHA256_PRF",
+			template: prf.HMACSHA256PRFKeyTemplate(),
+		},
+		{
+			name:     "HMAC_SHA512_PRF",
+			template: prf.HMACSHA512PRFKeyTemplate(),
+		},
+		{
 			name:     "ED25519",
 			template: signature.ED25519KeyTemplate(),
 		},
