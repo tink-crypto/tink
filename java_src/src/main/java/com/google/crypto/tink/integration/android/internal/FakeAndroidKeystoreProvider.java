@@ -41,7 +41,7 @@ import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 
 /**
- * A fake implementation of AndroidKeystore that provides all the function needed by Tink's android
+ * Fake implementations of AndroidKeystore that provide all the function needed by Tink's android
  * integration package.
  */
 public final class FakeAndroidKeystoreProvider {
@@ -221,14 +221,105 @@ public final class FakeAndroidKeystoreProvider {
       FakeKeyStoreSpi.setKeysMapRef(keys);
       FakeKeyGeneratorSpi.setKeysMapRef(keys);
 
-      this.put("KeyStore.AndroidKeyStore", FakeKeyStoreSpi.class.getName());
-      this.put("KeyGenerator.AES", FakeKeyGeneratorSpi.class.getName());
+      put("KeyStore.AndroidKeyStore", FakeKeyStoreSpi.class.getName());
+      put("KeyGenerator.AES", FakeKeyGeneratorSpi.class.getName());
     }
   }
 
   /** Returns a new fake Provider for AndroidKeystore. */
   public static Provider newProvider() {
     return new FakeProvider();
+  }
+
+  /**
+   * A fake KeyStoreSpi implementation that may raise a NullPointerException in engineContainsAlias.
+   *
+   * <p>This is added because of b/167402931.
+   */
+  public static class UnreliableFakeKeyStoreSpi
+      extends FakeAndroidKeystoreProvider.FakeKeyStoreSpi {
+
+    public UnreliableFakeKeyStoreSpi() {}
+
+    public static int failuresInARow;
+    public static int failuresLeft;
+
+    public static void setFailuresInARow(int failuresInARow) {
+      UnreliableFakeKeyStoreSpi.failuresInARow = failuresInARow;
+      failuresLeft = failuresInARow;
+    }
+
+    @Override
+    public boolean engineContainsAlias(String alias) {
+      if (failuresLeft > 0) {
+        failuresLeft = failuresLeft - 1;
+        throw new NullPointerException("something went wrong");
+      }
+      failuresLeft = failuresInARow;
+      return keys.containsKey(alias);
+    }
+  }
+
+  @SuppressWarnings(
+      "deprecation") // We need to use the old constructor to support older Java versions.
+  private static class UnreliableFakeProvider extends Provider {
+    UnreliableFakeProvider(int failuresInARow) {
+      super("AndroidKeyStore", 1.0, "Fake AndroidKeyStore with a bad containsAlias implementation");
+
+      HashMap<String, SecretKey> keys = new HashMap<>();
+      FakeAndroidKeystoreProvider.FakeKeyStoreSpi.setKeysMapRef(keys);
+      FakeAndroidKeystoreProvider.FakeKeyGeneratorSpi.setKeysMapRef(keys);
+      UnreliableFakeKeyStoreSpi.setFailuresInARow(failuresInARow);
+
+      this.setProperty("KeyStore.AndroidKeyStore", UnreliableFakeKeyStoreSpi.class.getName());
+      this.setProperty(
+          "KeyGenerator.AES", FakeAndroidKeystoreProvider.FakeKeyGeneratorSpi.class.getName());
+    }
+  }
+
+  /** Returns a new fake Provider for AndroidKeystore. */
+  public static Provider newUnreliableProvider(int failuresInARow) {
+    return new UnreliableFakeProvider(failuresInARow);
+  }
+
+  /**
+   * A partial fake implementation of KeyStoreSpi where engineGetKey always throws an exception.
+   *
+   * <p>This is added because of b/151893419.
+   */
+  public static class FakeKeyStoreSpiWithUnrecoverableKeys extends FakeKeyStoreSpi {
+
+    public FakeKeyStoreSpiWithUnrecoverableKeys() {}
+
+    @Override
+    public Key engineGetKey(String keyId, char[] password)
+        throws NoSuchAlgorithmException, UnrecoverableKeyException {
+      Key key = super.engineGetKey(keyId, password);
+      if (key == null) {
+        return null;
+      }
+      throw new UnrecoverableKeyException("Failed to obtain information about key");
+    }
+  }
+
+  @SuppressWarnings(
+      "deprecation") // We need to use the old constructor to support older Java versions.
+  private static class FakeProviderWithUnrecoverableKeys extends Provider {
+    FakeProviderWithUnrecoverableKeys() {
+      super("AndroidKeyStore", 1.0, "Fake AndroidKeyStore that returns null keys");
+
+      HashMap<String, SecretKey> keys = new HashMap<>();
+      FakeAndroidKeystoreProvider.FakeKeyStoreSpi.setKeysMapRef(keys);
+      FakeAndroidKeystoreProvider.FakeKeyGeneratorSpi.setKeysMapRef(keys);
+
+      put("KeyStore.AndroidKeyStore", FakeKeyStoreSpiWithUnrecoverableKeys.class.getName());
+      put("KeyGenerator.AES", FakeKeyGeneratorSpi.class.getName());
+    }
+  }
+
+  /** Returns a new fake Provider for AndroidKeystore. */
+  public static Provider newProviderWithUnrecoverableKeys() {
+    return new FakeProviderWithUnrecoverableKeys();
   }
 
   private FakeAndroidKeystoreProvider() {}
