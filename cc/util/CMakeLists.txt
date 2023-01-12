@@ -1,5 +1,8 @@
 tink_module(util)
 
+include(CheckSymbolExists)
+check_symbol_exists(pread "unistd.h" HAVE_PREAD)
+
 tink_cc_library(
   NAME buffer
   SRCS

@@ -47,6 +47,23 @@ int close_ignoring_eintr(int fd) {
   return result;
 }
 
+// From Google/glog
+#ifndef HAVE_PREAD
+ssize_t pread(int fd, void* buf, size_t count, off_t offset) {
+  off_t orig_offset = lseek(fd, 0, SEEK_CUR);
+  if (orig_offset == (off_t)-1)
+    return -1;
+  if (lseek(fd, offset, SEEK_CUR) == (off_t)-1)
+    return -1;
+  ssize_t len = read(fd, buf, count);
+  if (len < 0)
+    return len;
+  if (lseek(fd, orig_offset, SEEK_SET) == (off_t)-1)
+    return -1;
+  return len;
+}
+#endif  // !HAVE_PREAD
+
 }  // anonymous namespace
 
 FileRandomAccessStream::FileRandomAccessStream(int file_descriptor) {
