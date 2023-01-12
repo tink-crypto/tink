@@ -97,7 +97,7 @@ public final class EcdsaPrivateKey extends SignaturePrivateKey {
   }
 
   @RestrictedApi(
-      explanation = "Accessing parts of keys can produce unexpected incompatibilities",
+      explanation = "Accessing parts of keys can produce unexpected incompatibilities, annotate the function with @AccessesPartialKey",
       link = "https://developers.google.com/tink/design/access_control#accessing_partial_keys",
       allowedOnPath = ".*Test\\.java",
       allowlistAnnotations = {AccessesPartialKey.class})
@@ -116,7 +116,7 @@ public final class EcdsaPrivateKey extends SignaturePrivateKey {
   }
 
   @RestrictedApi(
-      explanation = "Accessing parts of keys can produce unexpected incompatibilities",
+      explanation = "Accessing parts of keys can produce unexpected incompatibilities, annotate the function with @AccessesPartialKey",
       link = "https://developers.google.com/tink/design/access_control#accessing_partial_keys",
       allowedOnPath = ".*Test\\.java",
       allowlistAnnotations = {AccessesPartialKey.class})
