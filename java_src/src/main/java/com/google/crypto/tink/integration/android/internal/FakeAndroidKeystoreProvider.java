@@ -28,6 +28,7 @@ import java.security.KeyStoreException;
 import java.security.KeyStoreSpi;
 import java.security.NoSuchAlgorithmException;
 import java.security.Provider;
+import java.security.ProviderException;
 import java.security.SecureRandom;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.Certificate;
@@ -320,6 +321,129 @@ public final class FakeAndroidKeystoreProvider {
   /** Returns a new fake Provider for AndroidKeystore. */
   public static Provider newProviderWithUnrecoverableKeys() {
     return new FakeProviderWithUnrecoverableKeys();
+  }
+
+  /**
+   * A fake implementation of KeyStoreSpi where engineGetKey always throws a ProviderException.
+   *
+   * <p>If the key is stored in StrongBox, it is possible that a ProviderException is thrown if
+   * there's any problem with it.
+   */
+  public static class FakeKeyStoreSpiWithProviderException extends FakeKeyStoreSpi {
+
+    public FakeKeyStoreSpiWithProviderException() {}
+
+    @Override
+    public Key engineGetKey(String keyId, char[] password)
+        throws NoSuchAlgorithmException, UnrecoverableKeyException {
+      throw new ProviderException("Something is wrong with the provider");
+    }
+  }
+
+  @SuppressWarnings(
+      "deprecation") // We need to use the old constructor to support older Java versions.
+  private static class FakeProviderWithProviderException extends Provider {
+    FakeProviderWithProviderException() {
+      super("AndroidKeyStore", 1.0, "Fake AndroidKeyStore that throws ProviderException");
+
+      HashMap<String, SecretKey> keys = new HashMap<>();
+      FakeAndroidKeystoreProvider.FakeKeyStoreSpi.setKeysMapRef(keys);
+      FakeAndroidKeystoreProvider.FakeKeyGeneratorSpi.setKeysMapRef(keys);
+
+      put("KeyStore.AndroidKeyStore", FakeKeyStoreSpiWithProviderException.class.getName());
+      put("KeyGenerator.AES", FakeKeyGeneratorSpi.class.getName());
+    }
+  }
+
+  /** Returns a new fake provider where getKey always throws ProviderException. */
+  public static Provider newProviderWithProviderException() {
+    return new FakeProviderWithProviderException();
+  }
+
+  /** A fake implementation of KeyStoreSpi where engineGetKey always returns null. */
+  public static class FakeKeyStoreSpiWithNullKeys extends FakeKeyStoreSpi {
+
+    public FakeKeyStoreSpiWithNullKeys() {}
+
+    @Override
+    public Key engineGetKey(String keyId, char[] password)
+        throws NoSuchAlgorithmException, UnrecoverableKeyException {
+      return null;
+    }
+  }
+
+  @SuppressWarnings(
+      "deprecation") // We need to use the old constructor to support older Java versions.
+  private static class FakeProviderWithNullKeys extends Provider {
+    FakeProviderWithNullKeys() {
+      super("AndroidKeyStore", 1.0, "Fake AndroidKeyStore that returns null keys");
+
+      HashMap<String, SecretKey> keys = new HashMap<>();
+      FakeAndroidKeystoreProvider.FakeKeyStoreSpi.setKeysMapRef(keys);
+      FakeAndroidKeystoreProvider.FakeKeyGeneratorSpi.setKeysMapRef(keys);
+
+      put("KeyStore.AndroidKeyStore", FakeKeyStoreSpiWithNullKeys.class.getName());
+      put("KeyGenerator.AES", FakeKeyGeneratorSpi.class.getName());
+    }
+  }
+
+  /** Returns a new fake Provider for AndroidKeystore where getKey always returns null. */
+  public static Provider newProviderWithNullKeys() {
+    return new FakeProviderWithNullKeys();
+  }
+
+  /** An implementation of KeyGeneratorSpi that doesn't generate keys. */
+  public static class NoKeyGeneratorSpi extends FakeKeyGeneratorSpi {
+
+    public NoKeyGeneratorSpi() {}
+
+    @Override
+    public SecretKey engineGenerateKey() {
+      return null;
+    }
+  }
+
+  @SuppressWarnings(
+      "deprecation") // We need to use the old constructor to support older Java versions.
+  private static class FakeProviderWithoutKeyGeneration extends Provider {
+    FakeProviderWithoutKeyGeneration() {
+      super("AndroidKeyStore", 1.0, "Fake AndroidKeyStore that returns null keys");
+
+      HashMap<String, SecretKey> keys = new HashMap<>();
+      FakeAndroidKeystoreProvider.FakeKeyStoreSpi.setKeysMapRef(keys);
+      FakeAndroidKeystoreProvider.FakeKeyGeneratorSpi.setKeysMapRef(keys);
+
+      put("KeyStore.AndroidKeyStore", FakeKeyStoreSpiWithNullKeys.class.getName());
+      put("KeyGenerator.AES", NoKeyGeneratorSpi.class.getName());
+    }
+  }
+
+  /** Returns a new fake Provider for AndroidKeystore that doesn't generate keys. */
+  public static Provider newProviderWithoutKeyGeneration() {
+    return new FakeProviderWithoutKeyGeneration();
+  }
+
+  @SuppressWarnings(
+      "deprecation") // We need to use the old constructor to support older Java versions.
+  private static class BadProvider extends Provider {
+    BadProvider() {
+      super("AndroidKeyStore", 1.0, "Fake AndroidKeyStore that throws ProviderException");
+
+      HashMap<String, SecretKey> keys = new HashMap<>();
+      FakeAndroidKeystoreProvider.FakeKeyStoreSpi.setKeysMapRef(keys);
+      FakeAndroidKeystoreProvider.FakeKeyGeneratorSpi.setKeysMapRef(keys);
+
+      put("KeyStore.AndroidKeyStore", FakeKeyStoreSpiWithProviderException.class.getName());
+      put("KeyGenerator.AES", NoKeyGeneratorSpi.class.getName());
+    }
+  }
+
+  /**
+   * Returns a new fake Provider that doesn't generate keys and where getKey always throws
+   * ProviderException.
+   */
+  public static Provider newBadProvider() {
+    return new BadProvider();
   }
 
   private FakeAndroidKeystoreProvider() {}
