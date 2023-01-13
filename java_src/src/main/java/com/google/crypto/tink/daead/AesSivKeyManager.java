@@ -126,10 +126,7 @@ public final class AesSivKeyManager extends KeyTypeManager<AesSivKey> {
 
         byte[] pseudorandomness = new byte[KEY_SIZE_IN_BYTES];
         try {
-          int read = inputStream.read(pseudorandomness);
-          if (read != KEY_SIZE_IN_BYTES) {
-            throw new GeneralSecurityException("Not enough pseudorandomness given");
-          }
+          readFully(inputStream, pseudorandomness);
           return AesSivKey.newBuilder()
               .setKeyValue(ByteString.copyFrom(pseudorandomness))
               .setVersion(getVersion())

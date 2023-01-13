@@ -111,10 +111,7 @@ public final class AesGcmSivKeyManager extends KeyTypeManager<AesGcmSivKey> {
 
         byte[] pseudorandomness = new byte[format.getKeySize()];
         try {
-          int read = inputStream.read(pseudorandomness);
-          if (read != format.getKeySize()) {
-            throw new GeneralSecurityException("Not enough pseudorandomness given");
-          }
+          readFully(inputStream, pseudorandomness);
           return AesGcmSivKey.newBuilder()
               .setKeyValue(ByteString.copyFrom(pseudorandomness))
               .setVersion(getVersion())

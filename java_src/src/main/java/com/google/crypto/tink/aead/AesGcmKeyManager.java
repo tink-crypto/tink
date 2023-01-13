@@ -109,10 +109,7 @@ public final class AesGcmKeyManager extends KeyTypeManager<AesGcmKey> {
 
         byte[] pseudorandomness = new byte[format.getKeySize()];
         try {
-          int read = inputStream.read(pseudorandomness);
-          if (read != format.getKeySize()) {
-            throw new GeneralSecurityException("Not enough pseudorandomness given");
-          }
+          readFully(inputStream, pseudorandomness);
           return AesGcmKey.newBuilder()
               .setKeyValue(ByteString.copyFrom(pseudorandomness))
               .setVersion(getVersion())

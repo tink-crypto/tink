@@ -116,10 +116,7 @@ public class XChaCha20Poly1305KeyManager extends KeyTypeManager<XChaCha20Poly130
 
         byte[] pseudorandomness = new byte[KEY_SIZE_IN_BYTES];
         try {
-          int read = inputStream.read(pseudorandomness);
-          if (read != KEY_SIZE_IN_BYTES) {
-            throw new GeneralSecurityException("Not enough pseudorandomness given");
-          }
+          readFully(inputStream, pseudorandomness);
           return XChaCha20Poly1305Key.newBuilder()
               .setKeyValue(ByteString.copyFrom(pseudorandomness))
               .setVersion(getVersion())

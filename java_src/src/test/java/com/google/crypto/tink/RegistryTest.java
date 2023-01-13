@@ -711,7 +711,7 @@ public class RegistryTest {
             throws GeneralSecurityException {
           byte[] pseudorandomness = new byte[format.getKeySize()];
           try {
-            stream.read(pseudorandomness);
+            readFully(stream, pseudorandomness);
           } catch (IOException e) {
             throw new AssertionError("Unexpected IOException", e);
           }

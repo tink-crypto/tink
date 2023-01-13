@@ -34,6 +34,7 @@ import com.google.crypto.tink.testing.TestUtil;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.ExtensionRegistryLite;
 import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.security.GeneralSecurityException;
 import java.security.Security;
 import java.util.Set;
@@ -179,6 +180,35 @@ public class AesGcmSivKeyManagerTest {
     assertThat(key.getKeyValue()).hasSize(keySize);
     for (int i = 0; i < keySize; ++i) {
       assertThat(key.getKeyValue().byteAt(i)).isEqualTo(keyMaterial[i]);
+    }
+  }
+
+  @Test
+  public void testDeriveKey_handlesDataFragmentationCorrectly() throws Exception {
+    int keySize = 32;
+    byte randomness = 4;
+    InputStream fragmentedInputStream =
+        new InputStream() {
+          @Override
+          public int read() {
+            return 0;
+          }
+
+          @Override
+          public int read(byte[] b, int off, int len) {
+            b[off] = randomness;
+            return 1;
+          }
+        };
+
+    AesGcmSivKey key =
+        factory.deriveKey(
+            AesGcmSivKeyFormat.newBuilder().setVersion(0).setKeySize(keySize).build(),
+            fragmentedInputStream);
+
+    assertThat(key.getKeyValue()).hasSize(keySize);
+    for (int i = 0; i < keySize; ++i) {
+      assertThat(key.getKeyValue().byteAt(i)).isEqualTo(randomness);
     }
   }
 

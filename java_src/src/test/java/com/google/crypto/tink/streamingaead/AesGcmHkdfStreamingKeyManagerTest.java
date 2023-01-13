@@ -32,6 +32,7 @@ import com.google.crypto.tink.testing.StreamingTestUtil;
 import com.google.crypto.tink.testing.TestUtil;
 import com.google.protobuf.ExtensionRegistryLite;
 import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.security.GeneralSecurityException;
 import java.util.Set;
 import java.util.TreeSet;
@@ -124,6 +125,35 @@ public class AesGcmHkdfStreamingKeyManagerTest {
       assertThat(key.getKeyValue().byteAt(i)).isEqualTo(keyMaterial[i]);
     }
     assertThat(key.getParams()).isEqualTo(format.getParams());
+  }
+
+  @Test
+  public void testDeriveKey_handlesDataFragmentationCorrectly() throws Exception {
+    int keySize = 32;
+    int derivedKeySize = 16;
+    byte randomness = 4;
+    InputStream fragmentedInputStream =
+        new InputStream() {
+          @Override
+          public int read() {
+            return 0;
+          }
+
+          @Override
+          public int read(byte[] b, int off, int len) {
+            b[off] = randomness;
+            return 1;
+          }
+        };
+    AesGcmHkdfStreamingKeyFormat format =
+        createKeyFormat(keySize, derivedKeySize, HashType.SHA256, 1024);
+
+    AesGcmHkdfStreamingKey key = factory.deriveKey(format, fragmentedInputStream);
+
+    assertThat(key.getKeyValue()).hasSize(keySize);
+    for (int i = 0; i < keySize; ++i) {
+      assertThat(key.getKeyValue().byteAt(i)).isEqualTo(randomness);
+    }
   }
 
   @Test

@@ -34,6 +34,7 @@ import com.google.crypto.tink.testing.TestUtil;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.ExtensionRegistryLite;
 import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.security.GeneralSecurityException;
 import java.util.Set;
 import java.util.TreeSet;
@@ -257,12 +258,39 @@ public class HmacKeyManagerTest {
   }
 
   @Test
+  public void testDeriveKey_handlesDataFragmentationCorrectly() throws Exception {
+    int keySize = 32;
+    byte randomness = 4;
+    InputStream fragmentedInputStream =
+        new InputStream() {
+          @Override
+          public int read() {
+            return 0;
+          }
+
+          @Override
+          public int read(byte[] b, int off, int len) {
+            b[off] = randomness;
+            return 1;
+          }
+        };
+
+    HmacParams params = HmacParams.newBuilder().setHash(HashType.SHA256).setTagSize(32).build();
+    HmacKey key =
+        factory.deriveKey(
+            HmacKeyFormat.newBuilder().setVersion(0).setParams(params).setKeySize(keySize).build(),
+            fragmentedInputStream);
+
+    assertThat(key.getKeyValue()).hasSize(keySize);
+    for (int i = 0; i < keySize; ++i) {
+      assertThat(key.getKeyValue().byteAt(i)).isEqualTo(randomness);
+    }
+  }
+
+  @Test
   public void testDeriveKey_notEnoughKeyMaterial_throws() throws Exception {
     byte[] keyMaterial = Random.randBytes(31);
-    HmacParams params = HmacParams.newBuilder()
-        .setHash(HashType.SHA256)
-        .setTagSize(32)
-        .build();
+    HmacParams params = HmacParams.newBuilder().setHash(HashType.SHA256).setTagSize(32).build();
     HmacKeyFormat format =
         HmacKeyFormat.newBuilder().setVersion(0).setParams(params).setKeySize(32).build();
     assertThrows(

@@ -126,10 +126,7 @@ public final class Ed25519PrivateKeyManager
 
         byte[] pseudorandomness = new byte[Ed25519Sign.SECRET_KEY_LEN];
         try {
-          int read = inputStream.read(pseudorandomness);
-          if (read != Ed25519Sign.SECRET_KEY_LEN) {
-            throw new GeneralSecurityException("Not enough pseudorandomness given");
-          }
+          readFully(inputStream, pseudorandomness);
           Ed25519Sign.KeyPair keyPair = Ed25519Sign.KeyPair.newKeyPairFromSeed(pseudorandomness);
           Ed25519PublicKey publicKey =
               Ed25519PublicKey.newBuilder()

@@ -187,10 +187,7 @@ public final class HmacKeyManager extends KeyTypeManager<HmacKey> {
         Validators.validateVersion(format.getVersion(), getVersion());
         byte[] pseudorandomness = new byte[format.getKeySize()];
         try {
-          int read = inputStream.read(pseudorandomness);
-          if (read != format.getKeySize()) {
-            throw new GeneralSecurityException("Not enough pseudorandomness given");
-          }
+          readFully(inputStream, pseudorandomness);
           return HmacKey.newBuilder()
               .setVersion(getVersion())
               .setParams(format.getParams())
