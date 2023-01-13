@@ -16,7 +16,7 @@
 
 package com.google.crypto.tink.jwt;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
+import static com.google.crypto.tink.internal.Util.UTF_8;
 
 import com.google.crypto.tink.proto.OutputPrefixType;
 import com.google.crypto.tink.subtle.Base64;

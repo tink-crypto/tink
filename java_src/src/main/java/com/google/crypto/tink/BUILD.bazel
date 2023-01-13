@@ -933,6 +933,7 @@ java_library(
         ":json_keyset_writer",
         ":registry_cluster",
         ":secret_key_access",
+        "//src/main/java/com/google/crypto/tink/internal:util",
     ],
 )
 
@@ -946,5 +947,6 @@ android_library(
         ":json_keyset_writer-android",
         ":registry_cluster-android",
         ":secret_key_access-android",
+        "//src/main/java/com/google/crypto/tink/internal:util-android",
     ],
 )

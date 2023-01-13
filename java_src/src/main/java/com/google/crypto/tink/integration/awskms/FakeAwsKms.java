@@ -15,8 +15,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 package com.google.crypto.tink.integration.awskms;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
-
 import com.amazonaws.AmazonServiceException;
 import com.amazonaws.services.kms.AbstractAWSKMS;
 import com.amazonaws.services.kms.model.DecryptRequest;
@@ -27,6 +25,7 @@ import com.google.crypto.tink.Aead;
 import com.google.crypto.tink.KeyTemplates;
 import com.google.crypto.tink.KeysetHandle;
 import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
 import java.security.GeneralSecurityException;
 import java.util.HashMap;
 import java.util.List;
@@ -41,6 +40,7 @@ import java.util.TreeMap;
  * and the key ID of the AEAD that can successfully decrypt it.
  */
 final class FakeAwsKms extends AbstractAWSKMS {
+  private static final Charset UTF_8 = Charset.forName("UTF-8");
   private final Map<String, Aead> aeads = new HashMap<>();
 
   private static byte[] serializeContext(Map<String, String> encryptionContext) {

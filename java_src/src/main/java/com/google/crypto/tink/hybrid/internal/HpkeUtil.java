@@ -16,7 +16,7 @@
 
 package com.google.crypto.tink.hybrid.internal;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
+import static com.google.crypto.tink.internal.Util.UTF_8;
 
 import com.google.crypto.tink.proto.HpkeAead;
 import com.google.crypto.tink.proto.HpkeKdf;

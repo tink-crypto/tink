@@ -17,11 +17,14 @@
 package com.google.crypto.tink.internal;
 
 import com.google.crypto.tink.util.Bytes;
+import java.nio.charset.Charset;
 import java.security.SecureRandom;
 import javax.annotation.Nullable;
 
 /** Helper functions used throughout Tink, for Tink internal use only. */
 public final class Util {
+  /** Android 18-compatible alternative to {@link java.nio.charset.StandardCharsets#UTF_8}. */
+  public static final Charset UTF_8 = Charset.forName("UTF-8");
 
   /** Returns a positive random int which can be used as a key ID in a keyset. */
   public static int randKeyId() {

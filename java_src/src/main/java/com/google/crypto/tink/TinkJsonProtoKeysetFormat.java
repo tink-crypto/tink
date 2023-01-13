@@ -16,7 +16,7 @@
 
 package com.google.crypto.tink;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
+import static com.google.crypto.tink.internal.Util.UTF_8;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
