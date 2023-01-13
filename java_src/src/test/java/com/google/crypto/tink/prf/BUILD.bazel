@@ -132,3 +132,16 @@ java_test(
         "@maven//:junit_junit",
     ],
 )
+
+java_test(
+    name = "HkdfPrfParametersTest",
+    size = "small",
+    srcs = ["HkdfPrfParametersTest.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink/prf:hkdf_prf_parameters",
+        "//src/main/java/com/google/crypto/tink/testing:test_util",
+        "//src/main/java/com/google/crypto/tink/util:bytes",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)

@@ -136,6 +136,18 @@ java_library(
     ],
 )
 
+java_library(
+    name = "hkdf_prf_parameters",
+    srcs = ["HkdfPrfParameters.java"],
+    deps = [
+        ":prf_parameters",
+        "//src/main/java/com/google/crypto/tink/annotations:alpha",
+        "//src/main/java/com/google/crypto/tink/util:bytes",
+        "@maven//:com_google_code_findbugs_jsr305",
+        "@maven//:com_google_errorprone_error_prone_annotations",
+    ],
+)
+
 android_library(
     name = "hkdf_prf_key_manager-android",
     srcs = ["HkdfPrfKeyManager.java"],
@@ -265,5 +277,17 @@ android_library(
     deps = [
         ":prf_parameters-android",
         "//src/main/java/com/google/crypto/tink:key-android",
+    ],
+)
+
+android_library(
+    name = "hkdf_prf_parameters-android",
+    srcs = ["HkdfPrfParameters.java"],
+    deps = [
+        ":prf_parameters-android",
+        "//src/main/java/com/google/crypto/tink/annotations:alpha-android",
+        "//src/main/java/com/google/crypto/tink/util:bytes-android",
+        "@maven//:com_google_code_findbugs_jsr305",
+        "@maven//:com_google_errorprone_error_prone_annotations",
     ],
 )
