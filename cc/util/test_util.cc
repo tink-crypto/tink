@@ -89,6 +89,11 @@ using google::crypto::tink::OutputPrefixType;
   #endif
 #endif // !_WIN32
 
+// O_BINARY mode is needed for Windows.
+#ifndef O_BINARY
+  #define O_BINARY 0
+#endif
+
 namespace crypto {
 namespace tink {
 namespace test {
@@ -104,7 +109,7 @@ int GetTestFileDescriptor(
   std::string full_filename =
       absl::StrCat(crypto::tink::test::TmpDir(), "/", filename);
   mode_t mode = S_IWUSR | S_IRUSR | S_IRGRP | S_IROTH;
-  int fd = open(full_filename.c_str(), O_WRONLY | O_CREAT | O_TRUNC, mode);
+  int fd = open(full_filename.c_str(), O_WRONLY | O_CREAT | O_TRUNC | O_BINARY, mode);
   if (fd == -1) {
     std::clog << "Cannot create file " << full_filename
               << " error: " << errno << std::endl;
@@ -118,7 +123,7 @@ int GetTestFileDescriptor(
     exit(1);
   }
   close(fd);
-  fd = open(full_filename.c_str(), O_RDONLY);
+  fd = open(full_filename.c_str(), O_RDONLY | O_BINARY);
   if (fd == -1) {
     std::clog << "Cannot re-open file " << full_filename
               << " error: " << errno << std::endl;
@@ -132,7 +137,7 @@ int GetTestFileDescriptor(absl::string_view filename) {
   std::string full_filename =
       absl::StrCat(crypto::tink::test::TmpDir(), "/", filename);
   mode_t mode = S_IWUSR | S_IRUSR | S_IRGRP | S_IROTH;
-  int fd = open(full_filename.c_str(), O_WRONLY | O_CREAT | O_TRUNC, mode);
+  int fd = open(full_filename.c_str(), O_WRONLY | O_CREAT | O_TRUNC | O_BINARY, mode);
   if (fd == -1) {
     std::clog << "Cannot create file " << full_filename
               << " error: " << errno << std::endl;
@@ -144,7 +149,7 @@ int GetTestFileDescriptor(absl::string_view filename) {
 std::string ReadTestFile(std::string filename) {
   std::string full_filename =
       absl::StrCat(crypto::tink::test::TmpDir(), "/", filename);
-  int fd = open(full_filename.c_str(), O_RDONLY);
+  int fd = open(full_filename.c_str(), O_RDONLY | O_BINARY);
   if (fd == -1) {
     std::clog << "Cannot open file " << full_filename
               << " error: " << errno << std::endl;
