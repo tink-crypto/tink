@@ -24,9 +24,12 @@
 #include <cmath>
 #include <cstdint>
 #include <cstdlib>
+#include <fstream>
+#include <ios>
 #include <iostream>
 #include <memory>
 #include <ostream>
+#include <sstream>
 #include <string>
 #include <vector>
 
@@ -120,32 +123,16 @@ int GetTestFileDescriptor(absl::string_view filename) {
   return fd;
 }
 
-std::string ReadTestFile(std::string filename) {
-  std::string full_filename =
-      absl::StrCat(crypto::tink::test::TmpDir(), "/", filename);
-  int fd = open(full_filename.c_str(), O_RDONLY);
-  if (fd == -1) {
-    std::clog << "Cannot open file " << full_filename
-              << " error: " << errno << std::endl;
+std::string ReadTestFile(absl::string_view filename) {
+  std::string full_filename = absl::StrCat(test::TmpDir(), "/", filename);
+  std::ifstream input_stream(full_filename, std::ios::binary);
+  if (!input_stream) {
+    std::clog << "Cannot open file " << full_filename << std::endl;
     exit(1);
   }
-  std::string contents;
-  int buffer_size = 128 * 1024;
-  auto buffer = absl::make_unique<uint8_t[]>(buffer_size);
-  int read_result = read(fd, buffer.get(), buffer_size);
-  while (read_result > 0) {
-    std::clog << "Read " << read_result << " bytes" << std::endl;
-    contents.append(reinterpret_cast<const char*>(buffer.get()), read_result);
-    read_result = read(fd, buffer.get(), buffer_size);
-  }
-  if (read_result < 0) {
-    std::clog << "Error reading file " << full_filename
-              << " error: " << errno << std::endl;
-    exit(1);
-  }
-  close(fd);
-  std::clog << "Read in total " << contents.length() << " bytes" << std::endl;
-  return contents;
+  std::stringstream buffer;
+  buffer << input_stream.rdbuf();
+  return buffer.str();
 }
 
 util::StatusOr<std::string> HexDecode(absl::string_view hex) {
