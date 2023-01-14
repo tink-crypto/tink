@@ -23,6 +23,8 @@ import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.ExtensionRegistryLite;
 import com.google.protobuf.InvalidProtocolBufferException;
+import java.io.InputStream;
+import java.security.GeneralSecurityException;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -182,6 +184,58 @@ public final class KeyTypeManagerTest {
                     return new Primitive1(key.getKeyValue());
                   }
                 }));
+  }
+
+  @Test
+  public void readNBytes_works() throws Exception {
+    byte randomness = 4;
+    InputStream fragmentedInputStream =
+        new InputStream() {
+          @Override
+          public int read() {
+            return 0;
+          }
+
+          @Override
+          public int read(byte[] b, int off, int len) {
+            b[off] = randomness;
+            return 1;
+          }
+        };
+    byte[] readBytes = new byte[4];
+
+    KeyTypeManager.KeyFactory.readFully(fragmentedInputStream, readBytes);
+
+    assertThat(readBytes).isEqualTo(new byte[]{4, 4, 4, 4});
+  }
+
+  @Test
+  public void readNBytes_throwsOnNotEnoughPseudorandomness() throws Exception {
+    byte randomness = 4;
+    InputStream shortInputStream =
+        new InputStream() {
+          int numReads = 3;
+
+          @Override
+          public int read() {
+            return 0;
+          }
+
+          @Override
+          public int read(byte[] b, int off, int len) {
+            if (numReads == 0) {
+              return -1;
+            }
+            --numReads;
+            b[off] = randomness;
+            return 1;
+          }
+        };
+    byte[] readBytes = new byte[4];
+
+    assertThrows(
+        GeneralSecurityException.class,
+        () -> KeyTypeManager.KeyFactory.readFully(shortInputStream, readBytes));
   }
 
   private static final class Primitive1 {

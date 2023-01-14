@@ -20,6 +20,7 @@ import (
 	"crypto/rand"
 	"errors"
 	"fmt"
+	"io"
 
 	"golang.org/x/crypto/ed25519"
 
@@ -65,22 +66,19 @@ func (km *ed25519SignerKeyManager) Primitive(serializedKey []byte) (interface{},
 }
 
 // NewKey creates a new ED25519PrivateKey according to specification the given serialized ED25519KeyFormat.
-func (km *ed25519SignerKeyManager) NewKey(serializedKey []byte) (proto.Message, error) {
-	public, private, err := ed25519.GenerateKey(rand.Reader)
+func (km *ed25519SignerKeyManager) NewKey(serializedKeyFormat []byte) (proto.Message, error) {
+	pub, priv, err := ed25519.GenerateKey(rand.Reader)
 	if err != nil {
 		return nil, fmt.Errorf("ed25519_signer_key_manager: cannot generate ED25519 key: %s", err)
 	}
-
-	publicProto := &ed25519pb.Ed25519PublicKey{
+	return &ed25519pb.Ed25519PrivateKey{
 		Version:  ed25519SignerKeyVersion,
-		KeyValue: public,
-	}
-	privateProto := &ed25519pb.Ed25519PrivateKey{
-		Version:   ed25519SignerKeyVersion,
-		PublicKey: publicProto,
-		KeyValue:  private.Seed(),
-	}
-	return privateProto, nil
+		KeyValue: priv.Seed(),
+		PublicKey: &ed25519pb.Ed25519PublicKey{
+			Version:  ed25519SignerKeyVersion,
+			KeyValue: pub,
+		},
+	}, nil
 }
 
 // NewKeyData creates a new KeyData according to specification in  the given
@@ -97,7 +95,7 @@ func (km *ed25519SignerKeyManager) NewKeyData(serializedKeyFormat []byte) (*tink
 	return &tinkpb.KeyData{
 		TypeUrl:         ed25519SignerTypeURL,
 		Value:           serializedKey,
-		KeyMaterialType: tinkpb.KeyData_ASYMMETRIC_PRIVATE,
+		KeyMaterialType: km.KeyMaterialType(),
 	}, nil
 }
 
@@ -126,6 +124,37 @@ func (km *ed25519SignerKeyManager) DoesSupport(typeURL string) bool {
 // TypeURL returns the key type of keys managed by this key manager.
 func (km *ed25519SignerKeyManager) TypeURL() string {
 	return ed25519SignerTypeURL
+}
+
+// KeyMaterialType returns the key material type of this key manager.
+func (km *ed25519SignerKeyManager) KeyMaterialType() tinkpb.KeyData_KeyMaterialType {
+	return tinkpb.KeyData_ASYMMETRIC_PRIVATE
+}
+
+// DeriveKey derives a new key from serializedKeyFormat and pseudorandomness.
+// Unlike NewKey, DeriveKey validates serializedKeyFormat's version.
+func (km *ed25519SignerKeyManager) DeriveKey(serializedKeyFormat []byte, pseudorandomness io.Reader) (proto.Message, error) {
+	keyFormat := new(ed25519pb.Ed25519KeyFormat)
+	if err := proto.Unmarshal(serializedKeyFormat, keyFormat); err != nil {
+		return nil, fmt.Errorf("ed25519_signer_key_manager: %v", err)
+	}
+	err := keyset.ValidateKeyVersion(keyFormat.Version, ed25519SignerKeyVersion)
+	if err != nil {
+		return nil, fmt.Errorf("ed25519_signer_key_manager: %v", err)
+	}
+
+	pub, priv, err := ed25519.GenerateKey(pseudorandomness)
+	if err != nil {
+		return nil, fmt.Errorf("ed25519_signer_key_manager: cannot generate ED25519 key: %s", err)
+	}
+	return &ed25519pb.Ed25519PrivateKey{
+		Version:  ed25519SignerKeyVersion,
+		KeyValue: priv.Seed(),
+		PublicKey: &ed25519pb.Ed25519PublicKey{
+			Version:  ed25519SignerKeyVersion,
+			KeyValue: pub,
+		},
+	}, nil
 }
 
 // validateKey validates the given ED25519PrivateKey.

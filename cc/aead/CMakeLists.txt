@@ -558,7 +558,9 @@ tink_cc_test(
     absl::endian
     absl::memory
     absl::status
+    absl::strings
     tink::core::aead
+    tink::core::keyset_handle
     tink::core::registry
     tink::mac::mac_key_templates
     tink::util::status

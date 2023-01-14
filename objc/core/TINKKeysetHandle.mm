@@ -365,7 +365,7 @@ static NSString *const kTinkService = @"com.google.crypto.tink";
 - (NSData *)serializedKeysetNoSecret:(NSError **)error {
   std::stringbuf buffer;
   auto writerResult = crypto::tink::BinaryKeysetWriter::New(
-      absl::make_unique<std::ostream>(&buffer));
+      std::make_unique<std::ostream>(&buffer));
   if (!writerResult.ok()) {
     if (error) {
       *error = TINKStatusToError(writerResult.status());

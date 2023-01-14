@@ -190,7 +190,6 @@ public final class AndroidKeystoreKmsClient implements KmsClient {
     try {
       return this.keyStore.containsAlias(keyId);
     } catch (NullPointerException ex1) {
-      // TODO(b/167402931): figure out how to test this.
       Log.w(
           TAG,
           "Keystore is temporarily unavailable, wait 20ms, reinitialize Keystore and try again.");

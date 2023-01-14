@@ -24,7 +24,7 @@
 #include "absl/strings/string_view.h"
 #include "absl/types/span.h"
 #include "openssl/evp.h"
-// BoringSSL and OpenSSL have incompatible ways to compute HDKF: BoringSSL
+// BoringSSL and OpenSSL have incompatible ways to compute HKDF: BoringSSL
 // provides a one-shot API HKDF, while OpenSSL doesn't make that API public, but
 // instead provides this functionality over the EVP interface, which in turn
 // doesn't provide means to compute HKDF in BoringSSL. As a consequence, we need

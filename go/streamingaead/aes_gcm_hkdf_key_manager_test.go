@@ -18,12 +18,16 @@ package streamingaead_test
 
 import (
 	"bytes"
+	"encoding/hex"
 	"fmt"
 	"testing"
 
+	"github.com/google/go-cmp/cmp"
 	"google.golang.org/protobuf/proto"
 	"github.com/google/tink/go/core/registry"
+	"github.com/google/tink/go/internal/internalregistry"
 	"github.com/google/tink/go/streamingaead/subtle"
+	"github.com/google/tink/go/subtle/random"
 	"github.com/google/tink/go/testutil"
 	gcmhkdfpb "github.com/google/tink/go/proto/aes_gcm_hkdf_streaming_go_proto"
 	commonpb "github.com/google/tink/go/proto/common_go_proto"
@@ -241,6 +245,238 @@ func TestAESGCMHKDFTypeURL(t *testing.T) {
 	}
 	if keyManager.TypeURL() != testutil.AESGCMHKDFTypeURL {
 		t.Errorf("incorrect key type")
+	}
+}
+
+func TestAESGCMHKDFKeyMaterialType(t *testing.T) {
+	km, err := registry.GetKeyManager(testutil.AESGCMHKDFTypeURL)
+	if err != nil {
+		t.Fatalf("registry.GetKeyManager(%q) err = %v, want nil", testutil.AESGCMHKDFTypeURL, err)
+	}
+	keyManager, ok := km.(internalregistry.DerivableKeyManager)
+	if !ok {
+		t.Fatalf("key manager is not DerivableKeyManager")
+	}
+	if got, want := keyManager.KeyMaterialType(), tinkpb.KeyData_SYMMETRIC; got != want {
+		t.Errorf("KeyMaterialType() = %v, want %v", got, want)
+	}
+}
+
+func TestAESGCMHKDFDeriveKey(t *testing.T) {
+	km, err := registry.GetKeyManager(testutil.AESGCMHKDFTypeURL)
+	if err != nil {
+		t.Fatalf("registry.GetKeyManager(%q) err = %v, want nil", testutil.AESGCMHKDFTypeURL, err)
+	}
+	keyManager, ok := km.(internalregistry.DerivableKeyManager)
+	if !ok {
+		t.Fatalf("key manager is not DerivableKeyManager")
+	}
+	for _, keySize := range []uint32{16, 32} {
+		for _, derivedKeySize := range []uint32{16, 32} {
+			keyFormat := &gcmhkdfpb.AesGcmHkdfStreamingKeyFormat{
+				Version: testutil.AESGCMHKDFKeyVersion,
+				Params: &gcmhkdfpb.AesGcmHkdfStreamingParams{
+					CiphertextSegmentSize: derivedKeySize + subtle.AESGCMHKDFNoncePrefixSizeInBytes + subtle.AESGCMHKDFTagSizeInBytes + 2,
+					DerivedKeySize:        derivedKeySize,
+					HkdfHashType:          commonpb.HashType_SHA256,
+				},
+				KeySize: keySize,
+			}
+			serializedKeyFormat, err := proto.Marshal(keyFormat)
+			if err != nil {
+				t.Fatalf("proto.Marshal(%v) err = %v, want nil", keyFormat, err)
+			}
+			rand := random.GetRandomBytes(keySize)
+			buf := &bytes.Buffer{}
+			if p, _ := buf.Write(rand); p != len(rand) {
+				t.Fatalf("incomplete Write() = %d bytes, want %d bytes", p, len(rand))
+			}
+			k, err := keyManager.DeriveKey(serializedKeyFormat, buf)
+			if err != nil {
+				t.Fatalf("keyManager.DeriveKey() err = %v, want nil", err)
+			}
+			key := k.(*gcmhkdfpb.AesGcmHkdfStreamingKey)
+			if got, want := len(key.GetKeyValue()), int(keySize); got != want {
+				t.Errorf("key length = %d, want %d", got, want)
+			}
+			if diff := cmp.Diff(key.GetKeyValue(), rand); diff != "" {
+				t.Errorf("incorrect derived key: diff = %v", diff)
+			}
+		}
+	}
+}
+
+func TestAESGCMHKDFDeriveKeyFailsWithInvalidKeyFormats(t *testing.T) {
+	km, err := registry.GetKeyManager(testutil.AESGCMHKDFTypeURL)
+	if err != nil {
+		t.Fatalf("registry.GetKeyManager(%q) err = %v, want nil", testutil.AESGCMHKDFTypeURL, err)
+	}
+	keyManager, ok := km.(internalregistry.DerivableKeyManager)
+	if !ok {
+		t.Fatalf("key manager is not DerivableKeyManager")
+	}
+
+	validKeyFormat := &gcmhkdfpb.AesGcmHkdfStreamingKeyFormat{
+		Version: testutil.AESGCMHKDFKeyVersion,
+		Params: &gcmhkdfpb.AesGcmHkdfStreamingParams{
+			CiphertextSegmentSize: 16 + subtle.AESGCMHKDFNoncePrefixSizeInBytes + subtle.AESGCMHKDFTagSizeInBytes + 2,
+			DerivedKeySize:        16,
+			HkdfHashType:          commonpb.HashType_SHA256,
+		},
+		KeySize: 16,
+	}
+	serializedValidKeyFormat, err := proto.Marshal(validKeyFormat)
+	if err != nil {
+		t.Fatalf("proto.Marshal(%v) err = %v, want nil", validKeyFormat, err)
+	}
+	buf := bytes.NewBuffer(random.GetRandomBytes(validKeyFormat.KeySize))
+	if _, err := keyManager.DeriveKey(serializedValidKeyFormat, buf); err != nil {
+		t.Fatalf("keyManager.DeriveKey() err = %v, want nil", err)
+	}
+
+	for _, test := range []struct {
+		name                  string
+		version               uint32
+		keySize               uint32
+		ciphertextSegmentSize uint32
+		derivedKeySize        uint32
+		hkdfHashType          commonpb.HashType
+	}{
+		{
+			name:                  "invalid version",
+			version:               10,
+			keySize:               validKeyFormat.KeySize,
+			ciphertextSegmentSize: validKeyFormat.Params.CiphertextSegmentSize,
+			derivedKeySize:        validKeyFormat.Params.DerivedKeySize,
+			hkdfHashType:          validKeyFormat.Params.HkdfHashType,
+		},
+		{
+			name:                  "invalid key size",
+			version:               validKeyFormat.Version,
+			keySize:               10,
+			ciphertextSegmentSize: validKeyFormat.Params.CiphertextSegmentSize,
+			derivedKeySize:        validKeyFormat.Params.DerivedKeySize,
+			hkdfHashType:          validKeyFormat.Params.HkdfHashType,
+		},
+		{
+			name:                  "invalid ciphertext segment size",
+			version:               validKeyFormat.Version,
+			keySize:               validKeyFormat.KeySize,
+			ciphertextSegmentSize: 10,
+			derivedKeySize:        validKeyFormat.Params.DerivedKeySize,
+			hkdfHashType:          validKeyFormat.Params.HkdfHashType,
+		},
+		{
+			name:                  "invalid derived key size",
+			version:               validKeyFormat.Version,
+			keySize:               validKeyFormat.KeySize,
+			ciphertextSegmentSize: validKeyFormat.Params.CiphertextSegmentSize,
+			derivedKeySize:        10,
+			hkdfHashType:          validKeyFormat.Params.HkdfHashType,
+		},
+		{
+			name:                  "invalid HKDF hash type",
+			version:               validKeyFormat.Version,
+			keySize:               validKeyFormat.KeySize,
+			ciphertextSegmentSize: validKeyFormat.Params.CiphertextSegmentSize,
+			derivedKeySize:        validKeyFormat.Params.DerivedKeySize,
+			hkdfHashType:          commonpb.HashType_UNKNOWN_HASH,
+		},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			keyFormat, err := proto.Marshal(&gcmhkdfpb.AesGcmHkdfStreamingKeyFormat{
+				Version: test.version,
+				KeySize: test.keySize,
+				Params: &gcmhkdfpb.AesGcmHkdfStreamingParams{
+					CiphertextSegmentSize: test.ciphertextSegmentSize,
+					DerivedKeySize:        test.derivedKeySize,
+					HkdfHashType:          test.hkdfHashType,
+				},
+			})
+			if err != nil {
+				t.Fatalf("proto.Marshal() err = %v, want nil", err)
+			}
+			buf := bytes.NewBuffer(random.GetRandomBytes(test.keySize))
+			if _, err := keyManager.DeriveKey(keyFormat, buf); err == nil {
+				t.Errorf("keyManager.DeriveKey() err = nil, want non-nil")
+			}
+		})
+	}
+}
+
+func TestAESGCMHKDFDeriveKeyFailsWithMalformedKeyFormats(t *testing.T) {
+	km, err := registry.GetKeyManager(testutil.AESGCMHKDFTypeURL)
+	if err != nil {
+		t.Fatalf("registry.GetKeyManager(%q) err = %v, want nil", testutil.AESGCMHKDFTypeURL, err)
+	}
+	keyManager, ok := km.(internalregistry.DerivableKeyManager)
+	if !ok {
+		t.Fatalf("key manager is not DerivableKeyManager")
+	}
+	// Proto messages start with a VarInt, which always ends with a byte with the
+	// MSB unset, so 0x80 is invalid.
+	invalidSerialization, err := hex.DecodeString("80")
+	if err != nil {
+		t.Errorf("hex.DecodeString() err = %v, want nil", err)
+	}
+	for _, test := range []struct {
+		name      string
+		keyFormat []byte
+	}{
+		{
+			name:      "nil",
+			keyFormat: nil,
+		},
+		{
+			name:      "empty",
+			keyFormat: []byte{},
+		},
+		{
+			name:      "invalid serialization",
+			keyFormat: invalidSerialization,
+		},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			buf := bytes.NewBuffer(random.GetRandomBytes(32))
+			if _, err := keyManager.DeriveKey(test.keyFormat, buf); err == nil {
+				t.Errorf("keyManager.DeriveKey() err = nil, want non-nil")
+			}
+		})
+	}
+}
+
+func TestAESGCMHKDFDeriveKeyFailsWithInsufficientRandomness(t *testing.T) {
+	km, err := registry.GetKeyManager(testutil.AESGCMHKDFTypeURL)
+	if err != nil {
+		t.Fatalf("registry.GetKeyManager(%q) err = %v, want nil", testutil.AESGCMHKDFTypeURL, err)
+	}
+	keyManager, ok := km.(internalregistry.DerivableKeyManager)
+	if !ok {
+		t.Fatalf("key manager is not DerivableKeyManager")
+	}
+	keyFormat, err := proto.Marshal(&gcmhkdfpb.AesGcmHkdfStreamingKeyFormat{
+		Version: testutil.AESGCMHKDFKeyVersion,
+		Params: &gcmhkdfpb.AesGcmHkdfStreamingParams{
+			CiphertextSegmentSize: 16 + subtle.AESGCMHKDFNoncePrefixSizeInBytes + subtle.AESGCMHKDFTagSizeInBytes + 2,
+			DerivedKeySize:        16,
+			HkdfHashType:          commonpb.HashType_SHA256,
+		},
+		KeySize: 16,
+	})
+	if err != nil {
+		t.Fatalf("proto.Marshal(%v) err = %v, want nil", keyFormat, err)
+	}
+	{
+		buf := bytes.NewBuffer(random.GetRandomBytes(16))
+		if _, err := keyManager.DeriveKey(keyFormat, buf); err != nil {
+			t.Errorf("keyManager.DeriveKey() err = %v, want nil", err)
+		}
+	}
+	{
+		insufficientBuf := bytes.NewBuffer(random.GetRandomBytes(15))
+		if _, err := keyManager.DeriveKey(keyFormat, insufficientBuf); err == nil {
+			t.Errorf("keyManager.DeriveKey() err = nil, want non-nil")
+		}
 	}
 }
 

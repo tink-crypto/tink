@@ -7,6 +7,7 @@ ts_library(
     srcs = ["index.ts"],
     module_name = "tink-crypto/binary",
     deps = [
-        "//internal",
+        "//internal:binary_keyset_reader",
+        "//internal:keyset_handle",
     ],
 )

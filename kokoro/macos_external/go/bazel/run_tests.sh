@@ -16,22 +16,26 @@
 
 set -euo pipefail
 
-if [[ -n "${KOKORO_ROOT:-}" ]]; then
-  cd "${KOKORO_ARTIFACTS_DIR}/git/tink"
-  use_bazel.sh "$(cat go/.bazelversion)"
+IS_KOKORO="false"
+if [[ -n "${KOKORO_ARTIFACTS_DIR:-}" ]]; then
+  IS_KOKORO="true"
+fi
+readonly IS_KOKORO
+
+if [[ "${IS_KOKORO}" == "true" ]]; then
+  cd "$(echo "${KOKORO_ARTIFACTS_DIR}"/git*/tink)"
 fi
 
 ./kokoro/testutils/copy_credentials.sh "go/testdata" "all"
 # Sourcing required to update callers environment.
 source ./kokoro/testutils/install_go.sh
-
 echo "Using go binary from $(which go): $(go version)"
-
-./kokoro/testutils/check_go_generated_files_up_to_date.sh go/
+./kokoro/testutils/check_go_generated_files_up_to_date.sh go
 
 MANUAL_TARGETS=()
-# Run manual tests that rely on test data only available via Bazel.
-if [[ -n "${KOKORO_ROOT:-}" ]]; then
+# Run manual tests which rely on key material injected into the Kokoro
+# environement.
+if [[ "${IS_KOKORO}" == "true" ]]; then
   MANUAL_TARGETS+=(
     "//integration/gcpkms:gcpkms_test"
     "//integration/awskms:awskms_test"

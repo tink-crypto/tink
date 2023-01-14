@@ -23,6 +23,7 @@ import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.MessageLite;
+import java.io.IOException;
 import java.io.InputStream;
 import java.security.GeneralSecurityException;
 import java.util.Collections;
@@ -240,6 +241,29 @@ public abstract class KeyTypeManager<KeyProtoT extends MessageLite> {
      */
     public Map<String, KeyFormat<KeyFormatProtoT>> keyFormats() throws GeneralSecurityException {
       return Collections.emptyMap();
+    }
+
+    /**
+     * Reads {@code output.length} number of bytes of (pseudo)randomness from the {@code input}
+     * stream into the provided {@code output} buffer.
+     *
+     * Note that this method will not close the {@code input} stream.
+     *
+     * @throws GeneralSecurityException when not enough randomness was provided in the {@code input}
+     *     stream.
+     */
+    protected static void readFully(InputStream input, byte[] output)
+        throws IOException, GeneralSecurityException {
+      int len = output.length;
+      int read;
+      int readTotal = 0;
+      while (readTotal < len) {
+        read = input.read(output, readTotal, len - readTotal);
+        if (read == -1) {
+          throw new GeneralSecurityException("Not enough pseudorandomness provided");
+        }
+        readTotal += read;
+      }
     }
   }
 

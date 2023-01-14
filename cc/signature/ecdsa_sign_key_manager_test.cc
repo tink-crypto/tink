@@ -316,6 +316,25 @@ TEST(EcdsaSignKeyManagerTest, DeriveKeyNotEnoughRandomness) {
               test::StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
+TEST(EcdsaSignKeyManagerTest, DeriveKeyWithInvalidKeyTemplateVersionFails) {
+  if (!internal::IsBoringSsl()) {
+    GTEST_SKIP()
+        << "Key derivation from an input stream is not supported with OpenSSL";
+  }
+  EcdsaKeyFormat format;
+  format.set_version(1);
+  EcdsaParams* params = format.mutable_params();
+  params->set_hash_type(HashType::SHA256);
+  params->set_curve(EllipticCurveType::NIST_P256);
+  params->set_encoding(EcdsaSignatureEncoding::DER);
+
+  util::IstreamInputStream input_stream{
+      absl::make_unique<std::stringstream>("tooshort")};
+
+  ASSERT_THAT(EcdsaSignKeyManager().DeriveKey(format, &input_stream).status(),
+              test::StatusIs(absl::StatusCode::kInvalidArgument));
+}
+
 TEST(EcdsaSignKeyManagerTest, DeriveKeyInvalidCurve) {
   if (!internal::IsBoringSsl()) {
     GTEST_SKIP()

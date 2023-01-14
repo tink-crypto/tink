@@ -136,8 +136,7 @@ func (km *hkdfprfKeyManager) DeriveKey(serializedKeyFormat []byte, pseudorandomn
 	}
 
 	keyValue := make([]byte, keyFormat.GetKeySize())
-	n, err := pseudorandomness.Read(keyValue)
-	if n != len(keyValue) || err != nil {
+	if _, err := io.ReadFull(pseudorandomness, keyValue); err != nil {
 		return nil, fmt.Errorf("hkdf_prf_key_manager: not enough pseudorandomness given")
 	}
 

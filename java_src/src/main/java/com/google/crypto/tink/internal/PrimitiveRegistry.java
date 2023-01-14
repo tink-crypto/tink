@@ -61,6 +61,9 @@ public class PrimitiveRegistry {
     public <KeyT extends Key, PrimitiveT> Builder registerPrimitiveConstructor(
         PrimitiveConstructor<KeyT, PrimitiveT> primitiveConstructor)
         throws GeneralSecurityException {
+      if (primitiveConstructor == null) {
+        throw new NullPointerException("primitive constructor must be non-null");
+      }
       PrimitiveConstructorIndex index =
           new PrimitiveConstructorIndex(
               primitiveConstructor.getKeyClass(), primitiveConstructor.getPrimitiveClass());
@@ -83,6 +86,9 @@ public class PrimitiveRegistry {
     public <InputPrimitiveT, WrapperPrimitiveT> Builder registerPrimitiveWrapper(
         PrimitiveWrapper<InputPrimitiveT, WrapperPrimitiveT> wrapper)
         throws GeneralSecurityException {
+      if (wrapper == null) {
+        throw new NullPointerException("wrapper must be non-null");
+      }
       Class<WrapperPrimitiveT> wrapperClassObject = wrapper.getPrimitiveClass();
       if (primitiveWrapperMap.containsKey(wrapperClassObject)) {
         PrimitiveWrapper<?, ?> existingPrimitiveWrapper =

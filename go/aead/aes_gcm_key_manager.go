@@ -134,8 +134,7 @@ func (km *aesGCMKeyManager) DeriveKey(serializedKeyFormat []byte, pseudorandomne
 	}
 
 	keyValue := make([]byte, keyFormat.GetKeySize())
-	n, err := pseudorandomness.Read(keyValue)
-	if n != len(keyValue) || err != nil {
+	if _, err := io.ReadFull(pseudorandomness, keyValue); err != nil {
 		return nil, fmt.Errorf("aes_gcm_key_manager: not enough pseudorandomness given")
 	}
 

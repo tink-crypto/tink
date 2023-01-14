@@ -24,10 +24,14 @@ import (
 	"fmt"
 
 	"github.com/google/tink/go/core/registry"
+	"github.com/google/tink/go/internal/internalregistry"
 )
 
 func init() {
 	if err := registry.RegisterKeyManager(new(aesSIVKeyManager)); err != nil {
+		panic(fmt.Sprintf("daead.init() failed: %v", err))
+	}
+	if err := internalregistry.AllowKeyDerivation(aesSIVTypeURL); err != nil {
 		panic(fmt.Sprintf("daead.init() failed: %v", err))
 	}
 }

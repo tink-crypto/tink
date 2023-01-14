@@ -57,7 +57,7 @@ ts_library(
         "//aead",
         "//exception",
         "//hybrid",
-        "//internal",
+        "//internal:registry",
         "//signature/internal",
         "//testing/internal",
         "@npm//@types/jasmine",

@@ -78,8 +78,8 @@ int GetTestFileDescriptor(absl::string_view filename,
 // Creates a new test file with the specified 'filename', ready for writing.
 int GetTestFileDescriptor(absl::string_view filename);
 
-// Reads the test file specified by 'filename', and returns its contents.
-std::string ReadTestFile(std::string filename);
+// Reads the test file specified by `filename`, and returns its contents.
+std::string ReadTestFile(absl::string_view filename);
 
 // Converts a hexadecimal string into a string of bytes.
 // Returns a status if the size of the input is odd or if the input contains

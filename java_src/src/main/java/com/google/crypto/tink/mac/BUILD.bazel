@@ -8,6 +8,8 @@ java_library(
     name = "hmac_key_manager",
     srcs = ["HmacKeyManager.java"],
     deps = [
+        ":chunked_mac",
+        ":hmac_key",
         ":hmac_proto_serialization",
         "//proto:common_java_proto",
         "//proto:hmac_java_proto",
@@ -17,7 +19,10 @@ java_library(
         "//src/main/java/com/google/crypto/tink:registry",
         "//src/main/java/com/google/crypto/tink/config/internal:tink_fips_util",
         "//src/main/java/com/google/crypto/tink/internal:key_type_manager",
+        "//src/main/java/com/google/crypto/tink/internal:mutable_primitive_registry",
+        "//src/main/java/com/google/crypto/tink/internal:primitive_constructor",
         "//src/main/java/com/google/crypto/tink/internal:primitive_factory",
+        "//src/main/java/com/google/crypto/tink/mac/internal:chunked_hmac_impl",
         "//src/main/java/com/google/crypto/tink/subtle:prf_hmac_jce",
         "//src/main/java/com/google/crypto/tink/subtle:prf_mac",
         "//src/main/java/com/google/crypto/tink/subtle:random",
@@ -30,6 +35,8 @@ android_library(
     name = "hmac_key_manager-android",
     srcs = ["HmacKeyManager.java"],
     deps = [
+        ":chunked_mac-android",
+        ":hmac_key-android",
         ":hmac_proto_serialization-android",
         "//proto:common_java_proto_lite",
         "//proto:hmac_java_proto_lite",
@@ -39,7 +46,10 @@ android_library(
         "//src/main/java/com/google/crypto/tink:registry-android",
         "//src/main/java/com/google/crypto/tink/config/internal:tink_fips_util-android",
         "//src/main/java/com/google/crypto/tink/internal:key_type_manager-android",
+        "//src/main/java/com/google/crypto/tink/internal:mutable_primitive_registry-android",
+        "//src/main/java/com/google/crypto/tink/internal:primitive_constructor-android",
         "//src/main/java/com/google/crypto/tink/internal:primitive_factory-android",
+        "//src/main/java/com/google/crypto/tink/mac/internal:chunked_hmac_impl-android",
         "//src/main/java/com/google/crypto/tink/subtle:prf_hmac_jce-android",
         "//src/main/java/com/google/crypto/tink/subtle:prf_mac-android",
         "//src/main/java/com/google/crypto/tink/subtle:random-android",
@@ -54,7 +64,6 @@ java_library(
     deps = [
         ":mac_wrapper",
         "//src/main/java/com/google/crypto/tink:mac",
-        "//src/main/java/com/google/crypto/tink:registry",
         "//src/main/java/com/google/crypto/tink:registry_cluster",
     ],
 )
@@ -65,7 +74,6 @@ android_library(
     deps = [
         ":mac_wrapper-android",
         "//src/main/java/com/google/crypto/tink:mac-android",
-        "//src/main/java/com/google/crypto/tink:registry-android",
         "//src/main/java/com/google/crypto/tink:registry_cluster-android",
     ],
 )
@@ -141,6 +149,7 @@ java_library(
     srcs = ["MacConfig.java"],
     deps = [
         ":aes_cmac_key_manager",
+        ":chunked_mac_wrapper",
         ":hmac_key_manager",
         ":mac_wrapper",
         "//proto:config_java_proto",
@@ -153,6 +162,7 @@ android_library(
     srcs = ["MacConfig.java"],
     deps = [
         ":aes_cmac_key_manager-android",
+        ":chunked_mac_wrapper-android",
         ":hmac_key_manager-android",
         ":mac_wrapper-android",
         "//proto:config_java_proto_lite",
@@ -164,14 +174,19 @@ java_library(
     name = "aes_cmac_key_manager",
     srcs = ["AesCmacKeyManager.java"],
     deps = [
+        ":aes_cmac_key",
         ":aes_cmac_proto_serialization",
+        ":chunked_mac",
         "//proto:aes_cmac_java_proto",
         "//proto:tink_java_proto",
         "//src/main/java/com/google/crypto/tink:key_template",
         "//src/main/java/com/google/crypto/tink:mac",
         "//src/main/java/com/google/crypto/tink:registry",
         "//src/main/java/com/google/crypto/tink/internal:key_type_manager",
+        "//src/main/java/com/google/crypto/tink/internal:mutable_primitive_registry",
+        "//src/main/java/com/google/crypto/tink/internal:primitive_constructor",
         "//src/main/java/com/google/crypto/tink/internal:primitive_factory",
+        "//src/main/java/com/google/crypto/tink/mac/internal:chunked_aes_cmac_impl",
         "//src/main/java/com/google/crypto/tink/subtle:prf_aes_cmac",
         "//src/main/java/com/google/crypto/tink/subtle:prf_mac",
         "//src/main/java/com/google/crypto/tink/subtle:random",
@@ -184,14 +199,19 @@ android_library(
     name = "aes_cmac_key_manager-android",
     srcs = ["AesCmacKeyManager.java"],
     deps = [
+        ":aes_cmac_key-android",
         ":aes_cmac_proto_serialization-android",
+        ":chunked_mac-android",
         "//proto:aes_cmac_java_proto_lite",
         "//proto:tink_java_proto_lite",
         "//src/main/java/com/google/crypto/tink:key_template-android",
         "//src/main/java/com/google/crypto/tink:mac-android",
         "//src/main/java/com/google/crypto/tink:registry-android",
         "//src/main/java/com/google/crypto/tink/internal:key_type_manager-android",
+        "//src/main/java/com/google/crypto/tink/internal:mutable_primitive_registry-android",
+        "//src/main/java/com/google/crypto/tink/internal:primitive_constructor-android",
         "//src/main/java/com/google/crypto/tink/internal:primitive_factory-android",
+        "//src/main/java/com/google/crypto/tink/mac/internal:chunked_aes_cmac_impl-android",
         "//src/main/java/com/google/crypto/tink/subtle:prf_aes_cmac-android",
         "//src/main/java/com/google/crypto/tink/subtle:prf_mac-android",
         "//src/main/java/com/google/crypto/tink/subtle:random-android",
@@ -481,5 +501,35 @@ android_library(
         "//src/main/java/com/google/crypto/tink/util:secret_bytes-android",
         "@maven//:com_google_code_findbugs_jsr305",
         "@maven//:com_google_protobuf_protobuf_javalite",
+    ],
+)
+
+java_library(
+    name = "chunked_mac_wrapper",
+    srcs = ["ChunkedMacWrapper.java"],
+    deps = [
+        ":chunked_mac",
+        ":chunked_mac_computation",
+        ":chunked_mac_verification",
+        "//src/main/java/com/google/crypto/tink:crypto_format",
+        "//src/main/java/com/google/crypto/tink:primitive_set",
+        "//src/main/java/com/google/crypto/tink:primitive_wrapper",
+        "//src/main/java/com/google/crypto/tink:registry",
+        "@maven//:com_google_errorprone_error_prone_annotations",
+    ],
+)
+
+android_library(
+    name = "chunked_mac_wrapper-android",
+    srcs = ["ChunkedMacWrapper.java"],
+    deps = [
+        ":chunked_mac-android",
+        ":chunked_mac_computation-android",
+        ":chunked_mac_verification-android",
+        "//src/main/java/com/google/crypto/tink:crypto_format-android",
+        "//src/main/java/com/google/crypto/tink:primitive_set-android",
+        "//src/main/java/com/google/crypto/tink:primitive_wrapper-android",
+        "//src/main/java/com/google/crypto/tink:registry-android",
+        "@maven//:com_google_errorprone_error_prone_annotations",
     ],
 )

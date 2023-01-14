@@ -17,7 +17,7 @@ ts_library(
         "//binary",
         "//binary/insecure",
         "//hybrid",
-        "//internal",
+        "//internal:keyset_handle",
         "//mac",
         "//mac/subtle",
         "//signature",

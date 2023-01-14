@@ -83,6 +83,7 @@ public final class MacConfig {
    */
   public static void register() throws GeneralSecurityException {
     MacWrapper.register();
+    ChunkedMacWrapper.register();
     HmacKeyManager.register(true);
 
     if (TinkFips.useOnlyFips()) {

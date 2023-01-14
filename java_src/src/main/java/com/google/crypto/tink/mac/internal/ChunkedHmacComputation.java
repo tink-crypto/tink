@@ -51,7 +51,7 @@ final class ChunkedHmacComputation implements ChunkedMacComputation {
   }
 
   @Override
-  public void update(final ByteBuffer data) {
+  public void update(ByteBuffer data) {
     if (finalized) {
       throw new IllegalStateException(
           "Cannot update after computing the MAC tag. Please create a new object.");

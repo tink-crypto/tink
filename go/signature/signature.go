@@ -24,6 +24,7 @@ import (
 	"fmt"
 
 	"github.com/google/tink/go/core/registry"
+	"github.com/google/tink/go/internal/internalregistry"
 )
 
 func init() {
@@ -37,6 +38,9 @@ func init() {
 
 	// ED25519
 	if err := registry.RegisterKeyManager(new(ed25519SignerKeyManager)); err != nil {
+		panic(fmt.Sprintf("signature.init() failed: %v", err))
+	}
+	if err := internalregistry.AllowKeyDerivation(ed25519SignerTypeURL); err != nil {
 		panic(fmt.Sprintf("signature.init() failed: %v", err))
 	}
 	if err := registry.RegisterKeyManager(new(ed25519VerifierKeyManager)); err != nil {

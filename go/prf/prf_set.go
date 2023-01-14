@@ -100,6 +100,9 @@ func init() {
 	if err := registry.RegisterKeyManager(new(hmacprfKeyManager)); err != nil {
 		panic(fmt.Sprintf("prf.init() failed: %v", err))
 	}
+	if err := internalregistry.AllowKeyDerivation(hmacprfTypeURL); err != nil {
+		panic(fmt.Sprintf("prf.init() failed: %v", err))
+	}
 	if err := registry.RegisterKeyManager(new(hkdfprfKeyManager)); err != nil {
 		panic(fmt.Sprintf("prf.init() failed: %v", err))
 	}

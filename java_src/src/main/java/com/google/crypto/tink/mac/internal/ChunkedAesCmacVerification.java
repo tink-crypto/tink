@@ -39,7 +39,7 @@ final class ChunkedAesCmacVerification implements ChunkedMacVerification {
   }
 
   @Override
-  public void update(final ByteBuffer data) throws GeneralSecurityException {
+  public void update(ByteBuffer data) throws GeneralSecurityException {
     // No need to check state since the ChunkedAesCmacComputation already does this.
     aesCmacComputation.update(data);
   }

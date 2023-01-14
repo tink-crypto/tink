@@ -19,6 +19,7 @@ package daead
 import (
 	"errors"
 	"fmt"
+	"io"
 
 	"google.golang.org/protobuf/proto"
 	"github.com/google/tink/go/core/registry"
@@ -68,6 +69,7 @@ func (km *aesSIVKeyManager) Primitive(serializedKey []byte) (interface{}, error)
 // NewKey generates a new AesSivKey. serializedKeyFormat is optional because
 // there is only one valid key format.
 func (km *aesSIVKeyManager) NewKey(serializedKeyFormat []byte) (proto.Message, error) {
+	// A nil serializedKeyFormat is acceptable. If specified, validate.
 	if serializedKeyFormat != nil {
 		keyFormat := new(aspb.AesSivKeyFormat)
 		if err := proto.Unmarshal(serializedKeyFormat, keyFormat); err != nil {
@@ -98,7 +100,7 @@ func (km *aesSIVKeyManager) NewKeyData(serializedKeyFormat []byte) (*tpb.KeyData
 	return &tpb.KeyData{
 		TypeUrl:         aesSIVTypeURL,
 		Value:           serializedKey,
-		KeyMaterialType: tpb.KeyData_SYMMETRIC,
+		KeyMaterialType: km.KeyMaterialType(),
 	}, nil
 }
 
@@ -110,6 +112,35 @@ func (km *aesSIVKeyManager) DoesSupport(typeURL string) bool {
 // TypeURL returns the type URL of keys managed by this key manager.
 func (km *aesSIVKeyManager) TypeURL() string {
 	return aesSIVTypeURL
+}
+
+// KeyMaterialType returns the key material type of this key manager.
+func (km *aesSIVKeyManager) KeyMaterialType() tpb.KeyData_KeyMaterialType {
+	return tpb.KeyData_SYMMETRIC
+}
+
+// DeriveKey derives a new key from serializedKeyFormat and pseudorandomness.
+// Unlike NewKey, DeriveKey validates serializedKeyFormat.
+func (km *aesSIVKeyManager) DeriveKey(serializedKeyFormat []byte, pseudorandomness io.Reader) (proto.Message, error) {
+	keyFormat := new(aspb.AesSivKeyFormat)
+	if err := proto.Unmarshal(serializedKeyFormat, keyFormat); err != nil {
+		return nil, errInvalidAESSIVKeyFormat
+	}
+	if keyFormat.GetKeySize() != subtle.AESSIVKeySize {
+		return nil, errInvalidAESSIVKeySize
+	}
+	if err := keyset.ValidateKeyVersion(keyFormat.GetVersion(), aesSIVKeyVersion); err != nil {
+		return nil, fmt.Errorf("aes_siv_key_manager: invalid key version: %s", err)
+	}
+
+	keyValue := make([]byte, subtle.AESSIVKeySize)
+	if _, err := io.ReadFull(pseudorandomness, keyValue); err != nil {
+		return nil, fmt.Errorf("aes_siv_key_manager: not enough pseudorandomness given")
+	}
+	return &aspb.AesSivKey{
+		Version:  aesSIVKeyVersion,
+		KeyValue: keyValue,
+	}, nil
 }
 
 // validateKey validates the given AesSivKey.

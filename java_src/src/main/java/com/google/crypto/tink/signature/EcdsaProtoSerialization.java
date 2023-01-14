@@ -174,14 +174,17 @@ final class EcdsaProtoSerialization {
 
   private static int getEncodingLength(EcdsaParameters.CurveType curveType)
       throws GeneralSecurityException {
+    // We currently encode with one extra 0 byte at the beginning, to make sure
+    // that parsing is correct even if passing of a two's complement encoding is used.
+    // See also b/264525021.
     if (EcdsaParameters.CurveType.NIST_P256.equals(curveType)) {
-      return 32;
+      return 33;
     }
     if (EcdsaParameters.CurveType.NIST_P384.equals(curveType)) {
-      return 48;
+      return 49;
     }
     if (EcdsaParameters.CurveType.NIST_P521.equals(curveType)) {
-      return 66;
+      return 67;
     }
     throw new GeneralSecurityException("Unable to serialize CurveType " + curveType);
   }
