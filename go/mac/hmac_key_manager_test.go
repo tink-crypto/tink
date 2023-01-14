@@ -247,9 +247,7 @@ func TestHMACDeriveKey(t *testing.T) {
 	}
 	rand := random.GetRandomBytes(16)
 	buf := &bytes.Buffer{}
-	if p, _ := buf.Write(rand); p != len(rand) {
-		t.Fatalf("incomplete Write() = %d bytes, want %d bytes", p, len(rand))
-	}
+	buf.Write(rand) // never returns a non-nil error
 	k, err := keyManager.DeriveKey(keyFormat, buf)
 	if err != nil {
 		t.Fatalf("keyManager.DeriveKey() err = %v, want nil", err)

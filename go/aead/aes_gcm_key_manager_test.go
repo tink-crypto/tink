@@ -259,9 +259,7 @@ func TestAESGCMDeriveKey(t *testing.T) {
 
 			rand := random.GetRandomBytes(test.keySize)
 			buf := &bytes.Buffer{}
-			if p, _ := buf.Write(rand); p != len(rand) {
-				t.Fatalf("incomplete Write() = %d bytes, want %d bytes", p, len(rand))
-			}
+			buf.Write(rand) // never returns a non-nil error
 
 			k, err := keyManager.DeriveKey(serializedKeyFormat, buf)
 			if err != nil {

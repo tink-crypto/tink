@@ -131,24 +131,13 @@ func (a *KMSEnvelopeAEAD) Decrypt(ct, aad []byte) ([]byte, error) {
 // buildCipherText builds the cipher text by appending the length DEK, encrypted DEK
 // and the encrypted payload.
 func buildCipherText(encryptedDEK, payload []byte) ([]byte, error) {
-	var b bytes.Buffer
-
 	// Write the length of the encrypted DEK.
 	lenDEKbuf := make([]byte, lenDEK)
 	binary.BigEndian.PutUint32(lenDEKbuf, uint32(len(encryptedDEK)))
-	_, err := b.Write(lenDEKbuf)
-	if err != nil {
-		return nil, err
-	}
 
-	_, err = b.Write(encryptedDEK)
-	if err != nil {
-		return nil, err
-	}
-
-	_, err = b.Write(payload)
-	if err != nil {
-		return nil, err
-	}
+	var b bytes.Buffer
+	b.Write(lenDEKbuf) // never returns a non-nil error
+	b.Write(encryptedDEK)
+	b.Write(payload)
 	return b.Bytes(), nil
 }

@@ -196,9 +196,7 @@ func TestXChaCha20Poly1305DeriveKey(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			rand := random.GetRandomBytes(chacha20poly1305.KeySize)
 			buf := &bytes.Buffer{}
-			if p, _ := buf.Write(rand); p != len(rand) {
-				t.Fatalf("incomplete Write() = %d bytes, want %d bytes", p, len(rand))
-			}
+			buf.Write(rand) // never returns a non-nil error
 			k, err := keyManager.DeriveKey(test.keyFormat, buf)
 			if err != nil {
 				t.Fatalf("keyManager.DeriveKey() err = %v, want nil", err)
