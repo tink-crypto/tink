@@ -49,7 +49,10 @@ int close_ignoring_eintr(int fd) {
 
 // From Google/glog
 #ifndef HAVE_PREAD
+// lseek() is not thread safe.
+absl::Mutex pread_mutex;
 ssize_t pread(int fd, void* buf, size_t count, off_t offset) {
+  absl::MutexLock lock(&pread_mutex);
   off_t orig_offset = lseek(fd, 0, SEEK_CUR);
   if (orig_offset == (off_t)-1)
     return -1;
