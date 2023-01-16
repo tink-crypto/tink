@@ -72,29 +72,29 @@ using google::crypto::tink::Keyset;
 using google::crypto::tink::OutputPrefixType;
 
 #ifdef _WIN32
-  // For _S_IREAD, _S_IWRITE
-  #include <sys/stat.h>
-  // On Windows, Read and write permission is exclusive to the user.
-  #ifndef S_IRUSR
-    #define S_IRUSR _S_IREAD
-  #endif
+// For _S_IREAD, _S_IWRITE
+#include <sys/stat.h>
+// On Windows, Read and write permission is exclusive to the user.
+#ifndef S_IRUSR
+#define S_IRUSR _S_IREAD
+#endif
 
-  #ifndef S_IWUSR
-    #define S_IWUSR _S_IWRITE
-  #endif
+#ifndef S_IWUSR
+#define S_IWUSR _S_IWRITE
+#endif
 
-  #ifndef S_IRGRP
-    #define S_IRGRP 0
-  #endif
+#ifndef S_IRGRP
+#define S_IRGRP 0
+#endif
 
-  #ifndef S_IROTH
-    #define S_IROTH 0
-  #endif
+#ifndef S_IROTH
+#define S_IROTH 0
+#endif
 #endif // !_WIN32
 
 // O_BINARY mode is needed for Windows.
 #ifndef O_BINARY
-  #define O_BINARY 0
+#define O_BINARY 0
 #endif
 
 namespace crypto {

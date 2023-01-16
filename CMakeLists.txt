@@ -14,6 +14,9 @@ option(USE_ONLY_FIPS "Enables the FIPS only mode in Tink" OFF)
 set(CPACK_GENERATOR TGZ)
 set(CPACK_PACKAGE_VERSION ${PROJECT_VERSION})
 
+include(CheckSymbolExists)
+check_symbol_exists(pread "unistd.h" HAVE_PREAD)
+
 include(CPack)
 include(TinkWorkspace)
 include(TinkBuildRules)
