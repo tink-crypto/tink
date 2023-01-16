@@ -23,6 +23,7 @@ import java.security.GeneralSecurityException;
 import java.security.InvalidKeyException;
 import java.security.KeyStore;
 import java.security.ProviderException;
+import javax.crypto.AEADBadTagException;
 import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.GCMParameterSpec;
@@ -91,10 +92,14 @@ public final class AndroidKeystoreAesGcm implements Aead {
   }
 
   @Override
-  public byte[] decrypt(final byte[] ciphertext, final byte[] aad)
-      throws GeneralSecurityException {
+  public byte[] decrypt(final byte[] ciphertext, final byte[] aad) throws GeneralSecurityException {
+    if (ciphertext.length < IV_SIZE_IN_BYTES + TAG_SIZE_IN_BYTES) {
+      throw new GeneralSecurityException("ciphertext too short");
+    }
     try {
       return decryptInternal(ciphertext, aad);
+    } catch (AEADBadTagException ex) {
+      throw ex;
     } catch (ProviderException | GeneralSecurityException ex) {
       Log.w(TAG, "encountered a potentially transient KeyStore error, will wait and retry", ex);
       sleep();
@@ -104,9 +109,6 @@ public final class AndroidKeystoreAesGcm implements Aead {
 
   private byte[] decryptInternal(final byte[] ciphertext, final byte[] aad)
       throws GeneralSecurityException {
-    if (ciphertext.length < IV_SIZE_IN_BYTES + TAG_SIZE_IN_BYTES) {
-      throw new GeneralSecurityException("ciphertext too short");
-    }
     GCMParameterSpec params =
         new GCMParameterSpec(8 * TAG_SIZE_IN_BYTES, ciphertext, 0, IV_SIZE_IN_BYTES);
     Cipher cipher = Cipher.getInstance("AES/GCM/NoPadding");
