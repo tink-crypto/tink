@@ -45,6 +45,8 @@ import javax.crypto.KeyGenerator;
  * @since 1.0.0
  */
 public final class AndroidKeystoreKmsClient implements KmsClient {
+  private static final Object keyCreationLock = new Object();
+
   private static final String TAG = AndroidKeystoreKmsClient.class.getSimpleName();
   private static final int WAIT_TIME_MILLISECONDS_BEFORE_RETRY = 20;
 
@@ -209,15 +211,17 @@ public final class AndroidKeystoreKmsClient implements KmsClient {
   /**
    * Generates a new key in Android Keystore, if it doesn't exist.
    *
-   * <p>At the moment it can generate only AES256-GCM keys.
+   * <p>Generates AES256-GCM keys.
    */
   @RequiresApi(Build.VERSION_CODES.M)
   public static Aead getOrGenerateNewAeadKey(String keyUri)
       throws GeneralSecurityException, IOException {
     AndroidKeystoreKmsClient client = new AndroidKeystoreKmsClient();
-    if (!client.hasKey(keyUri)) {
-      Log.i(TAG, String.format("key URI %s doesn't exist, generating a new one", keyUri));
-      generateNewAesGcmKeyWithoutExistenceCheck(keyUri);
+    synchronized (keyCreationLock) {
+      if (!client.hasKey(keyUri)) {
+        Log.i(TAG, String.format("key URI %s doesn't exist, generating a new one", keyUri));
+        generateNewAesGcmKeyWithoutExistenceCheck(keyUri);
+      }
     }
     return client.getAead(keyUri);
   }
@@ -225,19 +229,21 @@ public final class AndroidKeystoreKmsClient implements KmsClient {
   /**
    * Generates a new key in Android Keystore.
    *
-   * <p>At the moment it can generate only AES256-GCM keys.
+   * <p>Generates AES256-GCM keys.
    */
   @RequiresApi(Build.VERSION_CODES.M)
   public static void generateNewAeadKey(String keyUri) throws GeneralSecurityException {
     AndroidKeystoreKmsClient client = new AndroidKeystoreKmsClient();
-    if (client.hasKey(keyUri)) {
-      throw new IllegalArgumentException(
-          String.format(
-              "cannot generate a new key %s because it already exists; please delete it with"
-                  + " deleteKey() and try again",
-              keyUri));
+    synchronized (keyCreationLock) {
+      if (client.hasKey(keyUri)) {
+        throw new IllegalArgumentException(
+            String.format(
+                "cannot generate a new key %s because it already exists; please delete it with"
+                    + " deleteKey() and try again",
+                keyUri));
+      }
+      generateNewAesGcmKeyWithoutExistenceCheck(keyUri);
     }
-    generateNewAesGcmKeyWithoutExistenceCheck(keyUri);
   }
 
   /**
