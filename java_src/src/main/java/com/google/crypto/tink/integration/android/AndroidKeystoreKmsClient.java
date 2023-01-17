@@ -48,7 +48,7 @@ public final class AndroidKeystoreKmsClient implements KmsClient {
   private static final Object keyCreationLock = new Object();
 
   private static final String TAG = AndroidKeystoreKmsClient.class.getSimpleName();
-  private static final int WAIT_TIME_MILLISECONDS_BEFORE_RETRY = 20;
+  private static final int MAX_WAIT_TIME_MILLISECONDS_BEFORE_RETRY = 40;
 
   /** The prefix of all keys stored in Android Keystore. */
   public static final String PREFIX = "android-keystore://";
@@ -192,19 +192,24 @@ public final class AndroidKeystoreKmsClient implements KmsClient {
     try {
       return this.keyStore.containsAlias(keyId);
     } catch (NullPointerException ex1) {
-      Log.w(
-          TAG,
-          "Keystore is temporarily unavailable, wait 20ms, reinitialize Keystore and try again.");
+      Log.w(TAG, "Keystore is temporarily unavailable, wait, reinitialize Keystore and try again.");
       try {
-        Thread.sleep(WAIT_TIME_MILLISECONDS_BEFORE_RETRY);
+        sleepRandomAmount();
         this.keyStore = KeyStore.getInstance("AndroidKeyStore");
         this.keyStore.load(/* param= */ null);
       } catch (IOException ex2) {
         throw new GeneralSecurityException(ex2);
-      } catch (InterruptedException ex) {
-        // Ignored.
       }
       return this.keyStore.containsAlias(keyId);
+    }
+  }
+
+  private static void sleepRandomAmount() {
+    int waitTimeMillis = (int) (Math.random() * MAX_WAIT_TIME_MILLISECONDS_BEFORE_RETRY);
+    try {
+      Thread.sleep(waitTimeMillis);
+    } catch (InterruptedException ex) {
+      // Ignored.
     }
   }
 
