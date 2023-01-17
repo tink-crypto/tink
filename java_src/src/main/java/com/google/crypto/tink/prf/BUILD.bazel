@@ -148,6 +148,21 @@ java_library(
     ],
 )
 
+java_library(
+    name = "hkdf_prf_key",
+    srcs = ["HkdfPrfKey.java"],
+    deps = [
+        ":hkdf_prf_parameters",
+        ":prf_key",
+        "//src/main/java/com/google/crypto/tink:accesses_partial_key",
+        "//src/main/java/com/google/crypto/tink:key",
+        "//src/main/java/com/google/crypto/tink/annotations:alpha",
+        "//src/main/java/com/google/crypto/tink/util:secret_bytes",
+        "@maven//:com_google_code_findbugs_jsr305",
+        "@maven//:com_google_errorprone_error_prone_annotations",
+    ],
+)
+
 android_library(
     name = "hkdf_prf_key_manager-android",
     srcs = ["HkdfPrfKeyManager.java"],
@@ -287,6 +302,21 @@ android_library(
         ":prf_parameters-android",
         "//src/main/java/com/google/crypto/tink/annotations:alpha-android",
         "//src/main/java/com/google/crypto/tink/util:bytes-android",
+        "@maven//:com_google_code_findbugs_jsr305",
+        "@maven//:com_google_errorprone_error_prone_annotations",
+    ],
+)
+
+android_library(
+    name = "hkdf_prf_key-android",
+    srcs = ["HkdfPrfKey.java"],
+    deps = [
+        ":hkdf_prf_parameters-android",
+        ":prf_key-android",
+        "//src/main/java/com/google/crypto/tink:accesses_partial_key-android",
+        "//src/main/java/com/google/crypto/tink:key-android",
+        "//src/main/java/com/google/crypto/tink/annotations:alpha-android",
+        "//src/main/java/com/google/crypto/tink/util:secret_bytes-android",
         "@maven//:com_google_code_findbugs_jsr305",
         "@maven//:com_google_errorprone_error_prone_annotations",
     ],
