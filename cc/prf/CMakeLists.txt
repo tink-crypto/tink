@@ -79,8 +79,12 @@ tink_cc_library(
     tink::prf::prf_set
     absl::memory
     absl::status
+    absl::statusor
     tink::core::primitive_set
     tink::core::primitive_wrapper
+    tink::internal::monitoring_util
+    tink::internal::registry_impl
+    tink::monitoring::monitoring
     tink::util::status
     tink::util::statusor
     tink::proto::tink_cc_proto
@@ -183,8 +187,12 @@ tink_cc_test(
     tink::prf::prf_set_wrapper
     gmock
     absl::memory
+    absl::status
     absl::strings
     tink::core::primitive_set
+    tink::core::registry
+    tink::monitoring::monitoring_client_mocks
+    tink::util::status
     tink::util::statusor
     tink::util::test_matchers
     tink::proto::tink_cc_proto
