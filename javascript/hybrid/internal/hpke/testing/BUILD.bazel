@@ -7,9 +7,8 @@ ts_library(
     testonly = True,
     srcs = ["hpke_test_utils.ts"],
     deps = [
-        "//exception",
         "//hybrid/internal/hpke",
-        "//subtle",
+        "//subtle:bytes",
     ],
 )
 
@@ -19,9 +18,7 @@ ts_library(
     srcs = ["hpke_test_utils_test.ts"],
     deps = [
         ":hpke_test_utils",
-        "//exception",
         "//hybrid/internal/hpke",
-        "//subtle",
         "@npm//@types/jasmine",
     ],
 )

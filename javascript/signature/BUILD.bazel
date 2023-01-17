@@ -32,7 +32,10 @@ ts_library(
         "//internal:registry",
         "//internal:util",
         "//signature/internal",
-        "//subtle",
+        "//subtle:bytes",
+        "//subtle:ecdsa",
+        "//subtle:elliptic_curves",
+        "//subtle:validators",
     ],
 )
 
@@ -57,7 +60,9 @@ ts_library(
         "//internal:registry",
         "//internal:util",
         "//signature/internal",
-        "//subtle",
+        "//subtle:bytes",
+        "//subtle:elliptic_curves",
+        "//subtle:random",
         "//testing/internal",
         "@npm//@types/jasmine",
     ],

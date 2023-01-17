@@ -21,7 +21,10 @@ ts_library(
     deps = [
         "//aead/internal",
         "//exception",
-        "//subtle",
+        "//subtle:bytes",
+        "//subtle:elliptic_curves",
+        "//subtle:hmac",
+        "//subtle:validators",
     ],
 )
 
@@ -40,7 +43,9 @@ ts_library(
         ":hpke",
         "//exception",
         "//hybrid/internal/hpke/testing:hpke_test_utils",
-        "//subtle",
+        "//subtle:bytes",
+        "//subtle:elliptic_curves",
+        "//subtle:random",
         "//testing/internal",
         "@npm//@types/jasmine",
     ],

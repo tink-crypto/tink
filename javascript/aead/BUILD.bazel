@@ -30,7 +30,10 @@ ts_library(
         "//internal:proto_shims",
         "//internal:registry",
         "//internal:util",
-        "//subtle",
+        "//subtle:aes_gcm",
+        "//subtle:encrypt_then_authenticate",
+        "//subtle:random",
+        "//subtle:validators",
     ],
 )
 
@@ -56,7 +59,8 @@ ts_library(
         "//internal:proto",
         "//internal:proto_shims",
         "//internal:registry",
-        "//subtle",
+        "//subtle:bytes",
+        "//subtle:random",
         "//testing/internal",
         "@npm//@types/jasmine",
     ],

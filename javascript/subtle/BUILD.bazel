@@ -3,33 +3,148 @@ load("@npm//@bazel/typescript:index.bzl", "ts_library")
 package(default_visibility = ["//:__subpackages__"])
 
 ts_library(
-    name = "subtle",
+    name = "aes_ctr",
     srcs = [
         "aes_ctr.ts",
+    ],
+    deps = [
+        ":bytes",
+        ":ind_cpa_cipher",
+        ":random",
+        ":validators",
+        "//exception",
+    ],
+)
+
+ts_library(
+    name = "aes_gcm",
+    srcs = [
         "aes_gcm.ts",
+    ],
+    deps = [
+        ":random",
+        ":validators",
+        "//aead/internal",
+    ],
+)
+
+ts_library(
+    name = "bytes",
+    srcs = [
         "bytes.ts",
+    ],
+    deps = [
+        "//exception",
+    ],
+)
+
+ts_library(
+    name = "ecdsa",
+    srcs = [
         "ecdsa_sign.ts",
         "ecdsa_verify.ts",
+    ],
+    deps = [
+        ":elliptic_curves",
+        ":validators",
+        "//exception",
+        "//signature/internal",
+    ],
+)
+
+ts_library(
+    name = "ecies",
+    srcs = [
         "ecies_aead_hkdf_dem_helper.ts",
         "ecies_aead_hkdf_hybrid_decrypt.ts",
         "ecies_aead_hkdf_hybrid_encrypt.ts",
         "ecies_hkdf_kem_recipient.ts",
         "ecies_hkdf_kem_sender.ts",
-        "elliptic_curves.ts",
-        "encrypt_then_authenticate.ts",
-        "hkdf.ts",
-        "hmac.ts",
-        "ind_cpa_cipher.ts",
-        "random.ts",
-        "validators.ts",
     ],
     deps = [
+        ":bytes",
+        ":elliptic_curves",
+        ":hkdf",
         "//aead/internal",
         "//exception",
         "//hybrid/internal",
-        "//mac/internal",
-        "//signature/internal",
     ],
+)
+
+ts_library(
+    name = "elliptic_curves",
+    srcs = [
+        "elliptic_curves.ts",
+    ],
+    deps = [
+        ":bytes",
+        "//exception",
+    ],
+)
+
+ts_library(
+    name = "encrypt_then_authenticate",
+    srcs = [
+        "encrypt_then_authenticate.ts",
+    ],
+    deps = [
+        ":aes_ctr",
+        ":bytes",
+        ":hmac",
+        ":ind_cpa_cipher",
+        ":validators",
+        "//aead/internal",
+        "//exception",
+        "//mac/internal",
+    ],
+)
+
+ts_library(
+    name = "hkdf",
+    srcs = [
+        "hkdf.ts",
+    ],
+    deps = [
+        ":hmac",
+        ":validators",
+        "//exception",
+    ],
+)
+
+ts_library(
+    name = "hmac",
+    srcs = [
+        "hmac.ts",
+    ],
+    deps = [
+        ":bytes",
+        ":validators",
+        "//exception",
+        "//mac/internal",
+    ],
+)
+
+ts_library(
+    name = "ind_cpa_cipher",
+    srcs = [
+        "ind_cpa_cipher.ts",
+    ],
+)
+
+ts_library(
+    name = "random",
+    srcs = [
+        "random.ts",
+    ],
+    deps = ["//exception"],
+)
+
+ts_library(
+    name = "validators",
+    srcs = [
+        "validators.ts",
+    ],
+    deps = ["//exception"],
 )
 
 ts_library(
@@ -53,7 +168,17 @@ ts_library(
         ":wycheproof_ecdsa_test_vectors",
     ],
     deps = [
-        ":subtle",
+        ":aes_ctr",
+        ":aes_gcm",
+        ":bytes",
+        ":ecdsa",
+        ":ecies",
+        ":elliptic_curves",
+        ":encrypt_then_authenticate",
+        ":hkdf",
+        ":hmac",
+        ":random",
+        ":validators",
         "//aead",
         "//exception",
         "//hybrid",

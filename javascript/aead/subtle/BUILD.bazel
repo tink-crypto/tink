@@ -11,5 +11,8 @@ ts_library(
         "index.ts",
     ],
     module_name = "tink-crypto/aead/subtle",
-    deps = ["//subtle"],
+    deps = [
+        "//subtle:aes_gcm",
+        "//subtle:encrypt_then_authenticate",
+      ],
 )

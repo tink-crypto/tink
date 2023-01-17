@@ -37,7 +37,10 @@ ts_library(
         "//internal:proto_shims",
         "//internal:registry",
         "//internal:util",
-        "//subtle",
+        "//subtle:bytes",
+        "//subtle:ecies",
+        "//subtle:elliptic_curves",
+        "//subtle:validators",
     ],
 )
 
@@ -67,7 +70,9 @@ ts_library(
         "//internal:proto_shims",
         "//internal:registry",
         "//internal:util",
-        "//subtle",
+        "//subtle:bytes",
+        "//subtle:elliptic_curves",
+        "//subtle:random",
         "//testing/internal",
         "@npm//@types/jasmine",
     ],
