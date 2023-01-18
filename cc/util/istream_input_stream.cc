@@ -16,7 +16,8 @@
 
 #include "tink/util/istream_input_stream.h"
 
-#include <unistd.h>
+#include <errno.h>
+#include <stdint.h>
 
 #include <algorithm>
 #include <cstring>
@@ -26,7 +27,6 @@
 
 #include "absl/memory/memory.h"
 #include "absl/status/status.h"
-#include "tink/input_stream.h"
 #include "tink/util/errors.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"

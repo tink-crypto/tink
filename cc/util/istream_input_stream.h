@@ -17,6 +17,8 @@
 #ifndef TINK_UTIL_ISTREAM_INPUT_STREAM_H_
 #define TINK_UTIL_ISTREAM_INPUT_STREAM_H_
 
+#include <stdint.h>
+
 #include <istream>
 #include <memory>
 
