@@ -447,8 +447,11 @@ cc_test(
     srcs = ["file_input_stream_test.cc"],
     deps = [
         ":file_input_stream",
+        ":status",
+        ":test_matchers",
         ":test_util",
         "@com_google_absl//absl/memory",
+        "@com_google_absl//absl/status",
         "@com_google_absl//absl/strings",
         "@com_google_googletest//:gtest_main",
     ],

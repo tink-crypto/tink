@@ -302,9 +302,12 @@ tink_cc_test(
     file_input_stream_test.cc
   DEPS
     tink::util::file_input_stream
+    tink::util::status
+    tink::util::test_matchers
     tink::util::test_util
     gmock
     absl::memory
+    absl::status
     absl::strings
 )
 
