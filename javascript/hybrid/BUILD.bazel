@@ -5,34 +5,162 @@ package(default_visibility = ["//:__subpackages__"])
 ts_library(
     name = "hybrid",
     srcs = [
-        "decrypt.ts",
-        "decrypt_wrapper.ts",
-        "ecies_aead_hkdf_for_decrypting.ts",
-        "ecies_aead_hkdf_for_encrypting.ts",
-        "ecies_aead_hkdf_private_key_manager.ts",
-        "ecies_aead_hkdf_public_key_manager.ts",
-        "ecies_aead_hkdf_util.ts",
-        "ecies_aead_hkdf_validators.ts",
-        "ecies_with_aes_ctr_hmac.ts",
-        "ecies_with_aes_gcm.ts",
-        "encrypt.ts",
-        "encrypt_wrapper.ts",
-        "hybrid_config.ts",
-        "hybrid_decrypt_wrapper.ts",
-        "hybrid_encrypt_wrapper.ts",
-        "hybrid_key_templates.ts",
         "index.ts",
-        "registry_ecies_aead_hkdf_dem_helper.ts",
     ],
     module_name = "tink-crypto/hybrid",
     deps = [
+        ":ecies_aead_hkdf_private_key_manager",
+        ":ecies_aead_hkdf_public_key_manager",
+        ":hybrid_decrypt",
+        ":hybrid_decrypt_wrapper",
+        ":hybrid_encrypt",
+        ":hybrid_encrypt_wrapper",
+        ":hybrid_key_templates",
         "//aead",
+    ],
+)
+
+ts_library(
+    name = "hybrid_decrypt",
+    srcs = [
+        "decrypt.ts",
+    ],
+    deps = ["//hybrid/internal"],
+)
+
+ts_library(
+    name = "hybrid_decrypt_wrapper",
+    srcs = [
+        "decrypt_wrapper.ts",
+        "hybrid_decrypt_wrapper.ts",
+    ],
+    deps = [
         "//exception",
         "//hybrid/internal",
         "//internal:crypto_format",
-        "//internal:key_manager",
         "//internal:primitive_set",
         "//internal:primitive_wrapper",
+        "//internal:proto",
+        "//internal:registry",
+    ],
+)
+
+ts_library(
+    name = "hybrid_encrypt",
+    srcs = [
+        "encrypt.ts",
+    ],
+    deps = ["//hybrid/internal"],
+)
+
+ts_library(
+    name = "hybrid_encrypt_wrapper",
+    srcs = [
+        "encrypt_wrapper.ts",
+        "hybrid_encrypt_wrapper.ts",
+    ],
+    deps = [
+        "//exception",
+        "//hybrid/internal",
+        "//internal:primitive_set",
+        "//internal:primitive_wrapper",
+        "//internal:registry",
+        "//subtle:bytes",
+    ],
+)
+
+ts_library(
+    name = "hybrid_config",
+    srcs = [
+        "hybrid_config.ts",
+    ],
+    deps = [
+        ":ecies_aead_hkdf_private_key_manager",
+        ":ecies_aead_hkdf_public_key_manager",
+        ":hybrid_decrypt_wrapper",
+        ":hybrid_encrypt_wrapper",
+        "//aead",
+        "//internal:registry",
+    ],
+)
+
+ts_library(
+    name = "hybrid_key_templates",
+    srcs = [
+        "ecies_with_aes_ctr_hmac.ts",
+        "ecies_with_aes_gcm.ts",
+        "hybrid_key_templates.ts",
+    ],
+    deps = [
+        ":hybrid_config",
+        "//aead",
+        "//internal:proto",
+    ],
+)
+
+ts_library(
+    name = "ecies_aead_hkdf_util",
+    srcs = [
+        "ecies_aead_hkdf_util.ts",
+    ],
+    deps = [
+        "//exception",
+        "//internal:proto",
+        "//internal:proto_shims",
+        "//internal:util",
+        "//subtle:elliptic_curves",
+    ],
+)
+
+ts_library(
+    name = "ecies_aead_hkdf_validators",
+    srcs = [
+        "ecies_aead_hkdf_validators.ts",
+    ],
+    deps = [
+        "//aead",
+        "//exception",
+        "//internal:proto",
+        "//internal:proto_shims",
+        "//subtle:validators",
+    ],
+)
+
+ts_library(
+    name = "ecies_aead_hkdf_public_key_manager",
+    srcs = [
+        "ecies_aead_hkdf_for_encrypting.ts",
+        "ecies_aead_hkdf_public_key_manager.ts",
+    ],
+    deps = [
+        ":ecies_aead_hkdf_util",
+        ":ecies_aead_hkdf_validators",
+        ":registry_ecies_aead_hkdf_dem_helper",
+        "//exception",
+        "//hybrid/internal",
+        "//internal:key_manager",
+        "//internal:proto",
+        "//internal:proto_shims",
+        "//internal:registry",
+        "//internal:util",
+        "//subtle:ecies",
+    ],
+)
+
+ts_library(
+    name = "ecies_aead_hkdf_private_key_manager",
+    srcs = [
+        "ecies_aead_hkdf_for_decrypting.ts",
+        "ecies_aead_hkdf_private_key_manager.ts",
+    ],
+    deps = [
+        ":ecies_aead_hkdf_public_key_manager",
+        ":ecies_aead_hkdf_util",
+        ":ecies_aead_hkdf_validators",
+        ":registry_ecies_aead_hkdf_dem_helper",
+        "//exception",
+        "//hybrid/internal",
+        "//internal:key_manager",
         "//internal:proto",
         "//internal:proto_shims",
         "//internal:registry",
@@ -40,7 +168,20 @@ ts_library(
         "//subtle:bytes",
         "//subtle:ecies",
         "//subtle:elliptic_curves",
-        "//subtle:validators",
+    ],
+)
+
+ts_library(
+    name = "registry_ecies_aead_hkdf_dem_helper",
+    srcs = [
+        "registry_ecies_aead_hkdf_dem_helper.ts",
+    ],
+    deps = [
+        "//aead",
+        "//exception",
+        "//internal:proto",
+        "//internal:registry",
+        "//subtle:ecies",
     ],
 )
 
@@ -59,7 +200,15 @@ ts_library(
         "registry_ecies_aead_hkdf_dem_helper_test.ts",
     ],
     deps = [
-        ":hybrid",
+        ":ecies_aead_hkdf_private_key_manager",
+        ":ecies_aead_hkdf_public_key_manager",
+        ":ecies_aead_hkdf_util",
+        ":ecies_aead_hkdf_validators",
+        ":hybrid_config",
+        ":hybrid_decrypt_wrapper",
+        ":hybrid_encrypt_wrapper",
+        ":hybrid_key_templates",
+        ":registry_ecies_aead_hkdf_dem_helper",
         "//aead",
         "//exception",
         "//hybrid/internal",

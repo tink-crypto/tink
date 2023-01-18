@@ -182,6 +182,7 @@ ts_library(
         "//aead",
         "//exception",
         "//hybrid",
+        "//hybrid:registry_ecies_aead_hkdf_dem_helper",
         "//internal:registry",
         "//signature/internal",
         "//testing/internal",

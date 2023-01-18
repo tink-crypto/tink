@@ -251,6 +251,8 @@ ts_library(
         "//aead",
         "//exception",
         "//hybrid",
+        "//hybrid:hybrid_config",
+        "//hybrid:hybrid_key_templates",
         "//mac",
         "//subtle:bytes",
         "//subtle:elliptic_curves",
