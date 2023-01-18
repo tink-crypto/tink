@@ -16,7 +16,8 @@
 
 #include "tink/util/istream_input_stream.h"
 
-#include <unistd.h>
+#include <errno.h>
+#include <stdlib.h>
 
 #include <algorithm>
 #include <fstream>
@@ -29,6 +30,9 @@
 
 #include "gtest/gtest.h"
 #include "absl/memory/memory.h"
+#include "absl/status/status.h"
+#include "absl/status/statusor.h"
+#include "absl/strings/str_cat.h"
 #include "absl/strings/string_view.h"
 #include "tink/subtle/random.h"
 #include "tink/util/test_util.h"
