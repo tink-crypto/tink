@@ -24,9 +24,8 @@ go_test(
         "x25519_test.go",
     ],
     data = ["@wycheproof//testvectors:xdh"],
-    embed = [":subtle"],
     deps = [
-        "//subtle/random",
+        ":subtle",
         "//testutil",
         "@org_golang_x_crypto//curve25519",
     ],
