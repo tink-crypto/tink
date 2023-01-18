@@ -89,7 +89,6 @@ tink_cc_library(
     tink::util::errors
     tink::util::status
     tink::util::statusor
-    absl::memory
     absl::status
     tink::core::input_stream
 )

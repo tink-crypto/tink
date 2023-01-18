@@ -167,7 +167,6 @@ cc_library(
         ":status",
         ":statusor",
         "//:input_stream",
-        "@com_google_absl//absl/memory",
         "@com_google_absl//absl/status",
     ],
 )

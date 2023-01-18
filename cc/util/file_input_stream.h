@@ -17,7 +17,9 @@
 #ifndef TINK_UTIL_FILE_INPUT_STREAM_H_
 #define TINK_UTIL_FILE_INPUT_STREAM_H_
 
+#include <cstdint>
 #include <memory>
+#include <vector>
 
 #include "tink/input_stream.h"
 #include "tink/util/status.h"
@@ -31,8 +33,8 @@ namespace util {
 class FileInputStream : public crypto::tink::InputStream {
  public:
   // Constructs an InputStream that will read from the file specified
-  // via 'file_descriptor', using a buffer of the specified size, if any
-  // (if no legal 'buffer_size' is given, a reasonable default will be used).
+  // via `file_descriptor`, using a buffer of the specified size, if any
+  // (if no legal `buffer_size` is given, a reasonable default will be used).
   // Takes the ownership of the file, and will close it upon destruction.
   explicit FileInputStream(int file_descriptor, int buffer_size = -1);
 
@@ -45,16 +47,20 @@ class FileInputStream : public crypto::tink::InputStream {
   int64_t Position() const override;
 
  private:
-  util::Status status_;
+  // Status of the stream.
+  util::Status status_ = util::OkStatus();
   int fd_;
-  std::unique_ptr<uint8_t[]> buffer_;
-  const int buffer_size_;
-  int64_t position_;     // current position in the file (from the beginning)
+  std::vector<uint8_t> buffer_;
 
+  // Current position in the stream (from the beginning).
+  int64_t position_ = 0;
   // Counters that describe the state of the data in buffer_.
-  int count_in_buffer_;  // # of bytes available in buffer_
-  int count_backedup_;   // # of bytes available in buffer_ that were backed up
-  int buffer_offset_;    // offset at which the returned bytes start in buffer_
+  // # of bytes available in buffer_.
+  int count_in_buffer_ = 0;
+  // # of bytes available in buffer_ that were backed up.
+  int count_backedup_ = 0;
+  // offset at which the returned bytes start in buffer_.
+  int buffer_offset_ = 0;
 };
 
 }  // namespace util
