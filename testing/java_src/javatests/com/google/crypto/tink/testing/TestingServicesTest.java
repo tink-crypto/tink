@@ -187,7 +187,7 @@ public final class TestingServicesTest {
             + "      \"keyData\": {"
             + "        \"typeUrl\": \"type.googleapis.com/google.crypto.tink.AesGcmKey\","
             + "        \"keyMaterialType\": \"SYMMETRIC\","
-            + "        \"value\": \"AFakeTestKeyValue1234567\""
+            + "        \"value\": \"GhCC74uJ+2f4qlpaHwR4ylNQ\""
             + "      },"
             + "      \"outputPrefixType\": \"TINK\","
             + "      \"keyId\": 42,"
