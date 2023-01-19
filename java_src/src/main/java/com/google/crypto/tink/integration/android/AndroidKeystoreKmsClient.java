@@ -273,6 +273,23 @@ public final class AndroidKeystoreKmsClient implements KmsClient {
     keyGenerator.generateKey();
   }
 
+  /**
+   * Checks if the key exists, and generates a new one if it does not yet exist.
+   *
+   * <p>Returns true if a new key was generated.
+   */
+  @RequiresApi(Build.VERSION_CODES.M)
+  static boolean generateKeyIfNotExist(String keyUri) throws GeneralSecurityException {
+    AndroidKeystoreKmsClient client = new AndroidKeystoreKmsClient();
+    synchronized (keyCreationLock) {
+      if (!client.hasKey(keyUri)) {
+        generateNewAesGcmKeyWithoutExistenceCheck(keyUri);
+        return true;
+      }
+      return false;
+    }
+  }
+
   /** Does a self-test to verify whether we can rely on Android Keystore */
   private static Aead validateAead(Aead aead) throws GeneralSecurityException {
     // Non-empty message and empty aad.

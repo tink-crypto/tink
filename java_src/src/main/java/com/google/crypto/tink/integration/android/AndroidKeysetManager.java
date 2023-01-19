@@ -271,15 +271,13 @@ public final class AndroidKeysetManager {
         client = new AndroidKeystoreKmsClient();
       }
 
-      boolean existed = client.hasKey(masterKeyUri);
-      if (!existed) {
-        try {
-          // Note that this function does not use the keyStore instance set with withKeyStore.
-          AndroidKeystoreKmsClient.generateNewAesGcmKeyWithoutExistenceCheck(masterKeyUri);
-        } catch (GeneralSecurityException | ProviderException ex) {
-          Log.w(TAG, "cannot use Android Keystore, it'll be disabled", ex);
-          return null;
-        }
+      boolean generated;
+      try {
+        // Note that this function does not use the keyStore instance set with withKeyStore.
+        generated = AndroidKeystoreKmsClient.generateKeyIfNotExist(masterKeyUri);
+      } catch (GeneralSecurityException | ProviderException ex) {
+        Log.w(TAG, "cannot use Android Keystore, it'll be disabled", ex);
+        return null;
       }
 
       try {
@@ -287,9 +285,10 @@ public final class AndroidKeysetManager {
       } catch (GeneralSecurityException | ProviderException ex) {
         // Throw the exception if the key exists but is unusable. We can't recover by generating a
         // new key because there might be existing encrypted data under the unusable key.
-        // Users can provide a master key that is stored in StrongBox, which may throw a
-        // ProviderException if there's any problem with it.
-        if (existed) {
+        // Users can provide a master key that is stored in StrongBox (see
+        // https://developer.android.com/about/versions/pie/android-9.0#hardware-security-module),
+        // which may throw a ProviderException if there's any problem with it.
+        if (!generated) {
           throw new KeyStoreException(
               String.format("the master key %s exists but is unusable", masterKeyUri), ex);
         }
