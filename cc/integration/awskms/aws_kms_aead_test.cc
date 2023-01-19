@@ -34,7 +34,7 @@ namespace {
 using crypto::tink::integration::awskms::AwsKmsAead;
 
 class AwsKmsAeadTest : public ::testing::Test {
-  // TODO(przydatek): add a test with a mock KMSClient.
+  // TODO(b/266054896): add a test with a mock KMSClient.
 };
 
 

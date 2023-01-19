@@ -25,7 +25,7 @@ namespace {
 using crypto::tink::integration::gcpkms::GcpKmsAead;
 
 class GcpKmsAeadTest : public ::testing::Test {
-  // TODO(kste): Add tests when mock for
+  // TODO(b/266054896): Add tests when mock for
   // google::cloud::kms::v1::KeyManagementService::StubInterface is available.
 };
 
