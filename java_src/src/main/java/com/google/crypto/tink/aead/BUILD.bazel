@@ -8,6 +8,7 @@ java_library(
     name = "aes_gcm_key_manager",
     srcs = ["AesGcmKeyManager.java"],
     deps = [
+        ":aes_gcm_proto_serialization",
         "//proto:aes_gcm_java_proto",
         "//proto:tink_java_proto",
         "//src/main/java/com/google/crypto/tink:aead",
@@ -433,6 +434,7 @@ android_library(
     name = "aes_gcm_key_manager-android",
     srcs = ["AesGcmKeyManager.java"],
     deps = [
+        ":aes_gcm_proto_serialization-android",
         "//proto:aes_gcm_java_proto_lite",
         "//proto:tink_java_proto_lite",
         "//src/main/java/com/google/crypto/tink:aead-android",

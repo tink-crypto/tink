@@ -134,6 +134,7 @@ public final class AesGcmKeyManager extends KeyTypeManager<AesGcmKey> {
 
   public static void register(boolean newKeyAllowed) throws GeneralSecurityException {
     Registry.registerKeyManager(new AesGcmKeyManager(), newKeyAllowed);
+    AesGcmProtoSerialization.register();
   }
 
   /**
