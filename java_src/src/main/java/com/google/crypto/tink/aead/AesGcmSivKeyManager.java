@@ -149,6 +149,7 @@ public final class AesGcmSivKeyManager extends KeyTypeManager<AesGcmSivKey> {
   public static void register(boolean newKeyAllowed) throws GeneralSecurityException {
     if (canUseAesGcmSive()) {
       Registry.registerKeyManager(new AesGcmSivKeyManager(), newKeyAllowed);
+      AesGcmSivProtoSerialization.register();
     }
   }
 
