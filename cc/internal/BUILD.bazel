@@ -758,3 +758,30 @@ cc_test(
         "@com_google_googletest//:gtest_main",
     ],
 )
+
+cc_library(
+    name = "test_random_access_stream",
+    testonly = 1,
+    srcs = ["test_random_access_stream.cc"],
+    hdrs = ["test_random_access_stream.h"],
+    include_prefix = "tink/internal",
+    deps = [
+        "//:random_access_stream",
+        "@com_google_absl//absl/strings",
+    ],
+)
+
+cc_test(
+    name = "test_random_access_stream_test",
+    srcs = ["test_random_access_stream_test.cc"],
+    deps = [
+        ":test_random_access_stream",
+        "//subtle:random",
+        "//util:buffer",
+        "//util:status",
+        "//util:test_matchers",
+        "@com_google_absl//absl/status",
+        "@com_google_absl//absl/strings",
+        "@com_google_googletest//:gtest_main",
+    ],
+)

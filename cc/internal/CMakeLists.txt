@@ -716,3 +716,28 @@ tink_cc_test(
     tink::util::test_matchers
     tink::proto::tink_cc_proto
 )
+
+tink_cc_library(
+  NAME test_random_access_stream
+  SRCS
+    test_random_access_stream.cc
+    test_random_access_stream.h
+  DEPS
+    absl::strings
+    tink::core::random_access_stream
+)
+
+tink_cc_test(
+  NAME test_random_access_stream_test
+  SRCS
+    test_random_access_stream_test.cc
+  DEPS
+    tink::internal::test_random_access_stream
+    gmock
+    absl::status
+    absl::strings
+    tink::subtle::random
+    tink::util::buffer
+    tink::util::status
+    tink::util::test_matchers
+)
