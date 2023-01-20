@@ -5,37 +5,170 @@ package(default_visibility = ["//:__subpackages__"])
 ts_library(
     name = "signature",
     srcs = [
-        "ecdsa_for_signing.ts",
-        "ecdsa_for_verifying.ts",
-        "ecdsa_private_key_manager.ts",
-        "ecdsa_public_key_manager.ts",
-        "ecdsa_util.ts",
         "index.ts",
-        "public_key_sign_wrapper.ts",
-        "public_key_verify_wrapper.ts",
-        "sign.ts",
-        "sign_wrapper.ts",
-        "signature_config.ts",
-        "signature_key_templates.ts",
-        "verify.ts",
-        "verify_wrapper.ts",
     ],
     module_name = "tink-crypto/signature",
     deps = [
+        ":ecdsa_for_signing",
+        ":ecdsa_for_verifying",
+        ":public_key_sign",
+        ":public_key_sign_wrapper",
+        ":public_key_verify",
+        ":public_key_verify_wrapper",
+    ],
+)
+
+ts_library(
+    name = "public_key_sign",
+    srcs = [
+        "sign.ts",
+    ],
+    deps = [
+        "//signature/internal",
+    ],
+)
+
+ts_library(
+    name = "public_key_verify",
+    srcs = [
+        "verify.ts",
+    ],
+    deps = [
+        "//signature/internal",
+    ],
+)
+
+ts_library(
+    name = "signature_config",
+    srcs = [
+        "signature_config.ts",
+    ],
+    deps = [
+        ":ecdsa_private_key_manager",
+        ":ecdsa_public_key_manager",
+        ":public_key_sign_wrapper",
+        ":public_key_verify_wrapper",
+        "//internal:registry",
+    ],
+)
+
+ts_library(
+    name = "signature_key_templates",
+    srcs = [
+        "signature_key_templates.ts",
+    ],
+    deps = [
+        ":signature_config",
+        "//internal:proto",
+    ],
+)
+
+ts_library(
+    name = "ecdsa_util",
+    srcs = [
+        "ecdsa_util.ts",
+    ],
+    deps = [
+        "//exception",
+        "//internal:proto",
+        "//internal:proto_shims",
+        "//internal:util",
+        "//subtle:elliptic_curves",
+        "//subtle:validators",
+    ],
+)
+
+ts_library(
+    name = "public_key_sign_wrapper",
+    srcs = [
+        "public_key_sign_wrapper.ts",
+        "sign_wrapper.ts",
+    ],
+    deps = [
+        "//exception",
+        "//internal:primitive_set",
+        "//internal:primitive_wrapper",
+        "//internal:registry",
+        "//signature/internal",
+        "//subtle:bytes",
+        "//subtle:validators",
+    ],
+)
+
+ts_library(
+    name = "public_key_verify_wrapper",
+    srcs = [
+        "public_key_verify_wrapper.ts",
+        "verify_wrapper.ts",
+    ],
+    deps = [
         "//exception",
         "//internal:crypto_format",
-        "//internal:key_manager",
         "//internal:primitive_set",
         "//internal:primitive_wrapper",
         "//internal:proto",
-        "//internal:proto_shims",
         "//internal:registry",
+        "//signature/internal",
+        "//subtle:validators",
+    ],
+)
+
+ts_library(
+    name = "ecdsa_for_verifying",
+    srcs = [
+        "ecdsa_for_verifying.ts",
+    ],
+    deps = [
+        ":ecdsa_public_key_manager",
+        "//internal:registry",
+    ],
+)
+
+ts_library(
+    name = "ecdsa_public_key_manager",
+    srcs = [
+        "ecdsa_public_key_manager.ts",
+    ],
+    deps = [
+        ":ecdsa_util",
+        "//exception",
+        "//internal:key_manager",
+        "//internal:proto",
+        "//internal:util",
+        "//signature/internal",
+        "//subtle:ecdsa",
+    ],
+)
+
+ts_library(
+    name = "ecdsa_for_signing",
+    srcs = [
+        "ecdsa_for_signing.ts",
+    ],
+    deps = [
+        ":ecdsa_private_key_manager",
+        ":signature_key_templates",
+        "//internal:registry",
+    ],
+)
+
+ts_library(
+    name = "ecdsa_private_key_manager",
+    srcs = [
+        "ecdsa_private_key_manager.ts",
+    ],
+    deps = [
+        ":ecdsa_public_key_manager",
+        ":ecdsa_util",
+        "//exception",
+        "//internal:key_manager",
+        "//internal:proto",
+        "//internal:proto_shims",
         "//internal:util",
         "//signature/internal",
         "//subtle:bytes",
         "//subtle:ecdsa",
         "//subtle:elliptic_curves",
-        "//subtle:validators",
     ],
 )
 
@@ -51,7 +184,12 @@ ts_library(
         "signature_key_templates_test.ts",
     ],
     deps = [
-        ":signature",
+        ":ecdsa_private_key_manager",
+        ":ecdsa_public_key_manager",
+        ":public_key_sign_wrapper",
+        ":public_key_verify_wrapper",
+        ":signature_config",
+        ":signature_key_templates",
         "//internal:crypto_format",
         "//internal:keyset_handle",
         "//internal:primitive_set",
