@@ -326,12 +326,13 @@ public final class AndroidKeysetManager {
       return manager;
     }
 
+    @SuppressWarnings("UnusedException")
     private KeysetManager read() throws GeneralSecurityException, IOException {
       if (masterKey != null) {
         try {
           return KeysetManager.withKeysetHandle(KeysetHandle.read(reader, masterKey));
         } catch (InvalidProtocolBufferException | GeneralSecurityException ex) {
-          // Swallow the exception and attempt to read the keyset in cleartext.
+          // Attempt to read the keyset in cleartext.
           // This edge case may happen when either
           //   - the keyset was generated on a pre M phone which is then upgraded to M or newer, or
           //   - the keyset was generated with Keystore being disabled, then Keystore is enabled.
@@ -340,9 +341,16 @@ public final class AndroidKeysetManager {
           // cleartext value that it controls. This does not introduce new security risks because to
           // overwrite the encrypted keyset in private preferences of an app, said adversaries must
           // have the same privilege as the app, thus they can call Android Keystore to read or
-          // write
-          // the encrypted keyset in the first place.
+          // write the encrypted keyset in the first place.
           Log.w(TAG, "cannot decrypt keyset: ", ex);
+          try {
+            return KeysetManager.withKeysetHandle(CleartextKeysetHandle.read(reader));
+          } catch (InvalidProtocolBufferException ex2) {
+            // Raising a InvalidProtocolBufferException error here would be confusing, because
+            // parsing probably failed because the keyset was encrypted but we were not able to
+            // decrypt it. It is better to throw the error above.
+            throw ex;
+          }
         }
       }
 
