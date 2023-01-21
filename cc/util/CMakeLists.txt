@@ -370,10 +370,18 @@ tink_cc_test(
   SRCS
     test_util_test.cc
   DEPS
+    tink::util::buffer
+    tink::util::ostream_output_stream
+    tink::util::statusor
     tink::util::test_matchers
     tink::util::test_util
     gmock
+    absl::strings
+    tink::core::output_stream
+    tink::core::random_access_stream
+    tink::internal::test_random_access_stream
     tink::subtle::subtle
+    tink::subtle::test_util
     tink::proto::aes_gcm_cc_proto
     tink::proto::tink_cc_proto
 )

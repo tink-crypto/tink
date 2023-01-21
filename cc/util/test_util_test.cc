@@ -15,9 +15,24 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include "tink/util/test_util.h"
 
+#include <algorithm>
+#include <cstdint>
+#include <memory>
+#include <sstream>
+#include <string>
+#include <utility>
+
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include "absl/strings/string_view.h"
+#include "tink/internal/test_random_access_stream.h"
+#include "tink/output_stream.h"
+#include "tink/random_access_stream.h"
 #include "tink/subtle/random.h"
+#include "tink/subtle/test_util.h"
+#include "tink/util/buffer.h"
+#include "tink/util/ostream_output_stream.h"
+#include "tink/util/statusor.h"
 #include "tink/util/test_matchers.h"
 #include "proto/aes_gcm.pb.h"
 #include "proto/tink.pb.h"
@@ -27,6 +42,8 @@ namespace tink {
 namespace test {
 namespace {
 
+using ::crypto::tink::internal::TestRandomAccessStream;
+using ::crypto::tink::test::StatusIs;
 using ::google::crypto::tink::AesGcmKey;
 using ::google::crypto::tink::KeyData;
 using ::testing::Eq;
@@ -105,6 +122,170 @@ TEST(ZTests, AutocorrelationUniformString) {
   EXPECT_THAT(
       ZTestAutocorrelationUniformString(subtle::Random::GetRandomBytes(32)),
       IsOk());
+}
+
+TEST(DummyStreamingAead, DummyDecryptingStreamPreadAllAtOnceSucceeds) {
+  const int stream_size = 1024;
+  std::string stream_content = subtle::Random::GetRandomBytes(stream_size);
+
+  auto ostream = std::make_unique<std::ostringstream>();
+  auto string_stream_buffer = ostream->rdbuf();
+  auto output_stream =
+      std::make_unique<util::OstreamOutputStream>(std::move(ostream));
+
+  DummyStreamingAead streaming_aead("Some AEAD");
+  util::StatusOr<std::unique_ptr<OutputStream>> encrypting_output_stream =
+      streaming_aead.NewEncryptingStream(std::move(output_stream), "Some AAD");
+  ASSERT_THAT(encrypting_output_stream.status(), IsOk());
+  ASSERT_THAT(subtle::test::WriteToStream(
+                  encrypting_output_stream.value().get(), stream_content),
+              IsOk());
+
+  std::string ciphertext = string_stream_buffer->str();
+  auto test_random_access_stream =
+      std::make_unique<TestRandomAccessStream>(ciphertext);
+  util::StatusOr<std::unique_ptr<RandomAccessStream>>
+      decrypting_random_access_stream =
+          streaming_aead.NewDecryptingRandomAccessStream(
+              std::move(test_random_access_stream), "Some AAD");
+  ASSERT_THAT(decrypting_random_access_stream.status(), IsOk());
+
+  auto buffer = util::Buffer::New(ciphertext.size());
+  EXPECT_THAT((*decrypting_random_access_stream)
+                  ->PRead(/*position=*/0, ciphertext.size(), buffer->get()),
+              StatusIs(absl::StatusCode::kOutOfRange));
+  EXPECT_EQ(stream_content,
+            std::string((*buffer)->get_mem_block(), (*buffer)->size()));
+}
+
+TEST(DummyStreamingAead, DummyDecryptingStreamPreadInChunksSucceeds) {
+  const int stream_size = 1024;
+  std::string stream_content = subtle::Random::GetRandomBytes(stream_size);
+
+  auto ostream = std::make_unique<std::ostringstream>();
+  auto string_stream_buffer = ostream->rdbuf();
+  auto output_stream =
+      std::make_unique<util::OstreamOutputStream>(std::move(ostream));
+
+  DummyStreamingAead streaming_aead("Some AEAD");
+  util::StatusOr<std::unique_ptr<OutputStream>> encrypting_output_stream =
+      streaming_aead.NewEncryptingStream(std::move(output_stream), "Some AAD");
+  ASSERT_THAT(encrypting_output_stream.status(), IsOk());
+  ASSERT_THAT(subtle::test::WriteToStream(
+                  encrypting_output_stream.value().get(), stream_content),
+              IsOk());
+
+  std::string ciphertext = string_stream_buffer->str();
+  auto test_random_access_stream =
+      std::make_unique<TestRandomAccessStream>(ciphertext);
+  util::StatusOr<std::unique_ptr<RandomAccessStream>>
+      decrypting_random_access_stream =
+          streaming_aead.NewDecryptingRandomAccessStream(
+              std::move(test_random_access_stream), "Some AAD");
+  ASSERT_THAT(decrypting_random_access_stream.status(), IsOk());
+
+  int chunk_size = 10;
+  auto buffer = util::Buffer::New(chunk_size);
+  std::string plaintext;
+  int64_t position = 0;
+  util::Status status = (*decrypting_random_access_stream)
+                            ->PRead(position, chunk_size, buffer->get());
+  while (status.ok()) {
+    plaintext.append((*buffer)->get_mem_block(), (*buffer)->size());
+    position += (*buffer)->size();
+    status = (*decrypting_random_access_stream)
+                 ->PRead(position, chunk_size, buffer->get());
+  }
+  EXPECT_THAT(status, StatusIs(absl::StatusCode::kOutOfRange));
+  plaintext.append((*buffer)->get_mem_block(), (*buffer)->size());
+  EXPECT_EQ(stream_content, plaintext);
+}
+
+TEST(DummyStreamingAead, DummyDecryptingStreamPreadWithSmallerHeaderFails) {
+  const int stream_size = 1024;
+  std::string stream_content = subtle::Random::GetRandomBytes(stream_size);
+
+  auto ostream = std::make_unique<std::ostringstream>();
+  auto output_stream =
+      std::make_unique<util::OstreamOutputStream>(std::move(ostream));
+
+  constexpr absl::string_view kStreamingAeadName = "Some AEAD";
+  constexpr absl::string_view kStreamingAeadAad = "Some associated data";
+
+  DummyStreamingAead streaming_aead(kStreamingAeadName);
+  util::StatusOr<std::unique_ptr<OutputStream>> encrypting_output_stream =
+      streaming_aead.NewEncryptingStream(std::move(output_stream),
+                                         kStreamingAeadAad);
+  ASSERT_THAT(encrypting_output_stream.status(), IsOk());
+  ASSERT_THAT(subtle::test::WriteToStream(
+                  encrypting_output_stream.value().get(), stream_content),
+              IsOk());
+  // Stream content size is too small; DummyDecryptingStream expects
+  // absl::StrCat(kStreamingAeadName, kStreamingAeadAad).
+  std::string ciphertext = "Invalid header";
+  auto test_random_access_stream =
+      std::make_unique<TestRandomAccessStream>(ciphertext);
+  util::StatusOr<std::unique_ptr<RandomAccessStream>>
+      decrypting_random_access_stream =
+          streaming_aead.NewDecryptingRandomAccessStream(
+              std::move(test_random_access_stream), kStreamingAeadAad);
+  ASSERT_THAT(decrypting_random_access_stream.status(), IsOk());
+
+  int chunk_size = 10;
+  auto buffer = util::Buffer::New(chunk_size);
+  EXPECT_THAT(
+      (*decrypting_random_access_stream)
+          ->PRead(/*position=*/0, chunk_size, buffer->get()),
+      StatusIs(absl::StatusCode::kInvalidArgument, "Could not read header"));
+  EXPECT_THAT(
+      (*decrypting_random_access_stream)
+          ->PRead(/*position=*/0, chunk_size, buffer->get()),
+      StatusIs(absl::StatusCode::kInvalidArgument, "Could not read header"));
+  EXPECT_THAT(
+      (*decrypting_random_access_stream)->size().status(),
+      StatusIs(absl::StatusCode::kInvalidArgument, "Could not read header"));
+}
+
+TEST(DummyStreamingAead, DummyDecryptingStreamPreadWithCorruptedAadFails) {
+  const int stream_size = 1024;
+  std::string stream_content = subtle::Random::GetRandomBytes(stream_size);
+
+  auto ostream = std::make_unique<std::ostringstream>();
+  auto string_stream_buffer = ostream->rdbuf();
+  auto output_stream =
+      std::make_unique<util::OstreamOutputStream>(std::move(ostream));
+
+  constexpr absl::string_view kStreamingAeadName = "Some AEAD";
+  constexpr absl::string_view kStreamingAeadAad = "Some associated data";
+
+  DummyStreamingAead streaming_aead(kStreamingAeadName);
+  util::StatusOr<std::unique_ptr<OutputStream>> encrypting_output_stream =
+      streaming_aead.NewEncryptingStream(std::move(output_stream),
+                                         kStreamingAeadAad);
+  ASSERT_THAT(encrypting_output_stream.status(), IsOk());
+  ASSERT_THAT(subtle::test::WriteToStream(
+                  encrypting_output_stream.value().get(), stream_content),
+              IsOk());
+  // Invalid associated data.
+  std::string ciphertext = string_stream_buffer->str();
+  auto test_random_access_stream =
+      std::make_unique<TestRandomAccessStream>(ciphertext);
+  util::StatusOr<std::unique_ptr<RandomAccessStream>>
+      decrypting_random_access_stream =
+          streaming_aead.NewDecryptingRandomAccessStream(
+              std::move(test_random_access_stream), "Some wrong AAD");
+  ASSERT_THAT(decrypting_random_access_stream.status(), IsOk());
+
+  int chunk_size = 10;
+  auto buffer = util::Buffer::New(chunk_size);
+  EXPECT_THAT((*decrypting_random_access_stream)
+                  ->PRead(/*position=*/0, chunk_size, buffer->get()),
+              StatusIs(absl::StatusCode::kInvalidArgument, "Corrupted header"));
+  EXPECT_THAT((*decrypting_random_access_stream)
+                  ->PRead(/*position=*/0, chunk_size, buffer->get()),
+              StatusIs(absl::StatusCode::kInvalidArgument, "Corrupted header"));
+  EXPECT_THAT((*decrypting_random_access_stream)->size().status(),
+              StatusIs(absl::StatusCode::kInvalidArgument, "Corrupted header"));
 }
 
 }  // namespace

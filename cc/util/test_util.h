@@ -495,40 +495,35 @@ class DummyStreamingAead : public StreamingAead {
     util::Status status_;
   };  // class DummyDecryptingStream
 
-  // Upon first call to PRead() tries to read from 'ct_source' a header
-  // that is expected to be equal to 'expected_header'.  If this
+  // Upon first call to PRead() tries to read from `ct_source` a header
+  // that is expected to be equal to `expected_header`.  If this
   // header matching succeeds, all subsequent method calls are forwarded
-  // to the corresponding methods of 'cd_source'.
+  // to `ct_source->PRead`.
   class DummyDecryptingRandomAccessStream
       : public crypto::tink::RandomAccessStream {
    public:
     DummyDecryptingRandomAccessStream(
         std::unique_ptr<crypto::tink::RandomAccessStream> ct_source,
         absl::string_view expected_header)
-        : ct_source_(std::move(ct_source)),
-          exp_header_(expected_header),
-          status_(util::Status(absl::StatusCode::kUnavailable,
-                               "not initialized")) {}
+        : ct_source_(std::move(ct_source)), exp_header_(expected_header) {}
 
     crypto::tink::util::Status PRead(
         int64_t position, int count,
         crypto::tink::util::Buffer* dest_buffer) override {
-      {  // Initialize, if not initialized yet.
-        absl::MutexLock lock(&status_mutex_);
-        if (status_.code() == absl::StatusCode::kUnavailable) Initialize();
-        if (!status_.ok()) return status_;
+      util::Status status = CheckHeader();
+      if (!status.ok()) {
+        return status;
       }
-      auto status = dest_buffer->set_size(0);
+      status = dest_buffer->set_size(0);
       if (!status.ok()) return status;
       return ct_source_->PRead(position + exp_header_.size(), count,
                                dest_buffer);
     }
 
     util::StatusOr<int64_t> size() override {
-      {  // Initialize, if not initialized yet.
-        absl::MutexLock lock(&status_mutex_);
-        if (status_.code() == absl::StatusCode::kUnavailable) Initialize();
-        if (!status_.ok()) return status_;
+      util::Status status = CheckHeader();
+      if (!status.ok()) {
+        return status;
       }
       auto ct_size_result = ct_source_->size();
       if (!ct_size_result.ok()) return ct_size_result.status();
@@ -538,25 +533,39 @@ class DummyStreamingAead : public StreamingAead {
     }
 
    private:
-    void Initialize() ABSL_EXCLUSIVE_LOCKS_REQUIRED(status_mutex_) {
+    util::Status CheckHeader()
+        ABSL_LOCKS_EXCLUDED(header_check_status_mutex_) {
+      absl::MutexLock lock(&header_check_status_mutex_);
+      if (header_check_status_.code() != absl::StatusCode::kUnavailable) {
+        return header_check_status_;
+      }
       auto buf = std::move(util::Buffer::New(exp_header_.size()).value());
-      status_ = ct_source_->PRead(0, exp_header_.size(), buf.get());
-      if (!status_.ok() && status_.code() != absl::StatusCode::kOutOfRange)
-        return;
+      header_check_status_ =
+          ct_source_->PRead(0, exp_header_.size(), buf.get());
+      if (!header_check_status_.ok() &&
+          header_check_status_.code() != absl::StatusCode::kOutOfRange) {
+        return header_check_status_;
+      }
+      // EOF or Ok indicate a valid read has happened.
+      header_check_status_ = util::OkStatus();
+      // Invalid header.
       if (buf->size() < exp_header_.size()) {
-        status_ = util::Status(absl::StatusCode::kInvalidArgument,
+        header_check_status_ = util::Status(absl::StatusCode::kInvalidArgument,
                                "Could not read header");
       } else if (memcmp(buf->get_mem_block(), exp_header_.data(),
                         static_cast<int>(exp_header_.size()))) {
-        status_ = util::Status(absl::StatusCode::kInvalidArgument,
+        header_check_status_ = util::Status(absl::StatusCode::kInvalidArgument,
                                "Corrupted header");
       }
+      return header_check_status_;
     }
 
     std::unique_ptr<crypto::tink::RandomAccessStream> ct_source_;
     std::string exp_header_;
-    mutable absl::Mutex status_mutex_;
-    util::Status status_ ABSL_GUARDED_BY(status_mutex_);
+    mutable absl::Mutex header_check_status_mutex_;
+    util::Status header_check_status_
+        ABSL_GUARDED_BY(header_check_status_mutex_) =
+            util::Status(absl::StatusCode::kUnavailable, "Uninitialized");
   };  // class DummyDecryptingRandomAccessStream
 
  private:
