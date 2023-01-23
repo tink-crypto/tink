@@ -6,11 +6,11 @@ ts_library(
     name = "internal",
     srcs = [
         "aead.ts",
-        "bytes.ts",
         "insecure_iv_aes_gcm.ts",
     ],
     deps = [
         "//exception",
+        "//subtle:bytes",
     ],
 )
 
@@ -21,6 +21,7 @@ ts_library(
     deps = [
         ":internal",
         "//exception",
+        "//subtle:bytes",
         "@npm//@types/jasmine",
     ],
 )

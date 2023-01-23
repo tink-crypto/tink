@@ -7,7 +7,7 @@
 import {InvalidArgumentsException} from '../../exception/invalid_arguments_exception';
 import {SecurityException} from '../../exception/security_exception';
 
-import * as bytes from './bytes';
+import * as bytes from '../../subtle/bytes';
 
 /**
  * The only supported IV size.

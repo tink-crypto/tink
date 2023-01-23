@@ -6,7 +6,7 @@
 
 import {SecurityException} from '../../exception/security_exception';
 
-import {fromHex, toHex} from './bytes';
+import {fromHex, toHex} from '../../subtle/bytes';
 import {insecureIvAesGcmFromRawKey, IV_SIZE_IN_BYTES} from './insecure_iv_aes_gcm';
 
 const AAD_LENGTH: number = 20;
