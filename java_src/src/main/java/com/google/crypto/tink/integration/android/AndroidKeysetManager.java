@@ -132,7 +132,7 @@ public final class AndroidKeysetManager {
   private KeysetManager keysetManager;
 
   private AndroidKeysetManager(Builder builder) {
-    writer = builder.writer;
+    writer = new SharedPrefKeysetWriter(builder.context, builder.keysetName, builder.prefFileName);
     masterKey = builder.masterKey;
     keysetManager = builder.keysetManager;
   }
@@ -143,8 +143,10 @@ public final class AndroidKeysetManager {
    * <p>This class is thread-safe.
    */
   public static final class Builder {
-    private KeysetReader reader = null;
-    private KeysetWriter writer = null;
+    private Context context = null;
+    private String keysetName = null;
+    private String prefFileName = null;
+
     private String masterKeyUri = null;
     private Aead masterKey = null;
     private boolean useKeystore = true;
@@ -166,8 +168,10 @@ public final class AndroidKeysetManager {
       if (keysetName == null) {
         throw new IllegalArgumentException("need a keyset name");
       }
-      reader = new SharedPrefKeysetReader(context, keysetName, prefFileName);
-      writer = new SharedPrefKeysetWriter(context, keysetName, prefFileName);
+      this.context = context;
+      this.keysetName = keysetName;
+      this.prefFileName = prefFileName;
+
       return this;
     }
 
@@ -244,6 +248,9 @@ public final class AndroidKeysetManager {
      * @throws GeneralSecurityException If cannot read an existing keyset or generate a new one.
      */
     public synchronized AndroidKeysetManager build() throws GeneralSecurityException, IOException {
+      if (keysetName == null) {
+        throw new IllegalArgumentException("keysetName cannot be null");
+      }
       // readOrGenerateNewMasterKey() and readOrGenerateNewKeyset() involve shared pref filesystem
       // operations. To control access to this global state in multi-threaded contexts we need to
       // ensure mutual exclusion of these functions.
@@ -318,6 +325,7 @@ public final class AndroidKeysetManager {
       KeysetManager manager = KeysetManager.withEmptyKeyset().add(keyTemplate);
       int keyId = manager.getKeysetHandle().getKeysetInfo().getKeyInfo(0).getKeyId();
       manager = manager.setPrimary(keyId);
+      KeysetWriter writer = new SharedPrefKeysetWriter(context, keysetName, prefFileName);
       if (masterKey != null) {
         manager.getKeysetHandle().write(writer, masterKey);
       } else {
@@ -328,6 +336,7 @@ public final class AndroidKeysetManager {
 
     @SuppressWarnings("UnusedException")
     private KeysetManager read() throws GeneralSecurityException, IOException {
+      KeysetReader reader = new SharedPrefKeysetReader(context, keysetName, prefFileName);
       if (masterKey != null) {
         try {
           return KeysetManager.withKeysetHandle(KeysetHandle.read(reader, masterKey));
