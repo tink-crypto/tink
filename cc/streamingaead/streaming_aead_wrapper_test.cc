@@ -28,6 +28,7 @@
 #include "absl/strings/str_cat.h"
 #include "absl/strings/string_view.h"
 #include "tink/input_stream.h"
+#include "tink/internal/test_random_access_stream.h"
 #include "tink/output_stream.h"
 #include "tink/primitive_set.h"
 #include "tink/random_access_stream.h"
@@ -35,7 +36,6 @@
 #include "tink/subtle/random.h"
 #include "tink/subtle/test_util.h"
 #include "tink/util/buffer.h"
-#include "tink/util/file_random_access_stream.h"
 #include "tink/util/istream_input_stream.h"
 #include "tink/util/ostream_output_stream.h"
 #include "tink/util/status.h"
@@ -57,16 +57,6 @@ using subtle::test::ReadFromStream;
 using subtle::test::WriteToStream;
 using testing::HasSubstr;
 
-// Creates a RandomAccessStream with the specified contents.
-std::unique_ptr<RandomAccessStream> GetRandomAccessStream(
-    absl::string_view contents) {
-  static int index = 1;
-  std::string filename = absl::StrCat("stream_data_file_", index, ".txt");
-  index++;
-  int input_fd = test::GetTestFileDescriptor(filename, contents);
-  return {absl::make_unique<util::FileRandomAccessStream>(input_fd)};
-}
-
 // Reads the entire 'ra_stream', until no more bytes can be read,
 // and puts the read bytes into 'contents'.
 // Returns the status of the last ra_stream->PRead()-operation.
@@ -75,14 +65,11 @@ util::Status ReadAll(RandomAccessStream* ra_stream, std::string* contents) {
   contents->clear();
   auto buffer = std::move(util::Buffer::New(chunk_size).value());
   int64_t position = 0;
-  auto status = ra_stream->PRead(position, chunk_size, buffer.get());
+  auto status = util::OkStatus();
   while (status.ok()) {
+    status = ra_stream->PRead(position, chunk_size, buffer.get());
     contents->append(buffer->get_mem_block(), buffer->size());
     position = contents->size();
-    status = ra_stream->PRead(position, chunk_size, buffer.get());
-  }
-  if (status.code() == absl::StatusCode::kOutOfRange) {  // EOF
-    EXPECT_EQ(0, buffer->size());
   }
   return status;
 }
@@ -234,7 +221,8 @@ TEST(StreamingAeadSetWrapperTest, DecryptionWithRandomAccessStream) {
       EXPECT_EQ(absl::StrCat(saead_name_2, aad, plaintext), ct_buf->str());
 
       // Decrypt the ciphertext.
-      auto ct_source = GetRandomAccessStream(ct_buf->str());
+      auto ct_source =
+          std::make_unique<internal::TestRandomAccessStream>(ct_buf->str());
       auto dec_stream_result =
           saead->NewDecryptingRandomAccessStream(std::move(ct_source), aad);
       EXPECT_THAT(dec_stream_result, IsOk());

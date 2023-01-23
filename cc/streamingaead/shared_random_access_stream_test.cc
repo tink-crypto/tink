@@ -22,11 +22,11 @@
 #include "gtest/gtest.h"
 #include "absl/memory/memory.h"
 #include "absl/strings/str_cat.h"
+#include "tink/internal/test_random_access_stream.h"
 #include "tink/random_access_stream.h"
+#include "tink/subtle/random.h"
 #include "tink/util/buffer.h"
-#include "tink/util/file_random_access_stream.h"
 #include "tink/util/status.h"
-#include "tink/util/test_util.h"
 
 namespace crypto {
 namespace tink {
@@ -41,14 +41,11 @@ util::Status ReadAll(RandomAccessStream* ra_stream, int chunk_size,
   contents->clear();
   auto buffer = std::move(util::Buffer::New(chunk_size).value());
   int64_t position = 0;
-  auto status = ra_stream->PRead(position, chunk_size, buffer.get());
+  auto status = util::OkStatus();
   while (status.ok()) {
+    status = ra_stream->PRead(position, chunk_size, buffer.get());
     contents->append(buffer->get_mem_block(), buffer->size());
     position = contents->size();
-    status = ra_stream->PRead(position, chunk_size, buffer.get());
-  }
-  if (status.code() == absl::StatusCode::kOutOfRange) {  // EOF
-    EXPECT_EQ(0, buffer->size());
   }
   return status;
 }
@@ -56,19 +53,16 @@ util::Status ReadAll(RandomAccessStream* ra_stream, int chunk_size,
 TEST(SharedRandomAccessStreamTest, ReadingStreams) {
   for (auto stream_size : {0, 10, 100, 1000, 10000, 1000000}) {
     SCOPED_TRACE(absl::StrCat("stream_size = ", stream_size));
-    std::string file_contents;
-    std::string filename = absl::StrCat(stream_size, "_reading_test.bin");
-    int input_fd = test::GetTestFileDescriptor(
-        filename, stream_size, &file_contents);
-    EXPECT_EQ(stream_size, file_contents.size());
-    auto ra_stream = absl::make_unique<util::FileRandomAccessStream>(input_fd);
+    std::string stream_content = subtle::Random::GetRandomBytes(stream_size);
+    auto ra_stream =
+        absl::make_unique<internal::TestRandomAccessStream>(stream_content);
     SharedRandomAccessStream shared_stream(ra_stream.get());
     std::string stream_contents;
     auto status = ReadAll(&shared_stream, 1 + (stream_size / 10),
                           &stream_contents);
     EXPECT_EQ(absl::StatusCode::kOutOfRange, status.code());
     EXPECT_EQ("EOF", status.message());
-    EXPECT_EQ(file_contents, stream_contents);
+    EXPECT_EQ(stream_content, stream_contents);
     EXPECT_EQ(stream_size, shared_stream.size().value());
   }
 }

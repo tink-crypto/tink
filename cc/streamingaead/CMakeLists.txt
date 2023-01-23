@@ -198,10 +198,10 @@ tink_cc_test(
     tink::core::primitive_set
     tink::core::random_access_stream
     tink::core::streaming_aead
+    tink::internal::test_random_access_stream
     tink::subtle::random
     tink::subtle::test_util
     tink::util::buffer
-    tink::util::file_random_access_stream
     tink::util::istream_input_stream
     tink::util::ostream_output_stream
     tink::util::status
@@ -358,9 +358,9 @@ tink_cc_test(
     tink::core::primitive_set
     tink::core::random_access_stream
     tink::core::streaming_aead
+    tink::internal::test_random_access_stream
     tink::subtle::random
     tink::subtle::test_util
-    tink::util::file_random_access_stream
     tink::util::ostream_output_stream
     tink::util::status
     tink::util::test_matchers
@@ -397,8 +397,8 @@ tink_cc_test(
     absl::memory
     absl::strings
     tink::core::random_access_stream
+    tink::internal::test_random_access_stream
+    tink::subtle::random
     tink::util::buffer
-    tink::util::file_random_access_stream
     tink::util::status
-    tink::util::test_util
 )

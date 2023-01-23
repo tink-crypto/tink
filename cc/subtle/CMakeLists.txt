@@ -749,12 +749,11 @@ tink_cc_library(
     absl::strings
     tink::core::random_access_stream
     tink::core::streaming_aead
+    tink::internal::test_random_access_stream
     tink::util::buffer
-    tink::util::file_random_access_stream
     tink::util::istream_input_stream
     tink::util::ostream_output_stream
     tink::util::status
-    tink::util::test_util
 )
 
 tink_cc_library(
@@ -1453,11 +1452,10 @@ tink_cc_test(
     tink::core::output_stream
     tink::core::random_access_stream
     tink::core::streaming_aead
-    tink::util::file_random_access_stream
+    tink::internal::test_random_access_stream
     tink::util::ostream_output_stream
     tink::util::status
     tink::util::test_matchers
-    tink::util::test_util
 )
 
 tink_cc_test(
