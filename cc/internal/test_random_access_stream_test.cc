@@ -128,6 +128,34 @@ TEST(TestRandomAccessStreamTest, PreadTheLastPartialBlockReturnsEof) {
             stream_content.substr(stream_size - buffer_size + 1));
 }
 
+TEST(TestRandomAccessStreamTest, ReadAllFromRandomAccessStreamSucceeds) {
+  std::string content_to_read = subtle::Random::GetRandomBytes(4 * 1024);
+  auto test_random_access_stream =
+      std::make_unique<TestRandomAccessStream>(content_to_read);
+  std::string read_content;
+  EXPECT_THAT(ReadAllFromRandomAccessStream(test_random_access_stream.get(),
+                                            read_content,
+                                            /*chunk_size=*/128),
+              StatusIs(absl::StatusCode::kOutOfRange));
+  EXPECT_EQ(content_to_read, read_content);
+}
+
+TEST(TestRandomAccessStreamTest,
+     ReadAllFromRandomAccessStreamFailsWhenChunkIsLessThanOne) {
+  std::string content_to_read = subtle::Random::GetRandomBytes(4 * 1024);
+  auto test_random_access_stream =
+      std::make_unique<TestRandomAccessStream>(content_to_read);
+  std::string read_content;
+  EXPECT_THAT(ReadAllFromRandomAccessStream(test_random_access_stream.get(),
+                                            read_content,
+                                            /*chunk_size=*/0),
+              StatusIs(absl::StatusCode::kInvalidArgument));
+  EXPECT_THAT(ReadAllFromRandomAccessStream(test_random_access_stream.get(),
+                                            read_content,
+                                            /*chunk_size=*/-10),
+              StatusIs(absl::StatusCode::kInvalidArgument));
+}
+
 }  // namespace
 }  // namespace internal
 }  // namespace tink

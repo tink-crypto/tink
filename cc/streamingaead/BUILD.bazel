@@ -420,8 +420,6 @@ cc_test(
         "//:random_access_stream",
         "//internal:test_random_access_stream",
         "//subtle:random",
-        "//util:buffer",
-        "//util:status",
         "@com_google_absl//absl/memory",
         "@com_google_absl//absl/strings",
         "@com_google_googletest//:gtest_main",

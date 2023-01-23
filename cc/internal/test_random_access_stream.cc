@@ -18,6 +18,7 @@
 #include <algorithm>
 #include <memory>
 #include <string>
+#include <utility>
 
 namespace crypto {
 namespace tink {
@@ -62,6 +63,26 @@ util::Status TestRandomAccessStream::PRead(int64_t position, int count,
     return util::Status(absl::StatusCode::kOutOfRange, "EOF");
   }
   return util::OkStatus();
+}
+
+util::Status ReadAllFromRandomAccessStream(
+    RandomAccessStream* random_access_stream, std::string& contents,
+    int chunk_size) {
+  if (chunk_size < 1) {
+    return util::Status(absl::StatusCode::kInvalidArgument,
+                        "chunk_size must be greater than zero");
+  }
+  contents.clear();
+  std::unique_ptr<util::Buffer> buffer =
+      *std::move(util::Buffer::New(chunk_size));
+  int64_t position = 0;
+  auto status = util::OkStatus();
+  while (status.ok()) {
+    status = random_access_stream->PRead(position, chunk_size, buffer.get());
+    contents.append(buffer->get_mem_block(), buffer->size());
+    position = contents.size();
+  }
+  return status;
 }
 
 }  // namespace internal

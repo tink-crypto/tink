@@ -76,23 +76,6 @@ std::unique_ptr<RandomAccessStream> GetCiphertextSource(
   return std::make_unique<internal::TestRandomAccessStream>(ct_buf->str());
 }
 
-// Reads the entire 'ra_stream', until no more bytes can be read,
-// and puts the read bytes into 'contents'.
-// Returns the status of the last ra_stream->PRead()-operation.
-util::Status ReadAll(RandomAccessStream* ra_stream, std::string* contents) {
-  int chunk_size = 42;
-  contents->clear();
-  auto buffer = std::move(util::Buffer::New(chunk_size).value());
-  int64_t position = 0;
-  auto status = util::OkStatus();
-  while (status.ok()) {
-    status = ra_stream->PRead(position, chunk_size, buffer.get());
-    contents->append(buffer->get_mem_block(), buffer->size());
-    position = contents->size();
-  }
-  return status;
-}
-
 // A container for specification of instances of DummyStreamingAead
 // to be created for testing.
 struct StreamingAeadSpec {
@@ -161,7 +144,8 @@ TEST(DecryptingRandomAccessStreamTest, BasicDecryption) {
         EXPECT_THAT(dec_stream_result, IsOk());
         auto dec_stream = std::move(dec_stream_result.value());
         std::string decrypted;
-        auto status = ReadAll(dec_stream.get(), &decrypted);
+        auto status = internal::ReadAllFromRandomAccessStream(dec_stream.get(),
+                                                              decrypted);
         EXPECT_THAT(status, StatusIs(absl::StatusCode::kOutOfRange,
                                      HasSubstr("EOF")));
         EXPECT_EQ(pt_size, dec_stream->size().value());
@@ -312,7 +296,8 @@ TEST(DecryptingRandomAccessStreamTest, WrongAssociatedData) {
           saead_set, std::move(ct), "wrong aad");
       EXPECT_THAT(dec_stream_result, IsOk());
       std::string decrypted;
-      auto status = ReadAll(dec_stream_result.value().get(), &decrypted);
+      auto status = internal::ReadAllFromRandomAccessStream(
+          dec_stream_result.value().get(), decrypted);
       EXPECT_THAT(status, StatusIs(absl::StatusCode::kInvalidArgument));
     }
   }
@@ -342,7 +327,8 @@ TEST(DecryptingRandomAccessStreamTest, WrongCiphertext) {
           saead_set, std::move(wrong_ct), aad);
       EXPECT_THAT(dec_stream_result, IsOk());
       std::string decrypted;
-      auto status = ReadAll(dec_stream_result.value().get(), &decrypted);
+      auto status = internal::ReadAllFromRandomAccessStream(
+          dec_stream_result.value().get(), decrypted);
       EXPECT_THAT(status, StatusIs(absl::StatusCode::kInvalidArgument));
     }
   }

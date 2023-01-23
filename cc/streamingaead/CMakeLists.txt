@@ -399,6 +399,4 @@ tink_cc_test(
     tink::core::random_access_stream
     tink::internal::test_random_access_stream
     tink::subtle::random
-    tink::util::buffer
-    tink::util::status
 )

@@ -57,23 +57,6 @@ using subtle::test::ReadFromStream;
 using subtle::test::WriteToStream;
 using testing::HasSubstr;
 
-// Reads the entire 'ra_stream', until no more bytes can be read,
-// and puts the read bytes into 'contents'.
-// Returns the status of the last ra_stream->PRead()-operation.
-util::Status ReadAll(RandomAccessStream* ra_stream, std::string* contents) {
-  int chunk_size = 42;
-  contents->clear();
-  auto buffer = std::move(util::Buffer::New(chunk_size).value());
-  int64_t position = 0;
-  auto status = util::OkStatus();
-  while (status.ok()) {
-    status = ra_stream->PRead(position, chunk_size, buffer.get());
-    contents->append(buffer->get_mem_block(), buffer->size());
-    position = contents->size();
-  }
-  return status;
-}
-
 // A container for specification of instances of DummyStreamingAead
 // to be created for testing.
 struct StreamingAeadSpec {
@@ -227,7 +210,8 @@ TEST(StreamingAeadSetWrapperTest, DecryptionWithRandomAccessStream) {
           saead->NewDecryptingRandomAccessStream(std::move(ct_source), aad);
       EXPECT_THAT(dec_stream_result, IsOk());
       std::string decrypted;
-      status = ReadAll(dec_stream_result.value().get(), &decrypted);
+      status = internal::ReadAllFromRandomAccessStream(
+          dec_stream_result.value().get(), decrypted);
       EXPECT_THAT(status, StatusIs(absl::StatusCode::kOutOfRange,
                                    HasSubstr("EOF")));
       EXPECT_EQ(plaintext, decrypted);

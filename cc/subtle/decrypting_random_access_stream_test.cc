@@ -111,23 +111,6 @@ std::unique_ptr<RandomAccessStream> GetCiphertextSource(StreamingAead* saead,
       GetCiphertext(saead, pt, aad, ct_offset));
 }
 
-// Reads the entire 'ra_stream', until no more bytes can be read,
-// and puts the read bytes into 'contents'.
-// Returns the status of the last ra_stream->PRead()-operation.
-util::Status ReadAll(RandomAccessStream* ra_stream, std::string* contents) {
-  int chunk_size = 42;
-  contents->clear();
-  auto buffer = std::move(util::Buffer::New(chunk_size).value());
-  int64_t position = 0;
-  auto status = util::OkStatus();
-  while (status.ok()) {
-    status = ra_stream->PRead(position, chunk_size, buffer.get());
-    contents->append(buffer->get_mem_block(), buffer->size());
-    position = contents->size();
-  }
-  return status;
-}
-
 TEST(DecryptingRandomAccessStreamTest, NegativeCiphertextOffset) {
   int pt_segment_size = 100;
   int header_size = 20;
@@ -215,7 +198,8 @@ TEST(DecryptingRandomAccessStreamTest, BasicDecryption) {
           auto dec_stream = std::move(dec_stream_result.value());
           EXPECT_EQ(pt_size, dec_stream->size().value());
           std::string decrypted;
-          auto status = ReadAll(dec_stream.get(), &decrypted);
+          auto status = internal::ReadAllFromRandomAccessStream(
+              dec_stream.get(), decrypted);
           EXPECT_THAT(status, StatusIs(absl::StatusCode::kOutOfRange,
                                        HasSubstr("EOF")));
           EXPECT_EQ(plaintext, decrypted);

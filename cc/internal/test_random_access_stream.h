@@ -48,6 +48,13 @@ class TestRandomAccessStream : public RandomAccessStream {
   std::string content_;
 };
 
+// Reads the entire `random_access_stream` using a buffer of size `chunk_size`
+// until no more bytes can be read, and puts the read bytes into `contents`.
+// Returns the status of the last call to random_access_stream->PRead().
+util::Status ReadAllFromRandomAccessStream(
+    RandomAccessStream* random_access_stream, std::string& contents,
+    int chunk_size = 42);
+
 }  // namespace internal
 }  // namespace tink
 }  // namespace crypto
