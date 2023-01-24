@@ -17,22 +17,25 @@
 package com.google.crypto.tink.integration.android;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Build;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import androidx.annotation.ChecksSdkIntAtLeast;
 import androidx.annotation.Nullable;
 import com.google.crypto.tink.Aead;
+import com.google.crypto.tink.BinaryKeysetReader;
 import com.google.crypto.tink.CleartextKeysetHandle;
 import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.KeysetManager;
-import com.google.crypto.tink.KeysetReader;
 import com.google.crypto.tink.KeysetWriter;
 import com.google.crypto.tink.proto.OutputPrefixType;
+import com.google.crypto.tink.subtle.Hex;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.errorprone.annotations.InlineMe;
 import com.google.protobuf.InvalidProtocolBufferException;
-import java.io.FileNotFoundException;
+import java.io.CharConversionException;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.security.KeyStore;
@@ -240,6 +243,35 @@ public final class AndroidKeysetManager {
       return this;
     }
 
+    /** Returns the serialized keyset if it exist or null. */
+    @Nullable
+    @SuppressWarnings("UnusedException")
+    private static byte[] readKeysetFromPrefs(
+        Context context, String keysetName, String prefFileName) throws IOException {
+      if (keysetName == null) {
+        throw new IllegalArgumentException("keysetName cannot be null");
+      }
+      Context appContext = context.getApplicationContext();
+      SharedPreferences sharedPreferences;
+      if (prefFileName == null) {
+        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(appContext);
+      } else {
+        sharedPreferences = appContext.getSharedPreferences(prefFileName, Context.MODE_PRIVATE);
+      }
+      try {
+        String keysetHex = sharedPreferences.getString(keysetName, /* defValue= */ null);
+        if (keysetHex == null) {
+          return null;
+        }
+        return Hex.decode(keysetHex);
+      } catch (ClassCastException | IllegalArgumentException ex) {
+        // The original exception is swallowed to prevent leaked key material.
+        throw new CharConversionException(
+            String.format(
+                "can't read keyset; the pref value %s is not a valid hex string", keysetName));
+      }
+    }
+
     /**
      * Builds and returns a new {@link AndroidKeysetManager} with the specified options.
      *
@@ -251,14 +283,19 @@ public final class AndroidKeysetManager {
       if (keysetName == null) {
         throw new IllegalArgumentException("keysetName cannot be null");
       }
-      // readOrGenerateNewMasterKey() and readOrGenerateNewKeyset() involve shared pref filesystem
-      // operations. To control access to this global state in multi-threaded contexts we need to
-      // ensure mutual exclusion of these functions.
+      // readKeysetFromPrefs(), readOrGenerateNewMasterKey() and generateNewKeyset() involve shared
+      // pref filesystem operations. To control access to this global state in multi-threaded
+      // contexts we need to ensure mutual exclusion of these functions.
       synchronized (lock) {
         if (masterKeyUri != null) {
           masterKey = readOrGenerateNewMasterKey();
         }
-        this.keysetManager = readOrGenerateNewKeyset();
+        byte[] serializedKeyset = readKeysetFromPrefs(context, keysetName, prefFileName);
+        if (serializedKeyset == null) {
+          this.keysetManager = generateKeysetAndWriteToPrefs();
+        } else {
+          this.keysetManager = maybeDecryptAndParseKeyset(serializedKeyset);
+        }
 
         return new AndroidKeysetManager(this);
       }
@@ -307,17 +344,8 @@ public final class AndroidKeysetManager {
       return null;
     }
 
-    private KeysetManager readOrGenerateNewKeyset() throws GeneralSecurityException, IOException {
-      try {
-        return read();
-      } catch (FileNotFoundException ex) {
-        // Not found, handle below.
-        if (Log.isLoggable(TAG, Log.VERBOSE)) {
-          Log.v(
-              TAG, String.format("keyset not found, will generate a new one. %s", ex.getMessage()));
-        }
-      }
-
+    private KeysetManager generateKeysetAndWriteToPrefs()
+        throws GeneralSecurityException, IOException {
       if (keyTemplate == null) {
         throw new GeneralSecurityException("cannot read or generate keyset");
       }
@@ -335,11 +363,12 @@ public final class AndroidKeysetManager {
     }
 
     @SuppressWarnings("UnusedException")
-    private KeysetManager read() throws GeneralSecurityException, IOException {
-      KeysetReader reader = new SharedPrefKeysetReader(context, keysetName, prefFileName);
+    private KeysetManager maybeDecryptAndParseKeyset(byte[] serializedKeyset)
+        throws GeneralSecurityException, IOException {
       if (masterKey != null) {
         try {
-          return KeysetManager.withKeysetHandle(KeysetHandle.read(reader, masterKey));
+          return KeysetManager.withKeysetHandle(
+              KeysetHandle.read(BinaryKeysetReader.withBytes(serializedKeyset), masterKey));
         } catch (InvalidProtocolBufferException | GeneralSecurityException ex) {
           // Attempt to read the keyset in cleartext.
           // This edge case may happen when either
@@ -353,7 +382,8 @@ public final class AndroidKeysetManager {
           // write the encrypted keyset in the first place.
           Log.w(TAG, "cannot decrypt keyset: ", ex);
           try {
-            return KeysetManager.withKeysetHandle(CleartextKeysetHandle.read(reader));
+            return KeysetManager.withKeysetHandle(
+                CleartextKeysetHandle.read(BinaryKeysetReader.withBytes(serializedKeyset)));
           } catch (InvalidProtocolBufferException ex2) {
             // Raising a InvalidProtocolBufferException error here would be confusing, because
             // parsing probably failed because the keyset was encrypted but we were not able to
@@ -363,7 +393,8 @@ public final class AndroidKeysetManager {
         }
       }
 
-      return KeysetManager.withKeysetHandle(CleartextKeysetHandle.read(reader));
+      return KeysetManager.withKeysetHandle(
+          CleartextKeysetHandle.read(BinaryKeysetReader.withBytes(serializedKeyset)));
     }
   }
 
