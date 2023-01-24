@@ -16,7 +16,8 @@ ts_library(
         ":hybrid_encrypt",
         ":hybrid_encrypt_wrapper",
         ":hybrid_key_templates",
-        "//aead",
+        "//aead:aes_ctr_hmac",
+        "//aead:aes_gcm",
     ],
 )
 
@@ -79,7 +80,7 @@ ts_library(
         ":ecies_aead_hkdf_public_key_manager",
         ":hybrid_decrypt_wrapper",
         ":hybrid_encrypt_wrapper",
-        "//aead",
+        "//aead:aead_config",
         "//internal:registry",
     ],
 )
@@ -93,7 +94,7 @@ ts_library(
     ],
     deps = [
         ":hybrid_config",
-        "//aead",
+        "//aead:aead_key_templates",
         "//internal:proto",
     ],
 )
@@ -118,7 +119,7 @@ ts_library(
         "ecies_aead_hkdf_validators.ts",
     ],
     deps = [
-        "//aead",
+        "//aead:aead_config",
         "//exception",
         "//internal:proto",
         "//internal:proto_shims",
@@ -178,6 +179,7 @@ ts_library(
     ],
     deps = [
         "//aead",
+        "//aead:aead_config",
         "//exception",
         "//internal:proto",
         "//internal:registry",
@@ -209,7 +211,8 @@ ts_library(
         ":hybrid_encrypt_wrapper",
         ":hybrid_key_templates",
         ":registry_ecies_aead_hkdf_dem_helper",
-        "//aead",
+        "//aead:aead_config",
+        "//aead:aead_key_templates",
         "//exception",
         "//hybrid/internal",
         "//internal:crypto_format",

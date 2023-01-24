@@ -180,6 +180,8 @@ ts_library(
         ":random",
         ":validators",
         "//aead",
+        "//aead:aead_config",
+        "//aead:aead_key_templates",
         "//exception",
         "//hybrid",
         "//hybrid:registry_ecies_aead_hkdf_dem_helper",
