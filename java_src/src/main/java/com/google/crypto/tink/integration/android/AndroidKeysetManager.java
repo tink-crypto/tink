@@ -263,6 +263,12 @@ public final class AndroidKeysetManager {
       }
     }
 
+    private KeysetManager readKeysetInCleartext(byte[] serializedKeyset)
+        throws GeneralSecurityException, IOException {
+      return KeysetManager.withKeysetHandle(
+          CleartextKeysetHandle.read(BinaryKeysetReader.withBytes(serializedKeyset)));
+    }
+
     /**
      * Builds and returns a new {@link AndroidKeysetManager} with the specified options.
      *
@@ -278,16 +284,19 @@ public final class AndroidKeysetManager {
       // pref filesystem operations. To control access to this global state in multi-threaded
       // contexts we need to ensure mutual exclusion of these functions.
       synchronized (lock) {
-        if (masterKeyUri != null) {
-          masterKey = readOrGenerateNewMasterKey();
-        }
         byte[] serializedKeyset = readKeysetFromPrefs(context, keysetName, prefFileName);
         if (serializedKeyset == null) {
+          if (masterKeyUri != null) {
+            masterKey = readOrGenerateNewMasterKey();
+          }
           this.keysetManager = generateKeysetAndWriteToPrefs();
         } else {
-          this.keysetManager = maybeDecryptAndParseKeyset(serializedKeyset);
+          if (masterKeyUri == null || !isAtLeastM()) {
+            this.keysetManager = readKeysetInCleartext(serializedKeyset);
+          } else {
+            this.keysetManager = readMasterkeyDecryptAndParseKeyset(serializedKeyset);
+          }
         }
-
         return new AndroidKeysetManager(this);
       }
     }
@@ -349,38 +358,45 @@ public final class AndroidKeysetManager {
     }
 
     @SuppressWarnings("UnusedException")
-    private KeysetManager maybeDecryptAndParseKeyset(byte[] serializedKeyset)
+    private KeysetManager readMasterkeyDecryptAndParseKeyset(byte[] serializedKeyset)
         throws GeneralSecurityException, IOException {
-      if (masterKey != null) {
+      // We expect that the keyset is encrypted. Try to read masterKey.
+      try {
+        masterKey = new AndroidKeystoreKmsClient().getAead(masterKeyUri);
+      } catch (GeneralSecurityException | ProviderException keystoreException) {
+        // Reading masterkey failed. Attempt to read the keyset in cleartext.
         try {
-          return KeysetManager.withKeysetHandle(
-              KeysetHandle.read(BinaryKeysetReader.withBytes(serializedKeyset), masterKey));
-        } catch (InvalidProtocolBufferException | GeneralSecurityException ex) {
-          // Attempt to read the keyset in cleartext.
-          // This edge case may happen when either
-          //   - the keyset was generated on a pre M phone which is then upgraded to M or newer, or
-          //   - the keyset was generated with Keystore being disabled, then Keystore is enabled.
-          // By ignoring the security failure here, an adversary with write access to private
-          // preferences can replace an encrypted keyset (that it cannot read or write) with a
-          // cleartext value that it controls. This does not introduce new security risks because to
-          // overwrite the encrypted keyset in private preferences of an app, said adversaries must
-          // have the same privilege as the app, thus they can call Android Keystore to read or
-          // write the encrypted keyset in the first place.
-          Log.w(TAG, "cannot decrypt keyset: ", ex);
-          try {
-            return KeysetManager.withKeysetHandle(
-                CleartextKeysetHandle.read(BinaryKeysetReader.withBytes(serializedKeyset)));
-          } catch (InvalidProtocolBufferException ex2) {
-            // Raising a InvalidProtocolBufferException error here would be confusing, because
-            // parsing probably failed because the keyset was encrypted but we were not able to
-            // decrypt it. It is better to throw the error above.
-            throw ex;
-          }
+          KeysetManager manager = readKeysetInCleartext(serializedKeyset);
+          Log.w(TAG, "cannot use Android Keystore, it'll be disabled", keystoreException);
+          return manager;
+        } catch (InvalidProtocolBufferException unused) {
+          // Keyset is encrypted, throw error about master key encryption
+          throw keystoreException;
         }
       }
-
-      return KeysetManager.withKeysetHandle(
-          CleartextKeysetHandle.read(BinaryKeysetReader.withBytes(serializedKeyset)));
+      // masterKey was read successfully.
+      try {
+        // Decrypt and parse the keyset using masterKey.
+        return KeysetManager.withKeysetHandle(
+            KeysetHandle.read(BinaryKeysetReader.withBytes(serializedKeyset), masterKey));
+      } catch (InvalidProtocolBufferException | GeneralSecurityException ex) {
+        // Attempt to read the keyset in cleartext.
+        // This edge case may happen when either
+        //   - the keyset was generated on a pre M phone which was upgraded to M or newer, or
+        //   - the keyset was generated with Keystore being disabled, then Keystore is enabled.
+        // By ignoring the security failure here, an adversary with write access to private
+        // preferences can replace an encrypted keyset (that it cannot read or write) with a
+        // cleartext value that it controls. This does not introduce new security risks because to
+        // overwrite the encrypted keyset in private preferences of an app, said adversaries
+        // must have the same privilege as the app, thus they can call Android Keystore to read or
+        // write the encrypted keyset in the first place.
+        try {
+          return readKeysetInCleartext(serializedKeyset);
+        } catch (InvalidProtocolBufferException unused) {
+          // Parsing failed because the keyset is encrypted but we were not able to decrypt it.
+          throw ex;
+        }
+      }
     }
   }
 
