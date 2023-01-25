@@ -38,7 +38,6 @@ import com.google.protobuf.InvalidProtocolBufferException;
 import java.io.CharConversionException;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
-import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.ProviderException;
 import javax.annotation.concurrent.GuardedBy;
@@ -154,7 +153,6 @@ public final class AndroidKeysetManager {
     private Aead masterKey = null;
     private boolean useKeystore = true;
     private KeyTemplate keyTemplate = null;
-    private KeyStore keyStore = null;
 
     @GuardedBy("this")
     private KeysetManager keysetManager;
@@ -236,13 +234,6 @@ public final class AndroidKeysetManager {
       return this;
     }
 
-    /** This is for testing only */
-    @CanIgnoreReturnValue
-    Builder withKeyStore(KeyStore val) {
-      this.keyStore = val;
-      return this;
-    }
-
     /** Returns the serialized keyset if it exist or null. */
     @Nullable
     @SuppressWarnings("UnusedException")
@@ -308,12 +299,7 @@ public final class AndroidKeysetManager {
         return null;
       }
 
-      AndroidKeystoreKmsClient client;
-      if (keyStore != null) {
-        client = new AndroidKeystoreKmsClient.Builder().setKeyStore(keyStore).build();
-      } else {
-        client = new AndroidKeystoreKmsClient();
-      }
+      AndroidKeystoreKmsClient client = new AndroidKeystoreKmsClient();
 
       boolean generated;
       try {
