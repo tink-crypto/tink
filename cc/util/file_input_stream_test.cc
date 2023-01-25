@@ -15,8 +15,13 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include "tink/util/file_input_stream.h"
 
+#include <fcntl.h>
+
 #include <algorithm>
 #include <cstdint>
+#include <cstring>
+#include <iostream>
+#include <ostream>
 #include <string>
 
 #include "gmock/gmock.h"
@@ -25,6 +30,8 @@
 #include "absl/status/status.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/string_view.h"
+#include "tink/internal/test_file_util.h"
+#include "tink/subtle/random.h"
 #include "tink/util/status.h"
 #include "tink/util/test_matchers.h"
 #include "tink/util/test_util.h"
@@ -38,6 +45,18 @@ using ::crypto::tink::test::IsOkAndHolds;
 using ::crypto::tink::test::StatusIs;
 
 constexpr int kDefaultTestStreamSize = 100 * 1024;  // 100 KB.
+
+// Opens test file `filename` and returns a file descriptor to it.
+util::StatusOr<int> OpenTestFileToRead(absl::string_view filename) {
+  std::string full_filename = absl::StrCat(test::TmpDir(), "/", filename);
+  int fd = open(full_filename.c_str(), O_RDONLY);
+  if (fd == -1) {
+    return util::Status(absl::StatusCode::kInternal,
+                        absl::StrCat("Cannot open file ", full_filename,
+                                     " error: ", std::strerror(errno)));
+  }
+  return fd;
+}
 
 // Reads the specified `input_stream` until no more bytes can be read,
 // and puts the read bytes into `contents`.
@@ -59,12 +78,13 @@ using FileInputStreamTestDefaultBufferSize = testing::TestWithParam<int>;
 TEST_P(FileInputStreamTestDefaultBufferSize, ReadAllfFromInputStreamSucceeds) {
   int stream_size = GetParam();
   SCOPED_TRACE(absl::StrCat("stream_size = ", stream_size));
-  std::string file_contents;
+  std::string file_contents = subtle::Random::GetRandomBytes(stream_size);
   std::string filename = absl::StrCat(stream_size, "_reading_test.bin");
-  int input_fd =
-      test::GetTestFileDescriptor(filename, stream_size, &file_contents);
+  ASSERT_THAT(internal::CreateTestFile(filename, file_contents), IsOk());
+  util::StatusOr<int> input_fd = OpenTestFileToRead(filename);
+  ASSERT_THAT(input_fd.status(), IsOk());
   EXPECT_EQ(stream_size, file_contents.size());
-  auto input_stream = absl::make_unique<util::FileInputStream>(input_fd);
+  auto input_stream = absl::make_unique<util::FileInputStream>(*input_fd);
   std::string stream_contents;
   auto status = ReadAll(input_stream.get(), &stream_contents);
   EXPECT_THAT(status, StatusIs(absl::StatusCode::kOutOfRange));
@@ -83,13 +103,15 @@ TEST_P(FileInputStreamTestCustomBufferSizes,
        ReadAllWithCustomBufferSizeSucceeds) {
   int buffer_size = GetParam();
   SCOPED_TRACE(absl::StrCat("buffer_size = ", buffer_size));
-  std::string file_contents;
-  std::string filename = absl::StrCat(buffer_size, "_buffer_size_test.bin");
-  int input_fd = test::GetTestFileDescriptor(filename, kDefaultTestStreamSize,
-                                             &file_contents);
+  std::string file_contents =
+      subtle::Random::GetRandomBytes(kDefaultTestStreamSize);
+  std::string filename = absl::StrCat(buffer_size, "_reading_test.bin");
+  ASSERT_THAT(internal::CreateTestFile(filename, file_contents), IsOk());
+  util::StatusOr<int> input_fd = OpenTestFileToRead(filename);
+  ASSERT_THAT(input_fd.status(), IsOk());
   EXPECT_EQ(kDefaultTestStreamSize, file_contents.size());
   auto input_stream =
-      absl::make_unique<util::FileInputStream>(input_fd, buffer_size);
+      absl::make_unique<util::FileInputStream>(*input_fd, buffer_size);
   const void* buffer;
   auto next_result = input_stream->Next(&buffer);
   ASSERT_THAT(next_result, IsOk());
@@ -112,13 +134,15 @@ TEST(FileInputStreamTest, NextFailsIfFdIsInvalid) {
 
 TEST(FileInputStreamTest, NextFailsIfDataIsNull) {
   int buffer_size = 4 * 1024;
-  std::string file_contents;
-  std::string filename = absl::StrCat(buffer_size, "_backup_test.bin");
-  int input_fd = test::GetTestFileDescriptor(filename, kDefaultTestStreamSize,
-                                             &file_contents);
+  std::string file_contents =
+      subtle::Random::GetRandomBytes(kDefaultTestStreamSize);
+  std::string filename = absl::StrCat(buffer_size, "_reading_test.bin");
+  ASSERT_THAT(internal::CreateTestFile(filename, file_contents), IsOk());
+  util::StatusOr<int> input_fd = OpenTestFileToRead(filename);
+  ASSERT_THAT(input_fd.status(), IsOk());
   EXPECT_EQ(kDefaultTestStreamSize, file_contents.size());
   auto input_stream =
-      absl::make_unique<util::FileInputStream>(input_fd, buffer_size);
+      absl::make_unique<util::FileInputStream>(*input_fd, buffer_size);
 
   EXPECT_THAT(input_stream->Next(nullptr).status(),
               StatusIs(absl::StatusCode::kInvalidArgument));
@@ -126,13 +150,15 @@ TEST(FileInputStreamTest, NextFailsIfDataIsNull) {
 
 TEST(FileInputStreamTest, NextReadsExactlyOneBlockOfData) {
   int buffer_size = 4 * 1024;
-  std::string file_contents;
-  std::string filename = absl::StrCat(buffer_size, "_backup_test.bin");
-  int input_fd = test::GetTestFileDescriptor(filename, kDefaultTestStreamSize,
-                                             &file_contents);
+  std::string file_contents =
+      subtle::Random::GetRandomBytes(kDefaultTestStreamSize);
+  std::string filename = absl::StrCat(buffer_size, "_reading_test.bin");
+  ASSERT_THAT(internal::CreateTestFile(filename, file_contents), IsOk());
+  util::StatusOr<int> input_fd = OpenTestFileToRead(filename);
+  ASSERT_THAT(input_fd.status(), IsOk());
   EXPECT_EQ(kDefaultTestStreamSize, file_contents.size());
   auto input_stream =
-      absl::make_unique<util::FileInputStream>(input_fd, buffer_size);
+      absl::make_unique<util::FileInputStream>(*input_fd, buffer_size);
 
   auto expected_file_content_block =
       absl::string_view(file_contents).substr(0, buffer_size);
@@ -147,13 +173,15 @@ TEST(FileInputStreamTest, NextReadsExactlyOneBlockOfData) {
 
 TEST(FileInputStreamTest, BackupForNegativeOrZeroBytesIsANoop) {
   int buffer_size = 4 * 1024;
-  std::string file_contents;
-  std::string filename = absl::StrCat(buffer_size, "_backup_test.bin");
-  int input_fd = test::GetTestFileDescriptor(filename, kDefaultTestStreamSize,
-                                             &file_contents);
+  std::string file_contents =
+      subtle::Random::GetRandomBytes(kDefaultTestStreamSize);
+  std::string filename = absl::StrCat(buffer_size, "_reading_test.bin");
+  ASSERT_THAT(internal::CreateTestFile(filename, file_contents), IsOk());
+  util::StatusOr<int> input_fd = OpenTestFileToRead(filename);
+  ASSERT_THAT(input_fd.status(), IsOk());
   EXPECT_EQ(kDefaultTestStreamSize, file_contents.size());
   auto input_stream =
-      absl::make_unique<util::FileInputStream>(input_fd, buffer_size);
+      absl::make_unique<util::FileInputStream>(*input_fd, buffer_size);
   EXPECT_EQ(input_stream->Position(), 0);
 
   auto expected_file_content_block =
@@ -183,13 +211,15 @@ TEST(FileInputStreamTest, BackupForNegativeOrZeroBytesIsANoop) {
 
 TEST(FileInputStreamTest, BackupForLessThanOneBlockOfData) {
   int buffer_size = 4 * 1024;
-  std::string file_contents;
-  std::string filename = absl::StrCat(buffer_size, "_backup_test.bin");
-  int input_fd = test::GetTestFileDescriptor(filename, kDefaultTestStreamSize,
-                                             &file_contents);
+  std::string file_contents =
+      subtle::Random::GetRandomBytes(kDefaultTestStreamSize);
+  std::string filename = absl::StrCat(buffer_size, "_reading_test.bin");
+  ASSERT_THAT(internal::CreateTestFile(filename, file_contents), IsOk());
+  util::StatusOr<int> input_fd = OpenTestFileToRead(filename);
+  ASSERT_THAT(input_fd.status(), IsOk());
   EXPECT_EQ(kDefaultTestStreamSize, file_contents.size());
   auto input_stream =
-      absl::make_unique<util::FileInputStream>(input_fd, buffer_size);
+      absl::make_unique<util::FileInputStream>(*input_fd, buffer_size);
 
   auto expected_file_content_block =
       absl::string_view(file_contents).substr(0, buffer_size);
@@ -231,13 +261,15 @@ TEST(FileInputStreamTest, BackupForLessThanOneBlockOfData) {
 // of one block.
 TEST(FileInputStreamTest, BackupAtMostOfOneBlock) {
   int buffer_size = 4 * 1024;
-  std::string file_contents;
-  std::string filename = absl::StrCat(buffer_size, "_backup_test.bin");
-  int input_fd = test::GetTestFileDescriptor(filename, kDefaultTestStreamSize,
-                                             &file_contents);
+  std::string file_contents =
+      subtle::Random::GetRandomBytes(kDefaultTestStreamSize);
+  std::string filename = absl::StrCat(buffer_size, "_reading_test.bin");
+  ASSERT_THAT(internal::CreateTestFile(filename, file_contents), IsOk());
+  util::StatusOr<int> input_fd = OpenTestFileToRead(filename);
+  ASSERT_THAT(input_fd.status(), IsOk());
   EXPECT_EQ(kDefaultTestStreamSize, file_contents.size());
   auto input_stream =
-      absl::make_unique<util::FileInputStream>(input_fd, buffer_size);
+      absl::make_unique<util::FileInputStream>(*input_fd, buffer_size);
 
   // Read two blocks of size buffer_size, then back up of more than buffer_size
   // bytes.

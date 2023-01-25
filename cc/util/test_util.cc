@@ -16,10 +16,8 @@
 
 #include "tink/util/test_util.h"
 
-#include <fcntl.h>
 #include <stdarg.h>
 #include <stdlib.h>
-#include <unistd.h>
 
 #include <cmath>
 #include <cstdint>
@@ -74,54 +72,6 @@ using google::crypto::tink::OutputPrefixType;
 namespace crypto {
 namespace tink {
 namespace test {
-
-int GetTestFileDescriptor(absl::string_view filename, int size,
-                          std::string* file_contents) {
-  (*file_contents) = subtle::Random::GetRandomBytes(size);
-  return GetTestFileDescriptor(filename, *file_contents);
-}
-
-int GetTestFileDescriptor(
-    absl::string_view filename, absl::string_view file_contents) {
-  std::string full_filename =
-      absl::StrCat(crypto::tink::test::TmpDir(), "/", filename);
-  mode_t mode = S_IWUSR | S_IRUSR | S_IRGRP | S_IROTH;
-  int fd = open(full_filename.c_str(), O_WRONLY | O_CREAT | O_TRUNC, mode);
-  if (fd == -1) {
-    std::clog << "Cannot create file " << full_filename
-              << " error: " << errno << std::endl;
-    exit(1);
-  }
-  auto size = file_contents.size();
-  if (write(fd, file_contents.data(), size) != size) {
-    std::clog << "Failed to write " << size << " bytes to file "
-              << full_filename << " error: " << errno << std::endl;
-
-    exit(1);
-  }
-  close(fd);
-  fd = open(full_filename.c_str(), O_RDONLY);
-  if (fd == -1) {
-    std::clog << "Cannot re-open file " << full_filename
-              << " error: " << errno << std::endl;
-    exit(1);
-  }
-  return fd;
-}
-
-
-int GetTestFileDescriptor(absl::string_view filename) {
-  std::string full_filename =
-      absl::StrCat(crypto::tink::test::TmpDir(), "/", filename);
-  mode_t mode = S_IWUSR | S_IRUSR | S_IRGRP | S_IROTH;
-  int fd = open(full_filename.c_str(), O_WRONLY | O_CREAT | O_TRUNC, mode);
-  if (fd == -1) {
-    std::clog << "Cannot create file " << full_filename
-              << " error: " << errno << std::endl;
-    exit(1);
-  }
-  return fd;
-}
 
 std::string ReadTestFile(absl::string_view filename) {
   std::string full_filename = absl::StrCat(test::TmpDir(), "/", filename);
@@ -186,12 +136,10 @@ std::string TmpDir() {
   return "/tmp";
 }
 
-void AddKeyData(
-    const google::crypto::tink::KeyData& key_data,
-    uint32_t key_id,
-    google::crypto::tink::OutputPrefixType output_prefix,
-    google::crypto::tink::KeyStatusType key_status,
-    google::crypto::tink::Keyset* keyset) {
+void AddKeyData(const google::crypto::tink::KeyData& key_data, uint32_t key_id,
+                google::crypto::tink::OutputPrefixType output_prefix,
+                google::crypto::tink::KeyStatusType key_status,
+                google::crypto::tink::Keyset* keyset) {
   Keyset::Key* key = keyset->add_key();
   key->set_output_prefix_type(output_prefix);
   key->set_key_id(key_id);

@@ -31,10 +31,15 @@ cc_library(
 cc_library(
     name = "test_file_util",
     testonly = 1,
-    srcs = ["test_file_util_bazel.cc"],
+    srcs = [
+        "test_file_util.cc",
+        "test_file_util_bazel.cc",
+    ],
     hdrs = ["test_file_util.h"],
     include_prefix = "tink/internal",
     deps = [
+        "//util:status",
+        "//util:test_util",
         "@bazel_tools//tools/cpp/runfiles",
         "@com_google_absl//absl/strings",
     ],

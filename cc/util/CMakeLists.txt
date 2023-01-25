@@ -309,6 +309,8 @@ tink_cc_test(
     absl::memory
     absl::status
     absl::strings
+    tink::internal::test_file_util
+    tink::subtle::random
 )
 
 tink_cc_test(
@@ -317,10 +319,12 @@ tink_cc_test(
     file_output_stream_test.cc
   DEPS
     tink::util::file_output_stream
+    tink::util::test_matchers
     tink::util::test_util
     gmock
     absl::memory
     absl::strings
+    tink::internal::test_file_util
     tink::subtle::random
 )
 
@@ -331,10 +335,14 @@ tink_cc_test(
   DEPS
     tink::util::buffer
     tink::util::file_random_access_stream
+    tink::util::test_matchers
     tink::util::test_util
     gmock
     absl::memory
+    absl::status
     absl::strings
+    tink::internal::test_file_util
+    tink::subtle::random
 )
 
 tink_cc_test(

@@ -1,4 +1,4 @@
-// Copyright 2021 Google LLC
+// Copyright 2023 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,31 +14,31 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef TINK_INTERNAL_TEST_FILE_UTIL_H_
-#define TINK_INTERNAL_TEST_FILE_UTIL_H_
+#include "tink/internal/test_file_util.h"
 
+#include <fstream>
+#include <ios>
 #include <string>
 
+#include "absl/strings/str_cat.h"
 #include "absl/strings/string_view.h"
-#include "tink/util/status.h"
+#include "tink/util/test_util.h"
 
 namespace crypto {
 namespace tink {
 namespace internal {
 
-// File utilities for testing.
-///////////////////////////////////////////////////////////////////////////////
-
-// TODO(ckl): Move other file related functionality from cc/util/test_util.h
-
-// Returns the path of the specified file in the runfiles directory.
-std::string RunfilesPath(absl::string_view path);
-
-crypto::tink::util::Status CreateTestFile(absl::string_view filename,
-                                          absl::string_view file_content);
+util::Status CreateTestFile(absl::string_view filename,
+                            absl::string_view file_content) {
+  std::string full_filename = absl::StrCat(test::TmpDir(), "/", filename);
+  std::ofstream output_stream(full_filename, std::ios::binary);
+  if (!output_stream) {
+    return util::Status(absl::StatusCode::kInternal, "Cannot open file");
+  }
+  output_stream.write(file_content.data(), file_content.size());
+  return util::OkStatus();
+}
 
 }  // namespace internal
 }  // namespace tink
 }  // namespace crypto
-
-#endif  // TINK_INTERNAL_TEST_FILE_UTIL_H_
