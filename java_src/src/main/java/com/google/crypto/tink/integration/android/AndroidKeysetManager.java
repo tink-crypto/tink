@@ -58,7 +58,7 @@ import javax.annotation.concurrent.GuardedBy;
  * // later use.
  * AndroidKeysetManager manager = AndroidKeysetManager.Builder()
  *    .withSharedPref(getApplicationContext(), "my_keyset_name", "my_pref_file_name")
- *    .withKeyTemplate(AesGcmHkfStreamingKeyManager.aes128GcmHkdf4KBTemplate())
+ *    .withKeyTemplate(KeyTemplates.get("AES128_GCM_HKDF_4KB"))
  *    .build();
  * StreamingAead streamingAead = manager.getKeysetHandle().getPrimitive(StreamingAead.class);
  * }</pre>
@@ -78,13 +78,13 @@ import javax.annotation.concurrent.GuardedBy;
  *       my_pref_file_name} shared preferences file.
  * </ul>
  *
- * <h3>Key rotation</h3>
+ * <h3>Adding a new key</h3>
  *
  * <p>The resulting manager supports all operations supported by {@link KeysetManager}. For example
- * to rotate the keyset, you can do:
+ * to add a key to the keyset, you can do:
  *
  * <pre>{@code
- * manager.rotate(AesGcmHkfStreamingKeyManager.aes128GcmHkdf1MBTemplate());
+ * manager.add(KeyTemplates.get("AES128_GCM_HKDF_4KB"));
  * }</pre>
  *
  * <p>All operations that manipulate the keyset would automatically persist the new keyset to
@@ -128,14 +128,14 @@ public final class AndroidKeysetManager {
 
   private static final String TAG = AndroidKeysetManager.class.getSimpleName();
   private final KeysetWriter writer;
-  private final Aead masterKey;
+  private final Aead masterAead;
 
   @GuardedBy("this")
   private KeysetManager keysetManager;
 
   private AndroidKeysetManager(Builder builder) {
     writer = new SharedPrefKeysetWriter(builder.context, builder.keysetName, builder.prefFileName);
-    masterKey = builder.masterKey;
+    masterAead = builder.masterAead;
     keysetManager = builder.keysetManager;
   }
 
@@ -150,7 +150,7 @@ public final class AndroidKeysetManager {
     private String prefFileName = null;
 
     private String masterKeyUri = null;
-    private Aead masterKey = null;
+    private Aead masterAead = null;
     private boolean useKeystore = true;
     private KeyTemplate keyTemplate = null;
 
@@ -287,7 +287,7 @@ public final class AndroidKeysetManager {
         byte[] serializedKeyset = readKeysetFromPrefs(context, keysetName, prefFileName);
         if (serializedKeyset == null) {
           if (masterKeyUri != null) {
-            masterKey = readOrGenerateNewMasterKey();
+            masterAead = readOrGenerateNewMasterKey();
           }
           this.keysetManager = generateKeysetAndWriteToPrefs();
         } else {
@@ -349,8 +349,8 @@ public final class AndroidKeysetManager {
       int keyId = manager.getKeysetHandle().getKeysetInfo().getKeyInfo(0).getKeyId();
       manager = manager.setPrimary(keyId);
       KeysetWriter writer = new SharedPrefKeysetWriter(context, keysetName, prefFileName);
-      if (masterKey != null) {
-        manager.getKeysetHandle().write(writer, masterKey);
+      if (masterAead != null) {
+        manager.getKeysetHandle().write(writer, masterAead);
       } else {
         CleartextKeysetHandle.write(manager.getKeysetHandle(), writer);
       }
@@ -360,11 +360,11 @@ public final class AndroidKeysetManager {
     @SuppressWarnings("UnusedException")
     private KeysetManager readMasterkeyDecryptAndParseKeyset(byte[] serializedKeyset)
         throws GeneralSecurityException, IOException {
-      // We expect that the keyset is encrypted. Try to read masterKey.
+      // We expect that the keyset is encrypted. Try to get masterAead.
       try {
-        masterKey = new AndroidKeystoreKmsClient().getAead(masterKeyUri);
+        masterAead = new AndroidKeystoreKmsClient().getAead(masterKeyUri);
       } catch (GeneralSecurityException | ProviderException keystoreException) {
-        // Reading masterkey failed. Attempt to read the keyset in cleartext.
+        // Getting masterAead failed. Attempt to read the keyset in cleartext.
         try {
           KeysetManager manager = readKeysetInCleartext(serializedKeyset);
           Log.w(TAG, "cannot use Android Keystore, it'll be disabled", keystoreException);
@@ -374,11 +374,11 @@ public final class AndroidKeysetManager {
           throw keystoreException;
         }
       }
-      // masterKey was read successfully.
+      // Got masterAead successfully.
       try {
-        // Decrypt and parse the keyset using masterKey.
+        // Decrypt and parse the keyset using masterAead.
         return KeysetManager.withKeysetHandle(
-            KeysetHandle.read(BinaryKeysetReader.withBytes(serializedKeyset), masterKey));
+            KeysetHandle.read(BinaryKeysetReader.withBytes(serializedKeyset), masterAead));
       } catch (IOException | GeneralSecurityException ex) {
         // Attempt to read the keyset in cleartext.
         // This edge case may happen when either
@@ -538,7 +538,7 @@ public final class AndroidKeysetManager {
   private void write(KeysetManager manager) throws GeneralSecurityException {
     try {
       if (shouldUseKeystore()) {
-        manager.getKeysetHandle().write(writer, masterKey);
+        manager.getKeysetHandle().write(writer, masterAead);
       } else {
         CleartextKeysetHandle.write(manager.getKeysetHandle(), writer);
       }
@@ -549,7 +549,7 @@ public final class AndroidKeysetManager {
 
   @ChecksSdkIntAtLeast(api = Build.VERSION_CODES.M)
   private boolean shouldUseKeystore() {
-    return masterKey != null && isAtLeastM();
+    return masterAead != null && isAtLeastM();
   }
 
   private static KeyTemplate.OutputPrefixType fromProto(OutputPrefixType outputPrefixType) {
