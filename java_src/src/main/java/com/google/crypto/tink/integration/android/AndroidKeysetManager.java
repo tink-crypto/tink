@@ -369,7 +369,7 @@ public final class AndroidKeysetManager {
           KeysetManager manager = readKeysetInCleartext(serializedKeyset);
           Log.w(TAG, "cannot use Android Keystore, it'll be disabled", keystoreException);
           return manager;
-        } catch (InvalidProtocolBufferException unused) {
+        } catch (IOException unused) {
           // Keyset is encrypted, throw error about master key encryption
           throw keystoreException;
         }
@@ -379,7 +379,7 @@ public final class AndroidKeysetManager {
         // Decrypt and parse the keyset using masterKey.
         return KeysetManager.withKeysetHandle(
             KeysetHandle.read(BinaryKeysetReader.withBytes(serializedKeyset), masterKey));
-      } catch (InvalidProtocolBufferException | GeneralSecurityException ex) {
+      } catch (IOException | GeneralSecurityException ex) {
         // Attempt to read the keyset in cleartext.
         // This edge case may happen when either
         //   - the keyset was generated on a pre M phone which was upgraded to M or newer, or
@@ -392,7 +392,7 @@ public final class AndroidKeysetManager {
         // write the encrypted keyset in the first place.
         try {
           return readKeysetInCleartext(serializedKeyset);
-        } catch (InvalidProtocolBufferException unused) {
+        } catch (IOException unused) {
           // Parsing failed because the keyset is encrypted but we were not able to decrypt it.
           throw ex;
         }
