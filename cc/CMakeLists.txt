@@ -872,9 +872,11 @@ tink_cc_test(
     tink::internal::proto_key_serialization
     tink::internal::proto_parameters_serialization
     tink::mac::mac_key_templates
+    tink::subtle::random
     tink::util::status
     tink::util::test_matchers
     tink::util::test_util
+    tink::proto::aes_cmac_cc_proto
     tink::proto::tink_cc_proto
 )
 

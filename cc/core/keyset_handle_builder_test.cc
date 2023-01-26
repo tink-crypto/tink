@@ -35,9 +35,11 @@
 #include "tink/internal/proto_parameters_serialization.h"
 #include "tink/key_status.h"
 #include "tink/mac/mac_key_templates.h"
+#include "tink/subtle/random.h"
 #include "tink/util/status.h"
 #include "tink/util/test_matchers.h"
 #include "tink/util/test_util.h"
+#include "proto/aes_cmac.pb.h"
 #include "proto/tink.pb.h"
 
 namespace crypto {
@@ -47,10 +49,13 @@ namespace {
 using ::crypto::tink::test::AddTinkKey;
 using ::crypto::tink::test::IsOk;
 using ::crypto::tink::test::StatusIs;
+using ::google::crypto::tink::AesCmacKey;
+using ::google::crypto::tink::AesCmacParams;
 using ::google::crypto::tink::KeyData;
 using ::google::crypto::tink::Keyset;
 using ::google::crypto::tink::KeyStatusType;
 using ::google::crypto::tink::KeyTemplate;
+using ::google::crypto::tink::OutputPrefixType;
 using ::testing::Eq;
 using ::testing::IsFalse;
 using ::testing::IsTrue;
@@ -609,7 +614,7 @@ TEST_F(KeysetHandleBuilderTest, CreateBuilderEntryFromCopyableParameters) {
   ASSERT_THAT(handle.status(), IsOk());
 }
 
-TEST_F(KeysetHandleBuilderTest, UsePrimitive) {
+TEST_F(KeysetHandleBuilderTest, UsePrimitiveFromLegacyProtoParams) {
   util::StatusOr<internal::LegacyProtoParameters> parameters =
       CreateLegacyProtoParameters(MacKeyTemplates::AesCmac());
   ASSERT_THAT(parameters.status(), IsOk());
@@ -617,6 +622,44 @@ TEST_F(KeysetHandleBuilderTest, UsePrimitive) {
   KeysetHandleBuilder::Entry entry =
       KeysetHandleBuilder::Entry::CreateFromCopyableParams(
           *parameters, KeyStatus::kEnabled, /*is_primary=*/true);
+
+  util::StatusOr<KeysetHandle> handle =
+      KeysetHandleBuilder().AddEntry(std::move(entry)).Build();
+  ASSERT_THAT(handle.status(), IsOk());
+
+  util::StatusOr<std::unique_ptr<Mac>> mac = handle->GetPrimitive<Mac>();
+  ASSERT_THAT(mac.status(), IsOk());
+  util::StatusOr<std::string> tag = (*mac)->ComputeMac("some input");
+  ASSERT_THAT(tag.status(), IsOk());
+  util::Status verified = (*mac)->VerifyMac(*tag, "some input");
+  EXPECT_THAT(verified, IsOk());
+}
+
+TEST_F(KeysetHandleBuilderTest, UsePrimitiveFromLegacyProtoKey) {
+  AesCmacParams params;
+  params.set_tag_size(16);
+  AesCmacKey key;
+  *key.mutable_params() = params;
+  key.set_version(0);
+  key.set_key_value(subtle::Random::GetRandomBytes(32));
+
+  util::StatusOr<internal::ProtoKeySerialization> serialization =
+      internal::ProtoKeySerialization::Create(
+          "type.googleapis.com/google.crypto.tink.AesCmacKey",
+          RestrictedData(key.SerializeAsString(),
+                         InsecureSecretKeyAccess::Get()),
+          KeyData::SYMMETRIC, OutputPrefixType::TINK,
+          /*id_requirement=*/123);
+  ASSERT_THAT(serialization, IsOk());
+
+  util::StatusOr<internal::LegacyProtoKey> proto_key =
+      internal::LegacyProtoKey::Create(*serialization,
+                                       InsecureSecretKeyAccess::Get());
+  ASSERT_THAT(proto_key.status(), IsOk());
+
+  KeysetHandleBuilder::Entry entry =
+      KeysetHandleBuilder::Entry::CreateFromCopyableKey(
+          *proto_key, KeyStatus::kEnabled, /*is_primary=*/true);
 
   util::StatusOr<KeysetHandle> handle =
       KeysetHandleBuilder().AddEntry(std::move(entry)).Build();
