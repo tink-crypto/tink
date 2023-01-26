@@ -322,14 +322,16 @@ class RegistryImpl {
   class WrapperInfo {
    public:
     template <typename P, typename Q>
-    explicit WrapperInfo(std::unique_ptr<PrimitiveWrapper<P, Q>> wrapper)
+    explicit WrapperInfo(RegistryImpl& registry,
+                         std::unique_ptr<PrimitiveWrapper<P, Q>> wrapper)
         : is_same_primitive_wrapping_(std::is_same<P, Q>::value),
           wrapper_type_index_(std::type_index(typeid(*wrapper))),
           q_type_index_(std::type_index(typeid(Q))) {
       auto keyset_wrapper_unique_ptr =
           absl::make_unique<KeysetWrapperImpl<P, Q>>(
-              wrapper.get(), [](const google::crypto::tink::KeyData& key_data) {
-                return RegistryImpl::GlobalInstance().GetPrimitive<P>(key_data);
+              wrapper.get(),
+              [&registry](const google::crypto::tink::KeyData& key_data) {
+                return registry.GetPrimitive<P>(key_data);
               });
       keyset_wrapper_ = std::move(keyset_wrapper_unique_ptr);
       original_wrapper_ = std::move(wrapper);
@@ -719,7 +721,8 @@ crypto::tink::util::Status RegistryImpl::RegisterPrimitiveWrapper(
     }
     return crypto::tink::util::OkStatus();
   }
-  auto wrapper_info = absl::make_unique<WrapperInfo>(std::move(owned_wrapper));
+  auto wrapper_info =
+      absl::make_unique<WrapperInfo>(*this, std::move(owned_wrapper));
   primitive_to_wrapper_.insert(
       {std::type_index(typeid(Q)), std::move(wrapper_info)});
   return crypto::tink::util::OkStatus();
