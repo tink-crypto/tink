@@ -577,7 +577,7 @@ TEST_F(KeysetHandleTest, GenerateNewKeysetHandle) {
     auto handle_result = KeysetHandle::GenerateNew(*templ);
     EXPECT_TRUE(handle_result.ok())
         << "Failed for template:\n " << templ->SerializeAsString()
-        << "\n with status: "<< handle_result.status();
+        << "\n with status: " << handle_result.status();
   }
 }
 
@@ -631,7 +631,6 @@ TEST_F(KeysetHandleTest, UnknownPrefixIsInvalid) {
   EXPECT_FALSE(handle_result.ok());
 }
 
-
 void CompareKeyMetadata(const Keyset::Key& expected,
                         const Keyset::Key& actual) {
   EXPECT_EQ(expected.status(), actual.status());
@@ -640,9 +639,9 @@ void CompareKeyMetadata(const Keyset::Key& expected,
 }
 
 TEST_F(KeysetHandleTest, GetPublicKeysetHandle) {
-  { // A keyset with a single key.
-    auto handle_result = KeysetHandle::GenerateNew(
-        SignatureKeyTemplates::EcdsaP256());
+  {  // A keyset with a single key.
+    auto handle_result =
+        KeysetHandle::GenerateNew(SignatureKeyTemplates::EcdsaP256());
     ASSERT_TRUE(handle_result.ok()) << handle_result.status();
     auto handle = std::move(handle_result.value());
     auto public_handle_result = handle->GetPublicKeysetHandle();
@@ -656,7 +655,7 @@ TEST_F(KeysetHandleTest, GetPublicKeysetHandle) {
     EXPECT_EQ(KeyData::ASYMMETRIC_PUBLIC,
               public_keyset.key(0).key_data().key_material_type());
   }
-  { // A keyset with multiple keys.
+  {  // A keyset with multiple keys.
     EcdsaSignKeyManager key_manager;
     Keyset keyset;
     int key_count = 3;
@@ -694,9 +693,9 @@ TEST_F(KeysetHandleTest, GetPublicKeysetHandle) {
 }
 
 TEST_F(KeysetHandleTest, GetPublicKeysetHandleErrors) {
-  { // A keyset with a single key.
-    auto handle_result = KeysetHandle::GenerateNew(
-        AeadKeyTemplates::Aes128Eax());
+  {  // A keyset with a single key.
+    auto handle_result =
+        KeysetHandle::GenerateNew(AeadKeyTemplates::Aes128Eax());
     ASSERT_TRUE(handle_result.ok()) << handle_result.status();
     auto handle = std::move(handle_result.value());
     auto public_handle_result = handle->GetPublicKeysetHandle();
@@ -704,7 +703,7 @@ TEST_F(KeysetHandleTest, GetPublicKeysetHandleErrors) {
     EXPECT_PRED_FORMAT2(testing::IsSubstring, "ASYMMETRIC_PRIVATE",
                         std::string(public_handle_result.status().message()));
   }
-  { // A keyset with multiple keys.
+  {  // A keyset with multiple keys.
     Keyset keyset;
 
     EcdsaKeyFormat ecdsa_key_format;
@@ -1141,8 +1140,7 @@ TEST_F(KeysetHandleDeathTest, EntryWithUnknownStatusFails) {
       TestKeysetHandle::GetKeysetHandle(keyset);
   ASSERT_THAT(*handle, SizeIs(1));
 
-  EXPECT_THAT(handle->Validate(),
-              StatusIs(absl::StatusCode::kInvalidArgument));
+  EXPECT_THAT(handle->Validate(), StatusIs(absl::StatusCode::kInvalidArgument));
   EXPECT_THAT(handle->ValidateAt(0),
               StatusIs(absl::StatusCode::kInvalidArgument));
   EXPECT_DEATH_IF_SUPPORTED((*handle)[0], "Invalid key status type.");
