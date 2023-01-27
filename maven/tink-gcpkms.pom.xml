@@ -90,8 +90,8 @@
     <auto-service-annotations.version>1.0.1</auto-service-annotations.version>
     <jsr305.version>3.0.2</jsr305.version>
     <error_prone_annotations.version>2.16</error_prone_annotations.version>
-    <google-http-client.version>1.41.3</google-http-client.version>
-    <google-http-client-gson.version>1.41.3</google-http-client-gson.version>
+    <google-http-client.version>1.42.3</google-http-client.version>
+    <google-http-client-gson.version>1.42.3</google-http-client-gson.version>
     <google-oauth-client.version>1.33.0</google-oauth-client.version>
     <tink.version>VERSION_PLACEHOLDER</tink.version>
   </properties>
