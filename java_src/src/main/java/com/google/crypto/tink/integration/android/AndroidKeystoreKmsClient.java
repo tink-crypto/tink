@@ -224,7 +224,6 @@ public final class AndroidKeystoreKmsClient implements KmsClient {
     AndroidKeystoreKmsClient client = new AndroidKeystoreKmsClient();
     synchronized (keyCreationLock) {
       if (!client.hasKey(keyUri)) {
-        Log.i(TAG, String.format("key URI %s doesn't exist, generating a new one", keyUri));
         generateNewAesGcmKeyWithoutExistenceCheck(keyUri);
       }
     }
