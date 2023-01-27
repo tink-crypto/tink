@@ -22,24 +22,24 @@ tinkey create-public-keyset --in hybrid_test_private_keyset.json \
 
 ```shell
 git clone https://github.com/google/tink
-cd tink/examples/java_src
-bazel build ...
+cd tink/java_src/examples
+bazel build hybrid_example
 ```
 
 Encrypt a file:
 
 ```shell
 echo "some data" > testdata.txt
-./bazel-bin/hybrid/hybrid_example encrypt \
-    ./hybrid/hybrid_test_public_keyset.json \
+../bazel-bin/hybrid/hybrid_example encrypt \
+    ../hybrid/hybrid_test_public_keyset.json \
     testdata.txt testdata.txt.encrypted
 ```
 
 Decrypt a file:
 
 ```shell
-./bazel-bin/hybrid/hybrid_example decrypt \
-    ./hybrid/hybrid_test_private_keyset.json \
+../bazel-bin/hybrid/hybrid_example decrypt \
+    ../hybrid/hybrid_test_private_keyset.json \
     testdata.txt.encrypted testdata.txt.decrypted
 
 diff testdata.txt testdata.txt.decrypted
