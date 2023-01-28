@@ -227,6 +227,18 @@ util::StatusOr<RsaSsaPssPrivateKey> GetRsaSsaPssPrivateKeyProto(
   return private_key_proto;
 }
 
+PemKey CreatePemKey(absl::string_view serialized_key,
+                    crypto::tink::PemKeyType key_type,
+                    crypto::tink::PemAlgorithm algorithm,
+                    size_t key_size_in_bits,
+                    google::crypto::tink::HashType hash_type) {
+  PemKey pem_key = {
+      /*serialized_key=*/std::string(serialized_key),
+      /*parameters=*/{key_type, algorithm, key_size_in_bits, hash_type},
+  };
+  return pem_key;
+}
+
 // Verify check on PEM array size not zero before creating a reader.
 TEST(SignaturePemKeysetReaderTest, BuildEmptyPemArray) {
   auto builder = SignaturePemKeysetReaderBuilder(
@@ -240,11 +252,9 @@ TEST(SignaturePemKeysetReaderTest, BuildEmptyPemArray) {
 TEST(SignaturePemKeysetReaderTest, ReadEncryptedUnsupported) {
   auto builder = SignaturePemKeysetReaderBuilder(
       SignaturePemKeysetReaderBuilder::PemReaderType::PUBLIC_KEY_VERIFY);
-  builder.Add({.serialized_key = std::string(kRsaPublicKey2048),
-               .parameters = {.key_type = PemKeyType::PEM_RSA,
-                              .algorithm = PemAlgorithm::RSASSA_PSS,
-                              .key_size_in_bits = 2048,
-                              .hash_type = HashType::SHA384}});
+  builder.Add(CreatePemKey(kRsaPublicKey2048, PemKeyType::PEM_RSA,
+                           PemAlgorithm::RSASSA_PSS, /*key_size_in_bits=*/2048,
+                           HashType::SHA384));
 
   auto keyset_reader_or = builder.Build();
   ASSERT_THAT(keyset_reader_or, IsOk());
@@ -260,16 +270,12 @@ TEST(SignaturePemKeysetReaderTest, ReadRsaCorrectPublicKey) {
   auto builder = SignaturePemKeysetReaderBuilder(
       SignaturePemKeysetReaderBuilder::PemReaderType::PUBLIC_KEY_VERIFY);
 
-  builder.Add({.serialized_key = std::string(kRsaPublicKey2048),
-               .parameters = {.key_type = PemKeyType::PEM_RSA,
-                              .algorithm = PemAlgorithm::RSASSA_PSS,
-                              .key_size_in_bits = 2048,
-                              .hash_type = HashType::SHA384}});
-  builder.Add({.serialized_key = std::string(kRsaPublicKey2048),
-               .parameters = {.key_type = PemKeyType::PEM_RSA,
-                              .algorithm = PemAlgorithm::RSASSA_PSS,
-                              .key_size_in_bits = 2048,
-                              .hash_type = HashType::SHA256}});
+  builder.Add(CreatePemKey(kRsaPublicKey2048, PemKeyType::PEM_RSA,
+                           PemAlgorithm::RSASSA_PSS, /*key_size_in_bits=*/2048,
+                           HashType::SHA384));
+  builder.Add(CreatePemKey(kRsaPublicKey2048, PemKeyType::PEM_RSA,
+                           PemAlgorithm::RSASSA_PSS, /*key_size_in_bits=*/2048,
+                           HashType::SHA256));
 
   auto keyset_reader_or = builder.Build();
   ASSERT_THAT(keyset_reader_or, IsOk());
@@ -330,16 +336,12 @@ TEST(SignaturePemKeysetReaderTest, ReadRsaCorrectPrivateKey) {
   auto builder = SignaturePemKeysetReaderBuilder(
       SignaturePemKeysetReaderBuilder::PemReaderType::PUBLIC_KEY_SIGN);
 
-  builder.Add({.serialized_key = std::string(kRsaPrivateKey2048),
-               .parameters = {.key_type = PemKeyType::PEM_RSA,
-                              .algorithm = PemAlgorithm::RSASSA_PSS,
-                              .key_size_in_bits = 2048,
-                              .hash_type = HashType::SHA256}});
-  builder.Add({.serialized_key = std::string(kRsaPrivateKey2048),
-               .parameters = {.key_type = PemKeyType::PEM_RSA,
-                              .algorithm = PemAlgorithm::RSASSA_PSS,
-                              .key_size_in_bits = 2048,
-                              .hash_type = HashType::SHA384}});
+  builder.Add(CreatePemKey(kRsaPrivateKey2048, PemKeyType::PEM_RSA,
+                           PemAlgorithm::RSASSA_PSS, /*key_size_in_bits=*/2048,
+                           HashType::SHA256));
+  builder.Add(CreatePemKey(kRsaPrivateKey2048, PemKeyType::PEM_RSA,
+                           PemAlgorithm::RSASSA_PSS, /*key_size_in_bits=*/2048,
+                           HashType::SHA384));
 
   auto keyset_reader_or = builder.Build();
   ASSERT_THAT(keyset_reader_or, IsOk());
@@ -399,11 +401,9 @@ TEST(SignaturePemKeysetReaderTest, ReadRsaCorrectPrivateKey) {
 TEST(SignaturePemKeysetReaderTest, ReadRsaPrivateKeyKeyTypeMismatch) {
   auto builder = SignaturePemKeysetReaderBuilder(
       SignaturePemKeysetReaderBuilder::PemReaderType::PUBLIC_KEY_SIGN);
-  builder.Add({.serialized_key = std::string(kRsaPublicKey2048),
-               .parameters = {.key_type = PemKeyType::PEM_RSA,
-                              .algorithm = PemAlgorithm::RSASSA_PSS,
-                              .key_size_in_bits = 2048,
-                              .hash_type = HashType::SHA384}});
+  builder.Add(CreatePemKey(kRsaPublicKey2048, PemKeyType::PEM_RSA,
+                           PemAlgorithm::RSASSA_PSS, /*key_size_in_bits=*/2048,
+                           HashType::SHA384));
 
   auto keyset_reader_or = builder.Build();
   ASSERT_THAT(keyset_reader_or, IsOk());
@@ -420,11 +420,9 @@ TEST(SignaturePemKeysetReaderTest, ReadRsaPublicKeyKeyTypeMismatch) {
   auto builder = SignaturePemKeysetReaderBuilder(
       SignaturePemKeysetReaderBuilder::PemReaderType::PUBLIC_KEY_VERIFY);
 
-  builder.Add({.serialized_key = std::string(kRsaPrivateKey2048),
-               .parameters = {.key_type = PemKeyType::PEM_RSA,
-                              .algorithm = PemAlgorithm::RSASSA_PSS,
-                              .key_size_in_bits = 2048,
-                              .hash_type = HashType::SHA256}});
+  builder.Add(CreatePemKey(kRsaPrivateKey2048, PemKeyType::PEM_RSA,
+                           PemAlgorithm::RSASSA_PSS, /*key_size_in_bits=*/2048,
+                           HashType::SHA256));
 
   auto keyset_reader_or = builder.Build();
   ASSERT_THAT(keyset_reader_or, IsOk());
@@ -440,11 +438,9 @@ TEST(SignaturePemKeysetReaderTest, ReadRsaPublicKeyTooSmall) {
   auto builder = SignaturePemKeysetReaderBuilder(
       SignaturePemKeysetReaderBuilder::PemReaderType::PUBLIC_KEY_VERIFY);
 
-  builder.Add({.serialized_key = std::string(kRsaPublicKey1024),
-               .parameters = {.key_type = PemKeyType::PEM_RSA,
-                              .algorithm = PemAlgorithm::RSASSA_PSS,
-                              .key_size_in_bits = 1024,
-                              .hash_type = HashType::SHA256}});
+  builder.Add(CreatePemKey(kRsaPublicKey1024, PemKeyType::PEM_RSA,
+                           PemAlgorithm::RSASSA_PSS, /*key_size_in_bits=*/1024,
+                           HashType::SHA256));
 
   auto keyset_reader_or = builder.Build();
   ASSERT_THAT(keyset_reader_or, IsOk());
@@ -461,11 +457,9 @@ TEST(SignaturePemKeysetReaderTest, ReadRsaPublicKeySizeMismatch) {
   auto builder = SignaturePemKeysetReaderBuilder(
       SignaturePemKeysetReaderBuilder::PemReaderType::PUBLIC_KEY_VERIFY);
 
-  builder.Add({.serialized_key = std::string(kRsaPublicKey2048),
-               .parameters = {.key_type = PemKeyType::PEM_RSA,
-                              .algorithm = PemAlgorithm::RSASSA_PSS,
-                              .key_size_in_bits = 3072,
-                              .hash_type = HashType::SHA256}});
+  builder.Add(CreatePemKey(kRsaPublicKey2048, PemKeyType::PEM_RSA,
+                           PemAlgorithm::RSASSA_PSS, /*key_size_in_bits=*/3072,
+                           HashType::SHA256));
 
   auto keyset_reader_or = builder.Build();
   ASSERT_THAT(keyset_reader_or, IsOk());
@@ -481,11 +475,9 @@ TEST(SignaturePemKeysetReaderTest, ReadRsaPublicKeyInvalidHashType) {
   auto builder = SignaturePemKeysetReaderBuilder(
       SignaturePemKeysetReaderBuilder::PemReaderType::PUBLIC_KEY_VERIFY);
 
-  builder.Add({.serialized_key = std::string(kRsaPublicKey2048),
-               .parameters = {.key_type = PemKeyType::PEM_RSA,
-                              .algorithm = PemAlgorithm::RSASSA_PSS,
-                              .key_size_in_bits = 2048,
-                              .hash_type = HashType::SHA1}});
+  builder.Add(CreatePemKey(kRsaPublicKey2048, PemKeyType::PEM_RSA,
+                           PemAlgorithm::RSASSA_PSS, /*key_size_in_bits=*/2048,
+                           HashType::SHA1));
 
   auto keyset_reader_or = builder.Build();
   ASSERT_THAT(keyset_reader_or, IsOk());
@@ -500,17 +492,13 @@ TEST(SignaturePemKeysetReaderTest, ReadECDSACorrectPublicKey) {
   auto builder = SignaturePemKeysetReaderBuilder(
       SignaturePemKeysetReaderBuilder::PemReaderType::PUBLIC_KEY_VERIFY);
 
-  builder.Add({.serialized_key = std::string(kEcdsaP256PublicKey),
-               .parameters = {.key_type = PemKeyType::PEM_EC,
-                              .algorithm = PemAlgorithm::ECDSA_IEEE,
-                              .key_size_in_bits = 256,
-                              .hash_type = HashType::SHA256}});
+  builder.Add(CreatePemKey(kEcdsaP256PublicKey, PemKeyType::PEM_EC,
+                           PemAlgorithm::ECDSA_IEEE, /*key_size_in_bits=*/256,
+                           HashType::SHA256));
 
-  builder.Add({.serialized_key = std::string(kEcdsaP256PublicKey),
-               .parameters = {.key_type = PemKeyType::PEM_EC,
-                              .algorithm = PemAlgorithm::ECDSA_DER,
-                              .key_size_in_bits = 256,
-                              .hash_type = HashType::SHA256}});
+  builder.Add(CreatePemKey(kEcdsaP256PublicKey, PemKeyType::PEM_EC,
+                           PemAlgorithm::ECDSA_DER, /*key_size_in_bits=*/256,
+                           HashType::SHA256));
 
   auto reader = builder.Build();
   ASSERT_THAT(reader, IsOk());
@@ -565,11 +553,9 @@ TEST(SignaturePemKeysetReaderTest, ReadECDSAWrongHashType) {
   auto builder = SignaturePemKeysetReaderBuilder(
       SignaturePemKeysetReaderBuilder::PemReaderType::PUBLIC_KEY_VERIFY);
 
-  builder.Add({.serialized_key = std::string(kEcdsaP256PublicKey),
-               .parameters = {.key_type = PemKeyType::PEM_EC,
-                              .algorithm = PemAlgorithm::ECDSA_IEEE,
-                              .key_size_in_bits = 256,
-                              .hash_type = HashType::SHA512}});
+  builder.Add(CreatePemKey(kEcdsaP256PublicKey, PemKeyType::PEM_EC,
+                           PemAlgorithm::ECDSA_IEEE, /*key_size_in_bits=*/256,
+                           HashType::SHA512));
 
   auto reader = builder.Build();
   ASSERT_THAT(reader, IsOk());
@@ -582,11 +568,9 @@ TEST(SignaturePemKeysetReaderTest, ReadECDSAWrongKeySize) {
   auto builder = SignaturePemKeysetReaderBuilder(
       SignaturePemKeysetReaderBuilder::PemReaderType::PUBLIC_KEY_VERIFY);
 
-  builder.Add({.serialized_key = std::string(kEcdsaP256PublicKey),
-               .parameters = {.key_type = PemKeyType::PEM_EC,
-                              .algorithm = PemAlgorithm::ECDSA_IEEE,
-                              .key_size_in_bits = 512,
-                              .hash_type = HashType::SHA256}});
+  builder.Add(CreatePemKey(kEcdsaP256PublicKey, PemKeyType::PEM_EC,
+                           PemAlgorithm::ECDSA_IEEE, /*key_size_in_bits=*/512,
+                           HashType::SHA256));
 
   auto reader = builder.Build();
   ASSERT_THAT(reader, IsOk());
@@ -599,11 +583,9 @@ TEST(SignaturePemKeysetReaderTest, ReadECDSAWrongAlgorithm) {
   auto builder = SignaturePemKeysetReaderBuilder(
       SignaturePemKeysetReaderBuilder::PemReaderType::PUBLIC_KEY_VERIFY);
 
-  builder.Add({.serialized_key = std::string(kEcdsaP256PublicKey),
-               .parameters = {.key_type = PemKeyType::PEM_EC,
-                              .algorithm = PemAlgorithm::RSASSA_PSS,
-                              .key_size_in_bits = 256,
-                              .hash_type = HashType::SHA256}});
+  builder.Add(CreatePemKey(kEcdsaP256PublicKey, PemKeyType::PEM_EC,
+                           PemAlgorithm::RSASSA_PSS, /*key_size_in_bits=*/256,
+                           HashType::SHA256));
 
   auto reader = builder.Build();
   ASSERT_THAT(reader, IsOk());
@@ -616,11 +598,9 @@ TEST(SignaturePemKeysetReaderTest, ReadEd25519ShouldFail) {
   auto builder = SignaturePemKeysetReaderBuilder(
       SignaturePemKeysetReaderBuilder::PemReaderType::PUBLIC_KEY_VERIFY);
 
-  builder.Add({.serialized_key = std::string(kEd25519PublicKey),
-               .parameters = {.key_type = PemKeyType::PEM_EC,
-                              .algorithm = PemAlgorithm::ECDSA_IEEE,
-                              .key_size_in_bits = 256,
-                              .hash_type = HashType::SHA256}});
+  builder.Add(CreatePemKey(kEd25519PublicKey, PemKeyType::PEM_EC,
+                           PemAlgorithm::ECDSA_IEEE, /*key_size_in_bits=*/256,
+                           HashType::SHA256));
 
   auto reader = builder.Build();
   ASSERT_THAT(reader, IsOk());
@@ -633,11 +613,9 @@ TEST(SignaturePemKeysetReaderTest, ReadSecp256k1ShouldFail) {
   auto builder = SignaturePemKeysetReaderBuilder(
       SignaturePemKeysetReaderBuilder::PemReaderType::PUBLIC_KEY_VERIFY);
 
-  builder.Add({.serialized_key = std::string(kSecp256k1PublicKey),
-               .parameters = {.key_type = PemKeyType::PEM_EC,
-                              .algorithm = PemAlgorithm::ECDSA_IEEE,
-                              .key_size_in_bits = 256,
-                              .hash_type = HashType::SHA256}});
+  builder.Add(CreatePemKey(kSecp256k1PublicKey, PemKeyType::PEM_EC,
+                           PemAlgorithm::ECDSA_IEEE, /*key_size_in_bits=*/256,
+                           HashType::SHA256));
 
   auto reader = builder.Build();
   ASSERT_THAT(reader, IsOk());
@@ -664,11 +642,9 @@ TEST(SignaturePemKeysetReaderTest, ReadEcdsaP384ShouldFail) {
   auto builder = SignaturePemKeysetReaderBuilder(
       SignaturePemKeysetReaderBuilder::PemReaderType::PUBLIC_KEY_VERIFY);
 
-  builder.Add({.serialized_key = std::string(kEcdsaP384PublicKey),
-               .parameters = {.key_type = PemKeyType::PEM_EC,
-                              .algorithm = PemAlgorithm::ECDSA_IEEE,
-                              .key_size_in_bits = 384,
-                              .hash_type = HashType::SHA384}});
+  builder.Add(CreatePemKey(kEcdsaP384PublicKey, PemKeyType::PEM_EC,
+                           PemAlgorithm::ECDSA_IEEE, /*key_size_in_bits=*/384,
+                           HashType::SHA384));
 
   auto reader = builder.Build();
   ASSERT_THAT(reader, IsOk());
