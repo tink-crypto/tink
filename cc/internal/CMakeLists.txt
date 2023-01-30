@@ -558,6 +558,46 @@ tink_cc_test(
 )
 
 tink_cc_library(
+  NAME parser_index
+  SRCS
+    parser_index.h
+  DEPS
+    tink::internal::serialization
+)
+
+tink_cc_test(
+  NAME parser_index_test
+  SRCS
+    parser_index_test.cc
+  DEPS
+    tink::internal::parser_index
+    tink::internal::serialization
+    gmock
+)
+
+tink_cc_library(
+  NAME serializer_index
+  SRCS
+    serializer_index.h
+  DEPS
+    tink::internal::serialization
+    tink::core::key
+    tink::core::parameters
+)
+
+tink_cc_test(
+  NAME serializer_index_test
+  SRCS
+    serializer_index_test.cc
+  DEPS
+    tink::internal::serialization
+    tink::internal::serializer_index
+    gmock
+    tink::core::key
+    tink::core::parameters
+)
+
+tink_cc_library(
   NAME parameters_parser
   SRCS
     parameters_parser.h

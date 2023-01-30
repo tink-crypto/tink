@@ -596,6 +596,46 @@ cc_test(
 )
 
 cc_library(
+    name = "parser_index",
+    hdrs = ["parser_index.h"],
+    include_prefix = "tink/internal",
+    deps = [":serialization"],
+)
+
+cc_test(
+    name = "parser_index_test",
+    srcs = ["parser_index_test.cc"],
+    deps = [
+        ":parser_index",
+        ":serialization",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_library(
+    name = "serializer_index",
+    hdrs = ["serializer_index.h"],
+    include_prefix = "tink/internal",
+    deps = [
+        ":serialization",
+        "//:key",
+        "//:parameters",
+    ],
+)
+
+cc_test(
+    name = "serializer_index_test",
+    srcs = ["serializer_index_test.cc"],
+    deps = [
+        ":serialization",
+        ":serializer_index",
+        "//:key",
+        "//:parameters",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_library(
     name = "parameters_parser",
     hdrs = ["parameters_parser.h"],
     include_prefix = "tink/internal",
