@@ -41,7 +41,7 @@ load("@rules_jvm_external//:defs.bzl", "maven_install")
 maven_install(
     artifacts = TINK_MAVEN_ARTIFACTS + [
       "args4j:args4j:2.33",
-      "com.google.cloud:google-cloud-storage:2.3.0",
+      "com.google.cloud:google-cloud-storage:2.17.2",
     ],
     repositories = [
         "https://maven.google.com",
