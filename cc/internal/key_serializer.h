@@ -21,6 +21,7 @@
 #include <typeindex>
 
 #include "absl/functional/function_ref.h"
+#include "tink/internal/serializer_index.h"
 #include "tink/secret_key_access_token.h"
 #include "tink/util/statusor.h"
 
@@ -33,7 +34,7 @@ class KeySerializerBase {
  public:
   // Returns an index that can be used to look up the `KeySerializer`
   // object registered for the `KeyT` type in a registry.
-  virtual std::type_index TypeIndex() const = 0;
+  virtual SerializerIndex Index() const = 0;
 
   virtual ~KeySerializerBase() = default;
 };
@@ -55,8 +56,8 @@ class KeySerializer : public KeySerializerBase {
     return function_(key, token);
   }
 
-  std::type_index TypeIndex() const override {
-    return std::type_index(typeid(KeyT));
+  SerializerIndex Index() const override {
+    return SerializerIndex::Create<KeyT, SerializationT>();
   }
 
  private:

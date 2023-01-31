@@ -19,6 +19,7 @@
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "tink/insecure_secret_key_access.h"
+#include "tink/internal/parser_index.h"
 #include "tink/internal/serialization.h"
 #include "tink/key.h"
 #include "tink/parameters.h"
@@ -66,7 +67,9 @@ TEST(KeyParserTest, Create) {
   KeyParser<ExampleSerialization, ExampleKey> parser("example_type_url", Parse);
 
   EXPECT_THAT(parser.ObjectIdentifier(), Eq("example_type_url"));
-  EXPECT_THAT(parser.TypeIndex(), Eq(std::type_index(typeid(ExampleKey))));
+  EXPECT_THAT(
+      parser.Index(),
+      Eq(ParserIndex::Create<ExampleSerialization>("example_type_url")));
 }
 
 TEST(KeyParserTest, ParseKey) {

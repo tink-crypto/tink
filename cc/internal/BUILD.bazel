@@ -640,6 +640,7 @@ cc_library(
     hdrs = ["parameters_parser.h"],
     include_prefix = "tink/internal",
     deps = [
+        ":parser_index",
         "//util:statusor",
         "@com_google_absl//absl/strings",
     ],
@@ -650,6 +651,7 @@ cc_test(
     srcs = ["parameters_parser_test.cc"],
     deps = [
         ":parameters_parser",
+        ":parser_index",
         ":serialization",
         "//:parameters",
         "//util:test_matchers",
@@ -662,6 +664,7 @@ cc_library(
     hdrs = ["parameters_serializer.h"],
     include_prefix = "tink/internal",
     deps = [
+        ":serializer_index",
         "//util:statusor",
         "@com_google_absl//absl/strings",
     ],
@@ -673,6 +676,7 @@ cc_test(
     deps = [
         ":parameters_serializer",
         ":serialization",
+        ":serializer_index",
         "//:parameters",
         "//util:test_matchers",
         "@com_google_googletest//:gtest_main",
@@ -684,6 +688,7 @@ cc_library(
     hdrs = ["key_parser.h"],
     include_prefix = "tink/internal",
     deps = [
+        ":parser_index",
         "//:secret_key_access_token",
         "//util:statusor",
         "@com_google_absl//absl/functional:function_ref",
@@ -696,6 +701,7 @@ cc_test(
     srcs = ["key_parser_test.cc"],
     deps = [
         ":key_parser",
+        ":parser_index",
         ":serialization",
         "//:insecure_secret_key_access",
         "//:key",
@@ -710,6 +716,7 @@ cc_library(
     hdrs = ["key_serializer.h"],
     include_prefix = "tink/internal",
     deps = [
+        ":serializer_index",
         "//:secret_key_access_token",
         "//util:statusor",
         "@com_google_absl//absl/functional:function_ref",
@@ -722,6 +729,7 @@ cc_test(
     deps = [
         ":key_serializer",
         ":serialization",
+        ":serializer_index",
         "//:insecure_secret_key_access",
         "//:key",
         "//:parameters",

@@ -23,6 +23,7 @@
 
 #include "absl/functional/function_ref.h"
 #include "absl/strings/string_view.h"
+#include "tink/internal/parser_index.h"
 #include "tink/secret_key_access_token.h"
 #include "tink/util/statusor.h"
 
@@ -47,7 +48,7 @@ class KeyParserBase {
 
   // Returns an index that can be used to look up the `KeyParser`
   // object registered for the `KeyT` type in a registry.
-  virtual std::type_index TypeIndex() const = 0;
+  virtual ParserIndex Index() const = 0;
 
   virtual ~KeyParserBase() = default;
 };
@@ -78,8 +79,8 @@ class KeyParser : public KeyParserBase {
     return object_identifier_;
   }
 
-  std::type_index TypeIndex() const override {
-    return std::type_index(typeid(KeyT));
+  ParserIndex Index() const override {
+    return ParserIndex::Create<SerializationT>(object_identifier_);
   }
 
  private:

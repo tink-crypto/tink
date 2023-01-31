@@ -22,6 +22,7 @@
 #include <typeindex>
 
 #include "absl/strings/string_view.h"
+#include "tink/internal/serializer_index.h"
 #include "tink/util/statusor.h"
 
 namespace crypto {
@@ -45,7 +46,7 @@ class ParametersSerializerBase {
 
   // Returns an index that can be used to look up the `ParametersSerializer`
   // object registered for the `ParametersT` type in a registry.
-  virtual std::type_index TypeIndex() const = 0;
+  virtual SerializerIndex Index() const = 0;
 
   virtual ~ParametersSerializerBase() = default;
 };
@@ -70,8 +71,8 @@ class ParametersSerializer : public ParametersSerializerBase {
     return object_identifier_;
   }
 
-  std::type_index TypeIndex() const override {
-    return std::type_index(typeid(ParametersT));
+  SerializerIndex Index() const override {
+    return SerializerIndex::Create<ParametersT, SerializationT>();
   }
 
  private:

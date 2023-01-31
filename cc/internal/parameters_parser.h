@@ -22,6 +22,7 @@
 #include <typeindex>
 
 #include "absl/strings/string_view.h"
+#include "tink/internal/parser_index.h"
 #include "tink/util/statusor.h"
 
 namespace crypto {
@@ -45,7 +46,7 @@ class ParametersParserBase {
 
   // Returns an index that can be used to look up the `ParametersParser`
   // object registered for the `ParametersT` type in a registry.
-  virtual std::type_index TypeIndex() const = 0;
+  virtual ParserIndex Index() const = 0;
 
   virtual ~ParametersParserBase() = default;
 };
@@ -74,8 +75,8 @@ class ParametersParser : public ParametersParserBase {
     return object_identifier_;
   }
 
-  std::type_index TypeIndex() const override {
-    return std::type_index(typeid(ParametersT));
+  ParserIndex Index() const override {
+    return ParserIndex::Create<SerializationT>(object_identifier_);
   }
 
  private:

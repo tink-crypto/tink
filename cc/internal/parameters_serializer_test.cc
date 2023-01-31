@@ -19,6 +19,7 @@
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "tink/internal/serialization.h"
+#include "tink/internal/serializer_index.h"
 #include "tink/parameters.h"
 #include "tink/util/test_matchers.h"
 
@@ -53,8 +54,9 @@ TEST(ParametersParserTest, Create) {
       "example_type_url", Serialize);
 
   EXPECT_THAT(serializer.ObjectIdentifier(), Eq("example_type_url"));
-  EXPECT_THAT(serializer.TypeIndex(),
-              Eq(std::type_index(typeid(ExampleParameters))));
+  EXPECT_THAT(
+      serializer.Index(),
+      Eq(SerializerIndex::Create<ExampleParameters, ExampleSerialization>()));
 }
 
 TEST(ParametersParserTest, SerializeParameters) {

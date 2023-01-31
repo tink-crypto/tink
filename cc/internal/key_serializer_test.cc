@@ -20,6 +20,7 @@
 #include "gtest/gtest.h"
 #include "tink/insecure_secret_key_access.h"
 #include "tink/internal/serialization.h"
+#include "tink/internal/serializer_index.h"
 #include "tink/key.h"
 #include "tink/parameters.h"
 #include "tink/secret_key_access_token.h"
@@ -66,7 +67,8 @@ util::StatusOr<ExampleSerialization> Serialize(ExampleKey key,
 TEST(KeyParserTest, Create) {
   KeySerializer<ExampleKey, ExampleSerialization> serializer(Serialize);
 
-  EXPECT_THAT(serializer.TypeIndex(), Eq(std::type_index(typeid(ExampleKey))));
+  EXPECT_THAT(serializer.Index(),
+              Eq(SerializerIndex::Create<ExampleKey, ExampleSerialization>()));
 }
 
 TEST(KeyParserTest, SerializeKey) {
