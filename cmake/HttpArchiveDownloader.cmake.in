@@ -15,7 +15,7 @@
 # This template is used by http_archive() to download, unpack and configure Tink
 # dependencies. You shouldn't need to use it directly.
 
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.10)
 project(http-archive-${http_archive_NAME})
 
 include(ExternalProject)

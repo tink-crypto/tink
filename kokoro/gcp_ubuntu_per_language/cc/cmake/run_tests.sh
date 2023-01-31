@@ -21,7 +21,7 @@ if [[ -n "${KOKORO_ROOT:-}" ]]; then
 fi
 
 # Sourcing is needed to update the caller environment.
-# Install CMake 3.8 which is the minimum required.
-source ./kokoro/testutils/install_cmake.sh "3.8.0" \
-  "330357990d84599f9c1a87f568a724f0fe5de1687c32961dda689d52588a5b24"
+# Install CMake 3.10 which is the minimum required.
+source ./kokoro/testutils/install_cmake.sh "3.10.0" \
+  "6b5ea290042fac96023fd5387cd65cc69fdf4f48bad91177eb8697ba37e3deb3"
 ./kokoro/testutils/run_cmake_tests.sh .

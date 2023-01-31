@@ -13,7 +13,7 @@ your executable. This is the approach we currently recommend. Assuming the Tink
 source tree has been copied in the `third_party/tink` directory of your project,
 your top-level CMake script should look like this:
 
-    cmake_minimum_required(VERSION 3.5)
+    cmake_minimum_required(VERSION 3.10)
     project(YourProject CXX)
     set(CMAKE_CXX_STANDARD_REQUIRED ON)
     set(CMAKE_CXX_STANDARD 14)
@@ -25,7 +25,7 @@ your top-level CMake script should look like this:
 
 NOTES:
 
-*   You need at least CMake 3.8 to build Tink and its dependencies.
+*   You need at least CMake 3.10 to build Tink and its dependencies.
 *   Tink defines the C++ standard to use via the `TINK_CXX_STANDARD` variable,
     which is `14` by default. If you want to propagate to the value of
     `CMAKE_CXX_STANDARD` to Tink use `set(CMAKE_CXX_STANDARD_REQUIRED ON)`.
