@@ -33,7 +33,7 @@ namespace tink {
 namespace internal {
 
 // Non-template base class that can be used with internal registry map.
-class KeySerializerBase {
+class KeySerializer {
  public:
   // Returns the serialization of `key`.
   virtual util::StatusOr<std::unique_ptr<Serialization>> SerializeKey(
@@ -43,18 +43,18 @@ class KeySerializerBase {
   // object registered for the `KeyT` type in a registry.
   virtual SerializerIndex Index() const = 0;
 
-  virtual ~KeySerializerBase() = default;
+  virtual ~KeySerializer() = default;
 };
 
 // Serializes `KeyT` objects into `SerializationT` objects.
 template <typename KeyT, typename SerializationT>
-class KeySerializer : public KeySerializerBase {
+class KeySerializerImpl : public KeySerializer {
  public:
   // Creates a key serializer with serialization `function`. The referenced
   // `function` should outlive the created key serializer object.
-  explicit KeySerializer(absl::FunctionRef<util::StatusOr<SerializationT>(
-                             KeyT, SecretKeyAccessToken)>
-                             function)
+  explicit KeySerializerImpl(absl::FunctionRef<util::StatusOr<SerializationT>(
+                                 KeyT, SecretKeyAccessToken)>
+                                 function)
       : function_(function) {}
 
   util::StatusOr<std::unique_ptr<Serialization>> SerializeKey(

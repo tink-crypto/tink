@@ -74,17 +74,19 @@ util::StatusOr<ExampleKey> Parse(ExampleSerialization serialization,
 }
 
 TEST(KeyParserTest, Create) {
-  KeyParser<ExampleSerialization, ExampleKey> parser("example_type_url", Parse);
+  std::unique_ptr<KeyParser> parser =
+      absl::make_unique<KeyParserImpl<ExampleSerialization, ExampleKey>>(
+          "example_type_url", Parse);
 
-  EXPECT_THAT(parser.ObjectIdentifier(), Eq("example_type_url"));
+  EXPECT_THAT(parser->ObjectIdentifier(), Eq("example_type_url"));
   EXPECT_THAT(
-      parser.Index(),
+      parser->Index(),
       Eq(ParserIndex::Create<ExampleSerialization>("example_type_url")));
 }
 
 TEST(KeyParserTest, ParseKey) {
-  std::unique_ptr<KeyParserBase> parser =
-      absl::make_unique<KeyParser<ExampleSerialization, ExampleKey>>(
+  std::unique_ptr<KeyParser> parser =
+      absl::make_unique<KeyParserImpl<ExampleSerialization, ExampleKey>>(
           "example_type_url", Parse);
 
   ExampleSerialization serialization;
@@ -97,8 +99,8 @@ TEST(KeyParserTest, ParseKey) {
 }
 
 TEST(KeyParserTest, ParseKeyWithInvalidSerializationType) {
-  std::unique_ptr<KeyParserBase> parser =
-      absl::make_unique<KeyParser<ExampleSerialization, ExampleKey>>(
+  std::unique_ptr<KeyParser> parser =
+      absl::make_unique<KeyParserImpl<ExampleSerialization, ExampleKey>>(
           "example_type_url", Parse);
 
   DifferentSerialization serialization;

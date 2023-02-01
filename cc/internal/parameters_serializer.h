@@ -33,7 +33,7 @@ namespace tink {
 namespace internal {
 
 // Non-template base class that can be used with internal registry map.
-class ParametersSerializerBase {
+class ParametersSerializer {
  public:
   // Returns the serialization of `parameters`.
   virtual util::StatusOr<std::unique_ptr<Serialization>> SerializeParameters(
@@ -55,14 +55,14 @@ class ParametersSerializerBase {
   // object registered for the `ParametersT` type in a registry.
   virtual SerializerIndex Index() const = 0;
 
-  virtual ~ParametersSerializerBase() = default;
+  virtual ~ParametersSerializer() = default;
 };
 
 // Serializes `ParametersT` objects into `SerializationT` objects.
 template <typename ParametersT, typename SerializationT>
-class ParametersSerializer : public ParametersSerializerBase {
+class ParametersSerializerImpl : public ParametersSerializer {
  public:
-  explicit ParametersSerializer(
+  explicit ParametersSerializerImpl(
       absl::string_view object_identifier,
       const std::function<util::StatusOr<SerializationT>(ParametersT)>&
           function)

@@ -33,7 +33,7 @@ namespace tink {
 namespace internal {
 
 // Non-template base class that can be used with internal registry map.
-class ParametersParserBase {
+class ParametersParser {
  public:
   // Parses `serialization` into a parameters object.
   //
@@ -59,14 +59,14 @@ class ParametersParserBase {
   // object registered for the `ParametersT` type in a registry.
   virtual ParserIndex Index() const = 0;
 
-  virtual ~ParametersParserBase() = default;
+  virtual ~ParametersParser() = default;
 };
 
 // Parses `SerializationT` objects into `ParametersT` objects.
 template <typename SerializationT, typename ParametersT>
-class ParametersParser : public ParametersParserBase {
+class ParametersParserImpl : public ParametersParser {
  public:
-  explicit ParametersParser(
+  explicit ParametersParserImpl(
       absl::string_view object_identifier,
       const std::function<util::StatusOr<ParametersT>(SerializationT)>&
           function)

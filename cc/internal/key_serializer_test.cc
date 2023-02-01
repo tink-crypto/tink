@@ -80,15 +80,17 @@ util::StatusOr<ExampleSerialization> Serialize(ExampleKey key,
 }
 
 TEST(KeyParserTest, Create) {
-  KeySerializer<ExampleKey, ExampleSerialization> serializer(Serialize);
+  std::unique_ptr<KeySerializer> serializer =
+      absl::make_unique<KeySerializerImpl<ExampleKey, ExampleSerialization>>(
+          Serialize);
 
-  EXPECT_THAT(serializer.Index(),
+  EXPECT_THAT(serializer->Index(),
               Eq(SerializerIndex::Create<ExampleKey, ExampleSerialization>()));
 }
 
 TEST(KeyParserTest, SerializeKey) {
-  std::unique_ptr<KeySerializerBase> serializer =
-      absl::make_unique<KeySerializer<ExampleKey, ExampleSerialization>>(
+  std::unique_ptr<KeySerializer> serializer =
+      absl::make_unique<KeySerializerImpl<ExampleKey, ExampleSerialization>>(
           Serialize);
 
   ExampleKey key;
@@ -99,8 +101,8 @@ TEST(KeyParserTest, SerializeKey) {
 }
 
 TEST(KeyParserTest, SerializeKeyWithInvalidKeyType) {
-  std::unique_ptr<KeySerializerBase> serializer =
-      absl::make_unique<KeySerializer<ExampleKey, ExampleSerialization>>(
+  std::unique_ptr<KeySerializer> serializer =
+      absl::make_unique<KeySerializerImpl<ExampleKey, ExampleSerialization>>(
           Serialize);
 
   DifferentKey key;

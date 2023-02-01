@@ -61,18 +61,19 @@ util::StatusOr<ExampleParameters> Parse(ExampleSerialization serialization) {
 }
 
 TEST(ParametersParserTest, Create) {
-  ParametersParser<ExampleSerialization, ExampleParameters> parser(
+  std::unique_ptr<ParametersParser> parser = absl::make_unique<
+      ParametersParserImpl<ExampleSerialization, ExampleParameters>>(
       "example_type_url", Parse);
 
-  EXPECT_THAT(parser.ObjectIdentifier(), Eq("example_type_url"));
+  EXPECT_THAT(parser->ObjectIdentifier(), Eq("example_type_url"));
   EXPECT_THAT(
-      parser.Index(),
+      parser->Index(),
       Eq(ParserIndex::Create<ExampleSerialization>("example_type_url")));
 }
 
 TEST(ParametersParserTest, ParseParameters) {
-  std::unique_ptr<ParametersParserBase> parser = absl::make_unique<
-      ParametersParser<ExampleSerialization, ExampleParameters>>(
+  std::unique_ptr<ParametersParser> parser = absl::make_unique<
+      ParametersParserImpl<ExampleSerialization, ExampleParameters>>(
       "example_type_url", Parse);
 
   ExampleSerialization serialization;
@@ -83,8 +84,8 @@ TEST(ParametersParserTest, ParseParameters) {
 }
 
 TEST(ParametersParserTest, ParseParametersWithInvalidSerializationType) {
-  std::unique_ptr<ParametersParserBase> parser = absl::make_unique<
-      ParametersParser<ExampleSerialization, ExampleParameters>>(
+  std::unique_ptr<ParametersParser> parser = absl::make_unique<
+      ParametersParserImpl<ExampleSerialization, ExampleParameters>>(
       "example_type_url", Parse);
 
   DifferentSerialization serialization;

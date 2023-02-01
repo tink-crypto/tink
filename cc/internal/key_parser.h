@@ -35,7 +35,7 @@ namespace tink {
 namespace internal {
 
 // Non-template base class that can be used with internal registry map.
-class KeyParserBase {
+class KeyParser {
  public:
   // Parses a `serialization` into a key.
   //
@@ -61,19 +61,19 @@ class KeyParserBase {
   // object registered for the `KeyT` type in a registry.
   virtual ParserIndex Index() const = 0;
 
-  virtual ~KeyParserBase() = default;
+  virtual ~KeyParser() = default;
 };
 
 // Parses `SerializationT` objects into `KeyT` objects.
 template <typename SerializationT, typename KeyT>
-class KeyParser : public KeyParserBase {
+class KeyParserImpl : public KeyParser {
  public:
   // Creates a key parser with `object_identifier` and parsing `function`. The
   // referenced `function` should outlive the created key parser object.
-  explicit KeyParser(absl::string_view object_identifier,
-                     absl::FunctionRef<util::StatusOr<KeyT>(
-                         SerializationT, SecretKeyAccessToken)>
-                         function)
+  explicit KeyParserImpl(absl::string_view object_identifier,
+                         absl::FunctionRef<util::StatusOr<KeyT>(
+                             SerializationT, SecretKeyAccessToken)>
+                             function)
       : object_identifier_(object_identifier), function_(function) {}
 
   util::StatusOr<std::unique_ptr<Key>> ParseKey(

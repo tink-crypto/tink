@@ -60,18 +60,19 @@ util::StatusOr<ExampleSerialization> Serialize(ExampleParameters parameters) {
 }
 
 TEST(ParametersParserTest, Create) {
-  ParametersSerializer<ExampleParameters, ExampleSerialization> serializer(
+  std::unique_ptr<ParametersSerializer> serializer = absl::make_unique<
+      ParametersSerializerImpl<ExampleParameters, ExampleSerialization>>(
       "example_type_url", Serialize);
 
-  EXPECT_THAT(serializer.ObjectIdentifier(), Eq("example_type_url"));
+  EXPECT_THAT(serializer->ObjectIdentifier(), Eq("example_type_url"));
   EXPECT_THAT(
-      serializer.Index(),
+      serializer->Index(),
       Eq(SerializerIndex::Create<ExampleParameters, ExampleSerialization>()));
 }
 
 TEST(ParametersParserTest, SerializeParameters) {
-  std::unique_ptr<ParametersSerializerBase> serializer = absl::make_unique<
-      ParametersSerializer<ExampleParameters, ExampleSerialization>>(
+  std::unique_ptr<ParametersSerializer> serializer = absl::make_unique<
+      ParametersSerializerImpl<ExampleParameters, ExampleSerialization>>(
       "example_type_url", Serialize);
 
   ExampleParameters parameters;
@@ -82,8 +83,8 @@ TEST(ParametersParserTest, SerializeParameters) {
 }
 
 TEST(ParametersParserTest, SerializeParametersWithInvalidParametersType) {
-  std::unique_ptr<ParametersSerializerBase> serializer = absl::make_unique<
-      ParametersSerializer<ExampleParameters, ExampleSerialization>>(
+  std::unique_ptr<ParametersSerializer> serializer = absl::make_unique<
+      ParametersSerializerImpl<ExampleParameters, ExampleSerialization>>(
       "example_type_url", Serialize);
 
   DifferentParameters parameters;
