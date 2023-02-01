@@ -18,12 +18,15 @@
 #define TINK_INTERNAL_KEY_PARSER_H_
 
 #include <functional>
+#include <memory>
 #include <string>
 #include <typeindex>
 
 #include "absl/functional/function_ref.h"
 #include "absl/strings/string_view.h"
 #include "tink/internal/parser_index.h"
+#include "tink/internal/serialization.h"
+#include "tink/key.h"
 #include "tink/secret_key_access_token.h"
 #include "tink/util/statusor.h"
 
@@ -34,6 +37,14 @@ namespace internal {
 // Non-template base class that can be used with internal registry map.
 class KeyParserBase {
  public:
+  // Parses a `serialization` into a key.
+  //
+  // This function is usually called on a `Serialization` subclass matching the
+  // value returned by `ObjectIdentifier()`. However, implementations should
+  // check that this is the case.
+  virtual util::StatusOr<std::unique_ptr<Key>> ParseKey(
+      const Serialization& serialization, SecretKeyAccessToken token) const = 0;
+
   // Returns the object identifier for `SerializationT`, which is only valid
   // for the lifetime of this object.
   //
@@ -65,14 +76,18 @@ class KeyParser : public KeyParserBase {
                          function)
       : object_identifier_(object_identifier), function_(function) {}
 
-  // Parses a `serialization` into a key.
-  //
-  // This function is usually called with a `SerializationT` matching the
-  // value returned by `ObjectIdentifier()`. However, implementations should
-  // check that this is the case.
-  util::StatusOr<KeyT> ParseKey(SerializationT serialization,
-                                SecretKeyAccessToken token) const {
-    return function_(serialization, token);
+  util::StatusOr<std::unique_ptr<Key>> ParseKey(
+      const Serialization& serialization,
+      SecretKeyAccessToken token) const override {
+    const SerializationT* st =
+        dynamic_cast<const SerializationT*>(&serialization);
+    if (st == nullptr) {
+      return util::Status(absl::StatusCode::kInvalidArgument,
+                          "Invalid serialization type for this key parser.");
+    }
+    util::StatusOr<KeyT> key = function_(*st, token);
+    if (!key.ok()) return key.status();
+    return {absl::make_unique<KeyT>(std::move(*key))};
   }
 
   absl::string_view ObjectIdentifier() const override {

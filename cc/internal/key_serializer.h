@@ -18,10 +18,13 @@
 #define TINK_INTERNAL_KEY_SERIALIZER_H_
 
 #include <functional>
+#include <memory>
 #include <typeindex>
 
 #include "absl/functional/function_ref.h"
+#include "tink/internal/serialization.h"
 #include "tink/internal/serializer_index.h"
+#include "tink/key.h"
 #include "tink/secret_key_access_token.h"
 #include "tink/util/statusor.h"
 
@@ -32,6 +35,10 @@ namespace internal {
 // Non-template base class that can be used with internal registry map.
 class KeySerializerBase {
  public:
+  // Returns the serialization of `key`.
+  virtual util::StatusOr<std::unique_ptr<Serialization>> SerializeKey(
+      const Key& key, SecretKeyAccessToken token) const = 0;
+
   // Returns an index that can be used to look up the `KeySerializer`
   // object registered for the `KeyT` type in a registry.
   virtual SerializerIndex Index() const = 0;
@@ -50,10 +57,16 @@ class KeySerializer : public KeySerializerBase {
                              function)
       : function_(function) {}
 
-  // Returns the serialization of `key`.
-  util::StatusOr<SerializationT> SerializeKey(
-      KeyT key, SecretKeyAccessToken token) const {
-    return function_(key, token);
+  util::StatusOr<std::unique_ptr<Serialization>> SerializeKey(
+      const Key& key, SecretKeyAccessToken token) const override {
+    const KeyT* kt = dynamic_cast<const KeyT*>(&key);
+    if (kt == nullptr) {
+      return util::Status(absl::StatusCode::kInvalidArgument,
+                          "Invalid key type for this key serializer.");
+    }
+    util::StatusOr<SerializationT> serialization = function_(*kt, token);
+    if (!serialization.ok()) return serialization.status();
+    return {absl::make_unique<SerializationT>(std::move(*serialization))};
   }
 
   SerializerIndex Index() const override {

@@ -16,6 +16,8 @@
 
 #include "tink/internal/parameters_serializer.h"
 
+#include <memory>
+
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "tink/internal/serialization.h"
@@ -29,9 +31,17 @@ namespace internal {
 namespace {
 
 using ::crypto::tink::test::IsOk;
+using ::crypto::tink::test::StatusIs;
 using ::testing::Eq;
 
 class ExampleParameters : public Parameters {
+ public:
+  bool HasIdRequirement() const override { return false; }
+
+  bool operator==(const Parameters& other) const override { return true; }
+};
+
+class DifferentParameters : public Parameters {
  public:
   bool HasIdRequirement() const override { return false; }
 
@@ -60,13 +70,27 @@ TEST(ParametersParserTest, Create) {
 }
 
 TEST(ParametersParserTest, SerializeParameters) {
-  ParametersSerializer<ExampleParameters, ExampleSerialization> serializer(
+  std::unique_ptr<ParametersSerializerBase> serializer = absl::make_unique<
+      ParametersSerializer<ExampleParameters, ExampleSerialization>>(
       "example_type_url", Serialize);
 
-  util::StatusOr<ExampleSerialization> serialization =
-      serializer.SerializeParameters(ExampleParameters());
+  ExampleParameters parameters;
+  util::StatusOr<std::unique_ptr<Serialization>> serialization =
+      serializer->SerializeParameters(parameters);
   ASSERT_THAT(serialization, IsOk());
-  EXPECT_THAT(serialization->ObjectIdentifier(), Eq("example_type_url"));
+  EXPECT_THAT((*serialization)->ObjectIdentifier(), Eq("example_type_url"));
+}
+
+TEST(ParametersParserTest, SerializeParametersWithInvalidParametersType) {
+  std::unique_ptr<ParametersSerializerBase> serializer = absl::make_unique<
+      ParametersSerializer<ExampleParameters, ExampleSerialization>>(
+      "example_type_url", Serialize);
+
+  DifferentParameters parameters;
+  util::StatusOr<std::unique_ptr<Serialization>> serialization =
+      serializer->SerializeParameters(parameters);
+  ASSERT_THAT(serialization.status(),
+              StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
 }  // namespace

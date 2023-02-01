@@ -603,7 +603,9 @@ tink_cc_library(
     parameters_parser.h
   DEPS
     tink::internal::parser_index
+    tink::internal::serialization
     absl::strings
+    tink::core::parameters
     tink::util::statusor
 )
 
@@ -625,8 +627,10 @@ tink_cc_library(
   SRCS
     parameters_serializer.h
   DEPS
+    tink::internal::serialization
     tink::internal::serializer_index
     absl::strings
+    tink::core::parameters
     tink::util::statusor
 )
 
@@ -649,8 +653,10 @@ tink_cc_library(
     key_parser.h
   DEPS
     tink::internal::parser_index
+    tink::internal::serialization
     absl::function_ref
     absl::strings
+    tink::core::key
     tink::core::secret_key_access_token
     tink::util::statusor
 )
@@ -675,8 +681,10 @@ tink_cc_library(
   SRCS
     key_serializer.h
   DEPS
+    tink::internal::serialization
     tink::internal::serializer_index
     absl::function_ref
+    tink::core::key
     tink::core::secret_key_access_token
     tink::util::statusor
 )

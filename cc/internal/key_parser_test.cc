@@ -16,6 +16,8 @@
 
 #include "tink/internal/key_parser.h"
 
+#include <memory>
+
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "tink/insecure_secret_key_access.h"
@@ -30,6 +32,7 @@ namespace tink {
 namespace internal {
 
 using ::crypto::tink::test::IsOk;
+using ::crypto::tink::test::StatusIs;
 using ::testing::Eq;
 
 class ExampleParameters : public Parameters {
@@ -58,6 +61,13 @@ class ExampleSerialization : public Serialization {
   }
 };
 
+class DifferentSerialization : public Serialization {
+ public:
+  absl::string_view ObjectIdentifier() const override {
+    return "different_type_url";
+  }
+};
+
 util::StatusOr<ExampleKey> Parse(ExampleSerialization serialization,
                                  SecretKeyAccessToken token) {
   return ExampleKey();
@@ -73,14 +83,28 @@ TEST(KeyParserTest, Create) {
 }
 
 TEST(KeyParserTest, ParseKey) {
-  KeyParser<ExampleSerialization, ExampleKey> parser("example_type_url", Parse);
+  std::unique_ptr<KeyParserBase> parser =
+      absl::make_unique<KeyParser<ExampleSerialization, ExampleKey>>(
+          "example_type_url", Parse);
 
-  util::StatusOr<ExampleKey> key =
-      parser.ParseKey(ExampleSerialization(), InsecureSecretKeyAccess::Get());
+  ExampleSerialization serialization;
+  util::StatusOr<std::unique_ptr<Key>> key =
+      parser->ParseKey(serialization, InsecureSecretKeyAccess::Get());
   ASSERT_THAT(key, IsOk());
-  EXPECT_THAT(key->GetIdRequirement(), Eq(123));
-  EXPECT_THAT(key->GetParameters(), Eq(ExampleParameters()));
-  EXPECT_THAT(*key, Eq(ExampleKey()));
+  EXPECT_THAT((*key)->GetIdRequirement(), Eq(123));
+  EXPECT_THAT((*key)->GetParameters(), Eq(ExampleParameters()));
+  EXPECT_THAT(**key, Eq(ExampleKey()));
+}
+
+TEST(KeyParserTest, ParseKeyWithInvalidSerializationType) {
+  std::unique_ptr<KeyParserBase> parser =
+      absl::make_unique<KeyParser<ExampleSerialization, ExampleKey>>(
+          "example_type_url", Parse);
+
+  DifferentSerialization serialization;
+  util::StatusOr<std::unique_ptr<Key>> key =
+      parser->ParseKey(serialization, InsecureSecretKeyAccess::Get());
+  ASSERT_THAT(key.status(), StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
 }  // namespace internal

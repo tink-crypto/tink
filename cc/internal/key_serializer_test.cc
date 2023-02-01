@@ -16,6 +16,8 @@
 
 #include "tink/internal/key_serializer.h"
 
+#include <memory>
+
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "tink/insecure_secret_key_access.h"
@@ -31,6 +33,7 @@ namespace tink {
 namespace internal {
 
 using ::crypto::tink::test::IsOk;
+using ::crypto::tink::test::StatusIs;
 using ::testing::Eq;
 
 class ExampleParameters : public Parameters {
@@ -41,6 +44,18 @@ class ExampleParameters : public Parameters {
 };
 
 class ExampleKey : public Key {
+ public:
+  const Parameters& GetParameters() const override { return parameters_; }
+
+  absl::optional<int> GetIdRequirement() const override { return 123; }
+
+  bool operator==(const Key& other) const override { return true; }
+
+ private:
+  ExampleParameters parameters_;
+};
+
+class DifferentKey : public Key {
  public:
   const Parameters& GetParameters() const override { return parameters_; }
 
@@ -72,12 +87,27 @@ TEST(KeyParserTest, Create) {
 }
 
 TEST(KeyParserTest, SerializeKey) {
-  KeySerializer<ExampleKey, ExampleSerialization> serializer(Serialize);
+  std::unique_ptr<KeySerializerBase> serializer =
+      absl::make_unique<KeySerializer<ExampleKey, ExampleSerialization>>(
+          Serialize);
 
-  util::StatusOr<ExampleSerialization> serialization =
-      serializer.SerializeKey(ExampleKey(), InsecureSecretKeyAccess::Get());
+  ExampleKey key;
+  util::StatusOr<std::unique_ptr<Serialization>> serialization =
+      serializer->SerializeKey(key, InsecureSecretKeyAccess::Get());
   ASSERT_THAT(serialization, IsOk());
-  EXPECT_THAT(serialization->ObjectIdentifier(), Eq("example_type_url"));
+  EXPECT_THAT((*serialization)->ObjectIdentifier(), Eq("example_type_url"));
+}
+
+TEST(KeyParserTest, SerializeKeyWithInvalidKeyType) {
+  std::unique_ptr<KeySerializerBase> serializer =
+      absl::make_unique<KeySerializer<ExampleKey, ExampleSerialization>>(
+          Serialize);
+
+  DifferentKey key;
+  util::StatusOr<std::unique_ptr<Serialization>> serialization =
+      serializer->SerializeKey(key, InsecureSecretKeyAccess::Get());
+  ASSERT_THAT(serialization.status(),
+              StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
 }  // namespace internal

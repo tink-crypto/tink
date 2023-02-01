@@ -18,11 +18,14 @@
 #define TINK_INTERNAL_PARAMETERS_PARSER_H_
 
 #include <functional>
+#include <memory>
 #include <string>
 #include <typeindex>
 
 #include "absl/strings/string_view.h"
 #include "tink/internal/parser_index.h"
+#include "tink/internal/serialization.h"
+#include "tink/parameters.h"
 #include "tink/util/statusor.h"
 
 namespace crypto {
@@ -32,6 +35,14 @@ namespace internal {
 // Non-template base class that can be used with internal registry map.
 class ParametersParserBase {
  public:
+  // Parses `serialization` into a parameters object.
+  //
+  // This function is usually called on a `Serialization` subclass matching the
+  // value returned by `ObjectIdentifier()`. However, implementations should
+  // verify that this is the case.
+  virtual util::StatusOr<std::unique_ptr<Parameters>> ParseParameters(
+      const Serialization& serialization) const = 0;
+
   // Returns the object identifier for `SerializationT`, which is only valid
   // for the lifetime of this object.
   //
@@ -61,14 +72,18 @@ class ParametersParser : public ParametersParserBase {
           function)
       : object_identifier_(object_identifier), function_(function) {}
 
-  // Parses `serialization` into a parameters object.
-  //
-  // This function is usually called with a `SerializationT` matching the
-  // value returned by `ObjectIdentifier()`. However, implementations should
-  // verify that this is the case.
-  util::StatusOr<ParametersT> ParseParameters(
-      SerializationT serialization) const {
-    return function_(serialization);
+  util::StatusOr<std::unique_ptr<Parameters>> ParseParameters(
+      const Serialization& serialization) const override {
+    const SerializationT* st =
+        dynamic_cast<const SerializationT*>(&serialization);
+    if (st == nullptr) {
+      return util::Status(
+          absl::StatusCode::kInvalidArgument,
+          "Invalid serialization type for this parameters parser.");
+    }
+    util::StatusOr<ParametersT> parameters = function_(*st);
+    if (!parameters.ok()) return parameters.status();
+    return {absl::make_unique<ParametersT>(std::move(*parameters))};
   }
 
   absl::string_view ObjectIdentifier() const override {
