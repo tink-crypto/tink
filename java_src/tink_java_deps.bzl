@@ -19,7 +19,7 @@ TINK_MAVEN_ARTIFACTS = [
     "com.google.errorprone:error_prone_annotations:2.16",
     "com.google.http-client:google-http-client:1.42.3",
     "com.google.http-client:google-http-client-gson:1.42.3",
-    "com.google.oauth-client:google-oauth-client:1.30.1",
+    "com.google.oauth-client:google-oauth-client:1.34.1",
     "com.google.truth:truth:0.44",
     "joda-time:joda-time:2.10.3",
     "junit:junit:4.13",
