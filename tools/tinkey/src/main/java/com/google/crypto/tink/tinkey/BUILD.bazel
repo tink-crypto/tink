@@ -62,6 +62,7 @@ java_library(
         ":destroy_key_command",
         ":disable_key_command",
         ":enable_key_command",
+        ":help_command",
         ":list_key_templates_command",
         ":list_keyset_command",
         ":promote_key_command",
@@ -298,4 +299,10 @@ java_library(
         "@tink_java//src/main/java/com/google/crypto/tink:key_template",
         "@tink_java//src/main/java/com/google/crypto/tink:key_templates",
     ],
+)
+
+java_library(
+    name = "help_command",
+    srcs = ["HelpCommand.java"],
+    deps = [":command"],
 )

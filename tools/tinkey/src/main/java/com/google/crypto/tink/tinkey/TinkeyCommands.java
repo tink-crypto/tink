@@ -26,12 +26,12 @@ import org.kohsuke.args4j.spi.SubCommands;
  */
 public final class TinkeyCommands {
   @Argument(
-    metaVar = "command",
-    required = true,
-    handler = SubCommandHandler.class,
-    usage = "Command to run"
-  )
+      metaVar = "command",
+      required = true,
+      handler = SubCommandHandler.class,
+      usage = "Command to run")
   @SubCommands({
+    @SubCommand(name = "help", impl = HelpCommand.class),
     @SubCommand(name = "add-key", impl = AddKeyCommand.class),
     @SubCommand(name = "convert-keyset", impl = ConvertKeysetCommand.class),
     @SubCommand(name = "create-keyset", impl = CreateKeysetCommand.class),

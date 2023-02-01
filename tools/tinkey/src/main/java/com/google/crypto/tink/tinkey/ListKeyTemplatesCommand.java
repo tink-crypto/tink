@@ -17,6 +17,9 @@
 package com.google.crypto.tink.tinkey;
 
 import com.google.crypto.tink.Registry;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 /** Creates a new {@link com.google.crypto.tink.proto.KeyTemplate}. */
 public class ListKeyTemplatesCommand implements Command {
@@ -24,10 +27,11 @@ public class ListKeyTemplatesCommand implements Command {
   @Override
   public void run() throws Exception {
     System.out.println("The following key templates are supported:");
-    for (String name : Registry.keyTemplates()) {
-      System.out.println(name);
-    }
-    for (String name : TinkeyKeyTemplates.get().keySet()) {
+    List<String> keyTemplates = new ArrayList<>();
+    keyTemplates.addAll(Registry.keyTemplates());
+    keyTemplates.addAll(TinkeyKeyTemplates.get().keySet());
+    Collections.sort(keyTemplates);
+    for (String name : keyTemplates) {
       System.out.println(name);
     }
   }

@@ -45,17 +45,19 @@ The binary is located at `bazel-bin/tinkey/tinkey`.
 
 Available commands:
 
+*   `help`: Prints a help message for all available commands.
 *   `add-key`: Generates and adds a new key to a keyset.
 *   `convert-keyset`: Changes format, encrypts, decrypts a keyset.
 *   `create-keyset`: Creates a new keyset.
 *   `create-public-keyset`: Creates a public keyset from a private keyset.
 *   `list-key-templates`: Lists all supported key templates.
 *   `delete-key`: Deletes a specified key in a keyset.
+*   `destroy-key`: Destroys the key material of a specified key in a keyset.
 *   `disable-key`: Disables a specified key in a keyset.
 *   `enable-key`: Enables a specified key in a keyset.
 *   `list-keyset`: Lists keys in a keyset.
 *   `promote-key`: Promotes a specified key to primary.
-*   `rotate-keyset`: Deprecated. Rotate keysets in two steps using the commands
+*   `rotate-keyset`: *Deprecated.* Rotate keysets in two steps using the commands
     `add-key` and later `promote-key`.
 
 To obtain info about arguments available/required for a command, run `tinkey
