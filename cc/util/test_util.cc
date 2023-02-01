@@ -124,15 +124,18 @@ std::string HexEncode(absl::string_view bytes) {
 }
 
 std::string TmpDir() {
-  // The Bazel 'test' command sets TEST_TMPDIR.
-  const char* env = getenv("TEST_TMPDIR");
-  if (env && env[0] != '\0') {
-    return env;
+  // Try the following environment variables in order:
+  //  - TEST_TMPDIR: Set by `bazel test`.
+  //  - TMPDIR: Set by some Tink tests.
+  //  - TEMP, TMP: Set on Windows; they contain the tmp dir's path.
+  for (const std::string& tmp_env_variable :
+       {"TEST_TMPDIR", "TMPDIR", "TEMP", "TMP"}) {
+    const char* env = getenv(tmp_env_variable.c_str());
+    if (env && env[0] != '\0') {
+      return env;
+    }
   }
-  env = getenv("TMPDIR");
-  if (env && env[0] != '\0') {
-    return env;
-  }
+  // Tmp dir on Linux/macOS.
   return "/tmp";
 }
 
