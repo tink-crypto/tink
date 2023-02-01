@@ -30,6 +30,8 @@ namespace tink {
 namespace util {
 
 // An InputStream that reads from a file descriptor.
+//
+// NOTE: This class in not available when building on Windows.
 class FileInputStream : public crypto::tink::InputStream {
  public:
   // Constructs an InputStream that will read from the file specified

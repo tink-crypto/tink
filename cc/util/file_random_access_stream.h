@@ -29,6 +29,8 @@ namespace tink {
 namespace util {
 
 // An RandomAccessStream that reads from a file descriptor.
+//
+// NOTE: This class in not available when building on Windows.
 class FileRandomAccessStream : public crypto::tink::RandomAccessStream {
  public:
   // Constructs a FileRandomAccessStream that will read from the file specified

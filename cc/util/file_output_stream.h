@@ -28,6 +28,8 @@ namespace tink {
 namespace util {
 
 // An OutputStream that writes to a file descriptor.
+//
+// NOTE: This class in not available when building on Windows.
 class FileOutputStream : public crypto::tink::OutputStream {
  public:
   // Constructs an OutputStream that will write to the file specified
