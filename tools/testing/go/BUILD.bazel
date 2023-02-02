@@ -44,23 +44,3 @@ go_binary(
     ],
 )
 
-go_binary(
-    name = "generate_envelope_keyset",
-    testonly = 1,  # keep
-    srcs = ["generate_envelope_keyset.go"],
-    out = "generate_envelope_keyset",
-    data = [
-        "//testdata/aws:credentials",
-        "//testdata/gcp:credentials",
-    ],
-    tags = ["no_rbe"],
-    deps = [
-        "@tink_go//aead",
-        "@tink_go//core/registry",
-        "@tink_go//insecurecleartextkeyset",
-        "@tink_go//integration/awskms",
-        "@tink_go//integration/gcpkms",
-        "@tink_go//keyset",
-        "@tink_go//proto/tink_go_proto",
-    ],
-)
