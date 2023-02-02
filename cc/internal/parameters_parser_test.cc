@@ -17,6 +17,7 @@
 #include "tink/internal/parameters_parser.h"
 
 #include <memory>
+#include <string>
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
@@ -42,18 +43,29 @@ class ExampleParameters : public Parameters {
   bool operator==(const Parameters& other) const override { return true; }
 };
 
-class ExampleSerialization : public Serialization {
+class BaseSerialization : public Serialization {
  public:
+  explicit BaseSerialization(absl::string_view object_identifier)
+      : object_identifier_(object_identifier) {}
+
   absl::string_view ObjectIdentifier() const override {
-    return "example_type_url";
+    return object_identifier_;
   }
+
+ private:
+  std::string object_identifier_;
 };
 
-class DifferentSerialization : public Serialization {
+class ExampleSerialization : public BaseSerialization {
  public:
-  absl::string_view ObjectIdentifier() const override {
-    return "different_type_url";
-  }
+  explicit ExampleSerialization(absl::string_view object_identifier)
+      : BaseSerialization(object_identifier) {}
+};
+
+class DifferentSerialization : public BaseSerialization {
+ public:
+  explicit DifferentSerialization(absl::string_view object_identifier)
+      : BaseSerialization(object_identifier) {}
 };
 
 util::StatusOr<ExampleParameters> Parse(ExampleSerialization serialization) {
@@ -76,7 +88,7 @@ TEST(ParametersParserTest, ParseParameters) {
       ParametersParserImpl<ExampleSerialization, ExampleParameters>>(
       "example_type_url", Parse);
 
-  ExampleSerialization serialization;
+  ExampleSerialization serialization("example_type_url");
   util::StatusOr<std::unique_ptr<Parameters>> params =
       parser->ParseParameters(serialization);
   ASSERT_THAT(params, IsOk());
@@ -88,7 +100,18 @@ TEST(ParametersParserTest, ParseParametersWithInvalidSerializationType) {
       ParametersParserImpl<ExampleSerialization, ExampleParameters>>(
       "example_type_url", Parse);
 
-  DifferentSerialization serialization;
+  DifferentSerialization serialization("example_type_url");
+  util::StatusOr<std::unique_ptr<Parameters>> params =
+      parser->ParseParameters(serialization);
+  ASSERT_THAT(params.status(), StatusIs(absl::StatusCode::kInvalidArgument));
+}
+
+TEST(ParametersParserTest, ParseParametersWithInvalidObjectIdentifier) {
+  std::unique_ptr<ParametersParser> parser = absl::make_unique<
+      ParametersParserImpl<ExampleSerialization, ExampleParameters>>(
+      "example_type_url", Parse);
+
+  ExampleSerialization serialization("mismatched_type_url");
   util::StatusOr<std::unique_ptr<Parameters>> params =
       parser->ParseParameters(serialization);
   ASSERT_THAT(params.status(), StatusIs(absl::StatusCode::kInvalidArgument));

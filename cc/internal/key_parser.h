@@ -79,6 +79,10 @@ class KeyParserImpl : public KeyParser {
   util::StatusOr<std::unique_ptr<Key>> ParseKey(
       const Serialization& serialization,
       SecretKeyAccessToken token) const override {
+    if (serialization.ObjectIdentifier() != object_identifier_) {
+      return util::Status(absl::StatusCode::kInvalidArgument,
+                          "Invalid object identifier for this key parser.");
+    }
     const SerializationT* st =
         dynamic_cast<const SerializationT*>(&serialization);
     if (st == nullptr) {
