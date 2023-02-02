@@ -788,6 +788,7 @@ cc_test(
     srcs = ["core/version_test.cc"],
     deps = [
         ":version",
+        "//internal:util",
         "@com_google_googletest//:gtest_main",
     ],
 )

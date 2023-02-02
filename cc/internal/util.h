@@ -35,6 +35,15 @@ bool BuffersAreIdentical(absl::string_view first, absl::string_view second);
 // is not allowed).
 bool IsPrintableAscii(absl::string_view input);
 
+// Returns true if built on Windows; false otherwise.
+inline bool IsWindows() {
+#if defined(_WIN32)
+  return true;
+#else
+  return false;
+#endif
+}
+
 }  // namespace internal
 }  // namespace tink
 }  // namespace crypto

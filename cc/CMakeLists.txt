@@ -741,6 +741,7 @@ tink_cc_test(
   DEPS
     tink::core::version
     gmock
+    tink::internal::util
 )
 
 tink_cc_test(

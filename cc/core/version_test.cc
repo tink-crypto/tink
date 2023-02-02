@@ -20,12 +20,16 @@
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include "tink/internal/util.h"
 
 namespace crypto {
 namespace tink {
 namespace {
 
-TEST(VersionTest, testVersionFormat) {
+using ::testing::AnyOf;
+using ::testing::MatchesRegex;
+
+TEST(VersionTest, VersionHasCorrectFormat) {
   // The regex represents Semantic Versioning syntax (www.semver.org),
   // i.e. three dot-separated numbers, with an optional suffix
   // that starts with a hyphen, to cover alpha/beta releases and
@@ -33,8 +37,16 @@ TEST(VersionTest, testVersionFormat) {
   //   1.2.3
   //   1.2.3-beta
   //   1.2.3-RC1
-  std::string version_regex = "[0-9]+[.][0-9]+[.][0-9]+(-[A-Za-z0-9]+)?";
-  EXPECT_THAT(Version::kTinkVersion, testing::MatchesRegex(version_regex));
+  if (crypto::tink::internal::IsWindows()) {
+    // Using the syntax in
+    // https://github.com/google/googletest/blob/main/docs/advanced.md#regular-expression-syntax.
+    EXPECT_THAT(Version::kTinkVersion,
+                AnyOf(MatchesRegex(R"regex(\d+\.\d+\.\d+)regex"),
+                      MatchesRegex(R"regex(\d+\.\d+\.\d+-\w+)regex")));
+  } else {
+    std::string version_regex = "[0-9]+[.][0-9]+[.][0-9]+(-[A-Za-z0-9]+)?";
+    EXPECT_THAT(Version::kTinkVersion, testing::MatchesRegex(version_regex));
+  }
 }
 
 }  // namespace
