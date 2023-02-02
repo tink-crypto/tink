@@ -47,11 +47,17 @@ using ::testing::Eq;
 using ::testing::HasSubstr;
 using ::testing::Return;
 
+}  // namespace
+
 // Placeholders for the primitives. We don't really want to test anything with
 // these except that things compile and List<PrivatePrimitive> is never confused
 // with List<PublicPrimitive> in private_key_manager_impl.
+// NOTE: These are outside of the anonymous namespace to allow compiling with
+// MSVC.
 class PrivatePrimitive {};
 class PublicPrimitive {};
+
+namespace {
 
 class ExamplePrivateKeyTypeManager
     : public PrivateKeyTypeManager<EcdsaPrivateKey, EcdsaKeyFormat,

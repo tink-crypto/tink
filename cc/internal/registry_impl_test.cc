@@ -1326,8 +1326,14 @@ TEST_F(RegistryTest, RegisterKeyTypeManagerAfterKeyManager) {
               StatusIs(absl::StatusCode::kAlreadyExists));
 }
 
+}  // namespace
+
+// NOTE: These are outside of the anonymous namespace to allow compiling with
+// MSVC.
 class PrivatePrimitiveA {};
 class PrivatePrimitiveB {};
+
+namespace {
 
 class TestPrivateKeyTypeManager
     : public PrivateKeyTypeManager<EcdsaPrivateKey, EcdsaKeyFormat,
@@ -1391,8 +1397,14 @@ class TestPrivateKeyTypeManager
       "type.googleapis.com/google.crypto.tink.EcdsaPrivateKey";
 };
 
+}  // namespace
+
+// NOTE: These are outside of the anonymous namespace to allow compiling with
+// MSVC.
 class PublicPrimitiveA {};
 class PublicPrimitiveB {};
+
+namespace {
 
 class TestPublicKeyTypeManager
     : public KeyTypeManager<EcdsaPublicKey, void,
