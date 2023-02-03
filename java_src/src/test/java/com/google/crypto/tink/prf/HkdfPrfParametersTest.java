@@ -110,28 +110,52 @@ public final class HkdfPrfParametersTest {
 
   @Test
   public void equalsAndHashCode() throws Exception {
-    HkdfPrfParameters parameters1 =
+    HkdfPrfParameters parameters =
         HkdfPrfParameters.builder()
             .setKeySizeBytes(16)
             .setHashType(HkdfPrfParameters.HashType.SHA256)
             .setSalt(SALT)
             .build();
-    HkdfPrfParameters parameters2 =
+    HkdfPrfParameters sameParameters =
         HkdfPrfParameters.builder()
             .setKeySizeBytes(16)
             .setHashType(HkdfPrfParameters.HashType.SHA256)
             .setSalt(SALT)
             .build();
-    assertThat(parameters1).isEqualTo(parameters2);
-    assertThat(parameters1.hashCode()).isEqualTo(parameters2.hashCode());
+    assertThat(sameParameters).isEqualTo(parameters);
+    assertThat(sameParameters.hashCode()).isEqualTo(parameters.hashCode());
 
-    HkdfPrfParameters parameters3 =
+    HkdfPrfParameters keySize32Parameters =
         HkdfPrfParameters.builder()
             .setKeySizeBytes(32)
-            .setHashType(HkdfPrfParameters.HashType.SHA256)
-            .setSalt(SALT)
+            .setHashType(parameters.getHashType())
+            .setSalt(parameters.getSalt())
             .build();
-    assertThat(parameters1).isNotEqualTo(parameters3);
-    assertThat(parameters1.hashCode()).isNotEqualTo(parameters3.hashCode());
+    assertThat(keySize32Parameters).isNotEqualTo(parameters);
+    assertThat(keySize32Parameters.hashCode()).isNotEqualTo(parameters.hashCode());
+
+    HkdfPrfParameters sha512Parameters =
+        HkdfPrfParameters.builder()
+            .setKeySizeBytes(parameters.getKeySizeBytes())
+            .setHashType(HkdfPrfParameters.HashType.SHA512)
+            .setSalt(parameters.getSalt())
+            .build();
+    assertThat(sha512Parameters).isNotEqualTo(parameters);
+    assertThat(sha512Parameters.hashCode()).isNotEqualTo(parameters.hashCode());
+
+    HkdfPrfParameters noSaltParameters =
+        HkdfPrfParameters.builder()
+            .setKeySizeBytes(parameters.getKeySizeBytes())
+            .setHashType(parameters.getHashType())
+            .build();
+    HkdfPrfParameters sameNoSaltParameters =
+        HkdfPrfParameters.builder()
+            .setKeySizeBytes(parameters.getKeySizeBytes())
+            .setHashType(parameters.getHashType())
+            .build();
+    assertThat(sameNoSaltParameters).isEqualTo(noSaltParameters);
+    assertThat(sameNoSaltParameters.hashCode()).isEqualTo(noSaltParameters.hashCode());
+    assertThat(noSaltParameters).isNotEqualTo(parameters);
+    assertThat(noSaltParameters.hashCode()).isNotEqualTo(parameters.hashCode());
   }
 }

@@ -141,7 +141,7 @@ public final class HkdfPrfParameters extends PrfParameters {
     HkdfPrfParameters that = (HkdfPrfParameters) o;
     return that.getKeySizeBytes() == getKeySizeBytes()
         && that.getHashType() == getHashType()
-        && that.getSalt().equals(getSalt());
+        && Objects.equals(that.getSalt(), getSalt());
   }
 
   @Override
