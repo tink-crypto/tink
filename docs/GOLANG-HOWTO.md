@@ -115,36 +115,37 @@ const (
 )
 
 func main() {
-  // Generate a new key.
-  kh1, err := keyset.NewHandle(aead.AES128GCMKeyTemplate())
+  // Generate a new keyset handle.
+  handle1, err := keyset.NewHandle(aead.AES128GCMKeyTemplate())
   if err != nil {
     log.Fatal(err)
   }
 
-  // Fetch the master key from a KMS.
+  // Get the key encryption AEAD from a KMS.
   gcpClient, err := gcpkms.NewClientWithCredentials(keyURI, credentialsPath)
   if err != nil {
     log.Fatal(err)
   }
   registry.RegisterKMSClient(gcpClient)
-  masterKey, err := gcpClient.GetAEAD(keyURI)
+  keyEncryptionAEAD, err := gcpClient.GetAEAD(keyURI)
   if err != nil {
     log.Fatal(err)
   }
 
-  // An io.Reader and io.Writer implementation which simply writes to memory.
-  memKeyset := &keyset.MemReaderWriter{}
-
-  // Write encrypts the keyset handle with the master key and writes to the
-  // io.Writer implementation (memKeyset). We recommend that you encrypt the
-  // keyset handle before persisting it.
-  if err := kh1.Write(memKeyset, masterKey); err != nil {
+  // Serialize and encrypt the keyset handle using the key encryption AEAD.
+  // We strongly recommend that you encrypt the keyset handle before persisting
+  // it.
+  buf := new(bytes.Buffer)
+  writer := keyset.NewBinaryWriter(buf)
+  err = handle1.Write(writer, keyEncryptionAEAD)
+  if err != nil {
     log.Fatal(err)
   }
+  encryptedHandle := buf.Bytes()
 
-  // Read reads the encrypted keyset handle back from the io.Reader
-  // implementation and decrypts it using the master key.
-  kh2, err := keyset.Read(memKeyset, masterKey)
+  // Decrypt and parse the encrypted keyset using the key encryption AEAD.
+  reader := keyset.NewBinaryReader(bytes.NewReader(encryptedHandle))
+  handle2, err := keyset.Read(reader, keyEncryptionAEAD)
   if err != nil {
     log.Fatal(err)
   }
