@@ -161,6 +161,10 @@ cc_library(
     srcs = ["file_input_stream.cc"],
     hdrs = ["file_input_stream.h"],
     include_prefix = "tink/util",
+    target_compatible_with = select({
+        "@platforms//os:windows": ["@platforms//:incompatible"],
+        "//conditions:default": [],
+    }),
     visibility = ["//visibility:public"],
     deps = [
         ":errors",
@@ -176,6 +180,10 @@ cc_library(
     srcs = ["file_output_stream.cc"],
     hdrs = ["file_output_stream.h"],
     include_prefix = "tink/util",
+    target_compatible_with = select({
+        "@platforms//os:windows": ["@platforms//:incompatible"],
+        "//conditions:default": [],
+    }),
     visibility = ["//visibility:public"],
     deps = [
         ":errors",
@@ -192,6 +200,10 @@ cc_library(
     srcs = ["file_random_access_stream.cc"],
     hdrs = ["file_random_access_stream.h"],
     include_prefix = "tink/util",
+    target_compatible_with = select({
+        "@platforms//os:windows": ["@platforms//:incompatible"],
+        "//conditions:default": [],
+    }),
     visibility = ["//visibility:public"],
     deps = [
         ":buffer",
@@ -445,6 +457,10 @@ cc_test(
 cc_test(
     name = "file_input_stream_test",
     srcs = ["file_input_stream_test.cc"],
+    target_compatible_with = select({
+        "@platforms//os:windows": ["@platforms//:incompatible"],
+        "//conditions:default": [],
+    }),
     deps = [
         ":file_input_stream",
         ":status",
@@ -462,6 +478,10 @@ cc_test(
 cc_test(
     name = "file_output_stream_test",
     srcs = ["file_output_stream_test.cc"],
+    target_compatible_with = select({
+        "@platforms//os:windows": ["@platforms//:incompatible"],
+        "//conditions:default": [],
+    }),
     deps = [
         ":file_output_stream",
         ":test_matchers",
@@ -477,6 +497,10 @@ cc_test(
 cc_test(
     name = "file_random_access_stream_test",
     srcs = ["file_random_access_stream_test.cc"],
+    target_compatible_with = select({
+        "@platforms//os:windows": ["@platforms//:incompatible"],
+        "//conditions:default": [],
+    }),
     deps = [
         ":buffer",
         ":file_random_access_stream",
