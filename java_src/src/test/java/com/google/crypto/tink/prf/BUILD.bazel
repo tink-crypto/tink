@@ -164,3 +164,30 @@ java_test(
         "@maven//:junit_junit",
     ],
 )
+
+java_test(
+    name = "HkdfPrfProtoSerializationTest",
+    size = "small",
+    srcs = ["HkdfPrfProtoSerializationTest.java"],
+    deps = [
+        "//proto:common_java_proto",
+        "//proto:hkdf_prf_java_proto",
+        "//proto:tink_java_proto",
+        "//src/main/java/com/google/crypto/tink:insecure_secret_key_access",
+        "//src/main/java/com/google/crypto/tink:key",
+        "//src/main/java/com/google/crypto/tink:parameters",
+        "//src/main/java/com/google/crypto/tink/internal:mutable_serialization_registry",
+        "//src/main/java/com/google/crypto/tink/internal:proto_key_serialization",
+        "//src/main/java/com/google/crypto/tink/internal:proto_parameters_serialization",
+        "//src/main/java/com/google/crypto/tink/internal/testing:asserts",
+        "//src/main/java/com/google/crypto/tink/prf:hkdf_prf_key",
+        "//src/main/java/com/google/crypto/tink/prf:hkdf_prf_parameters",
+        "//src/main/java/com/google/crypto/tink/prf:hkdf_prf_proto_serialization",
+        "//src/main/java/com/google/crypto/tink/testing:test_util",
+        "//src/main/java/com/google/crypto/tink/util:bytes",
+        "//src/main/java/com/google/crypto/tink/util:secret_bytes",
+        "@maven//:com_google_protobuf_protobuf_java",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
