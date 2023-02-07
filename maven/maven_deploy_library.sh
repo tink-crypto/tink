@@ -83,6 +83,7 @@ parse_args() {
     usage
   fi
 
+  local -r maven_scripts_dir="$(cd "$(dirname "$0")" && pwd)"
   case "${ACTION}" in
     install)
       MAVEN_ARGS+=( "install:install-file" )
@@ -92,7 +93,6 @@ parse_args() {
       if [[ -z "${GIT_URL}" ]]; then
         usage
       fi
-      local -r maven_scripts_dir="$(cd "$(dirname "$0")" && pwd)"
       MAVEN_ARGS+=(
         "deploy:deploy-file"
         "-DrepositoryId=ossrh"
@@ -106,10 +106,12 @@ parse_args() {
         usage
       fi
       MAVEN_ARGS+=(
-        gpg:sign-and-deploy-file
+        "gpg:sign-and-deploy-file"
         "${ARTIFACT_VERSION}"
         "-DrepositoryId=ossrh"
         "-Durl=https://oss.sonatype.org/service/local/staging/deploy/maven2/"
+        "-Dgpg.keyname=tink-dev@google.com"
+        "--settings=${maven_scripts_dir}/settings.xml"
         "-X"
       )
       ;;
