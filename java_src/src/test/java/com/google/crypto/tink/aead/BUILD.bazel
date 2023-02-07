@@ -463,3 +463,30 @@ java_test(
         "@maven//:junit_junit",
     ],
 )
+
+java_test(
+    name = "ChaCha20Poly1305KeyTest",
+    size = "small",
+    srcs = ["ChaCha20Poly1305KeyTest.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink:insecure_secret_key_access",
+        "//src/main/java/com/google/crypto/tink/aead:cha_cha20_poly1305_key",
+        "//src/main/java/com/google/crypto/tink/aead:cha_cha20_poly1305_parameters",
+        "//src/main/java/com/google/crypto/tink/internal:key_tester",
+        "//src/main/java/com/google/crypto/tink/util:bytes",
+        "//src/main/java/com/google/crypto/tink/util:secret_bytes",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "ChaCha20Poly1305ParametersTest",
+    size = "small",
+    srcs = ["ChaCha20Poly1305ParametersTest.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink/aead:cha_cha20_poly1305_parameters",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
