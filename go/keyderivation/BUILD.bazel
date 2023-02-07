@@ -32,6 +32,7 @@ go_library(
 go_test(
     name = "keyderivation_test",
     srcs = [
+        "keyderivation_test.go",
         "keyset_deriver_factory_test.go",
         "keyset_deriver_factory_x_test.go",
         "keyset_deriver_key_templates_test.go",
