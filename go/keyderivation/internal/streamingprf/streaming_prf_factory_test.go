@@ -23,7 +23,6 @@ import (
 	"google.golang.org/protobuf/proto"
 	"github.com/google/tink/go/aead"
 	"github.com/google/tink/go/core/registry"
-	"github.com/google/tink/go/insecurecleartextkeyset"
 	"github.com/google/tink/go/keyderivation/internal/streamingprf"
 	"github.com/google/tink/go/keyset"
 	"github.com/google/tink/go/prf"
@@ -50,13 +49,13 @@ func TestNew(t *testing.T) {
 			},
 		},
 	}
-	handle, err := insecurecleartextkeyset.Read(&keyset.MemReaderWriter{Keyset: ks})
+	handle, err := testkeyset.NewHandle(ks)
 	if err != nil {
-		t.Fatalf("insecurecleartextkeyset.Read() err = %v, want nil", err)
+		t.Fatalf("testkeyset.NewHandle(ks) err = %v, want nil", err)
 	}
 	prf, err := streamingprf.New(handle)
 	if err != nil {
-		t.Errorf("streamingprf.New() err = %v, want nil", err)
+		t.Fatalf("streamingprf.New() err = %v, want nil", err)
 	}
 	r, err := prf.Compute(random.GetRandomBytes(32))
 	if err != nil {
@@ -288,9 +287,9 @@ func TestNewRejectsInvalidKeysetHandle(t *testing.T) {
 		},
 	} {
 		t.Run(test.name, func(t *testing.T) {
-			handle, err := insecurecleartextkeyset.Read(&keyset.MemReaderWriter{Keyset: test.keyset})
+			handle, err := testkeyset.NewHandle(test.keyset)
 			if err != nil {
-				t.Fatalf("insecurecleartextkeyset.Read() err = %v, want nil", err)
+				t.Fatalf("testkeyset.NewHandle(test.keyset) err = %v, want nil", err)
 			}
 			if _, err := streamingprf.New(handle); err == nil {
 				t.Error("streamingprf.New() err = nil, want non-nil")

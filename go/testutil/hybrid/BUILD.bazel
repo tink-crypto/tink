@@ -8,10 +8,10 @@ go_library(
     srcs = ["private_key.go"],
     importpath = "github.com/google/tink/go/testutil/hybrid",
     deps = [
-        "//insecurecleartextkeyset",
         "//keyset",
         "//proto/hpke_go_proto",
         "//proto/tink_go_proto",
+        "//testkeyset",
         "@org_golang_google_protobuf//proto",
     ],
 )
@@ -22,11 +22,11 @@ go_test(
     deps = [
         ":hybrid",
         "//hybrid",
-        "//insecurecleartextkeyset",
         "//keyset",
         "//proto/hpke_go_proto",
         "//proto/tink_go_proto",
         "//subtle/random",
+        "//testkeyset",
         "@org_golang_google_protobuf//proto",
     ],
 )
