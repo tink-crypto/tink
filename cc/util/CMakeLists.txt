@@ -80,10 +80,6 @@ tink_cc_library(
     tink::proto::tink_cc_proto
 )
 
-# Exclude file_*_stream targets when building on Windows. These targets use
-# the `unistd.h` header which is not available with MSVC.
-if (NOT WIN32)
-
 tink_cc_library(
   NAME file_input_stream
   SRCS
@@ -95,6 +91,8 @@ tink_cc_library(
     tink::util::statusor
     absl::status
     tink::core::input_stream
+  TAGS
+    exclude_if_windows
 )
 
 tink_cc_library(
@@ -109,6 +107,8 @@ tink_cc_library(
     absl::memory
     absl::status
     tink::core::output_stream
+  TAGS
+    exclude_if_windows
 )
 
 tink_cc_library(
@@ -124,9 +124,9 @@ tink_cc_library(
     absl::memory
     absl::status
     tink::core::random_access_stream
+  TAGS
+    exclude_if_windows
 )
-
-endif()
 
 tink_cc_library(
   NAME istream_input_stream
@@ -302,10 +302,6 @@ tink_cc_test(
     tink::proto::common_cc_proto
 )
 
-# Exclude file_*_stream_test targets when building on Windows. These targets use
-# the `unistd.h` header which is not available with MSVC.
-if (NOT WIN32)
-
 tink_cc_test(
   NAME file_input_stream_test
   SRCS
@@ -321,6 +317,8 @@ tink_cc_test(
     absl::strings
     tink::internal::test_file_util
     tink::subtle::random
+  TAGS
+    exclude_if_windows
 )
 
 tink_cc_test(
@@ -336,6 +334,8 @@ tink_cc_test(
     absl::strings
     tink::internal::test_file_util
     tink::subtle::random
+  TAGS
+    exclude_if_windows
 )
 
 tink_cc_test(
@@ -353,9 +353,9 @@ tink_cc_test(
     absl::strings
     tink::internal::test_file_util
     tink::subtle::random
+  TAGS
+    exclude_if_windows
 )
-
-endif()
 
 tink_cc_test(
   NAME istream_input_stream_test
