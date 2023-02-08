@@ -26,7 +26,6 @@ import com.google.crypto.tink.prf.PrfConfig;
 import com.google.crypto.tink.signature.SignatureConfig;
 import com.google.crypto.tink.streamingaead.StreamingAeadConfig;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -47,13 +46,15 @@ public final class CliUtil {
   public static KeysetHandle readKeyset(String filename)
       throws GeneralSecurityException, IOException {
     System.out.println("Reading the keyset...");
-    return CleartextKeysetHandle.read(BinaryKeysetReader.withFile(new File(filename)));
+    return CleartextKeysetHandle.read(
+        BinaryKeysetReader.withInputStream(new FileInputStream(filename)));
   }
 
   /** Writes a keyset to the specified file. In case of errors throws an exception. */
   public static void writeKeyset(KeysetHandle handle, String filename) throws IOException {
     System.out.println("Writing the keyset...");
-    CleartextKeysetHandle.write(handle, BinaryKeysetWriter.withFile(new File(filename)));
+    CleartextKeysetHandle.write(
+        handle, BinaryKeysetWriter.withOutputStream(new FileOutputStream(filename)));
   }
 
   /**
