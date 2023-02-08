@@ -22,96 +22,55 @@
 #include "gtest/gtest.h"
 #include "tink/insecure_secret_key_access.h"
 #include "tink/internal/serialization.h"
+#include "tink/internal/serialization_test_util.h"
 #include "tink/internal/serializer_index.h"
 #include "tink/key.h"
-#include "tink/parameters.h"
 #include "tink/secret_key_access_token.h"
 #include "tink/util/test_matchers.h"
 
 namespace crypto {
 namespace tink {
 namespace internal {
+namespace {
 
 using ::crypto::tink::test::IsOk;
 using ::crypto::tink::test::StatusIs;
 using ::testing::Eq;
 
-class ExampleParameters : public Parameters {
- public:
-  bool HasIdRequirement() const override { return false; }
-
-  bool operator==(const Parameters& other) const override { return true; }
-};
-
-class ExampleKey : public Key {
- public:
-  const Parameters& GetParameters() const override { return parameters_; }
-
-  absl::optional<int> GetIdRequirement() const override { return 123; }
-
-  bool operator==(const Key& other) const override { return true; }
-
- private:
-  ExampleParameters parameters_;
-};
-
-class DifferentKey : public Key {
- public:
-  const Parameters& GetParameters() const override { return parameters_; }
-
-  absl::optional<int> GetIdRequirement() const override { return 123; }
-
-  bool operator==(const Key& other) const override { return true; }
-
- private:
-  ExampleParameters parameters_;
-};
-
-class ExampleSerialization : public Serialization {
- public:
-  absl::string_view ObjectIdentifier() const override {
-    return "example_type_url";
-  }
-};
-
-util::StatusOr<ExampleSerialization> Serialize(ExampleKey key,
-                                               SecretKeyAccessToken token) {
-  return ExampleSerialization();
-}
-
 TEST(KeySerializerTest, Create) {
   std::unique_ptr<KeySerializer> serializer =
-      absl::make_unique<KeySerializerImpl<ExampleKey, ExampleSerialization>>(
-          Serialize);
+      absl::make_unique<KeySerializerImpl<NoIdKey, NoIdSerialization>>(
+          SerializeNoIdKey);
 
   EXPECT_THAT(serializer->Index(),
-              Eq(SerializerIndex::Create<ExampleKey, ExampleSerialization>()));
+              Eq(SerializerIndex::Create<NoIdKey, NoIdSerialization>()));
 }
 
 TEST(KeySerializerTest, SerializeKey) {
   std::unique_ptr<KeySerializer> serializer =
-      absl::make_unique<KeySerializerImpl<ExampleKey, ExampleSerialization>>(
-          Serialize);
+      absl::make_unique<KeySerializerImpl<NoIdKey, NoIdSerialization>>(
+          SerializeNoIdKey);
 
-  ExampleKey key;
+  NoIdKey key;
   util::StatusOr<std::unique_ptr<Serialization>> serialization =
       serializer->SerializeKey(key, InsecureSecretKeyAccess::Get());
   ASSERT_THAT(serialization, IsOk());
-  EXPECT_THAT((*serialization)->ObjectIdentifier(), Eq("example_type_url"));
+  EXPECT_THAT((*serialization)->ObjectIdentifier(), Eq(kNoIdTypeUrl));
 }
 
 TEST(KeySerializerTest, SerializeKeyWithInvalidKeyType) {
   std::unique_ptr<KeySerializer> serializer =
-      absl::make_unique<KeySerializerImpl<ExampleKey, ExampleSerialization>>(
-          Serialize);
+      absl::make_unique<KeySerializerImpl<NoIdKey, NoIdSerialization>>(
+          SerializeNoIdKey);
 
-  DifferentKey key;
+  IdKey key(/*id=*/123);
   util::StatusOr<std::unique_ptr<Serialization>> serialization =
       serializer->SerializeKey(key, InsecureSecretKeyAccess::Get());
   ASSERT_THAT(serialization.status(),
               StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
+}  // namespace
 }  // namespace internal
 }  // namespace tink
 }  // namespace crypto

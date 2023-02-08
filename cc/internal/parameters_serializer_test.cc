@@ -21,6 +21,7 @@
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "tink/internal/serialization.h"
+#include "tink/internal/serialization_test_util.h"
 #include "tink/internal/serializer_index.h"
 #include "tink/parameters.h"
 #include "tink/util/test_matchers.h"
@@ -34,60 +35,34 @@ using ::crypto::tink::test::IsOk;
 using ::crypto::tink::test::StatusIs;
 using ::testing::Eq;
 
-class ExampleParameters : public Parameters {
- public:
-  bool HasIdRequirement() const override { return false; }
-
-  bool operator==(const Parameters& other) const override { return true; }
-};
-
-class DifferentParameters : public Parameters {
- public:
-  bool HasIdRequirement() const override { return false; }
-
-  bool operator==(const Parameters& other) const override { return true; }
-};
-
-class ExampleSerialization : public Serialization {
- public:
-  absl::string_view ObjectIdentifier() const override {
-    return "example_type_url";
-  }
-};
-
-util::StatusOr<ExampleSerialization> Serialize(ExampleParameters parameters) {
-  return ExampleSerialization();
-}
-
 TEST(ParametersSerializerTest, Create) {
   std::unique_ptr<ParametersSerializer> serializer = absl::make_unique<
-      ParametersSerializerImpl<ExampleParameters, ExampleSerialization>>(
-      "example_type_url", Serialize);
+      ParametersSerializerImpl<NoIdParams, NoIdSerialization>>(
+      kNoIdTypeUrl, SerializeNoIdParams);
 
-  EXPECT_THAT(serializer->ObjectIdentifier(), Eq("example_type_url"));
-  EXPECT_THAT(
-      serializer->Index(),
-      Eq(SerializerIndex::Create<ExampleParameters, ExampleSerialization>()));
+  EXPECT_THAT(serializer->ObjectIdentifier(), Eq(kNoIdTypeUrl));
+  EXPECT_THAT(serializer->Index(),
+              Eq(SerializerIndex::Create<NoIdParams, NoIdSerialization>()));
 }
 
 TEST(ParametersSerializerTest, SerializeParameters) {
   std::unique_ptr<ParametersSerializer> serializer = absl::make_unique<
-      ParametersSerializerImpl<ExampleParameters, ExampleSerialization>>(
-      "example_type_url", Serialize);
+      ParametersSerializerImpl<NoIdParams, NoIdSerialization>>(
+      kNoIdTypeUrl, SerializeNoIdParams);
 
-  ExampleParameters parameters;
+  NoIdParams parameters;
   util::StatusOr<std::unique_ptr<Serialization>> serialization =
       serializer->SerializeParameters(parameters);
   ASSERT_THAT(serialization, IsOk());
-  EXPECT_THAT((*serialization)->ObjectIdentifier(), Eq("example_type_url"));
+  EXPECT_THAT((*serialization)->ObjectIdentifier(), Eq(kNoIdTypeUrl));
 }
 
 TEST(ParametersSerializerTest, SerializeParametersWithInvalidParametersType) {
   std::unique_ptr<ParametersSerializer> serializer = absl::make_unique<
-      ParametersSerializerImpl<ExampleParameters, ExampleSerialization>>(
-      "example_type_url", Serialize);
+      ParametersSerializerImpl<NoIdParams, NoIdSerialization>>(
+      kNoIdTypeUrl, SerializeNoIdParams);
 
-  DifferentParameters parameters;
+  IdParams parameters;
   util::StatusOr<std::unique_ptr<Serialization>> serialization =
       serializer->SerializeParameters(parameters);
   ASSERT_THAT(serialization.status(),

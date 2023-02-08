@@ -655,6 +655,7 @@ cc_test(
         ":parameters_parser",
         ":parser_index",
         ":serialization",
+        ":serialization_test_util",
         "//:parameters",
         "//util:test_matchers",
         "@com_google_googletest//:gtest_main",
@@ -680,6 +681,7 @@ cc_test(
     deps = [
         ":parameters_serializer",
         ":serialization",
+        ":serialization_test_util",
         ":serializer_index",
         "//:parameters",
         "//util:test_matchers",
@@ -709,6 +711,7 @@ cc_test(
         ":key_parser",
         ":parser_index",
         ":serialization",
+        ":serialization_test_util",
         "//:insecure_secret_key_access",
         "//:key",
         "//:parameters",
@@ -737,10 +740,10 @@ cc_test(
     deps = [
         ":key_serializer",
         ":serialization",
+        ":serialization_test_util",
         ":serializer_index",
         "//:insecure_secret_key_access",
         "//:key",
-        "//:parameters",
         "//:secret_key_access_token",
         "//util:test_matchers",
         "@com_google_googletest//:gtest_main",
@@ -829,6 +832,31 @@ cc_library(
     deps = [
         "//:random_access_stream",
         "@com_google_absl//absl/strings",
+    ],
+)
+
+cc_library(
+    name = "serialization_test_util",
+    testonly = 1,
+    hdrs = ["serialization_test_util.h"],
+    include_prefix = "tink/internal",
+    deps = [
+        ":serialization",
+        "//:key",
+        "//:parameters",
+        "//:secret_key_access_token",
+        "//util:statusor",
+    ],
+)
+
+cc_test(
+    name = "serialization_test_util_test",
+    srcs = ["serialization_test_util_test.cc"],
+    deps = [
+        ":serialization_test_util",
+        "//:insecure_secret_key_access",
+        "//util:test_matchers",
+        "@com_google_googletest//:gtest_main",
     ],
 )
 

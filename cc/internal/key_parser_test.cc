@@ -24,98 +24,50 @@
 #include "tink/insecure_secret_key_access.h"
 #include "tink/internal/parser_index.h"
 #include "tink/internal/serialization.h"
+#include "tink/internal/serialization_test_util.h"
 #include "tink/key.h"
-#include "tink/parameters.h"
 #include "tink/util/test_matchers.h"
 
 namespace crypto {
 namespace tink {
 namespace internal {
+namespace {
 
 using ::crypto::tink::test::IsOk;
 using ::crypto::tink::test::StatusIs;
 using ::testing::Eq;
 
-class ExampleParameters : public Parameters {
- public:
-  bool HasIdRequirement() const override { return false; }
-
-  bool operator==(const Parameters& other) const override { return true; }
-};
-
-class ExampleKey : public Key {
- public:
-  const Parameters& GetParameters() const override { return parameters_; }
-
-  absl::optional<int> GetIdRequirement() const override { return 123; }
-
-  bool operator==(const Key& other) const override { return true; }
-
- private:
-  ExampleParameters parameters_;
-};
-
-class BaseSerialization : public Serialization {
- public:
-  explicit BaseSerialization(absl::string_view object_identifier)
-      : object_identifier_(object_identifier) {}
-
-  absl::string_view ObjectIdentifier() const override {
-    return object_identifier_;
-  }
-
- private:
-  std::string object_identifier_;
-};
-
-class ExampleSerialization : public BaseSerialization {
- public:
-  explicit ExampleSerialization(absl::string_view object_identifier)
-      : BaseSerialization(object_identifier) {}
-};
-
-class DifferentSerialization : public BaseSerialization {
- public:
-  explicit DifferentSerialization(absl::string_view object_identifier)
-      : BaseSerialization(object_identifier) {}
-};
-
-util::StatusOr<ExampleKey> Parse(ExampleSerialization serialization,
-                                 SecretKeyAccessToken token) {
-  return ExampleKey();
-}
-
 TEST(KeyParserTest, Create) {
   std::unique_ptr<KeyParser> parser =
-      absl::make_unique<KeyParserImpl<ExampleSerialization, ExampleKey>>(
-          "example_type_url", Parse);
+      absl::make_unique<KeyParserImpl<NoIdSerialization, NoIdKey>>(
+          kNoIdTypeUrl, ParseNoIdKey);
 
-  EXPECT_THAT(parser->ObjectIdentifier(), Eq("example_type_url"));
+  EXPECT_THAT(parser->ObjectIdentifier(), Eq(kNoIdTypeUrl));
   EXPECT_THAT(
       parser->Index(),
-      Eq(ParserIndex::Create<ExampleSerialization>("example_type_url")));
+      Eq(ParserIndex::Create<NoIdSerialization>(kNoIdTypeUrl)));
 }
 
 TEST(KeyParserTest, ParseKey) {
   std::unique_ptr<KeyParser> parser =
-      absl::make_unique<KeyParserImpl<ExampleSerialization, ExampleKey>>(
-          "example_type_url", Parse);
+      absl::make_unique<KeyParserImpl<NoIdSerialization, NoIdKey>>(
+          kNoIdTypeUrl, ParseNoIdKey);
 
-  ExampleSerialization serialization("example_type_url");
+  NoIdSerialization serialization;
   util::StatusOr<std::unique_ptr<Key>> key =
       parser->ParseKey(serialization, InsecureSecretKeyAccess::Get());
   ASSERT_THAT(key, IsOk());
-  EXPECT_THAT((*key)->GetIdRequirement(), Eq(123));
-  EXPECT_THAT((*key)->GetParameters(), Eq(ExampleParameters()));
-  EXPECT_THAT(**key, Eq(ExampleKey()));
+  EXPECT_THAT((*key)->GetIdRequirement(), Eq(absl::nullopt));
+  EXPECT_THAT((*key)->GetParameters(), Eq(NoIdParams()));
+  EXPECT_THAT(**key, Eq(NoIdKey()));
 }
 
 TEST(KeyParserTest, ParseKeyWithInvalidSerializationType) {
   std::unique_ptr<KeyParser> parser =
-      absl::make_unique<KeyParserImpl<ExampleSerialization, ExampleKey>>(
-          "example_type_url", Parse);
+      absl::make_unique<KeyParserImpl<NoIdSerialization, NoIdKey>>(
+          "example_type_url", ParseNoIdKey);
 
-  DifferentSerialization serialization("example_type_url");
+  IdKeySerialization serialization(/*id=*/123);
   util::StatusOr<std::unique_ptr<Key>> key =
       parser->ParseKey(serialization, InsecureSecretKeyAccess::Get());
   ASSERT_THAT(key.status(), StatusIs(absl::StatusCode::kInvalidArgument));
@@ -123,15 +75,16 @@ TEST(KeyParserTest, ParseKeyWithInvalidSerializationType) {
 
 TEST(KeyParserTest, ParseKeyWithInvalidObjectIdentifier) {
   std::unique_ptr<KeyParser> parser =
-      absl::make_unique<KeyParserImpl<ExampleSerialization, ExampleKey>>(
-          "example_type_url", Parse);
+      absl::make_unique<KeyParserImpl<NoIdSerialization, NoIdKey>>(
+          "mismatched_type_url", ParseNoIdKey);
 
-  ExampleSerialization serialization("mismatched_type_url");
+  NoIdSerialization serialization;
   util::StatusOr<std::unique_ptr<Key>> key =
       parser->ParseKey(serialization, InsecureSecretKeyAccess::Get());
   ASSERT_THAT(key.status(), StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
+}  // namespace
 }  // namespace internal
 }  // namespace tink
 }  // namespace crypto
