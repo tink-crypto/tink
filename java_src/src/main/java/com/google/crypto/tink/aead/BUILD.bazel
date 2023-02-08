@@ -903,3 +903,53 @@ java_library(
         "@maven//:com_google_errorprone_error_prone_annotations",
     ],
 )
+
+android_library(
+    name = "x_cha_cha20_poly1305_key-android",
+    srcs = ["XChaCha20Poly1305Key.java"],
+    deps = [
+        ":aead_key-android",
+        ":x_cha_cha20_poly1305_parameters-android",
+        "//src/main/java/com/google/crypto/tink:accesses_partial_key-android",
+        "//src/main/java/com/google/crypto/tink:key-android",
+        "//src/main/java/com/google/crypto/tink/annotations:alpha-android",
+        "//src/main/java/com/google/crypto/tink/util:bytes-android",
+        "//src/main/java/com/google/crypto/tink/util:secret_bytes-android",
+        "@maven//:com_google_code_findbugs_jsr305",
+        "@maven//:com_google_errorprone_error_prone_annotations",
+    ],
+)
+
+android_library(
+    name = "x_cha_cha20_poly1305_parameters-android",
+    srcs = ["XChaCha20Poly1305Parameters.java"],
+    deps = [
+        ":aead_parameters-android",
+        "@maven//:com_google_errorprone_error_prone_annotations",
+    ],
+)
+
+java_library(
+    name = "x_cha_cha20_poly1305_key",
+    srcs = ["XChaCha20Poly1305Key.java"],
+    deps = [
+        ":aead_key",
+        ":x_cha_cha20_poly1305_parameters",
+        "//src/main/java/com/google/crypto/tink:accesses_partial_key",
+        "//src/main/java/com/google/crypto/tink:key",
+        "//src/main/java/com/google/crypto/tink/annotations:alpha",
+        "//src/main/java/com/google/crypto/tink/util:bytes",
+        "//src/main/java/com/google/crypto/tink/util:secret_bytes",
+        "@maven//:com_google_code_findbugs_jsr305",
+        "@maven//:com_google_errorprone_error_prone_annotations",
+    ],
+)
+
+java_library(
+    name = "x_cha_cha20_poly1305_parameters",
+    srcs = ["XChaCha20Poly1305Parameters.java"],
+    deps = [
+        ":aead_parameters",
+        "@maven//:com_google_errorprone_error_prone_annotations",
+    ],
+)
