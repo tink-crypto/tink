@@ -120,13 +120,13 @@ public final class AesGcmProtoSerializationTest {
             .setKeySizeBytes(32)
             .setTagSizeBytes(16)
             .setIvSizeBytes(12)
-            .setVariant(AesGcmParameters.Variant.TINK)
+            .setVariant(AesGcmParameters.Variant.CRUNCHY)
             .build();
 
     ProtoParametersSerialization serialization =
         ProtoParametersSerialization.create(
             "type.googleapis.com/google.crypto.tink.AesGcmKey",
-            OutputPrefixType.TINK,
+            OutputPrefixType.CRUNCHY,
             com.google.crypto.tink.proto.AesGcmKeyFormat.newBuilder().setKeySize(32).build());
 
     ProtoParametersSerialization serialized =

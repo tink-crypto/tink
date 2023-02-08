@@ -114,13 +114,13 @@ public final class AesGcmSivProtoSerializationTest {
     AesGcmSivParameters parameters =
         AesGcmSivParameters.builder()
             .setKeySizeBytes(32)
-            .setVariant(AesGcmSivParameters.Variant.TINK)
+            .setVariant(AesGcmSivParameters.Variant.CRUNCHY)
             .build();
 
     ProtoParametersSerialization serialization =
         ProtoParametersSerialization.create(
             "type.googleapis.com/google.crypto.tink.AesGcmSivKey",
-            OutputPrefixType.TINK,
+            OutputPrefixType.CRUNCHY,
             com.google.crypto.tink.proto.AesGcmSivKeyFormat.newBuilder().setKeySize(32).build());
 
     ProtoParametersSerialization serialized =
