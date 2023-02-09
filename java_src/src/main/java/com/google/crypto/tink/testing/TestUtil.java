@@ -23,9 +23,11 @@ import static org.junit.Assert.assertTrue;
 
 import com.google.crypto.tink.Aead;
 import com.google.crypto.tink.CleartextKeysetHandle;
+import com.google.crypto.tink.InsecureSecretKeyAccess;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.PrimitiveSet;
 import com.google.crypto.tink.Registry;
+import com.google.crypto.tink.TinkProtoKeysetFormat;
 import com.google.crypto.tink.aead.AeadConfig;
 import com.google.crypto.tink.daead.DeterministicAeadConfig;
 import com.google.crypto.tink.hybrid.HybridKeyTemplates;
@@ -174,7 +176,7 @@ public final class TestUtil {
 
   /** @return a keyset handle from a {@code keyset}. */
   public static KeysetHandle createKeysetHandle(Keyset keyset) throws Exception {
-    return CleartextKeysetHandle.parseFrom(keyset.toByteArray());
+    return TinkProtoKeysetFormat.parseKeyset(keyset.toByteArray(), InsecureSecretKeyAccess.get());
   }
 
   /** @return a keyset from a list of keys. The first key is primary. */

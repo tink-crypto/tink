@@ -138,7 +138,8 @@ public class JsonKeysetWriterTest {
             .setPrimaryKeyId(magicKeyId)
             .setKey(0, Keyset.Key.newBuilder(unmodified.getKey(0)).setKeyId(magicKeyId).build())
             .build();
-    KeysetHandle modifiedHandle = CleartextKeysetHandle.parseFrom(modified.toByteArray());
+    KeysetHandle modifiedHandle =
+        TinkProtoKeysetFormat.parseKeyset(modified.toByteArray(), InsecureSecretKeyAccess.get());
 
     // Write cleartext keyset
     ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
