@@ -41,30 +41,30 @@ TypeScript is still under development.
 
 ### Primitive implementations supported by language
 
-**Primitive**      | **Implementation**                    | **Java** | **C++ (BoringSSL)** | **C++ (OpenSSL)** | **Objective-C** | **Go** | **Python** | **TypeScript**
------------------- | ------------------------------------- | :------: | :-----------------: | :---------------: | :-------------: | :----: | :--------: | :------------:
-AEAD               | AES-GCM                               | yes      | yes                 | yes               | yes             | yes    | yes        | yes
-                   | AES-GCM-SIV                           | yes      | yes                 | **no**            | **no**          | **no** | **no**     | **no**
-                   | AES-CTR-HMAC                          | yes      | yes                 | yes               | yes             | yes    | yes        | yes
-                   | AES-EAX                               | yes      | yes                 | yes               | yes             | **no** | yes        | **no**
-                   | KMS Envelope                          | yes      | yes                 | yes               | **no**          | yes    | yes        | **no**
-                   | CHACHA20-POLY1305                     | yes      | **no**              | **no**            | **no**          | yes    | **no**     | **no**
-                   | XCHACHA20-POLY1305                    | yes      | yes                 | **no**            | yes             | yes    | yes        | **no**
-Streaming AEAD     | AES-GCM-HKDF-STREAMING                | yes      | yes                 | yes               | **no**          | yes    | yes        | **no**
-                   | AES-CTR-HMAC-STREAMING                | yes      | yes                 | yes               | **no**          | yes    | yes        | **no**
-Deterministic AEAD | AES-SIV                               | yes      | yes                 | yes               | yes             | yes    | yes        | **no**
-MAC                | HMAC-SHA2                             | yes      | yes                 | yes               | yes             | yes    | yes        | **no**
-                   | AES-CMAC                              | yes      | yes                 | yes               | yes             | yes    | yes        | **no**
-PRF                | HKDF-SHA2                             | yes      | yes                 | yes               | **no**          | yes    | yes        | **no**
-                   | HMAC-SHA2                             | yes      | yes                 | yes               | **no**          | yes    | yes        | **no**
-                   | AES-CMAC                              | yes      | yes                 | yes               | **no**          | yes    | yes        | **no**
-Digital Signatures | ECDSA over NIST curves                | yes      | yes                 | yes \*            | yes             | yes    | yes        | yes
-                   | Ed25519                               | yes      | yes                 | yes               | yes             | yes    | yes        | **no**
-                   | RSA-SSA-PKCS1                         | yes      | yes                 | yes               | yes             | yes    | yes        | **no**
-                   | RSA-SSA-PSS                           | yes      | yes                 | yes               | yes             | yes    | yes        | **no**
-Hybrid Encryption  | HPKE                                  | yes      | yes                 | **no**            | **no**          | yes    | yes        | **no**
-                   | ECIES with AEAD and HKDF              | yes      | yes                 | yes               | yes             | yes    | yes        | yes
-                   | ECIES with DeterministicAEAD and HKDF | yes      | yes                 | yes               | **no**          | yes    | yes        | **no**
+| **Primitive**       | **Implementation**                    | **Java** | **C++ (BoringSSL)** | **C++ (OpenSSL)** | **Objective-C** | **Go** | **Python** | **TypeScript**
+| ------------------- | ------------------------------------- | :------: | :-----------------: | :---------------: | :-------------: | :----: | :--------: | :------------:
+| AEAD                | AES-GCM                               | yes      | yes                 | yes               | yes             | yes    | yes        | yes
+|                     | AES-GCM-SIV                           | yes      | yes                 | **no**            | **no**          | **no** | **no**     | **no**
+|                     | AES-CTR-HMAC                          | yes      | yes                 | yes               | yes             | yes    | yes        | yes
+|                     | AES-EAX                               | yes      | yes                 | yes               | yes             | **no** | yes        | **no**
+|                     | KMS Envelope                          | yes      | yes                 | yes               | **no**          | yes    | yes        | **no**
+|                     | CHACHA20-POLY1305                     | yes      | **no**              | **no**            | **no**          | yes    | **no**     | **no**
+|                     | XCHACHA20-POLY1305                    | yes      | yes                 | **no**            | yes             | yes    | yes        | **no**
+| Streaming AEAD      | AES-GCM-HKDF-STREAMING                | yes      | yes                 | yes               | **no**          | yes    | yes        | **no**
+|                     | AES-CTR-HMAC-STREAMING                | yes      | yes                 | yes               | **no**          | yes    | yes        | **no**
+| Deterministic AEAD  | AES-SIV                               | yes      | yes                 | yes               | yes             | yes    | yes        | **no**
+| MAC                 | HMAC-SHA2                             | yes      | yes                 | yes               | yes             | yes    | yes        | **no**
+|                     | AES-CMAC                              | yes      | yes                 | yes               | yes             | yes    | yes        | **no**
+| PRF                 | HKDF-SHA2                             | yes      | yes                 | yes               | **no**          | yes    | yes        | **no**
+|                     | HMAC-SHA2                             | yes      | yes                 | yes               | **no**          | yes    | yes        | **no**
+|                     | AES-CMAC                              | yes      | yes                 | yes               | **no**          | yes    | yes        | **no**
+| Digital Signatures  | ECDSA over NIST curves                | yes      | yes                 | yes \*            | yes             | yes    | yes        | yes
+|                     | Ed25519                               | yes      | yes                 | yes               | yes             | yes    | yes        | **no**
+|                     | RSA-SSA-PKCS1                         | yes      | yes                 | yes               | yes             | yes    | yes        | **no**
+|                     | RSA-SSA-PSS                           | yes      | yes                 | yes               | yes             | yes    | yes        | **no**
+| Hybrid Encryption   | HPKE                                  | yes      | yes                 | **no**            | **no**          | yes    | yes        | **no**
+|                     | ECIES with AEAD and HKDF              | yes      | yes                 | yes               | yes             | yes    | yes        | yes
+|                     | ECIES with DeterministicAEAD and HKDF | yes      | yes                 | yes               | **no**          | yes    | yes        | **no**
 
 \* EC key creation from seed (`DeriveKey`) is unsupported.
 
