@@ -8,20 +8,20 @@ sh_binary(
 )
 
 sh_binary(
-    name = "create_github_release",
-    srcs = ["create_github_release.sh"],
+    name = "github_release_util",
+    srcs = ["github_release_util.sh"],
 )
 
 sh_test(
-    name = "create_github_release_test",
+    name = "github_release_util_test",
     size = "small",
-    srcs = ["create_github_release_test.sh"],
+    srcs = ["github_release_util_test.sh"],
     args = [
-        "$(rootpath :create_github_release.sh)",
+        "$(rootpath :github_release_util.sh)",
         "$(rootpath :test_utils)",
     ],
     data = [
-        ":create_github_release.sh",
+        ":github_release_util.sh",
         ":test_utils",
     ],
 )

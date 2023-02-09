@@ -19,13 +19,13 @@ if [[ -n "${TEST_SRCDIR}" ]]; then
   DEFAULT_DIR="${TEST_SRCDIR}/google3"
 fi
 readonly DEFAULT_DIR
-readonly CLI="${DEFAULT_DIR}/${1:-"create_github_release.sh"}"
+readonly CLI="${DEFAULT_DIR}/${1:-"github_release_util.sh"}"
 readonly TEST_UTILS="${DEFAULT_DIR}/${2:-test_utils.sh}"
 
 # Load the test library.
 source "${TEST_UTILS}"
 
-test_CreateGithubReleaseTest_CreateReleaseBranchMinorSucceeds() {
+test_GitHubReleaseUtil_CreateBranchMinorSucceeds() {
   cd "${TEST_CASE_TMPDIR}"
   local -r expected_git_cmds_file="${TEST_CASE_TMPDIR}/expected_cmds.txt"
   cat << EOF > ${expected_git_cmds_file}
@@ -33,9 +33,6 @@ git ls-remote ssh://git@github.com/tink-crypto/some-repo
 git clone ssh://git@github.com/tink-crypto/some-repo
 git branch 1.6
 git push origin 1.6
-git checkout 1.6
-git tag -a v1.6.0 -m some-repo version 1.6.0
-git push origin v1.6.0
 EOF
 
   local -r actual_git_cmds_file="${TEST_CASE_TMPDIR}/actual_git_cmds_file.txt"
@@ -56,20 +53,18 @@ EOF
         local -r repo_name="${1##*/}"
         mkdir "${repo_name}"
         ;;
-      *)
-        # Do nothing
-        ;;
+      *) ;; # Do nothing
     esac
   }
   # Run this in the caller's environment.
   (
-    source "${CLI}" -r 1.6.0 some-repo &> /dev/null
+    source "${CLI}" -r create_branch 1.6.0 some-repo &> /dev/null
   )
   ASSERT_CMD_SUCCEEDED
   ASSERT_FILE_EQUALS "${actual_git_cmds_file}" "${expected_git_cmds_file}"
 }
 
-test_CreateGithubReleaseTest_CreateReleaseBranchMinorWithCommitSucceeds() {
+test_GitHubReleaseUtil_CreateBranchMinorWithCommitSucceeds() {
   cd "${TEST_CASE_TMPDIR}"
   local -r expected_git_cmds_file="${TEST_CASE_TMPDIR}/expected_cmds.txt"
   cat << EOF > ${expected_git_cmds_file}
@@ -77,9 +72,6 @@ git ls-remote ssh://git@github.com/tink-crypto/some-repo
 git clone ssh://git@github.com/tink-crypto/some-repo
 git branch 1.6 6c68b48c884e0aeb983b8864f35187d9584d0d74
 git push origin 1.6
-git checkout 1.6
-git tag -a v1.6.0 -m some-repo version 1.6.0
-git push origin v1.6.0
 EOF
   local -r actual_git_cmds_file="${TEST_CASE_TMPDIR}/actual_git_cmds_file.txt"
   # Mock git command.
@@ -99,23 +91,20 @@ EOF
         local -r repo_name="${1##*/}"
         mkdir "${repo_name}"
         ;;
-      *)
-        # Do nothing
-        ;;
+      *) ;; # Do nothing
     esac
   }
 
   # Run this in the caller's environment.
   (
-    source "${CLI}" -r -c 6c68b48c884e0aeb983b8864f35187d9584d0d74 1.6.0 \
-      some-repo &> /dev/null
+    source "${CLI}" -r -c 6c68b48c884e0aeb983b8864f35187d9584d0d74 \
+      create_branch 1.6.0 some-repo &> /dev/null
   )
   ASSERT_CMD_SUCCEEDED
   ASSERT_FILE_EQUALS "${actual_git_cmds_file}" "${expected_git_cmds_file}"
 }
 
-# Tests that creating a patch release succeeds; the commit parameter is ignored.
-test_CreateGithubReleaseTest_CreateReleaseBranchPatchSucceeds() {
+test_GitHubReleaseUtil_CreateTagPatchSucceeds() {
   cd "${TEST_CASE_TMPDIR}"
   local -r expected_git_cmds_file="${TEST_CASE_TMPDIR}/expected_cmds.txt"
   cat << EOF > ${expected_git_cmds_file}
@@ -144,22 +133,48 @@ EOF
         local -r repo_name="${1##*/}"
         mkdir "${repo_name}"
         ;;
-      *)
-        # Do nothing.
-        ;;
+      *) ;; # Do nothing.
     esac
   }
 
   # Run this in the caller's environment.
   (
-    source "${CLI}" -r -c 6c68b48c884e0aeb983b8864f35187d9584d0d74 1.6.2 \
-      some-repo &> /dev/null
+    source "${CLI}" -r -c 6c68b48c884e0aeb983b8864f35187d9584d0d74 \
+      create_tag 1.6.2 some-repo &> /dev/null
   )
   ASSERT_CMD_SUCCEEDED
   ASSERT_FILE_EQUALS "${actual_git_cmds_file}" "${expected_git_cmds_file}"
 }
 
-test_CreateGithubReleaseTest_CreateReleaseFailsWhenCloneFails() {
+test_GitHubReleaseUtil_CreateBranchFailsWhenLsRemoteFails() {
+  cd "${TEST_CASE_TMPDIR}"
+  local -r expected_git_cmds_file="${TEST_CASE_TMPDIR}/expected_cmds.txt"
+  cat << EOF > ${expected_git_cmds_file}
+git ls-remote ssh://git@github.com/tink-crypto/some-repo
+EOF
+  local actual_git_cmds_file="${TEST_CASE_TMPDIR}/actual_cmds.txt"
+  # Mock git command.
+  git() {
+    local -r command="$1"
+    shift 1
+    cmd_and_args="git ${command} $@"
+    echo "${cmd_and_args}" >> "${actual_git_cmds_file}"
+    case "${command}" in
+      "ls-remote") return 1 ;;
+      *) ;; # Do nothing.
+    esac
+  }
+
+  # Run this in a subshell to prevent exiting on failure.
+  (
+    source "${CLI}" -r create_branch 1.6.2 some-repo &> /dev/null
+  )
+  ASSERT_CMD_FAILED
+  ASSERT_FILE_EQUALS "${actual_git_cmds_file}" "${expected_git_cmds_file}"
+  echo "" > "${actual_git_cmds_file}"
+}
+
+test_GitHubReleaseUtil_CreateBranchFailsWhenCloneFails() {
   cd "${TEST_CASE_TMPDIR}"
   local -r expected_git_cmds_file="${TEST_CASE_TMPDIR}/expected_cmds.txt"
   cat << EOF > ${expected_git_cmds_file}
@@ -180,24 +195,53 @@ EOF
 6c68b48c884e0aeb983b8864f35187d9584d0d74        refs/heads/main
 EOF
         ;;
-      "clone")
-        return 1
-        ;;
-      *)
-        # Do nothing.
-        ;;
+      "clone") return 1 ;;
+      *) ;; # Do nothing.
     esac
   }
 
   # Run this in a subshell to prevent exiting on failure.
   (
-    source "${CLI}" -r 1.6.2 some-repo &> /dev/null
+    source "${CLI}" -r create_branch 1.6.2 some-repo &> /dev/null
   )
   ASSERT_CMD_FAILED
   ASSERT_FILE_EQUALS "${actual_git_cmds_file}" "${expected_git_cmds_file}"
 }
 
-test_CreateGithubReleaseTest_CreateReleaseFailsIfReleaseTagAlreadyExists() {
+test_GitHubReleaseUtil_CreateTagFailsIfBranchDoesNotExist() {
+  cd "${TEST_CASE_TMPDIR}"
+  local -r expected_git_cmds_file="${TEST_CASE_TMPDIR}/expected_cmds.txt"
+  cat << EOF > ${expected_git_cmds_file}
+git ls-remote ssh://git@github.com/tink-crypto/some-repo
+EOF
+  local actual_git_cmds_file="${TEST_CASE_TMPDIR}/actual_cmds.txt"
+  # Mock git command.
+  git() {
+    local -r command="$1"
+    shift 1
+    cmd_and_args="git ${command} $@"
+    echo "${cmd_and_args}" >> "${actual_git_cmds_file}"
+    case "${command}" in
+      "ls-remote")
+        cat << EOF
+6c68b48c884e0aeb983b8864f35187d9584d0d74        HEAD
+6c68b48c884e0aeb983b8864f35187d9584d0d74        refs/heads/main
+EOF
+        ;;
+      *) ;; # Do nothing.
+    esac
+  }
+
+  # Run this in a subshell to prevent exiting on failure.
+  (
+    source "${CLI}" -r create_tag 1.6.2 some-repo &> /dev/null
+  )
+
+  ASSERT_CMD_FAILED
+  ASSERT_FILE_EQUALS "${actual_git_cmds_file}" "${expected_git_cmds_file}"
+}
+
+test_GitHubReleaseUtil_CreateTagFailsIfReleaseTagAlreadyExists() {
   cd "${TEST_CASE_TMPDIR}"
   local -r expected_git_cmds_file="${TEST_CASE_TMPDIR}/expected_cmds.txt"
   cat << EOF > ${expected_git_cmds_file}
@@ -221,60 +265,61 @@ EOF
 c6f48771296bca0bd22724b208abafeae7d7b764        refs/tags/v1.6.0
 EOF
         ;;
-      *)
-        # Do nothing.
-        ;;
+      *) ;; # Do nothing.
     esac
   }
 
   # Run this in a subshell to prevent exiting on failure.
   (
-    source "${CLI}" -r 1.6.2 some-repo &> /dev/null
+    source "${CLI}" -r create_tag 1.6.2 some-repo &> /dev/null
   )
 
   ASSERT_CMD_FAILED
   ASSERT_FILE_EQUALS "${actual_git_cmds_file}" "${expected_git_cmds_file}"
 }
 
-test_CreateGithubReleaseTest_CreateReleaseFailsWhenInvalidVersion() {
+test_GitHubReleaseUtil_FailsWhenInvalidVersion() {
   cd "${TEST_CASE_TMPDIR}"
-  # Run this in a subshell to prevent exiting on failure.
-  (
-    source "${CLI}" -r 1 some-repo &> /dev/null
-  )
-  ASSERT_CMD_FAILED
-  (
-    source "${CLI}" -r 1.2 some-repo &> /dev/null
-  )
-  ASSERT_CMD_FAILED
-  (
-    source "${CLI}" -r 1.2.a some-repo &> /dev/null
-  )
-  ASSERT_CMD_FAILED
-  (
-    source "${CLI}" -r a.b.c some-repo &> /dev/null
-  )
-  ASSERT_CMD_FAILED
-  (
-    source "${CLI}" -r 1.2.3.4 some-repo &> /dev/null
-  )
-  ASSERT_CMD_FAILED
-  (
-    source "${CLI}" -r invalid some-repo &> /dev/null
-  )
-  ASSERT_CMD_FAILED
+  for action in create_branch create_tag; do
+    (
+      source "${CLI}" -r "${action}" 1 some-repo &> /dev/null
+    )
+    ASSERT_CMD_FAILED
+    (
+      source "${CLI}" -r "${action}" 1.2 some-repo &> /dev/null
+    )
+    ASSERT_CMD_FAILED
+    (
+      source "${CLI}" -r "${action}" 1.2.a some-repo &> /dev/null
+    )
+    ASSERT_CMD_FAILED
+    (
+      source "${CLI}" -r "${action}" a.b.c some-repo &> /dev/null
+    )
+    ASSERT_CMD_FAILED
+    (
+      source "${CLI}" -r "${action}" 1.2.3.4 some-repo &> /dev/null
+    )
+    ASSERT_CMD_FAILED
+    (
+      source "${CLI}" -r "${action}" invalid some-repo &> /dev/null
+    )
+    ASSERT_CMD_FAILED
+  done
 }
 
-test_CreateGithubReleaseTest_CreateReleaseFailsWhenNoRepoNameIsGiven() {
+test_GitHubReleaseUtil_FailsWhenNoRepoNameIsGiven() {
   cd "${TEST_CASE_TMPDIR}"
-  # Run this in a subshell to prevent exiting on failure.
-  (
-    source "${CLI}" -r 1.6.0 &> /dev/null
-  )
-  ASSERT_CMD_FAILED
+  for action in create_branch create_tag; do
+    # Run this in a subshell to prevent exiting on failure.
+    (
+      source "${CLI}" -r "${action}" 1.6.0 &> /dev/null
+    )
+    ASSERT_CMD_FAILED
+  done
 }
 
-test_CreateGithubReleaseTest_CreateReleaseUsesCorrectGithubToken() {
+test_GitHubReleaseUtil_CreateBranchUsesCorrectGithubToken() {
   cd "${TEST_CASE_TMPDIR}"
   local -r access_token="a227da63673c236090a067c3f96b62e74dbd5857"
   local -r expected_url="https://ise-crypto:${access_token}@github.com/tink-crypto/some-repo"
@@ -284,9 +329,6 @@ git ls-remote ${expected_url}
 git clone ${expected_url}
 git branch 1.6
 git push origin 1.6
-git checkout 1.6
-git tag -a v1.6.0 -m some-repo version 1.6.0
-git push origin v1.6.0
 EOF
   local -r actual_git_cmds_file="${TEST_CASE_TMPDIR}/actual_git_cmds_file.txt"
   # Mock git command.
@@ -306,15 +348,58 @@ EOF
         local -r repo_name="${1##*/}"
         mkdir "${repo_name}"
         ;;
-      *)
-        # Do nothing
-        ;;
+      *) ;; # Do nothing
     esac
   }
 
   # Run this in the caller's environment.
   (
-    source "${CLI}" -r -t "${access_token}" 1.6.0 some-repo &> /dev/null
+    source "${CLI}" -r -t "${access_token}" create_branch 1.6.0 some-repo \
+      &> /dev/null
+  )
+  ASSERT_CMD_SUCCEEDED
+  ASSERT_FILE_EQUALS "${actual_git_cmds_file}" "${expected_git_cmds_file}"
+}
+
+test_GitHubReleaseUtil_CreateTagUsesCorrectGithubToken() {
+  cd "${TEST_CASE_TMPDIR}"
+  local -r access_token="a227da63673c236090a067c3f96b62e74dbd5857"
+  local -r expected_url="https://ise-crypto:${access_token}@github.com/tink-crypto/some-repo"
+  local -r expected_git_cmds_file="${TEST_CASE_TMPDIR}/expected_cmds.txt"
+  cat << EOF > ${expected_git_cmds_file}
+git ls-remote ${expected_url}
+git clone ${expected_url}
+git checkout 1.6
+git tag -a v1.6.2 -m some-repo version 1.6.2
+git push origin v1.6.2
+EOF
+  local -r actual_git_cmds_file="${TEST_CASE_TMPDIR}/actual_git_cmds_file.txt"
+  # Mock git command.
+  git() {
+    local -r command="$1"
+    shift 1
+    cmd_and_args="git ${command} $@"
+    echo "${cmd_and_args}" >> "${actual_git_cmds_file}"
+    case "${command}" in
+      "ls-remote")
+        cat << EOF
+6c68b48c884e0aeb983b8864f35187d9584d0d74        HEAD
+6c68b48c884e0aeb983b8864f35187d9584d0d74        refs/heads/main
+112a7d3a0453a1d926448519f94fe5a91c69be45        refs/heads/1.6
+EOF
+        ;;
+      "clone")
+        local -r repo_name="${1##*/}"
+        mkdir "${repo_name}"
+        ;;
+      *) ;; # Do nothing
+    esac
+  }
+
+  # Run this in the caller's environment.
+  (
+    source "${CLI}" -r -t "${access_token}" create_tag 1.6.2 some-repo \
+      &> /dev/null
   )
   ASSERT_CMD_SUCCEEDED
   ASSERT_FILE_EQUALS "${actual_git_cmds_file}" "${expected_git_cmds_file}"
