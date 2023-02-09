@@ -20,7 +20,6 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThrows;
 
-import com.google.crypto.tink.Config;
 import com.google.crypto.tink.Registry;
 import java.security.GeneralSecurityException;
 import org.junit.FixMethodOrder;
@@ -101,7 +100,6 @@ public class TinkConfigTest {
     TinkConfig.register();
 
     // After registration the key managers should be present.
-    Config.register(TinkConfig.TINK_1_1_0);
     assertNotNull(Registry.getUntypedKeyManager(macTypeUrl));
     assertNotNull(Registry.getUntypedKeyManager(aeadTypeUrl));
     assertNotNull(Registry.getUntypedKeyManager(daeadTypeUrl));

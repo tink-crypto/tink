@@ -18,7 +18,6 @@ package com.helloworld;
 
 import android.app.Application;
 import com.google.crypto.tink.Aead;
-import com.google.crypto.tink.Config;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.aead.AeadKeyTemplates;
 import com.google.crypto.tink.config.TinkConfig;
@@ -38,7 +37,7 @@ public class TinkApplication extends Application {
   public final void onCreate() {
     super.onCreate();
     try {
-      Config.register(TinkConfig.TINK_1_0_0);
+      TinkConfig.register();
       aead = getOrGenerateNewKeysetHandle().getPrimitive(Aead.class);
     } catch (GeneralSecurityException | IOException e) {
       throw new RuntimeException(e);

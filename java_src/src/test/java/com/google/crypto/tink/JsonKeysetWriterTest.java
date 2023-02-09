@@ -38,7 +38,7 @@ import org.junit.runners.JUnit4;
 public class JsonKeysetWriterTest {
   @BeforeClass
   public static void setUp() throws GeneralSecurityException {
-    Config.register(TinkConfig.TINK_1_0_0);
+    TinkConfig.register();
   }
 
   private void assertKeysetHandle(KeysetHandle handle1, KeysetHandle handle2) throws Exception {
