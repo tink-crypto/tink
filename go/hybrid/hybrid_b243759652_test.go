@@ -61,8 +61,17 @@ func TestBHybridEncrypt(t *testing.T) {
 	if err != nil {
 		t.Fatalf("handle.Public gives err = '%v', want nil", err)
 	}
-	// TODO(b/243759652): This should fail.
-	_, err = hybrid.NewHybridEncrypt(pub)
+	manager := keyset.NewManagerFromHandle(pub)
+	_, err = manager.Add(aead.AES128GCMKeyTemplate())
+	if err != nil {
+		t.Fatalf("manager.Add gives err = '%v', want nil", err)
+	}
+	mixedHandle, err := manager.Handle()
+	if err != nil {
+		t.Fatalf("manager.Handle gives err = '%v', want nil", err)
+	}
+	// TODO(b/243759652): We now have a HybridEncrypt and a Aead key, so this should fail
+	_, err = hybrid.NewHybridEncrypt(mixedHandle)
 	if err != nil {
 		t.Fatalf("hybrid.NewHybridEncrypt gives err = '%v', you fixed b/243759652, please change the test.", err)
 	}
