@@ -20,6 +20,7 @@ go_library(
         "//core/primitiveset",
         "//core/registry",
         "//insecurecleartextkeyset",
+        "//internal",
         "//internal/internalregistry",
         "//keyderivation/internal/streamingprf",
         "//keyset",

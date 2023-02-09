@@ -10,6 +10,7 @@ go_library(
     importpath = "github.com/google/tink/go/internal",
     visibility = [
         "//insecurecleartextkeyset:__pkg__",
+        "//keyderivation:__pkg__",
         "//keyset:__pkg__",
         "//testkeyset:__pkg__",
     ],

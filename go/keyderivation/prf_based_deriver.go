@@ -20,7 +20,6 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/google/tink/go/insecurecleartextkeyset"
 	"github.com/google/tink/go/internal/internalregistry"
 	"github.com/google/tink/go/keyderivation/internal/streamingprf"
 	"github.com/google/tink/go/keyset"
@@ -90,18 +89,15 @@ func (p *prfBasedDeriver) DeriveKeyset(salt []byte) (*keyset.Handle, error) {
 	// factory. This is acceptable because the keyset as-is will never leave Tink,
 	// and the user only interacts via the keyset deriver factory.
 	var primaryKeyID uint32 = 0
-	return insecurecleartextkeyset.Read(
-		&keyset.MemReaderWriter{
-			Keyset: &tinkpb.Keyset{
-				PrimaryKeyId: primaryKeyID,
-				Key: []*tinkpb.Keyset_Key{
-					&tinkpb.Keyset_Key{
-						KeyData:          keyData,
-						Status:           tinkpb.KeyStatusType_UNKNOWN_STATUS,
-						KeyId:            primaryKeyID,
-						OutputPrefixType: tinkpb.OutputPrefixType_UNKNOWN_PREFIX,
-					},
-				},
+	return keysetHandle(&tinkpb.Keyset{
+		PrimaryKeyId: primaryKeyID,
+		Key: []*tinkpb.Keyset_Key{
+			&tinkpb.Keyset_Key{
+				KeyData:          keyData,
+				Status:           tinkpb.KeyStatusType_UNKNOWN_STATUS,
+				KeyId:            primaryKeyID,
+				OutputPrefixType: tinkpb.OutputPrefixType_UNKNOWN_PREFIX,
 			},
-		})
+		},
+	})
 }

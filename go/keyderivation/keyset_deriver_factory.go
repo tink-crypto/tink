@@ -77,16 +77,13 @@ func (w *wrappedKeysetDeriver) DeriveKeyset(salt []byte) (*keyset.Handle, error)
 			if len(handle.KeysetInfo().GetKeyInfo()) != 1 {
 				return nil, errors.New("keyset_deriver_factory: primitive must derive keyset handle with exactly one key")
 			}
-			writer := &keyset.MemReaderWriter{}
-			if insecurecleartextkeyset.Write(handle, writer) != nil {
-				return nil, errors.New("keyset_deriver_factory: failed to retrieve key from derived keyset handle")
-			}
-			if len(writer.Keyset.GetKey()) != 1 {
+			ks := insecurecleartextkeyset.KeysetMaterial(handle)
+			if len(ks.GetKey()) != 1 {
 				return nil, errors.New("keyset_deriver_factory: primitive must derive keyset handle with exactly one key")
 			}
 			// Set all fields, except for KeyData, to match the Entry's in the keyset.
 			key := &tinkpb.Keyset_Key{
-				KeyData:          writer.Keyset.GetKey()[0].GetKeyData(),
+				KeyData:          ks.GetKey()[0].GetKeyData(),
 				Status:           e.Status,
 				KeyId:            e.KeyID,
 				OutputPrefixType: e.PrefixType,
@@ -98,5 +95,5 @@ func (w *wrappedKeysetDeriver) DeriveKeyset(salt []byte) (*keyset.Handle, error)
 		PrimaryKeyId: w.ps.Primary.KeyID,
 		Key:          keys,
 	}
-	return insecurecleartextkeyset.Read(&keyset.MemReaderWriter{Keyset: ks})
+	return keysetHandle(ks)
 }

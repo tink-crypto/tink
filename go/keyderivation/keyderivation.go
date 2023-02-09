@@ -27,6 +27,13 @@ import (
 	"fmt"
 
 	"github.com/google/tink/go/core/registry"
+	"github.com/google/tink/go/internal"
+	"github.com/google/tink/go/keyset"
+	tinkpb "github.com/google/tink/go/proto/tink_go_proto"
+)
+
+var (
+	keysetHandle   = internal.KeysetHandle.(func(*tinkpb.Keyset, ...keyset.Option) (*keyset.Handle, error))
 )
 
 func init() {
