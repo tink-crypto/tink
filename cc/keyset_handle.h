@@ -185,7 +185,6 @@ class KeysetHandle {
   // The classes below need access to get_keyset();
   friend class CleartextKeysetHandle;
   friend class KeysetManager;
-  friend class RegistryImpl;
 
   // TestKeysetHandle::GetKeyset() provides access to get_keyset().
   friend class TestKeysetHandle;
