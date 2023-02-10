@@ -48,10 +48,10 @@ go_test(
     deps = [
         ":keyset",
         "//aead",
-        "//aead/subtle",
         "//mac",
         "//proto/common_go_proto",
         "//proto/tink_go_proto",
+        "//signature",
         "//subtle/random",
         "//testing/fakekms",
         "//testkeyset",
