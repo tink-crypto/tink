@@ -304,14 +304,14 @@ util::StatusOr<std::unique_ptr<KeysetHandle>> KeysetHandle::GenerateNew(
     const KeyTemplate& key_template,
     const absl::flat_hash_map<std::string, std::string>&
         monitoring_annotations) {
-  Keyset keyset;
+  auto handle =
+      absl::WrapUnique(new KeysetHandle(Keyset(), monitoring_annotations));
   util::StatusOr<uint32_t> const result =
-      AddToKeyset(key_template, /*as_primary=*/true, &keyset);
+      handle->AddKey(key_template, /*as_primary=*/true);
   if (!result.ok()) {
     return result.status();
   }
-  return absl::WrapUnique(
-      new KeysetHandle(std::move(keyset), monitoring_annotations));
+  return std::move(handle);
 }
 
 util::StatusOr<std::unique_ptr<Keyset::Key>> ExtractPublicKey(
@@ -364,6 +364,11 @@ crypto::tink::util::StatusOr<uint32_t> KeysetHandle::AddToKeyset(
     keyset->set_primary_key_id(key_id);
   }
   return key_id;
+}
+
+crypto::tink::util::StatusOr<uint32_t> KeysetHandle::AddKey(
+    const google::crypto::tink::KeyTemplate& key_template, bool as_primary) {
+  return AddToKeyset(key_template, as_primary, &keyset_);
 }
 
 KeysetInfo KeysetHandle::GetKeysetInfo() const {

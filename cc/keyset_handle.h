@@ -209,12 +209,14 @@ class KeysetHandle {
       : keyset_(std::move(*keyset)),
         monitoring_annotations_(monitoring_annotations) {}
 
-  // Helper function which generates a key from a template, then adds it
-  // to the keyset. TODO(tholenst): Change this to a proper member operating
-  // on the internal keyset.
+  // Generates a key from `key_template` and adds it `keyset`.
   static crypto::tink::util::StatusOr<uint32_t> AddToKeyset(
       const google::crypto::tink::KeyTemplate& key_template, bool as_primary,
       google::crypto::tink::Keyset* keyset);
+
+  // Generates a key from `key_template` and adds it to the keyset handle.
+  crypto::tink::util::StatusOr<uint32_t> AddKey(
+      const google::crypto::tink::KeyTemplate& key_template, bool as_primary);
 
   // Returns keyset held by this handle.
   const google::crypto::tink::Keyset& get_keyset() const;
