@@ -83,7 +83,12 @@ parse_args() {
     usage
   fi
 
-  local -r maven_scripts_dir="$(cd "$(dirname "$0")" && pwd)"
+  if [[ ! -f "${POM_FILE}" ]]; then
+    echo "ERROR: The POM file doesn't exist: ${POM_FILE}" >&2
+    usage
+  fi
+
+  local -r maven_scripts_dir="$(cd "$(dirname "${POM_FILE}")" && pwd)"
   case "${ACTION}" in
     install)
       MAVEN_ARGS+=( "install:install-file" )
@@ -107,7 +112,6 @@ parse_args() {
       fi
       MAVEN_ARGS+=(
         "gpg:sign-and-deploy-file"
-        "${ARTIFACT_VERSION}"
         "-DrepositoryId=ossrh"
         "-Durl=https://oss.sonatype.org/service/local/staging/deploy/maven2/"
         "-Dgpg.keyname=tink-dev@google.com"
@@ -183,7 +187,7 @@ echo_output_file() {
       echo "Could not find Bazel output file for ${library}"
       exit 1
     fi
-    echo -n "${file}"
+    echo -n "${workspace_dir}/${file}"
   )
 }
 
@@ -209,9 +213,7 @@ publish_javadoc_to_github_pages() {
   local workspace_dir="$1"
   local javadoc="$2"
 
-  local javadoc_file="$(echo_output_file "${workspace_dir}" "${javadoc}")"
-  javadoc_file="${workspace_dir}/${javadoc_file}"
-  readonly javadoc_file
+  local -r javadoc_file="$(echo_output_file "${workspace_dir}" "${javadoc}")"
 
   print_and_do rm -rf gh-pages
   print_and_do git "${GIT_ARGS[@]}" clone \
@@ -256,27 +258,23 @@ main() {
 
   print_and_do "${BAZEL_CMD}" build "${library}" "${src_jar}" "${javadoc}"
 
-  local -r library_file="$(echo_output_file "." "${library}")"
-  local -r src_jar_file="$(echo_output_file "." "${src_jar}")"
-  local -r javadoc_file="$(echo_output_file "." "${javadoc}")"
+  local -r library_file="$(echo_output_file "${workspace_dir}" "${library}")"
+  local -r src_jar_file="$(echo_output_file "${workspace_dir}" "${src_jar}")"
+  local -r javadoc_file="$(echo_output_file "${workspace_dir}" "${javadoc}")"
 
   # Update the version in the POM file.
   do_run_if_not_dry_run sed -i \
     's/VERSION_PLACEHOLDER/'"${ARTIFACT_VERSION}"'/' "${POM_FILE}"
 
-  do_run_if_not_dry_run mvn "${MAVEN_ARGS[@]}" \
-    -Dfile="${library_file}" \
-    -Dsources="${src_jar_file}" \
-    -Djavadoc="${javadoc_file}" \
+  do_run_if_not_dry_run mvn "${MAVEN_ARGS[@]}" -Dfile="${library_file}" \
+    -Dsources="${src_jar_file}" -Djavadoc="${javadoc_file}" \
     -DpomFile="${POM_FILE}"
 
   # Add the placeholder back in the POM file.
   do_run_if_not_dry_run sed -i \
     's/'"${ARTIFACT_VERSION}"'/VERSION_PLACEHOLDER/' "${POM_FILE}"
 
-  publish_javadoc_to_github_pages \
-    "${workspace_dir}" \
-    "${javadoc}"
+  publish_javadoc_to_github_pages "${workspace_dir}" "${javadoc}"
 }
 
 main "$@"

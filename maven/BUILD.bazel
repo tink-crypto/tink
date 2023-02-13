@@ -1,0 +1,35 @@
+package(default_visibility = ["//:__subpackages__"])
+
+licenses(["notice"])
+
+filegroup(
+    name = "maven_settings",
+    srcs = ["settings.xml"],
+)
+
+sh_binary(
+    name = "maven_deploy_library",
+    srcs = ["maven_deploy_library.sh"],
+    target_compatible_with = [
+        "@platforms//os:linux",
+    ],
+)
+
+sh_test(
+    name = "maven_deploy_library_test",
+    size = "small",
+    srcs = ["maven_deploy_library_test.sh"],
+    target_compatible_with = [
+        "@platforms//os:linux",
+    ],
+    args = [
+        "$(rootpath :maven_deploy_library)",
+        "$(rootpath //kokoro/testutils:test_utils)",
+        "$(rootpath :maven_settings)",
+    ],
+    data = [
+        ":maven_deploy_library",
+        ":maven_settings",
+        "//kokoro/testutils:test_utils",
+    ],
+)
