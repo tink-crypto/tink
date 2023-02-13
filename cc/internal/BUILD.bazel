@@ -824,14 +824,38 @@ cc_test(
 )
 
 cc_library(
-    name = "test_random_access_stream",
-    testonly = 1,
-    srcs = ["test_random_access_stream.cc"],
-    hdrs = ["test_random_access_stream.h"],
+    name = "serialization_registry",
+    srcs = ["serialization_registry.cc"],
+    hdrs = ["serialization_registry.h"],
     include_prefix = "tink/internal",
     deps = [
-        "//:random_access_stream",
-        "@com_google_absl//absl/strings",
+        ":key_parser",
+        ":key_serializer",
+        ":parameters_parser",
+        ":parameters_serializer",
+        ":parser_index",
+        ":serializer_index",
+        "//:insecure_secret_key_access",
+        "//util:status",
+        "@com_google_absl//absl/container:flat_hash_map",
+        "@com_google_absl//absl/strings:str_format",
+    ],
+)
+
+cc_test(
+    name = "serialization_registry_test",
+    srcs = ["serialization_registry_test.cc"],
+    deps = [
+        ":key_parser",
+        ":key_serializer",
+        ":parameters_parser",
+        ":parameters_serializer",
+        ":serialization_registry",
+        ":serialization_test_util",
+        "//:key",
+        "//:parameters",
+        "//util:test_matchers",
+        "@com_google_googletest//:gtest_main",
     ],
 )
 
@@ -857,6 +881,18 @@ cc_test(
         "//:insecure_secret_key_access",
         "//util:test_matchers",
         "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_library(
+    name = "test_random_access_stream",
+    testonly = 1,
+    srcs = ["test_random_access_stream.cc"],
+    hdrs = ["test_random_access_stream.h"],
+    include_prefix = "tink/internal",
+    deps = [
+        "//:random_access_stream",
+        "@com_google_absl//absl/strings",
     ],
 )
 

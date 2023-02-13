@@ -780,6 +780,41 @@ tink_cc_test(
 )
 
 tink_cc_library(
+  NAME serialization_registry
+  SRCS
+    serialization_registry.cc
+    serialization_registry.h
+  DEPS
+    tink::internal::key_parser
+    tink::internal::key_serializer
+    tink::internal::parameters_parser
+    tink::internal::parameters_serializer
+    tink::internal::parser_index
+    tink::internal::serializer_index
+    absl::flat_hash_map
+    absl::str_format
+    tink::core::insecure_secret_key_access
+    tink::util::status
+)
+
+tink_cc_test(
+  NAME serialization_registry_test
+  SRCS
+    serialization_registry_test.cc
+  DEPS
+    tink::internal::key_parser
+    tink::internal::key_serializer
+    tink::internal::parameters_parser
+    tink::internal::parameters_serializer
+    tink::internal::serialization_registry
+    tink::internal::serialization_test_util
+    gmock
+    tink::core::key
+    tink::core::parameters
+    tink::util::test_matchers
+)
+
+tink_cc_library(
   NAME serialization_test_util
   SRCS
     serialization_test_util.h
