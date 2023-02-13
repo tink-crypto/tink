@@ -71,6 +71,10 @@ Status ValidateParams(const AesCtrHmacStreamingParams& params) {
     return Status(absl::StatusCode::kInvalidArgument,
                   "ciphertext_segment_size too small");
   }
+  if (params.ciphertext_segment_size() > 0x7fffffff) {
+    return Status(absl::StatusCode::kInvalidArgument,
+                  "ciphertext_segment_size too big");
+  }
   return ValidateAesKeySize(params.derived_key_size());
 }
 

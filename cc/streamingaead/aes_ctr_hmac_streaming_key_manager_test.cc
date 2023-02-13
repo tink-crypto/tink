@@ -225,6 +225,20 @@ TEST(AesCtrHmacStreamingKeyManagerTest, ValidateKeyFormatSmallSegment) {
                        HasSubstr("ciphertext_segment_size")));
 }
 
+TEST(AesCtrHmacStreamingKeyManagerTest, ValidateKeyFormatTooLargeSegment) {
+  AesCtrHmacStreamingKeyFormat key_format;
+  key_format.set_key_size(32);
+  key_format.mutable_params()->set_derived_key_size(32);
+  key_format.mutable_params()->set_hkdf_hash_type(HashType::SHA256);
+  key_format.mutable_params()->set_ciphertext_segment_size(2147483648);
+  key_format.mutable_params()->mutable_hmac_params()->
+      set_hash(HashType::SHA256);
+  key_format.mutable_params()->mutable_hmac_params()->set_tag_size(32);
+  EXPECT_THAT(AesCtrHmacStreamingKeyManager().ValidateKeyFormat(key_format),
+              StatusIs(absl::StatusCode::kInvalidArgument,
+                       HasSubstr("ciphertext_segment_size too big")));
+}
+
 TEST(AesCtrHmacStreamingKeyManagerTest, CreateKey) {
   AesCtrHmacStreamingKeyFormat key_format;
   key_format.set_key_size(32);

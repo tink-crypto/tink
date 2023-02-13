@@ -127,6 +127,11 @@ def lang_and_invalid_keys():
     if lang != 'go':
       result.append((lang, key))
 
+  key = simple_valid_key()
+  key.params.ciphertext_segment_size = 2**31
+  for lang in langs:
+    result.append((lang, key))
+
   return result
 
 

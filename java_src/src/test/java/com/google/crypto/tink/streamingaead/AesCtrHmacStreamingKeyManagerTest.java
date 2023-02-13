@@ -168,6 +168,18 @@ public class AesCtrHmacStreamingKeyManagerTest {
   }
 
   @Test
+  public void validateKeyFormat_ciphertextSegmentSizeOverflow_throws() throws Exception {
+    // ciphertext_segment_size is uint in the proto, so we check that overflows make the manager
+    // fail.
+    AesCtrHmacStreamingKeyFormat format =
+        createKeyFormat()
+            .setParams(createParams().setCiphertextSegmentSize(Integer.MIN_VALUE).build())
+            .build();
+
+    assertThrows(GeneralSecurityException.class, () -> factory.validateKeyFormat(format));
+  }
+
+  @Test
   public void createKey_values() throws Exception {
     AesCtrHmacStreamingKeyFormat format = createKeyFormat().build();
     AesCtrHmacStreamingKey key = factory.createKey(format);

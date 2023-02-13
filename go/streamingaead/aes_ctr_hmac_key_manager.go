@@ -170,5 +170,8 @@ func (km *aesCTRHMACKeyManager) validateParams(params *chpb.AesCtrHmacStreamingP
 	if params.CiphertextSegmentSize < minSegmentSize {
 		return fmt.Errorf("ciphertext segment size must be at least (derivedKeySize + noncePrefixInBytes + tagSizeInBytes + 2)")
 	}
+	if params.CiphertextSegmentSize > 0x7fffffff {
+		return fmt.Errorf("ciphertext segment size must be at most 2^31 - 1")
+	}
 	return nil
 }
