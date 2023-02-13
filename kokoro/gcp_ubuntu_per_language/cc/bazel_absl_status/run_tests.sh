@@ -18,6 +18,8 @@
 set -euo pipefail
 cd ${KOKORO_ARTIFACTS_DIR}/git/tink
 
+./kokoro/testutils/upgrade_gcc.sh
+
 cd cc
 use_bazel.sh $(cat .bazelversion)
 bazel build \

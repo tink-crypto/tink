@@ -20,6 +20,7 @@ if [[ -n "${KOKORO_ROOT:-}" ]]; then
   cd "${KOKORO_ARTIFACTS_DIR}/git/tink"
 fi
 
+./kokoro/testutils/upgrade_gcc.sh
 # Sourcing is needed to update the caller environment.
 # Install CMake 3.10 which is the minimum required.
 source ./kokoro/testutils/install_cmake.sh "3.10.0" \

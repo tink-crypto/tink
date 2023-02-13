@@ -21,6 +21,7 @@ if [[ -n "${KOKORO_ROOT:-}" ]]; then
 fi
 
 ./kokoro/testutils/update_certs.sh
+./kokoro/testutils/upgrade_gcc.sh
 source ./kokoro/testutils/install_cmake.sh
 source ./kokoro/testutils/install_openssl.sh
 

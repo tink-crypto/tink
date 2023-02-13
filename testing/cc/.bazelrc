@@ -1,3 +1,4 @@
 # Minumum C++ version. Override it building this project with
-# `bazel build --cxxopt='-std=c++<XY>' ...`
-build --cxxopt='-std=c++14'
+# `bazel build --cxxopt='-std=c++<XY>' --host_cxxopt='c++<XY>' ...`
+# (Both -std and --host_cxxopt must be set to force the desired version.)
+build --cxxopt='-std=c++14' --host_cxxopt='-std=c++14'

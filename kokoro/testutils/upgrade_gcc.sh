@@ -17,7 +17,7 @@
 
 # This script upgrades GCC when running on Kokoro.
 #
-# Currently this is only needed for Ubuntu 1604 (gcc-5 => gcc-6).
+# Currently this is only needed for Ubuntu 1604 (gcc-5 => gcc-7).
 #
 # Usage instructions:
 #
@@ -25,15 +25,13 @@
 set -e
 
 upgrade_gcc() {
-  if cat /etc/issue | grep "16.04" > /dev/null; then
-    # Install gcc-6.
-    sudo apt install build-essential software-properties-common -y
-    sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
-    sudo apt update
-    sudo apt install gcc-6 g++-6 -y
-    sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-6 60 \
-      --slave /usr/bin/g++ g++ /usr/bin/g++-6
-  fi
+  # Install gcc-7.
+  sudo apt install build-essential software-properties-common -y
+  sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
+  sudo apt update
+  sudo apt install gcc-7 g++-7 -y
+  sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-7 70 \
+    --slave /usr/bin/g++ g++ /usr/bin/g++-7
   gcc -v
 }
 
