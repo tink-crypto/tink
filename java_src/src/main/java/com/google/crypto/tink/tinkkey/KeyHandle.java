@@ -32,7 +32,7 @@ import java.security.GeneralSecurityException;
  * @deprecated Use {@link com.google.crypto.tink.Key} instead.
  */
 @Immutable
-@Deprecated
+@Deprecated /* Deprecation under consideration */
 public class KeyHandle {
 
   /**
@@ -67,7 +67,7 @@ public class KeyHandle {
    *
    * @deprecated Use the KeyHandle(TinkKey, KeyAccess) constructor instead.
    */
-  @Deprecated
+  @Deprecated /* Deprecation under consideration */
   public static KeyHandle createFromKey(KeyData keyData, OutputPrefixType opt) {
     return new KeyHandle(new ProtoKey(keyData, opt));
   }

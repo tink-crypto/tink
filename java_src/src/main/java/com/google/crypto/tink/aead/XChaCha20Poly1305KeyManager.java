@@ -152,7 +152,7 @@ public class XChaCha20Poly1305KeyManager extends KeyTypeManager<XChaCha20Poly130
    * @return a {@link KeyTemplate} that generates new instances of XChaCha20Poly1305 keys.
    * @deprecated use {@code KeyTemplates.get("XCHACHA20_POLY1305")}
    */
-  @Deprecated
+  @Deprecated /* Deprecation under consideration */
   public static final KeyTemplate xChaCha20Poly1305Template() {
     return KeyTemplate.create(
         new XChaCha20Poly1305KeyManager().getKeyType(),
@@ -166,7 +166,7 @@ public class XChaCha20Poly1305KeyManager extends KeyTypeManager<XChaCha20Poly130
    *     libraries.
    * @deprecated use {@code KeyTemplates.get("XCHACHA20_POLY1305_RAW")}
    */
-  @Deprecated
+  @Deprecated /* Deprecation under consideration */
   public static final KeyTemplate rawXChaCha20Poly1305Template() {
     return KeyTemplate.create(
         new XChaCha20Poly1305KeyManager().getKeyType(),

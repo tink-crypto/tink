@@ -484,21 +484,25 @@ public final class JwkSetConverter {
         null);
   }
 
-  /** @deprecated Use JwkSetConverter.fromPublicKeysetHandle(handle) instead. */
+  /**
+   * @deprecated Use JwkSetConverter.fromPublicKeysetHandle(handle) instead.
+   */
   @InlineMe(
       replacement = "JwkSetConverter.fromPublicKeysetHandle(handle)",
       imports = "com.google.crypto.tink.jwt.JwkSetConverter")
-  @Deprecated
+  @Deprecated /* Deprecation under consideration */
   public static String fromKeysetHandle(KeysetHandle handle, KeyAccess keyAccess)
       throws IOException, GeneralSecurityException {
     return fromPublicKeysetHandle(handle);
   }
 
-  /** @deprecated Use JwkSetConverter.toPublicKeysetHandle(jwkSet) instead. */
+  /**
+   * @deprecated Use JwkSetConverter.toPublicKeysetHandle(jwkSet) instead.
+   */
   @InlineMe(
       replacement = "JwkSetConverter.toPublicKeysetHandle(jwkSet)",
       imports = "com.google.crypto.tink.jwt.JwkSetConverter")
-  @Deprecated
+  @Deprecated /* Deprecation under consideration */
   public static KeysetHandle toKeysetHandle(String jwkSet, KeyAccess keyAccess)
       throws IOException, GeneralSecurityException {
     return toPublicKeysetHandle(jwkSet);

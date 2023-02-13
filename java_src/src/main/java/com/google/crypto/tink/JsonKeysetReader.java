@@ -77,7 +77,7 @@ public final class JsonKeysetReader implements KeysetReader {
    *
    * @deprecated Use {@code #withString}
    */
-  @Deprecated
+  @Deprecated /* Deprecation under consideration */
   @InlineMe(
       replacement = "JsonKeysetReader.withString(input.toString())",
       imports = "com.google.crypto.tink.JsonKeysetReader")
@@ -104,7 +104,7 @@ public final class JsonKeysetReader implements KeysetReader {
   @InlineMe(
       replacement = "JsonKeysetReader.withInputStream(new FileInputStream(file))",
       imports = {"com.google.crypto.tink.JsonKeysetReader", "java.io.FileInputStream"})
-  @Deprecated
+  @Deprecated /* Deprecation under consideration */
   public static JsonKeysetReader withFile(File file) throws IOException {
     return withInputStream(new FileInputStream(file));
   }
@@ -124,7 +124,7 @@ public final class JsonKeysetReader implements KeysetReader {
         "java.io.File",
         "java.io.FileInputStream"
       })
-  @Deprecated
+  @Deprecated /* Deprecation under consideration */
   public static JsonKeysetReader withPath(String path) throws IOException {
     return withInputStream(new FileInputStream(new File(path)));
   }
@@ -141,7 +141,7 @@ public final class JsonKeysetReader implements KeysetReader {
       replacement = "JsonKeysetReader.withInputStream(new FileInputStream(path.toFile()))",
       imports = {"com.google.crypto.tink.JsonKeysetReader", "java.io.FileInputStream"})
   @RequiresApi(26) // https://developer.android.com/reference/java/nio/file/Path
-  @Deprecated
+  @Deprecated /* Deprecation under consideration */
   public static JsonKeysetReader withPath(Path path) throws IOException {
     return JsonKeysetReader.withInputStream(new FileInputStream(path.toFile()));
   }

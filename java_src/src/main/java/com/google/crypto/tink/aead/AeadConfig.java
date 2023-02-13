@@ -48,20 +48,25 @@ public final class AeadConfig {
   public static final String XCHACHA20_POLY1305_TYPE_URL =
       new XChaCha20Poly1305KeyManager().getKeyType();
 
-  /** @deprecated use {@link #register} */
-  @Deprecated public static final RegistryConfig TINK_1_0_0 = RegistryConfig.getDefaultInstance();
+  /**
+   * @deprecated use {@link #register}
+   */
+  @Deprecated /* Deprecation under consideration */
+  public static final RegistryConfig TINK_1_0_0 = RegistryConfig.getDefaultInstance();
 
   /**
    * @deprecated use {@link #register}
    * @since 1.1.0
    */
-  @Deprecated public static final RegistryConfig TINK_1_1_0 = TINK_1_0_0;
+  @Deprecated /* Deprecation under consideration */
+  public static final RegistryConfig TINK_1_1_0 = TINK_1_0_0;
 
   /**
    * @deprecated use {@link #register}
    * @since 1.2.0
    */
-  @Deprecated public static final RegistryConfig LATEST = TINK_1_0_0;
+  @Deprecated /* Deprecation under consideration */
+  public static final RegistryConfig LATEST = TINK_1_0_0;
 
   static {
     try {
@@ -81,7 +86,7 @@ public final class AeadConfig {
    *
    * @deprecated use {@link #register}
    */
-  @Deprecated
+  @Deprecated /* Deprecation under consideration */
   public static void init() throws GeneralSecurityException {
     register();
   }
@@ -125,7 +130,7 @@ public final class AeadConfig {
    *
    * @deprecated use {@link #register}
    */
-  @Deprecated
+  @Deprecated /* Deprecation under consideration */
   public static void registerStandardKeyTypes() throws GeneralSecurityException {
     register();
   }

@@ -248,7 +248,7 @@ public final class KeysetHandle {
      *
      * @deprecated Use {@link #deleteAt} or {@link #getAt} instead.
      */
-    @Deprecated
+    @Deprecated /* Deprecation under consideration */
     @CanIgnoreReturnValue
     public Builder.Entry removeAt(int i) {
       return entries.remove(i);
@@ -697,11 +697,12 @@ public final class KeysetHandle {
     return entryByIndex(i);
   }
 
-  /** Returns the keyset data as a list of {@link KeyHandle}s.
+  /**
+   * Returns the keyset data as a list of {@link KeyHandle}s.
    *
    * @deprecated Use {@link #size} and {@link #getAt} instead.
    */
-  @Deprecated
+  @Deprecated /* Deprecation under consideration */
   public List<KeyHandle> getKeys() {
     ArrayList<KeyHandle> result = new ArrayList<>();
     for (Keyset.Key key : keyset.getKeyList()) {
@@ -731,7 +732,7 @@ public final class KeysetHandle {
    * @deprecated This method takes a KeyTemplate proto, which is an internal implementation detail.
    *     Please use the generateNew method that takes a {@link KeyTemplate} POJO.
    */
-  @Deprecated
+  @Deprecated /* Deprecation under consideration */
   public static final KeysetHandle generateNew(com.google.crypto.tink.proto.KeyTemplate keyTemplate)
       throws GeneralSecurityException {
     LegacyProtoParameters parameters =
@@ -761,7 +762,7 @@ public final class KeysetHandle {
    *
    * @deprecated Use {@link KeysetHandle.Builder.addEntry} instead.
    */
-  @Deprecated
+  @Deprecated /* Deprecation under consideration */
   public static final KeysetHandle createFromKey(KeyHandle keyHandle, KeyAccess access)
       throws GeneralSecurityException {
     KeysetManager km = KeysetManager.withEmptyKeyset().add(keyHandle);
@@ -838,7 +839,7 @@ public final class KeysetHandle {
    * @deprecated Use {@code TinkProtoKeysetFormat.parseKeysetWithoutSecret(serialized)} instead.
    */
   @SuppressWarnings("UnusedException")
-  @Deprecated
+  @Deprecated /* Deprecation under consideration */
   public static final KeysetHandle readNoSecret(final byte[] serialized)
       throws GeneralSecurityException {
     try {
@@ -1058,7 +1059,7 @@ public final class KeysetHandle {
    *
    * @deprecated Use {@link #getPrimary} instead.
    */
-  @Deprecated
+  @Deprecated /* Deprecation under consideration */
   public KeyHandle primaryKey() throws GeneralSecurityException {
     int primaryKeyId = keyset.getPrimaryKeyId();
     for (Keyset.Key key : keyset.getKeyList()) {

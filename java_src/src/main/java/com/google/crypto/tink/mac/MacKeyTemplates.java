@@ -41,7 +41,7 @@ import com.google.crypto.tink.proto.OutputPrefixType;
  * @deprecated use {@link com.google.crypto.tink.KeyTemplates#get}, e.g.,
  *     KeyTemplates.get("HMAC_SHA256_128BITTAG")
  */
-@Deprecated
+@Deprecated /* Deprecation under consideration */
 public final class MacKeyTemplates {
   /**
    * A {@link KeyTemplate} that generates new instances of {@link

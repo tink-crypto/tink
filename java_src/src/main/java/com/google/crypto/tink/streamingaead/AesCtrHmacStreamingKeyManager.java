@@ -225,7 +225,7 @@ public final class AesCtrHmacStreamingKeyManager extends KeyTypeManager<AesCtrHm
    *
    * @deprecated use {@code KeyTemplates.get("AES128_CTR_HMAC_SHA256_4KB")}
    */
-  @Deprecated
+  @Deprecated /* Deprecation under consideration */
   public static final KeyTemplate aes128CtrHmacSha2564KBTemplate() {
     return createKeyTemplate(16, HashType.SHA256, 16, HashType.SHA256, 32, 4096);
   }
@@ -244,7 +244,7 @@ public final class AesCtrHmacStreamingKeyManager extends KeyTypeManager<AesCtrHm
    *
    * @deprecated use {@code KeyTemplates.get("AES128_CTR_HMAC_SHA256_1MB")}
    */
-  @Deprecated
+  @Deprecated /* Deprecation under consideration */
   public static final KeyTemplate aes128CtrHmacSha2561MBTemplate() {
     return createKeyTemplate(16, HashType.SHA256, 16, HashType.SHA256, 32, 1 << 20);
   }
@@ -263,7 +263,7 @@ public final class AesCtrHmacStreamingKeyManager extends KeyTypeManager<AesCtrHm
    *
    * @deprecated use {@code KeyTemplates.get("AES256_CTR_HMAC_SHA256_4KB")}
    */
-  @Deprecated
+  @Deprecated /* Deprecation under consideration */
   public static final KeyTemplate aes256CtrHmacSha2564KBTemplate() {
     return createKeyTemplate(32, HashType.SHA256, 32, HashType.SHA256, 32, 4096);
   }
@@ -282,7 +282,7 @@ public final class AesCtrHmacStreamingKeyManager extends KeyTypeManager<AesCtrHm
    *
    * @deprecated use {@code KeyTemplates.get("AES256_CTR_HMAC_SHA256_1MB")}
    */
-  @Deprecated
+  @Deprecated /* Deprecation under consideration */
   public static final KeyTemplate aes256CtrHmacSha2561MBTemplate() {
     return createKeyTemplate(32, HashType.SHA256, 32, HashType.SHA256, 32, 1 << 20);
   }

@@ -160,7 +160,7 @@ public final class Registry {
    *     the same class as {@code catalogue}
    * @deprecated Catalogues are no longer supported.
    */
-  @Deprecated
+  @Deprecated /* Deprecation under consideration */
   public static synchronized void addCatalogue(String catalogueName, Catalogue<?> catalogue)
       throws GeneralSecurityException {
     if (catalogueName == null) {
@@ -187,9 +187,8 @@ public final class Registry {
    * @deprecated Catalogues are no longer supported.
    * @throws GeneralSecurityException if no catalogue is found
    */
-  @Deprecated
-  public static Catalogue<?> getCatalogue(String catalogueName)
-      throws GeneralSecurityException {
+  @Deprecated /* Deprecation under consideration */
+  public static Catalogue<?> getCatalogue(String catalogueName) throws GeneralSecurityException {
     if (catalogueName == null) {
       throw new IllegalArgumentException("catalogueName must be non-null.");
     }
@@ -319,7 +318,7 @@ public final class Registry {
    *     of the same class as {@code manager}
    * @deprecated use {@link #registerKeyManager(KeyManager) registerKeyManager(KeyManager&lt;P&gt;)}
    */
-  @Deprecated
+  @Deprecated /* Deprecation under consideration */
   public static synchronized <P> void registerKeyManager(
       String typeUrl, final KeyManager<P> manager) throws GeneralSecurityException {
     registerKeyManager(typeUrl, manager, /* newKeyAllowed= */ true);
@@ -337,7 +336,7 @@ public final class Registry {
    * @deprecated use {@link #registerKeyManager(KeyManager, boolean)
    *     registerKeyManager(KeyManager&lt;P&gt;, boolean)}
    */
-  @Deprecated
+  @Deprecated /* Deprecation under consideration */
   public static synchronized <P> void registerKeyManager(
       String typeUrl, final KeyManager<P> manager, boolean newKeyAllowed)
       throws GeneralSecurityException {
@@ -491,7 +490,7 @@ public final class Registry {
    * @deprecated Use {@code getKeyManager(typeUrl, Primitive.class)} or {@code getUntypedKeyManager
    *     typeUrl} instead.
    */
-  @Deprecated
+  @Deprecated /* Deprecation under consideration */
   public static <P> KeyManager<P> getKeyManager(String typeUrl) throws GeneralSecurityException {
     return keyManagerRegistry.get().getKeyManager(typeUrl);
   }
@@ -631,7 +630,7 @@ public final class Registry {
    * @return a new primitive
    * @deprecated Use {@code getPrimitive(typeUrl, key, P.class)} instead.
    */
-  @Deprecated
+  @Deprecated /* Deprecation under consideration */
   @SuppressWarnings("TypeParameterUnusedInFormals")
   public static <P> P getPrimitive(String typeUrl, MessageLite key)
       throws GeneralSecurityException {
@@ -662,7 +661,7 @@ public final class Registry {
    * @return a new primitive
    * @deprecated Use {@code getPrimitive(typeUrl, serializedKey, Primitive.class} instead.
    */
-  @Deprecated
+  @Deprecated /* Deprecation under consideration */
   @SuppressWarnings("TypeParameterUnusedInFormals")
   public static <P> P getPrimitive(String typeUrl, ByteString serializedKey)
       throws GeneralSecurityException {
@@ -694,7 +693,7 @@ public final class Registry {
    * @deprecated Use {@code getPrimitive(typeUrl, serializedKey, Primitive.class)} instead.
    * @return a new primitive
    */
-  @Deprecated
+  @Deprecated /* Deprecation under consideration */
   @SuppressWarnings("TypeParameterUnusedInFormals")
   public static <P> P getPrimitive(String typeUrl, byte[] serializedKey)
       throws GeneralSecurityException {
@@ -723,7 +722,7 @@ public final class Registry {
    * @return a new primitive
    * @deprecated Use {@code getPrimitive(keyData, Primitive.class)} instead.
    */
-  @Deprecated
+  @Deprecated /* Deprecation under consideration */
   @SuppressWarnings("TypeParameterUnusedInFormals")
   public static <P> P getPrimitive(KeyData keyData) throws GeneralSecurityException {
     return getPrimitive(keyData.getTypeUrl(), keyData.getValue());

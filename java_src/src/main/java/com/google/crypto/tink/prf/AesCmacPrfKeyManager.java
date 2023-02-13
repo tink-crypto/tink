@@ -152,7 +152,7 @@ public final class AesCmacPrfKeyManager extends KeyTypeManager<AesCmacPrfKey> {
    *
    * @deprecated use {@code KeyTemplates.get("AES256_CMAC_PRF")}
    */
-  @Deprecated
+  @Deprecated /* Deprecation under consideration */
   public static final KeyTemplate aes256CmacTemplate() {
     AesCmacPrfKeyFormat format = AesCmacPrfKeyFormat.newBuilder().setKeySize(32).build();
     return KeyTemplate.create(

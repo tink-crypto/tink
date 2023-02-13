@@ -29,14 +29,14 @@ import java.security.GeneralSecurityException;
  * @since 1.0.0
  * @deprecated use {@link KeysetHandle#readNoSecret} instead
  */
-@Deprecated
+@Deprecated /* Deprecation under consideration */
 public final class NoSecretKeysetHandle {
   /**
    * @return a new keyset handle from {@code serialized} which is a serialized {@link Keyset}.
    * @throws GeneralSecurityException
    * @deprecated use {@link NoSecretKeysetHandle#read} instead
    */
-  @Deprecated
+  @Deprecated /* Deprecation under consideration */
   public static final KeysetHandle parseFrom(final byte[] serialized)
       throws GeneralSecurityException {
     try {

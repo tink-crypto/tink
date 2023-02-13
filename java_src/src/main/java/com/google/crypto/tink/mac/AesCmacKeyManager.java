@@ -185,7 +185,7 @@ public final class AesCmacKeyManager extends KeyTypeManager<AesCmacKey> {
    *
    * @deprecated use {@code KeyTemplates.get("AES256_CMAC")}
    */
-  @Deprecated
+  @Deprecated /* Deprecation under consideration */
   public static final KeyTemplate aes256CmacTemplate() {
     AesCmacKeyFormat format =
         AesCmacKeyFormat.newBuilder()
@@ -209,7 +209,7 @@ public final class AesCmacKeyManager extends KeyTypeManager<AesCmacKey> {
    *
    * @deprecated use {@code KeyTemplates.get("AES256_CMAC_RAW")}
    */
-  @Deprecated
+  @Deprecated /* Deprecation under consideration */
   public static final KeyTemplate rawAes256CmacTemplate() {
     AesCmacKeyFormat format =
         AesCmacKeyFormat.newBuilder()

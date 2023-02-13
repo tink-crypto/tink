@@ -94,7 +94,7 @@ public final class SubtleUtil {
    * @deprecated Please reimplement this method in your code instead. From within Tink, use {@code
    *     Util.getAndroidApiLevel} directly.
    */
-  @Deprecated
+  @Deprecated /* Deprecation under consideration */
   public static int androidApiLevel() {
     @Nullable Integer androidApiLevel = Util.getAndroidApiLevel();
     if (androidApiLevel != null) {

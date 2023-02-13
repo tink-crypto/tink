@@ -283,7 +283,7 @@ public final class EciesAeadHkdfPrivateKeyManager
    *     might not work in older versions though.
    * @deprecated use {@code KeyTemplates.get("ECIES_P256_HKDF_HMAC_SHA256_AES128_GCM")}
    */
-  @Deprecated
+  @Deprecated /* Deprecation under consideration */
   public static final KeyTemplate eciesP256HkdfHmacSha256Aes128GcmTemplate() {
     return createKeyTemplate(
         EllipticCurveType.NIST_P256,
@@ -310,7 +310,7 @@ public final class EciesAeadHkdfPrivateKeyManager
    * @deprecated use {@code
    *     KeyTemplates.get("ECIES_P256_COMPRESSED_HKDF_HMAC_SHA256_AES128_GCM_RAW")}
    */
-  @Deprecated
+  @Deprecated /* Deprecation under consideration */
   public static final KeyTemplate rawEciesP256HkdfHmacSha256Aes128GcmCompressedTemplate() {
     return createKeyTemplate(
         EllipticCurveType.NIST_P256,
@@ -340,7 +340,7 @@ public final class EciesAeadHkdfPrivateKeyManager
    *
    * @deprecated use {@code KeyTemplates.get("ECIES_P256_HKDF_HMAC_SHA256_AES128_CTR_HMAC_SHA256")}
    */
-  @Deprecated
+  @Deprecated /* Deprecation under consideration */
   public static final KeyTemplate eciesP256HkdfHmacSha256Aes128CtrHmacSha256Template() {
     return createKeyTemplate(
         EllipticCurveType.NIST_P256,
@@ -371,7 +371,7 @@ public final class EciesAeadHkdfPrivateKeyManager
    * @deprecated use {@code
    *     KeyTemplates.get("ECIES_P256_COMPRESSED_HKDF_HMAC_SHA256_AES128_CTR_HMAC_SHA256_RAW")}
    */
-  @Deprecated
+  @Deprecated /* Deprecation under consideration */
   public static final KeyTemplate
       rawEciesP256HkdfHmacSha256Aes128CtrHmacSha256CompressedTemplate() {
     return createKeyTemplate(

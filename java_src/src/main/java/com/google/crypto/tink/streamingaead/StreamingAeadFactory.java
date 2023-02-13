@@ -35,7 +35,7 @@ import java.security.GeneralSecurityException;
  *     {@code StreamingAeadWrapper} instead.
  * @since 1.1.0
  */
-@Deprecated
+@Deprecated /* Deprecation under consideration */
 public final class StreamingAeadFactory {
   /**
    * @return a StreamingAead primitive from a {@code keysetHandle}.

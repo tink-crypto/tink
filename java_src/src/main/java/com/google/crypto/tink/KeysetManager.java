@@ -71,7 +71,7 @@ public final class KeysetManager {
    *     primary, because old binaries don't know the new key yet.
    */
   @CanIgnoreReturnValue
-  @Deprecated
+  @Deprecated /* Deprecation under consideration */
   public synchronized KeysetManager rotate(com.google.crypto.tink.proto.KeyTemplate keyTemplate)
       throws GeneralSecurityException {
     addNewKey(keyTemplate, true);
@@ -87,7 +87,7 @@ public final class KeysetManager {
    *     Please use the add method that takes a {@link KeyTemplate} POJO.
    */
   @CanIgnoreReturnValue
-  @Deprecated
+  @Deprecated /* Deprecation under consideration */
   public synchronized KeysetManager add(com.google.crypto.tink.proto.KeyTemplate keyTemplate)
       throws GeneralSecurityException {
     addNewKey(keyTemplate, false);
@@ -150,7 +150,7 @@ public final class KeysetManager {
    * @deprecated Use KeysetManager.add(KeyHandle) instead.
    */
   @CanIgnoreReturnValue
-  @Deprecated
+  @Deprecated /* Deprecation under consideration */
   public synchronized KeysetManager add(KeyHandle keyHandle, KeyAccess access)
       throws GeneralSecurityException {
     ProtoKey pkey;
@@ -174,7 +174,7 @@ public final class KeysetManager {
    *     never want to make the new key primary, because old binaries don't know the new key yet.
    */
   @CanIgnoreReturnValue
-  @Deprecated
+  @Deprecated /* Deprecation under consideration */
   public synchronized int addNewKey(
       com.google.crypto.tink.proto.KeyTemplate keyTemplate, boolean asPrimary)
       throws GeneralSecurityException {
@@ -215,7 +215,7 @@ public final class KeysetManager {
    */
   @InlineMe(replacement = "this.setPrimary(keyId)")
   @CanIgnoreReturnValue
-  @Deprecated
+  @Deprecated /* Deprecation under consideration */
   public synchronized KeysetManager promote(int keyId) throws GeneralSecurityException {
     return setPrimary(keyId);
   }

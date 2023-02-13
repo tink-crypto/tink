@@ -39,21 +39,23 @@ import java.security.GeneralSecurityException;
 public final class TinkConfig {
   /**
    * @deprecated Configs are not supported anymore. Please call {@code TinkConfig.register();}
-   * instead of accessing this variable.
+   *     instead of accessing this variable.
    */
-  @Deprecated public static final RegistryConfig TINK_1_0_0 = RegistryConfig.getDefaultInstance();
+  @Deprecated /* Deprecation under consideration */
+  public static final RegistryConfig TINK_1_0_0 = RegistryConfig.getDefaultInstance();
 
   /**
    * @deprecated Configs are not supported anymore. Please call {@code TinkConfig.register();}
-   * instead of accessing this variable.
+   *     instead of accessing this variable.
    */
-  @Deprecated public static final RegistryConfig TINK_1_1_0 = RegistryConfig.getDefaultInstance();
+  @Deprecated /* Deprecation under consideration */
+  public static final RegistryConfig TINK_1_1_0 = RegistryConfig.getDefaultInstance();
 
   /**
    * @deprecated Configs are not supported anymore. Please call {@code TinkConfig.register();}
-   * instead of accessing this variable.
+   *     instead of accessing this variable.
    */
-  @Deprecated
+  @Deprecated /* Deprecation under consideration */
   public static final RegistryConfig LATEST = RegistryConfig.getDefaultInstance();
 
   /**

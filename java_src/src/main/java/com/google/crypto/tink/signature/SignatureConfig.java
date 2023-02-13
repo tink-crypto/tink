@@ -53,13 +53,17 @@ public final class SignatureConfig {
   public static final String RSA_PSS_PUBLIC_KEY_TYPE_URL =
       new RsaSsaPssVerifyKeyManager().getKeyType();
 
-  /** @deprecated */
-  @Deprecated public static final RegistryConfig TINK_1_0_0 = RegistryConfig.getDefaultInstance();
+  /**
+   * @deprecated
+   */
+  @Deprecated /* Deprecation under consideration */
+  public static final RegistryConfig TINK_1_0_0 = RegistryConfig.getDefaultInstance();
   /**
    * @deprecated
    * @since 1.1.0
    */
-  @Deprecated public static final RegistryConfig TINK_1_1_0 = RegistryConfig.getDefaultInstance();
+  @Deprecated /* Deprecation under consideration */
+  public static final RegistryConfig TINK_1_1_0 = RegistryConfig.getDefaultInstance();
 
   /** @since 1.2.0 */
   public static final RegistryConfig LATEST = RegistryConfig.getDefaultInstance();
@@ -79,7 +83,7 @@ public final class SignatureConfig {
    *
    * @deprecated use {@link #register}
    */
-  @Deprecated
+  @Deprecated /* Deprecation under consideration */
   public static void init() throws GeneralSecurityException {
     register();
   }

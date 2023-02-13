@@ -29,7 +29,7 @@ import com.google.errorprone.annotations.Immutable;
  * @deprecated Use {@link com.google.crypto.tink.Key} instead.
  */
 @Immutable
-@Deprecated
+@Deprecated /* Deprecation under consideration */
 public interface TinkKey {
   /** Returns true if the key contains secret key material, and false otherwise. */
   public boolean hasSecret();

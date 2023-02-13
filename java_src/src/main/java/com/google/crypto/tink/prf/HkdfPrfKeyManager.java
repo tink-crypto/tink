@@ -187,7 +187,7 @@ public class HkdfPrfKeyManager extends KeyTypeManager<HkdfPrfKey> {
    *
    * @deprecated use {@code KeyTemplates.get("HKDF_SHA256")}
    */
-  @Deprecated
+  @Deprecated /* Deprecation under consideration */
   public static final KeyTemplate hkdfSha256Template() {
     HkdfPrfKeyFormat format =
         HkdfPrfKeyFormat.newBuilder()

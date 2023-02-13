@@ -30,7 +30,7 @@ import java.util.Arrays;
  *
  * @deprecated replaced by {@link com.google.crypto.tink.aead.internal.Poly1305}.
  */
-@Deprecated
+@Deprecated /* Deprecation under consideration */
 class Poly1305 {
 
   public static final int MAC_TAG_SIZE_IN_BYTES = 16;

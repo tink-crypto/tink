@@ -180,7 +180,7 @@ public final class Ed25519PrivateKeyManager
    * @return A {@link KeyTemplate} that generates new instances of ED25519 keys.
    * @deprecated use {@code KeyTemplates.get("ED25519")}
    */
-  @Deprecated
+  @Deprecated /* Deprecation under consideration */
   public static final KeyTemplate ed25519Template() {
     return KeyTemplate.create(
         new Ed25519PrivateKeyManager().getKeyType(),
@@ -194,7 +194,7 @@ public final class Ed25519PrivateKeyManager
    *     libraries.
    * @deprecated use {@code KeyTemplates.get("ED25519_RAW")}
    */
-  @Deprecated
+  @Deprecated /* Deprecation under consideration */
   public static final KeyTemplate rawEd25519Template() {
     return KeyTemplate.create(
         new Ed25519PrivateKeyManager().getKeyType(),

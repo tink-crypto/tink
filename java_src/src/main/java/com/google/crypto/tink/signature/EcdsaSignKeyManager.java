@@ -274,7 +274,7 @@ public final class EcdsaSignKeyManager
    *
    * @deprecated use {@code KeyTemplates.get("ECDSA_P256")}
    */
-  @Deprecated
+  @Deprecated /* Deprecation under consideration */
   public static final KeyTemplate ecdsaP256Template() {
     return createKeyTemplate(
         HashType.SHA256,
@@ -296,7 +296,7 @@ public final class EcdsaSignKeyManager
    *     compatible with JWS and most other libraries.
    * @deprecated use {@code KeyTemplates.get("ECDSA_P256_RAW")}
    */
-  @Deprecated
+  @Deprecated /* Deprecation under consideration */
   public static final KeyTemplate rawEcdsaP256Template() {
     return createKeyTemplate(
         HashType.SHA256,

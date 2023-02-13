@@ -166,7 +166,7 @@ public final class AesCtrHmacAeadKeyManager extends KeyTypeManager<AesCtrHmacAea
    *
    * @deprecated use {@code KeyTemplates.get("AES128_CTR_HMAC_SHA256")}
    */
-  @Deprecated
+  @Deprecated /* Deprecation under consideration */
   public static final KeyTemplate aes128CtrHmacSha256Template() {
     return createKeyTemplate(16, 16, 32, 16, HashType.SHA256);
   }
@@ -184,7 +184,7 @@ public final class AesCtrHmacAeadKeyManager extends KeyTypeManager<AesCtrHmacAea
    *
    * @deprecated use {@code KeyTemplates.get("AES256_CTR_HMAC_SHA256")}
    */
-  @Deprecated
+  @Deprecated /* Deprecation under consideration */
   public static final KeyTemplate aes256CtrHmacSha256Template() {
     return createKeyTemplate(32, 16, 32, 32, HashType.SHA256);
   }

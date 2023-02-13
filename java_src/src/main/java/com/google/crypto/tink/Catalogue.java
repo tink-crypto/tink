@@ -33,7 +33,7 @@ import java.security.GeneralSecurityException;
  * @since 1.0.0
  * @deprecated Catalogues are no longer supported.
  */
-@Deprecated
+@Deprecated /* Deprecation under consideration */
 public interface Catalogue<P> {
   /**
    * @return a {@link KeyManager} for the given {@code typeUrl}, {@code primitiveName}, and version

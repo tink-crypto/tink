@@ -62,7 +62,7 @@ public final class JsonKeysetWriter implements KeysetWriter {
   @InlineMe(
       replacement = "JsonKeysetWriter.withOutputStream(new FileOutputStream(file))",
       imports = {"com.google.crypto.tink.JsonKeysetWriter", "java.io.FileOutputStream"})
-  @Deprecated
+  @Deprecated /* Deprecation under consideration */
   public static KeysetWriter withFile(File file) throws IOException {
     return withOutputStream(new FileOutputStream(file));
   }
@@ -75,7 +75,7 @@ public final class JsonKeysetWriter implements KeysetWriter {
         "java.io.File",
         "java.io.FileOutputStream"
       })
-  @Deprecated
+  @Deprecated /* Deprecation under consideration */
   public static KeysetWriter withPath(String path) throws IOException {
     return withOutputStream(new FileOutputStream(new File(path)));
   }
@@ -89,7 +89,7 @@ public final class JsonKeysetWriter implements KeysetWriter {
   @InlineMe(
       replacement = "JsonKeysetWriter.withOutputStream(new FileOutputStream(path.toFile()))",
       imports = {"com.google.crypto.tink.JsonKeysetWriter", "java.io.FileOutputStream"})
-  @Deprecated
+  @Deprecated /* Deprecation under consideration */
   public static KeysetWriter withPath(Path path) throws IOException {
     return withOutputStream(new FileOutputStream(path.toFile()));
   }

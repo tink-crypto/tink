@@ -42,7 +42,7 @@ import com.google.crypto.tink.proto.OutputPrefixType;
  * @deprecated use {@link com.google.crypto.tink.KeyTemplates#get}, e.g.,
  *     KeyTemplates.get("AES256_GCM_HKDF_1MB")
  */
-@Deprecated
+@Deprecated /* Deprecation under consideration */
 public final class StreamingAeadKeyTemplates {
   /**
    * A {@link KeyTemplate} that generates new instances of {@link

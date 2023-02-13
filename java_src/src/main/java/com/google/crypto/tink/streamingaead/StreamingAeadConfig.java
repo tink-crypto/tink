@@ -42,8 +42,10 @@ public final class StreamingAeadConfig {
   public static final String AES_GCM_HKDF_STREAMINGAEAD_TYPE_URL =
       new AesGcmHkdfStreamingKeyManager().getKeyType();
 
-  /** @deprecated */
-  @Deprecated
+  /**
+   * @deprecated
+   */
+  @Deprecated /* Deprecation under consideration */
   public static final RegistryConfig TINK_1_1_0 = RegistryConfig.getDefaultInstance();
 
   /** @since 1.2.0 */
@@ -63,7 +65,7 @@ public final class StreamingAeadConfig {
    *
    * @deprecated use {@link #register}
    */
-  @Deprecated
+  @Deprecated /* Deprecation under consideration */
   public static void init() throws GeneralSecurityException {
     register();
   }

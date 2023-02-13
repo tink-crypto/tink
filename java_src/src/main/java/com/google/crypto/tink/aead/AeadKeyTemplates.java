@@ -47,7 +47,7 @@ import com.google.crypto.tink.proto.OutputPrefixType;
  * @deprecated use {@link com.google.crypto.tink.KeyTemplates#get}, e.g.,
  *     KeyTemplates.get("AES128_GCM")
  */
-@Deprecated
+@Deprecated /* Deprecation under consideration */
 public final class AeadKeyTemplates {
   /**
    * A {@link KeyTemplate} that generates new instances of {@link

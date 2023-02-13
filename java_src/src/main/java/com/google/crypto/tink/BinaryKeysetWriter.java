@@ -50,7 +50,7 @@ public final class BinaryKeysetWriter implements KeysetWriter {
   @InlineMe(
       replacement = "BinaryKeysetWriter.withOutputStream(new FileOutputStream(file))",
       imports = {"com.google.crypto.tink.BinaryKeysetWriter", "java.io.FileOutputStream"})
-  @Deprecated
+  @Deprecated /* Deprecation under consideration */
   public static KeysetWriter withFile(File file) throws IOException {
     return withOutputStream(new FileOutputStream(file));
   }

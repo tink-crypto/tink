@@ -203,7 +203,7 @@ public final class AndroidKeysetManager {
      *     detail. Please use the withKeyTemplate method that takes a {@link KeyTemplate} POJO.
      */
     @CanIgnoreReturnValue
-    @Deprecated
+    @Deprecated /* Deprecation under consideration */
     public Builder withKeyTemplate(com.google.crypto.tink.proto.KeyTemplate val) {
       keyTemplate =
           KeyTemplate.create(
@@ -227,7 +227,7 @@ public final class AndroidKeysetManager {
      * @deprecated Android Keystore can be disabled by not setting a master key URI.
      */
     @CanIgnoreReturnValue
-    @Deprecated
+    @Deprecated /* Deprecation under consideration */
     public Builder doNotUseKeystore() {
       masterKeyUri = null;
       useKeystore = false;
@@ -416,7 +416,7 @@ public final class AndroidKeysetManager {
    *     primary, because old binaries don't know the new key yet.
    */
   @CanIgnoreReturnValue
-  @Deprecated
+  @Deprecated /* Deprecation under consideration */
   public synchronized AndroidKeysetManager rotate(
       com.google.crypto.tink.proto.KeyTemplate keyTemplate) throws GeneralSecurityException {
     keysetManager = keysetManager.rotate(keyTemplate);
@@ -434,7 +434,7 @@ public final class AndroidKeysetManager {
    */
   @CanIgnoreReturnValue
   @GuardedBy("this")
-  @Deprecated
+  @Deprecated /* Deprecation under consideration */
   public synchronized AndroidKeysetManager add(com.google.crypto.tink.proto.KeyTemplate keyTemplate)
       throws GeneralSecurityException {
     keysetManager = keysetManager.add(keyTemplate);
@@ -477,7 +477,7 @@ public final class AndroidKeysetManager {
    */
   @InlineMe(replacement = "this.setPrimary(keyId)")
   @CanIgnoreReturnValue
-  @Deprecated
+  @Deprecated /* Deprecation under consideration */
   public synchronized AndroidKeysetManager promote(int keyId) throws GeneralSecurityException {
     return setPrimary(keyId);
   }

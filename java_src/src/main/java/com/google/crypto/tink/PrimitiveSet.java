@@ -231,7 +231,7 @@ public final class PrimitiveSet<P> {
   @InlineMe(
       replacement = "this.getPrimitive(CryptoFormat.getOutputPrefix(key))",
       imports = {"com.google.crypto.tink.CryptoFormat"})
-  @Deprecated
+  @Deprecated /* Deprecation under consideration */
   List<Entry<P>> getPrimitive(Keyset.Key key) throws GeneralSecurityException {
     return getPrimitive(CryptoFormat.getOutputPrefix(key));
   }
@@ -253,7 +253,7 @@ public final class PrimitiveSet<P> {
   private final MonitoringAnnotations annotations;
   private final boolean isMutable;
 
-  @Deprecated
+  @Deprecated /* Deprecation under consideration */
   private PrimitiveSet(Class<P> primitiveClass) {
     this.primitives = new ConcurrentHashMap<>();
     this.primitiveClass = primitiveClass;
@@ -276,7 +276,7 @@ public final class PrimitiveSet<P> {
    *
    * @deprecated use {@link Builder} instead.
    */
-  @Deprecated
+  @Deprecated /* Deprecation under consideration */
   public static <P> PrimitiveSet<P> newPrimitiveSet(Class<P> primitiveClass) {
     return new PrimitiveSet<P>(primitiveClass);
   }
@@ -287,7 +287,7 @@ public final class PrimitiveSet<P> {
    * @throws IllegalStateException if object has been created by the {@link Builder}.
    * @deprecated use {@link Builder.addPrimaryPrimitive} instead.
    */
-  @Deprecated
+  @Deprecated /* Deprecation under consideration */
   public void setPrimary(final Entry<P> primary) {
     if (!isMutable) {
       throw new IllegalStateException("setPrimary cannot be called on an immutable primitive set");
@@ -313,7 +313,7 @@ public final class PrimitiveSet<P> {
    * @throws IllegalStateException if object has been created by the {@link Builder}.
    * @deprecated use {@link Builder.addPrimitive} or {@link Builder.addPrimaryPrimitive} instead.
    */
-  @Deprecated
+  @Deprecated /* Deprecation under consideration */
   @CanIgnoreReturnValue
   public Entry<P> addPrimitive(final P primitive, Keyset.Key key) throws GeneralSecurityException {
     if (!isMutable) {

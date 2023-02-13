@@ -256,7 +256,7 @@ public final class HmacKeyManager extends KeyTypeManager<HmacKey> {
    *
    * @deprecated use {@code KeyTemplates.get("HMAC_SHA256_128BITTAG")}
    */
-  @Deprecated
+  @Deprecated /* Deprecation under consideration */
   public static final KeyTemplate hmacSha256HalfDigestTemplate() {
     return createTemplate(32, 16, HashType.SHA256);
   }
@@ -273,7 +273,7 @@ public final class HmacKeyManager extends KeyTypeManager<HmacKey> {
    *
    * @deprecated use {@code KeyTemplates.get("HMAC_SHA256_256BITTAG")}
    */
-  @Deprecated
+  @Deprecated /* Deprecation under consideration */
   public static final KeyTemplate hmacSha256Template() {
     return createTemplate(32, 32, HashType.SHA256);
   }
@@ -290,7 +290,7 @@ public final class HmacKeyManager extends KeyTypeManager<HmacKey> {
    *
    * @deprecated use {@code KeyTemplates.get("HMAC_SHA512_256BITTAG")}
    */
-  @Deprecated
+  @Deprecated /* Deprecation under consideration */
   public static final KeyTemplate hmacSha512HalfDigestTemplate() {
     return createTemplate(64, 32, HashType.SHA512);
   }
@@ -307,7 +307,7 @@ public final class HmacKeyManager extends KeyTypeManager<HmacKey> {
    *
    * @deprecated use {@code KeyTemplates.get("HMAC_SHA512_512BITTAG")}
    */
-  @Deprecated
+  @Deprecated /* Deprecation under consideration */
   public static final KeyTemplate hmacSha512Template() {
     return createTemplate(64, 64, HashType.SHA512);
   }

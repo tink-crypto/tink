@@ -391,7 +391,7 @@ final class KeyManagerRegistry {
    *
    * @deprecated
    */
-  @Deprecated
+  @Deprecated /* Deprecation under consideration */
   <P> KeyManager<P> getKeyManager(String typeUrl) throws GeneralSecurityException {
     return getKeyManagerInternal(typeUrl, null);
   }

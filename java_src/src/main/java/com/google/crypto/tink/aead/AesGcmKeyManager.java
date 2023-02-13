@@ -149,7 +149,7 @@ public final class AesGcmKeyManager extends KeyTypeManager<AesGcmKey> {
    *     in older versions.
    * @deprecated use {@code KeyTemplates.get("AES128_GCM")}
    */
-  @Deprecated
+  @Deprecated /* Deprecation under consideration */
   public static final KeyTemplate aes128GcmTemplate() {
     return createKeyTemplate(16, KeyTemplate.OutputPrefixType.TINK);
   }
@@ -168,7 +168,7 @@ public final class AesGcmKeyManager extends KeyTypeManager<AesGcmKey> {
    *     in older versions.
    * @deprecated use {@code KeyTemplates.get("AES128_GCM_RAW")}
    */
-  @Deprecated
+  @Deprecated /* Deprecation under consideration */
   public static final KeyTemplate rawAes128GcmTemplate() {
     return createKeyTemplate(16, KeyTemplate.OutputPrefixType.RAW);
   }
@@ -185,7 +185,7 @@ public final class AesGcmKeyManager extends KeyTypeManager<AesGcmKey> {
    *     in older versions.
    * @deprecated use {@code KeyTemplates.get("AES256_GCM")}
    */
-  @Deprecated
+  @Deprecated /* Deprecation under consideration */
   public static final KeyTemplate aes256GcmTemplate() {
     return createKeyTemplate(32, KeyTemplate.OutputPrefixType.TINK);
   }
@@ -204,7 +204,7 @@ public final class AesGcmKeyManager extends KeyTypeManager<AesGcmKey> {
    *     in older versions.
    * @deprecated use {@code KeyTemplates.get("AES256_GCM_RAW")}
    */
-  @Deprecated
+  @Deprecated /* Deprecation under consideration */
   public static final KeyTemplate rawAes256GcmTemplate() {
     return createKeyTemplate(32, KeyTemplate.OutputPrefixType.RAW);
   }

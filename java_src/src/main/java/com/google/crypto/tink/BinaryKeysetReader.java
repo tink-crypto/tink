@@ -60,7 +60,7 @@ public final class BinaryKeysetReader implements KeysetReader {
   @InlineMe(
       replacement = "BinaryKeysetReader.withInputStream(new FileInputStream(file))",
       imports = {"com.google.crypto.tink.BinaryKeysetReader", "java.io.FileInputStream"})
-  @Deprecated
+  @Deprecated /* Deprecation under consideration */
   public static KeysetReader withFile(File file) throws IOException {
     return withInputStream(new FileInputStream(file));
   }

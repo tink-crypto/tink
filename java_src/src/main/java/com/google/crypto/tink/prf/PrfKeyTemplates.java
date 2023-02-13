@@ -31,7 +31,7 @@ import com.google.crypto.tink.proto.OutputPrefixType;
  * @deprecated use {@link com.google.crypto.tink.KeyTemplates#get}, e.g.,
  *     KeyTemplates.get("HKDF_SHA256")
  */
-@Deprecated
+@Deprecated /* Deprecation under consideration */
 public final class PrfKeyTemplates {
 
   private PrfKeyTemplates() {}

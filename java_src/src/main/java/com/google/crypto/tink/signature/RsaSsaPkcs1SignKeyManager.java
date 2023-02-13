@@ -247,7 +247,7 @@ public final class RsaSsaPkcs1SignKeyManager
    *
    * @deprecated use {@code KeyTemplates.get("RSA_SSA_PKCS1_3072_SHA256_F4")}
    */
-  @Deprecated
+  @Deprecated /* Deprecation under consideration */
   public static final KeyTemplate rsa3072SsaPkcs1Sha256F4Template() {
     return createKeyTemplate(
         HashType.SHA256,
@@ -268,7 +268,7 @@ public final class RsaSsaPkcs1SignKeyManager
    *
    * @deprecated use {@code KeyTemplates.get("RSA_SSA_PKCS1_3072_SHA256_F4_RAW")}
    */
-  @Deprecated
+  @Deprecated /* Deprecation under consideration */
   public static final KeyTemplate rawRsa3072SsaPkcs1Sha256F4Template() {
     return createKeyTemplate(
         HashType.SHA256,
@@ -289,7 +289,7 @@ public final class RsaSsaPkcs1SignKeyManager
    *
    * @deprecated use {@code KeyTemplates.get("RSA_SSA_PKCS1_4096_SHA512_F4")}
    */
-  @Deprecated
+  @Deprecated /* Deprecation under consideration */
   public static final KeyTemplate rsa4096SsaPkcs1Sha512F4Template() {
     return createKeyTemplate(
         HashType.SHA512,
@@ -310,7 +310,7 @@ public final class RsaSsaPkcs1SignKeyManager
    *
    * @deprecated use {@code KeyTemplates.get("RSA_SSA_PKCS1_4096_SHA512_F4_RAW")}
    */
-  @Deprecated
+  @Deprecated /* Deprecation under consideration */
   public static final KeyTemplate rawRsa4096SsaPkcs1Sha512F4Template() {
     return createKeyTemplate(
         HashType.SHA512,

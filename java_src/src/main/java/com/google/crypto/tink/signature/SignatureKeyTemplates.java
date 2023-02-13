@@ -50,7 +50,7 @@ import java.security.spec.RSAKeyGenParameterSpec;
  * @deprecated use {@link com.google.crypto.tink.KeyTemplates#get}, e.g.,
  *     KeyTemplates.get("ECDSA_P256")
  */
-@Deprecated
+@Deprecated /* Deprecation under consideration */
 public final class SignatureKeyTemplates {
   /**
    * A {@link KeyTemplate} that generates new instances of {@link

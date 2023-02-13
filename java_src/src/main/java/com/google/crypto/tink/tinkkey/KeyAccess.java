@@ -26,7 +26,7 @@ import com.google.errorprone.annotations.Immutable;
  * @deprecated Use {@link com.google.crypto.tink.SecretKeyAccess} instead.
  */
 @Immutable
-@Deprecated
+@Deprecated /* Deprecation under consideration */
 public final class KeyAccess {
 
   private final boolean canAccessSecret;

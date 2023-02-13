@@ -163,7 +163,7 @@ public final class AesSivKeyManager extends KeyTypeManager<AesSivKey> {
    * @return a {@code KeyTemplate} that generates new instances of AES-SIV-CMAC keys.
    * @deprecated use {@code KeyTemplates.get("AES256_SIV")}
    */
-  @Deprecated
+  @Deprecated /* Deprecation under consideration */
   public static final KeyTemplate aes256SivTemplate() {
     return createKeyTemplate(KEY_SIZE_IN_BYTES, KeyTemplate.OutputPrefixType.TINK);
   }
@@ -173,7 +173,7 @@ public final class AesSivKeyManager extends KeyTypeManager<AesSivKey> {
    *     from this template create ciphertexts compatible with other libraries.
    * @deprecated use {@code KeyTemplates.get("AES256_SIV_RAW")}
    */
-  @Deprecated
+  @Deprecated /* Deprecation under consideration */
   public static final KeyTemplate rawAes256SivTemplate() {
     return createKeyTemplate(KEY_SIZE_IN_BYTES, KeyTemplate.OutputPrefixType.RAW);
   }

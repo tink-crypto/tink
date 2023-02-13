@@ -35,7 +35,7 @@ import com.google.crypto.tink.proto.OutputPrefixType;
  * @deprecated use {@link com.google.crypto.tink.KeyTemplates#get}, e.g.,
  *     KeyTemplates.get("AES256_SIV")
  */
-@Deprecated
+@Deprecated /* Deprecation under consideration */
 public final class DeterministicAeadKeyTemplates {
   /** A {@code KeyTemplate} that generates new instances of {@code AesSivKey} with a 64-byte key. */
   public static final KeyTemplate AES256_SIV = createAesSivKeyTemplate(64);

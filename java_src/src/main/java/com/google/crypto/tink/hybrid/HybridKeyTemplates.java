@@ -47,7 +47,7 @@ import com.google.protobuf.ByteString;
  * @deprecated use {@link com.google.crypto.tink.KeyTemplates#get}, e.g.,
  *     KeyTemplates.get("ECIES_P256_HKDF_HMAC_SHA256_AES128_GCM")
  */
-@Deprecated
+@Deprecated /* Deprecation under consideration */
 public final class HybridKeyTemplates {
   private static final byte[] EMPTY_SALT = new byte[0];
   /**
