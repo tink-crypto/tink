@@ -22,7 +22,7 @@ import "proto/common.proto";
 
 option java_package = "com.google.crypto.tink.proto";
 option java_multiple_files = true;
-option go_package = "github.com/google/tink/proto/hkdf_prf_proto";
+option go_package = "github.com/google/tink/go/proto/hkdf_prf_proto";
 
 message HkdfPrfParams {
   HashType hash = 1;

@@ -23,7 +23,7 @@ import "proto/hmac.proto";
 
 option java_package = "com.google.crypto.tink.proto";
 option java_multiple_files = true;
-option go_package = "github.com/google/tink/proto/aes_ctr_hmac_streaming_go_proto";
+option go_package = "github.com/google/tink/go/proto/aes_ctr_hmac_streaming_go_proto";
 
 message AesCtrHmacStreamingParams {
   uint32 ciphertext_segment_size = 1;

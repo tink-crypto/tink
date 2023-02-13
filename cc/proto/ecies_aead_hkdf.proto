@@ -24,7 +24,7 @@ import "proto/tink.proto";
 
 option java_package = "com.google.crypto.tink.proto";
 option java_multiple_files = true;
-option go_package = "github.com/google/tink/proto/ecies_aead_hkdf_go_proto";
+option go_package = "github.com/google/tink/go/proto/ecies_aead_hkdf_go_proto";
 
 // Protos for keys for ECIES with HKDF and AEAD encryption.
 //

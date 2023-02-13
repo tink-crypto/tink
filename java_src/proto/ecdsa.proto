@@ -23,7 +23,7 @@ import "proto/common.proto";
 
 option java_package = "com.google.crypto.tink.proto";
 option java_multiple_files = true;
-option go_package = "github.com/google/tink/proto/ecdsa_go_proto";
+option go_package = "github.com/google/tink/go/proto/ecdsa_go_proto";
 
 enum EcdsaSignatureEncoding {
   UNKNOWN_ENCODING = 0;

@@ -22,7 +22,7 @@ import "proto/common.proto";
 
 option java_package = "com.google.crypto.tink.proto";
 option java_multiple_files = true;
-option go_package = "github.com/google/tink/proto/hmac_prf_go_proto";
+option go_package = "github.com/google/tink/go/proto/hmac_prf_go_proto";
 
 message HmacPrfParams {
   HashType hash = 1;  // HashType is an enum.
