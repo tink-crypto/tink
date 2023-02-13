@@ -80,8 +80,7 @@ std::string WycheproofUtil::GetBytes(const rapidjson::Value &val) {
 std::unique_ptr<rapidjson::Document> WycheproofUtil::ReadTestVectors(
     const std::string &filename) {
   std::string test_vectors_path = crypto::tink::internal::RunfilesPath(
-      absl::StrCat(
-          "external/wycheproof/testvectors/", filename));
+      absl::StrCat("testvectors/", filename));
   std::ifstream input_stream;
   input_stream.open(test_vectors_path);
   rapidjson::IStreamWrapper input(input_stream);

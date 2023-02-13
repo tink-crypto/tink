@@ -1014,7 +1014,7 @@ cc_test(
     name = "aes_gcm_boringssl_test",
     size = "small",
     srcs = ["aes_gcm_boringssl_test.cc"],
-    data = ["@wycheproof//testvectors:aes_gcm"],
+    data = ["//testvectors:aes_gcm"],
     tags = ["fips"],
     deps = [
         ":aes_gcm_boringssl",
@@ -1117,7 +1117,7 @@ cc_test(
     name = "aes_eax_boringssl_test",
     size = "small",
     srcs = ["aes_eax_boringssl_test.cc"],
-    data = ["@wycheproof//testvectors:aes_eax"],
+    data = ["//testvectors:aes_eax"],
     tags = ["fips"],
     deps = [
         ":aes_eax_boringssl",
@@ -1176,7 +1176,7 @@ cc_test(
     name = "aes_siv_boringssl_test",
     size = "small",
     srcs = ["aes_siv_boringssl_test.cc"],
-    data = ["@wycheproof//testvectors:aes_siv_cmac"],
+    data = ["//testvectors:aes_siv_cmac"],
     tags = ["fips"],
     deps = [
         ":aes_siv_boringssl",
@@ -1219,8 +1219,8 @@ cc_test(
     size = "small",
     srcs = ["ecdsa_verify_boringssl_test.cc"],
     data = [
-        "@wycheproof//testvectors:ecdsa",
-        "@wycheproof//testvectors:ecdsa_webcrypto",
+        "//testvectors:ecdsa",
+        "//testvectors:ecdsa_webcrypto",
     ],
     tags = ["fips"],
     deps = [
@@ -1271,7 +1271,7 @@ cc_test(
     name = "ed25519_verify_boringssl_test",
     size = "small",
     srcs = ["ed25519_verify_boringssl_test.cc"],
-    data = ["@wycheproof//testvectors:eddsa"],
+    data = ["//testvectors:eddsa"],
     tags = ["fips"],
     deps = [
         ":ed25519_verify_boringssl",
@@ -1294,7 +1294,7 @@ cc_test(
     name = "rsa_ssa_pss_verify_boringssl_test",
     size = "small",
     srcs = ["rsa_ssa_pss_verify_boringssl_test.cc"],
-    data = ["@wycheproof//testvectors:rsa_pss"],
+    data = ["//testvectors:rsa_pss"],
     tags = ["fips"],
     deps = [
         ":common_enums",
@@ -1339,7 +1339,7 @@ cc_test(
     name = "rsa_ssa_pkcs1_verify_boringssl_test",
     size = "small",
     srcs = ["rsa_ssa_pkcs1_verify_boringssl_test.cc"],
-    data = ["@wycheproof//testvectors:rsa_signature"],
+    data = ["//testvectors:rsa_signature"],
     tags = ["fips"],
     deps = [
         ":common_enums",
@@ -1384,7 +1384,7 @@ cc_test(
     name = "aes_gcm_siv_boringssl_test",
     size = "small",
     srcs = ["aes_gcm_siv_boringssl_test.cc"],
-    data = ["@wycheproof//testvectors:aes_gcm_siv"],
+    data = ["//testvectors:aes_gcm_siv"],
     tags = ["fips"],
     deps = [
         ":aes_gcm_siv_boringssl",
@@ -1440,7 +1440,7 @@ cc_test(
     name = "xchacha20_poly1305_boringssl_test",
     size = "small",
     srcs = ["xchacha20_poly1305_boringssl_test.cc"],
-    data = ["@wycheproof//testvectors:chacha20_poly1305"],
+    data = ["//testvectors:chacha20_poly1305"],
     tags = ["fips"],
     deps = [
         ":subtle_util",
@@ -1571,7 +1571,7 @@ cc_test(
     name = "stateful_hmac_boringssl_test",
     size = "small",
     srcs = ["stateful_hmac_boringssl_test.cc"],
-    data = ["@wycheproof//testvectors:hmac"],
+    data = ["//testvectors:hmac"],
     deps = [
         ":common_enums",
         ":stateful_hmac_boringssl",
@@ -1591,7 +1591,7 @@ cc_test(
     name = "stateful_cmac_boringssl_test",
     size = "small",
     srcs = ["stateful_cmac_boringssl_test.cc"],
-    data = ["@wycheproof//testvectors:aes_cmac"],
+    data = ["//testvectors:aes_cmac"],
     deps = [
         ":common_enums",
         ":stateful_cmac_boringssl",

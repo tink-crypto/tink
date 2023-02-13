@@ -86,8 +86,9 @@ http_archive(
 )
 
 # Symlink the Wycheproof test data.
-# Paths are hard-coded in tests, which expects wycheproof/ in this location.
-add_directory_alias("${wycheproof_SOURCE_DIR}" "${CMAKE_BINARY_DIR}/external/wycheproof")
+# Tests expect Wycheproof test vectors to be in a local testvectors/ folder.
+add_directory_alias("${wycheproof_SOURCE_DIR}/testvectors"
+  "${CMAKE_BINARY_DIR}/testvectors")
 
 # Don't fetch BoringSSL or look for OpenSSL if target `crypto` is already
 # defined.

@@ -369,9 +369,9 @@ cc_test(
     size = "large",
     srcs = ["ec_util_test.cc"],
     data = [
-        "@wycheproof//testvectors:ecdh",
-        "@wycheproof//testvectors:ecdsa_webcrypto",
-        "@wycheproof//testvectors:eddsa",
+        "//testvectors:ecdh",
+        "//testvectors:ecdsa_webcrypto",
+        "//testvectors:eddsa",
     ],
     deps = [
         ":bn_util",

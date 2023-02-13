@@ -1,0 +1,200 @@
+"""Defines a set of genrules to copy test vectors from Wycheproof.
+
+This is needed to assist the transition to using Bazel Modules, in that Bazel
+Modules packages use a different folder naming for dependencies compared to
+WORKSPACE-based packages.
+"""
+
+package(default_visibility = ["//:__subpackages__"])
+
+licenses(["notice"])
+
+genrule(
+    name = "aes_cmac",
+    srcs = ["@wycheproof//testvectors:aes_cmac"],
+    outs = ["aes_cmac_test.json"],
+    cmd = "cp $(SRCS) $(@D)/",
+    testonly = 1,
+)
+
+genrule(
+    name = "aes_gcm",
+    srcs = ["@wycheproof//testvectors:aes_gcm"],
+    outs = ["aes_gcm_test.json"],
+    cmd = "cp $(SRCS) $(@D)/",
+    testonly = 1,
+)
+
+genrule(
+    name = "aes_gcm_siv",
+    srcs = ["@wycheproof//testvectors:aes_gcm_siv"],
+    outs = ["aes_gcm_siv_test.json"],
+    cmd = "cp $(SRCS) $(@D)/",
+    testonly = 1,
+)
+
+genrule(
+    name = "aes_eax",
+    srcs = ["@wycheproof//testvectors:aes_eax"],
+    outs = ["aes_eax_test.json"],
+    cmd = "cp $(SRCS) $(@D)/",
+    testonly = 1,
+)
+
+genrule(
+    name = "aes_siv_cmac",
+    srcs = ["@wycheproof//testvectors:aes_siv_cmac"],
+    outs = [
+        "aead_aes_siv_cmac_test.json",
+        "aes_siv_cmac_test.json",
+    ],
+    cmd = "cp $(SRCS) $(@D)/",
+    testonly = 1,
+)
+
+genrule(
+    name = "chacha20_poly1305",
+    srcs = ["@wycheproof//testvectors:chacha20_poly1305"],
+    outs = [
+        "chacha20_poly1305_test.json",
+        "xchacha20_poly1305_test.json",
+    ],
+    cmd = "cp $(SRCS) $(@D)/",
+    testonly = 1,
+)
+
+genrule(
+    name = "hmac",
+    srcs = ["@wycheproof//testvectors:hmac"],
+    outs = [
+        "hmac_sha1_test.json",
+        "hmac_sha224_test.json",
+        "hmac_sha256_test.json",
+        "hmac_sha384_test.json",
+        "hmac_sha3_224_test.json",
+        "hmac_sha3_256_test.json",
+        "hmac_sha3_384_test.json",
+        "hmac_sha3_512_test.json",
+        "hmac_sha512_test.json",
+    ],
+    cmd = "cp $(SRCS) $(@D)/",
+    testonly = 1,
+)
+
+genrule(
+    name = "rsa_pss",
+    srcs = ["@wycheproof//testvectors:rsa_pss"],
+    outs = [
+        "rsa_pss_2048_sha1_mgf1_20_test.json",
+        "rsa_pss_2048_sha256_mgf1_0_test.json",
+        "rsa_pss_2048_sha256_mgf1_32_test.json",
+        "rsa_pss_3072_sha256_mgf1_32_test.json",
+        "rsa_pss_4096_sha256_mgf1_32_test.json",
+        "rsa_pss_4096_sha512_mgf1_32_test.json",
+        "rsa_pss_misc_test.json",
+    ],
+    cmd = "cp $(SRCS) $(@D)/",
+    testonly = 1,
+)
+
+genrule(
+    name = "rsa_signature",
+    srcs = ["@wycheproof//testvectors:rsa_signature"],
+    outs = [
+        # Signature verification
+        "rsa_signature_2048_sha224_test.json",
+        "rsa_signature_2048_sha256_test.json",
+        "rsa_signature_2048_sha512_test.json",
+        "rsa_signature_3072_sha256_test.json",
+        "rsa_signature_3072_sha384_test.json",
+        "rsa_signature_3072_sha512_test.json",
+        "rsa_signature_4096_sha384_test.json",
+        "rsa_signature_4096_sha512_test.json",
+        "rsa_signature_2048_sha3_224_test.json",
+        "rsa_signature_2048_sha3_256_test.json",
+        "rsa_signature_2048_sha3_384_test.json",
+        "rsa_signature_2048_sha3_512_test.json",
+        "rsa_signature_3072_sha3_256_test.json",
+        "rsa_signature_3072_sha3_384_test.json",
+        "rsa_signature_3072_sha3_512_test.json",
+        "rsa_signature_test.json",
+        # Signature generation
+        "rsa_sig_gen_misc_test.json",
+    ],
+    cmd = "cp $(SRCS) $(@D)/",
+    testonly = 1,
+)
+
+genrule(
+    name = "ecdsa_webcrypto",
+    srcs = ["@wycheproof//testvectors:ecdsa_webcrypto"],
+    outs = ["ecdsa_webcrypto_test.json"],
+    cmd = "cp $(SRCS) $(@D)/",
+    testonly = 1,
+)
+
+genrule(
+    name = "ecdsa",
+    srcs = ["@wycheproof//testvectors:ecdsa"],
+    outs = [
+        "ecdsa_brainpoolP224r1_sha224_test.json",
+        "ecdsa_brainpoolP256r1_sha256_test.json",
+        "ecdsa_brainpoolP320r1_sha384_test.json",
+        "ecdsa_brainpoolP384r1_sha384_test.json",
+        "ecdsa_brainpoolP512r1_sha512_test.json",
+        "ecdsa_secp224r1_sha224_test.json",
+        "ecdsa_secp224r1_sha256_test.json",
+        "ecdsa_secp224r1_sha3_224_test.json",
+        "ecdsa_secp224r1_sha3_256_test.json",
+        "ecdsa_secp224r1_sha3_512_test.json",
+        "ecdsa_secp224r1_sha512_test.json",
+        "ecdsa_secp256k1_sha256_test.json",
+        "ecdsa_secp256k1_sha3_256_test.json",
+        "ecdsa_secp256k1_sha3_512_test.json",
+        "ecdsa_secp256k1_sha512_test.json",
+        "ecdsa_secp256r1_sha256_test.json",
+        "ecdsa_secp256r1_sha3_256_test.json",
+        "ecdsa_secp256r1_sha3_512_test.json",
+        "ecdsa_secp256r1_sha512_test.json",
+        "ecdsa_secp384r1_sha384_test.json",
+        "ecdsa_secp384r1_sha3_384_test.json",
+        "ecdsa_secp384r1_sha3_512_test.json",
+        "ecdsa_secp384r1_sha512_test.json",
+        "ecdsa_secp521r1_sha3_512_test.json",
+        "ecdsa_secp521r1_sha512_test.json",
+        "ecdsa_test.json",  # deprecated: use the files above
+    ],
+    cmd = "cp $(SRCS) $(@D)/",
+    testonly = 1,
+)
+
+genrule(
+    name = "eddsa",
+    srcs = ["@wycheproof//testvectors:eddsa"],
+    outs = [
+        "ed448_test.json",
+        "eddsa_test.json",
+    ],
+    cmd = "cp $(SRCS) $(@D)/",
+    testonly = 1,
+)
+
+genrule(
+    name = "ecdh",
+    srcs = ["@wycheproof//testvectors:ecdh"],
+    outs = [
+        "ecdh_brainpoolP224r1_test.json",
+        "ecdh_brainpoolP256r1_test.json",
+        "ecdh_brainpoolP320r1_test.json",
+        "ecdh_brainpoolP384r1_test.json",
+        "ecdh_brainpoolP512r1_test.json",
+        "ecdh_secp224r1_test.json",
+        "ecdh_secp256k1_test.json",
+        "ecdh_secp256r1_test.json",
+        "ecdh_secp384r1_test.json",
+        "ecdh_secp521r1_test.json",
+        "ecdh_test.json",  # deprecated use the files above
+    ],
+    cmd = "cp $(SRCS) $(@D)/",
+    testonly = 1,
+)
