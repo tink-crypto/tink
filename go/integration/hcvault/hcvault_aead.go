@@ -19,12 +19,11 @@ package hcvault
 import (
 	"encoding/base64"
 	"errors"
-	"fmt"
-	"regexp"
+	"net/url"
 	"strings"
 
-	"github.com/hashicorp/vault/api"
 	"github.com/google/tink/go/tink"
+	"github.com/hashicorp/vault/api"
 )
 
 // vaultAEAD represents a HashiCorp Vault service to a particular URI.
@@ -115,12 +114,10 @@ func (a *vaultAEAD) getDecryptionPath(keyURL string) (string, error) {
 	return strings.Join(parts, "/"), nil
 }
 
-var vaultKeyRegex = regexp.MustCompile(fmt.Sprintf("^%s/*([a-zA-Z0-9.:]+)/(.*)$", vaultPrefix))
-
 func (a *vaultAEAD) extractKey(keyURL string) (string, error) {
-	m := vaultKeyRegex.FindAllStringSubmatch(keyURL, -1)
-	if m == nil {
+	u, err := url.Parse(keyURL)
+	if err != nil || u.Scheme != "hcvault" || len(u.Path) == 0 {
 		return "", errors.New("malformed keyURL")
 	}
-	return m[0][2], nil
+	return u.EscapedPath()[1:], nil
 }
