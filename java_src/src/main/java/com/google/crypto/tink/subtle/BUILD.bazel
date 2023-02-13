@@ -267,12 +267,6 @@ java_library(
 )
 
 java_library(
-    name = "poly1305",
-    srcs = ["Poly1305.java"],
-    deps = [":bytes"],
-)
-
-java_library(
     name = "aes_gcm_jce",
     srcs = ["AesGcmJce.java"],
     deps = [
@@ -865,12 +859,6 @@ android_library(
         ":subtle_util_cluster-android",
         "@maven//:com_google_code_findbugs_jsr305",
     ],
-)
-
-android_library(
-    name = "poly1305-android",
-    srcs = ["Poly1305.java"],
-    deps = [":bytes-android"],
 )
 
 android_library(

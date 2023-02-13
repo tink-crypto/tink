@@ -586,19 +586,6 @@ java_test(
 )
 
 java_test(
-    name = "Poly1305Test",
-    size = "small",
-    srcs = ["Poly1305Test.java"],
-    deps = [
-        "//src/main/java/com/google/crypto/tink/subtle:poly1305",
-        "//src/main/java/com/google/crypto/tink/subtle:random",
-        "//src/main/java/com/google/crypto/tink/testing:test_util",
-        "@maven//:com_google_truth_truth",
-        "@maven//:junit_junit",
-    ],
-)
-
-java_test(
     name = "SignatureThreadSafetyTest",
     size = "small",
     srcs = ["SignatureThreadSafetyTest.java"],
