@@ -24,6 +24,7 @@ import (
 	ctrpb "github.com/google/tink/go/proto/aes_ctr_go_proto"
 	ctrhmacpb "github.com/google/tink/go/proto/aes_ctr_hmac_aead_go_proto"
 	gcmpb "github.com/google/tink/go/proto/aes_gcm_go_proto"
+	gcmsivpb "github.com/google/tink/go/proto/aes_gcm_siv_go_proto"
 	commonpb "github.com/google/tink/go/proto/common_go_proto"
 	hmacpb "github.com/google/tink/go/proto/hmac_go_proto"
 	kmsenvpb "github.com/google/tink/go/proto/kms_envelope_go_proto"
@@ -52,6 +53,27 @@ func AES256GCMKeyTemplate() *tinkpb.KeyTemplate {
 //   - Output prefix type: RAW
 func AES256GCMNoPrefixKeyTemplate() *tinkpb.KeyTemplate {
 	return createAESGCMKeyTemplate(32, tinkpb.OutputPrefixType_RAW)
+}
+
+// AES128GCMSIVKeyTemplate is a KeyTemplate that generates an AES-GCM-SIV key with the following parameters:
+//   - Key size: 16 bytes
+//   - Output prefix type: TINK
+func AES128GCMSIVKeyTemplate() *tinkpb.KeyTemplate {
+	return createAESGCMSIVKeyTemplate(16, tinkpb.OutputPrefixType_TINK)
+}
+
+// AES256GCMSIVKeyTemplate is a KeyTemplate that generates an AES-GCM-SIV key with the following parameters:
+//   - Key size: 32 bytes
+//   - Output prefix type: TINK
+func AES256GCMSIVKeyTemplate() *tinkpb.KeyTemplate {
+	return createAESGCMSIVKeyTemplate(32, tinkpb.OutputPrefixType_TINK)
+}
+
+// AES256GCMSIVNoPrefixKeyTemplate is a KeyTemplate that generates an AES-GCM key with the following parameters:
+//   - Key size: 32 bytes
+//   - Output prefix type: RAW
+func AES256GCMSIVNoPrefixKeyTemplate() *tinkpb.KeyTemplate {
+	return createAESGCMSIVKeyTemplate(32, tinkpb.OutputPrefixType_RAW)
 }
 
 // AES128CTRHMACSHA256KeyTemplate is a KeyTemplate that generates an AES-CTR-HMAC-AEAD key with the following parameters:
@@ -153,6 +175,23 @@ func createAESGCMKeyTemplate(keySize uint32, outputPrefixType tinkpb.OutputPrefi
 	}
 	return &tinkpb.KeyTemplate{
 		TypeUrl:          aesGCMTypeURL,
+		Value:            serializedFormat,
+		OutputPrefixType: outputPrefixType,
+	}
+}
+
+// createAESGCMSIVKeyTemplate creates a new AES-GCM-SIV key template with the given key
+// size in bytes.
+func createAESGCMSIVKeyTemplate(keySize uint32, outputPrefixType tinkpb.OutputPrefixType) *tinkpb.KeyTemplate {
+	format := &gcmsivpb.AesGcmSivKeyFormat{
+		KeySize: keySize,
+	}
+	serializedFormat, err := proto.Marshal(format)
+	if err != nil {
+		tinkerror.Fail(fmt.Sprintf("failed to marshal key format: %s", err))
+	}
+	return &tinkpb.KeyTemplate{
+		TypeUrl:          aesGCMSIVTypeURL,
 		Value:            serializedFormat,
 		OutputPrefixType: outputPrefixType,
 	}
