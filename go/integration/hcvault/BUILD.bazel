@@ -21,12 +21,13 @@ go_library(
 go_test(
     name = "hcvault_test",
     srcs = [
+        "hcvault_aead_internal_test.go",
         "hcvault_aead_test.go",
         "hcvault_client_test.go",
     ],
     data = ["//integration/hcvault/testdata:server_tls_files"],
+    embed = [":hcvault"],
     deps = [
-        ":hcvault",
         "//aead",
         "//core/registry",
         "//keyset",
