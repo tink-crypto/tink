@@ -860,6 +860,48 @@ cc_test(
 )
 
 cc_library(
+    name = "mutable_serialization_registry",
+    srcs = ["mutable_serialization_registry.cc"],
+    hdrs = ["mutable_serialization_registry.h"],
+    include_prefix = "tink/internal",
+    deps = [
+        ":key_parser",
+        ":key_serializer",
+        ":legacy_proto_key",
+        ":parameters_parser",
+        ":parameters_serializer",
+        ":proto_key_serialization",
+        ":serialization",
+        ":serialization_registry",
+        "//:key",
+        "//:parameters",
+        "//util:status",
+    ],
+)
+
+cc_test(
+    name = "mutable_serialization_registry_test",
+    srcs = ["mutable_serialization_registry_test.cc"],
+    deps = [
+        ":key_parser",
+        ":key_serializer",
+        ":mutable_serialization_registry",
+        ":parameters_parser",
+        ":parameters_serializer",
+        ":proto_key_serialization",
+        ":serialization",
+        ":serialization_test_util",
+        "//:insecure_secret_key_access",
+        "//:key",
+        "//:parameters",
+        "//:restricted_data",
+        "//proto:tink_cc_proto",
+        "//util:test_matchers",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_library(
     name = "serialization_test_util",
     testonly = 1,
     hdrs = ["serialization_test_util.h"],
