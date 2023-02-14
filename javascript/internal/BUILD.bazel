@@ -38,6 +38,13 @@ ts_library_from_closure(
         "PbHmacKey": "proto.google.crypto.tink.HmacKey",
         "PbHmacKeyFormat": "proto.google.crypto.tink.HmacKeyFormat",
         "PbHmacParams": "proto.google.crypto.tink.HmacParams",
+        "PbHpkeAead": "proto.google.crypto.tink.HpkeAead",
+        "PbHpkeKdf": "proto.google.crypto.tink.HpkeKdf",
+        "PbHpkeKem": "proto.google.crypto.tink.HpkeKem",
+        "PbHpkeKeyFormat": "proto.google.crypto.tink.HpkeKeyFormat",
+        "PbHpkeParams": "proto.google.crypto.tink.HpkeParams",
+        "PbHpkePrivateKey": "proto.google.crypto.tink.HpkePrivateKey",
+        "PbHpkePublicKey": "proto.google.crypto.tink.HpkePublicKey",
         "PbKeyData": "proto.google.crypto.tink.KeyData",
         "PbKeyMaterialType": "proto.google.crypto.tink.KeyData.KeyMaterialType",
         "PbKeyset": "proto.google.crypto.tink.Keyset",
@@ -59,6 +66,7 @@ ts_library_from_closure(
         ":ecdsa_closure_proto",
         ":ecies_aead_hkdf_closure_proto",
         ":hmac_closure_proto",
+        ":hpke_closure_proto",
         ":tink_closure_proto",
         ":xchacha20_poly1305_closure_proto",
         "@io_bazel_rules_closure//closure/protobuf:jspb",
@@ -309,6 +317,11 @@ closure_proto_library(
 closure_proto_library(
     name = "hmac_closure_proto",
     deps = ["//proto:hmac_proto"],
+)
+
+closure_proto_library(
+    name = "hpke_closure_proto",
+    deps = ["//proto:hpke_proto"],
 )
 
 closure_proto_library(
