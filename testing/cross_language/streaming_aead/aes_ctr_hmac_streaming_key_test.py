@@ -90,6 +90,61 @@ def lang_and_valid_keys_create_and_encrypt():
   for lang in langs:
     result.append((lang, key))
 
+  ## TAG SIZES
+  key = simple_valid_key()
+  key.params.hmac_params.hash = common_pb2.HashType.SHA1
+  key.params.hmac_params.tag_size = 10
+  for lang in langs:
+    result.append((lang, key))
+
+  key = simple_valid_key()
+  key.params.hmac_params.hash = common_pb2.HashType.SHA1
+  key.params.hmac_params.tag_size = 11
+  for lang in langs:
+    result.append((lang, key))
+
+  key = simple_valid_key()
+  key.params.hmac_params.hash = common_pb2.HashType.SHA1
+  key.params.hmac_params.tag_size = 20
+  for lang in langs:
+    result.append((lang, key))
+
+  key = simple_valid_key()
+  key.params.hmac_params.hash = common_pb2.HashType.SHA256
+  key.params.hmac_params.tag_size = 10
+  for lang in langs:
+    result.append((lang, key))
+
+  key = simple_valid_key()
+  key.params.hmac_params.hash = common_pb2.HashType.SHA256
+  key.params.hmac_params.tag_size = 11
+  for lang in langs:
+    result.append((lang, key))
+
+  key = simple_valid_key()
+  key.params.hmac_params.hash = common_pb2.HashType.SHA256
+  key.params.hmac_params.tag_size = 32
+  for lang in langs:
+    result.append((lang, key))
+
+  key = simple_valid_key()
+  key.params.hmac_params.hash = common_pb2.HashType.SHA512
+  key.params.hmac_params.tag_size = 10
+  for lang in langs:
+    result.append((lang, key))
+
+  key = simple_valid_key()
+  key.params.hmac_params.hash = common_pb2.HashType.SHA512
+  key.params.hmac_params.tag_size = 11
+  for lang in langs:
+    result.append((lang, key))
+
+  key = simple_valid_key()
+  key.params.hmac_params.hash = common_pb2.HashType.SHA512
+  key.params.hmac_params.tag_size = 64
+  for lang in langs:
+    result.append((lang, key))
+
   # TODO(b/268194266): Golang allows SHA224 in the HMAC
   key = simple_valid_key()
   key.params.hmac_params.hash = common_pb2.HashType.SHA224
@@ -117,6 +172,42 @@ def lang_and_invalid_keys():
 
   key = simple_valid_key()
   key.params.derived_key_size = 24
+  for lang in langs:
+    result.append((lang, key))
+
+  key = simple_valid_key()
+  key.params.hmac_params.hash = common_pb2.HashType.SHA1
+  key.params.hmac_params.tag_size = 9
+  for lang in langs:
+    result.append((lang, key))
+
+  key = simple_valid_key()
+  key.params.hmac_params.hash = common_pb2.HashType.SHA1
+  key.params.hmac_params.tag_size = 21
+  for lang in langs:
+    result.append((lang, key))
+
+  key = simple_valid_key()
+  key.params.hmac_params.hash = common_pb2.HashType.SHA256
+  key.params.hmac_params.tag_size = 9
+  for lang in langs:
+    result.append((lang, key))
+
+  key = simple_valid_key()
+  key.params.hmac_params.hash = common_pb2.HashType.SHA256
+  key.params.hmac_params.tag_size = 33
+  for lang in langs:
+    result.append((lang, key))
+
+  key = simple_valid_key()
+  key.params.hmac_params.hash = common_pb2.HashType.SHA512
+  key.params.hmac_params.tag_size = 9
+  for lang in langs:
+    result.append((lang, key))
+
+  key = simple_valid_key()
+  key.params.hmac_params.hash = common_pb2.HashType.SHA512
+  key.params.hmac_params.tag_size = 65
   for lang in langs:
     result.append((lang, key))
 
