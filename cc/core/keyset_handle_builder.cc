@@ -23,6 +23,7 @@
 #include <utility>
 #include <vector>
 
+#include "absl/log/check.h"
 #include "absl/status/status.h"
 #include "absl/strings/string_view.h"
 #include "absl/types/optional.h"
@@ -112,10 +113,8 @@ void KeysetHandleBuilder::ClearPrimary() {
 
 KeysetHandleBuilder& KeysetHandleBuilder::AddEntry(
     KeysetHandleBuilder::Entry entry) {
-  if (entry.added_to_builder_) {
-    std::cerr << "Keyset handle builder entry already added to a builder.";
-    std::abort();
-  }
+  CHECK(!entry.added_to_builder_)
+      << "Keyset handle builder entry already added to a builder.";
   entry.added_to_builder_ = true;
   if (entry.IsPrimary()) {
     ClearPrimary();
@@ -125,10 +124,8 @@ KeysetHandleBuilder& KeysetHandleBuilder::AddEntry(
 }
 
 KeysetHandleBuilder& KeysetHandleBuilder::RemoveEntry(int index) {
-  if (index < 0 || index >= entries_.size()) {
-    std::cerr << "Keyset handle builder entry removal index out of range.";
-    std::abort();
-  }
+  CHECK(index >= 0 && index < entries_.size())
+      << "Keyset handle builder entry removal index out of range.";
   entries_.erase(entries_.begin() + index);
   return *this;
 }

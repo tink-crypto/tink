@@ -21,6 +21,8 @@
 #include <utility>
 
 #include "absl/container/flat_hash_map.h"
+#include "absl/log/check.h"
+#include "absl/log/log.h"
 #include "absl/memory/memory.h"
 #include "absl/status/status.h"
 #include "absl/strings/string_view.h"
@@ -160,10 +162,7 @@ util::Status KeysetHandle::Validate() const {
 
 KeysetHandle::Entry KeysetHandle::GetPrimary() const {
   util::Status validation = Validate();
-  if (!validation.ok()) {
-    std::cerr << validation.message();
-    std::abort();
-  }
+  CHECK_OK(validation);
 
   const Keyset& keyset = get_keyset();
   for (int i = 0; i < keyset.key_size(); ++i) {
@@ -173,21 +172,15 @@ KeysetHandle::Entry KeysetHandle::GetPrimary() const {
   }
 
   // Since keyset handle was validated, it should have a valid primary key.
-  std::cerr << "Keyset handle should have a valid primary key.";
-  std::abort();
+  LOG(FATAL) << "Keyset handle should have a valid primary key.";
 }
 
 KeysetHandle::Entry KeysetHandle::operator[](int index) const {
-  if (index < 0 || index >= size()) {
-    std::cerr << "Invalid index " << index << " for keyset of size " << size();
-    std::abort();
-  }
+  CHECK(index >= 0 && index < size())
+      << "Invalid index " << index << " for keyset of size " << size();
 
   util::Status validation = ValidateAt(index);
-  if (!validation.ok()) {
-    std::cerr << validation.message();
-    std::abort();
-  }
+  CHECK_OK(validation);
 
   const Keyset::Key& proto_key = get_keyset().key(index);
   int id = proto_key.key_id();
@@ -195,10 +188,7 @@ KeysetHandle::Entry KeysetHandle::operator[](int index) const {
   util::StatusOr<internal::ProtoKeySerialization> serialization =
       ToProtoKeySerialization(proto_key);
   // Status should be OK since this keyset handle has been validated.
-  if (!serialization.ok()) {
-    std::cerr << serialization.status().message();
-    std::abort();
-  }
+  CHECK_OK(serialization.status());
 
   // TODO(b/242162436): Add support for more than legacy proto keys.
   util::StatusOr<internal::LegacyProtoKey> key =
@@ -208,10 +198,7 @@ KeysetHandle::Entry KeysetHandle::operator[](int index) const {
   util::StatusOr<KeyStatus> key_status =
       internal::FromKeyStatusType(proto_key.status());
   // Status should be OK since this keyset handle has been validated.
-  if (!key_status.ok()) {
-    std::cerr << key_status.status().message();
-    std::abort();
-  }
+  CHECK_OK(key_status.status());
 
   return Entry(absl::make_unique<internal::LegacyProtoKey>(std::move(*key)),
                *key_status, id, id == get_keyset().primary_key_id());

@@ -485,6 +485,8 @@ tink_cc_library(
     tink::core::registry
     absl::core_headers
     absl::flat_hash_map
+    absl::log
+    absl::check
     absl::memory
     absl::status
     absl::strings
@@ -509,6 +511,7 @@ tink_cc_library(
     tink::core::key_status
     tink::core::keyset_handle
     tink::core::parameters
+    absl::check
     absl::status
     absl::strings
     absl::optional
@@ -721,6 +724,7 @@ tink_cc_library(
     restricted_data.h
   DEPS
     tink::core::secret_key_access_token
+    absl::check
     crypto
     tink::subtle::random
     tink::util::secret_data

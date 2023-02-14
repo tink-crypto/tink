@@ -21,6 +21,8 @@
 #include <iostream>
 #include <utility>
 
+#include "absl/log/check.h"
+#include "absl/log/log.h"
 #include "absl/status/statusor.h"
 #include "tink/util/status.h"
 
@@ -165,18 +167,15 @@ class StatusOr {
  private:
   void EnsureOk() const {
     if (ABSL_PREDICT_FALSE(!ok())) {
-      std::cerr << "Attempting to fetch value of non-OK StatusOr\n";
-      std::cerr << status() << std::endl;
-      std::_Exit(1);
+      LOG(FATAL) << "Attempting to fetch value of non-OK StatusOr\n"
+                 << status();
     }
   }
 
   void AbortWithMessageFrom(crypto::tink::util::Status status) const {
-    std::cerr << "Attempting to fetch value instead of handling error\n";
-    std::cerr << status.ToString();
-    std::abort();
+    LOG(FATAL) << "Attempting to fetch value instead of handling error\n"
+               << status.ToString();
   }
-
 
   Status status_;
   absl::optional<T> value_;
@@ -190,13 +189,10 @@ inline StatusOr<T>::StatusOr()
 }
 
 template <typename T>
-inline StatusOr<T>::StatusOr(
-    const ::crypto::tink::util::Status& status) : status_(status) {
-  if (status.ok()) {
-    std::cerr << "::crypto::tink::util::OkStatus() "
-              << "is not a valid argument to StatusOr\n";
-    std::_Exit(1);
-  }
+inline StatusOr<T>::StatusOr(const ::crypto::tink::util::Status& status)
+    : status_(status) {
+  CHECK(!status.ok()) << "::crypto::tink::util::OkStatus() "
+                      << "is not a valid argument to StatusOr\n";
 }
 
 template <typename T>

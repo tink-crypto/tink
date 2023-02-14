@@ -528,6 +528,8 @@ cc_library(
         "//util:keyset_util",
         "@com_google_absl//absl/base:core_headers",
         "@com_google_absl//absl/container:flat_hash_map",
+        "@com_google_absl//absl/log",
+        "@com_google_absl//absl/log:check",
         "@com_google_absl//absl/memory",
         "@com_google_absl//absl/status",
         "@com_google_absl//absl/strings",
@@ -549,6 +551,7 @@ cc_library(
         "//internal:keyset_handle_builder_entry",
         "//proto:tink_cc_proto",
         "//subtle:random",
+        "@com_google_absl//absl/log:check",
         "@com_google_absl//absl/status",
         "@com_google_absl//absl/strings",
         "@com_google_absl//absl/types:optional",
@@ -770,6 +773,7 @@ cc_library(
         "//subtle:random",
         "//util:secret_data",
         "@boringssl//:crypto",
+        "@com_google_absl//absl/log:check",
     ],
 )
 

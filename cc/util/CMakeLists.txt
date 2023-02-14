@@ -64,6 +64,8 @@ tink_cc_library(
     statusor.h
   DEPS
     tink::util::status
+    absl::check
+    absl::log
     absl::statusor
   PUBLIC
 )

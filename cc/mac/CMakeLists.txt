@@ -160,6 +160,7 @@ tink_cc_library(
     aes_cmac_parameters.h
   DEPS
     tink::mac::mac_parameters
+    absl::log
     tink::core::crypto_format
     tink::util::status
     tink::util::statusor

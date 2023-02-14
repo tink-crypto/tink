@@ -18,6 +18,7 @@
 
 #include <iostream>
 
+#include "absl/log/check.h"
 #include "openssl/crypto.h"
 #include "tink/subtle/random.h"
 #include "tink/util/secret_data.h"
@@ -26,11 +27,8 @@ namespace crypto {
 namespace tink {
 
 RestrictedData::RestrictedData(int64_t num_random_bytes) {
-  // TODO(b/243001146): Replace following crash with Tink library call.
-  if (num_random_bytes < 0) {
-    std::cerr << "Cannot generate a negative number of random bytes.\n";
-    std::abort();
-  }
+  CHECK_GE(num_random_bytes, 0)
+      << "Cannot generate a negative number of random bytes.\n";
   secret_ = util::SecretDataFromStringView(
       subtle::Random::GetRandomBytes(num_random_bytes));
 }
