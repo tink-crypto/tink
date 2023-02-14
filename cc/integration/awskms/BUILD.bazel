@@ -64,7 +64,6 @@ cc_test(
     name = "aws_kms_aead_test",
     size = "medium",
     srcs = ["aws_kms_aead_test.cc"],
-    copts = ["-Iexternal/gtest/include"],
     deps = [
         ":aws_kms_aead",
         "@aws_cpp_sdk//:aws_sdk_core",
@@ -79,11 +78,7 @@ cc_test(
     name = "aws_kms_client_test",
     size = "medium",
     srcs = ["aws_kms_client_test.cc"],
-    copts = ["-Iexternal/gtest/include"],
-    data = [
-        "//testdata/aws:credentials",
-        "//testdata/gcp:credentials",
-    ],
+    data = ["//testdata/aws:credentials"],
     deps = [
         ":aws_kms_client",
         "@aws_cpp_sdk//:aws_sdk_core",
