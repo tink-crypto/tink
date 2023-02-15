@@ -145,6 +145,44 @@ def lang_and_valid_keys_create_and_encrypt():
   for lang in langs:
     result.append((lang, key))
 
+  # HKDF Hash Type:
+  key = simple_valid_key()
+  key.params.hkdf_hash_type = common_pb2.HashType.SHA1
+  for lang in langs:
+    result.append((lang, key))
+
+  key = simple_valid_key()
+  key.params.hkdf_hash_type = common_pb2.HashType.SHA224
+  for lang in langs:
+    # TODO(b/269248212) Align implementations
+    if lang not in ['python', 'cc']:
+      result.append((lang, key))
+
+  key = simple_valid_key()
+  key.params.hkdf_hash_type = common_pb2.HashType.SHA256
+  for lang in langs:
+    result.append((lang, key))
+
+  key = simple_valid_key()
+  key.params.hkdf_hash_type = common_pb2.HashType.SHA384
+  for lang in langs:
+    # TODO(b/269248212) Align implementations
+    if lang not in ['python', 'cc']:
+      result.append((lang, key))
+
+  key = simple_valid_key()
+  key.params.hkdf_hash_type = common_pb2.HashType.SHA512
+  for lang in langs:
+    result.append((lang, key))
+
+  # Minimum ciphertext_segment_size
+  key = simple_valid_key()
+  key.params.ciphertext_segment_size = (
+      key.params.derived_key_size + key.params.hmac_params.tag_size + 9
+  )
+  for lang in langs:
+    result.append((lang, key))
+
   return result
 
 
@@ -170,6 +208,42 @@ def lang_and_invalid_keys():
   for lang in langs:
     result.append((lang, key))
 
+  key = simple_valid_key()
+  key.params.hkdf_hash_type = common_pb2.HashType.SHA224
+  for lang in langs:
+    # TODO(b/269248212) Align implementations
+    if lang in ['py', 'cc']:
+      result.append((lang, key))
+
+  key = simple_valid_key()
+  key.params.hkdf_hash_type = common_pb2.HashType.SHA384
+  for lang in langs:
+    # TODO(b/269248212) Align implementations
+    if lang in ['py', 'cc']:
+      result.append((lang, key))
+
+  # Check requirement len(InitialKeyMaterial) >= DerivedKeySize
+  key = simple_valid_key()
+  key.key_value = b'0123456789abcdef'
+  key.params.derived_key_size = 32
+  for lang in langs:
+    result.append((lang, key))
+
+  # HKDF Hash Type:
+  key = simple_valid_key()
+  key.params.hkdf_hash_type = common_pb2.HashType.UNKNOWN_HASH
+  for lang in langs:
+    result.append((lang, key))
+
+  # Minimum ciphertext_segment_size
+  key = simple_valid_key()
+  key.params.ciphertext_segment_size = (
+      key.params.derived_key_size + key.params.hmac_params.tag_size + 8
+  )
+  for lang in langs:
+    result.append((lang, key))
+
+  ## Tag sizes
   key = simple_valid_key()
   key.params.hmac_params.hash = common_pb2.HashType.SHA1
   key.params.hmac_params.tag_size = 9
