@@ -41,25 +41,28 @@ public final class GcpKmsAead implements Aead {
   // The location of a CryptoKey in Google Cloud KMS.
   // Valid values have this format: projects/*/locations/*/keyRings/*/cryptoKeys/*.
   // See https://cloud.google.com/kms/docs/object-hierarchy.
-  private final String kmsKeyUri;
+  private final String keyName;
 
-  public GcpKmsAead(CloudKMS kmsClient, String keyUri) throws GeneralSecurityException {
+  public GcpKmsAead(CloudKMS kmsClient, String keyName) {
     this.kmsClient = kmsClient;
-    this.kmsKeyUri = keyUri;
+    this.keyName = keyName;
   }
 
   @Override
-  public byte[] encrypt(final byte[] plaintext, final byte[] aad) throws GeneralSecurityException {
+  public byte[] encrypt(final byte[] plaintext, final byte[] associatedData)
+      throws GeneralSecurityException {
     try {
       EncryptRequest request =
-          new EncryptRequest().encodePlaintext(plaintext).encodeAdditionalAuthenticatedData(aad);
+          new EncryptRequest()
+              .encodePlaintext(plaintext)
+              .encodeAdditionalAuthenticatedData(associatedData);
       EncryptResponse response =
           this.kmsClient
               .projects()
               .locations()
               .keyRings()
               .cryptoKeys()
-              .encrypt(this.kmsKeyUri, request)
+              .encrypt(this.keyName, request)
               .execute();
       return toNonNullableByteArray(response.decodeCiphertext());
     } catch (IOException e) {
@@ -68,17 +71,20 @@ public final class GcpKmsAead implements Aead {
   }
 
   @Override
-  public byte[] decrypt(final byte[] ciphertext, final byte[] aad) throws GeneralSecurityException {
+  public byte[] decrypt(final byte[] ciphertext, final byte[] associatedData)
+      throws GeneralSecurityException {
     try {
       DecryptRequest request =
-          new DecryptRequest().encodeCiphertext(ciphertext).encodeAdditionalAuthenticatedData(aad);
+          new DecryptRequest()
+              .encodeCiphertext(ciphertext)
+              .encodeAdditionalAuthenticatedData(associatedData);
       DecryptResponse response =
           this.kmsClient
               .projects()
               .locations()
               .keyRings()
               .cryptoKeys()
-              .decrypt(this.kmsKeyUri, request)
+              .decrypt(this.keyName, request)
               .execute();
       return toNonNullableByteArray(response.decodePlaintext());
     } catch (IOException e) {
