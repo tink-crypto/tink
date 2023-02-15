@@ -133,6 +133,7 @@ java_library(
     name = "x_cha_cha20_poly1305_key_manager",
     srcs = ["XChaCha20Poly1305KeyManager.java"],
     deps = [
+        ":x_cha_cha20_poly1305_proto_serialization",
         "//proto:tink_java_proto",
         "//proto:xchacha20_poly1305_java_proto",
         "//src/main/java/com/google/crypto/tink:aead",
@@ -204,6 +205,7 @@ java_library(
     name = "cha_cha20_poly1305_key_manager",
     srcs = ["ChaCha20Poly1305KeyManager.java"],
     deps = [
+        ":cha_cha20_poly1305_proto_serialization",
         "//proto:chacha20_poly1305_java_proto",
         "//proto:tink_java_proto",
         "//src/main/java/com/google/crypto/tink:aead",
@@ -559,6 +561,7 @@ android_library(
     name = "x_cha_cha20_poly1305_key_manager-android",
     srcs = ["XChaCha20Poly1305KeyManager.java"],
     deps = [
+        ":x_cha_cha20_poly1305_proto_serialization-android",
         "//proto:tink_java_proto_lite",
         "//proto:xchacha20_poly1305_java_proto_lite",
         "//src/main/java/com/google/crypto/tink:aead-android",
@@ -630,6 +633,7 @@ android_library(
     name = "cha_cha20_poly1305_key_manager-android",
     srcs = ["ChaCha20Poly1305KeyManager.java"],
     deps = [
+        ":cha_cha20_poly1305_proto_serialization-android",
         "//proto:chacha20_poly1305_java_proto_lite",
         "//proto:tink_java_proto_lite",
         "//src/main/java/com/google/crypto/tink:aead-android",

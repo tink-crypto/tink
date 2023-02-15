@@ -146,6 +146,7 @@ public class XChaCha20Poly1305KeyManager extends KeyTypeManager<XChaCha20Poly130
 
   public static void register(boolean newKeyAllowed) throws GeneralSecurityException {
     Registry.registerKeyManager(new XChaCha20Poly1305KeyManager(), newKeyAllowed);
+    XChaCha20Poly1305ProtoSerialization.register();
   }
 
   /**
