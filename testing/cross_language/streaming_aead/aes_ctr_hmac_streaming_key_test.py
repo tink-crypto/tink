@@ -145,11 +145,6 @@ def lang_and_valid_keys_create_and_encrypt():
   for lang in langs:
     result.append((lang, key))
 
-  # TODO(b/268194266): Golang allows SHA224 in the HMAC
-  key = simple_valid_key()
-  key.params.hmac_params.hash = common_pb2.HashType.SHA224
-  result.append(('go', key))
-
   return result
 
 
@@ -213,10 +208,13 @@ def lang_and_invalid_keys():
 
   key = simple_valid_key()
   key.params.hmac_params.hash = common_pb2.HashType.SHA224
-  # TODO(b/268194266): Golang allows creation of this primitive
   for lang in langs:
-    if lang != 'go':
-      result.append((lang, key))
+    result.append((lang, key))
+
+  key = simple_valid_key()
+  key.params.hmac_params.hash = common_pb2.HashType.SHA384
+  for lang in langs:
+    result.append((lang, key))
 
   key = simple_valid_key()
   key.params.ciphertext_segment_size = 2**31
