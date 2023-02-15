@@ -59,17 +59,15 @@ public final class GcpKmsClient implements KmsClient {
   /**
    * Constructs a generic GcpKmsClient that is not bound to any specific key.
    *
-   * @deprecated use {@link #register}
+   * We recommend users to instead register this object by calling {@link #register}.
    */
-  @Deprecated /* Deprecation under consideration */
   public GcpKmsClient() {}
 
   /**
    * Constructs a specific GcpKmsClient that is bound to a single key identified by {@code uri}.
    *
-   * @deprecated use {@link #register}
+   * We recommend users to instead register this object by calling {@link #register}.
    */
-  @Deprecated /* Deprecation under consideration */
   public GcpKmsClient(String uri) {
     if (!uri.toLowerCase(Locale.US).startsWith(PREFIX)) {
       throw new IllegalArgumentException("key URI must starts with " + PREFIX);
