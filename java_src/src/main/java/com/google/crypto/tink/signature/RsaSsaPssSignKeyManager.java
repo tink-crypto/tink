@@ -287,10 +287,7 @@ public final class RsaSsaPssSignKeyManager
    *       <li>Public exponent: 65537 (aka F4).
    *       <li>Prefix type: {@link KeyTemplate.OutputPrefixType#TINK}.
    *     </ul>
-   *
-   * @deprecated use {@code KeyTemplates.get("RSA_SSA_PSS_3072_SHA256_F4")}
    */
-  @Deprecated /* Deprecation under consideration */
   public static final KeyTemplate rsa3072PssSha256F4Template() {
     return createKeyTemplate(
         HashType.SHA256,
@@ -313,9 +310,7 @@ public final class RsaSsaPssSignKeyManager
    *     </ul>
    *     <p>Keys generated from this template create signatures compatible with OpenSSL and other
    *     libraries.
-   * @deprecated use {@code KeyTemplates.get("RSA_SSA_PSS_3072_SHA256_F4_RAW")}
    */
-  @Deprecated /* Deprecation under consideration */
   public static final KeyTemplate rawRsa3072PssSha256F4Template() {
     return createKeyTemplate(
         HashType.SHA256,
@@ -337,10 +332,7 @@ public final class RsaSsaPssSignKeyManager
    *       <li>Public exponent: 65537 (aka F4).
    *       <li>Prefix type: {@link KeyTemplate.OutputPrefixType#TINK}.
    *     </ul>
-   *
-   * @deprecated use {@code KeyTemplates.get("RSA_SSA_PSS_4096_SHA512_F4")}
    */
-  @Deprecated /* Deprecation under consideration */
   public static final KeyTemplate rsa4096PssSha512F4Template() {
     return createKeyTemplate(
         HashType.SHA512,
@@ -364,9 +356,7 @@ public final class RsaSsaPssSignKeyManager
    *     </ul>
    *     <p>Keys generated from this template create signatures compatible with OpenSSL and other
    *     libraries.
-   * @deprecated use {@code KeyTemplates.get("RSA_SSA_PSS_4096_SHA512_F4_RAW")}
    */
-  @Deprecated /* Deprecation under consideration */
   public static final KeyTemplate rawRsa4096PssSha512F4Template() {
     return createKeyTemplate(
         HashType.SHA512,

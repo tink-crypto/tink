@@ -193,10 +193,7 @@ public final class AesGcmHkdfStreamingKeyManager extends KeyTypeManager<AesGcmHk
    *       <li>Size of AES-GCM derived keys: 16 bytes
    *       <li>Ciphertext segment size: 4096 bytes
    *     </ul>
-   *
-   * @deprecated use {@code KeyTemplates.get("AES128_GCM_HKDF_4KB")}
    */
-  @Deprecated /* Deprecation under consideration */
   public static final KeyTemplate aes128GcmHkdf4KBTemplate() {
     return createKeyTemplate(16, HashType.SHA256, 16, 4096);
   }
@@ -210,10 +207,7 @@ public final class AesGcmHkdfStreamingKeyManager extends KeyTypeManager<AesGcmHk
    *       <li>Size of AES-GCM derived keys: 16 bytes
    *       <li>Ciphertext segment size: 1MB
    *     </ul>
-   *
-   * @deprecated use {@code KeyTemplates.get("AES128_GCM_HKDF_1MB")}
    */
-  @Deprecated /* Deprecation under consideration */
   public static final KeyTemplate aes128GcmHkdf1MBTemplate() {
     return createKeyTemplate(16, HashType.SHA256, 16, 1 << 20);
   }
@@ -227,10 +221,7 @@ public final class AesGcmHkdfStreamingKeyManager extends KeyTypeManager<AesGcmHk
    *       <li>Size of AES-GCM derived keys: 32 bytes
    *       <li>Ciphertext segment size: 4096 bytes
    *     </ul>
-   *
-   * @deprecated use {@code KeyTemplates.get("AES256_GCM_HKDF_4KB")}
    */
-  @Deprecated /* Deprecation under consideration */
   public static final KeyTemplate aes256GcmHkdf4KBTemplate() {
     return createKeyTemplate(32, HashType.SHA256, 32, 4096);
   }
@@ -244,10 +235,7 @@ public final class AesGcmHkdfStreamingKeyManager extends KeyTypeManager<AesGcmHk
    *       <li>Size of AES-GCM derived keys: 32 bytes
    *       <li>Ciphertext segment size: 1MB
    *     </ul>
-   *
-   * @deprecated use {@code KeyTemplates.get("AES256_GCM_HKDF_1MB")}
    */
-  @Deprecated /* Deprecation under consideration */
   public static final KeyTemplate aes256GcmHkdf1MBTemplate() {
     return createKeyTemplate(32, HashType.SHA256, 32, 1 << 20);
   }

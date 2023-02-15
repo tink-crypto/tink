@@ -141,7 +141,7 @@ public final class AesCmacPrfKeyManager extends KeyTypeManager<AesCmacPrfKey> {
    *   <li>Prefix type: {@link KeyTemplate.OutputPrefixType#RAW}
    * </ul>
    *
-   * .
+   *
    *
    * @return A {@link KeyTemplate} that generates new instances of AES-CMAC keys with the following
    *     parameters:
@@ -149,10 +149,7 @@ public final class AesCmacPrfKeyManager extends KeyTypeManager<AesCmacPrfKey> {
    *       <li>Key size: 32 bytes
    *       <li>Prefix type: {@link KeyTemplate.OutputPrefixType#RAW}
    *     </ul>
-   *
-   * @deprecated use {@code KeyTemplates.get("AES256_CMAC_PRF")}
    */
-  @Deprecated /* Deprecation under consideration */
   public static final KeyTemplate aes256CmacTemplate() {
     AesCmacPrfKeyFormat format = AesCmacPrfKeyFormat.newBuilder().setKeySize(32).build();
     return KeyTemplate.create(

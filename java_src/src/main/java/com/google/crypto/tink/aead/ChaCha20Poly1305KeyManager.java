@@ -129,9 +129,7 @@ public class ChaCha20Poly1305KeyManager extends KeyTypeManager<ChaCha20Poly1305K
 
   /**
    * @return a {@link KeyTemplate} that generates new instances of ChaCha20Poly1305 keys.
-   * @deprecated use {@code KeyTemplates.get("CHACHA20_POLY1305")}
    */
-  @Deprecated /* Deprecation under consideration */
   public static final KeyTemplate chaCha20Poly1305Template() {
     return KeyTemplate.create(
         new ChaCha20Poly1305KeyManager().getKeyType(),
@@ -143,9 +141,7 @@ public class ChaCha20Poly1305KeyManager extends KeyTypeManager<ChaCha20Poly1305K
    * @return a {@link KeyTemplate} that generates new instances of ChaCha20Poly1305 keys. Keys
    *     generated from this template create ciphertexts compatible with libsodium and other
    *     libraries.
-   * @deprecated use {@code KeyTemplates.get("CHACHA20_POLY1305_RAW")}
    */
-  @Deprecated /* Deprecation under consideration */
   public static final KeyTemplate rawChaCha20Poly1305Template() {
     return KeyTemplate.create(
         new ChaCha20Poly1305KeyManager().getKeyType(),

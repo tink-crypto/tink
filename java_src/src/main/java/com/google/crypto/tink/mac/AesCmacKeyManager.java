@@ -182,10 +182,7 @@ public final class AesCmacKeyManager extends KeyTypeManager<AesCmacKey> {
    *       <li>Tag size: 16 bytes
    *       <li>Prefix type: {@link KeyTemplate.OutputPrefixType#TINK}
    *     </ul>
-   *
-   * @deprecated use {@code KeyTemplates.get("AES256_CMAC")}
    */
-  @Deprecated /* Deprecation under consideration */
   public static final KeyTemplate aes256CmacTemplate() {
     AesCmacKeyFormat format =
         AesCmacKeyFormat.newBuilder()
@@ -206,10 +203,7 @@ public final class AesCmacKeyManager extends KeyTypeManager<AesCmacKey> {
    *       <li>Tag size: 16 bytes
    *       <li>Prefix type: {@link KeyTemplate.OutputPrefixType#RAW} (no prefix)
    *     </ul>
-   *
-   * @deprecated use {@code KeyTemplates.get("AES256_CMAC_RAW")}
    */
-  @Deprecated /* Deprecation under consideration */
   public static final KeyTemplate rawAes256CmacTemplate() {
     AesCmacKeyFormat format =
         AesCmacKeyFormat.newBuilder()
