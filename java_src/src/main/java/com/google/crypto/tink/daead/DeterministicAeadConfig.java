@@ -43,14 +43,14 @@ public final class DeterministicAeadConfig {
   /**
    * @deprecated use {@link #register}
    */
-  @Deprecated /* Deprecation under consideration */
+  @Deprecated
   public static final RegistryConfig TINK_1_1_0 = RegistryConfig.getDefaultInstance();
 
   /**
    * @deprecated use {@link #register}
    * @since 1.2.0
    */
-  @Deprecated /* Deprecation under consideration */
+  @Deprecated
   public static final RegistryConfig LATEST = RegistryConfig.getDefaultInstance();
 
   static {
@@ -74,7 +74,7 @@ public final class DeterministicAeadConfig {
   @InlineMe(
       replacement = "DeterministicAeadConfig.register()",
       imports = "com.google.crypto.tink.daead.DeterministicAeadConfig")
-  @Deprecated /* Deprecation under consideration */
+  @Deprecated
   public static void init() throws GeneralSecurityException {
     register();
   }

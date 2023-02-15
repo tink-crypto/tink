@@ -58,14 +58,14 @@ public final class AeadConfig {
    * @deprecated use {@link #register}
    * @since 1.1.0
    */
-  @Deprecated /* Deprecation under consideration */
+  @Deprecated
   public static final RegistryConfig TINK_1_1_0 = TINK_1_0_0;
 
   /**
    * @deprecated use {@link #register}
    * @since 1.2.0
    */
-  @Deprecated /* Deprecation under consideration */
+  @Deprecated
   public static final RegistryConfig LATEST = TINK_1_0_0;
 
   static {
@@ -86,7 +86,7 @@ public final class AeadConfig {
    *
    * @deprecated use {@link #register}
    */
-  @Deprecated /* Deprecation under consideration */
+  @Deprecated
   public static void init() throws GeneralSecurityException {
     register();
   }
@@ -130,7 +130,7 @@ public final class AeadConfig {
    *
    * @deprecated use {@link #register}
    */
-  @Deprecated /* Deprecation under consideration */
+  @Deprecated
   public static void registerStandardKeyTypes() throws GeneralSecurityException {
     register();
   }

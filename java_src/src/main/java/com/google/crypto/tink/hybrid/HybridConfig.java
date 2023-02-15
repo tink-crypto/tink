@@ -48,20 +48,20 @@ public final class HybridConfig {
   /**
    * @deprecated
    */
-  @Deprecated /* Deprecation under consideration */
+  @Deprecated
   public static final RegistryConfig TINK_1_0_0 = RegistryConfig.getDefaultInstance();
   /**
    * @deprecated
    * @since 1.1.0
    */
-  @Deprecated /* Deprecation under consideration */
+  @Deprecated
   public static final RegistryConfig TINK_1_1_0 = RegistryConfig.getDefaultInstance();
 
   /**
    * @deprecated
    * @since 1.2.0
    */
-  @Deprecated /* Deprecation under consideration */
+  @Deprecated
   public static final RegistryConfig LATEST = RegistryConfig.getDefaultInstance();
 
   static {
@@ -83,7 +83,7 @@ public final class HybridConfig {
    *
    * @deprecated use {@link #register}
    */
-  @Deprecated /* Deprecation under consideration */
+  @Deprecated
   public static void init() throws GeneralSecurityException {
     register();
   }
