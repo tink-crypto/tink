@@ -58,16 +58,24 @@ public final class JsonKeysetWriter implements KeysetWriter {
     return new JsonKeysetWriter(stream);
   }
 
-  /** Static method to create a JsonKeysetWriter that writes to a file. */
+  /**
+   * Static method to create a JsonKeysetWriter that writes to a file.
+   *
+   * @deprecated Method should be inlined.
+   */
   @InlineMe(
       replacement = "JsonKeysetWriter.withOutputStream(new FileOutputStream(file))",
       imports = {"com.google.crypto.tink.JsonKeysetWriter", "java.io.FileOutputStream"})
-  @Deprecated /* Deprecation under consideration */
+  @Deprecated
   public static KeysetWriter withFile(File file) throws IOException {
     return withOutputStream(new FileOutputStream(file));
   }
 
-  /** Static method to create a JsonKeysetWriter that writes to a file path. */
+  /**
+   * Static method to create a JsonKeysetWriter that writes to a file path.
+   *
+   * @deprecated Method should be inlined.
+   */
   @InlineMe(
       replacement = "JsonKeysetWriter.withOutputStream(new FileOutputStream(new File(path)))",
       imports = {
@@ -75,7 +83,7 @@ public final class JsonKeysetWriter implements KeysetWriter {
         "java.io.File",
         "java.io.FileOutputStream"
       })
-  @Deprecated /* Deprecation under consideration */
+  @Deprecated
   public static KeysetWriter withPath(String path) throws IOException {
     return withOutputStream(new FileOutputStream(new File(path)));
   }
@@ -84,12 +92,14 @@ public final class JsonKeysetWriter implements KeysetWriter {
    * Static method to create a JsonKeysetWriter that writes to a file path.
    *
    * <p>This method only works on Android API level 26 or newer.
+   *
+   * @deprecated Method should be inlined.
    */
   @RequiresApi(26) // https://developer.android.com/reference/java/nio/file/Path
   @InlineMe(
       replacement = "JsonKeysetWriter.withOutputStream(new FileOutputStream(path.toFile()))",
       imports = {"com.google.crypto.tink.JsonKeysetWriter", "java.io.FileOutputStream"})
-  @Deprecated /* Deprecation under consideration */
+  @Deprecated
   public static KeysetWriter withPath(Path path) throws IOException {
     return withOutputStream(new FileOutputStream(path.toFile()));
   }

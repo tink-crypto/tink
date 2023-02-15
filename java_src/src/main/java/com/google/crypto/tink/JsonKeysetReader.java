@@ -77,10 +77,10 @@ public final class JsonKeysetReader implements KeysetReader {
    *
    * @deprecated Use {@code #withString}
    */
-  @Deprecated /* Deprecation under consideration */
   @InlineMe(
       replacement = "JsonKeysetReader.withString(input.toString())",
       imports = "com.google.crypto.tink.JsonKeysetReader")
+  @Deprecated
   public static JsonKeysetReader withJsonObject(Object input) {
     return withString(input.toString());
   }
@@ -100,11 +100,13 @@ public final class JsonKeysetReader implements KeysetReader {
    *
    * <p>Note: the file won't be read until {@link JsonKeysetReader#read} or {@link
    * JsonKeysetReader#readEncrypted} is called.
+   *
+   * @deprecated Method should be inlined.
    */
   @InlineMe(
       replacement = "JsonKeysetReader.withInputStream(new FileInputStream(file))",
       imports = {"com.google.crypto.tink.JsonKeysetReader", "java.io.FileInputStream"})
-  @Deprecated /* Deprecation under consideration */
+  @Deprecated
   public static JsonKeysetReader withFile(File file) throws IOException {
     return withInputStream(new FileInputStream(file));
   }
@@ -116,6 +118,8 @@ public final class JsonKeysetReader implements KeysetReader {
    * JsonKeysetReader#readEncrypted} is called.
    *
    * <p>This method only works on Android API level 26 or newer.
+   *
+   * @deprecated Method should be inlined.
    */
   @InlineMe(
       replacement = "JsonKeysetReader.withInputStream(new FileInputStream(new File(path)))",
@@ -124,7 +128,7 @@ public final class JsonKeysetReader implements KeysetReader {
         "java.io.File",
         "java.io.FileInputStream"
       })
-  @Deprecated /* Deprecation under consideration */
+  @Deprecated
   public static JsonKeysetReader withPath(String path) throws IOException {
     return withInputStream(new FileInputStream(new File(path)));
   }
@@ -136,12 +140,14 @@ public final class JsonKeysetReader implements KeysetReader {
    * JsonKeysetReader#readEncrypted} is called.
    *
    * <p>This method only works on Android API level 26 or newer.
+   *
+   * @deprecated Method should be inlined.
    */
   @InlineMe(
       replacement = "JsonKeysetReader.withInputStream(new FileInputStream(path.toFile()))",
       imports = {"com.google.crypto.tink.JsonKeysetReader", "java.io.FileInputStream"})
   @RequiresApi(26) // https://developer.android.com/reference/java/nio/file/Path
-  @Deprecated /* Deprecation under consideration */
+  @Deprecated
   public static JsonKeysetReader withPath(Path path) throws IOException {
     return JsonKeysetReader.withInputStream(new FileInputStream(path.toFile()));
   }
