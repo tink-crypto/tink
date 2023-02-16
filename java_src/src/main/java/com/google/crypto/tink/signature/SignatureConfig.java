@@ -54,18 +54,21 @@ public final class SignatureConfig {
       new RsaSsaPssVerifyKeyManager().getKeyType();
 
   /**
-   * @deprecated
+   * @deprecated Call {@link #register} instead.
    */
-  @Deprecated /* Deprecation under consideration */
+  @Deprecated
   public static final RegistryConfig TINK_1_0_0 = RegistryConfig.getDefaultInstance();
+
   /**
-   * @deprecated
-   * @since 1.1.0
+   * @deprecated Call {@link #register} instead.
    */
-  @Deprecated /* Deprecation under consideration */
+  @Deprecated
   public static final RegistryConfig TINK_1_1_0 = RegistryConfig.getDefaultInstance();
 
-  /** @since 1.2.0 */
+  /**
+   * @deprecated Call {@link #register} instead.
+   */
+  @Deprecated
   public static final RegistryConfig LATEST = RegistryConfig.getDefaultInstance();
 
   static {
@@ -83,7 +86,7 @@ public final class SignatureConfig {
    *
    * @deprecated use {@link #register}
    */
-  @Deprecated /* Deprecation under consideration */
+  @Deprecated
   public static void init() throws GeneralSecurityException {
     register();
   }

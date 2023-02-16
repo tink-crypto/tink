@@ -34,7 +34,7 @@ import java.security.GeneralSecurityException;
  *
  * @deprecated use {@link Config} and {@link SignatureConfig}
  */
-@Deprecated /* Deprecation under consideration */
+@Deprecated
 public final class PublicKeyVerifyConfig {
   /**
    * Registers standard with the {@code Registry} all PublicKeyVerify key types released with the
@@ -45,9 +45,9 @@ public final class PublicKeyVerifyConfig {
    *
    * @deprecated use {@link Config#register}
    */
-  @Deprecated /* Deprecation under consideration */
+  @Deprecated
   public static void registerStandardKeyTypes() throws GeneralSecurityException {
-    Config.register(SignatureConfig.TINK_1_0_0);
+    SignatureConfig.register();
   }
 
   private PublicKeyVerifyConfig() {}
