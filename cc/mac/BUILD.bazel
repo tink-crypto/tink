@@ -199,6 +199,32 @@ cc_library(
     ],
 )
 
+cc_library(
+    name = "aes_cmac_proto_serialization",
+    srcs = ["aes_cmac_proto_serialization.cc"],
+    hdrs = ["aes_cmac_proto_serialization.h"],
+    include_prefix = "tink/mac",
+    deps = [
+        ":aes_cmac_key",
+        ":aes_cmac_parameters",
+        "//:partial_key_access",
+        "//:restricted_data",
+        "//:secret_key_access_token",
+        "//internal:key_parser",
+        "//internal:key_serializer",
+        "//internal:mutable_serialization_registry",
+        "//internal:parameters_parser",
+        "//internal:parameters_serializer",
+        "//internal:proto_key_serialization",
+        "//internal:proto_parameters_serialization",
+        "//proto:aes_cmac_cc_proto",
+        "//proto:tink_cc_proto",
+        "//util:status",
+        "//util:statusor",
+        "@com_google_absl//absl/status",
+    ],
+)
+
 # tests
 
 cc_test(
@@ -359,6 +385,28 @@ cc_test(
         "//util:statusor",
         "//util:test_matchers",
         "@com_google_absl//absl/types:optional",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "aes_cmac_proto_serialization_test",
+    size = "small",
+    srcs = ["aes_cmac_proto_serialization_test.cc"],
+    deps = [
+        ":aes_cmac_key",
+        ":aes_cmac_parameters",
+        ":aes_cmac_proto_serialization",
+        "//:insecure_secret_key_access",
+        "//:partial_key_access",
+        "//:restricted_data",
+        "//internal:mutable_serialization_registry",
+        "//internal:proto_key_serialization",
+        "//internal:proto_parameters_serialization",
+        "//proto:aes_cmac_cc_proto",
+        "//proto:tink_cc_proto",
+        "//subtle:random",
+        "//util:test_matchers",
         "@com_google_googletest//:gtest_main",
     ],
 )
