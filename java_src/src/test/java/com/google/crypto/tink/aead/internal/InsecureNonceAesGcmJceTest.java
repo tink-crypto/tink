@@ -24,7 +24,6 @@ import static org.junit.Assert.fail;
 
 import com.google.crypto.tink.config.TinkFips;
 import com.google.crypto.tink.config.internal.TinkFipsUtil;
-import com.google.crypto.tink.internal.Util;
 import com.google.crypto.tink.subtle.Bytes;
 import com.google.crypto.tink.subtle.Hex;
 import com.google.crypto.tink.subtle.Random;
@@ -38,7 +37,6 @@ import java.security.GeneralSecurityException;
 import java.security.Security;
 import java.util.Arrays;
 import java.util.HashSet;
-import javax.annotation.Nullable;
 import javax.crypto.Cipher;
 import org.conscrypt.Conscrypt;
 import org.junit.Assume;
@@ -118,9 +116,7 @@ public class InsecureNonceAesGcmJceTest {
   @Test
   public void testEncryptWithAad_shouldFailOnAndroid19OrOlder() throws Exception {
     Assume.assumeTrue(!TinkFips.useOnlyFips() || TinkFipsUtil.fipsModuleAvailable());
-    @Nullable Integer apiLevel = Util.getAndroidApiLevel();
-    Assume.assumeNotNull(apiLevel);
-    Assume.assumeTrue(apiLevel <= 19);
+    Assume.assumeFalse(!SubtleUtil.isAndroid() || SubtleUtil.androidApiLevel() > 19);
 
     InsecureNonceAesGcmJce gcm =
         new InsecureNonceAesGcmJce(Random.randBytes(16), /*prependIv=*/ false);
@@ -435,8 +431,7 @@ public class InsecureNonceAesGcmJceTest {
     byte[] aad = Random.randBytes(20);
     // AES-GCM on Android <= 19 doesn't support AAD. See last bullet point in
     // https://github.com/google/tink/blob/master/docs/KNOWN-ISSUES.md#android.
-    @Nullable Integer apiLevel = Util.getAndroidApiLevel();
-    if (apiLevel != null && apiLevel <= 19) {
+    if (SubtleUtil.isAndroid() && SubtleUtil.androidApiLevel() <= 19) {
       aad = new byte[0];
     }
     return aad;

@@ -17,13 +17,12 @@
 package com.google.crypto.tink.aead.internal;
 
 import com.google.crypto.tink.config.internal.TinkFipsUtil;
-import com.google.crypto.tink.internal.Util;
 import com.google.crypto.tink.subtle.EngineFactory;
+import com.google.crypto.tink.subtle.SubtleUtil;
 import com.google.crypto.tink.subtle.Validators;
 import java.nio.ByteBuffer;
 import java.security.GeneralSecurityException;
 import java.security.spec.AlgorithmParameterSpec;
-import javax.annotation.Nullable;
 import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.GCMParameterSpec;
@@ -149,8 +148,7 @@ public final class InsecureNonceAesGcmJce {
 
   private static AlgorithmParameterSpec getParams(final byte[] buf, int offset, int len)
       throws GeneralSecurityException {
-    @Nullable Integer apiLevel = Util.getAndroidApiLevel();
-    if (apiLevel != null && apiLevel <= 19) {
+    if (SubtleUtil.isAndroid() && SubtleUtil.androidApiLevel() <= 19) {
       // GCMParameterSpec should always be present in Java 7 or newer, but it's unsupported on
       // Android devices with API level <= 19. Fortunately, if a modern copy of Conscrypt is present
       // (either through GMS Core or bundled with the app) we can initialize the cipher with just an

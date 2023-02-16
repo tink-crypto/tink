@@ -24,7 +24,6 @@ import static org.junit.Assert.fail;
 
 import com.google.crypto.tink.config.TinkFips;
 import com.google.crypto.tink.config.internal.TinkFipsUtil;
-import com.google.crypto.tink.internal.Util;
 import com.google.crypto.tink.testing.TestUtil;
 import com.google.crypto.tink.testing.TestUtil.BytesMutation;
 import com.google.crypto.tink.testing.WycheproofTestUtil;
@@ -34,7 +33,6 @@ import java.security.GeneralSecurityException;
 import java.security.Security;
 import java.util.Arrays;
 import java.util.HashSet;
-import javax.annotation.Nullable;
 import javax.crypto.Cipher;
 import org.conscrypt.Conscrypt;
 import org.junit.Assume;
@@ -95,9 +93,7 @@ public class AesGcmJceTest {
   @Test
   public void testEncryptWithAad_shouldFailOnAndroid19OrOlder() throws Exception {
     Assume.assumeTrue(!TinkFips.useOnlyFips() || TinkFipsUtil.fipsModuleAvailable());
-    @Nullable Integer apiLevel = Util.getAndroidApiLevel();
-    Assume.assumeNotNull(apiLevel);
-    Assume.assumeTrue(apiLevel <= 19);
+    Assume.assumeFalse(!SubtleUtil.isAndroid() || SubtleUtil.androidApiLevel() > 19);
 
     AesGcmJce gcm = new AesGcmJce(Random.randBytes(16));
     byte[] message = Random.randBytes(20);
@@ -191,8 +187,7 @@ public class AesGcmJceTest {
         byte[] key = Hex.decode(testcase.get("key").getAsString());
         byte[] msg = Hex.decode(testcase.get("msg").getAsString());
         byte[] aad = Hex.decode(testcase.get("aad").getAsString());
-        @Nullable Integer apiLevel = Util.getAndroidApiLevel();
-        if (apiLevel != null && apiLevel <= 19 && aad.length != 0) {
+        if (SubtleUtil.isAndroid() && SubtleUtil.androidApiLevel() <= 19 && aad.length != 0) {
           cntSkippedTests++;
           continue;
         }
@@ -346,8 +341,7 @@ public class AesGcmJceTest {
     byte[] aad = Random.randBytes(20);
     // AES-GCM on Android <= 19 doesn't support AAD. See last bullet point in
     // https://github.com/google/tink/blob/master/docs/KNOWN-ISSUES.md#android.
-    @Nullable Integer apiLevel = Util.getAndroidApiLevel();
-    if (apiLevel != null && apiLevel <= 19) {
+    if (SubtleUtil.isAndroid() && SubtleUtil.androidApiLevel() <= 19) {
       aad = new byte[0];
     }
     return aad;
