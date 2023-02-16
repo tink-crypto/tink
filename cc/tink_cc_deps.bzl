@@ -51,12 +51,12 @@ def tink_cc_deps():
     # BoringSSL.
     # -------------------------------------------------------------------------
     if not native.existing_rule("boringssl"):
-        # Commit from 2022-09-14.
+        # Commit from 2023-02-15.
         http_archive(
             name = "boringssl",
-            strip_prefix = "boringssl-d345d68d5c4b5471290ebe13f090f1fd5b7e8f58",
-            url = "https://github.com/google/boringssl/archive/d345d68d5c4b5471290ebe13f090f1fd5b7e8f58.zip",
-            sha256 = "482796f369c8655dbda3be801ae98c47916ecd3bff223d007a723fd5f5ecba22",
+            strip_prefix = "boringssl-5c22014ca513807ed03c657e8ede076164663979",
+            url = "https://github.com/google/boringssl/archive/5c22014ca513807ed03c657e8ede076164663979.zip",
+            sha256 = "863fc670c456f30923740c1639305132fdfb9d1b25ba385a67ae3862ef12a8af",
         )
 
     # -------------------------------------------------------------------------

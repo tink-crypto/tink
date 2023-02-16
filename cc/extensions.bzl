@@ -28,19 +28,6 @@ abseil_extension = module_extension(
     implementation = _abseil_impl,
 )
 
-def _boringssl_impl(_ctx):
-    # Commit from 2022-02-25.
-    http_archive(
-        name = "boringssl",
-        strip_prefix = "boringssl-d345d68d5c4b5471290ebe13f090f1fd5b7e8f58",
-        url = "https://github.com/google/boringssl/archive/d345d68d5c4b5471290ebe13f090f1fd5b7e8f58.zip",
-        sha256 = "482796f369c8655dbda3be801ae98c47916ecd3bff223d007a723fd5f5ecba22",
-    )
-
-boringssl_extension = module_extension(
-    implementation = _boringssl_impl,
-)
-
 def _rapidjson_impl(_ctx):
     # Release from 2016-08-25 (still the latest release as of 2022-05-05).
     http_archive(

@@ -94,11 +94,14 @@ add_directory_alias("${wycheproof_SOURCE_DIR}/testvectors"
 # defined.
 if (NOT TARGET crypto)
   if (NOT TINK_USE_SYSTEM_OPENSSL)
-    # Commit from Sep 14, 2022.
+    # Commit from Feb 15, 2023.
+    # NOTE: This is one commit ahead of Bazel; the commit fixes a CMake issue,
+    # which made build fail on CMake 3.10.
+    # See https://github.com/google/boringssl/compare/5c22014...e27ff0e.
     http_archive(
       NAME boringssl
-      URL https://github.com/google/boringssl/archive/d345d68d5c4b5471290ebe13f090f1fd5b7e8f58.zip
-      SHA256 482796f369c8655dbda3be801ae98c47916ecd3bff223d007a723fd5f5ecba22
+      URL https://github.com/google/boringssl/archive/e27ff0e4312c91357778b36bbd8a7ec7bfc67be3.zip
+      SHA256 11d3c87906bed215a915b0db11cefd0fc7b939ddbec4952a29e343a83ce3bc50
       CMAKE_SUBDIR src
     )
     # BoringSSL targets do not carry include directory info, this fixes it.
