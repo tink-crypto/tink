@@ -22,6 +22,7 @@ import static org.junit.Assert.assertThrows;
 import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.StreamingAead;
 import com.google.crypto.tink.internal.KeyTypeManager;
+import com.google.crypto.tink.internal.Util;
 import com.google.crypto.tink.proto.AesCtrHmacStreamingKey;
 import com.google.crypto.tink.proto.AesCtrHmacStreamingKeyFormat;
 import com.google.crypto.tink.proto.AesCtrHmacStreamingParams;
@@ -30,6 +31,7 @@ import com.google.crypto.tink.proto.HmacParams;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
 import com.google.crypto.tink.testing.StreamingTestUtil;
 import com.google.crypto.tink.testing.TestUtil;
+import com.google.protobuf.ByteString;
 import com.google.protobuf.ExtensionRegistryLite;
 import java.security.GeneralSecurityException;
 import java.util.Set;
@@ -62,6 +64,14 @@ public class AesCtrHmacStreamingKeyManagerTest {
   // Returns an AesCtrHmacStreamingKeyFormat.Builder with valid parameters
   private static AesCtrHmacStreamingKeyFormat.Builder createKeyFormat() {
     return AesCtrHmacStreamingKeyFormat.newBuilder().setKeySize(32).setParams(createParams());
+  }
+
+  // Returns a valid AesCtrHmacStreamingKey.Builder
+  private static AesCtrHmacStreamingKey.Builder createKey() {
+    return AesCtrHmacStreamingKey.newBuilder()
+        .setParams(createParams())
+        .setVersion(0)
+        .setKeyValue(ByteString.copyFrom("This is a 32 byte random key.   ", Util.UTF_8));
   }
 
   @Test
@@ -177,6 +187,21 @@ public class AesCtrHmacStreamingKeyManagerTest {
             .build();
 
     assertThrows(GeneralSecurityException.class, () -> factory.validateKeyFormat(format));
+  }
+
+  @Test
+  public void validateKey_validKey_works() throws Exception {
+    AesCtrHmacStreamingKey key = createKey().build();
+
+    manager.validateKey(key);
+  }
+
+  @Test
+  public void validateKey_badHkdfHashType_throws() throws Exception {
+    AesCtrHmacStreamingKey key =
+        createKey().setParams(createParams().setHkdfHashType(HashType.SHA224)).build();
+
+    assertThrows(GeneralSecurityException.class, () -> manager.validateKey(key));
   }
 
   @Test

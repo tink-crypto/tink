@@ -163,8 +163,11 @@ public final class AesCtrHmacStreamingKeyManager extends KeyTypeManager<AesCtrHm
   private static void validateParams(AesCtrHmacStreamingParams params)
       throws GeneralSecurityException {
     Validators.validateAesKeySize(params.getDerivedKeySize());
-    if (params.getHkdfHashType() == HashType.UNKNOWN_HASH) {
-      throw new GeneralSecurityException("unknown HKDF hash type");
+    if (params.getHkdfHashType() != HashType.SHA1
+        && params.getHkdfHashType() != HashType.SHA256
+        && params.getHkdfHashType() != HashType.SHA512) {
+      throw new GeneralSecurityException(
+          "Invalid HKDF hash type: " + params.getHkdfHashType().getNumber());
     }
     if (params.getHmacParams().getHash() == HashType.UNKNOWN_HASH) {
       throw new GeneralSecurityException("unknown HMAC hash type");

@@ -156,11 +156,11 @@ func (km *aesCTRHMACKeyManager) validateParams(params *chpb.AesCtrHmacStreamingP
 	if err := subtleaead.ValidateAESKeySize(params.DerivedKeySize); err != nil {
 		return err
 	}
-	if params.HkdfHashType == commonpb.HashType_UNKNOWN_HASH {
-		return errors.New("unknown HKDF hash type")
+	if params.HkdfHashType != commonpb.HashType_SHA1 && params.HkdfHashType != commonpb.HashType_SHA256 && params.HkdfHashType != commonpb.HashType_SHA512 {
+		return fmt.Errorf("Invalid HKDF hash type (%s)", params.HkdfHashType)
 	}
 	if params.HmacParams.Hash != commonpb.HashType_SHA1 && params.HmacParams.Hash != commonpb.HashType_SHA256 && params.HmacParams.Hash != commonpb.HashType_SHA512 {
-		return fmt.Errorf("Invalid tag algorithm %s", params.HmacParams.Hash)
+		return fmt.Errorf("Invalid tag algorithm (%s)", params.HmacParams.Hash)
 	}
 	hmacHash := commonpb.HashType_name[int32(params.HmacParams.Hash)]
 	if err := subtlemac.ValidateHMACParams(hmacHash, subtle.AESCTRHMACKeySizeInBytes, params.HmacParams.TagSize); err != nil {

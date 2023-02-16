@@ -152,23 +152,9 @@ def lang_and_valid_keys_create_and_encrypt():
     result.append((lang, key))
 
   key = simple_valid_key()
-  key.params.hkdf_hash_type = common_pb2.HashType.SHA224
-  for lang in langs:
-    # TODO(b/269248212) Align implementations
-    if lang not in ['python', 'cc']:
-      result.append((lang, key))
-
-  key = simple_valid_key()
   key.params.hkdf_hash_type = common_pb2.HashType.SHA256
   for lang in langs:
     result.append((lang, key))
-
-  key = simple_valid_key()
-  key.params.hkdf_hash_type = common_pb2.HashType.SHA384
-  for lang in langs:
-    # TODO(b/269248212) Align implementations
-    if lang not in ['python', 'cc']:
-      result.append((lang, key))
 
   key = simple_valid_key()
   key.params.hkdf_hash_type = common_pb2.HashType.SHA512
@@ -211,16 +197,12 @@ def lang_and_invalid_keys():
   key = simple_valid_key()
   key.params.hkdf_hash_type = common_pb2.HashType.SHA224
   for lang in langs:
-    # TODO(b/269248212) Align implementations
-    if lang in ['py', 'cc']:
-      result.append((lang, key))
+    result.append((lang, key))
 
   key = simple_valid_key()
   key.params.hkdf_hash_type = common_pb2.HashType.SHA384
   for lang in langs:
-    # TODO(b/269248212) Align implementations
-    if lang in ['py', 'cc']:
-      result.append((lang, key))
+    result.append((lang, key))
 
   # Check requirement len(InitialKeyMaterial) >= DerivedKeySize
   key = simple_valid_key()
