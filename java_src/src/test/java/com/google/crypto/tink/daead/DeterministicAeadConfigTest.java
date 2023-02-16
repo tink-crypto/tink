@@ -42,8 +42,6 @@ public class DeterministicAeadConfigTest {
   @Test
   public void aaaTestInitialization() throws Exception {
     Assume.assumeFalse(TinkFips.useOnlyFips());
-    assertThrows(
-        GeneralSecurityException.class, () -> Registry.getCatalogue("tinkdeterministicaead"));
 
     // Before registration, the key manager should be absent.
     String typeUrl = "type.googleapis.com/google.crypto.tink.AesSivKey";

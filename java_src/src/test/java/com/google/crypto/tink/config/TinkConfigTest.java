@@ -37,40 +37,13 @@ import org.junit.runners.MethodSorters;
 public class TinkConfigTest {
   @Test
   public void aaaTestInitialization() throws Exception {
-    GeneralSecurityException e =
-        assertThrows(GeneralSecurityException.class, () -> Registry.getCatalogue("tinkmac"));
-    assertThat(e.toString()).contains("no catalogue found");
-    assertThat(e.toString()).contains("MacConfig.register()");
-    e = assertThrows(GeneralSecurityException.class, () -> Registry.getCatalogue("tinkaead"));
-    assertThat(e.toString()).contains("no catalogue found");
-    assertThat(e.toString()).contains("AeadConfig.register()");
-    e =
-        assertThrows(
-            GeneralSecurityException.class, () -> Registry.getCatalogue("tinkhybriddecrypt"));
-    assertThat(e.toString()).contains("no catalogue found");
-    assertThat(e.toString()).contains("HybridConfig.register()");
-    e =
-        assertThrows(
-            GeneralSecurityException.class, () -> Registry.getCatalogue("tinkhybridencrypt"));
-    assertThat(e.toString()).contains("no catalogue found");
-    assertThat(e.toString()).contains("HybridConfig.register()");
-    e =
-        assertThrows(
-            GeneralSecurityException.class, () -> Registry.getCatalogue("tinkpublickeysign"));
-    assertThat(e.toString()).contains("no catalogue found");
-    assertThat(e.toString()).contains("SignatureConfig.register()");
-    e =
-        assertThrows(
-            GeneralSecurityException.class, () -> Registry.getCatalogue("tinkpublickeyverify"));
-    assertThat(e.toString()).contains("no catalogue found");
-    assertThat(e.toString()).contains("SignatureConfig.register()");
     String macTypeUrl = "type.googleapis.com/google.crypto.tink.HmacKey";
     String aeadTypeUrl = "type.googleapis.com/google.crypto.tink.AesCtrHmacAeadKey";
     String daeadTypeUrl = "type.googleapis.com/google.crypto.tink.AesSivKey";
     String hybridTypeUrl = "type.googleapis.com/google.crypto.tink.EciesAeadHkdfPrivateKey";
     String signTypeUrl = "type.googleapis.com/google.crypto.tink.EcdsaPrivateKey";
     String streamingAeadTypeUrl = "type.googleapis.com/google.crypto.tink.AesCtrHmacStreamingKey";
-    e =
+    GeneralSecurityException e =
         assertThrows(
             GeneralSecurityException.class, () -> Registry.getUntypedKeyManager(macTypeUrl));
     assertThat(e.toString()).contains("No key manager found");

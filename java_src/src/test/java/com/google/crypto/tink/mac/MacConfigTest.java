@@ -45,12 +45,9 @@ public class MacConfigTest {
   public void aaaTestInitialization() throws Exception {
     Assume.assumeFalse(TinkFips.useOnlyFips());
 
-    GeneralSecurityException e =
-        assertThrows(GeneralSecurityException.class, () -> Registry.getCatalogue("tinkmac"));
-    assertThat(e.toString()).contains("no catalogue found");
-    assertThat(e.toString()).contains("MacConfig.register()");
     String typeUrl = "type.googleapis.com/google.crypto.tink.HmacKey";
-    e = assertThrows(GeneralSecurityException.class, () -> Registry.getKeyManager(typeUrl));
+    GeneralSecurityException e =
+        assertThrows(GeneralSecurityException.class, () -> Registry.getUntypedKeyManager(typeUrl));
     assertThat(e.toString()).contains("No key manager found");
 
     // Initialize the config.

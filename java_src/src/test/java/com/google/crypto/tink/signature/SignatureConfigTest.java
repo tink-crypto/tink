@@ -16,7 +16,6 @@
 
 package com.google.crypto.tink.signature;
 
-import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThrows;
 
@@ -45,19 +44,7 @@ public class SignatureConfigTest {
   @Test
   public void aaaTestInitialization() throws Exception {
     Assume.assumeFalse(TinkFips.useOnlyFips());
-    GeneralSecurityException e =
-        assertThrows(
-            GeneralSecurityException.class, () -> Registry.getCatalogue("tinkpublickeysign"));
-    assertThat(e.toString()).contains("no catalogue found");
-    assertThat(e.toString()).contains("SignatureConfig.registe");
-    e =
-        assertThrows(
-            GeneralSecurityException.class, () -> Registry.getCatalogue("tinkpublickeyverify"));
-    assertThat(e.toString()).contains("no catalogue found");
-    assertThat(e.toString()).contains("SignatureConfig.registe");
     String typeUrl = "type.googleapis.com/google.crypto.tink.EcdsaPrivateKey";
-    e = assertThrows(GeneralSecurityException.class, () -> Registry.getUntypedKeyManager(typeUrl));
-    assertThat(e.toString()).contains("No key manager found");
 
     // Initialize the config.
     SignatureConfig.register();

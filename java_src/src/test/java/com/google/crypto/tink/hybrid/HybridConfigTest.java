@@ -44,23 +44,9 @@ public class HybridConfigTest {
   @Test
   public void aaaTestInitialization() throws Exception {
     Assume.assumeFalse(TinkFips.useOnlyFips());
-    GeneralSecurityException e =
-        assertThrows(GeneralSecurityException.class, () -> Registry.getCatalogue("tinkmac"));
-    assertThat(e.toString()).contains("no catalogue found");
-    assertThat(e.toString()).contains("MacConfig.register()");
-    e =
-        assertThrows(
-            GeneralSecurityException.class, () -> Registry.getCatalogue("tinkhybridencrypt"));
-    assertThat(e.toString()).contains("no catalogue found");
-    assertThat(e.toString()).contains("HybridConfig.register()");
-    e =
-        assertThrows(
-            GeneralSecurityException.class, () -> Registry.getCatalogue("tinkhybriddecrypt"));
-    assertThat(e.toString()).contains("no catalogue found");
-    assertThat(e.toString()).contains("HybridConfig.register()");
 
     String eciesPrivateKeyUrl = "type.googleapis.com/google.crypto.tink.EciesAeadHkdfPrivateKey";
-    e =
+    GeneralSecurityException e =
         assertThrows(
             GeneralSecurityException.class,
             () -> Registry.getUntypedKeyManager(eciesPrivateKeyUrl));

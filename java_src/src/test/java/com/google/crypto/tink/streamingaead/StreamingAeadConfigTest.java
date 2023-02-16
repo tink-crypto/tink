@@ -43,16 +43,6 @@ public class StreamingAeadConfigTest {
   @Test
   public void aaaTestInitialization() throws Exception {
     Assume.assumeFalse(TinkFips.useOnlyFips());
-    GeneralSecurityException e =
-        assertThrows(
-            GeneralSecurityException.class, () -> Registry.getCatalogue("tinkstreamingaead"));
-    assertThat(e.toString()).contains("no catalogue found");
-    assertThat(e.toString()).contains("StreamingAeadConfig.register()");
-    GeneralSecurityException e2 =
-        assertThrows(
-            GeneralSecurityException.class, () -> Registry.getCatalogue("TinkStreamingAead"));
-    assertThat(e2.toString()).contains("no catalogue found");
-    assertThat(e2.toString()).contains("StreamingAeadConfig.register()");
     String typeUrl = "type.googleapis.com/google.crypto.tink.AesCtrHmacStreamingKey";
     GeneralSecurityException e3 =
         assertThrows(GeneralSecurityException.class, () -> Registry.getUntypedKeyManager(typeUrl));
