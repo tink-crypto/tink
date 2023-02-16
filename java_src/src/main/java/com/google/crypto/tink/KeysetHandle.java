@@ -248,8 +248,8 @@ public final class KeysetHandle {
      *
      * @deprecated Use {@link #deleteAt} or {@link #getAt} instead.
      */
-    @Deprecated /* Deprecation under consideration */
     @CanIgnoreReturnValue
+    @Deprecated
     public Builder.Entry removeAt(int i) {
       return entries.remove(i);
     }
@@ -762,7 +762,7 @@ public final class KeysetHandle {
    *
    * @deprecated Use {@link KeysetHandle.Builder.addEntry} instead.
    */
-  @Deprecated /* Deprecation under consideration */
+  @Deprecated
   public static final KeysetHandle createFromKey(KeyHandle keyHandle, KeyAccess access)
       throws GeneralSecurityException {
     KeysetManager km = KeysetManager.withEmptyKeyset().add(keyHandle);
