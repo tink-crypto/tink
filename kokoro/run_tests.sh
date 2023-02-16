@@ -199,7 +199,8 @@ main() {
       : "${XCODE_VERSION:=11.3}"
 
       export DEVELOPER_DIR="/Applications/Xcode_${XCODE_VERSION}.app/Contents/Developer"
-      export ANDROID_HOME="/Users/kbuilder/Library/Android/sdk"
+      export JAVA_HOME=$(/usr/libexec/java_home -v "1.8.0_292")
+      export ANDROID_HOME="/usr/local/share/android-sdk"
       export COURSIER_OPTS="-Djava.net.preferIPv6Addresses=true"
 
       # TODO(b/155225382): Avoid modifying the sytem Python installation.
