@@ -553,9 +553,7 @@ public final class EllipticCurves {
    * @return the point
    * @throws GeneralSecurityException if the encoded point is invalid or if the curve or format are
    *     not supported.
-   * @deprecated use {#pointDecode}
    */
-  @Deprecated /* Deprecation under consideration */
   public static ECPoint ecPointDecode(EllipticCurve curve, PointFormatType format, byte[] encoded)
       throws GeneralSecurityException {
     return pointDecode(curve, format, encoded);
