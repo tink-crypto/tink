@@ -164,9 +164,8 @@ enable_py_version() {
   pyenv shell "${version}"
 
   # Update environment.
-  python3 -m pip install --upgrade pip
-  python3 -m pip install --upgrade setuptools
-  python3 -m pip install --upgrade wheel
+  pip install --require-hashes -r \
+    "${TINK_PYTHON_ROOT_PATH}/tools/distribution/requirements.txt"
 }
 
 main() {
