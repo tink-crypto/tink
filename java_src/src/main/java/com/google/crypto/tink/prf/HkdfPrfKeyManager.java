@@ -170,6 +170,7 @@ public class HkdfPrfKeyManager extends KeyTypeManager<HkdfPrfKey> {
 
   public static void register(boolean newKeyAllowed) throws GeneralSecurityException {
     Registry.registerKeyManager(new HkdfPrfKeyManager(), newKeyAllowed);
+    HkdfPrfProtoSerialization.register();
   }
 
   public static String staticKeyType() {

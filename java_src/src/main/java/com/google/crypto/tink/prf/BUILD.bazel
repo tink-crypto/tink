@@ -6,6 +6,7 @@ java_library(
     name = "hkdf_prf_key_manager",
     srcs = ["HkdfPrfKeyManager.java"],
     deps = [
+        ":hkdf_prf_proto_serialization",
         ":prf_set",
         "//proto:common_java_proto",
         "//proto:hkdf_prf_java_proto",
@@ -193,6 +194,7 @@ android_library(
     name = "hkdf_prf_key_manager-android",
     srcs = ["HkdfPrfKeyManager.java"],
     deps = [
+        ":hkdf_prf_proto_serialization-android",
         ":prf_set-android",
         "//proto:common_java_proto_lite",
         "//proto:hkdf_prf_java_proto_lite",
