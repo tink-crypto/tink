@@ -5,7 +5,9 @@
  */
 
 import {InvalidArgumentsException} from '../../../exception/invalid_arguments_exception';
+import {PbHpkeKem} from '../../../internal/proto';
 import * as bytes from '../../../subtle/bytes';
+import * as ellipticCurves from '../../../subtle/elliptic_curves';
 import {randBytes} from '../../../subtle/random';
 
 import * as hpkeUtil from './hpke_util';
@@ -229,6 +231,26 @@ describe('HPKE Util', () => {
 
       expect(hpkeUtil.bigIntToByteArray(/*intendedLength*/ 4, BigInt(258)))
           .toEqual(Uint8Array.of(0x00, 0x00, 0x01, 0x02));
+    });
+  });
+
+  describe('nistHpkeKemToCurve', () => {
+    it('should convert values correctly', async () => {
+      expect(hpkeUtil.nistHpkeKemToCurve(PbHpkeKem.DHKEM_P256_HKDF_SHA256))
+          .toEqual(ellipticCurves.CurveType.P256);
+
+      expect(hpkeUtil.nistHpkeKemToCurve(PbHpkeKem.DHKEM_P521_HKDF_SHA512))
+          .toEqual(ellipticCurves.CurveType.P521);
+    });
+
+    it('should fail for unknown kem value', async () => {
+      try {
+        hpkeUtil.nistHpkeKemToCurve(PbHpkeKem.KEM_UNKNOWN);
+        fail('An exception should be thrown.');
+      } catch (e: unknown) {
+        expect((e as InvalidArgumentsException).message)
+            .toBe('Unrecognized NIST HPKE KEM identifier');
+      }
     });
   });
 });

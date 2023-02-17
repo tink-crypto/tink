@@ -4,7 +4,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import {InvalidArgumentsException} from '../../../exception/invalid_arguments_exception';
 import {SecurityException} from '../../../exception/security_exception';
+import {PbHpkeKem} from '../../../internal/proto';
 import * as bytes from '../../../subtle/bytes';
 import * as ellipticCurves from '../../../subtle/elliptic_curves';
 
@@ -120,6 +122,20 @@ export function labelInfo({infoLabel, info, suiteId, length}: {
   return bytes.concat(
       numberToByteArray(2, length), HPKE_V1, suiteId,
       bytes.fromByteString(infoLabel), info);
+}
+
+/** Translates the NIST HPKE KEM identifier to the corresponding curve type */
+export function nistHpkeKemToCurve(kem: PbHpkeKem):
+    ellipticCurves.CurveType.P256|ellipticCurves.CurveType.P521 {
+  switch (kem) {
+    case PbHpkeKem.DHKEM_P256_HKDF_SHA256:
+      return ellipticCurves.CurveType.P256;
+    case PbHpkeKem.DHKEM_P521_HKDF_SHA512:
+      return ellipticCurves.CurveType.P521;
+    default:
+      throw new InvalidArgumentsException(
+          'Unrecognized NIST HPKE KEM identifier');
+  }
 }
 
 /**
