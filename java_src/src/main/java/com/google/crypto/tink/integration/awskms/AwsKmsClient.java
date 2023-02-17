@@ -52,17 +52,15 @@ public final class AwsKmsClient implements KmsClient {
   /**
    * Constructs a generic AwsKmsClient that is not bound to any specific key.
    *
-   * @deprecated use {@link #register}
+   * This constructor should not be used. We recommend to register the client instead.
    */
-  @Deprecated /* Deprecation under consideration */
   public AwsKmsClient() {}
 
   /**
    * Constructs a specific AwsKmsClient that is bound to a single key identified by {@code uri}.
    *
-   * @deprecated use {@link #register}
+   * This constructor should not be used. We recommend to register the client instead.
    */
-  @Deprecated /* Deprecation under consideration */
   public AwsKmsClient(String uri) {
     if (!uri.toLowerCase(Locale.US).startsWith(PREFIX)) {
       throw new IllegalArgumentException("key URI must starts with " + PREFIX);
