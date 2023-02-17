@@ -107,7 +107,9 @@ __create_and_test_sdist_for_linux() {
   # Test install from source distribution.
   python3 --version
   python3 -m pip list
-  python3 -m pip install -v "release/${sdist_filename}"
+  # Install Tink dependencies.
+  python3 -m pip install --require-hashes -r requirements.txt
+  python3 -m pip install --no-deps --no-index -v "release/${sdist_filename}"
   python3 -m pip list
   find tink/ -not -path "*cc/pybind*" -type f -name "*_test.py" -print0 \
     | xargs -0 -n1 python3
