@@ -485,7 +485,6 @@ tink_cc_library(
     tink::core::registry
     absl::core_headers
     absl::flat_hash_map
-    absl::log
     absl::check
     absl::memory
     absl::status

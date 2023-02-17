@@ -162,6 +162,7 @@ tink_cc_library(
     tink::mac::mac_parameters
     absl::log
     tink::core::crypto_format
+    tink::internal::util
     tink::util::status
     tink::util::statusor
 )

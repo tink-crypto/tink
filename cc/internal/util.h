@@ -44,6 +44,10 @@ inline bool IsWindows() {
 #endif
 }
 
+// Wraps Abseil's LOG(FATAL) macro and sets the [noreturn] attribute, which is
+// useful for avoiding false positive [-Werror=return-type] compiler errors.
+ABSL_ATTRIBUTE_NORETURN void LogFatal(absl::string_view msg);
+
 }  // namespace internal
 }  // namespace tink
 }  // namespace crypto

@@ -25,7 +25,10 @@ cc_library(
     srcs = ["util.cc"],
     hdrs = ["util.h"],
     include_prefix = "tink/internal",
-    deps = ["@com_google_absl//absl/strings"],
+    deps = [
+        "@com_google_absl//absl/log",
+        "@com_google_absl//absl/strings",
+    ],
 )
 
 cc_library(

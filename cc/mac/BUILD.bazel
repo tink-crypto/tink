@@ -172,6 +172,7 @@ cc_library(
     deps = [
         ":mac_parameters",
         "//:crypto_format",
+        "//internal:util",
         "//util:status",
         "//util:statusor",
         "@com_google_absl//absl/log",

@@ -24,6 +24,7 @@
 
 #include "absl/log/log.h"
 #include "tink/crypto_format.h"
+#include "tink/internal/util.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 
@@ -73,7 +74,7 @@ int AesCmacParameters::TotalTagSizeInBytes() const {
       return CryptographicTagSizeInBytes();
     default:
       // Parameters objects with unknown variants should never be created.
-      LOG(FATAL) << "AES-CMAC parameters has an unknown variant.";
+      internal::LogFatal("AES-CMAC parameters has an unknown variant.");
   }
 }
 

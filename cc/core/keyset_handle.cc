@@ -22,7 +22,6 @@
 
 #include "absl/container/flat_hash_map.h"
 #include "absl/log/check.h"
-#include "absl/log/log.h"
 #include "absl/memory/memory.h"
 #include "absl/status/status.h"
 #include "absl/strings/string_view.h"
@@ -172,7 +171,7 @@ KeysetHandle::Entry KeysetHandle::GetPrimary() const {
   }
 
   // Since keyset handle was validated, it should have a valid primary key.
-  LOG(FATAL) << "Keyset handle should have a valid primary key.";
+  internal::LogFatal("Keyset handle should have a valid primary key.");
 }
 
 KeysetHandle::Entry KeysetHandle::operator[](int index) const {

@@ -19,6 +19,7 @@
 #include <functional>
 
 #include "absl/strings/ascii.h"
+#include "absl/log/log.h"
 #include "absl/strings/string_view.h"
 
 namespace crypto {
@@ -65,6 +66,10 @@ bool IsPrintableAscii(absl::string_view input) {
     }
   }
   return true;
+}
+
+void LogFatal(absl::string_view msg) {
+  LOG(FATAL) <<  msg;
 }
 
 }  // namespace internal

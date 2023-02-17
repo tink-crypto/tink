@@ -24,6 +24,7 @@ tink_cc_library(
     util.cc
     util.h
   DEPS
+    absl::log
     absl::strings
 )
 
