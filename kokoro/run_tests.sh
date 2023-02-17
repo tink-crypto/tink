@@ -92,6 +92,12 @@ run_java_apps_tests() {
 
 run_javascript_tests() {
   use_bazel "$(cat javascript/.bazelversion)"
+  # On MacOS, Javascript compilation fails with
+  # clang: error: unknown argument: '-fno-canonical-system-headers'
+  # The internet recommends to run "bazel clean --expunge"
+  if [[ "${PLATFORM}" == 'darwin' ]]; then
+    bazelisk clean --expunge
+  fi
   ./kokoro/testutils/run_bazel_tests.sh "javascript"
 }
 
