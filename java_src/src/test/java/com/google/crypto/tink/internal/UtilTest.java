@@ -61,4 +61,14 @@ public final class UtilTest {
       assertThat(Util.getAndroidApiLevel()).isEqualTo(null);
     }
   }
+
+  @Test
+  public void testIsAndroid() throws Exception {
+    try {
+      Class<?> buildVersion = Class.forName("android.os.Build$VERSION");
+      assertThat(Util.isAndroid()).isTrue();
+    } catch (ReflectiveOperationException e) {
+      assertThat(Util.isAndroid()).isFalse();
+    }
+  }
 }
