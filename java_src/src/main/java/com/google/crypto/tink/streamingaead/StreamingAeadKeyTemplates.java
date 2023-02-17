@@ -28,6 +28,21 @@ import com.google.crypto.tink.proto.OutputPrefixType;
 /**
  * Pre-generated {@link KeyTemplate} for {@link com.google.crypto.tink.StreamingAead} keys.
  *
+ * <p>We recommend to avoid this class in order to keep dependencies small.
+ *
+ * <ul>
+ *   <li>Using this class adds a dependency on protobuf. We hope that eventually it is possible to
+ *       use Tink without a dependency on protobuf.
+ *   <li>Using this class adds a dependency on classes for all involved key types.
+ * </ul>
+ *
+ * These dependencies all come from static class member variables, which are initialized when the
+ * class is loaded. This implies that static analysis and code minimization tools (such as proguard)
+ * cannot remove the usages either.
+ *
+ * <p>Instead, we recommend to use {@code KeysetHandle.generateEntryFromParametersName} or {@code
+ * KeysetHandle.generateEntryFromParameters}.
+ *
  * <p>One can use these templates to generate new {@link com.google.crypto.tink.proto.Keyset} with
  * {@code KeysetHandle}. To generate a new keyset that contains a {@link AesGcmHkdfStreamingKey},
  * one can do:
@@ -39,10 +54,7 @@ import com.google.crypto.tink.proto.OutputPrefixType;
  * }</pre>
  *
  * @since 1.1.0
- * @deprecated use {@link com.google.crypto.tink.KeyTemplates#get}, e.g.,
- *     KeyTemplates.get("AES256_GCM_HKDF_1MB")
  */
-@Deprecated /* Deprecation under consideration */
 public final class StreamingAeadKeyTemplates {
   /**
    * A {@link KeyTemplate} that generates new instances of {@link

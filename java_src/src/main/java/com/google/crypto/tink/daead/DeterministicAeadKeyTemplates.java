@@ -21,7 +21,24 @@ import com.google.crypto.tink.proto.KeyTemplate;
 import com.google.crypto.tink.proto.OutputPrefixType;
 
 /**
- * Pre-generated {@code KeyTemplate} for {@code DeterministicAead} keys. One can use these templates
+ * Pre-generated {@code KeyTemplate} for {@code DeterministicAead} keys.
+ *
+ * <p>We recommend to avoid this class in order to keep dependencies small.
+ *
+ * <ul>
+ *   <li>Using this class adds a dependency on protobuf. We hope that eventually it is possible to
+ *       use Tink without a dependency on protobuf.
+ *   <li>Using this class adds a dependency on classes for all involved key types.
+ * </ul>
+ *
+ * These dependencies all come from static class member variables, which are initialized when the
+ * class is loaded. This implies that static analysis and code minimization tools (such as proguard)
+ * cannot remove the usages either.
+ *
+ * <p>Instead, we recommend to use {@code KeysetHandle.generateEntryFromParametersName} or {@code
+ * KeysetHandle.generateEntryFromParameters}.
+ *
+ * One can use these templates
  * to generate new {@code Keyset} with {@code KeysetHandle}. To generate a new keyset that contains
  * a single {@code AesSivKey}, one can do:
  *
@@ -32,10 +49,7 @@ import com.google.crypto.tink.proto.OutputPrefixType;
  * </pre>
  *
  * @since 1.1.0
- * @deprecated use {@link com.google.crypto.tink.KeyTemplates#get}, e.g.,
- *     KeyTemplates.get("AES256_SIV")
  */
-@Deprecated /* Deprecation under consideration */
 public final class DeterministicAeadKeyTemplates {
   /** A {@code KeyTemplate} that generates new instances of {@code AesSivKey} with a 64-byte key. */
   public static final KeyTemplate AES256_SIV = createAesSivKeyTemplate(64);

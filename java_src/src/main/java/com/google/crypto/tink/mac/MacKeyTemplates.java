@@ -27,6 +27,21 @@ import com.google.crypto.tink.proto.OutputPrefixType;
 /**
  * Pre-generated {@link KeyTemplate} for {@link com.google.crypto.tink.Mac}.
  *
+ * <p>We recommend to avoid this class in order to keep dependencies small.
+ *
+ * <ul>
+ *   <li>Using this class adds a dependency on protobuf. We hope that eventually it is possible to
+ *       use Tink without a dependency on protobuf.
+ *   <li>Using this class adds a dependency on classes for all involved key types.
+ * </ul>
+ *
+ * These dependencies all come from static class member variables, which are initialized when the
+ * class is loaded. This implies that static analysis and code minimization tools (such as proguard)
+ * cannot remove the usages either.
+ *
+ * <p>Instead, we recommend to use {@code KeysetHandle.generateEntryFromParametersName} or {@code
+ * KeysetHandle.generateEntryFromParameters}.
+ *
  * <p>One can use these templates to generate new {@link com.google.crypto.tink.proto.Keyset} with
  * {@link com.google.crypto.tink.KeysetHandle}. To generate a new keyset that contains a single
  * {@link com.google.crypto.tink.proto.HmacKey}, one can do:
@@ -38,10 +53,7 @@ import com.google.crypto.tink.proto.OutputPrefixType;
  * }</pre>
  *
  * @since 1.0.0
- * @deprecated use {@link com.google.crypto.tink.KeyTemplates#get}, e.g.,
- *     KeyTemplates.get("HMAC_SHA256_128BITTAG")
  */
-@Deprecated /* Deprecation under consideration */
 public final class MacKeyTemplates {
   /**
    * A {@link KeyTemplate} that generates new instances of {@link

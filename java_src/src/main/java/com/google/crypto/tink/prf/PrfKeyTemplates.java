@@ -28,10 +28,21 @@ import com.google.crypto.tink.proto.OutputPrefixType;
 /**
  * Key templates for PRF-Keys.
  *
- * @deprecated use {@link com.google.crypto.tink.KeyTemplates#get}, e.g.,
- *     KeyTemplates.get("HKDF_SHA256")
+ * <p>We recommend to avoid this class in order to keep dependencies small.
+ *
+ * <ul>
+ *   <li>Using this class adds a dependency on protobuf. We hope that eventually it is possible to
+ *       use Tink without a dependency on protobuf.
+ *   <li>Using this class adds a dependency on classes for all involved key types.
+ * </ul>
+ *
+ * These dependencies all come from static class member variables, which are initialized when the
+ * class is loaded. This implies that static analysis and code minimization tools (such as proguard)
+ * cannot remove the usages either.
+ *
+ * <p>Instead, we recommend to use {@code KeysetHandle.generateEntryFromParametersName} or {@code
+ * KeysetHandle.generateEntryFromParameters}.
  */
-@Deprecated /* Deprecation under consideration */
 public final class PrfKeyTemplates {
 
   private PrfKeyTemplates() {}
