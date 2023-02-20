@@ -243,7 +243,6 @@ public final class PrimitiveSet<P> {
   private final MonitoringAnnotations annotations;
   private final boolean isMutable;
 
-  @Deprecated /* Deprecation under consideration */
   private PrimitiveSet(Class<P> primitiveClass) {
     this.primitives = new ConcurrentHashMap<>();
     this.primitiveClass = primitiveClass;
@@ -266,7 +265,7 @@ public final class PrimitiveSet<P> {
    *
    * @deprecated use {@link Builder} instead.
    */
-  @Deprecated /* Deprecation under consideration */
+  @Deprecated
   public static <P> PrimitiveSet<P> newPrimitiveSet(Class<P> primitiveClass) {
     return new PrimitiveSet<P>(primitiveClass);
   }
