@@ -20,7 +20,6 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertThrows;
 
-import com.google.crypto.tink.Config;
 import com.google.crypto.tink.HybridDecrypt;
 import com.google.crypto.tink.HybridEncrypt;
 import com.google.crypto.tink.aead.AeadKeyTemplates;
@@ -50,7 +49,7 @@ import org.junit.runners.JUnit4;
 public class EciesAeadHkdfHybridDecryptTest {
   @Before
   public void setUp() throws GeneralSecurityException {
-    Config.register(HybridConfig.TINK_1_0_0);
+    HybridConfig.register();
   }
 
   private static void testEncryptDecrypt(CurveType curveType, KeyTemplate keyTemplate)

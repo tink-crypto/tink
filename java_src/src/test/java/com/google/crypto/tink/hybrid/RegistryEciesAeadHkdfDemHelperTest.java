@@ -21,7 +21,6 @@ import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
 
-import com.google.crypto.tink.Config;
 import com.google.crypto.tink.aead.AeadConfig;
 import com.google.crypto.tink.aead.AeadKeyTemplates;
 import com.google.crypto.tink.daead.DeterministicAeadKeyTemplates;
@@ -46,7 +45,7 @@ public class RegistryEciesAeadHkdfDemHelperTest {
 
   @Before
   public void setUp() throws Exception {
-    Config.register(AeadConfig.TINK_1_0_0);
+    AeadConfig.register();
 
     if (Cipher.getMaxAllowedKeyLength("AES") < 256) {
       System.out.println(

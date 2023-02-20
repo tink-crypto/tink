@@ -19,7 +19,6 @@ package com.google.crypto.tink.hybrid;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
-import com.google.crypto.tink.Config;
 import com.google.crypto.tink.HybridDecrypt;
 import com.google.crypto.tink.HybridEncrypt;
 import com.google.crypto.tink.aead.AeadKeyTemplates;
@@ -52,7 +51,7 @@ import org.junit.runners.JUnit4;
 public class EciesAeadHkdfHybridEncryptTest {
   @Before
   public void setUp() throws GeneralSecurityException {
-    Config.register(HybridConfig.TINK_1_0_0);
+    HybridConfig.register();
   }
 
   private void testBasicMultipleEncrypts(CurveType curveType, KeyTemplate keyTemplate)

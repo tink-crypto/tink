@@ -22,7 +22,6 @@ java_test(
     srcs = ["RegistryEciesAeadHkdfDemHelperTest.java"],
     deps = [
         "//proto:tink_java_proto",
-        "//src/main/java/com/google/crypto/tink:config",
         "//src/main/java/com/google/crypto/tink/aead:aead_config",
         "//src/main/java/com/google/crypto/tink/aead:aead_key_templates",
         "//src/main/java/com/google/crypto/tink/daead:deterministic_aead_key_templates",
@@ -158,7 +157,6 @@ java_test(
     deps = [
         "//proto:common_java_proto",
         "//proto:tink_java_proto",
-        "//src/main/java/com/google/crypto/tink:config",
         "//src/main/java/com/google/crypto/tink:hybrid_decrypt",
         "//src/main/java/com/google/crypto/tink:hybrid_encrypt",
         "//src/main/java/com/google/crypto/tink/aead:aead_key_templates",
@@ -211,7 +209,6 @@ java_test(
     deps = [
         "//proto:common_java_proto",
         "//proto:tink_java_proto",
-        "//src/main/java/com/google/crypto/tink:config",
         "//src/main/java/com/google/crypto/tink:hybrid_decrypt",
         "//src/main/java/com/google/crypto/tink:hybrid_encrypt",
         "//src/main/java/com/google/crypto/tink/aead:aead_key_templates",
