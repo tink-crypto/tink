@@ -116,7 +116,6 @@ parse_args() {
         "-Durl=https://oss.sonatype.org/service/local/staging/deploy/maven2/"
         "-Dgpg.keyname=tink-dev@google.com"
         "--settings=${maven_scripts_dir}/settings.xml"
-        "-X"
       )
       ;;
     *)
