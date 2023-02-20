@@ -96,7 +96,10 @@ run_javascript_tests() {
   # clang: error: unknown argument: '-fno-canonical-system-headers'
   # The internet recommends to run "bazel clean --expunge"
   if [[ "${PLATFORM}" == 'darwin' ]]; then
-    bazelisk clean --expunge
+    (
+      cd javascript
+      bazelisk clean --expunge
+    )
   fi
   ./kokoro/testutils/run_bazel_tests.sh "javascript"
 }
