@@ -160,9 +160,9 @@ public final class Registry {
    *     the same class as {@code catalogue}
    * @deprecated Catalogues are no longer supported.
    */
-  @Deprecated /* Deprecation under consideration */
-  public static synchronized void addCatalogue(String catalogueName, Catalogue<?> catalogue)
-      throws GeneralSecurityException {
+  @Deprecated
+  public static synchronized void addCatalogue(
+      String catalogueName, Catalogue<?> catalogue) throws GeneralSecurityException {
     if (catalogueName == null) {
       throw new IllegalArgumentException("catalogueName must be non-null.");
     }
@@ -187,8 +187,9 @@ public final class Registry {
    * @deprecated Catalogues are no longer supported.
    * @throws GeneralSecurityException if no catalogue is found
    */
-  @Deprecated /* Deprecation under consideration */
-  public static Catalogue<?> getCatalogue(String catalogueName) throws GeneralSecurityException {
+  @Deprecated
+  public static Catalogue<?> getCatalogue(String catalogueName)
+      throws GeneralSecurityException {
     if (catalogueName == null) {
       throw new IllegalArgumentException("catalogueName must be non-null.");
     }
