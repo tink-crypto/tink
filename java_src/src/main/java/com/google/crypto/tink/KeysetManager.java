@@ -147,22 +147,11 @@ public final class KeysetManager {
    *     key contained in the {@code KeyHandle}.
    * @throws UnsupportedOperationException if the {@code KeyHandle} contains a {@code TinkKey} which
    *     is not a {@code ProtoKey}.
-   * @deprecated Use KeysetManager.add(KeyHandle) instead.
    */
   @CanIgnoreReturnValue
-  @Deprecated /* Deprecation under consideration */
   public synchronized KeysetManager add(KeyHandle keyHandle, KeyAccess access)
       throws GeneralSecurityException {
-    ProtoKey pkey;
-    try {
-      pkey = (ProtoKey) keyHandle.getKey(access);
-    } catch (ClassCastException e) {
-      throw new UnsupportedOperationException(
-          "KeyHandles which contain TinkKeys that are not ProtoKeys are not yet supported.", e);
-    }
-    keysetBuilder.addKey(
-        createKeysetKey(pkey.getProtoKey(), KeyTemplate.toProto(pkey.getOutputPrefixType())));
-    return this;
+    return add(keyHandle);
   }
 
   /**
