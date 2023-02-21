@@ -54,7 +54,7 @@ public class MacConfigTest {
     MacConfig.register();
 
     // After registration the key manager should be present.
-    assertNotNull(Registry.getKeyManager(typeUrl));
+    assertNotNull(Registry.getUntypedKeyManager(typeUrl));
 
     // Running init() manually again should succeed.
     MacConfig.register();
