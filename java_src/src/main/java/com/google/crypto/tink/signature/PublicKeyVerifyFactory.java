@@ -35,15 +35,15 @@ import java.security.GeneralSecurityException;
  *     {@code PublicKeyVerifyWrapper} instead.
  * @since 1.0.0
  */
-@Deprecated /* Deprecation under consideration */
+@Deprecated
 public final class PublicKeyVerifyFactory {
   /**
    * @return a PublicKeyVerify primitive from a {@code keysetHandle}.
    * @deprecated Use {@code keysetHandle.GetPrimitive(PublicKeyVerify.class)} after registering the
    *     {@code PublicKeyVerifyWrapper} instead.
    */
-  @Deprecated /* Deprecation under consideration */
-  public static PublicKeyVerify getPrimitive(KeysetHandle keysetHandle)
+  @Deprecated
+  public  static PublicKeyVerify getPrimitive(KeysetHandle keysetHandle)
       throws GeneralSecurityException {
     PublicKeyVerifyWrapper.register();
     return keysetHandle.getPrimitive(PublicKeyVerify.class);

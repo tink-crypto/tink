@@ -51,7 +51,7 @@ public final class AeadConfig {
   /**
    * @deprecated use {@link #register}
    */
-  @Deprecated /* Deprecation under consideration */
+  @Deprecated
   public static final RegistryConfig TINK_1_0_0 = RegistryConfig.getDefaultInstance();
 
   /**

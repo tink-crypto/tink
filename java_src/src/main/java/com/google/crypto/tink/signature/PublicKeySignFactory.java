@@ -35,15 +35,15 @@ import java.security.GeneralSecurityException;
  *     {@code PublicKeySignWrapper} instead.
  * @since 1.0.0
  */
-@Deprecated /* Deprecation under consideration */
+@Deprecated
 public final class PublicKeySignFactory {
   /**
    * @return a PublicKeySign primitive from a {@code keysetHandle}.
    * @deprecated Use {@code keysetHandle.GetPrimitive(PublicKeySign.class)} after registering the
    *     {@code PublicKeySignWrapper} instead.
    */
-  @Deprecated /* Deprecation under consideration */
-  public static PublicKeySign getPrimitive(KeysetHandle keysetHandle)
+  @Deprecated
+  public  static PublicKeySign getPrimitive(KeysetHandle keysetHandle)
       throws GeneralSecurityException {
     PublicKeySignWrapper.register();
     return keysetHandle.getPrimitive(PublicKeySign.class);
