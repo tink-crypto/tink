@@ -69,8 +69,8 @@ public final class AndroidKeystoreKmsClient implements KmsClient {
    *
    * @deprecated use {@link AndroidKeystoreKmsClient.Builder}.
    */
-  @Deprecated /* Deprecation under consideration */
   @RequiresApi(23)
+  @Deprecated
   public AndroidKeystoreKmsClient(String uri) {
     this(new Builder().setKeyUri(uri));
   }
