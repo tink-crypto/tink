@@ -1,0 +1,11 @@
+"""Module definition for Tink C++ Examples."""
+# Omitting `version` because this is not meant to be depended on by other
+# modules.
+module(name = "tink_cc_examples")
+
+# Use local tink_cc.
+bazel_dep(name = "tink_cc", version = "")
+local_path_override(module_name = "tink_cc", path = "../")
+
+bazel_dep(name = "googletest", version = "1.12.1", repo_name = "com_google_googletest")
+bazel_dep(name = "abseil-cpp", version = "20230125.1", repo_name="com_google_absl")

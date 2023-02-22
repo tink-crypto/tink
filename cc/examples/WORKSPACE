@@ -1,4 +1,4 @@
-workspace(name = "examples_cc")
+workspace(name = "tink_cc_examples")
 
 # The local_repository() rule is used below because the workspaces referenced
 # are all located within the Tink git repository.
