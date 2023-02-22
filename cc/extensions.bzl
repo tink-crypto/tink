@@ -16,18 +16,6 @@
 
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
-def _abseil_impl(_ctx):
-    http_archive(
-        name = "com_google_absl",
-        strip_prefix = "abseil-cpp-20230125.0",
-        url = "https://github.com/abseil/abseil-cpp/archive/refs/tags/20230125.0.zip",
-        sha256 = "70a2e30f715a7adcf5b7fcd2fcef7b624204b8e32ede8a23fd35ff5bd7d513b0",
-    )
-
-abseil_extension = module_extension(
-    implementation = _abseil_impl,
-)
-
 def _wycheproof_impl(_ctx):
     # Commit from 2019-12-17.
     http_archive(

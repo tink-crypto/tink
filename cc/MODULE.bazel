@@ -26,8 +26,7 @@ bazel_dep(name = "googletest", version = "1.12.1", repo_name = "com_google_googl
 bazel_dep(name = "protobuf", version = "21.7", repo_name = "com_google_protobuf")
 bazel_dep(name = "boringssl", version = "0.0.0-20230215-5c22014")
 bazel_dep(name = "rapidjson", version = "1.1.0")
+bazel_dep(name = "abseil-cpp", version = "20230125.1", repo_name="com_google_absl")
 
-abseil_extension = use_extension("//:extensions.bzl", "abseil_extension")
 wycheproof_extension = use_extension("//:extensions.bzl", "wycheproof_extension")
-use_repo(abseil_extension, "com_google_absl")
 use_repo(wycheproof_extension, "wycheproof")
