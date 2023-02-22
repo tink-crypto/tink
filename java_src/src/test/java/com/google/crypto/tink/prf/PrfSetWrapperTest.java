@@ -18,24 +18,27 @@ package com.google.crypto.tink.prf;
 import static com.google.common.truth.Truth.assertThat;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
 
+import com.google.crypto.tink.InsecureSecretKeyAccess;
+import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.PrimitiveSet;
 import com.google.crypto.tink.internal.MutableMonitoringRegistry;
 import com.google.crypto.tink.internal.testing.FakeMonitoringClient;
 import com.google.crypto.tink.monitoring.MonitoringAnnotations;
+import com.google.crypto.tink.prf.HkdfPrfParameters.HashType;
 import com.google.crypto.tink.proto.KeyStatusType;
 import com.google.crypto.tink.proto.Keyset;
 import com.google.crypto.tink.proto.OutputPrefixType;
+import com.google.crypto.tink.subtle.Hex;
 import com.google.crypto.tink.subtle.Random;
 import com.google.crypto.tink.testing.TestUtil;
+import com.google.crypto.tink.util.SecretBytes;
 import com.google.errorprone.annotations.Immutable;
 import java.security.GeneralSecurityException;
 import java.util.List;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.junit.function.ThrowingRunnable;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
@@ -44,108 +47,112 @@ import org.junit.runners.JUnit4;
 public class PrfSetWrapperTest {
   private static final int KEY_SIZE = 32;
 
+  private static HkdfPrfKey hkdfPrfKey0;
+  private static HkdfPrfKey hkdfPrfKey1;
+  private static HkdfPrfKey hkdfPrfKeyFixed;
+
   @BeforeClass
   public static void setUp() throws Exception {
     PrfConfig.register();
+    createTestKeys();
+  }
+
+  private static void createTestKeys() throws GeneralSecurityException {
+    hkdfPrfKey0 =
+        HkdfPrfKey.builder()
+            .setParameters(
+                HkdfPrfParameters.builder()
+                    .setKeySizeBytes(KEY_SIZE)
+                    .setHashType(HashType.SHA256)
+                    .build())
+            .setKeyBytes(SecretBytes.randomBytes(KEY_SIZE))
+            .build();
+    hkdfPrfKey1 =
+        HkdfPrfKey.builder()
+            .setParameters(
+                HkdfPrfParameters.builder()
+                    .setKeySizeBytes(KEY_SIZE)
+                    .setHashType(HashType.SHA256)
+                    .build())
+            .setKeyBytes(SecretBytes.randomBytes(KEY_SIZE))
+            .build();
+    hkdfPrfKeyFixed =
+        HkdfPrfKey.builder()
+            .setParameters(
+                HkdfPrfParameters.builder()
+                    .setKeySizeBytes(KEY_SIZE)
+                    .setHashType(HashType.SHA256)
+                    .build())
+            .setKeyBytes(
+                SecretBytes.copyFrom(
+                    Hex.decode("0000000000000000000000000000000000000000000000000000000000000000"),
+                    InsecureSecretKeyAccess.get()))
+            .build();
   }
 
   @Test
-  public void testSmallPlaintextWithRawKey() throws Exception {
-    byte[] keyValue = Random.randBytes(KEY_SIZE);
-    Keyset.Key primary =
-        TestUtil.createKey(
-            TestUtil.createPrfKeyData(keyValue),
-            /* keyId= */ 5,
-            KeyStatusType.ENABLED,
-            OutputPrefixType.RAW);
-    PrimitiveSet<Prf> primitives =
-        TestUtil.createPrimitiveSet(TestUtil.createKeyset(primary), Prf.class);
+  public void compute_works() throws Exception {
+    KeysetHandle keysetHandle =
+        KeysetHandle.newBuilder()
+            .addEntry(KeysetHandle.importKey(hkdfPrfKeyFixed).withFixedId(42).makePrimary())
+            .build();
+    PrfSet prfSet = keysetHandle.getPrimitive(PrfSet.class);
     byte[] plaintext = "blah".getBytes(UTF_8);
 
-    PrfSet prfSet = new PrfSetWrapper().wrap(primitives);
     byte[] prs = prfSet.computePrimary(plaintext, 12);
-    byte[] prs2 = prfSet.getPrfs().get(5).compute(plaintext, 12);
 
-    assertEquals(5, prfSet.getPrimaryId());
     assertThat(prfSet.getPrfs()).hasSize(1);
-    assertThat(prs).hasLength(12);
-    assertArrayEquals(prs2, prs);
+    assertThat(prs).isEqualTo(Hex.decode("04f108788845580686b70d61"));
   }
 
   @Test
-  public void testSmallPlaintextWithMultipleKeys() throws Exception {
-    byte[] primaryKeyValue = Random.randBytes(KEY_SIZE);
-    Keyset.Key primary =
-        TestUtil.createKey(
-            TestUtil.createPrfKeyData(primaryKeyValue),
-            /* keyId= */ 5,
-            KeyStatusType.ENABLED,
-            OutputPrefixType.RAW);
-    byte[] secondaryKeyValue = Random.randBytes(KEY_SIZE);
-    Keyset.Key secondary =
-        TestUtil.createKey(
-            TestUtil.createPrfKeyData(secondaryKeyValue),
-            /* keyId= */ 6,
-            KeyStatusType.ENABLED,
-            OutputPrefixType.RAW);
-    PrimitiveSet<Prf> primitives =
-        TestUtil.createPrimitiveSet(TestUtil.createKeyset(primary, secondary), Prf.class);
+  public void compute_usesPrimaryKey() throws Exception {
+    KeysetHandle keysetHandle =
+        KeysetHandle.newBuilder()
+            .addEntry(KeysetHandle.importKey(hkdfPrfKey0).withFixedId(42).makePrimary())
+            .addEntry(KeysetHandle.importKey(hkdfPrfKey1).withFixedId(43))
+            .build();
+    PrfSet prfSet = keysetHandle.getPrimitive(PrfSet.class);
     byte[] plaintext = "blah".getBytes(UTF_8);
 
-    PrfSet prfSet = new PrfSetWrapper().wrap(primitives);
-    byte[] prsPrimary = prfSet.computePrimary(plaintext, 12);
-    byte[] prs5 = prfSet.getPrfs().get(5).compute(plaintext, 12);
-    byte[] prs6 = prfSet.getPrfs().get(6).compute(plaintext, 12);
+    byte[] prs = prfSet.computePrimary(plaintext, 12);
+    byte[] prsPrimary = prfSet.getPrfs().get(42).compute(plaintext, 12);
 
-    assertEquals(5, prfSet.getPrimaryId());
-    assertThat(prfSet.getPrfs()).hasSize(2);
-    assertThat(prsPrimary).hasLength(12);
-    assertArrayEquals(prs5, prsPrimary);
-    assertThat(prsPrimary).isNotEqualTo(prs6);
+    assertThat(prfSet.getPrimaryId()).isEqualTo(42);
+    assertArrayEquals(prsPrimary, prs);
   }
 
-    @Test
-    public void testWrapEmptyThrows() throws Exception {
-      final PrimitiveSet<Prf> primitiveSet = PrimitiveSet.newBuilder(Prf.class).build();
+  @Test
+  public void prfsCorrespondToCorrectKeys() throws Exception {
+    KeysetHandle keysetHandle =
+        KeysetHandle.newBuilder()
+            .addEntry(KeysetHandle.importKey(hkdfPrfKey0).withFixedId(42).makePrimary())
+            .addEntry(KeysetHandle.importKey(hkdfPrfKey1).withFixedId(43))
+            .build();
+    KeysetHandle singleKeyKeysetHandle =
+        KeysetHandle.newBuilder()
+            .addEntry(KeysetHandle.importKey(hkdfPrfKey1).withFixedId(43).makePrimary())
+            .build();
+    PrfSet prfSet = keysetHandle.getPrimitive(PrfSet.class);
+    PrfSet singleKeyPrfSet = singleKeyKeysetHandle.getPrimitive(PrfSet.class);
+    byte[] plaintext = "blah".getBytes(UTF_8);
 
-      assertThrows(
-          GeneralSecurityException.class,
-          new ThrowingRunnable() {
-            @Override
-            public void run() throws Throwable {
-              new PrfSetWrapper().wrap(primitiveSet);
-            }
-          });
-    }
+    byte[] prs = prfSet.getPrfs().get(43).compute(plaintext, 12);
+    byte[] singleKeyPrs = singleKeyPrfSet.computePrimary(plaintext, 12);
+
+    assertArrayEquals(singleKeyPrs, prs);
+  }
 
   @Test
-  public void testWrapNoPrimaryThrows() throws Exception {
-    byte[] primaryKeyValue = Random.randBytes(KEY_SIZE);
-    Keyset.Key primary =
-        TestUtil.createKey(
-            TestUtil.createPrfKeyData(primaryKeyValue),
-            /* keyId= */ 5,
-            KeyStatusType.ENABLED,
-            OutputPrefixType.RAW);
-    final Prf unusedPrf =
-        new Prf() {
-          @Override
-          public byte[] compute(byte[] input, int outputLength) throws GeneralSecurityException {
-            return new byte[0];
-          }
-        };
-    final PrimitiveSet<Prf> primitiveSet =
-        PrimitiveSet.newBuilder(Prf.class).addPrimitive(unusedPrf, primary).build();
-    // Note: Added a primary key but did not call primitiveSet.setPrimary().
+  public void getPrfs_containsOnlyExistingKeys() throws Exception {
+    KeysetHandle keysetHandle =
+        KeysetHandle.newBuilder()
+            .addEntry(KeysetHandle.importKey(hkdfPrfKey0).withFixedId(42).makePrimary())
+            .addEntry(KeysetHandle.importKey(hkdfPrfKey1).withFixedId(43))
+            .build();
+    PrfSet prfSet = keysetHandle.getPrimitive(PrfSet.class);
 
-    assertThrows(
-        GeneralSecurityException.class,
-        new ThrowingRunnable() {
-          @Override
-          public void run() throws Throwable {
-            new PrfSetWrapper().wrap(primitiveSet);
-          }
-        });
+    assertThat(prfSet.getPrfs().keySet()).containsExactly(42, 43);
   }
 
   @Test
@@ -154,25 +161,17 @@ public class PrfSetWrapperTest {
     MutableMonitoringRegistry.globalInstance().clear();
     MutableMonitoringRegistry.globalInstance().registerMonitoringClient(fakeMonitoringClient);
 
-    Keyset.Key primary =
-        TestUtil.createKey(
-            TestUtil.createPrfKeyData(Random.randBytes(KEY_SIZE)),
-            /* keyId= */ 5,
-            KeyStatusType.ENABLED,
-            OutputPrefixType.RAW);
-    PrimitiveSet<Prf> primitives =
-        TestUtil.createPrimitiveSetWithAnnotations(
-            TestUtil.createKeyset(primary), MonitoringAnnotations.EMPTY, Prf.class);
+    KeysetHandle keysetHandle =
+        KeysetHandle.newBuilder()
+            .addEntry(KeysetHandle.importKey(hkdfPrfKey0).withFixedId(42).makePrimary())
+            .addEntry(KeysetHandle.importKey(hkdfPrfKey1).withFixedId(43))
+            .build();
+    PrfSet prfSet = keysetHandle.getPrimitive(PrfSet.class);
     byte[] plaintext = "blah".getBytes(UTF_8);
 
-    PrfSet prfSet = new PrfSetWrapper().wrap(primitives);
-    byte[] prsPrimary = prfSet.computePrimary(plaintext, 12);
-    byte[] prs5 = prfSet.getPrfs().get(5).compute(plaintext, 12);
-
-    assertThat(prfSet.getPrimaryId()).isEqualTo(5);
-    assertThat(prfSet.getPrfs()).hasSize(1);
-    assertThat(prsPrimary).hasLength(12);
-    assertThat(prs5).hasLength(12);
+    byte[] unused = prfSet.computePrimary(plaintext, 12);
+    unused = prfSet.getPrfs().get(42).compute(plaintext, 12);
+    unused = prfSet.getPrfs().get(43).compute(plaintext, 12);
 
     // Without annotations, nothing gets logged.
     assertThat(fakeMonitoringClient.getLogEntries()).isEmpty();
