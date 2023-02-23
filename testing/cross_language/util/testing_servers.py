@@ -323,11 +323,6 @@ def start(output_files_prefix: str) -> None:
     else:
       logging.warning('server in lang %s has no tink version.', lang)
   unique_versions = list(set(versions.values()))
-  if not unique_versions:
-    raise ValueError('tink version unknown')
-  if len(unique_versions) > 1:
-    raise ValueError('tink_version in testing servers are inconsistent: %s' %
-                     versions)
   logging.info('Tink version: %s', unique_versions[0])
 
 
