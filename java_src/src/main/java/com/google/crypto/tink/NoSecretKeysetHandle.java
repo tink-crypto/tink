@@ -27,16 +27,14 @@ import java.security.GeneralSecurityException;
  * Static methods for reading cleartext keysets that don't contain any secret key material.
  *
  * @since 1.0.0
- * @deprecated use {@link KeysetHandle#readNoSecret} instead
  */
-@Deprecated /* Deprecation under consideration */
 public final class NoSecretKeysetHandle {
   /**
    * @return a new keyset handle from {@code serialized} which is a serialized {@link Keyset}.
    * @throws GeneralSecurityException
-   * @deprecated use {@link NoSecretKeysetHandle#read} instead
+   * @deprecated call {@link TinkProtoKeysetFormat#parseKeysetWithoutSecret} instead
    */
-  @Deprecated /* Deprecation under consideration */
+  @Deprecated
   public static final KeysetHandle parseFrom(final byte[] serialized)
       throws GeneralSecurityException {
     try {
@@ -49,6 +47,9 @@ public final class NoSecretKeysetHandle {
   }
 
   /**
+   * Note: we recommend to avoid this function (and use {@code
+   * TinkProtoKeysetFormat#parseKeysetWithoutSecret} instead).
+   *
    * @return a new keyset handle from a keyset obtained from {@code reader}.
    * @throws GeneralSecurityException
    */
