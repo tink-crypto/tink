@@ -25,26 +25,29 @@ import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 
 /**
- * Implements the key wrapping primitive KWP defined in NIST SP 800 38f.
- * The same encryption mode is also defined in RFC 5649. The NIST document is used here
- * as a primary reference, since it contains a security analysis and further
- * recommendations. In particular, Section 8 of NIST SP 800 38f suggests that the
- * allowed key sizes may be restricted. The implementation in this class
+ * Implements the key wrapping primitive KWP defined in NIST SP 800 38f. The same encryption mode is
+ * also defined in RFC 5649. The NIST document is used here as a primary reference, since it
+ * contains a security analysis and further recommendations. In particular, Section 8 of NIST SP 800
+ * 38f suggests that the allowed key sizes may be restricted. The implementation in this class
  * requires that the key sizes are in the range MIN_WRAP_KEY_SIZE and MAX_WRAP_KEY_SIZE.
  *
- * <p>The minimum of 16 bytes has been chosen, because 128 bit keys are the smallest
- * key sizes used in tink. Additionally, wrapping short keys with KWP does not use
- * the function W and hence prevents using security arguments based on the assumption
- * that W is strong pseudorandom. (I.e. one consequence of using a strong pseudorandom
- * permutation as an underlying function is that leaking partial information about
- * decrypted bytes is not useful for an attack.)
+ * <p>The minimum of 16 bytes has been chosen, because 128 bit keys are the smallest key sizes used
+ * in tink. Additionally, wrapping short keys with KWP does not use the function W and hence
+ * prevents using security arguments based on the assumption that W is strong pseudorandom. (I.e.
+ * one consequence of using a strong pseudorandom permutation as an underlying function is that
+ * leaking partial information about decrypted bytes is not useful for an attack.)
  *
- * <p>The upper bound for the key size is somewhat arbitrary. Setting an upper bound is
- * motivated by the analysis in section A.4 of NIST SP 800 38f: forgeries of long
- * messages is simpler than forgeries of short message.
+ * <p>The upper bound for the key size is somewhat arbitrary. Setting an upper bound is motivated by
+ * the analysis in section A.4 of NIST SP 800 38f: forgeries of long messages is simpler than
+ * forgeries of short message.
  *
+ * @deprecated Tink does not support KeyWrap anymore. This implementation was fallback code for old
+ *     providers that did not implement KWP. It implements the same functionality as {@code
+ *     Cipher.getInstance("AESWRAPPAD");}. Some provider use a different algorithm name: {@code
+ *     Cipher.getInstance("AES/KWP/NoPadding");}.
  * @since 1.?.?
  */
+@Deprecated
 public class Kwp implements KeyWrap {
   private final SecretKey aesKey;
 
