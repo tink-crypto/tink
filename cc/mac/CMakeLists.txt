@@ -30,6 +30,7 @@ tink_cc_library(
     mac_config.h
   DEPS
     tink::mac::aes_cmac_key_manager
+    tink::mac::aes_cmac_proto_serialization
     tink::mac::hmac_key_manager
     tink::mac::mac_wrapper
     absl::core_headers
@@ -240,7 +241,9 @@ tink_cc_test(
   SRCS
     mac_config_test.cc
   DEPS
+    tink::mac::aes_cmac_key
     tink::mac::aes_cmac_key_manager
+    tink::mac::aes_cmac_parameters
     tink::mac::hmac_key_manager
     tink::mac::mac_config
     tink::mac::mac_key_templates
@@ -251,11 +254,16 @@ tink_cc_test(
     tink::core::config
     tink::core::keyset_handle
     tink::core::mac
+    tink::core::partial_key_access
     tink::core::registry
     tink::config::tink_fips
+    tink::internal::mutable_serialization_registry
+    tink::internal::proto_key_serialization
+    tink::internal::proto_parameters_serialization
     tink::util::status
     tink::util::test_matchers
     tink::util::test_util
+    tink::proto::tink_cc_proto
 )
 
 tink_cc_test(
