@@ -387,16 +387,6 @@ final class KeyManagerRegistry {
   }
 
   /**
-   * Should not be used since the API is a misuse of Java generics.
-   *
-   * @deprecated
-   */
-  @Deprecated /* Deprecation under consideration */
-  <P> KeyManager<P> getKeyManager(String typeUrl) throws GeneralSecurityException {
-    return getKeyManagerInternal(typeUrl, null);
-  }
-
-  /**
    * @return a {@link KeyManager} for the given {@code typeUrl} and {@code primitiveClass}(if found
    *     and this key type supports this primitive).
    */

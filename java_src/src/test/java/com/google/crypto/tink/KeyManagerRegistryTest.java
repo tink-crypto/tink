@@ -156,7 +156,6 @@ public final class KeyManagerRegistryTest {
     KeyManagerRegistry registry = new KeyManagerRegistry();
     assertThrows(
         GeneralSecurityException.class, () -> registry.getKeyManager("customTypeUrl", Aead.class));
-    assertThrows(GeneralSecurityException.class, () -> registry.getKeyManager("customTypeUrl"));
     assertThrows(
         GeneralSecurityException.class, () -> registry.getUntypedKeyManager("customTypeUrl"));
     assertThat(registry.typeUrlExists("customTypeUrl")).isFalse();
@@ -299,10 +298,8 @@ public final class KeyManagerRegistryTest {
     KeyManager<?> registered = new TestKeyManager("typeUrl");
     registry.registerKeyManager(registered);
     KeyManager<Primitive1> aeadManager1 = registry.getKeyManager("typeUrl", Primitive1.class);
-    KeyManager<Primitive1> aeadManager2 = registry.getKeyManager("typeUrl");
     KeyManager<?> manager = registry.getUntypedKeyManager("typeUrl");
     assertThat(aeadManager1).isSameInstanceAs(registered);
-    assertThat(aeadManager2).isSameInstanceAs(registered);
     assertThat(manager).isSameInstanceAs(registered);
   }
 

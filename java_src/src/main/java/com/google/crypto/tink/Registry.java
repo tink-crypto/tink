@@ -494,7 +494,9 @@ public final class Registry {
   @Deprecated
   public static <P> KeyManager<P> getKeyManager(String typeUrl)
       throws GeneralSecurityException {
-    return keyManagerRegistry.get().getKeyManager(typeUrl);
+    @SuppressWarnings("unchecked") // Unavoidable for the API we implement (hence it is deprecated)
+    KeyManager<P> result = (KeyManager<P>) getUntypedKeyManager(typeUrl);
+    return result;
   }
 
   /** @return a {@link KeyManager} for the given {@code typeUrl} (if found). */
@@ -636,7 +638,7 @@ public final class Registry {
   @Deprecated
   public static <P> P getPrimitive(String typeUrl, MessageLite key)
       throws GeneralSecurityException {
-    KeyManager<P> manager = keyManagerRegistry.get().getKeyManager(typeUrl);
+    KeyManager<P> manager = getKeyManager(typeUrl);
     return manager.getPrimitive(key);
   }
 
@@ -667,7 +669,7 @@ public final class Registry {
   @Deprecated
   public static <P> P getPrimitive(String typeUrl, ByteString serializedKey)
       throws GeneralSecurityException {
-    KeyManager<P> manager = keyManagerRegistry.get().getKeyManager(typeUrl);
+    KeyManager<P> manager = getKeyManager(typeUrl);
     return manager.getPrimitive(serializedKey);
   }
 
