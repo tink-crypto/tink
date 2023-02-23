@@ -14,8 +14,10 @@ java_library(
     srcs = ["InsecureNonceAesGcmJce.java"],
     deps = [
         "//src/main/java/com/google/crypto/tink/config/internal:tink_fips_util",
+        "//src/main/java/com/google/crypto/tink/internal:util",
         "//src/main/java/com/google/crypto/tink/subtle:subtle_util_cluster",
         "//src/main/java/com/google/crypto/tink/subtle:validators",
+        "@maven//:com_google_code_findbugs_jsr305",
     ],
 )
 
@@ -94,8 +96,10 @@ android_library(
     srcs = ["InsecureNonceAesGcmJce.java"],
     deps = [
         "//src/main/java/com/google/crypto/tink/config/internal:tink_fips_util-android",
+        "//src/main/java/com/google/crypto/tink/internal:util-android",
         "//src/main/java/com/google/crypto/tink/subtle:subtle_util_cluster-android",
         "//src/main/java/com/google/crypto/tink/subtle:validators-android",
+        "@maven//:com_google_code_findbugs_jsr305",
     ],
 )
 
