@@ -35,6 +35,10 @@ import javax.annotation.concurrent.GuardedBy;
  * Manages a {@link Keyset} proto, with convenience methods that rotate, disable, enable or destroy
  * keys.
  *
+ * <p>We do not recommend usage of this class. Instead, we recommend you to use a {@link
+ * Keyset.Builder} which has an improved API (in that it e.g. returns the just added objects,
+ * allowing you to manipulate them further).
+ *
  * @since 1.0.0
  */
 public final class KeysetManager {
@@ -66,12 +70,8 @@ public final class KeysetManager {
    *
    * @throws GeneralSecurityException if cannot find any {@link KeyManager} that can handle {@code
    *     keyTemplate}
-   * @deprecated Please use {@link #add}. This method adds a new key and immediately promotes it to
-   *     primary. However, when you do keyset rotation, you almost never want to make the new key
-   *     primary, because old binaries don't know the new key yet.
    */
   @CanIgnoreReturnValue
-  @Deprecated /* Deprecation under consideration */
   public synchronized KeysetManager rotate(com.google.crypto.tink.proto.KeyTemplate keyTemplate)
       throws GeneralSecurityException {
     addNewKey(keyTemplate, true);
@@ -83,11 +83,8 @@ public final class KeysetManager {
    *
    * @throws GeneralSecurityException if cannot find any {@link KeyManager} that can handle {@code
    *     keyTemplate}
-   * @deprecated This method takes a KeyTemplate proto, which is an internal implementation detail.
-   *     Please use the add method that takes a {@link KeyTemplate} POJO.
    */
   @CanIgnoreReturnValue
-  @Deprecated /* Deprecation under consideration */
   public synchronized KeysetManager add(com.google.crypto.tink.proto.KeyTemplate keyTemplate)
       throws GeneralSecurityException {
     addNewKey(keyTemplate, false);
@@ -157,13 +154,8 @@ public final class KeysetManager {
   /**
    * Generates a fresh key using {@code keyTemplate} and returns the {@code keyId} of it. In case
    * {@code asPrimary} is true the generated key will be the new primary.
-   *
-   * @deprecated Please use {@link #add}. This method adds a new key and when {@code asPrimary} is
-   *     true immediately promotes it to primary. However, when you do keyset rotation, you almost
-   *     never want to make the new key primary, because old binaries don't know the new key yet.
    */
   @CanIgnoreReturnValue
-  @Deprecated /* Deprecation under consideration */
   public synchronized int addNewKey(
       com.google.crypto.tink.proto.KeyTemplate keyTemplate, boolean asPrimary)
       throws GeneralSecurityException {
@@ -200,11 +192,9 @@ public final class KeysetManager {
    * Sets the key with {@code keyId} as primary.
    *
    * @throws GeneralSecurityException if the key is not found or not enabled
-   * @deprecated use {@link setPrimary}
    */
   @InlineMe(replacement = "this.setPrimary(keyId)")
   @CanIgnoreReturnValue
-  @Deprecated /* Deprecation under consideration */
   public synchronized KeysetManager promote(int keyId) throws GeneralSecurityException {
     return setPrimary(keyId);
   }
