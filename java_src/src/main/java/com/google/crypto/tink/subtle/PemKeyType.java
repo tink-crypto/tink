@@ -34,7 +34,7 @@ import javax.annotation.Nullable;
  *
  * @deprecated Use com.google.crypto.tink.PemKeyType instead.
  */
-@Deprecated /* Deprecation under consideration */
+@Deprecated
 public enum PemKeyType {
   // RSASSA-PSS 2048 bit key with a SHA256 digest.
   RSA_PSS_2048_SHA256("RSA", "RSASSA-PSS", 2048, HashType.SHA256),
