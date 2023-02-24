@@ -171,24 +171,6 @@ run_all_tests() {
   run_py_examples_tests
 }
 
-#######################################
-# Test Maven packages.
-# Globals:
-#   PLATFORM
-#   KOKORO_JOB_NAME
-# Arguments:
-#   None
-#######################################
-test_maven_packages() {
-  # Only test in the Ubuntu environment.
-  if [[ "${PLATFORM}" != "linux" ]]; then
-    return 0
-  fi
-  use_bazel "$(cat java_src/.bazelversion)"
-  ./maven/publish_snapshot.sh -l
-  ./maven/test_snapshot.sh -l
-}
-
 main() {
   # Initialization for Kokoro environments.
   if [[ "${IS_KOKORO}" == "true" ]]; then
@@ -260,8 +242,6 @@ main() {
   protoc --version
 
   run_all_tests
-
-  test_maven_packages
 }
 
 main "$@"
