@@ -53,7 +53,6 @@ using ::google::crypto::tink::OutputPrefixType;
 using ::testing::Eq;
 using ::testing::IsFalse;
 using ::testing::IsTrue;
-using ::testing::Not;
 using ::testing::Test;
 
 util::StatusOr<LegacyProtoParameters> CreateLegacyProtoParameters() {
@@ -230,6 +229,23 @@ TEST_F(CreateKeysetKeyTest,
 
 TEST_F(CreateKeysetKeyTest, CreateKeysetFromNonLegacyParameters) {
   util::StatusOr<AesCmacParameters> aes_cmac_parameters =
+      AesCmacParameters::Create(/*key_size_in_bytes=*/32,
+                                /*cryptographic_tag_size_in_bytes=*/10,
+                                AesCmacParameters::Variant::kTink);
+  ASSERT_THAT(aes_cmac_parameters, IsOk());
+
+  util::StatusOr<KeysetHandle> handle =
+      KeysetHandleBuilder()
+          .AddEntry(KeysetHandleBuilder::Entry::CreateFromCopyableParams(
+              *aes_cmac_parameters, KeyStatus::kEnabled, /*is_primary=*/true,
+              /*id=*/123))
+          .Build();
+  ASSERT_THAT(handle, IsOk());
+}
+
+TEST_F(CreateKeysetKeyTest,
+       CreateKeysetWithAllowedParametersProhibitedByKeyManager) {
+  util::StatusOr<AesCmacParameters> aes_cmac_parameters =
       AesCmacParameters::Create(/*key_size_in_bytes=*/16,
                                 /*cryptographic_tag_size_in_bytes=*/10,
                                 AesCmacParameters::Variant::kTink);
@@ -241,18 +257,17 @@ TEST_F(CreateKeysetKeyTest, CreateKeysetFromNonLegacyParameters) {
               *aes_cmac_parameters, KeyStatus::kEnabled, /*is_primary=*/true,
               /*id=*/123))
           .Build();
-  // TODO(b/242162436): This should succeed.
-  ASSERT_THAT(handle, Not(IsOk()));
+  ASSERT_THAT(handle.status(), StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
 TEST_F(CreateKeysetKeyTest, CreateKeysetFromNonLegacyKey) {
   util::StatusOr<AesCmacParameters> aes_cmac_parameters =
-      AesCmacParameters::Create(/*key_size_in_bytes=*/16,
+      AesCmacParameters::Create(/*key_size_in_bytes=*/32,
                                 /*cryptographic_tag_size_in_bytes=*/10,
                                 AesCmacParameters::Variant::kTink);
   ASSERT_THAT(aes_cmac_parameters, IsOk());
   util::StatusOr<AesCmacKey> aes_cmac_key = AesCmacKey::Create(
-      *aes_cmac_parameters, RestrictedData(16), 123, GetPartialKeyAccess());
+      *aes_cmac_parameters, RestrictedData(32), 123, GetPartialKeyAccess());
   ASSERT_THAT(aes_cmac_key.status(), IsOk());
 
   util::StatusOr<KeysetHandle> handle =
@@ -260,8 +275,7 @@ TEST_F(CreateKeysetKeyTest, CreateKeysetFromNonLegacyKey) {
           .AddEntry(KeysetHandleBuilder::Entry::CreateFromCopyableKey(
               *aes_cmac_key, KeyStatus::kEnabled, /*is_primary=*/true))
           .Build();
-  // TODO(b/242162436): This should succeed.
-  ASSERT_THAT(handle, Not(IsOk()));
+  ASSERT_THAT(handle, IsOk());
 }
 
 }  // namespace

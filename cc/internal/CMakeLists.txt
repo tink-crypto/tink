@@ -742,8 +742,10 @@ tink_cc_library(
     tink::internal::key_status_util
     tink::internal::legacy_proto_key
     tink::internal::legacy_proto_parameters
+    tink::internal::mutable_serialization_registry
     tink::internal::proto_key_serialization
     tink::internal::proto_parameters_serialization
+    absl::status
     absl::strings
     absl::optional
     tink::core::insecure_secret_key_access
@@ -751,6 +753,7 @@ tink_cc_library(
     tink::core::key_status
     tink::core::parameters
     tink::core::registry
+    tink::util::status
     tink::util::statusor
     tink::proto::tink_cc_proto
 )
