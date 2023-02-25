@@ -4,11 +4,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import {CryptoFormat} from './crypto_format';
-import {PbKeysetKey as PbKeysetKey, PbOutputPrefixType} from './proto';
+import {CryptoFormat} from "./crypto_format";
+import {PbKeysetKey as PbKeysetKey, PbOutputPrefixType} from "./proto";
 
-describe('crypto format test', function() {
-  it('constants', async function() {
+describe("crypto format test", () => {
+  it("constants", async () => {
     expect(CryptoFormat.RAW_PREFIX_SIZE).toBe(0);
     expect(CryptoFormat.NON_RAW_PREFIX_SIZE).toBe(5);
     expect(CryptoFormat.LEGACY_PREFIX_SIZE).toBe(5);
@@ -18,7 +18,7 @@ describe('crypto format test', function() {
     expect(CryptoFormat.TINK_START_BYTE).toBe(0x01);
   });
 
-  it('get output prefix unknown prefix type', async function() {
+  it("get output prefix unknown prefix type", async () => {
     let key = new PbKeysetKey()
                   .setOutputPrefixType(PbOutputPrefixType.UNKNOWN_PREFIX)
                   .setKeyId(2864434397);
@@ -27,13 +27,13 @@ describe('crypto format test', function() {
       CryptoFormat.getOutputPrefix(key);
     } catch (e: any) {
       expect(e.toString())
-          .toBe('SecurityException: Unsupported key prefix type.');
+          .toBe("SecurityException: Unsupported key prefix type.");
       return;
     }
-    fail('An exception should be thrown.');
+    fail("An exception should be thrown.");
   });
 
-  it('get output prefix invalid key id', async function() {
+  it("get output prefix invalid key id", async () => {
     // Key id has to be an unsigned 32-bit integer.
     const invalidKeyIds = [0.2, -10, 2**32];
     let key = new PbKeysetKey().setOutputPrefixType(PbOutputPrefixType.TINK);
@@ -46,14 +46,14 @@ describe('crypto format test', function() {
       } catch (e: any) {
         expect(e.toString())
             .toBe(
-                'InvalidArgumentsException: Number has to be unsigned 32-bit integer.');
+                "InvalidArgumentsException: Number has to be unsigned 32-bit integer.");
         continue;
       }
-      fail('An exception should be thrown for i: ' + i + '.');
+      fail("An exception should be thrown for i: " + i + ".");
     }
   });
 
-  it('get output prefix tink', async function() {
+  it("get output prefix tink", async () => {
     const key = new PbKeysetKey()
                     .setOutputPrefixType(PbOutputPrefixType.TINK)
                     .setKeyId(2864434397);
@@ -64,7 +64,7 @@ describe('crypto format test', function() {
     expect(actualResult).toEqual(expectedResult);
   });
 
-  it('get output prefix legacy', async function() {
+  it("get output prefix legacy", async () => {
     const key = new PbKeysetKey()
                     .setOutputPrefixType(PbOutputPrefixType.LEGACY)
                     .setKeyId(16909060);
@@ -75,7 +75,7 @@ describe('crypto format test', function() {
     expect(actualResult).toEqual(expectedResult);
   });
 
-  it('get output prefix raw', async function() {
+  it("get output prefix raw", async () => {
     const key = new PbKeysetKey()
                     .setOutputPrefixType(PbOutputPrefixType.RAW)
                     .setKeyId(370491921);
