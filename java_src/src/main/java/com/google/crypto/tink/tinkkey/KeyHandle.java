@@ -29,10 +29,10 @@ import java.security.GeneralSecurityException;
  * KeyAccess}. Specifically, if the underlying {@link TinkKey} has a secret, then one can only get
  * it with a {@link SecretKeyAccess} instance.
  *
- * @deprecated Use {@link com.google.crypto.tink.Key} instead.
+ * <p>Do not use this in new code. Instead, use {@link com.google.crypto.tink.Key} and
+ * these facilities.
  */
 @Immutable
-@Deprecated /* Deprecation under consideration */
 public class KeyHandle {
 
   /**
@@ -65,9 +65,9 @@ public class KeyHandle {
    * {@code keyData}. The returned KeyHandle has a secret if keyData has key material of type
    * UNKNOWN_KEYMATERIAL, SYMMETRIC, or ASYMMETRIC_PRIVATE.
    *
-   * @deprecated Use the KeyHandle(TinkKey, KeyAccess) constructor instead.
+   * <p>Do not use this in new code. Instead, use {@link com.google.crypto.tink.Key} and these
+   * facilities.
    */
-  @Deprecated /* Deprecation under consideration */
   public static KeyHandle createFromKey(KeyData keyData, OutputPrefixType opt) {
     return new KeyHandle(new ProtoKey(keyData, opt));
   }
