@@ -9,6 +9,8 @@ ts_library(
         "hkdf_hpke_kdf.ts",
         "hpke_aead.ts",
         "hpke_context.ts",
+        "hpke_decrypt.ts",
+        "hpke_encrypt.ts",
         "hpke_kdf.ts",
         "hpke_kem.ts",
         "hpke_kem_encap_output.ts",
@@ -23,6 +25,7 @@ ts_library(
     deps = [
         "//aead/internal",
         "//exception",
+        "//hybrid/internal",
         "//internal:proto",
         "//internal:proto_shims",
         "//subtle:bytes",
@@ -38,6 +41,7 @@ ts_library(
     srcs = [
         "aes_gcm_hpke_aead_tests.ts",
         "hkdf_hpke_kdf_test.ts",
+        "hpke_encrypt_decrypt_test.ts",
         "hpke_kem_key_factory_test.ts",
         "hpke_primitive_factory_test.ts",
         "hpke_util_test.ts",
