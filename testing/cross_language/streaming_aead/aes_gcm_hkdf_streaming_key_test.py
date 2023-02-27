@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import binascii
 import io
 
 from absl.testing import absltest
@@ -221,6 +222,94 @@ class AesGcmHkdfStreamingKeyTest(parameterized.TestCase):
       testing_servers.remote_primitive(
           lang, keyset.SerializeToString(), streaming_aead.StreamingAead
       )
+
+  @parameterized.parameters(
+      tink_config.supported_languages_for_key_type('AesCtrHmacStreamingKey')
+  )
+  def test_manually_created_test_vector(self, lang: str):
+    """This test uses a ciphertext created by looking at the documentation.
+
+    See https://developers.google.com/tink/streaming-aead/aes_gcm_hkdf_streaming
+    for the documentation. The goal is to ensure that the documentation is
+    clear; we expect readers to read this with the documentation.
+
+    Args:
+      lang: the language to test
+    """
+
+    h2b = binascii.a2b_hex
+
+    key = aes_gcm_hkdf_streaming_pb2.AesGcmHkdfStreamingKey(
+        version=0,
+        params=aes_gcm_hkdf_streaming_pb2.AesGcmHkdfStreamingParams(
+            ciphertext_segment_size=64,
+            derived_key_size=16,
+            hkdf_hash_type=common_pb2.HashType.SHA1,
+        ),
+        key_value=h2b('6eb56cdc726dfbe5d57f2fcdc6e9345b')
+    )
+    # We set the message to be:
+    msg = (
+        b'This is a fairly long plaintext. '
+        + b'It is of the exact length to create three output blocks. '
+    )
+    #
+    # We set the associated data to be:
+    associated_data = b'aad'
+
+    # We picked the header at random: Note the length is 24 = 0x18.
+    header_length = h2b('18')
+    salt = h2b('93b3af5e14ab378d065addfc8484da64')
+    nonce_prefix = h2b('2c0862877baea8')
+    header = header_length + salt + nonce_prefix
+    # hkdf.hkdf_sha1(ikm=key_value, salt=salt, info=aad, size=16) gives
+    # '66dd511791296a6cfc94a24041fcab9f'
+    # aes_key = h2b('66dd511791296a6cfc94a24041fcab9f')
+
+    # We next split the message:
+    # len(msg) = 90
+    # len(M_0) = 24 = CiphertextSegmentSize(64) - Headerlength(24) - 16
+    # len(M_1) = 48 = CiphertextSegmentSize(64) - 16
+    # len(M_2) = 18 < CiphertextSegmentSize(64) - 16
+    # msg_0 = msg[:24]
+    # msg_1 = msg[24:72]
+    # msg_2 = msg[72:]
+    #
+    # AES GCM computations with key = 66dd511791296a6cfc94a24041fcab9f
+    #
+    #
+    # IV = nonce_prefix + segment_nr + b | plaintext | result
+    # -----------------------------------------------------------------------
+    # 2c0862877baea8 00000000 00         | msg_0     | c_0
+    # 2c0862877baea8 00000001 00         | msg_1     | c_0
+    # 2c0862877baea8 00000002 01         | msg_2     | c_0
+    c0 = h2b(
+        b'db92d9c77406a406168478821c4298eab3e6d531277f4c1a'
+        + b'051714faebcaefcbca7b7be05e9445ea'
+    )
+    c1 = h2b(
+        b'a0bb2904153398a25084dd80ae0edcd1c3079fcea2cd3770'
+        + b'630ee36f7539207b8ec9d754956d486b71cdf989f0ed6fba'
+        + b'6779b63558be0a66e668df14e1603cd2'
+    )
+    c2 = h2b(
+        b'af8944844078345286d0b292e772e7190775'
+        + b'c51a0f83e40c0b75821027e7e538e111'
+    )
+
+    ciphertext = header + c0 + c1 + c2
+
+    keyset = to_keyset(key)
+    saead = testing_servers.remote_primitive(
+        lang, keyset.SerializeToString(), streaming_aead.StreamingAead
+    )
+
+    self.assertEqual(
+        saead.new_decrypting_stream(
+            io.BytesIO(ciphertext), associated_data
+        ).read(),
+        msg,
+    )
 
 
 if __name__ == '__main__':
