@@ -89,7 +89,7 @@ public class JsonKeysetWriterTest {
   private void testWriteEncrypted_shouldWork(KeysetHandle handle1) throws Exception {
     // Encrypt the keyset with an AeadKey.
     KeyTemplate masterKeyTemplate = AeadKeyTemplates.AES128_EAX;
-    Aead masterKey = Registry.getPrimitive(Registry.newKeyData(masterKeyTemplate));
+    Aead masterKey = Registry.getPrimitive(Registry.newKeyData(masterKeyTemplate), Aead.class);
     ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
     handle1.write(JsonKeysetWriter.withOutputStream(outputStream), masterKey);
     KeysetHandle handle2 =

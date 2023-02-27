@@ -726,8 +726,8 @@ public final class Registry {
    * @return a new primitive
    * @deprecated Use {@code getPrimitive(keyData, Primitive.class)} instead.
    */
-  @Deprecated /* Deprecation under consideration */
   @SuppressWarnings("TypeParameterUnusedInFormals")
+  @Deprecated
   public static <P> P getPrimitive(KeyData keyData) throws GeneralSecurityException {
     return getPrimitive(keyData.getTypeUrl(), keyData.getValue());
   }
