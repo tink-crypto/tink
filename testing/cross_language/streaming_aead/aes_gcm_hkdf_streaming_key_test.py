@@ -137,16 +137,12 @@ def lang_and_invalid_keys():
   key = simple_valid_key()
   key.params.hkdf_hash_type = common_pb2.HashType.SHA224
   for lang in langs:
-    # TODO(tholenst): Fix this in golang and java
-    if lang not in ['go', 'java']:
-      result.append((lang, key))
+    result.append((lang, key))
 
   key = simple_valid_key()
   key.params.hkdf_hash_type = common_pb2.HashType.SHA384
   for lang in langs:
-    # TODO(tholenst): Fix this in golang and java
-    if lang not in ['go', 'java']:
-      result.append((lang, key))
+    result.append((lang, key))
 
   # Check requirement len(InitialKeyMaterial) >= DerivedKeySize
   key = simple_valid_key()

@@ -181,7 +181,7 @@ func (km *aesGCMHKDFKeyManager) validateParams(params *ghpb.AesGcmHkdfStreamingP
 	if err := subtleaead.ValidateAESKeySize(params.DerivedKeySize); err != nil {
 		return fmt.Errorf("aes_gcm_hkdf_key_manager: %s", err)
 	}
-	if params.HkdfHashType == commonpb.HashType_UNKNOWN_HASH {
+	if params.HkdfHashType != commonpb.HashType_SHA1 && params.HkdfHashType != commonpb.HashType_SHA256 && params.HkdfHashType != commonpb.HashType_SHA512 {
 		return errors.New("unknown HKDF hash type")
 	}
 	minSegmentSize := params.DerivedKeySize + subtle.AESGCMHKDFNoncePrefixSizeInBytes + subtle.AESGCMHKDFTagSizeInBytes + 2

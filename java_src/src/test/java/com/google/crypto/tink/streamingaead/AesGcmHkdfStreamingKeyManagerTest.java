@@ -87,6 +87,20 @@ public class AesGcmHkdfStreamingKeyManagerTest {
   }
 
   @Test
+  public void validateKeyFormat_sha384_throws() throws Exception {
+    assertThrows(
+        GeneralSecurityException.class,
+        () -> factory.validateKeyFormat(createKeyFormat(32, 32, HashType.SHA384, 1024)));
+  }
+
+  @Test
+  public void validateKeyFormat_sha224_throws() throws Exception {
+    assertThrows(
+        GeneralSecurityException.class,
+        () -> factory.validateKeyFormat(createKeyFormat(32, 32, HashType.SHA224, 1024)));
+  }
+
+  @Test
   public void validateKeyFormat_smallKey_throws() throws Exception {
     assertThrows(
         GeneralSecurityException.class,

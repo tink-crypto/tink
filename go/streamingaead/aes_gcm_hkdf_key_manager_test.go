@@ -380,6 +380,22 @@ func TestAESGCMHKDFDeriveKeyFailsWithInvalidKeyFormats(t *testing.T) {
 			derivedKeySize:        validKeyFormat.Params.DerivedKeySize,
 			hkdfHashType:          commonpb.HashType_UNKNOWN_HASH,
 		},
+		{
+			name:                  "invalid HKDF hash type",
+			version:               validKeyFormat.Version,
+			keySize:               validKeyFormat.KeySize,
+			ciphertextSegmentSize: validKeyFormat.Params.CiphertextSegmentSize,
+			derivedKeySize:        validKeyFormat.Params.DerivedKeySize,
+			hkdfHashType:          commonpb.HashType_SHA224,
+		},
+		{
+			name:                  "invalid HKDF hash type",
+			version:               validKeyFormat.Version,
+			keySize:               validKeyFormat.KeySize,
+			ciphertextSegmentSize: validKeyFormat.Params.CiphertextSegmentSize,
+			derivedKeySize:        validKeyFormat.Params.DerivedKeySize,
+			hkdfHashType:          commonpb.HashType_SHA384,
+		},
 	} {
 		t.Run(test.name, func(t *testing.T) {
 			keyFormat, err := proto.Marshal(&gcmhkdfpb.AesGcmHkdfStreamingKeyFormat{

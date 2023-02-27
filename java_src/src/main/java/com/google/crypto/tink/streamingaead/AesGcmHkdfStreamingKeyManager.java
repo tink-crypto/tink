@@ -169,8 +169,10 @@ public final class AesGcmHkdfStreamingKeyManager extends KeyTypeManager<AesGcmHk
   private static void validateParams(AesGcmHkdfStreamingParams params)
       throws GeneralSecurityException {
     Validators.validateAesKeySize(params.getDerivedKeySize());
-    if (params.getHkdfHashType() == HashType.UNKNOWN_HASH) {
-      throw new GeneralSecurityException("unknown HKDF hash type");
+    if (params.getHkdfHashType() != HashType.SHA1
+        && params.getHkdfHashType() != HashType.SHA256
+        && params.getHkdfHashType() != HashType.SHA512) {
+      throw new GeneralSecurityException("Invalid HKDF hash type");
     }
     if (params.getCiphertextSegmentSize()
         < params.getDerivedKeySize() + NONCE_PREFIX_IN_BYTES + TAG_SIZE_IN_BYTES + 2) {
