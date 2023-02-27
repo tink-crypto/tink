@@ -1058,3 +1058,22 @@ android_library(
     ],
 )
 
+java_library(
+    name = "aes_ctr_hmac_aead_parameters",
+    srcs = ["AesCtrHmacAeadParameters.java"],
+    deps = [
+        ":aead_parameters",
+        "@maven//:com_google_code_findbugs_jsr305",
+        "@maven//:com_google_errorprone_error_prone_annotations",
+    ],
+)
+
+android_library(
+    name = "aes_ctr_hmac_aead_parameters-android",
+    srcs = ["AesCtrHmacAeadParameters.java"],
+    deps = [
+        ":aead_parameters-android",
+        "@maven//:com_google_code_findbugs_jsr305",
+        "@maven//:com_google_errorprone_error_prone_annotations",
+    ],
+)
