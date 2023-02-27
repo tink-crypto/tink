@@ -276,7 +276,7 @@ public final class PrimitiveSet<P> {
    * @throws IllegalStateException if object has been created by the {@link Builder}.
    * @deprecated use {@link Builder.addPrimaryPrimitive} instead.
    */
-  @Deprecated /* Deprecation under consideration */
+  @Deprecated
   public void setPrimary(final Entry<P> primary) {
     if (!isMutable) {
       throw new IllegalStateException("setPrimary cannot be called on an immutable primitive set");
@@ -302,9 +302,10 @@ public final class PrimitiveSet<P> {
    * @throws IllegalStateException if object has been created by the {@link Builder}.
    * @deprecated use {@link Builder.addPrimitive} or {@link Builder.addPrimaryPrimitive} instead.
    */
-  @Deprecated /* Deprecation under consideration */
   @CanIgnoreReturnValue
-  public Entry<P> addPrimitive(final P primitive, Keyset.Key key) throws GeneralSecurityException {
+  @Deprecated
+  public Entry<P> addPrimitive(final P primitive, Keyset.Key key)
+      throws GeneralSecurityException {
     if (!isMutable) {
       throw new IllegalStateException(
           "addPrimitive cannot be called on an immutable primitive set");
