@@ -365,6 +365,14 @@ func TestAESGCMHKDFDeriveKeyFailsWithInvalidKeyFormats(t *testing.T) {
 			hkdfHashType:          validKeyFormat.Params.HkdfHashType,
 		},
 		{
+			name:                  "invalid ciphertext segment size",
+			version:               validKeyFormat.Version,
+			keySize:               validKeyFormat.KeySize,
+			ciphertextSegmentSize: 2147483648,
+			derivedKeySize:        validKeyFormat.Params.DerivedKeySize,
+			hkdfHashType:          validKeyFormat.Params.HkdfHashType,
+		},
+		{
 			name:                  "invalid derived key size",
 			version:               validKeyFormat.Version,
 			keySize:               validKeyFormat.KeySize,
