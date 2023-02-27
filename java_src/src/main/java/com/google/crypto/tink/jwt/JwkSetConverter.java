@@ -490,7 +490,7 @@ public final class JwkSetConverter {
   @InlineMe(
       replacement = "JwkSetConverter.fromPublicKeysetHandle(handle)",
       imports = "com.google.crypto.tink.jwt.JwkSetConverter")
-  @Deprecated /* Deprecation under consideration */
+  @Deprecated
   public static String fromKeysetHandle(KeysetHandle handle, KeyAccess keyAccess)
       throws IOException, GeneralSecurityException {
     return fromPublicKeysetHandle(handle);
@@ -502,7 +502,7 @@ public final class JwkSetConverter {
   @InlineMe(
       replacement = "JwkSetConverter.toPublicKeysetHandle(jwkSet)",
       imports = "com.google.crypto.tink.jwt.JwkSetConverter")
-  @Deprecated /* Deprecation under consideration */
+  @Deprecated
   public static KeysetHandle toKeysetHandle(String jwkSet, KeyAccess keyAccess)
       throws IOException, GeneralSecurityException {
     return toPublicKeysetHandle(jwkSet);
