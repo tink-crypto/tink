@@ -97,5 +97,5 @@ func (c *vaultClient) GetAEAD(keyURI string) (tink.AEAD, error) {
 		return nil, errors.New("unsupported keyURI")
 	}
 
-	return newHCVaultAEAD(keyURI, c.client), nil
+	return newHCVaultAEAD(keyURI, c.client)
 }

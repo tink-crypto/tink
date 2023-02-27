@@ -74,7 +74,7 @@ func TestExtractKey(t *testing.T) {
 		},
 	} {
 		t.Run(tc.desc, func(t *testing.T) {
-			key, err := (&vaultAEAD{}).extractKey(tc.uri)
+			key, err := extractKey(tc.uri)
 			if err == nil {
 				if tc.err != "" {
 					t.Fatalf("Missing error, want=%s", tc.err)

@@ -22,41 +22,47 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/google/tink/go/tink"
 	"github.com/hashicorp/vault/api"
+	"github.com/google/tink/go/tink"
 )
 
 // vaultAEAD represents a HashiCorp Vault service to a particular URI.
 type vaultAEAD struct {
-	keyURI string
-	client *api.Logical
+	encKeyPath string
+	decKeyPath string
+	client     *api.Logical
 }
 
 var _ tink.AEAD = (*vaultAEAD)(nil)
 
 // newHCVaultAEAD returns a new HashiCorp Vault service.
-func newHCVaultAEAD(keyURI string, client *api.Logical) tink.AEAD {
-	return &vaultAEAD{
-		keyURI: keyURI,
-		client: client,
+func newHCVaultAEAD(keyURI string, client *api.Logical) (tink.AEAD, error) {
+	encKeyPath, err := getEncryptionPath(keyURI)
+	if err != nil {
+		return nil, err
 	}
+	decKeyPath, err := getDecryptionPath(keyURI)
+	if err != nil {
+		return nil, err
+	}
+	return &vaultAEAD{
+		encKeyPath: encKeyPath,
+		decKeyPath: decKeyPath,
+		client:     client,
+	}, nil
 }
 
 // Encrypt encrypts the plaintext data using a key stored in HashiCorp Vault.
 // associatedData parameter is used as a context for key derivation, more
 // information available https://www.vaultproject.io/docs/secrets/transit/index.html.
 func (a *vaultAEAD) Encrypt(plaintext, associatedData []byte) ([]byte, error) {
-	encryptionPath, err := a.getEncryptionPath(a.keyURI)
-	if err != nil {
-		return nil, err
-	}
 	// Create an encryption request map according to Vault REST API:
 	// https://www.vaultproject.io/api/secret/transit/index.html#encrypt-data.
 	req := map[string]interface{}{
 		"plaintext": base64.StdEncoding.EncodeToString(plaintext),
 		"context":   base64.StdEncoding.EncodeToString(associatedData),
 	}
-	secret, err := a.client.Write(encryptionPath, req)
+	secret, err := a.client.Write(a.encKeyPath, req)
 	if err != nil {
 		return nil, err
 	}
@@ -68,17 +74,13 @@ func (a *vaultAEAD) Encrypt(plaintext, associatedData []byte) ([]byte, error) {
 // associatedData parameter is used as a context for key derivation, more
 // information available https://www.vaultproject.io/docs/secrets/transit/index.html.
 func (a *vaultAEAD) Decrypt(ciphertext, associatedData []byte) ([]byte, error) {
-	decryptionPath, err := a.getDecryptionPath(a.keyURI)
-	if err != nil {
-		return nil, err
-	}
 	// Create a decryption request map according to Vault REST API:
 	// https://www.vaultproject.io/api/secret/transit/index.html#decrypt-data.
 	req := map[string]interface{}{
 		"ciphertext": string(ciphertext),
 		"context":    base64.StdEncoding.EncodeToString(associatedData),
 	}
-	secret, err := a.client.Write(decryptionPath, req)
+	secret, err := a.client.Write(a.decKeyPath, req)
 	if err != nil {
 		return nil, err
 	}
@@ -92,29 +94,37 @@ func (a *vaultAEAD) Decrypt(ciphertext, associatedData []byte) ([]byte, error) {
 
 // getEncryptionPath transforms keyURL to a Vault encryption path.
 // For example a keyURL "transit/keys/key-foo" will be transformed to "transit/encrypt/key-foo".
-func (a *vaultAEAD) getEncryptionPath(keyURL string) (string, error) {
-	key, err := a.extractKey(keyURL)
+func getEncryptionPath(keyURL string) (string, error) {
+	key, err := extractKey(keyURL)
 	if err != nil {
 		return "", err
 	}
 	parts := strings.Split(key, "/")
-	parts[len(parts)-2] = "encrypt"
+	if len(parts) != 3 {
+		// key must have the form "transit/keys/<name>", so it must have exactly two slashes
+		return "", errors.New("malformed keyURL")
+	}
+	parts[1] = "encrypt"
 	return strings.Join(parts, "/"), nil
 }
 
 // getDecryptionPath transforms keyURL to a Vault decryption path.
 // For example a keyURL "transit/keys/key-foo" will be transformed to "transit/decrypt/key-foo".
-func (a *vaultAEAD) getDecryptionPath(keyURL string) (string, error) {
-	key, err := a.extractKey(keyURL)
+func getDecryptionPath(keyURL string) (string, error) {
+	key, err := extractKey(keyURL)
 	if err != nil {
 		return "", err
 	}
 	parts := strings.Split(key, "/")
-	parts[len(parts)-2] = "decrypt"
+	if len(parts) != 3 {
+		// key must have the form "transit/keys/<name>", so it must have exactly two slashes
+		return "", errors.New("malformed keyURL")
+	}
+	parts[1] = "decrypt"
 	return strings.Join(parts, "/"), nil
 }
 
-func (a *vaultAEAD) extractKey(keyURL string) (string, error) {
+func extractKey(keyURL string) (string, error) {
 	u, err := url.Parse(keyURL)
 	if err != nil || u.Scheme != "hcvault" || len(u.Path) == 0 {
 		return "", errors.New("malformed keyURL")

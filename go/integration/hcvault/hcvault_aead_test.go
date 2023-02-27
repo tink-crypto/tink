@@ -4,7 +4,7 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//      http://www.apache.org/licenses/LICENSE-2.0
+//	http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-////////////////////////////////////////////////////////////////////////////////
+// //////////////////////////////////////////////////////////////////////////////
 package hcvault_test
 
 import (
@@ -48,7 +48,8 @@ func TestVaultAEAD_Encrypt(t *testing.T) {
 
 	client, err := hcvault.NewClient(
 		fmt.Sprintf("hcvault://localhost:%d/", port),
-		&tls.Config{InsecureSkipVerify: true},
+		// Using InsecureSkipVerify is fine here, since this is just a test running locally.
+		&tls.Config{InsecureSkipVerify: true}, // NOLINT
 		token,
 	)
 	if err != nil {
@@ -78,7 +79,8 @@ func TestVaultAEAD_Decrypt(t *testing.T) {
 
 	client, err := hcvault.NewClient(
 		fmt.Sprintf("hcvault://localhost:%d/", port),
-		&tls.Config{InsecureSkipVerify: true},
+		// Using InsecureSkipVerify is fine here, since this is just a test running locally.
+		&tls.Config{InsecureSkipVerify: true}, // NOLINT
 		token,
 	)
 	if err != nil {
@@ -99,6 +101,49 @@ func TestVaultAEAD_Decrypt(t *testing.T) {
 	}
 	if !bytes.Equal(wantPT, pt) {
 		t.Fatalf("Incorrect plain text, want=%s;got=%s", string(wantPT), string(pt))
+	}
+}
+
+func TestGetAEADFailWithBadKeyURI(t *testing.T) {
+	port, stopFunc := newServer(t)
+	defer stopFunc()
+
+	client, err := hcvault.NewClient(
+		fmt.Sprintf("hcvault://localhost:%d/", port),
+		// Using InsecureSkipVerify is fine here, since this is just a test running locally.
+		&tls.Config{InsecureSkipVerify: true}, // NOLINT
+		token,
+	)
+	if err != nil {
+		t.Fatalf("hcvault.NewClient() err = %v, want nil", err)
+	}
+
+	for _, test := range []struct {
+		name   string
+		keyURI string
+	}{
+		{
+			name:   "empty",
+			keyURI: fmt.Sprintf("hcvault://localhost:%d/", port),
+		},
+		{
+			name:   "without slash",
+			keyURI: fmt.Sprintf("hcvault://localhost:%d/badKeyUri", port),
+		},
+		{
+			name:   "with one slash",
+			keyURI: fmt.Sprintf("hcvault://localhost:%d/bad/KeyUri", port),
+		},
+		{
+			name:   "with three slash",
+			keyURI: fmt.Sprintf("hcvault://localhost:%d/one/two/three/four", port),
+		},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			if _, err := client.GetAEAD(test.keyURI); err == nil {
+				t.Errorf("client.GetAEAD(%q) err = nil, want error", test.keyURI)
+			}
+		})
 	}
 }
 
