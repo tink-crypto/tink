@@ -49,6 +49,10 @@ import java.util.List;
  * SignaturePemKeysetReader is a {@link KeysetReader} that can read digital signature keys in PEM
  * format (RFC 7468).
  *
+ * <p>Only supports public keys.
+ *
+ * <p>Private, unknown or invalid keys are ignored.
+ *
  * <h3>Usage</h3>
  *
  * <pre>{@code
@@ -66,7 +70,7 @@ public final class SignaturePemKeysetReader implements KeysetReader {
     this.pemKeys = pemKeys;
   }
 
-  /** @return a {@link Builder} for {@link SignaturePemKeysetReader}. */
+  /** Returns a {@link Builder} for {@link SignaturePemKeysetReader}. */
   public static Builder newBuilder() {
     return new Builder();
   }
@@ -143,7 +147,7 @@ public final class SignaturePemKeysetReader implements KeysetReader {
     } else if (key instanceof ECPublicKey) {
       keyData = convertEcPublicKey(pemKeyType, (ECPublicKey) key);
     } else {
-      // TODO(thaidn): support RSA and EC private keys.
+      // Private keys are ignored.
       return null;
     }
 
