@@ -28,7 +28,6 @@ import com.google.crypto.tink.internal.Util;
 import com.google.crypto.tink.subtle.Bytes;
 import com.google.crypto.tink.subtle.Hex;
 import com.google.crypto.tink.subtle.Random;
-import com.google.crypto.tink.subtle.SubtleUtil;
 import com.google.crypto.tink.testing.TestUtil;
 import com.google.crypto.tink.testing.TestUtil.BytesMutation;
 import com.google.crypto.tink.testing.WycheproofTestUtil;
@@ -266,7 +265,8 @@ public class InsecureNonceAesGcmJceTest {
         byte[] key = Hex.decode(testcase.get("key").getAsString());
         byte[] msg = Hex.decode(testcase.get("msg").getAsString());
         byte[] aad = Hex.decode(testcase.get("aad").getAsString());
-        if (SubtleUtil.isAndroid() && SubtleUtil.androidApiLevel() <= 19 && aad.length != 0) {
+        @Nullable Integer androidApiLevel = Util.getAndroidApiLevel();
+        if (androidApiLevel != null && androidApiLevel <= 19 && aad.length != 0) {
           cntSkippedTests++;
           continue;
         }
