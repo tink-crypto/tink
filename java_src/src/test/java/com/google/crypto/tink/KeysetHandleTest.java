@@ -1251,6 +1251,22 @@ public class KeysetHandleTest {
   }
 
   @Test
+  public void testBuilder_buildTwice_fails() throws Exception {
+    KeysetHandle.Builder builder =
+        KeysetHandle.newBuilder()
+            .addEntry(
+                KeysetHandle.generateEntryFromParametersName("AES256_CMAC_RAW")
+                    .withRandomId()
+                    .makePrimary());
+
+    Object unused = builder.build();
+    // We disallow calling build on the same builder twice. The reason is that build assigns IDs
+    // which were marked with "withRandomId()". Doing this twice results in incompatible keysets,
+    // which would be confusing.
+    assertThrows(GeneralSecurityException.class, builder::build);
+  }
+
+  @Test
   public void testImportKey_withoutIdRequirement_withFixedId_works() throws Exception {
     AesCmacParameters params = AesCmacParameters.builder().setKeySizeBytes(32).setTagSizeBytes(10)
         .build();

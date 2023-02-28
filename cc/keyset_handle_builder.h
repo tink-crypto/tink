@@ -139,6 +139,12 @@ class KeysetHandleBuilder {
   KeysetHandleBuilder::Entry& operator[](int index) { return entries_[index]; }
 
   // Creates a new `KeysetHandle` object.
+  //
+  // Note: Since KeysetHandleBuilder::Entry objects might have randomly
+  // generated IDs, Build() can only be called once on a single
+  // KeysetHandleBuilder object.  Otherwise, the KeysetHandleBuilder::Entry
+  // IDs would randomly change for each call to Build(), which would result
+  // in incompatible keysets.
   crypto::tink::util::StatusOr<KeysetHandle> Build();
 
  private:
@@ -153,6 +159,8 @@ class KeysetHandleBuilder {
   crypto::tink::util::Status CheckIdAssignments();
 
   std::vector<KeysetHandleBuilder::Entry> entries_;
+
+  bool build_called_ = false;
 };
 
 }  // namespace tink

@@ -673,6 +673,25 @@ TEST_F(KeysetHandleBuilderTest, UsePrimitiveFromLegacyProtoKey) {
   EXPECT_THAT(verified, IsOk());
 }
 
+TEST_F(KeysetHandleBuilderTest, BuildTwiceFails) {
+  util::StatusOr<internal::LegacyProtoParameters> parameters =
+      CreateLegacyProtoParameters(MacKeyTemplates::AesCmac());
+  ASSERT_THAT(parameters.status(), IsOk());
+
+  KeysetHandleBuilder::Entry entry =
+      KeysetHandleBuilder::Entry::CreateFromCopyableParams(
+          *parameters, KeyStatus::kEnabled, /*is_primary=*/true,
+          /*id=*/123);
+
+  KeysetHandleBuilder builder;
+  builder.AddEntry(std::move(entry));
+
+  EXPECT_THAT(builder.Build(), IsOk());
+  EXPECT_THAT(builder.Build().status(),
+              StatusIs(absl::StatusCode::kFailedPrecondition));
+}
+
+
 }  // namespace
 }  // namespace tink
 }  // namespace crypto

@@ -144,6 +144,12 @@ util::Status KeysetHandleBuilder::CheckIdAssignments() {
 }
 
 util::StatusOr<KeysetHandle> KeysetHandleBuilder::Build() {
+  if (build_called_) {
+      return util::Status(
+          absl::StatusCode::kFailedPrecondition,
+          "KeysetHandleBuilder::Build may only be called once");
+  }
+  build_called_ = true;
   Keyset keyset;
   absl::optional<int> primary_id = absl::nullopt;
 

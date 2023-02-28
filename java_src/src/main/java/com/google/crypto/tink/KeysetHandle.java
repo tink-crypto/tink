@@ -207,6 +207,7 @@ public final class KeysetHandle {
     }
 
     private final List<KeysetHandle.Builder.Entry> entries = new ArrayList<>();
+    private boolean buildCalled = false;
 
     private void clearPrimary() {
       for (Builder.Entry entry : entries) {
@@ -360,9 +361,16 @@ public final class KeysetHandle {
      *       withRandomId}-entry
      *   <li>There are two entries with the same {@code withFixedId} (including pre-existing keys
      *       and imported keys which have an id requirement).
+     *   <li>{@code build()} was previously called for {@code withRandomId} entries,
+     *       and hence calling {@code build()} twice would result in a keyset with different
+     *       key IDs.
      * </ul>
      */
     public KeysetHandle build() throws GeneralSecurityException {
+      if (buildCalled) {
+        throw new GeneralSecurityException("KeysetHandle.Builder#build must only be called once");
+      }
+      buildCalled = true;
       Keyset.Builder keysetBuilder = Keyset.newBuilder();
       Integer primaryId = null;
 
