@@ -45,7 +45,7 @@ public final class StreamingAeadConfig {
   /**
    * @deprecated
    */
-  @Deprecated /* Deprecation under consideration */
+  @Deprecated
   public static final RegistryConfig TINK_1_1_0 = RegistryConfig.getDefaultInstance();
 
   /** @since 1.2.0 */
@@ -65,7 +65,7 @@ public final class StreamingAeadConfig {
    *
    * @deprecated use {@link #register}
    */
-  @Deprecated /* Deprecation under consideration */
+  @Deprecated
   public static void init() throws GeneralSecurityException {
     register();
   }
