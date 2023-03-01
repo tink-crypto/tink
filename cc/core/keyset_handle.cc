@@ -30,7 +30,7 @@
 #include "tink/insecure_secret_key_access.h"
 #include "tink/internal/key_info.h"
 #include "tink/internal/key_status_util.h"
-#include "tink/internal/legacy_proto_key.h"
+#include "tink/internal/mutable_serialization_registry.h"
 #include "tink/internal/proto_key_serialization.h"
 #include "tink/internal/util.h"
 #include "tink/key_status.h"
@@ -100,6 +100,7 @@ util::StatusOr<internal::ProtoKeySerialization> ToProtoKeySerialization(
   if (key.output_prefix_type() != OutputPrefixType::RAW) {
     id_requirement = key.key_id();
   }
+
   return internal::ProtoKeySerialization::Create(
       key.key_data().type_url(),
       RestrictedData(key.key_data().value(), InsecureSecretKeyAccess::Get()),
@@ -189,18 +190,18 @@ KeysetHandle::Entry KeysetHandle::operator[](int index) const {
   // Status should be OK since this keyset handle has been validated.
   CHECK_OK(serialization.status());
 
-  // TODO(b/242162436): Add support for more than legacy proto keys.
-  util::StatusOr<internal::LegacyProtoKey> key =
-      internal::LegacyProtoKey::Create(*serialization,
-                                       InsecureSecretKeyAccess::Get());
+  util::StatusOr<std::unique_ptr<Key>> key =
+      internal::MutableSerializationRegistry::GlobalInstance()
+          .ParseKeyWithLegacyFallback(*serialization);
+  CHECK_OK(key.status());
 
   util::StatusOr<KeyStatus> key_status =
       internal::FromKeyStatusType(proto_key.status());
   // Status should be OK since this keyset handle has been validated.
   CHECK_OK(key_status.status());
 
-  return Entry(absl::make_unique<internal::LegacyProtoKey>(std::move(*key)),
-               *key_status, id, id == get_keyset().primary_key_id());
+  return Entry(*std::move(key), *key_status, id,
+               id == get_keyset().primary_key_id());
 }
 
 util::StatusOr<std::unique_ptr<KeysetHandle>> KeysetHandle::Read(

@@ -34,7 +34,10 @@
 #include "tink/internal/proto_key_serialization.h"
 #include "tink/internal/proto_parameters_serialization.h"
 #include "tink/key_status.h"
+#include "tink/mac/aes_cmac_key.h"
+#include "tink/mac/aes_cmac_parameters.h"
 #include "tink/mac/mac_key_templates.h"
+#include "tink/partial_key_access.h"
 #include "tink/subtle/random.h"
 #include "tink/util/status.h"
 #include "tink/util/test_matchers.h"
@@ -49,7 +52,6 @@ namespace {
 using ::crypto::tink::test::AddTinkKey;
 using ::crypto::tink::test::IsOk;
 using ::crypto::tink::test::StatusIs;
-using ::google::crypto::tink::AesCmacKey;
 using ::google::crypto::tink::AesCmacParams;
 using ::google::crypto::tink::KeyData;
 using ::google::crypto::tink::Keyset;
@@ -529,7 +531,23 @@ TEST_F(KeysetHandleBuilderTest, DuplicateId) {
   ASSERT_THAT(handle.status(), StatusIs(absl::StatusCode::kAlreadyExists));
 }
 
-TEST_F(KeysetHandleBuilderTest, CreateBuilderEntryFromKey) {
+TEST_F(KeysetHandleBuilderTest, CreateBuilderEntryFromParams) {
+  util::StatusOr<AesCmacParameters> params = AesCmacParameters::Create(
+      /*key_size_in_bytes=*/32, /*cryptographic_tag_size_in_bytes=*/16,
+      AesCmacParameters::Variant::kTink);
+  ASSERT_THAT(params, IsOk());
+
+  KeysetHandleBuilder::Entry entry =
+      KeysetHandleBuilder::Entry::CreateFromParams(
+          absl::make_unique<AesCmacParameters>(std::move(*params)),
+          KeyStatus::kEnabled, /*is_primary=*/true);
+
+  util::StatusOr<KeysetHandle> handle =
+      KeysetHandleBuilder().AddEntry(std::move(entry)).Build();
+  ASSERT_THAT(handle.status(), IsOk());
+}
+
+TEST_F(KeysetHandleBuilderTest, CreateBuilderEntryFromLegacyKey) {
   Keyset keyset;
   Keyset::Key key;
   AddTinkKey("first_key_type", 11, key, KeyStatusType::DISABLED,
@@ -551,6 +569,26 @@ TEST_F(KeysetHandleBuilderTest, CreateBuilderEntryFromKey) {
   KeysetHandleBuilder::Entry entry = KeysetHandleBuilder::Entry::CreateFromKey(
       absl::make_unique<internal::LegacyProtoKey>(std::move(*proto_key)),
       KeyStatus::kEnabled, /*is_primary=*/true);
+
+  util::StatusOr<KeysetHandle> handle =
+      KeysetHandleBuilder().AddEntry(std::move(entry)).Build();
+  ASSERT_THAT(handle.status(), IsOk());
+}
+
+TEST_F(KeysetHandleBuilderTest, CreateBuilderEntryFromKey) {
+  util::StatusOr<AesCmacParameters> params = AesCmacParameters::Create(
+      /*key_size_in_bytes=*/32, /*cryptographic_tag_size_in_bytes=*/16,
+      AesCmacParameters::Variant::kTink);
+  ASSERT_THAT(params, IsOk());
+
+  RestrictedData secret = RestrictedData(32);
+  util::StatusOr<AesCmacKey> key = AesCmacKey::Create(
+      *params, secret, /*id_requirement=*/123, GetPartialKeyAccess());
+  ASSERT_THAT(key.status(), IsOk());
+
+  KeysetHandleBuilder::Entry entry = KeysetHandleBuilder::Entry::CreateFromKey(
+      absl::make_unique<AesCmacKey>(std::move(*key)), KeyStatus::kEnabled,
+      /*is_primary=*/true);
 
   util::StatusOr<KeysetHandle> handle =
       KeysetHandleBuilder().AddEntry(std::move(entry)).Build();
@@ -635,10 +673,33 @@ TEST_F(KeysetHandleBuilderTest, UsePrimitiveFromLegacyProtoParams) {
   EXPECT_THAT(verified, IsOk());
 }
 
+TEST_F(KeysetHandleBuilderTest, UsePrimitiveFromParams) {
+  util::StatusOr<AesCmacParameters> params = AesCmacParameters::Create(
+      /*key_size_in_bytes=*/32, /*cryptographic_tag_size_in_bytes=*/16,
+      AesCmacParameters::Variant::kTink);
+  ASSERT_THAT(params, IsOk());
+
+  KeysetHandleBuilder::Entry entry =
+      KeysetHandleBuilder::Entry::CreateFromParams(
+          absl::make_unique<AesCmacParameters>(std::move(*params)),
+          KeyStatus::kEnabled, /*is_primary=*/true);
+
+  util::StatusOr<KeysetHandle> handle =
+      KeysetHandleBuilder().AddEntry(std::move(entry)).Build();
+  ASSERT_THAT(handle.status(), IsOk());
+
+  util::StatusOr<std::unique_ptr<Mac>> mac = handle->GetPrimitive<Mac>();
+  ASSERT_THAT(mac.status(), IsOk());
+  util::StatusOr<std::string> tag = (*mac)->ComputeMac("some input");
+  ASSERT_THAT(tag.status(), IsOk());
+  util::Status verified = (*mac)->VerifyMac(*tag, "some input");
+  EXPECT_THAT(verified, IsOk());
+}
+
 TEST_F(KeysetHandleBuilderTest, UsePrimitiveFromLegacyProtoKey) {
   AesCmacParams params;
   params.set_tag_size(16);
-  AesCmacKey key;
+  google::crypto::tink::AesCmacKey key;
   *key.mutable_params() = params;
   key.set_version(0);
   key.set_key_value(subtle::Random::GetRandomBytes(32));
@@ -660,6 +721,33 @@ TEST_F(KeysetHandleBuilderTest, UsePrimitiveFromLegacyProtoKey) {
   KeysetHandleBuilder::Entry entry =
       KeysetHandleBuilder::Entry::CreateFromCopyableKey(
           *proto_key, KeyStatus::kEnabled, /*is_primary=*/true);
+
+  util::StatusOr<KeysetHandle> handle =
+      KeysetHandleBuilder().AddEntry(std::move(entry)).Build();
+  ASSERT_THAT(handle.status(), IsOk());
+
+  util::StatusOr<std::unique_ptr<Mac>> mac = handle->GetPrimitive<Mac>();
+  ASSERT_THAT(mac.status(), IsOk());
+  util::StatusOr<std::string> tag = (*mac)->ComputeMac("some input");
+  ASSERT_THAT(tag.status(), IsOk());
+  util::Status verified = (*mac)->VerifyMac(*tag, "some input");
+  EXPECT_THAT(verified, IsOk());
+}
+
+TEST_F(KeysetHandleBuilderTest, UsePrimitiveFromKey) {
+  util::StatusOr<AesCmacParameters> params = AesCmacParameters::Create(
+      /*key_size_in_bytes=*/32, /*cryptographic_tag_size_in_bytes=*/16,
+      AesCmacParameters::Variant::kTink);
+  ASSERT_THAT(params, IsOk());
+
+  RestrictedData secret = RestrictedData(32);
+  util::StatusOr<AesCmacKey> key = AesCmacKey::Create(
+      *params, secret, /*id_requirement=*/123, GetPartialKeyAccess());
+  ASSERT_THAT(key.status(), IsOk());
+
+  KeysetHandleBuilder::Entry entry = KeysetHandleBuilder::Entry::CreateFromKey(
+      absl::make_unique<AesCmacKey>(std::move(*key)), KeyStatus::kEnabled,
+      /*is_primary=*/true);
 
   util::StatusOr<KeysetHandle> handle =
       KeysetHandleBuilder().AddEntry(std::move(entry)).Build();

@@ -492,7 +492,7 @@ tink_cc_library(
     absl::optional
     tink::internal::key_info
     tink::internal::key_status_util
-    tink::internal::legacy_proto_key
+    tink::internal::mutable_serialization_registry
     tink::internal::proto_key_serialization
     tink::internal::util
     tink::util::errors
@@ -867,6 +867,7 @@ tink_cc_test(
     tink::core::insecure_secret_key_access
     tink::core::key_status
     tink::core::keyset_handle_builder
+    tink::core::partial_key_access
     gmock
     absl::status
     absl::strings
@@ -875,6 +876,8 @@ tink_cc_test(
     tink::internal::legacy_proto_parameters
     tink::internal::proto_key_serialization
     tink::internal::proto_parameters_serialization
+    tink::mac::aes_cmac_key
+    tink::mac::aes_cmac_parameters
     tink::mac::mac_key_templates
     tink::subtle::random
     tink::util::status
