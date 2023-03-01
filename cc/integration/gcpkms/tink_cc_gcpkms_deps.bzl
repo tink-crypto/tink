@@ -57,7 +57,7 @@ def tink_cc_gcpkms_deps():
             url = "https://github.com/googleapis/googleapis/archive/2f9af297c84c55c8b871ba4495e01ade42476c92.tar.gz",
         )
 
-    if "upb" not in native.existing_rules():
+    if not native.existing_rule("upb"):
         # Matches version embedded in com_github_grpc_grpc from 2022-05-11.
         http_archive(
             name = "upb",
@@ -66,7 +66,7 @@ def tink_cc_gcpkms_deps():
             url = "https://github.com/protocolbuffers/upb/archive/bef53686ec702607971bd3ea4d4fefd80c6cc6e8.tar.gz",
         )
 
-    if "envoy_api" not in native.existing_rules():
+    if not native.existing_rule("envoy_api"):
         # Matches version embedded in com_github_grpc_grpc from 2022-05-11.
         http_archive(
             name = "envoy_api",
@@ -75,7 +75,7 @@ def tink_cc_gcpkms_deps():
             url = "https://github.com/envoyproxy/data-plane-api/archive/9c42588c956220b48eb3099d186487c2f04d32ec.tar.gz",
         )
 
-    if "com_envoyproxy_protoc_gen_validate" not in native.existing_rules():
+    if not native.existing_rule("com_envoyproxy_protoc_gen_validate"):
         # Matches version embedded in com_github_grpc_grpc from 2022-05-11.
         http_archive(
             name = "com_envoyproxy_protoc_gen_validate",
@@ -88,7 +88,7 @@ def tink_cc_gcpkms_deps():
             patch_args = ["-p1"],
         )
 
-    if "bazel_gazelle" not in native.existing_rules():
+    if not native.existing_rule("bazel_gazelle"):
         # Matches version embedded in com_github_grpc_grpc from 2022-05-11.
         http_archive(
             name = "bazel_gazelle",
@@ -116,24 +116,4 @@ def tink_cc_gcpkms_deps():
             sha256 = "c1b80883511ceb1e433fb2d4b2f6d85dca0c62a265a6a3e6695144610d6f65b8",
             strip_prefix = "grpc-java-1.46.0",
             url = "https://github.com/grpc/grpc-java/archive/v1.46.0.tar.gz",
-        )
-
-    if not native.existing_rule("curl"):
-        # Release from 2016-05-30.
-        http_archive(
-            name = "curl",
-            url = "https://mirror.bazel.build/curl.haxx.se/download/curl-7.49.1.tar.gz",
-            sha256 = "ff3e80c1ca6a068428726cd7dd19037a47cc538ce58ef61c59587191039b2ca6",
-            strip_prefix = "curl-7.49.1",
-            build_file = "@tink_cc_awskms//:third_party/curl.BUILD.bazel",
-        )
-
-    if not native.existing_rule("zlib"):
-        # Releaes from 2022-03-27.
-        http_archive(
-            name = "zlib",
-            url = "https://mirror.bazel.build/zlib.net/zlib-1.2.12.tar.gz",
-            sha256 = "91844808532e5ce316b3c010929493c0244f3d37593afd6de04f71821d5136d9",
-            strip_prefix = "zlib-1.2.12",
-            build_file = "@tink_cc_awskms//:third_party/zlib.BUILD.bazel",
         )
