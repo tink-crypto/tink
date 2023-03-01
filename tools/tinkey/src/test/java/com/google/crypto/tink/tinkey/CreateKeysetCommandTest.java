@@ -21,9 +21,7 @@ import static com.google.common.truth.Truth.assertThat;
 import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.KeyTemplates;
 import com.google.crypto.tink.mac.MacConfig;
-import com.google.crypto.tink.proto.EncryptedKeyset;
 import com.google.crypto.tink.proto.Keyset;
-import com.google.crypto.tink.proto.KeysetInfo;
 import com.google.crypto.tink.testing.TestUtil;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -51,16 +49,16 @@ public class CreateKeysetCommandTest {
     testCreateCleartext_shouldCreateNewKeyset("binary");
   }
 
-  private void testCreateCleartext_shouldCreateNewKeyset(String outFormat)
+  private void testCreateCleartext_shouldCreateNewKeyset(String format)
       throws Exception {
     // Create a cleartext keyset.
     String masterKeyUri = null; // This ensures that the keyset won't be encrypted.
     String credentialPath = null;
     ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-    CreateKeysetCommand.create(outputStream, outFormat, masterKeyUri, credentialPath, template);
-    Keyset keyset = TinkeyUtil.createKeysetReader(
-        new ByteArrayInputStream(outputStream.toByteArray()), outFormat).read();
+    CreateKeysetCommand.create(outputStream, format, masterKeyUri, credentialPath, template);
 
+    Keyset keyset = TinkeyUtil.createKeysetReader(
+        new ByteArrayInputStream(outputStream.toByteArray()), format).read();
     assertThat(keyset.getKeyCount()).isEqualTo(1);
     TestUtil.assertHmacKey(template, keyset.getKey(0));
   }
@@ -72,18 +70,28 @@ public class CreateKeysetCommandTest {
   }
 
   private void testCreateEncrypted_shouldCreateNewKeyset(
-      String outFormat) throws Exception {
+      String format) throws Exception {
     // Create an encrypted keyset.
     String masterKeyUri = TestUtil.GCP_KMS_TEST_KEY_URI;
     String credentialPath = TestUtil.SERVICE_ACCOUNT_FILE;
-    ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-    CreateKeysetCommand.create(outputStream, outFormat, masterKeyUri, credentialPath, template);
-    EncryptedKeyset encryptedKeyset = TinkeyUtil
-        .createKeysetReader(new ByteArrayInputStream(outputStream.toByteArray()), outFormat)
-        .readEncrypted();
-    KeysetInfo keysetInfo = encryptedKeyset.getKeysetInfo();
+    ByteArrayOutputStream createOutputStream = new ByteArrayOutputStream();
+    CreateKeysetCommand.create(createOutputStream, format, masterKeyUri, credentialPath, template);
 
-    assertThat(keysetInfo.getKeyInfoCount()).isEqualTo(1);
-    TestUtil.assertKeyInfo(template, keysetInfo.getKeyInfo(0));
+    byte[] encryptedKeyset = createOutputStream.toByteArray();
+
+    // Now, use the ConvertKeysetCommand command to convert the encrypted keyset into an
+    // unencrypted keyset.
+    ByteArrayOutputStream convertOutputStream = new ByteArrayOutputStream();
+
+    ConvertKeysetCommand.convert(convertOutputStream,  format,
+       new ByteArrayInputStream(encryptedKeyset),  format,
+       masterKeyUri,  credentialPath,
+       /* newMasterKeyUri = */ null,  /* newCredentialPath = */ null);
+
+    Keyset keyset = TinkeyUtil.createKeysetReader(
+        new ByteArrayInputStream(convertOutputStream.toByteArray()), format).read();
+
+    assertThat(keyset.getKeyCount()).isEqualTo(1);
+    TestUtil.assertHmacKey(template, keyset.getKey(0));
   }
 }

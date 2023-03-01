@@ -43,6 +43,7 @@ java_test(
         "requires-network",
     ],
     deps = [
+        "//tinkey/src/main/java/com/google/crypto/tink/tinkey:convert_keyset_command",
         "//tinkey/src/main/java/com/google/crypto/tink/tinkey:create_keyset_command",
         "//tinkey/src/main/java/com/google/crypto/tink/tinkey:tinkey_util",
         "@maven//:com_google_truth_truth",
