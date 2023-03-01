@@ -145,6 +145,22 @@ java_library(
     ],
 )
 
+java_library(
+    name = "streaming_aead_key",
+    srcs = ["StreamingAeadKey.java"],
+    deps = [
+        ":streaming_aead_parameters",
+        "//src/main/java/com/google/crypto/tink:key",
+        "@maven//:com_google_code_findbugs_jsr305",
+    ],
+)
+
+java_library(
+    name = "streaming_aead_parameters",
+    srcs = ["StreamingAeadParameters.java"],
+    deps = ["//src/main/java/com/google/crypto/tink:parameters"],
+)
+
 # Android libraries
 
 android_library(
@@ -286,4 +302,20 @@ android_library(
         "//src/main/java/com/google/crypto/tink:registry-android",
         "//src/main/java/com/google/crypto/tink:streaming_aead-android",
     ],
+)
+
+android_library(
+    name = "streaming_aead_key-android",
+    srcs = ["StreamingAeadKey.java"],
+    deps = [
+        ":streaming_aead_parameters-android",
+        "//src/main/java/com/google/crypto/tink:key-android",
+        "@maven//:com_google_code_findbugs_jsr305",
+    ],
+)
+
+android_library(
+    name = "streaming_aead_parameters-android",
+    srcs = ["StreamingAeadParameters.java"],
+    deps = ["//src/main/java/com/google/crypto/tink:parameters-android"],
 )
