@@ -161,6 +161,16 @@ java_library(
     deps = ["//src/main/java/com/google/crypto/tink:parameters"],
 )
 
+java_library(
+    name = "aes_gcm_hkdf_streaming_parameters",
+    srcs = ["AesGcmHkdfStreamingParameters.java"],
+    deps = [
+        ":streaming_aead_parameters",
+        "@maven//:com_google_code_findbugs_jsr305",
+        "@maven//:com_google_errorprone_error_prone_annotations",
+    ],
+)
+
 # Android libraries
 
 android_library(
@@ -318,4 +328,14 @@ android_library(
     name = "streaming_aead_parameters-android",
     srcs = ["StreamingAeadParameters.java"],
     deps = ["//src/main/java/com/google/crypto/tink:parameters-android"],
+)
+
+android_library(
+    name = "aes_gcm_hkdf_streaming_parameters-android",
+    srcs = ["AesGcmHkdfStreamingParameters.java"],
+    deps = [
+        ":streaming_aead_parameters-android",
+        "@maven//:com_google_code_findbugs_jsr305",
+        "@maven//:com_google_errorprone_error_prone_annotations",
+    ],
 )
