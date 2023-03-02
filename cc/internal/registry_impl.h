@@ -125,10 +125,14 @@ class RegistryImpl {
       const google::crypto::tink::KeyData& key_data) const
       ABSL_LOCKS_EXCLUDED(maps_mutex_);
 
+  // NOLINTBEGIN(whitespace/line_length) (Formatted when commented in)
+  // TINK-PENDING-REMOVAL-IN-2.0.0-START
   template <class P>
   crypto::tink::util::StatusOr<std::unique_ptr<P>> GetPrimitive(
       absl::string_view type_url, const portable_proto::MessageLite& key) const
       ABSL_LOCKS_EXCLUDED(maps_mutex_);
+  // TINK-PENDING-REMOVAL-IN-2.0.0-END
+  // NOLINTEND(whitespace/line_length)
 
   crypto::tink::util::StatusOr<std::unique_ptr<google::crypto::tink::KeyData>>
   NewKeyData(const google::crypto::tink::KeyTemplate& key_template) const
@@ -760,6 +764,8 @@ crypto::tink::util::StatusOr<std::unique_ptr<P>> RegistryImpl::GetPrimitive(
   return key_manager_result.status();
 }
 
+// NOLINTBEGIN(whitespace/line_length) (Formatted when commented in)
+// TINK-PENDING-REMOVAL-IN-2.0.0-START
 template <class P>
 crypto::tink::util::StatusOr<std::unique_ptr<P>> RegistryImpl::GetPrimitive(
     absl::string_view type_url, const portable_proto::MessageLite& key) const {
@@ -769,6 +775,8 @@ crypto::tink::util::StatusOr<std::unique_ptr<P>> RegistryImpl::GetPrimitive(
   }
   return key_manager_result.status();
 }
+// TINK-PENDING-REMOVAL-IN-2.0.0-END
+// NOLINTEND(whitespace/line_length)
 
 template <class P>
 crypto::tink::util::StatusOr<const PrimitiveWrapper<P, P>*>
