@@ -19,6 +19,9 @@ package keyset
 import tinkpb "github.com/google/tink/go/proto/tink_go_proto"
 
 // MemReaderWriter implements keyset.Reader and keyset.Writer for *tinkpb.Keyset and *tinkpb.EncryptedKeyset.
+//
+// Deprecated: Use [keyset.NewBinaryReader] or [keyset.NewBinaryWriter] instead. See tests in
+// mem_io_test.go for examples on how to use them instead.
 type MemReaderWriter struct {
 	Keyset          *tinkpb.Keyset
 	EncryptedKeyset *tinkpb.EncryptedKeyset
