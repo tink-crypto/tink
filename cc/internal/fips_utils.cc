@@ -18,8 +18,10 @@
 
 #include <atomic>
 
+#include "absl/base/attributes.h"
 #include "absl/status/status.h"
 #include "openssl/crypto.h"
+#include "tink/util/status.h"
 
 namespace crypto {
 namespace tink {

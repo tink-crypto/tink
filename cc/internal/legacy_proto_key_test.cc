@@ -16,14 +16,19 @@
 
 #include "tink/internal/legacy_proto_key.h"
 
+#include <string>
 #include <tuple>
-#include <vector>
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include "absl/status/status.h"
+#include "absl/types/optional.h"
 #include "tink/insecure_secret_key_access.h"
 #include "tink/internal/proto_key_serialization.h"
+#include "tink/key.h"
+#include "tink/parameters.h"
 #include "tink/restricted_data.h"
+#include "tink/secret_key_access_token.h"
 #include "tink/util/statusor.h"
 #include "tink/util/test_matchers.h"
 #include "proto/tink.pb.h"

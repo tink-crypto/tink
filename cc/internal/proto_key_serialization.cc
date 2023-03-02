@@ -17,10 +17,14 @@
 #include "tink/internal/proto_key_serialization.h"
 
 #include <string>
+#include <utility>
 
 #include "absl/status/status.h"
+#include "absl/strings/string_view.h"
+#include "absl/types/optional.h"
 #include "tink/internal/util.h"
 #include "tink/restricted_data.h"
+#include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "proto/tink.pb.h"
 

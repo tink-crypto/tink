@@ -15,18 +15,26 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include "tink/internal/rsa_util.h"
 
+#include <stddef.h>
+
+#include <memory>
 #include <string>
 #include <utility>
 
 #include "absl/status/status.h"
+#include "absl/status/statusor.h"
 #include "absl/strings/str_cat.h"
+#include "absl/strings/string_view.h"
 #include "openssl/bn.h"
+#include "openssl/rsa.h"
 #include "tink/config/tink_fips.h"
 #include "tink/internal/bn_util.h"
 #include "tink/internal/err_util.h"
+#include "tink/internal/fips_utils.h"
 #include "tink/internal/ssl_unique_ptr.h"
 #include "tink/internal/ssl_util.h"
 #include "tink/util/errors.h"
+#include "tink/util/secret_data.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 

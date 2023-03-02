@@ -15,8 +15,11 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include "tink/internal/keyset_wrapper_impl.h"
 
+#include <stdint.h>
+
 #include <memory>
 #include <string>
+#include <tuple>
 #include <utility>
 #include <vector>
 
@@ -26,8 +29,10 @@
 #include "absl/memory/memory.h"
 #include "absl/status/status.h"
 #include "absl/strings/match.h"
+#include "absl/strings/string_view.h"
 #include "tink/primitive_set.h"
 #include "tink/primitive_wrapper.h"
+#include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "tink/util/test_matchers.h"
 #include "tink/util/test_util.h"

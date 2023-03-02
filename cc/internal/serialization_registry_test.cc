@@ -17,18 +17,24 @@
 #include "tink/internal/serialization_registry.h"
 
 #include <memory>
-#include <string>
+#include <string_view>
+#include <typeindex>
 #include <utility>
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include "absl/status/status.h"
 #include "tink/internal/key_parser.h"
 #include "tink/internal/key_serializer.h"
 #include "tink/internal/parameters_parser.h"
 #include "tink/internal/parameters_serializer.h"
+#include "tink/internal/serialization.h"
 #include "tink/internal/serialization_test_util.h"
 #include "tink/key.h"
 #include "tink/parameters.h"
+#include "tink/secret_key_access_token.h"
+#include "tink/util/status.h"
+#include "tink/util/statusor.h"
 #include "tink/util/test_matchers.h"
 
 namespace crypto {

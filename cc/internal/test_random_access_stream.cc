@@ -15,10 +15,17 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include "tink/internal/test_random_access_stream.h"
 
+#include <stdint.h>
+
 #include <algorithm>
 #include <memory>
 #include <string>
 #include <utility>
+
+#include "absl/status/status.h"
+#include "tink/random_access_stream.h"
+#include "tink/util/buffer.h"
+#include "tink/util/status.h"
 
 namespace crypto {
 namespace tink {

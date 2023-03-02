@@ -20,6 +20,8 @@
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include "absl/strings/string_view.h"
+#include "absl/types/optional.h"
 #include "tink/internal/serialization.h"
 #include "tink/key.h"
 #include "tink/parameters.h"

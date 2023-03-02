@@ -17,6 +17,7 @@
 #define TINK_INTERNAL_SSL_UNIQUE_PTR_H_
 
 #include <memory>
+
 // Every header in BoringSSL includes base.h, which in turn defines
 // OPENSSL_IS_BORINGSSL. So we include this common header here to "force" the
 // definition of OPENSSL_IS_BORINGSSL in case BoringSSL is used.

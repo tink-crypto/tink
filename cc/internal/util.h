@@ -16,6 +16,7 @@
 #ifndef TINK_INTERNAL_UTIL_H_
 #define TINK_INTERNAL_UTIL_H_
 
+#include "absl/base/attributes.h"
 #include "absl/strings/string_view.h"
 
 namespace crypto {

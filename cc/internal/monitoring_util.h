@@ -26,6 +26,7 @@
 #include "tink/key_status.h"
 #include "tink/monitoring/monitoring.h"
 #include "tink/primitive_set.h"
+#include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "proto/tink.pb.h"
 

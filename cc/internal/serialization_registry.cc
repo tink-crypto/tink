@@ -17,8 +17,11 @@
 #include "tink/internal/serialization_registry.h"
 
 #include <memory>
+#include <string>
+#include <typeinfo>
 
 #include "absl/container/flat_hash_map.h"
+#include "absl/status/status.h"
 #include "absl/strings/str_format.h"
 #include "tink/insecure_secret_key_access.h"
 #include "tink/internal/key_parser.h"
@@ -26,8 +29,12 @@
 #include "tink/internal/parameters_parser.h"
 #include "tink/internal/parameters_serializer.h"
 #include "tink/internal/parser_index.h"
+#include "tink/internal/serialization.h"
 #include "tink/internal/serializer_index.h"
+#include "tink/key.h"
+#include "tink/parameters.h"
 #include "tink/util/status.h"
+#include "tink/util/statusor.h"
 
 namespace crypto {
 namespace tink {

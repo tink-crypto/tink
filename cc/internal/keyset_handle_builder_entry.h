@@ -20,6 +20,7 @@
 #include <memory>
 #include <utility>
 
+#include "absl/types/optional.h"
 #include "tink/key.h"
 #include "tink/key_status.h"
 #include "tink/parameters.h"

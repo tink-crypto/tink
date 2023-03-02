@@ -14,17 +14,22 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
+#include "tink/internal/registry_impl.h"
+
+#include <stdint.h>
+
 #include <memory>
 #include <sstream>
 #include <string>
 #include <thread>  // NOLINT(build/c++11)
+#include <typeinfo>
 #include <utility>
-#include <vector>
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "absl/memory/memory.h"
 #include "absl/status/status.h"
+#include "absl/status/statusor.h"
 #include "absl/strings/string_view.h"
 #include "openssl/crypto.h"
 #include "tink/aead.h"
@@ -34,15 +39,26 @@
 #include "tink/config/tink_fips.h"
 #include "tink/core/key_manager_impl.h"
 #include "tink/core/key_type_manager.h"
+#include "tink/core/private_key_manager_impl.h"
+#include "tink/core/private_key_type_manager.h"
+#include "tink/core/template_util.h"
 #include "tink/crypto_format.h"
 #include "tink/hybrid/ecies_aead_hkdf_private_key_manager.h"
 #include "tink/hybrid/ecies_aead_hkdf_public_key_manager.h"
+#include "tink/hybrid_decrypt.h"
+#include "tink/input_stream.h"
+#include "tink/internal/fips_utils.h"
+#include "tink/key_manager.h"
 #include "tink/keyset_manager.h"
+#include "tink/mac.h"
 #include "tink/monitoring/monitoring.h"
 #include "tink/monitoring/monitoring_client_mocks.h"
+#include "tink/primitive_set.h"
+#include "tink/primitive_wrapper.h"
 #include "tink/registry.h"
 #include "tink/subtle/aes_gcm_boringssl.h"
 #include "tink/subtle/random.h"
+#include "tink/util/input_stream_util.h"
 #include "tink/util/istream_input_stream.h"
 #include "tink/util/protobuf_helper.h"
 #include "tink/util/secret_data.h"
@@ -55,6 +71,7 @@
 #include "proto/aes_gcm.pb.h"
 #include "proto/common.pb.h"
 #include "proto/ecdsa.pb.h"
+#include "proto/ecies_aead_hkdf.pb.h"
 #include "proto/tink.pb.h"
 
 namespace crypto {

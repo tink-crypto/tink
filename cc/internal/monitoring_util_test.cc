@@ -15,19 +15,24 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include "tink/internal/monitoring_util.h"
 
+#include <stdint.h>
+
 #include <memory>
 #include <string>
-#include <tuple>
 #include <utility>
 #include <vector>
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include "absl/container/flat_hash_map.h"
+#include "absl/memory/memory.h"
 #include "absl/status/status.h"
 #include "absl/strings/string_view.h"
 #include "tink/key_status.h"
 #include "tink/monitoring/monitoring.h"
 #include "tink/primitive_set.h"
+#include "tink/util/status.h"
+#include "tink/util/statusor.h"
 #include "tink/util/test_matchers.h"
 #include "proto/tink.pb.h"
 

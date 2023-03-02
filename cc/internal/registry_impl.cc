@@ -15,13 +15,23 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include "tink/internal/registry_impl.h"
 
+#include <functional>
 #include <memory>
+#include <string>
 #include <typeindex>
 #include <utility>
 
+#include "absl/container/flat_hash_map.h"
 #include "absl/status/status.h"
+#include "absl/status/statusor.h"
+#include "absl/strings/str_cat.h"
+#include "absl/strings/string_view.h"
+#include "absl/synchronization/mutex.h"
+#include "tink/input_stream.h"
+#include "tink/key_manager.h"
 #include "tink/monitoring/monitoring.h"
 #include "tink/util/errors.h"
+#include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "proto/tink.pb.h"
 

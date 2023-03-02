@@ -16,6 +16,7 @@
 #ifndef TINK_INTERNAL_KEYSET_WRAPPER_H_
 #define TINK_INTERNAL_KEYSET_WRAPPER_H_
 
+#include <memory>
 #include <string>
 
 #include "absl/container/flat_hash_map.h"

@@ -16,12 +16,17 @@
 #ifndef TINK_INTERNAL_TEST_RANDOM_ACCESS_STREAM_H_
 #define TINK_INTERNAL_TEST_RANDOM_ACCESS_STREAM_H_
 
+#include <stdint.h>
+
 #include <memory>
 #include <string>
 #include <utility>
 
 #include "absl/strings/string_view.h"
 #include "tink/random_access_stream.h"
+#include "tink/util/buffer.h"
+#include "tink/util/status.h"
+#include "tink/util/statusor.h"
 
 namespace crypto {
 namespace tink {

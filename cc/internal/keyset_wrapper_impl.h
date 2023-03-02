@@ -16,14 +16,17 @@
 #ifndef TINK_INTERNAL_KEYSET_WRAPPER_IMPL_H_
 #define TINK_INTERNAL_KEYSET_WRAPPER_IMPL_H_
 
+#include <functional>
 #include <memory>
 #include <string>
+#include <utility>
 
 #include "absl/container/flat_hash_map.h"
 #include "tink/internal/key_info.h"
 #include "tink/internal/keyset_wrapper.h"
 #include "tink/primitive_set.h"
 #include "tink/primitive_wrapper.h"
+#include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "tink/util/validation.h"
 #include "proto/tink.pb.h"

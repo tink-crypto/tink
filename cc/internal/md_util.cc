@@ -15,9 +15,12 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include "tink/internal/md_util.h"
 
+#include <stdint.h>
+
 #include <string>
 
 #include "absl/status/status.h"
+#include "absl/strings/str_cat.h"
 #include "absl/strings/string_view.h"
 #include "openssl/evp.h"
 #include "tink/internal/err_util.h"
@@ -25,6 +28,7 @@
 #include "tink/subtle/common_enums.h"
 #include "tink/subtle/subtle_util.h"
 #include "tink/util/status.h"
+#include "tink/util/statusor.h"
 
 namespace crypto {
 namespace tink {

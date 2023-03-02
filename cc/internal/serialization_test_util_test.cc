@@ -16,9 +16,14 @@
 
 #include "tink/internal/serialization_test_util.h"
 
+#include <string_view>
+
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include "absl/types/optional.h"
 #include "tink/insecure_secret_key_access.h"
+#include "tink/parameters.h"
+#include "tink/util/statusor.h"
 #include "tink/util/test_matchers.h"
 
 namespace crypto {

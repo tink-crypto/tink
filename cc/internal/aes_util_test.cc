@@ -18,7 +18,6 @@
 #include <algorithm>
 #include <cstdint>
 #include <string>
-#include <vector>
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
@@ -30,6 +29,7 @@
 #include "openssl/evp.h"
 #include "tink/subtle/subtle_util.h"
 #include "tink/util/secret_data.h"
+#include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "tink/util/test_matchers.h"
 

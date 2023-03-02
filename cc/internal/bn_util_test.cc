@@ -15,6 +15,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include "tink/internal/bn_util.h"
 
+#include <stddef.h>
+
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -22,9 +25,12 @@
 #include "gtest/gtest.h"
 #include "absl/strings/escaping.h"
 #include "absl/strings/str_cat.h"
+#include "absl/strings/string_view.h"
+#include "absl/types/span.h"
 #include "openssl/bn.h"
 #include "tink/internal/ssl_unique_ptr.h"
 #include "tink/util/secret_data.h"
+#include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "tink/util/test_matchers.h"
 

@@ -16,6 +16,9 @@
 
 #include "tink/internal/legacy_proto_parameters.h"
 
+#include "tink/internal/proto_parameters_serialization.h"
+#include "tink/parameters.h"
+
 namespace crypto {
 namespace tink {
 namespace internal {

@@ -16,8 +16,11 @@
 #ifndef TINK_INTERNAL_RSA_UTIL_H_
 #define TINK_INTERNAL_RSA_UTIL_H_
 
+#include <stddef.h>
+
 #include <string>
 
+#include "absl/strings/string_view.h"
 #include "openssl/bn.h"
 #include "openssl/rsa.h"
 #include "tink/internal/ssl_unique_ptr.h"

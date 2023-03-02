@@ -16,6 +16,7 @@
 #include "tink/internal/aes_util.h"
 
 #include <cstdint>
+#include <string>
 #include <vector>
 
 #include "absl/status/status.h"
@@ -24,6 +25,7 @@
 #include "absl/types/span.h"
 #include "openssl/aes.h"
 #include "openssl/evp.h"
+#include "tink/util/statusor.h"
 #ifndef OPENSSL_IS_BORINGSSL
 // This is needed to use block128_f, which is necessary when OpenSSL is used.
 #include "openssl/modes.h"

@@ -16,11 +16,16 @@
 #ifndef TINK_INTERNAL_BN_UTIL_H_
 #define TINK_INTERNAL_BN_UTIL_H_
 
+#include <stddef.h>
+
 #include <string>
 
+#include "absl/strings/string_view.h"
+#include "absl/types/span.h"
 #include "openssl/bn.h"
 #include "tink/internal/ssl_unique_ptr.h"
 #include "tink/util/secret_data.h"
+#include "tink/util/status.h"
 #include "tink/util/statusor.h"
 
 namespace crypto {

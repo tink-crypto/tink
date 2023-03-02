@@ -16,9 +16,12 @@
 
 #include "tink/internal/legacy_proto_parameters.h"
 
+#include <string>
+
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "tink/internal/proto_parameters_serialization.h"
+#include "tink/parameters.h"
 #include "tink/util/statusor.h"
 #include "tink/util/test_matchers.h"
 #include "proto/test_proto.pb.h"

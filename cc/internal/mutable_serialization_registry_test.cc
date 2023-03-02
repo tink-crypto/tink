@@ -17,11 +17,12 @@
 #include "tink/internal/mutable_serialization_registry.h"
 
 #include <memory>
-#include <string>
-#include <utility>
+#include <string_view>
+#include <typeindex>
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include "absl/status/status.h"
 #include "tink/insecure_secret_key_access.h"
 #include "tink/internal/key_parser.h"
 #include "tink/internal/key_serializer.h"
@@ -33,6 +34,9 @@
 #include "tink/key.h"
 #include "tink/parameters.h"
 #include "tink/restricted_data.h"
+#include "tink/secret_key_access_token.h"
+#include "tink/util/status.h"
+#include "tink/util/statusor.h"
 #include "tink/util/test_matchers.h"
 #include "proto/tink.pb.h"
 

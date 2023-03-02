@@ -16,25 +16,31 @@
 
 #include "tink/internal/keyset_handle_builder_entry.h"
 
-#include <memory>
 #include <string>
-#include <utility>
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include "absl/memory/memory.h"
+#include "absl/status/status.h"
+#include "absl/types/optional.h"
 #include "tink/config/tink_config.h"
 #include "tink/insecure_secret_key_access.h"
 #include "tink/internal/legacy_proto_key.h"
 #include "tink/internal/legacy_proto_parameters.h"
 #include "tink/internal/proto_key_serialization.h"
 #include "tink/internal/proto_parameters_serialization.h"
+#include "tink/key.h"
+#include "tink/key_status.h"
 #include "tink/keyset_handle.h"
 #include "tink/keyset_handle_builder.h"
 #include "tink/mac/aes_cmac_key.h"
 #include "tink/mac/aes_cmac_parameters.h"
 #include "tink/mac/mac_key_templates.h"
+#include "tink/parameters.h"
 #include "tink/partial_key_access.h"
 #include "tink/restricted_data.h"
+#include "tink/secret_key_access_token.h"
+#include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "tink/util/test_matchers.h"
 #include "proto/tink.pb.h"

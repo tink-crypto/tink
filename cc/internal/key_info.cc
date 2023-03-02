@@ -16,6 +16,8 @@
 
 #include "tink/internal/key_info.h"
 
+#include "proto/tink.pb.h"
+
 namespace crypto {
 namespace tink {
 

@@ -17,11 +17,13 @@
 #define TINK_INTERNAL_REGISTRY_IMPL_H_
 
 #include <algorithm>
+#include <atomic>
 #include <functional>
 #include <initializer_list>
 #include <memory>
 #include <string>
 #include <tuple>
+#include <type_traits>
 #include <typeindex>
 #include <typeinfo>
 #include <utility>
@@ -29,6 +31,7 @@
 #include "absl/base/thread_annotations.h"
 #include "absl/container/flat_hash_map.h"
 #include "absl/memory/memory.h"
+#include "absl/meta/type_traits.h"
 #include "absl/status/status.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/str_join.h"
@@ -40,6 +43,8 @@
 #include "tink/core/key_type_manager.h"
 #include "tink/core/private_key_manager_impl.h"
 #include "tink/core/private_key_type_manager.h"
+#include "tink/core/template_util.h"
+#include "tink/input_stream.h"
 #include "tink/internal/fips_utils.h"
 #include "tink/internal/keyset_wrapper.h"
 #include "tink/internal/keyset_wrapper_impl.h"
@@ -50,6 +55,7 @@
 #include "tink/util/errors.h"
 #include "tink/util/protobuf_helper.h"
 #include "tink/util/status.h"
+#include "tink/util/statusor.h"
 #include "tink/util/validation.h"
 #include "proto/tink.pb.h"
 

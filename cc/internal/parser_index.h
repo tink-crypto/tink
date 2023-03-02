@@ -20,6 +20,7 @@
 #include <string>
 #include <typeindex>
 
+#include "absl/strings/string_view.h"
 #include "tink/internal/serialization.h"
 
 namespace crypto {

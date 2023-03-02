@@ -16,6 +16,8 @@
 
 #include "tink/internal/proto_parameters_serialization.h"
 
+#include <string>
+
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "tink/util/statusor.h"

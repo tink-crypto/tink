@@ -18,6 +18,10 @@
 
 #include <memory>
 
+#include "absl/memory/memory.h"
+#include "absl/status/status.h"
+#include "absl/synchronization/mutex.h"
+#include "tink/insecure_secret_key_access.h"
 #include "tink/internal/key_parser.h"
 #include "tink/internal/key_serializer.h"
 #include "tink/internal/legacy_proto_key.h"
@@ -28,7 +32,9 @@
 #include "tink/internal/serialization_registry.h"
 #include "tink/key.h"
 #include "tink/parameters.h"
+#include "tink/secret_key_access_token.h"
 #include "tink/util/status.h"
+#include "tink/util/statusor.h"
 
 namespace crypto {
 namespace tink {

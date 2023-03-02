@@ -18,18 +18,19 @@
 #include <algorithm>
 #include <cstdint>
 #include <cstring>
-#include <iterator>
 #include <memory>
 #include <string>
 #include <utility>
+#include <vector>
 
 #include "absl/memory/memory.h"
 #include "absl/status/status.h"
-#include "absl/strings/escaping.h"
+#include "absl/strings/str_cat.h"
 #include "absl/strings/string_view.h"
 #include "absl/types/span.h"
 #include "openssl/bn.h"
 #include "openssl/ec.h"
+#include "openssl/crypto.h"
 #include "openssl/ecdsa.h"
 #include "openssl/evp.h"
 #include "tink/internal/bn_util.h"

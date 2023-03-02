@@ -15,20 +15,25 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include "tink/internal/ec_util.h"
 
+#include <stdint.h>
+
 #include <memory>
 #include <string>
 #include <vector>
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include "absl/status/status.h"
 #include "absl/strings/escaping.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/str_split.h"
 #include "absl/strings/string_view.h"
 #include "absl/types/span.h"
+#include "openssl/bn.h"
 #include "openssl/ec.h"
 #include "openssl/ecdsa.h"
 #include "openssl/evp.h"
+#include "include/rapidjson/document.h"
 #include "tink/internal/bn_util.h"
 #include "tink/internal/fips_utils.h"
 #include "tink/internal/ssl_unique_ptr.h"
@@ -37,6 +42,7 @@
 #include "tink/subtle/subtle_util.h"
 #include "tink/subtle/wycheproof_util.h"
 #include "tink/util/secret_data.h"
+#include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "tink/util/test_matchers.h"
 

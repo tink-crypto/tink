@@ -24,6 +24,7 @@ tink_cc_library(
     util.cc
     util.h
   DEPS
+    absl::core_headers
     absl::log
     absl::strings
 )
@@ -50,6 +51,7 @@ tink_cc_library(
     absl::flat_hash_map
     tink::core::primitive_set
     tink::core::primitive_wrapper
+    tink::util::status
     tink::util::statusor
     tink::util::validation
     tink::proto::tink_cc_proto
@@ -93,7 +95,9 @@ tink_cc_library(
     absl::core_headers
     absl::flat_hash_map
     absl::memory
+    absl::type_traits
     absl::status
+    absl::statusor
     absl::strings
     absl::synchronization
     absl::optional
@@ -102,6 +106,8 @@ tink_cc_library(
     tink::core::key_type_manager
     tink::core::private_key_manager_impl
     tink::core::private_key_type_manager
+    tink::core::template_util
+    tink::core::input_stream
     tink::core::key_manager
     tink::core::primitive_set
     tink::core::primitive_wrapper
@@ -156,6 +162,8 @@ tink_cc_library(
     bn_util.h
   DEPS
     tink::internal::ssl_unique_ptr
+    absl::status
+    absl::strings
     absl::span
     crypto
     tink::subtle::subtle_util
@@ -172,9 +180,11 @@ tink_cc_library(
   DEPS
     tink::internal::bn_util
     tink::internal::err_util
+    tink::internal::fips_utils
     tink::internal::ssl_unique_ptr
     tink::internal::ssl_util
     absl::status
+    absl::statusor
     absl::strings
     crypto
     tink::config::tink_fips
@@ -208,6 +218,7 @@ tink_cc_test(
     absl::strings
     tink::core::primitive_set
     tink::core::primitive_wrapper
+    tink::util::status
     tink::util::statusor
     tink::util::test_matchers
     tink::util::test_util
@@ -221,6 +232,7 @@ tink_cc_test(
   DEPS
     tink::internal::key_info
     gmock
+    protobuf::libprotobuf-lite
     tink::proto::tink_cc_proto
 )
 
@@ -229,17 +241,29 @@ tink_cc_test(
   SRCS
     registry_impl_test.cc
   DEPS
+    tink::internal::fips_utils
+    tink::internal::registry_impl
     gmock
     absl::memory
     absl::status
+    absl::statusor
     absl::strings
     crypto
     tink::core::aead
     tink::core::catalogue
     tink::core::key_manager_impl
     tink::core::key_type_manager
+    tink::core::private_key_manager_impl
+    tink::core::private_key_type_manager
+    tink::core::template_util
     tink::core::crypto_format
+    tink::core::hybrid_decrypt
+    tink::core::input_stream
+    tink::core::key_manager
     tink::core::keyset_manager
+    tink::core::mac
+    tink::core::primitive_set
+    tink::core::primitive_wrapper
     tink::core::registry
     tink::aead::aead_wrapper
     tink::aead::aes_gcm_key_manager
@@ -250,6 +274,7 @@ tink_cc_test(
     tink::monitoring::monitoring_client_mocks
     tink::subtle::aes_gcm_boringssl
     tink::subtle::random
+    tink::util::input_stream_util
     tink::util::istream_input_stream
     tink::util::protobuf_helper
     tink::util::secret_data
@@ -262,6 +287,7 @@ tink_cc_test(
     tink::proto::aes_gcm_cc_proto
     tink::proto::common_cc_proto
     tink::proto::ecdsa_cc_proto
+    tink::proto::ecies_aead_hkdf_cc_proto
     tink::proto::tink_cc_proto
 )
 
@@ -285,8 +311,10 @@ tink_cc_test(
     tink::internal::ssl_unique_ptr
     gmock
     absl::strings
+    absl::span
     crypto
     tink::util::secret_data
+    tink::util::status
     tink::util::statusor
     tink::util::test_matchers
 )
@@ -300,9 +328,11 @@ tink_cc_test(
     tink::internal::rsa_util
     tink::internal::ssl_unique_ptr
     gmock
+    absl::status
     absl::strings
     crypto
     tink::subtle::random
+    tink::util::secret_data
     tink::util::status
     tink::util::statusor
     tink::util::test_matchers
@@ -334,13 +364,16 @@ tink_cc_test(
     tink::internal::ssl_unique_ptr
     tink::internal::ssl_util
     gmock
+    absl::status
     absl::strings
     absl::span
     crypto
+    rapidjson
     tink::subtle::common_enums
     tink::subtle::subtle_util
     tink::subtle::wycheproof_util
     tink::util::secret_data
+    tink::util::status
     tink::util::statusor
     tink::util::test_matchers
 )
@@ -370,9 +403,9 @@ tink_cc_test(
     tink::internal::md_util
     gmock
     absl::strings
-    absl::span
     crypto
     tink::subtle::common_enums
+    tink::util::status
     tink::util::statusor
     tink::util::test_matchers
 )
@@ -406,6 +439,7 @@ tink_cc_test(
     crypto
     tink::subtle::subtle_util
     tink::util::secret_data
+    tink::util::status
     tink::util::statusor
     tink::util::test_matchers
 )
@@ -422,6 +456,7 @@ tink_cc_library(
     tink::core::key_status
     tink::core::primitive_set
     tink::monitoring::monitoring
+    tink::util::status
     tink::util::statusor
     tink::proto::tink_cc_proto
 )
@@ -433,11 +468,15 @@ tink_cc_test(
   DEPS
     tink::internal::monitoring_util
     gmock
+    absl::flat_hash_map
+    absl::memory
     absl::status
     absl::strings
     tink::core::key_status
     tink::core::primitive_set
     tink::monitoring::monitoring
+    tink::util::status
+    tink::util::statusor
     tink::util::test_matchers
     tink::proto::tink_cc_proto
 )
@@ -458,7 +497,9 @@ tink_cc_library(
   DEPS
     tink::internal::serialization
     tink::internal::util
+    absl::status
     absl::strings
+    tink::util::status
     tink::util::statusor
     tink::proto::tink_cc_proto
 )
@@ -485,7 +526,10 @@ tink_cc_library(
     tink::internal::serialization
     tink::internal::util
     absl::status
+    absl::strings
+    absl::optional
     tink::core::restricted_data
+    tink::util::status
     tink::util::statusor
     tink::proto::tink_cc_proto
 )
@@ -497,6 +541,8 @@ tink_cc_test(
   DEPS
     tink::internal::proto_key_serialization
     gmock
+    absl::status
+    absl::optional
     tink::core::insecure_secret_key_access
     tink::core::restricted_data
     tink::util::statusor
@@ -523,6 +569,7 @@ tink_cc_test(
     tink::internal::legacy_proto_parameters
     tink::internal::proto_parameters_serialization
     gmock
+    tink::core::parameters
     tink::util::statusor
     tink::util::test_matchers
     tink::proto::test_proto_cc_proto
@@ -536,7 +583,11 @@ tink_cc_library(
     legacy_proto_key.h
   DEPS
     tink::internal::proto_key_serialization
+    absl::status
+    absl::strings
+    absl::optional
     tink::core::key
+    tink::core::parameters
     tink::core::secret_key_access_token
     tink::util::status
     tink::util::statusor
@@ -551,8 +602,13 @@ tink_cc_test(
     tink::internal::legacy_proto_key
     tink::internal::proto_key_serialization
     gmock
+    absl::status
+    absl::optional
     tink::core::insecure_secret_key_access
+    tink::core::key
+    tink::core::parameters
     tink::core::restricted_data
+    tink::core::secret_key_access_token
     tink::util::statusor
     tink::util::test_matchers
     tink::proto::tink_cc_proto
@@ -564,6 +620,7 @@ tink_cc_library(
     parser_index.h
   DEPS
     tink::internal::serialization
+    absl::strings
 )
 
 tink_cc_test(
@@ -574,6 +631,7 @@ tink_cc_test(
     tink::internal::parser_index
     tink::internal::serialization
     gmock
+    absl::strings
 )
 
 tink_cc_library(
@@ -594,6 +652,8 @@ tink_cc_test(
     tink::internal::serialization
     tink::internal::serializer_index
     gmock
+    absl::strings
+    absl::optional
     tink::core::key
     tink::core::parameters
 )
@@ -605,8 +665,10 @@ tink_cc_library(
   DEPS
     tink::internal::parser_index
     tink::internal::serialization
+    absl::status
     absl::strings
     tink::core::parameters
+    tink::util::status
     tink::util::statusor
 )
 
@@ -620,7 +682,10 @@ tink_cc_test(
     tink::internal::serialization
     tink::internal::serialization_test_util
     gmock
+    absl::memory
+    absl::status
     tink::core::parameters
+    tink::util::statusor
     tink::util::test_matchers
 )
 
@@ -631,8 +696,10 @@ tink_cc_library(
   DEPS
     tink::internal::serialization
     tink::internal::serializer_index
+    absl::status
     absl::strings
     tink::core::parameters
+    tink::util::status
     tink::util::statusor
 )
 
@@ -646,7 +713,10 @@ tink_cc_test(
     tink::internal::serialization_test_util
     tink::internal::serializer_index
     gmock
+    absl::memory
+    absl::status
     tink::core::parameters
+    tink::util::statusor
     tink::util::test_matchers
 )
 
@@ -658,9 +728,12 @@ tink_cc_library(
     tink::internal::parser_index
     tink::internal::serialization
     absl::function_ref
+    absl::log
+    absl::status
     absl::strings
     tink::core::key
     tink::core::secret_key_access_token
+    tink::util::status
     tink::util::statusor
 )
 
@@ -674,9 +747,13 @@ tink_cc_test(
     tink::internal::serialization
     tink::internal::serialization_test_util
     gmock
+    absl::memory
+    absl::status
+    absl::optional
     tink::core::insecure_secret_key_access
     tink::core::key
     tink::core::parameters
+    tink::util::statusor
     tink::util::test_matchers
 )
 
@@ -688,8 +765,11 @@ tink_cc_library(
     tink::internal::serialization
     tink::internal::serializer_index
     absl::function_ref
+    absl::log
+    absl::status
     tink::core::key
     tink::core::secret_key_access_token
+    tink::util::status
     tink::util::statusor
 )
 
@@ -703,9 +783,12 @@ tink_cc_test(
     tink::internal::serialization_test_util
     tink::internal::serializer_index
     gmock
+    absl::memory
+    absl::status
     tink::core::insecure_secret_key_access
     tink::core::key
     tink::core::secret_key_access_token
+    tink::util::statusor
     tink::util::test_matchers
 )
 
@@ -715,7 +798,9 @@ tink_cc_library(
     key_status_util.cc
     key_status_util.h
   DEPS
+    absl::status
     tink::core::key_status
+    tink::util::status
     tink::util::statusor
     tink::proto::tink_cc_proto
 )
@@ -727,6 +812,7 @@ tink_cc_test(
   DEPS
     tink::internal::key_status_util
     gmock
+    absl::status
     tink::core::key_status
     tink::util::statusor
     tink::util::test_matchers
@@ -745,6 +831,7 @@ tink_cc_library(
     tink::internal::mutable_serialization_registry
     tink::internal::proto_key_serialization
     tink::internal::proto_parameters_serialization
+    tink::internal::serialization
     absl::status
     absl::strings
     absl::optional
@@ -753,6 +840,8 @@ tink_cc_library(
     tink::core::key_status
     tink::core::parameters
     tink::core::registry
+    tink::core::restricted_data
+    tink::core::secret_key_access_token
     tink::util::status
     tink::util::statusor
     tink::proto::tink_cc_proto
@@ -769,15 +858,23 @@ tink_cc_test(
     tink::internal::proto_key_serialization
     tink::internal::proto_parameters_serialization
     gmock
+    absl::memory
+    absl::status
+    absl::optional
     tink::core::insecure_secret_key_access
+    tink::core::key
+    tink::core::key_status
     tink::core::keyset_handle
     tink::core::keyset_handle_builder
+    tink::core::parameters
     tink::core::partial_key_access
     tink::core::restricted_data
+    tink::core::secret_key_access_token
     tink::config::tink_config
     tink::mac::aes_cmac_key
     tink::mac::aes_cmac_parameters
     tink::mac::mac_key_templates
+    tink::util::status
     tink::util::statusor
     tink::util::test_matchers
     tink::proto::tink_cc_proto
@@ -794,11 +891,16 @@ tink_cc_library(
     tink::internal::parameters_parser
     tink::internal::parameters_serializer
     tink::internal::parser_index
+    tink::internal::serialization
     tink::internal::serializer_index
     absl::flat_hash_map
+    absl::status
     absl::str_format
     tink::core::insecure_secret_key_access
+    tink::core::key
+    tink::core::parameters
     tink::util::status
+    tink::util::statusor
 )
 
 tink_cc_test(
@@ -810,11 +912,16 @@ tink_cc_test(
     tink::internal::key_serializer
     tink::internal::parameters_parser
     tink::internal::parameters_serializer
+    tink::internal::serialization
     tink::internal::serialization_registry
     tink::internal::serialization_test_util
     gmock
+    absl::status
     tink::core::key
     tink::core::parameters
+    tink::core::secret_key_access_token
+    tink::util::status
+    tink::util::statusor
     tink::util::test_matchers
 )
 
@@ -832,9 +939,16 @@ tink_cc_library(
     tink::internal::proto_key_serialization
     tink::internal::serialization
     tink::internal::serialization_registry
+    absl::core_headers
+    absl::memory
+    absl::status
+    absl::synchronization
+    tink::core::insecure_secret_key_access
     tink::core::key
     tink::core::parameters
+    tink::core::secret_key_access_token
     tink::util::status
+    tink::util::statusor
 )
 
 tink_cc_test(
@@ -851,10 +965,14 @@ tink_cc_test(
     tink::internal::serialization
     tink::internal::serialization_test_util
     gmock
+    absl::status
     tink::core::insecure_secret_key_access
     tink::core::key
     tink::core::parameters
     tink::core::restricted_data
+    tink::core::secret_key_access_token
+    tink::util::status
+    tink::util::statusor
     tink::util::test_matchers
     tink::proto::tink_cc_proto
 )
@@ -865,6 +983,8 @@ tink_cc_library(
     serialization_test_util.h
   DEPS
     tink::internal::serialization
+    absl::strings
+    absl::optional
     tink::core::key
     tink::core::parameters
     tink::core::secret_key_access_token
@@ -878,7 +998,10 @@ tink_cc_test(
   DEPS
     tink::internal::serialization_test_util
     gmock
+    absl::optional
     tink::core::insecure_secret_key_access
+    tink::core::parameters
+    tink::util::statusor
     tink::util::test_matchers
 )
 
@@ -888,8 +1011,12 @@ tink_cc_library(
     test_random_access_stream.cc
     test_random_access_stream.h
   DEPS
+    absl::status
     absl::strings
     tink::core::random_access_stream
+    tink::util::buffer
+    tink::util::status
+    tink::util::statusor
 )
 
 tink_cc_test(
@@ -900,7 +1027,6 @@ tink_cc_test(
     tink::internal::test_random_access_stream
     gmock
     absl::status
-    absl::strings
     tink::subtle::random
     tink::util::buffer
     tink::util::status
