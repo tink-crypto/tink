@@ -19,15 +19,25 @@ package com.google.crypto.tink.streamingaead;
 import static com.google.crypto.tink.testing.TestUtil.assertExceptionContains;
 import static org.junit.Assert.assertThrows;
 
+import com.google.crypto.tink.InsecureSecretKeyAccess;
+import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.PrimitiveSet;
 import com.google.crypto.tink.StreamingAead;
+import com.google.crypto.tink.TinkProtoKeysetFormat;
 import com.google.crypto.tink.daead.DeterministicAeadConfig;
+import com.google.crypto.tink.proto.AesGcmHkdfStreamingKey;
+import com.google.crypto.tink.proto.AesGcmHkdfStreamingParams;
+import com.google.crypto.tink.proto.HashType;
+import com.google.crypto.tink.proto.KeyData;
+import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
 import com.google.crypto.tink.proto.KeyStatusType;
+import com.google.crypto.tink.proto.Keyset;
 import com.google.crypto.tink.proto.Keyset.Key;
 import com.google.crypto.tink.proto.OutputPrefixType;
 import com.google.crypto.tink.subtle.Random;
 import com.google.crypto.tink.testing.StreamingTestUtil;
 import com.google.crypto.tink.testing.TestUtil;
+import com.google.protobuf.ByteString;
 import java.io.IOException;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -39,6 +49,13 @@ import org.junit.runners.JUnit4;
 public class StreamingAeadWrapperTest {
   private static final int KDF_KEY_SIZE = 16;
   private static final int AES_KEY_SIZE = 16;
+
+  private static final String AES_GCM_HKDF_TYPE_URL =
+      "type.googleapis.com/google.crypto.tink.AesGcmHkdfStreamingKey";
+  private static final ByteString KEY_BYTES_1 =
+      ByteString.copyFromUtf8("0123456789012345");
+  private static final ByteString KEY_BYTES_2 =
+      ByteString.copyFromUtf8("0123456789abcdef");
 
   @BeforeClass
   public static void setUp() throws Exception {
@@ -150,5 +167,62 @@ public class StreamingAeadWrapperTest {
             IOException.class,
             () -> StreamingTestUtil.testEncryptionAndDecryption(anotherAead, primaryAead));
     assertExceptionContains(expected2, "No matching key");
+  }
+
+  @Test
+  public void testEncryptDecryptWithTinkKey() throws Exception {
+    AesGcmHkdfStreamingKey protoKey1 =
+        AesGcmHkdfStreamingKey.newBuilder()
+            .setVersion(0)
+            .setKeyValue(KEY_BYTES_1)
+            .setParams(
+                AesGcmHkdfStreamingParams.newBuilder()
+                    .setHkdfHashType(HashType.SHA1)
+                    .setDerivedKeySize(16)
+                    .setCiphertextSegmentSize(512 * 1024))
+            .build();
+    Keyset.Key keysetKey1 =
+        Keyset.Key.newBuilder()
+            .setKeyData(
+                KeyData.newBuilder()
+                    .setTypeUrl(AES_GCM_HKDF_TYPE_URL)
+                    .setValue(protoKey1.toByteString())
+                    .setKeyMaterialType(KeyMaterialType.SYMMETRIC))
+        .setKeyId(1)
+        .setOutputPrefixType(OutputPrefixType.TINK)
+        .setStatus(KeyStatusType.ENABLED)
+        .build();
+    AesGcmHkdfStreamingKey protoKey2 =
+        AesGcmHkdfStreamingKey.newBuilder()
+            .setVersion(0)
+            .setKeyValue(KEY_BYTES_2)
+            .setParams(
+                AesGcmHkdfStreamingParams.newBuilder()
+                    .setHkdfHashType(HashType.SHA1)
+                    .setDerivedKeySize(16)
+                    .setCiphertextSegmentSize(512 * 1024))
+            .build();
+    Keyset.Key keysetKey2 =
+        Keyset.Key.newBuilder()
+            .setKeyData(
+                KeyData.newBuilder()
+                    .setTypeUrl(AES_GCM_HKDF_TYPE_URL)
+                    .setValue(protoKey2.toByteString())
+                    .setKeyMaterialType(KeyMaterialType.SYMMETRIC))
+        .setKeyId(2)
+        .setOutputPrefixType(OutputPrefixType.RAW)
+        .setStatus(KeyStatusType.ENABLED)
+        .build();
+
+    Keyset keyset =
+        Keyset.newBuilder().addKey(keysetKey1).addKey(keysetKey2).setPrimaryKeyId(1).build();
+    KeysetHandle keysetHandle =
+        TinkProtoKeysetFormat.parseKeyset(keyset.toByteArray(), InsecureSecretKeyAccess.get());
+    StreamingAead streamingAead = keysetHandle.getPrimitive(StreamingAead.class);
+
+    // TODO(b/129044084) We need to change Tink so this works.
+    assertThrows(
+        IOException.class,
+        () -> StreamingTestUtil.testEncryptionAndDecryption(streamingAead, streamingAead));
   }
 }
