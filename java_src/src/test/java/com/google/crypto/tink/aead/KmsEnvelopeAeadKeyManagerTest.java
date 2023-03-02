@@ -215,16 +215,16 @@ public class KmsEnvelopeAeadKeyManagerTest {
   }
 
   @Test
-  public void createKeyTemplate_multipleKeysWithSameKek() throws Exception {
+  public void multipleAeadsWithSameKekAndSameDekTemplate_canDecryptEachOther() throws Exception {
     String kekUri = FakeKmsClient.createFakeKeyUri();
     KeyTemplate dekTemplate = AesCtrHmacAeadKeyManager.aes128CtrHmacSha256Template();
 
-    KeyTemplate kt1 = KmsEnvelopeAeadKeyManager.createKeyTemplate(kekUri, dekTemplate);
-    KeysetHandle handle1 = KeysetHandle.generateNew(kt1);
+    KeysetHandle handle1 =
+        KeysetHandle.generateNew(KmsEnvelopeAeadKeyManager.createKeyTemplate(kekUri, dekTemplate));
     Aead aead1 = handle1.getPrimitive(Aead.class);
 
-    KeyTemplate kt2 = KmsEnvelopeAeadKeyManager.createKeyTemplate(kekUri, dekTemplate);
-    KeysetHandle handle2 = KeysetHandle.generateNew(kt2);
+    KeysetHandle handle2 =
+        KeysetHandle.generateNew(KmsEnvelopeAeadKeyManager.createKeyTemplate(kekUri, dekTemplate));
     Aead aead2 = handle2.getPrimitive(Aead.class);
 
     byte[] plaintext = Random.randBytes(20);
@@ -232,5 +232,56 @@ public class KmsEnvelopeAeadKeyManagerTest {
 
     assertThat(aead1.decrypt(aead2.encrypt(plaintext, associatedData), associatedData))
         .isEqualTo(plaintext);
+  }
+
+  @Test
+  public void multipleAeadsWithSameKekAndDifferentDekTemplateOfSameKeyType_canDecryptEachOther()
+      throws Exception {
+    String kekUri = FakeKmsClient.createFakeKeyUri();
+
+    KeyTemplate dek1Template = AesCtrHmacAeadKeyManager.aes128CtrHmacSha256Template();
+    KeysetHandle handle1 =
+        KeysetHandle.generateNew(KmsEnvelopeAeadKeyManager.createKeyTemplate(kekUri, dek1Template));
+    Aead aead1 = handle1.getPrimitive(Aead.class);
+
+    KeyTemplate dek2Template = AesCtrHmacAeadKeyManager.aes256CtrHmacSha256Template();
+    KeysetHandle handle2 =
+        KeysetHandle.generateNew(KmsEnvelopeAeadKeyManager.createKeyTemplate(kekUri, dek2Template));
+    Aead aead2 = handle2.getPrimitive(Aead.class);
+
+    byte[] plaintext = Random.randBytes(20);
+    byte[] associatedData = Random.randBytes(20);
+
+    byte[] ciphertext = aead1.encrypt(plaintext, associatedData);
+
+    // This works because ciphertext contains an encrypted AesCtrHmacAeadKey, which aead2 correctly
+    // decrypts and parses. The resulting key can then decrypt the ciphertext.
+    assertThat(aead2.decrypt(ciphertext, associatedData)).isEqualTo(plaintext);
+  }
+
+  @Test
+  public void multipleAeadsWithSameKekAndDifferentDekTemplateKeyType_cannotDecryptEachOther()
+      throws Exception {
+    String kekUri = FakeKmsClient.createFakeKeyUri();
+
+    KeyTemplate dek1Template = AesCtrHmacAeadKeyManager.aes128CtrHmacSha256Template();
+    KeysetHandle handle1 =
+        KeysetHandle.generateNew(KmsEnvelopeAeadKeyManager.createKeyTemplate(kekUri, dek1Template));
+    Aead aead1 = handle1.getPrimitive(Aead.class);
+
+    KeyTemplate dek2Template = AesGcmKeyManager.aes128GcmTemplate();
+    KeysetHandle handle2 =
+        KeysetHandle.generateNew(KmsEnvelopeAeadKeyManager.createKeyTemplate(kekUri, dek2Template));
+    Aead aead2 = handle2.getPrimitive(Aead.class);
+
+    byte[] plaintext = Random.randBytes(20);
+    byte[] associatedData = Random.randBytes(20);
+
+    byte[] ciphertext = aead1.encrypt(plaintext, associatedData);
+
+    // ciphertext contains an encrypted AesCtrHmacAeadKey proto. aead2 can decrypt it, but it
+    // tries to parse it as an AesGcmKey proto. Either the parsing fails or the resulting key is
+    // not able to decrypt the ciphertext.
+    assertThrows(GeneralSecurityException.class, () -> aead2.decrypt(ciphertext, associatedData));
   }
 }
