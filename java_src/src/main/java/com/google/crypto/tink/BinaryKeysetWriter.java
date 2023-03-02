@@ -46,11 +46,15 @@ public final class BinaryKeysetWriter implements KeysetWriter {
     return new BinaryKeysetWriter(stream);
   }
 
-  /** Static method to create a BinaryKeysetWriter that writes to a file. */
+  /**
+   * Static method to create a BinaryKeysetWriter that writes to a file.
+   *
+   * @deprecated Inline the function.
+   */
   @InlineMe(
       replacement = "BinaryKeysetWriter.withOutputStream(new FileOutputStream(file))",
       imports = {"com.google.crypto.tink.BinaryKeysetWriter", "java.io.FileOutputStream"})
-  @Deprecated /* Deprecation under consideration */
+  @Deprecated
   public static KeysetWriter withFile(File file) throws IOException {
     return withOutputStream(new FileOutputStream(file));
   }

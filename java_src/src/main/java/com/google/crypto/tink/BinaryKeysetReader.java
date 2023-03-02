@@ -56,11 +56,13 @@ public final class BinaryKeysetReader implements KeysetReader {
    *
    * <p>Note: the input file won't be read until {@link BinaryKeysetReader#read} or {@link
    * BinaryKeysetReader#readEncrypted} is called.
+   *
+   * @deprecated Inline the function.
    */
   @InlineMe(
       replacement = "BinaryKeysetReader.withInputStream(new FileInputStream(file))",
       imports = {"com.google.crypto.tink.BinaryKeysetReader", "java.io.FileInputStream"})
-  @Deprecated /* Deprecation under consideration */
+  @Deprecated
   public static KeysetReader withFile(File file) throws IOException {
     return withInputStream(new FileInputStream(file));
   }
