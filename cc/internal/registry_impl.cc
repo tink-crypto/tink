@@ -129,8 +129,10 @@ void RegistryImpl::Reset() {
   {
     absl::MutexLock lock(&maps_mutex_);
     type_url_to_info_.clear();
-    name_to_catalogue_map_.clear();
     primitive_to_wrapper_.clear();
+    // TINK-PENDING-REMOVAL-IN-2.0.0-START
+    name_to_catalogue_map_.clear();
+    // TINK-PENDING-REMOVAL-IN-2.0.0-END
   }
   {
     absl::MutexLock lock(&monitoring_factory_mutex_);

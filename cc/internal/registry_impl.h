@@ -391,6 +391,7 @@ class RegistryImpl {
     std::shared_ptr<void> keyset_wrapper_;
   };
 
+  // TINK-PENDING-REMOVAL-IN-2.0.0-START
   // All information for a given primitive label.
   struct LabelInfo {
     LabelInfo(std::shared_ptr<void> catalogue, std::type_index type_index,
@@ -406,6 +407,7 @@ class RegistryImpl {
     // TypeId name of the primitive for which this key was inserted.
     const std::string type_id_name;
   };
+  // TINK-PENDING-REMOVAL-IN-2.0.0-END
 
   template <class P>
   crypto::tink::util::StatusOr<const PrimitiveWrapper<P, P>*> GetLegacyWrapper()
@@ -442,8 +444,10 @@ class RegistryImpl {
   absl::flat_hash_map<std::type_index, std::unique_ptr<WrapperInfo>>
       primitive_to_wrapper_ ABSL_GUARDED_BY(maps_mutex_);
 
+  // TINK-PENDING-REMOVAL-IN-2.0.0-START
   absl::flat_hash_map<std::string, std::unique_ptr<LabelInfo>>
       name_to_catalogue_map_ ABSL_GUARDED_BY(maps_mutex_);
+  // TINK-PENDING-REMOVAL-IN-2.0.0-END
 
   mutable absl::Mutex monitoring_factory_mutex_;
   std::unique_ptr<crypto::tink::MonitoringClientFactory> monitoring_factory_
