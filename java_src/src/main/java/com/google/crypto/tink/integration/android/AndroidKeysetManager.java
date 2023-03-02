@@ -198,12 +198,8 @@ public final class AndroidKeysetManager {
 
     /**
      * If the keyset is not found or valid, generates a new one using {@code val}.
-     *
-     * @deprecated This method takes a KeyTemplate proto, which is an internal implementation
-     *     detail. Please use the withKeyTemplate method that takes a {@link KeyTemplate} POJO.
      */
     @CanIgnoreReturnValue
-    @Deprecated /* Deprecation under consideration */
     public Builder withKeyTemplate(com.google.crypto.tink.proto.KeyTemplate val) {
       keyTemplate =
           KeyTemplate.create(
@@ -224,10 +220,12 @@ public final class AndroidKeysetManager {
      * <p><b>Warning:</b> When Android Keystore is disabled, keys are stored in cleartext. This
      * should be safe because they are stored in private preferences.
      *
-     * @deprecated Android Keystore can be disabled by not setting a master key URI.
+     * Please do not use this function. Instead, do not call {#code withMasterKeyUri} which has
+     * the same effect.
+     *
+     * TODO(b/27123533): properly deprecate this function and remove all known usages.
      */
     @CanIgnoreReturnValue
-    @Deprecated /* Deprecation under consideration */
     public Builder doNotUseKeystore() {
       masterKeyUri = null;
       useKeystore = false;
@@ -416,7 +414,7 @@ public final class AndroidKeysetManager {
    *     primary, because old binaries don't know the new key yet.
    */
   @CanIgnoreReturnValue
-  @Deprecated /* Deprecation under consideration */
+  @Deprecated
   public synchronized AndroidKeysetManager rotate(
       com.google.crypto.tink.proto.KeyTemplate keyTemplate) throws GeneralSecurityException {
     keysetManager = keysetManager.rotate(keyTemplate);
@@ -429,12 +427,9 @@ public final class AndroidKeysetManager {
    *
    * @throws GeneralSecurityException if cannot find any {@link KeyManager} that can handle {@code
    *     keyTemplate}
-   * @deprecated This method takes a KeyTemplate proto, which is an internal implementation detail.
-   *     Please use the add method that takes a {@link KeyTemplate} POJO.
    */
   @CanIgnoreReturnValue
   @GuardedBy("this")
-  @Deprecated /* Deprecation under consideration */
   public synchronized AndroidKeysetManager add(com.google.crypto.tink.proto.KeyTemplate keyTemplate)
       throws GeneralSecurityException {
     keysetManager = keysetManager.add(keyTemplate);
@@ -477,8 +472,9 @@ public final class AndroidKeysetManager {
    */
   @InlineMe(replacement = "this.setPrimary(keyId)")
   @CanIgnoreReturnValue
-  @Deprecated /* Deprecation under consideration */
-  public synchronized AndroidKeysetManager promote(int keyId) throws GeneralSecurityException {
+  @Deprecated
+  public synchronized AndroidKeysetManager promote(int keyId)
+      throws GeneralSecurityException {
     return setPrimary(keyId);
   }
 
