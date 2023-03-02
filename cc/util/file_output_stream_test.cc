@@ -84,7 +84,8 @@ TEST_F(FileOutputStreamTest, WritingStreams) {
   for (auto stream_size : {0, 10, 100, 1000, 10000, 100000, 1000000}) {
     SCOPED_TRACE(absl::StrCat("stream_size = ", stream_size));
     std::string stream_contents = subtle::Random::GetRandomBytes(stream_size);
-    std::string filename = absl::StrCat(stream_size, "_writing_test.bin");
+    std::string filename =
+        absl::StrCat(stream_size, "_file_output_stream_writing_test.bin");
     ASSERT_THAT(internal::CreateTestFile(filename, stream_contents), IsOk());
     util::StatusOr<int> output_fd = OpenTestFileToWrite(filename);
     ASSERT_THAT(output_fd.status(), IsOk());
@@ -102,7 +103,8 @@ TEST_F(FileOutputStreamTest, CustomBufferSizes) {
   std::string stream_contents = subtle::Random::GetRandomBytes(stream_size);
   for (auto buffer_size : {1, 10, 100, 1000, 10000, 100000, 1000000}) {
     SCOPED_TRACE(absl::StrCat("buffer_size = ", buffer_size));
-    std::string filename = absl::StrCat(buffer_size, "_buffer_size_test.bin");
+    std::string filename =
+        absl::StrCat(buffer_size, "_file_output_stream_buffer_size_test.bin");
     ASSERT_THAT(internal::CreateTestFile(filename, stream_contents), IsOk());
     util::StatusOr<int> output_fd = OpenTestFileToWrite(filename);
     ASSERT_THAT(output_fd.status(), IsOk());
@@ -127,7 +129,8 @@ TEST_F(FileOutputStreamTest, BackupAndPosition) {
   int buffer_size = 1234;
   void* buffer;
   std::string stream_contents = subtle::Random::GetRandomBytes(stream_size);
-  std::string filename = absl::StrCat(buffer_size, "_backup_test.bin");
+  std::string filename =
+      absl::StrCat(buffer_size, "_file_output_stream_backup_test.bin");
   ASSERT_THAT(internal::CreateTestFile(filename, stream_contents), IsOk());
   util::StatusOr<int> output_fd = OpenTestFileToWrite(filename);
   ASSERT_THAT(output_fd.status(), IsOk());
