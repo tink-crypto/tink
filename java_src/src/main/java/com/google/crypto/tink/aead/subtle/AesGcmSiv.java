@@ -16,19 +16,21 @@
 
 package com.google.crypto.tink.aead.subtle;
 
+import java.security.GeneralSecurityException;
+import java.security.spec.AlgorithmParameterSpec;
+
+import javax.crypto.Cipher;
+import javax.crypto.SecretKey;
+import javax.crypto.spec.GCMParameterSpec;
+import javax.crypto.spec.IvParameterSpec;
+import javax.crypto.spec.SecretKeySpec;
+
 import com.google.crypto.tink.Aead;
 import com.google.crypto.tink.annotations.Alpha;
 import com.google.crypto.tink.subtle.EngineFactory;
 import com.google.crypto.tink.subtle.Random;
 import com.google.crypto.tink.subtle.SubtleUtil;
 import com.google.crypto.tink.subtle.Validators;
-import java.security.GeneralSecurityException;
-import java.security.spec.AlgorithmParameterSpec;
-import javax.crypto.Cipher;
-import javax.crypto.SecretKey;
-import javax.crypto.spec.GCMParameterSpec;
-import javax.crypto.spec.IvParameterSpec;
-import javax.crypto.spec.SecretKeySpec;
 
 /**
  * This primitive implements AES-GCM-SIV (as defined in RFC 8452) using JCE.
@@ -57,6 +59,18 @@ public final class AesGcmSiv implements Aead {
   // All instances of this class use a 12 byte IV and a 16 byte tag.
   private static final int IV_SIZE_IN_BYTES = 12;
   private static final int TAG_SIZE_IN_BYTES = 16;
+
+  private static final boolean HAS_GCM_PARAMETER_SPEC_CLASS;
+
+  static {
+    boolean hasGcmParameterSpecClass = true;
+    try {
+      Class.forName("javax.crypto.spec.GCMParameterSpec");
+    } catch (ClassNotFoundException e) {
+      hasGcmParameterSpecClass = false;
+    }
+    HAS_GCM_PARAMETER_SPEC_CLASS = hasGcmParameterSpecClass;
+  }
 
   private final SecretKey keySpec;
 
@@ -128,17 +142,15 @@ public final class AesGcmSiv implements Aead {
 
   private static AlgorithmParameterSpec getParams(final byte[] buf, int offset, int len)
       throws GeneralSecurityException {
-    try {
-      Class.forName("javax.crypto.spec.GCMParameterSpec");
+    if (HAS_GCM_PARAMETER_SPEC_CLASS) {
       return new GCMParameterSpec(8 * TAG_SIZE_IN_BYTES, buf, offset, len);
-    } catch (ClassNotFoundException e) {
-      if (SubtleUtil.isAndroid()) {
-        // GCMParameterSpec should always be present in Java 7 or newer, but it's missing on Android
-        // devices with API level < 19. Fortunately, with a modern copy of Conscrypt (either through
-        // GMS or bundled with the app) we can initialize the cipher with just an IvParameterSpec.
-        // It will use a tag size of 128 bits. We'd double check the tag size in encrypt().
-        return new IvParameterSpec(buf, offset, len);
-      }
+    }
+    if (SubtleUtil.isAndroid()) {
+      // GCMParameterSpec should always be present in Java 7 or newer, but it's missing on Android
+      // devices with API level < 19. Fortunately, with a modern copy of Conscrypt (either through
+      // GMS or bundled with the app) we can initialize the cipher with just an IvParameterSpec.
+      // It will use a tag size of 128 bits. We'd double check the tag size in encrypt().
+      return new IvParameterSpec(buf, offset, len);
     }
     throw new GeneralSecurityException(
         "cannot use AES-GCM: javax.crypto.spec.GCMParameterSpec not found");
