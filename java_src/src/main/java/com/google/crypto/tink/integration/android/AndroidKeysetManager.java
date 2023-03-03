@@ -34,7 +34,6 @@ import com.google.crypto.tink.proto.OutputPrefixType;
 import com.google.crypto.tink.subtle.Hex;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.errorprone.annotations.InlineMe;
-import com.google.protobuf.InvalidProtocolBufferException;
 import java.io.CharConversionException;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
@@ -68,10 +67,11 @@ import javax.annotation.concurrent.GuardedBy;
  * preferences file.
  *
  * <ul>
- *   <li>If a keyset is found, but it is invalid, an {@link IOException} is thrown. The most common
- *       cause is when you decrypted a keyset with a wrong master key. In this case, an {@link
- *       InvalidProtocolBufferException} would be thrown. This is an irrecoverable error. You'd have
- *       to delete the keyset in Shared Preferences and all existing data encrypted with it.
+ *   <li>If a keyset is found, but cannot be read, either an {@link IOException} or a {@link
+ *       GeneralSecurityException} is thrown. The most common cause is that the master key is
+ *       missing or the wrong master key is used. In this case, a {@link GeneralSecurityException}
+ *       would be thrown. This is an irrecoverable error. You'd have to delete the keyset in Shared
+ *       Preferences and all existing data encrypted with it.
  *   <li>If a keyset is not found, and a {@link KeyTemplate} is set with {@link
  *       AndroidKeysetManager.Builder#withKeyTemplate(com.google.crypto.tink.KeyTemplate)}, a fresh
  *       keyset is generated and is written to the {@code my_keyset_name} preference of the {@code
@@ -177,10 +177,14 @@ public final class AndroidKeysetManager {
     }
 
     /**
-     * Sets the master key URI.
+     * Sets the master key URI that references the key in Android Keystore with which the keyset
+     * gets encrypted.
      *
      * <p>Only master keys stored in Android Keystore is supported. The URI must start with {@code
      * android-keystore://}.
+     *
+     * <p>Android Keystore is only supported on Android M (API level 23) and later. On older
+     * version, calling this method works but doesn't do anything.
      */
     @CanIgnoreReturnValue
     public Builder withMasterKeyUri(String val) {
