@@ -304,7 +304,8 @@ void register_test_managers(const std::string& key_type_prefix,
   for (int i = 0; i < manager_count; i++) {
     std::string key_type = key_type_prefix + std::to_string(i);
     util::Status status = Registry::RegisterKeyManager(
-        new TestAeadKeyManager(key_type));
+        absl::make_unique<TestAeadKeyManager>(key_type),
+        /* new_key_allowed= */ true);
     EXPECT_TRUE(status.ok()) << status;
   }
 }

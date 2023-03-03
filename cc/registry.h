@@ -98,6 +98,8 @@ class Registry {
         manager.release(), new_key_allowed);
   }
 
+  // NOLINTBEGIN(whitespace/line_length) (Formatted when commented in)
+  // TINK-PENDING-REMOVAL-IN-2.0.0-START
   // Same functionality as the overload which takes a unique pointer, for
   // new_key_allowed = true.
   template <class P>
@@ -114,6 +116,8 @@ class Registry {
                                                        bool new_key_allowed) {
     return RegisterKeyManager(absl::WrapUnique(manager), new_key_allowed);
   }
+  // TINK-PENDING-REMOVAL-IN-2.0.0-END
+  // NOLINTEND(whitespace/line_length)
 
   template <class KTManager>
   static crypto::tink::util::Status RegisterKeyTypeManager(
