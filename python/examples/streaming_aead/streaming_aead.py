@@ -28,13 +28,8 @@ It requires 4 arguments (and one optional one):
     provided as a string.
 """
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-
 from typing import BinaryIO
 
-# Special imports
 from absl import app
 from absl import flags
 from absl import logging

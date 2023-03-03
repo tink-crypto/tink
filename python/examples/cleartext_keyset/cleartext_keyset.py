@@ -17,10 +17,6 @@
 It loads cleartext keys from disk - this is not recommended!
 """
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-
 from absl import app
 from absl import flags
 from absl import logging
@@ -55,7 +51,7 @@ def main(argv):
     # Generate a new keyset
     try:
       key_template = aead.aead_key_templates.AES128_GCM
-      keyset_handle = tink.KeysetHandle.generate_new(key_template)
+      keyset_handle = tink.new_keyset_handle(key_template)
     except tink.TinkError as e:
       logging.exception('Error creating primitive: %s', e)
       return 1

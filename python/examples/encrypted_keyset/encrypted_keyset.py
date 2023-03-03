@@ -14,10 +14,6 @@
 # [START encrypted-keyset-example]
 """A command-line utility for generating, encrypting and storing keysets."""
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-
 from absl import app
 from absl import flags
 from absl import logging
@@ -68,7 +64,7 @@ def main(argv):
   # Create an AEAD primitive from the key-encryption key (KEK) for encrypting
   # Tink keysets
   try:
-    handle = tink.KeysetHandle.generate_new(
+    handle = tink.new_keyset_handle(
         aead.aead_key_templates.create_kms_aead_key_template(
             key_uri=FLAGS.kek_uri))
     gcp_aead = handle.primitive(aead.Aead)
@@ -81,7 +77,7 @@ def main(argv):
     # Generate a new keyset
     try:
       key_template = aead.aead_key_templates.AES128_GCM
-      keyset_handle = tink.KeysetHandle.generate_new(key_template)
+      keyset_handle = tink.new_keyset_handle(key_template)
     except tink.TinkError as e:
       logging.exception('Error creating primitive: %s', e)
       return 1

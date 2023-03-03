@@ -14,10 +14,6 @@
 # [START envelope-example]
 """A command-line utility for encrypting small files using envelope encryption with GCP."""
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-
 from absl import app
 from absl import flags
 from absl import logging
@@ -67,7 +63,7 @@ def main(argv):
     template = aead.aead_key_templates.create_kms_envelope_aead_key_template(
         kek_uri=FLAGS.kek_uri,
         dek_template=aead.aead_key_templates.AES256_GCM)
-    handle = tink.KeysetHandle.generate_new(template)
+    handle = tink.new_keyset_handle(template)
     env_aead = handle.primitive(aead.Aead)
   except tink.TinkError as e:
     logging.error('Error creating primitive: %s', e)
