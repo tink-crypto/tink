@@ -28,12 +28,17 @@
 #include "absl/strings/str_cat.h"
 #include "absl/strings/string_view.h"
 #include "tink/input_stream.h"
+#include "tink/insecure_secret_key_access.h"
 #include "tink/internal/test_random_access_stream.h"
 #include "tink/output_stream.h"
 #include "tink/primitive_set.h"
+#include "tink/proto_keyset_format.h"
 #include "tink/random_access_stream.h"
 #include "tink/streaming_aead.h"
+#include "tink/streamingaead/aes_gcm_hkdf_streaming_key_manager.h"
+#include "tink/streamingaead/streaming_aead_config.h"
 #include "tink/subtle/random.h"
+#include "tink/subtle/streaming_aead_test_util.h"
 #include "tink/subtle/test_util.h"
 #include "tink/util/buffer.h"
 #include "tink/util/istream_input_stream.h"
@@ -41,21 +46,24 @@
 #include "tink/util/status.h"
 #include "tink/util/test_matchers.h"
 #include "tink/util/test_util.h"
+#include "proto/aes_gcm_hkdf_streaming.pb.h"
+#include "proto/common.pb.h"
 #include "proto/tink.pb.h"
 
 namespace crypto {
 namespace tink {
 namespace {
 
-using crypto::tink::test::DummyStreamingAead;
-using crypto::tink::test::IsOk;
-using crypto::tink::test::StatusIs;
-using google::crypto::tink::KeysetInfo;
-using google::crypto::tink::KeyStatusType;
-using google::crypto::tink::OutputPrefixType;
-using subtle::test::ReadFromStream;
-using subtle::test::WriteToStream;
-using testing::HasSubstr;
+using ::crypto::tink::test::DummyStreamingAead;
+using ::crypto::tink::test::IsOk;
+using ::crypto::tink::test::StatusIs;
+using ::google::crypto::tink::KeysetInfo;
+using ::google::crypto::tink::KeyStatusType;
+using ::google::crypto::tink::OutputPrefixType;
+using ::crypto::tink::subtle::test::ReadFromStream;
+using ::crypto::tink::subtle::test::WriteToStream;
+using ::testing::HasSubstr;
+using ::testing::Not;
 
 // A container for specification of instances of DummyStreamingAead
 // to be created for testing.
@@ -295,6 +303,65 @@ TEST(StreamingAeadSetWrapperTest, MissingRawPrimitives) {
   auto wrap_result = wrapper.Wrap(std::move(saead_set));
   EXPECT_THAT(wrap_result.status(), StatusIs(absl::StatusCode::kInvalidArgument,
                                              HasSubstr("no raw primitives")));
+}
+
+TEST(StreamingAeadSetWrapperTest, EncryptWithTink) {
+  ASSERT_THAT(StreamingAeadConfig::Register(), IsOk());
+
+  google::crypto::tink::AesGcmHkdfStreamingKey key;
+  key.set_key_value("0123456789012345");
+  google::crypto::tink::AesGcmHkdfStreamingParams& params =
+      *key.mutable_params();
+  params.set_hkdf_hash_type(google::crypto::tink::HashType::SHA1);
+  params.set_derived_key_size(16);
+  params.set_ciphertext_segment_size(1024);
+
+  std::string serialized_key_1 = key.SerializeAsString();
+
+  key.set_key_value("0123456789abcdef");
+  std::string serialized_key_2 = key.SerializeAsString();
+
+  google::crypto::tink::Keyset keyset;
+  {
+    google::crypto::tink::Keyset::Key& keyset_key = *keyset.add_key();
+    google::crypto::tink::KeyData& key_data = *keyset_key.mutable_key_data();
+    key_data.set_type_url(AesGcmHkdfStreamingKeyManager().get_key_type());
+    key_data.set_value(serialized_key_1);
+    key_data.set_key_material_type(google::crypto::tink::KeyData::SYMMETRIC);
+    keyset_key.set_key_id(1);
+    keyset_key.set_output_prefix_type(
+        google::crypto::tink::OutputPrefixType::TINK);
+    keyset_key.set_status(google::crypto::tink::KeyStatusType::ENABLED);
+
+    keyset.set_primary_key_id(1);
+  }
+  {
+    google::crypto::tink::Keyset::Key& keyset_key = *keyset.add_key();
+    google::crypto::tink::KeyData& key_data = *keyset_key.mutable_key_data();
+    key_data.set_type_url(AesGcmHkdfStreamingKeyManager().get_key_type());
+    key_data.set_value(serialized_key_2);
+    key_data.set_key_material_type(google::crypto::tink::KeyData::SYMMETRIC);
+    keyset_key.set_key_id(2);
+    keyset_key.set_output_prefix_type(
+        google::crypto::tink::OutputPrefixType::RAW);
+    keyset_key.set_status(google::crypto::tink::KeyStatusType::ENABLED);
+  }
+
+  crypto::tink::util::StatusOr<KeysetHandle> handle =
+      ParseKeysetFromProtoKeysetFormat(keyset.SerializeAsString(),
+                                       InsecureSecretKeyAccess::Get());
+  ASSERT_THAT(handle.status(), IsOk());
+
+  crypto::tink::util::StatusOr<std::unique_ptr<StreamingAead>> streaming_aead =
+      handle->GetPrimitive<StreamingAead>();
+
+  ASSERT_THAT(streaming_aead.status(), IsOk());
+
+  EXPECT_THAT(EncryptThenDecrypt(streaming_aead.value().get(),
+                                 streaming_aead.value().get(),
+                                 subtle::Random::GetRandomBytes(10000),
+                                 "some associated data", 0),
+              Not(IsOk()));
 }
 
 }  // namespace

@@ -188,18 +188,23 @@ tink_cc_test(
   SRCS
     streaming_aead_wrapper_test.cc
   DEPS
+    tink::streamingaead::aes_gcm_hkdf_streaming_key_manager
+    tink::streamingaead::streaming_aead_config
     tink::streamingaead::streaming_aead_wrapper
     gmock
     absl::memory
     absl::status
     absl::strings
     tink::core::input_stream
+    tink::core::insecure_secret_key_access
     tink::core::output_stream
     tink::core::primitive_set
+    tink::core::proto_keyset_format
     tink::core::random_access_stream
     tink::core::streaming_aead
     tink::internal::test_random_access_stream
     tink::subtle::random
+    tink::subtle::streaming_aead_test_util
     tink::subtle::test_util
     tink::util::buffer
     tink::util::istream_input_stream
@@ -207,6 +212,8 @@ tink_cc_test(
     tink::util::status
     tink::util::test_matchers
     tink::util::test_util
+    tink::proto::aes_gcm_hkdf_streaming_cc_proto
+    tink::proto::common_cc_proto
     tink::proto::tink_cc_proto
 )
 
