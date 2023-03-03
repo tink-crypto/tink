@@ -63,6 +63,8 @@ using crypto::tink::test::AddTinkKey;
 using crypto::tink::test::DummyAead;
 using crypto::tink::test::IsOk;
 using crypto::tink::test::StatusIs;
+using google::crypto::tink::AesGcmKey;
+using google::crypto::tink::AesGcmKeyFormat;
 using google::crypto::tink::EcdsaKeyFormat;
 using google::crypto::tink::EncryptedKeyset;
 using google::crypto::tink::KeyData;
@@ -89,59 +91,58 @@ class KeysetHandleTest : public ::testing::Test {
 
 using KeysetHandleDeathTest = KeysetHandleTest;
 
-// Dummy key factory that is required to create a key manager.
-class DummyAeadKeyFactory : public KeyFactory {
+// Fake AEAD key type manager for testing.
+class FakeAeadKeyManager
+    : public KeyTypeManager<AesGcmKey, AesGcmKeyFormat, List<Aead>> {
  public:
-  explicit DummyAeadKeyFactory(absl::string_view key_type)
-      : key_type_(key_type) {}
+  class AeadFactory : public PrimitiveFactory<Aead> {
+   public:
+    explicit AeadFactory(absl::string_view key_type) : key_type_(key_type) {}
 
-  util::StatusOr<std::unique_ptr<portable_proto::MessageLite>> NewKey(
-      const portable_proto::MessageLite& key_format) const override {
-    return util::Status(absl::StatusCode::kUnimplemented, "Unimplemented");
-  }
+    util::StatusOr<std::unique_ptr<Aead>> Create(
+        const AesGcmKey& key) const override {
+      return {absl::make_unique<DummyAead>(key_type_)};
+    }
 
-  util::StatusOr<std::unique_ptr<portable_proto::MessageLite>> NewKey(
-      absl::string_view serialized_key_format) const override {
-    return util::Status(absl::StatusCode::kUnimplemented, "Unimplemented");
-  }
+   private:
+    const std::string key_type_;
+  };
 
-  util::StatusOr<std::unique_ptr<KeyData>> NewKeyData(
-      absl::string_view serialized_key_format) const override {
-    auto key_data = absl::make_unique<KeyData>();
-    key_data->set_type_url(key_type_);
-    std::string serialized_key_format_str(serialized_key_format);
-    key_data->set_value(serialized_key_format_str);
-    return std::move(key_data);
-  }
-
- private:
-  const std::string key_type_;
-};
-
-// Fake Aead key manager for testing.
-class FakeAeadKeyManager : public KeyManager<Aead> {
- public:
   explicit FakeAeadKeyManager(absl::string_view key_type)
-      : key_type_(key_type), key_factory_(key_type) {}
+      : KeyTypeManager(absl::make_unique<AeadFactory>(key_type)),
+        key_type_(key_type) {}
 
-  util::StatusOr<std::unique_ptr<Aead>> GetPrimitive(
-      const KeyData& key) const override {
-    return {absl::make_unique<DummyAead>(key_type_)};
-  }
-
-  util::StatusOr<std::unique_ptr<Aead>> GetPrimitive(
-      const portable_proto::MessageLite& key) const override {
-    return util::Status(absl::StatusCode::kUnknown,
-                        "DummyAeadKeyFactory cannot construct an aead");
+  google::crypto::tink::KeyData::KeyMaterialType key_material_type()
+      const override {
+    return google::crypto::tink::KeyData::SYMMETRIC;
   }
 
   uint32_t get_version() const override { return 0; }
+
   const std::string& get_key_type() const override { return key_type_; }
-  const KeyFactory& get_key_factory() const override { return key_factory_; }
+
+  crypto::tink::util::Status ValidateKey(const AesGcmKey& key) const override {
+    return util::OkStatus();
+  }
+
+  crypto::tink::util::Status ValidateKeyFormat(
+      const AesGcmKeyFormat& key_format) const override {
+    return util::OkStatus();
+  }
+
+  crypto::tink::util::StatusOr<AesGcmKey> CreateKey(
+      const AesGcmKeyFormat& key_format) const override {
+    return AesGcmKey();
+  }
+
+  crypto::tink::util::StatusOr<AesGcmKey> DeriveKey(
+      const AesGcmKeyFormat& key_format,
+      InputStream* input_stream) const override {
+    return AesGcmKey();
+  }
 
  private:
   const std::string key_type_;
-  const DummyAeadKeyFactory key_factory_;
 };
 
 class MockAeadPrimitiveWrapper : public PrimitiveWrapper<Aead, Aead> {
@@ -275,14 +276,15 @@ TEST_F(KeysetHandleTest, ReadEncryptedWithAnnotations) {
   Registry::Reset();
   ASSERT_THAT(Registry::RegisterPrimitiveWrapper(std::move(primitive_wrapper)),
               IsOk());
-  ASSERT_THAT(Registry::RegisterKeyManager(
+  ASSERT_THAT(Registry::RegisterKeyTypeManager(
                   absl::make_unique<FakeAeadKeyManager>("some key type"),
                   /*new_key_allowed=*/true),
               IsOk());
-  ASSERT_THAT(Registry::RegisterKeyManager(
-                  absl::make_unique<FakeAeadKeyManager>("some other key type"),
-                  /*new_key_allowed=*/true),
-              IsOk());
+  ASSERT_THAT(
+      Registry::RegisterKeyTypeManager(
+          absl::make_unique<FakeAeadKeyManager>("some other key type"),
+          /*new_key_allowed=*/true),
+      IsOk());
 
   ASSERT_THAT((*keyset_handle)->GetPrimitive<Aead>(), IsOk());
   EXPECT_EQ(generated_annotations, kAnnotations);
@@ -468,14 +470,15 @@ TEST_F(KeysetHandleTest, ReadEncryptedWithAssociatedDataAndAnnotations) {
   Registry::Reset();
   ASSERT_THAT(Registry::RegisterPrimitiveWrapper(std::move(primitive_wrapper)),
               IsOk());
-  ASSERT_THAT(Registry::RegisterKeyManager(
+  ASSERT_THAT(Registry::RegisterKeyTypeManager(
                   absl::make_unique<FakeAeadKeyManager>("some key type"),
                   /*new_key_allowed=*/true),
               IsOk());
-  ASSERT_THAT(Registry::RegisterKeyManager(
-                  absl::make_unique<FakeAeadKeyManager>("some other key type"),
-                  /*new_key_allowed=*/true),
-              IsOk());
+  ASSERT_THAT(
+      Registry::RegisterKeyTypeManager(
+          absl::make_unique<FakeAeadKeyManager>("some other key type"),
+          /*new_key_allowed=*/true),
+      IsOk());
 
   ASSERT_THAT((*keyset_handle)->GetPrimitive<Aead>(), IsOk());
   EXPECT_EQ(generated_annotations, kAnnotations);
@@ -602,10 +605,10 @@ TEST_F(KeysetHandleTest, GenerateNewWithAnnotations) {
   Registry::Reset();
   ASSERT_THAT(Registry::RegisterPrimitiveWrapper(std::move(primitive_wrapper)),
               IsOk());
-  ASSERT_THAT(Registry::RegisterKeyManager(
+  ASSERT_THAT(Registry::RegisterKeyTypeManager(
                   absl::make_unique<FakeAeadKeyManager>(
                       "type.googleapis.com/google.crypto.tink.AesGcmKey"),
-                  true),
+                  /*new_key_allowed=*/true),
               IsOk());
 
   EXPECT_THAT((*keyset_handle)->GetPrimitive<Aead>(), IsOk());
@@ -850,14 +853,15 @@ TEST_F(KeysetHandleTest, ReadNoSecretWithAnnotations) {
   Registry::Reset();
   ASSERT_THAT(Registry::RegisterPrimitiveWrapper(std::move(primitive_wrapper)),
               IsOk());
-  ASSERT_THAT(Registry::RegisterKeyManager(
+  ASSERT_THAT(Registry::RegisterKeyTypeManager(
                   absl::make_unique<FakeAeadKeyManager>("some key type"),
                   /*new_key_allowed=*/true),
               IsOk());
-  ASSERT_THAT(Registry::RegisterKeyManager(
-                  absl::make_unique<FakeAeadKeyManager>("some other key type"),
-                  /*new_key_allowed=*/true),
-              IsOk());
+  ASSERT_THAT(
+      Registry::RegisterKeyTypeManager(
+          absl::make_unique<FakeAeadKeyManager>("some other key type"),
+          /*new_key_allowed=*/true),
+      IsOk());
 
   EXPECT_THAT((*keyset_handle)->GetPrimitive<Aead>(), IsOk());
   EXPECT_EQ(generated_annotations, kAnnotations);
