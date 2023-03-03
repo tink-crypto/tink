@@ -151,6 +151,7 @@ public final class AesCtrHmacAeadKeyManager extends KeyTypeManager<AesCtrHmacAea
 
   public static void register(boolean newKeyAllowed) throws GeneralSecurityException {
     Registry.registerKeyManager(new AesCtrHmacAeadKeyManager(), newKeyAllowed);
+    AesCtrHmacAeadProtoSerialization.register();
   }
 
   /**

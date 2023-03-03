@@ -70,6 +70,7 @@ java_library(
     name = "aes_ctr_hmac_aead_key_manager",
     srcs = ["AesCtrHmacAeadKeyManager.java"],
     deps = [
+        ":aes_ctr_hmac_aead_proto_serialization",
         ":aes_ctr_key_manager",
         "//proto:aes_ctr_hmac_aead_java_proto",
         "//proto:aes_ctr_java_proto",
@@ -498,6 +499,7 @@ android_library(
     name = "aes_ctr_hmac_aead_key_manager-android",
     srcs = ["AesCtrHmacAeadKeyManager.java"],
     deps = [
+        ":aes_ctr_hmac_aead_proto_serialization-android",
         ":aes_ctr_key_manager-android",
         "//proto:aes_ctr_hmac_aead_java_proto_lite",
         "//proto:aes_ctr_java_proto_lite",
