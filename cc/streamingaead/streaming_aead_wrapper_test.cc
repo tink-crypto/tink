@@ -63,7 +63,6 @@ using ::google::crypto::tink::OutputPrefixType;
 using ::crypto::tink::subtle::test::ReadFromStream;
 using ::crypto::tink::subtle::test::WriteToStream;
 using ::testing::HasSubstr;
-using ::testing::Not;
 
 // A container for specification of instances of DummyStreamingAead
 // to be created for testing.
@@ -285,26 +284,6 @@ TEST(StreamingAeadSetWrapperTest, DecryptionAfterWrapperIsDestroyed) {
   EXPECT_EQ(plaintext, decrypted);
 }
 
-TEST(StreamingAeadSetWrapperTest, MissingRawPrimitives) {
-  uint32_t key_id_0 = 1234543;
-  uint32_t key_id_1 = 726329;
-  uint32_t key_id_2 = 7213743;
-  std::string saead_name_0 = "streaming_aead0";
-  std::string saead_name_1 = "streaming_aead1";
-  std::string saead_name_2 = "streaming_aead2";
-
-  auto saead_set = GetTestStreamingAeadSet(
-      {{key_id_0, saead_name_0, OutputPrefixType::TINK},
-       {key_id_1, saead_name_1, OutputPrefixType::LEGACY},
-       {key_id_2, saead_name_2, OutputPrefixType::TINK}});
-
-  // Wrap saead_set and test the resulting StreamingAead.
-  StreamingAeadWrapper wrapper;
-  auto wrap_result = wrapper.Wrap(std::move(saead_set));
-  EXPECT_THAT(wrap_result.status(), StatusIs(absl::StatusCode::kInvalidArgument,
-                                             HasSubstr("no raw primitives")));
-}
-
 TEST(StreamingAeadSetWrapperTest, EncryptWithTink) {
   ASSERT_THAT(StreamingAeadConfig::Register(), IsOk());
 
@@ -361,7 +340,7 @@ TEST(StreamingAeadSetWrapperTest, EncryptWithTink) {
                                  streaming_aead.value().get(),
                                  subtle::Random::GetRandomBytes(10000),
                                  "some associated data", 0),
-              Not(IsOk()));
+              IsOk());
 }
 
 }  // namespace

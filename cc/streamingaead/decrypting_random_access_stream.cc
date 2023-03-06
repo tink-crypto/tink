@@ -18,6 +18,7 @@
 
 #include <memory>
 #include <utility>
+#include <vector>
 
 #include "absl/memory/memory.h"
 #include "absl/status/status.h"
@@ -39,6 +40,8 @@ using crypto::tink::PrimitiveSet;
 using crypto::tink::StreamingAead;
 using util::Status;
 using util::StatusOr;
+
+using StreamingAeadEntry = PrimitiveSet<StreamingAead>::Entry<StreamingAead>;
 
 // static
 StatusOr<std::unique_ptr<RandomAccessStream>> DecryptingRandomAccessStream::New(
@@ -98,12 +101,9 @@ util::Status DecryptingRandomAccessStream::PRead(
                   "Did not find a decrypter matching the ciphertext stream.");
   }
   attempted_matching_ = true;
-  auto raw_primitives_result = primitives_->get_raw_primitives();
-  if (!raw_primitives_result.ok()) {
-    return Status(absl::StatusCode::kInternal, "No RAW primitives found");
-  }
-  for (auto& primitive : *(raw_primitives_result.value())) {
-    StreamingAead& streaming_aead = primitive->get_primitive();
+  std::vector<StreamingAeadEntry*> all_primitives = primitives_->get_all();
+  for (const StreamingAeadEntry* entry : all_primitives) {
+    StreamingAead& streaming_aead = entry->get_primitive();
     auto shared_ct = absl::make_unique<SharedRandomAccessStream>(
         ciphertext_source_.get());
     auto decrypting_stream_result =

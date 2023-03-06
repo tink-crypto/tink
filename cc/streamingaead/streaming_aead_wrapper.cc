@@ -18,6 +18,7 @@
 
 #include <memory>
 #include <utility>
+#include <vector>
 
 #include "absl/status/status.h"
 #include "tink/crypto_format.h"
@@ -48,12 +49,6 @@ Status Validate(PrimitiveSet<StreamingAead>* primitives) {
     return Status(absl::StatusCode::kInvalidArgument,
                   "primitive set has no primary");
   }
-  auto raw_primitives_result = primitives->get_raw_primitives();
-  if (!raw_primitives_result.ok()) {
-    return Status(absl::StatusCode::kInvalidArgument,
-                  "primitive set has no raw primitives");
-  }
-  // TODO(b/129044084)
   return util::OkStatus();
 }
 
