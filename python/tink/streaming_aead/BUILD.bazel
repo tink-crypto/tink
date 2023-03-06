@@ -170,7 +170,11 @@ py_test(
     deps = [
         ":streaming_aead",
         requirement("absl-py"),
+        "//tink:cleartext_keyset_handle",
         "//tink:tink_python",
+        "//tink/proto:aes_gcm_hkdf_streaming_py_pb2",
+        "//tink/proto:common_py_pb2",
+        "//tink/proto:tink_py_pb2",
         "//tink/testing:bytes_io",
         "//tink/testing:keyset_builder",
     ],

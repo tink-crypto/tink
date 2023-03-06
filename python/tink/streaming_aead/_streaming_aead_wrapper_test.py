@@ -18,13 +18,18 @@ from typing import BinaryIO, cast
 
 from absl.testing import absltest
 from absl.testing import parameterized
+from tink.proto import aes_gcm_hkdf_streaming_pb2
+from tink.proto import common_pb2
+from tink.proto import tink_pb2
 import tink
+from tink import cleartext_keyset_handle
 from tink import streaming_aead
 from tink.testing import bytes_io
 from tink.testing import keyset_builder
 
 
 TEMPLATE = streaming_aead.streaming_aead_key_templates.AES128_GCM_HKDF_4KB
+TYPE_URL = 'type.googleapis.com/google.crypto.tink.AesGcmHkdfStreamingKey'
 
 
 def setUpModule():
@@ -219,6 +224,70 @@ class StreamingAeadWrapperTest(parameterized.TestCase):
     with p4.new_decrypting_stream(
         cast(BinaryIO, input_stream_factory(ciphertext4)), b'aad4') as ds:
       self.assertEqual(ds.read(), plaintext4)
+
+  def test_decrypt_tink_output_prefix(self):
+    key = aes_gcm_hkdf_streaming_pb2.AesGcmHkdfStreamingKey(
+        version=0,
+        params=aes_gcm_hkdf_streaming_pb2.AesGcmHkdfStreamingParams(
+            ciphertext_segment_size=512,
+            derived_key_size=16,
+            hkdf_hash_type=common_pb2.HashType.SHA256,
+        ),
+        key_value=b'0123456789abcdef',
+    )
+    value1 = key.SerializeToString()
+    key.key_value = b'ABCDEF0123456789'
+    value2 = key.SerializeToString()
+
+    # We use two keys so that we have at least 1 raw key in the keyset: Tink
+    # has a check that creating a new StreamingAead fails when the keyset does
+    # not contain any raw keys, and we only want this to fail on decryption.
+    keyset = tink_pb2.Keyset(
+        primary_key_id=1,
+        key=[
+            tink_pb2.Keyset.Key(
+                key_data=tink_pb2.KeyData(
+                    type_url=TYPE_URL,
+                    value=value1,
+                    key_material_type=tink_pb2.KeyData.SYMMETRIC,
+                ),
+                output_prefix_type=tink_pb2.OutputPrefixType.TINK,
+                status=tink_pb2.KeyStatusType.ENABLED,
+                key_id=1,
+            ),
+            tink_pb2.Keyset.Key(
+                key_data=tink_pb2.KeyData(
+                    type_url=TYPE_URL,
+                    value=value2,
+                    key_material_type=tink_pb2.KeyData.SYMMETRIC,
+                ),
+                output_prefix_type=tink_pb2.OutputPrefixType.RAW,
+                status=tink_pb2.KeyStatusType.ENABLED,
+                key_id=2,
+            ),
+        ],
+    )
+
+    keyset_handle = cleartext_keyset_handle.from_keyset(keyset)
+    primitive = keyset_handle.primitive(streaming_aead.StreamingAead)
+
+    plaintext = b'plaintext'
+    associated_data = b'associated_data'
+
+    ciphertext_dest = bytes_io.BytesIOWithValueAfterClose()
+    with primitive.new_encrypting_stream(
+        ciphertext_dest, associated_data
+    ) as es:
+      self.assertLen(plaintext, es.write(plaintext))
+    self.assertTrue(ciphertext_dest.closed)
+
+    ciphertext_src = io.BytesIO(ciphertext_dest.value_after_close())
+    with self.assertRaises(tink.TinkError):
+      # TODO(b/129044084) Currently fails: TINK keys are ignored when decrypting
+      with primitive.new_decrypting_stream(
+          ciphertext_src, associated_data
+      ) as ds:
+        _ = ds.read()
 
 
 if __name__ == '__main__':
