@@ -636,9 +636,7 @@ public final class KeysetHandle {
     return new KeysetHandle(keyset, entries, annotations);
   }
 
-  /**
-   * @return the actual keyset data.
-   */
+  /** Returns the actual keyset data. */
   Keyset getKeyset() {
     return keyset;
   }
@@ -725,8 +723,8 @@ public final class KeysetHandle {
   }
 
   /**
-   * @return the {@link com.google.crypto.tink.proto.KeysetInfo} that doesn't contain actual key
-   *     material.
+   * Returns the {@link com.google.crypto.tink.proto.KeysetInfo} that doesn't contain actual key
+   * material.
    */
   public KeysetInfo getKeysetInfo() {
     return Util.getKeysetInfo(keyset);
@@ -842,12 +840,12 @@ public final class KeysetHandle {
    * <p>This can be used to load public keysets or envelope encryption keysets. Users that need to
    * load cleartext keysets can use {@link CleartextKeysetHandle}.
    *
+   * <p>Note: new code should call {@code TinkProtoKeysetFormat(serialized)} instead.
+   *
    * @return a new {@link KeysetHandle} from {@code serialized} that is a serialized {@link Keyset}
    * @throws GeneralSecurityException if the keyset is invalid
-   * @deprecated Use {@code TinkProtoKeysetFormat.parseKeysetWithoutSecret(serialized)} instead.
    */
   @SuppressWarnings("UnusedException")
-  @Deprecated /* Deprecation under consideration */
   public static final KeysetHandle readNoSecret(final byte[] serialized)
       throws GeneralSecurityException {
     try {

@@ -54,11 +54,7 @@ public final class TinkProtoKeysetFormat {
   @SuppressWarnings("UnusedException")
   public static KeysetHandle parseKeysetWithoutSecret(byte[] serializedKeyset)
       throws GeneralSecurityException {
-    try {
-      return KeysetHandle.readNoSecret(BinaryKeysetReader.withBytes(serializedKeyset));
-    } catch (IOException e) {
-      throw new GeneralSecurityException("Parse keyset failed");
-    }
+    return KeysetHandle.readNoSecret(serializedKeyset);
   }
 
   @SuppressWarnings("UnusedException")
