@@ -1,0 +1,25 @@
+load("@pip_deps//:requirements.bzl", "requirement")
+
+package(
+    default_testonly = 1,
+    default_visibility = ["//:__subpackages__"],
+)
+
+licenses(["notice"])
+
+py_test(
+    name = "hmac_test",
+    srcs = ["hmac_test.py"],
+    deps = [
+        "//tink_config",
+        "//util:testing_servers",
+        "//util:utilities",
+        "@tink_py//tink/testing:keyset_builder",
+        requirement("absl-py"),
+        "@tink_py//tink:tink_python",
+        "@tink_py//tink/proto:common_py_pb2",
+        "@tink_py//tink/proto:hmac_py_pb2",
+        "@tink_py//tink/proto:tink_py_pb2",
+        "@tink_py//tink/mac",
+    ],
+)
