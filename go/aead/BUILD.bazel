@@ -52,6 +52,7 @@ go_test(
     name = "aead_test",
     srcs = [
         "aead_factory_test.go",
+        "aead_init_test.go",
         "aead_key_templates_test.go",
         "aead_test.go",
         "aes_ctr_hmac_aead_key_manager_test.go",

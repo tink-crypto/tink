@@ -16,66 +16,76 @@
 
 package aead_test
 
+// [START aead-example]
+
 import (
-	"encoding/base64"
+	"bytes"
 	"fmt"
 	"log"
-	"testing"
 
 	"github.com/google/tink/go/aead"
-	"github.com/google/tink/go/core/registry"
+	"github.com/google/tink/go/insecurecleartextkeyset"
 	"github.com/google/tink/go/keyset"
-	"github.com/google/tink/go/testutil"
 )
 
 func Example() {
-	kh, err := keyset.NewHandle(aead.AES256GCMKeyTemplate())
-	if err != nil {
-		log.Fatal(err)
-	}
+	// A keyset created with "tinkey create-keyset --key-template=AES256_GCM". Note
+	// that this keyset has the secret key information in cleartext.
+	jsonKeyset := `{
+			"key": [{
+					"keyData": {
+							"keyMaterialType":
+									"SYMMETRIC",
+							"typeUrl":
+									"type.googleapis.com/google.crypto.tink.AesGcmKey",
+							"value":
+									"GiBWyUfGgYk3RTRhj/LIUzSudIWlyjCftCOypTr0jCNSLg=="
+					},
+					"keyId": 294406504,
+					"outputPrefixType": "TINK",
+					"status": "ENABLED"
+			}],
+			"primaryKeyId": 294406504
+	}`
 
-	// TODO: save the keyset to a safe location. DO NOT hardcode it in source code.
+	// Create a keyset handle from the cleartext keyset in the previous
+	// step. The keyset handle provides abstract access to the underlying keyset to
+	// limit the exposure of accessing the raw key material. WARNING: In practice,
+	// it is unlikely you will want to use a insecurecleartextkeyset, as it implies
+	// that your key material is passed in cleartext, which is a security risk.
 	// Consider encrypting it with a remote key in Cloud KMS, AWS KMS or HashiCorp Vault.
 	// See https://github.com/google/tink/blob/master/docs/GOLANG-HOWTO.md#storing-and-loading-existing-keysets.
-
-	a, err := aead.New(kh)
+	keysetHandle, err := insecurecleartextkeyset.Read(
+		keyset.NewJSONReader(bytes.NewBufferString(jsonKeyset)))
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	msg := []byte("this message needs to be encrypted")
-	aad := []byte("this data needs to be authenticated, but not encrypted")
-	ct, err := a.Encrypt(msg, aad)
+	// Retrieve the AEAD primitive we want to use from the keyset handle.
+	primitive, err := aead.New(keysetHandle)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	pt, err := a.Decrypt(ct, aad)
+	// Use the primitive to encrypt a message. In this case the primary key of the
+	// keyset will be used (which is also the only key in this example).
+	plaintext := []byte("message")
+	associatedData := []byte("associated data")
+	ciphertext, err := primitive.Encrypt(plaintext, associatedData)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	fmt.Printf("Ciphertext: %s\n", base64.StdEncoding.EncodeToString(ct))
-	fmt.Printf("Original  plaintext: %s\n", msg)
-	fmt.Printf("Decrypted Plaintext: %s\n", pt)
+	// Use the primitive to decrypt the message. Decrypt finds the correct key in
+	// the keyset and decrypts the ciphertext. If no key is found or decryption
+	// fails, it returns an error.
+	decrypted, err := primitive.Decrypt(ciphertext, associatedData)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Println(string(decrypted))
+	// Output: message
 }
 
-func TestAEADInit(t *testing.T) {
-	// Check for AES-GCM key manager.
-	_, err := registry.GetKeyManager(testutil.AESGCMTypeURL)
-	if err != nil {
-		t.Errorf("unexpected error: %s", err)
-	}
-
-	// Check for ChaCha20Poly1305 key manager.
-	_, err = registry.GetKeyManager(testutil.ChaCha20Poly1305TypeURL)
-	if err != nil {
-		t.Errorf("unexpected error: %s", err)
-	}
-
-	// Check for XChaCha20Poly1305 key manager.
-	_, err = registry.GetKeyManager(testutil.XChaCha20Poly1305TypeURL)
-	if err != nil {
-		t.Errorf("unexpected error: %s", err)
-	}
-}
+// [END aead-example]
