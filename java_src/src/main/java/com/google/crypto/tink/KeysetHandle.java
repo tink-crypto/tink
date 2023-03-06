@@ -938,7 +938,7 @@ public final class KeysetHandle {
   /**
    * If the managed keyset contains private keys, returns a {@link KeysetHandle} of the public keys.
    *
-   * @throws GenernalSecurityException if the managed keyset is null or if it contains any
+   * @throws GeneralSecurityException if the managed keyset is null or if it contains any
    *     non-private keys.
    */
   public KeysetHandle getPublicKeysetHandle() throws GeneralSecurityException {
