@@ -104,7 +104,9 @@ TEST(FileRandomAccessStreamTest, ReadingStreams) {
   for (auto stream_size : {1, 10, 100, 1000, 10000, 1000000}) {
     SCOPED_TRACE(absl::StrCat("stream_size = ", stream_size));
     std::string file_contents = subtle::Random::GetRandomBytes(stream_size);
-    std::string filename = absl::StrCat(stream_size, "_reading_test.bin");
+    std::string filename = absl::StrCat(
+        stream_size, crypto::tink::internal::GetTestFileNamePrefix(),
+        "_file.bin");
     ASSERT_THAT(crypto::tink::internal::CreateTestFile(filename, file_contents),
                 IsOk());
     util::StatusOr<int> input_fd = OpenTestFileToRead(filename);
@@ -125,7 +127,9 @@ TEST(FileRandomAccessStreamTest, ReadingStreamsTillLastByte) {
   for (auto stream_size : {1, 10, 100, 1000, 10000}) {
     SCOPED_TRACE(absl::StrCat("stream_size = ", stream_size));
     std::string file_contents = subtle::Random::GetRandomBytes(stream_size);
-    std::string filename = absl::StrCat(stream_size, "_reading_test.bin");
+    std::string filename = absl::StrCat(
+        stream_size, crypto::tink::internal::GetTestFileNamePrefix(),
+        "_file.bin");
     ASSERT_THAT(crypto::tink::internal::CreateTestFile(filename, file_contents),
                 IsOk());
     util::StatusOr<int> input_fd = OpenTestFileToRead(filename);
@@ -147,7 +151,9 @@ TEST(FileRandomAccessStreamTest, ReadingStreamsTillLastByte) {
 TEST(FileRandomAccessStreamTest, ConcurrentReads) {
   for (auto stream_size : {100, 1000, 10000, 100000}) {
     std::string file_contents = subtle::Random::GetRandomBytes(stream_size);
-    std::string filename = absl::StrCat(stream_size, "_reading_test.bin");
+    std::string filename = absl::StrCat(
+        stream_size, crypto::tink::internal::GetTestFileNamePrefix(),
+        "_file.bin");
     ASSERT_THAT(crypto::tink::internal::CreateTestFile(filename, file_contents),
                 IsOk());
     util::StatusOr<int> input_fd = OpenTestFileToRead(filename);
@@ -172,7 +178,9 @@ TEST(FileRandomAccessStreamTest, ConcurrentReads) {
 TEST(FileRandomAccessStreamTest, NegativeReadPosition) {
   for (auto stream_size : {0, 10, 100, 1000, 10000}) {
     std::string file_contents = subtle::Random::GetRandomBytes(stream_size);
-    std::string filename = absl::StrCat(stream_size, "_reading_test.bin");
+    std::string filename = absl::StrCat(
+        stream_size, crypto::tink::internal::GetTestFileNamePrefix(),
+        "_file.bin");
     ASSERT_THAT(crypto::tink::internal::CreateTestFile(filename, file_contents),
                 IsOk());
     util::StatusOr<int> input_fd = OpenTestFileToRead(filename);
@@ -193,7 +201,9 @@ TEST(FileRandomAccessStreamTest, NegativeReadPosition) {
 TEST(FileRandomAccessStreamTest, NotPositiveReadCount) {
   for (auto stream_size : {0, 10, 100, 1000, 10000}) {
     std::string file_contents = subtle::Random::GetRandomBytes(stream_size);
-    std::string filename = absl::StrCat(stream_size, "_reading_test.bin");
+    std::string filename = absl::StrCat(
+        stream_size, crypto::tink::internal::GetTestFileNamePrefix(),
+        "_file.bin");
     ASSERT_THAT(crypto::tink::internal::CreateTestFile(filename, file_contents),
                 IsOk());
     util::StatusOr<int> input_fd = OpenTestFileToRead(filename);
@@ -213,7 +223,9 @@ TEST(FileRandomAccessStreamTest, NotPositiveReadCount) {
 TEST(FileRandomAccessStreamTest, ReadPositionAfterEof) {
   for (auto stream_size : {0, 10, 100, 1000, 10000}) {
     std::string file_contents = subtle::Random::GetRandomBytes(stream_size);
-    std::string filename = absl::StrCat(stream_size, "_reading_test.bin");
+    std::string filename = absl::StrCat(
+        stream_size, crypto::tink::internal::GetTestFileNamePrefix(),
+        "_file.bin");
     ASSERT_THAT(crypto::tink::internal::CreateTestFile(filename, file_contents),
                 IsOk());
     util::StatusOr<int> input_fd = OpenTestFileToRead(filename);

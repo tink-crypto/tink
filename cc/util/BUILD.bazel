@@ -523,6 +523,7 @@ cc_test(
     deps = [
         ":istream_input_stream",
         ":test_util",
+        "//internal:test_file_util",
         "//subtle:random",
         "@com_google_absl//absl/memory",
         "@com_google_absl//absl/status",
@@ -538,6 +539,7 @@ cc_test(
     deps = [
         ":ostream_output_stream",
         ":test_util",
+        "//internal:test_file_util",
         "//subtle:random",
         "@com_google_absl//absl/memory",
         "@com_google_absl//absl/strings",

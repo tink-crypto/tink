@@ -36,7 +36,10 @@ tink_cc_library(
     test_file_util_cmake.cc
     test_file_util.h
   DEPS
+    absl::check
     absl::strings
+    gmock
+    tink::subtle::random
     tink::util::status
     tink::util::test_util
 )

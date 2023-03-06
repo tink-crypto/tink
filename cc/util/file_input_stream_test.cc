@@ -79,7 +79,8 @@ TEST_P(FileInputStreamTestDefaultBufferSize, ReadAllfFromInputStreamSucceeds) {
   int stream_size = GetParam();
   SCOPED_TRACE(absl::StrCat("stream_size = ", stream_size));
   std::string file_contents = subtle::Random::GetRandomBytes(stream_size);
-  std::string filename = absl::StrCat(stream_size, "_reading_test.bin");
+  std::string filename = absl::StrCat(
+      stream_size, "_", internal::GetTestFileNamePrefix(), "_file.bin");
   ASSERT_THAT(internal::CreateTestFile(filename, file_contents), IsOk());
   util::StatusOr<int> input_fd = OpenTestFileToRead(filename);
   ASSERT_THAT(input_fd.status(), IsOk());
@@ -105,7 +106,8 @@ TEST_P(FileInputStreamTestCustomBufferSizes,
   SCOPED_TRACE(absl::StrCat("buffer_size = ", buffer_size));
   std::string file_contents =
       subtle::Random::GetRandomBytes(kDefaultTestStreamSize);
-  std::string filename = absl::StrCat(buffer_size, "_reading_test.bin");
+  std::string filename = absl::StrCat(
+      buffer_size, "_", internal::GetTestFileNamePrefix(), "_file.bin");
   ASSERT_THAT(internal::CreateTestFile(filename, file_contents), IsOk());
   util::StatusOr<int> input_fd = OpenTestFileToRead(filename);
   ASSERT_THAT(input_fd.status(), IsOk());
@@ -136,7 +138,8 @@ TEST(FileInputStreamTest, NextFailsIfDataIsNull) {
   int buffer_size = 4 * 1024;
   std::string file_contents =
       subtle::Random::GetRandomBytes(kDefaultTestStreamSize);
-  std::string filename = absl::StrCat(buffer_size, "_reading_test.bin");
+  std::string filename = absl::StrCat(
+      buffer_size, "_", internal::GetTestFileNamePrefix(), "_file.bin");
   ASSERT_THAT(internal::CreateTestFile(filename, file_contents), IsOk());
   util::StatusOr<int> input_fd = OpenTestFileToRead(filename);
   ASSERT_THAT(input_fd.status(), IsOk());
@@ -152,7 +155,8 @@ TEST(FileInputStreamTest, NextReadsExactlyOneBlockOfData) {
   int buffer_size = 4 * 1024;
   std::string file_contents =
       subtle::Random::GetRandomBytes(kDefaultTestStreamSize);
-  std::string filename = absl::StrCat(buffer_size, "_reading_test.bin");
+  std::string filename = absl::StrCat(
+      buffer_size, "_", internal::GetTestFileNamePrefix(), "_file.bin");
   ASSERT_THAT(internal::CreateTestFile(filename, file_contents), IsOk());
   util::StatusOr<int> input_fd = OpenTestFileToRead(filename);
   ASSERT_THAT(input_fd.status(), IsOk());
@@ -175,7 +179,8 @@ TEST(FileInputStreamTest, BackupForNegativeOrZeroBytesIsANoop) {
   int buffer_size = 4 * 1024;
   std::string file_contents =
       subtle::Random::GetRandomBytes(kDefaultTestStreamSize);
-  std::string filename = absl::StrCat(buffer_size, "_reading_test.bin");
+  std::string filename = absl::StrCat(
+      buffer_size, "_", internal::GetTestFileNamePrefix(), "_file.bin");
   ASSERT_THAT(internal::CreateTestFile(filename, file_contents), IsOk());
   util::StatusOr<int> input_fd = OpenTestFileToRead(filename);
   ASSERT_THAT(input_fd.status(), IsOk());
@@ -213,7 +218,8 @@ TEST(FileInputStreamTest, BackupForLessThanOneBlockOfData) {
   int buffer_size = 4 * 1024;
   std::string file_contents =
       subtle::Random::GetRandomBytes(kDefaultTestStreamSize);
-  std::string filename = absl::StrCat(buffer_size, "_reading_test.bin");
+  std::string filename = absl::StrCat(
+      buffer_size, "_", internal::GetTestFileNamePrefix(), "_file.bin");
   ASSERT_THAT(internal::CreateTestFile(filename, file_contents), IsOk());
   util::StatusOr<int> input_fd = OpenTestFileToRead(filename);
   ASSERT_THAT(input_fd.status(), IsOk());
@@ -263,7 +269,8 @@ TEST(FileInputStreamTest, BackupAtMostOfOneBlock) {
   int buffer_size = 4 * 1024;
   std::string file_contents =
       subtle::Random::GetRandomBytes(kDefaultTestStreamSize);
-  std::string filename = absl::StrCat(buffer_size, "_reading_test.bin");
+  std::string filename = absl::StrCat(
+      buffer_size, "_", internal::GetTestFileNamePrefix(), "_file.bin");
   ASSERT_THAT(internal::CreateTestFile(filename, file_contents), IsOk());
   util::StatusOr<int> input_fd = OpenTestFileToRead(filename);
   ASSERT_THAT(input_fd.status(), IsOk());

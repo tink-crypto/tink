@@ -42,10 +42,13 @@ cc_library(
     hdrs = ["test_file_util.h"],
     include_prefix = "tink/internal",
     deps = [
+        "//subtle:random",
         "//util:status",
         "//util:test_util",
         "@bazel_tools//tools/cpp/runfiles",
+        "@com_google_absl//absl/log:check",
         "@com_google_absl//absl/strings",
+        "@com_google_googletest//:gtest",
     ],
 )
 

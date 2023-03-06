@@ -29,6 +29,7 @@
 #include "absl/memory/memory.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/string_view.h"
+#include "tink/internal/test_file_util.h"
 #include "tink/subtle/random.h"
 #include "tink/util/test_util.h"
 
@@ -77,8 +78,8 @@ TEST_F(OstreamOutputStreamTest, WritingStreams) {
   for (size_t stream_size : {0, 10, 100, 1000, 10000, 100000, 1000000}) {
     SCOPED_TRACE(absl::StrCat("stream_size = ", stream_size));
     std::string stream_contents = subtle::Random::GetRandomBytes(stream_size);
-    std::string filename =
-        absl::StrCat(stream_size, "_ostream_output_stream_writing_test.bin");
+    std::string filename = absl::StrCat(
+        stream_size, internal::GetTestFileNamePrefix(), "_file.bin");
     auto output = GetTestOstream(filename);
     auto output_stream = absl::make_unique<util::OstreamOutputStream>(
         std::move(output));
@@ -96,7 +97,7 @@ TEST_F(OstreamOutputStreamTest, CustomBufferSizes) {
   for (int buffer_size : {1, 10, 100, 1000, 10000, 100000, 1000000}) {
     SCOPED_TRACE(absl::StrCat("buffer_size = ", buffer_size));
     std::string filename = absl::StrCat(
-        buffer_size, "_ostream_output_stream_buffer_size_test.bin");
+        buffer_size, internal::GetTestFileNamePrefix(), "_file.bin");
     auto output = GetTestOstream(filename);
     auto output_stream = absl::make_unique<util::OstreamOutputStream>(
         std::move(output), buffer_size);
@@ -119,7 +120,7 @@ TEST_F(OstreamOutputStreamTest, BackupAndPosition) {
   void* buffer;
   std::string stream_contents = subtle::Random::GetRandomBytes(stream_size);
   std::string filename =
-      absl::StrCat(buffer_size, "_ostream_output_stream_backup_test.bin");
+      absl::StrCat(buffer_size, internal::GetTestFileNamePrefix(), "_file.bin");
   auto output = GetTestOstream(filename);
 
   // Prepare the stream and do the first call to Next().

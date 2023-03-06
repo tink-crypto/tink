@@ -17,11 +17,18 @@
 #include "tink/internal/test_file_util.h"
 
 #include <fstream>
+#include <ios>
 #include <string>
+#include <vector>
 
+#include "gtest/gtest.h"
+#include "absl/log/check.h"
 #include "absl/status/status.h"
+#include "absl/strings/escaping.h"
 #include "absl/strings/str_cat.h"
+#include "absl/strings/str_split.h"
 #include "absl/strings/string_view.h"
+#include "tink/subtle/random.h"
 #include "tink/util/status.h"
 #include "tink/util/test_util.h"
 
@@ -38,6 +45,31 @@ util::Status CreateTestFile(absl::string_view filename,
   }
   output_stream.write(file_content.data(), file_content.size());
   return util::OkStatus();
+}
+
+std::string GetTestFileNamePrefix() {
+  const testing::TestInfo* const test_info =
+      testing::UnitTest::GetInstance()->current_test_info();
+  CHECK(test_info != nullptr);
+  std::string random_string = subtle::Random::GetRandomBytes(/*length=*/16);
+  std::string test_suite_name = test_info->test_suite_name();
+  std::string test_name = test_info->name();
+  // Parametrized tests return test_suite_name of the form <Prefix>/<Test Suite>
+  // and name of the form <Test Name>/<Suffix>.
+  // In this case, get only the prefix and test name. Keeping all of these may
+  // result in a file name that is too long.
+  if (test_info->value_param() != nullptr) {
+    std::vector<std::string> test_suite_parts =
+        absl::StrSplit(test_info->test_suite_name(), '/');
+    CHECK_GE(test_suite_parts.size(), 1);
+    test_suite_name = test_suite_parts[0];
+    std::vector<std::string> test_name_parts =
+        absl::StrSplit(test_info->name(), '/');
+    CHECK_GE(test_name_parts.size(), 1);
+    test_name = test_name_parts[0];
+  }
+  return absl::StrCat(test_suite_name, "_", test_name, "_",
+                      absl::BytesToHexString(random_string));
 }
 
 }  // namespace internal

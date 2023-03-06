@@ -371,6 +371,7 @@ tink_cc_test(
     absl::status
     absl::statusor
     absl::strings
+    tink::internal::test_file_util
     tink::subtle::random
 )
 
@@ -384,6 +385,7 @@ tink_cc_test(
     gmock
     absl::memory
     absl::strings
+    tink::internal::test_file_util
     tink::subtle::random
 )
 

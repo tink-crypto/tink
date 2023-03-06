@@ -37,6 +37,10 @@ std::string RunfilesPath(absl::string_view path);
 crypto::tink::util::Status CreateTestFile(absl::string_view filename,
                                           absl::string_view file_content);
 
+// Returns the prefix to use for files to use in tests. The result will be of
+// the form: <test name>_<testcase name>_<hex encoded random 32 bytes string>.
+std::string GetTestFileNamePrefix();
+
 }  // namespace internal
 }  // namespace tink
 }  // namespace crypto
