@@ -74,18 +74,6 @@ class RegistryImpl {
   RegistryImpl(const RegistryImpl&) = delete;
   RegistryImpl& operator=(const RegistryImpl&) = delete;
 
-  // TINK-PENDING-REMOVAL-IN-2.0.0-START
-  template <class P>
-  crypto::tink::util::StatusOr<const Catalogue<P>*> get_catalogue(
-     absl::string_view catalogue_name) const
-      ABSL_LOCKS_EXCLUDED(maps_mutex_);
-
-  template <class P>
-  crypto::tink::util::Status AddCatalogue(absl::string_view catalogue_name,
-                                          Catalogue<P>* catalogue)
-     ABSL_LOCKS_EXCLUDED(maps_mutex_);
-  // TINK-PENDING-REMOVAL-IN-2.0.0-END
-
   // Registers the given 'manager' for the key type 'manager->get_key_type()'.
   // Takes ownership of 'manager', which must be non-nullptr.
   template <class P>
@@ -463,58 +451,6 @@ class RegistryImpl {
   std::unique_ptr<crypto::tink::MonitoringClientFactory> monitoring_factory_
       ABSL_GUARDED_BY(monitoring_factory_mutex_);
 };
-
-// NOLINTBEGIN(whitespace/line_length) (Formatted when commented in)
-// TINK-PENDING-REMOVAL-IN-2.0.0-START
-template <class P>
-crypto::tink::util::Status RegistryImpl::AddCatalogue(
-    absl::string_view catalogue_name, Catalogue<P>* catalogue) {
-  if (catalogue == nullptr) {
-    return crypto::tink::util::Status(
-        absl::StatusCode::kInvalidArgument,
-        "Parameter 'catalogue' must be non-null.");
-  }
-  std::shared_ptr<void> entry(catalogue);
-  absl::MutexLock lock(&maps_mutex_);
-  auto curr_catalogue = name_to_catalogue_map_.find(catalogue_name);
-  if (curr_catalogue != name_to_catalogue_map_.end()) {
-    auto existing =
-        static_cast<Catalogue<P>*>(curr_catalogue->second->catalogue.get());
-    if (std::type_index(typeid(*existing)) !=
-        std::type_index(typeid(*catalogue))) {
-      return ToStatusF(absl::StatusCode::kAlreadyExists,
-                       "A catalogue named '%s' has been already added.",
-                       catalogue_name);
-    }
-  } else {
-    auto label_info = absl::make_unique<LabelInfo>(
-        std::move(entry), std::type_index(typeid(P)), typeid(P).name());
-    name_to_catalogue_map_.insert(
-        {std::string(catalogue_name), std::move(label_info)});
-  }
-  return crypto::tink::util::OkStatus();
-}
-
-template <class P>
-crypto::tink::util::StatusOr<const Catalogue<P>*> RegistryImpl::get_catalogue(
-    absl::string_view catalogue_name) const {
-  absl::MutexLock lock(&maps_mutex_);
-  auto catalogue_entry = name_to_catalogue_map_.find(catalogue_name);
-  if (catalogue_entry == name_to_catalogue_map_.end()) {
-    return ToStatusF(absl::StatusCode::kNotFound,
-                     "No catalogue named '%s' has been added.", catalogue_name);
-  }
-  if (catalogue_entry->second->type_id_name != typeid(P).name()) {
-    return ToStatusF(absl::StatusCode::kInvalidArgument,
-                     "Wrong Primitive type for catalogue named '%s': "
-                     "got '%s', expected '%s'",
-                     catalogue_name, typeid(P).name(),
-                     catalogue_entry->second->type_id_name);
-  }
-  return static_cast<Catalogue<P>*>(catalogue_entry->second->catalogue.get());
-}
-// TINK-PENDING-REMOVAL-IN-2.0.0-END
-// NOLINTEND(whitespace/line_length)
 
 template <class P>
 crypto::tink::util::Status RegistryImpl::RegisterKeyManager(

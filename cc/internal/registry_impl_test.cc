@@ -505,51 +505,6 @@ TEST_F(RegistryTest, GetKeyManagerRemainsValid) {
   EXPECT_THAT(key_manager.value()->get_key_type(), Eq(key_type));
 }
 
-// TINK-PENDING-REMOVAL-IN-2.0.0-START
-class TestAeadCatalogue : public Catalogue<Aead> {
- public:
-  TestAeadCatalogue() {}
-
-  util::StatusOr<std::unique_ptr<KeyManager<Aead>>> GetKeyManager(
-      const std::string& type_url, const std::string& primitive_name,
-      uint32_t min_version) const override {
-    return util::Status(absl::StatusCode::kUnimplemented,
-                        "This is a test catalogue.");
-  }
-};
-
-class TestAeadCatalogue2 : public TestAeadCatalogue {};
-
-TEST_F(RegistryTest, testAddCatalogue) {
-  std::string catalogue_name = "SomeCatalogue";
-
-  std::unique_ptr<TestAeadCatalogue> null_catalogue = nullptr;
-  auto status =
-      Registry::AddCatalogue(catalogue_name, std::move(null_catalogue));
-  EXPECT_FALSE(status.ok());
-  EXPECT_EQ(absl::StatusCode::kInvalidArgument, status.code()) << status;
-
-  // Add a catalogue.
-  status = Registry::AddCatalogue(catalogue_name,
-                                  absl::make_unique<TestAeadCatalogue>());
-  EXPECT_TRUE(status.ok()) << status;
-
-  // Add the same catalogue again, it should work (idempotence).
-  status = Registry::AddCatalogue(catalogue_name,
-                                  absl::make_unique<TestAeadCatalogue>());
-  EXPECT_TRUE(status.ok()) << status;
-
-  // Try overriding a catalogue.
-  status = Registry::AddCatalogue(catalogue_name,
-                                  absl::make_unique<TestAeadCatalogue2>());
-  EXPECT_FALSE(status.ok());
-  EXPECT_EQ(absl::StatusCode::kAlreadyExists, status.code()) << status;
-
-  // Check the catalogue is still present.
-  EXPECT_THAT(Registry::get_catalogue<Aead>(catalogue_name), IsOk());
-}
-// TINK-PENDING-REMOVAL-IN-2.0.0-END
-
 TEST_F(RegistryTest, testGettingPrimitives) {
   std::string key_type_1 = "google.crypto.tink.AesCtrHmacAeadKey";
   std::string key_type_2 = "google.crypto.tink.AesGcmKey";
