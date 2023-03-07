@@ -47,8 +47,12 @@ class _DecryptingStreamWrapper(io.RawIOBase):
         ciphertext_source)
     self._associated_data = associated_data
     self._matching_stream = None
-    self._remaining_primitives = [
-        entry.primitive for entry in primitive_set.raw_primitives()]
+    self._remaining_primitives = []
+    # For legacy reasons (Tink always encrypted with non-RAW keys) we use all
+    # primitives, even those which have output_prefix_type != RAW.
+    for entry_list in primitive_set.all():
+      for e in entry_list:
+        self._remaining_primitives.append(e.primitive)
     self._attempting_stream = self._next_decrypting_stream()
 
   def _next_decrypting_stream(self) -> io.RawIOBase:

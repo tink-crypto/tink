@@ -282,12 +282,10 @@ class StreamingAeadWrapperTest(parameterized.TestCase):
     self.assertTrue(ciphertext_dest.closed)
 
     ciphertext_src = io.BytesIO(ciphertext_dest.value_after_close())
-    with self.assertRaises(tink.TinkError):
-      # TODO(b/129044084) Currently fails: TINK keys are ignored when decrypting
-      with primitive.new_decrypting_stream(
-          ciphertext_src, associated_data
-      ) as ds:
-        _ = ds.read()
+    with primitive.new_decrypting_stream(ciphertext_src, associated_data) as ds:
+      output = ds.read()
+    self.assertTrue(ciphertext_src.closed)
+    self.assertEqual(output, plaintext)
 
 
 if __name__ == '__main__':
