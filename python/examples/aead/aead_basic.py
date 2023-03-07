@@ -45,9 +45,9 @@ def example():
 
   # Create a keyset handle from the cleartext keyset in the previous
   # step. The keyset handle provides abstract access to the underlying keyset to
-  # limit the exposure of accessing the raw key material. WARNING: In practice
-  # it is unlikely you will want to use a cleartext_keyset_handle, as it implies
-  # that your key material is passed in cleartext which is a security risk.
+  # limit access of the raw key material. WARNING: In practice, it is unlikely
+  # you will want to use a cleartext_keyset_handle, as it implies that your key
+  # material is passed in cleartext, which is a security risk.
   keyset_handle = cleartext_keyset_handle.read(tink.JsonKeysetReader(keyset))
 
   # Retrieve the Aead primitive we want to use from the keyset handle.
