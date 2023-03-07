@@ -38,15 +38,6 @@ using google::crypto::tink::RegistryConfig;
 namespace crypto {
 namespace tink {
 
-// NOLINTBEGIN(whitespace/line_length) (Formatted when commented in)
-// TINK-PENDING-REMOVAL-IN-2.0.0-START
-const google::crypto::tink::RegistryConfig& SignatureConfig::Latest() {
-  static const RegistryConfig* config = new RegistryConfig();
-  return *config;
-}
-// TINK-PENDING-REMOVAL-IN-2.0.0-END
-// NOLINTEND(whitespace/line_length)
-
 // static
 util::Status SignatureConfig::Register() {
   // Register primitive wrappers.

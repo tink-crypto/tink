@@ -35,18 +35,6 @@ namespace tink {
 //
 class DeterministicAeadConfig {
  public:
-  // NOLINTBEGIN(whitespace/line_length) (Formatted when commented in)
-  // TINK-PENDING-REMOVAL-IN-2.0.0-START
-  static constexpr char kCatalogueName[] = "TinkDeterministicAead";
-  static constexpr char kPrimitiveName[] = "DeterministicAead";
-
-  // Returns config of DeterministicAead implementations supported
-  // in the current Tink release.
-  ABSL_DEPRECATED("This is not supported anymore.")
-  static const google::crypto::tink::RegistryConfig& Latest();
-  // TINK-PENDING-REMOVAL-IN-2.0.0-END
-  // NOLINTEND(whitespace/line_length)
-
   // Registers DeterministicAead primitive wrapper and key managers for all
   // DeterministicAead key types from the current Tink release.
   static crypto::tink::util::Status Register();
