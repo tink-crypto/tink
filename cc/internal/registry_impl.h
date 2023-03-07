@@ -389,24 +389,6 @@ class RegistryImpl {
     std::shared_ptr<void> keyset_wrapper_;
   };
 
-  // TINK-PENDING-REMOVAL-IN-2.0.0-START
-  // All information for a given primitive label.
-  struct LabelInfo {
-    LabelInfo(std::shared_ptr<void> catalogue, std::type_index type_index,
-              const char* type_id_name)
-        : catalogue(std::move(catalogue)),
-          type_index(type_index),
-          type_id_name(type_id_name) {}
-    // A pointer to the underlying Catalogue<P>. We use a shared_ptr because
-    // shared_ptr<void> is valid (as opposed to unique_ptr<void>).
-    const std::shared_ptr<void> catalogue;
-    // std::type_index of the primitive for which this key was inserted.
-    std::type_index type_index;
-    // TypeId name of the primitive for which this key was inserted.
-    const std::string type_id_name;
-  };
-  // TINK-PENDING-REMOVAL-IN-2.0.0-END
-
   template <class P>
   crypto::tink::util::StatusOr<const PrimitiveWrapper<P, P>*> GetLegacyWrapper()
       const ABSL_LOCKS_EXCLUDED(maps_mutex_);
@@ -441,11 +423,6 @@ class RegistryImpl {
   // A map from the type_id to the corresponding wrapper.
   absl::flat_hash_map<std::type_index, std::unique_ptr<WrapperInfo>>
       primitive_to_wrapper_ ABSL_GUARDED_BY(maps_mutex_);
-
-  // TINK-PENDING-REMOVAL-IN-2.0.0-START
-  absl::flat_hash_map<std::string, std::unique_ptr<LabelInfo>>
-      name_to_catalogue_map_ ABSL_GUARDED_BY(maps_mutex_);
-  // TINK-PENDING-REMOVAL-IN-2.0.0-END
 
   mutable absl::Mutex monitoring_factory_mutex_;
   std::unique_ptr<crypto::tink::MonitoringClientFactory> monitoring_factory_
