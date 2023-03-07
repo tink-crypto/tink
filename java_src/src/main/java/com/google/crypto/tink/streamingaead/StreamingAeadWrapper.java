@@ -21,6 +21,8 @@ import com.google.crypto.tink.PrimitiveWrapper;
 import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.StreamingAead;
 import java.security.GeneralSecurityException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * StreamingAeadWrapper is the implementation of PrimitiveWrapper for the StreamingAead primitive.
@@ -43,7 +45,19 @@ public class StreamingAeadWrapper implements PrimitiveWrapper<StreamingAead, Str
   @Override
   public StreamingAead wrap(final PrimitiveSet<StreamingAead> primitives)
       throws GeneralSecurityException {
-    return new StreamingAeadHelper(primitives);
+    List<StreamingAead> allStreamingAeads = new ArrayList<>();
+    for (List<PrimitiveSet.Entry<StreamingAead>> entryList : primitives.getAll()) {
+      // For legacy reasons (Tink always encrypted with non-RAW keys) we use all
+      // primitives, even those which have output_prefix_type != RAW.
+      for (PrimitiveSet.Entry<StreamingAead> entry : entryList) {
+        allStreamingAeads.add(entry.getPrimitive());
+      }
+    }
+    PrimitiveSet.Entry<StreamingAead> primary = primitives.getPrimary();
+    if (primary == null || primary.getPrimitive() == null) {
+      throw new GeneralSecurityException("No primary set");
+    }
+    return new StreamingAeadHelper(allStreamingAeads, primary.getPrimitive());
   }
 
   @Override

@@ -16,7 +16,6 @@
 
 package com.google.crypto.tink.streamingaead;
 
-import com.google.crypto.tink.PrimitiveSet;
 import com.google.crypto.tink.StreamingAead;
 import java.io.BufferedInputStream;
 import java.io.IOException;
@@ -36,27 +35,30 @@ final class InputStreamDecrypter extends InputStream {
   @GuardedBy("this")
   InputStream ciphertextStream;
 
-  PrimitiveSet<StreamingAead> primitives;
+  List<StreamingAead> primitives;
   byte[] associatedData;
 
   /**
    * Constructs a new decrypter for {@code ciphertextStream}.
    *
-   * <p>The decrypter picks a matching {@code StreamingAead}-primitive from {@code primitives},
-   * and uses it for decryption.  The matching happens as follows:
-   * upon first {@code read()}-call each candidate primitive reads an initial portion
-   * of the stream, until it can determine whether the stream matches the key of the primitive.
-   * If a canditate does not match, then the stream is reset to its initial position,
-   * and the next candiate can attempt matching.  The first successful candidate
-   * is then used exclusively on subsequent {@code read()}-calls.
+   * <p>The decrypter picks a matching {@code StreamingAead}-primitive from {@code primitives}, and
+   * uses it for decryption. The matching happens as follows: upon first {@code read()}-call each
+   * candidate primitive reads an initial portion of the stream, until it can determine whether the
+   * stream matches the key of the primitive. If a canditate does not match, then the stream is
+   * reset to its initial position, and the next candiate can attempt matching. The first successful
+   * candidate is then used exclusively on subsequent {@code read()}-calls.
    *
-   * <p> The matching process wraps {@code ciphertextStream} into a BufferedInputStream,
-   * unless ciphertextStream supports rewinding (i.e. ciphertextStream.markSupported() == true).
-   * Buffering of the ciphertext is disabled once a ciphertext block has been successfully
-   * decrypted.
+   * <p>The matching process wraps {@code ciphertextStream} into a BufferedInputStream, unless
+   * ciphertextStream supports rewinding (i.e. ciphertextStream.markSupported() == true). Buffering
+   * of the ciphertext is disabled once a ciphertext block has been successfully decrypted.
+   *
+   * @param primitives a list of possible {@link StreamingAeads} to try. Must not be mutateted by
+   * the caller. Will not be muteted by the {@code InputStreamDecrypter},
+   * @param ciphertextStream the stream with the ciphertext
+   * @param associatedData The assocated data with this encryption
    */
-  public InputStreamDecrypter(PrimitiveSet<StreamingAead> primitives,
-      InputStream ciphertextStream, final byte[] associatedData) {
+  public InputStreamDecrypter(
+      List<StreamingAead> primitives, InputStream ciphertextStream, final byte[] associatedData) {
     this.attemptedMatching = false;
     this.matchingStream = null;
     this.primitives = primitives;
@@ -143,11 +145,10 @@ final class InputStreamDecrypter extends InputStream {
         throw new IOException("No matching key found for the ciphertext in the stream.");
       }
       attemptedMatching = true;
-      List<PrimitiveSet.Entry<StreamingAead>> entries = primitives.getRawPrimitives();
-      for (PrimitiveSet.Entry<StreamingAead> entry : entries) {
+      for (StreamingAead streamingAead : primitives) {
         try {
           InputStream attemptedStream =
-              entry.getPrimitive().newDecryptingStream(ciphertextStream, associatedData);
+              streamingAead.newDecryptingStream(ciphertextStream, associatedData);
           int retValue = attemptedStream.read(b, offset, len);
           if (retValue == 0) {
             // Read should never return 0 when len > 0.

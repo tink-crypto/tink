@@ -220,9 +220,6 @@ public class StreamingAeadWrapperTest {
         TinkProtoKeysetFormat.parseKeyset(keyset.toByteArray(), InsecureSecretKeyAccess.get());
     StreamingAead streamingAead = keysetHandle.getPrimitive(StreamingAead.class);
 
-    // TODO(b/129044084) We need to change Tink so this works.
-    assertThrows(
-        IOException.class,
-        () -> StreamingTestUtil.testEncryptionAndDecryption(streamingAead, streamingAead));
+    StreamingTestUtil.testEncryptionAndDecryption(streamingAead, streamingAead);
   }
 }

@@ -16,7 +16,6 @@
 
 package com.google.crypto.tink.streamingaead;
 
-import com.google.crypto.tink.PrimitiveSet;
 import com.google.crypto.tink.StreamingAead;
 import com.google.crypto.tink.subtle.RewindableReadableByteChannel;
 import java.io.IOException;
@@ -25,6 +24,7 @@ import java.nio.channels.ReadableByteChannel;
 import java.security.GeneralSecurityException;
 import java.util.ArrayDeque;
 import java.util.Deque;
+import java.util.List;
 import javax.annotation.concurrent.GuardedBy;
 
 /**
@@ -42,24 +42,24 @@ final class ReadableByteChannelDecrypter implements ReadableByteChannel {
   Deque<StreamingAead> remainingPrimitives;
   byte[] associatedData;
 
-
   /**
    * Constructs a new decrypter for {@code ciphertextChannel}.
    *
-   * <p>The decrypter picks a matching {@code StreamingAead}-primitive from {@code primitives},
-   * and uses it for decryption.  The matching happens as follows:
-   * upon first {@code read()}-call each candidate primitive reads an initial portion
-   * of the channel, until it can determine whether the channel matches the key of the primitive.
-   * If a canditate does not match, then the channel is reset to its initial position,
-   * and the next candiate can attempt matching.  The first successful candidate
-   * is then used exclusively on subsequent {@code read()}-calls.
+   * <p>The decrypter picks a matching {@code StreamingAead}-primitive from {@code primitives}, and
+   * uses it for decryption. The matching happens as follows: upon first {@code read()}-call each
+   * candidate primitive reads an initial portion of the channel, until it can determine whether the
+   * channel matches the key of the primitive. If a canditate does not match, then the channel is
+   * reset to its initial position, and the next candiate can attempt matching. The first successful
+   * candidate is then used exclusively on subsequent {@code read()}-calls.
    *
-   * <p> The matching process uses a buffering wrapper around {@code ciphertextChannel}
-   * to enable resetting of the channel to the initial position.  The buffering
-   * is removed once the matching is successful.
+   * <p>The matching process uses a buffering wrapper around {@code ciphertextChannel} to enable
+   * resetting of the channel to the initial position. The buffering is removed once the matching is
+   * successful.
    */
-  public ReadableByteChannelDecrypter(PrimitiveSet<StreamingAead> primitives,
-      ReadableByteChannel ciphertextChannel, final byte[] associatedData) {
+  public ReadableByteChannelDecrypter(
+      List<StreamingAead> allPrimitives,
+      ReadableByteChannel ciphertextChannel,
+      final byte[] associatedData) {
     // There are 3 phases:
     // 1) both matchingChannel and attemptingChannel are null. Rewind is enabled.
     // 2) attemptingChannel is non-null, matchingChannel is null. Rewind is enabled.
@@ -67,8 +67,8 @@ final class ReadableByteChannelDecrypter implements ReadableByteChannel {
     this.attemptingChannel = null;
     this.matchingChannel = null;
     this.remainingPrimitives = new ArrayDeque<>();
-    for (PrimitiveSet.Entry<StreamingAead> entry : primitives.getRawPrimitives()) {
-      this.remainingPrimitives.add(entry.getPrimitive());
+    for (StreamingAead primitive : allPrimitives) {
+      this.remainingPrimitives.add(primitive);
     }
     this.ciphertextChannel = new RewindableReadableByteChannel(ciphertextChannel);
     this.associatedData = associatedData.clone();

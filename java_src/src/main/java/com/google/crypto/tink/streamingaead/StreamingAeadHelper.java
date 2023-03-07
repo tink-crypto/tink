@@ -17,7 +17,6 @@
 package com.google.crypto.tink.streamingaead;
 
 import androidx.annotation.RequiresApi;
-import com.google.crypto.tink.PrimitiveSet;
 import com.google.crypto.tink.StreamingAead;
 import java.io.IOException;
 import java.io.InputStream;
@@ -26,12 +25,14 @@ import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.SeekableByteChannel;
 import java.nio.channels.WritableByteChannel;
 import java.security.GeneralSecurityException;
+import java.util.List;
 
 /**
  * A helper for creating {@link StreamingAead}-primitives from keysets.
  */
 final class StreamingAeadHelper implements StreamingAead {
-  PrimitiveSet<StreamingAead> primitives;
+  private final List<StreamingAead> allPrimitives;
+  private final StreamingAead primary;
 
   /**
    * Creates a helper that uses the provided primitives for encryption
@@ -39,27 +40,24 @@ final class StreamingAeadHelper implements StreamingAead {
    * For encryption it uses the primitive corresponding to the primary key.
    * For decryption it uses an enabled primitive that matches the given ciphertext.
    */
-  public StreamingAeadHelper(PrimitiveSet<StreamingAead> primitives)
+  public StreamingAeadHelper(List<StreamingAead> allPrimitives, StreamingAead primary)
       throws GeneralSecurityException {
-    if (primitives.getPrimary() == null) {
-      throw new GeneralSecurityException("Missing primary primitive.");
-    }
-    this.primitives = primitives;
+    this.allPrimitives = allPrimitives;
+    this.primary = primary;
   }
 
   @Override
   public WritableByteChannel newEncryptingChannel(
       WritableByteChannel ciphertextDestination, byte[] associatedData)
       throws GeneralSecurityException, IOException {
-    return primitives.getPrimary().getPrimitive()
-        .newEncryptingChannel(ciphertextDestination, associatedData);
+    return primary.newEncryptingChannel(ciphertextDestination, associatedData);
   }
 
   @Override
   public ReadableByteChannel newDecryptingChannel(
       ReadableByteChannel ciphertextChannel, byte[] associatedData)
       throws GeneralSecurityException, IOException {
-    return new ReadableByteChannelDecrypter(primitives, ciphertextChannel, associatedData);
+    return new ReadableByteChannelDecrypter(allPrimitives, ciphertextChannel, associatedData);
   }
 
   @Override
@@ -67,7 +65,7 @@ final class StreamingAeadHelper implements StreamingAead {
   public SeekableByteChannel newSeekableDecryptingChannel(
       SeekableByteChannel ciphertextChannel, byte[] associatedData)
       throws GeneralSecurityException, IOException {
-    return new SeekableByteChannelDecrypter(primitives, ciphertextChannel, associatedData);
+    return new SeekableByteChannelDecrypter(allPrimitives, ciphertextChannel, associatedData);
   }
 
   @Override
@@ -75,14 +73,13 @@ final class StreamingAeadHelper implements StreamingAead {
       InputStream ciphertextStream,
       byte[] associatedData)
       throws GeneralSecurityException, IOException {
-    return new InputStreamDecrypter(primitives, ciphertextStream, associatedData);
+    return new InputStreamDecrypter(allPrimitives, ciphertextStream, associatedData);
   }
 
   @Override
   public OutputStream newEncryptingStream(
       OutputStream ciphertext, byte[] associatedData)
       throws GeneralSecurityException, IOException {
-    return primitives.getPrimary().getPrimitive()
-        .newEncryptingStream(ciphertext, associatedData);
+    return primary.newEncryptingStream(ciphertext, associatedData);
   }
 }
