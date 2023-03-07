@@ -58,27 +58,6 @@ class Registry {
         manager.release(), new_key_allowed);
   }
 
-  // NOLINTBEGIN(whitespace/line_length) (Formatted when commented in)
-  // TINK-PENDING-REMOVAL-IN-2.0.0-START
-  // Same functionality as the overload which takes a unique pointer, for
-  // new_key_allowed = true.
-  template <class P>
-  ABSL_DEPRECATED(
-      "Use RegisterKeyManager with a unique_ptr manager and new_key_allowed = "
-      "true instead.")
-  static crypto::tink::util::Status RegisterKeyManager(KeyManager<P>* manager) {
-    return RegisterKeyManager(absl::WrapUnique(manager), true);
-  }
-
-  template <class P>
-  ABSL_DEPRECATED("Use RegisterKeyManager with a unique_ptr manager instead.")
-  static crypto::tink::util::Status RegisterKeyManager(KeyManager<P>* manager,
-                                                       bool new_key_allowed) {
-    return RegisterKeyManager(absl::WrapUnique(manager), new_key_allowed);
-  }
-  // TINK-PENDING-REMOVAL-IN-2.0.0-END
-  // NOLINTEND(whitespace/line_length)
-
   template <class KTManager>
   static crypto::tink::util::Status RegisterKeyTypeManager(
       std::unique_ptr<KTManager> manager, bool new_key_allowed) {
