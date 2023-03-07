@@ -56,7 +56,6 @@
 #include "tink/util/protobuf_helper.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
-#include "tink/util/validation.h"
 #include "proto/tink.pb.h"
 
 namespace crypto {

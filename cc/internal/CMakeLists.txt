@@ -119,7 +119,6 @@ tink_cc_library(
     tink::util::protobuf_helper
     tink::util::status
     tink::util::statusor
-    tink::util::validation
     tink::proto::tink_cc_proto
 )
 
@@ -259,21 +258,17 @@ tink_cc_test(
     tink::core::private_key_manager_impl
     tink::core::private_key_type_manager
     tink::core::template_util
-    tink::core::crypto_format
     tink::core::hybrid_decrypt
     tink::core::input_stream
     tink::core::key_manager
-    tink::core::keyset_manager
     tink::core::mac
     tink::core::primitive_set
     tink::core::primitive_wrapper
     tink::core::registry
     tink::aead::aead_wrapper
     tink::aead::aes_gcm_key_manager
-    tink::config::tink_fips
     tink::hybrid::ecies_aead_hkdf_private_key_manager
     tink::hybrid::ecies_aead_hkdf_public_key_manager
-    tink::monitoring::monitoring
     tink::monitoring::monitoring_client_mocks
     tink::subtle::aes_gcm_boringssl
     tink::subtle::random
@@ -283,7 +278,6 @@ tink_cc_test(
     tink::util::secret_data
     tink::util::status
     tink::util::statusor
-    tink::util::test_keyset_handle
     tink::util::test_matchers
     tink::util::test_util
     tink::proto::aes_ctr_hmac_aead_cc_proto
