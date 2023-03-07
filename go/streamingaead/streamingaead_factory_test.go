@@ -24,6 +24,7 @@ import (
 	"strings"
 	"testing"
 
+	"google.golang.org/protobuf/proto"
 	"github.com/google/tink/go/keyset"
 	"github.com/google/tink/go/mac"
 	"github.com/google/tink/go/streamingaead"
@@ -31,7 +32,13 @@ import (
 	"github.com/google/tink/go/testkeyset"
 	"github.com/google/tink/go/testutil"
 	"github.com/google/tink/go/tink"
+	ghpb "github.com/google/tink/go/proto/aes_gcm_hkdf_streaming_go_proto"
+	commonpb "github.com/google/tink/go/proto/common_go_proto"
 	tinkpb "github.com/google/tink/go/proto/tink_go_proto"
+)
+
+const (
+	aesGCMHKDFTypeURL = "type.googleapis.com/google.crypto.tink.AesGcmHkdfStreamingKey"
 )
 
 func TestFactoryMultipleKeys(t *testing.T) {
@@ -126,7 +133,6 @@ func encryptDecrypt(encryptCipher, decryptCipher tink.StreamingAEAD, ptSize, aad
 	return nil
 }
 
-
 func TestFactoryWithInvalidPrimitiveSetType(t *testing.T) {
 	wrongKH, err := keyset.NewHandle(mac.HMACSHA256Tag128KeyTemplate())
 	if err != nil {
@@ -148,5 +154,63 @@ func TestFactoryWithValidPrimitiveSetType(t *testing.T) {
 	_, err = streamingaead.New(goodKH)
 	if err != nil {
 		t.Fatalf("New() failed with good *keyset.Handle: %s", err)
+	}
+}
+
+func TestFactoryWithKeysetWithTinkKeys(t *testing.T) {
+	key := &ghpb.AesGcmHkdfStreamingKey{
+		Version:  0,
+		KeyValue: []byte("0123456789abcdef"),
+		Params: &ghpb.AesGcmHkdfStreamingParams{
+			CiphertextSegmentSize: 512,
+			DerivedKeySize:        16,
+			HkdfHashType:          commonpb.HashType_SHA1,
+		},
+	}
+	value1, err := proto.Marshal(key)
+	if err != nil {
+		t.Fatalf("proto.Marshal(key) err = %q, want nil", err)
+	}
+	key.KeyValue = []byte("ABCDEF0123456789")
+	value2, err := proto.Marshal(key)
+	if err != nil {
+		t.Fatalf("proto.Marshal(key) err = %q, want nil", err)
+	}
+
+	keyset := &tinkpb.Keyset{
+		PrimaryKeyId: 1,
+		Key: []*tinkpb.Keyset_Key{{
+			KeyData: &tinkpb.KeyData{
+				TypeUrl:         aesGCMHKDFTypeURL,
+				Value:           value1,
+				KeyMaterialType: tinkpb.KeyData_SYMMETRIC,
+			},
+			OutputPrefixType: tinkpb.OutputPrefixType_TINK,
+			KeyId:            1,
+			Status:           tinkpb.KeyStatusType_ENABLED,
+		}, &tinkpb.Keyset_Key{
+			KeyData: &tinkpb.KeyData{
+				TypeUrl:         aesGCMHKDFTypeURL,
+				Value:           value2,
+				KeyMaterialType: tinkpb.KeyData_SYMMETRIC,
+			},
+			OutputPrefixType: tinkpb.OutputPrefixType_TINK,
+			KeyId:            2,
+			Status:           tinkpb.KeyStatusType_ENABLED,
+		}},
+	}
+
+	keysetHandle, err := testkeyset.NewHandle(keyset)
+	if err != nil {
+		t.Fatalf("testkeyset.NewHandle(keyset) err = %q, want nil", err)
+	}
+	a, err := streamingaead.New(keysetHandle)
+	if err != nil {
+		t.Errorf("streamingaead.New(keysetHandle) err = %q, want nil", err)
+	}
+
+	// TODO(b/129044084) Currently fails: TINK keys are ignored when decrypting
+	if err := validateFactoryCipher(a, a); err == nil {
+		t.Errorf("Encryption & Decryption with TINK key unexpectedly succeeded. Is b/129044084 fixed?")
 	}
 }
