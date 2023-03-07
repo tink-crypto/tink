@@ -484,7 +484,8 @@ public class KeysetHandleTest {
   }
 
   @Test
-  public void monitoringClientGetsAnnotationsWithKeysetInfo() throws Exception {
+  public void noBuilderSetMonitoringAnnotations_monitoringClientGetsAnnotationsWithKeysetInfo()
+      throws Exception {
     MutableMonitoringRegistry.globalInstance().clear();
     FakeMonitoringClient fakeMonitoringClient = new FakeMonitoringClient();
     MutableMonitoringRegistry.globalInstance().registerMonitoringClient(fakeMonitoringClient);
@@ -508,7 +509,85 @@ public class KeysetHandleTest {
     assertThat(entries.get(0).getKeysetInfo().getAnnotations()).isEqualTo(annotations);
   }
 
-  @SuppressWarnings("deprecation")  // This is a test for the deprecated function
+  @Test
+  public void builderSetMonitoringAnnotations_works() throws Exception {
+    FakeMonitoringClient fakeMonitoringClient = new FakeMonitoringClient();
+    MutableMonitoringRegistry.globalInstance().clear();
+    MutableMonitoringRegistry.globalInstance().registerMonitoringClient(fakeMonitoringClient);
+    MonitoringAnnotations annotations =
+        MonitoringAnnotations.newBuilder().add("annotation_name", "annotation_value").build();
+    KeysetHandle keysetHandleWithAnnotations =
+        KeysetHandle.newBuilder()
+            .addEntry(
+                KeysetHandle.generateEntryFromParameters(
+                        AesCmacParameters.builder()
+                            .setVariant(Variant.TINK)
+                            .setKeySizeBytes(32)
+                            .setTagSizeBytes(16)
+                            .build())
+                    .withFixedId(42)
+                    .makePrimary())
+            .setMonitoringAnnotations(annotations)
+            .build();
+    byte[] plaintext = "plaintext".getBytes(UTF_8);
+    Mac mac = keysetHandleWithAnnotations.getPrimitive(Mac.class);
+
+    // Work triggering various code paths.
+    byte[] tag = mac.computeMac(plaintext);
+    mac.verifyMac(tag, plaintext);
+    assertThrows(GeneralSecurityException.class, () -> mac.verifyMac(tag, new byte[0]));
+    assertThrows(GeneralSecurityException.class, () -> mac.verifyMac(new byte[0], plaintext));
+
+    // With annotations set, the events get logged.
+    List<FakeMonitoringClient.LogEntry> logEntries = fakeMonitoringClient.getLogEntries();
+    System.out.println(logEntries);
+    assertThat(logEntries).hasSize(2);
+
+    FakeMonitoringClient.LogEntry tinkComputeEntry = logEntries.get(0);
+    assertThat(tinkComputeEntry.getKeyId()).isEqualTo(42);
+    assertThat(tinkComputeEntry.getPrimitive()).isEqualTo("mac");
+    assertThat(tinkComputeEntry.getApi()).isEqualTo("compute");
+    assertThat(tinkComputeEntry.getNumBytesAsInput()).isEqualTo(plaintext.length);
+    assertThat(tinkComputeEntry.getKeysetInfo().getAnnotations()).isEqualTo(annotations);
+
+    FakeMonitoringClient.LogEntry rawComputeEntry = logEntries.get(1);
+    assertThat(rawComputeEntry.getKeyId()).isEqualTo(42);
+    assertThat(rawComputeEntry.getPrimitive()).isEqualTo("mac");
+    assertThat(rawComputeEntry.getApi()).isEqualTo("verify");
+    assertThat(rawComputeEntry.getNumBytesAsInput()).isEqualTo(plaintext.length);
+    assertThat(rawComputeEntry.getKeysetInfo().getAnnotations()).isEqualTo(annotations);
+  }
+
+  @Test
+  public void builderNotSetMonitoringAnnotations_setsEmptyAnnotations() throws Exception {
+    FakeMonitoringClient fakeMonitoringClient = new FakeMonitoringClient();
+    MutableMonitoringRegistry.globalInstance().clear();
+    MutableMonitoringRegistry.globalInstance().registerMonitoringClient(fakeMonitoringClient);
+    KeysetHandle keysetHandleWithAnnotations =
+        KeysetHandle.newBuilder()
+            .addEntry(
+                KeysetHandle.generateEntryFromParameters(
+                        AesCmacParameters.builder()
+                            .setVariant(Variant.TINK)
+                            .setKeySizeBytes(32)
+                            .setTagSizeBytes(16)
+                            .build())
+                    .withRandomId()
+                    .makePrimary())
+            .build();
+    byte[] plaintext = "plaintext".getBytes(UTF_8);
+    Mac mac = keysetHandleWithAnnotations.getPrimitive(Mac.class);
+
+    // Work triggering various code paths.
+    byte[] tag = mac.computeMac(plaintext);
+    mac.verifyMac(tag, plaintext);
+
+    // Without annotations, nothing gets logged.
+    assertThat(fakeMonitoringClient.getLogEntries()).isEmpty();
+    assertThat(fakeMonitoringClient.getLogFailureEntries()).isEmpty();
+  }
+
+  @SuppressWarnings("deprecation") // This is a test for the deprecated function
   @Test
   public void deprecated_readNoSecretWithBytesInput_sameAs_parseKeysetWithoutSecret()
       throws Exception {

@@ -207,6 +207,7 @@ public final class KeysetHandle {
     }
 
     private final List<KeysetHandle.Builder.Entry> entries = new ArrayList<>();
+    private MonitoringAnnotations annotations = MonitoringAnnotations.EMPTY;
     private boolean buildCalled = false;
 
     private void clearPrimary() {
@@ -226,6 +227,21 @@ public final class KeysetHandle {
       }
       entry.builder = this;
       entries.add(entry);
+      return this;
+    }
+
+    /**
+     * Sets MonitoringAnnotations. If not called, then the default value of {@link
+     * MonitoringAnnotations.EMPTY} is used.
+     *
+     * <p>When called twice, the last submitted annotations are used to create the keyset. This
+     * method is not thread-safe, and in case of multithreaded access it cannot be guaranteed which
+     * annotations get set.
+     */
+    @CanIgnoreReturnValue
+    @Alpha
+    public KeysetHandle.Builder setMonitoringAnnotations(MonitoringAnnotations annotations) {
+      this.annotations = annotations;
       return this;
     }
 
@@ -399,7 +415,7 @@ public final class KeysetHandle {
         throw new GeneralSecurityException("No primary was set");
       }
       keysetBuilder.setPrimaryKeyId(primaryId);
-      return KeysetHandle.fromKeyset(keysetBuilder.build());
+      return KeysetHandle.fromKeysetAndAnnotations(keysetBuilder.build(), annotations);
     }
   }
 
