@@ -40,8 +40,8 @@ import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
 import com.google.crypto.tink.subtle.EciesAeadHkdfDemHelper;
 import com.google.crypto.tink.subtle.EciesAeadHkdfHybridEncrypt;
 import com.google.crypto.tink.subtle.EllipticCurves;
+import com.google.crypto.tink.subtle.Hex;
 import com.google.crypto.tink.subtle.Random;
-import com.google.crypto.tink.testing.TestUtil;
 import com.google.protobuf.ExtensionRegistryLite;
 import java.security.GeneralSecurityException;
 import java.security.interfaces.ECPublicKey;
@@ -99,7 +99,7 @@ public class EciesAeadHkdfPrivateKeyManagerTest {
             HashType.SHA256,
             EcPointFormat.UNCOMPRESSED,
             AesCtrHmacAeadKeyManager.aes128CtrHmacSha256Template(),
-            TestUtil.hexDecode("aabbccddeeff"));
+            Hex.decode("aabbccddeeff"));
     factory.validateKeyFormat(format);
   }
 
@@ -111,7 +111,7 @@ public class EciesAeadHkdfPrivateKeyManagerTest {
             HashType.SHA256,
             EcPointFormat.UNKNOWN_FORMAT,
             AesCtrHmacAeadKeyManager.aes128CtrHmacSha256Template(),
-            TestUtil.hexDecode("aabbccddeeff"));
+            Hex.decode("aabbccddeeff"));
     assertThrows(GeneralSecurityException.class, () -> factory.validateKeyFormat(format));
   }
 
@@ -123,7 +123,7 @@ public class EciesAeadHkdfPrivateKeyManagerTest {
             HashType.SHA256,
             EcPointFormat.UNCOMPRESSED,
             KeyTemplate.create("", new byte[0], KeyTemplate.OutputPrefixType.TINK),
-            TestUtil.hexDecode("aabbccddeeff"));
+            Hex.decode("aabbccddeeff"));
     assertThrows(GeneralSecurityException.class, () -> factory.validateKeyFormat(format));
   }
 
@@ -135,7 +135,7 @@ public class EciesAeadHkdfPrivateKeyManagerTest {
             HashType.SHA256,
             EcPointFormat.UNCOMPRESSED,
             AesCtrHmacAeadKeyManager.aes128CtrHmacSha256Template(),
-            TestUtil.hexDecode("aabbccddeeff"));
+            Hex.decode("aabbccddeeff"));
     assertThrows(GeneralSecurityException.class, () -> factory.validateKeyFormat(format));
   }
 
@@ -147,7 +147,7 @@ public class EciesAeadHkdfPrivateKeyManagerTest {
             HashType.UNKNOWN_HASH,
             EcPointFormat.UNCOMPRESSED,
             AesCtrHmacAeadKeyManager.aes128CtrHmacSha256Template(),
-            TestUtil.hexDecode("aabbccddeeff"));
+            Hex.decode("aabbccddeeff"));
     assertThrows(GeneralSecurityException.class, () -> factory.validateKeyFormat(format));
   }
 
@@ -159,7 +159,7 @@ public class EciesAeadHkdfPrivateKeyManagerTest {
             HashType.SHA256,
             EcPointFormat.UNCOMPRESSED,
             AesCtrHmacAeadKeyManager.aes128CtrHmacSha256Template(),
-            TestUtil.hexDecode("aabbccddeeff"));
+            Hex.decode("aabbccddeeff"));
     EciesAeadHkdfPrivateKey key = factory.createKey(format);
     assertThat(key.getPublicKey().getParams()).isEqualTo(format.getParams());
     assertThat(key.getPublicKey().getX()).isNotEmpty();
@@ -174,7 +174,7 @@ public class EciesAeadHkdfPrivateKeyManagerTest {
             HashType.SHA256,
             EcPointFormat.UNCOMPRESSED,
             AesCtrHmacAeadKeyManager.aes128CtrHmacSha256Template(),
-            TestUtil.hexDecode("aabbccddeeff"));
+            Hex.decode("aabbccddeeff"));
     return factory.createKey(format);
   }
 

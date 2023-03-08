@@ -286,7 +286,7 @@ public class AesGcmSivTest {
     HashSet<String> ciphertexts = new HashSet<String>();
     for (int i = 0; i < samples; i++) {
       byte[] ct = gcm.encrypt(message, aad);
-      String ctHex = TestUtil.hexEncode(ct);
+      String ctHex = Hex.encode(ct);
       assertFalse(ciphertexts.contains(ctHex));
       ciphertexts.add(ctHex);
     }

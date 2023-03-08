@@ -23,7 +23,6 @@ import static org.junit.Assert.assertThrows;
 
 import com.google.crypto.tink.config.TinkFips;
 import com.google.crypto.tink.config.internal.TinkFipsUtil;
-import com.google.crypto.tink.testing.TestUtil;
 import java.security.GeneralSecurityException;
 import java.security.Security;
 import java.util.Arrays;
@@ -86,13 +85,13 @@ public class AesCtrJceCipherTest {
   public void testNistVector() throws Exception {
     Assume.assumeTrue(!TinkFips.useOnlyFips() || TinkFipsUtil.fipsModuleAvailable());
 
-    byte[] rawCiphertext = TestUtil.hexDecode(NIST_CIPHERTEXT);
-    byte[] iv = TestUtil.hexDecode(NIST_IV);
+    byte[] rawCiphertext = Hex.decode(NIST_CIPHERTEXT);
+    byte[] iv = Hex.decode(NIST_IV);
     byte[] ciphertext = new byte[iv.length + rawCiphertext.length];
     System.arraycopy(iv, 0, ciphertext, 0, iv.length);
     System.arraycopy(rawCiphertext, 0, ciphertext, iv.length, rawCiphertext.length);
-    AesCtrJceCipher cipher = new AesCtrJceCipher(TestUtil.hexDecode(NIST_KEY), iv.length);
-    assertArrayEquals(TestUtil.hexDecode(NIST_PLAINTEXT), cipher.decrypt(ciphertext));
+    AesCtrJceCipher cipher = new AesCtrJceCipher(Hex.decode(NIST_KEY), iv.length);
+    assertArrayEquals(Hex.decode(NIST_PLAINTEXT), cipher.decrypt(ciphertext));
   }
 
   @Test

@@ -25,8 +25,8 @@ import com.google.crypto.tink.internal.KeyTypeManager;
 import com.google.crypto.tink.proto.AesSivKey;
 import com.google.crypto.tink.proto.AesSivKeyFormat;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
+import com.google.crypto.tink.subtle.Hex;
 import com.google.crypto.tink.subtle.Random;
-import com.google.crypto.tink.testing.TestUtil;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.ExtensionRegistryLite;
 import java.io.ByteArrayInputStream;
@@ -129,7 +129,7 @@ public class AesSivKeyManagerTest {
         new AesSivKeyManager().keyFactory();
     final int numKeys = 1000;
     for (int i = 0; i < numKeys; ++i) {
-      keys.add(TestUtil.hexEncode(factory.createKey(format).toByteArray()));
+      keys.add(Hex.encode(factory.createKey(format).toByteArray()));
     }
     assertThat(keys).hasSize(numKeys);
   }

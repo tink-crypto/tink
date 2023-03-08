@@ -25,9 +25,9 @@ import com.google.crypto.tink.proto.AesCtrKeyFormat;
 import com.google.crypto.tink.proto.AesCtrParams;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
 import com.google.crypto.tink.subtle.AesCtrJceCipher;
+import com.google.crypto.tink.subtle.Hex;
 import com.google.crypto.tink.subtle.IndCpaCipher;
 import com.google.crypto.tink.subtle.Random;
-import com.google.crypto.tink.testing.TestUtil;
 import java.security.GeneralSecurityException;
 import java.util.Set;
 import java.util.TreeSet;
@@ -124,8 +124,7 @@ public class AesCtrKeyManagerTest {
     Set<String> keys = new TreeSet<>();
     final int numKeys = 100;
     for (int i = 0; i < numKeys; ++i) {
-      keys.add(
-          TestUtil.hexEncode(factory.createKey(createFormat(16, 16)).getKeyValue().toByteArray()));
+      keys.add(Hex.encode(factory.createKey(createFormat(16, 16)).getKeyValue().toByteArray()));
     }
     assertThat(keys).hasSize(numKeys);
   }

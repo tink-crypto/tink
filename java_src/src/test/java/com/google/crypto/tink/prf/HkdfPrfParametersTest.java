@@ -20,7 +20,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.Assert.assertThrows;
 
-import com.google.crypto.tink.testing.TestUtil;
+import com.google.crypto.tink.subtle.Hex;
 import com.google.crypto.tink.util.Bytes;
 import java.security.GeneralSecurityException;
 import org.junit.Test;
@@ -33,7 +33,7 @@ import org.junit.runner.RunWith;
 @RunWith(Theories.class)
 public final class HkdfPrfParametersTest {
 
-  private static final Bytes SALT = Bytes.copyFrom(TestUtil.hexDecode("2023af"));
+  private static final Bytes SALT = Bytes.copyFrom(Hex.decode("2023af"));
 
   @DataPoints("keySizes")
   public static final int[] KEY_SIZES = new int[] {16, 32};

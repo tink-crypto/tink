@@ -21,7 +21,7 @@ import static org.junit.Assert.assertThrows;
 
 import com.google.crypto.tink.InsecureSecretKeyAccess;
 import com.google.crypto.tink.internal.KeyTester;
-import com.google.crypto.tink.testing.TestUtil;
+import com.google.crypto.tink.subtle.Hex;
 import com.google.crypto.tink.util.Bytes;
 import com.google.crypto.tink.util.SecretBigInteger;
 import java.math.BigInteger;
@@ -121,8 +121,7 @@ public final class EcdsaPrivateKeyTest {
     assertThat(privateKey.getPublicKey()).isEqualTo(publicKey);
     assertThat(privateKey.getPrivateValue().getBigInteger(InsecureSecretKeyAccess.get()))
         .isEqualTo(P256_PRIVATE_VALUE);
-    assertThat(privateKey.getOutputPrefix())
-        .isEqualTo(Bytes.copyFrom(TestUtil.hexDecode("0166AABBCC")));
+    assertThat(privateKey.getOutputPrefix()).isEqualTo(Bytes.copyFrom(Hex.decode("0166AABBCC")));
     assertThat(privateKey.getIdRequirementOrNull()).isEqualTo(0x66AABBCC);
   }
 

@@ -37,6 +37,7 @@ import com.google.crypto.tink.proto.KeyStatusType;
 import com.google.crypto.tink.proto.Keyset.Key;
 import com.google.crypto.tink.proto.OutputPrefixType;
 import com.google.crypto.tink.subtle.Bytes;
+import com.google.crypto.tink.subtle.Hex;
 import com.google.crypto.tink.testing.TestUtil;
 import java.security.GeneralSecurityException;
 import java.util.List;
@@ -109,7 +110,7 @@ public class PublicKeyVerifyWrapperTest {
 
     wrappedVerifier.verify(sig, data);
 
-    byte[] sigWithTinkPrefix = Bytes.concat(TestUtil.hexDecode("0166AABBCC"), sig);
+    byte[] sigWithTinkPrefix = Bytes.concat(Hex.decode("0166AABBCC"), sig);
     assertThrows(
         GeneralSecurityException.class, () -> wrappedVerifier.verify(sigWithTinkPrefix, data));
     assertThrows(
@@ -139,10 +140,10 @@ public class PublicKeyVerifyWrapperTest {
 
     byte[] data = "data".getBytes(UTF_8);
     byte[] sig = rawSigner.sign(data);
-    byte[] sigWithTinkPrefix = Bytes.concat(TestUtil.hexDecode("0166AABBCC"), sig);
+    byte[] sigWithTinkPrefix = Bytes.concat(Hex.decode("0166AABBCC"), sig);
     wrappedVerifier.verify(sigWithTinkPrefix, data);
 
-    byte[] sigWithCrunchyPrefix = Bytes.concat(TestUtil.hexDecode("0066AABBCC"), sig);
+    byte[] sigWithCrunchyPrefix = Bytes.concat(Hex.decode("0066AABBCC"), sig);
     assertThrows(
         GeneralSecurityException.class, () -> wrappedVerifier.verify(sigWithCrunchyPrefix, data));
     assertThrows(GeneralSecurityException.class, () -> wrappedVerifier.verify(sig, data));
@@ -175,10 +176,10 @@ public class PublicKeyVerifyWrapperTest {
 
     byte[] data = "data".getBytes(UTF_8);
     byte[] sig = rawSigner.sign(data);
-    byte[] sigWithCrunchyPrefix = Bytes.concat(TestUtil.hexDecode("0066AABBCC"), sig);
+    byte[] sigWithCrunchyPrefix = Bytes.concat(Hex.decode("0066AABBCC"), sig);
     wrappedVerifier.verify(sigWithCrunchyPrefix, data);
 
-    byte[] sigWithTinkPrefix = Bytes.concat(TestUtil.hexDecode("0166AABBCC"), sig);
+    byte[] sigWithTinkPrefix = Bytes.concat(Hex.decode("0166AABBCC"), sig);
     assertThrows(
         GeneralSecurityException.class, () -> wrappedVerifier.verify(sigWithTinkPrefix, data));
     assertThrows(GeneralSecurityException.class, () -> wrappedVerifier.verify(sig, data));
@@ -211,15 +212,14 @@ public class PublicKeyVerifyWrapperTest {
     PublicKeyVerify wrappedVerifier = new PublicKeyVerifyWrapper().wrap(primitives);
 
     byte[] data = "data".getBytes(UTF_8);
-    byte[] dataToSign = Bytes.concat(data, TestUtil.hexDecode("00"));
-    byte[] legacySig =
-        Bytes.concat(TestUtil.hexDecode("0066AABBCC"), rawSigner.sign(dataToSign));
+    byte[] dataToSign = Bytes.concat(data, Hex.decode("00"));
+    byte[] legacySig = Bytes.concat(Hex.decode("0066AABBCC"), rawSigner.sign(dataToSign));
     wrappedVerifier.verify(legacySig, data);
 
     assertThrows(
         GeneralSecurityException.class, () -> wrappedVerifier.verify(legacySig, dataToSign));
 
-    byte[] crunchySig = Bytes.concat(TestUtil.hexDecode("0066AABBCC"), rawSigner.sign(data));
+    byte[] crunchySig = Bytes.concat(Hex.decode("0066AABBCC"), rawSigner.sign(data));
     assertThrows(
         GeneralSecurityException.class, () -> wrappedVerifier.verify(crunchySig, data));
     assertThrows(

@@ -27,9 +27,9 @@ import com.google.crypto.tink.proto.AesGcmHkdfStreamingKeyFormat;
 import com.google.crypto.tink.proto.AesGcmHkdfStreamingParams;
 import com.google.crypto.tink.proto.HashType;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
+import com.google.crypto.tink.subtle.Hex;
 import com.google.crypto.tink.subtle.Random;
 import com.google.crypto.tink.testing.StreamingTestUtil;
-import com.google.crypto.tink.testing.TestUtil;
 import com.google.protobuf.ExtensionRegistryLite;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -234,7 +234,7 @@ public class AesGcmHkdfStreamingKeyManagerTest {
     // Calls newKey multiple times and make sure that they generate different keys.
     int numTests = 100;
     for (int i = 0; i < numTests; i++) {
-      keys.add(TestUtil.hexEncode(factory.createKey(keyFormat).getKeyValue().toByteArray()));
+      keys.add(Hex.encode(factory.createKey(keyFormat).getKeyValue().toByteArray()));
     }
     assertThat(keys).hasSize(numTests);
   }

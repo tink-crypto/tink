@@ -29,8 +29,8 @@ import com.google.crypto.tink.proto.AesCtrHmacStreamingParams;
 import com.google.crypto.tink.proto.HashType;
 import com.google.crypto.tink.proto.HmacParams;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
+import com.google.crypto.tink.subtle.Hex;
 import com.google.crypto.tink.testing.StreamingTestUtil;
-import com.google.crypto.tink.testing.TestUtil;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.ExtensionRegistryLite;
 import java.security.GeneralSecurityException;
@@ -233,7 +233,7 @@ public class AesCtrHmacStreamingKeyManagerTest {
     // Calls newKey multiple times and make sure that they generate different keys.
     int numTests = 100;
     for (int i = 0; i < numTests; i++) {
-      keys.add(TestUtil.hexEncode(factory.createKey(keyFormat).getKeyValue().toByteArray()));
+      keys.add(Hex.encode(factory.createKey(keyFormat).getKeyValue().toByteArray()));
     }
     assertThat(keys).hasSize(numTests);
   }

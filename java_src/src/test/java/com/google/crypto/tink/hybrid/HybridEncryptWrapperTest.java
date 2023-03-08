@@ -37,6 +37,7 @@ import com.google.crypto.tink.proto.KeyData;
 import com.google.crypto.tink.proto.KeyStatusType;
 import com.google.crypto.tink.proto.Keyset.Key;
 import com.google.crypto.tink.proto.OutputPrefixType;
+import com.google.crypto.tink.subtle.Hex;
 import com.google.crypto.tink.testing.TestUtil;
 import java.security.GeneralSecurityException;
 import java.util.Arrays;
@@ -154,7 +155,7 @@ public class HybridEncryptWrapperTest {
     byte[] prefix = Arrays.copyOf(ciphertext, 5);
     byte[] ciphertextWithoutPrefix = Arrays.copyOfRange(ciphertext, 5, ciphertext.length);
 
-    assertThat(prefix).isEqualTo(TestUtil.hexDecode("0166AABBCC"));
+    assertThat(prefix).isEqualTo(Hex.decode("0166AABBCC"));
 
     assertThat(rawDecrypter.decrypt(ciphertextWithoutPrefix, contextInfo)).isEqualTo(plaintext);
   }

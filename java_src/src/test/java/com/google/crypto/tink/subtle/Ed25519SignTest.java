@@ -22,7 +22,6 @@ import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.fail;
 
 import com.google.crypto.tink.config.TinkFips;
-import com.google.crypto.tink.testing.TestUtil;
 import com.google.crypto.tink.testing.WycheproofTestUtil;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
@@ -56,10 +55,10 @@ public final class Ed25519SignTest {
         fail(
             String.format(
                 "\n\nMessage: %s\nSignature: %s\nPrivateKey: %s\nPublicKey: %s\n",
-                TestUtil.hexEncode(msg),
-                TestUtil.hexEncode(sig),
-                TestUtil.hexEncode(keyPair.getPrivateKey()),
-                TestUtil.hexEncode(keyPair.getPublicKey())));
+                Hex.encode(msg),
+                Hex.encode(sig),
+                Hex.encode(keyPair.getPrivateKey()),
+                Hex.encode(keyPair.getPublicKey())));
       }
     }
   }
@@ -75,17 +74,17 @@ public final class Ed25519SignTest {
     TreeSet<String> allSignatures = new TreeSet<String>();
     for (int i = 0; i < 100; i++) {
       byte[] sig = signer.sign(msg);
-      allSignatures.add(TestUtil.hexEncode(sig));
+      allSignatures.add(Hex.encode(sig));
       try {
         verifier.verify(sig, msg);
       } catch (GeneralSecurityException ex) {
         fail(
             String.format(
                 "\n\nMessage: %s\nSignature: %s\nPrivateKey: %s\nPublicKey: %s\n",
-                TestUtil.hexEncode(msg),
-                TestUtil.hexEncode(sig),
-                TestUtil.hexEncode(keyPair.getPrivateKey()),
-                TestUtil.hexEncode(keyPair.getPublicKey())));
+                Hex.encode(msg),
+                Hex.encode(sig),
+                Hex.encode(keyPair.getPrivateKey()),
+                Hex.encode(keyPair.getPublicKey())));
       }
     }
     // Ed25519 is deterministic, expect a unique signature for the same message.
@@ -124,10 +123,10 @@ public final class Ed25519SignTest {
         fail(
             String.format(
                 "\n\nMessage: %s\nSignature: %s\nPrivateKey: %s\nPublicKey: %s\n",
-                TestUtil.hexEncode(msg),
-                TestUtil.hexEncode(sig),
-                TestUtil.hexEncode(keyPair.getPrivateKey()),
-                TestUtil.hexEncode(keyPair.getPublicKey())));
+                Hex.encode(msg),
+                Hex.encode(sig),
+                Hex.encode(keyPair.getPrivateKey()),
+                Hex.encode(keyPair.getPublicKey())));
       }
     }
   }

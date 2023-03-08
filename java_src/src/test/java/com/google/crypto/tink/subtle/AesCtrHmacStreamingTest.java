@@ -46,7 +46,7 @@ public class AesCtrHmacStreamingTest {
   @Rule public TemporaryFolder tmpFolder = new TemporaryFolder();
 
   private AesCtrHmacStreaming createAesCtrHmacStreaming() throws Exception {
-    byte[] ikm = TestUtil.hexDecode("000102030405060708090a0b0c0d0e0f");
+    byte[] ikm = Hex.decode("000102030405060708090a0b0c0d0e0f");
     String hkdfAlgo = "HmacSha256";
     int keySize = 16;
     String tagAlgo = "HmacSha256";
@@ -78,8 +78,7 @@ public class AesCtrHmacStreamingTest {
     if (TestUtil.shouldSkipTestWithAesKeySize(keySizeInBytes)) {
       return;
     }
-    byte[] ikm =
-        TestUtil.hexDecode("000102030405060708090a0b0c0d0e0f00112233445566778899aabbccddeeff");
+    byte[] ikm = Hex.decode("000102030405060708090a0b0c0d0e0f00112233445566778899aabbccddeeff");
     AesCtrHmacStreaming ags =
         new AesCtrHmacStreaming(ikm, "HmacSha256", keySizeInBytes, "HmacSha256",
             tagSizeInBytes, segmentSize, firstSegmentOffset);
@@ -183,8 +182,7 @@ public class AesCtrHmacStreamingTest {
     if (TestUtil.shouldSkipTestWithAesKeySize(keySizeInBytes)) {
       return;
     }
-    byte[] ikm =
-        TestUtil.hexDecode("000102030405060708090a0b0c0d0e0f00112233445566778899aabbccddeeff");
+    byte[] ikm = Hex.decode("000102030405060708090a0b0c0d0e0f00112233445566778899aabbccddeeff");
     AesCtrHmacStreaming ags =
         new AesCtrHmacStreaming(ikm, "HmacSha256", keySizeInBytes, "HmacSha256",
             tagSizeInBytes, segmentSize, firstSegmentOffset);
@@ -272,8 +270,7 @@ public class AesCtrHmacStreamingTest {
     int firstSegmentOffset = 0;
     int segmentSize = 512;
     int tagSizeInBytes = 12;
-    byte[] ikm =
-        TestUtil.hexDecode("000102030405060708090a0b0c0d0e0f00112233445566778899aabbccddeeff");
+    byte[] ikm = Hex.decode("000102030405060708090a0b0c0d0e0f00112233445566778899aabbccddeeff");
     AesCtrHmacStreaming ags = new AesCtrHmacStreaming(ikm, "HmacSha256", keySizeInBytes,
         "HmacSha256", tagSizeInBytes, segmentSize, firstSegmentOffset);
     StreamingTestUtil.testEncryptSingleBytes(ags, plaintextSize);
@@ -308,14 +305,13 @@ public class AesCtrHmacStreamingTest {
     int firstSegmentOffset = 0;
     int keySizeInBytes = 16;
     int tagSizeInBytes = 12;
-    byte[] ikm =
-        TestUtil.hexDecode("000102030405060708090a0b0c0d0e0f00112233445566778899aabbccddeeff");
+    byte[] ikm = Hex.decode("000102030405060708090a0b0c0d0e0f00112233445566778899aabbccddeeff");
     AesCtrHmacStreaming ags = new AesCtrHmacStreaming(ikm, "HmacSha256", keySizeInBytes,
         "HmacSha256", tagSizeInBytes, segmentSize, firstSegmentOffset);
 
     int plaintextSize = 1 << 15;
     int maxChunkSize = 100;
-    byte[] aad = TestUtil.hexDecode("aabbccddeeff");
+    byte[] aad = Hex.decode("aabbccddeeff");
     byte[] plaintext = StreamingTestUtil.generatePlaintext(plaintextSize);
     int ciphertextLength = (int) ags.expectedCiphertextSize(plaintextSize);
     ByteBuffer ciphertext = ByteBuffer.allocate(ciphertextLength);
@@ -349,7 +345,7 @@ public class AesCtrHmacStreamingTest {
   public void testModifiedCiphertext() throws Exception {
     Assume.assumeFalse(TinkFips.useOnlyFips());
 
-    byte[] ikm = TestUtil.hexDecode("000102030405060708090a0b0c0d0e0f");
+    byte[] ikm = Hex.decode("000102030405060708090a0b0c0d0e0f");
     int keySize = 16;
     int tagSize = 12;
     int segmentSize = 256;
@@ -363,7 +359,7 @@ public class AesCtrHmacStreamingTest {
   public void testSkipWithStream() throws Exception {
     Assume.assumeFalse(TinkFips.useOnlyFips());
 
-    byte[] ikm = TestUtil.hexDecode("000102030405060708090a0b0c0d0e0f");
+    byte[] ikm = Hex.decode("000102030405060708090a0b0c0d0e0f");
     int keySize = 16;
     int tagSize = 12;
     int segmentSize = 256;
@@ -386,7 +382,7 @@ public class AesCtrHmacStreamingTest {
   public void testModifiedCiphertextWithSeekableByteChannel() throws Exception {
     Assume.assumeFalse(TinkFips.useOnlyFips());
 
-    byte[] ikm = TestUtil.hexDecode("000102030405060708090a0b0c0d0e0f");
+    byte[] ikm = Hex.decode("000102030405060708090a0b0c0d0e0f");
     int keySize = 16;
     int tagSize = 12;
     int segmentSize = 256;
@@ -406,8 +402,8 @@ public class AesCtrHmacStreamingTest {
     Assume.assumeFalse(TinkFips.useOnlyFips());
 
     HashSet<String> ciphertextBlocks = new HashSet<String>();
-    byte[] ikm = TestUtil.hexDecode("000102030405060708090a0b0c0d0e0f");
-    byte[] aad = TestUtil.hexDecode("aabbccddeeff");
+    byte[] ikm = Hex.decode("000102030405060708090a0b0c0d0e0f");
+    byte[] aad = Hex.decode("aabbccddeeff");
     int keySize = 16;
     int tagSize = 12;
     int segmentSize = 256;
@@ -422,7 +418,7 @@ public class AesCtrHmacStreamingTest {
       byte[] ciphertext =
           StreamingTestUtil.encryptWithChannel(ags, plaintext, aad, ags.getFirstSegmentOffset());
       for (int pos = ags.getHeaderLength(); pos + blocksize <= ciphertext.length; pos++) {
-        String block = TestUtil.hexEncode(Arrays.copyOfRange(ciphertext, pos, pos + blocksize));
+        String block = Hex.encode(Arrays.copyOfRange(ciphertext, pos, pos + blocksize));
         if (!ciphertextBlocks.add(block)) {
           fail("Ciphertext contains a repeating block " + block + " at position " + pos);
         }

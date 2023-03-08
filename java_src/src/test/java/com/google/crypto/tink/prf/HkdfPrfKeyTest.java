@@ -23,7 +23,7 @@ import com.google.crypto.tink.InsecureSecretKeyAccess;
 import com.google.crypto.tink.internal.KeyTester;
 import com.google.crypto.tink.mac.HmacKey;
 import com.google.crypto.tink.mac.HmacParameters;
-import com.google.crypto.tink.testing.TestUtil;
+import com.google.crypto.tink.subtle.Hex;
 import com.google.crypto.tink.util.Bytes;
 import com.google.crypto.tink.util.SecretBytes;
 import java.security.GeneralSecurityException;
@@ -38,7 +38,7 @@ import org.junit.runner.RunWith;
 @RunWith(Theories.class)
 public final class HkdfPrfKeyTest {
 
-  private static final Bytes SALT = Bytes.copyFrom(TestUtil.hexDecode("2023af"));
+  private static final Bytes SALT = Bytes.copyFrom(Hex.decode("2023af"));
   private static HkdfPrfParameters parameters16;
 
   @BeforeClass

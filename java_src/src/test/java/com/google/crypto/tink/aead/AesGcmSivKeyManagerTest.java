@@ -29,8 +29,8 @@ import com.google.crypto.tink.internal.KeyTypeManager;
 import com.google.crypto.tink.proto.AesGcmSivKey;
 import com.google.crypto.tink.proto.AesGcmSivKeyFormat;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
+import com.google.crypto.tink.subtle.Hex;
 import com.google.crypto.tink.subtle.Random;
-import com.google.crypto.tink.testing.TestUtil;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.ExtensionRegistryLite;
 import java.io.ByteArrayInputStream;
@@ -125,7 +125,7 @@ public class AesGcmSivKeyManagerTest {
     // Calls newKey multiple times and make sure that they generate different keys.
     int numTests = 50;
     for (int i = 0; i < numTests; i++) {
-      keys.add(TestUtil.hexEncode(factory.createKey(format).getKeyValue().toByteArray()));
+      keys.add(Hex.encode(factory.createKey(format).getKeyValue().toByteArray()));
     }
     assertThat(keys).hasSize(numTests);
   }

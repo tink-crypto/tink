@@ -28,6 +28,7 @@ import com.google.crypto.tink.proto.RsaSsaPssKeyFormat;
 import com.google.crypto.tink.proto.RsaSsaPssParams;
 import com.google.crypto.tink.proto.RsaSsaPssPrivateKey;
 import com.google.crypto.tink.proto.RsaSsaPssPublicKey;
+import com.google.crypto.tink.subtle.Hex;
 import com.google.crypto.tink.subtle.Random;
 import com.google.crypto.tink.testing.TestUtil;
 import com.google.protobuf.ByteString;
@@ -61,15 +62,11 @@ public class RsaSsaPssVerifyKeyManagerTest {
         HashType mgf1Hash,
         int saltLength)
         throws Exception {
-      this.msg = TestUtil.hexDecode(msg);
-      this.sig = TestUtil.hexDecode(sig);
+      this.msg = Hex.decode(msg);
+      this.sig = Hex.decode(sig);
       this.publicKeyProto =
           TestUtil.createRsaSsaPssPubKey(
-              TestUtil.hexDecode(modulus),
-              TestUtil.hexDecode(exponent),
-              sigHash,
-              mgf1Hash,
-              saltLength);
+              Hex.decode(modulus), Hex.decode(exponent), sigHash, mgf1Hash, saltLength);
     }
   }
 
@@ -162,8 +159,8 @@ public class RsaSsaPssVerifyKeyManagerTest {
 
     RsaSsaPssPublicKey invalidKey =
         RsaSsaPssPublicKey.newBuilder(publicKey)
-            .setN(ByteString.copyFrom(TestUtil.hexDecode("23")))
-            .setE(ByteString.copyFrom(TestUtil.hexDecode("03")))
+            .setN(ByteString.copyFrom(Hex.decode("23")))
+            .setE(ByteString.copyFrom(Hex.decode("03")))
             .build();
     assertThrows(GeneralSecurityException.class, () -> verifyManager.validateKey(invalidKey));
   }

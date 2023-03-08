@@ -139,7 +139,7 @@ public class RsaSsaPkcs1SignJceTest {
     RsaSsaPkcs1SignJce signer = new RsaSsaPkcs1SignJce(priv, HashType.SHA512);
     for (int i = 0; i < 100; i++) {
       byte[] sig = signer.sign(msg);
-      allSignatures.add(TestUtil.hexEncode(sig));
+      allSignatures.add(Hex.encode(sig));
       // Verify with JCE's Signature.
       Signature verifier = Signature.getInstance("SHA512WithRSA");
       verifier.initVerify(pub);
@@ -148,10 +148,10 @@ public class RsaSsaPkcs1SignJceTest {
         fail(
             String.format(
                 "\n\nMessage: %s\nSignature: %s\nPrivateKey: %s\nPublicKey: %s\n",
-                TestUtil.hexEncode(msg),
-                TestUtil.hexEncode(sig),
-                TestUtil.hexEncode(priv.getEncoded()),
-                TestUtil.hexEncode(pub.getEncoded())));
+                Hex.encode(msg),
+                Hex.encode(sig),
+                Hex.encode(priv.getEncoded()),
+                Hex.encode(pub.getEncoded())));
       }
     }
     // RSA SSA PKCS1 is deterministic, expect a unique signature for the same message.

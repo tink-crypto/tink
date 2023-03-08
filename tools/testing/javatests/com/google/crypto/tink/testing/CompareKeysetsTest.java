@@ -24,6 +24,7 @@ import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
 import com.google.crypto.tink.proto.KeyStatusType;
 import com.google.crypto.tink.proto.Keyset;
 import com.google.crypto.tink.proto.OutputPrefixType;
+import com.google.crypto.tink.subtle.Hex;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -36,13 +37,13 @@ public final class CompareKeysetsTest {
     AesGcmKeyManager.register(true);
   }
 
-  private static final byte[] KEY_0 = TestUtil.hexDecode("000102030405060708090a0b0c0d0e0f");
-  private static final byte[] KEY_1 = TestUtil.hexDecode("100102030405060708090a0b0c0d0e0f");
-  private static final byte[] KEY_2 = TestUtil.hexDecode("200102030405060708090a0b0c0d0e0f");
-  private static final byte[] KEY_3 = TestUtil.hexDecode("300102030405060708090a0b0c0d0e0f");
-  private static final byte[] KEY_4 = TestUtil.hexDecode("400102030405060708090a0b0c0d0e0f");
-  private static final byte[] KEY_5 = TestUtil.hexDecode("500102030405060708090a0b0c0d0e0f");
-  private static final byte[] KEY_6 = TestUtil.hexDecode("600102030405060708090a0b0c0d0e0f");
+  private static final byte[] KEY_0 = Hex.decode("000102030405060708090a0b0c0d0e0f");
+  private static final byte[] KEY_1 = Hex.decode("100102030405060708090a0b0c0d0e0f");
+  private static final byte[] KEY_2 = Hex.decode("200102030405060708090a0b0c0d0e0f");
+  private static final byte[] KEY_3 = Hex.decode("300102030405060708090a0b0c0d0e0f");
+  private static final byte[] KEY_4 = Hex.decode("400102030405060708090a0b0c0d0e0f");
+  private static final byte[] KEY_5 = Hex.decode("500102030405060708090a0b0c0d0e0f");
+  private static final byte[] KEY_6 = Hex.decode("600102030405060708090a0b0c0d0e0f");
 
   private static Keyset.Key aesGcmKey(
       byte[] keyValue, int keyId, KeyStatusType status, OutputPrefixType prefixType)

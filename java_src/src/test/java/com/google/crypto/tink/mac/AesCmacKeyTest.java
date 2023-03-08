@@ -21,7 +21,7 @@ import static org.junit.Assert.assertThrows;
 
 import com.google.crypto.tink.InsecureSecretKeyAccess;
 import com.google.crypto.tink.internal.KeyTester;
-import com.google.crypto.tink.testing.TestUtil;
+import com.google.crypto.tink.subtle.Hex;
 import com.google.crypto.tink.util.Bytes;
 import com.google.crypto.tink.util.SecretBytes;
 import java.security.GeneralSecurityException;
@@ -232,7 +232,7 @@ public final class AesCmacKeyTest {
                 .setIdRequirement(0x66AABBCC)
                 .build()
                 .getOutputPrefix())
-        .isEqualTo(Bytes.copyFrom(TestUtil.hexDecode("0166AABBCC")));
+        .isEqualTo(Bytes.copyFrom(Hex.decode("0166AABBCC")));
     assertThat(
             AesCmacKey.builder()
                 .setParameters(legacyParameters16)
@@ -240,7 +240,7 @@ public final class AesCmacKeyTest {
                 .setIdRequirement(0x66AABBCC)
                 .build()
                 .getOutputPrefix())
-        .isEqualTo(Bytes.copyFrom(TestUtil.hexDecode("0066AABBCC")));
+        .isEqualTo(Bytes.copyFrom(Hex.decode("0066AABBCC")));
     assertThat(
             AesCmacKey.builder()
                 .setParameters(crunchyParameters16)
@@ -248,7 +248,7 @@ public final class AesCmacKeyTest {
                 .setIdRequirement(0x66AABBCC)
                 .build()
                 .getOutputPrefix())
-        .isEqualTo(Bytes.copyFrom(TestUtil.hexDecode("0066AABBCC")));
+        .isEqualTo(Bytes.copyFrom(Hex.decode("0066AABBCC")));
   }
 
   @Test

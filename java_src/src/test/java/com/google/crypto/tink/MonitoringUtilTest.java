@@ -24,6 +24,7 @@ import com.google.crypto.tink.monitoring.MonitoringKeysetInfo;
 import com.google.crypto.tink.proto.KeyStatusType;
 import com.google.crypto.tink.proto.Keyset;
 import com.google.crypto.tink.proto.OutputPrefixType;
+import com.google.crypto.tink.subtle.Hex;
 import com.google.crypto.tink.testing.TestUtil;
 import java.util.List;
 import org.junit.Test;
@@ -33,8 +34,8 @@ import org.junit.runners.JUnit4;
 @RunWith(JUnit4.class)
 public final class MonitoringUtilTest {
 
-  private static final byte[] KEY = TestUtil.hexDecode("000102030405060708090a0b0c0d0e0f");
-  private static final byte[] KEY2 = TestUtil.hexDecode("100102030405060708090a0b0c0d0e0f");
+  private static final byte[] KEY = Hex.decode("000102030405060708090a0b0c0d0e0f");
+  private static final byte[] KEY2 = Hex.decode("100102030405060708090a0b0c0d0e0f");
 
   @Test
   public void monitoringKeysetInfoFromPrimitiveSet() throws Exception {

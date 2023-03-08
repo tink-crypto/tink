@@ -21,7 +21,7 @@ import static org.junit.Assert.assertThrows;
 
 import com.google.crypto.tink.InsecureSecretKeyAccess;
 import com.google.crypto.tink.internal.KeyTester;
-import com.google.crypto.tink.testing.TestUtil;
+import com.google.crypto.tink.subtle.Hex;
 import com.google.crypto.tink.util.Bytes;
 import com.google.crypto.tink.util.SecretBytes;
 import java.security.GeneralSecurityException;
@@ -69,7 +69,7 @@ public final class AesEaxKeyTest {
             .build();
     assertThat(key.getParameters()).isEqualTo(parameters);
     assertThat(key.getKeyBytes()).isEqualTo(keyBytes);
-    assertThat(key.getOutputPrefix()).isEqualTo(Bytes.copyFrom(TestUtil.hexDecode("0166AABBCC")));
+    assertThat(key.getOutputPrefix()).isEqualTo(Bytes.copyFrom(Hex.decode("0166AABBCC")));
     assertThat(key.getIdRequirementOrNull()).isEqualTo(0x66AABBCC);
   }
 
@@ -92,7 +92,7 @@ public final class AesEaxKeyTest {
             .build();
     assertThat(key.getParameters()).isEqualTo(parameters);
     assertThat(key.getKeyBytes()).isEqualTo(keyBytes);
-    assertThat(key.getOutputPrefix()).isEqualTo(Bytes.copyFrom(TestUtil.hexDecode("0066AABBCC")));
+    assertThat(key.getOutputPrefix()).isEqualTo(Bytes.copyFrom(Hex.decode("0066AABBCC")));
     assertThat(key.getIdRequirementOrNull()).isEqualTo(0x66AABBCC);
   }
 

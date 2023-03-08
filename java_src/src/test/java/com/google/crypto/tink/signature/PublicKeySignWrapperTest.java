@@ -40,6 +40,7 @@ import com.google.crypto.tink.proto.Keyset;
 import com.google.crypto.tink.proto.Keyset.Key;
 import com.google.crypto.tink.proto.OutputPrefixType;
 import com.google.crypto.tink.subtle.Bytes;
+import com.google.crypto.tink.subtle.Hex;
 import com.google.crypto.tink.testing.TestUtil;
 import java.security.GeneralSecurityException;
 import java.util.Arrays;
@@ -135,7 +136,7 @@ public class PublicKeySignWrapperTest {
     byte[] prefix = Arrays.copyOf(sig, 5);
     byte[] sigWithoutPrefix = Arrays.copyOfRange(sig, 5, sig.length);
 
-    assertThat(prefix).isEqualTo(TestUtil.hexDecode("0166AABBCC"));
+    assertThat(prefix).isEqualTo(Hex.decode("0166AABBCC"));
 
     rawVerifier.verify(sigWithoutPrefix, data);
   }
@@ -163,7 +164,7 @@ public class PublicKeySignWrapperTest {
     byte[] prefix = Arrays.copyOf(sig, 5);
     byte[] sigWithoutPrefix = Arrays.copyOfRange(sig, 5, sig.length);
 
-    assertThat(prefix).isEqualTo(TestUtil.hexDecode("0066AABBCC"));
+    assertThat(prefix).isEqualTo(Hex.decode("0066AABBCC"));
 
     rawVerifier.verify(sigWithoutPrefix, data);
   }
@@ -191,9 +192,9 @@ public class PublicKeySignWrapperTest {
     byte[] prefix = Arrays.copyOf(sig, 5);
     byte[] sigWithoutPrefix = Arrays.copyOfRange(sig, 5, sig.length);
 
-    assertThat(prefix).isEqualTo(TestUtil.hexDecode("0066AABBCC"));
+    assertThat(prefix).isEqualTo(Hex.decode("0066AABBCC"));
 
-    byte[] signedData = Bytes.concat(data, TestUtil.hexDecode("00"));
+    byte[] signedData = Bytes.concat(data, Hex.decode("00"));
     rawVerifier.verify(sigWithoutPrefix, signedData);
   }
 

@@ -20,7 +20,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertThrows;
 
 import com.google.crypto.tink.internal.KeyTester;
-import com.google.crypto.tink.testing.TestUtil;
+import com.google.crypto.tink.subtle.Hex;
 import com.google.crypto.tink.util.Bytes;
 import java.math.BigInteger;
 import java.security.GeneralSecurityException;
@@ -104,7 +104,7 @@ public final class EcdsaPublicKeyTest {
             .build();
     assertThat(key.getParameters()).isEqualTo(parameters);
     assertThat(key.getPublicPoint()).isEqualTo(A_P256_POINT);
-    assertThat(key.getOutputPrefix()).isEqualTo(Bytes.copyFrom(TestUtil.hexDecode("0166AABBCC")));
+    assertThat(key.getOutputPrefix()).isEqualTo(Bytes.copyFrom(Hex.decode("0166AABBCC")));
     assertThat(key.getIdRequirementOrNull()).isEqualTo(0x66AABBCC);
   }
 
@@ -126,7 +126,7 @@ public final class EcdsaPublicKeyTest {
             .build();
     assertThat(key.getParameters()).isEqualTo(parameters);
     assertThat(key.getPublicPoint()).isEqualTo(A_P256_POINT);
-    assertThat(key.getOutputPrefix()).isEqualTo(Bytes.copyFrom(TestUtil.hexDecode("0066AABBCC")));
+    assertThat(key.getOutputPrefix()).isEqualTo(Bytes.copyFrom(Hex.decode("0066AABBCC")));
     assertThat(key.getIdRequirementOrNull()).isEqualTo(0x66AABBCC);
   }
 
@@ -148,7 +148,7 @@ public final class EcdsaPublicKeyTest {
             .build();
     assertThat(key.getParameters()).isEqualTo(parameters);
     assertThat(key.getPublicPoint()).isEqualTo(A_P256_POINT);
-    assertThat(key.getOutputPrefix()).isEqualTo(Bytes.copyFrom(TestUtil.hexDecode("0066AABBCC")));
+    assertThat(key.getOutputPrefix()).isEqualTo(Bytes.copyFrom(Hex.decode("0066AABBCC")));
     assertThat(key.getIdRequirementOrNull()).isEqualTo(0x66AABBCC);
   }
 

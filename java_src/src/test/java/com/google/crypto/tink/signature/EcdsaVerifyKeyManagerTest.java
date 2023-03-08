@@ -160,9 +160,9 @@ public class EcdsaVerifyKeyManagerTest {
       } catch (Exception ignored) {
         // Ignored
       }
-      this.pubX = TestUtil.hexDecode(pubX.toLowerCase());
-      this.pubY = TestUtil.hexDecode(pubY.toLowerCase());
-      this.sig = TestUtil.hexDecode((r + s).toLowerCase());
+      this.pubX = Hex.decode(pubX.toLowerCase());
+      this.pubY = Hex.decode(pubY.toLowerCase());
+      this.sig = Hex.decode((r + s).toLowerCase());
       this.hashType = hashType;
       this.curveType = curveType;
     }

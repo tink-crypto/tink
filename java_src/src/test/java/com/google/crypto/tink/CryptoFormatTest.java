@@ -22,6 +22,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import com.google.crypto.tink.proto.KeyStatusType;
 import com.google.crypto.tink.proto.Keyset.Key;
 import com.google.crypto.tink.proto.OutputPrefixType;
+import com.google.crypto.tink.subtle.Hex;
 import com.google.crypto.tink.testing.TestUtil;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -47,19 +48,19 @@ public class CryptoFormatTest {
   @Test
   public void testTinkPrefix() throws Exception {
     assertThat(CryptoFormat.getOutputPrefix(getKey(OutputPrefixType.TINK, 0x66AABBCC)))
-        .isEqualTo(TestUtil.hexDecode("0166AABBCC"));
+        .isEqualTo(Hex.decode("0166AABBCC"));
   }
 
   @Test
   public void testLegacyPrefix() throws Exception {
     assertThat(CryptoFormat.getOutputPrefix(getKey(OutputPrefixType.LEGACY, 0x66AABBCC)))
-        .isEqualTo(TestUtil.hexDecode("0066AABBCC"));
+        .isEqualTo(Hex.decode("0066AABBCC"));
   }
 
   @Test
   public void testCrunchyPrefix() throws Exception {
     assertThat(CryptoFormat.getOutputPrefix(getKey(OutputPrefixType.CRUNCHY, 0x66AABBCC)))
-        .isEqualTo(TestUtil.hexDecode("0066AABBCC"));
+        .isEqualTo(Hex.decode("0066AABBCC"));
   }
 
   @Test
@@ -93,50 +94,50 @@ public class CryptoFormatTest {
   public void testKeyIdWithMsbSet() throws Exception {
     int keyId = 0xFF7F1058;
     assertThat(CryptoFormat.getOutputPrefix(getKey(OutputPrefixType.TINK, keyId)))
-        .isEqualTo(TestUtil.hexDecode("01FF7F1058"));
+        .isEqualTo(Hex.decode("01FF7F1058"));
   }
 
   @Test
   public void testKeyIdIsZero() throws Exception {
     assertThat(CryptoFormat.getOutputPrefix(getKey(OutputPrefixType.RAW, 0))).isEmpty();
     assertThat(CryptoFormat.getOutputPrefix(getKey(OutputPrefixType.TINK, 0)))
-        .isEqualTo(TestUtil.hexDecode("0100000000"));
+        .isEqualTo(Hex.decode("0100000000"));
     assertThat(CryptoFormat.getOutputPrefix(getKey(OutputPrefixType.LEGACY, 0)))
-        .isEqualTo(TestUtil.hexDecode("0000000000"));
+        .isEqualTo(Hex.decode("0000000000"));
     assertThat(CryptoFormat.getOutputPrefix(getKey(OutputPrefixType.CRUNCHY, 0)))
-        .isEqualTo(TestUtil.hexDecode("0000000000"));
+        .isEqualTo(Hex.decode("0000000000"));
   }
 
   @Test
   public void testKeyIdIsMinusOne() throws Exception {
     assertThat(CryptoFormat.getOutputPrefix(getKey(OutputPrefixType.RAW, -1))).isEmpty();
     assertThat(CryptoFormat.getOutputPrefix(getKey(OutputPrefixType.TINK, -1)))
-        .isEqualTo(TestUtil.hexDecode("01FFFFFFFF"));
+        .isEqualTo(Hex.decode("01FFFFFFFF"));
     assertThat(CryptoFormat.getOutputPrefix(getKey(OutputPrefixType.LEGACY, -1)))
-        .isEqualTo(TestUtil.hexDecode("00FFFFFFFF"));
+        .isEqualTo(Hex.decode("00FFFFFFFF"));
     assertThat(CryptoFormat.getOutputPrefix(getKey(OutputPrefixType.CRUNCHY, -1)))
-        .isEqualTo(TestUtil.hexDecode("00FFFFFFFF"));
+        .isEqualTo(Hex.decode("00FFFFFFFF"));
   }
 
   @Test
   public void testKeyIdIsMaxInt() throws Exception {
     assertThat(CryptoFormat.getOutputPrefix(getKey(OutputPrefixType.RAW, 2147483647))).isEmpty();
     assertThat(CryptoFormat.getOutputPrefix(getKey(OutputPrefixType.TINK, 2147483647)))
-        .isEqualTo(TestUtil.hexDecode("017FFFFFFF"));
+        .isEqualTo(Hex.decode("017FFFFFFF"));
     assertThat(CryptoFormat.getOutputPrefix(getKey(OutputPrefixType.LEGACY, 2147483647)))
-        .isEqualTo(TestUtil.hexDecode("007FFFFFFF"));
+        .isEqualTo(Hex.decode("007FFFFFFF"));
     assertThat(CryptoFormat.getOutputPrefix(getKey(OutputPrefixType.CRUNCHY, 2147483647)))
-        .isEqualTo(TestUtil.hexDecode("007FFFFFFF"));
+        .isEqualTo(Hex.decode("007FFFFFFF"));
   }
 
   @Test
   public void testKeyIdIsMinInt() throws Exception {
     assertThat(CryptoFormat.getOutputPrefix(getKey(OutputPrefixType.RAW, -2147483648))).isEmpty();
     assertThat(CryptoFormat.getOutputPrefix(getKey(OutputPrefixType.TINK, -2147483648)))
-        .isEqualTo(TestUtil.hexDecode("0180000000"));
+        .isEqualTo(Hex.decode("0180000000"));
     assertThat(CryptoFormat.getOutputPrefix(getKey(OutputPrefixType.LEGACY, -2147483648)))
-        .isEqualTo(TestUtil.hexDecode("0080000000"));
+        .isEqualTo(Hex.decode("0080000000"));
     assertThat(CryptoFormat.getOutputPrefix(getKey(OutputPrefixType.CRUNCHY, -2147483648)))
-        .isEqualTo(TestUtil.hexDecode("0080000000"));
+        .isEqualTo(Hex.decode("0080000000"));
   }
 }

@@ -182,6 +182,7 @@ java_test(
     deps = [
         "//proto:tink_java_proto",
         "//src/main/java/com/google/crypto/tink:crypto_format",
+        "//src/main/java/com/google/crypto/tink/subtle:hex",
         "//src/main/java/com/google/crypto/tink/testing:test_util",
         "@maven//:com_google_truth_truth",
         "@maven//:junit_junit",
@@ -481,6 +482,7 @@ java_test(
         "//src/main/java/com/google/crypto/tink/internal:monitoring_util",
         "//src/main/java/com/google/crypto/tink/monitoring:monitoring_annotations",
         "//src/main/java/com/google/crypto/tink/monitoring:monitoring_keyset_info",
+        "//src/main/java/com/google/crypto/tink/subtle:hex",
         "//src/main/java/com/google/crypto/tink/testing:test_util",
         "@maven//:com_google_truth_truth",
         "@maven//:junit_junit",

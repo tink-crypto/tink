@@ -22,8 +22,8 @@ import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.fail;
 
 import com.google.common.truth.Truth;
+import com.google.crypto.tink.subtle.Hex;
 import com.google.crypto.tink.subtle.Random;
-import com.google.crypto.tink.testing.TestUtil;
 import java.nio.charset.Charset;
 import java.security.GeneralSecurityException;
 import org.junit.Test;
@@ -86,12 +86,10 @@ public class Poly1305Test {
       try {
         Poly1305.verifyMac(key, in, mac);
       } catch (Throwable e) {
-        String error = String.format(
-            "\n\nIteration: %d\nInput: %s\nKey: %s\nMac: %s\n",
-            i,
-            TestUtil.hexEncode(in),
-            TestUtil.hexEncode(key),
-            TestUtil.hexEncode(mac));
+        String error =
+            String.format(
+                "\n\nIteration: %d\nInput: %s\nKey: %s\nMac: %s\n",
+                i, Hex.encode(in), Hex.encode(key), Hex.encode(mac));
         fail(error + e.getMessage());
       }
     }
@@ -114,12 +112,11 @@ public class Poly1305Test {
    */
   @Test
   public void testPoly1305() throws GeneralSecurityException {
-    byte[] key = TestUtil.hexDecode(""
-        + "85d6be7857556d337f4452fe42d506a8"
-        + "0103808afb0db2fd4abff6af4149f51b");
+    byte[] key =
+        Hex.decode("" + "85d6be7857556d337f4452fe42d506a8" + "0103808afb0db2fd4abff6af4149f51b");
     byte[] in = ("Cryptographic Forum Research Group").getBytes(UTF_8);
-    Truth.assertThat(Poly1305.computeMac(key, in)).isEqualTo(TestUtil.hexDecode(""
-        + "a8061dc1305136c6c22b8baf0c0127a9"));
+    Truth.assertThat(Poly1305.computeMac(key, in))
+        .isEqualTo(Hex.decode("" + "a8061dc1305136c6c22b8baf0c0127a9"));
   }
 
   /**
@@ -128,16 +125,17 @@ public class Poly1305Test {
    */
   @Test
   public void testPoly1305TestVector1() throws GeneralSecurityException {
-    byte[] key = TestUtil.hexDecode(""
-        + "00000000000000000000000000000000"
-        + "00000000000000000000000000000000");
-    byte[] in = TestUtil.hexDecode(""
-        + "00000000000000000000000000000000"
-        + "00000000000000000000000000000000"
-        + "00000000000000000000000000000000"
-        + "00000000000000000000000000000000");
-    Truth.assertThat(Poly1305.computeMac(key, in)).isEqualTo(TestUtil.hexDecode(""
-        + "00000000000000000000000000000000"));
+    byte[] key =
+        Hex.decode("" + "00000000000000000000000000000000" + "00000000000000000000000000000000");
+    byte[] in =
+        Hex.decode(
+            ""
+                + "00000000000000000000000000000000"
+                + "00000000000000000000000000000000"
+                + "00000000000000000000000000000000"
+                + "00000000000000000000000000000000");
+    Truth.assertThat(Poly1305.computeMac(key, in))
+        .isEqualTo(Hex.decode("" + "00000000000000000000000000000000"));
   }
 
   /**
@@ -146,9 +144,8 @@ public class Poly1305Test {
    */
   @Test
   public void testPoly1305TestVector2() throws GeneralSecurityException {
-    byte[] key = TestUtil.hexDecode(""
-        + "00000000000000000000000000000000"
-        + "36e5f6b5c5e06070f0efca96227a863e");
+    byte[] key =
+        Hex.decode("" + "00000000000000000000000000000000" + "36e5f6b5c5e06070f0efca96227a863e");
     byte[] in = (
         "Any submission to the IETF intended by the Contributor for publication as all or "
             + "part of an IETF Internet-Draft or RFC and any statement made within the context "
@@ -156,8 +153,8 @@ public class Poly1305Test {
             + "include oral statements in IETF sessions, as well as written and electronic "
             + "communications made at any time or place, which are addressed to")
         .getBytes(UTF_8);
-    Truth.assertThat(Poly1305.computeMac(key, in)).isEqualTo(TestUtil.hexDecode(""
-        + "36e5f6b5c5e06070f0efca96227a863e"));
+    Truth.assertThat(Poly1305.computeMac(key, in))
+        .isEqualTo(Hex.decode("" + "36e5f6b5c5e06070f0efca96227a863e"));
   }
 
   /**
@@ -166,9 +163,8 @@ public class Poly1305Test {
    */
   @Test
   public void testPoly1305TestVector3() throws GeneralSecurityException {
-    byte[] key = TestUtil.hexDecode(""
-        + "36e5f6b5c5e06070f0efca96227a863e"
-        + "00000000000000000000000000000000");
+    byte[] key =
+        Hex.decode("" + "36e5f6b5c5e06070f0efca96227a863e" + "00000000000000000000000000000000");
     byte[] in = (
         "Any submission to the IETF intended by the Contributor for publication as all or "
             + "part of an IETF Internet-Draft or RFC and any statement made within the context "
@@ -176,8 +172,8 @@ public class Poly1305Test {
             + "include oral statements in IETF sessions, as well as written and electronic "
             + "communications made at any time or place, which are addressed to")
         .getBytes(UTF_8);
-    Truth.assertThat(Poly1305.computeMac(key, in)).isEqualTo(TestUtil.hexDecode(""
-        + "f3477e7cd95417af89a6b8794c310cf0"));
+    Truth.assertThat(Poly1305.computeMac(key, in))
+        .isEqualTo(Hex.decode("" + "f3477e7cd95417af89a6b8794c310cf0"));
   }
 
   /**
@@ -186,20 +182,21 @@ public class Poly1305Test {
    */
   @Test
   public void testPoly1305TestVector4() throws GeneralSecurityException {
-    byte[] key = TestUtil.hexDecode(""
-        + "1c9240a5eb55d38af333888604f6b5f0"
-        + "473917c1402b80099dca5cbc207075c0");
-    byte[] in = TestUtil.hexDecode(""
-        + "2754776173206272696c6c69672c2061"
-        + "6e642074686520736c6974687920746f"
-        + "7665730a446964206779726520616e64"
-        + "2067696d626c6520696e207468652077"
-        + "6162653a0a416c6c206d696d73792077"
-        + "6572652074686520626f726f676f7665"
-        + "732c0a416e6420746865206d6f6d6520"
-        + "7261746873206f757467726162652e");
-    Truth.assertThat(Poly1305.computeMac(key, in)).isEqualTo(TestUtil.hexDecode(""
-        + "4541669a7eaaee61e708dc7cbcc5eb62"));
+    byte[] key =
+        Hex.decode("" + "1c9240a5eb55d38af333888604f6b5f0" + "473917c1402b80099dca5cbc207075c0");
+    byte[] in =
+        Hex.decode(
+            ""
+                + "2754776173206272696c6c69672c2061"
+                + "6e642074686520736c6974687920746f"
+                + "7665730a446964206779726520616e64"
+                + "2067696d626c6520696e207468652077"
+                + "6162653a0a416c6c206d696d73792077"
+                + "6572652074686520626f726f676f7665"
+                + "732c0a416e6420746865206d6f6d6520"
+                + "7261746873206f757467726162652e");
+    Truth.assertThat(Poly1305.computeMac(key, in))
+        .isEqualTo(Hex.decode("" + "4541669a7eaaee61e708dc7cbcc5eb62"));
   }
 
   /**
@@ -208,13 +205,11 @@ public class Poly1305Test {
    */
   @Test
   public void testPoly1305TestVector5() throws GeneralSecurityException {
-    byte[] key = TestUtil.hexDecode(""
-        + "02000000000000000000000000000000"
-        + "00000000000000000000000000000000");
-    byte[] in = TestUtil.hexDecode(""
-        + "ffffffffffffffffffffffffffffffff");
-    Truth.assertThat(Poly1305.computeMac(key, in)).isEqualTo(TestUtil.hexDecode(""
-        + "03000000000000000000000000000000"));
+    byte[] key =
+        Hex.decode("" + "02000000000000000000000000000000" + "00000000000000000000000000000000");
+    byte[] in = Hex.decode("" + "ffffffffffffffffffffffffffffffff");
+    Truth.assertThat(Poly1305.computeMac(key, in))
+        .isEqualTo(Hex.decode("" + "03000000000000000000000000000000"));
   }
 
   /**
@@ -223,13 +218,11 @@ public class Poly1305Test {
    */
   @Test
   public void testPoly1305TestVector6() throws GeneralSecurityException {
-    byte[] key = TestUtil.hexDecode(""
-        + "02000000000000000000000000000000"
-        + "ffffffffffffffffffffffffffffffff");
-    byte[] in = TestUtil.hexDecode(""
-        + "02000000000000000000000000000000");
-    Truth.assertThat(Poly1305.computeMac(key, in)).isEqualTo(TestUtil.hexDecode(""
-        + "03000000000000000000000000000000"));
+    byte[] key =
+        Hex.decode("" + "02000000000000000000000000000000" + "ffffffffffffffffffffffffffffffff");
+    byte[] in = Hex.decode("" + "02000000000000000000000000000000");
+    Truth.assertThat(Poly1305.computeMac(key, in))
+        .isEqualTo(Hex.decode("" + "03000000000000000000000000000000"));
   }
 
   /**
@@ -238,15 +231,16 @@ public class Poly1305Test {
    */
   @Test
   public void testPoly1305TestVector7() throws GeneralSecurityException {
-    byte[] key = TestUtil.hexDecode(""
-        + "01000000000000000000000000000000"
-        + "00000000000000000000000000000000");
-    byte[] in = TestUtil.hexDecode(""
-        + "ffffffffffffffffffffffffffffffff"
-        + "f0ffffffffffffffffffffffffffffff"
-        + "11000000000000000000000000000000");
-    Truth.assertThat(Poly1305.computeMac(key, in)).isEqualTo(TestUtil.hexDecode(""
-        + "05000000000000000000000000000000"));
+    byte[] key =
+        Hex.decode("" + "01000000000000000000000000000000" + "00000000000000000000000000000000");
+    byte[] in =
+        Hex.decode(
+            ""
+                + "ffffffffffffffffffffffffffffffff"
+                + "f0ffffffffffffffffffffffffffffff"
+                + "11000000000000000000000000000000");
+    Truth.assertThat(Poly1305.computeMac(key, in))
+        .isEqualTo(Hex.decode("" + "05000000000000000000000000000000"));
   }
 
   /**
@@ -255,15 +249,16 @@ public class Poly1305Test {
    */
   @Test
   public void testPoly1305TestVector8() throws GeneralSecurityException {
-    byte[] key = TestUtil.hexDecode(""
-        + "01000000000000000000000000000000"
-        + "00000000000000000000000000000000");
-    byte[] in = TestUtil.hexDecode(""
-        + "ffffffffffffffffffffffffffffffff"
-        + "fbfefefefefefefefefefefefefefefe"
-        + "01010101010101010101010101010101");
-    Truth.assertThat(Poly1305.computeMac(key, in)).isEqualTo(TestUtil.hexDecode(""
-        + "00000000000000000000000000000000"));
+    byte[] key =
+        Hex.decode("" + "01000000000000000000000000000000" + "00000000000000000000000000000000");
+    byte[] in =
+        Hex.decode(
+            ""
+                + "ffffffffffffffffffffffffffffffff"
+                + "fbfefefefefefefefefefefefefefefe"
+                + "01010101010101010101010101010101");
+    Truth.assertThat(Poly1305.computeMac(key, in))
+        .isEqualTo(Hex.decode("" + "00000000000000000000000000000000"));
   }
 
   /**
@@ -272,13 +267,11 @@ public class Poly1305Test {
    */
   @Test
   public void testPoly1305TestVector9() throws GeneralSecurityException {
-    byte[] key = TestUtil.hexDecode(""
-        + "02000000000000000000000000000000"
-        + "00000000000000000000000000000000");
-    byte[] in = TestUtil.hexDecode(""
-        + "fdffffffffffffffffffffffffffffff");
-    Truth.assertThat(Poly1305.computeMac(key, in)).isEqualTo(TestUtil.hexDecode(""
-        + "faffffffffffffffffffffffffffffff"));
+    byte[] key =
+        Hex.decode("" + "02000000000000000000000000000000" + "00000000000000000000000000000000");
+    byte[] in = Hex.decode("" + "fdffffffffffffffffffffffffffffff");
+    Truth.assertThat(Poly1305.computeMac(key, in))
+        .isEqualTo(Hex.decode("" + "faffffffffffffffffffffffffffffff"));
   }
 
   /**
@@ -287,16 +280,17 @@ public class Poly1305Test {
    */
   @Test
   public void testPoly1305TestVector10() throws GeneralSecurityException {
-    byte[] key = TestUtil.hexDecode(""
-        + "01000000000000000400000000000000"
-        + "00000000000000000000000000000000");
-    byte[] in = TestUtil.hexDecode(""
-        + "e33594d7505e43b90000000000000000"
-        + "3394d7505e4379cd0100000000000000"
-        + "00000000000000000000000000000000"
-        + "01000000000000000000000000000000");
-    Truth.assertThat(Poly1305.computeMac(key, in)).isEqualTo(TestUtil.hexDecode(""
-        + "14000000000000005500000000000000"));
+    byte[] key =
+        Hex.decode("" + "01000000000000000400000000000000" + "00000000000000000000000000000000");
+    byte[] in =
+        Hex.decode(
+            ""
+                + "e33594d7505e43b90000000000000000"
+                + "3394d7505e4379cd0100000000000000"
+                + "00000000000000000000000000000000"
+                + "01000000000000000000000000000000");
+    Truth.assertThat(Poly1305.computeMac(key, in))
+        .isEqualTo(Hex.decode("" + "14000000000000005500000000000000"));
   }
 
   /**
@@ -305,14 +299,15 @@ public class Poly1305Test {
    */
   @Test
   public void testPoly1305TestVector11() throws GeneralSecurityException {
-    byte[] key = TestUtil.hexDecode(""
-        + "01000000000000000400000000000000"
-        + "00000000000000000000000000000000");
-    byte[] in = TestUtil.hexDecode(""
-        + "e33594d7505e43b90000000000000000"
-        + "3394d7505e4379cd0100000000000000"
-        + "00000000000000000000000000000000");
-    Truth.assertThat(Poly1305.computeMac(key, in)).isEqualTo(TestUtil.hexDecode(""
-        + "13000000000000000000000000000000"));
+    byte[] key =
+        Hex.decode("" + "01000000000000000400000000000000" + "00000000000000000000000000000000");
+    byte[] in =
+        Hex.decode(
+            ""
+                + "e33594d7505e43b90000000000000000"
+                + "3394d7505e4379cd0100000000000000"
+                + "00000000000000000000000000000000");
+    Truth.assertThat(Poly1305.computeMac(key, in))
+        .isEqualTo(Hex.decode("" + "13000000000000000000000000000000"));
   }
 }

@@ -336,7 +336,7 @@ public class AesGcmJceTest {
     HashSet<String> ciphertexts = new HashSet<>();
     for (int i = 0; i < samples; i++) {
       byte[] ct = gcm.encrypt(message, aad);
-      String ctHex = TestUtil.hexEncode(ct);
+      String ctHex = Hex.encode(ct);
       assertThat(ciphertexts).doesNotContain(ctHex);
       ciphertexts.add(ctHex);
     }

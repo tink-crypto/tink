@@ -32,7 +32,7 @@ import com.google.crypto.tink.proto.Keyset;
 import com.google.crypto.tink.proto.OutputPrefixType;
 import com.google.crypto.tink.proto.RsaSsaPssPublicKey;
 import com.google.crypto.tink.signature.internal.SigUtil;
-import com.google.crypto.tink.testing.TestUtil;
+import com.google.crypto.tink.subtle.Hex;
 import com.google.protobuf.ExtensionRegistryLite;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -135,8 +135,7 @@ public final class SignaturePemKeysetReaderTest {
     EcdsaPublicKey publicKeyProto =
         EcdsaPublicKey.parseFrom(keyData.getValue(), ExtensionRegistryLite.getEmptyRegistry());
     assertThat(publicKeyProto.getX().toByteArray())
-        .isEqualTo(
-            TestUtil.hexDecode("D4CE489428982EF343186EB90E6A04ADF41366359A508FE7AC66B283F06641AE"));
+        .isEqualTo(Hex.decode("D4CE489428982EF343186EB90E6A04ADF41366359A508FE7AC66B283F06641AE"));
   }
 
   @Test

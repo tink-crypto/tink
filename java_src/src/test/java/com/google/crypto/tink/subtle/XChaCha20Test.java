@@ -20,7 +20,6 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertThrows;
 
-import com.google.crypto.tink.testing.TestUtil;
 import java.security.GeneralSecurityException;
 import java.security.InvalidKeyException;
 import org.junit.Test;
@@ -46,10 +45,10 @@ public class XChaCha20Test {
         assertArrayEquals(
             String.format(
                 "\n\nMessage: %s\nKey: %s\nOutput: %s\nDecrypted Msg: %s\n",
-                TestUtil.hexEncode(expectedInput),
-                TestUtil.hexEncode(key),
-                TestUtil.hexEncode(output),
-                TestUtil.hexEncode(actualInput)),
+                Hex.encode(expectedInput),
+                Hex.encode(key),
+                Hex.encode(output),
+                Hex.encode(actualInput)),
             expectedInput,
             actualInput);
       }

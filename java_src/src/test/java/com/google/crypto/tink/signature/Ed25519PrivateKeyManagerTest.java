@@ -29,8 +29,8 @@ import com.google.crypto.tink.proto.Ed25519PrivateKey;
 import com.google.crypto.tink.proto.Ed25519PublicKey;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
 import com.google.crypto.tink.subtle.Ed25519Verify;
+import com.google.crypto.tink.subtle.Hex;
 import com.google.crypto.tink.subtle.Random;
-import com.google.crypto.tink.testing.TestUtil;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.ExtensionRegistryLite;
 import java.io.ByteArrayInputStream;
@@ -85,7 +85,7 @@ public class Ed25519PrivateKeyManagerTest {
     Set<String> keys = new TreeSet<>();
     int numTests = 100;
     for (int i = 0; i < numTests; i++) {
-      keys.add(TestUtil.hexEncode(factory.createKey(format).getKeyValue().toByteArray()));
+      keys.add(Hex.encode(factory.createKey(format).getKeyValue().toByteArray()));
     }
     assertThat(keys).hasSize(numTests);
   }

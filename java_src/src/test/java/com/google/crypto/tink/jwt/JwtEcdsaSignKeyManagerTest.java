@@ -38,6 +38,7 @@ import com.google.crypto.tink.subtle.EcdsaSignJce;
 import com.google.crypto.tink.subtle.EllipticCurves;
 import com.google.crypto.tink.subtle.EllipticCurves.EcdsaEncoding;
 import com.google.crypto.tink.subtle.Enums;
+import com.google.crypto.tink.subtle.Hex;
 import com.google.crypto.tink.subtle.Random;
 import com.google.crypto.tink.testing.TestUtil;
 import com.google.gson.JsonObject;
@@ -135,7 +136,7 @@ public class JwtEcdsaSignKeyManagerTest {
     int numTests = 5;
     for (int i = 0; i < numTests; i++) {
       JwtEcdsaPrivateKey key = factory.createKey(format);
-      keys.add(TestUtil.hexEncode(key.getKeyValue().toByteArray()));
+      keys.add(Hex.encode(key.getKeyValue().toByteArray()));
     }
     assertThat(keys).hasSize(numTests);
   }

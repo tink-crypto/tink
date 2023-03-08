@@ -425,7 +425,7 @@ public class InsecureNonceAesGcmJceTest {
     for (int i = 0; i < samples; i++) {
       byte[] iv = Random.randBytes(InsecureNonceAesGcmJce.IV_SIZE_IN_BYTES);
       byte[] ct = gcm.encrypt(iv, message, aad);
-      String ctHex = TestUtil.hexEncode(ct);
+      String ctHex = Hex.encode(ct);
       assertThat(ciphertexts).doesNotContain(ctHex);
       ciphertexts.add(ctHex);
     }

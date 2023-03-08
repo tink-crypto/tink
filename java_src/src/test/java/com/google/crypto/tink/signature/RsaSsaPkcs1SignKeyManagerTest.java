@@ -32,6 +32,7 @@ import com.google.crypto.tink.proto.RsaSsaPkcs1PrivateKey;
 import com.google.crypto.tink.proto.RsaSsaPkcs1PublicKey;
 import com.google.crypto.tink.signature.internal.SigUtil;
 import com.google.crypto.tink.subtle.EngineFactory;
+import com.google.crypto.tink.subtle.Hex;
 import com.google.crypto.tink.subtle.Random;
 import com.google.crypto.tink.subtle.RsaSsaPkcs1VerifyJce;
 import com.google.crypto.tink.testing.TestUtil;
@@ -189,8 +190,8 @@ public class RsaSsaPkcs1SignKeyManagerTest {
     int numTests = 5;
     for (int i = 0; i < numTests; i++) {
       RsaSsaPkcs1PrivateKey key = factory.createKey(format);
-      keys.add(TestUtil.hexEncode(key.getQ().toByteArray()));
-      keys.add(TestUtil.hexEncode(key.getP().toByteArray()));
+      keys.add(Hex.encode(key.getQ().toByteArray()));
+      keys.add(Hex.encode(key.getP().toByteArray()));
     }
     assertThat(keys).hasSize(2 * numTests);
   }

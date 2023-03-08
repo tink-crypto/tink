@@ -229,7 +229,7 @@ public class XChaCha20Poly1305Test {
     final int samples = 1 << 17;
     for (int i = 0; i < samples; i++) {
       byte[] ct = aead.encrypt(message, aad);
-      String ctHex = TestUtil.hexEncode(ct);
+      String ctHex = Hex.encode(ct);
       assertFalse(ciphertexts.contains(ctHex));
       ciphertexts.add(ctHex);
     }

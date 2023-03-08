@@ -34,6 +34,7 @@ import com.google.crypto.tink.proto.AesEaxParams;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
 import com.google.crypto.tink.subtle.AesEaxJce;
 import com.google.crypto.tink.subtle.Bytes;
+import com.google.crypto.tink.subtle.Hex;
 import com.google.crypto.tink.subtle.Random;
 import com.google.crypto.tink.testing.TestUtil;
 import com.google.protobuf.ByteString;
@@ -128,7 +129,7 @@ public class AesEaxKeyManagerTest {
     // Calls newKey multiple times and make sure that they generate different keys.
     int numTests = 50;
     for (int i = 0; i < numTests; i++) {
-      keys.add(TestUtil.hexEncode(factory.createKey(format).getKeyValue().toByteArray()));
+      keys.add(Hex.encode(factory.createKey(format).getKeyValue().toByteArray()));
     }
     assertThat(keys).hasSize(numTests);
   }
@@ -164,12 +165,12 @@ public class AesEaxKeyManagerTest {
         String tag) {
       try {
         this.name = name;
-        this.keyValue = TestUtil.hexDecode(keyValue);
-        this.plaintext = TestUtil.hexDecode(plaintext);
-        this.aad = TestUtil.hexDecode(aad);
-        this.iv = TestUtil.hexDecode(iv);
-        this.ciphertext = TestUtil.hexDecode(ciphertext);
-        this.tag = TestUtil.hexDecode(tag);
+        this.keyValue = Hex.decode(keyValue);
+        this.plaintext = Hex.decode(plaintext);
+        this.aad = Hex.decode(aad);
+        this.iv = Hex.decode(iv);
+        this.ciphertext = Hex.decode(ciphertext);
+        this.tag = Hex.decode(tag);
       } catch (Exception ignored) {
         // Ignored
       }

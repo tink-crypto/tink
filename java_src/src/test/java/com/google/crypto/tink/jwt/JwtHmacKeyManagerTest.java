@@ -35,6 +35,7 @@ import com.google.crypto.tink.proto.KeyStatusType;
 import com.google.crypto.tink.proto.Keyset;
 import com.google.crypto.tink.proto.OutputPrefixType;
 import com.google.crypto.tink.subtle.Base64;
+import com.google.crypto.tink.subtle.Hex;
 import com.google.crypto.tink.subtle.PrfHmacJce;
 import com.google.crypto.tink.subtle.PrfMac;
 import com.google.crypto.tink.subtle.Random;
@@ -158,7 +159,7 @@ public class JwtHmacKeyManagerTest {
     int numKeys = 100;
     Set<String> keys = new TreeSet<>();
     for (int i = 0; i < numKeys; ++i) {
-      keys.add(TestUtil.hexEncode(factory.createKey(keyFormat).getKeyValue().toByteArray()));
+      keys.add(Hex.encode(factory.createKey(keyFormat).getKeyValue().toByteArray()));
     }
     assertThat(keys).hasSize(numKeys);
   }

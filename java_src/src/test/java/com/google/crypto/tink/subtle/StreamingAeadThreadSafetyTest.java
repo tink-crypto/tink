@@ -22,7 +22,6 @@ import static org.junit.Assert.fail;
 import com.google.crypto.tink.StreamingAead;
 import com.google.crypto.tink.testing.StreamingTestUtil.ByteBufferChannel;
 import com.google.crypto.tink.testing.StreamingTestUtil.SeekableByteBufferChannel;
-import com.google.crypto.tink.testing.TestUtil;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -169,8 +168,8 @@ public class StreamingAeadThreadSafetyTest {
 
   @Test
   public void testDecryptionAesGcm() throws Exception {
-    byte[] ikm = TestUtil.hexDecode("000102030405060708090a0b0c0d0e0f");
-    byte[] associatedData = TestUtil.hexDecode("aabbccddeeff");
+    byte[] ikm = Hex.decode("000102030405060708090a0b0c0d0e0f");
+    byte[] associatedData = Hex.decode("aabbccddeeff");
     int keySize = 16;
     int segmentSize = 512;
     AesGcmHkdfStreaming ags = new AesGcmHkdfStreaming(ikm, "HmacSha256", keySize, segmentSize, 0);
@@ -179,8 +178,8 @@ public class StreamingAeadThreadSafetyTest {
 
   @Test
   public void testDecryptionAesCtrHmac() throws Exception {
-    byte[] ikm = TestUtil.hexDecode("000102030405060708090a0b0c0d0e0f");
-    byte[] associatedData = TestUtil.hexDecode("aabbccddeeff");
+    byte[] ikm = Hex.decode("000102030405060708090a0b0c0d0e0f");
+    byte[] associatedData = Hex.decode("aabbccddeeff");
     int keySize = 16;
     int tagSize = 12;
     int segmentSize = 512;
@@ -284,8 +283,8 @@ public class StreamingAeadThreadSafetyTest {
 
   @Test
   public void testEncryptionAesGcm() throws Exception {
-    byte[] ikm = TestUtil.hexDecode("000102030405060708090a0b0c0d0e0f");
-    byte[] associatedData = TestUtil.hexDecode("aabbccddeeff");
+    byte[] ikm = Hex.decode("000102030405060708090a0b0c0d0e0f");
+    byte[] associatedData = Hex.decode("aabbccddeeff");
     int keySize = 16;
     int segmentSize = 512;
     AesGcmHkdfStreaming ags = new AesGcmHkdfStreaming(ikm, "HmacSha256", keySize, segmentSize, 0);
@@ -294,8 +293,8 @@ public class StreamingAeadThreadSafetyTest {
 
   @Test
   public void testEncryptionAesCtrHmac() throws Exception {
-    byte[] ikm = TestUtil.hexDecode("000102030405060708090a0b0c0d0e0f");
-    byte[] associatedData = TestUtil.hexDecode("aabbccddeeff");
+    byte[] ikm = Hex.decode("000102030405060708090a0b0c0d0e0f");
+    byte[] associatedData = Hex.decode("aabbccddeeff");
     int keySize = 16;
     int tagSize = 12;
     int segmentSize = 512;
@@ -306,8 +305,8 @@ public class StreamingAeadThreadSafetyTest {
 
   @Test
   public void testEncryptionLargeChunks() throws Exception {
-    byte[] ikm = TestUtil.hexDecode("000102030405060708090a0b0c0d0e0f");
-    byte[] associatedData = TestUtil.hexDecode("aabbccddeeff");
+    byte[] ikm = Hex.decode("000102030405060708090a0b0c0d0e0f");
+    byte[] associatedData = Hex.decode("aabbccddeeff");
     int keySize = 16;
     int segmentSize = 512;
     int chunkSize = 2048; // the size for each concurrent read.
@@ -317,8 +316,8 @@ public class StreamingAeadThreadSafetyTest {
 
   @Test
   public void testEncryptionSmallChunks() throws Exception {
-    byte[] ikm = TestUtil.hexDecode("000102030405060708090a0b0c0d0e0f");
-    byte[] associatedData = TestUtil.hexDecode("aabbccddeeff");
+    byte[] ikm = Hex.decode("000102030405060708090a0b0c0d0e0f");
+    byte[] associatedData = Hex.decode("aabbccddeeff");
     int keySize = 16;
     int segmentSize = 512;
     int chunkSize = 3; // the size for each concurrent read.
@@ -382,7 +381,7 @@ public class StreamingAeadThreadSafetyTest {
                     + " start:"
                     + pos
                     + "\nbytes:"
-                    + TestUtil.hexEncode(plaintext.array()));
+                    + Hex.encode(plaintext.array()));
           }
         }
       }
@@ -428,8 +427,8 @@ public class StreamingAeadThreadSafetyTest {
 
   @Test
   public void testRandomAccessAesGcm() throws Exception {
-    byte[] ikm = TestUtil.hexDecode("000102030405060708090a0b0c0d0e0f");
-    byte[] associatedData = TestUtil.hexDecode("aabbccddeeff");
+    byte[] ikm = Hex.decode("000102030405060708090a0b0c0d0e0f");
+    byte[] associatedData = Hex.decode("aabbccddeeff");
     int keySize = 16;
     int segmentSize = 503;
     int plaintextSize = 7654;
@@ -439,8 +438,8 @@ public class StreamingAeadThreadSafetyTest {
 
   @Test
   public void testRandomAccessAesCtrHmac() throws Exception {
-    byte[] ikm = TestUtil.hexDecode("000102030405060708090a0b0c0d0e0f");
-    byte[] associatedData = TestUtil.hexDecode("aabbccddeeff");
+    byte[] ikm = Hex.decode("000102030405060708090a0b0c0d0e0f");
+    byte[] associatedData = Hex.decode("aabbccddeeff");
     int keySize = 16;
     int tagSize = 12;
     int segmentSize = 479;

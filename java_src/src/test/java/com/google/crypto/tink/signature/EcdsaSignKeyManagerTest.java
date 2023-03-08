@@ -31,7 +31,7 @@ import com.google.crypto.tink.proto.EcdsaSignatureEncoding;
 import com.google.crypto.tink.proto.EllipticCurveType;
 import com.google.crypto.tink.proto.HashType;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
-import com.google.crypto.tink.testing.TestUtil;
+import com.google.crypto.tink.subtle.Hex;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.ExtensionRegistryLite;
 import java.security.GeneralSecurityException;
@@ -274,7 +274,7 @@ public class EcdsaSignKeyManagerTest {
     Set<String> keys = new TreeSet<>();
     int numTests = 100;
     for (int i = 0; i < numTests; i++) {
-      keys.add(TestUtil.hexEncode(factory.createKey(format).getKeyValue().toByteArray()));
+      keys.add(Hex.encode(factory.createKey(format).getKeyValue().toByteArray()));
     }
     assertThat(keys).hasSize(numTests);
   }
@@ -286,7 +286,7 @@ public class EcdsaSignKeyManagerTest {
     Set<String> keys = new TreeSet<>();
     int numTests = 100;
     for (int i = 0; i < numTests; i++) {
-      keys.add(TestUtil.hexEncode(factory.createKey(format).getKeyValue().toByteArray()));
+      keys.add(Hex.encode(factory.createKey(format).getKeyValue().toByteArray()));
     }
     assertThat(keys).hasSize(numTests);
   }
@@ -298,7 +298,7 @@ public class EcdsaSignKeyManagerTest {
     Set<String> keys = new TreeSet<>();
     int numTests = 100;
     for (int i = 0; i < numTests; i++) {
-      keys.add(TestUtil.hexEncode(factory.createKey(format).getKeyValue().toByteArray()));
+      keys.add(Hex.encode(factory.createKey(format).getKeyValue().toByteArray()));
     }
     assertThat(keys).hasSize(numTests);
   }

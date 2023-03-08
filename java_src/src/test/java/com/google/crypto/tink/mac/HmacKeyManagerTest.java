@@ -27,10 +27,10 @@ import com.google.crypto.tink.proto.HashType;
 import com.google.crypto.tink.proto.HmacKey;
 import com.google.crypto.tink.proto.HmacKeyFormat;
 import com.google.crypto.tink.proto.HmacParams;
+import com.google.crypto.tink.subtle.Hex;
 import com.google.crypto.tink.subtle.PrfHmacJce;
 import com.google.crypto.tink.subtle.PrfMac;
 import com.google.crypto.tink.subtle.Random;
-import com.google.crypto.tink.testing.TestUtil;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.ExtensionRegistryLite;
 import java.io.ByteArrayInputStream;
@@ -145,7 +145,7 @@ public class HmacKeyManagerTest {
     int numKeys = 100;
     Set<String> keys = new TreeSet<>();
     for (int i = 0; i < numKeys; ++i) {
-      keys.add(TestUtil.hexEncode(factory.createKey(keyFormat).getKeyValue().toByteArray()));
+      keys.add(Hex.encode(factory.createKey(keyFormat).getKeyValue().toByteArray()));
     }
     assertThat(keys).hasSize(numKeys);
   }

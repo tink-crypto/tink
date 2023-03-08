@@ -21,7 +21,6 @@ import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.fail;
 
 import com.google.crypto.tink.Aead;
-import com.google.crypto.tink.testing.TestUtil;
 import java.security.GeneralSecurityException;
 import java.util.Arrays;
 import javax.crypto.Cipher;
@@ -50,10 +49,10 @@ public class EncryptThenAuthenticateTest {
         int ivSize,
         int tagLength) {
       try {
-        this.encKey = TestUtil.hexDecode(encKey);
-        this.macKey = TestUtil.hexDecode(macKey);
-        this.ciphertext = TestUtil.hexDecode(ciphertext);
-        this.aad = TestUtil.hexDecode(aad);
+        this.encKey = Hex.decode(encKey);
+        this.macKey = Hex.decode(macKey);
+        this.ciphertext = Hex.decode(ciphertext);
+        this.aad = Hex.decode(aad);
         this.macAlg = macAlg;
         this.ivSize = ivSize;
         this.tagLength = tagLength;

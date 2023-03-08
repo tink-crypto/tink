@@ -38,6 +38,7 @@ import com.google.crypto.tink.proto.KeyStatusType;
 import com.google.crypto.tink.proto.Keyset.Key;
 import com.google.crypto.tink.proto.OutputPrefixType;
 import com.google.crypto.tink.subtle.Bytes;
+import com.google.crypto.tink.subtle.Hex;
 import com.google.crypto.tink.testing.TestUtil;
 import java.security.GeneralSecurityException;
 import java.util.List;
@@ -126,8 +127,8 @@ public class HybridDecryptWrapperTest {
     byte[] ciphertext = rawEncrypter.encrypt(plaintext, contextInfo);
     assertThat(wrappedDecrypter.decrypt(ciphertext, contextInfo)).isEqualTo(plaintext);
 
-    byte[] ciphertextWithTinkPrefix = Bytes.concat(TestUtil.hexDecode("0166AABBCC"), ciphertext);
-    byte[] ciphertextWithLegacyPrefix = Bytes.concat(TestUtil.hexDecode("0066AABBCC"), ciphertext);
+    byte[] ciphertextWithTinkPrefix = Bytes.concat(Hex.decode("0166AABBCC"), ciphertext);
+    byte[] ciphertextWithLegacyPrefix = Bytes.concat(Hex.decode("0066AABBCC"), ciphertext);
     assertThrows(
         GeneralSecurityException.class,
         () -> wrappedDecrypter.decrypt(ciphertextWithTinkPrefix, contextInfo));
@@ -167,7 +168,7 @@ public class HybridDecryptWrapperTest {
 
     byte[] rawCiphertext = rawEncrypter.encrypt(plaintext, contextInfo);
 
-    byte[] ciphertextWithTinkPrefix = Bytes.concat(TestUtil.hexDecode("0166AABBCC"), rawCiphertext);
+    byte[] ciphertextWithTinkPrefix = Bytes.concat(Hex.decode("0166AABBCC"), rawCiphertext);
 
     assertThat(wrappedDecrypter.decrypt(ciphertextWithTinkPrefix, contextInfo))
         .isEqualTo(plaintext);
@@ -175,8 +176,7 @@ public class HybridDecryptWrapperTest {
     assertThrows(
         GeneralSecurityException.class,
         () -> wrappedDecrypter.decrypt(rawCiphertext, contextInfo));
-    byte[] ciphertextWithLegacyPrefix =
-        Bytes.concat(TestUtil.hexDecode("0066AABBCC"), rawCiphertext);
+    byte[] ciphertextWithLegacyPrefix = Bytes.concat(Hex.decode("0066AABBCC"), rawCiphertext);
     assertThrows(
         GeneralSecurityException.class,
         () -> wrappedDecrypter.decrypt(ciphertextWithLegacyPrefix, contextInfo));

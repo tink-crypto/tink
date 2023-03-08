@@ -24,7 +24,6 @@ import com.google.crypto.tink.PublicKeySign;
 import com.google.crypto.tink.PublicKeyVerify;
 import com.google.crypto.tink.subtle.EllipticCurves.EcdsaEncoding;
 import com.google.crypto.tink.subtle.Enums.HashType;
-import com.google.crypto.tink.testing.TestUtil;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.interfaces.ECPrivateKey;
@@ -107,7 +106,7 @@ public class SignatureThreadSafetyTest {
       try {
         for (int i = 0; i < count; i++) {
           byte[] signature = signer.sign(message);
-          signatures.add(TestUtil.hexEncode(signature));
+          signatures.add(Hex.encode(signature));
         }
       } catch (Exception ex) {
         getUncaughtExceptionHandler().uncaughtException(this, ex);
@@ -150,7 +149,7 @@ public class SignatureThreadSafetyTest {
     exceptionHandler.check();
     if (isDeterministic) {
       for (int i = 0; i < numberOfThreads; i++) {
-        String expectedSignature = TestUtil.hexEncode(signer.sign(messages[i]));
+        String expectedSignature = Hex.encode(signer.sign(messages[i]));
         assertEquals(1, signatures.get(i).size());
         assertTrue(signatures.get(i).contains(expectedSignature));
       }
@@ -158,7 +157,7 @@ public class SignatureThreadSafetyTest {
       for (int i = 0; i < numberOfThreads; i++) {
         assertEquals(numberOfSignatures, signatures.get(i).size());
         for (String sig : signatures.get(i)) {
-          verifier.verify(TestUtil.hexDecode(sig), messages[i]);
+          verifier.verify(Hex.decode(sig), messages[i]);
         }
       }
     }
@@ -201,7 +200,7 @@ public class SignatureThreadSafetyTest {
     exceptionHandler.check();
 
     if (isDeterministic) {
-      String expectedSignature = TestUtil.hexEncode(signer.sign(message));
+      String expectedSignature = Hex.encode(signer.sign(message));
       for (int i = 0; i < numberOfThreads; i++) {
         assertEquals(1, signatures.get(i).size());
         assertTrue(signatures.get(i).contains(expectedSignature));
@@ -210,7 +209,7 @@ public class SignatureThreadSafetyTest {
       HashSet<String> allSignatures = new HashSet<String>();
       for (int i = 0; i < numberOfThreads; i++) {
         for (String sig : signatures.get(i)) {
-          verifier.verify(TestUtil.hexDecode(sig), message);
+          verifier.verify(Hex.decode(sig), message);
           assertFalse(allSignatures.contains(sig));
           allSignatures.add(sig);
         }

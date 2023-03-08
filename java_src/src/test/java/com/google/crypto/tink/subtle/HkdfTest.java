@@ -138,8 +138,12 @@ public class HkdfTest {
    */
   private String computeHkdfHex(String macAlgorithm, String ikmHex, String saltHex, String infoHex,
       int size) throws GeneralSecurityException {
-    return TestUtil.hexEncode(
-        Hkdf.computeHkdf(macAlgorithm, TestUtil.hexDecode(ikmHex), TestUtil.hexDecode(saltHex),
-          TestUtil.hexDecode(infoHex), size));
+    return Hex.encode(
+        Hkdf.computeHkdf(
+            macAlgorithm,
+            TestUtil.hexDecode(ikmHex),
+            TestUtil.hexDecode(saltHex),
+            TestUtil.hexDecode(infoHex),
+            size));
   }
 }

@@ -250,7 +250,7 @@ public class InsecureNonceChaCha20Poly1305Test {
     for (int i = 0; i < samples; i++) {
       byte[] nonce = Random.randBytes(NONCE_SIZE_IN_BYTES);
       byte[] ct = cipher.encrypt(nonce, message, aad);
-      String ctHex = TestUtil.hexEncode(ct);
+      String ctHex = Hex.encode(ct);
       assertThat(ciphertexts).doesNotContain(ctHex);
       ciphertexts.add(ctHex);
     }

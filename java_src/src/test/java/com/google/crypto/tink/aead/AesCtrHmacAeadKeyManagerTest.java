@@ -34,8 +34,8 @@ import com.google.crypto.tink.proto.HmacKeyFormat;
 import com.google.crypto.tink.proto.HmacParams;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
 import com.google.crypto.tink.subtle.EncryptThenAuthenticate;
+import com.google.crypto.tink.subtle.Hex;
 import com.google.crypto.tink.subtle.Random;
-import com.google.crypto.tink.testing.TestUtil;
 import com.google.protobuf.ExtensionRegistryLite;
 import java.security.GeneralSecurityException;
 import java.util.Set;
@@ -131,8 +131,7 @@ public class AesCtrHmacAeadKeyManagerTest {
     // Calls newKey multiple times and make sure that they generate different keys.
     int numTests = 50;
     for (int i = 0; i < numTests; i++) {
-      keys.add(
-          TestUtil.hexEncode(factory.createKey(format).getAesCtrKey().getKeyValue().toByteArray()));
+      keys.add(Hex.encode(factory.createKey(format).getAesCtrKey().getKeyValue().toByteArray()));
     }
     assertThat(keys).hasSize(numTests);
   }
@@ -144,8 +143,7 @@ public class AesCtrHmacAeadKeyManagerTest {
     // Calls newKey multiple times and make sure that they generate different keys.
     int numTests = 50;
     for (int i = 0; i < numTests; i++) {
-      keys.add(
-          TestUtil.hexEncode(factory.createKey(format).getHmacKey().getKeyValue().toByteArray()));
+      keys.add(Hex.encode(factory.createKey(format).getHmacKey().getKeyValue().toByteArray()));
     }
     assertThat(keys).hasSize(numTests);
   }

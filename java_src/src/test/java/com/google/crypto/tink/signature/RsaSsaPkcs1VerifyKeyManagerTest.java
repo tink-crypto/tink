@@ -28,6 +28,7 @@ import com.google.crypto.tink.proto.RsaSsaPkcs1KeyFormat;
 import com.google.crypto.tink.proto.RsaSsaPkcs1Params;
 import com.google.crypto.tink.proto.RsaSsaPkcs1PrivateKey;
 import com.google.crypto.tink.proto.RsaSsaPkcs1PublicKey;
+import com.google.crypto.tink.subtle.Hex;
 import com.google.crypto.tink.subtle.Random;
 import com.google.crypto.tink.testing.TestUtil;
 import com.google.protobuf.ByteString;
@@ -56,10 +57,9 @@ public final class RsaSsaPkcs1VerifyKeyManagerTest {
         String modulus, String exponent, String msg, String sig, HashType hashType)
         throws Exception {
       publicKeyProto =
-          TestUtil.createRsaSsaPkcs1PubKey(
-              TestUtil.hexDecode(modulus), TestUtil.hexDecode(exponent), hashType);
-      this.msg = TestUtil.hexDecode(msg);
-      this.sig = TestUtil.hexDecode(sig);
+          TestUtil.createRsaSsaPkcs1PubKey(Hex.decode(modulus), Hex.decode(exponent), hashType);
+      this.msg = Hex.decode(msg);
+      this.sig = Hex.decode(sig);
     }
   }
 
@@ -140,8 +140,8 @@ public final class RsaSsaPkcs1VerifyKeyManagerTest {
 
     RsaSsaPkcs1PublicKey invalidKey =
         RsaSsaPkcs1PublicKey.newBuilder(publicKey)
-            .setN(ByteString.copyFrom(TestUtil.hexDecode("23")))
-            .setE(ByteString.copyFrom(TestUtil.hexDecode("03")))
+            .setN(ByteString.copyFrom(Hex.decode("23")))
+            .setE(ByteString.copyFrom(Hex.decode("03")))
             .build();
     assertThrows(GeneralSecurityException.class, () -> verifyManager.validateKey(invalidKey));
   }

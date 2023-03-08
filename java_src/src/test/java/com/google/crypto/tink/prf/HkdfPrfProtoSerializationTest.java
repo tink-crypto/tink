@@ -28,7 +28,7 @@ import com.google.crypto.tink.internal.ProtoKeySerialization;
 import com.google.crypto.tink.internal.ProtoParametersSerialization;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
 import com.google.crypto.tink.proto.OutputPrefixType;
-import com.google.crypto.tink.testing.TestUtil;
+import com.google.crypto.tink.subtle.Hex;
 import com.google.crypto.tink.util.Bytes;
 import com.google.crypto.tink.util.SecretBytes;
 import com.google.protobuf.ByteString;
@@ -84,9 +84,7 @@ public final class HkdfPrfProtoSerializationTest {
 
   @DataPoints("salts")
   public static final Bytes[] SALTS =
-      new Bytes[] {
-        Bytes.copyFrom(TestUtil.hexDecode("2023af")), Bytes.copyFrom(TestUtil.hexDecode(""))
-      };
+      new Bytes[] {Bytes.copyFrom(Hex.decode("2023af")), Bytes.copyFrom(Hex.decode(""))};
 
   @Theory
   public void serializeAndParseParameters(
@@ -168,7 +166,7 @@ public final class HkdfPrfProtoSerializationTest {
                 HkdfPrfParameters.builder()
                     .setKeySizeBytes(16)
                     .setHashType(HkdfPrfParameters.HashType.SHA384)
-                    .setSalt(Bytes.copyFrom(TestUtil.hexDecode("2023af")))
+                    .setSalt(Bytes.copyFrom(Hex.decode("2023af")))
                     .build())
             .setKeyBytes(SECRET_16)
             .build();
@@ -188,7 +186,7 @@ public final class HkdfPrfProtoSerializationTest {
                 .setParams(
                     com.google.crypto.tink.proto.HkdfPrfParams.newBuilder()
                         .setHash(com.google.crypto.tink.proto.HashType.SHA256)
-                        .setSalt(ByteString.copyFrom(TestUtil.hexDecode("2023af")))
+                        .setSalt(ByteString.copyFrom(Hex.decode("2023af")))
                         .build())
                 .build()
                 .toByteString(),

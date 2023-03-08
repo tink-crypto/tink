@@ -493,8 +493,7 @@ public class KeysetHandleTest {
     Keyset keyset =
         TestUtil.createKeyset(
             TestUtil.createKey(
-                TestUtil.createAesGcmKeyData(
-                    TestUtil.hexDecode("000102030405060708090a0b0c0d0e0f")),
+                TestUtil.createAesGcmKeyData(Hex.decode("000102030405060708090a0b0c0d0e0f")),
                 42,
                 KeyStatusType.ENABLED,
                 OutputPrefixType.TINK));

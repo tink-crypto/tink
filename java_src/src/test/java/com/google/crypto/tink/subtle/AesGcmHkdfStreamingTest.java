@@ -40,7 +40,7 @@ public class AesGcmHkdfStreamingTest {
   @Rule public TemporaryFolder tmpFolder = new TemporaryFolder();
 
   private AesGcmHkdfStreaming createAesGcmStreaming() throws Exception {
-    byte[] ikm = TestUtil.hexDecode("000102030405060708090a0b0c0d0e0f");
+    byte[] ikm = Hex.decode("000102030405060708090a0b0c0d0e0f");
     String hkdfAlgo = "HmacSha256";
     int keySize = 16;
     int segmentSize = 4096;
@@ -64,8 +64,7 @@ public class AesGcmHkdfStreamingTest {
     if (TestUtil.shouldSkipTestWithAesKeySize(keySizeInBytes)) {
       return;
     }
-    byte[] ikm =
-        TestUtil.hexDecode("000102030405060708090a0b0c0d0e0f00112233445566778899aabbccddeeff");
+    byte[] ikm = Hex.decode("000102030405060708090a0b0c0d0e0f00112233445566778899aabbccddeeff");
     AesGcmHkdfStreaming ags =
         new AesGcmHkdfStreaming(ikm, "HmacSha256", keySizeInBytes, segmentSize,
             firstSegmentOffset);
@@ -138,8 +137,7 @@ public class AesGcmHkdfStreamingTest {
     if (TestUtil.shouldSkipTestWithAesKeySize(keySizeInBytes)) {
       return;
     }
-    byte[] ikm =
-        TestUtil.hexDecode("000102030405060708090a0b0c0d0e0f00112233445566778899aabbccddeeff");
+    byte[] ikm = Hex.decode("000102030405060708090a0b0c0d0e0f00112233445566778899aabbccddeeff");
     AesGcmHkdfStreaming ags =
         new AesGcmHkdfStreaming(ikm, "HmacSha256", keySizeInBytes, segmentSize,
             firstSegmentOffset);
@@ -196,8 +194,7 @@ public class AesGcmHkdfStreamingTest {
     }
     int firstSegmentOffset = 0;
     int segmentSize = 512;
-    byte[] ikm =
-        TestUtil.hexDecode("000102030405060708090a0b0c0d0e0f00112233445566778899aabbccddeeff");
+    byte[] ikm = Hex.decode("000102030405060708090a0b0c0d0e0f00112233445566778899aabbccddeeff");
     AesGcmHkdfStreaming ags =
         new AesGcmHkdfStreaming(ikm, "HmacSha256", keySizeInBytes, segmentSize,
             firstSegmentOffset);
@@ -215,7 +212,7 @@ public class AesGcmHkdfStreamingTest {
 
   @Test
   public void testSkipWithStream() throws Exception {
-    byte[] ikm = TestUtil.hexDecode("000102030405060708090a0b0c0d0e0f");
+    byte[] ikm = Hex.decode("000102030405060708090a0b0c0d0e0f");
     int keySize = 16;
     int tagSize = 12;
     int segmentSize = 256;
@@ -248,14 +245,13 @@ public class AesGcmHkdfStreamingTest {
     int segmentSize = 512;
     int firstSegmentOffset = 0;
     int keySizeInBytes = 16;
-    byte[] ikm =
-        TestUtil.hexDecode("000102030405060708090a0b0c0d0e0f00112233445566778899aabbccddeeff");
+    byte[] ikm = Hex.decode("000102030405060708090a0b0c0d0e0f00112233445566778899aabbccddeeff");
     AesGcmHkdfStreaming ags =
         new AesGcmHkdfStreaming(ikm, "HmacSha256", keySizeInBytes, segmentSize,
             firstSegmentOffset);
     int plaintextSize = 1 << 15;
     int maxChunkSize = 100;
-    byte[] aad = TestUtil.hexDecode("aabbccddeeff");
+    byte[] aad = Hex.decode("aabbccddeeff");
     byte[] plaintext = StreamingTestUtil.generatePlaintext(plaintextSize);
     int ciphertextLength = (int) ags.expectedCiphertextSize(plaintextSize);
     ByteBuffer ciphertext = ByteBuffer.allocate(ciphertextLength);
@@ -287,7 +283,7 @@ public class AesGcmHkdfStreamingTest {
   // (6) modify aad
   @Test
   public void testModifiedCiphertext() throws Exception {
-    byte[] ikm = TestUtil.hexDecode("000102030405060708090a0b0c0d0e0f");
+    byte[] ikm = Hex.decode("000102030405060708090a0b0c0d0e0f");
     int keySize = 16;
     int segmentSize = 256;
     int offset = 8;
@@ -298,7 +294,7 @@ public class AesGcmHkdfStreamingTest {
 
   @Test
   public void testModifiedCiphertextWithSeekableByteChannel() throws Exception {
-    byte[] ikm = TestUtil.hexDecode("000102030405060708090a0b0c0d0e0f");
+    byte[] ikm = Hex.decode("000102030405060708090a0b0c0d0e0f");
     int keySize = 16;
     int segmentSize = 256;
     int offset = 8;

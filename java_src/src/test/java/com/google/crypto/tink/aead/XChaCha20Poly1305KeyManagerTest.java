@@ -26,9 +26,9 @@ import com.google.crypto.tink.internal.KeyTypeManager;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
 import com.google.crypto.tink.proto.XChaCha20Poly1305Key;
 import com.google.crypto.tink.proto.XChaCha20Poly1305KeyFormat;
+import com.google.crypto.tink.subtle.Hex;
 import com.google.crypto.tink.subtle.Random;
 import com.google.crypto.tink.subtle.XChaCha20Poly1305;
-import com.google.crypto.tink.testing.TestUtil;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.ExtensionRegistryLite;
 import java.io.ByteArrayInputStream;
@@ -83,7 +83,7 @@ public class XChaCha20Poly1305KeyManagerTest {
     final int numKeys = 100;
     for (int i = 0; i < numKeys; ++i) {
       keys.add(
-          TestUtil.hexEncode(
+          Hex.encode(
               factory
                   .createKey(XChaCha20Poly1305KeyFormat.getDefaultInstance())
                   .getKeyValue()

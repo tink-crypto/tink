@@ -63,7 +63,7 @@ public class EllipticCurvesTest {
         String y) {
       this.curve = curve;
       this.format = format;
-      this.encoded = TestUtil.hexDecode(encodedHex);
+      this.encoded = Hex.decode(encodedHex);
       this.x = new BigInteger(x);
       this.y = new BigInteger(y);
     }
@@ -357,7 +357,7 @@ public class EllipticCurvesTest {
       EllipticCurve curve = EllipticCurves.getCurveSpec(test.curve).getCurve();
       ECPoint p = new ECPoint(test.x, test.y);
       byte[] encoded = EllipticCurves.pointEncode(curve, test.format, p);
-      assertEquals(TestUtil.hexEncode(encoded), TestUtil.hexEncode(test.encoded));
+      assertEquals(Hex.encode(encoded), Hex.encode(test.encoded));
     }
   }
 
@@ -381,9 +381,11 @@ public class EllipticCurvesTest {
   @Test
   public void pointDecode_uncompressed_failsIfPointIsNotOnCurve() throws Exception {
     // Same an entry of testVectors2, but the last byte is changed from f7 to f6
-    byte[] encoded = TestUtil.hexDecode("04"
-            + "b0cfc7bc02fc980d858077552947ffb449b10df8949dee4e56fe21e016dcb25a"
-            + "1886ccdca5487a6772f9401888203f90587cc00a730e2b83d5c6f89b3b568df6");
+    byte[] encoded =
+        Hex.decode(
+            "04"
+                + "b0cfc7bc02fc980d858077552947ffb449b10df8949dee4e56fe21e016dcb25a"
+                + "1886ccdca5487a6772f9401888203f90587cc00a730e2b83d5c6f89b3b568df6");
     // Adding one to y make the point not be on the curve.
     assertThrows(GeneralSecurityException.class,
         () -> EllipticCurves.pointDecode(EllipticCurves.CurveType.NIST_P256,
@@ -393,9 +395,10 @@ public class EllipticCurvesTest {
   @Test
   public void pointDecode_crunchy_failsIfPointIsNotOnCurve() throws Exception {
     // Same as an entry of testVectors2, but the last byte is changed from f4 to f5
-    byte[] encoded = TestUtil.hexDecode(
-        "0000000000000000000000000000000000000000000000000000000000000000"
-            + "66485c780e2f83d72433bd5d84a06bb6541c2af31dae871728bf856a174f93f5");
+    byte[] encoded =
+        Hex.decode(
+            "0000000000000000000000000000000000000000000000000000000000000000"
+                + "66485c780e2f83d72433bd5d84a06bb6541c2af31dae871728bf856a174f93f5");
     // Adding one to y make the point not be on the curve.
     assertThrows(GeneralSecurityException.class,
         () -> EllipticCurves.pointDecode(EllipticCurves.CurveType.NIST_P256,
@@ -405,8 +408,8 @@ public class EllipticCurvesTest {
   @Test
   public void pointDecode_compressed_failsIfEncodingIsInvalid() throws Exception {
     // Same as an entry of testVectors2, but the last byte is changed from 00 to 01
-    byte[] encoded = TestUtil.hexDecode(
-        "020000000000000000000000000000000000000000000000000000000000000001");
+    byte[] encoded =
+        Hex.decode("020000000000000000000000000000000000000000000000000000000000000001");
     assertThrows(GeneralSecurityException.class,
         () -> EllipticCurves.pointDecode(EllipticCurves.CurveType.NIST_P256,
             EllipticCurves.PointFormatType.COMPRESSED, encoded));

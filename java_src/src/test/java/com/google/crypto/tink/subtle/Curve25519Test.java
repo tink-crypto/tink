@@ -20,7 +20,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
 
 import com.google.common.truth.Expect;
-import com.google.crypto.tink.testing.TestUtil;
 import java.math.BigInteger;
 import java.security.InvalidKeyException;
 import java.util.Arrays;
@@ -51,7 +50,7 @@ public final class Curve25519Test {
     Curve25519.curveMult(x, e, k);
     assertEquals(
         "422c8e7a6227d7bca1350b3e2bb7279f7897b87bb6854b783c60e80311ae3079",
-        TestUtil.hexEncode(Field25519.contract(x)));
+        Hex.encode(Field25519.contract(x)));
   }
 
   /**
@@ -74,7 +73,7 @@ public final class Curve25519Test {
 
     Curve25519.curveMult(x, e, k);
     expect
-        .that(TestUtil.hexEncode(Field25519.contract(x)))
+        .that(Hex.encode(Field25519.contract(x)))
         .isEqualTo("422c8e7a6227d7bca1350b3e2bb7279f7897b87bb6854b783c60e80311ae3079");
     expect.that(k).isEqualTo(kOriginal);
   }

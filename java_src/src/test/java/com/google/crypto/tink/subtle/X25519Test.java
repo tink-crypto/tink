@@ -19,7 +19,6 @@ package com.google.crypto.tink.subtle;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
-import com.google.crypto.tink.testing.TestUtil;
 import com.google.crypto.tink.testing.WycheproofTestUtil;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
@@ -39,15 +38,13 @@ public final class X25519Test {
     k[0] = 9;
     byte[] prevK = k;
     k = X25519.computeSharedSecret(k, prevK);
-    assertEquals(
-        "422c8e7a6227d7bca1350b3e2bb7279f7897b87bb6854b783c60e80311ae3079", TestUtil.hexEncode(k));
+    assertEquals("422c8e7a6227d7bca1350b3e2bb7279f7897b87bb6854b783c60e80311ae3079", Hex.encode(k));
     for (int i = 0; i < 999; i++) {
       byte[] tmp = k;
       k = X25519.computeSharedSecret(k, prevK);
       prevK = tmp;
     }
-    assertEquals(
-        "684cf59ba83309552800ef566f2f4d3c1c3887c49360e3875f2eb94d99532c51", TestUtil.hexEncode(k));
+    assertEquals("684cf59ba83309552800ef566f2f4d3c1c3887c49360e3875f2eb94d99532c51", Hex.encode(k));
     // Omitting 1M iteration to limit the test runtime.
   }
 
@@ -58,17 +55,15 @@ public final class X25519Test {
   public void testPublicFromPrivateWithRfcTestVectors() throws Exception {
     byte[] out =
         X25519.publicFromPrivate(
-            TestUtil.hexDecode("77076d0a7318a57d3c16c17251b26645df4c2f87ebc0992ab177fba51db92c2a"));
+            Hex.decode("77076d0a7318a57d3c16c17251b26645df4c2f87ebc0992ab177fba51db92c2a"));
     assertEquals(
-        "8520f0098930a754748b7ddcb43ef75a0dbf3a0d26381af4eba4a98eaa9b4e6a",
-        TestUtil.hexEncode(out));
+        "8520f0098930a754748b7ddcb43ef75a0dbf3a0d26381af4eba4a98eaa9b4e6a", Hex.encode(out));
 
     out =
         X25519.publicFromPrivate(
-            TestUtil.hexDecode("5dab087e624a8a4b79e17f8b83800ee66f3bb1292618b6fd1c2f8b27ff88e0eb"));
+            Hex.decode("5dab087e624a8a4b79e17f8b83800ee66f3bb1292618b6fd1c2f8b27ff88e0eb"));
     assertEquals(
-        "de9edb7d7b7dc1b4d35b61c2ece435373f8343c85b78674dadfc7e146f882b4f",
-        TestUtil.hexEncode(out));
+        "de9edb7d7b7dc1b4d35b61c2ece435373f8343c85b78674dadfc7e146f882b4f", Hex.encode(out));
   }
 
   @Test

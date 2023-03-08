@@ -28,8 +28,8 @@ import com.google.crypto.tink.internal.KeyTypeManager;
 import com.google.crypto.tink.proto.ChaCha20Poly1305Key;
 import com.google.crypto.tink.proto.ChaCha20Poly1305KeyFormat;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
+import com.google.crypto.tink.subtle.Hex;
 import com.google.crypto.tink.subtle.Random;
-import com.google.crypto.tink.testing.TestUtil;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.ExtensionRegistryLite;
 import java.security.GeneralSecurityException;
@@ -117,7 +117,7 @@ public class ChaCha20Poly1305KeyManagerTest {
     final int numKeys = 1000;
     for (int i = 0; i < numKeys; ++i) {
       keys.add(
-          TestUtil.hexEncode(
+          Hex.encode(
               factory.createKey(ChaCha20Poly1305KeyFormat.getDefaultInstance()).toByteArray()));
     }
     assertThat(keys).hasSize(numKeys);

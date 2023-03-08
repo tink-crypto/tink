@@ -36,6 +36,7 @@ import com.google.crypto.tink.proto.Keyset;
 import com.google.crypto.tink.proto.Keyset.Key;
 import com.google.crypto.tink.proto.OutputPrefixType;
 import com.google.crypto.tink.subtle.Bytes;
+import com.google.crypto.tink.subtle.Hex;
 import com.google.crypto.tink.subtle.Random;
 import com.google.crypto.tink.testing.TestUtil;
 import java.security.GeneralSecurityException;
@@ -126,7 +127,7 @@ public class AeadWrapperTest {
         GeneralSecurityException.class, () -> wrappedAead.decrypt(rawCiphertext, invalid));
     assertThrows(
         GeneralSecurityException.class, () -> wrappedAead.decrypt(invalid, associatedData));
-    byte[] ciphertextWithTinkPrefix = Bytes.concat(TestUtil.hexDecode("0166AABBCC"), rawCiphertext);
+    byte[] ciphertextWithTinkPrefix = Bytes.concat(Hex.decode("0166AABBCC"), rawCiphertext);
     assertThrows(
         GeneralSecurityException.class,
         () -> wrappedAead.decrypt(ciphertextWithTinkPrefix, associatedData));
@@ -153,7 +154,7 @@ public class AeadWrapperTest {
     byte[] tinkPrefix = Arrays.copyOf(ciphertext, 5);
     byte[] ciphertextWithoutPrefix =
         Arrays.copyOfRange(ciphertext, 5, ciphertext.length);
-    assertThat(tinkPrefix).isEqualTo(TestUtil.hexDecode("0166AABBCC"));
+    assertThat(tinkPrefix).isEqualTo(Hex.decode("0166AABBCC"));
     assertThat(rawAead.decrypt(ciphertextWithoutPrefix, associatedData)).isEqualTo(plaintext);
   }
 
@@ -171,8 +172,7 @@ public class AeadWrapperTest {
     byte[] plaintext = "plaintext".getBytes(UTF_8);
     byte[] associatedData = "associatedData".getBytes(UTF_8);
     byte[] rawCiphertext = rawAead.encrypt(plaintext, associatedData);
-    byte[] rawCiphertextWithTinkPrefix =
-        Bytes.concat(TestUtil.hexDecode("0166AABBCC"), rawCiphertext);
+    byte[] rawCiphertextWithTinkPrefix = Bytes.concat(Hex.decode("0166AABBCC"), rawCiphertext);
 
     assertThat(wrappedAead.decrypt(rawCiphertextWithTinkPrefix, associatedData))
         .isEqualTo(plaintext);
