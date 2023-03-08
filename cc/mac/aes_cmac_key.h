@@ -19,6 +19,7 @@
 
 #include <memory>
 #include <string>
+#include <utility>
 
 #include "absl/types/optional.h"
 #include "tink/mac/aes_cmac_parameters.h"
@@ -50,7 +51,7 @@ class AesCmacKey : public MacKey {
     return aes_key_bytes_;
   }
 
-  util::StatusOr<std::string> GetOutputPrefix() const override;
+  std::string GetOutputPrefix() const override;
 
   const AesCmacParameters& GetParameters() const override {
     return parameters_;
@@ -64,14 +65,19 @@ class AesCmacKey : public MacKey {
 
  private:
   AesCmacKey(AesCmacParameters parameters, RestrictedData aes_key_bytes,
-             absl::optional<int> id_requirement)
+             absl::optional<int> id_requirement, std::string output_prefix)
       : parameters_(parameters),
         aes_key_bytes_(aes_key_bytes),
-        id_requirement_(id_requirement) {}
+        id_requirement_(id_requirement),
+        output_prefix_(std::move(output_prefix)) {}
+
+  static util::StatusOr<std::string> ComputeOutputPrefix(
+      const AesCmacParameters& parameters, absl::optional<int> id_requirement);
 
   AesCmacParameters parameters_;
   RestrictedData aes_key_bytes_;
   absl::optional<int> id_requirement_;
+  std::string output_prefix_;
 };
 
 }  // namespace tink

@@ -40,7 +40,7 @@ class MacKey : public Key {
   // may be a prefix of another). To avoid this, built-in Tink keys use the
   // convention that the prefix is either '0x00<big endian key id>' or
   // '0x01<big endian key id>'.
-  virtual util::StatusOr<std::string> GetOutputPrefix() const = 0;
+  virtual std::string GetOutputPrefix() const = 0;
 
   const MacParameters& GetParameters() const override = 0;
 

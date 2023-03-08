@@ -33,6 +33,7 @@
 namespace crypto {
 namespace tink {
 
+
 util::StatusOr<AesCmacKey> AesCmacKey::Create(
     AesCmacParameters parameters, RestrictedData aes_key_bytes,
     absl::optional<int> id_requirement, PartialKeyAccessToken token) {
@@ -52,26 +53,46 @@ util::StatusOr<AesCmacKey> AesCmacKey::Create(
         "Cannot create key with ID requirement with parameters without ID "
         "requirement");
   }
-  return AesCmacKey(parameters, aes_key_bytes, id_requirement);
+  util::StatusOr<std::string> output_prefix =
+      ComputeOutputPrefix(parameters, id_requirement);
+  if (!output_prefix.ok()) {
+    return output_prefix.status();
+  }
+  return AesCmacKey(parameters, aes_key_bytes, id_requirement,
+                    *std::move(output_prefix));
 }
 
-util::StatusOr<std::string> AesCmacKey::GetOutputPrefix() const {
-  switch (parameters_.GetVariant()) {
+util::StatusOr<std::string> AesCmacKey::ComputeOutputPrefix(
+    const AesCmacParameters& parameters, absl::optional<int> id_requirement) {
+  switch (parameters.GetVariant()) {
     case AesCmacParameters::Variant::kNoPrefix:
       return std::string("");  // Empty prefix.
     case AesCmacParameters::Variant::kLegacy:
       ABSL_FALLTHROUGH_INTENDED;
     case AesCmacParameters::Variant::kCrunchy:
+      if (!id_requirement.has_value()) {
+        return util::Status(
+            absl::StatusCode::kInvalidArgument,
+            "id requirement must have value with kCrunchy or kLegacy");
+      }
       return absl::StrCat(absl::HexStringToBytes("00"),
-                          subtle::BigEndian32(*id_requirement_));
+                          subtle::BigEndian32(*id_requirement));
     case AesCmacParameters::Variant::kTink:
+      if (!id_requirement.has_value()) {
+        return util::Status(absl::StatusCode::kInvalidArgument,
+                            "id requirement must have value with kTink");
+      }
       return absl::StrCat(absl::HexStringToBytes("01"),
-                          subtle::BigEndian32(*id_requirement_));
+                          subtle::BigEndian32(*id_requirement));
     default:
       return util::Status(
           absl::StatusCode::kInvalidArgument,
-          absl::StrCat("Invalid variant: ", parameters_.GetVariant()));
+          absl::StrCat("Invalid variant: ", parameters.GetVariant()));
   }
+}
+
+std::string AesCmacKey::GetOutputPrefix() const {
+  return output_prefix_;
 }
 
 bool AesCmacKey::operator==(const Key& other) const {

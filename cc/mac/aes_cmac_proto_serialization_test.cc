@@ -223,8 +223,7 @@ TEST_P(AesCmacProtoSerializationTest, ParseKey) {
   ASSERT_THAT(parsed_key, IsOk());
   EXPECT_THAT(parsed_key->GetSecret(InsecureSecretKeyAccess::Get()),
               Eq(raw_key_bytes));
-  EXPECT_THAT(cmac_key->GetOutputPrefix(),
-              IsOkAndHolds(test_case.output_prefix));
+  EXPECT_THAT(cmac_key->GetOutputPrefix(), Eq(test_case.output_prefix));
   EXPECT_THAT(cmac_key->GetParameters().GetVariant(), Eq(test_case.variant));
   EXPECT_THAT(cmac_key->GetParameters().KeySizeInBytes(),
               Eq(test_case.key_size));

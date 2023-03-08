@@ -80,7 +80,7 @@ TEST_P(AesCmacKeyTest, CreateSucceeds) {
 
   EXPECT_THAT(key->GetParameters(), Eq(*params));
   EXPECT_THAT(key->GetIdRequirement(), Eq(test_case.id_requirement));
-  EXPECT_THAT(key->GetOutputPrefix(), IsOkAndHolds(test_case.output_prefix));
+  EXPECT_THAT(key->GetOutputPrefix(), Eq(test_case.output_prefix));
 }
 
 TEST(AesCmacKeyTest, CreateKeyWithMismatchedKeySizeFails) {
