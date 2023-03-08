@@ -16,64 +16,79 @@
 
 package daead_test
 
+// [START deterministic-aead-example]
+
 import (
 	"bytes"
-	"encoding/base64"
 	"fmt"
 	"log"
-	"testing"
 
-	"github.com/google/tink/go/core/registry"
 	"github.com/google/tink/go/daead"
+	"github.com/google/tink/go/insecurecleartextkeyset"
 	"github.com/google/tink/go/keyset"
-	"github.com/google/tink/go/testutil"
 )
 
 func Example() {
-	kh, err := keyset.NewHandle(daead.AESSIVKeyTemplate())
-	if err != nil {
-		log.Fatal(err)
-	}
+	// A keyset created with "tinkey create-keyset --key-template=AES256_SIV". Note
+	// that this keyset has the secret key information in cleartext.
+	jsonKeyset := `{
+			"key": [{
+				"keyData": {
+						"keyMaterialType":
+								"SYMMETRIC",
+						"typeUrl":
+								"type.googleapis.com/google.crypto.tink.AesSivKey",
+						"value":
+								"EkAl9HCMmKTN1p3V186uhZpJQ+tivyc4IKyE+opg6SsEbWQ/WesWHzwCRrlgRuxdaggvgMzwWhjPnkk9gptBnGLK"
+				},
+				"keyId": 1919301694,
+				"outputPrefixType": "TINK",
+				"status": "ENABLED"
+		}],
+		"primaryKeyId": 1919301694
+	}`
 
-	// TODO: save the keyset to a safe location. DO NOT hardcode it in source code.
+	// Create a keyset handle from the cleartext keyset in the previous
+	// step. The keyset handle provides abstract access to the underlying keyset to
+	// limit the exposure of accessing the raw key material. WARNING: In practice,
+	// it is unlikely you will want to use a insecurecleartextkeyset, as it implies
+	// that your key material is passed in cleartext, which is a security risk.
 	// Consider encrypting it with a remote key in Cloud KMS, AWS KMS or HashiCorp Vault.
 	// See https://github.com/google/tink/blob/master/docs/GOLANG-HOWTO.md#storing-and-loading-existing-keysets.
-
-	d, err := daead.New(kh)
+	keysetHandle, err := insecurecleartextkeyset.Read(
+		keyset.NewJSONReader(bytes.NewBufferString(jsonKeyset)))
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	msg := []byte("this data needs to be encrypted")
-	aad := []byte("this data needs to be authenticated, but not encrypted")
-	ct1, err := d.EncryptDeterministically(msg, aad)
+	// Retrieve the DAEAD primitive we want to use from the keyset handle.
+	primitive, err := daead.New(keysetHandle)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	pt, err := d.DecryptDeterministically(ct1, aad)
+	// Use the primitive to encrypt a message. In this case the primary key of the
+	// keyset will be used (which is also the only key in this example).
+	plaintext := []byte("message")
+	associatedData := []byte("associated data")
+	ciphertext, err := primitive.EncryptDeterministically(plaintext, associatedData)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	ct2, err := d.EncryptDeterministically(msg, aad)
+	// Use the primitive to decrypt the message. Decrypt finds the correct key in
+	// the keyset and decrypts the ciphertext. If no key is found or decryption
+	// fails, it returns an error.
+	decrypted, err := primitive.DecryptDeterministically(ciphertext, associatedData)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	if !bytes.Equal(ct1, ct2) {
-		log.Fatal("ct1 != ct2")
-	}
-
-	fmt.Printf("Ciphertext: %s\n", base64.StdEncoding.EncodeToString(ct1))
-	fmt.Printf("Original  plaintext: %s\n", msg)
-	fmt.Printf("Decrypted Plaintext: %s\n", pt)
+	fmt.Println(ciphertext)
+	fmt.Println(string(decrypted))
+	// Output:
+	// [1 114 102 56 62 150 98 146 84 99 211 36 127 214 229 231 157 56 143 192 250 132 32 153 124 244 238 112]
+	// message
 }
 
-func TestDeterministicAEADInit(t *testing.T) {
-	// Check for AES-SIV key manager.
-	_, err := registry.GetKeyManager(testutil.AESSIVTypeURL)
-	if err != nil {
-		t.Errorf("unexpected error: %s", err)
-	}
-}
+// [END deterministic-aead-example]
