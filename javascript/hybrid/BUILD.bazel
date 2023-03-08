@@ -81,6 +81,7 @@ ts_library(
         ":hybrid_decrypt_wrapper",
         ":hybrid_encrypt_wrapper",
         "//aead:aead_config",
+        "//hybrid/internal/hpke",
         "//internal:registry",
     ],
 )
@@ -215,6 +216,7 @@ ts_library(
         "//aead:aead_key_templates",
         "//exception",
         "//hybrid/internal",
+        "//hybrid/internal/hpke",
         "//internal:crypto_format",
         "//internal:keyset_handle",
         "//internal:primitive_set",
