@@ -76,6 +76,7 @@ import com.google.crypto.tink.streamingaead.StreamingAeadConfig;
 import com.google.crypto.tink.subtle.EllipticCurves;
 import com.google.crypto.tink.subtle.Hex;
 import com.google.crypto.tink.subtle.Random;
+import com.google.errorprone.annotations.InlineMe;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.ExtensionRegistryLite;
 import com.google.protobuf.MessageLite;
@@ -559,11 +560,17 @@ public final class TestUtil {
   }
 
   /** Decodes hex string. */
+  @InlineMe(
+      replacement = "Hex.decode(hexData)",
+      imports = {"com.google.crypto.tink.subtle.Hex"})
   public static byte[] hexDecode(String hexData) {
     return Hex.decode(hexData);
   }
 
   /** Encodes bytes to hex string. */
+  @InlineMe(
+      replacement = "Hex.encode(data)",
+      imports = {"com.google.crypto.tink.subtle.Hex"})
   public static String hexEncode(byte[] data) {
     return Hex.encode(data);
   }
