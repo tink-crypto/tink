@@ -210,6 +210,16 @@ java_library(
     ],
 )
 
+java_library(
+    name = "aes_ctr_hmac_streaming_parameters",
+    srcs = ["AesCtrHmacStreamingParameters.java"],
+    deps = [
+        ":streaming_aead_parameters",
+        "@maven//:com_google_code_findbugs_jsr305",
+        "@maven//:com_google_errorprone_error_prone_annotations",
+    ],
+)
+
 # Android libraries
 
 android_library(
@@ -415,5 +425,15 @@ android_library(
         "//src/main/java/com/google/crypto/tink/util:secret_bytes-android",
         "@maven//:com_google_code_findbugs_jsr305",
         "@maven//:com_google_protobuf_protobuf_javalite",
+    ],
+)
+
+android_library(
+    name = "aes_ctr_hmac_streaming_parameters-android",
+    srcs = ["AesCtrHmacStreamingParameters.java"],
+    deps = [
+        ":streaming_aead_parameters-android",
+        "@maven//:com_google_code_findbugs_jsr305",
+        "@maven//:com_google_errorprone_error_prone_annotations",
     ],
 )

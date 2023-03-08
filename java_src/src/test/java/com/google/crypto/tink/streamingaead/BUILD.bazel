@@ -211,3 +211,15 @@ java_test(
         "@maven//:junit_junit",
     ],
 )
+
+java_test(
+    name = "AesCtrHmacStreamingParametersTest",
+    size = "small",
+    srcs = ["AesCtrHmacStreamingParametersTest.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink/aead:x_cha_cha20_poly1305_parameters",
+        "//src/main/java/com/google/crypto/tink/streamingaead:aes_ctr_hmac_streaming_parameters",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
