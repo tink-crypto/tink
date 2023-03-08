@@ -1702,7 +1702,6 @@ public class RegistryTest {
 
     assertThat(count).isEqualTo(2);
   }
-  // TODO(przydatek): Add more tests for creation of PrimitiveSets.
 
   private static PrimitiveSet<Aead> createAeadPrimitiveSet() throws Exception {
     return TestUtil.createPrimitiveSet(
