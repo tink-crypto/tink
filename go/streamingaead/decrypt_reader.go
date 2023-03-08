@@ -20,6 +20,7 @@ import (
 	"errors"
 	"io"
 
+	"github.com/google/tink/go/core/primitiveset"
 	"github.com/google/tink/go/tink"
 )
 
@@ -48,7 +49,12 @@ func (dr *decryptReader) Read(p []byte) (n int, err error) {
 		return 0, errKeyNotFound
 	}
 
-	entries, err := dr.wrapped.ps.RawEntries()
+	// For legacy reasons (Tink always encrypted with non-RAW keys) we use all
+	// primitives, even those which have output_prefix_type != RAW.
+	var allEntries []*primitiveset.Entry
+	for _, entryList := range dr.wrapped.ps.Entries {
+		allEntries = append(allEntries, entryList...)
+	}
 	if err != nil {
 		return 0, err
 	}
@@ -57,7 +63,7 @@ func (dr *decryptReader) Read(p []byte) (n int, err error) {
 	ur := &unreader{r: dr.cr}
 
 	// find proper key to decrypt ciphertext
-	for _, e := range entries {
+	for _, e := range allEntries {
 		sa, ok := e.Primitive.(tink.StreamingAEAD)
 		if !ok {
 			continue

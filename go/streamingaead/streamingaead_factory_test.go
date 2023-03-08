@@ -194,7 +194,7 @@ func TestFactoryWithKeysetWithTinkKeys(t *testing.T) {
 				Value:           value2,
 				KeyMaterialType: tinkpb.KeyData_SYMMETRIC,
 			},
-			OutputPrefixType: tinkpb.OutputPrefixType_TINK,
+			OutputPrefixType: tinkpb.OutputPrefixType_RAW,
 			KeyId:            2,
 			Status:           tinkpb.KeyStatusType_ENABLED,
 		}},
@@ -209,8 +209,7 @@ func TestFactoryWithKeysetWithTinkKeys(t *testing.T) {
 		t.Errorf("streamingaead.New(keysetHandle) err = %q, want nil", err)
 	}
 
-	// TODO(b/129044084) Currently fails: TINK keys are ignored when decrypting
-	if err := validateFactoryCipher(a, a); err == nil {
-		t.Errorf("Encryption & Decryption with TINK key unexpectedly succeeded. Is b/129044084 fixed?")
+	if err := validateFactoryCipher(a, a); err != nil {
+		t.Errorf("Encryption & Decryption with TINK key should succeed")
 	}
 }
