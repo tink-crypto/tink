@@ -76,8 +76,6 @@ public final class KeysetHandle {
    *   <li>By importing an existing key, with {@link KeysetHandle#importKey}
    * </ul>
    *
-   * . 7
-   *
    * <p>All these functions return a {@code KeysetBuilder.Entry}. It is necessary to assign an ID to
    * a new entry by calling one of {@link Entry#withFixedId} or {@link Entry#withRandomId}. The
    * exception is when an existing key which has an id requirement is imported (in which case the
