@@ -71,24 +71,24 @@ TEST_F(HmacBoringSslTest, testBasic) {
   { // Test with some example data.
     std::string data = "Some data to test.";
     auto res = hmac->ComputeMac(data);
-    EXPECT_TRUE(res.ok()) << res.status().ToString();
+    EXPECT_TRUE(res.ok()) << res.status();
     std::string tag = res.value();
     EXPECT_EQ(tag_size, tag.size());
     EXPECT_EQ(tag, absl::HexStringToBytes("9ccdca5b7fffb690df396e4ac49b9cd4"));
     auto status = hmac->VerifyMac(tag, data);
-    EXPECT_TRUE(status.ok()) << "tag:" << absl::BytesToHexString(tag)
-                             << " status:" << status.ToString();
+    EXPECT_TRUE(status.ok())
+        << "tag:" << absl::BytesToHexString(tag) << " status:" << status;
   }
   { // Test with empty example data.
     absl::string_view data;
     auto res = hmac->ComputeMac(data);
-    EXPECT_TRUE(res.ok()) << res.status().ToString();
+    EXPECT_TRUE(res.ok()) << res.status();
     std::string tag = res.value();
     EXPECT_EQ(tag_size, tag.size());
     EXPECT_EQ(tag, absl::HexStringToBytes("5433122f77bcf8a4d9b874b4149823ef"));
     auto status = hmac->VerifyMac(tag, data);
-    EXPECT_TRUE(status.ok()) << "tag:" << absl::BytesToHexString(tag)
-                             << " status:" << status.ToString();
+    EXPECT_TRUE(status.ok())
+        << "tag:" << absl::BytesToHexString(tag) << " status:" << status;
   }
 }
 
@@ -106,7 +106,7 @@ TEST_F(HmacBoringSslTest, testModification) {
   std::string data = "Some data to test";
   std::string tag = hmac->ComputeMac(data).value();
   auto status = hmac->VerifyMac(tag, data);
-  EXPECT_TRUE(status.ok()) << status.ToString();
+  EXPECT_TRUE(status.ok()) << status;
   size_t bits = tag.size() * 8;
   for (size_t i = 0; i < bits; i++) {
     std::string modified_tag = tag;
@@ -131,7 +131,7 @@ TEST_F(HmacBoringSslTest, testTruncation) {
   std::string data = "Some data to test";
   std::string tag = hmac->ComputeMac(data).value();
   auto status = hmac->VerifyMac(tag, data);
-  EXPECT_TRUE(status.ok()) << status.ToString();
+  EXPECT_TRUE(status.ok()) << status;
   for (size_t i = 0; i < tag.size(); i++) {
     std::string modified_tag(tag, 0, i);
     EXPECT_FALSE(hmac->VerifyMac(modified_tag, data).ok())
