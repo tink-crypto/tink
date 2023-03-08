@@ -14,6 +14,7 @@
 
 import binascii
 import io
+import random
 
 from absl.testing import absltest
 from absl.testing import parameterized
@@ -215,6 +216,45 @@ class AesGcmHkdfStreamingKeyTest(parameterized.TestCase):
     with self.assertRaises(tink.TinkError):
       testing_servers.remote_primitive(
           lang, keyset.SerializeToString(), streaming_aead.StreamingAead
+      )
+
+  def test_output_prefix_ignored(self):
+    lang_1 = random.choice(
+        tink_config.supported_languages_for_key_type('AesGcmHkdfStreamingKey')
+    )
+    lang_2 = random.choice(
+        tink_config.supported_languages_for_key_type('AesGcmHkdfStreamingKey')
+    )
+    output_prefix_1 = random.choice(
+        [tink_pb2.RAW, tink_pb2.CRUNCHY, tink_pb2.LEGACY, tink_pb2.TINK]
+    )
+    output_prefix_2 = random.choice(
+        [tink_pb2.RAW, tink_pb2.CRUNCHY, tink_pb2.LEGACY, tink_pb2.TINK]
+    )
+    with self.subTest(
+        f'Testing with languages ({lang_1}, {lang_2}) and output prefix types '
+        f'({tink_pb2.OutputPrefixType.Name(output_prefix_1)}, '
+        f'{tink_pb2.OutputPrefixType.Name(output_prefix_2)})'
+    ):
+      keyset = to_keyset(simple_valid_key())
+      keyset.key[0].output_prefix_type = output_prefix_1
+      saead_1 = testing_servers.remote_primitive(
+          lang_1, keyset.SerializeToString(), streaming_aead.StreamingAead
+      )
+      keyset.key[0].output_prefix_type = output_prefix_2
+      saead_2 = testing_servers.remote_primitive(
+          lang_2, keyset.SerializeToString(), streaming_aead.StreamingAead
+      )
+      plaintext = b'some plaintext'
+      associated_data = b'associated_data'
+      ciphertext = saead_1.new_encrypting_stream(
+          io.BytesIO(plaintext), associated_data
+      ).read()
+      self.assertEqual(
+          saead_2.new_decrypting_stream(
+              io.BytesIO(ciphertext), associated_data
+          ).read(),
+          plaintext,
       )
 
   @parameterized.parameters(
