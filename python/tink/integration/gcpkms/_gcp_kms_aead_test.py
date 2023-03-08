@@ -28,10 +28,12 @@ KEY_URI = 'gcp-kms://projects/tink-test-infrastructure/locations/global/keyRings
 LOCAL_KEY_URI = 'gcp-kms://projects/tink-test-infrastructure/locations/europe-west1/keyRings/unit-and-integration-test/cryptoKeys/aead-key'
 BAD_KEY_URI = 'aws-kms://arn:aws:kms:us-east-2:235739564943:key/3ee50705-5a82-4f5b-9753-05c4f473922f'
 
+ROOTS_PATH = 'google_root_pem/file/downloaded'
+
 if 'TEST_SRCDIR' in os.environ:
-  # Set root certificates for gRPC in Bazel Test which are needed on MacOS
+  # Set root certificates for gRPC
   os.environ['GRPC_DEFAULT_SSL_ROOTS_FILE_PATH'] = os.path.join(
-      os.environ['TEST_SRCDIR'], 'google_root_pem/file/downloaded')
+      os.environ['TEST_SRCDIR'], ROOTS_PATH)
 
 
 class GcpKmsAeadTest(absltest.TestCase):
