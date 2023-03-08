@@ -69,7 +69,7 @@ public class KeysDownloaderTest {
     httpTransportGetCount = new AtomicInteger(0);
     currentTimeInMillis = INITIAL_CURRENT_TIME_IN_MILLIS;
     executorIsAcceptingRunnables = true;
-    TestKeysDownloader.sTestInstance = this;
+    TestKeysDownloader.testInstance = this;
   }
 
   @After
@@ -450,7 +450,7 @@ public class KeysDownloaderTest {
   }
 
   private static class TestKeysDownloader extends KeysDownloader {
-    private static KeysDownloaderTest sTestInstance;
+    private static KeysDownloaderTest testInstance;
 
     TestKeysDownloader(Executor backgroundExecutor, HttpTransport httpTransport, String keysUrl) {
       super(backgroundExecutor, httpTransport, keysUrl);
@@ -458,7 +458,7 @@ public class KeysDownloaderTest {
 
     @Override
     long getCurrentTimeInMillis() {
-      return sTestInstance.currentTimeInMillis;
+      return testInstance.currentTimeInMillis;
     }
   }
 
