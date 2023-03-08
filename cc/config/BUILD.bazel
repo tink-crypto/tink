@@ -38,28 +38,6 @@ bool_flag(
     build_setting_default = False,
 )
 
-bool_flag(
-    name = "tink_use_absl_status",
-    build_setting_default = True,
-)
-
-config_setting(
-    name = "absl_status_enabled",
-    flag_values = {"//config:tink_use_absl_status": "True"},
-    visibility = ["//visibility:public"],
-)
-
-bool_flag(
-    name = "tink_use_absl_statusor",
-    build_setting_default = True,
-)
-
-config_setting(
-    name = "absl_statusor_enabled",
-    flag_values = {"//config:tink_use_absl_statusor": "True"},
-    visibility = ["//visibility:public"],
-)
-
 cc_library(
     name = "tink_fips",
     srcs = ["tink_fips.cc"],

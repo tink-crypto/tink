@@ -16,12 +16,6 @@ tink_module(core)
 
 # Configuration settings for the build.
 
-if (TINK_USE_ABSL_STATUS)
-    target_compile_definitions(tink_util_status PUBLIC TINK_USE_ABSL_STATUS)
-endif()
-if (TINK_USE_ABSL_STATUSOR)
-    target_compile_definitions(tink_util_statusor INTERFACE TINK_USE_ABSL_STATUSOR)
-endif()
 if(USE_ONLY_FIPS)
     target_compile_definitions(tink_internal_fips_utils PUBLIC TINK_USE_ONLY_FIPS)
 endif()

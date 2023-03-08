@@ -18,6 +18,7 @@
 
 #include "absl/status/status.h"
 #include "absl/strings/str_cat.h"
+#include "tink/util/status.h"
 #include "proto/common.pb.h"
 #include "proto/ecdsa.pb.h"
 #include "proto/tink.pb.h"

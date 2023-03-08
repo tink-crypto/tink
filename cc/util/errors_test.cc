@@ -24,49 +24,13 @@ namespace crypto {
 namespace tink {
 namespace {
 
-#ifndef TINK_USE_ABSL_STATUS
-TEST(ErrorsTest, ToStatusFTest) {
-  const char* const msg1 = "test message 1";
-  const char* const msg2 = "test message %s 2 %d";
-  crypto::tink::util::Status status;
-
-  status = util::Status(crypto::tink::util::error::OK, msg1);
-  EXPECT_TRUE(status.ok());
-  // if status is OK, error message is ignored
-  EXPECT_EQ("", status.message());
-  EXPECT_EQ(crypto::tink::util::error::OK, status.error_code());
-
-  const char* expected_msg2 = "test message asdf 2 42";
-  status = ToStatusF(crypto::tink::util::error::UNKNOWN, msg2, "asdf", 42);
-  EXPECT_FALSE(status.ok());
-  EXPECT_EQ(expected_msg2, status.message());
-  EXPECT_EQ(crypto::tink::util::error::UNKNOWN, status.error_code());
-}
-
-TEST(ErrorsTest, ToAbslStatus) {
-  crypto::tink::util::Status tink_status(util::error::INVALID_ARGUMENT,
-                                         "error");
-  ::absl::Status g3_status(tink_status);
-  EXPECT_FALSE(g3_status.ok());
-  EXPECT_EQ(g3_status.message(), "error");
-
-  EXPECT_EQ(::absl::Status(crypto::tink::util::OkStatus()), ::absl::OkStatus());
-}
-#endif
-
 TEST(ErrorsTest, ToStatusFAbslStatusCodeTest) {
   const char* const msg = "test message %s 2 %d";
   const char* expected_msg = "test message asdf 2 42";
-  crypto::tink::util::Status status =
-      ToStatusF(absl::StatusCode::kUnknown, msg, "asdf", 42);
+  util::Status status = ToStatusF(absl::StatusCode::kUnknown, msg, "asdf", 42);
   EXPECT_FALSE(status.ok());
   EXPECT_EQ(expected_msg, status.message());
   EXPECT_EQ(absl::StatusCode::kUnknown, status.code());
-
-  #ifndef TINK_USE_ABSL_STATUS
-  EXPECT_EQ(expected_msg, status.error_message());
-  EXPECT_EQ(crypto::tink::util::error::UNKNOWN, status.error_code());
-  #endif
 }
 
 }  // namespace

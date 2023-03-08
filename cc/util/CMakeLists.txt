@@ -36,6 +36,7 @@ tink_cc_library(
     enums.cc
     enums.h
   DEPS
+    tink::util::status
     tink::util::statusor
     absl::status
     absl::strings
@@ -48,12 +49,9 @@ tink_cc_library(
 tink_cc_library(
   NAME status
   SRCS
-    status.cc
     status.h
   DEPS
-    absl::core_headers
     absl::status
-    absl::strings
   PUBLIC
 )
 
@@ -61,11 +59,8 @@ tink_cc_library(
   NAME statusor
   SRCS
     statusor.h
-    statusor.h
   DEPS
     tink::util::status
-    absl::check
-    absl::log
     absl::statusor
   PUBLIC
 )
@@ -524,28 +519,4 @@ tink_cc_test(
     tink::aead::aead_key_templates
     tink::proto::kms_aead_cc_proto
     tink::proto::kms_envelope_cc_proto
-)
-
-tink_cc_test(
-  NAME status_test
-  SRCS
-    status_test.cc
-  DEPS
-    tink::util::status
-    gmock
-    absl::status
-)
-
-tink_cc_test(
-  NAME statusor_test
-  SRCS
-    statusor_test.cc
-  DEPS
-    tink::util::status
-    tink::util::statusor
-    tink::util::test_matchers
-    gmock
-    absl::memory
-    absl::status
-    absl::statusor
 )
