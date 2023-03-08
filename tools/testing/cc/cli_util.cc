@@ -220,16 +220,14 @@ Status CliUtil::InitAws() {
                            "/tools/testdata/aws/credentials.ini";
   auto client_result = AwsKmsClient::New("", creds_file);
   if (!client_result.ok()) {
-    return Status(crypto::tink::util::error::INTERNAL,
-                        "Failed to connect to AWS client.");
+    return Status(absl::StatusCode::kInternal, "Failed to connect to AWS client.");
   }
   auto client_add_result =
       KmsClients::Add(std::move(client_result.value()));
   if (!client_add_result.ok()) {
-    return Status(crypto::tink::util::error::INTERNAL,
-                        "Failed to add KMS client.");
+    return Status(absl::StatusCode::kInternal, "Failed to add KMS client.");
   }
-  return Status::OK;
+  return util::OkStatus();
 }
 
 // static
