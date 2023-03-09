@@ -611,7 +611,9 @@ public final class TestUtil {
    * Check that this is running in Remote Build Execution.
    *
    * @return true if running on Remote Build Execution.
+   * @deprecated This isn't supported anymore
    */
+  @Deprecated
   public static boolean isRemoteBuildExecution() {
     return false;
   }
