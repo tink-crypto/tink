@@ -117,7 +117,7 @@ class PrimitiveSet {
   };
 
   typedef std::vector<std::unique_ptr<Entry<P>>> Primitives;
-  typedef std::unordered_map<std::string, Primitives>
+  typedef absl::flat_hash_map<std::string, Primitives>
       CiphertextPrefixToPrimitivesMap;
 
  private:
