@@ -437,3 +437,29 @@ android_library(
         "@maven//:com_google_errorprone_error_prone_annotations",
     ],
 )
+
+android_library(
+    name = "aes_ctr_hmac_streaming_key-android",
+    srcs = ["AesCtrHmacStreamingKey.java"],
+    deps = [
+        ":aes_ctr_hmac_streaming_parameters-android",
+        ":streaming_aead_key-android",
+        "//src/main/java/com/google/crypto/tink:accesses_partial_key-android",
+        "//src/main/java/com/google/crypto/tink:key-android",
+        "//src/main/java/com/google/crypto/tink/util:secret_bytes-android",
+        "@maven//:com_google_errorprone_error_prone_annotations",
+    ],
+)
+
+java_library(
+    name = "aes_ctr_hmac_streaming_key",
+    srcs = ["AesCtrHmacStreamingKey.java"],
+    deps = [
+        ":aes_ctr_hmac_streaming_parameters",
+        ":streaming_aead_key",
+        "//src/main/java/com/google/crypto/tink:accesses_partial_key",
+        "//src/main/java/com/google/crypto/tink:key",
+        "//src/main/java/com/google/crypto/tink/util:secret_bytes",
+        "@maven//:com_google_errorprone_error_prone_annotations",
+    ],
+)
