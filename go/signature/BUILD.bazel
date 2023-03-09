@@ -60,6 +60,7 @@ go_test(
         "rsassapss_signer_key_manager_test.go",
         "rsassapss_verifier_key_manager_test.go",
         "signature_factory_test.go",
+        "signature_init_test.go",
         "signature_key_templates_test.go",
         "signature_test.go",
     ],
