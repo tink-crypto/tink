@@ -559,18 +559,28 @@ public final class TestUtil {
     assertArrayEquals(plaintext, decrypted);
   }
 
-  /** Decodes hex string. */
+  /**
+   * Decodes hex string.
+   *
+   * @deprecated Usages should be inlined.
+   */
   @InlineMe(
       replacement = "Hex.decode(hexData)",
       imports = {"com.google.crypto.tink.subtle.Hex"})
+  @Deprecated
   public static byte[] hexDecode(String hexData) {
     return Hex.decode(hexData);
   }
 
-  /** Encodes bytes to hex string. */
+  /**
+   * Encodes bytes to hex string.
+   *
+   * @deprecated Usages should be inlined.
+   */
   @InlineMe(
       replacement = "Hex.encode(data)",
       imports = {"com.google.crypto.tink.subtle.Hex"})
+  @Deprecated
   public static String hexEncode(byte[] data) {
     return Hex.encode(data);
   }
