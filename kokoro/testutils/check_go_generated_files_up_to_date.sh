@@ -16,18 +16,44 @@
 
 # This scripts checks that a given Go workspace has its generated Bazel files up
 # to date.
-#
-# NOTEs:
-#   * Bazel and go must be already installed.
-#
-# Usage:
-#   ./kokoro/testutils/check_go_generated_files_up_to_date.sh <go project dir>
 
-check_go_generated_files_up_to_date() {
-  local go_project_dir="$1"
+BAZEL_CMD="bazel"
+# Use Bazelisk (https://github.com/bazelbuild/bazelisk) if available.
+if command -v "bazelisk" &> /dev/null; then
+  BAZEL_CMD="bazelisk"
+  "${BAZEL_CMD}" version
+fi
+
+usage() {
+  echo "Usage: $0 [-h] [-c <compat value (default 1.17)>] <go project dir>"
+  echo "  -c: Value to pass to `-compat`. Default to 1.17."
+  echo "  -h: Help. Print this usage information."
+  exit 1
+}
+
+COMPAT="1.17"
+GO_PROJECT_DIR=
+
+process_args() {
+  # Parse options.
+  while getopts "hc:" opt; do
+    case "${opt}" in
+      c) COMPAT="${OPTARG}" ;;
+      *) usage ;;
+    esac
+  done
+  shift $((OPTIND - 1))
+  readonly GO_PROJECT_DIR="$1"
+  if [[ -z "${GO_PROJECT_DIR}" ]]; then
+    usage
+  fi
+}
+
+main() {
+  process_args "$@"
 
   (
-    cd "${go_project_dir}"
+    cd "${GO_PROJECT_DIR}"
     local -r temp_dir_current_generated_files="$(mktemp -dt \
       current_tink_go_build_files.XXXXXX)"
     local -r go_generated_files=(
@@ -45,19 +71,20 @@ check_go_generated_files_up_to_date() {
 
     for generated_file_path in "${current_go_generated_files[@]}"; do
       mkdir -p \
-        "$(dirname "${temp_dir_current_generated_files}/${generated_file_path}")"
+        "$(dirname \
+          "${temp_dir_current_generated_files}/${generated_file_path}")"
       cp "${generated_file_path}" \
         "${temp_dir_current_generated_files}/${generated_file_path}"
     done
 
-    # Update build files
-    go mod tidy
-    # Update deps.bzl
-    bazel run //:gazelle-update-repos
-    # Update all BUILD.bazel files
-    bazel run //:gazelle
+    # Update build files.
+    go mod tidy -compat="${COMPAT}"
+    # Update deps.bzl.
+    "${BAZEL_CMD}" run //:gazelle-update-repos
+    # Update all BUILD.bazel files.
+    "${BAZEL_CMD}" run //:gazelle
 
-    # Compare current with new build files
+    # Compare current with new build files.
     local new_go_generated_files=( "${go_generated_files[@]}" )
     while read -r -d $'\0' generated_file; do
       new_go_generated_files+=("${generated_file}")
@@ -67,12 +94,12 @@ check_go_generated_files_up_to_date() {
     for generated_file_path in "${new_go_generated_files[@]}"; do
       if ! cmp -s "${generated_file_path}" \
           "${temp_dir_current_generated_files}/${generated_file_path}"; then
-        echo "FAIL: ${generated_file_path} needs to be updated. Please follow \
-the instructions on go/tink-workflows#update-go-build."
+        echo "ERROR: ${generated_file_path} needs to be updated. Please follow \
+the instructions on go/tink-workflows#update-go-build." >&2
         exit 1
       fi
     done
   )
 }
 
-check_go_generated_files_up_to_date "$@"
+main "$@"
