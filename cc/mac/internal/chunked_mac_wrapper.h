@@ -14,8 +14,8 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef TINK_CHUNKEDMAC_INTERNAL_CHUNKED_MAC_WRAPPER_H_
-#define TINK_CHUNKEDMAC_INTERNAL_CHUNKED_MAC_WRAPPER_H_
+#ifndef TINK_MAC_INTERNAL_CHUNKED_MAC_WRAPPER_H_
+#define TINK_MAC_INTERNAL_CHUNKED_MAC_WRAPPER_H_
 
 #include <memory>
 
@@ -47,4 +47,4 @@ class ChunkedMacWrapper : public PrimitiveWrapper<ChunkedMac, ChunkedMac> {
 }  // namespace tink
 }  // namespace crypto
 
-#endif  // TINK_CHUNKEDMAC_INTERNAL_CHUNKED_MAC_WRAPPER_H_
+#endif  // TINK_MAC_INTERNAL_CHUNKED_MAC_WRAPPER_H_
