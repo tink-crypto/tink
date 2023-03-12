@@ -1083,3 +1083,30 @@ cc_test(
         "@com_google_googletest//:gtest_main",
     ],
 )
+
+cc_library(
+    name = "configuration_impl",
+    hdrs = ["configuration_impl.h"],
+    include_prefix = "tink/internal",
+    deps = [
+        ":registry_impl",
+        "//:configuration",
+    ],
+)
+
+cc_test(
+    name = "configuration_impl_test",
+    srcs = ["configuration_impl_test.cc"],
+    deps = [
+        ":configuration_impl",
+        ":fips_utils",
+        ":registry_impl",
+        "//:aead",
+        "//:configuration",
+        "//proto:aes_gcm_cc_proto",
+        "//proto:rsa_ssa_pss_cc_proto",
+        "//util:test_matchers",
+        "//util:test_util",
+        "@com_google_googletest//:gtest_main",
+    ],
+)

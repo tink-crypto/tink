@@ -1029,3 +1029,29 @@ tink_cc_test(
     tink::util::status
     tink::util::test_matchers
 )
+
+tink_cc_library(
+  NAME configuration_impl
+  SRCS
+    configuration_impl.h
+  DEPS
+    tink::internal::registry_impl
+    tink::core::configuration
+)
+
+tink_cc_test(
+  NAME configuration_impl_test
+  SRCS
+    configuration_impl_test.cc
+  DEPS
+    tink::internal::configuration_impl
+    tink::internal::fips_utils
+    tink::internal::registry_impl
+    gmock
+    tink::core::aead
+    tink::core::configuration
+    tink::util::test_matchers
+    tink::util::test_util
+    tink::proto::aes_gcm_cc_proto
+    tink::proto::rsa_ssa_pss_cc_proto
+)

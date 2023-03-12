@@ -1091,3 +1091,11 @@ tink_cc_test(
     tink::util::secret_data
     tink::util::test_matchers
 )
+
+tink_cc_library(
+  NAME configuration
+  SRCS
+    configuration.h
+  DEPS
+    tink::internal::registry_impl
+)

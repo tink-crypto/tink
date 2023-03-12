@@ -1161,3 +1161,10 @@ cc_test(
         "@com_google_googletest//:gtest_main",
     ],
 )
+
+cc_library(
+    name = "configuration",
+    hdrs = ["configuration.h"],
+    include_prefix = "tink",
+    deps = ["//internal:registry_impl"],
+)
