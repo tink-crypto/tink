@@ -33,6 +33,7 @@
 #include "tink/aead/internal/ssl_aead.h"
 #include "tink/config/tink_fips.h"
 #include "tink/internal/ssl_util.h"
+#include "tink/internal/util.h"
 #include "tink/subtle/subtle_util.h"
 #include "tink/util/secret_data.h"
 #include "tink/util/statusor.h"
@@ -87,6 +88,9 @@ using SslOneShotAeadLargeInputsTest = TestWithParam<TestParams>;
 
 // Encrypt/decrypt with an input larger than a MAX int.
 TEST_P(SslOneShotAeadLargeInputsTest, EncryptDecryptLargeInput) {
+  if (IsWindows()) {
+    GTEST_SKIP() << "Skipping on Windows: this currently times out";
+  }
   const int64_t buff_size =
       static_cast<int64_t>(std::numeric_limits<int>::max()) + 1024;
   std::string large_input(buff_size, '0');

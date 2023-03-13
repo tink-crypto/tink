@@ -265,6 +265,7 @@ cc_test(
         ":ssl_aead",
         "//config:tink_fips",
         "//internal:ssl_util",
+        "//internal:util",
         "//subtle:subtle_util",
         "//util:secret_data",
         "//util:statusor",
