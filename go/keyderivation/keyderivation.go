@@ -16,11 +16,6 @@
 
 // Package keyderivation provides implementations of the keyset deriver
 // primitive.
-//
-// # Status
-//
-// This package is not completely implemented.
-// TODO(b/227682336): Add cross-language tests before modifying status.
 package keyderivation
 
 import (
@@ -33,7 +28,7 @@ import (
 )
 
 var (
-	keysetHandle   = internal.KeysetHandle.(func(*tinkpb.Keyset, ...keyset.Option) (*keyset.Handle, error))
+	keysetHandle = internal.KeysetHandle.(func(*tinkpb.Keyset, ...keyset.Option) (*keyset.Handle, error))
 )
 
 func init() {
