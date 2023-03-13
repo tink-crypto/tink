@@ -104,7 +104,6 @@ tink_cc_library(
     absl::strings
     absl::synchronization
     absl::optional
-    tink::core::catalogue
     tink::core::key_manager_impl
     tink::core::key_type_manager
     tink::core::private_key_manager_impl
@@ -252,7 +251,6 @@ tink_cc_test(
     absl::strings
     crypto
     tink::core::aead
-    tink::core::catalogue
     tink::core::key_manager_impl
     tink::core::key_type_manager
     tink::core::private_key_manager_impl

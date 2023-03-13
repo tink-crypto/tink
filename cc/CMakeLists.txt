@@ -33,7 +33,6 @@ tink_cc_library(
     aead_key_templates.h
     binary_keyset_reader.h
     binary_keyset_writer.h
-    catalogue.h
     cleartext_keyset_handle.h
     deterministic_aead.h
     deterministic_aead_config.h
@@ -364,16 +363,6 @@ tink_cc_library(
     tink::util::status
     tink::util::statusor
     tink::proto::tink_cc_proto
-)
-
-tink_cc_library(
-  NAME catalogue
-  SRCS
-    catalogue.h
-  DEPS
-    tink::core::key_manager
-    absl::core_headers
-    tink::util::statusor
 )
 
 tink_cc_library(

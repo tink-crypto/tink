@@ -23,7 +23,6 @@ cc_library(
         "aead_key_templates.h",
         "binary_keyset_reader.h",
         "binary_keyset_writer.h",
-        "catalogue.h",
         "deterministic_aead.h",
         "deterministic_aead_config.h",
         "deterministic_aead_factory.h",
@@ -392,17 +391,6 @@ cc_library(
         "@com_google_absl//absl/status",
         "@com_google_absl//absl/strings",
         "@rapidjson",
-    ],
-)
-
-cc_library(
-    name = "catalogue",
-    hdrs = ["catalogue.h"],
-    include_prefix = "tink",
-    deps = [
-        ":key_manager",
-        "//util:statusor",
-        "@com_google_absl//absl/base:core_headers",
     ],
 )
 
