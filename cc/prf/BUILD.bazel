@@ -273,7 +273,6 @@ cc_test(
         ":prf_config",
         ":prf_key_templates",
         ":prf_set",
-        "//:config",
         "//:tink_cc",
         "//config:tink_fips",
         "//util:status",

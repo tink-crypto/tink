@@ -24,7 +24,6 @@ cc_library(
         "binary_keyset_reader.h",
         "binary_keyset_writer.h",
         "catalogue.h",
-        "config.h",
         "deterministic_aead.h",
         "deterministic_aead_config.h",
         "deterministic_aead_factory.h",
@@ -404,31 +403,6 @@ cc_library(
         ":key_manager",
         "//util:statusor",
         "@com_google_absl//absl/base:core_headers",
-    ],
-)
-
-cc_library(
-    name = "config",
-    srcs = ["core/config.cc"],
-    hdrs = ["config.h"],
-    include_prefix = "tink",
-    deps = [
-        ":catalogue",
-        ":key_manager",
-        ":registry",
-        "//aead:aead_config",
-        "//daead:deterministic_aead_config",
-        "//hybrid:hybrid_config",
-        "//mac:mac_config",
-        "//proto:config_cc_proto",
-        "//signature:signature_config",
-        "//streamingaead:streaming_aead_config",
-        "//util:errors",
-        "//util:status",
-        "//util:statusor",
-        "@com_google_absl//absl/base:core_headers",
-        "@com_google_absl//absl/status",
-        "@com_google_absl//absl/strings",
     ],
 )
 
@@ -857,18 +831,6 @@ cc_test(
 )
 
 cc_test(
-    name = "config_test",
-    size = "small",
-    srcs = ["core/config_test.cc"],
-    deps = [
-        ":config",
-        ":mac",
-        "//proto:config_cc_proto",
-        "@com_google_googletest//:gtest_main",
-    ],
-)
-
-cc_test(
     name = "crypto_format_test",
     size = "small",
     srcs = ["core/crypto_format_test.cc"],
@@ -963,7 +925,6 @@ cc_test(
     size = "small",
     srcs = ["core/keyset_manager_test.cc"],
     deps = [
-        ":config",
         ":keyset_handle",
         ":keyset_manager",
         "//aead:aead_config",

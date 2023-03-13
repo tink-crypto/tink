@@ -400,7 +400,6 @@ tink_cc_test(
     tink::signature::public_key_verify_factory
     tink::signature::signature_config
     gmock
-    tink::core::config
     tink::core::crypto_format
     tink::core::keyset_handle
     tink::core::public_key_verify
@@ -442,7 +441,6 @@ tink_cc_test(
     tink::signature::public_key_sign_factory
     tink::signature::signature_config
     gmock
-    tink::core::config
     tink::core::crypto_format
     tink::core::keyset_handle
     tink::core::public_key_sign
@@ -653,7 +651,6 @@ tink_cc_test(
     absl::memory
     absl::status
     crypto
-    tink::core::config
     tink::core::keyset_handle
     tink::core::public_key_sign
     tink::core::public_key_verify

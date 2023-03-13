@@ -284,7 +284,6 @@ cc_test(
         ":ecies_aead_hkdf_public_key_manager",
         ":hybrid_config",
         ":hybrid_key_templates",
-        "//:config",
         "//:hybrid_decrypt",
         "//:hybrid_encrypt",
         "//:keyset_handle",
@@ -373,7 +372,6 @@ cc_test(
         ":ecies_aead_hkdf_public_key_manager",
         ":hybrid_config",
         ":hybrid_decrypt_factory",
-        "//:config",
         "//:crypto_format",
         "//:hybrid_decrypt",
         "//:hybrid_encrypt",
@@ -395,7 +393,6 @@ cc_test(
     deps = [
         ":hybrid_config",
         ":hybrid_encrypt_factory",
-        "//:config",
         "//:crypto_format",
         "//:hybrid_encrypt",
         "//:keyset_handle",

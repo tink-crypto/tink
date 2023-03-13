@@ -7,7 +7,6 @@ tink_cc_library(
     tink_config.h
   DEPS
     absl::core_headers
-    tink::core::config
     tink::core::key_manager
     tink::core::registry
     tink::daead::deterministic_aead_config
@@ -53,7 +52,6 @@ tink_cc_test(
     absl::status
     tink::core::cc
     tink::core::aead
-    tink::core::config
     tink::core::deterministic_aead
     tink::core::hybrid_decrypt
     tink::core::hybrid_encrypt

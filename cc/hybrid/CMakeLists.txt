@@ -259,7 +259,6 @@ tink_cc_test(
     gmock
     absl::status
     crypto
-    tink::core::config
     tink::core::hybrid_decrypt
     tink::core::hybrid_encrypt
     tink::core::keyset_handle
@@ -344,7 +343,6 @@ tink_cc_test(
     tink::hybrid::hybrid_decrypt_factory
     gmock
     absl::memory
-    tink::core::config
     tink::core::crypto_format
     tink::core::hybrid_decrypt
     tink::core::hybrid_encrypt
@@ -364,7 +362,6 @@ tink_cc_test(
     tink::hybrid::hybrid_config
     tink::hybrid::hybrid_encrypt_factory
     gmock
-    tink::core::config
     tink::core::crypto_format
     tink::core::hybrid_encrypt
     tink::core::keyset_handle

@@ -25,7 +25,6 @@
 #include "absl/memory/memory.h"
 #include "absl/status/status.h"
 #include "openssl/crypto.h"
-#include "tink/config.h"
 #include "tink/config/tink_fips.h"
 #include "tink/keyset_handle.h"
 #include "tink/public_key_sign.h"

@@ -20,7 +20,6 @@
 #include <utility>
 
 #include "gtest/gtest.h"
-#include "tink/config.h"
 #include "tink/crypto_format.h"
 #include "tink/hybrid/hybrid_config.h"
 #include "tink/hybrid_encrypt.h"

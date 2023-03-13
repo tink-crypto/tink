@@ -20,7 +20,6 @@
 #include <utility>
 
 #include "gtest/gtest.h"
-#include "tink/config.h"
 #include "tink/crypto_format.h"
 #include "tink/keyset_handle.h"
 #include "tink/public_key_sign.h"

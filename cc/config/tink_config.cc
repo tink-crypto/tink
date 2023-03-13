@@ -16,7 +16,6 @@
 
 #include "tink/config/tink_config.h"
 
-#include "tink/config.h"
 #include "tink/daead/deterministic_aead_config.h"
 #include "tink/hybrid/hybrid_config.h"
 #include "tink/key_manager.h"

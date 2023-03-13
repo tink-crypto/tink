@@ -24,7 +24,6 @@
 #include "gtest/gtest.h"
 #include "absl/status/status.h"
 #include "tink/chunked_mac.h"
-#include "tink/config.h"
 #include "tink/config/tink_fips.h"
 #include "tink/internal/mutable_serialization_registry.h"
 #include "tink/internal/proto_key_serialization.h"

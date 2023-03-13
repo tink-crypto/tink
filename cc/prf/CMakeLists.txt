@@ -263,7 +263,6 @@ tink_cc_test(
     absl::status
     crypto
     tink::core::cc
-    tink::core::config
     tink::config::tink_fips
     tink::util::status
     tink::util::test_matchers

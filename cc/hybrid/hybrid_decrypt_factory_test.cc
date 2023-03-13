@@ -22,7 +22,6 @@
 
 #include "gtest/gtest.h"
 #include "absl/memory/memory.h"
-#include "tink/config.h"
 #include "tink/crypto_format.h"
 #include "tink/hybrid/ecies_aead_hkdf_public_key_manager.h"
 #include "tink/hybrid/hybrid_config.h"

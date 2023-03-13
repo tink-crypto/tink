@@ -264,7 +264,6 @@ cc_test(
         ":mac_config",
         ":mac_key_templates",
         "//:chunked_mac",
-        "//:config",
         "//:keyset_handle",
         "//:mac",
         "//:partial_key_access",
