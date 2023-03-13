@@ -18,6 +18,7 @@ ts_library(
         ":hybrid_key_templates",
         "//aead:aes_ctr_hmac",
         "//aead:aes_gcm",
+        "//hybrid/internal/hpke",
     ],
 )
 
