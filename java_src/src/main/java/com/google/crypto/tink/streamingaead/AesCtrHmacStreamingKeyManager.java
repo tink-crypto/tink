@@ -212,6 +212,7 @@ public final class AesCtrHmacStreamingKeyManager extends KeyTypeManager<AesCtrHm
 
   public static void register(boolean newKeyAllowed) throws GeneralSecurityException {
     Registry.registerKeyManager(new AesCtrHmacStreamingKeyManager(), newKeyAllowed);
+    AesCtrHmacStreamingProtoSerialization.register();
   }
 
   /**

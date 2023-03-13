@@ -85,6 +85,7 @@ java_library(
     name = "aes_gcm_hkdf_streaming_key_manager",
     srcs = ["AesGcmHkdfStreamingKeyManager.java"],
     deps = [
+        ":aes_gcm_hkdf_streaming_proto_serialization",
         ":streaming_aead_util",
         "//proto:aes_gcm_hkdf_streaming_java_proto",
         "//proto:common_java_proto",
@@ -105,6 +106,7 @@ java_library(
     name = "aes_ctr_hmac_streaming_key_manager",
     srcs = ["AesCtrHmacStreamingKeyManager.java"],
     deps = [
+        ":aes_ctr_hmac_streaming_proto_serialization",
         ":streaming_aead_util",
         "//proto:aes_ctr_hmac_streaming_java_proto",
         "//proto:common_java_proto",
@@ -301,6 +303,7 @@ android_library(
     name = "aes_gcm_hkdf_streaming_key_manager-android",
     srcs = ["AesGcmHkdfStreamingKeyManager.java"],
     deps = [
+        ":aes_gcm_hkdf_streaming_proto_serialization-android",
         ":streaming_aead_util-android",
         "//proto:aes_gcm_hkdf_streaming_java_proto_lite",
         "//proto:common_java_proto_lite",
@@ -321,6 +324,7 @@ android_library(
     name = "aes_ctr_hmac_streaming_key_manager-android",
     srcs = ["AesCtrHmacStreamingKeyManager.java"],
     deps = [
+        ":aes_ctr_hmac_streaming_proto_serialization-android",
         ":streaming_aead_util-android",
         "//proto:aes_ctr_hmac_streaming_java_proto_lite",
         "//proto:common_java_proto_lite",
