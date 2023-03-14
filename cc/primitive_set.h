@@ -30,12 +30,15 @@
 #include "absl/status/status.h"
 #include "absl/synchronization/mutex.h"
 #include "tink/crypto_format.h"
+#include "tink/util/constants.h"
 #include "tink/util/errors.h"
 #include "tink/util/statusor.h"
+#include "proto/prf_based_deriver.pb.h"
 #include "proto/tink.pb.h"
 
 namespace crypto {
 namespace tink {
+// Placeholder for internal forward declaration.
 
 // A container class for a set of primitives (i.e. implementations of
 // cryptographic primitives offered by Tink).  It provides also
@@ -149,19 +152,31 @@ class PrimitiveSet {
   static crypto::tink::util::StatusOr<Entry<P>*> AddPrimitiveImpl(
       std::unique_ptr<P> primitive,
       const google::crypto::tink::KeysetInfo::KeyInfo& key_info,
-      CiphertextPrefixToPrimitivesMap& primitives) {
+      CiphertextPrefixToPrimitivesMap& primitives,
+      std::vector<Entry<P>*>& ordered_keyset_deriver_primitives) {
     auto entry_or = Entry<P>::New(std::move(primitive), key_info);
     if (!entry_or.ok()) return entry_or.status();
 
     std::string identifier = entry_or.value()->get_identifier();
     primitives[identifier].push_back(std::move(entry_or.value()));
-    return primitives[identifier].back().get();
+
+    Entry<P>* stored_entry = primitives[identifier].back().get();
+    // Store KeysetDeriver entries so key derivation preserves the original
+    // keyset key order. Currently, key derivation only supports
+    // PrfBasedDeriverKeys.
+    if (stored_entry->get_key_type_url() ==
+        absl::StrCat(
+            kTypeGoogleapisCom,
+            google::crypto::tink::PrfBasedDeriverKey().GetTypeName())) {
+      ordered_keyset_deriver_primitives.push_back(stored_entry);
+    }
+    return stored_entry;
   }
 
  public:
-  // Builder is used to construct PrimitiveSet objects. Objects returned by the
-  // builder are immutable. Calling any of the non-const methods on them will
-  // fail.
+  // Builder is used to construct PrimitiveSet objects. Objects returned by
+  // the builder are immutable. Calling any of the non-const methods on them
+  // will fail.
   class Builder {
    public:
     // Adds 'primitive' to this set for the specified 'key'.
@@ -170,7 +185,8 @@ class PrimitiveSet {
         const google::crypto::tink::KeysetInfo::KeyInfo& key_info) & {
       absl::MutexLock lock(&mutex_);
       if (!status_.ok()) return *this;
-      status_ = AddPrimitiveImpl(std::move(primitive), key_info, primitives_)
+      status_ = AddPrimitiveImpl(std::move(primitive), key_info, primitives_,
+                                 ordered_keyset_deriver_primitives_)
                     .status();
       return *this;
     }
@@ -189,7 +205,8 @@ class PrimitiveSet {
       absl::MutexLock lock(&mutex_);
       if (!status_.ok()) return *this;
       auto entry_result =
-          AddPrimitiveImpl(std::move(primitive), key_info, primitives_);
+          AddPrimitiveImpl(std::move(primitive), key_info, primitives_,
+                           ordered_keyset_deriver_primitives_);
       if (!entry_result.ok()) {
         status_ = entry_result.status();
         return *this;
@@ -221,13 +238,19 @@ class PrimitiveSet {
       absl::MutexLock lock(&mutex_);
       if (!status_.ok()) return status_;
       return PrimitiveSet<P>(std::move(primitives_), primary_,
+                             std::move(ordered_keyset_deriver_primitives_),
                              std::move(annotations_));
     }
 
    private:
-    // The Entry<P> object is owned by primitives_
+    // The Entry<P> object is owned by primitives_.
     Entry<P>* primary_ ABSL_GUARDED_BY(mutex_) = nullptr;
     CiphertextPrefixToPrimitivesMap primitives_ ABSL_GUARDED_BY(mutex_);
+    // Stores KeysetDeriver entries so key derivation preserves the original
+    // keyset key order. Currently, key derivation only supports
+    // PrfBasedDeriverKeys.
+    std::vector<Entry<P>*> ordered_keyset_deriver_primitives_
+        ABSL_GUARDED_BY(mutex_);
     absl::flat_hash_map<std::string, std::string> annotations_
         ABSL_GUARDED_BY(mutex_);
     absl::Mutex mutex_;
@@ -267,7 +290,8 @@ class PrimitiveSet {
     }
 
     absl::MutexLock lock(primitives_mutex_.get());
-    return AddPrimitiveImpl(std::move(primitive), key_info, primitives_);
+    return AddPrimitiveImpl(std::move(primitive), key_info, primitives_,
+                            ordered_keyset_deriver_primitives_);
   }
 
   // Returns the entries with primitives identifed by 'identifier'.
@@ -328,11 +352,16 @@ class PrimitiveSet {
   // Constructs an empty PrimitiveSet.
   // Note: This is equivalent to PrimitiveSet<P>(/*annotations=*/{}).
   PrimitiveSet(CiphertextPrefixToPrimitivesMap primitives, Entry<P>* primary,
+               std::vector<Entry<P>*> ordered_keyset_deriver_primitives,
                absl::flat_hash_map<std::string, std::string> annotations)
       : primary_(primary),
         primitives_mutex_(nullptr),
         primitives_(std::move(primitives)),
+        ordered_keyset_deriver_primitives_(
+            std::move(ordered_keyset_deriver_primitives)),
         annotations_(std::move(annotations)) {}
+
+  // Placeholder for internal friend declaration.
 
   // The Entry<P> object is owned by primitives_
   Entry<P>* primary_ ABSL_GUARDED_BY(primitives_mutex_) = nullptr;
@@ -341,6 +370,11 @@ class PrimitiveSet {
   mutable std::unique_ptr<absl::Mutex> primitives_mutex_ =
       absl::make_unique<absl::Mutex>();
   CiphertextPrefixToPrimitivesMap primitives_
+      ABSL_GUARDED_BY(primitives_mutex_);
+  // Stores KeysetDeriver entries so key derivation preserves the original
+  // keyset key order. Currently, key derivation only supports
+  // PrfBasedDeriverKeys.
+  std::vector<Entry<P>*> ordered_keyset_deriver_primitives_
       ABSL_GUARDED_BY(primitives_mutex_);
 
   // Annotations for the set of primitives.

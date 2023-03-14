@@ -414,7 +414,9 @@ cc_library(
     include_prefix = "tink",
     deps = [
         ":crypto_format",
+        "//proto:prf_based_deriver_cc_proto",
         "//proto:tink_cc_proto",
+        "//util:constants",
         "//util:errors",
         "//util:statusor",
         "@com_google_absl//absl/base:core_headers",

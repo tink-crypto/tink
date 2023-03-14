@@ -389,8 +389,10 @@ tink_cc_library(
     absl::memory
     absl::status
     absl::synchronization
+    tink::util::constants
     tink::util::errors
     tink::util::statusor
+    tink::proto::prf_based_deriver_cc_proto
     tink::proto::tink_cc_proto
 )
 
