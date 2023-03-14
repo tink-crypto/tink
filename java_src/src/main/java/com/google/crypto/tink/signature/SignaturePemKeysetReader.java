@@ -16,7 +16,6 @@
 
 package com.google.crypto.tink.signature;
 
-import androidx.annotation.Nullable;
 import com.google.crypto.tink.KeysetReader;
 import com.google.crypto.tink.PemKeyType;
 import com.google.crypto.tink.proto.EcdsaParams;
@@ -44,6 +43,7 @@ import java.security.interfaces.ECPublicKey;
 import java.security.interfaces.RSAPublicKey;
 import java.util.ArrayList;
 import java.util.List;
+import javax.annotation.Nullable;
 
 /**
  * SignaturePemKeysetReader is a {@link KeysetReader} that can read digital signature keys in PEM
