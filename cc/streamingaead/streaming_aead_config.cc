@@ -25,8 +25,6 @@
 #include "tink/streamingaead/streaming_aead_wrapper.h"
 #include "tink/util/status.h"
 
-using google::crypto::tink::RegistryConfig;
-
 namespace crypto {
 namespace tink {
 
