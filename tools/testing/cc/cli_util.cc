@@ -226,7 +226,7 @@ Status CliUtil::InitAws() {
   if (!client_add_result.ok()) {
     return Status(absl::StatusCode::kInternal, "Failed to add KMS client.");
   }
-  return util::OkStatus();
+  return crypto::tink::util::OkStatus();
 }
 
 // static
