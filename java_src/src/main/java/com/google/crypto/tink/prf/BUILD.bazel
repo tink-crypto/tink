@@ -201,6 +201,15 @@ java_library(
     ],
 )
 
+java_library(
+    name = "aes_cmac_prf_parameters",
+    srcs = ["AesCmacPrfParameters.java"],
+    deps = [
+        ":prf_parameters",
+        "//src/main/java/com/google/crypto/tink/annotations:alpha",
+    ],
+)
+
 android_library(
     name = "hkdf_prf_key_manager-android",
     srcs = ["HkdfPrfKeyManager.java"],
@@ -395,5 +404,14 @@ android_library(
         "//src/main/java/com/google/crypto/tink/annotations:alpha-android",
         "@maven//:com_google_code_findbugs_jsr305",
         "@maven//:com_google_errorprone_error_prone_annotations",
+    ],
+)
+
+android_library(
+    name = "aes_cmac_prf_parameters-android",
+    srcs = ["AesCmacPrfParameters.java"],
+    deps = [
+        ":prf_parameters-android",
+        "//src/main/java/com/google/crypto/tink/annotations:alpha-android",
     ],
 )

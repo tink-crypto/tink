@@ -209,3 +209,15 @@ java_test(
         "@maven//:junit_junit",
     ],
 )
+
+java_test(
+    name = "AesCmacPrfParametersTest",
+    size = "small",
+    srcs = ["AesCmacPrfParametersTest.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink/prf:aes_cmac_prf_parameters",
+        "//src/main/java/com/google/crypto/tink/prf:hkdf_prf_parameters",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
