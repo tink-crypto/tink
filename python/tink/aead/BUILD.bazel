@@ -52,6 +52,7 @@ py_test(
         "//tink/proto:common_py_pb2",
         "//tink/proto:tink_py_pb2",
         "//tink/proto:xchacha20_poly1305_py_pb2",
+        "//tink/testing:fake_kms",
     ],
 )
 

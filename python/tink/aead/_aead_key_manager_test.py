@@ -26,10 +26,15 @@ from tink.proto import xchacha20_poly1305_pb2
 import tink
 from tink import aead
 from tink import core
+from tink.testing import fake_kms
+
+
+FAKE_KMS_URI = 'fake-kms://CM2b3_MDElQKSAowdHlwZS5nb29nbGVhcGlzLmNvbS9nb29nbGUuY3J5cHRvLnRpbmsuQWVzR2NtS2V5EhIaEIK75t5L-adlUwVhWvRuWUwYARABGM2b3_MDIAE'
 
 
 def setUpModule():
   aead.register()
+  fake_kms.register_client()
 
 
 class AeadKeyManagerTest(parameterized.TestCase):
@@ -132,6 +137,27 @@ class AeadKeyManagerTest(parameterized.TestCase):
       aead.aead_key_templates.AES256_CTR_HMAC_SHA256,
       aead.aead_key_templates.XCHACHA20_POLY1305])
   def test_encrypt_decrypt_success(self, template):
+    keyset_handle = tink.new_keyset_handle(template)
+    primitive = keyset_handle.primitive(aead.Aead)
+    plaintext = b'plaintext'
+    associated_data = b'associated_data'
+    ciphertext = primitive.encrypt(plaintext, associated_data)
+    self.assertEqual(primitive.decrypt(ciphertext, associated_data), plaintext)
+
+  def test_kms_aead_encrypt_decrypt_success(self):
+    template = aead.aead_key_templates.create_kms_aead_key_template(
+        key_uri=FAKE_KMS_URI)
+    keyset_handle = tink.new_keyset_handle(template)
+    primitive = keyset_handle.primitive(aead.Aead)
+    plaintext = b'plaintext'
+    associated_data = b'associated_data'
+    ciphertext = primitive.encrypt(plaintext, associated_data)
+    self.assertEqual(primitive.decrypt(ciphertext, associated_data), plaintext)
+
+  def test_kms_envelope_aead_encrypt_decrypt_success(self):
+    template = aead.aead_key_templates.create_kms_envelope_aead_key_template(
+        kek_uri=FAKE_KMS_URI, dek_template=aead.aead_key_templates.AES128_GCM
+    )
     keyset_handle = tink.new_keyset_handle(template)
     primitive = keyset_handle.primitive(aead.Aead)
     plaintext = b'plaintext'
