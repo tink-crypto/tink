@@ -26,6 +26,8 @@
 #include "absl/memory/memory.h"
 #include "absl/status/status.h"
 #include "tink/aead.h"
+#include "tink/configuration.h"
+#include "tink/internal/configuration_impl.h"
 #include "tink/internal/key_info.h"
 #include "tink/key.h"
 #include "tink/key_manager.h"
@@ -165,10 +167,14 @@ class KeysetHandle {
   crypto::tink::util::StatusOr<std::unique_ptr<KeysetHandle>>
   GetPublicKeysetHandle() const;
 
-  // Creates a wrapped primitive corresponding to this keyset or fails with
-  // a non-ok status. Uses the KeyManager and PrimitiveWrapper objects in the
-  // global registry to create the primitive. This function is the most common
-  // way of creating a primitive.
+  // Creates a wrapped primitive using this keyset handle and config, which
+  // stores necessary primitive wrappers and key type managers.
+  template <class P>
+  crypto::tink::util::StatusOr<std::unique_ptr<P>> GetPrimitive(
+      const Configuration& config) const;
+
+  // Creates a wrapped primitive using this keyset handle and the global
+  // registry, which stores necessary primitive wrappers and key type managers.
   template <class P>
   crypto::tink::util::StatusOr<std::unique_ptr<P>> GetPrimitive() const;
 
@@ -271,6 +277,13 @@ KeysetHandle::GetPrimitives(const KeyManager<P>* custom_manager) const {
   auto primitives = std::move(primitives_builder).Build();
   if (!primitives.ok()) return primitives.status();
   return absl::make_unique<PrimitiveSet<P>>(*std::move(primitives));
+}
+
+template <class P>
+crypto::tink::util::StatusOr<std::unique_ptr<P>> KeysetHandle::GetPrimitive(
+    const Configuration& config) const {
+  return internal::ConfigurationImpl::get_registry(config).WrapKeyset<P>(
+      keyset_, monitoring_annotations_);
 }
 
 template <class P>

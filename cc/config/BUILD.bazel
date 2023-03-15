@@ -150,6 +150,7 @@ cc_test(
         "//signature:ecdsa_verify_key_manager",
         "//signature:rsa_ssa_pkcs1_verify_key_manager",
         "//signature:rsa_ssa_pss_verify_key_manager",
+        "//util:test_keyset_handle",
         "//util:test_matchers",
         "//util:test_util",
         "@com_google_googletest//:gtest_main",

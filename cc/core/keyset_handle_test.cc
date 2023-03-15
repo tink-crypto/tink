@@ -33,8 +33,10 @@
 #include "tink/binary_keyset_reader.h"
 #include "tink/binary_keyset_writer.h"
 #include "tink/cleartext_keyset_handle.h"
+#include "tink/config/fips_140_2.h"
 #include "tink/config/tink_config.h"
 #include "tink/core/key_manager_impl.h"
+#include "tink/internal/fips_utils.h"
 #include "tink/internal/legacy_proto_parameters.h"
 #include "tink/internal/proto_parameters_serialization.h"
 #include "tink/json_keyset_reader.h"
@@ -86,6 +88,8 @@ class KeysetHandleTest : public ::testing::Test {
   void SetUp() override {
     auto status = TinkConfig::Register();
     ASSERT_TRUE(status.ok()) << status;
+
+    internal::UnSetFipsRestricted();
   }
 };
 
@@ -280,11 +284,10 @@ TEST_F(KeysetHandleTest, ReadEncryptedWithAnnotations) {
                   absl::make_unique<FakeAeadKeyManager>("some key type"),
                   /*new_key_allowed=*/true),
               IsOk());
-  ASSERT_THAT(
-      Registry::RegisterKeyTypeManager(
-          absl::make_unique<FakeAeadKeyManager>("some other key type"),
-          /*new_key_allowed=*/true),
-      IsOk());
+  ASSERT_THAT(Registry::RegisterKeyTypeManager(
+                  absl::make_unique<FakeAeadKeyManager>("some other key type"),
+                  /*new_key_allowed=*/true),
+              IsOk());
 
   ASSERT_THAT((*keyset_handle)->GetPrimitive<Aead>(), IsOk());
   EXPECT_EQ(generated_annotations, kAnnotations);
@@ -474,11 +477,10 @@ TEST_F(KeysetHandleTest, ReadEncryptedWithAssociatedDataAndAnnotations) {
                   absl::make_unique<FakeAeadKeyManager>("some key type"),
                   /*new_key_allowed=*/true),
               IsOk());
-  ASSERT_THAT(
-      Registry::RegisterKeyTypeManager(
-          absl::make_unique<FakeAeadKeyManager>("some other key type"),
-          /*new_key_allowed=*/true),
-      IsOk());
+  ASSERT_THAT(Registry::RegisterKeyTypeManager(
+                  absl::make_unique<FakeAeadKeyManager>("some other key type"),
+                  /*new_key_allowed=*/true),
+              IsOk());
 
   ASSERT_THAT((*keyset_handle)->GetPrimitive<Aead>(), IsOk());
   EXPECT_EQ(generated_annotations, kAnnotations);
@@ -772,6 +774,58 @@ TEST_F(KeysetHandleTest, GetPrimitive) {
   EXPECT_EQ(aead->Decrypt(raw_encryption, aad).value(), plaintext);
 }
 
+TEST_F(KeysetHandleTest, GetPrimitiveWithConfigFips1402Succeeds) {
+  if (!FIPS_mode()) {
+    GTEST_SKIP() << "Only test in FIPS mode";
+  }
+
+  const internal::RegistryImpl& registry =
+      internal::ConfigurationImpl::get_registry(ConfigFips140_2());
+
+  util::StatusOr<std::unique_ptr<KeyData>> key_data =
+      registry.NewKeyData(AeadKeyTemplates::Aes128Gcm());
+  ASSERT_THAT(key_data, IsOk());
+
+  Keyset keyset;
+  uint32_t key_id = 0;
+  test::AddKeyData(**key_data, key_id, OutputPrefixType::TINK,
+                   KeyStatusType::ENABLED, &keyset);
+  keyset.set_primary_key_id(key_id);
+  std::unique_ptr<KeysetHandle> handle =
+      TestKeysetHandle::GetKeysetHandle(keyset);
+
+  EXPECT_THAT(handle->GetPrimitive<Aead>(ConfigFips140_2()), IsOk());
+}
+
+TEST_F(KeysetHandleTest, GetPrimitiveWithConfigFips1402FailsWithNonFipsHandle) {
+  if (!FIPS_mode()) {
+    GTEST_SKIP() << "Only test in FIPS mode";
+  }
+
+  KeyTemplate templ = AeadKeyTemplates::Aes256Eax();
+  // Use ConfigFips140_2().
+  const internal::RegistryImpl& registry =
+      internal::ConfigurationImpl::get_registry(ConfigFips140_2());
+  EXPECT_THAT(registry.NewKeyData(templ), Not(IsOk()));
+  // Use the global registry.
+  util::StatusOr<std::unique_ptr<KeyData>> key_data =
+      Registry::NewKeyData(templ);
+  ASSERT_THAT(key_data, IsOk());
+
+  Keyset keyset;
+  uint32_t key_id = 0;
+  test::AddKeyData(**key_data, key_id, OutputPrefixType::TINK,
+                   KeyStatusType::ENABLED, &keyset);
+  keyset.set_primary_key_id(key_id);
+  std::unique_ptr<KeysetHandle> handle =
+      TestKeysetHandle::GetKeysetHandle(keyset);
+
+  // Use ConfigFips140_2().
+  EXPECT_THAT(handle->GetPrimitive<Aead>(ConfigFips140_2()), Not(IsOk()));
+  // Use the global registry.
+  EXPECT_THAT(handle->GetPrimitive<Aead>(), IsOk());
+}
+
 // Tests that GetPrimitive(nullptr) fails with a non-ok status.
 TEST_F(KeysetHandleTest, GetPrimitiveNullptrKeyManager) {
   Keyset keyset;
@@ -857,11 +911,10 @@ TEST_F(KeysetHandleTest, ReadNoSecretWithAnnotations) {
                   absl::make_unique<FakeAeadKeyManager>("some key type"),
                   /*new_key_allowed=*/true),
               IsOk());
-  ASSERT_THAT(
-      Registry::RegisterKeyTypeManager(
-          absl::make_unique<FakeAeadKeyManager>("some other key type"),
-          /*new_key_allowed=*/true),
-      IsOk());
+  ASSERT_THAT(Registry::RegisterKeyTypeManager(
+                  absl::make_unique<FakeAeadKeyManager>("some other key type"),
+                  /*new_key_allowed=*/true),
+              IsOk());
 
   EXPECT_THAT((*keyset_handle)->GetPrimitive<Aead>(), IsOk());
   EXPECT_EQ(generated_annotations, kAnnotations);

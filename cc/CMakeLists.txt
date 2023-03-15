@@ -435,6 +435,7 @@ tink_cc_library(
     keyset_handle.h
   DEPS
     tink::core::aead
+    tink::core::configuration
     tink::core::insecure_secret_key_access
     tink::core::key
     tink::core::key_manager
@@ -450,6 +451,7 @@ tink_cc_library(
     absl::status
     absl::strings
     absl::optional
+    tink::internal::configuration_impl
     tink::internal::key_info
     tink::internal::key_status_util
     tink::internal::mutable_serialization_registry
@@ -794,7 +796,9 @@ tink_cc_test(
     tink::aead::aead_key_templates
     tink::aead::aead_wrapper
     tink::aead::aes_gcm_key_manager
+    tink::config::fips_140_2
     tink::config::tink_config
+    tink::internal::fips_utils
     tink::internal::legacy_proto_parameters
     tink::internal::proto_parameters_serialization
     tink::mac::mac_key_templates

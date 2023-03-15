@@ -33,6 +33,7 @@
 #include "tink/signature/ecdsa_verify_key_manager.h"
 #include "tink/signature/rsa_ssa_pkcs1_verify_key_manager.h"
 #include "tink/signature/rsa_ssa_pss_verify_key_manager.h"
+#include "tink/util/test_keyset_handle.h"
 #include "tink/util/test_matchers.h"
 #include "tink/util/test_util.h"
 #include "proto/tink.pb.h"
@@ -119,10 +120,11 @@ TEST_F(Fips1402Test, NewKeyDataAndWrapKeysetSucceeds) {
                    KeyStatusType::ENABLED, &keyset);
   keyset.set_primary_key_id(key_id);
 
-  absl::flat_hash_map<std::string, std::string> annotations;
+  std::unique_ptr<KeysetHandle> handle =
+      TestKeysetHandle::GetKeysetHandle(keyset);
   util::StatusOr<std::unique_ptr<Aead>> aead =
-      registry.WrapKeyset<Aead>(keyset, annotations);
-  ASSERT_THAT(aead, IsOk());
+      handle->GetPrimitive<Aead>(ConfigFips140_2());
+  EXPECT_THAT(aead, IsOk());
 
   std::string plaintext = "plaintext";
   std::string ad = "ad";

@@ -134,6 +134,7 @@ tink_cc_test(
     tink::signature::ecdsa_verify_key_manager
     tink::signature::rsa_ssa_pkcs1_verify_key_manager
     tink::signature::rsa_ssa_pss_verify_key_manager
+    tink::util::test_keyset_handle
     tink::util::test_matchers
     tink::util::test_util
     tink::proto::tink_cc_proto
