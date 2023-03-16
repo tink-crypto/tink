@@ -184,6 +184,7 @@ public final class HmacPrfKeyManager extends KeyTypeManager<HmacPrfKey> {
 
   public static void register(boolean newKeyAllowed) throws GeneralSecurityException {
     Registry.registerKeyManager(new HmacPrfKeyManager(), newKeyAllowed);
+    HmacPrfProtoSerialization.register();
   }
 
   @Override

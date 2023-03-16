@@ -808,8 +808,8 @@ public class KeysetHandleTest {
   }
 
   @Test
-  public void testGetAt_singleKeyWithoutRegisteredProtoSerialization_works() throws Exception {
-    // HmacPrfKey does not have a proto serialization registered.
+  public void testGetAt_singleKeyWithoutRegisteredProtoSerialization_wrapsToLegacyProtoKey()
+      throws Exception {
     HmacPrfKey key =
         HmacPrfKey.newBuilder()
             .setParams(HmacPrfParams.newBuilder().setHash(HashType.SHA256).build())
@@ -819,7 +819,7 @@ public class KeysetHandleTest {
         TestUtil.createKeyset(
             TestUtil.createKey(
                 TestUtil.createKeyData(
-                    key, PrfConfig.HMAC_PRF_TYPE_URL, KeyData.KeyMaterialType.SYMMETRIC),
+                    key, "i.am.an.unregistered.key.type", KeyData.KeyMaterialType.SYMMETRIC),
                 42,
                 KeyStatusType.ENABLED,
                 OutputPrefixType.RAW));

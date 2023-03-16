@@ -103,6 +103,7 @@ java_library(
     name = "hmac_prf_key_manager",
     srcs = ["HmacPrfKeyManager.java"],
     deps = [
+        ":hmac_prf_proto_serialization",
         ":prf_set",
         "//proto:common_java_proto",
         "//proto:hmac_prf_java_proto",
@@ -365,6 +366,7 @@ android_library(
     name = "hmac_prf_key_manager-android",
     srcs = ["HmacPrfKeyManager.java"],
     deps = [
+        ":hmac_prf_proto_serialization-android",
         ":prf_set-android",
         "//proto:common_java_proto_lite",
         "//proto:hmac_prf_java_proto_lite",
