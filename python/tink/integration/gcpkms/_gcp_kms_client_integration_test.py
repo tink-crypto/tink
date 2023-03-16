@@ -18,7 +18,8 @@ import os
 
 from absl.testing import absltest
 
-from tink import core
+import tink
+from tink import aead
 from tink.integration import gcpkms
 from tink.testing import helper
 
@@ -34,46 +35,50 @@ if 'TEST_SRCDIR' in os.environ:
       os.environ['TEST_SRCDIR'], 'google_root_pem/file/downloaded')
 
 
+def setUpModule():
+  aead.register()
+
+
 class GcpKmsAeadTest(absltest.TestCase):
 
   def test_encrypt_decrypt(self):
     gcp_client = gcpkms.GcpKmsClient(KEY_URI, CREDENTIAL_PATH)
-    aead = gcp_client.get_aead(KEY_URI)
+    gcp_aead = gcp_client.get_aead(KEY_URI)
 
     plaintext = b'helloworld'
-    ciphertext = aead.encrypt(plaintext, b'')
-    self.assertEqual(plaintext, aead.decrypt(ciphertext, b''))
+    ciphertext = gcp_aead.encrypt(plaintext, b'')
+    self.assertEqual(plaintext, gcp_aead.decrypt(ciphertext, b''))
 
     plaintext = b'hello'
     associated_data = b'world'
-    ciphertext = aead.encrypt(plaintext, associated_data)
-    self.assertEqual(plaintext, aead.decrypt(ciphertext, associated_data))
+    ciphertext = gcp_aead.encrypt(plaintext, associated_data)
+    self.assertEqual(plaintext, gcp_aead.decrypt(ciphertext, associated_data))
 
   def test_encrypt_decrypt_localized_uri(self):
     gcp_client = gcpkms.GcpKmsClient(LOCAL_KEY_URI, CREDENTIAL_PATH)
-    aead = gcp_client.get_aead(LOCAL_KEY_URI)
+    gcp_aead = gcp_client.get_aead(LOCAL_KEY_URI)
 
     plaintext = b'helloworld'
-    ciphertext = aead.encrypt(plaintext, b'')
-    self.assertEqual(plaintext, aead.decrypt(ciphertext, b''))
+    ciphertext = gcp_aead.encrypt(plaintext, b'')
+    self.assertEqual(plaintext, gcp_aead.decrypt(ciphertext, b''))
 
     plaintext = b'hello'
     associated_data = b'world'
-    ciphertext = aead.encrypt(plaintext, associated_data)
-    self.assertEqual(plaintext, aead.decrypt(ciphertext, associated_data))
+    ciphertext = gcp_aead.encrypt(plaintext, associated_data)
+    self.assertEqual(plaintext, gcp_aead.decrypt(ciphertext, associated_data))
 
   def test_encrypt_with_bad_uri(self):
-    with self.assertRaises(core.TinkError):
+    with self.assertRaises(tink.TinkError):
       gcp_client = gcpkms.GcpKmsClient(KEY_URI, CREDENTIAL_PATH)
       gcp_client.get_aead(BAD_KEY_URI)
 
   def test_corrupted_ciphertext(self):
     gcp_client = gcpkms.GcpKmsClient(KEY_URI, CREDENTIAL_PATH)
-    aead = gcp_client.get_aead(KEY_URI)
+    gcp_aead = gcp_client.get_aead(KEY_URI)
 
     plaintext = b'helloworld'
-    ciphertext = aead.encrypt(plaintext, b'')
-    self.assertEqual(plaintext, aead.decrypt(ciphertext, b''))
+    ciphertext = gcp_aead.encrypt(plaintext, b'')
+    self.assertEqual(plaintext, gcp_aead.decrypt(ciphertext, b''))
 
     # Corrupt each byte once and check that decryption fails
     # NOTE: Only starting at 4th byte here, as the 3rd byte is malleable
@@ -82,8 +87,31 @@ class GcpKmsAeadTest(absltest.TestCase):
       tmp_ciphertext = list(ciphertext)
       tmp_ciphertext[byte_idx] ^= 1
       corrupted_ciphertext = bytes(tmp_ciphertext)
-      with self.assertRaises(core.TinkError):
-        aead.decrypt(corrupted_ciphertext, b'')
+      with self.assertRaises(tink.TinkError):
+        gcp_aead.decrypt(corrupted_ciphertext, b'')
+
+  def test_registration_client_bound_to_uri_works(self):
+    # Register GCP KMS Client bound to KEY_URI.
+    gcpkms.GcpKmsClient.register_client(KEY_URI, CREDENTIAL_PATH)
+
+    # Create a keyset handle for KEY_URI and use it. This works.
+    handle = tink.new_keyset_handle(
+        aead.aead_key_templates.create_kms_aead_key_template(KEY_URI)
+    )
+    gcp_aead = handle.primitive(aead.Aead)
+    ciphertext = gcp_aead.encrypt(b'plaintext', b'associated_data')
+    self.assertEqual(
+        b'plaintext', gcp_aead.decrypt(ciphertext, b'associated_data')
+    )
+
+    # But it fails for LOCAL_KEY_URI, since the URI is different.
+    with self.assertRaises(tink.TinkError):
+      handle2 = tink.new_keyset_handle(
+          aead.aead_key_templates.create_kms_aead_key_template(LOCAL_KEY_URI)
+      )
+      gcp_aead = handle2.primitive(aead.Aead)
+      gcp_aead.encrypt(b'plaintext', b'associated_data')
+
 
 if __name__ == '__main__':
   absltest.main()
