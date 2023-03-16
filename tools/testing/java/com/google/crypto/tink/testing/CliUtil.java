@@ -67,7 +67,7 @@ public final class CliUtil {
     PrfConfig.register();
     SignatureConfig.register();
     StreamingAeadConfig.register();
-    // place holder for KeyderivationConfig. DO NOT EDIT.
+    // place holder for KeyDerivationConfig. DO NOT EDIT.
   }
 
   /**
