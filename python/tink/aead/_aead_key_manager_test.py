@@ -25,6 +25,7 @@ from tink.proto import tink_pb2
 from tink.proto import xchacha20_poly1305_pb2
 import tink
 from tink import aead
+from tink import cleartext_keyset_handle
 from tink import core
 from tink.testing import fake_kms
 
@@ -164,6 +165,36 @@ class AeadKeyManagerTest(parameterized.TestCase):
     associated_data = b'associated_data'
     ciphertext = primitive.encrypt(plaintext, associated_data)
     self.assertEqual(primitive.decrypt(ciphertext, associated_data), plaintext)
+
+  def test_kms_envelope_aead_decrypt_fixed_ciphertext_success(self):
+    # This keyset contains a single KmsEnvelopeAeadKey with
+    # kek_uri = FAKE_KMS_URI and dek_template = AES128_GCM.
+    json_keyset = '''{
+      "primaryKeyId": 371374440,
+      "key": [
+        {
+          "keyData": {
+            "typeUrl": "type.googleapis.com/google.crypto.tink.KmsEnvelopeAeadKey",
+            "value": "EsMBEjgYARICEBAKMHR5cGUuZ29vZ2xlYXBpcy5jb20vZ29vZ2xlLmNyeXB0by50aW5rLkFlc0djbUtleQqGAWZha2Uta21zOi8vQ00yYjNfTURFbFFLU0Fvd2RIbHdaUzVuYjI5bmJHVmhjR2x6TG1OdmJTOW5iMjluYkdVdVkzSjVjSFJ2TG5ScGJtc3VRV1Z6UjJOdFMyVjVFaElhRUlLNzV0NUwtYWRsVXdWaFd2UnVXVXdZQVJBQkdNMmIzX01ESUFF",
+            "keyMaterialType": "REMOTE"
+          },
+          "status": "ENABLED",
+          "keyId": 371374440,
+          "outputPrefixType": "RAW"
+        }
+      ]
+    }'''
+    keyset_handle = cleartext_keyset_handle.read(
+        tink.JsonKeysetReader(json_keyset))
+
+    ciphertext = bytes.fromhex(
+        '00000033013e77cdcd39016d632a3bb83b694565d3d2d85329ccc3aff540'
+        'ef00a7dcb95c157f0199fa7af825a2da2cf2ed0818e6eb0becb39d73d1b1'
+        '26e60bdac2dbe7d742dabaedcc2b3809e429510d9a330dc9e2bb1dc9d5b59ecc'
+    )
+    primitive = keyset_handle.primitive(aead.Aead)
+    decrypted = primitive.decrypt(ciphertext, b'associated_data')
+    self.assertEqual(decrypted, b'plaintext')
 
   @parameterized.parameters([
       aead.aead_key_templates.AES128_EAX,
