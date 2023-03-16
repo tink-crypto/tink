@@ -78,10 +78,8 @@ public final class Bytes {
   }
 
   /**
-   * Computes the xor of two byte buffers, specifying the length to xor, and
-   * stores the result to {@code output}.
-   *
-   * @return a new byte[] of length len.
+   * Computes the xor of two byte buffers, specifying the length to xor, and stores the result to
+   * {@code output}.
    */
   public static final void xor(ByteBuffer output, ByteBuffer x, ByteBuffer y, int len) {
     if (len < 0 || x.remaining() < len || y.remaining() < len || output.remaining() < len) {
