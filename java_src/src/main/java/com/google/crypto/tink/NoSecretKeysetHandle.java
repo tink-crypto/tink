@@ -36,6 +36,7 @@ public final class NoSecretKeysetHandle {
    * @throws GeneralSecurityException
    * @deprecated use {@link NoSecretKeysetHandle#read} instead
    */
+  @SuppressWarnings("UnusedException")
   @Deprecated /* Deprecation under consideration */
   public static final KeysetHandle parseFrom(final byte[] serialized)
       throws GeneralSecurityException {

@@ -41,6 +41,7 @@ public final class CleartextKeysetHandle {
    * @throws GeneralSecurityException
    * @deprecated use {@link #read} instead
    */
+  @SuppressWarnings("UnusedException")
   @Deprecated /* Deprecation under consideration */
   public static final KeysetHandle parseFrom(final byte[] serialized)
       throws GeneralSecurityException {
