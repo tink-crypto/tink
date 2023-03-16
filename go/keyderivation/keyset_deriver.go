@@ -23,11 +23,9 @@ import (
 // KeysetDeriver is the interface used to derive new keysets based on an
 // additional input, the salt.
 //
-// The salt is used to create the keyset using a pseudorandom function. More
-// explicitly, implementations need to generate keysets which are secure even if
-// the attacker is given the salt, plus access to an oracle which creates
-// keysets for any salt the attacker requests, as long as it is not equal to the
-// salt which the attacker attacks.
+// The salt is used to create the keyset using a pseudorandom function.
+// Implementations must be indistinguishable from ideal KeysetDerivers, which,
+// for every salt, generates a new random keyset and caches it.
 type KeysetDeriver interface {
 	DeriveKeyset(salt []byte) (*keyset.Handle, error)
 }
