@@ -837,14 +837,14 @@ public final class KeysetHandle {
   @SuppressWarnings("UnusedException")
   public static final KeysetHandle readNoSecret(KeysetReader reader)
       throws GeneralSecurityException, IOException {
+    byte[] serializedKeyset;
     try {
-      Keyset keyset = reader.read();
-      assertNoSecretKeyMaterial(keyset);
-      return KeysetHandle.fromKeyset(keyset);
+      serializedKeyset = reader.read().toByteArray();
     } catch (InvalidProtocolBufferException e) {
       // Do not propagate InvalidProtocolBufferException to guarantee no key material is leaked
       throw new GeneralSecurityException("invalid keyset");
     }
+    return readNoSecret(serializedKeyset);
   }
 
   /**
