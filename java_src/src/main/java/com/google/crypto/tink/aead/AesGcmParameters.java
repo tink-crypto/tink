@@ -176,7 +176,7 @@ public final class AesGcmParameters extends AeadParameters {
 
   @Override
   public int hashCode() {
-    return Objects.hash(keySizeBytes, ivSizeBytes, tagSizeBytes, variant);
+    return Objects.hash(AesGcmParameters.class, keySizeBytes, ivSizeBytes, tagSizeBytes, variant);
   }
 
   @Override

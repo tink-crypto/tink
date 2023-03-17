@@ -253,7 +253,7 @@ public final class EcdsaParameters extends SignatureParameters {
 
   @Override
   public int hashCode() {
-    return Objects.hash(signatureEncoding, curveType, hashType, variant);
+    return Objects.hash(EcdsaParameters.class, signatureEncoding, curveType, hashType, variant);
   }
 
   @Override

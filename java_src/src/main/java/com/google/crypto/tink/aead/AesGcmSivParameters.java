@@ -118,7 +118,7 @@ public final class AesGcmSivParameters extends AeadParameters {
 
   @Override
   public int hashCode() {
-    return Objects.hash(keySizeBytes, variant);
+    return Objects.hash(AesGcmSivParameters.class, keySizeBytes, variant);
   }
 
   @Override

@@ -277,7 +277,13 @@ public final class AesCtrHmacAeadParameters extends AeadParameters {
 
   @Override
   public int hashCode() {
-    return Objects.hash(aesKeySizeBytes, hmacKeySizeBytes, tagSizeBytes, variant, hashType);
+    return Objects.hash(
+        AesCtrHmacAeadParameters.class,
+        aesKeySizeBytes,
+        hmacKeySizeBytes,
+        tagSizeBytes,
+        variant,
+        hashType);
   }
 
   @Override

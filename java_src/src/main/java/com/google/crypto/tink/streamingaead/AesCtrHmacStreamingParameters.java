@@ -255,6 +255,7 @@ public class AesCtrHmacStreamingParameters extends StreamingAeadParameters {
   @Override
   public int hashCode() {
     return Objects.hash(
+        AesCtrHmacStreamingParameters.class,
         keySizeBytes,
         derivedKeySizeBytes,
         hkdfHashType,

@@ -121,7 +121,7 @@ public final class HmacPrfParameters extends PrfParameters {
 
   @Override
   public int hashCode() {
-    return Objects.hash(keySizeBytes, hashType);
+    return Objects.hash(HmacPrfParameters.class, keySizeBytes, hashType);
   }
 
   @Override

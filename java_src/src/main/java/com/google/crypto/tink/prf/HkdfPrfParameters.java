@@ -146,7 +146,7 @@ public final class HkdfPrfParameters extends PrfParameters {
 
   @Override
   public int hashCode() {
-    return Objects.hash(keySizeBytes, hashType, salt);
+    return Objects.hash(HkdfPrfParameters.class, keySizeBytes, hashType, salt);
   }
 
   @Override

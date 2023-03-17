@@ -75,7 +75,7 @@ public final class XChaCha20Poly1305Parameters extends AeadParameters {
 
   @Override
   public int hashCode() {
-    return Objects.hashCode(variant);
+    return Objects.hash(XChaCha20Poly1305Parameters.class, variant);
   }
 
   @Override
