@@ -23,6 +23,7 @@ import java.security.GeneralSecurityException;
 final class CreateKeysetExample {
   private CreateKeysetExample() {}
   // [END_EXCLUDE]
+
   /**
    * Creates a keyset with a single AES128-GCM key and return a handle to it.
    *
@@ -40,7 +41,5 @@ final class CreateKeysetExample {
     // generate a new keyset with only *one* key and return a keyset handle to it.
     return KeysetHandle.generateNew(KeyTemplates.get("AES128_GCM"));
   }
-  // [START_EXCLUDE]
+  // [END tink_walkthrough_create_keyset]
 }
-// [END_EXCLUDE]
-// [END tink_walkthrough_create_keyset]

@@ -23,8 +23,9 @@ import java.security.GeneralSecurityException;
 final class ObtainAndUseAeadPrimitiveExample {
   private ObtainAndUseAeadPrimitiveExample() {}
   // [END_EXCLUDE]
+
   /**
-   * Example to showcase obtaining an AEAD primitive from {@code keysetHandle} and encrypt/decrypt.
+   * Showcases obtaining an AEAD primitive from {@code keysetHandle} and encrypt/decrypt.
    *
    * <p>Prerequisites for this example:
    *
@@ -44,7 +45,5 @@ final class ObtainAndUseAeadPrimitiveExample {
     byte[] ciphertext = aead.encrypt(plaintext, associatedData);
     return aead.decrypt(ciphertext, associatedData);
   }
-  // [START_EXCLUDE]
+  // [END tink_walkthrough_obtain_and_use_aead_primitive]
 }
-// [END_EXCLUDE]
-// [END tink_walkthrough_obtain_and_use_aead_primitive]

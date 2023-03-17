@@ -11,33 +11,32 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-// [START tink_walkthrough_write_keyset]
 package walkthrough;
 
+// [START tink_walkthrough_write_keyset]
 import com.google.crypto.tink.Aead;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.KmsClients;
 import com.google.crypto.tink.TinkJsonProtoKeysetFormat;
 import java.security.GeneralSecurityException;
 
-/**
- * Examples to write a keyset to an output stream encrypted with a KMS key.
- *
- * <p>Prerequisites for this example:
- *
- * <ul>
- *   <li>Register AEAD implementations of Tink.
- *   <li>Register a KMS client to {@link KmsClients} that can use {@code kmsKekUri}.
- *   <li>Create a keyset and wrap it with a {@link KeysetHandle}.
- * </ul>
- */
+// [START_EXCLUDE]
+/** Examples to write a keyset to an output stream encrypted with a KMS key. */
 final class WriteKeysetExample {
-  // [START_EXCLUDE]
   private WriteKeysetExample() {}
   // [END_EXCLUDE]
+
   /**
    * Serializes a keyset with handle {@code keysetHandle} in JSON format; the keyset is encrypted
    * through a KMS service using the KMS key {@code kmsKekUri} and {@code associatedData}.
+   *
+   * <p>Prerequisites for this example:
+   *
+   * <ul>
+   *   <li>Register AEAD implementations of Tink.
+   *   <li>Register a KMS client to {@link KmsClients} that can use {@code kmsKekUri}.
+   *   <li>Create a keyset and wrap it with a {@link KeysetHandle}.
+   * </ul>
    *
    * @param associatedData the associated data to use for encrypting the keyset. See
    *     https://developers.google.com/tink/aead#associated_data.
@@ -51,5 +50,5 @@ final class WriteKeysetExample {
     return TinkJsonProtoKeysetFormat.serializeEncryptedKeyset(
         keysetHandle, kmsKekAead, associatedData);
   }
+  // [END tink_walkthrough_write_keyset]
 }
-// [END tink_walkthrough_write_keyset]
