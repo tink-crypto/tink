@@ -538,11 +538,11 @@ public class PrimitiveSetTest {
   public void getKeyWithParser_works() throws Exception {
     // HmacKey's proto serialization HmacProtoSerialization is registed in HmacKeyManager.
     Key protoKey =
-            TestUtil.createKey(
-                TestUtil.createHmacKeyData("01234567890123456".getBytes(UTF_8), 16),
-                42,
-                KeyStatusType.ENABLED,
-                OutputPrefixType.TINK);
+        TestUtil.createKey(
+            TestUtil.createHmacKeyData("01234567890123456".getBytes(UTF_8), 16),
+            /* keyId= */ 42,
+            KeyStatusType.ENABLED,
+            OutputPrefixType.TINK);
     byte[] prefix = CryptoFormat.getOutputPrefix(protoKey);
     PrimitiveSet.Builder<Mac> builder = PrimitiveSet.newBuilder(Mac.class);
     builder.addPrimitive(new DummyMac1(), protoKey);
@@ -555,8 +555,7 @@ public class PrimitiveSetTest {
   }
 
   @Test
-  public void addPrimitiveWithInvalidKeyThatHasAParser_throws()
-      throws Exception {
+  public void addPrimitiveWithInvalidKeyThatHasAParser_throws() throws Exception {
     // HmacKey's proto serialization HmacProtoSerialization is registed in HmacKeyManager.
     com.google.crypto.tink.proto.HmacKey invalidProtoHmacKey =
         com.google.crypto.tink.proto.HmacKey.newBuilder()
@@ -565,20 +564,19 @@ public class PrimitiveSetTest {
             .setParams(HmacParams.newBuilder().setHash(HashType.UNKNOWN_HASH).setTagSize(0))
             .build();
     Key protoKey =
-            TestUtil.createKey(
-                TestUtil.createKeyData(
-                    invalidProtoHmacKey,
-                    "type.googleapis.com/google.crypto.tink.HmacKey",
-                    KeyData.KeyMaterialType.SYMMETRIC),
-                42,
-                KeyStatusType.ENABLED,
-                OutputPrefixType.TINK);
+        TestUtil.createKey(
+            TestUtil.createKeyData(
+                invalidProtoHmacKey,
+                "type.googleapis.com/google.crypto.tink.HmacKey",
+                KeyData.KeyMaterialType.SYMMETRIC),
+            /* keyId= */ 42,
+            KeyStatusType.ENABLED,
+            OutputPrefixType.TINK);
 
     PrimitiveSet.Builder<Mac> builder = PrimitiveSet.newBuilder(Mac.class);
-    assertThrows(GeneralSecurityException.class,
-        () -> builder.addPrimitive(new DummyMac1(), protoKey));
+    assertThrows(
+        GeneralSecurityException.class, () -> builder.addPrimitive(new DummyMac1(), protoKey));
   }
-
 
   @Test
   public void testWithAnnotations() throws Exception {
@@ -835,8 +833,7 @@ public class PrimitiveSetTest {
 
     assertThrows(
         GeneralSecurityException.class,
-        () ->
-            PrimitiveSet.newBuilder(Mac.class).addPrimitive(new DummyMac1(), key1).build());
+        () -> PrimitiveSet.newBuilder(Mac.class).addPrimitive(new DummyMac1(), key1).build());
     assertThrows(
         GeneralSecurityException.class,
         () ->
@@ -859,8 +856,7 @@ public class PrimitiveSetTest {
 
     assertThrows(
         GeneralSecurityException.class,
-        () ->
-            PrimitiveSet.newBuilder(Mac.class).addPrimitive(new DummyMac1(), key1).build());
+        () -> PrimitiveSet.newBuilder(Mac.class).addPrimitive(new DummyMac1(), key1).build());
     assertThrows(
         GeneralSecurityException.class,
         () ->
@@ -933,5 +929,39 @@ public class PrimitiveSetTest {
     assertThat(pset.getPrimitive(Hex.decode("01ffffffef"))).isEmpty();
     assertThat(pset.getPrimitive(Hex.decode("00ffffffff"))).isEmpty();
     assertThat(pset.getPrimitive(Hex.decode("00ffffffef"))).hasSize(1);
+  }
+
+  @Test
+  public void getAllInKeysetOrder_works() throws Exception {
+    Key key0 =
+        Key.newBuilder()
+            .setKeyId(0xffffffff)
+            .setStatus(KeyStatusType.ENABLED)
+            .setOutputPrefixType(OutputPrefixType.TINK)
+            .build();
+    Key key1 =
+        Key.newBuilder()
+            .setKeyId(0xffffffdf)
+            .setStatus(KeyStatusType.ENABLED)
+            .setOutputPrefixType(OutputPrefixType.RAW)
+            .build();
+    Key key2 =
+        Key.newBuilder()
+            .setKeyId(0xffffffef)
+            .setStatus(KeyStatusType.ENABLED)
+            .setOutputPrefixType(OutputPrefixType.LEGACY)
+            .build();
+    PrimitiveSet<Mac> pset =
+        PrimitiveSet.newBuilder(Mac.class)
+            .addPrimitive(new DummyMac1(), key0)
+            .addPrimaryPrimitive(new DummyMac2(), key1)
+            .addPrimitive(new DummyMac1(), key2)
+            .build();
+
+    List<PrimitiveSet.Entry<Mac>> entries = pset.getAllInKeysetOrder();
+    assertThat(entries).hasSize(3);
+    assertThat(entries.get(0).getOutputPrefixType()).isEqualTo(OutputPrefixType.TINK);
+    assertThat(entries.get(1).getOutputPrefixType()).isEqualTo(OutputPrefixType.RAW);
+    assertThat(entries.get(2).getOutputPrefixType()).isEqualTo(OutputPrefixType.LEGACY);
   }
 }
