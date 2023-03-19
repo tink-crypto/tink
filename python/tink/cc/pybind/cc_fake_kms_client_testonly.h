@@ -13,8 +13,8 @@
 // limitations under the License.
 //
 ///////////////////////////////////////////////////////////////////////////////
-#ifndef TINK_PYTHON_TINK_CC_PYBIND_CC_FAKE_KMS_CLIENT_H_
-#define TINK_PYTHON_TINK_CC_PYBIND_CC_FAKE_KMS_CLIENT_H_
+#ifndef TINK_PYTHON_TINK_CC_PYBIND_CC_FAKE_KMS_CLIENT_TESTONLY_H_
+#define TINK_PYTHON_TINK_CC_PYBIND_CC_FAKE_KMS_CLIENT_TESTONLY_H_
 
 #include "pybind11/pybind11.h"
 
@@ -28,4 +28,4 @@ void PybindRegisterCcFakeKmsClientTestonly(pybind11::module* m);
 }  // namespace tink
 }  // namespace crypto
 
-#endif  // TINK_PYTHON_TINK_CC_PYBIND_CC_FAKE_KMS_CLIENT_H_
+#endif  // TINK_PYTHON_TINK_CC_PYBIND_CC_FAKE_KMS_CLIENT_TESTONLY_H_
