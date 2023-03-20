@@ -136,6 +136,7 @@ py_test(
         requirement("absl-py"),
         "//tink:tink_python",
         "//tink/core",
+        "//tink/mac",
         "//tink/proto:aes_gcm_py_pb2",
     ],
 )
