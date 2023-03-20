@@ -19,6 +19,7 @@ package com.google.crypto.tink.prf;
 import com.google.crypto.tink.annotations.Alpha;
 import java.security.GeneralSecurityException;
 import java.security.InvalidAlgorithmParameterException;
+import java.util.Objects;
 
 /**
  * Describes the parameters of an {@link AesCmacPrfKey}.
@@ -58,7 +59,7 @@ public final class AesCmacPrfParameters extends PrfParameters {
 
   @Override
   public int hashCode() {
-    return Integer.hashCode(keySizeBytes);
+    return Objects.hash(AesCmacPrfParameters.class, keySizeBytes);
   }
 
   @Override

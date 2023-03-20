@@ -85,6 +85,7 @@ java_library(
     name = "aes_cmac_prf_key_manager",
     srcs = ["AesCmacPrfKeyManager.java"],
     deps = [
+        ":aes_cmac_prf_proto_serialization",
         ":prf_set",
         "//proto:aes_cmac_prf_java_proto",
         "//proto:tink_java_proto",
@@ -373,6 +374,7 @@ android_library(
     name = "aes_cmac_prf_key_manager-android",
     srcs = ["AesCmacPrfKeyManager.java"],
     deps = [
+        ":aes_cmac_prf_proto_serialization-android",
         ":prf_set-android",
         "//proto:aes_cmac_prf_java_proto_lite",
         "//proto:tink_java_proto_lite",
