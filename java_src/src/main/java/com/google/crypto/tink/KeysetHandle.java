@@ -749,10 +749,7 @@ public final class KeysetHandle {
    * {@code keyTemplate}.
    *
    * @throws GeneralSecurityException if the key template is invalid.
-   * @deprecated This method takes a KeyTemplate proto, which is an internal implementation detail.
-   *     Please use the generateNew method that takes a {@link KeyTemplate} POJO.
    */
-  @Deprecated /* Deprecation under consideration */
   public static final KeysetHandle generateNew(com.google.crypto.tink.proto.KeyTemplate keyTemplate)
       throws GeneralSecurityException {
     LegacyProtoParameters parameters =
