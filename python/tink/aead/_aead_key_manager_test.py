@@ -27,6 +27,7 @@ import tink
 from tink import aead
 from tink import cleartext_keyset_handle
 from tink import core
+from tink import mac
 from tink.testing import fake_kms
 
 
@@ -155,6 +156,13 @@ class AeadKeyManagerTest(parameterized.TestCase):
     ciphertext = primitive.encrypt(plaintext, associated_data)
     self.assertEqual(primitive.decrypt(ciphertext, associated_data), plaintext)
 
+  def test_kms_aead_with_unknown_key_uri_fails(self):
+    template = aead.aead_key_templates.create_kms_aead_key_template(
+        key_uri='unknown-kms://key_uri')
+    handle = tink.new_keyset_handle(template)
+    with self.assertRaises(tink.TinkError):
+      handle.primitive(aead.Aead)
+
   def test_kms_envelope_aead_encrypt_decrypt_success(self):
     template = aead.aead_key_templates.create_kms_envelope_aead_key_template(
         kek_uri=FAKE_KMS_URI, dek_template=aead.aead_key_templates.AES128_GCM
@@ -165,6 +173,24 @@ class AeadKeyManagerTest(parameterized.TestCase):
     associated_data = b'associated_data'
     ciphertext = primitive.encrypt(plaintext, associated_data)
     self.assertEqual(primitive.decrypt(ciphertext, associated_data), plaintext)
+
+  def test_kms_envelope_aead_with_unknown_key_uri_fails(self):
+    template = aead.aead_key_templates.create_kms_envelope_aead_key_template(
+        kek_uri='unknown-kms://key_uri',
+        dek_template=aead.aead_key_templates.AES128_GCM,
+    )
+    handle = tink.new_keyset_handle(template)
+    with self.assertRaises(tink.TinkError):
+      handle.primitive(aead.Aead)
+
+  def test_kms_envelope_aead_with_invalid_dek_template_fails(self):
+    template = aead.aead_key_templates.create_kms_envelope_aead_key_template(
+        kek_uri=FAKE_KMS_URI,
+        dek_template=mac.mac_key_templates.HMAC_SHA256_128BITTAG,
+    )
+    handle = tink.new_keyset_handle(template)
+    with self.assertRaises(tink.TinkError):
+      handle.primitive(aead.Aead)
 
   def test_kms_envelope_aead_decrypt_fixed_ciphertext_success(self):
     # This keyset contains a single KmsEnvelopeAeadKey with
