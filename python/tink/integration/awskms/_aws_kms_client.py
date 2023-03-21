@@ -18,10 +18,11 @@ import re
 
 from tink import aead
 from tink import core
+from tink.aead import _kms_aead_key_manager
 from tink.cc.pybind import tink_bindings
 
 
-class AwsKmsClient:
+class AwsKmsClient(_kms_aead_key_manager.KmsClient):
   """Basic AWS client for AEAD."""
 
   def __init__(self, key_uri: str, credentials_path: str):
@@ -84,4 +85,6 @@ class AwsKmsClient:
   @classmethod
   def register_client(cls, key_uri, credentials_path) -> None:
     """Registers the KMS client internally."""
-    tink_bindings.AwsKmsClient.register_client(key_uri, credentials_path)
+    _kms_aead_key_manager.register_kms_client(  # pylint: disable=protected-access
+        AwsKmsClient(key_uri, credentials_path)
+    )

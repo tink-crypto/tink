@@ -19,6 +19,7 @@ py_library(
     srcs_version = "PY3",
     deps = [
         "//tink/aead",
+        "//tink/aead:_kms_aead_key_manager",
         "//tink/cc/pybind:tink_bindings",
         "//tink/core",
     ],
@@ -28,8 +29,8 @@ py_test(
     name = "_aws_kms_client_test",
     srcs = ["_aws_kms_client_test.py"],
     data = [
-        "//testdata/aws:credentials",
         "//testdata/aws:bad_credentials",
+        "//testdata/aws:credentials",
     ],
     srcs_version = "PY3",
     deps = [
@@ -43,12 +44,12 @@ py_test(
     name = "_aws_kms_aead_test",
     srcs = ["_aws_kms_aead_test.py"],
     data = [
-        "//testdata/aws:credentials",
         "//testdata/aws:bad_credentials",
+        "//testdata/aws:credentials",
     ],
+    srcs_version = "PY3",
     # This test require valid AWS KMS credentials so we set it as `manual`.
     tags = ["manual"],
-    srcs_version = "PY3",
     deps = [
         ":awskms",
         "//tink/testing:helper",

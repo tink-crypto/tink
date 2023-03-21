@@ -15,12 +15,13 @@
 
 from tink import aead
 from tink import core
+from tink.aead import _kms_aead_key_manager
 from tink.cc.pybind import tink_bindings
 
 GCP_KEYURI_PREFIX = 'gcp-kms://'
 
 
-class GcpKmsClient:
+class GcpKmsClient(_kms_aead_key_manager.KmsClient):
   """Basic GCP client for AEAD."""
 
   def __init__(self, key_uri: str, credentials_path: str):
@@ -78,4 +79,6 @@ class GcpKmsClient:
   @classmethod
   def register_client(cls, key_uri, credentials_path) -> None:
     """Registers the KMS client internally."""
-    tink_bindings.GcpKmsClient.register_client(key_uri, credentials_path)
+    _kms_aead_key_manager.register_kms_client(  # pylint: disable=protected-access
+        GcpKmsClient(key_uri, credentials_path)
+    )

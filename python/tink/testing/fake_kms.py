@@ -13,13 +13,47 @@
 # limitations under the License.
 """A client for Fake KMS."""
 
-from tink.cc.pybind import tink_bindings
+import base64
+
+from typing import Optional
+
+import tink
+from tink import aead
+from tink import cleartext_keyset_handle
+from tink.aead import _kms_aead_key_manager
+
+
+FAKE_KMS_PREFIX = 'fake-kms://'
+
+
+class FakeKmsClient(_kms_aead_key_manager.KmsClient):
+  """A fake KMS client."""
+
+  def __init__(self, key_uri: Optional[str] = None):
+    if not key_uri:
+      self._key_uri = None
+    elif key_uri.startswith(FAKE_KMS_PREFIX):
+      self._key_uri = key_uri
+    else:
+      raise tink.TinkError('invalid key URI')
+
+  def does_support(self, key_uri: str) -> bool:
+    if not self._key_uri:
+      return True
+    return key_uri == self._key_uri
+
+  def get_aead(self, key_uri: str) -> aead.Aead:
+    if not key_uri.startswith(FAKE_KMS_PREFIX):
+      raise tink.TinkError('invalid key URI')
+    key_id = key_uri[len(FAKE_KMS_PREFIX) :]
+    serialized_key = base64.urlsafe_b64decode(key_id.encode('utf-8') + b'===')
+    handle = cleartext_keyset_handle.read(
+        tink.BinaryKeysetReader(serialized_key)
+    )
+    return handle.primitive(aead.Aead)
 
 
 def register_client(key_uri=None, credentials_path=None) -> None:
   """Registers a fake KMS client."""
-  if not key_uri:
-    key_uri = ''
-  if not credentials_path:
-    credentials_path = ''
-  tink_bindings.register_fake_kms_client_testonly(key_uri, credentials_path)
+  _ = credentials_path
+  _kms_aead_key_manager.register_kms_client(FakeKmsClient(key_uri))
