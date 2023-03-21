@@ -374,7 +374,6 @@ cc_test(
 
 cc_test(
     name = "rsa_util_test",
-    size = "large",
     srcs = ["rsa_util_test.cc"],
     deps = [
         ":bn_util",
@@ -394,7 +393,6 @@ cc_test(
 
 cc_test(
     name = "ec_util_test",
-    size = "large",
     srcs = ["ec_util_test.cc"],
     data = [
         "//testvectors:ecdh",
