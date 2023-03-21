@@ -32,14 +32,10 @@
 
 namespace tink_testing_api {
 
-namespace tinkutil = ::crypto::tink::util;
-
 using ::crypto::tink::InputStream;
 using ::crypto::tink::util::IstreamInputStream;
 using ::crypto::tink::util::OstreamOutputStream;
 using ::crypto::tink::util::StatusOr;
-using ::grpc::ServerContext;
-using ::grpc::Status;
 
 ::grpc::Status StreamingAeadImpl::Create(grpc::ServerContext* context,
                                          const CreationRequest* request,
