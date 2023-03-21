@@ -16,10 +16,13 @@
 
 package com.google.tink1to2;
 
+import com.google.crypto.tink.BinaryKeysetReader;
 import com.google.crypto.tink.KeysetHandle;
+import com.google.crypto.tink.KeysetReader;
 import com.google.crypto.tink.TinkProtoKeysetFormat;
 import com.google.errorprone.refaster.annotation.AfterTemplate;
 import com.google.errorprone.refaster.annotation.BeforeTemplate;
+import java.io.IOException;
 import java.security.GeneralSecurityException;
 
 final class KeysetHandleChanges {
@@ -32,6 +35,34 @@ final class KeysetHandleChanges {
     @AfterTemplate
     public KeysetHandle afterTemplate(byte[] b) throws GeneralSecurityException {
       return TinkProtoKeysetFormat.parseKeysetWithoutSecret(b);
+    }
+  }
+
+  /**
+   * If users first create a binary keyset reader from a byte[], then call readNoSecret, we can
+   * simply call the new function directly without any parsing.
+   */
+  class CleanupKeysetHandleReadNoSecretReaderWithBinaryReader {
+    @BeforeTemplate
+    public KeysetHandle beforeTemplate(byte[] bytes) throws GeneralSecurityException, IOException {
+      return KeysetHandle.readNoSecret(BinaryKeysetReader.withBytes(bytes));
+    }
+    @AfterTemplate
+    public KeysetHandle afterTemplate(byte[] bytes) throws GeneralSecurityException, IOException {
+      return TinkProtoKeysetFormat.parseKeysetWithoutSecret(bytes);
+    }
+  }
+  /** For any other reader, we can always just call read. */
+  class CleanupKeysetHandleReadNoSecretReader {
+    @BeforeTemplate
+    public KeysetHandle beforeTemplate(KeysetReader reader)
+        throws GeneralSecurityException, IOException {
+      return KeysetHandle.readNoSecret(reader);
+    }
+    @AfterTemplate
+    public KeysetHandle afterTemplate(KeysetReader reader)
+        throws GeneralSecurityException, IOException {
+      return TinkProtoKeysetFormat.parseKeysetWithoutSecret(reader.read().toByteArray());
     }
   }
 }

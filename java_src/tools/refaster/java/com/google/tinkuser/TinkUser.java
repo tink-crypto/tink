@@ -17,12 +17,21 @@
 package com.google.tinkuser;
 
 import com.google.crypto.tink.Aead;
+import com.google.crypto.tink.BinaryKeysetReader;
 import com.google.crypto.tink.KeysetHandle;
+import com.google.crypto.tink.KeysetReader;
+import java.io.IOException;
 import java.security.GeneralSecurityException;
 
 /** Example user code */
 public final class TinkUser {
   public Aead useReadNoSecret(byte[] b) throws GeneralSecurityException {
     return KeysetHandle.readNoSecret(b).getPrimitive(Aead.class);
+  }
+  public Aead useBinaryReader(byte[] b) throws GeneralSecurityException, IOException {
+    return KeysetHandle.readNoSecret(BinaryKeysetReader.withBytes(b)).getPrimitive(Aead.class);
+  }
+  public Aead useAnyReader(KeysetReader r) throws GeneralSecurityException, IOException {
+    return KeysetHandle.readNoSecret(r).getPrimitive(Aead.class);
   }
 }
