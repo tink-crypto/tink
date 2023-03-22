@@ -33,7 +33,7 @@ import java.security.GeneralSecurityException;
  *
  * @deprecated use {@link Config} and {@link HybridConfig}
  */
-@Deprecated /* Deprecation under consideration */
+@Deprecated
 public final class HybridEncryptConfig {
   /**
    * Registers standard with the {@code Registry} all HybridEncrypt key types released with the
@@ -44,7 +44,7 @@ public final class HybridEncryptConfig {
    *
    * @deprecated use {@link Config#register}
    */
-  @Deprecated /* Deprecation under consideration */
+  @Deprecated
   public static void registerStandardKeyTypes() throws GeneralSecurityException {
     Config.register(HybridConfig.TINK_1_0_0);
   }
