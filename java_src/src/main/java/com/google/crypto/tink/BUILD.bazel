@@ -950,3 +950,29 @@ android_library(
         "//src/main/java/com/google/crypto/tink/internal:util-android",
     ],
 )
+
+android_library(
+    name = "tink_proto_parameters_format-android",
+    srcs = ["TinkProtoParametersFormat.java"],
+    deps = [
+        ":parameters-android",
+        "//proto:tink_java_proto_lite",
+        "//src/main/java/com/google/crypto/tink/internal:legacy_proto_parameters-android",
+        "//src/main/java/com/google/crypto/tink/internal:mutable_serialization_registry-android",
+        "//src/main/java/com/google/crypto/tink/internal:proto_parameters_serialization-android",
+        "@maven//:com_google_protobuf_protobuf_javalite",
+    ],
+)
+
+java_library(
+    name = "tink_proto_parameters_format",
+    srcs = ["TinkProtoParametersFormat.java"],
+    deps = [
+        ":parameters",
+        "//proto:tink_java_proto",
+        "//src/main/java/com/google/crypto/tink/internal:legacy_proto_parameters",
+        "//src/main/java/com/google/crypto/tink/internal:mutable_serialization_registry",
+        "//src/main/java/com/google/crypto/tink/internal:proto_parameters_serialization",
+        "@maven//:com_google_protobuf_protobuf_java",
+    ],
+)
