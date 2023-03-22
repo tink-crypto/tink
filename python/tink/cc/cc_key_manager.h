@@ -14,8 +14,8 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef TINK_PYTHON_CC_CC_KEY_MANAGER_H_
-#define TINK_PYTHON_CC_CC_KEY_MANAGER_H_
+#ifndef TINK_PYTHON_TINK_CC_CC_KEY_MANAGER_H_
+#define TINK_PYTHON_TINK_CC_CC_KEY_MANAGER_H_
 
 #include <string>
 #include <utility>
@@ -123,4 +123,4 @@ class CcKeyManager {
 
 }  // namespace tink
 }  // namespace crypto
-#endif  // TINK_PYTHON_CC_CC_KEY_MANAGER_H_
+#endif  // TINK_PYTHON_TINK_CC_CC_KEY_MANAGER_H_
