@@ -450,6 +450,11 @@ public final class MutableSerializationRegistryTest {
     return new TestParameters1();
   }
 
+  private static TestParameters1 parseParametersAlwaysThrows(
+      ProtoParametersSerialization serialization) throws GeneralSecurityException {
+    throw new GeneralSecurityException("Always throws");
+  }
+
   @Test
   public void test_parseParametersWithLegacyFallback_testRegistered() throws Exception {
     MutableSerializationRegistry registry = new MutableSerializationRegistry();
@@ -463,6 +468,23 @@ public final class MutableSerializationRegistryTest {
             "typeUrlForTesting98178", OutputPrefixType.TINK, TestProto.getDefaultInstance());
     Parameters parameters = registry.parseParametersWithLegacyFallback(protoParameters);
     assertThat(parameters).isInstanceOf(TestParameters1.class);
+  }
+
+  @Test
+  public void test_parseParametersWithLegacyFallback_testRegisteredButFaulty_throws()
+      throws Exception {
+    MutableSerializationRegistry registry = new MutableSerializationRegistry();
+    registry.registerParametersParser(
+        ParametersParser.create(
+            MutableSerializationRegistryTest::parseParametersAlwaysThrows,
+            Util.toBytesFromPrintableAscii("typeUrlForTesting98178"),
+            ProtoParametersSerialization.class));
+    ProtoParametersSerialization protoParameters =
+        ProtoParametersSerialization.create(
+            "typeUrlForTesting98178", OutputPrefixType.TINK, TestProto.getDefaultInstance());
+    assertThrows(
+        GeneralSecurityException.class,
+        () -> registry.parseParametersWithLegacyFallback(protoParameters));
   }
 
   @Test

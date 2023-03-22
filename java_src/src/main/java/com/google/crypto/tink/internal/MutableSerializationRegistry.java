@@ -203,11 +203,11 @@ public final class MutableSerializationRegistry {
    * registered (e.g. for when we create a Key from a key template/parameters name object).
    */
   public Parameters parseParametersWithLegacyFallback(
-      ProtoParametersSerialization protoParametersSerialization) {
-    try {
-      return parseParameters(protoParametersSerialization);
-    } catch (GeneralSecurityException e) {
+      ProtoParametersSerialization protoParametersSerialization) throws GeneralSecurityException {
+    if (!hasParserForParameters(protoParametersSerialization)) {
       return new LegacyProtoParameters(protoParametersSerialization);
+    } else {
+      return parseParameters(protoParametersSerialization);
     }
   }
 
