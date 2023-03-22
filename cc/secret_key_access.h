@@ -14,8 +14,8 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-#ifndef THIRD_PARTY_TINK_SECRET_KEY_ACCESS_H_
-#define THIRD_PARTY_TINK_SECRET_KEY_ACCESS_H_
+#ifndef TINK_SECRET_KEY_ACCESS_H_
+#define TINK_SECRET_KEY_ACCESS_H_
 
 #include "tink/key_access.h"
 
@@ -30,4 +30,4 @@ class SecretKeyAccess {
 }  // namespace tink
 }  // namespace crypto
 
-#endif  // THIRD_PARTY_TINK_SECRET_KEY_ACCESS_H_
+#endif  // TINK_SECRET_KEY_ACCESS_H_
