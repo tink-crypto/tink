@@ -41,8 +41,8 @@ py_test(
 )
 
 py_test(
-    name = "_aws_kms_aead_test",
-    srcs = ["_aws_kms_aead_test.py"],
+    name = "_aws_kms_integration_test",
+    srcs = ["_aws_kms_integration_test.py"],
     data = [
         "//testdata/aws:bad_credentials",
         "//testdata/aws:credentials",
