@@ -79,6 +79,7 @@ go_test(
     embed = [":jwt"],
     deps = [
         "//core/registry",
+        "//insecurecleartextkeyset",
         "//keyset",
         "//mac/subtle",
         "//proto/jwt_ecdsa_go_proto",
