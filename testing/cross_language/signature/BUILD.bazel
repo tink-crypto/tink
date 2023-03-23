@@ -1,0 +1,22 @@
+load("@pip_deps//:requirements.bzl", "requirement")
+
+package(
+    default_testonly = 1,
+    default_visibility = ["//:__subpackages__"],
+)
+
+licenses(["notice"])
+
+py_test(
+    name = "rsa_ssa_pkcs1_test",
+    srcs = ["rsa_ssa_pkcs1_test.py"],
+    deps = [
+        requirement("absl-py"),
+        "//tink_config",
+        "//util:testing_servers",
+        "@tink_py//tink:tink_python",
+        "@tink_py//tink/proto:common_py_pb2",
+        "@tink_py//tink/proto:rsa_ssa_pkcs1_py_pb2",
+        "@tink_py//tink/proto:tink_py_pb2",
+    ],
+)
