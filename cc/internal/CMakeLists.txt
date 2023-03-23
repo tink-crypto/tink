@@ -644,13 +644,9 @@ tink_cc_test(
   SRCS
     serializer_index_test.cc
   DEPS
-    tink::internal::serialization
+    tink::internal::serialization_test_util
     tink::internal::serializer_index
     gmock
-    absl::strings
-    absl::optional
-    tink::core::key
-    tink::core::parameters
 )
 
 tink_cc_library(

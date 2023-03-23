@@ -683,12 +683,8 @@ cc_test(
     name = "serializer_index_test",
     srcs = ["serializer_index_test.cc"],
     deps = [
-        ":serialization",
+        ":serialization_test_util",
         ":serializer_index",
-        "//:key",
-        "//:parameters",
-        "@com_google_absl//absl/strings",
-        "@com_google_absl//absl/types:optional",
         "@com_google_googletest//:gtest_main",
     ],
 )

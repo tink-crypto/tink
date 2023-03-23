@@ -16,15 +16,9 @@
 
 #include "tink/internal/serializer_index.h"
 
-#include <string>
-
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
-#include "absl/strings/string_view.h"
-#include "absl/types/optional.h"
-#include "tink/internal/serialization.h"
-#include "tink/key.h"
-#include "tink/parameters.h"
+#include "tink/internal/serialization_test_util.h"
 
 namespace crypto {
 namespace tink {
@@ -33,116 +27,63 @@ namespace internal {
 using ::testing::Eq;
 using ::testing::Not;
 
-class ExampleSerialization : public Serialization {
- public:
-  explicit ExampleSerialization(absl::string_view object_identifier)
-      : object_identifier_(object_identifier) {}
-
-  absl::string_view ObjectIdentifier() const override {
-    return object_identifier_;
-  }
-
- protected:
-  std::string object_identifier_;
-};
-
-class DifferentSerialization : public ExampleSerialization {
- public:
-  explicit DifferentSerialization(absl::string_view object_identifier)
-      : ExampleSerialization(object_identifier) {}
-};
-
-class ExampleParameters : public Parameters {
- public:
-  bool HasIdRequirement() const override { return false; }
-
-  bool operator==(const Parameters& other) const override { return true; }
-};
-
-class DifferentParameters : public ExampleParameters {};
-
-class ExampleKey : public Key {
- public:
-  const Parameters& GetParameters() const override { return parameters_; }
-
-  absl::optional<int> GetIdRequirement() const override { return 123; }
-
-  bool operator==(const Key& other) const override { return true; }
-
- private:
-  ExampleParameters parameters_;
-};
-
-class DifferentKey : public ExampleKey {};
-
 TEST(SerializerIndex, CreateEquivalentFromParameters) {
   // Multi-parameter templates require extra surrounding parentheses.
-  ASSERT_THAT(
-      (SerializerIndex::Create<ExampleParameters, ExampleSerialization>()),
-      Eq((SerializerIndex::Create<ExampleParameters, ExampleSerialization>())));
-  ASSERT_THAT(
-      (SerializerIndex::Create<ExampleParameters, ExampleSerialization>()),
-      Eq((SerializerIndex::Create<ExampleSerialization>(ExampleParameters()))));
-  ASSERT_THAT(
-      (SerializerIndex::Create<ExampleSerialization>(ExampleParameters())),
-      Eq((SerializerIndex::Create<ExampleSerialization>(ExampleParameters()))));
+  ASSERT_THAT((SerializerIndex::Create<NoIdParams, NoIdSerialization>()),
+              Eq((SerializerIndex::Create<NoIdParams, NoIdSerialization>())));
+  ASSERT_THAT((SerializerIndex::Create<NoIdParams, NoIdSerialization>()),
+              Eq((SerializerIndex::Create<NoIdSerialization>(NoIdParams()))));
+  ASSERT_THAT((SerializerIndex::Create<NoIdSerialization>(NoIdParams())),
+              Eq((SerializerIndex::Create<NoIdSerialization>(NoIdParams()))));
 }
 
 TEST(SerializerIndex, CreateFromDifferentParametersType) {
   // Multi-parameter templates require extra surrounding parentheses.
   ASSERT_THAT(
-      (SerializerIndex::Create<ExampleParameters, ExampleSerialization>()),
-      Not(Eq((SerializerIndex::Create<DifferentParameters,
-                                      ExampleSerialization>()))));
+      (SerializerIndex::Create<NoIdParams, NoIdSerialization>()),
+      Not(Eq((SerializerIndex::Create<IdParams, NoIdSerialization>()))));
   ASSERT_THAT(
-      (SerializerIndex::Create<ExampleSerialization>(ExampleParameters())),
-      Not(Eq((SerializerIndex::Create<ExampleSerialization>(
-          DifferentParameters())))));
+      (SerializerIndex::Create<NoIdSerialization>(NoIdParams())),
+      Not(Eq((SerializerIndex::Create<NoIdSerialization>(IdParams())))));
 }
 
 TEST(SerializerIndex, CreateFromSameParametersTypeWithDifferentSerialization) {
   // Multi-parameter templates require extra surrounding parentheses.
   ASSERT_THAT(
-      (SerializerIndex::Create<ExampleParameters, ExampleSerialization>()),
-      Not(Eq((SerializerIndex::Create<ExampleParameters,
-                                      DifferentSerialization>()))));
+      (SerializerIndex::Create<NoIdParams, NoIdSerialization>()),
+      Not(Eq((SerializerIndex::Create<NoIdParams, IdParamsSerialization>()))));
   ASSERT_THAT(
-      (SerializerIndex::Create<ExampleSerialization>(ExampleParameters())),
-      Not(Eq((SerializerIndex::Create<DifferentSerialization>(
-          ExampleParameters())))));
+      (SerializerIndex::Create<NoIdSerialization>(NoIdParams())),
+      Not(Eq((SerializerIndex::Create<IdParamsSerialization>(NoIdParams())))));
 }
 
 TEST(SerializerIndex, CreateEquivalentFromKey) {
   // Multi-parameter templates require extra surrounding parentheses.
-  ASSERT_THAT(
-      (SerializerIndex::Create<ExampleKey, ExampleSerialization>()),
-      Eq((SerializerIndex::Create<ExampleKey, ExampleSerialization>())));
-  ASSERT_THAT(
-      (SerializerIndex::Create<ExampleKey, ExampleSerialization>()),
-      Eq((SerializerIndex::Create<ExampleSerialization>(ExampleKey()))));
-  ASSERT_THAT(
-      (SerializerIndex::Create<ExampleSerialization>(ExampleKey())),
-      Eq((SerializerIndex::Create<ExampleSerialization>(ExampleKey()))));
+  ASSERT_THAT((SerializerIndex::Create<NoIdKey, NoIdSerialization>()),
+              Eq((SerializerIndex::Create<NoIdKey, NoIdSerialization>())));
+  ASSERT_THAT((SerializerIndex::Create<NoIdKey, NoIdSerialization>()),
+              Eq((SerializerIndex::Create<NoIdSerialization>(NoIdKey()))));
+  ASSERT_THAT((SerializerIndex::Create<NoIdSerialization>(NoIdKey())),
+              Eq((SerializerIndex::Create<NoIdSerialization>(NoIdKey()))));
 }
 
 TEST(SerializerIndex, CreateFromDifferentKeyType) {
   // Multi-parameter templates require extra surrounding parentheses.
+  ASSERT_THAT((SerializerIndex::Create<NoIdKey, NoIdSerialization>()),
+              Not(Eq((SerializerIndex::Create<IdKey, NoIdSerialization>()))));
   ASSERT_THAT(
-      (SerializerIndex::Create<ExampleKey, ExampleSerialization>()),
-      Not(Eq((SerializerIndex::Create<DifferentKey, ExampleSerialization>()))));
-  ASSERT_THAT(
-      (SerializerIndex::Create<ExampleSerialization>(ExampleKey())),
-      Not(Eq((SerializerIndex::Create<ExampleSerialization>(DifferentKey())))));
+      (SerializerIndex::Create<NoIdSerialization>(NoIdKey())),
+      Not(Eq((SerializerIndex::Create<NoIdSerialization>(IdKey(/*id=*/1))))));
 }
 
 TEST(SerializerIndex, CreateFromSameKeyTypeWithDifferentSerialization) {
   // Multi-parameter templates require extra surrounding parentheses.
   ASSERT_THAT(
-      (SerializerIndex::Create<ExampleKey, ExampleSerialization>()),
-      Not(Eq((SerializerIndex::Create<ExampleKey, DifferentSerialization>()))));
+      (SerializerIndex::Create<NoIdKey, NoIdSerialization>()),
+      Not(Eq((SerializerIndex::Create<NoIdKey, IdKeySerialization>()))));
   ASSERT_THAT(
-      (SerializerIndex::Create<ExampleSerialization>(ExampleKey())),
-      Not(Eq((SerializerIndex::Create<DifferentSerialization>(ExampleKey())))));
+      (SerializerIndex::Create<NoIdSerialization>(NoIdKey())),
+      Not(Eq((SerializerIndex::Create<IdKeySerialization>(NoIdKey())))));
 }
 
 }  // namespace internal
