@@ -34,7 +34,11 @@ pip3 install protobuf==3.20.3 --user
 # environement.
 MANUAL_TARGETS=()
 if [[ "${IS_KOKORO}" == "true" ]]; then
-  MANUAL_TARGETS+=( "//tink/integration/gcpkms:_gcp_kms_aead_test" )
+  MANUAL_TARGETS+=(
+    "//tink/integration/awskms:_aws_kms_integration_test"
+    "//tink/integration/gcpkms:_gcp_kms_client_integration_test"
+    "//tink/integration/gcpkms:_gcp_kms_integration_test"
+  )
 fi
 readonly MANUAL_TARGETS
 
