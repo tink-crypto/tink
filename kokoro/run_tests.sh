@@ -62,7 +62,6 @@ run_tools_tests() {
     MANUAL_TOOLS_TARGETS+=(
       "//testing/cc:aws_kms_aead_test"
       "//testing/cc:gcp_kms_aead_test"
-      "//testing/cross_language:aead_envelope_test"
       "//tinkey/src/test/java/com/google/crypto/tink/tinkey:AddKeyCommandTest"
       "//tinkey/src/test/java/com/google/crypto/tink/tinkey:CreateKeysetCommandTest"
       "//tinkey/src/test/java/com/google/crypto/tink/tinkey:CreatePublicKeysetCommandTest"
