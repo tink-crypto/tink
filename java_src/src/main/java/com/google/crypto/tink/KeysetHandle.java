@@ -745,6 +745,20 @@ public final class KeysetHandle {
   }
 
   /**
+   * Generates a new {@link KeysetHandle} that contains a single fresh key generated key with the
+   * given {@code Parameters} object.
+   *
+   * @throws GeneralSecurityException if no generation method for the given {@code parameters} has
+   *     been registered.
+   */
+  public static final KeysetHandle generateNew(Parameters parameters)
+      throws GeneralSecurityException {
+    return KeysetHandle.newBuilder()
+        .addEntry(KeysetHandle.generateEntryFromParameters(parameters).withRandomId().makePrimary())
+        .build();
+  }
+
+  /**
    * Generates a new {@link KeysetHandle} that contains a single fresh key generated according to
    * {@code keyTemplate}.
    *
