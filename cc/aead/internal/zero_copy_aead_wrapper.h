@@ -48,4 +48,4 @@ class ZeroCopyAeadWrapper : public PrimitiveWrapper<ZeroCopyAead, Aead> {
 }  // namespace tink
 }  // namespace crypto
 
-#endif  // TINK_AEAD_AEAD_WRAPPER_H_
+#endif  // TINK_AEAD_INTERNAL_ZERO_COPY_AEAD_WRAPPER_H_
