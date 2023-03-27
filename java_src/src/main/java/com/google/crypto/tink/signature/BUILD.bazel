@@ -801,3 +801,21 @@ android_library(
         "@maven//:com_google_protobuf_protobuf_javalite",
     ],
 )
+
+java_library(
+    name = "ed25519_parameters",
+    srcs = ["Ed25519Parameters.java"],
+    deps = [
+        ":signature_parameters",
+        "@maven//:com_google_errorprone_error_prone_annotations",
+    ],
+)
+
+android_library(
+    name = "ed25519_parameters-android",
+    srcs = ["Ed25519Parameters.java"],
+    deps = [
+        ":signature_parameters-android",
+        "@maven//:com_google_errorprone_error_prone_annotations",
+    ],
+)
