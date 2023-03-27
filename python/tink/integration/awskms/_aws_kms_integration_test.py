@@ -17,7 +17,8 @@ import os
 
 from absl.testing import absltest
 
-from tink import core
+import tink
+from tink import aead
 from tink.integration import awskms
 from tink.testing import helper
 
@@ -25,32 +26,40 @@ CREDENTIAL_PATH = os.path.join(helper.tink_py_testdata_path(),
                                'aws/credentials.ini')
 BAD_CREDENTIALS_PATH = os.path.join(helper.tink_py_testdata_path(),
                                     'aws/credentials_bad.ini')
-KEY_URI = 'aws-kms://arn:aws:kms:us-east-2:235739564943:key/3ee50705-5a82-4f5b-9753-05c4f473922f'
-BAD_KEY_URI = 'gcp-kms://projects/tink-test-infrastructure/locations/global/keyRings/unit-and-integration-testing/cryptoKeys/aead-key'
+KEY_URI = ('aws-kms://arn:aws:kms:us-east-2:235739564943:key/'
+           '3ee50705-5a82-4f5b-9753-05c4f473922f')
+KEY_URI_2 = ('aws-kms://arn:aws:kms:us-east-2:235739564943:key/'
+             'b3ca2efd-a8fb-47f2-b541-7e20f8c5cd11')
+GCP_KEY_URI = ('gcp-kms://projects/tink-test-infrastructure/locations/global/'
+               'keyRings/unit-and-integration-testing/cryptoKeys/aead-key')
+
+
+def setUpModule():
+  aead.register()
 
 
 class AwsKmsAeadTest(absltest.TestCase):
 
   def test_encrypt_decrypt(self):
     aws_client = awskms.AwsKmsClient(KEY_URI, CREDENTIAL_PATH)
-    aead = aws_client.get_aead(KEY_URI)
+    aws_aead = aws_client.get_aead(KEY_URI)
 
     plaintext = b'hello'
     associated_data = b'world'
-    ciphertext = aead.encrypt(plaintext, associated_data)
-    self.assertEqual(plaintext, aead.decrypt(ciphertext, associated_data))
+    ciphertext = aws_aead.encrypt(plaintext, associated_data)
+    self.assertEqual(plaintext, aws_aead.decrypt(ciphertext, associated_data))
 
     plaintext = b'hello'
-    ciphertext = aead.encrypt(plaintext, b'')
-    self.assertEqual(plaintext, aead.decrypt(ciphertext, b''))
+    ciphertext = aws_aead.encrypt(plaintext, b'')
+    self.assertEqual(plaintext, aws_aead.decrypt(ciphertext, b''))
 
   def test_corrupted_ciphertext(self):
     aws_client = awskms.AwsKmsClient(KEY_URI, CREDENTIAL_PATH)
-    aead = aws_client.get_aead(KEY_URI)
+    aws_aead = aws_client.get_aead(KEY_URI)
 
     plaintext = b'helloworld'
-    ciphertext = aead.encrypt(plaintext, b'')
-    self.assertEqual(plaintext, aead.decrypt(ciphertext, b''))
+    ciphertext = aws_aead.encrypt(plaintext, b'')
+    self.assertEqual(plaintext, aws_aead.decrypt(ciphertext, b''))
 
     # Corrupt each byte once and check that decryption fails
     # NOTE: Skipping two bytes as they are malleable
@@ -58,22 +67,44 @@ class AwsKmsAeadTest(absltest.TestCase):
       tmp_ciphertext = list(ciphertext)
       tmp_ciphertext[byte_idx] ^= 1
       corrupted_ciphertext = bytes(tmp_ciphertext)
-      with self.assertRaises(core.TinkError):
-        aead.decrypt(corrupted_ciphertext, b'')
+      with self.assertRaises(tink.TinkError):
+        aws_aead.decrypt(corrupted_ciphertext, b'')
 
   def test_encrypt_with_bad_uri(self):
-    with self.assertRaises(core.TinkError):
+    with self.assertRaises(tink.TinkError):
       aws_client = awskms.AwsKmsClient(KEY_URI, CREDENTIAL_PATH)
-      aws_client.get_aead(BAD_KEY_URI)
+      aws_client.get_aead(GCP_KEY_URI)
 
   def test_encrypt_with_bad_credentials(self):
     aws_client = awskms.AwsKmsClient(KEY_URI, BAD_CREDENTIALS_PATH)
-    aead = aws_client.get_aead(KEY_URI)
+    aws_aead = aws_client.get_aead(KEY_URI)
 
     plaintext = b'hello'
     associated_data = b'world'
-    with self.assertRaises(core.TinkError):
-      aead.encrypt(plaintext, associated_data)
+    with self.assertRaises(tink.TinkError):
+      aws_aead.encrypt(plaintext, associated_data)
+
+  def test_client_registration(self):
+    # Register AWS KMS Client bound to KEY_URI.
+    awskms.AwsKmsClient.register_client(KEY_URI, CREDENTIAL_PATH)
+
+    # Create a keyset handle for KEY_URI and use it.
+    handle = tink.new_keyset_handle(
+        aead.aead_key_templates.create_kms_aead_key_template(KEY_URI)
+    )
+    aws_aead = handle.primitive(aead.Aead)
+    ciphertext = aws_aead.encrypt(b'plaintext', b'associated_data')
+    self.assertEqual(
+        b'plaintext', aws_aead.decrypt(ciphertext, b'associated_data')
+    )
+
+    # It fails for any other key URI.
+    with self.assertRaises(tink.TinkError):
+      handle2 = tink.new_keyset_handle(
+          aead.aead_key_templates.create_kms_aead_key_template(KEY_URI_2)
+      )
+      gcp_aead = handle2.primitive(aead.Aead)
+      gcp_aead.encrypt(b'plaintext', b'associated_data')
 
 
 if __name__ == '__main__':

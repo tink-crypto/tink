@@ -35,6 +35,7 @@ py_test(
     srcs_version = "PY3",
     deps = [
         ":awskms",
+        "//tink:tink_python",
         "//tink/testing:helper",
         requirement("absl-py"),
     ],
@@ -52,6 +53,8 @@ py_test(
     tags = ["manual"],
     deps = [
         ":awskms",
+        "//tink:tink_python",
+        "//tink/aead",
         "//tink/testing:helper",
         requirement("absl-py"),
     ],
