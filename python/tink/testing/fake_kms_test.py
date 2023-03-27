@@ -31,6 +31,12 @@ def setUpModule():
 
 class FakeKmsTest(absltest.TestCase):
 
+  def test_fake_kms_doesn_not_support_other_kms(self):
+    client = fake_kms.FakeKmsClient()
+    self.assertFalse(
+        client.does_support('aws-kms://arn:aws:kms:us-east-2:12345:key/12345')
+    )
+
   def test_fake_kms_aead_encrypt_decrypt(self):
     template = aead.aead_key_templates.create_kms_aead_key_template(
         key_uri=KEY_URI)

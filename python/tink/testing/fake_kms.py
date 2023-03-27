@@ -38,6 +38,8 @@ class FakeKmsClient(_kms_aead_key_manager.KmsClient):
       raise tink.TinkError('invalid key URI')
 
   def does_support(self, key_uri: str) -> bool:
+    if not key_uri.startswith(FAKE_KMS_PREFIX):
+      return False
     if not self._key_uri:
       return True
     return key_uri == self._key_uri
