@@ -45,7 +45,6 @@ using ::crypto::tink::test::IsOk;
 using ::crypto::tink::test::StatusIs;
 using ::crypto::tink::util::StatusOr;
 using ::google::crypto::tink::KeyTemplate;
-using ::testing::Eq;
 using ::testing::IsNull;
 using ::testing::Not;
 using ::testing::Test;
