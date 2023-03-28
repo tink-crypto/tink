@@ -26,7 +26,9 @@ GCP_KEYURI_PREFIX = 'gcp-kms://'
 class GcpKmsClient(_kms_aead_key_manager.KmsClient):
   """Basic GCP client for AEAD."""
 
-  def __init__(self, key_uri: Optional[str], credentials_path: str):
+  def __init__(
+      self, key_uri: Optional[str], credentials_path: Optional[str]
+  ) -> None:
     """Creates a new GcpKmsClient that is bound to the key specified in 'key_uri'.
 
     Uses the specified credentials when communicating with the KMS.
@@ -35,7 +37,7 @@ class GcpKmsClient(_kms_aead_key_manager.KmsClient):
       key_uri: The URI of the key the client should be bound to. If it is None
           or empty, then the client is not bound to any particular key.
       credentials_path: Path to the file with the access credentials. If it is
-          empty, then default credentials will be used.
+          None or empty, then default credentials will be used.
 
     Raises:
       ValueError: If the path or filename of the credentials is invalid.
@@ -48,7 +50,8 @@ class GcpKmsClient(_kms_aead_key_manager.KmsClient):
       self._key_uri = key_uri
     else:
       raise core.TinkError('Invalid key_uri.')
-
+    if not credentials_path:
+      credentials_path = ''
     # Use the C++ GCP KMS client
     self.cc_client = tink_bindings.GcpKmsClient(self._key_uri, credentials_path)
 
@@ -77,7 +80,9 @@ class GcpKmsClient(_kms_aead_key_manager.KmsClient):
     return aead.AeadCcToPyWrapper(self.cc_client.get_aead(key_uri))
 
   @classmethod
-  def register_client(cls, key_uri, credentials_path) -> None:
+  def register_client(
+      cls, key_uri: Optional[str], credentials_path: Optional[str]
+  ) -> None:
     """Registers the KMS client internally."""
     _kms_aead_key_manager.register_kms_client(  # pylint: disable=protected-access
         GcpKmsClient(key_uri, credentials_path)

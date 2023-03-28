@@ -29,6 +29,8 @@ KEY_URI = 'gcp-kms://projects/tink-test-infrastructure/locations/global/keyRings
 LOCAL_KEY_URI = 'gcp-kms://projects/tink-test-infrastructure/locations/europe-west1/keyRings/unit-and-integration-test/cryptoKeys/aead-key'
 BAD_KEY_URI = 'aws-kms://arn:aws:kms:us-east-2:235739564943:key/3ee50705-5a82-4f5b-9753-05c4f473922f'
 
+KEY2_URI = 'gcp-kms://projects/tink-test-infrastructure/locations/global/keyRings/unit-and-integration-testing/cryptoKeys/aead2-key'
+
 if 'TEST_SRCDIR' in os.environ:
   # Set root certificates for gRPC in Bazel Test which are needed on MacOS
   os.environ['GRPC_DEFAULT_SSL_ROOTS_FILE_PATH'] = os.path.join(
@@ -91,6 +93,9 @@ class GcpKmsAeadTest(absltest.TestCase):
         gcp_aead.decrypt(corrupted_ciphertext, b'')
 
   def test_registration_client_bound_to_uri_works(self):
+    # Make sure default credentials are not set.
+    os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = ''
+
     # Register GCP KMS Client bound to KEY_URI.
     gcpkms.GcpKmsClient.register_client(KEY_URI, CREDENTIAL_PATH)
 
@@ -112,6 +117,21 @@ class GcpKmsAeadTest(absltest.TestCase):
       gcp_aead = handle2.primitive(aead.Aead)
       gcp_aead.encrypt(b'plaintext', b'associated_data')
 
+  def test_registration_client_with_default_credentials_works(self):
+    # Set default credentials, see
+    # https://cloud.google.com/docs/authentication/application-default-credentials
+    os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = CREDENTIAL_PATH
+
+    gcpkms.GcpKmsClient.register_client(KEY2_URI, None)
+
+    handle = tink.new_keyset_handle(
+        aead.aead_key_templates.create_kms_aead_key_template(KEY2_URI)
+    )
+    gcp_aead = handle.primitive(aead.Aead)
+    ciphertext = gcp_aead.encrypt(b'plaintext', b'associated_data')
+    self.assertEqual(
+        b'plaintext', gcp_aead.decrypt(ciphertext, b'associated_data')
+    )
 
 if __name__ == '__main__':
   absltest.main()
