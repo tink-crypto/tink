@@ -44,8 +44,5 @@ java_binary(
         "@tink_java//src/main/java/com/google/crypto/tink:aead",
         "@tink_java//src/main/java/com/google/crypto/tink:registry_cluster",
         "@tink_java//src/main/java/com/google/crypto/tink/aead:aead_config",
-        "@tink_java//src/main/java/com/google/crypto/tink/integration/awskms:aws_kms_client",
-        "@tink_java//src/main/java/com/google/crypto/tink/integration/gcpkms:gcp_kms_client",
-        "@tink_java//src/main/java/com/google/crypto/tink/testing:test_util",
     ],
 )

@@ -29,8 +29,6 @@
 #include "tink/cleartext_keyset_handle.h"
 #include "tink/config/tink_config.h"
 #include "tink/input_stream.h"
-#include "tink/integration/awskms/aws_kms_client.h"
-#include "tink/integration/gcpkms/gcp_kms_client.h"
 #include "tink/json_keyset_reader.h"
 #include "tink/json_keyset_writer.h"
 #include "tink/keyset_handle.h"
@@ -52,8 +50,6 @@ using crypto::tink::KeysetWriter;
 using crypto::tink::KmsClients;
 using crypto::tink::OutputStream;
 using crypto::tink::TinkConfig;
-using crypto::tink::integration::awskms::AwsKmsClient;
-using crypto::tink::integration::gcpkms::GcpKmsClient;
 using crypto::tink::util::Status;
 
 namespace {
@@ -185,48 +181,6 @@ void CliUtil::InitTink() {
               << std::endl;
     exit(1);
   }
-
-  Status gcp_result = InitGcp();
-  if (!gcp_result.ok()) {
-    std::clog << gcp_result.message() << std::endl;
-  }
-
-  Status aws_result = InitAws();
-  if (!aws_result.ok()) {
-    std::clog << aws_result.message() << std::endl;
-  }
-}
-
-// static
-Status CliUtil::InitGcp() {
-  std::string creds_file = std::string(getenv("TEST_SRCDIR")) +
-                           "/tools/testdata/gcp/credential.json";
-  auto client_result = GcpKmsClient::New("", creds_file);
-  if (!client_result.ok()) {
-    return Status(absl::StatusCode::kInternal,
-                  "Failed to connect to GCP client.");
-  }
-  auto client_add_result = KmsClients::Add(std::move(client_result.value()));
-  if (!client_add_result.ok()) {
-    return Status(absl::StatusCode::kInternal, "Failed to add KMS client.");
-  }
-  return crypto::tink::util::OkStatus();
-}
-
-// static
-Status CliUtil::InitAws() {
-  std::string creds_file = std::string(getenv("TEST_SRCDIR")) +
-                           "/tools/testdata/aws/credentials.ini";
-  auto client_result = AwsKmsClient::New("", creds_file);
-  if (!client_result.ok()) {
-    return Status(absl::StatusCode::kInternal, "Failed to connect to AWS client.");
-  }
-  auto client_add_result =
-      KmsClients::Add(std::move(client_result.value()));
-  if (!client_add_result.ok()) {
-    return Status(absl::StatusCode::kInternal, "Failed to add KMS client.");
-  }
-  return crypto::tink::util::OkStatus();
 }
 
 // static
