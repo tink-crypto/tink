@@ -5,22 +5,6 @@ package(default_visibility = ["//:__subpackages__"])
 licenses(["notice"])
 
 go_binary(
-    name = "aead_cli_go",
-    testonly = 1,  # keep
-    srcs = ["aead_cli.go"],
-    out = "aead_cli_go",
-    data = ["//testdata/gcp:credentials"],
-    deps = [
-        "@tink_go//aead",
-        "@tink_go//core/registry",
-        "@tink_go//integration/awskms",
-        "@tink_go//integration/gcpkms",
-        "@tink_go//keyset",
-        "@tink_go//testkeyset",
-    ],
-)
-
-go_binary(
     name = "public_key_sign_cli_go",
     testonly = 1,  # keep
     srcs = ["public_key_sign_cli.go"],
