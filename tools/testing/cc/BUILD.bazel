@@ -30,73 +30,10 @@ cc_library(
 )
 
 cc_binary(
-    name = "aws_kms_aead_cli",
-    srcs = ["aws_kms_aead_cli.cc"],
-    deps = [
-        ":cli_util",
-        "@aws_cpp_sdk//:aws_sdk_core",
-        "@tink_cc",
-        "@tink_cc_awskms//:aws_crypto",
-        "@tink_cc_awskms//:aws_kms_aead",
-        "@tink_cc_awskms//:aws_kms_client",
-    ],
-)
-
-cc_binary(
-    name = "gcp_kms_aead_cli",
-    srcs = ["gcp_kms_aead_cli.cc"],
-    deps = [
-        ":cli_util",
-        "@tink_cc",
-        "@tink_cc_gcpkms//:gcp_kms_aead",
-        "@tink_cc_gcpkms//:gcp_kms_client",
-    ],
-)
-
-cc_binary(
     name = "aead_cli_cc",
     srcs = ["aead_cli.cc"],
     deps = [
         ":cli_util",
         "@tink_cc",
-    ],
-)
-
-sh_test(
-    name = "aws_kms_aead_test",
-    size = "medium",
-    srcs = [
-        "aws_kms_aead_test.sh",
-    ],
-    data = [
-        ":aws_kms_aead_cli",
-        "//testdata/aws:bad_credentials",
-        "//testdata/aws:credentials",
-        "//testing/cross_language:test_lib",
-    ],
-    tags = [
-        "manual",
-        "no_rbe",
-        "requires-network",
-    ],
-)
-
-sh_test(
-    name = "gcp_kms_aead_test",
-    size = "medium",
-    srcs = [
-        "gcp_kms_aead_test.sh",
-    ],
-    data = [
-        ":gcp_kms_aead_cli",
-        "//testdata/gcp:bad_credentials",
-        "//testdata/gcp:credentials",
-        "//testing/cross_language:test_lib",
-        "@google_root_pem//file",
-    ],
-    tags = [
-        "manual",
-        "no_rbe",
-        "requires-network",
     ],
 )

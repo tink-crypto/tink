@@ -18,7 +18,6 @@
 REPO_DIR="${TEST_SRCDIR}"
 TOOLS_DIR="${REPO_DIR}/tools"
 TINKEY_CLI="${TOOLS_DIR}/tinkey/tinkey"
-ENVELOPE_CLI="${TOOLS_DIR}/testing/go/generate_envelope_keyset"
 #############################################################################
 ##### Helper functions.
 
@@ -68,45 +67,6 @@ generate_symmetric_key() {
   $TINKEY_CLI create-keyset --key-template $key_template\
       --out-format $output_format --out $symmetric_key_file  || exit 1
   echo "Done generating a symmetric keyset."
-}
-
-# Generates an AWS Envelope Encryption using $key_template,
-# which should be supported by Tinkey.
-# Stores the key in file $aws_keyset_file.
-generate_aws_keyset() {
-  local key_name="$1"
-  local key_template="$2"
-  local output_format="$3"
-  if [ "$output_format" == "" ]; then
-    output_format="BINARY"
-  fi
-  aws_keyset_file="$TEST_TMPDIR/${key_name}_aws_keyset.bin"
-  echo "--- Using AWS KMS and template $key_template to generate keyset"\
-       "to file $aws_keyset_file ..."
-
-  $ENVELOPE_CLI $aws_keyset_file "AWS" $key_template || exit 1
-
-  echo "Done generating an AWS KMS generated keyset."
-}
-
-# Generates an GCP Envelope Encryption using $key_template,
-# which should be supported by Tinkey.
-# Stores the key in file $gcp_keyset_file.
-generate_gcp_keyset() {
-  local key_name="$1"
-  local key_template="$2"
-  local output_format="$3"
-
-  if [ "$output_format" == "" ]; then
-    output_format="BINARY"
-  fi
-  gcp_keyset_file="$TEST_TMPDIR/${key_name}_gcp_keyset.bin"
-  echo "--- Using GCP KMS and template $key_template to generate keyset"\
-      "to file $gcp_keyset_file ..."
-  $ENVELOPE_CLI $gcp_keyset_file "GCP" $key_template || exit 1
-
-  echo "Done generating an GCP KMS generated keyset."
-
 }
 
 # Generates some example plaintext data, and stores it in $plaintext_file.

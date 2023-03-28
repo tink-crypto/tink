@@ -37,8 +37,6 @@ time bazel test --test_output=errors -- ...
 if [[ -n "${KOKORO_ROOT}" ]]; then
   declare -a MANUAL_TARGETS
   MANUAL_TARGETS=(
-    "//testing/cc:aws_kms_aead_test"
-    "//testing/cc:gcp_kms_aead_test"
     "//tinkey/src/test/java/com/google/crypto/tink/tinkey:AddKeyCommandTest"
     "//tinkey/src/test/java/com/google/crypto/tink/tinkey:CreateKeysetCommandTest"
     "//tinkey/src/test/java/com/google/crypto/tink/tinkey:CreatePublicKeysetCommandTest"
