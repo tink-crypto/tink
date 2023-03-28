@@ -374,6 +374,17 @@ java_library(
     ],
 )
 
+java_library(
+    name = "rsa_ssa_pkcs1_parameters",
+    srcs = ["RsaSsaPkcs1Parameters.java"],
+    deps = [
+        ":signature_parameters",
+        "//src/main/java/com/google/crypto/tink/annotations:alpha",
+        "@maven//:com_google_code_findbugs_jsr305",
+        "@maven//:com_google_errorprone_error_prone_annotations",
+    ],
+)
+
 # Android packages
 
 android_library(
@@ -816,6 +827,17 @@ android_library(
     srcs = ["Ed25519Parameters.java"],
     deps = [
         ":signature_parameters-android",
+        "@maven//:com_google_errorprone_error_prone_annotations",
+    ],
+)
+
+android_library(
+    name = "rsa_ssa_pkcs1_parameters-android",
+    srcs = ["RsaSsaPkcs1Parameters.java"],
+    deps = [
+        ":signature_parameters-android",
+        "//src/main/java/com/google/crypto/tink/annotations:alpha-android",
+        "@maven//:com_google_code_findbugs_jsr305",
         "@maven//:com_google_errorprone_error_prone_annotations",
     ],
 )
