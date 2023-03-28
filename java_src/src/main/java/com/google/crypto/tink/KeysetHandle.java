@@ -720,9 +720,8 @@ public final class KeysetHandle {
   /**
    * Returns the keyset data as a list of {@link KeyHandle}s.
    *
-   * @deprecated Use {@link #size} and {@link #getAt} instead.
+   * Please do not use this function in new code. Instead, use {@link #getAt}.
    */
-  @Deprecated /* Deprecation under consideration */
   public List<KeyHandle> getKeys() {
     ArrayList<KeyHandle> result = new ArrayList<>();
     for (Keyset.Key key : keyset.getKeyList()) {
@@ -1097,9 +1096,8 @@ public final class KeysetHandle {
    * Searches the keyset to find the primary key of this {@code KeysetHandle}, and returns the key
    * wrapped in a {@code KeyHandle}.
    *
-   * @deprecated Use {@link #getPrimary} instead.
+   * Please do not use this function in new code. Instead, use {@link #getPrimary}.
    */
-  @Deprecated /* Deprecation under consideration */
   public KeyHandle primaryKey() throws GeneralSecurityException {
     int primaryKeyId = keyset.getPrimaryKeyId();
     for (Keyset.Key key : keyset.getKeyList()) {
