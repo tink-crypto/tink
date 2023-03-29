@@ -26,20 +26,4 @@ if [[ "${IS_KOKORO}" == "true" ]]; then
   cd "$(echo "${KOKORO_ARTIFACTS_DIR}"/git*/tink)"
 fi
 
-./kokoro/testutils/copy_credentials.sh "python/testdata" "gcp"
-# Install protobuf pip packages.
-pip3 install protobuf==3.20.3 --user
-
-# Run manual tests which rely on key material injected into the Kokoro
-# environement.
-MANUAL_TARGETS=()
-if [[ "${IS_KOKORO}" == "true" ]]; then
-  MANUAL_TARGETS+=(
-    "//tink/integration/awskms:_aws_kms_integration_test"
-    "//tink/integration/gcpkms:_gcp_kms_client_integration_test"
-    "//tink/integration/gcpkms:_gcp_kms_integration_test"
-  )
-fi
-readonly MANUAL_TARGETS
-
-./kokoro/testutils/run_bazel_tests.sh python "${MANUAL_TARGETS[@]}"
+# These tests are now run in python/kokoro/macos_external/bazel/run_tests.sh
