@@ -18,30 +18,4 @@ set -euo pipefail
 
 cd ${KOKORO_ARTIFACTS_DIR}/git/tink
 
-./kokoro/testutils/copy_credentials.sh "tools/testdata" "all"
-./kokoro/testutils/update_android_sdk.sh
-./kokoro/testutils/upgrade_gcc.sh
-# Sourcing required to update callers environment.
-source ./kokoro/testutils/install_python3.sh
-source ./kokoro/testutils/install_go.sh
-
-echo "Using go binary from $(which go): $(go version)"
-
-cd tools
-use_bazel.sh $(cat .bazelversion)
-time bazel build -- ...
-time bazel test --test_output=errors -- ...
-
-# Run manual tests which rely on key material injected into the Kokoro
-# environement.
-if [[ -n "${KOKORO_ROOT}" ]]; then
-  declare -a MANUAL_TARGETS
-  MANUAL_TARGETS=(
-    "//tinkey/src/test/java/com/google/crypto/tink/tinkey:AddKeyCommandTest"
-    "//tinkey/src/test/java/com/google/crypto/tink/tinkey:CreateKeysetCommandTest"
-    "//tinkey/src/test/java/com/google/crypto/tink/tinkey:CreatePublicKeysetCommandTest"
-    "//tinkey/src/test/java/com/google/crypto/tink/tinkey:RotateKeysetCommandTest"
-  )
-  readonly MANUAL_TARGETS
-  time bazel test --test_output=errors -- "${MANUAL_TARGETS[@]}"
-fi
+# These tests are now run in tink/github/tinkey/gcp_ubuntu/bazel/continuous.
