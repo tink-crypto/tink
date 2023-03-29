@@ -80,7 +80,6 @@ public final class RsaSsaPkcs1Parameters extends SignatureParameters {
   }
 
   public static final BigInteger F4 = BigInteger.valueOf(65537);
-  private static final BigInteger TWO = BigInteger.valueOf(2);
 
   /** Builds a new RsaSsaPkcs1Parameters instance. */
   public static final class Builder {
@@ -115,8 +114,13 @@ public final class RsaSsaPkcs1Parameters extends SignatureParameters {
       return this;
     }
 
+    private static final BigInteger TWO = BigInteger.valueOf(2);
+    private static final BigInteger PUBLIC_EXPONENT_UPPER_BOUND = TWO.pow(256);
+
     private void validatePublicExponent(BigInteger publicExponent)
         throws InvalidAlgorithmParameterException {
+      // We use the validation of the public exponent as defined in
+      // https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.186-4.pdf, B.3
       int c = publicExponent.compareTo(F4);
       if (c == 0) {
         // publicExponent is F4.
@@ -129,6 +133,11 @@ public final class RsaSsaPkcs1Parameters extends SignatureParameters {
       if (publicExponent.mod(TWO).equals(BigInteger.ZERO)) {
         // publicExponent is even. This is invalid since it is not co-prime to p-1.
         throw new InvalidAlgorithmParameterException("Invalid public exponent");
+      }
+      if (publicExponent.compareTo(PUBLIC_EXPONENT_UPPER_BOUND) > 0) {
+        // publicExponent is larger than PUBLIC_EXPONENT_UPPER_BOUND.
+        throw new InvalidAlgorithmParameterException(
+            "Public exponent cannot be larger than 2^256.");
       }
     }
 

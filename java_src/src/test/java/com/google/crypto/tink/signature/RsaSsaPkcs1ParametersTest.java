@@ -169,6 +169,23 @@ public final class RsaSsaPkcs1ParametersTest {
     assertThat(parameters.getPublicExponent()).isEqualTo(largeE);
   }
 
+  // Public exponents larger than 2^256 are rejected. See:
+  // https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.186-4.pdf, B.3
+  @Test
+  public void buildParametersWithTooLargePublicExponent_fails() throws Exception {
+    BigInteger tooLargeE = BigInteger.valueOf(2).pow(256).add(BigInteger.ONE);
+    assertThat(tooLargeE.bitLength()).isEqualTo(257);
+    assertThrows(
+        GeneralSecurityException.class,
+        () ->
+            RsaSsaPkcs1Parameters.builder()
+                .setModulusSizeBits(2048)
+                .setPublicExponent(tooLargeE)
+                .setHashType(RsaSsaPkcs1Parameters.HashType.SHA256)
+                .setVariant(RsaSsaPkcs1Parameters.Variant.NO_PREFIX)
+                .build());
+  }
+
   @Test
   public void buildParametersWithSha384() throws Exception {
     RsaSsaPkcs1Parameters parameters =
