@@ -13,8 +13,8 @@
 // limitations under the License.
 //
 ///////////////////////////////////////////////////////////////////////////////
-#ifndef TINK_MONITORING_MOCK_MONITORING_CLIENT_FACTORY_H_
-#define TINK_MONITORING_MOCK_MONITORING_CLIENT_FACTORY_H_
+#ifndef TINK_MONITORING_MONITORING_CLIENT_MOCKS_H_
+#define TINK_MONITORING_MONITORING_CLIENT_MOCKS_H_
 
 #include <cstdint>
 
@@ -42,4 +42,4 @@ class MockMonitoringClient : public MonitoringClient {
 }  // namespace tink
 }  // namespace crypto
 
-#endif  // TINK_MONITORING_MOCK_MONITORING_CLIENT_FACTORY_H_
+#endif  // TINK_MONITORING_MONITORING_CLIENT_MOCKS_H_
