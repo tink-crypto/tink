@@ -15,11 +15,15 @@
 
 import os
 
+import tempfile
+
 from absl.testing import absltest
 
 import tink
 from tink.integration import awskms
+from tink.integration.awskms import _aws_kms_client
 from tink.testing import helper
+
 
 CREDENTIAL_PATH = os.path.join(helper.tink_py_testdata_path(),
                                'aws/credentials.ini')
@@ -63,6 +67,59 @@ class AwsKmsClientTest(absltest.TestCase):
     with self.assertRaises(ValueError):
       awskms.AwsKmsClient(KEY_URI, '../credentials.txt')
 
+  def test_parse_valid_credentials_works(self):
+    config_file = tempfile.NamedTemporaryFile(delete=False)
+    with open(config_file.name, 'w') as f:
+      f.write("""
+[otherSection]
+aws_access_key_id = other_key_id
+aws_secret_access_key = other_key
+
+[default]
+aws_access_key_id = key_id_123
+aws_secret_access_key = key_123""")
+
+    aws_access_key_id, aws_secret_access_key = _aws_kms_client._parse_config(
+        config_file.name
+    )
+    self.assertEqual(aws_access_key_id, 'key_id_123')
+    self.assertEqual(aws_secret_access_key, 'key_123')
+
+    os.unlink(config_file.name)
+
+  def test_parse_credentials_without_key_id_fails(self):
+    config_file = tempfile.NamedTemporaryFile(delete=False)
+    with open(config_file.name, 'w') as f:
+      f.write("""
+[default]
+aws_secret_access_key = key_123""")
+    with self.assertRaises(ValueError):
+      _aws_kms_client._parse_config(config_file.name)
+
+    os.unlink(config_file.name)
+
+  def test_parse_credentials_without_key_fails(self):
+    config_file = tempfile.NamedTemporaryFile(delete=False)
+    with open(config_file.name, 'w') as f:
+      f.write("""
+[default]
+aws_secret_access_key = key_123""")
+    with self.assertRaises(ValueError):
+      _aws_kms_client._parse_config(config_file.name)
+
+    os.unlink(config_file.name)
+
+  def test_parse_credentials_without_default_section_fails(self):
+    config_file = tempfile.NamedTemporaryFile(delete=False)
+    with open(config_file.name, 'w') as f:
+      f.write("""
+[otherSection]
+aws_access_key_id = other_key_id
+aws_secret_access_key = other_key""")
+    with self.assertRaises(ValueError):
+      _aws_kms_client._parse_config(config_file.name)
+
+    os.unlink(config_file.name)
 
 if __name__ == '__main__':
   absltest.main()

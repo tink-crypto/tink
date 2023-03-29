@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""StreamingAead package."""
+"""AWS KMS integration package."""
 
 from tink.integration.awskms import _aws_kms_client
 
