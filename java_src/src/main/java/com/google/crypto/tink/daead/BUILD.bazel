@@ -137,3 +137,41 @@ android_library(
         "@maven//:com_google_protobuf_protobuf_javalite",
     ],
 )
+
+java_library(
+    name = "deterministic_aead_key",
+    srcs = ["DeterministicAeadKey.java"],
+    deps = [
+        ":deterministic_aead_parameters",
+        "//src/main/java/com/google/crypto/tink:key",
+        "//src/main/java/com/google/crypto/tink/util:bytes",
+    ],
+)
+
+android_library(
+    name = "deterministic_aead_key-android",
+    srcs = ["DeterministicAeadKey.java"],
+    deps = [
+        ":deterministic_aead_parameters-android",
+        "//src/main/java/com/google/crypto/tink:key-android",
+        "//src/main/java/com/google/crypto/tink/util:bytes-android",
+    ],
+)
+
+java_library(
+    name = "deterministic_aead_parameters",
+    srcs = ["DeterministicAeadParameters.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink:parameters",
+        "@maven//:com_google_errorprone_error_prone_annotations",
+    ],
+)
+
+android_library(
+    name = "deterministic_aead_parameters-android",
+    srcs = ["DeterministicAeadParameters.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink:parameters-android",
+        "@maven//:com_google_errorprone_error_prone_annotations",
+    ],
+)
