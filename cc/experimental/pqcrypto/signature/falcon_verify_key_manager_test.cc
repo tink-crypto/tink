@@ -55,7 +55,7 @@ struct FalconTestCase {
 using FalconVerifyKeyManagerTest = testing::TestWithParam<FalconTestCase>;
 
 // Helper function that returns a valid falcon private key.
-StatusOr<FalconPrivateKey> CreateValidPrivateKey(int32 private_key_size) {
+StatusOr<FalconPrivateKey> CreateValidPrivateKey(int32_t private_key_size) {
   FalconKeyFormat key_format;
   key_format.set_key_size(private_key_size);
 
@@ -63,7 +63,7 @@ StatusOr<FalconPrivateKey> CreateValidPrivateKey(int32 private_key_size) {
 }
 
 // Helper function that returns a valid falcon public key.
-StatusOr<FalconPublicKey> CreateValidPublicKey(int32 private_key_size) {
+StatusOr<FalconPublicKey> CreateValidPublicKey(int32_t private_key_size) {
   StatusOr<FalconPrivateKey> private_key =
       CreateValidPrivateKey(private_key_size);
 

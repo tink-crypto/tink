@@ -71,7 +71,7 @@ using DilithiumSignKeyManagerTest = testing::TestWithParam<DilithiumTestCase>;
 
 // Helper function that returns a valid dilithium key format.
 StatusOr<DilithiumKeyFormat> CreateValidKeyFormat(
-    int32 private_key_size, DilithiumSeedExpansion seed_expansion) {
+    int32_t private_key_size, DilithiumSeedExpansion seed_expansion) {
   DilithiumKeyFormat key_format;
   DilithiumParams* params = key_format.mutable_params();
   params->set_key_size(private_key_size);
