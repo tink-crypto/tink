@@ -49,6 +49,7 @@ go_test(
     embed = [":streamingaead"],
     deps = [
         "//core/registry",
+        "//insecurecleartextkeyset",
         "//internal/internalregistry",
         "//keyset",
         "//mac",
