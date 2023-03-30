@@ -59,6 +59,7 @@ go_test(
         "aes_gcm_key_manager_test.go",
         "aes_gcm_siv_key_manager_test.go",
         "chacha20poly1305_key_manager_test.go",
+        "kms_envelope_aead_example_test.go",
         "kms_envelope_aead_test.go",
         "xchacha20poly1305_key_manager_test.go",
     ],
