@@ -14,9 +14,11 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-package com.google.crypto.tink.subtle;
+package com.google.crypto.tink.internal;
 
 import com.google.crypto.tink.annotations.Alpha;
+import com.google.crypto.tink.subtle.Bytes;
+import com.google.crypto.tink.subtle.Hex;
 import java.security.InvalidKeyException;
 import java.util.Arrays;
 
@@ -32,7 +34,7 @@ import java.util.Arrays;
  * implementation</a>.
  */
 @Alpha
-final class Curve25519 {
+public final class Curve25519 {
   // https://cr.yp.to/ecdh.html#validate doesn't recommend validating peer's public key. However,
   // validating public key doesn't harm security and in certain cases, prevents unwanted edge
   // cases.
@@ -264,7 +266,7 @@ final class Curve25519 {
    *     32-byte.
    * @throws IllegalStateException iff there is arithmetic error.
    */
-  static void curveMult(long[] resultx, byte[] n, byte[] qBytes) throws InvalidKeyException {
+  public static void curveMult(long[] resultx, byte[] n, byte[] qBytes) throws InvalidKeyException {
     byte[] qBytesWithoutMsb = validatePubKeyAndClearMsb(qBytes);
 
     long[] q = Field25519.expand(qBytesWithoutMsb);
@@ -328,8 +330,7 @@ final class Curve25519 {
     // q, resultx, nqpqx/nqpqx  are x coordinates of 3 collinear points q, n*q, (n + 1)*q.
     if (!isCollinear(q, resultx, nqpqx, nqpqz)) {
       throw new IllegalStateException(
-          "Arithmetic error in curve multiplication with the public key: "
-              + Hex.encode(qBytes));
+          "Arithmetic error in curve multiplication with the public key: " + Hex.encode(qBytes));
     }
   }
 

@@ -14,12 +14,14 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-package com.google.crypto.tink.subtle;
+package com.google.crypto.tink.internal;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import com.google.crypto.tink.subtle.Hex;
+import com.google.crypto.tink.subtle.Random;
 import java.util.Arrays;
 import org.junit.Test;
 import org.junit.runner.RunWith;

@@ -14,12 +14,13 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-package com.google.crypto.tink.subtle;
+package com.google.crypto.tink.internal;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
 
 import com.google.common.truth.Expect;
+import com.google.crypto.tink.subtle.Hex;
 import java.math.BigInteger;
 import java.security.InvalidKeyException;
 import java.util.Arrays;

@@ -385,3 +385,39 @@ java_test(
         "@maven//:junit_junit",
     ],
 )
+
+java_test(
+    name = "Curve25519Test",
+    size = "small",
+    srcs = ["Curve25519Test.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink/internal:curve25519",
+        "//src/main/java/com/google/crypto/tink/internal:field25519",
+        "//src/main/java/com/google/crypto/tink/subtle:hex",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "Ed25519Test",
+    size = "small",
+    srcs = ["Ed25519Test.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink/internal:ed25519_cluster",
+        "//src/main/java/com/google/crypto/tink/internal:field25519",
+        "//src/main/java/com/google/crypto/tink/subtle:hex",
+        "//src/main/java/com/google/crypto/tink/subtle:random",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "Field25519Test",
+    size = "small",
+    srcs = ["Field25519Test.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink/internal:field25519",
+        "@maven//:junit_junit",
+    ],
+)

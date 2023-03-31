@@ -14,7 +14,7 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-package com.google.crypto.tink.subtle;
+package com.google.crypto.tink.internal;
 
 import com.google.crypto.tink.annotations.Alpha;
 import java.util.Arrays;
@@ -35,28 +35,30 @@ import java.util.Arrays;
  * <p>i.e. the limbs are 26, 25, 26, 25, ... bits wide.
  */
 @Alpha
-final class Field25519 {
+public final class Field25519 {
   /**
    * During Field25519 computation, the mixed radix representation may be in different forms:
+   *
    * <ul>
-   *  <li> Reduced-size form: the array has size at most 10.
-   *  <li> Non-reduced-size form: the array is not reduced modulo 2^255 - 19 and has size at most
-   *  19.
+   *   <li>Reduced-size form: the array has size at most 10.
+   *   <li>Non-reduced-size form: the array is not reduced modulo 2^255 - 19 and has size at most
+   *       19.
    * </ul>
    *
    * TODO(quannguyen):
+   *
    * <ul>
-   *  <li> Clarify ill-defined terminologies.
-   *  <li> The reduction procedure is different from DJB's paper
-   *  (http://cr.yp.to/ecdh/curve25519-20060209.pdf). The coefficients after reducing degree and
-   *  reducing coefficients aren't guaranteed to be in range {-2^25, ..., 2^25}. We should check to
-   *  see what's going on.
-   *  <li> Consider using method mult() everywhere and making product() private.
+   *   <li>Clarify ill-defined terminologies.
+   *   <li>The reduction procedure is different from DJB's paper
+   *       (http://cr.yp.to/ecdh/curve25519-20060209.pdf). The coefficients after reducing degree
+   *       and reducing coefficients aren't guaranteed to be in range {-2^25, ..., 2^25}. We should
+   *       check to see what's going on.
+   *   <li>Consider using method mult() everywhere and making product() private.
    * </ul>
    */
+  public static final int FIELD_LEN = 32;
 
-  static final int FIELD_LEN = 32;
-  static final int LIMB_CNT = 10;
+  public static final int LIMB_CNT = 10;
   private static final long TWO_TO_25 = 1 << 25;
   private static final long TWO_TO_26 = TWO_TO_25 << 1;
 
@@ -68,7 +70,7 @@ final class Field25519 {
   /**
    * Sums two numbers: output = in1 + in2
    *
-   * On entry: in1, in2 are in reduced-size form.
+   * <p>On entry: in1, in2 are in reduced-size form.
    */
   static void sum(long[] output, long[] in1, long[] in2) {
     for (int i = 0; i < LIMB_CNT; i++) {
@@ -79,17 +81,16 @@ final class Field25519 {
   /**
    * Sums two numbers: output += in
    *
-   * On entry: in is in reduced-size form.
+   * <p>On entry: in is in reduced-size form.
    */
   static void sum(long[] output, long[] in) {
     sum(output, output, in);
   }
 
   /**
-   * Find the difference of two numbers: output = in1 - in2
-   * (note the order of the arguments!).
+   * Find the difference of two numbers: output = in1 - in2 (note the order of the arguments!).
    *
-   * On entry: in1, in2 are in reduced-size form.
+   * <p>On entry: in1, in2 are in reduced-size form.
    */
   static void sub(long[] output, long[] in1, long[] in2) {
     for (int i = 0; i < LIMB_CNT; i++) {
@@ -98,18 +99,15 @@ final class Field25519 {
   }
 
   /**
-   * Find the difference of two numbers: output = in - output
-   * (note the order of the arguments!).
+   * Find the difference of two numbers: output = in - output (note the order of the arguments!).
    *
-   * On entry: in, output are in reduced-size form.
+   * <p>On entry: in, output are in reduced-size form.
    */
   static void sub(long[] output, long[] in) {
     sub(output, in, output);
   }
 
-  /**
-   * Multiply a number by a scalar: output = in * scalar
-   */
+  /** Multiply a number by a scalar: output = in * scalar */
   static void scalarProduct(long[] output, long[] in, long scalar) {
     for (int i = 0; i < LIMB_CNT; i++) {
       output[i] = in[i] * scalar;
@@ -119,96 +117,90 @@ final class Field25519 {
   /**
    * Multiply two numbers: out = in2 * in
    *
-   * output must be distinct to both inputs. The inputs are reduced coefficient form,
-   * the output is not.
+   * <p>output must be distinct to both inputs. The inputs are reduced coefficient form, the output
+   * is not.
    *
-   * out[x] <= 14 * the largest product of the input limbs.
+   * <p>out[x] <= 14 * the largest product of the input limbs.
    */
   static void product(long[] out, long[] in2, long[] in) {
     out[0] = in2[0] * in[0];
-    out[1] = in2[0] * in[1]
-        + in2[1] * in[0];
-    out[2] = 2 * in2[1] * in[1]
-        + in2[0] * in[2]
-        + in2[2] * in[0];
-    out[3] = in2[1] * in[2]
-        + in2[2] * in[1]
-        + in2[0] * in[3]
-        + in2[3] * in[0];
-    out[4] = in2[2] * in[2]
-        + 2 * (in2[1] * in[3] + in2[3] * in[1])
-        + in2[0] * in[4]
-        + in2[4] * in[0];
-    out[5] = in2[2] * in[3]
-        + in2[3] * in[2]
-        + in2[1] * in[4]
-        + in2[4] * in[1]
-        + in2[0] * in[5]
-        + in2[5] * in[0];
-    out[6] = 2 * (in2[3] * in[3] + in2[1] * in[5] + in2[5] * in[1])
-        + in2[2] * in[4]
-        + in2[4] * in[2]
-        + in2[0] * in[6]
-        + in2[6] * in[0];
-    out[7] = in2[3] * in[4]
-        + in2[4] * in[3]
-        + in2[2] * in[5]
-        + in2[5] * in[2]
-        + in2[1] * in[6]
-        + in2[6] * in[1]
-        + in2[0] * in[7]
-        + in2[7] * in[0];
-    out[8] = in2[4] * in[4]
-        + 2 * (in2[3] * in[5] + in2[5] * in[3] + in2[1] * in[7] + in2[7] * in[1])
-        + in2[2] * in[6]
-        + in2[6] * in[2]
-        + in2[0] * in[8]
-        + in2[8] * in[0];
-    out[9] = in2[4] * in[5]
-        + in2[5] * in[4]
-        + in2[3] * in[6]
-        + in2[6] * in[3]
-        + in2[2] * in[7]
-        + in2[7] * in[2]
-        + in2[1] * in[8]
-        + in2[8] * in[1]
-        + in2[0] * in[9]
-        + in2[9] * in[0];
+    out[1] = in2[0] * in[1] + in2[1] * in[0];
+    out[2] = 2 * in2[1] * in[1] + in2[0] * in[2] + in2[2] * in[0];
+    out[3] = in2[1] * in[2] + in2[2] * in[1] + in2[0] * in[3] + in2[3] * in[0];
+    out[4] =
+        in2[2] * in[2] + 2 * (in2[1] * in[3] + in2[3] * in[1]) + in2[0] * in[4] + in2[4] * in[0];
+    out[5] =
+        in2[2] * in[3]
+            + in2[3] * in[2]
+            + in2[1] * in[4]
+            + in2[4] * in[1]
+            + in2[0] * in[5]
+            + in2[5] * in[0];
+    out[6] =
+        2 * (in2[3] * in[3] + in2[1] * in[5] + in2[5] * in[1])
+            + in2[2] * in[4]
+            + in2[4] * in[2]
+            + in2[0] * in[6]
+            + in2[6] * in[0];
+    out[7] =
+        in2[3] * in[4]
+            + in2[4] * in[3]
+            + in2[2] * in[5]
+            + in2[5] * in[2]
+            + in2[1] * in[6]
+            + in2[6] * in[1]
+            + in2[0] * in[7]
+            + in2[7] * in[0];
+    out[8] =
+        in2[4] * in[4]
+            + 2 * (in2[3] * in[5] + in2[5] * in[3] + in2[1] * in[7] + in2[7] * in[1])
+            + in2[2] * in[6]
+            + in2[6] * in[2]
+            + in2[0] * in[8]
+            + in2[8] * in[0];
+    out[9] =
+        in2[4] * in[5]
+            + in2[5] * in[4]
+            + in2[3] * in[6]
+            + in2[6] * in[3]
+            + in2[2] * in[7]
+            + in2[7] * in[2]
+            + in2[1] * in[8]
+            + in2[8] * in[1]
+            + in2[0] * in[9]
+            + in2[9] * in[0];
     out[10] =
         2 * (in2[5] * in[5] + in2[3] * in[7] + in2[7] * in[3] + in2[1] * in[9] + in2[9] * in[1])
             + in2[4] * in[6]
             + in2[6] * in[4]
             + in2[2] * in[8]
             + in2[8] * in[2];
-    out[11] = in2[5] * in[6]
-        + in2[6] * in[5]
-        + in2[4] * in[7]
-        + in2[7] * in[4]
-        + in2[3] * in[8]
-        + in2[8] * in[3]
-        + in2[2] * in[9]
-        + in2[9] * in[2];
-    out[12] = in2[6] * in[6]
-        + 2 * (in2[5] * in[7] + in2[7] * in[5] + in2[3] * in[9] + in2[9] * in[3])
-        + in2[4] * in[8]
-        + in2[8] * in[4];
-    out[13] = in2[6] * in[7]
-        + in2[7] * in[6]
-        + in2[5] * in[8]
-        + in2[8] * in[5]
-        + in2[4] * in[9]
-        + in2[9] * in[4];
-    out[14] = 2 * (in2[7] * in[7] + in2[5] * in[9] + in2[9] * in[5])
-        + in2[6] * in[8]
-        + in2[8] * in[6];
-    out[15] = in2[7] * in[8]
-        + in2[8] * in[7]
-        + in2[6] * in[9]
-        + in2[9] * in[6];
-    out[16] = in2[8] * in[8]
-        + 2 * (in2[7] * in[9] + in2[9] * in[7]);
-    out[17] = in2[8] * in[9]
-        + in2[9] * in[8];
+    out[11] =
+        in2[5] * in[6]
+            + in2[6] * in[5]
+            + in2[4] * in[7]
+            + in2[7] * in[4]
+            + in2[3] * in[8]
+            + in2[8] * in[3]
+            + in2[2] * in[9]
+            + in2[9] * in[2];
+    out[12] =
+        in2[6] * in[6]
+            + 2 * (in2[5] * in[7] + in2[7] * in[5] + in2[3] * in[9] + in2[9] * in[3])
+            + in2[4] * in[8]
+            + in2[8] * in[4];
+    out[13] =
+        in2[6] * in[7]
+            + in2[7] * in[6]
+            + in2[5] * in[8]
+            + in2[8] * in[5]
+            + in2[4] * in[9]
+            + in2[9] * in[4];
+    out[14] =
+        2 * (in2[7] * in[7] + in2[5] * in[9] + in2[9] * in[5]) + in2[6] * in[8] + in2[8] * in[6];
+    out[15] = in2[7] * in[8] + in2[8] * in[7] + in2[6] * in[9] + in2[9] * in[6];
+    out[16] = in2[8] * in[8] + 2 * (in2[7] * in[9] + in2[9] * in[7]);
+    out[17] = in2[8] * in[9] + in2[9] * in[8];
     out[18] = 2 * in2[9] * in[9];
   }
 
@@ -216,9 +208,8 @@ final class Field25519 {
    * Reduce a field element by calling reduceSizeByModularReduction and reduceCoefficients.
    *
    * @param input An input array of any length. If the array has 19 elements, it will be used as
-   * temporary buffer and its contents changed.
+   *     temporary buffer and its contents changed.
    * @param output An output array of size LIMB_CNT. After the call |output[i]| < 2^26 will hold.
-   *
    */
   static void reduce(long[] input, long[] output) {
     long[] tmp;
@@ -236,8 +227,7 @@ final class Field25519 {
   /**
    * Reduce a long form to a reduced-size form by taking the input mod 2^255 - 19.
    *
-   * On entry: |output[i]| < 14*2^54
-   * On exit: |output[0..8]| < 280*2^54
+   * <p>On entry: |output[i]| < 14*2^54 On exit: |output[0..8]| < 280*2^54
    */
   static void reduceSizeByModularReduction(long[] output) {
     // The coefficients x[10], x[11],..., x[18] are eliminated by reduction modulo 2^255 - 19.
@@ -279,7 +269,7 @@ final class Field25519 {
   /**
    * Reduce all coefficients of the short form input so that |x| < 2^26.
    *
-   * On entry: |output[i]| < 280*2^54
+   * <p>On entry: |output[i]| < 280*2^54
    */
   static void reduceCoefficients(long[] output) {
     output[10] = 0;
@@ -319,9 +309,9 @@ final class Field25519 {
   /**
    * A helpful wrapper around {@ref Field25519#product}: output = in * in2.
    *
-   * On entry: |in[i]| < 2^27 and |in2[i]| < 2^27.
+   * <p>On entry: |in[i]| < 2^27 and |in2[i]| < 2^27.
    *
-   * The output is reduced degree (indeed, one need only provide storage for 10 limbs) and
+   * <p>The output is reduced degree (indeed, one need only provide storage for 10 limbs) and
    * |output[i]| < 2^26.
    */
   static void mult(long[] output, long[] in, long[] in2) {
@@ -334,47 +324,42 @@ final class Field25519 {
   /**
    * Square a number: out = in**2
    *
-   * output must be distinct from the input. The inputs are reduced coefficient form, the output is
-   * not.
+   * <p>output must be distinct from the input. The inputs are reduced coefficient form, the output
+   * is not.
    *
-   * out[x] <= 14 * the largest product of the input limbs.
+   * <p>out[x] <= 14 * the largest product of the input limbs.
    */
   private static void squareInner(long[] out, long[] in) {
     out[0] = in[0] * in[0];
-    out[1] =  2 * in[0] * in[1];
-    out[2] =  2 * (in[1] * in[1] + in[0] * in[2]);
-    out[3] =  2 * (in[1] * in[2] + in[0] * in[3]);
-    out[4] = in[2] * in[2]
-        + 4 * in[1] * in[3]
-        + 2 * in[0] * in[4];
-    out[5] =  2 * (in[2] * in[3] + in[1] * in[4] + in[0] * in[5]);
-    out[6] =  2 * (in[3] * in[3] + in[2] * in[4] + in[0] * in[6] + 2 *  in[1] * in[5]);
-    out[7] =  2 * (in[3] * in[4] + in[2] * in[5] + in[1] * in[6] + in[0] * in[7]);
-    out[8] = in[4] * in[4]
-        + 2 * (in[2] * in[6] + in[0] * in[8] + 2 * (in[1] * in[7] + in[3] * in[5]));
-    out[9] =  2 * (in[4] * in[5] + in[3] * in[6] + in[2] * in[7] + in[1] * in[8] + in[0] * in[9]);
-    out[10] = 2 * (in[5] * in[5]
-        + in[4] * in[6]
-        + in[2] * in[8]
-        + 2 * (in[3] * in[7] + in[1] * in[9]));
+    out[1] = 2 * in[0] * in[1];
+    out[2] = 2 * (in[1] * in[1] + in[0] * in[2]);
+    out[3] = 2 * (in[1] * in[2] + in[0] * in[3]);
+    out[4] = in[2] * in[2] + 4 * in[1] * in[3] + 2 * in[0] * in[4];
+    out[5] = 2 * (in[2] * in[3] + in[1] * in[4] + in[0] * in[5]);
+    out[6] = 2 * (in[3] * in[3] + in[2] * in[4] + in[0] * in[6] + 2 * in[1] * in[5]);
+    out[7] = 2 * (in[3] * in[4] + in[2] * in[5] + in[1] * in[6] + in[0] * in[7]);
+    out[8] =
+        in[4] * in[4] + 2 * (in[2] * in[6] + in[0] * in[8] + 2 * (in[1] * in[7] + in[3] * in[5]));
+    out[9] = 2 * (in[4] * in[5] + in[3] * in[6] + in[2] * in[7] + in[1] * in[8] + in[0] * in[9]);
+    out[10] =
+        2 * (in[5] * in[5] + in[4] * in[6] + in[2] * in[8] + 2 * (in[3] * in[7] + in[1] * in[9]));
     out[11] = 2 * (in[5] * in[6] + in[4] * in[7] + in[3] * in[8] + in[2] * in[9]);
-    out[12] = in[6] * in[6]
-        + 2 * (in[4] * in[8] + 2 * (in[5] * in[7] + in[3] * in[9]));
+    out[12] = in[6] * in[6] + 2 * (in[4] * in[8] + 2 * (in[5] * in[7] + in[3] * in[9]));
     out[13] = 2 * (in[6] * in[7] + in[5] * in[8] + in[4] * in[9]);
-    out[14] = 2 * (in[7] * in[7] + in[6] * in[8] + 2 *  in[5] * in[9]);
+    out[14] = 2 * (in[7] * in[7] + in[6] * in[8] + 2 * in[5] * in[9]);
     out[15] = 2 * (in[7] * in[8] + in[6] * in[9]);
     out[16] = in[8] * in[8] + 4 * in[7] * in[9];
-    out[17] = 2 *  in[8] * in[9];
-    out[18] = 2 *  in[9] * in[9];
+    out[17] = 2 * in[8] * in[9];
+    out[18] = 2 * in[9] * in[9];
   }
 
   /**
    * Returns in^2.
    *
-   * On entry: The |in| argument is in reduced coefficients form and |in[i]| < 2^27.
+   * <p>On entry: The |in| argument is in reduced coefficients form and |in[i]| < 2^27.
    *
-   * On exit: The |output| argument is in reduced coefficients form (indeed, one need only provide
-   * storage for 10 limbs) and |out[i]| < 2^26.
+   * <p>On exit: The |output| argument is in reduced coefficients form (indeed, one need only
+   * provide storage for 10 limbs) and |out[i]| < 2^26.
    */
   static void square(long[] output, long[] in) {
     long[] t = new long[19];
@@ -384,16 +369,17 @@ final class Field25519 {
     reduce(t, output);
   }
 
-  /**
-   * Takes a little-endian, 32-byte number and expands it into mixed radix form.
-   */
+  /** Takes a little-endian, 32-byte number and expands it into mixed radix form. */
   static long[] expand(byte[] input) {
     long[] output = new long[LIMB_CNT];
     for (int i = 0; i < LIMB_CNT; i++) {
-      output[i] = ((((long) (input[EXPAND_START[i]] & 0xff))
-          | ((long) (input[EXPAND_START[i] + 1] & 0xff)) << 8
-          | ((long) (input[EXPAND_START[i] + 2] & 0xff)) << 16
-          | ((long) (input[EXPAND_START[i] + 3] & 0xff)) << 24) >> EXPAND_SHIFT[i]) & MASK[i & 1];
+      output[i] =
+          ((((long) (input[EXPAND_START[i]] & 0xff))
+                      | ((long) (input[EXPAND_START[i] + 1] & 0xff)) << 8
+                      | ((long) (input[EXPAND_START[i] + 2] & 0xff)) << 16
+                      | ((long) (input[EXPAND_START[i] + 3] & 0xff)) << 24)
+                  >> EXPAND_SHIFT[i])
+              & MASK[i & 1];
     }
     return output;
   }
@@ -402,10 +388,10 @@ final class Field25519 {
    * Takes a fully reduced mixed radix form number and contract it into a little-endian, 32-byte
    * array.
    *
-   * On entry: |input_limbs[i]| < 2^26
+   * <p>On entry: |input_limbs[i]| < 2^26
    */
   @SuppressWarnings("NarrowingCompoundAssignment")
-  static byte[] contract(long[] inputLimbs) {
+  public static byte[] contract(long[] inputLimbs) {
     long[] input = Arrays.copyOf(inputLimbs, LIMB_CNT);
     for (int j = 0; j < 2; j++) {
       for (int i = 0; i < 9; i++) {
@@ -421,7 +407,7 @@ final class Field25519 {
       {
         int carry = -(int) ((input[9] & (input[9] >> 31)) >> 25);
         input[9] += (carry << 25);
-        input[0] -= (carry * 19);
+        input[0] -= (carry * 19L);
       }
 
       // After the first iteration, input[1..9] are non-negative and fit within 25 or 26 bits,
@@ -458,7 +444,7 @@ final class Field25519 {
     {
       int carry = (int) (input[9] >> 25);
       input[9] &= 0x1ffffff;
-      input[0] += 19 * carry;
+      input[0] += 19L * carry;
     }
 
     // If the first carry-chain pass, just above, ended up with a carry from input[9], and that
@@ -501,7 +487,7 @@ final class Field25519 {
   /**
    * Computes inverse of z = z(2^255 - 21)
    *
-   * Shamelessly copied from agl's code which was shamelessly copied from djb's code. Only the
+   * <p>Shamelessly copied from agl's code which was shamelessly copied from djb's code. Only the
    * comment format and the variable namings are different from those.
    */
   static void inverse(long[] out, long[] z) {
@@ -516,81 +502,78 @@ final class Field25519 {
     long[] t0 = new long[Field25519.LIMB_CNT];
     long[] t1 = new long[Field25519.LIMB_CNT];
 
-    square(z2, z);                          // 2
-    square(t1, z2);                         // 4
-    square(t0, t1);                         // 8
-    mult(z9, t0, z);                        // 9
-    mult(z11, z9, z2);                      // 11
-    square(t0, z11);                        // 22
-    mult(z2To5Minus1, t0, z9);              // 2^5 - 2^0 = 31
+    square(z2, z); // 2
+    square(t1, z2); // 4
+    square(t0, t1); // 8
+    mult(z9, t0, z); // 9
+    mult(z11, z9, z2); // 11
+    square(t0, z11); // 22
+    mult(z2To5Minus1, t0, z9); // 2^5 - 2^0 = 31
 
-    square(t0, z2To5Minus1);                // 2^6 - 2^1
-    square(t1, t0);                         // 2^7 - 2^2
-    square(t0, t1);                         // 2^8 - 2^3
-    square(t1, t0);                         // 2^9 - 2^4
-    square(t0, t1);                         // 2^10 - 2^5
-    mult(z2To10Minus1, t0, z2To5Minus1);    // 2^10 - 2^0
+    square(t0, z2To5Minus1); // 2^6 - 2^1
+    square(t1, t0); // 2^7 - 2^2
+    square(t0, t1); // 2^8 - 2^3
+    square(t1, t0); // 2^9 - 2^4
+    square(t0, t1); // 2^10 - 2^5
+    mult(z2To10Minus1, t0, z2To5Minus1); // 2^10 - 2^0
 
-    square(t0, z2To10Minus1);               // 2^11 - 2^1
-    square(t1, t0);                         // 2^12 - 2^2
-    for (int i = 2; i < 10; i += 2) {       // 2^20 - 2^10
+    square(t0, z2To10Minus1); // 2^11 - 2^1
+    square(t1, t0); // 2^12 - 2^2
+    for (int i = 2; i < 10; i += 2) { // 2^20 - 2^10
       square(t0, t1);
       square(t1, t0);
     }
-    mult(z2To20Minus1, t1, z2To10Minus1);   // 2^20 - 2^0
+    mult(z2To20Minus1, t1, z2To10Minus1); // 2^20 - 2^0
 
-    square(t0, z2To20Minus1);               // 2^21 - 2^1
-    square(t1, t0);                         // 2^22 - 2^2
-    for (int i = 2; i < 20; i += 2) {       // 2^40 - 2^20
+    square(t0, z2To20Minus1); // 2^21 - 2^1
+    square(t1, t0); // 2^22 - 2^2
+    for (int i = 2; i < 20; i += 2) { // 2^40 - 2^20
       square(t0, t1);
       square(t1, t0);
     }
-    mult(t0, t1, z2To20Minus1);             // 2^40 - 2^0
+    mult(t0, t1, z2To20Minus1); // 2^40 - 2^0
 
-    square(t1, t0);                         // 2^41 - 2^1
-    square(t0, t1);                         // 2^42 - 2^2
-    for (int i = 2; i < 10; i += 2) {       // 2^50 - 2^10
+    square(t1, t0); // 2^41 - 2^1
+    square(t0, t1); // 2^42 - 2^2
+    for (int i = 2; i < 10; i += 2) { // 2^50 - 2^10
       square(t1, t0);
       square(t0, t1);
     }
-    mult(z2To50Minus1, t0, z2To10Minus1);   // 2^50 - 2^0
+    mult(z2To50Minus1, t0, z2To10Minus1); // 2^50 - 2^0
 
-    square(t0, z2To50Minus1);               // 2^51 - 2^1
-    square(t1, t0);                         // 2^52 - 2^2
-    for (int i = 2; i < 50; i += 2) {       // 2^100 - 2^50
+    square(t0, z2To50Minus1); // 2^51 - 2^1
+    square(t1, t0); // 2^52 - 2^2
+    for (int i = 2; i < 50; i += 2) { // 2^100 - 2^50
       square(t0, t1);
       square(t1, t0);
     }
-    mult(z2To100Minus1, t1, z2To50Minus1);  // 2^100 - 2^0
+    mult(z2To100Minus1, t1, z2To50Minus1); // 2^100 - 2^0
 
-    square(t1, z2To100Minus1);              // 2^101 - 2^1
-    square(t0, t1);                         // 2^102 - 2^2
-    for (int i = 2; i < 100; i += 2) {      // 2^200 - 2^100
+    square(t1, z2To100Minus1); // 2^101 - 2^1
+    square(t0, t1); // 2^102 - 2^2
+    for (int i = 2; i < 100; i += 2) { // 2^200 - 2^100
       square(t1, t0);
       square(t0, t1);
     }
-    mult(t1, t0, z2To100Minus1);            // 2^200 - 2^0
+    mult(t1, t0, z2To100Minus1); // 2^200 - 2^0
 
-    square(t0, t1);                         // 2^201 - 2^1
-    square(t1, t0);                         // 2^202 - 2^2
-    for (int i = 2; i < 50; i += 2) {       // 2^250 - 2^50
+    square(t0, t1); // 2^201 - 2^1
+    square(t1, t0); // 2^202 - 2^2
+    for (int i = 2; i < 50; i += 2) { // 2^250 - 2^50
       square(t0, t1);
       square(t1, t0);
     }
-    mult(t0, t1, z2To50Minus1);             // 2^250 - 2^0
+    mult(t0, t1, z2To50Minus1); // 2^250 - 2^0
 
-    square(t1, t0);                         // 2^251 - 2^1
-    square(t0, t1);                         // 2^252 - 2^2
-    square(t1, t0);                         // 2^253 - 2^3
-    square(t0, t1);                         // 2^254 - 2^4
-    square(t1, t0);                         // 2^255 - 2^5
-    mult(out, t1, z11);                     // 2^255 - 21
+    square(t1, t0); // 2^251 - 2^1
+    square(t0, t1); // 2^252 - 2^2
+    square(t1, t0); // 2^253 - 2^3
+    square(t0, t1); // 2^254 - 2^4
+    square(t1, t0); // 2^255 - 2^5
+    mult(out, t1, z11); // 2^255 - 21
   }
 
-
-  /**
-   * Returns 0xffffffff iff a == b and zero otherwise.
-   */
+  /** Returns 0xffffffff iff a == b and zero otherwise. */
   private static int eq(int a, int b) {
     a = ~(a ^ b);
     a &= a << 16;
@@ -601,9 +584,7 @@ final class Field25519 {
     return a >> 31;
   }
 
-  /**
-   * returns 0xffffffff if a >= b and zero otherwise, where a and b are both non-negative.
-   */
+  /** returns 0xffffffff if a >= b and zero otherwise, where a and b are both non-negative. */
   private static int gte(int a, int b) {
     a -= b;
     // a >= 0 iff a >= b.

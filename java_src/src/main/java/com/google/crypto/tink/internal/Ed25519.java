@@ -14,16 +14,10 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-package com.google.crypto.tink.subtle;
+package com.google.crypto.tink.internal;
 
-import static com.google.crypto.tink.subtle.Ed25519Constants.B2;
-import static com.google.crypto.tink.subtle.Ed25519Constants.B_TABLE;
-import static com.google.crypto.tink.subtle.Ed25519Constants.D;
-import static com.google.crypto.tink.subtle.Ed25519Constants.D2;
-import static com.google.crypto.tink.subtle.Ed25519Constants.SQRTM1;
-import static com.google.crypto.tink.subtle.Field25519.FIELD_LEN;
-import static com.google.crypto.tink.subtle.Field25519.LIMB_CNT;
-
+import com.google.crypto.tink.subtle.Bytes;
+import com.google.crypto.tink.subtle.EngineFactory;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import java.security.GeneralSecurityException;
 import java.security.MessageDigest;
@@ -43,11 +37,11 @@ import java.util.Arrays;
  * @see <a href="https://eprint.iacr.org/2008/522.pdf">Hisil H., Wong K.KH., Carter G., Dawson E.
  *     (2008) Twisted Edwards Curves Revisited</a>
  */
-final class Ed25519 {
+public final class Ed25519 {
 
-  public static final int SECRET_KEY_LEN = FIELD_LEN;
-  public static final int PUBLIC_KEY_LEN = FIELD_LEN;
-  public static final int SIGNATURE_LEN = FIELD_LEN * 2;
+  public static final int SECRET_KEY_LEN = Field25519.FIELD_LEN;
+  public static final int PUBLIC_KEY_LEN = Field25519.FIELD_LEN;
+  public static final int SIGNATURE_LEN = Field25519.FIELD_LEN * 2;
 
   // (x = 0, y = 1) point
   private static final CachedXYT CACHED_NEUTRAL = new CachedXYT(
@@ -79,7 +73,10 @@ final class Ed25519 {
     final long[] z;
 
     XYZ() {
-      this(new long[LIMB_CNT], new long[LIMB_CNT], new long[LIMB_CNT]);
+      this(
+          new long[Field25519.LIMB_CNT],
+          new long[Field25519.LIMB_CNT],
+          new long[Field25519.LIMB_CNT]);
     }
 
     XYZ(long[] x, long[] y, long[] z) {
@@ -89,9 +86,9 @@ final class Ed25519 {
     }
 
     XYZ(XYZ xyz) {
-      x = Arrays.copyOf(xyz.x, LIMB_CNT);
-      y = Arrays.copyOf(xyz.y, LIMB_CNT);
-      z = Arrays.copyOf(xyz.z, LIMB_CNT);
+      x = Arrays.copyOf(xyz.x, Field25519.LIMB_CNT);
+      y = Arrays.copyOf(xyz.y, Field25519.LIMB_CNT);
+      z = Arrays.copyOf(xyz.z, Field25519.LIMB_CNT);
     }
 
     XYZ(PartialXYZT partialXYZT) {
@@ -114,9 +111,9 @@ final class Ed25519 {
      * Encodes this point to bytes.
      */
     byte[] toBytes() {
-      long[] recip = new long[LIMB_CNT];
-      long[] x = new long[LIMB_CNT];
-      long[] y = new long[LIMB_CNT];
+      long[] recip = new long[Field25519.LIMB_CNT];
+      long[] x = new long[Field25519.LIMB_CNT];
+      long[] y = new long[Field25519.LIMB_CNT];
       Field25519.inverse(recip, z);
       Field25519.mult(x, this.x, recip);
       Field25519.mult(y, this.y, recip);
@@ -127,24 +124,24 @@ final class Ed25519 {
 
     /** Checks that the point is on curve */
     boolean isOnCurve() {
-      long[] x2 = new long[LIMB_CNT];
+      long[] x2 = new long[Field25519.LIMB_CNT];
       Field25519.square(x2, x);
-      long[] y2 = new long[LIMB_CNT];
+      long[] y2 = new long[Field25519.LIMB_CNT];
       Field25519.square(y2, y);
-      long[] z2 = new long[LIMB_CNT];
+      long[] z2 = new long[Field25519.LIMB_CNT];
       Field25519.square(z2, z);
-      long[] z4 = new long[LIMB_CNT];
+      long[] z4 = new long[Field25519.LIMB_CNT];
       Field25519.square(z4, z2);
-      long[] lhs = new long[LIMB_CNT];
+      long[] lhs = new long[Field25519.LIMB_CNT];
       // lhs = y^2 - x^2
       Field25519.sub(lhs, y2, x2);
       // lhs = z^2 * (y2 - x2)
       Field25519.mult(lhs, lhs, z2);
-      long[] rhs = new long[LIMB_CNT];
+      long[] rhs = new long[Field25519.LIMB_CNT];
       // rhs = x^2 * y^2
       Field25519.mult(rhs, x2, y2);
       // rhs = D * x^2 * y^2
-      Field25519.mult(rhs, rhs, D);
+      Field25519.mult(rhs, rhs, Ed25519Constants.D);
       // rhs = z^4 + D * x^2 * y^2
       Field25519.sum(rhs, z4);
       // Field25519.mult reduces its output, but Field25519.sum does not, so we have to manually
@@ -173,7 +170,7 @@ final class Ed25519 {
     final long[] t;
 
     XYZT() {
-      this(new XYZ(), new long[LIMB_CNT]);
+      this(new XYZ(), new long[Field25519.LIMB_CNT]);
     }
 
     XYZT(XYZ xyz, long[] t) {
@@ -203,20 +200,21 @@ final class Ed25519 {
      * See Section 5.1.3 Decoding in https://tools.ietf.org/html/rfc8032#section-5.1.3
      */
     private static XYZT fromBytesNegateVarTime(byte[] s) throws GeneralSecurityException {
-      long[] x = new long[LIMB_CNT];
+      long[] x = new long[Field25519.LIMB_CNT];
       long[] y = Field25519.expand(s);
-      long[] z = new long[LIMB_CNT]; z[0] = 1;
-      long[] t = new long[LIMB_CNT];
-      long[] u = new long[LIMB_CNT];
-      long[] v = new long[LIMB_CNT];
-      long[] vxx = new long[LIMB_CNT];
-      long[] check = new long[LIMB_CNT];
+      long[] z = new long[Field25519.LIMB_CNT];
+      z[0] = 1;
+      long[] t = new long[Field25519.LIMB_CNT];
+      long[] u = new long[Field25519.LIMB_CNT];
+      long[] v = new long[Field25519.LIMB_CNT];
+      long[] vxx = new long[Field25519.LIMB_CNT];
+      long[] check = new long[Field25519.LIMB_CNT];
       Field25519.square(u, y);
-      Field25519.mult(v, u, D);
+      Field25519.mult(v, u, Ed25519Constants.D);
       Field25519.sub(u, u, z); // u = y^2 - 1
       Field25519.sum(v, v, z); // v = dy^2 + 1
 
-      long[] v3 = new long[LIMB_CNT];
+      long[] v3 = new long[Field25519.LIMB_CNT];
       Field25519.square(v3, v);
       Field25519.mult(v3, v3, v); // v3 = v^3
       Field25519.square(x, v3);
@@ -236,7 +234,7 @@ final class Ed25519 {
           throw new GeneralSecurityException("Cannot convert given bytes to extended projective "
               + "coordinates. No square root exists for modulo 2^255-19");
         }
-        Field25519.mult(x, x, SQRTM1);
+        Field25519.mult(x, x, Ed25519Constants.SQRTM1);
       }
 
       if (!isNonZeroVarTime(x) && (s[31] & 0xff) >> 7 != 0) {
@@ -273,7 +271,7 @@ final class Ed25519 {
     final long[] t;
 
     PartialXYZT() {
-      this(new XYZ(), new long[LIMB_CNT]);
+      this(new XYZ(), new long[Field25519.LIMB_CNT]);
     }
 
     PartialXYZT(XYZ xyz, long[] t) {
@@ -283,7 +281,7 @@ final class Ed25519 {
 
     PartialXYZT(PartialXYZT other) {
       xyz = new XYZ(other.xyz);
-      t = Arrays.copyOf(other.t, LIMB_CNT);
+      t = Arrays.copyOf(other.t, Field25519.LIMB_CNT);
     }
   }
 
@@ -299,7 +297,10 @@ final class Ed25519 {
     final long[] t2d;
 
     CachedXYT() {
-      this(new long[LIMB_CNT], new long[LIMB_CNT], new long[LIMB_CNT]);
+      this(
+          new long[Field25519.LIMB_CNT],
+          new long[Field25519.LIMB_CNT],
+          new long[Field25519.LIMB_CNT]);
     }
 
     /**
@@ -316,14 +317,14 @@ final class Ed25519 {
     }
 
     CachedXYT(CachedXYT other) {
-      yPlusX = Arrays.copyOf(other.yPlusX, LIMB_CNT);
-      yMinusX = Arrays.copyOf(other.yMinusX, LIMB_CNT);
-      t2d = Arrays.copyOf(other.t2d, LIMB_CNT);
+      yPlusX = Arrays.copyOf(other.yPlusX, Field25519.LIMB_CNT);
+      yMinusX = Arrays.copyOf(other.yMinusX, Field25519.LIMB_CNT);
+      t2d = Arrays.copyOf(other.t2d, Field25519.LIMB_CNT);
     }
 
     // z is one implicitly, so this just copies {@code in} to {@code output}.
     void multByZ(long[] output, long[] in) {
-      System.arraycopy(in, 0, output, 0, LIMB_CNT);
+      System.arraycopy(in, 0, output, 0, Field25519.LIMB_CNT);
     }
 
     /**
@@ -341,7 +342,11 @@ final class Ed25519 {
     private final long[] z;
 
     CachedXYZT() {
-      this(new long[LIMB_CNT], new long[LIMB_CNT], new long[LIMB_CNT], new long[LIMB_CNT]);
+      this(
+          new long[Field25519.LIMB_CNT],
+          new long[Field25519.LIMB_CNT],
+          new long[Field25519.LIMB_CNT],
+          new long[Field25519.LIMB_CNT]);
     }
 
     /**
@@ -351,8 +356,8 @@ final class Ed25519 {
       this();
       Field25519.sum(yPlusX, xyzt.xyz.y, xyzt.xyz.x);
       Field25519.sub(yMinusX, xyzt.xyz.y, xyzt.xyz.x);
-      System.arraycopy(xyzt.xyz.z, 0, z, 0, LIMB_CNT);
-      Field25519.mult(t2d, xyzt.t, D2);
+      System.arraycopy(xyzt.xyz.z, 0, z, 0, Field25519.LIMB_CNT);
+      Field25519.mult(t2d, xyzt.t, Ed25519Constants.D2);
     }
 
     /**
@@ -385,7 +390,7 @@ final class Ed25519 {
    * @param cached cached projective point input
    */
   private static void add(PartialXYZT partialXYZT, XYZT extended, CachedXYT cached) {
-    long[] t = new long[LIMB_CNT];
+    long[] t = new long[Field25519.LIMB_CNT];
 
     // Y1 + X1
     Field25519.sum(partialXYZT.xyz.x, extended.xyz.y, extended.xyz.x);
@@ -432,7 +437,7 @@ final class Ed25519 {
    * @param cached cached projective point input
    */
   private static void sub(PartialXYZT partialXYZT, XYZT extended, CachedXYT cached) {
-    long[] t = new long[LIMB_CNT];
+    long[] t = new long[Field25519.LIMB_CNT];
 
     // Y1 + X1
     Field25519.sum(partialXYZT.xyz.x, extended.xyz.y, extended.xyz.x);
@@ -479,7 +484,7 @@ final class Ed25519 {
    * the paper, H should be replaced with A+B.
    */
   private static void doubleXYZ(PartialXYZT partialXYZT, XYZ p) {
-    long[] t0 = new long[LIMB_CNT];
+    long[] t0 = new long[Field25519.LIMB_CNT];
 
     // XX = X1^2
     Field25519.square(partialXYZT.xyz.x, p.x);
@@ -550,18 +555,18 @@ final class Ed25519 {
     int bnegative = (b & 0xff) >> 7;
     int babs = b - (((-bnegative) & b) << 1);
 
-    t.copyConditional(B_TABLE[pos][0], eq(babs, 1));
-    t.copyConditional(B_TABLE[pos][1], eq(babs, 2));
-    t.copyConditional(B_TABLE[pos][2], eq(babs, 3));
-    t.copyConditional(B_TABLE[pos][3], eq(babs, 4));
-    t.copyConditional(B_TABLE[pos][4], eq(babs, 5));
-    t.copyConditional(B_TABLE[pos][5], eq(babs, 6));
-    t.copyConditional(B_TABLE[pos][6], eq(babs, 7));
-    t.copyConditional(B_TABLE[pos][7], eq(babs, 8));
+    t.copyConditional(Ed25519Constants.B_TABLE[pos][0], eq(babs, 1));
+    t.copyConditional(Ed25519Constants.B_TABLE[pos][1], eq(babs, 2));
+    t.copyConditional(Ed25519Constants.B_TABLE[pos][2], eq(babs, 3));
+    t.copyConditional(Ed25519Constants.B_TABLE[pos][3], eq(babs, 4));
+    t.copyConditional(Ed25519Constants.B_TABLE[pos][4], eq(babs, 5));
+    t.copyConditional(Ed25519Constants.B_TABLE[pos][5], eq(babs, 6));
+    t.copyConditional(Ed25519Constants.B_TABLE[pos][6], eq(babs, 7));
+    t.copyConditional(Ed25519Constants.B_TABLE[pos][7], eq(babs, 8));
 
-    long[] yPlusX = Arrays.copyOf(t.yMinusX, LIMB_CNT);
-    long[] yMinusX = Arrays.copyOf(t.yPlusX, LIMB_CNT);
-    long[] t2d = Arrays.copyOf(t.t2d, LIMB_CNT);
+    long[] yPlusX = Arrays.copyOf(t.yMinusX, Field25519.LIMB_CNT);
+    long[] yMinusX = Arrays.copyOf(t.yPlusX, Field25519.LIMB_CNT);
+    long[] t2d = Arrays.copyOf(t.t2d, Field25519.LIMB_CNT);
     neg(t2d, t2d);
     CachedXYT minust = new CachedXYT(yPlusX, yMinusX, t2d);
     t.copyConditional(minust, bnegative);
@@ -578,8 +583,8 @@ final class Ed25519 {
    */
   @SuppressWarnings("NarrowingCompoundAssignment")
   private static XYZ scalarMultWithBase(byte[] a) {
-    byte[] e = new byte[2 * FIELD_LEN];
-    for (int i = 0; i < FIELD_LEN; i++) {
+    byte[] e = new byte[2 * Field25519.FIELD_LEN];
+    for (int i = 0; i < Field25519.FIELD_LEN; i++) {
       e[2 * i + 0] = (byte) (((a[i] & 0xff) >> 0) & 0xf);
       e[2 * i + 1] = (byte) (((a[i] & 0xff) >> 4) & 0xf);
     }
@@ -642,7 +647,7 @@ final class Ed25519 {
    * Preconditions:
    * a[31] <= 127
    */
-  static byte[] scalarMultWithBaseToBytes(byte[] a) {
+  public static byte[] scalarMultWithBaseToBytes(byte[] a) {
     return scalarMultWithBase(a).toBytes();
   }
 
@@ -722,9 +727,9 @@ final class Ed25519 {
         sub(t, XYZT.fromPartialXYZT(u, t), pointAArray[-aSlide[i] / 2]);
       }
       if (bSlide[i] > 0) {
-        add(t, XYZT.fromPartialXYZT(u, t), B2[bSlide[i] / 2]);
+        add(t, XYZT.fromPartialXYZT(u, t), Ed25519Constants.B2[bSlide[i] / 2]);
       } else if (bSlide[i] < 0) {
-        sub(t, XYZT.fromPartialXYZT(u, t), B2[-bSlide[i] / 2]);
+        sub(t, XYZT.fromPartialXYZT(u, t), Ed25519Constants.B2[-bSlide[i] / 2]);
       }
     }
 
@@ -769,9 +774,9 @@ final class Ed25519 {
    * Computes {@code in}^(2^252-3) mod 2^255-19 and puts the result in {@code out}.
    */
   private static void pow2252m3(long[] out, long[] in) {
-    long[] t0 = new long[LIMB_CNT];
-    long[] t1 = new long[LIMB_CNT];
-    long[] t2 = new long[LIMB_CNT];
+    long[] t0 = new long[Field25519.LIMB_CNT];
+    long[] t1 = new long[Field25519.LIMB_CNT];
+    long[] t2 = new long[Field25519.LIMB_CNT];
 
     // z2 = z1^2^1
     Field25519.square(t0, in);
@@ -1506,10 +1511,9 @@ final class Ed25519 {
     s[31] = (byte) (s11 >> 17);
   }
 
-  static byte[] getHashedScalar(final byte[] privateKey)
-      throws GeneralSecurityException {
+  public static byte[] getHashedScalar(final byte[] privateKey) throws GeneralSecurityException {
     MessageDigest digest = EngineFactory.MESSAGE_DIGEST.getInstance("SHA-512");
-    digest.update(privateKey, 0, FIELD_LEN);
+    digest.update(privateKey, 0, Field25519.FIELD_LEN);
     byte[] h = digest.digest();
     // https://tools.ietf.org/html/rfc8032#section-5.1.2.
     // Clear the lowest three bits of the first octet.
@@ -1528,28 +1532,29 @@ final class Ed25519 {
    * @param publicKey {@link Ed25519#scalarMultToBytes(byte[])} of {@code hashedPrivateKey}
    * @param hashedPrivateKey {@link Ed25519#getHashedScalar(byte[])} of the private key
    * @return signature for the {@code message}.
-   * @throws GeneralSecurityException if there is no SHA-512 algorithm defined in
-   * {@link EngineFactory}.MESSAGE_DIGEST.
+   * @throws GeneralSecurityException if there is no SHA-512 algorithm defined in {@link
+   *     EngineFactory}.MESSAGE_DIGEST.
    */
-  static byte[] sign(final byte[] message, final byte[] publicKey, final byte[] hashedPrivateKey)
+  public static byte[] sign(
+      final byte[] message, final byte[] publicKey, final byte[] hashedPrivateKey)
       throws GeneralSecurityException {
     // Copying the message to make it thread-safe. Otherwise, if the caller modifies the message
     // between the first and the second hash then it might leak the private key.
     byte[] messageCopy = Arrays.copyOfRange(message, 0, message.length);
     MessageDigest digest = EngineFactory.MESSAGE_DIGEST.getInstance("SHA-512");
-    digest.update(hashedPrivateKey, FIELD_LEN, FIELD_LEN);
+    digest.update(hashedPrivateKey, Field25519.FIELD_LEN, Field25519.FIELD_LEN);
     digest.update(messageCopy);
     byte[] r = digest.digest();
     reduce(r);
 
-    byte[] rB = Arrays.copyOfRange(scalarMultWithBase(r).toBytes(), 0, FIELD_LEN);
+    byte[] rB = Arrays.copyOfRange(scalarMultWithBase(r).toBytes(), 0, Field25519.FIELD_LEN);
     digest.reset();
     digest.update(rB);
     digest.update(publicKey);
     digest.update(messageCopy);
     byte[] hram = digest.digest();
     reduce(hram);
-    byte[] s = new byte[FIELD_LEN];
+    byte[] s = new byte[Field25519.FIELD_LEN];
     mulAdd(s, hram, hashedPrivateKey, r);
     return Bytes.concat(rB, s);
   }
@@ -1572,7 +1577,7 @@ final class Ed25519 {
   // the range of S allows to modify signatures (cf. RFC 8032, Section 5.2.7 and Section 8.4.)
   // @param s an integer in little-endian order.
   private static boolean isSmallerThanGroupOrder(byte[] s) {
-    for (int j = FIELD_LEN - 1; j >= 0; j--) {
+    for (int j = Field25519.FIELD_LEN - 1; j >= 0; j--) {
       // compare unsigned bytes
       int a = s[j] & 0xff;
       int b = GROUP_ORDER[j] & 0xff;
@@ -1584,23 +1589,23 @@ final class Ed25519 {
   }
 
   /**
-   * Returns true if the EdDSA {@code signature} with {@code message}, can be verified with
-   * {@code publicKey}.
+   * Returns true if the EdDSA {@code signature} with {@code message}, can be verified with {@code
+   * publicKey}.
    *
-   * @throws GeneralSecurityException if there is no SHA-512 algorithm defined in
-   * {@link EngineFactory}.MESSAGE_DIGEST.
+   * @throws GeneralSecurityException if there is no SHA-512 algorithm defined in {@link
+   *     EngineFactory}.MESSAGE_DIGEST.
    */
-  static boolean verify(final byte[] message, final byte[] signature,
-      final byte[] publicKey) throws GeneralSecurityException {
+  public static boolean verify(final byte[] message, final byte[] signature, final byte[] publicKey)
+      throws GeneralSecurityException {
     if (signature.length != SIGNATURE_LEN) {
       return false;
     }
-    byte[] s = Arrays.copyOfRange(signature, FIELD_LEN, SIGNATURE_LEN);
+    byte[] s = Arrays.copyOfRange(signature, Field25519.FIELD_LEN, SIGNATURE_LEN);
     if (!isSmallerThanGroupOrder(s)) {
       return false;
     }
     MessageDigest digest = EngineFactory.MESSAGE_DIGEST.getInstance("SHA-512");
-    digest.update(signature, 0, FIELD_LEN);
+    digest.update(signature, 0, Field25519.FIELD_LEN);
     digest.update(publicKey);
     digest.update(message);
     byte[] h = digest.digest();
@@ -1609,7 +1614,7 @@ final class Ed25519 {
     XYZT negPublicKey = XYZT.fromBytesNegateVarTime(publicKey);
     XYZ xyz = doubleScalarMultVarTime(h, negPublicKey, s);
     byte[] expectedR = xyz.toBytes();
-    for (int i = 0; i < FIELD_LEN; i++) {
+    for (int i = 0; i < Field25519.FIELD_LEN; i++) {
       if (expectedR[i] != signature[i]) {
         return false;
       }

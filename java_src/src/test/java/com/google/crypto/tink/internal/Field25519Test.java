@@ -14,10 +14,10 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-package com.google.crypto.tink.subtle;
+package com.google.crypto.tink.internal;
 
-import static com.google.crypto.tink.subtle.Field25519.FIELD_LEN;
-import static com.google.crypto.tink.subtle.Field25519.LIMB_CNT;
+import static com.google.crypto.tink.internal.Field25519.FIELD_LEN;
+import static com.google.crypto.tink.internal.Field25519.LIMB_CNT;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
