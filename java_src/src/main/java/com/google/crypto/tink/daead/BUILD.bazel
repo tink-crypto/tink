@@ -175,3 +175,23 @@ android_library(
         "@maven//:com_google_errorprone_error_prone_annotations",
     ],
 )
+
+java_library(
+    name = "aes_siv_parameters",
+    srcs = ["AesSivParameters.java"],
+    deps = [
+        ":deterministic_aead_parameters",
+        "@maven//:com_google_code_findbugs_jsr305",
+        "@maven//:com_google_errorprone_error_prone_annotations",
+    ],
+)
+
+android_library(
+    name = "aes_siv_parameters-android",
+    srcs = ["AesSivParameters.java"],
+    deps = [
+        ":deterministic_aead_parameters-android",
+        "@maven//:com_google_code_findbugs_jsr305",
+        "@maven//:com_google_errorprone_error_prone_annotations",
+    ],
+)

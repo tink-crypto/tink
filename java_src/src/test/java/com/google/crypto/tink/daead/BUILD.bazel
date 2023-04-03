@@ -117,3 +117,14 @@ java_test(
         "@maven//:junit_junit",
     ],
 )
+
+java_test(
+    name = "AesSivParametersTest",
+    size = "small",
+    srcs = ["AesSivParametersTest.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink/daead:aes_siv_parameters",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
