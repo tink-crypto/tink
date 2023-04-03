@@ -63,8 +63,7 @@ public final class Ed25519PrivateKey extends SignaturePrivateKey {
     }
 
     // Validate private key based on the public key bytes.
-    byte[] publicKeyBytes =
-        publicKey.getPublicKeyBytes().toByteArray(InsecureSecretKeyAccess.get());
+    byte[] publicKeyBytes = publicKey.getPublicKeyBytes().toByteArray();
     byte[] secretSeed = privateKeyBytes.toByteArray(InsecureSecretKeyAccess.get());
     byte[] expectedPublicKeyBytes =
         Ed25519.scalarMultWithBaseToBytes(Ed25519.getHashedScalar(secretSeed));

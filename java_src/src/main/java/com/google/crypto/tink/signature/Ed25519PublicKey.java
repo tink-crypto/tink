@@ -20,7 +20,6 @@ import com.google.crypto.tink.AccessesPartialKey;
 import com.google.crypto.tink.Key;
 import com.google.crypto.tink.annotations.Alpha;
 import com.google.crypto.tink.util.Bytes;
-import com.google.crypto.tink.util.SecretBytes;
 import com.google.errorprone.annotations.Immutable;
 import com.google.errorprone.annotations.RestrictedApi;
 import java.nio.ByteBuffer;
@@ -38,13 +37,13 @@ import javax.annotation.Nullable;
 @Immutable
 public final class Ed25519PublicKey extends SignaturePublicKey {
   private final Ed25519Parameters parameters;
-  private final SecretBytes publicKeyBytes;
+  private final Bytes publicKeyBytes;
   private final Bytes outputPrefix;
   @Nullable private final Integer idRequirement;
 
   private Ed25519PublicKey(
       Ed25519Parameters parameters,
-      SecretBytes publicKeyBytes,
+      Bytes publicKeyBytes,
       Bytes outputPrefix,
       @Nullable Integer idRequirement) {
     this.parameters = parameters;
@@ -81,8 +80,8 @@ public final class Ed25519PublicKey extends SignaturePublicKey {
       allowedOnPath = ".*Test\\.java",
       allowlistAnnotations = {AccessesPartialKey.class})
   @AccessesPartialKey
-  public static Ed25519PublicKey create(SecretBytes secretBytes) throws GeneralSecurityException {
-    return create(Ed25519Parameters.Variant.NO_PREFIX, secretBytes, null);
+  public static Ed25519PublicKey create(Bytes publicKeyBytes) throws GeneralSecurityException {
+    return create(Ed25519Parameters.Variant.NO_PREFIX, publicKeyBytes, null);
   }
 
   @RestrictedApi(
@@ -91,7 +90,7 @@ public final class Ed25519PublicKey extends SignaturePublicKey {
       allowedOnPath = ".*Test\\.java",
       allowlistAnnotations = {AccessesPartialKey.class})
   public static Ed25519PublicKey create(
-      Ed25519Parameters.Variant variant, SecretBytes secretBytes, @Nullable Integer idRequirement)
+      Ed25519Parameters.Variant variant, Bytes publicKeyBytes, @Nullable Integer idRequirement)
       throws GeneralSecurityException {
     Ed25519Parameters parameters = Ed25519Parameters.create(variant);
     if (!variant.equals(Ed25519Parameters.Variant.NO_PREFIX) && idRequirement == null) {
@@ -103,13 +102,14 @@ public final class Ed25519PublicKey extends SignaturePublicKey {
       throw new GeneralSecurityException(
           "For given Variant NO_PREFIX the value of idRequirement must be null");
     }
-    if (secretBytes.size() != 32) {
+    if (publicKeyBytes.size() != 32) {
       throw new GeneralSecurityException(
-          "Ed25519 key must be constructed with key of length 32 bytes, not " + secretBytes.size());
+          "Ed25519 key must be constructed with key of length 32 bytes, not "
+              + publicKeyBytes.size());
     }
 
     return new Ed25519PublicKey(
-        parameters, secretBytes, createOutputPrefix(parameters, idRequirement), idRequirement);
+        parameters, publicKeyBytes, createOutputPrefix(parameters, idRequirement), idRequirement);
   }
 
   @RestrictedApi(
@@ -117,7 +117,7 @@ public final class Ed25519PublicKey extends SignaturePublicKey {
       link = "https://developers.google.com/tink/design/access_control#accessing_partial_keys",
       allowedOnPath = ".*Test\\.java",
       allowlistAnnotations = {AccessesPartialKey.class})
-  public SecretBytes getPublicKeyBytes() {
+  public Bytes getPublicKeyBytes() {
     return publicKeyBytes;
   }
 
@@ -140,7 +140,7 @@ public final class Ed25519PublicKey extends SignaturePublicKey {
     Ed25519PublicKey that = (Ed25519PublicKey) o;
     // Since outputPrefix is a function of parameters, we can ignore it here.
     return that.parameters.equals(parameters)
-        && that.publicKeyBytes.equalsSecretBytes(publicKeyBytes)
+        && that.publicKeyBytes.equals(publicKeyBytes)
         && Objects.equals(that.idRequirement, idRequirement);
   }
 }

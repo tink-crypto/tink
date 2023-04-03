@@ -19,9 +19,9 @@ package com.google.crypto.tink.signature;
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertThrows;
 
-import com.google.crypto.tink.InsecureSecretKeyAccess;
 import com.google.crypto.tink.aead.ChaCha20Poly1305Key;
 import com.google.crypto.tink.internal.KeyTester;
+import com.google.crypto.tink.subtle.Random;
 import com.google.crypto.tink.util.Bytes;
 import com.google.crypto.tink.util.SecretBytes;
 import java.security.GeneralSecurityException;
@@ -45,7 +45,7 @@ public final class Ed25519PublicKeyTest {
 
   @Test
   public void buildNoPrefixVariantAndGetProperties() throws Exception {
-    SecretBytes keyBytes = SecretBytes.randomBytes(32);
+    Bytes keyBytes = Bytes.copyFrom(Random.randBytes(32));
 
     Ed25519PublicKey key = Ed25519PublicKey.create(keyBytes);
 
@@ -57,7 +57,7 @@ public final class Ed25519PublicKeyTest {
 
   @Test
   public void buildNoPrefixVariantExplicitAndGetProperties() throws Exception {
-    SecretBytes keyBytes = SecretBytes.randomBytes(32);
+    Bytes keyBytes = Bytes.copyFrom(Random.randBytes(32));
 
     Ed25519PublicKey key =
         Ed25519PublicKey.create(
@@ -71,7 +71,7 @@ public final class Ed25519PublicKeyTest {
 
   @Test
   public void buildTinkVariantAndGetProperties() throws Exception {
-    SecretBytes keyBytes = SecretBytes.randomBytes(32);
+    Bytes keyBytes = Bytes.copyFrom(Random.randBytes(32));
 
     Ed25519PublicKey key =
         Ed25519PublicKey.create(
@@ -87,7 +87,7 @@ public final class Ed25519PublicKeyTest {
 
   @Test
   public void buildCrunchyVariantAndGetProperties() throws Exception {
-    SecretBytes keyBytes = SecretBytes.randomBytes(32);
+    Bytes keyBytes = Bytes.copyFrom(Random.randBytes(32));
 
     Ed25519PublicKey key =
         Ed25519PublicKey.create(
@@ -103,7 +103,7 @@ public final class Ed25519PublicKeyTest {
 
   @Test
   public void buildLegacyVariantAndGetProperties() throws Exception {
-    SecretBytes keyBytes = SecretBytes.randomBytes(32);
+    Bytes keyBytes = Bytes.copyFrom(Random.randBytes(32));
 
     Ed25519PublicKey key =
         Ed25519PublicKey.create(
@@ -120,7 +120,7 @@ public final class Ed25519PublicKeyTest {
   @Theory
   public void requireIdButIdIsNotSet_fails(
       @FromDataPoints("requireIdVariants") Ed25519Parameters.Variant variant) throws Exception {
-    SecretBytes keyBytes = SecretBytes.randomBytes(32);
+    Bytes keyBytes = Bytes.copyFrom(Random.randBytes(32));
 
     assertThrows(
         GeneralSecurityException.class,
@@ -129,7 +129,7 @@ public final class Ed25519PublicKeyTest {
 
   @Test
   public void doesNotRequireIdButIdIsSet_fails() throws Exception {
-    SecretBytes keyBytes = SecretBytes.randomBytes(32);
+    Bytes keyBytes = Bytes.copyFrom(Random.randBytes(32));
 
     assertThrows(
         GeneralSecurityException.class,
@@ -140,18 +140,16 @@ public final class Ed25519PublicKeyTest {
 
   @Test
   public void invalidKeySize() throws Exception {
-    SecretBytes keyBytes = SecretBytes.randomBytes(64);
+    Bytes keyBytes = Bytes.copyFrom(Random.randBytes(64));
 
     assertThrows(GeneralSecurityException.class, () -> Ed25519PublicKey.create(keyBytes));
   }
 
   @Test
   public void testEqualities() throws Exception {
-    SecretBytes keyBytes = SecretBytes.randomBytes(32);
-    SecretBytes keyBytesCopy =
-        SecretBytes.copyFrom(
-            keyBytes.toByteArray(InsecureSecretKeyAccess.get()), InsecureSecretKeyAccess.get());
-    SecretBytes keyBytesDiff = SecretBytes.randomBytes(32);
+    Bytes keyBytes = Bytes.copyFrom(Random.randBytes(32));
+    Bytes keyBytesCopy = Bytes.copyFrom(keyBytes.toByteArray());
+    Bytes keyBytesDiff = Bytes.copyFrom(Random.randBytes(32));
 
     new KeyTester()
         .addEqualityGroup(
@@ -188,10 +186,11 @@ public final class Ed25519PublicKeyTest {
 
   @Test
   public void testDifferentKeyTypesEquality_fails() throws Exception {
-    SecretBytes keyBytes = SecretBytes.randomBytes(32);
+    SecretBytes secretKeyBytes = SecretBytes.randomBytes(32);
+    Bytes publicKeyBytes = Bytes.copyFrom(Random.randBytes(32));
 
-    Ed25519PublicKey ed25519Key = Ed25519PublicKey.create(keyBytes);
-    ChaCha20Poly1305Key chaCha20Poly1305Key = ChaCha20Poly1305Key.create(keyBytes);
+    Ed25519PublicKey ed25519Key = Ed25519PublicKey.create(publicKeyBytes);
+    ChaCha20Poly1305Key chaCha20Poly1305Key = ChaCha20Poly1305Key.create(secretKeyBytes);
 
     assertThat(ed25519Key.equalsKey(chaCha20Poly1305Key)).isFalse();
   }

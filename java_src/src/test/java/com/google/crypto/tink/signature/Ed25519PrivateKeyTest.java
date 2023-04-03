@@ -39,8 +39,7 @@ public final class Ed25519PrivateKeyTest {
 
   private static final SecretBytes PRIVATE_KEY_BYTES =
       SecretBytes.copyFrom(SECRET_KEY, InsecureSecretKeyAccess.get());
-  private static final SecretBytes PUBLIC_KEY_BYTES =
-      SecretBytes.copyFrom(PUBLIC_KEY, InsecureSecretKeyAccess.get());
+  private static final Bytes PUBLIC_KEY_BYTES = Bytes.copyFrom(PUBLIC_KEY);
 
   @Test
   public void createNoPrefixVariantAndGetProperties() throws Exception {
@@ -141,10 +140,9 @@ public final class Ed25519PrivateKeyTest {
     Ed25519PublicKey publicKeyCopy = Ed25519PublicKey.create(PUBLIC_KEY_BYTES);
 
     // Test case from https://www.rfc-editor.org/rfc/rfc8032#page-24
-    SecretBytes publicKeyBytesDiff =
-        SecretBytes.copyFrom(
-            Hex.decode("3d4017c3e843895a92b70aa74d1b7ebc9c982ccf2ec4968cc0cd55f12af4660c"),
-            InsecureSecretKeyAccess.get());
+    Bytes publicKeyBytesDiff =
+        Bytes.copyFrom(
+            Hex.decode("3d4017c3e843895a92b70aa74d1b7ebc9c982ccf2ec4968cc0cd55f12af4660c"));
     Ed25519PublicKey publicKeyDiff = Ed25519PublicKey.create(publicKeyBytesDiff);
     SecretBytes privateKeyBytesDiff =
         SecretBytes.copyFrom(
