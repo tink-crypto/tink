@@ -18,8 +18,6 @@
 #include "tink/aead.h"
 #include "tink/util/statusor.h"
 #include "tink/cc/pybind/aead.h"
-#include "tink/cc/pybind/cc_aws_kms_client.h"
-#include "tink/cc/pybind/cc_gcp_kms_client.h"
 #include "tink/cc/pybind/cc_hpke_config.h"
 #include "tink/cc/pybind/cc_jwt_config.h"
 #include "tink/cc/pybind/cc_key_manager.h"
@@ -43,8 +41,6 @@ namespace crypto {
 namespace tink {
 
 PYBIND11_MODULE(tink_bindings, m) {
-  integration::awskms::PybindRegisterCcAwsKmsClient(&m);
-  integration::gcpkms::PybindRegisterCcGcpKmsClient(&m);
   namespace py = pybind11;
 
   py::register_exception<pybind11::google_tink::TinkException>(
