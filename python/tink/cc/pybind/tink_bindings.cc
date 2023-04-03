@@ -20,7 +20,6 @@
 #include "tink/cc/pybind/aead.h"
 #include "tink/cc/pybind/cc_aws_kms_client.h"
 #include "tink/cc/pybind/cc_gcp_kms_client.h"
-#include "tink/cc/pybind/cc_fake_kms_client_testonly.h"
 #include "tink/cc/pybind/cc_hpke_config.h"
 #include "tink/cc/pybind/cc_jwt_config.h"
 #include "tink/cc/pybind/cc_key_manager.h"
@@ -38,6 +37,7 @@
 #include "tink/cc/pybind/python_file_object_adapter.h"
 #include "tink/cc/pybind/streaming_aead.h"
 #include "tink/cc/pybind/tink_exception.h"
+
 
 namespace crypto {
 namespace tink {
@@ -59,7 +59,6 @@ PYBIND11_MODULE(tink_bindings, m) {
   PybindRegisterDeterministicAead(&m);
   PybindRegisterPublicKeySign(&m);
   PybindRegisterMac(&m);
-  test::PybindRegisterCcFakeKmsClientTestonly(&m);
   PybindRegisterPrf(&m);
   PybindRegisterHybridDecrypt(&m);
   PybindRegisterOutputStreamAdapter(&m);
