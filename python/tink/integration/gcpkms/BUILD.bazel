@@ -20,8 +20,10 @@ py_library(
     deps = [
         "//tink/aead",
         "//tink/aead:_kms_aead_key_manager",
-        "//tink/cc/pybind:tink_bindings",
         "//tink/core",
+        requirement("google-auth"),
+        requirement("google-api-core"),
+        requirement("google-cloud-kms"),
     ],
 )
 
@@ -69,6 +71,7 @@ py_test(
         "//tink:cleartext_keyset_handle",
         "//tink:tink_python",
         "//tink/aead",
+        "//tink/aead:_kms_aead_key_manager",
         "//tink/testing:helper",
         requirement("absl-py"),
     ],

@@ -56,6 +56,35 @@ class GcpKmsAeadTest(absltest.TestCase):
     ciphertext = gcp_aead.encrypt(plaintext, associated_data)
     self.assertEqual(plaintext, gcp_aead.decrypt(ciphertext, associated_data))
 
+  def test_decrypt_with_wrong_ad_fails(self):
+    gcp_client = gcpkms.GcpKmsClient(KEY_URI, CREDENTIAL_PATH)
+    gcp_aead = gcp_client.get_aead(KEY_URI)
+
+    ciphertext = gcp_aead.encrypt(b'plaintext', b'associated_data')
+    with self.assertRaises(tink.TinkError):
+      gcp_aead.decrypt(ciphertext, b'wrong_associated_data')
+
+  def test_decrypt_with_wrong_key_fails(self):
+    gcp_client = gcpkms.GcpKmsClient(None, CREDENTIAL_PATH)
+    gcp_aead1 = gcp_client.get_aead(KEY_URI)
+    gcp_aead2 = gcp_client.get_aead(KEY2_URI)
+
+    ciphertext1 = gcp_aead1.encrypt(b'plaintext', b'associated_data')
+    ciphertext2 = gcp_aead2.encrypt(b'plaintext', b'associated_data')
+
+    # First, verify that both key URIs work.
+    self.assertEqual(
+        b'plaintext', gcp_aead1.decrypt(ciphertext1, b'associated_data')
+    )
+    self.assertEqual(
+        b'plaintext', gcp_aead2.decrypt(ciphertext2, b'associated_data')
+    )
+
+    with self.assertRaises(tink.TinkError):
+      gcp_aead2.decrypt(ciphertext1, b'associated_data')
+    with self.assertRaises(tink.TinkError):
+      gcp_aead1.decrypt(ciphertext2, b'associated_data')
+
   def test_encrypt_decrypt_localized_uri(self):
     gcp_client = gcpkms.GcpKmsClient(LOCAL_KEY_URI, CREDENTIAL_PATH)
     gcp_aead = gcp_client.get_aead(LOCAL_KEY_URI)
