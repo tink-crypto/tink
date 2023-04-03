@@ -45,6 +45,11 @@ def register_kms_client(client: KmsClient) -> None:
   _kms_clients.append(client)
 
 
+def reset_kms_clients() -> None:
+  """Removes all previously registered KMS clients. Used in tests."""
+  _kms_clients.clear()
+
+
 def _kms_client_from_uri(key_uri: str) -> KmsClient:
   """Tink-internal function to get a KmsClient."""
   for client in _kms_clients:

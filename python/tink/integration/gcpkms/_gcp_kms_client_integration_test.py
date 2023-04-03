@@ -92,46 +92,5 @@ class GcpKmsAeadTest(absltest.TestCase):
       with self.assertRaises(tink.TinkError):
         gcp_aead.decrypt(corrupted_ciphertext, b'')
 
-  def test_registration_client_bound_to_uri_works(self):
-    # Make sure default credentials are not set.
-    os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = ''
-
-    # Register GCP KMS Client bound to KEY_URI.
-    gcpkms.GcpKmsClient.register_client(KEY_URI, CREDENTIAL_PATH)
-
-    # Create a keyset handle for KEY_URI and use it. This works.
-    handle = tink.new_keyset_handle(
-        aead.aead_key_templates.create_kms_aead_key_template(KEY_URI)
-    )
-    gcp_aead = handle.primitive(aead.Aead)
-    ciphertext = gcp_aead.encrypt(b'plaintext', b'associated_data')
-    self.assertEqual(
-        b'plaintext', gcp_aead.decrypt(ciphertext, b'associated_data')
-    )
-
-    # But it fails for LOCAL_KEY_URI, since the URI is different.
-    with self.assertRaises(tink.TinkError):
-      handle2 = tink.new_keyset_handle(
-          aead.aead_key_templates.create_kms_aead_key_template(LOCAL_KEY_URI)
-      )
-      gcp_aead = handle2.primitive(aead.Aead)
-      gcp_aead.encrypt(b'plaintext', b'associated_data')
-
-  def test_registration_client_with_default_credentials_works(self):
-    # Set default credentials, see
-    # https://cloud.google.com/docs/authentication/application-default-credentials
-    os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = CREDENTIAL_PATH
-
-    gcpkms.GcpKmsClient.register_client(KEY2_URI, None)
-
-    handle = tink.new_keyset_handle(
-        aead.aead_key_templates.create_kms_aead_key_template(KEY2_URI)
-    )
-    gcp_aead = handle.primitive(aead.Aead)
-    ciphertext = gcp_aead.encrypt(b'plaintext', b'associated_data')
-    self.assertEqual(
-        b'plaintext', gcp_aead.decrypt(ciphertext, b'associated_data')
-    )
-
 if __name__ == '__main__':
   absltest.main()

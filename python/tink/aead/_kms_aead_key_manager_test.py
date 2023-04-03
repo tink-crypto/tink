@@ -47,7 +47,7 @@ KMS_ENVELOPE_AEAD_KEY_TYPE_URL = (
 
 class KmsAeadKeyManagerTest(absltest.TestCase):
 
-  def test_register_and_get_kms_clients(self):
+  def test_register_get_and_reset_kms_clients(self):
     client1 = FakeClient('key_uri1')
     client2 = FakeClient('key_uri2')
     client3 = FakeClient('key_uri3')
@@ -64,6 +64,10 @@ class KmsAeadKeyManagerTest(absltest.TestCase):
     )
     with self.assertRaises(tink.TinkError):
       _kms_aead_key_manager._kms_client_from_uri('unknown')
+
+    _kms_aead_key_manager.reset_kms_clients()
+    with self.assertRaises(tink.TinkError):
+      _kms_aead_key_manager._kms_client_from_uri('key_uri1')
 
   def test_kms_aead_new_key_data_success(self):
     client = FakeClient('key_uri')

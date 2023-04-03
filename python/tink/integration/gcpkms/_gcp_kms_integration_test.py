@@ -22,6 +22,7 @@ from absl.testing import absltest
 import tink
 from tink import aead
 from tink import cleartext_keyset_handle
+from tink.aead import _kms_aead_key_manager
 from tink.integration import gcpkms
 from tink.testing import helper
 
@@ -33,8 +34,8 @@ BAD_CREDENTIAL_PATH = os.path.join(
 )
 
 KEY_URI = 'gcp-kms://projects/tink-test-infrastructure/locations/global/keyRings/unit-and-integration-testing/cryptoKeys/aead-key'
+LOCAL_KEY_URI = 'gcp-kms://projects/tink-test-infrastructure/locations/europe-west1/keyRings/unit-and-integration-test/cryptoKeys/aead-key'
 KEY2_URI = 'gcp-kms://projects/tink-test-infrastructure/locations/global/keyRings/unit-and-integration-testing/cryptoKeys/aead2-key'
-
 
 if 'TEST_SRCDIR' in os.environ:
   # Set root certificates for gRPC in Bazel Test which are needed on MacOS
@@ -44,13 +45,23 @@ if 'TEST_SRCDIR' in os.environ:
 
 def setUpModule():
   aead.register()
-  # Make an unbound registration.
-  gcpkms.GcpKmsClient.register_client('', CREDENTIAL_PATH)
 
 
 class GcpKmsIntegrationTest(absltest.TestCase):
 
+  def setUp(self):
+    super().setUp()
+    # Make sure default credentials are not set.
+    os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = ''
+
+  def tearDown(self):
+    super().tearDown()
+    _kms_aead_key_manager.reset_kms_clients()
+
   def test_aead_from_keyset_handle_for_key_uri_works(self):
+    # Register client not bound to a key URI.
+    gcpkms.GcpKmsClient.register_client('', CREDENTIAL_PATH)
+
     handle = tink.new_keyset_handle(
         aead.aead_key_templates.create_kms_aead_key_template(KEY_URI)
     )
@@ -64,6 +75,9 @@ class GcpKmsIntegrationTest(absltest.TestCase):
       gcp_aead.decrypt(ciphertext, b'invalid')
 
   def test_envelope_aead_from_keyset_handle(self):
+    # Register client not bound to a key URI.
+    gcpkms.GcpKmsClient.register_client('', CREDENTIAL_PATH)
+
     handle = tink.new_keyset_handle(
         aead.aead_key_templates.create_kms_envelope_aead_key_template(
             KEY_URI, aead.aead_key_templates.AES128_GCM_SIV
@@ -79,6 +93,9 @@ class GcpKmsIntegrationTest(absltest.TestCase):
       envelope_aead.decrypt(ciphertext, b'invalid')
 
   def test_aead_from_keyset_handle_for_key2_uri(self):
+    # Register client not bound to a key URI.
+    gcpkms.GcpKmsClient.register_client('', CREDENTIAL_PATH)
+
     handle = tink.new_keyset_handle(
         aead.aead_key_templates.create_kms_aead_key_template(KEY2_URI)
     )
@@ -90,6 +107,9 @@ class GcpKmsIntegrationTest(absltest.TestCase):
     )
 
   def test_aead_from_keyset_handle_with_invalid_key_uri_fails(self):
+    # Register client not bound to a key URI.
+    gcpkms.GcpKmsClient.register_client('', CREDENTIAL_PATH)
+
     handle = tink.new_keyset_handle(
         aead.aead_key_templates.create_kms_aead_key_template(
             'aws-kms://arn:aws:kms:us-west-2:acc:other/key3'
@@ -102,6 +122,9 @@ class GcpKmsIntegrationTest(absltest.TestCase):
   def test_decrypt_ciphertext_encrypted_in_bigquery_using_a_wrapped_keyset(
       self,
   ):
+    # Register client not bound to a key URI.
+    gcpkms.GcpKmsClient.register_client('', CREDENTIAL_PATH)
+
     # This wrapped keyset was generated in BigQuery using this command:
     # DECLARE kms_key_uri STRING;
     # SET kms_key_uri =
@@ -139,6 +162,46 @@ class GcpKmsIntegrationTest(absltest.TestCase):
     primitive = keyset_handle.primitive(aead.Aead)
     decrypted = primitive.decrypt(ciphertext, b'animal')
     self.assertEqual(decrypted, b'elephant')
+
+  def test_registration_client_bound_to_uri_works(self):
+    # Register client bound to KEY_URI.
+    gcpkms.GcpKmsClient.register_client(KEY_URI, CREDENTIAL_PATH)
+
+    # Create a keyset handle for KEY_URI and use it. This works.
+    handle = tink.new_keyset_handle(
+        aead.aead_key_templates.create_kms_aead_key_template(KEY_URI)
+    )
+    gcp_aead = handle.primitive(aead.Aead)
+    ciphertext = gcp_aead.encrypt(b'plaintext', b'associated_data')
+    self.assertEqual(
+        b'plaintext', gcp_aead.decrypt(ciphertext, b'associated_data')
+    )
+
+    # But it fails for LOCAL_KEY_URI, since the URI is different.
+    with self.assertRaises(tink.TinkError):
+      handle2 = tink.new_keyset_handle(
+          aead.aead_key_templates.create_kms_aead_key_template(LOCAL_KEY_URI)
+      )
+      gcp_aead = handle2.primitive(aead.Aead)
+      gcp_aead.encrypt(b'plaintext', b'associated_data')
+
+  def test_registration_client_with_default_credentials_works(self):
+    # Set default credentials, see
+    # https://cloud.google.com/docs/authentication/application-default-credentials
+    os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = CREDENTIAL_PATH
+
+    # register_client with credentials_path=None will use the default
+    # credentials.
+    gcpkms.GcpKmsClient.register_client(key_uri=KEY2_URI, credentials_path=None)
+
+    handle = tink.new_keyset_handle(
+        aead.aead_key_templates.create_kms_aead_key_template(KEY2_URI)
+    )
+    gcp_aead = handle.primitive(aead.Aead)
+    ciphertext = gcp_aead.encrypt(b'plaintext', b'associated_data')
+    self.assertEqual(
+        b'plaintext', gcp_aead.decrypt(ciphertext, b'associated_data')
+    )
 
 
 if __name__ == '__main__':
