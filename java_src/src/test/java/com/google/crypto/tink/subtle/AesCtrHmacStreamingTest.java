@@ -23,7 +23,6 @@ import static org.junit.Assert.fail;
 import com.google.crypto.tink.config.TinkFips;
 import com.google.crypto.tink.testing.StreamingTestUtil;
 import com.google.crypto.tink.testing.StreamingTestUtil.SeekableByteBufferChannel;
-import com.google.crypto.tink.testing.TestUtil;
 import java.nio.ByteBuffer;
 import java.nio.channels.WritableByteChannel;
 import java.security.GeneralSecurityException;
@@ -75,9 +74,6 @@ public class AesCtrHmacStreamingTest {
       int plaintextSize,
       int chunkSize)
       throws Exception {
-    if (TestUtil.shouldSkipTestWithAesKeySize(keySizeInBytes)) {
-      return;
-    }
     byte[] ikm = Hex.decode("000102030405060708090a0b0c0d0e0f00112233445566778899aabbccddeeff");
     AesCtrHmacStreaming ags =
         new AesCtrHmacStreaming(ikm, "HmacSha256", keySizeInBytes, "HmacSha256",
@@ -179,9 +175,6 @@ public class AesCtrHmacStreamingTest {
       int firstSegmentOffset,
       int plaintextSize)
       throws Exception {
-    if (TestUtil.shouldSkipTestWithAesKeySize(keySizeInBytes)) {
-      return;
-    }
     byte[] ikm = Hex.decode("000102030405060708090a0b0c0d0e0f00112233445566778899aabbccddeeff");
     AesCtrHmacStreaming ags =
         new AesCtrHmacStreaming(ikm, "HmacSha256", keySizeInBytes, "HmacSha256",
@@ -263,10 +256,6 @@ public class AesCtrHmacStreamingTest {
    * this stream.
    */
   public void testEncryptSingleBytes(int keySizeInBytes, int plaintextSize) throws Exception {
-    if (TestUtil.shouldSkipTestWithAesKeySize(keySizeInBytes)) {
-      return;
-    }
-
     int firstSegmentOffset = 0;
     int segmentSize = 512;
     int tagSizeInBytes = 12;

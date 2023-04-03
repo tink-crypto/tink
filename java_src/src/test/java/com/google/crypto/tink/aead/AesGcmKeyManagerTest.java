@@ -34,7 +34,6 @@ import com.google.crypto.tink.subtle.AesGcmJce;
 import com.google.crypto.tink.subtle.Bytes;
 import com.google.crypto.tink.subtle.Hex;
 import com.google.crypto.tink.subtle.Random;
-import com.google.crypto.tink.testing.TestUtil;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.ExtensionRegistryLite;
 import java.io.ByteArrayInputStream;
@@ -320,9 +319,6 @@ public class AesGcmKeyManagerTest {
   @Test
   public void testNistVectors() throws Exception {
     for (NistTestVector t : nistTestVectors) {
-      if (TestUtil.shouldSkipTestWithAesKeySize(t.keyValue.length)) {
-        continue;
-      }
       if (t.iv.length != 12 || t.tag.length != 16) {
         // We support only 12-byte IV and 16-byte tag.
         continue;

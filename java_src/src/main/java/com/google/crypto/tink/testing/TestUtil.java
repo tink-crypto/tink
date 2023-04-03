@@ -626,7 +626,13 @@ public final class TestUtil {
     return false;
   }
 
-  /** Returns whether we should skip a test with some AES key size. */
+  /**
+   * Returns whether we should skip a test with some AES key size.
+   *
+   * @deprecated Do not call this function. If you have any instance, you probably want to use
+   *     "false" instead.
+   */
+  @Deprecated
   public static boolean shouldSkipTestWithAesKeySize(int keySizeInBytes)
       throws NoSuchAlgorithmException {
     int maxKeySize = Cipher.getMaxAllowedKeyLength("AES/CTR/NoPadding");
