@@ -1069,7 +1069,13 @@ public final class KeysetHandle {
           fullPrimitive =
               getFullPrimitiveOrNull(entries.get(i).getKey(), inputPrimitiveClassObject);
         }
-
+        if (fullPrimitive == null && primitive == null) {
+          throw new GeneralSecurityException(
+              "Unable to get primitive "
+                  + inputPrimitiveClassObject
+                  + " for key of type "
+                  + protoKey.getKeyData().getTypeUrl());
+        }
         if (protoKey.getKeyId() == keyset.getPrimaryKeyId()) {
           builder.addPrimaryFullPrimitiveAndOptionalPrimitive(fullPrimitive, primitive, protoKey);
         } else {

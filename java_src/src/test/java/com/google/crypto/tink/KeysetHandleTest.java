@@ -1512,4 +1512,23 @@ public class KeysetHandleTest {
             .setStatus(null));
     assertThrows(GeneralSecurityException.class, builder::build);
   }
+
+  @Test
+  public void testStatusNotSet_getPrimitive_throws() throws Exception {
+    Keyset keyset =
+        Keyset.newBuilder()
+            .setPrimaryKeyId(1)
+            .addKey(
+                Keyset.Key.newBuilder()
+                    .setKeyId(1)
+                    .setStatus(KeyStatusType.ENABLED)
+                    .setOutputPrefixType(OutputPrefixType.TINK)
+                    .setKeyData(KeyData.newBuilder().setTypeUrl("unregisteredTypeUrl")))
+            .build();
+    KeysetHandle handle = KeysetHandle.fromKeyset(keyset);
+    GeneralSecurityException e =
+        assertThrows(GeneralSecurityException.class, () -> handle.getPrimitive(Aead.class));
+    assertThat(e).hasMessageThat().contains("Unable to get primitive");
+    assertThat(e).hasMessageThat().contains("unregisteredTypeUrl");
+  }
 }
