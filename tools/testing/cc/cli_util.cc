@@ -47,7 +47,6 @@ using crypto::tink::JsonKeysetWriter;
 using crypto::tink::KeysetHandle;
 using crypto::tink::KeysetReader;
 using crypto::tink::KeysetWriter;
-using crypto::tink::KmsClients;
 using crypto::tink::OutputStream;
 using crypto::tink::TinkConfig;
 using crypto::tink::util::Status;
