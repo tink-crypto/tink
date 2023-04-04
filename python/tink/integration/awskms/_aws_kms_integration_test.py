@@ -19,6 +19,7 @@ from absl.testing import absltest
 
 import tink
 from tink import aead
+from tink.aead import _kms_aead_key_manager
 from tink.integration import awskms
 from tink.testing import helper
 
@@ -39,6 +40,10 @@ def setUpModule():
 
 
 class AwsKmsAeadTest(absltest.TestCase):
+
+  def tearDown(self):
+    super().tearDown()
+    _kms_aead_key_manager.reset_kms_clients()
 
   def test_encrypt_decrypt(self):
     aws_client = awskms.AwsKmsClient(KEY_URI, CREDENTIAL_PATH)

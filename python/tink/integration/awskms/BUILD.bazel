@@ -57,6 +57,7 @@ py_test(
         ":awskms",
         "//tink:tink_python",
         "//tink/aead",
+        "//tink/aead:_kms_aead_key_manager",
         "//tink/testing:helper",
         requirement("absl-py"),
     ],
