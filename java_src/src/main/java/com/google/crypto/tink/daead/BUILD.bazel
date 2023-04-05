@@ -106,6 +106,7 @@ java_library(
     name = "aes_siv_key_manager",
     srcs = ["AesSivKeyManager.java"],
     deps = [
+        ":aes_siv_proto_serialization",
         "//proto:aes_siv_java_proto",
         "//proto:tink_java_proto",
         "//src/main/java/com/google/crypto/tink:deterministic_aead",
@@ -149,6 +150,7 @@ android_library(
     name = "aes_siv_key_manager-android",
     srcs = ["AesSivKeyManager.java"],
     deps = [
+        ":aes_siv_proto_serialization-android",
         "//proto:aes_siv_java_proto_lite",
         "//proto:tink_java_proto_lite",
         "//src/main/java/com/google/crypto/tink:deterministic_aead-android",

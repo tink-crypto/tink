@@ -157,6 +157,7 @@ public final class AesSivKeyManager extends KeyTypeManager<AesSivKey> {
 
   public static void register(boolean newKeyAllowed) throws GeneralSecurityException {
     Registry.registerKeyManager(new AesSivKeyManager(), newKeyAllowed);
+    AesSivProtoSerialization.register();
   }
 
   /**
