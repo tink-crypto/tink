@@ -17,7 +17,7 @@ import binascii
 import configparser
 import re
 
-from typing import Tuple, Any, Dict
+from typing import Optional, Tuple, Any, Dict
 
 import boto3
 from botocore import exceptions
@@ -107,20 +107,17 @@ def _get_region_from_key_arn(key_arn: str) -> str:
 class AwsKmsClient(_kms_aead_key_manager.KmsClient):
   """Basic AWS client for AEAD."""
 
-  def __init__(self, key_uri: str, credentials_path: str):
+  def __init__(self, key_uri: Optional[str], credentials_path: Optional[str]):
     """Creates a new AwsKmsClient that is bound to the key specified in 'key_uri'.
 
-    Uses the specified credentials when communicating with the KMS. Either of
-    arguments can be empty.
-
-    If 'key_uri' is empty, then the client is not bound to any particular key.
-    If 'credential_path' is empty, then default credentials will be used.
     For more information on credentials and in which order they are loaded see
     https://boto3.amazonaws.com/v1/documentation/api/latest/guide/configuration.html.
 
     Args:
-      key_uri: Text, URI of the key the client should be bound to.
-      credentials_path: Text, Path to the file with the access credentials.
+      key_uri: The URI of the key the client should be bound to. If it is None
+          or empty, then the client is not bound to any particular key.
+      credentials_path: Path to the file with the access credentials. If it is
+          None or empty, then default credentials will be used.
 
     Raises:
       ValueError: If the path or filename of the credentials is invalid.
@@ -133,9 +130,13 @@ class AwsKmsClient(_kms_aead_key_manager.KmsClient):
       if not match:
         raise tink.TinkError('invalid key URI')
       self._key_arn = _key_uri_to_key_arn(key_uri)
-    aws_access_key_id, aws_secret_access_key = _parse_config(credentials_path)
-    self._aws_access_key_id = aws_access_key_id
-    self._aws_secret_access_key = aws_secret_access_key
+    if not credentials_path:
+      self._aws_access_key_id = None
+      self._aws_secret_access_key = None
+    else:
+      aws_access_key_id, aws_secret_access_key = _parse_config(credentials_path)
+      self._aws_access_key_id = aws_access_key_id
+      self._aws_secret_access_key = aws_secret_access_key
 
   def does_support(self, key_uri: str) -> bool:
     """Returns true if this client supports KMS key specified in 'key_uri'.
@@ -180,7 +181,9 @@ class AwsKmsClient(_kms_aead_key_manager.KmsClient):
     return _AwsKmsAead(session.client('kms'), key_arn)
 
   @classmethod
-  def register_client(cls, key_uri, credentials_path) -> None:
+  def register_client(
+      cls, key_uri: Optional[str], credentials_path: Optional[str]
+  ) -> None:
     """Registers the KMS client internally."""
     _kms_aead_key_manager.register_kms_client(  # pylint: disable=protected-access
         AwsKmsClient(key_uri, credentials_path)

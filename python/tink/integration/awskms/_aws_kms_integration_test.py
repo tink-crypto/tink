@@ -111,6 +111,17 @@ class AwsKmsAeadTest(absltest.TestCase):
       gcp_aead = handle2.primitive(aead.Aead)
       gcp_aead.encrypt(b'plaintext', b'associated_data')
 
+  def test_encrypt_with_default_credentials(self):
+    # If no credentials_path is provided, this path here is used by default.
+    os.environ['AWS_SHARED_CREDENTIALS_FILE'] = CREDENTIAL_PATH
+
+    aws_client = awskms.AwsKmsClient(key_uri=KEY_URI, credentials_path=None)
+    aws_aead = aws_client.get_aead(KEY_URI)
+
+    ciphertext = aws_aead.encrypt(b'plaintext', b'associated_data')
+    self.assertEqual(
+        b'plaintext', aws_aead.decrypt(ciphertext, b'associated_data')
+    )
 
 if __name__ == '__main__':
   absltest.main()
