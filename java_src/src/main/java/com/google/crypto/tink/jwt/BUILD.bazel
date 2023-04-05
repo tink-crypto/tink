@@ -805,3 +805,33 @@ android_library(
     name = "jwt_names-android",
     srcs = ["JwtNames.java"],
 )
+
+android_library(
+    name = "jwt_mac_key-android",
+    srcs = ["JwtMacKey.java"],
+    deps = [
+        ":jwt_mac_parameters-android",
+        "//src/main/java/com/google/crypto/tink:key-android",
+    ],
+)
+
+android_library(
+    name = "jwt_mac_parameters-android",
+    srcs = ["JwtMacParameters.java"],
+    deps = ["//src/main/java/com/google/crypto/tink:parameters-android"],
+)
+
+java_library(
+    name = "jwt_mac_key",
+    srcs = ["JwtMacKey.java"],
+    deps = [
+        ":jwt_mac_parameters",
+        "//src/main/java/com/google/crypto/tink:key",
+    ],
+)
+
+java_library(
+    name = "jwt_mac_parameters",
+    srcs = ["JwtMacParameters.java"],
+    deps = ["//src/main/java/com/google/crypto/tink:parameters"],
+)
