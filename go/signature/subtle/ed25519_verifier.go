@@ -17,10 +17,9 @@
 package subtle
 
 import (
+	"crypto/ed25519"
 	"errors"
 	"fmt"
-
-	"golang.org/x/crypto/ed25519"
 )
 
 var errInvalidED25519Signature = errors.New("ed25519: invalid signature")

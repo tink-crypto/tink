@@ -20,6 +20,7 @@ package testutil
 import (
 	"bytes"
 	"crypto/ecdsa"
+	"crypto/ed25519"
 	"crypto/rand"
 	"encoding/gob"
 	"errors"
@@ -29,7 +30,6 @@ import (
 	"strconv"
 	"strings"
 
-	"golang.org/x/crypto/ed25519"
 	"google.golang.org/protobuf/proto"
 	"github.com/google/tink/go/core/registry"
 	subtledaead "github.com/google/tink/go/daead/subtle"

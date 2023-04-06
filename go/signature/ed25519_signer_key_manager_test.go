@@ -18,12 +18,12 @@ package signature_test
 
 import (
 	"bytes"
+	"crypto/ed25519"
 	"encoding/hex"
 	"fmt"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
-	"golang.org/x/crypto/ed25519"
 	"google.golang.org/protobuf/proto"
 	"github.com/google/tink/go/core/registry"
 	"github.com/google/tink/go/internal/internalregistry"
