@@ -13,6 +13,7 @@ import {HpkePublicKeyManager} from './hpke_public_key_manager';
 
 describe('hpke for encrypting test', () => {
   it('public key registers correctly', () => {
+    registry.reset();
     // Confirm that it fails before registering.
     try {
       registry.getKeyManager(
