@@ -835,3 +835,21 @@ java_library(
     srcs = ["JwtMacParameters.java"],
     deps = ["//src/main/java/com/google/crypto/tink:parameters"],
 )
+
+java_library(
+    name = "jwt_hmac_parameters",
+    srcs = ["JwtHmacParameters.java"],
+    deps = [
+        ":jwt_mac_parameters",
+        "@maven//:com_google_errorprone_error_prone_annotations",
+    ],
+)
+
+android_library(
+    name = "jwt_hmac_parameters-android",
+    srcs = ["JwtHmacParameters.java"],
+    deps = [
+        ":jwt_mac_parameters-android",
+        "@maven//:com_google_errorprone_error_prone_annotations",
+    ],
+)
