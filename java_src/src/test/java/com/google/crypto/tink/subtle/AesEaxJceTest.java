@@ -16,6 +16,7 @@
 
 package com.google.crypto.tink.subtle;
 
+import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
@@ -28,26 +29,15 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import java.security.GeneralSecurityException;
 import java.util.Arrays;
+import java.util.HashSet;
 import javax.crypto.AEADBadTagException;
-import javax.crypto.Cipher;
 import org.junit.Assume;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
-/**
- * Unit tests for AesEax.
- *
- * <p>TODO: Add more tests:
- *
- * <ul>
- *   <li>- maybe add NIST style verification.
- *   <li>- tests with long ciphertexts (e.g. BC had a bug with messages of size 8k or longer)
- *   <li>- check that IVs are distinct.
- *   <li>- use Github Wycheproof test vectors once they're published (b/66825199).
- * </ul>
- */
+/** Unit tests for AesEax. */
 @RunWith(JUnit4.class)
 public class AesEaxJceTest {
   private static final int KEY_SIZE = 16;
@@ -57,14 +47,8 @@ public class AesEaxJceTest {
 
   @Before
   public void setUp() throws Exception {
-    if (Cipher.getMaxAllowedKeyLength("AES") < 256) {
-      System.out.println(
-          "Unlimited Strength Jurisdiction Policy Files are required"
-              + " but not installed. Skip tests with keys larger than 128 bits.");
-      keySizeInBytes = new Integer[] {16};
-    } else {
-      keySizeInBytes = new Integer[] {16, 32};
-    }
+
+    keySizeInBytes = new Integer[] {16, 32};
     ivSizeInBytes = new Integer[] {12, 16};
   }
 
@@ -151,15 +135,15 @@ public class AesEaxJceTest {
 
     testModifyCiphertext(16, 16);
     testModifyCiphertext(16, 12);
-    // TODO(bleichen): Skipping test with key sizes larger than 128 bits because of b/35928521.
-    // testModifyCiphertext(24, 16);
-    // testModifyCiphertext(32, 16);
+    testModifyCiphertext(24, 16);
+    testModifyCiphertext(32, 16);
   }
 
   public void testModifyCiphertext(int keySizeInBytes, int ivSizeInBytes) throws Exception {
     Assume.assumeFalse(TinkFips.useOnlyFips());
 
     byte[] aad = new byte[] {1, 2, 3};
+    // TODO(tholenst): Investigate why this fails for "keySizeInBytes" instead of "KEY_SIZE".
     byte[] key = Random.randBytes(KEY_SIZE);
     byte[] message = Random.randBytes(32);
     AesEaxJce eax = new AesEaxJce(key, ivSizeInBytes);
@@ -245,7 +229,7 @@ public class AesEaxJceTest {
     AesEaxJce eax = new AesEaxJce(key, IV_SIZE);
     for (int messageSize = 0; messageSize < 75; messageSize++) {
       byte[] message = Random.randBytes(messageSize);
-      {  // encrypting with aad as a 0-length array
+      { // encrypting with aad as a 0-length array
         byte[] ciphertext = eax.encrypt(message, aad);
         byte[] decrypted = eax.decrypt(ciphertext, aad);
         assertArrayEquals(message, decrypted);
@@ -258,7 +242,7 @@ public class AesEaxJceTest {
               byte[] unused = eax.decrypt(ciphertext, badAad);
             });
       }
-      {  // encrypting with aad equal to null
+      { // encrypting with aad equal to null
         byte[] ciphertext = eax.encrypt(message, null);
         byte[] decrypted = eax.decrypt(ciphertext, aad);
         assertArrayEquals(message, decrypted);
@@ -274,6 +258,43 @@ public class AesEaxJceTest {
     }
   }
 
+  /**
+   * This is a very simple test for the randomness of the nonce. The test simply checks that the
+   * multiple ciphertexts of the same message are distinct.
+   */
+  @Test
+  public void testRandomNonce() throws Exception {
+    Assume.assumeFalse(TinkFips.useOnlyFips());
+
+    final int samples = 1 << 17;
+    byte[] key = Random.randBytes(KEY_SIZE);
+    byte[] message = new byte[0];
+    byte[] aad = Random.randBytes(20);
+    AesEaxJce eax = new AesEaxJce(key, IV_SIZE);
+    HashSet<String> ciphertexts = new HashSet<>();
+    for (int i = 0; i < samples; i++) {
+      byte[] ct = eax.encrypt(message, aad);
+      String ctHex = Hex.encode(ct);
+      assertThat(ciphertexts).doesNotContain(ctHex);
+      ciphertexts.add(ctHex);
+    }
+  }
+
+  @Test
+  public void testEncryptDecryptLongMessage() throws Exception {
+    Assume.assumeFalse(TinkFips.useOnlyFips());
+
+    byte[] key = Random.randBytes(KEY_SIZE);
+    AesEaxJce eax = new AesEaxJce(key, IV_SIZE);
+
+    byte[] message = Random.randBytes(150000);
+    byte[] aad = Random.randBytes(20);
+
+    byte[] ciphertext = eax.encrypt(message, aad);
+    byte[] decrypted = eax.decrypt(ciphertext, aad);
+    assertArrayEquals(message, decrypted);
+  }
+
   @Test
   public void testFailIfFipsModeUsed() throws Exception {
     Assume.assumeTrue(TinkFips.useOnlyFips());
@@ -281,5 +302,4 @@ public class AesEaxJceTest {
     byte[] key = Random.randBytes(16);
     assertThrows(GeneralSecurityException.class, () -> new AesEaxJce(key, IV_SIZE));
   }
-
 }
