@@ -174,6 +174,7 @@ public final class Ed25519PrivateKeyManager
   public static void registerPair(boolean newKeyAllowed) throws GeneralSecurityException {
     Registry.registerAsymmetricKeyManagers(
         new Ed25519PrivateKeyManager(), new Ed25519PublicKeyManager(), newKeyAllowed);
+    Ed25519ProtoSerialization.register();
   }
 
   /**
