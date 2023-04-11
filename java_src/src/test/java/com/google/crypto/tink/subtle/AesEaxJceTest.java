@@ -135,16 +135,15 @@ public class AesEaxJceTest {
 
     testModifyCiphertext(16, 16);
     testModifyCiphertext(16, 12);
-    testModifyCiphertext(24, 16);
     testModifyCiphertext(32, 16);
+    testModifyCiphertext(32, 12);
   }
 
   public void testModifyCiphertext(int keySizeInBytes, int ivSizeInBytes) throws Exception {
     Assume.assumeFalse(TinkFips.useOnlyFips());
 
     byte[] aad = new byte[] {1, 2, 3};
-    // TODO(tholenst): Investigate why this fails for "keySizeInBytes" instead of "KEY_SIZE".
-    byte[] key = Random.randBytes(KEY_SIZE);
+    byte[] key = Random.randBytes(keySizeInBytes);
     byte[] message = Random.randBytes(32);
     AesEaxJce eax = new AesEaxJce(key, ivSizeInBytes);
     byte[] ciphertext = eax.encrypt(message, aad);
