@@ -34,11 +34,14 @@ import javax.crypto.AEADBadTagException;
 import org.junit.Assume;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.experimental.theories.DataPoints;
+import org.junit.experimental.theories.FromDataPoints;
+import org.junit.experimental.theories.Theories;
+import org.junit.experimental.theories.Theory;
 import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
 
 /** Unit tests for AesEax. */
-@RunWith(JUnit4.class)
+@RunWith(Theories.class)
 public class AesEaxJceTest {
   private static final int KEY_SIZE = 16;
   private static final int IV_SIZE = 16;
@@ -300,5 +303,95 @@ public class AesEaxJceTest {
 
     byte[] key = Random.randBytes(16);
     assertThrows(GeneralSecurityException.class, () -> new AesEaxJce(key, IV_SIZE));
+  }
+
+  private static class TestVector {
+    public TestVector(
+        String hexMessage, String hexKey, String hexNonce, String hexAad, String hexCiphertext) {
+      this.hexMessage = hexMessage;
+      this.hexKey = hexKey;
+      this.hexNonce = hexNonce;
+      this.hexAad = hexAad;
+      this.hexCiphertext = hexCiphertext;
+    }
+
+    public final String hexMessage;
+    public final String hexKey;
+    public final String hexNonce;
+    public final String hexAad;
+    public final String hexCiphertext;
+  }
+
+  @DataPoints("testVectors")
+  // Test vectors from "The EAX Mode of Operation", Appendix G.
+  public static final TestVector[] TEST_VECTORS =
+      new TestVector[] {
+        new TestVector(
+            "",
+            "233952dee4d5ed5f9b9c6d6ff80ff478",
+            "62ec67f9c3a4a407fcb2a8c49031a8b3",
+            "6bfb914fd07eae6b",
+            "e037830e8389f27b025a2d6527e79d01"),
+        new TestVector(
+            "f7fb",
+            "91945d3f4dcbee0bf45ef52255f095a4",
+            "becaf043b0a23d843194ba972c66debd",
+            "fa3bfd4806eb53fa",
+            "19dd5c4c9331049d0bdab0277408f67967e5"),
+        new TestVector(
+            "481c9e39b1",
+            "d07cf6cbb7f313bdde66b727afd3c5e8",
+            "8408dfff3c1a2b1292dc199e46b7d617",
+            "33cce2eabff5a79d",
+            "632a9d131ad4c168a4225d8e1ff755939974a7bede"),
+        new TestVector(
+            "40d0c07da5e4",
+            "35b6d0580005bbc12b0587124557d2c2",
+            "fdb6b06676eedc5c61d74276e1f8e816",
+            "aeb96eaebe2970e9",
+            "071dfe16c675cb0677e536f73afe6a14b74ee49844dd"),
+        new TestVector(
+            "4de3b35c3fc039245bd1fb7d",
+            "bd8e6e11475e60b268784c38c62feb22",
+            "6eac5c93072d8e8513f750935e46da1b",
+            "d4482d1ca78dce0f",
+            "835bb4f15d743e350e728414abb8644fd6ccb86947c5e10590210a4f"),
+        new TestVector(
+            "8b0a79306c9ce7ed99dae4f87f8dd61636",
+            "7c77d6e813bed5ac98baa417477a2e7d",
+            "1a8c98dcd73d38393b2bf1569deefc19",
+            "65d2017990d62528",
+            "02083e3979da014812f59f11d52630da30137327d10649b0aa6e1c181db617d7f2"),
+        new TestVector(
+            "1bda122bce8a8dbaf1877d962b8592dd2d56",
+            "5fff20cafab119ca2fc73549e20f5b0d",
+            "dde59b97d722156d4d9aff2bc7559826",
+            "54b9f04e6a09189a",
+            "2ec47b2c4954a489afc7ba4897edcdae8cc33b60450599bd02c96382902aef7f832a"),
+        new TestVector(
+            "6cf36720872b8513f6eab1a8a44438d5ef11",
+            "a4a4782bcffd3ec5e7ef6d8c34a56123",
+            "b781fcf2f75fa5a8de97a9ca48e522ec",
+            "899a175897561d7e",
+            "0de18fd0fdd91e7af19f1d8ee8733938b1e8e7f6d2231618102fdb7fe55ff1991700"),
+        new TestVector(
+            "ca40d7446e545ffaed3bd12a740a659ffbbb3ceab7",
+            "8395fcf1e95bebd697bd010bc766aac3",
+            "22e7add93cfc6393c57ec0b3c17d6b44",
+            "126735fcc320d25a",
+            "cb8920f87a6c75cff39627b56e3ed197c552d295a7cfc46afc253b4652b1af3795b124ab6e")
+      };
+
+  @Theory
+  public void testVector_decrypt_works(@FromDataPoints("testVectors") TestVector vector)
+      throws Exception {
+    // We cannot use "Assume" here because Theories will complain that no input does any test.
+    if (TinkFips.useOnlyFips()) {
+      return;
+    }
+    byte[] fullCiphertext = Hex.decode(vector.hexNonce + vector.hexCiphertext);
+    AesEaxJce eax = new AesEaxJce(Hex.decode(vector.hexKey), Hex.decode(vector.hexNonce).length);
+    byte[] decryption = eax.decrypt(fullCiphertext, Hex.decode(vector.hexAad));
+    assertThat(Hex.encode(decryption)).isEqualTo(vector.hexMessage);
   }
 }
