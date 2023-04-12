@@ -23,7 +23,7 @@ import java.util.Objects;
 import java.util.Optional;
 
 /** Describes the parameters of a {@code JwtHmacKey}. */
-class JwtHmacParameters extends JwtMacParameters {
+public class JwtHmacParameters extends JwtMacParameters {
   /** Specifies how the "kid" header is handled. */
   @Immutable
   public static final class KidStrategy {

@@ -19,7 +19,7 @@ package com.google.crypto.tink.jwt;
 import com.google.crypto.tink.Parameters;
 
 /** Represents a description of a {@link JwtMacKey} excluding the randomly chosen key material. */
-abstract class JwtMacParameters extends Parameters {
+public abstract class JwtMacParameters extends Parameters {
   /** If true, no {@code "kid"} header is allowed when verifying a token. */
   public abstract boolean allowKidAbsent();
 }

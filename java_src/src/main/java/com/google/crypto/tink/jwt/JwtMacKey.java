@@ -23,7 +23,7 @@ import java.util.Optional;
  * Represents a key to compute JWT using symmetric cryptography (i.e., using the {@link JwtMac}
  * interface).
  */
-abstract class JwtMacKey extends Key {
+public abstract class JwtMacKey extends Key {
   /**
    * Returns the "kid" to be used for this key (https://www.rfc-editor.org/rfc/rfc7517#section-4.5).
    *
