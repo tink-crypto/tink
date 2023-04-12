@@ -5,6 +5,7 @@
  */
 
 import {InvalidArgumentsException} from '../../../exception/invalid_arguments_exception';
+import {SecurityException} from '../../../exception/security_exception';
 import {PbHpkeKem} from '../../../internal/proto';
 import * as bytes from '../../../subtle/bytes';
 import * as ellipticCurves from '../../../subtle/elliptic_curves';
@@ -101,7 +102,7 @@ describe('HPKE Util', () => {
         await expectAsync(
             hpkeUtil.getPublicKeyFromByteArray(
                 testInfo.curveType, randBytes(testInfo.publicKey.length - 1)))
-            .toBeRejectedWithError(InvalidArgumentsException);
+            .toBeRejectedWithError(SecurityException);
       });
     });
 
@@ -111,7 +112,7 @@ describe('HPKE Util', () => {
           curveType: testInfo.curveType,
           publicKey: randBytes(testInfo.publicKey.length - 1),
           privateKey: testInfo.privateKey,
-        })).toBeRejectedWithError(InvalidArgumentsException);
+        })).toBeRejectedWithError(SecurityException);
       });
 
       it('should fail when called with an invalid private key', async () => {

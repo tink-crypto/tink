@@ -273,7 +273,7 @@ describe('elliptic curves test', function() {
         // https://www.typescriptlang.org/tsconfig#useUnknownInCatchVariables
         // tslint:disable-next-line:no-any
       } catch (e: any) {
-        expect(e.toString()).toBe('InvalidArgumentsException: invalid point');
+        expect(e.toString()).toBe('SecurityException: invalid point');
       }
     }
   });
@@ -417,8 +417,7 @@ describe('elliptic curves test', function() {
         // https://www.typescriptlang.org/tsconfig#useUnknownInCatchVariables
         // tslint:disable-next-line:no-any
       } catch (e: any) {
-        expect(e.toString())
-            .toBe('InvalidArgumentsException: invalid DER signature');
+        expect(e.toString()).toBe('SecurityException: invalid DER signature');
       }
     }
   });

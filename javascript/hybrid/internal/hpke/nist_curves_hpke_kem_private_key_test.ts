@@ -5,6 +5,7 @@
  */
 
 import {InvalidArgumentsException} from '../../../exception/invalid_arguments_exception';
+import {SecurityException} from '../../../exception/security_exception';
 import * as bytes from '../../../subtle/bytes';
 import * as ellipticCurves from '../../../subtle/elliptic_curves';
 import {randBytes} from '../../../subtle/random';
@@ -69,7 +70,7 @@ describe('NistCurvesHpkeKemPrivateKey', () => {
           privateKey: testInfo.senderPrivateKey,
           publicKey: randBytes(testInfo.senderPublicKey.length),
           curveType: testInfo.curveType
-        })).toBeRejectedWithError(InvalidArgumentsException);
+        })).toBeRejectedWithError(SecurityException);
       });
 
       it('ECDH curve type', async () => {
@@ -82,7 +83,7 @@ describe('NistCurvesHpkeKemPrivateKey', () => {
           privateKey: testInfo.senderPrivateKey,
           publicKey: testInfo.senderPublicKey,
           curveType: mismatchedCurveType,
-        })).toBeRejectedWithError(InvalidArgumentsException);
+        })).toBeRejectedWithError(SecurityException);
       });
 
 

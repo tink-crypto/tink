@@ -10,6 +10,7 @@
  */
 
 import {InvalidArgumentsException} from '../exception/invalid_arguments_exception';
+import {SecurityException} from '../exception/security_exception';
 
 import * as Bytes from './bytes';
 
@@ -62,7 +63,7 @@ export enum EcdsaSignatureEncodingType {
  */
 export function ecdsaDer2Ieee(der: Uint8Array, ieeeLength: number): Uint8Array {
   if (!isValidDerEcdsaSignature(der)) {
-    throw new InvalidArgumentsException('invalid DER signature');
+    throw new SecurityException('invalid DER signature');
   }
   if (!Number.isInteger(ieeeLength) || ieeeLength < 0) {
     throw new InvalidArgumentsException(
@@ -113,7 +114,7 @@ export function ecdsaDer2Ieee(der: Uint8Array, ieeeLength: number): Uint8Array {
  */
 export function ecdsaIeee2Der(ieee: Uint8Array): Uint8Array {
   if (ieee.length % 2 != 0 || ieee.length == 0 || ieee.length > 132) {
-    throw new InvalidArgumentsException(
+    throw new SecurityException(
         'Invalid IEEE P1363 signature encoding. Length: ' + ieee.length);
   }
   const r = toUnsignedBigNum(ieee.subarray(0, ieee.length / 2));
@@ -440,7 +441,7 @@ export function pointEncode(
       return result;
     }
     default:
-      throw new InvalidArgumentsException('invalid format');
+      throw new SecurityException('invalid format');
   }
 }
 
@@ -552,8 +553,7 @@ function modSqrt(x: bigint, p: bigint): bigint {
     const q = (p + BigInt(1)) >> BigInt(2);
     const squareRoot = modPow(base, q, p);
     if ((squareRoot * squareRoot) % p !== base) {
-      throw new InvalidArgumentsException(
-          'could not find a modular square root');
+      throw new SecurityException('could not find a modular square root');
     }
     return squareRoot;
   }
@@ -589,7 +589,7 @@ export function pointDecode(
   switch (format) {
     case PointFormatType.UNCOMPRESSED: {
       if (point.length !== 1 + 2 * fieldSize || point[0] !== 4) {
-        throw new InvalidArgumentsException('invalid point');
+        throw new SecurityException('invalid point');
       }
       const result = ({
         'kty': 'EC',
@@ -608,7 +608,7 @@ export function pointDecode(
     }
     case PointFormatType.DO_NOT_USE_CRUNCHY_UNCOMPRESSED: {
       if (point.length !== 2 * fieldSize) {
-        throw new InvalidArgumentsException('invalid point');
+        throw new SecurityException('invalid point');
       }
       const result = ({
         'kty': 'EC',
@@ -624,17 +624,16 @@ export function pointDecode(
     }
     case PointFormatType.COMPRESSED: {
       if (point.length !== 1 + fieldSize) {
-        throw new InvalidArgumentsException(
-            'compressed point has wrong length');
+        throw new SecurityException('compressed point has wrong length');
       }
       if (point[0] !== 2 && point[0] !== 3) {
-        throw new InvalidArgumentsException('invalid format');
+        throw new SecurityException('invalid format');
       }
       const lsb = (point[0] === 3); // point[0] must be 2 (false) or 3 (true).
       const x = byteArrayToInteger(point.subarray(1, point.length));
       const p = getModulus(curveFromString(curve));
       if (x < BigInt(0) || x >= p) {
-        throw new InvalidArgumentsException('x is out of range');
+        throw new SecurityException('x is out of range');
       }
       const y = getY(x, lsb, curve);
       const result : JsonWebKey = {
@@ -647,7 +646,7 @@ export function pointDecode(
       return result;
     }
     default:
-      throw new InvalidArgumentsException('invalid format');
+      throw new SecurityException('invalid format');
   }
 }
 
