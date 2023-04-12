@@ -94,7 +94,7 @@ TEST_F(SerializeKeysetToProtoKeysetFormatTest, SerializeAndParseSingleKey) {
   ASSERT_THAT(handle->size(), Eq(1));
   ASSERT_THAT(parsed_handle->size(), Eq(1));
 
-  EXPECT_TRUE((*handle)[0].GetKey() == (*parsed_handle)[0].GetKey());
+  EXPECT_TRUE(*(*handle)[0].GetKey() == *(*parsed_handle)[0].GetKey());
   EXPECT_TRUE((*handle)[0].GetId() == (*parsed_handle)[0].GetId());
   EXPECT_TRUE((*handle)[0].GetStatus() == (*parsed_handle)[0].GetStatus());
 }
@@ -129,15 +129,15 @@ TEST_F(SerializeKeysetToProtoKeysetFormatTest, SerializeAndParseMultipleKeys) {
   ASSERT_THAT(handle->size(), Eq(3));
   ASSERT_THAT(parsed_handle->size(), Eq(3));
 
-  EXPECT_TRUE((*handle)[0].GetKey() == (*parsed_handle)[0].GetKey());
+  EXPECT_TRUE(*(*handle)[0].GetKey() == *(*parsed_handle)[0].GetKey());
   EXPECT_TRUE((*handle)[0].GetId() == (*parsed_handle)[0].GetId());
   EXPECT_TRUE((*handle)[0].GetStatus() == (*parsed_handle)[0].GetStatus());
 
-  EXPECT_TRUE((*handle)[1].GetKey() == (*parsed_handle)[1].GetKey());
+  EXPECT_TRUE(*(*handle)[1].GetKey() == *(*parsed_handle)[1].GetKey());
   EXPECT_TRUE((*handle)[1].GetId() == (*parsed_handle)[1].GetId());
   EXPECT_TRUE((*handle)[1].GetStatus() == (*parsed_handle)[1].GetStatus());
 
-  EXPECT_TRUE((*handle)[2].GetKey() == (*parsed_handle)[2].GetKey());
+  EXPECT_TRUE(*(*handle)[2].GetKey() == *(*parsed_handle)[2].GetKey());
   EXPECT_TRUE((*handle)[2].GetId() == (*parsed_handle)[2].GetId());
   EXPECT_TRUE((*handle)[2].GetStatus() == (*parsed_handle)[2].GetStatus());
 }
@@ -251,10 +251,11 @@ TEST_F(SerializeKeysetToProtoKeysetFormatTest, SerializeAndParsePublicKey) {
   ASSERT_THAT(parsed_handle3->size(), Eq(1));
   ASSERT_THAT(parsed_handle4->size(), Eq(1));
 
-  EXPECT_TRUE((**public_handle)[0].GetKey() == (*parsed_handle1)[0].GetKey());
-  EXPECT_TRUE((**public_handle)[0].GetKey() == (*parsed_handle2)[0].GetKey());
-  EXPECT_TRUE((**public_handle)[0].GetKey() == (*parsed_handle3)[0].GetKey());
-  EXPECT_TRUE((**public_handle)[0].GetKey() == (*parsed_handle4)[0].GetKey());
+  // TODO(b/277791403): Replace with KeysetHandle::Entry equality checks.
+  EXPECT_TRUE(*(**public_handle)[0].GetKey() == *(*parsed_handle1)[0].GetKey());
+  EXPECT_TRUE(*(**public_handle)[0].GetKey() == *(*parsed_handle2)[0].GetKey());
+  EXPECT_TRUE(*(**public_handle)[0].GetKey() == *(*parsed_handle3)[0].GetKey());
+  EXPECT_TRUE(*(**public_handle)[0].GetKey() == *(*parsed_handle4)[0].GetKey());
 
   EXPECT_TRUE((**public_handle)[0].GetId() == (*parsed_handle1)[0].GetId());
   EXPECT_TRUE((**public_handle)[0].GetId() == (*parsed_handle2)[0].GetId());

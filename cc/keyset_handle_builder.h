@@ -57,7 +57,7 @@ class KeysetHandleBuilder {
 
     // Creates new KeysetHandleBuilder::Entry from a given `key`. Also, sets
     // key `status` and whether or not the key `is_primary`.
-    static Entry CreateFromKey(std::unique_ptr<Key> key, KeyStatus status,
+    static Entry CreateFromKey(std::shared_ptr<const Key> key, KeyStatus status,
                                bool is_primary);
 
     template <typename CopyableKey>
@@ -70,7 +70,7 @@ class KeysetHandleBuilder {
     // Creates new KeysetHandleBuilder::Entry from given `parameters`. Also,
     // sets key `status` and whether or not the key `is_primary`. If `id`
     // does not have a value, then the key will be assigned a random id.
-    static Entry CreateFromParams(std::unique_ptr<Parameters> parameters,
+    static Entry CreateFromParams(std::shared_ptr<const Parameters> parameters,
                                   KeyStatus status, bool is_primary,
                                   absl::optional<int> id = absl::nullopt);
 

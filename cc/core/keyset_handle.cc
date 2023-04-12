@@ -15,10 +15,11 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include "tink/keyset_handle.h"
 
-#include <iostream>
+#include <cstdint>
 #include <memory>
 #include <string>
 #include <utility>
+#include <vector>
 
 #include "absl/container/flat_hash_map.h"
 #include "absl/log/check.h"
@@ -179,29 +180,57 @@ KeysetHandle::Entry KeysetHandle::operator[](int index) const {
   CHECK(index >= 0 && index < size())
       << "Invalid index " << index << " for keyset of size " << size();
 
+  if (!entries_.empty() && entries_.size() > index) {
+    return *entries_[index];
+  }
+  // Since `entries_` has not been populated, the entry must be created on
+  // demand from the key proto entry at `index` in `keyset_`. This special
+  // case will no longer be necessary after `keyset_` has been removed from the
+  // `KeysetHandle` class.
+  //
+  // TODO(b/277792846): Remove after transition to rely solely on
+  // `KeysetHandle::Entry`.
+  return CreateEntryAt(index);
+}
+
+KeysetHandle::Entry KeysetHandle::CreateEntryAt(int index) const {
+  CHECK(index >= 0 && index < size())
+      << "Invalid index " << index << " for keyset of size " << size();
+
   util::Status validation = ValidateAt(index);
   CHECK_OK(validation);
 
-  const Keyset::Key& proto_key = get_keyset().key(index);
-  int id = proto_key.key_id();
+  Keyset keyset = get_keyset();
+  util::StatusOr<Entry> entry =
+      CreateEntry(keyset.key(index), keyset.primary_key_id());
+  // Status should be OK since this keyset handle has been validated.
+  CHECK_OK(entry.status());
+  return *entry;
+}
 
+util::StatusOr<KeysetHandle::Entry> KeysetHandle::CreateEntry(
+    const Keyset::Key& proto_key, uint32_t primary_key_id) {
   util::StatusOr<internal::ProtoKeySerialization> serialization =
       ToProtoKeySerialization(proto_key);
-  // Status should be OK since this keyset handle has been validated.
-  CHECK_OK(serialization.status());
+  if (!serialization.ok()) {
+    return serialization.status();
+  }
 
-  util::StatusOr<std::unique_ptr<Key>> key =
+  util::StatusOr<std::shared_ptr<const Key>> key =
       internal::MutableSerializationRegistry::GlobalInstance()
           .ParseKeyWithLegacyFallback(*serialization);
-  CHECK_OK(key.status());
+  if (!key.ok()) {
+    return key.status();
+  }
 
   util::StatusOr<KeyStatus> key_status =
       internal::FromKeyStatusType(proto_key.status());
-  // Status should be OK since this keyset handle has been validated.
-  CHECK_OK(key_status.status());
+  if (!key_status.ok()) {
+    return key_status.status();
+  }
 
-  return Entry(*std::move(key), *key_status, id,
-               id == get_keyset().primary_key_id());
+  return Entry(*std::move(key), *key_status, proto_key.key_id(),
+               proto_key.key_id() == primary_key_id);
 }
 
 util::StatusOr<std::unique_ptr<KeysetHandle>> KeysetHandle::Read(
@@ -233,8 +262,17 @@ KeysetHandle::ReadWithAssociatedData(
                      "Error decrypting encrypted keyset: %s",
                      keyset_result.status().message());
   }
-  return absl::WrapUnique(
-      new KeysetHandle(*std::move(keyset_result), monitoring_annotations));
+  util::StatusOr<std::vector<std::shared_ptr<const Entry>>> entries =
+      GetEntriesFromKeyset(**keyset_result);
+  if (!entries.ok()) {
+    return entries.status();
+  }
+  if (entries->size() != (*keyset_result)->key_size()) {
+    return util::Status(absl::StatusCode::kInternal,
+                        "Error converting keyset proto into key entries.");
+  }
+  return absl::WrapUnique(new KeysetHandle(*std::move(keyset_result), *entries,
+                                           monitoring_annotations));
 }
 
 util::StatusOr<std::unique_ptr<KeysetHandle>> KeysetHandle::ReadNoSecret(
@@ -250,8 +288,17 @@ util::StatusOr<std::unique_ptr<KeysetHandle>> KeysetHandle::ReadNoSecret(
   if (!validation.ok()) {
     return validation;
   }
+  util::StatusOr<std::vector<std::shared_ptr<const Entry>>> entries =
+      GetEntriesFromKeyset(keyset);
+  if (!entries.ok()) {
+    return entries.status();
+  }
+  if (entries->size() != keyset.key_size()) {
+    return util::Status(absl::StatusCode::kInternal,
+                        "Error converting keyset proto into key entries.");
+  }
   return absl::WrapUnique(
-      new KeysetHandle(std::move(keyset), monitoring_annotations));
+      new KeysetHandle(std::move(keyset), *entries, monitoring_annotations));
 }
 
 util::Status KeysetHandle::Write(KeysetWriter* writer,
@@ -325,8 +372,17 @@ KeysetHandle::GetPublicKeysetHandle() const {
     public_keyset->add_key()->Swap(public_key_result.value().get());
   }
   public_keyset->set_primary_key_id(get_keyset().primary_key_id());
+  util::StatusOr<std::vector<std::shared_ptr<const Entry>>> entries =
+      GetEntriesFromKeyset(*public_keyset);
+  if (!entries.ok()) {
+    return entries.status();
+  }
+  if (entries->size() != public_keyset->key_size()) {
+    return util::Status(absl::StatusCode::kInternal,
+                        "Error converting keyset proto into key entries.");
+  }
   std::unique_ptr<KeysetHandle> handle(
-      new KeysetHandle(std::move(public_keyset)));
+      new KeysetHandle(std::move(public_keyset), *entries));
   return std::move(handle);
 }
 
@@ -355,19 +411,36 @@ crypto::tink::util::StatusOr<uint32_t> KeysetHandle::AddToKeyset(
 
 crypto::tink::util::StatusOr<uint32_t> KeysetHandle::AddKey(
     const google::crypto::tink::KeyTemplate& key_template, bool as_primary) {
-  return AddToKeyset(key_template, as_primary, &keyset_);
+  util::StatusOr<uint32_t> id = AddToKeyset(key_template, as_primary, &keyset_);
+  if (!id.ok()) {
+    return id.status();
+  }
+  util::StatusOr<const Entry> entry = CreateEntry(
+      keyset_.key(keyset_.key_size() - 1), keyset_.primary_key_id());
+  if (!entry.ok()) {
+    return entry.status();
+  }
+  entries_.push_back(std::make_shared<const Entry>(*entry));
+  return *id;
 }
 
 KeysetInfo KeysetHandle::GetKeysetInfo() const {
   return KeysetInfoFromKeyset(get_keyset());
 }
 
-KeysetHandle::KeysetHandle(Keyset keyset) : keyset_(std::move(keyset)) {}
-
-KeysetHandle::KeysetHandle(std::unique_ptr<Keyset> keyset)
-    : keyset_(std::move(*keyset)) {}
-
-const Keyset& KeysetHandle::get_keyset() const { return keyset_; }
+util::StatusOr<std::vector<std::shared_ptr<const KeysetHandle::Entry>>>
+KeysetHandle::GetEntriesFromKeyset(const Keyset& keyset) {
+  std::vector<std::shared_ptr<const Entry>> entries;
+  for (const Keyset::Key& key : keyset.key()) {
+    util::StatusOr<const Entry> entry =
+        CreateEntry(key, keyset.primary_key_id());
+    if (!entry.ok()) {
+      return entry.status();
+    }
+    entries.push_back(std::make_shared<const Entry>(*entry));
+  }
+  return entries;
+}
 
 }  // namespace tink
 }  // namespace crypto
