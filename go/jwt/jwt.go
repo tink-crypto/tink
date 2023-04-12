@@ -26,6 +26,17 @@ import (
 
 // A generic error returned when something went wrong before validation
 var errJwtVerification = errors.New("verification failed")
+var errJwtExpired = errors.New("token has expired")
+
+// IsExpirationErr returns true if err was returned by a JWT verification for a token
+// with a valid signature that is expired.
+//
+// Note that if the corresponding verification key has been removed from the keyset,
+// verification will not return an expiration error even if the token is expired, because
+// the expiration is only verified if the signature is valid.
+func IsExpirationErr(err error) bool {
+	return err == errJwtExpired
+}
 
 func init() {
 	if err := registry.RegisterKeyManager(new(jwtHMACKeyManager)); err != nil {

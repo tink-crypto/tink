@@ -114,7 +114,7 @@ func (v *Validator) validateTimestamps(rawJWT *RawJWT) error {
 			return err
 		}
 		if !exp.After(now.Add(-v.opts.ClockSkew)) {
-			return fmt.Errorf("token has expired")
+			return errJwtExpired
 		}
 	}
 	if rawJWT.HasNotBefore() {

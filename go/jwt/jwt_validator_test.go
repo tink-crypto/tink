@@ -276,6 +276,58 @@ func TestValidationFailures(t *testing.T) {
 	}
 }
 
+func TestExpiredTokenValidationReturnsExpiredErr(t *testing.T) {
+	tokenOpts := &jwt.RawJWTOptions{
+		ExpiresAt: refTime(100),
+	}
+	expiredToken, err := jwt.NewRawJWT(tokenOpts)
+	if err != nil {
+		t.Fatalf("jwt.NewRawJWT(tokenOpts) err = %v, want nil", err)
+	}
+	validatorOpts := &jwt.ValidatorOpts{
+		FixedNow: time.Unix(500, 0),
+	}
+	validator, err := jwt.NewValidator(validatorOpts)
+	if err != nil {
+		t.Fatalf("jwt.NewValidator(validatorOpts) err = %v, want nil", err)
+	}
+
+	validationErr := validator.Validate(expiredToken)
+	if validationErr == nil {
+		t.Errorf("validator.Validate(expiredToken) err = nil, want error")
+	}
+	if !jwt.IsExpirationErr(validationErr) {
+		t.Errorf("jwt.IsExpirationErr(validationErr) = false, want true")
+	}
+}
+
+func TestExpirationGetsValidatedFirst(t *testing.T) {
+	tokenOpts := &jwt.RawJWTOptions{
+		ExpiresAt: refTime(100),
+		Audience:  refString("invalidAudience"),
+	}
+	expiredTokenWithInvalidAudience, err := jwt.NewRawJWT(tokenOpts)
+	if err != nil {
+		t.Fatalf("jwt.NewRawJWT(tokenOpts) err = %v, want nil", err)
+	}
+	validatorOpts := &jwt.ValidatorOpts{
+		ExpectedAudiences: refString("audience"),
+		FixedNow:          time.Unix(500, 0),
+	}
+	validator, err := jwt.NewValidator(validatorOpts)
+	if err != nil {
+		t.Fatalf("jwt.NewValidator(validatorOpts) err = %v, want nil", err)
+	}
+
+	validationErr := validator.Validate(expiredTokenWithInvalidAudience)
+	if validationErr == nil {
+		t.Errorf("validator.Validate(expiredTokenWithInvalidAudience) err = nil, want error")
+	}
+	if !jwt.IsExpirationErr(validationErr) {
+		t.Errorf("jwt.IsExpirationErr(validationErr) = false, want true")
+	}
+}
+
 func TestValidationSuccess(t *testing.T) {
 	for _, tc := range []validationTestCase{
 		{
