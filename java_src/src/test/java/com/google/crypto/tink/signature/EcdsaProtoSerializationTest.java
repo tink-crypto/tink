@@ -87,9 +87,7 @@ public final class EcdsaProtoSerializationTest {
     ProtoParametersSerialization serialized =
         registry.serializeParameters(parameters, ProtoParametersSerialization.class);
     assertEqualWhenValueParsed(
-        com.google.crypto.tink.proto.HmacKeyFormat.parser(),
-        serialized,
-        serialization);
+        com.google.crypto.tink.proto.EcdsaKeyFormat.parser(), serialized, serialization);
 
     Parameters parsed = registry.parseParameters(serialization);
     assertThat(parsed).isEqualTo(parameters);
@@ -118,9 +116,7 @@ public final class EcdsaProtoSerializationTest {
     ProtoParametersSerialization serialized =
         registry.serializeParameters(parameters, ProtoParametersSerialization.class);
     assertEqualWhenValueParsed(
-        com.google.crypto.tink.proto.HmacKeyFormat.parser(),
-        serialized,
-        serialization);
+        com.google.crypto.tink.proto.EcdsaKeyFormat.parser(), serialized, serialization);
 
     Parameters parsed = registry.parseParameters(serialization);
     assertThat(parsed).isEqualTo(parameters);
@@ -149,9 +145,7 @@ public final class EcdsaProtoSerializationTest {
     ProtoParametersSerialization serialized =
         registry.serializeParameters(parameters, ProtoParametersSerialization.class);
     assertEqualWhenValueParsed(
-        com.google.crypto.tink.proto.HmacKeyFormat.parser(),
-        serialized,
-        serialization);
+        com.google.crypto.tink.proto.EcdsaKeyFormat.parser(), serialized, serialization);
 
     Parameters parsed = registry.parseParameters(serialization);
     assertThat(parsed).isEqualTo(parameters);
@@ -180,9 +174,7 @@ public final class EcdsaProtoSerializationTest {
     ProtoParametersSerialization serialized =
         registry.serializeParameters(parameters, ProtoParametersSerialization.class);
     assertEqualWhenValueParsed(
-        com.google.crypto.tink.proto.HmacKeyFormat.parser(),
-        serialized,
-        serialization);
+        com.google.crypto.tink.proto.EcdsaKeyFormat.parser(), serialized, serialization);
 
     Parameters parsed = registry.parseParameters(serialization);
     assertThat(parsed).isEqualTo(parameters);
