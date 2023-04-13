@@ -417,7 +417,6 @@ public final class EcdsaProtoSerializationTest {
             /* idRequirement= */ 123);
 
     Key parsed = registry.parseKey(serialization, InsecureSecretKeyAccess.get());
-    System.out.println(parsed);
     assertThat(parsed.equalsKey(privateKey)).isTrue();
 
     ProtoKeySerialization serialized =
