@@ -67,7 +67,7 @@ KeysetHandleBuilder::KeysetHandleBuilder(const KeysetHandle& handle) {
 }
 
 KeysetHandleBuilder::Entry KeysetHandleBuilder::Entry::CreateFromKey(
-    std::shared_ptr<const Key> key, KeyStatus status, bool is_primary) {
+    std::unique_ptr<Key> key, KeyStatus status, bool is_primary) {
   absl::optional<int> id_requirement = key->GetIdRequirement();
   auto imported_entry = absl::make_unique<internal::KeyEntry>(std::move(key));
   KeysetHandleBuilder::Entry entry(std::move(imported_entry));
@@ -76,8 +76,8 @@ KeysetHandleBuilder::Entry KeysetHandleBuilder::Entry::CreateFromKey(
 }
 
 KeysetHandleBuilder::Entry KeysetHandleBuilder::Entry::CreateFromParams(
-    std::shared_ptr<const Parameters> parameters, KeyStatus status,
-    bool is_primary, absl::optional<int> id) {
+    std::unique_ptr<Parameters> parameters, KeyStatus status, bool is_primary,
+    absl::optional<int> id) {
   auto generated_entry =
       absl::make_unique<internal::ParametersEntry>(std::move(parameters));
   KeysetHandleBuilder::Entry entry(std::move(generated_entry));
@@ -189,9 +189,7 @@ util::StatusOr<KeysetHandle> KeysetHandleBuilder::Build() {
                         "No primary set in this keyset.");
   }
   keyset.set_primary_key_id(*primary_id);
-  util::StatusOr<std::vector<std::shared_ptr<const KeysetHandle::Entry>>>
-      entries = KeysetHandle::GetEntriesFromKeyset(keyset);
-  return KeysetHandle(keyset, *std::move(entries));
+  return KeysetHandle(keyset);
 }
 
 }  // namespace tink

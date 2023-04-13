@@ -97,13 +97,13 @@ class KeyEntry : public KeysetHandleBuilderEntry {
   KeyEntry(const KeyEntry& other) = delete;
   KeyEntry& operator=(const KeyEntry& other) = delete;
 
-  explicit KeyEntry(std::shared_ptr<const Key> key) : key_(std::move(key)) {}
+  explicit KeyEntry(std::unique_ptr<Key> key) : key_(std::move(key)) {}
 
   crypto::tink::util::StatusOr<google::crypto::tink::Keyset::Key>
   CreateKeysetKey(int id) override;
 
  private:
-  std::shared_ptr<const Key> key_;
+  std::unique_ptr<Key> key_;
 };
 
 // Internal keyset handle builder entry constructed from a `Parameters` object.
@@ -115,14 +115,14 @@ class ParametersEntry : public KeysetHandleBuilderEntry {
   ParametersEntry(const ParametersEntry& other) = delete;
   ParametersEntry& operator=(const ParametersEntry& other) = delete;
 
-  explicit ParametersEntry(std::shared_ptr<const Parameters> parameters)
+  explicit ParametersEntry(std::unique_ptr<Parameters> parameters)
       : parameters_(std::move(parameters)) {}
 
   crypto::tink::util::StatusOr<google::crypto::tink::Keyset::Key>
   CreateKeysetKey(int id) override;
 
  private:
-  std::shared_ptr<const Parameters> parameters_;
+  std::unique_ptr<Parameters> parameters_;
 };
 
 }  // namespace internal

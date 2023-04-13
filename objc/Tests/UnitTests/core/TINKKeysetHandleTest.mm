@@ -80,10 +80,10 @@ static Keyset *gKeyset;
   gKeyset = new Keyset();
   google::crypto::tink::Keyset::Key ccKey;
 
-  crypto::tink::test::AddTinkKey("some_key_type", 42, ccKey,
+  crypto::tink::test::AddTinkKey("some key type", 42, ccKey,
                                  google::crypto::tink::KeyStatusType::ENABLED,
                                  google::crypto::tink::KeyData::SYMMETRIC, gKeyset);
-  crypto::tink::test::AddRawKey("some_other_key_type", 711, ccKey,
+  crypto::tink::test::AddRawKey("some other key type", 711, ccKey,
                                 google::crypto::tink::KeyStatusType::ENABLED,
                                 google::crypto::tink::KeyData::SYMMETRIC, gKeyset);
   gKeyset->set_primary_key_id(42);
@@ -458,9 +458,9 @@ static Keyset *gKeyset;
 - (void)testReadNoSecret {
   auto keyset = std::make_unique<Keyset>();
   Keyset::Key key;
-  AddTinkKey("some_key_type", 42, key, KeyStatusType::ENABLED, KeyData::ASYMMETRIC_PUBLIC,
+  AddTinkKey("some key type", 42, key, KeyStatusType::ENABLED, KeyData::ASYMMETRIC_PUBLIC,
              keyset.get());
-  AddRawKey("some_other_key_type", 711, key, KeyStatusType::ENABLED, KeyData::REMOTE, keyset.get());
+  AddRawKey("some other key type", 711, key, KeyStatusType::ENABLED, KeyData::REMOTE, keyset.get());
   keyset->set_primary_key_id(42);
   NSData *serializedKeyset = TINKStringToNSData(keyset->SerializeAsString());
   NSError *error = nil;
@@ -480,7 +480,7 @@ static Keyset *gKeyset;
 - (void)testReadNoSecretFailForTypeUnknown {
   auto keyset = std::make_unique<Keyset>();
   Keyset::Key key;
-  AddTinkKey("some_key_type", 42, key, KeyStatusType::ENABLED, KeyData::UNKNOWN_KEYMATERIAL,
+  AddTinkKey("some key type", 42, key, KeyStatusType::ENABLED, KeyData::UNKNOWN_KEYMATERIAL,
              keyset.get());
   keyset->set_primary_key_id(42);
   NSData *serializedKeyset = TINKStringToNSData(keyset->SerializeAsString());
@@ -497,7 +497,7 @@ static Keyset *gKeyset;
 - (void)testReadNoSecretFailForTypeSymmetric {
   auto keyset = std::make_unique<Keyset>();
   Keyset::Key key;
-  AddTinkKey("some_key_type", 42, key, KeyStatusType::ENABLED, KeyData::SYMMETRIC, keyset.get());
+  AddTinkKey("some key type", 42, key, KeyStatusType::ENABLED, KeyData::SYMMETRIC, keyset.get());
   keyset->set_primary_key_id(42);
   NSData *serializedKeyset = TINKStringToNSData(keyset->SerializeAsString());
   NSError *error = nil;
@@ -513,7 +513,7 @@ static Keyset *gKeyset;
 - (void)testReadNoSecretFailForTypeAssymmetricPrivate {
   auto keyset = std::make_unique<Keyset>();
   Keyset::Key key;
-  AddTinkKey("some_key_type", 42, key, KeyStatusType::ENABLED, KeyData::ASYMMETRIC_PRIVATE,
+  AddTinkKey("some key type", 42, key, KeyStatusType::ENABLED, KeyData::ASYMMETRIC_PRIVATE,
              keyset.get());
   keyset->set_primary_key_id(42);
   NSData *serializedKeyset = TINKStringToNSData(keyset->SerializeAsString());
@@ -530,13 +530,13 @@ static Keyset *gKeyset;
 - (void)testReadNoSecretFailForHidden {
   auto keyset = std::make_unique<Keyset>();
   Keyset::Key key;
-  AddTinkKey("some_key_type", 42, key, KeyStatusType::ENABLED, KeyData::ASYMMETRIC_PUBLIC,
+  AddTinkKey("some key type", 42, key, KeyStatusType::ENABLED, KeyData::ASYMMETRIC_PUBLIC,
              keyset.get());
   for (int i = 0; i < 10; ++i) {
     AddTinkKey(absl::StrCat("more key type", i), i, key, KeyStatusType::ENABLED,
                KeyData::ASYMMETRIC_PUBLIC, keyset.get());
   }
-  AddRawKey("some_other_key_type", 10, key, KeyStatusType::ENABLED, KeyData::ASYMMETRIC_PRIVATE,
+  AddRawKey("some other key type", 10, key, KeyStatusType::ENABLED, KeyData::ASYMMETRIC_PRIVATE,
             keyset.get());
   for (int i = 0; i < 10; ++i) {
     AddRawKey(absl::StrCat("more key type", i + 100), i + 100, key, KeyStatusType::ENABLED,

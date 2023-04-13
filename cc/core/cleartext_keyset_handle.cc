@@ -20,7 +20,6 @@
 #include <memory>
 #include <string>
 #include <utility>
-#include <vector>
 
 #include "absl/container/flat_hash_map.h"
 #include "absl/status/status.h"
@@ -42,23 +41,14 @@ util::StatusOr<std::unique_ptr<KeysetHandle>> CleartextKeysetHandle::Read(
     std::unique_ptr<KeysetReader> reader,
     const absl::flat_hash_map<std::string, std::string>&
         monitoring_annotations) {
-  util::StatusOr<std::unique_ptr<Keyset>> keyset_result = reader->Read();
+  auto keyset_result = reader->Read();
   if (!keyset_result.ok()) {
     return ToStatusF(absl::StatusCode::kInvalidArgument,
                      "Error reading keyset data: %s",
                      keyset_result.status().message());
   }
-  util::StatusOr<std::vector<std::shared_ptr<const KeysetHandle::Entry>>>
-      entries = KeysetHandle::GetEntriesFromKeyset(**keyset_result);
-  if (!entries.ok()) {
-    return entries.status();
-  }
-  if (entries->size() != (*keyset_result)->key_size()) {
-    return util::Status(absl::StatusCode::kInternal,
-                        "Error converting keyset proto into key entries.");
-  }
   std::unique_ptr<KeysetHandle> handle(new KeysetHandle(
-      std::move(keyset_result.value()), *entries, monitoring_annotations));
+      std::move(keyset_result.value()), monitoring_annotations));
   return std::move(handle);
 }
 

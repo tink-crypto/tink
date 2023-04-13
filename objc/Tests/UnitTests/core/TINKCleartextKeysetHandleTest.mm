@@ -51,10 +51,10 @@ using ::crypto::tink::util::StatusOr;
 - (void)testReadValidKeyset {
   google::crypto::tink::Keyset keyset;
   google::crypto::tink::Keyset::Key key;
-  crypto::tink::test::AddTinkKey("some_key_type", 42, key,
+  crypto::tink::test::AddTinkKey("some key type", 42, key,
                                  google::crypto::tink::KeyStatusType::ENABLED,
                                  google::crypto::tink::KeyData::SYMMETRIC, &keyset);
-  crypto::tink::test::AddRawKey("some_other_key_type", 711, key,
+  crypto::tink::test::AddRawKey("some other key type", 711, key,
                                 google::crypto::tink::KeyStatusType::ENABLED,
                                 google::crypto::tink::KeyData::SYMMETRIC, &keyset);
   keyset.set_primary_key_id(42);
@@ -106,10 +106,10 @@ using ::crypto::tink::util::StatusOr;
 - (void)testSerializeKeyset {
   google::crypto::tink::Keyset keyset;
   google::crypto::tink::Keyset::Key key;
-  crypto::tink::test::AddTinkKey("some_key_type", 42, key,
+  crypto::tink::test::AddTinkKey("some key type", 42, key,
                                  google::crypto::tink::KeyStatusType::ENABLED,
                                  google::crypto::tink::KeyData::SYMMETRIC, &keyset);
-  crypto::tink::test::AddRawKey("some_other_key_type", 711, key,
+  crypto::tink::test::AddRawKey("some other key type", 711, key,
                                 google::crypto::tink::KeyStatusType::ENABLED,
                                 google::crypto::tink::KeyData::SYMMETRIC, &keyset);
   keyset.set_primary_key_id(42);
