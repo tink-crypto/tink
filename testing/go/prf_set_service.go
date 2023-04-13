@@ -20,7 +20,7 @@ import (
 	"context"
 
 	"github.com/google/tink/go/prf"
-	pb "github.com/google/tink/testing/go/proto/testing_api_go_grpc"
+	pb "github.com/google/tink/testing/go/protos/testing_api_go_grpc"
 )
 
 // PrfSetService implements the PrfSet testing service.

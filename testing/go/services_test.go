@@ -34,7 +34,7 @@ import (
 	"github.com/google/tink/go/signature"
 	"github.com/google/tink/go/streamingaead"
 	"github.com/google/tink/testing/go/services"
-	pb "github.com/google/tink/testing/go/proto/testing_api_go_grpc"
+	pb "github.com/google/tink/testing/go/protos/testing_api_go_grpc"
 )
 
 func genKeyset(ctx context.Context, keysetService *services.KeysetService, template []byte) ([]byte, error) {

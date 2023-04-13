@@ -32,7 +32,7 @@ import (
 	"github.com/google/tink/go/integration/gcpkms"
 	"github.com/google/tink/go/testing/fakekms"
 	"github.com/google/tink/testing/go/services"
-	pbgrpc "github.com/google/tink/testing/go/proto/testing_api_go_grpc"
+	pbgrpc "github.com/google/tink/testing/go/protos/testing_api_go_grpc"
 )
 
 var (

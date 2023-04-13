@@ -28,8 +28,8 @@ from tink import jwt
 from google.protobuf import duration_pb2
 from google.protobuf import timestamp_pb2
 
-from proto import testing_api_pb2
-from proto import testing_api_pb2_grpc
+from protos import testing_api_pb2
+from protos import testing_api_pb2_grpc
 
 
 def _to_timestamp_tuple(t: datetime.datetime) -> Tuple[int, int]:

@@ -20,7 +20,7 @@ import (
 	"context"
 
 	"github.com/google/tink/go/mac"
-	pb "github.com/google/tink/testing/go/proto/testing_api_go_grpc"
+	pb "github.com/google/tink/testing/go/protos/testing_api_go_grpc"
 )
 
 // MacService implements the MAC testing service.

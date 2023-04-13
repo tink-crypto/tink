@@ -25,8 +25,8 @@ import tink
 
 from tink.proto import tink_pb2
 from util import _primitives
-from proto import testing_api_pb2
-from proto import testing_api_pb2_grpc
+from protos import testing_api_pb2
+from protos import testing_api_pb2_grpc
 
 P = TypeVar('P')
 

@@ -29,7 +29,7 @@ from tink import signature
 from tink import streaming_aead
 
 from tink.testing import fake_kms
-from proto import testing_api_pb2_grpc
+from protos import testing_api_pb2_grpc
 import jwt_service
 import services
 
