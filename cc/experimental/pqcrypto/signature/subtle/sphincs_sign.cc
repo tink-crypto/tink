@@ -52,7 +52,7 @@ util::StatusOr<std::unique_ptr<PublicKeySign>> SphincsSign::New(
 }
 
 util::StatusOr<std::string> SphincsSign::Sign(absl::string_view data) const {
-  util::StatusOr<int32> key_size_index =
+  util::StatusOr<int32_t> key_size_index =
       SphincsKeySizeToIndex(key_.GetKey().size());
   if (!key_size_index.ok()) {
     return key_size_index.status();

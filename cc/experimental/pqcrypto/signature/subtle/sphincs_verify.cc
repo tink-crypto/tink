@@ -55,7 +55,7 @@ util::StatusOr<std::unique_ptr<PublicKeyVerify>> SphincsVerify::New(
 util::Status SphincsVerify::Verify(absl::string_view signature,
                                    absl::string_view data) const {
   SphincsParamsPqclean params = key_.GetParams();
-  util::StatusOr<int32> key_size_index =
+  util::StatusOr<int32_t> key_size_index =
       SphincsKeySizeToIndex(params.private_key_size);
   if (!key_size_index.ok()) {
     return key_size_index.status();
