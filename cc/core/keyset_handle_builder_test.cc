@@ -51,6 +51,7 @@ namespace {
 
 using ::crypto::tink::test::AddTinkKey;
 using ::crypto::tink::test::IsOk;
+using ::crypto::tink::test::IsOkAndHolds;
 using ::crypto::tink::test::StatusIs;
 using ::google::crypto::tink::AesCmacParams;
 using ::google::crypto::tink::KeyData;
@@ -101,7 +102,7 @@ TEST_F(KeysetHandleBuilderTest, BuildWithSingleKey) {
   EXPECT_THAT((*handle)[0].GetStatus(), Eq(KeyStatus::kEnabled));
   EXPECT_THAT((*handle)[0].GetId(), Eq(123));
   EXPECT_THAT((*handle)[0].IsPrimary(), IsTrue());
-  EXPECT_THAT((*handle)[0].GetKey().GetParameters().HasIdRequirement(),
+  EXPECT_THAT((*handle)[0].GetKey()->GetParameters().HasIdRequirement(),
               IsTrue());
 }
 
@@ -137,19 +138,19 @@ TEST_F(KeysetHandleBuilderTest, BuildWithMultipleKeys) {
   EXPECT_THAT((*handle)[0].GetStatus(), Eq(KeyStatus::kDestroyed));
   EXPECT_THAT((*handle)[0].GetId(), Eq(123));
   EXPECT_THAT((*handle)[0].IsPrimary(), IsFalse());
-  EXPECT_THAT((*handle)[0].GetKey().GetParameters().HasIdRequirement(),
+  EXPECT_THAT((*handle)[0].GetKey()->GetParameters().HasIdRequirement(),
               IsTrue());
 
   EXPECT_THAT((*handle)[1].GetStatus(), Eq(KeyStatus::kEnabled));
   EXPECT_THAT((*handle)[1].GetId(), Eq(456));
   EXPECT_THAT((*handle)[1].IsPrimary(), IsTrue());
-  EXPECT_THAT((*handle)[1].GetKey().GetParameters().HasIdRequirement(),
+  EXPECT_THAT((*handle)[1].GetKey()->GetParameters().HasIdRequirement(),
               IsTrue());
 
   EXPECT_THAT((*handle)[2].GetStatus(), Eq(KeyStatus::kDisabled));
   EXPECT_THAT((*handle)[2].GetId(), Eq(789));
   EXPECT_THAT((*handle)[2].IsPrimary(), IsFalse());
-  EXPECT_THAT((*handle)[2].GetKey().GetParameters().HasIdRequirement(),
+  EXPECT_THAT((*handle)[2].GetKey()->GetParameters().HasIdRequirement(),
               IsTrue());
 }
 
@@ -188,17 +189,20 @@ TEST_F(KeysetHandleBuilderTest, BuildCopy) {
   EXPECT_THAT((*copy)[0].GetStatus(), Eq(KeyStatus::kDestroyed));
   EXPECT_THAT((*copy)[0].GetId(), Eq(123));
   EXPECT_THAT((*copy)[0].IsPrimary(), IsFalse());
-  EXPECT_THAT((*copy)[0].GetKey().GetParameters().HasIdRequirement(), IsTrue());
+  EXPECT_THAT((*copy)[0].GetKey()->GetParameters().HasIdRequirement(),
+              IsTrue());
 
   EXPECT_THAT((*copy)[1].GetStatus(), Eq(KeyStatus::kEnabled));
   EXPECT_THAT((*copy)[1].GetId(), Eq(456));
   EXPECT_THAT((*copy)[1].IsPrimary(), IsTrue());
-  EXPECT_THAT((*copy)[1].GetKey().GetParameters().HasIdRequirement(), IsTrue());
+  EXPECT_THAT((*copy)[1].GetKey()->GetParameters().HasIdRequirement(),
+              IsTrue());
 
   EXPECT_THAT((*copy)[2].GetStatus(), Eq(KeyStatus::kDisabled));
   EXPECT_THAT((*copy)[2].GetId(), Eq(789));
   EXPECT_THAT((*copy)[2].IsPrimary(), IsFalse());
-  EXPECT_THAT((*copy)[2].GetKey().GetParameters().HasIdRequirement(), IsTrue());
+  EXPECT_THAT((*copy)[2].GetKey()->GetParameters().HasIdRequirement(),
+              IsTrue());
 }
 
 TEST_F(KeysetHandleBuilderTest, IsPrimary) {
@@ -387,7 +391,7 @@ TEST_F(KeysetHandleBuilderTest, RemoveEntry) {
   EXPECT_THAT((*handle1)[0].GetStatus(), Eq(KeyStatus::kEnabled));
   EXPECT_THAT((*handle1)[0].GetId(), Eq(456));
   EXPECT_THAT((*handle1)[0].IsPrimary(), IsTrue());
-  EXPECT_THAT((*handle1)[0].GetKey().GetParameters().HasIdRequirement(),
+  EXPECT_THAT((*handle1)[0].GetKey()->GetParameters().HasIdRequirement(),
               IsTrue());
 }
 
@@ -779,6 +783,55 @@ TEST_F(KeysetHandleBuilderTest, BuildTwiceFails) {
               StatusIs(absl::StatusCode::kFailedPrecondition));
 }
 
+TEST_F(KeysetHandleBuilderTest, UsePrimitivesFromSplitKeyset) {
+  util::StatusOr<AesCmacParameters> params = AesCmacParameters::Create(
+      /*key_size_in_bytes=*/32, /*cryptographic_tag_size_in_bytes=*/16,
+      AesCmacParameters::Variant::kTink);
+  ASSERT_THAT(params, IsOk());
+
+  util::StatusOr<KeysetHandle> handle =
+      KeysetHandleBuilder()
+          .AddEntry(KeysetHandleBuilder::Entry::CreateFromCopyableParams(
+              *params, KeyStatus::kEnabled, /*is_primary=*/false))
+          .AddEntry(KeysetHandleBuilder::Entry::CreateFromCopyableParams(
+              *params, KeyStatus::kEnabled, /*is_primary=*/true))
+          .Build();
+  ASSERT_THAT(handle, IsOkAndHolds(SizeIs(2)));
+
+  util::StatusOr<KeysetHandle> handle0 =
+      KeysetHandleBuilder()
+          .AddEntry(KeysetHandleBuilder::Entry::CreateFromKey(
+              (*handle)[0].GetKey(), KeyStatus::kEnabled,
+              /*is_primary=*/true))
+          .Build();
+  ASSERT_THAT(handle0, IsOkAndHolds(SizeIs(1)));
+  ASSERT_THAT((*handle)[0].GetId(), Eq((*handle0)[0].GetId()));
+
+  util::StatusOr<KeysetHandle> handle1 =
+      KeysetHandleBuilder()
+          .AddEntry(KeysetHandleBuilder::Entry::CreateFromKey(
+              (*handle)[1].GetKey(), KeyStatus::kEnabled,
+              /*is_primary=*/true))
+          .Build();
+  ASSERT_THAT(handle1, IsOkAndHolds(SizeIs(1)));
+  ASSERT_THAT((*handle)[1].GetId(), Eq((*handle1)[0].GetId()));
+
+  util::StatusOr<std::unique_ptr<Mac>> mac0 = handle0->GetPrimitive<Mac>();
+  ASSERT_THAT(mac0.status(), IsOk());
+  util::StatusOr<std::string> tag0 = (*mac0)->ComputeMac("some input");
+  ASSERT_THAT(tag0.status(), IsOk());
+
+  util::StatusOr<std::unique_ptr<Mac>> mac1 = handle1->GetPrimitive<Mac>();
+  ASSERT_THAT(mac1.status(), IsOk());
+  util::StatusOr<std::string> tag1 = (*mac1)->ComputeMac("some other input");
+  ASSERT_THAT(tag1.status(), IsOk());
+
+  // Use original keyset to verify tags computed from new keysets.
+  util::StatusOr<std::unique_ptr<Mac>> mac = handle->GetPrimitive<Mac>();
+  ASSERT_THAT(mac.status(), IsOk());
+  EXPECT_THAT((*mac)->VerifyMac(*tag0, "some input"), IsOk());
+  EXPECT_THAT((*mac)->VerifyMac(*tag1, "some other input"), IsOk());
+}
 
 }  // namespace
 }  // namespace tink
