@@ -281,6 +281,7 @@ java_test(
     srcs = ["TinkBugExceptionTest.java"],
     deps = [
         "//src/main/java/com/google/crypto/tink/internal:tink_bug_exception",
+        "@maven//:com_google_truth_truth",
         "@maven//:junit_junit",
     ],
 )

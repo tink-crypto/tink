@@ -16,8 +16,10 @@
 
 package com.google.crypto.tink.internal;
 
+import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertThrows;
 
+import java.security.GeneralSecurityException;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -31,5 +33,44 @@ public final class TinkBugExceptionTest {
   @Test
   public void testException() throws Exception {
     assertThrows(TinkBugException.class, TinkBugExceptionTest::throwsTinkBugException);
+  }
+
+  private static void doNothing() throws GeneralSecurityException {}
+
+  @Test
+  public void test_exceptionIsBugVoidVersion_whenNotThrown_notThrown() throws Exception {
+    TinkBugException.exceptionIsBug(TinkBugExceptionTest::doNothing);
+  }
+
+  private static void throwAnException() throws GeneralSecurityException {
+    throw new GeneralSecurityException("");
+  }
+
+  @Test
+  public void test_exceptionIsBugVoidVersion_whenThrown_throws() throws Exception {
+    assertThrows(
+        TinkBugException.class,
+        () -> TinkBugException.exceptionIsBug(TinkBugExceptionTest::throwAnException));
+  }
+
+  private static String returnHello() throws GeneralSecurityException {
+    return "Hello";
+  }
+
+  @Test
+  public void test_exceptionIsBugSupplierVersion_whenNotThrown_notThrown() throws Exception {
+    assertThat(TinkBugException.exceptionIsBug(TinkBugExceptionTest::returnHello))
+        .isEqualTo("Hello");
+  }
+
+  private static String throwAnExceptionB() throws GeneralSecurityException {
+    throw new GeneralSecurityException("");
+  }
+
+  @Test
+  public void test_exceptionIsBugSupplierVersion_whenThrown_throws() throws Exception {
+    assertThrows(
+        TinkBugException.class,
+        () -> TinkBugException.exceptionIsBug(TinkBugExceptionTest::throwAnExceptionB));
   }
 }

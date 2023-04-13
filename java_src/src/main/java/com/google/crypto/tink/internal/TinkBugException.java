@@ -37,4 +37,40 @@ public final class TinkBugException extends RuntimeException {
   public TinkBugException(Throwable cause) {
     super(cause);
   }
+
+  /**
+   * A function which returns void and may throw an Exception.
+   *
+   * <p>Named after java.lang.Runnable.
+   */
+  public interface ThrowingRunnable {
+    void run() throws Exception;
+  }
+
+  /**
+   * A function which produces a T and may throw an Exception.
+   *
+   * <p>Named after java.util.function.Supplier.
+   */
+  public interface ThrowingSupplier<T> {
+    T get() throws Exception;
+  }
+
+  /** Swallows an exception and translates it into a TinkBugException. */
+  public static <T> T exceptionIsBug(ThrowingSupplier<T> t) {
+    try {
+      return t.get();
+    } catch (Exception e) {
+      throw new TinkBugException(e);
+    }
+  }
+
+  /** Swallows an exception and translates it into a TinkBugException. */
+  public static void exceptionIsBug(ThrowingRunnable v) {
+    try {
+      v.run();
+    } catch (Exception e) {
+      throw new TinkBugException(e);
+    }
+  }
 }
