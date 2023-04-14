@@ -770,7 +770,6 @@ gen_maven_jar_rules(
         "//src/main/java/com/google/crypto/tink/tinkkey/internal:internal_key_handle-android",
         "//src/main/java/com/google/crypto/tink/tinkkey/internal:proto_key-android",
         "//src/main/java/com/google/crypto/tink/util:bytes-android",
-        "//src/main/java/com/google/crypto/tink/util:keys_downloader-android",
         "//src/main/java/com/google/crypto/tink/util:secret_big_integer-android",
         "//src/main/java/com/google/crypto/tink/util:secret_bytes-android",
         "//src_android/main/java/com/google/crypto/tink/internal:build_dispatched_code",

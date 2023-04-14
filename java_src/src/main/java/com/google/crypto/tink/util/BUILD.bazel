@@ -15,17 +15,6 @@ java_library(
     ],
 )
 
-android_library(
-    name = "keys_downloader-android",
-    srcs = ["KeysDownloader.java"],
-    deps = [
-        "@maven//:com_google_code_findbugs_jsr305",
-        "@maven//:com_google_errorprone_error_prone_annotations",
-        "@maven//:com_google_http_client_google_http_client",
-        "@maven//:joda_time_joda_time",
-    ],
-)
-
 java_library(
     name = "secret_bytes",
     srcs = ["SecretBytes.java"],
