@@ -433,11 +433,13 @@ class SslXchacha20Poly1305OneShotAead : public SslOneShotAeadImpl {
 #ifdef OPENSSL_IS_BORINGSSL
   explicit SslXchacha20Poly1305OneShotAead(
       internal::SslUniquePtr<EVP_AEAD_CTX> context)
-      : BoringSslOneShotAeadImpl(std::move(context), kAesGcmTagSizeInBytes) {}
+      : BoringSslOneShotAeadImpl(std::move(context),
+                                 kXchacha20Poly1305TagSizeInBytes) {}
 #else
   explicit SslXchacha20Poly1305OneShotAead(
       internal::SslUniquePtr<EVP_CIPHER_CTX> context)
-      : SslOneShotAeadImpl(std::move(context), kAesGcmTagSizeInBytes) {}
+      : SslOneShotAeadImpl(std::move(context),
+                           kXchacha20Poly1305TagSizeInBytes) {}
 #endif
 
   int64_t CiphertextSize(int64_t plaintext_length) const override {
