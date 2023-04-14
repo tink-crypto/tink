@@ -27,6 +27,7 @@ from tink import mac
 from tink import prf
 from tink import signature
 from tink import streaming_aead
+from tink.integration import gcpkms
 
 from tink.testing import fake_kms
 from protos import testing_api_pb2_grpc
@@ -34,7 +35,6 @@ import jwt_service
 import services
 
 from tink.integration import awskms
-from tink.integration import gcpkms
 
 FLAGS = flags.FLAGS
 
@@ -53,6 +53,7 @@ AWS_KEY_URI = flags.DEFINE_string(
 
 def init_tink() -> None:
   """Initializes Tink registering the required primitives."""
+
   aead.register()
   daead.register()
   hybrid.register()
@@ -65,8 +66,10 @@ def init_tink() -> None:
   fake_kms.register_client()
   awskms.AwsKmsClient.register_client(
       key_uri=AWS_KEY_URI.value, credentials_path=AWS_CREDENTIALS_PATH.value)
+
   gcpkms.GcpKmsClient.register_client(
-      key_uri=GCP_KEY_URI.value, credentials_path=GCP_CREDENTIALS_PATH.value)
+      key_uri=GCP_KEY_URI.value, credentials_path=GCP_CREDENTIALS_PATH.value
+  )
 
 
 def main(unused_argv):

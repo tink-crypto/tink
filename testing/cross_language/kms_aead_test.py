@@ -54,7 +54,6 @@ _GCP_UNKNOWN_KEY_URI = (
     'gcp-kms://projects/tink-test-infrastructure/locations/global/'
     'keyRings/unit-and-integration-testing/cryptoKeys/unknown')
 
-
 _KMS_KEY_URI = {
     'GCP': _GCP_KEY_URI,
     'AWS': _AWS_KEY_URI,
