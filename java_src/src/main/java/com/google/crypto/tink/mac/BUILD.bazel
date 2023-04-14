@@ -533,3 +533,23 @@ android_library(
         "@maven//:com_google_errorprone_error_prone_annotations",
     ],
 )
+
+android_library(
+    name = "predefined_mac_parameters-android",
+    srcs = ["PredefinedMacParameters.java"],
+    deps = [
+        ":aes_cmac_parameters-android",
+        ":hmac_parameters-android",
+        "//src/main/java/com/google/crypto/tink/internal:tink_bug_exception-android",
+    ],
+)
+
+java_library(
+    name = "predefined_mac_parameters",
+    srcs = ["PredefinedMacParameters.java"],
+    deps = [
+        ":aes_cmac_parameters",
+        ":hmac_parameters",
+        "//src/main/java/com/google/crypto/tink/internal:tink_bug_exception",
+    ],
+)
