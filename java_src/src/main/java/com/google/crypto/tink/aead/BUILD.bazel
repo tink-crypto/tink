@@ -1166,3 +1166,28 @@ android_library(
     ],
 )
 
+android_library(
+    name = "predefined_aead_parameters-android",
+    srcs = ["PredefinedAeadParameters.java"],
+    deps = [
+        ":aes_ctr_hmac_aead_parameters-android",
+        ":aes_eax_parameters-android",
+        ":aes_gcm_parameters-android",
+        ":cha_cha20_poly1305_parameters-android",
+        ":x_cha_cha20_poly1305_parameters-android",
+        "//src/main/java/com/google/crypto/tink/internal:tink_bug_exception-android",
+    ],
+)
+
+java_library(
+    name = "predefined_aead_parameters",
+    srcs = ["PredefinedAeadParameters.java"],
+    deps = [
+        ":aes_ctr_hmac_aead_parameters",
+        ":aes_eax_parameters",
+        ":aes_gcm_parameters",
+        ":cha_cha20_poly1305_parameters",
+        ":x_cha_cha20_poly1305_parameters",
+        "//src/main/java/com/google/crypto/tink/internal:tink_bug_exception",
+    ],
+)
