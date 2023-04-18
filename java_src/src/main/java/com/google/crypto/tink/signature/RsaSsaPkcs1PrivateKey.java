@@ -216,11 +216,21 @@ public final class RsaSsaPkcs1PrivateKey extends SignaturePrivateKey {
   }
 
   /** Returns the prime factor p. */
+  @RestrictedApi(
+      explanation = "Accessing parts of keys can produce unexpected incompatibilities, annotate the function with @AccessesPartialKey",
+      link = "https://developers.google.com/tink/design/access_control#accessing_partial_keys",
+      allowedOnPath = ".*Test\\.java",
+      allowlistAnnotations = {AccessesPartialKey.class})
   public SecretBigInteger getPrimeP() {
     return p;
   }
 
   /** Returns the prime factor q. */
+  @RestrictedApi(
+      explanation = "Accessing parts of keys can produce unexpected incompatibilities, annotate the function with @AccessesPartialKey",
+      link = "https://developers.google.com/tink/design/access_control#accessing_partial_keys",
+      allowedOnPath = ".*Test\\.java",
+      allowlistAnnotations = {AccessesPartialKey.class})
   public SecretBigInteger getPrimeQ() {
     return q;
   }
