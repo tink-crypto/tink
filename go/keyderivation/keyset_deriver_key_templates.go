@@ -44,11 +44,8 @@ func CreatePRFBasedKeyTemplate(prfKeyTemplate, derivedKeyTemplate *tinkpb.KeyTem
 		OutputPrefixType: derivedKeyTemplate.GetOutputPrefixType(),
 		Value:            serializedFormat,
 	}
-	handle, err := keyset.NewHandle(template)
-	if err != nil {
-		return nil, err
-	}
-	if _, err = New(handle); err != nil {
+	// Verify `template` is derivable.
+	if _, err := keyset.NewHandle(template); err != nil {
 		return nil, err
 	}
 	return template, nil
