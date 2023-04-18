@@ -40,7 +40,6 @@
 > Tink Go AWS KMS extension             | [tink-crypto/tink-go-awskms](https://github.com/tink-crypto/tink-go-awskms)               | Not started (expected Q3 2023) | TBA
 > Tink Go Google Cloud KMS extension    | [tink-crypto/tink-go-gcpkms](https://github.com/tink-crypto/tink-go-gcpkms)               | Not started (expected Q3 2023) | TBA
 > Tink Go HashiCorp Vault KMS extension | [tink-crypto/tink-go-hcvault](https://github.com/tink-crypto/tink-go-hcvault)             | Not started (expected Q3 2023) | TBA
-> Tink Javascript                       | [tink-crypto/tink-javascript](https://github.com/tink-crypto/tink-javascript)             | Not started (expected Q4 2023) | TBA
 > Tink Obj-C                            | [tink-crypto/tink-objc](https://github.com/tink-crypto/tink-objc)                         | Not started (expected Q4 2023) | TBA
 > Tink Tinkey                           | [tink-crypto/tink-tinkey](https://github.com/tink-crypto/tink-tinkey)                     | Not started (expected Q4 2023) | TBA
 > Tink cross language tests             | [tink-crypto/tink-cross-lang-tests](https://github.com/tink-crypto/tink-cross-lang-tests) | Not started (expected Q4 2023) | TBA
