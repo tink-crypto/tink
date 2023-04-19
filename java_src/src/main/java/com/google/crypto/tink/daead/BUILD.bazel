@@ -279,3 +279,21 @@ android_library(
         "@maven//:com_google_protobuf_protobuf_javalite",
     ],
 )
+
+android_library(
+    name = "predefined_deterministic_aead_parameters-android",
+    srcs = ["PredefinedDeterministicAeadParameters.java"],
+    deps = [
+        ":aes_siv_parameters-android",
+        "//src/main/java/com/google/crypto/tink/internal:tink_bug_exception-android",
+    ],
+)
+
+java_library(
+    name = "predefined_deterministic_aead_parameters",
+    srcs = ["PredefinedDeterministicAeadParameters.java"],
+    deps = [
+        ":aes_siv_parameters",
+        "//src/main/java/com/google/crypto/tink/internal:tink_bug_exception",
+    ],
+)
