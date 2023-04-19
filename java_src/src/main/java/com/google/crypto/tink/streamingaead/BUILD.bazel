@@ -42,7 +42,6 @@ java_library(
     deps = [
         "//src/main/java/com/google/crypto/tink:primitive_set",
         "//src/main/java/com/google/crypto/tink:streaming_aead",
-        "@maven//:androidx_annotation_annotation",
         "@maven//:com_google_code_findbugs_jsr305",
         "@maven//:com_google_errorprone_error_prone_annotations",
     ],
@@ -67,7 +66,6 @@ java_library(
         ":seekable_byte_channel_decrypter",
         "//src/main/java/com/google/crypto/tink:primitive_set",
         "//src/main/java/com/google/crypto/tink:streaming_aead",
-        "@maven//:androidx_annotation_annotation",
     ],
 )
 
@@ -260,7 +258,6 @@ android_library(
     deps = [
         "//src/main/java/com/google/crypto/tink:primitive_set-android",
         "//src/main/java/com/google/crypto/tink:streaming_aead-android",
-        "@maven//:androidx_annotation_annotation",
         "@maven//:com_google_code_findbugs_jsr305",
         "@maven//:com_google_errorprone_error_prone_annotations",
     ],
@@ -285,7 +282,6 @@ android_library(
         ":seekable_byte_channel_decrypter-android",
         "//src/main/java/com/google/crypto/tink:primitive_set-android",
         "//src/main/java/com/google/crypto/tink:streaming_aead-android",
-        "@maven//:androidx_annotation_annotation",
     ],
 )
 

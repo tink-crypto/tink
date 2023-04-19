@@ -16,7 +16,6 @@
 
 package com.google.crypto.tink;
 
-import androidx.annotation.RequiresApi;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -162,7 +161,6 @@ public interface StreamingAead {
    *     associatedData is not correct.
    * @throws IOException if an IOException occurred while reading from ciphertextDestination.
    */
-  @RequiresApi(24) // https://developer.android.com/reference/java/nio/channels/SeekableByteChannel
   SeekableByteChannel newSeekableDecryptingChannel(
       SeekableByteChannel ciphertextSource, byte[] associatedData)
       throws GeneralSecurityException, IOException;
