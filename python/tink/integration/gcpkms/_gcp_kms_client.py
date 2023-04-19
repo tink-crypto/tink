@@ -19,8 +19,8 @@ from google.api_core import exceptions as core_exceptions
 from google.cloud import kms_v1
 from google.oauth2 import service_account
 
+import tink
 from tink import aead
-from tink import core
 from tink.aead import _kms_aead_key_manager
 
 GCP_KEYURI_PREFIX = 'gcp-kms://'
@@ -46,7 +46,7 @@ class _GcpKmsAead(aead.Aead):
       )
       return response.ciphertext
     except core_exceptions.GoogleAPIError as e:
-      raise core.TinkError(e)
+      raise tink.TinkError(e)
 
   def decrypt(self, ciphertext: bytes, associated_data: bytes) -> bytes:
     try:
@@ -59,7 +59,7 @@ class _GcpKmsAead(aead.Aead):
       )
       return response.plaintext
     except core_exceptions.GoogleAPIError as e:
-      raise core.TinkError(e)
+      raise tink.TinkError(e)
 
 
 class GcpKmsClient(_kms_aead_key_manager.KmsClient):
@@ -88,7 +88,7 @@ class GcpKmsClient(_kms_aead_key_manager.KmsClient):
     elif key_uri.startswith(GCP_KEYURI_PREFIX):
       self._key_uri = key_uri
     else:
-      raise core.TinkError('Invalid key_uri.')
+      raise tink.TinkError('Invalid key_uri.')
     if not credentials_path:
       credentials_path = ''
     if not credentials_path:
@@ -121,8 +121,13 @@ class GcpKmsClient(_kms_aead_key_manager.KmsClient):
     Returns:
       An Aead object.
     """
+    if self._key_uri and self._key_uri != key_uri:
+      raise tink.TinkError(
+          'This client is bound to %s and cannot use key %s'
+          % (self._key_uri, key_uri)
+      )
     if not key_uri.startswith(GCP_KEYURI_PREFIX):
-      raise core.TinkError('Invalid key_uri.')
+      raise tink.TinkError('Invalid key_uri.')
     key_id = key_uri[len(GCP_KEYURI_PREFIX) :]
     return _GcpKmsAead(self._client, key_id)
 

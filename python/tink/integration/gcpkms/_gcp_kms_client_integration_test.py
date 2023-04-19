@@ -43,18 +43,43 @@ def setUpModule():
 
 class GcpKmsAeadTest(absltest.TestCase):
 
-  def test_encrypt_decrypt(self):
+  def test_bound_to_key_uri_encrypt_decrypt(self):
     gcp_client = gcpkms.GcpKmsClient(KEY_URI, CREDENTIAL_PATH)
+
+    self.assertTrue(gcp_client.does_support(KEY_URI))
+    self.assertFalse(gcp_client.does_support(KEY2_URI))
+    self.assertFalse(gcp_client.does_support(BAD_KEY_URI))
+
     gcp_aead = gcp_client.get_aead(KEY_URI)
 
-    plaintext = b'helloworld'
+    plaintext = b'plaintext'
+    associated_data = b'associated_data'
+    ciphertext = gcp_aead.encrypt(plaintext, associated_data)
+    self.assertEqual(plaintext, gcp_aead.decrypt(ciphertext, associated_data))
+
     ciphertext = gcp_aead.encrypt(plaintext, b'')
     self.assertEqual(plaintext, gcp_aead.decrypt(ciphertext, b''))
 
-    plaintext = b'hello'
-    associated_data = b'world'
+    with self.assertRaises(tink.TinkError):
+      gcp_client.get_aead(KEY2_URI)
+
+  def test_not_bound_to_key_uri_encrypt_decrypt(self):
+    gcp_client = gcpkms.GcpKmsClient(None, CREDENTIAL_PATH)
+
+    self.assertTrue(gcp_client.does_support(KEY_URI))
+    self.assertTrue(gcp_client.does_support(KEY2_URI))
+    self.assertFalse(gcp_client.does_support(BAD_KEY_URI))
+
+    plaintext = b'plaintext'
+    associated_data = b'associated_data'
+
+    gcp_aead = gcp_client.get_aead(KEY_URI)
     ciphertext = gcp_aead.encrypt(plaintext, associated_data)
     self.assertEqual(plaintext, gcp_aead.decrypt(ciphertext, associated_data))
+
+    gcp_aead2 = gcp_client.get_aead(KEY_URI)
+    ciphertext2 = gcp_aead2.encrypt(plaintext, associated_data)
+    self.assertEqual(plaintext, gcp_aead2.decrypt(ciphertext2, associated_data))
 
   def test_decrypt_with_wrong_ad_fails(self):
     gcp_client = gcpkms.GcpKmsClient(KEY_URI, CREDENTIAL_PATH)
