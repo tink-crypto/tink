@@ -1033,7 +1033,7 @@ android_library(
         "//src/main/java/com/google/crypto/tink/util:bytes-android",
         "//src/main/java/com/google/crypto/tink/util:secret_big_integer-android",
         "@maven//:com_google_code_findbugs_jsr305",
-        "@maven//:com_google_protobuf_protobuf_java",
+        "@maven//:com_google_protobuf_protobuf_javalite",
     ],
 )
 
