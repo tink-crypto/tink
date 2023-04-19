@@ -113,6 +113,7 @@ java_library(
     deps = [
         ":json_util",
         ":jwt_format",
+        ":jwt_hmac_proto_serialization",
         ":jwt_invalid_exception",
         ":jwt_mac_internal",
         ":jwt_validator",
@@ -593,6 +594,7 @@ android_library(
     deps = [
         ":json_util-android",
         ":jwt_format-android",
+        ":jwt_hmac_proto_serialization-android",
         ":jwt_invalid_exception-android",
         ":jwt_mac_internal-android",
         ":jwt_validator-android",

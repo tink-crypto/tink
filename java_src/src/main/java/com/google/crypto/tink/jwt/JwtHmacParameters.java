@@ -193,4 +193,15 @@ public class JwtHmacParameters extends JwtMacParameters {
   public int hashCode() {
     return Objects.hash(JwtHmacParameters.class, keySizeBytes, kidStrategy, algorithm);
   }
+
+  @Override
+  public String toString() {
+    return "JWT HMAC Parameters (kidStrategy: "
+        + kidStrategy
+        + ", Algorithm "
+        + algorithm
+        + ", and "
+        + keySizeBytes
+        + "-byte key)";
+  }
 }

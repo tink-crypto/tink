@@ -22,6 +22,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.Assert.assertThrows;
 
 import com.google.crypto.tink.CleartextKeysetHandle;
+import com.google.crypto.tink.Key;
 import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.KeyTemplates;
 import com.google.crypto.tink.KeysetHandle;
@@ -248,6 +249,21 @@ public class JwtHmacKeyManagerTest {
     testKeyTemplateCompatible(manager, KeyTemplates.get("JWT_HS384"));
     testKeyTemplateCompatible(manager, KeyTemplates.get("JWT_HS512"));
     testKeyTemplateCompatible(manager, KeyTemplates.get("JWT_HS512_RAW"));
+  }
+
+  @Test
+  public void createKeysetHandle_works() throws Exception {
+    KeysetHandle handle = KeysetHandle.generateNew(KeyTemplates.get("JWT_HS256"));
+    Key key = handle.getAt(0).getKey();
+    assertThat(key).isInstanceOf(com.google.crypto.tink.jwt.JwtHmacKey.class);
+    com.google.crypto.tink.jwt.JwtHmacKey jwtHmacKey = (com.google.crypto.tink.jwt.JwtHmacKey) key;
+    assertThat(jwtHmacKey.getParameters())
+        .isEqualTo(
+            JwtHmacParameters.builder()
+                .setKeySizeBytes(32)
+                .setAlgorithm(JwtHmacParameters.Algorithm.HS256)
+                .setKidStrategy(JwtHmacParameters.KidStrategy.BASE64_ENCODED_KEY_ID)
+                .build());
   }
 
   // Note: we use Theory as a parametrized test -- different from what the Theory framework intends.
@@ -885,8 +901,6 @@ public class JwtHmacKeyManagerTest {
     KeysetHandle handleWithKid =
         CleartextKeysetHandle.fromKeyset(keyset.toBuilder().setKey(0, keyWithKid).build());
 
-    JwtMac jwtMacWithKid = handleWithKid.getPrimitive(JwtMac.class);
-    RawJwt rawToken = RawJwt.newBuilder().setJwtId("jwtId").withoutExpiration().build();
-    assertThrows(JwtInvalidException.class, () -> jwtMacWithKid.computeMacAndEncode(rawToken));
+    assertThrows(GeneralSecurityException.class, () -> handleWithKid.getPrimitive(JwtMac.class));
   }
 }
