@@ -25,7 +25,7 @@ import java.security.GeneralSecurityException;
 /**
  * Represents a StreamingAead functions.
  *
- * <p>See https://developers.devsite.corp.google.com/tink/streaming-aead/aes_gcm_hkdf_streaming.
+ * <p>See https://developers.google.com/tink/streaming-aead/aes_gcm_hkdf_streaming.
  */
 public final class AesGcmHkdfStreamingKey extends StreamingAeadKey {
   private final AesGcmHkdfStreamingParameters parameters;
