@@ -151,6 +151,7 @@ java_library(
     name = "rsa_ssa_pkcs1_sign_key_manager",
     srcs = ["RsaSsaPkcs1SignKeyManager.java"],
     deps = [
+        ":rsa_ssa_pkcs1_proto_serialization",
         ":rsa_ssa_pkcs1_verify_key_manager",
         "//proto:common_java_proto",
         "//proto:rsa_ssa_pkcs1_java_proto",
@@ -653,6 +654,7 @@ android_library(
     name = "rsa_ssa_pkcs1_sign_key_manager-android",
     srcs = ["RsaSsaPkcs1SignKeyManager.java"],
     deps = [
+        ":rsa_ssa_pkcs1_proto_serialization-android",
         ":rsa_ssa_pkcs1_verify_key_manager-android",
         "//proto:common_java_proto_lite",
         "//proto:rsa_ssa_pkcs1_java_proto_lite",

@@ -21,6 +21,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
 
 import com.google.crypto.tink.KeyTemplate;
+import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.PublicKeySign;
 import com.google.crypto.tink.PublicKeyVerify;
 import com.google.crypto.tink.internal.KeyTypeManager;
@@ -46,6 +47,7 @@ import java.security.spec.RSAKeyGenParameterSpec;
 import java.security.spec.RSAPublicKeySpec;
 import java.util.Set;
 import java.util.TreeSet;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -53,6 +55,12 @@ import org.junit.runners.JUnit4;
 /** Unit tests for RsaSsaPkcs1SignKeyManager. */
 @RunWith(JUnit4.class)
 public class RsaSsaPkcs1SignKeyManagerTest {
+
+  @BeforeClass
+  public static void beforeClass() throws Exception {
+    RsaSsaPkcs1SignKeyManager.registerPair(/* newKeyAllowed= */ true);
+  }
+
   private final RsaSsaPkcs1SignKeyManager manager = new RsaSsaPkcs1SignKeyManager();
   private final KeyTypeManager.KeyFactory<RsaSsaPkcs1KeyFormat, RsaSsaPkcs1PrivateKey> factory =
       manager.keyFactory();
@@ -152,15 +160,26 @@ public class RsaSsaPkcs1SignKeyManagerTest {
   }
 
   @Test
-  public void createKey_smallKey() throws Exception {
+  public void createKey_smallKey_works() throws Exception {
     if (TestUtil.isTsan()) {
       // factory.createKey is too slow in Tsan.
       return;
     }
-    RsaSsaPkcs1KeyFormat format = createKeyFormat(HashType.SHA256, 3072, RSAKeyGenParameterSpec.F4);
-    RsaSsaPkcs1PrivateKey key = factory.createKey(format);
-    checkConsistency(key, format);
-    checkKey(key);
+    RsaSsaPkcs1Parameters parameters =
+        RsaSsaPkcs1Parameters.builder()
+            .setModulusSizeBits(2048)
+            .setPublicExponent(RsaSsaPkcs1Parameters.F4)
+            .setHashType(RsaSsaPkcs1Parameters.HashType.SHA256)
+            .setVariant(RsaSsaPkcs1Parameters.Variant.NO_PREFIX)
+            .build();
+    KeysetHandle handle = KeysetHandle.generateNew(parameters);
+    com.google.crypto.tink.Key key = handle.getAt(0).getKey();
+    assertThat(key).isInstanceOf(com.google.crypto.tink.signature.RsaSsaPkcs1PrivateKey.class);
+    com.google.crypto.tink.signature.RsaSsaPkcs1PrivateKey privateKey =
+        (com.google.crypto.tink.signature.RsaSsaPkcs1PrivateKey) key;
+
+    assertThat(privateKey.getPublicKey().getParameters()).isEqualTo(parameters);
+    assertThat(privateKey.getPublicKey().getModulus().bitLength()).isEqualTo(2048);
   }
 
   @Test
