@@ -515,3 +515,23 @@ java_library(
         "@maven//:com_google_protobuf_protobuf_java",
     ],
 )
+
+android_library(
+    name = "predefined_streaming_aead_parameters-android",
+    srcs = ["PredefinedStreamingAeadParameters.java"],
+    deps = [
+        ":aes_ctr_hmac_streaming_parameters-android",
+        ":aes_gcm_hkdf_streaming_parameters-android",
+        "//src/main/java/com/google/crypto/tink/internal:tink_bug_exception-android",
+    ],
+)
+
+java_library(
+    name = "predefined_streaming_aead_parameters",
+    srcs = ["PredefinedStreamingAeadParameters.java"],
+    deps = [
+        ":aes_ctr_hmac_streaming_parameters",
+        ":aes_gcm_hkdf_streaming_parameters",
+        "//src/main/java/com/google/crypto/tink/internal:tink_bug_exception",
+    ],
+)

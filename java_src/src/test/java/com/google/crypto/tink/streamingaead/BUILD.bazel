@@ -9,10 +9,15 @@ java_test(
         "//proto:aes_gcm_hkdf_streaming_java_proto",
         "//proto:common_java_proto",
         "//proto:tink_java_proto",
+        "//src/main/java/com/google/crypto/tink:tink_proto_parameters_format",
         "//src/main/java/com/google/crypto/tink/streamingaead:aes_ctr_hmac_streaming_key_manager",
         "//src/main/java/com/google/crypto/tink/streamingaead:aes_gcm_hkdf_streaming_key_manager",
+        "//src/main/java/com/google/crypto/tink/streamingaead:predefined_streaming_aead_parameters",
+        "//src/main/java/com/google/crypto/tink/streamingaead:streaming_aead_config",
         "//src/main/java/com/google/crypto/tink/streamingaead:streaming_aead_key_templates",
+        "//src/main/java/com/google/crypto/tink/streamingaead:streaming_aead_parameters",
         "@maven//:com_google_protobuf_protobuf_java",
+        "@maven//:com_google_truth_truth",
         "@maven//:junit_junit",
     ],
 )
@@ -261,6 +266,21 @@ java_test(
         "//src/main/java/com/google/crypto/tink/streamingaead:aes_ctr_hmac_streaming_proto_serialization",
         "//src/main/java/com/google/crypto/tink/util:secret_bytes",
         "@maven//:com_google_protobuf_protobuf_java",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "PredefinedStreamingAeadParametersTest",
+    size = "small",
+    srcs = ["PredefinedStreamingAeadParametersTest.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink:key",
+        "//src/main/java/com/google/crypto/tink:registry_cluster",
+        "//src/main/java/com/google/crypto/tink/streamingaead:predefined_streaming_aead_parameters",
+        "//src/main/java/com/google/crypto/tink/streamingaead:streaming_aead_config",
+        "//src/main/java/com/google/crypto/tink/streamingaead:streaming_aead_parameters",
         "@maven//:com_google_truth_truth",
         "@maven//:junit_junit",
     ],

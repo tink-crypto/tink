@@ -16,21 +16,32 @@
 
 package com.google.crypto.tink.streamingaead;
 
+import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertEquals;
 
+import com.google.crypto.tink.TinkProtoParametersFormat;
 import com.google.crypto.tink.proto.AesCtrHmacStreamingKeyFormat;
 import com.google.crypto.tink.proto.AesGcmHkdfStreamingKeyFormat;
 import com.google.crypto.tink.proto.HashType;
 import com.google.crypto.tink.proto.KeyTemplate;
 import com.google.crypto.tink.proto.OutputPrefixType;
 import com.google.protobuf.ExtensionRegistryLite;
+import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.experimental.theories.DataPoints;
+import org.junit.experimental.theories.FromDataPoints;
+import org.junit.experimental.theories.Theories;
+import org.junit.experimental.theories.Theory;
 import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
 
 /** Tests for StreamingAeadKeyTemplates. */
-@RunWith(JUnit4.class)
+@RunWith(Theories.class)
 public class StreamingAeadKeyTemplatesTest {
+  @BeforeClass
+  public static void setUp() throws Exception {
+    StreamingAeadConfig.register();
+  }
+
   @Test
   public void testAes128CtrHmacSha256_4KB() throws Exception {
     KeyTemplate template = StreamingAeadKeyTemplates.AES128_CTR_HMAC_SHA256_4KB;
@@ -206,5 +217,50 @@ public class StreamingAeadKeyTemplatesTest {
     assertEquals(derivedKeySize,        format.getParams().getDerivedKeySize());
     assertEquals(hkdfHashType,          format.getParams().getHkdfHashType());
     assertEquals(ciphertextSegmentSize, format.getParams().getCiphertextSegmentSize());
+  }
+
+  public static class Pair {
+    public Pair(KeyTemplate template, StreamingAeadParameters parameters) {
+      this.template = template;
+      this.parameters = parameters;
+    }
+
+    KeyTemplate template;
+    StreamingAeadParameters parameters;
+  }
+
+  @DataPoints("EquivalentPairs")
+  public static final Pair[] TEMPLATES =
+      new Pair[] {
+        new Pair(
+            StreamingAeadKeyTemplates.AES128_CTR_HMAC_SHA256_4KB,
+            PredefinedStreamingAeadParameters.AES128_CTR_HMAC_SHA256_4KB),
+        new Pair(
+            StreamingAeadKeyTemplates.AES128_CTR_HMAC_SHA256_1MB,
+            PredefinedStreamingAeadParameters.AES128_CTR_HMAC_SHA256_1MB),
+        new Pair(
+            StreamingAeadKeyTemplates.AES256_CTR_HMAC_SHA256_4KB,
+            PredefinedStreamingAeadParameters.AES256_CTR_HMAC_SHA256_4KB),
+        new Pair(
+            StreamingAeadKeyTemplates.AES256_CTR_HMAC_SHA256_1MB,
+            PredefinedStreamingAeadParameters.AES256_CTR_HMAC_SHA256_1MB),
+        new Pair(
+            StreamingAeadKeyTemplates.AES128_GCM_HKDF_4KB,
+            PredefinedStreamingAeadParameters.AES128_GCM_HKDF_4KB),
+        new Pair(
+            StreamingAeadKeyTemplates.AES128_GCM_HKDF_1MB,
+            PredefinedStreamingAeadParameters.AES128_GCM_HKDF_1MB),
+        new Pair(
+            StreamingAeadKeyTemplates.AES256_GCM_HKDF_4KB,
+            PredefinedStreamingAeadParameters.AES256_GCM_HKDF_4KB),
+        new Pair(
+            StreamingAeadKeyTemplates.AES256_GCM_HKDF_1MB,
+            PredefinedStreamingAeadParameters.AES256_GCM_HKDF_1MB)
+      };
+
+  @Theory
+  public void testParametersEqualsKeyTemplate(@FromDataPoints("EquivalentPairs") Pair p)
+      throws Exception {
+    assertThat(TinkProtoParametersFormat.parse(p.template.toByteArray())).isEqualTo(p.parameters);
   }
 }
