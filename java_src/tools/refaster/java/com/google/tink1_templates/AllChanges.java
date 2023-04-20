@@ -20,12 +20,15 @@ import com.google.crypto.tink.BinaryKeysetReader;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.KeysetReader;
 import com.google.crypto.tink.TinkProtoKeysetFormat;
+import com.google.crypto.tink.mac.MacKeyTemplates;
+import com.google.crypto.tink.mac.PredefinedMacParameters;
 import com.google.errorprone.refaster.annotation.AfterTemplate;
 import com.google.errorprone.refaster.annotation.BeforeTemplate;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 
-final class KeysetHandleChanges {
+// We keep all changes in one file due to https://github.com/google/error-prone/issues/552
+final class AllChanges {
   class CleanupKeysetHandleReaderNoSecret {
     @BeforeTemplate
     public KeysetHandle beforeTemplate(byte[] b) throws GeneralSecurityException {
@@ -63,6 +66,66 @@ final class KeysetHandleChanges {
     public KeysetHandle afterTemplate(KeysetReader reader)
         throws GeneralSecurityException, IOException {
       return TinkProtoKeysetFormat.parseKeysetWithoutSecret(reader.read().toByteArray());
+    }
+  }
+
+  class HMAC_SHA256_128BITTAG {
+    @BeforeTemplate
+    public KeysetHandle beforeTemplate(byte[] b) throws GeneralSecurityException {
+      return KeysetHandle.generateNew(MacKeyTemplates.HMAC_SHA256_128BITTAG);
+    }
+
+    @AfterTemplate
+    public KeysetHandle afterTemplate(byte[] b) throws GeneralSecurityException {
+      return KeysetHandle.generateNew(PredefinedMacParameters.HMAC_SHA256_128BITTAG);
+    }
+  }
+
+  class HMAC_SHA256_256BITTAG {
+    @BeforeTemplate
+    public KeysetHandle beforeTemplate(byte[] b) throws GeneralSecurityException {
+      return KeysetHandle.generateNew(MacKeyTemplates.HMAC_SHA256_256BITTAG);
+    }
+
+    @AfterTemplate
+    public KeysetHandle afterTemplate(byte[] b) throws GeneralSecurityException {
+      return KeysetHandle.generateNew(PredefinedMacParameters.HMAC_SHA256_256BITTAG);
+    }
+  }
+
+  class HMAC_SHA512_256BITTAG {
+    @BeforeTemplate
+    public KeysetHandle beforeTemplate(byte[] b) throws GeneralSecurityException {
+      return KeysetHandle.generateNew(MacKeyTemplates.HMAC_SHA512_256BITTAG);
+    }
+
+    @AfterTemplate
+    public KeysetHandle afterTemplate(byte[] b) throws GeneralSecurityException {
+      return KeysetHandle.generateNew(PredefinedMacParameters.HMAC_SHA512_256BITTAG);
+    }
+  }
+
+  class HMAC_SHA512_512BITTAG {
+    @BeforeTemplate
+    public KeysetHandle beforeTemplate(byte[] b) throws GeneralSecurityException {
+      return KeysetHandle.generateNew(MacKeyTemplates.HMAC_SHA512_512BITTAG);
+    }
+
+    @AfterTemplate
+    public KeysetHandle afterTemplate(byte[] b) throws GeneralSecurityException {
+      return KeysetHandle.generateNew(PredefinedMacParameters.HMAC_SHA512_512BITTAG);
+    }
+  }
+
+  class AES_CMAC {
+    @BeforeTemplate
+    public KeysetHandle beforeTemplate(byte[] b) throws GeneralSecurityException {
+      return KeysetHandle.generateNew(MacKeyTemplates.AES_CMAC);
+    }
+
+    @AfterTemplate
+    public KeysetHandle afterTemplate(byte[] b) throws GeneralSecurityException {
+      return KeysetHandle.generateNew(PredefinedMacParameters.AES_CMAC);
     }
   }
 }

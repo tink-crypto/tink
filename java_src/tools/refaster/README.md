@@ -20,7 +20,7 @@ integration tests.
 
 
 ```bash
-tink_version="1.8.0"
+tink_version="1.9.0"
 errorprone_version="2.18.0"
 
 ## STEP 0: Switch to a directory so the remainder of the script can be run
@@ -36,7 +36,7 @@ pushd jars
 maven_base="repo1.maven.org/maven2/com/google"
 
 tink_jar="tink-${tink_version}.jar"
-tink_sha256="92b8676c15b11a7faa15f3d1f05ed776a2897da3deba18c528ff32043339f248"
+tink_sha256="8faf92d116a0ba138ee4e99a7418e985897818c2f6a9d4c01b8fe6b07db60eb7"
 
 refaster_jar="error_prone_refaster-${errorprone_version}.jar"
 refaster_sha256="0cde0a3db5c2f748fae4633ccd8c66a9ba9c5a0f7a380c9104b99372fd0c4959"
@@ -55,11 +55,12 @@ echo "${errorprone_sha256} ${errorprone_jar}" | sha256sum -c
 popd
 
 ## STEP 2: Use the current file in tink1to2 to create a "tinkrule.refaster":
-cp -r "${code_path}" .
+## First we delete the results of previous copy operations.
+rm -rf refaster/ ; cp -r "${code_path}" .
 
 javac -cp "jars/${tink_jar}:jars/${refaster_jar}" \
   "-Xplugin:RefasterRuleCompiler --out ${PWD}/tinkrule.refaster" \
-  refaster/java/com/google/tink1_templates/KeysetHandleChanges.java
+  refaster/java/com/google/tink1_templates/AllChanges.java
 
 ## STEP 3: Use error prone to create a patch:
 javac -cp "jars/${tink_jar}:jars/${errorprone_jar}" \

@@ -20,6 +20,7 @@ import com.google.crypto.tink.Aead;
 import com.google.crypto.tink.BinaryKeysetReader;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.KeysetReader;
+import com.google.crypto.tink.mac.MacKeyTemplates;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 
@@ -33,5 +34,13 @@ public final class TinkUser {
   }
   public Aead useAnyReader(KeysetReader r) throws GeneralSecurityException, IOException {
     return KeysetHandle.readNoSecret(r).getPrimitive(Aead.class);
+  }
+
+  public void macKeyTemplateUser() throws Exception {
+    Object a = KeysetHandle.generateNew(MacKeyTemplates.HMAC_SHA256_128BITTAG);
+    Object b = KeysetHandle.generateNew(MacKeyTemplates.HMAC_SHA256_256BITTAG);
+    Object c = KeysetHandle.generateNew(MacKeyTemplates.HMAC_SHA512_256BITTAG);
+    Object d = KeysetHandle.generateNew(MacKeyTemplates.HMAC_SHA512_512BITTAG);
+    Object e = KeysetHandle.generateNew(MacKeyTemplates.AES_CMAC);
   }
 }
