@@ -217,6 +217,15 @@ java_library(
     ],
 )
 
+java_library(
+    name = "hpke_parameters",
+    srcs = ["HpkeParameters.java"],
+    deps = [
+        ":hybrid_parameters",
+        "@maven//:com_google_errorprone_error_prone_annotations",
+    ],
+)
+
 # Android libraries
 
 android_library(
@@ -428,6 +437,15 @@ android_library(
         "//src/main/java/com/google/crypto/tink:key-android",
         "//src/main/java/com/google/crypto/tink/annotations:alpha-android",
         "//src/main/java/com/google/crypto/tink/util:bytes-android",
+        "@maven//:com_google_errorprone_error_prone_annotations",
+    ],
+)
+
+android_library(
+    name = "hpke_parameters-android",
+    srcs = ["HpkeParameters.java"],
+    deps = [
+        ":hybrid_parameters-android",
         "@maven//:com_google_errorprone_error_prone_annotations",
     ],
 )
