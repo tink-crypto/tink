@@ -159,11 +159,10 @@ tink_cc_test(
     tink::aead::internal::wycheproof_aead
     gmock
     absl::flat_hash_set
-    absl::memory
     absl::status
     absl::strings
     absl::span
-    tink::config::tink_fips
+    tink::internal::fips_utils
     tink::internal::ssl_util
     tink::subtle::subtle_util
     tink::util::secret_data

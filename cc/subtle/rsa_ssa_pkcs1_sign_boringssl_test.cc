@@ -25,7 +25,7 @@
 #include "openssl/bn.h"
 #include "openssl/crypto.h"
 #include "openssl/rsa.h"
-#include "tink/config/tink_fips.h"
+#include "tink/internal/fips_utils.h"
 #include "tink/internal/rsa_util.h"
 #include "tink/internal/ssl_unique_ptr.h"
 #include "tink/subtle/rsa_ssa_pkcs1_verify_boringssl.h"
@@ -58,7 +58,7 @@ class RsaPkcs1SignBoringsslTest : public ::testing::Test {
 };
 
 TEST_F(RsaPkcs1SignBoringsslTest, EncodesPkcs1) {
-  if (IsFipsModeEnabled()) {
+  if (internal::IsFipsModeEnabled()) {
     GTEST_SKIP() << "Test not run in FIPS-only mode";
   }
 
@@ -78,7 +78,7 @@ TEST_F(RsaPkcs1SignBoringsslTest, EncodesPkcs1) {
 }
 
 TEST_F(RsaPkcs1SignBoringsslTest, EncodesPkcs1WithSeparateHashes) {
-  if (IsFipsModeEnabled()) {
+  if (internal::IsFipsModeEnabled()) {
     GTEST_SKIP() << "Test not run in FIPS-only mode";
   }
 
@@ -98,7 +98,7 @@ TEST_F(RsaPkcs1SignBoringsslTest, EncodesPkcs1WithSeparateHashes) {
 }
 
 TEST_F(RsaPkcs1SignBoringsslTest, RejectsUnsafeHash) {
-  if (IsFipsModeEnabled()) {
+  if (internal::IsFipsModeEnabled()) {
     GTEST_SKIP() << "Test not run in FIPS-only mode";
   }
 
@@ -108,7 +108,7 @@ TEST_F(RsaPkcs1SignBoringsslTest, RejectsUnsafeHash) {
 }
 
 TEST_F(RsaPkcs1SignBoringsslTest, RejectsInvalidCrtParams) {
-  if (IsFipsModeEnabled()) {
+  if (internal::IsFipsModeEnabled()) {
     GTEST_SKIP() << "Test not run in FIPS-only mode";
   }
 
@@ -143,7 +143,7 @@ TEST_F(RsaPkcs1SignBoringsslTest, RejectsInvalidCrtParams) {
 
 // FIPS-only mode test
 TEST_F(RsaPkcs1SignBoringsslTest, TestFipsFailWithoutBoringCrypto) {
-  if (!IsFipsModeEnabled() || FIPS_mode()) {
+  if (!internal::IsFipsModeEnabled() || internal::IsFipsEnabledInSsl()) {
     GTEST_SKIP()
         << "Test assumes kOnlyUseFips but BoringCrypto is unavailable.";
   }
@@ -154,7 +154,7 @@ TEST_F(RsaPkcs1SignBoringsslTest, TestFipsFailWithoutBoringCrypto) {
 }
 
 TEST_F(RsaPkcs1SignBoringsslTest, TestRestrictedFipsModuli) {
-  if (!IsFipsModeEnabled() || !FIPS_mode()) {
+  if (!internal::IsFipsModeEnabled() || !internal::IsFipsEnabledInSsl()) {
     GTEST_SKIP() << "Test assumes kOnlyUseFips and BoringCrypto.";
   }
 
@@ -171,7 +171,7 @@ TEST_F(RsaPkcs1SignBoringsslTest, TestRestrictedFipsModuli) {
 }
 
 TEST_F(RsaPkcs1SignBoringsslTest, TestAllowedFipsModuli) {
-  if (!IsFipsModeEnabled() || !FIPS_mode()) {
+  if (!internal::IsFipsModeEnabled() || !internal::IsFipsEnabledInSsl()) {
     GTEST_SKIP() << "Test assumes kOnlyUseFips and BoringCrypto.";
   }
 

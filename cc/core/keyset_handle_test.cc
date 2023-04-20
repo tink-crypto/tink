@@ -775,7 +775,7 @@ TEST_F(KeysetHandleTest, GetPrimitive) {
 }
 
 TEST_F(KeysetHandleTest, GetPrimitiveWithConfigFips1402Succeeds) {
-  if (!FIPS_mode()) {
+  if (!internal::IsFipsEnabledInSsl()) {
     GTEST_SKIP() << "Only test in FIPS mode";
   }
 
@@ -798,7 +798,7 @@ TEST_F(KeysetHandleTest, GetPrimitiveWithConfigFips1402Succeeds) {
 }
 
 TEST_F(KeysetHandleTest, GetPrimitiveWithConfigFips1402FailsWithNonFipsHandle) {
-  if (!FIPS_mode()) {
+  if (!internal::IsFipsEnabledInSsl()) {
     GTEST_SKIP() << "Only test in FIPS mode";
   }
 

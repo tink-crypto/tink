@@ -255,7 +255,7 @@ tink_cc_test(
     tink::core::mac
     tink::core::partial_key_access
     tink::core::registry
-    tink::config::tink_fips
+    tink::internal::fips_utils
     tink::internal::mutable_serialization_registry
     tink::internal::proto_key_serialization
     tink::internal::proto_parameters_serialization

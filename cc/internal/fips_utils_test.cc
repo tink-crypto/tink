@@ -24,7 +24,7 @@
 
 namespace crypto {
 namespace tink {
-
+namespace internal {
 namespace {
 
 using ::crypto::tink::test::IsOk;
@@ -32,58 +32,52 @@ using ::crypto::tink::test::StatusIs;
 
 class FipsIncompatible {
  public:
-  static constexpr crypto::tink::internal::FipsCompatibility kFipsStatus =
-      crypto::tink::internal::FipsCompatibility::kNotFips;
+  static constexpr FipsCompatibility kFipsStatus = FipsCompatibility::kNotFips;
 };
 
 class FipsCompatibleWithBoringCrypto {
  public:
-  static constexpr crypto::tink::internal::FipsCompatibility kFipsStatus =
-      crypto::tink::internal::FipsCompatibility::kRequiresBoringCrypto;
+  static constexpr FipsCompatibility kFipsStatus =
+      FipsCompatibility::kRequiresBoringCrypto;
 };
 
 TEST(FipsUtilsTest, CompatibilityInNonFipsMode) {
-  if (internal::kUseOnlyFips) {
+  if (kUseOnlyFips) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
 
-  EXPECT_THAT(internal::CheckFipsCompatibility<FipsIncompatible>(), IsOk());
-  EXPECT_THAT(
-      internal::CheckFipsCompatibility<FipsCompatibleWithBoringCrypto>(),
-      IsOk());
+  EXPECT_THAT(CheckFipsCompatibility<FipsIncompatible>(), IsOk());
+  EXPECT_THAT(CheckFipsCompatibility<FipsCompatibleWithBoringCrypto>(), IsOk());
 }
 
 TEST(FipsUtilsTest, CompatibilityInFipsMode) {
-  if (!internal::kUseOnlyFips || !FIPS_mode()) {
+  if (!kUseOnlyFips || !IsFipsEnabledInSsl()) {
     GTEST_SKIP()
         << "Test should only run in FIPS mode with Boringcrypto available.";
   }
 
-  EXPECT_THAT(internal::CheckFipsCompatibility<FipsIncompatible>(),
+  EXPECT_THAT(CheckFipsCompatibility<FipsIncompatible>(),
               StatusIs(absl::StatusCode::kInternal));
-  EXPECT_THAT(
-      internal::CheckFipsCompatibility<FipsCompatibleWithBoringCrypto>(),
-      IsOk());
+  EXPECT_THAT(CheckFipsCompatibility<FipsCompatibleWithBoringCrypto>(), IsOk());
 }
 
 TEST(TinkFipsTest, CompatibilityInFipsModeWithoutBoringCrypto) {
-  if (!internal::kUseOnlyFips || FIPS_mode()) {
+  if (!kUseOnlyFips || IsFipsEnabledInSsl()) {
     GTEST_SKIP() << "Test only run if BoringCrypto module is not available.";
   }
 
   // In FIPS only mode compatibility checks should disallow algorithms
   // with the FipsCompatibility::kNone flag.
-  EXPECT_THAT(internal::CheckFipsCompatibility<FipsIncompatible>(),
+  EXPECT_THAT(CheckFipsCompatibility<FipsIncompatible>(),
               StatusIs(absl::StatusCode::kInternal));
 
   // FIPS validated implementations are not allowed if BoringCrypto is not
   // available.
-  EXPECT_THAT(
-      internal::CheckFipsCompatibility<FipsCompatibleWithBoringCrypto>(),
-      StatusIs(absl::StatusCode::kInternal));
+  EXPECT_THAT(CheckFipsCompatibility<FipsCompatibleWithBoringCrypto>(),
+              StatusIs(absl::StatusCode::kInternal));
 }
 
 }  // namespace
-
+}  // namespace internal
 }  // namespace tink
 }  // namespace crypto

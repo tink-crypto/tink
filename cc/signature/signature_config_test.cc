@@ -25,7 +25,7 @@
 #include "absl/memory/memory.h"
 #include "absl/status/status.h"
 #include "openssl/crypto.h"
-#include "tink/config/tink_fips.h"
+#include "tink/internal/fips_utils.h"
 #include "tink/keyset_handle.h"
 #include "tink/public_key_sign.h"
 #include "tink/public_key_verify.h"
@@ -53,7 +53,7 @@ class SignatureConfigTest : public ::testing::Test {
 };
 
 TEST_F(SignatureConfigTest, testBasic) {
-  if (IsFipsModeEnabled() && !FIPS_mode()) {
+  if (internal::IsFipsModeEnabled() && !internal::IsFipsEnabledInSsl()) {
     GTEST_SKIP() << "Not supported if FIPS-mode is used and BoringCrypto is "
                     "not available";
   }
@@ -80,7 +80,7 @@ TEST_F(SignatureConfigTest, testBasic) {
 // Tests that the PublicKeySignWrapper has been properly registered and we
 // can wrap primitives.
 TEST_F(SignatureConfigTest, PublicKeySignWrapperRegistered) {
-  if (IsFipsModeEnabled() && !FIPS_mode()) {
+  if (internal::IsFipsModeEnabled() && !internal::IsFipsEnabledInSsl()) {
     GTEST_SKIP() << "Not supported if FIPS-mode is used and BoringCrypto is "
                     "not available";
   }
@@ -116,7 +116,7 @@ TEST_F(SignatureConfigTest, PublicKeySignWrapperRegistered) {
 // Tests that the PublicKeyVerifyWrapper has been properly registered and we
 // can wrap primitives.
 TEST_F(SignatureConfigTest, PublicKeyVerifyWrapperRegistered) {
-  if (IsFipsModeEnabled() && !FIPS_mode()) {
+  if (internal::IsFipsModeEnabled() && !internal::IsFipsEnabledInSsl()) {
     GTEST_SKIP() << "Not supported if FIPS-mode is used and BoringCrypto is "
                     "not available";
   }
@@ -147,7 +147,7 @@ TEST_F(SignatureConfigTest, PublicKeyVerifyWrapperRegistered) {
 
 // FIPS-only mode tests
 TEST_F(SignatureConfigTest, RegisterNonFipsTemplates) {
-  if (!IsFipsModeEnabled() || !FIPS_mode()) {
+  if (!internal::IsFipsModeEnabled() || !internal::IsFipsEnabledInSsl()) {
     GTEST_SKIP() << "Only supported in FIPS-only mode with BoringCrypto.";
   }
 
@@ -172,7 +172,7 @@ TEST_F(SignatureConfigTest, RegisterNonFipsTemplates) {
 }
 
 TEST_F(SignatureConfigTest, RegisterFipsValidTemplates) {
-  if (!IsFipsModeEnabled() || !FIPS_mode()) {
+  if (!internal::IsFipsModeEnabled() || !internal::IsFipsEnabledInSsl()) {
     GTEST_SKIP() << "Only supported in FIPS-only mode with BoringCrypto.";
   }
 

@@ -39,8 +39,17 @@ void SetFipsRestricted() { is_fips_restricted = true; }
 
 void UnSetFipsRestricted() { is_fips_restricted = false; }
 
-crypto::tink::util::Status ChecksFipsCompatibility(
-    FipsCompatibility fips_status) {
+bool IsFipsModeEnabled() { return kUseOnlyFips || is_fips_restricted; }
+
+bool IsFipsEnabledInSsl() {
+#ifdef OPENSSL_IS_BORINGSSL
+  return FIPS_mode();
+#else
+  return false;
+#endif
+}
+
+util::Status ChecksFipsCompatibility(FipsCompatibility fips_status) {
   switch (fips_status) {
     case FipsCompatibility::kNotFips:
       if (IsFipsModeEnabled()) {
@@ -50,7 +59,7 @@ crypto::tink::util::Status ChecksFipsCompatibility(
         return util::OkStatus();
       }
     case FipsCompatibility::kRequiresBoringCrypto:
-      if ((IsFipsModeEnabled()) && !FIPS_mode()) {
+      if ((IsFipsModeEnabled()) && !IsFipsEnabledInSsl()) {
         return util::Status(
             absl::StatusCode::kInternal,
             "BoringSSL not built with the BoringCrypto module. If you want to "
@@ -64,8 +73,6 @@ crypto::tink::util::Status ChecksFipsCompatibility(
                           "Could not determine FIPS status.");
   }
 }
-
-bool IsFipsModeEnabled() { return kUseOnlyFips || is_fips_restricted; }
 
 }  // namespace internal
 }  // namespace tink

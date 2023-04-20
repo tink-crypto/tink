@@ -20,7 +20,7 @@
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "absl/status/status.h"
-#include "tink/config/tink_fips.h"
+#include "tink/internal/fips_utils.h"
 #include "tink/keyset_handle.h"
 #include "tink/prf/hmac_prf_key_manager.h"
 #include "tink/prf/prf_key_templates.h"
@@ -43,7 +43,7 @@ class PrfConfigTest : public ::testing::Test {
 };
 
 TEST_F(PrfConfigTest, RegisterWorks) {
-  if (IsFipsModeEnabled()) {
+  if (internal::IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
 
@@ -58,7 +58,7 @@ TEST_F(PrfConfigTest, RegisterWorks) {
 
 // FIPS-only mode tests
 TEST_F(PrfConfigTest, RegisterNonFipsTemplates) {
-  if (!IsFipsModeEnabled() || !FIPS_mode()) {
+  if (!internal::IsFipsModeEnabled() || !internal::IsFipsEnabledInSsl()) {
     GTEST_SKIP() << "Only supported in FIPS-only mode";
   }
 
@@ -76,7 +76,7 @@ TEST_F(PrfConfigTest, RegisterNonFipsTemplates) {
 }
 
 TEST_F(PrfConfigTest, RegisterFipsValidTemplates) {
-  if (!IsFipsModeEnabled() || !FIPS_mode()) {
+  if (!internal::IsFipsModeEnabled() || !internal::IsFipsEnabledInSsl()) {
     GTEST_SKIP() << "Only supported in FIPS-only mode";
   }
 

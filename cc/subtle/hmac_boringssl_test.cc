@@ -22,7 +22,7 @@
 #include "gtest/gtest.h"
 #include "absl/status/status.h"
 #include "absl/strings/escaping.h"
-#include "tink/config/tink_fips.h"
+#include "tink/internal/fips_utils.h"
 #include "tink/mac.h"
 #include "tink/subtle/common_enums.h"
 #include "tink/util/secret_data.h"
@@ -57,7 +57,7 @@ class HmacBoringSslTest : public ::testing::Test {
 };
 
 TEST_F(HmacBoringSslTest, testBasic) {
-  if (IsFipsModeEnabled() && !FIPS_mode()) {
+  if (internal::IsFipsModeEnabled() && !internal::IsFipsEnabledInSsl()) {
     GTEST_SKIP()
         << "Test should not run in FIPS mode when BoringCrypto is unavailable.";
   }
@@ -93,7 +93,7 @@ TEST_F(HmacBoringSslTest, testBasic) {
 }
 
 TEST_F(HmacBoringSslTest, testModification) {
-  if (IsFipsModeEnabled() && !FIPS_mode()) {
+  if (internal::IsFipsModeEnabled() && !internal::IsFipsEnabledInSsl()) {
     GTEST_SKIP()
         << "Test should not run in FIPS mode when BoringCrypto is unavailable.";
   }
@@ -118,7 +118,7 @@ TEST_F(HmacBoringSslTest, testModification) {
 }
 
 TEST_F(HmacBoringSslTest, testTruncation) {
-  if (IsFipsModeEnabled() && !FIPS_mode()) {
+  if (internal::IsFipsModeEnabled() && !internal::IsFipsEnabledInSsl()) {
     GTEST_SKIP()
         << "Test should not run in FIPS mode when BoringCrypto is unavailable.";
   }
@@ -141,7 +141,7 @@ TEST_F(HmacBoringSslTest, testTruncation) {
 }
 
 TEST_F(HmacBoringSslTest, testInvalidKeySizes) {
-  if (IsFipsModeEnabled() && !FIPS_mode()) {
+  if (internal::IsFipsModeEnabled() && !internal::IsFipsEnabledInSsl()) {
     GTEST_SKIP()
         << "Test should not run in FIPS mode when BoringCrypto is unavailable.";
   }
@@ -160,7 +160,7 @@ TEST_F(HmacBoringSslTest, testInvalidKeySizes) {
 }
 
 TEST_F(HmacBoringSslTest, TestFipsFailWithoutBoringCrypto) {
-  if (!IsFipsModeEnabled() || FIPS_mode()) {
+  if (!internal::IsFipsModeEnabled() || internal::IsFipsEnabledInSsl()) {
     GTEST_SKIP()
         << "Test assumes kOnlyUseFips but BoringCrypto is unavailable.";
   }

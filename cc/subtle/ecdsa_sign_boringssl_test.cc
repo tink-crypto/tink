@@ -21,8 +21,8 @@
 
 #include "gtest/gtest.h"
 #include "absl/status/status.h"
-#include "tink/config/tink_fips.h"
 #include "tink/internal/ec_util.h"
+#include "tink/internal/fips_utils.h"
 #include "tink/public_key_sign.h"
 #include "tink/public_key_verify.h"
 #include "tink/subtle/common_enums.h"
@@ -43,7 +43,7 @@ using ::crypto::tink::test::StatusIs;
 class EcdsaSignBoringSslTest : public ::testing::Test {};
 
 TEST_F(EcdsaSignBoringSslTest, testBasicSigning) {
-  if (IsFipsModeEnabled() && !FIPS_mode()) {
+  if (internal::IsFipsModeEnabled() && !internal::IsFipsEnabledInSsl()) {
     GTEST_SKIP()
         << "Test is skipped if kOnlyUseFips but BoringCrypto is unavailable.";
   }
@@ -84,7 +84,7 @@ TEST_F(EcdsaSignBoringSslTest, testBasicSigning) {
 }
 
 TEST_F(EcdsaSignBoringSslTest, testEncodingsMismatch) {
-  if (IsFipsModeEnabled() && !FIPS_mode()) {
+  if (internal::IsFipsModeEnabled() && !internal::IsFipsEnabledInSsl()) {
     GTEST_SKIP()
         << "Test is skipped if kOnlyUseFips but BoringCrypto is unavailable.";
   }
@@ -115,7 +115,7 @@ TEST_F(EcdsaSignBoringSslTest, testEncodingsMismatch) {
 }
 
 TEST_F(EcdsaSignBoringSslTest, testSignatureSizesWithIEEE_P1364Encoding) {
-  if (IsFipsModeEnabled() && !FIPS_mode()) {
+  if (internal::IsFipsModeEnabled() && !internal::IsFipsEnabledInSsl()) {
     GTEST_SKIP()
         << "Test is skipped if kOnlyUseFips but BoringCrypto is unavailable.";
   }
@@ -149,7 +149,7 @@ TEST_F(EcdsaSignBoringSslTest, testSignatureSizesWithIEEE_P1364Encoding) {
 }
 
 TEST_F(EcdsaSignBoringSslTest, testNewErrors) {
-  if (IsFipsModeEnabled() && !FIPS_mode()) {
+  if (internal::IsFipsModeEnabled() && !internal::IsFipsEnabledInSsl()) {
     GTEST_SKIP()
         << "Test is skipped if kOnlyUseFips but BoringCrypto is unavailable.";
   }
@@ -164,7 +164,7 @@ TEST_F(EcdsaSignBoringSslTest, testNewErrors) {
 
 // FIPS-only mode test
 TEST_F(EcdsaSignBoringSslTest, TestFipsFailWithoutBoringCrypto) {
-  if (!IsFipsModeEnabled() || FIPS_mode()) {
+  if (!internal::IsFipsModeEnabled() || internal::IsFipsEnabledInSsl()) {
     GTEST_SKIP()
         << "Test assumes kOnlyUseFips but BoringCrypto is unavailable.";
   }

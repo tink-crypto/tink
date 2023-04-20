@@ -34,6 +34,9 @@ ABSL_CONST_INIT extern const bool kUseOnlyFips;
 // the FIPS restrictions have been enabled at runtime.
 bool IsFipsModeEnabled();
 
+// Returns true if the Ssl layer (BoringSSL or OpenSSL) has FIPS mode enabled.
+bool IsFipsEnabledInSsl();
+
 // Enable FIPS restrictions. If Tink has been built in FIPS mode this is
 // redundant.
 void SetFipsRestricted();

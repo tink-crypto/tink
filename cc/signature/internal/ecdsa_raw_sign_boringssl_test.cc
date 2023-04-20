@@ -22,8 +22,8 @@
 
 #include "gtest/gtest.h"
 #include "absl/status/status.h"
-#include "tink/config/tink_fips.h"
 #include "tink/internal/ec_util.h"
+#include "tink/internal/fips_utils.h"
 #include "tink/public_key_sign.h"
 #include "tink/public_key_verify.h"
 #include "tink/subtle/common_enums.h"
@@ -62,7 +62,7 @@ util::StatusOr<std::string> ComputeDigest(subtle::HashType hash_type,
 }
 
 TEST(EcdsaRawSignBoringSslTest, VerifySignature) {
-  if (IsFipsModeEnabled() && !FIPS_mode()) {
+  if (internal::IsFipsModeEnabled() && !internal::IsFipsEnabledInSsl()) {
     GTEST_SKIP()
         << "Test is skipped if kOnlyUseFips but BoringCrypto is unavailable.";
   }
@@ -94,7 +94,7 @@ TEST(EcdsaRawSignBoringSslTest, VerifySignature) {
 }
 
 TEST(EcdsaRawSignBoringSslTest, VerifySignatureWithEmptyMessage) {
-  if (IsFipsModeEnabled() && !FIPS_mode()) {
+  if (internal::IsFipsModeEnabled() && !internal::IsFipsEnabledInSsl()) {
     GTEST_SKIP()
         << "Test is skipped if kOnlyUseFips but BoringCrypto is unavailable.";
   }
@@ -129,7 +129,7 @@ TEST(EcdsaRawSignBoringSslTest, VerifySignatureWithEmptyMessage) {
 }
 
 TEST(EcdsaRawSignBoringSslTest, VerifyFailsWithInvalidMessageOrSignature) {
-  if (IsFipsModeEnabled() && !FIPS_mode()) {
+  if (internal::IsFipsModeEnabled() && !internal::IsFipsEnabledInSsl()) {
     GTEST_SKIP()
         << "Test is skipped if kOnlyUseFips but BoringCrypto is unavailable.";
   }
@@ -166,7 +166,7 @@ TEST(EcdsaRawSignBoringSslTest, VerifyFailsWithInvalidMessageOrSignature) {
 }
 
 TEST(EcdsaRawSignBoringSslTest, VerifyFailsWhenEncodingDoesNotMatch) {
-  if (IsFipsModeEnabled() && !FIPS_mode()) {
+  if (internal::IsFipsModeEnabled() && !internal::IsFipsEnabledInSsl()) {
     GTEST_SKIP()
         << "Test is skipped if kOnlyUseFips but BoringCrypto is unavailable.";
   }
@@ -202,7 +202,7 @@ TEST(EcdsaRawSignBoringSslTest, VerifyFailsWhenEncodingDoesNotMatch) {
 
 TEST(EcdsaRawSignBoringSslTest,
      SignatureSizesAreCorrectWhenUsingIeeeP136Encoding) {
-  if (IsFipsModeEnabled() && !FIPS_mode()) {
+  if (internal::IsFipsModeEnabled() && !internal::IsFipsEnabledInSsl()) {
     GTEST_SKIP()
         << "Test is skipped if kOnlyUseFips but BoringCrypto is unavailable.";
   }
@@ -242,7 +242,7 @@ TEST(EcdsaRawSignBoringSslTest,
 }
 
 TEST(EcdsaRawSignBoringSslTest, CreateFailsWithBadPublicKey) {
-  if (IsFipsModeEnabled() && !FIPS_mode()) {
+  if (internal::IsFipsModeEnabled() && !internal::IsFipsEnabledInSsl()) {
     GTEST_SKIP()
         << "Test is skipped if kOnlyUseFips but BoringCrypto is unavailable.";
   }
@@ -260,7 +260,7 @@ TEST(EcdsaRawSignBoringSslTest, CreateFailsWithBadPublicKey) {
 
 // FIPS-only mode test
 TEST(EcdsaRawSignBoringSslTest, FipsFailWithoutBoringCrypto) {
-  if (!IsFipsModeEnabled() || FIPS_mode()) {
+  if (!internal::IsFipsModeEnabled() || internal::IsFipsEnabledInSsl()) {
     GTEST_SKIP()
         << "Test assumes kOnlyUseFips but BoringCrypto is unavailable.";
   }

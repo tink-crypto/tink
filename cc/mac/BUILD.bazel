@@ -268,7 +268,7 @@ cc_test(
         "//:mac",
         "//:partial_key_access",
         "//:registry",
-        "//config:tink_fips",
+        "//internal:fips_utils",
         "//internal:mutable_serialization_registry",
         "//internal:proto_key_serialization",
         "//internal:proto_parameters_serialization",

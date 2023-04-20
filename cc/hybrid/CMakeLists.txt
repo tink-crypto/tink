@@ -263,7 +263,7 @@ tink_cc_test(
     tink::core::hybrid_encrypt
     tink::core::keyset_handle
     tink::core::registry
-    tink::config::tink_fips
+    tink::internal::fips_utils
     tink::util::status
     tink::util::test_matchers
     tink::util::test_util

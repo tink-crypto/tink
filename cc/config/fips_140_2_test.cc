@@ -56,7 +56,7 @@ class Fips1402Test : public ::testing::Test {
 };
 
 TEST_F(Fips1402Test, ConfigFips1402) {
-  if (!FIPS_mode()) {
+  if (!internal::IsFipsEnabledInSsl()) {
     GTEST_SKIP() << "Only test in FIPS mode";
   }
 
@@ -83,7 +83,7 @@ TEST_F(Fips1402Test, ConfigFips1402) {
 }
 
 TEST_F(Fips1402Test, NonFipsKeyManagerIsNotPresent) {
-  if (!FIPS_mode()) {
+  if (!internal::IsFipsEnabledInSsl()) {
     GTEST_SKIP() << "Only test in FIPS mode";
   }
 
@@ -94,7 +94,7 @@ TEST_F(Fips1402Test, NonFipsKeyManagerIsNotPresent) {
 }
 
 TEST_F(Fips1402Test, ConfigFips1402FailsInNonFipsMode) {
-  if (FIPS_mode()) {
+  if (internal::IsFipsEnabledInSsl()) {
     GTEST_SKIP() << "Only test in non-FIPS mode";
   }
 
@@ -103,7 +103,7 @@ TEST_F(Fips1402Test, ConfigFips1402FailsInNonFipsMode) {
 }
 
 TEST_F(Fips1402Test, NewKeyDataAndWrapKeysetSucceeds) {
-  if (!FIPS_mode()) {
+  if (!internal::IsFipsEnabledInSsl()) {
     GTEST_SKIP() << "Only test in FIPS mode";
   }
 
