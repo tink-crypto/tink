@@ -23,8 +23,6 @@ cc_library(
         "aead_key_templates.h",
         "binary_keyset_reader.h",
         "binary_keyset_writer.h",
-        "catalogue.h",
-        "config.h",
         "deterministic_aead.h",
         "deterministic_aead_config.h",
         "deterministic_aead_factory.h",
@@ -397,42 +395,6 @@ cc_library(
 )
 
 cc_library(
-    name = "catalogue",
-    hdrs = ["catalogue.h"],
-    include_prefix = "tink",
-    deps = [
-        ":key_manager",
-        "//util:statusor",
-        "@com_google_absl//absl/base:core_headers",
-    ],
-)
-
-cc_library(
-    name = "config",
-    srcs = ["core/config.cc"],
-    hdrs = ["config.h"],
-    include_prefix = "tink",
-    deps = [
-        ":catalogue",
-        ":key_manager",
-        ":registry",
-        "//aead:aead_config",
-        "//daead:deterministic_aead_config",
-        "//hybrid:hybrid_config",
-        "//mac:mac_config",
-        "//proto:config_cc_proto",
-        "//signature:signature_config",
-        "//streamingaead:streaming_aead_config",
-        "//util:errors",
-        "//util:status",
-        "//util:statusor",
-        "@com_google_absl//absl/base:core_headers",
-        "@com_google_absl//absl/status",
-        "@com_google_absl//absl/strings",
-    ],
-)
-
-cc_library(
     name = "crypto_format",
     srcs = ["core/crypto_format.cc"],
     hdrs = ["crypto_format.h"],
@@ -452,7 +414,9 @@ cc_library(
     include_prefix = "tink",
     deps = [
         ":crypto_format",
+        "//proto:prf_based_deriver_cc_proto",
         "//proto:tink_cc_proto",
+        "//util:constants",
         "//util:errors",
         "//util:statusor",
         "@com_google_absl//absl/base:core_headers",
@@ -510,6 +474,7 @@ cc_library(
     visibility = ["//visibility:public"],
     deps = [
         ":aead",
+        ":configuration",
         ":insecure_secret_key_access",
         ":key",
         ":key_manager",
@@ -518,6 +483,7 @@ cc_library(
         ":keyset_writer",
         ":primitive_set",
         ":registry",
+        "//internal:configuration_impl",
         "//internal:key_info",
         "//internal:key_status_util",
         "//internal:mutable_serialization_registry",
@@ -857,18 +823,6 @@ cc_test(
 )
 
 cc_test(
-    name = "config_test",
-    size = "small",
-    srcs = ["core/config_test.cc"],
-    deps = [
-        ":config",
-        ":mac",
-        "//proto:config_cc_proto",
-        "@com_google_googletest//:gtest_main",
-    ],
-)
-
-cc_test(
     name = "crypto_format_test",
     size = "small",
     srcs = ["core/crypto_format_test.cc"],
@@ -897,7 +851,9 @@ cc_test(
         "//aead:aead_key_templates",
         "//aead:aead_wrapper",
         "//aead:aes_gcm_key_manager",
+        "//config:fips_140_2",
         "//config:tink_config",
+        "//internal:fips_utils",
         "//internal:legacy_proto_parameters",
         "//internal:proto_parameters_serialization",
         "//mac:mac_key_templates",
@@ -963,7 +919,6 @@ cc_test(
     size = "small",
     srcs = ["core/keyset_manager_test.cc"],
     deps = [
-        ":config",
         ":keyset_handle",
         ":keyset_manager",
         "//aead:aead_config",
@@ -1160,4 +1115,11 @@ cc_test(
         "@com_google_absl//absl/strings",
         "@com_google_googletest//:gtest_main",
     ],
+)
+
+cc_library(
+    name = "configuration",
+    hdrs = ["configuration.h"],
+    include_prefix = "tink",
+    deps = ["//internal:registry_impl"],
 )

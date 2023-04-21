@@ -103,7 +103,7 @@ struct SphincsTestCase {
 using SphincsVerifyKeyManagerTest = testing::TestWithParam<SphincsTestCase>;
 
 // Helper function that returns a valid sphincs private key.
-StatusOr<SphincsPrivateKey> CreateValidPrivateKey(int32 private_key_size,
+StatusOr<SphincsPrivateKey> CreateValidPrivateKey(int32_t private_key_size,
                                                   SphincsHashType hash_type,
                                                   SphincsVariant variant,
                                                   SphincsSignatureType type) {
@@ -118,7 +118,7 @@ StatusOr<SphincsPrivateKey> CreateValidPrivateKey(int32 private_key_size,
 }
 
 // Helper function that returns a valid sphincs public key.
-StatusOr<SphincsPublicKey> CreateValidPublicKey(int32 private_key_size,
+StatusOr<SphincsPublicKey> CreateValidPublicKey(int32_t private_key_size,
                                                 SphincsHashType hash_type,
                                                 SphincsVariant variant,
                                                 SphincsSignatureType type) {

@@ -14,8 +14,8 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef TINK_EXPERIMENTAL_SIGNATURE_DILITHIUM_KEY_TEMPLATE_H_
-#define TINK_EXPERIMENTAL_SIGNATURE_DILITHIUM_KEY_TEMPLATE_H_
+#ifndef TINK_EXPERIMENTAL_PQCRYPTO_SIGNATURE_DILITHIUM_KEY_TEMPLATE_H_
+#define TINK_EXPERIMENTAL_PQCRYPTO_SIGNATURE_DILITHIUM_KEY_TEMPLATE_H_
 
 #include "proto/tink.pb.h"
 
@@ -38,4 +38,4 @@ const google::crypto::tink::KeyTemplate& Dilithium5AesKeyTemplate();
 }  // namespace tink
 }  // namespace crypto
 
-#endif  // TINK_EXPERIMENTAL_SIGNATURE_DILITHIUM_KEY_TEMPLATE_H_
+#endif  // TINK_EXPERIMENTAL_PQCRYPTO_SIGNATURE_DILITHIUM_KEY_TEMPLATE_H_

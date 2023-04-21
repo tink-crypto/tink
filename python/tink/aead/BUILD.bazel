@@ -14,6 +14,7 @@ py_library(
         ":_aead",
         ":_aead_key_manager",
         ":_aead_key_templates",
+        ":_kms_aead_key_manager",
         ":_kms_envelope_aead",
     ],
 )
@@ -31,6 +32,7 @@ py_library(
     deps = [
         ":_aead",
         ":_aead_wrapper",
+        ":_kms_aead_key_manager",
         "//tink/cc/pybind:tink_bindings",
         "//tink/core",
     ],
@@ -43,8 +45,10 @@ py_test(
     deps = [
         ":aead",
         requirement("absl-py"),
+        "//tink:cleartext_keyset_handle",
         "//tink:tink_python",
         "//tink/core",
+        "//tink/mac",
         "//tink/proto:aes_ctr_hmac_aead_py_pb2",
         "//tink/proto:aes_eax_py_pb2",
         "//tink/proto:aes_gcm_py_pb2",
@@ -52,6 +56,7 @@ py_test(
         "//tink/proto:common_py_pb2",
         "//tink/proto:tink_py_pb2",
         "//tink/proto:xchacha20_poly1305_py_pb2",
+        "//tink/testing:fake_kms",
     ],
 )
 
@@ -133,6 +138,20 @@ py_test(
         requirement("absl-py"),
         "//tink:tink_python",
         "//tink/core",
+        "//tink/mac",
         "//tink/proto:aes_gcm_py_pb2",
+    ],
+)
+
+py_library(
+    name = "_kms_aead_key_manager",
+    srcs = ["_kms_aead_key_manager.py"],
+    deps = [
+        ":_aead",
+        ":_kms_envelope_aead",
+        "//tink/core",
+        "//tink/proto:kms_aead_py_pb2",
+        "//tink/proto:kms_envelope_py_pb2",
+        "//tink/proto:tink_py_pb2",
     ],
 )

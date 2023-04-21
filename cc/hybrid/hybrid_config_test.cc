@@ -24,12 +24,12 @@
 #include "gtest/gtest.h"
 #include "absl/status/status.h"
 #include "openssl/crypto.h"
-#include "tink/config/tink_fips.h"
 #include "tink/hybrid/ecies_aead_hkdf_private_key_manager.h"
 #include "tink/hybrid/ecies_aead_hkdf_public_key_manager.h"
 #include "tink/hybrid/hybrid_key_templates.h"
 #include "tink/hybrid_decrypt.h"
 #include "tink/hybrid_encrypt.h"
+#include "tink/internal/fips_utils.h"
 #include "tink/keyset_handle.h"
 #include "tink/registry.h"
 #include "tink/util/status.h"
@@ -51,7 +51,7 @@ class HybridConfigTest : public ::testing::Test {
 };
 
 TEST_F(HybridConfigTest, Basic) {
-  if (IsFipsModeEnabled()) {
+  if (internal::IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
 
@@ -77,7 +77,7 @@ TEST_F(HybridConfigTest, Basic) {
 // Tests that the HybridEncryptWrapper has been properly registered and we
 // can wrap primitives.
 TEST_F(HybridConfigTest, EncryptWrapperRegistered) {
-  if (IsFipsModeEnabled()) {
+  if (internal::IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
 
@@ -112,7 +112,7 @@ TEST_F(HybridConfigTest, EncryptWrapperRegistered) {
 // Tests that the HybridDecryptWrapper has been properly registered and we
 // can wrap primitives.
 TEST_F(HybridConfigTest, DecryptWrapperRegistered) {
-  if (IsFipsModeEnabled()) {
+  if (internal::IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
 
@@ -146,7 +146,7 @@ TEST_F(HybridConfigTest, DecryptWrapperRegistered) {
 
 // FIPS-only mode tests
 TEST_F(HybridConfigTest, RegisterNonFipsTemplates) {
-  if (!IsFipsModeEnabled() || !FIPS_mode()) {
+  if (!internal::IsFipsModeEnabled() || !internal::IsFipsEnabledInSsl()) {
     GTEST_SKIP() << "Only supported in FIPS-only mode with BoringCrypto";
   }
 

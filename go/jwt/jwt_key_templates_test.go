@@ -18,6 +18,7 @@ package jwt_test
 
 import (
 	"testing"
+	"time"
 
 	"github.com/google/tink/go/jwt"
 	"github.com/google/tink/go/keyset"
@@ -31,7 +32,10 @@ type templateTestCase struct {
 }
 
 func TestJWTComputeVerifyMAC(t *testing.T) {
-	rawJWT, err := jwt.NewRawJWT(&jwt.RawJWTOptions{WithoutExpiration: true})
+	expiresAt := time.Now().Add(time.Hour)
+	rawJWT, err := jwt.NewRawJWT(&jwt.RawJWTOptions{
+		ExpiresAt: &expiresAt,
+	})
 	if err != nil {
 		t.Errorf("NewRawJWT() err = %v, want nil", err)
 	}
@@ -56,19 +60,36 @@ func TestJWTComputeVerifyMAC(t *testing.T) {
 			if err != nil {
 				t.Errorf("m.ComputeMACAndEncode() err = %v, want nil", err)
 			}
-			verifier, err := jwt.NewValidator(&jwt.ValidatorOpts{AllowMissingExpiration: true})
+			validator, err := jwt.NewValidator(&jwt.ValidatorOpts{})
 			if err != nil {
 				t.Errorf("jwt.NewValidator() err = %v, want nil", err)
 			}
-			if _, err := m.VerifyMACAndDecode(compact, verifier); err != nil {
+			if _, err := m.VerifyMACAndDecode(compact, validator); err != nil {
 				t.Errorf("m.VerifyMACAndDecode() err = %v, want nil", err)
+			}
+
+			// In two hours, VerifyMACAndDecode should fail with an expiration error.
+			inTwoHours := time.Now().Add(time.Hour * 2)
+			futureValidator, err := jwt.NewValidator(&jwt.ValidatorOpts{FixedNow: inTwoHours})
+			if err != nil {
+				t.Errorf("jwt.NewValidator() err = %v, want nil", err)
+			}
+			_, futureError := m.VerifyMACAndDecode(compact, futureValidator)
+			if futureError == nil {
+				t.Errorf("m.VerifyMACAndDecode(compact, futureValidator) err = nil, want error")
+			}
+			if !jwt.IsExpirationErr(futureError) {
+				t.Errorf("jwt.IsExpirationErr(futureError) = false, want true")
 			}
 		})
 	}
 }
 
 func TestJWTSignVerify(t *testing.T) {
-	rawJWT, err := jwt.NewRawJWT(&jwt.RawJWTOptions{WithoutExpiration: true})
+	expiresAt := time.Now().Add(time.Hour)
+	rawJWT, err := jwt.NewRawJWT(&jwt.RawJWTOptions{
+		ExpiresAt: &expiresAt,
+	})
 	if err != nil {
 		t.Errorf("jwt.NewRawJWT() err = %v, want nil", err)
 	}
@@ -117,12 +138,26 @@ func TestJWTSignVerify(t *testing.T) {
 			if err != nil {
 				t.Fatalf("jwt.NewVerifier() err = %v, want nil", err)
 			}
-			validator, err := jwt.NewValidator(&jwt.ValidatorOpts{AllowMissingExpiration: true})
+			validator, err := jwt.NewValidator(&jwt.ValidatorOpts{})
 			if err != nil {
 				t.Fatalf("jwt.NewValidator() err = %v, want nil", err)
 			}
 			if _, err := verifier.VerifyAndDecode(compact, validator); err != nil {
 				t.Errorf("verifier.VerifyAndDecode() err = %v, want nil", err)
+			}
+
+			// In two hours, VerifyAndDecode should fail with an expiration error.
+			inTwoHours := time.Now().Add(time.Hour * 2)
+			futureValidator, err := jwt.NewValidator(&jwt.ValidatorOpts{FixedNow: inTwoHours})
+			if err != nil {
+				t.Errorf("jwt.NewValidator() err = %v, want nil", err)
+			}
+			_, futureError := verifier.VerifyAndDecode(compact, futureValidator)
+			if futureError == nil {
+				t.Errorf("verifier.VerifyAndDecode(compact, futureValidator) err = nil, want error")
+			}
+			if !jwt.IsExpirationErr(futureError) {
+				t.Errorf("jwt.IsExpirationErr(expirationError) = false, want true")
 			}
 		})
 	}

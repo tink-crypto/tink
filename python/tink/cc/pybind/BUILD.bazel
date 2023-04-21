@@ -253,43 +253,6 @@ tink_pybind_library(
     ],
 )
 
-tink_pybind_library(
-    name = "cc_gcp_kms_client",
-    srcs = ["cc_gcp_kms_client.cc"],
-    hdrs = ["cc_gcp_kms_client.h"],
-    deps = [
-        ":tink_exception",
-        "//tink/cc:output_stream_adapter",
-        "@pybind11",
-        "@tink_cc//:kms_clients",
-        "@tink_cc_gcpkms//:gcp_kms_client",
-    ],
-)
-
-tink_pybind_library(
-    name = "cc_aws_kms_client",
-    srcs = ["cc_aws_kms_client.cc"],
-    hdrs = ["cc_aws_kms_client.h"],
-    deps = [
-        ":tink_exception",
-        "//tink/cc:output_stream_adapter",
-        "@pybind11",
-        "@tink_cc_awskms//:aws_kms_client",
-    ],
-)
-
-tink_pybind_library(
-    name = "cc_fake_kms_client_testonly",
-    srcs = ["cc_fake_kms_client_testonly.cc"],
-    hdrs = ["cc_fake_kms_client_testonly.h"],
-    deps = [
-        ":tink_exception",
-        "@pybind11",
-        "@tink_cc//util:fake_kms_client_pybind",
-        "@tink_cc//util:statusor",
-    ],
-)
-
 # To avoid getting multiple instances of KmsClients, ":aead" and
 # ":cc_fake_kms_client_testonly" need to be in the same pybind exension.
 tink_pybind_extension(
@@ -297,9 +260,6 @@ tink_pybind_extension(
     srcs = ["tink_bindings.cc"],
     deps = [
         ":aead",
-        ":cc_aws_kms_client",
-        ":cc_fake_kms_client_testonly",
-        ":cc_gcp_kms_client",
         ":cc_hpke_config",
         ":cc_jwt_config",
         ":cc_key_manager",

@@ -14,8 +14,8 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef TINK_PYTHON_CC_TEST_UTIL_H_
-#define TINK_PYTHON_CC_TEST_UTIL_H_
+#ifndef TINK_PYTHON_TINK_CC_TEST_UTIL_H_
+#define TINK_PYTHON_TINK_CC_TEST_UTIL_H_
 
 #include <algorithm>
 #include <string>
@@ -313,5 +313,4 @@ class DummyStreamingAead : public StreamingAead {
 }  // namespace tink
 }  // namespace crypto
 
-
-#endif  // TINK_PYTHON_CC_TEST_UTIL_H_
+#endif  // TINK_PYTHON_TINK_CC_TEST_UTIL_H_

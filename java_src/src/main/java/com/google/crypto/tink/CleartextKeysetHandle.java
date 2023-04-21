@@ -39,9 +39,11 @@ public final class CleartextKeysetHandle {
   /**
    * @return a new {@link KeysetHandle} from {@code serialized} that is a serialized {@link Keyset}
    * @throws GeneralSecurityException
-   * @deprecated use {@link #read} instead
+   * @deprecated Call {@code TinkProtoKeysetFormat.parseKeyset(serialized,
+   *     InsecureSecretKeyAccess.get())} which has the same semantics.
    */
-  @Deprecated /* Deprecation under consideration */
+  @SuppressWarnings("UnusedException")
+  @Deprecated
   public static final KeysetHandle parseFrom(final byte[] serialized)
       throws GeneralSecurityException {
     try {

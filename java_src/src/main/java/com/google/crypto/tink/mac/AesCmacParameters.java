@@ -168,7 +168,7 @@ public final class AesCmacParameters extends MacParameters {
 
   @Override
   public int hashCode() {
-    return Objects.hash(keySizeBytes, tagSizeBytes, variant);
+    return Objects.hash(AesCmacParameters.class, keySizeBytes, tagSizeBytes, variant);
   }
 
   @Override

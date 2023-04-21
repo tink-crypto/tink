@@ -52,6 +52,10 @@ run_go_tests() {
 
 run_py_tests() {
   use_bazel "$(cat python/.bazelversion)"
+
+  # TODO(b/276277854) It is not clear why this is needed.
+  pip3 install google-cloud-kms==2.15.0 --user
+
   ./kokoro/testutils/run_bazel_tests.sh "python"
 }
 
@@ -60,9 +64,6 @@ run_tools_tests() {
   local -a MANUAL_TOOLS_TARGETS
   if [[ "${IS_KOKORO}" == "true" ]]; then
     MANUAL_TOOLS_TARGETS+=(
-      "//testing/cc:aws_kms_aead_test"
-      "//testing/cc:gcp_kms_aead_test"
-      "//testing/cross_language:aead_envelope_test"
       "//tinkey/src/test/java/com/google/crypto/tink/tinkey:AddKeyCommandTest"
       "//tinkey/src/test/java/com/google/crypto/tink/tinkey:CreateKeysetCommandTest"
       "//tinkey/src/test/java/com/google/crypto/tink/tinkey:CreatePublicKeysetCommandTest"
@@ -92,15 +93,6 @@ run_java_apps_tests() {
 
 run_javascript_tests() {
   use_bazel "$(cat javascript/.bazelversion)"
-  # On MacOS, Javascript compilation fails with
-  # clang: error: unknown argument: '-fno-canonical-system-headers'
-  # The internet recommends to run "bazel clean --expunge"
-  if [[ "${PLATFORM}" == 'darwin' ]]; then
-    (
-      cd javascript
-      bazelisk clean --expunge
-    )
-  fi
   ./kokoro/testutils/run_bazel_tests.sh "javascript"
 }
 
@@ -187,7 +179,7 @@ main() {
     if [[ "${PLATFORM}" == 'darwin' ]]; then
       # Default values for iOS SDK and Xcode. Can be overriden by another script.
       : "${IOS_SDK_VERSION:=13.2}"
-      : "${XCODE_VERSION:=11.3}"
+      : "${XCODE_VERSION:=14}"
 
       export DEVELOPER_DIR="/Applications/Xcode_${XCODE_VERSION}.app/Contents/Developer"
       export JAVA_HOME=$(/usr/libexec/java_home -v "1.8.0_292")

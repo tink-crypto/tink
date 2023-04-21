@@ -8,8 +8,12 @@ java_test(
         "//proto:common_java_proto",
         "//proto:hkdf_prf_java_proto",
         "//proto:tink_java_proto",
+        "//src/main/java/com/google/crypto/tink:tink_proto_parameters_format",
         "//src/main/java/com/google/crypto/tink/prf:hkdf_prf_key_manager",
+        "//src/main/java/com/google/crypto/tink/prf:predefined_prf_parameters",
+        "//src/main/java/com/google/crypto/tink/prf:prf_config",
         "//src/main/java/com/google/crypto/tink/prf:prf_key_templates",
+        "//src/main/java/com/google/crypto/tink/prf:prf_parameters",
         "@maven//:com_google_protobuf_protobuf_java",
         "@maven//:com_google_truth_truth",
         "@maven//:junit_junit",
@@ -193,6 +197,128 @@ java_test(
         "//src/main/java/com/google/crypto/tink/util:bytes",
         "//src/main/java/com/google/crypto/tink/util:secret_bytes",
         "@maven//:com_google_protobuf_protobuf_java",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "HmacPrfParametersTest",
+    size = "small",
+    srcs = ["HmacPrfParametersTest.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink/prf:hkdf_prf_parameters",
+        "//src/main/java/com/google/crypto/tink/prf:hmac_prf_parameters",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "AesCmacPrfParametersTest",
+    size = "small",
+    srcs = ["AesCmacPrfParametersTest.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink/prf:aes_cmac_prf_parameters",
+        "//src/main/java/com/google/crypto/tink/prf:hkdf_prf_parameters",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "HmacPrfKeyTest",
+    size = "small",
+    srcs = ["HmacPrfKeyTest.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink:insecure_secret_key_access",
+        "//src/main/java/com/google/crypto/tink/internal:key_tester",
+        "//src/main/java/com/google/crypto/tink/prf:hkdf_prf_key",
+        "//src/main/java/com/google/crypto/tink/prf:hkdf_prf_parameters",
+        "//src/main/java/com/google/crypto/tink/prf:hmac_prf_key",
+        "//src/main/java/com/google/crypto/tink/prf:hmac_prf_parameters",
+        "//src/main/java/com/google/crypto/tink/util:secret_bytes",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "AesCmacPrfKeyTest",
+    size = "small",
+    srcs = ["AesCmacPrfKeyTest.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink:insecure_secret_key_access",
+        "//src/main/java/com/google/crypto/tink/internal:key_tester",
+        "//src/main/java/com/google/crypto/tink/prf:aes_cmac_prf_key",
+        "//src/main/java/com/google/crypto/tink/prf:aes_cmac_prf_parameters",
+        "//src/main/java/com/google/crypto/tink/prf:hkdf_prf_key",
+        "//src/main/java/com/google/crypto/tink/prf:hkdf_prf_parameters",
+        "//src/main/java/com/google/crypto/tink/util:secret_bytes",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "HmacPrfProtoSerializationTest",
+    size = "small",
+    srcs = ["HmacPrfProtoSerializationTest.java"],
+    deps = [
+        "//proto:common_java_proto",
+        "//proto:hmac_prf_java_proto",
+        "//proto:tink_java_proto",
+        "//src/main/java/com/google/crypto/tink:insecure_secret_key_access",
+        "//src/main/java/com/google/crypto/tink:key",
+        "//src/main/java/com/google/crypto/tink:parameters",
+        "//src/main/java/com/google/crypto/tink/internal:mutable_serialization_registry",
+        "//src/main/java/com/google/crypto/tink/internal:proto_key_serialization",
+        "//src/main/java/com/google/crypto/tink/internal:proto_parameters_serialization",
+        "//src/main/java/com/google/crypto/tink/internal/testing:asserts",
+        "//src/main/java/com/google/crypto/tink/prf:hmac_prf_key",
+        "//src/main/java/com/google/crypto/tink/prf:hmac_prf_parameters",
+        "//src/main/java/com/google/crypto/tink/prf:hmac_prf_proto_serialization",
+        "//src/main/java/com/google/crypto/tink/util:secret_bytes",
+        "@maven//:com_google_protobuf_protobuf_java",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "AesCmacPrfProtoSerializationTest",
+    size = "small",
+    srcs = ["AesCmacPrfProtoSerializationTest.java"],
+    deps = [
+        "//proto:aes_cmac_prf_java_proto",
+        "//proto:tink_java_proto",
+        "//src/main/java/com/google/crypto/tink:insecure_secret_key_access",
+        "//src/main/java/com/google/crypto/tink:key",
+        "//src/main/java/com/google/crypto/tink:parameters",
+        "//src/main/java/com/google/crypto/tink/internal:mutable_serialization_registry",
+        "//src/main/java/com/google/crypto/tink/internal:proto_key_serialization",
+        "//src/main/java/com/google/crypto/tink/internal:proto_parameters_serialization",
+        "//src/main/java/com/google/crypto/tink/internal/testing:asserts",
+        "//src/main/java/com/google/crypto/tink/prf:aes_cmac_prf_key",
+        "//src/main/java/com/google/crypto/tink/prf:aes_cmac_prf_parameters",
+        "//src/main/java/com/google/crypto/tink/prf:aes_cmac_prf_proto_serialization",
+        "//src/main/java/com/google/crypto/tink/util:secret_bytes",
+        "@maven//:com_google_protobuf_protobuf_java",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "PredefinedPrfParametersTest",
+    size = "small",
+    srcs = ["PredefinedPrfParametersTest.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink:key",
+        "//src/main/java/com/google/crypto/tink:registry_cluster",
+        "//src/main/java/com/google/crypto/tink/prf:predefined_prf_parameters",
+        "//src/main/java/com/google/crypto/tink/prf:prf_config",
+        "//src/main/java/com/google/crypto/tink/prf:prf_parameters",
         "@maven//:com_google_truth_truth",
         "@maven//:junit_junit",
     ],

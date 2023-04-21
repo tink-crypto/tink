@@ -60,7 +60,7 @@ def main(argv):
 
   # Get the primitive.
   try:
-    cipher = keyset_handle.primitive(mac.Mac)
+    primitive = keyset_handle.primitive(mac.Mac)
   except tink.TinkError as e:
     logging.error('Error creating primitive: %s', e)
     return 1
@@ -70,20 +70,20 @@ def main(argv):
 
   if FLAGS.mode == 'compute':
     # Compute the MAC.
-    code = cipher.compute_mac(data)
+    tag = primitive.compute_mac(data)
     with open(FLAGS.mac_path, 'wb') as mac_file:
-      mac_file.write(binascii.hexlify(code))
+      mac_file.write(binascii.hexlify(tag))
     return 0
 
   with open(FLAGS.mac_path, 'rb') as mac_file:
     try:
-      expected_mac = binascii.unhexlify(mac_file.read().strip())
+      expected_tag = binascii.unhexlify(mac_file.read().strip())
     except binascii.Error as e:
-      logging.exception('Error reading expected code: %s', e)
+      logging.exception('Error reading expected tag: %s', e)
       return 1
 
   try:
-    cipher.verify_mac(expected_mac, data)
+    primitive.verify_mac(expected_tag, data)
     logging.info('MAC verification succeeded.')
     return 0
   except tink.TinkError as e:

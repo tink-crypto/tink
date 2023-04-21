@@ -203,6 +203,33 @@ public class KeysetHandleTest {
   }
 
   @Test
+  public void testKeysetHandleGenerateNew_parameters_works() throws Exception {
+    AesCmacParameters parameters =
+        AesCmacParameters.builder()
+            .setVariant(Variant.CRUNCHY)
+            .setKeySizeBytes(32)
+            .setTagSizeBytes(16)
+            .build();
+    KeysetHandle h = KeysetHandle.generateNew(parameters);
+    assertThat(h.size()).isEqualTo(1);
+    assertThat(h.getAt(0).getKey().getParameters()).isEqualTo(parameters);
+  }
+
+  @Test
+  public void testKeysetHandleGenerateNew_parameters_fails() throws Exception {
+    Parameters p =
+        new Parameters() {
+          @Override
+          public boolean hasIdRequirement() {
+            return false;
+          }
+        };
+
+    assertThrows(GeneralSecurityException.class, () -> KeysetHandle.generateNew(p));
+  }
+
+
+  @Test
   public void generateNew_raw_shouldWork() throws Exception {
     KeyTemplate template = KeyTemplates.get("AES128_EAX_RAW");
 
@@ -808,8 +835,8 @@ public class KeysetHandleTest {
   }
 
   @Test
-  public void testGetAt_singleKeyWithoutRegisteredProtoSerialization_works() throws Exception {
-    // HmacPrfKey does not have a proto serialization registered.
+  public void testGetAt_singleKeyWithoutRegisteredProtoSerialization_wrapsToLegacyProtoKey()
+      throws Exception {
     HmacPrfKey key =
         HmacPrfKey.newBuilder()
             .setParams(HmacPrfParams.newBuilder().setHash(HashType.SHA256).build())
@@ -819,7 +846,7 @@ public class KeysetHandleTest {
         TestUtil.createKeyset(
             TestUtil.createKey(
                 TestUtil.createKeyData(
-                    key, PrfConfig.HMAC_PRF_TYPE_URL, KeyData.KeyMaterialType.SYMMETRIC),
+                    key, "i.am.an.unregistered.key.type", KeyData.KeyMaterialType.SYMMETRIC),
                 42,
                 KeyStatusType.ENABLED,
                 OutputPrefixType.RAW));
@@ -1484,5 +1511,24 @@ public class KeysetHandleTest {
             .withRandomId()
             .setStatus(null));
     assertThrows(GeneralSecurityException.class, builder::build);
+  }
+
+  @Test
+  public void testStatusNotSet_getPrimitive_throws() throws Exception {
+    Keyset keyset =
+        Keyset.newBuilder()
+            .setPrimaryKeyId(1)
+            .addKey(
+                Keyset.Key.newBuilder()
+                    .setKeyId(1)
+                    .setStatus(KeyStatusType.ENABLED)
+                    .setOutputPrefixType(OutputPrefixType.TINK)
+                    .setKeyData(KeyData.newBuilder().setTypeUrl("unregisteredTypeUrl")))
+            .build();
+    KeysetHandle handle = KeysetHandle.fromKeyset(keyset);
+    GeneralSecurityException e =
+        assertThrows(GeneralSecurityException.class, () -> handle.getPrimitive(Aead.class));
+    assertThat(e).hasMessageThat().contains("Unable to get primitive");
+    assertThat(e).hasMessageThat().contains("unregisteredTypeUrl");
   }
 }

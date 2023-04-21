@@ -14,8 +14,8 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-#ifndef TINK_INSECURE_KEY_ACCESS_H_
-#define TINK_INSECURE_KEY_ACCESS_H_
+#ifndef TINK_INSECURE_SECRET_KEY_ACCESS_H_
+#define TINK_INSECURE_SECRET_KEY_ACCESS_H_
 
 #include "tink/secret_key_access_token.h"
 
@@ -39,4 +39,4 @@ class InsecureSecretKeyAccess {
 }  // namespace tink
 }  // namespace crypto
 
-#endif  // TINK_INSECURE_KEY_ACCESS_H_
+#endif  // TINK_INSECURE_SECRET_KEY_ACCESS_H_

@@ -28,28 +28,37 @@ CREDENTIAL_PATH = os.path.join(helper.tink_py_testdata_path(),
 
 class GcpKmsClientTest(absltest.TestCase):
 
-  def test_client_generation(self):
-    gcp_client = gcpkms.GcpKmsClient('', CREDENTIAL_PATH)
-    self.assertNotEqual(gcp_client, None)
-
-  def test_client_registration(self):
-    gcp_client = gcpkms.GcpKmsClient('', CREDENTIAL_PATH)
-    gcp_client.register_client('', CREDENTIAL_PATH)
-
-  def test_client_invalid_path(self):
-    with self.assertRaises(ValueError):
-      gcpkms.GcpKmsClient('', CREDENTIAL_PATH + 'corrupted')
-
-  def test_client_not_bound(self):
+  def test_client_bound_to_key_uri(self):
     gcp_key1 = 'gcp-kms://projects/someProject/.../cryptoKeys/key1'
     gcp_key2 = 'gcp-kms://projects/otherProject/.../cryptoKeys/key2'
     non_gcp_key = 'aws-kms://arn:aws:kms:us-west-2:acc:other/key3'
 
-    gcp_client = gcpkms.GcpKmsClient('', CREDENTIAL_PATH)
+    gcp_client = gcpkms.GcpKmsClient(gcp_key1, CREDENTIAL_PATH)
+
+    self.assertEqual(gcp_client.does_support(gcp_key1), True)
+    self.assertEqual(gcp_client.does_support(gcp_key2), False)
+    self.assertEqual(gcp_client.does_support(non_gcp_key), False)
+
+  def test_client_not_bound_to_key_uri(self):
+    gcp_key1 = 'gcp-kms://projects/someProject/.../cryptoKeys/key1'
+    gcp_key2 = 'gcp-kms://projects/otherProject/.../cryptoKeys/key2'
+    non_gcp_key = 'aws-kms://arn:aws:kms:us-west-2:acc:other/key3'
+
+    gcp_client = gcpkms.GcpKmsClient(None, CREDENTIAL_PATH)
 
     self.assertEqual(gcp_client.does_support(gcp_key1), True)
     self.assertEqual(gcp_client.does_support(gcp_key2), True)
     self.assertEqual(gcp_client.does_support(non_gcp_key), False)
+
+  def test_client_empty_key_uri(self):
+    gcp_key = 'gcp-kms://projects/someProject/.../cryptoKeys/key1'
+    gcp_client = gcpkms.GcpKmsClient('', CREDENTIAL_PATH)
+    self.assertEqual(gcp_client.does_support(gcp_key), True)
+
+  def test_client_invalid_path(self):
+    with self.assertRaises(FileNotFoundError):
+      gcpkms.GcpKmsClient(None, CREDENTIAL_PATH + 'corrupted')
+
 
 if __name__ == '__main__':
   absltest.main()

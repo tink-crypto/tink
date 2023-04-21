@@ -275,9 +275,6 @@ TEST(EncryptThenAuthenticateTest, testParamsEmptyVersusNullStringView) {
 // test ensures that the overflow issue and the auth bypass vulnerability are
 // fixed.
 TEST(EncryptThenAuthenticateTest, testAuthBypassShouldNotWork) {
-// Disable this test when running with ASYLO, because it allocates more memory
-// than ASYLO can handle.
-#ifndef __ASYLO__
   int encryption_key_size = 16;
   int iv_size = 12;
   int mac_key_size = 16;
@@ -307,7 +304,6 @@ TEST(EncryptThenAuthenticateTest, testAuthBypassShouldNotWork) {
   ct = std::move(associated_data) + ct;
   decrypted = cipher->Decrypt(ct, "");
   EXPECT_FALSE(decrypted.ok());
-#endif  // __ASYLO__
 }
 
 }  // namespace

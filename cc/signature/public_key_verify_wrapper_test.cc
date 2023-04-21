@@ -115,12 +115,12 @@ TEST_F(PublicKeyVerifySetWrapperTest, testBasic) {
                                                     keyset_info.key_info(0));
     ASSERT_TRUE(entry_result.ok());
 
-    pk_verify.reset(new DummyPublicKeyVerify(signature_name_1));
+    pk_verify = std::make_unique<DummyPublicKeyVerify>(signature_name_1);
     entry_result = pk_verify_set->AddPrimitive(std::move(pk_verify),
                                                keyset_info.key_info(1));
     ASSERT_TRUE(entry_result.ok());
 
-    pk_verify.reset(new DummyPublicKeyVerify(signature_name_2));
+    pk_verify = std::make_unique<DummyPublicKeyVerify>(signature_name_2);
     entry_result = pk_verify_set->AddPrimitive(std::move(pk_verify),
                                                keyset_info.key_info(2));
     ASSERT_TRUE(entry_result.ok());

@@ -82,10 +82,9 @@ process_args() {
   # Use Bazelisk (https://github.com/bazelbuild/bazelisk) if available.
   if command -v "bazelisk" &> /dev/null; then
     BAZEL_CMD="bazelisk"
-    "${BAZEL_CMD}" version
   fi
-  "${BAZEL_CMD}" --version
   readonly BAZEL_CMD
+  echo "Using: $(which ${BAZEL_CMD})"
 }
 
 #######################################

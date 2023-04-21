@@ -33,8 +33,10 @@
 #include "tink/binary_keyset_reader.h"
 #include "tink/binary_keyset_writer.h"
 #include "tink/cleartext_keyset_handle.h"
+#include "tink/config/fips_140_2.h"
 #include "tink/config/tink_config.h"
 #include "tink/core/key_manager_impl.h"
+#include "tink/internal/fips_utils.h"
 #include "tink/internal/legacy_proto_parameters.h"
 #include "tink/internal/proto_parameters_serialization.h"
 #include "tink/json_keyset_reader.h"
@@ -86,6 +88,8 @@ class KeysetHandleTest : public ::testing::Test {
   void SetUp() override {
     auto status = TinkConfig::Register();
     ASSERT_TRUE(status.ok()) << status;
+
+    internal::UnSetFipsRestricted();
   }
 };
 
@@ -156,9 +160,9 @@ class MockAeadPrimitiveWrapper : public PrimitiveWrapper<Aead, Aead> {
 Keyset GetTestKeyset() {
   Keyset keyset;
   Keyset::Key key;
-  AddTinkKey("some key type", 42, key, KeyStatusType::ENABLED,
+  AddTinkKey("some_key_type", 42, key, KeyStatusType::ENABLED,
              KeyData::SYMMETRIC, &keyset);
-  AddRawKey("some other key type", 711, key, KeyStatusType::ENABLED,
+  AddRawKey("some_other_key_type", 711, key, KeyStatusType::ENABLED,
             KeyData::SYMMETRIC, &keyset);
   keyset.set_primary_key_id(42);
   return keyset;
@@ -168,9 +172,9 @@ Keyset GetTestKeyset() {
 Keyset GetPublicTestKeyset() {
   Keyset keyset;
   Keyset::Key key;
-  AddTinkKey("some key type", 42, key, KeyStatusType::ENABLED,
+  AddTinkKey("some_key_type", 42, key, KeyStatusType::ENABLED,
              KeyData::ASYMMETRIC_PUBLIC, &keyset);
-  AddRawKey("some other key type", 711, key, KeyStatusType::ENABLED,
+  AddRawKey("some_other_key_type", 711, key, KeyStatusType::ENABLED,
             KeyData::REMOTE, &keyset);
   keyset.set_primary_key_id(42);
   return keyset;
@@ -179,9 +183,9 @@ Keyset GetPublicTestKeyset() {
 TEST_F(KeysetHandleTest, ReadEncryptedKeysetBinary) {
   Keyset keyset;
   Keyset::Key key;
-  AddTinkKey("some key type", 42, key, KeyStatusType::ENABLED,
+  AddTinkKey("some_key_type", 42, key, KeyStatusType::ENABLED,
              KeyData::SYMMETRIC, &keyset);
-  AddRawKey("some other key type", 711, key, KeyStatusType::ENABLED,
+  AddRawKey("some_other_key_type", 711, key, KeyStatusType::ENABLED,
             KeyData::SYMMETRIC, &keyset);
   keyset.set_primary_key_id(42);
 
@@ -277,14 +281,13 @@ TEST_F(KeysetHandleTest, ReadEncryptedWithAnnotations) {
   ASSERT_THAT(Registry::RegisterPrimitiveWrapper(std::move(primitive_wrapper)),
               IsOk());
   ASSERT_THAT(Registry::RegisterKeyTypeManager(
-                  absl::make_unique<FakeAeadKeyManager>("some key type"),
+                  absl::make_unique<FakeAeadKeyManager>("some_key_type"),
                   /*new_key_allowed=*/true),
               IsOk());
-  ASSERT_THAT(
-      Registry::RegisterKeyTypeManager(
-          absl::make_unique<FakeAeadKeyManager>("some other key type"),
-          /*new_key_allowed=*/true),
-      IsOk());
+  ASSERT_THAT(Registry::RegisterKeyTypeManager(
+                  absl::make_unique<FakeAeadKeyManager>("some_other_key_type"),
+                  /*new_key_allowed=*/true),
+              IsOk());
 
   ASSERT_THAT((*keyset_handle)->GetPrimitive<Aead>(), IsOk());
   EXPECT_EQ(generated_annotations, kAnnotations);
@@ -295,9 +298,9 @@ TEST_F(KeysetHandleTest, ReadEncryptedWithAnnotations) {
 TEST_F(KeysetHandleTest, ReadEncryptedKeysetJson) {
   Keyset keyset;
   Keyset::Key key;
-  AddTinkKey("some key type", 42, key, KeyStatusType::ENABLED,
+  AddTinkKey("some_key_type", 42, key, KeyStatusType::ENABLED,
              KeyData::SYMMETRIC, &keyset);
-  AddRawKey("some other key type", 711, key, KeyStatusType::ENABLED,
+  AddRawKey("some_other_key_type", 711, key, KeyStatusType::ENABLED,
             KeyData::SYMMETRIC, &keyset);
   keyset.set_primary_key_id(42);
 
@@ -378,9 +381,9 @@ TEST_F(KeysetHandleTest, WriteEncryptedKeyset_Json) {
   // Prepare a valid keyset handle
   Keyset keyset;
   Keyset::Key key;
-  AddTinkKey("some key type", 42, key, KeyStatusType::ENABLED,
+  AddTinkKey("some_key_type", 42, key, KeyStatusType::ENABLED,
              KeyData::SYMMETRIC, &keyset);
-  AddRawKey("some other key type", 711, key, KeyStatusType::ENABLED,
+  AddRawKey("some_other_key_type", 711, key, KeyStatusType::ENABLED,
             KeyData::SYMMETRIC, &keyset);
   keyset.set_primary_key_id(42);
   auto reader =
@@ -418,9 +421,9 @@ TEST_F(KeysetHandleTest, WriteEncryptedKeyset_Json) {
 TEST_F(KeysetHandleTest, ReadEncryptedKeysetWithAssociatedDataGoodKeyset) {
   Keyset keyset;
   Keyset::Key key;
-  AddTinkKey("some key type", 42, key, KeyStatusType::ENABLED,
+  AddTinkKey("some_key_type", 42, key, KeyStatusType::ENABLED,
              KeyData::SYMMETRIC, &keyset);
-  AddRawKey("some other key type", 711, key, KeyStatusType::ENABLED,
+  AddRawKey("some_other_key_type", 711, key, KeyStatusType::ENABLED,
             KeyData::SYMMETRIC, &keyset);
   keyset.set_primary_key_id(42);
 
@@ -471,14 +474,13 @@ TEST_F(KeysetHandleTest, ReadEncryptedWithAssociatedDataAndAnnotations) {
   ASSERT_THAT(Registry::RegisterPrimitiveWrapper(std::move(primitive_wrapper)),
               IsOk());
   ASSERT_THAT(Registry::RegisterKeyTypeManager(
-                  absl::make_unique<FakeAeadKeyManager>("some key type"),
+                  absl::make_unique<FakeAeadKeyManager>("some_key_type"),
                   /*new_key_allowed=*/true),
               IsOk());
-  ASSERT_THAT(
-      Registry::RegisterKeyTypeManager(
-          absl::make_unique<FakeAeadKeyManager>("some other key type"),
-          /*new_key_allowed=*/true),
-      IsOk());
+  ASSERT_THAT(Registry::RegisterKeyTypeManager(
+                  absl::make_unique<FakeAeadKeyManager>("some_other_key_type"),
+                  /*new_key_allowed=*/true),
+              IsOk());
 
   ASSERT_THAT((*keyset_handle)->GetPrimitive<Aead>(), IsOk());
   EXPECT_EQ(generated_annotations, kAnnotations);
@@ -489,9 +491,9 @@ TEST_F(KeysetHandleTest, ReadEncryptedWithAssociatedDataAndAnnotations) {
 TEST_F(KeysetHandleTest, ReadEncryptedKeysetWithAssociatedDataWrongAad) {
   Keyset keyset;
   Keyset::Key key;
-  AddTinkKey("some key type", 42, key, KeyStatusType::ENABLED,
+  AddTinkKey("some_key_type", 42, key, KeyStatusType::ENABLED,
              KeyData::SYMMETRIC, &keyset);
-  AddRawKey("some other key type", 711, key, KeyStatusType::ENABLED,
+  AddRawKey("some_other_key_type", 711, key, KeyStatusType::ENABLED,
             KeyData::SYMMETRIC, &keyset);
   keyset.set_primary_key_id(42);
   DummyAead aead("dummy aead 42");
@@ -510,9 +512,9 @@ TEST_F(KeysetHandleTest, ReadEncryptedKeysetWithAssociatedDataWrongAad) {
 TEST_F(KeysetHandleTest, ReadEncryptedKeysetWithAssociatedDataEmptyAad) {
   Keyset keyset;
   Keyset::Key key;
-  AddTinkKey("some key type", 42, key, KeyStatusType::ENABLED,
+  AddTinkKey("some_key_type", 42, key, KeyStatusType::ENABLED,
              KeyData::SYMMETRIC, &keyset);
-  AddRawKey("some other key type", 711, key, KeyStatusType::ENABLED,
+  AddRawKey("some_other_key_type", 711, key, KeyStatusType::ENABLED,
             KeyData::SYMMETRIC, &keyset);
   keyset.set_primary_key_id(42);
   DummyAead aead("dummy aead 42");
@@ -531,9 +533,9 @@ TEST_F(KeysetHandleTest, WriteEncryptedKeysetWithAssociatedData) {
   // Prepare a valid keyset handle
   Keyset keyset;
   Keyset::Key key;
-  AddTinkKey("some key type", 42, key, KeyStatusType::ENABLED,
+  AddTinkKey("some_key_type", 42, key, KeyStatusType::ENABLED,
              KeyData::SYMMETRIC, &keyset);
-  AddRawKey("some other key type", 711, key, KeyStatusType::ENABLED,
+  AddRawKey("some_other_key_type", 711, key, KeyStatusType::ENABLED,
             KeyData::SYMMETRIC, &keyset);
   keyset.set_primary_key_id(42);
   auto reader =
@@ -772,6 +774,58 @@ TEST_F(KeysetHandleTest, GetPrimitive) {
   EXPECT_EQ(aead->Decrypt(raw_encryption, aad).value(), plaintext);
 }
 
+TEST_F(KeysetHandleTest, GetPrimitiveWithConfigFips1402Succeeds) {
+  if (!internal::IsFipsEnabledInSsl()) {
+    GTEST_SKIP() << "Only test in FIPS mode";
+  }
+
+  const internal::RegistryImpl& registry =
+      internal::ConfigurationImpl::get_registry(ConfigFips140_2());
+
+  util::StatusOr<std::unique_ptr<KeyData>> key_data =
+      registry.NewKeyData(AeadKeyTemplates::Aes128Gcm());
+  ASSERT_THAT(key_data, IsOk());
+
+  Keyset keyset;
+  uint32_t key_id = 0;
+  test::AddKeyData(**key_data, key_id, OutputPrefixType::TINK,
+                   KeyStatusType::ENABLED, &keyset);
+  keyset.set_primary_key_id(key_id);
+  std::unique_ptr<KeysetHandle> handle =
+      TestKeysetHandle::GetKeysetHandle(keyset);
+
+  EXPECT_THAT(handle->GetPrimitive<Aead>(ConfigFips140_2()), IsOk());
+}
+
+TEST_F(KeysetHandleTest, GetPrimitiveWithConfigFips1402FailsWithNonFipsHandle) {
+  if (!internal::IsFipsEnabledInSsl()) {
+    GTEST_SKIP() << "Only test in FIPS mode";
+  }
+
+  KeyTemplate templ = AeadKeyTemplates::Aes256Eax();
+  // Use ConfigFips140_2().
+  const internal::RegistryImpl& registry =
+      internal::ConfigurationImpl::get_registry(ConfigFips140_2());
+  EXPECT_THAT(registry.NewKeyData(templ), Not(IsOk()));
+  // Use the global registry.
+  util::StatusOr<std::unique_ptr<KeyData>> key_data =
+      Registry::NewKeyData(templ);
+  ASSERT_THAT(key_data, IsOk());
+
+  Keyset keyset;
+  uint32_t key_id = 0;
+  test::AddKeyData(**key_data, key_id, OutputPrefixType::TINK,
+                   KeyStatusType::ENABLED, &keyset);
+  keyset.set_primary_key_id(key_id);
+  std::unique_ptr<KeysetHandle> handle =
+      TestKeysetHandle::GetKeysetHandle(keyset);
+
+  // Use ConfigFips140_2().
+  EXPECT_THAT(handle->GetPrimitive<Aead>(ConfigFips140_2()), Not(IsOk()));
+  // Use the global registry.
+  EXPECT_THAT(handle->GetPrimitive<Aead>(), IsOk());
+}
+
 // Tests that GetPrimitive(nullptr) fails with a non-ok status.
 TEST_F(KeysetHandleTest, GetPrimitiveNullptrKeyManager) {
   Keyset keyset;
@@ -815,9 +869,9 @@ TEST_F(KeysetHandleTest, Copiable) {
 TEST_F(KeysetHandleTest, ReadNoSecret) {
   Keyset keyset;
   Keyset::Key key;
-  AddTinkKey("some key type", 42, key, KeyStatusType::ENABLED,
+  AddTinkKey("some_key_type", 42, key, KeyStatusType::ENABLED,
              KeyData::ASYMMETRIC_PUBLIC, &keyset);
-  AddRawKey("some other key type", 711, key, KeyStatusType::ENABLED,
+  AddRawKey("some_other_key_type", 711, key, KeyStatusType::ENABLED,
             KeyData::REMOTE, &keyset);
   keyset.set_primary_key_id(42);
   auto handle_result = KeysetHandle::ReadNoSecret(keyset.SerializeAsString());
@@ -854,14 +908,13 @@ TEST_F(KeysetHandleTest, ReadNoSecretWithAnnotations) {
   ASSERT_THAT(Registry::RegisterPrimitiveWrapper(std::move(primitive_wrapper)),
               IsOk());
   ASSERT_THAT(Registry::RegisterKeyTypeManager(
-                  absl::make_unique<FakeAeadKeyManager>("some key type"),
+                  absl::make_unique<FakeAeadKeyManager>("some_key_type"),
                   /*new_key_allowed=*/true),
               IsOk());
-  ASSERT_THAT(
-      Registry::RegisterKeyTypeManager(
-          absl::make_unique<FakeAeadKeyManager>("some other key type"),
-          /*new_key_allowed=*/true),
-      IsOk());
+  ASSERT_THAT(Registry::RegisterKeyTypeManager(
+                  absl::make_unique<FakeAeadKeyManager>("some_other_key_type"),
+                  /*new_key_allowed=*/true),
+              IsOk());
 
   EXPECT_THAT((*keyset_handle)->GetPrimitive<Aead>(), IsOk());
   EXPECT_EQ(generated_annotations, kAnnotations);
@@ -872,7 +925,7 @@ TEST_F(KeysetHandleTest, ReadNoSecretWithAnnotations) {
 TEST_F(KeysetHandleTest, ReadNoSecretFailForTypeUnknown) {
   Keyset keyset;
   Keyset::Key key;
-  AddTinkKey("some key type", 42, key, KeyStatusType::ENABLED,
+  AddTinkKey("some_key_type", 42, key, KeyStatusType::ENABLED,
              KeyData::UNKNOWN_KEYMATERIAL, &keyset);
   keyset.set_primary_key_id(42);
   auto result = KeysetHandle::ReadNoSecret(keyset.SerializeAsString());
@@ -882,7 +935,7 @@ TEST_F(KeysetHandleTest, ReadNoSecretFailForTypeUnknown) {
 TEST_F(KeysetHandleTest, ReadNoSecretFailForTypeSymmetric) {
   Keyset keyset;
   Keyset::Key key;
-  AddTinkKey("some key type", 42, key, KeyStatusType::ENABLED,
+  AddTinkKey("some_key_type", 42, key, KeyStatusType::ENABLED,
              KeyData::SYMMETRIC, &keyset);
   keyset.set_primary_key_id(42);
   auto result = KeysetHandle::ReadNoSecret(keyset.SerializeAsString());
@@ -892,7 +945,7 @@ TEST_F(KeysetHandleTest, ReadNoSecretFailForTypeSymmetric) {
 TEST_F(KeysetHandleTest, ReadNoSecretFailForTypeAssymmetricPrivate) {
   Keyset keyset;
   Keyset::Key key;
-  AddTinkKey("some key type", 42, key, KeyStatusType::ENABLED,
+  AddTinkKey("some_key_type", 42, key, KeyStatusType::ENABLED,
              KeyData::ASYMMETRIC_PRIVATE, &keyset);
   keyset.set_primary_key_id(42);
   auto result = KeysetHandle::ReadNoSecret(keyset.SerializeAsString());
@@ -902,13 +955,13 @@ TEST_F(KeysetHandleTest, ReadNoSecretFailForTypeAssymmetricPrivate) {
 TEST_F(KeysetHandleTest, ReadNoSecretFailForHidden) {
   Keyset keyset;
   Keyset::Key key;
-  AddTinkKey("some key type", 42, key, KeyStatusType::ENABLED,
+  AddTinkKey("some_key_type", 42, key, KeyStatusType::ENABLED,
              KeyData::ASYMMETRIC_PUBLIC, &keyset);
   for (int i = 0; i < 10; ++i) {
     AddTinkKey(absl::StrCat("more key type", i), i, key, KeyStatusType::ENABLED,
                KeyData::ASYMMETRIC_PUBLIC, &keyset);
   }
-  AddRawKey("some other key type", 10, key, KeyStatusType::ENABLED,
+  AddRawKey("some_other_key_type", 10, key, KeyStatusType::ENABLED,
             KeyData::ASYMMETRIC_PRIVATE, &keyset);
   for (int i = 0; i < 10; ++i) {
     AddRawKey(absl::StrCat("more key type", i + 100), i + 100, key,
@@ -929,9 +982,9 @@ TEST_F(KeysetHandleTest, ReadNoSecretFailForInvalidString) {
 TEST_F(KeysetHandleTest, WriteNoSecret) {
   Keyset keyset;
   Keyset::Key key;
-  AddTinkKey("some key type", 42, key, KeyStatusType::ENABLED,
+  AddTinkKey("some_key_type", 42, key, KeyStatusType::ENABLED,
              KeyData::ASYMMETRIC_PUBLIC, &keyset);
-  AddRawKey("some other key type", 711, key, KeyStatusType::ENABLED,
+  AddRawKey("some_other_key_type", 711, key, KeyStatusType::ENABLED,
             KeyData::REMOTE, &keyset);
   keyset.set_primary_key_id(42);
 
@@ -948,7 +1001,7 @@ TEST_F(KeysetHandleTest, WriteNoSecret) {
 TEST_F(KeysetHandleTest, WriteNoSecretFailForTypeUnknown) {
   Keyset keyset;
   Keyset::Key key;
-  AddTinkKey("some key type", 42, key, KeyStatusType::ENABLED,
+  AddTinkKey("some_key_type", 42, key, KeyStatusType::ENABLED,
              KeyData::UNKNOWN_KEYMATERIAL, &keyset);
   keyset.set_primary_key_id(42);
 
@@ -965,7 +1018,7 @@ TEST_F(KeysetHandleTest, WriteNoSecretFailForTypeUnknown) {
 TEST_F(KeysetHandleTest, WriteNoSecretFailForTypeSymmetric) {
   Keyset keyset;
   Keyset::Key key;
-  AddTinkKey("some key type", 42, key, KeyStatusType::ENABLED,
+  AddTinkKey("some_key_type", 42, key, KeyStatusType::ENABLED,
              KeyData::SYMMETRIC, &keyset);
   keyset.set_primary_key_id(42);
 
@@ -982,7 +1035,7 @@ TEST_F(KeysetHandleTest, WriteNoSecretFailForTypeSymmetric) {
 TEST_F(KeysetHandleTest, WriteNoSecretFailForTypeAssymmetricPrivate) {
   Keyset keyset;
   Keyset::Key key;
-  AddTinkKey("some key type", 42, key, KeyStatusType::ENABLED,
+  AddTinkKey("some_key_type", 42, key, KeyStatusType::ENABLED,
              KeyData::ASYMMETRIC_PRIVATE, &keyset);
   keyset.set_primary_key_id(42);
 
@@ -999,13 +1052,13 @@ TEST_F(KeysetHandleTest, WriteNoSecretFailForTypeAssymmetricPrivate) {
 TEST_F(KeysetHandleTest, WriteNoSecretFailForHidden) {
   Keyset keyset;
   Keyset::Key key;
-  AddTinkKey("some key type", 42, key, KeyStatusType::ENABLED,
+  AddTinkKey("some_key_type", 42, key, KeyStatusType::ENABLED,
              KeyData::ASYMMETRIC_PUBLIC, &keyset);
   for (int i = 0; i < 10; ++i) {
     AddTinkKey(absl::StrCat("more key type", i), i, key, KeyStatusType::ENABLED,
                KeyData::ASYMMETRIC_PUBLIC, &keyset);
   }
-  AddRawKey("some other key type", 10, key, KeyStatusType::ENABLED,
+  AddRawKey("some_other_key_type", 10, key, KeyStatusType::ENABLED,
             KeyData::ASYMMETRIC_PRIVATE, &keyset);
   for (int i = 0; i < 10; ++i) {
     AddRawKey(absl::StrCat("more key type", i + 100), i + 100, key,
@@ -1027,13 +1080,13 @@ TEST_F(KeysetHandleTest, WriteNoSecretFailForHidden) {
 TEST_F(KeysetHandleTest, GetKeysetInfo) {
   Keyset keyset;
   Keyset::Key key;
-  AddTinkKey("some key type", 42, key, KeyStatusType::ENABLED,
+  AddTinkKey("some_key_type", 42, key, KeyStatusType::ENABLED,
              KeyData::ASYMMETRIC_PUBLIC, &keyset);
   for (int i = 0; i < 10; ++i) {
     AddTinkKey(absl::StrCat("more key type", i), i, key, KeyStatusType::ENABLED,
                KeyData::ASYMMETRIC_PUBLIC, &keyset);
   }
-  AddRawKey("some other key type", 10, key, KeyStatusType::ENABLED,
+  AddRawKey("some_other_key_type", 10, key, KeyStatusType::ENABLED,
             KeyData::ASYMMETRIC_PRIVATE, &keyset);
   for (int i = 0; i < 10; ++i) {
     AddRawKey(absl::StrCat("more key type", i + 100), i + 100, key,
@@ -1072,8 +1125,8 @@ TEST_F(KeysetHandleTest, GetEntryFromSingleKeyKeyset) {
   EXPECT_THAT(entry.GetId(), Eq(11));
   EXPECT_THAT(entry.GetStatus(), Eq(KeyStatus::kEnabled));
   EXPECT_THAT(entry.IsPrimary(), IsTrue());
-  EXPECT_THAT(entry.GetKey().GetIdRequirement(), Eq(11));
-  EXPECT_THAT(entry.GetKey().GetParameters().HasIdRequirement(), IsTrue());
+  EXPECT_THAT(entry.GetKey()->GetIdRequirement(), Eq(11));
+  EXPECT_THAT(entry.GetKey()->GetParameters().HasIdRequirement(), IsTrue());
 }
 
 TEST_F(KeysetHandleTest, GetEntryFromMultipleKeyKeyset) {
@@ -1097,24 +1150,24 @@ TEST_F(KeysetHandleTest, GetEntryFromMultipleKeyKeyset) {
   EXPECT_THAT(entry0.GetId(), Eq(11));
   EXPECT_THAT(entry0.GetStatus(), Eq(KeyStatus::kDisabled));
   EXPECT_THAT(entry0.IsPrimary(), IsFalse());
-  EXPECT_THAT(entry0.GetKey().GetIdRequirement(), Eq(absl::nullopt));
-  EXPECT_THAT(entry0.GetKey().GetParameters().HasIdRequirement(), IsFalse());
+  EXPECT_THAT(entry0.GetKey()->GetIdRequirement(), Eq(absl::nullopt));
+  EXPECT_THAT(entry0.GetKey()->GetParameters().HasIdRequirement(), IsFalse());
 
   ASSERT_THAT(handle->ValidateAt(1), IsOk());
   KeysetHandle::Entry entry1 = (*handle)[1];
   EXPECT_THAT(entry1.GetId(), Eq(22));
   EXPECT_THAT(entry1.GetStatus(), Eq(KeyStatus::kEnabled));
   EXPECT_THAT(entry1.IsPrimary(), IsTrue());
-  EXPECT_THAT(entry1.GetKey().GetIdRequirement(), Eq(22));
-  EXPECT_THAT(entry1.GetKey().GetParameters().HasIdRequirement(), IsTrue());
+  EXPECT_THAT(entry1.GetKey()->GetIdRequirement(), Eq(22));
+  EXPECT_THAT(entry1.GetKey()->GetParameters().HasIdRequirement(), IsTrue());
 
   ASSERT_THAT(handle->ValidateAt(2), IsOk());
   KeysetHandle::Entry entry2 = (*handle)[2];
   EXPECT_THAT(entry2.GetId(), Eq(33));
   EXPECT_THAT(entry2.GetStatus(), Eq(KeyStatus::kDestroyed));
   EXPECT_THAT(entry2.IsPrimary(), IsFalse());
-  EXPECT_THAT(entry2.GetKey().GetIdRequirement(), Eq(absl::nullopt));
-  EXPECT_THAT(entry2.GetKey().GetParameters().HasIdRequirement(), IsFalse());
+  EXPECT_THAT(entry2.GetKey()->GetIdRequirement(), Eq(absl::nullopt));
+  EXPECT_THAT(entry2.GetKey()->GetParameters().HasIdRequirement(), IsFalse());
 }
 
 TEST_F(KeysetHandleDeathTest, EntryWithIndexOutOfBoundsCrashes) {

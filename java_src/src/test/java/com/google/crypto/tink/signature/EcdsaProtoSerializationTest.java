@@ -34,7 +34,6 @@ import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
 import com.google.crypto.tink.proto.KeyTemplate;
 import com.google.crypto.tink.proto.OutputPrefixType;
 import com.google.crypto.tink.subtle.Hex;
-import com.google.crypto.tink.testing.TestUtil;
 import com.google.crypto.tink.util.SecretBigInteger;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.ExtensionRegistryLite;
@@ -88,9 +87,7 @@ public final class EcdsaProtoSerializationTest {
     ProtoParametersSerialization serialized =
         registry.serializeParameters(parameters, ProtoParametersSerialization.class);
     assertEqualWhenValueParsed(
-        com.google.crypto.tink.proto.HmacKeyFormat.parser(),
-        serialized,
-        serialization);
+        com.google.crypto.tink.proto.EcdsaKeyFormat.parser(), serialized, serialization);
 
     Parameters parsed = registry.parseParameters(serialization);
     assertThat(parsed).isEqualTo(parameters);
@@ -119,9 +116,7 @@ public final class EcdsaProtoSerializationTest {
     ProtoParametersSerialization serialized =
         registry.serializeParameters(parameters, ProtoParametersSerialization.class);
     assertEqualWhenValueParsed(
-        com.google.crypto.tink.proto.HmacKeyFormat.parser(),
-        serialized,
-        serialization);
+        com.google.crypto.tink.proto.EcdsaKeyFormat.parser(), serialized, serialization);
 
     Parameters parsed = registry.parseParameters(serialization);
     assertThat(parsed).isEqualTo(parameters);
@@ -150,9 +145,7 @@ public final class EcdsaProtoSerializationTest {
     ProtoParametersSerialization serialized =
         registry.serializeParameters(parameters, ProtoParametersSerialization.class);
     assertEqualWhenValueParsed(
-        com.google.crypto.tink.proto.HmacKeyFormat.parser(),
-        serialized,
-        serialization);
+        com.google.crypto.tink.proto.EcdsaKeyFormat.parser(), serialized, serialization);
 
     Parameters parsed = registry.parseParameters(serialization);
     assertThat(parsed).isEqualTo(parameters);
@@ -181,9 +174,7 @@ public final class EcdsaProtoSerializationTest {
     ProtoParametersSerialization serialized =
         registry.serializeParameters(parameters, ProtoParametersSerialization.class);
     assertEqualWhenValueParsed(
-        com.google.crypto.tink.proto.HmacKeyFormat.parser(),
-        serialized,
-        serialization);
+        com.google.crypto.tink.proto.EcdsaKeyFormat.parser(), serialized, serialization);
 
     Parameters parsed = registry.parseParameters(serialization);
     assertThat(parsed).isEqualTo(parameters);
@@ -426,7 +417,6 @@ public final class EcdsaProtoSerializationTest {
             /* idRequirement= */ 123);
 
     Key parsed = registry.parseKey(serialization, InsecureSecretKeyAccess.get());
-    System.out.println(parsed);
     assertThat(parsed.equalsKey(privateKey)).isTrue();
 
     ProtoKeySerialization serialized =
@@ -580,7 +570,7 @@ public final class EcdsaProtoSerializationTest {
                 .setX(ByteString.copyFrom(Hex.decode(hexX)))
                 .setY(
                     ByteString.copyFrom(
-                        TestUtil.hexDecode(
+                        Hex.decode(
                             // modified hexY
                             "7903FE1008B8BC99A41AE9E95628BC64F2F1B20C2D7E9F5177A3C294D4462298")))
                 .setParams(
@@ -750,7 +740,7 @@ public final class EcdsaProtoSerializationTest {
                 .setPublicKey(validProtoPublicKey)
                 .setKeyValue(
                     ByteString.copyFrom(
-                        TestUtil.hexDecode(
+                        Hex.decode(
                             // modified hexPrivateValue
                             "C9AFA9D845BA75166B5C215767B1D6934E50C3DB36E89B127B8A622B120F6720")))
                 .build()

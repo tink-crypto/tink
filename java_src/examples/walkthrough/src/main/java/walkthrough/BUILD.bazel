@@ -1,0 +1,32 @@
+package(default_visibility = ["//visibility:public"])
+
+licenses(["notice"])
+
+java_library(
+    name = "create_keyset_example",
+    srcs = ["CreateKeysetExample.java"],
+    deps = [
+        "@tink_java//src/main/java/com/google/crypto/tink:key_templates",
+        "@tink_java//src/main/java/com/google/crypto/tink:registry_cluster",
+    ],
+)
+
+java_library(
+    name = "obtain_and_use_aead_primitive_example",
+    srcs = ["ObtainAndUseAeadPrimitiveExample.java"],
+    deps = [
+        "@tink_java//src/main/java/com/google/crypto/tink:aead",
+        "@tink_java//src/main/java/com/google/crypto/tink:registry_cluster",
+    ],
+)
+
+java_library(
+    name = "write_keyset_example",
+    srcs = ["WriteKeysetExample.java"],
+    deps = [
+        "@tink_java//src/main/java/com/google/crypto/tink:aead",
+        "@tink_java//src/main/java/com/google/crypto/tink:kms_clients",
+        "@tink_java//src/main/java/com/google/crypto/tink:registry_cluster",
+        "@tink_java//src/main/java/com/google/crypto/tink:tink_json_proto_keyset_format",
+    ],
+)

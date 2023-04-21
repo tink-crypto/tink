@@ -598,3 +598,67 @@ android_library(
     name = "big_integer_encoding-android",
     srcs = ["BigIntegerEncoding.java"],
 )
+
+android_library(
+    name = "curve25519-android",
+    srcs = ["Curve25519.java"],
+    deps = [
+        ":field25519-android",
+        "//src/main/java/com/google/crypto/tink/annotations:alpha-android",
+        "//src/main/java/com/google/crypto/tink/subtle:bytes-android",
+        "//src/main/java/com/google/crypto/tink/subtle:hex-android",
+    ],
+)
+
+android_library(
+    name = "ed25519_cluster-android",
+    srcs = [
+        "Ed25519.java",
+        "Ed25519Constants.java",
+    ],
+    deps = [
+        ":curve25519-android",
+        ":field25519-android",
+        "//src/main/java/com/google/crypto/tink/subtle:bytes-android",
+        "//src/main/java/com/google/crypto/tink/subtle:subtle_util_cluster-android",
+        "@maven//:com_google_errorprone_error_prone_annotations",
+    ],
+)
+
+android_library(
+    name = "field25519-android",
+    srcs = ["Field25519.java"],
+    deps = ["//src/main/java/com/google/crypto/tink/annotations:alpha-android"],
+)
+
+java_library(
+    name = "curve25519",
+    srcs = ["Curve25519.java"],
+    deps = [
+        ":field25519",
+        "//src/main/java/com/google/crypto/tink/annotations:alpha",
+        "//src/main/java/com/google/crypto/tink/subtle:bytes",
+        "//src/main/java/com/google/crypto/tink/subtle:hex",
+    ],
+)
+
+java_library(
+    name = "ed25519_cluster",
+    srcs = [
+        "Ed25519.java",
+        "Ed25519Constants.java",
+    ],
+    deps = [
+        ":curve25519",
+        ":field25519",
+        "//src/main/java/com/google/crypto/tink/subtle:bytes",
+        "//src/main/java/com/google/crypto/tink/subtle:subtle_util_cluster",
+        "@maven//:com_google_errorprone_error_prone_annotations",
+    ],
+)
+
+java_library(
+    name = "field25519",
+    srcs = ["Field25519.java"],
+    deps = ["//src/main/java/com/google/crypto/tink/annotations:alpha"],
+)

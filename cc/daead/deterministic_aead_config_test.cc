@@ -22,7 +22,6 @@
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "absl/status/status.h"
-#include "tink/config.h"
 #include "tink/config/tink_fips.h"
 #include "tink/daead/aes_siv_key_manager.h"
 #include "tink/daead/deterministic_aead_key_templates.h"

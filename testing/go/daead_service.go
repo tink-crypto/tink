@@ -20,7 +20,7 @@ import (
 	"context"
 
 	"github.com/google/tink/go/daead"
-	pb "github.com/google/tink/testing/go/proto/testing_api_go_grpc"
+	pb "github.com/google/tink/testing/go/protos/testing_api_go_grpc"
 )
 
 // DeterministicAEADService implements the DeterministicAead testing service.

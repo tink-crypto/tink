@@ -38,7 +38,6 @@
 #include "absl/strings/string_view.h"
 #include "absl/synchronization/mutex.h"
 #include "absl/types/optional.h"
-#include "tink/catalogue.h"
 #include "tink/core/key_manager_impl.h"
 #include "tink/core/key_type_manager.h"
 #include "tink/core/private_key_manager_impl.h"

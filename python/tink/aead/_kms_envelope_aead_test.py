@@ -20,6 +20,7 @@ from tink.proto import aes_gcm_pb2
 import tink
 from tink import aead
 from tink import core
+from tink import mac
 
 
 def setUpModule():
@@ -48,6 +49,15 @@ class KmsEnvelopeAeadTest(absltest.TestCase):
     ciphertext = env_aead.encrypt(plaintext, b'envelope_ad')
     with self.assertRaises(core.TinkError):
       plaintext = env_aead.decrypt(ciphertext, b'')
+
+  def test_invalid_dek_template_fails(self):
+    key_template = aead.aead_key_templates.AES256_GCM
+    keyset_handle = tink.new_keyset_handle(key_template)
+    remote_aead = keyset_handle.primitive(aead.Aead)
+
+    with self.assertRaises(tink.TinkError):
+      aead.KmsEnvelopeAead(
+          mac.mac_key_templates.HMAC_SHA256_128BITTAG, remote_aead)
 
   def test_corrupted_ciphertext(self):
     key_template = aead.aead_key_templates.AES256_GCM

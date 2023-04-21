@@ -16,69 +16,104 @@
 
 package signature_test
 
+// [START signature-example]
+
 import (
-	"encoding/base64"
+	"bytes"
 	"fmt"
 	"log"
-	"testing"
 
-	"github.com/google/tink/go/core/registry"
+	"github.com/google/tink/go/insecurecleartextkeyset"
 	"github.com/google/tink/go/keyset"
 	"github.com/google/tink/go/signature"
-	"github.com/google/tink/go/testutil"
 )
 
-func TestSignatureInit(t *testing.T) {
-	// check for ECDSASignerKeyManager
-	_, err := registry.GetKeyManager(testutil.ECDSASignerTypeURL)
-	if err != nil {
-		t.Errorf("unexpected error: %s", err)
-	}
-
-	// check for ECDSAVerifierKeyManager
-	_, err = registry.GetKeyManager(testutil.ECDSAVerifierTypeURL)
-	if err != nil {
-		t.Errorf("unexpected error: %s", err)
-	}
-}
-
 func Example() {
-	kh, err := keyset.NewHandle(signature.ECDSAP256KeyTemplate()) // Other key templates can also be used.
-	if err != nil {
-		log.Fatal(err)
-	}
+	// A private keyset created with
+	// "tinkey create-keyset --key-template=ECDSA_P256 --out private_keyset.cfg".
+	// Note that this keyset has the secret key information in cleartext.
+	privateJSONKeyset := `{
+		"key": [{
+			"keyData": {
+					"keyMaterialType":
+							"ASYMMETRIC_PRIVATE",
+					"typeUrl":
+							"type.googleapis.com/google.crypto.tink.EcdsaPrivateKey",
+					"value":
+							"EkwSBggDEAIYAhogEiSZ9u2nDtvZuDgWgGsVTIZ5/V08N4ycUspTX0RYRrkiIHpEwHxQd1bImkyMvV2bqtUbgMh5uPSTdnUEGrPXdt56GiEA3iUi+CRN71qy0fOCK66xAW/IvFyjOGtxjppRhSFUneo="
+			},
+			"keyId": 611814836,
+			"outputPrefixType": "TINK",
+			"status": "ENABLED"
+		}],
+		"primaryKeyId": 611814836
+	}`
 
-	// TODO: save the private keyset to a safe location. DO NOT hardcode it in source code.
+	// The corresponding public keyset created with
+	// "tinkey create-public-keyset --in private_keyset.cfg"
+	publicJSONKeyset := `{
+      "key": [{
+          "keyData": {
+              "keyMaterialType":
+                  "ASYMMETRIC_PUBLIC",
+              "typeUrl":
+                  "type.googleapis.com/google.crypto.tink.EcdsaPublicKey",
+              "value":
+                  "EgYIAxACGAIaIBIkmfbtpw7b2bg4FoBrFUyGef1dPDeMnFLKU19EWEa5IiB6RMB8UHdWyJpMjL1dm6rVG4DIebj0k3Z1BBqz13beeg=="
+          },
+          "keyId": 611814836,
+          "outputPrefixType": "TINK",
+          "status": "ENABLED"
+      }],
+      "primaryKeyId": 611814836
+  }`
+
+	// Create a keyset handle from the cleartext private keyset in the previous
+	// step. The keyset handle provides abstract access to the underlying keyset to
+	// limit the access of the raw key material. WARNING: In practice,
+	// it is unlikely you will want to use a insecurecleartextkeyset, as it implies
+	// that your key material is passed in cleartext, which is a security risk.
 	// Consider encrypting it with a remote key in Cloud KMS, AWS KMS or HashiCorp Vault.
 	// See https://github.com/google/tink/blob/master/docs/GOLANG-HOWTO.md#storing-and-loading-existing-keysets.
-
-	s, err := signature.NewSigner(kh)
+	privateKeysetHandle, err := insecurecleartextkeyset.Read(
+		keyset.NewJSONReader(bytes.NewBufferString(privateJSONKeyset)))
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	msg := []byte("this data needs to be signed")
-	sig, err := s.Sign(msg)
+	// Retrieve the Signer primitive from privateKeysetHandle.
+	signer, err := signature.NewSigner(privateKeysetHandle)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	pubkh, err := kh.Public()
+	// Use the primitive to sign a message. In this case, the primary key of the
+	// keyset will be used (which is also the only key in this example).
+	data := []byte("data")
+	sig, err := signer.Sign(data)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	// TODO: share the public with the verifier.
-
-	v, err := signature.NewVerifier(pubkh)
+	// Create a keyset handle from the keyset containing the public key. Because the
+	// public keyset does not contain any secrets, we can use [keyset.ReadWithNoSecrets].
+	publicKeysetHandle, err := keyset.ReadWithNoSecrets(
+		keyset.NewJSONReader(bytes.NewBufferString(publicJSONKeyset)))
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	if err := v.Verify(sig, msg); err != nil {
+	// Retrieve the Verifier primitive from publicKeysetHandle.
+	verifier, err := signature.NewVerifier(publicKeysetHandle)
+	if err != nil {
 		log.Fatal(err)
 	}
 
-	fmt.Printf("Message: %s\n", msg)
-	fmt.Printf("Signature: %s\n", base64.StdEncoding.EncodeToString(sig))
+	if err = verifier.Verify(sig, data); err != nil {
+		log.Fatal(err)
+	}
+	fmt.Printf("sig is valid")
+	// Output: sig is valid
 }
+
+// [END signature-example]

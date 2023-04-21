@@ -559,18 +559,28 @@ public final class TestUtil {
     assertArrayEquals(plaintext, decrypted);
   }
 
-  /** Decodes hex string. */
+  /**
+   * Decodes hex string.
+   *
+   * @deprecated Usages should be inlined.
+   */
   @InlineMe(
       replacement = "Hex.decode(hexData)",
       imports = {"com.google.crypto.tink.subtle.Hex"})
+  @Deprecated
   public static byte[] hexDecode(String hexData) {
     return Hex.decode(hexData);
   }
 
-  /** Encodes bytes to hex string. */
+  /**
+   * Encodes bytes to hex string.
+   *
+   * @deprecated Usages should be inlined.
+   */
   @InlineMe(
       replacement = "Hex.encode(data)",
       imports = {"com.google.crypto.tink.subtle.Hex"})
+  @Deprecated
   public static String hexEncode(byte[] data) {
     return Hex.encode(data);
   }
@@ -601,7 +611,9 @@ public final class TestUtil {
    * Check that this is running in Remote Build Execution.
    *
    * @return true if running on Remote Build Execution.
+   * @deprecated This isn't supported anymore
    */
+  @Deprecated
   public static boolean isRemoteBuildExecution() {
     return false;
   }
@@ -614,7 +626,13 @@ public final class TestUtil {
     return false;
   }
 
-  /** Returns whether we should skip a test with some AES key size. */
+  /**
+   * Returns whether we should skip a test with some AES key size.
+   *
+   * @deprecated Do not call this function. If you have any instance, you probably want to use
+   *     "false" instead.
+   */
+  @Deprecated
   public static boolean shouldSkipTestWithAesKeySize(int keySizeInBytes)
       throws NoSuchAlgorithmException {
     int maxKeySize = Cipher.getMaxAllowedKeyLength("AES/CTR/NoPadding");

@@ -16,7 +16,6 @@
 
 package com.google.crypto.tink;
 
-import androidx.annotation.RequiresApi;
 import com.google.crypto.tink.internal.JsonParser;
 import com.google.crypto.tink.proto.EncryptedKeyset;
 import com.google.crypto.tink.proto.KeyData;
@@ -146,7 +145,6 @@ public final class JsonKeysetReader implements KeysetReader {
   @InlineMe(
       replacement = "JsonKeysetReader.withInputStream(new FileInputStream(path.toFile()))",
       imports = {"com.google.crypto.tink.JsonKeysetReader", "java.io.FileInputStream"})
-  @RequiresApi(26) // https://developer.android.com/reference/java/nio/file/Path
   @Deprecated
   public static JsonKeysetReader withPath(Path path) throws IOException {
     return JsonKeysetReader.withInputStream(new FileInputStream(path.toFile()));

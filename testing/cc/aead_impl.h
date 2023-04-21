@@ -14,8 +14,8 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef TINK_TESTING_SERIVCES_AEAD_IMPL_H_
-#define TINK_TESTING_SERIVCES_AEAD_IMPL_H_
+#ifndef TINK_TESTING_AEAD_IMPL_H_
+#define TINK_TESTING_AEAD_IMPL_H_
 
 #include <grpcpp/grpcpp.h>
 #include <grpcpp/server_context.h>
@@ -43,4 +43,4 @@ class AeadImpl final : public Aead::Service {
 
 }  // namespace tink_testing_api
 
-#endif  // TINK_TESTING_SERIVCES_AEAD_IMPL_H_
+#endif  // TINK_TESTING_AEAD_IMPL_H_

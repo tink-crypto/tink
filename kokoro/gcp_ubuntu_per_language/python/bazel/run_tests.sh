@@ -21,20 +21,4 @@ if [[ -n "${KOKORO_ROOT:-}" ]]; then
   use_bazel.sh "$(cat python/.bazelversion)"
 fi
 
-./kokoro/testutils/copy_credentials.sh "python/testdata" "all"
-./kokoro/testutils/upgrade_gcc.sh
-# Sourcing required to update callers environment.
-source ./kokoro/testutils/install_python3.sh
-
-# Run manual tests which rely on key material injected into the Kokoro
-# environement.
-MANUAL_TARGETS=()
-if [[ -n "${KOKORO_ROOT:-}" ]]; then
-  MANUAL_TARGETS+=(
-    "//tink/integration/awskms:_aws_kms_aead_test"
-    "//tink/integration/gcpkms:_gcp_kms_aead_test"
-  )
-fi
-readonly MANUAL_TARGETS
-
-./kokoro/testutils/run_bazel_tests.sh python "${MANUAL_TARGETS[@]}"
+# These tests are now run in python/kokoro/gcp_ubuntu/bazel/run_tests.sh

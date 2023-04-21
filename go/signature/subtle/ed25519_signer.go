@@ -17,7 +17,7 @@
 package subtle
 
 import (
-	"golang.org/x/crypto/ed25519"
+	"crypto/ed25519"
 )
 
 // ED25519Signer is an implementation of Signer for ED25519.

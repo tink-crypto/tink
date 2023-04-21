@@ -36,7 +36,6 @@ import com.google.crypto.tink.subtle.AesEaxJce;
 import com.google.crypto.tink.subtle.Bytes;
 import com.google.crypto.tink.subtle.Hex;
 import com.google.crypto.tink.subtle.Random;
-import com.google.crypto.tink.testing.TestUtil;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.ExtensionRegistryLite;
 import java.security.GeneralSecurityException;
@@ -265,9 +264,6 @@ public class AesEaxKeyManagerTest {
   @Test
   public void testPublicTestVectors() throws Exception {
     for (PublicTestVector t : publicTestVectors) {
-      if (TestUtil.shouldSkipTestWithAesKeySize(t.keyValue.length)) {
-        continue;
-      }
       AesEaxKey key =
           AesEaxKey.newBuilder()
               .setKeyValue(ByteString.copyFrom(t.keyValue))

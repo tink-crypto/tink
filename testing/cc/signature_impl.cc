@@ -29,8 +29,6 @@
 namespace tink_testing_api {
 
 using ::crypto::tink::util::StatusOr;
-using ::grpc::ServerContext;
-using ::grpc::Status;
 
 ::grpc::Status SignatureImpl::CreatePublicKeySign(
     grpc::ServerContext* context, const CreationRequest* request,

@@ -18,9 +18,12 @@ py_library(
     srcs = ["_gcp_kms_client.py"],
     srcs_version = "PY3",
     deps = [
+        "//tink:tink_python",
         "//tink/aead",
-        "//tink/cc/pybind:tink_bindings",
-        "//tink/core",
+        "//tink/aead:_kms_aead_key_manager",
+        requirement("google-auth"),
+        requirement("google-api-core"),
+        requirement("google-cloud-kms"),
     ],
 )
 
@@ -37,8 +40,8 @@ py_test(
 )
 
 py_test(
-    name = "_gcp_kms_aead_test",
-    srcs = ["_gcp_kms_aead_test.py"],
+    name = "_gcp_kms_client_integration_test",
+    srcs = ["_gcp_kms_client_integration_test.py"],
     data = [
         "//testdata/gcp:credentials",
         "@google_root_pem//file",
@@ -47,6 +50,28 @@ py_test(
     tags = ["manual"],
     deps = [
         ":gcpkms",
+        "//tink:tink_python",
+        "//tink/aead",
+        "//tink/testing:helper",
+        requirement("absl-py"),
+    ],
+)
+
+py_test(
+    name = "_gcp_kms_integration_test",
+    srcs = ["_gcp_kms_integration_test.py"],
+    data = [
+        "//testdata/gcp:credentials",
+        "@google_root_pem//file",
+    ],
+    srcs_version = "PY3",
+    tags = ["manual"],
+    deps = [
+        ":gcpkms",
+        "//tink:cleartext_keyset_handle",
+        "//tink:tink_python",
+        "//tink/aead",
+        "//tink/aead:_kms_aead_key_manager",
         "//tink/testing:helper",
         requirement("absl-py"),
     ],

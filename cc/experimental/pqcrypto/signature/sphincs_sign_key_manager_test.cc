@@ -105,7 +105,7 @@ struct SphincsTestCase {
 using SphincsSignKeyManagerTest = testing::TestWithParam<SphincsTestCase>;
 
 // Helper function that returns a valid sphincs key format.
-StatusOr<SphincsKeyFormat> CreateValidKeyFormat(int32 private_key_size,
+StatusOr<SphincsKeyFormat> CreateValidKeyFormat(int32_t private_key_size,
                                                 SphincsHashType hash_type,
                                                 SphincsVariant variant,
                                                 SphincsSignatureType type) {

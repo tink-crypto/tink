@@ -16,54 +16,73 @@
 
 package mac_test
 
+// [START mac-example]
+
 import (
-	"encoding/base64"
+	"bytes"
 	"fmt"
 	"log"
-	"testing"
 
-	"github.com/google/tink/go/core/registry"
+	"github.com/google/tink/go/insecurecleartextkeyset"
 	"github.com/google/tink/go/keyset"
 	"github.com/google/tink/go/mac"
-	"github.com/google/tink/go/testutil"
 )
 
-func TestMacInit(t *testing.T) {
-	_, err := registry.GetKeyManager(testutil.HMACTypeURL)
-	if err != nil {
-		t.Errorf("unexpected error: %s", err)
-	}
-	_, err = registry.GetKeyManager(testutil.AESCMACTypeURL)
-	if err != nil {
-		t.Errorf("unexpected error: %s", err)
-	}
-}
-
 func Example() {
-	kh, err := keyset.NewHandle(mac.HMACSHA256Tag256KeyTemplate())
-	if err != nil {
-		log.Fatal(err)
-	}
+	// A keyset created with "tinkey create-keyset --key-template=HMAC_SHA256_128BITTAG".
+	// Note that this keyset has the secret key information in cleartext.
+	jsonKeyset := `{
+			"key": [{
+					"keyData": {
+							"keyMaterialType":
+									"SYMMETRIC",
+							"typeUrl":
+									"type.googleapis.com/google.crypto.tink.HmacKey",
+							"value":
+									"EgQIAxAQGiA0LQjovcydWhVQV3k8W9ZSRkd7Ei4Y/TRWApE8guwV4Q=="
+					},
+					"keyId": 1892702217,
+					"outputPrefixType": "TINK",
+					"status": "ENABLED"
+			}],
+			"primaryKeyId": 1892702217
+	}`
 
-	// TODO: save the keyset to a safe location. DO NOT hardcode it in source code.
+	// Create a keyset handle from the cleartext keyset in the previous
+	// step. The keyset handle provides abstract access to the underlying keyset to
+	// limit the exposure of accessing the raw key material. WARNING: In practice,
+	// it is unlikely you will want to use a insecurecleartextkeyset, as it implies
+	// that your key material is passed in cleartext, which is a security risk.
 	// Consider encrypting it with a remote key in Cloud KMS, AWS KMS or HashiCorp Vault.
 	// See https://github.com/google/tink/blob/master/docs/GOLANG-HOWTO.md#storing-and-loading-existing-keysets.
-
-	m, err := mac.New(kh)
+	keysetHandle, err := insecurecleartextkeyset.Read(
+		keyset.NewJSONReader(bytes.NewBufferString(jsonKeyset)))
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	msg := []byte("this data needs to be authenticated")
-	tag, err := m.ComputeMAC(msg)
+	// Retrieve the MAC primitive we want to use from the keyset handle.
+	primitive, err := mac.New(keysetHandle)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	if m.VerifyMAC(tag, msg); err != nil {
+	// Use the primitive to create a MAC tag for some data. In this case the primary
+	// key of the keyset will be used (which is also the only key in this example).
+	data := []byte("data")
+	tag, err := primitive.ComputeMAC(data)
+	if err != nil {
 		log.Fatal(err)
 	}
 
-	fmt.Printf("Message: %s\n", msg)
-	fmt.Printf("Authentication tag: %s\n", base64.StdEncoding.EncodeToString(tag))
+	// Use the primitive to verify the tag. VerifyMAC finds the correct key in
+	// the keyset. If no key is found or verification fails, it returns an error.
+	err = primitive.VerifyMAC(tag, data)
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Printf("tag is valid")
+	// Output: tag is valid
 }
+
+// [END mac-example]

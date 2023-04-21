@@ -22,16 +22,6 @@ java_library(
     ],
 )
 
-java_library(
-    name = "compare_keysets",
-    testonly = 1,
-    srcs = ["java/com/google/crypto/tink/testing/CompareKeysets.java"],
-    deps = [
-        "@tink_java//proto:tink_java_proto",
-        "@tink_java//src/main/java/com/google/crypto/tink:privileged_registry",
-    ],
-)
-
 java_binary(
     name = "aead_cli_java",
     testonly = 1,
@@ -44,8 +34,5 @@ java_binary(
         "@tink_java//src/main/java/com/google/crypto/tink:aead",
         "@tink_java//src/main/java/com/google/crypto/tink:registry_cluster",
         "@tink_java//src/main/java/com/google/crypto/tink/aead:aead_config",
-        "@tink_java//src/main/java/com/google/crypto/tink/integration/awskms:aws_kms_client",
-        "@tink_java//src/main/java/com/google/crypto/tink/integration/gcpkms:gcp_kms_client",
-        "@tink_java//src/main/java/com/google/crypto/tink/testing:test_util",
     ],
 )

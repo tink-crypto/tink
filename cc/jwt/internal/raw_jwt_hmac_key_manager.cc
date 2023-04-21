@@ -46,8 +46,6 @@ using google::crypto::tink::JwtHmacKeyFormat;
 
 namespace {
 
-constexpr int kMinKeySizeInBytes = 32;
-
 StatusOr<int> MinimumKeySize(const JwtHmacAlgorithm& algorithm) {
   switch (algorithm) {
     case JwtHmacAlgorithm::HS256:

@@ -24,8 +24,7 @@
 #include "gtest/gtest.h"
 #include "absl/status/status.h"
 #include "tink/chunked_mac.h"
-#include "tink/config.h"
-#include "tink/config/tink_fips.h"
+#include "tink/internal/fips_utils.h"
 #include "tink/internal/mutable_serialization_registry.h"
 #include "tink/internal/proto_key_serialization.h"
 #include "tink/internal/proto_parameters_serialization.h"
@@ -66,7 +65,7 @@ class MacConfigTest : public ::testing::Test {
 };
 
 TEST_F(MacConfigTest, Basic) {
-  if (IsFipsModeEnabled()) {
+  if (internal::IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
 
@@ -106,7 +105,7 @@ TEST_F(MacConfigTest, Basic) {
 // Tests that the MacWrapper has been properly registered and we can wrap
 // primitives.
 TEST_F(MacConfigTest, MacWrappersRegistered) {
-  if (IsFipsModeEnabled()) {
+  if (internal::IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
 
@@ -138,7 +137,7 @@ TEST_F(MacConfigTest, MacWrappersRegistered) {
 }
 
 TEST_F(MacConfigTest, AesCmacProtoParamsSerializationRegistered) {
-  if (IsFipsModeEnabled()) {
+  if (internal::IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
 
@@ -178,7 +177,7 @@ TEST_F(MacConfigTest, AesCmacProtoParamsSerializationRegistered) {
 }
 
 TEST_F(MacConfigTest, AesCmacProtoKeySerializationRegistered) {
-  if (IsFipsModeEnabled()) {
+  if (internal::IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
 
@@ -242,7 +241,7 @@ INSTANTIATE_TEST_SUITE_P(ChunkedMacConfigTestSuite, ChunkedMacConfigTest,
 // Tests that the ChunkedMacWrapper has been properly registered and we can get
 // primitives.
 TEST_P(ChunkedMacConfigTest, ChunkedMacWrappersRegistered) {
-  if (IsFipsModeEnabled()) {
+  if (internal::IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
 
@@ -274,7 +273,7 @@ TEST_P(ChunkedMacConfigTest, ChunkedMacWrappersRegistered) {
 
 // FIPS-only mode tests
 TEST_F(MacConfigTest, RegisterNonFipsTemplates) {
-  if (!IsFipsModeEnabled() || !FIPS_mode()) {
+  if (!internal::IsFipsModeEnabled() || !internal::IsFipsEnabledInSsl()) {
     GTEST_SKIP() << "Only supported in FIPS-only mode";
   }
 
@@ -290,7 +289,7 @@ TEST_F(MacConfigTest, RegisterNonFipsTemplates) {
 }
 
 TEST_F(MacConfigTest, RegisterFipsValidTemplates) {
-  if (!IsFipsModeEnabled() || !FIPS_mode()) {
+  if (!internal::IsFipsModeEnabled() || !internal::IsFipsEnabledInSsl()) {
     GTEST_SKIP() << "Only supported in FIPS-only mode";
   }
 

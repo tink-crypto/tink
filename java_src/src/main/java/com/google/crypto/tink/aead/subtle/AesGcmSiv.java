@@ -57,6 +57,7 @@ public final class AesGcmSiv implements Aead {
   // All instances of this class use a 12 byte IV and a 16 byte tag.
   private static final int IV_SIZE_IN_BYTES = 12;
   private static final int TAG_SIZE_IN_BYTES = 16;
+  private static final boolean HAS_GCM_PARAMETER_SPEC_CLASS = hasGCMParameterSpecClass();
 
   private final SecretKey keySpec;
 
@@ -128,19 +129,26 @@ public final class AesGcmSiv implements Aead {
 
   private static AlgorithmParameterSpec getParams(final byte[] buf, int offset, int len)
       throws GeneralSecurityException {
-    try {
-      Class.forName("javax.crypto.spec.GCMParameterSpec");
+    if (HAS_GCM_PARAMETER_SPEC_CLASS) {
       return new GCMParameterSpec(8 * TAG_SIZE_IN_BYTES, buf, offset, len);
-    } catch (ClassNotFoundException e) {
-      if (SubtleUtil.isAndroid()) {
-        // GCMParameterSpec should always be present in Java 7 or newer, but it's missing on Android
-        // devices with API level < 19. Fortunately, with a modern copy of Conscrypt (either through
-        // GMS or bundled with the app) we can initialize the cipher with just an IvParameterSpec.
-        // It will use a tag size of 128 bits. We'd double check the tag size in encrypt().
-        return new IvParameterSpec(buf, offset, len);
-      }
+    }
+    if (SubtleUtil.isAndroid()) {
+      // GCMParameterSpec should always be present in Java 7 or newer, but it's missing on Android
+      // devices with API level < 19. Fortunately, with a modern copy of Conscrypt (either through
+      // GMS or bundled with the app) we can initialize the cipher with just an IvParameterSpec.
+      // It will use a tag size of 128 bits. We'd double check the tag size in encrypt().
+      return new IvParameterSpec(buf, offset, len);
     }
     throw new GeneralSecurityException(
         "cannot use AES-GCM: javax.crypto.spec.GCMParameterSpec not found");
+  }
+
+  private static boolean hasGCMParameterSpecClass() {
+    try {
+      Class.forName("javax.crypto.spec.GCMParameterSpec");
+    } catch (ClassNotFoundException e) {
+      return false;
+    }
+    return true;
   }
 }

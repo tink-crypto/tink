@@ -10,8 +10,8 @@ licenses(["notice"])
 
 go_grpc_library(
     name = "testing_api_go_grpc",
-    importpath = "github.com/google/tink/testing/go/proto/testing_api_go_grpc",
-    protos = ["//proto:testing_api_proto"],
+    importpath = "github.com/google/tink/testing/go/protos/testing_api_go_grpc",
+    protos = ["//protos:testing_api_proto"],
 )
 
 go_library(

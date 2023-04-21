@@ -832,7 +832,6 @@ std::vector<EcdhWycheproofTestVector> GetEcUtilComputeEcdhSharedSecretParams() {
   others = ReadEcdhWycheproofTestVectors(
       /*file_name=*/"ecdh_secp521r1_test.json");
   test_vectors.insert(test_vectors.end(), others.begin(), others.end());
-// placeholder_disabled_subtle_test, please ignore
   others = ReadEcdhWycheproofTestVectors(
       /*file_name=*/"ecdh_test.json");
   test_vectors.insert(test_vectors.end(), others.begin(), others.end());

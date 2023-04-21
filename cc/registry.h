@@ -107,15 +107,6 @@ class Registry {
       const google::crypto::tink::KeyData& key_data) {
     return internal::RegistryImpl::GlobalInstance().GetPrimitive<P>(key_data);
   }
-  // Convenience method for creating a new primitive for the key given
-  // in 'key'.  It looks up a KeyManager identified by type_url,
-  // and calls manager's GetPrimitive(key)-method.
-  template <class P>
-  static crypto::tink::util::StatusOr<std::unique_ptr<P>> GetPrimitive(
-      absl::string_view type_url, const portable_proto::MessageLite& key) {
-    return internal::RegistryImpl::GlobalInstance().GetPrimitive<P>(type_url,
-                                                                    key);
-  }
 
   // Generates a new KeyData for the specified 'key_template'.
   // It looks up a KeyManager identified by key_template.type_url,

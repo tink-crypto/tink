@@ -351,10 +351,10 @@ tink_cc_test(
     tink::core::primitive_set
     tink::core::registry
     tink::config::tink_fips
+    tink::internal::fips_utils
     tink::util::status
     tink::util::statusor
     tink::util::test_matchers
-    tink::util::test_util
     tink::proto::tink_cc_proto
 )
 

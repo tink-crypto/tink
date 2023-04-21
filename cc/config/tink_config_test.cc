@@ -20,7 +20,6 @@
 #include "absl/status/status.h"
 #include "tink/aead.h"
 #include "tink/aead/aes_gcm_key_manager.h"
-#include "tink/config.h"
 #include "tink/deterministic_aead.h"
 #include "tink/hybrid_decrypt.h"
 #include "tink/hybrid_encrypt.h"

@@ -5,6 +5,7 @@
  */
 
 import {InvalidArgumentsException} from '../../../exception/invalid_arguments_exception';
+import {SecurityException} from '../../../exception/security_exception';
 import {PbHpkeAead, PbHpkeKdf, PbHpkeKem, PbHpkeParams, PbHpkePrivateKey, PbHpkePublicKey} from '../../../internal/proto';
 import * as bytes from '../../../subtle/bytes';
 
@@ -82,8 +83,7 @@ describe('HpkeKemKeyFactory', () => {
           await HpkeKemKeyFactory.createPrivate(invalidHpkePrivateKey);
           fail('An exception should be thrown.');
         } catch (e: unknown) {
-          expect((e as InvalidArgumentsException).message)
-              .toBe('invalid point');
+          expect((e as SecurityException).message).toBe('invalid point');
         }
       });
       it('kem params', async () => {

@@ -185,7 +185,11 @@ public class AesGcmHkdfStreamingParameters extends StreamingAeadParameters {
   @Override
   public int hashCode() {
     return Objects.hash(
-        keySizeBytes, derivedAesGcmKeySizeBytes, hkdfHashType, ciphertextSegmentSizeBytes);
+        AesGcmHkdfStreamingParameters.class,
+        keySizeBytes,
+        derivedAesGcmKeySizeBytes,
+        hkdfHashType,
+        ciphertextSegmentSizeBytes);
   }
 
   @Override

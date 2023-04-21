@@ -40,7 +40,7 @@ using google::crypto::tink::DilithiumSeedExpansion;
 using google::crypto::tink::KeyTemplate;
 using google::crypto::tink::OutputPrefixType;
 
-KeyTemplate* NewDilithiumKeyTemplate(int32 key_size,
+KeyTemplate* NewDilithiumKeyTemplate(int32_t key_size,
                                      DilithiumSeedExpansion seed_expansion) {
   KeyTemplate* key_template = new KeyTemplate;
   key_template->set_type_url(

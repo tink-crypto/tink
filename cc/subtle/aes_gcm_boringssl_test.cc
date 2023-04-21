@@ -27,7 +27,7 @@
 #include "absl/strings/escaping.h"
 #include "absl/strings/str_cat.h"
 #include "tink/aead/internal/wycheproof_aead.h"
-#include "tink/config/tink_fips.h"
+#include "tink/internal/fips_utils.h"
 #include "tink/util/secret_data.h"
 #include "tink/util/statusor.h"
 #include "tink/util/test_matchers.h"
@@ -55,7 +55,7 @@ using ::testing::ValuesIn;
 class AesGcmBoringSslTest : public Test {
  protected:
   void SetUp() override {
-    if (IsFipsModeEnabled() && !FIPS_mode()) {
+    if (internal::IsFipsModeEnabled() && !internal::IsFipsEnabledInSsl()) {
       GTEST_SKIP() << "Test should not run in FIPS mode when BoringCrypto is "
                       "unavailable.";
     }
@@ -225,7 +225,7 @@ TEST_F(AesGcmBoringSslTest, InvalidKeySizes) {
 }
 
 TEST(AesGcmBoringSslFipsTest, FipsOnly) {
-  if (IsFipsModeEnabled() && !FIPS_mode()) {
+  if (internal::IsFipsModeEnabled() && !internal::IsFipsEnabledInSsl()) {
     GTEST_SKIP()
         << "Test should not run in FIPS mode when BoringCrypto is unavailable.";
   }
@@ -240,7 +240,7 @@ TEST(AesGcmBoringSslFipsTest, FipsOnly) {
 }
 
 TEST(AesGcmBoringSslFipsTest, FipsFailWithoutBoringCrypto) {
-  if (!IsFipsModeEnabled() || FIPS_mode()) {
+  if (!internal::IsFipsModeEnabled() || internal::IsFipsEnabledInSsl()) {
     GTEST_SKIP()
         << "Test assumes kOnlyUseFips but BoringCrypto is unavailable.";
   }
@@ -259,7 +259,7 @@ TEST(AesGcmBoringSslFipsTest, FipsFailWithoutBoringCrypto) {
 class AesGcmBoringSslWycheproofTest
     : public TestWithParam<internal::WycheproofTestVector> {
   void SetUp() override {
-    if (IsFipsModeEnabled() && !FIPS_mode()) {
+    if (internal::IsFipsModeEnabled() && !internal::IsFipsEnabledInSsl()) {
       GTEST_SKIP() << "Test should not run in FIPS mode when BoringCrypto is "
                       "unavailable.";
     }

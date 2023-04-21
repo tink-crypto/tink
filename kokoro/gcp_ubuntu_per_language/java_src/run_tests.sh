@@ -99,19 +99,4 @@ if [[ -n "${KOKORO_ROOT:-}" ]] ; then
   use_bazel.sh "$(cat java_src/.bazelversion)"
 fi
 
-./kokoro/testutils/copy_credentials.sh "java_src/testdata" "all"
-./kokoro/testutils/update_android_sdk.sh
-
-# Run manual tests which rely on key material injected into the Kokoro
-# environement.
-MANUAL_TARGETS=()
-if [[ -n "${KOKORO_ROOT:-}" ]]; then
-  MANUAL_TARGETS+=(
-    "//src/test/java/com/google/crypto/tink/integration/gcpkms:GcpKmsIntegrationTest"
-  )
-fi
-readonly MANUAL_TARGETS
-
-./kokoro/testutils/run_bazel_tests.sh java_src "${MANUAL_TARGETS[@]}"
-
 test_build_bazel_file

@@ -27,8 +27,8 @@
 #include "absl/strings/str_cat.h"
 #include "openssl/bn.h"
 #include "include/rapidjson/document.h"
-#include "tink/config/tink_fips.h"
 #include "tink/internal/err_util.h"
+#include "tink/internal/fips_utils.h"
 #include "tink/internal/rsa_util.h"
 #include "tink/internal/ssl_unique_ptr.h"
 #include "tink/public_key_sign.h"
@@ -87,7 +87,7 @@ static const NistTestVector nist_test_vector{
     HashType::SHA256};
 
 TEST_F(RsaSsaPkcs1VerifyBoringSslTest, BasicVerify) {
-  if (IsFipsModeEnabled()) {
+  if (internal::IsFipsModeEnabled()) {
     GTEST_SKIP() << "Test not run in FIPS-only mode";
   }
 
@@ -103,7 +103,7 @@ TEST_F(RsaSsaPkcs1VerifyBoringSslTest, BasicVerify) {
 }
 
 TEST_F(RsaSsaPkcs1VerifyBoringSslTest, NewErrors) {
-  if (IsFipsModeEnabled()) {
+  if (internal::IsFipsModeEnabled()) {
     GTEST_SKIP() << "Test not run in FIPS-only mode";
   }
 
@@ -133,7 +133,7 @@ TEST_F(RsaSsaPkcs1VerifyBoringSslTest, NewErrors) {
 }
 
 TEST_F(RsaSsaPkcs1VerifyBoringSslTest, Modification) {
-  if (IsFipsModeEnabled()) {
+  if (internal::IsFipsModeEnabled()) {
     GTEST_SKIP() << "Test not run in FIPS-only mode";
   }
 
@@ -258,7 +258,7 @@ bool TestSignatures(const std::string& filename, bool allow_skipping) {
 }
 
 TEST_F(RsaSsaPkcs1VerifyBoringSslTest, WycheproofRsaPkcs12048SHA256) {
-  if (IsFipsModeEnabled()) {
+  if (internal::IsFipsModeEnabled()) {
     GTEST_SKIP() << "Test not run in FIPS-only mode";
   }
   ASSERT_TRUE(TestSignatures("rsa_signature_2048_sha256_test.json",
@@ -266,7 +266,7 @@ TEST_F(RsaSsaPkcs1VerifyBoringSslTest, WycheproofRsaPkcs12048SHA256) {
 }
 
 TEST_F(RsaSsaPkcs1VerifyBoringSslTest, WycheproofRsaPkcs13072SHA256) {
-  if (IsFipsModeEnabled() && !FIPS_mode()) {
+  if (internal::IsFipsModeEnabled() && !internal::IsFipsEnabledInSsl()) {
     GTEST_SKIP()
         << "Test is skipped if kOnlyUseFips but BoringCrypto is unavailable.";
   }
@@ -275,7 +275,7 @@ TEST_F(RsaSsaPkcs1VerifyBoringSslTest, WycheproofRsaPkcs13072SHA256) {
 }
 
 TEST_F(RsaSsaPkcs1VerifyBoringSslTest, WycheproofRsaPkcs13072SHA512) {
-  if (IsFipsModeEnabled() && !FIPS_mode()) {
+  if (internal::IsFipsModeEnabled() && !internal::IsFipsEnabledInSsl()) {
     GTEST_SKIP()
         << "Test is skipped if kOnlyUseFips but BoringCrypto is unavailable.";
   }
@@ -284,7 +284,7 @@ TEST_F(RsaSsaPkcs1VerifyBoringSslTest, WycheproofRsaPkcs13072SHA512) {
 }
 
 TEST_F(RsaSsaPkcs1VerifyBoringSslTest, WycheproofRsaPkcs14096SHA512) {
-  if (IsFipsModeEnabled()) {
+  if (internal::IsFipsModeEnabled()) {
     GTEST_SKIP() << "Test not run in FIPS-only mode";
   }
   ASSERT_TRUE(TestSignatures("rsa_signature_4096_sha512_test.json",
@@ -293,7 +293,7 @@ TEST_F(RsaSsaPkcs1VerifyBoringSslTest, WycheproofRsaPkcs14096SHA512) {
 
 // FIPS-only mode test
 TEST_F(RsaSsaPkcs1VerifyBoringSslTest, TestFipsFailWithoutBoringCrypto) {
-  if (!IsFipsModeEnabled() || FIPS_mode()) {
+  if (!internal::IsFipsModeEnabled() || internal::IsFipsEnabledInSsl()) {
     GTEST_SKIP()
         << "Test assumes kOnlyUseFips but BoringCrypto is unavailable.";
   }
@@ -305,7 +305,7 @@ TEST_F(RsaSsaPkcs1VerifyBoringSslTest, TestFipsFailWithoutBoringCrypto) {
 }
 
 TEST_F(RsaSsaPkcs1VerifyBoringSslTest, TestAllowedFipsModuli) {
-  if (!IsFipsModeEnabled() || !FIPS_mode()) {
+  if (!internal::IsFipsModeEnabled() || !internal::IsFipsEnabledInSsl()) {
     GTEST_SKIP() << "Test assumes kOnlyUseFips and BoringCrypto.";
   }
 
@@ -324,7 +324,7 @@ TEST_F(RsaSsaPkcs1VerifyBoringSslTest, TestAllowedFipsModuli) {
 }
 
 TEST_F(RsaSsaPkcs1VerifyBoringSslTest, TestRestrictedFipsModuli) {
-  if (!IsFipsModeEnabled() || !FIPS_mode()) {
+  if (!internal::IsFipsModeEnabled() || !internal::IsFipsEnabledInSsl()) {
     GTEST_SKIP() << "Test assumes kOnlyUseFips and BoringCrypto.";
   }
 

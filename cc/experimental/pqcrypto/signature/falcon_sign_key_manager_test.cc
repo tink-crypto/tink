@@ -55,7 +55,7 @@ struct FalconTestCase {
 using FalconSignKeyManagerTest = testing::TestWithParam<FalconTestCase>;
 
 // Helper function that returns a valid falcon key format.
-StatusOr<FalconKeyFormat> CreateValidKeyFormat(int32 private_key_size) {
+StatusOr<FalconKeyFormat> CreateValidKeyFormat(int32_t private_key_size) {
   FalconKeyFormat key_format;
   key_format.set_key_size(private_key_size);
 

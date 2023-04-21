@@ -18,7 +18,10 @@ go_library(
 
 go_test(
     name = "insecurecleartextkeyset_test",
-    srcs = ["insecurecleartextkeyset_test.go"],
+    srcs = [
+        "example_test.go",
+        "insecurecleartextkeyset_test.go",
+    ],
     deps = [
         ":insecurecleartextkeyset",
         "//aead",

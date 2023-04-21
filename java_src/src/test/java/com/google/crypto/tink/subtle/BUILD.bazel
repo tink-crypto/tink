@@ -162,19 +162,6 @@ java_test(
 )
 
 java_test(
-    name = "Ed25519Test",
-    size = "small",
-    srcs = ["Ed25519Test.java"],
-    deps = [
-        "//src/main/java/com/google/crypto/tink/subtle:ed25519_cluster",
-        "//src/main/java/com/google/crypto/tink/subtle:field25519",
-        "//src/main/java/com/google/crypto/tink/subtle:hex",
-        "//src/main/java/com/google/crypto/tink/subtle:random",
-        "@maven//:junit_junit",
-    ],
-)
-
-java_test(
     name = "RsaSsaPkcs1SignJceTest",
     size = "large",
     srcs = ["RsaSsaPkcs1SignJceTest.java"],
@@ -221,6 +208,7 @@ java_test(
         "//src/main/java/com/google/crypto/tink/testing:test_util",
         "//src/main/java/com/google/crypto/tink/testing:wycheproof_test_util",
         "@maven//:com_google_code_gson_gson",
+        "@maven//:com_google_truth_truth",
         "@maven//:junit_junit",
     ],
 )
@@ -491,16 +479,6 @@ java_test(
 )
 
 java_test(
-    name = "Field25519Test",
-    size = "small",
-    srcs = ["Field25519Test.java"],
-    deps = [
-        "//src/main/java/com/google/crypto/tink/subtle:field25519",
-        "@maven//:junit_junit",
-    ],
-)
-
-java_test(
     name = "XChaCha20Poly1305Test",
     size = "large",
     srcs = ["XChaCha20Poly1305Test.java"],
@@ -582,7 +560,6 @@ java_test(
         "//src/main/java/com/google/crypto/tink/subtle:aes_ctr_hmac_streaming",
         "//src/main/java/com/google/crypto/tink/subtle:hex",
         "//src/main/java/com/google/crypto/tink/testing:streaming_test_util",
-        "//src/main/java/com/google/crypto/tink/testing:test_util",
         "@maven//:junit_junit",
     ],
 )
@@ -602,19 +579,6 @@ java_test(
         "//src/main/java/com/google/crypto/tink/subtle:enums",
         "//src/main/java/com/google/crypto/tink/subtle:hex",
         "//src/main/java/com/google/crypto/tink/subtle:random",
-        "@maven//:junit_junit",
-    ],
-)
-
-java_test(
-    name = "Curve25519Test",
-    size = "small",
-    srcs = ["Curve25519Test.java"],
-    deps = [
-        "//src/main/java/com/google/crypto/tink/subtle:curve25519",
-        "//src/main/java/com/google/crypto/tink/subtle:field25519",
-        "//src/main/java/com/google/crypto/tink/subtle:hex",
-        "@maven//:com_google_truth_truth",
         "@maven//:junit_junit",
     ],
 )

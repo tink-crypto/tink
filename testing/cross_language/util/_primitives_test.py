@@ -19,7 +19,7 @@ from absl.testing import absltest
 from tink import jwt
 
 from util import _primitives
-from proto import testing_api_pb2
+from protos import testing_api_pb2
 
 
 class PrimitivesTest(absltest.TestCase):

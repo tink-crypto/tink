@@ -18,6 +18,8 @@ package com.google.crypto.tink.subtle;
 
 import com.google.crypto.tink.PublicKeyVerify;
 import com.google.crypto.tink.config.internal.TinkFipsUtil;
+import com.google.crypto.tink.internal.Ed25519;
+import com.google.crypto.tink.internal.Field25519;
 import com.google.crypto.tink.util.Bytes;
 import java.security.GeneralSecurityException;
 

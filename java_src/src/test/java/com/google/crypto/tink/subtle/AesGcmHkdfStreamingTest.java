@@ -61,9 +61,6 @@ public class AesGcmHkdfStreamingTest {
   public void testEncryptDecrypt(
       int keySizeInBytes, int segmentSize, int firstSegmentOffset, int plaintextSize, int chunkSize)
       throws Exception {
-    if (TestUtil.shouldSkipTestWithAesKeySize(keySizeInBytes)) {
-      return;
-    }
     byte[] ikm = Hex.decode("000102030405060708090a0b0c0d0e0f00112233445566778899aabbccddeeff");
     AesGcmHkdfStreaming ags =
         new AesGcmHkdfStreaming(ikm, "HmacSha256", keySizeInBytes, segmentSize,
@@ -134,9 +131,6 @@ public class AesGcmHkdfStreamingTest {
   public void testEncryptDecryptRandomAccess(
       int keySizeInBytes, int segmentSize, int firstSegmentOffset, int plaintextSize)
       throws Exception {
-    if (TestUtil.shouldSkipTestWithAesKeySize(keySizeInBytes)) {
-      return;
-    }
     byte[] ikm = Hex.decode("000102030405060708090a0b0c0d0e0f00112233445566778899aabbccddeeff");
     AesGcmHkdfStreaming ags =
         new AesGcmHkdfStreaming(ikm, "HmacSha256", keySizeInBytes, segmentSize,
@@ -189,9 +183,6 @@ public class AesGcmHkdfStreamingTest {
   }
 
   public void testEncryptSingleBytes(int keySizeInBytes, int plaintextSize) throws Exception {
-    if (TestUtil.shouldSkipTestWithAesKeySize(keySizeInBytes)) {
-      return;
-    }
     int firstSegmentOffset = 0;
     int segmentSize = 512;
     byte[] ikm = Hex.decode("000102030405060708090a0b0c0d0e0f00112233445566778899aabbccddeeff");

@@ -14,8 +14,8 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef TINK_PYTHON_CC_CC_TINK_CONFIG_H_
-#define TINK_PYTHON_CC_CC_TINK_CONFIG_H_
+#ifndef TINK_PYTHON_TINK_CC_CC_TINK_CONFIG_H_
+#define TINK_PYTHON_TINK_CC_CC_TINK_CONFIG_H_
 
 #include "tink/util/status.h"
 #include "tink/registry.h"
@@ -28,4 +28,4 @@ void CcTinkConfigRegister();
 }  // namespace tink
 }  // namespace crypto
 
-#endif  // TINK_PYTHON_CC_CC_TINK_CONFIG_H_
+#endif  // TINK_PYTHON_TINK_CC_CC_TINK_CONFIG_H_

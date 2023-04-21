@@ -9,10 +9,15 @@ java_test(
         "//proto:aes_gcm_hkdf_streaming_java_proto",
         "//proto:common_java_proto",
         "//proto:tink_java_proto",
+        "//src/main/java/com/google/crypto/tink:tink_proto_parameters_format",
         "//src/main/java/com/google/crypto/tink/streamingaead:aes_ctr_hmac_streaming_key_manager",
         "//src/main/java/com/google/crypto/tink/streamingaead:aes_gcm_hkdf_streaming_key_manager",
+        "//src/main/java/com/google/crypto/tink/streamingaead:predefined_streaming_aead_parameters",
+        "//src/main/java/com/google/crypto/tink/streamingaead:streaming_aead_config",
         "//src/main/java/com/google/crypto/tink/streamingaead:streaming_aead_key_templates",
+        "//src/main/java/com/google/crypto/tink/streamingaead:streaming_aead_parameters",
         "@maven//:com_google_protobuf_protobuf_java",
+        "@maven//:com_google_truth_truth",
         "@maven//:junit_junit",
     ],
 )
@@ -219,6 +224,63 @@ java_test(
     deps = [
         "//src/main/java/com/google/crypto/tink/aead:x_cha_cha20_poly1305_parameters",
         "//src/main/java/com/google/crypto/tink/streamingaead:aes_ctr_hmac_streaming_parameters",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "AesCtrHmacStreamingKeyTest",
+    size = "small",
+    srcs = ["AesCtrHmacStreamingKeyTest.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink:insecure_secret_key_access",
+        "//src/main/java/com/google/crypto/tink/aead:x_cha_cha20_poly1305_key",
+        "//src/main/java/com/google/crypto/tink/internal:key_tester",
+        "//src/main/java/com/google/crypto/tink/streamingaead:aes_ctr_hmac_streaming_key",
+        "//src/main/java/com/google/crypto/tink/streamingaead:aes_ctr_hmac_streaming_parameters",
+        "//src/main/java/com/google/crypto/tink/util:secret_bytes",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "AesCtrHmacStreamingProtoSerializationTest",
+    size = "small",
+    srcs = ["AesCtrHmacStreamingProtoSerializationTest.java"],
+    deps = [
+        "//proto:aes_ctr_hmac_streaming_java_proto",
+        "//proto:common_java_proto",
+        "//proto:hmac_java_proto",
+        "//proto:tink_java_proto",
+        "//src/main/java/com/google/crypto/tink:insecure_secret_key_access",
+        "//src/main/java/com/google/crypto/tink:key",
+        "//src/main/java/com/google/crypto/tink:parameters",
+        "//src/main/java/com/google/crypto/tink/internal:mutable_serialization_registry",
+        "//src/main/java/com/google/crypto/tink/internal:proto_key_serialization",
+        "//src/main/java/com/google/crypto/tink/internal:proto_parameters_serialization",
+        "//src/main/java/com/google/crypto/tink/internal/testing:asserts",
+        "//src/main/java/com/google/crypto/tink/streamingaead:aes_ctr_hmac_streaming_key",
+        "//src/main/java/com/google/crypto/tink/streamingaead:aes_ctr_hmac_streaming_parameters",
+        "//src/main/java/com/google/crypto/tink/streamingaead:aes_ctr_hmac_streaming_proto_serialization",
+        "//src/main/java/com/google/crypto/tink/util:secret_bytes",
+        "@maven//:com_google_protobuf_protobuf_java",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "PredefinedStreamingAeadParametersTest",
+    size = "small",
+    srcs = ["PredefinedStreamingAeadParametersTest.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink:key",
+        "//src/main/java/com/google/crypto/tink:registry_cluster",
+        "//src/main/java/com/google/crypto/tink/streamingaead:predefined_streaming_aead_parameters",
+        "//src/main/java/com/google/crypto/tink/streamingaead:streaming_aead_config",
+        "//src/main/java/com/google/crypto/tink/streamingaead:streaming_aead_parameters",
         "@maven//:com_google_truth_truth",
         "@maven//:junit_junit",
     ],

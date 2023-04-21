@@ -5,6 +5,7 @@
  */
 
 import {InvalidArgumentsException} from '../../../exception/invalid_arguments_exception';
+import {SecurityException} from '../../../exception/security_exception';
 import * as bytes from '../../../subtle/bytes';
 import * as ellipticCurves from '../../../subtle/elliptic_curves';
 
@@ -112,7 +113,7 @@ describe('NIST curves HPKE KEM', () => {
 
            await expectAsync(
                kem.TEST_ONLY(invalidRecipientPublicKey, senderPrivateKeyPair))
-               .toBeRejectedWithError(InvalidArgumentsException);
+               .toBeRejectedWithError(SecurityException);
          });
 
       it(`should fail with a mismatched curve type for ${curveString}`,
@@ -125,7 +126,7 @@ describe('NIST curves HPKE KEM', () => {
            const kem = NistCurvesHpkeKem.fromCurve(mismatchedCurveType);
 
            await expectAsync(kem.encapsulate(testInfo.recipientPublicKey))
-               .toBeRejectedWithError(InvalidArgumentsException);
+               .toBeRejectedWithError(SecurityException);
          });
 
       it(`should not encapsulate the correct sharedSecret nor escapsulatedKey with a mismatched senderPrivateKeyPair for ${
@@ -178,7 +179,7 @@ describe('NIST curves HPKE KEM', () => {
 
            await expectAsync(
                kem.decapsulate(invalidEncapsulatedKey, recipientPrivateKeyPair))
-               .toBeRejectedWithError(InvalidArgumentsException);
+               .toBeRejectedWithError(SecurityException);
          });
 
       it(`should fail with a mismatched curve type for ${curveString}`,
@@ -199,7 +200,7 @@ describe('NIST curves HPKE KEM', () => {
            await expectAsync(
                kem.decapsulate(
                    testInfo.encapsulatedKey, recipientPrivateKeyPair))
-               .toBeRejectedWithError(InvalidArgumentsException);
+               .toBeRejectedWithError(SecurityException);
          });
 
       it(`should not decapsulate the correct sharedSecret with a mismatched recipientPrivateKeyPair for ${

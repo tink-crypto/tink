@@ -41,6 +41,7 @@ go_test(
         "aes_cmac_key_manager_test.go",
         "hmac_key_manager_test.go",
         "mac_factory_test.go",
+        "mac_init_test.go",
         "mac_key_templates_test.go",
         "mac_test.go",
     ],

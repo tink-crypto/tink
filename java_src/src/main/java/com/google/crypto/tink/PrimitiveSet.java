@@ -157,11 +157,8 @@ public final class PrimitiveSet<P> {
     }
   }
 
-  private static <P> Entry<P> addEntryToMap(
-      @Nullable P fullPrimitive,
-      @Nullable P primitive,
-      Keyset.Key key,
-      ConcurrentMap<Prefix, List<Entry<P>>> primitives)
+  private static <P> Entry<P> createEntry(
+      @Nullable P fullPrimitive, @Nullable P primitive, Keyset.Key key)
       throws GeneralSecurityException {
     @Nullable Integer idRequirement = key.getKeyId();
     if (key.getOutputPrefixType() == OutputPrefixType.RAW) {
@@ -177,16 +174,21 @@ public final class PrimitiveSet<P> {
                     key.getOutputPrefixType(),
                     idRequirement),
                 InsecureSecretKeyAccess.get());
-    Entry<P> entry =
-        new Entry<P>(
-            fullPrimitive,
-            primitive,
-            CryptoFormat.getOutputPrefix(key),
-            key.getStatus(),
-            key.getOutputPrefixType(),
-            key.getKeyId(),
-            key.getKeyData().getTypeUrl(),
-            keyObject);
+    return new Entry<P>(
+        fullPrimitive,
+        primitive,
+        CryptoFormat.getOutputPrefix(key),
+        key.getStatus(),
+        key.getOutputPrefixType(),
+        key.getKeyId(),
+        key.getKeyData().getTypeUrl(),
+        keyObject);
+  }
+
+  private static <P> void storeEntryInPrimitiveSet(
+      Entry<P> entry,
+      ConcurrentMap<Prefix, List<Entry<P>>> primitives,
+      List<Entry<P>> primitivesInKeysetOrder) {
     List<Entry<P>> list = new ArrayList<>();
     list.add(entry);
     // Cannot use byte[] as keys in hash map, convert to Prefix wrapper class.
@@ -198,7 +200,7 @@ public final class PrimitiveSet<P> {
       newList.add(entry);
       primitives.put(identifier, Collections.unmodifiableList(newList));
     }
-    return entry;
+    primitivesInKeysetOrder.add(entry);
   }
 
   /** Returns the entry with the primary primitive. */
@@ -215,28 +217,36 @@ public final class PrimitiveSet<P> {
     return annotations;
   }
 
-  /** @return all primitives using RAW prefix. */
+  /** Returns all primitives using RAW prefix. */
   public List<Entry<P>> getRawPrimitives() {
     return getPrimitive(CryptoFormat.RAW_PREFIX);
   }
 
-  /** @return the entries with primitive identifed by {@code identifier}. */
+  /** Returns the entries with primitive identifed by {@code identifier}. */
   public List<Entry<P>> getPrimitive(final byte[] identifier) {
     List<Entry<P>> found = primitives.get(new Prefix(identifier));
     return found != null ? found : Collections.<Entry<P>>emptyList();
   }
 
-  /** @return all primitives */
+  /** Returns all primitives. */
   public Collection<List<Entry<P>>> getAll() {
     return primitives.values();
   }
 
+  /** Returns all primitives in the original keyset key order. */
+  public List<Entry<P>> getAllInKeysetOrder() {
+    return Collections.unmodifiableList(primitivesInKeysetOrder);
+  }
+
   /**
-   * The primitives are stored in a hash map of (ciphertext prefix, list of primivies sharing the
+   * The primitives are stored in a hash map of (ciphertext prefix, list of primitives sharing the
    * prefix). This allows quickly retrieving the list of primitives sharing some particular prefix.
    * Because all RAW keys are using an empty prefix, this also quickly allows retrieving them.
    */
   private final ConcurrentMap<Prefix, List<Entry<P>>> primitives;
+
+  /** Stores entries in the original keyset key order. */
+  private final List<Entry<P>> primitivesInKeysetOrder;
 
   private Entry<P> primary;
   private final Class<P> primitiveClass;
@@ -245,15 +255,21 @@ public final class PrimitiveSet<P> {
 
   private PrimitiveSet(Class<P> primitiveClass) {
     this.primitives = new ConcurrentHashMap<>();
+    this.primitivesInKeysetOrder = new ArrayList<>();
     this.primitiveClass = primitiveClass;
     this.annotations = MonitoringAnnotations.EMPTY;
     this.isMutable = true;
   }
 
-  /** Creates an immutable PrimitiveSet. It is used by the Builder.*/
-  private PrimitiveSet(ConcurrentMap<Prefix, List<Entry<P>>> primitives,
-      Entry<P> primary, MonitoringAnnotations annotations, Class<P> primitiveClass) {
+  /** Creates an immutable PrimitiveSet. It is used by the Builder. */
+  private PrimitiveSet(
+      ConcurrentMap<Prefix, List<Entry<P>>> primitives,
+      List<Entry<P>> primitivesInKeysetOrder,
+      Entry<P> primary,
+      MonitoringAnnotations annotations,
+      Class<P> primitiveClass) {
     this.primitives = primitives;
+    this.primitivesInKeysetOrder = primitivesInKeysetOrder;
     this.primary = primary;
     this.primitiveClass = primitiveClass;
     this.annotations = annotations;
@@ -313,7 +329,9 @@ public final class PrimitiveSet<P> {
     if (key.getStatus() != KeyStatusType.ENABLED) {
       throw new GeneralSecurityException("only ENABLED key is allowed");
     }
-    return addEntryToMap(null, primitive, key, primitives);
+    Entry<P> entry = createEntry(null, primitive, key);
+    storeEntryInPrimitiveSet(entry, primitives, primitivesInKeysetOrder);
+    return entry;
   }
 
   public Class<P> getPrimitiveClass() {
@@ -367,6 +385,7 @@ public final class PrimitiveSet<P> {
     // primitives == null indicates that build has been called and the builder can't be used
     // anymore.
     private ConcurrentMap<Prefix, List<Entry<P>>> primitives = new ConcurrentHashMap<>();
+    private final List<Entry<P>> primitivesInKeysetOrder = new ArrayList<>();
     private Entry<P> primary;
     private MonitoringAnnotations annotations;
 
@@ -387,7 +406,8 @@ public final class PrimitiveSet<P> {
       if (key.getStatus() != KeyStatusType.ENABLED) {
         throw new GeneralSecurityException("only ENABLED key is allowed");
       }
-      Entry<P> entry = addEntryToMap(fullPrimitive, primitive, key, primitives);
+      Entry<P> entry = createEntry(fullPrimitive, primitive, key);
+      storeEntryInPrimitiveSet(entry, primitives, primitivesInKeysetOrder);
       if (asPrimary) {
         if (this.primary != null) {
           throw new IllegalStateException("you cannot set two primary primitives");
@@ -447,7 +467,8 @@ public final class PrimitiveSet<P> {
       }
       // Note that we currently don't enforce that primary must be set.
       PrimitiveSet<P> output =
-          new PrimitiveSet<P>(primitives, primary, annotations, primitiveClass);
+          new PrimitiveSet<P>(
+              primitives, primitivesInKeysetOrder, primary, annotations, primitiveClass);
       this.primitives = null;
       return output;
     }

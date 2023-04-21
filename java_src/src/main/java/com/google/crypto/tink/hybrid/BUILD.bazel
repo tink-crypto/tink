@@ -180,6 +180,52 @@ java_library(
     ],
 )
 
+java_library(
+    name = "hybrid_parameters",
+    srcs = ["HybridParameters.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink:parameters",
+        "//src/main/java/com/google/crypto/tink/annotations:alpha",
+        "@maven//:com_google_errorprone_error_prone_annotations",
+    ],
+)
+
+java_library(
+    name = "hybrid_private_key",
+    srcs = ["HybridPrivateKey.java"],
+    deps = [
+        ":hybrid_parameters",
+        ":hybrid_public_key",
+        "//src/main/java/com/google/crypto/tink:key",
+        "//src/main/java/com/google/crypto/tink:private_key",
+        "//src/main/java/com/google/crypto/tink/annotations:alpha",
+        "//src/main/java/com/google/crypto/tink/util:bytes",
+        "@maven//:com_google_code_findbugs_jsr305",
+        "@maven//:com_google_errorprone_error_prone_annotations",
+    ],
+)
+
+java_library(
+    name = "hybrid_public_key",
+    srcs = ["HybridPublicKey.java"],
+    deps = [
+        ":hybrid_parameters",
+        "//src/main/java/com/google/crypto/tink:key",
+        "//src/main/java/com/google/crypto/tink/annotations:alpha",
+        "//src/main/java/com/google/crypto/tink/util:bytes",
+        "@maven//:com_google_errorprone_error_prone_annotations",
+    ],
+)
+
+java_library(
+    name = "hpke_parameters",
+    srcs = ["HpkeParameters.java"],
+    deps = [
+        ":hybrid_parameters",
+        "@maven//:com_google_errorprone_error_prone_annotations",
+    ],
+)
+
 # Android libraries
 
 android_library(
@@ -355,5 +401,51 @@ android_library(
     deps = [
         ":hybrid_config-android",
         "//src/main/java/com/google/crypto/tink:config-android",
+    ],
+)
+
+android_library(
+    name = "hybrid_parameters-android",
+    srcs = ["HybridParameters.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink:parameters-android",
+        "//src/main/java/com/google/crypto/tink/annotations:alpha-android",
+        "@maven//:com_google_errorprone_error_prone_annotations",
+    ],
+)
+
+android_library(
+    name = "hybrid_private_key-android",
+    srcs = ["HybridPrivateKey.java"],
+    deps = [
+        ":hybrid_parameters-android",
+        ":hybrid_public_key-android",
+        "//src/main/java/com/google/crypto/tink:key-android",
+        "//src/main/java/com/google/crypto/tink:private_key-android",
+        "//src/main/java/com/google/crypto/tink/annotations:alpha-android",
+        "//src/main/java/com/google/crypto/tink/util:bytes-android",
+        "@maven//:com_google_code_findbugs_jsr305",
+        "@maven//:com_google_errorprone_error_prone_annotations",
+    ],
+)
+
+android_library(
+    name = "hybrid_public_key-android",
+    srcs = ["HybridPublicKey.java"],
+    deps = [
+        ":hybrid_parameters-android",
+        "//src/main/java/com/google/crypto/tink:key-android",
+        "//src/main/java/com/google/crypto/tink/annotations:alpha-android",
+        "//src/main/java/com/google/crypto/tink/util:bytes-android",
+        "@maven//:com_google_errorprone_error_prone_annotations",
+    ],
+)
+
+android_library(
+    name = "hpke_parameters-android",
+    srcs = ["HpkeParameters.java"],
+    deps = [
+        ":hybrid_parameters-android",
+        "@maven//:com_google_errorprone_error_prone_annotations",
     ],
 )

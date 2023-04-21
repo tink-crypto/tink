@@ -1,0 +1,53 @@
+package(default_visibility = ["//visibility:public"])
+
+licenses(["notice"])
+
+java_test(
+    name = "CreateKesetExampleTest",
+    size = "small",
+    srcs = ["CreateKesetExampleTest.java"],
+    deps = [
+        "//walkthrough/src/main/java/walkthrough:create_keyset_example",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+        "@tink_java//src/main/java/com/google/crypto/tink:aead",
+        "@tink_java//src/main/java/com/google/crypto/tink:registry_cluster",
+        "@tink_java//src/main/java/com/google/crypto/tink/aead:aead_config",
+    ],
+)
+
+java_test(
+    name = "ObtainAndUseAeadPrimitiveExampleTest",
+    size = "small",
+    srcs = ["ObtainAndUseAeadPrimitiveExampleTest.java"],
+    deps = [
+        "//walkthrough/src/main/java/walkthrough:obtain_and_use_aead_primitive_example",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+        "@tink_java//src/main/java/com/google/crypto/tink:insecure_secret_key_access",
+        "@tink_java//src/main/java/com/google/crypto/tink:registry_cluster",
+        "@tink_java//src/main/java/com/google/crypto/tink:tink_json_proto_keyset_format",
+        "@tink_java//src/main/java/com/google/crypto/tink/aead:aead_config",
+    ],
+)
+
+java_test(
+    name = "WriteKeyserExampleTest",
+    size = "small",
+    srcs = ["WriteKeyserExampleTest.java"],
+    deps = [
+        "//walkthrough/src/main/java/walkthrough:obtain_and_use_aead_primitive_example",
+        "//walkthrough/src/main/java/walkthrough:write_keyset_example",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+        "@tink_java//src/main/java/com/google/crypto/tink:aead",
+        "@tink_java//src/main/java/com/google/crypto/tink:insecure_secret_key_access",
+        "@tink_java//src/main/java/com/google/crypto/tink:kms_clients",
+        "@tink_java//src/main/java/com/google/crypto/tink:registry_cluster",
+        "@tink_java//src/main/java/com/google/crypto/tink:tink_json_proto_keyset_format",
+        "@tink_java//src/main/java/com/google/crypto/tink:tink_proto_keyset_format",
+        "@tink_java//src/main/java/com/google/crypto/tink/aead:aead_config",
+        "@tink_java//src/main/java/com/google/crypto/tink/subtle:base64",
+        "@tink_java//src/main/java/com/google/crypto/tink/testing:fake_kms_client",
+    ],
+)

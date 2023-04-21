@@ -79,10 +79,10 @@ def example():
   # keyset will be used (which is also the only key in this example).
   sig = sign_primitive.sign(b'msg')
 
-  # Create a keyset handle from the keyset containing the public key. Note that
-  # we could have also created `kh_public` directly using
-  # `kh_priv.public_keyset_handle()`.
-  public_keyset_handle = cleartext_keyset_handle.read(
+  # Create a keyset handle from the keyset containing the public key. Because
+  # this keyset does not contain any secrets, we can use
+  # `tink.read_no_secret_keyset_handle`.
+  public_keyset_handle = tink.read_no_secret_keyset_handle(
       tink.JsonKeysetReader(public_keyset))
 
   # Retrieve the PublicKeyVerify primitive we want to use from the keyset
@@ -93,4 +93,10 @@ def example():
   # Verify finds the correct key in the keyset. If no key is found or
   # verification fails, it raises an error.
   verify_primitive.verify(sig, b'msg')
+
+  # Note that we can also get the public keyset handle from the private keyset
+  # handle. The verification works the same as above.
+  public_keyset_handle2 = private_keyset_handle.public_keyset_handle()
+  verify_primitive2 = public_keyset_handle2.primitive(signature.PublicKeyVerify)
+  verify_primitive2.verify(sig, b'msg')
   # [END signature-basic-example]

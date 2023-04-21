@@ -33,8 +33,6 @@
 #include "tink/signature/ecdsa_sign_key_manager.h"
 #include "proto/config.pb.h"
 
-using google::crypto::tink::RegistryConfig;
-
 namespace crypto {
 namespace tink {
 

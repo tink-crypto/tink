@@ -9,7 +9,7 @@ licenses(["notice"])
 
 cpp_grpc_library(
     name = "testing_api_cpp_library",
-    protos = ["//proto:testing_api_proto"],
+    protos = ["//protos:testing_api_proto"],
     service_namespace = "testing_api",
 )
 

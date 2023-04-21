@@ -1,5 +1,9 @@
 # Tink
 
+*A multi-language, cross-platform library that provides cryptographic APIs that
+are secure, easy to use correctly, and hard(er) to misuse. See also:
+https://developers.google.com/tink*.
+
 > **NOTE**: **Tink is moving!**
 >
 > As part of our roadmap we are splitting Tink into
@@ -28,40 +32,43 @@
 >
 > Tink implementation/extension         | New repository                                                                            | Migration status               | End of support in google/tink
 > ------------------------------------- | ----------------------------------------------------------------------------------------- | ------------------------------ | -----------------------------
-> Tink Java                             | [tink-crypto/tink-java](https://github.com/tink-crypto/tink-java)                         | In progress (Q1 2023)          | Q3 2023
-> Tink Java AWS KMS extension           | [tink-crypto/tink-java-awskms](https://github.com/tink-crypto/tink-java-awskms)           | In progress (Q1 2023)          | Q3 2023
-> Tink Java Google Cloud KMS extension  | [tink-crypto/tink-java-gcpkms](https://github.com/tink-crypto/tink-java-gcpkms)           | In progress (Q1 2023)          | Q3 2023
-> Tink Java apps extension              | [tink-crypto/tink-java-apps](https://github.com/tink-crypto/tink-java-apps)               | In progress (Q1 2023)          | Q3 2023
-> Tink C++                              | [tink-crypto/tink-cc](https://github.com/tink-crypto/tink-cc)                             | Not started (expected Q2 2023) | TBA
-> Tink C++ AWS KMS extension            | [tink-crypto/tink-cc-awskms](https://github.com/tink-crypto/tink-cc-awskms)               | Not started (expected Q2 2023) | TBA
-> Tink C++ Google Cloud KMS extension   | [tink-crypto/tink-cc-gcpkms](https://github.com/tink-crypto/tink-cc-gcpkms)               | Not started (expected Q2 2023) | TBA
+> Tink Java                             | [tink-crypto/tink-java](https://github.com/tink-crypto/tink-java)                         | Complete (Q1 2023)             | Q3 2023
+> Tink Java AWS KMS extension           | [tink-crypto/tink-java-awskms](https://github.com/tink-crypto/tink-java-awskms)           | Complete (Q1 2023)             | Q3 2023
+> Tink Java Google Cloud KMS extension  | [tink-crypto/tink-java-gcpkms](https://github.com/tink-crypto/tink-java-gcpkms)           | Complete (Q1 2023)             | Q3 2023
+> Tink Java apps extension              | [tink-crypto/tink-java-apps](https://github.com/tink-crypto/tink-java-apps)               | Complete (Q1 2023)             | Q3 2023
+> Tink C++                              | [tink-crypto/tink-cc](https://github.com/tink-crypto/tink-cc)                             | In progress (expected Q2 2023) | Q4 2023
+> Tink C++ AWS KMS extension            | [tink-crypto/tink-cc-awskms](https://github.com/tink-crypto/tink-cc-awskms)               | In progress (expected Q2 2023) | Q4 2023
+> Tink C++ Google Cloud KMS extension   | [tink-crypto/tink-cc-gcpkms](https://github.com/tink-crypto/tink-cc-gcpkms)               | In progress (expected Q2 2023) | Q4 2023
 > Tink Python                           | [tink-crypto/tink-py](https://github.com/tink-crypto/tink-py)                             | Not started (expected Q2 2023) | TBA
 > Tink Go                               | [tink-crypto/tink-go](https://github.com/tink-crypto/tink-go)                             | Not started (expected Q3 2023) | TBA
 > Tink Go AWS KMS extension             | [tink-crypto/tink-go-awskms](https://github.com/tink-crypto/tink-go-awskms)               | Not started (expected Q3 2023) | TBA
 > Tink Go Google Cloud KMS extension    | [tink-crypto/tink-go-gcpkms](https://github.com/tink-crypto/tink-go-gcpkms)               | Not started (expected Q3 2023) | TBA
 > Tink Go HashiCorp Vault KMS extension | [tink-crypto/tink-go-hcvault](https://github.com/tink-crypto/tink-go-hcvault)             | Not started (expected Q3 2023) | TBA
-> Tink Javascript                       | [tink-crypto/tink-javascript](https://github.com/tink-crypto/tink-javascript)             | Not started (expected Q4 2023) | TBA
 > Tink Obj-C                            | [tink-crypto/tink-objc](https://github.com/tink-crypto/tink-objc)                         | Not started (expected Q4 2023) | TBA
-> Tink Tinkey                           | [tink-crypto/tink-tinkey](https://github.com/tink-crypto/tink-tinkey)                     | Not started (expected Q4 2023) | TBA
+> Tink Tinkey                           | [tink-crypto/tink-tinkey](https://github.com/tink-crypto/tink-tinkey)                     | Complete (Q2 2023)             | Q4 2023
 > Tink cross language tests             | [tink-crypto/tink-cross-lang-tests](https://github.com/tink-crypto/tink-cross-lang-tests) | Not started (expected Q4 2023) | TBA
+
+> **NOTE**: **We are removing Tink for JavaScript/TypeScript**
 >
-> Please use our [mailing list][tink_mailing_list_url] to raise any questions,
-> issues or concerns.
+> We are removing the Tink JavaScript/TypeScript library from our current Github
+> repository (master branch). As part of our effort to migrate Tink to
+> https://github.com/tink-crypto, we will not release an individual
+> JavaScript/Typescript repository. Furthermore, the JavaScript/TypeScript
+> [directory](https://github.com/google/tink/tree/master/javascript) in the
+> current release branch (v1.7.0) will no longer be actively supported.
+>
+> _We aim to remove the JS/TS directory from the current Tink Github repository
+> (master branch) on **June 22, 2023**. We will also deprecate the Tink npm
+> package on this date._
+>
+> See [this](https://github.com/google/tink/issues/689) tracking issue for more
+> details.
+>
+> Feel free to use our [mailing list][tink_mailing_list_url] to raise any
+> questions, issues or concerns.
 
 [split_repo_roadmap_url]: https://developers.google.com/tink/roadmap#splitting_tink_into_multiple_github_repositories
 [tink_mailing_list_url]: https://groups.google.com/forum/#!forum/tink-users
-
-*A multi-language, cross-platform library that provides cryptographic APIs that
-are secure, easy to use correctly, and hard(er) to misuse.*
-
-https://developers.google.com/tink
-
-**`Ubuntu`**                        | **`macOS`**
------------------------------------ | ---------------------------------
-[![Kokoro Ubuntu][ubuntu_badge]](#) | [![Kokoro macOS][macos_badge]](#)
-
-[ubuntu_badge]: https://storage.googleapis.com/tink-kokoro-build-badges/tink-ubuntu.png
-[macos_badge]: https://storage.googleapis.com/tink-kokoro-build-badges/tink-macos.png
 
 ## Index
 
@@ -77,9 +84,10 @@ https://developers.google.com/tink
 Using crypto in your application [shouldn't have to][devs_are_users_too_slides]
 feel like juggling chainsaws in the dark. Tink is a crypto library written by a
 group of cryptographers and security engineers at Google. It was born out of our
-extensive experience working with Google's product teams, [fixing weaknesses in
-implementations](https://github.com/google/wycheproof), and providing simple
-APIs that can be used safely without needing a crypto background.
+extensive experience working with Google's product teams,
+[fixing weaknesses in implementations](https://github.com/google/wycheproof),
+and providing simple APIs that can be used safely without needing a crypto
+background.
 
 Tink provides secure APIs that are easy to use correctly and hard(er) to misuse.
 It reduces common crypto pitfalls with user-centered design, careful
@@ -104,6 +112,15 @@ latest version is [1.7.0](https://github.com/google/tink/releases/tag/v1.7.0),
 released on 2022-08-09.
 
 Javascript/Typescript is in an alpha state and should only be used for testing.
+Please see the intent to remove statement
+[here](https://github.com/google/tink/issues/689).
+
+**`Ubuntu`**                        | **`macOS`**
+----------------------------------- | ---------------------------------
+[![Kokoro Ubuntu][ubuntu_badge]](#) | [![Kokoro macOS][macos_badge]](#)
+
+[ubuntu_badge]: https://storage.googleapis.com/tink-kokoro-build-badges/tink-ubuntu.png
+[macos_badge]: https://storage.googleapis.com/tink-kokoro-build-badges/tink-macos.png
 
 ## Getting started
 
@@ -182,8 +199,8 @@ maintain them and have no plan to support them in the foreseeable future.
 
 ## Contact and mailing list
 
-If you want to contribute, please read [CONTRIBUTING](docs/CONTRIBUTING.md)
-and send us pull requests. You can also report bugs or file feature requests.
+If you want to contribute, please read [CONTRIBUTING](docs/CONTRIBUTING.md) and
+send us pull requests. You can also report bugs or file feature requests.
 
 If you'd like to talk to the developers or get notified about major product
 updates, you may want to subscribe to our [mailing list][tink_mailing_list_url].

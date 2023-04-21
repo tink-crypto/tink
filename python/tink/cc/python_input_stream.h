@@ -14,8 +14,8 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef TINK_PYTHON_CC_PYTHON_INPUT_STREAM_H_
-#define TINK_PYTHON_CC_PYTHON_INPUT_STREAM_H_
+#ifndef TINK_PYTHON_TINK_CC_PYTHON_INPUT_STREAM_H_
+#define TINK_PYTHON_TINK_CC_PYTHON_INPUT_STREAM_H_
 
 #include <memory>
 #include <string>
@@ -61,4 +61,4 @@ class PythonInputStream : public InputStream {
 }  // namespace tink
 }  // namespace crypto
 
-#endif  // TINK_PYTHON_CC_PYTHON_INPUT_STREAM_H_
+#endif  // TINK_PYTHON_TINK_CC_PYTHON_INPUT_STREAM_H_

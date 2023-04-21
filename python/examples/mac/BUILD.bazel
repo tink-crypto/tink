@@ -1,7 +1,7 @@
 load("@rules_python//python:defs.bzl", "py_binary")
 load("@pip_deps//:requirements.bzl", "requirement")
 
-package(default_visibility = ["//visibility:public"])
+package(default_visibility = ["//visibility:private"])
 
 licenses(["notice"])
 
@@ -46,5 +46,25 @@ sh_test(
     data = [
         ":mac.py",
         ":mac_test_keyset.json",
+    ],
+)
+
+py_library(
+    name = "mac_basic",
+    srcs = ["mac_basic.py"],
+    deps = [
+        "@tink_py//tink:cleartext_keyset_handle",
+        "@tink_py//tink:tink_python",
+        "@tink_py//tink/mac",
+    ],
+)
+
+py_test(
+    name = "mac_basic_test",
+    srcs = ["mac_basic_test.py"],
+    python_version = "PY3",
+    deps = [
+        requirement("absl-py"),
+        ":mac_basic",
     ],
 )

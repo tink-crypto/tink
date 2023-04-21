@@ -62,7 +62,7 @@ struct SphincsParamsPqclean {
   SphincsHashType hash_type;
   SphincsVariant variant;
   SphincsSignatureType sig_length_type;
-  int32 private_key_size;
+  int32_t private_key_size;
 };
 
 // Representation of the Sphincs private key.
@@ -127,10 +127,10 @@ crypto::tink::util::StatusOr<SphincsKeyPair> GenerateSphincsKeyPair(
     SphincsParamsPqclean params);
 
 // Validates whether the private key size is safe to use for sphincs signature.
-crypto::tink::util::Status ValidatePrivateKeySize(int32 key_size);
+crypto::tink::util::Status ValidatePrivateKeySize(int32_t key_size);
 
 // Validates whether the public key size is safe to use for sphincs signature.
-crypto::tink::util::Status ValidatePublicKeySize(int32 key_size);
+crypto::tink::util::Status ValidatePublicKeySize(int32_t key_size);
 
 // Validates whether the parameters are safe to use for sphincs signature.
 crypto::tink::util::Status ValidateParams(SphincsParamsPqclean params);
@@ -138,7 +138,7 @@ crypto::tink::util::Status ValidateParams(SphincsParamsPqclean params);
 
 // Convert the sphincs private key size to the appropiate index in the
 // pqclean functions array.
-crypto::tink::util::StatusOr<int32> SphincsKeySizeToIndex(int32 key_size);
+crypto::tink::util::StatusOr<int32_t> SphincsKeySizeToIndex(int32_t key_size);
 
 }  // namespace subtle
 }  // namespace tink

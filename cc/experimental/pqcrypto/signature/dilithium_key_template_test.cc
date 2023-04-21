@@ -51,7 +51,7 @@ using ::google::crypto::tink::OutputPrefixType;
 
 struct DilithiumKeyTemplateTestCase {
   std::string test_name;
-  int32 key_size;
+  int32_t key_size;
   DilithiumSeedExpansion seed_expansion;
   KeyTemplate key_template;
 };

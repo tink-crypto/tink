@@ -184,6 +184,7 @@ public final class AesGcmHkdfStreamingKeyManager extends KeyTypeManager<AesGcmHk
 
   public static void register(boolean newKeyAllowed) throws GeneralSecurityException {
     Registry.registerKeyManager(new AesGcmHkdfStreamingKeyManager(), newKeyAllowed);
+    AesGcmHkdfStreamingProtoSerialization.register();
   }
 
   /**

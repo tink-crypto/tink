@@ -233,6 +233,7 @@ public final class RsaSsaPkcs1SignKeyManager
   public static void registerPair(boolean newKeyAllowed) throws GeneralSecurityException {
     Registry.registerAsymmetricKeyManagers(
         new RsaSsaPkcs1SignKeyManager(), new RsaSsaPkcs1VerifyKeyManager(), newKeyAllowed);
+    RsaSsaPkcs1ProtoSerialization.register();
   }
 
   /**

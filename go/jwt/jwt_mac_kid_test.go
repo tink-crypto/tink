@@ -205,8 +205,12 @@ func TestValidateFixedToken(t *testing.T) {
 	if err != nil {
 		t.Fatalf("creating JWTValidator: %v", err)
 	}
-	if _, err := m.VerifyMACAndDecodeWithKID(compact, presentValidator, nil); err == nil {
+	_, err = m.VerifyMACAndDecodeWithKID(compact, presentValidator, nil)
+	if err == nil {
 		t.Fatalf("m.VerifyMACAndDecodeWithKID() with expired token err = nil, want error")
+	}
+	if !IsExpirationErr(err) {
+		t.Fatalf("IsExpirationErr(err) for err = %q is false, want true", err)
 	}
 
 	// tampered token verification fails

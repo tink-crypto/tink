@@ -93,7 +93,6 @@ cc_library(
         ":fips_utils",
         ":keyset_wrapper",
         ":keyset_wrapper_impl",
-        "//:catalogue",
         "//:core/key_manager_impl",
         "//:core/key_type_manager",
         "//:core/private_key_manager_impl",
@@ -286,7 +285,6 @@ cc_test(
         ":fips_utils",
         ":registry_impl",
         "//:aead",
-        "//:catalogue",
         "//:core/key_manager_impl",
         "//:core/key_type_manager",
         "//:core/private_key_manager_impl",
@@ -376,7 +374,6 @@ cc_test(
 
 cc_test(
     name = "rsa_util_test",
-    size = "large",
     srcs = ["rsa_util_test.cc"],
     deps = [
         ":bn_util",
@@ -396,7 +393,6 @@ cc_test(
 
 cc_test(
     name = "ec_util_test",
-    size = "large",
     srcs = ["ec_util_test.cc"],
     data = [
         "//testvectors:ecdh",
@@ -687,12 +683,8 @@ cc_test(
     name = "serializer_index_test",
     srcs = ["serializer_index_test.cc"],
     deps = [
-        ":serialization",
+        ":serialization_test_util",
         ":serializer_index",
-        "//:key",
-        "//:parameters",
-        "@com_google_absl//absl/strings",
-        "@com_google_absl//absl/types:optional",
         "@com_google_googletest//:gtest_main",
     ],
 )
@@ -1080,6 +1072,33 @@ cc_test(
         "//util:status",
         "//util:test_matchers",
         "@com_google_absl//absl/status",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_library(
+    name = "configuration_impl",
+    hdrs = ["configuration_impl.h"],
+    include_prefix = "tink/internal",
+    deps = [
+        ":registry_impl",
+        "//:configuration",
+    ],
+)
+
+cc_test(
+    name = "configuration_impl_test",
+    srcs = ["configuration_impl_test.cc"],
+    deps = [
+        ":configuration_impl",
+        ":fips_utils",
+        ":registry_impl",
+        "//:aead",
+        "//:configuration",
+        "//proto:aes_gcm_cc_proto",
+        "//proto:rsa_ssa_pss_cc_proto",
+        "//util:test_matchers",
+        "//util:test_util",
         "@com_google_googletest//:gtest_main",
     ],
 )

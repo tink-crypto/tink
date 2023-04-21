@@ -242,6 +242,7 @@ public final class JwtHmacKeyManager extends KeyTypeManager<JwtHmacKey> {
 
   public static void register(boolean newKeyAllowed) throws GeneralSecurityException {
     Registry.registerKeyManager(new JwtHmacKeyManager(), newKeyAllowed);
+    JwtHmacProtoSerialization.register();
   }
 
   /** Returns a {@link KeyTemplate} that generates new instances of HS256 256-bit keys. */

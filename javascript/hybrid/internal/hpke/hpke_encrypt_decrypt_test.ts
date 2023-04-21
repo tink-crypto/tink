@@ -128,7 +128,7 @@ describe('HpkeEncryptDecrypt', () => {
       const ciphertext = await hpkeEncrypt.encrypt(input, contextInfo);
       const modifiedCiphertext = random.randBytes(ciphertext.length);
       await expectAsync(hpkeDecrypt.decrypt(modifiedCiphertext, contextInfo))
-          .toBeRejectedWithError(InvalidArgumentsException);
+          .toBeRejectedWithError(SecurityException);
     });
 
     it('fails with truncated context info', async () => {

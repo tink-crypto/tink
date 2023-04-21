@@ -172,7 +172,7 @@ public final class AesEaxParameters extends AeadParameters {
 
   @Override
   public int hashCode() {
-    return Objects.hash(keySizeBytes, ivSizeBytes, tagSizeBytes, variant);
+    return Objects.hash(AesEaxParameters.class, keySizeBytes, ivSizeBytes, tagSizeBytes, variant);
   }
 
   @Override

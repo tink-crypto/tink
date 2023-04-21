@@ -79,6 +79,18 @@ public final class HkdfPrfParametersTest {
   }
 
   @Test
+  public void clearSaltWithEmptyString_succeeds() throws Exception {
+    HkdfPrfParameters parameters =
+        HkdfPrfParameters.builder()
+            .setKeySizeBytes(16)
+            .setHashType(HkdfPrfParameters.HashType.SHA256)
+            .setSalt(Bytes.copyFrom("Some Salt".getBytes(UTF_8)))
+            .setSalt(Bytes.copyFrom("".getBytes(UTF_8)))
+            .build();
+    assertThat(parameters.getSalt()).isNull();
+  }
+
+  @Test
   public void buildWithoutSettingKeySize_fails() throws Exception {
     assertThrows(
         GeneralSecurityException.class,

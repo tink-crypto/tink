@@ -26,7 +26,7 @@ from tink import signature
 from tink import streaming_aead
 
 
-from proto import testing_api_pb2
+from protos import testing_api_pb2
 import services
 
 

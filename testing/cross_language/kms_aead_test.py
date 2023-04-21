@@ -54,7 +54,6 @@ _GCP_UNKNOWN_KEY_URI = (
     'gcp-kms://projects/tink-test-infrastructure/locations/global/'
     'keyRings/unit-and-integration-testing/cryptoKeys/unknown')
 
-
 _KMS_KEY_URI = {
     'GCP': _GCP_KEY_URI,
     'AWS': _AWS_KEY_URI,
@@ -145,7 +144,9 @@ def _unknown_key_uris_test_cases():
 class KmsAeadTest(parameterized.TestCase):
 
   @parameterized.parameters(_kms_aead_test_cases())
-  def test_encrypt_decrypt(self, kms_service, encrypt_lang, decrypt_lang):
+  def test_encrypt_decrypt_with_associated_data(
+      self, kms_service, encrypt_lang, decrypt_lang
+  ):
     kms_key_uri = _KMS_KEY_URI[kms_service]
     kms_aead_template_name = '%s_KMS_AEAD' % kms_service
     key_template = aead.aead_key_templates.create_kms_aead_key_template(
@@ -155,6 +156,24 @@ class KmsAeadTest(parameterized.TestCase):
         lang=encrypt_lang, keyset=keyset, primitive_class=aead.Aead)
     plaintext, associated_data = _get_plaintext_and_aad(kms_aead_template_name,
                                                         encrypt_primitive.lang)
+    ciphertext = encrypt_primitive.encrypt(plaintext, associated_data)
+    decrypt_primitive = testing_servers.remote_primitive(
+        decrypt_lang, keyset, aead.Aead)
+    output = decrypt_primitive.decrypt(ciphertext, associated_data)
+    self.assertEqual(output, plaintext)
+
+  @parameterized.parameters(_kms_aead_test_cases())
+  def test_encrypt_decrypt_with_empty_associated_data(
+      self, kms_service, encrypt_lang, decrypt_lang
+  ):
+    kms_key_uri = _KMS_KEY_URI[kms_service]
+    key_template = aead.aead_key_templates.create_kms_aead_key_template(
+        kms_key_uri)
+    keyset = testing_servers.new_keyset(encrypt_lang, key_template)
+    encrypt_primitive = testing_servers.remote_primitive(
+        lang=encrypt_lang, keyset=keyset, primitive_class=aead.Aead)
+    plaintext = b'plaintext'
+    associated_data = b''
     ciphertext = encrypt_primitive.encrypt(plaintext, associated_data)
     decrypt_primitive = testing_servers.remote_primitive(
         decrypt_lang, keyset, aead.Aead)
@@ -283,7 +302,9 @@ def _kms_envelope_aead_test_cases() -> Iterable[Tuple[str, str, str]]:
 class KmsEnvelopeAeadTest(parameterized.TestCase):
 
   @parameterized.parameters(_kms_envelope_aead_test_cases())
-  def test_encrypt_decrypt(self, key_template_name, encrypt_lang, decrypt_lang):
+  def test_encrypt_decrypt_with_associated_data(
+      self, key_template_name, encrypt_lang, decrypt_lang
+  ):
     key_template = _KMS_ENVELOPE_AEAD_KEY_TEMPLATES[key_template_name]
     # Use the encryption language to generate the keyset proto.
     keyset = testing_servers.new_keyset(encrypt_lang, key_template)
@@ -294,6 +315,23 @@ class KmsEnvelopeAeadTest(parameterized.TestCase):
     ciphertext = encrypt_primitive.encrypt(plaintext, associated_data)
 
     # Decrypt.
+    decrypt_primitive = testing_servers.remote_primitive(
+        decrypt_lang, keyset, aead.Aead)
+    output = decrypt_primitive.decrypt(ciphertext, associated_data)
+    self.assertEqual(output, plaintext)
+
+  @parameterized.parameters(_kms_envelope_aead_test_cases())
+  def test_encrypt_decrypt_with_empty_associated_data(
+      self, key_template_name, encrypt_lang, decrypt_lang
+  ):
+    key_template = _KMS_ENVELOPE_AEAD_KEY_TEMPLATES[key_template_name]
+    # Use the encryption language to generate the keyset proto.
+    keyset = testing_servers.new_keyset(encrypt_lang, key_template)
+    encrypt_primitive = testing_servers.remote_primitive(
+        encrypt_lang, keyset, aead.Aead)
+    plaintext = b'plaintext'
+    associated_data = b''
+    ciphertext = encrypt_primitive.encrypt(plaintext, associated_data)
     decrypt_primitive = testing_servers.remote_primitive(
         decrypt_lang, keyset, aead.Aead)
     output = decrypt_primitive.decrypt(ciphertext, associated_data)

@@ -14,8 +14,8 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef TINK_CHUNKEDMAC_INTERNAL_CHUNKED_MAC_IMPL_H_
-#define TINK_CHUNKEDMAC_INTERNAL_CHUNKED_MAC_IMPL_H_
+#ifndef TINK_MAC_INTERNAL_CHUNKED_MAC_IMPL_H_
+#define TINK_MAC_INTERNAL_CHUNKED_MAC_IMPL_H_
 
 #include <memory>
 #include <string>
@@ -92,4 +92,4 @@ util::StatusOr<std::unique_ptr<ChunkedMac>> NewChunkedHmac(
 }  // namespace tink
 }  // namespace crypto
 
-#endif  // TINK_CHUNKEDMAC_INTERNAL_CHUNKED_MAC_IMPL_H_
+#endif  // TINK_MAC_INTERNAL_CHUNKED_MAC_IMPL_H_

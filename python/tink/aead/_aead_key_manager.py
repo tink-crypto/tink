@@ -17,6 +17,7 @@
 from tink import core
 from tink.aead import _aead
 from tink.aead import _aead_wrapper
+from tink.aead import _kms_aead_key_manager
 from tink.cc.pybind import tink_bindings
 
 
@@ -44,8 +45,6 @@ def register() -> None:
       'AesGcmSivKey',
       'AesEaxKey',
       'XChaCha20Poly1305Key',
-      'KmsAeadKey',
-      'KmsEnvelopeAeadKey',
   ):
     type_url = 'type.googleapis.com/google.crypto.tink.{}'.format(ident)
     key_manager = core.KeyManagerCcToPyWrapper(
@@ -53,3 +52,9 @@ def register() -> None:
         AeadCcToPyWrapper)
     core.Registry.register_key_manager(key_manager, new_key_allowed=True)
   core.Registry.register_primitive_wrapper(_aead_wrapper.AeadWrapper())
+  core.Registry.register_key_manager(
+      _kms_aead_key_manager.KmsAeadKeyManager(), new_key_allowed=True
+  )
+  core.Registry.register_key_manager(
+      _kms_aead_key_manager.KmsEnvelopeAeadKeyManager(), new_key_allowed=True
+  )

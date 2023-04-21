@@ -24,7 +24,6 @@
 #include "gtest/gtest.h"
 #include "absl/memory/memory.h"
 #include "absl/status/status.h"
-#include "tink/config.h"
 #include "tink/config/tink_fips.h"
 #include "tink/keyset_handle.h"
 #include "tink/registry.h"

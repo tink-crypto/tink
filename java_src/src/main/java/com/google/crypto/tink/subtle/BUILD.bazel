@@ -65,10 +65,10 @@ java_library(
     name = "x25519",
     srcs = ["X25519.java"],
     deps = [
-        ":curve25519",
-        ":field25519",
         ":random",
         "//src/main/java/com/google/crypto/tink/annotations:alpha",
+        "//src/main/java/com/google/crypto/tink/internal:curve25519",
+        "//src/main/java/com/google/crypto/tink/internal:field25519",
     ],
 )
 
@@ -286,11 +286,11 @@ java_library(
     name = "ed25519_sign",
     srcs = ["Ed25519Sign.java"],
     deps = [
-        ":ed25519_cluster",
-        ":field25519",
         ":random",
         "//src/main/java/com/google/crypto/tink:public_key_sign",
         "//src/main/java/com/google/crypto/tink/config/internal:tink_fips_util",
+        "//src/main/java/com/google/crypto/tink/internal:ed25519_cluster",
+        "//src/main/java/com/google/crypto/tink/internal:field25519",
     ],
 )
 
@@ -324,10 +324,10 @@ java_library(
     name = "ed25519_verify",
     srcs = ["Ed25519Verify.java"],
     deps = [
-        ":ed25519_cluster",
-        ":field25519",
         "//src/main/java/com/google/crypto/tink:public_key_verify",
         "//src/main/java/com/google/crypto/tink/config/internal:tink_fips_util",
+        "//src/main/java/com/google/crypto/tink/internal:ed25519_cluster",
+        "//src/main/java/com/google/crypto/tink/internal:field25519",
         "//src/main/java/com/google/crypto/tink/util:bytes",
     ],
 )
@@ -353,12 +353,6 @@ java_library(
         "//src/main/java/com/google/crypto/tink/config/internal:tink_fips_util",
         "@maven//:com_google_errorprone_error_prone_annotations",
     ],
-)
-
-java_library(
-    name = "field25519",
-    srcs = ["Field25519.java"],
-    deps = ["//src/main/java/com/google/crypto/tink/annotations:alpha"],
 )
 
 java_library(
@@ -464,17 +458,6 @@ java_library(
 )
 
 java_library(
-    name = "curve25519",
-    srcs = ["Curve25519.java"],
-    deps = [
-        ":bytes",
-        ":field25519",
-        ":hex",
-        "//src/main/java/com/google/crypto/tink/annotations:alpha",
-    ],
-)
-
-java_library(
     name = "nonce_based_streaming_aead_cluster",
     srcs = [
         "NonceBasedStreamingAead.java",
@@ -488,7 +471,6 @@ java_library(
         ":stream_segment_decrypter",
         ":stream_segment_encrypter",
         "//src/main/java/com/google/crypto/tink:streaming_aead",
-        "@maven//:androidx_annotation_annotation",
         "@maven//:com_google_errorprone_error_prone_annotations",
     ],
 )
@@ -507,21 +489,6 @@ java_library(
         "//src/main/java/com/google/crypto/tink/internal:big_integer_encoding",
         "//src/main/java/com/google/crypto/tink/internal:util",
         "@maven//:com_google_code_findbugs_jsr305",
-        "@maven//:com_google_errorprone_error_prone_annotations",
-    ],
-)
-
-java_library(
-    name = "ed25519_cluster",
-    srcs = [
-        "Ed25519.java",
-        "Ed25519Constants.java",
-    ],
-    deps = [
-        ":bytes",
-        ":curve25519",
-        ":field25519",
-        ":subtle_util_cluster",
         "@maven//:com_google_errorprone_error_prone_annotations",
     ],
 )
@@ -631,17 +598,6 @@ android_library(
 )
 
 android_library(
-    name = "curve25519-android",
-    srcs = ["Curve25519.java"],
-    deps = [
-        ":bytes-android",
-        ":field25519-android",
-        ":hex-android",
-        "//src/main/java/com/google/crypto/tink/annotations:alpha-android",
-    ],
-)
-
-android_library(
     name = "ecdsa_sign_jce-android",
     srcs = ["EcdsaSignJce.java"],
     deps = [
@@ -717,29 +673,14 @@ android_library(
 )
 
 android_library(
-    name = "ed25519_cluster-android",
-    srcs = [
-        "Ed25519.java",
-        "Ed25519Constants.java",
-    ],
-    deps = [
-        ":bytes-android",
-        ":curve25519-android",
-        ":field25519-android",
-        ":subtle_util_cluster-android",
-        "@maven//:com_google_errorprone_error_prone_annotations",
-    ],
-)
-
-android_library(
     name = "ed25519_sign-android",
     srcs = ["Ed25519Sign.java"],
     deps = [
-        ":ed25519_cluster-android",
-        ":field25519-android",
         ":random-android",
         "//src/main/java/com/google/crypto/tink:public_key_sign-android",
         "//src/main/java/com/google/crypto/tink/config/internal:tink_fips_util-android",
+        "//src/main/java/com/google/crypto/tink/internal:ed25519_cluster-android",
+        "//src/main/java/com/google/crypto/tink/internal:field25519-android",
     ],
 )
 
@@ -759,10 +700,10 @@ android_library(
     name = "ed25519_verify-android",
     srcs = ["Ed25519Verify.java"],
     deps = [
-        ":ed25519_cluster-android",
-        ":field25519-android",
         "//src/main/java/com/google/crypto/tink:public_key_verify-android",
         "//src/main/java/com/google/crypto/tink/config/internal:tink_fips_util-android",
+        "//src/main/java/com/google/crypto/tink/internal:ed25519_cluster-android",
+        "//src/main/java/com/google/crypto/tink/internal:field25519-android",
         "//src/main/java/com/google/crypto/tink/util:bytes-android",
     ],
 )
@@ -794,12 +735,6 @@ android_library(
 android_library(
     name = "enums-android",
     srcs = ["Enums.java"],
-)
-
-android_library(
-    name = "field25519-android",
-    srcs = ["Field25519.java"],
-    deps = ["//src/main/java/com/google/crypto/tink/annotations:alpha-android"],
 )
 
 android_library(
@@ -844,7 +779,6 @@ android_library(
         ":stream_segment_decrypter-android",
         ":stream_segment_encrypter-android",
         "//src/main/java/com/google/crypto/tink:streaming_aead-android",
-        "@maven//:androidx_annotation_annotation",
         "@maven//:com_google_errorprone_error_prone_annotations",
     ],
 )
@@ -1021,10 +955,10 @@ android_library(
     name = "x25519-android",
     srcs = ["X25519.java"],
     deps = [
-        ":curve25519-android",
-        ":field25519-android",
         ":random-android",
         "//src/main/java/com/google/crypto/tink/annotations:alpha-android",
+        "//src/main/java/com/google/crypto/tink/internal:curve25519-android",
+        "//src/main/java/com/google/crypto/tink/internal:field25519-android",
     ],
 )
 

@@ -72,7 +72,7 @@ using ::google::crypto::tink::SphincsPrivateKey;
 using ::google::crypto::tink::SphincsSignatureType;
 using ::google::crypto::tink::SphincsVariant;
 
-KeyTemplate* NewSphincsKeyTemplate(int32 private_key_size,
+KeyTemplate* NewSphincsKeyTemplate(int32_t private_key_size,
                                    SphincsHashType hash_type,
                                    SphincsVariant variant,
                                    SphincsSignatureType type) {

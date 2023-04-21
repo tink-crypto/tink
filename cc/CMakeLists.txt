@@ -33,9 +33,7 @@ tink_cc_library(
     aead_key_templates.h
     binary_keyset_reader.h
     binary_keyset_writer.h
-    catalogue.h
     cleartext_keyset_handle.h
-    config.h
     deterministic_aead.h
     deterministic_aead_config.h
     deterministic_aead_factory.h
@@ -368,40 +366,6 @@ tink_cc_library(
 )
 
 tink_cc_library(
-  NAME catalogue
-  SRCS
-    catalogue.h
-  DEPS
-    tink::core::key_manager
-    absl::core_headers
-    tink::util::statusor
-)
-
-tink_cc_library(
-  NAME config
-  SRCS
-    core/config.cc
-    config.h
-  DEPS
-    tink::core::catalogue
-    tink::core::key_manager
-    tink::core::registry
-    absl::core_headers
-    absl::status
-    absl::strings
-    tink::aead::aead_config
-    tink::daead::deterministic_aead_config
-    tink::hybrid::hybrid_config
-    tink::mac::mac_config
-    tink::signature::signature_config
-    tink::streamingaead::streaming_aead_config
-    tink::util::errors
-    tink::util::status
-    tink::util::statusor
-    tink::proto::config_cc_proto
-)
-
-tink_cc_library(
   NAME crypto_format
   SRCS
     core/crypto_format.cc
@@ -425,8 +389,10 @@ tink_cc_library(
     absl::memory
     absl::status
     absl::synchronization
+    tink::util::constants
     tink::util::errors
     tink::util::statusor
+    tink::proto::prf_based_deriver_cc_proto
     tink::proto::tink_cc_proto
 )
 
@@ -469,6 +435,7 @@ tink_cc_library(
     keyset_handle.h
   DEPS
     tink::core::aead
+    tink::core::configuration
     tink::core::insecure_secret_key_access
     tink::core::key
     tink::core::key_manager
@@ -484,6 +451,7 @@ tink_cc_library(
     absl::status
     absl::strings
     absl::optional
+    tink::internal::configuration_impl
     tink::internal::key_info
     tink::internal::key_status_util
     tink::internal::mutable_serialization_registry
@@ -798,17 +766,6 @@ tink_cc_test(
 )
 
 tink_cc_test(
-  NAME config_test
-  SRCS
-    core/config_test.cc
-  DEPS
-    tink::core::config
-    tink::core::mac
-    gmock
-    tink::proto::config_cc_proto
-)
-
-tink_cc_test(
   NAME crypto_format_test
   SRCS
     core/crypto_format_test.cc
@@ -839,7 +796,9 @@ tink_cc_test(
     tink::aead::aead_key_templates
     tink::aead::aead_wrapper
     tink::aead::aes_gcm_key_manager
+    tink::config::fips_140_2
     tink::config::tink_config
+    tink::internal::fips_utils
     tink::internal::legacy_proto_parameters
     tink::internal::proto_parameters_serialization
     tink::mac::mac_key_templates
@@ -899,7 +858,6 @@ tink_cc_test(
   SRCS
     core/keyset_manager_test.cc
   DEPS
-    tink::core::config
     tink::core::keyset_handle
     tink::core::keyset_manager
     gmock
@@ -1090,4 +1048,12 @@ tink_cc_test(
     tink::signature::signature_key_templates
     tink::util::secret_data
     tink::util::test_matchers
+)
+
+tink_cc_library(
+  NAME configuration
+  SRCS
+    configuration.h
+  DEPS
+    tink::internal::registry_impl
 )

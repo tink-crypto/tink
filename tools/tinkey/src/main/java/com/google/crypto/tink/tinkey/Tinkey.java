@@ -38,7 +38,7 @@ public final class Tinkey {
     StreamingAeadConfig.register();
     JwtSignatureConfig.register();
     JwtMacConfig.register();
-    // place holder for KeyderivationConfig. DO NOT EDIT.
+    // place holder for KeyDerivationConfig. DO NOT EDIT.
     // place holder for Internal Prps. DO NOT EDIT.
     TinkeyCommands commands = new TinkeyCommands();
     CmdLineParser parser = new CmdLineParser(commands);

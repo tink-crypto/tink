@@ -76,8 +76,6 @@ public final class KeysetHandle {
    *   <li>By importing an existing key, with {@link KeysetHandle#importKey}
    * </ul>
    *
-   * . 7
-   *
    * <p>All these functions return a {@code KeysetBuilder.Entry}. It is necessary to assign an ID to
    * a new entry by calling one of {@link Entry#withFixedId} or {@link Entry#withRandomId}. The
    * exception is when an existing key which has an id requirement is imported (in which case the
@@ -722,9 +720,8 @@ public final class KeysetHandle {
   /**
    * Returns the keyset data as a list of {@link KeyHandle}s.
    *
-   * @deprecated Use {@link #size} and {@link #getAt} instead.
+   * Please do not use this function in new code. Instead, use {@link #getAt}.
    */
-  @Deprecated /* Deprecation under consideration */
   public List<KeyHandle> getKeys() {
     ArrayList<KeyHandle> result = new ArrayList<>();
     for (Keyset.Key key : keyset.getKeyList()) {
@@ -747,14 +744,25 @@ public final class KeysetHandle {
   }
 
   /**
+   * Generates a new {@link KeysetHandle} that contains a single fresh key generated key with the
+   * given {@code Parameters} object.
+   *
+   * @throws GeneralSecurityException if no generation method for the given {@code parameters} has
+   *     been registered.
+   */
+  public static final KeysetHandle generateNew(Parameters parameters)
+      throws GeneralSecurityException {
+    return KeysetHandle.newBuilder()
+        .addEntry(KeysetHandle.generateEntryFromParameters(parameters).withRandomId().makePrimary())
+        .build();
+  }
+
+  /**
    * Generates a new {@link KeysetHandle} that contains a single fresh key generated according to
    * {@code keyTemplate}.
    *
    * @throws GeneralSecurityException if the key template is invalid.
-   * @deprecated This method takes a KeyTemplate proto, which is an internal implementation detail.
-   *     Please use the generateNew method that takes a {@link KeyTemplate} POJO.
    */
-  @Deprecated /* Deprecation under consideration */
   public static final KeysetHandle generateNew(com.google.crypto.tink.proto.KeyTemplate keyTemplate)
       throws GeneralSecurityException {
     LegacyProtoParameters parameters =
@@ -839,14 +847,14 @@ public final class KeysetHandle {
   @SuppressWarnings("UnusedException")
   public static final KeysetHandle readNoSecret(KeysetReader reader)
       throws GeneralSecurityException, IOException {
+    byte[] serializedKeyset;
     try {
-      Keyset keyset = reader.read();
-      assertNoSecretKeyMaterial(keyset);
-      return KeysetHandle.fromKeyset(keyset);
+      serializedKeyset = reader.read().toByteArray();
     } catch (InvalidProtocolBufferException e) {
       // Do not propagate InvalidProtocolBufferException to guarantee no key material is leaked
       throw new GeneralSecurityException("invalid keyset");
     }
+    return readNoSecret(serializedKeyset);
   }
 
   /**
@@ -1061,7 +1069,13 @@ public final class KeysetHandle {
           fullPrimitive =
               getFullPrimitiveOrNull(entries.get(i).getKey(), inputPrimitiveClassObject);
         }
-
+        if (fullPrimitive == null && primitive == null) {
+          throw new GeneralSecurityException(
+              "Unable to get primitive "
+                  + inputPrimitiveClassObject
+                  + " for key of type "
+                  + protoKey.getKeyData().getTypeUrl());
+        }
         if (protoKey.getKeyId() == keyset.getPrimaryKeyId()) {
           builder.addPrimaryFullPrimitiveAndOptionalPrimitive(fullPrimitive, primitive, protoKey);
         } else {
@@ -1088,9 +1102,8 @@ public final class KeysetHandle {
    * Searches the keyset to find the primary key of this {@code KeysetHandle}, and returns the key
    * wrapped in a {@code KeyHandle}.
    *
-   * @deprecated Use {@link #getPrimary} instead.
+   * Please do not use this function in new code. Instead, use {@link #getPrimary}.
    */
-  @Deprecated /* Deprecation under consideration */
   public KeyHandle primaryKey() throws GeneralSecurityException {
     int primaryKeyId = keyset.getPrimaryKeyId();
     for (Keyset.Key key : keyset.getKeyList()) {

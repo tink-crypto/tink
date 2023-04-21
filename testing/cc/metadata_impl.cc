@@ -20,9 +20,6 @@
 
 namespace tink_testing_api {
 
-using ::grpc::ServerContext;
-using ::grpc::Status;
-
 // Returns server info.
 grpc::Status MetadataImpl::GetServerInfo(grpc::ServerContext* context,
                                          const ServerInfoRequest* request,

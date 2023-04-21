@@ -941,7 +941,7 @@ tink_cc_test(
     absl::status
     absl::strings
     tink::core::mac
-    tink::config::tink_fips
+    tink::internal::fips_utils
     tink::util::secret_data
     tink::util::status
     tink::util::statusor
@@ -960,9 +960,8 @@ tink_cc_test(
     absl::status
     absl::strings
     tink::aead::internal::wycheproof_aead
-    tink::config::tink_fips
+    tink::internal::fips_utils
     tink::util::secret_data
-    tink::util::status
     tink::util::statusor
     tink::util::test_matchers
 )
@@ -1092,7 +1091,7 @@ tink_cc_test(
     tink::subtle::random
     gmock
     absl::status
-    tink::config::tink_fips
+    tink::internal::fips_utils
     tink::util::secret_data
     tink::util::status
     tink::util::statusor
@@ -1132,8 +1131,8 @@ tink_cc_test(
     absl::status
     tink::core::public_key_sign
     tink::core::public_key_verify
-    tink::config::tink_fips
     tink::internal::ec_util
+    tink::internal::fips_utils
     tink::util::status
     tink::util::statusor
     tink::util::test_matchers
@@ -1157,7 +1156,7 @@ tink_cc_test(
     rapidjson
     tink::core::public_key_sign
     tink::core::public_key_verify
-    tink::config::tink_fips
+    tink::internal::fips_utils
     tink::util::status
     tink::util::statusor
     tink::util::test_matchers
@@ -1225,8 +1224,8 @@ tink_cc_test(
     rapidjson
     tink::core::public_key_sign
     tink::core::public_key_verify
-    tink::config::tink_fips
     tink::internal::err_util
+    tink::internal::fips_utils
     tink::internal::rsa_util
     tink::internal::ssl_unique_ptr
     tink::util::status
@@ -1245,7 +1244,7 @@ tink_cc_test(
     absl::status
     absl::strings
     crypto
-    tink::config::tink_fips
+    tink::internal::fips_utils
     tink::internal::rsa_util
     tink::internal::ssl_unique_ptr
     tink::util::test_matchers
@@ -1268,8 +1267,8 @@ tink_cc_test(
     rapidjson
     tink::core::public_key_sign
     tink::core::public_key_verify
-    tink::config::tink_fips
     tink::internal::err_util
+    tink::internal::fips_utils
     tink::internal::rsa_util
     tink::internal::ssl_unique_ptr
     tink::util::status
@@ -1288,7 +1287,7 @@ tink_cc_test(
     absl::status
     absl::strings
     crypto
-    tink::config::tink_fips
+    tink::internal::fips_utils
     tink::internal::rsa_util
     tink::internal::ssl_unique_ptr
     tink::util::test_matchers

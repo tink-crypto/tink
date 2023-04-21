@@ -16,7 +16,6 @@
 
 package com.google.crypto.tink;
 
-import androidx.annotation.RequiresApi;
 import com.google.crypto.tink.proto.EncryptedKeyset;
 import com.google.crypto.tink.proto.KeyData;
 import com.google.crypto.tink.proto.Keyset;
@@ -95,7 +94,6 @@ public final class JsonKeysetWriter implements KeysetWriter {
    *
    * @deprecated Method should be inlined.
    */
-  @RequiresApi(26) // https://developer.android.com/reference/java/nio/file/Path
   @InlineMe(
       replacement = "JsonKeysetWriter.withOutputStream(new FileOutputStream(path.toFile()))",
       imports = {"com.google.crypto.tink.JsonKeysetWriter", "java.io.FileOutputStream"})

@@ -65,7 +65,7 @@ TEST(TinkFipsTest, FipsDisabledWhenNotBuildInFipsMode) {
 }
 
 TEST(TinkFipsTest, CompatibilityChecksWithBoringCrypto) {
-  if (!FIPS_mode()) {
+  if (!internal::IsFipsEnabledInSsl()) {
     GTEST_SKIP() << "Test only run if BoringCrypto module is available.";
   }
 
@@ -88,7 +88,7 @@ TEST(TinkFipsTest, CompatibilityChecksWithBoringCrypto) {
 }
 
 TEST(TinkFipsTest, CompatibilityChecksWithoutBoringCrypto) {
-  if (FIPS_mode()) {
+  if (internal::IsFipsEnabledInSsl()) {
     GTEST_SKIP() << "Test only run if BoringCrypto module is not available.";
   }
 

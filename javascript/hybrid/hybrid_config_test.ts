@@ -7,76 +7,97 @@
 import {KeysetHandle} from '../internal/keyset_handle';
 import {PbKeyData, PbKeyset, PbKeysetKey, PbKeyStatusType, PbOutputPrefixType} from '../internal/proto';
 import {bytesAsU8} from '../internal/proto_shims';
-import * as Registry from '../internal/registry';
-import * as Random from '../subtle/random';
+import * as registry from '../internal/registry';
+import * as random from '../subtle/random';
 
 import {EciesAeadHkdfPrivateKeyManager} from './ecies_aead_hkdf_private_key_manager';
 import {EciesAeadHkdfPublicKeyManager} from './ecies_aead_hkdf_public_key_manager';
-import * as HybridConfig from './hybrid_config';
+import * as hybridConfig from './hybrid_config';
 import {HybridKeyTemplates} from './hybrid_key_templates';
+import * as hpkeKeyTemplates from './internal/hpke/hpke_key_templates';
+import {HpkePrivateKeyManager} from './internal/hpke/hpke_private_key_manager';
+import {HpkePublicKeyManager} from './internal/hpke/hpke_public_key_manager';
 import {HybridDecrypt} from './internal/hybrid_decrypt';
 import {HybridEncrypt} from './internal/hybrid_encrypt';
 
-describe('hybrid config test', function() {
-  beforeEach(function() {
+describe('hybrid config test', () => {
+  beforeEach(() => {
     // Use a generous promise timeout for running continuously.
     jasmine.DEFAULT_TIMEOUT_INTERVAL = 1000 * 1000;  // 1000s
   });
 
-  afterEach(function() {
-    Registry.reset();
+  afterEach(() => {
+    registry.reset();
     // Reset the promise timeout to default value.
     jasmine.DEFAULT_TIMEOUT_INTERVAL = 1000;  // 1s
   });
 
-  it('constants', function() {
-    expect(HybridConfig.ENCRYPT_PRIMITIVE_NAME).toBe(ENCRYPT_PRIMITIVE_NAME);
-    expect(HybridConfig.DECRYPT_PRIMITIVE_NAME).toBe(DECRYPT_PRIMITIVE_NAME);
+  it('constants', () => {
+    expect(hybridConfig.ENCRYPT_PRIMITIVE_NAME).toBe(ENCRYPT_PRIMITIVE_NAME);
+    expect(hybridConfig.DECRYPT_PRIMITIVE_NAME).toBe(DECRYPT_PRIMITIVE_NAME);
 
-    expect(HybridConfig.ECIES_AEAD_HKDF_PUBLIC_KEY_TYPE)
+    expect(hybridConfig.ECIES_AEAD_HKDF_PUBLIC_KEY_TYPE)
         .toBe(ECIES_AEAD_HKDF_PUBLIC_KEY_TYPE);
-    expect(HybridConfig.ECIES_AEAD_HKDF_PRIVATE_KEY_TYPE)
+    expect(hybridConfig.ECIES_AEAD_HKDF_PRIVATE_KEY_TYPE)
         .toBe(ECIES_AEAD_HKDF_PRIVATE_KEY_TYPE);
+
+    expect(hybridConfig.HPKE_PUBLIC_KEY_TYPE).toBe(HPKE_PUBLIC_KEY_TYPE);
+    expect(hybridConfig.HPKE_PRIVATE_KEY_TYPE).toBe(HPKE_PRIVATE_KEY_TYPE);
   });
 
-  it('register, correct key managers were registered', function() {
-    HybridConfig.register();
+  it('register, correct key managers were registered', () => {
+    hybridConfig.register();
 
     // Test that the corresponding key managers were registered.
-    const publicKeyManager =
-        Registry.getKeyManager(ECIES_AEAD_HKDF_PUBLIC_KEY_TYPE);
-    expect(publicKeyManager instanceof EciesAeadHkdfPublicKeyManager)
+    const eciesAeadHkdfPublicKeyManager =
+        registry.getKeyManager(ECIES_AEAD_HKDF_PUBLIC_KEY_TYPE);
+    expect(
+        eciesAeadHkdfPublicKeyManager instanceof EciesAeadHkdfPublicKeyManager)
         .toBe(true);
 
-    const privateKeyManager =
-        Registry.getKeyManager(ECIES_AEAD_HKDF_PRIVATE_KEY_TYPE);
-    expect(privateKeyManager instanceof EciesAeadHkdfPrivateKeyManager)
+    const eciesAeadHkdfPrivateKeyManager =
+        registry.getKeyManager(ECIES_AEAD_HKDF_PRIVATE_KEY_TYPE);
+    expect(
+        eciesAeadHkdfPrivateKeyManager instanceof
+        EciesAeadHkdfPrivateKeyManager)
         .toBe(true);
+
+    const hpkePublicKeyManager = registry.getKeyManager(HPKE_PUBLIC_KEY_TYPE);
+    expect(hpkePublicKeyManager instanceof HpkePublicKeyManager).toBe(true);
+
+    const hpkePrivateKeyManager = registry.getKeyManager(HPKE_PRIVATE_KEY_TYPE);
+    expect(hpkePrivateKeyManager instanceof HpkePrivateKeyManager).toBe(true);
   });
 
   // Check that everything was registered correctly and thus new keys may be
   // generated using the predefined key templates and then they may be used for
   // encryption and decryption.
-  it('register, predefined templates should work', async function() {
-    HybridConfig.register();
-    let templates = [
+  it('register, predefined templates should work', async () => {
+    hybridConfig.register();
+    const templates = [
       HybridKeyTemplates.eciesP256HkdfHmacSha256Aes128Gcm(),
-      HybridKeyTemplates.eciesP256HkdfHmacSha256Aes128CtrHmacSha256()
+      HybridKeyTemplates.eciesP256HkdfHmacSha256Aes128CtrHmacSha256(),
+      hpkeKeyTemplates.hpkeP256HkdfSha256Aes128GcmRaw(),
+      hpkeKeyTemplates.hpkeP256HkdfSha256Aes128Gcm(),
+      hpkeKeyTemplates.hpkeP256HkdfSha256Aes256GcmRaw(),
+      hpkeKeyTemplates.hpkeP256HkdfSha256Aes256Gcm(),
+      hpkeKeyTemplates.hpkeP521HkdfSha512Aes256GcmRaw(),
+      hpkeKeyTemplates.hpkeP521HkdfSha512Aes256Gcm()
     ];
     for (const template of templates) {
-      const privateKeyData = await Registry.newKeyData(template);
+      const privateKeyData = await registry.newKeyData(template);
       const privateKeysetHandle = createKeysetHandleFromKeyData(privateKeyData);
       const hybridDecrypt =
           await privateKeysetHandle.getPrimitive<HybridDecrypt>(HybridDecrypt);
 
-      const publicKeyData = Registry.getPublicKeyData(
+      const publicKeyData = registry.getPublicKeyData(
           privateKeyData.getTypeUrl(), bytesAsU8(privateKeyData.getValue()));
       const publicKeysetHandle = createKeysetHandleFromKeyData(publicKeyData);
       const hybridEncrypt =
           await publicKeysetHandle.getPrimitive<HybridEncrypt>(HybridEncrypt);
 
-      const plaintext = new Uint8Array(Random.randBytes(10));
-      const contextInfo = new Uint8Array(Random.randBytes(8));
+      const plaintext = new Uint8Array(random.randBytes(10));
+      const contextInfo = new Uint8Array(random.randBytes(8));
       const ciphertext = await hybridEncrypt.encrypt(plaintext, contextInfo);
       const decryptedCiphertext =
           await hybridDecrypt.decrypt(ciphertext, contextInfo);
@@ -93,6 +114,10 @@ const ECIES_AEAD_HKDF_PUBLIC_KEY_TYPE =
     'type.googleapis.com/google.crypto.tink.EciesAeadHkdfPublicKey';
 const ECIES_AEAD_HKDF_PRIVATE_KEY_TYPE =
     'type.googleapis.com/google.crypto.tink.EciesAeadHkdfPrivateKey';
+const HPKE_PUBLIC_KEY_TYPE =
+    'type.googleapis.com/google.crypto.tink.HpkePublicKey';
+const HPKE_PRIVATE_KEY_TYPE =
+    'type.googleapis.com/google.crypto.tink.HpkePrivateKey';
 
 /**
  * Creates a keyset containing only the key given by keyData and returns it

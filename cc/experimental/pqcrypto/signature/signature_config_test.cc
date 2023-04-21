@@ -19,13 +19,13 @@
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "absl/status/status.h"
-#include "tink/config/tink_fips.h"
 #include "tink/experimental/pqcrypto/signature/dilithium_sign_key_manager.h"
 #include "tink/experimental/pqcrypto/signature/dilithium_verify_key_manager.h"
-#include "tink/experimental/pqcrypto/signature/sphincs_sign_key_manager.h"
-#include "tink/experimental/pqcrypto/signature/sphincs_verify_key_manager.h"
 #include "tink/experimental/pqcrypto/signature/falcon_sign_key_manager.h"
 #include "tink/experimental/pqcrypto/signature/falcon_verify_key_manager.h"
+#include "tink/experimental/pqcrypto/signature/sphincs_sign_key_manager.h"
+#include "tink/experimental/pqcrypto/signature/sphincs_verify_key_manager.h"
+#include "tink/internal/fips_utils.h"
 #include "tink/public_key_sign.h"
 #include "tink/public_key_verify.h"
 #include "tink/registry.h"
@@ -45,7 +45,7 @@ class PcqSignatureConfigTest : public ::testing::Test {
 };
 
 TEST_F(PcqSignatureConfigTest, CheckDilithium) {
-  if (IsFipsModeEnabled() && !FIPS_mode()) {
+  if (internal::IsFipsModeEnabled() && !internal::IsFipsEnabledInSsl()) {
     GTEST_SKIP() << "Not supported if FIPS-mode is used";
   }
 
@@ -69,7 +69,7 @@ TEST_F(PcqSignatureConfigTest, CheckDilithium) {
 }
 
 TEST_F(PcqSignatureConfigTest, CheckSphincs) {
-  if (IsFipsModeEnabled() && !FIPS_mode()) {
+  if (internal::IsFipsModeEnabled() && !internal::IsFipsEnabledInSsl()) {
     GTEST_SKIP() << "Not supported if FIPS-mode is used";
   }
 
@@ -93,7 +93,7 @@ TEST_F(PcqSignatureConfigTest, CheckSphincs) {
 }
 
 TEST_F(PcqSignatureConfigTest, CheckFalcon) {
-  if (IsFipsModeEnabled() && !FIPS_mode()) {
+  if (internal::IsFipsModeEnabled() && !internal::IsFipsEnabledInSsl()) {
     GTEST_SKIP() << "Not supported if FIPS-mode is used";
   }
 

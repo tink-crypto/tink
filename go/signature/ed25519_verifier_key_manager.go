@@ -17,9 +17,9 @@
 package signature
 
 import (
+	"crypto/ed25519"
 	"fmt"
 
-	"golang.org/x/crypto/ed25519"
 	"google.golang.org/protobuf/proto"
 	"github.com/google/tink/go/keyset"
 	"github.com/google/tink/go/signature/subtle"

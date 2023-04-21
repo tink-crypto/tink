@@ -71,7 +71,7 @@ using DilithiumVerifyKeyManagerTest = testing::TestWithParam<DilithiumTestCase>;
 
 // Helper function that returns a valid dilithium private key.
 StatusOr<DilithiumPrivateKey> CreateValidPrivateKey(
-    int32 private_key_size, DilithiumSeedExpansion seed_expansion) {
+    int32_t private_key_size, DilithiumSeedExpansion seed_expansion) {
   DilithiumKeyFormat key_format;
   DilithiumParams* params = key_format.mutable_params();
   params->set_key_size(private_key_size);
@@ -82,7 +82,7 @@ StatusOr<DilithiumPrivateKey> CreateValidPrivateKey(
 
 // Helper function that returns a valid dilithium public key.
 StatusOr<DilithiumPublicKey> CreateValidPublicKey(
-    int32 private_key_size, DilithiumSeedExpansion seed_expansion) {
+    int32_t private_key_size, DilithiumSeedExpansion seed_expansion) {
   StatusOr<DilithiumPrivateKey> private_key =
       CreateValidPrivateKey(private_key_size, seed_expansion);
 

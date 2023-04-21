@@ -29,6 +29,7 @@
 #include "tink/aead/aead_key_templates.h"
 #include "tink/aead/aes_gcm_key_manager.h"
 #include "tink/config/tink_fips.h"
+#include "tink/internal/fips_utils.h"
 #include "tink/keyset_handle.h"
 #include "tink/primitive_set.h"
 #include "tink/registry.h"
@@ -45,7 +46,6 @@ using ::crypto::tink::test::IsOk;
 using ::crypto::tink::test::StatusIs;
 using ::crypto::tink::util::StatusOr;
 using ::google::crypto::tink::KeyTemplate;
-using ::testing::Eq;
 using ::testing::IsNull;
 using ::testing::Not;
 using ::testing::Test;
@@ -87,7 +87,7 @@ TEST_F(AeadConfigTest, WrappersRegistered) {
 
 // FIPS-only mode tests
 TEST_F(AeadConfigTest, RegisterNonFipsTemplates) {
-  if (!IsFipsModeEnabled() || !FIPS_mode()) {
+  if (!IsFipsModeEnabled() || !internal::IsFipsEnabledInSsl()) {
     GTEST_SKIP() << "Only supported in FIPS-only mode with BoringCrypto.";
   }
 
@@ -107,7 +107,7 @@ TEST_F(AeadConfigTest, RegisterNonFipsTemplates) {
 }
 
 TEST_F(AeadConfigTest, RegisterFipsValidTemplates) {
-  if (!IsFipsModeEnabled() || !FIPS_mode()) {
+  if (!IsFipsModeEnabled() || !internal::IsFipsEnabledInSsl()) {
     GTEST_SKIP() << "Only supported in FIPS-only mode with BoringCrypto.";
   }
 
@@ -127,7 +127,7 @@ TEST_F(AeadConfigTest, RegisterFipsValidTemplates) {
 }
 
 TEST_F(AeadConfigTest, RegisterFailsIfBoringCryptoNotAvailable) {
-  if (!IsFipsModeEnabled() || FIPS_mode()) {
+  if (!IsFipsModeEnabled() || internal::IsFipsEnabledInSsl()) {
     GTEST_SKIP()
         << "Only supported in FIPS-only mode with BoringCrypto not available.";
   }

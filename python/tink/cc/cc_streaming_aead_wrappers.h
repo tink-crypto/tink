@@ -14,8 +14,8 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef TINK_PYTHON_CC_CC_STREAMING_AEAD_WRAPPERS_H_
-#define TINK_PYTHON_CC_CC_STREAMING_AEAD_WRAPPERS_H_
+#ifndef TINK_PYTHON_TINK_CC_CC_STREAMING_AEAD_WRAPPERS_H_
+#define TINK_PYTHON_TINK_CC_CC_STREAMING_AEAD_WRAPPERS_H_
 
 #include <memory>
 
@@ -56,4 +56,4 @@ util::StatusOr<std::unique_ptr<InputStreamAdapter>> NewCcDecryptingStream(
 }  // namespace tink
 }  // namespace crypto
 
-#endif  // TINK_PYTHON_CC_CC_STREAMING_AEAD_WRAPPERS_H_
+#endif  // TINK_PYTHON_TINK_CC_CC_STREAMING_AEAD_WRAPPERS_H_

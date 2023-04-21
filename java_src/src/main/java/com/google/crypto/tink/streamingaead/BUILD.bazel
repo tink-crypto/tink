@@ -42,7 +42,6 @@ java_library(
     deps = [
         "//src/main/java/com/google/crypto/tink:primitive_set",
         "//src/main/java/com/google/crypto/tink:streaming_aead",
-        "@maven//:androidx_annotation_annotation",
         "@maven//:com_google_code_findbugs_jsr305",
         "@maven//:com_google_errorprone_error_prone_annotations",
     ],
@@ -67,7 +66,6 @@ java_library(
         ":seekable_byte_channel_decrypter",
         "//src/main/java/com/google/crypto/tink:primitive_set",
         "//src/main/java/com/google/crypto/tink:streaming_aead",
-        "@maven//:androidx_annotation_annotation",
     ],
 )
 
@@ -85,6 +83,7 @@ java_library(
     name = "aes_gcm_hkdf_streaming_key_manager",
     srcs = ["AesGcmHkdfStreamingKeyManager.java"],
     deps = [
+        ":aes_gcm_hkdf_streaming_proto_serialization",
         ":streaming_aead_util",
         "//proto:aes_gcm_hkdf_streaming_java_proto",
         "//proto:common_java_proto",
@@ -105,6 +104,7 @@ java_library(
     name = "aes_ctr_hmac_streaming_key_manager",
     srcs = ["AesCtrHmacStreamingKeyManager.java"],
     deps = [
+        ":aes_ctr_hmac_streaming_proto_serialization",
         ":streaming_aead_util",
         "//proto:aes_ctr_hmac_streaming_java_proto",
         "//proto:common_java_proto",
@@ -220,8 +220,6 @@ java_library(
     ],
 )
 
-# Android libraries
-
 android_library(
     name = "streaming_aead_util-android",
     srcs = ["StreamingAeadUtil.java"],
@@ -260,7 +258,6 @@ android_library(
     deps = [
         "//src/main/java/com/google/crypto/tink:primitive_set-android",
         "//src/main/java/com/google/crypto/tink:streaming_aead-android",
-        "@maven//:androidx_annotation_annotation",
         "@maven//:com_google_code_findbugs_jsr305",
         "@maven//:com_google_errorprone_error_prone_annotations",
     ],
@@ -285,7 +282,6 @@ android_library(
         ":seekable_byte_channel_decrypter-android",
         "//src/main/java/com/google/crypto/tink:primitive_set-android",
         "//src/main/java/com/google/crypto/tink:streaming_aead-android",
-        "@maven//:androidx_annotation_annotation",
     ],
 )
 
@@ -303,6 +299,7 @@ android_library(
     name = "aes_gcm_hkdf_streaming_key_manager-android",
     srcs = ["AesGcmHkdfStreamingKeyManager.java"],
     deps = [
+        ":aes_gcm_hkdf_streaming_proto_serialization-android",
         ":streaming_aead_util-android",
         "//proto:aes_gcm_hkdf_streaming_java_proto_lite",
         "//proto:common_java_proto_lite",
@@ -323,6 +320,7 @@ android_library(
     name = "aes_ctr_hmac_streaming_key_manager-android",
     srcs = ["AesCtrHmacStreamingKeyManager.java"],
     deps = [
+        ":aes_ctr_hmac_streaming_proto_serialization-android",
         ":streaming_aead_util-android",
         "//proto:aes_ctr_hmac_streaming_java_proto_lite",
         "//proto:common_java_proto_lite",
@@ -435,5 +433,105 @@ android_library(
         ":streaming_aead_parameters-android",
         "@maven//:com_google_code_findbugs_jsr305",
         "@maven//:com_google_errorprone_error_prone_annotations",
+    ],
+)
+
+android_library(
+    name = "aes_ctr_hmac_streaming_key-android",
+    srcs = ["AesCtrHmacStreamingKey.java"],
+    deps = [
+        ":aes_ctr_hmac_streaming_parameters-android",
+        ":streaming_aead_key-android",
+        "//src/main/java/com/google/crypto/tink:accesses_partial_key-android",
+        "//src/main/java/com/google/crypto/tink:key-android",
+        "//src/main/java/com/google/crypto/tink/util:secret_bytes-android",
+        "@maven//:com_google_errorprone_error_prone_annotations",
+    ],
+)
+
+java_library(
+    name = "aes_ctr_hmac_streaming_key",
+    srcs = ["AesCtrHmacStreamingKey.java"],
+    deps = [
+        ":aes_ctr_hmac_streaming_parameters",
+        ":streaming_aead_key",
+        "//src/main/java/com/google/crypto/tink:accesses_partial_key",
+        "//src/main/java/com/google/crypto/tink:key",
+        "//src/main/java/com/google/crypto/tink/util:secret_bytes",
+        "@maven//:com_google_errorprone_error_prone_annotations",
+    ],
+)
+
+android_library(
+    name = "aes_ctr_hmac_streaming_proto_serialization-android",
+    srcs = ["AesCtrHmacStreamingProtoSerialization.java"],
+    deps = [
+        ":aes_ctr_hmac_streaming_key-android",
+        ":aes_ctr_hmac_streaming_parameters-android",
+        "//proto:aes_ctr_hmac_streaming_java_proto_lite",
+        "//proto:common_java_proto_lite",
+        "//proto:hmac_java_proto_lite",
+        "//proto:tink_java_proto_lite",
+        "//src/main/java/com/google/crypto/tink:accesses_partial_key-android",
+        "//src/main/java/com/google/crypto/tink:secret_key_access-android",
+        "//src/main/java/com/google/crypto/tink/internal:key_parser-android",
+        "//src/main/java/com/google/crypto/tink/internal:key_serializer-android",
+        "//src/main/java/com/google/crypto/tink/internal:mutable_serialization_registry-android",
+        "//src/main/java/com/google/crypto/tink/internal:parameters_parser-android",
+        "//src/main/java/com/google/crypto/tink/internal:parameters_serializer-android",
+        "//src/main/java/com/google/crypto/tink/internal:proto_key_serialization-android",
+        "//src/main/java/com/google/crypto/tink/internal:proto_parameters_serialization-android",
+        "//src/main/java/com/google/crypto/tink/internal:util-android",
+        "//src/main/java/com/google/crypto/tink/util:bytes-android",
+        "//src/main/java/com/google/crypto/tink/util:secret_bytes-android",
+        "@maven//:com_google_code_findbugs_jsr305",
+        "@maven//:com_google_protobuf_protobuf_javalite",
+    ],
+)
+
+java_library(
+    name = "aes_ctr_hmac_streaming_proto_serialization",
+    srcs = ["AesCtrHmacStreamingProtoSerialization.java"],
+    deps = [
+        ":aes_ctr_hmac_streaming_key",
+        ":aes_ctr_hmac_streaming_parameters",
+        "//proto:aes_ctr_hmac_streaming_java_proto",
+        "//proto:common_java_proto",
+        "//proto:hmac_java_proto",
+        "//proto:tink_java_proto",
+        "//src/main/java/com/google/crypto/tink:accesses_partial_key",
+        "//src/main/java/com/google/crypto/tink:secret_key_access",
+        "//src/main/java/com/google/crypto/tink/internal:key_parser",
+        "//src/main/java/com/google/crypto/tink/internal:key_serializer",
+        "//src/main/java/com/google/crypto/tink/internal:mutable_serialization_registry",
+        "//src/main/java/com/google/crypto/tink/internal:parameters_parser",
+        "//src/main/java/com/google/crypto/tink/internal:parameters_serializer",
+        "//src/main/java/com/google/crypto/tink/internal:proto_key_serialization",
+        "//src/main/java/com/google/crypto/tink/internal:proto_parameters_serialization",
+        "//src/main/java/com/google/crypto/tink/internal:util",
+        "//src/main/java/com/google/crypto/tink/util:bytes",
+        "//src/main/java/com/google/crypto/tink/util:secret_bytes",
+        "@maven//:com_google_code_findbugs_jsr305",
+        "@maven//:com_google_protobuf_protobuf_java",
+    ],
+)
+
+android_library(
+    name = "predefined_streaming_aead_parameters-android",
+    srcs = ["PredefinedStreamingAeadParameters.java"],
+    deps = [
+        ":aes_ctr_hmac_streaming_parameters-android",
+        ":aes_gcm_hkdf_streaming_parameters-android",
+        "//src/main/java/com/google/crypto/tink/internal:tink_bug_exception-android",
+    ],
+)
+
+java_library(
+    name = "predefined_streaming_aead_parameters",
+    srcs = ["PredefinedStreamingAeadParameters.java"],
+    deps = [
+        ":aes_ctr_hmac_streaming_parameters",
+        ":aes_gcm_hkdf_streaming_parameters",
+        "//src/main/java/com/google/crypto/tink/internal:tink_bug_exception",
     ],
 )

@@ -299,7 +299,6 @@ tink_cc_test(
     gmock
     absl::memory
     absl::status
-    tink::core::config
     tink::core::keyset_handle
     tink::core::registry
     tink::core::streaming_aead

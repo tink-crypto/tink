@@ -138,7 +138,6 @@ tink_cc_test(
     tink::daead::deterministic_aead_key_templates
     gmock
     absl::status
-    tink::core::config
     tink::core::deterministic_aead
     tink::core::keyset_handle
     tink::core::registry

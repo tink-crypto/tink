@@ -1,7 +1,7 @@
 load("@rules_python//python:defs.bzl", "py_binary")
 load("@pip_deps//:requirements.bzl", "requirement")
 
-package(default_visibility = ["//visibility:public"])
+package(default_visibility = ["//visibility:private"])
 
 licenses(["notice"])
 
@@ -53,5 +53,25 @@ sh_test(
         ":hybrid",
         ":hybrid_test_private_keyset.json",
         ":hybrid_test_public_keyset.json",
+    ],
+)
+
+py_library(
+    name = "hybrid_basic",
+    srcs = ["hybrid_basic.py"],
+    deps = [
+        "@tink_py//tink:cleartext_keyset_handle",
+        "@tink_py//tink:tink_python",
+        "@tink_py//tink/hybrid",
+    ],
+)
+
+py_test(
+    name = "hybrid_basic_test",
+    srcs = ["hybrid_basic_test.py"],
+    python_version = "PY3",
+    deps = [
+        requirement("absl-py"),
+        ":hybrid_basic",
     ],
 )

@@ -224,12 +224,11 @@ public final class AndroidKeysetManager {
      * <p><b>Warning:</b> When Android Keystore is disabled, keys are stored in cleartext. This
      * should be safe because they are stored in private preferences.
      *
-     * Please do not use this function. Instead, do not call {#code withMasterKeyUri} which has
-     * the same effect.
-     *
-     * TODO(b/27123533): properly deprecate this function and remove all known usages.
+     * @deprecated Please do not use this function. Instead, do not call {#code withMasterKeyUri}
+     *     which has the same effect.
      */
     @CanIgnoreReturnValue
+    @Deprecated
     public Builder doNotUseKeystore() {
       masterKeyUri = null;
       useKeystore = false;
