@@ -52,11 +52,11 @@ public class JwtHmacParameters extends JwtMacParameters {
     /**
      * The "kid" is fixed. It can be obtained from {@code parameters.getCustomKid()}.
      *
-     * <p>In {@code computeMacAndEncode} If the kid is present, it needs to match {@code
-     * parameters.getCustomKid()}. If the kid is absent, it will be accepted.
-     *
-     * <p>In {@code verifyMacAndDecode} Tink writes the "kid" header to the value given by {@code
+     * <p>In {@code computeMacAndEncode} Tink writes the "kid" header to the value given by {@code
      * parameters.getCustomKid()}.
+     *
+     * <p>In {@code verifyMacAndDecode} If the kid is present, it needs to match {@code
+     * parameters.getCustomKid()}. If the kid is absent, it will be accepted.
      *
      * <p>Note: Tink does not allow to randomly generate new {@link JwtHmacKey} objects from
      * parameters objects with {@code KidStrategy} equals to {@code CUSTOM}.
