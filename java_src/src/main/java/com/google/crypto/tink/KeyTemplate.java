@@ -18,6 +18,7 @@ package com.google.crypto.tink;
 
 import com.google.errorprone.annotations.Immutable;
 import com.google.protobuf.ByteString;
+import java.security.GeneralSecurityException;
 
 /** A KeyTemplate specifies how to generate keys of a particular type. */
 @Immutable
@@ -104,5 +105,9 @@ public final class KeyTemplate {
 
   public OutputPrefixType getOutputPrefixType() {
     return fromProto(kt.getOutputPrefixType());
+  }
+
+  public Parameters toParameters() throws GeneralSecurityException {
+    return TinkProtoParametersFormat.parse(kt.toByteArray());
   }
 }

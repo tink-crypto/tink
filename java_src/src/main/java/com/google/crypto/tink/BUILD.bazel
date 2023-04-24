@@ -262,6 +262,8 @@ java_library(
     name = "key_template",
     srcs = ["KeyTemplate.java"],
     deps = [
+        ":parameters",
+        ":tink_proto_parameters_format",
         "//proto:tink_java_proto",
         "@maven//:com_google_errorprone_error_prone_annotations",
         "@maven//:com_google_protobuf_protobuf_java",
@@ -272,6 +274,8 @@ android_library(
     name = "key_template-android",
     srcs = ["KeyTemplate.java"],
     deps = [
+        ":parameters-android",
+        ":tink_proto_parameters_format-android",
         "//proto:tink_java_proto_lite",
         "@maven//:com_google_errorprone_error_prone_annotations",
         "@maven//:com_google_protobuf_protobuf_javalite",
