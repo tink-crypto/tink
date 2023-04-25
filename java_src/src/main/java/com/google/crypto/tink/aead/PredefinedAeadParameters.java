@@ -125,6 +125,7 @@ public final class PredefinedAeadParameters {
                   .setAesKeySizeBytes(16)
                   .setHmacKeySizeBytes(32)
                   .setTagSizeBytes(16)
+                  .setIvSizeBytes(16)
                   .setHashType(AesCtrHmacAeadParameters.HashType.SHA256)
                   .setVariant(AesCtrHmacAeadParameters.Variant.TINK)
                   .build());
@@ -148,6 +149,7 @@ public final class PredefinedAeadParameters {
                   .setAesKeySizeBytes(32)
                   .setHmacKeySizeBytes(32)
                   .setTagSizeBytes(32)
+                  .setIvSizeBytes(16)
                   .setHashType(AesCtrHmacAeadParameters.HashType.SHA256)
                   .setVariant(AesCtrHmacAeadParameters.Variant.TINK)
                   .build());

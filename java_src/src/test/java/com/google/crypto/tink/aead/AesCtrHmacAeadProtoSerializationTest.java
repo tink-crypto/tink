@@ -58,12 +58,18 @@ public final class AesCtrHmacAeadProtoSerializationTest {
   private static final MutableSerializationRegistry registry = new MutableSerializationRegistry();
 
   private static com.google.crypto.tink.proto.AesCtrHmacAeadKeyFormat getAesCtrHmacKeyFormatProto(
-      int aesCtrKeySizeBytes, int hmacKeySizeBytes, int tagSizeBytes, HashType hashType) {
+      int aesCtrKeySizeBytes,
+      int hmacKeySizeBytes,
+      int ivSizeBytes,
+      int tagSizeBytes,
+      HashType hashType) {
     return com.google.crypto.tink.proto.AesCtrHmacAeadKeyFormat.newBuilder()
         .setAesCtrKeyFormat(
             com.google.crypto.tink.proto.AesCtrKeyFormat.newBuilder()
                 .setParams(
-                    com.google.crypto.tink.proto.AesCtrParams.newBuilder().setIvSize(16).build())
+                    com.google.crypto.tink.proto.AesCtrParams.newBuilder()
+                        .setIvSize(ivSizeBytes)
+                        .build())
                 .setKeySize(aesCtrKeySizeBytes)
                 .build())
         .setHmacKeyFormat(
@@ -82,6 +88,7 @@ public final class AesCtrHmacAeadProtoSerializationTest {
       int version,
       ByteString aesKeyValue,
       ByteString hmacKeyValue,
+      int ivSize,
       int tagSizeBytes,
       HashType hashType) {
     return com.google.crypto.tink.proto.AesCtrHmacAeadKey.newBuilder()
@@ -89,7 +96,9 @@ public final class AesCtrHmacAeadProtoSerializationTest {
         .setAesCtrKey(
             com.google.crypto.tink.proto.AesCtrKey.newBuilder()
                 .setParams(
-                    com.google.crypto.tink.proto.AesCtrParams.newBuilder().setIvSize(16).build())
+                    com.google.crypto.tink.proto.AesCtrParams.newBuilder()
+                        .setIvSize(ivSize)
+                        .build())
                 .setKeyValue(aesKeyValue)
                 .build())
         .setHmacKey(
@@ -123,6 +132,7 @@ public final class AesCtrHmacAeadProtoSerializationTest {
             .setAesKeySizeBytes(32)
             .setHmacKeySizeBytes(32)
             .setTagSizeBytes(13)
+            .setIvSizeBytes(16)
             .setHashType(AesCtrHmacAeadParameters.HashType.SHA1)
             .setVariant(AesCtrHmacAeadParameters.Variant.NO_PREFIX)
             .build();
@@ -131,7 +141,7 @@ public final class AesCtrHmacAeadProtoSerializationTest {
         ProtoParametersSerialization.create(
             "type.googleapis.com/google.crypto.tink.AesCtrHmacAeadKey",
             OutputPrefixType.RAW,
-            getAesCtrHmacKeyFormatProto(32, 32, 13, HashType.SHA1));
+            getAesCtrHmacKeyFormatProto(32, 32, 16, 13, HashType.SHA1));
 
     ProtoParametersSerialization serialized =
         registry.serializeParameters(parameters, ProtoParametersSerialization.class);
@@ -149,6 +159,7 @@ public final class AesCtrHmacAeadProtoSerializationTest {
             .setAesKeySizeBytes(32)
             .setHmacKeySizeBytes(32)
             .setTagSizeBytes(13)
+            .setIvSizeBytes(16)
             .setHashType(AesCtrHmacAeadParameters.HashType.SHA224)
             .setVariant(AesCtrHmacAeadParameters.Variant.TINK)
             .build();
@@ -156,7 +167,7 @@ public final class AesCtrHmacAeadProtoSerializationTest {
         ProtoParametersSerialization.create(
             "type.googleapis.com/google.crypto.tink.AesCtrHmacAeadKey",
             OutputPrefixType.TINK,
-            getAesCtrHmacKeyFormatProto(32, 32, 13, HashType.SHA224));
+            getAesCtrHmacKeyFormatProto(32, 32, 16, 13, HashType.SHA224));
 
     ProtoParametersSerialization serialized =
         registry.serializeParameters(parameters, ProtoParametersSerialization.class);
@@ -174,6 +185,7 @@ public final class AesCtrHmacAeadProtoSerializationTest {
             .setAesKeySizeBytes(32)
             .setHmacKeySizeBytes(32)
             .setTagSizeBytes(13)
+            .setIvSizeBytes(16)
             .setHashType(AesCtrHmacAeadParameters.HashType.SHA256)
             .setVariant(AesCtrHmacAeadParameters.Variant.CRUNCHY)
             .build();
@@ -181,7 +193,7 @@ public final class AesCtrHmacAeadProtoSerializationTest {
         ProtoParametersSerialization.create(
             "type.googleapis.com/google.crypto.tink.AesCtrHmacAeadKey",
             OutputPrefixType.CRUNCHY,
-            getAesCtrHmacKeyFormatProto(32, 32, 13, HashType.SHA256));
+            getAesCtrHmacKeyFormatProto(32, 32, 16, 13, HashType.SHA256));
     ProtoParametersSerialization serialized =
         registry.serializeParameters(parameters, ProtoParametersSerialization.class);
     assertEqualWhenValueParsed(
@@ -192,12 +204,13 @@ public final class AesCtrHmacAeadProtoSerializationTest {
   }
 
   @Test
-  public void serializeParseParameters_crunchy_sha384_equal() throws Exception {
+  public void serializeParseParameters_crunchy_sha384_ivSize12_equal() throws Exception {
     AesCtrHmacAeadParameters parameters =
         AesCtrHmacAeadParameters.builder()
             .setAesKeySizeBytes(16)
             .setHmacKeySizeBytes(32)
             .setTagSizeBytes(13)
+            .setIvSizeBytes(12)
             .setHashType(AesCtrHmacAeadParameters.HashType.SHA384)
             .setVariant(AesCtrHmacAeadParameters.Variant.CRUNCHY)
             .build();
@@ -205,7 +218,7 @@ public final class AesCtrHmacAeadProtoSerializationTest {
         ProtoParametersSerialization.create(
             "type.googleapis.com/google.crypto.tink.AesCtrHmacAeadKey",
             OutputPrefixType.CRUNCHY,
-            getAesCtrHmacKeyFormatProto(16, 32, 13, HashType.SHA384));
+            getAesCtrHmacKeyFormatProto(16, 32, 12, 13, HashType.SHA384));
     ProtoParametersSerialization serialized =
         registry.serializeParameters(parameters, ProtoParametersSerialization.class);
     assertEqualWhenValueParsed(
@@ -216,12 +229,13 @@ public final class AesCtrHmacAeadProtoSerializationTest {
   }
 
   @Test
-  public void serializeParseParameters_tink_sha512_equal() throws Exception {
+  public void serializeParseParameters_tink_sha512_ivSize14_equal() throws Exception {
     AesCtrHmacAeadParameters parameters =
         AesCtrHmacAeadParameters.builder()
             .setAesKeySizeBytes(32)
             .setHmacKeySizeBytes(16)
             .setTagSizeBytes(13)
+            .setIvSizeBytes(14)
             .setHashType(AesCtrHmacAeadParameters.HashType.SHA512)
             .setVariant(AesCtrHmacAeadParameters.Variant.TINK)
             .build();
@@ -229,7 +243,7 @@ public final class AesCtrHmacAeadProtoSerializationTest {
         ProtoParametersSerialization.create(
             "type.googleapis.com/google.crypto.tink.AesCtrHmacAeadKey",
             OutputPrefixType.TINK,
-            getAesCtrHmacKeyFormatProto(32, 16, 13, HashType.SHA512));
+            getAesCtrHmacKeyFormatProto(32, 16, 14, 13, HashType.SHA512));
     ProtoParametersSerialization serialized =
         registry.serializeParameters(parameters, ProtoParametersSerialization.class);
     assertEqualWhenValueParsed(
@@ -248,6 +262,7 @@ public final class AesCtrHmacAeadProtoSerializationTest {
                     .setAesKeySizeBytes(32)
                     .setHmacKeySizeBytes(32)
                     .setTagSizeBytes(13)
+                    .setIvSizeBytes(16)
                     .setHashType(AesCtrHmacAeadParameters.HashType.SHA1)
                     .setVariant(AesCtrHmacAeadParameters.Variant.NO_PREFIX)
                     .build())
@@ -256,7 +271,7 @@ public final class AesCtrHmacAeadProtoSerializationTest {
             .build();
     com.google.crypto.tink.proto.AesCtrHmacAeadKey protoAesCtrHmacAeadKey =
         getAesCtrHmacKeyProto(
-            0, KEY_BYTES_32_AS_BYTE_STRING, KEY_BYTES_32_AS_BYTE_STRING, 13, HashType.SHA1);
+            0, KEY_BYTES_32_AS_BYTE_STRING, KEY_BYTES_32_AS_BYTE_STRING, 16, 13, HashType.SHA1);
     ProtoKeySerialization serialization =
         ProtoKeySerialization.create(
             "type.googleapis.com/google.crypto.tink.AesCtrHmacAeadKey",
@@ -281,6 +296,7 @@ public final class AesCtrHmacAeadProtoSerializationTest {
             .setAesKeySizeBytes(32)
             .setHmacKeySizeBytes(32)
             .setTagSizeBytes(13)
+            .setIvSizeBytes(16)
             .setHashType(AesCtrHmacAeadParameters.HashType.SHA224)
             .setVariant(AesCtrHmacAeadParameters.Variant.TINK)
             .build();
@@ -293,7 +309,7 @@ public final class AesCtrHmacAeadProtoSerializationTest {
             .build();
     com.google.crypto.tink.proto.AesCtrHmacAeadKey protoAesCtrHmacAeadKey =
         getAesCtrHmacKeyProto(
-            0, KEY_BYTES_32_AS_BYTE_STRING, KEY_BYTES_32_AS_BYTE_STRING, 13, HashType.SHA224);
+            0, KEY_BYTES_32_AS_BYTE_STRING, KEY_BYTES_32_AS_BYTE_STRING, 16, 13, HashType.SHA224);
     ProtoKeySerialization serialization =
         ProtoKeySerialization.create(
             "type.googleapis.com/google.crypto.tink.AesCtrHmacAeadKey",
@@ -318,6 +334,7 @@ public final class AesCtrHmacAeadProtoSerializationTest {
             .setAesKeySizeBytes(32)
             .setHmacKeySizeBytes(32)
             .setTagSizeBytes(13)
+            .setIvSizeBytes(16)
             .setHashType(AesCtrHmacAeadParameters.HashType.SHA256)
             .setVariant(AesCtrHmacAeadParameters.Variant.CRUNCHY)
             .build();
@@ -330,7 +347,7 @@ public final class AesCtrHmacAeadProtoSerializationTest {
             .build();
     com.google.crypto.tink.proto.AesCtrHmacAeadKey protoAesCtrHmacAeadKey =
         getAesCtrHmacKeyProto(
-            0, KEY_BYTES_32_AS_BYTE_STRING, KEY_BYTES_32_AS_BYTE_STRING, 13, HashType.SHA256);
+            0, KEY_BYTES_32_AS_BYTE_STRING, KEY_BYTES_32_AS_BYTE_STRING, 16, 13, HashType.SHA256);
     ProtoKeySerialization serialization =
         ProtoKeySerialization.create(
             "type.googleapis.com/google.crypto.tink.AesCtrHmacAeadKey",
@@ -349,12 +366,13 @@ public final class AesCtrHmacAeadProtoSerializationTest {
   }
 
   @Test
-  public void serializeParseKey_crunchy_sha384_equal() throws Exception {
+  public void serializeParseKey_crunchy_sha384_ivSize12_equal() throws Exception {
     AesCtrHmacAeadParameters parameters =
         AesCtrHmacAeadParameters.builder()
             .setAesKeySizeBytes(16)
             .setHmacKeySizeBytes(32)
             .setTagSizeBytes(13)
+            .setIvSizeBytes(12)
             .setHashType(AesCtrHmacAeadParameters.HashType.SHA384)
             .setVariant(AesCtrHmacAeadParameters.Variant.CRUNCHY)
             .build();
@@ -367,7 +385,7 @@ public final class AesCtrHmacAeadProtoSerializationTest {
             .build();
     com.google.crypto.tink.proto.AesCtrHmacAeadKey protoAesCtrHmacAeadKey =
         getAesCtrHmacKeyProto(
-            0, KEY_BYTES_16_AS_BYTE_STRING, KEY_BYTES_32_AS_BYTE_STRING, 13, HashType.SHA384);
+            0, KEY_BYTES_16_AS_BYTE_STRING, KEY_BYTES_32_AS_BYTE_STRING, 12, 13, HashType.SHA384);
     ProtoKeySerialization serialization =
         ProtoKeySerialization.create(
             "type.googleapis.com/google.crypto.tink.AesCtrHmacAeadKey",
@@ -386,12 +404,13 @@ public final class AesCtrHmacAeadProtoSerializationTest {
   }
 
   @Test
-  public void serializeParseKey_tink_sha512_equal() throws Exception {
+  public void serializeParseKey_tink_sha512_ivSize14_equal() throws Exception {
     AesCtrHmacAeadParameters parameters =
         AesCtrHmacAeadParameters.builder()
             .setAesKeySizeBytes(32)
             .setHmacKeySizeBytes(16)
             .setTagSizeBytes(13)
+            .setIvSizeBytes(14)
             .setHashType(AesCtrHmacAeadParameters.HashType.SHA512)
             .setVariant(AesCtrHmacAeadParameters.Variant.TINK)
             .build();
@@ -404,7 +423,7 @@ public final class AesCtrHmacAeadProtoSerializationTest {
             .build();
     com.google.crypto.tink.proto.AesCtrHmacAeadKey protoAesCtrHmacAeadKey =
         getAesCtrHmacKeyProto(
-            0, KEY_BYTES_32_AS_BYTE_STRING, KEY_BYTES_16_AS_BYTE_STRING, 13, HashType.SHA512);
+            0, KEY_BYTES_32_AS_BYTE_STRING, KEY_BYTES_16_AS_BYTE_STRING, 14, 13, HashType.SHA512);
     ProtoKeySerialization serialization =
         ProtoKeySerialization.create(
             "type.googleapis.com/google.crypto.tink.AesCtrHmacAeadKey",
@@ -426,7 +445,7 @@ public final class AesCtrHmacAeadProtoSerializationTest {
   public void testParseKeys_noAccess_throws() throws Exception {
     com.google.crypto.tink.proto.AesCtrHmacAeadKey protoAesCtrHmacAeadKey =
         getAesCtrHmacKeyProto(
-            0, KEY_BYTES_32_AS_BYTE_STRING, KEY_BYTES_32_AS_BYTE_STRING, 13, HashType.SHA512);
+            0, KEY_BYTES_32_AS_BYTE_STRING, KEY_BYTES_32_AS_BYTE_STRING, 16, 13, HashType.SHA512);
     ProtoKeySerialization serialization =
         ProtoKeySerialization.create(
             "type.googleapis.com/google.crypto.tink.AesCtrHmacAeadKey",
@@ -441,7 +460,7 @@ public final class AesCtrHmacAeadProtoSerializationTest {
   public void testParseKey_legacy() throws Exception {
     com.google.crypto.tink.proto.AesCtrHmacAeadKey protoAesCtrHmacAeadKey =
         getAesCtrHmacKeyProto(
-            0, KEY_BYTES_32_AS_BYTE_STRING, KEY_BYTES_32_AS_BYTE_STRING, 13, HashType.SHA512);
+            0, KEY_BYTES_32_AS_BYTE_STRING, KEY_BYTES_32_AS_BYTE_STRING, 16, 13, HashType.SHA512);
     ProtoKeySerialization serialization =
         ProtoKeySerialization.create(
             "type.googleapis.com/google.crypto.tink.AesCtrHmacAeadKey",
@@ -461,6 +480,7 @@ public final class AesCtrHmacAeadProtoSerializationTest {
             .setAesKeySizeBytes(32)
             .setHmacKeySizeBytes(32)
             .setTagSizeBytes(13)
+            .setIvSizeBytes(16)
             .setHashType(AesCtrHmacAeadParameters.HashType.SHA512)
             .setVariant(AesCtrHmacAeadParameters.Variant.TINK)
             .build();
@@ -483,22 +503,27 @@ public final class AesCtrHmacAeadProtoSerializationTest {
         ProtoParametersSerialization.create(
             TYPE_URL,
             OutputPrefixType.RAW,
-            getAesCtrHmacKeyFormatProto(32, 32, 9, HashType.SHA256)),
+            getAesCtrHmacKeyFormatProto(32, 32, 16, 9, HashType.SHA256)),
+        // IV size too small
+        ProtoParametersSerialization.create(
+            TYPE_URL,
+            OutputPrefixType.RAW,
+            getAesCtrHmacKeyFormatProto(32, 32, 11, 13, HashType.SHA256)),
         // Aes key size too small
         ProtoParametersSerialization.create(
             TYPE_URL,
             OutputPrefixType.RAW,
-            getAesCtrHmacKeyFormatProto(12, 32, 13, HashType.SHA256)),
+            getAesCtrHmacKeyFormatProto(12, 32, 16, 13, HashType.SHA256)),
         // Hmac key size too small
         ProtoParametersSerialization.create(
             TYPE_URL,
             OutputPrefixType.RAW,
-            getAesCtrHmacKeyFormatProto(32, 12, 13, HashType.SHA256)),
+            getAesCtrHmacKeyFormatProto(32, 12, 16, 13, HashType.SHA256)),
         // Unknown output prefix
         ProtoParametersSerialization.create(
             TYPE_URL,
             OutputPrefixType.UNKNOWN_PREFIX,
-            getAesCtrHmacKeyFormatProto(32, 32, 13, HashType.SHA256)),
+            getAesCtrHmacKeyFormatProto(32, 32, 16, 13, HashType.SHA256)),
         // Proto messages start with a VarInt, which always ends with a byte with most
         // significant bit unset. 0x80 is hence invalid.
         ProtoParametersSerialization.create(
@@ -528,6 +553,7 @@ public final class AesCtrHmacAeadProtoSerializationTest {
                     1,
                     KEY_BYTES_32_AS_BYTE_STRING,
                     KEY_BYTES_32_AS_BYTE_STRING,
+                    16,
                     13,
                     HashType.SHA512)
                 .toByteString(),
@@ -541,6 +567,7 @@ public final class AesCtrHmacAeadProtoSerializationTest {
                     0,
                     KEY_BYTES_32_AS_BYTE_STRING,
                     KEY_BYTES_32_AS_BYTE_STRING,
+                    16,
                     13,
                     HashType.SHA512)
                 .toByteString(),
@@ -551,7 +578,26 @@ public final class AesCtrHmacAeadProtoSerializationTest {
         ProtoKeySerialization.create(
             TYPE_URL,
             getAesCtrHmacKeyProto(
-                    0, KEY_BYTES_32_AS_BYTE_STRING, KEY_BYTES_32_AS_BYTE_STRING, 9, HashType.SHA512)
+                    0,
+                    KEY_BYTES_32_AS_BYTE_STRING,
+                    KEY_BYTES_32_AS_BYTE_STRING,
+                    16,
+                    9,
+                    HashType.SHA512)
+                .toByteString(),
+            KeyMaterialType.SYMMETRIC,
+            OutputPrefixType.TINK,
+            1479),
+        // Bad IV Length (11)
+        ProtoKeySerialization.create(
+            TYPE_URL,
+            getAesCtrHmacKeyProto(
+                    0,
+                    KEY_BYTES_32_AS_BYTE_STRING,
+                    KEY_BYTES_32_AS_BYTE_STRING,
+                    11,
+                    9,
+                    HashType.SHA512)
                 .toByteString(),
             KeyMaterialType.SYMMETRIC,
             OutputPrefixType.TINK,
@@ -563,6 +609,7 @@ public final class AesCtrHmacAeadProtoSerializationTest {
                     0,
                     ByteString.copyFrom(new byte[8]),
                     KEY_BYTES_32_AS_BYTE_STRING,
+                    16,
                     13,
                     HashType.SHA512)
                 .toByteString(),
@@ -576,6 +623,7 @@ public final class AesCtrHmacAeadProtoSerializationTest {
                     0,
                     KEY_BYTES_32_AS_BYTE_STRING,
                     ByteString.copyFrom(new byte[8]),
+                    16,
                     13,
                     HashType.SHA512)
                 .toByteString(),

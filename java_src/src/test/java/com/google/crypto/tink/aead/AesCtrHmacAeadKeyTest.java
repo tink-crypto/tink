@@ -38,6 +38,7 @@ public final class AesCtrHmacAeadKeyTest {
             .setAesKeySizeBytes(16)
             .setHmacKeySizeBytes(16)
             .setTagSizeBytes(10)
+            .setIvSizeBytes(16)
             .setHashType(AesCtrHmacAeadParameters.HashType.SHA256)
             .setVariant(AesCtrHmacAeadParameters.Variant.NO_PREFIX)
             .build();
@@ -64,6 +65,7 @@ public final class AesCtrHmacAeadKeyTest {
             .setAesKeySizeBytes(16)
             .setHmacKeySizeBytes(16)
             .setTagSizeBytes(10)
+            .setIvSizeBytes(16)
             .setHashType(AesCtrHmacAeadParameters.HashType.SHA256)
             .setVariant(AesCtrHmacAeadParameters.Variant.TINK)
             .build();
@@ -91,6 +93,7 @@ public final class AesCtrHmacAeadKeyTest {
             .setAesKeySizeBytes(16)
             .setHmacKeySizeBytes(16)
             .setTagSizeBytes(10)
+            .setIvSizeBytes(16)
             .setHashType(AesCtrHmacAeadParameters.HashType.SHA256)
             .setVariant(AesCtrHmacAeadParameters.Variant.CRUNCHY)
             .build();
@@ -134,6 +137,7 @@ public final class AesCtrHmacAeadKeyTest {
             .setAesKeySizeBytes(16)
             .setHmacKeySizeBytes(16)
             .setTagSizeBytes(10)
+            .setIvSizeBytes(16)
             .setHashType(AesCtrHmacAeadParameters.HashType.SHA256)
             .setVariant(AesCtrHmacAeadParameters.Variant.NO_PREFIX)
             .build();
@@ -149,6 +153,7 @@ public final class AesCtrHmacAeadKeyTest {
             .setAesKeySizeBytes(16)
             .setHmacKeySizeBytes(16)
             .setTagSizeBytes(10)
+            .setIvSizeBytes(16)
             .setHashType(AesCtrHmacAeadParameters.HashType.SHA256)
             .setVariant(AesCtrHmacAeadParameters.Variant.TINK)
             .build();
@@ -170,6 +175,7 @@ public final class AesCtrHmacAeadKeyTest {
             .setAesKeySizeBytes(16)
             .setHmacKeySizeBytes(16)
             .setTagSizeBytes(10)
+            .setIvSizeBytes(16)
             .setHashType(AesCtrHmacAeadParameters.HashType.SHA256)
             .setVariant(AesCtrHmacAeadParameters.Variant.NO_PREFIX)
             .build();
@@ -192,6 +198,7 @@ public final class AesCtrHmacAeadKeyTest {
             .setAesKeySizeBytes(32)
             .setHmacKeySizeBytes(32)
             .setTagSizeBytes(10)
+            .setIvSizeBytes(16)
             .setHashType(AesCtrHmacAeadParameters.HashType.SHA256)
             .setVariant(AesCtrHmacAeadParameters.Variant.NO_PREFIX)
             .build();
@@ -212,6 +219,7 @@ public final class AesCtrHmacAeadKeyTest {
             .setAesKeySizeBytes(16)
             .setHmacKeySizeBytes(16)
             .setTagSizeBytes(10)
+            .setIvSizeBytes(16)
             .setHashType(AesCtrHmacAeadParameters.HashType.SHA256)
             .setVariant(AesCtrHmacAeadParameters.Variant.NO_PREFIX)
             .build();
@@ -239,6 +247,7 @@ public final class AesCtrHmacAeadKeyTest {
             .setAesKeySizeBytes(32)
             .setHmacKeySizeBytes(32)
             .setTagSizeBytes(10)
+            .setIvSizeBytes(16)
             .setHashType(AesCtrHmacAeadParameters.HashType.SHA256)
             .setVariant(AesCtrHmacAeadParameters.Variant.NO_PREFIX)
             .build();
@@ -247,6 +256,7 @@ public final class AesCtrHmacAeadKeyTest {
             .setAesKeySizeBytes(16)
             .setHmacKeySizeBytes(16)
             .setTagSizeBytes(10)
+            .setIvSizeBytes(16)
             .setHashType(AesCtrHmacAeadParameters.HashType.SHA256)
             .setVariant(AesCtrHmacAeadParameters.Variant.NO_PREFIX)
             .build();
@@ -255,6 +265,7 @@ public final class AesCtrHmacAeadKeyTest {
             .setAesKeySizeBytes(32)
             .setHmacKeySizeBytes(32)
             .setTagSizeBytes(10)
+            .setIvSizeBytes(16)
             .setHashType(AesCtrHmacAeadParameters.HashType.SHA256)
             .setVariant(AesCtrHmacAeadParameters.Variant.TINK)
             .build();
@@ -263,6 +274,7 @@ public final class AesCtrHmacAeadKeyTest {
             .setAesKeySizeBytes(32)
             .setHmacKeySizeBytes(32)
             .setTagSizeBytes(10)
+            .setIvSizeBytes(16)
             .setHashType(AesCtrHmacAeadParameters.HashType.SHA256)
             .setVariant(AesCtrHmacAeadParameters.Variant.CRUNCHY)
             .build();
@@ -271,7 +283,17 @@ public final class AesCtrHmacAeadKeyTest {
             .setAesKeySizeBytes(32)
             .setHmacKeySizeBytes(32)
             .setTagSizeBytes(10)
+            .setIvSizeBytes(16)
             .setHashType(AesCtrHmacAeadParameters.HashType.SHA512)
+            .setVariant(AesCtrHmacAeadParameters.Variant.NO_PREFIX)
+            .build();
+    AesCtrHmacAeadParameters noPrefixParametersIvSize12 =
+        AesCtrHmacAeadParameters.builder()
+            .setAesKeySizeBytes(32)
+            .setHmacKeySizeBytes(32)
+            .setTagSizeBytes(10)
+            .setIvSizeBytes(12)
+            .setHashType(AesCtrHmacAeadParameters.HashType.SHA256)
             .setVariant(AesCtrHmacAeadParameters.Variant.NO_PREFIX)
             .build();
     new KeyTester()
@@ -341,15 +363,16 @@ public final class AesCtrHmacAeadKeyTest {
                 .build(),
             AesCtrHmacAeadKey.builder()
                 .setParameters(tinkPrefixParameters)
-                .setAesKeyBytes(keyBytes1)
-                .setHmacKeyBytes(keyBytes1)
-                .setIdRequirement(1907)
-                .build(),
-            AesCtrHmacAeadKey.builder()
-                .setParameters(tinkPrefixParameters)
                 .setAesKeyBytes(keyBytes1Copy)
                 .setHmacKeyBytes(keyBytes1Copy)
                 .setIdRequirement(1907)
+                .build())
+        .addEqualityGroup(
+            "No prefix, IV size 12",
+            AesCtrHmacAeadKey.builder()
+                .setParameters(noPrefixParametersIvSize12)
+                .setAesKeyBytes(keyBytes1)
+                .setHmacKeyBytes(keyBytes1)
                 .build())
         // This group checks that keys with different key ids are not equal
         .addEqualityGroup(
@@ -387,6 +410,7 @@ public final class AesCtrHmacAeadKeyTest {
             .setAesKeySizeBytes(16)
             .setHmacKeySizeBytes(16)
             .setTagSizeBytes(16)
+            .setIvSizeBytes(16)
             .setHashType(AesCtrHmacAeadParameters.HashType.SHA256)
             .setVariant(AesCtrHmacAeadParameters.Variant.NO_PREFIX)
             .build();

@@ -159,7 +159,7 @@ final class AesCtrHmacAeadProtoSerialization {
                         com.google.crypto.tink.proto.AesCtrKeyFormat.newBuilder()
                             .setParams(
                                 com.google.crypto.tink.proto.AesCtrParams.newBuilder()
-                                    .setIvSize(16)
+                                    .setIvSize(parameters.getIvSizeBytes())
                                     .build())
                             .setKeySize(parameters.getAesKeySizeBytes())
                             .build())
@@ -183,7 +183,7 @@ final class AesCtrHmacAeadProtoSerialization {
                 com.google.crypto.tink.proto.AesCtrKey.newBuilder()
                     .setParams(
                         com.google.crypto.tink.proto.AesCtrParams.newBuilder()
-                            .setIvSize(16)
+                            .setIvSize(key.getParameters().getIvSizeBytes())
                             .build())
                     .setKeyValue(
                         ByteString.copyFrom(
@@ -224,6 +224,7 @@ final class AesCtrHmacAeadProtoSerialization {
     return AesCtrHmacAeadParameters.builder()
         .setAesKeySizeBytes(format.getAesCtrKeyFormat().getKeySize())
         .setHmacKeySizeBytes(format.getHmacKeyFormat().getKeySize())
+        .setIvSizeBytes(format.getAesCtrKeyFormat().getParams().getIvSize())
         .setTagSizeBytes(format.getHmacKeyFormat().getParams().getTagSize())
         .setHashType(toHashType(format.getHmacKeyFormat().getParams().getHash()))
         .setVariant(toVariant(serialization.getKeyTemplate().getOutputPrefixType()))
@@ -249,6 +250,7 @@ final class AesCtrHmacAeadProtoSerialization {
           AesCtrHmacAeadParameters.builder()
               .setAesKeySizeBytes(protoKey.getAesCtrKey().getKeyValue().size())
               .setHmacKeySizeBytes(protoKey.getHmacKey().getKeyValue().size())
+              .setIvSizeBytes(protoKey.getAesCtrKey().getParams().getIvSize())
               .setTagSizeBytes(protoKey.getHmacKey().getParams().getTagSize())
               .setHashType(toHashType(protoKey.getHmacKey().getParams().getHash()))
               .setVariant(toVariant(serialization.getOutputPrefixType()))
