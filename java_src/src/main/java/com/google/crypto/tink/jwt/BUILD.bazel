@@ -929,3 +929,61 @@ java_library(
         "@maven//:com_google_protobuf_protobuf_java",
     ],
 )
+
+android_library(
+    name = "jwt_signature_parameters-android",
+    srcs = ["JwtSignatureParameters.java"],
+    deps = ["//src/main/java/com/google/crypto/tink:parameters-android"],
+)
+
+android_library(
+    name = "jwt_signature_private_key-android",
+    srcs = ["JwtSignaturePrivateKey.java"],
+    deps = [
+        ":jwt_signature_parameters-android",
+        ":jwt_signature_public_key-android",
+        "//src/main/java/com/google/crypto/tink:key-android",
+        "//src/main/java/com/google/crypto/tink:private_key-android",
+        "//src/main/java/com/google/crypto/tink/annotations:alpha-android",
+        "@maven//:com_google_code_findbugs_jsr305",
+        "@maven//:com_google_errorprone_error_prone_annotations",
+    ],
+)
+
+android_library(
+    name = "jwt_signature_public_key-android",
+    srcs = ["JwtSignaturePublicKey.java"],
+    deps = [
+        ":jwt_signature_parameters-android",
+        "//src/main/java/com/google/crypto/tink:key-android",
+    ],
+)
+
+java_library(
+    name = "jwt_signature_parameters",
+    srcs = ["JwtSignatureParameters.java"],
+    deps = ["//src/main/java/com/google/crypto/tink:parameters"],
+)
+
+java_library(
+    name = "jwt_signature_private_key",
+    srcs = ["JwtSignaturePrivateKey.java"],
+    deps = [
+        ":jwt_signature_parameters",
+        ":jwt_signature_public_key",
+        "//src/main/java/com/google/crypto/tink:key",
+        "//src/main/java/com/google/crypto/tink:private_key",
+        "//src/main/java/com/google/crypto/tink/annotations:alpha",
+        "@maven//:com_google_code_findbugs_jsr305",
+        "@maven//:com_google_errorprone_error_prone_annotations",
+    ],
+)
+
+java_library(
+    name = "jwt_signature_public_key",
+    srcs = ["JwtSignaturePublicKey.java"],
+    deps = [
+        ":jwt_signature_parameters",
+        "//src/main/java/com/google/crypto/tink:key",
+    ],
+)
