@@ -26,6 +26,10 @@ def tink_android_test(name, srcs, deps, shard_count = 1, data = [], min_version 
         28: "//tools/mobile/devices/android/generic_phone:android_28_x86",
         29: "//tools/mobile/devices/android/generic_phone:android_29_x86",
         30: "//tools/mobile/devices/android/generic_phone:android_30_x86",
+        31: "//tools/mobile/devices/android/generic_phone:android_31_x86_64",
+        32: "//tools/mobile/devices/android/generic_phone:android_32_x86_64",
+        33: "//tools/mobile/devices/android/generic_phone:android_33_x86_64",
+        34: "//tools/mobile/devices/android/generic_phone:android_34_x86_64",
     }
 
     deps.append("//java/com/google/android/apps/common/testing/testrunner")
