@@ -20,6 +20,6 @@ import com.google.crypto.tink.Parameters;
 
 /** Represents a description of a {@link JwtMacKey} excluding the randomly chosen key material. */
 public abstract class JwtMacParameters extends Parameters {
-  /** If true, no {@code "kid"} header is allowed when verifying a token. */
+  /** If true, tokens without {@code "kid"} header are allowed when verifying a token. */
   public abstract boolean allowKidAbsent();
 }
