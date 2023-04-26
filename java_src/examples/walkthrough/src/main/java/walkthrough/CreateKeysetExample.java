@@ -14,8 +14,8 @@
 package walkthrough;
 
 // [START tink_walkthrough_create_keyset]
-import com.google.crypto.tink.KeyTemplates;
 import com.google.crypto.tink.KeysetHandle;
+import com.google.crypto.tink.aead.PredefinedAeadParameters;
 import java.security.GeneralSecurityException;
 
 // [START_EXCLUDE]
@@ -37,9 +37,9 @@ final class CreateKeysetExample {
    * @throws GeneralSecurityException if any error occours.
    */
   static KeysetHandle createAes128GcmKeyset() throws GeneralSecurityException {
-    // Tink provides pre-baked templates. For example, here we use AES128-GCM's template. This will
-    // generate a new keyset with only *one* key and return a keyset handle to it.
-    return KeysetHandle.generateNew(KeyTemplates.get("AES128_GCM"));
+    // Tink provides pre-baked sets of parameters. For example, here we use AES128-GCM's template.
+    // This will generate a new keyset with only *one* key and return a keyset handle to it.
+    return KeysetHandle.generateNew(PredefinedAeadParameters.AES128_GCM);
   }
   // [END tink_walkthrough_create_keyset]
 }

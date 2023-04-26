@@ -6,6 +6,7 @@ java_library(
     name = "create_keyset_example",
     srcs = ["CreateKeysetExample.java"],
     deps = [
+        "@tink_java//src/main/java/com/google/crypto/tink/aead:predefined_aead_parameters",
         "@tink_java//src/main/java/com/google/crypto/tink:key_templates",
         "@tink_java//src/main/java/com/google/crypto/tink:registry_cluster",
     ],
