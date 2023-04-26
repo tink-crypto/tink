@@ -987,3 +987,21 @@ java_library(
         "//src/main/java/com/google/crypto/tink:key",
     ],
 )
+
+android_library(
+    name = "jwt_ecdsa_parameters-android",
+    srcs = ["JwtEcdsaParameters.java"],
+    deps = [
+        ":jwt_signature_parameters-android",
+        "@maven//:com_google_errorprone_error_prone_annotations",
+    ],
+)
+
+java_library(
+    name = "jwt_ecdsa_parameters",
+    srcs = ["JwtEcdsaParameters.java"],
+    deps = [
+        ":jwt_signature_parameters",
+        "@maven//:com_google_errorprone_error_prone_annotations",
+    ],
+)
