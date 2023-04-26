@@ -50,19 +50,33 @@ endmacro()
 
 set(gtest_force_shared_crt ON CACHE BOOL "Tink dependency override" FORCE)
 
-if (NOT TINK_USE_INSTALLED_GOOGLETEST)
+if (TINK_BUILD_TESTS)
+  if (TINK_USE_INSTALLED_GOOGLETEST)
+    # This uses the CMake's FindGTest module; if successful, this call to
+    # find_package generates the targets GTest::gmock, GTest::gtest and
+    # GTest::gtest_main.
+    find_package(GTest CONFIG REQUIRED)
+    _create_interface_target(gmock GTest::gmock)
+    _create_interface_target(gtest_main GTest::gtest_main)
+  else()
+    http_archive(
+      NAME com_google_googletest
+      URL https://github.com/google/googletest/archive/refs/tags/release-1.11.0.tar.gz
+      SHA256 b4870bf121ff7795ba20d20bcdd8627b8e088f2d1dab299a031c1034eddc93d5
+    )
+  endif()
+
   http_archive(
-    NAME com_google_googletest
-    URL https://github.com/google/googletest/archive/refs/tags/release-1.11.0.tar.gz
-    SHA256 b4870bf121ff7795ba20d20bcdd8627b8e088f2d1dab299a031c1034eddc93d5
+    NAME wycheproof
+    URL https://github.com/google/wycheproof/archive/d8ed1ba95ac4c551db67f410c06131c3bc00a97c.zip
+    SHA256 eb1d558071acf1aa6d677d7f1cabec2328d1cf8381496c17185bd92b52ce7545
+    DATA_ONLY
   )
-else()
-  # This uses the CMake's FindGTest module; if successful, this call to
-  # find_package generates the targets GTest::gmock, GTest::gtest and
-  # GTest::gtest_main.
-  find_package(GTest CONFIG REQUIRED)
-  _create_interface_target(gmock GTest::gmock)
-  _create_interface_target(gtest_main GTest::gtest_main)
+
+  # Symlink the Wycheproof test data.
+  # Tests expect Wycheproof test vectors to be in a local testvectors/ folder.
+  add_directory_alias("${wycheproof_SOURCE_DIR}/testvectors"
+    "${CMAKE_BINARY_DIR}/testvectors")
 endif()
 
 if (NOT TINK_USE_INSTALLED_ABSEIL)
@@ -77,18 +91,6 @@ else()
   # targets, which gets linked in tink_cc_(library|test).
   find_package(absl REQUIRED)
 endif()
-
-http_archive(
-  NAME wycheproof
-  URL https://github.com/google/wycheproof/archive/d8ed1ba95ac4c551db67f410c06131c3bc00a97c.zip
-  SHA256 eb1d558071acf1aa6d677d7f1cabec2328d1cf8381496c17185bd92b52ce7545
-  DATA_ONLY
-)
-
-# Symlink the Wycheproof test data.
-# Tests expect Wycheproof test vectors to be in a local testvectors/ folder.
-add_directory_alias("${wycheproof_SOURCE_DIR}/testvectors"
-  "${CMAKE_BINARY_DIR}/testvectors")
 
 # Don't fetch BoringSSL or look for OpenSSL if target `crypto` is already
 # defined.
