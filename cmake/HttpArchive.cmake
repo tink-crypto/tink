@@ -12,21 +12,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-include(ExternalProject)
+include(FetchContent)
 include(CMakeParseArguments)
-
-if (NOT DEFINED TINK_THIRD_PARTY_DIR)
-  set(TINK_THIRD_PARTY_DIR "${CMAKE_CURRENT_BINARY_DIR}/__third_party")
-endif()
 
 # Download, unpack and configure a dependency.
 #
 # The project is added as a subdirectory of Tink, unless DATA_ONLY is
 # specified. This makes all target defined by it available as dependencies.
 #
-# This rule also defines a <NAME>_SOURCE_DIR variable, which points to the
-# root directory of the downloaded package and can be used to reference data in
-# tests, or append extra include/link paths in the Workspace file.
+# This rule also defines two variables:
+#   - <NAME>_SOURCE_DIR points to the root directory of the downloaded package;
+#     it can be used to reference data in tests, or append extra include/link
+#     paths in the Workspace file.
+#   - <NAME>_BINARY_DIR points to the build directory.
 #
 # Parameters:
 #   NAME name of the dependency.
@@ -49,40 +47,29 @@ function(http_archive)
     "NAME;URL;SHA256;CMAKE_SUBDIR"
     "CMAKE_ARGS"
   )
-
+  FetchContent_Declare(
+    ${http_archive_NAME}
+    URL       ${http_archive_URL}
+    URL_HASH  SHA256=${http_archive_SHA256}
+  )
   message(STATUS "Fetching ${http_archive_NAME}")
-
-  set(http_archive_PREFIX "${TINK_THIRD_PARTY_DIR}/${http_archive_NAME}")
-  set(http_archive_SOURCE_DIR "${http_archive_PREFIX}/src")
-  set(http_archive_BINARY_DIR "${http_archive_PREFIX}/build")
-
-  configure_file(
-    cmake/HttpArchiveDownloader.cmake.in
-    "${http_archive_PREFIX}/CMakeLists.txt")
-
-  execute_process(
-    COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
-    RESULT_VARIABLE errors
-    WORKING_DIRECTORY "${http_archive_PREFIX}")
-
-  if (errors)
-    message(FATAL_ERROR "While configuring ${http_archive_NAME}: ${errors}")
-  endif()
-
-  set(${http_archive_NAME}_SOURCE_DIR "${http_archive_SOURCE_DIR}" PARENT_SCOPE)
-
-  execute_process(
-    COMMAND ${CMAKE_COMMAND} --build .
-    RESULT_VARIABLE errors
-    WORKING_DIRECTORY "${http_archive_PREFIX}")
-
-  if (errors)
-    message(FATAL_ERROR "While fetching ${http_archive_NAME}: ${errors}")
-  endif()
-
-  if (NOT http_archive_DATA_ONLY)
-    add_subdirectory(
-      "${http_archive_SOURCE_DIR}/${http_archive_CMAKE_SUBDIR}"
-      "${http_archive_BINARY_DIR}" EXCLUDE_FROM_ALL)
+  FetchContent_GetProperties(${http_archive_NAME})
+  if(NOT ${http_archive_NAME}_POPULATED)
+    FetchContent_Populate(${http_archive_NAME})
+    if (NOT http_archive_DATA_ONLY)
+      add_subdirectory(
+        ${${http_archive_NAME}_SOURCE_DIR}/${http_archive_CMAKE_SUBDIR}
+        ${${http_archive_NAME}_BINARY_DIR}
+        EXCLUDE_FROM_ALL)
+    endif()
+    # Expose these variables to the caller.
+    set(
+      "${http_archive_NAME}_SOURCE_DIR"
+      "${${http_archive_NAME}_SOURCE_DIR}"
+      PARENT_SCOPE)
+    set(
+      "${http_archive_NAME}_BINARY_DIR"
+      "${${http_archive_NAME}_BINARY_DIR}"
+      PARENT_SCOPE)
   endif()
 endfunction(http_archive)

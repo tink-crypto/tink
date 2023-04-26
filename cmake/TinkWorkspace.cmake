@@ -60,7 +60,7 @@ if (TINK_BUILD_TESTS)
     _create_interface_target(gtest_main GTest::gtest_main)
   else()
     http_archive(
-      NAME com_google_googletest
+      NAME googletest
       URL https://github.com/google/googletest/archive/refs/tags/release-1.11.0.tar.gz
       SHA256 b4870bf121ff7795ba20d20bcdd8627b8e088f2d1dab299a031c1034eddc93d5
     )
@@ -72,7 +72,6 @@ if (TINK_BUILD_TESTS)
     SHA256 eb1d558071acf1aa6d677d7f1cabec2328d1cf8381496c17185bd92b52ce7545
     DATA_ONLY
   )
-
   # Symlink the Wycheproof test data.
   # Tests expect Wycheproof test vectors to be in a local testvectors/ folder.
   add_directory_alias("${wycheproof_SOURCE_DIR}/testvectors"
@@ -82,7 +81,7 @@ endif()
 if (NOT TINK_USE_INSTALLED_ABSEIL)
   # Commit from 2023-01-25
   http_archive(
-    NAME com_google_absl
+    NAME abseil
     URL https://github.com/abseil/abseil-cpp/archive/refs/tags/20230125.0.zip
     SHA256 70a2e30f715a7adcf5b7fcd2fcef7b624204b8e32ede8a23fd35ff5bd7d513b0
   )
@@ -129,14 +128,12 @@ http_archive(
   URL https://github.com/Tencent/rapidjson/archive/v1.1.0.tar.gz
   SHA256 bf7ced29704a1e696fbccf2a2b4ea068e7774fa37f6d7dd4039d0787f8bed98e
 )
-
 # Rapidjson is a header-only library with no explicit target. Here we create one.
 add_library(rapidjson INTERFACE)
 target_include_directories(rapidjson INTERFACE "${rapidjson_SOURCE_DIR}")
 
 set(protobuf_BUILD_TESTS OFF CACHE BOOL "Tink dependency override" FORCE)
 set(protobuf_BUILD_EXAMPLES OFF CACHE BOOL "Tink dependency override" FORCE)
-
 ## Use protobuf X.21.9.
 http_archive(
   NAME com_google_protobuf
