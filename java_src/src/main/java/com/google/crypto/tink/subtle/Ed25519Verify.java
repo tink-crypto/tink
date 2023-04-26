@@ -26,6 +26,9 @@ import java.security.GeneralSecurityException;
 /**
  * Ed25519 verifying.
  *
+ * <p>The first call to this function may take longer, because Ed25519Constants needs to be
+ * initialized.
+ *
  * <h3>Usage</h3>
  *
  * <pre>{@code
@@ -63,6 +66,7 @@ public final class Ed25519Verify implements PublicKeyVerify {
           String.format("Given public key's length is not %s.", PUBLIC_KEY_LEN));
     }
     this.publicKey = Bytes.copyFrom(publicKey);
+    Ed25519.init();
   }
 
   @Override

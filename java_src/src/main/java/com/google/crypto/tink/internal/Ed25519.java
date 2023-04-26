@@ -1622,5 +1622,13 @@ public final class Ed25519 {
     return true;
   }
 
+  /** Initializes Ed25519 if not yet initialized. */
+  public static void init() {
+    // We access one of the constants to make sure that the static initialization is called.
+    if (Ed25519Constants.D == null) {
+      throw new IllegalStateException("Could not initialize Ed25519.");
+    }
+  }
+
   private Ed25519() {}
 }
