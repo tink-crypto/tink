@@ -20,6 +20,8 @@ import com.google.crypto.tink.BinaryKeysetReader;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.KeysetReader;
 import com.google.crypto.tink.TinkProtoKeysetFormat;
+import com.google.crypto.tink.aead.AeadKeyTemplates;
+import com.google.crypto.tink.aead.PredefinedAeadParameters;
 import com.google.crypto.tink.mac.MacKeyTemplates;
 import com.google.crypto.tink.mac.PredefinedMacParameters;
 import com.google.errorprone.refaster.annotation.AfterTemplate;
@@ -126,6 +128,102 @@ final class AllChanges {
     @AfterTemplate
     public KeysetHandle afterTemplate(byte[] b) throws GeneralSecurityException {
       return KeysetHandle.generateNew(PredefinedMacParameters.AES_CMAC);
+    }
+  }
+
+  class AES128_GCM {
+    @BeforeTemplate
+    public KeysetHandle beforeTemplate(byte[] b) throws GeneralSecurityException {
+      return KeysetHandle.generateNew(AeadKeyTemplates.AES128_GCM);
+    }
+
+    @AfterTemplate
+    public KeysetHandle afterTemplate(byte[] b) throws GeneralSecurityException {
+      return KeysetHandle.generateNew(PredefinedAeadParameters.AES128_GCM);
+    }
+  }
+
+  class AES256_GCM {
+    @BeforeTemplate
+    public KeysetHandle beforeTemplate(byte[] b) throws GeneralSecurityException {
+      return KeysetHandle.generateNew(AeadKeyTemplates.AES256_GCM);
+    }
+
+    @AfterTemplate
+    public KeysetHandle afterTemplate(byte[] b) throws GeneralSecurityException {
+      return KeysetHandle.generateNew(PredefinedAeadParameters.AES256_GCM);
+    }
+  }
+
+  class AES128_EAX {
+    @BeforeTemplate
+    public KeysetHandle beforeTemplate(byte[] b) throws GeneralSecurityException {
+      return KeysetHandle.generateNew(AeadKeyTemplates.AES128_EAX);
+    }
+
+    @AfterTemplate
+    public KeysetHandle afterTemplate(byte[] b) throws GeneralSecurityException {
+      return KeysetHandle.generateNew(PredefinedAeadParameters.AES128_EAX);
+    }
+  }
+
+  class AES256_EAX {
+    @BeforeTemplate
+    public KeysetHandle beforeTemplate(byte[] b) throws GeneralSecurityException {
+      return KeysetHandle.generateNew(AeadKeyTemplates.AES256_EAX);
+    }
+
+    @AfterTemplate
+    public KeysetHandle afterTemplate(byte[] b) throws GeneralSecurityException {
+      return KeysetHandle.generateNew(PredefinedAeadParameters.AES256_EAX);
+    }
+  }
+
+  class AES128_CTR_HMAC_SHA256 {
+    @BeforeTemplate
+    public KeysetHandle beforeTemplate(byte[] b) throws GeneralSecurityException {
+      return KeysetHandle.generateNew(AeadKeyTemplates.AES128_CTR_HMAC_SHA256);
+    }
+
+    @AfterTemplate
+    public KeysetHandle afterTemplate(byte[] b) throws GeneralSecurityException {
+      return KeysetHandle.generateNew(PredefinedAeadParameters.AES128_CTR_HMAC_SHA256);
+    }
+  }
+
+  class AES256_CTR_HMAC_SHA256 {
+    @BeforeTemplate
+    public KeysetHandle beforeTemplate(byte[] b) throws GeneralSecurityException {
+      return KeysetHandle.generateNew(AeadKeyTemplates.AES256_CTR_HMAC_SHA256);
+    }
+
+    @AfterTemplate
+    public KeysetHandle afterTemplate(byte[] b) throws GeneralSecurityException {
+      return KeysetHandle.generateNew(PredefinedAeadParameters.AES256_CTR_HMAC_SHA256);
+    }
+  }
+
+  class CHACHA20_POLY1305 {
+    @BeforeTemplate
+    public KeysetHandle beforeTemplate(byte[] b) throws GeneralSecurityException {
+      return KeysetHandle.generateNew(AeadKeyTemplates.CHACHA20_POLY1305);
+    }
+
+    @AfterTemplate
+    public KeysetHandle afterTemplate(byte[] b) throws GeneralSecurityException {
+      return KeysetHandle.generateNew(PredefinedAeadParameters.CHACHA20_POLY1305);
+    }
+  }
+
+  class XCHACHA20_POLY1305 {
+    @BeforeTemplate
+    public KeysetHandle beforeTemplate(byte[] b) throws GeneralSecurityException {
+      return KeysetHandle.generateNew(AeadKeyTemplates.XCHACHA20_POLY1305);
+    }
+
+    @AfterTemplate
+    public KeysetHandle afterTemplate(byte[] b) throws GeneralSecurityException {
+      return KeysetHandle.generateNew(PredefinedAeadParameters.XCHACHA20_POLY1305);
     }
   }
 }

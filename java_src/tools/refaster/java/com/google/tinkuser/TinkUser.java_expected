@@ -21,6 +21,8 @@ import com.google.crypto.tink.BinaryKeysetReader;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.KeysetReader;
 import com.google.crypto.tink.TinkProtoKeysetFormat;
+import com.google.crypto.tink.aead.AeadKeyTemplates;
+import com.google.crypto.tink.aead.PredefinedAeadParameters;
 import com.google.crypto.tink.mac.MacKeyTemplates;
 import com.google.crypto.tink.mac.PredefinedMacParameters;
 import java.io.IOException;
@@ -44,5 +46,16 @@ public final class TinkUser {
     Object c = KeysetHandle.generateNew(PredefinedMacParameters.HMAC_SHA512_256BITTAG);
     Object d = KeysetHandle.generateNew(PredefinedMacParameters.HMAC_SHA512_512BITTAG);
     Object e = KeysetHandle.generateNew(PredefinedMacParameters.AES_CMAC);
+  }
+
+  public void aeadKeyTemplateUser() throws Exception {
+    Object a = KeysetHandle.generateNew(PredefinedAeadParameters.AES128_GCM);
+    Object b = KeysetHandle.generateNew(PredefinedAeadParameters.AES256_GCM);
+    Object c = KeysetHandle.generateNew(PredefinedAeadParameters.AES128_EAX);
+    Object d = KeysetHandle.generateNew(PredefinedAeadParameters.AES256_EAX);
+    Object e = KeysetHandle.generateNew(PredefinedAeadParameters.AES128_CTR_HMAC_SHA256);
+    Object f = KeysetHandle.generateNew(PredefinedAeadParameters.AES256_CTR_HMAC_SHA256);
+    Object g = KeysetHandle.generateNew(PredefinedAeadParameters.CHACHA20_POLY1305);
+    Object h = KeysetHandle.generateNew(PredefinedAeadParameters.XCHACHA20_POLY1305);
   }
 }
