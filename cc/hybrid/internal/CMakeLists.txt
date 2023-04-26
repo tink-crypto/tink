@@ -201,6 +201,7 @@ tink_cc_library(
     tink::util::status
     tink::util::statusor
     tink::proto::hpke_cc_proto
+  TESTONLY
   TAGS
     exclude_if_openssl
 )
@@ -253,6 +254,7 @@ tink_cc_library(
     tink::util::secret_data
     tink::util::status
     tink::util::statusor
+  TESTONLY
   TAGS
     exclude_if_openssl
 )

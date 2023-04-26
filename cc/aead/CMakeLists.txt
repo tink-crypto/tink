@@ -304,6 +304,7 @@ tink_cc_library(
     absl::strings
     tink::core::aead
     tink::util::statusor
+  TESTONLY
 )
 
 # tests
@@ -622,6 +623,7 @@ tink_cc_library(
   DEPS
     absl::strings
     tink::core::aead
+  TESTONLY
 )
 
 tink_cc_test(

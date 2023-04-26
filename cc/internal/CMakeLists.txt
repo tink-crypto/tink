@@ -42,6 +42,7 @@ tink_cc_library(
     tink::subtle::random
     tink::util::status
     tink::util::test_util
+  TESTONLY
 )
 
 tink_cc_library(
@@ -980,6 +981,7 @@ tink_cc_library(
     tink::core::parameters
     tink::core::secret_key_access_token
     tink::util::statusor
+  TESTONLY
 )
 
 tink_cc_test(
@@ -1008,6 +1010,7 @@ tink_cc_library(
     tink::util::buffer
     tink::util::status
     tink::util::statusor
+  TESTONLY
 )
 
 tink_cc_test(

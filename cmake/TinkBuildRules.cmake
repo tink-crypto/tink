@@ -75,10 +75,12 @@ endmacro()
 # a way to organise code and speed up compilation.
 #
 # Arguments:
-#   NAME base name of the target. See below for target naming conventions.
-#   SRCS list of source files, including headers.
-#   DEPS list of dependency targets.
-#   PUBLIC flag, signal that this target is intended for external use.
+#   NAME      base name of the target. See below for target naming conventions.
+#   SRCS      list of source files, including headers.
+#   DEPS      list of dependency targets.
+#   PUBLIC    flag, signals that this target is intended for external use.
+#   TESTONLY  flag, signals that this target should be ignored if
+#             TINK_BUILD_TESTS=OFF.
 #
 # If SRCS contains only headers, an INTERFACE rule is created. This rule carries
 # include path and link library information, but is not directly buildable.
@@ -95,10 +97,14 @@ endmacro()
 #
 function(tink_cc_library)
   cmake_parse_arguments(PARSE_ARGV 0 tink_cc_library
-    "PUBLIC"
+    "PUBLIC;TESTONLY"
     "NAME"
     "SRCS;DEPS;TAGS"
   )
+
+  if (tink_cc_library_TESTONLY AND NOT TINK_BUILD_TESTS)
+    return()
+  endif()
 
   if (NOT DEFINED TINK_MODULE)
     message(FATAL_ERROR
@@ -162,10 +168,10 @@ endfunction(tink_cc_library)
 # Declare a Tink test using googletest, with a syntax similar to Bazel.
 #
 # Parameters:
-#   NAME base name of the test.
-#   SRCS list of test source files, headers included.
-#   DEPS list of dependencies, see tink_cc_library above.
-#   DATA list of non-code dependencies, such as test vectors.
+#   NAME  base name of the test.
+#   SRCS  list of test source files, headers included.
+#   DEPS  list of dependencies, see tink_cc_library above.
+#   DATA  list of non-code dependencies, such as test vectors.
 #
 # Tests added with this macro are automatically registered.
 # Each test produces a build target named tink_test_<MODULE>_<NAME>.
@@ -285,8 +291,8 @@ endfunction()
 # to group dependencies that are logically related and give them a single name.
 #
 # Parameters:
-#   NAME base name of the target.
-#   DEPS list of dependencies to group.
+#   NAME  base name of the target.
+#   DEPS  list of dependencies to group.
 #
 # Each tink_target_group produces a target named tink_<MODULE>_<NAME>.
 function(tink_target_group)

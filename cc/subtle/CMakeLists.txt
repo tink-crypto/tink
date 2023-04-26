@@ -644,6 +644,7 @@ tink_cc_library(
     tink::internal::test_file_util
     tink::util::status
     tink::util::statusor
+  TESTONLY
 )
 
 tink_cc_library(
@@ -724,6 +725,7 @@ tink_cc_library(
     tink::core::output_stream
     tink::util::status
     tink::util::statusor
+  TESTONLY
 )
 
 tink_cc_library(
@@ -737,6 +739,7 @@ tink_cc_library(
     tink::core::aead
     tink::aead::cord_aead
     tink::util::status
+  TESTONLY
 )
 
 tink_cc_library(
@@ -754,6 +757,7 @@ tink_cc_library(
     tink::util::istream_input_stream
     tink::util::ostream_output_stream
     tink::util::status
+  TESTONLY
 )
 
 tink_cc_library(
@@ -766,6 +770,7 @@ tink_cc_library(
     tink::core::hybrid_decrypt
     tink::core::hybrid_encrypt
     tink::util::status
+  TESTONLY
 )
 
 tink_cc_library(

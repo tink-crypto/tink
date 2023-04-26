@@ -152,6 +152,7 @@ tink_cc_library(
   DEPS
     absl::strings
     tink::core::mac
+  TESTONLY
 )
 
 tink_cc_library(

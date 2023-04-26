@@ -18,4 +18,5 @@ tink_cc_library(
   DEPS
     tink::monitoring::monitoring
     gmock
+  TESTONLY
 )

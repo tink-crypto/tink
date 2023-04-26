@@ -21,6 +21,7 @@ tink_cc_library(
     absl::strings
     tink::subtle::wycheproof_util
     tink::util::statusor
+  TESTONLY
 )
 
 tink_cc_library(
@@ -74,6 +75,7 @@ tink_cc_library(
     gmock
     absl::strings
     tink::util::statusor
+  TESTONLY
 )
 
 tink_cc_library(

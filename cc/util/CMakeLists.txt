@@ -205,6 +205,7 @@ tink_cc_library(
     tink::proto::hmac_cc_proto
     tink::proto::tink_cc_proto
     tink::proto::xchacha20_poly1305_cc_proto
+  TESTONLY
 )
 
 tink_cc_library(
@@ -216,6 +217,7 @@ tink_cc_library(
     tink::util::statusor
     gmock
     absl::status
+  TESTONLY
 )
 
 tink_cc_library(
@@ -235,6 +237,7 @@ tink_cc_library(
     absl::memory
     tink::core::keyset_handle
     tink::proto::tink_cc_proto
+  TESTONLY
 )
 
 tink_cc_library(
@@ -502,6 +505,7 @@ tink_cc_library(
     tink::core::kms_client
     tink::core::kms_clients
     tink::aead::aead_key_templates
+  TESTONLY
 )
 
 tink_cc_test(
