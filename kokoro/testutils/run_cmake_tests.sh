@@ -69,9 +69,7 @@ main() {
   cd "${cmake_build_dir}"
   cmake --version
   cmake "${tink_cmake_project_dir}" "${cmake_parameters[@]}"
-  # TODO(b/271407288): Replace this with --parallel when CMake 3.12 is used as
-  # minimum version.
-  cmake --build . -- -j"$(nproc)"
+  cmake --build . --parallel "$(nproc)"
   CTEST_OUTPUT_ON_FAILURE=1 ctest --parallel "$(nproc)"
 }
 
