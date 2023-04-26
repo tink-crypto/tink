@@ -163,6 +163,31 @@ public final class JwtHmacKeyTest {
   }
 
   @Test
+  public void build_kidStrategyBase64_works() throws Exception {
+    JwtHmacParameters parameters =
+        JwtHmacParameters.builder()
+            .setKeySizeBytes(16)
+            .setAlgorithm(JwtHmacParameters.Algorithm.HS384)
+            .setKidStrategy(JwtHmacParameters.KidStrategy.BASE64_ENCODED_KEY_ID)
+            .build();
+    SecretBytes keyBytes = SecretBytes.randomBytes(16);
+    JwtHmacKey key =
+        JwtHmacKey.builder()
+            .setParameters(parameters)
+            .setKeyBytes(keyBytes)
+            .setIdRequirement(0x89abcdef)
+            .build();
+    assertThat(key.getParameters()).isEqualTo(parameters);
+    assertThat(key.getKeyBytes()).isEqualTo(keyBytes);
+    assertThat(key.getIdRequirementOrNull()).isEqualTo(0x89abcdef);
+    // ID Requirement(Hex):       8    9    a    b    c    d    e    f
+    // ID Requirement(Binary): 1000 1001 1010 1011 1100 1101 1110 1111
+    // Regroup for base64:     100010  011010 101111  001101 111011 11 (+0000)
+    // Base64 encode:          i       a      v       N      7      w
+    assertThat(key.getKid()).isEqualTo(Optional.of("iavN7w"));
+  }
+
+  @Test
   public void build_kidStrategyBase64_setCustomKeyId_throws() throws Exception {
     JwtHmacParameters parameters =
         JwtHmacParameters.builder()
