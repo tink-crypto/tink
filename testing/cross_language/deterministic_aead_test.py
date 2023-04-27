@@ -67,6 +67,34 @@ class DeterministicAeadTest(parameterized.TestCase):
       output = p2.decrypt_deterministically(ciphertext, associated_data)
       self.assertEqual(output, plaintext)
 
+  @parameterized.parameters(
+      utilities.tinkey_template_names_for(daead.DeterministicAead))
+  def test_encrypt_decrypt_without_associated_data(self, key_template_name):
+    supported_langs = utilities.SUPPORTED_LANGUAGES_BY_TEMPLATE_NAME[
+        key_template_name]
+    self.assertNotEmpty(supported_langs)
+    key_template = utilities.KEY_TEMPLATE[key_template_name]
+    # Take the first supported language to generate the keyset.
+    keyset = testing_servers.new_keyset(supported_langs[0], key_template)
+    supported_daeads = [
+        testing_servers.remote_primitive(lang, keyset, daead.DeterministicAead)
+        for lang in supported_langs
+    ]
+    self.assertNotEmpty(supported_daeads)
+    plaintext = b'plaintext'
+    associated_data = b''
+    ciphertext = None
+    for p in supported_daeads:
+      if ciphertext:
+        self.assertEqual(
+            ciphertext,
+            p.encrypt_deterministically(plaintext, associated_data))
+      else:
+        ciphertext = p.encrypt_deterministically(plaintext, associated_data)
+    for p2 in supported_daeads:
+      output = p2.decrypt_deterministically(ciphertext, associated_data)
+      self.assertEqual(output, plaintext)
+
 
 # If the implementations work fine for keysets with single keys, then key
 # rotation should work if the primitive wrapper is implemented correctly.
