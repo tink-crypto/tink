@@ -425,3 +425,16 @@ java_test(
         "@maven//:junit_junit",
     ],
 )
+
+java_test(
+    name = "JwtEcdsaPublicKeyTest",
+    size = "small",
+    srcs = ["JwtEcdsaPublicKeyTest.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink/internal:key_tester",
+        "//src/main/java/com/google/crypto/tink/jwt:jwt_ecdsa_parameters",
+        "//src/main/java/com/google/crypto/tink/jwt:jwt_ecdsa_public_key",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
