@@ -20,7 +20,6 @@ integration tests.
 
 
 ```bash
-tink_version="1.9.0"
 errorprone_version="2.18.0"
 
 ## STEP 0: Switch to a directory so the remainder of the script can be run
@@ -35,15 +34,18 @@ mkdir jars
 pushd jars
 maven_base="repo1.maven.org/maven2/com/google"
 
-tink_jar="tink-${tink_version}.jar"
-tink_sha256="8faf92d116a0ba138ee4e99a7418e985897818c2f6a9d4c01b8fe6b07db60eb7"
+# We download Tink from Head because Tink 1.9 does not have all key templates
+# This URL is found by going to https://oss.sonatype.org/ and browsing.
+tink_jar="tink-HEAD-20230426.095746-3687.jar"
+tink_url="https://oss.sonatype.org/service/local/repositories/snapshots/content/com/google/crypto/tink/tink/HEAD-SNAPSHOT/tink-HEAD-20230426.095746-3687.jar"
+tink_sha256="d88bbb07f02d3c55f9edc2a3450a1d6c8ff59c2cbe00d2d8b5628bdc67c0638f"
 
 refaster_jar="error_prone_refaster-${errorprone_version}.jar"
 refaster_sha256="0cde0a3db5c2f748fae4633ccd8c66a9ba9c5a0f7a380c9104b99372fd0c4959"
 errorprone_jar="error_prone_core-${errorprone_version}-with-dependencies.jar"
 errorprone_sha256="2b3f2d21e7754bece946cf8f7b0e2b2f805c46f58b4839eb302c3d2498a3a55e"
 
-wget "https://${maven_base}/crypto/tink/tink/${tink_version}/${tink_jar}"
+wget "${tink_url}"
 echo "${tink_sha256} ${tink_jar}" | sha256sum -c
 
 wget "https://${maven_base}/errorprone/error_prone_refaster/${errorprone_version}/${refaster_jar}"

@@ -21,7 +21,9 @@ import com.google.crypto.tink.BinaryKeysetReader;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.KeysetReader;
 import com.google.crypto.tink.aead.AeadKeyTemplates;
+import com.google.crypto.tink.daead.DeterministicAeadKeyTemplates;
 import com.google.crypto.tink.mac.MacKeyTemplates;
+import com.google.crypto.tink.streamingaead.StreamingAeadKeyTemplates;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 
@@ -54,5 +56,20 @@ public final class TinkUser {
     Object f = KeysetHandle.generateNew(AeadKeyTemplates.AES256_CTR_HMAC_SHA256);
     Object g = KeysetHandle.generateNew(AeadKeyTemplates.CHACHA20_POLY1305);
     Object h = KeysetHandle.generateNew(AeadKeyTemplates.XCHACHA20_POLY1305);
+  }
+
+  public void deterministicAeadKeyTemplateUser() throws Exception {
+    Object a = KeysetHandle.generateNew(DeterministicAeadKeyTemplates.AES256_SIV);
+  }
+
+  public void streamingAeadKeyTemplateUser() throws Exception {
+    Object a = KeysetHandle.generateNew(StreamingAeadKeyTemplates.AES128_CTR_HMAC_SHA256_4KB);
+    Object b = KeysetHandle.generateNew(StreamingAeadKeyTemplates.AES128_CTR_HMAC_SHA256_1MB);
+    Object c = KeysetHandle.generateNew(StreamingAeadKeyTemplates.AES256_CTR_HMAC_SHA256_4KB);
+    Object d = KeysetHandle.generateNew(StreamingAeadKeyTemplates.AES256_CTR_HMAC_SHA256_1MB);
+    Object e = KeysetHandle.generateNew(StreamingAeadKeyTemplates.AES128_GCM_HKDF_4KB);
+    Object f = KeysetHandle.generateNew(StreamingAeadKeyTemplates.AES128_GCM_HKDF_1MB);
+    Object g = KeysetHandle.generateNew(StreamingAeadKeyTemplates.AES256_GCM_HKDF_4KB);
+    Object h = KeysetHandle.generateNew(StreamingAeadKeyTemplates.AES256_GCM_HKDF_1MB);
   }
 }
