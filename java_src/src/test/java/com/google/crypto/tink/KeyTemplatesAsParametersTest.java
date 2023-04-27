@@ -21,6 +21,8 @@ import static com.google.common.truth.Truth.assertThat;
 import com.google.crypto.tink.aead.PredefinedAeadParameters;
 import com.google.crypto.tink.config.TinkConfig;
 import com.google.crypto.tink.internal.Util;
+import com.google.crypto.tink.mac.PredefinedMacParameters;
+import com.google.crypto.tink.streamingaead.PredefinedStreamingAeadParameters;
 import java.util.HashSet;
 import java.util.Set;
 import org.junit.BeforeClass;
@@ -34,6 +36,11 @@ import org.junit.runner.RunWith;
 /**
  * This test compares all KeyTemplates (available via {@code KeyTemplates.get("SomeString")} to
  * corresponding parameters objects.
+ *
+ * <p>This can be used to find {@link Parameters} object which correspond to results of {@code
+ * KeyTemplates.get(s)} for a given string {@code s}: simply check the list in {@code TEMPLATES}
+ * below: if a pair {@code (s,p)} is in this list, this means that {@code
+ * KeyTemplates.get(s).toParameters()} is equal to {@code p}.
  */
 @RunWith(Theories.class)
 public final class KeyTemplatesAsParametersTest {
@@ -55,8 +62,38 @@ public final class KeyTemplatesAsParametersTest {
   @DataPoints("EquivalentPairs")
   public static final Pair[] TEMPLATES =
       new Pair[] {
+        // Aead
         new Pair("AES128_GCM", PredefinedAeadParameters.AES128_GCM),
-        new Pair("AES256_GCM", PredefinedAeadParameters.AES256_GCM)
+        new Pair("AES256_GCM", PredefinedAeadParameters.AES256_GCM),
+        new Pair("AES128_EAX", PredefinedAeadParameters.AES128_EAX),
+        new Pair("AES256_EAX", PredefinedAeadParameters.AES256_EAX),
+        new Pair("AES128_CTR_HMAC_SHA256", PredefinedAeadParameters.AES128_CTR_HMAC_SHA256),
+        new Pair("AES256_CTR_HMAC_SHA256", PredefinedAeadParameters.AES256_CTR_HMAC_SHA256),
+        new Pair("CHACHA20_POLY1305", PredefinedAeadParameters.CHACHA20_POLY1305),
+        new Pair("XCHACHA20_POLY1305", PredefinedAeadParameters.XCHACHA20_POLY1305),
+        // Mac
+        new Pair("HMAC_SHA256_128BITTAG", PredefinedMacParameters.HMAC_SHA256_128BITTAG),
+        new Pair("HMAC_SHA256_256BITTAG", PredefinedMacParameters.HMAC_SHA256_256BITTAG),
+        new Pair("HMAC_SHA512_256BITTAG", PredefinedMacParameters.HMAC_SHA512_256BITTAG),
+        new Pair("HMAC_SHA512_512BITTAG", PredefinedMacParameters.HMAC_SHA512_512BITTAG),
+        new Pair("AES_CMAC", PredefinedMacParameters.AES_CMAC),
+        // StreamingAead
+        new Pair(
+            "AES128_CTR_HMAC_SHA256_4KB",
+            PredefinedStreamingAeadParameters.AES128_CTR_HMAC_SHA256_4KB),
+        new Pair(
+            "AES128_CTR_HMAC_SHA256_1MB",
+            PredefinedStreamingAeadParameters.AES128_CTR_HMAC_SHA256_1MB),
+        new Pair(
+            "AES256_CTR_HMAC_SHA256_4KB",
+            PredefinedStreamingAeadParameters.AES256_CTR_HMAC_SHA256_4KB),
+        new Pair(
+            "AES256_CTR_HMAC_SHA256_1MB",
+            PredefinedStreamingAeadParameters.AES256_CTR_HMAC_SHA256_1MB),
+        new Pair("AES128_GCM_HKDF_4KB", PredefinedStreamingAeadParameters.AES128_GCM_HKDF_4KB),
+        new Pair("AES128_GCM_HKDF_1MB", PredefinedStreamingAeadParameters.AES128_GCM_HKDF_1MB),
+        new Pair("AES256_GCM_HKDF_4KB", PredefinedStreamingAeadParameters.AES256_GCM_HKDF_4KB),
+        new Pair("AES256_GCM_HKDF_1MB", PredefinedStreamingAeadParameters.AES256_GCM_HKDF_1MB),
       };
 
   @Theory
@@ -75,32 +112,18 @@ public final class KeyTemplatesAsParametersTest {
 
   private static Set<String> getUntestedNames() {
     Set<String> result = new HashSet<>();
-    result.add("AES128_CTR_HMAC_SHA256");
-    result.add("AES128_CTR_HMAC_SHA256_1MB");
-    result.add("AES128_CTR_HMAC_SHA256_4KB");
     result.add("AES128_CTR_HMAC_SHA256_RAW");
-    result.add("AES128_EAX");
     result.add("AES128_EAX_RAW");
-    result.add("AES128_GCM_HKDF_1MB");
-    result.add("AES128_GCM_HKDF_4KB");
     result.add("AES128_GCM_RAW");
     result.add("AES256_CMAC");
     result.add("AES256_CMAC_PRF");
     result.add("AES256_CMAC_RAW");
-    result.add("AES256_CTR_HMAC_SHA256");
-    result.add("AES256_CTR_HMAC_SHA256_1MB");
-    result.add("AES256_CTR_HMAC_SHA256_4KB");
     result.add("AES256_CTR_HMAC_SHA256_RAW");
-    result.add("AES256_EAX");
     result.add("AES256_EAX_RAW");
-    result.add("AES256_GCM_HKDF_1MB");
-    result.add("AES256_GCM_HKDF_4KB");
     result.add("AES256_GCM_RAW");
     result.add("AES256_SIV");
     result.add("AES256_SIV_RAW");
-    result.add("AES_CMAC");
     result.add("AES_CMAC_PRF");
-    result.add("CHACHA20_POLY1305");
     result.add("CHACHA20_POLY1305_RAW");
     result.add("DHKEM_P256_HKDF_SHA256_HKDF_SHA256_AES_128_GCM");
     result.add("DHKEM_P256_HKDF_SHA256_HKDF_SHA256_AES_128_GCM_RAW");
@@ -143,16 +166,12 @@ public final class KeyTemplatesAsParametersTest {
     result.add("ED25519_RAW");
     result.add("ED25519WithRawOutput");
     result.add("HKDF_SHA256");
-    result.add("HMAC_SHA256_128BITTAG");
     result.add("HMAC_SHA256_128BITTAG_RAW");
-    result.add("HMAC_SHA256_256BITTAG");
     result.add("HMAC_SHA256_256BITTAG_RAW");
     result.add("HMAC_SHA256_PRF");
     result.add("HMAC_SHA512_128BITTAG");
     result.add("HMAC_SHA512_128BITTAG_RAW");
-    result.add("HMAC_SHA512_256BITTAG");
     result.add("HMAC_SHA512_256BITTAG_RAW");
-    result.add("HMAC_SHA512_512BITTAG");
     result.add("HMAC_SHA512_512BITTAG_RAW");
     result.add("HMAC_SHA512_PRF");
     result.add("RSA_SSA_PKCS1_3072_SHA256_F4");
@@ -166,7 +185,6 @@ public final class KeyTemplatesAsParametersTest {
     result.add("RSA_SSA_PSS_4096_SHA512_F4");
     result.add("RSA_SSA_PSS_4096_SHA512_F4_RAW");
     result.add("RSA_SSA_PSS_4096_SHA512_SHA512_64_F4");
-    result.add("XCHACHA20_POLY1305");
     result.add("XCHACHA20_POLY1305_RAW");
     if (Util.isAndroid()) {
       result.add("AES128_GCM_SIV");

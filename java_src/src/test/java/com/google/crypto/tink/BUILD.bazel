@@ -667,6 +667,8 @@ java_test(
         "//src/main/java/com/google/crypto/tink/aead:predefined_aead_parameters",
         "//src/main/java/com/google/crypto/tink/config:tink_config",
         "//src/main/java/com/google/crypto/tink/internal:util",
+        "//src/main/java/com/google/crypto/tink/mac:predefined_mac_parameters",
+        "//src/main/java/com/google/crypto/tink/streamingaead:predefined_streaming_aead_parameters",
         "@maven//:com_google_truth_truth",
         "@maven//:junit_junit",
     ],
