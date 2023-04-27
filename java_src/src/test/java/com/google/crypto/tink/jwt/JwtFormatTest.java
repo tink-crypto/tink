@@ -68,6 +68,10 @@ public final class JwtFormatTest {
   public void getKidFromTinkOutputPrefixType_success() throws Exception {
     int keyId = 0x1ac6a944;
     Optional<String> kid = JwtFormat.getKid(keyId, OutputPrefixType.TINK);
+    // ID Requirement(Hex):       1    a    c    6    a    9    4    4
+    // ID Requirement(Binary): 0001 1010 1100 0110 1010 1001 0100 0100
+    // Regroup for base64:     000110  101100 011010  101001 010001 00 (+0000)
+    // Base64 encode:          G       s      a       p      R      A
     assertThat(kid.get()).isEqualTo("GsapRA");
     assertThat(JwtFormat.getKeyId(kid.get()).get()).isEqualTo(0x1ac6a944);
   }

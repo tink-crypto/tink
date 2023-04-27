@@ -175,16 +175,13 @@ public final class JwtHmacKeyTest {
         JwtHmacKey.builder()
             .setParameters(parameters)
             .setKeyBytes(keyBytes)
-            .setIdRequirement(0x89abcdef)
+            .setIdRequirement(0x1ac6a944)
             .build();
     assertThat(key.getParameters()).isEqualTo(parameters);
     assertThat(key.getKeyBytes()).isEqualTo(keyBytes);
-    assertThat(key.getIdRequirementOrNull()).isEqualTo(0x89abcdef);
-    // ID Requirement(Hex):       8    9    a    b    c    d    e    f
-    // ID Requirement(Binary): 1000 1001 1010 1011 1100 1101 1110 1111
-    // Regroup for base64:     100010  011010 101111  001101 111011 11 (+0000)
-    // Base64 encode:          i       a      v       N      7      w
-    assertThat(key.getKid()).isEqualTo(Optional.of("iavN7w"));
+    assertThat(key.getIdRequirementOrNull()).isEqualTo(0x1ac6a944);
+    // See JwtFormatTest.getKidFromTinkOutputPrefixType_success
+    assertThat(key.getKid()).isEqualTo(Optional.of("GsapRA"));
   }
 
   @Test
