@@ -178,7 +178,7 @@ public final class JwtEcdsaPublicKey extends JwtSignaturePublicKey {
   }
 
   @Override
-  public JwtSignatureParameters getParameters() {
+  public JwtEcdsaParameters getParameters() {
     return parameters;
   }
 
