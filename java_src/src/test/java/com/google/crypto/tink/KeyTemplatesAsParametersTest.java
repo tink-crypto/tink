@@ -17,7 +17,9 @@
 package com.google.crypto.tink;
 
 import static com.google.common.truth.Truth.assertThat;
+import static com.google.crypto.tink.internal.TinkBugException.exceptionIsBug;
 
+import com.google.crypto.tink.aead.AesGcmParameters;
 import com.google.crypto.tink.aead.PredefinedAeadParameters;
 import com.google.crypto.tink.config.TinkConfig;
 import com.google.crypto.tink.internal.Util;
@@ -61,40 +63,54 @@ public final class KeyTemplatesAsParametersTest {
 
   @DataPoints("EquivalentPairs")
   public static final Pair[] TEMPLATES =
-      new Pair[] {
-        // Aead
-        new Pair("AES128_GCM", PredefinedAeadParameters.AES128_GCM),
-        new Pair("AES256_GCM", PredefinedAeadParameters.AES256_GCM),
-        new Pair("AES128_EAX", PredefinedAeadParameters.AES128_EAX),
-        new Pair("AES256_EAX", PredefinedAeadParameters.AES256_EAX),
-        new Pair("AES128_CTR_HMAC_SHA256", PredefinedAeadParameters.AES128_CTR_HMAC_SHA256),
-        new Pair("AES256_CTR_HMAC_SHA256", PredefinedAeadParameters.AES256_CTR_HMAC_SHA256),
-        new Pair("CHACHA20_POLY1305", PredefinedAeadParameters.CHACHA20_POLY1305),
-        new Pair("XCHACHA20_POLY1305", PredefinedAeadParameters.XCHACHA20_POLY1305),
-        // Mac
-        new Pair("HMAC_SHA256_128BITTAG", PredefinedMacParameters.HMAC_SHA256_128BITTAG),
-        new Pair("HMAC_SHA256_256BITTAG", PredefinedMacParameters.HMAC_SHA256_256BITTAG),
-        new Pair("HMAC_SHA512_256BITTAG", PredefinedMacParameters.HMAC_SHA512_256BITTAG),
-        new Pair("HMAC_SHA512_512BITTAG", PredefinedMacParameters.HMAC_SHA512_512BITTAG),
-        new Pair("AES_CMAC", PredefinedMacParameters.AES_CMAC),
-        // StreamingAead
-        new Pair(
-            "AES128_CTR_HMAC_SHA256_4KB",
-            PredefinedStreamingAeadParameters.AES128_CTR_HMAC_SHA256_4KB),
-        new Pair(
-            "AES128_CTR_HMAC_SHA256_1MB",
-            PredefinedStreamingAeadParameters.AES128_CTR_HMAC_SHA256_1MB),
-        new Pair(
-            "AES256_CTR_HMAC_SHA256_4KB",
-            PredefinedStreamingAeadParameters.AES256_CTR_HMAC_SHA256_4KB),
-        new Pair(
-            "AES256_CTR_HMAC_SHA256_1MB",
-            PredefinedStreamingAeadParameters.AES256_CTR_HMAC_SHA256_1MB),
-        new Pair("AES128_GCM_HKDF_4KB", PredefinedStreamingAeadParameters.AES128_GCM_HKDF_4KB),
-        new Pair("AES128_GCM_HKDF_1MB", PredefinedStreamingAeadParameters.AES128_GCM_HKDF_1MB),
-        new Pair("AES256_GCM_HKDF_4KB", PredefinedStreamingAeadParameters.AES256_GCM_HKDF_4KB),
-        new Pair("AES256_GCM_HKDF_1MB", PredefinedStreamingAeadParameters.AES256_GCM_HKDF_1MB),
-      };
+      exceptionIsBug(
+          () ->
+              new Pair[] {
+                // Aead
+                new Pair("AES128_GCM", PredefinedAeadParameters.AES128_GCM),
+                new Pair(
+                    "AES128_GCM_RAW",
+                    AesGcmParameters.builder()
+                        .setIvSizeBytes(12)
+                        .setKeySizeBytes(16)
+                        .setTagSizeBytes(16)
+                        .setVariant(AesGcmParameters.Variant.NO_PREFIX)
+                        .build()),
+                new Pair("AES256_GCM", PredefinedAeadParameters.AES256_GCM),
+                new Pair("AES128_EAX", PredefinedAeadParameters.AES128_EAX),
+                new Pair("AES256_EAX", PredefinedAeadParameters.AES256_EAX),
+                new Pair("AES128_CTR_HMAC_SHA256", PredefinedAeadParameters.AES128_CTR_HMAC_SHA256),
+                new Pair("AES256_CTR_HMAC_SHA256", PredefinedAeadParameters.AES256_CTR_HMAC_SHA256),
+                new Pair("CHACHA20_POLY1305", PredefinedAeadParameters.CHACHA20_POLY1305),
+                new Pair("XCHACHA20_POLY1305", PredefinedAeadParameters.XCHACHA20_POLY1305),
+                // Mac
+                new Pair("HMAC_SHA256_128BITTAG", PredefinedMacParameters.HMAC_SHA256_128BITTAG),
+                new Pair("HMAC_SHA256_256BITTAG", PredefinedMacParameters.HMAC_SHA256_256BITTAG),
+                new Pair("HMAC_SHA512_256BITTAG", PredefinedMacParameters.HMAC_SHA512_256BITTAG),
+                new Pair("HMAC_SHA512_512BITTAG", PredefinedMacParameters.HMAC_SHA512_512BITTAG),
+                new Pair("AES_CMAC", PredefinedMacParameters.AES_CMAC),
+                // StreamingAead
+                new Pair(
+                    "AES128_CTR_HMAC_SHA256_4KB",
+                    PredefinedStreamingAeadParameters.AES128_CTR_HMAC_SHA256_4KB),
+                new Pair(
+                    "AES128_CTR_HMAC_SHA256_1MB",
+                    PredefinedStreamingAeadParameters.AES128_CTR_HMAC_SHA256_1MB),
+                new Pair(
+                    "AES256_CTR_HMAC_SHA256_4KB",
+                    PredefinedStreamingAeadParameters.AES256_CTR_HMAC_SHA256_4KB),
+                new Pair(
+                    "AES256_CTR_HMAC_SHA256_1MB",
+                    PredefinedStreamingAeadParameters.AES256_CTR_HMAC_SHA256_1MB),
+                new Pair(
+                    "AES128_GCM_HKDF_4KB", PredefinedStreamingAeadParameters.AES128_GCM_HKDF_4KB),
+                new Pair(
+                    "AES128_GCM_HKDF_1MB", PredefinedStreamingAeadParameters.AES128_GCM_HKDF_1MB),
+                new Pair(
+                    "AES256_GCM_HKDF_4KB", PredefinedStreamingAeadParameters.AES256_GCM_HKDF_4KB),
+                new Pair(
+                    "AES256_GCM_HKDF_1MB", PredefinedStreamingAeadParameters.AES256_GCM_HKDF_1MB),
+              });
 
   @Theory
   public void testParametersEqualsKeyTemplate(@FromDataPoints("EquivalentPairs") Pair p)
@@ -114,7 +130,6 @@ public final class KeyTemplatesAsParametersTest {
     Set<String> result = new HashSet<>();
     result.add("AES128_CTR_HMAC_SHA256_RAW");
     result.add("AES128_EAX_RAW");
-    result.add("AES128_GCM_RAW");
     result.add("AES256_CMAC");
     result.add("AES256_CMAC_PRF");
     result.add("AES256_CMAC_RAW");
