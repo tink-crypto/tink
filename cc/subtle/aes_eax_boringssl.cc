@@ -66,7 +66,7 @@ uint64_t BigEndianLoad64(const uint8_t src[8]) {
 #if defined(ABSL_IS_LITTLE_ENDIAN)
   return ByteSwap(Load64(src));
 #elif defined(ABSL_IS_BIG_ENDIAN)
-  return val;
+  return Load64(src);
 #else
 #error Unknown endianness
 #endif
