@@ -17,8 +17,8 @@
 #ifndef TINK_INTEGRATION_AWSKMS_AWS_KMS_AEAD_H_
 #define TINK_INTEGRATION_AWSKMS_AWS_KMS_AEAD_H_
 
-#include "absl/strings/string_view.h"
 #include "aws/kms/KMSClient.h"
+#include "absl/strings/string_view.h"
 #include "tink/aead.h"
 #include "tink/util/statusor.h"
 
@@ -27,15 +27,20 @@ namespace tink {
 namespace integration {
 namespace awskms {
 
-// AwsKmsAead is an implementation of AEAD that forwards
-// encryption/decryption requests to a key managed by
-// <a href="https://aws.amazon.com/kms/">AWS KMS</a>.
+// AwsKmsAead is an implementation of AEAD that forwards encryption/decryption
+// requests to a key managed by the AWS KMS (https://aws.amazon.com/kms).
 class AwsKmsAead : public Aead {
  public:
-  // Creates a new AwsKmsAead that is bound to the key specified in 'key_arn',
+  // Move only.
+  AwsKmsAead(AwsKmsAead&& other) = default;
+  AwsKmsAead& operator=(AwsKmsAead&& other) = default;
+  AwsKmsAead(const AwsKmsAead&) = delete;
+  AwsKmsAead& operator=(const AwsKmsAead&) = delete;
+
+  // Creates a new AwsKmsAead that is bound to the key specified in `key_arn`,
   // and that uses the given client when communicating with the KMS.
-  static crypto::tink::util::StatusOr<std::unique_ptr<Aead>>
-  New(absl::string_view key_arn,
+  static crypto::tink::util::StatusOr<std::unique_ptr<Aead>> New(
+      absl::string_view key_arn,
       std::shared_ptr<Aws::KMS::KMSClient> aws_client);
 
   crypto::tink::util::StatusOr<std::string> Encrypt(
@@ -46,15 +51,14 @@ class AwsKmsAead : public Aead {
       absl::string_view ciphertext,
       absl::string_view associated_data) const override;
 
-  virtual ~AwsKmsAead() {}
-
  private:
   AwsKmsAead(absl::string_view key_arn,
-             std::shared_ptr<Aws::KMS::KMSClient> aws_client);
+             std::shared_ptr<Aws::KMS::KMSClient> aws_client)
+      : key_arn_(key_arn), aws_client_(aws_client) {}
+
   std::string key_arn_;  // The location of a crypto key in AWS KMS.
   std::shared_ptr<Aws::KMS::KMSClient> aws_client_;
 };
-
 
 }  // namespace awskms
 }  // namespace integration
