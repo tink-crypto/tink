@@ -153,8 +153,10 @@ def _patch_with_http_archive(workspace_content, filename, prefix):
   workspace_lines = workspace_content.split('\n')
   http_archive_load = ('load("@bazel_tools//tools/build_defs/repo:http.bzl", '
                        '"http_archive")')
-  workspace_content = '\n'.join([workspace_lines[0], http_archive_load] +
-                                workspace_lines[1:])
+
+  if http_archive_load not in workspace_content:
+    workspace_content = '\n'.join([workspace_lines[0], http_archive_load] +
+                                  workspace_lines[1:])
 
   cc = textwrap.dedent(
       '''\
