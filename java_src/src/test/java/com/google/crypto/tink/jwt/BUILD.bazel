@@ -420,6 +420,7 @@ java_test(
     size = "small",
     srcs = ["JwtEcdsaParametersTest.java"],
     deps = [
+        "//src/main/java/com/google/crypto/tink/internal:elliptic_curves_util",
         "//src/main/java/com/google/crypto/tink/jwt:jwt_ecdsa_parameters",
         "@maven//:com_google_truth_truth",
         "@maven//:junit_junit",

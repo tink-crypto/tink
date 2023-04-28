@@ -16,9 +16,11 @@
 
 package com.google.crypto.tink.jwt;
 
+import com.google.crypto.tink.internal.EllipticCurvesUtil;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.errorprone.annotations.Immutable;
 import java.security.GeneralSecurityException;
+import java.security.spec.ECParameterSpec;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -80,16 +82,23 @@ public final class JwtEcdsaParameters extends JwtSignatureParameters {
   @Immutable
   public static final class Algorithm {
     /** ECDSA using P-256 and SHA-256 */
-    public static final Algorithm ES256 = new Algorithm("ES256");
+    public static final Algorithm ES256 =
+        new Algorithm("ES256", EllipticCurvesUtil.NIST_P256_PARAMS);
     /** ECDSA using P-384 and SHA-384 */
-    public static final Algorithm ES384 = new Algorithm("ES384");
+    public static final Algorithm ES384 =
+        new Algorithm("ES384", EllipticCurvesUtil.NIST_P384_PARAMS);
     /** ECDSA using P-521 and SHA-512 */
-    public static final Algorithm ES512 = new Algorithm("ES512");
+    public static final Algorithm ES512 =
+        new Algorithm("ES512", EllipticCurvesUtil.NIST_P521_PARAMS);
 
     private final String name;
 
-    private Algorithm(String name) {
+    @SuppressWarnings("Immutable") // ECParameterSpec is immutable
+    private final ECParameterSpec ecParameterSpec;
+
+    private Algorithm(String name, ECParameterSpec ecParameterSpec) {
       this.name = name;
+      this.ecParameterSpec = ecParameterSpec;
     }
 
     @Override
@@ -99,6 +108,10 @@ public final class JwtEcdsaParameters extends JwtSignatureParameters {
 
     public String getStandardName() {
       return name;
+    }
+
+    ECParameterSpec getECParameterSpec() {
+      return ecParameterSpec;
     }
   }
 

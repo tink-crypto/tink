@@ -18,6 +18,7 @@ package com.google.crypto.tink.jwt;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import com.google.crypto.tink.internal.EllipticCurvesUtil;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -136,5 +137,15 @@ public final class JwtEcdsaParametersTest {
             .build();
     assertThat(parameters1).isNotEqualTo(parameters2);
     assertThat(parameters1.hashCode()).isNotEqualTo(parameters2.hashCode());
+  }
+
+  @Test
+  public void testAlgorithmGetEcParamtersSpec() throws Exception {
+    assertThat(JwtEcdsaParameters.Algorithm.ES256.getECParameterSpec())
+        .isEqualTo(EllipticCurvesUtil.NIST_P256_PARAMS);
+    assertThat(JwtEcdsaParameters.Algorithm.ES384.getECParameterSpec())
+        .isEqualTo(EllipticCurvesUtil.NIST_P384_PARAMS);
+    assertThat(JwtEcdsaParameters.Algorithm.ES512.getECParameterSpec())
+        .isEqualTo(EllipticCurvesUtil.NIST_P521_PARAMS);
   }
 }

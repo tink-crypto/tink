@@ -25,7 +25,6 @@ import com.google.errorprone.annotations.Immutable;
 import com.google.errorprone.annotations.RestrictedApi;
 import java.nio.ByteBuffer;
 import java.security.GeneralSecurityException;
-import java.security.spec.ECParameterSpec;
 import java.security.spec.ECPoint;
 import java.util.Optional;
 import javax.annotation.Nullable;
@@ -101,20 +100,6 @@ public final class JwtEcdsaPublicKey extends JwtSignaturePublicKey {
       throw new IllegalStateException("Unknown kid strategy");
     }
 
-    private static ECParameterSpec parameterSpecFor(JwtEcdsaParameters.Algorithm algorithm)
-        throws GeneralSecurityException {
-      if (algorithm.equals(JwtEcdsaParameters.Algorithm.ES256)) {
-        return EllipticCurvesUtil.NIST_P256_PARAMS;
-      }
-      if (algorithm.equals(JwtEcdsaParameters.Algorithm.ES384)) {
-        return EllipticCurvesUtil.NIST_P384_PARAMS;
-      }
-      if (algorithm.equals(JwtEcdsaParameters.Algorithm.ES512)) {
-        return EllipticCurvesUtil.NIST_P521_PARAMS;
-      }
-      throw new GeneralSecurityException("Unknown algorithm: " + algorithm);
-    }
-
     public JwtEcdsaPublicKey build() throws GeneralSecurityException {
       if (!parameters.isPresent()) {
         throw new GeneralSecurityException("Cannot build without parameters");
@@ -123,7 +108,7 @@ public final class JwtEcdsaPublicKey extends JwtSignaturePublicKey {
         throw new GeneralSecurityException("Cannot build without public point");
       }
       EllipticCurvesUtil.checkPointOnCurve(
-          publicPoint.get(), parameterSpecFor(parameters.get().getAlgorithm()).getCurve());
+          publicPoint.get(), parameters.get().getAlgorithm().getECParameterSpec().getCurve());
       if (parameters.get().hasIdRequirement() && !idRequirement.isPresent()) {
         throw new GeneralSecurityException(
             "Cannot create key without ID requirement with parameters with ID requirement");
