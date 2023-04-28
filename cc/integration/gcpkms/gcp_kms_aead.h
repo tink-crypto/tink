@@ -30,18 +30,25 @@ namespace tink {
 namespace integration {
 namespace gcpkms {
 
-// GcpKmsAead is an implementation of AEAD that forwards
-// encryption/decryption requests to a key managed by
-// <a href="https://cloud.google.com/kms/">Google Cloud KMS</a>.
+// GcpKmsAead is an implementation of AEAD that forwards encryption/decryption
+// requests to a key managed by the Google Cloud KMS
+// (https://cloud.google.com/kms/).
 class GcpKmsAead : public Aead {
  public:
-  // Creates a new GcpKmsAead that is bound to the key specified in 'key_name',
+  // Move only.
+  GcpKmsAead(GcpKmsAead&& other) = default;
+  GcpKmsAead& operator=(GcpKmsAead&& other) = default;
+  GcpKmsAead(const GcpKmsAead&) = delete;
+  GcpKmsAead& operator=(const GcpKmsAead&) = delete;
+
+  // Creates a new GcpKmsAead that is bound to the key specified in `key_name`,
   // and that uses the channel when communicating with the KMS.
-  // Valid values for 'key_name' have the following format:
+  //
+  // Valid values for `key_name` have the following format:
   //    projects/*/locations/*/keyRings/*/cryptoKeys/*.
   // See https://cloud.google.com/kms/docs/object-hierarchy for more info.
-  static crypto::tink::util::StatusOr<std::unique_ptr<Aead>>
-  New(absl::string_view key_name,
+  static crypto::tink::util::StatusOr<std::unique_ptr<Aead>> New(
+      absl::string_view key_name,
       std::shared_ptr<google::cloud::kms::v1::KeyManagementService::Stub>
           kms_stub);
 
@@ -53,18 +60,17 @@ class GcpKmsAead : public Aead {
       absl::string_view ciphertext,
       absl::string_view associated_data) const override;
 
-  ~GcpKmsAead() override = default;
-
  private:
-  GcpKmsAead(
+  explicit GcpKmsAead(
       absl::string_view key_name,
       std::shared_ptr<google::cloud::kms::v1::KeyManagementService::Stub>
-          kms_stub);
-  std::string key_name_;  // The location of a crypto key in GCP KMS.
-  std::shared_ptr<google::cloud::kms::v1::KeyManagementService::Stub>
-      kms_stub_;
-};
+          kms_stub)
+      : key_name_(key_name), kms_stub_(kms_stub) {}
 
+  // The location of a crypto key in GCP KMS.
+  std::string key_name_;
+  std::shared_ptr<google::cloud::kms::v1::KeyManagementService::Stub> kms_stub_;
+};
 
 }  // namespace gcpkms
 }  // namespace integration

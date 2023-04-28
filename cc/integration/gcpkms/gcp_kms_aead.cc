@@ -18,12 +18,10 @@
 
 #include <memory>
 #include <string>
-#include <utility>
 
 #include "google/cloud/kms/v1/service.grpc.pb.h"
 #include "absl/memory/memory.h"
 #include "absl/status/status.h"
-#include "absl/strings/match.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/string_view.h"
 #include "tink/aead.h"
@@ -35,37 +33,27 @@ namespace tink {
 namespace integration {
 namespace gcpkms {
 
-using crypto::tink::util::Status;
-using crypto::tink::util::StatusOr;
-using google::cloud::kms::v1::DecryptRequest;
-using google::cloud::kms::v1::DecryptResponse;
-using google::cloud::kms::v1::EncryptRequest;
-using google::cloud::kms::v1::EncryptResponse;
-using google::cloud::kms::v1::KeyManagementService;
-using grpc::ClientContext;
+using ::google::cloud::kms::v1::DecryptRequest;
+using ::google::cloud::kms::v1::DecryptResponse;
+using ::google::cloud::kms::v1::EncryptRequest;
+using ::google::cloud::kms::v1::EncryptResponse;
+using ::google::cloud::kms::v1::KeyManagementService;
 
-GcpKmsAead::GcpKmsAead(
+util::StatusOr<std::unique_ptr<Aead>> GcpKmsAead::New(
     absl::string_view key_name,
-    std::shared_ptr<KeyManagementService::Stub> kms_stub)
-    : key_name_(key_name), kms_stub_(kms_stub) {}
-
-// static
-StatusOr<std::unique_ptr<Aead>>
-GcpKmsAead::New(absl::string_view key_name,
-                std::shared_ptr<KeyManagementService::Stub> kms_stub) {
+    std::shared_ptr<KeyManagementService::Stub> kms_stub) {
   if (key_name.empty()) {
-    return Status(absl::StatusCode::kInvalidArgument,
+    return util::Status(absl::StatusCode::kInvalidArgument,
                         "Key URI cannot be empty.");
   }
   if (kms_stub == nullptr) {
-    return Status(absl::StatusCode::kInvalidArgument,
+    return util::Status(absl::StatusCode::kInvalidArgument,
                         "KMS stub cannot be null.");
   }
-  std::unique_ptr<Aead> aead(new GcpKmsAead(key_name, kms_stub));
-  return std::move(aead);
+  return absl::WrapUnique(new GcpKmsAead(key_name, kms_stub));
 }
 
-StatusOr<std::string> GcpKmsAead::Encrypt(
+util::StatusOr<std::string> GcpKmsAead::Encrypt(
     absl::string_view plaintext, absl::string_view associated_data) const {
   EncryptRequest req;
   req.set_name(key_name_);
@@ -73,19 +61,21 @@ StatusOr<std::string> GcpKmsAead::Encrypt(
   req.set_additional_authenticated_data(std::string(associated_data));
 
   EncryptResponse resp;
-  ClientContext context;
+  grpc::ClientContext context;
   context.AddMetadata("x-goog-request-params",
                       absl::StrCat("name=", key_name_));
 
-  auto status =  kms_stub_->Encrypt(&context, req, &resp);
+  grpc::Status status = kms_stub_->Encrypt(&context, req, &resp);
 
-  if (status.ok()) return resp.ciphertext();
-  return Status(
-      absl::StatusCode::kInvalidArgument,
-      absl::StrCat("GCP KMS encryption failed: ", status.error_message()));
+  if (!status.ok()) {
+    return util::Status(
+        absl::StatusCode::kInvalidArgument,
+        absl::StrCat("GCP KMS encryption failed: ", status.error_message()));
+  }
+  return resp.ciphertext();
 }
 
-StatusOr<std::string> GcpKmsAead::Decrypt(
+util::StatusOr<std::string> GcpKmsAead::Decrypt(
     absl::string_view ciphertext, absl::string_view associated_data) const {
   DecryptRequest req;
   req.set_name(key_name_);
@@ -93,16 +83,18 @@ StatusOr<std::string> GcpKmsAead::Decrypt(
   req.set_additional_authenticated_data(std::string(associated_data));
 
   DecryptResponse resp;
-  ClientContext context;
+  grpc::ClientContext context;
   context.AddMetadata("x-goog-request-params",
                       absl::StrCat("name=", key_name_));
 
-  auto status =  kms_stub_->Decrypt(&context, req, &resp);
+  grpc::Status status = kms_stub_->Decrypt(&context, req, &resp);
 
-  if (status.ok()) return resp.plaintext();
-  return Status(
-      absl::StatusCode::kInvalidArgument,
-      absl::StrCat("GCP KMS encryption failed: ", status.error_message()));
+  if (!status.ok()) {
+    return util::Status(
+        absl::StatusCode::kInvalidArgument,
+        absl::StrCat("GCP KMS encryption failed: ", status.error_message()));
+  }
+  return resp.plaintext();
 }
 
 }  // namespace gcpkms
