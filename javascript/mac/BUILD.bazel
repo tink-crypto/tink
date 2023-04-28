@@ -11,3 +11,40 @@ ts_library(
     module_name = "tink-crypto/mac",
     deps = ["//mac/internal"],
 )
+
+ts_library(
+    name = "mac_wrapper",
+    srcs = [
+        "mac_wrapper.ts",
+    ],
+    deps = [
+        "//exception",
+        "//internal:crypto_format",
+        "//internal:primitive_set",
+        "//internal:primitive_wrapper",
+        "//internal:proto",
+        "//internal:registry",
+        "//internal:util",
+        "//mac/internal",
+        "//subtle:bytes",
+    ],
+)
+
+ts_library(
+    name = "mac_tests",
+    testonly = True,
+    srcs = [
+        "mac_wrapper_test.ts",
+    ],
+    deps = [
+        ":mac_wrapper",
+        "//exception",
+        "//internal:crypto_format",
+        "//internal:primitive_set",
+        "//internal:proto",
+        "//mac/internal",
+        "//subtle:bytes",
+        "//subtle:random",
+        "//testing/internal",
+    ],
+)
