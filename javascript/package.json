@@ -1,6 +1,6 @@
 {
   "name": "tink-crypto",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "A multi-language, cross-platform library that provides cryptographic APIs that are secure, easy to use correctly, and hard(er) to misuse.",
   "keywords": [
     "crypto",
