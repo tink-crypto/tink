@@ -1,0 +1,17 @@
+"""Internal utilities."""
+package(default_visibility = ["//:__subpackages__"])
+
+licenses(["notice"])
+
+cc_library(
+    name = "aws_crypto",
+    srcs = ["aws_crypto.cc"],
+    hdrs = ["aws_crypto.h"],
+    include_prefix = "tink/integration/awskms",
+    deps = [
+        "@aws_cpp_sdk//:aws_sdk_core",
+        "@boringssl//:crypto",
+        "@com_google_absl//absl/base",
+    ],
+    alwayslink = 1,
+)

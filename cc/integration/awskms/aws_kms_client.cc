@@ -179,10 +179,12 @@ void AwsKmsClient::InitAwsApi() {
   }
   Aws::SDKOptions options;
   options.cryptoOptions.sha256Factory_create_fn = []() {
-    return Aws::MakeShared<AwsSha256Factory>(kAwsCryptoAllocationTag);
+    return Aws::MakeShared<internal::AwsSha256Factory>(
+        internal::kAwsCryptoAllocationTag);
   };
   options.cryptoOptions.sha256HMACFactory_create_fn = []() {
-    return Aws::MakeShared<AwsSha256HmacFactory>(kAwsCryptoAllocationTag);
+    return Aws::MakeShared<internal::AwsSha256HmacFactory>(
+        internal::kAwsCryptoAllocationTag);
   };
   Aws::InitAPI(options);
   aws_api_is_initialized_ = true;
@@ -217,7 +219,7 @@ util::StatusOr<std::unique_ptr<AwsKmsClient>> AwsKmsClient::New(
   auto client = absl::WrapUnique(new AwsKmsClient(*key_arn, *credentials));
   // Create AWS KMSClient.
   client->aws_client_ = Aws::MakeShared<Aws::KMS::KMSClient>(
-      kAwsCryptoAllocationTag, client->credentials_, *client_config);
+      internal::kAwsCryptoAllocationTag, client->credentials_, *client_config);
   return std::move(client);
 }
 
@@ -256,7 +258,7 @@ AwsKmsClient::GetAead(absl::string_view key_uri) const {
     return client_config.status();
   }
   auto aws_client = Aws::MakeShared<Aws::KMS::KMSClient>(
-      kAwsCryptoAllocationTag, credentials_, *client_config);
+      internal::kAwsCryptoAllocationTag, credentials_, *client_config);
   return AwsKmsAead::New(*key_arn, aws_client);
 }
 

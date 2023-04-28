@@ -24,8 +24,7 @@
 
 namespace crypto {
 namespace tink {
-namespace integration {
-namespace awskms {
+namespace internal {
 
 // Helpers for building AWS C++ Client without OpenSSL, to avoid
 // collisions with BoringSSL used by Tink.
@@ -48,18 +47,31 @@ extern const char* kAwsCryptoAllocationTag;
 
 class AwsSha256Factory : public Aws::Utils::Crypto::HashFactory {
  public:
+  AwsSha256Factory() = default;
+  // Move only.
+  AwsSha256Factory(AwsSha256Factory&& other) = default;
+  AwsSha256Factory& operator=(AwsSha256Factory&& other) = default;
+  AwsSha256Factory(const AwsSha256Factory&) = delete;
+  AwsSha256Factory& operator=(const AwsSha256Factory&) = delete;
+
   std::shared_ptr<Aws::Utils::Crypto::Hash> CreateImplementation()
       const override;
 };
 
 class AwsSha256HmacFactory : public Aws::Utils::Crypto::HMACFactory {
  public:
+  AwsSha256HmacFactory() = default;
+  // Move only.
+  AwsSha256HmacFactory(AwsSha256HmacFactory&& other) = default;
+  AwsSha256HmacFactory& operator=(AwsSha256HmacFactory&& other) = default;
+  AwsSha256HmacFactory(const AwsSha256HmacFactory&) = delete;
+  AwsSha256HmacFactory& operator=(const AwsSha256HmacFactory&) = delete;
+
   std::shared_ptr<Aws::Utils::Crypto::HMAC> CreateImplementation()
       const override;
 };
 
-}  // namespace awskms
-}  // namespace integration
+}  // namespace internal
 }  // namespace tink
 }  // namespace crypto
 

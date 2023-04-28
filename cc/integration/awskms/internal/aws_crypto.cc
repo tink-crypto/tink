@@ -19,24 +19,31 @@
 #include "aws/core/Aws.h"
 #include "aws/core/utils/Outcome.h"
 #include "aws/core/utils/crypto/Factories.h"
-#include "aws/core/utils/crypto/HashResult.h"
 #include "aws/core/utils/crypto/HMAC.h"
 #include "aws/core/utils/crypto/Hash.h"
-
+#include "aws/core/utils/crypto/HashResult.h"
 #include "absl/base/attributes.h"
 #include "openssl/hmac.h"
 #include "openssl/sha.h"
 
 namespace crypto {
 namespace tink {
-namespace integration {
-namespace awskms {
+namespace internal {
 
 ABSL_CONST_INIT const char* kAwsCryptoAllocationTag = "AwsCryptoAllocation";
 
+namespace {
+
 class AwsSha256HmacOpenSslImpl : public Aws::Utils::Crypto::HMAC {
  public:
-  AwsSha256HmacOpenSslImpl() {}
+  AwsSha256HmacOpenSslImpl() = default;
+
+  // Move only.
+  AwsSha256HmacOpenSslImpl(AwsSha256HmacOpenSslImpl&& other) = default;
+  AwsSha256HmacOpenSslImpl& operator=(AwsSha256HmacOpenSslImpl&& other) =
+      default;
+  AwsSha256HmacOpenSslImpl(const AwsSha256HmacOpenSslImpl&) = delete;
+  AwsSha256HmacOpenSslImpl& operator=(const AwsSha256HmacOpenSslImpl&) = delete;
 
   virtual ~AwsSha256HmacOpenSslImpl() = default;
 
@@ -62,7 +69,13 @@ class AwsSha256HmacOpenSslImpl : public Aws::Utils::Crypto::HMAC {
 
 class AwsSha256OpenSslImpl : public Aws::Utils::Crypto::Hash {
  public:
-  AwsSha256OpenSslImpl() {}
+  AwsSha256OpenSslImpl() = default;
+
+  // Move only.
+  AwsSha256OpenSslImpl(AwsSha256OpenSslImpl&& other) = default;
+  AwsSha256OpenSslImpl& operator=(AwsSha256OpenSslImpl&& other) = default;
+  AwsSha256OpenSslImpl(const AwsSha256OpenSslImpl&) = delete;
+  AwsSha256OpenSslImpl& operator=(const AwsSha256OpenSslImpl&) = delete;
 
   virtual ~AwsSha256OpenSslImpl() = default;
 
@@ -111,6 +124,8 @@ class AwsSha256OpenSslImpl : public Aws::Utils::Crypto::Hash {
   }
 };
 
+}  // namespace
+
 std::shared_ptr<Aws::Utils::Crypto::Hash>
 AwsSha256Factory::CreateImplementation() const {
   return Aws::MakeShared<AwsSha256OpenSslImpl>(kAwsCryptoAllocationTag);
@@ -121,8 +136,6 @@ AwsSha256HmacFactory::CreateImplementation() const {
   return Aws::MakeShared<AwsSha256HmacOpenSslImpl>(kAwsCryptoAllocationTag);
 }
 
-
-}  // namespace awskms
-}  // namespace integration
+}  // namespace internal
 }  // namespace tink
 }  // namespace crypto
