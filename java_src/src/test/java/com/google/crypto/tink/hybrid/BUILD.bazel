@@ -280,3 +280,19 @@ java_test(
         "@maven//:junit_junit",
     ],
 )
+
+java_test(
+    name = "HpkePublicKeyTest",
+    size = "small",
+    srcs = ["HpkePublicKeyTest.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink/hybrid:hpke_parameters",
+        "//src/main/java/com/google/crypto/tink/hybrid:hpke_public_key",
+        "//src/main/java/com/google/crypto/tink/internal:big_integer_encoding",
+        "//src/main/java/com/google/crypto/tink/subtle:elliptic_curves",
+        "//src/main/java/com/google/crypto/tink/subtle:x25519",
+        "//src/main/java/com/google/crypto/tink/util:bytes",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
