@@ -22,7 +22,6 @@ import static org.junit.Assert.assertThrows;
 import com.google.crypto.tink.InsecureSecretKeyAccess;
 import com.google.crypto.tink.internal.KeyTester;
 import com.google.crypto.tink.subtle.Base64;
-import com.google.crypto.tink.subtle.EngineFactory;
 import com.google.crypto.tink.subtle.Hex;
 import com.google.crypto.tink.util.Bytes;
 import com.google.crypto.tink.util.SecretBigInteger;
@@ -404,8 +403,9 @@ public final class RsaSsaPkcs1PrivateKeyTest {
 
   @Test
   public void buildFromJavaRSAKeys() throws Exception {
-    // Create new RSA key pair, which gives us a RSAPublicKey and a RSAPrivateCrtKey.
-    KeyPairGenerator keyGen = EngineFactory.KEY_PAIR_GENERATOR.getInstance("RSA");
+    // Create a new RSA key pair using Java's KeyPairGenerator, which gives us a
+    // RSAPublicKey and a RSAPrivateCrtKey.
+    KeyPairGenerator keyGen = KeyPairGenerator.getInstance("RSA");
     RSAKeyGenParameterSpec spec = new RSAKeyGenParameterSpec(2048, EXPONENT);
     keyGen.initialize(spec);
     KeyPair keyPair = keyGen.generateKeyPair();
@@ -447,7 +447,7 @@ public final class RsaSsaPkcs1PrivateKeyTest {
                     privKey.getCrtCoefficient(), InsecureSecretKeyAccess.get()))
             .build();
 
-    // Build a RsaSsaPkcs1PrivateKey from a RSAPrivateCrtKey.
+    // Build a RsaSsaPkcs1PrivateKey from a RSAPrivateCrtKey, without a RSAPublicKey.
     int privKeyModulusSizeBits = privKey.getModulus().bitLength();
     assertThat(privKeyModulusSizeBits).isEqualTo(2048);
     RsaSsaPkcs1PrivateKey privateKey2 =
@@ -480,7 +480,7 @@ public final class RsaSsaPkcs1PrivateKeyTest {
             .build();
     assertThat(privateKey.equalsKey(privateKey2)).isTrue();
 
-    KeyFactory keyFactory = EngineFactory.KEY_FACTORY.getInstance("RSA");
+    KeyFactory keyFactory = KeyFactory.getInstance("RSA");
 
     // Convert RsaSsaPkcs1PublicKey back into a RSAPublicKey.
     RSAPublicKey pubKey2 =
