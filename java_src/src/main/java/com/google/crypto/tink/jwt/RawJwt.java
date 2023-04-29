@@ -355,6 +355,14 @@ public final class RawJwt {
       return this;
     }
 
+    /** Adds a custom claim of type {@code long} to the JWT. */
+    @CanIgnoreReturnValue
+    public Builder addNumberClaim(String name, long value) {
+      JwtNames.validate(name);
+      payload.add(name, new JsonPrimitive(value));
+      return this;
+    }
+
     /** Adds a custom claim of type {@code double} to the JWT. */
     @CanIgnoreReturnValue
     public Builder addNumberClaim(String name, double value) {

@@ -461,6 +461,12 @@ public final class RawJwtTest {
   }
 
   @Test
+  public void integerIsEncodedAsInteger() throws Exception {
+    RawJwt token = RawJwt.newBuilder().addNumberClaim("num", 1).withoutExpiration().build();
+    assertThat(token.getJsonPayload()).isEqualTo("{\"num\":1}");
+  }
+
+  @Test
   public void getJsonPayload_success() throws Exception {
     RawJwt token = RawJwt.newBuilder().setJwtId("id").withoutExpiration().build();
     assertThat(token.getJsonPayload()).isEqualTo("{\"jti\":\"id\"}");

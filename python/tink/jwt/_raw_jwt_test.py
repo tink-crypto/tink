@@ -289,6 +289,12 @@ class RawJwtTest(absltest.TestCase):
     token = jwt.RawJwt._from_json(None, json.dumps(payload))
     self.assertEqual(json.loads(token.json_payload()), payload)
 
+  def test_integer_is_encoded_as_integer(self):
+    token = jwt.new_raw_jwt(
+        without_expiration=True,
+        custom_claims={'num': 1})
+    self.assertEqual(token.json_payload(), '{"num":1}')
+
   def test_exp_to_payload(self):
     expiration = datetime.datetime.fromtimestamp(2218027244,
                                                  datetime.timezone.utc)

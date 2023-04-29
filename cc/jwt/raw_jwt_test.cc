@@ -474,7 +474,15 @@ TEST(RawJwt, GetJsonPayload) {
       RawJwtBuilder().SetIssuer("issuer").WithoutExpiration().Build();
   ASSERT_THAT(jwt, IsOk());
 
-  ASSERT_THAT(jwt->GetJsonPayload(), IsOkAndHolds(R"({"iss":"issuer"})"));
+  EXPECT_THAT(jwt->GetJsonPayload(), IsOkAndHolds(R"({"iss":"issuer"})"));
+}
+
+TEST(RawJwt, IntegerIsEncodedAsInteger) {
+  util::StatusOr<RawJwt> jwt =
+      RawJwtBuilder().AddNumberClaim("num", 1).WithoutExpiration().Build();
+  ASSERT_THAT(jwt, IsOk());
+
+  EXPECT_THAT(jwt->GetJsonPayload(), IsOkAndHolds(R"({"num":1})"));
 }
 
 TEST(RawJwt, GetExpirationJsonPayload) {

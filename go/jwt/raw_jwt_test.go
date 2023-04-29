@@ -617,6 +617,16 @@ func TestJSONPayload(t *testing.T) {
 			json: `{"exp":78324}`,
 		},
 		{
+			tag: "integer",
+			opts: &jwt.RawJWTOptions{
+				WithoutExpiration: true,
+				CustomClaims: map[string]interface{}{
+					"num": 1,
+				},
+			},
+			json: `{"num":1}`,
+		},
+		{
 			tag: "custom-claim",
 			opts: &jwt.RawJWTOptions{
 				WithoutExpiration: true,
