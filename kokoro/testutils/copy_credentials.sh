@@ -66,6 +66,10 @@ process_args() {
 #   TINK_TEST_SERVICE_ACCOUNT
 #######################################
 copy_gcp_credentials() {
+  if [[ -z "${TINK_TEST_SERVICE_ACCOUNT}" ]]; then
+    echo "ERROR: TINK_TEST_SERVICE_ACCOUNT is expected to be set" >&2
+    exit 1
+  fi
   cp "${TINK_TEST_SERVICE_ACCOUNT}" "${TESTDATA_DIR}/gcp/credential.json"
 }
 
@@ -77,6 +81,11 @@ copy_gcp_credentials() {
 #   AWS_TINK_TEST_SERVICE_ACCOUNT
 #######################################
 copy_aws_credentials() {
+  if [[ -z "${AWS_TINK_TEST_SERVICE_ACCOUNT}" ]]; then
+    echo "ERROR: AWS_TINK_TEST_SERVICE_ACCOUNT is expected to be set" >&2
+    exit 1
+  fi
+
   # Create the different format for the AWS credentials
   local -r aws_key_id="AKIATNYZMJOHVMN7MSYH"
   local -r aws_key="$(cat ${AWS_TINK_TEST_SERVICE_ACCOUNT})"
@@ -101,6 +110,7 @@ END
 
 main() {
   if [[ -z "${KOKORO_ROOT}" ]]; then
+    echo "Not running on Kokoro, skipping copying credentials."
     exit 0
   fi
 
