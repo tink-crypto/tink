@@ -26,11 +26,14 @@ import com.google.crypto.tink.util.Bytes;
 import com.google.crypto.tink.util.SecretBigInteger;
 import java.math.BigInteger;
 import java.security.GeneralSecurityException;
+import java.security.KeyFactory;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.interfaces.ECPrivateKey;
 import java.security.interfaces.ECPublicKey;
 import java.security.spec.ECPoint;
+import java.security.spec.ECPrivateKeySpec;
+import java.security.spec.ECPublicKeySpec;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -126,21 +129,22 @@ public final class EcdsaPrivateKeyTest {
   }
 
   @Test
-  public void buildFromJavaECKeys() throws Exception {
+  public void convertToAndFromJavaECKeys() throws Exception {
+    // Create an elliptic curve key pair using Java's KeyPairGenerator.
     KeyPairGenerator keyGen = KeyPairGenerator.getInstance("EC");
     keyGen.initialize(EcdsaParameters.CurveType.NIST_P384.toParameterSpec());
     KeyPair keyPair = keyGen.generateKeyPair();
-
     ECPrivateKey ecPrivateKey = (ECPrivateKey) keyPair.getPrivate();
     ECPublicKey ecPublicKey = (ECPublicKey) keyPair.getPublic();
 
-    // Check that the specs of ecPrivateKey and ecPublicKey are what we expect.
+    // Before conversion, always check that the specs of ecPrivateKey and ecPublicKey are what
+    // we expect.
     assertThat(EcdsaParameters.CurveType.fromParameterSpec(ecPrivateKey.getParams()))
         .isEqualTo(EcdsaParameters.CurveType.NIST_P384);
     assertThat(EcdsaParameters.CurveType.fromParameterSpec(ecPublicKey.getParams()))
         .isEqualTo(EcdsaParameters.CurveType.NIST_P384);
 
-    // Fill in the remaining parameters that match the curve type
+    // Create EcdsaParameters that match the curve type.
     EcdsaParameters parameters =
         EcdsaParameters.builder()
             .setSignatureEncoding(EcdsaParameters.SignatureEncoding.IEEE_P1363)
@@ -149,7 +153,7 @@ public final class EcdsaPrivateKeyTest {
             .setVariant(EcdsaParameters.Variant.NO_PREFIX)
             .build();
 
-    // generate the EcdsaPrivateKey using ecPublicKey and ecPrivateKey
+    // Create EcdsaPublicKey and EcdsaPrivateKey using ecPublicKey and ecPrivateKey.
     EcdsaPublicKey publicKey =
         EcdsaPublicKey.builder()
             .setParameters(parameters)
@@ -162,8 +166,28 @@ public final class EcdsaPrivateKeyTest {
                 SecretBigInteger.fromBigInteger(ecPrivateKey.getS(), InsecureSecretKeyAccess.get()))
             .build();
 
-    // we skip testing any other properties of privateKey.
-    assertThat(privateKey).isNotNull();
+    // Convert EcdsaPublicKey and back into a ECPublicKey.
+    KeyFactory keyFactory = KeyFactory.getInstance("EC");
+    ECPublicKey ecPublicKey2 =
+        (ECPublicKey)
+            keyFactory.generatePublic(
+                new ECPublicKeySpec(
+                    publicKey.getPublicPoint(),
+                    publicKey.getParameters().getCurveType().toParameterSpec()));
+    assertThat(ecPublicKey2.getW()).isEqualTo(ecPublicKey.getW());
+    assertThat(EcdsaParameters.CurveType.fromParameterSpec(ecPublicKey2.getParams()))
+        .isEqualTo(EcdsaParameters.CurveType.NIST_P384);
+
+    // Convert EcdsaPrivateKey back into a ECPrivateKey.
+    ECPrivateKey ecPrivateKey2 =
+        (ECPrivateKey)
+            keyFactory.generatePrivate(
+                new ECPrivateKeySpec(
+                    privateKey.getPrivateValue().getBigInteger(InsecureSecretKeyAccess.get()),
+                    privateKey.getParameters().getCurveType().toParameterSpec()));
+    assertThat(ecPrivateKey2.getS()).isEqualTo(ecPrivateKey.getS());
+    assertThat(EcdsaParameters.CurveType.fromParameterSpec(ecPrivateKey2.getParams()))
+        .isEqualTo(EcdsaParameters.CurveType.NIST_P384);
   }
 
   @Test
