@@ -19,6 +19,7 @@
 
 #include <memory>
 #include <string>
+#include <utility>
 
 #include "google/cloud/kms/v1/service.grpc.pb.h"
 #include "grpcpp/channel.h"
@@ -33,39 +34,47 @@ namespace tink {
 namespace integration {
 namespace gcpkms {
 
-
-// GcpKmsClient is an implementation of KmsClient for
-// <a href="https://cloud.google.com/kms/">Google Cloud KMS</a>.
-class GcpKmsClient : public crypto::tink::KmsClient  {
+// GcpKmsClient is an implementation of KmsClient for Google Cloud KMS
+// (https://cloud.google.com/kms/).
+class GcpKmsClient : public crypto::tink::KmsClient {
  public:
-  // Creates a new GcpKmsClient that is bound to the key specified in 'key_uri',
-  // and that uses the specifed credentials when communicating with the KMS.
+  // Move only.
+  GcpKmsClient(GcpKmsClient&& other) = default;
+  GcpKmsClient& operator=(GcpKmsClient&& other) = default;
+  GcpKmsClient(const GcpKmsClient&) = delete;
+  GcpKmsClient& operator=(const GcpKmsClient&) = delete;
+
+  // Creates a new GcpKmsClient that is bound to the key specified in `key_uri`,
+  // and that uses the specified credentials when communicating with the KMS.
   //
-  // Either of arguments can be empty.
-  // If 'key_uri' is empty, then the client is not bound to any particular key.
-  // If 'credential_path' is empty, then default credentials will be used.
-  static crypto::tink::util::StatusOr<std::unique_ptr<GcpKmsClient>>
-  New(absl::string_view key_uri, absl::string_view credentials_path);
+  // Either argument can be empty.
+  // If `key_uri` is empty, then the client is not bound to any particular key.
+  // If `credential_path` is empty, then default credentials will be used.
+  static crypto::tink::util::StatusOr<std::unique_ptr<GcpKmsClient>> New(
+      absl::string_view key_uri, absl::string_view credentials_path);
 
   // Creates a new client and registers it in KMSClients.
   static crypto::tink::util::Status RegisterNewClient(
       absl::string_view key_uri, absl::string_view credentials_path);
 
-  // Returns true iff this client does support KMS key specified by 'key_uri'.
+  // Returns true iff this client does support KMS key specified by `key_uri`.
   bool DoesSupport(absl::string_view key_uri) const override;
 
-  // Returns an Aead-primitive backed by KMS key specified by 'key_uri',
-  // provided that this KmsClient does support 'key_uri'.
-  crypto::tink::util::StatusOr<std::unique_ptr<Aead>>
-  GetAead(absl::string_view key_uri) const override;
+  // Returns an Aead-primitive backed by KMS key specified by `key_uri`,
+  // provided that this KmsClient does support `key_uri`.
+  crypto::tink::util::StatusOr<std::unique_ptr<Aead>> GetAead(
+      absl::string_view key_uri) const override;
 
  private:
-  GcpKmsClient() {}
+  explicit GcpKmsClient(
+      std::string key_name,
+      std::shared_ptr<google::cloud::kms::v1::KeyManagementService::Stub>
+          kms_stub)
+      : key_name_(key_name), kms_stub_(std::move(kms_stub)) {}
 
   std::string key_name_;
   std::shared_ptr<google::cloud::kms::v1::KeyManagementService::Stub> kms_stub_;
 };
-
 
 }  // namespace gcpkms
 }  // namespace integration
