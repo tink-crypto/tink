@@ -49,7 +49,7 @@ namespace {
 constexpr absl::string_view kKeyUriPrefix = "aws-kms://";
 
 // Returns AWS key ARN contained in `key_uri`. If `key_uri` does not refer to an
-// AWS key, returns an empty string.
+// AWS key, returns an error.
 util::StatusOr<std::string> GetKeyArn(absl::string_view key_uri) {
   if (!absl::StartsWithIgnoreCase(key_uri, kKeyUriPrefix)) {
     return util::Status(absl::StatusCode::kInvalidArgument,
@@ -62,8 +62,8 @@ util::StatusOr<std::string> GetKeyArn(absl::string_view key_uri) {
 // `key_arn`.
 // An AWS key ARN is of the form
 // arn:aws:kms:us-west-2:111122223333:key/1234abcd-12ab-34cd-56ef-1234567890ab.
-util::StatusOr<Aws::Client::ClientConfiguration>
-    GetAwsClientConfig(absl::string_view key_arn) {
+util::StatusOr<Aws::Client::ClientConfiguration> GetAwsClientConfig(
+    absl::string_view key_arn) {
   std::vector<std::string> key_arn_parts = absl::StrSplit(key_arn, ':');
   if (key_arn_parts.size() < 6) {
     return util::Status(absl::StatusCode::kInvalidArgument,
@@ -98,9 +98,9 @@ util::StatusOr<std::string> GetValue(absl::string_view name,
                                      absl::string_view line) {
   std::vector<std::string> parts = absl::StrSplit(line, '=');
   if (parts.size() != 2 || absl::StripAsciiWhitespace(parts[0]) != name) {
-    return util::Status(
-        absl::StatusCode::kInvalidArgument,
-        absl::StrCat("Expected line in format ", name, " = value"));
+    return util::Status(absl::StatusCode::kInvalidArgument,
+                        absl::StrCat("Expected line to have the format: ", name,
+                                     " = value. Found: ", line));
   }
   return std::string(absl::StripAsciiWhitespace(parts[1]));
 }
@@ -132,40 +132,42 @@ util::StatusOr<std::string> GetValue(absl::string_view name,
 // Aws::Auth::ProfileConfigFileAWSCredentialsProvider.
 util::StatusOr<Aws::Auth::AWSCredentials> GetAwsCredentials(
     absl::string_view credentials_path) {
-  if (!credentials_path.empty()) {  // Read credentials from given file.
-    auto creds_result = ReadFile(std::string(credentials_path));
-    if (!creds_result.ok()) {
-      return creds_result.status();
-    }
-    std::vector<std::string> creds_lines =
-        absl::StrSplit(creds_result.value(), '\n');
-    if (creds_lines.size() < 3) {
-      return util::Status(absl::StatusCode::kInvalidArgument,
-                          absl::StrCat("Invalid format of credentials in file ",
-                                       credentials_path));
-    }
-    auto key_id_result = GetValue("aws_access_key_id", creds_lines[1]);
-    if (!key_id_result.ok()) {
-      return util::Status(absl::StatusCode::kInvalidArgument,
-                          absl::StrCat("Invalid format of credentials in file ",
-                                       credentials_path, " : ",
-                                       key_id_result.status().message()));
-    }
-    auto secret_key_result = GetValue("aws_secret_access_key", creds_lines[2]);
-    if (!secret_key_result.ok()) {
-      return util::Status(
-          absl::StatusCode::kInvalidArgument,
-          absl::StrCat("Invalid format of credentials in file ",
-                       credentials_path, " : ",
-                       secret_key_result.status().message()));
-    }
-    return Aws::Auth::AWSCredentials(key_id_result.value().c_str(),
-                                     secret_key_result.value().c_str());
+  if (credentials_path.empty()) {
+    // Get default credentials.
+    Aws::Auth::DefaultAWSCredentialsProviderChain provider_chain;
+    return provider_chain.GetAWSCredentials();
   }
-
-  // Get default credentials.
-  Aws::Auth::DefaultAWSCredentialsProviderChain provider_chain;
-  return provider_chain.GetAWSCredentials();
+  // Read credentials from the given file.
+  util::StatusOr<std::string> creds_result =
+      ReadFile(std::string(credentials_path));
+  if (!creds_result.ok()) {
+    return creds_result.status();
+  }
+  std::vector<std::string> creds_lines =
+      absl::StrSplit(creds_result.value(), '\n');
+  if (creds_lines.size() < 3) {
+    return util::Status(absl::StatusCode::kInvalidArgument,
+                        absl::StrCat("Invalid format of credentials in file ",
+                                     credentials_path));
+  }
+  util::StatusOr<std::string> key_id_result =
+      GetValue("aws_access_key_id", creds_lines[1]);
+  if (!key_id_result.ok()) {
+    return util::Status(
+        absl::StatusCode::kInvalidArgument,
+        absl::StrCat("Invalid format of credentials in file ", credentials_path,
+                     " : ", key_id_result.status().message()));
+  }
+  util::StatusOr<std::string> secret_key_result =
+      GetValue("aws_secret_access_key", creds_lines[2]);
+  if (!secret_key_result.ok()) {
+    return util::Status(
+        absl::StatusCode::kInvalidArgument,
+        absl::StrCat("Invalid format of credentials in file ", credentials_path,
+                     " : ", secret_key_result.status().message()));
+  }
+  return Aws::Auth::AWSCredentials(key_id_result.value().c_str(),
+                                   secret_key_result.value().c_str());
 }
 
 void InitAwsApi() {
@@ -225,26 +227,22 @@ bool AwsKmsClient::DoesSupport(absl::string_view key_uri) const {
   return key_arn_.empty() ? true : key_arn_ == *key_arn;
 }
 
-util::StatusOr<std::unique_ptr<Aead>>
-AwsKmsClient::GetAead(absl::string_view key_uri) const {
-  if (!DoesSupport(key_uri)) {
-    if (!key_arn_.empty()) {
+util::StatusOr<std::unique_ptr<Aead>> AwsKmsClient::GetAead(
+    absl::string_view key_uri) const {
+  util::StatusOr<std::string> key_arn = GetKeyArn(key_uri);
+  if (!key_arn.ok()) {
+    return key_arn.status();
+  }
+  // This client is bound to a specific key.
+  if (!key_arn_.empty()) {
+    if (key_arn_ != *key_arn) {
       return util::Status(absl::StatusCode::kInvalidArgument,
                           absl::StrCat("This client is bound to ", key_arn_,
                                        " and cannot use key ", key_uri));
     }
-    return util::Status(
-        absl::StatusCode::kInvalidArgument,
-        absl::StrCat("This client does not support key ", key_uri));
-  }
-
-  // This client is bound to a specific key.
-  if (!key_arn_.empty()) {
     return AwsKmsAead::New(key_arn_, aws_client_);
   }
 
-  // Create an Aws::KMS::KMSClient for the given key.
-  util::StatusOr<std::string> key_arn = GetKeyArn(key_uri);
   util::StatusOr<Aws::Client::ClientConfiguration> client_config =
       GetAwsClientConfig(*key_arn);
   if (!client_config.ok()) {
