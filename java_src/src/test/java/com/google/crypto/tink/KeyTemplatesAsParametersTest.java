@@ -26,9 +26,13 @@ import com.google.crypto.tink.aead.ChaCha20Poly1305Parameters;
 import com.google.crypto.tink.aead.PredefinedAeadParameters;
 import com.google.crypto.tink.aead.XChaCha20Poly1305Parameters;
 import com.google.crypto.tink.config.TinkConfig;
+import com.google.crypto.tink.daead.AesSivParameters;
+import com.google.crypto.tink.daead.PredefinedDeterministicAeadParameters;
 import com.google.crypto.tink.internal.Util;
+import com.google.crypto.tink.mac.AesCmacParameters;
 import com.google.crypto.tink.mac.HmacParameters;
 import com.google.crypto.tink.mac.PredefinedMacParameters;
+import com.google.crypto.tink.prf.PredefinedPrfParameters;
 import com.google.crypto.tink.streamingaead.PredefinedStreamingAeadParameters;
 import java.util.HashSet;
 import java.util.Set;
@@ -199,6 +203,22 @@ public final class KeyTemplatesAsParametersTest {
                 new Pair("HMAC_SHA512_256BITTAG", PredefinedMacParameters.HMAC_SHA512_256BITTAG),
                 new Pair("HMAC_SHA512_512BITTAG", PredefinedMacParameters.HMAC_SHA512_512BITTAG),
                 new Pair("AES_CMAC", PredefinedMacParameters.AES_CMAC),
+                new Pair("AES256_CMAC", PredefinedMacParameters.AES_CMAC),
+                new Pair(
+                    "AES256_CMAC_RAW",
+                    AesCmacParameters.builder()
+                        .setKeySizeBytes(32)
+                        .setTagSizeBytes(16)
+                        .setVariant(AesCmacParameters.Variant.NO_PREFIX)
+                        .build()),
+                // DeterministicAead
+                new Pair("AES256_SIV", PredefinedDeterministicAeadParameters.AES256_SIV),
+                new Pair(
+                    "AES256_SIV_RAW",
+                    AesSivParameters.builder()
+                        .setKeySizeBytes(64)
+                        .setVariant(AesSivParameters.Variant.NO_PREFIX)
+                        .build()),
                 // StreamingAead
                 new Pair(
                     "AES128_CTR_HMAC_SHA256_4KB",
@@ -220,6 +240,12 @@ public final class KeyTemplatesAsParametersTest {
                     "AES256_GCM_HKDF_4KB", PredefinedStreamingAeadParameters.AES256_GCM_HKDF_4KB),
                 new Pair(
                     "AES256_GCM_HKDF_1MB", PredefinedStreamingAeadParameters.AES256_GCM_HKDF_1MB),
+                // Prf
+                new Pair("HKDF_SHA256", PredefinedPrfParameters.HKDF_SHA256),
+                new Pair("HMAC_SHA256_PRF", PredefinedPrfParameters.HMAC_SHA256_PRF),
+                new Pair("HMAC_SHA512_PRF", PredefinedPrfParameters.HMAC_SHA512_PRF),
+                new Pair("AES256_CMAC_PRF", PredefinedPrfParameters.AES_CMAC_PRF),
+                new Pair("AES_CMAC_PRF", PredefinedPrfParameters.AES_CMAC_PRF),
               });
 
   @Theory
@@ -238,12 +264,6 @@ public final class KeyTemplatesAsParametersTest {
 
   private static Set<String> getUntestedNames() {
     Set<String> result = new HashSet<>();
-    result.add("AES256_CMAC");
-    result.add("AES256_CMAC_PRF");
-    result.add("AES256_CMAC_RAW");
-    result.add("AES256_SIV");
-    result.add("AES256_SIV_RAW");
-    result.add("AES_CMAC_PRF");
     result.add("DHKEM_P256_HKDF_SHA256_HKDF_SHA256_AES_128_GCM");
     result.add("DHKEM_P256_HKDF_SHA256_HKDF_SHA256_AES_128_GCM_RAW");
     result.add("DHKEM_P256_HKDF_SHA256_HKDF_SHA256_AES_256_GCM");
@@ -284,9 +304,6 @@ public final class KeyTemplatesAsParametersTest {
     result.add("ED25519");
     result.add("ED25519_RAW");
     result.add("ED25519WithRawOutput");
-    result.add("HKDF_SHA256");
-    result.add("HMAC_SHA256_PRF");
-    result.add("HMAC_SHA512_PRF");
     result.add("RSA_SSA_PKCS1_3072_SHA256_F4");
     result.add("RSA_SSA_PKCS1_3072_SHA256_F4_RAW");
     result.add("RSA_SSA_PKCS1_3072_SHA256_F4_WITHOUT_PREFIX");
