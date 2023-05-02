@@ -13,16 +13,15 @@
 // limitations under the License.
 //
 ///////////////////////////////////////////////////////////////////////////////
+
 #ifndef TINK_INTERNAL_REGISTRY_IMPL_H_
 #define TINK_INTERNAL_REGISTRY_IMPL_H_
 
 #include <algorithm>
 #include <atomic>
 #include <functional>
-#include <initializer_list>
 #include <memory>
 #include <string>
-#include <tuple>
 #include <type_traits>
 #include <typeindex>
 #include <typeinfo>
@@ -52,7 +51,6 @@
 #include "tink/primitive_set.h"
 #include "tink/primitive_wrapper.h"
 #include "tink/util/errors.h"
-#include "tink/util/protobuf_helper.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "proto/tink.pb.h"
@@ -156,78 +154,79 @@ class RegistryImpl {
   }
 
  private:
-  // All information for a given type url.
+  // Information for a key type URL.
   class KeyTypeInfo {
    public:
-    // Takes ownership of the 'key_manager'.
-    template <typename P>
-    KeyTypeInfo(KeyManager<P>* key_manager, bool new_key_allowed)
-        : key_manager_type_index_(std::type_index(typeid(*key_manager))),
-          public_key_manager_type_index_(absl::nullopt),
-          new_key_allowed_(new_key_allowed),
-          internal_key_factory_(nullptr),
-          key_factory_(&key_manager->get_key_factory()),
-          key_type_manager_(nullptr) {
-      primitive_to_manager_.emplace(std::type_index(typeid(P)),
-                                    absl::WrapUnique(key_manager));
-    }
-
-    // Takes ownership of the 'key_manager'.
+    // Takes ownership of `key_type_manager`.
     template <typename KeyProto, typename KeyFormatProto,
               typename... Primitives>
     KeyTypeInfo(KeyTypeManager<KeyProto, KeyFormatProto, List<Primitives...>>*
-                    key_manager,
+                    key_type_manager,
                 bool new_key_allowed)
-        : key_manager_type_index_(std::type_index(typeid(*key_manager))),
-          public_key_manager_type_index_(absl::nullopt),
+        : key_manager_type_index_(std::type_index(typeid(*key_type_manager))),
+          public_key_type_manager_type_index_(absl::nullopt),
           new_key_allowed_(new_key_allowed),
+          key_type_manager_(absl::WrapUnique(key_type_manager)),
           internal_key_factory_(
               absl::make_unique<internal::KeyFactoryImpl<KeyTypeManager<
                   KeyProto, KeyFormatProto, List<Primitives...>>>>(
-                  key_manager)),
+                  key_type_manager)),
           key_factory_(internal_key_factory_.get()),
-          key_deriver_(CreateDeriverFunctionFor(key_manager)),
-          key_type_manager_(absl::WrapUnique(key_manager)) {
-      // TODO(C++17) replace with a fold expression
+          key_deriver_(CreateDeriverFunctionFor(key_type_manager)) {
+      // TODO(C++17): Replace with a fold expression.
       (void)std::initializer_list<int>{
           0, (primitive_to_manager_.emplace(
                   std::type_index(typeid(Primitives)),
-                  internal::MakeKeyManager<Primitives>(key_manager)),
+                  internal::MakeKeyManager<Primitives>(key_type_manager)),
               0)...};
     }
 
-    // Takes ownership of the 'private_key_manager', but *not* of the
-    // 'public_key_manager'. The public_key_manager must only be alive for the
-    // duration of the constructor.
+    // Takes ownership of `private_key_type_manager`, but *not* of
+    // `public_key_type_manager`, which must only be alive for the duration of
+    // the constructor.
     template <typename PrivateKeyProto, typename KeyFormatProto,
               typename PublicKeyProto, typename PublicPrimitivesList,
               typename... PrivatePrimitives>
-    KeyTypeInfo(
-        PrivateKeyTypeManager<PrivateKeyProto, KeyFormatProto, PublicKeyProto,
-                              List<PrivatePrimitives...>>* private_key_manager,
-        KeyTypeManager<PublicKeyProto, void, PublicPrimitivesList>*
-            public_key_manager,
-        bool new_key_allowed)
+    KeyTypeInfo(PrivateKeyTypeManager<
+                    PrivateKeyProto, KeyFormatProto, PublicKeyProto,
+                    List<PrivatePrimitives...>>* private_key_type_manager,
+                KeyTypeManager<PublicKeyProto, void, PublicPrimitivesList>*
+                    public_key_type_manager,
+                bool new_key_allowed)
         : key_manager_type_index_(
-              std::type_index(typeid(*private_key_manager))),
-          public_key_manager_type_index_(
-              std::type_index(typeid(*public_key_manager))),
+              std::type_index(typeid(*private_key_type_manager))),
+          public_key_type_manager_type_index_(
+              std::type_index(typeid(*public_key_type_manager))),
           new_key_allowed_(new_key_allowed),
+          key_type_manager_(absl::WrapUnique(private_key_type_manager)),
           internal_key_factory_(
               absl::make_unique<internal::PrivateKeyFactoryImpl<
                   PrivateKeyProto, KeyFormatProto, PublicKeyProto,
                   List<PrivatePrimitives...>, PublicPrimitivesList>>(
-                  private_key_manager, public_key_manager)),
+                  private_key_type_manager, public_key_type_manager)),
           key_factory_(internal_key_factory_.get()),
-          key_deriver_(CreateDeriverFunctionFor(private_key_manager)),
-          key_type_manager_(absl::WrapUnique(private_key_manager)) {
-      // TODO(C++17) replace with a fold expression
+          key_deriver_(CreateDeriverFunctionFor(private_key_type_manager)) {
+      // TODO(C++17): Replace with a fold expression.
       (void)std::initializer_list<int>{
           0, (primitive_to_manager_.emplace(
                   std::type_index(typeid(PrivatePrimitives)),
                   internal::MakePrivateKeyManager<PrivatePrimitives>(
-                      private_key_manager, public_key_manager)),
+                      private_key_type_manager, public_key_type_manager)),
               0)...};
+    }
+
+    // Takes ownership of `key_manager`. KeyManager is the legacy version of
+    // KeyTypeManager.
+    template <typename P>
+    KeyTypeInfo(KeyManager<P>* key_manager, bool new_key_allowed)
+        : key_manager_type_index_(std::type_index(typeid(*key_manager))),
+          public_key_type_manager_type_index_(absl::nullopt),
+          new_key_allowed_(new_key_allowed),
+          key_type_manager_(nullptr),
+          internal_key_factory_(nullptr),
+          key_factory_(&key_manager->get_key_factory()) {
+      primitive_to_manager_.emplace(std::type_index(typeid(P)),
+                                    absl::WrapUnique(key_manager));
     }
 
     template <typename P>
@@ -259,10 +258,11 @@ class RegistryImpl {
 
     const absl::optional<std::type_index>& public_key_manager_type_index()
         const {
-      return public_key_manager_type_index_;
+      return public_key_type_manager_type_index_;
     }
 
     bool new_key_allowed() const { return new_key_allowed_.load(); }
+
     void set_new_key_allowed(bool b) { new_key_allowed_.store(b); }
 
     const KeyFactory& key_factory() const { return *key_factory_; }
@@ -274,36 +274,37 @@ class RegistryImpl {
     }
 
    private:
-    // dynamic std::type_index of the actual key manager class for which this
-    // key was inserted.
+    // Dynamic type_index of the KeyManager or KeyTypeManager for this key type.
     std::type_index key_manager_type_index_;
-    // dynamic std::type_index of the public key manager corresponding to this
-    // class, in case it was inserted using RegisterAsymmetricKeyManagers,
-    // nullopt otherwise.
-    absl::optional<std::type_index> public_key_manager_type_index_;
+    // Dynamic type_index of the public KeyTypeManager for this key type when
+    // inserted into the registry via RegisterAsymmetricKeyManagers. Otherwise,
+    // nullopt.
+    absl::optional<std::type_index> public_key_type_manager_type_index_;
+    // Whether the key manager allows the creation of new keys.
+    std::atomic<bool> new_key_allowed_;
 
-    // For each primitive, the corresponding names and key_manager.
+    // Map from primitive type_index to KeyManager.
     absl::flat_hash_map<std::type_index, std::unique_ptr<KeyManagerBase>>
         primitive_to_manager_;
-    // Whether the key manager allows creating new keys.
-    std::atomic<bool> new_key_allowed_;
-    // A factory constructed from an internal key manager. Owned version of
-    // key_factory if constructed with a KeyTypeManager. This is nullptr if
-    // constructed with a KeyManager.
+    // Key type manager. Equals nullptr if KeyTypeInfo was constructed from a
+    // KeyManager.
+    const std::shared_ptr<void> key_type_manager_;
+
+    // Key factory. Equals nullptr if KeyTypeInfo was constructed from a
+    // KeyManager.
     std::unique_ptr<const KeyFactory> internal_key_factory_;
-    // Unowned copy of internal_key_factory, always different from
-    // nullptr.
+    // Unowned version of `internal_key_factory_` if KeyTypeInfo was constructed
+    // from a KeyTypeManager.
+    // Key factory belonging to the KeyManager if KeyTypeInfo was constructed
+    // from a KeyManager.
     const KeyFactory* key_factory_;
-    // A function to call to derive a key. If the container was constructed with
-    // a KeyTypeManager which has non-void keyformat type, this will forward to
-    // the function DeriveKey of this container. Otherwise, the function is
-    // 'empty', i.e., "key_deriver_" will cast to false when cast to a bool.
+
+    // Derives a key if KeyTypeInfo was constructed from a KeyTypeManager with a
+    // non-void KeyFormat type. Else, this function is empty and casting to a
+    // bool returns false.
     std::function<crypto::tink::util::StatusOr<google::crypto::tink::KeyData>(
         absl::string_view, InputStream*)>
         key_deriver_;
-    // The owned pointer in case we use a KeyTypeManager, nullptr if
-    // constructed with a KeyManager.
-    const std::shared_ptr<void> key_type_manager_;
   };
 
   class WrapperInfo {
