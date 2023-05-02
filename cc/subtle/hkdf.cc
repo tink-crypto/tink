@@ -16,11 +16,11 @@
 
 #include "tink/subtle/hkdf.h"
 
+#include <cstdint>
 #include <string>
 
 #include "absl/algorithm/container.h"
 #include "absl/status/status.h"
-#include "absl/strings/str_cat.h"
 #include "absl/strings/string_view.h"
 #include "absl/types/span.h"
 #include "openssl/evp.h"
@@ -30,6 +30,7 @@
 // doesn't provide means to compute HKDF in BoringSSL. As a consequence, we need
 // to selectively include the correct header and use different implementations.
 #ifdef OPENSSL_IS_BORINGSSL
+#include "openssl/base.h"
 #include "openssl/hkdf.h"
 #else
 #include "openssl/kdf.h"
@@ -52,11 +53,12 @@ namespace {
 util::Status SslHkdf(const EVP_MD *evp_md, absl::string_view ikm,
                      absl::string_view salt, absl::string_view info,
                      absl::Span<uint8_t> out_key) {
+  const uint8_t *ikm_ptr = reinterpret_cast<const uint8_t *>(ikm.data());
+  const uint8_t *salt_ptr = reinterpret_cast<const uint8_t *>(salt.data());
+  const uint8_t *info_ptr = reinterpret_cast<const uint8_t *>(info.data());
 #ifdef OPENSSL_IS_BORINGSSL
-  if (HKDF(out_key.data(), out_key.size(), evp_md,
-           reinterpret_cast<const uint8_t *>(ikm.data()), ikm.size(),
-           reinterpret_cast<const uint8_t *>(salt.data()), salt.size(),
-           reinterpret_cast<const uint8_t *>(info.data()), info.size()) != 1) {
+  if (HKDF(out_key.data(), out_key.size(), evp_md, ikm_ptr, ikm.size(),
+           salt_ptr, salt.size(), info_ptr, info.size()) != 1) {
     return util::Status(absl::StatusCode::kInternal, "HKDF failed");
   }
   return util::OkStatus();
@@ -65,11 +67,9 @@ util::Status SslHkdf(const EVP_MD *evp_md, absl::string_view ikm,
       EVP_PKEY_CTX_new_id(EVP_PKEY_HKDF, /*e=*/nullptr));
   if (pctx == nullptr || EVP_PKEY_derive_init(pctx.get()) <= 0 ||
       EVP_PKEY_CTX_set_hkdf_md(pctx.get(), evp_md) <= 0 ||
-      EVP_PKEY_CTX_set1_hkdf_salt(pctx.get(), salt.data(), salt.size()) <= 0 ||
-      EVP_PKEY_CTX_set1_hkdf_key(pctx.get(),
-                                 reinterpret_cast<const uint8_t *>(ikm.data()),
-                                 ikm.size()) <= 0 ||
-      EVP_PKEY_CTX_add1_hkdf_info(pctx.get(), info.data(), info.size()) <= 0) {
+      EVP_PKEY_CTX_set1_hkdf_salt(pctx.get(), salt_ptr, salt.size()) <= 0 ||
+      EVP_PKEY_CTX_set1_hkdf_key(pctx.get(), ikm_ptr, ikm.size()) <= 0 ||
+      EVP_PKEY_CTX_add1_hkdf_info(pctx.get(), info_ptr, info.size()) <= 0) {
     return util::Status(absl::StatusCode::kInternal,
                         "EVP_PKEY_CTX setup failed");
   }

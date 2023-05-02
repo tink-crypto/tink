@@ -110,7 +110,7 @@ if (NOT TARGET crypto)
       "$<BUILD_INTERFACE:${boringssl_SOURCE_DIR}/src/include>")
   else()
     # Support for ED25519 was added from 1.1.1.
-    find_package(OpenSSL 1.1.1 EXACT REQUIRED)
+    find_package(OpenSSL 1.1.1 REQUIRED)
     _create_interface_target(crypto OpenSSL::Crypto)
   endif()
 else()
