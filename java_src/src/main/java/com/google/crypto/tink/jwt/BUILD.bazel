@@ -1037,3 +1037,35 @@ java_library(
         "@maven//:com_google_errorprone_error_prone_annotations",
     ],
 )
+
+android_library(
+    name = "jwt_ecdsa_private_key-android",
+    srcs = ["JwtEcdsaPrivateKey.java"],
+    deps = [
+        ":jwt_ecdsa_parameters-android",
+        ":jwt_ecdsa_public_key-android",
+        ":jwt_signature_private_key-android",
+        "//src/main/java/com/google/crypto/tink:accesses_partial_key-android",
+        "//src/main/java/com/google/crypto/tink:insecure_secret_key_access-android",
+        "//src/main/java/com/google/crypto/tink:key-android",
+        "//src/main/java/com/google/crypto/tink/internal:elliptic_curves_util-android",
+        "//src/main/java/com/google/crypto/tink/util:secret_big_integer-android",
+        "@maven//:com_google_errorprone_error_prone_annotations",
+    ],
+)
+
+java_library(
+    name = "jwt_ecdsa_private_key",
+    srcs = ["JwtEcdsaPrivateKey.java"],
+    deps = [
+        ":jwt_ecdsa_parameters",
+        ":jwt_ecdsa_public_key",
+        ":jwt_signature_private_key",
+        "//src/main/java/com/google/crypto/tink:accesses_partial_key",
+        "//src/main/java/com/google/crypto/tink:insecure_secret_key_access",
+        "//src/main/java/com/google/crypto/tink:key",
+        "//src/main/java/com/google/crypto/tink/internal:elliptic_curves_util",
+        "//src/main/java/com/google/crypto/tink/util:secret_big_integer",
+        "@maven//:com_google_errorprone_error_prone_annotations",
+    ],
+)
