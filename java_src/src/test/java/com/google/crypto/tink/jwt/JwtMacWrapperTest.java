@@ -19,10 +19,15 @@ package com.google.crypto.tink.jwt;
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertThrows;
 
+import com.google.crypto.tink.InsecureSecretKeyAccess;
 import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.KeyTemplates;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.KeysetManager;
+import com.google.crypto.tink.TinkProtoKeysetFormat;
+import com.google.crypto.tink.proto.Keyset;
+import com.google.crypto.tink.proto.OutputPrefixType;
+import com.google.protobuf.ExtensionRegistryLite;
 import java.security.GeneralSecurityException;
 import java.time.Clock;
 import java.time.Instant;
@@ -55,11 +60,18 @@ public class JwtMacWrapperTest {
   public void test_wrapLegacy_throws() throws Exception {
     KeyTemplate rawTemplate = KeyTemplates.get("JWT_HS256_RAW");
     // Convert the normal, raw template into a template with output prefix type LEGACY
-    KeyTemplate tinkTemplate =
-        KeyTemplate.create(
-            rawTemplate.getTypeUrl(), rawTemplate.getValue(), KeyTemplate.OutputPrefixType.LEGACY);
-    KeysetHandle handle = KeysetHandle.generateNew(tinkTemplate);
-    assertThrows(GeneralSecurityException.class, () -> handle.getPrimitive(JwtMac.class));
+    KeysetHandle handle = KeysetHandle.generateNew(rawTemplate);
+    Keyset keyset =
+        Keyset.parseFrom(
+            TinkProtoKeysetFormat.serializeKeyset(handle, InsecureSecretKeyAccess.get()),
+            ExtensionRegistryLite.getEmptyRegistry());
+    Keyset.Builder legacyKeysetBuilder = keyset.toBuilder();
+    legacyKeysetBuilder.setKey(
+        0, legacyKeysetBuilder.getKey(0).toBuilder().setOutputPrefixType(OutputPrefixType.LEGACY));
+    KeysetHandle legacyHandle =
+        TinkProtoKeysetFormat.parseKeyset(
+            legacyKeysetBuilder.build().toByteArray(), InsecureSecretKeyAccess.get());
+    assertThrows(GeneralSecurityException.class, () -> legacyHandle.getPrimitive(JwtMac.class));
   }
 
   @Test

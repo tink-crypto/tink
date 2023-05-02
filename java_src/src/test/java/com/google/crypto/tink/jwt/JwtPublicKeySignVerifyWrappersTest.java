@@ -19,11 +19,16 @@ package com.google.crypto.tink.jwt;
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertThrows;
 
+import com.google.crypto.tink.InsecureSecretKeyAccess;
 import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.KeyTemplates;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.KeysetManager;
+import com.google.crypto.tink.TinkProtoKeysetFormat;
+import com.google.crypto.tink.proto.Keyset;
+import com.google.crypto.tink.proto.OutputPrefixType;
 import com.google.crypto.tink.testing.TestUtil;
+import com.google.protobuf.ExtensionRegistryLite;
 import java.security.GeneralSecurityException;
 import java.time.Clock;
 import java.time.Instant;
@@ -90,16 +95,21 @@ public class JwtPublicKeySignVerifyWrappersTest {
 
   @Test
   public void test_wrapLegacy_throws() throws Exception {
-    KeyTemplate rawTemplate = KeyTemplates.get("JWT_ES256_RAW");
-    // Convert the normal, raw template into a template with output prefix type LEGACY
-    KeyTemplate tinkTemplate =
-        KeyTemplate.create(
-            rawTemplate.getTypeUrl(), rawTemplate.getValue(), KeyTemplate.OutputPrefixType.LEGACY);
-    KeysetHandle handle = KeysetHandle.generateNew(tinkTemplate);
+    KeysetHandle handle = KeysetHandle.generateNew(KeyTemplates.get("JWT_ES256_RAW"));
+    Keyset keyset =
+        Keyset.parseFrom(
+            TinkProtoKeysetFormat.serializeKeyset(handle, InsecureSecretKeyAccess.get()),
+            ExtensionRegistryLite.getEmptyRegistry());
+    Keyset.Builder legacyKeysetBuilder = keyset.toBuilder();
+    legacyKeysetBuilder.setKey(
+        0, legacyKeysetBuilder.getKey(0).toBuilder().setOutputPrefixType(OutputPrefixType.LEGACY));
+    KeysetHandle legacyHandle =
+        TinkProtoKeysetFormat.parseKeyset(
+            legacyKeysetBuilder.build().toByteArray(), InsecureSecretKeyAccess.get());
     assertThrows(
-        GeneralSecurityException.class, () -> handle.getPrimitive(JwtPublicKeySign.class));
+        GeneralSecurityException.class, () -> legacyHandle.getPrimitive(JwtPublicKeySign.class));
 
-    KeysetHandle publicHandle = handle.getPublicKeysetHandle();
+    KeysetHandle publicHandle = legacyHandle.getPublicKeysetHandle();
     assertThrows(
         GeneralSecurityException.class, () -> publicHandle.getPrimitive(JwtPublicKeyVerify.class));
   }

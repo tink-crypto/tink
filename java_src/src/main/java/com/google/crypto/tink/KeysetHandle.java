@@ -776,15 +776,14 @@ public final class KeysetHandle {
    * Generates a new {@link KeysetHandle} that contains a single fresh key generated according to
    * {@code keyTemplate}.
    *
+   * <p>Please do not use this function. Instead, inline it: replace calls with {@code
+   * generateNew(t)} with {@code generateNew(t.toParameters())}.
+   *
    * @throws GeneralSecurityException if the key template is invalid.
    */
   public static final KeysetHandle generateNew(KeyTemplate keyTemplate)
       throws GeneralSecurityException {
-    LegacyProtoParameters parameters =
-        new LegacyProtoParameters(ProtoParametersSerialization.create(keyTemplate.getProto()));
-    return KeysetHandle.newBuilder()
-        .addEntry(KeysetHandle.generateEntryFromParameters(parameters).makePrimary().withRandomId())
-        .build();
+    return generateNew(keyTemplate.toParameters());
   }
 
   /**
