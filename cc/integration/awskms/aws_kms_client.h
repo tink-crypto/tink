@@ -66,11 +66,6 @@ class AwsKmsClient : public crypto::tink::KmsClient {
   AwsKmsClient(Aws::Auth::AWSCredentials credentials)
       : credentials_(credentials) {}
 
-  // Initializes AWS API.
-  static void InitAwsApi();
-  static bool aws_api_is_initialized_;
-  static absl::Mutex aws_api_init_mutex_;
-
   std::string key_arn_;
   Aws::Auth::AWSCredentials credentials_;
   std::shared_ptr<Aws::KMS::KMSClient> aws_client_;

@@ -19,13 +19,6 @@
 #include <iostream>
 #include <sstream>
 
-#include "absl/status/status.h"
-#include "absl/strings/match.h"
-#include "absl/strings/ascii.h"
-#include "absl/strings/escaping.h"
-#include "absl/strings/str_split.h"
-#include "absl/strings/string_view.h"
-#include "absl/synchronization/mutex.h"
 #include "aws/core/Aws.h"
 #include "aws/core/auth/AWSCredentialsProvider.h"
 #include "aws/core/auth/AWSCredentialsProviderChain.h"
@@ -33,6 +26,14 @@
 #include "aws/core/utils/crypto/Factories.h"
 #include "aws/core/utils/memory/AWSMemory.h"
 #include "aws/kms/KMSClient.h"
+#include "absl/base/call_once.h"
+#include "absl/status/status.h"
+#include "absl/strings/ascii.h"
+#include "absl/strings/escaping.h"
+#include "absl/strings/match.h"
+#include "absl/strings/str_split.h"
+#include "absl/strings/string_view.h"
+#include "absl/synchronization/mutex.h"
 #include "tink/integration/awskms/aws_crypto.h"
 #include "tink/integration/awskms/aws_kms_aead.h"
 #include "tink/kms_client.h"
@@ -167,16 +168,7 @@ util::StatusOr<Aws::Auth::AWSCredentials> GetAwsCredentials(
   return provider_chain.GetAWSCredentials();
 }
 
-}  // namespace
-
-bool AwsKmsClient::aws_api_is_initialized_;
-absl::Mutex AwsKmsClient::aws_api_init_mutex_;
-
-void AwsKmsClient::InitAwsApi() {
-  absl::MutexLock lock(&aws_api_init_mutex_);
-  if (aws_api_is_initialized_) {
-    return;
-  }
+void InitAwsApi() {
   Aws::SDKOptions options;
   options.cryptoOptions.sha256Factory_create_fn = []() {
     return Aws::MakeShared<internal::AwsSha256Factory>(
@@ -187,14 +179,15 @@ void AwsKmsClient::InitAwsApi() {
         internal::kAwsCryptoAllocationTag);
   };
   Aws::InitAPI(options);
-  aws_api_is_initialized_ = true;
 }
+
+}  // namespace
+
+static absl::once_flag aws_initialization_once;
 
 util::StatusOr<std::unique_ptr<AwsKmsClient>> AwsKmsClient::New(
     absl::string_view key_uri, absl::string_view credentials_path) {
-  if (!aws_api_is_initialized_) {
-    InitAwsApi();
-  }
+  absl::call_once(aws_initialization_once, []() { InitAwsApi(); });
   // Read credentials.
   util::StatusOr<Aws::Auth::AWSCredentials> credentials =
       GetAwsCredentials(credentials_path);
@@ -237,8 +230,8 @@ AwsKmsClient::GetAead(absl::string_view key_uri) const {
   if (!DoesSupport(key_uri)) {
     if (!key_arn_.empty()) {
       return util::Status(absl::StatusCode::kInvalidArgument,
-          absl::StrCat("This client is bound to ", key_arn_,
-                       " and cannot use key ", key_uri));
+                          absl::StrCat("This client is bound to ", key_arn_,
+                                       " and cannot use key ", key_uri));
     }
     return util::Status(
         absl::StatusCode::kInvalidArgument,

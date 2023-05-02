@@ -29,6 +29,7 @@ cc_library(
         ":aws_kms_aead",
         "//tink/integration/awskms/internal:aws_crypto",
         "@aws_cpp_sdk//:aws_sdk_core",
+        "@com_google_absl//absl/base",
         "@com_google_absl//absl/status",
         "@com_google_absl//absl/strings",
         "@com_google_absl//absl/synchronization",
