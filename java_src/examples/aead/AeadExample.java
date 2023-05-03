@@ -17,16 +17,13 @@ package aead;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 import com.google.crypto.tink.Aead;
-import com.google.crypto.tink.CleartextKeysetHandle;
-import com.google.crypto.tink.JsonKeysetReader;
+import com.google.crypto.tink.InsecureSecretKeyAccess;
 import com.google.crypto.tink.KeysetHandle;
+import com.google.crypto.tink.TinkJsonProtoKeysetFormat;
 import com.google.crypto.tink.aead.AeadConfig;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.nio.file.Files;
-import java.security.GeneralSecurityException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 /**
  * A command-line utility for encrypting small files with AEAD.
@@ -55,9 +52,9 @@ public final class AeadExample {
       System.exit(1);
     }
     String mode = args[0];
-    File keyFile = new File(args[1]);
-    File inputFile = new File(args[2]);
-    File outputFile = new File(args[3]);
+    Path keyFile = Paths.get(args[1]);
+    Path inputFile = Paths.get(args[2]);
+    Path outputFile = Paths.get(args[3]);
     byte[] associatedData = new byte[0];
     if (args.length == 5) {
       associatedData = args[4].getBytes(UTF_8);
@@ -66,42 +63,26 @@ public final class AeadExample {
     AeadConfig.register();
 
     // Read the keyset into a KeysetHandle.
-    KeysetHandle handle = null;
-    try (FileInputStream inputStream = new FileInputStream(keyFile)) {
-      handle = CleartextKeysetHandle.read(JsonKeysetReader.withInputStream(inputStream));
-    } catch (GeneralSecurityException | IOException ex) {
-      System.err.println("Cannot read keyset, got error: " + ex);
-      System.exit(1);
-    }
+    KeysetHandle handle =
+        TinkJsonProtoKeysetFormat.parseKeyset(
+            new String(Files.readAllBytes(keyFile), UTF_8), InsecureSecretKeyAccess.get());
 
     // Get the primitive.
-    Aead aead = null;
-    try {
-      aead = handle.getPrimitive(Aead.class);
-    } catch (GeneralSecurityException ex) {
-      System.err.println("Cannot create primitive, got error: " + ex);
-      System.exit(1);
-    }
+    Aead aead = handle.getPrimitive(Aead.class);
 
     // Use the primitive to encrypt/decrypt files.
     if (MODE_ENCRYPT.equals(mode)) {
-      byte[] plaintext = Files.readAllBytes(inputFile.toPath());
+      byte[] plaintext = Files.readAllBytes(inputFile);
       byte[] ciphertext = aead.encrypt(plaintext, associatedData);
-      try (FileOutputStream stream = new FileOutputStream(outputFile)) {
-        stream.write(ciphertext);
-      }
+      Files.write(outputFile, ciphertext);
     } else if (MODE_DECRYPT.equals(mode)) {
-      byte[] ciphertext = Files.readAllBytes(inputFile.toPath());
+      byte[] ciphertext = Files.readAllBytes(inputFile);
       byte[] plaintext = aead.decrypt(ciphertext, associatedData);
-      try (FileOutputStream stream = new FileOutputStream(outputFile)) {
-        stream.write(plaintext);
-      }
+      Files.write(outputFile, plaintext);
     } else {
       System.err.println("The first argument must be either encrypt or decrypt, got: " + mode);
       System.exit(1);
     }
-
-    System.exit(0);
   }
 
   private AeadExample() {}

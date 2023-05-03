@@ -16,20 +16,14 @@ package mac;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
-import com.google.crypto.tink.CleartextKeysetHandle;
-import com.google.crypto.tink.JsonKeysetReader;
+import com.google.crypto.tink.InsecureSecretKeyAccess;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.Mac;
+import com.google.crypto.tink.TinkJsonProtoKeysetFormat;
 import com.google.crypto.tink.mac.MacConfig;
-import com.google.crypto.tink.subtle.Hex;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.security.GeneralSecurityException;
-import java.util.List;
 
 /**
  * A command-line utility for checking file integrity with a Message Authentication Code (MAC).
@@ -56,54 +50,29 @@ public final class MacExample {
       System.err.println("Incorrect mode. Please select compute or verify.");
       System.exit(1);
     }
-    File keyFile = new File(args[1]);
+    Path keyFile = Paths.get(args[1]);
     byte[] msg = Files.readAllBytes(Paths.get(args[2]));
-    File macFile = new File(args[3]);
+    Path macFile = Paths.get(args[3]);
 
     // Register all MAC key types with the Tink runtime.
     MacConfig.register();
 
     // Read the keyset into a KeysetHandle.
-    KeysetHandle handle = null;
-    try (FileInputStream inputStream = new FileInputStream(keyFile)) {
-      handle = CleartextKeysetHandle.read(JsonKeysetReader.withInputStream(inputStream));
-    } catch (GeneralSecurityException | IOException ex) {
-      System.err.println("Cannot read keyset, got error: " + ex);
-      System.exit(1);
-    }
+    KeysetHandle handle =
+        TinkJsonProtoKeysetFormat.parseKeyset(
+            new String(Files.readAllBytes(keyFile), UTF_8), InsecureSecretKeyAccess.get());
 
     // Get the primitive.
-    Mac macPrimitive = null;
-    try {
-      macPrimitive = handle.getPrimitive(Mac.class);
-    } catch (GeneralSecurityException ex) {
-      System.err.println("Cannot create primitive, got error: " + ex);
-      System.exit(1);
-    }
+    Mac macPrimitive = handle.getPrimitive(Mac.class);
 
     if (mode.equals("compute")) {
-      byte[] mac = macPrimitive.computeMac(msg);
-      try (FileOutputStream stream = new FileOutputStream(macFile)) {
-        stream.write(Hex.encode(mac).getBytes(UTF_8));
-      }
-      System.exit(0);
+      byte[] macTag = macPrimitive.computeMac(msg);
+      Files.write(macFile, macTag);
+    } else {
+      byte[] macTag = Files.readAllBytes(macFile);
+      // This will throw a GeneralSecurityException if verification fails.
+      macPrimitive.verifyMac(macTag, msg);
     }
-
-    List<String> lines = Files.readAllLines(macFile.toPath());
-    if (lines.size() != 1) {
-      System.err.printf("The MAC file should contain only one line, got %d", lines.size());
-      System.exit(1);
-    }
-
-    byte[] mac = Hex.decode(lines.get(0).trim());
-    try {
-      macPrimitive.verifyMac(mac, msg);
-    } catch (GeneralSecurityException ex) {
-      System.err.println("MAC verification failed.");
-      System.exit(1);
-    }
-
-    System.exit(0);
   }
 
   private MacExample() {}
