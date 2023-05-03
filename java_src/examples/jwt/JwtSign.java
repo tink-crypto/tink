@@ -16,17 +16,15 @@ package jwt;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
-import com.google.crypto.tink.CleartextKeysetHandle;
-import com.google.crypto.tink.JsonKeysetReader;
+import com.google.crypto.tink.InsecureSecretKeyAccess;
 import com.google.crypto.tink.KeysetHandle;
+import com.google.crypto.tink.TinkJsonProtoKeysetFormat;
 import com.google.crypto.tink.jwt.JwtPublicKeySign;
 import com.google.crypto.tink.jwt.JwtSignatureConfig;
 import com.google.crypto.tink.jwt.RawJwt;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.security.GeneralSecurityException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.Instant;
 
 /**
@@ -50,42 +48,30 @@ public final class JwtSign {
       System.exit(1);
     }
 
-    File privateKeysetFile = new File(args[0]);
+    Path privateKeysetFile = Paths.get(args[0]);
     String audience = args[1];
-    File tokenFile = new File(args[2]);
+    Path tokenFile = Paths.get(args[2]);
 
     // Register all JWT signature key types with the Tink runtime.
     JwtSignatureConfig.register();
 
     // Read the private keyset into a KeysetHandle.
-    KeysetHandle privateKeysetHandle = null;
-    try (FileInputStream inputStream = new FileInputStream(privateKeysetFile)) {
-      privateKeysetHandle =
-          CleartextKeysetHandle.read(JsonKeysetReader.withInputStream(inputStream));
-    } catch (GeneralSecurityException | IOException ex) {
-      System.err.println("Cannot read keyset, got error: " + ex);
-      System.exit(1);
-    }
+    KeysetHandle privateKeysetHandle =
+        TinkJsonProtoKeysetFormat.parseKeyset(
+            new String(Files.readAllBytes(privateKeysetFile), UTF_8),
+            InsecureSecretKeyAccess.get());
 
     // Get the primitive.
-    JwtPublicKeySign signer = null;
-    try {
-      signer = privateKeysetHandle.getPrimitive(JwtPublicKeySign.class);
-    } catch (GeneralSecurityException ex) {
-      System.err.println("Cannot create primitive, got error: " + ex);
-      System.exit(1);
-    }
+    JwtPublicKeySign signer = privateKeysetHandle.getPrimitive(JwtPublicKeySign.class);
 
     // Use the primitive to sign a token that expires in 100 seconds.
-    RawJwt rawJwt = RawJwt.newBuilder()
-        .addAudience(audience)
-        .setExpiration(Instant.now().plusSeconds(100))
-        .build();
+    RawJwt rawJwt =
+        RawJwt.newBuilder()
+            .addAudience(audience)
+            .setExpiration(Instant.now().plusSeconds(100))
+            .build();
     String signedToken = signer.signAndEncode(rawJwt);
-    try (FileOutputStream stream = new FileOutputStream(tokenFile)) {
-      stream.write(signedToken.getBytes(UTF_8));
-    }
-    System.exit(0);
+    Files.write(tokenFile, signedToken.getBytes(UTF_8));
   }
 
   private JwtSign() {}

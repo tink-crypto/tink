@@ -22,10 +22,9 @@ import com.google.crypto.tink.jwt.JwtPublicKeyVerify;
 import com.google.crypto.tink.jwt.JwtSignatureConfig;
 import com.google.crypto.tink.jwt.JwtValidator;
 import com.google.crypto.tink.jwt.VerifiedJwt;
-import java.io.File;
-import java.io.IOException;
 import java.nio.file.Files;
-import java.security.GeneralSecurityException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
@@ -49,24 +48,19 @@ public final class JwtVerify {
       System.exit(1);
     }
 
-    File publicJwkSetFile = new File(args[0]);
+    Path publicJwkSetFile = Paths.get(args[0]);
     String audience = args[1];
-    File tokenFile = new File(args[2]);
+    Path tokenFile = Paths.get(args[2]);
 
     // Register all JWT signature key types with the Tink runtime.
     JwtSignatureConfig.register();
 
     // Read the public keyset in JWK set format into a KeysetHandle.
-    KeysetHandle publicKeysetHandle = null;
-    try {
-      String publicJwkSet = new String(Files.readAllBytes(publicJwkSetFile.toPath()), UTF_8);
-      publicKeysetHandle = JwkSetConverter.toPublicKeysetHandle(publicJwkSet);
-    } catch (GeneralSecurityException | IOException ex) {
-      System.err.println("Cannot read keyset, got error: " + ex);
-      System.exit(1);
-    }
+    KeysetHandle publicKeysetHandle =
+        JwkSetConverter.toPublicKeysetHandle(
+            new String(Files.readAllBytes(publicJwkSetFile), UTF_8));
 
-    List<String> lines = Files.readAllLines(tokenFile.toPath());
+    List<String> lines = Files.readAllLines(tokenFile, UTF_8);
     if (lines.size() != 1) {
       System.err.printf("The signature file should contain only one line,  got %d", lines.size());
       System.exit(1);
@@ -74,26 +68,13 @@ public final class JwtVerify {
     String signedToken = lines.get(0).trim();
 
     // Get the primitive.
-    JwtPublicKeyVerify verifier = null;
-    try {
-      verifier = publicKeysetHandle.getPrimitive(JwtPublicKeyVerify.class);
-    } catch (GeneralSecurityException ex) {
-      System.err.println("Cannot create primitive, got error: " + ex);
-      System.exit(1);
-    }
+    JwtPublicKeyVerify verifier = publicKeysetHandle.getPrimitive(JwtPublicKeyVerify.class);
 
     // Use the primitive to verify a token.
-    try {
-      JwtValidator validator = JwtValidator.newBuilder().expectAudience(audience).build();
-      VerifiedJwt verifiedJwt = verifier.verifyAndDecode(signedToken, validator);
-      long seconds = ChronoUnit.SECONDS.between(Instant.now(), verifiedJwt.getExpiration());
-      System.out.println("Token is valid and expires in " + seconds + " seconds.");
-    } catch (GeneralSecurityException ex) {
-      System.err.println("JWT verification failed.");
-      System.exit(1);
-    }
-
-    System.exit(0);
+    JwtValidator validator = JwtValidator.newBuilder().expectAudience(audience).build();
+    VerifiedJwt verifiedJwt = verifier.verifyAndDecode(signedToken, validator);
+    long seconds = ChronoUnit.SECONDS.between(Instant.now(), verifiedJwt.getExpiration());
+    System.out.println("Token is valid and expires in " + seconds + " seconds.");
   }
 
   private JwtVerify() {}

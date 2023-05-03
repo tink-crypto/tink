@@ -16,16 +16,14 @@ package jwt;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
-import com.google.crypto.tink.CleartextKeysetHandle;
-import com.google.crypto.tink.JsonKeysetReader;
+import com.google.crypto.tink.InsecureSecretKeyAccess;
 import com.google.crypto.tink.KeysetHandle;
+import com.google.crypto.tink.TinkJsonProtoKeysetFormat;
 import com.google.crypto.tink.jwt.JwkSetConverter;
 import com.google.crypto.tink.jwt.JwtSignatureConfig;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.security.GeneralSecurityException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 /**
  * A command-line example for generating the public JWT keyset in JWK set format.
@@ -47,29 +45,22 @@ public final class JwtGeneratePublicJwkSet {
       System.exit(1);
     }
 
-    File privateKeysetFile = new File(args[0]);
-    File publicJwkSetFile = new File(args[1]);
+    Path privateKeysetFile = Paths.get(args[0]);
+    Path publicJwkSetFile = Paths.get(args[1]);
 
     // Register all JWT signature key types with the Tink runtime.
     JwtSignatureConfig.register();
 
     // Read the keyset into a KeysetHandle.
-    KeysetHandle privateKeysetHandle = null;
-    try (FileInputStream inputStream = new FileInputStream(privateKeysetFile)) {
-      privateKeysetHandle =
-          CleartextKeysetHandle.read(JsonKeysetReader.withInputStream(inputStream));
-    } catch (GeneralSecurityException | IOException ex) {
-      System.err.println("Cannot read keyset, got error: " + ex);
-      System.exit(1);
-    }
+    KeysetHandle privateKeysetHandle =
+        TinkJsonProtoKeysetFormat.parseKeyset(
+            new String(Files.readAllBytes(privateKeysetFile), UTF_8),
+            InsecureSecretKeyAccess.get());
 
     // Export the public keyset as JWK set.
     String publicJwkSet =
         JwkSetConverter.fromPublicKeysetHandle(privateKeysetHandle.getPublicKeysetHandle());
-    try (FileOutputStream stream = new FileOutputStream(publicJwkSetFile)) {
-      stream.write(publicJwkSet.getBytes(UTF_8));
-    }
-    System.exit(0);
+    Files.write(publicJwkSetFile, publicJwkSet.getBytes(UTF_8));
   }
 
   private JwtGeneratePublicJwkSet() {}
