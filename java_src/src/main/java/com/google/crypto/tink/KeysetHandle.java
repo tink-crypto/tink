@@ -761,15 +761,20 @@ public final class KeysetHandle {
    * Generates a new {@link KeysetHandle} that contains a single fresh key generated according to
    * {@code keyTemplate}.
    *
+   * <p>Please do not use this function. Instead, use {@link #generateNew(Parameters)}.
+   *
+   * <p>For existing usage, try to use refaster
+   * https://github.com/tink-crypto/tink-java/tree/main/tools/refaster to replace usage
+   * automatically. This will replaces calls {@code KeysetHandle.generateNew(XYZKeyTemplates.ABC);}
+   * with {@code KeysetHandle.generateNew(PredefinedXYZParameters.ABC);} which is a NO-OP.
+   *
+   * <p>If this is not possible, please inline the function in your code.
+   *
    * @throws GeneralSecurityException if the key template is invalid.
    */
   public static final KeysetHandle generateNew(com.google.crypto.tink.proto.KeyTemplate keyTemplate)
       throws GeneralSecurityException {
-    LegacyProtoParameters parameters =
-        new LegacyProtoParameters(ProtoParametersSerialization.create(keyTemplate));
-    return KeysetHandle.newBuilder()
-        .addEntry(KeysetHandle.generateEntryFromParameters(parameters).makePrimary().withRandomId())
-        .build();
+    return generateNew(TinkProtoParametersFormat.parse(keyTemplate.toByteArray()));
   }
 
   /**
