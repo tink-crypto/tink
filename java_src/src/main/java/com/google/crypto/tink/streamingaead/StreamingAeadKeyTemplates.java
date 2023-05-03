@@ -53,8 +53,12 @@ import com.google.crypto.tink.proto.OutputPrefixType;
  * StreamingAead ags = handle.getPrimitive(StreamingAead.class);
  * }</pre>
  *
+ * @deprecated Try using our refaster templates to replace them (see
+ *     https://github.com/tink-crypto/tink-java/tree/main/tools/refaster). If migration is unclear,
+ *     please file an issue on https://github.com/tink-crypto/tink-java.
  * @since 1.1.0
  */
+@Deprecated
 public final class StreamingAeadKeyTemplates {
   /**
    * A {@link KeyTemplate} that generates new instances of {@link
