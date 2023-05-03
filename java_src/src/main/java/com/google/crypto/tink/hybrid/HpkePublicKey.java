@@ -127,6 +127,18 @@ public final class HpkePublicKey extends HybridPublicKey {
     EllipticCurvesUtil.checkPointOnCurve(point, curve);
   }
 
+  /**
+   * Validate public key according to https://www.rfc-editor.org/rfc/rfc9180.html#section-7.1.4.
+   *
+   * <p>Specifically, validate public key lengths and NIST KEM public key values according to
+   * Section 5.6.2.3.4 of https://doi.org/10.6028/nist.sp.800-56ar3.
+   */
+  private static void validatePublicKey(HpkeParameters.KemId kemId, Bytes publicKeyBytes)
+      throws GeneralSecurityException {
+    validatePublicKeyByteLength(kemId, publicKeyBytes);
+    validatePublicKeyOnCurve(kemId, publicKeyBytes);
+  }
+
   private static Bytes createOutputPrefix(
       HpkeParameters.Variant variant, @Nullable Integer idRequirement) {
     if (variant == HpkeParameters.Variant.NO_PREFIX) {
@@ -163,8 +175,7 @@ public final class HpkePublicKey extends HybridPublicKey {
       HpkeParameters parameters, Bytes publicKeyBytes, @Nullable Integer idRequirement)
       throws GeneralSecurityException {
     validateIdRequirement(parameters.getVariant(), idRequirement);
-    validatePublicKeyByteLength(parameters.getKemId(), publicKeyBytes);
-    validatePublicKeyOnCurve(parameters.getKemId(), publicKeyBytes);
+    validatePublicKey(parameters.getKemId(), publicKeyBytes);
     Bytes prefix = createOutputPrefix(parameters.getVariant(), idRequirement);
     return new HpkePublicKey(parameters, publicKeyBytes, prefix, idRequirement);
   }
