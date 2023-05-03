@@ -666,6 +666,7 @@ java_test(
         "//src/main/java/com/google/crypto/tink/aead:aes_ctr_hmac_aead_parameters",
         "//src/main/java/com/google/crypto/tink/aead:aes_eax_parameters",
         "//src/main/java/com/google/crypto/tink/aead:aes_gcm_parameters",
+        "//src/main/java/com/google/crypto/tink/aead:aes_gcm_siv_parameters",
         "//src/main/java/com/google/crypto/tink/aead:cha_cha20_poly1305_parameters",
         "//src/main/java/com/google/crypto/tink/aead:predefined_aead_parameters",
         "//src/main/java/com/google/crypto/tink/aead:x_cha_cha20_poly1305_parameters",

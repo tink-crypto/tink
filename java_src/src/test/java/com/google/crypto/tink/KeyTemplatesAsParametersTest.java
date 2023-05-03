@@ -22,6 +22,7 @@ import static com.google.crypto.tink.internal.TinkBugException.exceptionIsBug;
 import com.google.crypto.tink.aead.AesCtrHmacAeadParameters;
 import com.google.crypto.tink.aead.AesEaxParameters;
 import com.google.crypto.tink.aead.AesGcmParameters;
+import com.google.crypto.tink.aead.AesGcmSivParameters;
 import com.google.crypto.tink.aead.ChaCha20Poly1305Parameters;
 import com.google.crypto.tink.aead.PredefinedAeadParameters;
 import com.google.crypto.tink.aead.XChaCha20Poly1305Parameters;
@@ -264,6 +265,36 @@ public final class KeyTemplatesAsParametersTest {
     result.add(new Pair("HMAC_SHA512_PRF", PredefinedPrfParameters.HMAC_SHA512_PRF));
     result.add(new Pair("AES256_CMAC_PRF", PredefinedPrfParameters.AES_CMAC_PRF));
     result.add(new Pair("AES_CMAC_PRF", PredefinedPrfParameters.AES_CMAC_PRF));
+    if (Util.isAndroid()) {
+      result.add(
+          new Pair(
+              "AES128_GCM_SIV",
+              AesGcmSivParameters.builder()
+                  .setKeySizeBytes(16)
+                  .setVariant(AesGcmSivParameters.Variant.TINK)
+                  .build()));
+      result.add(
+          new Pair(
+              "AES128_GCM_SIV_RAW",
+              AesGcmSivParameters.builder()
+                  .setKeySizeBytes(16)
+                  .setVariant(AesGcmSivParameters.Variant.NO_PREFIX)
+                  .build()));
+      result.add(
+          new Pair(
+              "AES256_GCM_SIV",
+              AesGcmSivParameters.builder()
+                  .setKeySizeBytes(32)
+                  .setVariant(AesGcmSivParameters.Variant.TINK)
+                  .build()));
+      result.add(
+          new Pair(
+              "AES256_GCM_SIV_RAW",
+              AesGcmSivParameters.builder()
+                  .setKeySizeBytes(32)
+                  .setVariant(AesGcmSivParameters.Variant.NO_PREFIX)
+                  .build()));
+    }
     return result;
   }
 
@@ -337,13 +368,6 @@ public final class KeyTemplatesAsParametersTest {
     result.add("RSA_SSA_PSS_4096_SHA512_F4");
     result.add("RSA_SSA_PSS_4096_SHA512_F4_RAW");
     result.add("RSA_SSA_PSS_4096_SHA512_SHA512_64_F4");
-    if (Util.isAndroid()) {
-      result.add("AES128_GCM_SIV");
-      result.add("AES128_GCM_SIV_RAW");
-      result.add("AES256_GCM_SIV");
-      result.add("AES256_GCM_SIV_RAW");
-    }
-
     return result;
   }
 
