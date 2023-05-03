@@ -53,14 +53,12 @@ tink_cc_library(
   DEPS
     tink::aead::internal::aead_util
     absl::status
-    absl::strings
     absl::cord
     crypto
     tink::aead::cord_aead
     tink::internal::ssl_unique_ptr
     tink::subtle::random
     tink::subtle::subtle_util
-    tink::util::errors
     tink::util::secret_data
     tink::util::status
     tink::util::statusor

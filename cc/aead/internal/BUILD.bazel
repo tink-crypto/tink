@@ -61,13 +61,11 @@ cc_library(
         "//internal:ssl_unique_ptr",
         "//subtle:random",
         "//subtle:subtle_util",
-        "//util:errors",
         "//util:secret_data",
         "//util:status",
         "//util:statusor",
         "@boringssl//:crypto",
         "@com_google_absl//absl/status",
-        "@com_google_absl//absl/strings",
         "@com_google_absl//absl/strings:cord",
     ],
 )
