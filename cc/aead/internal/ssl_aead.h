@@ -28,9 +28,10 @@ namespace crypto {
 namespace tink {
 namespace internal {
 
+// Tag sizes.
 ABSL_CONST_INIT extern const int kXchacha20Poly1305TagSizeInBytes;
-// Tag size for both AES-GCM and AES-GCM-SIV.
 ABSL_CONST_INIT extern const int kAesGcmTagSizeInBytes;
+ABSL_CONST_INIT extern const int kAesGcmSivTagSizeInBytes;
 
 // Interface for one-shot AEAD crypters.
 class SslOneShotAead {
