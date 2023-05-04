@@ -23,7 +23,7 @@ import java.security.InvalidAlgorithmParameterException;
 import java.util.Objects;
 import javax.annotation.Nullable;
 
-/** Describes the parameters of an {@link AesCtrHmacAeadƒKey}. */
+/** Describes the parameters of an {@link AesCtrHmacAeadKey}. */
 public final class AesCtrHmacAeadParameters extends AeadParameters {
   private static final int PREFIX_SIZE_IN_BYTES = 5;
   /**
