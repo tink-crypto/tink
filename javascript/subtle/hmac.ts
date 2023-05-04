@@ -7,14 +7,14 @@
 import {InvalidArgumentsException} from '../exception/invalid_arguments_exception';
 import {Mac} from '../mac/internal/mac';
 
-import * as Bytes from './bytes';
-import * as Validators from './validators';
+import * as bytes from './bytes';
+import * as validators from './validators';
 
 /**
  * The minimum tag size.
  *
  */
-const MIN_TAG_SIZE_IN_BYTES: number = 10;
+const MIN_TAG_SIZE_IN_BYTES = 10;
 
 /**
  * Implementation of HMAC.
@@ -23,7 +23,7 @@ const MIN_TAG_SIZE_IN_BYTES: number = 10;
  */
 export class Hmac extends Mac {
   /**
-   * @param hash accepted names are SHA-1, SHA-256 and SHA-512
+   * @param hash accepted names are SHA-1, SHA-256, SHA-384 and SHA-512
    * @param tagSize the size of the tag
    */
   constructor(
@@ -35,7 +35,7 @@ export class Hmac extends Mac {
   /**
    */
   async computeMac(data: Uint8Array): Promise<Uint8Array> {
-    Validators.requireUint8Array(data);
+    validators.requireUint8Array(data);
     const tag = await self.crypto.subtle.sign(
         {'name': 'HMAC', 'hash': {'name': this.hash}}, this.key, data);
     return new Uint8Array(tag.slice(0, this.tagSize));
@@ -44,26 +44,27 @@ export class Hmac extends Mac {
   /**
    */
   async verifyMac(tag: Uint8Array, data: Uint8Array): Promise<boolean> {
-    Validators.requireUint8Array(tag);
-    Validators.requireUint8Array(data);
+    validators.requireUint8Array(tag);
+    validators.requireUint8Array(data);
     const computedTag = await this.computeMac(data);
-    return Bytes.isEqual(tag, computedTag);
+    return bytes.isEqual(tag, computedTag);
   }
 }
 
 /**
- * @param hash accepted names are SHA-1, SHA-256 and SHA-512
+ * @param hash accepted names are SHA-1, SHA-256, SHA-384 and SHA-512
  * @param tagSize the size of the tag
  */
 export async function fromRawKey(
     hash: string, key: Uint8Array, tagSize: number): Promise<Mac> {
-  Validators.requireUint8Array(key);
+  validators.requireUint8Array(key);
   if (!Number.isInteger(tagSize)) {
     throw new InvalidArgumentsException('invalid tag size, must be an integer');
   }
   if (tagSize < MIN_TAG_SIZE_IN_BYTES) {
     throw new InvalidArgumentsException(
-        'tag too short, must be at least ' + MIN_TAG_SIZE_IN_BYTES + ' bytes');
+        'tag too short, must be at least ' + MIN_TAG_SIZE_IN_BYTES.toString() +
+        ' bytes');
   }
   switch (hash) {
     case 'SHA-1':
@@ -76,6 +77,12 @@ export async function fromRawKey(
       if (tagSize > 32) {
         throw new InvalidArgumentsException(
             'tag too long, must not be larger than 32 bytes');
+      }
+      break;
+    case 'SHA-384':
+      if (tagSize > 48) {
+        throw new InvalidArgumentsException(
+            'tag too long, must not be larger than 48 bytes');
       }
       break;
     case 'SHA-512':
