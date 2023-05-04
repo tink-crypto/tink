@@ -91,13 +91,11 @@ cc_library(
     include_prefix = "tink/internal",
     deps = [
         ":fips_utils",
+        ":key_type_info_store",
         ":keyset_wrapper",
         ":keyset_wrapper_impl",
-        "//:core/key_manager_impl",
         "//:core/key_type_manager",
-        "//:core/private_key_manager_impl",
         "//:core/private_key_type_manager",
-        "//:core/template_util",
         "//:input_stream",
         "//:key_manager",
         "//:primitive_set",
@@ -112,10 +110,8 @@ cc_library(
         "@com_google_absl//absl/memory",
         "@com_google_absl//absl/meta:type_traits",
         "@com_google_absl//absl/status",
-        "@com_google_absl//absl/status:statusor",
         "@com_google_absl//absl/strings",
         "@com_google_absl//absl/synchronization",
-        "@com_google_absl//absl/types:optional",
     ],
 )
 
@@ -1098,6 +1094,50 @@ cc_test(
         "//proto:rsa_ssa_pss_cc_proto",
         "//util:test_matchers",
         "//util:test_util",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_library(
+    name = "key_type_info_store",
+    srcs = ["key_type_info_store.cc"],
+    hdrs = ["key_type_info_store.h"],
+    include_prefix = "tink/internal",
+    deps = [
+        ":fips_utils",
+        "//:core/key_manager_impl",
+        "//:core/key_type_manager",
+        "//:core/private_key_manager_impl",
+        "//:core/private_key_type_manager",
+        "//:key_manager",
+        "//util:status",
+        "//util:statusor",
+        "@com_google_absl//absl/container:flat_hash_map",
+        "@com_google_absl//absl/status",
+        "@com_google_absl//absl/strings",
+    ],
+)
+
+cc_test(
+    name = "key_type_info_store_test",
+    srcs = ["key_type_info_store_test.cc"],
+    deps = [
+        ":fips_utils",
+        ":key_type_info_store",
+        "//:aead",
+        "//:core/key_manager_impl",
+        "//:key_manager",
+        "//aead:aes_gcm_key_manager",
+        "//aead:cord_aead",
+        "//aead:kms_envelope_aead_key_manager",
+        "//proto:aes_gcm_cc_proto",
+        "//proto:common_cc_proto",
+        "//proto:ecdsa_cc_proto",
+        "//signature:ecdsa_sign_key_manager",
+        "//signature:ecdsa_verify_key_manager",
+        "//util:test_matchers",
+        "@com_google_absl//absl/status",
+        "@com_google_absl//absl/types:optional",
         "@com_google_googletest//:gtest_main",
     ],
 )

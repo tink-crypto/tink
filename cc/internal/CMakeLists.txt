@@ -94,6 +94,7 @@ tink_cc_library(
     registry_impl.h
   DEPS
     tink::internal::fips_utils
+    tink::internal::key_type_info_store
     tink::internal::keyset_wrapper
     tink::internal::keyset_wrapper_impl
     absl::core_headers
@@ -101,15 +102,10 @@ tink_cc_library(
     absl::memory
     absl::type_traits
     absl::status
-    absl::statusor
     absl::strings
     absl::synchronization
-    absl::optional
-    tink::core::key_manager_impl
     tink::core::key_type_manager
-    tink::core::private_key_manager_impl
     tink::core::private_key_type_manager
-    tink::core::template_util
     tink::core::input_stream
     tink::core::key_manager
     tink::core::primitive_set
@@ -1050,4 +1046,47 @@ tink_cc_test(
     tink::util::test_util
     tink::proto::aes_gcm_cc_proto
     tink::proto::rsa_ssa_pss_cc_proto
+)
+
+tink_cc_library(
+  NAME key_type_info_store
+  SRCS
+    key_type_info_store.cc
+    key_type_info_store.h
+  DEPS
+    tink::internal::fips_utils
+    absl::flat_hash_map
+    absl::status
+    absl::strings
+    tink::core::key_manager_impl
+    tink::core::key_type_manager
+    tink::core::private_key_manager_impl
+    tink::core::private_key_type_manager
+    tink::core::key_manager
+    tink::util::status
+    tink::util::statusor
+)
+
+tink_cc_test(
+  NAME key_type_info_store_test
+  SRCS
+    key_type_info_store_test.cc
+  DEPS
+    tink::internal::fips_utils
+    tink::internal::key_type_info_store
+    gmock
+    absl::status
+    absl::optional
+    tink::core::aead
+    tink::core::key_manager_impl
+    tink::core::key_manager
+    tink::aead::aes_gcm_key_manager
+    tink::aead::cord_aead
+    tink::aead::kms_envelope_aead_key_manager
+    tink::signature::ecdsa_sign_key_manager
+    tink::signature::ecdsa_verify_key_manager
+    tink::util::test_matchers
+    tink::proto::aes_gcm_cc_proto
+    tink::proto::common_cc_proto
+    tink::proto::ecdsa_cc_proto
 )

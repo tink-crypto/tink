@@ -18,8 +18,6 @@
 #define TINK_INTERNAL_REGISTRY_IMPL_H_
 
 #include <algorithm>
-#include <atomic>
-#include <functional>
 #include <memory>
 #include <string>
 #include <type_traits>
@@ -33,17 +31,13 @@
 #include "absl/meta/type_traits.h"
 #include "absl/status/status.h"
 #include "absl/strings/str_cat.h"
-#include "absl/strings/str_join.h"
 #include "absl/strings/string_view.h"
 #include "absl/synchronization/mutex.h"
-#include "absl/types/optional.h"
-#include "tink/core/key_manager_impl.h"
 #include "tink/core/key_type_manager.h"
-#include "tink/core/private_key_manager_impl.h"
 #include "tink/core/private_key_type_manager.h"
-#include "tink/core/template_util.h"
 #include "tink/input_stream.h"
 #include "tink/internal/fips_utils.h"
+#include "tink/internal/key_type_info_store.h"
 #include "tink/internal/keyset_wrapper.h"
 #include "tink/internal/keyset_wrapper_impl.h"
 #include "tink/key_manager.h"
@@ -71,7 +65,8 @@ class RegistryImpl {
   RegistryImpl& operator=(const RegistryImpl&) = delete;
 
   // Registers the given 'manager' for the key type 'manager->get_key_type()'.
-  // Takes ownership of 'manager', which must be non-nullptr.
+  // Takes ownership of 'manager', which must be non-nullptr. KeyManager is the
+  // legacy/internal version of KeyTypeManager.
   template <class P>
   crypto::tink::util::Status RegisterKeyManager(KeyManager<P>* manager,
                                                 bool new_key_allowed = true)
@@ -154,156 +149,6 @@ class RegistryImpl {
   }
 
  private:
-  // Information for a key type constructed from a KeyTypeManager or KeyManager.
-  class KeyTypeInfo {
-   public:
-    // Takes ownership of `manager`.
-    template <typename KeyProto, typename KeyFormatProto,
-              typename... Primitives>
-    KeyTypeInfo(
-        KeyTypeManager<KeyProto, KeyFormatProto, List<Primitives...>>* manager,
-        bool new_key_allowed)
-        : key_manager_type_index_(std::type_index(typeid(*manager))),
-          public_key_type_manager_type_index_(absl::nullopt),
-          new_key_allowed_(new_key_allowed),
-          key_type_manager_(absl::WrapUnique(manager)),
-          internal_key_factory_(
-              absl::make_unique<internal::KeyFactoryImpl<KeyTypeManager<
-                  KeyProto, KeyFormatProto, List<Primitives...>>>>(manager)),
-          key_factory_(internal_key_factory_.get()),
-          key_deriver_(CreateDeriverFunctionFor(manager)) {
-      // TODO(C++17): Replace with a fold expression.
-      (void)std::initializer_list<int>{
-          0, (primitive_to_manager_.emplace(
-                  std::type_index(typeid(Primitives)),
-                  internal::MakeKeyManager<Primitives>(manager)),
-              0)...};
-    }
-
-    // Takes ownership of `private_manager`, but not of `public_manager`, which
-    // must only be alive for the duration of the constructor.
-    template <typename PrivateKeyProto, typename KeyFormatProto,
-              typename PublicKeyProto, typename PublicPrimitivesList,
-              typename... PrivatePrimitives>
-    KeyTypeInfo(
-        PrivateKeyTypeManager<PrivateKeyProto, KeyFormatProto, PublicKeyProto,
-                              List<PrivatePrimitives...>>* private_manager,
-        KeyTypeManager<PublicKeyProto, void, PublicPrimitivesList>*
-            public_manager,
-        bool new_key_allowed)
-        : key_manager_type_index_(std::type_index(typeid(*private_manager))),
-          public_key_type_manager_type_index_(
-              std::type_index(typeid(*public_manager))),
-          new_key_allowed_(new_key_allowed),
-          key_type_manager_(absl::WrapUnique(private_manager)),
-          internal_key_factory_(
-              absl::make_unique<internal::PrivateKeyFactoryImpl<
-                  PrivateKeyProto, KeyFormatProto, PublicKeyProto,
-                  List<PrivatePrimitives...>, PublicPrimitivesList>>(
-                  private_manager, public_manager)),
-          key_factory_(internal_key_factory_.get()),
-          key_deriver_(CreateDeriverFunctionFor(private_manager)) {
-      // TODO(C++17): Replace with a fold expression.
-      (void)std::initializer_list<int>{
-          0, (primitive_to_manager_.emplace(
-                  std::type_index(typeid(PrivatePrimitives)),
-                  internal::MakePrivateKeyManager<PrivatePrimitives>(
-                      private_manager, public_manager)),
-              0)...};
-    }
-
-    // Takes ownership of `manager`. KeyManager is the legacy version of
-    // KeyTypeManager.
-    template <typename P>
-    KeyTypeInfo(KeyManager<P>* manager, bool new_key_allowed)
-        : key_manager_type_index_(std::type_index(typeid(*manager))),
-          public_key_type_manager_type_index_(absl::nullopt),
-          new_key_allowed_(new_key_allowed),
-          key_type_manager_(nullptr),
-          internal_key_factory_(nullptr),
-          key_factory_(&manager->get_key_factory()) {
-      primitive_to_manager_.emplace(std::type_index(typeid(P)),
-                                    absl::WrapUnique(manager));
-    }
-
-    template <typename P>
-    crypto::tink::util::StatusOr<const KeyManager<P>*> get_key_manager(
-        absl::string_view requested_type_url) const {
-      auto it = primitive_to_manager_.find(std::type_index(typeid(P)));
-      if (it == primitive_to_manager_.end()) {
-        return crypto::tink::util::Status(
-            absl::StatusCode::kInvalidArgument,
-            absl::StrCat(
-                "Primitive type ", typeid(P).name(),
-                " not among supported primitives ",
-                absl::StrJoin(
-                    primitive_to_manager_.begin(), primitive_to_manager_.end(),
-                    ", ",
-                    [](std::string* out,
-                       const std::pair<const std::type_index,
-                                       std::unique_ptr<KeyManagerBase>>& kv) {
-                      absl::StrAppend(out, kv.first.name());
-                    }),
-                " for type URL ", requested_type_url));
-      }
-      return static_cast<const KeyManager<P>*>(it->second.get());
-    }
-
-    const std::type_index& key_manager_type_index() const {
-      return key_manager_type_index_;
-    }
-
-    const absl::optional<std::type_index>& public_key_type_manager_type_index()
-        const {
-      return public_key_type_manager_type_index_;
-    }
-
-    bool new_key_allowed() const { return new_key_allowed_.load(); }
-
-    void set_new_key_allowed(bool b) { new_key_allowed_.store(b); }
-
-    const KeyFactory& key_factory() const { return *key_factory_; }
-
-    const std::function<crypto::tink::util::StatusOr<
-        google::crypto::tink::KeyData>(absl::string_view, InputStream*)>&
-    key_deriver() const {
-      return key_deriver_;
-    }
-
-   private:
-    // Dynamic type_index of the KeyManager or KeyTypeManager for this key type.
-    std::type_index key_manager_type_index_;
-    // Dynamic type_index of the public KeyTypeManager for this key type when
-    // inserted into the registry via RegisterAsymmetricKeyManagers. Otherwise,
-    // nullopt.
-    absl::optional<std::type_index> public_key_type_manager_type_index_;
-    // Whether the key manager allows the creation of new keys.
-    std::atomic<bool> new_key_allowed_;
-
-    // Map from primitive type_index to KeyManager.
-    absl::flat_hash_map<std::type_index, std::unique_ptr<KeyManagerBase>>
-        primitive_to_manager_;
-    // Key type manager. Equals nullptr if KeyTypeInfo was constructed from a
-    // KeyManager.
-    const std::shared_ptr<void> key_type_manager_;
-
-    // Key factory. Equals nullptr if KeyTypeInfo was constructed from a
-    // KeyManager.
-    std::unique_ptr<const KeyFactory> internal_key_factory_;
-    // Unowned version of `internal_key_factory_` if KeyTypeInfo was constructed
-    // from a KeyTypeManager.
-    // Key factory belonging to the KeyManager if KeyTypeInfo was constructed
-    // from a KeyManager.
-    const KeyFactory* key_factory_;
-
-    // Derives a key if KeyTypeInfo was constructed from a KeyTypeManager with a
-    // non-void KeyFormat type. Else, this function is empty and casting to a
-    // bool returns false.
-    std::function<crypto::tink::util::StatusOr<google::crypto::tink::KeyData>(
-        absl::string_view, InputStream*)>
-        key_deriver_;
-  };
-
   class WrapperInfo {
    public:
     template <typename P, typename Q>
@@ -387,26 +232,17 @@ class RegistryImpl {
   // Returns the key type info for a given type URL. Since we never replace
   // key type infos, the pointers will stay valid for the lifetime of the
   // binary.
-  crypto::tink::util::StatusOr<const KeyTypeInfo*> get_key_type_info(
+  crypto::tink::util::StatusOr<const KeyTypeInfoStore::Info*> get_key_type_info(
       absl::string_view type_url) const ABSL_LOCKS_EXCLUDED(maps_mutex_);
 
-  // Returns OK if the key manager with the given type index can be inserted
-  // for type url type_url and parameter new_key_allowed. Otherwise returns
-  // an error to be returned to the user.
-  crypto::tink::util::Status CheckInsertable(
-      absl::string_view type_url, const std::type_index& key_manager_type_index,
-      bool new_key_allowed) const ABSL_SHARED_LOCKS_REQUIRED(maps_mutex_);
-
   mutable absl::Mutex maps_mutex_;
-  // A map from the type_url to the given KeyTypeInfo. Once emplaced KeyTypeInfo
-  // objects must remain valid throughout the life time of the binary. Hence,
-  // one should /never/ replace any element of the KeyTypeInfo. This is because
-  // get_key_type_manager() needs to guarantee that the returned
-  // key_type_manager remains valid.
-  // NOTE: We require pointer stability of the value, as get_key_type_info
-  // returns a pointer which needs to stay alive.
-  absl::flat_hash_map<std::string, std::unique_ptr<KeyTypeInfo>>
-      type_url_to_info_ ABSL_GUARDED_BY(maps_mutex_);
+  // Stores information about key types constructed from their KeyTypeManager or
+  // KeyManager.
+  // Once inserted, KeyTypeInfoStore::Info objects must remain valid for the
+  // lifetime of the binary, and the Info object's pointer stability is
+  // required. Elements in Info, which include the KeyTypeManager or KeyManager,
+  // must not be replaced.
+  KeyTypeInfoStore key_type_info_store_ ABSL_GUARDED_BY(maps_mutex_);
   // A map from the type_id to the corresponding wrapper.
   absl::flat_hash_map<std::type_index, std::unique_ptr<WrapperInfo>>
       primitive_to_wrapper_ ABSL_GUARDED_BY(maps_mutex_);
@@ -420,29 +256,13 @@ template <class P>
 crypto::tink::util::Status RegistryImpl::RegisterKeyManager(
     KeyManager<P>* manager, bool new_key_allowed) {
   auto owned_manager = absl::WrapUnique(manager);
-  if (owned_manager == nullptr) {
+  if (manager == nullptr) {
     return crypto::tink::util::Status(absl::StatusCode::kInvalidArgument,
                                       "Parameter 'manager' must be non-null.");
   }
-  std::string type_url = owned_manager->get_key_type();
-  if (!manager->DoesSupport(type_url)) {
-    return ToStatusF(absl::StatusCode::kInvalidArgument,
-                     "The manager does not support type '%s'.", type_url);
-  }
   absl::MutexLock lock(&maps_mutex_);
-  crypto::tink::util::Status status = CheckInsertable(
-      type_url, std::type_index(typeid(*owned_manager)), new_key_allowed);
-  if (!status.ok()) return status;
-
-  auto it = type_url_to_info_.find(type_url);
-  if (it != type_url_to_info_.end()) {
-    it->second->set_new_key_allowed(new_key_allowed);
-  } else {
-    auto key_type_info = absl::make_unique<KeyTypeInfo>(owned_manager.release(),
-                                                        new_key_allowed);
-    type_url_to_info_.insert({type_url, std::move(key_type_info)});
-  }
-  return crypto::tink::util::OkStatus();
+  return key_type_info_store_.AddKeyManager(std::move(owned_manager),
+                                            new_key_allowed);
 }
 
 template <class KeyProto, class KeyFormatProto, class PrimitiveList>
@@ -454,33 +274,9 @@ crypto::tink::util::Status RegistryImpl::RegisterKeyTypeManager(
     return crypto::tink::util::Status(absl::StatusCode::kInvalidArgument,
                                       "Parameter 'manager' must be non-null.");
   }
-  std::string type_url = manager->get_key_type();
   absl::MutexLock lock(&maps_mutex_);
-
-  // Check FIPS status
-  internal::FipsCompatibility fips_compatible = manager->FipsStatus();
-  auto fips_status = internal::ChecksFipsCompatibility(fips_compatible);
-  if (!fips_status.ok()) {
-    return crypto::tink::util::Status(
-        absl::StatusCode::kInternal,
-        absl::StrCat("Failed registering the key manager for ",
-                     typeid(*manager).name(),
-                     " as it is not FIPS compatible: ", fips_status.message()));
-  }
-
-  crypto::tink::util::Status status = CheckInsertable(
-      type_url, std::type_index(typeid(*manager)), new_key_allowed);
-  if (!status.ok()) return status;
-
-  auto it = type_url_to_info_.find(type_url);
-  if (it != type_url_to_info_.end()) {
-    it->second->set_new_key_allowed(new_key_allowed);
-  } else {
-    auto key_type_info =
-        absl::make_unique<KeyTypeInfo>(manager.release(), new_key_allowed);
-    type_url_to_info_.insert({type_url, std::move(key_type_info)});
-  }
-  return crypto::tink::util::OkStatus();
+  return key_type_info_store_.AddKeyTypeManager(std::move(manager),
+                                                new_key_allowed);
 }
 
 template <class PrivateKeyProto, class KeyFormatProto, class PublicKeyProto,
@@ -492,6 +288,7 @@ crypto::tink::util::Status RegistryImpl::RegisterAsymmetricKeyManagers(
     bool new_key_allowed) ABSL_LOCKS_EXCLUDED(maps_mutex_) {
   auto owned_private_manager = absl::WrapUnique(private_manager);
   auto owned_public_manager = absl::WrapUnique(public_manager);
+
   if (private_manager == nullptr) {
     return crypto::tink::util::Status(
         absl::StatusCode::kInvalidArgument,
@@ -502,119 +299,11 @@ crypto::tink::util::Status RegistryImpl::RegisterAsymmetricKeyManagers(
         absl::StatusCode::kInvalidArgument,
         "Parameter 'public_manager' must be non-null.");
   }
-  std::string private_type_url = private_manager->get_key_type();
-  std::string public_type_url = public_manager->get_key_type();
 
   absl::MutexLock lock(&maps_mutex_);
-
-  // Check FIPS status
-  auto private_fips_status =
-      internal::ChecksFipsCompatibility(private_manager->FipsStatus());
-
-  if (!private_fips_status.ok()) {
-    return crypto::tink::util::Status(
-        absl::StatusCode::kInternal,
-        absl::StrCat(
-            "Failed registering the key manager for ",
-            typeid(*private_manager).name(),
-            " as it is not FIPS compatible: ", private_fips_status.message()));
-  }
-
-  auto public_fips_status =
-      internal::ChecksFipsCompatibility(public_manager->FipsStatus());
-
-  if (!public_fips_status.ok()) {
-    return crypto::tink::util::Status(
-        absl::StatusCode::kInternal,
-        absl::StrCat(
-            "Failed registering the key manager for ",
-            typeid(*public_manager).name(),
-            " as it is not FIPS compatible: ", public_fips_status.message()));
-  }
-
-  crypto::tink::util::Status status = CheckInsertable(
-      private_type_url, std::type_index(typeid(*private_manager)),
+  return key_type_info_store_.AddAsymmetricKeyTypeManagers(
+      std::move(owned_private_manager), std::move(owned_public_manager),
       new_key_allowed);
-  if (!status.ok()) return status;
-  status =
-      CheckInsertable(public_type_url, std::type_index(typeid(*public_manager)),
-                      new_key_allowed);
-  if (!status.ok()) return status;
-
-  if (private_type_url == public_type_url) {
-    return crypto::tink::util::Status(
-        absl::StatusCode::kInvalidArgument,
-        "Passed in key managers must have different get_key_type() results.");
-  }
-
-  auto private_it = type_url_to_info_.find(private_type_url);
-  auto public_it = type_url_to_info_.find(public_type_url);
-  bool private_found = private_it != type_url_to_info_.end();
-  bool public_found = public_it != type_url_to_info_.end();
-
-  // Only one of the private and public key type managers is found.
-  if (private_found && !public_found) {
-    return crypto::tink::util::Status(
-        absl::StatusCode::kInvalidArgument,
-        absl::StrCat(
-            "Private key manager corresponding to ",
-            typeid(*private_manager).name(),
-            " was previously registered, but key manager corresponding to ",
-            typeid(*public_manager).name(),
-            " was not, so it's impossible to register them jointly"));
-  }
-  if (!private_found && public_found) {
-    return crypto::tink::util::Status(
-        absl::StatusCode::kInvalidArgument,
-        absl::StrCat("Key manager corresponding to ",
-                     typeid(*public_manager).name(),
-                     " was previously registered, but private key manager "
-                     "corresponding to ",
-                     typeid(*private_manager).name(),
-                     " was not, so it's impossible to register them jointly"));
-  }
-
-  // Both private and public key type managers are found.
-  if (private_found) {
-    // implies public_found.
-    if (!private_it->second->public_key_type_manager_type_index().has_value()) {
-      return crypto::tink::util::Status(
-          absl::StatusCode::kInvalidArgument,
-          absl::StrCat("private key manager corresponding to ",
-                       typeid(*private_manager).name(),
-                       " is already registered without public key manager, "
-                       "cannot be re-registered with public key manager. "));
-    }
-    if (*private_it->second->public_key_type_manager_type_index() !=
-        std::type_index(typeid(*public_manager))) {
-      return crypto::tink::util::Status(
-          absl::StatusCode::kInvalidArgument,
-          absl::StrCat(
-              "private key manager corresponding to ",
-              typeid(*private_manager).name(), " is already registered with ",
-              private_it->second->public_key_type_manager_type_index()->name(),
-              ", cannot be re-registered with ",
-              typeid(*public_manager).name()));
-    }
-  }
-
-  // Both private and public key type managers are not found.
-  if (!private_found) {
-    // !public_found must hold.
-    auto private_key_type_manager_info = absl::make_unique<KeyTypeInfo>(
-        owned_private_manager.release(), owned_public_manager.get(),
-        new_key_allowed);
-    type_url_to_info_.insert(
-        {private_type_url, std::move(private_key_type_manager_info)});
-    auto public_key_type_info = absl::make_unique<KeyTypeInfo>(
-        owned_public_manager.release(), new_key_allowed);
-    type_url_to_info_.insert(
-        {public_type_url, std::move(public_key_type_info)});
-  } else {
-    private_it->second->set_new_key_allowed(new_key_allowed);
-  }
-
-  return util::OkStatus();
 }
 
 template <class P, class Q>
@@ -647,12 +336,12 @@ template <class P>
 crypto::tink::util::StatusOr<const KeyManager<P>*>
 RegistryImpl::get_key_manager(absl::string_view type_url) const {
   absl::MutexLock lock(&maps_mutex_);
-  auto it = type_url_to_info_.find(type_url);
-  if (it == type_url_to_info_.end()) {
-    return ToStatusF(absl::StatusCode::kNotFound,
-                     "No manager for type '%s' has been registered.", type_url);
+  util::StatusOr<const KeyTypeInfoStore::Info*> info =
+      key_type_info_store_.Get(type_url);
+  if (!info.ok()) {
+    return info.status();
   }
-  return it->second->get_key_manager<P>(type_url);
+  return (*info)->get_key_manager<P>(type_url);
 }
 
 template <class P>
@@ -725,7 +414,7 @@ inline crypto::tink::util::Status RegistryImpl::RestrictToFipsIfEmpty() const {
   if (IsFipsModeEnabled()) {
     return util::OkStatus();
   }
-  if (type_url_to_info_.empty()) {
+  if (key_type_info_store_.IsEmpty()) {
     SetFipsRestricted();
     return util::OkStatus();
   }

@@ -13,6 +13,7 @@
 // limitations under the License.
 //
 ///////////////////////////////////////////////////////////////////////////////
+
 #include "tink/internal/registry_impl.h"
 
 #include <functional>
@@ -23,7 +24,6 @@
 
 #include "absl/container/flat_hash_map.h"
 #include "absl/status/status.h"
-#include "absl/status/statusor.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/string_view.h"
 #include "absl/synchronization/mutex.h"
@@ -35,28 +35,21 @@
 #include "tink/util/statusor.h"
 #include "proto/tink.pb.h"
 
-using crypto::tink::util::StatusOr;
-using google::crypto::tink::KeyData;
-using google::crypto::tink::KeyTemplate;
-
 namespace crypto {
 namespace tink {
 namespace internal {
 
 using ::crypto::tink::MonitoringClientFactory;
+using ::google::crypto::tink::KeyData;
+using ::google::crypto::tink::KeyTemplate;
 
-StatusOr<const RegistryImpl::KeyTypeInfo*> RegistryImpl::get_key_type_info(
+util::StatusOr<const KeyTypeInfoStore::Info*> RegistryImpl::get_key_type_info(
     absl::string_view type_url) const {
   absl::MutexLock lock(&maps_mutex_);
-  auto it = type_url_to_info_.find(type_url);
-  if (it == type_url_to_info_.end()) {
-    return ToStatusF(absl::StatusCode::kNotFound,
-                     "No manager for type '%s' has been registered.", type_url);
-  }
-  return it->second.get();
+  return key_type_info_store_.Get(type_url);
 }
 
-StatusOr<std::unique_ptr<KeyData>> RegistryImpl::NewKeyData(
+util::StatusOr<std::unique_ptr<KeyData>> RegistryImpl::NewKeyData(
     const KeyTemplate& key_template) const {
   auto key_type_info_or = get_key_type_info(key_template.type_url());
   if (!key_type_info_or.ok()) return key_type_info_or.status();
@@ -70,7 +63,7 @@ StatusOr<std::unique_ptr<KeyData>> RegistryImpl::NewKeyData(
       key_template.value());
 }
 
-StatusOr<std::unique_ptr<KeyData>> RegistryImpl::GetPublicKeyData(
+util::StatusOr<std::unique_ptr<KeyData>> RegistryImpl::GetPublicKeyData(
     absl::string_view type_url,
     absl::string_view serialized_private_key) const {
   auto key_type_info_or = get_key_type_info(type_url);
@@ -87,31 +80,8 @@ StatusOr<std::unique_ptr<KeyData>> RegistryImpl::GetPublicKeyData(
   return result;
 }
 
-crypto::tink::util::Status RegistryImpl::CheckInsertable(
-    absl::string_view type_url, const std::type_index& key_manager_type_index,
-    bool new_key_allowed) const {
-  auto it = type_url_to_info_.find(type_url);
-
-  if (it == type_url_to_info_.end()) {
-    return crypto::tink::util::OkStatus();
-  }
-  if (it->second->key_manager_type_index() != key_manager_type_index) {
-    return ToStatusF(absl::StatusCode::kAlreadyExists,
-                     "A manager for type '%s' has been already registered.",
-                     type_url);
-  }
-  if (!it->second->new_key_allowed() && new_key_allowed) {
-    return ToStatusF(absl::StatusCode::kAlreadyExists,
-                     "A manager for type '%s' has been already registered "
-                     "with forbidden new key operation.",
-                     type_url);
-  }
-  return crypto::tink::util::OkStatus();
-}
-
-crypto::tink::util::StatusOr<google::crypto::tink::KeyData>
-RegistryImpl::DeriveKey(const google::crypto::tink::KeyTemplate& key_template,
-                        InputStream* randomness) const {
+util::StatusOr<KeyData> RegistryImpl::DeriveKey(const KeyTemplate& key_template,
+                                                InputStream* randomness) const {
   auto key_type_info_or = get_key_type_info(key_template.type_url());
   if (!key_type_info_or.ok()) return key_type_info_or.status();
   if (!key_type_info_or.value()->key_deriver()) {
@@ -138,7 +108,7 @@ util::Status RegistryImpl::RegisterMonitoringClientFactory(
 void RegistryImpl::Reset() {
   {
     absl::MutexLock lock(&maps_mutex_);
-    type_url_to_info_.clear();
+    key_type_info_store_ = KeyTypeInfoStore();
     primitive_to_wrapper_.clear();
   }
   {
