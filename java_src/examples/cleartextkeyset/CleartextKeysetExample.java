@@ -14,25 +14,23 @@
 // [START cleartext-keyset-example]
 package cleartextkeyset;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
+
 import com.google.crypto.tink.Aead;
-import com.google.crypto.tink.CleartextKeysetHandle;
-import com.google.crypto.tink.JsonKeysetReader;
-import com.google.crypto.tink.JsonKeysetWriter;
+import com.google.crypto.tink.InsecureSecretKeyAccess;
 import com.google.crypto.tink.KeysetHandle;
+import com.google.crypto.tink.TinkJsonProtoKeysetFormat;
 import com.google.crypto.tink.aead.AeadConfig;
 import com.google.crypto.tink.aead.PredefinedAeadParameters;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.security.GeneralSecurityException;
 
 /**
- * A command-line utility for generating, storing and using cleartext AES128_GCM keysets.
+ * A command-line utility for generating, storing and using AES128_GCM keysets.
  *
- * <h1>WARNING: It loads cleartext keys from disk - this is not recommended!
+ * <h1>WARNING: Loading a Keyset from disk is often a security problem -- hence this needs {@code
+ * InsecureSecretKeyAccess.get()}.
  *
  * <p>It requires the following arguments:
  *
@@ -63,7 +61,7 @@ public final class CleartextKeysetExample {
       System.err.print("The first argument should be either encrypt, decrypt or generate");
       System.exit(1);
     }
-    File keyFile = new File(args[1]);
+    Path keyFile = Paths.get(args[1]);
 
     // Initialise Tink: register all AEAD key types with the Tink runtime
     AeadConfig.register();
@@ -74,49 +72,33 @@ public final class CleartextKeysetExample {
       // [END generate-a-new-keyset]
 
       // [START store-a-cleartext-keyset]
-      try (FileOutputStream outputStream = new FileOutputStream(keyFile)) {
-        CleartextKeysetHandle.write(handle, JsonKeysetWriter.withOutputStream(outputStream));
-      }
+      String serializedKeyset =
+          TinkJsonProtoKeysetFormat.serializeKeyset(handle, InsecureSecretKeyAccess.get());
+      Files.write(keyFile, serializedKeyset.getBytes(UTF_8));
       // [END store-a-cleartext-keyset]
-      System.exit(0);
+      return;
     }
 
     // Use the primitive to encrypt/decrypt files
 
-    // Read the cleartext keyset
-    KeysetHandle handle = null;
-    try (FileInputStream inputStream = new FileInputStream(keyFile)) {
-      handle = CleartextKeysetHandle.read(JsonKeysetReader.withInputStream(inputStream));
-    } catch (GeneralSecurityException | IOException ex) {
-      System.err.println("Error reading key: " + ex);
-      System.exit(1);
-    }
+    // Read the keyset from disk
+    String serializedKeyset = new String(Files.readAllBytes(keyFile), UTF_8);
+    KeysetHandle handle =
+        TinkJsonProtoKeysetFormat.parseKeyset(serializedKeyset, InsecureSecretKeyAccess.get());
 
     // Get the primitive
-    Aead aead = null;
-    try {
-      aead = handle.getPrimitive(Aead.class);
-    } catch (GeneralSecurityException ex) {
-      System.err.println("Error creating primitive: %s " + ex);
-      System.exit(1);
-    }
+    Aead aead = handle.getPrimitive(Aead.class);
 
     byte[] input = Files.readAllBytes(Paths.get(args[2]));
-    File outputFile = new File(args[3]);
+    Path outputFile = Paths.get(args[3]);
 
     if (MODE_ENCRYPT.equals(mode)) {
       byte[] ciphertext = aead.encrypt(input, EMPTY_ASSOCIATED_DATA);
-      try (FileOutputStream stream = new FileOutputStream(outputFile)) {
-        stream.write(ciphertext);
-      }
+      Files.write(outputFile, ciphertext);
     } else if (MODE_DECRYPT.equals(mode)) {
       byte[] plaintext = aead.decrypt(input, EMPTY_ASSOCIATED_DATA);
-      try (FileOutputStream stream = new FileOutputStream(outputFile)) {
-        stream.write(plaintext);
-      }
+      Files.write(outputFile, plaintext);
     }
-
-    System.exit(0);
   }
 
   private CleartextKeysetExample() {}
