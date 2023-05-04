@@ -12,11 +12,11 @@ java_binary(
     srcs = ["HybridExample.java"],
     main_class = "hybrid.HybridExample",
     deps = [
-        "@tink_java//src/main/java/com/google/crypto/tink:cleartext_keyset_handle",
         "@tink_java//src/main/java/com/google/crypto/tink:hybrid_decrypt",
         "@tink_java//src/main/java/com/google/crypto/tink:hybrid_encrypt",
-        "@tink_java//src/main/java/com/google/crypto/tink:json_keyset_reader",
+        "@tink_java//src/main/java/com/google/crypto/tink:insecure_secret_key_access",
         "@tink_java//src/main/java/com/google/crypto/tink:registry_cluster",
+        "@tink_java//src/main/java/com/google/crypto/tink:tink_json_proto_keyset_format",
         "@tink_java//src/main/java/com/google/crypto/tink/hybrid:hybrid_config",
     ],
 )

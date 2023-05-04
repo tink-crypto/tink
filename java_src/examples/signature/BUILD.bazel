@@ -12,13 +12,12 @@ java_binary(
     srcs = ["SignatureExample.java"],
     main_class = "signature.SignatureExample",
     deps = [
-        "@tink_java//src/main/java/com/google/crypto/tink:cleartext_keyset_handle",
-        "@tink_java//src/main/java/com/google/crypto/tink:json_keyset_reader",
+        "@tink_java//src/main/java/com/google/crypto/tink:insecure_secret_key_access",
         "@tink_java//src/main/java/com/google/crypto/tink:public_key_sign",
         "@tink_java//src/main/java/com/google/crypto/tink:public_key_verify",
         "@tink_java//src/main/java/com/google/crypto/tink:registry_cluster",
+        "@tink_java//src/main/java/com/google/crypto/tink:tink_json_proto_keyset_format",
         "@tink_java//src/main/java/com/google/crypto/tink/signature:signature_config",
-        "@tink_java//src/main/java/com/google/crypto/tink/subtle:hex",
     ],
 )
 

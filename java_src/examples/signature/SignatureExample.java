@@ -16,21 +16,15 @@ package signature;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
-import com.google.crypto.tink.CleartextKeysetHandle;
-import com.google.crypto.tink.JsonKeysetReader;
+import com.google.crypto.tink.InsecureSecretKeyAccess;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.PublicKeySign;
 import com.google.crypto.tink.PublicKeyVerify;
+import com.google.crypto.tink.TinkJsonProtoKeysetFormat;
 import com.google.crypto.tink.signature.SignatureConfig;
-import com.google.crypto.tink.subtle.Hex;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.security.GeneralSecurityException;
-import java.util.List;
 
 /**
  * A command-line utility for digitally signing and verifying a file.
@@ -59,65 +53,33 @@ public final class SignatureExample {
       System.err.println("Incorrect mode. Please select sign or verify.");
       System.exit(1);
     }
-    File keyFile = new File(args[1]);
+    Path keyFile = Paths.get(args[1]);
     byte[] msg = Files.readAllBytes(Paths.get(args[2]));
-    File signatureFile = new File(args[3]);
+    Path signatureFile = Paths.get(args[3]);
 
     // Register all signature key types with the Tink runtime.
     SignatureConfig.register();
 
     // Read the keyset into a KeysetHandle.
-    KeysetHandle handle = null;
-    try (FileInputStream inputStream = new FileInputStream(keyFile)) {
-      handle = CleartextKeysetHandle.read(JsonKeysetReader.withInputStream(inputStream));
-    } catch (GeneralSecurityException | IOException ex) {
-      System.err.println("Cannot read keyset, got error: " + ex);
-      System.exit(1);
-    }
+    KeysetHandle handle =
+        TinkJsonProtoKeysetFormat.parseKeyset(
+            new String(Files.readAllBytes(keyFile), UTF_8), InsecureSecretKeyAccess.get());
 
     if (mode.equals("sign")) {
       // Get the primitive.
-      PublicKeySign signer = null;
-      try {
-        signer = handle.getPrimitive(PublicKeySign.class);
-      } catch (GeneralSecurityException ex) {
-        System.err.println("Cannot create primitive, got error: " + ex);
-        System.exit(1);
-      }
+      PublicKeySign signer = handle.getPrimitive(PublicKeySign.class);
 
       // Use the primitive to sign data.
       byte[] signature = signer.sign(msg);
-      try (FileOutputStream stream = new FileOutputStream(signatureFile)) {
-        stream.write(Hex.encode(signature).getBytes(UTF_8));
-      }
-      System.exit(0);
-    }
+      Files.write(signatureFile, signature);
+    } else {
+      byte[] signature = Files.readAllBytes(signatureFile);
 
-    List<String> lines = Files.readAllLines(signatureFile.toPath());
-    if (lines.size() != 1) {
-      System.err.printf("The signature file should contain only one line,  got %d", lines.size());
-      System.exit(1);
-    }
-    byte[] signature = Hex.decode(lines.get(0).trim());
+      // Get the primitive.
+      PublicKeyVerify verifier = handle.getPrimitive(PublicKeyVerify.class);
 
-    // Get the primitive.
-    PublicKeyVerify verifier = null;
-    try {
-      verifier = handle.getPrimitive(PublicKeyVerify.class);
-    } catch (GeneralSecurityException ex) {
-      System.err.println("Cannot create primitive, got error: " + ex);
-      System.exit(1);
-    }
-
-    // Use the primitive to verify data.
-    try {
       verifier.verify(signature, msg);
-    } catch (GeneralSecurityException ex) {
-      System.err.println("Signature verification failed.");
-      System.exit(1);
     }
-
-    System.exit(0);
   }
 
   private SignatureExample() {}

@@ -16,18 +16,15 @@ package hybrid;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
-import com.google.crypto.tink.CleartextKeysetHandle;
 import com.google.crypto.tink.HybridDecrypt;
 import com.google.crypto.tink.HybridEncrypt;
-import com.google.crypto.tink.JsonKeysetReader;
+import com.google.crypto.tink.InsecureSecretKeyAccess;
 import com.google.crypto.tink.KeysetHandle;
+import com.google.crypto.tink.TinkJsonProtoKeysetFormat;
 import com.google.crypto.tink.hybrid.HybridConfig;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.nio.file.Files;
-import java.security.GeneralSecurityException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 /**
  * A command-line utility for hybrid encryption.
@@ -57,10 +54,10 @@ public final class HybridExample {
       System.err.println("Incorrect mode. Please select encrypt or decrypt.");
       System.exit(1);
     }
-    File keyFile = new File(args[1]);
-    File inputFile = new File(args[2]);
-    byte[] input = Files.readAllBytes(inputFile.toPath());
-    File outputFile = new File(args[3]);
+    Path keyFile = Paths.get(args[1]);
+    Path inputFile = Paths.get(args[2]);
+    byte[] input = Files.readAllBytes(inputFile);
+    Path outputFile = Paths.get(args[3]);
     byte[] contextInfo = new byte[0];
     if (args.length == 5) {
       contextInfo = args[4].getBytes(UTF_8);
@@ -70,47 +67,24 @@ public final class HybridExample {
     HybridConfig.register();
 
     // Read the keyset into a KeysetHandle.
-    KeysetHandle handle = null;
-    try (FileInputStream inputStream = new FileInputStream(keyFile)) {
-      handle = CleartextKeysetHandle.read(JsonKeysetReader.withInputStream(inputStream));
-    } catch (GeneralSecurityException | IOException ex) {
-      System.err.println("Cannot read keyset, got error: " + ex);
-      System.exit(1);
-    }
+    KeysetHandle handle =
+        TinkJsonProtoKeysetFormat.parseKeyset(
+            new String(Files.readAllBytes(keyFile), UTF_8), InsecureSecretKeyAccess.get());
 
     if (mode.equals("encrypt")) {
       // Get the primitive.
-      HybridEncrypt encryptor = null;
-      try {
-        encryptor = handle.getPrimitive(HybridEncrypt.class);
-      } catch (GeneralSecurityException ex) {
-        System.err.println("Cannot create primitive, got error: " + ex);
-        System.exit(1);
-      }
+      HybridEncrypt encryptor = handle.getPrimitive(HybridEncrypt.class);
 
       // Use the primitive to encrypt data.
       byte[] ciphertext = encryptor.encrypt(input, contextInfo);
-      try (FileOutputStream stream = new FileOutputStream(outputFile)) {
-        stream.write(ciphertext);
-      }
-      System.exit(0);
-    }
+      Files.write(outputFile, ciphertext);
+    } else {
+      HybridDecrypt decryptor = handle.getPrimitive(HybridDecrypt.class);
 
-    // Get the primitive.
-    HybridDecrypt decryptor = null;
-    try {
-      decryptor = handle.getPrimitive(HybridDecrypt.class);
-    } catch (GeneralSecurityException ex) {
-      System.err.println("Cannot create primitive, got error: " + ex);
-      System.exit(1);
+      // Use the primitive to decrypt data.
+      byte[] plaintext = decryptor.decrypt(input, contextInfo);
+      Files.write(outputFile, plaintext);
     }
-
-    // Use the primitive to decrypt data.
-    byte[] plaintext = decryptor.decrypt(input, contextInfo);
-    try (FileOutputStream stream = new FileOutputStream(outputFile)) {
-      stream.write(plaintext);
-    }
-    System.exit(0);
   }
 
   private HybridExample() {}
