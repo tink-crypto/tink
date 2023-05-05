@@ -30,6 +30,7 @@
 
 readonly DEFAULT_OPENSSL_VERSION="1.1.1l"
 readonly DEFAULT_OPENSSL_SHA256="0b7a3e5e59c34827fe0c3a74b7ec8baef302b98fa80088d7f9153aa16fa76bd1"
+readonly PLATFORM="$(uname | tr '[:upper:]' '[:lower:]')"
 
 install_openssl() {
   local openssl_version="${1:-${DEFAULT_OPENSSL_VERSION}}"
@@ -47,8 +48,12 @@ install_openssl() {
     tar xzf "${openssl_archive}"
     cd "${openssl_name}"
     ./config --prefix="${openssl_tmpdir}" --openssldir="${openssl_tmpdir}"
-    make
-    make install
+    if [[ "${PLATFORM}" == "darwin" ]]; then
+      make -j "$(sysctl -n hw.ncpu)"
+    else
+      make -j "$(nproc)"
+    fi
+    make install_sw > /dev/null
   )
   export OPENSSL_ROOT_DIR="${openssl_tmpdir}"
   export PATH="${openssl_tmpdir}/bin:${PATH}"
