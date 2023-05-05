@@ -31,17 +31,39 @@ ts_library(
 )
 
 ts_library(
+    name = "hmac_key_manager",
+    srcs = [
+        "hmac_key_manager.ts",
+    ],
+    deps = [
+        "//exception",
+        "//internal:key_manager",
+        "//internal:proto",
+        "//internal:proto_shims",
+        "//internal:registry",
+        "//internal:util",
+        "//mac/internal",
+        "//subtle:hmac",
+        "//subtle:random",
+        "//subtle:validators",
+    ],
+)
+
+ts_library(
     name = "mac_tests",
     testonly = True,
     srcs = [
+        "hmac_key_manager_test.ts",
         "mac_wrapper_test.ts",
     ],
     deps = [
+        ":hmac_key_manager",
         ":mac_wrapper",
         "//exception",
         "//internal:crypto_format",
         "//internal:primitive_set",
         "//internal:proto",
+        "//internal:proto_shims",
         "//mac/internal",
         "//subtle:bytes",
         "//subtle:random",
