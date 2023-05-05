@@ -14,21 +14,18 @@
 // [START encrypted-keyset-example]
 package encryptedkeyset;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
+
 import com.google.crypto.tink.Aead;
-import com.google.crypto.tink.JsonKeysetReader;
-import com.google.crypto.tink.JsonKeysetWriter;
 import com.google.crypto.tink.KeysetHandle;
+import com.google.crypto.tink.TinkJsonProtoKeysetFormat;
 import com.google.crypto.tink.aead.AeadConfig;
 import com.google.crypto.tink.aead.KmsAeadKeyManager;
 import com.google.crypto.tink.aead.PredefinedAeadParameters;
 import com.google.crypto.tink.integration.gcpkms.GcpKmsClient;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.security.GeneralSecurityException;
 import java.util.Optional;
 
 /**
@@ -65,7 +62,7 @@ public final class EncryptedKeysetExample {
       System.err.print("The first argument should be either encrypt, decrypt or generate");
       System.exit(1);
     }
-    File keyFile = new File(args[1]);
+    Path keyFile = Paths.get(args[1]);
     String kekUri = args[2];
     String gcpCredentialFilename = args[3];
 
@@ -73,23 +70,12 @@ public final class EncryptedKeysetExample {
     AeadConfig.register();
 
     // Read the GCP credentials and set up client
-    try {
-      GcpKmsClient.register(Optional.of(kekUri), Optional.of(gcpCredentialFilename));
-    } catch (GeneralSecurityException ex) {
-      System.err.println("Error initializing GCP client: " + ex);
-      System.exit(1);
-    }
+    GcpKmsClient.register(Optional.of(kekUri), Optional.of(gcpCredentialFilename));
 
     // From the key-encryption key (KEK) URI, create a remote AEAD primitive for encrypting Tink
     // keysets.
-    Aead kekAead = null;
-    try {
-      KeysetHandle handle = KeysetHandle.generateNew(KmsAeadKeyManager.createKeyTemplate(kekUri));
-      kekAead = handle.getPrimitive(Aead.class);
-    } catch (GeneralSecurityException ex) {
-      System.err.println("Error creating primitive: %s " + ex);
-      System.exit(1);
-    }
+    KeysetHandle kekHandle = KeysetHandle.generateNew(KmsAeadKeyManager.createKeyTemplate(kekUri));
+    Aead kekAead = kekHandle.getPrimitive(Aead.class);
 
     if (MODE_GENERATE.equals(mode)) {
       // [START generate-a-new-keyset]
@@ -97,49 +83,36 @@ public final class EncryptedKeysetExample {
       // [END generate-a-new-keyset]
 
       // [START encrypt-a-keyset]
-      try (FileOutputStream outputStream = new FileOutputStream(keyFile)) {
-        handle.write(JsonKeysetWriter.withOutputStream(outputStream), kekAead);
-      }
+      String serializedEncryptedKeyset =
+          TinkJsonProtoKeysetFormat.serializeEncryptedKeyset(
+              handle, kekAead, EMPTY_ASSOCIATED_DATA);
+      Files.write(keyFile, serializedEncryptedKeyset.getBytes(UTF_8));
       // [END encrypt-a-keyset]
-      System.exit(0);
+      return;
     }
 
     // Use the primitive to encrypt/decrypt files
 
     // Read the encrypted keyset
-    KeysetHandle handle = null;
-    try (FileInputStream inputStream = new FileInputStream(keyFile)) {
-      handle = KeysetHandle.read(JsonKeysetReader.withInputStream(inputStream), kekAead);
-    } catch (GeneralSecurityException | IOException ex) {
-      System.err.println("Error reading key: " + ex);
-      System.exit(1);
-    }
+    KeysetHandle handle =
+        TinkJsonProtoKeysetFormat.parseEncryptedKeyset(
+            new String(Files.readAllBytes(keyFile), UTF_8), kekAead, EMPTY_ASSOCIATED_DATA);
 
     // Get the primitive
-    Aead aead = null;
-    try {
-      aead = handle.getPrimitive(Aead.class);
-    } catch (GeneralSecurityException ex) {
-      System.err.println("Error creating primitive: %s " + ex);
-      System.exit(1);
-    }
+    Aead aead = handle.getPrimitive(Aead.class);
 
-    byte[] input = Files.readAllBytes(Paths.get(args[4]));
-    File outputFile = new File(args[5]);
+    Path inputFile = Paths.get(args[4]);
+    Path outputFile = Paths.get(args[5]);
 
     if (MODE_ENCRYPT.equals(mode)) {
-      byte[] ciphertext = aead.encrypt(input, EMPTY_ASSOCIATED_DATA);
-      try (FileOutputStream stream = new FileOutputStream(outputFile)) {
-        stream.write(ciphertext);
-      }
+      byte[] plaintext = Files.readAllBytes(inputFile);
+      byte[] ciphertext = aead.encrypt(plaintext, EMPTY_ASSOCIATED_DATA);
+      Files.write(outputFile, ciphertext);
     } else if (MODE_DECRYPT.equals(mode)) {
-      byte[] plaintext = aead.decrypt(input, EMPTY_ASSOCIATED_DATA);
-      try (FileOutputStream stream = new FileOutputStream(outputFile)) {
-        stream.write(plaintext);
-      }
+      byte[] ciphertext = Files.readAllBytes(inputFile);
+      byte[] plaintext = aead.decrypt(ciphertext, EMPTY_ASSOCIATED_DATA);
+      Files.write(outputFile, plaintext);
     }
-
-    System.exit(0);
   }
 
   private EncryptedKeysetExample() {}

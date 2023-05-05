@@ -8,10 +8,9 @@ java_binary(
     main_class = "encryptedkeyset.EncryptedKeysetExample",
     deps = [
         "@tink_java//src/main/java/com/google/crypto/tink:aead",
-        "@tink_java//src/main/java/com/google/crypto/tink:json_keyset_reader",
-        "@tink_java//src/main/java/com/google/crypto/tink:json_keyset_writer",
         "@tink_java//src/main/java/com/google/crypto/tink:key_templates",
         "@tink_java//src/main/java/com/google/crypto/tink:registry_cluster",
+        "@tink_java//src/main/java/com/google/crypto/tink:tink_json_proto_keyset_format",
         "@tink_java//src/main/java/com/google/crypto/tink/aead:aead_config",
         "@tink_java//src/main/java/com/google/crypto/tink/aead:kms_aead_key_manager",
         "@tink_java//src/main/java/com/google/crypto/tink/aead:predefined_aead_parameters",
