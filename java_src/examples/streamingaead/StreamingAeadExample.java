@@ -16,17 +16,20 @@ package streamingaead;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
-import com.google.crypto.tink.CleartextKeysetHandle;
-import com.google.crypto.tink.JsonKeysetReader;
+import com.google.crypto.tink.InsecureSecretKeyAccess;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.StreamingAead;
+import com.google.crypto.tink.TinkJsonProtoKeysetFormat;
 import com.google.crypto.tink.streamingaead.StreamingAeadConfig;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel;
+import java.nio.channels.ReadableByteChannel;
+import java.nio.channels.WritableByteChannel;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.security.GeneralSecurityException;
 
 /**
@@ -46,6 +49,7 @@ import java.security.GeneralSecurityException;
 public final class StreamingAeadExample {
   private static final String MODE_ENCRYPT = "encrypt";
   private static final String MODE_DECRYPT = "decrypt";
+  private static final int BLOCK_SIZE_IN_BYTES = 8 * 1024;
 
   public static void main(String[] args) throws Exception {
     if (args.length != 4 && args.length != 5) {
@@ -56,9 +60,9 @@ public final class StreamingAeadExample {
       System.exit(1);
     }
     String mode = args[0];
-    File keyFile = new File(args[1]);
-    File inputFile = new File(args[2]);
-    File outputFile = new File(args[3]);
+    Path keyFile = Paths.get(args[1]);
+    Path inputFile = Paths.get(args[2]);
+    Path outputFile = Paths.get(args[3]);
     byte[] associatedData = new byte[0];
     if (args.length == 5) {
       associatedData = args[4].getBytes(UTF_8);
@@ -68,22 +72,12 @@ public final class StreamingAeadExample {
     StreamingAeadConfig.register();
 
     // Read the keyset into a KeysetHandle
-    KeysetHandle handle = null;
-    try (FileInputStream inputStream = new FileInputStream(keyFile)) {
-      handle = CleartextKeysetHandle.read(JsonKeysetReader.withInputStream(inputStream));
-    } catch (GeneralSecurityException | IOException ex) {
-      System.err.println("Cannot read keyset, got error: " + ex);
-      System.exit(1);
-    }
+    KeysetHandle handle =
+        TinkJsonProtoKeysetFormat.parseKeyset(
+            new String(Files.readAllBytes(keyFile), UTF_8), InsecureSecretKeyAccess.get());
 
     // Get the primitive
-    StreamingAead streamingAead = null;
-    try {
-      streamingAead = handle.getPrimitive(StreamingAead.class);
-    } catch (GeneralSecurityException ex) {
-      System.err.println("Cannot create primitive, got error: " + ex);
-      System.exit(1);
-    }
+    StreamingAead streamingAead = handle.getPrimitive(StreamingAead.class);
 
     // Use the primitive to encrypt/decrypt files
     if (MODE_ENCRYPT.equals(mode)) {
@@ -94,39 +88,52 @@ public final class StreamingAeadExample {
       System.err.println("The first argument must be either encrypt or decrypt, got: " + mode);
       System.exit(1);
     }
-
-    System.exit(0);
   }
 
   private static void encryptFile(
-      StreamingAead streamingAead, File inputFile, File outputFile, byte[] associatedData)
+      StreamingAead streamingAead, Path inputFile, Path outputFile, byte[] associatedData)
       throws GeneralSecurityException, IOException {
-    try (OutputStream ciphertextStream =
-            streamingAead.newEncryptingStream(new FileOutputStream(outputFile), associatedData);
-        InputStream plaintextStream = new FileInputStream(inputFile)) {
-      byte[] chunk = new byte[1024];
-      int chunkLen = 0;
-      while ((chunkLen = plaintextStream.read(chunk)) != -1) {
-        ciphertextStream.write(chunk, 0, chunkLen);
+    try (WritableByteChannel plaintextChannel =
+            streamingAead.newEncryptingChannel(
+                FileChannel.open(outputFile, StandardOpenOption.WRITE, StandardOpenOption.CREATE),
+                associatedData);
+        FileChannel inputChannel = FileChannel.open(inputFile, StandardOpenOption.READ)) {
+      ByteBuffer byteBuffer = ByteBuffer.allocate(BLOCK_SIZE_IN_BYTES);
+      while (true) {
+        int read = inputChannel.read(byteBuffer);
+        if (read <= 0) {
+          return;
+        }
+        byteBuffer.flip();
+        while (byteBuffer.hasRemaining()) {
+          plaintextChannel.write(byteBuffer);
+        }
+        byteBuffer.clear();
       }
     }
   }
 
   private static void decryptFile(
-      StreamingAead streamingAead, File inputFile, File outputFile, byte[] associatedData)
+      StreamingAead streamingAead, Path inputFile, Path outputFile, byte[] associatedData)
       throws GeneralSecurityException, IOException {
-    InputStream ciphertextStream =
-        streamingAead.newDecryptingStream(new FileInputStream(inputFile), associatedData);
-
-    OutputStream plaintextStream = new FileOutputStream(outputFile);
-    byte[] chunk = new byte[1024];
-    int chunkLen = 0;
-    while ((chunkLen = ciphertextStream.read(chunk)) != -1) {
-      plaintextStream.write(chunk, 0, chunkLen);
+    try (ReadableByteChannel plaintextChannel =
+            streamingAead.newDecryptingChannel(
+                FileChannel.open(inputFile, StandardOpenOption.READ), associatedData);
+        FileChannel outputChannel =
+            FileChannel.open(outputFile, StandardOpenOption.WRITE, StandardOpenOption.CREATE)) {
+      ByteBuffer byteBuffer = ByteBuffer.allocate(BLOCK_SIZE_IN_BYTES);
+      while (true) {
+        int read = plaintextChannel.read(byteBuffer);
+        if (read <= 0) {
+          return;
+        }
+        byteBuffer.flip();
+        while (byteBuffer.hasRemaining()) {
+          outputChannel.write(byteBuffer);
+        }
+        byteBuffer.clear();
+      }
     }
-
-    ciphertextStream.close();
-    plaintextStream.close();
   }
 
   private StreamingAeadExample() {}
