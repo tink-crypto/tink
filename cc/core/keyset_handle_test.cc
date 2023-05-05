@@ -52,28 +52,30 @@
 #include "tink/util/test_keyset_handle.h"
 #include "tink/util/test_matchers.h"
 #include "tink/util/test_util.h"
+#include "proto/aes_gcm_siv.pb.h"
 #include "proto/tink.pb.h"
 
 namespace crypto {
 namespace tink {
 
-using crypto::tink::TestKeysetHandle;
-using crypto::tink::test::AddKeyData;
-using crypto::tink::test::AddLegacyKey;
-using crypto::tink::test::AddRawKey;
-using crypto::tink::test::AddTinkKey;
-using crypto::tink::test::DummyAead;
-using crypto::tink::test::IsOk;
-using crypto::tink::test::StatusIs;
-using google::crypto::tink::AesGcmKey;
-using google::crypto::tink::AesGcmKeyFormat;
-using google::crypto::tink::EcdsaKeyFormat;
-using google::crypto::tink::EncryptedKeyset;
-using google::crypto::tink::KeyData;
-using google::crypto::tink::Keyset;
-using google::crypto::tink::KeyStatusType;
-using google::crypto::tink::KeyTemplate;
-using google::crypto::tink::OutputPrefixType;
+using ::crypto::tink::TestKeysetHandle;
+using ::crypto::tink::test::AddKeyData;
+using ::crypto::tink::test::AddLegacyKey;
+using ::crypto::tink::test::AddRawKey;
+using ::crypto::tink::test::AddTinkKey;
+using ::crypto::tink::test::DummyAead;
+using ::crypto::tink::test::IsOk;
+using ::crypto::tink::test::StatusIs;
+using ::google::crypto::tink::AesGcmKey;
+using ::google::crypto::tink::AesGcmKeyFormat;
+using ::google::crypto::tink::AesGcmSivKey;
+using ::google::crypto::tink::EcdsaKeyFormat;
+using ::google::crypto::tink::EncryptedKeyset;
+using ::google::crypto::tink::KeyData;
+using ::google::crypto::tink::Keyset;
+using ::google::crypto::tink::KeyStatusType;
+using ::google::crypto::tink::KeyTemplate;
+using ::google::crypto::tink::OutputPrefixType;
 using ::testing::_;
 using ::testing::Eq;
 using ::testing::IsFalse;
@@ -86,6 +88,7 @@ namespace {
 class KeysetHandleTest : public ::testing::Test {
  protected:
   void SetUp() override {
+    Registry::Reset();
     auto status = TinkConfig::Register();
     ASSERT_TRUE(status.ok()) << status;
 
@@ -802,28 +805,24 @@ TEST_F(KeysetHandleTest, GetPrimitiveWithConfigFips1402FailsWithNonFipsHandle) {
     GTEST_SKIP() << "Only test in FIPS mode";
   }
 
-  KeyTemplate templ = AeadKeyTemplates::Aes256Eax();
+  KeyTemplate non_fips_key_template = AeadKeyTemplates::Aes256GcmSiv();
   // Use ConfigFips140_2().
   const internal::RegistryImpl& registry =
       internal::ConfigurationImpl::get_registry(ConfigFips140_2());
-  EXPECT_THAT(registry.NewKeyData(templ), Not(IsOk()));
-  // Use the global registry.
-  util::StatusOr<std::unique_ptr<KeyData>> key_data =
-      Registry::NewKeyData(templ);
-  ASSERT_THAT(key_data, IsOk());
+  EXPECT_THAT(registry.NewKeyData(non_fips_key_template), Not(IsOk()));
 
   Keyset keyset;
   uint32_t key_id = 0;
-  test::AddKeyData(**key_data, key_id, OutputPrefixType::TINK,
-                   KeyStatusType::ENABLED, &keyset);
+  AesGcmSivKey key_proto;
+  *key_proto.mutable_key_value() = subtle::Random::GetRandomBytes(32);
+  test::AddTinkKey(non_fips_key_template.type_url(), key_id, key_proto,
+                   KeyStatusType::ENABLED, KeyData::SYMMETRIC, &keyset);
   keyset.set_primary_key_id(key_id);
   std::unique_ptr<KeysetHandle> handle =
       TestKeysetHandle::GetKeysetHandle(keyset);
 
   // Use ConfigFips140_2().
   EXPECT_THAT(handle->GetPrimitive<Aead>(ConfigFips140_2()), Not(IsOk()));
-  // Use the global registry.
-  EXPECT_THAT(handle->GetPrimitive<Aead>(), IsOk());
 }
 
 // Tests that GetPrimitive(nullptr) fails with a non-ok status.

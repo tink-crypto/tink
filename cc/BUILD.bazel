@@ -857,6 +857,7 @@ cc_test(
         "//internal:legacy_proto_parameters",
         "//internal:proto_parameters_serialization",
         "//mac:mac_key_templates",
+        "//proto:aes_gcm_siv_cc_proto",
         "//proto:tink_cc_proto",
         "//signature:ecdsa_sign_key_manager",
         "//signature:signature_key_templates",

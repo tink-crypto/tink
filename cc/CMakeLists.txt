@@ -809,6 +809,7 @@ tink_cc_test(
     tink::util::test_keyset_handle
     tink::util::test_matchers
     tink::util::test_util
+    tink::proto::aes_gcm_siv_cc_proto
     tink::proto::tink_cc_proto
 )
 
