@@ -35,11 +35,14 @@ readonly PLATFORM="$(uname | tr '[:upper:]' '[:lower:]')"
 install_openssl() {
   local openssl_version="${1:-${DEFAULT_OPENSSL_VERSION}}"
   local openssl_sha256="${2:-${DEFAULT_OPENSSL_SHA256}}"
+
   local openssl_name="openssl-${openssl_version}"
   local openssl_archive="${openssl_name}.tar.gz"
   local openssl_url="https://www.openssl.org/source/${openssl_archive}"
 
-  local openssl_tmpdir="$(mktemp -dt tink-openssl.XXXXXX)"
+  local openssl_tmpdir="$(mktemp -dt tink-openssl-${openssl_version}.XXXXXX)"
+  echo "Building and installing OpensSSL ${openssl_version} to \
+${openssl_tmpdir}..."
   (
     cd "${openssl_tmpdir}"
     curl -OLsS "${openssl_url}"
@@ -49,12 +52,13 @@ install_openssl() {
     cd "${openssl_name}"
     ./config --prefix="${openssl_tmpdir}" --openssldir="${openssl_tmpdir}"
     if [[ "${PLATFORM}" == "darwin" ]]; then
-      make -j "$(sysctl -n hw.ncpu)"
+      make -j "$(sysctl -n hw.ncpu)" > /dev/null
     else
-      make -j "$(nproc)"
+      make -j "$(nproc)" > /dev/null
     fi
     make install_sw > /dev/null
   )
+  echo "Done"
   export OPENSSL_ROOT_DIR="${openssl_tmpdir}"
   export PATH="${openssl_tmpdir}/bin:${PATH}"
 }
