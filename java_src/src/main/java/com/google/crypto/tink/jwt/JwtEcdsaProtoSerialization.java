@@ -19,17 +19,26 @@ package com.google.crypto.tink.jwt;
 import static com.google.crypto.tink.internal.Util.toBytesFromPrintableAscii;
 
 import com.google.crypto.tink.AccessesPartialKey;
+import com.google.crypto.tink.SecretKeyAccess;
+import com.google.crypto.tink.internal.BigIntegerEncoding;
+import com.google.crypto.tink.internal.KeyParser;
+import com.google.crypto.tink.internal.KeySerializer;
 import com.google.crypto.tink.internal.MutableSerializationRegistry;
 import com.google.crypto.tink.internal.ParametersParser;
 import com.google.crypto.tink.internal.ParametersSerializer;
+import com.google.crypto.tink.internal.ProtoKeySerialization;
 import com.google.crypto.tink.internal.ProtoParametersSerialization;
 import com.google.crypto.tink.proto.JwtEcdsaAlgorithm;
+import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
 import com.google.crypto.tink.proto.KeyTemplate;
 import com.google.crypto.tink.proto.OutputPrefixType;
 import com.google.crypto.tink.util.Bytes;
+import com.google.protobuf.ByteString;
 import com.google.protobuf.ExtensionRegistryLite;
 import com.google.protobuf.InvalidProtocolBufferException;
 import java.security.GeneralSecurityException;
+import java.security.spec.ECPoint;
+import javax.annotation.Nullable;
 
 /**
  * Methods to serialize and parse {@link JwtEcdsaPrivateKey}, {@link JwtEcdsaPublicKey}, and {@link
@@ -41,6 +50,10 @@ final class JwtEcdsaProtoSerialization {
   private static final String TYPE_URL =
       "type.googleapis.com/google.crypto.tink.JwtEcdsaPrivateKey";
   private static final Bytes TYPE_URL_BYTES = toBytesFromPrintableAscii(TYPE_URL);
+
+  private static final String PUBLIC_TYPE_URL =
+      "type.googleapis.com/google.crypto.tink.JwtEcdsaPublicKey";
+  private static final Bytes PUBLIC_TYPE_URL_BYTES = toBytesFromPrintableAscii(PUBLIC_TYPE_URL);
 
   private static final ParametersSerializer<JwtEcdsaParameters, ProtoParametersSerialization>
       PARAMETERS_SERIALIZER =
@@ -54,6 +67,19 @@ final class JwtEcdsaProtoSerialization {
           JwtEcdsaProtoSerialization::parseParameters,
           TYPE_URL_BYTES,
           ProtoParametersSerialization.class);
+
+  private static final KeySerializer<JwtEcdsaPublicKey, ProtoKeySerialization>
+      PUBLIC_KEY_SERIALIZER =
+          KeySerializer.create(
+              JwtEcdsaProtoSerialization::serializePublicKey,
+              JwtEcdsaPublicKey.class,
+              ProtoKeySerialization.class);
+
+  private static final KeyParser<ProtoKeySerialization> PUBLIC_KEY_PARSER =
+      KeyParser.create(
+          JwtEcdsaProtoSerialization::parsePublicKey,
+          PUBLIC_TYPE_URL_BYTES,
+          ProtoKeySerialization.class);
 
   private static JwtEcdsaAlgorithm toProtoAlgorithm(JwtEcdsaParameters.Algorithm algorithm)
       throws GeneralSecurityException {
@@ -147,6 +173,115 @@ final class JwtEcdsaProtoSerialization {
         .build();
   }
 
+  private static int getEncodingLength(JwtEcdsaParameters.Algorithm algorithm)
+      throws GeneralSecurityException {
+    // We currently encode with one extra 0 byte at the beginning, to make sure
+    // that parsing is correct even if passing of a two's complement encoding is used.
+    // We want to prevent bugs similar to b/264525021
+    if (algorithm.equals(JwtEcdsaParameters.Algorithm.ES256)) {
+      return 33;
+    }
+    if (algorithm.equals(JwtEcdsaParameters.Algorithm.ES384)) {
+      return 49;
+    }
+    if (algorithm.equals(JwtEcdsaParameters.Algorithm.ES512)) {
+      return 67;
+    }
+    throw new GeneralSecurityException("Unknown algorithm: " + algorithm);
+  }
+
+  private static OutputPrefixType toProtoOutputPrefixType(JwtEcdsaParameters parameters) {
+    if (parameters.getKidStrategy().equals(JwtEcdsaParameters.KidStrategy.BASE64_ENCODED_KEY_ID)) {
+      return OutputPrefixType.TINK;
+    }
+    return OutputPrefixType.RAW;
+  }
+
+  private static com.google.crypto.tink.proto.JwtEcdsaPublicKey serializePublicKey(
+      JwtEcdsaPublicKey key) throws GeneralSecurityException {
+    int encLength = getEncodingLength(key.getParameters().getAlgorithm());
+    ECPoint publicPoint = key.getPublicPoint();
+    com.google.crypto.tink.proto.JwtEcdsaPublicKey.Builder builder =
+        com.google.crypto.tink.proto.JwtEcdsaPublicKey.newBuilder()
+            .setVersion(0)
+            .setAlgorithm(toProtoAlgorithm(key.getParameters().getAlgorithm()))
+            .setX(
+                ByteString.copyFrom(
+                    BigIntegerEncoding.toBigEndianBytesOfFixedLength(
+                        publicPoint.getAffineX(), encLength)))
+            .setY(
+                ByteString.copyFrom(
+                    BigIntegerEncoding.toBigEndianBytesOfFixedLength(
+                        publicPoint.getAffineY(), encLength)));
+    if (key.getParameters().getKidStrategy().equals(JwtEcdsaParameters.KidStrategy.CUSTOM)) {
+      builder.setCustomKid(
+          com.google.crypto.tink.proto.JwtEcdsaPublicKey.CustomKid.newBuilder()
+              .setValue(key.getKid().get())
+              .build());
+    }
+    return builder.build();
+  }
+
+  private static ProtoKeySerialization serializePublicKey(
+      JwtEcdsaPublicKey key, @Nullable SecretKeyAccess access) throws GeneralSecurityException {
+    return ProtoKeySerialization.create(
+        PUBLIC_TYPE_URL,
+        serializePublicKey(key).toByteString(),
+        KeyMaterialType.ASYMMETRIC_PUBLIC,
+        toProtoOutputPrefixType(key.getParameters()),
+        key.getIdRequirementOrNull());
+  }
+
+  @SuppressWarnings("UnusedException")
+  private static JwtEcdsaPublicKey parsePublicKey(
+      ProtoKeySerialization serialization, @Nullable SecretKeyAccess access)
+      throws GeneralSecurityException {
+    if (!serialization.getTypeUrl().equals(PUBLIC_TYPE_URL)) {
+      throw new IllegalArgumentException(
+          "Wrong type URL in call to EcdsaProtoSerialization.parsePublicKey: "
+              + serialization.getTypeUrl());
+    }
+    try {
+      com.google.crypto.tink.proto.JwtEcdsaPublicKey protoKey =
+          com.google.crypto.tink.proto.JwtEcdsaPublicKey.parseFrom(
+              serialization.getValue(), ExtensionRegistryLite.getEmptyRegistry());
+      if (protoKey.getVersion() != 0) {
+        throw new GeneralSecurityException("Only version 0 keys are accepted");
+      }
+      JwtEcdsaParameters.Builder parametersBuilder = JwtEcdsaParameters.builder();
+      JwtEcdsaPublicKey.Builder keyBuilder = JwtEcdsaPublicKey.builder();
+
+      if (serialization.getOutputPrefixType().equals(OutputPrefixType.TINK)) {
+        if (protoKey.hasCustomKid()) {
+          throw new GeneralSecurityException(
+              "Keys serialized with OutputPrefixType TINK should not have a custom kid");
+        }
+        @Nullable Integer idRequirement = serialization.getIdRequirementOrNull();
+        if (idRequirement == null) {
+          throw new GeneralSecurityException(
+              "Keys serialized with OutputPrefixType TINK need an ID Requirement");
+        }
+        parametersBuilder.setKidStrategy(JwtEcdsaParameters.KidStrategy.BASE64_ENCODED_KEY_ID);
+        keyBuilder.setIdRequirement(idRequirement);
+      } else if (serialization.getOutputPrefixType().equals(OutputPrefixType.RAW)) {
+        if (protoKey.hasCustomKid()) {
+          parametersBuilder.setKidStrategy(JwtEcdsaParameters.KidStrategy.CUSTOM);
+          keyBuilder.setCustomKid(protoKey.getCustomKid().getValue());
+        } else {
+          parametersBuilder.setKidStrategy(JwtEcdsaParameters.KidStrategy.IGNORED);
+        }
+      }
+      parametersBuilder.setAlgorithm(toAlgorithm(protoKey.getAlgorithm()));
+      keyBuilder.setPublicPoint(
+          new ECPoint(
+              BigIntegerEncoding.fromUnsignedBigEndianBytes(protoKey.getX().toByteArray()),
+              BigIntegerEncoding.fromUnsignedBigEndianBytes(protoKey.getY().toByteArray())));
+      return keyBuilder.setParameters(parametersBuilder.build()).build();
+    } catch (InvalidProtocolBufferException | IllegalArgumentException e) {
+      throw new GeneralSecurityException("Parsing EcdsaPublicKey failed");
+    }
+  }
+
   public static void register() throws GeneralSecurityException {
     register(MutableSerializationRegistry.globalInstance());
   }
@@ -155,6 +290,8 @@ final class JwtEcdsaProtoSerialization {
       throws GeneralSecurityException {
     registry.registerParametersSerializer(PARAMETERS_SERIALIZER);
     registry.registerParametersParser(PARAMETERS_PARSER);
+    registry.registerKeySerializer(PUBLIC_KEY_SERIALIZER);
+    registry.registerKeyParser(PUBLIC_KEY_PARSER);
   }
 
   private JwtEcdsaProtoSerialization() {}
