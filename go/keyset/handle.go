@@ -49,12 +49,16 @@ func newWithOptions(ks *tinkpb.Keyset, opts ...Option) (*Handle, error) {
 // NewHandle creates a keyset handle that contains a single fresh key generated according
 // to the given KeyTemplate.
 func NewHandle(kt *tinkpb.KeyTemplate) (*Handle, error) {
-	ksm := NewManager()
-	err := ksm.Rotate(kt)
+	manager := NewManager()
+	keyID, err := manager.Add(kt)
 	if err != nil {
 		return nil, fmt.Errorf("keyset.Handle: cannot generate new keyset: %s", err)
 	}
-	handle, err := ksm.Handle()
+	err = manager.SetPrimary(keyID)
+	if err != nil {
+		return nil, fmt.Errorf("keyset.Handle: cannot set primary: %s", err)
+	}
+	handle, err := manager.Handle()
 	if err != nil {
 		return nil, fmt.Errorf("keyset.Handle: cannot get keyset handle: %s", err)
 	}
