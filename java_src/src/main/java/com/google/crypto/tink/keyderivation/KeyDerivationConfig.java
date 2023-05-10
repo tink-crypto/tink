@@ -17,6 +17,7 @@
 package com.google.crypto.tink.keyderivation;
 
 import com.google.crypto.tink.config.TinkFips;
+import com.google.crypto.tink.keyderivation.internal.PrfBasedDeriverKeyManager;
 import com.google.crypto.tink.prf.HkdfPrfKeyManager;
 import java.security.GeneralSecurityException;
 

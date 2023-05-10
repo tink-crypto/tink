@@ -18,6 +18,7 @@ package com.google.crypto.tink.keyderivation;
 
 import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.KeysetHandle;
+import com.google.crypto.tink.keyderivation.internal.PrfBasedDeriverKeyManager;
 import com.google.crypto.tink.proto.OutputPrefixType;
 import com.google.crypto.tink.proto.PrfBasedDeriverKeyFormat;
 import com.google.crypto.tink.proto.PrfBasedDeriverParams;

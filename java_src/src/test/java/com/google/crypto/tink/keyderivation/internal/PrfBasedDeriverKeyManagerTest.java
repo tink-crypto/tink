@@ -14,7 +14,7 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-package com.google.crypto.tink.keyderivation;
+package com.google.crypto.tink.keyderivation.internal;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertThrows;
@@ -25,7 +25,7 @@ import com.google.crypto.tink.aead.AeadKeyTemplates;
 import com.google.crypto.tink.aead.AesGcmKeyManager;
 import com.google.crypto.tink.config.TinkConfig;
 import com.google.crypto.tink.internal.KeyTypeManager;
-import com.google.crypto.tink.keyderivation.internal.PrfBasedDeriver;
+import com.google.crypto.tink.keyderivation.KeysetDeriver;
 import com.google.crypto.tink.prf.HkdfPrfKeyManager;
 import com.google.crypto.tink.proto.AesGcmKey;
 import com.google.crypto.tink.proto.HashType;

@@ -9,8 +9,8 @@ java_library(
     srcs = ["KeyDerivationConfig.java"],
     deps = [
         ":keyset_deriver_wrapper",
-        ":prf_based_deriver_key_manager",
         "//src/main/java/com/google/crypto/tink/config:tink_fips",
+        "//src/main/java/com/google/crypto/tink/keyderivation/internal:prf_based_deriver_key_manager",
         "//src/main/java/com/google/crypto/tink/prf:hkdf_prf_key_manager",
     ],
 )
@@ -19,11 +19,11 @@ java_library(
     name = "key_derivation_key_templates",
     srcs = ["KeyDerivationKeyTemplates.java"],
     deps = [
-        ":prf_based_deriver_key_manager",
         "//proto:prf_based_deriver_java_proto",
         "//proto:tink_java_proto",
         "//src/main/java/com/google/crypto/tink:key_template",
         "//src/main/java/com/google/crypto/tink:registry_cluster",
+        "//src/main/java/com/google/crypto/tink/keyderivation/internal:prf_based_deriver_key_manager",
         "@maven//:com_google_protobuf_protobuf_java",
     ],
 )
@@ -54,29 +54,13 @@ java_library(
     ],
 )
 
-java_library(
-    name = "prf_based_deriver_key_manager",
-    srcs = ["PrfBasedDeriverKeyManager.java"],
-    deps = [
-        ":keyset_deriver",
-        "//proto:prf_based_deriver_java_proto",
-        "//proto:tink_java_proto",
-        "//src/main/java/com/google/crypto/tink:registry",
-        "//src/main/java/com/google/crypto/tink/internal:key_type_manager",
-        "//src/main/java/com/google/crypto/tink/internal:primitive_factory",
-        "//src/main/java/com/google/crypto/tink/keyderivation/internal:prf_based_deriver",
-        "//src/main/java/com/google/crypto/tink/subtle:validators",
-        "@maven//:com_google_protobuf_protobuf_java",
-    ],
-)
-
 android_library(
     name = "key_derivation_config-android",
     srcs = ["KeyDerivationConfig.java"],
     deps = [
         ":keyset_deriver_wrapper-android",
-        ":prf_based_deriver_key_manager-android",
         "//src/main/java/com/google/crypto/tink/config:tink_fips-android",
+        "//src/main/java/com/google/crypto/tink/keyderivation/internal:prf_based_deriver_key_manager-android",
         "//src/main/java/com/google/crypto/tink/prf:hkdf_prf_key_manager-android",
     ],
 )
@@ -85,11 +69,11 @@ android_library(
     name = "key_derivation_key_templates-android",
     srcs = ["KeyDerivationKeyTemplates.java"],
     deps = [
-        ":prf_based_deriver_key_manager-android",
         "//proto:prf_based_deriver_java_proto_lite",
         "//proto:tink_java_proto_lite",
         "//src/main/java/com/google/crypto/tink:key_template-android",
         "//src/main/java/com/google/crypto/tink:registry_cluster-android",
+        "//src/main/java/com/google/crypto/tink/keyderivation/internal:prf_based_deriver_key_manager-android",
         "@maven//:com_google_protobuf_protobuf_javalite",
     ],
 )
@@ -117,21 +101,5 @@ android_library(
         "//src/main/java/com/google/crypto/tink:registry_cluster-android",
         "//src/main/java/com/google/crypto/tink:tink_proto_keyset_format-android",
         "@maven//:com_google_errorprone_error_prone_annotations",
-    ],
-)
-
-android_library(
-    name = "prf_based_deriver_key_manager-android",
-    srcs = ["PrfBasedDeriverKeyManager.java"],
-    deps = [
-        ":keyset_deriver-android",
-        "//proto:prf_based_deriver_java_proto_lite",
-        "//proto:tink_java_proto_lite",
-        "//src/main/java/com/google/crypto/tink:registry-android",
-        "//src/main/java/com/google/crypto/tink/internal:key_type_manager-android",
-        "//src/main/java/com/google/crypto/tink/internal:primitive_factory-android",
-        "//src/main/java/com/google/crypto/tink/keyderivation/internal:prf_based_deriver-android",
-        "//src/main/java/com/google/crypto/tink/subtle:validators-android",
-        "@maven//:com_google_protobuf_protobuf_javalite",
     ],
 )

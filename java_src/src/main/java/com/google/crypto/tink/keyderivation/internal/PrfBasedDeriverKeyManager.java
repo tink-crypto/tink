@@ -14,12 +14,12 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-package com.google.crypto.tink.keyderivation;
+package com.google.crypto.tink.keyderivation.internal;
 
 import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.internal.KeyTypeManager;
 import com.google.crypto.tink.internal.PrimitiveFactory;
-import com.google.crypto.tink.keyderivation.internal.PrfBasedDeriver;
+import com.google.crypto.tink.keyderivation.KeysetDeriver;
 import com.google.crypto.tink.proto.KeyData;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
 import com.google.crypto.tink.proto.PrfBasedDeriverKey;
@@ -31,8 +31,8 @@ import com.google.protobuf.InvalidProtocolBufferException;
 import java.security.GeneralSecurityException;
 
 /** {@link com.google.crypto.tink.internal.KeyTypeManager} for {@link PrfBasedDeriverKey}. */
-public class PrfBasedDeriverKeyManager extends KeyTypeManager<PrfBasedDeriverKey> {
-  PrfBasedDeriverKeyManager() {
+public final class PrfBasedDeriverKeyManager extends KeyTypeManager<PrfBasedDeriverKey> {
+  public PrfBasedDeriverKeyManager() {
     super(
         PrfBasedDeriverKey.class,
         new PrimitiveFactory<KeysetDeriver, PrfBasedDeriverKey>(KeysetDeriver.class) {
