@@ -61,22 +61,37 @@ ts_library(
 )
 
 ts_library(
+    name = "mac_config",
+    srcs = [
+        "mac_config.ts",
+    ],
+    deps = [
+        ":hmac_key_manager",
+        ":mac_wrapper",
+    ],
+)
+
+ts_library(
     name = "mac_tests",
     testonly = True,
     srcs = [
         "hmac_key_manager_test.ts",
+        "mac_config_test.ts",
         "mac_key_templates_test.ts",
         "mac_wrapper_test.ts",
     ],
     deps = [
         ":hmac_key_manager",
+        ":mac_config",
         ":mac_key_templates",
         ":mac_wrapper",
         "//exception",
         "//internal:crypto_format",
+        "//internal:keyset_handle",
         "//internal:primitive_set",
         "//internal:proto",
         "//internal:proto_shims",
+        "//internal:registry",
         "//mac/internal",
         "//subtle:bytes",
         "//subtle:random",
