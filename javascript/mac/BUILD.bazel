@@ -9,7 +9,10 @@ ts_library(
         "mac.ts",
     ],
     module_name = "tink-crypto/mac",
-    deps = ["//mac/internal"],
+    deps = [
+      ":hmac",
+      ":mac_wrapper",
+      "//mac/internal"],
 )
 
 ts_library(
@@ -72,15 +75,29 @@ ts_library(
 )
 
 ts_library(
+    name = "hmac",
+    srcs = [
+        "hmac.ts",
+    ],
+    deps = [
+        ":hmac_key_manager",
+        ":mac_key_templates",
+        "//internal:registry",
+    ],
+)
+
+ts_library(
     name = "mac_tests",
     testonly = True,
     srcs = [
         "hmac_key_manager_test.ts",
+        "hmac_test.ts",
         "mac_config_test.ts",
         "mac_key_templates_test.ts",
         "mac_wrapper_test.ts",
     ],
     deps = [
+        ":hmac",
         ":hmac_key_manager",
         ":mac_config",
         ":mac_key_templates",
