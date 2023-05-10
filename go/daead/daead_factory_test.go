@@ -442,7 +442,7 @@ func TestPrimitiveFactoryWithMonitoringAnnotationsEncryptionFailureIsLogged(t *t
 	}
 	p, err := daead.New(mh)
 	if err != nil {
-		t.Fatalf("aead.NewWithKeyManager() err = %v, want nil", err)
+		t.Fatalf("daead.New() err = %v, want nil", err)
 	}
 	if _, err := p.EncryptDeterministically(nil, nil); err == nil {
 		t.Fatalf("EncryptDeterministically() err = nil, want error")
