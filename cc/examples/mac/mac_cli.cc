@@ -26,6 +26,7 @@
 
 #include "absl/flags/flag.h"
 #include "absl/flags/parse.h"
+#include "absl/log/check.h"
 #include "absl/strings/string_view.h"
 #include "util/util.h"
 #include "tink/keyset_handle.h"
@@ -39,6 +40,7 @@ ABSL_FLAG(std::string, data_filename, "", "Data file name");
 ABSL_FLAG(std::string, tag_filename, "", "Authentication tag file name");
 
 namespace {
+
 using ::crypto::tink::KeysetHandle;
 using ::crypto::tink::Mac;
 using ::crypto::tink::MacConfig;
@@ -48,32 +50,19 @@ using ::crypto::tink::util::StatusOr;
 constexpr absl::string_view kCompute = "compute";
 constexpr absl::string_view kVerify = "verify";
 
-// [START_EXCLUDE]
 void ValidateParams() {
-  if (absl::GetFlag(FLAGS_mode).empty() ||
-      (absl::GetFlag(FLAGS_mode) != kCompute &&
-       absl::GetFlag(FLAGS_mode) != kVerify)) {
-    std::cout << "ERROR: Invalid mode; must be `" << kCompute << "` or `"
-              << kVerify << "`" << std::endl;
-    exit(1);
-  }
-
-  if (absl::GetFlag(FLAGS_keyset_filename).empty()) {
-    std::cerr << "ERROR: Keyset file must be specified" << std::endl;
-    exit(1);
-  }
-
-  if (absl::GetFlag(FLAGS_data_filename).empty()) {
-    std::cerr << "ERROR: Data file must be specified" << std::endl;
-    exit(1);
-  }
-
-  if (absl::GetFlag(FLAGS_tag_filename).empty()) {
-    std::cerr << "ERROR: Tag file must be specified" << std::endl;
-    exit(1);
-  }
+  // [START_EXCLUDE]
+  CHECK(absl::GetFlag(FLAGS_mode) == kCompute ||
+        absl::GetFlag(FLAGS_mode) == kVerify)
+      << "Invalid mode; must be `" << kCompute << "` or `" << kVerify << "`";
+  CHECK(!absl::GetFlag(FLAGS_keyset_filename).empty())
+      << "Keyset file must be specified";
+  CHECK(!absl::GetFlag(FLAGS_data_filename).empty())
+      << "Data file must be specified";
+  CHECK(!absl::GetFlag(FLAGS_tag_filename).empty())
+      << "Tag file must be specified";
+  // [END_EXCLUDE]
 }
-// [END_EXCLUDE]
 
 }  // namespace
 
@@ -142,12 +131,8 @@ int main(int argc, char** argv) {
             << ((mode == kCompute) ? "written to" : "read from") << " file '"
             << tag_filename << "'." << std::endl;
 
-  Status result = tink_cc_examples::MacCli(mode, keyset_filename, data_filename,
-                                           tag_filename);
-  if (!result.ok()) {
-    std::cerr << result.message() << std::endl;
-    exit(1);
-  }
+  CHECK_OK(tink_cc_examples::MacCli(mode, keyset_filename, data_filename,
+                                    tag_filename));
   return 0;
 }
 // [END mac-example]

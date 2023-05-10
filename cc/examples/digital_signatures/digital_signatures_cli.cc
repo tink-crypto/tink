@@ -19,10 +19,10 @@
 #include <memory>
 #include <ostream>
 #include <string>
-#include <utility>
 
 #include "absl/flags/flag.h"
 #include "absl/flags/parse.h"
+#include "absl/log/check.h"
 #include "util/util.h"
 #include "tink/keyset_handle.h"
 #include "tink/public_key_sign.h"
@@ -46,32 +46,21 @@ using ::crypto::tink::util::StatusOr;
 constexpr absl::string_view kSign = "sign";
 constexpr absl::string_view kVerify = "verify";
 
-// [START_EXCLUDE]
 void ValidateParams() {
-  if (absl::GetFlag(FLAGS_mode).empty() ||
-      (absl::GetFlag(FLAGS_mode) != kSign &&
-       absl::GetFlag(FLAGS_mode) != kVerify)) {
-    std::cerr << "ERROR: Invalid mode; must be `" << kSign << "` or `"
-              << kVerify << "`" << std::endl;
-    exit(1);
-  }
-
-  if (absl::GetFlag(FLAGS_keyset_filename).empty()) {
-    std::cerr << "ERROR: Keyset file must be specified" << std::endl;
-    exit(1);
-  }
-
-  if (absl::GetFlag(FLAGS_input_filename).empty()) {
-    std::cerr << "ERROR: Input file must be specified" << std::endl;
-    exit(1);
-  }
-
-  if (absl::GetFlag(FLAGS_signature_filename).empty()) {
-    std::cerr << "ERROR: Signature file must be specified" << std::endl;
-    exit(1);
-  }
+  // [START_EXCLUDE]
+  CHECK(absl::GetFlag(FLAGS_mode) == kSign ||
+        absl::GetFlag(FLAGS_mode) == kVerify)
+      << "Invalid mode; must be `" << kSign << "` or `" << kVerify << "`"
+      << std::endl;
+  CHECK(!absl::GetFlag(FLAGS_keyset_filename).empty())
+      << "Keyset file must be specified";
+  CHECK(!absl::GetFlag(FLAGS_input_filename).empty())
+      << "Input file must be specified";
+  CHECK(!absl::GetFlag(FLAGS_signature_filename).empty())
+      << "Signature file must be specified";
+  // [END_EXCLUDE]
 }
-// [END_EXCLUDE]
+
 }  // namespace
 
 namespace tink_cc_examples {
@@ -116,6 +105,7 @@ Status DigitalSignatureCli(absl::string_view mode,
         ->Verify(*signature_file_content, *input_file_content);
   }
 }
+
 }  // namespace tink_cc_examples
 
 int main(int argc, char** argv) {
@@ -138,13 +128,8 @@ int main(int argc, char** argv) {
               << " over the content of " << input_filename << std::endl;
   }
 
-  Status result = tink_cc_examples::DigitalSignatureCli(
-      mode, keyset_filename, input_filename, signature_filename);
-  if (!result.ok()) {
-    std::cerr << result.message() << std::endl;
-    exit(1);
-  }
-
+  CHECK_OK(tink_cc_examples::DigitalSignatureCli(
+      mode, keyset_filename, input_filename, signature_filename));
   return 0;
 }
 // [END digital-signature-example]

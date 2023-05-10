@@ -4,6 +4,7 @@ target_include_directories(mac_cli PUBLIC
   "${TINK_EXAMPLES_INCLUDE_PATH}")
 target_link_libraries(mac_cli
   tink::static
+  absl::check
   absl::flags_parse
   util)
 

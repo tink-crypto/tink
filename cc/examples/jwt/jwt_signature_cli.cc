@@ -23,6 +23,7 @@
 
 #include "absl/flags/flag.h"
 #include "absl/flags/parse.h"
+#include "absl/log/check.h"
 #include "util/util.h"
 #include "tink/jwt/jwt_public_key_sign.h"
 #include "tink/jwt/jwt_public_key_verify.h"
@@ -51,33 +52,21 @@ using ::crypto::tink::util::StatusOr;
 constexpr absl::string_view kSign = "sign";
 constexpr absl::string_view kVerify = "verify";
 
-// [START_EXCLUDE]
 void ValidateParams() {
-  if (absl::GetFlag(FLAGS_mode).empty() ||
-      (absl::GetFlag(FLAGS_mode) != kSign &&
-       absl::GetFlag(FLAGS_mode) != kVerify)) {
-    std::cerr << "ERROR: Invalid mode; must be `" << kSign << "` or `"
-              << kVerify << "`" << std::endl;
-    exit(1);
-  }
-
-  if (absl::GetFlag(FLAGS_keyset_filename).empty()) {
-    std::cerr << "ERROR: Keyset file must be specified" << std::endl;
-    exit(1);
-  }
-
-  if (absl::GetFlag(FLAGS_audience).empty()) {
-    std::cerr << "ERROR: Expected audience in the token must be specified"
-              << std::endl;
-    exit(1);
-  }
-
-  if (absl::GetFlag(FLAGS_token_filename).empty()) {
-    std::cerr << "ERROR: Token file must be specified" << std::endl;
-    exit(1);
-  }
+  // [START_EXCLUDE]
+  CHECK(absl::GetFlag(FLAGS_mode) == kSign ||
+        absl::GetFlag(FLAGS_mode) == kVerify)
+      << "Invalid mode; must be `" << kSign << "` or `" << kVerify << "`"
+      << std::endl;
+  CHECK(!absl::GetFlag(FLAGS_keyset_filename).empty())
+      << "Keyset file must be specified";
+  CHECK(!absl::GetFlag(FLAGS_audience).empty())
+      << "Expected audience in the token must be specified";
+  CHECK(!absl::GetFlag(FLAGS_token_filename).empty())
+      << "Token file must be specified";
+  // [END_EXCLUDE]
 }
-// [END_EXCLUDE]
+
 }  // namespace
 
 namespace tink_cc_examples {
@@ -124,6 +113,7 @@ Status JwtCli(absl::string_view mode, const std::string& keyset_filename,
     return (*jwt_verifier)->VerifyAndDecode(*token, *validator).status();
   }
 }
+
 }  // namespace tink_cc_examples
 
 int main(int argc, char** argv) {
@@ -146,13 +136,8 @@ int main(int argc, char** argv) {
               << std::endl;
   }
 
-  Status result =
-      tink_cc_examples::JwtCli(mode, keyset_filename, audience, token_filename);
-  if (!result.ok()) {
-    std::cerr << result.message() << std::endl;
-    exit(1);
-  }
-
+  CHECK_OK(tink_cc_examples::JwtCli(mode, keyset_filename, audience,
+                                    token_filename));
   return 0;
 }
 // [END jwt-example]

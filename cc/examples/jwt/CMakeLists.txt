@@ -5,6 +5,7 @@ target_include_directories(jwt_signature_cli PUBLIC
 target_link_libraries(jwt_signature_cli
   tink::static
   tink::jwt::jwt_signature_config
+  absl::check
   absl::flags_parse
   util)
 

@@ -15,9 +15,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 // [START aead-example]
 // A command-line utility for testing Tink AEAD.
-
-#include <stdlib.h>
-
 #include <iostream>
 #include <memory>
 #include <ostream>
@@ -25,7 +22,7 @@
 
 #include "absl/flags/flag.h"
 #include "absl/flags/parse.h"
-#include "absl/status/status.h"
+#include "absl/log/check.h"
 #include "absl/strings/string_view.h"
 #include "tink/aead.h"
 #include "tink/aead/aead_config.h"
@@ -51,32 +48,19 @@ using ::crypto::tink::util::StatusOr;
 constexpr absl::string_view kEncrypt = "encrypt";
 constexpr absl::string_view kDecrypt = "decrypt";
 
-// [START_EXCLUDE]
 void ValidateParams() {
-  if (absl::GetFlag(FLAGS_mode).empty() ||
-      (absl::GetFlag(FLAGS_mode) != kEncrypt &&
-       absl::GetFlag(FLAGS_mode) != kDecrypt)) {
-    std::cout << "ERROR: Invalid mode; must be `encrypt` or `decrypt`"
-              << std::endl;
-    exit(1);
-  }
-
-  if (absl::GetFlag(FLAGS_keyset_filename).empty()) {
-    std::cerr << "ERROR: Keyset file must be specified" << std::endl;
-    exit(1);
-  }
-
-  if (absl::GetFlag(FLAGS_input_filename).empty()) {
-    std::cerr << "ERROR: Input file must be specified" << std::endl;
-    exit(1);
-  }
-
-  if (absl::GetFlag(FLAGS_output_filename).empty()) {
-    std::cerr << "ERROR: Output file must be specified" << std::endl;
-    exit(1);
-  }
+  // [START_EXCLUDE]
+  CHECK(absl::GetFlag(FLAGS_mode) == kEncrypt ||
+        absl::GetFlag(FLAGS_mode) == kDecrypt)
+      << "Invalid mode; must be `encrypt` or `decrypt`";
+  CHECK(!absl::GetFlag(FLAGS_keyset_filename).empty())
+      << "Keyset file must be specified";
+  CHECK(!absl::GetFlag(FLAGS_input_filename).empty())
+      << "Input file must be specified";
+  CHECK(!absl::GetFlag(FLAGS_output_filename).empty())
+      << "Output file must be specified";
+  // [END_EXCLUDE]
 }
-// [END_EXCLUDE]
 
 }  // namespace
 
@@ -140,13 +124,8 @@ int main(int argc, char** argv) {
   std::clog << "The resulting output will be written to " << output_filename
             << std::endl;
 
-  Status result = tink_cc_examples::AeadCli(
-      mode, keyset_filename, input_filename, output_filename, associated_data);
-  if (!result.ok()) {
-    std::cerr << result.message() << std::endl;
-    exit(1);
-  }
-
+  CHECK_OK(tink_cc_examples::AeadCli(mode, keyset_filename, input_filename,
+                                     output_filename, associated_data));
   return 0;
 }
 // [END aead-example]

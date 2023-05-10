@@ -4,6 +4,7 @@ target_include_directories(hybrid_cli PUBLIC
   "${TINK_EXAMPLES_INCLUDE_PATH}")
 target_link_libraries(hybrid_cli
   tink::static
+  absl::check
   absl::flags_parse
   util)
 # Tink CMake's configuration doesn't expose tink::core::hpke_config. Remove

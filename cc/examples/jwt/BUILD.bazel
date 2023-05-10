@@ -14,9 +14,10 @@ cc_binary(
     name = "jwt_signature_cli",
     srcs = ["jwt_signature_cli.cc"],
     deps = [
-        "//util:util",
+        "//util",
         "@com_google_absl//absl/flags:flag",
         "@com_google_absl//absl/flags:parse",
+        "@com_google_absl//absl/log:check",
         "@tink_cc//:keyset_handle",
         "@tink_cc//jwt:jwt_public_key_sign",
         "@tink_cc//jwt:jwt_public_key_verify",

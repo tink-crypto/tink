@@ -4,6 +4,7 @@ target_include_directories(digital_signatures_cli PUBLIC
   "${TINK_EXAMPLES_INCLUDE_PATH}")
 target_link_libraries(digital_signatures_cli
   tink::static
+  absl::check
   absl::flags_parse
   util)
 

@@ -6,9 +6,10 @@ cc_binary(
     name = "hybrid_cli",
     srcs = ["hybrid_cli.cc"],
     deps = [
-        "//util:util",
+        "//util",
         "@com_google_absl//absl/flags:flag",
         "@com_google_absl//absl/flags:parse",
+        "@com_google_absl//absl/log:check",
         "@com_google_absl//absl/status",
         "@com_google_absl//absl/strings",
         "@tink_cc//:hybrid_decrypt",

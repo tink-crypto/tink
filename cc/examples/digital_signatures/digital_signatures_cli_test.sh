@@ -48,7 +48,7 @@ test_command() {
 }
 
 #######################################
-# Asserts that the outcome of the latest test command was the expected one.
+# Asserts that the outcome of the latest test command is 0.
 #
 # If not, it terminates the test execution.
 #
@@ -56,23 +56,29 @@ test_command() {
 #   TEST_STATUS
 #   TEST_NAME
 #   TEST_CASE
-# Arguments:
-#   expected_outcome: The expected outcome.
 #######################################
-_assert_test_command_outcome() {
-  expected_outcome="$1"
-  if (( TEST_STATUS != expected_outcome )); then
-      echo "[   FAILED ] ${TEST_NAME}.${TEST_CASE}"
-      exit 1
+assert_command_succeeded() {
+  if (( TEST_STATUS != 0 )); then
+    echo "[   FAILED ] ${TEST_NAME}.${TEST_CASE}"
+    exit 1
   fi
 }
 
-assert_command_succeeded() {
-  _assert_test_command_outcome 0
-}
-
+#######################################
+# Asserts that the outcome of the latest test command is not 0.
+#
+# If not, it terminates the test execution.
+#
+# Globals:
+#   TEST_STATUS
+#   TEST_NAME
+#   TEST_CASE
+#######################################
 assert_command_failed() {
-  _assert_test_command_outcome 1
+  if (( TEST_STATUS == 0 )); then
+      echo "[   FAILED ] ${TEST_NAME}.${TEST_CASE}"
+      exit 1
+  fi
 }
 
 #######################################
