@@ -976,3 +976,13 @@ java_library(
         "@maven//:com_google_protobuf_protobuf_java",
     ],
 )
+
+android_library(
+    name = "configuration-android",
+    srcs = ["Configuration.java"],
+)
+
+java_library(
+    name = "configuration",
+    srcs = ["Configuration.java"],
+)
