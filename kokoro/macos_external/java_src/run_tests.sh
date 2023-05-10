@@ -16,8 +16,8 @@
 
 set -euo pipefail
 
-export XCODE_VERSION=14
-export DEVELOPER_DIR="/Applications/Xcode_${XCODE_VERSION}.app/Contents/Developer"
+export XCODE_VERSION="14.1"
+export DEVELOPER_DIR="/Applications/Xcode.app/Contents/Developer"
 export ANDROID_HOME="/usr/local/share/android-sdk"
 export COURSIER_OPTS="-Djava.net.preferIPv6Addresses=true"
 

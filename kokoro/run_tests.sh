@@ -179,9 +179,9 @@ main() {
     if [[ "${PLATFORM}" == 'darwin' ]]; then
       # Default values for iOS SDK and Xcode. Can be overriden by another script.
       : "${IOS_SDK_VERSION:=13.2}"
-      : "${XCODE_VERSION:=14}"
+      : "${XCODE_VERSION:=14.1}"
 
-      export DEVELOPER_DIR="/Applications/Xcode_${XCODE_VERSION}.app/Contents/Developer"
+      export DEVELOPER_DIR="/Applications/Xcode.app/Contents/Developer"
       export JAVA_HOME=$(/usr/libexec/java_home -v "1.8.0_292")
       export ANDROID_HOME="/usr/local/share/android-sdk"
       export COURSIER_OPTS="-Djava.net.preferIPv6Addresses=true"
