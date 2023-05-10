@@ -17,6 +17,7 @@
 package com.google.crypto.tink.keyderivation;
 
 import com.google.crypto.tink.config.TinkFips;
+import com.google.crypto.tink.prf.HkdfPrfKeyManager;
 import java.security.GeneralSecurityException;
 
 /**
@@ -39,6 +40,7 @@ public final class KeyDerivationConfig {
    * com.google.crypto.tink.KeyManager} needed to handle KeysetDeriver key types supported in Tink.
    */
   public static void register() throws GeneralSecurityException {
+    // Register primitive wrappers.
     KeysetDeriverWrapper.register();
 
     if (TinkFips.useOnlyFips()) {
@@ -48,8 +50,11 @@ public final class KeyDerivationConfig {
       return;
     }
 
-    PrfBasedDeriverKeyManager.register(/*newKeyAllowed=*/ true);
+    // Register required key manager for PrfBasedDeriverKeyManager.
+    HkdfPrfKeyManager.register(/* newKeyAllowed= */ true);
 
+    // Register key managers.
+    PrfBasedDeriverKeyManager.register(/* newKeyAllowed= */ true);
   }
 
   private KeyDerivationConfig() {}

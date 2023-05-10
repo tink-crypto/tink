@@ -11,6 +11,7 @@ java_library(
         ":keyset_deriver_wrapper",
         ":prf_based_deriver_key_manager",
         "//src/main/java/com/google/crypto/tink/config:tink_fips",
+        "//src/main/java/com/google/crypto/tink/prf:hkdf_prf_key_manager",
     ],
 )
 
@@ -76,6 +77,7 @@ android_library(
         ":keyset_deriver_wrapper-android",
         ":prf_based_deriver_key_manager-android",
         "//src/main/java/com/google/crypto/tink/config:tink_fips-android",
+        "//src/main/java/com/google/crypto/tink/prf:hkdf_prf_key_manager-android",
     ],
 )
 

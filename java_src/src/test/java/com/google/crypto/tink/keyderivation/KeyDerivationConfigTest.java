@@ -42,16 +42,29 @@ public class KeyDerivationConfigTest {
   @Test
   public void aaaTestInitialization() throws Exception {
     Assume.assumeFalse(TinkFips.useOnlyFips());
-    String typeUrl = "type.googleapis.com/google.crypto.tink.PrfBasedDeriverKey";
-    GeneralSecurityException e =
-        assertThrows(GeneralSecurityException.class, () -> Registry.getUntypedKeyManager(typeUrl));
-    assertThat(e.toString()).contains("No key manager found");
+
+    String[] keyTypeUrls = {
+      "type.googleapis.com/google.crypto.tink.PrfBasedDeriverKey",
+      "type.googleapis.com/google.crypto.tink.HkdfPrfKey",
+    };
+
+    for (String typeUrl : keyTypeUrls) {
+      GeneralSecurityException e =
+          assertThrows(
+              GeneralSecurityException.class, () -> Registry.getUntypedKeyManager(typeUrl));
+      assertThat(e.toString()).contains("No key manager found");
+    }
 
     // Initialize the config.
     KeyDerivationConfig.register();
 
     // After registration the key manager should be present.
-    assertNotNull(Registry.getKeyManager(typeUrl, KeysetDeriver.class));
+    for (String typeUrl : keyTypeUrls) {
+      assertNotNull(Registry.getUntypedKeyManager(typeUrl));
+    }
+    assertNotNull(
+        Registry.getKeyManager(
+            "type.googleapis.com/google.crypto.tink.PrfBasedDeriverKey", KeysetDeriver.class));
 
     // Running init() manually again should succeed.
     KeyDerivationConfig.register();
@@ -66,12 +79,16 @@ public class KeyDerivationConfigTest {
 
     // Check if all key types are registered when not using FIPS mode.
     String[] keyTypeUrls = {
-      "type.googleapis.com/google.crypto.tink.PrfBasedDeriverKey"
+      "type.googleapis.com/google.crypto.tink.PrfBasedDeriverKey",
+      "type.googleapis.com/google.crypto.tink.HkdfPrfKey",
     };
 
     for (String typeUrl : keyTypeUrls) {
-      assertNotNull(Registry.getKeyManager(typeUrl, KeysetDeriver.class));
+      assertNotNull(Registry.getUntypedKeyManager(typeUrl));
     }
+    assertNotNull(
+        Registry.getKeyManager(
+            "type.googleapis.com/google.crypto.tink.PrfBasedDeriverKey", KeysetDeriver.class));
   }
 
   @Test
@@ -83,7 +100,8 @@ public class KeyDerivationConfigTest {
 
     // List of algorithms which are not part of FIPS and should not be registered.
     String[] keyTypeUrls = {
-      "type.googleapis.com/google.crypto.tink.PrfBasedDeriverKey"
+      "type.googleapis.com/google.crypto.tink.PrfBasedDeriverKey",
+      "type.googleapis.com/google.crypto.tink.HkdfPrfKey",
     };
 
     for (String typeUrl : keyTypeUrls) {
