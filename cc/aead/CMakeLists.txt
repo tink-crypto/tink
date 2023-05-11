@@ -199,6 +199,7 @@ tink_cc_library(
     tink::subtle::random
     tink::util::constants
     tink::util::enums
+    tink::util::input_stream_util
     tink::util::secret_data
     tink::util::status
     tink::util::statusor
@@ -488,11 +489,11 @@ tink_cc_test(
     gmock
     absl::status
     tink::core::aead
-    tink::core::mac
     tink::subtle::subtle
     tink::subtle::aead_test_util
     tink::subtle::aes_ctr_boringssl
     tink::util::enums
+    tink::util::istream_input_stream
     tink::util::secret_data
     tink::util::status
     tink::util::statusor

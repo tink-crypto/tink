@@ -67,6 +67,10 @@ class AesCtrHmacAeadKeyManager
   CreateKey(const google::crypto::tink::AesCtrHmacAeadKeyFormat& key_format)
       const override;
 
+  crypto::tink::util::StatusOr<google::crypto::tink::AesCtrHmacAeadKey>
+  DeriveKey(const google::crypto::tink::AesCtrHmacAeadKeyFormat& key_format,
+            InputStream* input_stream) const override;
+
   internal::FipsCompatibility FipsStatus() const override {
     return internal::FipsCompatibility::kRequiresBoringCrypto;
   }

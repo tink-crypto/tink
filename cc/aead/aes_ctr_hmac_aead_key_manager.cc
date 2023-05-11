@@ -34,6 +34,7 @@
 #include "tink/subtle/ind_cpa_cipher.h"
 #include "tink/subtle/random.h"
 #include "tink/util/enums.h"
+#include "tink/util/input_stream_util.h"
 #include "tink/util/secret_data.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
@@ -52,12 +53,14 @@ constexpr int kMinIvSizeInBytes = 12;
 constexpr int kMinTagSizeInBytes = 10;
 }
 
-using crypto::tink::util::Enums;
-using crypto::tink::util::Status;
-using crypto::tink::util::StatusOr;
-using google::crypto::tink::AesCtrHmacAeadKey;
-using google::crypto::tink::AesCtrHmacAeadKeyFormat;
-using google::crypto::tink::HashType;
+using ::crypto::tink::util::Enums;
+using ::crypto::tink::util::Status;
+using ::crypto::tink::util::StatusOr;
+using ::google::crypto::tink::AesCtrHmacAeadKey;
+using ::google::crypto::tink::AesCtrHmacAeadKeyFormat;
+using ::google::crypto::tink::AesCtrKey;
+using ::google::crypto::tink::HashType;
+using ::google::crypto::tink::HmacKey;
 
 StatusOr<AesCtrHmacAeadKey> AesCtrHmacAeadKeyManager::CreateKey(
     const AesCtrHmacAeadKeyFormat& aes_ctr_hmac_aead_key_format) const {
@@ -174,6 +177,54 @@ Status AesCtrHmacAeadKeyManager::ValidateKeyFormat(
   }
 
   return HmacKeyManager().ValidateKeyFormat(key_format.hmac_key_format());
+}
+
+// To ensure the resulting key can provide key commitment, the AES-CTR key must
+// be derived first, then the HMAC key. This avoids situation where it's
+// possible to brute force raw key material so that the 32th byte of the
+// keystream is a 0 Give party A a key with this raw key material, saying that
+// the size of the HMAC key is 32 bytes and the size of the AES key is 16 bytes.
+// Give party B a key with this raw key material, saying that the size of the
+// HMAC key is 31 bytes and the size of the AES key is 16 bytes. Since HMAC will
+// pad the key with zeroes, this leads to both parties using the same HMAC key,
+// but a different AES key (offset by 1 byte)
+StatusOr<AesCtrHmacAeadKey> AesCtrHmacAeadKeyManager::DeriveKey(
+    const AesCtrHmacAeadKeyFormat& key_format,
+    InputStream* input_stream) const {
+  Status status = ValidateKeyFormat(key_format);
+  if (!status.ok()) {
+    return status;
+  }
+  StatusOr<std::string> aes_ctr_randomness = ReadBytesFromStream(
+      key_format.aes_ctr_key_format().key_size(), input_stream);
+  if (!aes_ctr_randomness.ok()) {
+    if (absl::IsOutOfRange(aes_ctr_randomness.status())) {
+      return crypto::tink::util::Status(
+          absl::StatusCode::kInvalidArgument,
+          "Could not get enough pseudorandomness from input stream");
+    }
+    return aes_ctr_randomness.status();
+  }
+  StatusOr<HmacKey> hmac_key =
+      HmacKeyManager().DeriveKey(key_format.hmac_key_format(), input_stream);
+  if (!hmac_key.ok()) {
+    return hmac_key.status();
+  }
+
+  google::crypto::tink::AesCtrHmacAeadKey key;
+  key.set_version(get_version());
+  *key.mutable_hmac_key() = hmac_key.value();
+
+  AesCtrKey* aes_ctr_key = key.mutable_aes_ctr_key();
+  aes_ctr_key->set_version(get_version());
+  aes_ctr_key->set_key_value(aes_ctr_randomness.value());
+  *aes_ctr_key->mutable_params() = key_format.aes_ctr_key_format().params();
+
+  status = ValidateKey(key);
+  if (!status.ok()) {
+    return status;
+  }
+  return key;
 }
 
 }  // namespace tink
