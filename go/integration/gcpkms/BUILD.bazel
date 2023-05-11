@@ -25,8 +25,8 @@ go_library(
 go_test(
     name = "gcpkms_test",
     srcs = [
-        "gcp_kms_integration_test.go",
         "gcp_kms_client_test.go",
+        "gcp_kms_integration_test.go",
     ],
     data = [
         # Credentials can be injected into the test files included in these

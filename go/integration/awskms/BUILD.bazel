@@ -26,8 +26,8 @@ go_library(
 go_test(
     name = "awskms_test",
     srcs = [
-        "aws_kms_integration_test.go",
         "aws_kms_client_test.go",
+        "aws_kms_integration_test.go",
     ],
     data = [
         "//testdata/aws:bad_credentials",
