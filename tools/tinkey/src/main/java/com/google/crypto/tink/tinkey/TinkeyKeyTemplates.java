@@ -25,8 +25,14 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * This class contains key templates that cannot stay in Tink, such as those that break Tink's
- * modularity because they depend on other key templates.
+ * Contains key templates that should be part of Tinkey but are not defined in the corresponding
+ * {@link KeyTypeManager#keyFormats()}.
+ *
+ * <p>For example, key template {@code HKDF_SHA256_DERIVES_AES128_GCM} requires key template {@code
+ * AES128_GCM} to exist in the {@link Registry}, which requires {@link AeadConfig#register()} to
+ * have been called. Since {@link KeyDerivationConfig} does not automatically call {@link
+ * AeadConfig#register()}, {@code HKDF_SHA256_DERIVES_AES128_GCM} cannot be defined in {@link
+ * PrfBasedDeriverKeyManager#keyFormats()}.
  */
 final class TinkeyKeyTemplates {
 
