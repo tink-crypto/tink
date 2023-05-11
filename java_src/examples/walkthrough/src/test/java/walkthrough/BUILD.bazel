@@ -51,3 +51,24 @@ java_test(
         "@tink_java//src/main/java/com/google/crypto/tink/testing:fake_kms_client",
     ],
 )
+
+java_test(
+    name = "ReadKeysetExampleTest",
+    size = "small",
+    srcs = ["ReadKeysetExampleTest.java"],
+    deps = [
+        "//walkthrough/src/main/java/walkthrough:obtain_and_use_aead_primitive_example",
+        "//walkthrough/src/main/java/walkthrough:read_keyset_example",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+        "@tink_java//src/main/java/com/google/crypto/tink:aead",
+        "@tink_java//src/main/java/com/google/crypto/tink:insecure_secret_key_access",
+        "@tink_java//src/main/java/com/google/crypto/tink:kms_clients",
+        "@tink_java//src/main/java/com/google/crypto/tink:registry_cluster",
+        "@tink_java//src/main/java/com/google/crypto/tink:tink_json_proto_keyset_format",
+        "@tink_java//src/main/java/com/google/crypto/tink:tink_proto_keyset_format",
+        "@tink_java//src/main/java/com/google/crypto/tink/aead:aead_config",
+        "@tink_java//src/main/java/com/google/crypto/tink/subtle:base64",
+        "@tink_java//src/main/java/com/google/crypto/tink/testing:fake_kms_client",
+    ],
+)
