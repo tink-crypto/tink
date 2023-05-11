@@ -34,7 +34,7 @@
 #include "absl/strings/str_split.h"
 #include "absl/strings/string_view.h"
 #include "absl/synchronization/mutex.h"
-#include "tink/integration/awskms/aws_crypto.h"
+#include "tink/integration/awskms/internal/aws_crypto.h"
 #include "tink/integration/awskms/aws_kms_aead.h"
 #include "tink/kms_client.h"
 #include "tink/util/status.h"

@@ -7,7 +7,7 @@ cc_library(
     name = "aws_crypto",
     srcs = ["aws_crypto.cc"],
     hdrs = ["aws_crypto.h"],
-    include_prefix = "tink/integration/awskms",
+    include_prefix = "tink/integration/awskms/internal",
     deps = [
         "@aws_cpp_sdk//:aws_sdk_core",
         "@boringssl//:crypto",
