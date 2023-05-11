@@ -413,7 +413,7 @@ public final class RawJwt {
     }
   }
 
-  String getJsonPayload() {
+  public String getJsonPayload() {
     return payload.toString();
   }
 
