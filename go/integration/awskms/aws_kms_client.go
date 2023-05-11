@@ -54,16 +54,11 @@ type awsClient struct {
 // uriPrefix must have the following format: 'aws-kms://arn:<partition>:kms:<region>:[:path]'.
 // See http://docs.aws.amazon.com/general/latest/gr/aws-arns-and-namespaces.html.
 func NewClient(uriPrefix string) (registry.KMSClient, error) {
-	r, err := getRegion(uriPrefix)
+	k, err := getKMS(uriPrefix)
 	if err != nil {
 		return nil, err
 	}
-
-	session := session.Must(session.NewSession(&aws.Config{
-		Region: aws.String(r),
-	}))
-
-	return NewClientWithKMS(uriPrefix, kms.New(session))
+	return NewClientWithKMS(uriPrefix, k)
 }
 
 // NewClientWithCredentials returns a new AWS KMS client which will use given
@@ -71,31 +66,11 @@ func NewClient(uriPrefix string) (registry.KMSClient, error) {
 // uriPrefix must have the following format: 'aws-kms://arn:<partition>:kms:<region>:[:path]'.
 // See http://docs.aws.amazon.com/general/latest/gr/aws-arns-and-namespaces.html.
 func NewClientWithCredentials(uriPrefix string, credentialPath string) (registry.KMSClient, error) {
-	r, err := getRegion(uriPrefix)
+	k, err := getKMSFromCredentialPath(uriPrefix, credentialPath)
 	if err != nil {
 		return nil, err
 	}
-
-	var creds *credentials.Credentials
-	if len(credentialPath) == 0 {
-		return nil, errCred
-	}
-	c, err := extractCredsCSV(credentialPath)
-	switch err {
-	case nil:
-		creds = credentials.NewStaticCredentialsFromCreds(*c)
-	case errBadFile, errCredCSV:
-		return nil, err
-	default:
-		// fallback to load the credential path as .ini shared credentials.
-		creds = credentials.NewSharedCredentials(credentialPath, "default")
-	}
-	session := session.Must(session.NewSession(&aws.Config{
-		Credentials: creds,
-		Region:      aws.String(r),
-	}))
-
-	return NewClientWithKMS(uriPrefix, kms.New(session))
+	return NewClientWithKMS(uriPrefix, k)
 }
 
 // NewClientWithKMS returns a new AWS KMS client with user created KMS client.
@@ -128,6 +103,47 @@ func (c *awsClient) GetAEAD(keyURI string) (tink.AEAD, error) {
 
 	uri := strings.TrimPrefix(keyURI, awsPrefix)
 	return newAWSAEAD(uri, c.kms), nil
+}
+
+func getKMS(uriPrefix string) (*kms.KMS, error) {
+	r, err := getRegion(uriPrefix)
+	if err != nil {
+		return nil, err
+	}
+
+	session := session.Must(session.NewSession(&aws.Config{
+		Region: aws.String(r),
+	}))
+
+	return kms.New(session), nil
+}
+
+func getKMSFromCredentialPath(uriPrefix string, credentialPath string) (*kms.KMS, error) {
+	r, err := getRegion(uriPrefix)
+	if err != nil {
+		return nil, err
+	}
+
+	var creds *credentials.Credentials
+	if len(credentialPath) == 0 {
+		return nil, errCred
+	}
+	c, err := extractCredsCSV(credentialPath)
+	switch err {
+	case nil:
+		creds = credentials.NewStaticCredentialsFromCreds(*c)
+	case errBadFile, errCredCSV:
+		return nil, err
+	default:
+		// fallback to load the credential path as .ini shared credentials.
+		creds = credentials.NewSharedCredentials(credentialPath, "default")
+	}
+	session := session.Must(session.NewSession(&aws.Config{
+		Credentials: creds,
+		Region:      aws.String(r),
+	}))
+
+	return kms.New(session), nil
 }
 
 func extractCredsCSV(file string) (*credentials.Value, error) {
