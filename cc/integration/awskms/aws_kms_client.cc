@@ -34,7 +34,6 @@
 #include "absl/strings/str_split.h"
 #include "absl/strings/string_view.h"
 #include "absl/synchronization/mutex.h"
-#include "tink/integration/awskms/internal/aws_crypto.h"
 #include "tink/integration/awskms/aws_kms_aead.h"
 #include "tink/kms_client.h"
 #include "tink/util/status.h"
@@ -47,6 +46,7 @@ namespace awskms {
 namespace {
 
 constexpr absl::string_view kKeyUriPrefix = "aws-kms://";
+constexpr char kTinkAwsKmsAllocationTag[] = "tink::integration::awskms";
 
 // Returns AWS key ARN contained in `key_uri`. If `key_uri` does not refer to an
 // AWS key, returns an error.
@@ -172,14 +172,6 @@ util::StatusOr<Aws::Auth::AWSCredentials> GetAwsCredentials(
 
 void InitAwsApi() {
   Aws::SDKOptions options;
-  options.cryptoOptions.sha256Factory_create_fn = []() {
-    return Aws::MakeShared<internal::AwsSha256Factory>(
-        internal::kAwsCryptoAllocationTag);
-  };
-  options.cryptoOptions.sha256HMACFactory_create_fn = []() {
-    return Aws::MakeShared<internal::AwsSha256HmacFactory>(
-        internal::kAwsCryptoAllocationTag);
-  };
   Aws::InitAPI(options);
 }
 
@@ -214,7 +206,7 @@ util::StatusOr<std::unique_ptr<AwsKmsClient>> AwsKmsClient::New(
   auto client = absl::WrapUnique(new AwsKmsClient(*key_arn, *credentials));
   // Create AWS KMSClient.
   client->aws_client_ = Aws::MakeShared<Aws::KMS::KMSClient>(
-      internal::kAwsCryptoAllocationTag, client->credentials_, *client_config);
+      kTinkAwsKmsAllocationTag, client->credentials_, *client_config);
   return std::move(client);
 }
 
@@ -249,7 +241,7 @@ util::StatusOr<std::unique_ptr<Aead>> AwsKmsClient::GetAead(
     return client_config.status();
   }
   auto aws_client = Aws::MakeShared<Aws::KMS::KMSClient>(
-      internal::kAwsCryptoAllocationTag, credentials_, *client_config);
+      kTinkAwsKmsAllocationTag, credentials_, *client_config);
   return AwsKmsAead::New(*key_arn, aws_client);
 }
 
