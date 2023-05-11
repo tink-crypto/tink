@@ -34,16 +34,19 @@ go_test(
         "//testdata/aws:credentials",
         "@google_root_pem//file",  #keep
     ],
+    embed = [":awskms"],
     tags = [
         "manual",
         "no_rbe",
     ],
     deps = [
-        ":awskms",
         "//aead",
         "//core/registry",
+        "//integration/awskms/internal/fakeawskms",
         "//keyset",
         "//subtle/random",
+        "@com_github_aws_aws_sdk_go//aws",
+        "@com_github_aws_aws_sdk_go//service/kms",
     ],
 )
 

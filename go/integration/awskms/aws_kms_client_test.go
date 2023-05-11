@@ -14,19 +14,25 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-package awskms_test
+package awskms
 
 import (
+	"bytes"
+	"encoding/hex"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
-	"github.com/google/tink/go/integration/awskms"
+	"github.com/google/tink/go/integration/awskms/internal/fakeawskms"
+
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/service/kms"
 )
 
 func TestNewClientGoodUriPrefixWithAwsPartition(t *testing.T) {
 	uriPrefix := "aws-kms://arn:aws:kms:us-east-2:235739564943:key/3ee50705-5a82-4f5b-9753-05c4f473922f"
-	_, err := awskms.NewClient(uriPrefix)
+	_, err := NewClient(uriPrefix)
 	if err != nil {
 		t.Fatalf("error getting new client with good URI prefix: %v", err)
 	}
@@ -34,7 +40,7 @@ func TestNewClientGoodUriPrefixWithAwsPartition(t *testing.T) {
 
 func TestNewClientGoodUriPrefixWithAwsUsGovPartition(t *testing.T) {
 	uriPrefix := "aws-kms://arn:aws-us-gov:kms:us-gov-east-1:235739564943:key/3ee50705-5a82-4f5b-9753-05c4f473922f"
-	_, err := awskms.NewClient(uriPrefix)
+	_, err := NewClient(uriPrefix)
 	if err != nil {
 		t.Fatalf("error getting new client with good URI prefix: %v", err)
 	}
@@ -42,7 +48,7 @@ func TestNewClientGoodUriPrefixWithAwsUsGovPartition(t *testing.T) {
 
 func TestNewClientGoodUriPrefixWithAwsCnPartition(t *testing.T) {
 	uriPrefix := "aws-kms://arn:aws-cn:kms:cn-north-1:235739564943:key/3ee50705-5a82-4f5b-9753-05c4f473922f"
-	_, err := awskms.NewClient(uriPrefix)
+	_, err := NewClient(uriPrefix)
 	if err != nil {
 		t.Fatalf("error getting new client with good URI prefix: %v", err)
 	}
@@ -51,7 +57,7 @@ func TestNewClientGoodUriPrefixWithAwsCnPartition(t *testing.T) {
 func TestNewClientBadUriPrefix(t *testing.T) {
 	uriPrefix := "bad-prefix://arn:aws-cn:kms:cn-north-1:235739564943:key/3ee50705-5a82-4f5b-9753-05c4f473922f"
 
-	_, err := awskms.NewClient(uriPrefix)
+	_, err := NewClient(uriPrefix)
 	if err == nil {
 		t.Fatalf("does not reject bad URI prefix: %s", uriPrefix)
 	}
@@ -66,7 +72,7 @@ func TestNewClientWithCredentialsWithGoodCredentialsCsv(t *testing.T) {
 	}
 	goodCsvCredFile := filepath.Join(srcDir, "tink_go/testdata/aws/credentials.csv")
 
-	_, err := awskms.NewClientWithCredentials(uriPrefix, goodCsvCredFile)
+	_, err := NewClientWithCredentials(uriPrefix, goodCsvCredFile)
 	if err != nil {
 		t.Fatalf("reject good CSV cred file: %s", goodCsvCredFile)
 	}
@@ -81,7 +87,7 @@ func TestNewClientWithCredentialsWithGoodCredentialsIni(t *testing.T) {
 	}
 	credINIFile := filepath.Join(srcDir, "tink_go/testdata/aws/credentials.cred")
 
-	_, err := awskms.NewClientWithCredentials(uriPrefix, credINIFile)
+	_, err := NewClientWithCredentials(uriPrefix, credINIFile)
 	if err != nil {
 		t.Fatalf("reject good CSV cred file: %s", credINIFile)
 	}
@@ -96,7 +102,7 @@ func TestNewClientWithCredentialsWithBadCredentials(t *testing.T) {
 	}
 	badCredFile := filepath.Join(srcDir, "tink_go/testdata/aws/access_keys_bad.csv")
 
-	_, err := awskms.NewClientWithCredentials(uriPrefix, badCredFile)
+	_, err := NewClientWithCredentials(uriPrefix, badCredFile)
 	if err == nil {
 		t.Fatalf("awskms.NewClientWithCredentials(uriPrefix, badCredFile) err = nil, want error")
 	}
@@ -107,7 +113,7 @@ func TestSupported(t *testing.T) {
 	supportedKeyURI := "aws-kms://arn:aws-us-gov:kms:us-gov-east-1:235739564943:key/3ee50705-5a82-4f5b-9753-05c4f473922f"
 	nonSupportedKeyURI := "aws-kms://arn:aws-us-gov:kms:us-gov-east-DOES-NOT-EXIST:key/"
 
-	client, err := awskms.NewClient(uriPrefix)
+	client, err := NewClient(uriPrefix)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -125,7 +131,7 @@ func TestGetAeadSupportedURI(t *testing.T) {
 	uriPrefix := "aws-kms://arn:aws-us-gov:kms:us-gov-east-1:235739564943:key/"
 	supportedKeyURI := "aws-kms://arn:aws-us-gov:kms:us-gov-east-1:235739564943:key/3ee50705-5a82-4f5b-9753-05c4f473922f"
 
-	client, err := awskms.NewClient(uriPrefix)
+	client, err := NewClient(uriPrefix)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -136,17 +142,89 @@ func TestGetAeadSupportedURI(t *testing.T) {
 	}
 }
 
-func TestGetAeadNonSupportedURI(t *testing.T) {
-	uriPrefix := "aws-kms://arn:aws-us-gov:kms:us-gov-east-1:235739564943:key/"
-	nonSupportedKeyURI := "aws-kms://arn:aws-us-gov:kms:us-gov-east-DOES-NOT-EXIST:key/"
-
-	client, err := awskms.NewClient(uriPrefix)
+func TestGetAeadEncryptDecrypt(t *testing.T) {
+	keyARN := "arn:aws:kms:us-east-2:235739564943:key/3ee50705-5a82-4f5b-9753-05c4f473922f"
+	keyURI := "aws-kms://arn:aws:kms:us-east-2:235739564943:key/3ee50705-5a82-4f5b-9753-05c4f473922f"
+	fakekms, err := fakeawskms.New([]string{keyARN})
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	_, err = client.GetAEAD(nonSupportedKeyURI)
+	client, err := NewClientWithKMS("aws-kms://", fakekms)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	a, err := client.GetAEAD(keyURI)
+	if err != nil {
+		t.Fatalf("client.GetAEAD(keyURI) failed: %s", err)
+	}
+
+	plaintext := []byte("plaintext")
+	associatedData := []byte("associatedData")
+	ciphertext, err := a.Encrypt(plaintext, associatedData)
+	if err != nil {
+		t.Fatalf("a.Encrypt(plaintext, associatedData) err = %v, want nil", err)
+	}
+	decrypted, err := a.Decrypt(ciphertext, associatedData)
+	if err != nil {
+		t.Fatalf("a.Decrypt(ciphertext, associatedData) err = %v, want nil", err)
+	}
+	if !bytes.Equal(decrypted, plaintext) {
+		t.Errorf("decrypted = %q, want %q", decrypted, plaintext)
+	}
+
+	_, err = a.Decrypt(ciphertext, []byte("invalidAssociatedData"))
 	if err == nil {
-		t.Fatalf("client with URI prefix %s should NOT support key URI %s", uriPrefix, nonSupportedKeyURI)
+		t.Error("a.Decrypt(ciphertext, []byte{'invalidAssociatedData'}) err = nil, want error")
+	}
+
+	_, err = a.Decrypt([]byte("invalidCiphertext"), associatedData)
+	if err == nil {
+		t.Error("a.Decrypt([]byte{'invalidCiphertext'}, associatedData) err = nil, want error")
+	}
+}
+
+func TestUsesAdditionalDataAsContextName(t *testing.T) {
+	keyARN := "arn:aws:kms:us-east-2:235739564943:key/3ee50705-5a82-4f5b-9753-05c4f473922f"
+	keyURI := "aws-kms://arn:aws:kms:us-east-2:235739564943:key/3ee50705-5a82-4f5b-9753-05c4f473922f"
+	fakekms, err := fakeawskms.New([]string{keyARN})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	client, err := NewClientWithKMS("aws-kms://", fakekms)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	a, err := client.GetAEAD(keyURI)
+	if err != nil {
+		t.Fatalf("client.GetAEAD(keyURI) failed: %s", err)
+	}
+
+	plaintext := []byte("plaintext")
+	associatedData := []byte("associatedData")
+	ciphertext, err := a.Encrypt(plaintext, associatedData)
+	if err != nil {
+		t.Fatalf("a.Encrypt(plaintext, associatedData) err = %v, want nil", err)
+	}
+
+	hexAD := hex.EncodeToString(associatedData)
+	context := map[string]*string{"additionalData": &hexAD}
+	decRequest := &kms.DecryptInput{
+		KeyId:             aws.String(keyARN),
+		CiphertextBlob:    ciphertext,
+		EncryptionContext: context,
+	}
+	decResponse, err := fakekms.Decrypt(decRequest)
+	if err != nil {
+		t.Fatalf("fakeKMS.Decrypt(decRequest) err = %s, want nil", err)
+	}
+	if !bytes.Equal(decResponse.Plaintext, plaintext) {
+		t.Fatalf("decResponse.Plaintext = %q, want %q", decResponse.Plaintext, plaintext)
+	}
+	if strings.Compare(*decResponse.KeyId, keyARN) != 0 {
+		t.Fatalf("decResponse.KeyId = %q, want %q", *decResponse.KeyId, keyARN)
 	}
 }
