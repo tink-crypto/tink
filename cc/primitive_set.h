@@ -38,7 +38,9 @@
 
 namespace crypto {
 namespace tink {
-// Placeholder for internal forward declaration.
+namespace internal {
+class KeysetDeriverSetWrapperImpl;
+}
 
 // A container class for a set of primitives (i.e. implementations of
 // cryptographic primitives offered by Tink).  It provides also
@@ -361,7 +363,9 @@ class PrimitiveSet {
             std::move(ordered_keyset_deriver_primitives)),
         annotations_(std::move(annotations)) {}
 
-  // Placeholder for internal friend declaration.
+  // KeysetDeriverWrapperImpl requires access to
+  // ordered_keyset_deriver_primitives_.
+  friend class internal::KeysetDeriverSetWrapperImpl;
 
   // The Entry<P> object is owned by primitives_
   Entry<P>* primary_ ABSL_GUARDED_BY(primitives_mutex_) = nullptr;

@@ -1,0 +1,97 @@
+package(default_visibility = ["//:__subpackages__"])
+
+licenses(["notice"])
+
+cc_library(
+    name = "keyset_deriver_set_wrapper_impl",
+    hdrs = ["keyset_deriver_set_wrapper_impl.h"],
+    include_prefix = "tink/keyderivation/internal",
+    deps = [
+        "//:primitive_set",
+        "//keyderivation:keyset_deriver",
+    ],
+)
+
+cc_test(
+    name = "keyset_deriver_set_wrapper_impl_test",
+    srcs = ["keyset_deriver_set_wrapper_impl_test.cc"],
+    deps = [
+        ":keyset_deriver_set_wrapper_impl",
+        "//:cleartext_keyset_handle",
+        "//:crypto_format",
+        "//:primitive_set",
+        "//keyderivation:keyset_deriver",
+        "//util:test_matchers",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_library(
+    name = "prf_based_deriver",
+    srcs = ["prf_based_deriver.cc"],
+    hdrs = ["prf_based_deriver.h"],
+    include_prefix = "tink/keyderivation/internal",
+    deps = [
+        "//:cleartext_keyset_handle",
+        "//:keyset_handle",
+        "//:registry",
+        "//keyderivation:keyset_deriver",
+        "//proto:tink_cc_proto",
+        "//subtle/prf:streaming_prf",
+    ],
+)
+
+cc_test(
+    name = "prf_based_deriver_test",
+    srcs = ["prf_based_deriver_test.cc"],
+    deps = [
+        ":prf_based_deriver",
+        "//:cleartext_keyset_handle",
+        "//aead:aead_key_templates",
+        "//aead:aes_gcm_key_manager",
+        "//prf:hkdf_prf_key_manager",
+        "//proto:aes_gcm_cc_proto",
+        "//util:test_matchers",
+        "//util:test_util",
+        "@com_google_absl//absl/status",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_library(
+    name = "prf_based_deriver_key_manager",
+    hdrs = ["prf_based_deriver_key_manager.h"],
+    include_prefix = "tink/keyderivation/internal",
+    deps = [
+        ":prf_based_deriver",
+        "//keyderivation:keyset_deriver",
+        "//proto:prf_based_deriver_cc_proto",
+        "//proto:tink_cc_proto",
+        "@com_google_absl//absl/memory",
+        "@com_google_absl//absl/status",
+        "@com_google_absl//absl/strings",
+    ],
+)
+
+cc_test(
+    name = "prf_based_deriver_key_manager_test",
+    srcs = ["prf_based_deriver_key_manager_test.cc"],
+    deps = [
+        ":prf_based_deriver_key_manager",
+        "//:cleartext_keyset_handle",
+        "//aead:aead_key_templates",
+        "//aead:aes_gcm_key_manager",
+        "//keyderivation:keyset_deriver",
+        "//prf:hkdf_prf_key_manager",
+        "//proto:aes_gcm_cc_proto",
+        "//proto:hkdf_prf_cc_proto",
+        "//proto:prf_based_deriver_cc_proto",
+        "//proto:tink_cc_proto",
+        "//subtle",
+        "//util:statusor",
+        "//util:test_matchers",
+        "//util:test_util",
+        "@com_google_absl//absl/status",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
