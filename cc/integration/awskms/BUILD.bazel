@@ -50,6 +50,7 @@ cc_test(
     deps = [
         ":aws_kms_aead",
         ":aws_kms_client",
+        "//tink/integration/awskms/internal:test_file_util",
         "@bazel_tools//tools/cpp/runfiles",
         "@com_google_absl//absl/log:check",
         "@com_google_absl//absl/strings",
@@ -66,6 +67,7 @@ cc_test(
     data = ["//testdata/aws:credentials"],
     deps = [
         ":aws_kms_client",
+        "//tink/integration/awskms/internal:test_file_util",
         "@aws_cpp_sdk//:aws_sdk_core",
         "@com_google_absl//absl/status",
         "@com_google_googletest//:gtest_main",

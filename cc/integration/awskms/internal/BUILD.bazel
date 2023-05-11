@@ -1,0 +1,17 @@
+package(default_visibility = ["//:__subpackages__"])
+
+licenses(["notice"])
+
+cc_library(
+    name = "test_file_util",
+    srcs = ["test_file_util_bazel.cc"],
+    hdrs = ["test_file_util.h"],
+    include_prefix = "tink/integration/awskms/internal",
+    testonly = 1,
+    deps = [
+        "@bazel_tools//tools/cpp/runfiles",
+        "@com_google_absl//absl/log:check",
+        "@com_google_absl//absl/strings",
+    ],
+    alwayslink = 1,
+)

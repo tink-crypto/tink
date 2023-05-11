@@ -14,18 +14,15 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-#include "tink/integration/awskms/aws_kms_aead.h"
-
 #include <string>
 #include <vector>
 
 #include "gtest/gtest.h"
-#include "absl/log/check.h"
-#include "absl/strings/str_cat.h"
+#include "tink/integration/awskms/aws_kms_aead.h"
 #include "tink/integration/awskms/aws_kms_client.h"
+#include "tink/integration/awskms/internal/test_file_util.h"
 #include "tink/util/statusor.h"
 #include "tink/util/test_matchers.h"
-#include "tools/cpp/runfiles/runfiles.h"
 
 namespace crypto {
 namespace tink {
@@ -33,7 +30,6 @@ namespace integration {
 namespace awskms {
 namespace {
 
-using ::bazel::tools::cpp::runfiles::Runfiles;
 using ::crypto::tink::test::IsOk;
 using ::crypto::tink::test::IsOkAndHolds;
 
@@ -41,18 +37,9 @@ constexpr absl::string_view kAwsKmsKeyUri =
     "aws-kms://arn:aws:kms:us-east-2:235739564943:key/"
     "3ee50705-5a82-4f5b-9753-05c4f473922f";
 
-std::string RunfilesPath(absl::string_view path) {
-  std::string error;
-  std::unique_ptr<Runfiles> runfiles(Runfiles::CreateForTest(&error));
-  CHECK(runfiles != nullptr) << "Unable to determine runfile path: ";
-  const char* workspace_dir = getenv("TEST_WORKSPACE");
-  CHECK(workspace_dir != nullptr && workspace_dir[0] != '\0')
-      << "Unable to determine workspace name.";
-  return runfiles->Rlocation(absl::StrCat(workspace_dir, "/", path));
-}
-
 TEST(AwsKmsAeadTest, EncryptDecrypt) {
-  std::string credentials = RunfilesPath("testdata/aws/credentials.ini");
+  std::string credentials =
+      internal::RunfilesPath("testdata/aws/credentials.ini");
   util::StatusOr<std::unique_ptr<AwsKmsClient>> client =
       AwsKmsClient::New(/*key_uri=*/"", credentials);
   ASSERT_THAT(client, IsOk());

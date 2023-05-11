@@ -27,6 +27,7 @@
 #include "gtest/gtest.h"
 #include "absl/status/status.h"
 #include "absl/strings/str_cat.h"
+#include "tink/integration/awskms/internal/test_file_util.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "tink/util/test_matchers.h"
@@ -52,13 +53,9 @@ constexpr absl::string_view kAwsKey2 =
     "aws-kms://arn:aws:kms:us-east-1:acc:some/key2";
 constexpr absl::string_view kNonAwsKey = "gcp-kms:://some/gcp/key";
 
-std::string GetCredentialsFilePath() {
-  return absl::StrCat(getenv("TEST_SRCDIR"), "/", getenv("TEST_WORKSPACE"), "/",
-                      "testdata/aws/credentials.ini");
-}
-
 TEST(AwsKmsClientTest, CreateClientNotBoundToSpecificKeySupportsAllValidKeys) {
-  std::string creds_file = GetCredentialsFilePath();
+  std::string creds_file =
+      internal::RunfilesPath("testdata/aws/credentials.ini");
   util::StatusOr<std::unique_ptr<AwsKmsClient>> client =
       AwsKmsClient::New(/*key_uri=*/"", creds_file);
   ASSERT_THAT(client, IsOk());
@@ -70,7 +67,8 @@ TEST(AwsKmsClientTest, CreateClientNotBoundToSpecificKeySupportsAllValidKeys) {
 // Test that a client that is bound to a specific key does not support a
 // different key URI.
 TEST(AwsKmsClientTest, CreateClientBoundToSpecificKeySupportOnlyOneKey) {
-  std::string creds_file = GetCredentialsFilePath();
+  std::string creds_file =
+      internal::RunfilesPath("testdata/aws/credentials.ini");
   util::StatusOr<std::unique_ptr<AwsKmsClient>> client =
       AwsKmsClient::New(kAwsKey1, creds_file);
   ASSERT_THAT(client, IsOk());
@@ -80,7 +78,8 @@ TEST(AwsKmsClientTest, CreateClientBoundToSpecificKeySupportOnlyOneKey) {
 }
 
 TEST(AwsKmsClientTest, RegisterKmsClient) {
-  std::string creds_file = GetCredentialsFilePath();
+  std::string creds_file =
+      internal::RunfilesPath("testdata/aws/credentials.ini");
   ASSERT_THAT(AwsKmsClient::RegisterNewClient(kAwsKey1, creds_file), IsOk());
   util::StatusOr<const KmsClient*> kms_client = KmsClients::Get(kAwsKey1);
   EXPECT_THAT(kms_client, IsOkAndHolds(Not(IsNull())));
@@ -89,7 +88,7 @@ TEST(AwsKmsClientTest, RegisterKmsClient) {
 TEST(AwsKmsClientTest, RegisterKmsClientFailsWhenKeyIsInvalid) {
   util::Status client = AwsKmsClient::RegisterNewClient(
       "gcp-kms://projects/someProject/.../cryptoKeys/key1",
-      GetCredentialsFilePath());
+      internal::RunfilesPath("testdata/aws/credentials.ini"));
   EXPECT_THAT(client, StatusIs(absl::StatusCode::kInvalidArgument));
   EXPECT_PRED_FORMAT2(IsSubstring, "Invalid key URI",
                       std::string(client.message()));
@@ -107,7 +106,7 @@ TEST(AwsKmsClientTest, RegisterKmsClientFailsWhenMalformedCredentials) {
   // Create an invalid credentials file.
   std::string malformed_content = "These are malformed credentials.";
   std::string invalid_credentials_file =
-      absl::StrCat(getenv("TEST_TMPDIR"), "/", "invalid.ini");
+      internal::RunfilesPath("testdata/aws/invalid.ini");
   std::ofstream out_stream(invalid_credentials_file, std::ios::binary);
   out_stream.write(malformed_content.data(), malformed_content.size());
   out_stream.close();
