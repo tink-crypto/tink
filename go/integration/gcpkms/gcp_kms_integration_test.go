@@ -38,7 +38,7 @@ const (
 )
 
 var (
-	credFile = "google3/third_party/tink/testdata/gcp/credential.json"
+	credFile = "tink_go/testdata/gcp/credential.json"
 )
 
 func init() {
@@ -57,7 +57,7 @@ func setupKMS(t *testing.T) {
 
 	g, err := gcpkms.NewClientWithCredentials(keyURI, filepath.Join(srcDir, credFile))
 	if err != nil {
-		t.Errorf("error setting up gcp client: %v", err)
+		t.Fatalf("error setting up GCP client: %v", err)
 	}
 	registry.RegisterKMSClient(g)
 }
