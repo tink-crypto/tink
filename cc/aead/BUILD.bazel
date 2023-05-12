@@ -330,6 +330,23 @@ cc_library(
     ],
 )
 
+cc_library(
+    name = "aead_key",
+    hdrs = ["aead_key.h"],
+    include_prefix = "tink/aead",
+    deps = [
+        ":aead_parameters",
+        "//:key",
+    ],
+)
+
+cc_library(
+    name = "aead_parameters",
+    hdrs = ["aead_parameters.h"],
+    include_prefix = "tink/aead",
+    deps = ["//:parameters"],
+)
+
 # tests
 
 cc_test(

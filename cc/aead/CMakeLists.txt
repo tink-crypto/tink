@@ -308,6 +308,34 @@ tink_cc_library(
   TESTONLY
 )
 
+tink_cc_library(
+  NAME failing_aead
+  SRCS
+    failing_aead.cc
+    failing_aead.h
+  DEPS
+    absl::strings
+    tink::core::aead
+  TESTONLY
+)
+
+tink_cc_library(
+  NAME aead_key
+  SRCS
+    aead_key.h
+  DEPS
+    tink::aead::aead_parameters
+    tink::core::key
+)
+
+tink_cc_library(
+  NAME aead_parameters
+  SRCS
+    aead_parameters.h
+  DEPS
+    tink::core::parameters
+)
+
 # tests
 
 tink_cc_test(
@@ -614,17 +642,6 @@ tink_cc_test(
     tink::util::test_matchers
     tink::util::test_util
     tink::proto::tink_cc_proto
-)
-
-tink_cc_library(
-  NAME failing_aead
-  SRCS
-    failing_aead.cc
-    failing_aead.h
-  DEPS
-    absl::strings
-    tink::core::aead
-  TESTONLY
 )
 
 tink_cc_test(
