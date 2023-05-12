@@ -44,7 +44,6 @@
 #include "tink/monitoring/monitoring.h"
 #include "tink/primitive_set.h"
 #include "tink/primitive_wrapper.h"
-#include "tink/util/errors.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "proto/tink.pb.h"
@@ -152,18 +151,16 @@ class RegistryImpl {
   class WrapperInfo {
    public:
     template <typename P, typename Q>
-    explicit WrapperInfo(RegistryImpl& registry,
-                         std::unique_ptr<PrimitiveWrapper<P, Q>> wrapper)
+    explicit WrapperInfo(
+        std::unique_ptr<PrimitiveWrapper<P, Q>> wrapper,
+        std::function<crypto::tink::util::StatusOr<std::unique_ptr<P>>(
+            const google::crypto::tink::KeyData& key_data)>
+            primitive_getter)
         : is_same_primitive_wrapping_(std::is_same<P, Q>::value),
           wrapper_type_index_(std::type_index(typeid(*wrapper))),
           q_type_index_(std::type_index(typeid(Q))) {
-      auto keyset_wrapper_unique_ptr =
-          absl::make_unique<KeysetWrapperImpl<P, Q>>(
-              wrapper.get(),
-              [&registry](const google::crypto::tink::KeyData& key_data) {
-                return registry.GetPrimitive<P>(key_data);
-              });
-      keyset_wrapper_ = std::move(keyset_wrapper_unique_ptr);
+      keyset_wrapper_ = absl::make_unique<KeysetWrapperImpl<P, Q>>(
+          wrapper.get(), primitive_getter);
       original_wrapper_ = std::move(wrapper);
     }
 
@@ -325,8 +322,13 @@ crypto::tink::util::Status RegistryImpl::RegisterPrimitiveWrapper(
     }
     return crypto::tink::util::OkStatus();
   }
-  auto wrapper_info =
-      absl::make_unique<WrapperInfo>(*this, std::move(owned_wrapper));
+  std::function<crypto::tink::util::StatusOr<std::unique_ptr<P>>(
+      const google::crypto::tink::KeyData& key_data)>
+      primitive_getter = [this](const google::crypto::tink::KeyData& key_data) {
+        return this->GetPrimitive<P>(key_data);
+      };
+  auto wrapper_info = absl::make_unique<WrapperInfo>(std::move(owned_wrapper),
+                                                     primitive_getter);
   primitive_to_wrapper_.insert(
       {std::type_index(typeid(Q)), std::move(wrapper_info)});
   return crypto::tink::util::OkStatus();
