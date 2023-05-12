@@ -20,7 +20,6 @@ import (
 	"fmt"
 
 	"github.com/google/tink/go/core/primitiveset"
-	"github.com/google/tink/go/core/registry"
 	"github.com/google/tink/go/internal/internalregistry"
 	"github.com/google/tink/go/internal/monitoringutil"
 	"github.com/google/tink/go/keyset"
@@ -29,18 +28,10 @@ import (
 
 // NewPRFSet creates a prf.Set primitive from the given keyset handle.
 func NewPRFSet(h *keyset.Handle) (*Set, error) {
-	return NewPRFSetWithKeyManager(h, nil /*keyManager*/)
-}
-
-// NewPRFSetWithKeyManager creates a prf.Set primitive from the given keyset handle and a custom key manager.
-//
-// Deprecated: Use [NewPRFSet].
-func NewPRFSetWithKeyManager(h *keyset.Handle, km registry.KeyManager) (*Set, error) {
-	ps, err := h.PrimitivesWithKeyManager(km)
+	ps, err := h.Primitives()
 	if err != nil {
 		return nil, fmt.Errorf("prf_set_factory: cannot obtain primitive set: %s", err)
 	}
-
 	return wrapPRFset(ps)
 }
 

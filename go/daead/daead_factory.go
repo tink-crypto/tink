@@ -21,7 +21,6 @@ import (
 
 	"github.com/google/tink/go/core/cryptofmt"
 	"github.com/google/tink/go/core/primitiveset"
-	"github.com/google/tink/go/core/registry"
 	"github.com/google/tink/go/internal/internalregistry"
 	"github.com/google/tink/go/internal/monitoringutil"
 	"github.com/google/tink/go/keyset"
@@ -31,14 +30,7 @@ import (
 
 // New returns a DeterministicAEAD primitive from the given keyset handle.
 func New(h *keyset.Handle) (tink.DeterministicAEAD, error) {
-	return NewWithKeyManager(h, nil /*keyManager*/)
-}
-
-// NewWithKeyManager returns a DeterministicAEAD primitive from the given keyset handle and custom key manager.
-//
-// Deprecated: Use [New].
-func NewWithKeyManager(h *keyset.Handle, km registry.KeyManager) (tink.DeterministicAEAD, error) {
-	ps, err := h.PrimitivesWithKeyManager(km)
+	ps, err := h.Primitives()
 	if err != nil {
 		return nil, fmt.Errorf("daead_factory: cannot obtain primitive set: %s", err)
 	}

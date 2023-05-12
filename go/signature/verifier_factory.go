@@ -22,7 +22,6 @@ import (
 
 	"github.com/google/tink/go/core/cryptofmt"
 	"github.com/google/tink/go/core/primitiveset"
-	"github.com/google/tink/go/core/registry"
 	"github.com/google/tink/go/internal/internalregistry"
 	"github.com/google/tink/go/internal/monitoringutil"
 	"github.com/google/tink/go/keyset"
@@ -33,14 +32,7 @@ import (
 
 // NewVerifier returns a Verifier primitive from the given keyset handle.
 func NewVerifier(h *keyset.Handle) (tink.Verifier, error) {
-	return NewVerifierWithKeyManager(h, nil /*keyManager*/)
-}
-
-// NewVerifierWithKeyManager returns a Verifier primitive from the given keyset handle and custom key manager.
-//
-// Deprecated: Use [NewVerifier].
-func NewVerifierWithKeyManager(h *keyset.Handle, km registry.KeyManager) (tink.Verifier, error) {
-	ps, err := h.PrimitivesWithKeyManager(km)
+	ps, err := h.Primitives()
 	if err != nil {
 		return nil, fmt.Errorf("verifier_factory: cannot obtain primitive set: %s", err)
 	}

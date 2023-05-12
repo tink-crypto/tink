@@ -21,7 +21,6 @@ import (
 
 	"github.com/google/tink/go/core/cryptofmt"
 	"github.com/google/tink/go/core/primitiveset"
-	"github.com/google/tink/go/core/registry"
 	"github.com/google/tink/go/internal/internalregistry"
 	"github.com/google/tink/go/internal/monitoringutil"
 	"github.com/google/tink/go/keyset"
@@ -31,19 +30,10 @@ import (
 
 // NewHybridDecrypt returns an HybridDecrypt primitive from the given keyset handle.
 func NewHybridDecrypt(h *keyset.Handle) (tink.HybridDecrypt, error) {
-	return NewHybridDecryptWithKeyManager(h, nil /*keyManager*/)
-}
-
-// NewHybridDecryptWithKeyManager returns an HybridDecrypt primitive from the given keyset handle
-// and custom key manager.
-//
-// Deprecated: Use [NewHybridDecrypt].
-func NewHybridDecryptWithKeyManager(h *keyset.Handle, km registry.KeyManager) (tink.HybridDecrypt, error) {
-	ps, err := h.PrimitivesWithKeyManager(km)
+	ps, err := h.Primitives()
 	if err != nil {
 		return nil, fmt.Errorf("hybrid_factory: cannot obtain primitive set: %s", err)
 	}
-
 	return newWrappedHybridDecrypt(ps)
 }
 

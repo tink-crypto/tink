@@ -20,7 +20,6 @@ import (
 	"fmt"
 
 	"github.com/google/tink/go/core/primitiveset"
-	"github.com/google/tink/go/core/registry"
 	"github.com/google/tink/go/internal/internalregistry"
 	"github.com/google/tink/go/internal/monitoringutil"
 	"github.com/google/tink/go/keyset"
@@ -31,18 +30,10 @@ import (
 
 // NewSigner returns a Signer primitive from the given keyset handle.
 func NewSigner(h *keyset.Handle) (tink.Signer, error) {
-	return NewSignerWithKeyManager(h, nil /*keyManager*/)
-}
-
-// NewSignerWithKeyManager returns a Signer primitive from the given keyset handle and custom key manager.
-//
-// Deprecated: Use [NewSigner].
-func NewSignerWithKeyManager(h *keyset.Handle, km registry.KeyManager) (tink.Signer, error) {
-	ps, err := h.PrimitivesWithKeyManager(km)
+	ps, err := h.Primitives()
 	if err != nil {
 		return nil, fmt.Errorf("public_key_sign_factory: cannot obtain primitive set: %s", err)
 	}
-
 	return newWrappedSigner(ps)
 }
 

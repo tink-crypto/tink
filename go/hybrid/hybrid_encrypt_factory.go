@@ -20,7 +20,6 @@ import (
 	"fmt"
 
 	"github.com/google/tink/go/core/primitiveset"
-	"github.com/google/tink/go/core/registry"
 	"github.com/google/tink/go/internal/internalregistry"
 	"github.com/google/tink/go/internal/monitoringutil"
 	"github.com/google/tink/go/keyset"
@@ -30,18 +29,10 @@ import (
 
 // NewHybridEncrypt returns an HybridEncrypt primitive from the given keyset handle.
 func NewHybridEncrypt(h *keyset.Handle) (tink.HybridEncrypt, error) {
-	return NewHybridEncryptWithKeyManager(h, nil /*keyManager*/)
-}
-
-// NewHybridEncryptWithKeyManager returns an HybridEncrypt primitive from the given keyset handle and custom key manager.
-//
-// Deprecated: Use [NewHybridEncrypt].
-func NewHybridEncryptWithKeyManager(h *keyset.Handle, km registry.KeyManager) (tink.HybridEncrypt, error) {
-	ps, err := h.PrimitivesWithKeyManager(km)
+	ps, err := h.Primitives()
 	if err != nil {
 		return nil, fmt.Errorf("hybrid_factory: cannot obtain primitive set: %s", err)
 	}
-
 	return newEncryptPrimitiveSet(ps)
 }
 
