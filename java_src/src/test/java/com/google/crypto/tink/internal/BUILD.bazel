@@ -422,3 +422,16 @@ java_test(
         "@maven//:junit_junit",
     ],
 )
+
+java_test(
+    name = "EnumTypeProtoConverterTest",
+    size = "small",
+    srcs = ["EnumTypeProtoConverterTest.java"],
+    deps = [
+        "//proto:tink_java_proto",
+        "//src/main/java/com/google/crypto/tink/hybrid:hpke_parameters",
+        "//src/main/java/com/google/crypto/tink/internal:enum_type_proto_converter",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
