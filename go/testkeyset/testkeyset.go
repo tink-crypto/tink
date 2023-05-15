@@ -72,19 +72,3 @@ func Write(h *keyset.Handle, w keyset.Writer) error {
 func KeysetMaterial(h *keyset.Handle) *tinkpb.Keyset {
 	return keysetMaterial(h)
 }
-
-// KeysetHandle creates a keyset.Handle from cleartext key material.
-//
-// Callers should verify that the returned *keyset.Handle isn't nil.
-//
-// Deprecated: Use [NewHandle].
-func KeysetHandle(ks *tinkpb.Keyset) *keyset.Handle {
-	kh, err := keysetHandle(ks)
-	if err != nil {
-		// This *keyset.Handle can only return errors when *keyset.Option arguments
-		// are provided. To maintain backwards compatibility and avoid panic, it returns
-		// a nil value if an error happens.
-		return nil
-	}
-	return kh
-}
