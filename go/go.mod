@@ -7,7 +7,6 @@ require (
 	github.com/google/go-cmp v0.5.8
 	github.com/hashicorp/vault/api v1.4.1
 	golang.org/x/crypto v0.6.0
-	golang.org/x/oauth2 v0.5.0
 	google.golang.org/api v0.86.0
 	google.golang.org/protobuf v1.28.0
 )
@@ -56,6 +55,7 @@ require (
 	go.opencensus.io v0.23.0 // indirect
 	go.uber.org/atomic v1.9.0 // indirect
 	golang.org/x/net v0.7.0 // indirect
+	golang.org/x/oauth2 v0.5.0 // indirect
 	golang.org/x/sys v0.5.0 // indirect
 	golang.org/x/text v0.7.0 // indirect
 	golang.org/x/time v0.0.0-20200416051211-89c76fbcd5d1 // indirect
