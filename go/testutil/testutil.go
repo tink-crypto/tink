@@ -604,9 +604,13 @@ func NewAESCMACKeyFormat(tagSize uint32) *cmacpb.AesCmacKeyFormat {
 func NewHMACKeysetManager() *keyset.Manager {
 	ksm := keyset.NewManager()
 	kt := mac.HMACSHA256Tag128KeyTemplate()
-	err := ksm.Rotate(kt)
+	keyID, err := ksm.Add(kt)
 	if err != nil {
-		panic(fmt.Sprintf("cannot rotate keyset manager: %s", err))
+		panic(fmt.Sprintf("cannot add key: %v", err))
+	}
+	err = ksm.SetPrimary(keyID)
+	if err != nil {
+		panic(fmt.Sprintf("cannot set primary key: %v", err))
 	}
 	return ksm
 }

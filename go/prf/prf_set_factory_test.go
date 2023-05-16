@@ -40,19 +40,15 @@ const (
 )
 
 func addKeyAndReturnID(m *keyset.Manager, template *tinkpb.KeyTemplate) (uint32, error) {
-	err := m.Rotate(template)
+	keyID, err := m.Add(template)
 	if err != nil {
-		return 0, fmt.Errorf("Could not add template: %v", err)
+		return 0, fmt.Errorf("Could not add key from the given template: %v", err)
 	}
-	h, err := m.Handle()
+	err = m.SetPrimary(keyID)
 	if err != nil {
-		return 0, fmt.Errorf("Could not obtain handle: %v", err)
+		return 0, fmt.Errorf("Could set key as primary: %v", err)
 	}
-	p, err := h.Primitives()
-	if err != nil {
-		return 0, fmt.Errorf("Could not obtain primitives: %v", err)
-	}
-	return p.Primary.KeyID, nil
+	return keyID, nil
 }
 
 func TestFactoryBasic(t *testing.T) {
@@ -172,7 +168,7 @@ func TestNonRawKeys(t *testing.T) {
 		t.Errorf("Expected non RAW prefix to fail to create prf.Set")
 	}
 	m := keyset.NewManagerFromHandle(h)
-	err = m.Rotate(prf.HMACSHA256PRFKeyTemplate())
+	_, err = addKeyAndReturnID(m, prf.HMACSHA256PRFKeyTemplate())
 	if err != nil {
 		t.Errorf("Expected to be able to add keys to the keyset: %v", err)
 	}
@@ -198,7 +194,7 @@ func TestNonPRFPrimitives(t *testing.T) {
 		t.Errorf("Expected non PRF primitive to fail to create prf.Set")
 	}
 	m := keyset.NewManagerFromHandle(h)
-	err = m.Rotate(prf.HMACSHA256PRFKeyTemplate())
+	_, err = addKeyAndReturnID(m, prf.HMACSHA256PRFKeyTemplate())
 	if err != nil {
 		t.Errorf("Expected to be able to add keys to the keyset: %v", err)
 	}

@@ -32,9 +32,13 @@ func TestKeysetManagerBasic(t *testing.T) {
 	// Create a keyset that contains a single HmacKey.
 	ksm := keyset.NewManager()
 	kt := mac.HMACSHA256Tag128KeyTemplate()
-	err := ksm.Rotate(kt)
+	keyID, err := ksm.Add(kt)
 	if err != nil {
-		t.Errorf("cannot rotate when key template is available: %s", err)
+		t.Errorf("cannot add key: %s", err)
+	}
+	err = ksm.SetPrimary(keyID)
+	if err != nil {
+		t.Errorf("cannot set primary key: %s", err)
 	}
 	h, err := ksm.Handle()
 	if err != nil {
@@ -56,11 +60,14 @@ func TestExistingKeyset(t *testing.T) {
 	// Create a keyset that contains a single HmacKey.
 	ksm1 := keyset.NewManager()
 	kt := mac.HMACSHA256Tag128KeyTemplate()
-	err := ksm1.Rotate(kt)
+	keyID1, err := ksm1.Add(kt)
 	if err != nil {
-		t.Errorf("cannot rotate when key template is available: %s", err)
+		t.Errorf("cannot add key: %s", err)
 	}
-
+	err = ksm1.SetPrimary(keyID1)
+	if err != nil {
+		t.Errorf("cannot set primary key: %s", err)
+	}
 	h1, err := ksm1.Handle()
 	if err != nil {
 		t.Errorf("cannot get keyset handle: %s", err)
@@ -68,7 +75,14 @@ func TestExistingKeyset(t *testing.T) {
 	ks1 := testkeyset.KeysetMaterial(h1)
 
 	ksm2 := keyset.NewManagerFromHandle(h1)
-	ksm2.Rotate(kt)
+	keyID2, err := ksm2.Add(kt)
+	if err != nil {
+		t.Errorf("cannot add key: %s", err)
+	}
+	err = ksm2.SetPrimary(keyID2)
+	if err != nil {
+		t.Errorf("cannot set primary key: %s", err)
+	}
 	h2, err := ksm2.Handle()
 	if err != nil {
 		t.Errorf("cannot get keyset handle: %s", err)
@@ -115,29 +129,6 @@ func TestKeysetManagerFull(t *testing.T) {
 	}
 }
 
-func TestUnknowOutputPrefixTypeFails(t *testing.T) {
-	ksm1 := keyset.NewManager()
-	kt := mac.HMACSHA256Tag128KeyTemplate()
-	kt.OutputPrefixType = tinkpb.OutputPrefixType_UNKNOWN_PREFIX
-	err := ksm1.Rotate(kt)
-	if err == nil {
-		t.Errorf("ksm1.Rotate(kt) where kt has an unknown prefix succeeded, want error")
-	}
-}
-
-func TestKeysetManagerWithNilKeysetTemplate(t *testing.T) {
-	// ops with nil template should fail
-	ksm1 := keyset.NewManager()
-	err := ksm1.Rotate(nil)
-	if err == nil {
-		t.Error("ksm1.Rotate succeeded, but want error")
-	}
-	_, err = ksm1.Add(nil)
-	if err == nil {
-		t.Errorf("ksm1.Add succeeded, but want error")
-	}
-}
-
 func TestKeysetManagerAdd(t *testing.T) {
 	ksm1 := keyset.NewManager()
 	kt := mac.HMACSHA256Tag128KeyTemplate()
@@ -165,7 +156,16 @@ func TestKeysetManagerAdd(t *testing.T) {
 	}
 }
 
-func TestKeysetManagerAddWithBadTemplate(t *testing.T) {
+func TestKeysetManagerAddWithNilKeysetTemplateFails(t *testing.T) {
+	// ops with nil template should fail
+	ksm1 := keyset.NewManager()
+	_, err := ksm1.Add(nil)
+	if err == nil {
+		t.Errorf("ksm1.Add succeeded, but want error")
+	}
+}
+
+func TestKeysetManagerAddWithInvalidTypeUrlFails(t *testing.T) {
 	ksm1 := keyset.NewManager()
 	kt := &tinkpb.KeyTemplate{
 		TypeUrl:          "invalid type",
@@ -174,6 +174,16 @@ func TestKeysetManagerAddWithBadTemplate(t *testing.T) {
 	_, err := ksm1.Add(kt)
 	if err == nil {
 		t.Errorf("ksm1.Add succeeded, want error")
+	}
+}
+
+func TestKeysetManagerAddWithUnknownOutputPrefixTypeFails(t *testing.T) {
+	ksm1 := keyset.NewManager()
+	kt := mac.HMACSHA256Tag128KeyTemplate()
+	kt.OutputPrefixType = tinkpb.OutputPrefixType_UNKNOWN_PREFIX
+	_, err := ksm1.Add(kt)
+	if err == nil {
+		t.Errorf("ksm1.Add(kt) where kt has an unknown prefix succeeded, want error")
 	}
 }
 
@@ -573,10 +583,6 @@ func TestKeysetManagerWithEmptyManager(t *testing.T) {
 	_, err := ksm1.Add(mac.HMACSHA256Tag128KeyTemplate())
 	if err == nil {
 		t.Errorf("ksm1.Add succeeded on empty manager, want error")
-	}
-	err = ksm1.Rotate(mac.HMACSHA256Tag128KeyTemplate())
-	if err == nil {
-		t.Errorf("ksm1.Rotate succeeded on empty manager, want error")
 	}
 	err = ksm1.SetPrimary(0)
 	if err == nil {
