@@ -40,6 +40,8 @@ import com.google.crypto.tink.subtle.Validators;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.ExtensionRegistryLite;
 import com.google.protobuf.InvalidProtocolBufferException;
+import java.io.IOException;
+import java.io.InputStream;
 import java.security.GeneralSecurityException;
 import java.util.Collections;
 import java.util.HashMap;
@@ -122,6 +124,40 @@ public final class AesCtrHmacAeadKeyManager extends KeyTypeManager<AesCtrHmacAea
             .setAesCtrKey(aesCtrKey)
             .setHmacKey(hmacKey)
             .setVersion(getVersion())
+            .build();
+      }
+
+      // To ensure that the derived key can provide key commitment, the AES-CTR key must be derived
+      // before the HMAC key.
+      // Consider the following malicious scenario using a brute-forced key InputStream with a 0 as
+      // its 32nd byte:
+      //     31 bytes || 1 byte of 0s || 16 bytes
+      // We give this stream to party A, saying that it is 32-byte HMAC key || 16-byte AES key. We
+      // also give this stream to party B, saying that it is 31-byte HMAC key || 16-byte AES key.
+      // Since HMAC pads the key with zeroes, this same stream will lead to both parties using the
+      // same HMAC key but different AES keys.
+      @Override
+      public AesCtrHmacAeadKey deriveKey(AesCtrHmacAeadKeyFormat format, InputStream inputStream)
+          throws GeneralSecurityException {
+        validateKeyFormat(format);
+        byte[] aesCtrKeyBytes = new byte[format.getAesCtrKeyFormat().getKeySize()];
+        try {
+          readFully(inputStream, aesCtrKeyBytes);
+        } catch (IOException e) {
+          throw new GeneralSecurityException("Reading pseudorandomness failed", e);
+        }
+        HmacKey hmacKey =
+            new HmacKeyManager().keyFactory().deriveKey(format.getHmacKeyFormat(), inputStream);
+        AesCtrKey aesCtrKey =
+            AesCtrKey.newBuilder()
+                .setParams(format.getAesCtrKeyFormat().getParams())
+                .setVersion(getVersion())
+                .setKeyValue(ByteString.copyFrom(aesCtrKeyBytes))
+                .build();
+        return AesCtrHmacAeadKey.newBuilder()
+            .setVersion(getVersion())
+            .setAesCtrKey(aesCtrKey)
+            .setHmacKey(hmacKey)
             .build();
       }
 
