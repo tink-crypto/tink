@@ -139,9 +139,12 @@ func getKMS(uriPrefix string) (*kms.KMS, error) {
 		return nil, err
 	}
 
-	session := session.Must(session.NewSession(&aws.Config{
+	session, err := session.NewSession(&aws.Config{
 		Region: aws.String(r),
-	}))
+	})
+	if err != nil {
+		return nil, err
+	}
 
 	return kms.New(session), nil
 }
@@ -166,10 +169,14 @@ func getKMSFromCredentialPath(uriPrefix string, credentialPath string) (*kms.KMS
 		// Fallback to load the credential path as .ini shared credentials.
 		creds = credentials.NewSharedCredentials(credentialPath, "default")
 	}
-	session := session.Must(session.NewSession(&aws.Config{
+
+	session, err := session.NewSession(&aws.Config{
 		Credentials: creds,
 		Region:      aws.String(r),
-	}))
+	})
+	if err != nil {
+		return nil, err
+	}
 
 	return kms.New(session), nil
 }
