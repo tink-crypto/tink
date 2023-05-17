@@ -14,7 +14,7 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-// Package awskms provides integration with the AWS Cloud KMS.
+// Package awskms provides integration with the AWS Key Management Service.
 package awskms
 
 import (
@@ -27,14 +27,20 @@ import (
 	"github.com/aws/aws-sdk-go/service/kms/kmsiface"
 )
 
-// AWSAEAD represents a AWS KMS service to a particular URI.
+// AWSAEAD is an implementation of the AEAD interface which performs
+// cryptographic operations remotely via the AWS KMS service using a specific
+// key URI.
 type AWSAEAD struct {
 	keyURI string
 	kms    kmsiface.KMSAPI
 }
 
-// newAWSAEAD returns a new AWS KMS service.
-// keyURI must have the following format: 'arn:<partition>:kms:<region>:[:path]'.
+// newAWSAEAD returns a new AWSAEAD instance.
+//
+// keyURI must have the following format:
+//
+//	aws-kms://arn:<partition>:kms:<region>:[<path>]
+//
 // See http://docs.aws.amazon.com/general/latest/gr/aws-arns-and-namespaces.html.
 func newAWSAEAD(keyURI string, kms kmsiface.KMSAPI) *AWSAEAD {
 	return &AWSAEAD{
@@ -65,14 +71,14 @@ func (a *AWSAEAD) Encrypt(plaintext, associatedData []byte) ([]byte, error) {
 	return resp.CiphertextBlob, nil
 }
 
-// Decrypt AEAD decrypts the data and verified the associated data.
+// Decrypt decrypts the data and verifies the associated data.
 //
-// Returns an error if the KeyId field in the response does not match the KeyURI
-// provided when creating the client. If we don't do this, the possibility exists
-// for the ciphertext to be replaced by one under a key we don't control/expect,
-// but do have decrypt permissions on.
+// Returns an error if the KeyId field in the response does not match the key
+// URI provided when creating the client. This is to exclude the case where
+// ciphertext is encrypted with a key that the user doesn't control/expect, but
+// it is a key the user is permitted to use.
 //
-// This check is disabled if AWSAEAD.keyURI is not in key ARN format.
+// WARNING: This check is disabled if the key URI is not in key ARN format.
 //
 // See https://docs.aws.amazon.com/kms/latest/developerguide/concepts.html#key-id.
 func (a *AWSAEAD) Decrypt(ciphertext, associatedData []byte) ([]byte, error) {
@@ -97,7 +103,8 @@ func (a *AWSAEAD) Decrypt(ciphertext, associatedData []byte) ([]byte, error) {
 	return resp.Plaintext, nil
 }
 
-// isKeyArnFormat returns true if the keyURI is the KMS Key ARN format; false otherwise.
+// isKeyArnFormat returns true if the keyURI is in the KMS Key ARN format; false
+// otherwise.
 func isKeyArnFormat(keyURI string) bool {
 	tokens := strings.Split(keyURI, ":")
 	return len(tokens) == 6 && strings.HasPrefix(tokens[5], "key/")

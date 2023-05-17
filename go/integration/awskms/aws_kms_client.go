@@ -40,19 +40,24 @@ const (
 var (
 	errCred    = errors.New("invalid credential path")
 	errBadFile = errors.New("cannot open credential path")
-	errCredCSV = errors.New("malformed credential csv file")
+	errCredCSV = errors.New("malformed credential CSV file")
 )
 
-// awsClient represents a client that connects to the AWS KMS backend.
+// awsClient is a wrapper around an AWS SDK provided KMS client that can
+// instantiate Tink primitives.
 type awsClient struct {
 	keyURIPrefix string
 	kms          kmsiface.KMSAPI
 }
 
-// NewClient returns a new AWS KMS client which will use default
-// credentials to handle keys with uriPrefix prefix.
-// uriPrefix must have the following format: 'aws-kms://arn:<partition>:kms:<region>:[:path]'.
-// See http://docs.aws.amazon.com/general/latest/gr/aws-arns-and-namespaces.html.
+// NewClient returns a KMSClient backed by AWS KMS using default credentials to
+// handle keys whose URIs start with uriPrefix.
+//
+// uriPrefix must have the following format:
+//
+//	aws-kms://arn:<partition>:kms:<region>:[<path>]
+//
+// See https://docs.aws.amazon.com/IAM/latest/UserGuide/reference-arns.html
 func NewClient(uriPrefix string) (registry.KMSClient, error) {
 	k, err := getKMS(uriPrefix)
 	if err != nil {
@@ -61,10 +66,20 @@ func NewClient(uriPrefix string) (registry.KMSClient, error) {
 	return NewClientWithKMS(uriPrefix, k)
 }
 
-// NewClientWithCredentials returns a new AWS KMS client which will use given
-// credentials to handle keys with uriPrefix prefix.
-// uriPrefix must have the following format: 'aws-kms://arn:<partition>:kms:<region>:[:path]'.
-// See http://docs.aws.amazon.com/general/latest/gr/aws-arns-and-namespaces.html.
+// NewClientWithCredentials returns a KMSClient backed by AWS KMS using the given
+// credentials to handle keys whose URIs start with uriPrefix.
+//
+// uriPrefix must have the following format:
+//
+//	aws-kms://arn:<partition>:kms:<region>:[<path>]
+//
+// See https://docs.aws.amazon.com/IAM/latest/UserGuide/reference-arns.html
+//
+// credentialPath can specify a file in CSV format as provided in the IAM
+// console or an INI-style credentials file.
+//
+// See https://docs.aws.amazon.com/cli/latest/userguide/cli-authentication-user.html#cli-authentication-user-configure-csv
+// and https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html#cli-configure-files-format.
 func NewClientWithCredentials(uriPrefix string, credentialPath string) (registry.KMSClient, error) {
 	k, err := getKMSFromCredentialPath(uriPrefix, credentialPath)
 	if err != nil {
@@ -73,10 +88,17 @@ func NewClientWithCredentials(uriPrefix string, credentialPath string) (registry
 	return NewClientWithKMS(uriPrefix, k)
 }
 
-// NewClientWithKMS returns a new AWS KMS client with user created KMS client.
-// Client is responsible for keeping the region consistency between key URI and KMS client.
-// uriPrefix must have the following format: 'aws-kms://arn:<partition>:kms:<region>:[:path]'.
-// See http://docs.aws.amazon.com/general/latest/gr/aws-arns-and-namespaces.html.
+// NewClientWithKMS returns a KMSClient backed by AWS KMS using the provided
+// instance of the AWS SDK KMS client.
+//
+// The caller is responsible for ensuring that the region specified in the KMS
+// client is consitent with the region specified within uriPrefix.
+//
+// uriPrefix must have the following format:
+//
+//	aws-kms://arn:<partition>:kms:<region>:[<path>]
+//
+// See https://docs.aws.amazon.com/IAM/latest/UserGuide/reference-arns.html
 func NewClientWithKMS(uriPrefix string, kms kmsiface.KMSAPI) (registry.KMSClient, error) {
 	if !strings.HasPrefix(strings.ToLower(uriPrefix), awsPrefix) {
 		return nil, fmt.Errorf("uriPrefix must start with %s, but got %s", awsPrefix, uriPrefix)
@@ -88,14 +110,20 @@ func NewClientWithKMS(uriPrefix string, kms kmsiface.KMSAPI) (registry.KMSClient
 	}, nil
 }
 
-// Supported true if this client does support keyURI
+// Supported returns true if keyURI starts with the URI prefix provided when
+// creating the client.
 func (c *awsClient) Supported(keyURI string) bool {
 	return strings.HasPrefix(keyURI, c.keyURIPrefix)
 }
 
-// GetAEAD gets an AEAD backend by keyURI.
-// keyURI must have the following format: 'aws-kms://arn:<partition>:kms:<region>:[:path]'.
-// See http://docs.aws.amazon.com/general/latest/gr/aws-arns-and-namespaces.html.
+// GetAEAD returns an implementation of the AEAD interface which performs
+// cyrptographic operations remotely via AWS KMS using keyURI.
+//
+// keyUri must be supported by this client and must have the following format:
+//
+//	aws-kms://arn:<partition>:kms:<region>:<path>
+//
+// See https://docs.aws.amazon.com/IAM/latest/UserGuide/reference-arns.html
 func (c *awsClient) GetAEAD(keyURI string) (tink.AEAD, error) {
 	if !c.Supported(keyURI) {
 		return nil, fmt.Errorf("keyURI must start with prefix %s, but got %s", c.keyURIPrefix, keyURI)
@@ -135,7 +163,7 @@ func getKMSFromCredentialPath(uriPrefix string, credentialPath string) (*kms.KMS
 	case errBadFile, errCredCSV:
 		return nil, err
 	default:
-		// fallback to load the credential path as .ini shared credentials.
+		// Fallback to load the credential path as .ini shared credentials.
 		creds = credentials.NewSharedCredentials(credentialPath, "default")
 	}
 	session := session.Must(session.NewSession(&aws.Config{
@@ -146,6 +174,16 @@ func getKMSFromCredentialPath(uriPrefix string, credentialPath string) (*kms.KMS
 	return kms.New(session), nil
 }
 
+// extractCredsCSV extracts credentials from a CSV file.
+//
+// A CSV formatted credentials file can be obtained when an AWS IAM user is
+// created through the IAM console.
+//
+// Properties of a properly formatted CSV file:
+//
+//  1. The first line consists of the headers:
+//     "User name,Password,Access key ID,Secret access key,Console login link"
+//  2. The second line contains 5 comma separated values.
 func extractCredsCSV(file string) (*credentials.Value, error) {
 	f, err := os.Open(file)
 	if err != nil {
@@ -164,12 +202,6 @@ func extractCredsCSV(file string) (*credentials.Value, error) {
 		return nil, errors.New("not a valid CSV credential file")
 	}
 
-	// credentials.csv can be obtained when a AWS IAM user is created through IAM console.
-	// The first line of the csv file is "User name,Password,Access key ID,Secret access key,Console login link"
-	// The 2nd line of it contains 5 comma separated values.
-	// Parse the file with a strict format assumption as follows:
-	// 1. There must be at least 4 columns and 2 rows.
-	// 2. The access key id and the secret access key must be on (0-based) column 2 and 3.
 	if len(lines) < 2 {
 		return nil, errCredCSV
 	}
@@ -184,9 +216,8 @@ func extractCredsCSV(file string) (*credentials.Value, error) {
 	}, nil
 }
 
+// getRegion extracts the region from keyURI.
 func getRegion(keyURI string) (string, error) {
-	// keyURI must have the following format: 'aws-kms://arn:<partition>:kms:<region>:[:path]'.
-	// See http://docs.aws.amazon.com/general/latest/gr/aws-arns-and-namespaces.html.
 	re1, err := regexp.Compile(`aws-kms://arn:(aws[a-zA-Z0-9-_]*):kms:([a-z0-9-]+):`)
 	if err != nil {
 		return "", err
