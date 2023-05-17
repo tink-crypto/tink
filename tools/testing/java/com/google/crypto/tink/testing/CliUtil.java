@@ -22,6 +22,7 @@ import com.google.crypto.tink.CleartextKeysetHandle;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.daead.DeterministicAeadConfig;
 import com.google.crypto.tink.hybrid.HybridConfig;
+import com.google.crypto.tink.keyderivation.KeyDerivationConfig;
 import com.google.crypto.tink.prf.PrfConfig;
 import com.google.crypto.tink.signature.SignatureConfig;
 import com.google.crypto.tink.streamingaead.StreamingAeadConfig;
@@ -67,7 +68,7 @@ public final class CliUtil {
     PrfConfig.register();
     SignatureConfig.register();
     StreamingAeadConfig.register();
-    // place holder for KeyDerivationConfig. DO NOT EDIT.
+    KeyDerivationConfig.register();
   }
 
   /**

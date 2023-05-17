@@ -43,6 +43,7 @@ java_library(
         "@tink_java//src/main/java/com/google/crypto/tink/hybrid:hybrid_config",
         "@tink_java//src/main/java/com/google/crypto/tink/jwt:jwt_mac_config",
         "@tink_java//src/main/java/com/google/crypto/tink/jwt:jwt_signature_config",
+        "@tink_java//src/main/java/com/google/crypto/tink/keyderivation:key_derivation_config",
         "@tink_java//src/main/java/com/google/crypto/tink/prf:prf_config",
         "@tink_java//src/main/java/com/google/crypto/tink/signature:signature_config",
         "@tink_java//src/main/java/com/google/crypto/tink/streamingaead:streaming_aead_config",
@@ -298,6 +299,7 @@ java_library(
     deps = [
         "@tink_java//src/main/java/com/google/crypto/tink:key_template",
         "@tink_java//src/main/java/com/google/crypto/tink:key_templates",
+        "@tink_java//src/main/java/com/google/crypto/tink/keyderivation:key_derivation_key_templates",
     ],
 )
 
