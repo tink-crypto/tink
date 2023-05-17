@@ -81,7 +81,6 @@ func (s *KeysetService) GetTemplate(ctx context.Context, req *pb.KeysetTemplateR
 			"HMAC_SHA512_512BITTAG":                mac.HMACSHA512Tag512KeyTemplate(),
 			"ECDSA_P256":                           signature.ECDSAP256KeyTemplate(),
 			"ECDSA_P256_RAW":                       signature.ECDSAP256RawKeyTemplate(),
-			"ECDSA_P384":                           signature.ECDSAP384KeyTemplate(),
 			"ECDSA_P384_SHA384":                    signature.ECDSAP384SHA384KeyTemplate(),
 			"ECDSA_P384_SHA512":                    signature.ECDSAP384SHA512KeyTemplate(),
 			"ECDSA_P521":                           signature.ECDSAP521KeyTemplate(),

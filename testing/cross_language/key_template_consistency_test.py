@@ -33,6 +33,7 @@ def all_template_names() -> Iterable[str]:
 
 # These key templates are not defined in these languages.
 UNDEFINED_TEMPLATES = [
+    ('ECDSA_P384', 'go'),
     ('ECDSA_P384_SHA384_IEEE_P1363', 'cc'),
     ('ECDSA_P384_SHA384_IEEE_P1363', 'java'),
     ('ECDSA_P384_SHA384_IEEE_P1363', 'go'),
