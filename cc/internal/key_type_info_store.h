@@ -39,7 +39,7 @@ namespace tink {
 namespace internal {
 
 // Stores information about key types constructed from their KeyTypeManager or
-// KeyManager. This is used by the Registry and Configuration classes.
+// KeyManager. This is used by the Configuration and Registry classes.
 //
 // Once inserted, Info objects must remain valid for the lifetime of the
 // KeyTypeInfoStore object, and the Info object's pointer stability is required.
@@ -47,11 +47,11 @@ namespace internal {
 // be replaced.
 //
 // Example:
-//   KeyTypeInfoStore store;
-//   crypto::tink::util::Status status =
-//       store.AddKeyTypeManager(absl::make_unique<AesGcmKeyManager>(), true);
-//   crypto::tink::util::StatusOr<KeyTypeInfoStore::Info*> info =
-//       store.Get(AesGcmKeyManager().get_key_type());
+//  KeyTypeInfoStore store;
+//  crypto::tink::util::Status status =
+//      store.AddKeyTypeManager(absl::make_unique<AesGcmKeyManager>(), true);
+//  crypto::tink::util::StatusOr<KeyTypeInfoStore::Info*> info =
+//      store.Get(AesGcmKeyManager().get_key_type());
 class KeyTypeInfoStore {
  public:
   KeyTypeInfoStore() = default;
