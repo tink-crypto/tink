@@ -96,11 +96,10 @@ tink_cc_library(
     tink::internal::fips_utils
     tink::internal::key_type_info_store
     tink::internal::keyset_wrapper
-    tink::internal::keyset_wrapper_impl
+    tink::internal::keyset_wrapper_store
     absl::core_headers
     absl::flat_hash_map
     absl::memory
-    absl::type_traits
     absl::status
     absl::strings
     absl::synchronization
@@ -1089,4 +1088,36 @@ tink_cc_test(
     tink::proto::aes_gcm_cc_proto
     tink::proto::common_cc_proto
     tink::proto::ecdsa_cc_proto
+)
+
+tink_cc_library(
+  NAME keyset_wrapper_store
+  SRCS
+    keyset_wrapper_store.h
+  DEPS
+    tink::internal::keyset_wrapper
+    tink::internal::keyset_wrapper_impl
+    tink::core::primitive_wrapper
+    tink::util::status
+    tink::util::statusor
+)
+
+tink_cc_test(
+  NAME keyset_wrapper_store_test
+  SRCS
+    keyset_wrapper_store_test.cc
+  DEPS
+    tink::internal::keyset_wrapper_store
+    tink::internal::registry_impl
+    gmock
+    absl::status
+    tink::core::primitive_set
+    tink::core::primitive_wrapper
+    tink::mac::mac_wrapper
+    tink::subtle::random
+    tink::util::status
+    tink::util::statusor
+    tink::util::test_matchers
+    tink::util::test_util
+    tink::proto::aes_gcm_cc_proto
 )

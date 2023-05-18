@@ -93,7 +93,7 @@ cc_library(
         ":fips_utils",
         ":key_type_info_store",
         ":keyset_wrapper",
-        ":keyset_wrapper_impl",
+        ":keyset_wrapper_store",
         "//:core/key_type_manager",
         "//:core/private_key_type_manager",
         "//:input_stream",
@@ -108,7 +108,6 @@ cc_library(
         "@com_google_absl//absl/base:core_headers",
         "@com_google_absl//absl/container:flat_hash_map",
         "@com_google_absl//absl/memory",
-        "@com_google_absl//absl/meta:type_traits",
         "@com_google_absl//absl/status",
         "@com_google_absl//absl/strings",
         "@com_google_absl//absl/synchronization",
@@ -1138,6 +1137,39 @@ cc_test(
         "//util:test_matchers",
         "@com_google_absl//absl/status",
         "@com_google_absl//absl/types:optional",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_library(
+    name = "keyset_wrapper_store",
+    hdrs = ["keyset_wrapper_store.h"],
+    include_prefix = "tink/internal",
+    deps = [
+        ":keyset_wrapper",
+        ":keyset_wrapper_impl",
+        "//:primitive_wrapper",
+        "//util:status",
+        "//util:statusor",
+    ],
+)
+
+cc_test(
+    name = "keyset_wrapper_store_test",
+    srcs = ["keyset_wrapper_store_test.cc"],
+    deps = [
+        ":keyset_wrapper_store",
+        ":registry_impl",
+        "//:primitive_set",
+        "//:primitive_wrapper",
+        "//mac:mac_wrapper",
+        "//proto:aes_gcm_cc_proto",
+        "//subtle:random",
+        "//util:status",
+        "//util:statusor",
+        "//util:test_matchers",
+        "//util:test_util",
+        "@com_google_absl//absl/status",
         "@com_google_googletest//:gtest_main",
     ],
 )

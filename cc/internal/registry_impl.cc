@@ -18,16 +18,14 @@
 
 #include <functional>
 #include <memory>
-#include <string>
-#include <typeindex>
 #include <utility>
 
-#include "absl/container/flat_hash_map.h"
 #include "absl/status/status.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/string_view.h"
 #include "absl/synchronization/mutex.h"
 #include "tink/input_stream.h"
+#include "tink/internal/keyset_wrapper_store.h"
 #include "tink/key_manager.h"
 #include "tink/monitoring/monitoring.h"
 #include "tink/util/errors.h"
@@ -109,7 +107,7 @@ void RegistryImpl::Reset() {
   {
     absl::MutexLock lock(&maps_mutex_);
     key_type_info_store_ = KeyTypeInfoStore();
-    primitive_to_wrapper_.clear();
+    keyset_wrapper_store_ = KeysetWrapperStore();
   }
   {
     absl::MutexLock lock(&monitoring_factory_mutex_);
