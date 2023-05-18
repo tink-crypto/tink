@@ -70,6 +70,8 @@ type PrimitiveSet struct {
 	// primitives sharing the prefix). This allows quickly retrieving the
 	// primitives sharing some particular prefix.
 	Entries map[string][]*Entry
+	// Stores entries in the original keyset key order.
+	EntriesInKeysetOrder []*Entry
 
 	Annotations map[string]string
 }
@@ -77,9 +79,10 @@ type PrimitiveSet struct {
 // New returns an empty instance of PrimitiveSet.
 func New() *PrimitiveSet {
 	return &PrimitiveSet{
-		Primary:     nil,
-		Entries:     make(map[string][]*Entry),
-		Annotations: nil,
+		Primary:              nil,
+		Entries:              make(map[string][]*Entry),
+		EntriesInKeysetOrder: make([]*Entry, 0),
+		Annotations:          nil,
 	}
 }
 
@@ -121,5 +124,6 @@ func (ps *PrimitiveSet) Add(p interface{}, key *tinkpb.Keyset_Key) (*Entry, erro
 		key.GetKeyData().GetTypeUrl(),
 	)
 	ps.Entries[prefix] = append(ps.Entries[prefix], e)
+	ps.EntriesInKeysetOrder = append(ps.EntriesInKeysetOrder, e)
 	return e, nil
 }
