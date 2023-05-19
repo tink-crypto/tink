@@ -23,19 +23,28 @@ go_library(
 
 go_test(
     name = "registry_test",
-    srcs = ["registry_test.go"],
+    srcs = [
+        "custom_key_manager_test.go",
+        "registry_test.go",
+    ],
     deps = [
         ":registry",
         "//aead",
+        "//aead/subtle",
+        "//insecurecleartextkeyset",
+        "//internal/tinkerror",
+        "//keyset",
         "//mac",
         "//mac/subtle",
         "//proto/aes_gcm_go_proto",
         "//proto/common_go_proto",
         "//proto/hmac_go_proto",
         "//proto/tink_go_proto",
+        "//subtle/random",
         "//testing/fakekms",
         "//testutil",
         "@org_golang_google_protobuf//proto",
+        "@org_golang_google_protobuf//types/known/wrapperspb",
     ],
 )
 
