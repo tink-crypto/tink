@@ -34,7 +34,7 @@ func TestNewClientGoodUriPrefixWithAwsPartition(t *testing.T) {
 	uriPrefix := "aws-kms://arn:aws:kms:us-east-2:235739564943:key/3ee50705-5a82-4f5b-9753-05c4f473922f"
 	_, err := NewClient(uriPrefix)
 	if err != nil {
-		t.Fatalf("error getting new client with good URI prefix: %v", err)
+		t.Errorf("NewClient(%q) err = %v, want nil", uriPrefix, err)
 	}
 }
 
@@ -42,7 +42,7 @@ func TestNewClientGoodUriPrefixWithAwsUsGovPartition(t *testing.T) {
 	uriPrefix := "aws-kms://arn:aws-us-gov:kms:us-gov-east-1:235739564943:key/3ee50705-5a82-4f5b-9753-05c4f473922f"
 	_, err := NewClient(uriPrefix)
 	if err != nil {
-		t.Fatalf("error getting new client with good URI prefix: %v", err)
+		t.Errorf("NewClient(%q) err = %v, want nil", uriPrefix, err)
 	}
 }
 
@@ -50,61 +50,60 @@ func TestNewClientGoodUriPrefixWithAwsCnPartition(t *testing.T) {
 	uriPrefix := "aws-kms://arn:aws-cn:kms:cn-north-1:235739564943:key/3ee50705-5a82-4f5b-9753-05c4f473922f"
 	_, err := NewClient(uriPrefix)
 	if err != nil {
-		t.Fatalf("error getting new client with good URI prefix: %v", err)
+		t.Errorf("NewClient(%q) err = %v, want nil", uriPrefix, err)
 	}
 }
 
 func TestNewClientBadUriPrefix(t *testing.T) {
 	uriPrefix := "bad-prefix://arn:aws-cn:kms:cn-north-1:235739564943:key/3ee50705-5a82-4f5b-9753-05c4f473922f"
-
 	_, err := NewClient(uriPrefix)
 	if err == nil {
-		t.Fatalf("does not reject bad URI prefix: %s", uriPrefix)
+		t.Errorf("NewClient(%q) err = nil, want error", uriPrefix)
 	}
 }
 
 func TestNewClientWithCredentialsWithGoodCredentialsCsv(t *testing.T) {
-	uriPrefix := "aws-kms://arn:aws:kms:us-east-2:235739564943:key/3ee50705-5a82-4f5b-9753-05c4f473922f"
-
 	srcDir, ok := os.LookupEnv("TEST_SRCDIR")
 	if !ok {
 		t.Skip("TEST_SRCDIR not set")
 	}
-	goodCsvCredFile := filepath.Join(srcDir, "tink_go/testdata/aws/credentials.csv")
 
-	_, err := NewClientWithCredentials(uriPrefix, goodCsvCredFile)
+	uriPrefix := "aws-kms://arn:aws:kms:us-east-2:235739564943:key/3ee50705-5a82-4f5b-9753-05c4f473922f"
+	csvCredFile := filepath.Join(srcDir, "tink_go/testdata/aws/credentials.csv")
+
+	_, err := NewClientWithCredentials(uriPrefix, csvCredFile)
 	if err != nil {
-		t.Fatalf("reject good CSV cred file: %s", goodCsvCredFile)
+		t.Errorf("NewClientWithCredentials(_, %q) err = %v, want nil", csvCredFile, err)
 	}
 }
 
 func TestNewClientWithCredentialsWithGoodCredentialsIni(t *testing.T) {
-	uriPrefix := "aws-kms://arn:aws:kms:us-east-2:235739564943:key/3ee50705-5a82-4f5b-9753-05c4f473922f"
-
 	srcDir, ok := os.LookupEnv("TEST_SRCDIR")
 	if !ok {
 		t.Skip("TEST_SRCDIR not set")
 	}
-	credINIFile := filepath.Join(srcDir, "tink_go/testdata/aws/credentials.cred")
 
-	_, err := NewClientWithCredentials(uriPrefix, credINIFile)
+	uriPrefix := "aws-kms://arn:aws:kms:us-east-2:235739564943:key/3ee50705-5a82-4f5b-9753-05c4f473922f"
+	iniCredFile := filepath.Join(srcDir, "tink_go/testdata/aws/credentials.cred")
+
+	_, err := NewClientWithCredentials(uriPrefix, iniCredFile)
 	if err != nil {
-		t.Fatalf("reject good CSV cred file: %s", credINIFile)
+		t.Errorf("NewClientWithCredentials(_, %q) err = %v, want nil", iniCredFile, err)
 	}
 }
 
 func TestNewClientWithCredentialsWithBadCredentials(t *testing.T) {
-	uriPrefix := "aws-kms://arn:aws:kms:us-east-2:235739564943:key/3ee50705-5a82-4f5b-9753-05c4f473922f"
-
 	srcDir, ok := os.LookupEnv("TEST_SRCDIR")
 	if !ok {
 		t.Skip("TEST_SRCDIR not set")
 	}
+
+	uriPrefix := "aws-kms://arn:aws:kms:us-east-2:235739564943:key/3ee50705-5a82-4f5b-9753-05c4f473922f"
 	badCredFile := filepath.Join(srcDir, "tink_go/testdata/aws/access_keys_bad.csv")
 
 	_, err := NewClientWithCredentials(uriPrefix, badCredFile)
 	if err == nil {
-		t.Fatalf("awskms.NewClientWithCredentials(uriPrefix, badCredFile) err = nil, want error")
+		t.Errorf("NewClientWithCredentials(uriPrefix, badCredFile) err = nil, want error")
 	}
 }
 
@@ -119,11 +118,11 @@ func TestSupported(t *testing.T) {
 	}
 
 	if !client.Supported(supportedKeyURI) {
-		t.Fatalf("client with URI prefix %s should support key URI %s", uriPrefix, supportedKeyURI)
+		t.Errorf("client with URI prefix %q should support key URI %q", uriPrefix, supportedKeyURI)
 	}
 
 	if client.Supported(nonSupportedKeyURI) {
-		t.Fatalf("client with URI prefix %s should NOT support key URI %s", uriPrefix, nonSupportedKeyURI)
+		t.Errorf("client with URI prefix %q should NOT support key URI %q", uriPrefix, nonSupportedKeyURI)
 	}
 }
 
@@ -138,7 +137,7 @@ func TestGetAeadSupportedURI(t *testing.T) {
 
 	_, err = client.GetAEAD(supportedKeyURI)
 	if err != nil {
-		t.Fatalf("client with URI prefix %s should support key URI %s", uriPrefix, supportedKeyURI)
+		t.Errorf("client with URI prefix %q should support key URI %q", uriPrefix, supportedKeyURI)
 	}
 }
 
@@ -157,7 +156,7 @@ func TestGetAeadEncryptDecrypt(t *testing.T) {
 
 	a, err := client.GetAEAD(keyURI)
 	if err != nil {
-		t.Fatalf("client.GetAEAD(keyURI) failed: %s", err)
+		t.Fatalf("client.GetAEAD(keyURI) err = %v, want nil", err)
 	}
 
 	plaintext := []byte("plaintext")
@@ -176,12 +175,12 @@ func TestGetAeadEncryptDecrypt(t *testing.T) {
 
 	_, err = a.Decrypt(ciphertext, []byte("invalidAssociatedData"))
 	if err == nil {
-		t.Error("a.Decrypt(ciphertext, []byte{'invalidAssociatedData'}) err = nil, want error")
+		t.Error("a.Decrypt(ciphertext, []byte(\"invalidAssociatedData\")) err = nil, want error")
 	}
 
 	_, err = a.Decrypt([]byte("invalidCiphertext"), associatedData)
 	if err == nil {
-		t.Error("a.Decrypt([]byte{'invalidCiphertext'}, associatedData) err = nil, want error")
+		t.Error("a.Decrypt([]byte(\"invalidCiphertext\"), associatedData) err = nil, want error")
 	}
 }
 
@@ -200,7 +199,7 @@ func TestUsesAdditionalDataAsContextName(t *testing.T) {
 
 	a, err := client.GetAEAD(keyURI)
 	if err != nil {
-		t.Fatalf("client.GetAEAD(keyURI) failed: %s", err)
+		t.Fatalf("client.GetAEAD(keyURI) err = %v, want nil", err)
 	}
 
 	plaintext := []byte("plaintext")
@@ -219,7 +218,7 @@ func TestUsesAdditionalDataAsContextName(t *testing.T) {
 	}
 	decResponse, err := fakekms.Decrypt(decRequest)
 	if err != nil {
-		t.Fatalf("fakeKMS.Decrypt(decRequest) err = %s, want nil", err)
+		t.Fatalf("fakeKMS.Decrypt(decRequest) err = %v, want nil", err)
 	}
 	if !bytes.Equal(decResponse.Plaintext, plaintext) {
 		t.Fatalf("decResponse.Plaintext = %q, want %q", decResponse.Plaintext, plaintext)
