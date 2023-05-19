@@ -25,13 +25,13 @@ if command -v "bazelisk" &> /dev/null; then
 fi
 
 usage() {
-  echo "Usage: $0 [-h] [-c <compat value (default 1.17)>] <go project dir>"
-  echo "  -c: Value to pass to `-compat`. Default to 1.17."
+  echo "Usage: $0 [-h] [-c <compat value (default 1.19)>] <go project dir>"
+  echo "  -c: Value to pass to `-compat`. Default to 1.19."
   echo "  -h: Help. Print this usage information."
   exit 1
 }
 
-COMPAT="1.17"
+COMPAT="1.19"
 GO_PROJECT_DIR=
 
 process_args() {
