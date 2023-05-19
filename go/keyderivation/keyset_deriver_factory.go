@@ -52,11 +52,9 @@ func newWrappedKeysetDeriver(ps *primitiveset.PrimitiveSet) (*wrappedKeysetDeriv
 	if _, ok := (ps.Primary.Primitive).(KeysetDeriver); !ok {
 		return nil, errNotKeysetDeriverPrimitive
 	}
-	for _, primitives := range ps.Entries {
-		for _, p := range primitives {
-			if _, ok := (p.Primitive).(KeysetDeriver); !ok {
-				return nil, errNotKeysetDeriverPrimitive
-			}
+	for _, p := range ps.EntriesInKeysetOrder {
+		if _, ok := (p.Primitive).(KeysetDeriver); !ok {
+			return nil, errNotKeysetDeriverPrimitive
 		}
 	}
 	return &wrappedKeysetDeriver{ps: ps}, nil
@@ -64,32 +62,30 @@ func newWrappedKeysetDeriver(ps *primitiveset.PrimitiveSet) (*wrappedKeysetDeriv
 
 func (w *wrappedKeysetDeriver) DeriveKeyset(salt []byte) (*keyset.Handle, error) {
 	keys := []*tinkpb.Keyset_Key{}
-	for _, entriesWithSamePrefix := range w.ps.Entries {
-		for _, e := range entriesWithSamePrefix {
-			p, ok := (e.Primitive).(KeysetDeriver)
-			if !ok {
-				return nil, errNotKeysetDeriverPrimitive
-			}
-			handle, err := p.DeriveKeyset(salt)
-			if err != nil {
-				return nil, errors.New("keyset_deriver_factory: keyset derivation failed")
-			}
-			if len(handle.KeysetInfo().GetKeyInfo()) != 1 {
-				return nil, errors.New("keyset_deriver_factory: primitive must derive keyset handle with exactly one key")
-			}
-			ks := insecurecleartextkeyset.KeysetMaterial(handle)
-			if len(ks.GetKey()) != 1 {
-				return nil, errors.New("keyset_deriver_factory: primitive must derive keyset handle with exactly one key")
-			}
-			// Set all fields, except for KeyData, to match the Entry's in the keyset.
-			key := &tinkpb.Keyset_Key{
-				KeyData:          ks.GetKey()[0].GetKeyData(),
-				Status:           e.Status,
-				KeyId:            e.KeyID,
-				OutputPrefixType: e.PrefixType,
-			}
-			keys = append(keys, key)
+	for _, e := range w.ps.EntriesInKeysetOrder {
+		p, ok := (e.Primitive).(KeysetDeriver)
+		if !ok {
+			return nil, errNotKeysetDeriverPrimitive
 		}
+		handle, err := p.DeriveKeyset(salt)
+		if err != nil {
+			return nil, errors.New("keyset_deriver_factory: keyset derivation failed")
+		}
+		if len(handle.KeysetInfo().GetKeyInfo()) != 1 {
+			return nil, errors.New("keyset_deriver_factory: primitive must derive keyset handle with exactly one key")
+		}
+		ks := insecurecleartextkeyset.KeysetMaterial(handle)
+		if len(ks.GetKey()) != 1 {
+			return nil, errors.New("keyset_deriver_factory: primitive must derive keyset handle with exactly one key")
+		}
+		// Set all fields, except for KeyData, to match the Entry's in the keyset.
+		key := &tinkpb.Keyset_Key{
+			KeyData:          ks.GetKey()[0].GetKeyData(),
+			Status:           e.Status,
+			KeyId:            e.KeyID,
+			OutputPrefixType: e.PrefixType,
+		}
+		keys = append(keys, key)
 	}
 	ks := &tinkpb.Keyset{
 		PrimaryKeyId: w.ps.Primary.KeyID,

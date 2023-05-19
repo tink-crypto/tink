@@ -33,18 +33,19 @@ type invalidDeriver struct{}
 var _ KeysetDeriver = (*invalidDeriver)(nil)
 
 func (i *invalidDeriver) DeriveKeyset(salt []byte) (*keyset.Handle, error) {
-	kh, err := keyset.NewHandle(aead.AES128GCMKeyTemplate())
+	manager := keyset.NewManager()
+	keyID, err := manager.Add(aead.AES128GCMKeyTemplate())
 	if err != nil {
 		return nil, err
 	}
-	manager := keyset.NewManagerFromHandle(kh)
-	if _, err := manager.Add(aead.AES128GCMKeyTemplate()); err != nil {
+	manager.SetPrimary(keyID)
+	if _, err = manager.Add(aead.AES256GCMKeyTemplate()); err != nil {
 		return nil, err
 	}
-	return kh, nil
+	return manager.Handle()
 }
 
-func TestInvalidKeysetDeriverImplementationFails(t *testing.T) {
+func TestDeriveKeysetWithInvalidPrimitiveImplementationFails(t *testing.T) {
 	entry := &primitiveset.Entry{
 		KeyID:     119,
 		Primitive: &invalidDeriver{},
@@ -57,14 +58,31 @@ func TestInvalidKeysetDeriverImplementationFails(t *testing.T) {
 		Entries: map[string][]*primitiveset.Entry{
 			cryptofmt.RawPrefix: []*primitiveset.Entry{entry},
 		},
+		EntriesInKeysetOrder: []*primitiveset.Entry{entry},
 	}
-	wkd, err := newWrappedKeysetDeriver(ps)
+	wrappedDeriver, err := newWrappedKeysetDeriver(ps)
 	if err != nil {
 		t.Fatalf("newWrappedKeysetDeriver() err = %v, want nil", err)
 	}
-	if _, err := wkd.DeriveKeyset([]byte("salt")); err == nil {
-		t.Error("DeriveKeyset() err = nil, want non-nil")
-	} else if !strings.Contains(err.Error(), "exactly one key") {
+	_, err = wrappedDeriver.DeriveKeyset([]byte("salt"))
+	if err == nil {
+		t.Fatal("DeriveKeyset() err = nil, want non-nil")
+	}
+	if !strings.Contains(err.Error(), "exactly one key") {
 		t.Errorf("DeriveKeyset() err = %q, doesn't contain %q", err, "exactly one key")
+	}
+}
+
+func TestNewWrappedKeysetDeriverWrongPrimitiveFails(t *testing.T) {
+	handle, err := keyset.NewHandle(aead.AES128GCMKeyTemplate())
+	if err != nil {
+		t.Fatalf("keyset.NewHandle() err = %v, want nil", err)
+	}
+	ps, err := handle.Primitives()
+	if err != nil {
+		t.Fatalf("handle.Primitives() err = %v, want nil", err)
+	}
+	if _, err := newWrappedKeysetDeriver(ps); err == nil {
+		t.Errorf("newWrappedKeysetDeriver() err = nil, want non-nil")
 	}
 }
