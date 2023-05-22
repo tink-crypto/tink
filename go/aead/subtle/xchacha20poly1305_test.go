@@ -250,3 +250,25 @@ func runXChaCha20Poly1305WycheproofCase(t *testing.T, tc *AEADCase) {
 		}
 	}
 }
+
+func TestPreallocatedCiphertextMemoryInXChaCha20Poly1305IsExact(t *testing.T) {
+	key := random.GetRandomBytes(chacha20poly1305.KeySize)
+	a, err := subtle.NewXChaCha20Poly1305(key)
+	if err != nil {
+		t.Fatalf("aead.NewAESGCMInsecureIV() err = %v, want nil", err)
+	}
+	plaintext := random.GetRandomBytes(13)
+	associatedData := random.GetRandomBytes(17)
+
+	ciphertext, err := a.Encrypt(plaintext, associatedData)
+	if err != nil {
+		t.Fatalf("a.Encrypt() err = %v, want nil", err)
+	}
+	// Encrypt() uses cipher.Overhead() to pre-allocate the memory needed store the ciphertext.
+	// For ChaCha20Poly1305, the size of the allocated memory should always be exact. If this check
+	// fails, the pre-allocated memory was too large or too small. If it was too small, the system had
+	// to re-allocate more memory, which is expensive and should be avoided.
+	if len(ciphertext) != cap(ciphertext) {
+		t.Errorf("want len(ciphertext) == cap(ciphertext), got %d != %d", len(ciphertext), cap(ciphertext))
+	}
+}

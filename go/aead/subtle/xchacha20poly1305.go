@@ -56,8 +56,9 @@ func (x *XChaCha20Poly1305) Encrypt(plaintext []byte, associatedData []byte) ([]
 	}
 
 	n := x.newNonce()
-	ct := c.Seal(nil, n, plaintext, associatedData)
-	return append(n, ct...), nil
+	dst := make([]byte, 0, chacha20poly1305.NonceSizeX+len(plaintext)+c.Overhead())
+	dst = append(dst, n...)
+	return c.Seal(dst, n, plaintext, associatedData), nil
 }
 
 // Decrypt decrypts ciphertext with associatedData.
