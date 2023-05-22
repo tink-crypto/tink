@@ -20,6 +20,7 @@ import static com.google.crypto.tink.internal.Util.toBytesFromPrintableAscii;
 
 import com.google.crypto.tink.AccessesPartialKey;
 import com.google.crypto.tink.SecretKeyAccess;
+import com.google.crypto.tink.internal.EnumTypeProtoConverter;
 import com.google.crypto.tink.internal.KeyParser;
 import com.google.crypto.tink.internal.KeySerializer;
 import com.google.crypto.tink.internal.MutableSerializationRegistry;
@@ -37,10 +38,6 @@ import com.google.protobuf.ByteString;
 import com.google.protobuf.ExtensionRegistryLite;
 import com.google.protobuf.InvalidProtocolBufferException;
 import java.security.GeneralSecurityException;
-import java.util.Collections;
-import java.util.EnumMap;
-import java.util.HashMap;
-import java.util.Map;
 import javax.annotation.Nullable;
 
 /**
@@ -96,17 +93,14 @@ final class Ed25519ProtoSerialization {
           PRIVATE_TYPE_URL_BYTES,
           ProtoKeySerialization.class);
 
-  // Maps the key variants to the corresponding proto output prefix types
-  @SuppressWarnings(
-      "ConstantCaseForConstants") // This map is constructed using Collections.unmodifiableMap
-  private static final Map<Ed25519Parameters.Variant, OutputPrefixType>
-      VARIANT_TO_OUTPUT_PREFIX_MAP = createVariantToOutputPrefixMap();
-
-  // Maps the proto output prefix types to the corresponding key variants
-  @SuppressWarnings(
-      "ConstantCaseForConstants") // This map is constructed using Collections.unmodifiableMap
-  private static final Map<OutputPrefixType, Ed25519Parameters.Variant>
-      OUTPUT_PREFIX_TO_VARIANT_MAP = createOutputPrefixToVariantMap();
+  private static final EnumTypeProtoConverter<OutputPrefixType, Ed25519Parameters.Variant>
+      VARIANT_CONVERTER =
+          EnumTypeProtoConverter.<OutputPrefixType, Ed25519Parameters.Variant>builder()
+              .add(OutputPrefixType.RAW, Ed25519Parameters.Variant.NO_PREFIX)
+              .add(OutputPrefixType.TINK, Ed25519Parameters.Variant.TINK)
+              .add(OutputPrefixType.CRUNCHY, Ed25519Parameters.Variant.CRUNCHY)
+              .add(OutputPrefixType.LEGACY, Ed25519Parameters.Variant.LEGACY)
+              .build();
 
   /**
    * Registers previously defined parser/serializer objects into a global, mutable registry.
@@ -127,43 +121,6 @@ final class Ed25519ProtoSerialization {
     registry.registerKeyParser(PRIVATE_KEY_PARSER);
   }
 
-  private static Map<Ed25519Parameters.Variant, OutputPrefixType> createVariantToOutputPrefixMap() {
-    Map<Ed25519Parameters.Variant, OutputPrefixType> result = new HashMap<>();
-    result.put(Ed25519Parameters.Variant.NO_PREFIX, OutputPrefixType.RAW);
-    result.put(Ed25519Parameters.Variant.TINK, OutputPrefixType.TINK);
-    result.put(Ed25519Parameters.Variant.CRUNCHY, OutputPrefixType.CRUNCHY);
-    result.put(Ed25519Parameters.Variant.LEGACY, OutputPrefixType.LEGACY);
-    return Collections.unmodifiableMap(result);
-  }
-
-  private static Map<OutputPrefixType, Ed25519Parameters.Variant> createOutputPrefixToVariantMap() {
-    Map<OutputPrefixType, Ed25519Parameters.Variant> result = new EnumMap<>(OutputPrefixType.class);
-    result.put(OutputPrefixType.RAW, Ed25519Parameters.Variant.NO_PREFIX);
-    result.put(OutputPrefixType.TINK, Ed25519Parameters.Variant.TINK);
-    result.put(OutputPrefixType.CRUNCHY, Ed25519Parameters.Variant.CRUNCHY);
-    result.put(OutputPrefixType.LEGACY, Ed25519Parameters.Variant.LEGACY);
-    return Collections.unmodifiableMap(result);
-  }
-
-  private static OutputPrefixType toProtoOutputPrefixType(Ed25519Parameters.Variant variant)
-      throws GeneralSecurityException {
-    OutputPrefixType mapping = VARIANT_TO_OUTPUT_PREFIX_MAP.get(variant);
-    if (mapping == null) {
-      throw new GeneralSecurityException("Unable to serialize variant: " + variant);
-    }
-    return mapping;
-  }
-
-  private static Ed25519Parameters.Variant toVariant(OutputPrefixType outputPrefixType)
-      throws GeneralSecurityException {
-    Ed25519Parameters.Variant mapping = OUTPUT_PREFIX_TO_VARIANT_MAP.get(outputPrefixType);
-    if (mapping == null) {
-      throw new GeneralSecurityException(
-          "Unable to parse OutputPrefixType: " + outputPrefixType.getNumber());
-    }
-    return mapping;
-  }
-
   private static com.google.crypto.tink.proto.Ed25519PublicKey getProtoPublicKey(
       Ed25519PublicKey key) {
     return com.google.crypto.tink.proto.Ed25519PublicKey.newBuilder()
@@ -177,7 +134,7 @@ final class Ed25519ProtoSerialization {
         KeyTemplate.newBuilder()
             .setTypeUrl(PRIVATE_TYPE_URL)
             .setValue(Ed25519KeyFormat.getDefaultInstance().toByteString())
-            .setOutputPrefixType(toProtoOutputPrefixType(parameters.getVariant()))
+            .setOutputPrefixType(VARIANT_CONVERTER.toProtoEnum(parameters.getVariant()))
             .build());
   }
 
@@ -193,7 +150,7 @@ final class Ed25519ProtoSerialization {
         PUBLIC_TYPE_URL,
         getProtoPublicKey(key).toByteString(),
         KeyMaterialType.ASYMMETRIC_PUBLIC,
-        toProtoOutputPrefixType(key.getParameters().getVariant()),
+        VARIANT_CONVERTER.toProtoEnum(key.getParameters().getVariant()),
         key.getIdRequirementOrNull());
   }
 
@@ -209,7 +166,7 @@ final class Ed25519ProtoSerialization {
             .build()
             .toByteString(),
         KeyMaterialType.ASYMMETRIC_PRIVATE,
-        toProtoOutputPrefixType(key.getParameters().getVariant()),
+        VARIANT_CONVERTER.toProtoEnum(key.getParameters().getVariant()),
         key.getIdRequirementOrNull());
   }
 
@@ -232,7 +189,7 @@ final class Ed25519ProtoSerialization {
       throw new GeneralSecurityException("Parsing Ed25519Parameters failed: ", e);
     }
     return Ed25519Parameters.create(
-        toVariant(serialization.getKeyTemplate().getOutputPrefixType()));
+        VARIANT_CONVERTER.fromProtoEnum(serialization.getKeyTemplate().getOutputPrefixType()));
   }
 
   @SuppressWarnings("UnusedException")
@@ -253,7 +210,7 @@ final class Ed25519ProtoSerialization {
       }
 
       return Ed25519PublicKey.create(
-          toVariant(serialization.getOutputPrefixType()),
+          VARIANT_CONVERTER.fromProtoEnum(serialization.getOutputPrefixType()),
           Bytes.copyFrom(protoKey.getKeyValue().toByteArray()),
           serialization.getIdRequirementOrNull());
     } catch (InvalidProtocolBufferException e) {
@@ -280,7 +237,7 @@ final class Ed25519ProtoSerialization {
       com.google.crypto.tink.proto.Ed25519PublicKey protoPublicKey = protoKey.getPublicKey();
       Ed25519PublicKey publicKey =
           Ed25519PublicKey.create(
-              toVariant(serialization.getOutputPrefixType()),
+              VARIANT_CONVERTER.fromProtoEnum(serialization.getOutputPrefixType()),
               Bytes.copyFrom(protoPublicKey.getKeyValue().toByteArray()),
               serialization.getIdRequirementOrNull());
 
