@@ -417,3 +417,34 @@ func baseModeX25519HKDFSHA256Vectors(t *testing.T) map[hpkeID]vector {
 
 	return m
 }
+
+func TestHpkeSuiteIDMemoryAllocatedIsExact(t *testing.T) {
+	suiteID := hpkeSuiteID(1, 2, 3)
+	if len(suiteID) != cap(suiteID) {
+		t.Errorf("want len(suiteID) == cap(suiteID), got %d != %d", len(suiteID), cap(suiteID))
+	}
+}
+
+func TestKeyScheduleContextMemoryAllocatedIsExact(t *testing.T) {
+	context := keyScheduleContext(1, []byte{1, 2, 3}, []byte{1, 2, 3, 4, 5})
+	if len(context) != cap(context) {
+		t.Errorf("want len(context) == cap(context), got %d != %d", len(context), cap(context))
+	}
+}
+
+func TestLabelIKMMemoryAllocatedIsExact(t *testing.T) {
+	ikm := labelIKM("abcde", []byte{1, 2, 3}, []byte{1, 2, 3, 4, 5})
+	if len(ikm) != cap(ikm) {
+		t.Errorf("want len(ikm) == cap(ikm), got %d != %d", len(ikm), cap(ikm))
+	}
+}
+
+func TestLabelInfoMemoryAllocatedIsExact(t *testing.T) {
+	info, err := labelInfo("abcde", []byte{1, 2, 3}, []byte{1, 2, 3, 4, 5}, 42)
+	if err != nil {
+		t.Errorf("labelInfo() err = %v, want nil", err)
+	}
+	if len(info) != cap(info) {
+		t.Errorf("want len(info) == cap(info), got %d != %d", len(info), cap(info))
+	}
+}

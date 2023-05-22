@@ -58,7 +58,8 @@ func kemSuiteID(kemID uint16) []byte {
 // hpkeSuiteID generates the HPKE suite ID according to
 // https://www.rfc-editor.org/rfc/rfc9180.html#section-5.1-8.
 func hpkeSuiteID(kemID, kdfID, aeadID uint16) []byte {
-	var res []byte
+	// Allocate memory for the return value with the exact amount of bytes needed.
+	res := make([]byte, 0, 4+2+2+2)
 	res = append(res, "HPKE"...)
 	res = appendBigEndianUint16(res, kemID)
 	res = appendBigEndianUint16(res, kdfID)
@@ -69,7 +70,8 @@ func hpkeSuiteID(kemID, kdfID, aeadID uint16) []byte {
 // keyScheduleContext creates the key_schedule_context defined at
 // https://www.rfc-editor.org/rfc/rfc9180.html#section-5.1-10.
 func keyScheduleContext(mode uint8, pskIDHash, infoHash []byte) []byte {
-	var res []byte
+	// Allocate memory for the return value with the exact amount of bytes needed.
+	res := make([]byte, 0, 1+len(pskIDHash)+len(infoHash))
 	res = append(res, mode)
 	res = append(res, pskIDHash...)
 	res = append(res, infoHash...)
@@ -79,7 +81,8 @@ func keyScheduleContext(mode uint8, pskIDHash, infoHash []byte) []byte {
 // labelIKM returns a labeled IKM according to LabeledExtract() defined at
 // https://www.rfc-editor.org/rfc/rfc9180.html#section-4.
 func labelIKM(label string, ikm, suiteID []byte) []byte {
-	var res []byte
+	// Allocate memory for the return value with the exact amount of bytes needed.
+	res := make([]byte, 0, len(hpkeV1)+len(suiteID)+len(label)+len(ikm))
 	res = append(res, hpkeV1...)
 	res = append(res, suiteID...)
 	res = append(res, label...)
@@ -95,7 +98,8 @@ func labelInfo(label string, info, suiteID []byte, length int) ([]byte, error) {
 		return nil, fmt.Errorf("length %d must be a valid uint16 value", length)
 	}
 
-	var res []byte
+	// Allocate memory for the return value with the exact amount of bytes needed.
+	res := make([]byte, 0, 2+len(hpkeV1)+len(suiteID)+len(label)+len(info))
 	res = appendBigEndianUint16(res, length16)
 	res = append(res, hpkeV1...)
 	res = append(res, suiteID...)
