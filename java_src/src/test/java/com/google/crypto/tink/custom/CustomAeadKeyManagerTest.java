@@ -45,6 +45,7 @@ import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.MessageLite;
 import com.google.protobuf.StringValue;
 import java.security.GeneralSecurityException;
+import java.util.Arrays;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -148,7 +149,8 @@ public final class CustomAeadKeyManagerTest {
       return TinkProtoParametersFormat.parse(template.toByteArray());
     }
 
-    static KeysetHandle aesGcm128KeyToKeysetHandle(byte[] rawAesKey)
+    static KeysetHandle aesGcm128KeyToKeysetHandle(
+        byte[] rawAesKey, int keyId, OutputPrefixType outputPrefixType)
         throws GeneralSecurityException {
       if (rawAesKey.length != 16) {
         throw new IllegalArgumentException("unexpected raw key length");
@@ -159,7 +161,8 @@ public final class CustomAeadKeyManagerTest {
               .addKey(
                   Keyset.Key.newBuilder()
                       .setStatus(KeyStatusType.ENABLED)
-                      .setOutputPrefixType(OutputPrefixType.RAW)
+                      .setOutputPrefixType(outputPrefixType)
+                      .setKeyId(keyId)
                       .setKeyData(
                           KeyData.newBuilder()
                               .setTypeUrl(TYPE_URL)
@@ -167,6 +170,7 @@ public final class CustomAeadKeyManagerTest {
                               .setKeyMaterialType(KeyMaterialType.SYMMETRIC)
                               .build())
                       .build())
+              .setPrimaryKeyId(keyId)
               .build();
       return CleartextKeysetHandle.fromKeyset(keyset);
     }
@@ -199,10 +203,38 @@ public final class CustomAeadKeyManagerTest {
     byte[] associatedData = "associatedData".getBytes(UTF_8);
     byte[] ciphertext = jceAead.encrypt(plaintext, associatedData);
 
-    KeysetHandle handle = MyCustomKeyManager.aesGcm128KeyToKeysetHandle(rawAesKey);
+    KeysetHandle handle =
+        MyCustomKeyManager.aesGcm128KeyToKeysetHandle(
+            rawAesKey, /* keyId= */ 0x11223344, OutputPrefixType.RAW);
     Aead aead = handle.getPrimitive(Aead.class);
     byte[] decrypted = aead.decrypt(ciphertext, associatedData);
     assertThat(decrypted).isEqualTo(plaintext);
+  }
+
+  @Test
+  public void encryptAndDecryptWithTinkPrefix_success() throws Exception {
+    // Create a new key and import it with output prefix type TINK with a fixed key ID.
+    byte[] rawAesKey = Random.randBytes(16);
+    int keyId = 0x11223344;
+    KeysetHandle handle =
+        MyCustomKeyManager.aesGcm128KeyToKeysetHandle(rawAesKey, keyId, OutputPrefixType.TINK);
+
+    Aead aead = handle.getPrimitive(Aead.class);
+    byte[] plaintext = "plaintext".getBytes(UTF_8);
+    byte[] associatedData = "associatedData".getBytes(UTF_8);
+    byte[] ciphertext = aead.encrypt(plaintext, associatedData);
+    assertThat(aead.decrypt(ciphertext, associatedData)).isEqualTo(plaintext);
+
+    // Check that ciphertext generated using OutputPrefixType.TINK has a 5 byte prefix:
+    // the first byte is always 0x01, and the next 4 bytes are the big-endian encoded key ID.
+    byte[] prefix = Arrays.copyOf(ciphertext, 5);
+    assertThat(prefix)
+        .isEqualTo(new byte[] {(byte) 0x01, (byte) 0x11, (byte) 0x22, (byte) 0x33, (byte) 0x44});
+
+    // Check that AesGcmJce can decrypt using the raw key, if the prefix is removed.
+    byte[] ciphertextWithoutPrefix = Arrays.copyOfRange(ciphertext, 5, ciphertext.length);
+    Aead jceAead = new AesGcmJce(rawAesKey);
+    assertThat(jceAead.decrypt(ciphertextWithoutPrefix, associatedData)).isEqualTo(plaintext);
   }
 
   @Test
@@ -220,18 +252,17 @@ public final class CustomAeadKeyManagerTest {
     Aead aead2 = handleWithTinkKey.getPrimitive(Aead.class);
     byte[] ciphertext2 = aead2.encrypt(plaintext, associatedData);
 
-    // Create keyset handle with both the custom key and the normal Tink key
     KeysetHandle handle =
-        KeysetHandle.newBuilder()
+        MyCustomKeyManager.aesGcm128KeyToKeysetHandle(
+            rawAesKey, /* keyId= */ 0x11223344, OutputPrefixType.RAW);
+    // Create keyset handle with both the custom key and the normal Tink key
+    KeysetHandle handle2 =
+        KeysetHandle.newBuilder(handle)
             .addEntry(KeysetHandle.importKey(handleWithTinkKey.getAt(0).getKey()).makePrimary())
-            .addEntry(
-                KeysetHandle.importKey(
-                        MyCustomKeyManager.aesGcm128KeyToKeysetHandle(rawAesKey).getAt(0).getKey())
-                    .withRandomId())
             .build();
 
     // Decrypt both ciphertexts
-    Aead aead = handle.getPrimitive(Aead.class);
+    Aead aead = handle2.getPrimitive(Aead.class);
     assertThat(aead.decrypt(ciphertext, associatedData)).isEqualTo(plaintext);
     assertThat(aead.decrypt(ciphertext2, associatedData)).isEqualTo(plaintext);
   }
