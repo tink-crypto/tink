@@ -88,12 +88,14 @@ func (i *AESGCMInsecureIV) Encrypt(iv, plaintext, associatedData []byte) ([]byte
 	if err != nil {
 		return nil, err
 	}
-	ciphertext := cipher.Seal(nil, iv, plaintext, associatedData)
-
-	if i.prependIV {
-		return append(iv, ciphertext...), nil
+	if !i.prependIV {
+		return cipher.Seal(nil, iv, plaintext, associatedData), nil
 	}
-	return ciphertext, nil
+	// Make the capacity of dst large enough so that both the IV and the ciphertext fit inside.
+	dst := make([]byte, 0, AESGCMIVSize+len(plaintext)+cipher.Overhead())
+	dst = append(dst, iv...)
+	// Seal appends the ciphertext to dst. So the final output is: iv || ciphertext.
+	return cipher.Seal(dst, iv, plaintext, associatedData), nil
 }
 
 // Decrypt decrypts ciphertext with iv as the initialization vector and
@@ -101,10 +103,12 @@ func (i *AESGCMInsecureIV) Encrypt(iv, plaintext, associatedData []byte) ([]byte
 //
 // If prependIV is true, the iv argument and the first AESGCMIVSize bytes of
 // ciphertext must be equal. The ciphertext argument is as follows:
-//     | iv | actual ciphertext | tag |
+//
+//	| iv | actual ciphertext | tag |
 //
 // If false, the ciphertext argument is as follows:
-//     | actual ciphertext | tag |
+//
+//	| actual ciphertext | tag |
 func (i *AESGCMInsecureIV) Decrypt(iv, ciphertext, associatedData []byte) ([]byte, error) {
 	if len(iv) != AESGCMIVSize {
 		return nil, fmt.Errorf("unexpected IV size: got %d, want %d", len(iv), AESGCMIVSize)
