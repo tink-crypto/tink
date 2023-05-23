@@ -70,10 +70,12 @@ func (e *EncryptThenAuthenticate) Encrypt(plaintext, associatedData []byte) ([]b
 		return nil, fmt.Errorf("encrypt_then_authenticate: %v", err)
 	}
 
-	toAuthData := append(associatedData, ciphertext...)
 	adSizeInBits := uint64(len(associatedData)) * 8
-	toAuthData = append(toAuthData, uint64ToByte(adSizeInBits)...)
-
+	adSizeInBitsEncoded := uint64ToByte(adSizeInBits)
+	toAuthData := make([]byte, 0, len(associatedData)+len(ciphertext)+len(adSizeInBitsEncoded))
+	toAuthData = append(toAuthData, associatedData...)
+	toAuthData = append(toAuthData, ciphertext...)
+	toAuthData = append(toAuthData, adSizeInBitsEncoded...)
 	tag, err := e.mac.ComputeMAC(toAuthData)
 	if err != nil {
 		return nil, fmt.Errorf("encrypt_then_authenticate: %v", err)
@@ -98,9 +100,12 @@ func (e *EncryptThenAuthenticate) Decrypt(ciphertext, associatedData []byte) ([]
 
 	// Authenticate the following data:
 	// associatedData || payload || adSizeInBits
-	toAuthData := append(associatedData, payload...)
 	adSizeInBits := uint64(len(associatedData)) * 8
-	toAuthData = append(toAuthData, uint64ToByte(adSizeInBits)...)
+	adSizeInBitsEncoded := uint64ToByte(adSizeInBits)
+	toAuthData := make([]byte, 0, len(associatedData)+len(payload)+len(adSizeInBitsEncoded))
+	toAuthData = append(toAuthData, associatedData...)
+	toAuthData = append(toAuthData, payload...)
+	toAuthData = append(toAuthData, adSizeInBitsEncoded...)
 
 	err := e.mac.VerifyMAC(ciphertext[len(ciphertext)-e.tagSize:], toAuthData)
 	if err != nil {

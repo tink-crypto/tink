@@ -175,6 +175,31 @@ func TestETAEncryptDecrypt(t *testing.T) {
 	}
 }
 
+func TestETAWithAssociatedDataSlice(t *testing.T) {
+	const keySize = 16
+	const ivSize = 12
+	const macKeySize = 16
+	const tagSize = 16
+	cipher, err := createAEAD(keySize, ivSize, "SHA1", macKeySize, tagSize)
+	if err != nil {
+		t.Fatalf("got: %v, want: success", err)
+	}
+
+	message := []byte("message")
+	largeData := []byte("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx")
+	associatedData := largeData[:1]
+
+	_, err = cipher.Encrypt(message, associatedData)
+	if err != nil {
+		t.Fatalf("encryption failed, error: %v", err)
+	}
+
+	wantLargeData := []byte("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx")
+	if !bytes.Equal(largeData, wantLargeData) {
+		t.Errorf("largeData = %q, want: %q", largeData, wantLargeData)
+	}
+}
+
 func TestETAEncryptDecryptRandomMessage(t *testing.T) {
 	const keySize = 16
 	const ivSize = 12
