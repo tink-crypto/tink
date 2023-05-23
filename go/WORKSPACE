@@ -105,14 +105,6 @@ go_dependencies()
 
 load("@io_bazel_rules_go//go:deps.bzl", "go_register_toolchains", "go_rules_dependencies")
 
-# TODO(b/213404399): Remove after Gazelle issue is fixed.
-go_repository(
-    name = "com_google_cloud_go_compute",
-    importpath = "cloud.google.com/go/compute",
-    sum = "h1:rSUBvAyVwNJ5uQCKNJFMwPtTvJkfN38b6Pvb9zZoqJ8=",
-    version = "v0.1.0",
-)
-
 go_rules_dependencies()
 
 go_register_toolchains(
