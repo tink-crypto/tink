@@ -214,6 +214,20 @@ tink_cc_library(
     tink::proto::tink_cc_proto
 )
 
+tink_cc_library(
+  NAME hmac_parameters
+  SRCS
+    hmac_parameters.cc
+    hmac_parameters.h
+  DEPS
+    tink::mac::mac_parameters
+    absl::log
+    tink::core::crypto_format
+    tink::internal::util
+    tink::util::status
+    tink::util::statusor
+)
+
 # tests
 
 tink_cc_test(
@@ -394,4 +408,15 @@ tink_cc_test(
     tink::util::test_matchers
     tink::proto::aes_cmac_cc_proto
     tink::proto::tink_cc_proto
+)
+
+tink_cc_test(
+  NAME hmac_parameters_test
+  SRCS
+    hmac_parameters_test.cc
+  DEPS
+    tink::mac::hmac_parameters
+    gmock
+    tink::util::statusor
+    tink::util::test_matchers
 )

@@ -227,6 +227,21 @@ cc_library(
     ],
 )
 
+cc_library(
+    name = "hmac_parameters",
+    srcs = ["hmac_parameters.cc"],
+    hdrs = ["hmac_parameters.h"],
+    include_prefix = "tink/mac",
+    deps = [
+        ":mac_parameters",
+        "//:crypto_format",
+        "//internal:util",
+        "//util:status",
+        "//util:statusor",
+        "@com_google_absl//absl/log",
+    ],
+)
+
 # tests
 
 cc_test(
@@ -414,6 +429,18 @@ cc_test(
         "//proto:aes_cmac_cc_proto",
         "//proto:tink_cc_proto",
         "//subtle:random",
+        "//util:test_matchers",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "hmac_parameters_test",
+    size = "small",
+    srcs = ["hmac_parameters_test.cc"],
+    deps = [
+        ":hmac_parameters",
+        "//util:statusor",
         "//util:test_matchers",
         "@com_google_googletest//:gtest_main",
     ],
