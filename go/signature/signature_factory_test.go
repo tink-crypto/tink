@@ -450,3 +450,44 @@ func TestPrimitiveFactoryMonitoringWithAnnotationsVerifyFailureIsLogged(t *testi
 		t.Errorf("%v", diff)
 	}
 }
+
+func TestVerifyWithLegacyKeyDoesNotHaveSideEffectOnMessage(t *testing.T) {
+	privateKey, publicKey := newECDSAKeysetKeypair(commonpb.HashType_SHA256,
+		commonpb.EllipticCurveType_NIST_P256,
+		tinkpb.OutputPrefixType_LEGACY,
+		2)
+	privateKeyset := testutil.NewKeyset(privateKey.KeyId, []*tinkpb.Keyset_Key{privateKey})
+	privateHandle, err := testkeyset.NewHandle(privateKeyset)
+	if err != nil {
+		t.Fatalf("testkeyset.NewHandle(privateHandle) err = %v, want nil", err)
+	}
+	publicKeyset := testutil.NewKeyset(publicKey.KeyId, []*tinkpb.Keyset_Key{publicKey})
+	publicHandle, err := testkeyset.NewHandle(publicKeyset)
+	if err != nil {
+		t.Fatalf("testkeyset.NewHandle(publicKeyset) err = %v, want nil", err)
+	}
+	signer, err := signature.NewSigner(privateHandle)
+	if err != nil {
+		t.Fatalf("signature.NewSigner(privateHandle) err = %v, want nil", err)
+	}
+	verifier, err := signature.NewVerifier(publicHandle)
+	if err != nil {
+		t.Fatalf("signature.NewVerifier(publicHandle) err = %v, want nil", err)
+	}
+
+	data := []byte("data")
+	message := data[:3] // Let message be a slice of data.
+
+	sig, err := signer.Sign(message)
+	if err != nil {
+		t.Fatalf("signer.Sign(message) err = %v, want nil", err)
+	}
+	err = verifier.Verify(sig, message)
+	if err != nil {
+		t.Fatalf("verifier.Verify(sig, message) err = %v, want nil", err)
+	}
+	wantData := []byte("data")
+	if !bytes.Equal(data, wantData) {
+		t.Errorf("data = %q, want: %q", data, wantData)
+	}
+}

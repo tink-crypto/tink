@@ -104,7 +104,9 @@ func (v *wrappedVerifier) Verify(signature, data []byte) error {
 		for i := 0; i < len(entries); i++ {
 			var signedData []byte
 			if entries[i].PrefixType == tinkpb.OutputPrefixType_LEGACY {
-				signedData = append(data, byte(0))
+				signedData = make([]byte, 0, len(data)+1)
+				signedData = append(signedData, data...)
+				signedData = append(signedData, byte(0))
 			} else {
 				signedData = data
 			}
