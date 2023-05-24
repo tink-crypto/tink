@@ -67,9 +67,10 @@ func createAEAD(keySize, ivSize int, hashAlgo string, macKeySize int, tagSize in
 
 // Copied from
 // https://tools.ietf.org/html/draft-mcgrew-aead-aes-cbc-hmac-sha2-05.
+//
 // We use CTR but the RFC uses CBC mode, so it's not possible to compare
-// plaintexts. However, the tests are still valueable to ensure that we correcly
-// compute HMAC over ciphertext and associatedData.
+// plaintexts. However, the tests are still valueable to ensure that we
+// correcly compute HMAC over ciphertext and associatedData.
 var rfcTestVectors = []struct {
 	macKey         string
 	encryptionKey  string
@@ -79,9 +80,11 @@ var rfcTestVectors = []struct {
 	ivSize         int
 	tagSize        int
 }{
-	{"000102030405060708090a0b0c0d0e0f",
-		"101112131415161718191a1b1c1d1e1f",
-		"1af38c2dc2b96ffdd86694092341bc04" +
+	{
+		macKey:        "000102030405060708090a0b0c0d0e0f",
+		encryptionKey: "101112131415161718191a1b1c1d1e1f",
+		ciphertext: "" +
+			"1af38c2dc2b96ffdd86694092341bc04" +
 			"c80edfa32ddf39d5ef00c0b468834279" +
 			"a2e46a1b8049f792f76bfe54b903a9c9" +
 			"a94ac9b47ad2655c5f10f9aef71427e2" +
@@ -92,13 +95,19 @@ var rfcTestVectors = []struct {
 			"bd34d848b3d69550a67646344427ade5" +
 			"4b8851ffb598f7f80074b9473c82e2db" +
 			"652c3fa36b0a7c5b3219fab3a30bc1c4",
-		"546865207365636f6e64207072696e63" +
+		associatedData: "" +
+			"546865207365636f6e64207072696e63" +
 			"69706c65206f66204175677573746520" +
 			"4b6572636b686f666673",
-		"SHA256", 16, 16},
-	{"000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
-		"202122232425262728292a2b2c2d2e2f303132333435363738393a3b3c3d3e3f",
-		"1af38c2dc2b96ffdd86694092341bc04" +
+		hashAlgo: "SHA256",
+		ivSize:   16,
+		tagSize:  16,
+	},
+	{
+		macKey:        "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+		encryptionKey: "202122232425262728292a2b2c2d2e2f303132333435363738393a3b3c3d3e3f",
+		ciphertext: "" +
+			"1af38c2dc2b96ffdd86694092341bc04" +
 			"4affaaadb78c31c5da4b1b590d10ffbd" +
 			"3dd8d5d302423526912da037ecbcc7bd" +
 			"822c301dd67c373bccb584ad3e9279c2" +
@@ -110,26 +119,31 @@ var rfcTestVectors = []struct {
 			"be2638d09dd7a4930930806d0703b1f6" +
 			"4dd3b4c088a7f45c216839645b2012bf" +
 			"2e6269a8c56a816dbc1b267761955bc5",
-		"546865207365636f6e64207072696e63" +
+		associatedData: "" +
+			"546865207365636f6e64207072696e63" +
 			"69706c65206f66204175677573746520" +
 			"4b6572636b686f666673",
-		"SHA512", 16, 32},
+		hashAlgo: "SHA512",
+		ivSize:   16,
+		tagSize:  32,
+	},
 }
 
-func hexDecodeOrDie(data string) []byte {
+func hexDecode(t *testing.T, data string) []byte {
+	t.Helper()
 	decoded, err := hex.DecodeString(data)
 	if err != nil {
-		panic(err)
+		t.Fatal(err)
 	}
 	return decoded
 }
 
 func TestETARFCTestVectors(t *testing.T) {
 	for _, v := range rfcTestVectors {
-		macKey := hexDecodeOrDie(v.macKey)
-		encryptionKey := hexDecodeOrDie(v.encryptionKey)
-		ciphertext := hexDecodeOrDie(v.ciphertext)
-		associatedData := hexDecodeOrDie(v.associatedData)
+		macKey := hexDecode(t, v.macKey)
+		encryptionKey := hexDecode(t, v.encryptionKey)
+		ciphertext := hexDecode(t, v.ciphertext)
+		associatedData := hexDecode(t, v.associatedData)
 
 		cipher, err := createAEADWithKeys(encryptionKey, v.ivSize, v.hashAlgo, macKey, v.tagSize)
 		if err != nil {
