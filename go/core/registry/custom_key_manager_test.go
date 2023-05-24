@@ -113,7 +113,7 @@ func aesGCM128KeyTemplate() *tinkpb.KeyTemplate {
 }
 
 // aesGCM128KeyToKeysetHandle creates a keyset.Handle with one custom AES GCM 128 key.
-func aesGCM128KeyToKeysetHandle(rawAESKey []byte) (*keyset.Handle, error) {
+func aesGCM128KeyToKeysetHandle(rawAESKey []byte, keyID uint32, prefixType tinkpb.OutputPrefixType) (*keyset.Handle, error) {
 	if len(rawAESKey) != 16 {
 		return nil, fmt.Errorf("invalid key length")
 	}
@@ -128,13 +128,13 @@ func aesGCM128KeyToKeysetHandle(rawAESKey []byte) (*keyset.Handle, error) {
 		KeyMaterialType: tinkpb.KeyData_SYMMETRIC,
 	}
 	ks := &tinkpb.Keyset{
-		PrimaryKeyId: 123,
+		PrimaryKeyId: keyID,
 		Key: []*tinkpb.Keyset_Key{
 			&tinkpb.Keyset_Key{
 				KeyData:          keyData,
 				Status:           tinkpb.KeyStatusType_ENABLED,
-				KeyId:            123,
-				OutputPrefixType: tinkpb.OutputPrefixType_RAW,
+				KeyId:            keyID,
+				OutputPrefixType: prefixType,
 			},
 		},
 	}
@@ -150,7 +150,7 @@ func TestCreateEncryptDecrypt(t *testing.T) {
 	if err != nil {
 		t.Fatalf("keyset.NewHandle(aesGCM128KeyTemplate()) err = %v, want nil", err)
 	}
-	a, err := aead.New(handle)
+	primitive, err := aead.New(handle)
 	if err != nil {
 		t.Fatalf("aead.New(handle) err = %v, want nil", err)
 	}
@@ -158,16 +158,16 @@ func TestCreateEncryptDecrypt(t *testing.T) {
 	plaintext := []byte("plaintext")
 	associatedData := []byte("associatedData")
 
-	ciphertext, err := a.Encrypt(plaintext, associatedData)
+	ciphertext, err := primitive.Encrypt(plaintext, associatedData)
 	if err != nil {
-		t.Fatalf("a.Encrypt(plaintext, associatedData) err = %v, want nil", err)
+		t.Fatalf("primitive.Encrypt(plaintext, associatedData) err = %v, want nil", err)
 	}
-	decrypted, err := a.Decrypt(ciphertext, associatedData)
+	decrypted, err := primitive.Decrypt(ciphertext, associatedData)
 	if err != nil {
-		t.Fatalf("a.Decrypt(ciphertext, associatedData) err = %v, want nil", err)
+		t.Fatalf("primitive.Decrypt(ciphertext, associatedData) err = %v, want nil", err)
 	}
 	if !bytes.Equal(plaintext, decrypted) {
-		t.Errorf("a.Decrypt(ciphertext, associatedData) = %q, want: %q", decrypted, plaintext)
+		t.Errorf("primitive.Decrypt(ciphertext, associatedData) = %q, want: %q", decrypted, plaintext)
 	}
 }
 
@@ -187,20 +187,68 @@ func TestImportExistingKeyDecryptsExistingCiphertext(t *testing.T) {
 	}
 
 	// Import rawAesKey into a Tink keyset.Handle, and decrypt the ciphertext.
-	handle, err := aesGCM128KeyToKeysetHandle(rawAesKey)
+	handle, err := aesGCM128KeyToKeysetHandle(rawAesKey, 123, tinkpb.OutputPrefixType_RAW)
 	if err != nil {
-		t.Fatalf("aesGCM128KeyToKeysetHandle(rawAesKey) err = %v, want nil", err)
+		t.Fatalf("aesGCM128KeyToKeysetHandle() err = %v, want nil", err)
 	}
-	a, err := aead.New(handle)
+	primitive, err := aead.New(handle)
 	if err != nil {
 		t.Fatalf("aead.New(handle) err = %v, want nil", err)
 	}
-	gotPlaintext, err := a.Decrypt(ciphertext, associatedData)
+	gotPlaintext, err := primitive.Decrypt(ciphertext, associatedData)
 	if err != nil {
-		t.Fatalf("a.Decrypt(ciphertext, associatedData) err = %v, want nil", err)
+		t.Fatalf("primitive.Decrypt(ciphertext, associatedData) err = %v, want nil", err)
 	}
 	if !bytes.Equal(plaintext, gotPlaintext) {
-		t.Fatalf("a.Decrypt(ciphertext, associatedData) = %q, want: %q", gotPlaintext, plaintext)
+		t.Fatalf("primitive.Decrypt(ciphertext, associatedData) = %q, want: %q", gotPlaintext, plaintext)
+	}
+}
+
+func TestEncryptAndDecryptWithTinkPrefix(t *testing.T) {
+	// Create an AEAD for rawAesKey with output prefix type TINK.
+	rawAesKey := random.GetRandomBytes(16)
+	handle, err := aesGCM128KeyToKeysetHandle(rawAesKey, 0x11223344, tinkpb.OutputPrefixType_TINK)
+	if err != nil {
+		t.Fatalf("aesGCM128KeyToKeysetHandle() err = %v, want nil", err)
+	}
+	primitive, err := aead.New(handle)
+	if err != nil {
+		t.Fatalf("aead.New(handle) err = %v, want nil", err)
+	}
+
+	// Encrypt and decrypt.
+	plaintext := []byte("plaintext")
+	associatedData := []byte("associatedData")
+	ciphertext, err := primitive.Encrypt(plaintext, associatedData)
+	if err != nil {
+		t.Fatalf("primitive.Encrypt(plaintext, associatedData) err = %v, want nil", err)
+	}
+	gotPlaintext, err := primitive.Decrypt(ciphertext, associatedData)
+	if err != nil {
+		t.Fatalf("primitive.Decrypt(ciphertext, associatedData) err = %v, want nil", err)
+	}
+	if !bytes.Equal(plaintext, gotPlaintext) {
+		t.Fatalf("primitive.Decrypt(ciphertext, associatedData) = %q, want: %q", gotPlaintext, plaintext)
+	}
+
+	// Check that ciphertext has the correct prefix.
+	gotPrefix := ciphertext[:5]
+	wantPrefix := []byte{0x01, 0x11, 0x22, 0x33, 0x44}
+	if !bytes.Equal(gotPrefix, wantPrefix) {
+		t.Fatalf("ciphertext[:5] = %q, want: %q", gotPrefix, wantPrefix)
+	}
+
+	// Check that subtle.NewAESGCM with rawAesKey can decrypt the ciphertext if the prefix is removed.
+	aesGCMForRawAesKey, err := subtle.NewAESGCM(rawAesKey)
+	if err != nil {
+		t.Fatalf("subtle.NewAESGCM(rawAesKey) err = %v, want nil", err)
+	}
+	gotPlaintext, err = aesGCMForRawAesKey.Decrypt(ciphertext[5:], associatedData)
+	if err != nil {
+		t.Fatalf("aesGCMForRawAesKey.Decrypt() err = %v, want nil", err)
+	}
+	if !bytes.Equal(plaintext, gotPlaintext) {
+		t.Fatalf("aesGCMForRawAesKey.Decrypt() = %q, want: %q", gotPlaintext, plaintext)
 	}
 }
 
@@ -221,9 +269,9 @@ func TestMixedKeysetWorks(t *testing.T) {
 
 	// Create handle2, which is a keyset.Handle that contains a customKeyManager key of rawAesKey and
 	// a new, non-customKeyManager key.
-	handle1, err := aesGCM128KeyToKeysetHandle(rawAesKey)
+	handle1, err := aesGCM128KeyToKeysetHandle(rawAesKey, 123, tinkpb.OutputPrefixType_RAW)
 	if err != nil {
-		t.Fatalf("aesGCM128KeyToKeysetHandle(rawAesKey) err = %v, want nil", err)
+		t.Fatalf("aesGCM128KeyToKeysetHandle() err = %v, want nil", err)
 	}
 	manager := keyset.NewManagerFromHandle(handle1)
 	keyID, err := manager.Add(aead.AES128CTRHMACSHA256KeyTemplate())
@@ -239,16 +287,16 @@ func TestMixedKeysetWorks(t *testing.T) {
 		t.Fatalf("manager.Handle() err = %v", err)
 	}
 
-	a, err := aead.New(handle2)
+	primitive, err := aead.New(handle2)
 	if err != nil {
 		t.Fatalf("aead.New(handle2) err = %v", err)
 	}
-	gotPlaintext, err := a.Decrypt(ciphertext, associatedData)
+	gotPlaintext, err := primitive.Decrypt(ciphertext, associatedData)
 	if err != nil {
-		t.Fatalf("a.Decrypt(ciphertext, associatedData) err = %v, want nil", err)
+		t.Fatalf("primitive.Decrypt(ciphertext, associatedData) err = %v, want nil", err)
 	}
 	if !bytes.Equal(plaintext, gotPlaintext) {
-		t.Errorf("a.Decrypt(ciphertext, associatedData) = %q, want: %q", gotPlaintext, plaintext)
+		t.Errorf("primitive.Decrypt(ciphertext, associatedData) = %q, want: %q", gotPlaintext, plaintext)
 	}
 }
 
@@ -257,16 +305,16 @@ func TestSerializeAndParseKeysetWorks(t *testing.T) {
 	if err != nil {
 		t.Fatalf("keyset.NewHandle(aesGCM128KeyTemplate()) err = %v, want nil", err)
 	}
-	a, err := aead.New(handle)
+	primitive, err := aead.New(handle)
 	if err != nil {
 		t.Fatalf("aead.New(handle) err = %v, want nil", err)
 	}
 
 	plaintext := []byte("plaintext")
 	associatedData := []byte("associatedData")
-	ciphertext, err := a.Encrypt(plaintext, associatedData)
+	ciphertext, err := primitive.Encrypt(plaintext, associatedData)
 	if err != nil {
-		t.Fatalf("a.Encrypt(plaintext, associatedData) err = %v, want nil", err)
+		t.Fatalf("primitive.Encrypt(plaintext, associatedData) err = %v, want nil", err)
 	}
 
 	// Serialize the keyset.
@@ -284,17 +332,17 @@ func TestSerializeAndParseKeysetWorks(t *testing.T) {
 		t.Fatalf("insecurecleartextkeyset.Read(keyset.NewBinaryReader(bytes.NewBuffer(serializedKeyset))) = %v, want nil", err)
 	}
 
-	a2, err := aead.New(parsedHandle)
+	primitive2, err := aead.New(parsedHandle)
 	if err != nil {
 		t.Fatalf("aead.New(parsedHandle) err = %v, want nil", err)
 	}
 
-	gotPlaintext, err := a2.Decrypt(ciphertext, associatedData)
+	gotPlaintext, err := primitive2.Decrypt(ciphertext, associatedData)
 	if err != nil {
-		t.Fatalf("a2.Decrypt(ciphertext, associatedData) err = %v, want nil", err)
+		t.Fatalf("primitive2.Decrypt(ciphertext, associatedData) err = %v, want nil", err)
 	}
 	if !bytes.Equal(plaintext, gotPlaintext) {
-		t.Errorf("a2.Decrypt(ciphertext, associatedData) = %q, want: %q", gotPlaintext, plaintext)
+		t.Errorf("primitive2.Decrypt(ciphertext, associatedData) = %q, want: %q", gotPlaintext, plaintext)
 	}
 }
 
