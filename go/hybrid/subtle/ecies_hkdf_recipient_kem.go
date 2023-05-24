@@ -34,7 +34,8 @@ func (s *ECIESHKDFRecipientKem) decapsulate(kem []byte, hashAlg string, salt []b
 	if err != nil {
 		return nil, err
 	}
-	i := append(kem, secret...)
-
+	i := make([]byte, 0, len(kem)+len(secret))
+	i = append(i, kem...)
+	i = append(i, secret...)
 	return subtle.ComputeHKDF(hashAlg, i, salt, info, keySize)
 }
