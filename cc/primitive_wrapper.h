@@ -31,10 +31,15 @@ namespace tink {
 //
 // PrimitiveWrappers need to be written for every new primitive. They can be
 // registered in the registry to be fully integrated in Tink.
-template <typename InputPrimitive, typename Primitive>
+template <typename InputPrimitiveParam, typename PrimitiveParam>
 class PrimitiveWrapper {
  public:
   virtual ~PrimitiveWrapper() = default;
+
+  // Useful when writing templated code.
+  using InputPrimitive = InputPrimitiveParam;
+  using Primitive = PrimitiveParam;
+
   virtual crypto::tink::util::StatusOr<std::unique_ptr<Primitive>> Wrap(
       std::unique_ptr<PrimitiveSet<InputPrimitive>> primitive_set) const = 0;
 };
