@@ -19,22 +19,29 @@ package com.google.crypto.tink.hybrid;
 import static com.google.crypto.tink.internal.Util.toBytesFromPrintableAscii;
 
 import com.google.crypto.tink.AccessesPartialKey;
+import com.google.crypto.tink.SecretKeyAccess;
 import com.google.crypto.tink.internal.EnumTypeProtoConverter;
+import com.google.crypto.tink.internal.KeyParser;
+import com.google.crypto.tink.internal.KeySerializer;
 import com.google.crypto.tink.internal.MutableSerializationRegistry;
 import com.google.crypto.tink.internal.ParametersParser;
 import com.google.crypto.tink.internal.ParametersSerializer;
+import com.google.crypto.tink.internal.ProtoKeySerialization;
 import com.google.crypto.tink.internal.ProtoParametersSerialization;
 import com.google.crypto.tink.proto.HpkeAead;
 import com.google.crypto.tink.proto.HpkeKdf;
 import com.google.crypto.tink.proto.HpkeKem;
 import com.google.crypto.tink.proto.HpkeKeyFormat;
 import com.google.crypto.tink.proto.HpkeParams;
+import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
 import com.google.crypto.tink.proto.KeyTemplate;
 import com.google.crypto.tink.proto.OutputPrefixType;
 import com.google.crypto.tink.util.Bytes;
+import com.google.protobuf.ByteString;
 import com.google.protobuf.ExtensionRegistryLite;
 import com.google.protobuf.InvalidProtocolBufferException;
 import java.security.GeneralSecurityException;
+import javax.annotation.Nullable;
 
 /**
  * Methods to serialize and parse {@link HpkePrivateKey}, {@link HpkePublicKey}, and {@link
@@ -43,9 +50,13 @@ import java.security.GeneralSecurityException;
 @AccessesPartialKey
 @SuppressWarnings("UnnecessarilyFullyQualified") // Fully specifying proto types is more readable
 final class HpkeProtoSerialization {
+  private static final int VERSION = 0;
   private static final String PRIVATE_TYPE_URL =
       "type.googleapis.com/google.crypto.tink.HpkePrivateKey";
   private static final Bytes PRIVATE_TYPE_URL_BYTES = toBytesFromPrintableAscii(PRIVATE_TYPE_URL);
+  private static final String PUBLIC_TYPE_URL =
+      "type.googleapis.com/google.crypto.tink.HpkePublicKey";
+  private static final Bytes PUBLIC_TYPE_URL_BYTES = toBytesFromPrintableAscii(PUBLIC_TYPE_URL);
 
   private static final ParametersSerializer<HpkeParameters, ProtoParametersSerialization>
       PARAMETERS_SERIALIZER =
@@ -59,6 +70,18 @@ final class HpkeProtoSerialization {
           HpkeProtoSerialization::parseParameters,
           PRIVATE_TYPE_URL_BYTES,
           ProtoParametersSerialization.class);
+
+  private static final KeySerializer<HpkePublicKey, ProtoKeySerialization> PUBLIC_KEY_SERIALIZER =
+      KeySerializer.create(
+          HpkeProtoSerialization::serializePublicKey,
+          HpkePublicKey.class,
+          ProtoKeySerialization.class);
+
+  private static final KeyParser<ProtoKeySerialization> PUBLIC_KEY_PARSER =
+      KeyParser.create(
+          HpkeProtoSerialization::parsePublicKey,
+          PUBLIC_TYPE_URL_BYTES,
+          ProtoKeySerialization.class);
 
   private static final EnumTypeProtoConverter<OutputPrefixType, HpkeParameters.Variant>
       VARIANT_TYPE_CONVERTER =
@@ -103,6 +126,26 @@ final class HpkeProtoSerialization {
       throws GeneralSecurityException {
     registry.registerParametersSerializer(PARAMETERS_SERIALIZER);
     registry.registerParametersParser(PARAMETERS_PARSER);
+    registry.registerKeySerializer(PUBLIC_KEY_SERIALIZER);
+    registry.registerKeyParser(PUBLIC_KEY_PARSER);
+  }
+
+  private static com.google.crypto.tink.proto.HpkeParams toProtoParameters(HpkeParameters params)
+      throws GeneralSecurityException {
+    return com.google.crypto.tink.proto.HpkeParams.newBuilder()
+        .setKem(KEM_TYPE_CONVERTER.toProtoEnum(params.getKemId()))
+        .setKdf(KDF_TYPE_CONVERTER.toProtoEnum(params.getKdfId()))
+        .setAead(AEAD_TYPE_CONVERTER.toProtoEnum(params.getAeadId()))
+        .build();
+  }
+
+  private static com.google.crypto.tink.proto.HpkePublicKey toProtoPublicKey(HpkePublicKey key)
+      throws GeneralSecurityException {
+    return com.google.crypto.tink.proto.HpkePublicKey.newBuilder()
+        .setVersion(VERSION)
+        .setParams(toProtoParameters(key.getParameters()))
+        .setPublicKey(ByteString.copyFrom(key.getPublicKeyBytes().toByteArray()))
+        .build();
   }
 
   private static HpkeParameters fromProtoParameters(
@@ -117,18 +160,32 @@ final class HpkeProtoSerialization {
 
   private static ProtoParametersSerialization serializeParameters(HpkeParameters parameters)
       throws GeneralSecurityException {
-    HpkeParams protoParams =
-        HpkeParams.newBuilder()
-            .setKem(KEM_TYPE_CONVERTER.toProtoEnum(parameters.getKemId()))
-            .setKdf(KDF_TYPE_CONVERTER.toProtoEnum(parameters.getKdfId()))
-            .setAead(AEAD_TYPE_CONVERTER.toProtoEnum(parameters.getAeadId()))
-            .build();
     return ProtoParametersSerialization.create(
         KeyTemplate.newBuilder()
             .setTypeUrl(PRIVATE_TYPE_URL)
-            .setValue(HpkeKeyFormat.newBuilder().setParams(protoParams).build().toByteString())
+            .setValue(
+                HpkeKeyFormat.newBuilder()
+                    .setParams(toProtoParameters(parameters))
+                    .build()
+                    .toByteString())
             .setOutputPrefixType(VARIANT_TYPE_CONVERTER.toProtoEnum(parameters.getVariant()))
             .build());
+  }
+
+  /**
+   * Returns the proto serialization of a {@link HpkePublicKey}.
+   *
+   * @param access may be null for public key material
+   * @throws GeneralSecurityException if the key cannot be serialized (e.g. unknown variant)
+   */
+  private static ProtoKeySerialization serializePublicKey(
+      HpkePublicKey key, @Nullable SecretKeyAccess access) throws GeneralSecurityException {
+    return ProtoKeySerialization.create(
+        PUBLIC_TYPE_URL,
+        toProtoPublicKey(key).toByteString(),
+        KeyMaterialType.ASYMMETRIC_PUBLIC,
+        VARIANT_TYPE_CONVERTER.toProtoEnum(key.getParameters().getVariant()),
+        key.getIdRequirementOrNull());
   }
 
   private static HpkeParameters parseParameters(ProtoParametersSerialization serialization)
@@ -148,6 +205,34 @@ final class HpkeProtoSerialization {
     }
     return fromProtoParameters(
         serialization.getKeyTemplate().getOutputPrefixType(), format.getParams());
+  }
+
+  @SuppressWarnings("UnusedException")
+  private static HpkePublicKey parsePublicKey(
+      ProtoKeySerialization serialization, @Nullable SecretKeyAccess access)
+      throws GeneralSecurityException {
+    if (!serialization.getTypeUrl().equals(PUBLIC_TYPE_URL)) {
+      throw new IllegalArgumentException(
+          "Wrong type URL in call to HpkeProtoSerialization.parsePublicKey: "
+              + serialization.getTypeUrl());
+    }
+    try {
+      com.google.crypto.tink.proto.HpkePublicKey protoKey =
+          com.google.crypto.tink.proto.HpkePublicKey.parseFrom(
+              serialization.getValue(), ExtensionRegistryLite.getEmptyRegistry());
+      if (protoKey.getVersion() != VERSION) {
+        throw new GeneralSecurityException("Only version " + VERSION + " keys are accepted");
+      }
+
+      HpkeParameters params =
+          fromProtoParameters(serialization.getOutputPrefixType(), protoKey.getParams());
+      return HpkePublicKey.create(
+          params,
+          Bytes.copyFrom(protoKey.getPublicKey().toByteArray()),
+          serialization.getIdRequirementOrNull());
+    } catch (InvalidProtocolBufferException e) {
+      throw new GeneralSecurityException("Parsing HpkePublicKey failed");
+    }
   }
 
   private HpkeProtoSerialization() {}
