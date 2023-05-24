@@ -241,9 +241,9 @@ crypto::tink::util::Status RegistryImpl::RegisterPrimitiveWrapper(
 template <class P>
 crypto::tink::util::StatusOr<const KeyManager<P>*>
 RegistryImpl::get_key_manager(absl::string_view type_url) const {
-  absl::MutexLock lock(&maps_mutex_);
-  util::StatusOr<const KeyTypeInfoStore::Info*> info =
-      key_type_info_store_.Get(type_url);
+  crypto::tink::util::StatusOr<
+      const crypto::tink::internal::KeyTypeInfoStore::Info*>
+      info = get_key_type_info(type_url);
   if (!info.ok()) {
     return info.status();
   }
