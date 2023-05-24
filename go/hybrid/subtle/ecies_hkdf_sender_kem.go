@@ -46,7 +46,9 @@ func (s *ECIESHKDFSenderKem) encapsulate(hashAlg string, salt []byte, info []byt
 	if err != nil {
 		return nil, err
 	}
-	i := append(sdata, secret...)
+	i := make([]byte, 0, len(sdata)+len(secret))
+	i = append(i, sdata...)
+	i = append(i, secret...)
 
 	sKey, err := subtle.ComputeHKDF(hashAlg, i, salt, info, keySize)
 	if err != nil {
