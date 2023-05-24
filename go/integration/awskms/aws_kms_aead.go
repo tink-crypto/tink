@@ -55,7 +55,8 @@ func (a *AWSAEAD) Encrypt(plaintext, associatedData []byte) ([]byte, error) {
 		KeyId:     aws.String(a.keyURI),
 		Plaintext: plaintext,
 	}
-	if ad := hex.EncodeToString(associatedData); ad != "" {
+	if len(associatedData) > 0 {
+		ad := hex.EncodeToString(associatedData)
 		req.EncryptionContext = map[string]*string{"additionalData": &ad}
 	}
 	resp, err := a.kms.Encrypt(req)
@@ -80,7 +81,8 @@ func (a *AWSAEAD) Decrypt(ciphertext, associatedData []byte) ([]byte, error) {
 		KeyId:          aws.String(a.keyURI),
 		CiphertextBlob: ciphertext,
 	}
-	if ad := hex.EncodeToString(associatedData); ad != "" {
+	if len(associatedData) > 0 {
+		ad := hex.EncodeToString(associatedData)
 		req.EncryptionContext = map[string]*string{"additionalData": &ad}
 	}
 	resp, err := a.kms.Decrypt(req)
