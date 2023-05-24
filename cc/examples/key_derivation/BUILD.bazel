@@ -1,0 +1,34 @@
+package(default_visibility = ["//visibility:public"])
+
+licenses(["notice"])
+
+cc_binary(
+    name = "key_derivation_cli",
+    srcs = ["key_derivation_cli.cc"],
+    deps = [
+        "//util",
+        "@com_google_absl//absl/flags:flag",
+        "@com_google_absl//absl/flags:parse",
+        "@com_google_absl//absl/log:check",
+        "@tink_cc//:aead",
+        "@tink_cc//:keyset_handle",
+        "@tink_cc//aead:aead_config",
+        "@tink_cc//keyderivation:key_derivation_config",
+        "@tink_cc//keyderivation:keyset_deriver",
+        "@tink_cc//util:status",
+    ],
+)
+
+sh_test(
+    name = "key_derivation_cli_test",
+    size = "small",
+    srcs = ["key_derivation_cli_test.sh"],
+    args = [
+        "$(rootpath :key_derivation_cli)",
+        "$(rootpaths :keyset.json)",
+    ],
+    data = [
+        ":key_derivation_cli",
+        ":keyset.json",
+    ],
+)

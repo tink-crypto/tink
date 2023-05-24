@@ -1,0 +1,15 @@
+{
+  "primaryKeyId": 1746379508,
+  "key": [
+    {
+      "keyData": {
+        "typeUrl": "type.googleapis.com/google.crypto.tink.PrfBasedDeriverKey",
+        "value": "El0KMXR5cGUuZ29vZ2xlYXBpcy5jb20vZ29vZ2xlLmNyeXB0by50aW5rLkhrZGZQcmZLZXkSJhICCAMaIHq3492RGOyzGsJTQh6Xi6noTDSrPQxULHuBqB10zMUCGAEaOgo4CjB0eXBlLmdvb2dsZWFwaXMuY29tL2dvb2dsZS5jcnlwdG8udGluay5BZXNHY21LZXkSAhAQGAE=",
+        "keyMaterialType": "SYMMETRIC"
+      },
+      "status": "ENABLED",
+      "keyId": 1746379508,
+      "outputPrefixType": "TINK"
+    }
+  ]
+}
