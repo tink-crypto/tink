@@ -42,13 +42,14 @@ class HmacKey : public MacKey {
   // Creates a new HMAC key.  If the parameters specify a variant that uses
   // a prefix, then the id is used to compute this prefix.
   static util::StatusOr<HmacKey> Create(HmacParameters parameters,
-                                        RestrictedData hmac_key_bytes,
+                                        RestrictedData key_bytes,
                                         absl::optional<int> id_requirement,
                                         PartialKeyAccessToken token);
 
   // Returns the underlying HMAC key bytes.
-  util::StatusOr<RestrictedData> GetHmacKey(PartialKeyAccessToken token) const {
-    return hmac_key_bytes_;
+  util::StatusOr<RestrictedData> GetKeyBytes(
+      PartialKeyAccessToken token) const {
+    return key_bytes_;
   }
 
   std::string GetOutputPrefix() const override;
@@ -62,10 +63,10 @@ class HmacKey : public MacKey {
   bool operator==(const Key& other) const override;
 
  private:
-  HmacKey(HmacParameters parameters, RestrictedData hmac_key_bytes,
+  HmacKey(HmacParameters parameters, RestrictedData key_bytes,
           absl::optional<int> id_requirement, std::string output_prefix)
       : parameters_(parameters),
-        hmac_key_bytes_(hmac_key_bytes),
+        key_bytes_(key_bytes),
         id_requirement_(id_requirement),
         output_prefix_(std::move(output_prefix)) {}
 
@@ -73,7 +74,7 @@ class HmacKey : public MacKey {
       const HmacParameters& parameters, absl::optional<int> id_requirement);
 
   HmacParameters parameters_;
-  RestrictedData hmac_key_bytes_;
+  RestrictedData key_bytes_;
   absl::optional<int> id_requirement_;
   std::string output_prefix_;
 };

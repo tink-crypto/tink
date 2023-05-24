@@ -34,10 +34,10 @@ namespace crypto {
 namespace tink {
 
 util::StatusOr<HmacKey> HmacKey::Create(HmacParameters parameters,
-                                        RestrictedData hmac_key_bytes,
+                                        RestrictedData key_bytes,
                                         absl::optional<int> id_requirement,
                                         PartialKeyAccessToken token) {
-  if (parameters.KeySizeInBytes() != hmac_key_bytes.size()) {
+  if (parameters.KeySizeInBytes() != key_bytes.size()) {
     return util::Status(absl::StatusCode::kInvalidArgument,
                         "Key size does not match HMAC parameters");
   }
@@ -58,7 +58,7 @@ util::StatusOr<HmacKey> HmacKey::Create(HmacParameters parameters,
   if (!output_prefix.ok()) {
     return output_prefix.status();
   }
-  return HmacKey(parameters, hmac_key_bytes, id_requirement,
+  return HmacKey(parameters, key_bytes, id_requirement,
                  *std::move(output_prefix));
 }
 
@@ -104,7 +104,7 @@ bool HmacKey::operator==(const Key& other) const {
   if (id_requirement_ != that->id_requirement_) {
     return false;
   }
-  return hmac_key_bytes_ == that->hmac_key_bytes_;
+  return key_bytes_ == that->key_bytes_;
 }
 
 }  // namespace tink

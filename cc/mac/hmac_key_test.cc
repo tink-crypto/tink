@@ -130,7 +130,7 @@ TEST(HmacKeyTest, CreateKeyWithWrongIdRequirementFails) {
       StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
-TEST_P(HmacKeyTest, GetHmacKey) {
+TEST_P(HmacKeyTest, GetKeyBytes) {
   int key_size;
   int cryptographic_tag_size;
   HmacParameters::HashType hash_type;
@@ -147,7 +147,7 @@ TEST_P(HmacKeyTest, GetHmacKey) {
       *params, secret, test_case.id_requirement, GetPartialKeyAccess());
   ASSERT_THAT(key.status(), IsOk());
 
-  EXPECT_THAT(key->GetHmacKey(GetPartialKeyAccess()), IsOkAndHolds(secret));
+  EXPECT_THAT(key->GetKeyBytes(GetPartialKeyAccess()), IsOkAndHolds(secret));
 }
 
 TEST_P(HmacKeyTest, KeyEquals) {
