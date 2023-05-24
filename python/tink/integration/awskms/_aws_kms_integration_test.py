@@ -16,21 +16,32 @@
 import os
 
 from absl.testing import absltest
+import botocore
 
 import tink
 from tink import aead
 from tink.aead import _kms_aead_key_manager
 from tink.integration import awskms
+from tink.integration.awskms import _aws_kms_client
 from tink.testing import helper
+
 
 CREDENTIAL_PATH = os.path.join(helper.tink_py_testdata_path(),
                                'aws/credentials.ini')
+
 BAD_CREDENTIALS_PATH = os.path.join(helper.tink_py_testdata_path(),
                                     'aws/credentials_bad.ini')
+
 KEY_URI = ('aws-kms://arn:aws:kms:us-east-2:235739564943:key/'
            '3ee50705-5a82-4f5b-9753-05c4f473922f')
+
+# An alias for KEY_URI.
+KEY_ALIAS_URI = ('aws-kms://arn:aws:kms:us-east-2:235739564943:alias/'
+                 'unit-and-integration-testing')
+
 KEY_URI_2 = ('aws-kms://arn:aws:kms:us-east-2:235739564943:key/'
              'b3ca2efd-a8fb-47f2-b541-7e20f8c5cd11')
+
 GCP_KEY_URI = ('gcp-kms://projects/tink-test-infrastructure/locations/global/'
                'keyRings/unit-and-integration-testing/cryptoKeys/aead-key')
 
@@ -122,6 +133,62 @@ class AwsKmsAeadTest(absltest.TestCase):
     self.assertEqual(
         b'plaintext', aws_aead.decrypt(ciphertext, b'associated_data')
     )
+
+  def test_server_side_key_commitment(self):
+    # TODO(b/242678738): Remove direct usage of KMS client and protected
+    # functions in this test once client side key ID verifiaction is removed.
+
+    plaintext = b'hello'
+    associated_data = b'world'
+    encryption_context = _aws_kms_client._encryption_context(associated_data)
+
+    # Confirm that KEY_URI and KEY_ALIAS_URI are interchangeable while the
+    # KEY_ALIAS_URI continues to reference KEY_URI. This no longer holds if
+    # KEY_ALIAS_URI is updated to reference a different key.
+    for k in (KEY_URI, KEY_ALIAS_URI):
+      # Create a ciphertext with k.
+      aws_client = awskms.AwsKmsClient(k, CREDENTIAL_PATH)
+      aws_aead = aws_client.get_aead(k)
+      ciphertext = aws_aead.encrypt(plaintext, associated_data)
+
+      # NOTE: The following operations directly utilize the KMS client to bypass
+      # client-side key commitment checks and to verify KMS behavior for
+      # requests not produced by this implementation (e.g. no KeyId specified).
+
+      # Decrypt with KEY_URI.
+      response = aws_aead.client.decrypt(
+          KeyId=_aws_kms_client._key_uri_to_key_arn(KEY_URI),
+          CiphertextBlob=ciphertext,
+          EncryptionContext=encryption_context,
+      )
+      self.assertEqual(plaintext, response['Plaintext'])
+
+      # Decrypt with KEY_ALIAS_URI.
+      response = aws_aead.client.decrypt(
+          KeyId=_aws_kms_client._key_uri_to_key_arn(KEY_ALIAS_URI),
+          CiphertextBlob=ciphertext,
+          EncryptionContext=encryption_context,
+      )
+      self.assertEqual(plaintext, response['Plaintext'])
+      # AWS KMS always includes resolved key ID in responses, not aliases.
+      self.assertEqual(
+          _aws_kms_client._key_uri_to_key_arn(KEY_URI), response['KeyId'])
+
+      # Decrypt without specifying a key ID in the request.
+      response = aws_aead.client.decrypt(
+          CiphertextBlob=ciphertext,
+          EncryptionContext=encryption_context,
+      )
+      self.assertEqual(plaintext, response['Plaintext'])
+
+      # Attempt to decrypt with KEY_URI_2.
+      with self.assertRaises(botocore.exceptions.ClientError):
+        response = aws_aead.client.decrypt(
+            KeyId=_aws_kms_client._key_uri_to_key_arn(KEY_URI_2),
+            CiphertextBlob=ciphertext,
+            EncryptionContext=encryption_context,
+        )
+
 
 if __name__ == '__main__':
   absltest.main()
