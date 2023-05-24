@@ -110,7 +110,13 @@ func (a *wrappedAead) Encrypt(plaintext, associatedData []byte) ([]byte, error) 
 		return nil, err
 	}
 	a.encLogger.Log(primary.KeyID, len(plaintext))
-	return append([]byte(primary.Prefix), ct...), nil
+	if len(primary.Prefix) == 0 {
+		return ct, nil
+	}
+	output := make([]byte, 0, len(primary.Prefix)+len(ct))
+	output = append(output, primary.Prefix...)
+	output = append(output, ct...)
+	return output, nil
 }
 
 // Decrypt decrypts the given ciphertext and authenticates it with the given

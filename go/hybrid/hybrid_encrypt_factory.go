@@ -97,5 +97,11 @@ func (a *wrappedHybridEncrypt) Encrypt(plaintext, contextInfo []byte) ([]byte, e
 		return nil, err
 	}
 	a.logger.Log(primary.KeyID, len(plaintext))
-	return append([]byte(primary.Prefix), ct...), nil
+	if len(primary.Prefix) == 0 {
+		return ct, nil
+	}
+	output := make([]byte, 0, len(primary.Prefix)+len(ct))
+	output = append(output, primary.Prefix...)
+	output = append(output, ct...)
+	return output, nil
 }

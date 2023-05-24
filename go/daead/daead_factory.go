@@ -114,7 +114,13 @@ func (d *wrappedDeterministicAEAD) EncryptDeterministically(pt, aad []byte) ([]b
 		return nil, err
 	}
 	d.encLogger.Log(primary.KeyID, len(pt))
-	return append([]byte(primary.Prefix), ct...), nil
+	if len(primary.Prefix) == 0 {
+		return ct, nil
+	}
+	output := make([]byte, 0, len(primary.Prefix)+len(ct))
+	output = append(output, primary.Prefix...)
+	output = append(output, ct...)
+	return output, nil
 }
 
 // DecryptDeterministically deterministically decrypts ciphertext with additionalData as

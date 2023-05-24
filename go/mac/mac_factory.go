@@ -127,7 +127,13 @@ func (m *wrappedMAC) ComputeMAC(data []byte) ([]byte, error) {
 		return nil, err
 	}
 	m.computeLogger.Log(primary.KeyID, len(data))
-	return append([]byte(primary.Prefix), mac...), nil
+	if len(primary.Prefix) == 0 {
+		return mac, nil
+	}
+	output := make([]byte, 0, len(primary.Prefix)+len(mac))
+	output = append(output, primary.Prefix...)
+	output = append(output, mac...)
+	return output, nil
 }
 
 var errInvalidMAC = fmt.Errorf("mac_factory: invalid mac")
