@@ -1036,10 +1036,8 @@ tink_cc_test(
     configuration_impl_test.cc
   DEPS
     tink::internal::configuration_impl
-    tink::internal::fips_utils
     tink::internal::registry_impl
     gmock
-    tink::core::aead
     tink::core::configuration
     tink::util::test_matchers
     tink::util::test_util

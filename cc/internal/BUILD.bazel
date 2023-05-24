@@ -1085,9 +1085,7 @@ cc_test(
     srcs = ["configuration_impl_test.cc"],
     deps = [
         ":configuration_impl",
-        ":fips_utils",
         ":registry_impl",
-        "//:aead",
         "//:configuration",
         "//proto:aes_gcm_cc_proto",
         "//proto:rsa_ssa_pss_cc_proto",

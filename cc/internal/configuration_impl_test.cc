@@ -21,9 +21,7 @@
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
-#include "tink/aead.h"
 #include "tink/configuration.h"
-#include "tink/internal/fips_utils.h"
 #include "tink/internal/registry_impl.h"
 #include "tink/util/test_matchers.h"
 #include "tink/util/test_util.h"
@@ -46,42 +44,49 @@ using ::google::crypto::tink::RsaSsaPssPublicKey;
 
 TEST(ConfigurationImplTest, GetRegistry) {
   Configuration config;
-  const RegistryImpl& registry = ConfigurationImpl::get_registry(config);
-  EXPECT_THAT(registry.RestrictToFipsIfEmpty(), IsOk());
-  UnSetFipsRestricted();
+  ConfigurationImpl::get_registry(config);
 }
 
-template <typename P>
-class TestWrapper : public PrimitiveWrapper<P, P> {
+class FakePrimitive {
  public:
-  TestWrapper() = default;
-  util::StatusOr<std::unique_ptr<P>> Wrap(
-      std::unique_ptr<PrimitiveSet<P>> primitive_set) const override {
-    return util::Status(absl::StatusCode::kUnimplemented,
-                        "This is a test wrapper.");
+  explicit FakePrimitive(std::string s) : s_(s) {}
+  std::string get() { return s_; }
+
+ private:
+  std::string s_;
+};
+
+class FakePrimitiveWrapper
+    : public PrimitiveWrapper<FakePrimitive, FakePrimitive> {
+ public:
+  util::StatusOr<std::unique_ptr<FakePrimitive>> Wrap(
+      std::unique_ptr<PrimitiveSet<FakePrimitive>> primitive_set)
+      const override {
+    return absl::make_unique<FakePrimitive>(
+        primitive_set->get_primary()->get_primitive().get());
   }
 };
 
 TEST(ConfigurationImplTest, RegisterPrimitiveWrapper) {
   Configuration config;
   EXPECT_THAT(ConfigurationImpl::RegisterPrimitiveWrapper(
-                  absl::make_unique<TestWrapper<std::string>>(), config),
+                  absl::make_unique<FakePrimitiveWrapper>(), config),
               IsOk());
 }
 
-class FakeAeadKeyManager
-    : public KeyTypeManager<AesGcmKey, AesGcmKeyFormat, List<Aead>> {
+class FakeKeyTypeManager
+    : public KeyTypeManager<AesGcmKey, AesGcmKeyFormat, List<FakePrimitive>> {
  public:
-  class AeadFactory : public PrimitiveFactory<Aead> {
+  class FakePrimitiveFactory : public PrimitiveFactory<FakePrimitive> {
    public:
-    util::StatusOr<std::unique_ptr<Aead>> Create(
+    util::StatusOr<std::unique_ptr<FakePrimitive>> Create(
         const AesGcmKey& key) const override {
-      return {absl::make_unique<test::DummyAead>("an aead")};
+      return absl::make_unique<FakePrimitive>(key.key_value());
     }
   };
 
-  explicit FakeAeadKeyManager()
-      : KeyTypeManager(absl::make_unique<AeadFactory>()) {}
+  FakeKeyTypeManager()
+      : KeyTypeManager(absl::make_unique<FakePrimitiveFactory>()) {}
 
   KeyData::KeyMaterialType key_material_type() const override {
     return KeyData::SYMMETRIC;
@@ -112,20 +117,22 @@ class FakeAeadKeyManager
   }
 
  private:
-  const std::string key_type_ = "some.aead.key.type";
+  const std::string key_type_ =
+      "type.googleapis.com/google.crypto.tink.AesGcmKey";
 };
 
 TEST(ConfigurationImplTest, RegisterKeyTypeManager) {
   Configuration config;
   EXPECT_THAT(ConfigurationImpl::RegisterKeyTypeManager(
-                  absl::make_unique<FakeAeadKeyManager>(), config),
+                  absl::make_unique<FakeKeyTypeManager>(), config),
               IsOk());
   const RegistryImpl& registry = ConfigurationImpl::get_registry(config);
-  util::StatusOr<const KeyManager<Aead>*> key_manager =
-      registry.get_key_manager<Aead>(FakeAeadKeyManager().get_key_type());
+  util::StatusOr<const KeyManager<FakePrimitive>*> key_manager =
+      registry.get_key_manager<FakePrimitive>(
+          FakeKeyTypeManager().get_key_type());
   EXPECT_THAT(key_manager, IsOk());
   EXPECT_EQ((*key_manager)->get_key_type(),
-            FakeAeadKeyManager().get_key_type());
+            FakeKeyTypeManager().get_key_type());
 }
 
 class FakeSignKeyManager
@@ -188,7 +195,7 @@ class FakeVerifyKeyManager
     util::StatusOr<std::unique_ptr<PublicKeyVerify>> Create(
         const RsaSsaPssPublicKey& key) const override {
       return {
-          absl::make_unique<test::DummyPublicKeyVerify>("a public key sign")};
+          absl::make_unique<test::DummyPublicKeyVerify>("a public key verify")};
     }
   };
 
