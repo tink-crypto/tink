@@ -37,6 +37,7 @@ import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
 import com.google.crypto.tink.proto.KeyTemplate;
 import com.google.crypto.tink.proto.OutputPrefixType;
 import com.google.crypto.tink.util.Bytes;
+import com.google.crypto.tink.util.SecretBytes;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.ExtensionRegistryLite;
 import com.google.protobuf.InvalidProtocolBufferException;
@@ -81,6 +82,18 @@ final class HpkeProtoSerialization {
       KeyParser.create(
           HpkeProtoSerialization::parsePublicKey,
           PUBLIC_TYPE_URL_BYTES,
+          ProtoKeySerialization.class);
+
+  private static final KeySerializer<HpkePrivateKey, ProtoKeySerialization> PRIVATE_KEY_SERIALIZER =
+      KeySerializer.create(
+          HpkeProtoSerialization::serializePrivateKey,
+          HpkePrivateKey.class,
+          ProtoKeySerialization.class);
+
+  private static final KeyParser<ProtoKeySerialization> PRIVATE_KEY_PARSER =
+      KeyParser.create(
+          HpkeProtoSerialization::parsePrivateKey,
+          PRIVATE_TYPE_URL_BYTES,
           ProtoKeySerialization.class);
 
   private static final EnumTypeProtoConverter<OutputPrefixType, HpkeParameters.Variant>
@@ -128,6 +141,8 @@ final class HpkeProtoSerialization {
     registry.registerParametersParser(PARAMETERS_PARSER);
     registry.registerKeySerializer(PUBLIC_KEY_SERIALIZER);
     registry.registerKeyParser(PUBLIC_KEY_PARSER);
+    registry.registerKeySerializer(PRIVATE_KEY_SERIALIZER);
+    registry.registerKeyParser(PRIVATE_KEY_PARSER);
   }
 
   private static com.google.crypto.tink.proto.HpkeParams toProtoParameters(HpkeParameters params)
@@ -145,6 +160,17 @@ final class HpkeProtoSerialization {
         .setVersion(VERSION)
         .setParams(toProtoParameters(key.getParameters()))
         .setPublicKey(ByteString.copyFrom(key.getPublicKeyBytes().toByteArray()))
+        .build();
+  }
+
+  private static com.google.crypto.tink.proto.HpkePrivateKey toProtoPrivateKey(
+      HpkePrivateKey key, @Nullable SecretKeyAccess access) throws GeneralSecurityException {
+    return com.google.crypto.tink.proto.HpkePrivateKey.newBuilder()
+        .setVersion(VERSION)
+        .setPublicKey(toProtoPublicKey(key.getPublicKey()))
+        .setPrivateKey(
+            ByteString.copyFrom(
+                key.getPrivateKeyBytes().toByteArray(SecretKeyAccess.requireAccess(access))))
         .build();
   }
 
@@ -184,6 +210,16 @@ final class HpkeProtoSerialization {
         PUBLIC_TYPE_URL,
         toProtoPublicKey(key).toByteString(),
         KeyMaterialType.ASYMMETRIC_PUBLIC,
+        VARIANT_TYPE_CONVERTER.toProtoEnum(key.getParameters().getVariant()),
+        key.getIdRequirementOrNull());
+  }
+
+  private static ProtoKeySerialization serializePrivateKey(
+      HpkePrivateKey key, @Nullable SecretKeyAccess access) throws GeneralSecurityException {
+    return ProtoKeySerialization.create(
+        PRIVATE_TYPE_URL,
+        toProtoPrivateKey(key, access).toByteString(),
+        KeyMaterialType.ASYMMETRIC_PRIVATE,
         VARIANT_TYPE_CONVERTER.toProtoEnum(key.getParameters().getVariant()),
         key.getIdRequirementOrNull());
   }
@@ -232,6 +268,39 @@ final class HpkeProtoSerialization {
           serialization.getIdRequirementOrNull());
     } catch (InvalidProtocolBufferException e) {
       throw new GeneralSecurityException("Parsing HpkePublicKey failed");
+    }
+  }
+
+  @SuppressWarnings("UnusedException") // Prevents leaking key material
+  private static HpkePrivateKey parsePrivateKey(
+      ProtoKeySerialization serialization, @Nullable SecretKeyAccess access)
+      throws GeneralSecurityException {
+    if (!serialization.getTypeUrl().equals(PRIVATE_TYPE_URL)) {
+      throw new IllegalArgumentException(
+          "Wrong type URL in call to HpkeProtoSerialization.parsePrivateKey: "
+              + serialization.getTypeUrl());
+    }
+    try {
+      com.google.crypto.tink.proto.HpkePrivateKey protoKey =
+          com.google.crypto.tink.proto.HpkePrivateKey.parseFrom(
+              serialization.getValue(), ExtensionRegistryLite.getEmptyRegistry());
+      if (protoKey.getVersion() != VERSION) {
+        throw new GeneralSecurityException("Only version " + VERSION + " keys are accepted");
+      }
+      com.google.crypto.tink.proto.HpkePublicKey protoPublicKey = protoKey.getPublicKey();
+      HpkeParameters params =
+          fromProtoParameters(serialization.getOutputPrefixType(), protoPublicKey.getParams());
+      HpkePublicKey publicKey =
+          HpkePublicKey.create(
+              params,
+              Bytes.copyFrom(protoPublicKey.getPublicKey().toByteArray()),
+              serialization.getIdRequirementOrNull());
+      return HpkePrivateKey.create(
+          publicKey,
+          SecretBytes.copyFrom(
+              protoKey.getPrivateKey().toByteArray(), SecretKeyAccess.requireAccess(access)));
+    } catch (InvalidProtocolBufferException e) {
+      throw new GeneralSecurityException("Parsing HpkePrivateKey failed");
     }
   }
 

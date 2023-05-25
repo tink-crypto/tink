@@ -20,6 +20,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static com.google.crypto.tink.internal.testing.Asserts.assertEqualWhenValueParsed;
 import static org.junit.Assert.assertThrows;
 
+import com.google.crypto.tink.InsecureSecretKeyAccess;
 import com.google.crypto.tink.Key;
 import com.google.crypto.tink.Parameters;
 import com.google.crypto.tink.internal.MutableSerializationRegistry;
@@ -34,7 +35,9 @@ import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
 import com.google.crypto.tink.proto.KeyTemplate;
 import com.google.crypto.tink.proto.OutputPrefixType;
 import com.google.crypto.tink.subtle.Hex;
+import com.google.crypto.tink.subtle.Random;
 import com.google.crypto.tink.util.Bytes;
+import com.google.crypto.tink.util.SecretBytes;
 import com.google.protobuf.ByteString;
 import java.security.GeneralSecurityException;
 import javax.annotation.Nullable;
@@ -69,11 +72,13 @@ public final class HpkeProtoSerializationTest {
     final HpkeParameters.KemId kemId;
     final HpkeKem kemProto;
     final byte[] publicKey;
+    final byte[] privateKey;
 
-    KemTuple(HpkeParameters.KemId kemId, HpkeKem kemProto, byte[] publicKey) {
+    KemTuple(HpkeParameters.KemId kemId, HpkeKem kemProto, byte[] publicKey, byte[] privateKey) {
       this.kemId = kemId;
       this.kemProto = kemProto;
       this.publicKey = publicKey;
+      this.privateKey = privateKey;
     }
   }
 
@@ -123,14 +128,18 @@ public final class HpkeProtoSerializationTest {
             HpkeParameters.KemId.DHKEM_X25519_HKDF_SHA256,
             HpkeKem.DHKEM_X25519_HKDF_SHA256,
             /* publicKey= */ Hex.decode(
-                "37fda3567bdbd628e88668c3c8d7e97d1d1253b6d4ea6d44c150f741f1bf4431")),
+                "37fda3567bdbd628e88668c3c8d7e97d1d1253b6d4ea6d44c150f741f1bf4431"),
+            /* privateKey= */ Hex.decode(
+                "52c4a758a802cd8b936eceea314432798d5baf2d7e9235dc084ab1b9cfa2f736")),
         new KemTuple(
             // Ephemeral key pair from https://www.rfc-editor.org/rfc/rfc9180.html#appendix-A.3.1.
             HpkeParameters.KemId.DHKEM_P256_HKDF_SHA256,
             HpkeKem.DHKEM_P256_HKDF_SHA256,
             /* publicKey= */ Hex.decode(
                 "04a92719c6195d5085104f469a8b9814d5838ff72b60501e2c4466e5e67b32"
-                    + "5ac98536d7b61a1af4b78e5b7f951c0900be863c403ce65c9bfcb9382657222d18c4")),
+                    + "5ac98536d7b61a1af4b78e5b7f951c0900be863c403ce65c9bfcb9382657222d18c4"),
+            /* privateKey= */ Hex.decode(
+                "4995788ef4b9d6132b249ce59a77281493eb39af373d236a1fe415cb0c2d7beb")),
         new KemTuple(
             // Ephemeral key pair from  https://www.rfc-editor.org/rfc/rfc9180.html#appendix-A.6.1.
             HpkeParameters.KemId.DHKEM_P521_HKDF_SHA512,
@@ -139,7 +148,11 @@ public final class HpkeProtoSerializationTest {
                 "040138b385ca16bb0d5fa0c0665fbbd7e69e3ee29f63991d3e9b5fa740aab8"
                     + "900aaeed46ed73a49055758425a0ce36507c54b29cc5b85a5cee6bae0cf1c21f2731"
                     + "ece2013dc3fb7c8d21654bb161b463962ca19e8c654ff24c94dd2898de12051f1ed0"
-                    + "692237fb02b2f8d1dc1c73e9b366b529eb436e98a996ee522aef863dd5739d2f29b0")),
+                    + "692237fb02b2f8d1dc1c73e9b366b529eb436e98a996ee522aef863dd5739d2f29b0"),
+            /* privateKey= */ Hex.decode(
+                "014784c692da35df6ecde98ee43ac425dbdd0969c0c72b42f2e708ab9d5354"
+                    + "15a8569bdacfcc0a114c85b8e3f26acf4d68115f8c91a66178cdbd03b7bcc5291e37"
+                    + "4b")),
       };
 
   @DataPoints("kdfs")
@@ -168,6 +181,15 @@ public final class HpkeProtoSerializationTest {
         .setVersion(version)
         .setParams(params)
         .setPublicKey(ByteString.copyFrom(publicKey))
+        .build();
+  }
+
+  private static final com.google.crypto.tink.proto.HpkePrivateKey createHpkeProtoPrivateKey(
+      int version, com.google.crypto.tink.proto.HpkePublicKey publicKey, byte[] privateKey) {
+    return com.google.crypto.tink.proto.HpkePrivateKey.newBuilder()
+        .setVersion(version)
+        .setPublicKey(publicKey)
+        .setPrivateKey(ByteString.copyFrom(privateKey))
         .build();
   }
 
@@ -276,14 +298,101 @@ public final class HpkeProtoSerializationTest {
             variantTuple.outputPrefixType,
             variantTuple.idRequirement);
 
-    Key parsed = registry.parseKey(serialization, /* access = */ null);
+    Key parsed = registry.parseKey(serialization, /* access= */ null);
     assertThat(parsed.equalsKey(publicKey)).isTrue();
 
     ProtoKeySerialization serialized =
-        registry.serializeKey(
-            publicKey, ProtoKeySerialization.class, /* access = */ null);
+        registry.serializeKey(publicKey, ProtoKeySerialization.class, /* access= */ null);
     assertEqualWhenValueParsed(
         com.google.crypto.tink.proto.HpkePublicKey.parser(), serialized, serialization);
+  }
+
+  @Theory
+  public void serializeParsePrivateKey(
+      @FromDataPoints("variants") VariantTuple variantTuple,
+      @FromDataPoints("kems") KemTuple kemTuple,
+      @FromDataPoints("kdfs") KdfTuple kdfTuple,
+      @FromDataPoints("aeads") AeadTuple aeadTuple)
+      throws Exception {
+    HpkeParameters parameters =
+        HpkeParameters.builder()
+            .setKemId(kemTuple.kemId)
+            .setKdfId(kdfTuple.kdfId)
+            .setAeadId(aeadTuple.aeadId)
+            .setVariant(variantTuple.variant)
+            .build();
+    HpkePublicKey publicKey =
+        HpkePublicKey.create(
+            parameters, Bytes.copyFrom(kemTuple.publicKey), variantTuple.idRequirement);
+    HpkePrivateKey privateKey =
+        HpkePrivateKey.create(
+            publicKey, SecretBytes.copyFrom(kemTuple.privateKey, InsecureSecretKeyAccess.get()));
+
+    HpkeParams protoParams =
+        createHpkeProtoParams(kemTuple.kemProto, kdfTuple.kdfProto, aeadTuple.aeadProto);
+    com.google.crypto.tink.proto.HpkePublicKey protoPublicKey =
+        createHpkeProtoPublicKey(/* version= */ 0, protoParams, kemTuple.publicKey);
+    com.google.crypto.tink.proto.HpkePrivateKey protoPrivateKey =
+        createHpkeProtoPrivateKey(/* version= */ 0, protoPublicKey, kemTuple.privateKey);
+
+    ProtoKeySerialization serialization =
+        ProtoKeySerialization.create(
+            "type.googleapis.com/google.crypto.tink.HpkePrivateKey",
+            protoPrivateKey.toByteString(),
+            KeyMaterialType.ASYMMETRIC_PRIVATE,
+            variantTuple.outputPrefixType,
+            /* idRequirement= */ variantTuple.idRequirement);
+
+    Key parsed = registry.parseKey(serialization, InsecureSecretKeyAccess.get());
+    assertThat(parsed.equalsKey(privateKey)).isTrue();
+
+    ProtoKeySerialization serialized =
+        registry.serializeKey(
+            privateKey, ProtoKeySerialization.class, InsecureSecretKeyAccess.get());
+
+    assertEqualWhenValueParsed(
+        com.google.crypto.tink.proto.HpkePublicKey.parser(), serialized, serialization);
+  }
+
+  @Test
+  public void parsePrivateKey_noAccess_throws() throws Exception {
+    HpkeParams protoParams =
+        createHpkeProtoParams(KEMS[0].kemProto, KDFS[0].kdfProto, AEADS[0].aeadProto);
+    com.google.crypto.tink.proto.HpkePublicKey protoPublicKey =
+        createHpkeProtoPublicKey(/* version= */ 0, protoParams, KEMS[0].publicKey);
+    com.google.crypto.tink.proto.HpkePrivateKey protoPrivateKey =
+        createHpkeProtoPrivateKey(/* version= */ 0, protoPublicKey, KEMS[0].privateKey);
+
+    ProtoKeySerialization serialization =
+        ProtoKeySerialization.create(
+            "type.googleapis.com/google.crypto.tink.HpkePrivateKey",
+            protoPrivateKey.toByteString(),
+            KeyMaterialType.ASYMMETRIC_PRIVATE,
+            OutputPrefixType.TINK,
+            /* idRequirement= */ 123);
+    assertThrows(
+        GeneralSecurityException.class, () -> registry.parseKey(serialization, /* access= */ null));
+  }
+
+  @Test
+  public void serializePrivateKey_noAccess_throws() throws Exception {
+    HpkeParameters parameters =
+        HpkeParameters.builder()
+            .setKemId(KEMS[0].kemId)
+            .setKdfId(KDFS[0].kdfId)
+            .setAeadId(AEADS[0].aeadId)
+            .setVariant(VARIANTS[0].variant)
+            .build();
+    HpkePublicKey publicKey =
+        HpkePublicKey.create(
+            parameters, Bytes.copyFrom(KEMS[0].publicKey), VARIANTS[0].idRequirement);
+    HpkePrivateKey privateKey =
+        HpkePrivateKey.create(
+            publicKey, SecretBytes.copyFrom(KEMS[0].privateKey, InsecureSecretKeyAccess.get()));
+
+    assertThrows(
+        GeneralSecurityException.class,
+        () -> registry.serializeKey(privateKey, ProtoKeySerialization.class, /* access= */ null));
   }
 
   @DataPoints("invalidParametersSerializations")
@@ -402,7 +511,84 @@ public final class HpkeProtoSerializationTest {
   public void parseInvalidPublicKeys_throws(
       @FromDataPoints("invalidPublicKeySerializations") ProtoKeySerialization serialization) {
     assertThrows(
+        GeneralSecurityException.class, () -> registry.parseKey(serialization, /* access= */ null));
+  }
+
+  private static ProtoKeySerialization[] createInvalidPrivateKeySerializations() {
+    try {
+      HpkeParams protoParams =
+          createHpkeProtoParams(KEMS[0].kemProto, KDFS[0].kdfProto, AEADS[0].aeadProto);
+      com.google.crypto.tink.proto.HpkePublicKey validProtoPublicKey =
+          createHpkeProtoPublicKey(/* version= */ 0, protoParams, KEMS[0].publicKey);
+
+      return new ProtoKeySerialization[] {
+        // Bad private key value.
+        ProtoKeySerialization.create(
+            PRIVATE_TYPE_URL,
+            createHpkeProtoPrivateKey(/* version= */ 0, validProtoPublicKey, Random.randBytes(4))
+                .toByteString(),
+            KeyMaterialType.ASYMMETRIC_PRIVATE,
+            OutputPrefixType.TINK,
+            123),
+        // Bad version number (1).
+        ProtoKeySerialization.create(
+            PRIVATE_TYPE_URL,
+            createHpkeProtoPrivateKey(/* version= */ 1, validProtoPublicKey, KEMS[0].privateKey)
+                .toByteString(),
+            KeyMaterialType.ASYMMETRIC_PRIVATE,
+            OutputPrefixType.TINK,
+            123),
+        // Unknown prefix.
+        ProtoKeySerialization.create(
+            PRIVATE_TYPE_URL,
+            createHpkeProtoPrivateKey(/* version= */ 0, validProtoPublicKey, KEMS[0].privateKey)
+                .toByteString(),
+            KeyMaterialType.ASYMMETRIC_PRIVATE,
+            OutputPrefixType.UNKNOWN_PREFIX,
+            123),
+        // Invalid public key.
+        ProtoKeySerialization.create(
+            PRIVATE_TYPE_URL,
+            createHpkeProtoPrivateKey(
+                    /* version= */ 0,
+                    createHpkeProtoPublicKey(/* version= */ 0, protoParams, Random.randBytes(4)),
+                    KEMS[0].privateKey)
+                .toByteString(),
+            KeyMaterialType.ASYMMETRIC_PRIVATE,
+            OutputPrefixType.TINK,
+            123),
+        // Invalid proto encoding
+        ProtoKeySerialization.create(
+            PRIVATE_TYPE_URL,
+            // Proto messages start with a VarInt, which always ends with a byte with most
+            // significant bit unset. 0x80 is hence invalid.
+            ByteString.copyFrom(new byte[] {(byte) 0x80}),
+            KeyMaterialType.ASYMMETRIC_PRIVATE,
+            OutputPrefixType.TINK,
+            123),
+        // Wrong Type URL
+        ProtoKeySerialization.create(
+            "WrongTypeUrl",
+            createHpkeProtoPrivateKey(/* version= */ 0, validProtoPublicKey, KEMS[0].privateKey)
+                .toByteString(),
+            KeyMaterialType.ASYMMETRIC_PRIVATE,
+            OutputPrefixType.TINK,
+            123),
+      };
+    } catch (GeneralSecurityException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  @DataPoints("invalidPrivateKeySerializations")
+  public static final ProtoKeySerialization[] INVALID_PRIVATE_KEY_SERIALIZATIONS =
+      createInvalidPrivateKeySerializations();
+
+  @Theory
+  public void parseInvalidPrivateKeys_throws(
+      @FromDataPoints("invalidPrivateKeySerializations") ProtoKeySerialization serialization) {
+    assertThrows(
         GeneralSecurityException.class,
-        () -> registry.parseKey(serialization, /* access = */ null));
+        () -> registry.parseKey(serialization, InsecureSecretKeyAccess.get()));
   }
 }
