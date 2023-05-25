@@ -125,8 +125,8 @@ type aesGCMHKDFSegmentEncrypter struct {
 }
 
 func (e aesGCMHKDFSegmentEncrypter) EncryptSegment(segment, nonce []byte) ([]byte, error) {
-	result := make([]byte, len(segment))
-	result = e.cipher.Seal(result[0:0], nonce, segment, nil)
+	result := make([]byte, 0, len(segment))
+	result = e.cipher.Seal(result, nonce, segment, nil)
 	return result, nil
 }
 
