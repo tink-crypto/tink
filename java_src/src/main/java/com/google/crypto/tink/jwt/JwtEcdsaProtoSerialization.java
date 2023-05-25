@@ -232,38 +232,30 @@ final class JwtEcdsaProtoSerialization {
         key.getIdRequirementOrNull());
   }
 
-  @SuppressWarnings("UnusedException")
-  private static JwtEcdsaPublicKey parsePublicKey(
-      ProtoKeySerialization serialization, @Nullable SecretKeyAccess access)
+  private static JwtEcdsaPublicKey parsePublicKeyFromProto(
+      com.google.crypto.tink.proto.JwtEcdsaPublicKey protoKey,
+      OutputPrefixType outputPrefixType,
+      @Nullable Integer idRequirement)
       throws GeneralSecurityException {
-    if (!serialization.getTypeUrl().equals(PUBLIC_TYPE_URL)) {
-      throw new IllegalArgumentException(
-          "Wrong type URL in call to EcdsaProtoSerialization.parsePublicKey: "
-              + serialization.getTypeUrl());
-    }
-    try {
-      com.google.crypto.tink.proto.JwtEcdsaPublicKey protoKey =
-          com.google.crypto.tink.proto.JwtEcdsaPublicKey.parseFrom(
-              serialization.getValue(), ExtensionRegistryLite.getEmptyRegistry());
       if (protoKey.getVersion() != 0) {
         throw new GeneralSecurityException("Only version 0 keys are accepted");
       }
+
       JwtEcdsaParameters.Builder parametersBuilder = JwtEcdsaParameters.builder();
       JwtEcdsaPublicKey.Builder keyBuilder = JwtEcdsaPublicKey.builder();
 
-      if (serialization.getOutputPrefixType().equals(OutputPrefixType.TINK)) {
+    if (outputPrefixType.equals(OutputPrefixType.TINK)) {
         if (protoKey.hasCustomKid()) {
           throw new GeneralSecurityException(
               "Keys serialized with OutputPrefixType TINK should not have a custom kid");
-        }
-        @Nullable Integer idRequirement = serialization.getIdRequirementOrNull();
+      }
         if (idRequirement == null) {
           throw new GeneralSecurityException(
               "Keys serialized with OutputPrefixType TINK need an ID Requirement");
         }
         parametersBuilder.setKidStrategy(JwtEcdsaParameters.KidStrategy.BASE64_ENCODED_KEY_ID);
         keyBuilder.setIdRequirement(idRequirement);
-      } else if (serialization.getOutputPrefixType().equals(OutputPrefixType.RAW)) {
+    } else if (outputPrefixType.equals(OutputPrefixType.RAW)) {
         if (protoKey.hasCustomKid()) {
           parametersBuilder.setKidStrategy(JwtEcdsaParameters.KidStrategy.CUSTOM);
           keyBuilder.setCustomKid(protoKey.getCustomKid().getValue());
@@ -277,7 +269,24 @@ final class JwtEcdsaProtoSerialization {
               BigIntegerEncoding.fromUnsignedBigEndianBytes(protoKey.getX().toByteArray()),
               BigIntegerEncoding.fromUnsignedBigEndianBytes(protoKey.getY().toByteArray())));
       return keyBuilder.setParameters(parametersBuilder.build()).build();
-    } catch (InvalidProtocolBufferException | IllegalArgumentException e) {
+  }
+
+  @SuppressWarnings("UnusedException")
+  private static JwtEcdsaPublicKey parsePublicKey(
+      ProtoKeySerialization serialization, @Nullable SecretKeyAccess access)
+      throws GeneralSecurityException {
+    if (!serialization.getTypeUrl().equals(PUBLIC_TYPE_URL)) {
+      throw new IllegalArgumentException(
+          "Wrong type URL in call to EcdsaProtoSerialization.parsePublicKey: "
+              + serialization.getTypeUrl());
+    }
+    try {
+      com.google.crypto.tink.proto.JwtEcdsaPublicKey protoKey =
+          com.google.crypto.tink.proto.JwtEcdsaPublicKey.parseFrom(
+              serialization.getValue(), ExtensionRegistryLite.getEmptyRegistry());
+      return parsePublicKeyFromProto(
+          protoKey, serialization.getOutputPrefixType(), serialization.getIdRequirementOrNull());
+    } catch (InvalidProtocolBufferException e) {
       throw new GeneralSecurityException("Parsing EcdsaPublicKey failed");
     }
   }
