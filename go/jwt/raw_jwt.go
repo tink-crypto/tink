@@ -134,7 +134,7 @@ func (r *RawJWT) Audiences() ([]string, error) {
 	if val, isString := aud.GetKind().(*spb.Value_StringValue); isString {
 		return []string{val.StringValue}, nil
 	}
-	s := []string{}
+	s := make([]string, 0, len(aud.GetListValue().GetValues()))
 	for _, a := range aud.GetListValue().GetValues() {
 		s = append(s, a.GetStringValue())
 	}
