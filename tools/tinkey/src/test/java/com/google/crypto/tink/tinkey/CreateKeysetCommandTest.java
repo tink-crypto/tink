@@ -17,81 +17,141 @@
 package com.google.crypto.tink.tinkey;
 
 import static com.google.common.truth.Truth.assertThat;
+import static java.nio.charset.StandardCharsets.UTF_8;
 
-import com.google.crypto.tink.KeyTemplate;
-import com.google.crypto.tink.KeyTemplates;
-import com.google.crypto.tink.mac.MacConfig;
-import com.google.crypto.tink.proto.Keyset;
+import com.google.crypto.tink.Aead;
+import com.google.crypto.tink.InsecureSecretKeyAccess;
+import com.google.crypto.tink.KeysetHandle;
+import com.google.crypto.tink.KmsClients;
+import com.google.crypto.tink.TinkJsonProtoKeysetFormat;
+import com.google.crypto.tink.TinkProtoKeysetFormat;
+import com.google.crypto.tink.mac.PredefinedMacParameters;
 import com.google.crypto.tink.testing.TestUtil;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import org.junit.BeforeClass;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
-/**
- * Tests for {@code CreateKeysetCommand}.
- */
+/** Tests for {@code CreateKeysetCommand}. */
 @RunWith(JUnit4.class)
 public class CreateKeysetCommandTest {
-  private static KeyTemplate template;
-
-  @BeforeClass
-  public static void setUp() throws Exception {
-    MacConfig.register();
-    template = KeyTemplates.get("HMAC_SHA256_128BITTAG");
-  }
-
   @Test
   public void testCreateCleartext_shouldCreateNewKeyset() throws Exception {
-    testCreateCleartext_shouldCreateNewKeyset("json");
-    testCreateCleartext_shouldCreateNewKeyset("binary");
-  }
+    Path path = Files.createTempDirectory(/* prefix= */ "");
+    Path outputFile = Paths.get(path.toString(), "keyset");
 
-  private void testCreateCleartext_shouldCreateNewKeyset(String format)
-      throws Exception {
-    // Create a cleartext keyset.
-    String masterKeyUri = null; // This ensures that the keyset won't be encrypted.
-    String credentialPath = null;
-    ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-    CreateKeysetCommand.create(outputStream, format, masterKeyUri, credentialPath, template);
+    Tinkey.main(
+        new String[] {
+          "create-keyset", "--key-template", "HMAC_SHA256_128BITTAG", "--out", outputFile.toString()
+        });
 
-    Keyset keyset = TinkeyUtil.createKeysetReader(
-        new ByteArrayInputStream(outputStream.toByteArray()), format).read();
-    assertThat(keyset.getKeyCount()).isEqualTo(1);
-    TestUtil.assertHmacKey(template, keyset.getKey(0));
+    KeysetHandle handle =
+        TinkJsonProtoKeysetFormat.parseKeyset(
+            new String(Files.readAllBytes(outputFile), UTF_8), InsecureSecretKeyAccess.get());
+
+    assertThat(handle.size()).isEqualTo(1);
+    assertThat(handle.getPrimary().getKey().getParameters())
+        .isEqualTo(PredefinedMacParameters.HMAC_SHA256_128BITTAG);
   }
 
   @Test
-  public void testCreateEncrypted_shouldCreateNewKeyset() throws Exception {
-    testCreateEncrypted_shouldCreateNewKeyset("json");
-    testCreateEncrypted_shouldCreateNewKeyset("binary");
+  public void testCreateCleartext_explicitJson_shouldCreateNewKeyset() throws Exception {
+    Path path = Files.createTempDirectory(/* prefix= */ "");
+    Path outputFile = Paths.get(path.toString(), "keyset");
+
+    String commandLine =
+        String.format(
+            "create-keyset --key-template HMAC_SHA256_128BITTAG --out-format json --out %s",
+            outputFile.toString());
+
+    Tinkey.main(commandLine.split(" "));
+
+    KeysetHandle handle =
+        TinkJsonProtoKeysetFormat.parseKeyset(
+            new String(Files.readAllBytes(outputFile), UTF_8), InsecureSecretKeyAccess.get());
+
+    assertThat(handle.size()).isEqualTo(1);
+    assertThat(handle.getPrimary().getKey().getParameters())
+        .isEqualTo(PredefinedMacParameters.HMAC_SHA256_128BITTAG);
   }
 
-  private void testCreateEncrypted_shouldCreateNewKeyset(
-      String format) throws Exception {
-    // Create an encrypted keyset.
-    String masterKeyUri = TestUtil.GCP_KMS_TEST_KEY_URI;
-    String credentialPath = TestUtil.SERVICE_ACCOUNT_FILE;
-    ByteArrayOutputStream createOutputStream = new ByteArrayOutputStream();
-    CreateKeysetCommand.create(createOutputStream, format, masterKeyUri, credentialPath, template);
+  @Test
+  public void testCreateCleartext_binary_shouldCreateNewKeyset() throws Exception {
+    Path path = Files.createTempDirectory(/* prefix= */ "");
+    Path outputFile = Paths.get(path.toString(), "keyset");
 
-    byte[] encryptedKeyset = createOutputStream.toByteArray();
+    String commandLine =
+        String.format(
+            "create-keyset --key-template HMAC_SHA256_128BITTAG --out-format binary --out %s",
+            outputFile);
 
-    // Now, use the ConvertKeysetCommand command to convert the encrypted keyset into an
-    // unencrypted keyset.
-    ByteArrayOutputStream convertOutputStream = new ByteArrayOutputStream();
+    Tinkey.main(commandLine.split(" "));
 
-    ConvertKeysetCommand.convert(convertOutputStream,  format,
-       new ByteArrayInputStream(encryptedKeyset),  format,
-       masterKeyUri,  credentialPath,
-       /* newMasterKeyUri = */ null,  /* newCredentialPath = */ null);
+    KeysetHandle handle =
+        TinkProtoKeysetFormat.parseKeyset(
+            Files.readAllBytes(outputFile), InsecureSecretKeyAccess.get());
 
-    Keyset keyset = TinkeyUtil.createKeysetReader(
-        new ByteArrayInputStream(convertOutputStream.toByteArray()), format).read();
-
-    assertThat(keyset.getKeyCount()).isEqualTo(1);
-    TestUtil.assertHmacKey(template, keyset.getKey(0));
+    assertThat(handle.size()).isEqualTo(1);
+    assertThat(handle.getPrimary().getKey().getParameters())
+        .isEqualTo(PredefinedMacParameters.HMAC_SHA256_128BITTAG);
   }
+
+  @Test
+  public void testCreateCleartext_gcp_shouldCreateNewKeyset() throws Exception {
+    Path path = Files.createTempDirectory(/* prefix= */ "");
+    Path outputFile = Paths.get(path.toString(), "keyset");
+    String commandLine =
+        String.format(
+            "create-keyset --key-template HMAC_SHA256_128BITTAG --out-format binary "
+                + "--master-key-uri %s "
+                + "--credential %s "
+                + "--out %s",
+            TestUtil.GCP_KMS_TEST_KEY_URI, TestUtil.SERVICE_ACCOUNT_FILE, outputFile.toString());
+
+    Tinkey.main(commandLine.split(" "));
+
+    Aead masterKeyAead =
+        KmsClients.getAutoLoaded(TestUtil.GCP_KMS_TEST_KEY_URI)
+            .withCredentials(TestUtil.SERVICE_ACCOUNT_FILE)
+            .getAead(TestUtil.GCP_KMS_TEST_KEY_URI);
+
+    KeysetHandle handle =
+        TinkProtoKeysetFormat.parseEncryptedKeyset(
+            Files.readAllBytes(outputFile), masterKeyAead, new byte[] {});
+
+    assertThat(handle.size()).isEqualTo(1);
+    assertThat(handle.getPrimary().getKey().getParameters())
+        .isEqualTo(PredefinedMacParameters.HMAC_SHA256_128BITTAG);
+  }
+
+  @Test
+  public void testCreateCleartext_gcp_jsonFormat_shouldCreateNewKeyset() throws Exception {
+    Path path = Files.createTempDirectory(/* prefix= */ "");
+    Path outputFile = Paths.get(path.toString(), "keyset");
+    String commandLine =
+        String.format(
+            "create-keyset --key-template HMAC_SHA256_128BITTAG --out-format json "
+                + "--master-key-uri %s "
+                + "--credential %s "
+                + "--out %s",
+            TestUtil.GCP_KMS_TEST_KEY_URI, TestUtil.SERVICE_ACCOUNT_FILE, outputFile.toString());
+
+    Tinkey.main(commandLine.split(" "));
+
+    Aead masterKeyAead =
+        KmsClients.getAutoLoaded(TestUtil.GCP_KMS_TEST_KEY_URI)
+            .withCredentials(TestUtil.SERVICE_ACCOUNT_FILE)
+            .getAead(TestUtil.GCP_KMS_TEST_KEY_URI);
+
+    KeysetHandle handle =
+        TinkJsonProtoKeysetFormat.parseEncryptedKeyset(
+            new String(Files.readAllBytes(outputFile), UTF_8), masterKeyAead, new byte[] {});
+
+    assertThat(handle.size()).isEqualTo(1);
+    assertThat(handle.getPrimary().getKey().getParameters())
+        .isEqualTo(PredefinedMacParameters.HMAC_SHA256_128BITTAG);
+  }
+
 }
