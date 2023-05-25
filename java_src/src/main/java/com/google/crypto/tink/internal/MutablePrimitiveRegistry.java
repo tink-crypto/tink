@@ -45,7 +45,7 @@ public final class MutablePrimitiveRegistry {
   }
 
   private final AtomicReference<PrimitiveRegistry> registry =
-      new AtomicReference<>(new PrimitiveRegistry.Builder().build());
+      new AtomicReference<>(PrimitiveRegistry.builder().build());
 
   MutablePrimitiveRegistry() {}
 
@@ -60,7 +60,7 @@ public final class MutablePrimitiveRegistry {
   public synchronized <KeyT extends Key, PrimitiveT> void registerPrimitiveConstructor(
       PrimitiveConstructor<KeyT, PrimitiveT> constructor) throws GeneralSecurityException {
     PrimitiveRegistry newRegistry =
-        new PrimitiveRegistry.Builder(registry.get())
+        PrimitiveRegistry.builder(registry.get())
             .registerPrimitiveConstructor(constructor)
             .build();
     registry.set(newRegistry);
@@ -70,7 +70,7 @@ public final class MutablePrimitiveRegistry {
       PrimitiveWrapper<InputPrimitiveT, WrapperPrimitiveT> wrapper)
       throws GeneralSecurityException {
     PrimitiveRegistry newRegistry =
-        new PrimitiveRegistry.Builder(registry.get()).registerPrimitiveWrapper(wrapper).build();
+        PrimitiveRegistry.builder(registry.get()).registerPrimitiveWrapper(wrapper).build();
     registry.set(newRegistry);
   }
 

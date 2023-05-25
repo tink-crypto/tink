@@ -155,19 +155,17 @@ public final class PrimitiveRegistryTest {
   @Test
   public void test_registerConstructorAndGet() throws Exception {
     PrimitiveRegistry registry =
-        new PrimitiveRegistry.Builder()
+        PrimitiveRegistry.builder()
             .registerPrimitiveConstructor(
                 PrimitiveConstructor.create(
-                    PrimitiveRegistryTest::getPrimitiveAKey1,
-                    TestKey1.class,
-                    TestPrimitiveA.class))
+                    PrimitiveRegistryTest::getPrimitiveAKey1, TestKey1.class, TestPrimitiveA.class))
             .build();
     assertThat(registry.getPrimitive(new TestKey1(), TestPrimitiveA.class)).isNotNull();
   }
 
   @Test
   public void test_emptyRegistry_throws() throws Exception {
-    PrimitiveRegistry registry = new PrimitiveRegistry.Builder().build();
+    PrimitiveRegistry registry = PrimitiveRegistry.builder().build();
     assertThrows(
         GeneralSecurityException.class,
         () -> registry.getPrimitive(new TestKey1(), TestPrimitiveA.class));
@@ -186,10 +184,11 @@ public final class PrimitiveRegistryTest {
     PrimitiveConstructor<TestKey1, TestPrimitiveA> testPrimitiveConstructor =
         PrimitiveConstructor.create(
             PrimitiveRegistryTest::getPrimitiveAKey1, TestKey1.class, TestPrimitiveA.class);
-    PrimitiveRegistry unused = new PrimitiveRegistry.Builder()
-        .registerPrimitiveConstructor(testPrimitiveConstructor)
-        .registerPrimitiveConstructor(testPrimitiveConstructor)
-        .build();
+    PrimitiveRegistry unused =
+        PrimitiveRegistry.builder()
+            .registerPrimitiveConstructor(testPrimitiveConstructor)
+            .registerPrimitiveConstructor(testPrimitiveConstructor)
+            .build();
   }
 
   @Test
@@ -200,7 +199,7 @@ public final class PrimitiveRegistryTest {
     PrimitiveConstructor<TestKey1, TestPrimitiveA> testPrimitiveConstructor2 =
         PrimitiveConstructor.create(
             PrimitiveRegistryTest::getPrimitiveAKey1, TestKey1.class, TestPrimitiveA.class);
-    PrimitiveRegistry.Builder builder = new PrimitiveRegistry.Builder();
+    PrimitiveRegistry.Builder builder = PrimitiveRegistry.builder();
     builder.registerPrimitiveConstructor(testPrimitiveConstructor1);
     assertThrows(
         GeneralSecurityException.class,
@@ -215,10 +214,11 @@ public final class PrimitiveRegistryTest {
     PrimitiveConstructor<TestKey2, TestPrimitiveA> testPrimitiveConstructor2 =
         PrimitiveConstructor.create(
             PrimitiveRegistryTest::getPrimitiveAKey2, TestKey2.class, TestPrimitiveA.class);
-    PrimitiveRegistry unused = new PrimitiveRegistry.Builder()
-        .registerPrimitiveConstructor(testPrimitiveConstructor1)
-        .registerPrimitiveConstructor(testPrimitiveConstructor2)
-        .build();
+    PrimitiveRegistry unused =
+        PrimitiveRegistry.builder()
+            .registerPrimitiveConstructor(testPrimitiveConstructor1)
+            .registerPrimitiveConstructor(testPrimitiveConstructor2)
+            .build();
   }
 
   @Test
@@ -230,16 +230,17 @@ public final class PrimitiveRegistryTest {
     PrimitiveConstructor<TestKey1, TestPrimitiveB> testPrimitiveConstructor2 =
         PrimitiveConstructor.create(
             PrimitiveRegistryTest::getPrimitiveBKey1, TestKey1.class, TestPrimitiveB.class);
-    PrimitiveRegistry unused = new PrimitiveRegistry.Builder()
-        .registerPrimitiveConstructor(testPrimitiveConstructor1)
-        .registerPrimitiveConstructor(testPrimitiveConstructor2)
-        .build();
+    PrimitiveRegistry unused =
+        PrimitiveRegistry.builder()
+            .registerPrimitiveConstructor(testPrimitiveConstructor1)
+            .registerPrimitiveConstructor(testPrimitiveConstructor2)
+            .build();
   }
 
   @Test
   public void test_registerAllConstructors_checkDispatch() throws Exception {
     PrimitiveRegistry registry =
-        new PrimitiveRegistry.Builder()
+        PrimitiveRegistry.builder()
             .registerPrimitiveConstructor(
                 PrimitiveConstructor.create(
                     PrimitiveRegistryTest::getPrimitiveAKey1, TestKey1.class, TestPrimitiveA.class))
@@ -267,7 +268,7 @@ public final class PrimitiveRegistryTest {
   @Test
   public void test_registerWrapperAndGet() throws Exception {
     PrimitiveRegistry registry =
-        new PrimitiveRegistry.Builder().registerPrimitiveWrapper(new TestWrapperA()).build();
+        PrimitiveRegistry.builder().registerPrimitiveWrapper(new TestWrapperA()).build();
     assertThat(
             registry.wrap(
                 PrimitiveSet.newBuilder(TestPrimitiveA.class).build(), TestPrimitiveA.class))
@@ -278,7 +279,7 @@ public final class PrimitiveRegistryTest {
   public void test_registerSameWrapperTwice_works() throws Exception {
     TestWrapperA wrapper = new TestWrapperA();
     PrimitiveRegistry unused =
-        new PrimitiveRegistry.Builder()
+        PrimitiveRegistry.builder()
             .registerPrimitiveWrapper(wrapper)
             .registerPrimitiveWrapper(wrapper)
             .build();
@@ -286,7 +287,7 @@ public final class PrimitiveRegistryTest {
 
   @Test
   public void test_registerDifferentWrapperWithSamePrimitiveType_throws() throws Exception {
-    PrimitiveRegistry.Builder builder = new PrimitiveRegistry.Builder();
+    PrimitiveRegistry.Builder builder = PrimitiveRegistry.builder();
     builder.registerPrimitiveWrapper(new TestWrapperA());
     assertThrows(
         GeneralSecurityException.class, () -> builder.registerPrimitiveWrapper(new TestWrapperA()));
@@ -295,7 +296,7 @@ public final class PrimitiveRegistryTest {
   @Test
   public void test_registerDifferentWrapperWithDifferentPrimitiveType_works() throws Exception {
     PrimitiveRegistry unused =
-        new PrimitiveRegistry.Builder()
+        PrimitiveRegistry.builder()
             .registerPrimitiveWrapper(new TestWrapperA())
             .registerPrimitiveWrapper(new TestWrapperB())
             .build();
@@ -304,7 +305,7 @@ public final class PrimitiveRegistryTest {
   @Test
   public void test_registerAllWrappers_checkDispatch() throws Exception {
     PrimitiveRegistry registry =
-        new PrimitiveRegistry.Builder()
+        PrimitiveRegistry.builder()
             .registerPrimitiveWrapper(new TestWrapperA())
             .registerPrimitiveWrapper(new TestWrapperB())
             .build();
@@ -326,13 +327,13 @@ public final class PrimitiveRegistryTest {
   @Test
   public void test_copyWorks() throws Exception {
     PrimitiveRegistry registry =
-        new PrimitiveRegistry.Builder()
+        PrimitiveRegistry.builder()
             .registerPrimitiveConstructor(
                 PrimitiveConstructor.create(
                     PrimitiveRegistryTest::getPrimitiveAKey1, TestKey1.class, TestPrimitiveA.class))
             .registerPrimitiveWrapper(new TestWrapperA())
             .build();
-    PrimitiveRegistry registry2 = new PrimitiveRegistry.Builder(registry).build();
+    PrimitiveRegistry registry2 = PrimitiveRegistry.builder(registry).build();
     assertThat(registry2.getPrimitive(new TestKey1(), TestPrimitiveA.class))
         .isInstanceOf(TestPrimitiveA.class);
     assertThat(
@@ -345,8 +346,8 @@ public final class PrimitiveRegistryTest {
 
   @Test
   public void test_copyDoesNotChangeOldVersion() throws Exception {
-    PrimitiveRegistry registry1 = new PrimitiveRegistry.Builder().build();
-    PrimitiveRegistry.Builder builder = new PrimitiveRegistry.Builder(registry1);
+    PrimitiveRegistry registry1 = PrimitiveRegistry.builder().build();
+    PrimitiveRegistry.Builder builder = PrimitiveRegistry.builder(registry1);
     PrimitiveRegistry registry2 = builder.build();
 
     builder

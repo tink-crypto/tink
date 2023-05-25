@@ -39,12 +39,12 @@ public class PrimitiveRegistry {
         primitiveConstructorMap;
     private final Map<Class<?>, PrimitiveWrapper<?, ?>> primitiveWrapperMap;
 
-    public Builder() {
+    private Builder() {
       primitiveConstructorMap = new HashMap<>();
       primitiveWrapperMap = new HashMap<>();
     }
 
-    public Builder(PrimitiveRegistry registry) {
+    private Builder(PrimitiveRegistry registry) {
       primitiveConstructorMap = new HashMap<>(registry.primitiveConstructorMap);
       primitiveWrapperMap = new HashMap<>(registry.primitiveWrapperMap);
     }
@@ -109,6 +109,14 @@ public class PrimitiveRegistry {
     PrimitiveRegistry build() {
       return new PrimitiveRegistry(this);
     }
+  }
+
+  public static Builder builder() {
+    return new Builder();
+  }
+
+  public static Builder builder(PrimitiveRegistry registry) {
+    return new Builder(registry);
   }
 
   private PrimitiveRegistry(Builder builder) {

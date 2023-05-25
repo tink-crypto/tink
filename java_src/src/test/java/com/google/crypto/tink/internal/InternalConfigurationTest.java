@@ -159,7 +159,7 @@ public class InternalConfigurationTest {
   @Test
   public void getLegacyPrimitive_throws() throws Exception {
     PrimitiveRegistry registry =
-        new PrimitiveRegistry.Builder()
+        PrimitiveRegistry.builder()
             .registerPrimitiveConstructor(
                 PrimitiveConstructor.create(
                     InternalConfigurationTest::getPrimitiveAKey1,
@@ -186,7 +186,7 @@ public class InternalConfigurationTest {
   @Test
   public void getPrimitive_works() throws Exception {
     PrimitiveRegistry registry =
-        new PrimitiveRegistry.Builder()
+        PrimitiveRegistry.builder()
             .registerPrimitiveConstructor(
                 PrimitiveConstructor.create(
                     InternalConfigurationTest::getPrimitiveAKey1,
@@ -205,7 +205,7 @@ public class InternalConfigurationTest {
   @Test
   public void wrap_works() throws Exception {
     PrimitiveRegistry registry =
-        new PrimitiveRegistry.Builder().registerPrimitiveWrapper(new TestWrapperA()).build();
+        PrimitiveRegistry.builder().registerPrimitiveWrapper(new TestWrapperA()).build();
     InternalConfiguration configuration =
         InternalConfiguration.createFromPrimitiveRegistry(registry);
 
@@ -217,7 +217,7 @@ public class InternalConfigurationTest {
   @Test
   public void getInputPrimitiveClass_works() throws Exception {
     PrimitiveRegistry registry =
-        new PrimitiveRegistry.Builder().registerPrimitiveWrapper(new TestWrapperA()).build();
+        PrimitiveRegistry.builder().registerPrimitiveWrapper(new TestWrapperA()).build();
     InternalConfiguration configuration =
         InternalConfiguration.createFromPrimitiveRegistry(registry);
 
@@ -228,7 +228,7 @@ public class InternalConfigurationTest {
   @Test
   public void getPrimitive_dispatchWorks() throws Exception {
     PrimitiveRegistry registry =
-        new PrimitiveRegistry.Builder()
+        PrimitiveRegistry.builder()
             .registerPrimitiveConstructor(
                 PrimitiveConstructor.create(
                     InternalConfigurationTest::getPrimitiveAKey1,
@@ -262,7 +262,7 @@ public class InternalConfigurationTest {
   @Test
   public void wrap_dispatchWorks() throws Exception {
     PrimitiveRegistry registry =
-        new PrimitiveRegistry.Builder()
+        PrimitiveRegistry.builder()
             .registerPrimitiveWrapper(new TestWrapperA())
             .registerPrimitiveWrapper(new TestWrapperB())
             .build();
@@ -279,7 +279,7 @@ public class InternalConfigurationTest {
   @Test
   public void getInputPrimitiveClass_dispatchWorks() throws Exception {
     PrimitiveRegistry registry =
-        new PrimitiveRegistry.Builder()
+        PrimitiveRegistry.builder()
             .registerPrimitiveWrapper(new TestWrapperA())
             .registerPrimitiveWrapper(new TestWrapperB())
             .build();
@@ -295,7 +295,7 @@ public class InternalConfigurationTest {
   @Test
   public void getPrimitive_unregisteredKeyTypeThrows() throws Exception {
     PrimitiveRegistry registry =
-        new PrimitiveRegistry.Builder()
+        PrimitiveRegistry.builder()
             .registerPrimitiveConstructor(
                 PrimitiveConstructor.create(
                     InternalConfigurationTest::getPrimitiveAKey1,
@@ -314,7 +314,7 @@ public class InternalConfigurationTest {
   @Test
   public void getPrimitive_unregisteredPrimitiveClassThrows() throws Exception {
     PrimitiveRegistry registry =
-        new PrimitiveRegistry.Builder()
+        PrimitiveRegistry.builder()
             .registerPrimitiveConstructor(
                 PrimitiveConstructor.create(
                     InternalConfigurationTest::getPrimitiveAKey1,
@@ -333,7 +333,7 @@ public class InternalConfigurationTest {
   @Test
   public void getPrimitive_wrongPrimitiveKeyClassCombinationThrows() throws Exception {
     PrimitiveRegistry registry =
-        new PrimitiveRegistry.Builder()
+        PrimitiveRegistry.builder()
             .registerPrimitiveConstructor(
                 PrimitiveConstructor.create(
                     InternalConfigurationTest::getPrimitiveAKey1,
@@ -359,7 +359,7 @@ public class InternalConfigurationTest {
   @Test
   public void wrap_wrongInputPrimitiveClassThrows() throws Exception {
     PrimitiveRegistry registry =
-        new PrimitiveRegistry.Builder().registerPrimitiveWrapper(new TestWrapperA()).build();
+        PrimitiveRegistry.builder().registerPrimitiveWrapper(new TestWrapperA()).build();
     InternalConfiguration configuration =
         InternalConfiguration.createFromPrimitiveRegistry(registry);
 
@@ -373,7 +373,7 @@ public class InternalConfigurationTest {
   @Test
   public void wrap_unregisteredWrapperClassThrows() throws Exception {
     PrimitiveRegistry registry =
-        new PrimitiveRegistry.Builder().registerPrimitiveWrapper(new TestWrapperA()).build();
+        PrimitiveRegistry.builder().registerPrimitiveWrapper(new TestWrapperA()).build();
     InternalConfiguration configuration =
         InternalConfiguration.createFromPrimitiveRegistry(registry);
 
@@ -387,7 +387,7 @@ public class InternalConfigurationTest {
   @Test
   public void getInputPrimitiveClass_unregisteredWrapperClassThrows() throws Exception {
     PrimitiveRegistry registry =
-        new PrimitiveRegistry.Builder().registerPrimitiveWrapper(new TestWrapperA()).build();
+        PrimitiveRegistry.builder().registerPrimitiveWrapper(new TestWrapperA()).build();
     InternalConfiguration configuration =
         InternalConfiguration.createFromPrimitiveRegistry(registry);
 
@@ -398,7 +398,7 @@ public class InternalConfigurationTest {
 
   @Test
   public void emptyRegistry_throws() {
-    PrimitiveRegistry registry = new PrimitiveRegistry.Builder().build();
+    PrimitiveRegistry registry = PrimitiveRegistry.builder().build();
     InternalConfiguration configuration =
         InternalConfiguration.createFromPrimitiveRegistry(registry);
 
