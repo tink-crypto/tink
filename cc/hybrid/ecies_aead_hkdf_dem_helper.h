@@ -17,14 +17,16 @@
 #ifndef TINK_HYBRID_ECIES_AEAD_HKDF_DEM_HELPER_H_
 #define TINK_HYBRID_ECIES_AEAD_HKDF_DEM_HELPER_H_
 
+#include <stdint.h>
+
 #include <memory>
 
 #include "tink/aead.h"
 #include "tink/daead/subtle/aead_or_daead.h"
-#include "tink/key_manager.h"
 #include "tink/util/protobuf_helper.h"
 #include "tink/util/secret_data.h"
 #include "tink/util/statusor.h"
+#include "proto/common.pb.h"
 #include "proto/tink.pb.h"
 
 namespace crypto {
@@ -50,7 +52,7 @@ class EciesAeadHkdfDemHelper {
   // be of length dem_key_size_in_bytes().
   virtual crypto::tink::util::StatusOr<
       std::unique_ptr<crypto::tink::subtle::AeadOrDaead>>
-  GetAeadOrDaead(const util::SecretData& symmetric_key_value) const = 0;
+  GetAeadOrDaead(const util::SecretData& symmetric_key_value) const;
 
  protected:
   enum DemKeyType {
@@ -64,6 +66,9 @@ class EciesAeadHkdfDemHelper {
     DemKeyType key_type;
     uint32_t key_size_in_bytes;
     uint32_t aes_ctr_key_size_in_bytes;
+    uint32_t aes_ctr_key_iv_size_in_bytes;
+    google::crypto::tink::HashType hmac_key_hash;
+    uint32_t hmac_key_tag_size_in_bytes;
   };
 
   EciesAeadHkdfDemHelper(const google::crypto::tink::KeyTemplate& key_template,
@@ -72,11 +77,6 @@ class EciesAeadHkdfDemHelper {
 
   static util::StatusOr<DemKeyParams> GetKeyParams(
       const ::google::crypto::tink::KeyTemplate& key_template);
-
-  bool ReplaceKeyBytes(const util::SecretData& key_bytes,
-                       portable_proto::MessageLite* proto) const;
-
-  void ZeroKeyBytes(portable_proto::MessageLite* proto) const;
 
   const google::crypto::tink::KeyTemplate key_template_;
   const DemKeyParams key_params_;

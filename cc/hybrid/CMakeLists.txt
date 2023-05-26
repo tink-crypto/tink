@@ -137,11 +137,15 @@ tink_cc_library(
   DEPS
     absl::memory
     absl::status
+    absl::statusor
+    absl::strings
     tink::core::aead
     tink::core::deterministic_aead
-    tink::core::key_manager
-    tink::core::registry
+    tink::aead::aes_ctr_hmac_aead_key_manager
     tink::daead::subtle::aead_or_daead
+    tink::subtle::aes_gcm_boringssl
+    tink::subtle::aes_siv_boringssl
+    tink::subtle::xchacha20_poly1305_boringssl
     tink::util::errors
     tink::util::protobuf_helper
     tink::util::secret_data
@@ -150,6 +154,7 @@ tink_cc_library(
     tink::proto::aes_ctr_hmac_aead_cc_proto
     tink::proto::aes_gcm_cc_proto
     tink::proto::aes_siv_cc_proto
+    tink::proto::common_cc_proto
     tink::proto::hmac_cc_proto
     tink::proto::tink_cc_proto
     tink::proto::xchacha20_poly1305_cc_proto
@@ -401,7 +406,6 @@ tink_cc_test(
     tink::hybrid::ecies_aead_hkdf_dem_helper
     gmock
     absl::status
-    tink::core::registry
     tink::aead::aes_gcm_key_manager
     tink::daead::aes_siv_key_manager
     tink::util::secret_data
@@ -419,7 +423,6 @@ tink_cc_test(
     gmock
     absl::memory
     tink::core::hybrid_decrypt
-    tink::core::registry
     tink::aead::aes_ctr_hmac_aead_key_manager
     tink::aead::aes_gcm_key_manager
     tink::aead::xchacha20_poly1305_key_manager
@@ -445,7 +448,6 @@ tink_cc_test(
     gmock
     absl::memory
     tink::core::hybrid_encrypt
-    tink::core::registry
     tink::aead::aes_gcm_key_manager
     tink::internal::ec_util
     tink::util::enums

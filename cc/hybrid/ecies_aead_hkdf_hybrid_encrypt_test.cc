@@ -25,7 +25,6 @@
 #include "tink/aead/aes_gcm_key_manager.h"
 #include "tink/hybrid_encrypt.h"
 #include "tink/internal/ec_util.h"
-#include "tink/registry.h"
 #include "tink/util/enums.h"
 #include "tink/util/statusor.h"
 #include "tink/util/test_util.h"
@@ -113,19 +112,6 @@ TEST_F(EciesAeadHkdfHybridEncryptTest, testBasic) {
       EcPointFormat::UNCOMPRESSED,
       HashType::SHA256,
       32);
-
-  // Try to get a HybridEncrypt primitive without DEM key manager.
-  auto bad_result(EciesAeadHkdfHybridEncrypt::New(ecies_key.public_key()));
-  EXPECT_FALSE(bad_result.ok());
-  EXPECT_EQ(absl::StatusCode::kFailedPrecondition, bad_result.status().code());
-  EXPECT_PRED_FORMAT2(testing::IsSubstring, "No manager for DEM",
-                      std::string(bad_result.status().message()));
-
-  // Register DEM key manager.
-  ASSERT_TRUE(Registry::RegisterKeyTypeManager(
-                  absl::make_unique<AesGcmKeyManager>(), true)
-                  .ok());
-  std::string dem_key_type = AesGcmKeyManager().get_key_type();
 
   // Generate and test many keys with various parameters.
   std::string plaintext = "some plaintext";

@@ -31,7 +31,6 @@
 #include "tink/hybrid_decrypt.h"
 #include "tink/internal/ec_util.h"
 #include "tink/internal/ssl_util.h"
-#include "tink/registry.h"
 #include "tink/subtle/random.h"
 #include "tink/util/enums.h"
 #include "tink/util/statusor.h"
@@ -215,21 +214,6 @@ TEST_F(EciesAeadHkdfHybridDecryptTest, testInvalidKeys) {
     EXPECT_PRED_FORMAT2(testing::IsSubstring, "Unsupported DEM",
                         std::string(result.status().message()));
   }
-}
-
-TEST_F(EciesAeadHkdfHybridDecryptTest, testGettingHybridEncryptWithoutManager) {
-  // Prepare an ECIES key.
-  Registry::Reset();
-  auto ecies_key = test::GetEciesAesGcmHkdfTestKey(EllipticCurveType::NIST_P256,
-                                                   EcPointFormat::UNCOMPRESSED,
-                                                   HashType::SHA256, 32);
-
-  // Try to get a HybridEncrypt primitive without DEM key manager.
-  auto bad_result(EciesAeadHkdfHybridDecrypt::New(ecies_key));
-  EXPECT_FALSE(bad_result.ok());
-  EXPECT_EQ(absl::StatusCode::kFailedPrecondition, bad_result.status().code());
-  EXPECT_PRED_FORMAT2(testing::IsSubstring, "No manager for DEM",
-                      std::string(bad_result.status().message()));
 }
 
 TEST_F(EciesAeadHkdfHybridDecryptTest, testAesGcmHybridDecryption) {

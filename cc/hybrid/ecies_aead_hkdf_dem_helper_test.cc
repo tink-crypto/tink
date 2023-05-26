@@ -25,7 +25,6 @@
 #include "absl/status/status.h"
 #include "tink/aead/aes_gcm_key_manager.h"
 #include "tink/daead/aes_siv_key_manager.h"
-#include "tink/registry.h"
 #include "tink/util/secret_data.h"
 #include "tink/util/test_matchers.h"
 #include "tink/util/test_util.h"
@@ -70,8 +69,6 @@ TEST(EciesAeadHkdfDemHelperTest, DemHelperWithSomeAeadKeyType) {
   key_format.set_key_size(16);
   std::unique_ptr<AesGcmKeyManager> key_manager(new AesGcmKeyManager());
   std::string dem_key_type = key_manager->get_key_type();
-  ASSERT_THAT(Registry::RegisterKeyTypeManager(std::move(key_manager), true),
-              IsOk());
 
   google::crypto::tink::KeyTemplate dem_key_template;
   dem_key_template.set_type_url(dem_key_type);
@@ -97,8 +94,6 @@ TEST(EciesAeadHkdfDemHelperTest, DemHelperWithSomeDeterministicAeadKeyType) {
   key_format.set_key_size(64);
   std::unique_ptr<AesSivKeyManager> key_manager(new AesSivKeyManager());
   std::string dem_key_type = key_manager->get_key_type();
-  ASSERT_THAT(Registry::RegisterKeyTypeManager(std::move(key_manager), true),
-              IsOk());
 
   google::crypto::tink::KeyTemplate dem_key_template;
   dem_key_template.set_type_url(dem_key_type);
