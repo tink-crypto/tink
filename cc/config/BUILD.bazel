@@ -142,7 +142,6 @@ cc_test(
         "//aead:aes_gcm_key_manager",
         "//internal:configuration_impl",
         "//internal:fips_utils",
-        "//internal:registry_impl",
         "//mac:aes_cmac_key_manager",
         "//mac:hmac_key_manager",
         "//prf:hmac_prf_key_manager",

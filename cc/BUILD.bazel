@@ -853,6 +853,7 @@ cc_test(
         "//aead:aes_gcm_key_manager",
         "//config:fips_140_2",
         "//config:tink_config",
+        "//internal:configuration_impl",
         "//internal:fips_utils",
         "//internal:legacy_proto_parameters",
         "//internal:proto_parameters_serialization",
@@ -1122,5 +1123,8 @@ cc_library(
     name = "configuration",
     hdrs = ["configuration.h"],
     include_prefix = "tink",
-    deps = ["//internal:registry_impl"],
+    deps = [
+        "//internal:key_type_info_store",
+        "//internal:keyset_wrapper_store",
+    ],
 )

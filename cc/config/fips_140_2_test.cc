@@ -26,7 +26,6 @@
 #include "tink/aead/aes_gcm_key_manager.h"
 #include "tink/internal/configuration_impl.h"
 #include "tink/internal/fips_utils.h"
-#include "tink/internal/registry_impl.h"
 #include "tink/mac/aes_cmac_key_manager.h"
 #include "tink/mac/hmac_key_manager.h"
 #include "tink/prf/hmac_prf_key_manager.h"
@@ -44,11 +43,12 @@ namespace {
 
 using ::crypto::tink::test::IsOk;
 using ::crypto::tink::test::IsOkAndHolds;
+using ::crypto::tink::test::StatusIs;
 using ::google::crypto::tink::KeyData;
 using ::google::crypto::tink::Keyset;
 using ::google::crypto::tink::KeyStatusType;
+using ::google::crypto::tink::KeyTemplate;
 using ::google::crypto::tink::OutputPrefixType;
-using ::testing::Not;
 
 class Fips1402Test : public ::testing::Test {
  protected:
@@ -60,26 +60,34 @@ TEST_F(Fips1402Test, ConfigFips1402) {
     GTEST_SKIP() << "Only test in FIPS mode";
   }
 
-  const internal::RegistryImpl& registry =
-      internal::ConfigurationImpl::get_registry(ConfigFips140_2());
-  EXPECT_THAT(registry.get_key_manager<Mac>(HmacKeyManager().get_key_type()),
-              IsOk());
   EXPECT_THAT(
-      registry.get_key_manager<Aead>(AesCtrHmacAeadKeyManager().get_key_type()),
+      internal::ConfigurationImpl::GetKeyTypeInfoStore(ConfigFips140_2())
+          .Get(HmacKeyManager().get_key_type()),
       IsOk());
-  EXPECT_THAT(registry.get_key_manager<Aead>(AesGcmKeyManager().get_key_type()),
-              IsOk());
-  EXPECT_THAT(registry.get_key_manager<Prf>(HmacPrfKeyManager().get_key_type()),
-              IsOk());
-  EXPECT_THAT(registry.get_key_manager<PublicKeyVerify>(
-                  EcdsaVerifyKeyManager().get_key_type()),
-              IsOk());
-  EXPECT_THAT(registry.get_key_manager<PublicKeyVerify>(
-                  RsaSsaPssVerifyKeyManager().get_key_type()),
-              IsOk());
-  EXPECT_THAT(registry.get_key_manager<PublicKeyVerify>(
-                  RsaSsaPkcs1VerifyKeyManager().get_key_type()),
-              IsOk());
+  EXPECT_THAT(
+      internal::ConfigurationImpl::GetKeyTypeInfoStore(ConfigFips140_2())
+          .Get(AesCtrHmacAeadKeyManager().get_key_type()),
+      IsOk());
+  EXPECT_THAT(
+      internal::ConfigurationImpl::GetKeyTypeInfoStore(ConfigFips140_2())
+          .Get(AesGcmKeyManager().get_key_type()),
+      IsOk());
+  EXPECT_THAT(
+      internal::ConfigurationImpl::GetKeyTypeInfoStore(ConfigFips140_2())
+          .Get(HmacPrfKeyManager().get_key_type()),
+      IsOk());
+  EXPECT_THAT(
+      internal::ConfigurationImpl::GetKeyTypeInfoStore(ConfigFips140_2())
+          .Get(EcdsaVerifyKeyManager().get_key_type()),
+      IsOk());
+  EXPECT_THAT(
+      internal::ConfigurationImpl::GetKeyTypeInfoStore(ConfigFips140_2())
+          .Get(RsaSsaPssVerifyKeyManager().get_key_type()),
+      IsOk());
+  EXPECT_THAT(
+      internal::ConfigurationImpl::GetKeyTypeInfoStore(ConfigFips140_2())
+          .Get(RsaSsaPkcs1VerifyKeyManager().get_key_type()),
+      IsOk());
 }
 
 TEST_F(Fips1402Test, NonFipsKeyManagerIsNotPresent) {
@@ -87,10 +95,11 @@ TEST_F(Fips1402Test, NonFipsKeyManagerIsNotPresent) {
     GTEST_SKIP() << "Only test in FIPS mode";
   }
 
-  const internal::RegistryImpl& registry =
-      internal::ConfigurationImpl::get_registry(ConfigFips140_2());
-  EXPECT_THAT(registry.get_key_manager<Mac>(AesCmacKeyManager().get_key_type()),
-              Not(IsOk()));
+  EXPECT_THAT(
+      internal::ConfigurationImpl::GetKeyTypeInfoStore(ConfigFips140_2())
+          .Get(AesCmacKeyManager().get_key_type())
+          .status(),
+      StatusIs(absl::StatusCode::kNotFound));
 }
 
 TEST_F(Fips1402Test, ConfigFips1402FailsInNonFipsMode) {
@@ -102,16 +111,21 @@ TEST_F(Fips1402Test, ConfigFips1402FailsInNonFipsMode) {
       ConfigFips140_2(), "BoringSSL not built with the BoringCrypto module.");
 }
 
-TEST_F(Fips1402Test, NewKeyDataAndWrapKeysetSucceeds) {
+TEST_F(Fips1402Test, NewKeyDataAndGetPrimitiveSucceeds) {
   if (!internal::IsFipsEnabledInSsl()) {
     GTEST_SKIP() << "Only test in FIPS mode";
   }
 
-  const internal::RegistryImpl& registry =
-      internal::ConfigurationImpl::get_registry(ConfigFips140_2());
+  // TODO(b/265705174): Replace with KeysetHandle::GenerateNew once that takes a
+  // config parameter.
+  KeyTemplate templ = AeadKeyTemplates::Aes128Gcm();
+  util::StatusOr<internal::KeyTypeInfoStore::Info*> info =
+      internal::ConfigurationImpl::GetKeyTypeInfoStore(ConfigFips140_2())
+          .Get(templ.type_url());
+  ASSERT_THAT(info, IsOk());
 
   util::StatusOr<std::unique_ptr<KeyData>> key_data =
-      registry.NewKeyData(AeadKeyTemplates::Aes128Gcm());
+      (*info)->key_factory().NewKeyData(templ.value());
   ASSERT_THAT(key_data, IsOk());
 
   Keyset keyset;

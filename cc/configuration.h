@@ -17,7 +17,8 @@
 #ifndef TINK_CONFIGURATION_H_
 #define TINK_CONFIGURATION_H_
 
-#include "tink/internal/registry_impl.h"
+#include "tink/internal/key_type_info_store.h"
+#include "tink/internal/keyset_wrapper_store.h"
 
 namespace crypto {
 namespace tink {
@@ -29,11 +30,20 @@ class ConfigurationImpl;
 // Enables primitive generation by storing necessary primitive wrappers and key
 // type managers.
 class Configuration {
+ public:
+  Configuration() = default;
+
+  // Not copyable or movable.
+  Configuration(const Configuration&) = delete;
+  Configuration& operator=(const Configuration&) = delete;
+
  private:
-  // ConfigurationImpl requires access to `registry_`.
+  // ConfigurationImpl requires access to `key_type_info_store_` and
+  // `keyset_wrapper_store_`.
   friend class internal::ConfigurationImpl;
 
-  internal::RegistryImpl registry_;
+  crypto::tink::internal::KeyTypeInfoStore key_type_info_store_;
+  crypto::tink::internal::KeysetWrapperStore keyset_wrapper_store_;
 };
 
 }  // namespace tink

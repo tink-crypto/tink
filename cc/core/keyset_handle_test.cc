@@ -36,6 +36,7 @@
 #include "tink/config/fips_140_2.h"
 #include "tink/config/tink_config.h"
 #include "tink/core/key_manager_impl.h"
+#include "tink/internal/configuration_impl.h"
 #include "tink/internal/fips_utils.h"
 #include "tink/internal/legacy_proto_parameters.h"
 #include "tink/internal/proto_parameters_serialization.h"
@@ -777,16 +778,21 @@ TEST_F(KeysetHandleTest, GetPrimitive) {
   EXPECT_EQ(aead->Decrypt(raw_encryption, aad).value(), plaintext);
 }
 
-TEST_F(KeysetHandleTest, GetPrimitiveWithConfigFips1402Succeeds) {
+TEST_F(KeysetHandleTest, GetPrimitiveWithConfigFips1402) {
   if (!internal::IsFipsEnabledInSsl()) {
     GTEST_SKIP() << "Only test in FIPS mode";
   }
 
-  const internal::RegistryImpl& registry =
-      internal::ConfigurationImpl::get_registry(ConfigFips140_2());
+  // TODO(b/265705174): Replace with KeysetHandle::GenerateNew once that takes a
+  // config parameter.
+  KeyTemplate templ = AeadKeyTemplates::Aes128Gcm();
+  util::StatusOr<internal::KeyTypeInfoStore::Info*> info =
+      internal::ConfigurationImpl::GetKeyTypeInfoStore(ConfigFips140_2())
+          .Get(templ.type_url());
+  ASSERT_THAT(info, IsOk());
 
   util::StatusOr<std::unique_ptr<KeyData>> key_data =
-      registry.NewKeyData(AeadKeyTemplates::Aes128Gcm());
+      (*info)->key_factory().NewKeyData(templ.value());
   ASSERT_THAT(key_data, IsOk());
 
   Keyset keyset;
@@ -805,24 +811,18 @@ TEST_F(KeysetHandleTest, GetPrimitiveWithConfigFips1402FailsWithNonFipsHandle) {
     GTEST_SKIP() << "Only test in FIPS mode";
   }
 
-  KeyTemplate non_fips_key_template = AeadKeyTemplates::Aes256GcmSiv();
-  // Use ConfigFips140_2().
-  const internal::RegistryImpl& registry =
-      internal::ConfigurationImpl::get_registry(ConfigFips140_2());
-  EXPECT_THAT(registry.NewKeyData(non_fips_key_template), Not(IsOk()));
-
   Keyset keyset;
-  uint32_t key_id = 0;
   AesGcmSivKey key_proto;
-  *key_proto.mutable_key_value() = subtle::Random::GetRandomBytes(32);
-  test::AddTinkKey(non_fips_key_template.type_url(), key_id, key_proto,
-                   KeyStatusType::ENABLED, KeyData::SYMMETRIC, &keyset);
-  keyset.set_primary_key_id(key_id);
+  *key_proto.mutable_key_value() = subtle::Random::GetRandomBytes(16);
+  test::AddTinkKey(AeadKeyTemplates::Aes256GcmSiv().type_url(), /*key_id=*/13,
+                   key_proto, KeyStatusType::ENABLED, KeyData::SYMMETRIC,
+                   &keyset);
+  keyset.set_primary_key_id(13);
+
   std::unique_ptr<KeysetHandle> handle =
       TestKeysetHandle::GetKeysetHandle(keyset);
-
-  // Use ConfigFips140_2().
-  EXPECT_THAT(handle->GetPrimitive<Aead>(ConfigFips140_2()), Not(IsOk()));
+  EXPECT_THAT(handle->GetPrimitive<Aead>(ConfigFips140_2()).status(),
+              StatusIs(absl::StatusCode::kNotFound));
 }
 
 // Tests that GetPrimitive(nullptr) fails with a non-ok status.

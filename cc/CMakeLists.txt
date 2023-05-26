@@ -798,6 +798,7 @@ tink_cc_test(
     tink::aead::aes_gcm_key_manager
     tink::config::fips_140_2
     tink::config::tink_config
+    tink::internal::configuration_impl
     tink::internal::fips_utils
     tink::internal::legacy_proto_parameters
     tink::internal::proto_parameters_serialization
@@ -1056,5 +1057,6 @@ tink_cc_library(
   SRCS
     configuration.h
   DEPS
-    tink::internal::registry_impl
+    tink::internal::key_type_info_store
+    tink::internal::keyset_wrapper_store
 )

@@ -1026,7 +1026,8 @@ tink_cc_library(
   SRCS
     configuration_impl.h
   DEPS
-    tink::internal::registry_impl
+    tink::internal::key_type_info_store
+    tink::internal::keyset_wrapper_store
     tink::core::configuration
 )
 
@@ -1036,9 +1037,9 @@ tink_cc_test(
     configuration_impl_test.cc
   DEPS
     tink::internal::configuration_impl
-    tink::internal::registry_impl
     gmock
     tink::core::configuration
+    tink::subtle::random
     tink::util::test_matchers
     tink::util::test_util
     tink::proto::aes_gcm_cc_proto

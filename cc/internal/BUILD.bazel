@@ -1075,7 +1075,8 @@ cc_library(
     hdrs = ["configuration_impl.h"],
     include_prefix = "tink/internal",
     deps = [
-        ":registry_impl",
+        ":key_type_info_store",
+        ":keyset_wrapper_store",
         "//:configuration",
     ],
 )
@@ -1085,10 +1086,10 @@ cc_test(
     srcs = ["configuration_impl_test.cc"],
     deps = [
         ":configuration_impl",
-        ":registry_impl",
         "//:configuration",
         "//proto:aes_gcm_cc_proto",
         "//proto:rsa_ssa_pss_cc_proto",
+        "//subtle:random",
         "//util:test_matchers",
         "//util:test_util",
         "@com_google_googletest//:gtest_main",
