@@ -7,45 +7,25 @@ local_repository(
     path = "../../go",
 )
 
-# Release from 2022-03-21
+# Release from 2023-04-20
 http_archive(
     name = "io_bazel_rules_go",
-    sha256 = "f2dcd210c7095febe54b804bb1cd3a58fe8435a909db2ec04e31542631cf715c",
+    sha256 = "6dc2da7ab4cf5d7bfc7c949776b1b7c733f05e56edc4bcd9022bb249d2e2a996",
     urls = [
-        "https://mirror.bazel.build/github.com/bazelbuild/rules_go/releases/download/v0.31.0/rules_go-v0.31.0.zip",
-        "https://github.com/bazelbuild/rules_go/releases/download/v0.31.0/rules_go-v0.31.0.zip",
+        "https://mirror.bazel.build/github.com/bazelbuild/rules_go/releases/download/v0.39.1/rules_go-v0.39.1.zip",
+        "https://github.com/bazelbuild/rules_go/releases/download/v0.39.1/rules_go-v0.39.1.zip",
     ],
 )
 
-# Release from 2021-10-11
+# Release from 2023-01-14
 http_archive(
     name = "bazel_gazelle",
-    sha256 = "de69a09dc70417580aabf20a28619bb3ef60d038470c7cf8442fafcf627c21cb",
+    sha256 = "ecba0f04f96b4960a5b250c8e8eeec42281035970aa8852dda73098274d14a1d",
     urls = [
-        "https://mirror.bazel.build/github.com/bazelbuild/bazel-gazelle/releases/download/v0.24.0/bazel-gazelle-v0.24.0.tar.gz",
-        "https://github.com/bazelbuild/bazel-gazelle/releases/download/v0.24.0/bazel-gazelle-v0.24.0.tar.gz",
+        "https://mirror.bazel.build/github.com/bazelbuild/bazel-gazelle/releases/download/v0.29.0/bazel-gazelle-v0.29.0.tar.gz",
+        "https://github.com/bazelbuild/bazel-gazelle/releases/download/v0.29.0/bazel-gazelle-v0.29.0.tar.gz",
     ],
 )
-
-load("@io_bazel_rules_go//go:deps.bzl", "go_register_toolchains", "go_rules_dependencies")
-load("@bazel_gazelle//:deps.bzl", "gazelle_dependencies", "go_repository")
-load("@tink_go//:deps.bzl", "go_dependencies")
-
-go_dependencies()
-
-# TODO(b/213404399): Remove after Gazelle issue is fixed.
-go_repository(
-    name = "com_google_cloud_go_compute",
-    importpath = "cloud.google.com/go/compute",
-    sum = "h1:rSUBvAyVwNJ5uQCKNJFMwPtTvJkfN38b6Pvb9zZoqJ8=",
-    version = "v0.1.0",
-)
-
-go_rules_dependencies()
-
-go_register_toolchains(version = "1.17.6")
-
-gazelle_dependencies()
 
 # Release from 2021-09-15
 http_archive(
@@ -58,12 +38,6 @@ http_archive(
     ],
 )
 
-load("@rules_proto//proto:repositories.bzl", "rules_proto_dependencies", "rules_proto_toolchains")
-
-rules_proto_dependencies()
-
-rules_proto_toolchains()
-
 # Release from 2021-12-12
 http_archive(
     name = "rules_proto_grpc",
@@ -72,12 +46,32 @@ http_archive(
     urls = ["https://github.com/rules-proto-grpc/rules_proto_grpc/archive/4.1.0.tar.gz"],
 )
 
+load("@io_bazel_rules_go//go:deps.bzl", "go_register_toolchains", "go_rules_dependencies")
+
+load("@bazel_gazelle//:deps.bzl", "gazelle_dependencies")
+
+load("@tink_go//:deps.bzl", tink_go_dependencies="go_dependencies")
+
+load("@rules_proto//proto:repositories.bzl", "rules_proto_dependencies", "rules_proto_toolchains")
+
 load("@rules_proto_grpc//:repositories.bzl", "rules_proto_grpc_repos", "rules_proto_grpc_toolchains")
+
+load("@rules_proto_grpc//go:repositories.bzl", rules_proto_grpc_go_repos = "go_repos")
+
+tink_go_dependencies()
+
+go_rules_dependencies()
+
+go_register_toolchains(version = "1.19.9")
+
+rules_proto_dependencies()
+
+rules_proto_toolchains()
 
 rules_proto_grpc_toolchains()
 
 rules_proto_grpc_repos()
 
-load("@rules_proto_grpc//go:repositories.bzl", rules_proto_grpc_go_repos = "go_repos")
-
 rules_proto_grpc_go_repos()
+
+gazelle_dependencies()
