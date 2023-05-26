@@ -17,26 +17,24 @@
 package com.google.crypto.tink.tinkey;
 
 import static com.google.common.truth.Truth.assertThat;
+import static java.nio.charset.StandardCharsets.UTF_8;
+import static org.junit.Assert.assertTrue;
 
-import com.google.crypto.tink.CleartextKeysetHandle;
-import com.google.crypto.tink.HybridDecrypt;
-import com.google.crypto.tink.HybridEncrypt;
-import com.google.crypto.tink.KeyTemplate;
-import com.google.crypto.tink.KeyTemplates;
+import com.google.crypto.tink.Aead;
+import com.google.crypto.tink.InsecureSecretKeyAccess;
+import com.google.crypto.tink.Key;
 import com.google.crypto.tink.KeysetHandle;
-import com.google.crypto.tink.KeysetReader;
-import com.google.crypto.tink.PublicKeySign;
-import com.google.crypto.tink.PublicKeyVerify;
+import com.google.crypto.tink.KmsClients;
+import com.google.crypto.tink.PrivateKey;
+import com.google.crypto.tink.TinkJsonProtoKeysetFormat;
+import com.google.crypto.tink.TinkProtoKeysetFormat;
 import com.google.crypto.tink.hybrid.HybridConfig;
-import com.google.crypto.tink.proto.EncryptedKeyset;
-import com.google.crypto.tink.proto.Keyset;
+import com.google.crypto.tink.signature.Ed25519Parameters;
 import com.google.crypto.tink.signature.SignatureConfig;
-import com.google.crypto.tink.subtle.Random;
 import com.google.crypto.tink.testing.TestUtil;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -62,127 +60,144 @@ public class CreatePublicKeysetCommandTest {
   }
 
   @Test
-  public void testCreate_hybrid_cleartextPrivate_shouldCreateCleartextPublic()
-      throws Exception {
-    testCreate_cleartextPrivate_shouldCreateCleartextPublic(
-        KeyTemplates.get("ECIES_P256_HKDF_HMAC_SHA256_AES128_GCM"), KeyType.HYBRID);
+  public void testCreatePublicKeyset_ed25519Json_works() throws Exception {
+    Path path = Files.createTempDirectory(/* prefix= */ "");
+    Path privateKeyFile = Paths.get(path.toString(), "privateKeyFile");
+    Path publicKeyFile = Paths.get(path.toString(), "publicKeyFile");
+
+    KeysetHandle privateKeyset =
+        KeysetHandle.generateNew(Ed25519Parameters.create(Ed25519Parameters.Variant.TINK));
+    String serializedKeyset =
+        TinkJsonProtoKeysetFormat.serializeKeyset(privateKeyset, InsecureSecretKeyAccess.get());
+    Files.write(privateKeyFile, serializedKeyset.getBytes(UTF_8));
+
+    Tinkey.main(
+        new String[] {
+          "create-public-keyset",
+          "--in",
+          privateKeyFile.toString(),
+          "--out",
+          publicKeyFile.toString()
+        });
+
+    KeysetHandle publicKeyset =
+        TinkJsonProtoKeysetFormat.parseKeysetWithoutSecret(
+            new String(Files.readAllBytes(publicKeyFile), UTF_8));
+    assertThat(publicKeyset.size()).isEqualTo(1);
+    Key expectedPublicKey = ((PrivateKey) privateKeyset.getPrimary().getKey()).getPublicKey();
+    assertTrue(publicKeyset.getPrimary().getKey().equalsKey(expectedPublicKey));
   }
 
   @Test
-  public void testCreate_hybrid_encryptedPrivate_shouldCreateCleartextPublic() throws Exception {
-    testCreate_encryptedPrivate_shouldCreateCleartextPublic(
-        KeyTemplates.get("ECIES_P256_HKDF_HMAC_SHA256_AES128_GCM"), KeyType.HYBRID);
+  public void testCreatePublicKeyset_ed25519Binary_works() throws Exception {
+    Path path = Files.createTempDirectory(/* prefix= */ "");
+    Path privateKeyFile = Paths.get(path.toString(), "privateKeyFile");
+    Path publicKeyFile = Paths.get(path.toString(), "publicKeyFile");
+
+    KeysetHandle privateKeyset =
+        KeysetHandle.generateNew(Ed25519Parameters.create(Ed25519Parameters.Variant.TINK));
+    byte[] serializedKeyset =
+        TinkProtoKeysetFormat.serializeKeyset(privateKeyset, InsecureSecretKeyAccess.get());
+    Files.write(privateKeyFile, serializedKeyset);
+
+    Tinkey.main(
+        new String[] {
+          "create-public-keyset",
+          "--in",
+          privateKeyFile.toString(),
+          "--in-format",
+          "binary",
+          "--out",
+          publicKeyFile.toString(),
+          "--out-format",
+          "binary"
+        });
+
+    KeysetHandle publicKeyset =
+        TinkProtoKeysetFormat.parseKeysetWithoutSecret(Files.readAllBytes(publicKeyFile));
+    assertThat(publicKeyset.size()).isEqualTo(1);
+    Key expectedPublicKey = ((PrivateKey) privateKeyset.getPrimary().getKey()).getPublicKey();
+    assertTrue(publicKeyset.getPrimary().getKey().equalsKey(expectedPublicKey));
   }
 
   @Test
-  public void testCreate_signature_cleartextPrivate_shouldCreateCleartextPublic()
-      throws Exception {
-    testCreate_cleartextPrivate_shouldCreateCleartextPublic(
-        KeyTemplates.get("ECDSA_P256"), KeyType.SIGNATURE);
-    testCreate_cleartextPrivate_shouldCreateCleartextPublic(
-        KeyTemplates.get("ED25519"), KeyType.SIGNATURE);
+  public void testCreatePublicKeyset_ed25519_encrypted_json_works() throws Exception {
+    Path path = Files.createTempDirectory(/* prefix= */ "");
+    Path privateKeyFile = Paths.get(path.toString(), "privateKeyFile");
+    Path publicKeyFile = Paths.get(path.toString(), "publicKeyFile");
+
+    KeysetHandle privateKeyset =
+        KeysetHandle.generateNew(Ed25519Parameters.create(Ed25519Parameters.Variant.TINK));
+
+    Aead masterKeyAead =
+        KmsClients.getAutoLoaded(TestUtil.GCP_KMS_TEST_KEY_URI)
+            .withCredentials(TestUtil.SERVICE_ACCOUNT_FILE)
+            .getAead(TestUtil.GCP_KMS_TEST_KEY_URI);
+    String serializedKeyset =
+        TinkJsonProtoKeysetFormat.serializeEncryptedKeyset(
+            privateKeyset, masterKeyAead, new byte[] {});
+
+    Files.write(privateKeyFile, serializedKeyset.getBytes(UTF_8));
+
+    Tinkey.main(
+        new String[] {
+          "create-public-keyset",
+          "--in",
+          privateKeyFile.toString(),
+          "--out",
+          publicKeyFile.toString(),
+          "--master-key-uri",
+          TestUtil.GCP_KMS_TEST_KEY_URI,
+          "--credential",
+          TestUtil.SERVICE_ACCOUNT_FILE
+        });
+
+    KeysetHandle publicKeyset =
+        TinkJsonProtoKeysetFormat.parseKeysetWithoutSecret(
+            new String(Files.readAllBytes(publicKeyFile), UTF_8));
+    assertThat(publicKeyset.size()).isEqualTo(1);
+    Key expectedPublicKey = ((PrivateKey) privateKeyset.getPrimary().getKey()).getPublicKey();
+    assertTrue(publicKeyset.getPrimary().getKey().equalsKey(expectedPublicKey));
   }
 
   @Test
-  public void testCreate_signature_encryptedPrivate_shouldCreateCleartextPublic() throws Exception {
-    testCreate_encryptedPrivate_shouldCreateCleartextPublic(
-        KeyTemplates.get("ECDSA_P256"), KeyType.SIGNATURE);
-    testCreate_encryptedPrivate_shouldCreateCleartextPublic(
-        KeyTemplates.get("ED25519"), KeyType.SIGNATURE);
-  }
+  public void testCreatePublicKeyset_ed25519_encrypted_jsonBinaryMixed_works() throws Exception {
+    Path path = Files.createTempDirectory(/* prefix= */ "");
+    Path privateKeyFile = Paths.get(path.toString(), "privateKeyFile");
+    Path publicKeyFile = Paths.get(path.toString(), "publicKeyFile");
 
-  private void testCreate_cleartextPrivate_shouldCreateCleartextPublic(
-      KeyTemplate template, KeyType type) throws Exception {
-    // Create a cleartext private keyset.
-    String masterKeyUri = null;
-    String credentialPath = null;
-    InputStream inputStream1 = TinkeyUtil.createKeyset(
-        template, INPUT_FORMAT, masterKeyUri, credentialPath);
-    KeysetReader privateReader = TinkeyUtil
-        .createKeysetReader(inputStream1, INPUT_FORMAT);
-    // Create the public keyset.
-    ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-    inputStream1.mark(inputStream1.available());
-    CreatePublicKeysetCommand.create(
-        outputStream, OUTPUT_FORMAT,
-        inputStream1, INPUT_FORMAT,
-        masterKeyUri, credentialPath);
-    inputStream1.reset();
-    InputStream inputStream2 = new ByteArrayInputStream(outputStream.toByteArray());
-    KeysetReader publicReader = TinkeyUtil
-        .createKeysetReader(inputStream2, OUTPUT_FORMAT);
+    KeysetHandle privateKeyset =
+        KeysetHandle.generateNew(Ed25519Parameters.create(Ed25519Parameters.Variant.TINK));
 
-    assertPublicKey(type, privateReader, publicReader);
-  }
+    Aead masterKeyAead =
+        KmsClients.getAutoLoaded(TestUtil.GCP_KMS_TEST_KEY_URI)
+            .withCredentials(TestUtil.SERVICE_ACCOUNT_FILE)
+            .getAead(TestUtil.GCP_KMS_TEST_KEY_URI);
+    byte[] serializedKeyset =
+        TinkProtoKeysetFormat.serializeEncryptedKeyset(privateKeyset, masterKeyAead, new byte[] {});
 
-  private void testCreate_encryptedPrivate_shouldCreateCleartextPublic(
-      KeyTemplate template, KeyType type) throws Exception {
-    // Create an input stream containing a cleartext private keyset.
-    String masterKeyUri = TestUtil.GCP_KMS_TEST_KEY_URI;
-    String credentialPath = TestUtil.SERVICE_ACCOUNT_FILE;
-    InputStream inputStream1 = TinkeyUtil.createKeyset(
-        template, INPUT_FORMAT, masterKeyUri, credentialPath);
-    inputStream1.mark(inputStream1.available());
-    final KeysetHandle privateHandle = TinkeyUtil.getKeysetHandle(
-        inputStream1, INPUT_FORMAT, masterKeyUri, credentialPath);
-    inputStream1.reset();
-    KeysetReader privateReader = new KeysetReader() {
-        @Override
-        public Keyset read() throws IOException {
-            return TestUtil.getKeyset(privateHandle);
-        }
-        @Override
-        public EncryptedKeyset readEncrypted() throws IOException {
-            throw new IOException("Not Implemented");
-        }
-    };
-    ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-    inputStream1.mark(inputStream1.available());
-    CreatePublicKeysetCommand.create(
-        outputStream, OUTPUT_FORMAT,
-        inputStream1, INPUT_FORMAT,
-        masterKeyUri, credentialPath);
-    inputStream1.reset();
-    InputStream inputStream2 = new ByteArrayInputStream(outputStream.toByteArray());
-    KeysetReader publicReader = TinkeyUtil
-        .createKeysetReader(inputStream2, OUTPUT_FORMAT);
+    Files.write(privateKeyFile, serializedKeyset);
 
-    assertPublicKey(type, privateReader, publicReader);
-  }
+    Tinkey.main(
+        new String[] {
+          "create-public-keyset",
+          "--in",
+          privateKeyFile.toString(),
+          "--in-format",
+          "binary",
+          "--out",
+          publicKeyFile.toString(),
+          "--master-key-uri",
+          TestUtil.GCP_KMS_TEST_KEY_URI,
+          "--credential",
+          TestUtil.SERVICE_ACCOUNT_FILE
+        });
 
-  private void assertHybrid(KeysetReader privateReader, KeysetReader publicReader)
-    throws Exception {
-    KeysetHandle privateHandle = CleartextKeysetHandle.read(privateReader);
-    HybridDecrypt decrypter = privateHandle.getPrimitive(HybridDecrypt.class);
-    KeysetHandle publicHandle = CleartextKeysetHandle.read(publicReader);
-    HybridEncrypt encrypter = publicHandle.getPrimitive(HybridEncrypt.class);
-    byte[] message = Random.randBytes(10);
-    byte[] contextInfo = Random.randBytes(20);
-
-    assertThat(decrypter.decrypt(encrypter.encrypt(message, contextInfo), contextInfo)).isEqualTo(
-        message);
-  }
-
-  private void assertSignature(KeysetReader privateReader, KeysetReader publicReader)
-    throws Exception {
-    byte[] message = Random.randBytes(10);
-    KeysetHandle privateHandle = CleartextKeysetHandle.read(privateReader);
-    PublicKeySign signer = privateHandle.getPrimitive(PublicKeySign.class);
-    KeysetHandle publicHandle = CleartextKeysetHandle.read(publicReader);
-    PublicKeyVerify verifier = publicHandle.getPrimitive(PublicKeyVerify.class);
-
-    verifier.verify(signer.sign(message), message);
-  }
-
-  private void assertPublicKey(KeyType type, KeysetReader privateReader,
-      KeysetReader publicReader) throws Exception {
-    switch (type) {
-        case HYBRID:
-            assertHybrid(privateReader, publicReader);
-            break;
-        case SIGNATURE:
-            assertSignature(privateReader, publicReader);
-            break;
-    }
+    KeysetHandle publicKeyset =
+        TinkJsonProtoKeysetFormat.parseKeysetWithoutSecret(
+            new String(Files.readAllBytes(publicKeyFile), UTF_8));
+    assertThat(publicKeyset.size()).isEqualTo(1);
+    Key expectedPublicKey = ((PrivateKey) privateKeyset.getPrimary().getKey()).getPublicKey();
+    assertTrue(publicKeyset.getPrimary().getKey().equalsKey(expectedPublicKey));
   }
 }
