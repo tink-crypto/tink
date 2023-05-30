@@ -33,6 +33,7 @@ import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
 import com.google.crypto.tink.proto.KeyTemplate;
 import com.google.crypto.tink.proto.OutputPrefixType;
 import com.google.crypto.tink.util.Bytes;
+import com.google.crypto.tink.util.SecretBigInteger;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.ExtensionRegistryLite;
 import com.google.protobuf.InvalidProtocolBufferException;
@@ -80,6 +81,17 @@ final class JwtEcdsaProtoSerialization {
           JwtEcdsaProtoSerialization::parsePublicKey,
           PUBLIC_TYPE_URL_BYTES,
           ProtoKeySerialization.class);
+
+  private static final KeySerializer<JwtEcdsaPrivateKey, ProtoKeySerialization>
+      PRIVATE_KEY_SERIALIZER =
+          KeySerializer.create(
+              JwtEcdsaProtoSerialization::serializePrivateKey,
+              JwtEcdsaPrivateKey.class,
+              ProtoKeySerialization.class);
+
+  private static final KeyParser<ProtoKeySerialization> PRIVATE_KEY_PARSER =
+      KeyParser.create(
+          JwtEcdsaProtoSerialization::parsePrivateKey, TYPE_URL_BYTES, ProtoKeySerialization.class);
 
   private static JwtEcdsaAlgorithm toProtoAlgorithm(JwtEcdsaParameters.Algorithm algorithm)
       throws GeneralSecurityException {
@@ -291,6 +303,59 @@ final class JwtEcdsaProtoSerialization {
     }
   }
 
+  private static com.google.crypto.tink.proto.JwtEcdsaPrivateKey serializePrivateKeyToProto(
+      JwtEcdsaPrivateKey key, SecretKeyAccess access) throws GeneralSecurityException {
+    int encLength = getEncodingLength(key.getParameters().getAlgorithm());
+    return com.google.crypto.tink.proto.JwtEcdsaPrivateKey.newBuilder()
+        .setPublicKey(serializePublicKey(key.getPublicKey()))
+        .setKeyValue(
+            ByteString.copyFrom(
+                BigIntegerEncoding.toBigEndianBytesOfFixedLength(
+                    key.getPrivateValue().getBigInteger(access), encLength)))
+        .build();
+  }
+
+  private static ProtoKeySerialization serializePrivateKey(
+      JwtEcdsaPrivateKey key, @Nullable SecretKeyAccess access) throws GeneralSecurityException {
+    return ProtoKeySerialization.create(
+        TYPE_URL,
+        serializePrivateKeyToProto(key, SecretKeyAccess.requireAccess(access)).toByteString(),
+        KeyMaterialType.ASYMMETRIC_PRIVATE,
+        toProtoOutputPrefixType(key.getParameters()),
+        key.getIdRequirementOrNull());
+  }
+
+  @SuppressWarnings("UnusedException")
+  private static JwtEcdsaPrivateKey parsePrivateKey(
+      ProtoKeySerialization serialization, @Nullable SecretKeyAccess access)
+      throws GeneralSecurityException {
+    if (!serialization.getTypeUrl().equals(TYPE_URL)) {
+      throw new IllegalArgumentException(
+          "Wrong type URL in call to EcdsaProtoSerialization.parsePublicKey: "
+              + serialization.getTypeUrl());
+    }
+    try {
+      com.google.crypto.tink.proto.JwtEcdsaPrivateKey protoKey =
+          com.google.crypto.tink.proto.JwtEcdsaPrivateKey.parseFrom(
+              serialization.getValue(), ExtensionRegistryLite.getEmptyRegistry());
+      if (protoKey.getVersion() != 0) {
+        throw new GeneralSecurityException("Only version 0 keys are accepted");
+      }
+      JwtEcdsaPublicKey publicKey =
+          parsePublicKeyFromProto(
+              protoKey.getPublicKey(),
+              serialization.getOutputPrefixType(),
+              serialization.getIdRequirementOrNull());
+      return JwtEcdsaPrivateKey.create(
+          publicKey,
+          SecretBigInteger.fromBigInteger(
+              BigIntegerEncoding.fromUnsignedBigEndianBytes(protoKey.getKeyValue().toByteArray()),
+              SecretKeyAccess.requireAccess(access)));
+    } catch (InvalidProtocolBufferException e) {
+      throw new GeneralSecurityException("Parsing EcdsaPrivateKey failed");
+    }
+  }
+
   public static void register() throws GeneralSecurityException {
     register(MutableSerializationRegistry.globalInstance());
   }
@@ -301,6 +366,8 @@ final class JwtEcdsaProtoSerialization {
     registry.registerParametersParser(PARAMETERS_PARSER);
     registry.registerKeySerializer(PUBLIC_KEY_SERIALIZER);
     registry.registerKeyParser(PUBLIC_KEY_PARSER);
+    registry.registerKeySerializer(PRIVATE_KEY_SERIALIZER);
+    registry.registerKeyParser(PRIVATE_KEY_PARSER);
   }
 
   private JwtEcdsaProtoSerialization() {}

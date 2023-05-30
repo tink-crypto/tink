@@ -23,6 +23,7 @@ import static org.junit.Assert.assertThrows;
 import com.google.crypto.tink.InsecureSecretKeyAccess;
 import com.google.crypto.tink.Key;
 import com.google.crypto.tink.Parameters;
+import com.google.crypto.tink.internal.BigIntegerEncoding;
 import com.google.crypto.tink.internal.MutableSerializationRegistry;
 import com.google.crypto.tink.internal.ProtoKeySerialization;
 import com.google.crypto.tink.internal.ProtoParametersSerialization;
@@ -31,6 +32,7 @@ import com.google.crypto.tink.proto.JwtEcdsaPublicKey.CustomKid;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
 import com.google.crypto.tink.proto.OutputPrefixType;
 import com.google.crypto.tink.subtle.Hex;
+import com.google.crypto.tink.util.SecretBigInteger;
 import com.google.protobuf.ByteString;
 import java.math.BigInteger;
 import java.security.GeneralSecurityException;
@@ -521,5 +523,150 @@ public final class JwtEcdsaProtoSerializationTest {
     assertThrows(
         GeneralSecurityException.class,
         () -> registry.parseKey(serialization, InsecureSecretKeyAccess.get()));
+  }
+  // PRIVATE KEY PARSING ======================================================= PRIVATE KEY PARSING
+  @Test
+  public void serializeParsePrivateKey_es256_kidIgnored_equal() throws Exception {
+    // a valid P256 point. Each coordinate is encoded in 32 bytes.
+    String hexX = "60FED4BA255A9D31C961EB74C6356D68C049B8923B61FA6CE669622E60F29FB6";
+    String hexY = "7903FE1008B8BC99A41AE9E95628BC64F2F1B20C2D7E9F5177A3C294D4462299";
+    String hexPrivateValue = "C9AFA9D845BA75166B5C215767B1D6934E50C3DB36E89B127B8A622B120F6721";
+    SecretBigInteger privateValue =
+        SecretBigInteger.fromBigInteger(
+            BigIntegerEncoding.fromUnsignedBigEndianBytes(Hex.decode(hexPrivateValue)),
+            InsecureSecretKeyAccess.get());
+
+    JwtEcdsaPublicKey publicKey =
+        JwtEcdsaPublicKey.builder()
+            .setParameters(
+                JwtEcdsaParameters.builder()
+                    .setAlgorithm(JwtEcdsaParameters.Algorithm.ES256)
+                    .setKidStrategy(JwtEcdsaParameters.KidStrategy.IGNORED)
+                    .build())
+            .setPublicPoint(new ECPoint(new BigInteger(hexX, 16), new BigInteger(hexY, 16)))
+            .build();
+    JwtEcdsaPrivateKey privateKey = JwtEcdsaPrivateKey.create(publicKey, privateValue);
+
+    com.google.crypto.tink.proto.JwtEcdsaPrivateKey protoPrivateKey =
+        com.google.crypto.tink.proto.JwtEcdsaPrivateKey.newBuilder()
+            .setVersion(0)
+            .setPublicKey(
+                com.google.crypto.tink.proto.JwtEcdsaPublicKey.newBuilder()
+                    .setVersion(0)
+                    // X and Y are currently serialized with an extra zero at the beginning.
+                    .setX(ByteString.copyFrom(Hex.decode("00" + hexX)))
+                    .setY(ByteString.copyFrom(Hex.decode("00" + hexY)))
+                    .setAlgorithm(JwtEcdsaAlgorithm.ES256))
+            .setKeyValue(ByteString.copyFrom(Hex.decode("00" + hexPrivateValue)))
+            .build();
+
+    ProtoKeySerialization serialization =
+        ProtoKeySerialization.create(
+            "type.googleapis.com/google.crypto.tink.JwtEcdsaPrivateKey",
+            protoPrivateKey.toByteString(),
+            KeyMaterialType.ASYMMETRIC_PRIVATE,
+            OutputPrefixType.RAW,
+            /* idRequirement= */ null);
+
+    Key parsed = registry.parseKey(serialization, InsecureSecretKeyAccess.get());
+    assertThat(parsed.equalsKey(privateKey)).isTrue();
+
+    ProtoKeySerialization serialized =
+        registry.serializeKey(
+            privateKey, ProtoKeySerialization.class, InsecureSecretKeyAccess.get());
+    assertEqualWhenValueParsed(
+        com.google.crypto.tink.proto.JwtEcdsaPrivateKey.parser(), serialized, serialization);
+  }
+
+  @Test
+  public void parsePrivateKey_invalidVersion() throws Exception {
+    // a valid P256 point. Each coordinate is encoded in 32 bytes.
+    String hexX = "60FED4BA255A9D31C961EB74C6356D68C049B8923B61FA6CE669622E60F29FB6";
+    String hexY = "7903FE1008B8BC99A41AE9E95628BC64F2F1B20C2D7E9F5177A3C294D4462299";
+    String hexPrivateValue = "C9AFA9D845BA75166B5C215767B1D6934E50C3DB36E89B127B8A622B120F6721";
+
+    com.google.crypto.tink.proto.JwtEcdsaPrivateKey protoPrivateKey =
+        com.google.crypto.tink.proto.JwtEcdsaPrivateKey.newBuilder()
+            .setVersion(0)
+            .setPublicKey(
+                com.google.crypto.tink.proto.JwtEcdsaPublicKey.newBuilder()
+                    .setVersion(1)
+                    // X and Y are currently serialized with an extra zero at the beginning.
+                    .setX(ByteString.copyFrom(Hex.decode("00" + hexX)))
+                    .setY(ByteString.copyFrom(Hex.decode("00" + hexY)))
+                    .setAlgorithm(JwtEcdsaAlgorithm.ES256))
+            .setKeyValue(ByteString.copyFrom(Hex.decode("00" + hexPrivateValue)))
+            .build();
+
+    ProtoKeySerialization serialization =
+        ProtoKeySerialization.create(
+            "type.googleapis.com/google.crypto.tink.JwtEcdsaPrivateKey",
+            protoPrivateKey.toByteString(),
+            KeyMaterialType.ASYMMETRIC_PRIVATE,
+            OutputPrefixType.RAW,
+            /* idRequirement= */ null);
+
+    assertThrows(
+        GeneralSecurityException.class,
+        () -> registry.parseKey(serialization, InsecureSecretKeyAccess.get()));
+  }
+
+  @Test
+  public void serialize_noSecretKeyAccess_throws() throws Exception {
+    // a valid P256 point. Each coordinate is encoded in 32 bytes.
+    String hexX = "60FED4BA255A9D31C961EB74C6356D68C049B8923B61FA6CE669622E60F29FB6";
+    String hexY = "7903FE1008B8BC99A41AE9E95628BC64F2F1B20C2D7E9F5177A3C294D4462299";
+    String hexPrivateValue = "C9AFA9D845BA75166B5C215767B1D6934E50C3DB36E89B127B8A622B120F6721";
+    SecretBigInteger privateValue =
+        SecretBigInteger.fromBigInteger(
+            BigIntegerEncoding.fromUnsignedBigEndianBytes(Hex.decode(hexPrivateValue)),
+            InsecureSecretKeyAccess.get());
+
+    JwtEcdsaPublicKey publicKey =
+        JwtEcdsaPublicKey.builder()
+            .setParameters(
+                JwtEcdsaParameters.builder()
+                    .setAlgorithm(JwtEcdsaParameters.Algorithm.ES256)
+                    .setKidStrategy(JwtEcdsaParameters.KidStrategy.IGNORED)
+                    .build())
+            .setPublicPoint(new ECPoint(new BigInteger(hexX, 16), new BigInteger(hexY, 16)))
+            .build();
+    JwtEcdsaPrivateKey privateKey = JwtEcdsaPrivateKey.create(publicKey, privateValue);
+
+    assertThrows(
+        GeneralSecurityException.class,
+        () -> registry.serializeKey(privateKey, ProtoKeySerialization.class, /* access= */ null));
+  }
+
+  @Test
+  public void parse_noSecretKeyAccess_throws() throws Exception {
+    // a valid P256 point. Each coordinate is encoded in 32 bytes.
+    String hexX = "60FED4BA255A9D31C961EB74C6356D68C049B8923B61FA6CE669622E60F29FB6";
+    String hexY = "7903FE1008B8BC99A41AE9E95628BC64F2F1B20C2D7E9F5177A3C294D4462299";
+    String hexPrivateValue = "C9AFA9D845BA75166B5C215767B1D6934E50C3DB36E89B127B8A622B120F6721";
+
+    com.google.crypto.tink.proto.JwtEcdsaPrivateKey protoPrivateKey =
+        com.google.crypto.tink.proto.JwtEcdsaPrivateKey.newBuilder()
+            .setVersion(0)
+            .setPublicKey(
+                com.google.crypto.tink.proto.JwtEcdsaPublicKey.newBuilder()
+                    .setVersion(0)
+                    // X and Y are currently serialized with an extra zero at the beginning.
+                    .setX(ByteString.copyFrom(Hex.decode("00" + hexX)))
+                    .setY(ByteString.copyFrom(Hex.decode("00" + hexY)))
+                    .setAlgorithm(JwtEcdsaAlgorithm.ES256))
+            .setKeyValue(ByteString.copyFrom(Hex.decode("00" + hexPrivateValue)))
+            .build();
+
+    ProtoKeySerialization serialization =
+        ProtoKeySerialization.create(
+            "type.googleapis.com/google.crypto.tink.JwtEcdsaPrivateKey",
+            protoPrivateKey.toByteString(),
+            KeyMaterialType.ASYMMETRIC_PRIVATE,
+            OutputPrefixType.RAW,
+            /* idRequirement= */ null);
+
+    assertThrows(
+        GeneralSecurityException.class, () -> registry.parseKey(serialization, /* access= */ null));
   }
 }
