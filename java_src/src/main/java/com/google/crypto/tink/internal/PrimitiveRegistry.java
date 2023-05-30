@@ -106,7 +106,7 @@ public class PrimitiveRegistry {
       return this;
     }
 
-    PrimitiveRegistry build() {
+    public PrimitiveRegistry build() {
       return new PrimitiveRegistry(this);
     }
   }
