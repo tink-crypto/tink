@@ -262,12 +262,6 @@ class KmsAeadTest(parameterized.TestCase):
     self.assertEqual(
         primitive_2.decrypt(ciphertext_2, associated_data), plaintext)
 
-    if lang == 'java':
-      # TODO(b/242678738) Java currently does not reject this.
-      self.assertEqual(
-          primitive.decrypt(ciphertext_2, associated_data), plaintext)
-      return
-
     # Cannot be decrypted by the other primitive.
     with self.assertRaises(tink.TinkError):
       primitive.decrypt(ciphertext_2, associated_data)
