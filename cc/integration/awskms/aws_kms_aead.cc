@@ -72,7 +72,7 @@ util::StatusOr<std::string> AwsKmsAead::Encrypt(
   req.SetPlaintext(plaintext_buffer);
   if (!associated_data.empty()) {
     req.AddEncryptionContext("associatedData",
-                             absl::HexStringToBytes(associated_data).c_str());
+                             absl::BytesToHexString(associated_data).c_str());
   }
   auto outcome = aws_client_->Encrypt(req);
   if (!outcome.IsSuccess()) {
@@ -98,7 +98,7 @@ util::StatusOr<std::string> AwsKmsAead::Decrypt(
   req.SetCiphertextBlob(ciphertext_buffer);
   if (!associated_data.empty()) {
     req.AddEncryptionContext("associatedData",
-                             absl::HexStringToBytes(associated_data).c_str());
+                             absl::BytesToHexString(associated_data).c_str());
   }
   auto outcome = aws_client_->Decrypt(req);
   if (!outcome.IsSuccess()) {
