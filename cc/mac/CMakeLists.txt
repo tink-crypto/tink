@@ -286,6 +286,7 @@ tink_cc_test(
     absl::status
     crypto
     tink::core::chunked_mac
+    tink::core::insecure_secret_key_access
     tink::core::keyset_handle
     tink::core::mac
     tink::core::partial_key_access

@@ -210,7 +210,7 @@ TEST_P(AesCmacProtoSerializationTest, ParseKey) {
 
   util::StatusOr<std::unique_ptr<Key>> key =
       internal::MutableSerializationRegistry::GlobalInstance().ParseKey(
-          *serialization);
+          *serialization, InsecureSecretKeyAccess::Get());
   ASSERT_THAT(key, IsOk());
   EXPECT_THAT((*key)->GetIdRequirement(), Eq(test_case.id));
   EXPECT_THAT((*key)->GetParameters().HasIdRequirement(),
@@ -255,7 +255,7 @@ TEST_F(AesCmacProtoSerializationTest, ParseKeyWithInvalidSerialization) {
 
   util::StatusOr<std::unique_ptr<Key>> key =
       internal::MutableSerializationRegistry::GlobalInstance().ParseKey(
-          *serialization);
+          *serialization, InsecureSecretKeyAccess::Get());
   ASSERT_THAT(key.status(), StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
@@ -279,7 +279,7 @@ TEST_F(AesCmacProtoSerializationTest, ParseKeyWithInvalidVersion) {
 
   util::StatusOr<std::unique_ptr<Key>> key =
       internal::MutableSerializationRegistry::GlobalInstance().ParseKey(
-          *serialization);
+          *serialization, InsecureSecretKeyAccess::Get());
   ASSERT_THAT(key.status(), StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
@@ -300,7 +300,8 @@ TEST_P(AesCmacProtoSerializationTest, SerializeKey) {
 
   util::StatusOr<std::unique_ptr<Serialization>> serialization =
       internal::MutableSerializationRegistry::GlobalInstance()
-          .SerializeKey<internal::ProtoKeySerialization>(*key);
+          .SerializeKey<internal::ProtoKeySerialization>(
+              *key, InsecureSecretKeyAccess::Get());
   ASSERT_THAT(serialization, IsOk());
   EXPECT_THAT((*serialization)->ObjectIdentifier(),
               Eq("type.googleapis.com/google.crypto.tink.AesCmacKey"));

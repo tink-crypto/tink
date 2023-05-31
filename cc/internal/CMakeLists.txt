@@ -884,7 +884,7 @@ tink_cc_library(
     absl::flat_hash_map
     absl::status
     absl::str_format
-    tink::core::insecure_secret_key_access
+    absl::optional
     tink::core::key
     tink::core::parameters
     tink::util::status
@@ -905,6 +905,7 @@ tink_cc_test(
     tink::internal::serialization_test_util
     gmock
     absl::status
+    tink::core::insecure_secret_key_access
     tink::core::key
     tink::core::parameters
     tink::core::secret_key_access_token
@@ -931,6 +932,7 @@ tink_cc_library(
     absl::memory
     absl::status
     absl::synchronization
+    absl::optional
     tink::core::insecure_secret_key_access
     tink::core::key
     tink::core::parameters
@@ -954,6 +956,7 @@ tink_cc_test(
     tink::internal::serialization_test_util
     gmock
     absl::status
+    absl::optional
     tink::core::insecure_secret_key_access
     tink::core::key
     tink::core::parameters

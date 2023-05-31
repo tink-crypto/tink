@@ -24,6 +24,7 @@
 #include "gtest/gtest.h"
 #include "absl/status/status.h"
 #include "tink/chunked_mac.h"
+#include "tink/insecure_secret_key_access.h"
 #include "tink/internal/fips_utils.h"
 #include "tink/internal/mutable_serialization_registry.h"
 #include "tink/internal/proto_key_serialization.h"
@@ -196,7 +197,7 @@ TEST_F(MacConfigTest, AesCmacProtoKeySerializationRegistered) {
 
   util::StatusOr<std::unique_ptr<Key>> parsed_key =
       internal::MutableSerializationRegistry::GlobalInstance().ParseKey(
-          *proto_key_serialization);
+          *proto_key_serialization, InsecureSecretKeyAccess::Get());
   ASSERT_THAT(parsed_key.status(), StatusIs(absl::StatusCode::kNotFound));
 
   util::StatusOr<AesCmacParameters> params = AesCmacParameters::Create(
@@ -213,19 +214,21 @@ TEST_F(MacConfigTest, AesCmacProtoKeySerializationRegistered) {
 
   util::StatusOr<std::unique_ptr<Serialization>> serialized_key =
       internal::MutableSerializationRegistry::GlobalInstance()
-          .SerializeKey<internal::ProtoKeySerialization>(*key);
+          .SerializeKey<internal::ProtoKeySerialization>(
+              *key, InsecureSecretKeyAccess::Get());
   ASSERT_THAT(serialized_key.status(), StatusIs(absl::StatusCode::kNotFound));
 
   ASSERT_THAT(MacConfig::Register(), IsOk());
 
   util::StatusOr<std::unique_ptr<Key>> parsed_key2 =
       internal::MutableSerializationRegistry::GlobalInstance().ParseKey(
-          *proto_key_serialization);
+          *proto_key_serialization, InsecureSecretKeyAccess::Get());
   ASSERT_THAT(parsed_key2, IsOk());
 
   util::StatusOr<std::unique_ptr<Serialization>> serialized_key2 =
       internal::MutableSerializationRegistry::GlobalInstance()
-          .SerializeKey<internal::ProtoKeySerialization>(*key);
+          .SerializeKey<internal::ProtoKeySerialization>(
+              *key, InsecureSecretKeyAccess::Get());
   ASSERT_THAT(serialized_key2, IsOk());
 }
 

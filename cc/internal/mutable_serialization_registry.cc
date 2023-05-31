@@ -94,15 +94,16 @@ MutableSerializationRegistry::ParseParameters(
 }
 
 util::StatusOr<std::unique_ptr<Key>> MutableSerializationRegistry::ParseKey(
-    const Serialization& serialization) {
+    const Serialization& serialization,
+    absl::optional<SecretKeyAccessToken> token) {
   absl::MutexLock lock(&registry_mutex_);
-  return registry_.ParseKey(serialization);
+  return registry_.ParseKey(serialization, token);
 }
 
 util::StatusOr<std::unique_ptr<Key>>
 MutableSerializationRegistry::ParseKeyWithLegacyFallback(
-    const Serialization& serialization) {
-  util::StatusOr<std::unique_ptr<Key>> key = ParseKey(serialization);
+    const Serialization& serialization, SecretKeyAccessToken token) {
+  util::StatusOr<std::unique_ptr<Key>> key = ParseKey(serialization, token);
   if (key.status().code() == absl::StatusCode::kNotFound) {
     const ProtoKeySerialization* proto_serialization =
         dynamic_cast<const ProtoKeySerialization*>(&serialization);
@@ -118,4 +119,3 @@ MutableSerializationRegistry::ParseKeyWithLegacyFallback(
 }  // namespace internal
 }  // namespace tink
 }  // namespace crypto
-

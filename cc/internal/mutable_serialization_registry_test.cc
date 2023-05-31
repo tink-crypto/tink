@@ -23,6 +23,7 @@
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "absl/status/status.h"
+#include "absl/types/optional.h"
 #include "tink/insecure_secret_key_access.h"
 #include "tink/internal/key_parser.h"
 #include "tink/internal/key_serializer.h"
@@ -163,17 +164,29 @@ TEST(MutableSerializationRegistryTest, ParseKey) {
   ASSERT_THAT(registry.RegisterKeyParser(&parser2), IsOk());
 
   util::StatusOr<std::unique_ptr<Key>> no_id_key =
-      registry.ParseKey(NoIdSerialization());
+      registry.ParseKey(NoIdSerialization(), InsecureSecretKeyAccess::Get());
   ASSERT_THAT(no_id_key, IsOk());
   EXPECT_THAT(std::type_index(typeid(**no_id_key)),
               std::type_index(typeid(NoIdKey)));
 
-  util::StatusOr<std::unique_ptr<Key>> id_key =
-      registry.ParseKey(IdKeySerialization(/*id=*/123));
+  util::StatusOr<std::unique_ptr<Key>> id_key = registry.ParseKey(
+      IdKeySerialization(/*id=*/123), InsecureSecretKeyAccess::Get());
   ASSERT_THAT(id_key, IsOk());
   EXPECT_THAT(std::type_index(typeid(**id_key)),
               std::type_index(typeid(IdKey)));
   EXPECT_THAT((*id_key)->GetIdRequirement(), Eq(123));
+}
+
+TEST(MutableSerializationRegistryTest, ParseKeyNoSecretAccess) {
+  MutableSerializationRegistry registry;
+  KeyParserImpl<NoIdSerialization, NoIdKey> parser(kNoIdTypeUrl, ParseNoIdKey);
+  ASSERT_THAT(registry.RegisterKeyParser(&parser), IsOk());
+
+  util::StatusOr<std::unique_ptr<Key>> no_id_public_key =
+      registry.ParseKey(NoIdSerialization(), absl::nullopt);
+  ASSERT_THAT(no_id_public_key, IsOk());
+  EXPECT_THAT(std::type_index(typeid(**no_id_public_key)),
+              std::type_index(typeid(NoIdKey)));
 }
 
 TEST(MutableSerializationRegistryTest, ParseKeyWithLegacyFallback) {
@@ -183,7 +196,8 @@ TEST(MutableSerializationRegistryTest, ParseKeyWithLegacyFallback) {
 
   // Parse key with registered key parser.
   util::StatusOr<std::unique_ptr<Key>> id_key =
-      registry.ParseKeyWithLegacyFallback(IdKeySerialization(/*id=*/123));
+      registry.ParseKeyWithLegacyFallback(IdKeySerialization(/*id=*/123),
+                                          InsecureSecretKeyAccess::Get());
   ASSERT_THAT(id_key, IsOk());
   EXPECT_THAT(std::type_index(typeid(**id_key)),
               std::type_index(typeid(IdKey)));
@@ -199,7 +213,8 @@ TEST(MutableSerializationRegistryTest, ParseKeyWithLegacyFallback) {
 
   // Fall back to legacy proto key.
   util::StatusOr<std::unique_ptr<Key>> proto_key =
-      registry.ParseKeyWithLegacyFallback(*serialization);
+      registry.ParseKeyWithLegacyFallback(*serialization,
+                                          InsecureSecretKeyAccess::Get());
   ASSERT_THAT(proto_key, IsOk());
   EXPECT_THAT((*proto_key)->GetIdRequirement(), Eq(456));
 }
@@ -207,8 +222,10 @@ TEST(MutableSerializationRegistryTest, ParseKeyWithLegacyFallback) {
 TEST(MutableSerializationRegistryTest, ParseKeyWithoutRegistration) {
   MutableSerializationRegistry registry;
 
-  ASSERT_THAT(registry.ParseKey(NoIdSerialization()).status(),
-              StatusIs(absl::StatusCode::kNotFound));
+  ASSERT_THAT(
+      registry.ParseKey(NoIdSerialization(), InsecureSecretKeyAccess::Get())
+          .status(),
+      StatusIs(absl::StatusCode::kNotFound));
 }
 
 TEST(MutableSerializationRegistryTest, RegisterSameKeyParser) {
@@ -238,20 +255,36 @@ TEST(MutableSerializationRegistryTest, SerializeKey) {
   ASSERT_THAT(registry.RegisterKeySerializer(&serializer2), IsOk());
 
   util::StatusOr<std::unique_ptr<Serialization>> serialization1 =
-      registry.SerializeKey<NoIdSerialization>(NoIdKey());
+      registry.SerializeKey<NoIdSerialization>(NoIdKey(),
+                                               InsecureSecretKeyAccess::Get());
   ASSERT_THAT(serialization1, IsOk());
   EXPECT_THAT((*serialization1)->ObjectIdentifier(), Eq(kNoIdTypeUrl));
 
   util::StatusOr<std::unique_ptr<Serialization>> serialization2 =
-      registry.SerializeKey<IdKeySerialization>(IdKey(123));
+      registry.SerializeKey<IdKeySerialization>(IdKey(123),
+                                                InsecureSecretKeyAccess::Get());
   ASSERT_THAT(serialization2, IsOk());
   EXPECT_THAT((*serialization2)->ObjectIdentifier(), Eq(kIdTypeUrl));
+}
+
+TEST(MutableSerializationRegistryTest, SerializeKeyNoSecretAccess) {
+  MutableSerializationRegistry registry;
+  KeySerializerImpl<NoIdKey, NoIdSerialization> serializer(SerializeNoIdKey);
+  ASSERT_THAT(registry.RegisterKeySerializer(&serializer), IsOk());
+
+  util::StatusOr<std::unique_ptr<Serialization>> serialization =
+      registry.SerializeKey<NoIdSerialization>(NoIdKey(), absl::nullopt);
+  ASSERT_THAT(serialization, IsOk());
+  EXPECT_THAT((*serialization)->ObjectIdentifier(), Eq(kNoIdTypeUrl));
 }
 
 TEST(MutableSerializationRegistryTest, SerializeKeyWithoutRegistration) {
   MutableSerializationRegistry registry;
 
-  ASSERT_THAT(registry.SerializeKey<NoIdSerialization>(NoIdKey()).status(),
+  ASSERT_THAT(registry
+                  .SerializeKey<NoIdSerialization>(
+                      NoIdKey(), InsecureSecretKeyAccess::Get())
+                  .status(),
               StatusIs(absl::StatusCode::kNotFound));
 }
 
@@ -298,10 +331,11 @@ TEST(MutableSerializationRegistryTest, Reset) {
       registry.SerializeParameters<NoIdSerialization>(NoIdParams());
   ASSERT_THAT(serialization1, IsOk());
   util::StatusOr<std::unique_ptr<Key>> key =
-      registry.ParseKey(NoIdSerialization());
+      registry.ParseKey(NoIdSerialization(), InsecureSecretKeyAccess::Get());
   ASSERT_THAT(key, IsOk());
   util::StatusOr<std::unique_ptr<Serialization>> serialization2 =
-      registry.SerializeKey<NoIdSerialization>(NoIdKey());
+      registry.SerializeKey<NoIdSerialization>(NoIdKey(),
+                                               InsecureSecretKeyAccess::Get());
   ASSERT_THAT(serialization2, IsOk());
 
   registry.Reset();
@@ -311,9 +345,14 @@ TEST(MutableSerializationRegistryTest, Reset) {
   ASSERT_THAT(
       registry.SerializeParameters<NoIdSerialization>(NoIdParams()).status(),
       StatusIs(absl::StatusCode::kNotFound));
-  ASSERT_THAT(registry.ParseKey(NoIdSerialization()).status(),
-              StatusIs(absl::StatusCode::kNotFound));
-  ASSERT_THAT(registry.SerializeKey<NoIdSerialization>(NoIdKey()).status(),
+  ASSERT_THAT(
+      registry.ParseKey(NoIdSerialization(), InsecureSecretKeyAccess::Get())
+          .status(),
+      StatusIs(absl::StatusCode::kNotFound));
+  ASSERT_THAT(registry
+                  .SerializeKey<NoIdSerialization>(
+                      NoIdKey(), InsecureSecretKeyAccess::Get())
+                  .status(),
               StatusIs(absl::StatusCode::kNotFound));
 }
 

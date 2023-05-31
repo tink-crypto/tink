@@ -21,6 +21,7 @@
 
 #include "absl/base/thread_annotations.h"
 #include "absl/synchronization/mutex.h"
+#include "absl/types/optional.h"
 #include "tink/internal/key_parser.h"
 #include "tink/internal/key_serializer.h"
 #include "tink/internal/parameters_parser.h"
@@ -29,6 +30,7 @@
 #include "tink/internal/serialization_registry.h"
 #include "tink/key.h"
 #include "tink/parameters.h"
+#include "tink/secret_key_access_token.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 
@@ -79,19 +81,22 @@ class MutableSerializationRegistry {
 
   // Parses `serialization` into a `Key` instance.
   util::StatusOr<std::unique_ptr<Key>> ParseKey(
-      const Serialization& serialization) ABSL_LOCKS_EXCLUDED(registry_mutex_);
+      const Serialization& serialization,
+      absl::optional<SecretKeyAccessToken> token)
+      ABSL_LOCKS_EXCLUDED(registry_mutex_);
 
   // Similar to `ParseKey` but falls back to legacy proto key serialization if
   // the corresponding key parser is not found.
   util::StatusOr<std::unique_ptr<Key>> ParseKeyWithLegacyFallback(
-      const Serialization& serialization);
+      const Serialization& serialization, SecretKeyAccessToken token);
 
   // Serializes `parameters` into a `Serialization` instance.
   template <typename SerializationT>
-  util::StatusOr<std::unique_ptr<Serialization>> SerializeKey(const Key& key)
+  util::StatusOr<std::unique_ptr<Serialization>> SerializeKey(
+      const Key& key, absl::optional<SecretKeyAccessToken> token)
       ABSL_LOCKS_EXCLUDED(registry_mutex_) {
     absl::MutexLock lock(&registry_mutex_);
-    return registry_.SerializeKey<SerializationT>(key);
+    return registry_.SerializeKey<SerializationT>(key, token);
   }
 
   // Resets to a new empty registry.

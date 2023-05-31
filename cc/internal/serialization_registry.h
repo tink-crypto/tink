@@ -26,7 +26,7 @@
 #include "absl/container/flat_hash_map.h"
 #include "absl/status/status.h"
 #include "absl/strings/str_format.h"
-#include "tink/insecure_secret_key_access.h"
+#include "absl/types/optional.h"
 #include "tink/internal/key_parser.h"
 #include "tink/internal/key_serializer.h"
 #include "tink/internal/parameters_parser.h"
@@ -129,12 +129,13 @@ class SerializationRegistry {
 
   // Parses `serialization` into a `Key` instance.
   util::StatusOr<std::unique_ptr<Key>> ParseKey(
-      const Serialization& serialization) const;
+      const Serialization& serialization,
+      absl::optional<SecretKeyAccessToken> token) const;
 
   // Serializes `parameters` into a `Serialization` instance.
   template <typename SerializationT>
   util::StatusOr<std::unique_ptr<Serialization>> SerializeKey(
-      const Key& key) const {
+      const Key& key, absl::optional<SecretKeyAccessToken> token) const {
     SerializerIndex index = SerializerIndex::Create<SerializationT>(key);
     auto it = key_serializers_.find(index);
     if (it == key_serializers_.end()) {
@@ -144,8 +145,7 @@ class SerializationRegistry {
                           typeid(key).name()));
     }
 
-    return key_serializers_.at(index)->SerializeKey(
-        key, InsecureSecretKeyAccess::Get());
+    return key_serializers_.at(index)->SerializeKey(key, token);
   }
 
  private:

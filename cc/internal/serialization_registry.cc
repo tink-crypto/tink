@@ -23,7 +23,6 @@
 #include "absl/container/flat_hash_map.h"
 #include "absl/status/status.h"
 #include "absl/strings/str_format.h"
-#include "tink/insecure_secret_key_access.h"
 #include "tink/internal/key_parser.h"
 #include "tink/internal/key_serializer.h"
 #include "tink/internal/parameters_parser.h"
@@ -122,7 +121,8 @@ SerializationRegistry::ParseParameters(
 }
 
 util::StatusOr<std::unique_ptr<Key>> SerializationRegistry::ParseKey(
-    const Serialization& serialization) const {
+    const Serialization& serialization,
+    absl::optional<SecretKeyAccessToken> token) const {
   ParserIndex index = ParserIndex::Create(serialization);
   auto it = key_parsers_.find(index);
   if (it == key_parsers_.end()) {
@@ -132,8 +132,7 @@ util::StatusOr<std::unique_ptr<Key>> SerializationRegistry::ParseKey(
                         typeid(serialization).name()));
   }
 
-  return key_parsers_.at(index)->ParseKey(serialization,
-                                          InsecureSecretKeyAccess::Get());
+  return key_parsers_.at(index)->ParseKey(serialization, token);
 }
 
 }  // namespace internal

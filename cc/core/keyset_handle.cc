@@ -218,7 +218,8 @@ util::StatusOr<KeysetHandle::Entry> KeysetHandle::CreateEntry(
 
   util::StatusOr<std::shared_ptr<const Key>> key =
       internal::MutableSerializationRegistry::GlobalInstance()
-          .ParseKeyWithLegacyFallback(*serialization);
+          .ParseKeyWithLegacyFallback(*serialization,
+                                      InsecureSecretKeyAccess::Get());
   if (!key.ok()) {
     return key.status();
   }

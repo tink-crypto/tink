@@ -300,6 +300,7 @@ cc_test(
         ":mac_config",
         ":mac_key_templates",
         "//:chunked_mac",
+        "//:insecure_secret_key_access",
         "//:keyset_handle",
         "//:mac",
         "//:partial_key_access",

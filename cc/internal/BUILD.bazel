@@ -926,7 +926,6 @@ cc_library(
         ":parser_index",
         ":serialization",
         ":serializer_index",
-        "//:insecure_secret_key_access",
         "//:key",
         "//:parameters",
         "//util:status",
@@ -934,6 +933,7 @@ cc_library(
         "@com_google_absl//absl/container:flat_hash_map",
         "@com_google_absl//absl/status",
         "@com_google_absl//absl/strings:str_format",
+        "@com_google_absl//absl/types:optional",
     ],
 )
 
@@ -948,6 +948,7 @@ cc_test(
         ":serialization",
         ":serialization_registry",
         ":serialization_test_util",
+        "//:insecure_secret_key_access",
         "//:key",
         "//:parameters",
         "//:secret_key_access_token",
@@ -983,6 +984,7 @@ cc_library(
         "@com_google_absl//absl/memory",
         "@com_google_absl//absl/status",
         "@com_google_absl//absl/synchronization",
+        "@com_google_absl//absl/types:optional",
     ],
 )
 
@@ -1008,6 +1010,7 @@ cc_test(
         "//util:statusor",
         "//util:test_matchers",
         "@com_google_absl//absl/status",
+        "@com_google_absl//absl/types:optional",
         "@com_google_googletest//:gtest_main",
     ],
 )

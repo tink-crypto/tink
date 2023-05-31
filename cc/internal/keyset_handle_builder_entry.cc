@@ -95,7 +95,8 @@ util::StatusOr<ProtoParametersSerialization> SerializeLegacyParameters(
 util::StatusOr<ProtoKeySerialization> SerializeKey(const Key& key) {
   util::StatusOr<std::unique_ptr<Serialization>> serialization =
       MutableSerializationRegistry::GlobalInstance()
-          .SerializeKey<ProtoKeySerialization>(key);
+          .SerializeKey<ProtoKeySerialization>(key,
+                                               InsecureSecretKeyAccess::Get());
   if (!serialization.ok()) return serialization.status();
 
   const ProtoKeySerialization* serialized_proto_key =
