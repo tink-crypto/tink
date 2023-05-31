@@ -61,7 +61,7 @@ func newWrappedKeysetDeriver(ps *primitiveset.PrimitiveSet) (*wrappedKeysetDeriv
 }
 
 func (w *wrappedKeysetDeriver) DeriveKeyset(salt []byte) (*keyset.Handle, error) {
-	keys := []*tinkpb.Keyset_Key{}
+	keys := make([]*tinkpb.Keyset_Key, 0, len(w.ps.EntriesInKeysetOrder))
 	for _, e := range w.ps.EntriesInKeysetOrder {
 		p, ok := (e.Primitive).(KeysetDeriver)
 		if !ok {

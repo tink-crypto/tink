@@ -516,7 +516,7 @@ func setAudiences(p *spb.Struct, claim string, vals []string) {
 		return
 	}
 	audList := &spb.ListValue{
-		Values: []*spb.Value{},
+		Values: make([]*spb.Value, 0, len(vals)),
 	}
 	for _, aud := range vals {
 		audList.Values = append(audList.Values, spb.NewStringValue(aud))
