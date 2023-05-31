@@ -68,6 +68,13 @@ public final class RegistryConfiguration extends InternalConfiguration {
     return Registry.getInputPrimitive(wrapperClassObject);
   }
 
+  /**
+   * Do not call.
+   *
+   * <p>We shadow the function {@code createFromPrimitiveRegistry} here so that one cannot invoke
+   * the static function in the superclass by writing {@code
+   * RegistryConfiguration.createFromPrimitiveRegistry}.
+   */
   @DoNotCall
   public static InternalConfiguration createFromPrimitiveRegistry(PrimitiveRegistry registry) {
     throw new UnsupportedOperationException(
