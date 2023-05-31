@@ -19,10 +19,9 @@ package com.google.crypto.tink;
 import static com.google.common.truth.Truth.assertThat;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
-import com.google.crypto.tink.aead.AeadKeyTemplates;
+import com.google.crypto.tink.aead.PredefinedAeadParameters;
 import com.google.crypto.tink.config.TinkConfig;
 import com.google.crypto.tink.mac.PredefinedMacParameters;
-import com.google.crypto.tink.proto.KeyTemplate;
 import com.google.crypto.tink.proto.Keyset;
 import com.google.crypto.tink.subtle.Random;
 import java.io.ByteArrayInputStream;
@@ -87,8 +86,8 @@ public class JsonKeysetWriterTest {
 
   private void testWriteEncrypted_shouldWork(KeysetHandle handle1) throws Exception {
     // Encrypt the keyset with an AeadKey.
-    KeyTemplate masterKeyTemplate = AeadKeyTemplates.AES128_EAX;
-    Aead masterKey = Registry.getPrimitive(Registry.newKeyData(masterKeyTemplate), Aead.class);
+    Aead masterKey =
+        KeysetHandle.generateNew(PredefinedAeadParameters.AES128_EAX).getPrimitive(Aead.class);
     ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
     handle1.write(JsonKeysetWriter.withOutputStream(outputStream), masterKey);
     KeysetHandle handle2 =
