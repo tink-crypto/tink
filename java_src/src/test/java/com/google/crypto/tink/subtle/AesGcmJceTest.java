@@ -35,7 +35,6 @@ import java.security.Security;
 import java.util.Arrays;
 import java.util.HashSet;
 import javax.annotation.Nullable;
-import javax.crypto.Cipher;
 import org.conscrypt.Conscrypt;
 import org.junit.Assume;
 import org.junit.Before;
@@ -51,14 +50,7 @@ public class AesGcmJceTest {
 
   @Before
   public void setUp() throws Exception {
-    if (Cipher.getMaxAllowedKeyLength("AES") < 256) {
-      System.out.println(
-          "Unlimited Strength Jurisdiction Policy Files are required"
-              + " but not installed. Skip tests with keys larger than 128 bits.");
-      keySizeInBytes = new Integer[] {16};
-    } else {
-      keySizeInBytes = new Integer[] {16, 32};
-    }
+    keySizeInBytes = new Integer[] {16, 32};
   }
 
   @Before

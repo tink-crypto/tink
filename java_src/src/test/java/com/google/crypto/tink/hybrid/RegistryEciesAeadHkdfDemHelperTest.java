@@ -30,7 +30,6 @@ import com.google.crypto.tink.signature.SignatureKeyTemplates;
 import com.google.crypto.tink.subtle.Random;
 import java.nio.charset.Charset;
 import java.security.GeneralSecurityException;
-import javax.crypto.Cipher;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -47,22 +46,14 @@ public class RegistryEciesAeadHkdfDemHelperTest {
   public void setUp() throws Exception {
     AeadConfig.register();
 
-    if (Cipher.getMaxAllowedKeyLength("AES") < 256) {
-      System.out.println(
-          "Unlimited Strength Jurisdiction Policy Files are required"
-              + " but not installed. Skip tests with keys larger than 128 bits.");
-      keyTemplates =
-          new KeyTemplate[] {AeadKeyTemplates.AES128_GCM, AeadKeyTemplates.AES128_CTR_HMAC_SHA256};
-    } else {
-      keyTemplates =
-          new KeyTemplate[] {
-            AeadKeyTemplates.AES128_GCM,
-            AeadKeyTemplates.AES256_GCM,
-            AeadKeyTemplates.AES128_CTR_HMAC_SHA256,
-            AeadKeyTemplates.AES256_CTR_HMAC_SHA256,
-            DeterministicAeadKeyTemplates.AES256_SIV
-          };
-    }
+    keyTemplates =
+        new KeyTemplate[] {
+          AeadKeyTemplates.AES128_GCM,
+          AeadKeyTemplates.AES256_GCM,
+          AeadKeyTemplates.AES128_CTR_HMAC_SHA256,
+          AeadKeyTemplates.AES256_CTR_HMAC_SHA256,
+          DeterministicAeadKeyTemplates.AES256_SIV
+        };
   }
 
   @Test
@@ -78,12 +69,6 @@ public class RegistryEciesAeadHkdfDemHelperTest {
 
   @Test
   public void testConstructorWith256BitCiphers() throws Exception {
-    if (Cipher.getMaxAllowedKeyLength("AES") < 256) {
-      System.out.println(
-          "Unlimited Strength Jurisdiction Policy Files are required"
-              + " but not installed. Skip tests with keys larger than 128 bits.");
-      return;
-    }
     // Supported templates.
     RegistryEciesAeadHkdfDemHelper helper =
         new RegistryEciesAeadHkdfDemHelper(AeadKeyTemplates.AES256_GCM);

@@ -33,7 +33,6 @@ import java.security.GeneralSecurityException;
 import java.security.Security;
 import java.util.Arrays;
 import java.util.HashSet;
-import javax.crypto.Cipher;
 import org.conscrypt.Conscrypt;
 import org.junit.Before;
 import org.junit.Test;
@@ -48,14 +47,7 @@ public class AesGcmSivTest {
 
   @Before
   public void setUp() throws Exception {
-    if (Cipher.getMaxAllowedKeyLength("AES") < 256) {
-      System.out.println(
-          "Unlimited Strength Jurisdiction Policy Files are required"
-              + " but not installed. Skip tests with keys larger than 128 bits.");
-      keySizeInBytes = new Integer[] {16};
-    } else {
-      keySizeInBytes = new Integer[] {16, 32};
-    }
+    keySizeInBytes = new Integer[] {16, 32};
   }
 
   @Before

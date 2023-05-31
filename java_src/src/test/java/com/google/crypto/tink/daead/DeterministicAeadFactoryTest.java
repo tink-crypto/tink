@@ -24,7 +24,6 @@ import com.google.crypto.tink.DeterministicAead;
 import com.google.crypto.tink.KeyTemplates;
 import com.google.crypto.tink.KeysetHandle;
 import java.security.GeneralSecurityException;
-import javax.crypto.Cipher;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -43,10 +42,6 @@ public class DeterministicAeadFactoryTest {
   @SuppressWarnings("deprecation") // This is a test that the deprecated function works.
   public void deprecatedDeterministicAeadFactoryGetPrimitive_sameAs_keysetHandleGetPrimitive()
       throws Exception {
-    if (Cipher.getMaxAllowedKeyLength("AES") < 256) {
-      // skip all tests.
-      return;
-    }
     KeysetHandle handle = KeysetHandle.generateNew(KeyTemplates.get("AES256_SIV"));
 
     DeterministicAead daead = handle.getPrimitive(DeterministicAead.class);

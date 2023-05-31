@@ -23,7 +23,6 @@ import static org.junit.Assert.fail;
 import com.google.crypto.tink.Aead;
 import java.security.GeneralSecurityException;
 import java.util.Arrays;
-import javax.crypto.Cipher;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -109,12 +108,6 @@ public class EncryptThenAuthenticateTest {
   public void testRFCVectors() throws Exception {
     for (int i = 0; i < rfcTestVectors.length; i++) {
       RFCTestVector t = rfcTestVectors[i];
-      if (Cipher.getMaxAllowedKeyLength("AES") < 256 && t.encKey.length > 16) {
-        System.out.println(
-            "Unlimited Strength Jurisdiction Policy Files are required"
-                + " but not installed. Skip tests with keys larger than 128 bits.");
-        continue;
-      }
       Aead aead = getAead(t.macKey, t.encKey, t.ivSize, t.tagLength, t.macAlg);
       Object unused = aead.decrypt(t.ciphertext, t.aad);
     }

@@ -36,7 +36,6 @@ import com.google.crypto.tink.testing.TestUtil;
 import java.security.GeneralSecurityException;
 import java.util.Arrays;
 import java.util.List;
-import javax.crypto.Cipher;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -55,14 +54,7 @@ public class DeterministicAeadWrapperTest {
 
   @Before
   public void setUp2() throws Exception {
-    if (Cipher.getMaxAllowedKeyLength("AES") < 256) {
-      System.out.println(
-          "Unlimited Strength Jurisdiction Policy Files are required"
-              + " but not installed. Skip all DeterministicAeadFactory tests");
-      keySizeInBytes = new Integer[] {};
-    } else {
-      keySizeInBytes = new Integer[] {64};
-    }
+    keySizeInBytes = new Integer[] {64};
   }
 
   @Test

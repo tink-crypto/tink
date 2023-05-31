@@ -33,7 +33,6 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.security.GeneralSecurityException;
 import java.util.TreeSet;
-import javax.crypto.Cipher;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -211,13 +210,6 @@ public class AesSivKeyManagerTest {
 
   @Test
   public void testCiphertextSize() throws Exception {
-    if (Cipher.getMaxAllowedKeyLength("AES") < 256) {
-      System.out.println(
-          "Unlimited Strength Jurisdiction Policy Files are required"
-              + " but not installed. Skipping testCiphertextSize");
-      return;
-    }
-
     DeterministicAead daead =
         new AesSivKeyManager().getPrimitive(createAesSivKey(64), DeterministicAead.class);
     byte[] plaintext = "plaintext".getBytes("UTF-8");

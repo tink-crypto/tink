@@ -31,7 +31,6 @@ import java.security.GeneralSecurityException;
 import java.security.InvalidKeyException;
 import java.util.Arrays;
 import javax.crypto.AEADBadTagException;
-import javax.crypto.Cipher;
 import org.junit.Assume;
 import org.junit.Before;
 import org.junit.Test;
@@ -46,14 +45,7 @@ public class AesSivTest {
 
   @Before
   public void setUp() throws Exception {
-    if (Cipher.getMaxAllowedKeyLength("AES") < 256) {
-      System.out.println(
-          "Unlimited Strength Jurisdiction Policy Files are required"
-              + " but not installed. Skip most AesSiv tests.");
-      keySizeInBytes = new Integer[] {};
-    } else {
       keySizeInBytes = new Integer[] {64};
-    }
   }
 
   @Test

@@ -22,7 +22,6 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import com.google.crypto.tink.DeterministicAead;
 import com.google.crypto.tink.KeyTemplates;
 import com.google.crypto.tink.KeysetHandle;
-import javax.crypto.Cipher;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -40,10 +39,6 @@ public class DeterministicAeadFactoryWithoutWrapperRegisteredTest {
   @SuppressWarnings("deprecation") // This is a test that the deprecated function works.
   public void deprecatedFactoryGetPrimitive_whenWrapperHasNotBeenRegistered_works()
       throws Exception {
-    if (Cipher.getMaxAllowedKeyLength("AES") < 256) {
-      // skip all tests.
-      return;
-    }
     // Only register AesSivKeyManager, but not the DeterministicAeadWrapper.
     AesSivKeyManager.register(/* newKeyAllowed = */ true);
     KeysetHandle handle = KeysetHandle.generateNew(KeyTemplates.get("AES256_SIV"));
