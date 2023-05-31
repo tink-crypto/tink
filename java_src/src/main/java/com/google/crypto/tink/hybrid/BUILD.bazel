@@ -96,6 +96,7 @@ java_library(
         "//proto:config_java_proto",
         "//src/main/java/com/google/crypto/tink/aead:aead_config",
         "//src/main/java/com/google/crypto/tink/config:tink_fips",
+        "//src/main/java/com/google/crypto/tink/daead:deterministic_aead_config",
         "//src/main/java/com/google/crypto/tink/hybrid/internal:hpke_private_key_manager",
     ],
 )
@@ -384,6 +385,7 @@ android_library(
         "//proto:config_java_proto_lite",
         "//src/main/java/com/google/crypto/tink/aead:aead_config-android",
         "//src/main/java/com/google/crypto/tink/config:tink_fips-android",
+        "//src/main/java/com/google/crypto/tink/daead:deterministic_aead_config-android",
         "//src/main/java/com/google/crypto/tink/hybrid/internal:hpke_private_key_manager-android",
     ],
 )

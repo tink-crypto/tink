@@ -21,8 +21,10 @@ import static org.junit.Assert.assertEquals;
 
 import com.google.crypto.tink.HybridDecrypt;
 import com.google.crypto.tink.HybridEncrypt;
-import com.google.crypto.tink.aead.AeadKeyTemplates;
-import com.google.crypto.tink.daead.DeterministicAeadKeyTemplates;
+import com.google.crypto.tink.Parameters;
+import com.google.crypto.tink.TinkProtoParametersFormat;
+import com.google.crypto.tink.aead.PredefinedAeadParameters;
+import com.google.crypto.tink.daead.PredefinedDeterministicAeadParameters;
 import com.google.crypto.tink.proto.HashType;
 import com.google.crypto.tink.proto.KeyTemplate;
 import com.google.crypto.tink.subtle.EciesAeadHkdfHybridDecrypt;
@@ -31,6 +33,7 @@ import com.google.crypto.tink.subtle.EllipticCurves;
 import com.google.crypto.tink.subtle.EllipticCurves.CurveType;
 import com.google.crypto.tink.subtle.Random;
 import com.google.crypto.tink.testing.TestUtil;
+import com.google.protobuf.ExtensionRegistryLite;
 import java.security.GeneralSecurityException;
 import java.security.KeyPair;
 import java.security.interfaces.ECPrivateKey;
@@ -54,8 +57,12 @@ public class EciesAeadHkdfHybridEncryptTest {
     HybridConfig.register();
   }
 
-  private void testBasicMultipleEncrypts(CurveType curveType, KeyTemplate keyTemplate)
+  private void testBasicMultipleEncrypts(CurveType curveType, Parameters parameters)
       throws Exception {
+    KeyTemplate keyTemplate =
+        KeyTemplate.parseFrom(
+            TinkProtoParametersFormat.serialize(parameters),
+            ExtensionRegistryLite.getEmptyRegistry());
     KeyPair recipientKey = EllipticCurves.generateKeyPair(curveType);
     ECPublicKey recipientPublicKey = (ECPublicKey) recipientKey.getPublic();
     ECPrivateKey recipientPrivateKey = (ECPrivateKey) recipientKey.getPrivate();
@@ -94,16 +101,17 @@ public class EciesAeadHkdfHybridEncryptTest {
 
   @Test
   public void testBasicMultipleEncrypts() throws Exception {
-    testBasicMultipleEncrypts(CurveType.NIST_P256, AeadKeyTemplates.AES128_CTR_HMAC_SHA256);
-    testBasicMultipleEncrypts(CurveType.NIST_P384, AeadKeyTemplates.AES128_CTR_HMAC_SHA256);
-    testBasicMultipleEncrypts(CurveType.NIST_P521, AeadKeyTemplates.AES128_CTR_HMAC_SHA256);
+    testBasicMultipleEncrypts(CurveType.NIST_P256, PredefinedAeadParameters.AES128_CTR_HMAC_SHA256);
+    testBasicMultipleEncrypts(CurveType.NIST_P384, PredefinedAeadParameters.AES128_CTR_HMAC_SHA256);
+    testBasicMultipleEncrypts(CurveType.NIST_P521, PredefinedAeadParameters.AES128_CTR_HMAC_SHA256);
 
-    testBasicMultipleEncrypts(CurveType.NIST_P521, DeterministicAeadKeyTemplates.AES256_SIV);
+    testBasicMultipleEncrypts(
+        CurveType.NIST_P521, PredefinedDeterministicAeadParameters.AES256_SIV);
 
     if (!TestUtil.isAndroid()) {
-      testBasicMultipleEncrypts(CurveType.NIST_P256, AeadKeyTemplates.AES128_GCM);
-      testBasicMultipleEncrypts(CurveType.NIST_P384, AeadKeyTemplates.AES128_GCM);
-      testBasicMultipleEncrypts(CurveType.NIST_P521, AeadKeyTemplates.AES128_GCM);
+      testBasicMultipleEncrypts(CurveType.NIST_P256, PredefinedAeadParameters.AES128_GCM);
+      testBasicMultipleEncrypts(CurveType.NIST_P384, PredefinedAeadParameters.AES128_GCM);
+      testBasicMultipleEncrypts(CurveType.NIST_P521, PredefinedAeadParameters.AES128_GCM);
     }
   }
 }

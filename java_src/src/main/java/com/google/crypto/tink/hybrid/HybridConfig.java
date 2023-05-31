@@ -18,6 +18,7 @@ package com.google.crypto.tink.hybrid;
 
 import com.google.crypto.tink.aead.AeadConfig;
 import com.google.crypto.tink.config.TinkFips;
+import com.google.crypto.tink.daead.DeterministicAeadConfig;
 import com.google.crypto.tink.hybrid.internal.HpkePrivateKeyManager;
 import com.google.crypto.tink.proto.RegistryConfig;
 import java.security.GeneralSecurityException;
@@ -104,6 +105,7 @@ public final class HybridConfig {
     HybridEncryptWrapper.register();
 
     AeadConfig.register();
+    DeterministicAeadConfig.register();
 
     if (TinkFips.useOnlyFips()) {
       // If Tink is built in FIPS-mode do not register algorithms which are not compatible.

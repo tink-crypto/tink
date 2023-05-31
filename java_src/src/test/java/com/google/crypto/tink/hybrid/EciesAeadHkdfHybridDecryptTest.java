@@ -22,8 +22,10 @@ import static org.junit.Assert.assertThrows;
 
 import com.google.crypto.tink.HybridDecrypt;
 import com.google.crypto.tink.HybridEncrypt;
-import com.google.crypto.tink.aead.AeadKeyTemplates;
-import com.google.crypto.tink.daead.DeterministicAeadKeyTemplates;
+import com.google.crypto.tink.Parameters;
+import com.google.crypto.tink.TinkProtoParametersFormat;
+import com.google.crypto.tink.aead.PredefinedAeadParameters;
+import com.google.crypto.tink.daead.PredefinedDeterministicAeadParameters;
 import com.google.crypto.tink.proto.HashType;
 import com.google.crypto.tink.proto.KeyTemplate;
 import com.google.crypto.tink.subtle.EciesAeadHkdfHybridDecrypt;
@@ -34,6 +36,7 @@ import com.google.crypto.tink.subtle.Hex;
 import com.google.crypto.tink.subtle.Random;
 import com.google.crypto.tink.testing.TestUtil;
 import com.google.crypto.tink.testing.TestUtil.BytesMutation;
+import com.google.protobuf.ExtensionRegistryLite;
 import java.security.GeneralSecurityException;
 import java.security.KeyPair;
 import java.security.interfaces.ECPrivateKey;
@@ -52,8 +55,10 @@ public class EciesAeadHkdfHybridDecryptTest {
     HybridConfig.register();
   }
 
-  private static void testEncryptDecrypt(CurveType curveType, KeyTemplate keyTemplate)
+  private static void testEncryptDecrypt(CurveType curveType, Parameters parameters)
       throws Exception {
+    KeyTemplate keyTemplate =
+        KeyTemplate.parseFrom(TinkProtoParametersFormat.serialize(parameters));
     KeyPair recipientKey = EllipticCurves.generateKeyPair(curveType);
     ECPublicKey recipientPublicKey = (ECPublicKey) recipientKey.getPublic();
     ECPrivateKey recipientPrivateKey = (ECPrivateKey) recipientKey.getPrivate();
@@ -82,51 +87,55 @@ public class EciesAeadHkdfHybridDecryptTest {
 
   @Test
   public void testEncryptDecryptP256CtrHmac() throws Exception {
-    testEncryptDecrypt(CurveType.NIST_P256, AeadKeyTemplates.AES128_CTR_HMAC_SHA256);
+    testEncryptDecrypt(CurveType.NIST_P256, PredefinedAeadParameters.AES128_CTR_HMAC_SHA256);
   }
 
   @Test
   public void testEncryptDecryptP384CtrHmac() throws Exception {
-    testEncryptDecrypt(CurveType.NIST_P384, AeadKeyTemplates.AES128_CTR_HMAC_SHA256);
+    testEncryptDecrypt(CurveType.NIST_P384, PredefinedAeadParameters.AES128_CTR_HMAC_SHA256);
   }
 
   @Test
   public void testEncryptDecryptP521CtrHmac() throws Exception {
-    testEncryptDecrypt(CurveType.NIST_P521, AeadKeyTemplates.AES128_CTR_HMAC_SHA256);
+    testEncryptDecrypt(CurveType.NIST_P521, PredefinedAeadParameters.AES128_CTR_HMAC_SHA256);
   }
 
   @Test
   public void testEncryptDecryptP256Gcm() throws Exception {
-    testEncryptDecrypt(CurveType.NIST_P256, AeadKeyTemplates.AES128_GCM);
+    testEncryptDecrypt(CurveType.NIST_P256, PredefinedAeadParameters.AES128_GCM);
   }
 
   @Test
   public void testEncryptDecryptP384Gcm() throws Exception {
-    testEncryptDecrypt(CurveType.NIST_P384, AeadKeyTemplates.AES128_GCM);
+    testEncryptDecrypt(CurveType.NIST_P384, PredefinedAeadParameters.AES128_GCM);
   }
 
   @Test
   public void testEncryptDecryptP512Gcm() throws Exception {
-    testEncryptDecrypt(CurveType.NIST_P521, AeadKeyTemplates.AES128_GCM);
+    testEncryptDecrypt(CurveType.NIST_P521, PredefinedAeadParameters.AES128_GCM);
   }
 
   @Test
   public void testEncryptDecryptP256AesSiv() throws Exception {
-    testEncryptDecrypt(CurveType.NIST_P256, DeterministicAeadKeyTemplates.AES256_SIV);
+    testEncryptDecrypt(CurveType.NIST_P256, PredefinedDeterministicAeadParameters.AES256_SIV);
   }
 
   @Test
   public void testEncryptDecryptP384AesSiv() throws Exception {
-    testEncryptDecrypt(CurveType.NIST_P384, DeterministicAeadKeyTemplates.AES256_SIV);
+    testEncryptDecrypt(CurveType.NIST_P384, PredefinedDeterministicAeadParameters.AES256_SIV);
   }
 
   @Test
   public void testEncryptDecryptP512AesSiv() throws Exception {
-    testEncryptDecrypt(CurveType.NIST_P521, DeterministicAeadKeyTemplates.AES256_SIV);
+    testEncryptDecrypt(CurveType.NIST_P521, PredefinedDeterministicAeadParameters.AES256_SIV);
   }
 
   private static void testEncryptDecrypt_mutatedCiphertext_throws(
-      CurveType curveType, KeyTemplate keyTemplate) throws Exception {
+      CurveType curveType, Parameters parameters) throws Exception {
+    KeyTemplate keyTemplate =
+        KeyTemplate.parseFrom(
+            TinkProtoParametersFormat.serialize(parameters),
+            ExtensionRegistryLite.getEmptyRegistry());
     KeyPair recipientKey = EllipticCurves.generateKeyPair(curveType);
     ECPublicKey recipientPublicKey = (ECPublicKey) recipientKey.getPublic();
     ECPrivateKey recipientPrivateKey = (ECPrivateKey) recipientKey.getPrivate();
@@ -162,56 +171,63 @@ public class EciesAeadHkdfHybridDecryptTest {
   @Test
   public void testEncryptDecryptP256CtrHmac_mutatedCiphertext_throws() throws Exception {
     testEncryptDecrypt_mutatedCiphertext_throws(
-        CurveType.NIST_P256, AeadKeyTemplates.AES128_CTR_HMAC_SHA256);
+        CurveType.NIST_P256, PredefinedAeadParameters.AES128_CTR_HMAC_SHA256);
   }
 
   @Test
   public void testEncryptDecryptP384CtrHmac_mutatedCiphertext_throws() throws Exception {
     testEncryptDecrypt_mutatedCiphertext_throws(
-        CurveType.NIST_P384, AeadKeyTemplates.AES128_CTR_HMAC_SHA256);
+        CurveType.NIST_P384, PredefinedAeadParameters.AES128_CTR_HMAC_SHA256);
   }
 
   @Test
   public void testEncryptDecryptP521CtrHmac_mutatedCiphertext_throws() throws Exception {
     testEncryptDecrypt_mutatedCiphertext_throws(
-        CurveType.NIST_P521, AeadKeyTemplates.AES128_CTR_HMAC_SHA256);
+        CurveType.NIST_P521, PredefinedAeadParameters.AES128_CTR_HMAC_SHA256);
   }
 
   @Test
   public void testEncryptDecryptP256Gcm_mutatedCiphertext_throws() throws Exception {
-    testEncryptDecrypt_mutatedCiphertext_throws(CurveType.NIST_P256, AeadKeyTemplates.AES128_GCM);
+    testEncryptDecrypt_mutatedCiphertext_throws(
+        CurveType.NIST_P256, PredefinedAeadParameters.AES128_GCM);
   }
 
   @Test
   public void testEncryptDecryptP384Gcm_mutatedCiphertext_throws() throws Exception {
-    testEncryptDecrypt_mutatedCiphertext_throws(CurveType.NIST_P384, AeadKeyTemplates.AES128_GCM);
+    testEncryptDecrypt_mutatedCiphertext_throws(
+        CurveType.NIST_P384, PredefinedAeadParameters.AES128_GCM);
   }
 
   @Test
   public void testEncryptDecryptP512Gcm_mutatedCiphertext_throws() throws Exception {
-    testEncryptDecrypt_mutatedCiphertext_throws(CurveType.NIST_P521, AeadKeyTemplates.AES128_GCM);
+    testEncryptDecrypt_mutatedCiphertext_throws(
+        CurveType.NIST_P521, PredefinedAeadParameters.AES128_GCM);
   }
 
   @Test
   public void testEncryptDecryptP256AesSiv_mutatedCiphertext_throws() throws Exception {
     testEncryptDecrypt_mutatedCiphertext_throws(
-        CurveType.NIST_P256, DeterministicAeadKeyTemplates.AES256_SIV);
+        CurveType.NIST_P256, PredefinedDeterministicAeadParameters.AES256_SIV);
   }
 
   @Test
   public void testEncryptDecryptP384AesSiv_mutatedCiphertext_throws() throws Exception {
     testEncryptDecrypt_mutatedCiphertext_throws(
-        CurveType.NIST_P384, DeterministicAeadKeyTemplates.AES256_SIV);
+        CurveType.NIST_P384, PredefinedDeterministicAeadParameters.AES256_SIV);
   }
 
   @Test
   public void testEncryptDecryptP512AesSiv_mutatedCiphertext_throws() throws Exception {
     testEncryptDecrypt_mutatedCiphertext_throws(
-        CurveType.NIST_P521, DeterministicAeadKeyTemplates.AES256_SIV);
+        CurveType.NIST_P521, PredefinedDeterministicAeadParameters.AES256_SIV);
   }
 
   private static void testEncryptDecrypt_mutatedContext_throws(
-      CurveType curveType, KeyTemplate keyTemplate) throws Exception {
+      CurveType curveType, Parameters parameters) throws Exception {
+    KeyTemplate keyTemplate =
+        KeyTemplate.parseFrom(
+            TinkProtoParametersFormat.serialize(parameters),
+            ExtensionRegistryLite.getEmptyRegistry());
     KeyPair recipientKey = EllipticCurves.generateKeyPair(curveType);
     ECPublicKey recipientPublicKey = (ECPublicKey) recipientKey.getPublic();
     ECPrivateKey recipientPrivateKey = (ECPrivateKey) recipientKey.getPrivate();
@@ -247,55 +263,63 @@ public class EciesAeadHkdfHybridDecryptTest {
   @Test
   public void testEncryptDecryptP256CtrHmac_mutatedContext_throws() throws Exception {
     testEncryptDecrypt_mutatedContext_throws(
-        CurveType.NIST_P256, AeadKeyTemplates.AES128_CTR_HMAC_SHA256);
+        CurveType.NIST_P256, PredefinedAeadParameters.AES128_CTR_HMAC_SHA256);
   }
 
   @Test
   public void testEncryptDecryptP384CtrHmac_mutatedContext_throws() throws Exception {
     testEncryptDecrypt_mutatedContext_throws(
-        CurveType.NIST_P384, AeadKeyTemplates.AES128_CTR_HMAC_SHA256);
+        CurveType.NIST_P384, PredefinedAeadParameters.AES128_CTR_HMAC_SHA256);
   }
 
   @Test
   public void testEncryptDecryptP521CtrHmac_mutatedContext_throws() throws Exception {
-    testEncryptDecrypt_mutatedContext_throws(CurveType.NIST_P521, AeadKeyTemplates.AES128_GCM);
+    testEncryptDecrypt_mutatedContext_throws(
+        CurveType.NIST_P521, PredefinedAeadParameters.AES128_GCM);
   }
 
   @Test
   public void testEncryptDecryptP256Gcm_mutatedContext_throws() throws Exception {
-    testEncryptDecrypt_mutatedContext_throws(CurveType.NIST_P256, AeadKeyTemplates.AES128_GCM);
+    testEncryptDecrypt_mutatedContext_throws(
+        CurveType.NIST_P256, PredefinedAeadParameters.AES128_GCM);
   }
 
   @Test
   public void testEncryptDecryptP384Gcm_mutatedContext_throws() throws Exception {
-    testEncryptDecrypt_mutatedContext_throws(CurveType.NIST_P384, AeadKeyTemplates.AES128_GCM);
+    testEncryptDecrypt_mutatedContext_throws(
+        CurveType.NIST_P384, PredefinedAeadParameters.AES128_GCM);
   }
 
   @Test
   public void testEncryptDecryptP512Gcm_mutatedContext_throws() throws Exception {
-    testEncryptDecrypt_mutatedContext_throws(CurveType.NIST_P521, AeadKeyTemplates.AES128_GCM);
+    testEncryptDecrypt_mutatedContext_throws(
+        CurveType.NIST_P521, PredefinedAeadParameters.AES128_GCM);
   }
 
   @Test
   public void testEncryptDecryptP256AesSiv_mutatedContext_throws() throws Exception {
     testEncryptDecrypt_mutatedContext_throws(
-        CurveType.NIST_P256, DeterministicAeadKeyTemplates.AES256_SIV);
+        CurveType.NIST_P256, PredefinedDeterministicAeadParameters.AES256_SIV);
   }
 
   @Test
   public void testEncryptDecryptP384AesSiv_mutatedContext_throws() throws Exception {
     testEncryptDecrypt_mutatedContext_throws(
-        CurveType.NIST_P384, DeterministicAeadKeyTemplates.AES256_SIV);
+        CurveType.NIST_P384, PredefinedDeterministicAeadParameters.AES256_SIV);
   }
 
   @Test
   public void testEncryptDecryptP512AesSiv_mutatedContext_throws() throws Exception {
     testEncryptDecrypt_mutatedContext_throws(
-        CurveType.NIST_P521, DeterministicAeadKeyTemplates.AES256_SIV);
+        CurveType.NIST_P521, PredefinedDeterministicAeadParameters.AES256_SIV);
   }
 
   private static void testEncryptDecrypt_mutatedSalt_throws(
-      CurveType curveType, KeyTemplate keyTemplate) throws Exception {
+      CurveType curveType, Parameters parameters) throws Exception {
+    KeyTemplate keyTemplate =
+        KeyTemplate.parseFrom(
+            TinkProtoParametersFormat.serialize(parameters),
+            ExtensionRegistryLite.getEmptyRegistry());
     KeyPair recipientKey = EllipticCurves.generateKeyPair(curveType);
     ECPublicKey recipientPublicKey = (ECPublicKey) recipientKey.getPublic();
     ECPrivateKey recipientPrivateKey = (ECPrivateKey) recipientKey.getPrivate();
@@ -336,52 +360,52 @@ public class EciesAeadHkdfHybridDecryptTest {
   @Test
   public void testEncryptDecryptP256CtrHmac_mutatedSalt_throws() throws Exception {
     testEncryptDecrypt_mutatedSalt_throws(
-        CurveType.NIST_P256, AeadKeyTemplates.AES128_CTR_HMAC_SHA256);
+        CurveType.NIST_P256, PredefinedAeadParameters.AES128_CTR_HMAC_SHA256);
   }
 
   @Test
   public void testEncryptDecryptP384CtrHmac_mutatedSalt_throws() throws Exception {
     testEncryptDecrypt_mutatedSalt_throws(
-        CurveType.NIST_P384, AeadKeyTemplates.AES128_CTR_HMAC_SHA256);
+        CurveType.NIST_P384, PredefinedAeadParameters.AES128_CTR_HMAC_SHA256);
   }
 
   @Test
   public void testEncryptDecryptP521CtrHmac_mutatedSalt_throws() throws Exception {
     testEncryptDecrypt_mutatedSalt_throws(
-        CurveType.NIST_P521, AeadKeyTemplates.AES128_CTR_HMAC_SHA256);
+        CurveType.NIST_P521, PredefinedAeadParameters.AES128_CTR_HMAC_SHA256);
   }
 
   @Test
   public void testEncryptDecryptP256Gcm_mutatedSalt_throws() throws Exception {
-    testEncryptDecrypt_mutatedSalt_throws(CurveType.NIST_P256, AeadKeyTemplates.AES128_GCM);
+    testEncryptDecrypt_mutatedSalt_throws(CurveType.NIST_P256, PredefinedAeadParameters.AES128_GCM);
   }
 
   @Test
   public void testEncryptDecryptP384Gcm_mutatedSalt_throws() throws Exception {
-    testEncryptDecrypt_mutatedSalt_throws(CurveType.NIST_P384, AeadKeyTemplates.AES128_GCM);
+    testEncryptDecrypt_mutatedSalt_throws(CurveType.NIST_P384, PredefinedAeadParameters.AES128_GCM);
   }
 
   @Test
   public void testEncryptDecryptP512Gcm_mutatedSalt_throws() throws Exception {
-    testEncryptDecrypt_mutatedSalt_throws(CurveType.NIST_P521, AeadKeyTemplates.AES128_GCM);
+    testEncryptDecrypt_mutatedSalt_throws(CurveType.NIST_P521, PredefinedAeadParameters.AES128_GCM);
   }
 
   @Test
   public void testEncryptDecryptP256AesSiv_mutatedSalt_throws() throws Exception {
     testEncryptDecrypt_mutatedSalt_throws(
-        CurveType.NIST_P256, DeterministicAeadKeyTemplates.AES256_SIV);
+        CurveType.NIST_P256, PredefinedDeterministicAeadParameters.AES256_SIV);
   }
 
   @Test
   public void testEncryptDecryptP384AesSiv_mutatedSalt_throws() throws Exception {
     testEncryptDecrypt_mutatedSalt_throws(
-        CurveType.NIST_P384, DeterministicAeadKeyTemplates.AES256_SIV);
+        CurveType.NIST_P384, PredefinedDeterministicAeadParameters.AES256_SIV);
   }
 
   @Test
   public void testEncryptDecryptP512AesSiv_mutatedSalt_throws() throws Exception {
     testEncryptDecrypt_mutatedSalt_throws(
-        CurveType.NIST_P521, DeterministicAeadKeyTemplates.AES256_SIV);
+        CurveType.NIST_P521, PredefinedDeterministicAeadParameters.AES256_SIV);
   }
 
   /** Test vector for hybrid decryption. */
@@ -421,19 +445,23 @@ public class EciesAeadHkdfHybridDecryptTest {
   };
 
   @Test
-  public void decryptWithTestVectors() throws GeneralSecurityException {
+  public void decryptWithTestVectors() throws Exception {
     for (HybridDecryptionTestVector vector : aesSivDemHybridTestVectors) {
       CurveType curveType = CurveType.NIST_P256;
       byte[] salt = new byte[0];
 
       ECPrivateKey recipientPrivateKey = EllipticCurves.getEcPrivateKey(curveType, vector.key);
+      KeyTemplate template =
+          KeyTemplate.parseFrom(
+              TinkProtoParametersFormat.serialize(PredefinedDeterministicAeadParameters.AES256_SIV),
+              ExtensionRegistryLite.getEmptyRegistry());
       HybridDecrypt hybridDecrypt =
           new EciesAeadHkdfHybridDecrypt(
               recipientPrivateKey,
               salt,
               HybridUtil.toHmacAlgo(HashType.SHA256),
               EllipticCurves.PointFormatType.UNCOMPRESSED,
-              new RegistryEciesAeadHkdfDemHelper(DeterministicAeadKeyTemplates.AES256_SIV));
+              new RegistryEciesAeadHkdfDemHelper(template));
 
       byte[] decrypted = hybridDecrypt.decrypt(vector.ciphertext, vector.context);
       assertArrayEquals(vector.plaintext, decrypted);
