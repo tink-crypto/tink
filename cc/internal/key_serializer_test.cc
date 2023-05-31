@@ -62,6 +62,18 @@ TEST(KeySerializerTest, SerializeKey) {
   EXPECT_THAT((*serialization)->ObjectIdentifier(), Eq(kNoIdTypeUrl));
 }
 
+TEST(KeySerializerTest, SerializePublicKeyNoAccessToken) {
+  std::unique_ptr<KeySerializer> serializer =
+      absl::make_unique<KeySerializerImpl<NoIdKey, NoIdSerialization>>(
+          SerializeNoIdKey);
+
+  NoIdKey public_key;
+  util::StatusOr<std::unique_ptr<Serialization>> serialization =
+      serializer->SerializeKey(public_key, absl::nullopt);
+  ASSERT_THAT(serialization, IsOk());
+  EXPECT_THAT((*serialization)->ObjectIdentifier(), Eq(kNoIdTypeUrl));
+}
+
 TEST(KeySerializerTest, SerializeKeyWithInvalidKeyType) {
   std::unique_ptr<KeySerializer> serializer =
       absl::make_unique<KeySerializerImpl<NoIdKey, NoIdSerialization>>(

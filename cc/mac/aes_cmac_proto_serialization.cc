@@ -19,6 +19,7 @@
 #include <string>
 
 #include "absl/status/status.h"
+#include "absl/types/optional.h"
 #include "tink/internal/key_parser.h"
 #include "tink/internal/key_serializer.h"
 #include "tink/internal/mutable_serialization_registry.h"
@@ -132,17 +133,22 @@ util::StatusOr<internal::ProtoParametersSerialization> SerializeParameters(
 }
 
 util::StatusOr<AesCmacKey> ParseKey(
-    internal::ProtoKeySerialization serialization, SecretKeyAccessToken token) {
+    internal::ProtoKeySerialization serialization,
+    absl::optional<SecretKeyAccessToken> token) {
   if (serialization.TypeUrl() != kTypeUrl) {
     return util::Status(absl::StatusCode::kInvalidArgument,
                         "Wrong type URL when parsing AesCmacKey.");
   }
-
+  // TODO(ioannanedelcu): Add a test for this behaviour.
+  if (!token.has_value()) {
+    return util::Status(absl::StatusCode::kInvalidArgument,
+                        "SecretKeyAccess is required");
+  }
   google::crypto::tink::AesCmacKey proto_key;
   RestrictedData restricted_data = serialization.SerializedKeyProto();
   // OSS proto library complains if input is not converted to a string.
   if (!proto_key.ParseFromString(
-          std::string(restricted_data.GetSecret(token)))) {
+          std::string(restricted_data.GetSecret(*token)))) {
     return util::Status(absl::StatusCode::kInvalidArgument,
                         "Failed to parse AesCmacKey proto");
   }
@@ -160,7 +166,7 @@ util::StatusOr<AesCmacKey> ParseKey(
   if (!parameters.ok()) return parameters.status();
 
   util::StatusOr<AesCmacKey> key = AesCmacKey::Create(
-      *parameters, RestrictedData(proto_key.key_value(), token),
+      *parameters, RestrictedData(proto_key.key_value(), *token),
       serialization.IdRequirement(), GetPartialKeyAccess());
   if (!key.ok()) return key.status();
 
@@ -168,10 +174,15 @@ util::StatusOr<AesCmacKey> ParseKey(
 }
 
 util::StatusOr<internal::ProtoKeySerialization> SerializeKey(
-    AesCmacKey key, SecretKeyAccessToken token) {
+    AesCmacKey key, absl::optional<SecretKeyAccessToken> token) {
   util::StatusOr<RestrictedData> restricted_input =
       key.GetKeyBytes(GetPartialKeyAccess());
   if (!restricted_input.ok()) return restricted_input.status();
+    // TODO(ioannanedelcu): Add a test for this behaviour.
+  if (!token.has_value()) {
+    return util::Status(absl::StatusCode::kInvalidArgument,
+                        "SecretKeyAccess is required");
+  }
 
   AesCmacParams proto_params;
   proto_params.set_tag_size(key.GetParameters().CryptographicTagSizeInBytes());
@@ -179,14 +190,14 @@ util::StatusOr<internal::ProtoKeySerialization> SerializeKey(
   *proto_key.mutable_params() = proto_params;
   proto_key.set_version(0);
   // OSS proto library complains if input is not converted to a string.
-  proto_key.set_key_value(std::string(restricted_input->GetSecret(token)));
+  proto_key.set_key_value(std::string(restricted_input->GetSecret(*token)));
 
   util::StatusOr<OutputPrefixType> output_prefix_type =
       ToOutputPrefixType(key.GetParameters().GetVariant());
   if (!output_prefix_type.ok()) return output_prefix_type.status();
 
   RestrictedData restricted_output =
-      RestrictedData(proto_key.SerializeAsString(), token);
+      RestrictedData(proto_key.SerializeAsString(), *token);
   return internal::ProtoKeySerialization::Create(
       kTypeUrl, restricted_output, google::crypto::tink::KeyData::SYMMETRIC,
       *output_prefix_type, key.GetIdRequirement());

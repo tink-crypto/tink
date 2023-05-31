@@ -25,6 +25,7 @@
 #include "absl/functional/function_ref.h"
 #include "absl/log/log.h"
 #include "absl/status/status.h"
+#include "absl/types/optional.h"
 #include "tink/internal/serialization.h"
 #include "tink/internal/serializer_index.h"
 #include "tink/key.h"
@@ -41,7 +42,7 @@ class KeySerializer {
  public:
   // Returns the serialization of `key`.
   virtual util::StatusOr<std::unique_ptr<Serialization>> SerializeKey(
-      const Key& key, SecretKeyAccessToken token) const = 0;
+      const Key& key, absl::optional<SecretKeyAccessToken> token) const = 0;
 
   // Returns an index that can be used to look up the `KeySerializer`
   // object registered for the `KeyT` type in a registry.
@@ -57,12 +58,13 @@ class KeySerializerImpl : public KeySerializer {
   // Creates a key serializer with serialization `function`. The referenced
   // `function` should outlive the created key serializer object.
   explicit KeySerializerImpl(absl::FunctionRef<util::StatusOr<SerializationT>(
-                                 KeyT, SecretKeyAccessToken)>
+                                 KeyT, absl::optional<SecretKeyAccessToken>)>
                                  function)
       : function_(function) {}
 
   util::StatusOr<std::unique_ptr<Serialization>> SerializeKey(
-      const Key& key, SecretKeyAccessToken token) const override {
+      const Key& key,
+      absl::optional<SecretKeyAccessToken> token) const override {
     const KeyT* kt = dynamic_cast<const KeyT*>(&key);
     if (kt == nullptr) {
       return util::Status(absl::StatusCode::kInvalidArgument,
@@ -78,7 +80,8 @@ class KeySerializerImpl : public KeySerializer {
   }
 
  private:
-  std::function<util::StatusOr<SerializationT>(KeyT, SecretKeyAccessToken)>
+  std::function<util::StatusOr<SerializationT>(
+      KeyT, absl::optional<SecretKeyAccessToken>)>
       function_;
 };
 

@@ -157,26 +157,28 @@ inline util::StatusOr<IdParamsSerialization> SerializeIdParams(
 }
 
 // Parse `serialization` into a key without an ID requirement.
-inline util::StatusOr<NoIdKey> ParseNoIdKey(NoIdSerialization serialization,
-                                            SecretKeyAccessToken token) {
+inline util::StatusOr<NoIdKey> ParseNoIdKey(
+    NoIdSerialization serialization,
+    absl::optional<SecretKeyAccessToken> token) {
   return NoIdKey();
 }
 
 // Parse `serialization` into a key with an ID requirement.
-inline util::StatusOr<IdKey> ParseIdKey(IdKeySerialization serialization,
-                                        SecretKeyAccessToken token) {
+inline util::StatusOr<IdKey> ParseIdKey(
+    IdKeySerialization serialization,
+    absl::optional<SecretKeyAccessToken> token) {
   return IdKey(serialization.GetKeyId());
 }
 
 // Serialize `key` without an ID requirement.
 inline util::StatusOr<NoIdSerialization> SerializeNoIdKey(
-    NoIdKey key, SecretKeyAccessToken token) {
+    NoIdKey key, absl::optional<SecretKeyAccessToken> token) {
   return NoIdSerialization();
 }
 
 // Serialize `key` with an ID requirement.
 inline util::StatusOr<IdKeySerialization> SerializeIdKey(
-    IdKey key, SecretKeyAccessToken token) {
+    IdKey key, absl::optional<SecretKeyAccessToken> token) {
   return IdKeySerialization(key.GetIdRequirement().value());
 }
 

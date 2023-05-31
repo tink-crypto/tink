@@ -717,6 +717,7 @@ tink_cc_library(
     absl::log
     absl::status
     absl::strings
+    absl::optional
     tink::core::key
     tink::core::secret_key_access_token
     tink::util::status
@@ -753,6 +754,7 @@ tink_cc_library(
     absl::function_ref
     absl::log
     absl::status
+    absl::optional
     tink::core::key
     tink::core::secret_key_access_token
     tink::util::status

@@ -17,6 +17,7 @@
 #include "tink/internal/key_parser.h"
 
 #include <memory>
+#include <optional>
 #include <string_view>
 
 #include "gmock/gmock.h"
@@ -65,6 +66,20 @@ TEST(KeyParserTest, ParseKey) {
   EXPECT_THAT((*key)->GetIdRequirement(), Eq(absl::nullopt));
   EXPECT_THAT((*key)->GetParameters(), Eq(NoIdParams()));
   EXPECT_THAT(**key, Eq(NoIdKey()));
+}
+
+TEST(KeyParserTest, ParsePublicKeyNoAccessToken) {
+  std::unique_ptr<KeyParser> parser =
+      absl::make_unique<KeyParserImpl<NoIdSerialization, NoIdKey>>(
+          kNoIdTypeUrl, ParseNoIdKey);
+
+  NoIdSerialization serialization;
+  util::StatusOr<std::unique_ptr<Key>> public_key =
+      parser->ParseKey(serialization, absl::nullopt);
+  ASSERT_THAT(public_key, IsOk());
+  EXPECT_THAT((*public_key)->GetIdRequirement(), Eq(absl::nullopt));
+  EXPECT_THAT((*public_key)->GetParameters(), Eq(NoIdParams()));
+  EXPECT_THAT(**public_key, Eq(NoIdKey()));
 }
 
 TEST(KeyParserTest, ParseKeyWithInvalidSerializationType) {

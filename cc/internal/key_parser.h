@@ -27,6 +27,7 @@
 #include "absl/log/log.h"
 #include "absl/status/status.h"
 #include "absl/strings/string_view.h"
+#include "absl/types/optional.h"
 #include "tink/internal/parser_index.h"
 #include "tink/internal/serialization.h"
 #include "tink/key.h"
@@ -47,7 +48,8 @@ class KeyParser {
   // value returned by `ObjectIdentifier()`. However, implementations should
   // check that this is the case.
   virtual util::StatusOr<std::unique_ptr<Key>> ParseKey(
-      const Serialization& serialization, SecretKeyAccessToken token) const = 0;
+      const Serialization& serialization,
+      absl::optional<SecretKeyAccessToken> token) const = 0;
 
   // Returns the object identifier for `SerializationT`, which is only valid
   // for the lifetime of this object.
@@ -74,15 +76,16 @@ class KeyParserImpl : public KeyParser {
  public:
   // Creates a key parser with `object_identifier` and parsing `function`. The
   // referenced `function` should outlive the created key parser object.
-  explicit KeyParserImpl(absl::string_view object_identifier,
-                         absl::FunctionRef<util::StatusOr<KeyT>(
-                             SerializationT, SecretKeyAccessToken)>
-                             function)
+  explicit KeyParserImpl(
+      absl::string_view object_identifier,
+      absl::FunctionRef<util::StatusOr<KeyT>(
+          SerializationT, absl::optional<SecretKeyAccessToken>)>
+          function)
       : object_identifier_(object_identifier), function_(function) {}
 
   util::StatusOr<std::unique_ptr<Key>> ParseKey(
       const Serialization& serialization,
-      SecretKeyAccessToken token) const override {
+      absl::optional<SecretKeyAccessToken> token) const override {
     if (serialization.ObjectIdentifier() != object_identifier_) {
       return util::Status(absl::StatusCode::kInvalidArgument,
                           "Invalid object identifier for this key parser.");
@@ -108,7 +111,8 @@ class KeyParserImpl : public KeyParser {
 
  private:
   std::string object_identifier_;
-  std::function<util::StatusOr<KeyT>(SerializationT, SecretKeyAccessToken)>
+  std::function<util::StatusOr<KeyT>(SerializationT,
+                                     absl::optional<SecretKeyAccessToken>)>
       function_;
 };
 
