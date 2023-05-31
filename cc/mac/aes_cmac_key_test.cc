@@ -142,7 +142,7 @@ TEST_P(AesCmacKeyTest, GetAesCmacKey) {
       *params, secret, test_case.id_requirement, GetPartialKeyAccess());
   ASSERT_THAT(key.status(), IsOk());
 
-  EXPECT_THAT(key->GetAesKey(GetPartialKeyAccess()), IsOkAndHolds(secret));
+  EXPECT_THAT(key->GetKeyBytes(GetPartialKeyAccess()), IsOkAndHolds(secret));
 }
 
 TEST_P(AesCmacKeyTest, KeyEquals) {

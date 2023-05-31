@@ -170,7 +170,7 @@ util::StatusOr<AesCmacKey> ParseKey(
 util::StatusOr<internal::ProtoKeySerialization> SerializeKey(
     AesCmacKey key, SecretKeyAccessToken token) {
   util::StatusOr<RestrictedData> restricted_input =
-      key.GetAesKey(GetPartialKeyAccess());
+      key.GetKeyBytes(GetPartialKeyAccess());
   if (!restricted_input.ok()) return restricted_input.status();
 
   AesCmacParams proto_params;

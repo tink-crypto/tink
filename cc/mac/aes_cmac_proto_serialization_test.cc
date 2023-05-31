@@ -219,7 +219,7 @@ TEST_P(AesCmacProtoSerializationTest, ParseKey) {
   const AesCmacKey* cmac_key = dynamic_cast<const AesCmacKey*>(key->get());
   ASSERT_THAT(cmac_key, NotNull());
   util::StatusOr<RestrictedData> parsed_key =
-      cmac_key->GetAesKey(GetPartialKeyAccess());
+      cmac_key->GetKeyBytes(GetPartialKeyAccess());
   ASSERT_THAT(parsed_key, IsOk());
   EXPECT_THAT(parsed_key->GetSecret(InsecureSecretKeyAccess::Get()),
               Eq(raw_key_bytes));

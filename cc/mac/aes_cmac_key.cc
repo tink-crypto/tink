@@ -35,9 +35,9 @@ namespace tink {
 
 
 util::StatusOr<AesCmacKey> AesCmacKey::Create(
-    AesCmacParameters parameters, RestrictedData aes_key_bytes,
+    AesCmacParameters parameters, RestrictedData key_bytes,
     absl::optional<int> id_requirement, PartialKeyAccessToken token) {
-  if (parameters.KeySizeInBytes() != aes_key_bytes.size()) {
+  if (parameters.KeySizeInBytes() != key_bytes.size()) {
     return util::Status(absl::StatusCode::kInvalidArgument,
                         "Key size does not match AES-CMAC parameters");
   }
@@ -58,7 +58,7 @@ util::StatusOr<AesCmacKey> AesCmacKey::Create(
   if (!output_prefix.ok()) {
     return output_prefix.status();
   }
-  return AesCmacKey(parameters, aes_key_bytes, id_requirement,
+  return AesCmacKey(parameters, key_bytes, id_requirement,
                     *std::move(output_prefix));
 }
 
@@ -106,7 +106,7 @@ bool AesCmacKey::operator==(const Key& other) const {
   if (id_requirement_ != that->id_requirement_) {
     return false;
   }
-  return aes_key_bytes_ == that->aes_key_bytes_;
+  return key_bytes_ == that->key_bytes_;
 }
 
 }  // namespace tink
