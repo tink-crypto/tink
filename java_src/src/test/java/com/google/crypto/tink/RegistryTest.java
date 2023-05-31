@@ -34,7 +34,7 @@ import com.google.crypto.tink.internal.KeyTypeManager;
 import com.google.crypto.tink.internal.PrimitiveFactory;
 import com.google.crypto.tink.internal.PrivateKeyTypeManager;
 import com.google.crypto.tink.mac.MacConfig;
-import com.google.crypto.tink.mac.MacKeyTemplates;
+import com.google.crypto.tink.mac.PredefinedMacParameters;
 import com.google.crypto.tink.proto.AesEaxKey;
 import com.google.crypto.tink.proto.AesGcmKey;
 import com.google.crypto.tink.proto.AesGcmKeyFormat;
@@ -210,7 +210,13 @@ public class RegistryTest {
     Assume.assumeFalse(TinkFips.useOnlyFips());
 
     KeyManager<Aead> wrongType = Registry.getKeyManager(MacConfig.HMAC_TYPE_URL);
-    HmacKey hmacKey = (HmacKey) Registry.newKey(MacKeyTemplates.HMAC_SHA256_128BITTAG);
+    HmacKey hmacKey =
+        (HmacKey)
+            Registry.newKey(
+                com.google.crypto.tink.proto.KeyTemplate.parseFrom(
+                    TinkProtoParametersFormat.serialize(
+                        PredefinedMacParameters.HMAC_SHA256_128BITTAG),
+                    ExtensionRegistryLite.getEmptyRegistry()));
 
     ClassCastException e =
         assertThrows(
@@ -410,7 +416,11 @@ public class RegistryTest {
 
   @Test
   public void testGetPublicKeyData_shouldThrow() throws Exception {
-    KeyData keyData = Registry.newKeyData(MacKeyTemplates.HMAC_SHA256_128BITTAG);
+    KeyData keyData =
+        Registry.newKeyData(
+            com.google.crypto.tink.proto.KeyTemplate.parseFrom(
+                TinkProtoParametersFormat.serialize(PredefinedMacParameters.HMAC_SHA256_128BITTAG),
+                ExtensionRegistryLite.getEmptyRegistry()));
     GeneralSecurityException e =
         assertThrows(
             GeneralSecurityException.class,
@@ -461,7 +471,10 @@ public class RegistryTest {
     // Skip test if in FIPS mode, as no provider available to instantiate.
     Assume.assumeFalse(TinkFips.useOnlyFips());
 
-    com.google.crypto.tink.proto.KeyTemplate template = MacKeyTemplates.HMAC_SHA256_128BITTAG;
+    com.google.crypto.tink.proto.KeyTemplate template =
+        com.google.crypto.tink.proto.KeyTemplate.parseFrom(
+            TinkProtoParametersFormat.serialize(PredefinedMacParameters.HMAC_SHA256_128BITTAG),
+            ExtensionRegistryLite.getEmptyRegistry());
     HmacKey hmacKey = (HmacKey) Registry.newKey(template);
     KeyData hmacKeyData = Registry.newKeyData(template);
     Mac mac = Registry.getPrimitive(hmacKeyData);
@@ -479,7 +492,10 @@ public class RegistryTest {
     // Skip test if in FIPS mode, as no provider available to instantiate.
     Assume.assumeFalse(TinkFips.useOnlyFips());
 
-    com.google.crypto.tink.proto.KeyTemplate template = MacKeyTemplates.HMAC_SHA256_128BITTAG;
+    com.google.crypto.tink.proto.KeyTemplate template =
+        com.google.crypto.tink.proto.KeyTemplate.parseFrom(
+            TinkProtoParametersFormat.serialize(PredefinedMacParameters.HMAC_SHA256_128BITTAG),
+            ExtensionRegistryLite.getEmptyRegistry());
     HmacKey hmacKey = (HmacKey) Registry.newKey(template);
     KeyData hmacKeyData = Registry.newKeyData(template);
     Mac mac = Registry.getPrimitive(hmacKeyData, Mac.class);
