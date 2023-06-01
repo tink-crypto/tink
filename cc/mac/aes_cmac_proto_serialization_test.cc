@@ -238,11 +238,6 @@ TEST_P(AesCmacProtoSerializationTest, ParseKey) {
 TEST_F(AesCmacProtoSerializationTest, ParseKeyWithInvalidSerialization) {
   ASSERT_THAT(RegisterAesCmacProtoSerialization(), IsOk());
 
-  std::string raw_key_bytes = Random::GetRandomBytes(16);
-  google::crypto::tink::AesCmacKey key_proto;
-  key_proto.set_version(0);
-  key_proto.set_key_value(raw_key_bytes);
-  key_proto.mutable_params()->set_tag_size(10);
   RestrictedData serialized_key =
       RestrictedData("invalid_serialization", InsecureSecretKeyAccess::Get());
 
@@ -256,6 +251,30 @@ TEST_F(AesCmacProtoSerializationTest, ParseKeyWithInvalidSerialization) {
   util::StatusOr<std::unique_ptr<Key>> key =
       internal::MutableSerializationRegistry::GlobalInstance().ParseKey(
           *serialization, InsecureSecretKeyAccess::Get());
+  ASSERT_THAT(key.status(), StatusIs(absl::StatusCode::kInvalidArgument));
+}
+
+TEST_F(AesCmacProtoSerializationTest, ParseKeyNoSecretKeyAccess) {
+  ASSERT_THAT(RegisterAesCmacProtoSerialization(), IsOk());
+
+  std::string raw_key_bytes = Random::GetRandomBytes(16);
+  google::crypto::tink::AesCmacKey key_proto;
+  key_proto.set_version(0);
+  key_proto.set_key_value(raw_key_bytes);
+  key_proto.mutable_params()->set_tag_size(10);
+  RestrictedData serialized_key = RestrictedData(
+      key_proto.SerializeAsString(), InsecureSecretKeyAccess::Get());
+
+  util::StatusOr<internal::ProtoKeySerialization> serialization =
+      internal::ProtoKeySerialization::Create(
+          "type.googleapis.com/google.crypto.tink.AesCmacKey", serialized_key,
+          KeyData::SYMMETRIC, OutputPrefixType::TINK,
+          /*id_requirement=*/0x23456789);
+  ASSERT_THAT(serialization, IsOk());
+
+  util::StatusOr<std::unique_ptr<Key>> key =
+      internal::MutableSerializationRegistry::GlobalInstance().ParseKey(
+          *serialization, absl::nullopt);
   ASSERT_THAT(key.status(), StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
@@ -325,6 +344,28 @@ TEST_P(AesCmacProtoSerializationTest, SerializeKey) {
               IsTrue());
   EXPECT_THAT(proto_key.key_value().size(), Eq(test_case.key_size));
   EXPECT_THAT(proto_key.params().tag_size(), Eq(test_case.tag_size));
+}
+
+TEST_F(AesCmacProtoSerializationTest, SerializeKeyNoSecretKeyAccess) {
+  ASSERT_THAT(RegisterAesCmacProtoSerialization(), IsOk());
+
+  util::StatusOr<AesCmacParameters> parameters = AesCmacParameters::Create(
+      /*key_size_in_bytes=*/16, /*cryptographic_tag_size_in_bytes=*/10,
+      AesCmacParameters::Variant::kNoPrefix);
+  ASSERT_THAT(parameters, IsOk());
+
+  std::string raw_key_bytes = Random::GetRandomBytes(16);
+  util::StatusOr<AesCmacKey> key = AesCmacKey::Create(
+      *parameters,
+      RestrictedData(raw_key_bytes, InsecureSecretKeyAccess::Get()),
+      /*id_requirement=*/absl::nullopt, GetPartialKeyAccess());
+  ASSERT_THAT(key, IsOk());
+
+  util::StatusOr<std::unique_ptr<Serialization>> serialization =
+      internal::MutableSerializationRegistry::GlobalInstance()
+          .SerializeKey<internal::ProtoKeySerialization>(*key, absl::nullopt);
+  ASSERT_THAT(serialization.status(),
+              StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
 }  // namespace

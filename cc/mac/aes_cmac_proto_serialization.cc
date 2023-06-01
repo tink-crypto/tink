@@ -139,7 +139,6 @@ util::StatusOr<AesCmacKey> ParseKey(
     return util::Status(absl::StatusCode::kInvalidArgument,
                         "Wrong type URL when parsing AesCmacKey.");
   }
-  // TODO(ioannanedelcu): Add a test for this behaviour.
   if (!token.has_value()) {
     return util::Status(absl::StatusCode::kInvalidArgument,
                         "SecretKeyAccess is required");
@@ -178,7 +177,6 @@ util::StatusOr<internal::ProtoKeySerialization> SerializeKey(
   util::StatusOr<RestrictedData> restricted_input =
       key.GetKeyBytes(GetPartialKeyAccess());
   if (!restricted_input.ok()) return restricted_input.status();
-    // TODO(ioannanedelcu): Add a test for this behaviour.
   if (!token.has_value()) {
     return util::Status(absl::StatusCode::kInvalidArgument,
                         "SecretKeyAccess is required");
