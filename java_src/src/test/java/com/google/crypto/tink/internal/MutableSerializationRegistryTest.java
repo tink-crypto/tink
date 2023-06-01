@@ -528,4 +528,33 @@ public final class MutableSerializationRegistryTest {
     Key key = registry.parseKeyWithLegacyFallback(protoKey, InsecureSecretKeyAccess.get());
     assertThat(key).isInstanceOf(TestKey1.class);
   }
+
+  @Test
+  public void test_parseKeyWithLegacyFallback_testFallback_missingAccess() throws Exception {
+    MutableSerializationRegistry registry = new MutableSerializationRegistry();
+    ProtoKeySerialization protoKey =
+        ProtoKeySerialization.create(
+            "typeUrlForTesting21125",
+            ByteString.EMPTY,
+            KeyMaterialType.SYMMETRIC,
+            OutputPrefixType.RAW,
+            /* idRequirement= */ null);
+    assertThrows(
+        GeneralSecurityException.class, () -> registry.parseKeyWithLegacyFallback(protoKey, null));
+  }
+
+  @Test
+  public void test_parseKeyWithLegacyFallback_testFallback_accessNotNeededRemote()
+      throws Exception {
+    MutableSerializationRegistry registry = new MutableSerializationRegistry();
+    ProtoKeySerialization protoKey =
+        ProtoKeySerialization.create(
+            "typeUrlForTesting21125",
+            ByteString.EMPTY,
+            KeyMaterialType.REMOTE,
+            OutputPrefixType.RAW,
+            /* idRequirement= */ null);
+    Key key = registry.parseKeyWithLegacyFallback(protoKey, InsecureSecretKeyAccess.get());
+    assertThat(key).isInstanceOf(LegacyProtoKey.class);
+  }
 }

@@ -148,23 +148,14 @@ public final class MutableSerializationRegistry {
    * types for which we did not yet register a parser; in this case we simply fall back to return a
    * LegacyProtoKey.
    *
-   * <p>This always requires SecretKeyAccess.
-   *
-   * @throws GeneralSecurityException if a parser is registered but parsing fails.
+   * @throws GeneralSecurityException if a parser is registered but parsing fails or required
+   *     SecretKeyAccess is missing
    */
   public Key parseKeyWithLegacyFallback(
-      ProtoKeySerialization protoKeySerialization, SecretKeyAccess access)
+      ProtoKeySerialization protoKeySerialization, @Nullable SecretKeyAccess access)
       throws GeneralSecurityException {
-    if (access == null) {
-      throw new NullPointerException("access cannot be null");
-    }
     if (!hasParserForKey(protoKeySerialization)) {
-      try {
-        return new LegacyProtoKey(protoKeySerialization, access);
-      } catch (GeneralSecurityException e2) {
-        // Cannot happen -- this only throws if we have no access.
-        throw new TinkBugException("Creating a LegacyProtoKey failed", e2);
-      }
+      return new LegacyProtoKey(protoKeySerialization, access);
     }
     return parseKey(protoKeySerialization, access);
   }
