@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"os"
 	"regexp"
+	"strconv"
 	"strings"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -46,8 +47,146 @@ var (
 // awsClient is a wrapper around an AWS SDK provided KMS client that can
 // instantiate Tink primitives.
 type awsClient struct {
-	keyURIPrefix string
-	kms          kmsiface.KMSAPI
+	keyURIPrefix          string
+	kms                   kmsiface.KMSAPI
+	encryptionContextName EncryptionContextName
+}
+
+// ClientOption is an interface for defining options that are passed to
+// [NewClientWithOptions].
+type ClientOption interface{ set(*awsClient) error }
+
+type option func(*awsClient) error
+
+func (o option) set(a *awsClient) error { return o(a) }
+
+// WithCredentialPath instantiates the underlying AWS KMS client using the
+// credentials located at credentialPath.
+//
+// credentialPath can specify a file in CSV format as provided in the IAM
+// console or an INI-style credentials file.
+//
+// See https://docs.aws.amazon.com/cli/latest/userguide/cli-authentication-user.html#cli-authentication-user-configure-csv
+// and https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html#cli-configure-files-format.
+func WithCredentialPath(credentialPath string) ClientOption {
+	return option(func(a *awsClient) error {
+		if a.kms != nil {
+			return errors.New("WithCredentialPath option cannot be used, KMS client already set")
+		}
+
+		k, err := getKMSFromCredentialPath(a.keyURIPrefix, credentialPath)
+		if err != nil {
+			return err
+		}
+
+		a.kms = k
+		return nil
+	})
+}
+
+// WithKMS sets the underlying AWS KMS client to kms, a preexisting AWS KMS
+// client instance.
+//
+// It's the callers responsibility to ensure that the configured region of kms
+// aligns with the region in key URIs passed to this client. Otherwise, API
+// requests will fail.
+func WithKMS(kms kmsiface.KMSAPI) ClientOption {
+	return option(func(a *awsClient) error {
+		if a.kms != nil {
+			return errors.New("WithKMS option cannot be used, KMS client already set")
+		}
+		a.kms = kms
+		return nil
+	})
+}
+
+// EncryptionContextName specifies the name used in the EncryptionContext field
+// of EncryptInput and DecryptInput requests. See [WithEncryptionContextName]
+// for further details.
+type EncryptionContextName uint
+
+const (
+	// AssociatedData will set the EncryptionContext name to "associatedData".
+	AssociatedData EncryptionContextName = 1 + iota
+	// LegacyAdditionalData will set the EncryptionContext name to "additionalData".
+	LegacyAdditionalData
+)
+
+var encryptionContextNames = map[EncryptionContextName]string{
+	AssociatedData: "associatedData",
+	LegacyAdditionalData: "additionalData",
+}
+
+func (n EncryptionContextName) valid() bool {
+	_, ok := encryptionContextNames[n]
+	return ok
+}
+
+func (n EncryptionContextName) String() string {
+	if !n.valid() {
+		return "unrecognized value " + strconv.Itoa(int(n))
+	}
+	return encryptionContextNames[n]
+}
+
+// WithEncryptionContextName sets the name which maps to the base64 encoded
+// associated data within the EncryptionContext field of EncrypInput and
+// DecryptInput requests.
+//
+// The default is [AssociatedData], which is compatible with the Tink AWS KMS
+// extensions in other languages. In older versions of this packge, before this
+// option was present, "additionalData" was hardcoded.
+//
+// This option is provided to facilitate compatibility with older ciphertexts.
+func WithEncryptionContextName(name EncryptionContextName) ClientOption {
+	return option(func(a *awsClient) error {
+		if !name.valid() {
+			return fmt.Errorf("invalid EncryptionContextName: %v", name)
+		}
+		if a.encryptionContextName != 0 {
+			return errors.New("encryptionContextName already set")
+		}
+		a.encryptionContextName = name
+		return nil
+	})
+}
+
+// NewClientWithOptions returns a [registry.KMSClient] which wraps an AWS KMS
+// client and will handle keys whose URIs start with uriPrefix.
+//
+// By default, the client will use default credentials.
+//
+// AEAD primitives produced by this client will use [AssociatedData] when
+// serializing associated data.
+func NewClientWithOptions(uriPrefix string, opts ...ClientOption) (registry.KMSClient, error) {
+	if !strings.HasPrefix(strings.ToLower(uriPrefix), awsPrefix) {
+		return nil, fmt.Errorf("uriPrefix must start with %q, but got %q", awsPrefix, uriPrefix)
+	}
+
+	a := &awsClient{
+		keyURIPrefix: uriPrefix,
+	}
+
+	// Process options, if any.
+	for _, opt := range opts {
+		if err := opt.set(a); err != nil {
+			return nil, fmt.Errorf("failed setting option: %v", err)
+		}
+	}
+
+	// Populate values not defined via options.
+	if a.kms == nil {
+		k, err := getKMS(uriPrefix)
+		if err != nil {
+			return nil, err
+		}
+		a.kms = k
+	}
+	if a.encryptionContextName == 0 {
+		a.encryptionContextName = AssociatedData
+	}
+
+	return a, nil
 }
 
 // NewClient returns a KMSClient backed by AWS KMS using default credentials to
@@ -58,12 +197,15 @@ type awsClient struct {
 //	aws-kms://arn:<partition>:kms:<region>:[<path>]
 //
 // See https://docs.aws.amazon.com/IAM/latest/UserGuide/reference-arns.html
+//
+// AEAD primitives produced by this client will use [LegacyAdditionalData] when
+// serializing associated data.
+//
+// Deprecated: Instead, use [NewClientWithOptions].
+//
+//	awskms.NewClientWithOptions(uriPrefix)
 func NewClient(uriPrefix string) (registry.KMSClient, error) {
-	k, err := getKMS(uriPrefix)
-	if err != nil {
-		return nil, err
-	}
-	return NewClientWithKMS(uriPrefix, k)
+	return NewClientWithOptions(uriPrefix, WithEncryptionContextName(LegacyAdditionalData))
 }
 
 // NewClientWithCredentials returns a KMSClient backed by AWS KMS using the given
@@ -80,12 +222,15 @@ func NewClient(uriPrefix string) (registry.KMSClient, error) {
 //
 // See https://docs.aws.amazon.com/cli/latest/userguide/cli-authentication-user.html#cli-authentication-user-configure-csv
 // and https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html#cli-configure-files-format.
+//
+// AEAD primitives produced by this client will use [LegacyAdditionalData] when
+// serializing associated data.
+//
+// Deprecated: Instead use [NewClientWithOptions] and [WithCredentialPath].
+//
+//	awskms.NewClientWithOptions(uriPrefix, awskms.WithCredentialPath(credentialPath))
 func NewClientWithCredentials(uriPrefix string, credentialPath string) (registry.KMSClient, error) {
-	k, err := getKMSFromCredentialPath(uriPrefix, credentialPath)
-	if err != nil {
-		return nil, err
-	}
-	return NewClientWithKMS(uriPrefix, k)
+	return NewClientWithOptions(uriPrefix, WithCredentialPath(credentialPath), WithEncryptionContextName(LegacyAdditionalData))
 }
 
 // NewClientWithKMS returns a KMSClient backed by AWS KMS using the provided
@@ -99,15 +244,15 @@ func NewClientWithCredentials(uriPrefix string, credentialPath string) (registry
 //	aws-kms://arn:<partition>:kms:<region>:[<path>]
 //
 // See https://docs.aws.amazon.com/IAM/latest/UserGuide/reference-arns.html
+//
+// AEAD primitives produced by this client will use [LegacyAdditionalData] when
+// serializing associated data.
+//
+// Deprecated: Instead use [NewClientWithOptions] and [WithKMS].
+//
+//	awskms.NewClientWithOptions(uriPrefix, awskms.WithKMS(kms))
 func NewClientWithKMS(uriPrefix string, kms kmsiface.KMSAPI) (registry.KMSClient, error) {
-	if !strings.HasPrefix(strings.ToLower(uriPrefix), awsPrefix) {
-		return nil, fmt.Errorf("uriPrefix must start with %s, but got %s", awsPrefix, uriPrefix)
-	}
-
-	return &awsClient{
-		keyURIPrefix: uriPrefix,
-		kms:          kms,
-	}, nil
+	return NewClientWithOptions(uriPrefix, WithKMS(kms), WithEncryptionContextName(LegacyAdditionalData))
 }
 
 // Supported returns true if keyURI starts with the URI prefix provided when
@@ -117,7 +262,7 @@ func (c *awsClient) Supported(keyURI string) bool {
 }
 
 // GetAEAD returns an implementation of the AEAD interface which performs
-// cyrptographic operations remotely via AWS KMS using keyURI.
+// cryptographic operations remotely via AWS KMS using keyURI.
 //
 // keyUri must be supported by this client and must have the following format:
 //
@@ -130,7 +275,7 @@ func (c *awsClient) GetAEAD(keyURI string) (tink.AEAD, error) {
 	}
 
 	uri := strings.TrimPrefix(keyURI, awsPrefix)
-	return newAWSAEAD(uri, c.kms), nil
+	return newAWSAEAD(uri, c.kms, c.encryptionContextName), nil
 }
 
 func getKMS(uriPrefix string) (*kms.KMS, error) {

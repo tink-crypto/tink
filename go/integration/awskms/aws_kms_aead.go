@@ -31,8 +31,9 @@ import (
 // cryptographic operations remotely via the AWS KMS service using a specific
 // key URI.
 type AWSAEAD struct {
-	keyURI string
-	kms    kmsiface.KMSAPI
+	keyURI                string
+	kms                   kmsiface.KMSAPI
+	encryptionContextName EncryptionContextName
 }
 
 // newAWSAEAD returns a new AWSAEAD instance.
@@ -42,10 +43,11 @@ type AWSAEAD struct {
 //	aws-kms://arn:<partition>:kms:<region>:[<path>]
 //
 // See http://docs.aws.amazon.com/general/latest/gr/aws-arns-and-namespaces.html.
-func newAWSAEAD(keyURI string, kms kmsiface.KMSAPI) *AWSAEAD {
+func newAWSAEAD(keyURI string, kms kmsiface.KMSAPI, name EncryptionContextName) *AWSAEAD {
 	return &AWSAEAD{
-		keyURI: keyURI,
-		kms:    kms,
+		keyURI:                keyURI,
+		kms:                   kms,
+		encryptionContextName: name,
 	}
 }
 
@@ -57,7 +59,7 @@ func (a *AWSAEAD) Encrypt(plaintext, associatedData []byte) ([]byte, error) {
 	}
 	if len(associatedData) > 0 {
 		ad := hex.EncodeToString(associatedData)
-		req.EncryptionContext = map[string]*string{"additionalData": &ad}
+		req.EncryptionContext = map[string]*string{a.encryptionContextName.String(): &ad}
 	}
 	resp, err := a.kms.Encrypt(req)
 	if err != nil {
@@ -83,7 +85,7 @@ func (a *AWSAEAD) Decrypt(ciphertext, associatedData []byte) ([]byte, error) {
 	}
 	if len(associatedData) > 0 {
 		ad := hex.EncodeToString(associatedData)
-		req.EncryptionContext = map[string]*string{"additionalData": &ad}
+		req.EncryptionContext = map[string]*string{a.encryptionContextName.String(): &ad}
 	}
 	resp, err := a.kms.Decrypt(req)
 	if err != nil {
