@@ -31,6 +31,18 @@ import (
 )
 
 func TestNewClient_URIPrefix(t *testing.T) {
+	srcDir, ok := os.LookupEnv("TEST_SRCDIR")
+	if !ok {
+		t.Skip("TEST_SRCDIR not set")
+	}
+
+	credFile := filepath.Join(srcDir, "tink_go/testdata/aws/credentials.csv")
+	keyARN := "arn:aws:kms:us-east-2:235739564943:key/3ee50705-5a82-4f5b-9753-05c4f473922f"
+	fakekms, err := fakeawskms.New([]string{keyARN})
+	if err != nil {
+		t.Fatalf("fakeawskms.New() failed: %v", err)
+	}
+
 	tests := []struct {
 		name      string
 		uriPrefix string
@@ -66,6 +78,22 @@ func TestNewClient_URIPrefix(t *testing.T) {
 			}
 			if !test.valid && err == nil {
 				t.Errorf("NewClient(%q) err = nil, want error", test.uriPrefix)
+			}
+
+			_, err = NewClientWithCredentials(test.uriPrefix, credFile)
+			if test.valid && err != nil {
+				t.Errorf("NewClientWithCredentialPath(%q, _) err = %v, want nil", test.uriPrefix, err)
+			}
+			if !test.valid && err == nil {
+				t.Errorf("NewClientWithCredentialPath(%q, _) err = nil, want error", test.uriPrefix)
+			}
+
+			_, err = NewClientWithKMS(test.uriPrefix, fakekms)
+			if test.valid && err != nil {
+				t.Errorf("NewClientWithKMS(%q, _) err = %v, want nil", test.uriPrefix, err)
+			}
+			if !test.valid && err == nil {
+				t.Errorf("NewClientWithKMS(%q, _) err = nil, want error", test.uriPrefix)
 			}
 		})
 	}
