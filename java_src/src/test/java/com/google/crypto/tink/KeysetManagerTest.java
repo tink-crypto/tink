@@ -24,10 +24,9 @@ import static org.junit.Assert.fail;
 import com.google.common.truth.Expect;
 import com.google.crypto.tink.aead.AesGcmKeyManager;
 import com.google.crypto.tink.config.TinkConfig;
-import com.google.crypto.tink.mac.MacKeyTemplates;
+import com.google.crypto.tink.mac.PredefinedMacParameters;
 import com.google.crypto.tink.proto.AesGcmKey;
 import com.google.crypto.tink.proto.AesGcmKeyFormat;
-import com.google.crypto.tink.proto.HashType;
 import com.google.crypto.tink.proto.KeyStatusType;
 import com.google.crypto.tink.proto.Keyset;
 import com.google.crypto.tink.proto.Keyset.Key;
@@ -39,6 +38,7 @@ import com.google.crypto.tink.tinkkey.SecretKeyAccess;
 import com.google.crypto.tink.tinkkey.TinkKey;
 import com.google.crypto.tink.tinkkey.internal.ProtoKey;
 import com.google.protobuf.ExtensionRegistryLite;
+import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.util.List;
 import org.junit.BeforeClass;
@@ -561,10 +561,12 @@ public class KeysetManagerTest {
 
   @Test
   public void testAdd_protoKeyTemplateWithoutPrefix_shouldThrowException() throws Exception {
+    com.google.crypto.tink.proto.KeyTemplate template =
+        com.google.crypto.tink.proto.KeyTemplate.parseFrom(
+            TinkProtoParametersFormat.serialize(PredefinedMacParameters.HMAC_SHA256_128BITTAG),
+            ExtensionRegistryLite.getEmptyRegistry());
     com.google.crypto.tink.proto.KeyTemplate templateWithoutPrefix =
-        MacKeyTemplates.createHmacKeyTemplate(32, 16, HashType.SHA256).toBuilder()
-            .setOutputPrefixType(OutputPrefixType.UNKNOWN_PREFIX)
-            .build();
+        template.toBuilder().setOutputPrefixType(OutputPrefixType.UNKNOWN_PREFIX).build();
     assertThrows(
         GeneralSecurityException.class,
         () -> KeysetManager.withEmptyKeyset().add(templateWithoutPrefix));
@@ -608,16 +610,18 @@ public class KeysetManagerTest {
 
   @Test
   public void testAdd_existingKeySet_shouldAddNewKey_proto() throws Exception {
-    KeysetHandle existing =
-        KeysetManager.withEmptyKeyset()
-            .rotate(MacKeyTemplates.HMAC_SHA256_128BITTAG)
-            .getKeysetHandle();
+    com.google.crypto.tink.proto.KeyTemplate template1 =
+        com.google.crypto.tink.proto.KeyTemplate.parseFrom(
+            TinkProtoParametersFormat.serialize(PredefinedMacParameters.HMAC_SHA256_128BITTAG),
+            ExtensionRegistryLite.getEmptyRegistry());
+    com.google.crypto.tink.proto.KeyTemplate template2 =
+        com.google.crypto.tink.proto.KeyTemplate.parseFrom(
+            TinkProtoParametersFormat.serialize(PredefinedMacParameters.HMAC_SHA256_256BITTAG),
+            ExtensionRegistryLite.getEmptyRegistry());
+    KeysetHandle existing = KeysetManager.withEmptyKeyset().rotate(template1).getKeysetHandle();
     int existingPrimaryKeyId = existing.getKeyset().getPrimaryKeyId();
     Keyset keyset =
-        KeysetManager.withKeysetHandle(existing)
-            .add(MacKeyTemplates.HMAC_SHA256_256BITTAG)
-            .getKeysetHandle()
-            .getKeyset();
+        KeysetManager.withKeysetHandle(existing).add(template2).getKeysetHandle().getKeyset();
 
     assertThat(keyset.getKeyCount()).isEqualTo(2);
     assertThat(keyset.getPrimaryKeyId()).isEqualTo(existingPrimaryKeyId);
@@ -845,8 +849,13 @@ public class KeysetManagerTest {
 
   @Test
   public void testAddNewKey_onePrimary() throws Exception {
+    com.google.crypto.tink.proto.KeyTemplate template =
+        com.google.crypto.tink.proto.KeyTemplate.parseFrom(
+            TinkProtoParametersFormat.serialize(PredefinedMacParameters.HMAC_SHA256_128BITTAG),
+            ExtensionRegistryLite.getEmptyRegistry());
+
     KeysetManager keysetManager = KeysetManager.withEmptyKeyset();
-    int keyId = keysetManager.addNewKey(MacKeyTemplates.HMAC_SHA256_128BITTAG, true);
+    int keyId = keysetManager.addNewKey(template, true);
     Keyset keyset = keysetManager.getKeysetHandle().getKeyset();
     assertThat(keyset.getKeyCount()).isEqualTo(1);
     assertThat(keyset.getPrimaryKeyId()).isEqualTo(keyId);
@@ -855,9 +864,14 @@ public class KeysetManagerTest {
 
   @Test
   public void testAddNewKey_onePrimaryAnotherPrimary() throws Exception {
+    com.google.crypto.tink.proto.KeyTemplate template =
+        com.google.crypto.tink.proto.KeyTemplate.parseFrom(
+            TinkProtoParametersFormat.serialize(PredefinedMacParameters.HMAC_SHA256_128BITTAG),
+            ExtensionRegistryLite.getEmptyRegistry());
+
     KeysetManager keysetManager = KeysetManager.withEmptyKeyset();
-    keysetManager.addNewKey(MacKeyTemplates.HMAC_SHA256_128BITTAG, true);
-    int primaryKeyId = keysetManager.addNewKey(MacKeyTemplates.HMAC_SHA256_128BITTAG, true);
+    keysetManager.addNewKey(template, true);
+    int primaryKeyId = keysetManager.addNewKey(template, true);
     Keyset keyset = keysetManager.getKeysetHandle().getKeyset();
     assertThat(keyset.getKeyCount()).isEqualTo(2);
     assertThat(keyset.getPrimaryKeyId()).isEqualTo(primaryKeyId);
@@ -865,9 +879,14 @@ public class KeysetManagerTest {
 
   @Test
   public void testAddNewKey_primaryThenNonPrimary() throws Exception {
+    com.google.crypto.tink.proto.KeyTemplate template =
+        com.google.crypto.tink.proto.KeyTemplate.parseFrom(
+            TinkProtoParametersFormat.serialize(PredefinedMacParameters.HMAC_SHA256_128BITTAG),
+            ExtensionRegistryLite.getEmptyRegistry());
+
     KeysetManager keysetManager = KeysetManager.withEmptyKeyset();
-    int primaryKeyId = keysetManager.addNewKey(MacKeyTemplates.HMAC_SHA256_128BITTAG, true);
-    keysetManager.addNewKey(MacKeyTemplates.HMAC_SHA256_128BITTAG, false);
+    int primaryKeyId = keysetManager.addNewKey(template, true);
+    keysetManager.addNewKey(template, false);
     Keyset keyset = keysetManager.getKeysetHandle().getKeyset();
     assertThat(keyset.getKeyCount()).isEqualTo(2);
     assertThat(keyset.getPrimaryKeyId()).isEqualTo(primaryKeyId);
@@ -875,9 +894,14 @@ public class KeysetManagerTest {
 
   @Test
   public void testAddNewKey_addThenDestroy() throws Exception {
+    com.google.crypto.tink.proto.KeyTemplate template =
+        com.google.crypto.tink.proto.KeyTemplate.parseFrom(
+            TinkProtoParametersFormat.serialize(PredefinedMacParameters.HMAC_SHA256_128BITTAG),
+            ExtensionRegistryLite.getEmptyRegistry());
+
     KeysetManager keysetManager = KeysetManager.withEmptyKeyset();
-    keysetManager.addNewKey(MacKeyTemplates.HMAC_SHA256_128BITTAG, true);
-    int secondaryKeyId = keysetManager.addNewKey(MacKeyTemplates.HMAC_SHA256_128BITTAG, false);
+    keysetManager.addNewKey(template, true);
+    int secondaryKeyId = keysetManager.addNewKey(template, false);
     keysetManager.destroy(secondaryKeyId);
     Keyset keyset = keysetManager.getKeysetHandle().getKeyset();
     assertThat(keyset.getKeyCount()).isEqualTo(2);
@@ -887,9 +911,12 @@ public class KeysetManagerTest {
 
   private void manipulateKeyset(KeysetManager manager) {
     try {
-      com.google.crypto.tink.proto.KeyTemplate template = MacKeyTemplates.HMAC_SHA256_128BITTAG;
+      com.google.crypto.tink.proto.KeyTemplate template =
+          com.google.crypto.tink.proto.KeyTemplate.parseFrom(
+              TinkProtoParametersFormat.serialize(PredefinedMacParameters.HMAC_SHA256_128BITTAG),
+              ExtensionRegistryLite.getEmptyRegistry());
       manager.rotate(template).add(template).rotate(template).add(template);
-    } catch (GeneralSecurityException e) {
+    } catch (GeneralSecurityException | IOException e) {
       fail("should not throw exception: " + e);
     }
   }
