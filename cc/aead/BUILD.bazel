@@ -331,6 +331,26 @@ cc_library(
 )
 
 cc_library(
+    name = "failing_aead",
+    testonly = 1,
+    srcs = ["failing_aead.cc"],
+    hdrs = ["failing_aead.h"],
+    include_prefix = "tink/aead",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//:aead",
+        "@com_google_absl//absl/strings",
+    ],
+)
+
+cc_library(
+    name = "aead_parameters",
+    hdrs = ["aead_parameters.h"],
+    include_prefix = "tink/aead",
+    deps = ["//:parameters"],
+)
+
+cc_library(
     name = "aead_key",
     hdrs = ["aead_key.h"],
     include_prefix = "tink/aead",
@@ -341,10 +361,16 @@ cc_library(
 )
 
 cc_library(
-    name = "aead_parameters",
-    hdrs = ["aead_parameters.h"],
+    name = "aes_gcm_parameters",
+    srcs = ["aes_gcm_parameters.cc"],
+    hdrs = ["aes_gcm_parameters.h"],
     include_prefix = "tink/aead",
-    deps = ["//:parameters"],
+    deps = [
+        ":aead_parameters",
+        "//util:status",
+        "//util:statusor",
+        "@com_google_absl//absl/strings",
+    ],
 )
 
 # tests
@@ -670,19 +696,6 @@ cc_test(
     ],
 )
 
-cc_library(
-    name = "failing_aead",
-    testonly = 1,
-    srcs = ["failing_aead.cc"],
-    hdrs = ["failing_aead.h"],
-    include_prefix = "tink/aead",
-    visibility = ["//visibility:public"],
-    deps = [
-        "//:aead",
-        "@com_google_absl//absl/strings",
-    ],
-)
-
 cc_test(
     name = "failing_aead_test",
     srcs = ["failing_aead_test.cc"],
@@ -690,6 +703,17 @@ cc_test(
         ":failing_aead",
         "//util:test_matchers",
         "@com_google_absl//absl/status",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "aes_gcm_parameters_test",
+    srcs = ["aes_gcm_parameters_test.cc"],
+    deps = [
+        ":aes_gcm_parameters",
+        "//util:statusor",
+        "//util:test_matchers",
         "@com_google_googletest//:gtest_main",
     ],
 )

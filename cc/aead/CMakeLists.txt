@@ -320,6 +320,14 @@ tink_cc_library(
 )
 
 tink_cc_library(
+  NAME aead_parameters
+  SRCS
+    aead_parameters.h
+  DEPS
+    tink::core::parameters
+)
+
+tink_cc_library(
   NAME aead_key
   SRCS
     aead_key.h
@@ -329,11 +337,15 @@ tink_cc_library(
 )
 
 tink_cc_library(
-  NAME aead_parameters
+  NAME aes_gcm_parameters
   SRCS
-    aead_parameters.h
+    aes_gcm_parameters.cc
+    aes_gcm_parameters.h
   DEPS
-    tink::core::parameters
+    tink::aead::aead_parameters
+    absl::strings
+    tink::util::status
+    tink::util::statusor
 )
 
 # tests
@@ -652,5 +664,16 @@ tink_cc_test(
     tink::aead::failing_aead
     gmock
     absl::status
+    tink::util::test_matchers
+)
+
+tink_cc_test(
+  NAME aes_gcm_parameters_test
+  SRCS
+    aes_gcm_parameters_test.cc
+  DEPS
+    tink::aead::aes_gcm_parameters
+    gmock
+    tink::util::statusor
     tink::util::test_matchers
 )
