@@ -17,7 +17,6 @@
 package com.google.crypto.tink;
 
 import com.google.crypto.tink.annotations.Alpha;
-import com.google.crypto.tink.internal.LegacyProtoKey;
 import com.google.crypto.tink.internal.LegacyProtoParameters;
 import com.google.crypto.tink.internal.MutableSerializationRegistry;
 import com.google.crypto.tink.internal.ProtoKeySerialization;
@@ -344,16 +343,10 @@ public final class KeysetHandle {
         return createKeyFromParameters(
             builderEntry.parameters, id, serializeStatus(builderEntry.getStatus()));
       } else {
-        ProtoKeySerialization serializedKey;
-        if (builderEntry.key instanceof LegacyProtoKey) {
-          serializedKey =
-              ((LegacyProtoKey) builderEntry.key).getSerialization(InsecureSecretKeyAccess.get());
-        } else {
-          serializedKey =
-              MutableSerializationRegistry.globalInstance()
-                  .serializeKey(
-                      builderEntry.key, ProtoKeySerialization.class, InsecureSecretKeyAccess.get());
-        }
+        ProtoKeySerialization serializedKey =
+            MutableSerializationRegistry.globalInstance()
+                .serializeKey(
+                    builderEntry.key, ProtoKeySerialization.class, InsecureSecretKeyAccess.get());
         @Nullable Integer idRequirement = serializedKey.getIdRequirementOrNull();
         if (idRequirement != null && idRequirement != id) {
           throw new GeneralSecurityException("Wrong ID set for key with ID requirement");
