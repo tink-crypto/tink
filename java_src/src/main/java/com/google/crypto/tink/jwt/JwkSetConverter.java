@@ -18,7 +18,6 @@ package com.google.crypto.tink.jwt;
 
 import com.google.crypto.tink.KeyStatus;
 import com.google.crypto.tink.KeysetHandle;
-import com.google.crypto.tink.internal.LegacyProtoKey;
 import com.google.crypto.tink.internal.MutableSerializationRegistry;
 import com.google.crypto.tink.internal.ProtoKeySerialization;
 import com.google.crypto.tink.proto.JwtEcdsaAlgorithm;
@@ -141,7 +140,10 @@ public final class JwkSetConverter {
               "unexpected alg value: " + getStringItem(jsonKey, "alg"));
       }
       builder.addEntry(
-          KeysetHandle.importKey(new LegacyProtoKey(keySerialization, null)).withRandomId());
+          KeysetHandle.importKey(
+                  MutableSerializationRegistry.globalInstance()
+                      .parseKeyWithLegacyFallback(keySerialization, null))
+              .withRandomId());
     }
     if (builder.size() <= 0) {
       throw new GeneralSecurityException("empty keyset");
