@@ -42,7 +42,10 @@ import com.google.crypto.tink.proto.OutputPrefixType;
  *
  * <p>Instead, we recommend to use {@code KeysetHandle.generateEntryFromParametersName} or {@code
  * KeysetHandle.generateEntryFromParameters}.
+ *
+ * @deprecated Use PredefinedPrfParameters instead.
  */
+@Deprecated
 public final class PrfKeyTemplates {
 
   private PrfKeyTemplates() {}
