@@ -43,4 +43,5 @@ if [[ "${IS_KOKORO}" == "true" ]]; then
 fi
 readonly MANUAL_TARGETS
 
-./kokoro/testutils/run_bazel_tests.sh go "${MANUAL_TARGETS[@]}"
+./kokoro/testutils/run_bazel_tests.sh \
+  -t --test_arg=--test.v go "${MANUAL_TARGETS[@]}"

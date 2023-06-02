@@ -47,7 +47,7 @@ run_cc_tests() {
 
 run_go_tests() {
   use_bazel "$(cat go/.bazelversion)"
-  ./kokoro/testutils/run_bazel_tests.sh "go"
+  ./kokoro/testutils/run_bazel_tests.sh -t --test_arg=--test.v "go"
 }
 
 run_py_tests() {
