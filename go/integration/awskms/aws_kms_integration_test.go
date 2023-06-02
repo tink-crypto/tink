@@ -49,9 +49,9 @@ func init() {
 	os.Setenv("SSL_CERT_FILE", certPath)
 }
 
-func setupKMS(t *testing.T, cf string, uri string) {
+func setupKMS(t *testing.T, credPath string, uri string) {
 	t.Helper()
-	g, err := awskms.NewClientWithCredentials(uri, cf)
+	client, err := awskms.NewClientWithOptions(keyURI, awskms.WithCredentialPath(credPath))
 	if err != nil {
 		t.Fatalf("error setting up aws client: %v", err)
 	}
@@ -59,7 +59,77 @@ func setupKMS(t *testing.T, cf string, uri string) {
 	// the keyURI.  The tests re-use the same keyURI, so clear any clients
 	// registered by earlier tests before registering the new client.
 	registry.ClearKMSClients()
-	registry.RegisterKMSClient(g)
+	registry.RegisterKMSClient(client)
+}
+
+func TestNewClientWithCredentialsGetAEADEncryptDecrypt(t *testing.T) {
+	srcDir, ok := os.LookupEnv("TEST_SRCDIR")
+	if !ok {
+		t.Skip("TEST_SRCDIR not set")
+	}
+	client, err := awskms.NewClientWithOptions(keyURI, awskms.WithCredentialPath(filepath.Join(srcDir, credFile)))
+	if err != nil {
+		t.Fatalf("error setting up aws client: %v", err)
+	}
+	a, err := client.GetAEAD(keyURI)
+	if err != nil {
+		t.Fatalf("client.GetAEAD(keyURI) err = %v, want nil", err)
+	}
+	plaintext := []byte("plaintext")
+	associatedData := []byte("associatedData")
+	ciphertext, err := a.Encrypt(plaintext, associatedData)
+	if err != nil {
+		t.Fatalf("a.Encrypt(plaintext, associatedData) err = %v, want nil", err)
+	}
+	gotPlaintext, err := a.Decrypt(ciphertext, associatedData)
+	if err != nil {
+		t.Fatalf("a.Decrypt(ciphertext, associatedData) err = %v, want nil", err)
+	}
+	if !bytes.Equal(gotPlaintext, plaintext) {
+		t.Errorf("a.Decrypt() = %q, want %q", gotPlaintext, plaintext)
+	}
+
+	invalidAssociatedData := []byte("invalidAssociatedData")
+	_, err = a.Decrypt(ciphertext, invalidAssociatedData)
+	if err == nil {
+		t.Error("a.Decrypt(ciphertext, invalidAssociatedData) err = nil, want error")
+	}
+}
+
+func TestEmptyAssociatedDataEncryptDecrypt(t *testing.T) {
+	srcDir, ok := os.LookupEnv("TEST_SRCDIR")
+	if !ok {
+		t.Skip("TEST_SRCDIR not set")
+	}
+	client, err := awskms.NewClientWithOptions(keyURI, awskms.WithCredentialPath(filepath.Join(srcDir, credFile)))
+	if err != nil {
+		t.Fatalf("error setting up aws client: %v", err)
+	}
+	a, err := client.GetAEAD(keyURI)
+	if err != nil {
+		t.Fatalf("client.GetAEAD(keyURI) err = %v, want nil", err)
+	}
+	plaintext := []byte("plaintext")
+	emptyAssociatedData := []byte{}
+	ciphertext, err := a.Encrypt(plaintext, emptyAssociatedData)
+	if err != nil {
+		t.Fatalf("a.Encrypt(plaintext, emptyAssociatedData) err = %v, want nil", err)
+	}
+	gotPlaintext, err := a.Decrypt(ciphertext, emptyAssociatedData)
+	if err != nil {
+		t.Fatalf("a.Decrypt(ciphertext, associatedData) err = %v, want nil", err)
+	}
+	if !bytes.Equal(gotPlaintext, plaintext) {
+		t.Errorf("a.Decrypt() = %q, want %q", gotPlaintext, plaintext)
+	}
+
+	gotPlaintext2, err := a.Decrypt(ciphertext, nil)
+	if err != nil {
+		t.Fatalf("a.Decrypt(ciphertext, nil) err = %v, want nil", err)
+	}
+	if !bytes.Equal(gotPlaintext2, plaintext) {
+		t.Errorf("a.Decrypt() = %q, want %q", gotPlaintext, plaintext)
+	}
 }
 
 func TestKMSEnvelopeAEADEncryptAndDecrypt(t *testing.T) {
