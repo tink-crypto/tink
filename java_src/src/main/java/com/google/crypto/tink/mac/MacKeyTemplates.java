@@ -53,7 +53,9 @@ import com.google.crypto.tink.proto.OutputPrefixType;
  * }</pre>
  *
  * @since 1.0.0
+ * @deprecated Use PredefinedMacParameters instead.
  */
+@Deprecated
 public final class MacKeyTemplates {
   /**
    * A {@link KeyTemplate} that generates new instances of {@link
