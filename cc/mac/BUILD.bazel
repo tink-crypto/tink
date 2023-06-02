@@ -263,6 +263,34 @@ cc_library(
     ],
 )
 
+cc_library(
+    name = "hmac_proto_serialization",
+    srcs = ["hmac_proto_serialization.cc"],
+    hdrs = ["hmac_proto_serialization.h"],
+    include_prefix = "tink/mac",
+    deps = [
+        ":hmac_key",
+        ":hmac_parameters",
+        "//:partial_key_access",
+        "//:restricted_data",
+        "//:secret_key_access_token",
+        "//internal:key_parser",
+        "//internal:key_serializer",
+        "//internal:mutable_serialization_registry",
+        "//internal:parameters_parser",
+        "//internal:parameters_serializer",
+        "//internal:proto_key_serialization",
+        "//internal:proto_parameters_serialization",
+        "//proto:common_cc_proto",
+        "//proto:hmac_cc_proto",
+        "//proto:tink_cc_proto",
+        "//util:status",
+        "//util:statusor",
+        "@com_google_absl//absl/status",
+        "@com_google_absl//absl/types:optional",
+    ],
+)
+
 # tests
 
 cc_test(
@@ -479,6 +507,28 @@ cc_test(
         "//util:statusor",
         "//util:test_matchers",
         "@com_google_absl//absl/types:optional",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "hmac_proto_serialization_test",
+    srcs = ["hmac_proto_serialization_test.cc"],
+    deps = [
+        ":hmac_key",
+        ":hmac_parameters",
+        ":hmac_proto_serialization",
+        "//:insecure_secret_key_access",
+        "//:partial_key_access",
+        "//:restricted_data",
+        "//internal:mutable_serialization_registry",
+        "//internal:proto_key_serialization",
+        "//internal:proto_parameters_serialization",
+        "//proto:common_cc_proto",
+        "//proto:hmac_cc_proto",
+        "//proto:tink_cc_proto",
+        "//subtle:random",
+        "//util:test_matchers",
         "@com_google_googletest//:gtest_main",
     ],
 )

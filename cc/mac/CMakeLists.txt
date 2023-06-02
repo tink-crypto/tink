@@ -248,6 +248,33 @@ tink_cc_library(
     tink::util::statusor
 )
 
+tink_cc_library(
+  NAME hmac_proto_serialization
+  SRCS
+    hmac_proto_serialization.cc
+    hmac_proto_serialization.h
+  DEPS
+    tink::mac::hmac_key
+    tink::mac::hmac_parameters
+    absl::status
+    absl::optional
+    tink::core::partial_key_access
+    tink::core::restricted_data
+    tink::core::secret_key_access_token
+    tink::internal::key_parser
+    tink::internal::key_serializer
+    tink::internal::mutable_serialization_registry
+    tink::internal::parameters_parser
+    tink::internal::parameters_serializer
+    tink::internal::proto_key_serialization
+    tink::internal::proto_parameters_serialization
+    tink::util::status
+    tink::util::statusor
+    tink::proto::common_cc_proto
+    tink::proto::hmac_cc_proto
+    tink::proto::tink_cc_proto
+)
+
 # tests
 
 tink_cc_test(
@@ -455,4 +482,26 @@ tink_cc_test(
     tink::core::restricted_data
     tink::util::statusor
     tink::util::test_matchers
+)
+
+tink_cc_test(
+  NAME hmac_proto_serialization_test
+  SRCS
+    hmac_proto_serialization_test.cc
+  DEPS
+    tink::mac::hmac_key
+    tink::mac::hmac_parameters
+    tink::mac::hmac_proto_serialization
+    gmock
+    tink::core::insecure_secret_key_access
+    tink::core::partial_key_access
+    tink::core::restricted_data
+    tink::internal::mutable_serialization_registry
+    tink::internal::proto_key_serialization
+    tink::internal::proto_parameters_serialization
+    tink::subtle::random
+    tink::util::test_matchers
+    tink::proto::common_cc_proto
+    tink::proto::hmac_cc_proto
+    tink::proto::tink_cc_proto
 )
