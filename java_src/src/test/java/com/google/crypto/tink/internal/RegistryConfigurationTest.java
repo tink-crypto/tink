@@ -93,7 +93,7 @@ public class RegistryConfigurationTest {
                       .setParams(
                           HmacParams.newBuilder()
                               .setHash(com.google.crypto.tink.proto.HashType.SHA256)
-                              .setTagSize(HMAC_KEY_SIZE)
+                              .setTagSize(HMAC_TAG_SIZE)
                               .build())
                       .setKeyValue(
                           ByteString.copyFrom(

@@ -24,18 +24,25 @@ import static org.junit.Assume.assumeFalse;
 import com.google.common.truth.Expect;
 import com.google.crypto.tink.aead.AeadConfig;
 import com.google.crypto.tink.aead.AesEaxKeyManager;
+import com.google.crypto.tink.internal.InternalConfiguration;
 import com.google.crypto.tink.internal.KeyParser;
 import com.google.crypto.tink.internal.KeyStatusTypeProtoConverter;
 import com.google.crypto.tink.internal.LegacyProtoKey;
 import com.google.crypto.tink.internal.MonitoringUtil;
 import com.google.crypto.tink.internal.MutableMonitoringRegistry;
+import com.google.crypto.tink.internal.MutablePrimitiveRegistry;
 import com.google.crypto.tink.internal.MutableSerializationRegistry;
+import com.google.crypto.tink.internal.PrimitiveConstructor;
+import com.google.crypto.tink.internal.PrimitiveRegistry;
 import com.google.crypto.tink.internal.ProtoKeySerialization;
 import com.google.crypto.tink.internal.testing.FakeMonitoringClient;
 import com.google.crypto.tink.mac.AesCmacKey;
 import com.google.crypto.tink.mac.AesCmacParameters;
 import com.google.crypto.tink.mac.AesCmacParameters.Variant;
+import com.google.crypto.tink.mac.ChunkedMac;
+import com.google.crypto.tink.mac.ChunkedMacComputation;
 import com.google.crypto.tink.mac.HmacKey;
+import com.google.crypto.tink.mac.HmacParameters;
 import com.google.crypto.tink.mac.MacConfig;
 import com.google.crypto.tink.monitoring.MonitoringAnnotations;
 import com.google.crypto.tink.monitoring.MonitoringClient;
@@ -48,6 +55,7 @@ import com.google.crypto.tink.proto.HmacParams;
 import com.google.crypto.tink.proto.HmacPrfKey;
 import com.google.crypto.tink.proto.HmacPrfParams;
 import com.google.crypto.tink.proto.KeyData;
+import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
 import com.google.crypto.tink.proto.KeyStatusType;
 import com.google.crypto.tink.proto.Keyset;
 import com.google.crypto.tink.proto.OutputPrefixType;
@@ -66,6 +74,7 @@ import com.google.protobuf.ByteString;
 import com.google.protobuf.ExtensionRegistryLite;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.nio.ByteBuffer;
 import java.security.GeneralSecurityException;
 import java.util.HashSet;
 import java.util.List;
@@ -89,6 +98,7 @@ import org.junit.runners.JUnit4;
  * {@link KeysetHandleFullPrimitiveTest}.
  */
 @RunWith(JUnit4.class)
+@SuppressWarnings("UnnecessarilyFullyQualified") // Fully specifying proto types is more readable
 public class KeysetHandleTest {
 
   @Rule public final Expect expect = Expect.create();
@@ -141,6 +151,11 @@ public class KeysetHandleTest {
     }
   }
 
+  private static final int HMAC_KEY_SIZE = 20;
+  private static final int HMAC_TAG_SIZE = 10;
+
+  private static HmacKey rawKey;
+
   @BeforeClass
   public static void setUp() throws GeneralSecurityException {
     MacConfig.register();
@@ -148,6 +163,27 @@ public class KeysetHandleTest {
     PrfConfig.register();
     SignatureConfig.register();
     AeadToEncryptOnlyWrapper.register();
+
+    createTestKeys();
+  }
+
+  private static void createTestKeys() {
+    try {
+      rawKey =
+          HmacKey.builder()
+              .setParameters(
+                  HmacParameters.builder()
+                      .setKeySizeBytes(HMAC_KEY_SIZE)
+                      .setTagSizeBytes(HMAC_TAG_SIZE)
+                      .setVariant(HmacParameters.Variant.NO_PREFIX)
+                      .setHashType(HmacParameters.HashType.SHA256)
+                      .build())
+              .setKeyBytes(SecretBytes.randomBytes(HMAC_KEY_SIZE))
+              .setIdRequirement(null)
+              .build();
+    } catch (GeneralSecurityException e) {
+      throw new IllegalStateException(e);
+    }
   }
 
   @SuppressWarnings("deprecation") // This is a test for the deprecated function
@@ -1530,5 +1566,127 @@ public class KeysetHandleTest {
         assertThrows(GeneralSecurityException.class, () -> handle.getPrimitive(Aead.class));
     assertThat(e).hasMessageThat().contains("Unable to get primitive");
     assertThat(e).hasMessageThat().contains("unregisteredTypeUrl");
+  }
+
+  @Immutable
+  private static final class TestPrimitiveA {
+    public TestPrimitiveA() {}
+  }
+
+  @Immutable
+  private static final class TestPrimitiveB {
+    public TestPrimitiveB() {}
+  }
+
+  @Immutable
+  private static final class TestWrapperA
+      implements PrimitiveWrapper<TestPrimitiveA, TestPrimitiveB> {
+
+    @Override
+    public TestPrimitiveB wrap(final PrimitiveSet<TestPrimitiveA> primitives) {
+      return new TestPrimitiveB();
+    }
+
+    @Override
+    public Class<TestPrimitiveB> getPrimitiveClass() {
+      return TestPrimitiveB.class;
+    }
+
+    @Override
+    public Class<TestPrimitiveA> getInputPrimitiveClass() {
+      return TestPrimitiveA.class;
+    }
+  }
+
+  private static TestPrimitiveA getPrimitiveAHmacKey(HmacKey key) {
+    return new TestPrimitiveA();
+  }
+
+  @Test
+  public void getPrimitive_usesProvidedConfigurationWhenProvided() throws Exception {
+    PrimitiveRegistry registry =
+        PrimitiveRegistry.builder()
+            .registerPrimitiveConstructor(
+                PrimitiveConstructor.create(
+                    KeysetHandleTest::getPrimitiveAHmacKey,
+                    HmacKey.class,
+                    TestPrimitiveA.class))
+            .registerPrimitiveWrapper(new TestWrapperA())
+            .build();
+    InternalConfiguration configuration =
+        InternalConfiguration.createFromPrimitiveRegistry(registry);
+    HmacKey hmacKey =
+        HmacKey.builder()
+            .setParameters(
+                HmacParameters.builder()
+                    .setKeySizeBytes(20)
+                    .setTagSizeBytes(10)
+                    .setVariant(HmacParameters.Variant.NO_PREFIX)
+                    .setHashType(HmacParameters.HashType.SHA256)
+                    .build())
+            .setKeyBytes(SecretBytes.randomBytes(20))
+            .setIdRequirement(null)
+            .build();
+    KeysetHandle keysetHandle =
+        KeysetHandle.newBuilder()
+            .addEntry(KeysetHandle.importKey(hmacKey).withRandomId().makePrimary())
+            .build();
+
+    assertThrows(
+        GeneralSecurityException.class, () -> keysetHandle.getPrimitive(TestPrimitiveB.class));
+    assertThat(keysetHandle.getPrimitive(configuration, TestPrimitiveB.class)).isNotNull();
+  }
+
+  @Test
+  public void getPrimitive_usesRegistryWhenNoConfigurationProvided() throws Exception {
+    KeysetHandle keysetHandle =
+        KeysetHandle.newBuilder()
+            .addEntry(KeysetHandle.importKey(rawKey).withRandomId().makePrimary())
+            .build();
+    byte[] plaintext = "plaintext".getBytes(UTF_8);
+
+    ChunkedMac registryMac =
+        MutablePrimitiveRegistry.globalInstance().getPrimitive(rawKey, ChunkedMac.class);
+    ChunkedMacComputation registryMacComputation = registryMac.createComputation();
+    registryMacComputation.update(ByteBuffer.wrap(plaintext));
+    ChunkedMac keysetHandleMac = keysetHandle.getPrimitive(ChunkedMac.class);
+    ChunkedMacComputation keysetHandleMacComputation = keysetHandleMac.createComputation();
+    keysetHandleMacComputation.update(ByteBuffer.wrap(plaintext));
+
+    assertThat(keysetHandleMacComputation.computeMac())
+        .isEqualTo(registryMacComputation.computeMac());
+  }
+
+  @Test
+  public void getLegacyPrimitive_usesRegistryWhenNoConfigurationProvided()
+      throws Exception {
+    KeysetHandle keysetHandle =
+        KeysetHandle.newBuilder()
+            .addEntry(KeysetHandle.importKey(rawKey).withRandomId().makePrimary())
+            .build();
+    KeyData rawKeyData =
+        KeyData.newBuilder()
+            .setValue(
+                com.google.crypto.tink.proto.HmacKey.newBuilder()
+                    .setParams(
+                        HmacParams.newBuilder()
+                            .setHash(com.google.crypto.tink.proto.HashType.SHA256)
+                            .setTagSize(HMAC_TAG_SIZE)
+                            .build())
+                    .setKeyValue(
+                        ByteString.copyFrom(
+                            rawKey.getKeyBytes().toByteArray(InsecureSecretKeyAccess.get())))
+                    .build()
+                    .toByteString())
+            .setTypeUrl(keysetHandle.getKeysetInfo().getKeyInfo(0).getTypeUrl())
+            .setKeyMaterialType(KeyMaterialType.SYMMETRIC)
+            .build();
+
+    byte[] plaintext = "plaintext".getBytes(UTF_8);
+
+    Mac registryMac = Registry.getPrimitive(rawKeyData, Mac.class);
+    Mac keysetHandleMac = keysetHandle.getPrimitive(Mac.class);
+
+    assertThat(keysetHandleMac.computeMac(plaintext)).isEqualTo(registryMac.computeMac(plaintext));
   }
 }

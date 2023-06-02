@@ -17,10 +17,12 @@
 package com.google.crypto.tink;
 
 import com.google.crypto.tink.annotations.Alpha;
+import com.google.crypto.tink.internal.InternalConfiguration;
 import com.google.crypto.tink.internal.LegacyProtoParameters;
 import com.google.crypto.tink.internal.MutableSerializationRegistry;
 import com.google.crypto.tink.internal.ProtoKeySerialization;
 import com.google.crypto.tink.internal.ProtoParametersSerialization;
+import com.google.crypto.tink.internal.RegistryConfiguration;
 import com.google.crypto.tink.internal.TinkBugException;
 import com.google.crypto.tink.monitoring.MonitoringAnnotations;
 import com.google.crypto.tink.proto.EncryptedKeyset;
@@ -1052,19 +1054,21 @@ public final class KeysetHandle {
 
   /** Allows us to have a name {@code B} for the base primitive. */
   private <B, P> P getPrimitiveWithKnownInputPrimitive(
-      Class<P> classObject, Class<B> inputPrimitiveClassObject) throws GeneralSecurityException {
+      InternalConfiguration config, Class<P> classObject, Class<B> inputPrimitiveClassObject)
+      throws GeneralSecurityException {
     Util.validateKeyset(keyset);
     PrimitiveSet.Builder<B> builder = PrimitiveSet.newBuilder(inputPrimitiveClassObject);
     builder.setAnnotations(annotations);
     for (int i = 0; i < size(); ++i) {
       Keyset.Key protoKey = keyset.getKey(i);
       if (protoKey.getStatus().equals(KeyStatusType.ENABLED)) {
-        @Nullable B primitive = getLegacyPrimitiveOrNull(protoKey, inputPrimitiveClassObject);
+        @Nullable
+        B primitive = getLegacyPrimitiveOrNull(config, protoKey, inputPrimitiveClassObject);
         @Nullable B fullPrimitive = null;
-        // Entries.get(i) may be null (if the status is invalid in the proto, or parsing failed.
+        // Entries.get(i) may be null (if the status is invalid in the proto, or parsing failed).
         if (entries.get(i) != null) {
           fullPrimitive =
-              getFullPrimitiveOrNull(entries.get(i).getKey(), inputPrimitiveClassObject);
+              getFullPrimitiveOrNull(config, entries.get(i).getKey(), inputPrimitiveClassObject);
         }
         if (fullPrimitive == null && primitive == null) {
           throw new GeneralSecurityException(
@@ -1080,7 +1084,26 @@ public final class KeysetHandle {
         }
       }
     }
-    return Registry.wrap(builder.build(), classObject);
+    return config.wrap(builder.build(), classObject);
+  }
+
+  /**
+   * Returns a primitive from this keyset using the provided {@link Configuration} to create
+   * resources used in creating the primitive.
+   */
+  public <P> P getPrimitive(Configuration configuration, Class<P> targetClassObject)
+      throws GeneralSecurityException {
+    if (!(configuration instanceof InternalConfiguration)) {
+      throw new GeneralSecurityException(
+          "Currently only subclasses of InternalConfiguration are accepted");
+    }
+    InternalConfiguration internalConfig = (InternalConfiguration) configuration;
+    Class<?> inputPrimitiveClassObject = internalConfig.getInputPrimitiveClass(targetClassObject);
+    if (inputPrimitiveClassObject == null) {
+      throw new GeneralSecurityException("No wrapper found for " + targetClassObject.getName());
+    }
+    return getPrimitiveWithKnownInputPrimitive(
+        internalConfig, targetClassObject, inputPrimitiveClassObject);
   }
 
   /**
@@ -1088,11 +1111,7 @@ public final class KeysetHandle {
    * the primitive.
    */
   public <P> P getPrimitive(Class<P> targetClassObject) throws GeneralSecurityException {
-    Class<?> inputPrimitiveClassObject = Registry.getInputPrimitive(targetClassObject);
-    if (inputPrimitiveClassObject == null) {
-      throw new GeneralSecurityException("No wrapper found for " + targetClassObject.getName());
-    }
-    return getPrimitiveWithKnownInputPrimitive(targetClassObject, inputPrimitiveClassObject);
+    return getPrimitive(RegistryConfiguration.get(), targetClassObject);
   }
 
   /**
@@ -1115,10 +1134,11 @@ public final class KeysetHandle {
   }
 
   @Nullable
-  private static <B> B getLegacyPrimitiveOrNull(Keyset.Key key, Class<B> inputPrimitiveClassObject)
+  private static <B> B getLegacyPrimitiveOrNull(
+      InternalConfiguration config, Keyset.Key key, Class<B> inputPrimitiveClassObject)
       throws GeneralSecurityException {
     try {
-      return Registry.getPrimitive(key.getKeyData(), inputPrimitiveClassObject);
+      return config.getLegacyPrimitive(key.getKeyData(), inputPrimitiveClassObject);
     } catch (GeneralSecurityException e) {
       if (e.getMessage().contains("No key manager found for key type ")
           || e.getMessage().contains(" not supported by key manager of type ")) {
@@ -1127,14 +1147,18 @@ public final class KeysetHandle {
       }
       // Otherwise the error is likely legit. Do not swallow.
       throw e;
+    } catch (UnsupportedOperationException e) {
+      // We are using the new configuration that doesn't work with proto keys.
+      return null;
     }
   }
 
   @Nullable
-  private <B> B getFullPrimitiveOrNull(Key key, Class<B> inputPrimitiveClassObject)
+  private <B> B getFullPrimitiveOrNull(
+      InternalConfiguration config, Key key, Class<B> inputPrimitiveClassObject)
       throws GeneralSecurityException {
     try {
-      return Registry.getFullPrimitive(key, inputPrimitiveClassObject);
+      return config.getPrimitive(key, inputPrimitiveClassObject);
     } catch (GeneralSecurityException e) {
       // Ignoring because the key may not yet have a corresponding class.
       // TODO(lizatretyakova): stop ignoring when all key classes are migrated from protos.
