@@ -76,7 +76,7 @@ public class AesGcmSivTest {
   }
 
   @Test
-  /** BC had a bug, where GCM failed for messages of size > 8192 */
+  /* BC had a bug, where GCM failed for messages of size > 8192 */
   public void testLongMessages() throws Exception {
     if (TestUtil.isAndroid()) {
       System.out.println("testLongMessages doesn't work on Android, skipping");
@@ -265,7 +265,7 @@ public class AesGcmSivTest {
   }
 
   @Test
-  /**
+  /*
    * This is a very simple test for the randomness of the nonce. The test simply checks that the
    * multiple ciphertexts of the same message are distinct.
    */
