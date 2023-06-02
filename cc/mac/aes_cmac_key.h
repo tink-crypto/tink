@@ -41,8 +41,8 @@ class AesCmacKey : public MacKey {
 
   // Creates a new AES-CMAC key.  If the parameters specify a variant that uses
   // a prefix, then the id is used to compute this prefix.
-  static util::StatusOr<AesCmacKey> Create(AesCmacParameters parameters,
-                                           RestrictedData key_bytes,
+  static util::StatusOr<AesCmacKey> Create(const AesCmacParameters& parameters,
+                                           const RestrictedData& key_bytes,
                                            absl::optional<int> id_requirement,
                                            PartialKeyAccessToken token);
 
@@ -65,7 +65,8 @@ class AesCmacKey : public MacKey {
   bool operator==(const Key& other) const override;
 
  private:
-  AesCmacKey(AesCmacParameters parameters, RestrictedData key_bytes,
+  AesCmacKey(const AesCmacParameters& parameters,
+             const RestrictedData& key_bytes,
              absl::optional<int> id_requirement, std::string output_prefix)
       : parameters_(parameters),
         key_bytes_(key_bytes),

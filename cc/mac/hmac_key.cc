@@ -33,8 +33,8 @@
 namespace crypto {
 namespace tink {
 
-util::StatusOr<HmacKey> HmacKey::Create(HmacParameters parameters,
-                                        RestrictedData key_bytes,
+util::StatusOr<HmacKey> HmacKey::Create(const HmacParameters& parameters,
+                                        const RestrictedData& key_bytes,
                                         absl::optional<int> id_requirement,
                                         PartialKeyAccessToken token) {
   if (parameters.KeySizeInBytes() != key_bytes.size()) {

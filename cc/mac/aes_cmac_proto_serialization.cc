@@ -94,7 +94,7 @@ util::StatusOr<OutputPrefixType> ToOutputPrefixType(
 }
 
 util::StatusOr<AesCmacParameters> ParseParameters(
-    internal::ProtoParametersSerialization serialization) {
+    const internal::ProtoParametersSerialization& serialization) {
   if (serialization.GetKeyTemplate().type_url() != kTypeUrl) {
     return util::Status(absl::StatusCode::kInvalidArgument,
                         "Wrong type URL when parsing AesCmacParameters.");
@@ -117,7 +117,7 @@ util::StatusOr<AesCmacParameters> ParseParameters(
 }
 
 util::StatusOr<internal::ProtoParametersSerialization> SerializeParameters(
-    AesCmacParameters parameters) {
+    const AesCmacParameters& parameters) {
   util::StatusOr<OutputPrefixType> output_prefix_type =
       ToOutputPrefixType(parameters.GetVariant());
   if (!output_prefix_type.ok()) return output_prefix_type.status();
@@ -133,7 +133,7 @@ util::StatusOr<internal::ProtoParametersSerialization> SerializeParameters(
 }
 
 util::StatusOr<AesCmacKey> ParseKey(
-    internal::ProtoKeySerialization serialization,
+    const internal::ProtoKeySerialization& serialization,
     absl::optional<SecretKeyAccessToken> token) {
   if (serialization.TypeUrl() != kTypeUrl) {
     return util::Status(absl::StatusCode::kInvalidArgument,
@@ -173,7 +173,7 @@ util::StatusOr<AesCmacKey> ParseKey(
 }
 
 util::StatusOr<internal::ProtoKeySerialization> SerializeKey(
-    AesCmacKey key, absl::optional<SecretKeyAccessToken> token) {
+    const AesCmacKey& key, absl::optional<SecretKeyAccessToken> token) {
   util::StatusOr<RestrictedData> restricted_input =
       key.GetKeyBytes(GetPartialKeyAccess());
   if (!restricted_input.ok()) return restricted_input.status();
