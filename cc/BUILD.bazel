@@ -875,7 +875,6 @@ cc_test(
 
 cc_test(
     name = "keyset_handle_builder_test",
-    size = "small",
     srcs = ["core/keyset_handle_builder_test.cc"],
     deps = [
         ":insecure_secret_key_access",
