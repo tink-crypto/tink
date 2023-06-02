@@ -17,8 +17,7 @@
 #ifndef TINK_AEAD_AEAD_KEY_H_
 #define TINK_AEAD_AEAD_KEY_H_
 
-#include <string>
-
+#include "absl/strings/string_view.h"
 #include "tink/aead/aead_parameters.h"
 #include "tink/key.h"
 
@@ -40,7 +39,7 @@ class AeadKey : public Key {
   // may be a prefix of another). To avoid this, built-in Tink keys use the
   // convention that the prefix is either '0x00<big endian key id>' or
   // '0x01<big endian key id>'.
-  virtual std::string GetOutputPrefix() const = 0;
+  virtual absl::string_view GetOutputPrefix() const = 0;
 
   const AeadParameters& GetParameters() const override = 0;
 

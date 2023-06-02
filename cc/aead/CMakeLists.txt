@@ -333,6 +333,7 @@ tink_cc_library(
     aead_key.h
   DEPS
     tink::aead::aead_parameters
+    absl::strings
     tink::core::key
 )
 
@@ -344,6 +345,23 @@ tink_cc_library(
   DEPS
     tink::aead::aead_parameters
     absl::strings
+    tink::util::status
+    tink::util::statusor
+)
+
+tink_cc_library(
+  NAME aes_gcm_key
+  SRCS
+    aes_gcm_key.cc
+    aes_gcm_key.h
+  DEPS
+    tink::aead::aead_key
+    tink::aead::aes_gcm_parameters
+    absl::strings
+    absl::optional
+    tink::core::partial_key_access_token
+    tink::core::restricted_data
+    tink::subtle::subtle_util
     tink::util::status
     tink::util::statusor
 )
@@ -674,6 +692,21 @@ tink_cc_test(
   DEPS
     tink::aead::aes_gcm_parameters
     gmock
+    tink::util::statusor
+    tink::util::test_matchers
+)
+
+tink_cc_test(
+  NAME aes_gcm_key_test
+  SRCS
+    aes_gcm_key_test.cc
+  DEPS
+    tink::aead::aes_gcm_key
+    tink::aead::aes_gcm_parameters
+    gmock
+    absl::optional
+    tink::core::partial_key_access
+    tink::core::restricted_data
     tink::util::statusor
     tink::util::test_matchers
 )

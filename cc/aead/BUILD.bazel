@@ -357,6 +357,7 @@ cc_library(
     deps = [
         ":aead_parameters",
         "//:key",
+        "@com_google_absl//absl/strings",
     ],
 )
 
@@ -370,6 +371,24 @@ cc_library(
         "//util:status",
         "//util:statusor",
         "@com_google_absl//absl/strings",
+    ],
+)
+
+cc_library(
+    name = "aes_gcm_key",
+    srcs = ["aes_gcm_key.cc"],
+    hdrs = ["aes_gcm_key.h"],
+    include_prefix = "tink/aead",
+    deps = [
+        ":aead_key",
+        ":aes_gcm_parameters",
+        "//:partial_key_access_token",
+        "//:restricted_data",
+        "//subtle:subtle_util",
+        "//util:status",
+        "//util:statusor",
+        "@com_google_absl//absl/strings",
+        "@com_google_absl//absl/types:optional",
     ],
 )
 
@@ -714,6 +733,21 @@ cc_test(
         ":aes_gcm_parameters",
         "//util:statusor",
         "//util:test_matchers",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "aes_gcm_key_test",
+    srcs = ["aes_gcm_key_test.cc"],
+    deps = [
+        ":aes_gcm_key",
+        ":aes_gcm_parameters",
+        "//:partial_key_access",
+        "//:restricted_data",
+        "//util:statusor",
+        "//util:test_matchers",
+        "@com_google_absl//absl/types:optional",
         "@com_google_googletest//:gtest_main",
     ],
 )
