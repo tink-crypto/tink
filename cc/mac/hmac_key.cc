@@ -91,8 +91,6 @@ util::StatusOr<std::string> HmacKey::ComputeOutputPrefix(
   }
 }
 
-std::string HmacKey::GetOutputPrefix() const { return output_prefix_; }
-
 bool HmacKey::operator==(const Key& other) const {
   const HmacKey* that = dynamic_cast<const HmacKey*>(&other);
   if (that == nullptr) {

@@ -90,8 +90,6 @@ util::StatusOr<std::string> AesCmacKey::ComputeOutputPrefix(
   }
 }
 
-std::string AesCmacKey::GetOutputPrefix() const { return output_prefix_; }
-
 bool AesCmacKey::operator==(const Key& other) const {
   const AesCmacKey* that = dynamic_cast<const AesCmacKey*>(&other);
   if (that == nullptr) {

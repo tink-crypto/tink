@@ -52,7 +52,7 @@ class HmacKey : public MacKey {
     return key_bytes_;
   }
 
-  std::string GetOutputPrefix() const override;
+  absl::string_view GetOutputPrefix() const override { return output_prefix_; }
 
   const HmacParameters& GetParameters() const override { return parameters_; }
 

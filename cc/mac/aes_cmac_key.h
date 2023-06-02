@@ -52,7 +52,7 @@ class AesCmacKey : public MacKey {
     return key_bytes_;
   }
 
-  std::string GetOutputPrefix() const override;
+  absl::string_view GetOutputPrefix() const override { return output_prefix_; }
 
   const AesCmacParameters& GetParameters() const override {
     return parameters_;
