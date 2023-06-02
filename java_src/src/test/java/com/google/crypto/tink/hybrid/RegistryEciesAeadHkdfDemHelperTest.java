@@ -21,39 +21,47 @@ import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
 
+import com.google.crypto.tink.Parameters;
+import com.google.crypto.tink.TinkProtoParametersFormat;
 import com.google.crypto.tink.aead.AeadConfig;
 import com.google.crypto.tink.aead.AeadKeyTemplates;
-import com.google.crypto.tink.daead.DeterministicAeadKeyTemplates;
+import com.google.crypto.tink.aead.PredefinedAeadParameters;
+import com.google.crypto.tink.daead.DeterministicAeadConfig;
+import com.google.crypto.tink.daead.PredefinedDeterministicAeadParameters;
 import com.google.crypto.tink.hybrid.subtle.AeadOrDaead;
 import com.google.crypto.tink.proto.KeyTemplate;
 import com.google.crypto.tink.signature.SignatureKeyTemplates;
 import com.google.crypto.tink.subtle.Random;
+import com.google.protobuf.ExtensionRegistryLite;
 import java.nio.charset.Charset;
 import java.security.GeneralSecurityException;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.experimental.theories.DataPoints;
+import org.junit.experimental.theories.FromDataPoints;
+import org.junit.experimental.theories.Theories;
+import org.junit.experimental.theories.Theory;
 import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
 
 /** Tests for RegistryEciesAeadHkdfDemHelper. */
-@RunWith(JUnit4.class)
+@RunWith(Theories.class)
 public class RegistryEciesAeadHkdfDemHelperTest {
   private static final Charset UTF_8 = Charset.forName("UTF-8");
 
-  private KeyTemplate[] keyTemplates;
+  @DataPoints("parameters")
+  public static final Parameters[] PARAMETERS_TO_TEST =
+      new Parameters[] {
+        PredefinedAeadParameters.AES128_GCM,
+        PredefinedAeadParameters.AES256_GCM,
+        PredefinedAeadParameters.AES128_CTR_HMAC_SHA256,
+        PredefinedAeadParameters.AES256_CTR_HMAC_SHA256,
+        PredefinedDeterministicAeadParameters.AES256_SIV
+      };
 
   @Before
   public void setUp() throws Exception {
     AeadConfig.register();
-
-    keyTemplates =
-        new KeyTemplate[] {
-          AeadKeyTemplates.AES128_GCM,
-          AeadKeyTemplates.AES256_GCM,
-          AeadKeyTemplates.AES128_CTR_HMAC_SHA256,
-          AeadKeyTemplates.AES256_CTR_HMAC_SHA256,
-          DeterministicAeadKeyTemplates.AES256_SIV
-        };
+    DeterministicAeadConfig.register();
   }
 
   @Test
@@ -111,38 +119,38 @@ public class RegistryEciesAeadHkdfDemHelperTest {
         () -> new RegistryEciesAeadHkdfDemHelper(template));
   }
 
-  @Test
-  public void testGetAead() throws Exception {
+  @Theory
+  public void testGetAead(@FromDataPoints("parameters") Parameters parameters) throws Exception {
     byte[] plaintext = "some plaintext string".getBytes(UTF_8);
     byte[] associatedData = "some associated data".getBytes(UTF_8);
-    int count = 0;
-    for (KeyTemplate template : keyTemplates) {
-      RegistryEciesAeadHkdfDemHelper helper = new RegistryEciesAeadHkdfDemHelper(template);
-      byte[] symmetricKey = Random.randBytes(helper.getSymmetricKeySizeInBytes());
-      AeadOrDaead aead = helper.getAeadOrDaead(symmetricKey);
-      byte[] ciphertext = aead.encrypt(plaintext, associatedData);
-      byte[] decrypted = aead.decrypt(ciphertext, associatedData);
-      assertArrayEquals(plaintext, decrypted);
+    KeyTemplate template =
+        KeyTemplate.parseFrom(
+            TinkProtoParametersFormat.serialize(parameters),
+            ExtensionRegistryLite.getEmptyRegistry());
 
-      // Try using a symmetric key that is too short.
-      final byte[] symmetricKey2 = Random.randBytes(helper.getSymmetricKeySizeInBytes() - 1);
-      GeneralSecurityException e =
-          assertThrows(
-              "Symmetric key too short, should have thrown exception:\n" + template.toString(),
-              GeneralSecurityException.class,
-              () -> helper.getAeadOrDaead(symmetricKey2));
-      assertExceptionContains(e, "incorrect length");
+    RegistryEciesAeadHkdfDemHelper helper = new RegistryEciesAeadHkdfDemHelper(template);
+    byte[] symmetricKey = Random.randBytes(helper.getSymmetricKeySizeInBytes());
+    AeadOrDaead aead = helper.getAeadOrDaead(symmetricKey);
+    byte[] ciphertext = aead.encrypt(plaintext, associatedData);
+    byte[] decrypted = aead.decrypt(ciphertext, associatedData);
+    assertArrayEquals(plaintext, decrypted);
 
-      // Try using a symmetric key that is too long.
-      final byte[] symmetricKey3 = Random.randBytes(helper.getSymmetricKeySizeInBytes() + 1);
-      e =
-          assertThrows(
-              "Symmetric key too long, should have thrown exception:\n" + template.toString(),
-              GeneralSecurityException.class,
-              () -> helper.getAeadOrDaead(symmetricKey3));
-      assertExceptionContains(e, "incorrect length");
-      count++;
-    }
-    assertEquals(keyTemplates.length, count);
+    // Try using a symmetric key that is too short.
+    final byte[] symmetricKey2 = Random.randBytes(helper.getSymmetricKeySizeInBytes() - 1);
+    GeneralSecurityException e =
+        assertThrows(
+            "Symmetric key too short, should have thrown exception:\n" + template,
+            GeneralSecurityException.class,
+            () -> helper.getAeadOrDaead(symmetricKey2));
+    assertExceptionContains(e, "incorrect length");
+
+    // Try using a symmetric key that is too long.
+    final byte[] symmetricKey3 = Random.randBytes(helper.getSymmetricKeySizeInBytes() + 1);
+    e =
+        assertThrows(
+            "Symmetric key too long, should have thrown exception:\n" + template,
+            GeneralSecurityException.class,
+            () -> helper.getAeadOrDaead(symmetricKey3));
+    assertExceptionContains(e, "incorrect length");
   }
 }
