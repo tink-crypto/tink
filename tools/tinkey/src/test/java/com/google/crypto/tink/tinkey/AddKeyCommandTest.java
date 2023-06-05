@@ -17,113 +17,232 @@
 package com.google.crypto.tink.tinkey;
 
 import static com.google.common.truth.Truth.assertThat;
-import static org.junit.Assert.fail;
+import static java.nio.charset.StandardCharsets.UTF_8;
+import static org.junit.Assert.assertThrows;
 
-import com.google.crypto.tink.KeyTemplate;
-import com.google.crypto.tink.KeyTemplates;
-import com.google.crypto.tink.KeysetReader;
+import com.google.crypto.tink.Aead;
+import com.google.crypto.tink.InsecureSecretKeyAccess;
+import com.google.crypto.tink.KeysetHandle;
+import com.google.crypto.tink.KmsClients;
+import com.google.crypto.tink.TinkJsonProtoKeysetFormat;
+import com.google.crypto.tink.TinkProtoKeysetFormat;
 import com.google.crypto.tink.mac.MacConfig;
-import com.google.crypto.tink.proto.EncryptedKeyset;
-import com.google.crypto.tink.proto.Keyset;
-import com.google.crypto.tink.proto.KeysetInfo;
+import com.google.crypto.tink.mac.PredefinedMacParameters;
 import com.google.crypto.tink.testing.TestUtil;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
-/**
- * Tests for {@code AddKeyCommand}.
- */
+/** Tests for {@code AddKeyCommand}. */
 @RunWith(JUnit4.class)
 public class AddKeyCommandTest {
-  private static KeyTemplate existingTemplate;
-  private static KeyTemplate newTemplate;
-  private static final String OUTPUT_FORMAT = "json";
-  private static final String INPUT_FORMAT = "json";
-
   @BeforeClass
   public static void setUp() throws Exception {
     MacConfig.register();
-    existingTemplate = KeyTemplates.get("HMAC_SHA256_128BITTAG");
-    newTemplate = KeyTemplates.get("HMAC_SHA256_256BITTAG");
-  }
-
-  private KeysetReader addNewKeyToKeyset(String outFormat, InputStream inputStream,
-      String inFormat, String masterKeyUri, String credentialPath, KeyTemplate template)
-      throws Exception {
-    ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-    AddKeyCommand.add(
-        outputStream, outFormat,
-        inputStream, inFormat,
-        masterKeyUri, credentialPath,
-        template);
-    return TinkeyUtil.createKeysetReader(
-        new ByteArrayInputStream(outputStream.toByteArray()), outFormat);
   }
 
   @Test
-  public void testAddCleartext_shouldAddNewKey() throws Exception {
-    // Create an input stream containing a cleartext keyset.
-    String masterKeyUri = null;
-    String credentialPath = null;
-    InputStream inputStream =
-        TinkeyUtil.createKeyset(existingTemplate, INPUT_FORMAT, masterKeyUri, credentialPath);
-    // Add a new key to the existing keyset.
-    Keyset keyset =
-        addNewKeyToKeyset(
-                OUTPUT_FORMAT, inputStream, INPUT_FORMAT, masterKeyUri, credentialPath, newTemplate)
-            .read();
+  public void testAddKey_json_works() throws Exception {
+    Path path = Files.createTempDirectory(/* prefix= */ "");
+    Path inputFile = Paths.get(path.toString(), "input");
+    Path outputFile = Paths.get(path.toString(), "output");
 
-    assertThat(keyset.getKeyCount()).isEqualTo(2);
-    assertThat(keyset.getPrimaryKeyId()).isEqualTo(keyset.getKey(0).getKeyId());
-    TestUtil.assertHmacKey(existingTemplate, keyset.getKey(0));
-    TestUtil.assertHmacKey(newTemplate, keyset.getKey(1));
+    KeysetHandle inputKeyset =
+        KeysetHandle.generateNew(PredefinedMacParameters.HMAC_SHA256_128BITTAG);
+    String serializedKeyset =
+        TinkJsonProtoKeysetFormat.serializeKeyset(inputKeyset, InsecureSecretKeyAccess.get());
+    Files.write(inputFile, serializedKeyset.getBytes(UTF_8));
+
+    Tinkey.main(
+        new String[] {
+          "add-key",
+          "--in",
+          inputFile.toString(),
+          "--out",
+          outputFile.toString(),
+          "--key-template",
+          "HMAC_SHA256_256BITTAG",
+        });
+
+    KeysetHandle handle =
+        TinkJsonProtoKeysetFormat.parseKeyset(
+            new String(Files.readAllBytes(outputFile), UTF_8), InsecureSecretKeyAccess.get());
+
+    assertThat(handle.size()).isEqualTo(2);
+    assertThat(handle.getAt(0).getKey().equalsKey(inputKeyset.getAt(0).getKey())).isTrue();
+    assertThat(handle.getAt(0).isPrimary()).isTrue();
+    assertThat(handle.getAt(1).getKey().getParameters())
+        .isEqualTo(PredefinedMacParameters.HMAC_SHA256_256BITTAG);
+    assertThat(handle.getAt(1).isPrimary()).isFalse();
   }
 
   @Test
-  public void testAddCleartext_shouldThrowExceptionIfExistingKeysetIsEmpty() throws Exception {
-    InputStream emptyStream = new ByteArrayInputStream(new byte[0]);
-    String masterKeyUri = null; // This ensures that the keyset won't be encrypted.
-    String credentialPath = null;
-    ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+  public void testAddKey_binary_works() throws Exception {
+    Path path = Files.createTempDirectory(/* prefix= */ "");
+    Path inputFile = Paths.get(path.toString(), "input");
+    Path outputFile = Paths.get(path.toString(), "output");
 
-    try {
-      AddKeyCommand.add(
-          outputStream,
-          OUTPUT_FORMAT,
-          emptyStream,
-          INPUT_FORMAT,
-          masterKeyUri,
-          credentialPath,
-          newTemplate);
-      fail("Expected IOException");
-    } catch (IOException e) {
-      // expected
-    }
+    KeysetHandle inputKeyset =
+        KeysetHandle.generateNew(PredefinedMacParameters.HMAC_SHA256_128BITTAG);
+    byte[] serializedKeyset =
+        TinkProtoKeysetFormat.serializeKeyset(inputKeyset, InsecureSecretKeyAccess.get());
+    Files.write(inputFile, serializedKeyset);
+
+    Tinkey.main(
+        new String[] {
+          "add-key",
+          "--in",
+          inputFile.toString(),
+          "--in-format",
+          "binary",
+          "--out",
+          outputFile.toString(),
+          "--out-format",
+          "binary",
+          "--key-template",
+          "HMAC_SHA256_256BITTAG",
+        });
+
+    KeysetHandle handle =
+        TinkProtoKeysetFormat.parseKeyset(
+            Files.readAllBytes(outputFile), InsecureSecretKeyAccess.get());
+
+    assertThat(handle.size()).isEqualTo(2);
+    assertThat(handle.getAt(0).getKey().equalsKey(inputKeyset.getAt(0).getKey())).isTrue();
+    assertThat(handle.getAt(0).isPrimary()).isTrue();
+    assertThat(handle.getAt(1).getKey().getParameters())
+        .isEqualTo(PredefinedMacParameters.HMAC_SHA256_256BITTAG);
+    assertThat(handle.getAt(1).isPrimary()).isFalse();
   }
 
   @Test
-  public void testAddEncrypted_shouldAddNewKey() throws Exception {
-    // Create an input stream containing an encrypted keyset.
-    String masterKeyUri = TestUtil.GCP_KMS_TEST_KEY_URI;
-    String credentialPath = TestUtil.SERVICE_ACCOUNT_FILE;
-    InputStream inputStream =
-        TinkeyUtil.createKeyset(existingTemplate, INPUT_FORMAT, masterKeyUri, credentialPath);
-    EncryptedKeyset encryptedKeyset =
-        addNewKeyToKeyset(
-                OUTPUT_FORMAT, inputStream, INPUT_FORMAT, masterKeyUri, credentialPath, newTemplate)
-            .readEncrypted();
-    KeysetInfo keysetInfo = encryptedKeyset.getKeysetInfo();
+  public void testAddKey_binaryEncrypted_works() throws Exception {
+    Path path = Files.createTempDirectory(/* prefix= */ "");
+    Path inputFile = Paths.get(path.toString(), "input");
+    Path outputFile = Paths.get(path.toString(), "output");
 
-    assertThat(keysetInfo.getKeyInfoCount()).isEqualTo(2);
-    assertThat(keysetInfo.getPrimaryKeyId()).isEqualTo(keysetInfo.getKeyInfo(0).getKeyId());
-    TestUtil.assertKeyInfo(existingTemplate, keysetInfo.getKeyInfo(0));
-    TestUtil.assertKeyInfo(newTemplate, keysetInfo.getKeyInfo(0));
+    Aead masterKeyAead =
+        KmsClients.getAutoLoaded(TestUtil.GCP_KMS_TEST_KEY_URI)
+            .withCredentials(TestUtil.SERVICE_ACCOUNT_FILE)
+            .getAead(TestUtil.GCP_KMS_TEST_KEY_URI);
+
+    KeysetHandle inputKeyset =
+        KeysetHandle.generateNew(PredefinedMacParameters.HMAC_SHA256_128BITTAG);
+    byte[] serializedKeyset =
+        TinkProtoKeysetFormat.serializeEncryptedKeyset(inputKeyset, masterKeyAead, new byte[] {});
+    Files.write(inputFile, serializedKeyset);
+
+    Tinkey.main(
+        new String[] {
+          "add-key",
+          "--in",
+          inputFile.toString(),
+          "--in-format",
+          "binary",
+          "--out",
+          outputFile.toString(),
+          "--out-format",
+          "binary",
+          "--key-template",
+          "HMAC_SHA256_256BITTAG",
+          "--master-key-uri",
+          TestUtil.GCP_KMS_TEST_KEY_URI,
+          "--credential",
+          TestUtil.SERVICE_ACCOUNT_FILE
+        });
+
+    KeysetHandle handle =
+        TinkProtoKeysetFormat.parseEncryptedKeyset(
+            Files.readAllBytes(outputFile), masterKeyAead, new byte[] {});
+
+    assertThat(handle.size()).isEqualTo(2);
+    assertThat(handle.getAt(0).getKey().equalsKey(inputKeyset.getAt(0).getKey())).isTrue();
+    assertThat(handle.getAt(0).isPrimary()).isTrue();
+    assertThat(handle.getAt(1).getKey().getParameters())
+        .isEqualTo(PredefinedMacParameters.HMAC_SHA256_256BITTAG);
+    assertThat(handle.getAt(1).isPrimary()).isFalse();
   }
 
+  @Test
+  public void testAddKey_jsonEncrypted_works() throws Exception {
+    Path path = Files.createTempDirectory(/* prefix= */ "");
+    Path inputFile = Paths.get(path.toString(), "input");
+    Path outputFile = Paths.get(path.toString(), "output");
+
+    Aead masterKeyAead =
+        KmsClients.getAutoLoaded(TestUtil.GCP_KMS_TEST_KEY_URI)
+            .withCredentials(TestUtil.SERVICE_ACCOUNT_FILE)
+            .getAead(TestUtil.GCP_KMS_TEST_KEY_URI);
+
+    KeysetHandle inputKeyset =
+        KeysetHandle.generateNew(PredefinedMacParameters.HMAC_SHA256_128BITTAG);
+    String serializedKeyset =
+        TinkJsonProtoKeysetFormat.serializeEncryptedKeyset(
+            inputKeyset, masterKeyAead, new byte[] {});
+    Files.write(inputFile, serializedKeyset.getBytes(UTF_8));
+
+    Tinkey.main(
+        new String[] {
+          "add-key",
+          "--in",
+          inputFile.toString(),
+          "--in-format",
+          "json",
+          "--out",
+          outputFile.toString(),
+          "--out-format",
+          "json",
+          "--key-template",
+          "HMAC_SHA256_256BITTAG",
+          "--master-key-uri",
+          TestUtil.GCP_KMS_TEST_KEY_URI,
+          "--credential",
+          TestUtil.SERVICE_ACCOUNT_FILE
+        });
+
+    KeysetHandle handle =
+        TinkJsonProtoKeysetFormat.parseEncryptedKeyset(
+            new String(Files.readAllBytes(outputFile), UTF_8), masterKeyAead, new byte[] {});
+
+    assertThat(handle.size()).isEqualTo(2);
+    assertThat(handle.getAt(0).getKey().equalsKey(inputKeyset.getAt(0).getKey())).isTrue();
+    assertThat(handle.getAt(0).isPrimary()).isTrue();
+    assertThat(handle.getAt(1).getKey().getParameters())
+        .isEqualTo(PredefinedMacParameters.HMAC_SHA256_256BITTAG);
+    assertThat(handle.getAt(1).isPrimary()).isFalse();
+  }
+
+  @Test
+  public void testAddKey_notValidKeyset_fails() throws Exception {
+    Path path = Files.createTempDirectory(/* prefix= */ "");
+    Path inputFile = Paths.get(path.toString(), "input");
+    Path outputFile = Paths.get(path.toString(), "output");
+    Files.write(inputFile, new byte[] {});
+
+    assertThrows(
+        Exception.class,
+        () ->
+            Tinkey.main(
+                new String[] {
+                  "add-key",
+                  "--in",
+                  inputFile.toString(),
+                  "--in-format",
+                  "binary",
+                  "--out",
+                  outputFile.toString(),
+                  "--out-format",
+                  "binary",
+                  "--key-template",
+                  "HMAC_SHA256_256BITTAG",
+                  "--master-key-uri",
+                  TestUtil.GCP_KMS_TEST_KEY_URI,
+                  "--credential",
+                  TestUtil.SERVICE_ACCOUNT_FILE
+                }));
+  }
 }
