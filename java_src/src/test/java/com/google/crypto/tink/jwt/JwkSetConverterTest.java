@@ -59,8 +59,8 @@ public final class JwkSetConverterTest {
       "{\"keys\":[{"
           + "\"kty\":\"EC\","
           + "\"crv\":\"P-256\","
-          + "\"x\":\"EM8jrqGMse-PGZQnafIcgEOZ061DiA-y9aBhiBnSDKA\","
-          + "\"y\":\"UxCtK0wAqQG_e5vpr7SSgJNKt5h4z3FGZtAuBLng1uE\","
+          + "\"x\":\"ABDPI66hjLHvjxmUJ2nyHIBDmdOtQ4gPsvWgYYgZ0gyg\","
+          + "\"y\":\"AFMQrStMAKkBv3ub6a-0koCTSreYeM9xRmbQLgS54Nbh\","
           + "\"use\":\"sig\",\"alg\":\"ES256\",\"key_ops\":[\"verify\"]}]}";
 
   private static final String ES256_KEYSET_TINK =
@@ -74,8 +74,8 @@ public final class JwkSetConverterTest {
       "{\"keys\":[{"
           + "\"kty\":\"EC\","
           + "\"crv\":\"P-256\","
-          + "\"x\":\"EM8jrqGMse-PGZQnafIcgEOZ061DiA-y9aBhiBnSDKA\","
-          + "\"y\":\"UxCtK0wAqQG_e5vpr7SSgJNKt5h4z3FGZtAuBLng1uE\","
+          + "\"x\":\"ABDPI66hjLHvjxmUJ2nyHIBDmdOtQ4gPsvWgYYgZ0gyg\","
+          + "\"y\":\"AFMQrStMAKkBv3ub6a-0koCTSreYeM9xRmbQLgS54Nbh\","
           + "\"use\":\"sig\",\"alg\":\"ES256\",\"key_ops\":[\"verify\"],"
           + "\"kid\":\"ENgjPA\"}]}";
 
@@ -89,7 +89,7 @@ public final class JwkSetConverterTest {
   private static final String ES384_JWK_SET =
       "{\"keys\":[{\"kty\":\"EC\",\"crv\":\"P-384\","
           + "\"x\":\"ANKO9aKGgoaavieUO4j8qS-4-8Rmv4HhtTQy5dBBeDI0wYCkWbaJN6i2_ssJKwbeZA\","
-          + "\"y\":\"QcgwbHjBr5jzJ4lBYyJKm6Sk8zuM_0aprKRlBDYZj80uD-f34Em2e2C8WEbmBYtO\","
+          + "\"y\":\"AEHIMGx4wa-Y8yeJQWMiSpukpPM7jP9GqaykZQQ2GY_NLg_n9-BJtntgvFhG5gWLTg\","
           + "\"use\":\"sig\",\"alg\":\"ES384\",\"key_ops\":[\"verify\"]}]}";
 
   private static final String ES512_KEYSET =
@@ -102,10 +102,8 @@ public final class JwkSetConverterTest {
           + "},\"status\":\"ENABLED\",\"keyId\":1570200439,\"outputPrefixType\":\"RAW\"}]}";
   private static final String ES512_JWK_SET =
       "{\"keys\":[{\"kty\":\"EC\",\"crv\":\"P-521\","
-          + "\"x\":\"ARXefB5F6PpnX9o9OoKRzW1CVrl5Ujrz6p_BHWQH_BcK5gIHmi1quGiZS3rgVqH_xON_RYkcxnIWvz"
-          + "pFSK2JFCbV\","
-          + "\"y\":\"ATht_NOX8RcbaEr1MaH-0BFTaepvpTzSfQ04C2P8VCoURB3GeVKk4VQh8O_KLSYfX-58bqEnaZ0G7W"
-          + "9qjHa2ols2\","
+          + "\"x\":\"AAEV3nweRej6Z1_aPTqCkc1tQla5eVI68-qfwR1kB_wXCuYCB5otarhomUt64Fah_8Tjf0WJHMZyFr86RUitiRQm1Q\","
+          + "\"y\":\"AAE4bfzTl_EXG2hK9TGh_tARU2nqb6U80n0NOAtj_FQqFEQdxnlSpOFUIfDvyi0mH1_ufG6hJ2mdBu1vaox2tqJbNg\","
           + "\"use\":\"sig\",\"alg\":\"ES512\",\"key_ops\":[\"verify\"]}]}";
 
   private static final String RS256_KEYSET =
@@ -326,8 +324,8 @@ public final class JwkSetConverterTest {
       "{\"keys\":[{"
           + "\"kty\":\"EC\","
           + "\"crv\":\"P-256\","
-          + "\"x\":\"EM8jrqGMse-PGZQnafIcgEOZ061DiA-y9aBhiBnSDKA\","
-          + "\"y\":\"UxCtK0wAqQG_e5vpr7SSgJNKt5h4z3FGZtAuBLng1uE\","
+          + "\"x\":\"ABDPI66hjLHvjxmUJ2nyHIBDmdOtQ4gPsvWgYYgZ0gyg\","
+          + "\"y\":\"AFMQrStMAKkBv3ub6a-0koCTSreYeM9xRmbQLgS54Nbh\","
           + "\"use\":\"sig\",\"alg\":\"ES256\",\"key_ops\":[\"verify\"]},"
           + "{\"kty\":\"RSA\","
           + "\"n\":\"AJLKZN-5Rgal5jz6tgi-SnQ3kce8RYk2naS943OJ12qn7QraTOqhMX63NiS2iLJ8KcHxjApX3v2pSL"
@@ -336,7 +334,6 @@ public final class JwkSetConverterTest {
           + "EdUgU3ttAbdQJqWQ09g5n5pW_0NVBY4_xdwu-zQjUN-OGXABCONh2ProoIcuRnSkERzKE09Ts8gxvdAAY4IEKg"
           + "xlvs188\","
           + "\"e\":\"AQAB\",\"use\":\"sig\",\"alg\":\"RS256\",\"key_ops\":[\"verify\"]}]}";
-
 
   private static void assertEqualJwkSets(String jwkSet1, String jwkSet2) throws Exception {
     // Consider these strings equal, if their equal after parsing them.

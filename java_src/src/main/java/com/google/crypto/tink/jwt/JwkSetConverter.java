@@ -18,6 +18,7 @@ package com.google.crypto.tink.jwt;
 
 import com.google.crypto.tink.KeyStatus;
 import com.google.crypto.tink.KeysetHandle;
+import com.google.crypto.tink.internal.BigIntegerEncoding;
 import com.google.crypto.tink.internal.MutableSerializationRegistry;
 import com.google.crypto.tink.internal.ProtoKeySerialization;
 import com.google.crypto.tink.proto.JwtEcdsaAlgorithm;
@@ -42,6 +43,7 @@ import com.google.protobuf.ExtensionRegistryLite;
 import com.google.protobuf.InvalidProtocolBufferException;
 import java.io.IOException;
 import java.io.StringReader;
+import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.security.GeneralSecurityException;
 import java.util.Optional;
@@ -179,18 +181,25 @@ public final class JwkSetConverter {
     }
     String alg;
     String crv;
+    // We currently encode with one extra 0 byte at the beginning, to make sure
+    // that parsing is correct even if passing of a two's complement encoding is used.
+    // See also b/264525021.
+    int encLength;
     switch (jwtEcdsaPublicKey.getAlgorithm()) {
       case ES256:
         alg = "ES256";
         crv = "P-256";
+        encLength = 33;
         break;
       case ES384:
         alg = "ES384";
         crv = "P-384";
+        encLength = 49;
         break;
       case ES512:
         alg = "ES512";
         crv = "P-521";
+        encLength = 67;
         break;
       default:
         throw new GeneralSecurityException("unknown algorithm");
@@ -198,8 +207,14 @@ public final class JwkSetConverter {
     JsonObject jsonKey = new JsonObject();
     jsonKey.addProperty("kty", "EC");
     jsonKey.addProperty("crv", crv);
-    jsonKey.addProperty("x", Base64.urlSafeEncode(jwtEcdsaPublicKey.getX().toByteArray()));
-    jsonKey.addProperty("y", Base64.urlSafeEncode(jwtEcdsaPublicKey.getY().toByteArray()));
+    BigInteger x =
+        BigIntegerEncoding.fromUnsignedBigEndianBytes(jwtEcdsaPublicKey.getX().toByteArray());
+    BigInteger y =
+        BigIntegerEncoding.fromUnsignedBigEndianBytes(jwtEcdsaPublicKey.getY().toByteArray());
+    jsonKey.addProperty(
+        "x", Base64.urlSafeEncode(BigIntegerEncoding.toBigEndianBytesOfFixedLength(x, encLength)));
+    jsonKey.addProperty(
+        "y", Base64.urlSafeEncode(BigIntegerEncoding.toBigEndianBytesOfFixedLength(y, encLength)));
     jsonKey.addProperty("use", "sig");
     jsonKey.addProperty("alg", alg);
     JsonArray keyOps = new JsonArray();
