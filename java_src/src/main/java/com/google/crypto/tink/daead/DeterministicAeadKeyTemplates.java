@@ -38,9 +38,8 @@ import com.google.crypto.tink.proto.OutputPrefixType;
  * <p>Instead, we recommend to use {@code KeysetHandle.generateEntryFromParametersName} or {@code
  * KeysetHandle.generateEntryFromParameters}.
  *
- * One can use these templates
- * to generate new {@code Keyset} with {@code KeysetHandle}. To generate a new keyset that contains
- * a single {@code AesSivKey}, one can do:
+ * <p>One can use these templates to generate new {@code Keyset} with {@code KeysetHandle}. To
+ * generate a new keyset that contains a single {@code AesSivKey}, one can do:
  *
  * <pre>
  *   Config.register(DeterministicAeadConfig.TINK_1_1_0);
@@ -49,7 +48,9 @@ import com.google.crypto.tink.proto.OutputPrefixType;
  * </pre>
  *
  * @since 1.1.0
+ * @deprecated Use {@link PredefinedDeterministicAeadParameters} instead.
  */
+@Deprecated
 public final class DeterministicAeadKeyTemplates {
   /** A {@code KeyTemplate} that generates new instances of {@code AesSivKey} with a 64-byte key. */
   public static final KeyTemplate AES256_SIV = createAesSivKeyTemplate(64);
