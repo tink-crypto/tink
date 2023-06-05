@@ -7,7 +7,7 @@
 absl-py==1.3.0 \
     --hash=sha256:34995df9bd7a09b3b8749e230408f5a2a2dd7a68a0d33c12a3d0cb15a041a507 \
     --hash=sha256:463c38a08d2e4cef6c498b76ba5bd4858e4c6ef51da1a5a1f27139a022e20248
-    # via -r requirements.in
+    # via -r examples/requirements.in
 cachetools==5.2.0 \
     --hash=sha256:6a94c6402995a99c3970cc7e4884bb60b4a8639938157eeed436098bf9831757 \
     --hash=sha256:f9f17d2aec496a9aa6b76f53e3b614c965223c061982d434d160f930c698a9db
@@ -24,7 +24,7 @@ google-api-core==2.10.1 \
     --hash=sha256:92d17123cfe399b5ef7e026c63babf978d8475e1ac877919eb7933e25dea2273 \
     --hash=sha256:e16c15a11789bc5a3457afb2818a3540a03f341e6e710d7f9bbf6cde2ef4a7c8
     # via
-    #   -c constraints.in
+    #   -c examples/constraints.in
     #   google-cloud-core
     #   google-cloud-storage
 google-auth==2.13.0 \
@@ -41,7 +41,7 @@ google-cloud-core==2.3.2 \
 google-cloud-storage==2.5.0 \
     --hash=sha256:19a26c66c317ce542cea0830b7e787e8dac2588b6bfa4d3fd3b871ba16305ab0 \
     --hash=sha256:382f34b91de2212e3c2e7b40ec079d27ee2e3dbbae99b75b1bcd8c63063ce235
-    # via -r requirements.in
+    # via -r examples/requirements.in
 google-crc32c==1.5.0 \
     --hash=sha256:024894d9d3cfbc5943f8f230e23950cd4906b2fe004c72e29b209420a1e6b05a \
     --hash=sha256:02c65b9817512edc6a4ae7c7e987fea799d2e0ee40c53ec573a692bee24de876 \
@@ -140,7 +140,7 @@ protobuf==4.21.9 \
     --hash=sha256:e575c57dc8b5b2b2caa436c16d44ef6981f2235eb7179bfc847557886376d740 \
     --hash=sha256:f9eae277dd240ae19bb06ff4e2346e771252b0e619421965504bd1b1bba7c5fa
     # via
-    #   -r requirements.in
+    #   -r examples/requirements.in
     #   google-api-core
     #   googleapis-common-protos
 pyasn1==0.4.8 \
@@ -153,9 +153,9 @@ pyasn1-modules==0.2.8 \
     --hash=sha256:905f84c712230b2c592c19470d3ca8d552de726050d1d1716282a1f6146be65e \
     --hash=sha256:a50b808ffeb97cb3601dd25981f6b016cbb3d31fbf57a8b8a87428e6158d0c74
     # via google-auth
-requests==2.28.1 \
-    --hash=sha256:7c5599b102feddaa661c826c56ab4fee28bfd17f5abca1ebbe3e7f19d7c97983 \
-    --hash=sha256:8fefa2a1a1365bf5520aac41836fbee479da67864514bdb821f31ce07ce65349
+requests==2.31.0 \
+    --hash=sha256:58cd2187c01e70e6e26505bca751777aa9f2ee0b7f4300988b709f44e013003f \
+    --hash=sha256:942c5a758f98d790eaed1a29cb6eefc7ffb0d1cf7af05c3d2791656dbd6ad1e1
     # via
     #   google-api-core
     #   google-cloud-storage
