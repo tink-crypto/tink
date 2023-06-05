@@ -573,7 +573,9 @@ public final class Registry {
    * {@link KeyManager#newKey} with {@code format} as the parameter.
    *
    * @return a new key
+   * @deprecated Use {@code newKeyData} instead.
    */
+  @Deprecated
   public static synchronized MessageLite newKey(String typeUrl, MessageLite format)
       throws GeneralSecurityException {
     KeyManager<?> manager = getKeyManager(typeUrl);
