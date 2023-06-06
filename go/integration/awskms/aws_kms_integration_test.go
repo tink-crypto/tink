@@ -35,11 +35,10 @@ import (
 const (
 	keyAliasURI = "aws-kms://arn:aws:kms:us-east-2:235739564943:alias/unit-and-integration-testing"
 	keyURI      = "aws-kms://arn:aws:kms:us-east-2:235739564943:key/3ee50705-5a82-4f5b-9753-05c4f473922f"
-	profile     = "tink-user1"
 )
 
 var (
-	credFile    = "tink_go/testdata/aws/credentials.csv"
+	credCSVFile = "tink_go/testdata/aws/credentials.csv"
 	credINIFile = "tink_go/testdata/aws/credentials.ini"
 )
 
@@ -49,27 +48,14 @@ func init() {
 	os.Setenv("SSL_CERT_FILE", certPath)
 }
 
-func setupKMS(t *testing.T, credPath string, uri string) {
-	t.Helper()
-	client, err := awskms.NewClientWithOptions(keyURI, awskms.WithCredentialPath(credPath))
-	if err != nil {
-		t.Fatalf("error setting up aws client: %v", err)
-	}
-	// The registry will return the first KMS client that claims support for
-	// the keyURI.  The tests re-use the same keyURI, so clear any clients
-	// registered by earlier tests before registering the new client.
-	registry.ClearKMSClients()
-	registry.RegisterKMSClient(client)
-}
-
 func TestNewClientWithCredentialsGetAEADEncryptDecrypt(t *testing.T) {
 	srcDir, ok := os.LookupEnv("TEST_SRCDIR")
 	if !ok {
 		t.Skip("TEST_SRCDIR not set")
 	}
-	client, err := awskms.NewClientWithOptions(keyURI, awskms.WithCredentialPath(filepath.Join(srcDir, credFile)))
+	client, err := awskms.NewClientWithOptions(keyURI, awskms.WithCredentialPath(filepath.Join(srcDir, credCSVFile)))
 	if err != nil {
-		t.Fatalf("error setting up aws client: %v", err)
+		t.Fatalf("error setting up AWS client: %v", err)
 	}
 	a, err := client.GetAEAD(keyURI)
 	if err != nil {
@@ -101,9 +87,9 @@ func TestEmptyAssociatedDataEncryptDecrypt(t *testing.T) {
 	if !ok {
 		t.Skip("TEST_SRCDIR not set")
 	}
-	client, err := awskms.NewClientWithOptions(keyURI, awskms.WithCredentialPath(filepath.Join(srcDir, credFile)))
+	client, err := awskms.NewClientWithOptions(keyURI, awskms.WithCredentialPath(filepath.Join(srcDir, credCSVFile)))
 	if err != nil {
-		t.Fatalf("error setting up aws client: %v", err)
+		t.Fatalf("error setting up AWS client: %v", err)
 	}
 	a, err := client.GetAEAD(keyURI)
 	if err != nil {
@@ -132,14 +118,27 @@ func TestEmptyAssociatedDataEncryptDecrypt(t *testing.T) {
 	}
 }
 
+func setupKMS(t *testing.T, credPath string, uri string) {
+	t.Helper()
+	client, err := awskms.NewClientWithOptions(keyURI, awskms.WithCredentialPath(credPath))
+	if err != nil {
+		t.Fatalf("error setting up AWS client: %v", err)
+	}
+	// The registry will return the first KMS client that claims support for
+	// the keyURI.  The tests re-use the same keyURI, so clear any clients
+	// registered by earlier tests before registering the new client.
+	registry.ClearKMSClients()
+	registry.RegisterKMSClient(client)
+}
+
 func TestKMSEnvelopeAEADEncryptAndDecrypt(t *testing.T) {
 	srcDir, ok := os.LookupEnv("TEST_SRCDIR")
 	if !ok {
 		t.Skip("TEST_SRCDIR not set")
 	}
 
-	for _, file := range []string{credFile, credINIFile} {
-		setupKMS(t, filepath.Join(srcDir, file), keyURI)
+	for _, credFile := range []string{credCSVFile, credINIFile} {
+		setupKMS(t, filepath.Join(srcDir, credFile), keyURI)
 		dek := aead.AES128CTRHMACSHA256KeyTemplate()
 		template, err := aead.CreateKMSEnvelopeAEADKeyTemplate(keyURI, dek)
 		if err != nil {
