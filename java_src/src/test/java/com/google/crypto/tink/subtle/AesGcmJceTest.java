@@ -99,7 +99,7 @@ public class AesGcmJceTest {
   }
 
   @Test
-  /** BC had a bug, where GCM failed for messages of size > 8192 */
+  /* BC had a bug, where GCM failed for messages of size > 8192 */
   public void testLongMessages() throws Exception {
     Assume.assumeTrue(!TinkFips.useOnlyFips() || TinkFipsUtil.fipsModuleAvailable());
     Assume.assumeFalse(TestUtil.isAndroid()); // doesn't work on Android
@@ -313,7 +313,7 @@ public class AesGcmJceTest {
   }
 
   @Test
-  /**
+  /*
    * This is a very simple test for the randomness of the nonce. The test simply checks that the
    * multiple ciphertexts of the same message are distinct.
    */

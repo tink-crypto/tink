@@ -95,7 +95,7 @@ public class ChaCha20Poly1305Test {
   }
 
   @Test
-  /** BC had a bug, where GCM failed for messages of size > 8192 */
+  /* BC had a bug, where GCM failed for messages of size > 8192 */
   public void testLongMessages() throws Exception {
     Assume.assumeFalse(TinkFips.useOnlyFips());
     Assume.assumeFalse(TestUtil.isAndroid()); // Doesn't work on Android

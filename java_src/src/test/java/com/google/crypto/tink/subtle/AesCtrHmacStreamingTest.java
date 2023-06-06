@@ -382,7 +382,7 @@ public class AesCtrHmacStreamingTest {
   }
 
   @Test
-  /**
+  /*
    * Encrypts a plaintext consisting of 0's and checks that the ciphertext has no repeating blocks.
    * This is a simple test to catch basic errors that violate semantic security. The probability of
    * false positives is smaller than 2^{-100}.
