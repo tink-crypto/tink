@@ -1,0 +1,39 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+package(default_visibility = ["//:__subpackages__"])  # keep
+
+licenses(["notice"])  # keep
+
+go_library(
+    name = "kmsaead",
+    testonly = 1,
+    srcs = ["key_manager.go"],
+    importpath = "github.com/google/tink/go/aead/internal/testing/kmsaead",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//core/registry",
+        "//keyset",
+        "//proto/kms_aead_go_proto",
+        "//proto/tink_go_proto",
+        "@org_golang_google_protobuf//proto",
+    ],
+)
+
+go_test(
+    name = "kmsaead_test",
+    testonly = 1,
+    srcs = ["key_manager_test.go"],
+    deps = [
+        ":kmsaead",
+        "//aead",
+        "//core/registry",
+        "//keyset",
+        "//testing/fakekms",
+    ],
+)
+
+alias(
+    name = "go_default_library",
+    actual = ":kmsaead",
+    visibility = ["//aead:__subpackages__"],
+)
