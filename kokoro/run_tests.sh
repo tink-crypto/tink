@@ -121,10 +121,13 @@ run_py_examples_tests() {
   ## Install Tink and its dependencies via pip for the examples/python tests.
   source ./kokoro/testutils/install_tink_via_pip.sh "${PWD}/python"
   if [[ "${IS_KOKORO}" == "true" ]]; then
+    local pip_flags=( --require-hashes )
+    if [[ "${PLATFORM}" == "darwin" ]]; then
+      pip_flags+=( --user )
+    fi
+    readonly pip_flags
     # Install dependencies for the examples/python tests.
-    pip3 install "${PIP_FLAGS[@]}" \
-      -r python/examples/requirements.txt \
-      -c python/examples/constraints.in
+    pip3 install "${pip_flags[@]}" -r python/examples/requirements.txt
   fi
 
   local -a MANUAL_EXAMPLE_PYTHON_TARGETS

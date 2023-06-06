@@ -1,2 +1,0 @@
-# This is to prevent using an incompatible version of protobuf (b/253216420).
-google-api-core==2.10.1
