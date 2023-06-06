@@ -19,8 +19,6 @@ package awskms
 
 import (
 	"encoding/hex"
-	"errors"
-	"strings"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/kms"
@@ -68,16 +66,7 @@ func (a *AWSAEAD) Encrypt(plaintext, associatedData []byte) ([]byte, error) {
 	return resp.CiphertextBlob, nil
 }
 
-// Decrypt decrypts the data and verifies the associated data.
-//
-// Returns an error if the KeyId field in the response does not match the key
-// URI provided when creating the client. This is to exclude the case where
-// ciphertext is encrypted with a key that the user doesn't control/expect, but
-// it is a key the user is permitted to use.
-//
-// WARNING: This check is disabled if the key URI is not in key ARN format.
-//
-// See https://docs.aws.amazon.com/kms/latest/developerguide/concepts.html#key-id.
+// Decrypt decrypts the ciphertext and verifies the associated data.
 func (a *AWSAEAD) Decrypt(ciphertext, associatedData []byte) ([]byte, error) {
 	req := &kms.DecryptInput{
 		KeyId:          aws.String(a.keyURI),
@@ -91,15 +80,5 @@ func (a *AWSAEAD) Decrypt(ciphertext, associatedData []byte) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	if isKeyArnFormat(a.keyURI) && strings.Compare(*resp.KeyId, a.keyURI) != 0 {
-		return nil, errors.New("decryption failed: wrong key id")
-	}
 	return resp.Plaintext, nil
-}
-
-// isKeyArnFormat returns true if the keyURI is in the KMS Key ARN format; false
-// otherwise.
-func isKeyArnFormat(keyURI string) bool {
-	tokens := strings.Split(keyURI, ":")
-	return len(tokens) == 6 && strings.HasPrefix(tokens[5], "key/")
 }
