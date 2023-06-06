@@ -28,13 +28,16 @@ import (
 	"github.com/google/tink/go/core/registry"
 	"github.com/google/tink/go/keyset"
 	"github.com/google/tink/go/subtle/random"
+	"github.com/google/tink/go/tink"
 
 	"github.com/google/tink/go/integration/awskms"
 )
 
 const (
+	keyPrefix   = "aws-kms://arn:aws:kms:us-east-2:235739564943:"
 	keyAliasURI = "aws-kms://arn:aws:kms:us-east-2:235739564943:alias/unit-and-integration-testing"
 	keyURI      = "aws-kms://arn:aws:kms:us-east-2:235739564943:key/3ee50705-5a82-4f5b-9753-05c4f473922f"
+	keyURI2     = "aws-kms://arn:aws:kms:us-east-2:235739564943:key/b3ca2efd-a8fb-47f2-b541-7e20f8c5cd11"
 )
 
 var (
@@ -115,6 +118,50 @@ func TestEmptyAssociatedDataEncryptDecrypt(t *testing.T) {
 	}
 	if !bytes.Equal(gotPlaintext2, plaintext) {
 		t.Errorf("a.Decrypt() = %q, want %q", gotPlaintext, plaintext)
+	}
+}
+
+func TestKeyCommitment(t *testing.T) {
+	srcDir, ok := os.LookupEnv("TEST_SRCDIR")
+	if !ok {
+		t.Skip("TEST_SRCDIR not set")
+	}
+
+	client, err := awskms.NewClientWithOptions(keyPrefix, awskms.WithCredentialPath(filepath.Join(srcDir, credCSVFile)))
+	if err != nil {
+		t.Fatalf("error setting up AWS client: %v", err)
+	}
+
+	// Create AEAD primitives for two keys.
+	keys := []string{keyURI, keyURI2}
+	aeads := make([]tink.AEAD, 0, len(keys))
+	for _, k := range keys {
+		a, err := client.GetAEAD(k)
+		if err != nil {
+			t.Fatalf("client.GetAEAD(keyURI) err = %v, want nil", err)
+		}
+		aeads = append(aeads, a)
+	}
+
+	// Create a ciphertext using the first primitive.
+	plaintext := []byte("plaintext")
+	associatedData := []byte("associated data")
+	ciphertext, err := aeads[0].Encrypt(plaintext, associatedData)
+	if err != nil {
+		t.Fatalf("aeads[0].Encrypt(plaintext, associatedData) err = %v, want nil", err)
+	}
+	gotPlaintext, err := aeads[0].Decrypt(ciphertext, associatedData)
+	if err != nil {
+		t.Fatalf("aeads[0].Decrypt(ciphertext, associatedData) err = %v, want nil", err)
+	}
+	if !bytes.Equal(gotPlaintext, plaintext) {
+		t.Errorf("aeads[0].Decrypt() = %q, want %q", gotPlaintext, plaintext)
+	}
+
+	// Attempt to decrypt using the other primitive.
+	_, err = aeads[1].Decrypt(ciphertext, associatedData)
+	if err == nil {
+		t.Fatalf("aeads[1].Decrypt(ciphertext, associatedData) err = nil, want non-nil")
 	}
 }
 

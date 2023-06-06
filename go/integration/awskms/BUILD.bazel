@@ -45,6 +45,7 @@ go_test(
         "//integration/awskms/internal/fakeawskms",
         "//keyset",
         "//subtle/random",
+        "//tink",
         "@com_github_aws_aws_sdk_go//aws",
         "@com_github_aws_aws_sdk_go//service/kms",
     ],
