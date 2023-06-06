@@ -115,9 +115,9 @@ google-auth==2.16.2 \
     # via
     #   -r requirements.in
     #   google-api-core
-google-cloud-kms==2.15.0 \
-    --hash=sha256:da96748c54d19a947a47fdac9b95c234231a6dd0a34dc269147af8de7969c9e8 \
-    --hash=sha256:fed9b4f253968d0323575215a2ff1c5f4109b0a8f0c4c403d8d21c267a077557
+google-cloud-kms==2.16.1 \
+    --hash=sha256:0aca7337a0da0fad880404e507ffaf79f21fda8313f42c2bf641eaeb757a9364 \
+    --hash=sha256:48a8af30b83c4f7573b4c1576d5685e56fe64e9ae755b6bcf0fbd5a0b93ae95e
     # via -r requirements.in
 googleapis-common-protos[grpc]==1.59.0 \
     --hash=sha256:4168fcb568a826a52f23510412da405abd93f4d23ba544bb68d943b14ba3cb44 \
@@ -236,9 +236,9 @@ python-dateutil==2.8.2 \
     --hash=sha256:0123cacc1627ae19ddf3c27a5de5bd67ee4586fbdd6440d9748f8abb483d3e86 \
     --hash=sha256:961d03dc3453ebbc59dbdea9e4e11c5651520a876d0f4db161e8674aae935da9
     # via botocore
-requests==2.28.2 \
-    --hash=sha256:64299f4909223da747622c030b781c0d7811e359c37124b4bd368fb8c6518baa \
-    --hash=sha256:98b1b2782e3c6c4904938b84c0eb932721069dfdb9134313beff7c83c2df24bf
+requests==2.31.0 \
+    --hash=sha256:58cd2187c01e70e6e26505bca751777aa9f2ee0b7f4300988b709f44e013003f \
+    --hash=sha256:942c5a758f98d790eaed1a29cb6eefc7ffb0d1cf7af05c3d2791656dbd6ad1e1
     # via google-api-core
 rsa==4.9 \
     --hash=sha256:90260d9058e514786967344d0ef75fa8727eed8a7d2e43ce9f4bcf1b536174f7 \
