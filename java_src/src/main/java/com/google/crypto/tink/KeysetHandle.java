@@ -206,6 +206,8 @@ public final class KeysetHandle {
     }
 
     private final List<KeysetHandle.Builder.Entry> entries = new ArrayList<>();
+    // If set, throw this error on BUILD instead of actually building.
+    @Nullable private GeneralSecurityException errorToThrow = null;
     private MonitoringAnnotations annotations = MonitoringAnnotations.EMPTY;
     private boolean buildCalled = false;
 
@@ -296,6 +298,10 @@ public final class KeysetHandle {
       }
     }
 
+    private void setErrorToThrow(GeneralSecurityException errorToThrow) {
+      this.errorToThrow = errorToThrow;
+    }
+
     private static int randomIdNotInSet(Set<Integer> ids) {
       int id = 0;
       while (id == 0 || ids.contains(id)) {
@@ -376,6 +382,10 @@ public final class KeysetHandle {
      * </ul>
      */
     public KeysetHandle build() throws GeneralSecurityException {
+      if (errorToThrow != null) {
+        throw new GeneralSecurityException(
+            "Cannot build keyset due to error in original", errorToThrow);
+      }
       if (buildCalled) {
         throw new GeneralSecurityException("KeysetHandle.Builder#build must only be called once");
       }
@@ -551,7 +561,7 @@ public final class KeysetHandle {
       // This may happen if a keyset without status makes it here; or if a key has a parser
       // registered but parsing fails. We should reject such keysets earlier instead.
       throw new IllegalStateException(
-          "Keyset-Entry at position i has wrong status or key parsing failed");
+          "Keyset-Entry at position " + i + " has wrong status or key parsing failed");
     }
     return entries.get(i);
   }
@@ -659,7 +669,17 @@ public final class KeysetHandle {
   public static Builder newBuilder(KeysetHandle handle) {
     Builder builder = new Builder();
     for (int i = 0; i < handle.size(); ++i) {
-      KeysetHandle.Entry entry = handle.entryByIndex(i);
+      // Currently, this can be null (as old APIs do not check validity e.g. in {@link #fromKeyset})
+      @Nullable KeysetHandle.Entry entry = handle.entries.get(i);
+      if (entry == null) {
+        builder.setErrorToThrow(
+            new GeneralSecurityException(
+                "Keyset-Entry in original keyset at position "
+                    + i
+                    + " has wrong status or key parsing failed"));
+        break;
+      }
+
       KeysetHandle.Builder.Entry builderEntry =
           importKey(entry.getKey()).withFixedId(entry.getId());
       builderEntry.setStatus(entry.getStatus());
@@ -701,7 +721,13 @@ public final class KeysetHandle {
    * entries were inserted when the KeysetHandle was built.
    *
    * <p>Currently, this may throw "IllegalStateException" in case the status entry of the Key in the
-   * keyset was wrongly set. In the future, Tink will throw at parsing time in this case.
+   * keyset was wrongly set. In this case, we call this KeysetHandle invalid. In the future, Tink
+   * will throw at parsing time in this case, and we will not have invalid KeysetHandles.
+   *
+   * <p>If you want to ensure that this does not throw an IllegalStateException, please first
+   * re-parse the KeysetHandle: {@code KeysetHandle guaranteedValid =
+   * KeysetHandle.newBuilder(maybeInvalidHandle).build();} (This would throw a {@code
+   * GeneralSecurityException} if the {@code maybeInvalidHandle} handle is invalid).
    *
    * @throws IndexOutOfBoundsException if i < 0 or i >= size();
    */

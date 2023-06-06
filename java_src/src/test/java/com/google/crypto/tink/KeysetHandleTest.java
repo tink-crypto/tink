@@ -1402,6 +1402,66 @@ public class KeysetHandleTest {
   }
 
   @Test
+  public void testBuilder_copyKeyset_works() throws Exception {
+    KeysetHandle original =
+        KeysetHandle.newBuilder()
+            .addEntry(KeysetHandle.generateEntryFromParametersName("AES256_CMAC").withFixedId(777))
+            .addEntry(
+                KeysetHandle.generateEntryFromParametersName("AES256_CMAC")
+                    .makePrimary()
+                    .withFixedId(778))
+            .build();
+    KeysetHandle copy = KeysetHandle.newBuilder(original).build();
+    assertThat(copy.size()).isEqualTo(2);
+    assertThat(copy.getAt(0).getId()).isEqualTo(777);
+    assertThat(copy.getAt(0).getKey().equalsKey(original.getAt(0).getKey())).isTrue();
+    assertThat(copy.getAt(0).getStatus()).isEqualTo(original.getAt(0).getStatus());
+    assertThat(copy.getAt(1).getId()).isEqualTo(778);
+    assertThat(copy.getAt(1).getKey().equalsKey(original.getAt(1).getKey())).isTrue();
+    assertThat(copy.getAt(1).getStatus()).isEqualTo(original.getAt(1).getStatus());
+  }
+
+  @Test
+  public void testBuilder_copyKeyset_originalHasInvalidKey_throws() throws Exception {
+    Keyset keyset =
+        Keyset.newBuilder()
+            .setPrimaryKeyId(1)
+            .addKey(
+                Keyset.Key.newBuilder()
+                    .setKeyId(1)
+                    .setStatus(KeyStatusType.ENABLED)
+                    .setKeyData(
+                        KeyData.newBuilder()
+                            .setTypeUrl("type.googleapis.com/google.crypto.tink.AesGcmKey")
+                            .setValue(ByteString.EMPTY)))
+            .build();
+    KeysetHandle.Builder builder = KeysetHandle.newBuilder(KeysetHandle.fromKeyset(keyset));
+    GeneralSecurityException thrown = assertThrows(GeneralSecurityException.class, builder::build);
+    assertThat(thrown)
+        .hasCauseThat()
+        .hasMessageThat()
+        .contains("wrong status or key parsing failed");
+  }
+
+  @Test
+  public void testBuilder_copyKeyset_originalHasNoPrimary_throws() throws Exception {
+    KeysetHandle original =
+        KeysetHandle.newBuilder()
+            .addEntry(
+                KeysetHandle.generateEntryFromParametersName("AES256_CMAC")
+                    .makePrimary()
+                    .withFixedId(778))
+            .build();
+    Keyset keyset = original.getKeyset();
+    Keyset keysetWithoutPrimary = keyset.toBuilder().setPrimaryKeyId(3843).build();
+
+    KeysetHandle.Builder builder =
+        KeysetHandle.newBuilder(KeysetHandle.fromKeyset(keysetWithoutPrimary));
+    GeneralSecurityException thrown = assertThrows(GeneralSecurityException.class, builder::build);
+    assertThat(thrown).hasMessageThat().contains("No primary was set");
+  }
+
+  @Test
   public void testBuilder_buildTwice_fails() throws Exception {
     KeysetHandle.Builder builder =
         KeysetHandle.newBuilder()
