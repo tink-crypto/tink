@@ -119,7 +119,7 @@ run_java_examples_tests() {
 run_py_examples_tests() {
   use_bazel "$(cat python/examples/.bazelversion)"
   ## Install Tink and its dependencies via pip for the examples/python tests.
-  source ./kokoro/testutils/install_tink_via_pip.sh "${PWD}/python"
+  ./kokoro/testutils/install_tink_via_pip.sh "${PWD}/python" "${PWD}"
   if [[ "${IS_KOKORO}" == "true" ]]; then
     local pip_flags=( --require-hashes )
     if [[ "${PLATFORM}" == "darwin" ]]; then

@@ -18,49 +18,73 @@
 # This scripts installs Tink for Python and its dependencies using Pip.
 # Tink's root folder must be specified.
 #
-# NOTES:
-#   * If not running on Kokoro, this script will do nothing.
-#   * This script *must* be sourced to update the environment of the calling
-#     script.
-#   * The required Bazel version *must* be installed before running this script.
-#
-# Usage:
-#   source ./kokoro/testutils/install_tink_via_pip.sh <path to tink python root>
+# NOTE: If not running on Kokoro, this script will do nothing.
 
-install_tink_via_pip() {
-  local tink_py_path="${1}"
+set -eo pipefail
+
+usage() {
+  cat <<EOF
+Usage:  $0 <path to tink python root> <tink python deps dir>
+  -h: Help. Print this usage information.
+EOF
+  exit 1
+}
+
+TINK_PY_ROOT_DIR=
+TINK_PY_DEPS_BASE_DIR=
+
+#######################################
+# Process command line arguments.
+#######################################
+process_args() {
+  # Parse options.
+  while getopts "h" opt; do
+    case "${opt}" in
+      *) usage ;;
+    esac
+  done
+  shift $((OPTIND - 1))
+  TINK_PY_ROOT_DIR="$1"
+  if [[ -z "${TINK_PY_ROOT_DIR}" ]]; then
+    echo "ERROR: The root folder of Tink Python must be specified" >&2
+    usage
+  fi
+  TINK_PY_DEPS_BASE_DIR="$2"
+  if [[ -z "${TINK_PY_DEPS_BASE_DIR}" ]]; then
+    echo "ERROR: The folder containing Tink Python's dependencies must be \
+specified" >&2
+    usage
+  fi
+  readonly TINK_PY_ROOT_DIR
+  readonly TINK_PY_DEPS_BASE_DIR
+}
+
+
+main() {
+  process_args "$@"
+  if [[ -z "${KOKORO_ROOT:-}" ]] ; then
+    echo "Not running on Kokoro, skip installing tink-py"
+    return
+  fi
   (
-    cd "${tink_py_path}"
-    readonly local platform="$(uname | tr '[:upper:]' '[:lower:]')"
-    local setuptools_requirements="setuptools"
+    cd "${TINK_PY_ROOT_DIR}"
+    local -r platform="$(uname | tr '[:upper:]' '[:lower:]')"
     local -a pip_flags
     if [[ "${platform}" == 'darwin' ]]; then
       # On MacOS we need to use the --user flag as otherwise pip will complain
       # about permissions.
       pip_flags=( --user )
-      # TODO(b/219813176): Remove once Kokoro environment is compatible.
-      setuptools_requirements="setuptools==60.9.0"
     fi
     readonly pip_flags
 
     # Set base path to the Tink Python's dependencies.
-    export TINK_PYTHON_SETUPTOOLS_OVERRIDE_BASE_PATH="${PWD}/.."
-
-    # Temporary disable treating unset variables generating errors to avoid old
-    # versions of bash generating errors when expanding empty pip_flags array.
-    set +u
-    # Check if we can build Tink python package.
-    pip3 install "${pip_flags[@]}" --upgrade pip
-    pip3 install "${pip_flags[@]}" --upgrade "${setuptools_requirements}"
+    export TINK_PYTHON_SETUPTOOLS_OVERRIDE_BASE_PATH="${TINK_PY_DEPS_BASE_DIR}"
+    pip3 install "${pip_flags[@]}" --upgrade pip setuptools
+    # Install Tink Python requirements.
+    pip3 install "${pip_flags[@]}" --require-hashes -r requirements.txt
+    # Install Tink Python
     pip3 install "${pip_flags[@]}" .
-    set -u
   )
 }
 
-if [[ -n "${KOKORO_ROOT:-}" ]] ; then
-  if (( "$#" < 1 )); then
-    echo "Tink Python folder path must be specified" >&2
-    exit 1
-  fi
-  install_tink_via_pip "$@"
-fi
+main "$@"

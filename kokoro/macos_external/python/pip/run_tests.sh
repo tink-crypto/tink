@@ -22,7 +22,7 @@ fi
 
 ./kokoro/testutils/copy_credentials.sh "python/testdata" "all"
 source ./kokoro/testutils/install_protoc.sh
-source ./kokoro/testutils/install_tink_via_pip.sh "${PWD}/python"
+./kokoro/testutils/install_tink_via_pip.sh "${PWD}/python" "${PWD}"
 
 # Get root certificates for gRPC
 curl -OLsS https://raw.githubusercontent.com/grpc/grpc/master/etc/roots.pem
