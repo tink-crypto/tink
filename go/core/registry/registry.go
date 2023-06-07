@@ -47,14 +47,14 @@ var (
 
 // RegisterKeyManager registers the given key manager.
 // Does not allow to overwrite existing key managers.
-func RegisterKeyManager(km KeyManager) error {
+func RegisterKeyManager(keyManager KeyManager) error {
 	keyManagersMu.Lock()
 	defer keyManagersMu.Unlock()
-	typeURL := km.TypeURL()
+	typeURL := keyManager.TypeURL()
 	if _, existed := keyManagers[typeURL]; existed {
 		return fmt.Errorf("registry.RegisterKeyManager: type %s already registered", typeURL)
 	}
-	keyManagers[typeURL] = km
+	keyManagers[typeURL] = keyManager
 	return nil
 }
 
@@ -62,76 +62,76 @@ func RegisterKeyManager(km KeyManager) error {
 func GetKeyManager(typeURL string) (KeyManager, error) {
 	keyManagersMu.RLock()
 	defer keyManagersMu.RUnlock()
-	km, existed := keyManagers[typeURL]
+	keyManager, existed := keyManagers[typeURL]
 	if !existed {
 		return nil, fmt.Errorf("registry.GetKeyManager: unsupported key type: %s", typeURL)
 	}
-	return km, nil
+	return keyManager, nil
 }
 
 // NewKeyData generates a new KeyData for the given key template.
-func NewKeyData(kt *tinkpb.KeyTemplate) (*tinkpb.KeyData, error) {
-	if kt == nil {
+func NewKeyData(template *tinkpb.KeyTemplate) (*tinkpb.KeyData, error) {
+	if template == nil {
 		return nil, fmt.Errorf("registry.NewKeyData: invalid key template")
 	}
-	km, err := GetKeyManager(kt.TypeUrl)
+	keyManager, err := GetKeyManager(template.TypeUrl)
 	if err != nil {
 		return nil, err
 	}
-	return km.NewKeyData(kt.Value)
+	return keyManager.NewKeyData(template.Value)
 }
 
 // NewKey generates a new key for the given key template.
-func NewKey(kt *tinkpb.KeyTemplate) (proto.Message, error) {
-	if kt == nil {
+func NewKey(template *tinkpb.KeyTemplate) (proto.Message, error) {
+	if template == nil {
 		return nil, fmt.Errorf("registry.NewKey: invalid key template")
 	}
-	km, err := GetKeyManager(kt.TypeUrl)
+	keyManager, err := GetKeyManager(template.TypeUrl)
 	if err != nil {
 		return nil, err
 	}
-	return km.NewKey(kt.Value)
+	return keyManager.NewKey(template.Value)
 }
 
 // PrimitiveFromKeyData creates a new primitive for the key given in the given KeyData.
 // Note that the returned primitive does not add/remove the output prefix.
 // It is the caller's responsibility to handle this correctly, based on the key's output_prefix_type.
-func PrimitiveFromKeyData(kd *tinkpb.KeyData) (interface{}, error) {
-	if kd == nil {
+func PrimitiveFromKeyData(keyData *tinkpb.KeyData) (interface{}, error) {
+	if keyData == nil {
 		return nil, fmt.Errorf("registry.PrimitiveFromKeyData: invalid key data")
 	}
-	return Primitive(kd.TypeUrl, kd.Value)
+	return Primitive(keyData.TypeUrl, keyData.Value)
 }
 
 // Primitive creates a new primitive for the given serialized key using the KeyManager
 // identified by the given typeURL.
 // Note that the returned primitive does not add/remove the output prefix.
 // It is the caller's responsibility to handle this correctly, based on the key's output_prefix_type.
-func Primitive(typeURL string, sk []byte) (interface{}, error) {
-	if len(sk) == 0 {
+func Primitive(typeURL string, serializedKey []byte) (interface{}, error) {
+	if len(serializedKey) == 0 {
 		return nil, fmt.Errorf("registry.Primitive: invalid serialized key")
 	}
-	km, err := GetKeyManager(typeURL)
+	keyManager, err := GetKeyManager(typeURL)
 	if err != nil {
 		return nil, err
 	}
-	return km.Primitive(sk)
+	return keyManager.Primitive(serializedKey)
 }
 
 // RegisterKMSClient is used to register a new KMS client
-func RegisterKMSClient(k KMSClient) {
+func RegisterKMSClient(kmsClient KMSClient) {
 	kmsClientsMu.Lock()
 	defer kmsClientsMu.Unlock()
-	kmsClients = append(kmsClients, k)
+	kmsClients = append(kmsClients, kmsClient)
 }
 
 // GetKMSClient fetches a KMSClient by a given URI.
 func GetKMSClient(keyURI string) (KMSClient, error) {
 	kmsClientsMu.RLock()
 	defer kmsClientsMu.RUnlock()
-	for _, k := range kmsClients {
-		if k.Supported(keyURI) {
-			return k, nil
+	for _, kmsClient := range kmsClients {
+		if kmsClient.Supported(keyURI) {
+			return kmsClient, nil
 		}
 	}
 	return nil, fmt.Errorf("KMS client supporting %s not found", keyURI)
