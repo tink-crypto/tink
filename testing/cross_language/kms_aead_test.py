@@ -219,13 +219,8 @@ class KmsAeadTest(parameterized.TestCase):
     plaintext = b'plaintext'
     associated_data = b'associated_data'
     ciphertext = primitive.encrypt(plaintext, associated_data)
-    if lang == 'cc' or lang == 'python':
-      # TODO(b/263231865) C++ and Python do not yet properly support aliases.
-      with self.assertRaises(tink.TinkError):
-        primitive.decrypt(ciphertext, associated_data)
-    else:
-      self.assertEqual(
-          primitive.decrypt(ciphertext, associated_data), plaintext)
+    self.assertEqual(
+        primitive.decrypt(ciphertext, associated_data), plaintext)
 
   @parameterized.parameters(_two_key_uris_with_alias_test_cases())
   def test_cannot_decrypt_ciphertext_of_other_alias_key_uri(
@@ -247,14 +242,6 @@ class KmsAeadTest(parameterized.TestCase):
 
     ciphertext = primitive.encrypt(plaintext, associated_data)
     ciphertext_2 = primitive_2.encrypt(plaintext, associated_data)
-
-    if lang == 'cc' or lang == 'python':
-      # TODO(b/263231865) C++ and Python do not yet properly support aliases.
-      with self.assertRaises(tink.TinkError):
-        primitive.decrypt(ciphertext, associated_data)
-      with self.assertRaises(tink.TinkError):
-        primitive_2.decrypt(ciphertext_2, associated_data)
-      return
 
     # Can be decrypted by the primtive that created the ciphertext.
     self.assertEqual(primitive.decrypt(ciphertext, associated_data), plaintext)
