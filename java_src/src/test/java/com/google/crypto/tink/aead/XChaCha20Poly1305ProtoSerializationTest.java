@@ -237,6 +237,13 @@ public final class XChaCha20Poly1305ProtoSerializationTest {
             TYPE_URL,
             OutputPrefixType.UNKNOWN_PREFIX,
             com.google.crypto.tink.proto.XChaCha20Poly1305KeyFormat.getDefaultInstance()),
+        // Wrong version
+        ProtoParametersSerialization.create(
+            TYPE_URL,
+            OutputPrefixType.RAW,
+            com.google.crypto.tink.proto.XChaCha20Poly1305KeyFormat.newBuilder()
+                .setVersion(1)
+                .build()),
       };
 
   @Theory

@@ -220,7 +220,9 @@ final class AesCtrHmacAeadProtoSerialization {
     } catch (InvalidProtocolBufferException e) {
       throw new GeneralSecurityException("Parsing AesCtrHmacAeadParameters failed: ", e);
     }
-
+    if (format.getHmacKeyFormat().getVersion() != 0) {
+      throw new GeneralSecurityException("Only version 0 keys are accepted");
+    }
     return AesCtrHmacAeadParameters.builder()
         .setAesKeySizeBytes(format.getAesCtrKeyFormat().getKeySize())
         .setHmacKeySizeBytes(format.getHmacKeyFormat().getKeySize())

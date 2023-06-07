@@ -146,6 +146,9 @@ final class AesGcmSivProtoSerialization {
     } catch (InvalidProtocolBufferException e) {
       throw new GeneralSecurityException("Parsing AesGcmSivParameters failed: ", e);
     }
+    if (format.getVersion() != 0) {
+      throw new GeneralSecurityException("Only version 0 parameters are accepted");
+    }
     return AesGcmSivParameters.builder()
         .setKeySizeBytes(format.getKeySize())
         .setVariant(toVariant(serialization.getKeyTemplate().getOutputPrefixType()))

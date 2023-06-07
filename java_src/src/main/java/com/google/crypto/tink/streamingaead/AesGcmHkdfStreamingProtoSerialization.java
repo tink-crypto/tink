@@ -172,6 +172,9 @@ final class AesGcmHkdfStreamingProtoSerialization {
     } catch (InvalidProtocolBufferException e) {
       throw new GeneralSecurityException("Parsing AesGcmHkdfStreamingParameters failed: ", e);
     }
+    if (format.getVersion() != 0) {
+      throw new GeneralSecurityException("Only version 0 parameters are accepted");
+    }
     return toParametersObject(format.getParams(), format.getKeySize());
   }
 

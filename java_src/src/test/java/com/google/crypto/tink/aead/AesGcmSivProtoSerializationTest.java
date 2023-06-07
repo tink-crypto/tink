@@ -304,6 +304,14 @@ public final class AesGcmSivProtoSerializationTest {
             TYPE_URL,
             OutputPrefixType.RAW,
             com.google.crypto.tink.proto.AesGcmSivKeyFormat.newBuilder().setKeySize(10).build()),
+        // Bad version
+        ProtoParametersSerialization.create(
+            TYPE_URL,
+            OutputPrefixType.RAW,
+            com.google.crypto.tink.proto.AesGcmSivKeyFormat.newBuilder()
+                .setKeySize(16)
+                .setVersion(1)
+                .build()),
         // Unknown output prefix
         ProtoParametersSerialization.create(
             TYPE_URL,

@@ -354,6 +354,14 @@ public final class AesGcmProtoSerializationTest {
             TYPE_URL,
             OutputPrefixType.UNKNOWN_PREFIX,
             com.google.crypto.tink.proto.AesGcmKeyFormat.newBuilder().setKeySize(16).build()),
+        // Bad version
+        ProtoParametersSerialization.create(
+            TYPE_URL,
+            OutputPrefixType.RAW,
+            com.google.crypto.tink.proto.AesGcmKeyFormat.newBuilder()
+                .setKeySize(16)
+                .setVersion(1)
+                .build()),
       };
 
   @Theory

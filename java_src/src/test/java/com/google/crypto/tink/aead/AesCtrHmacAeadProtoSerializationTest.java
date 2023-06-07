@@ -524,6 +524,31 @@ public final class AesCtrHmacAeadProtoSerializationTest {
             TYPE_URL,
             OutputPrefixType.UNKNOWN_PREFIX,
             getAesCtrHmacKeyFormatProto(32, 32, 16, 13, HashType.SHA256)),
+        // Wrong version:
+        ProtoParametersSerialization.create(
+            TYPE_URL,
+            OutputPrefixType.RAW,
+            com.google.crypto.tink.proto.AesCtrHmacAeadKeyFormat.newBuilder()
+                .setAesCtrKeyFormat(
+                    com.google.crypto.tink.proto.AesCtrKeyFormat.newBuilder()
+                        .setParams(
+                            com.google.crypto.tink.proto.AesCtrParams.newBuilder()
+                                .setIvSize(32)
+                                .build())
+                        .setKeySize(32)
+                        .build())
+                .setHmacKeyFormat(
+                    com.google.crypto.tink.proto.HmacKeyFormat.newBuilder()
+                        // Here is the version
+                        .setVersion(1)
+                        .setParams(
+                            com.google.crypto.tink.proto.HmacParams.newBuilder()
+                                .setTagSize(32)
+                                .setHash(HashType.SHA256)
+                                .build())
+                        .setKeySize(32)
+                        .build())
+                .build()),
         // Proto messages start with a VarInt, which always ends with a byte with most
         // significant bit unset. 0x80 is hence invalid.
         ProtoParametersSerialization.create(

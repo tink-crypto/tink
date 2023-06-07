@@ -140,15 +140,16 @@ final class XChaCha20Poly1305ProtoSerialization {
           "Wrong type URL in call to XChaCha20Poly1305Parameters.parseParameters: "
               + serialization.getKeyTemplate().getTypeUrl());
     }
-    // XChaCha20Poly1305KeyFormat is currently an empty proto -- so it's not quite clear if we want
-    // to even do anything here. However, we might add a version field later, so we at least check
-    // that serialization.getKeyTemplate().getValue() is a proto-encoded string.
+    com.google.crypto.tink.proto.XChaCha20Poly1305KeyFormat format;
     try {
-      Object unused =
+      format =
           com.google.crypto.tink.proto.XChaCha20Poly1305KeyFormat.parseFrom(
               serialization.getKeyTemplate().getValue(), ExtensionRegistryLite.getEmptyRegistry());
     } catch (InvalidProtocolBufferException e) {
       throw new GeneralSecurityException("Parsing XChaCha20Poly1305Parameters failed: ", e);
+    }
+    if (format.getVersion() != 0) {
+      throw new GeneralSecurityException("Only version 0 parameters are accepted");
     }
     return XChaCha20Poly1305Parameters.create(
         toVariant(serialization.getKeyTemplate().getOutputPrefixType()));

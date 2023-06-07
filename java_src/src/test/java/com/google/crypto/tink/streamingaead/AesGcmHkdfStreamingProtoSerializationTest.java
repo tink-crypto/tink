@@ -349,6 +349,18 @@ public final class AesGcmHkdfStreamingProtoSerializationTest {
                         .setDerivedKeySize(32)
                         .setHkdfHashType(HashType.SHA1))
                 .build()),
+        ProtoParametersSerialization.create(
+            TYPE_URL,
+            OutputPrefixType.RAW,
+            com.google.crypto.tink.proto.AesGcmHkdfStreamingKeyFormat.newBuilder()
+                .setVersion(1)
+                .setKeySize(32)
+                .setParams(
+                    com.google.crypto.tink.proto.AesGcmHkdfStreamingParams.newBuilder()
+                        .setCiphertextSegmentSize(1024)
+                        .setDerivedKeySize(32)
+                        .setHkdfHashType(HashType.SHA1))
+                .build()),
         // Bad hash type
         ProtoParametersSerialization.create(
             TYPE_URL,

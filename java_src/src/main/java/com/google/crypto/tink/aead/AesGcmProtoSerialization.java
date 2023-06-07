@@ -163,6 +163,9 @@ final class AesGcmProtoSerialization {
     } catch (InvalidProtocolBufferException e) {
       throw new GeneralSecurityException("Parsing AesGcmParameters failed: ", e);
     }
+    if (format.getVersion() != 0) {
+      throw new GeneralSecurityException("Only version 0 parameters are accepted");
+    }
     return AesGcmParameters.builder()
         .setKeySizeBytes(format.getKeySize())
         /**
