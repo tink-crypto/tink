@@ -22,6 +22,7 @@
 #include "tink/mac/aes_cmac_key_manager.h"
 #include "tink/mac/aes_cmac_proto_serialization.h"
 #include "tink/mac/hmac_key_manager.h"
+#include "tink/mac/hmac_proto_serialization.h"
 #include "tink/mac/internal/chunked_mac_wrapper.h"
 #include "tink/mac/mac_wrapper.h"
 #include "tink/registry.h"
@@ -48,6 +49,9 @@ util::Status MacConfig::Register() {
   // implementations.
   status = Registry::RegisterKeyTypeManager(absl::make_unique<HmacKeyManager>(),
                                             true);
+  if (!status.ok()) return status;
+
+  status = RegisterHmacProtoSerialization();
   if (!status.ok()) return status;
 
   if (IsFipsModeEnabled()) {

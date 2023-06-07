@@ -32,6 +32,7 @@ tink_cc_library(
     tink::mac::aes_cmac_key_manager
     tink::mac::aes_cmac_proto_serialization
     tink::mac::hmac_key_manager
+    tink::mac::hmac_proto_serialization
     tink::mac::mac_wrapper
     absl::core_headers
     absl::memory
@@ -306,7 +307,9 @@ tink_cc_test(
     tink::mac::aes_cmac_key
     tink::mac::aes_cmac_key_manager
     tink::mac::aes_cmac_parameters
+    tink::mac::hmac_key
     tink::mac::hmac_key_manager
+    tink::mac::hmac_parameters
     tink::mac::mac_config
     tink::mac::mac_key_templates
     gmock
@@ -325,6 +328,7 @@ tink_cc_test(
     tink::util::status
     tink::util::test_matchers
     tink::util::test_util
+    tink::proto::common_cc_proto
     tink::proto::tink_cc_proto
 )
 

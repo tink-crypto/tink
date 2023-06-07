@@ -34,13 +34,16 @@
 #include "tink/mac/aes_cmac_key.h"
 #include "tink/mac/aes_cmac_key_manager.h"
 #include "tink/mac/aes_cmac_parameters.h"
+#include "tink/mac/hmac_key.h"
 #include "tink/mac/hmac_key_manager.h"
+#include "tink/mac/hmac_parameters.h"
 #include "tink/mac/mac_key_templates.h"
 #include "tink/partial_key_access.h"
 #include "tink/registry.h"
 #include "tink/util/status.h"
 #include "tink/util/test_matchers.h"
 #include "tink/util/test_util.h"
+#include "proto/common.pb.h"
 #include "proto/tink.pb.h"
 
 namespace crypto {
@@ -53,6 +56,7 @@ using ::crypto::tink::test::StatusIs;
 using ::google::crypto::tink::KeyData;
 using ::google::crypto::tink::KeysetInfo;
 using ::google::crypto::tink::KeyStatusType;
+using ::google::crypto::tink::HashType;
 using ::google::crypto::tink::KeyTemplate;
 using ::google::crypto::tink::OutputPrefixType;
 using ::testing::Values;
@@ -218,6 +222,106 @@ TEST_F(MacConfigTest, AesCmacProtoKeySerializationRegistered) {
               *key, InsecureSecretKeyAccess::Get());
   ASSERT_THAT(serialized_key.status(), StatusIs(absl::StatusCode::kNotFound));
 
+  ASSERT_THAT(MacConfig::Register(), IsOk());
+
+  util::StatusOr<std::unique_ptr<Key>> parsed_key2 =
+      internal::MutableSerializationRegistry::GlobalInstance().ParseKey(
+          *proto_key_serialization, InsecureSecretKeyAccess::Get());
+  ASSERT_THAT(parsed_key2, IsOk());
+
+  util::StatusOr<std::unique_ptr<Serialization>> serialized_key2 =
+      internal::MutableSerializationRegistry::GlobalInstance()
+          .SerializeKey<internal::ProtoKeySerialization>(
+              *key, InsecureSecretKeyAccess::Get());
+  ASSERT_THAT(serialized_key2, IsOk());
+}
+
+TEST_F(MacConfigTest, HmacProtoParamsSerializationRegistered) {
+  if (internal::IsFipsModeEnabled()) {
+    GTEST_SKIP() << "Not supported in FIPS-only mode";
+  }
+
+  util::StatusOr<internal::ProtoParametersSerialization>
+      proto_params_serialization =
+          internal::ProtoParametersSerialization::Create(
+              MacKeyTemplates::HmacSha256());
+  ASSERT_THAT(proto_params_serialization, IsOk());
+
+  util::StatusOr<std::unique_ptr<Parameters>> parsed_params =
+      internal::MutableSerializationRegistry::GlobalInstance().ParseParameters(
+          *proto_params_serialization);
+  ASSERT_THAT(parsed_params.status(), StatusIs(absl::StatusCode::kNotFound));
+
+  util::StatusOr<HmacParameters> parameters = HmacParameters::Create(
+      /*key_size_in_bytes=*/32, /*cryptographic_tag_size_in_bytes=*/32,
+      HmacParameters::HashType::kSha256, HmacParameters::Variant::kTink);
+  ASSERT_THAT(parameters, IsOk());
+
+  util::StatusOr<std::unique_ptr<Serialization>> serialized_parameters =
+      internal::MutableSerializationRegistry::GlobalInstance()
+          .SerializeParameters<internal::ProtoParametersSerialization>(
+              *parameters);
+  ASSERT_THAT(serialized_parameters.status(),
+              StatusIs(absl::StatusCode::kNotFound));
+
+  // Register parser and serializer.
+  ASSERT_THAT(MacConfig::Register(), IsOk());
+
+  util::StatusOr<std::unique_ptr<Parameters>> parsed_params2 =
+      internal::MutableSerializationRegistry::GlobalInstance().ParseParameters(
+          *proto_params_serialization);
+  ASSERT_THAT(parsed_params2, IsOk());
+
+  util::StatusOr<std::unique_ptr<Serialization>> serialized_params2 =
+      internal::MutableSerializationRegistry::GlobalInstance()
+          .SerializeParameters<internal::ProtoParametersSerialization>(
+              *parameters);
+  ASSERT_THAT(serialized_params2, IsOk());
+}
+
+TEST_F(MacConfigTest, HmacProtoKeySerializationRegistered) {
+  if (internal::IsFipsModeEnabled()) {
+    GTEST_SKIP() << "Not supported in FIPS-only mode";
+  }
+
+  google::crypto::tink::HmacKey key_proto;
+  key_proto.set_version(0);
+  key_proto.set_key_value(subtle::Random::GetRandomBytes(32));
+  key_proto.mutable_params()->set_tag_size(32);
+  key_proto.mutable_params()->set_hash(HashType::SHA256);
+
+  util::StatusOr<internal::ProtoKeySerialization> proto_key_serialization =
+      internal::ProtoKeySerialization::Create(
+          "type.googleapis.com/google.crypto.tink.HmacKey",
+          RestrictedData(key_proto.SerializeAsString(),
+                         InsecureSecretKeyAccess::Get()),
+          KeyData::SYMMETRIC, OutputPrefixType::TINK, /*id_requirement=*/123);
+  ASSERT_THAT(proto_key_serialization, IsOk());
+
+  util::StatusOr<std::unique_ptr<Key>> parsed_key =
+      internal::MutableSerializationRegistry::GlobalInstance().ParseKey(
+          *proto_key_serialization, InsecureSecretKeyAccess::Get());
+  ASSERT_THAT(parsed_key.status(), StatusIs(absl::StatusCode::kNotFound));
+
+  util::StatusOr<HmacParameters> parameters = HmacParameters::Create(
+      /*key_size_in_bytes=*/32, /*cryptographic_tag_size_in_bytes=*/32,
+      HmacParameters::HashType::kSha256, HmacParameters::Variant::kTink);
+  ASSERT_THAT(parameters, IsOk());
+
+  util::StatusOr<HmacKey> key =
+      HmacKey::Create(*parameters,
+                      RestrictedData(subtle::Random::GetRandomBytes(32),
+                                     InsecureSecretKeyAccess::Get()),
+                      /*id_requirement=*/123, GetPartialKeyAccess());
+  ASSERT_THAT(key, IsOk());
+
+  util::StatusOr<std::unique_ptr<Serialization>> serialized_key =
+      internal::MutableSerializationRegistry::GlobalInstance()
+          .SerializeKey<internal::ProtoKeySerialization>(
+              *key, InsecureSecretKeyAccess::Get());
+  ASSERT_THAT(serialized_key.status(), StatusIs(absl::StatusCode::kNotFound));
+
+  // Register parser and serializer.
   ASSERT_THAT(MacConfig::Register(), IsOk());
 
   util::StatusOr<std::unique_ptr<Key>> parsed_key2 =
