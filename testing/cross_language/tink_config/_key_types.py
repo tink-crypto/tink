@@ -109,7 +109,7 @@ SUPPORTED_LANGUAGES = {
     'AesCtrHmacAeadKey': ['cc', 'java', 'go', 'python'],
     'ChaCha20Poly1305Key': ['java', 'go'],
     'XChaCha20Poly1305Key': ['cc', 'java', 'go', 'python'],
-    'KmsAeadKey': ['cc', 'java', 'python'],
+    'KmsAeadKey': ['cc', 'java', 'go', 'python'],  # go only supported in tests.
     'KmsEnvelopeAeadKey': ['cc', 'java', 'go', 'python'],
     'AesSivKey': ['cc', 'java', 'go', 'python'],
     'AesCtrHmacStreamingKey': ['cc', 'java', 'go', 'python'],

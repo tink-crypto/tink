@@ -80,10 +80,9 @@ def _kms_envelope_aead_templates(
 _KMS_ENVELOPE_AEAD_KEY_TEMPLATES = _kms_envelope_aead_templates(['GCP', 'AWS'])
 _SUPPORTED_LANGUAGES_FOR_KMS_ENVELOPE_AEAD = ('python', 'cc', 'go', 'java')
 
-# Currently Go doesn't support KmsAeadKey.
 _SUPPORTED_LANGUAGES_FOR_KMS_AEAD = {
-    'AWS': ('python', 'cc', 'java'),
-    'GCP': ('python', 'cc', 'java'),
+    'AWS': ('python', 'cc', 'go', 'java'),
+    'GCP': ('python', 'cc', 'go', 'java'),
 }
 
 

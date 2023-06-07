@@ -83,7 +83,7 @@ SUPPORTED_LANGUAGES_BY_PRIMITIVE = {
 GCP_KEY_URI_PREFIX = (
     'gcp-kms://projects/tink-test-infrastructure/locations/global/'
     'keyRings/unit-and-integration-testing/cryptoKeys/')
-AWS_KEY_URI_PREFIX = 'aws-kms://arn:aws:kms:us-east-2:235739564943:key/'
+AWS_KEY_URI_PREFIX = 'aws-kms://arn:aws:kms:us-east-2:235739564943:'
 
 GCP_CREDENTIALS_PATH = os.path.join(
     os.environ['TEST_SRCDIR'] if 'TEST_SRCDIR' in os.environ else '',

@@ -37,6 +37,8 @@ go_library(
         "@org_golang_google_protobuf//types/known/timestamppb",
         "@org_golang_google_protobuf//types/known/wrapperspb",
         "@tink_go//aead",
+        "@tink_go//aead/internal/testing/kmsaead",
+        "@tink_go//core/registry",
         "@tink_go//daead",
         "@tink_go//hybrid",
         "@tink_go//insecurecleartextkeyset",

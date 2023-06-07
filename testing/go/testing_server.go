@@ -57,9 +57,9 @@ func main() {
 	}
 	registry.RegisterKMSClient(gcpClient)
 
-	awsClient, err := awskms.NewClientWithCredentials(*awsKeyURI, *awsCredFilePath)
+	awsClient, err := awskms.NewClientWithOptions(*awsKeyURI, awskms.WithCredentialPath(*awsCredFilePath))
 	if err != nil {
-		log.Fatalf("awskms.NewClientWithCredentials failed: %v", err)
+		log.Fatalf("awskms.NewClientWithOptions failed: %v", err)
 	}
 	registry.RegisterKMSClient(awsClient)
 
