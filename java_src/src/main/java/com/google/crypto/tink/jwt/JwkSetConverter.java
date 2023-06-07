@@ -65,6 +65,9 @@ public final class JwkSetConverter {
    */
   public static String fromPublicKeysetHandle(KeysetHandle handle)
       throws IOException, GeneralSecurityException {
+    // Check validity of the keyset handle before calling "getAt".
+    // See comments in {@link KeysetHandle#Entry#getAt}.
+    handle = KeysetHandle.newBuilder(handle).build();
     // We never throw a IOException anymore, but keep it in the interface for compatibility.
     JsonArray keys = new JsonArray();
     for (int i = 0; i < handle.size(); i++) {
