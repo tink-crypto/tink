@@ -718,25 +718,7 @@ public final class JwkSetConverterTest {
   }
 
   @Test
-  public void ecdsaWithSmallX_getPrimitiveFails() throws Exception {
-    String jwksString =
-        "{"
-            + "\"keys\":[{"
-            + "\"kty\":\"EC\","
-            + "\"crv\":\"P-256\","
-            + "\"x\":\"AAAwOQ\","
-            + "\"y\":\"b22m_Y4sT-jUJSxBVqjrW_DxWyBLopxYHTuFVfx70ZI\","
-            + "\"use\":\"sig\","
-            + "\"alg\":\"ES256\","
-            + "\"key_ops\":[\"verify\"]"
-            + "}]}";
-    KeysetHandle handle = JwkSetConverter.toPublicKeysetHandle(jwksString);
-    assertThrows(
-        GeneralSecurityException.class, () -> handle.getPrimitive(JwtPublicKeyVerify.class));
-  }
-
-  @Test
-  public void ecdsaWithSmallY_getPrimitiveFails() throws Exception {
+  public void ecdsa_pointNotOnCurve_getPrimitiveFails() throws Exception {
     String jwksString =
         "{"
             + "\"keys\":[{"
@@ -748,9 +730,8 @@ public final class JwkSetConverterTest {
             + "\"alg\":\"ES256\","
             + "\"key_ops\":[\"verify\"]"
             + "}]}";
-    KeysetHandle handle = JwkSetConverter.toPublicKeysetHandle(jwksString);
     assertThrows(
-        GeneralSecurityException.class, () -> handle.getPrimitive(JwtPublicKeyVerify.class));
+        GeneralSecurityException.class, () -> JwkSetConverter.toPublicKeysetHandle(jwksString));
   }
 
   @Test

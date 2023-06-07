@@ -231,6 +231,7 @@ public final class JwtEcdsaSignKeyManager
   public static void registerPair(boolean newKeyAllowed) throws GeneralSecurityException {
     Registry.registerAsymmetricKeyManagers(
         new JwtEcdsaSignKeyManager(), new JwtEcdsaVerifyKeyManager(), newKeyAllowed);
+    JwtEcdsaProtoSerialization.register();
   }
 
   private static KeyFactory.KeyFormat<JwtEcdsaKeyFormat> createKeyFormat(

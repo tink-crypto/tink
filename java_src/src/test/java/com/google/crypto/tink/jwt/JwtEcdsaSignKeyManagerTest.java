@@ -591,17 +591,4 @@ public class JwtEcdsaSignKeyManagerTest {
         JwtInvalidException.class,
         () -> verifierWithWrongKid.verifyAndDecode(signedCompactWithKid, validator));
   }
-
-  @Test
-  public void signWithTinkKeyAndCustomKid_fails() throws Exception {
-    assumeFalse(TestUtil.isTsan()); // KeysetHandle.generateNew is too slow in Tsan.
-    KeyTemplate template = KeyTemplates.get("JWT_ES256");
-    KeysetHandle handleWithoutKid = KeysetHandle.generateNew(template);
-    KeysetHandle handleWithKid =
-        withCustomKid(handleWithoutKid, "Lorem ipsum dolor sit amet, consectetur adipiscing elit");
-
-    JwtPublicKeySign signerWithKid = handleWithKid.getPrimitive(JwtPublicKeySign.class);
-    RawJwt rawToken = RawJwt.newBuilder().setJwtId("jwtId").withoutExpiration().build();
-    assertThrows(JwtInvalidException.class, () -> signerWithKid.signAndEncode(rawToken));
-  }
 }

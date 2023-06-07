@@ -261,6 +261,7 @@ java_library(
     name = "jwt_ecdsa_sign_key_manager",
     srcs = ["JwtEcdsaSignKeyManager.java"],
     deps = [
+        ":jwt_ecdsa_proto_serialization",
         ":jwt_ecdsa_verify_key_manager",
         ":jwt_format",
         ":jwt_invalid_exception",
@@ -286,6 +287,7 @@ android_library(
     name = "jwt_ecdsa_sign_key_manager-android",
     srcs = ["JwtEcdsaSignKeyManager.java"],
     deps = [
+        ":jwt_ecdsa_proto_serialization-android",
         ":jwt_ecdsa_verify_key_manager-android",
         ":jwt_format-android",
         ":jwt_invalid_exception-android",
