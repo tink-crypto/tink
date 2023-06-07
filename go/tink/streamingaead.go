@@ -33,13 +33,13 @@ and Vizár https://eprint.iacr.org/2015/189.pdf
 */
 type StreamingAEAD interface {
 	// NewEncryptingWriter returns a wrapper around underlying io.Writer, such that any write-operation
-	// via the wrapper results in AEAD-encryption of the written data, using aad
-	// as associated authenticated data. The associated data is not included in the ciphertext
+	// via the wrapper results in AEAD-encryption of the written data, using associatedData
+	// as associated data. The associated data is not included in the ciphertext
 	// and has to be passed in as parameter for decryption.
-	NewEncryptingWriter(w io.Writer, aad []byte) (io.WriteCloser, error)
+	NewEncryptingWriter(w io.Writer, associatedData []byte) (io.WriteCloser, error)
 
 	// NewDecryptingReader returns a wrapper around underlying io.Reader, such that any read-operation
 	// via the wrapper results in AEAD-decryption of the underlying ciphertext,
-	// using aad as associated authenticated data.
-	NewDecryptingReader(r io.Reader, aad []byte) (io.Reader, error)
+	// using associatedData as associated data.
+	NewDecryptingReader(r io.Reader, associatedData []byte) (io.Reader, error)
 }
