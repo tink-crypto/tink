@@ -35,8 +35,8 @@ const (
 )
 
 // New creates a MAC primitive from the given keyset handle.
-func New(h *keyset.Handle) (tink.MAC, error) {
-	ps, err := h.Primitives()
+func New(handle *keyset.Handle) (tink.MAC, error) {
+	ps, err := handle.Primitives()
 	if err != nil {
 		return nil, fmt.Errorf("mac_factory: cannot obtain primitive set: %s", err)
 	}

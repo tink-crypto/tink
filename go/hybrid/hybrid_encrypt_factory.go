@@ -28,8 +28,8 @@ import (
 )
 
 // NewHybridEncrypt returns an HybridEncrypt primitive from the given keyset handle.
-func NewHybridEncrypt(h *keyset.Handle) (tink.HybridEncrypt, error) {
-	ps, err := h.Primitives()
+func NewHybridEncrypt(handle *keyset.Handle) (tink.HybridEncrypt, error) {
+	ps, err := handle.Primitives()
 	if err != nil {
 		return nil, fmt.Errorf("hybrid_factory: cannot obtain primitive set: %s", err)
 	}

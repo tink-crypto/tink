@@ -29,8 +29,8 @@ import (
 )
 
 // NewSigner returns a Signer primitive from the given keyset handle.
-func NewSigner(h *keyset.Handle) (tink.Signer, error) {
-	ps, err := h.Primitives()
+func NewSigner(handle *keyset.Handle) (tink.Signer, error) {
+	ps, err := handle.Primitives()
 	if err != nil {
 		return nil, fmt.Errorf("public_key_sign_factory: cannot obtain primitive set: %s", err)
 	}

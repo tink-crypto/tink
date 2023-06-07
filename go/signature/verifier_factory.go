@@ -31,8 +31,8 @@ import (
 )
 
 // NewVerifier returns a Verifier primitive from the given keyset handle.
-func NewVerifier(h *keyset.Handle) (tink.Verifier, error) {
-	ps, err := h.Primitives()
+func NewVerifier(handle *keyset.Handle) (tink.Verifier, error) {
+	ps, err := handle.Primitives()
 	if err != nil {
 		return nil, fmt.Errorf("verifier_factory: cannot obtain primitive set: %s", err)
 	}

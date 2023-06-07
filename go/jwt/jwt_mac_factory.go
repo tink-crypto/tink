@@ -24,11 +24,11 @@ import (
 )
 
 // NewMAC generates a new instance of the JWT MAC primitive.
-func NewMAC(h *keyset.Handle) (MAC, error) {
-	if h == nil {
+func NewMAC(handle *keyset.Handle) (MAC, error) {
+	if handle == nil {
 		return nil, fmt.Errorf("keyset handle can't be nil")
 	}
-	ps, err := h.PrimitivesWithKeyManager(nil)
+	ps, err := handle.PrimitivesWithKeyManager(nil)
 	if err != nil {
 		return nil, fmt.Errorf("jwt_mac_factory: cannot obtain primitive set: %v", err)
 	}

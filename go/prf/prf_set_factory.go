@@ -27,8 +27,8 @@ import (
 )
 
 // NewPRFSet creates a prf.Set primitive from the given keyset handle.
-func NewPRFSet(h *keyset.Handle) (*Set, error) {
-	ps, err := h.Primitives()
+func NewPRFSet(handle *keyset.Handle) (*Set, error) {
+	ps, err := handle.Primitives()
 	if err != nil {
 		return nil, fmt.Errorf("prf_set_factory: cannot obtain primitive set: %s", err)
 	}

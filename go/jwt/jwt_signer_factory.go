@@ -24,11 +24,11 @@ import (
 )
 
 // NewSigner generates a new instance of the JWT Signer primitive.
-func NewSigner(h *keyset.Handle) (Signer, error) {
-	if h == nil {
+func NewSigner(handle *keyset.Handle) (Signer, error) {
+	if handle == nil {
 		return nil, fmt.Errorf("keyset handle can't be nil")
 	}
-	ps, err := h.PrimitivesWithKeyManager(nil)
+	ps, err := handle.PrimitivesWithKeyManager(nil)
 	if err != nil {
 		return nil, fmt.Errorf("jwt_signer_factory: cannot obtain primitive set: %v", err)
 	}

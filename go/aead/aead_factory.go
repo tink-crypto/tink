@@ -29,8 +29,8 @@ import (
 )
 
 // New returns an AEAD primitive from the given keyset handle.
-func New(h *keyset.Handle) (tink.AEAD, error) {
-	ps, err := h.Primitives()
+func New(handle *keyset.Handle) (tink.AEAD, error) {
+	ps, err := handle.Primitives()
 	if err != nil {
 		return nil, fmt.Errorf("aead_factory: cannot obtain primitive set: %s", err)
 	}

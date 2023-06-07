@@ -51,21 +51,21 @@ func Read(r keyset.Reader, opts ...keyset.Option) (*keyset.Handle, error) {
 	return keysetHandle(ks, opts...)
 }
 
-// Write exports the keyset from h to the given writer w without encrypting it.
+// Write exports the keyset from handle to the given writer w without encrypting it.
 //
 // Storing secret key material in an unencrypted fashion is dangerous. If
 // feasible, you should use [keyset.Handle.Write] instead.
-func Write(h *keyset.Handle, w keyset.Writer) error {
-	if h == nil {
+func Write(handle *keyset.Handle, w keyset.Writer) error {
+	if handle == nil {
 		return errInvalidHandle
 	}
 	if w == nil {
 		return errInvalidWriter
 	}
-	return w.Write(KeysetMaterial(h))
+	return w.Write(KeysetMaterial(handle))
 }
 
 // KeysetMaterial returns the key material contained in a keyset.Handle.
-func KeysetMaterial(h *keyset.Handle) *tinkpb.Keyset {
-	return keysetMaterial(h)
+func KeysetMaterial(handle *keyset.Handle) *tinkpb.Keyset {
+	return keysetMaterial(handle)
 }

@@ -29,11 +29,11 @@ import (
 var errNotKeysetDeriverPrimitive = errors.New("keyset_deriver_factory: not a Keyset Deriver primitive")
 
 // New generates a new instance of the Keyset Deriver primitive.
-func New(h *keyset.Handle) (KeysetDeriver, error) {
-	if h == nil {
+func New(handle *keyset.Handle) (KeysetDeriver, error) {
+	if handle == nil {
 		return nil, errors.New("keyset_deriver_factory: keyset handle can't be nil")
 	}
-	ps, err := h.PrimitivesWithKeyManager(nil)
+	ps, err := handle.PrimitivesWithKeyManager(nil)
 	if err != nil {
 		return nil, fmt.Errorf("keyset_deriver_factory: cannot obtain primitive set: %v", err)
 	}

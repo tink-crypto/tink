@@ -26,8 +26,8 @@ import (
 )
 
 // New returns a StreamingAEAD primitive from the given keyset handle.
-func New(h *keyset.Handle) (tink.StreamingAEAD, error) {
-	ps, err := h.Primitives()
+func New(handle *keyset.Handle) (tink.StreamingAEAD, error) {
+	ps, err := handle.Primitives()
 	if err != nil {
 		return nil, fmt.Errorf("streamingaead_factory: cannot obtain primitive set: %s", err)
 	}

@@ -24,11 +24,11 @@ import (
 )
 
 // NewVerifier generates a new instance of the JWT Verifier primitive.
-func NewVerifier(h *keyset.Handle) (Verifier, error) {
-	if h == nil {
+func NewVerifier(handle *keyset.Handle) (Verifier, error) {
+	if handle == nil {
 		return nil, fmt.Errorf("keyset handle can't be nil")
 	}
-	ps, err := h.PrimitivesWithKeyManager(nil)
+	ps, err := handle.PrimitivesWithKeyManager(nil)
 	if err != nil {
 		return nil, fmt.Errorf("jwt_verifier_factory: cannot obtain primitive set: %v", err)
 	}

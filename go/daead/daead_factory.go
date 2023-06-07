@@ -29,8 +29,8 @@ import (
 )
 
 // New returns a DeterministicAEAD primitive from the given keyset handle.
-func New(h *keyset.Handle) (tink.DeterministicAEAD, error) {
-	ps, err := h.Primitives()
+func New(handle *keyset.Handle) (tink.DeterministicAEAD, error) {
+	ps, err := handle.Primitives()
 	if err != nil {
 		return nil, fmt.Errorf("daead_factory: cannot obtain primitive set: %s", err)
 	}
