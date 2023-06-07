@@ -107,10 +107,6 @@ util::StatusOr<std::string> AwsKmsAead::Decrypt(
                         absl::StrCat("AWS KMS decryption failed with error: ",
                                      AwsErrorToString(err)));
   }
-  if (outcome.GetResult().GetKeyId() != Aws::String(key_arn_.c_str())) {
-    return util::Status(absl::StatusCode::kInvalidArgument,
-                        "AWS KMS decryption failed: wrong key ARN.");
-  }
   auto& buffer = outcome.GetResult().GetPlaintext();
   std::string plaintext(
       reinterpret_cast<const char*>(buffer.GetUnderlyingData()),

@@ -37,6 +37,11 @@ constexpr absl::string_view kAwsKmsKeyUri =
     "aws-kms://arn:aws:kms:us-east-2:235739564943:key/"
     "3ee50705-5a82-4f5b-9753-05c4f473922f";
 
+constexpr absl::string_view kAwsKmsKeyAliasUri =
+    "aws-kms://arn:aws:kms:us-east-2:235739564943:alias/"
+    "unit-and-integration-testing";
+
+
 TEST(AwsKmsAeadTest, EncryptDecrypt) {
   std::string credentials =
       internal::RunfilesPath("testdata/aws/credentials.ini");
@@ -57,6 +62,28 @@ TEST(AwsKmsAeadTest, EncryptDecrypt) {
   EXPECT_THAT((*aead)->Decrypt(*ciphertext, kAssociatedData),
               IsOkAndHolds(kPlaintext));
 }
+
+TEST(AwsKmsAeadTest, EncryptDecryptWithKeyAlias) {
+  std::string credentials =
+      internal::RunfilesPath("testdata/aws/credentials.ini");
+  util::StatusOr<std::unique_ptr<AwsKmsClient>> client =
+      AwsKmsClient::New(/*key_uri=*/"", credentials);
+  ASSERT_THAT(client, IsOk());
+
+  util::StatusOr<std::unique_ptr<Aead>> aead =
+      (*client)->GetAead(kAwsKmsKeyAliasUri);
+  ASSERT_THAT(aead, IsOk());
+
+  constexpr absl::string_view kPlaintext = "plaintext";
+  constexpr absl::string_view kAssociatedData = "aad";
+
+  util::StatusOr<std::string> ciphertext =
+      (*aead)->Encrypt(kPlaintext, kAssociatedData);
+  ASSERT_THAT(ciphertext, IsOk());
+  EXPECT_THAT((*aead)->Decrypt(*ciphertext, kAssociatedData),
+              IsOkAndHolds(kPlaintext));
+}
+
 }  // namespace
 }  // namespace awskms
 }  // namespace integration
