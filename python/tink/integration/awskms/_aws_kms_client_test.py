@@ -27,10 +27,17 @@ from tink.testing import helper
 
 CREDENTIAL_PATH = os.path.join(helper.tink_py_testdata_path(),
                                'aws/credentials.ini')
+
 KEY_URI = ('aws-kms://arn:aws:kms:us-east-2:235739564943:key/'
            '3ee50705-5a82-4f5b-9753-05c4f473922f')
+
+# An alias for KEY_URI.
+KEY_ALIAS_URI = ('aws-kms://arn:aws:kms:us-east-2:235739564943:alias/'
+                 'unit-and-integration-testing')
+
 KEY_URI_2 = ('aws-kms://arn:aws:kms:us-east-2:235739564943:key/'
              'b3ca2efd-a8fb-47f2-b541-7e20f8c5cd11')
+
 GCP_KEY_URI = ('gcp-kms://projects/tink-test-infrastructure/locations/global/'
                'keyRings/unit-and-integration-testing/cryptoKeys/aead-key')
 
@@ -41,6 +48,7 @@ class AwsKmsClientTest(absltest.TestCase):
     aws_client = awskms.AwsKmsClient(KEY_URI, CREDENTIAL_PATH)
 
     self.assertEqual(aws_client.does_support(KEY_URI), True)
+    self.assertEqual(aws_client.does_support(KEY_ALIAS_URI), False)
     self.assertEqual(aws_client.does_support(KEY_URI_2), False)
     self.assertEqual(aws_client.does_support(GCP_KEY_URI), False)
 
@@ -48,6 +56,7 @@ class AwsKmsClientTest(absltest.TestCase):
     aws_client = awskms.AwsKmsClient('', CREDENTIAL_PATH)
 
     self.assertEqual(aws_client.does_support(KEY_URI), True)
+    self.assertEqual(aws_client.does_support(KEY_ALIAS_URI), True)
     self.assertEqual(aws_client.does_support(KEY_URI_2), True)
     self.assertEqual(aws_client.does_support(GCP_KEY_URI), False)
 

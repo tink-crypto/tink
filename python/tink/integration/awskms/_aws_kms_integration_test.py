@@ -69,6 +69,19 @@ class AwsKmsAeadTest(absltest.TestCase):
     ciphertext = aws_aead.encrypt(plaintext, b'')
     self.assertEqual(plaintext, aws_aead.decrypt(ciphertext, b''))
 
+  def test_encrypt_decrypt_with_key_alias(self):
+    aws_client = awskms.AwsKmsClient(KEY_ALIAS_URI, CREDENTIAL_PATH)
+    aws_aead = aws_client.get_aead(KEY_ALIAS_URI)
+
+    plaintext = b'hello'
+    associated_data = b'world'
+    ciphertext = aws_aead.encrypt(plaintext, associated_data)
+    self.assertEqual(plaintext, aws_aead.decrypt(ciphertext, associated_data))
+
+    plaintext = b'hello'
+    ciphertext = aws_aead.encrypt(plaintext, b'')
+    self.assertEqual(plaintext, aws_aead.decrypt(ciphertext, b''))
+
   def test_corrupted_ciphertext(self):
     aws_client = awskms.AwsKmsClient(KEY_URI, CREDENTIAL_PATH)
     aws_aead = aws_client.get_aead(KEY_URI)

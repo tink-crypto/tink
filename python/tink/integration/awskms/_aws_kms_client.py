@@ -63,11 +63,6 @@ class _AwsKmsAead(aead.Aead):
           CiphertextBlob=ciphertext,
           EncryptionContext=_encryption_context(associated_data),
       )
-      if response['KeyId'] != self.key_arn:
-        raise tink.TinkError(
-            'invalid key id: got %s, want %s'
-            % (self.key_arn, response['KeyId'])
-        )
       return response['Plaintext']
     except exceptions.ClientError as e:
       raise tink.TinkError(e)
