@@ -3,24 +3,6 @@
 
 licenses(["notice"])  # MIT/X derivative license
 
-# Settings for building in various environments.
-config_setting(
-    name = "linux_x86_64",
-    values = {"cpu": "k8"},
-)
-
-config_setting(
-    name = "mac_x86_64",
-    values = {"cpu": "darwin"},
-)
-
-config_setting(
-    name = "darwin_arm64",
-    values = {
-        "cpu": "darwin_arm64",
-    },
-)
-
 cc_library(
     name = "curl",
     srcs = [
@@ -220,15 +202,9 @@ cc_library(
         "lib/wildcard.h",
         "lib/x509asn1.h",
     ] + select({
-        ":mac_x86_64": [
-            "lib/vtls/darwinssl.c",
-        ],
-        ":darwin_arm64": [
-            "lib/vtls/darwinssl.c",
-        ],
-        ":linux_x86_64": [
-            "lib/vtls/openssl.c",
-        ],
+        "@platforms//os:macos": ["lib/vtls/darwinssl.c"],
+        "@platforms//os:linux": ["lib/vtls/openssl.c"],
+        "//conditions:default": ["@platforms//:incompatible"],
     }),
     hdrs = [
         ":configure",
@@ -252,34 +228,21 @@ cc_library(
         "-DHAVE_ZLIB_H",
         "-Wno-string-plus-int",
     ] + select({
-        ":mac_x86_64": [
-            "-fno-constant-cfstrings",
-        ],
-        ":darwin_arm64": [
-            "-fno-constant-cfstrings",
-        ],
-        ":linux_x86_64": [
-            "-DCURL_MAX_WRITE_SIZE=65536",
-        ],
+        "@platforms//os:macos": ["-fno-constant-cfstrings"],
+        "@platforms//os:linux": ["-DCURL_MAX_WRITE_SIZE=65536"],
+        "//conditions:default": ["@platforms//:incompatible"],
     }),
     defines = ["CURL_STATICLIB"],
     includes = ["include"],
     linkopts = select({
-        ":mac_x86_64": [
+        "@platforms//os:macos": [
             "-Wl,-framework",
             "-Wl,CoreFoundation",
             "-Wl,-framework",
             "-Wl,Security",
         ],
-        ":darwin_arm64": [
-            "-Wl,-framework",
-            "-Wl,CoreFoundation",
-            "-Wl,-framework",
-            "-Wl,Security",
-        ],
-        ":linux_x86_64": [
-            "-lrt",
-        ],
+        "@platforms//os:linux": ["-lrt"],
+        "//conditions:default": ["@platforms//:incompatible"],
     }),
     visibility = ["//visibility:public"],
     deps = [
