@@ -3,9 +3,12 @@ licenses(["notice"])  # Apache 2.0
 cc_library(
     name = "aws_checksums",
     srcs = glob([
-        "source/intel/*.c",
         "source/*.c",
-    ]),
+    ]) + select({
+        "@platforms//cpu:x86_64": glob(["source/intel/*.c"]),
+        "@platforms//cpu:aarch64": glob(["source/arm/*.c"]),
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
     hdrs = glob([
         "include/**/*.h"
     ]),
