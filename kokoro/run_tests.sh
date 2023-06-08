@@ -64,7 +64,6 @@ run_tools_tests() {
   local -a MANUAL_TOOLS_TARGETS
   if [[ "${IS_KOKORO}" == "true" ]]; then
     MANUAL_TOOLS_TARGETS+=(
-      "//tinkey/src/test/java/com/google/crypto/tink/tinkey:AddKeyCommandTest"
       "//tinkey/src/test/java/com/google/crypto/tink/tinkey:CreateKeysetCommandTest"
       "//tinkey/src/test/java/com/google/crypto/tink/tinkey:CreatePublicKeysetCommandTest"
       "//tinkey/src/test/java/com/google/crypto/tink/tinkey:RotateKeysetCommandTest"

@@ -61,25 +61,23 @@ java_test(
     name = "AddKeyCommandTest",
     size = "small",
     srcs = ["AddKeyCommandTest.java"],
-    data = ["//testdata/gcp:credentials"],
-    tags = [
-        "manual",
-        "no_rbe",
-        "requires-network",
+    runtime_deps = [
+        "//tinkey/src/main/java/com/google/crypto/tink/tinkey:tinkey_test_kms_client",
     ],
     deps = [
         "//tinkey/src/main/java/com/google/crypto/tink/tinkey",
+        "//tinkey/src/main/java/com/google/crypto/tink/tinkey:tinkey_test_kms_client",
         "@maven//:com_google_truth_truth",
         "@maven//:junit_junit",
         "@tink_java//src/main/java/com/google/crypto/tink:aead",
         "@tink_java//src/main/java/com/google/crypto/tink:insecure_secret_key_access",
-        "@tink_java//src/main/java/com/google/crypto/tink:kms_clients",
         "@tink_java//src/main/java/com/google/crypto/tink:registry_cluster",
         "@tink_java//src/main/java/com/google/crypto/tink:tink_json_proto_keyset_format",
         "@tink_java//src/main/java/com/google/crypto/tink:tink_proto_keyset_format",
+        "@tink_java//src/main/java/com/google/crypto/tink/aead:aead_config",
+        "@tink_java//src/main/java/com/google/crypto/tink/aead:predefined_aead_parameters",
         "@tink_java//src/main/java/com/google/crypto/tink/mac:mac_config",
         "@tink_java//src/main/java/com/google/crypto/tink/mac:predefined_mac_parameters",
-        "@tink_java//src/main/java/com/google/crypto/tink/testing:test_util",
     ],
 )
 
@@ -106,5 +104,25 @@ java_test(
         "@tink_java//src/main/java/com/google/crypto/tink/mac:mac_config",
         "@tink_java//src/main/java/com/google/crypto/tink/mac:predefined_mac_parameters",
         "@tink_java//src/main/java/com/google/crypto/tink/testing:test_util",
+    ],
+)
+
+java_test(
+    name = "TinkeyTestKmsClientTest",
+    size = "small",
+    srcs = ["TinkeyTestKmsClientTest.java"],
+    runtime_deps = [
+        "//tinkey/src/main/java/com/google/crypto/tink/tinkey:tinkey_test_kms_client",
+    ],
+    deps = [
+        "//tinkey/src/main/java/com/google/crypto/tink/tinkey:tinkey_test_kms_client",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+        "@tink_java//src/main/java/com/google/crypto/tink:aead",
+        "@tink_java//src/main/java/com/google/crypto/tink:kms_client",
+        "@tink_java//src/main/java/com/google/crypto/tink:kms_clients",
+        "@tink_java//src/main/java/com/google/crypto/tink:registry_cluster",
+        "@tink_java//src/main/java/com/google/crypto/tink/aead:aead_config",
+        "@tink_java//src/main/java/com/google/crypto/tink/aead:predefined_aead_parameters",
     ],
 )

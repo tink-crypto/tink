@@ -308,3 +308,27 @@ java_library(
     srcs = ["HelpCommand.java"],
     deps = [":command"],
 )
+
+java_library(
+    name = "tinkey_test_kms_client",
+    testonly = 1,
+    srcs = ["TinkeyTestKmsClient.java"],
+    plugins = [":auto_service_plugin"],
+    deps = [
+        "@maven//:com_google_auto_service_auto_service_annotations",
+        "@tink_java//src/main/java/com/google/crypto/tink:aead",
+        "@tink_java//src/main/java/com/google/crypto/tink:insecure_secret_key_access",
+        "@tink_java//src/main/java/com/google/crypto/tink:kms_client",
+        "@tink_java//src/main/java/com/google/crypto/tink:registry_cluster",
+        "@tink_java//src/main/java/com/google/crypto/tink:tink_json_proto_keyset_format",
+    ],
+)
+
+java_plugin(
+    name = "auto_service_plugin",
+    processor_class = "com.google.auto.service.processor.AutoServiceProcessor",
+    deps = [
+        "@maven//:com_google_auto_auto_common",
+        "@maven//:com_google_auto_service_auto_service",
+    ],
+)

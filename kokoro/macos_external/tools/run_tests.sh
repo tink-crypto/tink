@@ -46,7 +46,6 @@ pip3 install --user protobuf
 MANUAL_TARGETS=()
 if [[ "${IS_KOKORO}" == "true" ]] ; then
   MANUAL_TARGETS+=(
-    "//tinkey/src/test/java/com/google/crypto/tink/tinkey:AddKeyCommandTest"
     "//tinkey/src/test/java/com/google/crypto/tink/tinkey:CreateKeysetCommandTest"
     "//tinkey/src/test/java/com/google/crypto/tink/tinkey:CreatePublicKeysetCommandTest"
     "//tinkey/src/test/java/com/google/crypto/tink/tinkey:RotateKeysetCommandTest"
