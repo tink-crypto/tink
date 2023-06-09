@@ -31,9 +31,9 @@ import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
 import com.google.crypto.tink.subtle.Hex;
 import com.google.crypto.tink.subtle.Random;
 import com.google.protobuf.ByteString;
-import com.google.protobuf.ExtensionRegistryLite;
 import java.security.GeneralSecurityException;
 import java.util.TreeSet;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -44,6 +44,11 @@ public class ChaCha20Poly1305KeyManagerTest {
   private final ChaCha20Poly1305KeyManager manager = new ChaCha20Poly1305KeyManager();
   private final KeyTypeManager.KeyFactory<ChaCha20Poly1305KeyFormat, ChaCha20Poly1305Key> factory =
       manager.keyFactory();
+
+  @Before
+  public void register() throws Exception {
+    AeadConfig.register();
+  }
 
   @Test
   public void basics() throws Exception {
@@ -143,21 +148,14 @@ public class ChaCha20Poly1305KeyManagerTest {
   @Test
   public void testChaCha20Poly1305Template() throws Exception {
     KeyTemplate template = ChaCha20Poly1305KeyManager.chaCha20Poly1305Template();
-    assertEquals(new ChaCha20Poly1305KeyManager().getKeyType(), template.getTypeUrl());
-    assertEquals(KeyTemplate.OutputPrefixType.TINK, template.getOutputPrefixType());
-    ChaCha20Poly1305KeyFormat unused =
-        ChaCha20Poly1305KeyFormat.parseFrom(
-            template.getValue(), ExtensionRegistryLite.getEmptyRegistry());
+    assertThat(template.toParameters())
+        .isEqualTo(ChaCha20Poly1305Parameters.create(ChaCha20Poly1305Parameters.Variant.TINK));
   }
 
   @Test
   public void testRawChaCha20Poly1305Template() throws Exception {
     KeyTemplate template = ChaCha20Poly1305KeyManager.rawChaCha20Poly1305Template();
-    assertEquals(new ChaCha20Poly1305KeyManager().getKeyType(), template.getTypeUrl());
-    assertEquals(KeyTemplate.OutputPrefixType.RAW, template.getOutputPrefixType());
-    ChaCha20Poly1305KeyFormat unused =
-        ChaCha20Poly1305KeyFormat.parseFrom(
-            template.getValue(), ExtensionRegistryLite.getEmptyRegistry());
+    assertThat(template.toParameters()).isEqualTo(ChaCha20Poly1305Parameters.create());
   }
 
   @Test

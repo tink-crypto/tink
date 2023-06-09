@@ -29,13 +29,12 @@ import com.google.crypto.tink.proto.XChaCha20Poly1305KeyFormat;
 import com.google.crypto.tink.subtle.Hex;
 import com.google.crypto.tink.subtle.Random;
 import com.google.crypto.tink.subtle.XChaCha20Poly1305;
-import com.google.protobuf.ByteString;
-import com.google.protobuf.ExtensionRegistryLite;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.security.GeneralSecurityException;
 import java.util.Set;
 import java.util.TreeSet;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -46,6 +45,11 @@ public class XChaCha20Poly1305KeyManagerTest {
   private final XChaCha20Poly1305KeyManager manager = new XChaCha20Poly1305KeyManager();
   private final KeyTypeManager.KeyFactory<XChaCha20Poly1305KeyFormat, XChaCha20Poly1305Key>
       factory = manager.keyFactory();
+
+  @Before
+  public void register() throws Exception {
+    AeadConfig.register();
+  }
 
   @Test
   public void basics() throws Exception {
@@ -171,21 +175,14 @@ public class XChaCha20Poly1305KeyManagerTest {
   @Test
   public void testXChaCha20Poly1305Template() throws Exception {
     KeyTemplate template = XChaCha20Poly1305KeyManager.xChaCha20Poly1305Template();
-    assertThat(template.getTypeUrl()).isEqualTo(new XChaCha20Poly1305KeyManager().getKeyType());
-    assertThat(template.getOutputPrefixType()).isEqualTo(KeyTemplate.OutputPrefixType.TINK);
-    XChaCha20Poly1305KeyFormat unused =
-        XChaCha20Poly1305KeyFormat.parseFrom(
-            ByteString.copyFrom(template.getValue()), ExtensionRegistryLite.getEmptyRegistry());
+    assertThat(template.toParameters())
+        .isEqualTo(XChaCha20Poly1305Parameters.create(XChaCha20Poly1305Parameters.Variant.TINK));
   }
 
   @Test
   public void testRawXChaCha20Poly1305Template() throws Exception {
     KeyTemplate template = XChaCha20Poly1305KeyManager.rawXChaCha20Poly1305Template();
-    assertThat(template.getTypeUrl()).isEqualTo(new XChaCha20Poly1305KeyManager().getKeyType());
-    assertThat(template.getOutputPrefixType()).isEqualTo(KeyTemplate.OutputPrefixType.RAW);
-    XChaCha20Poly1305KeyFormat unused =
-        XChaCha20Poly1305KeyFormat.parseFrom(
-            ByteString.copyFrom(template.getValue()), ExtensionRegistryLite.getEmptyRegistry());
+    assertThat(template.toParameters()).isEqualTo(XChaCha20Poly1305Parameters.create());
   }
 
   @Test

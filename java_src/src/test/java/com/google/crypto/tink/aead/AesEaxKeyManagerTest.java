@@ -22,7 +22,6 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
-import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import com.google.crypto.tink.Aead;
@@ -37,10 +36,10 @@ import com.google.crypto.tink.subtle.Bytes;
 import com.google.crypto.tink.subtle.Hex;
 import com.google.crypto.tink.subtle.Random;
 import com.google.protobuf.ByteString;
-import com.google.protobuf.ExtensionRegistryLite;
 import java.security.GeneralSecurityException;
 import java.util.Set;
 import java.util.TreeSet;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -51,6 +50,11 @@ public class AesEaxKeyManagerTest {
   private final AesEaxKeyManager manager = new AesEaxKeyManager();
   private final KeyTypeManager.KeyFactory<AesEaxKeyFormat, AesEaxKey> factory =
       manager.keyFactory();
+
+  @Before
+  public void register() throws Exception {
+    AeadConfig.register();
+  }
 
   @Test
   public void basics() throws Exception {
@@ -293,53 +297,52 @@ public class AesEaxKeyManagerTest {
   @Test
   public void testAes128EaxTemplate() throws Exception {
     KeyTemplate template = AesEaxKeyManager.aes128EaxTemplate();
-    assertEquals(new AesEaxKeyManager().getKeyType(), template.getTypeUrl());
-    assertEquals(KeyTemplate.OutputPrefixType.TINK, template.getOutputPrefixType());
-    AesEaxKeyFormat format =
-        AesEaxKeyFormat.parseFrom(
-            ByteString.copyFrom(template.getValue()), ExtensionRegistryLite.getEmptyRegistry());
-    assertEquals(16, format.getKeySize());
-    assertTrue(format.hasParams());
-    assertEquals(16, format.getParams().getIvSize());
+    assertThat(template.toParameters())
+        .isEqualTo(
+            AesEaxParameters.builder()
+                .setKeySizeBytes(16)
+                .setIvSizeBytes(16)
+                .setTagSizeBytes(16)
+                .setVariant(AesEaxParameters.Variant.TINK)
+                .build());
   }
 
   @Test
   public void testRawAes128EaxTemplate() throws Exception {
     KeyTemplate template = AesEaxKeyManager.rawAes128EaxTemplate();
-    assertEquals(new AesEaxKeyManager().getKeyType(), template.getTypeUrl());
-    assertEquals(KeyTemplate.OutputPrefixType.RAW, template.getOutputPrefixType());
-    AesEaxKeyFormat format =
-        AesEaxKeyFormat.parseFrom(
-            ByteString.copyFrom(template.getValue()), ExtensionRegistryLite.getEmptyRegistry());
-    assertEquals(16, format.getKeySize());
-    assertTrue(format.hasParams());
-    assertEquals(16, format.getParams().getIvSize());
+    assertThat(template.toParameters())
+        .isEqualTo(
+            AesEaxParameters.builder()
+                .setKeySizeBytes(16)
+                .setIvSizeBytes(16)
+                .setTagSizeBytes(16)
+                .setVariant(AesEaxParameters.Variant.NO_PREFIX)
+                .build());
   }
 
   @Test
   public void testAes256EaxTemplate() throws Exception {
     KeyTemplate template = AesEaxKeyManager.aes256EaxTemplate();
-    assertEquals(new AesEaxKeyManager().getKeyType(), template.getTypeUrl());
-    assertEquals(KeyTemplate.OutputPrefixType.TINK, template.getOutputPrefixType());
-    AesEaxKeyFormat format =
-        AesEaxKeyFormat.parseFrom(
-            ByteString.copyFrom(template.getValue()), ExtensionRegistryLite.getEmptyRegistry());
-    assertEquals(32, format.getKeySize());
-    assertTrue(format.hasParams());
-    assertEquals(16, format.getParams().getIvSize());
+    assertThat(template.toParameters())
+        .isEqualTo(
+            AesEaxParameters.builder()
+                .setKeySizeBytes(32)
+                .setIvSizeBytes(16)
+                .setTagSizeBytes(16)
+                .setVariant(AesEaxParameters.Variant.TINK)
+                .build());
   }
 
   @Test
   public void testRawAes256EaxTemplate() throws Exception {
     KeyTemplate template = AesEaxKeyManager.rawAes256EaxTemplate();
-    assertEquals(new AesEaxKeyManager().getKeyType(), template.getTypeUrl());
-    assertEquals(KeyTemplate.OutputPrefixType.RAW, template.getOutputPrefixType());
-    AesEaxKeyFormat format =
-        AesEaxKeyFormat.parseFrom(
-            ByteString.copyFrom(template.getValue()), ExtensionRegistryLite.getEmptyRegistry());
-    assertEquals(32, format.getKeySize());
-    assertTrue(format.hasParams());
-    assertEquals(16, format.getParams().getIvSize());
+    assertThat(template.toParameters())
+        .isEqualTo(
+            AesEaxParameters.builder()
+                .setIvSizeBytes(16)
+                .setKeySizeBytes(32)
+                .setTagSizeBytes(16)
+                .build());
   }
 
   @Test

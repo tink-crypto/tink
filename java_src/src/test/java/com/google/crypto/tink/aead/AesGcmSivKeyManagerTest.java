@@ -19,7 +19,6 @@ package com.google.crypto.tink.aead;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.crypto.tink.testing.KeyTypeManagerTestUtil.testKeyTemplateCompatible;
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
 
 import com.google.crypto.tink.Aead;
@@ -31,8 +30,6 @@ import com.google.crypto.tink.proto.AesGcmSivKeyFormat;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
 import com.google.crypto.tink.subtle.Hex;
 import com.google.crypto.tink.subtle.Random;
-import com.google.protobuf.ByteString;
-import com.google.protobuf.ExtensionRegistryLite;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.security.GeneralSecurityException;
@@ -61,6 +58,11 @@ public class AesGcmSivKeyManagerTest {
       throw new IllegalStateException(
           "Cannot test AesGcmSivKeyManager without Conscrypt Provider", cause);
     }
+  }
+
+  @Before
+  public void register() throws Exception {
+    AeadConfig.register();
   }
 
   @Test
@@ -252,45 +254,45 @@ public class AesGcmSivKeyManagerTest {
   @Test
   public void testAes128GcmSivTemplate() throws Exception {
     KeyTemplate template = AesGcmSivKeyManager.aes128GcmSivTemplate();
-    assertEquals(new AesGcmSivKeyManager().getKeyType(), template.getTypeUrl());
-    assertEquals(KeyTemplate.OutputPrefixType.TINK, template.getOutputPrefixType());
-    AesGcmSivKeyFormat format =
-        AesGcmSivKeyFormat.parseFrom(
-            ByteString.copyFrom(template.getValue()), ExtensionRegistryLite.getEmptyRegistry());
-    assertEquals(16, format.getKeySize());
+    assertThat(template.toParameters())
+        .isEqualTo(
+            AesGcmSivParameters.builder()
+                .setKeySizeBytes(16)
+                .setVariant(AesGcmSivParameters.Variant.TINK)
+                .build());
   }
 
   @Test
   public void testRawAes128GcmSivTemplate() throws Exception {
     KeyTemplate template = AesGcmSivKeyManager.rawAes128GcmSivTemplate();
-    assertEquals(new AesGcmSivKeyManager().getKeyType(), template.getTypeUrl());
-    assertEquals(KeyTemplate.OutputPrefixType.RAW, template.getOutputPrefixType());
-    AesGcmSivKeyFormat format =
-        AesGcmSivKeyFormat.parseFrom(
-            ByteString.copyFrom(template.getValue()), ExtensionRegistryLite.getEmptyRegistry());
-    assertEquals(16, format.getKeySize());
+    assertThat(template.toParameters())
+        .isEqualTo(
+            AesGcmSivParameters.builder()
+                .setKeySizeBytes(16)
+                .setVariant(AesGcmSivParameters.Variant.NO_PREFIX)
+                .build());
   }
 
   @Test
   public void testAes256GcmSivTemplate() throws Exception {
     KeyTemplate template = AesGcmSivKeyManager.aes256GcmSivTemplate();
-    assertEquals(new AesGcmSivKeyManager().getKeyType(), template.getTypeUrl());
-    assertEquals(KeyTemplate.OutputPrefixType.TINK, template.getOutputPrefixType());
-    AesGcmSivKeyFormat format =
-        AesGcmSivKeyFormat.parseFrom(
-            ByteString.copyFrom(template.getValue()), ExtensionRegistryLite.getEmptyRegistry());
-    assertEquals(32, format.getKeySize());
+    assertThat(template.toParameters())
+        .isEqualTo(
+            AesGcmSivParameters.builder()
+                .setKeySizeBytes(32)
+                .setVariant(AesGcmSivParameters.Variant.TINK)
+                .build());
   }
 
   @Test
   public void testRawAes256GcmSivTemplate() throws Exception {
     KeyTemplate template = AesGcmSivKeyManager.rawAes256GcmSivTemplate();
-    assertEquals(new AesGcmSivKeyManager().getKeyType(), template.getTypeUrl());
-    assertEquals(KeyTemplate.OutputPrefixType.RAW, template.getOutputPrefixType());
-    AesGcmSivKeyFormat format =
-        AesGcmSivKeyFormat.parseFrom(
-            ByteString.copyFrom(template.getValue()), ExtensionRegistryLite.getEmptyRegistry());
-    assertEquals(32, format.getKeySize());
+    assertThat(template.toParameters())
+        .isEqualTo(
+            AesGcmSivParameters.builder()
+                .setKeySizeBytes(32)
+                .setVariant(AesGcmSivParameters.Variant.NO_PREFIX)
+                .build());
   }
 
   @Test

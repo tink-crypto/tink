@@ -20,7 +20,6 @@ import static com.google.common.truth.Truth.assertThat;
 import static com.google.crypto.tink.testing.KeyTypeManagerTestUtil.testKeyTemplateCompatible;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.fail;
 
@@ -35,12 +34,12 @@ import com.google.crypto.tink.subtle.Bytes;
 import com.google.crypto.tink.subtle.Hex;
 import com.google.crypto.tink.subtle.Random;
 import com.google.protobuf.ByteString;
-import com.google.protobuf.ExtensionRegistryLite;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.security.GeneralSecurityException;
 import java.util.Set;
 import java.util.TreeSet;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -51,6 +50,11 @@ public class AesGcmKeyManagerTest {
   private final AesGcmKeyManager manager = new AesGcmKeyManager();
   private final KeyTypeManager.KeyFactory<AesGcmKeyFormat, AesGcmKey> factory =
       manager.keyFactory();
+
+  @Before
+  public void register() throws Exception {
+    AeadConfig.register();
+  }
 
   @Test
   public void basics() throws Exception {
@@ -443,45 +447,53 @@ public class AesGcmKeyManagerTest {
   @Test
   public void testAes128GcmTemplate() throws Exception {
     KeyTemplate template = AesGcmKeyManager.aes128GcmTemplate();
-    assertEquals(new AesGcmKeyManager().getKeyType(), template.getTypeUrl());
-    assertEquals(KeyTemplate.OutputPrefixType.TINK, template.getOutputPrefixType());
-    AesGcmKeyFormat format =
-        AesGcmKeyFormat.parseFrom(
-            ByteString.copyFrom(template.getValue()), ExtensionRegistryLite.getEmptyRegistry());
-    assertEquals(16, format.getKeySize());
+    assertThat(template.toParameters())
+        .isEqualTo(
+            AesGcmParameters.builder()
+                .setIvSizeBytes(12)
+                .setTagSizeBytes(16)
+                .setKeySizeBytes(16)
+                .setVariant(AesGcmParameters.Variant.TINK)
+                .build());
   }
 
   @Test
   public void testRawAes128GcmTemplate() throws Exception {
     KeyTemplate template = AesGcmKeyManager.rawAes128GcmTemplate();
-    assertEquals(new AesGcmKeyManager().getKeyType(), template.getTypeUrl());
-    assertEquals(KeyTemplate.OutputPrefixType.RAW, template.getOutputPrefixType());
-    AesGcmKeyFormat format =
-        AesGcmKeyFormat.parseFrom(
-            ByteString.copyFrom(template.getValue()), ExtensionRegistryLite.getEmptyRegistry());
-    assertEquals(16, format.getKeySize());
+    assertThat(template.toParameters())
+        .isEqualTo(
+            AesGcmParameters.builder()
+                .setIvSizeBytes(12)
+                .setTagSizeBytes(16)
+                .setKeySizeBytes(16)
+                .setVariant(AesGcmParameters.Variant.NO_PREFIX)
+                .build());
   }
 
   @Test
   public void testAes256GcmTemplate() throws Exception {
     KeyTemplate template = AesGcmKeyManager.aes256GcmTemplate();
-    assertEquals(new AesGcmKeyManager().getKeyType(), template.getTypeUrl());
-    assertEquals(KeyTemplate.OutputPrefixType.TINK, template.getOutputPrefixType());
-    AesGcmKeyFormat format =
-        AesGcmKeyFormat.parseFrom(
-            ByteString.copyFrom(template.getValue()), ExtensionRegistryLite.getEmptyRegistry());
-    assertEquals(32, format.getKeySize());
+    assertThat(template.toParameters())
+        .isEqualTo(
+            AesGcmParameters.builder()
+                .setIvSizeBytes(12)
+                .setTagSizeBytes(16)
+                .setKeySizeBytes(32)
+                .setVariant(AesGcmParameters.Variant.TINK)
+                .build());
   }
 
   @Test
   public void testRawAes256GcmTemplate() throws Exception {
     KeyTemplate template = AesGcmKeyManager.rawAes256GcmTemplate();
-    assertEquals(new AesGcmKeyManager().getKeyType(), template.getTypeUrl());
-    assertEquals(KeyTemplate.OutputPrefixType.RAW, template.getOutputPrefixType());
-    AesGcmKeyFormat format =
-        AesGcmKeyFormat.parseFrom(
-            ByteString.copyFrom(template.getValue()), ExtensionRegistryLite.getEmptyRegistry());
-    assertEquals(32, format.getKeySize());
+    assertThat(template.toParameters())
+        .isEqualTo(
+            AesGcmParameters.builder()
+                .setIvSizeBytes(12)
+                .setTagSizeBytes(16)
+                .setKeySizeBytes(32)
+                .setVariant(AesGcmParameters.Variant.NO_PREFIX)
+                .build());
   }
 
   @Test

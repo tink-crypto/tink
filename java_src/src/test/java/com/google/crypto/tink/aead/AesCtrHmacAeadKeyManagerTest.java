@@ -18,9 +18,7 @@ package com.google.crypto.tink.aead;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.crypto.tink.testing.KeyTypeManagerTestUtil.testKeyTemplateCompatible;
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
-import static org.junit.Assert.assertTrue;
 
 import com.google.crypto.tink.Aead;
 import com.google.crypto.tink.KeyTemplate;
@@ -37,12 +35,12 @@ import com.google.crypto.tink.subtle.EncryptThenAuthenticate;
 import com.google.crypto.tink.subtle.Hex;
 import com.google.crypto.tink.subtle.Random;
 import com.google.protobuf.ByteString;
-import com.google.protobuf.ExtensionRegistryLite;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.security.GeneralSecurityException;
 import java.util.Set;
 import java.util.TreeSet;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -53,6 +51,11 @@ public class AesCtrHmacAeadKeyManagerTest {
   private final AesCtrHmacAeadKeyManager manager = new AesCtrHmacAeadKeyManager();
   private final KeyTypeManager.KeyFactory<AesCtrHmacAeadKeyFormat, AesCtrHmacAeadKey> factory =
       manager.keyFactory();
+
+  @Before
+  public void register() throws Exception {
+    AeadConfig.register();
+  }
 
   @Test
   public void basics() throws Exception {
@@ -328,43 +331,31 @@ public class AesCtrHmacAeadKeyManagerTest {
   @Test
   public void testAes128CtrHmacSha256Template() throws Exception {
     KeyTemplate template = AesCtrHmacAeadKeyManager.aes128CtrHmacSha256Template();
-    assertEquals(new AesCtrHmacAeadKeyManager().getKeyType(), template.getTypeUrl());
-    assertEquals(KeyTemplate.OutputPrefixType.TINK, template.getOutputPrefixType());
-    AesCtrHmacAeadKeyFormat format =
-        AesCtrHmacAeadKeyFormat.parseFrom(
-            template.getValue(), ExtensionRegistryLite.getEmptyRegistry());
-
-    assertTrue(format.hasAesCtrKeyFormat());
-    assertTrue(format.getAesCtrKeyFormat().hasParams());
-    assertEquals(16, format.getAesCtrKeyFormat().getKeySize());
-    assertEquals(16, format.getAesCtrKeyFormat().getParams().getIvSize());
-
-    assertTrue(format.hasHmacKeyFormat());
-    assertTrue(format.getHmacKeyFormat().hasParams());
-    assertEquals(32, format.getHmacKeyFormat().getKeySize());
-    assertEquals(16, format.getHmacKeyFormat().getParams().getTagSize());
-    assertEquals(HashType.SHA256, format.getHmacKeyFormat().getParams().getHash());
+    assertThat(template.toParameters())
+        .isEqualTo(
+            AesCtrHmacAeadParameters.builder()
+                .setAesKeySizeBytes(16)
+                .setHmacKeySizeBytes(32)
+                .setIvSizeBytes(16)
+                .setTagSizeBytes(16)
+                .setHashType(AesCtrHmacAeadParameters.HashType.SHA256)
+                .setVariant(AesCtrHmacAeadParameters.Variant.TINK)
+                .build());
   }
 
   @Test
   public void testAes256CtrHmacSha256Template() throws Exception {
     KeyTemplate template = AesCtrHmacAeadKeyManager.aes256CtrHmacSha256Template();
-    assertEquals(new AesCtrHmacAeadKeyManager().getKeyType(), template.getTypeUrl());
-    assertEquals(KeyTemplate.OutputPrefixType.TINK, template.getOutputPrefixType());
-    AesCtrHmacAeadKeyFormat format =
-        AesCtrHmacAeadKeyFormat.parseFrom(
-            template.getValue(), ExtensionRegistryLite.getEmptyRegistry());
-
-    assertTrue(format.hasAesCtrKeyFormat());
-    assertTrue(format.getAesCtrKeyFormat().hasParams());
-    assertEquals(32, format.getAesCtrKeyFormat().getKeySize());
-    assertEquals(16, format.getAesCtrKeyFormat().getParams().getIvSize());
-
-    assertTrue(format.hasHmacKeyFormat());
-    assertTrue(format.getHmacKeyFormat().hasParams());
-    assertEquals(32, format.getHmacKeyFormat().getKeySize());
-    assertEquals(32, format.getHmacKeyFormat().getParams().getTagSize());
-    assertEquals(HashType.SHA256, format.getHmacKeyFormat().getParams().getHash());
+    assertThat(template.toParameters())
+        .isEqualTo(
+            AesCtrHmacAeadParameters.builder()
+                .setAesKeySizeBytes(32)
+                .setHmacKeySizeBytes(32)
+                .setIvSizeBytes(16)
+                .setTagSizeBytes(32)
+                .setHashType(AesCtrHmacAeadParameters.HashType.SHA256)
+                .setVariant(AesCtrHmacAeadParameters.Variant.TINK)
+                .build());
   }
 
   @Test
