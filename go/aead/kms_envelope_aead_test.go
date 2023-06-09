@@ -17,56 +17,98 @@
 package aead_test
 
 import (
+	"bytes"
+	"log"
 	"testing"
 
 	"github.com/google/tink/go/aead"
-	"github.com/google/tink/go/keyset"
-	"github.com/google/tink/go/tink"
+	"github.com/google/tink/go/testing/fakekms"
+	tinkpb "github.com/google/tink/go/proto/tink_go_proto"
 )
 
-func createKMSEnvelopeAEAD(t *testing.T) tink.AEAD {
-	t.Helper()
-
-	kh, err := keyset.NewHandle(aead.AES256GCMKeyTemplate())
+func TestKMSEnvelopeWorksWithTinkKeyTemplatesAsDekTemplate(t *testing.T) {
+	keyURI := "fake-kms://CM2b3_MDElQKSAowdHlwZS5nb29nbGVhcGlzLmNvbS9nb29nbGUuY3J5cHRvLnRpbmsuQWVzR2NtS2V5EhIaEIK75t5L-adlUwVhWvRuWUwYARABGM2b3_MDIAE"
+	client, err := fakekms.NewClient(keyURI)
 	if err != nil {
-		t.Fatalf("failed to create new handle: %v", err)
+		log.Fatal(err)
 	}
-
-	parentAEAD, err := aead.New(kh)
+	kekAEAD, err := client.GetAEAD(keyURI)
 	if err != nil {
-		t.Fatalf("failed to create parent AEAD: %v", err)
+		log.Fatal(err)
 	}
+	plaintext := []byte("plaintext")
+	associatedData := []byte("associatedData")
+	invalidAssociatedData := []byte("invalidAssociatedData")
 
-	return aead.NewKMSEnvelopeAEAD2(aead.AES256GCMKeyTemplate(), parentAEAD)
-}
-
-func TestKMSEnvelopeRoundtrip(t *testing.T) {
-	a := createKMSEnvelopeAEAD(t)
-
-	originalPlaintext := "hello world"
-
-	ciphertext, err := a.Encrypt([]byte(originalPlaintext), nil)
-	if err != nil {
-		t.Fatalf("failed to encrypt: %v", err)
+	var kmsEnvelopeAeadDekTestCases = []struct {
+		name        string
+		dekTemplate *tinkpb.KeyTemplate
+	}{
+		{
+			name:        "AES128_GCM",
+			dekTemplate: aead.AES128GCMKeyTemplate(),
+		}, {
+			name:        "AES256_GCM",
+			dekTemplate: aead.AES256GCMKeyTemplate(),
+		}, {
+			name:        "AES256_GCM_NO_PREFIX",
+			dekTemplate: aead.AES256GCMNoPrefixKeyTemplate(),
+		}, {
+			name:        "AES128_GCM_SIV",
+			dekTemplate: aead.AES128GCMSIVKeyTemplate(),
+		}, {
+			name:        "AES256_GCM_SIV",
+			dekTemplate: aead.AES256GCMSIVKeyTemplate(),
+		}, {
+			name:        "AES256_GCM_SIV_NO_PREFIX",
+			dekTemplate: aead.AES256GCMSIVNoPrefixKeyTemplate(),
+		}, {
+			name:        "AES128_CTR_HMAC_SHA256",
+			dekTemplate: aead.AES128CTRHMACSHA256KeyTemplate(),
+		}, {
+			name:        "AES256_CTR_HMAC_SHA256",
+			dekTemplate: aead.AES256CTRHMACSHA256KeyTemplate(),
+		}, {
+			name:        "CHACHA20_POLY1305",
+			dekTemplate: aead.ChaCha20Poly1305KeyTemplate(),
+		}, {
+			name:        "XCHACHA20_POLY1305",
+			dekTemplate: aead.XChaCha20Poly1305KeyTemplate(),
+		},
 	}
-
-	plaintextBytes, err := a.Decrypt(ciphertext, nil)
-	if err != nil {
-		t.Fatalf("failed to decrypt: %v", err)
-	}
-	plaintext := string(plaintextBytes)
-
-	if plaintext != originalPlaintext {
-		t.Errorf("Decrypt(Encrypt(%q)) = %q; want %q", originalPlaintext, plaintext, originalPlaintext)
+	for _, tc := range kmsEnvelopeAeadDekTestCases {
+		t.Run(tc.name, func(t *testing.T) {
+			a := aead.NewKMSEnvelopeAEAD2(aead.AES256GCMKeyTemplate(), kekAEAD)
+			ciphertext, err := a.Encrypt(plaintext, associatedData)
+			if err != nil {
+				t.Fatalf("a.Encrypt(plaintext, associatedData) err = %q, want nil", err)
+			}
+			gotPlaintext, err := a.Decrypt(ciphertext, associatedData)
+			if err != nil {
+				t.Fatalf("a.Decrypt(ciphertext, associatedData) err = %q, want nil", err)
+			}
+			if !bytes.Equal(gotPlaintext, plaintext) {
+				t.Fatalf("got plaintext %q, want %q", gotPlaintext, plaintext)
+			}
+			if _, err = a.Decrypt(ciphertext, invalidAssociatedData); err == nil {
+				t.Error("a.Decrypt(ciphertext, invalidAssociatedData) err = nil, want error")
+			}
+		})
 	}
 }
 
 func TestKMSEnvelopeShortCiphertext(t *testing.T) {
-	a := createKMSEnvelopeAEAD(t)
-
-	_, err := a.Decrypt([]byte{1}, nil)
-	if err == nil {
-		t.Errorf("Decrypt({1}) worked, but should've errored out")
+	keyURI := "fake-kms://CM2b3_MDElQKSAowdHlwZS5nb29nbGVhcGlzLmNvbS9nb29nbGUuY3J5cHRvLnRpbmsuQWVzR2NtS2V5EhIaEIK75t5L-adlUwVhWvRuWUwYARABGM2b3_MDIAE"
+	client, err := fakekms.NewClient(keyURI)
+	if err != nil {
+		log.Fatal(err)
 	}
-
+	kekAEAD, err := client.GetAEAD(keyURI)
+	if err != nil {
+		log.Fatal(err)
+	}
+	a := aead.NewKMSEnvelopeAEAD2(aead.AES256GCMKeyTemplate(), kekAEAD)
+	if _, err = a.Decrypt([]byte{1}, nil); err == nil {
+		t.Error("a.Decrypt([]byte{1}, nil) err = nil, want error")
+	}
 }
