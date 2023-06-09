@@ -126,3 +126,15 @@ java_test(
         "@tink_java//src/main/java/com/google/crypto/tink/aead:predefined_aead_parameters",
     ],
 )
+
+java_test(
+    name = "KmsClientsFactoryTest",
+    size = "small",
+    srcs = ["KmsClientsFactoryTest.java"],
+    deps = [
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+        "//tinkey/src/main/java/com/google/crypto/tink/tinkey:kms_clients_factory",
+        "//tinkey/src/main/java/com/google/crypto/tink/tinkey:tinkey_test_kms_client",
+    ],
+)

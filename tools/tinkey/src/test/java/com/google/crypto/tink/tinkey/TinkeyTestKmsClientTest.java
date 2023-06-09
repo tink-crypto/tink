@@ -18,7 +18,9 @@ package com.google.crypto.tink.tinkey;
 
 import static com.google.common.truth.Truth.assertThat;
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThrows;
+import static org.junit.Assert.assertTrue;
 
 import com.google.crypto.tink.Aead;
 import com.google.crypto.tink.KeysetHandle;
@@ -51,13 +53,20 @@ public final class TinkeyTestKmsClientTest {
     KeysetHandle handle = KeysetHandle.generateNew(PredefinedAeadParameters.AES128_GCM);
     String masterKeyUri = TinkeyTestKmsClient.createKeyUri(handle);
     Aead masterKey =
-        KmsClients.getAutoLoaded(masterKeyUri)
-            .withCredentials(credentialPath.toString())
-            .getAead(masterKeyUri);
+        new TinkeyTestKmsClient().withCredentials(credentialPath.toString()).getAead(masterKeyUri);
     Aead manualMasterKey = handle.getPrimitive(Aead.class);
 
     byte[] ciphertext = manualMasterKey.encrypt(new byte[] {}, new byte[] {});
     assertThat(masterKey.decrypt(ciphertext, new byte[] {})).isEqualTo(new byte[] {});
+  }
+
+  @Test
+  public void test_clientAllowsCorrectPrefixes_works() throws Exception {
+    assertTrue(new TinkeyTestKmsClient().doesSupport("tinkey-test-kms-client://"));
+    assertFalse(new TinkeyTestKmsClient().doesSupport("somethingelse://"));
+
+    assertTrue(TinkeyTestKmsClient.createForPrefix("a").doesSupport("a://"));
+    assertFalse(TinkeyTestKmsClient.createForPrefix("a").doesSupport("tinkey-test-kms-client://"));
   }
 
   @Test
@@ -68,8 +77,7 @@ public final class TinkeyTestKmsClientTest {
 
     KeysetHandle handle = KeysetHandle.generateNew(PredefinedAeadParameters.AES128_GCM);
     String masterKeyUri = TinkeyTestKmsClient.createKeyUri(handle);
-    KmsClient client =
-        KmsClients.getAutoLoaded(masterKeyUri).withCredentials(credentialPath.toString());
+    KmsClient client = new TinkeyTestKmsClient().withCredentials(credentialPath.toString());
     assertThrows(GeneralSecurityException.class, () -> client.getAead(masterKeyUri));
   }
 
@@ -77,8 +85,26 @@ public final class TinkeyTestKmsClientTest {
   public void test_clientCannotBeUsedWithoutCallingWithCredential_throws() throws Exception {
     KeysetHandle handle = KeysetHandle.generateNew(PredefinedAeadParameters.AES128_GCM);
     String masterKeyUri = TinkeyTestKmsClient.createKeyUri(handle);
-    KmsClient client = KmsClients.getAutoLoaded(masterKeyUri);
+    KmsClient client = new TinkeyTestKmsClient();
 
     assertThrows(GeneralSecurityException.class, () -> client.getAead(masterKeyUri));
+  }
+
+  @Test
+  public void test_differentPrefix_works() throws Exception {
+    Path directory = Files.createTempDirectory(/* prefix= */ "");
+    Path credentialPath = Paths.get(directory.toString(), "credentials");
+    Files.write(credentialPath, "VALID CREDENTIALS".getBytes(UTF_8));
+
+    KeysetHandle handle = KeysetHandle.generateNew(PredefinedAeadParameters.AES128_GCM);
+    String masterKeyUri = TinkeyTestKmsClient.createKeyUri(handle);
+    Aead masterKey =
+        KmsClients.getAutoLoaded(masterKeyUri)
+            .withCredentials(credentialPath.toString())
+            .getAead(masterKeyUri);
+    Aead manualMasterKey = handle.getPrimitive(Aead.class);
+
+    byte[] ciphertext = manualMasterKey.encrypt(new byte[] {}, new byte[] {});
+    assertThat(masterKey.decrypt(ciphertext, new byte[] {})).isEqualTo(new byte[] {});
   }
 }

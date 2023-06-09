@@ -40,8 +40,19 @@ import java.util.Arrays;
 @AutoService(KmsClient.class)
 public final class TinkeyTestKmsClient implements KmsClient {
 
-  public TinkeyTestKmsClient() {}
+  public TinkeyTestKmsClient() {
+    this(PREFIX);
+  }
 
+  private TinkeyTestKmsClient(String prefix) {
+    this.prefix = prefix;
+  }
+
+  public static KmsClient createForPrefix(String prefix) {
+    return new TinkeyTestKmsClient(prefix);
+  }
+
+  private final String prefix;
   private static final String PREFIX = "tinkey-test-kms-client://";
   private static final String CREDENTIALS_FILE_CONTENTS = "VALID CREDENTIALS";
 
@@ -54,16 +65,16 @@ public final class TinkeyTestKmsClient implements KmsClient {
     Files.write(path, CREDENTIALS_FILE_CONTENTS.getBytes(UTF_8));
   }
 
-  private static String stripPrefix(String str) throws GeneralSecurityException {
-    if (!str.startsWith(PREFIX)) {
+  private static String stripPrefix(String prefix, String str) throws GeneralSecurityException {
+    if (!str.startsWith(prefix)) {
       throw new GeneralSecurityException("Invalid key uri: " + str);
     }
-    return str.substring(PREFIX.length());
+    return str.substring(prefix.length());
   }
 
   @Override
   public boolean doesSupport(String keyUri) {
-    return keyUri.startsWith(PREFIX);
+    return keyUri.startsWith(prefix);
   }
 
   byte[] credentialFileContents = new byte[] {};
@@ -93,7 +104,7 @@ public final class TinkeyTestKmsClient implements KmsClient {
   @Override
   public Aead getAead(String keyUri) throws GeneralSecurityException {
     checkCredentials();
-    String keyset = stripPrefix(keyUri);
+    String keyset = stripPrefix(prefix, keyUri);
     return TinkJsonProtoKeysetFormat.parseKeyset(keyset, InsecureSecretKeyAccess.get())
         .getPrimitive(Aead.class);
   }

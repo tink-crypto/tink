@@ -332,3 +332,11 @@ java_plugin(
         "@maven//:com_google_auto_service_auto_service",
     ],
 )
+
+java_library(
+    name = "kms_clients_factory",
+    srcs = ["KmsClientsFactory.java"],
+    deps = [
+        "@tink_java//src/main/java/com/google/crypto/tink:kms_client",
+    ],
+)
