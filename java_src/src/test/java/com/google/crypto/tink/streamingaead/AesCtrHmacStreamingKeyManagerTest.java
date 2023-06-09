@@ -32,10 +32,10 @@ import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
 import com.google.crypto.tink.subtle.Hex;
 import com.google.crypto.tink.testing.StreamingTestUtil;
 import com.google.protobuf.ByteString;
-import com.google.protobuf.ExtensionRegistryLite;
 import java.security.GeneralSecurityException;
 import java.util.Set;
 import java.util.TreeSet;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -46,6 +46,11 @@ public class AesCtrHmacStreamingKeyManagerTest {
   private final AesCtrHmacStreamingKeyManager manager = new AesCtrHmacStreamingKeyManager();
   private final KeyTypeManager.KeyFactory<AesCtrHmacStreamingKeyFormat, AesCtrHmacStreamingKey>
       factory = manager.keyFactory();
+
+  @Before
+  public void register() throws Exception {
+    StreamingAeadConfig.register();
+  }
 
   // Returns an HmacParams.Builder with valid parameters
   private static HmacParams.Builder createHmacParams() {
@@ -241,69 +246,61 @@ public class AesCtrHmacStreamingKeyManagerTest {
   @Test
   public void testAes128CtrHmacSha2564KBTemplate() throws Exception {
     KeyTemplate template = AesCtrHmacStreamingKeyManager.aes128CtrHmacSha2564KBTemplate();
-    assertThat(template.getTypeUrl()).isEqualTo(new AesCtrHmacStreamingKeyManager().getKeyType());
-    assertThat(template.getOutputPrefixType()).isEqualTo(KeyTemplate.OutputPrefixType.RAW);
-    AesCtrHmacStreamingKeyFormat format =
-        AesCtrHmacStreamingKeyFormat.parseFrom(
-            template.getValue(), ExtensionRegistryLite.getEmptyRegistry());
-
-    assertThat(format.getKeySize()).isEqualTo(16);
-    assertThat(format.getParams().getDerivedKeySize()).isEqualTo(16);
-    assertThat(format.getParams().getHkdfHashType()).isEqualTo(HashType.SHA256);
-    assertThat(format.getParams().getHmacParams().getHash()).isEqualTo(HashType.SHA256);
-    assertThat(format.getParams().getHmacParams().getTagSize()).isEqualTo(32);
-    assertThat(format.getParams().getCiphertextSegmentSize()).isEqualTo(4096);
+    assertThat(template.toParameters())
+        .isEqualTo(
+            AesCtrHmacStreamingParameters.builder()
+                .setKeySizeBytes(16)
+                .setDerivedKeySizeBytes(16)
+                .setHkdfHashType(AesCtrHmacStreamingParameters.HashType.SHA256)
+                .setHmacHashType(AesCtrHmacStreamingParameters.HashType.SHA256)
+                .setHmacTagSizeBytes(32)
+                .setCiphertextSegmentSizeBytes(4 * 1024)
+                .build());
   }
 
   @Test
   public void testAes128CtrHmacSha2561MBTemplate() throws Exception {
     KeyTemplate template = AesCtrHmacStreamingKeyManager.aes128CtrHmacSha2561MBTemplate();
-    assertThat(template.getTypeUrl()).isEqualTo(new AesCtrHmacStreamingKeyManager().getKeyType());
-    assertThat(template.getOutputPrefixType()).isEqualTo(KeyTemplate.OutputPrefixType.RAW);
-    AesCtrHmacStreamingKeyFormat format =
-        AesCtrHmacStreamingKeyFormat.parseFrom(
-            template.getValue(), ExtensionRegistryLite.getEmptyRegistry());
-
-    assertThat(format.getKeySize()).isEqualTo(16);
-    assertThat(format.getParams().getDerivedKeySize()).isEqualTo(16);
-    assertThat(format.getParams().getHkdfHashType()).isEqualTo(HashType.SHA256);
-    assertThat(format.getParams().getHmacParams().getHash()).isEqualTo(HashType.SHA256);
-    assertThat(format.getParams().getHmacParams().getTagSize()).isEqualTo(32);
-    assertThat(format.getParams().getCiphertextSegmentSize()).isEqualTo(1 << 20);
+    assertThat(template.toParameters())
+        .isEqualTo(
+            AesCtrHmacStreamingParameters.builder()
+                .setKeySizeBytes(16)
+                .setDerivedKeySizeBytes(16)
+                .setHkdfHashType(AesCtrHmacStreamingParameters.HashType.SHA256)
+                .setHmacHashType(AesCtrHmacStreamingParameters.HashType.SHA256)
+                .setHmacTagSizeBytes(32)
+                .setCiphertextSegmentSizeBytes(1024 * 1024)
+                .build());
   }
 
   @Test
   public void testAes256CtrHmacSha2564KBTemplate() throws Exception {
     KeyTemplate template = AesCtrHmacStreamingKeyManager.aes256CtrHmacSha2564KBTemplate();
-    assertThat(template.getTypeUrl()).isEqualTo(new AesCtrHmacStreamingKeyManager().getKeyType());
-    assertThat(template.getOutputPrefixType()).isEqualTo(KeyTemplate.OutputPrefixType.RAW);
-    AesCtrHmacStreamingKeyFormat format =
-        AesCtrHmacStreamingKeyFormat.parseFrom(
-            template.getValue(), ExtensionRegistryLite.getEmptyRegistry());
-
-    assertThat(format.getKeySize()).isEqualTo(32);
-    assertThat(format.getParams().getDerivedKeySize()).isEqualTo(32);
-    assertThat(format.getParams().getHkdfHashType()).isEqualTo(HashType.SHA256);
-    assertThat(format.getParams().getHmacParams().getHash()).isEqualTo(HashType.SHA256);
-    assertThat(format.getParams().getHmacParams().getTagSize()).isEqualTo(32);
-    assertThat(format.getParams().getCiphertextSegmentSize()).isEqualTo(4096);
+    assertThat(template.toParameters())
+        .isEqualTo(
+            AesCtrHmacStreamingParameters.builder()
+                .setKeySizeBytes(32)
+                .setDerivedKeySizeBytes(32)
+                .setHkdfHashType(AesCtrHmacStreamingParameters.HashType.SHA256)
+                .setHmacHashType(AesCtrHmacStreamingParameters.HashType.SHA256)
+                .setHmacTagSizeBytes(32)
+                .setCiphertextSegmentSizeBytes(4 * 1024)
+                .build());
   }
 
   @Test
   public void testAes256CtrHmacSha2561MBTemplate() throws Exception {
     KeyTemplate template = AesCtrHmacStreamingKeyManager.aes256CtrHmacSha2561MBTemplate();
-    assertThat(template.getTypeUrl()).isEqualTo(new AesCtrHmacStreamingKeyManager().getKeyType());
-    assertThat(template.getOutputPrefixType()).isEqualTo(KeyTemplate.OutputPrefixType.RAW);
-    AesCtrHmacStreamingKeyFormat format =
-        AesCtrHmacStreamingKeyFormat.parseFrom(
-            template.getValue(), ExtensionRegistryLite.getEmptyRegistry());
-
-    assertThat(format.getKeySize()).isEqualTo(32);
-    assertThat(format.getParams().getDerivedKeySize()).isEqualTo(32);
-    assertThat(format.getParams().getHkdfHashType()).isEqualTo(HashType.SHA256);
-    assertThat(format.getParams().getHmacParams().getHash()).isEqualTo(HashType.SHA256);
-    assertThat(format.getParams().getHmacParams().getTagSize()).isEqualTo(32);
-    assertThat(format.getParams().getCiphertextSegmentSize()).isEqualTo(1 << 20);
+    assertThat(template.toParameters())
+        .isEqualTo(
+            AesCtrHmacStreamingParameters.builder()
+                .setKeySizeBytes(32)
+                .setDerivedKeySizeBytes(32)
+                .setHkdfHashType(AesCtrHmacStreamingParameters.HashType.SHA256)
+                .setHmacHashType(AesCtrHmacStreamingParameters.HashType.SHA256)
+                .setHmacTagSizeBytes(32)
+                .setCiphertextSegmentSizeBytes(1024 * 1024)
+                .build());
   }
 
   @Test
