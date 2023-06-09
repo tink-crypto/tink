@@ -30,8 +30,8 @@ import com.google.crypto.tink.subtle.PrfAesCmac;
 import com.google.crypto.tink.subtle.PrfMac;
 import com.google.crypto.tink.subtle.Random;
 import com.google.protobuf.ByteString;
-import com.google.protobuf.ExtensionRegistryLite;
 import java.security.GeneralSecurityException;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -42,6 +42,11 @@ public class AesCmacKeyManagerTest {
   private final AesCmacKeyManager manager = new AesCmacKeyManager();
   private final KeyTypeManager.KeyFactory<AesCmacKeyFormat, AesCmacKey> factory =
       manager.keyFactory();
+
+  @Before
+  public void register() throws Exception {
+    MacConfig.register();
+  }
 
   @Test
   public void validateKeyFormat_empty() throws Exception {
@@ -201,25 +206,25 @@ public class AesCmacKeyManagerTest {
   @Test
   public void testAes256CmacTemplate() throws Exception {
     KeyTemplate template = AesCmacKeyManager.aes256CmacTemplate();
-    assertThat(template.getTypeUrl()).isEqualTo(new AesCmacKeyManager().getKeyType());
-    assertThat(template.getOutputPrefixType()).isEqualTo(KeyTemplate.OutputPrefixType.TINK);
-    AesCmacKeyFormat format =
-        AesCmacKeyFormat.parseFrom(template.getValue(), ExtensionRegistryLite.getEmptyRegistry());
-
-    assertThat(format.getKeySize()).isEqualTo(32);
-    assertThat(format.getParams().getTagSize()).isEqualTo(16);
+    assertThat(template.toParameters())
+        .isEqualTo(
+            AesCmacParameters.builder()
+                .setKeySizeBytes(32)
+                .setTagSizeBytes(16)
+                .setVariant(AesCmacParameters.Variant.TINK)
+                .build());
   }
 
   @Test
   public void testRawAes256CmacTemplate() throws Exception {
     KeyTemplate template = AesCmacKeyManager.rawAes256CmacTemplate();
-    assertThat(template.getTypeUrl()).isEqualTo(new AesCmacKeyManager().getKeyType());
-    assertThat(template.getOutputPrefixType()).isEqualTo(KeyTemplate.OutputPrefixType.RAW);
-    AesCmacKeyFormat format =
-        AesCmacKeyFormat.parseFrom(template.getValue(), ExtensionRegistryLite.getEmptyRegistry());
-
-    assertThat(format.getKeySize()).isEqualTo(32);
-    assertThat(format.getParams().getTagSize()).isEqualTo(16);
+    assertThat(template.toParameters())
+        .isEqualTo(
+            AesCmacParameters.builder()
+                .setKeySizeBytes(32)
+                .setTagSizeBytes(16)
+                .setVariant(AesCmacParameters.Variant.NO_PREFIX)
+                .build());
   }
 
   @Test
