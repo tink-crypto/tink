@@ -32,10 +32,11 @@ import com.google.crypto.tink.subtle.Enums;
 import com.google.crypto.tink.subtle.Random;
 import com.google.crypto.tink.subtle.prf.HkdfStreamingPrf;
 import com.google.crypto.tink.subtle.prf.StreamingPrf;
+import com.google.crypto.tink.util.Bytes;
 import com.google.protobuf.ByteString;
-import com.google.protobuf.ExtensionRegistryLite;
 import java.io.InputStream;
 import java.security.GeneralSecurityException;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -46,6 +47,11 @@ public class HkdfPrfKeyManagerTest {
   private final HkdfPrfKeyManager manager = new HkdfPrfKeyManager();
   private final KeyTypeManager.KeyFactory<HkdfPrfKeyFormat, HkdfPrfKey> factory =
       manager.keyFactory();
+
+  @Before
+  public void register() throws Exception {
+    PrfConfig.register();
+  }
 
   @Test
   public void basics() throws Exception {
@@ -262,13 +268,13 @@ public class HkdfPrfKeyManagerTest {
   @Test
   public void testHkdfSha256Template() throws Exception {
     KeyTemplate kt = HkdfPrfKeyManager.hkdfSha256Template();
-    assertThat(kt.getTypeUrl()).isEqualTo(new HkdfPrfKeyManager().getKeyType());
-    assertThat(kt.getOutputPrefixType()).isEqualTo(KeyTemplate.OutputPrefixType.RAW);
-
-    HkdfPrfKeyFormat format =
-        HkdfPrfKeyFormat.parseFrom(kt.getValue(), ExtensionRegistryLite.getEmptyRegistry());
-    assertThat(format.getKeySize()).isEqualTo(32);
-    assertThat(format.getParams().getHash()).isEqualTo(HashType.SHA256);
+    assertThat(kt.toParameters())
+        .isEqualTo(
+            HkdfPrfParameters.builder()
+                .setKeySizeBytes(32)
+                .setHashType(HkdfPrfParameters.HashType.SHA256)
+                .setSalt(Bytes.copyFrom(new byte[] {}))
+                .build());
   }
 
   @Test

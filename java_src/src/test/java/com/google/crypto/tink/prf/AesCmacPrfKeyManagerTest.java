@@ -27,8 +27,8 @@ import com.google.crypto.tink.proto.AesCmacPrfKeyFormat;
 import com.google.crypto.tink.subtle.PrfAesCmac;
 import com.google.crypto.tink.subtle.Random;
 import com.google.protobuf.ByteString;
-import com.google.protobuf.ExtensionRegistryLite;
 import java.security.GeneralSecurityException;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -39,6 +39,11 @@ public class AesCmacPrfKeyManagerTest {
   private final AesCmacPrfKeyManager manager = new AesCmacPrfKeyManager();
   private final KeyTypeManager.KeyFactory<AesCmacPrfKeyFormat, AesCmacPrfKey> factory =
       manager.keyFactory();
+
+  @Before
+  public void register() throws Exception {
+    PrfConfig.register();
+  }
 
   @Test
   public void validateKeyFormat_empty() throws Exception {
@@ -140,13 +145,7 @@ public class AesCmacPrfKeyManagerTest {
   @Test
   public void testAes256CmacTemplate() throws Exception {
     KeyTemplate template = AesCmacPrfKeyManager.aes256CmacTemplate();
-    assertThat(template.getTypeUrl()).isEqualTo(new AesCmacPrfKeyManager().getKeyType());
-    assertThat(template.getOutputPrefixType()).isEqualTo(KeyTemplate.OutputPrefixType.RAW);
-    AesCmacPrfKeyFormat format =
-        AesCmacPrfKeyFormat.parseFrom(
-            template.getValue(), ExtensionRegistryLite.getEmptyRegistry());
-
-    assertThat(format.getKeySize()).isEqualTo(32);
+    assertThat(template.toParameters()).isEqualTo(AesCmacPrfParameters.create(32));
   }
 
   @Test

@@ -28,11 +28,11 @@ import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
 import com.google.crypto.tink.subtle.Hex;
 import com.google.crypto.tink.subtle.Random;
 import com.google.protobuf.ByteString;
-import com.google.protobuf.ExtensionRegistryLite;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.security.GeneralSecurityException;
 import java.util.TreeSet;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -43,6 +43,11 @@ public class AesSivKeyManagerTest {
   private final AesSivKeyManager manager = new AesSivKeyManager();
   private final KeyTypeManager.KeyFactory<AesSivKeyFormat, AesSivKey> factory =
       manager.keyFactory();
+
+  @Before
+  public void register() throws Exception {
+    DeterministicAeadConfig.register();
+  }
 
   @Test
   public void basics() throws Exception {
@@ -231,23 +236,23 @@ public class AesSivKeyManagerTest {
   @Test
   public void testAes256SivTemplate() throws Exception {
     KeyTemplate template = AesSivKeyManager.aes256SivTemplate();
-    assertThat(template.getTypeUrl()).isEqualTo(new AesSivKeyManager().getKeyType());
-    assertThat(template.getOutputPrefixType()).isEqualTo(KeyTemplate.OutputPrefixType.TINK);
-    AesSivKeyFormat format =
-        AesSivKeyFormat.parseFrom(template.getValue(), ExtensionRegistryLite.getEmptyRegistry());
-
-    assertThat(format.getKeySize()).isEqualTo(format.getKeySize());
+    assertThat(template.toParameters())
+        .isEqualTo(
+            AesSivParameters.builder()
+                .setKeySizeBytes(64)
+                .setVariant(AesSivParameters.Variant.TINK)
+                .build());
   }
 
   @Test
   public void testRawAes256SivTemplate() throws Exception {
     KeyTemplate template = AesSivKeyManager.rawAes256SivTemplate();
-    assertThat(template.getTypeUrl()).isEqualTo(new AesSivKeyManager().getKeyType());
-    assertThat(template.getOutputPrefixType()).isEqualTo(KeyTemplate.OutputPrefixType.RAW);
-    AesSivKeyFormat format =
-        AesSivKeyFormat.parseFrom(template.getValue(), ExtensionRegistryLite.getEmptyRegistry());
-
-    assertThat(format.getKeySize()).isEqualTo(format.getKeySize());
+    assertThat(template.toParameters())
+        .isEqualTo(
+            AesSivParameters.builder()
+                .setKeySizeBytes(64)
+                .setVariant(AesSivParameters.Variant.NO_PREFIX)
+                .build());
   }
 
   @Test

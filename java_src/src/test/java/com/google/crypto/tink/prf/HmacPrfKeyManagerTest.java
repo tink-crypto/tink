@@ -30,13 +30,13 @@ import com.google.crypto.tink.subtle.Hex;
 import com.google.crypto.tink.subtle.PrfHmacJce;
 import com.google.crypto.tink.subtle.Random;
 import com.google.protobuf.ByteString;
-import com.google.protobuf.ExtensionRegistryLite;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.security.GeneralSecurityException;
 import java.util.Set;
 import java.util.TreeSet;
 import javax.crypto.spec.SecretKeySpec;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -47,6 +47,11 @@ public class HmacPrfKeyManagerTest {
   private final HmacPrfKeyManager manager = new HmacPrfKeyManager();
   private final KeyTypeManager.KeyFactory<HmacPrfKeyFormat, HmacPrfKey> factory =
       manager.keyFactory();
+
+  @Before
+  public void register() throws Exception {
+    PrfConfig.register();
+  }
 
   @Test
   public void validateKeyFormat_empty() throws Exception {
@@ -263,25 +268,23 @@ public class HmacPrfKeyManagerTest {
   @Test
   public void testHmacSha256Template() throws Exception {
     KeyTemplate template = HmacPrfKeyManager.hmacSha256Template();
-    assertThat(template.getTypeUrl()).isEqualTo(new HmacPrfKeyManager().getKeyType());
-    assertThat(template.getOutputPrefixType()).isEqualTo(KeyTemplate.OutputPrefixType.RAW);
-    HmacPrfKeyFormat format =
-        HmacPrfKeyFormat.parseFrom(template.getValue(), ExtensionRegistryLite.getEmptyRegistry());
-
-    assertThat(format.getKeySize()).isEqualTo(32);
-    assertThat(format.getParams().getHash()).isEqualTo(HashType.SHA256);
+    assertThat(template.toParameters())
+        .isEqualTo(
+            HmacPrfParameters.builder()
+                .setKeySizeBytes(32)
+                .setHashType(HmacPrfParameters.HashType.SHA256)
+                .build());
   }
 
   @Test
   public void testHmacSha512Template() throws Exception {
     KeyTemplate template = HmacPrfKeyManager.hmacSha512Template();
-    assertThat(template.getTypeUrl()).isEqualTo(new HmacPrfKeyManager().getKeyType());
-    assertThat(template.getOutputPrefixType()).isEqualTo(KeyTemplate.OutputPrefixType.RAW);
-    HmacPrfKeyFormat format =
-        HmacPrfKeyFormat.parseFrom(template.getValue(), ExtensionRegistryLite.getEmptyRegistry());
-
-    assertThat(format.getKeySize()).isEqualTo(64);
-    assertThat(format.getParams().getHash()).isEqualTo(HashType.SHA512);
+    assertThat(template.toParameters())
+        .isEqualTo(
+            HmacPrfParameters.builder()
+                .setKeySizeBytes(64)
+                .setHashType(HmacPrfParameters.HashType.SHA512)
+                .build());
   }
 
   @Test
