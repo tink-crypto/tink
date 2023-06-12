@@ -52,10 +52,6 @@ run_go_tests() {
 
 run_py_tests() {
   use_bazel "$(cat python/.bazelversion)"
-
-  # TODO(b/276277854) It is not clear why this is needed.
-  pip3 install google-cloud-kms==2.15.0 --user
-
   ./kokoro/testutils/run_bazel_tests.sh "python"
 }
 
@@ -149,7 +145,7 @@ run_all_tests() {
   # Only run these tests if exeucting a Kokoro GitHub continuous integration
   # job or if running locally (e.g. as part of release.sh).
   #
-  # TODO(b/228529710): Use an easier to maintain approach to test parity.
+  # TODO(b/231610897): Use an easier to maintain approach to test parity.
   if [[ "${KOKORO_JOB_NAME:-}" =~ ^tink/github \
         || -z "${KOKORO_JOB_NAME+x}" ]]; then
     run_cc_tests
