@@ -16,6 +16,7 @@
 
 package com.google.crypto.tink.signature;
 
+import static com.google.common.truth.Truth.assertThat;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 import com.google.crypto.tink.InsecureSecretKeyAccess;
@@ -27,8 +28,11 @@ import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.PrivateKey;
 import java.security.PublicKey;
+import java.security.Signature;
 import java.security.interfaces.ECPrivateKey;
 import java.security.interfaces.ECPublicKey;
+import java.security.interfaces.RSAPrivateCrtKey;
+import java.security.interfaces.RSAPublicKey;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -100,5 +104,79 @@ public final class KeyConversionTest {
             .build();
     PublicKeyVerify verifier = publicHandle.getPrimitive(PublicKeyVerify.class);
     verifier.verify(sig, data);
+  }
+
+  /**
+   * This test show how Tink can be used with Java RSA keys, by importing them as RSA SSA PKCS1
+   * keys.
+   */
+  @Test
+  public void signAndVerifyUsingJavaRSAKeys() throws Exception {
+    // Generate a RSA key pair
+    KeyPairGenerator keyGen = KeyPairGenerator.getInstance("RSA");
+    keyGen.initialize(/* keysize= */ 2048);
+    KeyPair keyPair = keyGen.generateKeyPair();
+    PrivateKey privateKey = keyPair.getPrivate();
+    PublicKey publicKey = keyPair.getPublic();
+
+    // Convert publicKey into a Tink RsaSsaPkcs1PublicKey.
+    RSAPublicKey rsaPublicKey = (RSAPublicKey) publicKey;
+    RsaSsaPkcs1PublicKey rsaSsaPkcs1PublicKey =
+        RsaSsaPkcs1PublicKey.builder()
+            .setParameters(
+                RsaSsaPkcs1Parameters.builder()
+                    .setModulusSizeBits(rsaPublicKey.getModulus().bitLength())
+                    .setPublicExponent(rsaPublicKey.getPublicExponent())
+                    .setHashType(RsaSsaPkcs1Parameters.HashType.SHA256)
+                    .setVariant(RsaSsaPkcs1Parameters.Variant.NO_PREFIX)
+                    .build())
+            .setModulus(rsaPublicKey.getModulus())
+            .build();
+
+    // Convert privateKey and publicKey into a Tink RsaSsaPkcs1PrivateKey.
+    RSAPrivateCrtKey rsaPrivateKey = (RSAPrivateCrtKey) privateKey;
+    RsaSsaPkcs1PrivateKey rsaSsaPkcs1PrivateKey =
+        RsaSsaPkcs1PrivateKey.builder()
+            .setPublicKey(rsaSsaPkcs1PublicKey)
+            .setPrimes(
+                SecretBigInteger.fromBigInteger(
+                    rsaPrivateKey.getPrimeP(), InsecureSecretKeyAccess.get()),
+                SecretBigInteger.fromBigInteger(
+                    rsaPrivateKey.getPrimeQ(), InsecureSecretKeyAccess.get()))
+            .setPrivateExponent(
+                SecretBigInteger.fromBigInteger(
+                    rsaPrivateKey.getPrivateExponent(), InsecureSecretKeyAccess.get()))
+            .setPrimeExponents(
+                SecretBigInteger.fromBigInteger(
+                    rsaPrivateKey.getPrimeExponentP(), InsecureSecretKeyAccess.get()),
+                SecretBigInteger.fromBigInteger(
+                    rsaPrivateKey.getPrimeExponentQ(), InsecureSecretKeyAccess.get()))
+            .setCrtCoefficient(
+                SecretBigInteger.fromBigInteger(
+                    rsaPrivateKey.getCrtCoefficient(), InsecureSecretKeyAccess.get()))
+            .build();
+
+    // Generate a PublicKeySign primitive from rsaSsaPkcs1PrivateKey and sign a message.
+    KeysetHandle privateHandle =
+        KeysetHandle.newBuilder()
+            .addEntry(KeysetHandle.importKey(rsaSsaPkcs1PrivateKey).withRandomId().makePrimary())
+            .build();
+    PublicKeySign signer = privateHandle.getPrimitive(PublicKeySign.class);
+    byte[] data = "data".getBytes(UTF_8);
+    byte[] sig = signer.sign(data);
+
+    // Generate a PublicKeyVerify primitive from rsaSsaPkcs1PublicKey, and verify the signature.
+    KeysetHandle publicHandle =
+        KeysetHandle.newBuilder()
+            .addEntry(KeysetHandle.importKey(rsaSsaPkcs1PublicKey).withRandomId().makePrimary())
+            .build();
+    PublicKeyVerify verifier = publicHandle.getPrimitive(PublicKeyVerify.class);
+    verifier.verify(sig, data);
+
+    // Verify using java.security.Signature.
+    Signature signatureVerify = Signature.getInstance("SHA256withRSA");
+    signatureVerify.initVerify(publicKey);
+    signatureVerify.update(data);
+    assertThat(signatureVerify.verify(sig)).isTrue();
   }
 }

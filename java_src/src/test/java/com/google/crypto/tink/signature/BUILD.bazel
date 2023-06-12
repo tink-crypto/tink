@@ -594,8 +594,12 @@ java_test(
         "//src/main/java/com/google/crypto/tink/signature:ecdsa_parameters",
         "//src/main/java/com/google/crypto/tink/signature:ecdsa_private_key",
         "//src/main/java/com/google/crypto/tink/signature:ecdsa_public_key",
+        "//src/main/java/com/google/crypto/tink/signature:rsa_ssa_pkcs1_parameters",
+        "//src/main/java/com/google/crypto/tink/signature:rsa_ssa_pkcs1_private_key",
+        "//src/main/java/com/google/crypto/tink/signature:rsa_ssa_pkcs1_public_key",
         "//src/main/java/com/google/crypto/tink/signature:signature_config",
         "//src/main/java/com/google/crypto/tink/util:secret_big_integer",
+        "@maven//:com_google_truth_truth",
         "@maven//:junit_junit",
     ],
 )
