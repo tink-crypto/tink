@@ -16,10 +16,9 @@
 
 package com.google.crypto.tink.testing;
 
-import com.google.crypto.tink.BinaryKeysetReader;
-import com.google.crypto.tink.BinaryKeysetWriter;
-import com.google.crypto.tink.CleartextKeysetHandle;
+import com.google.crypto.tink.InsecureSecretKeyAccess;
 import com.google.crypto.tink.KeysetHandle;
+import com.google.crypto.tink.TinkProtoKeysetFormat;
 import com.google.crypto.tink.daead.DeterministicAeadConfig;
 import com.google.crypto.tink.hybrid.HybridConfig;
 import com.google.crypto.tink.keyderivation.KeyDerivationConfig;
@@ -33,6 +32,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.Charset;
+import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.security.GeneralSecurityException;
 
@@ -47,15 +47,17 @@ public final class CliUtil {
   public static KeysetHandle readKeyset(String filename)
       throws GeneralSecurityException, IOException {
     System.out.println("Reading the keyset...");
-    return CleartextKeysetHandle.read(
-        BinaryKeysetReader.withInputStream(new FileInputStream(filename)));
+    return TinkProtoKeysetFormat.parseKeyset(
+        Files.readAllBytes(Paths.get(filename)), InsecureSecretKeyAccess.get());
   }
 
   /** Writes a keyset to the specified file. In case of errors throws an exception. */
-  public static void writeKeyset(KeysetHandle handle, String filename) throws IOException {
+  public static void writeKeyset(KeysetHandle handle, String filename)
+      throws IOException, GeneralSecurityException {
     System.out.println("Writing the keyset...");
-    CleartextKeysetHandle.write(
-        handle, BinaryKeysetWriter.withOutputStream(new FileOutputStream(filename)));
+    byte[] serializedKeyset =
+        TinkProtoKeysetFormat.serializeKeyset(handle, InsecureSecretKeyAccess.get());
+    Files.write(Paths.get(filename), serializedKeyset);
   }
 
   /**
