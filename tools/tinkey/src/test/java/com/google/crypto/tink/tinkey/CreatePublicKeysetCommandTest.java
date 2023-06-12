@@ -27,10 +27,12 @@ import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.PrivateKey;
 import com.google.crypto.tink.TinkJsonProtoKeysetFormat;
 import com.google.crypto.tink.TinkProtoKeysetFormat;
+import com.google.crypto.tink.aead.AeadConfig;
+import com.google.crypto.tink.aead.PredefinedAeadParameters;
 import com.google.crypto.tink.hybrid.HybridConfig;
+import com.google.crypto.tink.mac.MacConfig;
 import com.google.crypto.tink.signature.Ed25519Parameters;
 import com.google.crypto.tink.signature.SignatureConfig;
-import com.google.crypto.tink.testing.TestUtil;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -44,18 +46,14 @@ import org.junit.runners.JUnit4;
  */
 @RunWith(JUnit4.class)
 public class CreatePublicKeysetCommandTest {
-  private enum KeyType {
-    HYBRID,
-    SIGNATURE,
-  };
-
-  private static final String OUTPUT_FORMAT = "json";
-  private static final String INPUT_FORMAT = "json";
 
   @BeforeClass
   public static void setUp() throws Exception {
+    AeadConfig.register();
+    MacConfig.register();
     HybridConfig.register();
     SignatureConfig.register();
+    KmsClientsFactory.globalInstance().addFactory(TinkeyTestKmsClient::new);
   }
 
   @Test
@@ -124,15 +122,17 @@ public class CreatePublicKeysetCommandTest {
     Path path = Files.createTempDirectory(/* prefix= */ "");
     Path privateKeyFile = Paths.get(path.toString(), "privateKeyFile");
     Path publicKeyFile = Paths.get(path.toString(), "publicKeyFile");
+    Path credentialFile = Paths.get(path.toString(), "credentials");
+    TinkeyTestKmsClient.createCredentialFile(credentialFile);
+
+    KeysetHandle masterKeyAeadKeyset =
+        KeysetHandle.generateNew(PredefinedAeadParameters.AES128_GCM);
+    Aead masterKeyAead = masterKeyAeadKeyset.getPrimitive(Aead.class);
+    String masterKeyUri = TinkeyTestKmsClient.createKeyUri(masterKeyAeadKeyset);
 
     KeysetHandle privateKeyset =
         KeysetHandle.generateNew(Ed25519Parameters.create(Ed25519Parameters.Variant.TINK));
 
-    Aead masterKeyAead =
-        KmsClientsFactory.globalInstance()
-            .newClientFor(TestUtil.GCP_KMS_TEST_KEY_URI)
-            .withCredentials(TestUtil.SERVICE_ACCOUNT_FILE)
-            .getAead(TestUtil.GCP_KMS_TEST_KEY_URI);
     String serializedKeyset =
         TinkJsonProtoKeysetFormat.serializeEncryptedKeyset(
             privateKeyset, masterKeyAead, new byte[] {});
@@ -147,9 +147,9 @@ public class CreatePublicKeysetCommandTest {
           "--out",
           publicKeyFile.toString(),
           "--master-key-uri",
-          TestUtil.GCP_KMS_TEST_KEY_URI,
+          masterKeyUri,
           "--credential",
-          TestUtil.SERVICE_ACCOUNT_FILE
+          credentialFile.toString()
         });
 
     KeysetHandle publicKeyset =
@@ -165,15 +165,17 @@ public class CreatePublicKeysetCommandTest {
     Path path = Files.createTempDirectory(/* prefix= */ "");
     Path privateKeyFile = Paths.get(path.toString(), "privateKeyFile");
     Path publicKeyFile = Paths.get(path.toString(), "publicKeyFile");
+    Path credentialFile = Paths.get(path.toString(), "credentials");
+    TinkeyTestKmsClient.createCredentialFile(credentialFile);
+
+    KeysetHandle masterKeyAeadKeyset =
+        KeysetHandle.generateNew(PredefinedAeadParameters.AES128_GCM);
+    Aead masterKeyAead = masterKeyAeadKeyset.getPrimitive(Aead.class);
+    String masterKeyUri = TinkeyTestKmsClient.createKeyUri(masterKeyAeadKeyset);
 
     KeysetHandle privateKeyset =
         KeysetHandle.generateNew(Ed25519Parameters.create(Ed25519Parameters.Variant.TINK));
 
-    Aead masterKeyAead =
-        KmsClientsFactory.globalInstance()
-            .newClientFor(TestUtil.GCP_KMS_TEST_KEY_URI)
-            .withCredentials(TestUtil.SERVICE_ACCOUNT_FILE)
-            .getAead(TestUtil.GCP_KMS_TEST_KEY_URI);
     byte[] serializedKeyset =
         TinkProtoKeysetFormat.serializeEncryptedKeyset(privateKeyset, masterKeyAead, new byte[] {});
 
@@ -189,9 +191,9 @@ public class CreatePublicKeysetCommandTest {
           "--out",
           publicKeyFile.toString(),
           "--master-key-uri",
-          TestUtil.GCP_KMS_TEST_KEY_URI,
+          masterKeyUri,
           "--credential",
-          TestUtil.SERVICE_ACCOUNT_FILE
+          credentialFile.toString()
         });
 
     KeysetHandle publicKeyset =

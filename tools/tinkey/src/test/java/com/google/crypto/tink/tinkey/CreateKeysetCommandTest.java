@@ -24,11 +24,14 @@ import com.google.crypto.tink.InsecureSecretKeyAccess;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.TinkJsonProtoKeysetFormat;
 import com.google.crypto.tink.TinkProtoKeysetFormat;
+import com.google.crypto.tink.aead.AeadConfig;
+import com.google.crypto.tink.aead.PredefinedAeadParameters;
+import com.google.crypto.tink.mac.MacConfig;
 import com.google.crypto.tink.mac.PredefinedMacParameters;
-import com.google.crypto.tink.testing.TestUtil;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -36,6 +39,13 @@ import org.junit.runners.JUnit4;
 /** Tests for {@code CreateKeysetCommand}. */
 @RunWith(JUnit4.class)
 public class CreateKeysetCommandTest {
+  @BeforeClass
+  public static void setUp() throws Exception {
+    AeadConfig.register();
+    MacConfig.register();
+    KmsClientsFactory.globalInstance().addFactory(TinkeyTestKmsClient::new);
+  }
+
   @Test
   public void testCreateCleartext_shouldCreateNewKeyset() throws Exception {
     Path path = Files.createTempDirectory(/* prefix= */ "");
@@ -98,24 +108,26 @@ public class CreateKeysetCommandTest {
   }
 
   @Test
-  public void testCreateCleartext_gcp_shouldCreateNewKeyset() throws Exception {
+  public void testCreateCleartext_withMasterKey_shouldCreateNewKeyset() throws Exception {
     Path path = Files.createTempDirectory(/* prefix= */ "");
     Path outputFile = Paths.get(path.toString(), "keyset");
+    Path credentialFile = Paths.get(path.toString(), "credentials");
+    TinkeyTestKmsClient.createCredentialFile(credentialFile);
+
+    KeysetHandle masterKeyAeadKeyset =
+        KeysetHandle.generateNew(PredefinedAeadParameters.AES128_GCM);
+    Aead masterKeyAead = masterKeyAeadKeyset.getPrimitive(Aead.class);
+    String masterKeyUri = TinkeyTestKmsClient.createKeyUri(masterKeyAeadKeyset);
+
     String commandLine =
         String.format(
             "create-keyset --key-template HMAC_SHA256_128BITTAG --out-format binary "
                 + "--master-key-uri %s "
                 + "--credential %s "
                 + "--out %s",
-            TestUtil.GCP_KMS_TEST_KEY_URI, TestUtil.SERVICE_ACCOUNT_FILE, outputFile.toString());
+            masterKeyUri, credentialFile, outputFile.toString());
 
     Tinkey.main(commandLine.split(" "));
-
-    Aead masterKeyAead =
-        KmsClientsFactory.globalInstance()
-            .newClientFor(TestUtil.GCP_KMS_TEST_KEY_URI)
-            .withCredentials(TestUtil.SERVICE_ACCOUNT_FILE)
-            .getAead(TestUtil.GCP_KMS_TEST_KEY_URI);
 
     KeysetHandle handle =
         TinkProtoKeysetFormat.parseEncryptedKeyset(
@@ -127,24 +139,27 @@ public class CreateKeysetCommandTest {
   }
 
   @Test
-  public void testCreateCleartext_gcp_jsonFormat_shouldCreateNewKeyset() throws Exception {
+  public void testCreateCleartext_withMasterKey_jsonFormat_shouldCreateNewKeyset()
+      throws Exception {
     Path path = Files.createTempDirectory(/* prefix= */ "");
     Path outputFile = Paths.get(path.toString(), "keyset");
+    Path credentialFile = Paths.get(path.toString(), "credentials");
+    TinkeyTestKmsClient.createCredentialFile(credentialFile);
+
+    KeysetHandle masterKeyAeadKeyset =
+        KeysetHandle.generateNew(PredefinedAeadParameters.AES128_GCM);
+    Aead masterKeyAead = masterKeyAeadKeyset.getPrimitive(Aead.class);
+    String masterKeyUri = TinkeyTestKmsClient.createKeyUri(masterKeyAeadKeyset);
+
     String commandLine =
         String.format(
             "create-keyset --key-template HMAC_SHA256_128BITTAG --out-format json "
                 + "--master-key-uri %s "
                 + "--credential %s "
                 + "--out %s",
-            TestUtil.GCP_KMS_TEST_KEY_URI, TestUtil.SERVICE_ACCOUNT_FILE, outputFile.toString());
+            masterKeyUri, credentialFile, outputFile.toString());
 
     Tinkey.main(commandLine.split(" "));
-
-    Aead masterKeyAead =
-        KmsClientsFactory.globalInstance()
-            .newClientFor(TestUtil.GCP_KMS_TEST_KEY_URI)
-            .withCredentials(TestUtil.SERVICE_ACCOUNT_FILE)
-            .getAead(TestUtil.GCP_KMS_TEST_KEY_URI);
 
     KeysetHandle handle =
         TinkJsonProtoKeysetFormat.parseEncryptedKeyset(
