@@ -37,6 +37,7 @@ java_library(
     name = "tinkey",
     srcs = ["Tinkey.java"],
     deps = [
+        ":kms_clients_factory",
         ":tinkey_commands",
         "@maven//:args4j_args4j",
         "@tink_java//src/main/java/com/google/crypto/tink/daead:deterministic_aead_config",
@@ -47,6 +48,8 @@ java_library(
         "@tink_java//src/main/java/com/google/crypto/tink/prf:prf_config",
         "@tink_java//src/main/java/com/google/crypto/tink/signature:signature_config",
         "@tink_java//src/main/java/com/google/crypto/tink/streamingaead:streaming_aead_config",
+        "@tink_java//src/main/java/com/google/crypto/tink/integration/awskms:aws_kms_client",
+        "@tink_java//src/main/java/com/google/crypto/tink/integration/gcpkms:gcp_kms_client",
     ],
 )
 
@@ -108,12 +111,8 @@ java_library(
 java_library(
     name = "tinkey_util",
     srcs = ["TinkeyUtil.java"],
-    runtime_deps = [
-        # Tinkey automatically loads these KMS clients at runtime.
-        "@tink_java//src/main/java/com/google/crypto/tink/integration/awskms:aws_kms_client",
-        "@tink_java//src/main/java/com/google/crypto/tink/integration/gcpkms:gcp_kms_client",
-    ],
     deps = [
+        ":kms_clients_factory",
         "@com_google_protobuf//:protobuf_javalite",
         "@tink_java//proto:tink_java_proto",
         "@tink_java//src/main/java/com/google/crypto/tink:aead",
@@ -125,7 +124,6 @@ java_library(
         "@tink_java//src/main/java/com/google/crypto/tink:key_template",
         "@tink_java//src/main/java/com/google/crypto/tink:keyset_reader",
         "@tink_java//src/main/java/com/google/crypto/tink:keyset_writer",
-        "@tink_java//src/main/java/com/google/crypto/tink:kms_clients",
         "@tink_java//src/main/java/com/google/crypto/tink:registry_cluster",
     ],
 )

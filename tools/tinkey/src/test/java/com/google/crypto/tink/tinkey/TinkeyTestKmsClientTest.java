@@ -25,7 +25,6 @@ import static org.junit.Assert.assertTrue;
 import com.google.crypto.tink.Aead;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.KmsClient;
-import com.google.crypto.tink.KmsClients;
 import com.google.crypto.tink.aead.AeadConfig;
 import com.google.crypto.tink.aead.PredefinedAeadParameters;
 import java.nio.file.Files;
@@ -42,6 +41,7 @@ public final class TinkeyTestKmsClientTest {
   @BeforeClass
   public static void setUp() throws Exception {
     AeadConfig.register();
+    KmsClientsFactory.globalInstance().addFactory(TinkeyTestKmsClient::new);
   }
 
   @Test
@@ -99,7 +99,8 @@ public final class TinkeyTestKmsClientTest {
     KeysetHandle handle = KeysetHandle.generateNew(PredefinedAeadParameters.AES128_GCM);
     String masterKeyUri = TinkeyTestKmsClient.createKeyUri(handle);
     Aead masterKey =
-        KmsClients.getAutoLoaded(masterKeyUri)
+        KmsClientsFactory.globalInstance()
+            .newClientFor(masterKeyUri)
             .withCredentials(credentialPath.toString())
             .getAead(masterKeyUri);
     Aead manualMasterKey = handle.getPrimitive(Aead.class);

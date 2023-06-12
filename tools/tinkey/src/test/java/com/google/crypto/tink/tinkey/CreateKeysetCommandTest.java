@@ -22,7 +22,6 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import com.google.crypto.tink.Aead;
 import com.google.crypto.tink.InsecureSecretKeyAccess;
 import com.google.crypto.tink.KeysetHandle;
-import com.google.crypto.tink.KmsClients;
 import com.google.crypto.tink.TinkJsonProtoKeysetFormat;
 import com.google.crypto.tink.TinkProtoKeysetFormat;
 import com.google.crypto.tink.mac.PredefinedMacParameters;
@@ -113,7 +112,8 @@ public class CreateKeysetCommandTest {
     Tinkey.main(commandLine.split(" "));
 
     Aead masterKeyAead =
-        KmsClients.getAutoLoaded(TestUtil.GCP_KMS_TEST_KEY_URI)
+        KmsClientsFactory.globalInstance()
+            .newClientFor(TestUtil.GCP_KMS_TEST_KEY_URI)
             .withCredentials(TestUtil.SERVICE_ACCOUNT_FILE)
             .getAead(TestUtil.GCP_KMS_TEST_KEY_URI);
 
@@ -141,7 +141,8 @@ public class CreateKeysetCommandTest {
     Tinkey.main(commandLine.split(" "));
 
     Aead masterKeyAead =
-        KmsClients.getAutoLoaded(TestUtil.GCP_KMS_TEST_KEY_URI)
+        KmsClientsFactory.globalInstance()
+            .newClientFor(TestUtil.GCP_KMS_TEST_KEY_URI)
             .withCredentials(TestUtil.SERVICE_ACCOUNT_FILE)
             .getAead(TestUtil.GCP_KMS_TEST_KEY_URI);
 

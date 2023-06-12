@@ -44,6 +44,7 @@ public class AddKeyCommandTest {
   public static void setUp() throws Exception {
     AeadConfig.register();
     MacConfig.register();
+    KmsClientsFactory.globalInstance().addFactory(TinkeyTestKmsClient::new);
   }
 
   @Test

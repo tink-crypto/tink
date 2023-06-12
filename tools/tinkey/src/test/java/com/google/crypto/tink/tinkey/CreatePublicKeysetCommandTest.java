@@ -24,7 +24,6 @@ import com.google.crypto.tink.Aead;
 import com.google.crypto.tink.InsecureSecretKeyAccess;
 import com.google.crypto.tink.Key;
 import com.google.crypto.tink.KeysetHandle;
-import com.google.crypto.tink.KmsClients;
 import com.google.crypto.tink.PrivateKey;
 import com.google.crypto.tink.TinkJsonProtoKeysetFormat;
 import com.google.crypto.tink.TinkProtoKeysetFormat;
@@ -130,7 +129,8 @@ public class CreatePublicKeysetCommandTest {
         KeysetHandle.generateNew(Ed25519Parameters.create(Ed25519Parameters.Variant.TINK));
 
     Aead masterKeyAead =
-        KmsClients.getAutoLoaded(TestUtil.GCP_KMS_TEST_KEY_URI)
+        KmsClientsFactory.globalInstance()
+            .newClientFor(TestUtil.GCP_KMS_TEST_KEY_URI)
             .withCredentials(TestUtil.SERVICE_ACCOUNT_FILE)
             .getAead(TestUtil.GCP_KMS_TEST_KEY_URI);
     String serializedKeyset =
@@ -170,7 +170,8 @@ public class CreatePublicKeysetCommandTest {
         KeysetHandle.generateNew(Ed25519Parameters.create(Ed25519Parameters.Variant.TINK));
 
     Aead masterKeyAead =
-        KmsClients.getAutoLoaded(TestUtil.GCP_KMS_TEST_KEY_URI)
+        KmsClientsFactory.globalInstance()
+            .newClientFor(TestUtil.GCP_KMS_TEST_KEY_URI)
             .withCredentials(TestUtil.SERVICE_ACCOUNT_FILE)
             .getAead(TestUtil.GCP_KMS_TEST_KEY_URI);
     byte[] serializedKeyset =

@@ -27,7 +27,6 @@ import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.KeysetManager;
 import com.google.crypto.tink.KeysetReader;
 import com.google.crypto.tink.KeysetWriter;
-import com.google.crypto.tink.KmsClients;
 import com.google.crypto.tink.proto.OutputPrefixType;
 import com.google.protobuf.ByteString;
 import java.io.ByteArrayInputStream;
@@ -216,7 +215,8 @@ final class TinkeyUtil {
     KeysetWriter writer = createKeysetWriter(outputStream, outFormat);
     if (masterKeyUri != null) {
       Aead masterKey =
-          KmsClients.getAutoLoaded(masterKeyUri)
+          KmsClientsFactory.globalInstance()
+              .newClientFor(masterKeyUri)
               .withCredentials(credentialPath)
               .getAead(masterKeyUri);
       handle.write(writer, masterKey);
@@ -235,7 +235,8 @@ final class TinkeyUtil {
     KeysetReader reader = createKeysetReader(inputStream, inFormat);
     if (masterKeyUri != null) {
       Aead masterKey =
-          KmsClients.getAutoLoaded(masterKeyUri)
+          KmsClientsFactory.globalInstance()
+              .newClientFor(masterKeyUri)
               .withCredentials(credentialPath)
               .getAead(masterKeyUri);
       return KeysetHandle.read(reader, masterKey);
