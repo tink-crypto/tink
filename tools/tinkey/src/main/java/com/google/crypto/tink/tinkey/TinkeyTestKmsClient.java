@@ -17,7 +17,6 @@ package com.google.crypto.tink.tinkey;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
-import com.google.auto.service.AutoService;
 import com.google.crypto.tink.Aead;
 import com.google.crypto.tink.InsecureSecretKeyAccess;
 import com.google.crypto.tink.KeysetHandle;
@@ -37,10 +36,9 @@ import java.util.Arrays;
  * JSON-encoded AEAD keyset. It will use this Aead when "getAead" is called. As credentials, it must
  * be given a file which starts whose contents are "VALID CREDENTIALS".
  */
-@AutoService(KmsClient.class)
-public final class TinkeyTestKmsClient implements KmsClient {
+final class TinkeyTestKmsClient implements KmsClient {
 
-  public TinkeyTestKmsClient() {
+  TinkeyTestKmsClient() {
     this(PREFIX);
   }
 
@@ -48,7 +46,7 @@ public final class TinkeyTestKmsClient implements KmsClient {
     this.prefix = prefix;
   }
 
-  public static KmsClient createForPrefix(String prefix) {
+  static KmsClient createForPrefix(String prefix) {
     return new TinkeyTestKmsClient(prefix);
   }
 
