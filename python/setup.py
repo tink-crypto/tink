@@ -96,14 +96,19 @@ def _parse_requirements(filename):
     ]
 
 
-def _patch_workspace(workspace_content):
+def _patch_workspace(workspace_file):
   """Update the Bazel workspace with valid repository references.
 
-  setuptools builds in a temporary folder which breaks the relative paths
-  defined in the Bazel workspace.  By default, the local_repository() rules will
-  be replaced with http_archive() rules which contain URLs that point to an
-  archive of the Tink GitHub repository as of the latest commit as of the master
-  branch.
+  When installing the sdist, e.g., with `pip install tink --no-binary` or
+  `python3 -m pip install -v path/to/sdist.tar.gz`, setuptools unpacks the
+  sdist in a temporary folder that contains only the python/ folder, and then
+  builds it. As a consequence, relative local_repository paths that are set by
+  default in python/WORKSPACE don't exist (or worst, they may exist by
+  chance!).
+
+  By default, the local_repository() rules will be replaced with http_archive()
+  rules which contain URLs that point to an archive of the Tink GitHub
+  repository as of the latest commit as of the master branch.
 
   This behavior can be modified via the following environment variables, in
   order of precedence:
@@ -119,23 +124,29 @@ def _patch_workspace(workspace_content):
         for creating release artifacts).
 
   Args:
-    workspace_content: The original tink/python WORKSPACE.
-  Returns:
-    The workspace_content using http_archive for tink_cc.
+    workspace_file: The tink/python WORKSPACE.
   """
+
+  with open(workspace_file, 'r') as f:
+    workspace_content = f.read()
 
   if 'TINK_PYTHON_SETUPTOOLS_OVERRIDE_BASE_PATH' in os.environ:
     base_path = os.environ['TINK_PYTHON_SETUPTOOLS_OVERRIDE_BASE_PATH']
-    return _patch_with_local_path(workspace_content, base_path)
+    workspace_content = _patch_with_local_path(workspace_content, base_path)
 
-  if 'TINK_PYTHON_SETUPTOOLS_TAGGED_VERSION' in os.environ:
-    archive_filename = 'v{}.zip'.format(_TINK_VERSION)
-    archive_prefix = 'tink-{}'.format(_TINK_VERSION)
-    return _patch_with_http_archive(workspace_content,
-                                    archive_filename, archive_prefix)
+  elif 'TINK_PYTHON_SETUPTOOLS_TAGGED_VERSION' in os.environ:
+    tagged_version = os.environ['TINK_PYTHON_SETUP_TOOLS_TAGGED_VERSION']
+    archive_filename = 'v{}.zip'.format(tagged_version)
+    archive_prefix = 'tink-{}'.format(tagged_version)
+    workspace_content = _patch_with_http_archive(workspace_content,
+                                                 archive_filename,
+                                                 archive_prefix)
+  else:
+    workspace_content = _patch_with_http_archive(workspace_content,
+                                                 'master.zip', 'tink-master')
 
-  return _patch_with_http_archive(workspace_content,
-                                  'master.zip', 'tink-master')
+  with open(workspace_file, 'w') as f:
+    f.write(workspace_content)
 
 
 def _patch_with_local_path(workspace_content, base_path):
@@ -151,8 +162,8 @@ def _patch_with_http_archive(workspace_content, filename, prefix):
   """Replaces local_repository() rules with http_archive() rules."""
 
   workspace_lines = workspace_content.split('\n')
-  http_archive_load = ('load("@bazel_tools//tools/build_defs/repo:http.bzl", '
-                       '"http_archive")')
+  http_archive_load = (
+      'load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")')
 
   if http_archive_load not in workspace_content:
     workspace_content = '\n'.join([workspace_lines[0], http_archive_load] +
@@ -207,10 +218,7 @@ class BuildBazelExtension(build_ext.build_ext):
 
   def bazel_build(self, ext):
     # Change WORKSPACE to include tink_cc from an archive
-    with open('WORKSPACE', 'r') as f:
-      workspace_contents = f.read()
-    with open('WORKSPACE', 'w') as f:
-      f.write(_patch_workspace(workspace_contents))
+    _patch_workspace('WORKSPACE')
 
     if not os.path.exists(self.build_temp):
       os.makedirs(self.build_temp)
