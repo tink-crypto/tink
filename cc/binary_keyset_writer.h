@@ -39,7 +39,7 @@ class BinaryKeysetWriter : public KeysetWriter {
       std::unique_ptr<std::ostream> destination_stream);
 
   crypto::tink::util::Status
-  Write(const google::crypto::tink::Keyset& keyset) override;;
+  Write(const google::crypto::tink::Keyset& keyset) override;
 
   crypto::tink::util::Status
   Write(const google::crypto::tink::EncryptedKeyset& encrypted_keyset) override;
