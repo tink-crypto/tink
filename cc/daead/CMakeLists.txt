@@ -90,6 +90,34 @@ tink_cc_library(
     tink::proto::tink_cc_proto
 )
 
+tink_cc_library(
+  NAME failing_daead
+  SRCS
+    failing_daead.cc
+    failing_daead.h
+  DEPS
+    absl::strings
+    tink::core::deterministic_aead
+)
+
+tink_cc_library(
+  NAME deterministic_aead_parameters
+  SRCS
+    deterministic_aead_parameters.h
+  DEPS
+    tink::core::parameters
+)
+
+tink_cc_library(
+  NAME deterministic_aead_key
+  SRCS
+    deterministic_aead_key.h
+  DEPS
+    tink::daead::deterministic_aead_parameters
+    absl::strings
+    tink::core::key
+)
+
 # tests
 
 tink_cc_test(
@@ -179,16 +207,6 @@ tink_cc_test(
     tink::proto::aes_siv_cc_proto
     tink::proto::common_cc_proto
     tink::proto::tink_cc_proto
-)
-
-tink_cc_library(
-  NAME failing_daead
-  SRCS
-    failing_daead.cc
-    failing_daead.h
-  DEPS
-    absl::strings
-    tink::core::deterministic_aead
 )
 
 tink_cc_test(
