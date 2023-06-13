@@ -48,7 +48,6 @@ import com.google.crypto.tink.monitoring.MonitoringAnnotations;
 import com.google.crypto.tink.monitoring.MonitoringClient;
 import com.google.crypto.tink.prf.PrfConfig;
 import com.google.crypto.tink.proto.AesEaxKey;
-import com.google.crypto.tink.proto.AesEaxKeyFormat;
 import com.google.crypto.tink.proto.EcdsaPrivateKey;
 import com.google.crypto.tink.proto.HashType;
 import com.google.crypto.tink.proto.HmacParams;
@@ -223,19 +222,8 @@ public class KeysetHandleTest {
 
     KeysetHandle handle = KeysetHandle.generateNew(template);
 
-    Keyset keyset = handle.getKeyset();
-    expect.that(keyset.getKeyCount()).isEqualTo(1);
-    Keyset.Key key = keyset.getKey(0);
-    expect.that(keyset.getPrimaryKeyId()).isEqualTo(key.getKeyId());
-    expect.that(key.getStatus()).isEqualTo(KeyStatusType.ENABLED);
-    expect.that(key.getOutputPrefixType()).isEqualTo(OutputPrefixType.TINK);
-    expect.that(key.hasKeyData()).isTrue();
-    expect.that(key.getKeyData().getTypeUrl()).isEqualTo(template.getTypeUrl());
-    AesEaxKeyFormat aesEaxKeyFormat =
-        AesEaxKeyFormat.parseFrom(template.getValue(), ExtensionRegistryLite.getEmptyRegistry());
-    AesEaxKey aesEaxKey =
-        AesEaxKey.parseFrom(key.getKeyData().getValue(), ExtensionRegistryLite.getEmptyRegistry());
-    expect.that(aesEaxKey.getKeyValue().size()).isEqualTo(aesEaxKeyFormat.getKeySize());
+    assertThat(handle.size()).isEqualTo(1);
+    assertThat(handle.getAt(0).getKey().getParameters()).isEqualTo(template.toParameters());
   }
 
   @Test
@@ -271,41 +259,20 @@ public class KeysetHandleTest {
 
     KeysetHandle handle = KeysetHandle.generateNew(template);
 
-    Keyset keyset = handle.getKeyset();
-    expect.that(keyset.getKeyCount()).isEqualTo(1);
-    Keyset.Key key = keyset.getKey(0);
-    expect.that(keyset.getPrimaryKeyId()).isEqualTo(key.getKeyId());
-    expect.that(key.getStatus()).isEqualTo(KeyStatusType.ENABLED);
-    expect.that(key.getOutputPrefixType()).isEqualTo(OutputPrefixType.RAW);
-    expect.that(key.hasKeyData()).isTrue();
-    expect.that(key.getKeyData().getTypeUrl()).isEqualTo(template.getTypeUrl());
-    AesEaxKeyFormat aesEaxKeyFormat =
-        AesEaxKeyFormat.parseFrom(template.getValue(), ExtensionRegistryLite.getEmptyRegistry());
-    AesEaxKey aesEaxKey =
-        AesEaxKey.parseFrom(key.getKeyData().getValue(), ExtensionRegistryLite.getEmptyRegistry());
-    expect.that(aesEaxKey.getKeyValue().size()).isEqualTo(aesEaxKeyFormat.getKeySize());
+    assertThat(handle.size()).isEqualTo(1);
+    assertThat(handle.getAt(0).getKey().getParameters()).isEqualTo(template.toParameters());
   }
 
   @Test
   public void generateNew_withProtoKeyTemplate_shouldWork() throws Exception {
-    com.google.crypto.tink.proto.KeyTemplate template = KeyTemplates.get("AES128_EAX").getProto();
+    KeyTemplate template = KeyTemplates.get("AES128_EAX");
+    com.google.crypto.tink.proto.KeyTemplate protoTemplate = template.getProto();
 
     @SuppressWarnings("deprecation") // Need to test the deprecated function
-    KeysetHandle handle = KeysetHandle.generateNew(template);
+    KeysetHandle handle = KeysetHandle.generateNew(protoTemplate);
 
-    Keyset keyset = handle.getKeyset();
-    expect.that(keyset.getKeyCount()).isEqualTo(1);
-    Keyset.Key key = keyset.getKey(0);
-    expect.that(keyset.getPrimaryKeyId()).isEqualTo(key.getKeyId());
-    expect.that(key.getStatus()).isEqualTo(KeyStatusType.ENABLED);
-    expect.that(key.getOutputPrefixType()).isEqualTo(OutputPrefixType.TINK);
-    expect.that(key.hasKeyData()).isTrue();
-    expect.that(key.getKeyData().getTypeUrl()).isEqualTo(template.getTypeUrl());
-    AesEaxKeyFormat aesEaxKeyFormat =
-        AesEaxKeyFormat.parseFrom(template.getValue(), ExtensionRegistryLite.getEmptyRegistry());
-    AesEaxKey aesEaxKey =
-        AesEaxKey.parseFrom(key.getKeyData().getValue(), ExtensionRegistryLite.getEmptyRegistry());
-    expect.that(aesEaxKey.getKeyValue().size()).isEqualTo(aesEaxKeyFormat.getKeySize());
+    assertThat(handle.size()).isEqualTo(1);
+    assertThat(handle.getAt(0).getKey().getParameters()).isEqualTo(template.toParameters());
   }
 
   @Test
@@ -335,19 +302,8 @@ public class KeysetHandleTest {
 
     KeysetHandle handle = KeysetHandle.createFromKey(keyHandle, token);
 
-    Keyset keyset = handle.getKeyset();
-    expect.that(keyset.getKeyCount()).isEqualTo(1);
-    Keyset.Key key = keyset.getKey(0);
-    expect.that(keyset.getPrimaryKeyId()).isEqualTo(key.getKeyId());
-    expect.that(key.getStatus()).isEqualTo(KeyStatusType.ENABLED);
-    expect.that(key.getOutputPrefixType()).isEqualTo(OutputPrefixType.TINK);
-    expect.that(key.hasKeyData()).isTrue();
-    expect.that(key.getKeyData().getTypeUrl()).isEqualTo(template.getTypeUrl());
-    AesEaxKeyFormat aesEaxKeyFormat =
-        AesEaxKeyFormat.parseFrom(template.getValue(), ExtensionRegistryLite.getEmptyRegistry());
-    AesEaxKey aesEaxKey =
-        AesEaxKey.parseFrom(key.getKeyData().getValue(), ExtensionRegistryLite.getEmptyRegistry());
-    expect.that(aesEaxKey.getKeyValue().size()).isEqualTo(aesEaxKeyFormat.getKeySize());
+    assertThat(handle.size()).isEqualTo(1);
+    assertThat(handle.getAt(0).getKey().getParameters()).isEqualTo(template.toParameters());
   }
 
   @Test
