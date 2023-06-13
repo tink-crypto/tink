@@ -50,8 +50,6 @@ readonly IMAGE="${IMAGE_NAME}@${IMAGE_DIGEST}"
 #######################################
 __create_and_test_wheels_for_linux() {
   echo "### Building and testing Linux binary wheels ###"
-  local -r tink_py_relative_path="${PWD##*/}"
-  local -r workdir="/tmp/tink/${tink_py_relative_path}"
   # Use signatures for getting images from registry (see
   # https://docs.docker.com/engine/security/trust/content_trust/).
   export DOCKER_CONTENT_TRUST=1
@@ -60,16 +58,20 @@ __create_and_test_wheels_for_linux() {
   # file so we save a copy for backup.
   cp WORKSPACE WORKSPACE.bak
 
+  local -r tink_base_dir="/tmp/tink"
+  local -r tink_py_relative_path="${PWD##*/}"
+  local -r workdir="${tink_base_dir}/${tink_py_relative_path}"
   # Build binary wheels.
   docker run \
-    --volume "${TINK_PYTHON_ROOT_PATH}/..:/tmp/tink" \
+    --volume "${TINK_PYTHON_ROOT_PATH}/..:${tink_base_dir}" \
     --workdir "${workdir}" \
+    -e TINK_PYTHON_SETUPTOOLS_OVERRIDE_BASE_PATH="${tink_base_dir}" \
     "${IMAGE}" \
     "${workdir}/tools/distribution/build_linux_binary_wheels.sh"
 
   ## Test binary wheels.
   docker run \
-    --volume "${TINK_PYTHON_ROOT_PATH}/..:/tmp/tink" \
+    --volume "${TINK_PYTHON_ROOT_PATH}/..:${tink_base_dir}" \
     --workdir "${workdir}" \
     "${IMAGE}" \
     "${workdir}/tools/distribution/test_linux_binary_wheels.sh"

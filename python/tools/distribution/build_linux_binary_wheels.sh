@@ -52,9 +52,6 @@ PROTOC_ZIP="protoc-${PROTOC_RELEASE_TAG}-linux-x86_64.zip"
 curl -OL "https://github.com/protocolbuffers/protobuf/releases/download/v${PROTOC_RELEASE_TAG}/${PROTOC_ZIP}"
 unzip -o "${PROTOC_ZIP}" -d /usr/local bin/protoc
 
-# Setup required for Tink.
-export TINK_PYTHON_SETUPTOOLS_OVERRIDE_BASE_PATH="${TINK_PYTHON_ROOT_PATH}/.."
-
 # Required to fix https://github.com/pypa/manylinux/issues/357.
 export LD_LIBRARY_PATH="/usr/local/lib"
 
