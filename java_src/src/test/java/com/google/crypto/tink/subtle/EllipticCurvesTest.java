@@ -16,6 +16,7 @@
 
 package com.google.crypto.tink.subtle;
 
+import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -340,6 +341,22 @@ public class EllipticCurvesTest {
             + "0778100463909972583865730916407864371153050622267306901033104806"
             + "9570407113457901669103973732"),
   };
+
+  @Test
+  public void testFieldSizeInBytes() throws Exception {
+    assertThat(
+            EllipticCurves.fieldSizeInBytes(
+                EllipticCurves.getCurveSpec(EllipticCurves.CurveType.NIST_P256).getCurve()))
+        .isEqualTo(32);
+    assertThat(
+            EllipticCurves.fieldSizeInBytes(
+                EllipticCurves.getCurveSpec(EllipticCurves.CurveType.NIST_P384).getCurve()))
+        .isEqualTo(48);
+    assertThat(
+            EllipticCurves.fieldSizeInBytes(
+                EllipticCurves.getCurveSpec(EllipticCurves.CurveType.NIST_P521).getCurve()))
+        .isEqualTo(66);
+  }
 
   @Test
   public void testPointDecode() throws Exception {
