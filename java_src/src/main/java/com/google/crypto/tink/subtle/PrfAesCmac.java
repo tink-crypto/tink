@@ -16,8 +16,11 @@
 
 package com.google.crypto.tink.subtle;
 
+import com.google.crypto.tink.AccessesPartialKey;
+import com.google.crypto.tink.InsecureSecretKeyAccess;
 import com.google.crypto.tink.config.internal.TinkFipsUtil;
 import com.google.crypto.tink.mac.internal.AesUtil;
+import com.google.crypto.tink.prf.AesCmacPrfKey;
 import com.google.crypto.tink.prf.Prf;
 import com.google.errorprone.annotations.Immutable;
 import java.security.GeneralSecurityException;
@@ -31,6 +34,7 @@ import javax.crypto.spec.SecretKeySpec;
  * An implementation of CMAC following <a href="https://tools.ietf.org/html/rfc4493">RFC 4493</a>.
  */
 @Immutable
+@AccessesPartialKey
 public final class PrfAesCmac implements Prf {
   public static final TinkFipsUtil.AlgorithmFipsCompatibility FIPS =
       TinkFipsUtil.AlgorithmFipsCompatibility.ALGORITHM_NOT_FIPS;
@@ -56,6 +60,10 @@ public final class PrfAesCmac implements Prf {
 
     keySpec = new SecretKeySpec(key, "AES");
     generateSubKeys();
+  }
+
+  public static Prf create(AesCmacPrfKey key) throws GeneralSecurityException {
+    return new PrfAesCmac(key.getKeyBytes().toByteArray(InsecureSecretKeyAccess.get()));
   }
 
   // https://tools.ietf.org/html/rfc4493#section-2.4
@@ -100,8 +108,7 @@ public final class PrfAesCmac implements Prf {
     y = Bytes.xor(mLast, x);
 
     // Step 7
-    byte[] output = Arrays.copyOf(aes.doFinal(y), outputLength);
-    return output;
+    return Arrays.copyOf(aes.doFinal(y), outputLength);
   }
 
   // https://tools.ietf.org/html/rfc4493#section-2.3
