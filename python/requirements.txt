@@ -8,13 +8,13 @@ absl-py==1.4.0 \
     --hash=sha256:0d3fe606adfa4f7db64792dd4c7aee4ee0c38ab75dfd353b7a83ed3e957fcb47 \
     --hash=sha256:d2c244d01048ba476e7c080bd2c6df5e141d211de80223460d5b3b8a2a58433d
     # via -r requirements.in
-boto3==1.26.147 \
-    --hash=sha256:45ed158defbf554d051c4f3eae9a1ca3c1039dd29a528e884f47a06ad0ac17a1 \
-    --hash=sha256:ccfbdb6e9ebdf943e222c88c9a8f161a8a607f3dbdbf3b1b0eed25c1d8cb215e
+boto3==1.26.152 \
+    --hash=sha256:a2778c5729d3dc0b3688c9f0d103543d7ec5ff44a4fd0e84d0d542e2dff05e62 \
+    --hash=sha256:ee0b8f8d238d4e1cf50fa6a185e4e066955b6105e9838a80b1b6582cd327dfdf
     # via -r requirements.in
-botocore==1.29.147 \
-    --hash=sha256:67a7ce69fc6d44a881b01964a76edb00b4e87723a8cc596339d306d8eb321fec \
-    --hash=sha256:f7433bcce5ef7baad2fdd29f97c9fdcf8de4ec1cf577ae308901caf778ed48c2
+botocore==1.29.152 \
+    --hash=sha256:02a3205cc8579d4be6d537e63d72aebbf3f70f3aedcf40b3cae9dc2e24c774d0 \
+    --hash=sha256:f6319ecdbe3d325878f837cac2874e461b4d90691bb2d2186f980bce3b3cfcc8
     # via
     #   boto3
     #   s3transfer
@@ -119,9 +119,9 @@ google-cloud-kms==2.17.0 \
     --hash=sha256:0282281a63af2f49800f9761b16c48908140c381bed62f52c8d1780f9238173d \
     --hash=sha256:af7136da8372eee1efd21789c1679ccc8f8b11bf52e4231ede808a90bcdc0368
     # via -r requirements.in
-googleapis-common-protos[grpc]==1.59.0 \
-    --hash=sha256:4168fcb568a826a52f23510412da405abd93f4d23ba544bb68d943b14ba3cb44 \
-    --hash=sha256:b287dc48449d1d41af0c69f4ea26242b5ae4c3d7249a38b0984c86a4caffff1f
+googleapis-common-protos[grpc]==1.59.1 \
+    --hash=sha256:0cbedb6fb68f1c07e18eb4c48256320777707e7d0c55063ae56c15db3224a61e \
+    --hash=sha256:b35d530fe825fb4227857bc47ad84c33c809ac96f312e13182bdeaa2abe1178a
     # via
     #   google-api-core
     #   grpc-google-iam-v1
