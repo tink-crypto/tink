@@ -22,7 +22,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import com.google.crypto.tink.Aead;
-import com.google.crypto.tink.CleartextKeysetHandle;
 import com.google.crypto.tink.InsecureSecretKeyAccess;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.PrimitiveSet;
@@ -80,6 +79,7 @@ import com.google.errorprone.annotations.InlineMe;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.ExtensionRegistryLite;
 import com.google.protobuf.MessageLite;
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.security.GeneralSecurityException;
 import java.security.KeyPair;
@@ -170,9 +170,20 @@ public final class TestUtil {
     return builder.build();
   }
 
-  /** @return a {@code Keyset} from a {@code handle}. */
+  /**
+   * @return a {@code Keyset} from a {@code handle}.
+   * @deprecated The return value of this function is a Keyset and typically should not be used.
+   *     Instead, operate on the KeysetHandle directly.
+   */
+  @Deprecated
   public static Keyset getKeyset(final KeysetHandle handle) {
-    return CleartextKeysetHandle.getKeyset(handle);
+    try {
+      return Keyset.parseFrom(
+          TinkProtoKeysetFormat.serializeKeyset(handle, InsecureSecretKeyAccess.get()),
+          ExtensionRegistryLite.getEmptyRegistry());
+    } catch (GeneralSecurityException | IOException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   /** @return a keyset handle from a {@code keyset}. */
