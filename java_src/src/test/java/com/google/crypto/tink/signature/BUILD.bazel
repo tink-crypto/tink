@@ -588,6 +588,7 @@ java_test(
     srcs = ["KeyConversionTest.java"],
     deps = [
         "//src/main/java/com/google/crypto/tink:insecure_secret_key_access",
+        "//src/main/java/com/google/crypto/tink:key_templates",
         "//src/main/java/com/google/crypto/tink:public_key_sign",
         "//src/main/java/com/google/crypto/tink:public_key_verify",
         "//src/main/java/com/google/crypto/tink:registry_cluster",

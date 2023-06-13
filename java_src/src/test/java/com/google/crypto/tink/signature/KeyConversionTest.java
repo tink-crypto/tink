@@ -20,10 +20,12 @@ import static com.google.common.truth.Truth.assertThat;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 import com.google.crypto.tink.InsecureSecretKeyAccess;
+import com.google.crypto.tink.KeyTemplates;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.PublicKeySign;
 import com.google.crypto.tink.PublicKeyVerify;
 import com.google.crypto.tink.util.SecretBigInteger;
+import java.security.KeyFactory;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.PrivateKey;
@@ -33,6 +35,8 @@ import java.security.interfaces.ECPrivateKey;
 import java.security.interfaces.ECPublicKey;
 import java.security.interfaces.RSAPrivateCrtKey;
 import java.security.interfaces.RSAPublicKey;
+import java.security.spec.RSAPrivateCrtKeySpec;
+import java.security.spec.RSAPublicKeySpec;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -174,6 +178,61 @@ public final class KeyConversionTest {
     verifier.verify(sig, data);
 
     // Verify using java.security.Signature.
+    Signature signatureVerify = Signature.getInstance("SHA256withRSA");
+    signatureVerify.initVerify(publicKey);
+    signatureVerify.update(data);
+    assertThat(signatureVerify.verify(sig)).isTrue();
+  }
+
+  /** This test shows how Tink keys can be exported to Java RSA keys. */
+  @Test
+  public void exportToJavaRSAKey() throws Exception {
+    KeysetHandle privateHandle =
+        KeysetHandle.generateNew(KeyTemplates.get("RSA_SSA_PKCS1_3072_SHA256_F4_RAW"));
+    KeysetHandle publicHandle = privateHandle.getPublicKeysetHandle();
+
+    PublicKeySign signer = privateHandle.getPrimitive(PublicKeySign.class);
+    byte[] data = "data".getBytes(UTF_8);
+    byte[] sig = signer.sign(data);
+
+    // Export private key and sign using java.security.Signature.
+    RsaSsaPkcs1PrivateKey rsaSsaPkcs1PrivateKey =
+        (RsaSsaPkcs1PrivateKey) privateHandle.getAt(0).getKey();
+    PrivateKey privateKey =
+        KeyFactory.getInstance("RSA")
+            .generatePrivate(
+                new RSAPrivateCrtKeySpec(
+                    rsaSsaPkcs1PrivateKey.getPublicKey().getModulus(),
+                    rsaSsaPkcs1PrivateKey.getParameters().getPublicExponent(),
+                    rsaSsaPkcs1PrivateKey
+                        .getPrivateExponent()
+                        .getBigInteger(InsecureSecretKeyAccess.get()),
+                    rsaSsaPkcs1PrivateKey.getPrimeP().getBigInteger(InsecureSecretKeyAccess.get()),
+                    rsaSsaPkcs1PrivateKey.getPrimeQ().getBigInteger(InsecureSecretKeyAccess.get()),
+                    rsaSsaPkcs1PrivateKey
+                        .getPrimeExponentP()
+                        .getBigInteger(InsecureSecretKeyAccess.get()),
+                    rsaSsaPkcs1PrivateKey
+                        .getPrimeExponentQ()
+                        .getBigInteger(InsecureSecretKeyAccess.get()),
+                    rsaSsaPkcs1PrivateKey
+                        .getCrtCoefficient()
+                        .getBigInteger(InsecureSecretKeyAccess.get())));
+    Signature signatureSigner = Signature.getInstance("SHA256withRSA");
+    signatureSigner.initSign(privateKey);
+    signatureSigner.update(data);
+    // These signatures are deterministic, so they must be equal.
+    assertThat(signatureSigner.sign()).isEqualTo(sig);
+
+    // Export public key and verify using java.security.Signature.
+    RsaSsaPkcs1PublicKey rsaSsaPkcs1PublicKey =
+        (RsaSsaPkcs1PublicKey) publicHandle.getAt(0).getKey();
+    PublicKey publicKey =
+        KeyFactory.getInstance("RSA")
+            .generatePublic(
+                new RSAPublicKeySpec(
+                    rsaSsaPkcs1PublicKey.getModulus(),
+                    rsaSsaPkcs1PublicKey.getParameters().getPublicExponent()));
     Signature signatureVerify = Signature.getInstance("SHA256withRSA");
     signatureVerify.initVerify(publicKey);
     signatureVerify.update(data);
