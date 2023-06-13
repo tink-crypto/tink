@@ -127,3 +127,18 @@ java_library(
         "@tink_java//src/main/java/com/google/crypto/tink/subtle:subtle_util_cluster",
     ],
 )
+
+java_library(
+    name = "jwt_key_converter",
+    srcs = ["JwtKeyConverter.java"],
+    deps = [
+        "@tink_java//src/main/java/com/google/crypto/tink:accesses_partial_key",
+        "@tink_java//src/main/java/com/google/crypto/tink:secret_key_access",
+        "@tink_java//src/main/java/com/google/crypto/tink/jwt:jwt_ecdsa_parameters",
+        "@tink_java//src/main/java/com/google/crypto/tink/jwt:jwt_ecdsa_private_key",
+        "@tink_java//src/main/java/com/google/crypto/tink/jwt:jwt_ecdsa_public_key",
+        "@tink_java//src/main/java/com/google/crypto/tink/subtle:base64",
+        "@tink_java//src/main/java/com/google/crypto/tink/subtle:elliptic_curves",
+        "@tink_java//src/main/java/com/google/crypto/tink/util:secret_big_integer",
+    ],
+)

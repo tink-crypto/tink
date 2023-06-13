@@ -14,6 +14,7 @@ java_library(
     ]),
     deps = [
         "//paymentmethodtoken/src/main/java/com/google/crypto/tink/apps/paymentmethodtoken:google_payments_public_keys_manager",
+        "//paymentmethodtoken/src/main/java/com/google/crypto/tink/apps/paymentmethodtoken:jwt_key_converter",
         "//paymentmethodtoken/src/main/java/com/google/crypto/tink/apps/paymentmethodtoken:payment_method_token_constants",
         "//paymentmethodtoken/src/main/java/com/google/crypto/tink/apps/paymentmethodtoken:payment_method_token_hybrid_decrypt",
         "//paymentmethodtoken/src/main/java/com/google/crypto/tink/apps/paymentmethodtoken:payment_method_token_hybrid_encrypt",
@@ -24,10 +25,22 @@ java_library(
         "//paymentmethodtoken/src/main/java/com/google/crypto/tink/apps/paymentmethodtoken:sender_intermediate_cert_factory",
         "@maven//:com_google_code_gson_gson",
         "@maven//:com_google_http_client_google_http_client",
+        "@maven//:com_google_truth_truth",
         "@maven//:joda_time_joda_time",
         "@maven//:junit_junit",
         "@tink_java//src/main/java/com/google/crypto/tink:hybrid_decrypt",
         "@tink_java//src/main/java/com/google/crypto/tink:hybrid_encrypt",
+        "@tink_java//src/main/java/com/google/crypto/tink:insecure_secret_key_access",
+        "@tink_java//src/main/java/com/google/crypto/tink:registry_cluster",
+        "@tink_java//src/main/java/com/google/crypto/tink/jwt:jwt_ecdsa_parameters",
+        "@tink_java//src/main/java/com/google/crypto/tink/jwt:jwt_ecdsa_private_key",
+        "@tink_java//src/main/java/com/google/crypto/tink/jwt:jwt_ecdsa_public_key",
+        "@tink_java//src/main/java/com/google/crypto/tink/jwt:jwt_public_key_sign",
+        "@tink_java//src/main/java/com/google/crypto/tink/jwt:jwt_public_key_verify",
+        "@tink_java//src/main/java/com/google/crypto/tink/jwt:jwt_signature_config",
+        "@tink_java//src/main/java/com/google/crypto/tink/jwt:jwt_validator",
+        "@tink_java//src/main/java/com/google/crypto/tink/jwt:raw_jwt",
+        "@tink_java//src/main/java/com/google/crypto/tink/jwt:verified_jwt",
         "@tink_java//src/main/java/com/google/crypto/tink/subtle:base64",
         "@tink_java//src/main/java/com/google/crypto/tink/subtle:elliptic_curves",
         "@tink_java//src/main/java/com/google/crypto/tink/subtle:random",
@@ -35,7 +48,8 @@ java_library(
 )
 
 gen_java_test_rules(
-    test_files = glob(["**/*Test.java"],
+    test_files = glob(
+        ["**/*Test.java"],
     ),
     deps = [
         ":generator_test",
