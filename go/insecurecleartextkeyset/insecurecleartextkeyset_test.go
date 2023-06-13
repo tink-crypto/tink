@@ -22,7 +22,9 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 	"google.golang.org/protobuf/proto"
+	"google.golang.org/protobuf/testing/protocmp"
 	"github.com/google/tink/go/aead"
+	"github.com/google/tink/go/hybrid"
 	"github.com/google/tink/go/insecurecleartextkeyset"
 	"github.com/google/tink/go/internal/internalregistry"
 	"github.com/google/tink/go/keyset"
@@ -120,6 +122,29 @@ func TestWriteAndReadInJson(t *testing.T) {
 	got := insecurecleartextkeyset.KeysetMaterial(parsedHandle)
 	if !proto.Equal(got, want) {
 		t.Errorf("KeysetMaterial(Read()) = %q, want %q", got, want)
+	}
+}
+
+func TestLegacyKeysetHandle(t *testing.T) {
+	handle, err := keyset.NewHandle(hybrid.DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_AES_128_GCM_Key_Template())
+	if err != nil {
+		t.Fatalf(" keyset.NewHandle(hybrid.DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_AES_128_GCM_Key_Template()) err = %v, want nil", err)
+	}
+	ks := insecurecleartextkeyset.KeysetMaterial(handle)
+	gotHandle1 := insecurecleartextkeyset.KeysetHandle(ks)
+	if !cmp.Equal(gotHandle1.KeysetInfo(), handle.KeysetInfo(), protocmp.Transform()) {
+		t.Errorf("gotHandle1.KeysetInfo() = %v, want %v", gotHandle1.KeysetInfo(), handle.KeysetInfo())
+	}
+	serializedKeyset, err := proto.Marshal(ks)
+	if err != nil {
+		t.Fatalf("proto.Marshal() err = %v, want nil", err)
+	}
+	gotHandle2, err := insecurecleartextkeyset.Read(keyset.NewBinaryReader(bytes.NewBuffer(serializedKeyset)))
+	if err != nil {
+		t.Fatalf("insecurecleartextkeyset.Read() err = %v, want nil", err)
+	}
+	if !cmp.Equal(gotHandle2.KeysetInfo(), handle.KeysetInfo(), protocmp.Transform()) {
+		t.Errorf("gotHandle2.KeysetInfo() = %v, want %v", gotHandle2.KeysetInfo(), handle.KeysetInfo())
 	}
 }
 

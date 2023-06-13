@@ -69,3 +69,28 @@ func Write(handle *keyset.Handle, w keyset.Writer) error {
 func KeysetMaterial(handle *keyset.Handle) *tinkpb.Keyset {
 	return keysetMaterial(handle)
 }
+
+// KeysetHandle creates a keyset.Handle from cleartext key material.
+//
+// Callers should verify that the returned *keyset.Handle isn't nil.
+//
+// Deprecated: Use [Read] instead with a serialized keyset.
+//
+//	sks, err := proto.Marshal(ks)
+//	if err != nil {
+//		return err
+//	}
+//	h, err := insecurecleartextkeyset.Read(keyset.NewBinaryReader(bytes.NewBuffer(sks)))
+//	if err != nil {
+//		return err
+//	}
+func KeysetHandle(ks *tinkpb.Keyset) *keyset.Handle {
+	kh, err := keysetHandle(ks)
+	if err != nil {
+		// this *keyset.Handle can only return errors when *keyset.Option arguments
+		// are provided. To maintain backwards compatibility and avoid panic, it returns
+		// a nil value if an error happens.
+		return nil
+	}
+	return kh
+}
