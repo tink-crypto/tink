@@ -198,49 +198,73 @@ public class JwtHmacKeyManagerTest {
   @Test
   public void testHs256Template() throws Exception {
     KeyTemplate template = KeyTemplates.get("JWT_HS256");
-    assertThat(template.getTypeUrl()).isEqualTo(manager.getKeyType());
-    assertThat(template.getOutputPrefixType()).isEqualTo(KeyTemplate.OutputPrefixType.TINK);
-    JwtHmacKeyFormat format =
-        JwtHmacKeyFormat.parseFrom(template.getValue(), ExtensionRegistryLite.getEmptyRegistry());
-
-    assertThat(format.getKeySize()).isEqualTo(32);
-    assertThat(format.getAlgorithm()).isEqualTo(JwtHmacAlgorithm.HS256);
+    assertThat(template.toParameters())
+        .isEqualTo(
+            JwtHmacParameters.builder()
+                .setKeySizeBytes(32)
+                .setKidStrategy(JwtHmacParameters.KidStrategy.BASE64_ENCODED_KEY_ID)
+                .setAlgorithm(JwtHmacParameters.Algorithm.HS256)
+                .build());
   }
 
   @Test
   public void testHs384Template() throws Exception {
     KeyTemplate template = KeyTemplates.get("JWT_HS384");
-    assertThat(template.getTypeUrl()).isEqualTo(new JwtHmacKeyManager().getKeyType());
-    assertThat(template.getOutputPrefixType()).isEqualTo(KeyTemplate.OutputPrefixType.TINK);
-    JwtHmacKeyFormat format =
-        JwtHmacKeyFormat.parseFrom(template.getValue(), ExtensionRegistryLite.getEmptyRegistry());
-
-    assertThat(format.getKeySize()).isEqualTo(48);
-    assertThat(format.getAlgorithm()).isEqualTo(JwtHmacAlgorithm.HS384);
+    assertThat(template.toParameters())
+        .isEqualTo(
+            JwtHmacParameters.builder()
+                .setKeySizeBytes(48)
+                .setKidStrategy(JwtHmacParameters.KidStrategy.BASE64_ENCODED_KEY_ID)
+                .setAlgorithm(JwtHmacParameters.Algorithm.HS384)
+                .build());
   }
 
   @Test
   public void testHs512Template() throws Exception {
     KeyTemplate template = KeyTemplates.get("JWT_HS512");
-    assertThat(template.getTypeUrl()).isEqualTo(new JwtHmacKeyManager().getKeyType());
-    assertThat(template.getOutputPrefixType()).isEqualTo(KeyTemplate.OutputPrefixType.TINK);
-    JwtHmacKeyFormat format =
-        JwtHmacKeyFormat.parseFrom(template.getValue(), ExtensionRegistryLite.getEmptyRegistry());
-
-    assertThat(format.getKeySize()).isEqualTo(64);
-    assertThat(format.getAlgorithm()).isEqualTo(JwtHmacAlgorithm.HS512);
+    assertThat(template.toParameters())
+        .isEqualTo(
+            JwtHmacParameters.builder()
+                .setKeySizeBytes(64)
+                .setKidStrategy(JwtHmacParameters.KidStrategy.BASE64_ENCODED_KEY_ID)
+                .setAlgorithm(JwtHmacParameters.Algorithm.HS512)
+                .build());
   }
 
   @Test
-  public void testRawHs256Template() throws Exception {
+  public void testHs256RawTemplate() throws Exception {
     KeyTemplate template = KeyTemplates.get("JWT_HS256_RAW");
-    assertThat(template.getTypeUrl()).isEqualTo(manager.getKeyType());
-    assertThat(template.getOutputPrefixType()).isEqualTo(KeyTemplate.OutputPrefixType.RAW);
-    JwtHmacKeyFormat format =
-        JwtHmacKeyFormat.parseFrom(template.getValue(), ExtensionRegistryLite.getEmptyRegistry());
+    assertThat(template.toParameters())
+        .isEqualTo(
+            JwtHmacParameters.builder()
+                .setKeySizeBytes(32)
+                .setKidStrategy(JwtHmacParameters.KidStrategy.IGNORED)
+                .setAlgorithm(JwtHmacParameters.Algorithm.HS256)
+                .build());
+  }
 
-    assertThat(format.getKeySize()).isEqualTo(32);
-    assertThat(format.getAlgorithm()).isEqualTo(JwtHmacAlgorithm.HS256);
+  @Test
+  public void testHs384RawTemplate() throws Exception {
+    KeyTemplate template = KeyTemplates.get("JWT_HS384_RAW");
+    assertThat(template.toParameters())
+        .isEqualTo(
+            JwtHmacParameters.builder()
+                .setKeySizeBytes(48)
+                .setKidStrategy(JwtHmacParameters.KidStrategy.IGNORED)
+                .setAlgorithm(JwtHmacParameters.Algorithm.HS384)
+                .build());
+  }
+
+  @Test
+  public void testHs512RawTemplate() throws Exception {
+    KeyTemplate template = KeyTemplates.get("JWT_HS512_RAW");
+    assertThat(template.toParameters())
+        .isEqualTo(
+            JwtHmacParameters.builder()
+                .setKeySizeBytes(64)
+                .setKidStrategy(JwtHmacParameters.KidStrategy.IGNORED)
+                .setAlgorithm(JwtHmacParameters.Algorithm.HS512)
+                .build());
   }
 
   @Test

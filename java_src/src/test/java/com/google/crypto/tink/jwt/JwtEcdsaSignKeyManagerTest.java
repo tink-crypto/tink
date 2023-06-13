@@ -190,31 +190,70 @@ public class JwtEcdsaSignKeyManagerTest {
                 new ByteArrayInputStream(Random.randBytes(100))));
   }
 
-  private static void checkTemplate(KeyTemplate template, JwtEcdsaAlgorithm algorithm)
-      throws Exception {
-    assertThat(template.getTypeUrl()).isEqualTo(new JwtEcdsaSignKeyManager().getKeyType());
-    assertThat(template.getOutputPrefixType()).isEqualTo(KeyTemplate.OutputPrefixType.RAW);
-    JwtEcdsaKeyFormat format =
-        JwtEcdsaKeyFormat.parseFrom(template.getValue(), ExtensionRegistryLite.getEmptyRegistry());
-    assertThat(format.getAlgorithm()).isEqualTo(algorithm);
+  @Test
+  public void testJwtES256RawTemplate_ok() throws Exception {
+    KeyTemplate template = KeyTemplates.get("JWT_ES256_RAW");
+    assertThat(template.toParameters())
+        .isEqualTo(
+            JwtEcdsaParameters.builder()
+                .setKidStrategy(JwtEcdsaParameters.KidStrategy.IGNORED)
+                .setAlgorithm(JwtEcdsaParameters.Algorithm.ES256)
+                .build());
+  }
+
+  @Test
+  public void testJwtES384RawTemplate_ok() throws Exception {
+    KeyTemplate template = KeyTemplates.get("JWT_ES384_RAW");
+    assertThat(template.toParameters())
+        .isEqualTo(
+            JwtEcdsaParameters.builder()
+                .setKidStrategy(JwtEcdsaParameters.KidStrategy.IGNORED)
+                .setAlgorithm(JwtEcdsaParameters.Algorithm.ES384)
+                .build());
+  }
+
+  @Test
+  public void testJwtES512RawTemplate_ok() throws Exception {
+    KeyTemplate template = KeyTemplates.get("JWT_ES512_RAW");
+    assertThat(template.toParameters())
+        .isEqualTo(
+            JwtEcdsaParameters.builder()
+                .setKidStrategy(JwtEcdsaParameters.KidStrategy.IGNORED)
+                .setAlgorithm(JwtEcdsaParameters.Algorithm.ES512)
+                .build());
   }
 
   @Test
   public void testJwtES256Template_ok() throws Exception {
-    KeyTemplate template = KeyTemplates.get("JWT_ES256_RAW");
-    checkTemplate(template, JwtEcdsaAlgorithm.ES256);
+    KeyTemplate template = KeyTemplates.get("JWT_ES256");
+    assertThat(template.toParameters())
+        .isEqualTo(
+            JwtEcdsaParameters.builder()
+                .setKidStrategy(JwtEcdsaParameters.KidStrategy.BASE64_ENCODED_KEY_ID)
+                .setAlgorithm(JwtEcdsaParameters.Algorithm.ES256)
+                .build());
   }
 
   @Test
   public void testJwtES384Template_ok() throws Exception {
-    KeyTemplate template = KeyTemplates.get("JWT_ES384_RAW");
-    checkTemplate(template, JwtEcdsaAlgorithm.ES384);
+    KeyTemplate template = KeyTemplates.get("JWT_ES384");
+    assertThat(template.toParameters())
+        .isEqualTo(
+            JwtEcdsaParameters.builder()
+                .setKidStrategy(JwtEcdsaParameters.KidStrategy.BASE64_ENCODED_KEY_ID)
+                .setAlgorithm(JwtEcdsaParameters.Algorithm.ES384)
+                .build());
   }
 
   @Test
   public void testJwtES512Template_ok() throws Exception {
-    KeyTemplate template = KeyTemplates.get("JWT_ES512_RAW");
-    checkTemplate(template, JwtEcdsaAlgorithm.ES512);
+    KeyTemplate template = KeyTemplates.get("JWT_ES512");
+    assertThat(template.toParameters())
+        .isEqualTo(
+            JwtEcdsaParameters.builder()
+                .setKidStrategy(JwtEcdsaParameters.KidStrategy.BASE64_ENCODED_KEY_ID)
+                .setAlgorithm(JwtEcdsaParameters.Algorithm.ES512)
+                .build());
   }
 
   @Test
