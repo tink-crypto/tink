@@ -20,42 +20,55 @@ import (
 	"testing"
 )
 
-func TestExtractKey(t *testing.T) {
+func TestGetEndpointPaths(t *testing.T) {
 	for _, tc := range []struct {
 		desc string
 		uri  string
-		key  string
+		enc  string
+		dec  string
 		err  string
 	}{
 		{
 			desc: "simple",
-			uri:  "hcvault://vault.example.com/hi",
-			key:  "hi",
-		},
-		{
-			desc: "path",
-			uri:  "hcvault://vault.example.com/foo/bar/baz",
-			key:  "foo/bar/baz",
-		},
-		{
-			desc: "hyphen host",
-			uri:  "hcvault://vault-prd.example.com/coyote",
-			key:  "coyote",
-		},
-		{
-			desc: "empty string",
-			uri:  "hcvault://example.com/",
-			key:  "",
+			uri:  "hcvault://vault.example.com/transit/keys/foo",
+			enc:  "transit/encrypt/foo",
+			dec:  "transit/decrypt/foo",
 		},
 		{
 			desc: "escaped",
-			uri:  "hcvault://vault.example.com/this%2Band+that",
-			key:  "this%2Band+that",
+			uri:  "hcvault://vault.example.com/transit/keys/this%2Band+that",
+			enc:  "transit/encrypt/this%2Band+that",
+			dec:  "transit/decrypt/this%2Band+that",
 		},
 		{
-			desc: "no host",
-			uri:  "hcvault:///hi",
-			key:  "hi",
+			desc: "sub-path",
+			uri:  "hcvault://vault.example.com/teams/billing/something/transit/keys/pci-key",
+			enc:  "teams/billing/something/transit/encrypt/pci-key",
+			dec:  "teams/billing/something/transit/decrypt/pci-key",
+		},
+		{
+			desc: "transit-twice",
+			uri:  "hcvault://vault.example.com/transit/keys/something/transit/keys/my-key",
+			enc:  "transit/keys/something/transit/encrypt/my-key",
+			dec:  "transit/keys/something/transit/decrypt/my-key",
+		},
+		{
+			desc: "hyphen-host",
+			uri:  "hcvault://vault-prd.example.com/transit/keys/hi",
+			enc:  "transit/encrypt/hi",
+			dec:  "transit/decrypt/hi",
+		},
+		{
+			desc: "no-host",
+			uri:  "hcvault:///transit/keys/hi",
+			enc:  "transit/encrypt/hi",
+			dec:  "transit/decrypt/hi",
+		},
+		{
+			desc: "mount-not-named-transit",
+			uri:  "hcvault:///cipher/keys/hi",
+			enc:  "cipher/encrypt/hi",
+			dec:  "cipher/decrypt/hi",
 		},
 		{
 			desc: "http",
@@ -63,29 +76,43 @@ func TestExtractKey(t *testing.T) {
 			err:  "malformed keyURL",
 		},
 		{
-			desc: "no path",
+			desc: "no-path",
 			uri:  "hcvault://vault.com",
 			err:  "malformed keyURL",
 		},
 		{
-			desc: "slash only",
+			desc: "slash-only",
 			uri:  "hcvault://vault.com/",
-			key:  "",
+			err:  "malformed keyURL",
+		},
+		{
+			desc: "not-transit",
+			uri:  "hcvault://vault.example.com/foo/bar/baz",
+			err:  "malformed keyURL",
+		},
+		{
+			desc: "not-end-of-path",
+			uri:  "hcvault://vault.example.com/transit/keys/bar/baz",
+			err:  "malformed keyURL",
 		},
 	} {
 		t.Run(tc.desc, func(t *testing.T) {
-			key, err := extractKey(tc.uri)
+			encPath, decPath, err := getEndpointPaths(tc.uri)
 			if err == nil {
 				if tc.err != "" {
-					t.Fatalf("Missing error, want=%s", tc.err)
+					t.Errorf("getEndpointPaths(%q) err is nil, want %q", tc.uri, tc.err)
 				}
 			} else {
 				if tc.err != err.Error() {
-					t.Fatalf("Incorrect error, want=%s;got=%s", tc.err, err)
+					t.Errorf("getEndpointPaths(%q) err = %v; want %q", tc.uri, err, tc.err)
 				}
 			}
-			if key != tc.key {
-				t.Fatalf("Incorrect key, want=%s;got=%s", tc.key, key)
+
+			if encPath != tc.enc {
+				t.Errorf("getEndpointPaths(%q) encryptPath = %q, want %q", tc.uri, encPath, tc.enc)
+			}
+			if decPath != tc.dec {
+				t.Errorf("getEndpointPaths(%q) decryptPath = %q, want %q", tc.uri, decPath, tc.dec)
 			}
 		})
 	}
