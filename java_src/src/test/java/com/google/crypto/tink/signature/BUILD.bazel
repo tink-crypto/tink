@@ -604,3 +604,14 @@ java_test(
         "@maven//:junit_junit",
     ],
 )
+
+java_test(
+    name = "RsaSsaPssParametersTest",
+    size = "small",
+    srcs = ["RsaSsaPssParametersTest.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink/signature:rsa_ssa_pss_parameters",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)

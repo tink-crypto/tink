@@ -1083,3 +1083,23 @@ android_library(
         "@maven//:com_google_protobuf_protobuf_javalite",
     ],
 )
+
+java_library(
+    name = "rsa_ssa_pss_parameters",
+    srcs = ["RsaSsaPssParameters.java"],
+    deps = [
+        ":signature_parameters",
+        "@maven//:com_google_code_findbugs_jsr305",
+        "@maven//:com_google_errorprone_error_prone_annotations",
+    ],
+)
+
+android_library(
+    name = "rsa_ssa_pss_parameters-android",
+    srcs = ["RsaSsaPssParameters.java"],
+    deps = [
+        ":signature_parameters-android",
+        "@maven//:com_google_code_findbugs_jsr305",
+        "@maven//:com_google_errorprone_error_prone_annotations",
+    ],
+)
