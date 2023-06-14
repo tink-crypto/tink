@@ -77,7 +77,7 @@ TEST_P(AesGcmKeyTest, CreateSucceeds) {
   RestrictedData secret = RestrictedData(key_size);
   util::StatusOr<AesGcmKey> key = AesGcmKey::Create(
       *params, secret, test_case.id_requirement, GetPartialKeyAccess());
-  ASSERT_THAT(key.status(), IsOk());
+  ASSERT_THAT(key, IsOk());
 
   EXPECT_THAT(key->GetParameters(), Eq(*params));
   EXPECT_THAT(key->GetIdRequirement(), Eq(test_case.id_requirement));
@@ -155,7 +155,7 @@ TEST_P(AesGcmKeyTest, GetKeyBytes) {
 
   util::StatusOr<AesGcmKey> key = AesGcmKey::Create(
       *params, secret, test_case.id_requirement, GetPartialKeyAccess());
-  ASSERT_THAT(key.status(), IsOk());
+  ASSERT_THAT(key, IsOk());
 
   EXPECT_THAT(key->GetKeyBytes(GetPartialKeyAccess()), IsOkAndHolds(secret));
 }
@@ -214,12 +214,12 @@ TEST(AesGcmKeyTest, DifferentVariantNotEqual) {
   util::StatusOr<AesGcmKey> key =
       AesGcmKey::Create(*crunchy_params, secret, /*id_requirement=*/0x01020304,
                         GetPartialKeyAccess());
-  ASSERT_THAT(key.status(), IsOk());
+  ASSERT_THAT(key, IsOk());
 
   util::StatusOr<AesGcmKey> other_key =
       AesGcmKey::Create(*tink_params, secret, /*id_requirement=*/0x01020304,
                         GetPartialKeyAccess());
-  ASSERT_THAT(other_key.status(), IsOk());
+  ASSERT_THAT(other_key, IsOk());
 
   EXPECT_TRUE(*key != *other_key);
   EXPECT_TRUE(*other_key != *key);
@@ -242,11 +242,11 @@ TEST(AesGcmKeyTest, DifferentSecretDataNotEqual) {
 
   util::StatusOr<AesGcmKey> key = AesGcmKey::Create(
       *params, secret1, /*id_requirement=*/0x01020304, GetPartialKeyAccess());
-  ASSERT_THAT(key.status(), IsOk());
+  ASSERT_THAT(key, IsOk());
 
   util::StatusOr<AesGcmKey> other_key = AesGcmKey::Create(
       *params, secret2, /*id_requirement=*/0x01020304, GetPartialKeyAccess());
-  ASSERT_THAT(other_key.status(), IsOk());
+  ASSERT_THAT(other_key, IsOk());
 
   EXPECT_TRUE(*key != *other_key);
   EXPECT_TRUE(*other_key != *key);
@@ -268,11 +268,11 @@ TEST(AesGcmKeyTest, DifferentIdRequirementNotEqual) {
 
   util::StatusOr<AesGcmKey> key = AesGcmKey::Create(
       *params, secret, /*id_requirement=*/0x01020304, GetPartialKeyAccess());
-  ASSERT_THAT(key.status(), IsOk());
+  ASSERT_THAT(key, IsOk());
 
   util::StatusOr<AesGcmKey> other_key = AesGcmKey::Create(
       *params, secret, /*id_requirement=*/0x02030405, GetPartialKeyAccess());
-  ASSERT_THAT(other_key.status(), IsOk());
+  ASSERT_THAT(other_key, IsOk());
 
   EXPECT_TRUE(*key != *other_key);
   EXPECT_TRUE(*other_key != *key);
