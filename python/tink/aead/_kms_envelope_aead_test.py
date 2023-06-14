@@ -14,7 +14,9 @@
 """Tests for tink.python.tink.aead.aead."""
 
 import struct
+
 from absl.testing import absltest
+from absl.testing import parameterized
 
 from tink.proto import aes_gcm_pb2
 import tink
@@ -27,17 +29,31 @@ def setUpModule():
   aead.register()
 
 
-class KmsEnvelopeAeadTest(absltest.TestCase):
+class KmsEnvelopeAeadTest(parameterized.TestCase):
 
-  def test_encrypt_decrypt(self):
-    key_template = aead.aead_key_templates.AES256_GCM
-    keyset_handle = tink.new_keyset_handle(key_template)
+  @parameterized.parameters([
+      aead.aead_key_templates.AES128_EAX,
+      aead.aead_key_templates.AES256_EAX,
+      aead.aead_key_templates.AES128_GCM,
+      aead.aead_key_templates.AES256_GCM,
+      aead.aead_key_templates.AES128_GCM_SIV,
+      aead.aead_key_templates.AES256_GCM_SIV,
+      aead.aead_key_templates.AES128_CTR_HMAC_SHA256,
+      aead.aead_key_templates.AES256_CTR_HMAC_SHA256,
+      aead.aead_key_templates.XCHACHA20_POLY1305,
+  ])
+  def test_encrypt_decrypt(self, dek_template):
+    keyset_handle = tink.new_keyset_handle(dek_template)
     remote_aead = keyset_handle.primitive(aead.Aead)
-    env_aead = aead.KmsEnvelopeAead(key_template, remote_aead)
+    env_aead = aead.KmsEnvelopeAead(dek_template, remote_aead)
 
-    plaintext = b'helloworld'
-    ciphertext = env_aead.encrypt(plaintext, b'')
-    self.assertEqual(plaintext, env_aead.decrypt(ciphertext, b''))
+    plaintext = b'plaintext'
+    associated_data = b'associated_data'
+    ciphertext = env_aead.encrypt(plaintext, associated_data)
+    self.assertEqual(plaintext, env_aead.decrypt(ciphertext, associated_data))
+
+    with self.assertRaises(core.TinkError):
+      _ = env_aead.decrypt(ciphertext, b'invalid_associated_data')
 
   def test_encrypt_decrypt_missing_ad(self):
     key_template = aead.aead_key_templates.AES256_GCM
@@ -48,7 +64,7 @@ class KmsEnvelopeAeadTest(absltest.TestCase):
     plaintext = b'helloworld'
     ciphertext = env_aead.encrypt(plaintext, b'envelope_ad')
     with self.assertRaises(core.TinkError):
-      plaintext = env_aead.decrypt(ciphertext, b'')
+      _ = env_aead.decrypt(ciphertext, b'')
 
   def test_invalid_dek_template_fails(self):
     key_template = aead.aead_key_templates.AES256_GCM
@@ -71,7 +87,7 @@ class KmsEnvelopeAeadTest(absltest.TestCase):
     corrupted_ciphertext = bytes(ciphertext)
 
     with self.assertRaises(core.TinkError):
-      plaintext = env_aead.decrypt(corrupted_ciphertext, b'some ad')
+      _ = env_aead.decrypt(corrupted_ciphertext, b'some ad')
 
   def test_corrupted_dek(self):
     key_template = aead.aead_key_templates.AES256_GCM
@@ -85,7 +101,7 @@ class KmsEnvelopeAeadTest(absltest.TestCase):
     corrupted_ciphertext = bytes(ciphertext)
 
     with self.assertRaises(core.TinkError):
-      plaintext = env_aead.decrypt(corrupted_ciphertext, b'some ad')
+      _ = env_aead.decrypt(corrupted_ciphertext, b'some ad')
 
   def test_ciphertext_too_short(self):
     key_template = aead.aead_key_templates.AES256_GCM
@@ -94,7 +110,7 @@ class KmsEnvelopeAeadTest(absltest.TestCase):
     env_aead = aead.KmsEnvelopeAead(key_template, remote_aead)
 
     with self.assertRaises(core.TinkError):
-      env_aead.decrypt(b'foo', b'some ad')
+      _ = env_aead.decrypt(b'foo', b'some ad')
 
   def test_malformed_dek_length(self):
     key_template = aead.aead_key_templates.AES256_GCM
@@ -108,15 +124,15 @@ class KmsEnvelopeAeadTest(absltest.TestCase):
     corrupted_ciphertext = bytes(ciphertext)
 
     with self.assertRaises(core.TinkError):
-      plaintext = env_aead.decrypt(corrupted_ciphertext, b'some ad')
+      _ = env_aead.decrypt(corrupted_ciphertext, b'some ad')
 
     ciphertext[0:3] = [0, 0, 0, 0]
     corrupted_ciphertext = bytes(ciphertext)
 
     with self.assertRaises(core.TinkError):
-      plaintext = env_aead.decrypt(corrupted_ciphertext, b'some ad')
+      _ = env_aead.decrypt(corrupted_ciphertext, b'some ad')
 
-  def test_dek_extraction(self):
+  def test_ciphertext_wire_format(self):
     key_template = aead.aead_key_templates.AES256_GCM
     keyset_handle = tink.new_keyset_handle(key_template)
     remote_aead = keyset_handle.primitive(aead.Aead)
@@ -125,7 +141,8 @@ class KmsEnvelopeAeadTest(absltest.TestCase):
     plaintext = b'helloworld'
     ciphertext = bytearray(env_aead.encrypt(plaintext, b'some ad'))
 
-    # Decrypt DEK
+    # test that ciphertext has the wire format described here:
+    # https://developers.google.com/tink/wire-format#envelope_encryption
     dek_len = struct.unpack('>I',
                             ciphertext[0:aead.KmsEnvelopeAead.DEK_LEN_BYTES])[0]
     encrypted_dek_bytes = bytes(ciphertext[
@@ -135,8 +152,8 @@ class KmsEnvelopeAeadTest(absltest.TestCase):
 
     # Try to deserialize key
     key = aes_gcm_pb2.AesGcmKey.FromString(dek_bytes)
-
     self.assertLen(key.key_value, 32)
+
 
 if __name__ == '__main__':
   absltest.main()
