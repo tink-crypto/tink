@@ -118,6 +118,16 @@ tink_cc_library(
     tink::core::key
 )
 
+tink_cc_library(
+  NAME aes_siv_parameters
+  SRCS
+    aes_siv_parameters.cc
+    aes_siv_parameters.h
+  DEPS
+    tink::daead::deterministic_aead_parameters
+    tink::util::statusor
+)
+
 # tests
 
 tink_cc_test(
@@ -217,5 +227,16 @@ tink_cc_test(
     tink::daead::failing_daead
     gmock
     absl::status
+    tink::util::test_matchers
+)
+
+tink_cc_test(
+  NAME aes_siv_parameters_test
+  SRCS
+    aes_siv_parameters_test.cc
+  DEPS
+    tink::daead::aes_siv_parameters
+    gmock
+    tink::util::statusor
     tink::util::test_matchers
 )
