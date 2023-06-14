@@ -24,7 +24,9 @@
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include "tink/cleartext_keyset_handle.h"
 #include "tink/crypto_format.h"
+#include "tink/keyderivation/keyset_deriver.h"
 #include "tink/mac.h"
 #include "tink/util/test_matchers.h"
 #include "tink/util/test_util.h"
@@ -32,9 +34,12 @@
 
 using ::crypto::tink::test::DummyMac;
 using ::crypto::tink::test::IsOk;
+using ::google::crypto::tink::Keyset;
 using ::google::crypto::tink::KeysetInfo;
 using ::google::crypto::tink::KeyStatusType;
 using ::google::crypto::tink::OutputPrefixType;
+using ::testing::Eq;
+using ::testing::SizeIs;
 using ::testing::UnorderedElementsAreArray;
 
 namespace crypto {
@@ -432,6 +437,63 @@ TEST_F(PrimitiveSetTest, GetAll) {
        /*type_url=*/"type.googleapis.com/google.crypto.tink.AesCmacKey"}};
 
   EXPECT_THAT(mac_id_and_type, UnorderedElementsAreArray(expected_result));
+}
+
+class FakeDeriver : public KeysetDeriver {
+ public:
+  explicit FakeDeriver() = default;
+  crypto::tink::util::StatusOr<std::unique_ptr<KeysetHandle>> DeriveKeyset(
+      absl::string_view salt) const override {
+    Keyset keyset;
+    return CleartextKeysetHandle::GetKeysetHandle(keyset);
+  }
+};
+
+TEST_F(PrimitiveSetTest, GetAllInKeysetOrder) {
+  auto pset = absl::make_unique<PrimitiveSet<KeysetDeriver>>();
+  std::vector<KeysetInfo::KeyInfo> key_infos;
+
+  KeysetInfo::KeyInfo key_info;
+  key_info.set_key_id(1010101);
+  key_info.set_status(KeyStatusType::ENABLED);
+  key_info.set_output_prefix_type(OutputPrefixType::RAW);
+  key_info.set_type_url(
+      "type.googleapis.com/google.crypto.tink.PrfBasedDeriverKey");
+  ASSERT_THAT(pset->AddPrimitive(absl::make_unique<FakeDeriver>(), key_info),
+              IsOk());
+  key_infos.push_back(key_info);
+
+  key_info.set_key_id(2020202);
+  key_info.set_status(KeyStatusType::ENABLED);
+  key_info.set_output_prefix_type(OutputPrefixType::LEGACY);
+  key_info.set_type_url(
+      "type.googleapis.com/google.crypto.tink.PrfBasedDeriverKey");
+  ASSERT_THAT(pset->AddPrimitive(absl::make_unique<FakeDeriver>(), key_info),
+              IsOk());
+  key_infos.push_back(key_info);
+
+  key_info.set_key_id(3030303);
+  key_info.set_status(KeyStatusType::ENABLED);
+  key_info.set_output_prefix_type(OutputPrefixType::TINK);
+  key_info.set_type_url(
+      "type.googleapis.com/google.crypto.tink.PrfBasedDeriverKey");
+  ASSERT_THAT(pset->AddPrimitive(absl::make_unique<FakeDeriver>(), key_info),
+              IsOk());
+  key_infos.push_back(key_info);
+
+  std::vector<PrimitiveSet<KeysetDeriver>::Entry<KeysetDeriver>*> entries =
+      pset->get_all_in_keyset_order();
+  ASSERT_THAT(entries, SizeIs(key_infos.size()));
+
+  for (int i = 0; i < entries.size(); i++) {
+    EXPECT_THAT(entries[i]->get_identifier(),
+                Eq(*CryptoFormat::GetOutputPrefix(key_infos[i])));
+    EXPECT_THAT(entries[i]->get_status(), Eq(KeyStatusType::ENABLED));
+    EXPECT_THAT(entries[i]->get_key_id(), Eq(key_infos[i].key_id()));
+    EXPECT_THAT(entries[i]->get_output_prefix_type(),
+                Eq(key_infos[i].output_prefix_type()));
+    EXPECT_THAT(entries[i]->get_key_type_url(), Eq(key_infos[i].type_url()));
+  }
 }
 
 TEST_F(PrimitiveSetTest, LegacyConcurrentOperations) {

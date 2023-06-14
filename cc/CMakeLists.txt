@@ -6,6 +6,7 @@ add_subdirectory(internal)
 add_subdirectory(mac)
 add_subdirectory(monitoring)
 add_subdirectory(jwt)
+add_subdirectory(keyderivation)
 add_subdirectory(prf)
 add_subdirectory(signature)
 add_subdirectory(streamingaead)
@@ -389,10 +390,8 @@ tink_cc_library(
     absl::memory
     absl::status
     absl::synchronization
-    tink::util::constants
     tink::util::errors
     tink::util::statusor
-    tink::proto::prf_based_deriver_cc_proto
     tink::proto::tink_cc_proto
 )
 
@@ -889,10 +888,12 @@ tink_cc_test(
   SRCS
     core/primitive_set_test.cc
   DEPS
+    tink::core::cleartext_keyset_handle
     tink::core::crypto_format
     tink::core::mac
     tink::core::primitive_set
     gmock
+    tink::keyderivation::keyset_deriver
     tink::util::test_matchers
     tink::util::test_util
     tink::proto::tink_cc_proto

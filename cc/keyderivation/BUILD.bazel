@@ -94,7 +94,6 @@ cc_library(
         "//:cleartext_keyset_handle",
         "//:primitive_set",
         "//:primitive_wrapper",
-        "//keyderivation/internal:keyset_deriver_set_wrapper_impl",
         "//proto:tink_cc_proto",
         "@com_google_absl//absl/status",
     ],
@@ -104,8 +103,10 @@ cc_test(
     name = "keyset_deriver_wrapper_test",
     srcs = ["keyset_deriver_wrapper_test.cc"],
     deps = [
+        ":keyset_deriver",
         ":keyset_deriver_wrapper",
         "//:cleartext_keyset_handle",
+        "//:primitive_set",
         "//proto:tink_cc_proto",
         "//util:test_matchers",
         "@com_google_absl//absl/status",

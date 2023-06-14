@@ -21,7 +21,6 @@
 
 #include "absl/status/status.h"
 #include "tink/cleartext_keyset_handle.h"
-#include "tink/keyderivation/internal/keyset_deriver_set_wrapper_impl.h"
 #include "proto/tink.pb.h"
 
 namespace crypto {
@@ -76,9 +75,7 @@ crypto::tink::util::StatusOr<KeyData> DeriveAndGetKeyData(
 crypto::tink::util::StatusOr<std::unique_ptr<KeysetHandle>>
 KeysetDeriverSetWrapper::DeriveKeyset(absl::string_view salt) const {
   Keyset keyset;
-  for (const auto* entry :
-       internal::KeysetDeriverSetWrapperImpl::get_all_in_keyset_order(
-           *deriver_set_)) {
+  for (const auto* entry : deriver_set_->get_all_in_keyset_order()) {
     Keyset::Key* key = keyset.add_key();
 
     crypto::tink::util::StatusOr<KeyData> key_data_or =

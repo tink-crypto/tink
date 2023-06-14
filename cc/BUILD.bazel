@@ -414,9 +414,7 @@ cc_library(
     include_prefix = "tink",
     deps = [
         ":crypto_format",
-        "//proto:prf_based_deriver_cc_proto",
         "//proto:tink_cc_proto",
-        "//util:constants",
         "//util:errors",
         "//util:statusor",
         "@com_google_absl//absl/base:core_headers",
@@ -951,9 +949,11 @@ cc_test(
     size = "small",
     srcs = ["core/primitive_set_test.cc"],
     deps = [
+        ":cleartext_keyset_handle",
         ":crypto_format",
         ":mac",
         ":primitive_set",
+        "//keyderivation:keyset_deriver",
         "//proto:tink_cc_proto",
         "//util:test_matchers",
         "//util:test_util",

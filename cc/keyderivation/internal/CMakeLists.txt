@@ -1,29 +1,6 @@
 tink_module(keyderivation::internal)
 
 tink_cc_library(
-  NAME keyset_deriver_set_wrapper_impl
-  SRCS
-    keyset_deriver_set_wrapper_impl.h
-  DEPS
-    tink::core::primitive_set
-    tink::keyderivation::keyset_deriver
-)
-
-tink_cc_test(
-  NAME keyset_deriver_set_wrapper_impl_test
-  SRCS
-    keyset_deriver_set_wrapper_impl_test.cc
-  DEPS
-    tink::keyderivation::internal::keyset_deriver_set_wrapper_impl
-    gmock
-    tink::core::cleartext_keyset_handle
-    tink::core::crypto_format
-    tink::core::primitive_set
-    tink::keyderivation::keyset_deriver
-    tink::util::test_matchers
-)
-
-tink_cc_library(
   NAME prf_based_deriver
   SRCS
     prf_based_deriver.cc

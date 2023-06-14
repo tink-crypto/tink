@@ -90,7 +90,6 @@ tink_cc_library(
     tink::core::cleartext_keyset_handle
     tink::core::primitive_set
     tink::core::primitive_wrapper
-    tink::keyderivation::internal::keyset_deriver_set_wrapper_impl
     tink::proto::tink_cc_proto
 )
 
@@ -99,10 +98,12 @@ tink_cc_test(
   SRCS
     keyset_deriver_wrapper_test.cc
   DEPS
+    tink::keyderivation::keyset_deriver
     tink::keyderivation::keyset_deriver_wrapper
     gmock
     absl::status
     tink::core::cleartext_keyset_handle
+    tink::core::primitive_set
     tink::util::test_matchers
     tink::proto::tink_cc_proto
 )

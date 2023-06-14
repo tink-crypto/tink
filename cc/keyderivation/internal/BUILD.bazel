@@ -3,30 +3,6 @@ package(default_visibility = ["//:__subpackages__"])
 licenses(["notice"])
 
 cc_library(
-    name = "keyset_deriver_set_wrapper_impl",
-    hdrs = ["keyset_deriver_set_wrapper_impl.h"],
-    include_prefix = "tink/keyderivation/internal",
-    deps = [
-        "//:primitive_set",
-        "//keyderivation:keyset_deriver",
-    ],
-)
-
-cc_test(
-    name = "keyset_deriver_set_wrapper_impl_test",
-    srcs = ["keyset_deriver_set_wrapper_impl_test.cc"],
-    deps = [
-        ":keyset_deriver_set_wrapper_impl",
-        "//:cleartext_keyset_handle",
-        "//:crypto_format",
-        "//:primitive_set",
-        "//keyderivation:keyset_deriver",
-        "//util:test_matchers",
-        "@com_google_googletest//:gtest_main",
-    ],
-)
-
-cc_library(
     name = "prf_based_deriver",
     srcs = ["prf_based_deriver.cc"],
     hdrs = ["prf_based_deriver.h"],

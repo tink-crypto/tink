@@ -19,11 +19,14 @@
 #include <memory>
 #include <string>
 #include <utility>
+#include <vector>
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "absl/status/status.h"
 #include "tink/cleartext_keyset_handle.h"
+#include "tink/keyderivation/keyset_deriver.h"
+#include "tink/primitive_set.h"
 #include "tink/util/test_matchers.h"
 #include "proto/tink.pb.h"
 
@@ -45,7 +48,7 @@ using ::testing::HasSubstr;
 class DummyDeriver : public KeysetDeriver {
  public:
   explicit DummyDeriver(absl::string_view name) : name_(name) {}
-  crypto::tink::util::StatusOr<std::unique_ptr<KeysetHandle>> DeriveKeyset(
+  util::StatusOr<std::unique_ptr<KeysetHandle>> DeriveKeyset(
       absl::string_view salt) const override {
     Keyset::Key key;
     key.mutable_key_data()->set_type_url(
@@ -129,7 +132,8 @@ TEST(KeysetDeriverWrapperTest, WrapSingle) {
 }
 
 TEST(KeysetDeriverWrapperTest, WrapMultiple) {
-  auto deriver_set = absl::make_unique<PrimitiveSet<KeysetDeriver>>();
+  auto pset = absl::make_unique<PrimitiveSet<KeysetDeriver>>();
+  std::vector<KeysetInfo::KeyInfo> key_infos;
 
   KeysetInfo::KeyInfo key_info;
   key_info.set_key_id(1010101);
@@ -137,54 +141,55 @@ TEST(KeysetDeriverWrapperTest, WrapMultiple) {
   key_info.set_output_prefix_type(OutputPrefixType::RAW);
   key_info.set_type_url(
       "type.googleapis.com/google.crypto.tink.PrfBasedDeriverKey");
-  EXPECT_THAT(
-      deriver_set->AddPrimitive(absl::make_unique<DummyDeriver>("k1"), key_info)
+  ASSERT_THAT(
+      pset->AddPrimitive(absl::make_unique<DummyDeriver>("k1"), key_info)
           .status(),
       IsOk());
+  key_infos.push_back(key_info);
 
   key_info.set_key_id(2020202);
   key_info.set_status(KeyStatusType::ENABLED);
   key_info.set_output_prefix_type(OutputPrefixType::LEGACY);
   key_info.set_type_url(
       "type.googleapis.com/google.crypto.tink.PrfBasedDeriverKey");
-  auto entry_or = deriver_set->AddPrimitive(
-      absl::make_unique<DummyDeriver>("k2"), key_info);
-  ASSERT_THAT(entry_or, IsOk());
-  EXPECT_THAT(deriver_set->set_primary(entry_or.value()), IsOk());
+  util::StatusOr<PrimitiveSet<KeysetDeriver>::Entry<KeysetDeriver>*> entry =
+      pset->AddPrimitive(absl::make_unique<DummyDeriver>("k2"), key_info);
+  ASSERT_THAT(entry, IsOk());
+  ASSERT_THAT(pset->set_primary(*entry), IsOk());
+  key_infos.push_back(key_info);
 
   key_info.set_key_id(3030303);
   key_info.set_status(KeyStatusType::ENABLED);
   key_info.set_output_prefix_type(OutputPrefixType::TINK);
   key_info.set_type_url(
       "type.googleapis.com/google.crypto.tink.PrfBasedDeriverKey");
-  entry_or = deriver_set->AddPrimitive(absl::make_unique<DummyDeriver>("k3"),
-                                       key_info);
+  ASSERT_THAT(
+      pset->AddPrimitive(absl::make_unique<DummyDeriver>("k3"), key_info),
+      IsOk());
+  key_infos.push_back(key_info);
 
-  auto wrapper_deriver_or = KeysetDeriverWrapper().Wrap(std::move(deriver_set));
-  ASSERT_THAT(wrapper_deriver_or, IsOk());
+  util::StatusOr<std::unique_ptr<KeysetDeriver>> wrapper_deriver =
+      KeysetDeriverWrapper().Wrap(std::move(pset));
+  ASSERT_THAT(wrapper_deriver, IsOk());
 
-  auto derived_keyset_or = wrapper_deriver_or.value()->DeriveKeyset("salt");
-  ASSERT_THAT(derived_keyset_or, IsOk());
-
-  Keyset keyset = CleartextKeysetHandle::GetKeyset(*derived_keyset_or.value());
+  util::StatusOr<std::unique_ptr<KeysetHandle>> derived_keyset =
+      (*wrapper_deriver)->DeriveKeyset("salt");
+  ASSERT_THAT(derived_keyset, IsOk());
+  Keyset keyset = CleartextKeysetHandle::GetKeyset(**derived_keyset);
 
   EXPECT_THAT(keyset.primary_key_id(), Eq(2020202));
   ASSERT_THAT(keyset.key_size(), Eq(3));
 
-  EXPECT_THAT(keyset.key(0).key_data().type_url(), Eq("2:k1salt"));
-  EXPECT_THAT(keyset.key(0).status(), Eq(KeyStatusType::ENABLED));
-  EXPECT_THAT(keyset.key(0).key_id(), Eq(1010101));
-  EXPECT_THAT(keyset.key(0).output_prefix_type(), Eq(OutputPrefixType::RAW));
+  for (int i = 0; i < keyset.key().size(); i++) {
+    std::string type_url = absl::StrCat("2:k", i + 1, "salt");
+    EXPECT_THAT(keyset.key(i).key_data().type_url(), Eq(type_url));
 
-  EXPECT_THAT(keyset.key(1).key_data().type_url(), Eq("2:k2salt"));
-  EXPECT_THAT(keyset.key(1).status(), Eq(KeyStatusType::ENABLED));
-  EXPECT_THAT(keyset.key(1).key_id(), Eq(2020202));
-  EXPECT_THAT(keyset.key(1).output_prefix_type(), Eq(OutputPrefixType::LEGACY));
-
-  EXPECT_THAT(keyset.key(2).key_data().type_url(), Eq("2:k3salt"));
-  EXPECT_THAT(keyset.key(2).status(), Eq(KeyStatusType::ENABLED));
-  EXPECT_THAT(keyset.key(2).key_id(), Eq(3030303));
-  EXPECT_THAT(keyset.key(2).output_prefix_type(), Eq(OutputPrefixType::TINK));
+    Keyset::Key key = keyset.key(i);
+    key_info = key_infos[i];
+    EXPECT_THAT(key.status(), Eq(key_info.status()));
+    EXPECT_THAT(key.key_id(), Eq(key_info.key_id()));
+    EXPECT_THAT(key.output_prefix_type(), Eq(key_info.output_prefix_type()));
+  }
 }
 
 }  // namespace
