@@ -41,16 +41,4 @@ echo "Using go binary from $(which go): $(go version)"
 # TODO(b/155225382): Avoid modifying the sytem Python installation.
 pip3 install --user protobuf
 
-# Run manual tests which rely on key material injected into the Kokoro
-# environement.
-MANUAL_TARGETS=()
-if [[ "${IS_KOKORO}" == "true" ]] ; then
-  MANUAL_TARGETS+=(
-    "//tinkey/src/test/java/com/google/crypto/tink/tinkey:CreateKeysetCommandTest"
-    "//tinkey/src/test/java/com/google/crypto/tink/tinkey:CreatePublicKeysetCommandTest"
-    "//tinkey/src/test/java/com/google/crypto/tink/tinkey:RotateKeysetCommandTest"
-  )
-fi
-readonly MANUAL_TARGETS
-
-./kokoro/testutils/run_bazel_tests.sh tools "${MANUAL_TARGETS}"
+./kokoro/testutils/run_bazel_tests.sh tools

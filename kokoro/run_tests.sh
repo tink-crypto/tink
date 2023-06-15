@@ -57,16 +57,7 @@ run_py_tests() {
 
 run_tools_tests() {
   use_bazel "$(cat tools/.bazelversion)"
-  local -a MANUAL_TOOLS_TARGETS
-  if [[ "${IS_KOKORO}" == "true" ]]; then
-    MANUAL_TOOLS_TARGETS+=(
-      "//tinkey/src/test/java/com/google/crypto/tink/tinkey:CreateKeysetCommandTest"
-      "//tinkey/src/test/java/com/google/crypto/tink/tinkey:CreatePublicKeysetCommandTest"
-      "//tinkey/src/test/java/com/google/crypto/tink/tinkey:RotateKeysetCommandTest"
-    )
-  fi
-  readonly MANUAL_TOOLS_TARGETS
-  ./kokoro/testutils/run_bazel_tests.sh "tools" "${MANUAL_TOOLS_TARGETS[@]}"
+  ./kokoro/testutils/run_bazel_tests.sh "tools"
 }
 
 run_java_tests() {
