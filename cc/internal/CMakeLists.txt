@@ -1031,6 +1031,7 @@ tink_cc_library(
   SRCS
     configuration_impl.h
   DEPS
+    tink::internal::key_gen_configuration_impl
     tink::internal::key_type_info_store
     tink::internal::keyset_wrapper_store
     tink::core::configuration
@@ -1124,4 +1125,27 @@ tink_cc_test(
     tink::util::test_matchers
     tink::util::test_util
     tink::proto::aes_gcm_cc_proto
+)
+
+tink_cc_library(
+  NAME key_gen_configuration_impl
+  SRCS
+    key_gen_configuration_impl.h
+  DEPS
+    tink::internal::key_type_info_store
+    tink::core::key_gen_configuration
+)
+
+tink_cc_test(
+  NAME key_gen_configuration_impl_test
+  SRCS
+    key_gen_configuration_impl_test.cc
+  DEPS
+    tink::internal::key_gen_configuration_impl
+    gmock
+    tink::core::key_gen_configuration
+    tink::util::test_matchers
+    tink::util::test_util
+    tink::proto::aes_gcm_cc_proto
+    tink::proto::rsa_ssa_pss_cc_proto
 )
