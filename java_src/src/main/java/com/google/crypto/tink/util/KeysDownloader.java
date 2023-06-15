@@ -38,7 +38,6 @@ import java.util.concurrent.Executors;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.annotation.concurrent.GuardedBy;
-import org.joda.time.Instant;
 
 /**
  * Thread-safe downloader.
@@ -157,7 +156,7 @@ public class KeysDownloader {
    * <p>Visible so tests can override it in subclasses.
    */
   long getCurrentTimeInMillis() {
-    return Instant.now().getMillis();
+    return System.currentTimeMillis();
   }
 
   @GuardedBy("fetchDataLock")

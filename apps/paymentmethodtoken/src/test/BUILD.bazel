@@ -26,7 +26,6 @@ java_library(
         "@maven//:com_google_code_gson_gson",
         "@maven//:com_google_http_client_google_http_client",
         "@maven//:com_google_truth_truth",
-        "@maven//:joda_time_joda_time",
         "@maven//:junit_junit",
         "@tink_java//src/main/java/com/google/crypto/tink:hybrid_decrypt",
         "@tink_java//src/main/java/com/google/crypto/tink:hybrid_encrypt",

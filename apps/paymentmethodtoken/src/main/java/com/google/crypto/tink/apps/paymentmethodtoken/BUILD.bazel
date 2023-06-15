@@ -93,7 +93,6 @@ java_library(
         ":payment_method_token_util",
         "@maven//:com_google_code_gson_gson",
         "@maven//:com_google_errorprone_error_prone_annotations",
-        "@maven//:joda_time_joda_time",
         "@tink_java//src/main/java/com/google/crypto/tink:hybrid_decrypt",
         "@tink_java//src/main/java/com/google/crypto/tink/subtle:base64",
         "@tink_java//src/main/java/com/google/crypto/tink/subtle:ecdsa_verify_jce",

@@ -26,8 +26,6 @@ import java.security.KeyPairGenerator;
 import java.security.interfaces.ECPrivateKey;
 import java.security.interfaces.ECPublicKey;
 import java.security.spec.ECParameterSpec;
-import org.joda.time.Duration;
-import org.joda.time.Instant;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -62,7 +60,7 @@ public class PaymentMethodTokenSenderTest {
           + "      \"keyValue\": \"MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE/1+3HBVSbdv+j7NaArdgMyoSAM"
           + "43yRydzqdg1TxodSzA96Dj4Mc1EiKroxxunavVIvdxGnJeFViTzFvzFRxyCw==\",\n"
           + "      \"keyExpiration\": \""
-          + Instant.now().plus(Duration.standardDays(1)).getMillis()
+          + (System.currentTimeMillis() + 24 * 60 * 60 * 1000)
           + "\",\n"
           + "      \"protocolVersion\": \"ECv2\"\n"
           + "    },\n"
@@ -70,7 +68,7 @@ public class PaymentMethodTokenSenderTest {
           + "      \"keyValue\": \"MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAENXvYqxD5WayKYhuXQevdGdLA8i"
           + "fV4LsRS2uKvFo8wwyiwgQHB9DiKzG6T/P1Fu9Bl7zWy/se5Dy4wk1mJoPuxg==\",\n"
           + "      \"keyExpiration\": \""
-          + Instant.now().plus(Duration.standardDays(1)).getMillis()
+          + (System.currentTimeMillis() + 24 * 60 * 60 * 1000)
           + "\",\n"
           + "      \"protocolVersion\": \"ECv2SigningOnly\"\n"
           + "    }\n"
@@ -257,7 +255,7 @@ public class PaymentMethodTokenSenderTest {
                     .addSenderSigningKey(GOOGLE_SIGNING_EC_V2_PRIVATE_KEY_PKCS8_BASE64)
                     .senderIntermediateSigningKey(
                         GOOGLE_SIGNING_EC_V2_INTERMEDIATE_PUBLIC_KEY_X509_BASE64)
-                    .expiration(Instant.now().plus(Duration.standardDays(1)).getMillis())
+                    .expiration(System.currentTimeMillis() + 24 * 60 * 60 * 1000)
                     .build()
                     .create())
             .recipientId(RECIPIENT_ID)
@@ -290,7 +288,7 @@ public class PaymentMethodTokenSenderTest {
                     .addSenderSigningKey(GOOGLE_SIGNING_EC_V2_SIGNING_ONLY_PRIVATE_KEY_PKCS8_BASE64)
                     .senderIntermediateSigningKey(
                         GOOGLE_SIGNING_EC_V2_SIGNING_ONLY_INTERMEDIATE_PUBLIC_KEY_X509_BASE64)
-                    .expiration(Instant.now().plus(Duration.standardDays(1)).getMillis())
+                    .expiration(System.currentTimeMillis() + 24 * 60 * 60 * 1000)
                     .build()
                     .create())
             .recipientId(RECIPIENT_ID)
@@ -461,7 +459,7 @@ public class PaymentMethodTokenSenderTest {
                   .addSenderSigningKey(GOOGLE_SIGNING_EC_V2_SIGNING_ONLY_PRIVATE_KEY_PKCS8_BASE64)
                   .senderIntermediateSigningKey(
                       GOOGLE_SIGNING_EC_V2_SIGNING_ONLY_INTERMEDIATE_PUBLIC_KEY_X509_BASE64)
-                  .expiration(Instant.now().plus(Duration.standardDays(1)).getMillis())
+                  .expiration(System.currentTimeMillis() + 24 * 60 * 60 * 1000)
                   .build()
                   .create())
           .recipientId(RECIPIENT_ID)
@@ -570,7 +568,7 @@ public class PaymentMethodTokenSenderTest {
         .protocolVersion(PaymentMethodTokenConstants.PROTOCOL_VERSION_EC_V2)
         .addSenderSigningKey(GOOGLE_SIGNING_EC_V2_PRIVATE_KEY_PKCS8_BASE64)
         .senderIntermediateSigningKey(GOOGLE_SIGNING_EC_V2_INTERMEDIATE_PUBLIC_KEY_X509_BASE64)
-        .expiration(Instant.now().plus(Duration.standardDays(1)).getMillis())
+        .expiration(System.currentTimeMillis() + 24 * 60 * 60 * 1000)
         .build()
         .create();
   }

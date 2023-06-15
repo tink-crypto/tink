@@ -35,7 +35,6 @@ import java.security.interfaces.ECPublicKey;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import org.joda.time.Instant;
 
 /**
  * An implementation of the recipient side of <a
@@ -439,7 +438,7 @@ public final class PaymentMethodTokenRecipient {
               decodedMessage
                   .get(PaymentMethodTokenConstants.JSON_MESSAGE_EXPIRATION_KEY)
                   .getAsString());
-      if (expirationInMillis <= Instant.now().getMillis()) {
+      if (expirationInMillis <= System.currentTimeMillis()) {
         throw new GeneralSecurityException("expired payload");
       }
     }
@@ -583,7 +582,7 @@ public final class PaymentMethodTokenRecipient {
     long expirationInMillis =
         Long.parseLong(
             signedKey.get(PaymentMethodTokenConstants.JSON_KEY_EXPIRATION_KEY).getAsString());
-    if (expirationInMillis <= Instant.now().getMillis()) {
+    if (expirationInMillis <= System.currentTimeMillis()) {
       throw new GeneralSecurityException("expired intermediateSigningKey");
     }
   }
@@ -607,7 +606,7 @@ public final class PaymentMethodTokenRecipient {
             long expirationInMillis =
                 Long.parseLong(
                     key.get(PaymentMethodTokenConstants.JSON_KEY_EXPIRATION_KEY).getAsString());
-            if (expirationInMillis <= Instant.now().getMillis()) {
+            if (expirationInMillis <= System.currentTimeMillis()) {
               // Ignore expired keys
               continue;
             }

@@ -29,8 +29,6 @@ import com.google.gson.JsonParser;
 import java.security.GeneralSecurityException;
 import java.security.interfaces.ECPrivateKey;
 import java.security.interfaces.ECPublicKey;
-import org.joda.time.Duration;
-import org.joda.time.Instant;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -87,7 +85,7 @@ public class PaymentMethodTokenRecipientTest {
           + "      \"keyValue\": \"MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE/1+3HBVSbdv+j7NaArdgMyoSAM"
           + "43yRydzqdg1TxodSzA96Dj4Mc1EiKroxxunavVIvdxGnJeFViTzFvzFRxyCw==\",\n"
           + "      \"keyExpiration\": \""
-          + Instant.now().plus(Duration.standardDays(1)).getMillis()
+          + (System.currentTimeMillis() + 24 * 60 * 60 * 1000)
           + "\",\n"
           + "      \"protocolVersion\": \"ECv2\"\n"
           + "    },\n"
@@ -95,7 +93,7 @@ public class PaymentMethodTokenRecipientTest {
           + "      \"keyValue\": \"MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAENXvYqxD5WayKYhuXQevdGdLA8i"
           + "fV4LsRS2uKvFo8wwyiwgQHB9DiKzG6T/P1Fu9Bl7zWy/se5Dy4wk1mJoPuxg==\",\n"
           + "      \"keyExpiration\": \""
-          + Instant.now().plus(Duration.standardDays(1)).getMillis()
+          + (System.currentTimeMillis() + 24 * 60 * 60 * 1000)
           + "\",\n"
           + "      \"protocolVersion\": \"ECv2SigningOnly\"\n"
           + "    }\n"
@@ -603,7 +601,7 @@ public class PaymentMethodTokenRecipientTest {
     plaintext.addProperty(
         "messageExpiration",
         // One day in the future
-        String.valueOf(Instant.now().plus(Duration.standardDays(1)).getMillis()));
+        String.valueOf(System.currentTimeMillis() + 24 * 60 * 60 * 1000));
     plaintext.addProperty("someKey", "someValue");
     String ciphertext = sender.seal(plaintext.toString());
     JsonObject decrypted = JsonParser.parseString(recipient.unseal(ciphertext)).getAsJsonObject();
@@ -630,7 +628,7 @@ public class PaymentMethodTokenRecipientTest {
     expired.addProperty(
         "messageExpiration",
         // One day in the past
-        String.valueOf(Instant.now().minus(Duration.standardDays(1)).getMillis()));
+        String.valueOf(System.currentTimeMillis() - 24 * 60 * 60 * 1000));
 
     String ciphertext = sender.seal(expired.toString());
     try {
@@ -649,7 +647,7 @@ public class PaymentMethodTokenRecipientTest {
     JsonObject key1 = keys.get(INDEX_OF_GOOGLE_SIGNING_EC_V1).getAsJsonObject();
     key1.addProperty(
         "keyExpiration", // One day in the past
-        String.valueOf(Instant.now().minus(Duration.standardDays(1)).getMillis()));
+        String.valueOf(System.currentTimeMillis() - 24 * 60 * 60 * 1000));
     JsonArray newKeys = new JsonArray();
     newKeys.add(key1);
     trustedKeysJson.add("keys", newKeys);
@@ -793,7 +791,7 @@ public class PaymentMethodTokenRecipientTest {
     JsonObject key1 = keys.get(INDEX_OF_GOOGLE_SIGNING_EC_V2).getAsJsonObject();
     key1.addProperty(
         "keyExpiration", // One day in the past
-        String.valueOf(Instant.now().minus(Duration.standardDays(1)).getMillis()));
+        String.valueOf(System.currentTimeMillis() - 24 * 60 * 60 * 1000));
     JsonArray newKeys = new JsonArray();
     newKeys.add(key1);
     trustedKeysJson.add("keys", newKeys);
@@ -973,7 +971,7 @@ public class PaymentMethodTokenRecipientTest {
     payload.addProperty(
         "messageExpiration",
         // One day in the future
-        String.valueOf(Instant.now().plus(Duration.standardDays(1)).getMillis()));
+        String.valueOf(System.currentTimeMillis() + 24 * 60 * 60 * 1000));
     String plaintext = payload.toString();
     assertEquals(plaintext, recipient.unseal(sealECV2(plaintext)));
   }
@@ -992,7 +990,7 @@ public class PaymentMethodTokenRecipientTest {
     payload.addProperty(
         "messageExpiration",
         // One day in the past
-        String.valueOf(Instant.now().minus(Duration.standardDays(1)).getMillis()));
+        String.valueOf(System.currentTimeMillis() - 24 * 60 * 60 * 1000));
 
     String ciphertext = sealECV2(payload.toString());
     try {
@@ -1024,7 +1022,7 @@ public class PaymentMethodTokenRecipientTest {
                     .senderIntermediateSigningKey(
                         GOOGLE_SIGNING_EC_V2_INTERMEDIATE_PUBLIC_KEY_X509_BASE64)
                     // Expiration date in the past.
-                    .expiration(Instant.now().minus(Duration.standardDays(1)).getMillis())
+                    .expiration(System.currentTimeMillis() - 24 * 60 * 60 * 1000)
                     .build()
                     .create())
             .recipientId(RECIPIENT_ID)
@@ -1049,7 +1047,7 @@ public class PaymentMethodTokenRecipientTest {
                 .addSenderSigningKey(GOOGLE_SIGNING_EC_V2_PRIVATE_KEY_PKCS8_BASE64)
                 .senderIntermediateSigningKey(
                     GOOGLE_SIGNING_EC_V2_INTERMEDIATE_PUBLIC_KEY_X509_BASE64)
-                .expiration(Instant.now().plus(Duration.standardDays(1)).getMillis())
+                .expiration(System.currentTimeMillis() + 24 * 60 * 60 * 1000)
                 .build()
                 .create())
         .recipientId(RECIPIENT_ID)
@@ -1142,7 +1140,7 @@ public class PaymentMethodTokenRecipientTest {
     JsonObject key = keys.get(INDEX_OF_GOOGLE_SIGNING_EC_V2_SIGNING_ONLY).getAsJsonObject();
     key.addProperty(
         "keyExpiration", // One day in the past
-        String.valueOf(Instant.now().minus(Duration.standardDays(1)).getMillis()));
+        String.valueOf(System.currentTimeMillis() - 24 * 60 * 60 * 1000));
     JsonArray newKeys = new JsonArray();
     newKeys.add(key);
     trustedKeysJson.add("keys", newKeys);
@@ -1319,7 +1317,7 @@ public class PaymentMethodTokenRecipientTest {
     payload.addProperty(
         "messageExpiration",
         // One day in the future
-        String.valueOf(Instant.now().plus(Duration.standardDays(1)).getMillis()));
+        String.valueOf(System.currentTimeMillis() + 24 * 60 * 60 * 1000));
     String plaintext = payload.toString();
     assertEquals(plaintext, recipient.unseal(signECV2SigningOnly(plaintext)));
   }
@@ -1337,7 +1335,7 @@ public class PaymentMethodTokenRecipientTest {
     payload.addProperty(
         "messageExpiration",
         // One day in the past
-        String.valueOf(Instant.now().minus(Duration.standardDays(1)).getMillis()));
+        String.valueOf(System.currentTimeMillis() - 24 * 60 * 60 * 1000));
     String ciphertext = signECV2SigningOnly(payload.toString());
     try {
       recipient.unseal(ciphertext);
@@ -1368,7 +1366,7 @@ public class PaymentMethodTokenRecipientTest {
                     .senderIntermediateSigningKey(
                         GOOGLE_SIGNING_EC_V2_SIGNING_ONLY_INTERMEDIATE_PUBLIC_KEY_X509_BASE64)
                     // Expiration date in the past.
-                    .expiration(Instant.now().minus(Duration.standardDays(1)).getMillis())
+                    .expiration(System.currentTimeMillis() - 24 * 60 * 60 * 1000)
                     .build()
                     .create())
             .recipientId(RECIPIENT_ID)
@@ -1393,7 +1391,7 @@ public class PaymentMethodTokenRecipientTest {
                 .addSenderSigningKey(GOOGLE_SIGNING_EC_V2_SIGNING_ONLY_PRIVATE_KEY_PKCS8_BASE64)
                 .senderIntermediateSigningKey(
                     GOOGLE_SIGNING_EC_V2_SIGNING_ONLY_INTERMEDIATE_PUBLIC_KEY_X509_BASE64)
-                .expiration(Instant.now().plus(Duration.standardDays(1)).getMillis())
+                .expiration(System.currentTimeMillis() + 24 * 60 * 60 * 1000)
                 .build()
                 .create())
         .recipientId(RECIPIENT_ID)

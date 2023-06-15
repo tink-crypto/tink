@@ -23,8 +23,6 @@ import static org.junit.Assert.fail;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import org.joda.time.Duration;
-import org.joda.time.Instant;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -127,7 +125,7 @@ public class SenderIntermediateCertFactoryTest {
           .protocolVersion(PaymentMethodTokenConstants.PROTOCOL_VERSION_EC_V2)
           .senderIntermediateSigningKey(GOOGLE_SIGNING_EC_V2_INTERMEDIATE_PUBLIC_KEY_X509_BASE64)
           // no call to addSenderSigningKey
-          .expiration(Instant.now().plus(Duration.standardDays(1)).getMillis())
+          .expiration(System.currentTimeMillis() + 24 * 60 * 60 * 1000)
           .build();
       fail("Should have thrown!");
     } catch (IllegalArgumentException expected) {
