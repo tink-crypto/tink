@@ -1061,3 +1061,11 @@ tink_cc_library(
     tink::internal::key_type_info_store
     tink::internal::keyset_wrapper_store
 )
+
+tink_cc_library(
+  NAME key_gen_configuration
+  SRCS
+    key_gen_configuration.h
+  DEPS
+    tink::internal::key_type_info_store
+)

@@ -14,38 +14,35 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-#ifndef TINK_CONFIGURATION_H_
-#define TINK_CONFIGURATION_H_
+#ifndef TINK_KEY_GEN_CONFIGURATION_H_
+#define TINK_KEY_GEN_CONFIGURATION_H_
 
 #include "tink/internal/key_type_info_store.h"
-#include "tink/internal/keyset_wrapper_store.h"
 
 namespace crypto {
 namespace tink {
 
 namespace internal {
-class ConfigurationImpl;
+class KeyGenConfigurationImpl;
 }
 
-// Generates primitives using stored primitive wrappers and key type managers.
-class Configuration {
+// Generates keys using stored key type managers.
+class KeyGenConfiguration {
  public:
-  Configuration() = default;
+  KeyGenConfiguration() = default;
 
   // Not copyable or movable.
-  Configuration(const Configuration&) = delete;
-  Configuration& operator=(const Configuration&) = delete;
+  KeyGenConfiguration(const KeyGenConfiguration&) = delete;
+  KeyGenConfiguration& operator=(const KeyGenConfiguration&) = delete;
 
  private:
-  // ConfigurationImpl requires access to `key_type_info_store_` and
-  // `keyset_wrapper_store_`.
-  friend class internal::ConfigurationImpl;
+  // KeyGenConfigurationImpl requires access to `key_type_info_store_`.
+  friend class internal::KeyGenConfigurationImpl;
 
   crypto::tink::internal::KeyTypeInfoStore key_type_info_store_;
-  crypto::tink::internal::KeysetWrapperStore keyset_wrapper_store_;
 };
 
 }  // namespace tink
 }  // namespace crypto
 
-#endif  // TINK_CONFIGURATION_H_
+#endif  // TINK_KEY_GEN_CONFIGURATION_H_

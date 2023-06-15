@@ -1122,8 +1122,17 @@ cc_library(
     name = "configuration",
     hdrs = ["configuration.h"],
     include_prefix = "tink",
+    visibility = ["//visibility:public"],
     deps = [
         "//internal:key_type_info_store",
         "//internal:keyset_wrapper_store",
     ],
+)
+
+cc_library(
+    name = "key_gen_configuration",
+    hdrs = ["key_gen_configuration.h"],
+    include_prefix = "tink",
+    visibility = ["//visibility:public"],
+    deps = ["//internal:key_type_info_store"],
 )
