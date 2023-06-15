@@ -201,7 +201,7 @@ def _normalize_and_text_format_message(msg: message.Message,
     a comment.
   """
   output = []
-  fields = msg.DESCRIPTOR.fields
+  fields = list(msg.DESCRIPTOR.fields)
   # special case for Tinks custom 'any' proto.
   if (msg.DESCRIPTOR.full_name == 'google.crypto.tink.KeyTemplate' or
       msg.DESCRIPTOR.full_name == 'google.crypto.tink.KeyData'):
