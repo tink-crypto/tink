@@ -77,7 +77,14 @@ public class KeysetManagerTest {
   @Test
   public void testEnable_shouldEnableKey() throws Exception {
     int keyId = 42;
-    KeysetHandle handle = KeysetHandle.fromKeyset(TestUtil.createKeyset(createDisabledKey(keyId)));
+    KeysetHandle handle =
+        KeysetHandle.newBuilder()
+            .addEntry(
+                KeysetHandle.generateEntryFromParametersName("AES128_GCM")
+                    .withFixedId(keyId)
+                    .setStatus(KeyStatus.DISABLED)
+                    .makePrimary())
+            .build();
     Keyset keyset =
         KeysetManager.withKeysetHandle(handle).enable(keyId).getKeysetHandle().getKeyset();
 
@@ -114,7 +121,14 @@ public class KeysetManagerTest {
   @Test
   public void testEnable_keyNotFound_shouldThrowException() throws Exception {
     int keyId = 42;
-    KeysetHandle handle = KeysetHandle.fromKeyset(TestUtil.createKeyset(createDisabledKey(keyId)));
+    KeysetHandle handle =
+        KeysetHandle.newBuilder()
+            .addEntry(
+                KeysetHandle.generateEntryFromParametersName("AES128_GCM")
+                    .withFixedId(keyId)
+                    .setStatus(KeyStatus.DISABLED)
+                    .makePrimary())
+            .build();
 
     GeneralSecurityException e =
         assertThrows(
@@ -128,9 +142,15 @@ public class KeysetManagerTest {
     int primaryKeyId = 42;
     int newPrimaryKeyId = 43;
     KeysetHandle handle =
-        KeysetHandle.fromKeyset(
-            TestUtil.createKeyset(
-                createEnabledKey(primaryKeyId), createEnabledKey(newPrimaryKeyId)));
+        KeysetHandle.newBuilder()
+            .addEntry(
+                KeysetHandle.generateEntryFromParametersName("AES128_GCM")
+                    .withFixedId(primaryKeyId)
+                    .makePrimary())
+            .addEntry(
+                KeysetHandle.generateEntryFromParametersName("AES128_GCM")
+                    .withFixedId(newPrimaryKeyId))
+            .build();
     Keyset keyset =
         KeysetManager.withKeysetHandle(handle)
             .setPrimary(newPrimaryKeyId)
@@ -146,9 +166,16 @@ public class KeysetManagerTest {
     int primaryKeyId = 42;
     int newPrimaryKeyId = 43;
     KeysetHandle handle =
-        KeysetHandle.fromKeyset(
-            TestUtil.createKeyset(
-                createEnabledKey(primaryKeyId), createEnabledKey(newPrimaryKeyId)));
+        KeysetHandle.newBuilder()
+            .addEntry(
+                KeysetHandle.generateEntryFromParametersName("AES128_GCM")
+                    .withFixedId(primaryKeyId)
+                    .makePrimary())
+            .addEntry(
+                KeysetHandle.generateEntryFromParametersName("AES128_GCM")
+                    .withFixedId(newPrimaryKeyId))
+            .build();
+
     GeneralSecurityException e =
         assertThrows(
             GeneralSecurityException.class,
@@ -161,9 +188,16 @@ public class KeysetManagerTest {
     int primaryKeyId = 42;
     int newPrimaryKeyId = 43;
     KeysetHandle handle =
-        KeysetHandle.fromKeyset(
-            TestUtil.createKeyset(
-                createEnabledKey(primaryKeyId), createDisabledKey(newPrimaryKeyId)));
+        KeysetHandle.newBuilder()
+            .addEntry(
+                KeysetHandle.generateEntryFromParametersName("AES128_GCM")
+                    .withFixedId(primaryKeyId)
+                    .makePrimary())
+            .addEntry(
+                KeysetHandle.generateEntryFromParametersName("AES128_GCM")
+                    .withFixedId(newPrimaryKeyId)
+                    .setStatus(KeyStatus.DISABLED))
+            .build();
     GeneralSecurityException e =
         assertThrows(
             GeneralSecurityException.class,
@@ -207,9 +241,15 @@ public class KeysetManagerTest {
     int primaryKeyId = 42;
     int newPrimaryKeyId = 43;
     KeysetHandle handle =
-        KeysetHandle.fromKeyset(
-            TestUtil.createKeyset(
-                createEnabledKey(primaryKeyId), createEnabledKey(newPrimaryKeyId)));
+        KeysetHandle.newBuilder()
+            .addEntry(
+                KeysetHandle.generateEntryFromParametersName("AES128_GCM")
+                    .withFixedId(primaryKeyId)
+                    .makePrimary())
+            .addEntry(
+                KeysetHandle.generateEntryFromParametersName("AES128_GCM")
+                    .withFixedId(newPrimaryKeyId))
+            .build();
     Keyset keyset =
         KeysetManager.withKeysetHandle(handle)
             .promote(newPrimaryKeyId)
@@ -225,9 +265,15 @@ public class KeysetManagerTest {
     int primaryKeyId = 42;
     int newPrimaryKeyId = 43;
     KeysetHandle handle =
-        KeysetHandle.fromKeyset(
-            TestUtil.createKeyset(
-                createEnabledKey(primaryKeyId), createEnabledKey(newPrimaryKeyId)));
+        KeysetHandle.newBuilder()
+            .addEntry(
+                KeysetHandle.generateEntryFromParametersName("AES128_GCM")
+                    .withFixedId(primaryKeyId)
+                    .makePrimary())
+            .addEntry(
+                KeysetHandle.generateEntryFromParametersName("AES128_GCM")
+                    .withFixedId(newPrimaryKeyId))
+            .build();
     GeneralSecurityException e =
         assertThrows(
             GeneralSecurityException.class,
@@ -240,9 +286,16 @@ public class KeysetManagerTest {
     int primaryKeyId = 42;
     int newPrimaryKeyId = 43;
     KeysetHandle handle =
-        KeysetHandle.fromKeyset(
-            TestUtil.createKeyset(
-                createEnabledKey(primaryKeyId), createDisabledKey(newPrimaryKeyId)));
+        KeysetHandle.newBuilder()
+            .addEntry(
+                KeysetHandle.generateEntryFromParametersName("AES128_GCM")
+                    .withFixedId(primaryKeyId)
+                    .makePrimary())
+            .addEntry(
+                KeysetHandle.generateEntryFromParametersName("AES128_GCM")
+                    .withFixedId(newPrimaryKeyId)
+                    .setStatus(KeyStatus.DISABLED))
+            .build();
     GeneralSecurityException e =
         assertThrows(
             GeneralSecurityException.class,
@@ -285,8 +338,14 @@ public class KeysetManagerTest {
     int primaryKeyId = 42;
     int otherKeyId = 43;
     KeysetHandle handle =
-        KeysetHandle.fromKeyset(
-            TestUtil.createKeyset(createEnabledKey(primaryKeyId), createEnabledKey(otherKeyId)));
+        KeysetHandle.newBuilder()
+            .addEntry(
+                KeysetHandle.generateEntryFromParametersName("AES128_GCM")
+                    .withFixedId(primaryKeyId)
+                    .makePrimary())
+            .addEntry(
+                KeysetHandle.generateEntryFromParametersName("AES128_GCM").withFixedId(otherKeyId))
+            .build();
     Keyset keyset =
         KeysetManager.withKeysetHandle(handle).disable(otherKeyId).getKeysetHandle().getKeyset();
 
@@ -302,8 +361,14 @@ public class KeysetManagerTest {
     int primaryKeyId = 42;
     int otherKeyId = 43;
     KeysetHandle handle =
-        KeysetHandle.fromKeyset(
-            TestUtil.createKeyset(createEnabledKey(primaryKeyId), createEnabledKey(otherKeyId)));
+        KeysetHandle.newBuilder()
+            .addEntry(
+                KeysetHandle.generateEntryFromParametersName("AES128_GCM")
+                    .withFixedId(primaryKeyId)
+                    .makePrimary())
+            .addEntry(
+                KeysetHandle.generateEntryFromParametersName("AES128_GCM").withFixedId(otherKeyId))
+            .build();
     GeneralSecurityException e =
         assertThrows(
             GeneralSecurityException.class,
@@ -336,7 +401,13 @@ public class KeysetManagerTest {
   @Test
   public void testDisable_keyNotFound_shouldThrowException() throws Exception {
     int keyId = 42;
-    KeysetHandle handle = KeysetHandle.fromKeyset(TestUtil.createKeyset(createDisabledKey(keyId)));
+    KeysetHandle handle =
+        KeysetHandle.newBuilder()
+            .addEntry(
+                KeysetHandle.generateEntryFromParametersName("AES128_GCM")
+                    .withFixedId(keyId)
+                    .makePrimary())
+            .build();
 
     GeneralSecurityException e =
         assertThrows(
@@ -350,8 +421,14 @@ public class KeysetManagerTest {
     int primaryKeyId = 42;
     int otherKeyId = 43;
     KeysetHandle handle =
-        KeysetHandle.fromKeyset(
-            TestUtil.createKeyset(createEnabledKey(primaryKeyId), createEnabledKey(otherKeyId)));
+        KeysetHandle.newBuilder()
+            .addEntry(
+                KeysetHandle.generateEntryFromParametersName("AES128_GCM")
+                    .withFixedId(primaryKeyId)
+                    .makePrimary())
+            .addEntry(
+                KeysetHandle.generateEntryFromParametersName("AES128_GCM").withFixedId(otherKeyId))
+            .build();
     Keyset keyset =
         KeysetManager.withKeysetHandle(handle).destroy(otherKeyId).getKeysetHandle().getKeyset();
 
@@ -368,8 +445,14 @@ public class KeysetManagerTest {
     int primaryKeyId = 42;
     int otherKeyId = 43;
     KeysetHandle handle =
-        KeysetHandle.fromKeyset(
-            TestUtil.createKeyset(createEnabledKey(primaryKeyId), createEnabledKey(otherKeyId)));
+        KeysetHandle.newBuilder()
+            .addEntry(
+                KeysetHandle.generateEntryFromParametersName("AES128_GCM")
+                    .withFixedId(primaryKeyId)
+                    .makePrimary())
+            .addEntry(
+                KeysetHandle.generateEntryFromParametersName("AES128_GCM").withFixedId(otherKeyId))
+            .build();
     GeneralSecurityException e =
         assertThrows(
             GeneralSecurityException.class,
@@ -417,8 +500,14 @@ public class KeysetManagerTest {
     int primaryKeyId = 42;
     int otherKeyId = 43;
     KeysetHandle handle =
-        KeysetHandle.fromKeyset(
-            TestUtil.createKeyset(createEnabledKey(primaryKeyId), createEnabledKey(otherKeyId)));
+        KeysetHandle.newBuilder()
+            .addEntry(
+                KeysetHandle.generateEntryFromParametersName("AES128_GCM")
+                    .withFixedId(primaryKeyId)
+                    .makePrimary())
+            .addEntry(
+                KeysetHandle.generateEntryFromParametersName("AES128_GCM").withFixedId(otherKeyId))
+            .build();
     Keyset keyset =
         KeysetManager.withKeysetHandle(handle).delete(otherKeyId).getKeysetHandle().getKeyset();
 
@@ -432,8 +521,14 @@ public class KeysetManagerTest {
     int primaryKeyId = 42;
     int otherKeyId = 43;
     KeysetHandle handle =
-        KeysetHandle.fromKeyset(
-            TestUtil.createKeyset(createEnabledKey(primaryKeyId), createEnabledKey(otherKeyId)));
+        KeysetHandle.newBuilder()
+            .addEntry(
+                KeysetHandle.generateEntryFromParametersName("AES128_GCM")
+                    .withFixedId(primaryKeyId)
+                    .makePrimary())
+            .addEntry(
+                KeysetHandle.generateEntryFromParametersName("AES128_GCM").withFixedId(otherKeyId))
+            .build();
     GeneralSecurityException e =
         assertThrows(
             GeneralSecurityException.class,
@@ -450,8 +545,14 @@ public class KeysetManagerTest {
     int keyId1 = 42;
     final int keyId2 = 43;
     KeysetHandle handle =
-        KeysetHandle.fromKeyset(
-            TestUtil.createKeyset(createEnabledKey(keyId1), createEnabledKey(keyId2)));
+        KeysetHandle.newBuilder()
+            .addEntry(
+                KeysetHandle.generateEntryFromParametersName("AES128_GCM")
+                    .withFixedId(keyId1)
+                    .makePrimary())
+            .addEntry(
+                KeysetHandle.generateEntryFromParametersName("AES128_GCM").withFixedId(keyId2))
+            .build();
 
     GeneralSecurityException e =
         assertThrows(
