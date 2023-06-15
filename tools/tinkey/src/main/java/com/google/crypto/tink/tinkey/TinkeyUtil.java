@@ -16,17 +16,15 @@
 
 package com.google.crypto.tink.tinkey;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
+
 import com.google.crypto.tink.Aead;
-import com.google.crypto.tink.BinaryKeysetReader;
-import com.google.crypto.tink.BinaryKeysetWriter;
-import com.google.crypto.tink.CleartextKeysetHandle;
-import com.google.crypto.tink.JsonKeysetReader;
-import com.google.crypto.tink.JsonKeysetWriter;
+import com.google.crypto.tink.InsecureSecretKeyAccess;
 import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.KeysetManager;
-import com.google.crypto.tink.KeysetReader;
-import com.google.crypto.tink.KeysetWriter;
+import com.google.crypto.tink.TinkJsonProtoKeysetFormat;
+import com.google.crypto.tink.TinkProtoKeysetFormat;
 import com.google.crypto.tink.proto.OutputPrefixType;
 import com.google.protobuf.ByteString;
 import java.io.ByteArrayInputStream;
@@ -35,6 +33,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.security.GeneralSecurityException;
+import java.util.ArrayDeque;
+import java.util.Arrays;
+import java.util.Locale;
 
 /** Various helpers. */
 final class TinkeyUtil {
@@ -53,22 +54,8 @@ final class TinkeyUtil {
     PROMOTE_KEY
   }
 
-  /** Creates a {@code KeysetReader} that can read the keyset in the right {@code inFormat}. */
-  public static KeysetReader createKeysetReader(InputStream inputStream, String inFormat)
-      throws IOException {
-    if (inFormat == null || inFormat.toLowerCase().equals("json")) {
-      return JsonKeysetReader.withInputStream(inputStream);
-    }
-    return BinaryKeysetReader.withInputStream(inputStream);
-  }
-
-  /** Creates a {@code KeysetWriter} that can write the keyset in the right {@code outFormat}. */
-  public static KeysetWriter createKeysetWriter(OutputStream outputStream, String outFormat)
-      throws IOException {
-    if (outFormat == null || outFormat.toLowerCase().equals("json")) {
-      return JsonKeysetWriter.withOutputStream(outputStream);
-    }
-    return BinaryKeysetWriter.withOutputStream(outputStream);
+  private static boolean isJson(String outFormat) {
+    return outFormat == null || outFormat.toLowerCase(Locale.ROOT).equals("json");
   }
 
   /**
@@ -212,17 +199,57 @@ final class TinkeyUtil {
       String masterKeyUri,
       String credentialPath)
       throws GeneralSecurityException, IOException {
-    KeysetWriter writer = createKeysetWriter(outputStream, outFormat);
     if (masterKeyUri != null) {
       Aead masterKey =
           KmsClientsFactory.globalInstance()
               .newClientFor(masterKeyUri)
               .withCredentials(credentialPath)
               .getAead(masterKeyUri);
-      handle.write(writer, masterKey);
-    } else {
-      CleartextKeysetHandle.write(handle, writer);
+      if (isJson(outFormat)) {
+        outputStream.write(
+            TinkJsonProtoKeysetFormat.serializeEncryptedKeyset(handle, masterKey, new byte[] {})
+                .getBytes(UTF_8));
+        return;
+      } else {
+        outputStream.write(
+            TinkProtoKeysetFormat.serializeEncryptedKeyset(handle, masterKey, new byte[] {}));
+        return;
+      }
     }
+    if (isJson(outFormat)) {
+      outputStream.write(
+          TinkJsonProtoKeysetFormat.serializeKeyset(handle, InsecureSecretKeyAccess.get())
+              .getBytes(UTF_8));
+      return;
+    }
+    outputStream.write(
+        TinkProtoKeysetFormat.serializeKeyset(handle, InsecureSecretKeyAccess.get()));
+    return;
+  }
+
+  private static byte[] combine(ArrayDeque<byte[]> deque) {
+    int totalSize = 0;
+    for (byte[] buf : deque) {
+      totalSize += buf.length;
+    }
+    byte[] result = new byte[totalSize];
+    int curSize = 0;
+    for (byte[] buf : deque) {
+      System.arraycopy(buf, 0, result, curSize, buf.length);
+      curSize += buf.length;
+    }
+    return result;
+  }
+
+  private static byte[] toByteArray(InputStream in) throws IOException {
+    ArrayDeque<byte[]> deque = new ArrayDeque<>();
+    byte[] buf = new byte[100];
+    int read = in.read(buf);
+    while (read != -1) {
+      deque.add(Arrays.copyOf(buf, read));
+      read = in.read(buf);
+    }
+    return combine(deque);
   }
 
   /**
@@ -232,16 +259,25 @@ final class TinkeyUtil {
   public static KeysetHandle getKeysetHandle(
       InputStream inputStream, String inFormat, String masterKeyUri, String credentialPath)
       throws IOException, GeneralSecurityException {
-    KeysetReader reader = createKeysetReader(inputStream, inFormat);
+    byte[] keyset = toByteArray(inputStream);
     if (masterKeyUri != null) {
       Aead masterKey =
           KmsClientsFactory.globalInstance()
               .newClientFor(masterKeyUri)
               .withCredentials(credentialPath)
               .getAead(masterKeyUri);
-      return KeysetHandle.read(reader, masterKey);
+      if (isJson(inFormat)) {
+        return TinkJsonProtoKeysetFormat.parseEncryptedKeyset(
+            new String(keyset, UTF_8), masterKey, new byte[] {});
+      } else {
+        return TinkProtoKeysetFormat.parseEncryptedKeyset(keyset, masterKey, new byte[] {});
+      }
     }
-    return CleartextKeysetHandle.read(reader);
+    if (isJson(inFormat)) {
+      return TinkJsonProtoKeysetFormat.parseKeyset(
+          new String(keyset, UTF_8), InsecureSecretKeyAccess.get());
+    }
+    return TinkProtoKeysetFormat.parseKeyset(keyset, InsecureSecretKeyAccess.get());
   }
 
   /**

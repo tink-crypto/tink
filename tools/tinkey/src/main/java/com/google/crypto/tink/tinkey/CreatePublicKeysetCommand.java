@@ -16,9 +16,7 @@
 
 package com.google.crypto.tink.tinkey;
 
-import com.google.crypto.tink.CleartextKeysetHandle;
 import com.google.crypto.tink.KeysetHandle;
-import com.google.crypto.tink.KeysetWriter;
 import java.io.InputStream;
 import java.io.OutputStream;
 
@@ -44,9 +42,6 @@ public class CreatePublicKeysetCommand extends OutOptions implements Command {
       throws Exception {
     KeysetHandle handle = TinkeyUtil.getKeysetHandle(inputStream, inFormat, masterKeyUri,
         credentialPath);
-    KeysetWriter writer = TinkeyUtil.createKeysetWriter(outputStream, outFormat);
-    CleartextKeysetHandle.write(
-        handle.getPublicKeysetHandle(),
-        writer);
+    TinkeyUtil.writeKeyset(handle.getPublicKeysetHandle(), outputStream, outFormat, null, null);
   }
 }
