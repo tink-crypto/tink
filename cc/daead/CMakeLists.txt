@@ -128,6 +128,23 @@ tink_cc_library(
     tink::util::statusor
 )
 
+tink_cc_library(
+  NAME aes_siv_key
+  SRCS
+    aes_siv_key.cc
+    aes_siv_key.h
+  DEPS
+    tink::daead::aes_siv_parameters
+    tink::daead::deterministic_aead_key
+    absl::strings
+    absl::optional
+    tink::core::partial_key_access_token
+    tink::core::restricted_data
+    tink::subtle::subtle_util
+    tink::util::status
+    tink::util::statusor
+)
+
 # tests
 
 tink_cc_test(
@@ -237,6 +254,21 @@ tink_cc_test(
   DEPS
     tink::daead::aes_siv_parameters
     gmock
+    tink::util::statusor
+    tink::util::test_matchers
+)
+
+tink_cc_test(
+  NAME aes_siv_key_test
+  SRCS
+    aes_siv_key_test.cc
+  DEPS
+    tink::daead::aes_siv_key
+    tink::daead::aes_siv_parameters
+    gmock
+    absl::optional
+    tink::core::partial_key_access
+    tink::core::restricted_data
     tink::util::statusor
     tink::util::test_matchers
 )
