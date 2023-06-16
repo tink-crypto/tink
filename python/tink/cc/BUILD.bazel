@@ -1,4 +1,4 @@
-load("@tink_py//tools/build_defs:tink_python_rules.bzl", "tink_pybind_library")
+load("@pybind11_bazel//:build_defs.bzl", "pybind_library")
 
 package(default_visibility = ["//:__subpackages__"])
 
@@ -19,7 +19,7 @@ cc_library(
     ],
 )
 
-tink_pybind_library(
+pybind_library(
     name = "cc_tink_config",
     srcs = ["cc_tink_config.cc"],
     hdrs = ["cc_tink_config.h"],
@@ -181,8 +181,8 @@ cc_library(
     deps = [
         ":python_file_object_adapter",
         "@com_google_absl//absl/memory",
-        "@com_google_absl//absl/strings",
         "@com_google_absl//absl/status",
+        "@com_google_absl//absl/strings",
         "@tink_cc//:input_stream",
         "@tink_cc//subtle:subtle_util",
         "@tink_cc//util:status",
