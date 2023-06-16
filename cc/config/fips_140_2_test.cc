@@ -90,7 +90,16 @@ TEST_F(Fips1402Test, ConfigFips1402) {
       IsOk());
 }
 
-TEST_F(Fips1402Test, NonFipsKeyManagerIsNotPresent) {
+TEST_F(Fips1402Test, ConfigFips1402FailsInNonFipsMode) {
+  if (internal::IsFipsEnabledInSsl()) {
+    GTEST_SKIP() << "Only test in non-FIPS mode";
+  }
+
+  EXPECT_DEATH_IF_SUPPORTED(
+      ConfigFips140_2(), "BoringSSL not built with the BoringCrypto module.");
+}
+
+TEST_F(Fips1402Test, NonFipsTypeNotPresent) {
   if (!internal::IsFipsEnabledInSsl()) {
     GTEST_SKIP() << "Only test in FIPS mode";
   }
@@ -102,16 +111,7 @@ TEST_F(Fips1402Test, NonFipsKeyManagerIsNotPresent) {
       StatusIs(absl::StatusCode::kNotFound));
 }
 
-TEST_F(Fips1402Test, ConfigFips1402FailsInNonFipsMode) {
-  if (internal::IsFipsEnabledInSsl()) {
-    GTEST_SKIP() << "Only test in non-FIPS mode";
-  }
-
-  EXPECT_DEATH_IF_SUPPORTED(
-      ConfigFips140_2(), "BoringSSL not built with the BoringCrypto module.");
-}
-
-TEST_F(Fips1402Test, NewKeyDataAndGetPrimitiveSucceeds) {
+TEST_F(Fips1402Test, NewKeyDataAndGetPrimitive) {
   if (!internal::IsFipsEnabledInSsl()) {
     GTEST_SKIP() << "Only test in FIPS mode";
   }
