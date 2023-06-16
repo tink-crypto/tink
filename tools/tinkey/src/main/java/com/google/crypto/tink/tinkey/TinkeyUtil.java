@@ -263,11 +263,5 @@ final class TinkeyUtil {
     }
   }
 
-  /** Prints an error then exits. */
-  public static void die(String error) {
-    System.err.print(String.format("Error: %s\n", error));
-    System.exit(1);
-  }
-
   private TinkeyUtil() {}
 }

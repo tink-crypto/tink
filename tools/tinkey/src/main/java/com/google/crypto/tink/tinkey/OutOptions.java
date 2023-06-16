@@ -16,6 +16,7 @@
 
 package com.google.crypto.tink.tinkey;
 
+import java.io.IOException;
 import java.io.OutputStream;
 import org.kohsuke.args4j.Option;
 
@@ -40,15 +41,11 @@ class OutOptions extends InOptions {
   String outFormat;
 
   @Override
-  void validate() {
+  void validate() throws IOException {
     super.validate();
     if (outputStream == null) {
       outputStream = System.out;
     }
-    try {
-      TinkeyUtil.validateFormat(outFormat);
-    } catch (Exception e) {
-      TinkeyUtil.die(e.toString());
-    }
+    TinkeyUtil.validateFormat(outFormat);
   }
 }

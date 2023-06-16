@@ -18,6 +18,7 @@ package com.google.crypto.tink.tinkey;
 
 import com.google.crypto.tink.subtle.Validators;
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import org.kohsuke.args4j.Option;
 
@@ -69,17 +70,13 @@ class InOptions {
       )
   String credentialPath;
 
-  void validate() {
+  void validate() throws IOException {
     if (inputStream == null) {
       inputStream = System.in;
     }
-    try {
-      TinkeyUtil.validateFormat(inFormat);
-      if (credentialPath != null) {
-        Validators.validateExists(new File(credentialPath));
-      }
-    } catch (Exception e) {
-      TinkeyUtil.die(e.toString());
+    TinkeyUtil.validateFormat(inFormat);
+    if (credentialPath != null) {
+      Validators.validateExists(new File(credentialPath));
     }
   }
 }

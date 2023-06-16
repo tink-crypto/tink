@@ -34,14 +34,10 @@ class ConvertKeysetOptions extends OutOptions {
   String newCredentialPath;
 
   @Override
-  void validate() {
+  void validate() throws IOException {
     super.validate();
     if (newCredentialPath != null) {
-      try {
-        Validators.validateExists(new File(newCredentialPath));
-      } catch (IOException e) {
-        TinkeyUtil.die(e.toString());
-      }
+      Validators.validateExists(new File(newCredentialPath));
     }
   }
 }
