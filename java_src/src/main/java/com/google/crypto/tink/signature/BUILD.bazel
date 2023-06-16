@@ -1103,3 +1103,31 @@ android_library(
         "@maven//:com_google_errorprone_error_prone_annotations",
     ],
 )
+
+android_library(
+    name = "rsa_ssa_pss_public_key-android",
+    srcs = ["RsaSsaPssPublicKey.java"],
+    deps = [
+        ":rsa_ssa_pss_parameters-android",
+        ":signature_public_key-android",
+        "//src/main/java/com/google/crypto/tink:accesses_partial_key-android",
+        "//src/main/java/com/google/crypto/tink:key-android",
+        "//src/main/java/com/google/crypto/tink/util:bytes-android",
+        "@maven//:com_google_code_findbugs_jsr305",
+        "@maven//:com_google_errorprone_error_prone_annotations",
+    ],
+)
+
+java_library(
+    name = "rsa_ssa_pss_public_key",
+    srcs = ["RsaSsaPssPublicKey.java"],
+    deps = [
+        ":rsa_ssa_pss_parameters",
+        ":signature_public_key",
+        "//src/main/java/com/google/crypto/tink:accesses_partial_key",
+        "//src/main/java/com/google/crypto/tink:key",
+        "//src/main/java/com/google/crypto/tink/util:bytes",
+        "@maven//:com_google_code_findbugs_jsr305",
+        "@maven//:com_google_errorprone_error_prone_annotations",
+    ],
+)
