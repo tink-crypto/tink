@@ -42,7 +42,14 @@ public class RotateKeysetCommand extends AddRotateOptions implements Command {
       InputStream inputStream, String inFormat,
       String masterKeyUri, String credentialPath,
       KeyTemplate keyTemplate) throws Exception {
-    TinkeyUtil.createKey(TinkeyUtil.CommandType.ROTATE_KEYSET, outputStream, outFormat,
-        inputStream, inFormat, masterKeyUri, credentialPath, keyTemplate);
+    TinkeyUtil.createKey(
+        TinkeyUtil.CommandType.ROTATE_KEYSET,
+        outputStream,
+        outFormat,
+        inputStream,
+        inFormat,
+        masterKeyUri,
+        credentialPath,
+        keyTemplate.toParameters());
   }
 }

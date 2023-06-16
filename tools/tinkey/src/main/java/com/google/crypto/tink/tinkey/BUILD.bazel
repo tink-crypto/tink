@@ -113,14 +113,13 @@ java_library(
     srcs = ["TinkeyUtil.java"],
     deps = [
         ":kms_clients_factory",
-        "@com_google_protobuf//:protobuf_javalite",
-        "@tink_java//proto:tink_java_proto",
         "@tink_java//src/main/java/com/google/crypto/tink:aead",
         "@tink_java//src/main/java/com/google/crypto/tink:insecure_secret_key_access",
         "@tink_java//src/main/java/com/google/crypto/tink:key_template",
         "@tink_java//src/main/java/com/google/crypto/tink:registry_cluster",
         "@tink_java//src/main/java/com/google/crypto/tink:tink_json_proto_keyset_format",
         "@tink_java//src/main/java/com/google/crypto/tink:tink_proto_keyset_format",
+        "@tink_java//src/main/java/com/google/crypto/tink:parameters",
     ],
 )
 

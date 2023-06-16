@@ -23,10 +23,9 @@ import com.google.crypto.tink.InsecureSecretKeyAccess;
 import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.KeysetManager;
+import com.google.crypto.tink.Parameters;
 import com.google.crypto.tink.TinkJsonProtoKeysetFormat;
 import com.google.crypto.tink.TinkProtoKeysetFormat;
-import com.google.crypto.tink.proto.OutputPrefixType;
-import com.google.protobuf.ByteString;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -84,9 +83,7 @@ final class TinkeyUtil {
       String credentialPath,
       KeyTemplate keyTemplate)
       throws GeneralSecurityException, IOException {
-    @SuppressWarnings("deprecation") // Need to maintain backward-compatibility
-    KeysetHandle handle =
-        KeysetManager.withEmptyKeyset().rotate(toProto(keyTemplate)).getKeysetHandle();
+    KeysetHandle handle = KeysetHandle.generateNew(keyTemplate);
 
     writeKeyset(handle, outputStream, outFormat, masterKeyUri, credentialPath);
   }
@@ -140,52 +137,24 @@ final class TinkeyUtil {
       String inFormat,
       String masterKeyUri,
       String credentialPath,
-      KeyTemplate keyTemplate)
+      Parameters parameters)
       throws GeneralSecurityException, IOException {
-    KeysetManager manager =
-        KeysetManager.withKeysetHandle(
+    KeysetHandle.Builder builder =
+        KeysetHandle.newBuilder(
             getKeysetHandle(inputStream, inFormat, masterKeyUri, credentialPath));
     switch (type) {
       case ADD_KEY:
-        manager.add(keyTemplate);
+        builder.addEntry(KeysetHandle.generateEntryFromParameters(parameters).withRandomId());
         break;
       case ROTATE_KEYSET:
-        manager.rotate(toProto(keyTemplate));
+        builder.addEntry(
+            KeysetHandle.generateEntryFromParameters(parameters).withRandomId().makePrimary());
         break;
       default:
         throw new GeneralSecurityException("invalid command");
     }
 
-    writeKeyset(manager.getKeysetHandle(), outputStream, outFormat, masterKeyUri, credentialPath);
-  }
-
-  // TODO(b/153937575): remove this once KeysetManager allows to directly work with KeyTemplate
-  // POJO.
-  private static com.google.crypto.tink.proto.KeyTemplate toProto(KeyTemplate template) {
-    OutputPrefixType prefixType;
-
-    switch (template.getOutputPrefixType()) {
-      case TINK:
-        prefixType = OutputPrefixType.TINK;
-        break;
-      case LEGACY:
-        prefixType = OutputPrefixType.LEGACY;
-        break;
-      case RAW:
-        prefixType = OutputPrefixType.RAW;
-        break;
-      case CRUNCHY:
-        prefixType = OutputPrefixType.CRUNCHY;
-        break;
-      default:
-        throw new IllegalArgumentException("Unknown output prefix type");
-    }
-
-    return com.google.crypto.tink.proto.KeyTemplate.newBuilder()
-        .setTypeUrl(template.getTypeUrl())
-        .setValue(ByteString.copyFrom(template.getValue()))
-        .setOutputPrefixType(prefixType)
-        .build();
+    writeKeyset(builder.build(), outputStream, outFormat, masterKeyUri, credentialPath);
   }
 
   /**

@@ -50,7 +50,14 @@ public class AddKeyCommand extends AddRotateOptions implements Command {
       InputStream inputStream, String inFormat,
       String masterKeyUri, String credentialPath,
       KeyTemplate keyTemplate) throws GeneralSecurityException, IOException {
-    TinkeyUtil.createKey(TinkeyUtil.CommandType.ADD_KEY, outputStream, outFormat,
-        inputStream, inFormat, masterKeyUri, credentialPath, keyTemplate);
+    TinkeyUtil.createKey(
+        TinkeyUtil.CommandType.ADD_KEY,
+        outputStream,
+        outFormat,
+        inputStream,
+        inFormat,
+        masterKeyUri,
+        credentialPath,
+        keyTemplate.toParameters());
   }
 }
