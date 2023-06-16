@@ -14,20 +14,20 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-#ifndef TINK_CONFIG_FIPS_140_2_H_
-#define TINK_CONFIG_FIPS_140_2_H_
+#ifndef TINK_CONFIG_KEY_GEN_FIPS_140_2_H_
+#define TINK_CONFIG_KEY_GEN_FIPS_140_2_H_
 
-#include "tink/configuration.h"
+#include "tink/key_gen_configuration.h"
 
 namespace crypto {
 namespace tink {
 
-// Configuration used to generate primitives using FIPS 140-2-compliant key
-// types. Importing this Configuration restricts Tink to FIPS globally and
-// requires BoringSSL to be built with the BoringCrypto module.
-const Configuration& ConfigFips140_2();
+// KeyGenConfiguration used to generate keys using using FIPS 140-2-compliant
+// key types. Importing this KeyGenConfiguration restricts Tink to FIPS globally
+// and requires BoringSSL to be built with the BoringCrypto module.
+const KeyGenConfiguration& KeyGenConfigFips140_2();
 
 }  // namespace tink
 }  // namespace crypto
 
-#endif  // TINK_CONFIG_FIPS_140_2_H_
+#endif  // TINK_CONFIG_KEY_GEN_FIPS_140_2_H_
