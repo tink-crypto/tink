@@ -32,12 +32,12 @@ import com.google.crypto.tink.subtle.Ed25519Verify;
 import com.google.crypto.tink.subtle.Hex;
 import com.google.crypto.tink.subtle.Random;
 import com.google.protobuf.ByteString;
-import com.google.protobuf.ExtensionRegistryLite;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.security.GeneralSecurityException;
 import java.util.Set;
 import java.util.TreeSet;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -48,6 +48,11 @@ public class Ed25519PrivateKeyManagerTest {
   private final Ed25519PrivateKeyManager manager = new Ed25519PrivateKeyManager();
   private final KeyTypeManager.KeyFactory<Ed25519KeyFormat, Ed25519PrivateKey> factory =
       manager.keyFactory();
+
+  @Before
+  public void register() throws Exception {
+    SignatureConfig.register();
+  }
 
   @Test
   public void basics() throws Exception {
@@ -146,19 +151,15 @@ public class Ed25519PrivateKeyManagerTest {
   @Test
   public void testEd25519Template() throws Exception {
     KeyTemplate template = Ed25519PrivateKeyManager.ed25519Template();
-    assertThat(template.getTypeUrl()).isEqualTo(new Ed25519PrivateKeyManager().getKeyType());
-    assertThat(template.getOutputPrefixType()).isEqualTo(KeyTemplate.OutputPrefixType.TINK);
-    Ed25519KeyFormat unused =
-        Ed25519KeyFormat.parseFrom(template.getValue(), ExtensionRegistryLite.getEmptyRegistry());
+    assertThat(template.toParameters())
+        .isEqualTo(Ed25519Parameters.create(Ed25519Parameters.Variant.TINK));
   }
 
   @Test
   public void testRawEd25519Template() throws Exception {
     KeyTemplate template = Ed25519PrivateKeyManager.rawEd25519Template();
-    assertThat(template.getTypeUrl()).isEqualTo(new Ed25519PrivateKeyManager().getKeyType());
-    assertThat(template.getOutputPrefixType()).isEqualTo(KeyTemplate.OutputPrefixType.RAW);
-    Ed25519KeyFormat unused =
-        Ed25519KeyFormat.parseFrom(template.getValue(), ExtensionRegistryLite.getEmptyRegistry());
+    assertThat(template.toParameters())
+        .isEqualTo(Ed25519Parameters.create());
   }
 
   @Test

@@ -33,10 +33,10 @@ import com.google.crypto.tink.proto.HashType;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
 import com.google.crypto.tink.subtle.Hex;
 import com.google.protobuf.ByteString;
-import com.google.protobuf.ExtensionRegistryLite;
 import java.security.GeneralSecurityException;
 import java.util.Set;
 import java.util.TreeSet;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -47,6 +47,11 @@ public class EcdsaSignKeyManagerTest {
   private final EcdsaSignKeyManager manager = new EcdsaSignKeyManager();
   private final KeyTypeManager.KeyFactory<EcdsaKeyFormat, EcdsaPrivateKey> factory =
       manager.keyFactory();
+
+  @Before
+  public void register() throws Exception {
+    SignatureConfig.register();
+  }
 
   private static EcdsaKeyFormat createKeyFormat(
       HashType hashType, EllipticCurveType curveType, EcdsaSignatureEncoding encoding) {
@@ -306,29 +311,27 @@ public class EcdsaSignKeyManagerTest {
   @Test
   public void testEcdsaP256Template() throws Exception {
     KeyTemplate template = EcdsaSignKeyManager.ecdsaP256Template();
-    assertThat(template.getTypeUrl()).isEqualTo(new EcdsaSignKeyManager().getKeyType());
-    assertThat(template.getOutputPrefixType()).isEqualTo(KeyTemplate.OutputPrefixType.TINK);
-    EcdsaKeyFormat format =
-        EcdsaKeyFormat.parseFrom(template.getValue(), ExtensionRegistryLite.getEmptyRegistry());
-
-    assertThat(format.hasParams()).isTrue();
-    assertThat(format.getParams().getHashType()).isEqualTo(HashType.SHA256);
-    assertThat(format.getParams().getCurve()).isEqualTo(EllipticCurveType.NIST_P256);
-    assertThat(format.getParams().getEncoding()).isEqualTo(EcdsaSignatureEncoding.DER);
+    assertThat(template.toParameters())
+        .isEqualTo(
+            EcdsaParameters.builder()
+                .setSignatureEncoding(EcdsaParameters.SignatureEncoding.DER)
+                .setCurveType(EcdsaParameters.CurveType.NIST_P256)
+                .setHashType(EcdsaParameters.HashType.SHA256)
+                .setVariant(EcdsaParameters.Variant.TINK)
+                .build());
   }
 
   @Test
   public void testRawEcdsaP256Template() throws Exception {
     KeyTemplate template = EcdsaSignKeyManager.rawEcdsaP256Template();
-    assertThat(template.getTypeUrl()).isEqualTo(new EcdsaSignKeyManager().getKeyType());
-    assertThat(template.getOutputPrefixType()).isEqualTo(KeyTemplate.OutputPrefixType.RAW);
-    EcdsaKeyFormat format =
-        EcdsaKeyFormat.parseFrom(template.getValue(), ExtensionRegistryLite.getEmptyRegistry());
-
-    assertThat(format.hasParams()).isTrue();
-    assertThat(format.getParams().getHashType()).isEqualTo(HashType.SHA256);
-    assertThat(format.getParams().getCurve()).isEqualTo(EllipticCurveType.NIST_P256);
-    assertThat(format.getParams().getEncoding()).isEqualTo(EcdsaSignatureEncoding.IEEE_P1363);
+    assertThat(template.toParameters())
+        .isEqualTo(
+            EcdsaParameters.builder()
+                .setSignatureEncoding(EcdsaParameters.SignatureEncoding.IEEE_P1363)
+                .setCurveType(EcdsaParameters.CurveType.NIST_P256)
+                .setHashType(EcdsaParameters.HashType.SHA256)
+                .setVariant(EcdsaParameters.Variant.NO_PREFIX)
+                .build());
   }
 
   @Test
