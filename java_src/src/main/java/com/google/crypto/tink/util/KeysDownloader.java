@@ -53,7 +53,10 @@ import javax.annotation.concurrent.GuardedBy;
  * to proactively fetch the data.
  *
  * @since 1.1.0
+ * @deprecated This is not supported by Tink, as it incurs a dependency on <code>
+ *     com.google.api.client.http</code>. If you need this, please copy it into your codebase.
  */
+@Deprecated
 public class KeysDownloader {
   private static final Charset UTF_8 = Charset.forName("UTF-8");
 
