@@ -21,6 +21,7 @@ import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.KmsClient;
 import com.google.crypto.tink.KmsClients;
 import com.google.crypto.tink.Registry;
+import com.google.crypto.tink.TinkProtoParametersFormat;
 import com.google.crypto.tink.internal.KeyTypeManager;
 import com.google.crypto.tink.internal.PrimitiveFactory;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
@@ -37,6 +38,9 @@ import java.security.GeneralSecurityException;
  * {@code KmsEnvelopeAead}.
  */
 public class KmsEnvelopeAeadKeyManager extends KeyTypeManager<KmsEnvelopeAeadKey> {
+  private static final String TYPE_URL =
+      "type.googleapis.com/google.crypto.tink.KmsEnvelopeAeadKey";
+
   KmsEnvelopeAeadKeyManager() {
     super(
         KmsEnvelopeAeadKey.class,
@@ -53,7 +57,7 @@ public class KmsEnvelopeAeadKeyManager extends KeyTypeManager<KmsEnvelopeAeadKey
 
   @Override
   public String getKeyType() {
-    return "type.googleapis.com/google.crypto.tink.KmsEnvelopeAeadKey";
+    return TYPE_URL;
   }
 
   @Override
@@ -112,24 +116,29 @@ public class KmsEnvelopeAeadKeyManager extends KeyTypeManager<KmsEnvelopeAeadKey
    * does not generate new key material, but only creates a reference to the remote KEK.
    */
   public static KeyTemplate createKeyTemplate(String kekUri, KeyTemplate dekTemplate) {
-    KmsEnvelopeAeadKeyFormat format = createKeyFormat(kekUri, dekTemplate);
-    return KeyTemplate.create(
-        new KmsEnvelopeAeadKeyManager().getKeyType(),
-        format.toByteArray(),
-        KeyTemplate.OutputPrefixType.RAW);
+    try {
+      KmsEnvelopeAeadKeyFormat format = createKeyFormat(kekUri, dekTemplate);
+      return KeyTemplate.create(TYPE_URL, format.toByteArray(), KeyTemplate.OutputPrefixType.RAW);
+    } catch (GeneralSecurityException | InvalidProtocolBufferException e) {
+      // It is in principle possible that this throws: if the "KeyTemplate" is created directly
+      // from a parameters object, but then we cannot serialize it.  However, the only way I can
+      // see this happen is if a user defines their own parameters object and then passes it in
+      // here, hence I think an IllegalArgumentError is appropriate.
+      throw new IllegalArgumentException("Unable to serialize key template", e);
+    }
   }
 
   public static void register(boolean newKeyAllowed) throws GeneralSecurityException {
     Registry.registerKeyManager(new KmsEnvelopeAeadKeyManager(), newKeyAllowed);
   }
 
-  static KmsEnvelopeAeadKeyFormat createKeyFormat(String kekUri, KeyTemplate dekTemplate) {
+  static KmsEnvelopeAeadKeyFormat createKeyFormat(String kekUri, KeyTemplate dekTemplate)
+      throws GeneralSecurityException, InvalidProtocolBufferException {
+    byte[] serializedTemplate = TinkProtoParametersFormat.serialize(dekTemplate.toParameters());
     return KmsEnvelopeAeadKeyFormat.newBuilder()
         .setDekTemplate(
-            com.google.crypto.tink.proto.KeyTemplate.newBuilder()
-                .setTypeUrl(dekTemplate.getTypeUrl())
-                .setValue(ByteString.copyFrom(dekTemplate.getValue()))
-                .build())
+            com.google.crypto.tink.proto.KeyTemplate.parseFrom(
+                serializedTemplate, ExtensionRegistryLite.getEmptyRegistry()))
         .setKekUri(kekUri)
         .build();
   }
