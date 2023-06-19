@@ -23,7 +23,6 @@ import (
 
 	"google.golang.org/protobuf/proto"
 	"github.com/google/tink/go/core/registry"
-	"github.com/google/tink/go/mac/subtle"
 	subtleMac "github.com/google/tink/go/mac/subtle"
 	"github.com/google/tink/go/subtle/random"
 	"github.com/google/tink/go/testutil"
@@ -270,7 +269,7 @@ func validateCMACKey(format *cmacpb.AesCmacKeyFormat, key *cmacpb.AesCmacKey) er
 // validateCMACPrimitive checks whether the given primitive matches the given AESCMACKey
 func validateCMACPrimitive(p interface{}, key *cmacpb.AesCmacKey) error {
 	cmacPrimitive := p.(*subtleMac.AESCMAC)
-	keyPrimitive, err := subtle.NewAESCMAC(key.KeyValue, key.Params.TagSize)
+	keyPrimitive, err := subtleMac.NewAESCMAC(key.KeyValue, key.Params.TagSize)
 	if err != nil {
 		return fmt.Errorf("Could not create AES CMAC with key material %q and tag size %d: %s", hex.EncodeToString(key.KeyValue), key.Params.TagSize, err)
 	}
