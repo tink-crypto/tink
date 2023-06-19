@@ -27,7 +27,6 @@ import com.google.crypto.tink.subtle.EcdsaSignJce;
 import com.google.crypto.tink.subtle.EllipticCurves;
 import com.google.crypto.tink.subtle.EllipticCurves.EcdsaEncoding;
 import com.google.crypto.tink.subtle.Enums.HashType;
-import com.google.crypto.tink.util.KeysDownloader;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import java.net.URI;

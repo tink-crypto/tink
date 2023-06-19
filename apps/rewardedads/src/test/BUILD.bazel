@@ -13,8 +13,10 @@ java_library(
         "**/*.java",
     ]),
     deps = [
+        "//rewardedads/src/main/java/com/google/crypto/tink/apps/rewardedads:keys_downloader",
         "//rewardedads/src/main/java/com/google/crypto/tink/apps/rewardedads:rewarded_ads_verifier",
         "@maven//:com_google_code_gson_gson",
+        "@maven//:com_google_errorprone_error_prone_annotations",
         "@maven//:com_google_http_client_google_http_client",
         "@maven//:junit_junit",
         "@tink_java//src/main/java/com/google/crypto/tink/subtle:base64",

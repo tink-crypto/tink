@@ -6,6 +6,7 @@ java_library(
     name = "rewarded_ads_verifier",
     srcs = ["RewardedAdsVerifier.java"],
     deps = [
+        ":keys_downloader",
         "@maven//:com_google_code_gson_gson",
         "@maven//:com_google_errorprone_error_prone_annotations",
         "@maven//:com_google_http_client_google_http_client",
@@ -13,6 +14,15 @@ java_library(
         "@tink_java//src/main/java/com/google/crypto/tink/subtle:ecdsa_verify_jce",
         "@tink_java//src/main/java/com/google/crypto/tink/subtle:elliptic_curves",
         "@tink_java//src/main/java/com/google/crypto/tink/subtle:enums",
-        "@tink_java//src/main/java/com/google/crypto/tink/util:keys_downloader",
+    ],
+)
+
+java_library(
+    name = "keys_downloader",
+    srcs = ["KeysDownloader.java"],
+    deps = [
+        "@maven//:com_google_code_findbugs_jsr305",
+        "@maven//:com_google_errorprone_error_prone_annotations",
+        "@maven//:com_google_http_client_google_http_client",
     ],
 )

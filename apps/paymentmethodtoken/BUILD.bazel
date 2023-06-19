@@ -13,6 +13,7 @@ gen_maven_jar_rules(
     root_packages = ["com.google.crypto.tink.apps.paymentmethodtoken"],
     deps = [
         "//paymentmethodtoken/src/main/java/com/google/crypto/tink/apps/paymentmethodtoken:google_payments_public_keys_manager",
+        "//paymentmethodtoken/src/main/java/com/google/crypto/tink/apps/paymentmethodtoken:keys_downloader",
         "//paymentmethodtoken/src/main/java/com/google/crypto/tink/apps/paymentmethodtoken:payment_method_token_constants",
         "//paymentmethodtoken/src/main/java/com/google/crypto/tink/apps/paymentmethodtoken:payment_method_token_hybrid_decrypt",
         "//paymentmethodtoken/src/main/java/com/google/crypto/tink/apps/paymentmethodtoken:payment_method_token_hybrid_encrypt",

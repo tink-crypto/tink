@@ -18,7 +18,6 @@ package com.google.crypto.tink.apps.paymentmethodtoken;
 
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.http.javanet.NetHttpTransport;
-import com.google.crypto.tink.util.KeysDownloader;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import java.io.IOException;
 import java.util.Arrays;

@@ -15,6 +15,7 @@ java_library(
     deps = [
         "//paymentmethodtoken/src/main/java/com/google/crypto/tink/apps/paymentmethodtoken:google_payments_public_keys_manager",
         "//paymentmethodtoken/src/main/java/com/google/crypto/tink/apps/paymentmethodtoken:jwt_key_converter",
+        "//paymentmethodtoken/src/main/java/com/google/crypto/tink/apps/paymentmethodtoken:keys_downloader",
         "//paymentmethodtoken/src/main/java/com/google/crypto/tink/apps/paymentmethodtoken:payment_method_token_constants",
         "//paymentmethodtoken/src/main/java/com/google/crypto/tink/apps/paymentmethodtoken:payment_method_token_hybrid_decrypt",
         "//paymentmethodtoken/src/main/java/com/google/crypto/tink/apps/paymentmethodtoken:payment_method_token_hybrid_encrypt",
@@ -24,6 +25,7 @@ java_library(
         "//paymentmethodtoken/src/main/java/com/google/crypto/tink/apps/paymentmethodtoken:payment_method_token_util",
         "//paymentmethodtoken/src/main/java/com/google/crypto/tink/apps/paymentmethodtoken:sender_intermediate_cert_factory",
         "@maven//:com_google_code_gson_gson",
+        "@maven//:com_google_errorprone_error_prone_annotations",
         "@maven//:com_google_http_client_google_http_client",
         "@maven//:com_google_truth_truth",
         "@maven//:junit_junit",

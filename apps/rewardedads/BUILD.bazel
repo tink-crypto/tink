@@ -11,5 +11,8 @@ gen_maven_jar_rules(
         "Automatic-Module-Name: com.google.crypto.tink.apps.rewardedads",
     ],
     root_packages = ["com.google.crypto.tink.apps.rewardedads"],
-    deps = ["//rewardedads/src/main/java/com/google/crypto/tink/apps/rewardedads:rewarded_ads_verifier"],
+    deps = [
+        "//rewardedads/src/main/java/com/google/crypto/tink/apps/rewardedads:keys_downloader",
+        "//rewardedads/src/main/java/com/google/crypto/tink/apps/rewardedads:rewarded_ads_verifier",
+    ],
 )
