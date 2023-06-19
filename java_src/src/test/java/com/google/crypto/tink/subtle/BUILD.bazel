@@ -614,3 +614,17 @@ java_test(
         "@maven//:junit_junit",
     ],
 )
+
+java_test(
+    name = "PrfMacTest",
+    size = "small",
+    srcs = ["PrfMacTest.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink:mac",
+        "//src/main/java/com/google/crypto/tink/config:tink_fips",
+        "//src/main/java/com/google/crypto/tink/mac/internal:aes_cmac_test_util",
+        "//src/main/java/com/google/crypto/tink/subtle:prf_mac",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
