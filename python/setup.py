@@ -27,6 +27,7 @@ import textwrap
 
 import setuptools
 from setuptools.command import build_ext
+from setuptools.command import sdist
 
 
 _PROJECT_BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -135,7 +136,7 @@ def _patch_workspace(workspace_file):
     workspace_content = _patch_with_local_path(workspace_content, base_path)
 
   elif 'TINK_PYTHON_SETUPTOOLS_TAGGED_VERSION' in os.environ:
-    tagged_version = os.environ['TINK_PYTHON_SETUP_TOOLS_TAGGED_VERSION']
+    tagged_version = os.environ['TINK_PYTHON_SETUPTOOLS_TAGGED_VERSION']
     archive_filename = 'v{}.zip'.format(tagged_version)
     archive_prefix = 'tink-{}'.format(tagged_version)
     workspace_content = _patch_with_http_archive(workspace_content,
@@ -242,6 +243,14 @@ class BuildBazelExtension(build_ext.build_ext):
     shutil.copyfile(ext_bazel_bin_path, ext_dest_path)
 
 
+class SdistCmd(sdist.sdist):
+  """A command that patches the workspace before creating an sdist."""
+
+  def run(self):
+    _patch_workspace('WORKSPACE')
+    sdist.sdist.run(self)
+
+
 def main():
   # Generate compiled protocol buffers.
   protoc_command = _get_protoc_command()
@@ -262,7 +271,10 @@ def main():
       # Contained modules and scripts.
       packages=setuptools.find_packages(),
       install_requires=_parse_requirements('requirements.in'),
-      cmdclass=dict(build_ext=BuildBazelExtension),
+      cmdclass={
+          'build_ext': BuildBazelExtension,
+          'sdist': SdistCmd,
+      },
       ext_modules=[
           BazelExtension('//tink/cc/pybind:tink_bindings'),
       ],
