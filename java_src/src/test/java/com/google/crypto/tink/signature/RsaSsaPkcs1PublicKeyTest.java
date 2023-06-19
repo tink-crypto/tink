@@ -318,11 +318,6 @@ public final class RsaSsaPkcs1PublicKeyTest {
                 .setParameters(tinkPrefixParameters)
                 .setModulus(MODULUS)
                 .setIdRequirement(1907)
-                .build(),
-            RsaSsaPkcs1PublicKey.builder()
-                .setParameters(tinkPrefixParameters)
-                .setModulus(MODULUS)
-                .setIdRequirement(1907)
                 .build())
         // This group checks that keys with different key ids are not equal
         .addEqualityGroup(
