@@ -229,7 +229,11 @@ public final class TestUtil {
         .build();
   }
 
-  /** @return a {@code HkdfPrfKey}. */
+  /**
+   * @return a {@code HkdfPrfKey}.
+   * @deprecated Do not use this function
+   */
+  @Deprecated
   public static HkdfPrfKey createPrfKey(byte[] keyValue) throws Exception {
     HkdfPrfParams params = HkdfPrfParams.newBuilder().setHash(HashType.SHA256).build();
 
@@ -316,7 +320,11 @@ public final class TestUtil {
         KeyData.KeyMaterialType.SYMMETRIC);
   }
 
-  /** @return a {@code KeyData} containing a {@code AesCtrHmacAeadKey}. */
+  /**
+   * @return a {@code KeyData} containing a {@code AesCtrHmacAeadKey}.
+   * @deprecated Do not use this function
+   */
+  @Deprecated
   public static KeyData createAesCtrHmacAeadKeyData(
       byte[] aesCtrKeyValue, int ivSize, byte[] hmacKeyValue, int tagSize) throws Exception {
     AesCtrKey aesCtrKey = createAesCtrKey(aesCtrKeyValue, ivSize);
@@ -342,8 +350,13 @@ public final class TestUtil {
     return createKeyData(keyProto, AeadConfig.AES_GCM_TYPE_URL, KeyData.KeyMaterialType.SYMMETRIC);
   }
 
-  /** @return a {@code KeyData} containing a {@code AesEaxKey}. */
-  public static KeyData createAesEaxKeyData(byte[] keyValue, int ivSizeInBytes) throws Exception {
+  /**
+   * @return a {@code KeyData} containing a {@code AesEaxKey}.
+   * @deprecated DO not use this function.
+   */
+  @Deprecated
+  public static KeyData createAesEaxKeyData(byte[] keyValue, int ivSizeInBytes)
+      throws Exception {
     AesEaxKey keyProto =
         AesEaxKey.newBuilder()
             .setKeyValue(ByteString.copyFrom(keyValue))
@@ -528,7 +541,9 @@ public final class TestUtil {
   /**
    * @return a {@code KeyData} containing a {@code EciesAeadHkdfPrivateKey} with the specified key
    *     material and parameters.
+   * @deprecated Do not use this function
    */
+  @Deprecated
   public static EciesAeadHkdfPrivateKey createEciesAeadHkdfPrivKey(
       EciesAeadHkdfPublicKey pubKey, byte[] privKeyValue) throws Exception {
     final int version = 0;
@@ -539,7 +554,11 @@ public final class TestUtil {
         .build();
   }
 
-  /** @return a {@code EciesAeadHkdfPublicKey} with the specified key material and parameters. */
+  /**
+   * @return a {@code EciesAeadHkdfPublicKey} with the specified key material and parameters.
+   * @deprecated Do not use this function.
+   */
+  @Deprecated
   public static EciesAeadHkdfPublicKey createEciesAeadHkdfPubKey(
       EllipticCurveType curve,
       HashType hashType,
@@ -694,7 +713,12 @@ public final class TestUtil {
     assertThat(hmacKey.getKeyValue().size()).isEqualTo(hmacKeyFormat.getKeySize());
   }
 
-  /** Asserts that {@code KeyInfo} is corresponding to a key from {@code keyTemplate}. */
+  /**
+   * Asserts that {@code KeyInfo} is corresponding to a key from {@code keyTemplate}.
+   *
+   * @deprecated Do not use this function.
+   */
+  @Deprecated
   public static void assertKeyInfo(
       com.google.crypto.tink.KeyTemplate keyTemplate, KeysetInfo.KeyInfo keyInfo) throws Exception {
     assertThat(keyInfo.getKeyId()).isGreaterThan(0);
@@ -738,7 +762,12 @@ public final class TestUtil {
     assertByteBufferContains("", expected, buffer);
   }
 
-  /** Verifies that the given entry has the specified contents. */
+  /**
+   * Verifies that the given entry has the specified contents.
+   *
+   * @deprecated Do not use this function.
+   */
+  @Deprecated
   public static void verifyConfigEntry(
       KeyTypeEntry entry,
       String catalogueName,
