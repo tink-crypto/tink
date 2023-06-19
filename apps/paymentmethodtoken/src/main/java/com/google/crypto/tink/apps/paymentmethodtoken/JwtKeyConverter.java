@@ -33,14 +33,14 @@ import java.security.interfaces.ECPublicKey;
  *
  * <p>These functions are currently just an example, and are not (yet) part of the public API.
  */
-final class JwtKeyConverter {
+public final class JwtKeyConverter {
 
   /**
    * Converts an uncompressed Base64 encoded ECDSA public key for NIST P-256 Curve into a Tink
    * JwtEcdsaPublicKey with algorithm ES256.
    */
   @AccessesPartialKey
-  static JwtEcdsaPublicKey fromBase64EncodedNistP256PublicKey(
+  public static JwtEcdsaPublicKey fromBase64EncodedNistP256PublicKey(
       String based64EncodedEcNistP256PublicKey) throws GeneralSecurityException {
     ECPublicKey ecPublicKey =
         EllipticCurves.getEcPublicKey(
@@ -59,13 +59,33 @@ final class JwtKeyConverter {
   }
 
   /**
+   * Converts a JwtEcdsaPublicKey using algorithm ES256 to an uncompressed Base64 encoded ECDSA
+   * public key for NIST P-256 Curve.
+   */
+  @AccessesPartialKey
+  public static String toBase64EncodedNistP256PublicKey(JwtEcdsaPublicKey publicKey)
+      throws GeneralSecurityException {
+    if (publicKey.getParameters().getAlgorithm() != JwtEcdsaParameters.Algorithm.ES256) {
+      throw new GeneralSecurityException("Only ES256 is supported.");
+    }
+    if (publicKey.getParameters().getKidStrategy() != JwtEcdsaParameters.KidStrategy.IGNORED) {
+      throw new GeneralSecurityException("Only KidStrategy IGNORED is supported.");
+    }
+    return Base64.encode(
+        EllipticCurves.pointEncode(
+            EllipticCurves.CurveType.NIST_P256,
+            EllipticCurves.PointFormatType.UNCOMPRESSED,
+            publicKey.getPublicPoint()));
+  }
+
+  /**
    * Converts a Base64 encoded PKCS8 ECDSA private key for NIST P-256 Curve into a Tink
    * JwtEcdsaPrivateKey with algorithm ES256.
    *
    * <p>It also requires that you provide the corresponding JwtEcdsaPublicKey.
    */
   @AccessesPartialKey
-  static JwtEcdsaPrivateKey fromBased64EncodedPkcs8EcNistP256PrivateKey(
+  public static JwtEcdsaPrivateKey fromBased64EncodedPkcs8EcNistP256PrivateKey(
       String based64EncodedPkcs8EcNistP256PrivateKey,
       JwtEcdsaPublicKey publicKey,
       SecretKeyAccess access)

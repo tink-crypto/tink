@@ -32,8 +32,10 @@ import com.google.crypto.tink.jwt.RawJwt;
 import com.google.crypto.tink.jwt.VerifiedJwt;
 import com.google.crypto.tink.subtle.Base64;
 import com.google.crypto.tink.subtle.EllipticCurves;
+import java.math.BigInteger;
 import java.security.GeneralSecurityException;
 import java.security.interfaces.ECPublicKey;
+import java.security.spec.ECPoint;
 import java.time.Clock;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -100,6 +102,18 @@ public final class JwtKeyConverterTest {
   }
 
   @Test
+  public void importAndExportPublicKey_same() throws Exception {
+    String based64EncodedEcNistP256PublicKey =
+        "BOdoXP+9Aq473SnGwg3JU1aiNpsd9vH2ognq4PtDtlLGa3Kj8TPf+jaQNPyDSkh3JUhiS0KyrrlWhAgNZKHYF2Y=";
+
+    JwtEcdsaPublicKey jwtEcdsaPublicKey =
+        JwtKeyConverter.fromBase64EncodedNistP256PublicKey(based64EncodedEcNistP256PublicKey);
+    String exported = JwtKeyConverter.toBase64EncodedNistP256PublicKey(jwtEcdsaPublicKey);
+
+    assertThat(exported).isEqualTo(based64EncodedEcNistP256PublicKey);
+  }
+
+  @Test
   public void fromBase64EncodedNistP256PublicKey_rejectInvalidPublicKey() throws Exception {
     String invalidBased64EncodedEcNistP256PublicKey =
         "BOdoXP+9Aq473SnGwg3JU1aiNpsd9vH2ognq4PtDtlLGa3Kj8TPf+jaQNPyDSkh3JUhiS0KyrrlWhAgNZKHYF2X=";
@@ -108,6 +122,33 @@ public final class JwtKeyConverterTest {
         () ->
             JwtKeyConverter.fromBase64EncodedNistP256PublicKey(
                 invalidBased64EncodedEcNistP256PublicKey));
+  }
+
+  @Test
+  public void toBase64EncodedNistP256PublicKey_rejectsEs512PublicKey() throws Exception {
+    JwtEcdsaPublicKey es512PublicKey =
+        JwtEcdsaPublicKey.builder()
+            .setParameters(
+                JwtEcdsaParameters.builder()
+                    .setKidStrategy(JwtEcdsaParameters.KidStrategy.IGNORED)
+                    .setAlgorithm(JwtEcdsaParameters.Algorithm.ES512)
+                    .build())
+            .setPublicPoint(
+                new ECPoint(
+                    new BigInteger(
+                        "000000685a48e86c79f0f0875f7bc18d25eb5fc8c0b07e5da4f4370f3a9490340"
+                            + "854334b1e1b87fa395464c60626124a4e70d0f785601d37c09870ebf176666877a2"
+                            + "046d",
+                        16),
+                    new BigInteger(
+                        "000001ba52c56fc8776d9e8f5db4f0cc27636d0b741bbe05400697942e80b7398"
+                            + "84a83bde99e0f6716939e632bc8986fa18dccd443a348b6c3e522497955a4f3c302"
+                            + "f676",
+                        16)))
+            .build();
+    assertThrows(
+        GeneralSecurityException.class,
+        () -> JwtKeyConverter.toBase64EncodedNistP256PublicKey(es512PublicKey));
   }
 
   @Test
