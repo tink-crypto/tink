@@ -12,13 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Cross-language tests for the KMS Envelope AEAD primitive with AWS and GCP."""
-import itertools
-
-from typing import Dict, Iterable, Tuple, Sequence
+from typing import Dict, Iterable, List, Sequence, Tuple
 
 from absl.testing import absltest
 from absl.testing import parameterized
-
 import tink
 from tink import aead
 
@@ -95,6 +92,25 @@ def tearDownModule():
   testing_servers.stop()
 
 
+def _get_lang_tuples(langs: List[str]) -> Iterable[Tuple[str, str]]:
+  """Yields language tuples to run cross-language tests.
+
+  Ideally, we would want to the test all possible tuples of languages. But
+  that results in a quadratic number of tuples. It is not really necessary,
+  because if an implementation in one language does something different, then
+  any cross-language test with another language will fail. So it is enough to
+  only use every implementation once for encryption and once for decryption.
+
+  Args:
+    langs: List of language names.
+
+  Yields:
+    Tuples of 2 languages.
+  """
+  for i, _ in enumerate(langs):
+    yield (langs[i], langs[((i + 1) % len(langs))])
+
+
 def _get_plaintext_and_aad(key_template_name: str,
                            lang: str) -> Tuple[bytes, bytes]:
   """Creates test plaintext and associated data from a key template and lang."""
@@ -110,8 +126,7 @@ def _get_plaintext_and_aad(key_template_name: str,
 def _kms_aead_test_cases() -> Iterable[Tuple[str, str, str]]:
   """Yields (KMS service, encrypt lang, decrypt lang)."""
   for kms_service, supported_langs in _SUPPORTED_LANGUAGES_FOR_KMS_AEAD.items():
-    for encrypt_lang, decrypt_lang in itertools.product(supported_langs,
-                                                        supported_langs):
+    for encrypt_lang, decrypt_lang in _get_lang_tuples(supported_langs):
       yield (kms_service, encrypt_lang, decrypt_lang)
 
 
@@ -141,6 +156,13 @@ def _unknown_key_uris_test_cases():
 
 
 class KmsAeadTest(parameterized.TestCase):
+
+  def test_get_lang_tuples(self):
+    self.assertEqual(
+        list(_get_lang_tuples(['cc', 'java', 'go', 'python'])),
+        [('cc', 'java'), ('java', 'go'), ('go', 'python'), ('python', 'cc')],
+    )
+    self.assertEqual(list(_get_lang_tuples([])), [])
 
   @parameterized.parameters(_kms_aead_test_cases())
   def test_encrypt_decrypt_with_associated_data(
@@ -274,9 +296,8 @@ def _kms_envelope_aead_test_cases() -> Iterable[Tuple[str, str, str]]:
   for key_template_name in _KMS_ENVELOPE_AEAD_KEY_TEMPLATES:
     # Make sure to test languages that support the pritive used for DEK.
     supported_langs = _SUPPORTED_LANGUAGES_FOR_KMS_ENVELOPE_AEAD
-    for encrypt_lang in supported_langs:
-      for decrypt_lang in supported_langs:
-        yield (key_template_name, encrypt_lang, decrypt_lang)
+    for encrypt_lang, decrypt_lang in _get_lang_tuples(supported_langs):
+      yield (key_template_name, encrypt_lang, decrypt_lang)
 
 
 class KmsEnvelopeAeadTest(parameterized.TestCase):
