@@ -165,7 +165,7 @@ public final class TestingServicesTest {
     assertThat(response.getErr()).isEmpty();
     KeyTemplate template =
         KeyTemplateProtoConverter.fromByteArray(response.getKeyTemplate().toByteArray());
-    assertThat(template.getTypeUrl()).isEqualTo("type.googleapis.com/google.crypto.tink.AesGcmKey");
+    assertThat(template.toParameters()).isEqualTo(KeyTemplates.get("AES256_GCM").toParameters());
   }
 
   @Test

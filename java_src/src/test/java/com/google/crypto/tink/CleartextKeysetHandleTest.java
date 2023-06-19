@@ -21,6 +21,7 @@ import static com.google.crypto.tink.testing.TestUtil.assertExceptionContains;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
+import static org.junit.Assert.assertTrue;
 
 import com.google.crypto.tink.config.TinkConfig;
 import com.google.crypto.tink.internal.MutableMonitoringRegistry;
@@ -69,13 +70,10 @@ public class CleartextKeysetHandleTest {
         CleartextKeysetHandle.read(BinaryKeysetReader.withBytes(keyset1.toByteArray()));
     assertEquals(keyset1, handle1.getKeyset());
 
-    KeysetHandle handle2 = KeysetHandle.generateNew(template);
-    Keyset keyset2 = handle2.getKeyset();
-    assertEquals(1, keyset2.getKeyCount());
-    Keyset.Key key2 = keyset2.getKey(0);
-    assertEquals(keyset2.getPrimaryKeyId(), key2.getKeyId());
-    assertEquals(template.getTypeUrl(), key2.getKeyData().getTypeUrl());
-    Mac unused = handle2.getPrimitive(Mac.class);
+    assertThat(handle1.size()).isEqualTo(1);
+    assertThat(handle1.getAt(0).getId()).isEqualTo(handle.getAt(0).getId());
+    assertThat(handle1.getAt(0).getStatus()).isEqualTo(handle.getAt(0).getStatus());
+    assertTrue(handle1.getAt(0).getKey().equalsKey(handle.getAt(0).getKey()));
   }
 
   @Test
