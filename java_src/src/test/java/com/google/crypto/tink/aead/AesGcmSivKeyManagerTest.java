@@ -50,7 +50,7 @@ public class AesGcmSivKeyManagerTest {
       manager.keyFactory();
 
   @Before
-  public void setUpConscrypt() throws Exception {
+  public void setUp() throws Exception {
     try {
       Conscrypt.checkAvailability();
       Security.addProvider(Conscrypt.newProvider());
@@ -58,10 +58,6 @@ public class AesGcmSivKeyManagerTest {
       throw new IllegalStateException(
           "Cannot test AesGcmSivKeyManager without Conscrypt Provider", cause);
     }
-  }
-
-  @Before
-  public void register() throws Exception {
     AeadConfig.register();
   }
 
