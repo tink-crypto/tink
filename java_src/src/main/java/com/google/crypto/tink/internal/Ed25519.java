@@ -1529,7 +1529,7 @@ public final class Ed25519 {
    * Returns the EdDSA signature for the {@code message} based on the {@code hashedPrivateKey}.
    *
    * @param message to sign
-   * @param publicKey {@link Ed25519#scalarMultToBytes(byte[])} of {@code hashedPrivateKey}
+   * @param publicKey {@link Ed25519#scalarMultWithBaseToBytes(byte[])} of {@code hashedPrivateKey}
    * @param hashedPrivateKey {@link Ed25519#getHashedScalar(byte[])} of the private key
    * @return signature for the {@code message}.
    * @throws GeneralSecurityException if there is no SHA-512 algorithm defined in {@link
