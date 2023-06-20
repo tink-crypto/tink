@@ -26,6 +26,7 @@
 #include "absl/memory/memory.h"
 #include "absl/status/status.h"
 #include "tink/aead.h"
+#include "tink/aead/aead_config.h"
 #include "tink/aead/aead_key_templates.h"
 #include "tink/aead/aes_eax_key_manager.h"
 #include "tink/aead/kms_envelope_aead.h"
@@ -33,6 +34,7 @@
 #include "tink/kms_clients.h"
 #include "tink/registry.h"
 #include "tink/subtle/aead_test_util.h"
+#include "tink/util/fake_kms_client.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "tink/util/test_matchers.h"
@@ -46,7 +48,9 @@ namespace tink {
 using ::crypto::tink::test::DummyAead;
 using ::crypto::tink::test::DummyKmsClient;
 using ::crypto::tink::test::IsOk;
+using ::crypto::tink::test::IsOkAndHolds;
 using ::crypto::tink::test::StatusIs;
+using ::google::crypto::tink::KeyTemplate;
 using ::google::crypto::tink::KmsEnvelopeAeadKey;
 using ::google::crypto::tink::KmsEnvelopeAeadKeyFormat;
 using ::testing::Eq;
@@ -227,6 +231,54 @@ TEST_F(KmsEnvelopeAeadKeyManagerCreateTest, CreateAeadUnboundKey) {
                                  "plaintext", "aad"),
               IsOk());
 }
+
+class KmsEnvelopeAeadKeyManagerDekTemplatesTest
+    : public testing::TestWithParam<KeyTemplate> {
+  void SetUp() override { ASSERT_THAT(AeadConfig::Register(), IsOk()); }
+};
+
+TEST_P(KmsEnvelopeAeadKeyManagerDekTemplatesTest, EncryptDecryp) {
+  util::StatusOr<std::string> kek_uri_result =
+      test::FakeKmsClient::CreateFakeKeyUri();
+  ASSERT_THAT(kek_uri_result, IsOk());
+  std::string kek_uri = kek_uri_result.value();
+  util::Status register_fake_kms_client_status =
+      test::FakeKmsClient::RegisterNewClient(kek_uri, /*credentials_path=*/"");
+  ASSERT_THAT(register_fake_kms_client_status, IsOk());
+
+  KeyTemplate dek_template = GetParam();
+  KeyTemplate env_template =
+      AeadKeyTemplates::KmsEnvelopeAead(kek_uri, dek_template);
+  util::StatusOr<std::unique_ptr<KeysetHandle>> handle =
+      KeysetHandle::GenerateNew(env_template);
+  ASSERT_THAT(handle, IsOk());
+  util::StatusOr<std::unique_ptr<Aead>> envelope_aead =
+      (*handle)->GetPrimitive<Aead>();
+  ASSERT_THAT(envelope_aead, IsOk());
+
+  std::string plaintext = "plaintext";
+  std::string associated_data = "associated_data";
+  util::StatusOr<std::string> ciphertext =
+      (*envelope_aead)->Encrypt(plaintext, associated_data);
+  ASSERT_THAT(ciphertext, IsOk());
+  util::StatusOr<std::string> decrypted =
+      (*envelope_aead)->Decrypt(ciphertext.value(), associated_data);
+  EXPECT_THAT(decrypted, IsOkAndHolds(plaintext));
+
+  std::string invalid_associated_data = "invalid_associated_data";
+  util::StatusOr<std::string> decrypted_with_invalid_associated_data =
+      (*envelope_aead)->Decrypt(ciphertext.value(), invalid_associated_data);
+  EXPECT_THAT(decrypted_with_invalid_associated_data.status(), Not(IsOk()));
+}
+
+INSTANTIATE_TEST_SUITE_P(
+    KmsEnvelopeAeadKeyManagerDekTemplatesTest,
+    KmsEnvelopeAeadKeyManagerDekTemplatesTest,
+    testing::Values(AeadKeyTemplates::Aes128Gcm(),
+                    AeadKeyTemplates::Aes256Gcm(),
+                    AeadKeyTemplates::Aes128CtrHmacSha256(),
+                    AeadKeyTemplates::Aes128Eax(),
+                    AeadKeyTemplates::Aes128GcmNoPrefix()));
 
 }  // namespace
 }  // namespace tink

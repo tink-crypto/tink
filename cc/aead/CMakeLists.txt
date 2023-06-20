@@ -648,6 +648,7 @@ tink_cc_test(
     tink::core::aead
     tink::core::keyset_handle
     tink::core::registry
+    tink::internal::ssl_util
     tink::mac::mac_key_templates
     tink::util::status
     tink::util::statusor
@@ -661,6 +662,7 @@ tink_cc_test(
   SRCS
     kms_envelope_aead_key_manager_test.cc
   DEPS
+    tink::aead::aead_config
     tink::aead::aead_key_templates
     tink::aead::aes_eax_key_manager
     tink::aead::kms_envelope_aead
@@ -673,6 +675,7 @@ tink_cc_test(
     tink::core::kms_clients
     tink::core::registry
     tink::subtle::aead_test_util
+    tink::util::fake_kms_client
     tink::util::status
     tink::util::statusor
     tink::util::test_matchers

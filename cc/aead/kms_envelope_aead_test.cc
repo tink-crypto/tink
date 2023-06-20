@@ -40,6 +40,7 @@
 #include "tink/util/test_matchers.h"
 #include "tink/util/test_util.h"
 #include "proto/aes_gcm.pb.h"
+#include "tink/internal/ssl_util.h"
 
 namespace crypto {
 namespace tink {
@@ -234,6 +235,53 @@ TEST_F(KmsEnvelopeAeadTest, MultipleEncryptionsProduceDifferentDeks) {
     }
   }
 }
+
+class KmsEnvelopeAeadDekTemplatesTest
+    : public testing::TestWithParam<KeyTemplate> {
+  void SetUp() override { ASSERT_THAT(AeadConfig::Register(), IsOk()); }
+};
+
+TEST_P(KmsEnvelopeAeadDekTemplatesTest, EncryptDecrypt) {
+  // Use an AES-128-GCM primitive as the remote AEAD.
+  util::StatusOr<std::unique_ptr<KeysetHandle>> keyset_handle =
+      KeysetHandle::GenerateNew(AeadKeyTemplates::Aes128Gcm());
+  ASSERT_THAT(keyset_handle, IsOk());
+  util::StatusOr<std::unique_ptr<Aead>> remote_aead =
+      (*keyset_handle)->GetPrimitive<Aead>();
+
+  KeyTemplate dek_template = GetParam();
+  util::StatusOr<std::unique_ptr<Aead>> envelope_aead =
+      KmsEnvelopeAead::New(dek_template, *std::move(remote_aead));
+  ASSERT_THAT(envelope_aead, IsOk());
+
+  std::string plaintext = "plaintext";
+  std::string associated_data = "associated_data";
+  util::StatusOr<std::string> ciphertext =
+      (*envelope_aead)->Encrypt(plaintext, associated_data);
+  ASSERT_THAT(ciphertext, IsOk());
+  util::StatusOr<std::string> decrypted =
+      (*envelope_aead)->Decrypt(ciphertext.value(), associated_data);
+  EXPECT_THAT(decrypted, IsOkAndHolds(plaintext));
+}
+
+std::vector<KeyTemplate> GetTestTemplates() {
+  std::vector<KeyTemplate> templates = {
+    AeadKeyTemplates::Aes128Gcm(),
+    AeadKeyTemplates::Aes256Gcm(),
+    AeadKeyTemplates::Aes128CtrHmacSha256(),
+    AeadKeyTemplates::Aes128Eax(),
+    AeadKeyTemplates::Aes128GcmNoPrefix()
+  };
+  if (internal::IsBoringSsl()) {
+    templates.push_back(AeadKeyTemplates::XChaCha20Poly1305());
+    templates.push_back(AeadKeyTemplates::Aes256GcmSiv());
+  }
+  return templates;
+}
+
+INSTANTIATE_TEST_SUITE_P(
+    KmsEnvelopeAeadDekTemplatesTest, KmsEnvelopeAeadDekTemplatesTest,
+    testing::ValuesIn(GetTestTemplates()));
 
 }  // namespace
 }  // namespace tink
