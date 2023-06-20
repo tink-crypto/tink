@@ -322,7 +322,6 @@ tink_cc_library(
     signature_config.cc
     signature_config.h
   DEPS
-    tink::signature::ecdsa_sign_key_manager
     tink::signature::ecdsa_verify_key_manager
     tink::signature::ed25519_sign_key_manager
     tink::signature::ed25519_verify_key_manager
@@ -338,6 +337,7 @@ tink_cc_library(
     tink::config::config_util
     tink::config::tink_fips
     tink::util::status
+    tink::signature::ecdsa_sign_key_manager
     tink::proto::config_cc_proto
 )
 

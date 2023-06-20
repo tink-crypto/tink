@@ -64,6 +64,7 @@ cc_library(
         "//aead:aes_ctr_hmac_aead_key_manager",
         "//aead:aes_gcm_key_manager",
         "//internal:configuration_impl",
+        "//internal:fips_utils",
         "//mac:hmac_key_manager",
         "//mac:mac_wrapper",
         "//mac/internal:chunked_mac_wrapper",
