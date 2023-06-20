@@ -17,8 +17,8 @@
 package com.google.crypto.tink.internal;
 
 import com.google.crypto.tink.KeyTemplate;
+import com.google.crypto.tink.Parameters;
 import com.google.crypto.tink.proto.OutputPrefixType;
-import com.google.protobuf.ByteString;
 import com.google.protobuf.ExtensionRegistryLite;
 import com.google.protobuf.InvalidProtocolBufferException;
 import java.security.GeneralSecurityException;
@@ -42,28 +42,16 @@ public final class KeyTemplateProtoConverter {
     }
   }
 
-  private static OutputPrefixType prefixToProto(KeyTemplate.OutputPrefixType outputPrefixType)
-      throws GeneralSecurityException {
-    switch (outputPrefixType) {
-      case TINK:
-        return OutputPrefixType.TINK;
-      case LEGACY:
-        return OutputPrefixType.LEGACY;
-      case RAW:
-        return OutputPrefixType.RAW;
-      case CRUNCHY:
-        return OutputPrefixType.CRUNCHY;
-    }
-    throw new GeneralSecurityException("Unknown output prefix type");
-  }
-
   public static com.google.crypto.tink.proto.KeyTemplate toProto(KeyTemplate keyTemplate)
       throws GeneralSecurityException {
-    return com.google.crypto.tink.proto.KeyTemplate.newBuilder()
-        .setTypeUrl(keyTemplate.getTypeUrl())
-        .setValue(ByteString.copyFrom(keyTemplate.getValue()))
-        .setOutputPrefixType(prefixToProto(keyTemplate.getOutputPrefixType()))
-        .build();
+    Parameters parameters = keyTemplate.toParameters();
+    if (parameters instanceof LegacyProtoParameters) {
+      return ((LegacyProtoParameters) parameters).getSerialization().getKeyTemplate();
+    }
+    ProtoParametersSerialization s =
+        MutableSerializationRegistry.globalInstance()
+            .serializeParameters(parameters, ProtoParametersSerialization.class);
+    return s.getKeyTemplate();
   }
 
   public static byte[] toByteArray(KeyTemplate keyTemplate) throws GeneralSecurityException {
