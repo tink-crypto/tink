@@ -153,7 +153,7 @@ func CreateKMSEnvelopeAEADKeyTemplate(uri string, dekTemplate *tinkpb.KeyTemplat
 // If either uri or dekTemplate contain invalid input, program execution will
 // be interrupted.
 //
-// Deprecated: Use [CreateKMSEnvelopAEADKeyTemplate], which returns an error
+// Deprecated: Use [CreateKMSEnvelopeAEADKeyTemplate], which returns an error
 // value instead of interrupting the program.
 func KMSEnvelopeAEADKeyTemplate(uri string, dekTemplate *tinkpb.KeyTemplate) *tinkpb.KeyTemplate {
 	t, err := CreateKMSEnvelopeAEADKeyTemplate(uri, dekTemplate)
