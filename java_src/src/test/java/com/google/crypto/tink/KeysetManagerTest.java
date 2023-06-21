@@ -25,8 +25,6 @@ import com.google.common.truth.Expect;
 import com.google.crypto.tink.aead.AesGcmKeyManager;
 import com.google.crypto.tink.config.TinkConfig;
 import com.google.crypto.tink.mac.PredefinedMacParameters;
-import com.google.crypto.tink.proto.AesGcmKey;
-import com.google.crypto.tink.proto.AesGcmKeyFormat;
 import com.google.crypto.tink.proto.KeyStatusType;
 import com.google.crypto.tink.proto.Keyset;
 import com.google.crypto.tink.proto.Keyset.Key;
@@ -818,20 +816,12 @@ public class KeysetManagerTest {
     keysetManager = keysetManager.add(keyHandle, keyAccess);
 
     KeysetHandle keysetHandle = keysetManager.getKeysetHandle();
-    Keyset keyset = keysetHandle.getKeyset();
-    expect.that(keyset.getKeyCount()).isEqualTo(1);
-    Keyset.Key key = keyset.getKey(0);
-    expect.that(key.getStatus()).isEqualTo(KeyStatusType.ENABLED);
-    expect.that(key.getOutputPrefixType()).isEqualTo(OutputPrefixType.TINK);
-    expect.that(key.hasKeyData()).isTrue();
-    expect.that(key.getKeyData().getTypeUrl()).isEqualTo(keyTemplate.getTypeUrl());
-    AesGcmKeyFormat aesGcmKeyFormat =
-        AesGcmKeyFormat.parseFrom(keyTemplate.getValue(), ExtensionRegistryLite.getEmptyRegistry());
-    AesGcmKey aesGcmKey =
-        AesGcmKey.parseFrom(key.getKeyData().getValue(), ExtensionRegistryLite.getEmptyRegistry());
-    expect.that(aesGcmKey.getKeyValue().size()).isEqualTo(aesGcmKeyFormat.getKeySize());
-    // No primary key because add doesn't automatically promote the new key to primary.
-    assertThrows(GeneralSecurityException.class, () -> keysetHandle.getPrimitive(Aead.class));
+    expect.that(keysetHandle.size()).isEqualTo(1);
+    expect.that(keysetHandle.getAt(0).getStatus()).isEqualTo(KeyStatus.ENABLED);
+    expect.that(keysetHandle.getAt(0).isPrimary()).isFalse();
+    expect
+        .that(keysetHandle.getAt(0).getKey().getParameters())
+        .isEqualTo(keyTemplate.toParameters());
   }
 
   @Test
@@ -848,32 +838,17 @@ public class KeysetManagerTest {
     keysetManager = keysetManager.add(keyHandle, keyAccess);
 
     KeysetHandle keysetHandle = keysetManager.getKeysetHandle();
-    Keyset keyset = keysetHandle.getKeyset();
-    expect.that(keyset.getKeyCount()).isEqualTo(2);
-    Keyset.Key key1 = keyset.getKey(0);
-    expect.that(key1.getStatus()).isEqualTo(KeyStatusType.ENABLED);
-    expect.that(key1.getOutputPrefixType()).isEqualTo(OutputPrefixType.TINK);
-    expect.that(key1.hasKeyData()).isTrue();
-    expect.that(key1.getKeyData().getTypeUrl()).isEqualTo(keyTemplate1.getTypeUrl());
-    AesGcmKeyFormat aesGcmKeyFormat1 =
-        AesGcmKeyFormat.parseFrom(
-            keyTemplate1.getValue(), ExtensionRegistryLite.getEmptyRegistry());
-    AesGcmKey aesGcmKey1 =
-        AesGcmKey.parseFrom(key1.getKeyData().getValue(), ExtensionRegistryLite.getEmptyRegistry());
-    expect.that(aesGcmKey1.getKeyValue().size()).isEqualTo(aesGcmKeyFormat1.getKeySize());
-    Keyset.Key key2 = keyset.getKey(1);
-    expect.that(key2.getStatus()).isEqualTo(KeyStatusType.ENABLED);
-    expect.that(key2.getOutputPrefixType()).isEqualTo(OutputPrefixType.TINK);
-    expect.that(key2.hasKeyData()).isTrue();
-    expect.that(key2.getKeyData().getTypeUrl()).isEqualTo(keyTemplate2.getTypeUrl());
-    AesGcmKeyFormat aesGcmKeyFormat2 =
-        AesGcmKeyFormat.parseFrom(
-            keyTemplate2.getValue(), ExtensionRegistryLite.getEmptyRegistry());
-    AesGcmKey aesGcmKey2 =
-        AesGcmKey.parseFrom(key2.getKeyData().getValue(), ExtensionRegistryLite.getEmptyRegistry());
-    expect.that(aesGcmKey2.getKeyValue().size()).isEqualTo(aesGcmKeyFormat2.getKeySize());
-    // No primary key because add doesn't automatically promote the new key to primary.
-    assertThrows(GeneralSecurityException.class, () -> keysetHandle.getPrimitive(Aead.class));
+    assertThat(keysetHandle.size()).isEqualTo(2);
+    expect.that(keysetHandle.getAt(0).getStatus()).isEqualTo(KeyStatus.ENABLED);
+    expect.that(keysetHandle.getAt(0).isPrimary()).isFalse();
+    expect
+        .that(keysetHandle.getAt(0).getKey().getParameters())
+        .isEqualTo(keyTemplate1.toParameters());
+    expect.that(keysetHandle.getAt(1).getStatus()).isEqualTo(KeyStatus.ENABLED);
+    expect.that(keysetHandle.getAt(1).isPrimary()).isFalse();
+    expect
+        .that(keysetHandle.getAt(1).getKey().getParameters())
+        .isEqualTo(keyTemplate2.toParameters());
   }
 
   @Test
