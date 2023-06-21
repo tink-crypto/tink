@@ -14,8 +14,8 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-#ifndef TINK_MAC_AES_GCM_PROTO_SERIALIZATION_H_
-#define TINK_MAC_AES_GCM_PROTO_SERIALIZATION_H_
+#ifndef TINK_AEAD_AES_GCM_PROTO_SERIALIZATION_H_
+#define TINK_AEAD_AES_GCM_PROTO_SERIALIZATION_H_
 
 #include "tink/util/status.h"
 
@@ -28,4 +28,4 @@ crypto::tink::util::Status RegisterAesGcmProtoSerialization();
 }  // namespace tink
 }  // namespace crypto
 
-#endif  // TINK_MAC_AES_GCM_PROTO_SERIALIZATION_H_
+#endif  // TINK_AEAD_AES_GCM_PROTO_SERIALIZATION_H_
