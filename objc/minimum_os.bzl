@@ -1,3 +1,3 @@
 """Minimum OS version definitions"""
 
-IOS_MINIMUM_OS = "11.0"
+IOS_MINIMUM_OS = "12.0"
