@@ -377,26 +377,39 @@ java_library(
 )
 
 java_library(
+    name = "ecdsa_proto_serialization",
+    srcs = ["EcdsaProtoSerialization.java"],
+    deps = [
+        ":ecdsa_parameters",
+        ":ecdsa_private_key",
+        ":ecdsa_public_key",
+        "//proto:common_java_proto",
+        "//proto:ecdsa_java_proto",
+        "//proto:tink_java_proto",
+        "//src/main/java/com/google/crypto/tink:accesses_partial_key",
+        "//src/main/java/com/google/crypto/tink:secret_key_access",
+        "//src/main/java/com/google/crypto/tink/internal:big_integer_encoding",
+        "//src/main/java/com/google/crypto/tink/internal:key_parser",
+        "//src/main/java/com/google/crypto/tink/internal:key_serializer",
+        "//src/main/java/com/google/crypto/tink/internal:mutable_serialization_registry",
+        "//src/main/java/com/google/crypto/tink/internal:parameters_parser",
+        "//src/main/java/com/google/crypto/tink/internal:parameters_serializer",
+        "//src/main/java/com/google/crypto/tink/internal:proto_key_serialization",
+        "//src/main/java/com/google/crypto/tink/internal:proto_parameters_serialization",
+        "//src/main/java/com/google/crypto/tink/internal:util",
+        "//src/main/java/com/google/crypto/tink/util:bytes",
+        "//src/main/java/com/google/crypto/tink/util:secret_big_integer",
+        "@maven//:com_google_code_findbugs_jsr305",
+        "@maven//:com_google_protobuf_protobuf_java",
+    ],
+)
+
+java_library(
     name = "rsa_ssa_pkcs1_parameters",
     srcs = ["RsaSsaPkcs1Parameters.java"],
     deps = [
         ":signature_parameters",
         "//src/main/java/com/google/crypto/tink/annotations:alpha",
-        "@maven//:com_google_code_findbugs_jsr305",
-        "@maven//:com_google_errorprone_error_prone_annotations",
-    ],
-)
-
-java_library(
-    name = "ed25519_public_key",
-    srcs = ["Ed25519PublicKey.java"],
-    deps = [
-        ":ed25519_parameters",
-        ":signature_public_key",
-        "//src/main/java/com/google/crypto/tink:accesses_partial_key",
-        "//src/main/java/com/google/crypto/tink:key",
-        "//src/main/java/com/google/crypto/tink/annotations:alpha",
-        "//src/main/java/com/google/crypto/tink/util:bytes",
         "@maven//:com_google_code_findbugs_jsr305",
         "@maven//:com_google_errorprone_error_prone_annotations",
     ],
@@ -463,6 +476,30 @@ java_library(
 )
 
 java_library(
+    name = "ed25519_parameters",
+    srcs = ["Ed25519Parameters.java"],
+    deps = [
+        ":signature_parameters",
+        "@maven//:com_google_errorprone_error_prone_annotations",
+    ],
+)
+
+java_library(
+    name = "ed25519_public_key",
+    srcs = ["Ed25519PublicKey.java"],
+    deps = [
+        ":ed25519_parameters",
+        ":signature_public_key",
+        "//src/main/java/com/google/crypto/tink:accesses_partial_key",
+        "//src/main/java/com/google/crypto/tink:key",
+        "//src/main/java/com/google/crypto/tink/annotations:alpha",
+        "//src/main/java/com/google/crypto/tink/util:bytes",
+        "@maven//:com_google_code_findbugs_jsr305",
+        "@maven//:com_google_errorprone_error_prone_annotations",
+    ],
+)
+
+java_library(
     name = "ed25519_private_key",
     srcs = ["Ed25519PrivateKey.java"],
     deps = [
@@ -501,6 +538,75 @@ java_library(
         "//src/main/java/com/google/crypto/tink/internal:util",
         "//src/main/java/com/google/crypto/tink/util:bytes",
         "//src/main/java/com/google/crypto/tink/util:secret_bytes",
+        "@maven//:com_google_code_findbugs_jsr305",
+        "@maven//:com_google_protobuf_protobuf_java",
+    ],
+)
+
+java_library(
+    name = "rsa_ssa_pss_parameters",
+    srcs = ["RsaSsaPssParameters.java"],
+    deps = [
+        ":signature_parameters",
+        "@maven//:com_google_code_findbugs_jsr305",
+        "@maven//:com_google_errorprone_error_prone_annotations",
+    ],
+)
+
+java_library(
+    name = "rsa_ssa_pss_public_key",
+    srcs = ["RsaSsaPssPublicKey.java"],
+    deps = [
+        ":rsa_ssa_pss_parameters",
+        ":signature_public_key",
+        "//src/main/java/com/google/crypto/tink:accesses_partial_key",
+        "//src/main/java/com/google/crypto/tink:key",
+        "//src/main/java/com/google/crypto/tink/util:bytes",
+        "@maven//:com_google_code_findbugs_jsr305",
+        "@maven//:com_google_errorprone_error_prone_annotations",
+    ],
+)
+
+java_library(
+    name = "rsa_ssa_pss_private_key",
+    srcs = ["RsaSsaPssPrivateKey.java"],
+    deps = [
+        ":rsa_ssa_pss_parameters",
+        ":rsa_ssa_pss_public_key",
+        ":signature_private_key",
+        "//src/main/java/com/google/crypto/tink:accesses_partial_key",
+        "//src/main/java/com/google/crypto/tink:insecure_secret_key_access",
+        "//src/main/java/com/google/crypto/tink:key",
+        "//src/main/java/com/google/crypto/tink/util:secret_big_integer",
+        "@maven//:com_google_code_findbugs_jsr305",
+        "@maven//:com_google_errorprone_error_prone_annotations",
+    ],
+)
+
+java_library(
+    name = "rsa_ssa_pss_proto_serialization",
+    srcs = ["RsaSsaPssProtoSerialization.java"],
+    deps = [
+        ":rsa_ssa_pss_parameters",
+        ":rsa_ssa_pss_private_key",
+        ":rsa_ssa_pss_public_key",
+        "//proto:common_java_proto",
+        "//proto:rsa_ssa_pss_java_proto",
+        "//proto:tink_java_proto",
+        "//src/main/java/com/google/crypto/tink:accesses_partial_key",
+        "//src/main/java/com/google/crypto/tink:secret_key_access",
+        "//src/main/java/com/google/crypto/tink/internal:big_integer_encoding",
+        "//src/main/java/com/google/crypto/tink/internal:enum_type_proto_converter",
+        "//src/main/java/com/google/crypto/tink/internal:key_parser",
+        "//src/main/java/com/google/crypto/tink/internal:key_serializer",
+        "//src/main/java/com/google/crypto/tink/internal:mutable_serialization_registry",
+        "//src/main/java/com/google/crypto/tink/internal:parameters_parser",
+        "//src/main/java/com/google/crypto/tink/internal:parameters_serializer",
+        "//src/main/java/com/google/crypto/tink/internal:proto_key_serialization",
+        "//src/main/java/com/google/crypto/tink/internal:proto_parameters_serialization",
+        "//src/main/java/com/google/crypto/tink/internal:util",
+        "//src/main/java/com/google/crypto/tink/util:bytes",
+        "//src/main/java/com/google/crypto/tink/util:secret_big_integer",
         "@maven//:com_google_code_findbugs_jsr305",
         "@maven//:com_google_protobuf_protobuf_java",
     ],
@@ -880,34 +986,6 @@ android_library(
     ],
 )
 
-java_library(
-    name = "ecdsa_proto_serialization",
-    srcs = ["EcdsaProtoSerialization.java"],
-    deps = [
-        ":ecdsa_parameters",
-        ":ecdsa_private_key",
-        ":ecdsa_public_key",
-        "//proto:common_java_proto",
-        "//proto:ecdsa_java_proto",
-        "//proto:tink_java_proto",
-        "//src/main/java/com/google/crypto/tink:accesses_partial_key",
-        "//src/main/java/com/google/crypto/tink:secret_key_access",
-        "//src/main/java/com/google/crypto/tink/internal:big_integer_encoding",
-        "//src/main/java/com/google/crypto/tink/internal:key_parser",
-        "//src/main/java/com/google/crypto/tink/internal:key_serializer",
-        "//src/main/java/com/google/crypto/tink/internal:mutable_serialization_registry",
-        "//src/main/java/com/google/crypto/tink/internal:parameters_parser",
-        "//src/main/java/com/google/crypto/tink/internal:parameters_serializer",
-        "//src/main/java/com/google/crypto/tink/internal:proto_key_serialization",
-        "//src/main/java/com/google/crypto/tink/internal:proto_parameters_serialization",
-        "//src/main/java/com/google/crypto/tink/internal:util",
-        "//src/main/java/com/google/crypto/tink/util:bytes",
-        "//src/main/java/com/google/crypto/tink/util:secret_big_integer",
-        "@maven//:com_google_code_findbugs_jsr305",
-        "@maven//:com_google_protobuf_protobuf_java",
-    ],
-)
-
 android_library(
     name = "ecdsa_proto_serialization-android",
     srcs = ["EcdsaProtoSerialization.java"],
@@ -936,30 +1014,27 @@ android_library(
     ],
 )
 
-java_library(
-    name = "ed25519_parameters",
-    srcs = ["Ed25519Parameters.java"],
-    deps = [
-        ":signature_parameters",
-        "@maven//:com_google_errorprone_error_prone_annotations",
-    ],
-)
-
-android_library(
-    name = "ed25519_parameters-android",
-    srcs = ["Ed25519Parameters.java"],
-    deps = [
-        ":signature_parameters-android",
-        "@maven//:com_google_errorprone_error_prone_annotations",
-    ],
-)
-
 android_library(
     name = "rsa_ssa_pkcs1_parameters-android",
     srcs = ["RsaSsaPkcs1Parameters.java"],
     deps = [
         ":signature_parameters-android",
         "//src/main/java/com/google/crypto/tink/annotations:alpha-android",
+        "@maven//:com_google_code_findbugs_jsr305",
+        "@maven//:com_google_errorprone_error_prone_annotations",
+    ],
+)
+
+android_library(
+    name = "rsa_ssa_pkcs1_public_key-android",
+    srcs = ["RsaSsaPkcs1PublicKey.java"],
+    deps = [
+        ":rsa_ssa_pkcs1_parameters-android",
+        ":signature_public_key-android",
+        "//src/main/java/com/google/crypto/tink:accesses_partial_key-android",
+        "//src/main/java/com/google/crypto/tink:key-android",
+        "//src/main/java/com/google/crypto/tink/annotations:alpha-android",
+        "//src/main/java/com/google/crypto/tink/util:bytes-android",
         "@maven//:com_google_code_findbugs_jsr305",
         "@maven//:com_google_errorprone_error_prone_annotations",
     ],
@@ -977,36 +1052,6 @@ android_library(
         "//src/main/java/com/google/crypto/tink:key-android",
         "//src/main/java/com/google/crypto/tink/annotations:alpha-android",
         "//src/main/java/com/google/crypto/tink/util:secret_big_integer-android",
-        "@maven//:com_google_code_findbugs_jsr305",
-        "@maven//:com_google_errorprone_error_prone_annotations",
-    ],
-)
-
-android_library(
-    name = "ed25519_public_key-android",
-    srcs = ["Ed25519PublicKey.java"],
-    deps = [
-        ":ed25519_parameters-android",
-        ":signature_public_key-android",
-        "//src/main/java/com/google/crypto/tink:accesses_partial_key-android",
-        "//src/main/java/com/google/crypto/tink:key-android",
-        "//src/main/java/com/google/crypto/tink/annotations:alpha-android",
-        "//src/main/java/com/google/crypto/tink/util:bytes-android",
-        "@maven//:com_google_code_findbugs_jsr305",
-        "@maven//:com_google_errorprone_error_prone_annotations",
-    ],
-)
-
-android_library(
-    name = "rsa_ssa_pkcs1_public_key-android",
-    srcs = ["RsaSsaPkcs1PublicKey.java"],
-    deps = [
-        ":rsa_ssa_pkcs1_parameters-android",
-        ":signature_public_key-android",
-        "//src/main/java/com/google/crypto/tink:accesses_partial_key-android",
-        "//src/main/java/com/google/crypto/tink:key-android",
-        "//src/main/java/com/google/crypto/tink/annotations:alpha-android",
-        "//src/main/java/com/google/crypto/tink/util:bytes-android",
         "@maven//:com_google_code_findbugs_jsr305",
         "@maven//:com_google_errorprone_error_prone_annotations",
     ],
@@ -1037,6 +1082,30 @@ android_library(
         "//src/main/java/com/google/crypto/tink/util:secret_big_integer-android",
         "@maven//:com_google_code_findbugs_jsr305",
         "@maven//:com_google_protobuf_protobuf_javalite",
+    ],
+)
+
+android_library(
+    name = "ed25519_parameters-android",
+    srcs = ["Ed25519Parameters.java"],
+    deps = [
+        ":signature_parameters-android",
+        "@maven//:com_google_errorprone_error_prone_annotations",
+    ],
+)
+
+android_library(
+    name = "ed25519_public_key-android",
+    srcs = ["Ed25519PublicKey.java"],
+    deps = [
+        ":ed25519_parameters-android",
+        ":signature_public_key-android",
+        "//src/main/java/com/google/crypto/tink:accesses_partial_key-android",
+        "//src/main/java/com/google/crypto/tink:key-android",
+        "//src/main/java/com/google/crypto/tink/annotations:alpha-android",
+        "//src/main/java/com/google/crypto/tink/util:bytes-android",
+        "@maven//:com_google_code_findbugs_jsr305",
+        "@maven//:com_google_errorprone_error_prone_annotations",
     ],
 )
 
@@ -1084,16 +1153,6 @@ android_library(
     ],
 )
 
-java_library(
-    name = "rsa_ssa_pss_parameters",
-    srcs = ["RsaSsaPssParameters.java"],
-    deps = [
-        ":signature_parameters",
-        "@maven//:com_google_code_findbugs_jsr305",
-        "@maven//:com_google_errorprone_error_prone_annotations",
-    ],
-)
-
 android_library(
     name = "rsa_ssa_pss_parameters-android",
     srcs = ["RsaSsaPssParameters.java"],
@@ -1118,20 +1177,6 @@ android_library(
     ],
 )
 
-java_library(
-    name = "rsa_ssa_pss_public_key",
-    srcs = ["RsaSsaPssPublicKey.java"],
-    deps = [
-        ":rsa_ssa_pss_parameters",
-        ":signature_public_key",
-        "//src/main/java/com/google/crypto/tink:accesses_partial_key",
-        "//src/main/java/com/google/crypto/tink:key",
-        "//src/main/java/com/google/crypto/tink/util:bytes",
-        "@maven//:com_google_code_findbugs_jsr305",
-        "@maven//:com_google_errorprone_error_prone_annotations",
-    ],
-)
-
 android_library(
     name = "rsa_ssa_pss_private_key-android",
     srcs = ["RsaSsaPssPrivateKey.java"],
@@ -1148,18 +1193,31 @@ android_library(
     ],
 )
 
-java_library(
-    name = "rsa_ssa_pss_private_key",
-    srcs = ["RsaSsaPssPrivateKey.java"],
+android_library(
+    name = "rsa_ssa_pss_proto_serialization-android",
+    srcs = ["RsaSsaPssProtoSerialization.java"],
     deps = [
-        ":rsa_ssa_pss_parameters",
-        ":rsa_ssa_pss_public_key",
-        ":signature_private_key",
-        "//src/main/java/com/google/crypto/tink:accesses_partial_key",
-        "//src/main/java/com/google/crypto/tink:insecure_secret_key_access",
-        "//src/main/java/com/google/crypto/tink:key",
-        "//src/main/java/com/google/crypto/tink/util:secret_big_integer",
+        ":rsa_ssa_pss_parameters-android",
+        ":rsa_ssa_pss_private_key-android",
+        ":rsa_ssa_pss_public_key-android",
+        "//proto:common_java_proto_lite",
+        "//proto:rsa_ssa_pss_java_proto_lite",
+        "//proto:tink_java_proto_lite",
+        "//src/main/java/com/google/crypto/tink:accesses_partial_key-android",
+        "//src/main/java/com/google/crypto/tink:secret_key_access-android",
+        "//src/main/java/com/google/crypto/tink/internal:big_integer_encoding-android",
+        "//src/main/java/com/google/crypto/tink/internal:enum_type_proto_converter-android",
+        "//src/main/java/com/google/crypto/tink/internal:key_parser-android",
+        "//src/main/java/com/google/crypto/tink/internal:key_serializer-android",
+        "//src/main/java/com/google/crypto/tink/internal:mutable_serialization_registry-android",
+        "//src/main/java/com/google/crypto/tink/internal:parameters_parser-android",
+        "//src/main/java/com/google/crypto/tink/internal:parameters_serializer-android",
+        "//src/main/java/com/google/crypto/tink/internal:proto_key_serialization-android",
+        "//src/main/java/com/google/crypto/tink/internal:proto_parameters_serialization-android",
+        "//src/main/java/com/google/crypto/tink/internal:util-android",
+        "//src/main/java/com/google/crypto/tink/util:bytes-android",
+        "//src/main/java/com/google/crypto/tink/util:secret_big_integer-android",
         "@maven//:com_google_code_findbugs_jsr305",
-        "@maven//:com_google_errorprone_error_prone_annotations",
+        "@maven//:com_google_protobuf_protobuf_javalite",
     ],
 )
