@@ -103,3 +103,33 @@ android_library(
         "@maven//:com_google_errorprone_error_prone_annotations",
     ],
 )
+
+android_library(
+    name = "key_derivation_key-android",
+    srcs = ["KeyDerivationKey.java"],
+    deps = [
+        ":key_derivation_parameters-android",
+        "//src/main/java/com/google/crypto/tink:key-android",
+    ],
+)
+
+android_library(
+    name = "key_derivation_parameters-android",
+    srcs = ["KeyDerivationParameters.java"],
+    deps = ["//src/main/java/com/google/crypto/tink:parameters-android"],
+)
+
+java_library(
+    name = "key_derivation_key",
+    srcs = ["KeyDerivationKey.java"],
+    deps = [
+        ":key_derivation_parameters",
+        "//src/main/java/com/google/crypto/tink:key",
+    ],
+)
+
+java_library(
+    name = "key_derivation_parameters",
+    srcs = ["KeyDerivationParameters.java"],
+    deps = ["//src/main/java/com/google/crypto/tink:parameters"],
+)
