@@ -151,7 +151,7 @@ public final class RewardedAdsVerifier {
       long keyId = Long.parseLong(sigAndKeyId.substring(i + KEY_ID_PARAM_NAME.length()));
       verify(tbsData, keyId, Base64.urlSafeDecode(sig));
     } catch (NumberFormatException ex) {
-      throw new GeneralSecurityException("key_id must be a long");
+      throw new GeneralSecurityException("key_id must be a long", ex);
     }
   }
 
