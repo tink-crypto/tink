@@ -217,7 +217,7 @@ TEST(KeysetWrapperStoreTest, AddWrappersForDifferentPrimitivesSucceeds) {
               IsOk());
 }
 
-TEST(KeysetWrapperStoreTest, AddTheSameWrapperTwiceSucceeds) {
+TEST(KeysetWrapperStoreTest, AddSameWrapperTwiceSucceeds) {
   RegistryImpl registry;
   util::StatusOr<std::function<util::StatusOr<std::unique_ptr<FakePrimitive>>(
       const KeyData& key_data)>>
@@ -352,6 +352,22 @@ TEST(KeysetWrapperStoreTest, GetNonexistentWrapperFails) {
       IsOk());
 
   EXPECT_THAT(store.Get<Mac>().status(), StatusIs(absl::StatusCode::kNotFound));
+}
+
+TEST(KeysetWrapperStoreTest, IsEmpty) {
+  KeysetWrapperStore store;
+  EXPECT_EQ(store.IsEmpty(), true);
+
+  RegistryImpl registry;
+  util::StatusOr<std::function<util::StatusOr<std::unique_ptr<FakePrimitive>>(
+      const KeyData& key_data)>>
+      primitive_getter = PrimitiveGetter(registry);
+  ASSERT_THAT(primitive_getter, IsOk());
+  ASSERT_THAT(
+      (store.Add<FakePrimitive, FakePrimitive>(
+          absl::make_unique<FakePrimitiveWrapper>(), *primitive_getter)),
+      IsOk());
+  EXPECT_THAT(store.IsEmpty(), false);
 }
 
 TEST(KeysetWrapperStoreTest, Move) {

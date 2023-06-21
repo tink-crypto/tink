@@ -69,6 +69,8 @@ class KeysetWrapperStore {
   template <class Q>
   crypto::tink::util::StatusOr<const KeysetWrapper<Q>*> Get() const;
 
+  bool IsEmpty() const { return primitive_to_info_.empty(); }
+
  private:
   class Info {
    public:
