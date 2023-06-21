@@ -211,7 +211,8 @@ public final class RsaSsaPkcs1Parameters extends SignatureParameters {
 
   @Override
   public int hashCode() {
-    return Objects.hash(modulusSizeBits, publicExponent, variant, hashType);
+    return Objects.hash(
+        RsaSsaPkcs1Parameters.class, modulusSizeBits, publicExponent, variant, hashType);
   }
 
   @Override
