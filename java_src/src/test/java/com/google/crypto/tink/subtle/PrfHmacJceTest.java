@@ -16,16 +16,22 @@
 
 package com.google.crypto.tink.subtle;
 
+import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.fail;
 
+import com.google.crypto.tink.InsecureSecretKeyAccess;
 import com.google.crypto.tink.Mac;
 import com.google.crypto.tink.config.TinkFips;
 import com.google.crypto.tink.config.internal.TinkFipsUtil;
+import com.google.crypto.tink.prf.HmacPrfKey;
+import com.google.crypto.tink.prf.HmacPrfParameters;
+import com.google.crypto.tink.prf.HmacPrfParameters.HashType;
 import com.google.crypto.tink.prf.Prf;
 import com.google.crypto.tink.testing.TestUtil;
+import com.google.crypto.tink.util.SecretBytes;
 import java.security.GeneralSecurityException;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.Security;
@@ -328,5 +334,48 @@ public class PrfHmacJceTest {
     assertThrows(
         GeneralSecurityException.class,
         () -> new PrfHmacJce("HMACSHA256", new SecretKeySpec(Random.randBytes(16), "HMAC")));
+  }
+
+  @Test
+  public void createWithHmacPrfKey_equivalentToByteArray() throws Exception {
+    Assume.assumeFalse(TinkFips.useOnlyFips());
+    for (MacTestVector t : HMAC_TEST_VECTORS) {
+      HmacPrfParameters.HashType hashType;
+      switch (t.algName) {
+        case "HMACSHA1":
+          hashType = HashType.SHA1;
+          break;
+        case "HMACSHA224":
+          hashType = HashType.SHA224;
+          break;
+        case "HMACSHA256":
+          hashType = HashType.SHA256;
+          break;
+        case "HMACSHA384":
+          hashType = HashType.SHA384;
+          break;
+        case "HMACSHA512":
+          hashType = HashType.SHA512;
+          break;
+        default:
+          // Should not happen
+          throw new IllegalStateException("Unknown algorithm: " + t.algName);
+      }
+      Prf hmacPrfKeyPrf =
+          PrfHmacJce.create(
+              HmacPrfKey.builder()
+                  .setKeyBytes(SecretBytes.copyFrom(t.key, InsecureSecretKeyAccess.get()))
+                  .setParameters(
+                      HmacPrfParameters.builder()
+                          .setKeySizeBytes(t.key.length)
+                          .setHashType(hashType)
+                          .build())
+                  .build());
+
+      Prf byteArrayPrf = new PrfHmacJce(t.algName, new SecretKeySpec(t.key, "HMAC"));
+
+      assertThat(hmacPrfKeyPrf.compute(t.message, t.tag.length))
+          .isEqualTo(byteArrayPrf.compute(t.message, t.tag.length));
+    }
   }
 }

@@ -426,7 +426,10 @@ java_library(
     srcs = ["PrfHmacJce.java"],
     deps = [
         ":subtle_util_cluster",
+        "//src/main/java/com/google/crypto/tink:accesses_partial_key",
+        "//src/main/java/com/google/crypto/tink:insecure_secret_key_access",
         "//src/main/java/com/google/crypto/tink/config/internal:tink_fips_util",
+        "//src/main/java/com/google/crypto/tink/prf:hmac_prf_key",
         "//src/main/java/com/google/crypto/tink/prf:prf_set",
         "@maven//:com_google_errorprone_error_prone_annotations",
     ],
@@ -825,7 +828,10 @@ android_library(
     srcs = ["PrfHmacJce.java"],
     deps = [
         ":subtle_util_cluster-android",
+        "//src/main/java/com/google/crypto/tink:accesses_partial_key-android",
+        "//src/main/java/com/google/crypto/tink:insecure_secret_key_access-android",
         "//src/main/java/com/google/crypto/tink/config/internal:tink_fips_util-android",
+        "//src/main/java/com/google/crypto/tink/prf:hmac_prf_key-android",
         "//src/main/java/com/google/crypto/tink/prf:prf_set-android",
         "@maven//:com_google_errorprone_error_prone_annotations",
     ],

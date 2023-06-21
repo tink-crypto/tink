@@ -16,7 +16,10 @@
 
 package com.google.crypto.tink.subtle;
 
+import com.google.crypto.tink.AccessesPartialKey;
+import com.google.crypto.tink.InsecureSecretKeyAccess;
 import com.google.crypto.tink.config.internal.TinkFipsUtil;
+import com.google.crypto.tink.prf.HmacPrfKey;
 import com.google.crypto.tink.prf.Prf;
 import com.google.errorprone.annotations.Immutable;
 import java.security.GeneralSecurityException;
@@ -24,9 +27,11 @@ import java.security.InvalidAlgorithmParameterException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
 
 /** {@link Prf} implementation using JCE. */
 @Immutable
+@AccessesPartialKey
 public final class PrfHmacJce implements Prf {
   public static final TinkFipsUtil.AlgorithmFipsCompatibility FIPS =
       TinkFipsUtil.AlgorithmFipsCompatibility.ALGORITHM_REQUIRES_BORINGCRYPTO;
@@ -90,6 +95,13 @@ public final class PrfHmacJce implements Prf {
 
     // Initialize the current threads mac, mostly to fail fast if anything is wrong.
     localMac.get();
+  }
+
+  /** Given an HmacPrfKey, returns an instance of the Prf interface. */
+  public static Prf create(HmacPrfKey key) throws GeneralSecurityException {
+    return new PrfHmacJce(
+        "HMAC" + key.getParameters().getHashType(),
+        new SecretKeySpec(key.getKeyBytes().toByteArray(InsecureSecretKeyAccess.get()), "HMAC"));
   }
 
   @Override
