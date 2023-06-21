@@ -36,18 +36,53 @@ const (
 type KMSEnvelopeAEAD struct {
 	dekTemplate *tinkpb.KeyTemplate
 	remote      tink.AEAD
+	// if err != nil, then the primitive will always fail with this error.
+	// this is needed because NewKMSEnvelopeAEAD2 doesn't return an error.
+	err error
+}
+
+var tinkAEADKeyTypes map[string]bool = map[string]bool{
+	aesCTRHMACAEADTypeURL:    true,
+	aesGCMTypeURL:            true,
+	chaCha20Poly1305TypeURL:  true,
+	xChaCha20Poly1305TypeURL: true,
+	aesGCMSIVTypeURL:         true,
+}
+
+func isSupporedKMSEnvelopeDEK(dekKeyTypeURL string) bool {
+	_, found := tinkAEADKeyTypes[dekKeyTypeURL]
+	return found
 }
 
 // NewKMSEnvelopeAEAD2 creates an new instance of KMSEnvelopeAEAD.
-func NewKMSEnvelopeAEAD2(kt *tinkpb.KeyTemplate, remote tink.AEAD) *KMSEnvelopeAEAD {
+//
+// dekTemplate must be a KeyTemplate for any of these Tink AEAD key types (any
+// other key template will be rejected):
+//   - AesCtrHmacAeadKey
+//   - AesGcmKey
+//   - ChaCha20Poly1305Key
+//   - XChaCha20Poly1305
+//   - AesGcmSivKey
+func NewKMSEnvelopeAEAD2(dekTemplate *tinkpb.KeyTemplate, remote tink.AEAD) *KMSEnvelopeAEAD {
+	if !isSupporedKMSEnvelopeDEK(dekTemplate.GetTypeUrl()) {
+		return &KMSEnvelopeAEAD{
+			remote:      nil,
+			dekTemplate: nil,
+			err:         fmt.Errorf("unsupported DEK key type %s", dekTemplate.GetTypeUrl()),
+		}
+	}
 	return &KMSEnvelopeAEAD{
 		remote:      remote,
-		dekTemplate: kt,
+		dekTemplate: dekTemplate,
+		err:         nil,
 	}
 }
 
 // Encrypt implements the tink.AEAD interface for encryption.
 func (a *KMSEnvelopeAEAD) Encrypt(pt, aad []byte) ([]byte, error) {
+	if a.err != nil {
+		return nil, a.err
+	}
 	dekM, err := registry.NewKey(a.dekTemplate)
 	if err != nil {
 		return nil, err
@@ -79,6 +114,9 @@ func (a *KMSEnvelopeAEAD) Encrypt(pt, aad []byte) ([]byte, error) {
 
 // Decrypt implements the tink.AEAD interface for decryption.
 func (a *KMSEnvelopeAEAD) Decrypt(ct, aad []byte) ([]byte, error) {
+	if a.err != nil {
+		return nil, a.err
+	}
 	// Verify we have enough bytes for the length of the encrypted DEK.
 	if len(ct) <= lenDEK {
 		return nil, errors.New("kms_envelope_aead: invalid ciphertext")

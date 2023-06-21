@@ -70,6 +70,11 @@ func (km *kmsEnvelopeAEADKeyManager) NewKey(serializedKeyFormat []byte) (proto.M
 	if err := proto.Unmarshal(serializedKeyFormat, keyFormat); err != nil {
 		return nil, errors.New("kms_envelope_aead_key_manager: invalid key format")
 	}
+	dekKeyType := keyFormat.GetDekTemplate().GetTypeUrl()
+	if !isSupporedKMSEnvelopeDEK(dekKeyType) {
+		return nil, fmt.Errorf("unsupported DEK key type %s. Only Tink AEAD key types are supported with KMSEnvelopeAEAD", dekKeyType)
+	}
+
 	return &kmsepb.KmsEnvelopeAeadKey{
 		Version: kmsEnvelopeAEADKeyVersion,
 		Params:  keyFormat,
@@ -110,6 +115,10 @@ func (km *kmsEnvelopeAEADKeyManager) validateKey(key *kmsepb.KmsEnvelopeAeadKey)
 	err := keyset.ValidateKeyVersion(key.Version, kmsEnvelopeAEADKeyVersion)
 	if err != nil {
 		return fmt.Errorf("kms_envelope_aead_key_manager: %s", err)
+	}
+	dekKeyType := key.GetParams().GetDekTemplate().GetTypeUrl()
+	if !isSupporedKMSEnvelopeDEK(dekKeyType) {
+		return fmt.Errorf("unsupported DEK key type %s. Only Tink AEAD key types are supported with KMSEnvelopeAEAD", dekKeyType)
 	}
 	return nil
 }

@@ -25,6 +25,7 @@ import (
 	"github.com/google/tink/go/core/registry"
 	"github.com/google/tink/go/internal/tinkerror/tinkerrortest"
 	"github.com/google/tink/go/keyset"
+	"github.com/google/tink/go/mac"
 	"github.com/google/tink/go/testing/fakekms"
 	tinkpb "github.com/google/tink/go/proto/tink_go_proto"
 )
@@ -253,6 +254,17 @@ func TestCreateKMSEnvelopeAEADKeyTemplateFails(t *testing.T) {
 	}
 	if _, err := aead.CreateKMSEnvelopeAEADKeyTemplate(keyURI, invalidTemplate); err == nil {
 		t.Errorf("aead.CreateKMSEnvelopAEADKeyTemplate(keyURI, invalidTemplate) err = nil, want non-nil")
+	}
+}
+
+func TestCreateKMSEnvelopeAEADKeyTemplateWithUnsupportedTemplateFails(t *testing.T) {
+	keyURI, err := fakekms.NewKeyURI()
+	if err != nil {
+		t.Fatalf("fakekms.NewKeyURI() err = %v", err)
+	}
+	unsupportedTemplate := mac.HMACSHA256Tag128KeyTemplate()
+	if _, err := aead.CreateKMSEnvelopeAEADKeyTemplate(keyURI, unsupportedTemplate); err == nil {
+		t.Errorf("aead.CreateKMSEnvelopAEADKeyTemplate(keyURI, unsupportedTemplate) err = nil, want non-nil")
 	}
 }
 
