@@ -1080,7 +1080,6 @@ cc_library(
     hdrs = ["configuration_impl.h"],
     include_prefix = "tink/internal",
     deps = [
-        ":key_gen_configuration_impl",
         ":key_type_info_store",
         ":keyset_wrapper_store",
         "//:configuration",

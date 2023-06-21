@@ -1031,7 +1031,6 @@ tink_cc_library(
   SRCS
     configuration_impl.h
   DEPS
-    tink::internal::key_gen_configuration_impl
     tink::internal::key_type_info_store
     tink::internal::keyset_wrapper_store
     tink::core::configuration
