@@ -21,9 +21,11 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.Assert.assertThrows;
 
 import com.google.crypto.tink.Aead;
+import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.KeyTemplates;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.internal.KeyTemplateProtoConverter;
+import com.google.crypto.tink.mac.HmacKeyManager;
 import java.security.GeneralSecurityException;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -76,6 +78,17 @@ public final class KmsEnvelopeAeadTest {
 
     assertThat(envAead.decrypt(envAead.encrypt(plaintext, EMPTY_ADD), EMPTY_ADD))
         .isEqualTo(plaintext);
+  }
+
+  @Test
+  public void createKeyFormatWithInvalidDekTemplate_fails() throws Exception {
+    Aead remoteAead = this.generateNewRemoteAead();
+    KeyTemplate invalidDekTemplate = HmacKeyManager.hmacSha256Template();
+
+    assertThrows(
+        IllegalArgumentException.class,
+        () ->
+            new KmsEnvelopeAead(KeyTemplateProtoConverter.toProto(invalidDekTemplate), remoteAead));
   }
 
   @Test

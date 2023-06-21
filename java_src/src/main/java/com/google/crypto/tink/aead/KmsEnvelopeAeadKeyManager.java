@@ -73,6 +73,12 @@ public class KmsEnvelopeAeadKeyManager extends KeyTypeManager<KmsEnvelopeAeadKey
   @Override
   public void validateKey(KmsEnvelopeAeadKey key) throws GeneralSecurityException {
     Validators.validateVersion(key.getVersion(), getVersion());
+    if (!KmsEnvelopeAead.isSupportedDekKeyType(key.getParams().getDekTemplate().getTypeUrl())) {
+      throw new GeneralSecurityException(
+          "Unsupported DEK key type: "
+              + key.getParams().getDekTemplate().getTypeUrl()
+              + ". Only Tink AEAD key types are supported.");
+    }
   }
 
   @Override
@@ -87,6 +93,12 @@ public class KmsEnvelopeAeadKeyManager extends KeyTypeManager<KmsEnvelopeAeadKey
       @Override
       public void validateKeyFormat(KmsEnvelopeAeadKeyFormat format)
           throws GeneralSecurityException {
+        if (!KmsEnvelopeAead.isSupportedDekKeyType(format.getDekTemplate().getTypeUrl())) {
+          throw new GeneralSecurityException(
+              "Unsupported DEK key type: "
+                  + format.getDekTemplate().getTypeUrl()
+                  + ". Only Tink AEAD key types are supported.");
+        }
         if (format.getKekUri().isEmpty() || !format.hasDekTemplate()) {
           throw new GeneralSecurityException("invalid key format: missing KEK URI or DEK template");
         }
@@ -134,6 +146,12 @@ public class KmsEnvelopeAeadKeyManager extends KeyTypeManager<KmsEnvelopeAeadKey
 
   static KmsEnvelopeAeadKeyFormat createKeyFormat(String kekUri, KeyTemplate dekTemplate)
       throws GeneralSecurityException, InvalidProtocolBufferException {
+    if (!KmsEnvelopeAead.isSupportedDekKeyType(dekTemplate.getTypeUrl())) {
+      throw new IllegalArgumentException(
+          "Unsupported DEK key type: "
+              + dekTemplate.getTypeUrl()
+              + ". Only Tink AEAD key types are supported.");
+    }
     byte[] serializedTemplate = TinkProtoParametersFormat.serialize(dekTemplate.toParameters());
     return KmsEnvelopeAeadKeyFormat.newBuilder()
         .setDekTemplate(

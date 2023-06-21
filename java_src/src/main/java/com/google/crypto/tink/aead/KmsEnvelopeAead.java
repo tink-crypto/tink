@@ -22,6 +22,9 @@ import com.google.crypto.tink.proto.KeyTemplate;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 import java.security.GeneralSecurityException;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * This primitive implements <a href="https://cloud.google.com/kms/docs/data-encryption-keys">
@@ -47,7 +50,30 @@ public final class KmsEnvelopeAead implements Aead {
   private final Aead remote;
   private static final int LENGTH_ENCRYPTED_DEK = 4;
 
+  private static Set<String> listSupportedDekKeyTypes() {
+    HashSet<String> dekKeyTypeUrls = new HashSet<>();
+    dekKeyTypeUrls.add("type.googleapis.com/google.crypto.tink.AesGcmKey");
+    dekKeyTypeUrls.add("type.googleapis.com/google.crypto.tink.ChaCha20Poly1305Key");
+    dekKeyTypeUrls.add("type.googleapis.com/google.crypto.tink.XChaCha20Poly1305Key");
+    dekKeyTypeUrls.add("type.googleapis.com/google.crypto.tink.AesCtrHmacAeadKey");
+    dekKeyTypeUrls.add("type.googleapis.com/google.crypto.tink.AesGcmSivKey");
+    dekKeyTypeUrls.add("type.googleapis.com/google.crypto.tink.AesEaxKey");
+    return Collections.unmodifiableSet(dekKeyTypeUrls);
+  }
+
+  private static final Set<String> supportedDekKeyTypes = listSupportedDekKeyTypes();
+
+  public static boolean isSupportedDekKeyType(String dekKeyTypeUrl) {
+    return supportedDekKeyTypes.contains(dekKeyTypeUrl);
+  }
+
   public KmsEnvelopeAead(KeyTemplate dekTemplate, Aead remote) {
+    if (!isSupportedDekKeyType(dekTemplate.getTypeUrl())) {
+      throw new IllegalArgumentException(
+          "Unsupported DEK key type: "
+              + dekTemplate.getTypeUrl()
+              + ". Only Tink AEAD key types are supported.");
+    }
     this.dekTemplate = dekTemplate;
     this.remote = remote;
   }

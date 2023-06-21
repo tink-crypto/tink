@@ -25,6 +25,7 @@ import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.KmsClients;
 import com.google.crypto.tink.internal.KeyTypeManager;
+import com.google.crypto.tink.mac.HmacKeyManager;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
 import com.google.crypto.tink.proto.KmsEnvelopeAeadKey;
 import com.google.crypto.tink.proto.KmsEnvelopeAeadKeyFormat;
@@ -92,6 +93,16 @@ public class KmsEnvelopeAeadKeyManagerTest {
         () ->
             factory.validateKeyFormat(
                 KmsEnvelopeAeadKeyFormat.newBuilder().setKekUri("foo").build()));
+  }
+
+  @Test
+  public void createKeyFormatWithInvalidDekTemplate_fails() throws Exception {
+    String kekUri = FakeKmsClient.createFakeKeyUri();
+    KeyTemplate invalidDekTemplate = HmacKeyManager.hmacSha256Template();
+
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> KmsEnvelopeAeadKeyManager.createKeyFormat(kekUri, invalidDekTemplate));
   }
 
   @Test
