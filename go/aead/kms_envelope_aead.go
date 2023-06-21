@@ -22,7 +22,6 @@ import (
 	"errors"
 	"fmt"
 
-	"google.golang.org/protobuf/proto"
 	"github.com/google/tink/go/core/registry"
 	"github.com/google/tink/go/tink"
 	tinkpb "github.com/google/tink/go/proto/tink_go_proto"
@@ -83,14 +82,11 @@ func (a *KMSEnvelopeAEAD) Encrypt(pt, aad []byte) ([]byte, error) {
 	if a.err != nil {
 		return nil, a.err
 	}
-	dekM, err := registry.NewKey(a.dekTemplate)
+	dekKeyData, err := registry.NewKeyData(a.dekTemplate)
 	if err != nil {
 		return nil, err
 	}
-	dek, err := proto.Marshal(dekM)
-	if err != nil {
-		return nil, err
-	}
+	dek := dekKeyData.GetValue()
 	encryptedDEK, err := a.remote.Encrypt(dek, []byte{})
 	if err != nil {
 		return nil, err
