@@ -30,6 +30,7 @@ import com.google.crypto.tink.TinkProtoKeysetFormat;
 import com.google.crypto.tink.aead.AeadConfig;
 import com.google.crypto.tink.daead.DeterministicAeadConfig;
 import com.google.crypto.tink.hybrid.HybridKeyTemplates;
+import com.google.crypto.tink.internal.KeyTemplateProtoConverter;
 import com.google.crypto.tink.mac.MacConfig;
 import com.google.crypto.tink.monitoring.MonitoringAnnotations;
 import com.google.crypto.tink.prf.PrfConfig;
@@ -696,17 +697,24 @@ public final class TestUtil {
     assertTrue(message, e.getMessage().contains(contains));
   }
 
-  /** Asserts that {@code key} is generated from {@code keyTemplate}. */
-  public static void assertHmacKey(com.google.crypto.tink.KeyTemplate keyTemplate, Keyset.Key key)
-      throws Exception {
+  /**
+   * Asserts that {@code key} is generated from {@code keyTemplate}.
+   *
+   * @deprecated Do not use this function.
+   */
+  @Deprecated
+  public static void assertHmacKey(
+      com.google.crypto.tink.KeyTemplate keyTemplate, Keyset.Key key) throws Exception {
+    KeyTemplate protoTemplate = KeyTemplateProtoConverter.toProto(keyTemplate);
+
     assertThat(key.getKeyId()).isGreaterThan(0);
     assertThat(key.getStatus()).isEqualTo(KeyStatusType.ENABLED);
     assertThat(key.getOutputPrefixType()).isEqualTo(OutputPrefixType.TINK);
     assertThat(key.hasKeyData()).isTrue();
-    assertThat(key.getKeyData().getTypeUrl()).isEqualTo(keyTemplate.getTypeUrl());
+    assertThat(key.getKeyData().getTypeUrl()).isEqualTo(protoTemplate.getTypeUrl());
 
     HmacKeyFormat hmacKeyFormat =
-        HmacKeyFormat.parseFrom(keyTemplate.getValue(), ExtensionRegistryLite.getEmptyRegistry());
+        HmacKeyFormat.parseFrom(protoTemplate.getValue(), ExtensionRegistryLite.getEmptyRegistry());
     HmacKey hmacKey =
         HmacKey.parseFrom(key.getKeyData().getValue(), ExtensionRegistryLite.getEmptyRegistry());
     assertThat(hmacKey.getParams()).isEqualTo(hmacKeyFormat.getParams());
