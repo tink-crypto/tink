@@ -14,7 +14,9 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-// Package hcvault provides integration with the HashiCorp Vault (https://www.vaultproject.io/).
+// Package hcvault provides integration with the [HashiCorp Vault].
+//
+//	[HashiCorp Vault]: https://www.vaultproject.io/.
 package hcvault
 
 import (
@@ -25,9 +27,9 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/hashicorp/vault/api"
 	"github.com/google/tink/go/core/registry"
 	"github.com/google/tink/go/tink"
+	"github.com/hashicorp/vault/api"
 )
 
 const (
