@@ -64,7 +64,10 @@ class RegistryEciesAeadHkdfDemHelper implements EciesAeadHkdfDemHelper {
         AesGcmKeyFormat gcmKeyFormat =
             AesGcmKeyFormat.parseFrom(
                 demTemplate.getValue(), ExtensionRegistryLite.getEmptyRegistry());
-        this.aesGcmKey = (AesGcmKey) Registry.newKey(demTemplate);
+        this.aesGcmKey =
+            AesGcmKey.parseFrom(
+                Registry.newKeyData(demTemplate).getValue(),
+                ExtensionRegistryLite.getEmptyRegistry());
         this.symmetricKeySize = gcmKeyFormat.getKeySize();
       } catch (InvalidProtocolBufferException e) {
         throw new GeneralSecurityException(
@@ -75,7 +78,10 @@ class RegistryEciesAeadHkdfDemHelper implements EciesAeadHkdfDemHelper {
         AesCtrHmacAeadKeyFormat aesCtrHmacAeadKeyFormat =
             AesCtrHmacAeadKeyFormat.parseFrom(
                 demTemplate.getValue(), ExtensionRegistryLite.getEmptyRegistry());
-        this.aesCtrHmacAeadKey = (AesCtrHmacAeadKey) Registry.newKey(demTemplate);
+        this.aesCtrHmacAeadKey =
+            AesCtrHmacAeadKey.parseFrom(
+                Registry.newKeyData(demTemplate).getValue(),
+                ExtensionRegistryLite.getEmptyRegistry());
         this.aesCtrKeySize = aesCtrHmacAeadKeyFormat.getAesCtrKeyFormat().getKeySize();
         int hmacKeySize = aesCtrHmacAeadKeyFormat.getHmacKeyFormat().getKeySize();
         this.symmetricKeySize = aesCtrKeySize + hmacKeySize;
@@ -88,7 +94,10 @@ class RegistryEciesAeadHkdfDemHelper implements EciesAeadHkdfDemHelper {
         AesSivKeyFormat aesSivKeyFormat =
             AesSivKeyFormat.parseFrom(
                 demTemplate.getValue(), ExtensionRegistryLite.getEmptyRegistry());
-        this.aesSivKey = (AesSivKey) Registry.newKey(demTemplate);
+        this.aesSivKey =
+            AesSivKey.parseFrom(
+                Registry.newKeyData(demTemplate).getValue(),
+                ExtensionRegistryLite.getEmptyRegistry());
         this.symmetricKeySize = aesSivKeyFormat.getKeySize();
       } catch (InvalidProtocolBufferException e) {
         throw new GeneralSecurityException(
