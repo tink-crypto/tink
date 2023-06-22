@@ -41,74 +41,74 @@ namespace crypto {
 namespace tink {
 namespace {
 
-util::Status RegisterMac(Configuration& config) {
-  util::Status status = internal::ConfigurationImpl::RegisterPrimitiveWrapper(
+util::Status AddMac(Configuration& config) {
+  util::Status status = internal::ConfigurationImpl::AddPrimitiveWrapper(
       absl::make_unique<MacWrapper>(), config);
   if (!status.ok()) {
     return status;
   }
-  status = internal::ConfigurationImpl::RegisterPrimitiveWrapper(
+  status = internal::ConfigurationImpl::AddPrimitiveWrapper(
       absl::make_unique<internal::ChunkedMacWrapper>(), config);
   if (!status.ok()) {
     return status;
   }
 
-  return internal::ConfigurationImpl::RegisterKeyTypeManager(
+  return internal::ConfigurationImpl::AddKeyTypeManager(
       absl::make_unique<HmacKeyManager>(), config);
 }
 
-util::Status RegisterAead(Configuration& config) {
-  util::Status status = internal::ConfigurationImpl::RegisterPrimitiveWrapper(
+util::Status AddAead(Configuration& config) {
+  util::Status status = internal::ConfigurationImpl::AddPrimitiveWrapper(
       absl::make_unique<AeadWrapper>(), config);
   if (!status.ok()) {
     return status;
   }
 
-  status = internal::ConfigurationImpl::RegisterKeyTypeManager(
+  status = internal::ConfigurationImpl::AddKeyTypeManager(
       absl::make_unique<AesCtrHmacAeadKeyManager>(), config);
   if (!status.ok()) {
     return status;
   }
-  return internal::ConfigurationImpl::RegisterKeyTypeManager(
+  return internal::ConfigurationImpl::AddKeyTypeManager(
       absl::make_unique<AesGcmKeyManager>(), config);
 }
 
-util::Status RegisterPrf(Configuration& config) {
-  util::Status status = internal::ConfigurationImpl::RegisterPrimitiveWrapper(
+util::Status AddPrf(Configuration& config) {
+  util::Status status = internal::ConfigurationImpl::AddPrimitiveWrapper(
       absl::make_unique<PrfSetWrapper>(), config);
   if (!status.ok()) {
     return status;
   }
 
-  return internal::ConfigurationImpl::RegisterKeyTypeManager(
+  return internal::ConfigurationImpl::AddKeyTypeManager(
       absl::make_unique<HmacPrfKeyManager>(), config);
 }
 
-util::Status RegisterSignature(Configuration& config) {
-  util::Status status = internal::ConfigurationImpl::RegisterPrimitiveWrapper(
+util::Status AddSignature(Configuration& config) {
+  util::Status status = internal::ConfigurationImpl::AddPrimitiveWrapper(
       absl::make_unique<PublicKeySignWrapper>(), config);
   if (!status.ok()) {
     return status;
   }
-  status = internal::ConfigurationImpl::RegisterPrimitiveWrapper(
+  status = internal::ConfigurationImpl::AddPrimitiveWrapper(
       absl::make_unique<PublicKeyVerifyWrapper>(), config);
   if (!status.ok()) {
     return status;
   }
 
-  status = internal::ConfigurationImpl::RegisterAsymmetricKeyManagers(
+  status = internal::ConfigurationImpl::AddAsymmetricKeyManagers(
       absl::make_unique<EcdsaSignKeyManager>(),
       absl::make_unique<EcdsaVerifyKeyManager>(), config);
   if (!status.ok()) {
     return status;
   }
-  status = internal::ConfigurationImpl::RegisterAsymmetricKeyManagers(
+  status = internal::ConfigurationImpl::AddAsymmetricKeyManagers(
       absl::make_unique<RsaSsaPssSignKeyManager>(),
       absl::make_unique<RsaSsaPssVerifyKeyManager>(), config);
   if (!status.ok()) {
     return status;
   }
-  return internal::ConfigurationImpl::RegisterAsymmetricKeyManagers(
+  return internal::ConfigurationImpl::AddAsymmetricKeyManagers(
       absl::make_unique<RsaSsaPkcs1SignKeyManager>(),
       absl::make_unique<RsaSsaPkcs1VerifyKeyManager>(), config);
 }
@@ -120,10 +120,10 @@ const Configuration& ConfigFips140_2() {
     internal::SetFipsRestricted();
 
     static Configuration* config = new Configuration();
-    CHECK_OK(RegisterMac(*config));
-    CHECK_OK(RegisterAead(*config));
-    CHECK_OK(RegisterPrf(*config));
-    CHECK_OK(RegisterSignature(*config));
+    CHECK_OK(AddMac(*config));
+    CHECK_OK(AddAead(*config));
+    CHECK_OK(AddPrf(*config));
+    CHECK_OK(AddSignature(*config));
 
     return config;
   }();

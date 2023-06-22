@@ -27,7 +27,7 @@ namespace internal {
 class KeyGenConfigurationImpl {
  public:
   template <class KM>
-  static crypto::tink::util::Status RegisterKeyTypeManager(
+  static crypto::tink::util::Status AddKeyTypeManager(
       std::unique_ptr<KM> key_manager,
       crypto::tink::KeyGenConfiguration& config) {
     return config.key_type_info_store_.AddKeyTypeManager(
@@ -35,7 +35,7 @@ class KeyGenConfigurationImpl {
   }
 
   template <class PrivateKM, class PublicKM>
-  static crypto::tink::util::Status RegisterAsymmetricKeyManagers(
+  static crypto::tink::util::Status AddAsymmetricKeyManagers(
       std::unique_ptr<PrivateKM> private_key_manager,
       std::unique_ptr<PublicKM> public_key_manager,
       crypto::tink::KeyGenConfiguration& config) {

@@ -35,42 +35,41 @@ namespace crypto {
 namespace tink {
 namespace {
 
-util::Status RegisterMac(KeyGenConfiguration& config) {
-  return internal::KeyGenConfigurationImpl::RegisterKeyTypeManager(
+util::Status AddMac(KeyGenConfiguration& config) {
+  return internal::KeyGenConfigurationImpl::AddKeyTypeManager(
       absl::make_unique<HmacKeyManager>(), config);
 }
 
-util::Status RegisterAead(KeyGenConfiguration& config) {
-  util::Status status =
-      internal::KeyGenConfigurationImpl::RegisterKeyTypeManager(
-          absl::make_unique<AesCtrHmacAeadKeyManager>(), config);
+util::Status AddAead(KeyGenConfiguration& config) {
+  util::Status status = internal::KeyGenConfigurationImpl::AddKeyTypeManager(
+      absl::make_unique<AesCtrHmacAeadKeyManager>(), config);
   if (!status.ok()) {
     return status;
   }
-  return internal::KeyGenConfigurationImpl::RegisterKeyTypeManager(
+  return internal::KeyGenConfigurationImpl::AddKeyTypeManager(
       absl::make_unique<AesGcmKeyManager>(), config);
 }
 
-util::Status RegisterPrf(KeyGenConfiguration& config) {
-  return internal::KeyGenConfigurationImpl::RegisterKeyTypeManager(
+util::Status AddPrf(KeyGenConfiguration& config) {
+  return internal::KeyGenConfigurationImpl::AddKeyTypeManager(
       absl::make_unique<HmacPrfKeyManager>(), config);
 }
 
-util::Status RegisterSignature(KeyGenConfiguration& config) {
+util::Status AddSignature(KeyGenConfiguration& config) {
   util::Status status =
-      internal::KeyGenConfigurationImpl::RegisterAsymmetricKeyManagers(
+      internal::KeyGenConfigurationImpl::AddAsymmetricKeyManagers(
           absl::make_unique<EcdsaSignKeyManager>(),
           absl::make_unique<EcdsaVerifyKeyManager>(), config);
   if (!status.ok()) {
     return status;
   }
-  status = internal::KeyGenConfigurationImpl::RegisterAsymmetricKeyManagers(
+  status = internal::KeyGenConfigurationImpl::AddAsymmetricKeyManagers(
       absl::make_unique<RsaSsaPssSignKeyManager>(),
       absl::make_unique<RsaSsaPssVerifyKeyManager>(), config);
   if (!status.ok()) {
     return status;
   }
-  return internal::KeyGenConfigurationImpl::RegisterAsymmetricKeyManagers(
+  return internal::KeyGenConfigurationImpl::AddAsymmetricKeyManagers(
       absl::make_unique<RsaSsaPkcs1SignKeyManager>(),
       absl::make_unique<RsaSsaPkcs1VerifyKeyManager>(), config);
 }
@@ -82,10 +81,10 @@ const KeyGenConfiguration& KeyGenConfigFips140_2() {
     internal::SetFipsRestricted();
 
     static KeyGenConfiguration* config = new KeyGenConfiguration();
-    CHECK_OK(RegisterMac(*config));
-    CHECK_OK(RegisterAead(*config));
-    CHECK_OK(RegisterPrf(*config));
-    CHECK_OK(RegisterSignature(*config));
+    CHECK_OK(AddMac(*config));
+    CHECK_OK(AddAead(*config));
+    CHECK_OK(AddPrf(*config));
+    CHECK_OK(AddSignature(*config));
 
     return config;
   }();

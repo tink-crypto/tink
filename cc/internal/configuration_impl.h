@@ -28,7 +28,7 @@ namespace internal {
 class ConfigurationImpl {
  public:
   template <class PW>
-  static crypto::tink::util::Status RegisterPrimitiveWrapper(
+  static crypto::tink::util::Status AddPrimitiveWrapper(
       std::unique_ptr<PW> wrapper, crypto::tink::Configuration& config) {
     // We must specify `primitive_getter` here and no later, since the
     // corresponding get function, KeysetWrapper::WrapKeyset, does not have
@@ -66,14 +66,14 @@ class ConfigurationImpl {
   }
 
   template <class KM>
-  static crypto::tink::util::Status RegisterKeyTypeManager(
+  static crypto::tink::util::Status AddKeyTypeManager(
       std::unique_ptr<KM> key_manager, crypto::tink::Configuration& config) {
     return config.key_type_info_store_.AddKeyTypeManager(
         std::move(key_manager), /*new_key_allowed=*/true);
   }
 
   template <class PrivateKM, class PublicKM>
-  static crypto::tink::util::Status RegisterAsymmetricKeyManagers(
+  static crypto::tink::util::Status AddAsymmetricKeyManagers(
       std::unique_ptr<PrivateKM> private_key_manager,
       std::unique_ptr<PublicKM> public_key_manager,
       crypto::tink::Configuration& config) {

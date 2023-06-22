@@ -150,23 +150,23 @@ std::string AddAesGcmKeyToKeyset(Keyset& keyset, uint32_t key_id,
   return key.key_value();
 }
 
-TEST(ConfigurationImplTest, RegisterPrimitiveWrapper) {
+TEST(ConfigurationImplTest, AddPrimitiveWrapper) {
   Configuration config;
-  EXPECT_THAT((ConfigurationImpl::RegisterPrimitiveWrapper(
+  EXPECT_THAT((ConfigurationImpl::AddPrimitiveWrapper(
                   absl::make_unique<FakePrimitiveWrapper>(), config)),
               IsOk());
 }
 
-TEST(ConfigurationImplTest, RegisterKeyTypeManager) {
+TEST(ConfigurationImplTest, AddKeyTypeManager) {
   Configuration config;
-  EXPECT_THAT(ConfigurationImpl::RegisterKeyTypeManager(
+  EXPECT_THAT(ConfigurationImpl::AddKeyTypeManager(
                   absl::make_unique<FakeKeyTypeManager>(), config),
               IsOk());
 }
 
 TEST(ConfigurationImplTest, GetKeyTypeInfoStore) {
   Configuration config;
-  ASSERT_THAT(ConfigurationImpl::RegisterKeyTypeManager(
+  ASSERT_THAT(ConfigurationImpl::AddKeyTypeManager(
                   absl::make_unique<FakeKeyTypeManager>(), config),
               IsOk());
 
@@ -191,10 +191,10 @@ TEST(ConfigurationImplTest, GetKeyTypeInfoStoreMissingInfoFails) {
 
 TEST(ConfigurationImplTest, GetKeysetWrapperStoreAndWrap) {
   Configuration config;
-  ASSERT_THAT((ConfigurationImpl::RegisterPrimitiveWrapper(
+  ASSERT_THAT((ConfigurationImpl::AddPrimitiveWrapper(
                   absl::make_unique<FakePrimitiveWrapper>(), config)),
               IsOk());
-  ASSERT_THAT(ConfigurationImpl::RegisterKeyTypeManager(
+  ASSERT_THAT(ConfigurationImpl::AddKeyTypeManager(
                   absl::make_unique<FakeKeyTypeManager>(), config),
               IsOk());
 
@@ -215,7 +215,7 @@ TEST(ConfigurationImplTest, GetKeysetWrapperStoreAndWrap) {
 
 TEST(ConfigurationImplTest, KeysetWrapperWrapMissingKeyTypeInfoFails) {
   Configuration config;
-  ASSERT_THAT((ConfigurationImpl::RegisterPrimitiveWrapper(
+  ASSERT_THAT((ConfigurationImpl::AddPrimitiveWrapper(
                   absl::make_unique<FakePrimitiveWrapper>(), config)),
               IsOk());
 
@@ -235,11 +235,11 @@ TEST(ConfigurationImplTest, KeysetWrapperWrapMissingKeyTypeInfoFails) {
 TEST(ConfigurationImplTest, KeysetWrapperWrapMissingKeyManagerFails) {
   Configuration config;
   // Transforms FakePrimitive2 to FakePrimitive.
-  ASSERT_THAT((ConfigurationImpl::RegisterPrimitiveWrapper(
+  ASSERT_THAT((ConfigurationImpl::AddPrimitiveWrapper(
                   absl::make_unique<FakePrimitiveWrapper2>(), config)),
               IsOk());
   // Transforms KeyData to FakePrimitive.
-  ASSERT_THAT(ConfigurationImpl::RegisterKeyTypeManager(
+  ASSERT_THAT(ConfigurationImpl::AddKeyTypeManager(
                   absl::make_unique<FakeKeyTypeManager>(), config),
               IsOk());
 
@@ -348,9 +348,9 @@ class FakeVerifyKeyManager
   const std::string key_type_ = "some.verify.key.type";
 };
 
-TEST(ConfigurationImplTest, RegisterAsymmetricKeyManagers) {
+TEST(ConfigurationImplTest, AddAsymmetricKeyManagers) {
   Configuration config;
-  EXPECT_THAT(ConfigurationImpl::RegisterAsymmetricKeyManagers(
+  EXPECT_THAT(ConfigurationImpl::AddAsymmetricKeyManagers(
                   absl::make_unique<FakeSignKeyManager>(),
                   absl::make_unique<FakeVerifyKeyManager>(), config),
               IsOk());
@@ -358,7 +358,7 @@ TEST(ConfigurationImplTest, RegisterAsymmetricKeyManagers) {
 
 TEST(ConfigurationImplTest, GetKeyTypeInfoStoreAsymmetric) {
   Configuration config;
-  ASSERT_THAT(ConfigurationImpl::RegisterAsymmetricKeyManagers(
+  ASSERT_THAT(ConfigurationImpl::AddAsymmetricKeyManagers(
                   absl::make_unique<FakeSignKeyManager>(),
                   absl::make_unique<FakeVerifyKeyManager>(), config),
               IsOk());

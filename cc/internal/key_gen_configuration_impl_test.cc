@@ -98,16 +98,16 @@ class FakeKeyTypeManager
       "type.googleapis.com/google.crypto.tink.AesGcmKey";
 };
 
-TEST(KeyGenConfigurationImplTest, RegisterKeyTypeManager) {
+TEST(KeyGenConfigurationImplTest, AddKeyTypeManager) {
   KeyGenConfiguration config;
-  EXPECT_THAT(KeyGenConfigurationImpl::RegisterKeyTypeManager(
+  EXPECT_THAT(KeyGenConfigurationImpl::AddKeyTypeManager(
                   absl::make_unique<FakeKeyTypeManager>(), config),
               IsOk());
 }
 
 TEST(KeyGenConfigurationImplTest, GetKeyTypeInfoStore) {
   KeyGenConfiguration config;
-  ASSERT_THAT(KeyGenConfigurationImpl::RegisterKeyTypeManager(
+  ASSERT_THAT(KeyGenConfigurationImpl::AddKeyTypeManager(
                   absl::make_unique<FakeKeyTypeManager>(), config),
               IsOk());
 
@@ -217,9 +217,9 @@ class FakeVerifyKeyManager
   const std::string key_type_ = "some.verify.key.type";
 };
 
-TEST(KeyGenConfigurationImplTest, RegisterAsymmetricKeyManagers) {
+TEST(KeyGenConfigurationImplTest, AddAsymmetricKeyManagers) {
   KeyGenConfiguration config;
-  EXPECT_THAT(KeyGenConfigurationImpl::RegisterAsymmetricKeyManagers(
+  EXPECT_THAT(KeyGenConfigurationImpl::AddAsymmetricKeyManagers(
                   absl::make_unique<FakeSignKeyManager>(),
                   absl::make_unique<FakeVerifyKeyManager>(), config),
               IsOk());
@@ -227,7 +227,7 @@ TEST(KeyGenConfigurationImplTest, RegisterAsymmetricKeyManagers) {
 
 TEST(KeyGenConfigurationImplTest, GetKeyTypeInfoStoreAsymmetric) {
   KeyGenConfiguration config;
-  ASSERT_THAT(KeyGenConfigurationImpl::RegisterAsymmetricKeyManagers(
+  ASSERT_THAT(KeyGenConfigurationImpl::AddAsymmetricKeyManagers(
                   absl::make_unique<FakeSignKeyManager>(),
                   absl::make_unique<FakeVerifyKeyManager>(), config),
               IsOk());
