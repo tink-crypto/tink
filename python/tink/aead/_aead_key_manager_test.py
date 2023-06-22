@@ -192,6 +192,33 @@ class AeadKeyManagerTest(parameterized.TestCase):
     with self.assertRaises(tink.TinkError):
       handle.primitive(aead.Aead)
 
+  def test_kms_envelope_aead_with_envelope_template_as_dek_template_fails(self):
+    env_template = (
+        aead.aead_key_templates.create_kms_envelope_aead_key_template(
+            kek_uri=FAKE_KMS_URI,
+            dek_template=aead.aead_key_templates.AES128_GCM,
+        )
+    )
+    template = aead.aead_key_templates.create_kms_envelope_aead_key_template(
+        kek_uri=FAKE_KMS_URI,
+        dek_template=env_template,
+    )
+    handle = tink.new_keyset_handle(template)
+    with self.assertRaises(tink.TinkError):
+      _ = handle.primitive(aead.Aead)
+
+  def test_kms_envelope_aead_with_kms_template_as_dek_template_fails(self):
+    kms_template = aead.aead_key_templates.create_kms_aead_key_template(
+        key_uri=FAKE_KMS_URI,
+    )
+    template = aead.aead_key_templates.create_kms_envelope_aead_key_template(
+        kek_uri=FAKE_KMS_URI,
+        dek_template=kms_template,
+    )
+    handle = tink.new_keyset_handle(template)
+    with self.assertRaises(tink.TinkError):
+      _ = handle.primitive(aead.Aead)
+
   def test_kms_envelope_aead_decrypt_fixed_ciphertext_success(self):
     # This keyset contains a single KmsEnvelopeAeadKey with
     # kek_uri = FAKE_KMS_URI and dek_template = AES128_GCM.
