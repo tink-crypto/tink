@@ -21,6 +21,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
 
 import com.google.crypto.tink.KeyTemplate;
+import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.PublicKeySign;
 import com.google.crypto.tink.PublicKeyVerify;
 import com.google.crypto.tink.internal.KeyTypeManager;
@@ -46,6 +47,7 @@ import java.security.spec.RSAKeyGenParameterSpec;
 import java.security.spec.RSAPublicKeySpec;
 import java.util.Set;
 import java.util.TreeSet;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -56,6 +58,11 @@ public class RsaSsaPssSignKeyManagerTest {
   private final RsaSsaPssSignKeyManager manager = new RsaSsaPssSignKeyManager();
   private final KeyTypeManager.KeyFactory<RsaSsaPssKeyFormat, RsaSsaPssPrivateKey> factory =
       manager.keyFactory();
+
+  @BeforeClass
+  public static void beforeClass() throws Exception {
+    RsaSsaPssSignKeyManager.registerPair(/* newKeyAllowed= */ true);
+  }
 
   private static RsaSsaPssKeyFormat createKeyFormat(
       HashType sigHash,
@@ -178,17 +185,30 @@ public class RsaSsaPssSignKeyManagerTest {
   }
 
   @Test
-  public void createKey_smallKey() throws Exception {
+  public void createSmallKeyUsingParameters_works() throws Exception {
     if (TestUtil.isTsan()) {
       // factory.createKey is too slow in Tsan.
       return;
     }
-    RsaSsaPssKeyFormat format =
-        createKeyFormat(HashType.SHA256, HashType.SHA256, 32, 3072, RSAKeyGenParameterSpec.F4);
-    RsaSsaPssPrivateKey key = factory.createKey(format);
-    checkConsistency(key, format);
-    checkKey(key);
+    RsaSsaPssParameters parameters =
+        RsaSsaPssParameters.builder()
+            .setModulusSizeBits(3072)
+            .setPublicExponent(RsaSsaPssParameters.F4)
+            .setSigHashType(RsaSsaPssParameters.HashType.SHA256)
+            .setMgf1HashType(RsaSsaPssParameters.HashType.SHA256)
+            .setVariant(RsaSsaPssParameters.Variant.NO_PREFIX)
+            .setSaltLengthBytes(32)
+            .build();
+    KeysetHandle handle = KeysetHandle.generateNew(parameters);
+    com.google.crypto.tink.Key key = handle.getAt(0).getKey();
+    assertThat(key).isInstanceOf(com.google.crypto.tink.signature.RsaSsaPssPrivateKey.class);
+    com.google.crypto.tink.signature.RsaSsaPssPrivateKey privateKey =
+        (com.google.crypto.tink.signature.RsaSsaPssPrivateKey) key;
+
+    assertThat(privateKey.getPublicKey().getParameters()).isEqualTo(parameters);
+    assertThat(privateKey.getPublicKey().getModulus().bitLength()).isEqualTo(3072);
   }
+
 
   @Test
   public void createKey_largeKey() throws Exception {
