@@ -366,12 +366,11 @@ public final class Registry {
    *         <li>The key manager was already registered, but it contains new key templates.
    *         <li>The key manager is new, but it contains existing key templates.
    */
-  private static synchronized <KeyProtoT extends MessageLite, KeyFormatProtoT extends MessageLite>
-      void ensureKeyManagerInsertable(
-          String typeUrl,
-          Map<String, KeyTypeManager.KeyFactory.KeyFormat<KeyFormatProtoT>> keyFormats,
-          boolean newKeyAllowed)
-          throws GeneralSecurityException {
+  private static synchronized <KeyFormatProtoT extends MessageLite> void ensureKeyManagerInsertable(
+      String typeUrl,
+      Map<String, KeyTypeManager.KeyFactory.KeyFormat<KeyFormatProtoT>> keyFormats,
+      boolean newKeyAllowed)
+      throws GeneralSecurityException {
     if (newKeyAllowed && newKeyAllowedMap.containsKey(typeUrl) && !newKeyAllowedMap.get(typeUrl)) {
       throw new GeneralSecurityException("New keys are already disallowed for key type " + typeUrl);
     }
