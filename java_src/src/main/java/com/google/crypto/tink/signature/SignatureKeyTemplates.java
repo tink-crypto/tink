@@ -223,7 +223,9 @@ public final class SignatureKeyTemplates {
   /**
    * @return a {@link KeyTemplate} containing a {@link EcdsaKeyFormat} with some specified
    *     parameters.
+   * @deprecated Use a corresponding {@link EcdsaParameters} object instead.
    */
+  @Deprecated
   public static KeyTemplate createEcdsaKeyTemplate(
       HashType hashType,
       EllipticCurveType curve,
@@ -291,7 +293,9 @@ public final class SignatureKeyTemplates {
   /**
    * @return a {@link KeyTemplate} containing a {@link RsaSsaPkcs1KeyFormat} with some specified
    *     parameters.
+   * @deprecated Use a corresponding {@link RsaSsaPkcs1Parameters} object instead
    */
+  @Deprecated
   public static KeyTemplate createRsaSsaPkcs1KeyTemplate(
       HashType hashType, int modulusSize, BigInteger publicExponent, OutputPrefixType prefixType) {
     RsaSsaPkcs1Params params = RsaSsaPkcs1Params.newBuilder().setHashType(hashType).build();
@@ -343,7 +347,9 @@ public final class SignatureKeyTemplates {
   /**
    * @return a {@link KeyTemplate} containing a {@link RsaSsaPssKeyFormat} with some specified
    *     parameters.
+   * @deprecated Use a corresponding {@link RsaSsaPssParameters} object instead.
    */
+  @Deprecated
   public static KeyTemplate createRsaSsaPssKeyTemplate(
       HashType sigHash,
       HashType mgf1Hash,
