@@ -82,14 +82,16 @@ class ConfigurationImpl {
         /*new_key_allowed=*/true);
   }
 
-  static const crypto::tink::internal::KeyTypeInfoStore& GetKeyTypeInfoStore(
-      const crypto::tink::Configuration& config) {
-    return config.key_type_info_store_;
+  static crypto::tink::util::StatusOr<
+      const crypto::tink::internal::KeyTypeInfoStore*>
+  GetKeyTypeInfoStore(const crypto::tink::Configuration& config) {
+    return &config.key_type_info_store_;
   }
 
-  static const crypto::tink::internal::KeysetWrapperStore&
+  static crypto::tink::util::StatusOr<
+      const crypto::tink::internal::KeysetWrapperStore*>
   GetKeysetWrapperStore(const crypto::tink::Configuration& config) {
-    return config.keyset_wrapper_store_;
+    return &config.keyset_wrapper_store_;
   }
 };
 

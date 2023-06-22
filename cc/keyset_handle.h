@@ -330,11 +330,15 @@ KeysetHandle::GetPrimitives(const KeyManager<P>* custom_manager) const {
 template <class P>
 crypto::tink::util::StatusOr<std::unique_ptr<P>> KeysetHandle::GetPrimitive(
     const Configuration& config) const {
+  crypto::tink::util::StatusOr<
+      const crypto::tink::internal::KeysetWrapperStore*>
+      store = crypto::tink::internal::ConfigurationImpl::GetKeysetWrapperStore(
+          config);
+  if (!store.ok()) {
+    return store.status();
+  }
   crypto::tink::util::StatusOr<const crypto::tink::internal::KeysetWrapper<P>*>
-      wrapper =
-          crypto::tink::internal::ConfigurationImpl::GetKeysetWrapperStore(
-              config)
-              .Get<P>();
+      wrapper = (*store)->Get<P>();
   if (!wrapper.ok()) {
     return wrapper.status();
   }

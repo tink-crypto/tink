@@ -112,8 +112,10 @@ TEST(KeyGenConfigurationImplTest, GetKeyTypeInfoStore) {
               IsOk());
 
   std::string type_url = FakeKeyTypeManager().get_key_type();
-  util::StatusOr<const KeyTypeInfoStore::Info*> info =
-      KeyGenConfigurationImpl::GetKeyTypeInfoStore(config).Get(type_url);
+  util::StatusOr<const KeyTypeInfoStore*> store =
+      KeyGenConfigurationImpl::GetKeyTypeInfoStore(config);
+  ASSERT_THAT(store, IsOk());
+  util::StatusOr<const KeyTypeInfoStore::Info*> info = (*store)->Get(type_url);
   ASSERT_THAT(info, IsOk());
 
   util::StatusOr<const KeyManager<FakePrimitive>*> key_manager =
@@ -124,9 +126,10 @@ TEST(KeyGenConfigurationImplTest, GetKeyTypeInfoStore) {
 
 TEST(KeyGenConfigurationImplTest, GetKeyTypeInfoStoreMissingInfoFails) {
   KeyGenConfiguration config;
-  EXPECT_THAT(KeyGenConfigurationImpl::GetKeyTypeInfoStore(config)
-                  .Get("i.do.not.exist")
-                  .status(),
+  util::StatusOr<const KeyTypeInfoStore*> store =
+      KeyGenConfigurationImpl::GetKeyTypeInfoStore(config);
+  ASSERT_THAT(store, IsOk());
+  EXPECT_THAT((*store)->Get("i.do.not.exist").status(),
               StatusIs(absl::StatusCode::kNotFound));
 }
 
@@ -234,8 +237,11 @@ TEST(KeyGenConfigurationImplTest, GetKeyTypeInfoStoreAsymmetric) {
 
   {
     std::string type_url = FakeSignKeyManager().get_key_type();
+    util::StatusOr<const KeyTypeInfoStore*> store =
+        KeyGenConfigurationImpl::GetKeyTypeInfoStore(config);
+    ASSERT_THAT(store, IsOk());
     util::StatusOr<const KeyTypeInfoStore::Info*> info =
-        KeyGenConfigurationImpl::GetKeyTypeInfoStore(config).Get(type_url);
+        (*store)->Get(type_url);
     ASSERT_THAT(info, IsOk());
 
     util::StatusOr<const KeyManager<PublicKeySign>*> key_manager =
@@ -245,8 +251,11 @@ TEST(KeyGenConfigurationImplTest, GetKeyTypeInfoStoreAsymmetric) {
   }
   {
     std::string type_url = FakeVerifyKeyManager().get_key_type();
+    util::StatusOr<const KeyTypeInfoStore*> store =
+        KeyGenConfigurationImpl::GetKeyTypeInfoStore(config);
+    ASSERT_THAT(store, IsOk());
     util::StatusOr<const KeyTypeInfoStore::Info*> info =
-        KeyGenConfigurationImpl::GetKeyTypeInfoStore(config).Get(type_url);
+        (*store)->Get(type_url);
     ASSERT_THAT(info, IsOk());
 
     util::StatusOr<const KeyManager<PublicKeyVerify>*> key_manager =

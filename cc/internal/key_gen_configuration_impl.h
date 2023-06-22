@@ -44,9 +44,10 @@ class KeyGenConfigurationImpl {
         /*new_key_allowed=*/true);
   }
 
-  static const crypto::tink::internal::KeyTypeInfoStore& GetKeyTypeInfoStore(
-      const crypto::tink::KeyGenConfiguration& config) {
-    return config.key_type_info_store_;
+  static crypto::tink::util::StatusOr<
+      const crypto::tink::internal::KeyTypeInfoStore*>
+  GetKeyTypeInfoStore(const crypto::tink::KeyGenConfiguration& config) {
+    return &config.key_type_info_store_;
   }
 };
 

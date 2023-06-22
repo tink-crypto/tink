@@ -150,6 +150,7 @@ tink_cc_test(
     tink::aead::aes_gcm_key_manager
     tink::internal::configuration_impl
     tink::internal::fips_utils
+    tink::internal::key_type_info_store
     tink::mac::aes_cmac_key_manager
     tink::mac::hmac_key_manager
     tink::prf::hmac_prf_key_manager

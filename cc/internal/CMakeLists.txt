@@ -1042,6 +1042,7 @@ tink_cc_test(
     configuration_impl_test.cc
   DEPS
     tink::internal::configuration_impl
+    tink::internal::keyset_wrapper_store
     gmock
     tink::core::configuration
     tink::subtle::random

@@ -22,6 +22,7 @@
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "tink/configuration.h"
+#include "tink/internal/keyset_wrapper_store.h"
 #include "tink/subtle/random.h"
 #include "tink/util/test_matchers.h"
 #include "tink/util/test_util.h"
@@ -171,8 +172,10 @@ TEST(ConfigurationImplTest, GetKeyTypeInfoStore) {
               IsOk());
 
   std::string type_url = FakeKeyTypeManager().get_key_type();
-  util::StatusOr<const KeyTypeInfoStore::Info*> info =
-      ConfigurationImpl::GetKeyTypeInfoStore(config).Get(type_url);
+  util::StatusOr<const KeyTypeInfoStore*> store =
+      ConfigurationImpl::GetKeyTypeInfoStore(config);
+  ASSERT_THAT(store, IsOk());
+  util::StatusOr<const KeyTypeInfoStore::Info*> info = (*store)->Get(type_url);
   ASSERT_THAT(info, IsOk());
 
   util::StatusOr<const KeyManager<FakePrimitive>*> key_manager =
@@ -183,9 +186,10 @@ TEST(ConfigurationImplTest, GetKeyTypeInfoStore) {
 
 TEST(ConfigurationImplTest, GetKeyTypeInfoStoreMissingInfoFails) {
   Configuration config;
-  EXPECT_THAT(ConfigurationImpl::GetKeyTypeInfoStore(config)
-                  .Get("i.do.not.exist")
-                  .status(),
+  util::StatusOr<const KeyTypeInfoStore*> store =
+      ConfigurationImpl::GetKeyTypeInfoStore(config);
+  ASSERT_THAT(store, IsOk());
+  EXPECT_THAT((*store)->Get("i.do.not.exist").status(),
               StatusIs(absl::StatusCode::kNotFound));
 }
 
@@ -198,8 +202,11 @@ TEST(ConfigurationImplTest, GetKeysetWrapperStoreAndWrap) {
                   absl::make_unique<FakeKeyTypeManager>(), config),
               IsOk());
 
+  util::StatusOr<const KeysetWrapperStore*> store =
+      ConfigurationImpl::GetKeysetWrapperStore(config);
+  ASSERT_THAT(store, IsOk());
   util::StatusOr<const KeysetWrapper<FakePrimitive>*> wrapper =
-      ConfigurationImpl::GetKeysetWrapperStore(config).Get<FakePrimitive>();
+      (*store)->Get<FakePrimitive>();
   ASSERT_THAT(wrapper, IsOk());
 
   Keyset keyset;
@@ -215,12 +222,15 @@ TEST(ConfigurationImplTest, GetKeysetWrapperStoreAndWrap) {
 
 TEST(ConfigurationImplTest, KeysetWrapperWrapMissingKeyTypeInfoFails) {
   Configuration config;
-  ASSERT_THAT((ConfigurationImpl::AddPrimitiveWrapper(
-                  absl::make_unique<FakePrimitiveWrapper>(), config)),
+  ASSERT_THAT(ConfigurationImpl::AddPrimitiveWrapper(
+                  absl::make_unique<FakePrimitiveWrapper>(), config),
               IsOk());
 
+  util::StatusOr<const KeysetWrapperStore*> store =
+      ConfigurationImpl::GetKeysetWrapperStore(config);
+  ASSERT_THAT(store, IsOk());
   util::StatusOr<const KeysetWrapper<FakePrimitive>*> wrapper =
-      ConfigurationImpl::GetKeysetWrapperStore(config).Get<FakePrimitive>();
+      (*store)->Get<FakePrimitive>();
   ASSERT_THAT(wrapper, IsOk());
 
   Keyset keyset;
@@ -246,9 +256,11 @@ TEST(ConfigurationImplTest, KeysetWrapperWrapMissingKeyManagerFails) {
   // AesGcmKey KeyData -> FakePrimitive2 -> FakePrimitive is the success path,
   // but the AesGcmKey KeyData -> FakePrimitive2 transformation is not
   // registered.
-
+  util::StatusOr<const KeysetWrapperStore*> store =
+      ConfigurationImpl::GetKeysetWrapperStore(config);
+  ASSERT_THAT(store, IsOk());
   util::StatusOr<const KeysetWrapper<FakePrimitive>*> wrapper =
-      ConfigurationImpl::GetKeysetWrapperStore(config).Get<FakePrimitive>();
+      (*store)->Get<FakePrimitive>();
   ASSERT_THAT(wrapper, IsOk());
 
   Keyset keyset;
@@ -365,8 +377,11 @@ TEST(ConfigurationImplTest, GetKeyTypeInfoStoreAsymmetric) {
 
   {
     std::string type_url = FakeSignKeyManager().get_key_type();
+    util::StatusOr<const KeyTypeInfoStore*> store =
+        ConfigurationImpl::GetKeyTypeInfoStore(config);
+    ASSERT_THAT(store, IsOk());
     util::StatusOr<const KeyTypeInfoStore::Info*> info =
-        ConfigurationImpl::GetKeyTypeInfoStore(config).Get(type_url);
+        (*store)->Get(type_url);
     ASSERT_THAT(info, IsOk());
 
     util::StatusOr<const KeyManager<PublicKeySign>*> key_manager =
@@ -376,8 +391,11 @@ TEST(ConfigurationImplTest, GetKeyTypeInfoStoreAsymmetric) {
   }
   {
     std::string type_url = FakeVerifyKeyManager().get_key_type();
+    util::StatusOr<const KeyTypeInfoStore*> store =
+        ConfigurationImpl::GetKeyTypeInfoStore(config);
+    ASSERT_THAT(store, IsOk());
     util::StatusOr<const KeyTypeInfoStore::Info*> info =
-        ConfigurationImpl::GetKeyTypeInfoStore(config).Get(type_url);
+        (*store)->Get(type_url);
     ASSERT_THAT(info, IsOk());
 
     util::StatusOr<const KeyManager<PublicKeyVerify>*> key_manager =

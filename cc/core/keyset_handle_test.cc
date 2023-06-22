@@ -786,9 +786,11 @@ TEST_F(KeysetHandleTest, GetPrimitiveWithConfigFips1402) {
   // TODO(b/265705174): Replace with KeysetHandle::GenerateNew once that takes a
   // config parameter.
   KeyTemplate templ = AeadKeyTemplates::Aes128Gcm();
+  util::StatusOr<const internal::KeyTypeInfoStore*> store =
+      internal::ConfigurationImpl::GetKeyTypeInfoStore(ConfigFips140_2());
+  ASSERT_THAT(store, IsOk());
   util::StatusOr<internal::KeyTypeInfoStore::Info*> info =
-      internal::ConfigurationImpl::GetKeyTypeInfoStore(ConfigFips140_2())
-          .Get(templ.type_url());
+      (*store)->Get(templ.type_url());
   ASSERT_THAT(info, IsOk());
 
   util::StatusOr<std::unique_ptr<KeyData>> key_data =

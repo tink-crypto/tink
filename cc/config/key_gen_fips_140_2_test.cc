@@ -53,33 +53,19 @@ TEST_F(KeyGenFips1402Test, KeyGenConfigFips1402) {
     GTEST_SKIP() << "Only test in FIPS mode";
   }
 
-  EXPECT_THAT(internal::KeyGenConfigurationImpl::GetKeyTypeInfoStore(
-                  KeyGenConfigFips140_2())
-                  .Get(HmacKeyManager().get_key_type()),
+  util::StatusOr<const internal::KeyTypeInfoStore*> store =
+      internal::KeyGenConfigurationImpl::GetKeyTypeInfoStore(
+          KeyGenConfigFips140_2());
+  ASSERT_THAT(store, IsOk());
+
+  EXPECT_THAT((*store)->Get(HmacKeyManager().get_key_type()), IsOk());
+  EXPECT_THAT((*store)->Get(AesCtrHmacAeadKeyManager().get_key_type()), IsOk());
+  EXPECT_THAT((*store)->Get(AesGcmKeyManager().get_key_type()), IsOk());
+  EXPECT_THAT((*store)->Get(HmacPrfKeyManager().get_key_type()), IsOk());
+  EXPECT_THAT((*store)->Get(EcdsaVerifyKeyManager().get_key_type()), IsOk());
+  EXPECT_THAT((*store)->Get(RsaSsaPssVerifyKeyManager().get_key_type()),
               IsOk());
-  EXPECT_THAT(internal::KeyGenConfigurationImpl::GetKeyTypeInfoStore(
-                  KeyGenConfigFips140_2())
-                  .Get(AesCtrHmacAeadKeyManager().get_key_type()),
-              IsOk());
-  EXPECT_THAT(internal::KeyGenConfigurationImpl::GetKeyTypeInfoStore(
-                  KeyGenConfigFips140_2())
-                  .Get(AesGcmKeyManager().get_key_type()),
-              IsOk());
-  EXPECT_THAT(internal::KeyGenConfigurationImpl::GetKeyTypeInfoStore(
-                  KeyGenConfigFips140_2())
-                  .Get(HmacPrfKeyManager().get_key_type()),
-              IsOk());
-  EXPECT_THAT(internal::KeyGenConfigurationImpl::GetKeyTypeInfoStore(
-                  KeyGenConfigFips140_2())
-                  .Get(EcdsaVerifyKeyManager().get_key_type()),
-              IsOk());
-  EXPECT_THAT(internal::KeyGenConfigurationImpl::GetKeyTypeInfoStore(
-                  KeyGenConfigFips140_2())
-                  .Get(RsaSsaPssVerifyKeyManager().get_key_type()),
-              IsOk());
-  EXPECT_THAT(internal::KeyGenConfigurationImpl::GetKeyTypeInfoStore(
-                  KeyGenConfigFips140_2())
-                  .Get(RsaSsaPkcs1VerifyKeyManager().get_key_type()),
+  EXPECT_THAT((*store)->Get(RsaSsaPkcs1VerifyKeyManager().get_key_type()),
               IsOk());
 }
 
@@ -98,10 +84,11 @@ TEST_F(KeyGenFips1402Test, NonFipsTypeNotPresent) {
     GTEST_SKIP() << "Only test in FIPS mode";
   }
 
-  EXPECT_THAT(internal::KeyGenConfigurationImpl::GetKeyTypeInfoStore(
-                  KeyGenConfigFips140_2())
-                  .Get(AesCmacKeyManager().get_key_type())
-                  .status(),
+  util::StatusOr<const internal::KeyTypeInfoStore*> store =
+      internal::KeyGenConfigurationImpl::GetKeyTypeInfoStore(
+          KeyGenConfigFips140_2());
+  ASSERT_THAT(store, IsOk());
+  EXPECT_THAT((*store)->Get(AesCmacKeyManager().get_key_type()).status(),
               StatusIs(absl::StatusCode::kNotFound));
 }
 
@@ -112,11 +99,13 @@ TEST_F(KeyGenFips1402Test, NewKeyData) {
 
   // TODO(b/265705174): Replace with KeysetHandle::GenerateNew once that takes a
   // config parameter.
+  util::StatusOr<const internal::KeyTypeInfoStore*> store =
+      internal::KeyGenConfigurationImpl::GetKeyTypeInfoStore(
+          KeyGenConfigFips140_2());
+  ASSERT_THAT(store, IsOk());
   KeyTemplate templ = AeadKeyTemplates::Aes128Gcm();
   util::StatusOr<internal::KeyTypeInfoStore::Info*> info =
-      internal::KeyGenConfigurationImpl::GetKeyTypeInfoStore(
-          KeyGenConfigFips140_2())
-          .Get(templ.type_url());
+      (*store)->Get(templ.type_url());
   ASSERT_THAT(info, IsOk());
 
   util::StatusOr<std::unique_ptr<KeyData>> key_data =
