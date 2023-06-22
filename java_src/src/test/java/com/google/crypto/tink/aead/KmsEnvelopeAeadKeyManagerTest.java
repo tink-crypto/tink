@@ -295,4 +295,16 @@ public class KmsEnvelopeAeadKeyManagerTest {
     // not able to decrypt the ciphertext.
     assertThrows(GeneralSecurityException.class, () -> aead2.decrypt(ciphertext, associatedData));
   }
+
+  @Test
+  public void createKeyTemplateWithEnvelopeKeyTemplateAsDekTemplate_fails() throws Exception {
+    String kekUri = FakeKmsClient.createFakeKeyUri();
+
+    KeyTemplate dekTemplate =
+        KmsEnvelopeAeadKeyManager.createKeyTemplate(
+            kekUri, AesCtrHmacAeadKeyManager.aes128CtrHmacSha256Template());
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> KmsEnvelopeAeadKeyManager.createKeyTemplate(kekUri, dekTemplate));
+  }
 }
