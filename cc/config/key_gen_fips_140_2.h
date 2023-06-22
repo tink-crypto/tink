@@ -22,9 +22,9 @@
 namespace crypto {
 namespace tink {
 
-// KeyGenConfiguration used to generate keys using using FIPS 140-2-compliant
-// key types. Importing this KeyGenConfiguration restricts Tink to FIPS globally
-// and requires BoringSSL to be built with the BoringCrypto module.
+// KeyGenConfiguration used to generate keys using FIPS 140-2-compliant key
+// types. Importing this KeyGenConfiguration restricts Tink to FIPS globally and
+// requires BoringSSL to be built with the BoringCrypto module.
 const KeyGenConfiguration& KeyGenConfigFips140_2();
 
 }  // namespace tink
