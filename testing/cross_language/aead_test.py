@@ -49,16 +49,80 @@ _FAKE_KMS_KEY_URI = (
     'LnRpbmsuQWVzR2NtS2V5EhIaEIK75t5L-adlUwVhWvRuWUwYARABGM2b3_MDIAE')
 
 
-# maps from key_template_name to (key_template, key_type).  Contains all
+# maps from key_template_name to (key_template, supported_langs).  Contains all
 # templates we want to test which do not have a name in Tinkey.
 _ADDITIONAL_KEY_TEMPLATES = {
     '_FAKE_KMS_AEAD': (
         aead.aead_key_templates.create_kms_aead_key_template(_FAKE_KMS_KEY_URI),
-        'KmsAeadKey'),
-    '_FAKE_KMS_ENVELOPE_AEAD_WITH_AES128_GCM':
-        (aead.aead_key_templates.create_kms_envelope_aead_key_template(
-            _FAKE_KMS_KEY_URI,
-            aead.aead_key_templates.AES128_GCM), 'KmsEnvelopeAeadKey')
+        tink_config.supported_languages_for_key_type('KmsAeadKey'),
+    ),
+    # Since the key type KmsEnvelopeAeadKey is supported by all languages, the
+    # following templates should be supported if the DEK Template is supported
+    # by the language.
+    '_FAKE_KMS_ENVELOPE_AEAD_WITH_AES128_GCM': (
+        aead.aead_key_templates.create_kms_envelope_aead_key_template(
+            _FAKE_KMS_KEY_URI, aead.aead_key_templates.AES128_GCM
+        ),
+        utilities.SUPPORTED_LANGUAGES_BY_TEMPLATE_NAME['AES128_GCM'],
+    ),
+    '_FAKE_KMS_ENVELOPE_AEAD_WITH_AES256_GCM': (
+        aead.aead_key_templates.create_kms_envelope_aead_key_template(
+            _FAKE_KMS_KEY_URI, aead.aead_key_templates.AES256_GCM
+        ),
+        utilities.SUPPORTED_LANGUAGES_BY_TEMPLATE_NAME['AES256_GCM'],
+    ),
+    '_FAKE_KMS_ENVELOPE_AEAD_WITH_AES128_EAX': (
+        aead.aead_key_templates.create_kms_envelope_aead_key_template(
+            _FAKE_KMS_KEY_URI, aead.aead_key_templates.AES128_EAX
+        ),
+        utilities.SUPPORTED_LANGUAGES_BY_TEMPLATE_NAME['AES128_EAX'],
+    ),
+    '_FAKE_KMS_ENVELOPE_AEAD_WITH_AES256_EAX': (
+        aead.aead_key_templates.create_kms_envelope_aead_key_template(
+            _FAKE_KMS_KEY_URI, aead.aead_key_templates.AES256_EAX
+        ),
+        utilities.SUPPORTED_LANGUAGES_BY_TEMPLATE_NAME['AES256_EAX'],
+    ),
+    '_FAKE_KMS_ENVELOPE_AEAD_WITH_AES128_GCM_SIV': (
+        aead.aead_key_templates.create_kms_envelope_aead_key_template(
+            _FAKE_KMS_KEY_URI, aead.aead_key_templates.AES128_GCM_SIV
+        ),
+        utilities.SUPPORTED_LANGUAGES_BY_TEMPLATE_NAME['AES128_GCM_SIV'],
+    ),
+    '_FAKE_KMS_ENVELOPE_AEAD_WITH_AES256_GCM_SIV': (
+        aead.aead_key_templates.create_kms_envelope_aead_key_template(
+            _FAKE_KMS_KEY_URI, aead.aead_key_templates.AES256_GCM_SIV
+        ),
+        utilities.SUPPORTED_LANGUAGES_BY_TEMPLATE_NAME['AES256_GCM_SIV'],
+    ),
+    '_FAKE_KMS_ENVELOPE_AEAD_WITH_AES128_CTR_HMAC_SHA256': (
+        aead.aead_key_templates.create_kms_envelope_aead_key_template(
+            _FAKE_KMS_KEY_URI, aead.aead_key_templates.AES128_CTR_HMAC_SHA256
+        ),
+        utilities.SUPPORTED_LANGUAGES_BY_TEMPLATE_NAME[
+            'AES128_CTR_HMAC_SHA256'
+        ],
+    ),
+    '_FAKE_KMS_ENVELOPE_AEAD_WITH_AES256_CTR_HMAC_SHA256': (
+        aead.aead_key_templates.create_kms_envelope_aead_key_template(
+            _FAKE_KMS_KEY_URI, aead.aead_key_templates.AES256_CTR_HMAC_SHA256
+        ),
+        utilities.SUPPORTED_LANGUAGES_BY_TEMPLATE_NAME[
+            'AES256_CTR_HMAC_SHA256'
+        ],
+    ),
+    '_FAKE_KMS_ENVELOPE_AEAD_WITH_CHACHA20_POLY1305': (
+        aead.aead_key_templates.create_kms_envelope_aead_key_template(
+            _FAKE_KMS_KEY_URI, utilities.KEY_TEMPLATE['CHACHA20_POLY1305']
+        ),
+        utilities.SUPPORTED_LANGUAGES_BY_TEMPLATE_NAME['CHACHA20_POLY1305'],
+    ),
+    '_FAKE_KMS_ENVELOPE_AEAD_WITH_XCHACHA20_POLY1305': (
+        aead.aead_key_templates.create_kms_envelope_aead_key_template(
+            _FAKE_KMS_KEY_URI, aead.aead_key_templates.XCHACHA20_POLY1305
+        ),
+        utilities.SUPPORTED_LANGUAGES_BY_TEMPLATE_NAME['XCHACHA20_POLY1305'],
+    ),
 }
 
 
@@ -86,8 +150,8 @@ class AeadPythonTest(parameterized.TestCase):
 
   def _langs_from_key_template_name(self, key_template_name: str) -> List[str]:
     if key_template_name in _ADDITIONAL_KEY_TEMPLATES:
-      _, key_type = _ADDITIONAL_KEY_TEMPLATES[key_template_name]
-      return tink_config.supported_languages_for_key_type(key_type)
+      _, supported_langs = _ADDITIONAL_KEY_TEMPLATES[key_template_name]
+      return supported_langs
     else:
       return utilities.SUPPORTED_LANGUAGES_BY_TEMPLATE_NAME[key_template_name]
 
