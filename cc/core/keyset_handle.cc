@@ -12,7 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-///////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
 #include "tink/keyset_handle.h"
 
 #include <cstdint>
@@ -29,11 +30,13 @@
 #include "absl/types/optional.h"
 #include "tink/aead.h"
 #include "tink/insecure_secret_key_access.h"
+#include "tink/internal/key_gen_configuration_impl.h"
 #include "tink/internal/key_info.h"
 #include "tink/internal/key_status_util.h"
 #include "tink/internal/mutable_serialization_registry.h"
 #include "tink/internal/proto_key_serialization.h"
 #include "tink/internal/util.h"
+#include "tink/key_gen_configuration.h"
 #include "tink/key_status.h"
 #include "tink/keyset_reader.h"
 #include "tink/keyset_writer.h"
@@ -336,17 +339,30 @@ util::Status KeysetHandle::WriteNoSecret(KeysetWriter* writer) const {
 }
 
 util::StatusOr<std::unique_ptr<KeysetHandle>> KeysetHandle::GenerateNew(
-    const KeyTemplate& key_template,
+    const KeyTemplate& key_template, const KeyGenConfiguration& config,
     const absl::flat_hash_map<std::string, std::string>&
         monitoring_annotations) {
   auto handle =
       absl::WrapUnique(new KeysetHandle(Keyset(), monitoring_annotations));
   util::StatusOr<uint32_t> const result =
-      handle->AddKey(key_template, /*as_primary=*/true);
+      handle->AddKey(key_template, /*as_primary=*/true, config);
   if (!result.ok()) {
     return result.status();
   }
   return std::move(handle);
+}
+
+util::StatusOr<std::unique_ptr<KeysetHandle>> KeysetHandle::GenerateNew(
+    const KeyTemplate& key_template,
+    const absl::flat_hash_map<std::string, std::string>&
+        monitoring_annotations) {
+  KeyGenConfiguration config;
+  util::Status status =
+      internal::KeyGenConfigurationImpl::SetGlobalRegistryMode(config);
+  if (!status.ok()) {
+    return status;
+  }
+  return GenerateNew(key_template, config, monitoring_annotations);
 }
 
 util::StatusOr<std::unique_ptr<Keyset::Key>> ExtractPublicKey(
@@ -389,21 +405,42 @@ KeysetHandle::GetPublicKeysetHandle() const {
 
 crypto::tink::util::StatusOr<uint32_t> KeysetHandle::AddToKeyset(
     const google::crypto::tink::KeyTemplate& key_template, bool as_primary,
-    Keyset* keyset) {
+    const KeyGenConfiguration& config, Keyset* keyset) {
   if (key_template.output_prefix_type() ==
       google::crypto::tink::OutputPrefixType::UNKNOWN_PREFIX) {
     return util::Status(absl::StatusCode::kInvalidArgument,
                         "key template has unknown prefix");
   }
-  auto key_data_result = Registry::NewKeyData(key_template);
-  if (!key_data_result.ok()) return key_data_result.status();
-  auto key_data = std::move(key_data_result.value());
+
+  // Generate new key data.
+  util::StatusOr<std::unique_ptr<KeyData>> key_data;
+  if (internal::KeyGenConfigurationImpl::GetGlobalRegistryMode(config)) {
+    key_data = Registry::NewKeyData(key_template);
+  } else {
+    util::StatusOr<const internal::KeyTypeInfoStore*> key_type_info_store =
+        internal::KeyGenConfigurationImpl::GetKeyTypeInfoStore(config);
+    if (!key_type_info_store.ok()) {
+      return key_type_info_store.status();
+    }
+    util::StatusOr<const internal::KeyTypeInfoStore::Info*> key_type_info =
+        (*key_type_info_store)->Get(key_template.type_url());
+    if (!key_type_info.ok()) {
+      return key_type_info.status();
+    }
+    key_data = (*key_type_info)->key_factory().NewKeyData(key_template.value());
+  }
+  if (!key_data.ok()) {
+    return key_data.status();
+  }
+
+  // Add and fill in new key in `keyset`.
   Keyset::Key* key = keyset->add_key();
-  uint32_t key_id = GenerateUnusedKeyId(*keyset);
-  *(key->mutable_key_data()) = *key_data;
-  key->set_status(google::crypto::tink::KeyStatusType::ENABLED);
-  key->set_key_id(key_id);
+  *(key->mutable_key_data()) = *std::move(key_data).value();
+  key->set_status(KeyStatusType::ENABLED);
   key->set_output_prefix_type(key_template.output_prefix_type());
+
+  uint32_t key_id = GenerateUnusedKeyId(*keyset);
+  key->set_key_id(key_id);
   if (as_primary) {
     keyset->set_primary_key_id(key_id);
   }
@@ -411,8 +448,10 @@ crypto::tink::util::StatusOr<uint32_t> KeysetHandle::AddToKeyset(
 }
 
 crypto::tink::util::StatusOr<uint32_t> KeysetHandle::AddKey(
-    const google::crypto::tink::KeyTemplate& key_template, bool as_primary) {
-  util::StatusOr<uint32_t> id = AddToKeyset(key_template, as_primary, &keyset_);
+    const google::crypto::tink::KeyTemplate& key_template, bool as_primary,
+    const KeyGenConfiguration& config) {
+  util::StatusOr<uint32_t> id =
+      AddToKeyset(key_template, as_primary, config, &keyset_);
   if (!id.ok()) {
     return id.status();
   }

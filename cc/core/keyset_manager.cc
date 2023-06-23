@@ -17,14 +17,13 @@
 #include "tink/keyset_manager.h"
 
 #include <memory>
-#include <random>
 #include <utility>
 
 #include "absl/memory/memory.h"
 #include "absl/status/status.h"
+#include "tink/internal/key_gen_configuration_impl.h"
+#include "tink/key_gen_configuration.h"
 #include "tink/keyset_handle.h"
-#include "tink/keyset_reader.h"
-#include "tink/registry.h"
 #include "tink/util/enums.h"
 #include "tink/util/errors.h"
 #include "tink/util/status.h"
@@ -34,12 +33,12 @@
 namespace crypto {
 namespace tink {
 
+using ::crypto::tink::util::Enums;
+using ::crypto::tink::util::Status;
+using ::crypto::tink::util::StatusOr;
 using google::crypto::tink::Keyset;
 using google::crypto::tink::KeyStatusType;
 using google::crypto::tink::KeyTemplate;
-using crypto::tink::util::Enums;
-using crypto::tink::util::Status;
-using crypto::tink::util::StatusOr;
 
 // static
 StatusOr<std::unique_ptr<KeysetManager>> KeysetManager::New(
@@ -71,16 +70,21 @@ StatusOr<uint32_t> KeysetManager::Add(const KeyTemplate& key_template) {
   return Add(key_template, false);
 }
 
-crypto::tink::util::StatusOr<uint32_t> KeysetManager::Add(
+StatusOr<uint32_t> KeysetManager::Add(
     const google::crypto::tink::KeyTemplate& key_template, bool as_primary) {
+  KeyGenConfiguration config;
+  Status status =
+      internal::KeyGenConfigurationImpl::SetGlobalRegistryMode(config);
+  if (!status.ok()) {
+    return status;
+  }
   absl::MutexLock lock(&keyset_mutex_);
-  return KeysetHandle::AddToKeyset(key_template, as_primary, &keyset_);
+  return KeysetHandle::AddToKeyset(key_template, as_primary, config, &keyset_);
 }
 
 StatusOr<uint32_t> KeysetManager::Rotate(const KeyTemplate& key_template) {
   return Add(key_template, true);
 }
-
 
 Status KeysetManager::Enable(uint32_t key_id) {
   absl::MutexLock lock(&keyset_mutex_);
@@ -129,8 +133,7 @@ Status KeysetManager::Delete(uint32_t key_id) {
                      "Cannot delete primary key (key_id %u).", key_id);
   }
   auto key_field = keyset_.mutable_key();
-  for (auto key_iter = key_field->begin();
-       key_iter != key_field->end();
+  for (auto key_iter = key_field->begin(); key_iter != key_field->end();
        key_iter++) {
     auto key = *key_iter;
     if (key.key_id() == key_id) {
@@ -183,7 +186,6 @@ Status KeysetManager::SetPrimary(uint32_t key_id) {
   return ToStatusF(absl::StatusCode::kNotFound,
                    "No key with key_id %u found in the keyset.", key_id);
 }
-
 
 int KeysetManager::KeyCount() const {
   absl::MutexLock lock(&keyset_mutex_);

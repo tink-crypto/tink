@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-///////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 
 #ifndef TINK_KEYSET_HANDLE_H_
 #define TINK_KEYSET_HANDLE_H_
@@ -32,6 +32,7 @@
 #include "tink/internal/configuration_impl.h"
 #include "tink/internal/key_info.h"
 #include "tink/key.h"
+#include "tink/key_gen_configuration.h"
 #include "tink/key_manager.h"
 #include "tink/key_status.h"
 #include "tink/keyset_reader.h"
@@ -131,10 +132,18 @@ class KeysetHandle {
                const absl::flat_hash_map<std::string, std::string>&
                    monitoring_annotations = {});
 
-  // Returns a KeysetHandle for a new keyset that contains a single fresh key
-  // generated according to `key_template`. The keyset is annotated for
-  // monitoring with `monitoring_annotations`; by default,
-  // `monitoring_annotations` is empty.
+  // Returns a KeysetHandle containing a single new key generated according to
+  // `key_template` and using `config`. The keyset is annotated for monitoring
+  // with `monitoring_annotations`, which is empty by default.
+  static crypto::tink::util::StatusOr<std::unique_ptr<KeysetHandle>>
+  GenerateNew(const google::crypto::tink::KeyTemplate& key_template,
+              const crypto::tink::KeyGenConfiguration& config,
+              const absl::flat_hash_map<std::string, std::string>&
+                  monitoring_annotations = {});
+
+  // Returns a KeysetHandle containing a single new key generated according to
+  // `key_template`. The keyset is annotated for monitoring with
+  // `monitoring_annotations`, which is empty by default.
   static crypto::tink::util::StatusOr<std::unique_ptr<KeysetHandle>>
   GenerateNew(const google::crypto::tink::KeyTemplate& key_template,
               const absl::flat_hash_map<std::string, std::string>&
@@ -247,6 +256,7 @@ class KeysetHandle {
   // Generates a key from `key_template` and adds it `keyset`.
   static crypto::tink::util::StatusOr<uint32_t> AddToKeyset(
       const google::crypto::tink::KeyTemplate& key_template, bool as_primary,
+      const crypto::tink::KeyGenConfiguration& config,
       google::crypto::tink::Keyset* keyset);
 
   // Creates list of KeysetHandle::Entry entries derived from `keyset` in order.
@@ -260,7 +270,8 @@ class KeysetHandle {
 
   // Generates a key from `key_template` and adds it to the keyset handle.
   crypto::tink::util::StatusOr<uint32_t> AddKey(
-      const google::crypto::tink::KeyTemplate& key_template, bool as_primary);
+      const google::crypto::tink::KeyTemplate& key_template, bool as_primary,
+      const crypto::tink::KeyGenConfiguration& config);
 
   // Returns keyset held by this handle.
   const google::crypto::tink::Keyset& get_keyset() const { return keyset_; }

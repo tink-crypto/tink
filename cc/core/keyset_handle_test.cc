@@ -34,21 +34,19 @@
 #include "tink/binary_keyset_writer.h"
 #include "tink/cleartext_keyset_handle.h"
 #include "tink/config/fips_140_2.h"
+#include "tink/config/key_gen_fips_140_2.h"
 #include "tink/config/tink_config.h"
 #include "tink/core/key_manager_impl.h"
-#include "tink/internal/configuration_impl.h"
 #include "tink/internal/fips_utils.h"
-#include "tink/internal/legacy_proto_parameters.h"
-#include "tink/internal/proto_parameters_serialization.h"
+#include "tink/internal/key_gen_configuration_impl.h"
 #include "tink/json_keyset_reader.h"
 #include "tink/json_keyset_writer.h"
+#include "tink/key_gen_configuration.h"
 #include "tink/key_status.h"
-#include "tink/mac/mac_key_templates.h"
 #include "tink/primitive_set.h"
 #include "tink/primitive_wrapper.h"
 #include "tink/signature/ecdsa_sign_key_manager.h"
 #include "tink/signature/signature_key_templates.h"
-#include "tink/util/protobuf_helper.h"
 #include "tink/util/status.h"
 #include "tink/util/test_keyset_handle.h"
 #include "tink/util/test_matchers.h"
@@ -575,55 +573,94 @@ TEST_F(KeysetHandleTest, WriteEncryptedKeysetWithAssociatedData) {
   EXPECT_EQ(absl::StatusCode::kInvalidArgument, status.code());
 }
 
-TEST_F(KeysetHandleTest, GenerateNewKeysetHandle) {
-  const google::crypto::tink::KeyTemplate* key_templates[] = {
+TEST_F(KeysetHandleTest, GenerateNew) {
+  const google::crypto::tink::KeyTemplate* templates[] = {
       &AeadKeyTemplates::Aes128Gcm(),
       &AeadKeyTemplates::Aes256Gcm(),
       &AeadKeyTemplates::Aes128CtrHmacSha256(),
       &AeadKeyTemplates::Aes256CtrHmacSha256(),
   };
-  for (auto templ : key_templates) {
-    auto handle_result = KeysetHandle::GenerateNew(*templ);
-    EXPECT_TRUE(handle_result.ok())
-        << "Failed for template:\n " << templ->SerializeAsString()
-        << "\n with status: " << handle_result.status();
+  KeyGenConfiguration config;
+  ASSERT_THAT(internal::KeyGenConfigurationImpl::SetGlobalRegistryMode(config),
+              IsOk());
+  for (auto templ : templates) {
+    EXPECT_THAT(KeysetHandle::GenerateNew(*templ).status(), IsOk());
+    EXPECT_THAT(KeysetHandle::GenerateNew(*templ, config).status(), IsOk());
   }
+}
+
+TEST_F(KeysetHandleTest, GenerateNewWithBespokeConfig) {
+  KeyGenConfiguration config;
+  EXPECT_THAT(
+      KeysetHandle::GenerateNew(AeadKeyTemplates::Aes128Gcm(), config).status(),
+      StatusIs(absl::StatusCode::kNotFound));
+
+  ASSERT_THAT(internal::KeyGenConfigurationImpl::AddKeyTypeManager(
+                  absl::make_unique<AesGcmKeyManager>(), config),
+              IsOk());
+  EXPECT_THAT(
+      KeysetHandle::GenerateNew(AeadKeyTemplates::Aes128Gcm(), config).status(),
+      IsOk());
+}
+
+TEST_F(KeysetHandleTest, GenerateNewWithGlobalRegistryConfig) {
+  KeyGenConfiguration config;
+  ASSERT_THAT(internal::KeyGenConfigurationImpl::SetGlobalRegistryMode(config),
+              IsOk());
+  EXPECT_THAT(KeysetHandle::GenerateNew(AeadKeyTemplates::Aes128Gcm(), config),
+              IsOk());
 }
 
 TEST_F(KeysetHandleTest, GenerateNewWithAnnotations) {
   const absl::flat_hash_map<std::string, std::string> kAnnotations = {
       {"key1", "value1"}, {"key2", "value2"}};
 
-  // The template used doesn't make any different w.r.t. annotations.
-  util::StatusOr<std::unique_ptr<KeysetHandle>> keyset_handle =
+  // `handle` depends on the global registry.
+  util::StatusOr<std::unique_ptr<KeysetHandle>> handle =
       KeysetHandle::GenerateNew(AeadKeyTemplates::Aes128Gcm(), kAnnotations);
-  ASSERT_THAT(keyset_handle, IsOk());
-  auto primitive_wrapper = absl::make_unique<MockAeadPrimitiveWrapper>();
-  absl::flat_hash_map<std::string, std::string> generated_annotations;
-  EXPECT_CALL(*primitive_wrapper, Wrap(_))
-      .WillOnce(
-          [&generated_annotations](
-              std::unique_ptr<PrimitiveSet<Aead>> generated_primitive_set) {
-            generated_annotations = generated_primitive_set->get_annotations();
-            std::unique_ptr<Aead> aead = absl::make_unique<DummyAead>("");
-            return aead;
-          });
-  Registry::Reset();
-  ASSERT_THAT(Registry::RegisterPrimitiveWrapper(std::move(primitive_wrapper)),
-              IsOk());
-  ASSERT_THAT(Registry::RegisterKeyTypeManager(
-                  absl::make_unique<FakeAeadKeyManager>(
-                      "type.googleapis.com/google.crypto.tink.AesGcmKey"),
-                  /*new_key_allowed=*/true),
-              IsOk());
+  ASSERT_THAT(handle, IsOk());
 
-  EXPECT_THAT((*keyset_handle)->GetPrimitive<Aead>(), IsOk());
-  EXPECT_EQ(generated_annotations, kAnnotations);
-  // This is needed to cleanup mocks.
-  Registry::Reset();
+  // `config_handle` uses a config that depends on the global registry.
+  KeyGenConfiguration config;
+  ASSERT_THAT(internal::KeyGenConfigurationImpl::SetGlobalRegistryMode(config),
+              IsOk());
+  util::StatusOr<std::unique_ptr<KeysetHandle>> config_handle =
+      KeysetHandle::GenerateNew(AeadKeyTemplates::Aes128Gcm(), config,
+                                kAnnotations);
+  ASSERT_THAT(config_handle, IsOk());
+
+  for (KeysetHandle h : {**handle, **config_handle}) {
+    auto primitive_wrapper = absl::make_unique<MockAeadPrimitiveWrapper>();
+    absl::flat_hash_map<std::string, std::string> generated_annotations;
+    EXPECT_CALL(*primitive_wrapper, Wrap(_))
+        .WillOnce(
+            [&generated_annotations](
+                std::unique_ptr<PrimitiveSet<Aead>> generated_primitive_set) {
+              generated_annotations =
+                  generated_primitive_set->get_annotations();
+              std::unique_ptr<Aead> aead = absl::make_unique<DummyAead>("");
+              return aead;
+            });
+
+    Registry::Reset();
+    ASSERT_THAT(
+        Registry::RegisterPrimitiveWrapper(std::move(primitive_wrapper)),
+        IsOk());
+    ASSERT_THAT(Registry::RegisterKeyTypeManager(
+                    absl::make_unique<FakeAeadKeyManager>(
+                        "type.googleapis.com/google.crypto.tink.AesGcmKey"),
+                    /*new_key_allowed=*/true),
+                IsOk());
+
+    EXPECT_THAT(h.GetPrimitive<Aead>(), IsOk());
+    EXPECT_EQ(generated_annotations, kAnnotations);
+
+    // This is needed to cleanup mocks.
+    Registry::Reset();
+  }
 }
 
-TEST_F(KeysetHandleTest, GenerateNewKeysetHandleErrors) {
+TEST_F(KeysetHandleTest, GenerateNewErrors) {
   KeyTemplate templ;
   templ.set_type_url("type.googleapis.com/some.unknown.KeyType");
   templ.set_output_prefix_type(OutputPrefixType::TINK);
@@ -783,29 +820,11 @@ TEST_F(KeysetHandleTest, GetPrimitiveWithConfigFips1402) {
     GTEST_SKIP() << "Only test in FIPS mode";
   }
 
-  // TODO(b/265705174): Replace with KeysetHandle::GenerateNew once that takes a
-  // config parameter.
-  KeyTemplate templ = AeadKeyTemplates::Aes128Gcm();
-  util::StatusOr<const internal::KeyTypeInfoStore*> store =
-      internal::ConfigurationImpl::GetKeyTypeInfoStore(ConfigFips140_2());
-  ASSERT_THAT(store, IsOk());
-  util::StatusOr<internal::KeyTypeInfoStore::Info*> info =
-      (*store)->Get(templ.type_url());
-  ASSERT_THAT(info, IsOk());
-
-  util::StatusOr<std::unique_ptr<KeyData>> key_data =
-      (*info)->key_factory().NewKeyData(templ.value());
-  ASSERT_THAT(key_data, IsOk());
-
-  Keyset keyset;
-  uint32_t key_id = 0;
-  test::AddKeyData(**key_data, key_id, OutputPrefixType::TINK,
-                   KeyStatusType::ENABLED, &keyset);
-  keyset.set_primary_key_id(key_id);
-  std::unique_ptr<KeysetHandle> handle =
-      TestKeysetHandle::GetKeysetHandle(keyset);
-
-  EXPECT_THAT(handle->GetPrimitive<Aead>(ConfigFips140_2()), IsOk());
+  util::StatusOr<std::unique_ptr<KeysetHandle>> handle =
+      KeysetHandle::GenerateNew(AeadKeyTemplates::Aes128Gcm(),
+                                KeyGenConfigFips140_2());
+  ASSERT_THAT(handle, IsOk());
+  EXPECT_THAT((*handle)->GetPrimitive<Aead>(ConfigFips140_2()), IsOk());
 }
 
 TEST_F(KeysetHandleTest, GetPrimitiveWithConfigFips1402FailsWithNonFipsHandle) {

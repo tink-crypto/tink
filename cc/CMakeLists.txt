@@ -437,6 +437,7 @@ tink_cc_library(
     tink::core::configuration
     tink::core::insecure_secret_key_access
     tink::core::key
+    tink::core::key_gen_configuration
     tink::core::key_manager
     tink::core::key_status
     tink::core::keyset_reader
@@ -451,6 +452,7 @@ tink_cc_library(
     absl::strings
     absl::optional
     tink::internal::configuration_impl
+    tink::internal::key_gen_configuration_impl
     tink::internal::key_info
     tink::internal::key_status_util
     tink::internal::mutable_serialization_registry
@@ -517,13 +519,13 @@ tink_cc_library(
     core/keyset_manager.cc
     keyset_manager.h
   DEPS
+    tink::core::key_gen_configuration
     tink::core::keyset_handle
-    tink::core::keyset_reader
-    tink::core::registry
     absl::core_headers
     absl::memory
     absl::status
     absl::synchronization
+    tink::internal::key_gen_configuration_impl
     tink::util::enums
     tink::util::errors
     tink::util::status
@@ -785,6 +787,7 @@ tink_cc_test(
     tink::core::key_manager_impl
     tink::core::json_keyset_reader
     tink::core::json_keyset_writer
+    tink::core::key_gen_configuration
     tink::core::key_status
     tink::core::keyset_handle
     tink::core::primitive_set
@@ -796,15 +799,12 @@ tink_cc_test(
     tink::aead::aead_wrapper
     tink::aead::aes_gcm_key_manager
     tink::config::fips_140_2
+    tink::config::key_gen_fips_140_2
     tink::config::tink_config
-    tink::internal::configuration_impl
     tink::internal::fips_utils
-    tink::internal::legacy_proto_parameters
-    tink::internal::proto_parameters_serialization
-    tink::mac::mac_key_templates
+    tink::internal::key_gen_configuration_impl
     tink::signature::ecdsa_sign_key_manager
     tink::signature::signature_key_templates
-    tink::util::protobuf_helper
     tink::util::status
     tink::util::test_keyset_handle
     tink::util::test_matchers
