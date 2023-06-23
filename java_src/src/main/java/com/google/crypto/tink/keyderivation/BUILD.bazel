@@ -133,3 +133,27 @@ java_library(
     srcs = ["KeyDerivationParameters.java"],
     deps = ["//src/main/java/com/google/crypto/tink:parameters"],
 )
+
+java_library(
+    name = "prf_based_key_derivation_parameters",
+    srcs = ["PrfBasedKeyDerivationParameters.java"],
+    deps = [
+        ":key_derivation_parameters",
+        "//src/main/java/com/google/crypto/tink:parameters",
+        "//src/main/java/com/google/crypto/tink/prf:prf_parameters",
+        "@maven//:com_google_code_findbugs_jsr305",
+        "@maven//:com_google_errorprone_error_prone_annotations",
+    ],
+)
+
+android_library(
+    name = "prf_based_key_derivation_parameters-android",
+    srcs = ["PrfBasedKeyDerivationParameters.java"],
+    deps = [
+        ":key_derivation_parameters-android",
+        "//src/main/java/com/google/crypto/tink:parameters-android",
+        "//src/main/java/com/google/crypto/tink/prf:prf_parameters-android",
+        "@maven//:com_google_code_findbugs_jsr305",
+        "@maven//:com_google_errorprone_error_prone_annotations",
+    ],
+)
