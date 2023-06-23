@@ -407,10 +407,11 @@ TEST(ConfigurationImplTest, GetKeyTypeInfoStoreAsymmetric) {
   }
 }
 
-TEST(ConfigurationImplTest, SetGlobalRegistryMode) {
+TEST(ConfigurationImplTest, GlobalRegistryMode) {
   Registry::Reset();
   Configuration config;
   ASSERT_THAT(ConfigurationImpl::SetGlobalRegistryMode(config), IsOk());
+  EXPECT_TRUE(ConfigurationImpl::GetGlobalRegistryMode(config));
 
   // Check that ConfigurationImpl functions return kFailedPrecondition.
   EXPECT_THAT(ConfigurationImpl::AddPrimitiveWrapper(
@@ -449,13 +450,14 @@ TEST(ConfigurationImplTest, SetGlobalRegistryMode) {
   EXPECT_THAT(handle->GetPrimitive<FakePrimitive>(), IsOk());
 }
 
-TEST(ConfigurationImplTest, SetGlobalRegistryModeNonEmptyConfigFails) {
+TEST(ConfigurationImplTest, GlobalRegistryModeWithNonEmptyConfigFails) {
   Configuration config;
   ASSERT_THAT(ConfigurationImpl::AddPrimitiveWrapper(
                   absl::make_unique<FakePrimitiveWrapper>(), config),
               IsOk());
   EXPECT_THAT(ConfigurationImpl::SetGlobalRegistryMode(config),
               StatusIs(absl::StatusCode::kFailedPrecondition));
+  EXPECT_FALSE(ConfigurationImpl::GetGlobalRegistryMode(config));
 }
 
 }  // namespace

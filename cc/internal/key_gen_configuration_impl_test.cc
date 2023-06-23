@@ -266,10 +266,11 @@ TEST(KeyGenConfigurationImplTest, GetKeyTypeInfoStoreAsymmetric) {
   }
 }
 
-TEST(KeyGenConfigurationImplTest, SetGlobalRegistryMode) {
+TEST(KeyGenConfigurationImplTest, GlobalRegistryMode) {
   Registry::Reset();
   KeyGenConfiguration config;
   ASSERT_THAT(KeyGenConfigurationImpl::SetGlobalRegistryMode(config), IsOk());
+  EXPECT_TRUE(KeyGenConfigurationImpl::GetGlobalRegistryMode(config));
 
   // Check that KeyGenConfigurationImpl functions return kFailedPrecondition.
   EXPECT_THAT(KeyGenConfigurationImpl::AddKeyTypeManager(
@@ -295,13 +296,14 @@ TEST(KeyGenConfigurationImplTest, SetGlobalRegistryMode) {
   EXPECT_THAT(Registry::NewKeyData(AeadKeyTemplates::Aes256Gcm()), IsOk());
 }
 
-TEST(KeyGenConfigurationImplTest, SetGlobalRegistryModeNonEmptyConfigFails) {
+TEST(KeyGenConfigurationImplTest, GlobalRegistryModeWithNonEmptyConfigFails) {
   KeyGenConfiguration config;
   ASSERT_THAT(KeyGenConfigurationImpl::AddKeyTypeManager(
                   absl::make_unique<FakeKeyTypeManager>(), config),
               IsOk());
   EXPECT_THAT(KeyGenConfigurationImpl::SetGlobalRegistryMode(config),
               StatusIs(absl::StatusCode::kFailedPrecondition));
+  EXPECT_FALSE(KeyGenConfigurationImpl::GetGlobalRegistryMode(config));
 }
 
 }  // namespace

@@ -128,6 +128,10 @@ class ConfigurationImpl {
     config.global_registry_mode_ = true;
     return crypto::tink::util::OkStatus();
   }
+
+  static bool GetGlobalRegistryMode(const crypto::tink::Configuration& config) {
+    return config.global_registry_mode_;
+  }
 };
 
 }  // namespace internal

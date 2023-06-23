@@ -77,6 +77,11 @@ class KeyGenConfigurationImpl {
     config.global_registry_mode_ = true;
     return crypto::tink::util::OkStatus();
   }
+
+  static bool GetGlobalRegistryMode(
+      const crypto::tink::KeyGenConfiguration& config) {
+    return config.global_registry_mode_;
+  }
 };
 
 }  // namespace internal
