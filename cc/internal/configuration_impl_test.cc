@@ -21,6 +21,8 @@
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include "absl/status/status.h"
+#include "tink/cleartext_keyset_handle.h"
 #include "tink/configuration.h"
 #include "tink/internal/keyset_wrapper_store.h"
 #include "tink/subtle/random.h"
@@ -403,6 +405,57 @@ TEST(ConfigurationImplTest, GetKeyTypeInfoStoreAsymmetric) {
     ASSERT_THAT(key_manager, IsOk());
     EXPECT_EQ((*key_manager)->get_key_type(), type_url);
   }
+}
+
+TEST(ConfigurationImplTest, SetGlobalRegistryMode) {
+  Registry::Reset();
+  Configuration config;
+  ASSERT_THAT(ConfigurationImpl::SetGlobalRegistryMode(config), IsOk());
+
+  // Check that ConfigurationImpl functions return kFailedPrecondition.
+  EXPECT_THAT(ConfigurationImpl::AddPrimitiveWrapper(
+                  absl::make_unique<FakePrimitiveWrapper>(), config),
+              StatusIs(absl::StatusCode::kFailedPrecondition));
+  EXPECT_THAT(ConfigurationImpl::AddKeyTypeManager(
+                  absl::make_unique<FakeKeyTypeManager>(), config),
+              StatusIs(absl::StatusCode::kFailedPrecondition));
+  EXPECT_THAT(ConfigurationImpl::AddAsymmetricKeyManagers(
+                  absl::make_unique<FakeSignKeyManager>(),
+                  absl::make_unique<FakeVerifyKeyManager>(), config),
+              StatusIs(absl::StatusCode::kFailedPrecondition));
+  EXPECT_THAT(ConfigurationImpl::GetKeyTypeInfoStore(config).status(),
+              StatusIs(absl::StatusCode::kFailedPrecondition));
+  EXPECT_THAT(ConfigurationImpl::GetKeysetWrapperStore(config).status(),
+              StatusIs(absl::StatusCode::kFailedPrecondition));
+
+  Keyset keyset;
+  std::string raw_key = AddAesGcmKeyToKeyset(
+      keyset, /*key_id=*/13, OutputPrefixType::TINK, KeyStatusType::ENABLED);
+  keyset.set_primary_key_id(13);
+  std::unique_ptr<KeysetHandle> handle =
+      CleartextKeysetHandle::GetKeysetHandle(keyset);
+  // TODO(b/265705174): Replace with GetPrimitive(config) once implemented.
+  EXPECT_THAT(handle->GetPrimitive<FakePrimitive>().status(),
+              StatusIs(absl::StatusCode::kNotFound));
+
+  ASSERT_THAT(Registry::RegisterPrimitiveWrapper(
+                  absl::make_unique<FakePrimitiveWrapper>()),
+              IsOk());
+  ASSERT_THAT(
+      Registry::RegisterKeyTypeManager(absl::make_unique<FakeKeyTypeManager>(),
+                                       /*new_key_allowed=*/true),
+      IsOk());
+  // TODO(b/265705174): Replace with GetPrimitive(config) once implemented.
+  EXPECT_THAT(handle->GetPrimitive<FakePrimitive>(), IsOk());
+}
+
+TEST(ConfigurationImplTest, SetGlobalRegistryModeNonEmptyConfigFails) {
+  Configuration config;
+  ASSERT_THAT(ConfigurationImpl::AddPrimitiveWrapper(
+                  absl::make_unique<FakePrimitiveWrapper>(), config),
+              IsOk());
+  EXPECT_THAT(ConfigurationImpl::SetGlobalRegistryMode(config),
+              StatusIs(absl::StatusCode::kFailedPrecondition));
 }
 
 }  // namespace

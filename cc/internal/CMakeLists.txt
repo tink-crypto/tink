@@ -1044,6 +1044,8 @@ tink_cc_test(
     tink::internal::configuration_impl
     tink::internal::keyset_wrapper_store
     gmock
+    absl::status
+    tink::core::cleartext_keyset_handle
     tink::core::configuration
     tink::subtle::random
     tink::util::test_matchers
@@ -1144,6 +1146,7 @@ tink_cc_test(
     tink::internal::key_gen_configuration_impl
     gmock
     tink::core::key_gen_configuration
+    tink::aead::aead_key_templates
     tink::util::test_matchers
     tink::util::test_util
     tink::proto::aes_gcm_cc_proto

@@ -21,6 +21,7 @@
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include "tink/aead/aead_key_templates.h"
 #include "tink/key_gen_configuration.h"
 #include "tink/util/test_matchers.h"
 #include "tink/util/test_util.h"
@@ -263,6 +264,44 @@ TEST(KeyGenConfigurationImplTest, GetKeyTypeInfoStoreAsymmetric) {
     ASSERT_THAT(key_manager, IsOk());
     EXPECT_EQ((*key_manager)->get_key_type(), type_url);
   }
+}
+
+TEST(KeyGenConfigurationImplTest, SetGlobalRegistryMode) {
+  Registry::Reset();
+  KeyGenConfiguration config;
+  ASSERT_THAT(KeyGenConfigurationImpl::SetGlobalRegistryMode(config), IsOk());
+
+  // Check that KeyGenConfigurationImpl functions return kFailedPrecondition.
+  EXPECT_THAT(KeyGenConfigurationImpl::AddKeyTypeManager(
+                  absl::make_unique<FakeKeyTypeManager>(), config),
+              StatusIs(absl::StatusCode::kFailedPrecondition));
+  EXPECT_THAT(KeyGenConfigurationImpl::AddAsymmetricKeyManagers(
+                  absl::make_unique<FakeSignKeyManager>(),
+                  absl::make_unique<FakeVerifyKeyManager>(), config),
+              StatusIs(absl::StatusCode::kFailedPrecondition));
+  EXPECT_THAT(KeyGenConfigurationImpl::GetKeyTypeInfoStore(config).status(),
+              StatusIs(absl::StatusCode::kFailedPrecondition));
+
+  // TODO(b/265705174): Replace with KeysetHandle::GenerateNew(config).
+  EXPECT_THAT(Registry::NewKeyData(AeadKeyTemplates::Aes256Gcm()).status(),
+              StatusIs(absl::StatusCode::kNotFound));
+
+  ASSERT_THAT(
+      Registry::RegisterKeyTypeManager(absl::make_unique<FakeKeyTypeManager>(),
+                                       /*new_key_allowed=*/true),
+      IsOk());
+  // TODO(b/265705174): Replace with KeysetHandle::GenerateNew(config) once
+  // implemented.
+  EXPECT_THAT(Registry::NewKeyData(AeadKeyTemplates::Aes256Gcm()), IsOk());
+}
+
+TEST(KeyGenConfigurationImplTest, SetGlobalRegistryModeNonEmptyConfigFails) {
+  KeyGenConfiguration config;
+  ASSERT_THAT(KeyGenConfigurationImpl::AddKeyTypeManager(
+                  absl::make_unique<FakeKeyTypeManager>(), config),
+              IsOk());
+  EXPECT_THAT(KeyGenConfigurationImpl::SetGlobalRegistryMode(config),
+              StatusIs(absl::StatusCode::kFailedPrecondition));
 }
 
 }  // namespace

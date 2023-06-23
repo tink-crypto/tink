@@ -26,7 +26,7 @@ namespace internal {
 class KeyGenConfigurationImpl;
 }
 
-// Generates keys using stored key type managers.
+// KeyGenConfiguration used to generate keys using stored key type managers.
 class KeyGenConfiguration {
  public:
   KeyGenConfiguration() = default;
@@ -36,8 +36,12 @@ class KeyGenConfiguration {
   KeyGenConfiguration& operator=(const KeyGenConfiguration&) = delete;
 
  private:
-  // KeyGenConfigurationImpl requires access to `key_type_info_store_`.
   friend class internal::KeyGenConfigurationImpl;
+
+  // When true, KeyGenConfiguration is in global registry mode. For
+  // `some_fn(config)` with a `config` parameter, this indicates to `some_fn` to
+  // use crypto::tink::Registry directly.
+  bool global_registry_mode_ = false;
 
   crypto::tink::internal::KeyTypeInfoStore key_type_info_store_;
 };

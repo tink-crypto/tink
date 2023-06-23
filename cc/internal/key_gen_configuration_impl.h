@@ -24,12 +24,19 @@ namespace crypto {
 namespace tink {
 namespace internal {
 
+constexpr absl::string_view kKeyGenConfigurationImplErr =
+    "Use crypto::tink::Registry instead when in global registry mode.";
+
 class KeyGenConfigurationImpl {
  public:
   template <class KM>
   static crypto::tink::util::Status AddKeyTypeManager(
       std::unique_ptr<KM> key_manager,
       crypto::tink::KeyGenConfiguration& config) {
+    if (config.global_registry_mode_) {
+      return crypto::tink::util::Status(absl::StatusCode::kFailedPrecondition,
+                                        kKeyGenConfigurationImplErr);
+    }
     return config.key_type_info_store_.AddKeyTypeManager(
         std::move(key_manager), /*new_key_allowed=*/true);
   }
@@ -39,6 +46,10 @@ class KeyGenConfigurationImpl {
       std::unique_ptr<PrivateKM> private_key_manager,
       std::unique_ptr<PublicKM> public_key_manager,
       crypto::tink::KeyGenConfiguration& config) {
+    if (config.global_registry_mode_) {
+      return crypto::tink::util::Status(absl::StatusCode::kFailedPrecondition,
+                                        kKeyGenConfigurationImplErr);
+    }
     return config.key_type_info_store_.AddAsymmetricKeyTypeManagers(
         std::move(private_key_manager), std::move(public_key_manager),
         /*new_key_allowed=*/true);
@@ -47,7 +58,24 @@ class KeyGenConfigurationImpl {
   static crypto::tink::util::StatusOr<
       const crypto::tink::internal::KeyTypeInfoStore*>
   GetKeyTypeInfoStore(const crypto::tink::KeyGenConfiguration& config) {
+    if (config.global_registry_mode_) {
+      return crypto::tink::util::Status(absl::StatusCode::kFailedPrecondition,
+                                        kKeyGenConfigurationImplErr);
+    }
     return &config.key_type_info_store_;
+  }
+
+  // `config` can be set to global registry mode only if empty.
+  static crypto::tink::util::Status SetGlobalRegistryMode(
+      crypto::tink::KeyGenConfiguration& config) {
+    if (!config.key_type_info_store_.IsEmpty()) {
+      return crypto::tink::util::Status(
+          absl::StatusCode::kFailedPrecondition,
+          "Using the global registry is only allowed when KeyGenConfiguration "
+          "is empty.");
+    }
+    config.global_registry_mode_ = true;
+    return crypto::tink::util::OkStatus();
   }
 };
 

@@ -25,15 +25,21 @@ namespace crypto {
 namespace tink {
 namespace internal {
 
+constexpr absl::string_view kConfigurationImplErr =
+    "Use crypto::tink::Registry instead when in global registry mode.";
+
 class ConfigurationImpl {
  public:
   template <class PW>
   static crypto::tink::util::Status AddPrimitiveWrapper(
       std::unique_ptr<PW> wrapper, crypto::tink::Configuration& config) {
-    // We must specify `primitive_getter` here and no later, since the
-    // corresponding get function, KeysetWrapper::WrapKeyset, does not have
-    // access to PW::InputPrimitive. `primitive_getter` is stored in the key
-    // manager, which is currently stored in `config.key_type_info_store_`.
+    if (config.global_registry_mode_) {
+      return crypto::tink::util::Status(absl::StatusCode::kFailedPrecondition,
+                                        kConfigurationImplErr);
+    }
+
+    // Function `primitive_getter` must be defined here, since
+    // PW::InputPrimitive is not accessible later.
     // TODO(b/284084337): Move primitive getter out of key manager.
     std::function<crypto::tink::util::StatusOr<
         std::unique_ptr<typename PW::InputPrimitive>>(
@@ -68,6 +74,10 @@ class ConfigurationImpl {
   template <class KM>
   static crypto::tink::util::Status AddKeyTypeManager(
       std::unique_ptr<KM> key_manager, crypto::tink::Configuration& config) {
+    if (config.global_registry_mode_) {
+      return crypto::tink::util::Status(absl::StatusCode::kFailedPrecondition,
+                                        kConfigurationImplErr);
+    }
     return config.key_type_info_store_.AddKeyTypeManager(
         std::move(key_manager), /*new_key_allowed=*/true);
   }
@@ -77,6 +87,10 @@ class ConfigurationImpl {
       std::unique_ptr<PrivateKM> private_key_manager,
       std::unique_ptr<PublicKM> public_key_manager,
       crypto::tink::Configuration& config) {
+    if (config.global_registry_mode_) {
+      return crypto::tink::util::Status(absl::StatusCode::kFailedPrecondition,
+                                        kConfigurationImplErr);
+    }
     return config.key_type_info_store_.AddAsymmetricKeyTypeManagers(
         std::move(private_key_manager), std::move(public_key_manager),
         /*new_key_allowed=*/true);
@@ -85,13 +99,34 @@ class ConfigurationImpl {
   static crypto::tink::util::StatusOr<
       const crypto::tink::internal::KeyTypeInfoStore*>
   GetKeyTypeInfoStore(const crypto::tink::Configuration& config) {
+    if (config.global_registry_mode_) {
+      return crypto::tink::util::Status(absl::StatusCode::kFailedPrecondition,
+                                        kConfigurationImplErr);
+    }
     return &config.key_type_info_store_;
   }
 
   static crypto::tink::util::StatusOr<
       const crypto::tink::internal::KeysetWrapperStore*>
   GetKeysetWrapperStore(const crypto::tink::Configuration& config) {
+    if (config.global_registry_mode_) {
+      return crypto::tink::util::Status(absl::StatusCode::kFailedPrecondition,
+                                        kConfigurationImplErr);
+    }
     return &config.keyset_wrapper_store_;
+  }
+
+  // `config` can be set to global registry mode only if empty.
+  static crypto::tink::util::Status SetGlobalRegistryMode(
+      crypto::tink::Configuration& config) {
+    if (!config.key_type_info_store_.IsEmpty() ||
+        !config.keyset_wrapper_store_.IsEmpty()) {
+      return crypto::tink::util::Status(absl::StatusCode::kFailedPrecondition,
+                                        "Using the global registry is only "
+                                        "allowed when Configuration is empty.");
+    }
+    config.global_registry_mode_ = true;
+    return crypto::tink::util::OkStatus();
   }
 };
 

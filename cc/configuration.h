@@ -27,7 +27,8 @@ namespace internal {
 class ConfigurationImpl;
 }
 
-// Generates primitives using stored primitive wrappers and key type managers.
+// Configuration used to generate primitives using stored primitive wrappers and
+// key type managers.
 class Configuration {
  public:
   Configuration() = default;
@@ -37,9 +38,12 @@ class Configuration {
   Configuration& operator=(const Configuration&) = delete;
 
  private:
-  // ConfigurationImpl requires access to `key_type_info_store_` and
-  // `keyset_wrapper_store_`.
   friend class internal::ConfigurationImpl;
+
+  // When true, Configuration is in global registry mode. For `some_fn(config)`
+  // with a `config` parameter, this indicates to `some_fn` to use
+  // crypto::tink::Registry directly.
+  bool global_registry_mode_ = false;
 
   crypto::tink::internal::KeyTypeInfoStore key_type_info_store_;
   crypto::tink::internal::KeysetWrapperStore keyset_wrapper_store_;
