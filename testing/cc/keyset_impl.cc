@@ -77,8 +77,12 @@ KeysetImpl::KeysetImpl() {
       crypto::tink::DeterministicAeadKeyTemplates::Aes256Siv();
   key_templates_["AES128_CTR_HMAC_SHA256_4KB"] =
       crypto::tink::StreamingAeadKeyTemplates::Aes128CtrHmacSha256Segment4KB();
+  key_templates_["AES128_CTR_HMAC_SHA256_1MB"] =
+      crypto::tink::StreamingAeadKeyTemplates::Aes128CtrHmacSha256Segment1MB();
   key_templates_["AES256_CTR_HMAC_SHA256_4KB"] =
       crypto::tink::StreamingAeadKeyTemplates::Aes256CtrHmacSha256Segment4KB();
+  key_templates_["AES256_CTR_HMAC_SHA256_1MB"] =
+      crypto::tink::StreamingAeadKeyTemplates::Aes256CtrHmacSha256Segment1MB();
   key_templates_["AES128_GCM_HKDF_4KB"] =
       crypto::tink::StreamingAeadKeyTemplates::Aes128GcmHkdf4KB();
   key_templates_["AES256_GCM_HKDF_4KB"] =

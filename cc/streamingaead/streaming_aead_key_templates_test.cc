@@ -203,6 +203,49 @@ TEST(Aes128CtrHmacSha256Segment4KBTest, CheckValues) {
   EXPECT_THAT(key_format.params().hmac_params().tag_size(), Eq(32));
 }
 
+TEST(Aes128CtrHmacSha256Segment1MBTest, TypeUrl) {
+  EXPECT_THAT(
+      StreamingAeadKeyTemplates::Aes128CtrHmacSha256Segment1MB().type_url(),
+      Eq("type.googleapis.com/google.crypto.tink.AesCtrHmacStreamingKey"));
+  EXPECT_THAT(
+      StreamingAeadKeyTemplates::Aes128CtrHmacSha256Segment1MB().type_url(),
+      Eq(AesCtrHmacStreamingKeyManager().get_key_type()));
+}
+
+TEST(Aes128CtrHmacSha256Segment1MBTest, OutputPrefixType) {
+  EXPECT_THAT(StreamingAeadKeyTemplates::Aes128CtrHmacSha256Segment1MB()
+                  .output_prefix_type(),
+              Eq(OutputPrefixType::RAW));
+}
+
+TEST(Aes128CtrHmacSha256Segment1MBTest, SameReference) {
+  // Check that reference to the same object is returned.
+  EXPECT_THAT(StreamingAeadKeyTemplates::Aes128CtrHmacSha256Segment1MB(),
+              Ref(StreamingAeadKeyTemplates::Aes128CtrHmacSha256Segment1MB()));
+}
+
+TEST(Aes128CtrHmacSha256Segment1MBTest, WorksWithKeyTypeManager) {
+  const KeyTemplate& key_template =
+      StreamingAeadKeyTemplates::Aes128CtrHmacSha256Segment1MB();
+  AesCtrHmacStreamingKeyFormat key_format;
+  EXPECT_TRUE(key_format.ParseFromString(key_template.value()));
+  EXPECT_THAT(AesCtrHmacStreamingKeyManager().ValidateKeyFormat(key_format),
+              IsOk());
+}
+
+TEST(Aes128CtrHmacSha256Segment1MBTest, CheckValues) {
+  const KeyTemplate& key_template =
+      StreamingAeadKeyTemplates::Aes128CtrHmacSha256Segment1MB();
+  AesCtrHmacStreamingKeyFormat key_format;
+  EXPECT_TRUE(key_format.ParseFromString(key_template.value()));
+  EXPECT_THAT(key_format.key_size(), Eq(16));
+  EXPECT_THAT(key_format.params().ciphertext_segment_size(), Eq(1048576));
+  EXPECT_THAT(key_format.params().derived_key_size(), Eq(16));
+  EXPECT_THAT(key_format.params().hkdf_hash_type(), Eq(HashType::SHA256));
+  EXPECT_THAT(key_format.params().hmac_params().hash(), Eq(HashType::SHA256));
+  EXPECT_THAT(key_format.params().hmac_params().tag_size(), Eq(32));
+}
+
 TEST(Aes256CtrHmacSha256Segment4KBTest, TypeUrl) {
   EXPECT_THAT(
       StreamingAeadKeyTemplates::Aes256CtrHmacSha256Segment4KB().type_url(),
@@ -240,6 +283,49 @@ TEST(Aes256CtrHmacSha256Segment4KBTest, CheckValues) {
   EXPECT_TRUE(key_format.ParseFromString(key_template.value()));
   EXPECT_THAT(key_format.key_size(), Eq(32));
   EXPECT_THAT(key_format.params().ciphertext_segment_size(), Eq(4096));
+  EXPECT_THAT(key_format.params().derived_key_size(), Eq(32));
+  EXPECT_THAT(key_format.params().hkdf_hash_type(), Eq(HashType::SHA256));
+  EXPECT_THAT(key_format.params().hmac_params().hash(), Eq(HashType::SHA256));
+  EXPECT_THAT(key_format.params().hmac_params().tag_size(), Eq(32));
+}
+
+TEST(Aes256CtrHmacSha256Segment1MBTest, TypeUrl) {
+  EXPECT_THAT(
+      StreamingAeadKeyTemplates::Aes256CtrHmacSha256Segment1MB().type_url(),
+      Eq("type.googleapis.com/google.crypto.tink.AesCtrHmacStreamingKey"));
+  EXPECT_THAT(
+      StreamingAeadKeyTemplates::Aes256CtrHmacSha256Segment1MB().type_url(),
+      Eq(AesCtrHmacStreamingKeyManager().get_key_type()));
+}
+
+TEST(Aes256CtrHmacSha256Segment1MBTest, OutputPrefixType) {
+  EXPECT_THAT(StreamingAeadKeyTemplates::Aes256CtrHmacSha256Segment1MB()
+                  .output_prefix_type(),
+              Eq(OutputPrefixType::RAW));
+}
+
+TEST(Aes256CtrHmacSha256Segment1MBTest, SameReference) {
+  // Check that reference to the same object is returned.
+  EXPECT_THAT(StreamingAeadKeyTemplates::Aes256CtrHmacSha256Segment1MB(),
+              Ref(StreamingAeadKeyTemplates::Aes256CtrHmacSha256Segment1MB()));
+}
+
+TEST(Aes256CtrHmacSha256Segment1MBTest, WorksWithKeyTypeManager) {
+  const KeyTemplate& key_template =
+      StreamingAeadKeyTemplates::Aes256CtrHmacSha256Segment1MB();
+  AesCtrHmacStreamingKeyFormat key_format;
+  EXPECT_TRUE(key_format.ParseFromString(key_template.value()));
+  EXPECT_THAT(AesCtrHmacStreamingKeyManager().ValidateKeyFormat(key_format),
+              IsOk());
+}
+
+TEST(Aes256CtrHmacSha256Segment1MBTest, CheckValues) {
+  const KeyTemplate& key_template =
+      StreamingAeadKeyTemplates::Aes256CtrHmacSha256Segment1MB();
+  AesCtrHmacStreamingKeyFormat key_format;
+  EXPECT_TRUE(key_format.ParseFromString(key_template.value()));
+  EXPECT_THAT(key_format.key_size(), Eq(32));
+  EXPECT_THAT(key_format.params().ciphertext_segment_size(), Eq(1048576));
   EXPECT_THAT(key_format.params().derived_key_size(), Eq(32));
   EXPECT_THAT(key_format.params().hkdf_hash_type(), Eq(HashType::SHA256));
   EXPECT_THAT(key_format.params().hmac_params().hash(), Eq(HashType::SHA256));
