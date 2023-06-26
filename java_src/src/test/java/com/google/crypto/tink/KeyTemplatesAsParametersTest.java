@@ -34,6 +34,10 @@ import com.google.crypto.tink.mac.AesCmacParameters;
 import com.google.crypto.tink.mac.HmacParameters;
 import com.google.crypto.tink.mac.PredefinedMacParameters;
 import com.google.crypto.tink.prf.PredefinedPrfParameters;
+import com.google.crypto.tink.signature.EcdsaParameters;
+import com.google.crypto.tink.signature.PredefinedSignatureParameters;
+import com.google.crypto.tink.signature.RsaSsaPkcs1Parameters;
+import com.google.crypto.tink.signature.RsaSsaPssParameters;
 import com.google.crypto.tink.streamingaead.PredefinedStreamingAeadParameters;
 import java.security.GeneralSecurityException;
 import java.util.ArrayList;
@@ -265,6 +269,134 @@ public final class KeyTemplatesAsParametersTest {
     result.add(new Pair("HMAC_SHA512_PRF", PredefinedPrfParameters.HMAC_SHA512_PRF));
     result.add(new Pair("AES256_CMAC_PRF", PredefinedPrfParameters.AES_CMAC_PRF));
     result.add(new Pair("AES_CMAC_PRF", PredefinedPrfParameters.AES_CMAC_PRF));
+
+    result.add(new Pair("ECDSA_P256", PredefinedSignatureParameters.ECDSA_P256));
+    result.add(
+        new Pair("ECDSA_P256_IEEE_P1363", PredefinedSignatureParameters.ECDSA_P256_IEEE_P1363));
+    result.add(
+        new Pair(
+            "ECDSA_P256_IEEE_P1363_WITHOUT_PREFIX",
+            PredefinedSignatureParameters.ECDSA_P256_IEEE_P1363_WITHOUT_PREFIX));
+    result.add(
+        new Pair(
+            "ECDSA_P256_RAW",
+            EcdsaParameters.builder()
+                .setHashType(EcdsaParameters.HashType.SHA256)
+                .setCurveType(EcdsaParameters.CurveType.NIST_P256)
+                .setSignatureEncoding(EcdsaParameters.SignatureEncoding.IEEE_P1363)
+                .setVariant(EcdsaParameters.Variant.NO_PREFIX)
+                .build()));
+    result.add(new Pair("ECDSA_P384", PredefinedSignatureParameters.ECDSA_P384));
+    result.add(
+        new Pair("ECDSA_P384_IEEE_P1363", PredefinedSignatureParameters.ECDSA_P384_IEEE_P1363));
+    result.add(
+        new Pair(
+            "ECDSA_P384_SHA384",
+            EcdsaParameters.builder()
+                .setHashType(EcdsaParameters.HashType.SHA384)
+                .setCurveType(EcdsaParameters.CurveType.NIST_P384)
+                .setSignatureEncoding(EcdsaParameters.SignatureEncoding.DER)
+                .setVariant(EcdsaParameters.Variant.TINK)
+                .build()));
+    result.add(
+        new Pair(
+            "ECDSA_P384_SHA512",
+            EcdsaParameters.builder()
+                .setHashType(EcdsaParameters.HashType.SHA512)
+                .setCurveType(EcdsaParameters.CurveType.NIST_P384)
+                .setSignatureEncoding(EcdsaParameters.SignatureEncoding.DER)
+                .setVariant(EcdsaParameters.Variant.TINK)
+                .build()));
+    result.add(new Pair("ECDSA_P521", PredefinedSignatureParameters.ECDSA_P521));
+    result.add(
+        new Pair("ECDSA_P521_IEEE_P1363", PredefinedSignatureParameters.ECDSA_P521_IEEE_P1363));
+    result.add(new Pair("ED25519", PredefinedSignatureParameters.ED25519));
+    result.add(new Pair("ED25519_RAW", PredefinedSignatureParameters.ED25519WithRawOutput));
+    result.add(
+        new Pair("ED25519WithRawOutput", PredefinedSignatureParameters.ED25519WithRawOutput));
+    result.add(
+        new Pair(
+            "RSA_SSA_PKCS1_3072_SHA256_F4",
+            PredefinedSignatureParameters.RSA_SSA_PKCS1_3072_SHA256_F4));
+    result.add(
+        new Pair(
+            "RSA_SSA_PKCS1_3072_SHA256_F4_RAW",
+            RsaSsaPkcs1Parameters.builder()
+                .setHashType(RsaSsaPkcs1Parameters.HashType.SHA256)
+                .setModulusSizeBits(3072)
+                .setPublicExponent(RsaSsaPkcs1Parameters.F4)
+                .setVariant(RsaSsaPkcs1Parameters.Variant.NO_PREFIX)
+                .build()));
+    result.add(
+        new Pair(
+            "RSA_SSA_PKCS1_3072_SHA256_F4_WITHOUT_PREFIX",
+            PredefinedSignatureParameters.RSA_SSA_PKCS1_3072_SHA256_F4_WITHOUT_PREFIX));
+    result.add(
+        new Pair(
+            "RSA_SSA_PKCS1_4096_SHA512_F4",
+            PredefinedSignatureParameters.RSA_SSA_PKCS1_4096_SHA512_F4));
+    result.add(
+        new Pair(
+            "RSA_SSA_PKCS1_4096_SHA512_F4_RAW",
+            RsaSsaPkcs1Parameters.builder()
+                .setHashType(RsaSsaPkcs1Parameters.HashType.SHA512)
+                .setModulusSizeBits(4096)
+                .setPublicExponent(RsaSsaPkcs1Parameters.F4)
+                .setVariant(RsaSsaPkcs1Parameters.Variant.NO_PREFIX)
+                .build()));
+    result.add(
+        new Pair(
+            "RSA_SSA_PSS_3072_SHA256_F4",
+            RsaSsaPssParameters.builder()
+                .setSigHashType(RsaSsaPssParameters.HashType.SHA256)
+                .setMgf1HashType(RsaSsaPssParameters.HashType.SHA256)
+                .setSaltLengthBytes(32)
+                .setModulusSizeBits(3072)
+                .setPublicExponent(RsaSsaPssParameters.F4)
+                .setVariant(RsaSsaPssParameters.Variant.TINK)
+                .build()));
+    result.add(
+        new Pair(
+            "RSA_SSA_PSS_3072_SHA256_F4_RAW",
+            RsaSsaPssParameters.builder()
+                .setSigHashType(RsaSsaPssParameters.HashType.SHA256)
+                .setMgf1HashType(RsaSsaPssParameters.HashType.SHA256)
+                .setSaltLengthBytes(32)
+                .setModulusSizeBits(3072)
+                .setPublicExponent(RsaSsaPssParameters.F4)
+                .setVariant(RsaSsaPssParameters.Variant.NO_PREFIX)
+                .build()));
+    result.add(
+        new Pair(
+            "RSA_SSA_PSS_3072_SHA256_SHA256_32_F4",
+            PredefinedSignatureParameters.RSA_SSA_PSS_3072_SHA256_SHA256_32_F4));
+    result.add(
+        new Pair(
+            "RSA_SSA_PSS_4096_SHA512_F4",
+            RsaSsaPssParameters.builder()
+                .setSigHashType(RsaSsaPssParameters.HashType.SHA512)
+                .setMgf1HashType(RsaSsaPssParameters.HashType.SHA512)
+                .setSaltLengthBytes(64)
+                .setModulusSizeBits(4096)
+                .setPublicExponent(RsaSsaPssParameters.F4)
+                .setVariant(RsaSsaPssParameters.Variant.TINK)
+                .build()));
+    result.add(
+        new Pair(
+            "RSA_SSA_PSS_4096_SHA512_F4_RAW",
+            RsaSsaPssParameters.builder()
+                .setSigHashType(RsaSsaPssParameters.HashType.SHA512)
+                .setMgf1HashType(RsaSsaPssParameters.HashType.SHA512)
+                .setSaltLengthBytes(64)
+                .setModulusSizeBits(4096)
+                .setPublicExponent(RsaSsaPssParameters.F4)
+                .setVariant(RsaSsaPssParameters.Variant.NO_PREFIX)
+                .build()));
+    result.add(
+        new Pair(
+            "RSA_SSA_PSS_4096_SHA512_SHA512_64_F4",
+            PredefinedSignatureParameters.RSA_SSA_PSS_4096_SHA512_SHA512_64_F4));
+
     if (Util.isAndroid()) {
       result.add(
           new Pair(
@@ -335,16 +467,6 @@ public final class KeyTemplatesAsParametersTest {
     result.add("DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_AES_256_GCM_RAW");
     result.add("DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_CHACHA20_POLY1305");
     result.add("DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_CHACHA20_POLY1305_RAW");
-    result.add("ECDSA_P256");
-    result.add("ECDSA_P256_IEEE_P1363");
-    result.add("ECDSA_P256_IEEE_P1363_WITHOUT_PREFIX");
-    result.add("ECDSA_P256_RAW");
-    result.add("ECDSA_P384");
-    result.add("ECDSA_P384_IEEE_P1363");
-    result.add("ECDSA_P384_SHA384");
-    result.add("ECDSA_P384_SHA512");
-    result.add("ECDSA_P521");
-    result.add("ECDSA_P521_IEEE_P1363");
     result.add("ECIES_P256_COMPRESSED_HKDF_HMAC_SHA256_AES128_CTR_HMAC_SHA256");
     result.add("ECIES_P256_COMPRESSED_HKDF_HMAC_SHA256_AES128_CTR_HMAC_SHA256_RAW");
     result.add("ECIES_P256_COMPRESSED_HKDF_HMAC_SHA256_AES128_GCM");
@@ -354,20 +476,6 @@ public final class KeyTemplatesAsParametersTest {
     result.add("ECIES_P256_HKDF_HMAC_SHA256_AES128_GCM");
     result.add("ECIES_P256_HKDF_HMAC_SHA256_AES128_GCM_COMPRESSED_WITHOUT_PREFIX");
     result.add("ECIES_P256_HKDF_HMAC_SHA256_AES128_GCM_RAW");
-    result.add("ED25519");
-    result.add("ED25519_RAW");
-    result.add("ED25519WithRawOutput");
-    result.add("RSA_SSA_PKCS1_3072_SHA256_F4");
-    result.add("RSA_SSA_PKCS1_3072_SHA256_F4_RAW");
-    result.add("RSA_SSA_PKCS1_3072_SHA256_F4_WITHOUT_PREFIX");
-    result.add("RSA_SSA_PKCS1_4096_SHA512_F4");
-    result.add("RSA_SSA_PKCS1_4096_SHA512_F4_RAW");
-    result.add("RSA_SSA_PSS_3072_SHA256_F4");
-    result.add("RSA_SSA_PSS_3072_SHA256_F4_RAW");
-    result.add("RSA_SSA_PSS_3072_SHA256_SHA256_32_F4");
-    result.add("RSA_SSA_PSS_4096_SHA512_F4");
-    result.add("RSA_SSA_PSS_4096_SHA512_F4_RAW");
-    result.add("RSA_SSA_PSS_4096_SHA512_SHA512_64_F4");
     return result;
   }
 
