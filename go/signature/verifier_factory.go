@@ -87,7 +87,8 @@ func createVerifierLogger(ps *primitiveset.PrimitiveSet) (monitoring.Logger, err
 	})
 }
 
-var errInvalidSignature = errors.New("verifier_factory: invalid signature")
+// ErrInvalidSignature is returned when a signature is invalid.
+var ErrInvalidSignature = errors.New("verifier_factory: invalid signature")
 
 // Verify checks whether the given signature is a valid signature of the given data.
 func (v *wrappedVerifier) Verify(signature, data []byte) error {
