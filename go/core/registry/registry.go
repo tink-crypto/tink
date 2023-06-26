@@ -82,6 +82,8 @@ func NewKeyData(template *tinkpb.KeyTemplate) (*tinkpb.KeyData, error) {
 }
 
 // NewKey generates a new key for the given key template.
+//
+// Deprecated: use [NewKeyData] instead.
 func NewKey(template *tinkpb.KeyTemplate) (proto.Message, error) {
 	if template == nil {
 		return nil, fmt.Errorf("registry.NewKey: invalid key template")
