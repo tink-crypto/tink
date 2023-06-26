@@ -17,6 +17,7 @@
 package com.google.crypto.tink.signature;
 
 import static com.google.common.truth.Truth.assertThat;
+import static com.google.crypto.tink.testing.KeyTypeManagerTestUtil.testKeyTemplateCompatible;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
 
@@ -38,7 +39,6 @@ import com.google.crypto.tink.subtle.Random;
 import com.google.crypto.tink.subtle.RsaSsaPssVerifyJce;
 import com.google.crypto.tink.testing.TestUtil;
 import com.google.protobuf.ByteString;
-import com.google.protobuf.ExtensionRegistryLite;
 import java.math.BigInteger;
 import java.security.GeneralSecurityException;
 import java.security.KeyFactory;
@@ -378,38 +378,22 @@ public class RsaSsaPssSignKeyManagerTest {
 
   @Test
   public void testRsa3072PssSha256F4TemplateWithManager() throws Exception {
-    RsaSsaPssKeyFormat format =
-        RsaSsaPssKeyFormat.parseFrom(
-            RsaSsaPssSignKeyManager.rsa3072PssSha256F4Template().getValue(),
-            ExtensionRegistryLite.getEmptyRegistry());
-    new RsaSsaPssSignKeyManager().keyFactory().validateKeyFormat(format);
+    testKeyTemplateCompatible(manager, RsaSsaPssSignKeyManager.rsa3072PssSha256F4Template());
   }
 
   @Test
   public void testRawRsa3072PssSha256F4TemplateWithManager() throws Exception {
-    RsaSsaPssKeyFormat format =
-        RsaSsaPssKeyFormat.parseFrom(
-            RsaSsaPssSignKeyManager.rawRsa3072PssSha256F4Template().getValue(),
-            ExtensionRegistryLite.getEmptyRegistry());
-    new RsaSsaPssSignKeyManager().keyFactory().validateKeyFormat(format);
+    testKeyTemplateCompatible(manager, RsaSsaPssSignKeyManager.rawRsa3072PssSha256F4Template());
   }
 
   @Test
   public void testRsa4096PssSha512F4TemplateWithManager() throws Exception {
-    RsaSsaPssKeyFormat format =
-        RsaSsaPssKeyFormat.parseFrom(
-            RsaSsaPssSignKeyManager.rsa4096PssSha512F4Template().getValue(),
-            ExtensionRegistryLite.getEmptyRegistry());
-    new RsaSsaPssSignKeyManager().keyFactory().validateKeyFormat(format);
+    testKeyTemplateCompatible(manager, RsaSsaPssSignKeyManager.rsa4096PssSha512F4Template());
   }
 
   @Test
   public void testRawRsa4096PssSha512F4TemplateWithManager() throws Exception {
-    RsaSsaPssKeyFormat format =
-        RsaSsaPssKeyFormat.parseFrom(
-            RsaSsaPssSignKeyManager.rawRsa4096PssSha512F4Template().getValue(),
-            ExtensionRegistryLite.getEmptyRegistry());
-    new RsaSsaPssSignKeyManager().keyFactory().validateKeyFormat(format);
+    testKeyTemplateCompatible(manager, RsaSsaPssSignKeyManager.rawRsa4096PssSha512F4Template());
   }
 
   @Test
