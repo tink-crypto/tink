@@ -124,7 +124,8 @@ class RegistryEciesAeadHkdfDemHelper implements EciesAeadHkdfDemHelper {
           .mergeFrom(aesGcmKey)
           .setKeyValue(ByteString.copyFrom(symmetricKeyValue, 0, symmetricKeySize))
           .build();
-      return new AeadOrDaead(Registry.getPrimitive(demKeyTypeUrl, aeadKey, Aead.class));
+      return new AeadOrDaead(
+          Registry.getPrimitive(demKeyTypeUrl, aeadKey.toByteString(), Aead.class));
     } else if (demKeyTypeUrl.equals(AeadConfig.AES_CTR_HMAC_AEAD_TYPE_URL)) {
       byte[] aesCtrKeyValue = Arrays.copyOfRange(symmetricKeyValue, 0, aesCtrKeySize);
       byte[] hmacKeyValue = Arrays.copyOfRange(symmetricKeyValue, aesCtrKeySize, symmetricKeySize);
@@ -144,7 +145,8 @@ class RegistryEciesAeadHkdfDemHelper implements EciesAeadHkdfDemHelper {
               .setAesCtrKey(aesCtrKey)
               .setHmacKey(hmacKey)
               .build();
-      return new AeadOrDaead(Registry.getPrimitive(demKeyTypeUrl, aeadKey, Aead.class));
+      return new AeadOrDaead(
+          Registry.getPrimitive(demKeyTypeUrl, aeadKey.toByteString(), Aead.class));
     } else if (demKeyTypeUrl.equals(DeterministicAeadConfig.AES_SIV_TYPE_URL)) {
       AesSivKey daeadKey =
           AesSivKey.newBuilder()
@@ -152,7 +154,7 @@ class RegistryEciesAeadHkdfDemHelper implements EciesAeadHkdfDemHelper {
               .setKeyValue(ByteString.copyFrom(symmetricKeyValue, 0, symmetricKeySize))
               .build();
       return new AeadOrDaead(
-          Registry.getPrimitive(demKeyTypeUrl, daeadKey, DeterministicAead.class));
+          Registry.getPrimitive(demKeyTypeUrl, daeadKey.toByteString(), DeterministicAead.class));
     } else {
       throw new GeneralSecurityException("unknown DEM key type");
     }
