@@ -78,7 +78,7 @@ func TestKMSEnvelopeWorksWithTinkKeyTemplatesAsDekTemplate(t *testing.T) {
 	}
 	for _, tc := range kmsEnvelopeAeadDekTestCases {
 		t.Run(tc.name, func(t *testing.T) {
-			a := aead.NewKMSEnvelopeAEAD2(aead.AES256GCMKeyTemplate(), kekAEAD)
+			a := aead.NewKMSEnvelopeAEAD2(tc.dekTemplate, kekAEAD)
 			ciphertext, err := a.Encrypt(plaintext, associatedData)
 			if err != nil {
 				t.Fatalf("a.Encrypt(plaintext, associatedData) err = %q, want nil", err)
@@ -94,6 +94,32 @@ func TestKMSEnvelopeWorksWithTinkKeyTemplatesAsDekTemplate(t *testing.T) {
 				t.Error("a.Decrypt(ciphertext, invalidAssociatedData) err = nil, want error")
 			}
 		})
+	}
+}
+
+func TestKMSEnvelopeWithKmsEnvelopeKeyTemplatesAsDekTemplate_fails(t *testing.T) {
+	keyURI := "fake-kms://CM2b3_MDElQKSAowdHlwZS5nb29nbGVhcGlzLmNvbS9nb29nbGUuY3J5cHRvLnRpbmsuQWVzR2NtS2V5EhIaEIK75t5L-adlUwVhWvRuWUwYARABGM2b3_MDIAE"
+	client, err := fakekms.NewClient(keyURI)
+	if err != nil {
+		t.Fatalf("fakekms.NewClient(keyURI) err = %q, want nil", err)
+	}
+	kekAEAD, err := client.GetAEAD(keyURI)
+	if err != nil {
+		t.Fatalf("client.GetAEAD(keyURI) err = %q, want nil", err)
+	}
+	plaintext := []byte("plaintext")
+	associatedData := []byte("associatedData")
+
+	// Use a KmsEnvelopeAeadKeyTemplate as DEK template.
+	dekTemplate, err := aead.CreateKMSEnvelopeAEADKeyTemplate(keyURI, aead.AES128GCMKeyTemplate())
+	if err != nil {
+		t.Fatalf("aead.CreateKMSEnvelopAEADKeyTemplate() err = %q, want nil", err)
+	}
+
+	a := aead.NewKMSEnvelopeAEAD2(dekTemplate, kekAEAD)
+	_, err = a.Encrypt(plaintext, associatedData)
+	if err == nil {
+		t.Error("a.Encrypt(plaintext, associatedData) err = nil, want error")
 	}
 }
 
