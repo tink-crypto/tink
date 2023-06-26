@@ -190,6 +190,45 @@ class AeadPythonTest(parameterized.TestCase):
             output, plaintext,
             'While encrypting in %s an decrypting in %s' % (lang, lang2))
 
+  @parameterized.parameters(
+      tink_config.supported_languages_for_key_type('KmsEnvelopeAeadKey')
+  )
+  def test_envelope_encryption_rejects_envelope_templates_as_dek(self, lang):
+    dek_template = (
+        aead.aead_key_templates.create_kms_envelope_aead_key_template(
+            kek_uri=_FAKE_KMS_KEY_URI,
+            dek_template=aead.aead_key_templates.AES128_GCM,
+        )
+    )
+    template = aead.aead_key_templates.create_kms_envelope_aead_key_template(
+        kek_uri=_FAKE_KMS_KEY_URI, dek_template=dek_template
+    )
+
+    if lang in {'cc', 'python'}:
+      # TODO(b/285863345): Template gets accepted but it should be rejected.
+      _ = testing_servers.new_keyset(lang, template)
+      return
+    with self.assertRaises(tink.TinkError):
+      _ = testing_servers.new_keyset(lang, template)
+
+  @parameterized.parameters(
+      tink_config.supported_languages_for_key_type('KmsAeadKey')
+  )
+  def test_envelope_encryption_rejects_kms_templates_as_dek(self, lang):
+    dek_template = aead.aead_key_templates.create_kms_aead_key_template(
+        key_uri=_FAKE_KMS_KEY_URI
+    )
+    template = aead.aead_key_templates.create_kms_envelope_aead_key_template(
+        kek_uri=_FAKE_KMS_KEY_URI, dek_template=dek_template
+    )
+
+    if lang in {'cc', 'python'}:
+      # TODO(b/285863345): Template gets accepted but it should be rejected.
+      _ = testing_servers.new_keyset(lang, template)
+      return
+    with self.assertRaises(tink.TinkError):
+      _ = testing_servers.new_keyset(lang, template)
+
 
 # If the implementations work fine for keysets with single keys, then key
 # rotation should work if the primitive wrapper is implemented correctly.
