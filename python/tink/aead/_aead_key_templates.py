@@ -54,10 +54,11 @@ def _create_aes_eax_key_template(
   key_format = aes_eax_pb2.AesEaxKeyFormat()
   key_format.params.iv_size = iv_size
   key_format.key_size = key_size
-  key_template = tink_pb2.KeyTemplate()
-  key_template.value = key_format.SerializeToString()
-  key_template.type_url = _AES_EAX_KEY_TYPE_URL
-  key_template.output_prefix_type = output_prefix_type
+  key_template = tink_pb2.KeyTemplate(
+      value=key_format.SerializeToString(),
+      type_url=_AES_EAX_KEY_TYPE_URL,
+      output_prefix_type=output_prefix_type,
+  )
   return key_template
 
 
@@ -66,12 +67,12 @@ def _create_aes_gcm_key_template(
     output_prefix_type: tink_pb2.OutputPrefixType = tink_pb2.TINK
 ) -> tink_pb2.KeyTemplate:
   """Creates an AES GCM KeyTemplate, and fills in its values."""
-  key_format = aes_gcm_pb2.AesGcmKeyFormat()
-  key_format.key_size = key_size
-  key_template = tink_pb2.KeyTemplate()
-  key_template.value = key_format.SerializeToString()
-  key_template.type_url = _AES_GCM_KEY_TYPE_URL
-  key_template.output_prefix_type = output_prefix_type
+  key_format = aes_gcm_pb2.AesGcmKeyFormat(key_size=key_size)
+  key_template = tink_pb2.KeyTemplate(
+      value=key_format.SerializeToString(),
+      type_url=_AES_GCM_KEY_TYPE_URL,
+      output_prefix_type=output_prefix_type,
+  )
   return key_template
 
 
@@ -80,12 +81,14 @@ def _create_aes_gcm_siv_key_template(
     output_prefix_type: tink_pb2.OutputPrefixType = tink_pb2.TINK
 ) -> tink_pb2.KeyTemplate:
   """Creates an AES GCM SIV KeyTemplate, and fills in its values."""
-  key_format = aes_gcm_siv_pb2.AesGcmSivKeyFormat()
-  key_format.key_size = key_size
-  key_template = tink_pb2.KeyTemplate()
-  key_template.value = key_format.SerializeToString()
-  key_template.type_url = _AES_GCM_SIV_KEY_TYPE_URL
-  key_template.output_prefix_type = output_prefix_type
+  key_format = aes_gcm_siv_pb2.AesGcmSivKeyFormat(
+      key_size=key_size,
+  )
+  key_template = tink_pb2.KeyTemplate(
+      value=key_format.SerializeToString(),
+      type_url=_AES_GCM_SIV_KEY_TYPE_URL,
+      output_prefix_type=output_prefix_type,
+  )
   return key_template
 
 
@@ -104,10 +107,11 @@ def _create_aes_ctr_hmac_aead_key_template(
   key_format.hmac_key_format.params.hash = hash_type
   key_format.hmac_key_format.params.tag_size = tag_size
   key_format.hmac_key_format.key_size = hmac_key_size
-  key_template = tink_pb2.KeyTemplate()
-  key_template.value = key_format.SerializeToString()
-  key_template.type_url = _AES_CTR_HMAC_AEAD_KEY_TYPE_URL
-  key_template.output_prefix_type = output_prefix_type
+  key_template = tink_pb2.KeyTemplate(
+      value=key_format.SerializeToString(),
+      type_url=_AES_CTR_HMAC_AEAD_KEY_TYPE_URL,
+      output_prefix_type=output_prefix_type,
+  )
   return key_template
 
 
@@ -124,12 +128,12 @@ def create_kms_aead_key_template(key_uri: str) -> tink_pb2.KeyTemplate:
   Returns:
     A KMS Aead KeyTemplate.
   """
-  key_format = kms_aead_pb2.KmsAeadKeyFormat()
-  key_format.key_uri = key_uri
-  key_template = tink_pb2.KeyTemplate()
-  key_template.value = key_format.SerializeToString()
-  key_template.type_url = _KMS_AEAD_KEY_TYPE_URL
-  key_template.output_prefix_type = tink_pb2.RAW
+  key_format = kms_aead_pb2.KmsAeadKeyFormat(key_uri=key_uri)
+  key_template = tink_pb2.KeyTemplate(
+      value=key_format.SerializeToString(),
+      type_url=_KMS_AEAD_KEY_TYPE_URL,
+      output_prefix_type=tink_pb2.RAW,
+  )
   return key_template
 
 
@@ -148,13 +152,14 @@ def create_kms_envelope_aead_key_template(
   Returns:
       the resulting key template
   """
-  key_format = kms_envelope_pb2.KmsEnvelopeAeadKeyFormat()
-  key_format.kek_uri = kek_uri
-  key_format.dek_template.MergeFrom(dek_template)
-  key_template = tink_pb2.KeyTemplate()
-  key_template.value = key_format.SerializeToString()
-  key_template.type_url = _KMS_ENVELOPE_AEAD_KEY_TYPE_URL
-  key_template.output_prefix_type = tink_pb2.RAW
+  key_format = kms_envelope_pb2.KmsEnvelopeAeadKeyFormat(
+      kek_uri=kek_uri, dek_template=dek_template
+  )
+  key_template = tink_pb2.KeyTemplate(
+      value=key_format.SerializeToString(),
+      type_url=_KMS_ENVELOPE_AEAD_KEY_TYPE_URL,
+      output_prefix_type=tink_pb2.RAW,
+  )
   return key_template
 
 
