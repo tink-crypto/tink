@@ -204,7 +204,7 @@ class AeadPythonTest(parameterized.TestCase):
         kek_uri=_FAKE_KMS_KEY_URI, dek_template=dek_template
     )
 
-    if lang in {'cc', 'python'}:
+    if lang in {'cc'}:
       # TODO(b/285863345): Template gets accepted but it should be rejected.
       _ = testing_servers.new_keyset(lang, template)
       return
@@ -222,7 +222,7 @@ class AeadPythonTest(parameterized.TestCase):
         kek_uri=_FAKE_KMS_KEY_URI, dek_template=dek_template
     )
 
-    if lang in {'cc', 'python'}:
+    if lang in {'cc'}:
       # TODO(b/285863345): Template gets accepted but it should be rejected.
       _ = testing_servers.new_keyset(lang, template)
       return

@@ -124,11 +124,18 @@ class KmsEnvelopeAeadKeyManager(core.KeyManager[_aead.Aead]):
   ) -> tink_pb2.KeyData:
     if key_template.type_url != _KMS_ENVELOPE_AEAD_KEY_TYPE_URL:
       raise core.TinkError('wrong key type: ' + key_template.type_url)
+    params = kms_envelope_pb2.KmsEnvelopeAeadKeyFormat.FromString(
+        key_template.value
+    )
+    if not _kms_envelope_aead.is_supported_dek_key_type(
+        params.dek_template.type_url
+    ):
+      raise core.TinkError(
+          'Unsupported DEK key type: %s' % key_template.type_url
+      )
     env_key = kms_envelope_pb2.KmsEnvelopeAeadKey(
         version=0,
-        params=kms_envelope_pb2.KmsEnvelopeAeadKeyFormat.FromString(
-            key_template.value
-        ),
+        params=params,
     )
     return tink_pb2.KeyData(
         type_url=_KMS_ENVELOPE_AEAD_KEY_TYPE_URL,

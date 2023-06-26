@@ -19,13 +19,17 @@ from tink.proto import tink_pb2
 from tink import core
 from tink.aead import _aead
 
-_SUPPORTED_DEK_KEY_TYPES = {
+_SUPPORTED_DEK_KEY_TYPES = frozenset({
     'type.googleapis.com/google.crypto.tink.AesGcmKey',
     'type.googleapis.com/google.crypto.tink.XChaCha20Poly1305Key',
     'type.googleapis.com/google.crypto.tink.AesCtrHmacAeadKey',
     'type.googleapis.com/google.crypto.tink.AesEaxKey',
     'type.googleapis.com/google.crypto.tink.AesGcmSivKey',
-}
+})
+
+
+def is_supported_dek_key_type(type_url: str) -> bool:
+  return type_url in _SUPPORTED_DEK_KEY_TYPES
 
 
 class KmsEnvelopeAead(_aead.Aead):
@@ -56,7 +60,7 @@ class KmsEnvelopeAead(_aead.Aead):
   DEK_LEN_BYTES = 4
 
   def __init__(self, key_template: tink_pb2.KeyTemplate, remote: _aead.Aead):
-    if key_template.type_url not in _SUPPORTED_DEK_KEY_TYPES:
+    if not is_supported_dek_key_type(key_template.type_url):
       raise core.TinkError(
           'Unsupported DEK key type: %s' % key_template.type_url
       )
