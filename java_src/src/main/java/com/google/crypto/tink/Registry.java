@@ -553,7 +553,9 @@ public final class Registry {
    * {@link KeyManager#newKey} with {@code keyTemplate} as the parameter.
    *
    * @return a new key
+   * @deprecated Use {@code newKeyData} instead.
    */
+  @Deprecated
   public static synchronized MessageLite newKey(
       com.google.crypto.tink.proto.KeyTemplate keyTemplate) throws GeneralSecurityException {
     KeyManager<?> manager = getUntypedKeyManager(keyTemplate.getTypeUrl());
