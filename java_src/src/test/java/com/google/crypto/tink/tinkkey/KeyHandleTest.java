@@ -24,8 +24,8 @@ import com.google.crypto.tink.KeyTemplate.OutputPrefixType;
 import com.google.crypto.tink.KeyTemplates;
 import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.aead.AesEaxKeyManager;
+import com.google.crypto.tink.aead.AesEaxParameters;
 import com.google.crypto.tink.proto.AesEaxKey;
-import com.google.crypto.tink.proto.AesEaxKeyFormat;
 import com.google.crypto.tink.proto.KeyData;
 import com.google.crypto.tink.signature.Ed25519PrivateKeyManager;
 import com.google.crypto.tink.tinkkey.internal.ProtoKey;
@@ -159,19 +159,20 @@ public final class KeyHandleTest {
     expect.that(protoKey.getOutputPrefixType()).isEqualTo(KeyTemplate.OutputPrefixType.TINK);
     expect.that(protoKey.hasSecret()).isTrue();
     KeyData keyData = protoKey.getProtoKey();
-    expect.that(keyData.getTypeUrl()).isEqualTo(template.getTypeUrl());
-    AesEaxKeyFormat aesEaxKeyFormat =
-        AesEaxKeyFormat.parseFrom(template.getValue(), ExtensionRegistryLite.getEmptyRegistry());
+    expect.that(keyData.getTypeUrl()).isEqualTo("type.googleapis.com/google.crypto.tink.AesEaxKey");
+
+    AesEaxParameters parameters = (AesEaxParameters) template.toParameters();
+
     AesEaxKey aesEaxKey =
         AesEaxKey.parseFrom(keyData.getValue(), ExtensionRegistryLite.getEmptyRegistry());
-    expect.that(aesEaxKey.getKeyValue().size()).isEqualTo(aesEaxKeyFormat.getKeySize());
+    expect.that(aesEaxKey.getKeyValue().size()).isEqualTo(parameters.getKeySizeBytes());
   }
 
   @Test
   public void generateNew_compareWith_createFromKeyViaProtoKey_shouldBeEqual() throws Exception {
     KeyTemplate template = KeyTemplates.get("AES128_EAX");
     KeyData keyData = Registry.newKeyData(template);
-    ProtoKey protoKey = new ProtoKey(keyData, template.getOutputPrefixType());
+    ProtoKey protoKey = new ProtoKey(keyData, KeyTemplate.OutputPrefixType.TINK);
 
     KeyHandle handle1 = KeyHandle.generateNew(template);
     KeyHandle handle2 = KeyHandle.createFromKey(protoKey, SecretKeyAccess.insecureSecretAccess());
@@ -275,7 +276,7 @@ public final class KeyHandleTest {
 
     KeyTemplate returnedKeyTemplate = keyHandle.getKeyTemplate();
 
-    assertThat(returnedKeyTemplate.getValue()).isEqualTo(keyTemplate.getValue());
+    assertThat(returnedKeyTemplate.toParameters()).isEqualTo(keyTemplate.toParameters());
   }
 
   @Test
