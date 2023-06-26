@@ -35,6 +35,8 @@ import org.junit.runners.JUnit4;
 public final class PrfBasedKeyDerivationParametersTest {
   private static final PrfParameters PRF_PARAMETERS_1 =
       exceptionIsBug(() -> AesCmacPrfParameters.create(16));
+  private static final PrfParameters PRF_PARAMETERS_1_COPY =
+      exceptionIsBug(() -> AesCmacPrfParameters.create(16));
   private static final PrfParameters PRF_PARAMETERS_2 =
       exceptionIsBug(
           () ->
@@ -43,6 +45,8 @@ public final class PrfBasedKeyDerivationParametersTest {
                   .setHashType(HmacPrfParameters.HashType.SHA256)
                   .build());
   private static final Parameters DERIVED_PARAMETERS_1 =
+      exceptionIsBug(() -> XChaCha20Poly1305Parameters.create());
+  private static final Parameters DERIVED_PARAMETERS_1_COPY =
       exceptionIsBug(() -> XChaCha20Poly1305Parameters.create());
   private static final Parameters DERIVED_PARAMETERS_2 =
       exceptionIsBug(
@@ -88,8 +92,8 @@ public final class PrfBasedKeyDerivationParametersTest {
             .build();
     PrfBasedKeyDerivationParameters params11Copy =
         PrfBasedKeyDerivationParameters.builder()
-            .setPrfParameters(PRF_PARAMETERS_1)
-            .setDerivedKeyParameters(DERIVED_PARAMETERS_1)
+            .setPrfParameters(PRF_PARAMETERS_1_COPY)
+            .setDerivedKeyParameters(DERIVED_PARAMETERS_1_COPY)
             .build();
     PrfBasedKeyDerivationParameters params12 =
         PrfBasedKeyDerivationParameters.builder()

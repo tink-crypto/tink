@@ -91,12 +91,18 @@ public final class PrfBasedKeyDerivationParameters extends KeyDerivationParamete
       return false;
     }
     PrfBasedKeyDerivationParameters that = (PrfBasedKeyDerivationParameters) o;
-    return that.getPrfParameters() == getPrfParameters()
-        && that.getDerivedKeyParameters() == getDerivedKeyParameters();
+    return that.getPrfParameters().equals(getPrfParameters())
+        && that.getDerivedKeyParameters().equals(getDerivedKeyParameters());
   }
 
   @Override
   public int hashCode() {
     return Objects.hash(PrfBasedKeyDerivationParameters.class, prfParameters, derivedKeyParameters);
+  }
+
+  @Override
+  public String toString() {
+    return String.format(
+        "PrfBasedKeyDerivationParameters(%s, %s)", prfParameters, derivedKeyParameters);
   }
 }
