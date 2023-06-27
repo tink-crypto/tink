@@ -53,11 +53,11 @@ tink_cc_library(
     deterministic_aead_config.h
   DEPS
     tink::daead::aes_siv_key_manager
+    tink::daead::aes_siv_proto_serialization
     tink::daead::deterministic_aead_wrapper
     absl::core_headers
     absl::memory
     tink::core::registry
-    tink::config::config_util
     tink::config::tink_fips
     tink::util::status
     tink::proto::config_cc_proto
@@ -214,15 +214,22 @@ tink_cc_test(
   SRCS
     deterministic_aead_config_test.cc
   DEPS
+    tink::daead::aes_siv_key
     tink::daead::aes_siv_key_manager
+    tink::daead::aes_siv_parameters
     tink::daead::deterministic_aead_config
     tink::daead::deterministic_aead_key_templates
     gmock
     absl::status
     tink::core::deterministic_aead
+    tink::core::insecure_secret_key_access
     tink::core::keyset_handle
+    tink::core::partial_key_access
     tink::core::registry
     tink::config::tink_fips
+    tink::internal::mutable_serialization_registry
+    tink::internal::proto_key_serialization
+    tink::internal::proto_parameters_serialization
     tink::util::status
     tink::util::test_matchers
     tink::util::test_util

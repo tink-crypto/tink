@@ -17,13 +17,12 @@
 #include "tink/daead/deterministic_aead_config.h"
 
 #include "absl/memory/memory.h"
-#include "tink/config/config_util.h"
 #include "tink/config/tink_fips.h"
 #include "tink/daead/aes_siv_key_manager.h"
+#include "tink/daead/aes_siv_proto_serialization.h"
 #include "tink/daead/deterministic_aead_wrapper.h"
 #include "tink/registry.h"
 #include "tink/util/status.h"
-#include "proto/config.pb.h"
 
 namespace crypto {
 namespace tink {
@@ -39,6 +38,9 @@ util::Status DeterministicAeadConfig::Register() {
   // Register non-FIPS key managers.
   auto status = Registry::RegisterKeyTypeManager(
       absl::make_unique<AesSivKeyManager>(), true);
+  if (!status.ok()) return status;
+
+  status = RegisterAesSivProtoSerialization();
   if (!status.ok()) return status;
 
   // Register primitive wrapper.
