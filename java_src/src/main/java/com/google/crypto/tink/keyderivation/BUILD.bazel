@@ -157,3 +157,31 @@ android_library(
         "@maven//:com_google_errorprone_error_prone_annotations",
     ],
 )
+
+android_library(
+    name = "prf_based_key_derivation_key-android",
+    srcs = ["PrfBasedKeyDerivationKey.java"],
+    deps = [
+        ":key_derivation_key-android",
+        ":prf_based_key_derivation_parameters-android",
+        "//src/main/java/com/google/crypto/tink:accesses_partial_key-android",
+        "//src/main/java/com/google/crypto/tink:key-android",
+        "//src/main/java/com/google/crypto/tink/prf:prf_key-android",
+        "@maven//:com_google_code_findbugs_jsr305",
+        "@maven//:com_google_errorprone_error_prone_annotations",
+    ],
+)
+
+java_library(
+    name = "prf_based_key_derivation_key",
+    srcs = ["PrfBasedKeyDerivationKey.java"],
+    deps = [
+        ":key_derivation_key",
+        ":prf_based_key_derivation_parameters",
+        "//src/main/java/com/google/crypto/tink:accesses_partial_key",
+        "//src/main/java/com/google/crypto/tink:key",
+        "//src/main/java/com/google/crypto/tink/prf:prf_key",
+        "@maven//:com_google_code_findbugs_jsr305",
+        "@maven//:com_google_errorprone_error_prone_annotations",
+    ],
+)

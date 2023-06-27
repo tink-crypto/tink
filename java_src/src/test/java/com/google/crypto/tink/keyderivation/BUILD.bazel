@@ -98,3 +98,20 @@ java_test(
         "@maven//:junit_junit",
     ],
 )
+
+java_test(
+    name = "PrfBasedKeyDerivationKeyTest",
+    size = "small",
+    srcs = ["PrfBasedKeyDerivationKeyTest.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink/aead:aes_eax_parameters",
+        "//src/main/java/com/google/crypto/tink/internal:key_tester",
+        "//src/main/java/com/google/crypto/tink/keyderivation:prf_based_key_derivation_key",
+        "//src/main/java/com/google/crypto/tink/keyderivation:prf_based_key_derivation_parameters",
+        "//src/main/java/com/google/crypto/tink/prf:hmac_prf_key",
+        "//src/main/java/com/google/crypto/tink/prf:hmac_prf_parameters",
+        "//src/main/java/com/google/crypto/tink/util:secret_bytes",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
