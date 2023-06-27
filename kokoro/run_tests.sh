@@ -77,11 +77,6 @@ run_java_apps_tests() {
   ./kokoro/testutils/run_bazel_tests.sh "apps"
 }
 
-run_javascript_tests() {
-  use_bazel "$(cat javascript/.bazelversion)"
-  ./kokoro/testutils/run_bazel_tests.sh "javascript"
-}
-
 run_cc_examples_tests() {
   use_bazel "$(cat cc/examples/.bazelversion)"
   ./kokoro/testutils/run_bazel_tests.sh "cc/examples"
@@ -146,7 +141,6 @@ run_all_tests() {
     run_tools_tests
     run_java_apps_tests
   fi
-  run_javascript_tests
   run_cc_examples_tests
   run_java_examples_tests
   run_py_examples_tests
