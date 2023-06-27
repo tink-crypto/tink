@@ -42,7 +42,6 @@ import com.google.protobuf.ByteString;
 import com.google.protobuf.BytesValue;
 import com.google.protobuf.ExtensionRegistryLite;
 import com.google.protobuf.InvalidProtocolBufferException;
-import com.google.protobuf.MessageLite;
 import com.google.protobuf.StringValue;
 import java.security.GeneralSecurityException;
 import java.util.Arrays;
@@ -83,33 +82,8 @@ public final class CustomAeadKeyManagerTest {
     }
 
     @Override
-    public Aead getPrimitive(MessageLite key) throws GeneralSecurityException {
-      throw new UnsupportedOperationException("not implemented");
-    }
-
-    @Override
-    public MessageLite newKey(ByteString serializedKeyFormat) throws GeneralSecurityException {
-      throw new UnsupportedOperationException("not implemented");
-    }
-
-    @Override
-    public MessageLite newKey(MessageLite keyFormat) throws GeneralSecurityException {
-      throw new UnsupportedOperationException("not implemented");
-    }
-
-    @Override
-    public boolean doesSupport(String typeUrl) {
-      throw new UnsupportedOperationException("not implemented");
-    }
-
-    @Override
     public String getKeyType() {
       return TYPE_URL;
-    }
-
-    @Override
-    public int getVersion() {
-      throw new UnsupportedOperationException("not implemented");
     }
 
     @Override

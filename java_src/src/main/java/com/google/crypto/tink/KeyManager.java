@@ -57,10 +57,16 @@ public interface KeyManager<P> {
    * PublicKeyVerify}, {@code DeterministicAead}, {@code HybridEncrypt}, and {@code HybridDecrypt}
    * this should be a primitive which <b>ignores</b> the output prefix and assumes "RAW".
    *
+   * <p>This method is not used by Tink. It does not need to be implemented.
+   *
    * @return the new constructed P
    * @throws GeneralSecurityException if the key given in {@code key} is corrupted or not supported
+   * @deprecated Use {@code getPrimitive(serializedKey)} instead.
    */
-  P getPrimitive(MessageLite key) throws GeneralSecurityException;
+  @Deprecated // Unused Interface Method. Will be removed.
+  default P getPrimitive(MessageLite key) throws GeneralSecurityException {
+    throw new UnsupportedOperationException();
+  }
 
   /**
    * Generates a new key according to specification in {@code serializedKeyFormat}, which must be a
@@ -70,8 +76,12 @@ public interface KeyManager<P> {
    *
    * @return the new generated key
    * @throws GeneralSecurityException if the specified format is wrong or not supported
+   * @deprecated Use {@code newKeyData(serializedKeyFormat)} instead.
    */
-  MessageLite newKey(ByteString serializedKeyFormat) throws GeneralSecurityException;
+  @Deprecated // Unused Interface Method. Will be removed.
+  default MessageLite newKey(ByteString serializedKeyFormat) throws GeneralSecurityException {
+    throw new UnsupportedOperationException();
+  }
 
   /**
    * Generates a new key according to specification in {@code keyFormat}.
@@ -81,17 +91,38 @@ public interface KeyManager<P> {
    *
    * @return the new generated key
    * @throws GeneralSecurityException if the specified format is wrong or not supported
+   * @deprecated Use {@code newKeyData(serializedKeyFormat)} instead.
    */
-  MessageLite newKey(MessageLite keyFormat) throws GeneralSecurityException;
+  @Deprecated // Unused Interface Method. Will be removed.
+  default MessageLite newKey(MessageLite keyFormat) throws GeneralSecurityException {
+    throw new UnsupportedOperationException();
+  }
 
-  /** Returns true iff this KeyManager supports key type identified by {@code typeUrl}. */
-  boolean doesSupport(String typeUrl);
+  /**
+   * Returns true iff this KeyManager supports key type identified by {@code typeUrl}.
+   *
+   * <p>This method is not used by Tink anymore. It does not need to be implemented.
+   *
+   * @deprecated Use {@code getKeyType()} instead.
+   */
+  @Deprecated // Unused Interface Method. Will be removed.
+  default boolean doesSupport(String typeUrl) {
+    throw new UnsupportedOperationException();
+  }
 
   /** Returns the type URL that identifies the key type of keys managed by this KeyManager. */
   String getKeyType();
 
-  /** Returns the version number of this KeyManager. */
-  int getVersion();
+  /**
+   * Returns the version number of this KeyManager.
+   *
+   * <p>This method is not used by Tink anymore. It does not need to be implemented.
+   * @deprecated Do not use it.
+   */
+  @Deprecated // Unused Interface Method. Will be removed.
+  default int getVersion() {
+    throw new UnsupportedOperationException();
+  }
 
   /**
    * Returns the primitive class object of the P. Should be implemented as {@code return P.class;}

@@ -33,7 +33,6 @@ import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.ExtensionRegistryLite;
 import com.google.protobuf.InvalidProtocolBufferException;
-import com.google.protobuf.MessageLite;
 import java.security.GeneralSecurityException;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -54,22 +53,7 @@ public final class KeyManagerRegistryTest {
     private final String typeUrl;
 
     @Override
-    public Primitive1 getPrimitive(ByteString proto) throws GeneralSecurityException {
-      throw new UnsupportedOperationException("Not needed for test");
-    }
-
-    @Override
-    public Primitive1 getPrimitive(MessageLite proto) throws GeneralSecurityException {
-      throw new UnsupportedOperationException("Not needed for test");
-    }
-
-    @Override
-    public MessageLite newKey(ByteString template) throws GeneralSecurityException {
-      throw new UnsupportedOperationException("Not needed for test");
-    }
-
-    @Override
-    public MessageLite newKey(MessageLite template) throws GeneralSecurityException {
+    public Primitive1 getPrimitive(ByteString serializedKey) throws GeneralSecurityException {
       throw new UnsupportedOperationException("Not needed for test");
     }
 
@@ -79,18 +63,8 @@ public final class KeyManagerRegistryTest {
     }
 
     @Override
-    public boolean doesSupport(String typeUrl) {
-      throw new UnsupportedOperationException("Not needed for test");
-    }
-
-    @Override
     public String getKeyType() {
       return this.typeUrl;
-    }
-
-    @Override
-    public int getVersion() {
-      throw new UnsupportedOperationException("Not needed for test");
     }
 
     @Override

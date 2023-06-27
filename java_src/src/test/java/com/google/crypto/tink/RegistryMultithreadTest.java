@@ -29,7 +29,6 @@ import com.google.crypto.tink.proto.KeyData;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
-import com.google.protobuf.MessageLite;
 import java.security.GeneralSecurityException;
 import java.util.ArrayList;
 import java.util.List;
@@ -53,22 +52,7 @@ public final class RegistryMultithreadTest {
     private final String typeUrl;
 
     @Override
-    public Primitive getPrimitive(ByteString proto) throws GeneralSecurityException {
-      throw new UnsupportedOperationException("Not needed for test");
-    }
-
-    @Override
-    public Primitive getPrimitive(MessageLite proto) throws GeneralSecurityException {
-      throw new UnsupportedOperationException("Not needed for test");
-    }
-
-    @Override
-    public MessageLite newKey(ByteString template) throws GeneralSecurityException {
-      throw new UnsupportedOperationException("Not needed for test");
-    }
-
-    @Override
-    public MessageLite newKey(MessageLite template) throws GeneralSecurityException {
+    public Primitive getPrimitive(ByteString serializedKey) throws GeneralSecurityException {
       throw new UnsupportedOperationException("Not needed for test");
     }
 
@@ -78,18 +62,8 @@ public final class RegistryMultithreadTest {
     }
 
     @Override
-    public boolean doesSupport(String typeUrl) {
-      throw new UnsupportedOperationException("Not needed for test");
-    }
-
-    @Override
     public String getKeyType() {
       return this.typeUrl;
-    }
-
-    @Override
-    public int getVersion() {
-      throw new UnsupportedOperationException("Not needed for test");
     }
 
     @Override
@@ -253,10 +227,10 @@ public final class RegistryMultithreadTest {
             () -> {
               try {
                 for (int i = 0; i < REPETITIONS; ++i) {
-                  assertNotNull(Registry.getKeyManager("KeyManagerStart"));
-                  assertNotNull(Registry.getKeyManager("KeyTypeManagerStart"));
-                  assertNotNull(Registry.getKeyManager("PrivateKeyTypeManagerStart"));
-                  assertNotNull(Registry.getKeyManager("PublicKeyTypeManagerStart"));
+                  assertNotNull(Registry.getUntypedKeyManager("KeyManagerStart"));
+                  assertNotNull(Registry.getUntypedKeyManager("KeyTypeManagerStart"));
+                  assertNotNull(Registry.getUntypedKeyManager("PrivateKeyTypeManagerStart"));
+                  assertNotNull(Registry.getUntypedKeyManager("PublicKeyTypeManagerStart"));
                 }
               } catch (GeneralSecurityException e) {
                 throw new RuntimeException(e);
