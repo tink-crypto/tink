@@ -31,12 +31,14 @@ _AES_SIV_KEY_TYPE_URL = 'type.googleapis.com/google.crypto.tink.AesSivKey'
 
 def _create_aes_siv_key_template(key_size: int) -> tink_pb2.KeyTemplate:
   """Creates an AES EAX KeyTemplate, and fills in its values."""
-  key_format = aes_siv_pb2.AesSivKeyFormat()
-  key_format.key_size = key_size
-  key_template = tink_pb2.KeyTemplate()
-  key_template.type_url = _AES_SIV_KEY_TYPE_URL
-  key_template.output_prefix_type = tink_pb2.TINK
-  key_template.value = key_format.SerializeToString()
+  key_format = aes_siv_pb2.AesSivKeyFormat(
+      key_size=key_size,
+  )
+  key_template = tink_pb2.KeyTemplate(
+      type_url=_AES_SIV_KEY_TYPE_URL,
+      output_prefix_type=tink_pb2.TINK,
+      value=key_format.SerializeToString(),
+  )
   return key_template
 
 

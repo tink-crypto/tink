@@ -48,10 +48,11 @@ def _create_aes_gcm_hkdf_streaming_key_template(
   key_format.params.derived_key_size = derived_key_size
   key_format.params.ciphertext_segment_size = ciphertext_segment_size
 
-  key_template = tink_pb2.KeyTemplate()
-  key_template.value = key_format.SerializeToString()
-  key_template.type_url = _AES_GCM_HKDF_STREAMING_KEY_TYPE_URL
-  key_template.output_prefix_type = tink_pb2.RAW
+  key_template = tink_pb2.KeyTemplate(
+      value=key_format.SerializeToString(),
+      type_url=_AES_GCM_HKDF_STREAMING_KEY_TYPE_URL,
+      output_prefix_type=tink_pb2.RAW,
+  )
   return key_template
 
 
@@ -70,10 +71,11 @@ def _create_aes_ctr_hmac_streaming_key_template(
   key_format.params.hmac_params.hash = mac_hash_type
   key_format.params.hmac_params.tag_size = tag_size
 
-  key_template = tink_pb2.KeyTemplate()
-  key_template.value = key_format.SerializeToString()
-  key_template.type_url = _AES_CTR_HMAC_STREAMING_KEY_TYPE_URL
-  key_template.output_prefix_type = tink_pb2.RAW
+  key_template = tink_pb2.KeyTemplate(
+      value=key_format.SerializeToString(),
+      type_url=_AES_CTR_HMAC_STREAMING_KEY_TYPE_URL,
+      output_prefix_type=tink_pb2.RAW,
+  )
   return key_template
 
 

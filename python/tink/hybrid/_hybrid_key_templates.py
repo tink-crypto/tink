@@ -58,11 +58,11 @@ def _create_hpke_key_template(
   key_format.params.kdf = hpke_kdf
   key_format.params.aead = hpke_aead
 
-  key_template = tink_pb2.KeyTemplate()
-  key_template.type_url = (
-      'type.googleapis.com/google.crypto.tink.HpkePrivateKey')
-  key_template.value = key_format.SerializeToString()
-  key_template.output_prefix_type = output_prefix_type
+  key_template = tink_pb2.KeyTemplate(
+      type_url='type.googleapis.com/google.crypto.tink.HpkePrivateKey',
+      value=key_format.SerializeToString(),
+      output_prefix_type=output_prefix_type,
+  )
   return key_template
 
 

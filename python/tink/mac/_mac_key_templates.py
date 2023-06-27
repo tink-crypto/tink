@@ -35,10 +35,11 @@ def _create_hmac_key_template(
   key_format.params.hash = hash_type
   key_format.params.tag_size = tag_size
   key_format.key_size = key_size
-  key_template = tink_pb2.KeyTemplate()
-  key_template.value = key_format.SerializeToString()
-  key_template.type_url = 'type.googleapis.com/google.crypto.tink.HmacKey'
-  key_template.output_prefix_type = tink_pb2.TINK
+  key_template = tink_pb2.KeyTemplate(
+      value=key_format.SerializeToString(),
+      type_url='type.googleapis.com/google.crypto.tink.HmacKey',
+      output_prefix_type=tink_pb2.TINK,
+  )
   return key_template
 
 
