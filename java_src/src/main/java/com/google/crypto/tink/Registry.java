@@ -498,15 +498,14 @@ public final class Registry {
     return result;
   }
 
-  /** @return a {@link KeyManager} for the given {@code typeUrl} (if found). */
+  /** Returns a {@link KeyManager} for the given {@code typeUrl} (if found). */
   public static <P> KeyManager<P> getKeyManager(String typeUrl, Class<P> primitiveClass)
       throws GeneralSecurityException {
     return keyManagerRegistry.get().getKeyManager(typeUrl, primitiveClass);
   }
 
-  /** @return a {@link KeyManager} for the given {@code typeUrl} (if found). */
-  public static KeyManager<?> getUntypedKeyManager(String typeUrl)
-      throws GeneralSecurityException {
+  /** Returns a {@link KeyManager} for the given {@code typeUrl} (if found). */
+  public static KeyManager<?> getUntypedKeyManager(String typeUrl) throws GeneralSecurityException {
     return keyManagerRegistry.get().getUntypedKeyManager(typeUrl);
   }
 
@@ -635,14 +634,14 @@ public final class Registry {
    * KeyManager#getPrimitive} with {@code key} as the parameter.
    *
    * @return a new primitive
-   * @deprecated Use {@code getPrimitive(typeUrl, key, P.class)} instead.
+   * @deprecated Use {@code getPrimitive(typeUrl, serializedKey, P.class)} instead.
    */
   @SuppressWarnings("TypeParameterUnusedInFormals")
   @Deprecated
   public static <P> P getPrimitive(String typeUrl, MessageLite key)
       throws GeneralSecurityException {
     KeyManager<P> manager = getKeyManager(typeUrl);
-    return manager.getPrimitive(key);
+    return manager.getPrimitive(key.toByteString());
   }
 
   /**
@@ -652,11 +651,13 @@ public final class Registry {
    * KeyManager#getPrimitive} with {@code key} as the parameter.
    *
    * @return a new primitive
+   * @deprecated Use {@code getPrimitive(typeUrl, serializedKey, Primitive.class} instead.
    */
-  public static <P> P getPrimitive(String typeUrl, MessageLite key, Class<P> primitiveClass)
-      throws GeneralSecurityException {
+  @Deprecated
+  public static <P> P getPrimitive(
+      String typeUrl, MessageLite key, Class<P> primitiveClass) throws GeneralSecurityException {
     KeyManager<P> manager = keyManagerRegistry.get().getKeyManager(typeUrl, primitiveClass);
-    return manager.getPrimitive(key);
+    return manager.getPrimitive(key.toByteString());
   }
 
   /**
