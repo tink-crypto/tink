@@ -222,7 +222,7 @@ public final class AesCmacTestUtil {
   /**
    * Represents a single AesCmac test vector.
    */
-  public static class AesCmacTestVector {
+  public static final class AesCmacTestVector {
     public final AesCmacKey key;
     public final byte[] message;
     public final byte[] tag;
