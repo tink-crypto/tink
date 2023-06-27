@@ -933,22 +933,6 @@ public class RegistryTest {
   }
 
   @Test
-  public void testParseKeyData_succeeds() throws Exception {
-    Registry.reset();
-    Registry.registerKeyManager(new TestKeyTypeManager(), true);
-    AesGcmKey key =
-        AesGcmKey.newBuilder()
-            .setKeyValue(ByteString.copyFrom("0123456789abcdef".getBytes(UTF_8)))
-            .build();
-    KeyData keyData =
-        KeyData.newBuilder()
-            .setTypeUrl(new TestKeyTypeManager().getKeyType())
-            .setValue(key.toByteString())
-            .build();
-    assertThat(Registry.parseKeyData(keyData)).isEqualTo(key);
-  }
-
-  @Test
   public void testDeriveKey_succeeds() throws Exception {
     Registry.reset();
     Registry.registerKeyManager(new TestKeyTypeManager(), true);

@@ -802,16 +802,6 @@ public final class Registry {
   }
 
   /**
-   * Returns the key proto in the keyData if a corresponding key type manager was registered.
-   * Returns null if the key type was registered with a {@link KeyManager} (and not a {@link
-   * KeyTypeManager}).
-   */
-  static MessageLite parseKeyData(KeyData keyData)
-      throws GeneralSecurityException, InvalidProtocolBufferException {
-    return keyManagerRegistry.get().parseKeyData(keyData);
-  }
-
-  /**
    * Tries to enable the FIPS restrictions if the Registry is empty.
    *
    * @throws GeneralSecurityException if any key manager has already been registered.
