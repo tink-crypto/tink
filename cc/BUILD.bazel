@@ -855,6 +855,7 @@ cc_test(
         "//config:fips_140_2",
         "//config:key_gen_fips_140_2",
         "//config:tink_config",
+        "//config/internal:global_registry",
         "//internal:fips_utils",
         "//internal:key_gen_configuration_impl",
         "//proto:aes_gcm_siv_cc_proto",

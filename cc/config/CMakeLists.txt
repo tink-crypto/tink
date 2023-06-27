@@ -1,5 +1,7 @@
 tink_module(config)
 
+add_subdirectory(internal)
+
 tink_cc_library(
   NAME tink_config
   SRCS

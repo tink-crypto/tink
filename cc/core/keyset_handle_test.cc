@@ -34,6 +34,7 @@
 #include "tink/binary_keyset_writer.h"
 #include "tink/cleartext_keyset_handle.h"
 #include "tink/config/fips_140_2.h"
+#include "tink/config/internal/global_registry.h"
 #include "tink/config/key_gen_fips_140_2.h"
 #include "tink/config/tink_config.h"
 #include "tink/core/key_manager_impl.h"
@@ -813,6 +814,53 @@ TEST_F(KeysetHandleTest, GetPrimitive) {
 
   std::string raw_encryption = raw_aead->Encrypt(plaintext, aad).value();
   EXPECT_EQ(aead->Decrypt(raw_encryption, aad).value(), plaintext);
+}
+
+TEST_F(KeysetHandleTest, GetPrimitiveWithBespokeConfigSucceeds) {
+  KeyGenConfiguration key_gen_config;
+  ASSERT_THAT(internal::KeyGenConfigurationImpl::AddKeyTypeManager(
+                  absl::make_unique<AesGcmKeyManager>(), key_gen_config),
+              IsOk());
+  util::StatusOr<std::unique_ptr<KeysetHandle>> handle =
+      KeysetHandle::GenerateNew(AeadKeyTemplates::Aes128Gcm(), key_gen_config);
+  ASSERT_THAT(handle, IsOk());
+
+  Configuration config;
+  ASSERT_THAT(internal::ConfigurationImpl::AddKeyTypeManager(
+                  absl::make_unique<AesGcmKeyManager>(), config),
+              IsOk());
+  ASSERT_THAT(internal::ConfigurationImpl::AddPrimitiveWrapper(
+                  absl::make_unique<AeadWrapper>(), config),
+              IsOk());
+
+  EXPECT_THAT((*handle)->GetPrimitive<Aead>(config).status(), IsOk());
+}
+
+TEST_F(KeysetHandleTest, GetPrimitiveWithBespokeConfigFailsIfEmpty) {
+  KeyGenConfiguration key_gen_config;
+  ASSERT_THAT(internal::KeyGenConfigurationImpl::AddKeyTypeManager(
+                  absl::make_unique<AesGcmKeyManager>(), key_gen_config),
+              IsOk());
+  util::StatusOr<std::unique_ptr<KeysetHandle>> handle =
+      KeysetHandle::GenerateNew(AeadKeyTemplates::Aes128Gcm(), key_gen_config);
+  ASSERT_THAT(handle, IsOk());
+
+  Configuration config;
+  EXPECT_THAT((*handle)->GetPrimitive<Aead>(config).status(),
+              StatusIs(absl::StatusCode::kNotFound));
+}
+
+TEST_F(KeysetHandleTest, GetPrimitiveWithGlobalRegistryConfig) {
+  util::StatusOr<std::unique_ptr<KeysetHandle>> handle =
+      KeysetHandle::GenerateNew(AeadKeyTemplates::Aes128Gcm(),
+                                internal::KeyGenConfigGlobalRegistry());
+  ASSERT_THAT(handle, IsOk());
+
+  // TODO(b/265705174): Replace with ConfigGlobalRegistry instance.
+  Configuration config;
+  ASSERT_THAT(internal::ConfigurationImpl::SetGlobalRegistryMode(config),
+              IsOk());
+  EXPECT_THAT((*handle)->GetPrimitive<Aead>(config), IsOk());
 }
 
 TEST_F(KeysetHandleTest, GetPrimitiveWithConfigFips1402) {

@@ -801,6 +801,7 @@ tink_cc_test(
     tink::config::fips_140_2
     tink::config::key_gen_fips_140_2
     tink::config::tink_config
+    tink::config::internal::global_registry
     tink::internal::fips_utils
     tink::internal::key_gen_configuration_impl
     tink::signature::ecdsa_sign_key_manager

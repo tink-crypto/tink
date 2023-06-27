@@ -141,6 +141,7 @@ class KeysetHandle {
               const absl::flat_hash_map<std::string, std::string>&
                   monitoring_annotations = {});
 
+  // TODO(b/265865177): Deprecate.
   // Returns a KeysetHandle containing a single new key generated according to
   // `key_template`. The keyset is annotated for monitoring with
   // `monitoring_annotations`, which is empty by default.
@@ -341,26 +342,40 @@ KeysetHandle::GetPrimitives(const KeyManager<P>* custom_manager) const {
 template <class P>
 crypto::tink::util::StatusOr<std::unique_ptr<P>> KeysetHandle::GetPrimitive(
     const Configuration& config) const {
+  if (crypto::tink::internal::ConfigurationImpl::GetGlobalRegistryMode(
+          config)) {
+    return crypto::tink::internal::RegistryImpl::GlobalInstance().WrapKeyset<P>(
+        keyset_, monitoring_annotations_);
+  }
+
   crypto::tink::util::StatusOr<
       const crypto::tink::internal::KeysetWrapperStore*>
-      store = crypto::tink::internal::ConfigurationImpl::GetKeysetWrapperStore(
-          config);
-  if (!store.ok()) {
-    return store.status();
+      wrapper_store =
+          crypto::tink::internal::ConfigurationImpl::GetKeysetWrapperStore(
+              config);
+  if (!wrapper_store.ok()) {
+    return wrapper_store.status();
   }
   crypto::tink::util::StatusOr<const crypto::tink::internal::KeysetWrapper<P>*>
-      wrapper = (*store)->Get<P>();
+      wrapper = (*wrapper_store)->Get<P>();
   if (!wrapper.ok()) {
     return wrapper.status();
   }
   return (*wrapper)->Wrap(keyset_, monitoring_annotations_);
 }
 
+// TODO(b/265865177): Deprecate.
 template <class P>
 crypto::tink::util::StatusOr<std::unique_ptr<P>> KeysetHandle::GetPrimitive()
     const {
-  return internal::RegistryImpl::GlobalInstance().WrapKeyset<P>(
-      keyset_, monitoring_annotations_);
+  // TODO(b/265705174): Replace with ConfigGlobalRegistry instance.
+  crypto::tink::Configuration config;
+  crypto::tink::util::Status status =
+      crypto::tink::internal::ConfigurationImpl::SetGlobalRegistryMode(config);
+  if (!status.ok()) {
+    return status;
+  }
+  return GetPrimitive<P>(config);
 }
 
 template <class P>
