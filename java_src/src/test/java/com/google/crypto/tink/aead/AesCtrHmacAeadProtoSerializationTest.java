@@ -664,6 +664,67 @@ public final class AesCtrHmacAeadProtoSerializationTest {
             KeyMaterialType.SYMMETRIC,
             OutputPrefixType.TINK,
             1479),
+        // Bad Version in Aes Ctr Key
+        ProtoKeySerialization.create(
+            TYPE_URL,
+            com.google.crypto.tink.proto.AesCtrHmacAeadKey.newBuilder()
+                .setAesCtrKey(
+                    com.google.crypto.tink.proto.AesCtrKey.newBuilder()
+                        .setVersion(1)
+                        .setParams(
+                            com.google.crypto.tink.proto.AesCtrParams.newBuilder()
+                                .setIvSize(16)
+                                .build())
+                        .setKeyValue(KEY_BYTES_32_AS_BYTE_STRING)
+                        .build())
+                .setHmacKey(
+                    com.google.crypto.tink.proto.HmacKey.newBuilder()
+                        .setParams(
+                            com.google.crypto.tink.proto.HmacParams.newBuilder()
+                                .setTagSize(16)
+                                .setHash(HashType.SHA1)
+                                .build())
+                        .setKeyValue(KEY_BYTES_32_AS_BYTE_STRING)
+                        .build())
+                .build()
+                .toByteString(),
+            KeyMaterialType.SYMMETRIC,
+            OutputPrefixType.TINK,
+            1479),
+        // Bad Version in Hmac Key
+        ProtoKeySerialization.create(
+            TYPE_URL,
+            com.google.crypto.tink.proto.AesCtrHmacAeadKey.newBuilder()
+                .setAesCtrKey(
+                    com.google.crypto.tink.proto.AesCtrKey.newBuilder()
+                        .setParams(
+                            com.google.crypto.tink.proto.AesCtrParams.newBuilder()
+                                .setIvSize(16)
+                                .build())
+                        .setKeyValue(KEY_BYTES_32_AS_BYTE_STRING)
+                        .build())
+                .setHmacKey(
+                    com.google.crypto.tink.proto.HmacKey.newBuilder()
+                        .setVersion(1)
+                        .setParams(
+                            com.google.crypto.tink.proto.HmacParams.newBuilder()
+                                .setTagSize(16)
+                                .setHash(HashType.SHA1)
+                                .build())
+                        .setKeyValue(KEY_BYTES_32_AS_BYTE_STRING)
+                        .build())
+                .build()
+                .toByteString(),
+            KeyMaterialType.SYMMETRIC,
+            OutputPrefixType.TINK,
+            1479),
+        // Invalid proto encoding
+        ProtoKeySerialization.create(
+            TYPE_URL,
+            ByteString.copyFrom(new byte[] {(byte) 0x80}),
+            KeyMaterialType.SYMMETRIC,
+            OutputPrefixType.TINK,
+            1479),
       };
     } catch (GeneralSecurityException e) {
       throw new RuntimeException(e);

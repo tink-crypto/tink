@@ -248,6 +248,12 @@ final class AesCtrHmacAeadProtoSerialization {
       if (protoKey.getVersion() != 0) {
         throw new GeneralSecurityException("Only version 0 keys are accepted");
       }
+      if (protoKey.getAesCtrKey().getVersion() != 0) {
+        throw new GeneralSecurityException("Only version 0 keys inner AES CTR keys are accepted");
+      }
+      if (protoKey.getHmacKey().getVersion() != 0) {
+        throw new GeneralSecurityException("Only version 0 keys inner HMAC keys are accepted");
+      }
       AesCtrHmacAeadParameters parameters =
           AesCtrHmacAeadParameters.builder()
               .setAesKeySizeBytes(protoKey.getAesCtrKey().getKeyValue().size())
