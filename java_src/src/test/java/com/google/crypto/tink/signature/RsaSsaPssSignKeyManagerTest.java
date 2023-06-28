@@ -286,7 +286,9 @@ public class RsaSsaPssSignKeyManagerTest {
 
   @Test
   public void createCorruptedModulusPrimitive_throws() throws Exception {
-
+    if (TestUtil.isTsan()) {
+      return; // too slow for tsan.
+    }
     RsaSsaPssKeyFormat format =
         createKeyFormat(HashType.SHA512, HashType.SHA512, 64, 4096, RSAKeyGenParameterSpec.F4);
     RsaSsaPssPrivateKey originalKey = factory.createKey(format);
@@ -378,21 +380,33 @@ public class RsaSsaPssSignKeyManagerTest {
 
   @Test
   public void testRsa3072PssSha256F4TemplateWithManager() throws Exception {
+    if (TestUtil.isTsan()) {
+      return; // too slow for tsan
+    }
     testKeyTemplateCompatible(manager, RsaSsaPssSignKeyManager.rsa3072PssSha256F4Template());
   }
 
   @Test
   public void testRawRsa3072PssSha256F4TemplateWithManager() throws Exception {
+    if (TestUtil.isTsan()) {
+      return; // too slow for tsan
+    }
     testKeyTemplateCompatible(manager, RsaSsaPssSignKeyManager.rawRsa3072PssSha256F4Template());
   }
 
   @Test
   public void testRsa4096PssSha512F4TemplateWithManager() throws Exception {
+    if (TestUtil.isTsan()) {
+      return; // too slow for tsan
+    }
     testKeyTemplateCompatible(manager, RsaSsaPssSignKeyManager.rsa4096PssSha512F4Template());
   }
 
   @Test
   public void testRawRsa4096PssSha512F4TemplateWithManager() throws Exception {
+    if (TestUtil.isTsan()) {
+      return; // too slow for tsan
+    }
     testKeyTemplateCompatible(manager, RsaSsaPssSignKeyManager.rawRsa4096PssSha512F4Template());
   }
 
