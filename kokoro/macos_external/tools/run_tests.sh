@@ -21,24 +21,10 @@ export DEVELOPER_DIR="/Applications/Xcode.app/Contents/Developer"
 export ANDROID_HOME="/usr/local/share/android-sdk"
 export COURSIER_OPTS="-Djava.net.preferIPv6Addresses=true"
 
-IS_KOKORO="false"
-if [[ -n "${KOKORO_ARTIFACTS_DIR:-}" ]]; then
-  IS_KOKORO="true"
-fi
-readonly IS_KOKORO
-
-if [[ "${IS_KOKORO}" == "true" ]] ; then
+if [[ -n "${KOKORO_ARTIFACTS_DIR:-}" ]] ; then
   cd "$(echo "${KOKORO_ARTIFACTS_DIR}"/git*/tink)"
   export JAVA_HOME=$(/usr/libexec/java_home -v "1.8.0_292")
 fi
 
-./kokoro/testutils/copy_credentials.sh "tools/testdata" "all"
 ./kokoro/testutils/update_android_sdk.sh
-# Sourcing required to update callers environment.
-source ./kokoro/testutils/install_go.sh
-echo "Using go binary from $(which go): $(go version)"
-
-# TODO(b/155225382): Avoid modifying the sytem Python installation.
-pip3 install --user protobuf
-
 ./kokoro/testutils/run_bazel_tests.sh tools

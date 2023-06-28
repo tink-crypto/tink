@@ -172,7 +172,6 @@ main() {
     ./kokoro/testutils/copy_credentials.sh "java_src/testdata" "all"
     ./kokoro/testutils/copy_credentials.sh "python/examples/testdata" "gcp"
     ./kokoro/testutils/copy_credentials.sh "python/testdata" "all"
-    ./kokoro/testutils/copy_credentials.sh "tools/testdata" "all"
 
     ./kokoro/testutils/update_android_sdk.sh
     # Sourcing required to update callers environment.
