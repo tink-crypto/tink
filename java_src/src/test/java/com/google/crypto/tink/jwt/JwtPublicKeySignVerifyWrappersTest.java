@@ -24,6 +24,7 @@ import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.KeyTemplates;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.KeysetManager;
+import com.google.crypto.tink.Parameters;
 import com.google.crypto.tink.TinkProtoKeysetFormat;
 import com.google.crypto.tink.proto.Keyset;
 import com.google.crypto.tink.proto.OutputPrefixType;
@@ -303,5 +304,33 @@ public class JwtPublicKeySignVerifyWrappersTest {
     String compact = jwtSigner.signAndEncode(rawJwt);
     JwtValidator validator = JwtValidator.newBuilder().allowMissingExpiration().build();
     assertThrows(JwtInvalidException.class, () -> jwtVerifier.verifyAndDecode(compact, validator));
+  }
+
+  /* TODO: b/252792776. All keysets without primary should be rejected in every case. */
+  @Test
+  public void test_verifyWithoutPrimary_works() throws Exception {
+    Parameters parameters = KeyTemplates.get("JWT_ES256").toParameters();
+    KeysetHandle handle =
+        KeysetHandle.newBuilder()
+            .addEntry(
+                KeysetHandle.generateEntryFromParameters(parameters).withRandomId().makePrimary())
+            .addEntry(KeysetHandle.generateEntryFromParameters(parameters).withRandomId())
+            .build();
+    KeysetHandle publicHandle = handle.getPublicKeysetHandle();
+    Keyset publicKeyset =
+        Keyset.parseFrom(TinkProtoKeysetFormat.serializeKeysetWithoutSecret(publicHandle));
+    Keyset publicKeysetWithoutPrimary = publicKeyset.toBuilder().setPrimaryKeyId(0).build();
+    // TODO(b/252792776): Optimally, this would throw.
+    KeysetHandle publicHandleWithoutPrimary =
+        TinkProtoKeysetFormat.parseKeysetWithoutSecret(publicKeysetWithoutPrimary.toByteArray());
+
+    JwtPublicKeySign signer = handle.getPrimitive(JwtPublicKeySign.class);
+    // TODO(b/252792776): At least this should throw.
+    JwtPublicKeyVerify verifier = publicHandleWithoutPrimary.getPrimitive(JwtPublicKeyVerify.class);
+    RawJwt rawToken = RawJwt.newBuilder().setJwtId("blah").withoutExpiration().build();
+    String signedCompact = signer.signAndEncode(rawToken);
+    JwtValidator validator = JwtValidator.newBuilder().allowMissingExpiration().build();
+    VerifiedJwt verifiedToken = verifier.verifyAndDecode(signedCompact, validator);
+    assertThat(verifiedToken.getJwtId()).isEqualTo("blah");
   }
 }

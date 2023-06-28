@@ -16,14 +16,14 @@
 
 package com.google.crypto.tink.testing;
 
-import com.google.crypto.tink.BinaryKeysetReader;
-import com.google.crypto.tink.CleartextKeysetHandle;
+import com.google.crypto.tink.InsecureSecretKeyAccess;
 import com.google.crypto.tink.KeysetHandle;
+import com.google.crypto.tink.TinkProtoKeysetFormat;
+import com.google.crypto.tink.monitoring.MonitoringAnnotations;
 import com.google.crypto.tink.testing.proto.AnnotatedKeyset;
 import com.google.crypto.tink.testing.proto.CreationRequest;
 import com.google.crypto.tink.testing.proto.CreationResponse;
 import io.grpc.stub.StreamObserver;
-import java.io.IOException;
 import java.security.GeneralSecurityException;
 
 /**
@@ -32,13 +32,13 @@ import java.security.GeneralSecurityException;
 final class Util {
   static KeysetHandle parseBinaryProtoKeyset(AnnotatedKeyset annotatedKeyset)
       throws GeneralSecurityException {
-    try {
-      return CleartextKeysetHandle.read(
-          BinaryKeysetReader.withBytes(annotatedKeyset.getSerializedKeyset().toByteArray()),
-          annotatedKeyset.getAnnotationsMap());
-    } catch (IOException e) {
-      throw new GeneralSecurityException(e);
-    }
+    KeysetHandle handle =
+        TinkProtoKeysetFormat.parseKeyset(
+            annotatedKeyset.getSerializedKeyset().toByteArray(), InsecureSecretKeyAccess.get());
+    return KeysetHandle.newBuilder(handle)
+        .setMonitoringAnnotations(
+            MonitoringAnnotations.newBuilder().addAll(annotatedKeyset.getAnnotationsMap()).build())
+        .build();
   }
 
   /** Responds to a "create" request for a specific class */

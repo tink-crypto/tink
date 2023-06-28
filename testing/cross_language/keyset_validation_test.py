@@ -116,11 +116,11 @@ class KeysetValidationTest(parameterized.TestCase):
     with self.assertRaises(tink.TinkError):
       _ = testing_servers.remote_primitive(
           lang, private_keyset_without_primary, signature.PublicKeySign)
-    if lang not in ['java', 'python']:
+    if lang not in ['python']:
       with self.assertRaises(tink.TinkError):
         _ = testing_servers.remote_primitive(
             lang, public_keyset_without_primary, signature.PublicKeyVerify)
-    if lang in ['java', 'python']:
+    if lang in ['python']:
       # TODO(b/252792776) This should fail.
       verifier_without_primary = testing_servers.remote_primitive(
           lang, public_keyset_without_primary, signature.PublicKeyVerify)
@@ -168,12 +168,12 @@ class KeysetValidationTest(parameterized.TestCase):
       _ = testing_servers.remote_primitive(
           lang, private_keyset_without_primary, jwt.JwtPublicKeySign)
 
-    if lang not in ['cc', 'java', 'python']:
+    if lang not in ['cc', 'python']:
       with self.assertRaises(tink.TinkError):
         _ = testing_servers.remote_primitive(lang,
                                              public_keyset_without_primary,
                                              jwt.JwtPublicKeyVerify)
-    if lang in ['cc', 'java', 'python']:
+    if lang in ['cc', 'python']:
       # TODO(b/252792776) This should fail.
       verifier_without_primary = testing_servers.remote_primitive(
           lang, public_keyset_without_primary, jwt.JwtPublicKeyVerify)
