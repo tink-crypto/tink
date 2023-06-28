@@ -12,16 +12,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-///////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
 #ifndef TINK_INTERNAL_KEYSET_WRAPPER_IMPL_H_
 #define TINK_INTERNAL_KEYSET_WRAPPER_IMPL_H_
 
-#include <functional>
 #include <memory>
 #include <string>
 #include <utility>
 
 #include "absl/container/flat_hash_map.h"
+#include "absl/functional/any_invocable.h"
 #include "tink/internal/key_info.h"
 #include "tink/internal/keyset_wrapper.h"
 #include "tink/primitive_set.h"
@@ -42,10 +43,10 @@ class KeysetWrapperImpl : public KeysetWrapper<Q> {
   // testing -- later, this function will just be Registry::GetPrimitive().
   explicit KeysetWrapperImpl(
       const PrimitiveWrapper<P, Q>* transforming_wrapper,
-      std::function<crypto::tink::util::StatusOr<std::unique_ptr<P>>(
-          const google::crypto::tink::KeyData& key_data)>
+      absl::AnyInvocable<crypto::tink::util::StatusOr<std::unique_ptr<P>>(
+          const google::crypto::tink::KeyData& key_data) const>
           primitive_getter)
-      : primitive_getter_(primitive_getter),
+      : primitive_getter_(std::move(primitive_getter)),
         transforming_wrapper_(*transforming_wrapper) {}
 
   crypto::tink::util::StatusOr<std::unique_ptr<Q>> Wrap(
@@ -78,8 +79,8 @@ class KeysetWrapperImpl : public KeysetWrapper<Q> {
   }
 
  private:
-  const std::function<crypto::tink::util::StatusOr<std::unique_ptr<P>>(
-      const google::crypto::tink::KeyData& key_data)>
+  absl::AnyInvocable<crypto::tink::util::StatusOr<std::unique_ptr<P>>(
+      const google::crypto::tink::KeyData& key_data) const>
       primitive_getter_;
   const PrimitiveWrapper<P, Q>& transforming_wrapper_;
 };

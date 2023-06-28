@@ -176,23 +176,16 @@ TEST(KeysetWrapperStoreTest, Add) {
 }
 
 TEST(KeysetWrapperStoreTest, AddNull) {
-  KeysetWrapperStore store;
-  EXPECT_THAT((store.Add<FakePrimitive, FakePrimitive>(nullptr, nullptr)),
-              StatusIs(absl::StatusCode::kInvalidArgument));
-
-  EXPECT_THAT((store.Add<FakePrimitive, FakePrimitive>(
-                  absl::make_unique<FakePrimitiveWrapper>(), nullptr)),
-              StatusIs(absl::StatusCode::kInvalidArgument));
-
   RegistryImpl registry;
   util::StatusOr<std::function<util::StatusOr<std::unique_ptr<FakePrimitive>>(
       const KeyData& key_data)>>
       primitive_getter = PrimitiveGetter(registry);
   ASSERT_THAT(primitive_getter, IsOk());
 
-  EXPECT_THAT(
-      (store.Add<FakePrimitive, FakePrimitive>(nullptr, *primitive_getter)),
-      StatusIs(absl::StatusCode::kInvalidArgument));
+  KeysetWrapperStore store;
+  EXPECT_THAT((store.Add<FakePrimitive, FakePrimitive>(/*wrapper=*/nullptr,
+                                                       *primitive_getter)),
+              StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
 TEST(KeysetWrapperStoreTest, AddWrappersForDifferentPrimitivesSucceeds) {

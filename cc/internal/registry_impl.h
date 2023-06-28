@@ -24,6 +24,7 @@
 
 #include "absl/base/thread_annotations.h"
 #include "absl/container/flat_hash_map.h"
+#include "absl/functional/any_invocable.h"
 #include "absl/memory/memory.h"
 #include "absl/status/status.h"
 #include "absl/strings/string_view.h"
@@ -230,12 +231,13 @@ crypto::tink::util::Status RegistryImpl::RegisterPrimitiveWrapper(
   std::unique_ptr<PrimitiveWrapper<P, Q>> owned_wrapper(wrapper);
 
   absl::MutexLock lock(&maps_mutex_);
-  std::function<crypto::tink::util::StatusOr<std::unique_ptr<P>>(
-      const google::crypto::tink::KeyData& key_data)>
+  absl::AnyInvocable<crypto::tink::util::StatusOr<std::unique_ptr<P>>(
+      const google::crypto::tink::KeyData& key_data) const>
       primitive_getter = [this](const google::crypto::tink::KeyData& key_data) {
         return this->GetPrimitive<P>(key_data);
       };
-  return keyset_wrapper_store_.Add(std::move(owned_wrapper), primitive_getter);
+  return keyset_wrapper_store_.Add(std::move(owned_wrapper),
+                                   std::move(primitive_getter));
 }
 
 template <class P>

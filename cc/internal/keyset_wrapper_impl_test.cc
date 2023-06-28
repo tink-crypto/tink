@@ -15,11 +15,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include "tink/internal/keyset_wrapper_impl.h"
 
-#include <stdint.h>
-
 #include <memory>
 #include <string>
-#include <tuple>
 #include <utility>
 #include <vector>
 
