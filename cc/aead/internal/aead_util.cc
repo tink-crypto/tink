@@ -15,6 +15,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include "tink/aead/internal/aead_util.h"
 
+#include <string>
+
 #include "absl/status/status.h"
 #include "openssl/evp.h"
 #include "tink/util/errors.h"
@@ -23,6 +25,18 @@
 namespace crypto {
 namespace tink {
 namespace internal {
+
+bool IsSupportedKmsEnvelopeAeadDekKeyType(absl::string_view key_type) {
+  static const auto *kSupportedDekKeyTypes =
+      new absl::flat_hash_set<std::string>({
+          "type.googleapis.com/google.crypto.tink.AesGcmKey",
+          "type.googleapis.com/google.crypto.tink.XChaCha20Poly1305Key",
+          "type.googleapis.com/google.crypto.tink.AesCtrHmacAeadKey",
+          "type.googleapis.com/google.crypto.tink.AesEaxKey",
+          "type.googleapis.com/google.crypto.tink.AesGcmSivKey",
+      });
+  return kSupportedDekKeyTypes->contains(key_type);
+}
 
 util::StatusOr<const EVP_CIPHER *> GetAesGcmCipherForKeySize(
     uint32_t key_size_in_bytes) {

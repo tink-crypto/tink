@@ -11,6 +11,7 @@ cc_library(
         "//util:errors",
         "//util:statusor",
         "@boringssl//:crypto",
+        "@com_google_absl//absl/container:flat_hash_set",
         "@com_google_absl//absl/status",
     ],
 )

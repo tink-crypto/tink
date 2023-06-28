@@ -106,14 +106,14 @@ TEST_F(KmsEnvelopeAeadTest, NewFailsIfDekKeyManagerIsNotRegistered) {
       StatusIs(absl::StatusCode::kNotFound, HasSubstr("AesEaxKey")));
 }
 
-TEST_F(KmsEnvelopeAeadTest, NewFailsIfUsingWrongDekPrimitive) {
+TEST_F(KmsEnvelopeAeadTest, NewFailsIfUsingDekTemplateOfUnsupportedKeyType) {
   ASSERT_THAT(AeadConfig::Register(), IsOk());
   KeyTemplate dek_template = MacKeyTemplates::HmacSha256();
   auto remote_aead = absl::make_unique<DummyAead>(kRemoteAeadName);
   EXPECT_THAT(
       KmsEnvelopeAead::New(dek_template, std::move(remote_aead)).status(),
       StatusIs(absl::StatusCode::kInvalidArgument,
-               HasSubstr("not among supported primitives")));
+               HasSubstr("unsupported key type")));
 }
 
 TEST_F(KmsEnvelopeAeadTest, DecryptFailsWithInvalidCiphertextOrAad) {

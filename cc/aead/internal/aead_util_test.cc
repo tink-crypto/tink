@@ -27,6 +27,8 @@ namespace {
 
 using ::crypto::tink::test::IsOk;
 using ::crypto::tink::test::IsOkAndHolds;
+using ::testing::IsFalse;
+using ::testing::IsTrue;
 using ::testing::Not;
 
 TEST(AeadUtilTest, GetAesGcmCipherForKeySize) {
@@ -40,6 +42,15 @@ TEST(AeadUtilTest, GetAesGcmCipherForKeySize) {
       EXPECT_THAT(cipher, Not(IsOk()));
     }
   }
+}
+
+TEST(AeadUtilTest, SupportedKmsEnvelopeAeadDekKeyTypes) {
+  EXPECT_THAT(IsSupportedKmsEnvelopeAeadDekKeyType(
+                  "type.googleapis.com/google.crypto.tink.AesGcmKey"),
+              IsTrue());
+  EXPECT_THAT(IsSupportedKmsEnvelopeAeadDekKeyType(
+                  "type.googleapis.com/google.crypto.tink.KmsEnvelopeAeadKey"),
+              IsFalse());
 }
 
 #ifdef OPENSSL_IS_BORINGSSL

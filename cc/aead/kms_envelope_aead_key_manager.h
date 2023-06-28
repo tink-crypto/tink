@@ -25,6 +25,7 @@
 #include "absl/status/status.h"
 #include "absl/strings/str_cat.h"
 #include "tink/aead.h"
+#include "tink/aead/internal/aead_util.h"
 #include "tink/core/key_type_manager.h"
 #include "tink/core/template_util.h"
 #include "tink/internal/fips_utils.h"
@@ -74,6 +75,11 @@ class KmsEnvelopeAeadKeyManager
     if (format.kek_uri().empty()) {
       return crypto::tink::util::Status(absl::StatusCode::kInvalidArgument,
                                         "Missing kek_uri.");
+    }
+    if (!internal::IsSupportedKmsEnvelopeAeadDekKeyType(
+            format.dek_template().type_url())) {
+      return util::Status(absl::StatusCode::kInvalidArgument,
+                          "unsupported dek key type");
     }
     return util::OkStatus();
   }

@@ -6,6 +6,7 @@ tink_cc_library(
     aead_util.cc
     aead_util.h
   DEPS
+    absl::flat_hash_set
     absl::status
     crypto
     tink::util::errors

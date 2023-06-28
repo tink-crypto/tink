@@ -267,6 +267,7 @@ tink_cc_library(
     absl::strings
     tink::core::aead
     tink::core::registry
+    tink::aead::internal::aead_util
     tink::util::status
     tink::util::statusor
     tink::proto::tink_cc_proto
@@ -287,6 +288,7 @@ tink_cc_library(
     tink::core::template_util
     tink::core::kms_client
     tink::core::kms_clients
+    tink::aead::internal::aead_util
     tink::internal::fips_utils
     tink::util::constants
     tink::util::status
@@ -674,6 +676,7 @@ tink_cc_test(
     tink::core::kms_client
     tink::core::kms_clients
     tink::core::registry
+    tink::mac::mac_key_templates
     tink::subtle::aead_test_util
     tink::util::fake_kms_client
     tink::util::status

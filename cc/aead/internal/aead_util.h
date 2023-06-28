@@ -16,12 +16,17 @@
 #ifndef TINK_AEAD_INTERNAL_AEAD_UTIL_H_
 #define TINK_AEAD_INTERNAL_AEAD_UTIL_H_
 
+#include <string>
+
+#include "absl/container/flat_hash_set.h"
 #include "openssl/evp.h"
 #include "tink/util/statusor.h"
 
 namespace crypto {
 namespace tink {
 namespace internal {
+
+bool IsSupportedKmsEnvelopeAeadDekKeyType(absl::string_view key_type);
 
 // Returns a pointer to an AES-GCM EVP_CIPHER for the given key size.
 util::StatusOr<const EVP_CIPHER *> GetAesGcmCipherForKeySize(

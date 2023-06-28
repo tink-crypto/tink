@@ -32,6 +32,7 @@
 #include "tink/aead/kms_envelope_aead.h"
 #include "tink/kms_client.h"
 #include "tink/kms_clients.h"
+#include "tink/mac/mac_key_templates.h"
 #include "tink/registry.h"
 #include "tink/subtle/aead_test_util.h"
 #include "tink/util/fake_kms_client.h"
@@ -121,7 +122,15 @@ TEST(KmsEnvelopeAeadKeyManagerTest, ValidateKeyFormatNoUri) {
 
 TEST(KmsEnvelopeAeadKeyManagerTest, ValidateKeyFormatNoTemplate) {
   KmsEnvelopeAeadKeyFormat key_format;
-  *key_format.mutable_dek_template() = AeadKeyTemplates::Aes128Eax();
+  key_format.set_kek_uri("Some uri");
+  EXPECT_THAT(KmsEnvelopeAeadKeyManager().ValidateKeyFormat(key_format),
+              Not(IsOk()));
+}
+
+TEST(KmsEnvelopeAeadKeyManagerTest, ValidateKeyFormatInvalidDekTemplate) {
+  KmsEnvelopeAeadKeyFormat key_format;
+  key_format.set_kek_uri("Some uri");
+  *key_format.mutable_dek_template() = MacKeyTemplates::HmacSha256();
   EXPECT_THAT(KmsEnvelopeAeadKeyManager().ValidateKeyFormat(key_format),
               Not(IsOk()));
 }

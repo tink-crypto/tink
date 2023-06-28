@@ -27,6 +27,7 @@
 #include "absl/strings/str_cat.h"
 #include "absl/strings/string_view.h"
 #include "tink/aead.h"
+#include "tink/aead/internal/aead_util.h"
 #include "tink/registry.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
@@ -60,6 +61,11 @@ std::string GetEnvelopeCiphertext(absl::string_view encrypted_dek,
 util::StatusOr<std::unique_ptr<Aead>> KmsEnvelopeAead::New(
     const google::crypto::tink::KeyTemplate& dek_template,
     std::unique_ptr<Aead> remote_aead) {
+  if (!internal::IsSupportedKmsEnvelopeAeadDekKeyType(
+          dek_template.type_url())) {
+    return util::Status(absl::StatusCode::kInvalidArgument,
+                        "unsupported key type");
+  }
   if (remote_aead == nullptr) {
     return util::Status(absl::StatusCode::kInvalidArgument,
                         "remote_aead must be non-null");

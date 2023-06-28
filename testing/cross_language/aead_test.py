@@ -203,11 +203,6 @@ class AeadPythonTest(parameterized.TestCase):
     template = aead.aead_key_templates.create_kms_envelope_aead_key_template(
         kek_uri=_FAKE_KMS_KEY_URI, dek_template=dek_template
     )
-
-    if lang in {'cc'}:
-      # TODO(b/285863345): Template gets accepted but it should be rejected.
-      _ = testing_servers.new_keyset(lang, template)
-      return
     with self.assertRaises(tink.TinkError):
       _ = testing_servers.new_keyset(lang, template)
 
@@ -221,11 +216,6 @@ class AeadPythonTest(parameterized.TestCase):
     template = aead.aead_key_templates.create_kms_envelope_aead_key_template(
         kek_uri=_FAKE_KMS_KEY_URI, dek_template=dek_template
     )
-
-    if lang in {'cc'}:
-      # TODO(b/285863345): Template gets accepted but it should be rejected.
-      _ = testing_servers.new_keyset(lang, template)
-      return
     with self.assertRaises(tink.TinkError):
       _ = testing_servers.new_keyset(lang, template)
 
