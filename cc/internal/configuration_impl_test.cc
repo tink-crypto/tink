@@ -411,7 +411,7 @@ TEST(ConfigurationImplTest, GlobalRegistryMode) {
   Registry::Reset();
   Configuration config;
   ASSERT_THAT(ConfigurationImpl::SetGlobalRegistryMode(config), IsOk());
-  EXPECT_TRUE(ConfigurationImpl::GetGlobalRegistryMode(config));
+  EXPECT_TRUE(ConfigurationImpl::IsInGlobalRegistryMode(config));
 
   // Check that ConfigurationImpl functions return kFailedPrecondition.
   EXPECT_THAT(ConfigurationImpl::AddPrimitiveWrapper(
@@ -457,7 +457,7 @@ TEST(ConfigurationImplTest, GlobalRegistryModeWithNonEmptyConfigFails) {
               IsOk());
   EXPECT_THAT(ConfigurationImpl::SetGlobalRegistryMode(config),
               StatusIs(absl::StatusCode::kFailedPrecondition));
-  EXPECT_FALSE(ConfigurationImpl::GetGlobalRegistryMode(config));
+  EXPECT_FALSE(ConfigurationImpl::IsInGlobalRegistryMode(config));
 }
 
 }  // namespace

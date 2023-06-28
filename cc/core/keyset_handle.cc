@@ -414,7 +414,7 @@ crypto::tink::util::StatusOr<uint32_t> KeysetHandle::AddToKeyset(
 
   // Generate new key data.
   util::StatusOr<std::unique_ptr<KeyData>> key_data;
-  if (internal::KeyGenConfigurationImpl::GetGlobalRegistryMode(config)) {
+  if (internal::KeyGenConfigurationImpl::IsInGlobalRegistryMode(config)) {
     key_data = Registry::NewKeyData(key_template);
   } else {
     util::StatusOr<const internal::KeyTypeInfoStore*> key_type_info_store =

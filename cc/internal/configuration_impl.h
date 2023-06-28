@@ -129,7 +129,8 @@ class ConfigurationImpl {
     return crypto::tink::util::OkStatus();
   }
 
-  static bool GetGlobalRegistryMode(const crypto::tink::Configuration& config) {
+  static bool IsInGlobalRegistryMode(
+      const crypto::tink::Configuration& config) {
     return config.global_registry_mode_;
   }
 };

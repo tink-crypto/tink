@@ -270,7 +270,7 @@ TEST(KeyGenConfigurationImplTest, GlobalRegistryMode) {
   Registry::Reset();
   KeyGenConfiguration config;
   ASSERT_THAT(KeyGenConfigurationImpl::SetGlobalRegistryMode(config), IsOk());
-  EXPECT_TRUE(KeyGenConfigurationImpl::GetGlobalRegistryMode(config));
+  EXPECT_TRUE(KeyGenConfigurationImpl::IsInGlobalRegistryMode(config));
 
   // Check that KeyGenConfigurationImpl functions return kFailedPrecondition.
   EXPECT_THAT(KeyGenConfigurationImpl::AddKeyTypeManager(
@@ -303,7 +303,7 @@ TEST(KeyGenConfigurationImplTest, GlobalRegistryModeWithNonEmptyConfigFails) {
               IsOk());
   EXPECT_THAT(KeyGenConfigurationImpl::SetGlobalRegistryMode(config),
               StatusIs(absl::StatusCode::kFailedPrecondition));
-  EXPECT_FALSE(KeyGenConfigurationImpl::GetGlobalRegistryMode(config));
+  EXPECT_FALSE(KeyGenConfigurationImpl::IsInGlobalRegistryMode(config));
 }
 
 }  // namespace

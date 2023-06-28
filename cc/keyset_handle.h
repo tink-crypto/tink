@@ -342,7 +342,7 @@ KeysetHandle::GetPrimitives(const KeyManager<P>* custom_manager) const {
 template <class P>
 crypto::tink::util::StatusOr<std::unique_ptr<P>> KeysetHandle::GetPrimitive(
     const Configuration& config) const {
-  if (crypto::tink::internal::ConfigurationImpl::GetGlobalRegistryMode(
+  if (crypto::tink::internal::ConfigurationImpl::IsInGlobalRegistryMode(
           config)) {
     return crypto::tink::internal::RegistryImpl::GlobalInstance().WrapKeyset<P>(
         keyset_, monitoring_annotations_);
