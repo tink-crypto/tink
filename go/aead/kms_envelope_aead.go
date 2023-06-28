@@ -17,7 +17,6 @@
 package aead
 
 import (
-	"bytes"
 	"encoding/binary"
 	"errors"
 	"fmt"
@@ -28,7 +27,8 @@ import (
 )
 
 const (
-	lenDEK = 4
+	lenDEK        = 4
+	maxUint32Size = 4294967295
 )
 
 // KMSEnvelopeAEAD represents an instance of Envelope AEAD.
@@ -104,8 +104,14 @@ func (a *KMSEnvelopeAEAD) Encrypt(pt, aad []byte) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	return buildCipherText(encryptedDEK, payload)
-
+	if len(encryptedDEK) > maxUint32Size {
+		return nil, errors.New("kms_envelope_aead: encrypted dek too large")
+	}
+	res := make([]byte, 0, lenDEK+len(encryptedDEK)+len(payload))
+	res = binary.BigEndian.AppendUint32(res, uint32(len(encryptedDEK)))
+	res = append(res, encryptedDEK...)
+	res = append(res, payload...)
+	return res, nil
 }
 
 // Decrypt implements the tink.AEAD interface for decryption.
@@ -150,18 +156,4 @@ func (a *KMSEnvelopeAEAD) Decrypt(ct, aad []byte) ([]byte, error) {
 
 	// Decrypt the payload.
 	return primitive.Decrypt(payload, aad)
-}
-
-// buildCipherText builds the cipher text by appending the length DEK, encrypted DEK
-// and the encrypted payload.
-func buildCipherText(encryptedDEK, payload []byte) ([]byte, error) {
-	// Write the length of the encrypted DEK.
-	lenDEKbuf := make([]byte, lenDEK)
-	binary.BigEndian.PutUint32(lenDEKbuf, uint32(len(encryptedDEK)))
-
-	var b bytes.Buffer
-	b.Write(lenDEKbuf) // never returns a non-nil error
-	b.Write(encryptedDEK)
-	b.Write(payload)
-	return b.Bytes(), nil
 }
