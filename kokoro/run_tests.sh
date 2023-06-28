@@ -72,11 +72,6 @@ run_java_tests() {
   ./kokoro/testutils/run_bazel_tests.sh "java_src" "${MANUAL_JAVA_TARGETS[@]}"
 }
 
-run_java_apps_tests() {
-  use_bazel "$(cat apps/.bazelversion)"
-  ./kokoro/testutils/run_bazel_tests.sh "apps"
-}
-
 run_cc_examples_tests() {
   use_bazel "$(cat cc/examples/.bazelversion)"
   ./kokoro/testutils/run_bazel_tests.sh "cc/examples"
@@ -139,7 +134,6 @@ run_all_tests() {
     run_go_tests
     run_py_tests
     run_tools_tests
-    run_java_apps_tests
   fi
   run_cc_examples_tests
   run_java_examples_tests
