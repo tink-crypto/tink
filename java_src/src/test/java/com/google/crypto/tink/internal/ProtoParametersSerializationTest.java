@@ -18,11 +18,13 @@ package com.google.crypto.tink.internal;
 
 import static com.google.common.truth.Truth.assertThat;
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static org.junit.Assert.assertThrows;
 
 import com.google.crypto.tink.proto.KeyTemplate;
 import com.google.crypto.tink.proto.OutputPrefixType;
 import com.google.crypto.tink.proto.TestProto;
 import com.google.crypto.tink.util.Bytes;
+import java.security.GeneralSecurityException;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -51,5 +53,28 @@ public final class ProtoParametersSerializationTest {
         .isEqualTo(OutputPrefixType.RAW);
     TestProto parsedProto = TestProto.parseFrom(serialization.getKeyTemplate().getValue());
     assertThat(parsedProto.getNum()).isEqualTo(13234);
+  }
+
+  @Test
+  public void testCreationFromTemplate_invalidTypeUrl_throws() throws Exception {
+    KeyTemplate template = KeyTemplate.newBuilder().setTypeUrl("some invalid typeurl").build();
+    assertThrows(TinkBugException.class, () -> ProtoParametersSerialization.create(template));
+  }
+
+  @Test
+  public void testCheckedCreationAndValues_basic() throws Exception {
+    KeyTemplate template = KeyTemplate.newBuilder().setTypeUrl("myTypeUrl").build();
+    ProtoParametersSerialization serialization =
+        ProtoParametersSerialization.checkedCreate(template);
+    assertThat(serialization.getKeyTemplate()).isEqualTo(template);
+    assertThat(serialization.getObjectIdentifier())
+        .isEqualTo(Bytes.copyFrom("myTypeUrl".getBytes(UTF_8)));
+  }
+
+  @Test
+  public void testCheckedCreationFromTemplate_invalidTypeUrl_throws() throws Exception {
+    KeyTemplate template = KeyTemplate.newBuilder().setTypeUrl("some invalid typeurl").build();
+    assertThrows(
+        GeneralSecurityException.class, () -> ProtoParametersSerialization.checkedCreate(template));
   }
 }

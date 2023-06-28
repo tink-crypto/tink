@@ -19,6 +19,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertThrows;
 
 import com.google.crypto.tink.util.Bytes;
+import java.security.GeneralSecurityException;
 import java.util.stream.IntStream;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -49,6 +50,23 @@ public final class UtilTest {
     assertThrows(TinkBugException.class, () -> Util.toBytesFromPrintableAscii(" "));
     assertThrows(TinkBugException.class, () -> Util.toBytesFromPrintableAscii("\0x7f"));
     assertThrows(TinkBugException.class, () -> Util.toBytesFromPrintableAscii("ö"));
+  }
+
+  @Test
+  public void checkedToBytesFromPrintableAscii_works() throws Exception {
+    String pureAsciiString =
+        "!\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~";
+    Bytes pureAsciiBytes = Bytes.copyFrom(pureAsciiString.getBytes("ASCII"));
+    assertThat(Util.checkedToBytesFromPrintableAscii(pureAsciiString)).isEqualTo(pureAsciiBytes);
+  }
+
+  @Test
+  public void checkedToBytesFromPrintableAscii_nonAscii_throws() throws Exception {
+    assertThrows(GeneralSecurityException.class, () -> Util.checkedToBytesFromPrintableAscii("\n"));
+    assertThrows(GeneralSecurityException.class, () -> Util.checkedToBytesFromPrintableAscii(" "));
+    assertThrows(
+        GeneralSecurityException.class, () -> Util.checkedToBytesFromPrintableAscii("\0x7f"));
+    assertThrows(GeneralSecurityException.class, () -> Util.checkedToBytesFromPrintableAscii("ö"));
   }
 
   @Test

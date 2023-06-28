@@ -143,4 +143,17 @@ public final class TinkProtoParametersFormatTest {
     assertThat(KeyTemplate.parseFrom(serialized, ExtensionRegistryLite.getEmptyRegistry()))
         .isEqualTo(template);
   }
+
+  @Test
+  public void testParseWithSpaceTypeUrl_throws() throws Exception {
+    KeyTemplate template =
+        KeyTemplate.newBuilder()
+            .setValue(ByteString.EMPTY)
+            .setOutputPrefixType(OutputPrefixType.TINK)
+            .setTypeUrl("SomeTypeUrlWhichHas OneSpace")
+            .build();
+    assertThrows(
+        GeneralSecurityException.class,
+        () -> TinkProtoParametersFormat.parse(template.toByteArray()));
+  }
 }

@@ -18,6 +18,7 @@ package com.google.crypto.tink.internal;
 
 import com.google.crypto.tink.util.Bytes;
 import java.nio.charset.Charset;
+import java.security.GeneralSecurityException;
 import java.security.SecureRandom;
 import java.util.Objects;
 import javax.annotation.Nullable;
@@ -51,18 +52,42 @@ public final class Util {
     return (byte) c;
   }
 
+  private static final byte checkedToByteFromPrintableAscii(char c)
+      throws GeneralSecurityException {
+    if (c < '!' || c > '~') {
+      throw new GeneralSecurityException("Not a printable ASCII character: " + c);
+    }
+    return (byte) c;
+  }
+
   /**
    * Converts a string {@code s} to a corresponding {@link Bytes} object.
    *
    * <p>The string must contain only printable ASCII characters; calling it in any other way is a
    * considered a bug in Tink. Spaces are not allowed.
    *
-   * @throws TinkBugException if s contains a character which is not a printable ASCII character.
+   * @throws TinkBugException if s contains a character which is not a printable ASCII character or
+   *     a space.
    */
   public static final Bytes toBytesFromPrintableAscii(String s) {
     byte[] result = new byte[s.length()];
     for (int i = 0; i < s.length(); ++i) {
       result[i] = toByteFromPrintableAscii(s.charAt(i));
+    }
+    return Bytes.copyFrom(result);
+  }
+
+  /**
+   * Converts a string {@code s} to a corresponding {@link Bytes} object.
+   *
+   * @throws GeneralSecurityException if s contains a character which is not a printable ASCII
+   *     character or a space.
+   */
+  public static final Bytes checkedToBytesFromPrintableAscii(String s)
+      throws GeneralSecurityException {
+    byte[] result = new byte[s.length()];
+    for (int i = 0; i < s.length(); ++i) {
+      result[i] = checkedToByteFromPrintableAscii(s.charAt(i));
     }
     return Bytes.copyFrom(result);
   }

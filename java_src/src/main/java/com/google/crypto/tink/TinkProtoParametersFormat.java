@@ -50,7 +50,7 @@ public final class TinkProtoParametersFormat {
       throw new GeneralSecurityException("Failed to parse proto", e);
     }
     return MutableSerializationRegistry.globalInstance()
-        .parseParametersWithLegacyFallback(ProtoParametersSerialization.create(t));
+        .parseParametersWithLegacyFallback(ProtoParametersSerialization.checkedCreate(t));
   }
 
   private TinkProtoParametersFormat() {}
