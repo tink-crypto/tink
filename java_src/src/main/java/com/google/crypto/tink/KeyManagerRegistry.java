@@ -19,9 +19,6 @@ package com.google.crypto.tink;
 import com.google.crypto.tink.config.internal.TinkFipsUtil;
 import com.google.crypto.tink.internal.KeyTypeManager;
 import com.google.crypto.tink.internal.PrivateKeyTypeManager;
-import com.google.crypto.tink.proto.KeyData;
-import com.google.protobuf.ByteString;
-import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.MessageLite;
 import java.security.GeneralSecurityException;
 import java.util.Collections;
@@ -29,6 +26,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.logging.Logger;
+import javax.annotation.Nullable;
 
 /**
  * An internal API to register KeyManagers and KeyTypeManagers.
@@ -89,22 +87,13 @@ final class KeyManagerRegistry {
      */
     Class<?> publicKeyManagerClassOrNull();
 
-    /**
-     * Parses a key into a corresponding message lite. Only works if the key type has been
-     * registered with a KeyTypeManager, returns null otherwise.
-     *
-     * <p>Can throw exceptions if validation fails or if parsing fails.
-     */
-    MessageLite parseKey(ByteString serializedKey)
-        throws GeneralSecurityException, InvalidProtocolBufferException;
   }
 
   private static <P> KeyManagerContainer createContainerFor(KeyManager<P> keyManager) {
     final KeyManager<P> localKeyManager = keyManager;
     return new KeyManagerContainer() {
       @Override
-      public <Q> KeyManager<Q> getKeyManager(Class<Q> primitiveClass)
-          throws GeneralSecurityException {
+      public <Q> KeyManager<Q> getKeyManager(Class<Q> primitiveClass) {
         if (!localKeyManager.getPrimitiveClass().equals(primitiveClass)) {
           throw new InternalError(
               "This should never be called, as we always first check supportedPrimitives.");
@@ -130,13 +119,8 @@ final class KeyManagerRegistry {
       }
 
       @Override
+      @Nullable
       public Class<?> publicKeyManagerClassOrNull() {
-        return null;
-      }
-
-      @Override
-      public MessageLite parseKey(ByteString serializedKey)
-          throws GeneralSecurityException, InvalidProtocolBufferException {
         return null;
       }
     };
@@ -173,16 +157,9 @@ final class KeyManagerRegistry {
       }
 
       @Override
+      @Nullable
       public Class<?> publicKeyManagerClassOrNull() {
         return null;
-      }
-
-      @Override
-      public MessageLite parseKey(ByteString serializedKey)
-          throws GeneralSecurityException, InvalidProtocolBufferException {
-        KeyProtoT result = localKeyManager.parseKey(serializedKey);
-        localKeyManager.validateKey(result);
-        return result;
       }
     };
   }
@@ -228,14 +205,6 @@ final class KeyManagerRegistry {
       public Class<?> publicKeyManagerClassOrNull() {
         return localPublicKeyManager.getClass();
       }
-
-      @Override
-      public MessageLite parseKey(ByteString serializedKey)
-          throws GeneralSecurityException, InvalidProtocolBufferException {
-        KeyProtoT result = localPrivateKeyManager.parseKey(serializedKey);
-        localPrivateKeyManager.validateKey(result);
-        return result;
-      }
     };
   }
 
@@ -247,7 +216,7 @@ final class KeyManagerRegistry {
     return keyManagerMap.get(typeUrl);
   }
 
-  private synchronized <P> void registerKeyManagerContainer(
+  private synchronized void registerKeyManagerContainer(
       final KeyManagerContainer containerToInsert, boolean forceOverwrite)
       throws GeneralSecurityException {
     String typeUrl = containerToInsert.getUntypedKeyManager().getKeyType();
@@ -403,18 +372,6 @@ final class KeyManagerRegistry {
   KeyManager<?> getUntypedKeyManager(String typeUrl) throws GeneralSecurityException {
     KeyManagerContainer container = getKeyManagerContainerOrThrow(typeUrl);
     return container.getUntypedKeyManager();
-  }
-
-  /**
-   * Parses the key in a keyData to the corresponding proto message, or returns null.
-   *
-   * <p>Parsing happens if the key type was registered with a KeyTypeManager. If a legacy KeyManager
-   * was used, this returns null.
-   */
-  MessageLite parseKeyData(KeyData keyData)
-      throws GeneralSecurityException, InvalidProtocolBufferException {
-    KeyManagerContainer container = getKeyManagerContainerOrThrow(keyData.getTypeUrl());
-    return container.parseKey(keyData.getValue());
   }
 
   boolean isEmpty() {

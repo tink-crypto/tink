@@ -277,43 +277,6 @@ public final class KeyManagerRegistryTest {
     assertThat(manager).isSameInstanceAs(registered);
   }
 
-  // The method "parseKeyData" only works if a KeyTypeManager was registered -- KeyManager objects
-  // do not support this.
-  @Test
-  public void testParseKeyData_keyTypeManager_works() throws Exception {
-    if (TinkFipsUtil.useOnlyFips()) {
-      assumeTrue(
-          "If FIPS is required, we can only register managers if the fips module is available",
-          TinkFipsUtil.fipsModuleAvailable());
-    }
-
-    KeyManagerRegistry registry = new KeyManagerRegistry();
-    registry.registerKeyManager(new TestKeyTypeManager("typeUrl"));
-    AesGcmKey key = AesGcmKey.newBuilder().setVersion(13).build();
-    KeyData keyData =
-        KeyData.newBuilder()
-            .setTypeUrl("typeUrl")
-            .setValue(key.toByteString())
-            .setKeyMaterialType(KeyMaterialType.SYMMETRIC)
-            .build();
-    assertThat(registry.parseKeyData(keyData)).isEqualTo(key);
-  }
-
-  @Test
-  public void testParseKeyData_keyManager_returnsNull() throws Exception {
-    assumeFalse("Unable to test KeyManagers in Fips mode", TinkFipsUtil.useOnlyFips());
-    KeyManagerRegistry registry = new KeyManagerRegistry();
-    registry.registerKeyManager(new TestKeyManager("typeUrl"));
-    AesGcmKey key = AesGcmKey.newBuilder().setVersion(13).build();
-    KeyData keyData =
-        KeyData.newBuilder()
-            .setTypeUrl("typeUrl")
-            .setValue(key.toByteString())
-            .setKeyMaterialType(KeyMaterialType.SYMMETRIC)
-            .build();
-    assertThat(registry.parseKeyData(keyData)).isNull();
-  }
-
   private static class TestPublicKeyTypeManager extends KeyTypeManager<Ed25519PublicKey> {
     private final String typeUrl;
 
