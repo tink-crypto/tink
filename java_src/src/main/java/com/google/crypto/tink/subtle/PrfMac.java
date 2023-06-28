@@ -21,11 +21,14 @@ import com.google.crypto.tink.InsecureSecretKeyAccess;
 import com.google.crypto.tink.Mac;
 import com.google.crypto.tink.mac.AesCmacKey;
 import com.google.crypto.tink.mac.AesCmacParameters.Variant;
+import com.google.crypto.tink.mac.HmacKey;
+import com.google.crypto.tink.mac.HmacParameters;
 import com.google.crypto.tink.prf.Prf;
 import com.google.errorprone.annotations.Immutable;
 import java.security.GeneralSecurityException;
 import java.security.InvalidAlgorithmParameterException;
 import java.util.Arrays;
+import javax.crypto.spec.SecretKeySpec;
 
 /**
  * Class that provides the functionality expressed by the Mac primitive using a Prf implementation.
@@ -78,7 +81,32 @@ public class PrfMac implements Mac {
     }
   }
 
+  private PrfMac(HmacKey key) throws GeneralSecurityException {
+    // The use of toString() in this code leverages the fact that the constructor will not work if
+    // the algorithm name is incorrect.
+    wrappedPrf =
+        new PrfHmacJce(
+            "HMAC" + key.getParameters().getHashType(),
+            new SecretKeySpec(
+                key.getKeyBytes().toByteArray(InsecureSecretKeyAccess.get()), "HMAC"));
+    // Due to the correctness checks during AesCmacKey creation, there is no need to perform
+    // additional tag size checks here.
+    tagSize = key.getParameters().getCryptographicTagSizeBytes();
+    outputPrefix = key.getOutputPrefix().toByteArray();
+    if (key.getParameters().getVariant().equals(HmacParameters.Variant.LEGACY)) {
+      plaintextLegacySuffix = Arrays.copyOf(FORMAT_VERSION, FORMAT_VERSION.length);
+    } else {
+      plaintextLegacySuffix = new byte[0];
+    }
+  }
+
+  /** Creates an object implementing the {@link Mac} interface using an AesCmac underneath. */
   public static Mac create(AesCmacKey key) throws GeneralSecurityException {
+    return new PrfMac(key);
+  }
+
+  /** Creates an object implementing the {@link Mac} interface using an Hmac underneath. */
+  public static Mac create(HmacKey key) throws GeneralSecurityException {
     return new PrfMac(key);
   }
 
