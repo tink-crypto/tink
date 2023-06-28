@@ -16,12 +16,15 @@
 
 package com.google.crypto.tink.hybrid;
 
+import static com.google.crypto.tink.internal.TinkBugException.exceptionIsBug;
+
 import com.google.crypto.tink.HybridDecrypt;
 import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.KeyTemplates;
 import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.aead.AesCtrHmacAeadKeyManager;
 import com.google.crypto.tink.aead.AesGcmKeyManager;
+import com.google.crypto.tink.internal.KeyTemplateProtoConverter;
 import com.google.crypto.tink.internal.KeyTypeManager;
 import com.google.crypto.tink.internal.PrimitiveFactory;
 import com.google.crypto.tink.internal.PrivateKeyTypeManager;
@@ -35,7 +38,6 @@ import com.google.crypto.tink.proto.EciesHkdfKemParams;
 import com.google.crypto.tink.proto.EllipticCurveType;
 import com.google.crypto.tink.proto.HashType;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
-import com.google.crypto.tink.proto.OutputPrefixType;
 import com.google.crypto.tink.subtle.EciesAeadHkdfDemHelper;
 import com.google.crypto.tink.subtle.EciesAeadHkdfHybridDecrypt;
 import com.google.crypto.tink.subtle.EllipticCurves;
@@ -415,11 +417,7 @@ public final class EciesAeadHkdfPrivateKeyManager
             .setHkdfSalt(ByteString.copyFrom(salt))
             .build();
     com.google.crypto.tink.proto.KeyTemplate protoKt =
-        com.google.crypto.tink.proto.KeyTemplate.newBuilder()
-            .setTypeUrl(demKeyTemplate.getTypeUrl())
-            .setValue(ByteString.copyFrom(demKeyTemplate.getValue()))
-            .setOutputPrefixType(toProto(demKeyTemplate.getOutputPrefixType()))
-            .build();
+        exceptionIsBug(() -> KeyTemplateProtoConverter.toProto(demKeyTemplate));
     EciesAeadDemParams demParams = EciesAeadDemParams.newBuilder().setAeadDem(protoKt).build();
     return EciesAeadHkdfParams.newBuilder()
         .setKemParams(kemParams)
@@ -428,17 +426,4 @@ public final class EciesAeadHkdfPrivateKeyManager
         .build();
   }
 
-  private static OutputPrefixType toProto(KeyTemplate.OutputPrefixType outputPrefixType) {
-    switch (outputPrefixType) {
-      case TINK:
-        return OutputPrefixType.TINK;
-      case LEGACY:
-        return OutputPrefixType.LEGACY;
-      case RAW:
-        return OutputPrefixType.RAW;
-      case CRUNCHY:
-        return OutputPrefixType.CRUNCHY;
-    }
-    throw new IllegalArgumentException("Unknown output prefix type");
-  }
 }
