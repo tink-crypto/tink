@@ -438,8 +438,8 @@ tink_cc_library(
   SRCS
     secret_data_internal.h
   DEPS
-    absl::strings
-    absl::base
+    absl::config
+    absl::core_headers
     crypto
 )
 

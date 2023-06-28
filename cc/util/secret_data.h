@@ -28,6 +28,17 @@
 namespace crypto {
 namespace tink {
 namespace util {
+namespace internal {
+
+template <typename T>
+struct SanitizingDeleter {
+  void operator()(T* ptr) {
+    ptr->~T();  // Invoke destructor. Must do this before sanitize.
+    SanitizingAllocator<T>().deallocate(ptr, 1);
+  }
+};
+
+}  // namespace internal
 
 // Stores secret (sensitive) data and makes sure it's marked as such and
 // destroyed in a safe way.
