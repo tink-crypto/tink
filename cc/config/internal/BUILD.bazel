@@ -8,7 +8,9 @@ cc_library(
     hdrs = ["global_registry.h"],
     include_prefix = "tink/config/internal",
     deps = [
+        "//:configuration",
         "//:key_gen_configuration",
+        "//internal:configuration_impl",
         "//internal:key_gen_configuration_impl",
         "@com_google_absl//absl/log:check",
     ],

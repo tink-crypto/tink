@@ -96,13 +96,23 @@ class FakeKeyTypeManager
       "type.googleapis.com/google.crypto.tink.AesGcmKey";
 };
 
+class FakePrimitiveWrapper
+    : public PrimitiveWrapper<FakePrimitive, FakePrimitive> {
+ public:
+  util::StatusOr<std::unique_ptr<FakePrimitive>> Wrap(
+      std::unique_ptr<PrimitiveSet<FakePrimitive>> primitive_set)
+      const override {
+    return absl::make_unique<FakePrimitive>(
+        primitive_set->get_primary()->get_primitive().get());
+  }
+};
+
 TEST(GlobalRegistryTest, KeyGenConfigGlobalRegistry) {
   Registry::Reset();
 
   KeyTemplate templ;
   templ.set_type_url("type.googleapis.com/google.crypto.tink.AesGcmKey");
   templ.set_output_prefix_type(OutputPrefixType::TINK);
-
   EXPECT_THAT(
       KeysetHandle::GenerateNew(templ, KeyGenConfigGlobalRegistry()).status(),
       StatusIs(absl::StatusCode::kNotFound));
@@ -111,9 +121,40 @@ TEST(GlobalRegistryTest, KeyGenConfigGlobalRegistry) {
       Registry::RegisterKeyTypeManager(absl::make_unique<FakeKeyTypeManager>(),
                                        /*new_key_allowed=*/true),
       IsOk());
+
   EXPECT_THAT(
       KeysetHandle::GenerateNew(templ, KeyGenConfigGlobalRegistry()).status(),
       IsOk());
+}
+
+TEST(GlobalRegistryTest, ConfigGlobalRegistry) {
+  Registry::Reset();
+  ASSERT_THAT(
+      Registry::RegisterKeyTypeManager(absl::make_unique<FakeKeyTypeManager>(),
+                                       /*new_key_allowed=*/true),
+      IsOk());
+
+  KeyTemplate templ;
+  templ.set_type_url("type.googleapis.com/google.crypto.tink.AesGcmKey");
+  templ.set_output_prefix_type(OutputPrefixType::TINK);
+  util::StatusOr<std::unique_ptr<KeysetHandle>> handle =
+      KeysetHandle::GenerateNew(templ, KeyGenConfigGlobalRegistry());
+  ASSERT_THAT(handle, IsOk());
+  EXPECT_THAT(
+      (*handle)->GetPrimitive<FakePrimitive>(ConfigGlobalRegistry()).status(),
+      StatusIs(absl::StatusCode::kNotFound));
+
+  Registry::Reset();
+  ASSERT_THAT(
+      Registry::RegisterKeyTypeManager(absl::make_unique<FakeKeyTypeManager>(),
+                                       /*new_key_allowed=*/true),
+      IsOk());
+  ASSERT_THAT(Registry::RegisterPrimitiveWrapper(
+                  absl::make_unique<FakePrimitiveWrapper>()),
+              IsOk());
+
+  EXPECT_THAT((*handle)->GetPrimitive<FakePrimitive>(ConfigGlobalRegistry()),
+              IsOk());
 }
 
 }  // namespace

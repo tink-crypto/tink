@@ -17,6 +17,7 @@
 #ifndef TINK_CONFIG_INTERNAL_GLOBAL_REGISTRY_H_
 #define TINK_CONFIG_INTERNAL_GLOBAL_REGISTRY_H_
 
+#include "tink/configuration.h"
 #include "tink/key_gen_configuration.h"
 
 namespace crypto {
@@ -25,6 +26,7 @@ namespace internal {
 
 // TODO(b/265705174): Move to public API after API review.
 // Used to generate keys using the global crypto::tink::Registry.
+const crypto::tink::Configuration& ConfigGlobalRegistry();
 const crypto::tink::KeyGenConfiguration& KeyGenConfigGlobalRegistry();
 
 }  // namespace internal

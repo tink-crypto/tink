@@ -7,7 +7,9 @@ tink_cc_library(
     global_registry.h
   DEPS
     absl::check
+    tink::core::configuration
     tink::core::key_gen_configuration
+    tink::internal::configuration_impl
     tink::internal::key_gen_configuration_impl
 )
 

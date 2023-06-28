@@ -17,12 +17,23 @@
 #include "tink/config/internal/global_registry.h"
 
 #include "absl/log/check.h"
+#include "tink/configuration.h"
+#include "tink/internal/configuration_impl.h"
 #include "tink/internal/key_gen_configuration_impl.h"
 #include "tink/key_gen_configuration.h"
 
 namespace crypto {
 namespace tink {
 namespace internal {
+
+const Configuration& ConfigGlobalRegistry() {
+  static const Configuration* instance = [] {
+    static Configuration* config = new Configuration();
+    CHECK_OK(ConfigurationImpl::SetGlobalRegistryMode(*config));
+    return config;
+  }();
+  return *instance;
+}
 
 const KeyGenConfiguration& KeyGenConfigGlobalRegistry() {
   static const KeyGenConfiguration* instance = [] {
