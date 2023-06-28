@@ -247,14 +247,6 @@ final class KeyManagerRegistry {
     return keyManagerMap.get(typeUrl);
   }
 
-  /** Helper method to check if an instance is not null; taken from guava's Precondition.java */
-  private static <T> T checkNotNull(T reference) {
-    if (reference == null) {
-      throw new NullPointerException();
-    }
-    return reference;
-  }
-
   private synchronized <P> void registerKeyManagerContainer(
       final KeyManagerContainer containerToInsert, boolean forceOverwrite)
       throws GeneralSecurityException {
@@ -392,17 +384,7 @@ final class KeyManagerRegistry {
    */
   <P> KeyManager<P> getKeyManager(String typeUrl, Class<P> primitiveClass)
       throws GeneralSecurityException {
-    return getKeyManagerInternal(typeUrl, checkNotNull(primitiveClass));
-  }
-
-  private <P> KeyManager<P> getKeyManagerInternal(String typeUrl, Class<P> primitiveClass)
-      throws GeneralSecurityException {
     KeyManagerContainer container = getKeyManagerContainerOrThrow(typeUrl);
-    if (primitiveClass == null) {
-      @SuppressWarnings("unchecked") // Only called from deprecated functions; unavoidable there.
-      KeyManager<P> result = (KeyManager<P>) container.getUntypedKeyManager();
-      return result;
-    }
     if (container.supportedPrimitives().contains(primitiveClass)) {
       return container.getKeyManager(primitiveClass);
     }
