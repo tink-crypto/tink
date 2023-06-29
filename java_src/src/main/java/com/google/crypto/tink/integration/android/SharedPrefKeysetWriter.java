@@ -29,7 +29,10 @@ import java.io.IOException;
  * A {@link KeysetWriter} that can write keysets to private shared preferences on Android.
  *
  * @since 1.0.0
+ * @deprecated We do not expect anyone to use this class. Please file an issue on
+ *     github.com/tink-crypto/tink-java/ if you need to replace this.
  */
+@Deprecated
 public final class SharedPrefKeysetWriter implements KeysetWriter {
   private final SharedPreferences.Editor editor;
   private final String keysetName;
