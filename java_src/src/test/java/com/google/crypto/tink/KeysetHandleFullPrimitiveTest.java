@@ -33,8 +33,6 @@ import com.google.crypto.tink.mac.AesCmacParameters.Variant;
 import com.google.crypto.tink.mac.MacConfig;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
 import com.google.crypto.tink.proto.OutputPrefixType;
-import com.google.crypto.tink.subtle.PrfAesCmac;
-import com.google.crypto.tink.subtle.PrfMac;
 import com.google.crypto.tink.util.Bytes;
 import com.google.crypto.tink.util.SecretBytes;
 import com.google.protobuf.ByteString;
@@ -68,9 +66,6 @@ public class KeysetHandleFullPrimitiveTest {
           KeysetHandleFullPrimitiveTest::parseTestKey,
           Bytes.copyFrom("testKeyForFullPrimitiveUrl".getBytes(UTF_8)),
           ProtoKeySerialization.class);
-  private static final PrimitiveConstructor<AesCmacKey, Mac> MAC_PRIMITIVE_CONSTRUCTOR =
-      PrimitiveConstructor.create(
-          KeysetHandleFullPrimitiveTest::createMacPrimitive, AesCmacKey.class, Mac.class);
 
   private static class SingleTestPrimitive {}
 
@@ -209,12 +204,6 @@ public class KeysetHandleFullPrimitiveTest {
     }
   }
 
-  private static Mac createMacPrimitive(AesCmacKey key) throws GeneralSecurityException {
-    return new PrfMac(
-        new PrfAesCmac(key.getAesKey().toByteArray(InsecureSecretKeyAccess.get())),
-        key.getParameters().getTotalTagSizeBytes());
-  }
-
   @Test
   public void getPrimitive_fullPrimitiveWithoutPrimitive_worksCorrectly() throws Exception {
     Registry.reset();
@@ -288,8 +277,6 @@ public class KeysetHandleFullPrimitiveTest {
   @Test
   public void getPrimitive_fullPrimitiveWithPrimitive_worksCorrectly() throws Exception {
     Registry.reset();
-    MutablePrimitiveRegistry.globalInstance()
-        .registerPrimitiveConstructor(MAC_PRIMITIVE_CONSTRUCTOR);
     MacTestWrapper.register();
     MacConfig.register();
     AesCmacParameters parameters =

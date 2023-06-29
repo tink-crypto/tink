@@ -67,6 +67,12 @@ public final class AesCmacKeyManager extends KeyTypeManager<AesCmacKey> {
               ChunkedAesCmacImpl::new,
               com.google.crypto.tink.mac.AesCmacKey.class,
               ChunkedMac.class);
+  private static final PrimitiveConstructor<com.google.crypto.tink.mac.AesCmacKey, Mac>
+      MAC_PRIMITIVE_CONSTRUCTOR =
+      PrimitiveConstructor.create(
+          PrfMac::create,
+          com.google.crypto.tink.mac.AesCmacKey.class,
+          Mac.class);
 
   @Override
   public String getKeyType() {
@@ -172,6 +178,8 @@ public final class AesCmacKeyManager extends KeyTypeManager<AesCmacKey> {
     AesCmacProtoSerialization.register();
     MutablePrimitiveRegistry.globalInstance()
         .registerPrimitiveConstructor(CHUNKED_MAC_PRIMITIVE_CONSTRUCTOR);
+    MutablePrimitiveRegistry.globalInstance()
+        .registerPrimitiveConstructor(MAC_PRIMITIVE_CONSTRUCTOR);
   }
 
   /**
