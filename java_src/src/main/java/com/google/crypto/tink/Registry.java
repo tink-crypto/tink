@@ -83,7 +83,7 @@ public final class Registry {
   private static final AtomicReference<KeyManagerRegistry> keyManagerRegistry =
       new AtomicReference<>(new KeyManagerRegistry());
 
-  private static final ConcurrentMap<String, KeyDeriverContainer> keyDeriverMap =
+  private static final ConcurrentMap<String, KeyDataDeriver> keyDeriverMap =
       new ConcurrentHashMap<>(); // typeUrl -> deriver (created out of KeyTypeManager).
 
   private static final ConcurrentMap<String, Boolean> newKeyAllowedMap =
@@ -95,14 +95,14 @@ public final class Registry {
   private static final ConcurrentMap<String, KeyTemplate> keyTemplateMap =
       new ConcurrentHashMap<>(); // name -> KeyTemplate mapping
 
-  private static interface KeyDeriverContainer {
-    KeyData deriveKey(ByteString serializedKeyFormat, InputStream stream)
+  private static interface KeyDataDeriver {
+    KeyData deriveKeyData(ByteString serializedKeyFormat, InputStream stream)
         throws GeneralSecurityException;
   }
 
-  private static <KeyProtoT extends MessageLite> KeyDeriverContainer createDeriverFor(
+  private static <KeyProtoT extends MessageLite> KeyDataDeriver createDeriverFor(
       final KeyTypeManager<KeyProtoT> keyManager) {
-    return new KeyDeriverContainer() {
+    return new KeyDataDeriver() {
       private <KeyFormatProtoT extends MessageLite> MessageLite deriveKeyWithFactory(
           ByteString serializedKeyFormat,
           InputStream stream,
@@ -119,7 +119,7 @@ public final class Registry {
       }
 
       @Override
-      public KeyData deriveKey(ByteString serializedKeyFormat, InputStream stream)
+      public KeyData deriveKeyData(ByteString serializedKeyFormat, InputStream stream)
           throws GeneralSecurityException {
         KeyTypeManager.KeyFactory<?, KeyProtoT> keyFactory = keyManager.keyFactory();
         MessageLite keyValue = deriveKeyWithFactory(serializedKeyFormat, stream, keyFactory);
@@ -604,8 +604,8 @@ public final class Registry {
       throw new GeneralSecurityException(
           "No keymanager registered or key manager cannot derive keys for " + typeUrl);
     }
-    KeyDeriverContainer deriver = keyDeriverMap.get(typeUrl);
-    return deriver.deriveKey(keyTemplate.getValue(), randomStream);
+    KeyDataDeriver deriver = keyDeriverMap.get(typeUrl);
+    return deriver.deriveKeyData(keyTemplate.getValue(), randomStream);
   }
 
   /**
