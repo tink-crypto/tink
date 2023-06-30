@@ -21,6 +21,7 @@ import static com.google.crypto.tink.internal.Util.toBytesFromPrintableAscii;
 import com.google.crypto.tink.AccessesPartialKey;
 import com.google.crypto.tink.SecretKeyAccess;
 import com.google.crypto.tink.internal.BigIntegerEncoding;
+import com.google.crypto.tink.internal.EnumTypeProtoConverter;
 import com.google.crypto.tink.internal.KeyParser;
 import com.google.crypto.tink.internal.KeySerializer;
 import com.google.crypto.tink.internal.MutableSerializationRegistry;
@@ -94,73 +95,27 @@ final class RsaSsaPkcs1ProtoSerialization {
           PRIVATE_TYPE_URL_BYTES,
           ProtoKeySerialization.class);
 
-  private static OutputPrefixType toProtoOutputPrefixType(RsaSsaPkcs1Parameters.Variant variant)
-      throws GeneralSecurityException {
-    if (RsaSsaPkcs1Parameters.Variant.TINK.equals(variant)) {
-      return OutputPrefixType.TINK;
-    }
-    if (RsaSsaPkcs1Parameters.Variant.CRUNCHY.equals(variant)) {
-      return OutputPrefixType.CRUNCHY;
-    }
-    if (RsaSsaPkcs1Parameters.Variant.NO_PREFIX.equals(variant)) {
-      return OutputPrefixType.RAW;
-    }
-    if (RsaSsaPkcs1Parameters.Variant.LEGACY.equals(variant)) {
-      return OutputPrefixType.LEGACY;
-    }
-    throw new GeneralSecurityException("Unable to serialize variant: " + variant);
-  }
+  private static final EnumTypeProtoConverter<OutputPrefixType, RsaSsaPkcs1Parameters.Variant>
+      VARIANT_CONVERTER =
+          EnumTypeProtoConverter.<OutputPrefixType, RsaSsaPkcs1Parameters.Variant>builder()
+              .add(OutputPrefixType.RAW, RsaSsaPkcs1Parameters.Variant.NO_PREFIX)
+              .add(OutputPrefixType.TINK, RsaSsaPkcs1Parameters.Variant.TINK)
+              .add(OutputPrefixType.CRUNCHY, RsaSsaPkcs1Parameters.Variant.CRUNCHY)
+              .add(OutputPrefixType.LEGACY, RsaSsaPkcs1Parameters.Variant.LEGACY)
+              .build();
 
-  private static HashType toProtoHashType(RsaSsaPkcs1Parameters.HashType hashType)
-      throws GeneralSecurityException {
-    if (RsaSsaPkcs1Parameters.HashType.SHA256.equals(hashType)) {
-      return HashType.SHA256;
-    }
-    if (RsaSsaPkcs1Parameters.HashType.SHA384.equals(hashType)) {
-      return HashType.SHA384;
-    }
-    if (RsaSsaPkcs1Parameters.HashType.SHA512.equals(hashType)) {
-      return HashType.SHA512;
-    }
-    throw new GeneralSecurityException("Unable to serialize HashType " + hashType);
-  }
-
-  private static RsaSsaPkcs1Parameters.HashType toHashType(HashType hashType)
-      throws GeneralSecurityException {
-    switch (hashType) {
-      case SHA256:
-        return RsaSsaPkcs1Parameters.HashType.SHA256;
-      case SHA384:
-        return RsaSsaPkcs1Parameters.HashType.SHA384;
-      case SHA512:
-        return RsaSsaPkcs1Parameters.HashType.SHA512;
-      default:
-        throw new GeneralSecurityException(
-            "Unable to parse HashType: " + hashType.getNumber());
-    }
-  }
-
-  private static RsaSsaPkcs1Parameters.Variant toVariant(OutputPrefixType outputPrefixType)
-      throws GeneralSecurityException {
-    switch (outputPrefixType) {
-      case TINK:
-        return RsaSsaPkcs1Parameters.Variant.TINK;
-      case CRUNCHY:
-        return RsaSsaPkcs1Parameters.Variant.CRUNCHY;
-      case LEGACY:
-        return RsaSsaPkcs1Parameters.Variant.LEGACY;
-      case RAW:
-        return RsaSsaPkcs1Parameters.Variant.NO_PREFIX;
-      default:
-        throw new GeneralSecurityException(
-            "Unable to parse OutputPrefixType: " + outputPrefixType.getNumber());
-    }
-  }
+  private static final EnumTypeProtoConverter<HashType, RsaSsaPkcs1Parameters.HashType>
+      HASH_TYPE_CONVERTER =
+          EnumTypeProtoConverter.<HashType, RsaSsaPkcs1Parameters.HashType>builder()
+              .add(HashType.SHA256, RsaSsaPkcs1Parameters.HashType.SHA256)
+              .add(HashType.SHA384, RsaSsaPkcs1Parameters.HashType.SHA384)
+              .add(HashType.SHA512, RsaSsaPkcs1Parameters.HashType.SHA512)
+              .build();
 
   private static com.google.crypto.tink.proto.RsaSsaPkcs1Params getProtoParams(
       RsaSsaPkcs1Parameters parameters) throws GeneralSecurityException {
     return com.google.crypto.tink.proto.RsaSsaPkcs1Params.newBuilder()
-        .setHashType(toProtoHashType(parameters.getHashType()))
+        .setHashType(HASH_TYPE_CONVERTER.toProtoEnum(parameters.getHashType()))
         .build();
   }
 
@@ -193,7 +148,7 @@ final class RsaSsaPkcs1ProtoSerialization {
                     .setPublicExponent(encodeBigInteger(parameters.getPublicExponent()))
                     .build()
                     .toByteString())
-            .setOutputPrefixType(toProtoOutputPrefixType(parameters.getVariant()))
+            .setOutputPrefixType(VARIANT_CONVERTER.toProtoEnum(parameters.getVariant()))
             .build());
   }
 
@@ -203,7 +158,7 @@ final class RsaSsaPkcs1ProtoSerialization {
         PUBLIC_TYPE_URL,
         getProtoPublicKey(key).toByteString(),
         KeyMaterialType.ASYMMETRIC_PUBLIC,
-        toProtoOutputPrefixType(key.getParameters().getVariant()),
+        VARIANT_CONVERTER.toProtoEnum(key.getParameters().getVariant()),
         key.getIdRequirementOrNull());
   }
 
@@ -229,7 +184,7 @@ final class RsaSsaPkcs1ProtoSerialization {
         PRIVATE_TYPE_URL,
         protoPrivateKey.toByteString(),
         KeyMaterialType.ASYMMETRIC_PRIVATE,
-        toProtoOutputPrefixType(key.getParameters().getVariant()),
+        VARIANT_CONVERTER.toProtoEnum(key.getParameters().getVariant()),
         key.getIdRequirementOrNull());
   }
 
@@ -253,10 +208,11 @@ final class RsaSsaPkcs1ProtoSerialization {
       throw new GeneralSecurityException("Parsing RsaSsaPkcs1Parameters failed: ", e);
     }
     return RsaSsaPkcs1Parameters.builder()
-        .setHashType(toHashType(format.getParams().getHashType()))
+        .setHashType(HASH_TYPE_CONVERTER.fromProtoEnum(format.getParams().getHashType()))
         .setPublicExponent(decodeBigInteger(format.getPublicExponent()))
         .setModulusSizeBits(format.getModulusSizeInBits())
-        .setVariant(toVariant(serialization.getKeyTemplate().getOutputPrefixType()))
+        .setVariant(
+            VARIANT_CONVERTER.fromProtoEnum(serialization.getKeyTemplate().getOutputPrefixType()))
         .build();
   }
 
@@ -280,10 +236,10 @@ final class RsaSsaPkcs1ProtoSerialization {
       int modulusSizeInBits = modulus.bitLength();
       RsaSsaPkcs1Parameters parameters =
           RsaSsaPkcs1Parameters.builder()
-              .setHashType(toHashType(protoKey.getParams().getHashType()))
+              .setHashType(HASH_TYPE_CONVERTER.fromProtoEnum(protoKey.getParams().getHashType()))
               .setPublicExponent(decodeBigInteger(protoKey.getE()))
               .setModulusSizeBits(modulusSizeInBits)
-              .setVariant(toVariant(serialization.getOutputPrefixType()))
+              .setVariant(VARIANT_CONVERTER.fromProtoEnum(serialization.getOutputPrefixType()))
               .build();
       return RsaSsaPkcs1PublicKey.builder()
           .setParameters(parameters)
@@ -323,10 +279,11 @@ final class RsaSsaPkcs1ProtoSerialization {
       BigInteger publicExponent = decodeBigInteger(protoPublicKey.getE());
       RsaSsaPkcs1Parameters parameters =
           RsaSsaPkcs1Parameters.builder()
-              .setHashType(toHashType(protoPublicKey.getParams().getHashType()))
+              .setHashType(
+                  HASH_TYPE_CONVERTER.fromProtoEnum(protoPublicKey.getParams().getHashType()))
               .setPublicExponent(publicExponent)
               .setModulusSizeBits(modulusSizeInBits)
-              .setVariant(toVariant(serialization.getOutputPrefixType()))
+              .setVariant(VARIANT_CONVERTER.fromProtoEnum(serialization.getOutputPrefixType()))
               .build();
       RsaSsaPkcs1PublicKey publicKey =
           RsaSsaPkcs1PublicKey.builder()
