@@ -1155,3 +1155,9 @@ tink_cc_test(
     tink::proto::aes_gcm_cc_proto
     tink::proto::rsa_ssa_pss_cc_proto
 )
+
+tink_cc_library(
+  NAME call_with_core_dump_protection
+  SRCS
+    call_with_core_dump_protection.h
+)

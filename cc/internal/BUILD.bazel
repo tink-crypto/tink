@@ -1208,3 +1208,8 @@ cc_test(
         "@com_google_googletest//:gtest_main",
     ],
 )
+
+cc_library(
+    name = "call_with_core_dump_protection",
+    hdrs = ["call_with_core_dump_protection.h"],
+)
