@@ -111,9 +111,12 @@ public final class KeysetManager {
    *     is not a {@link ProtoKey}.
    * @throws GeneralSecurityException if the {@link KeyHandle}'s key ID collides with another key ID
    *     in the keyset.
+   * @deprecated We recommend to use the {@code KeysetHandle.Builder} API.
    */
   @CanIgnoreReturnValue
-  public synchronized KeysetManager add(KeyHandle keyHandle) throws GeneralSecurityException {
+  @Deprecated
+  public synchronized KeysetManager add(KeyHandle keyHandle)
+      throws GeneralSecurityException {
     ProtoKey pkey;
     try {
       pkey = (ProtoKey) keyHandle.getKey(SecretKeyAccess.insecureSecretAccess());
@@ -144,8 +147,10 @@ public final class KeysetManager {
    *     key contained in the {@code KeyHandle}.
    * @throws UnsupportedOperationException if the {@code KeyHandle} contains a {@code TinkKey} which
    *     is not a {@code ProtoKey}.
+   * @deprecated We recommend to use the {@code KeysetHandle.Builder} API.
    */
   @CanIgnoreReturnValue
+  @Deprecated
   public synchronized KeysetManager add(KeyHandle keyHandle, KeyAccess access)
       throws GeneralSecurityException {
     return add(keyHandle);
