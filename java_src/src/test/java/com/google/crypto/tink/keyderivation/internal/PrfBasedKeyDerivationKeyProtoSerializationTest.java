@@ -14,7 +14,7 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-package com.google.crypto.tink.keyderivation;
+package com.google.crypto.tink.keyderivation.internal;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.crypto.tink.internal.TinkBugException.exceptionIsBug;
@@ -29,6 +29,8 @@ import com.google.crypto.tink.aead.XChaCha20Poly1305Parameters;
 import com.google.crypto.tink.internal.MutableSerializationRegistry;
 import com.google.crypto.tink.internal.ProtoKeySerialization;
 import com.google.crypto.tink.internal.ProtoParametersSerialization;
+import com.google.crypto.tink.keyderivation.PrfBasedKeyDerivationKey;
+import com.google.crypto.tink.keyderivation.PrfBasedKeyDerivationParameters;
 import com.google.crypto.tink.prf.AesCmacPrfKey;
 import com.google.crypto.tink.prf.AesCmacPrfParameters;
 import com.google.crypto.tink.prf.PrfConfig;

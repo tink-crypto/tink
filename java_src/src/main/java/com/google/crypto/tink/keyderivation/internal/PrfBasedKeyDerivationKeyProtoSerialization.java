@@ -14,7 +14,7 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-package com.google.crypto.tink.keyderivation;
+package com.google.crypto.tink.keyderivation.internal;
 
 import static com.google.crypto.tink.internal.Util.toBytesFromPrintableAscii;
 
@@ -30,6 +30,8 @@ import com.google.crypto.tink.internal.ParametersParser;
 import com.google.crypto.tink.internal.ParametersSerializer;
 import com.google.crypto.tink.internal.ProtoKeySerialization;
 import com.google.crypto.tink.internal.ProtoParametersSerialization;
+import com.google.crypto.tink.keyderivation.PrfBasedKeyDerivationKey;
+import com.google.crypto.tink.keyderivation.PrfBasedKeyDerivationParameters;
 import com.google.crypto.tink.prf.PrfKey;
 import com.google.crypto.tink.prf.PrfParameters;
 import com.google.crypto.tink.proto.KeyData;
