@@ -16,6 +16,7 @@
 package com.google.crypto.tink.jwt;
 
 import static com.google.common.truth.Truth.assertThat;
+import static com.google.crypto.tink.testing.KeyTypeManagerTestUtil.testKeyTemplateCompatible;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
@@ -339,29 +340,17 @@ public class JwtRsaSsaPkcs1SignKeyManagerTest {
 
   @Test
   public void testJwtRsa4096AlgoRS512F4TemplateWithManager_ok() throws Exception {
-    JwtRsaSsaPkcs1KeyFormat format =
-        JwtRsaSsaPkcs1KeyFormat.parseFrom(
-            KeyTemplates.get("JWT_RS512_4096_F4").getValue(),
-            ExtensionRegistryLite.getEmptyRegistry());
-    new JwtRsaSsaPkcs1SignKeyManager().keyFactory().validateKeyFormat(format);
+    testKeyTemplateCompatible(manager, KeyTemplates.get("JWT_RS512_4096_F4"));
   }
 
   @Test
   public void testJwtRsa3072AlgoRS384F4TemplateWithManager_ok() throws Exception {
-    JwtRsaSsaPkcs1KeyFormat format =
-        JwtRsaSsaPkcs1KeyFormat.parseFrom(
-            KeyTemplates.get("JWT_RS384_3072_F4").getValue(),
-            ExtensionRegistryLite.getEmptyRegistry());
-    new JwtRsaSsaPkcs1SignKeyManager().keyFactory().validateKeyFormat(format);
+    testKeyTemplateCompatible(manager, KeyTemplates.get("JWT_RS384_3072_F4"));
   }
 
   @Test
   public void testJwtRsa3072AlgoRS256F4TemplateWithManager_ok() throws Exception {
-    JwtRsaSsaPkcs1KeyFormat format =
-        JwtRsaSsaPkcs1KeyFormat.parseFrom(
-            KeyTemplates.get("JWT_RS256_3072_F4").getValue(),
-            ExtensionRegistryLite.getEmptyRegistry());
-    new JwtRsaSsaPkcs1SignKeyManager().keyFactory().validateKeyFormat(format);
+    testKeyTemplateCompatible(manager, KeyTemplates.get("JWT_RS256_3072_F4"));
   }
 
   // Note: we use Theory as a parametrized test -- different from what the Theory framework intends.
