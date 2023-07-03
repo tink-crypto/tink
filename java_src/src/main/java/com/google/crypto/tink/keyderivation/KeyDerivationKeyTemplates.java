@@ -18,11 +18,10 @@ package com.google.crypto.tink.keyderivation;
 
 import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.KeysetHandle;
+import com.google.crypto.tink.internal.KeyTemplateProtoConverter;
 import com.google.crypto.tink.keyderivation.internal.PrfBasedDeriverKeyManager;
-import com.google.crypto.tink.proto.OutputPrefixType;
 import com.google.crypto.tink.proto.PrfBasedDeriverKeyFormat;
 import com.google.crypto.tink.proto.PrfBasedDeriverParams;
-import com.google.protobuf.ByteString;
 import java.security.GeneralSecurityException;
 
 /**
@@ -95,27 +94,8 @@ public final class KeyDerivationKeyTemplates {
   }
 
   private static com.google.crypto.tink.proto.KeyTemplate toKeyTemplateProto(
-      KeyTemplate keyTemplate) {
-    return com.google.crypto.tink.proto.KeyTemplate.newBuilder()
-        .setTypeUrl(keyTemplate.getTypeUrl())
-        .setValue(ByteString.copyFrom(keyTemplate.getValue()))
-        .setOutputPrefixType(toOutputPrefixProto(keyTemplate.getOutputPrefixType()))
-        .build();
-  }
-
-  private static OutputPrefixType toOutputPrefixProto(
-      KeyTemplate.OutputPrefixType outputPrefixType) {
-    switch (outputPrefixType) {
-      case TINK:
-        return OutputPrefixType.TINK;
-      case LEGACY:
-        return OutputPrefixType.LEGACY;
-      case RAW:
-        return OutputPrefixType.RAW;
-      case CRUNCHY:
-        return OutputPrefixType.CRUNCHY;
-    }
-    throw new IllegalArgumentException("Unknown output prefix type");
+      KeyTemplate keyTemplate) throws GeneralSecurityException {
+    return KeyTemplateProtoConverter.toProto(keyTemplate);
   }
 
   private KeyDerivationKeyTemplates() {}

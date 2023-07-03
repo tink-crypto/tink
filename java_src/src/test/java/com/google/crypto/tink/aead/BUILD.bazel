@@ -102,6 +102,7 @@ java_test(
         "//src/main/java/com/google/crypto/tink/aead:aes_ctr_hmac_aead_key_manager",
         "//src/main/java/com/google/crypto/tink/aead:aes_gcm_key_manager",
         "//src/main/java/com/google/crypto/tink/aead:kms_envelope_aead_key_manager",
+        "//src/main/java/com/google/crypto/tink/internal:key_template_proto_converter",
         "//src/main/java/com/google/crypto/tink/internal:key_type_manager",
         "//src/main/java/com/google/crypto/tink/mac:hmac_key_manager",
         "//src/main/java/com/google/crypto/tink/subtle:random",
@@ -196,6 +197,7 @@ java_test(
     srcs = ["KmsAeadKeyManagerTest.java"],
     deps = [
         "//proto:kms_aead_java_proto",
+        "//proto:tink_java_proto",
         "//src/main/java/com/google/crypto/tink:aead",
         "//src/main/java/com/google/crypto/tink:key_template",
         "//src/main/java/com/google/crypto/tink:kms_clients",
@@ -203,6 +205,7 @@ java_test(
         "//src/main/java/com/google/crypto/tink/aead:aead_config",
         "//src/main/java/com/google/crypto/tink/aead:aead_key_templates",
         "//src/main/java/com/google/crypto/tink/aead:kms_aead_key_manager",
+        "//src/main/java/com/google/crypto/tink/internal:key_template_proto_converter",
         "//src/main/java/com/google/crypto/tink/subtle:random",
         "//src/main/java/com/google/crypto/tink/testing:fake_kms_client",
         "//src/main/java/com/google/crypto/tink/testing:test_util",

@@ -23,8 +23,8 @@ java_library(
         "//proto:tink_java_proto",
         "//src/main/java/com/google/crypto/tink:key_template",
         "//src/main/java/com/google/crypto/tink:registry_cluster",
+        "//src/main/java/com/google/crypto/tink/internal:key_template_proto_converter",
         "//src/main/java/com/google/crypto/tink/keyderivation/internal:prf_based_deriver_key_manager",
-        "@maven//:com_google_protobuf_protobuf_java",
     ],
 )
 
@@ -73,8 +73,8 @@ android_library(
         "//proto:tink_java_proto_lite",
         "//src/main/java/com/google/crypto/tink:key_template-android",
         "//src/main/java/com/google/crypto/tink:registry_cluster-android",
+        "//src/main/java/com/google/crypto/tink/internal:key_template_proto_converter-android",
         "//src/main/java/com/google/crypto/tink/keyderivation/internal:prf_based_deriver_key_manager-android",
-        "@maven//:com_google_protobuf_protobuf_javalite",
     ],
 )
 

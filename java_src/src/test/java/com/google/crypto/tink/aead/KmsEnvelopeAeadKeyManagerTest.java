@@ -24,6 +24,7 @@ import com.google.crypto.tink.Aead;
 import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.KmsClients;
+import com.google.crypto.tink.internal.KeyTemplateProtoConverter;
 import com.google.crypto.tink.internal.KeyTypeManager;
 import com.google.crypto.tink.mac.HmacKeyManager;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
@@ -213,16 +214,23 @@ public class KmsEnvelopeAeadKeyManagerTest {
     // to test that the function correctly puts them in the resulting template.
     String kekUri = "some example KEK URI";
     KeyTemplate dekTemplate = AesCtrHmacAeadKeyManager.aes128CtrHmacSha256Template();
+    com.google.crypto.tink.proto.KeyTemplate dekTemplateProto =
+        KeyTemplateProtoConverter.toProto(dekTemplate);
+
     KeyTemplate template = KmsEnvelopeAeadKeyManager.createKeyTemplate(kekUri, dekTemplate);
+
+    com.google.crypto.tink.proto.KeyTemplate protoTemplate =
+        KeyTemplateProtoConverter.toProto(template);
     assertThat(new KmsEnvelopeAeadKeyManager().getKeyType()).isEqualTo(template.getTypeUrl());
-    assertThat(KeyTemplate.OutputPrefixType.RAW).isEqualTo(template.getOutputPrefixType());
+    assertThat(com.google.crypto.tink.proto.OutputPrefixType.RAW)
+        .isEqualTo(protoTemplate.getOutputPrefixType());
 
     KmsEnvelopeAeadKeyFormat format =
         KmsEnvelopeAeadKeyFormat.parseFrom(
             template.getValue(), ExtensionRegistryLite.getEmptyRegistry());
     assertThat(kekUri).isEqualTo(format.getKekUri());
-    assertThat(dekTemplate.getTypeUrl()).isEqualTo(format.getDekTemplate().getTypeUrl());
-    assertThat(dekTemplate.getValue()).isEqualTo(format.getDekTemplate().getValue().toByteArray());
+    assertThat(dekTemplateProto.getTypeUrl()).isEqualTo(format.getDekTemplate().getTypeUrl());
+    assertThat(dekTemplateProto.getValue()).isEqualTo(format.getDekTemplate().getValue());
   }
 
   @Test
