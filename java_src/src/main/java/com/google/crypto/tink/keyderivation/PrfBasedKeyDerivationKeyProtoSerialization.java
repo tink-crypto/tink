@@ -18,20 +18,32 @@ package com.google.crypto.tink.keyderivation;
 
 import static com.google.crypto.tink.internal.Util.toBytesFromPrintableAscii;
 
+import com.google.crypto.tink.AccessesPartialKey;
+import com.google.crypto.tink.Key;
 import com.google.crypto.tink.Parameters;
+import com.google.crypto.tink.SecretKeyAccess;
 import com.google.crypto.tink.TinkProtoParametersFormat;
+import com.google.crypto.tink.internal.KeyParser;
+import com.google.crypto.tink.internal.KeySerializer;
 import com.google.crypto.tink.internal.MutableSerializationRegistry;
 import com.google.crypto.tink.internal.ParametersParser;
 import com.google.crypto.tink.internal.ParametersSerializer;
+import com.google.crypto.tink.internal.ProtoKeySerialization;
 import com.google.crypto.tink.internal.ProtoParametersSerialization;
+import com.google.crypto.tink.prf.PrfKey;
 import com.google.crypto.tink.prf.PrfParameters;
+import com.google.crypto.tink.proto.KeyData;
+import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
 import com.google.crypto.tink.proto.KeyTemplate;
+import com.google.crypto.tink.proto.OutputPrefixType;
+import com.google.crypto.tink.proto.PrfBasedDeriverKey;
 import com.google.crypto.tink.proto.PrfBasedDeriverKeyFormat;
 import com.google.crypto.tink.proto.PrfBasedDeriverParams;
 import com.google.crypto.tink.util.Bytes;
 import com.google.protobuf.ExtensionRegistryLite;
 import com.google.protobuf.InvalidProtocolBufferException;
 import java.security.GeneralSecurityException;
+import javax.annotation.Nullable;
 
 /**
  * Methods to serialize and parse {@link PrfBasedKeyDerivationKey} and {@link
@@ -55,6 +67,19 @@ final class PrfBasedKeyDerivationKeyProtoSerialization {
           PrfBasedKeyDerivationKeyProtoSerialization::parseParameters,
           TYPE_URL_BYTES,
           ProtoParametersSerialization.class);
+
+  private static final KeySerializer<PrfBasedKeyDerivationKey, ProtoKeySerialization>
+      KEY_SERIALIZER =
+          KeySerializer.create(
+              PrfBasedKeyDerivationKeyProtoSerialization::serializeKey,
+              PrfBasedKeyDerivationKey.class,
+              ProtoKeySerialization.class);
+
+  private static final KeyParser<ProtoKeySerialization> KEY_PARSER =
+      KeyParser.create(
+          PrfBasedKeyDerivationKeyProtoSerialization::parseKey,
+          TYPE_URL_BYTES,
+          ProtoKeySerialization.class);
 
   private static PrfBasedKeyDerivationParameters parseParameters(
       ProtoParametersSerialization serialization) throws GeneralSecurityException {
@@ -121,6 +146,88 @@ final class PrfBasedKeyDerivationKeyProtoSerialization {
     }
   }
 
+  @AccessesPartialKey
+  private static ProtoKeySerialization serializeKey(
+      PrfBasedKeyDerivationKey key, @Nullable SecretKeyAccess access)
+      throws GeneralSecurityException {
+    ProtoKeySerialization prfKeySerialization =
+        MutableSerializationRegistry.globalInstance()
+            .serializeKey(key.getPrfKey(), ProtoKeySerialization.class, access);
+    ProtoParametersSerialization derivedKeyParametersSerialization =
+        MutableSerializationRegistry.globalInstance()
+            .serializeParameters(
+                key.getParameters().getDerivedKeyParameters(), ProtoParametersSerialization.class);
+    return ProtoKeySerialization.create(
+        TYPE_URL,
+        PrfBasedDeriverKey.newBuilder()
+            .setPrfKey(
+                KeyData.newBuilder()
+                    .setValue(prfKeySerialization.getValue())
+                    .setTypeUrl(prfKeySerialization.getTypeUrl())
+                    .setKeyMaterialType(prfKeySerialization.getKeyMaterialType()))
+            .setParams(
+                PrfBasedDeriverParams.newBuilder()
+                    .setDerivedKeyTemplate(derivedKeyParametersSerialization.getKeyTemplate()))
+            .build()
+            .toByteString(),
+        KeyMaterialType.SYMMETRIC,
+        derivedKeyParametersSerialization.getKeyTemplate().getOutputPrefixType(),
+        key.getIdRequirementOrNull());
+  }
+
+  @AccessesPartialKey
+  @SuppressWarnings("UnusedException")
+  private static PrfBasedKeyDerivationKey parseKey(
+      ProtoKeySerialization serialization, @Nullable SecretKeyAccess access)
+      throws GeneralSecurityException {
+    if (!serialization.getTypeUrl().equals(TYPE_URL)) {
+      throw new IllegalArgumentException(
+          "Wrong type URL in call to PrfBasedKeyDerivationKey.parseKey");
+    }
+    try {
+      PrfBasedDeriverKey protoKey =
+          PrfBasedDeriverKey.parseFrom(
+              serialization.getValue(), ExtensionRegistryLite.getEmptyRegistry());
+      ProtoKeySerialization prfKeySerialization =
+          ProtoKeySerialization.create(
+              protoKey.getPrfKey().getTypeUrl(),
+              protoKey.getPrfKey().getValue(),
+              protoKey.getPrfKey().getKeyMaterialType(),
+              OutputPrefixType.RAW,
+              /* idRequirement= */ null);
+      Key prfKeyUncast =
+          MutableSerializationRegistry.globalInstance().parseKey(prfKeySerialization, access);
+      if (!(prfKeyUncast instanceof PrfKey)) {
+        throw new GeneralSecurityException("Non-PRF key stored in the field prf_key");
+      }
+      PrfKey prfKey = (PrfKey) prfKeyUncast;
+      ProtoParametersSerialization derivedKeyParametersSerialization =
+          ProtoParametersSerialization.checkedCreate(protoKey.getParams().getDerivedKeyTemplate());
+      Parameters derivedKeyParameters =
+          MutableSerializationRegistry.globalInstance()
+              .parseParameters(derivedKeyParametersSerialization);
+      PrfBasedKeyDerivationParameters parameters =
+          PrfBasedKeyDerivationParameters.builder()
+              .setDerivedKeyParameters(derivedKeyParameters)
+              .setPrfParameters(prfKey.getParameters())
+              .build();
+
+      if (serialization.getOutputPrefixType()
+          != derivedKeyParametersSerialization.getKeyTemplate().getOutputPrefixType()) {
+        throw new GeneralSecurityException(
+            "Output-Prefix mismatch in parameters while parsing PrfBasedKeyDerivationKey with"
+                + " parameters "
+                + parameters);
+      }
+
+      return PrfBasedKeyDerivationKey.create(
+          parameters, prfKey, serialization.getIdRequirementOrNull());
+    } catch (InvalidProtocolBufferException e) {
+      // Suppressing Exception to prevent leakage of key material
+      throw new GeneralSecurityException("Parsing HmacKey failed");
+    }
+  }
+
   public static void register() throws GeneralSecurityException {
     register(MutableSerializationRegistry.globalInstance());
   }
@@ -129,6 +236,8 @@ final class PrfBasedKeyDerivationKeyProtoSerialization {
       throws GeneralSecurityException {
     registry.registerParametersSerializer(PARAMETERS_SERIALIZER);
     registry.registerParametersParser(PARAMETERS_PARSER);
+    registry.registerKeySerializer(KEY_SERIALIZER);
+    registry.registerKeyParser(KEY_PARSER);
   }
 
   private PrfBasedKeyDerivationKeyProtoSerialization() {}
