@@ -25,6 +25,7 @@ import com.google.crypto.tink.CleartextKeysetHandle;
 import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.KeyTemplates;
 import com.google.crypto.tink.KeysetHandle;
+import com.google.crypto.tink.internal.KeyTemplateProtoConverter;
 import com.google.crypto.tink.internal.KeyTypeManager;
 import com.google.crypto.tink.proto.JwtRsaSsaPkcs1Algorithm;
 import com.google.crypto.tink.proto.JwtRsaSsaPkcs1KeyFormat;
@@ -270,8 +271,14 @@ public class JwtRsaSsaPkcs1SignKeyManagerTest {
   }
 
   private static void checkTemplate(
-      KeyTemplate template, JwtRsaSsaPkcs1Algorithm algorithm, int moduloSize, int publicExponent)
+      KeyTemplate javaTemplate,
+      JwtRsaSsaPkcs1Algorithm algorithm,
+      int moduloSize,
+      int publicExponent)
       throws Exception {
+    com.google.crypto.tink.proto.KeyTemplate template =
+        KeyTemplateProtoConverter.toProto(javaTemplate);
+
     assertThat(template.getTypeUrl()).isEqualTo(new JwtRsaSsaPkcs1SignKeyManager().getKeyType());
     JwtRsaSsaPkcs1KeyFormat format =
         JwtRsaSsaPkcs1KeyFormat.parseFrom(
