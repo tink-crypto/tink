@@ -140,6 +140,7 @@ py_test(
         "//tink/core",
         "//tink/mac",
         "//tink/proto:aes_gcm_py_pb2",
+        "//tink/testing:fake_kms",
     ],
 )
 

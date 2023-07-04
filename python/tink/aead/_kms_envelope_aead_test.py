@@ -23,6 +23,7 @@ import tink
 from tink import aead
 from tink import core
 from tink import mac
+from tink.testing import fake_kms
 
 
 def setUpModule():
@@ -30,6 +31,10 @@ def setUpModule():
 
 
 class KmsEnvelopeAeadTest(parameterized.TestCase):
+
+  def remote_aead(self):
+    keyset_handle = tink.new_keyset_handle(aead.aead_key_templates.AES256_GCM)
+    return keyset_handle.primitive(aead.Aead)
 
   @parameterized.parameters([
       aead.aead_key_templates.AES128_EAX,
@@ -43,9 +48,7 @@ class KmsEnvelopeAeadTest(parameterized.TestCase):
       aead.aead_key_templates.XCHACHA20_POLY1305,
   ])
   def test_encrypt_decrypt(self, dek_template):
-    keyset_handle = tink.new_keyset_handle(dek_template)
-    remote_aead = keyset_handle.primitive(aead.Aead)
-    env_aead = aead.KmsEnvelopeAead(dek_template, remote_aead)
+    env_aead = aead.KmsEnvelopeAead(dek_template, self.remote_aead())
 
     plaintext = b'plaintext'
     associated_data = b'associated_data'
@@ -57,9 +60,7 @@ class KmsEnvelopeAeadTest(parameterized.TestCase):
 
   def test_encrypt_decrypt_missing_ad(self):
     key_template = aead.aead_key_templates.AES256_GCM
-    keyset_handle = tink.new_keyset_handle(key_template)
-    remote_aead = keyset_handle.primitive(aead.Aead)
-    env_aead = aead.KmsEnvelopeAead(key_template, remote_aead)
+    env_aead = aead.KmsEnvelopeAead(key_template, self.remote_aead())
 
     plaintext = b'helloworld'
     ciphertext = env_aead.encrypt(plaintext, b'envelope_ad')
@@ -67,19 +68,15 @@ class KmsEnvelopeAeadTest(parameterized.TestCase):
       _ = env_aead.decrypt(ciphertext, b'')
 
   def test_invalid_dek_template_fails(self):
-    key_template = aead.aead_key_templates.AES256_GCM
-    keyset_handle = tink.new_keyset_handle(key_template)
-    remote_aead = keyset_handle.primitive(aead.Aead)
-
+    remote_aead = self.remote_aead()
     with self.assertRaises(tink.TinkError):
       aead.KmsEnvelopeAead(
-          mac.mac_key_templates.HMAC_SHA256_128BITTAG, remote_aead)
+          mac.mac_key_templates.HMAC_SHA256_128BITTAG, remote_aead
+      )
 
   def test_corrupted_ciphertext(self):
-    key_template = aead.aead_key_templates.AES256_GCM
-    keyset_handle = tink.new_keyset_handle(key_template)
-    remote_aead = keyset_handle.primitive(aead.Aead)
-    env_aead = aead.KmsEnvelopeAead(key_template, remote_aead)
+    dek_template = aead.aead_key_templates.AES256_GCM
+    env_aead = aead.KmsEnvelopeAead(dek_template, self.remote_aead())
 
     plaintext = b'helloworld'
     ciphertext = bytearray(env_aead.encrypt(plaintext, b'some ad'))
@@ -90,10 +87,8 @@ class KmsEnvelopeAeadTest(parameterized.TestCase):
       _ = env_aead.decrypt(corrupted_ciphertext, b'some ad')
 
   def test_corrupted_dek(self):
-    key_template = aead.aead_key_templates.AES256_GCM
-    keyset_handle = tink.new_keyset_handle(key_template)
-    remote_aead = keyset_handle.primitive(aead.Aead)
-    env_aead = aead.KmsEnvelopeAead(key_template, remote_aead)
+    dek_template = aead.aead_key_templates.AES256_GCM
+    env_aead = aead.KmsEnvelopeAead(dek_template, self.remote_aead())
 
     plaintext = b'helloworld'
     ciphertext = bytearray(env_aead.encrypt(plaintext, b'some ad'))
@@ -104,19 +99,15 @@ class KmsEnvelopeAeadTest(parameterized.TestCase):
       _ = env_aead.decrypt(corrupted_ciphertext, b'some ad')
 
   def test_ciphertext_too_short(self):
-    key_template = aead.aead_key_templates.AES256_GCM
-    keyset_handle = tink.new_keyset_handle(key_template)
-    remote_aead = keyset_handle.primitive(aead.Aead)
-    env_aead = aead.KmsEnvelopeAead(key_template, remote_aead)
+    dek_template = aead.aead_key_templates.AES256_GCM
+    env_aead = aead.KmsEnvelopeAead(dek_template, self.remote_aead())
 
     with self.assertRaises(core.TinkError):
       _ = env_aead.decrypt(b'foo', b'some ad')
 
   def test_malformed_dek_length(self):
-    key_template = aead.aead_key_templates.AES256_GCM
-    keyset_handle = tink.new_keyset_handle(key_template)
-    remote_aead = keyset_handle.primitive(aead.Aead)
-    env_aead = aead.KmsEnvelopeAead(key_template, remote_aead)
+    dek_template = aead.aead_key_templates.AES256_GCM
+    env_aead = aead.KmsEnvelopeAead(dek_template, self.remote_aead())
 
     plaintext = b'helloworld'
     ciphertext = bytearray(env_aead.encrypt(plaintext, b'some ad'))
@@ -133,10 +124,9 @@ class KmsEnvelopeAeadTest(parameterized.TestCase):
       _ = env_aead.decrypt(corrupted_ciphertext, b'some ad')
 
   def test_ciphertext_wire_format(self):
-    key_template = aead.aead_key_templates.AES256_GCM
-    keyset_handle = tink.new_keyset_handle(key_template)
-    remote_aead = keyset_handle.primitive(aead.Aead)
-    env_aead = aead.KmsEnvelopeAead(key_template, remote_aead)
+    dek_template = aead.aead_key_templates.AES256_GCM
+    remote_aead = self.remote_aead()
+    env_aead = aead.KmsEnvelopeAead(dek_template, remote_aead)
 
     plaintext = b'helloworld'
     ciphertext = bytearray(env_aead.encrypt(plaintext, b'some ad'))
@@ -153,6 +143,33 @@ class KmsEnvelopeAeadTest(parameterized.TestCase):
     # Try to deserialize key
     key = aes_gcm_pb2.AesGcmKey.FromString(dek_bytes)
     self.assertLen(key.key_value, 32)
+
+  def test_compatible_with_kms_envelope_aead_key(self):
+    kms_uri = 'fake-kms://CM2b3_MDElQKSAowdHlwZS5nb29nbGVhcGlzLmNvbS9nb29nbGUuY3J5cHRvLnRpbmsuQWVzR2NtS2V5EhIaEIK75t5L-adlUwVhWvRuWUwYARABGM2b3_MDIAE'
+    dek_template = aead.aead_key_templates.AES256_GCM
+
+    # Register kmsClient, and use create_kms_envelope_aead_key_template,
+    # tink.new_keyset_handle and keyset_handle.primitive to create an Aead.
+    fake_kms.register_client(key_uri=kms_uri)
+    template = aead.aead_key_templates.create_kms_envelope_aead_key_template(
+        kek_uri=kms_uri, dek_template=dek_template
+    )
+    keyset_handle = tink.new_keyset_handle(template)
+    aead1 = keyset_handle.primitive(aead.Aead)
+
+    # Get Aead from the kms_client, and directly create the envelope AEAD
+    # without the registry.
+    kms_client = fake_kms.FakeKmsClient()
+    remote_aead = kms_client.get_aead(kms_uri)
+    aead2 = aead.KmsEnvelopeAead(dek_template, remote_aead)
+
+    plaintext = b'plaintext'
+    associated_data = b'associated_data'
+    ciphertext1 = aead1.encrypt(plaintext, associated_data)
+    self.assertEqual(aead2.decrypt(ciphertext1, associated_data), plaintext)
+
+    ciphertext2 = aead2.encrypt(plaintext, associated_data)
+    self.assertEqual(aead1.decrypt(ciphertext2, associated_data), plaintext)
 
 
 if __name__ == '__main__':
