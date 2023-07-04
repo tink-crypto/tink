@@ -350,11 +350,7 @@ public final class AndroidKeysetManager {
       int keyId = manager.getKeysetHandle().getKeysetInfo().getKeyInfo(0).getKeyId();
       manager = manager.setPrimary(keyId);
       KeysetWriter writer = new SharedPrefKeysetWriter(context, keysetName, prefFileName);
-      if (masterAead != null) {
-        manager.getKeysetHandle().write(writer, masterAead);
-      } else {
-        CleartextKeysetHandle.write(manager.getKeysetHandle(), writer);
-      }
+      write(manager.getKeysetHandle(), writer, masterAead);
       return manager;
     }
 
@@ -421,7 +417,7 @@ public final class AndroidKeysetManager {
   public synchronized AndroidKeysetManager rotate(
       com.google.crypto.tink.proto.KeyTemplate keyTemplate) throws GeneralSecurityException {
     keysetManager = keysetManager.rotate(keyTemplate);
-    write(keysetManager);
+    write(keysetManager.getKeysetHandle(), writer, masterAead);
     return this;
   }
 
@@ -436,7 +432,7 @@ public final class AndroidKeysetManager {
   public synchronized AndroidKeysetManager add(com.google.crypto.tink.proto.KeyTemplate keyTemplate)
       throws GeneralSecurityException {
     keysetManager = keysetManager.add(keyTemplate);
-    write(keysetManager);
+    write(keysetManager.getKeysetHandle(), writer, masterAead);
     return this;
   }
 
@@ -451,7 +447,7 @@ public final class AndroidKeysetManager {
   public synchronized AndroidKeysetManager add(KeyTemplate keyTemplate)
       throws GeneralSecurityException {
     keysetManager = keysetManager.add(keyTemplate);
-    write(keysetManager);
+    write(keysetManager.getKeysetHandle(), writer, masterAead);
     return this;
   }
 
@@ -463,7 +459,7 @@ public final class AndroidKeysetManager {
   @CanIgnoreReturnValue
   public synchronized AndroidKeysetManager setPrimary(int keyId) throws GeneralSecurityException {
     keysetManager = keysetManager.setPrimary(keyId);
-    write(keysetManager);
+    write(keysetManager.getKeysetHandle(), writer, masterAead);
     return this;
   }
 
@@ -489,7 +485,7 @@ public final class AndroidKeysetManager {
   @CanIgnoreReturnValue
   public synchronized AndroidKeysetManager enable(int keyId) throws GeneralSecurityException {
     keysetManager = keysetManager.enable(keyId);
-    write(keysetManager);
+    write(keysetManager.getKeysetHandle(), writer, masterAead);
     return this;
   }
 
@@ -501,7 +497,7 @@ public final class AndroidKeysetManager {
   @CanIgnoreReturnValue
   public synchronized AndroidKeysetManager disable(int keyId) throws GeneralSecurityException {
     keysetManager = keysetManager.disable(keyId);
-    write(keysetManager);
+    write(keysetManager.getKeysetHandle(), writer, masterAead);
     return this;
   }
 
@@ -513,7 +509,7 @@ public final class AndroidKeysetManager {
   @CanIgnoreReturnValue
   public synchronized AndroidKeysetManager delete(int keyId) throws GeneralSecurityException {
     keysetManager = keysetManager.delete(keyId);
-    write(keysetManager);
+    write(keysetManager.getKeysetHandle(), writer, masterAead);
     return this;
   }
 
@@ -525,7 +521,7 @@ public final class AndroidKeysetManager {
   @CanIgnoreReturnValue
   public synchronized AndroidKeysetManager destroy(int keyId) throws GeneralSecurityException {
     keysetManager = keysetManager.destroy(keyId);
-    write(keysetManager);
+    write(keysetManager.getKeysetHandle(), writer, masterAead);
     return this;
   }
 
@@ -534,12 +530,13 @@ public final class AndroidKeysetManager {
     return masterAead != null;
   }
 
-  private void write(KeysetManager manager) throws GeneralSecurityException {
+  private static void write(KeysetHandle handle, KeysetWriter writer, Aead masterAead)
+      throws GeneralSecurityException {
     try {
       if (masterAead != null) {
-        manager.getKeysetHandle().write(writer, masterAead);
+        handle.write(writer, masterAead);
       } else {
-        CleartextKeysetHandle.write(manager.getKeysetHandle(), writer);
+        CleartextKeysetHandle.write(handle, writer);
       }
     } catch (IOException e) {
       throw new GeneralSecurityException(e);
