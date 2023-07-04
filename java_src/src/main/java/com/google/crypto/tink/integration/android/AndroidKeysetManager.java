@@ -531,12 +531,12 @@ public final class AndroidKeysetManager {
 
   /** Returns whether Android Keystore is being used to wrap Tink keysets. */
   public synchronized boolean isUsingKeystore() {
-    return shouldUseKeystore();
+    return masterAead != null;
   }
 
   private void write(KeysetManager manager) throws GeneralSecurityException {
     try {
-      if (shouldUseKeystore()) {
+      if (masterAead != null) {
         manager.getKeysetHandle().write(writer, masterAead);
       } else {
         CleartextKeysetHandle.write(manager.getKeysetHandle(), writer);
@@ -544,11 +544,6 @@ public final class AndroidKeysetManager {
     } catch (IOException e) {
       throw new GeneralSecurityException(e);
     }
-  }
-
-  @ChecksSdkIntAtLeast(api = Build.VERSION_CODES.M)
-  private boolean shouldUseKeystore() {
-    return masterAead != null && isAtLeastM();
   }
 
   private static KeyTemplate.OutputPrefixType fromProto(OutputPrefixType outputPrefixType) {
