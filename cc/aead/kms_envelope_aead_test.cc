@@ -32,15 +32,16 @@
 #include "tink/aead.h"
 #include "tink/aead/aead_config.h"
 #include "tink/aead/aead_key_templates.h"
+#include "tink/internal/ssl_util.h"
 #include "tink/keyset_handle.h"
 #include "tink/mac/mac_key_templates.h"
 #include "tink/registry.h"
+#include "tink/util/fake_kms_client.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "tink/util/test_matchers.h"
 #include "tink/util/test_util.h"
 #include "proto/aes_gcm.pb.h"
-#include "tink/internal/ssl_util.h"
 
 namespace crypto {
 namespace tink {
@@ -282,6 +283,66 @@ std::vector<KeyTemplate> GetTestTemplates() {
 INSTANTIATE_TEST_SUITE_P(
     KmsEnvelopeAeadDekTemplatesTest, KmsEnvelopeAeadDekTemplatesTest,
     testing::ValuesIn(GetTestTemplates()));
+
+TEST_F(KmsEnvelopeAeadTest, PrimitiveFromTemplateAndFromNewAreCompatible) {
+  ASSERT_THAT(AeadConfig::Register(), IsOk());
+
+  util::StatusOr<std::string> kek_uri_result =
+      test::FakeKmsClient::CreateFakeKeyUri();
+  ASSERT_THAT(kek_uri_result, IsOk());
+  std::string kek_uri = *kek_uri_result;
+  KeyTemplate dek_template = AeadKeyTemplates::Aes128Gcm();
+
+  // Create a KmsEnvelopeAead primitive from a KmsEnvelopeAeadKey template.
+  util::Status register_status =
+      test::FakeKmsClient::RegisterNewClient(kek_uri, /*credentials_path=*/"");
+  ASSERT_THAT(register_status, IsOk());
+  // Create a KmsEnvelopeAeadKey template.
+  KeyTemplate env_template =
+      AeadKeyTemplates::KmsEnvelopeAead(kek_uri, dek_template);
+  // Get KMS envelope AEAD primitive.
+  util::StatusOr<std::unique_ptr<KeysetHandle>> handle =
+      KeysetHandle::GenerateNew(env_template);
+  ASSERT_THAT(handle, IsOk());
+  util::StatusOr<std::unique_ptr<Aead>> envelope_aead_from_template =
+      (*handle)->GetPrimitive<Aead>();
+  ASSERT_THAT(envelope_aead_from_template, IsOk());
+
+  // Create a KmsEnvelopeAead primitive form KmsEnvelopeAead::New.
+  util::StatusOr<std::unique_ptr<test::FakeKmsClient>> client =
+      test::FakeKmsClient::New(/*key_uri=*/"", /*credentials_path=*/"");
+  ASSERT_THAT(client, IsOk());
+  util::StatusOr<std::unique_ptr<Aead>> remote_aead =
+      (*client)->GetAead(kek_uri);
+  ASSERT_THAT(remote_aead, IsOk());
+  // Get KMS envelope AEAD primitive.
+  util::StatusOr<std::unique_ptr<Aead>> envelope_aead_from_new =
+      KmsEnvelopeAead::New(dek_template, *std::move(remote_aead));
+  ASSERT_THAT(envelope_aead_from_new, IsOk());
+
+  // Check that envelope_aead_from_template and envelope_aead_from_new are the
+  // same primitive by encrypting with envelope_aead_from_template and
+  // decrypting with envelope_aead_from_new and vice versa.
+  std::string plaintext = "plaintext";
+  std::string associated_data = "associated_data";
+  {
+    util::StatusOr<std::string> ciphertext =
+        (*envelope_aead_from_template)->Encrypt(plaintext, associated_data);
+    ASSERT_THAT(ciphertext, IsOk());
+    util::StatusOr<std::string> decrypted =
+        (*envelope_aead_from_new)->Decrypt(ciphertext.value(), associated_data);
+    EXPECT_THAT(decrypted, IsOkAndHolds(plaintext));
+  }
+  {
+    util::StatusOr<std::string> ciphertext =
+        (*envelope_aead_from_new)->Encrypt(plaintext, associated_data);
+    ASSERT_THAT(ciphertext, IsOk());
+    util::StatusOr<std::string> decrypted =
+        (*envelope_aead_from_template)
+            ->Decrypt(ciphertext.value(), associated_data);
+    EXPECT_THAT(decrypted, IsOkAndHolds(plaintext));
+  }
+}
 
 }  // namespace
 }  // namespace tink

@@ -686,6 +686,7 @@ cc_test(
         "//internal:ssl_util",
         "//mac:mac_key_templates",
         "//proto:aes_gcm_cc_proto",
+        "//util:fake_kms_client",
         "//util:status",
         "//util:statusor",
         "//util:test_matchers",

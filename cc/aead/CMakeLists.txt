@@ -652,6 +652,7 @@ tink_cc_test(
     tink::core::registry
     tink::internal::ssl_util
     tink::mac::mac_key_templates
+    tink::util::fake_kms_client
     tink::util::status
     tink::util::statusor
     tink::util::test_matchers
