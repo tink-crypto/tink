@@ -293,6 +293,22 @@ java_library(
     ],
 )
 
+java_library(
+    name = "ecies_parameters",
+    srcs = ["EciesParameters.java"],
+    deps = [
+        ":hybrid_parameters",
+        "//src/main/java/com/google/crypto/tink:parameters",
+        "//src/main/java/com/google/crypto/tink/aead:aes_ctr_hmac_aead_parameters",
+        "//src/main/java/com/google/crypto/tink/aead:aes_gcm_parameters",
+        "//src/main/java/com/google/crypto/tink/aead:x_cha_cha20_poly1305_parameters",
+        "//src/main/java/com/google/crypto/tink/daead:aes_siv_parameters",
+        "//src/main/java/com/google/crypto/tink/util:bytes",
+        "@maven//:com_google_code_findbugs_jsr305",
+        "@maven//:com_google_errorprone_error_prone_annotations",
+    ],
+)
+
 # Android libraries
 
 android_library(
@@ -581,5 +597,21 @@ android_library(
         "//src/main/java/com/google/crypto/tink/util:secret_bytes-android",
         "@maven//:com_google_code_findbugs_jsr305",
         "@maven//:com_google_protobuf_protobuf_javalite",
+    ],
+)
+
+android_library(
+    name = "ecies_parameters-android",
+    srcs = ["EciesParameters.java"],
+    deps = [
+        ":hybrid_parameters-android",
+        "//src/main/java/com/google/crypto/tink:parameters-android",
+        "//src/main/java/com/google/crypto/tink/aead:aes_ctr_hmac_aead_parameters-android",
+        "//src/main/java/com/google/crypto/tink/aead:aes_gcm_parameters-android",
+        "//src/main/java/com/google/crypto/tink/aead:x_cha_cha20_poly1305_parameters-android",
+        "//src/main/java/com/google/crypto/tink/daead:aes_siv_parameters-android",
+        "//src/main/java/com/google/crypto/tink/util:bytes-android",
+        "@maven//:com_google_code_findbugs_jsr305",
+        "@maven//:com_google_errorprone_error_prone_annotations",
     ],
 )
