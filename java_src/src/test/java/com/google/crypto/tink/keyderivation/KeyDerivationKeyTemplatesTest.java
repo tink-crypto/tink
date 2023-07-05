@@ -22,11 +22,12 @@ import static org.junit.Assert.assertThrows;
 
 import com.google.crypto.tink.Aead;
 import com.google.crypto.tink.KeyTemplate;
-import com.google.crypto.tink.KeyTemplate.OutputPrefixType;
 import com.google.crypto.tink.KeyTemplates;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.aead.AeadConfig;
+import com.google.crypto.tink.internal.KeyTemplateProtoConverter;
 import com.google.crypto.tink.prf.PrfConfig;
+import com.google.crypto.tink.proto.OutputPrefixType;
 import com.google.crypto.tink.testing.TestUtil;
 import java.security.GeneralSecurityException;
 import java.util.ArrayList;
@@ -61,8 +62,13 @@ public final class KeyDerivationKeyTemplatesTest {
     outputPrefixTypes.add(OutputPrefixType.CRUNCHY);
 
     for (OutputPrefixType outputPrefixType : outputPrefixTypes) {
-      KeyTemplate derivedTemplate =
-          KeyTemplate.create(aeadTemplate.getTypeUrl(), aeadTemplate.getValue(), outputPrefixType);
+      com.google.crypto.tink.proto.KeyTemplate protoAeadTemplate =
+          KeyTemplateProtoConverter.toProto(aeadTemplate);
+      com.google.crypto.tink.proto.KeyTemplate protoDerivedTemplate =
+          com.google.crypto.tink.proto.KeyTemplate.newBuilder(protoAeadTemplate)
+              .setOutputPrefixType(outputPrefixType)
+              .build();
+      KeyTemplate derivedTemplate = KeyTemplateProtoConverter.fromProto(protoDerivedTemplate);
       KeyTemplate prfBasedTemplate =
           KeyDerivationKeyTemplates.createPrfBasedKeyTemplate(prfTemplate, derivedTemplate);
 

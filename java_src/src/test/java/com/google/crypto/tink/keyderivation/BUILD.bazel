@@ -19,11 +19,13 @@ java_test(
     size = "small",
     srcs = ["KeyDerivationKeyTemplatesTest.java"],
     deps = [
+        "//proto:tink_java_proto",
         "//src/main/java/com/google/crypto/tink:aead",
         "//src/main/java/com/google/crypto/tink:key_template",
         "//src/main/java/com/google/crypto/tink:key_templates",
         "//src/main/java/com/google/crypto/tink:registry_cluster",
         "//src/main/java/com/google/crypto/tink/aead:aead_config",
+        "//src/main/java/com/google/crypto/tink/internal:key_template_proto_converter",
         "//src/main/java/com/google/crypto/tink/internal:util",
         "//src/main/java/com/google/crypto/tink/keyderivation:key_derivation_config",
         "//src/main/java/com/google/crypto/tink/keyderivation:key_derivation_key_templates",

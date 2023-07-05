@@ -27,6 +27,7 @@ import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.aead.AeadConfig;
 import com.google.crypto.tink.aead.AeadKeyTemplates;
 import com.google.crypto.tink.aead.AesCtrHmacAeadKeyManager;
+import com.google.crypto.tink.internal.KeyTemplateProtoConverter;
 import com.google.crypto.tink.internal.KeyTypeManager;
 import com.google.crypto.tink.proto.EcPointFormat;
 import com.google.crypto.tink.proto.EciesAeadHkdfKeyFormat;
@@ -229,11 +230,14 @@ public class EciesAeadHkdfPrivateKeyManagerTest {
   public void testEciesP256HkdfHmacSha256Aes128GcmTemplate() throws Exception {
     KeyTemplate template =
         EciesAeadHkdfPrivateKeyManager.eciesP256HkdfHmacSha256Aes128GcmTemplate();
+
+    com.google.crypto.tink.proto.KeyTemplate protoTemplate =
+        KeyTemplateProtoConverter.toProto(template);
     assertEquals(new EciesAeadHkdfPrivateKeyManager().getKeyType(), template.getTypeUrl());
     assertEquals(KeyTemplate.OutputPrefixType.TINK, template.getOutputPrefixType());
     EciesAeadHkdfKeyFormat format =
         EciesAeadHkdfKeyFormat.parseFrom(
-            template.getValue(), ExtensionRegistryLite.getEmptyRegistry());
+            protoTemplate.getValue(), ExtensionRegistryLite.getEmptyRegistry());
 
     assertThat(format.hasParams()).isTrue();
     assertThat(format.getParams().hasKemParams()).isTrue();
@@ -253,11 +257,14 @@ public class EciesAeadHkdfPrivateKeyManagerTest {
   public void testRawEciesP256HkdfHmacSha256Aes128GcmCompressedTemplate() throws Exception {
     KeyTemplate template =
         EciesAeadHkdfPrivateKeyManager.rawEciesP256HkdfHmacSha256Aes128GcmCompressedTemplate();
+
+    com.google.crypto.tink.proto.KeyTemplate protoTemplate =
+        KeyTemplateProtoConverter.toProto(template);
     assertEquals(new EciesAeadHkdfPrivateKeyManager().getKeyType(), template.getTypeUrl());
     assertEquals(KeyTemplate.OutputPrefixType.RAW, template.getOutputPrefixType());
     EciesAeadHkdfKeyFormat format =
         EciesAeadHkdfKeyFormat.parseFrom(
-            template.getValue(), ExtensionRegistryLite.getEmptyRegistry());
+            protoTemplate.getValue(), ExtensionRegistryLite.getEmptyRegistry());
 
     assertThat(format.hasParams()).isTrue();
     assertThat(format.getParams().hasKemParams()).isTrue();
@@ -277,11 +284,14 @@ public class EciesAeadHkdfPrivateKeyManagerTest {
   public void testEciesP256HkdfHmacSha256Aes128CtrHmacSha256Template() throws Exception {
     KeyTemplate template =
         EciesAeadHkdfPrivateKeyManager.eciesP256HkdfHmacSha256Aes128CtrHmacSha256Template();
+
+    com.google.crypto.tink.proto.KeyTemplate protoTemplate =
+        KeyTemplateProtoConverter.toProto(template);
     assertEquals(new EciesAeadHkdfPrivateKeyManager().getKeyType(), template.getTypeUrl());
     assertEquals(KeyTemplate.OutputPrefixType.TINK, template.getOutputPrefixType());
     EciesAeadHkdfKeyFormat format =
         EciesAeadHkdfKeyFormat.parseFrom(
-            template.getValue(), ExtensionRegistryLite.getEmptyRegistry());
+            protoTemplate.getValue(), ExtensionRegistryLite.getEmptyRegistry());
 
     assertThat(format.hasParams()).isTrue();
     assertThat(format.getParams().hasKemParams()).isTrue();
@@ -303,11 +313,14 @@ public class EciesAeadHkdfPrivateKeyManagerTest {
     KeyTemplate template =
         EciesAeadHkdfPrivateKeyManager
             .rawEciesP256HkdfHmacSha256Aes128CtrHmacSha256CompressedTemplate();
+
+    com.google.crypto.tink.proto.KeyTemplate protoTemplate =
+        KeyTemplateProtoConverter.toProto(template);
     assertEquals(new EciesAeadHkdfPrivateKeyManager().getKeyType(), template.getTypeUrl());
     assertEquals(KeyTemplate.OutputPrefixType.RAW, template.getOutputPrefixType());
     EciesAeadHkdfKeyFormat format =
         EciesAeadHkdfKeyFormat.parseFrom(
-            template.getValue(), ExtensionRegistryLite.getEmptyRegistry());
+            protoTemplate.getValue(), ExtensionRegistryLite.getEmptyRegistry());
 
     assertThat(format.hasParams()).isTrue();
     assertThat(format.getParams().hasKemParams()).isTrue();

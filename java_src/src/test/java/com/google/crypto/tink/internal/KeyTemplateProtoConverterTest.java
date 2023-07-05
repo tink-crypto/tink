@@ -38,9 +38,7 @@ public final class KeyTemplateProtoConverterTest {
     KeyTemplate template = AesGcmKeyManager.aes128GcmTemplate();
     byte[] bytes = KeyTemplateProtoConverter.toByteArray(template);
     KeyTemplate template2 = KeyTemplateProtoConverter.fromByteArray(bytes);
-    assertThat(template.getTypeUrl()).isEqualTo(template2.getTypeUrl());
-    assertThat(template.getValue()).isEqualTo(template2.getValue());
-    assertThat(template.getOutputPrefixType()).isEqualTo(template2.getOutputPrefixType());
+    assertThat(template.toParameters()).isEqualTo(template2.toParameters());
   }
 
   @Test

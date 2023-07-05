@@ -227,7 +227,7 @@ public class KmsEnvelopeAeadKeyManagerTest {
 
     KmsEnvelopeAeadKeyFormat format =
         KmsEnvelopeAeadKeyFormat.parseFrom(
-            template.getValue(), ExtensionRegistryLite.getEmptyRegistry());
+            protoTemplate.getValue(), ExtensionRegistryLite.getEmptyRegistry());
     assertThat(kekUri).isEqualTo(format.getKekUri());
     assertThat(dekTemplateProto.getTypeUrl()).isEqualTo(format.getDekTemplate().getTypeUrl());
     assertThat(dekTemplateProto.getValue()).isEqualTo(format.getDekTemplate().getValue());
