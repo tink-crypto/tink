@@ -18,6 +18,8 @@ package com.google.crypto.tink;
 
 import com.google.errorprone.annotations.Immutable;
 import com.google.protobuf.ByteString;
+import com.google.protobuf.ExtensionRegistryLite;
+import java.io.IOException;
 import java.security.GeneralSecurityException;
 
 /** A KeyTemplate specifies how to generate keys of a particular type. */
@@ -85,6 +87,17 @@ public final class KeyTemplate {
             .setValue(ByteString.copyFrom(value))
             .setOutputPrefixType(toProto(outputPrefixType))
             .build());
+  }
+
+  public static KeyTemplate createFrom(Parameters p) throws GeneralSecurityException {
+    try {
+      byte[] serializedParameters = TinkProtoParametersFormat.serialize(p);
+      return new KeyTemplate(
+          com.google.crypto.tink.proto.KeyTemplate.parseFrom(
+              serializedParameters, ExtensionRegistryLite.getEmptyRegistry()));
+    } catch (IOException e) {
+      throw new GeneralSecurityException("Parsing parameters failed", e);
+    }
   }
 
   private KeyTemplate(com.google.crypto.tink.proto.KeyTemplate kt) {

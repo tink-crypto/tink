@@ -655,6 +655,7 @@ java_test(
         "//src/main/java/com/google/crypto/tink:parameters",
         "//src/main/java/com/google/crypto/tink/aead:aead_config",
         "//src/main/java/com/google/crypto/tink/aead:aes_gcm_parameters",
+        "//src/main/java/com/google/crypto/tink/aead:predefined_aead_parameters",
         "//src/main/java/com/google/crypto/tink/internal:legacy_proto_parameters",
         "@maven//:com_google_protobuf_protobuf_java",
         "@maven//:com_google_truth_truth",

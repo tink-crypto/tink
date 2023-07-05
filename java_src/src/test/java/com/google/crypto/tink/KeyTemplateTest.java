@@ -21,6 +21,7 @@ import static org.junit.Assert.assertThrows;
 
 import com.google.crypto.tink.aead.AeadConfig;
 import com.google.crypto.tink.aead.AesGcmParameters;
+import com.google.crypto.tink.aead.PredefinedAeadParameters;
 import com.google.crypto.tink.internal.LegacyProtoParameters;
 import com.google.crypto.tink.proto.AesGcmKeyFormat;
 import com.google.crypto.tink.proto.OutputPrefixType;
@@ -92,5 +93,24 @@ public final class KeyTemplateTest {
         .isEqualTo(ByteString.copyFrom(new byte[] {1}));
     assertThat(parameters.getSerialization().getKeyTemplate().getOutputPrefixType())
         .isEqualTo(OutputPrefixType.TINK);
+  }
+
+  @Test
+  public void testCreateFromParameters_works() throws Exception {
+    assertThat(KeyTemplate.createFrom(PredefinedAeadParameters.AES128_GCM).toParameters())
+        .isEqualTo(PredefinedAeadParameters.AES128_GCM);
+  }
+
+  @Test
+  public void testCreateFromParameters_unparseable_throws() throws Exception {
+    Parameters p =
+        new Parameters() {
+          @Override
+          public boolean hasIdRequirement() {
+            return false;
+          }
+        };
+
+    assertThrows(GeneralSecurityException.class, () -> KeyTemplate.createFrom(p));
   }
 }
