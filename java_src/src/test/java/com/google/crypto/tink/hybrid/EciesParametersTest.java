@@ -42,12 +42,11 @@ public final class EciesParametersTest {
   private static final Bytes SALT = Bytes.copyFrom(Hex.decode("2023af"));
 
   @DataPoints("curveTypes")
-  public static final EciesParameters.CurveType[] CURVE_TYPES =
+  public static final EciesParameters.CurveType[] NIST_CURVE_TYPES =
       new EciesParameters.CurveType[] {
         EciesParameters.CurveType.NIST_P256,
         EciesParameters.CurveType.NIST_P384,
         EciesParameters.CurveType.NIST_P521,
-        EciesParameters.CurveType.X25519
       };
 
   @DataPoints("hashTypes")
@@ -77,7 +76,7 @@ public final class EciesParametersTest {
       };
 
   @Theory
-  public void buildParametersWithAesGcm_hasExpectedValues(
+  public void buildWithNistCurvesAndAesGcmDem_hasExpectedValues(
       @FromDataPoints("variants") EciesParameters.Variant variant,
       @FromDataPoints("hashTypes") EciesParameters.HashType hashType,
       @FromDataPoints("curveTypes") EciesParameters.CurveType curveType,
@@ -110,7 +109,7 @@ public final class EciesParametersTest {
   }
 
   @Test
-  public void buildWithAesCtrHmacAead_succeeds() throws Exception {
+  public void buildWithAesCtrHmacAeadDem_succeeds() throws Exception {
     Parameters aesCtrHmacAeadParameters =
         AesCtrHmacAeadParameters.builder()
             .setAesKeySizeBytes(16)
@@ -135,7 +134,7 @@ public final class EciesParametersTest {
   }
 
   @Theory
-  public void buildParametersWithXChaCha20Poly1305_succeeds() throws Exception {
+  public void buildWithXChaCha20Poly1305Dem_succeeds() throws Exception {
     Parameters xChaCha20Poly1305Parameters = XChaCha20Poly1305Parameters.create();
 
     EciesParameters params =
@@ -152,7 +151,7 @@ public final class EciesParametersTest {
   }
 
   @Theory
-  public void buildParametersWithAesSiv_succeeds() throws Exception {
+  public void buildWithAesSivDem_succeeds() throws Exception {
     Parameters aesSivParameters = AesSivParameters.builder().setKeySizeBytes(32).build();
 
     EciesParameters params =
@@ -166,6 +165,45 @@ public final class EciesParametersTest {
             .build();
 
     assertThat(params.getDemParameters()).isEqualTo(aesSivParameters);
+  }
+
+  @Theory
+  public void buildWithX25519_succeeds(
+      @FromDataPoints("variants") EciesParameters.Variant variant,
+      @FromDataPoints("hashTypes") EciesParameters.HashType hashType)
+      throws Exception {
+    Parameters xChaCha20Poly1305Parameters = XChaCha20Poly1305Parameters.create();
+
+    EciesParameters params =
+        EciesParameters.builder()
+            .setCurveType(EciesParameters.CurveType.X25519)
+            .setHashType(hashType)
+            .setPointFormat(EciesParameters.PointFormat.COMPRESSED)
+            .setVariant(variant)
+            .setDemParameters(xChaCha20Poly1305Parameters)
+            .setSalt(SALT)
+            .build();
+
+    assertThat(params.getCurveType()).isEqualTo(EciesParameters.CurveType.X25519);
+    assertThat(params.getPointFormat()).isEqualTo(EciesParameters.PointFormat.COMPRESSED);
+    assertThat(params.getHashType()).isEqualTo(hashType);
+    assertThat(params.getVariant()).isEqualTo(variant);
+  }
+
+  @Theory
+  public void buildWithX25519Uncompressed_fails() throws Exception {
+    Parameters xChaCha20Poly1305Parameters = XChaCha20Poly1305Parameters.create();
+
+    EciesParameters.Builder builder =
+        EciesParameters.builder()
+            .setCurveType(EciesParameters.CurveType.X25519)
+            .setHashType(EciesParameters.HashType.SHA256)
+            .setPointFormat(EciesParameters.PointFormat.UNCOMPRESSED)
+            .setVariant(EciesParameters.Variant.NO_PREFIX)
+            .setDemParameters(xChaCha20Poly1305Parameters)
+            .setSalt(SALT);
+
+    assertThrows(GeneralSecurityException.class, builder::build);
   }
 
   @Test
@@ -278,7 +316,7 @@ public final class EciesParametersTest {
   }
 
   @Test
-  public void sethUnsupportedDemParameters_fails() throws Exception {
+  public void setUnsupportedDemParameters_fails() throws Exception {
     assertThrows(
         GeneralSecurityException.class,
         () ->

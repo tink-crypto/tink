@@ -221,6 +221,10 @@ public final class EciesParameters extends HybridParameters {
       if (variant == null) {
         throw new GeneralSecurityException("Variant is not set");
       }
+
+      if (curveType == CurveType.X25519 && pointFormat != PointFormat.COMPRESSED) {
+        throw new GeneralSecurityException("X25519 only supports compressed elliptic curve points");
+      }
       return new EciesParameters(curveType, hashType, pointFormat, demParameters, variant, salt);
     }
   }
