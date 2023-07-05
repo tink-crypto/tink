@@ -489,3 +489,28 @@ java_test(
         "@maven//:junit_junit",
     ],
 )
+
+java_test(
+    name = "RandomTest",
+    size = "small",
+    srcs = ["RandomTest.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink/internal:random",
+        "//src/main/java/com/google/crypto/tink/testing:test_util",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+        "@maven//:org_conscrypt_conscrypt_openjdk_uber",
+    ],
+)
+
+java_test(
+    name = "RandomWithoutConscryptTest",
+    size = "small",
+    srcs = ["RandomWithoutConscryptTest.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink/internal:random",
+        "//src/main/java/com/google/crypto/tink/testing:test_util",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)

@@ -636,3 +636,14 @@ java_test(
         "@maven//:org_conscrypt_conscrypt_openjdk_uber",
     ],
 )
+
+java_test(
+    name = "RandomTest",
+    size = "small",
+    srcs = ["RandomTest.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink/subtle:random",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)

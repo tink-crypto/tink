@@ -1,4 +1,4 @@
-// Copyright 2017 Google Inc.
+// Copyright 2023 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,27 +16,27 @@
 
 package com.google.crypto.tink.subtle;
 
-/**
- * Provides secure randomness using {@link SecureRandom}.
- *
- * @since 1.0.0
- */
-public final class Random {
+import static com.google.common.truth.Truth.assertThat;
 
-  /** Returns a random byte array of size {@code size}. */
-  public static byte[] randBytes(int size) {
-    return com.google.crypto.tink.internal.Random.randBytes(size);
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
+
+@RunWith(JUnit4.class)
+public final class RandomTest {
+
+  @Test
+  public void randdomBytes_areDifferent() throws Exception {
+    assertThat(Random.randBytes(10)).isNotEqualTo(Random.randBytes(10));
   }
 
-  /** Returns a random int between 0 and max-1. */
-  public static final int randInt(int max) {
-    return com.google.crypto.tink.internal.Random.randInt(max);
+  @Test
+  public void randIntWithMax_works() throws Exception {
+    assertThat(Random.randInt(5)).isLessThan(5);
   }
 
-  /** Returns a random int. */
-  public static final int randInt() {
-    return com.google.crypto.tink.internal.Random.randInt();
+  @Test
+  public void randInt_works() throws Exception {
+    int unused = Random.randInt();
   }
-
-  private Random() {}
 }
