@@ -128,7 +128,8 @@ public final class KeyHandleTest {
   @Test
   public void createFromKey_keyDataAsymmetricPublic_shouldNotHaveSecret() throws Exception {
     KeyTemplate kt = KeyTemplates.get("ED25519");
-    KeyData kd = Registry.getPublicKeyData(kt.getTypeUrl(), Registry.newKeyData(kt).getValue());
+    KeyData privateKeyData = Registry.newKeyData(kt);
+    KeyData kd = Registry.getPublicKeyData(privateKeyData.getTypeUrl(), privateKeyData.getValue());
 
     KeyHandle kh = KeyHandle.createFromKey(kd, kt.getOutputPrefixType());
 

@@ -233,7 +233,7 @@ public class EciesAeadHkdfPrivateKeyManagerTest {
 
     com.google.crypto.tink.proto.KeyTemplate protoTemplate =
         KeyTemplateProtoConverter.toProto(template);
-    assertEquals(new EciesAeadHkdfPrivateKeyManager().getKeyType(), template.getTypeUrl());
+    assertEquals(new EciesAeadHkdfPrivateKeyManager().getKeyType(), protoTemplate.getTypeUrl());
     assertEquals(KeyTemplate.OutputPrefixType.TINK, template.getOutputPrefixType());
     EciesAeadHkdfKeyFormat format =
         EciesAeadHkdfKeyFormat.parseFrom(
@@ -260,7 +260,7 @@ public class EciesAeadHkdfPrivateKeyManagerTest {
 
     com.google.crypto.tink.proto.KeyTemplate protoTemplate =
         KeyTemplateProtoConverter.toProto(template);
-    assertEquals(new EciesAeadHkdfPrivateKeyManager().getKeyType(), template.getTypeUrl());
+    assertEquals(new EciesAeadHkdfPrivateKeyManager().getKeyType(), protoTemplate.getTypeUrl());
     assertEquals(KeyTemplate.OutputPrefixType.RAW, template.getOutputPrefixType());
     EciesAeadHkdfKeyFormat format =
         EciesAeadHkdfKeyFormat.parseFrom(
@@ -287,7 +287,7 @@ public class EciesAeadHkdfPrivateKeyManagerTest {
 
     com.google.crypto.tink.proto.KeyTemplate protoTemplate =
         KeyTemplateProtoConverter.toProto(template);
-    assertEquals(new EciesAeadHkdfPrivateKeyManager().getKeyType(), template.getTypeUrl());
+    assertEquals(new EciesAeadHkdfPrivateKeyManager().getKeyType(), protoTemplate.getTypeUrl());
     assertEquals(KeyTemplate.OutputPrefixType.TINK, template.getOutputPrefixType());
     EciesAeadHkdfKeyFormat format =
         EciesAeadHkdfKeyFormat.parseFrom(
@@ -316,7 +316,7 @@ public class EciesAeadHkdfPrivateKeyManagerTest {
 
     com.google.crypto.tink.proto.KeyTemplate protoTemplate =
         KeyTemplateProtoConverter.toProto(template);
-    assertEquals(new EciesAeadHkdfPrivateKeyManager().getKeyType(), template.getTypeUrl());
+    assertEquals(new EciesAeadHkdfPrivateKeyManager().getKeyType(), protoTemplate.getTypeUrl());
     assertEquals(KeyTemplate.OutputPrefixType.RAW, template.getOutputPrefixType());
     EciesAeadHkdfKeyFormat format =
         EciesAeadHkdfKeyFormat.parseFrom(

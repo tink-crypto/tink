@@ -21,7 +21,7 @@ import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.KmsClient;
 import com.google.crypto.tink.KmsClients;
 import com.google.crypto.tink.Registry;
-import com.google.crypto.tink.TinkProtoParametersFormat;
+import com.google.crypto.tink.internal.KeyTemplateProtoConverter;
 import com.google.crypto.tink.internal.KeyTypeManager;
 import com.google.crypto.tink.internal.PrimitiveFactory;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
@@ -146,17 +146,16 @@ public class KmsEnvelopeAeadKeyManager extends KeyTypeManager<KmsEnvelopeAeadKey
 
   static KmsEnvelopeAeadKeyFormat createKeyFormat(String kekUri, KeyTemplate dekTemplate)
       throws GeneralSecurityException, InvalidProtocolBufferException {
-    if (!KmsEnvelopeAead.isSupportedDekKeyType(dekTemplate.getTypeUrl())) {
+    com.google.crypto.tink.proto.KeyTemplate protoDekTemplate =
+        KeyTemplateProtoConverter.toProto(dekTemplate);
+    if (!KmsEnvelopeAead.isSupportedDekKeyType(protoDekTemplate.getTypeUrl())) {
       throw new IllegalArgumentException(
           "Unsupported DEK key type: "
-              + dekTemplate.getTypeUrl()
+              + protoDekTemplate.getTypeUrl()
               + ". Only Tink AEAD key types are supported.");
     }
-    byte[] serializedTemplate = TinkProtoParametersFormat.serialize(dekTemplate.toParameters());
     return KmsEnvelopeAeadKeyFormat.newBuilder()
-        .setDekTemplate(
-            com.google.crypto.tink.proto.KeyTemplate.parseFrom(
-                serializedTemplate, ExtensionRegistryLite.getEmptyRegistry()))
+        .setDekTemplate(protoDekTemplate)
         .setKekUri(kekUri)
         .build();
   }

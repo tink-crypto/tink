@@ -221,7 +221,7 @@ public class KmsEnvelopeAeadKeyManagerTest {
 
     com.google.crypto.tink.proto.KeyTemplate protoTemplate =
         KeyTemplateProtoConverter.toProto(template);
-    assertThat(new KmsEnvelopeAeadKeyManager().getKeyType()).isEqualTo(template.getTypeUrl());
+    assertThat(new KmsEnvelopeAeadKeyManager().getKeyType()).isEqualTo(protoTemplate.getTypeUrl());
     assertThat(com.google.crypto.tink.proto.OutputPrefixType.RAW)
         .isEqualTo(protoTemplate.getOutputPrefixType());
 

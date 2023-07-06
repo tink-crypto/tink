@@ -85,7 +85,8 @@ public final class ProtoKeyTest {
   public void testProtoKey_keyDataASYMMETRICPUBLIC_shouldNotHaveSecret()
       throws GeneralSecurityException {
     KeyTemplate kt = KeyTemplates.get("ED25519");
-    KeyData kd = Registry.getPublicKeyData(kt.getTypeUrl(), Registry.newKeyData(kt).getValue());
+    KeyData privateKeyData = Registry.newKeyData(kt);
+    KeyData kd = Registry.getPublicKeyData(privateKeyData.getTypeUrl(), privateKeyData.getValue());
 
     ProtoKey pk = new ProtoKey(kd, kt.getOutputPrefixType());
 

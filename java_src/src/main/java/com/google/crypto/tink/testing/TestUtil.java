@@ -730,9 +730,11 @@ public final class TestUtil {
   public static void assertKeyInfo(
       com.google.crypto.tink.KeyTemplate keyTemplate, KeysetInfo.KeyInfo keyInfo) throws Exception {
     assertThat(keyInfo.getKeyId()).isGreaterThan(0);
+    com.google.crypto.tink.proto.KeyTemplate protoTemplate =
+        KeyTemplateProtoConverter.toProto(keyTemplate);
+    assertThat(keyInfo.getTypeUrl()).isEqualTo(protoTemplate.getTypeUrl());
     assertThat(keyInfo.getStatus()).isEqualTo(KeyStatusType.ENABLED);
     assertThat(keyInfo.getOutputPrefixType()).isEqualTo(OutputPrefixType.TINK);
-    assertThat(keyInfo.getTypeUrl()).isEqualTo(keyTemplate.getTypeUrl());
   }
 
   /**
