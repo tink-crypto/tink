@@ -45,10 +45,6 @@ cc_library(
     hdrs = ["hpke_decrypt.h"],
     include_prefix = "tink/hybrid/internal",
     tags = ["requires_boringcrypto_update"],
-    visibility = [
-        "//:__subpackages__",
-        "//objc:__subpackages__",
-    ],
     deps = [
         ":hpke_context",
         ":hpke_util",
@@ -58,7 +54,6 @@ cc_library(
         "//util:status",
         "//util:statusor",
         "@com_google_absl//absl/status",
-        "@com_google_absl//absl/strings",
     ],
 )
 
@@ -88,10 +83,6 @@ cc_library(
     hdrs = ["hpke_encrypt.h"],
     include_prefix = "tink/hybrid/internal",
     tags = ["requires_boringcrypto_update"],
-    visibility = [
-        "//:__subpackages__",
-        "//objc:__subpackages__",
-    ],
     deps = [
         ":hpke_context",
         ":hpke_util",
