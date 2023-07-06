@@ -227,9 +227,8 @@ func (h *Handle) PrimitivesWithKeyManager(km registry.KeyManager) (*primitiveset
 	return primitiveSet, nil
 }
 
-// hasSecrets checks if the keyset handle contains any key material considered secret.
-// Both symmetric keys and the private key of an assymmetric crypto system are considered secret keys.
-// Also returns true when encountering any errors.
+// hasSecrets returns true if the keyset handle contains key material considered secret. This
+// includes symmetric keys, private keys of asymmetric crypto systems, and keys of an unknown type.
 func (h *Handle) hasSecrets() bool {
 	for _, k := range h.ks.Key {
 		if k == nil || k.KeyData == nil {
