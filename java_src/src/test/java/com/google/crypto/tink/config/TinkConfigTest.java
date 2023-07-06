@@ -17,67 +17,35 @@
 package com.google.crypto.tink.config;
 
 import static com.google.common.truth.Truth.assertThat;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThrows;
 
-import com.google.crypto.tink.Registry;
-import java.security.GeneralSecurityException;
-import org.junit.FixMethodOrder;
+import com.google.crypto.tink.KeysetHandle;
+import com.google.crypto.tink.aead.PredefinedAeadParameters;
+import com.google.crypto.tink.daead.PredefinedDeterministicAeadParameters;
+import com.google.crypto.tink.hybrid.HybridKeyTemplates;
+import com.google.crypto.tink.mac.PredefinedMacParameters;
+import com.google.crypto.tink.signature.PredefinedSignatureParameters;
+import com.google.crypto.tink.streamingaead.PredefinedStreamingAeadParameters;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
-import org.junit.runners.MethodSorters;
 
-/**
- * Tests for TinkConfig. Using FixedMethodOrder to ensure that aaaTestInitialization runs first, as
- * it tests execution of a static block within referenced Config-classes.
- */
+/** Tests for TinkConfig. */
 @RunWith(JUnit4.class)
-@FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class TinkConfigTest {
   @Test
-  public void aaaTestInitialization() throws Exception {
-    String macTypeUrl = "type.googleapis.com/google.crypto.tink.HmacKey";
-    String aeadTypeUrl = "type.googleapis.com/google.crypto.tink.AesCtrHmacAeadKey";
-    String daeadTypeUrl = "type.googleapis.com/google.crypto.tink.AesSivKey";
-    String hybridTypeUrl = "type.googleapis.com/google.crypto.tink.EciesAeadHkdfPrivateKey";
-    String signTypeUrl = "type.googleapis.com/google.crypto.tink.EcdsaPrivateKey";
-    String streamingAeadTypeUrl = "type.googleapis.com/google.crypto.tink.AesCtrHmacStreamingKey";
-    GeneralSecurityException e =
-        assertThrows(
-            GeneralSecurityException.class, () -> Registry.getUntypedKeyManager(macTypeUrl));
-    assertThat(e.toString()).contains("No key manager found");
-    e =
-        assertThrows(
-            GeneralSecurityException.class, () -> Registry.getUntypedKeyManager(aeadTypeUrl));
-    assertThat(e.toString()).contains("No key manager found");
-    e =
-        assertThrows(
-            GeneralSecurityException.class, () -> Registry.getUntypedKeyManager(daeadTypeUrl));
-    assertThat(e.toString()).contains("No key manager found");
-    e =
-        assertThrows(
-            GeneralSecurityException.class, () -> Registry.getUntypedKeyManager(hybridTypeUrl));
-    assertThat(e.toString()).contains("No key manager found");
-    e =
-        assertThrows(
-            GeneralSecurityException.class, () -> Registry.getUntypedKeyManager(signTypeUrl));
-    assertThat(e.toString()).contains("No key manager found");
-    e =
-        assertThrows(
-            GeneralSecurityException.class,
-            () -> Registry.getUntypedKeyManager(streamingAeadTypeUrl));
-    assertThat(e.toString()).contains("No key manager found");
-
-    // Initialize the config.
+  public void registerWorks() throws Exception {
     TinkConfig.register();
 
-    // After registration the key managers should be present.
-    assertNotNull(Registry.getUntypedKeyManager(macTypeUrl));
-    assertNotNull(Registry.getUntypedKeyManager(aeadTypeUrl));
-    assertNotNull(Registry.getUntypedKeyManager(daeadTypeUrl));
-    assertNotNull(Registry.getUntypedKeyManager(hybridTypeUrl));
-    assertNotNull(Registry.getUntypedKeyManager(signTypeUrl));
-    assertNotNull(Registry.getUntypedKeyManager(streamingAeadTypeUrl));
+    // Check that registration worked by generating a new key.
+    assertThat(KeysetHandle.generateNew(PredefinedMacParameters.HMAC_SHA256_128BITTAG)).isNotNull();
+    assertThat(KeysetHandle.generateNew(PredefinedAeadParameters.AES128_CTR_HMAC_SHA256))
+        .isNotNull();
+    assertThat(KeysetHandle.generateNew(PredefinedDeterministicAeadParameters.AES256_SIV))
+        .isNotNull();
+    assertThat(KeysetHandle.generateNew(HybridKeyTemplates.ECIES_P256_HKDF_HMAC_SHA256_AES128_GCM))
+        .isNotNull();
+    assertThat(KeysetHandle.generateNew(PredefinedSignatureParameters.ECDSA_P256)).isNotNull();
+    assertThat(KeysetHandle.generateNew(PredefinedStreamingAeadParameters.AES128_GCM_HKDF_4KB))
+        .isNotNull();
   }
 }

@@ -16,12 +16,10 @@
 
 package com.google.crypto.tink.aead;
 
-import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThrows;
 
-import com.google.crypto.tink.Aead;
-import com.google.crypto.tink.Registry;
+import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.config.TinkFips;
 import com.google.crypto.tink.config.internal.TinkFipsUtil;
 import java.security.GeneralSecurityException;
@@ -40,89 +38,48 @@ import org.junit.runners.MethodSorters;
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class AeadConfigTest {
 
-  // This test must run first.
   @Test
-  public void aaaTestInitialization() throws Exception {
+  public void withoutFips_allAeadKeyTypesAreRegistered() throws Exception {
     Assume.assumeFalse(TinkFips.useOnlyFips());
 
-    // Before registration, key manager should be absent.
-    String typeUrl = "type.googleapis.com/google.crypto.tink.AesCtrHmacAeadKey";
-    GeneralSecurityException e =
-        assertThrows(GeneralSecurityException.class, () -> Registry.getUntypedKeyManager(typeUrl));
-    assertThat(e.toString()).contains("No key manager found");
-
-    // Initialize the config.
     AeadConfig.register();
 
-    // After registration the key manager should be present.
-    assertNotNull(Registry.getKeyManager(typeUrl, Aead.class));
-
-    // Running init() manually again should succeed.
-    AeadConfig.register();
+    assertNotNull(KeysetHandle.generateNew(PredefinedAeadParameters.AES128_CTR_HMAC_SHA256));
+    assertNotNull(KeysetHandle.generateNew(PredefinedAeadParameters.AES128_GCM));
+    assertNotNull(KeysetHandle.generateNew(PredefinedAeadParameters.AES128_EAX));
+    assertNotNull(KeysetHandle.generateNew(PredefinedAeadParameters.CHACHA20_POLY1305));
+    assertNotNull(KeysetHandle.generateNew(PredefinedAeadParameters.XCHACHA20_POLY1305));
   }
 
   @Test
-  public void testNoFipsRegister() throws Exception {
-    Assume.assumeFalse(TinkFips.useOnlyFips());
-
-    // Register AEAD key manager
-    AeadConfig.register();
-
-    // Check if all key types are registered when not using FIPS mode.
-    String[] keyTypeUrls = {
-      "type.googleapis.com/google.crypto.tink.AesCtrHmacAeadKey",
-      "type.googleapis.com/google.crypto.tink.AesGcmKey",
-      "type.googleapis.com/google.crypto.tink.AesEaxKey",
-      // AES-GCM-SIV is not included here, as it's not available with the default JCE provider.
-      // "type.googleapis.com/google.crypto.tink.AesGcmSivKey",
-      "type.googleapis.com/google.crypto.tink.ChaCha20Poly1305Key",
-      "type.googleapis.com/google.crypto.tink.XChaCha20Poly1305Key",
-    };
-
-    for (String typeUrl : keyTypeUrls) {
-      assertNotNull(Registry.getKeyManager(typeUrl, Aead.class));
-    }
-  }
-
-  @Test
-  public void testFipsRegisterFipsKeys() throws Exception {
+  public void withFips_fipsKeyTypesAreRegistered() throws Exception {
     Assume.assumeTrue(TinkFips.useOnlyFips());
     Assume.assumeTrue(TinkFipsUtil.fipsModuleAvailable());
 
-    // Register AEAD key manager
     AeadConfig.register();
 
-    String[] keyTypeUrls = {
-      "type.googleapis.com/google.crypto.tink.AesCtrHmacAeadKey",
-      "type.googleapis.com/google.crypto.tink.AesGcmKey",
-    };
-
-    for (String typeUrl : keyTypeUrls) {
-      assertNotNull(Registry.getKeyManager(typeUrl, Aead.class));
-    }
+    assertNotNull(KeysetHandle.generateNew(PredefinedAeadParameters.AES128_CTR_HMAC_SHA256));
+    assertNotNull(KeysetHandle.generateNew(PredefinedAeadParameters.AES128_GCM));
   }
 
   @Test
-  public void testFipsRegisterNonFipsKeys() throws Exception {
+  public void withFips_nonFipsKeyTypesAreNotRegistered() throws Exception {
     Assume.assumeTrue(TinkFips.useOnlyFips());
     Assume.assumeTrue(TinkFipsUtil.fipsModuleAvailable());
 
-    // Register AEAD key manager
     AeadConfig.register();
 
-    // List of algorithms which are not part of FIPS and should not be registered.
-    String[] keyTypeUrls = {
-      "type.googleapis.com/google.crypto.tink.AesEaxKey",
-      "type.googleapis.com/google.crypto.tink.AesGcmSivKey",
-      "type.googleapis.com/google.crypto.tink.ChaCha20Poly1305Key",
-      "type.googleapis.com/google.crypto.tink.XChaCha20Poly1305Key",
-    };
-
-    for (String typeUrl : keyTypeUrls) {
-      GeneralSecurityException e =
-          assertThrows(
-              GeneralSecurityException.class, () -> Registry.getUntypedKeyManager(typeUrl));
-      assertThat(e.toString()).contains("No key manager found");
-    }
+    assertThrows(
+        GeneralSecurityException.class,
+        () -> KeysetHandle.generateNew(PredefinedAeadParameters.AES128_EAX));
+    assertThrows(
+        GeneralSecurityException.class,
+        () -> KeysetHandle.generateNew(AesGcmSivParameters.builder().setKeySizeBytes(16).build()));
+    assertThrows(
+        GeneralSecurityException.class,
+        () -> KeysetHandle.generateNew(PredefinedAeadParameters.CHACHA20_POLY1305));
+    assertThrows(
+        GeneralSecurityException.class,
+        () -> KeysetHandle.generateNew(PredefinedAeadParameters.XCHACHA20_POLY1305));
   }
 }

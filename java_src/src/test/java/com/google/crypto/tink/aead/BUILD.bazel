@@ -36,12 +36,12 @@ java_test(
     srcs = ["AeadConfigTest.java"],
     tags = ["fips"],
     deps = [
-        "//src/main/java/com/google/crypto/tink:aead",
-        "//src/main/java/com/google/crypto/tink:registry",
+        "//src/main/java/com/google/crypto/tink:registry_cluster",
         "//src/main/java/com/google/crypto/tink/aead:aead_config",
+        "//src/main/java/com/google/crypto/tink/aead:aes_gcm_siv_parameters",
+        "//src/main/java/com/google/crypto/tink/aead:predefined_aead_parameters",
         "//src/main/java/com/google/crypto/tink/config:tink_fips",
         "//src/main/java/com/google/crypto/tink/config/internal:tink_fips_util",
-        "@maven//:com_google_truth_truth",
         "@maven//:junit_junit",
     ],
 )
