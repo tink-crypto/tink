@@ -170,7 +170,7 @@ TEST_F(KeysetImplTest, FromJsonSuccess) {
           "key": [
             {
               "keyData": {
-                "typeUrl": "type.googleapis.com/google.crypto.tink.AesGcmKey",
+                "typeUrl": "type.googleapis.com/google.crypto.tink.FakeKeyType",
                 "keyMaterialType": "SYMMETRIC",
                 "value": "AFakeTestKeyValue1234567"
               },
