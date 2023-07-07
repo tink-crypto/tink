@@ -4,6 +4,7 @@
 include requirements.in
 include requirements.txt
 include .bazelrc
+include .bazelversion
 include VERSION
 include WORKSPACE
 include BUILD.bazel
