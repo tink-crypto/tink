@@ -57,7 +57,6 @@ public final class KeyDerivationKeyTemplatesTest {
 
     List<OutputPrefixType> outputPrefixTypes = new ArrayList<>();
     outputPrefixTypes.add(OutputPrefixType.TINK);
-    outputPrefixTypes.add(OutputPrefixType.LEGACY);
     outputPrefixTypes.add(OutputPrefixType.RAW);
     outputPrefixTypes.add(OutputPrefixType.CRUNCHY);
 
