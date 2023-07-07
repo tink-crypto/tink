@@ -92,6 +92,54 @@ tink_cc_library(
     tink::signature::ecdsa_sign_key_manager
 )
 
+tink_cc_library(
+  NAME v0
+  SRCS
+    v0.cc
+    v0.h
+  DEPS
+    absl::check
+    tink::core::configuration
+    tink::aead::aead_wrapper
+    tink::aead::aes_ctr_hmac_aead_key_manager
+    tink::aead::aes_eax_key_manager
+    tink::aead::aes_gcm_key_manager
+    tink::aead::aes_gcm_siv_key_manager
+    tink::aead::xchacha20_poly1305_key_manager
+    tink::daead::aes_siv_key_manager
+    tink::daead::deterministic_aead_wrapper
+    tink::hybrid::ecies_aead_hkdf_private_key_manager
+    tink::hybrid::ecies_aead_hkdf_public_key_manager
+    tink::hybrid::hybrid_decrypt_wrapper
+    tink::hybrid::hybrid_encrypt_wrapper
+    tink::hybrid::internal::hpke_private_key_manager
+    tink::hybrid::internal::hpke_public_key_manager
+    tink::internal::configuration_impl
+    tink::mac::aes_cmac_key_manager
+    tink::mac::hmac_key_manager
+    tink::mac::mac_wrapper
+    tink::mac::internal::chunked_mac_wrapper
+    tink::prf::aes_cmac_prf_key_manager
+    tink::prf::hkdf_prf_key_manager
+    tink::prf::hmac_prf_key_manager
+    tink::prf::prf_set_wrapper
+    tink::signature::ecdsa_verify_key_manager
+    tink::signature::ed25519_sign_key_manager
+    tink::signature::ed25519_verify_key_manager
+    tink::signature::public_key_sign_wrapper
+    tink::signature::public_key_verify_wrapper
+    tink::signature::rsa_ssa_pkcs1_sign_key_manager
+    tink::signature::rsa_ssa_pkcs1_verify_key_manager
+    tink::signature::rsa_ssa_pss_sign_key_manager
+    tink::signature::rsa_ssa_pss_verify_key_manager
+    tink::streamingaead::aes_ctr_hmac_streaming_key_manager
+    tink::streamingaead::aes_gcm_hkdf_streaming_key_manager
+    tink::streamingaead::streaming_aead_wrapper
+    tink::signature::ecdsa_sign_key_manager
+  TAGS
+    exclude_if_openssl
+)
+
 # tests
 
 tink_cc_test(
@@ -185,4 +233,37 @@ tink_cc_test(
     tink::signature::rsa_ssa_pss_verify_key_manager
     tink::util::test_matchers
     tink::proto::tink_cc_proto
+)
+
+tink_cc_test(
+  NAME v0_test
+  SRCS
+    v0_test.cc
+  DEPS
+    tink::config::v0
+    gmock
+    tink::core::configuration
+    tink::aead::aes_ctr_hmac_aead_key_manager
+    tink::aead::aes_eax_key_manager
+    tink::aead::aes_gcm_key_manager
+    tink::aead::aes_gcm_siv_key_manager
+    tink::aead::xchacha20_poly1305_key_manager
+    tink::daead::aes_siv_key_manager
+    tink::hybrid::ecies_aead_hkdf_public_key_manager
+    tink::hybrid::internal::hpke_public_key_manager
+    tink::internal::configuration_impl
+    tink::mac::aes_cmac_key_manager
+    tink::mac::hmac_key_manager
+    tink::prf::aes_cmac_prf_key_manager
+    tink::prf::hkdf_prf_key_manager
+    tink::prf::hmac_prf_key_manager
+    tink::signature::ecdsa_verify_key_manager
+    tink::signature::ed25519_verify_key_manager
+    tink::signature::rsa_ssa_pkcs1_verify_key_manager
+    tink::signature::rsa_ssa_pss_verify_key_manager
+    tink::streamingaead::aes_ctr_hmac_streaming_key_manager
+    tink::streamingaead::aes_gcm_hkdf_streaming_key_manager
+    tink::util::test_matchers
+  TAGS
+    exclude_if_openssl
 )
