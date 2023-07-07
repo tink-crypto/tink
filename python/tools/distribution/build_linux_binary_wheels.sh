@@ -14,7 +14,6 @@
 # limitations under the License.
 ################################################################################
 
-
 # This script builds binary wheels of Tink for Linux based on PEP 599. It
 # should be run inside a manylinux2014 Docker container to have the correct
 # environment setup.
@@ -36,21 +35,23 @@ readonly -A PYTHON_VERSIONS
 
 export TINK_PYTHON_ROOT_PATH="${PWD}"
 
-readonly BAZEL_VERSION="$(cat ${TINK_PYTHON_ROOT_PATH}/.bazelversion)"
-# Contains python version 4.21.9 of protobuf
-readonly PROTOC_RELEASE_TAG="21.9"
+# Install Bazelisk.
+readonly BAZELISK_VERSION="1.17.0"
+readonly BAZELISK_URL="https://github.com/bazelbuild/bazelisk/releases/download/v${BAZELISK_VERSION}/bazelisk-linux-amd64"
+readonly BAZELISK_SHA256="61699e22abb2a26304edfa1376f65ad24191f94a4ffed68a58d42b6fee01e124"
+curl -LsS "${BAZELISK_URL}" -o /usr/local/bin/bazelisk
+echo "${BAZELISK_SHA256} /usr/local/bin/bazelisk" | sha256sum -c
+chmod +x /usr/local/bin/bazelisk
 
-# Get dependencies which are needed for building Tink.
-
-# Install Bazel. Needed for building C++ extensions.
-curl -OL "https://github.com/bazelbuild/bazel/releases/download/${BAZEL_VERSION}/bazel-${BAZEL_VERSION}-installer-linux-x86_64.sh"
-chmod +x "bazel-${BAZEL_VERSION}-installer-linux-x86_64.sh"
-./"bazel-${BAZEL_VERSION}-installer-linux-x86_64.sh"
-
-# Install protoc. Needed for protocol buffer compilation.
+# Install protoc 21.12 (python version 4.21.12). Needed for protocol buffer
+# compilation.
+readonly PROTOC_RELEASE_TAG="21.12"
+readonly PROTOC_URL="https://github.com/protocolbuffers/protobuf/releases/download/v${PROTOC_RELEASE_TAG}/protoc-${PROTOC_RELEASE_TAG}-linux-x86_64.zip"
+readonly PROTOC_SHA256="3a4c1e5f2516c639d3079b1586e703fc7bcfa2136d58bda24d1d54f949c315e8"
 PROTOC_ZIP="protoc-${PROTOC_RELEASE_TAG}-linux-x86_64.zip"
-curl -OL "https://github.com/protocolbuffers/protobuf/releases/download/v${PROTOC_RELEASE_TAG}/${PROTOC_ZIP}"
-unzip -o "${PROTOC_ZIP}" -d /usr/local bin/protoc
+curl -LsS "${PROTOC_URL}" -o protoc.zip
+echo "${PROTOC_SHA256} protoc.zip" | sha256sum -c
+unzip -o protoc.zip -d /usr/local bin/protoc
 
 # Required to fix https://github.com/pypa/manylinux/issues/357.
 export LD_LIBRARY_PATH="/usr/local/lib"
@@ -65,12 +66,8 @@ for v in "${!PYTHON_VERSIONS[@]}"; do
     #
     # [1] https://github.com/pybind/pybind11_bazel/blob/fc56ce8a8b51e3dd941139d329b63ccfea1d304b/python_configure.bzl#L434
     export PATH="${PATH}:/opt/python/${PYTHON_VERSIONS[$v]}/bin"
-    pip wheel .
+    python3 -m pip wheel .
   )
-
-  # This is needed to ensure we get a clean build, otherwise parts of the
-  # compiled code from a previous build may be reused in a subsequent build.
-  bazel clean --expunge
 done
 
 # Repair wheels to convert them from linux to manylinux.
