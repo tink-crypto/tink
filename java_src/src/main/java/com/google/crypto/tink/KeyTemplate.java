@@ -108,6 +108,13 @@ public final class KeyTemplate {
     return kt;
   }
 
+  /**
+   * @deprecated Instead, operate on the {@link Parameters} object obtained with {@link
+   *     #toParameters}. If you really need this array, you need to first use
+   *     TinkProtoParametersFormat to serialize this parameters object, then parse the result with
+   *     the Tink-internal proto class "KeyTemplate".
+   */
+  @Deprecated
   public String getTypeUrl() {
     return kt.getTypeUrl();
   }
