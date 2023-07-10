@@ -27,6 +27,7 @@ import (
 	"github.com/google/tink/go/keyset"
 )
 
+// [START jwt-signature-example]
 func Example_signAndVerify() {
 	// A private keyset created with
 	// "tinkey create-keyset --key-template=JWT_RS256_2048_F4 --out private_keyset.cfg".
@@ -138,6 +139,8 @@ func Example_signAndVerify() {
 	// Output: example subject
 }
 
+// [END jwt-signature-example]
+
 func Example_verifyWithJWKS() {
 	// A signed token with the subject 'example subject', audience 'example audience'.
 	// and expiration on 2023-03-23.
@@ -197,6 +200,7 @@ func Example_verifyWithJWKS() {
 	// Output: example subject
 }
 
+// [START jwt-mac-example]
 func Example_computeMACAndVerify() {
 	// Generate a keyset handle.
 	handle, err := keyset.NewHandle(jwt.HS256Template())
@@ -250,3 +254,5 @@ func Example_computeMACAndVerify() {
 	fmt.Println(extractedCustomClaim)
 	// Output: my custom claim
 }
+
+// [END jwt-mac-example]
