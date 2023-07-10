@@ -21,6 +21,8 @@ import static com.google.crypto.tink.testing.KeyTypeManagerTestUtil.testKeyTempl
 import static org.junit.Assert.assertThrows;
 
 import com.google.crypto.tink.KeyTemplate;
+import com.google.crypto.tink.KeyTemplates;
+import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.Mac;
 import com.google.crypto.tink.internal.KeyTypeManager;
 import com.google.crypto.tink.proto.HashType;
@@ -40,11 +42,14 @@ import java.util.TreeSet;
 import javax.crypto.spec.SecretKeySpec;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.experimental.theories.DataPoints;
+import org.junit.experimental.theories.FromDataPoints;
+import org.junit.experimental.theories.Theories;
+import org.junit.experimental.theories.Theory;
 import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
 
 /** Unit tests for {@link HmacKeyManager}. */
-@RunWith(JUnit4.class)
+@RunWith(Theories.class)
 public class HmacKeyManagerTest {
   private final HmacKeyManager manager = new HmacKeyManager();
   private final KeyTypeManager.KeyFactory<HmacKeyFormat, HmacKey> factory = manager.keyFactory();
@@ -400,21 +405,26 @@ public class HmacKeyManagerTest {
     testKeyTemplateCompatible(manager, HmacKeyManager.hmacSha512HalfDigestTemplate());
   }
 
-  @Test
-  public void testKeyFormats() throws Exception {
-    factory.validateKeyFormat(factory.keyFormats().get("HMAC_SHA256_128BITTAG").keyFormat);
-    factory.validateKeyFormat(factory.keyFormats().get("HMAC_SHA256_128BITTAG_RAW").keyFormat);
+  @DataPoints("templateNames")
+  public static final String[] KEY_TEMPLATES =
+      new String[] {
+        "HMAC_SHA256_128BITTAG",
+        "HMAC_SHA256_128BITTAG_RAW",
+        "HMAC_SHA256_256BITTAG",
+        "HMAC_SHA256_256BITTAG_RAW",
+        "HMAC_SHA512_128BITTAG",
+        "HMAC_SHA512_128BITTAG_RAW",
+        "HMAC_SHA512_256BITTAG",
+        "HMAC_SHA512_256BITTAG_RAW",
+        "HMAC_SHA512_512BITTAG",
+        "HMAC_SHA512_512BITTAG_RAW"
+      };
 
-    factory.validateKeyFormat(factory.keyFormats().get("HMAC_SHA256_256BITTAG").keyFormat);
-    factory.validateKeyFormat(factory.keyFormats().get("HMAC_SHA256_256BITTAG_RAW").keyFormat);
-
-    factory.validateKeyFormat(factory.keyFormats().get("HMAC_SHA512_128BITTAG").keyFormat);
-    factory.validateKeyFormat(factory.keyFormats().get("HMAC_SHA512_128BITTAG_RAW").keyFormat);
-
-    factory.validateKeyFormat(factory.keyFormats().get("HMAC_SHA512_256BITTAG").keyFormat);
-    factory.validateKeyFormat(factory.keyFormats().get("HMAC_SHA512_256BITTAG_RAW").keyFormat);
-
-    factory.validateKeyFormat(factory.keyFormats().get("HMAC_SHA512_512BITTAG").keyFormat);
-    factory.validateKeyFormat(factory.keyFormats().get("HMAC_SHA512_512BITTAG_RAW").keyFormat);
+  @Theory
+  public void testTemplates(@FromDataPoints("templateNames") String templateName) throws Exception {
+    KeysetHandle h = KeysetHandle.generateNew(KeyTemplates.get(templateName));
+    assertThat(h.size()).isEqualTo(1);
+    assertThat(h.getAt(0).getKey().getParameters())
+        .isEqualTo(KeyTemplates.get(templateName).toParameters());
   }
 }
