@@ -22,6 +22,8 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.Assert.assertThrows;
 
 import com.google.crypto.tink.KeyTemplate;
+import com.google.crypto.tink.KeyTemplates;
+import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.internal.KeyTypeManager;
 import com.google.crypto.tink.proto.HashType;
 import com.google.crypto.tink.proto.HkdfPrfKey;
@@ -38,11 +40,14 @@ import java.io.InputStream;
 import java.security.GeneralSecurityException;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.experimental.theories.DataPoints;
+import org.junit.experimental.theories.FromDataPoints;
+import org.junit.experimental.theories.Theories;
+import org.junit.experimental.theories.Theory;
 import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
 
 /** Tests for HkdfPrfKeyManager. */
-@RunWith(JUnit4.class)
+@RunWith(Theories.class)
 public class HkdfPrfKeyManagerTest {
   private final HkdfPrfKeyManager manager = new HkdfPrfKeyManager();
   private final KeyTypeManager.KeyFactory<HkdfPrfKeyFormat, HkdfPrfKey> factory =
@@ -284,8 +289,17 @@ public class HkdfPrfKeyManagerTest {
     testKeyTemplateCompatible(manager, HkdfPrfKeyManager.hkdfSha256Template());
   }
 
-  @Test
-  public void testKeyFormats() throws Exception {
-    factory.validateKeyFormat(factory.keyFormats().get("HKDF_SHA256").keyFormat);
+  @DataPoints("templateNames")
+  public static final String[] KEY_TEMPLATES =
+      new String[] {
+        "HKDF_SHA256",
+      };
+
+  @Theory
+  public void testTemplates(@FromDataPoints("templateNames") String templateName) throws Exception {
+    KeysetHandle h = KeysetHandle.generateNew(KeyTemplates.get(templateName));
+    assertThat(h.size()).isEqualTo(1);
+    assertThat(h.getAt(0).getKey().getParameters())
+        .isEqualTo(KeyTemplates.get(templateName).toParameters());
   }
 }
