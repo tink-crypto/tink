@@ -323,6 +323,8 @@ java_test(
         "//src/main/java/com/google/crypto/tink:tink_proto_keyset_format",
         "//src/main/java/com/google/crypto/tink/aead:aead_config",
         "//src/main/java/com/google/crypto/tink/aead:aes_eax_key_manager",
+        "//src/main/java/com/google/crypto/tink/aead:x_cha_cha20_poly1305_key",
+        "//src/main/java/com/google/crypto/tink/aead:x_cha_cha20_poly1305_parameters",
         "//src/main/java/com/google/crypto/tink/internal:internal_configuration",
         "//src/main/java/com/google/crypto/tink/internal:key_parser",
         "//src/main/java/com/google/crypto/tink/internal:key_status_type_proto_converter",
