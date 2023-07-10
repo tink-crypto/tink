@@ -183,12 +183,7 @@ constexpr absl::string_view kSingleKeyAesGcmKeyset = R"json(
   XCTAssertNotNil(reader);
   XCTAssertNil(error, @"Initialization of TINKJSONKeysetReader failed with %@", error);
 
-  TINKKeysetHandle *handle =
-      [[TINKKeysetHandle alloc] initCleartextKeysetHandleWithKeysetReader:reader error:&error];
-  XCTAssertNotNil(handle);
-  XCTAssertNil(error, @"Initialization of TINKKeysetHandle failed with %@", error);
-
-  (void)[TINKAeadFactory primitiveWithKeysetHandle:handle error:&error];
+  (void)[[TINKKeysetHandle alloc] initCleartextKeysetHandleWithKeysetReader:reader error:&error];
   XCTAssertNotNil(error);
 }
 
