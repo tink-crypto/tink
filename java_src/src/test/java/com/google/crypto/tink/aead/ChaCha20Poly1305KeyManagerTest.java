@@ -24,6 +24,8 @@ import static org.junit.Assert.assertThrows;
 
 import com.google.crypto.tink.Aead;
 import com.google.crypto.tink.KeyTemplate;
+import com.google.crypto.tink.KeyTemplates;
+import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.internal.KeyTypeManager;
 import com.google.crypto.tink.proto.ChaCha20Poly1305Key;
 import com.google.crypto.tink.proto.ChaCha20Poly1305KeyFormat;
@@ -35,15 +37,16 @@ import java.security.GeneralSecurityException;
 import java.util.TreeSet;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.experimental.theories.DataPoints;
+import org.junit.experimental.theories.FromDataPoints;
+import org.junit.experimental.theories.Theories;
+import org.junit.experimental.theories.Theory;
 import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
 
 /** Test for ChaCha20Poly1305KeyManager. */
-@RunWith(JUnit4.class)
+@RunWith(Theories.class)
 public class ChaCha20Poly1305KeyManagerTest {
   private final ChaCha20Poly1305KeyManager manager = new ChaCha20Poly1305KeyManager();
-  private final KeyTypeManager.KeyFactory<ChaCha20Poly1305KeyFormat, ChaCha20Poly1305Key> factory =
-      manager.keyFactory();
 
   @Before
   public void register() throws Exception {
@@ -164,9 +167,15 @@ public class ChaCha20Poly1305KeyManagerTest {
     testKeyTemplateCompatible(manager, ChaCha20Poly1305KeyManager.rawChaCha20Poly1305Template());
   }
 
-  @Test
-  public void testKeyFormats() throws Exception {
-    factory.validateKeyFormat(factory.keyFormats().get("CHACHA20_POLY1305").keyFormat);
-    factory.validateKeyFormat(factory.keyFormats().get("CHACHA20_POLY1305_RAW").keyFormat);
+  @DataPoints("templateNames")
+  public static final String[] KEY_TEMPLATES =
+      new String[] {"CHACHA20_POLY1305", "CHACHA20_POLY1305_RAW"};
+
+  @Theory
+  public void testTemplates(@FromDataPoints("templateNames") String templateName) throws Exception {
+    KeysetHandle h = KeysetHandle.generateNew(KeyTemplates.get(templateName));
+    assertThat(h.size()).isEqualTo(1);
+    assertThat(h.getAt(0).getKey().getParameters())
+        .isEqualTo(KeyTemplates.get(templateName).toParameters());
   }
 }
