@@ -1222,7 +1222,7 @@ public final class KeysetHandle {
    * which are irrelevant to the function computed. Currently, keysets can also be invalid in which
    * case this will return false.
    */
-  boolean equalsKeyset(KeysetHandle other) {
+  public boolean equalsKeyset(KeysetHandle other) {
     if (size() != other.size()) {
       return false;
     }
