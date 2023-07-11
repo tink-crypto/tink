@@ -1164,7 +1164,10 @@ public final class KeysetHandle {
    * wrapped in a {@code KeyHandle}.
    *
    * <p>Please do not use this function in new code. Instead, use {@link #getPrimary}.
+   *
+   * @deprecated Use {@link #getPrimary} instead.
    */
+  @Deprecated
   public KeyHandle primaryKey() throws GeneralSecurityException {
     int primaryKeyId = keyset.getPrimaryKeyId();
     for (Keyset.Key key : keyset.getKeyList()) {
