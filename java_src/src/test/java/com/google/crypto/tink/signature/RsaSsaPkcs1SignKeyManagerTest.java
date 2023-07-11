@@ -22,6 +22,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
 
 import com.google.crypto.tink.KeyTemplate;
+import com.google.crypto.tink.KeyTemplates;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.PublicKeySign;
 import com.google.crypto.tink.PublicKeyVerify;
@@ -49,11 +50,14 @@ import java.util.Set;
 import java.util.TreeSet;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.experimental.theories.DataPoints;
+import org.junit.experimental.theories.FromDataPoints;
+import org.junit.experimental.theories.Theories;
+import org.junit.experimental.theories.Theory;
 import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
 
 /** Unit tests for RsaSsaPkcs1SignKeyManager. */
-@RunWith(JUnit4.class)
+@RunWith(Theories.class)
 public class RsaSsaPkcs1SignKeyManagerTest {
 
   @BeforeClass
@@ -356,16 +360,25 @@ public class RsaSsaPkcs1SignKeyManagerTest {
         () -> manager.getPrimitive(corruptedKey, PublicKeySign.class));
   }
 
-  @Test
-  public void testKeyFormats() throws Exception {
-    factory.validateKeyFormat(factory.keyFormats().get("RSA_SSA_PKCS1_3072_SHA256_F4").keyFormat);
-    factory.validateKeyFormat(
-        factory.keyFormats().get("RSA_SSA_PKCS1_3072_SHA256_F4_RAW").keyFormat);
+  @DataPoints("templateNames")
+  public static final String[] KEY_TEMPLATES =
+      new String[] {
+        "RSA_SSA_PKCS1_3072_SHA256_F4",
+        "RSA_SSA_PKCS1_3072_SHA256_F4_RAW",
+        "RSA_SSA_PKCS1_4096_SHA512_F4",
+        "RSA_SSA_PKCS1_4096_SHA512_F4_RAW",
+        "RSA_SSA_PKCS1_3072_SHA256_F4_WITHOUT_PREFIX"
+      };
 
-    factory.validateKeyFormat(factory.keyFormats().get("RSA_SSA_PKCS1_4096_SHA512_F4").keyFormat);
-    factory.validateKeyFormat(
-        factory.keyFormats().get("RSA_SSA_PKCS1_4096_SHA512_F4_RAW").keyFormat);
-    factory.validateKeyFormat(
-        factory.keyFormats().get("RSA_SSA_PKCS1_3072_SHA256_F4_WITHOUT_PREFIX").keyFormat);
+  @Theory
+  public void testTemplates(@FromDataPoints("templateNames") String templateName) throws Exception {
+    if (TestUtil.isTsan()) {
+      // factory.createKey is too slow in Tsan.
+      return;
+    }
+    KeysetHandle h = KeysetHandle.generateNew(KeyTemplates.get(templateName));
+    assertThat(h.size()).isEqualTo(1);
+    assertThat(h.getAt(0).getKey().getParameters())
+        .isEqualTo(KeyTemplates.get(templateName).toParameters());
   }
 }

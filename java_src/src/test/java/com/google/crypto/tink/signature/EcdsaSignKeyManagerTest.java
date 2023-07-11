@@ -21,6 +21,8 @@ import static com.google.crypto.tink.testing.KeyTypeManagerTestUtil.testKeyTempl
 import static org.junit.Assert.assertThrows;
 
 import com.google.crypto.tink.KeyTemplate;
+import com.google.crypto.tink.KeyTemplates;
+import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.PublicKeySign;
 import com.google.crypto.tink.internal.KeyTypeManager;
 import com.google.crypto.tink.proto.EcdsaKeyFormat;
@@ -38,11 +40,14 @@ import java.util.Set;
 import java.util.TreeSet;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.experimental.theories.DataPoints;
+import org.junit.experimental.theories.FromDataPoints;
+import org.junit.experimental.theories.Theories;
+import org.junit.experimental.theories.Theory;
 import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
 
 /** Unit tests for EcdsaSignKeyManager. */
-@RunWith(JUnit4.class)
+@RunWith(Theories.class)
 public class EcdsaSignKeyManagerTest {
   private final EcdsaSignKeyManager manager = new EcdsaSignKeyManager();
   private final KeyTypeManager.KeyFactory<EcdsaKeyFormat, EcdsaPrivateKey> factory =
@@ -342,19 +347,25 @@ public class EcdsaSignKeyManagerTest {
     testKeyTemplateCompatible(manager, EcdsaSignKeyManager.rawEcdsaP256Template());
   }
 
-  @Test
-  public void testKeyFormats() throws Exception {
-    factory.validateKeyFormat(factory.keyFormats().get("ECDSA_P256").keyFormat);
-    factory.validateKeyFormat(factory.keyFormats().get("ECDSA_P256_IEEE_P1363").keyFormat);
-    factory.validateKeyFormat(factory.keyFormats().get("ECDSA_P256_RAW").keyFormat);
-    factory.validateKeyFormat(
-        factory.keyFormats().get("ECDSA_P256_IEEE_P1363_WITHOUT_PREFIX").keyFormat);
+  @DataPoints("templateNames")
+  public static final String[] KEY_TEMPLATES =
+      new String[] {
+        "ECDSA_P256",
+        "ECDSA_P256_IEEE_P1363",
+        "ECDSA_P256_RAW",
+        "ECDSA_P256_IEEE_P1363_WITHOUT_PREFIX",
+        "ECDSA_P384_SHA384",
+        "ECDSA_P384_SHA512",
+        "ECDSA_P384_IEEE_P1363",
+        "ECDSA_P521",
+        "ECDSA_P521_IEEE_P1363",
+      };
 
-    factory.validateKeyFormat(factory.keyFormats().get("ECDSA_P384_SHA384").keyFormat);
-    factory.validateKeyFormat(factory.keyFormats().get("ECDSA_P384_SHA512").keyFormat);
-    factory.validateKeyFormat(factory.keyFormats().get("ECDSA_P384_IEEE_P1363").keyFormat);
-
-    factory.validateKeyFormat(factory.keyFormats().get("ECDSA_P521").keyFormat);
-    factory.validateKeyFormat(factory.keyFormats().get("ECDSA_P521_IEEE_P1363").keyFormat);
+  @Theory
+  public void testTemplates(@FromDataPoints("templateNames") String templateName) throws Exception {
+    KeysetHandle h = KeysetHandle.generateNew(KeyTemplates.get(templateName));
+    assertThat(h.size()).isEqualTo(1);
+    assertThat(h.getAt(0).getKey().getParameters())
+        .isEqualTo(KeyTemplates.get(templateName).toParameters());
   }
 }

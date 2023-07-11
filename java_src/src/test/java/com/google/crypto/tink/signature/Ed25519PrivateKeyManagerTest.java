@@ -21,6 +21,8 @@ import static com.google.crypto.tink.testing.KeyTypeManagerTestUtil.testKeyTempl
 import static org.junit.Assert.assertThrows;
 
 import com.google.crypto.tink.KeyTemplate;
+import com.google.crypto.tink.KeyTemplates;
+import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.PublicKeySign;
 import com.google.crypto.tink.PublicKeyVerify;
 import com.google.crypto.tink.internal.KeyTypeManager;
@@ -39,11 +41,14 @@ import java.util.Set;
 import java.util.TreeSet;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.experimental.theories.DataPoints;
+import org.junit.experimental.theories.FromDataPoints;
+import org.junit.experimental.theories.Theories;
+import org.junit.experimental.theories.Theory;
 import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
 
 /** Unit tests for Ed25519PrivateKeyManager. */
-@RunWith(JUnit4.class)
+@RunWith(Theories.class)
 public class Ed25519PrivateKeyManagerTest {
   private final Ed25519PrivateKeyManager manager = new Ed25519PrivateKeyManager();
   private final KeyTypeManager.KeyFactory<Ed25519KeyFormat, Ed25519PrivateKey> factory =
@@ -243,10 +248,17 @@ public class Ed25519PrivateKeyManagerTest {
           new ByteArrayInputStream(keyMaterial)));
   }
 
-  @Test
-  public void testKeyFormats() throws Exception {
-    factory.validateKeyFormat(factory.keyFormats().get("ED25519").keyFormat);
-    factory.validateKeyFormat(factory.keyFormats().get("ED25519_RAW").keyFormat);
-    factory.validateKeyFormat(factory.keyFormats().get("ED25519WithRawOutput").keyFormat);
+  @DataPoints("templateNames")
+  public static final String[] KEY_TEMPLATES =
+      new String[] {
+        "ED25519", "ED25519_RAW", "ED25519WithRawOutput",
+      };
+
+  @Theory
+  public void testTemplates(@FromDataPoints("templateNames") String templateName) throws Exception {
+    KeysetHandle h = KeysetHandle.generateNew(KeyTemplates.get(templateName));
+    assertThat(h.size()).isEqualTo(1);
+    assertThat(h.getAt(0).getKey().getParameters())
+        .isEqualTo(KeyTemplates.get(templateName).toParameters());
   }
 }
