@@ -233,7 +233,9 @@ tink_cc_test(
     fips_140_2_test.cc
   DEPS
     tink::config::fips_140_2
+    tink::config::key_gen_fips_140_2
     gmock
+    tink::core::keyset_handle
     tink::aead::aead_key_templates
     tink::aead::aes_ctr_hmac_aead_key_manager
     tink::aead::aes_gcm_key_manager
@@ -246,10 +248,7 @@ tink_cc_test(
     tink::signature::ecdsa_verify_key_manager
     tink::signature::rsa_ssa_pkcs1_verify_key_manager
     tink::signature::rsa_ssa_pss_verify_key_manager
-    tink::util::test_keyset_handle
     tink::util::test_matchers
-    tink::util::test_util
-    tink::proto::tink_cc_proto
 )
 
 tink_cc_test(
@@ -259,6 +258,7 @@ tink_cc_test(
   DEPS
     tink::config::key_gen_fips_140_2
     gmock
+    tink::core::keyset_handle
     tink::aead::aead_key_templates
     tink::aead::aes_ctr_hmac_aead_key_manager
     tink::aead::aes_gcm_key_manager
@@ -271,7 +271,6 @@ tink_cc_test(
     tink::signature::rsa_ssa_pkcs1_verify_key_manager
     tink::signature::rsa_ssa_pss_verify_key_manager
     tink::util::test_matchers
-    tink::proto::tink_cc_proto
 )
 
 tink_cc_test(

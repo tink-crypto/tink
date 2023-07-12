@@ -250,6 +250,8 @@ cc_test(
     srcs = ["fips_140_2_test.cc"],
     deps = [
         ":fips_140_2",
+        ":key_gen_fips_140_2",
+        "//:keyset_handle",
         "//aead:aead_key_templates",
         "//aead:aes_ctr_hmac_aead_key_manager",
         "//aead:aes_gcm_key_manager",
@@ -259,13 +261,10 @@ cc_test(
         "//mac:aes_cmac_key_manager",
         "//mac:hmac_key_manager",
         "//prf:hmac_prf_key_manager",
-        "//proto:tink_cc_proto",
         "//signature:ecdsa_verify_key_manager",
         "//signature:rsa_ssa_pkcs1_verify_key_manager",
         "//signature:rsa_ssa_pss_verify_key_manager",
-        "//util:test_keyset_handle",
         "//util:test_matchers",
-        "//util:test_util",
         "@com_google_googletest//:gtest_main",
     ],
 )
@@ -275,6 +274,7 @@ cc_test(
     srcs = ["key_gen_fips_140_2_test.cc"],
     deps = [
         ":key_gen_fips_140_2",
+        "//:keyset_handle",
         "//aead:aead_key_templates",
         "//aead:aes_ctr_hmac_aead_key_manager",
         "//aead:aes_gcm_key_manager",
@@ -283,7 +283,6 @@ cc_test(
         "//mac:aes_cmac_key_manager",
         "//mac:hmac_key_manager",
         "//prf:hmac_prf_key_manager",
-        "//proto:tink_cc_proto",
         "//signature:ecdsa_verify_key_manager",
         "//signature:rsa_ssa_pkcs1_verify_key_manager",
         "//signature:rsa_ssa_pss_verify_key_manager",

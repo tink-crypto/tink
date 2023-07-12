@@ -24,19 +24,18 @@
 #include "tink/aead/aead_key_templates.h"
 #include "tink/aead/aes_ctr_hmac_aead_key_manager.h"
 #include "tink/aead/aes_gcm_key_manager.h"
+#include "tink/config/key_gen_fips_140_2.h"
 #include "tink/internal/configuration_impl.h"
 #include "tink/internal/fips_utils.h"
 #include "tink/internal/key_type_info_store.h"
+#include "tink/keyset_handle.h"
 #include "tink/mac/aes_cmac_key_manager.h"
 #include "tink/mac/hmac_key_manager.h"
 #include "tink/prf/hmac_prf_key_manager.h"
 #include "tink/signature/ecdsa_verify_key_manager.h"
 #include "tink/signature/rsa_ssa_pkcs1_verify_key_manager.h"
 #include "tink/signature/rsa_ssa_pss_verify_key_manager.h"
-#include "tink/util/test_keyset_handle.h"
 #include "tink/util/test_matchers.h"
-#include "tink/util/test_util.h"
-#include "proto/tink.pb.h"
 
 namespace crypto {
 namespace tink {
@@ -45,11 +44,6 @@ namespace {
 using ::crypto::tink::test::IsOk;
 using ::crypto::tink::test::IsOkAndHolds;
 using ::crypto::tink::test::StatusIs;
-using ::google::crypto::tink::KeyData;
-using ::google::crypto::tink::Keyset;
-using ::google::crypto::tink::KeyStatusType;
-using ::google::crypto::tink::KeyTemplate;
-using ::google::crypto::tink::OutputPrefixType;
 
 class Fips1402Test : public ::testing::Test {
  protected:
@@ -97,36 +91,19 @@ TEST_F(Fips1402Test, NonFipsTypeNotPresent) {
               StatusIs(absl::StatusCode::kNotFound));
 }
 
-TEST_F(Fips1402Test, NewKeyDataAndGetPrimitive) {
+TEST_F(Fips1402Test, GenerateNewKeysetHandleAndGetPrimitive) {
   if (!internal::IsFipsEnabledInSsl()) {
     GTEST_SKIP() << "Only test in FIPS mode";
   }
 
-  // TODO(b/265705174): Replace with KeysetHandle::GenerateNew once that takes a
-  // config parameter.
-  util::StatusOr<const internal::KeyTypeInfoStore*> store =
-      internal::ConfigurationImpl::GetKeyTypeInfoStore(ConfigFips140_2());
-  ASSERT_THAT(store, IsOk());
-  KeyTemplate templ = AeadKeyTemplates::Aes128Gcm();
-  util::StatusOr<internal::KeyTypeInfoStore::Info*> info =
-      (*store)->Get(templ.type_url());
-  ASSERT_THAT(info, IsOk());
+  util::StatusOr<std::unique_ptr<KeysetHandle>> handle =
+      KeysetHandle::GenerateNew(AeadKeyTemplates::Aes128Gcm(),
+                                KeyGenConfigFips140_2());
+  ASSERT_THAT(handle, IsOk());
 
-  util::StatusOr<std::unique_ptr<KeyData>> key_data =
-      (*info)->key_factory().NewKeyData(templ.value());
-  ASSERT_THAT(key_data, IsOk());
-
-  Keyset keyset;
-  uint32_t key_id = 0;
-  test::AddKeyData(**key_data, key_id, OutputPrefixType::TINK,
-                   KeyStatusType::ENABLED, &keyset);
-  keyset.set_primary_key_id(key_id);
-
-  std::unique_ptr<KeysetHandle> handle =
-      TestKeysetHandle::GetKeysetHandle(keyset);
   util::StatusOr<std::unique_ptr<Aead>> aead =
-      handle->GetPrimitive<Aead>(ConfigFips140_2());
-  EXPECT_THAT(aead, IsOk());
+      (*handle)->GetPrimitive<Aead>(ConfigFips140_2());
+  ASSERT_THAT(aead, IsOk());
 
   std::string plaintext = "plaintext";
   std::string ad = "ad";
