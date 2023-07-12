@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# [START python-jwt-signature-example]
+# [START python-jwt-verify-example]
 """A utility for verifying Json Web Tokens (JWT)."""
 
 import datetime
@@ -65,8 +65,9 @@ def main(argv):
         logging.exception('Error reading public JWK set: %s', e)
         return 1
   else:
-    logging.info(
+    logging.exception(
         'Either --public_keyset_path or --public_jwk_set_path must be set')
+    return 1
 
   now = datetime.datetime.now(tz=datetime.timezone.utc)
   try:
@@ -93,4 +94,4 @@ if __name__ == '__main__':
   flags.mark_flags_as_required(['audience', 'token_path'])
   app.run(main)
 
-# [END python-jwt-signature-example]
+# [END python-jwt-verify-example]
