@@ -402,3 +402,20 @@ java_test(
         "@maven//:junit_junit",
     ],
 )
+
+java_test(
+    name = "EciesPublicKeyTest",
+    size = "small",
+    srcs = ["EciesPublicKeyTest.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink/aead:x_cha_cha20_poly1305_parameters",
+        "//src/main/java/com/google/crypto/tink/hybrid:ecies_parameters",
+        "//src/main/java/com/google/crypto/tink/hybrid:ecies_public_key",
+        "//src/main/java/com/google/crypto/tink/internal:big_integer_encoding",
+        "//src/main/java/com/google/crypto/tink/subtle:elliptic_curves",
+        "//src/main/java/com/google/crypto/tink/subtle:x25519",
+        "//src/main/java/com/google/crypto/tink/util:bytes",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
