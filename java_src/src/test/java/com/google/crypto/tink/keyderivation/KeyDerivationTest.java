@@ -23,15 +23,16 @@ import static org.junit.Assert.assertThrows;
 import com.google.crypto.tink.Aead;
 import com.google.crypto.tink.DeterministicAead;
 import com.google.crypto.tink.InsecureSecretKeyAccess;
-import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.KeyTemplates;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.Mac;
+import com.google.crypto.tink.Parameters;
 import com.google.crypto.tink.TinkJsonProtoKeysetFormat;
 import com.google.crypto.tink.aead.AeadConfig;
 import com.google.crypto.tink.daead.DeterministicAeadConfig;
 import com.google.crypto.tink.mac.MacConfig;
 import com.google.crypto.tink.prf.PrfConfig;
+import com.google.crypto.tink.prf.PrfParameters;
 import com.google.crypto.tink.testing.TestUtil;
 import java.security.GeneralSecurityException;
 import org.junit.Assume;
@@ -56,11 +57,13 @@ public final class KeyDerivationTest {
   @Test
   public void createTemplateAndDeriveAesGcmKeyset_success() throws Exception {
     Assume.assumeFalse(TestUtil.isAndroid()); // some android versions don't support AesGcm
-    KeyTemplate keyDerivationTemplate =
-        KeyDerivationKeyTemplates.createPrfBasedKeyTemplate(
-            KeyTemplates.get("HKDF_SHA256"), KeyTemplates.get("AES256_GCM"));
+    Parameters keyDerivationParameters =
+        PrfBasedKeyDerivationParameters.builder()
+            .setPrfParameters((PrfParameters) KeyTemplates.get("HKDF_SHA256").toParameters())
+            .setDerivedKeyParameters(KeyTemplates.get("AES256_GCM").toParameters())
+            .build();
 
-    KeysetHandle handle = KeysetHandle.generateNew(keyDerivationTemplate);
+    KeysetHandle handle = KeysetHandle.generateNew(keyDerivationParameters);
     KeysetDeriver deriver = handle.getPrimitive(KeysetDeriver.class);
 
     KeysetHandle derivedHandle = deriver.deriveKeyset("salt".getBytes(UTF_8));
@@ -190,11 +193,13 @@ public final class KeyDerivationTest {
 
   @Test
   public void createTemplateAndDeriveHmacKeyset_success() throws Exception {
-    KeyTemplate keyDerivationTemplate =
-        KeyDerivationKeyTemplates.createPrfBasedKeyTemplate(
-            KeyTemplates.get("HKDF_SHA256"), KeyTemplates.get("HMAC_SHA256_128BITTAG"));
+    Parameters keyDerivationParameters =
+        PrfBasedKeyDerivationParameters.builder()
+            .setPrfParameters((PrfParameters) KeyTemplates.get("HKDF_SHA256").toParameters())
+            .setDerivedKeyParameters(KeyTemplates.get("HMAC_SHA256_128BITTAG").toParameters())
+            .build();
 
-    KeysetHandle handle = KeysetHandle.generateNew(keyDerivationTemplate);
+    KeysetHandle handle = KeysetHandle.generateNew(keyDerivationParameters);
     KeysetDeriver deriver = handle.getPrimitive(KeysetDeriver.class);
 
     KeysetHandle derivedHandle = deriver.deriveKeyset("salt".getBytes(UTF_8));
