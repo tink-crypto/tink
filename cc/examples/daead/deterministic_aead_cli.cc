@@ -13,7 +13,7 @@
 // limitations under the License.
 //
 ///////////////////////////////////////////////////////////////////////////////
-// [START daead-example]
+// [START deterministic-aead-example]
 // A command-line utility for testing Tink Deterministic AEAD.
 #include <iostream>
 #include <memory>
@@ -131,4 +131,4 @@ int main(int argc, char** argv) {
       mode, keyset_filename, input_filename, output_filename, associated_data));
   return 0;
 }
-// [END daead-example]
+// [END deterministic-aead-example]
