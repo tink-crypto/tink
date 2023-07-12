@@ -55,21 +55,19 @@ def main(argv):
     logging.exception('Error initialising Tink: %s', e)
     return 1
 
-  # Read the GCP credentials and setup client
   try:
-    gcpkms.GcpKmsClient.register_client(
-        FLAGS.kek_uri, FLAGS.gcp_credential_path)
+    # Read the GCP credentials and setup client
+    client = gcpkms.GcpKmsClient(FLAGS.kek_uri, FLAGS.gcp_credential_path)
   except tink.TinkError as e:
-    logging.exception('Error initializing GCP client: %s', e)
+    logging.exception('Error creating GCP KMS client: %s', e)
     return 1
 
   # Create envelope AEAD primitive using AES256 GCM for encrypting the data
   try:
-    template = aead.aead_key_templates.create_kms_envelope_aead_key_template(
-        kek_uri=FLAGS.kek_uri,
-        dek_template=aead.aead_key_templates.AES256_GCM)
-    handle = tink.new_keyset_handle(template)
-    env_aead = handle.primitive(aead.Aead)
+    remote_aead = client.get_aead(FLAGS.kek_uri)
+    env_aead = aead.KmsEnvelopeAead(
+        aead.aead_key_templates.AES256_GCM, remote_aead
+    )
   except tink.TinkError as e:
     logging.exception('Error creating primitive: %s', e)
     return 1
@@ -98,7 +96,9 @@ def main(argv):
 
   else:
     logging.error(
-        'Error mode not supported. Please choose "encrypt" or "decrypt".')
+        'Unsupported mode %s. Please choose "encrypt" or "decrypt".',
+        FLAGS.mode,
+    )
     return 1
 
 

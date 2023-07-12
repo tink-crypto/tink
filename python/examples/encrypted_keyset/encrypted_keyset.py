@@ -50,26 +50,21 @@ def main(argv):
   try:
     aead.register()
   except tink.TinkError as e:
-    logging.error('Error initialising Tink: %s', e)
+    logging.exception('Error initialising Tink: %s', e)
     return 1
 
-  # Read the GCP credentials and set up a client
   try:
-    gcpkms.GcpKmsClient.register_client(
-        FLAGS.kek_uri, FLAGS.gcp_credential_path)
+    # Read the GCP credentials and setup client
+    client = gcpkms.GcpKmsClient(FLAGS.kek_uri, FLAGS.gcp_credential_path)
   except tink.TinkError as e:
-    logging.error('Error initializing GCP client: %s', e)
+    logging.exception('Error creating GCP KMS client: %s', e)
     return 1
 
-  # Create an AEAD primitive from the key-encryption key (KEK) for encrypting
-  # Tink keysets
+  # Create envelope AEAD primitive using AES256 GCM for encrypting the data
   try:
-    handle = tink.new_keyset_handle(
-        aead.aead_key_templates.create_kms_aead_key_template(
-            key_uri=FLAGS.kek_uri))
-    gcp_aead = handle.primitive(aead.Aead)
+    remote_aead = client.get_aead(FLAGS.kek_uri)
   except tink.TinkError as e:
-    logging.exception('Error creating KMS AEAD primitive: %s', e)
+    logging.exception('Error creating primitive: %s', e)
     return 1
 
   if FLAGS.mode == 'generate':
@@ -87,7 +82,7 @@ def main(argv):
     # Encrypt the keyset_handle with the remote key-encryption key (KEK)
     with open(FLAGS.keyset_path, 'wt') as keyset_file:
       try:
-        keyset_handle.write(tink.JsonKeysetWriter(keyset_file), gcp_aead)
+        keyset_handle.write(tink.JsonKeysetWriter(keyset_file), remote_aead)
       except tink.TinkError as e:
         logging.exception('Error writing key: %s', e)
         return 1
@@ -101,7 +96,8 @@ def main(argv):
     try:
       text = keyset_file.read()
       keyset_handle = tink.KeysetHandle.read(
-          tink.JsonKeysetReader(text), gcp_aead)
+          tink.JsonKeysetReader(text), remote_aead
+      )
     except tink.TinkError as e:
       logging.exception('Error reading key: %s', e)
       return 1
@@ -110,7 +106,7 @@ def main(argv):
   try:
     cipher = keyset_handle.primitive(aead.Aead)
   except tink.TinkError as e:
-    logging.error('Error creating primitive: %s', e)
+    logging.exception('Error creating primitive: %s', e)
     return 1
 
   with open(FLAGS.input_path, 'rb') as input_file:
@@ -121,7 +117,9 @@ def main(argv):
       output_data = cipher.encrypt(input_data, associated_data)
     else:
       logging.error(
-          'Error mode not supported. Please choose "encrypt" or "decrypt".')
+          'Unsupported mode %s. Please choose "encrypt" or "decrypt".',
+          FLAGS.mode,
+      )
       return 1
 
     with open(FLAGS.output_path, 'wb') as output_file:
