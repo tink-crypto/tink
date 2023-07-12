@@ -280,6 +280,7 @@ cc_library(
     srcs = ["kms_envelope_aead.cc"],
     hdrs = ["kms_envelope_aead.h"],
     include_prefix = "tink/aead",
+    visibility = ["//visibility:public"],
     deps = [
         "//:aead",
         "//:registry",
