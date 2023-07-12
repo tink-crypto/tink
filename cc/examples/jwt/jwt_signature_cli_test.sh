@@ -22,9 +22,10 @@ set -euo pipefail
 
 : "${TEST_TMPDIR:=$(mktemp -d)}"
 
-readonly CLI="$1"
-readonly PRIVATE_KEYSET_FILE="$2"
-readonly PUBLIC_KEYSET_FILE="$3"
+readonly CLI_SIGN="$1"
+readonly CLI_VERIFY="$2"
+readonly PRIVATE_KEYSET_FILE="$3"
+readonly PUBLIC_KEYSET_FILE="$4"
 readonly TOKEN_FILE="${TEST_TMPDIR}/token.json"
 readonly TEST_NAME="TinkCcExamplesJwtSignatureTest"
 
@@ -110,16 +111,14 @@ end_test_case() {
 start_test_case "sign_verify_all_good"
 
 # Sign.
-test_command "${CLI}" \
-  --mode sign \
+test_command "${CLI_SIGN}" \
   --keyset_filename "${PRIVATE_KEYSET_FILE}" \
   --audience "${AUDIENCE}" \
   --token_filename "${TOKEN_FILE}"
 assert_command_succeeded
 
 # Verify.
-test_command "${CLI}" \
-  --mode verify \
+test_command "${CLI_VERIFY}" \
   --keyset_filename "${PUBLIC_KEYSET_FILE}" \
   --audience "${AUDIENCE}" \
   --token_filename "${TOKEN_FILE}"
@@ -132,8 +131,7 @@ end_test_case
 start_test_case "verify_fails_with_invalid_token"
 
 # Sign.
-test_command "${CLI}" \
-  --mode sign \
+test_command "${CLI_SIGN}" \
   --keyset_filename "${PRIVATE_KEYSET_FILE}" \
   --audience "${AUDIENCE}" \
   --token_filename "${TOKEN_FILE}"
@@ -143,8 +141,7 @@ assert_command_succeeded
 echo "modified" >> "${TOKEN_FILE}"
 
 # Verify.
-test_command "${CLI}" \
-  --mode verify \
+test_command "${CLI_VERIFY}" \
   --keyset_filename "${PUBLIC_KEYSET_FILE}" \
   --audience "${AUDIENCE}" \
   --token_filename "${TOKEN_FILE}"
@@ -157,8 +154,7 @@ end_test_case
 start_test_case "verify_fails_with_invalid_audience"
 
 # Sign.
-test_command "${CLI}" \
-  --mode sign \
+test_command "${CLI_SIGN}" \
   --keyset_filename "${PRIVATE_KEYSET_FILE}" \
   --audience "${AUDIENCE}" \
   --token_filename "${TOKEN_FILE}"
@@ -168,8 +164,7 @@ assert_command_succeeded
 readonly INVALID_AUDIENCE="invalid audience"
 
 # Verify.
-test_command "${CLI}" \
-  --mode verify \
+test_command "${CLI_VERIFY}" \
   --keyset_filename "${PUBLIC_KEYSET_FILE}" \
   --audience "${INVALID_AUDIENCE}" \
   --token_filename "${TOKEN_FILE}"
