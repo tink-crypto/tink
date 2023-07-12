@@ -18,6 +18,7 @@ package jwt_test
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"log"
 	"time"
@@ -141,6 +142,53 @@ func Example_signAndVerify() {
 
 // [END jwt-signature-example]
 
+// [START jwt-generate-jwks-example]
+func Example_generateJWKS() {
+	// A Tink keyset in JSON format with one JWT public key.
+	publicJSONKeyset := `{
+		"primaryKeyId": 185188009,
+		"key": [
+			{
+				"keyData": {
+					"typeUrl": "type.googleapis.com/google.crypto.tink.JwtRsaSsaPkcs1PublicKey",
+					"value": "EAEagQIAs9iifvWObNLbP+x7zupVIYTdHKba4VFgJEnnGtIII21R+KGddTdvNGAokd4GPrFk1GDPitHrAAoW1+NWrafsEUi2J9Sy3uwEyarsKDggewoBCNg2fcWAiZXplPjUyTlhrLvTuyrcL/mGPy+ib7bdmov+D2EP+rKUH6/ydtQGiyHRR3uurTUWfrMD1/6WaBVfngpy5Pxs2nuHXRmBHQKWmPfvErgr4abdjhKDaWIuxzSise1CSAbiWTNcxpIuFYZgPjgQzpqeh93LUXIX9YJds/bhHtXqRdxk6yTisloHOZETItK/rHCCE25dLkkaJ2Li7AtnJdBc6tEUNiuFj2JCjSIDAQAB",
+					"keyMaterialType": "ASYMMETRIC_PUBLIC"
+				},
+				"status": "ENABLED",
+				"keyId": 185188009,
+				"outputPrefixType": "TINK"
+			}
+		]
+	}`
+
+	// Create a keyset handle from the keyset containing the public key. Because the
+	// public keyset does not contain any secrets, we can use [keyset.ReadWithNoSecrets].
+	publicKeysetHandle, err := keyset.ReadWithNoSecrets(
+		keyset.NewJSONReader(bytes.NewBufferString(publicJSONKeyset)))
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// Create a publicJWKset from publicKeysetHandle.
+	publicJWKset, err := jwt.JWKSetFromPublicKeysetHandle(publicKeysetHandle)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// Remove whitespace so that we can compare it to the expected string.
+	compactPublicJWKset := &bytes.Buffer{}
+	err = json.Compact(compactPublicJWKset, publicJWKset)
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println(compactPublicJWKset.String())
+	// Output:
+	// {"keys":[{"alg":"RS256","e":"AQAB","key_ops":["verify"],"kid":"Cwm-qQ","kty":"RSA","n":"ALPYon71jmzS2z_se87qVSGE3Rym2uFRYCRJ5xrSCCNtUfihnXU3bzRgKJHeBj6xZNRgz4rR6wAKFtfjVq2n7BFItifUst7sBMmq7Cg4IHsKAQjYNn3FgImV6ZT41Mk5Yay707sq3C_5hj8vom-23ZqL_g9hD_qylB-v8nbUBosh0Ud7rq01Fn6zA9f-lmgVX54KcuT8bNp7h10ZgR0Clpj37xK4K-Gm3Y4Sg2liLsc0orHtQkgG4lkzXMaSLhWGYD44EM6anofdy1FyF_WCXbP24R7V6kXcZOsk4rJaBzmREyLSv6xwghNuXS5JGidi4uwLZyXQXOrRFDYrhY9iQo0","use":"sig"}]}
+}
+
+// [END jwt-generate-jwks-example]
+
+// [START jwt-verify-with-jwks-example]
 func Example_verifyWithJWKS() {
 	// A signed token with the subject 'example subject', audience 'example audience'.
 	// and expiration on 2023-03-23.
@@ -200,6 +248,8 @@ func Example_verifyWithJWKS() {
 	// Output: example subject
 }
 
+// [END jwt-verify-with-jwks-example]
+
 // [START jwt-mac-example]
 func Example_computeMACAndVerify() {
 	// Generate a keyset handle.
@@ -215,7 +265,7 @@ func Example_computeMACAndVerify() {
 	// Create a token and compute a MAC for it.
 	expiresAt := time.Now().Add(time.Hour)
 	audience := "example audience"
-	customClaims := map[string]interface{}{"custom": "my custom claim"}
+	customClaims := map[string]any{"custom": "my custom claim"}
 	rawJWT, err := jwt.NewRawJWT(&jwt.RawJWTOptions{
 		Audience:     &audience,
 		CustomClaims: customClaims,
