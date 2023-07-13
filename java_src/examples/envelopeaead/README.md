@@ -21,7 +21,7 @@ The CLI takes the following arguments:
 
 ## Build and Run
 
-### Prequisite
+### Prerequisite
 
 This envelope encryption example uses a Cloud KMS key as a key-encryption key
 (KEK). In order to run it, you need to:
