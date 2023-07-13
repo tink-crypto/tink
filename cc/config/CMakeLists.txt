@@ -1,7 +1,5 @@
 tink_module(config)
 
-add_subdirectory(internal)
-
 tink_cc_library(
   NAME tink_config
   SRCS
@@ -40,6 +38,19 @@ tink_cc_library(
     tink::internal::fips_utils
     tink::internal::registry_impl
     tink::util::status
+)
+
+tink_cc_library(
+  NAME global_registry
+  SRCS
+    global_registry.cc
+    global_registry.h
+  DEPS
+    absl::check
+    tink::core::configuration
+    tink::core::key_gen_configuration
+    tink::internal::configuration_impl
+    tink::internal::key_gen_configuration_impl
 )
 
 tink_cc_library(
@@ -225,6 +236,20 @@ tink_cc_test(
     tink::internal::fips_utils
     tink::util::status
     tink::util::test_matchers
+)
+
+tink_cc_test(
+  NAME global_registry_test
+  SRCS
+    global_registry_test.cc
+  DEPS
+    tink::config::global_registry
+    gmock
+    absl::status
+    tink::core::keyset_handle
+    tink::util::test_matchers
+    tink::proto::aes_gcm_cc_proto
+    tink::proto::tink_cc_proto
 )
 
 tink_cc_test(

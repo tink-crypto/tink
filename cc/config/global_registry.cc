@@ -14,23 +14,34 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-#ifndef TINK_CONFIG_INTERNAL_GLOBAL_REGISTRY_H_
-#define TINK_CONFIG_INTERNAL_GLOBAL_REGISTRY_H_
+#include "tink/config/global_registry.h"
 
+#include "absl/log/check.h"
 #include "tink/configuration.h"
+#include "tink/internal/configuration_impl.h"
+#include "tink/internal/key_gen_configuration_impl.h"
 #include "tink/key_gen_configuration.h"
 
 namespace crypto {
 namespace tink {
-namespace internal {
 
-// TODO(b/265705174): Move to public API after API review.
-// Used to generate keys using the global crypto::tink::Registry.
-const crypto::tink::Configuration& ConfigGlobalRegistry();
-const crypto::tink::KeyGenConfiguration& KeyGenConfigGlobalRegistry();
+const Configuration& ConfigGlobalRegistry() {
+  static const Configuration* instance = [] {
+    static Configuration* config = new Configuration();
+    CHECK_OK(internal::ConfigurationImpl::SetGlobalRegistryMode(*config));
+    return config;
+  }();
+  return *instance;
+}
 
-}  // namespace internal
+const KeyGenConfiguration& KeyGenConfigGlobalRegistry() {
+  static const KeyGenConfiguration* instance = [] {
+    static KeyGenConfiguration* config = new KeyGenConfiguration();
+    CHECK_OK(internal::KeyGenConfigurationImpl::SetGlobalRegistryMode(*config));
+    return config;
+  }();
+  return *instance;
+}
+
 }  // namespace tink
 }  // namespace crypto
-
-#endif  // TINK_CONFIG_INTERNAL_GLOBAL_REGISTRY_H_

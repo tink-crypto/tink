@@ -14,7 +14,7 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-#include "tink/config/internal/global_registry.h"
+#include "tink/config/global_registry.h"
 
 #include <memory>
 #include <string>
@@ -29,7 +29,6 @@
 
 namespace crypto {
 namespace tink {
-namespace internal {
 namespace {
 
 using ::crypto::tink::test::IsOk;
@@ -107,7 +106,7 @@ class FakePrimitiveWrapper
   }
 };
 
-TEST(GlobalRegistryTest, KeyGenConfigGlobalRegistry) {
+TEST(GlobalRegistryTest, GenerateNewKeysetHandleFromKeyGenConfig) {
   Registry::Reset();
 
   KeyTemplate templ;
@@ -127,7 +126,7 @@ TEST(GlobalRegistryTest, KeyGenConfigGlobalRegistry) {
       IsOk());
 }
 
-TEST(GlobalRegistryTest, ConfigGlobalRegistry) {
+TEST(GlobalRegistryTest, GetPrimitiveFromConfig) {
   Registry::Reset();
   ASSERT_THAT(
       Registry::RegisterKeyTypeManager(absl::make_unique<FakeKeyTypeManager>(),
@@ -158,6 +157,5 @@ TEST(GlobalRegistryTest, ConfigGlobalRegistry) {
 }
 
 }  // namespace
-}  // namespace internal
 }  // namespace tink
 }  // namespace crypto

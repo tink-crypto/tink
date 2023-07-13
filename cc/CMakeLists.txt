@@ -799,9 +799,9 @@ tink_cc_test(
     tink::aead::aead_wrapper
     tink::aead::aes_gcm_key_manager
     tink::config::fips_140_2
+    tink::config::global_registry
     tink::config::key_gen_fips_140_2
     tink::config::tink_config
-    tink::config::internal::global_registry
     tink::internal::fips_utils
     tink::internal::key_gen_configuration_impl
     tink::signature::ecdsa_sign_key_manager
