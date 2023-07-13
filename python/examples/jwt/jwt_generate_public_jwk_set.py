@@ -34,11 +34,7 @@ def main(argv):
   del argv  # Unused.
 
   # Initialise Tink
-  try:
-    jwt.register_jwt_signature()
-  except tink.TinkError as e:
-    logging.exception('Error initialising Tink: %s', e)
-    return 1
+  jwt.register_jwt_signature()
 
   # Read the keyset into a KeysetHandle
   with open(_PUBLIC_KEYSET_PATH.value, 'rt') as keyset_file:
