@@ -131,9 +131,7 @@ TEST_F(Fips1402Test, GetPrimitive) {
   std::string ad = "ad";
   util::StatusOr<std::string> ciphertext = (*aead)->Encrypt(plaintext, ad);
   ASSERT_THAT(ciphertext, IsOk());
-
-  util::StatusOr<std::string> decrypted = (*aead)->Decrypt(*ciphertext, ad);
-  EXPECT_THAT(decrypted, IsOkAndHolds(plaintext));
+  EXPECT_THAT((*aead)->Decrypt(*ciphertext, ad), IsOkAndHolds(plaintext));
 }
 
 }  // namespace
