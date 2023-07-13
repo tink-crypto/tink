@@ -18,6 +18,7 @@
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include "tink/aead/aead_key_templates.h"
 #include "tink/aead/aes_ctr_hmac_aead_key_manager.h"
 #include "tink/aead/aes_eax_key_manager.h"
 #include "tink/aead/aes_gcm_key_manager.h"
@@ -28,6 +29,7 @@
 #include "tink/hybrid/internal/hpke_public_key_manager.h"
 #include "tink/internal/key_gen_configuration_impl.h"
 #include "tink/key_gen_configuration.h"
+#include "tink/keyset_handle.h"
 #include "tink/mac/aes_cmac_key_manager.h"
 #include "tink/mac/hmac_key_manager.h"
 #include "tink/prf/aes_cmac_prf_key_manager.h"
@@ -47,7 +49,7 @@ namespace {
 
 using ::crypto::tink::test::IsOk;
 
-TEST(KeyGenV0Test, KeyGenConfigV0) {
+TEST(KeyGenV0Test, KeyManagers) {
   util::StatusOr<const internal::KeyTypeInfoStore*> store =
       internal::KeyGenConfigurationImpl::GetKeyTypeInfoStore(KeyGenConfigV0());
   ASSERT_THAT(store, IsOk());
@@ -78,6 +80,12 @@ TEST(KeyGenV0Test, KeyGenConfigV0) {
   EXPECT_THAT((*store)->Get(RsaSsaPkcs1VerifyKeyManager().get_key_type()),
               IsOk());
   EXPECT_THAT((*store)->Get(Ed25519VerifyKeyManager().get_key_type()), IsOk());
+}
+
+TEST(KeyGenV0Test, GenerateNewKeysetHandle) {
+  EXPECT_THAT(KeysetHandle::GenerateNew(AeadKeyTemplates::Aes128Gcm(),
+                                        KeyGenConfigV0()),
+              IsOk());
 }
 
 }  // namespace

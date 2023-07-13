@@ -44,7 +44,7 @@ class KeyGenFips1402Test : public testing::Test {
   void TearDown() override { internal::UnSetFipsRestricted(); }
 };
 
-TEST_F(KeyGenFips1402Test, KeyGenConfigFips1402) {
+TEST_F(KeyGenFips1402Test, KeyManagers) {
   if (!internal::IsFipsEnabledInSsl()) {
     GTEST_SKIP() << "Only test in FIPS mode";
   }
@@ -65,7 +65,7 @@ TEST_F(KeyGenFips1402Test, KeyGenConfigFips1402) {
               IsOk());
 }
 
-TEST_F(KeyGenFips1402Test, KeyGenConfigFips1402FailsInNonFipsMode) {
+TEST_F(KeyGenFips1402Test, FailsInNonFipsMode) {
   if (internal::IsFipsEnabledInSsl()) {
     GTEST_SKIP() << "Only test in non-FIPS mode";
   }
