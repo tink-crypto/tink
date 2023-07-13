@@ -311,4 +311,12 @@ public final class EciesParameters extends HybridParameters {
     return Objects.hash(
         EciesParameters.class, curveType, hashType, pointFormat, demParameters, variant, salt);
   }
+
+  @Override
+  public String toString() {
+    return String.format(
+        "EciesParameters(curveType=%s, hashType=%s, pointFormat=%s, demParameters=%s, variant=%s,"
+            + " salt=%s)",
+        curveType, hashType, pointFormat, demParameters, variant, salt);
+  }
 }
