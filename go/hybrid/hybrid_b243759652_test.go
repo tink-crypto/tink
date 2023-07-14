@@ -24,7 +24,7 @@ import (
 	"github.com/google/tink/go/keyset"
 )
 
-/* This test demonstrates buggy behavior of Tink. Please do not rely on it. */
+// TODO(b/243759652): Move to hybrid_factory_test.go.
 func TestBHybridDecrypt(t *testing.T) {
 	manager := keyset.NewManager()
 	id, err := manager.Add(aead.AES256GCMKeyTemplate())
@@ -44,14 +44,11 @@ func TestBHybridDecrypt(t *testing.T) {
 		t.Fatalf("manager.Handle gives err = '%v', want nil", err)
 	}
 
-	// TODO(b/243759652): This should fail.
-	_, err = hybrid.NewHybridDecrypt(handle)
-	if err != nil {
-		t.Fatalf("hybrid.NewHybridDecrypt gives err = '%v', you fixed b/243759652, please change the test.", err)
+	if _, err := hybrid.NewHybridDecrypt(handle); err == nil {
+		t.Error("hybrid.NewHybridDecrypt err = nil, want err")
 	}
 }
 
-/* This test demonstrates buggy behavior of Tink. Please do not rely on it. */
 func TestBHybridEncrypt(t *testing.T) {
 	handle, err := keyset.NewHandle(hybrid.DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_AES_128_GCM_Key_Template())
 	if err != nil {
@@ -70,9 +67,7 @@ func TestBHybridEncrypt(t *testing.T) {
 	if err != nil {
 		t.Fatalf("manager.Handle gives err = '%v', want nil", err)
 	}
-	// TODO(b/243759652): We now have a HybridEncrypt and a Aead key, so this should fail
-	_, err = hybrid.NewHybridEncrypt(mixedHandle)
-	if err != nil {
-		t.Fatalf("hybrid.NewHybridEncrypt gives err = '%v', you fixed b/243759652, please change the test.", err)
+	if _, err := hybrid.NewHybridEncrypt(mixedHandle); err == nil {
+		t.Error("hybrid.NewHybridDecrypt err = nil, want err")
 	}
 }

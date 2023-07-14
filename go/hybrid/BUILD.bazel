@@ -63,7 +63,6 @@ go_test(
         "//hybrid/subtle",
         "//insecurecleartextkeyset",
         "//internal/internalregistry",
-        "//internal/testing/stubkeymanager",
         "//keyset",
         "//mac",
         "//monitoring",

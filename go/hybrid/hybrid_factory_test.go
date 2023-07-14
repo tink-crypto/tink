@@ -18,7 +18,6 @@ package hybrid_test
 
 import (
 	"bytes"
-	"fmt"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
@@ -26,11 +25,9 @@ import (
 	"google.golang.org/protobuf/proto"
 	"github.com/google/tink/go/aead"
 	"github.com/google/tink/go/core/cryptofmt"
-	"github.com/google/tink/go/core/registry"
 	"github.com/google/tink/go/hybrid"
 	"github.com/google/tink/go/insecurecleartextkeyset"
 	"github.com/google/tink/go/internal/internalregistry"
-	"github.com/google/tink/go/internal/testing/stubkeymanager"
 	"github.com/google/tink/go/keyset"
 	"github.com/google/tink/go/monitoring"
 	"github.com/google/tink/go/signature"
@@ -524,41 +521,8 @@ func TestPrimitiveFactoryMonitoringWithAnnotationsEncryptFailureIsLogged(t *test
 	if err := internalregistry.RegisterMonitoringClient(client); err != nil {
 		t.Fatalf("internalregistry.RegisterMonitoringClient() err = %v, want nil", err)
 	}
-	// Since this key type will be registered in the registry,
-	// we create a very unique typeURL to avoid colliding with other tests.
-	privKeyTypeURL := "TestPrimitiveFactoryWithMonitoringEncryptionFailureIsLogged" + "PrivateKeyManager"
-	pubKeyTypeURL := "TestPrimitiveFactoryWithMonitoringEncryptionFailureIsLogged" + "PublicKeyManager"
-	template := &tinkpb.KeyTemplate{
-		TypeUrl:          privKeyTypeURL,
-		OutputPrefixType: tinkpb.OutputPrefixType_LEGACY,
-	}
-	privKeyManager := &stubkeymanager.StubPrivateKeyManager{
-		StubKeyManager: stubkeymanager.StubKeyManager{
-			URL: privKeyTypeURL,
-			KeyData: &tinkpb.KeyData{
-				TypeUrl:         template.TypeUrl,
-				Value:           []byte("some_data"),
-				KeyMaterialType: tinkpb.KeyData_ASYMMETRIC_PRIVATE,
-			},
-		},
-		PubKeyData: &tinkpb.KeyData{
-			TypeUrl:         pubKeyTypeURL,
-			Value:           []byte("some_data"),
-			KeyMaterialType: tinkpb.KeyData_ASYMMETRIC_PUBLIC,
-		},
-	}
-	pubKeyManager := &stubkeymanager.StubKeyManager{
-		URL: pubKeyTypeURL,
-		// TODO(b/243759652): implement an always failing HybridEncrypt
-		Prim: &testutil.AlwaysFailingAead{Error: fmt.Errorf("panic at the kernel")},
-	}
-	if err := registry.RegisterKeyManager(privKeyManager); err != nil {
-		t.Fatalf("registry.RegisterKeyManager() err = %v, want nil", err)
-	}
-	if err := registry.RegisterKeyManager(pubKeyManager); err != nil {
-		t.Fatalf("registry.RegisterKeyManager() err = %v, want nil", err)
-	}
-	handle, err := keyset.NewHandle(template)
+
+	handle, err := keyset.NewHandle(hybrid.DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_AES_128_GCM_Key_Template())
 	if err != nil {
 		t.Fatalf("keyset.NewHandle() err = %v, want nil", err)
 	}
@@ -571,11 +535,12 @@ func TestPrimitiveFactoryMonitoringWithAnnotationsEncryptFailureIsLogged(t *test
 	if err != nil {
 		t.Fatalf("insecurecleartextkeyset.Read() err = %v, want nil", err)
 	}
+	buff.Reset()
+
 	pubHandle, err := privHandle.Public()
 	if err != nil {
 		t.Fatalf("privHandle.Public() err = %v, want nil", err)
 	}
-	buff.Reset()
 	if err := insecurecleartextkeyset.Write(pubHandle, keyset.NewBinaryWriter(buff)); err != nil {
 		t.Fatalf("insecurecleartextkeyset.Write() err = %v, want nil", err)
 	}
@@ -583,28 +548,40 @@ func TestPrimitiveFactoryMonitoringWithAnnotationsEncryptFailureIsLogged(t *test
 	if err != nil {
 		t.Fatalf("insecurecleartextkeyset.Read() err = %v, want nil", err)
 	}
+
 	e, err := hybrid.NewHybridEncrypt(pubHandle)
 	if err != nil {
-		t.Fatalf("hybrid.NewHybridEncrypt() err = %v, want nil", err)
+		t.Fatalf("NewHybridEncrypt() err = %v, want nil", err)
 	}
-	if _, err := e.Encrypt(nil, nil); err == nil {
-		t.Fatalf("e.Encrypt() err = nil, want non-nil error")
+	d, err := hybrid.NewHybridDecrypt(privHandle)
+	if err != nil {
+		t.Fatalf("NewHybridDecrypt() err = %v, want nil", err)
 	}
+
+	ct, err := e.Encrypt([]byte("plaintext"), []byte("info"))
+	if err != nil {
+		t.Fatalf("Encrypt() err = nil, want non-nil")
+	}
+	if _, err := d.Decrypt(ct, []byte("wrong info")); err == nil {
+		t.Fatalf("Decrypt() err = nil, want non-nil")
+	}
+
 	got := client.Failures()
+	primaryKeyID := privHandle.KeysetInfo().GetPrimaryKeyId()
 	want := []*fakemonitoring.LogFailure{
 		{
 			Context: monitoring.NewContext(
-				"hybrid_encrypt",
-				"encrypt",
+				"hybrid_decrypt",
+				"decrypt",
 				monitoring.NewKeysetInfo(
 					annotations,
-					pubHandle.KeysetInfo().GetPrimaryKeyId(),
+					primaryKeyID,
 					[]*monitoring.Entry{
 						{
-							KeyID:     pubHandle.KeysetInfo().GetPrimaryKeyId(),
+							KeyID:     primaryKeyID,
 							Status:    monitoring.Enabled,
-							KeyType:   pubKeyTypeURL,
-							KeyPrefix: "LEGACY",
+							KeyType:   "tink.HpkePrivateKey",
+							KeyPrefix: "TINK",
 						},
 					},
 				),

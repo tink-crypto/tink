@@ -84,6 +84,7 @@ def named_testcases():
         case_num += 1
 
 
+# Delete.
 def _is_b243759652_test_case(lang: str, keyset: bytes, primitive: Any) -> bool:
   """Returns whether the test case falls under b/243759652.
 
@@ -150,8 +151,8 @@ class SupportedKeyTypesTest(parameterized.TestCase):
     keytype = keytypes[0]
 
     if _is_b243759652_test_case(lang, keyset, primitive):
-      # TODO(b/243759652): This should raise a TinkError, but doesn't
-      _ = testing_servers.remote_primitive(lang, keyset, primitive)
+      with self.assertRaises(tink.TinkError):
+        _ = testing_servers.remote_primitive(lang, keyset, primitive)
       return
 
     if (lang in tink_config.supported_languages_for_key_type(keytype) and
@@ -184,8 +185,8 @@ class SupportedKeyTypesTest(parameterized.TestCase):
     keytype = keytypes[0]
 
     if _is_b243759652_test_case(lang, public_keyset, primitive):
-      # TODO(b/243759652): This should raise a TinkError, but doesn't
-      _ = testing_servers.remote_primitive(lang, public_keyset, primitive)
+      with self.assertRaises(tink.TinkError):
+        _ = testing_servers.remote_primitive(lang, public_keyset, primitive)
       return
 
     if (lang in tink_config.supported_languages_for_key_type(keytype) and
@@ -215,8 +216,8 @@ class SupportedKeyTypesTest(parameterized.TestCase):
     keytype = keytypes[0]
 
     if _is_b243759652_test_case(lang, modified_keyset, primitive):
-      # TODO(b/243759652): This should raise a TinkError, but doesn't
-      _ = testing_servers.remote_primitive(lang, modified_keyset, primitive)
+      with self.assertRaises(tink.TinkError):
+        _ = testing_servers.remote_primitive(lang, modified_keyset, primitive)
       return
 
     if (lang in tink_config.supported_languages_for_key_type(keytype) and
