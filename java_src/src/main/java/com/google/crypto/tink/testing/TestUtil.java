@@ -29,7 +29,6 @@ import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.TinkProtoKeysetFormat;
 import com.google.crypto.tink.aead.AeadConfig;
 import com.google.crypto.tink.daead.DeterministicAeadConfig;
-import com.google.crypto.tink.hybrid.HybridKeyTemplates;
 import com.google.crypto.tink.internal.KeyTemplateProtoConverter;
 import com.google.crypto.tink.mac.MacConfig;
 import com.google.crypto.tink.monitoring.MonitoringAnnotations;
@@ -50,9 +49,11 @@ import com.google.crypto.tink.proto.EcdsaParams;
 import com.google.crypto.tink.proto.EcdsaPrivateKey;
 import com.google.crypto.tink.proto.EcdsaPublicKey;
 import com.google.crypto.tink.proto.EcdsaSignatureEncoding;
+import com.google.crypto.tink.proto.EciesAeadDemParams;
 import com.google.crypto.tink.proto.EciesAeadHkdfParams;
 import com.google.crypto.tink.proto.EciesAeadHkdfPrivateKey;
 import com.google.crypto.tink.proto.EciesAeadHkdfPublicKey;
+import com.google.crypto.tink.proto.EciesHkdfKemParams;
 import com.google.crypto.tink.proto.EllipticCurveType;
 import com.google.crypto.tink.proto.HashType;
 import com.google.crypto.tink.proto.HkdfPrfKey;
@@ -555,6 +556,27 @@ public final class TestUtil {
         .build();
   }
 
+  private static EciesAeadHkdfParams createEciesAeadHkdfParams(
+      EllipticCurveType curve,
+      HashType hashType,
+      EcPointFormat ecPointFormat,
+      KeyTemplate demKeyTemplate,
+      byte[] salt) {
+    EciesHkdfKemParams kemParams =
+        EciesHkdfKemParams.newBuilder()
+            .setCurveType(curve)
+            .setHkdfHashType(hashType)
+            .setHkdfSalt(ByteString.copyFrom(salt))
+            .build();
+    EciesAeadDemParams demParams =
+        EciesAeadDemParams.newBuilder().setAeadDem(demKeyTemplate).build();
+    return EciesAeadHkdfParams.newBuilder()
+        .setKemParams(kemParams)
+        .setDemParams(demParams)
+        .setEcPointFormat(ecPointFormat)
+        .build();
+  }
+
   /**
    * @return a {@code EciesAeadHkdfPublicKey} with the specified key material and parameters.
    * @deprecated Do not use this function.
@@ -571,8 +593,7 @@ public final class TestUtil {
       throws Exception {
     final int version = 0;
     EciesAeadHkdfParams params =
-        HybridKeyTemplates.createEciesAeadHkdfParams(
-            curve, hashType, ecPointFormat, demKeyTemplate, salt);
+        createEciesAeadHkdfParams(curve, hashType, ecPointFormat, demKeyTemplate, salt);
     return EciesAeadHkdfPublicKey.newBuilder()
         .setVersion(version)
         .setParams(params)
