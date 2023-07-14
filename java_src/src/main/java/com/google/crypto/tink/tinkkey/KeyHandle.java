@@ -15,6 +15,8 @@
 ////////////////////////////////////////////////////////////////////////////////
 package com.google.crypto.tink.tinkkey;
 
+import static com.google.crypto.tink.internal.KeyTemplateProtoConverter.getOutputPrefixType;
+
 import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.KeyTemplate.OutputPrefixType;
 import com.google.crypto.tink.Registry;
@@ -105,7 +107,7 @@ public class KeyHandle {
    */
   public static KeyHandle generateNew(KeyTemplate keyTemplate) throws GeneralSecurityException {
     ProtoKey protoKey =
-        new ProtoKey(Registry.newKeyData(keyTemplate), keyTemplate.getOutputPrefixType());
+        new ProtoKey(Registry.newKeyData(keyTemplate), getOutputPrefixType(keyTemplate));
     return new KeyHandle(protoKey);
   }
 

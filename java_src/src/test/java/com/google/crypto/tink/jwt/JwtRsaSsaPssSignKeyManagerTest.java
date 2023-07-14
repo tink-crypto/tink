@@ -16,6 +16,7 @@
 package com.google.crypto.tink.jwt;
 
 import static com.google.common.truth.Truth.assertThat;
+import static com.google.crypto.tink.internal.KeyTemplateProtoConverter.getOutputPrefixType;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
@@ -313,25 +314,25 @@ public class JwtRsaSsaPssSignKeyManagerTest {
 
   @Test
   public void testTinkTemplatesAreTink() throws Exception {
-    assertThat(KeyTemplates.get("JWT_PS256_2048_F4").getOutputPrefixType())
+    assertThat(getOutputPrefixType(KeyTemplates.get("JWT_PS256_2048_F4")))
         .isEqualTo(KeyTemplate.OutputPrefixType.TINK);
-    assertThat(KeyTemplates.get("JWT_PS256_3072_F4").getOutputPrefixType())
+    assertThat(getOutputPrefixType(KeyTemplates.get("JWT_PS256_3072_F4")))
         .isEqualTo(KeyTemplate.OutputPrefixType.TINK);
-    assertThat(KeyTemplates.get("JWT_PS384_3072_F4").getOutputPrefixType())
+    assertThat(getOutputPrefixType(KeyTemplates.get("JWT_PS384_3072_F4")))
         .isEqualTo(KeyTemplate.OutputPrefixType.TINK);
-    assertThat(KeyTemplates.get("JWT_PS512_4096_F4").getOutputPrefixType())
+    assertThat(getOutputPrefixType(KeyTemplates.get("JWT_PS512_4096_F4")))
         .isEqualTo(KeyTemplate.OutputPrefixType.TINK);
   }
 
   @Test
   public void testRawTemplatesAreRaw() throws Exception {
-    assertThat(KeyTemplates.get("JWT_PS256_2048_F4_RAW").getOutputPrefixType())
+    assertThat(getOutputPrefixType(KeyTemplates.get("JWT_PS256_2048_F4_RAW")))
         .isEqualTo(KeyTemplate.OutputPrefixType.RAW);
-    assertThat(KeyTemplates.get("JWT_PS256_3072_F4_RAW").getOutputPrefixType())
+    assertThat(getOutputPrefixType(KeyTemplates.get("JWT_PS256_3072_F4_RAW")))
         .isEqualTo(KeyTemplate.OutputPrefixType.RAW);
-    assertThat(KeyTemplates.get("JWT_PS384_3072_F4_RAW").getOutputPrefixType())
+    assertThat(getOutputPrefixType(KeyTemplates.get("JWT_PS384_3072_F4_RAW")))
         .isEqualTo(KeyTemplate.OutputPrefixType.RAW);
-    assertThat(KeyTemplates.get("JWT_PS512_4096_F4_RAW").getOutputPrefixType())
+    assertThat(getOutputPrefixType(KeyTemplates.get("JWT_PS512_4096_F4_RAW")))
         .isEqualTo(KeyTemplate.OutputPrefixType.RAW);
   }
 

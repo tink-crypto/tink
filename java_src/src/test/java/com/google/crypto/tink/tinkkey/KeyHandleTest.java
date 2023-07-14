@@ -16,6 +16,7 @@
 package com.google.crypto.tink.tinkkey;
 
 import static com.google.common.truth.Truth.assertThat;
+import static com.google.crypto.tink.internal.KeyTemplateProtoConverter.getOutputPrefixType;
 import static org.junit.Assert.assertThrows;
 
 import com.google.common.truth.Expect;
@@ -96,7 +97,7 @@ public final class KeyHandleTest {
     KeyTemplate kt = KeyTemplates.get("AES128_EAX");
     KeyData kd = Registry.newKeyData(kt);
 
-    KeyHandle kh = KeyHandle.createFromKey(kd, kt.getOutputPrefixType());
+    KeyHandle kh = KeyHandle.createFromKey(kd, getOutputPrefixType(kt));
 
     assertThat(kh.hasSecret()).isTrue();
   }
@@ -106,7 +107,7 @@ public final class KeyHandleTest {
     KeyTemplate kt = KeyTemplates.get("ED25519");
     KeyData kd = Registry.newKeyData(kt);
 
-    KeyHandle kh = KeyHandle.createFromKey(kd, kt.getOutputPrefixType());
+    KeyHandle kh = KeyHandle.createFromKey(kd, getOutputPrefixType(kt));
 
     assertThat(kh.hasSecret()).isTrue();
   }
@@ -120,7 +121,7 @@ public final class KeyHandleTest {
             .setKeyMaterialType(KeyData.KeyMaterialType.UNKNOWN_KEYMATERIAL)
             .build();
 
-    KeyHandle kh = KeyHandle.createFromKey(kd, kt.getOutputPrefixType());
+    KeyHandle kh = KeyHandle.createFromKey(kd, getOutputPrefixType(kt));
 
     assertThat(kh.hasSecret()).isTrue();
   }
@@ -131,7 +132,7 @@ public final class KeyHandleTest {
     KeyData privateKeyData = Registry.newKeyData(kt);
     KeyData kd = Registry.getPublicKeyData(privateKeyData.getTypeUrl(), privateKeyData.getValue());
 
-    KeyHandle kh = KeyHandle.createFromKey(kd, kt.getOutputPrefixType());
+    KeyHandle kh = KeyHandle.createFromKey(kd, getOutputPrefixType(kt));
 
     assertThat(kh.hasSecret()).isFalse();
   }
@@ -145,7 +146,7 @@ public final class KeyHandleTest {
             .setKeyMaterialType(KeyData.KeyMaterialType.REMOTE)
             .build();
 
-    KeyHandle kh = KeyHandle.createFromKey(kd, kt.getOutputPrefixType());
+    KeyHandle kh = KeyHandle.createFromKey(kd, getOutputPrefixType(kt));
 
     assertThat(kh.hasSecret()).isFalse();
   }
