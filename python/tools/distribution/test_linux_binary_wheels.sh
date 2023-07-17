@@ -52,6 +52,15 @@ export LD_LIBRARY_PATH="/usr/local/lib"
 # to fail.
 ln -s /etc/ssl/certs/ca-bundle.trust.crt /etc/ssl/certs/ca-certificates.crt
 
+TEST_IGNORE_PATHS=( -not -path "*cc/pybind*")
+if [[ "${ARCH}" == "aarch64" || "${ARCH}" == "arm64" ]]; then
+  # gRPC doesn't seem compatible with libstdc++ present in
+  # manylinux2014_aarch64 (see https://github.com/grpc/grpc/issues/33734).
+  # TODO(b/291055539): Re-enable these tests when/after this is solved.
+  TEST_IGNORE_PATHS+=( -not -path "*integration/gcpkms*")
+fi
+readonly TEST_IGNORE_PATHS
+
 for v in "${!PYTHON_VERSIONS[@]}"; do
   (
     # Executing in a subshell to make the PATH modification temporary.
@@ -59,7 +68,7 @@ for v in "${!PYTHON_VERSIONS[@]}"; do
     python3 -m pip install --require-hashes -r requirements.txt
     python3 -m pip install --no-deps --no-index \
       release/*-"${PYTHON_VERSIONS[$v]}"-"${PLATFORM_TAG_SET}".whl
-    find tink/ -not -path "*cc/pybind*" -type f -name "*_test.py" -print0 \
+    find tink/ "${TEST_IGNORE_PATHS[@]}" -type f -name "*_test.py" -print0 \
       | xargs -0 -n1 python3
   )
 done
