@@ -50,11 +50,7 @@ def main(argv):
   )
 
   # Initialise Tink
-  try:
-    aead.register()
-  except tink.TinkError as e:
-    logging.exception('Error initialising Tink: %s', e)
-    return 1
+  aead.register()
 
   try:
     # Read the GCP credentials and setup client

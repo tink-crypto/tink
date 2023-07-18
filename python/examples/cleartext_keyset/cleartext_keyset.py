@@ -40,11 +40,7 @@ def main(argv):
   del argv  # Unused.
 
   # Initialise Tink
-  try:
-    aead.register()
-  except tink.TinkError as e:
-    logging.error('Error initialising Tink: %s', e)
-    return 1
+  aead.register()
 
   if FLAGS.mode == 'generate':
     # [START generate-a-new-keyset]
