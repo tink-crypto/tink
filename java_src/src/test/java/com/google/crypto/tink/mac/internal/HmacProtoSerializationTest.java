@@ -14,7 +14,7 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-package com.google.crypto.tink.mac;
+package com.google.crypto.tink.mac.internal;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.crypto.tink.internal.testing.Asserts.assertEqualWhenValueParsed;
@@ -26,6 +26,8 @@ import com.google.crypto.tink.Parameters;
 import com.google.crypto.tink.internal.MutableSerializationRegistry;
 import com.google.crypto.tink.internal.ProtoKeySerialization;
 import com.google.crypto.tink.internal.ProtoParametersSerialization;
+import com.google.crypto.tink.mac.HmacKey;
+import com.google.crypto.tink.mac.HmacParameters;
 import com.google.crypto.tink.proto.HashType;
 import com.google.crypto.tink.proto.HmacParams;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;

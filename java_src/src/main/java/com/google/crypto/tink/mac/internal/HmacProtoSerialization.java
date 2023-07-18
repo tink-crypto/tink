@@ -14,7 +14,7 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-package com.google.crypto.tink.mac;
+package com.google.crypto.tink.mac.internal;
 
 import static com.google.crypto.tink.internal.Util.toBytesFromPrintableAscii;
 
@@ -27,6 +27,8 @@ import com.google.crypto.tink.internal.ParametersParser;
 import com.google.crypto.tink.internal.ParametersSerializer;
 import com.google.crypto.tink.internal.ProtoKeySerialization;
 import com.google.crypto.tink.internal.ProtoParametersSerialization;
+import com.google.crypto.tink.mac.HmacKey;
+import com.google.crypto.tink.mac.HmacParameters;
 import com.google.crypto.tink.proto.HashType;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
 import com.google.crypto.tink.proto.KeyTemplate;
@@ -42,7 +44,7 @@ import javax.annotation.Nullable;
 /** Methods to serialize and parse {@link HmacKey} objects and {@link HmacParameters} objects. */
 @AccessesPartialKey
 @SuppressWarnings("UnnecessarilyFullyQualified") // Fully specifying proto types is more readable
-final class HmacProtoSerialization {
+public final class HmacProtoSerialization {
   private static final String TYPE_URL = "type.googleapis.com/google.crypto.tink.HmacKey";
   private static final Bytes TYPE_URL_BYTES = toBytesFromPrintableAscii(TYPE_URL);
 

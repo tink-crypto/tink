@@ -27,6 +27,7 @@ import com.google.crypto.tink.PrimitiveSet;
 import com.google.crypto.tink.internal.MutableMonitoringRegistry;
 import com.google.crypto.tink.internal.testing.FakeMonitoringClient;
 import com.google.crypto.tink.mac.HmacParameters.HashType;
+import com.google.crypto.tink.mac.internal.HmacProtoSerialization;
 import com.google.crypto.tink.monitoring.MonitoringAnnotations;
 import com.google.crypto.tink.proto.KeyStatusType;
 import com.google.crypto.tink.proto.Keyset.Key;
