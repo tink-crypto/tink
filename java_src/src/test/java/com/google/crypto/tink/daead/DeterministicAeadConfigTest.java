@@ -16,78 +16,39 @@
 
 package com.google.crypto.tink.daead;
 
-import static org.junit.Assert.assertNotNull;
+import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertThrows;
 
-import com.google.crypto.tink.DeterministicAead;
-import com.google.crypto.tink.Registry;
+import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.config.TinkFips;
 import java.security.GeneralSecurityException;
 import org.junit.Assume;
-import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
-import org.junit.runners.MethodSorters;
 
-/**
- * Tests for DeterministicAeadConfig. Using FixedMethodOrder to ensure that aaaTestInitialization
- * runs first, as it tests execution of a static block within DeterministicAeadConfig-class.
- */
+/** Tests for DeterministicAeadConfig. */
 @RunWith(JUnit4.class)
-@FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class DeterministicAeadConfigTest {
 
-  // This test must run first.
   @Test
-  public void aaaTestInitialization() throws Exception {
+  public void notOnlyFips_shouldRegisterAllKeyTypes() throws Exception {
     Assume.assumeFalse(TinkFips.useOnlyFips());
 
-    // Before registration, the key manager should be absent.
-    String typeUrl = "type.googleapis.com/google.crypto.tink.AesSivKey";
-    assertThrows(GeneralSecurityException.class, () -> Registry.getUntypedKeyManager(typeUrl));
-
-    // Initialize the config.
     DeterministicAeadConfig.register();
 
-    // After registration, the key manager should be present.
-    assertNotNull(Registry.getKeyManager(typeUrl, DeterministicAead.class));
-
-    // Running init() manually again should succeed.
-    DeterministicAeadConfig.register();
+    assertThat(KeysetHandle.generateNew(PredefinedDeterministicAeadParameters.AES256_SIV))
+        .isNotNull();
   }
 
   @Test
-  public void testNoFipsRegister() throws Exception {
-    Assume.assumeFalse(TinkFips.useOnlyFips());
-
-    // Register AEAD key manager
-    DeterministicAeadConfig.register();
-
-    // Check if all key types are registered when not using FIPS mode.
-    String[] keyTypeUrls = {
-      "type.googleapis.com/google.crypto.tink.AesSivKey",
-    };
-
-    for (String typeUrl : keyTypeUrls) {
-      assertNotNull(Registry.getKeyManager(typeUrl, DeterministicAead.class));
-    }
-  }
-
-  @Test
-  public void testFipsRegisterNonFipsKeys() throws Exception {
+  public void onlyFips_shouldNotRegisterNonFipsKeyTypes() throws Exception {
     Assume.assumeTrue(TinkFips.useOnlyFips());
 
-    // Register AEAD key manager
     DeterministicAeadConfig.register();
 
-    // List of algorithms which are not part of FIPS and should not be registered.
-    String[] keyTypeUrls = {
-      "type.googleapis.com/google.crypto.tink.AesSivKey",
-    };
-
-    for (String typeUrl : keyTypeUrls) {
-      assertThrows(GeneralSecurityException.class, () -> Registry.getUntypedKeyManager(typeUrl));
-    }
+    assertThrows(
+        GeneralSecurityException.class,
+        () -> KeysetHandle.generateNew(PredefinedDeterministicAeadParameters.AES256_SIV));
   }
 }

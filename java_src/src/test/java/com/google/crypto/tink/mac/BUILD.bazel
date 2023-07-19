@@ -29,11 +29,11 @@ java_test(
     srcs = ["MacConfigTest.java"],
     tags = ["fips"],
     deps = [
-        "//src/main/java/com/google/crypto/tink:mac",
-        "//src/main/java/com/google/crypto/tink:registry",
+        "//src/main/java/com/google/crypto/tink:registry_cluster",
         "//src/main/java/com/google/crypto/tink/config:tink_fips",
         "//src/main/java/com/google/crypto/tink/config/internal:tink_fips_util",
         "//src/main/java/com/google/crypto/tink/mac:mac_config",
+        "//src/main/java/com/google/crypto/tink/mac:predefined_mac_parameters",
         "@maven//:com_google_truth_truth",
         "@maven//:junit_junit",
     ],
